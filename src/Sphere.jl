@@ -2,8 +2,7 @@ struct Sphere{T} <: Manifold where {T}
     shape::T
 end
 
-isapprox(S::Sphere, x, y; kwargs...) = isapprox(x, y; kwargs...)
-project_tangent!(S::Sphere, w, x, v) = (w .= w .- dot(x, v).*x)
+project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v).*x)
 distance(S::Sphere, x, y) = acos(dot(x, y))
 
 function exp!(S::Sphere, y, x, v)
