@@ -5,12 +5,13 @@ end
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v).*x)
 distance(S::Sphere, x, y) = acos(dot(x, y))
 
-function exp!(S::Sphere, y, x, v)
-    nv = norm(S, x, v)
+function exp!(S::Sphere, y, x, v, t=1)
+    scaled_v = t*v
+    nv = norm(S, x, scaled_v)
     if nv ≈ 0.0
         y .= x
     else
-        y .= cos(nv).*x .+ (sin(nv)/nv).*v
+        y .= cos(nv).*x .+ (sin(nv)/nv).*scaled_v
     end
     return y
 end

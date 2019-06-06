@@ -22,6 +22,11 @@ function test_manifold(M::Manifold, pts::AbstractVector)
     @test isapprox(tv1, zero_tangent_vector(M, pts[1]))
     log!(M, tv1, pts[1], pts[2])
     @test norm(M, pts[1], tv1) ≈ sqrt(dot(M, pts[1], tv1, tv1))
+
+    @test isapprox(M, exp(M, pts[1], tv1, 1), pts[2])
+    @test isapprox(M, exp(M, pts[1], tv1, 0), pts[1])
+    @test isapprox(M, pts[1], 0*tv1, zero_tangent_vector(M, pts[1]))
+    @test isapprox(M, pts[1], 2*tv1, tv1+tv1)
 end
 
 @testset "Sphere" begin
