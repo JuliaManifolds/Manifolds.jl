@@ -43,7 +43,7 @@ or `Matrix` type elements, this type can be used for more complicated
 representations, semantic verification or even dispatch for different
 representations of cotangent vectors and their types on a manifold.
 """
-abstract type TVector end
+abstract type CoTVector end
 
 
 isapprox(m::Manifold, x, y; kwargs...) = isapprox(x, y; kwargs...)
@@ -84,12 +84,13 @@ zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 
 geodesic(M::Manifold, x, y, t) = exp(M, x, log(M, x, y), t)
 
-include("MatrixManifold.jl")
+include("ArrayManifold.jl")
 include("Sphere.jl")
 
 export Manifold,
     MPoint,
-    TVector 
+    TVector,
+    CoTVector
 export dimension,
     distance,
     dot,
