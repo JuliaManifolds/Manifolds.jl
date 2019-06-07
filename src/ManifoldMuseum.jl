@@ -4,9 +4,47 @@ import Base: isapprox, exp, log
 import LinearAlgebra: dot, norm
 
 
+"""
+    Manifold
+
+A manifold type. The `Manifold` is used to dispatch to different exponential
+and logarithmic maps as well as other function on manifold.
+"""
 abstract type Manifold end
+
+"""
+    MPoint
+
+Type for a point on a manifold. While a [`Manifold`](@ref) not necessarily
+requires this type, for example when it is implemented for `Vector`s or
+`Matrix` type elements, this type can be used for more complicated
+representations, semantic verification or even dispatch for different
+representations of points on a manifold.
+"""
 abstract type MPoint end
+
+"""
+    TVector
+
+Type for a tangent vector of a manifold. While a [`Manifold`](@ref) not
+necessarily requires this type, for example when it is implemented for `Vector`s
+or `Matrix` type elements, this type can be used for more complicated
+representations, semantic verification or even dispatch for different
+representations of tangent vectors and their types on a manifold.
+"""
 abstract type TVector end
+
+"""
+    CoTVector
+
+Type for a cotangent vector of a manifold. While a [`Manifold`](@ref) not
+necessarily requires this type, for example when it is implemented for `Vector`s
+or `Matrix` type elements, this type can be used for more complicated
+representations, semantic verification or even dispatch for different
+representations of cotangent vectors and their types on a manifold.
+"""
+abstract type TVector end
+
 
 isapprox(m::Manifold, x, y; kwargs...) = isapprox(x, y; kwargs...)
 
