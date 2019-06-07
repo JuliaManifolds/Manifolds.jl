@@ -1,8 +1,17 @@
 module ManifoldMuseum
 
-import Base: isapprox, exp, log
-import LinearAlgebra: dot, norm
+import Base: isapprox,
+    exp,
+    log
 
+import LinearAlgebra: dot,
+    norm
+
+import Distributions: _rand!
+
+import Random: rand
+
+using Random: AbstractRNG
 
 abstract type Manifold end
 
@@ -35,16 +44,15 @@ dimension(M::Manifold) = error("Not implemented")
 vector_transport!(M::Manifold, vto, x, v, y) = project_tangent!(M, vto, x, v)
 vector_transport(M::Manifold, x, v, y) = vector_transport!(M, copy(v), x, y, v)
 
-random_point(M::Manifold) = error("Not implemented")
-random_tangent_vector(M::Manifold, x) = error("Not implemented")
-
 typical_distance(M::Manifold) = 1.0
 zero_tangent_vector(M::Manifold, x) = log(M, x, x)
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 
 geodesic(M::Manifold, x, y, t) = exp(M, x, log(M, x, y), t)
 
+include("DistributionsBase.jl")
 include("Sphere.jl")
+include("RetractedDistribution.jl")
 
 export Manifold
 export dimension,

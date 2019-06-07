@@ -2,6 +2,8 @@ struct Sphere{T} <: Manifold where {T}
     shape::T
 end
 
+retr!(S::Sphere, x) = (x ./= norm(x))
+
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v).*x)
 distance(S::Sphere, x, y) = acos(dot(x, y))
 
@@ -26,7 +28,6 @@ function log!(S::Sphere, v, x, y)
 end
 
 dimension(S::Sphere) = sum(S.shape)
-random_point(S::Sphere) = (x = randn(S.shape); x / norm(x))
 
 function random_tangent_vector(S::Sphere, x)
     v = randn(S.shape)
