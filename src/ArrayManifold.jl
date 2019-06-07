@@ -16,14 +16,14 @@ struct ArrayMPoint{V <: AbstractArray{<:Number}} <: MPoint
     value::V
 end
 convert(::Type{V},x::ArrayMPoint{V}) where V <: AbstractArray{<:Number} = x.value
-convert(::Type{ArrayMPoint{V}},x::V) where V <: AbstractArray{<:Number} = MatrixPoint{V}(x)
+convert(::Type{ArrayMPoint{V}},x::V) where V <: AbstractArray{<:Number} = ArrayPoint{V}(x)
 
-struct MatrixTVector{V <: AbstractArray{<:Number}} <: TVector
+struct ArrayTVector{V <: AbstractArray{<:Number}} <: TVector
     value::V
 end
-convert(::Type{V},x::MatrixTVector{V}) where V <: AbstractArray{<:Number} = x.value
-convert(::Type{MatrixTVector{V}},x::V) where V <: AbstractArray{<:Number} = MatrixPoint{V}(x)
+convert(::Type{V},x::ArrayTVector{V}) where V <: AbstractArray{<:Number} = x.value
+convert(::Type{ArrayTVector{V}},x::V) where V <: AbstractArray{<:Number} = ArrayTVector{V}(x)
 
 export ArrayManifold,
     ArrayMPoint,
-    MatrixTVector
+    ArrayTVector
