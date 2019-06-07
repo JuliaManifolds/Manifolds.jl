@@ -5,6 +5,8 @@ import LinearAlgebra: dot, norm
 
 
 abstract type Manifold end
+abstract type MPoint end
+abstract type TVector end
 
 isapprox(m::Manifold, x, y; kwargs...) = isapprox(x, y; kwargs...)
 
@@ -44,9 +46,12 @@ zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 
 geodesic(M::Manifold, x, y, t) = exp(M, x, log(M, x, y), t)
 
+include("MatrixManifold.jl")
 include("Sphere.jl")
 
-export Manifold
+export Manifold,
+    MPoint,
+    TVector 
 export dimension,
     distance,
     dot,
