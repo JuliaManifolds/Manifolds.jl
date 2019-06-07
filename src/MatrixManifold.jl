@@ -12,17 +12,17 @@ end
 convert(::Type{M},m::MatrixManifold{M}) where M <: Manifold = m.manifold
 convert(::Type{MatrixManifold{M}},m::M) where M <: Manifold = MatrixManifold(M)
 
-struct MatrixMPoint{V <: AbstractVector{<:Real}} <: MPoint
+struct MatrixMPoint{V <: AbstractArray{<:Number}} <: MPoint
     value::V
 end
-convert(::Type{V},x::MatrixMPoint{V}) where V <: AbstractVector{<:Real} = x.value
-convert(::Type{MatrixMPoint{V}},x::V) where V <: AbstractVector{<:Real} = MatrixPoint{V}(x)
+convert(::Type{V},x::MatrixMPoint{V}) where V <: AbstractArray{<:Number} = x.value
+convert(::Type{MatrixMPoint{V}},x::V) where V <: AbstractArray{<:Number} = MatrixPoint{V}(x)
 
-struct MatrixTVector{V <: AbstractVector{<:Real}} <: TVector
+struct MatrixTVector{V <: AbstractArray{<:Number}} <: TVector
     value::V
 end
-convert(::Type{V},x::MatrixTVector{V}) where V <: AbstractVector{<:Real} = x.value
-convert(::Type{MatrixTVector{V}},x::V) where V <: AbstractVector{<:Real} = MatrixPoint{V}(x)
+convert(::Type{V},x::MatrixTVector{V}) where V <: AbstractArray{<:Number} = x.value
+convert(::Type{MatrixTVector{V}},x::V) where V <: AbstractArray{<:Number} = MatrixPoint{V}(x)
 
 export MatrixManifold,
     MatrixMPoint,
