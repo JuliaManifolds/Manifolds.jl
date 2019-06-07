@@ -6,7 +6,7 @@ A manifold to encapsulate manifolds working on array representations of
 not necessary to introduce explicit types for the points and tangent vectors,
 but they are encapusalted/stripped automatically when needed.
 """
-struct MatrixManifold{M <: Manifold}
+struct MatrixManifold{M <: Manifold} <: Manifold
     manifold::M
 end
 convert(::Type{M},m::MatrixManifold{M}) where M <: Manifold = m.manifold
