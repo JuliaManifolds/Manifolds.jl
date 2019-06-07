@@ -45,7 +45,9 @@ Retraction (cheaper, approximate version of exponential map) of tangent
 vector `t*v` at point `x` from manifold `M`.
 Result is saved to `y`.
 """
-retract!(M::Manifold, y, x, v, t=1) = exp!(M, y, x, v, t)
+retract!(M::Manifold, y, x, v) = exp!(M, y, x, v)
+
+retract!(M::Manifold, y, x, v, t) = retract!(M, y, x, t*v)
 
 """
     retract(M::Manifold, x, v, t=1)
@@ -53,19 +55,21 @@ retract!(M::Manifold, y, x, v, t=1) = exp!(M, y, x, v, t)
 Retraction (cheaper, approximate version of exponential map) of tangent
 vector `t*v` at point `x` from manifold `M`.
 """
-retract(M::Manifold, x, v, t=1) = retract!(M, copy(x), x, v, t)
+retract(M::Manifold, x, v) = retract!(M, similar(x), x, v)
+
+retract(M::Manifold, x, v, t) = retract(M, x, t*v)
 
 project_tangent!(M::Manifold, w, x, v) = error("Not implemented")
 project_tangent(M::Manifold, x, v) = project_tangent!(M, copy(x), x, v)
 
-distance(M::Manifold, x, y) = error("Not implemented")
+distance(M::Manifold, x, y) = norm(M, x, log(M, x, y))
 
 """
     dot(M::Manifold, x, v, w)
 
 Inner product of tangent vectors `v` and `w` at point `x` from manifold `M`.
 """
-dot(M::Manifold, x, v, w) = dot(v, w)
+dot(M::Manifold, x, v, w) = error("Not implemented")
 
 """
     norm(M::Manifold, x, v)
@@ -80,14 +84,18 @@ norm(M::Manifold, x, v) = sqrt(dot(M, x, v, v))
 Exponential map of tangent vector `t*v` at point `x` from manifold `M`.
 Result is saved to `y`.
 """
-exp!(M::Manifold, y, x, v, t=1) = error("Not implemented")
+exp!(M::Manifold, y, x, v, t) = exp!(M::Manifold, y, x, t*v)
+
+exp!(M::Manifold, y, x, v) = error("Not implemented")
 
 """
     exp(M::Manifold, x, v, t=1)
 
 Exponential map of tangent vector `t*v` at point `x` from manifold `M`.
 """
-exp(M::Manifold, x, v, t=1) = exp!(M, copy(x), x, v, t)
+exp(M::Manifold, x, v) = exp!(M, similar(x), x, v)
+
+exp(M::Manifold, x, v, t) = exp(M, x, t*v)
 
 log!(M::Manifold, v, x, y) = error("Not implemented")
 
