@@ -13,7 +13,7 @@ export dimension,
     norm,
     retract,
     retract!,
-    typical_distance,
+    injectivity_radius,
     zero_tangent_vector,
     zero_tangent_vector!
 
@@ -113,7 +113,7 @@ vector_transport(M::Manifold, x, v, y) = vector_transport!(M, copy(v), x, y, v)
 random_point(M::Manifold) = error("Not implemented")
 random_tangent_vector(M::Manifold, x) = error("Not implemented")
 
-typical_distance(M::Manifold) = 1.0
+injectivity_radius(M::Manifold, x) = 1.0
 zero_tangent_vector(M::Manifold, x) = log(M, x, x)
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 
