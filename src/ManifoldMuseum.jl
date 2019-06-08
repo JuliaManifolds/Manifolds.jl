@@ -1,6 +1,6 @@
 module ManifoldMuseum
 
-import Base: isapprox, exp, log
+import Base: isapprox, exp, log, convert
 import LinearAlgebra: dot, norm
 
 
@@ -44,6 +44,7 @@ zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 
 geodesic(M::Manifold, x, y, t) = exp(M, x, log(M, x, y), t)
 
+include("Metric.jl")
 include("Sphere.jl")
 
 export Manifold
@@ -60,6 +61,11 @@ export dimension,
     typical_distance,
     zero_tangent_vector,
     zero_tangent_vector!
+export Metric, RiemannianMetric, LorentzianMetric
+export EuclideanMetric, TransformedEuclideanMetric
+export manifold,
+    local_matrix,
+    local_matrix!
 
 
 end # module
