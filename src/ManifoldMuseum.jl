@@ -45,6 +45,7 @@ zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 geodesic(M::Manifold, x, y, t) = exp(M, x, log(M, x, y), t)
 
 include("Metric.jl")
+include("Euclidean.jl")
 include("Sphere.jl")
 
 export Manifold
@@ -62,10 +63,9 @@ export dimension,
     zero_tangent_vector,
     zero_tangent_vector!
 export Metric, RiemannianMetric, LorentzianMetric
-export EuclideanMetric, TransformedEuclideanMetric
 export manifold,
     local_matrix,
     local_matrix!
-
+export Euclidean, EuclideanMetric, TransformedEuclideanMetric
 
 end # module
