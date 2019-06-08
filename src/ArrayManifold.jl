@@ -24,6 +24,48 @@ end
 convert(::Type{V},x::ArrayTVector{V}) where V <: AbstractArray{<:Number} = x.value
 convert(::Type{ArrayTVector{V}},x::V) where V <: AbstractArray{<:Number} = ArrayTVector{V}(x)
 
+function isapprox(M::ArrayManifold, x, y; kwargs...)
+    is_manifold_point(M.manifold,x)
+    is_manifold_point(M.manifold,y)
+    return isapprox(M.manifold, x, y; kwargs...)
+end
+
+function project_tangent!(M::ArrayManifold, w, x, v)
+    is_manifold_point(M.manifold,x)
+    project_tangent!(M.manifold,w,x,v)
+    is_tangent_vector(M.manifold,x,w)
+    return w
+end
+
+function distance(M::ArrayManifold, x, y)
+    is_manifold_point(M,x)
+    is_manifold_point(M,y)
+    return distance(M.manifold,x,y)
+end
+
+function dot(M::ArrayManifold, x, v, w)
+    is_manifold_point(M,x)
+    is_tangent_vector(M,x,v)
+    is_tangent_vector(M,x,w)
+    return dot(M.manifold,x,v,w)
+end
+
+function exp!(M::ArrayManifold, y, x, v)
+    is_manifold_point(M,x)
+    is_tangent_vector(M,x,v)
+    exp!(M.manifold,y,x,v)
+    is_manifold_point(M,y)
+    return y
+end
+
+function log!(M::Manifold, v, x, y)
+    is_manifold_point(M,x)
+    is_manifold_point(M,y)
+    log!(M.manifold, v,y,x)
+    is_tangent_vector(M,x,v)
+    return v
+end
+
 export ArrayManifold,
     ArrayMPoint,
     ArrayTVector
