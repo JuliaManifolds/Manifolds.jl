@@ -38,33 +38,36 @@ function project_tangent!(M::ArrayManifold, w, x, v)
 end
 
 function distance(M::ArrayManifold, x, y)
-    is_manifold_point(M,x)
-    is_manifold_point(M,y)
+    is_manifold_point(M.manifold,x)
+    is_manifold_point(M.manifold,y)
     return distance(M.manifold,x,y)
 end
 
 function dot(M::ArrayManifold, x, v, w)
-    is_manifold_point(M,x)
-    is_tangent_vector(M,x,v)
-    is_tangent_vector(M,x,w)
+    is_manifold_point(M.manifold,x)
+    is_tangent_vector(M.manifold,x,v)
+    is_tangent_vector(M.manifold,x,w)
     return dot(M.manifold,x,v,w)
 end
 
 function exp!(M::ArrayManifold, y, x, v)
-    is_manifold_point(M,x)
-    is_tangent_vector(M,x,v)
+    is_manifold_point(M.manifold,x)
+    is_tangent_vector(M.manifold,x,v)
     exp!(M.manifold,y,x,v)
-    is_manifold_point(M,y)
+    is_manifold_point(M.manifold,y)
     return y
 end
 
-function log!(M::Manifold, v, x, y)
-    is_manifold_point(M,x)
-    is_manifold_point(M,y)
+function log!(M::ArrayManifold, v, x, y)
+    is_manifold_point(M.manifold,x)
+    is_manifold_point(M.manifold,y)
     log!(M.manifold, v,y,x)
-    is_tangent_vector(M,x,v)
+    is_tangent_vector(M.manifold,x,v)
     return v
 end
+
+zero_tangent_vector!(M::ArrayManifold, v, x) = zero_tangent_vector!(M.manifold, v, x)
+zero_tangent_vector(M::ArrayManifold, x) = zero_tangent_vector(M.manifold, x)
 
 export ArrayManifold,
     ArrayMPoint,

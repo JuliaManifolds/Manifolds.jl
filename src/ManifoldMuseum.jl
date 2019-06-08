@@ -90,7 +90,7 @@ geodesic(M::Manifold, x, y, t) = exp(M, x, log(M, x, y), t)
 check, whether `x` is a valid point on the [`Manifold`](@ref) `M`. If it is not,
 an error is thrown.
 The default is to return `true`, i.e. if no checks are implmented,
-the assumption is to be optiimistic.
+the assumption is to be optimistic.
 """
 is_manifold_point(M::Manifold,x) = true
 
@@ -102,7 +102,7 @@ check, whether `v` is a valid tangnt vector in the tangent plane of `x` on the
 [`is_manifold_point`](@ref)`(M,x)` and then validate `v`. If it is not a tangent
 vector an error should be thrown.
 The default is to return `true`, i.e. if no checks are implmented,
-the assumption is to be optiimistic.
+the assumption is to be optimistic.
 """
 is_tangent_vector(M::Manifold,x,v) = true
 

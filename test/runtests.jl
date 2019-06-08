@@ -24,6 +24,18 @@ function test_manifold(M::Manifold, pts::AbstractVector)
     @test norm(M, pts[1], tv1) ≈ sqrt(dot(M, pts[1], tv1, tv1))
 end
 
+function text_arraymanifold()
+    M = ManifoldMuseum.Sphere((3,))
+    A = ArrayManifold(M)
+    x = [1., 0., 0.]
+    y = 1/sqrt(2)*[1., 1., 0.]
+    z = [0., 1., 0.]
+    v = log(M,x,y)
+    v2 = log(A,x,y)
+    v3 = log(A,ArrayMPoint(x),ArrayMPoint(y))
+    
+end
+
 @testset "Sphere" begin
     test_manifold(ManifoldMuseum.Sphere((3,)), [[1.0, 0.0, 0.0],
                                                 [0.0, 1.0, 0.0],
