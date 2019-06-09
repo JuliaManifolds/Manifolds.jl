@@ -36,25 +36,25 @@ end
 zero_tangent_vector(S::Sphere, x) = zero(x)
 zero_tangent_vector!(S::Sphere, v, x) = (v .= zero(x))
 
-function is_manifold_point(S::Sphere,x)
+function is_manifold_point(S::Sphere,x, local_isapprox=Base.isapprox)
     if size(x) != S.shape
         throw(DomainError(size(x),"The point $(x) does not lie on $S, since its size is not $(S.shape)."))
     end
-    if abs(norm(x)-1) > 10^(-15)
+    if !local_isapprox(norm(x), 1.)
         throw(DomainError(norm(x), "The point $(x) does not lie on the sphere $(S) since its norm is not 1."))
     end
     return true
 end
 
-function is_tangent_vector(S::Sphere,x,v)
+function is_tangent_vector(S::Sphere,x,v,local_isapprox=Base.isapprox)
     is_manifold_point(S,x)
     if size(v) != S.shape
         throw(DomainError(size(v),
-            "The vector $(v) can not be tangent to a point on $S since its size does not match $(S.shape)."))
+            "The vector $(v) is not a tangent to a point on $S since its size does not match $(S.shape)."))
     end
-    if dot(x,v) > 10^(-15)
+    if !local_isapprox( abs(dot(x,v)), 0.)
         throw(DomainError(dot(x,v),
-            "The vector $(v) can not be a tangent vector to $(x) on $(S), since it is not orthogonal to $x in the embedding"
+            "The vector $(v) is not a tangent vector to $(x) on $(S), since it is not orthogonal to $x in the embedding"
         ))
     end
 end

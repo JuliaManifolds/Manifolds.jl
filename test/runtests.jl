@@ -47,4 +47,5 @@ end
     test_manifold(ManifoldMuseum.Sphere((3,)), [[1.0, 0.0, 0.0],
                                                 [0.0, 1.0, 0.0],
                                                 [0.0, 0.0, 1.0]])
+    test_arraymanifold()
 end
