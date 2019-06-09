@@ -18,7 +18,7 @@ Sphere(n::Int) = Sphere{Tuple{n+1}}()
 
 returns the dimension of the manifold $\mathbb S^n$, i.e. $n$.
 """
-@generated manifold_dimension(::Sphere{T}) where {T} = sum(T.parameters)-1
+@generated manifold_dimension(::Sphere{Tuple{N}}) where N = N-1
 
 @doc doc"""
     dot(S,x,w,v)
@@ -52,20 +52,19 @@ function log!(S::Sphere, v, x, y)
     return v
 end
 
-dimension(S::Sphere) = sum(S.shape)
-random_point(S::Sphere) = (x = randn(S.shape); x / norm(x))
+random_point(S::Sphere{Tuple{N}}) where N = (x = randn(N); x / norm(x))
 
-function random_tangent_vector(S::Sphere, x)
-    v = randn(S.shape)
+function random_tangent_vector(S::Sphere{Tuple{N}}, x) where N
+    v = randn(N)
     return project_tangent!(S, v, x, v)
 end
 
 zero_tangent_vector(S::Sphere, x) = zero(x)
 zero_tangent_vector!(S::Sphere, v, x) = (v .= zero(x))
 
-function is_manifold_point(S::Sphere,x, local_isapprox=Base.isapprox)
-    if size(x) != S.shape
-        throw(DomainError(size(x),"The point $(x) does not lie on $S, since its size is not $(S.shape)."))
+function is_manifold_point(S::Sphere{Tuple{N}},x, local_isapprox=Base.isapprox) where N
+    if size(x) != N
+        throw(DomainError(size(x),"The point $(x) does not lie on $S, since its size is not $(N)."))
     end
     if !local_isapprox(norm(x), 1.)
         throw(DomainError(norm(x), "The point $(x) does not lie on the sphere $(S) since its norm is not 1."))
@@ -73,11 +72,11 @@ function is_manifold_point(S::Sphere,x, local_isapprox=Base.isapprox)
     return true
 end
 
-function is_tangent_vector(S::Sphere,x,v,local_isapprox=Base.isapprox)
+function is_tangent_vector(S::Sphere{Tuple{N}},x,v,local_isapprox=Base.isapprox) where N
     is_manifold_point(S,x)
-    if size(v) != S.shape
+    if size(v) != N
         throw(DomainError(size(v),
-            "The vector $(v) is not a tangent to a point on $S since its size does not match $(S.shape)."))
+            "The vector $(v) is not a tangent to a point on $S since its size does not match $(N)."))
     end
     if !local_isapprox( abs(dot(x,v)), 0.)
         throw(DomainError(dot(x,v),

@@ -1,6 +1,6 @@
 name = "ManifoldMuseum"
 uuid = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
-authors = ["Seth Axen", "Ronny Bergmann <manopt@ronnybergmann.net>", "Mateusz Batan", "Antoine Levitt <antoine.levitt@gmail.com>"]
+authors = ["Seth Axen", "Ronny Bergmann <manopt@ronnybergmann.net>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Antoine Levitt <antoine.levitt@gmail.com>"]
 version = "0.1.0"
 
 [deps]
