@@ -18,7 +18,7 @@ Sphere(n::Int) = Sphere{Tuple{n+1}}()
 
 returns the dimension of the manifold $\mathbb S^n$, i.e. $n$.
 """
-@generated manifold_dimension(::Sphere{T}) where {T} = sum(T.parameters)-1
+@generated manifold_dimension(::Sphere{Tuple{N}}) where N = N-1
 
 @doc doc"""
     dot(S,x,w,v)
@@ -52,11 +52,10 @@ function log!(S::Sphere, v, x, y)
     return v
 end
 
-dimension(S::Sphere) = sum(S.shape)
-random_point(S::Sphere) = (x = randn(S.shape); x / norm(x))
+random_point(S::Sphere{Tuple{N}}) where N = (x = randn(N); x / norm(x))
 
-function random_tangent_vector(S::Sphere, x)
-    v = randn(S.shape)
+function random_tangent_vector(S::Sphere{Tuple{N}}, x) where N
+    v = randn(N)
     return project_tangent!(S, v, x, v)
 end
 

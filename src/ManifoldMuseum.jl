@@ -106,7 +106,7 @@ function log(M::Manifold, x, y)
     return v
 end
 
-dimension(M::Manifold) = error("Not implemented")
+manifold_dimension(M::Manifold) = error("Not implemented")
 
 vector_transport!(M::Manifold, vto, x, v, y) = project_tangent!(M, vto, x, v)
 vector_transport(M::Manifold, x, v, y) = vector_transport!(M, copy(v), x, y, v)
@@ -128,5 +128,24 @@ geodesic(M::Manifold, x, y, t) = exp(M, x, log(M, x, y), t)
 
 include("Sphere.jl")
 
+export Manifold,
+    MPoint,
+    TVector,
+    CoTVector
+export manifold_dimension,
+    distance,
+    dot,
+    exp,
+    exp!,
+    geodesic,
+    isapprox,
+    is_manifold_point,
+    is_tangent_vector,
+    log,
+    log!,
+    norm,
+    injectivity_radius,
+    zero_tangent_vector,
+    zero_tangent_vector!
 
 end # module
