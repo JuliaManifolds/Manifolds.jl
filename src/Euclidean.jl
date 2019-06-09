@@ -6,18 +6,17 @@ Euclidean(m::Int, n::Int) = Euclidean{Tuple{m,n}}()
 @generated dimension(::Euclidean{T}) where {T} = sum(T.parameters)
 
 struct EuclideanMetric{M} <: RiemannianMetric{M}
-   m::M
+   manifold::M
 end
 
 struct TransformedEuclideanMetric{M,G<:AbstractMatrix} <: RiemannianMetric{M}
-   m::M
    g::G
+   manifold::M
 end
 
-manifold(g::EuclideanMetric) = g.m
-manifold(g::TransformedEuclideanMetric) = g.m
 
 local_matrix(g::EuclideanMetric, x) = I
+local_matrix(g::TransformedEuclideanMetric, x) = g.metric
 
 function local_matrix!(g::EuclideanMetric, G, x)
    n = dimension(manifold(g))

@@ -1,7 +1,7 @@
 module ManifoldMuseum
 
 import Base: isapprox, exp, log, convert
-import LinearAlgebra: dot, norm
+import LinearAlgebra: dot, norm, I
 
 
 abstract type Manifold end
@@ -14,22 +14,6 @@ retract(M::Manifold, x, v) = retract!(M, copy(x), x, v)
 project_tangent!(M::Manifold, w, x, v) = error("Not implemented")
 project_tangent(M::Manifold, x, v) = project_tangent!(M, copy(x), x, v)
 
-distance(M::Manifold, x, y) = error("Not implemented")
-
-dot(M::Manifold, x, v, w) = dot(v, w)
-norm(M::Manifold, x, v) = sqrt(dot(M, x, v, v))
-
-exp!(M::Manifold, y, x, v) = error("Not implemented")
-exp(M::Manifold, x, v) = exp!(M,copy(x), x, v)
-
-log!(M::Manifold, v, x, y) = error("Not implemented")
-
-function log(M::Manifold, x, y)
-    v = zero_tangent_vector(M, x)
-    log!(M, v, x, y)
-    return v
-end
-
 dimension(M::Manifold) = error("Not implemented")
 
 vector_transport!(M::Manifold, vto, x, v, y) = project_tangent!(M, vto, x, v)
@@ -38,11 +22,8 @@ vector_transport(M::Manifold, x, v, y) = vector_transport!(M, copy(v), x, y, v)
 random_point(M::Manifold) = error("Not implemented")
 random_tangent_vector(M::Manifold, x) = error("Not implemented")
 
-typical_distance(M::Manifold) = 1.0
 zero_tangent_vector(M::Manifold, x) = log(M, x, x)
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
-
-geodesic(M::Manifold, x, y, t) = exp(M, x, log(M, x, y), t)
 
 include("Metric.jl")
 include("Euclidean.jl")
@@ -59,13 +40,14 @@ export dimension,
     log,
     log!,
     norm,
-    typical_distance,
+    angle,
+    injectivity_radius,
     zero_tangent_vector,
     zero_tangent_vector!
 export Metric, RiemannianMetric, LorentzianMetric
 export manifold,
     local_matrix,
-    local_matrix!
+    inverse_local_matrix
 export Euclidean, EuclideanMetric, TransformedEuclideanMetric
 
 end # module

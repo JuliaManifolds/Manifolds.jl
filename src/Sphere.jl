@@ -3,10 +3,11 @@ struct Sphere{T} <: Manifold where {T}
 end
 
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v).*x)
-distance(S::Sphere, x, y) = acos(dot(x, y))
 
-function exp!(S::Sphere, y, x, v)
-    nv = norm(S, x, v)
+distance(g::EuclideanMetric{<:Sphere}, x, y) = acos(dot(x, y))
+
+function exp!(g::EuclideanMetric{<:Sphere}, y, x, v)
+    nv = norm(g, x, v)
     if nv ≈ 0.0
         y .= x
     else
@@ -15,10 +16,10 @@ function exp!(S::Sphere, y, x, v)
     return y
 end
 
-function log!(S::Sphere, v, x, y)
+function log!(g::EuclideanMetric{<:Sphere}, v, x, y)
     θ = acos(dot(x, y))
     if θ ≈ 0.0
-        zero_tangent_vector!(S, v, x)
+        zero_tangent_vector!(manifold(g), v, x)
     else
         v .= (θ/sin(θ)) .* (y .- cos(θ).*x)
     end
