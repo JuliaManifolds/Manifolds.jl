@@ -32,8 +32,15 @@ function test_arraymanifold()
     z = [0., 1., 0.]
     v = log(M,x,y)
     v2 = log(A,x,y)
-    v3 = log(A,ArrayMPoint(x),ArrayMPoint(y))
-    
+    y2 = exp(A,x,v2)
+    w = log(M,x,z)
+    w2 = log(A,x,z)
+    @test isapprox(y2.value,y)
+    @test distance(A,x,y) == distance(M,x,y)
+    @test norm(A,x,v) == norm(M,x,v)
+    @test dot(A,x,v2,w2) == dot(M,x,v,w)
+    @test_throws DomainError is_manifold_point(M,2*y)
+    @test_throws DomainError is_tangent_vector(M,y,v)
 end
 
 @testset "Sphere" begin
