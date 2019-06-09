@@ -49,7 +49,7 @@ function test_manifold(M::Manifold, pts::AbstractVector)
 end
 
 @testset "Sphere" begin
-    M = ManifoldMuseum.Sphere((3,))
+    M = ManifoldMuseum.Sphere(2)
     types = [Vector{Float64},
              MVector{3, Float64},
              Vector{Float32},

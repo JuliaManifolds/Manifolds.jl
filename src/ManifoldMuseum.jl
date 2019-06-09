@@ -2,6 +2,7 @@ module ManifoldMuseum
 
 import Base: isapprox, exp, log
 import LinearAlgebra: dot, norm
+import Markdown: @doc_str
 
 export Manifold
 export dimension,
