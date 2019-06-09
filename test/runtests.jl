@@ -24,7 +24,7 @@ function test_manifold(M::Manifold, pts::AbstractVector)
     @test norm(M, pts[1], tv1) ≈ sqrt(dot(M, pts[1], tv1, tv1))
 end
 
-function text_arraymanifold()
+function test_arraymanifold()
     M = ManifoldMuseum.Sphere((3,))
     A = ArrayManifold(M)
     x = [1., 0., 0.]
