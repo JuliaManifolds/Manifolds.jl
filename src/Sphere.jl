@@ -2,6 +2,8 @@ struct Sphere{T} <: Manifold where {T}
     shape::T
 end
 
+dot(S::Sphere, x, w, v) = dot(w, v)
+
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v).*x)
 distance(S::Sphere, x, y) = acos(dot(x, y))
 
