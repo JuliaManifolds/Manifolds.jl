@@ -30,7 +30,7 @@ function test_manifold(M::Manifold, pts::AbstractVector)
 end
 
 @testset "Sphere" begin
-    test_manifold(ManifoldMuseum.Sphere((3,)), [[1.0, 0.0, 0.0],
+    test_manifold(ManifoldMuseum.Sphere(2), [[1.0, 0.0, 0.0],
                                                 [0.0, 1.0, 0.0],
                                                 [0.0, 0.0, 1.0]])
 end
