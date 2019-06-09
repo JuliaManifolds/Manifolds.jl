@@ -3,10 +3,24 @@ module ManifoldMuseum
 import Base: isapprox, exp, log
 import LinearAlgebra: dot, norm
 
-
 abstract type Manifold end
 
-isapprox(m::Manifold, x, y; kwargs...) = isapprox(x, y; kwargs...)
+"""
+   IsDecoratorManifold
+
+A `Trait` to mark a manifold as a decorator type. For any function that is only
+implemented for a decorator (i.e. a Manifold with `@traitimpl
+IsDecoratorManifold{M}`), a specific function should be implemented as a
+`@traitfn`, that transparently passes down through decorators, i.e.
+
+```
+@traitfn myFeature(M::Mt, k...) where {Mt; IsNice{Mt}} = myFeature(M.manifold, k...)
+myFeature(M::MyManifold, k...) = #... my explicit impementation
+```
+"""
+@traitdef IsDecoratorManifold{M}
+
+isapprox(M::Manifold, x, y; kwargs...) = isapprox(x, y; kwargs...)
 
 retract!(M::Manifold, y, x, v) = exp!(M, y, x, v)
 retract(M::Manifold, x, v) = retract!(M, copy(x), x, v)
