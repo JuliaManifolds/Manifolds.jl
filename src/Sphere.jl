@@ -29,13 +29,13 @@ plane at `x` on the sphere `S=`$\mathbb S^n$ using the restriction of the metric
 embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
 dot(S::Sphere, x, w, v) = dot(w, v)
+dot(g::EuclideanMetric{<:Sphere}, args...) = dot(manifold(g), args...)
 
-project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v).*x)
+distance(m::Sphere, x, y) = acos(dot(x, y))
+distance(g::EuclideanMetric{<:Sphere}, args...) = distance(manifold(g), args...)
 
-distance(g::EuclideanMetric{<:Sphere}, x, y) = acos(dot(x, y))
-
-function exp!(g::EuclideanMetric{<:Sphere}, y, x, v)
-    nv = norm(g, x, v)
+function exp!(m::Sphere, y, x, v)
+    nv = norm(m, x, v)
     if nv ≈ 0.0
         y .= x
     else
@@ -43,6 +43,8 @@ function exp!(g::EuclideanMetric{<:Sphere}, y, x, v)
     end
     return y
 end
+
+exp!(g::EuclideanMetric{<:Sphere}, args...) = exp!(manifold(g), args...)
 
 function log!(g::EuclideanMetric{<:Sphere}, v, x, y)
     θ = acos(dot(x, y))
@@ -54,7 +56,11 @@ function log!(g::EuclideanMetric{<:Sphere}, v, x, y)
     return v
 end
 
+log!(g::EuclideanMetric{<:Sphere}, args...) = log!(manifold(g), args...)
+
 random_point(S::Sphere) where N = (x = randn(S.n); x / norm(x))
+
+project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v).*x)
 
 function random_tangent_vector(S::Sphere, x)
     v = randn(S.n)

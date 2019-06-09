@@ -119,7 +119,14 @@ random_tangent_vector(M::Manifold, x) = error("Not implemented")
 
 Distance such that `log(M, x, y)` is defined for all points within this radius.
 """
-injectivity_radius(M::Manifold, x) = 1.0
+injectivity_radius(M::Manifold, x) = Inf
+
+"""
+    injectivity_radius(M::Manifold, x)
+
+Infimum of the injectivity radii of all manifold points.
+"""
+injectivity_radius(M::Manifold) = Inf
 
 zero_tangent_vector(M::Manifold, x) = log(M, x, x)
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
@@ -149,6 +156,7 @@ export manifold_dimension,
     zero_tangent_vector,
     zero_tangent_vector!
 export Metric, RiemannianMetric, LorentzianMetric
+export SemiRiemannianManifold
 export manifold,
     local_matrix,
     inverse_local_matrix
