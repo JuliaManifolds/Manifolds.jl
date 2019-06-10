@@ -1,7 +1,7 @@
 module ManifoldMuseum
 
 import Base: isapprox, exp, log, convert
-import LinearAlgebra: dot, norm, I
+import LinearAlgebra: dot, norm, I, UniformScaling
 import Markdown: @doc_str
 
 export Manifold
@@ -80,6 +80,13 @@ Norm of tangent vector `v` at point `x` from manifold `M`.
 norm(M::Manifold, x, v) = sqrt(dot(M, x, v, v))
 
 """
+    angle(M::Manifold, x, v, w)
+
+Angle between tangent vectors `v` and `w` at point `x` from manifold `M`.
+"""
+angle(M::Manifold, x, v, w) = dot(M, x, v, w) / norm(M, x, v) / norm(M, x, w)
+
+"""
     exp!(M::Manifold, y, x, v, t=1)
 
 Exponential map of tangent vector `t*v` at point `x` from manifold `M`.
@@ -105,6 +112,8 @@ function log(M::Manifold, x, y)
     log!(M, v, x, y)
     return v
 end
+
+geodesic(g::Manifold, x, y, t) = exp(m, x, log(m, x, y), t)
 
 manifold_dimension(M::Manifold) = error("Not implemented")
 
@@ -156,10 +165,10 @@ export manifold_dimension,
     zero_tangent_vector,
     zero_tangent_vector!
 export Metric, RiemannianMetric, LorentzianMetric
-export SemiRiemannianManifold
+export MetricManifold
 export manifold,
-    local_matrix,
-    inverse_local_matrix
+    local_metric,
+    inverse_local_metric
 export Euclidean, EuclideanMetric, TransformedEuclideanMetric
 
 end # module

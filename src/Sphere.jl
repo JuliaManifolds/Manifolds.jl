@@ -29,10 +29,12 @@ plane at `x` on the sphere `S=`$\mathbb S^n$ using the restriction of the metric
 embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
 dot(S::Sphere, x, w, v) = dot(w, v)
-dot(g::EuclideanMetric{<:Sphere}, args...) = dot(manifold(g), args...)
 
 distance(m::Sphere, x, y) = acos(dot(x, y))
-distance(g::EuclideanMetric{<:Sphere}, args...) = distance(manifold(g), args...)
+
+function distance(M::MetricManifold{<:Sphere,EuclideanMetric}, args...)
+    return distance(manifold(M), args...)
+end
 
 function exp!(m::Sphere, y, x, v)
     nv = norm(m, x, v)
@@ -44,19 +46,19 @@ function exp!(m::Sphere, y, x, v)
     return y
 end
 
-exp!(g::EuclideanMetric{<:Sphere}, args...) = exp!(manifold(g), args...)
+exp!(M::MetricManifold{<:Sphere,EuclideanMetric}, args...) = exp!(manifold(M), args...)
 
-function log!(g::EuclideanMetric{<:Sphere}, v, x, y)
+function log!(m::Sphere, v, x, y)
     θ = acos(dot(x, y))
     if θ ≈ 0.0
-        zero_tangent_vector!(manifold(g), v, x)
+        zero_tangent_vector!(m, v, x)
     else
         v .= (θ/sin(θ)) .* (y .- cos(θ).*x)
     end
     return v
 end
 
-log!(g::EuclideanMetric{<:Sphere}, args...) = log!(manifold(g), args...)
+log!(M::MetricManifold{<:Sphere,EuclideanMetric}, args...) = log!(manifold(M), args...)
 
 random_point(S::Sphere) where N = (x = randn(S.n); x / norm(x))
 

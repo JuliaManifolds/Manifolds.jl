@@ -5,33 +5,38 @@ Euclidean(m::Int, n::Int) = Euclidean{Tuple{m,n}}()
 
 @generated dimension(::Euclidean{T}) where {T} = sum(T.parameters)
 
-struct EuclideanMetric{M} <: RiemannianMetric{M}
-   manifold::M
+struct EuclideanMetric <: RiemannianMetric end
+
+struct TransformedEuclideanMetric{G,IG} <: RiemannianMetric
+   g::G
+   g⁻¹::IG
 end
 
-struct TransformedEuclideanMetric{M,G<:AbstractMatrix,IG<:AbstractMatrix} <: RiemannianMetric{M}
-   manifold::M
-   metric::G
-   inv_metric::IG
+function TransformedEuclideanMetric(g::Union{AbstractMatrix,UniformScaling})
+   return TransformedEuclideanMetric(g, inv(g))
 end
 
-function TransformedEuclideanMetric(manifold, metric)
-   return TransformedEuclideanMetric(manifold, metric, inv(metric))
+local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x)= I
+local_metric(M::MetricManifold{<:Manifold,TransformedEuclideanMetric}, x) = metric(M).g
+
+inverse_local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x) = I
+function inverse_local_metric(M::MetricManifold{<:Manifold,TransformedEuclideanMetric}, x)
+   return metric(M).g⁻¹
 end
 
-local_matrix(g::EuclideanMetric, x) = I
-local_matrix(g::TransformedEuclideanMetric, x) = g.metric
+dot(::Euclidean, x, v, w) = dot(v, w)
+dot(M::MetricManifold{<:Manifold,EuclideanMetric}, args...) = dot(manifold(M), args...)
 
-inverse_local_matrix(g::EuclideanMetric, x) = I
-inverse_local_matrix(g::TransformedEuclideanMetric, x) = g.inv_metric
+exp!(M::Euclidean, y, x, v) = y .= x + v
+exp!(M::MetricManifold{<:Euclidean,EuclideanMetric}, args...) = exp!(manifold(M), args...)
 
-dot(m::Euclidean, x, v, w) = dot(v, w)
-dot(g::EuclideanMetric{<:Euclidean}, args...) = dot(manifold(g), args...)
-
-exp!(m::Euclidean, y, x, v) = y .= x + v
-exp!(g::EuclideanMetric{<:Euclidean}, args...) = exp!(manifold(g), args...)
-exp!(g::TransformedEuclideanMetric{<:Euclidean}, y, x, v) = y .= x + g.inv_metric * v
+function exp!(M::MetricManifold{<:Euclidean,TransformedEuclideanMetric}, y, x, v)
+   y .= x + inverse_local_metric(M) * v
+end
 
 log!(m::Euclidean, v, x, y) = v .= y - x
-log!(g::EuclideanMetric{<:Euclidean}, args...) = exp!(manifold(g), args...)
-log!(g::TransformedEuclideanMetric{<:Euclidean}, v, x, y) = v .= g.metric * (y - x)
+log!(M::MetricManifold{<:Euclidean,EuclideanMetric}, args...) = log!(manifold(M), args...)
+
+function log!(M::MetricManifold{<:Euclidean,TransformedEuclideanMetric}, v, x, y)
+   v .= local_metric(M) * (y - x)
+end
