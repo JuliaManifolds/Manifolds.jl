@@ -63,23 +63,38 @@ end
 zero_tangent_vector(S::Sphere, x) = zero(x)
 zero_tangent_vector!(S::Sphere, v, x) = (v .= zero(x))
 
-function is_manifold_point(S::Sphere,x, local_isapprox=Base.isapprox)
+"""
+    is_manifold_point(S,x; kwargs...)
+
+checks, whether `x` is a valid point on the [`Sphere`](@ref) `S`, i.e. is a vector
+of length [`manifold_dimension`](@ref)`(S)+1` (approximately) of unit length.
+The tolerance for the last test can be set using the ´kwargs...`.
+"""
+function is_manifold_point(S::Sphere,x; kwargs...)
     if size(x) != S.n+1
         throw(DomainError(size(x),"The point $(x) does not lie on $S, since its size is not $(S.n+1)."))
     end
-    if !local_isapprox(norm(x), 1.)
+    if !isapprox(norm(x), 1.; kwargs...)
         throw(DomainError(norm(x), "The point $(x) does not lie on the sphere $(S) since its norm is not 1."))
     end
     return true
 end
 
-function is_tangent_vector(S::Sphere,x,v,local_isapprox=Base.isapprox)
+"""
+    is_tangent_vector(S,x,v; kwargs... )
+
+checks whether `v` is a tangent vector to `x` on the [`Sphere`](@ref) `S`, i.e.
+atfer [`is_manifold_point`](@ref)`(S,x)`, `v` has to be of same dimension as `x`
+and orthogonal to `x`.
+The tolerance for the last test can be set using the ´kwargs...`.
+"""
+function is_tangent_vector(S::Sphere,x,v; kwargs...)
     is_manifold_point(S,x)
     if size(v) != S.n+1
         throw(DomainError(size(v),
             "The vector $(v) is not a tangent to a point on $S since its size does not match $(S.n+1)."))
     end
-    if !local_isapprox( abs(dot(x,v)), 0.)
+    if !isapprox( abs(dot(x,v)), 0.; kwargs...)
         throw(DomainError(dot(x,v),
             "The vector $(v) is not a tangent vector to $(x) on $(S), since it is not orthogonal to $x in the embedding"
         ))

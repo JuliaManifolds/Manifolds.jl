@@ -14,7 +14,11 @@ Order = [:type, :function]
 ## Decorators
 
 ### ArrayManifold
-
+```@autodocs
+Modules = [ManifoldMuseum]
+Pages = ["ArrayManifold.jl"]
+Order = [:type, :function]
+```
 ### Lie Group
 
 ### Metric

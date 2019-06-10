@@ -59,7 +59,6 @@ representations of cotangent vectors and their types on a manifold.
 """
 abstract type CoTVector end
 
-isapprox(m::Manifold, x, y; kwargs...) = isapprox(x, y; kwargs...)
 """
     isapprox(M::Manifold, x, y; kwargs...)
 
@@ -174,7 +173,7 @@ an error is thrown.
 The default is to return `true`, i.e. if no checks are implmented,
 the assumption is to be optimistic.
 """
-is_manifold_point(M::Manifold,x) = true
+is_manifold_point(M::Manifold,x; kwargs...) = true
 
 """
     is_tangent_vector(M,x,v)
@@ -186,7 +185,7 @@ vector an error should be thrown.
 The default is to return `true`, i.e. if no checks are implmented,
 the assumption is to be optimistic.
 """
-is_tangent_vector(M::Manifold,x,v) = true
+is_tangent_vector(M::Manifold,x,v; kwargs...) = true
 
 include("ArrayManifold.jl")
 include("Sphere.jl")
