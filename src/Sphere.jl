@@ -55,11 +55,6 @@ function log!(S::Sphere, v, x, y)
     return v
 end
 
-function random_tangent_vector(S::Sphere{N}, x) where N
-    v = randn(N+1)
-    return project_tangent!(S, v, x, v)
-end
-
 zero_tangent_vector(S::Sphere, x) = zero(x)
 zero_tangent_vector!(S::Sphere, v, x) = (v .= zero(x))
 
@@ -71,5 +66,16 @@ type to `x`.
 """
 function uniform_sphere_distribution(S::Sphere, x)
 	d = Distributions.MvNormal(zero(x), 1.0)
-	return ProjectedDistribution(S, d, proj!, x)
+	return ProjectedPointDistribution(S, d, proj!, x)
+end
+
+"""
+	gaussian_sphere_tvector_distribution(S::Sphere, x, σ)
+
+Normal distribution in ambient space with standard deviation `σ`
+projected to tangent space at `x`.
+"""
+function gaussian_sphere_tvector_distribution(S::Sphere, x, σ)
+	d = Distributions.MvNormal(zero(x), σ)
+	return ProjectedTVectorDistribution(S, x, d, project_tangent!, x)
 end

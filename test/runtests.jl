@@ -70,5 +70,14 @@ end
         end
         usd_mvector = ManifoldMuseum.uniform_sphere_distribution(M, @MVector [1.0, 0.0, 0.0])
         @test isa(rand(usd_mvector), MVector)
+
+        x = [1.0, 0.0, 0.0]
+        gtsd_vector = ManifoldMuseum.gaussian_sphere_tvector_distribution(M, x, 1.0)
+        @test isa(rand(gtsd_vector), Vector)
+        for _ in 1:10
+            @test dot(x, rand(gtsd_vector)) ≈ 0.0
+        end
+        gtsd_mvector = ManifoldMuseum.gaussian_sphere_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
+        @test isa(rand(gtsd_mvector), MVector)
     end
 end
