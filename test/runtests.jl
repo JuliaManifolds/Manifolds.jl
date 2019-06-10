@@ -30,7 +30,7 @@ function test_manifold(M::Manifold, pts::AbstractVector)
 end
 
 function test_arraymanifold()
-    M = ManifoldMuseum.Sphere((3,))
+    M = ManifoldMuseum.Sphere(2)
     A = ArrayManifold(M)
     x = [1., 0., 0.]
     y = 1/sqrt(2)*[1., 1., 0.]
@@ -39,13 +39,13 @@ function test_arraymanifold()
     v2 = log(A,x,y)
     y2 = exp(A,x,v2)
     w = log(M,x,z)
-    w2 = log(A,x,z)
+    w2 = log(A,x,z; atol=10^(-15))
     @test isapprox(y2.value,y)
     @test distance(A,x,y) == distance(M,x,y)
     @test norm(A,x,v) == norm(M,x,v)
-    @test dot(A,x,v2,w2) == dot(M,x,v,w)
+    @test dot(A,x,v2,w2; atol=10^(-15)) == dot(M,x,v,w)
     @test_throws DomainError is_manifold_point(M,2*y)
-    @test_throws DomainError is_tangent_vector(M,y,v)
+    @test_throws DomainError is_tangent_vector(M,y,v; atol=10^(-15))
 end
 
 @testset "Sphere" begin
