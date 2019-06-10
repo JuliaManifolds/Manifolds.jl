@@ -42,7 +42,7 @@ function test_manifold(M::Manifold, pts::AbstractVector)
     @testset "ForwardDiff support" begin
         exp_f(t) = distance(M, pts[1], exp(M, pts[1], t*tv1))
         d12 = distance(M, pts[1], pts[2])
-        for t ∈ 0.0:0.1:1.0
+        for t ∈ 0.1:0.1:1.0
             @test d12 ≈ ForwardDiff.derivative(exp_f, t)
         end
     end
