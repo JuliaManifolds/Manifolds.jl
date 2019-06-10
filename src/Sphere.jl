@@ -30,14 +30,14 @@ embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
 dot(S::Sphere, x, w, v) = dot(w, v)
 
-distance(m::Sphere, x, y) = acos(dot(x, y))
+distance(S::Sphere, x, y) = acos(dot(x, y))
 
 function distance(M::MetricManifold{<:Sphere,EuclideanMetric}, args...)
     return distance(manifold(M), args...)
 end
 
-function exp!(m::Sphere, y, x, v)
-    nv = norm(m, x, v)
+function exp!(S::Sphere, y, x, v)
+    nv = norm(S, x, v)
     if nv ≈ 0.0
         y .= x
     else
@@ -48,10 +48,10 @@ end
 
 exp!(M::MetricManifold{<:Sphere,EuclideanMetric}, args...) = exp!(manifold(M), args...)
 
-function log!(m::Sphere, v, x, y)
+function log!(S::Sphere, v, x, y)
     θ = acos(dot(x, y))
     if θ ≈ 0.0
-        zero_tangent_vector!(m, v, x)
+        zero_tangent_vector!(S, v, x)
     else
         v .= (θ/sin(θ)) .* (y .- cos(θ).*x)
     end

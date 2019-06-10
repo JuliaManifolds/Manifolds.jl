@@ -34,7 +34,7 @@ function exp!(M::MetricManifold{<:Euclidean,TransformedEuclideanMetric}, y, x, v
    y .= x + inverse_local_metric(M) * v
 end
 
-log!(m::Euclidean, v, x, y) = v .= y - x
+log!(M::Euclidean, v, x, y) = v .= y - x
 log!(M::MetricManifold{<:Euclidean,EuclideanMetric}, args...) = log!(manifold(M), args...)
 
 function log!(M::MetricManifold{<:Euclidean,TransformedEuclideanMetric}, v, x, y)
