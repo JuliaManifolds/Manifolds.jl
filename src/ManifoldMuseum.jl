@@ -158,7 +158,7 @@ end
 
 include("DistributionsBase.jl")
 include("Sphere.jl")
-include("RetractedDistribution.jl")
+include("ProjectedDistribution.jl")
 
 export Manifold,
     MPoint,

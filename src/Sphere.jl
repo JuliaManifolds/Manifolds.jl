@@ -29,7 +29,7 @@ embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
 dot(S::Sphere, x, w, v) = dot(w, v)
 
-retr!(S::Sphere, x) = (x ./= norm(x))
+proj!(S::Sphere, x) = (x ./= norm(x))
 
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v).*x)
 distance(S::Sphere, x, y) = acos(dot(x, y))
@@ -62,3 +62,14 @@ end
 
 zero_tangent_vector(S::Sphere, x) = zero(x)
 zero_tangent_vector!(S::Sphere, v, x) = (v .= zero(x))
+
+"""
+	uniform_sphere_distribution(S::Sphere, x)
+
+Uniform distribution on given sphere. Generated points will be of similar
+type to `x`.
+"""
+function uniform_sphere_distribution(S::Sphere, x)
+	d = Distributions.MvNormal(zero(x), 1.0)
+	return ProjectedDistribution(S, d, proj!, x)
+end

@@ -61,4 +61,14 @@ end
                           convert(T, [0.0, 1.0, 0.0]),
                           convert(T, [0.0, 0.0, 1.0])])
     end
+
+    @testset "Distribution tests" begin
+        usd_vector = ManifoldMuseum.uniform_sphere_distribution(M, [1.0, 0.0, 0.0])
+        @test isa(rand(usd_vector), Vector)
+        for _ in 1:10
+            @test norm(rand(usd_vector)) ≈ 1.0
+        end
+        usd_mvector = ManifoldMuseum.uniform_sphere_distribution(M, @MVector [1.0, 0.0, 0.0])
+        @test isa(rand(usd_mvector), MVector)
+    end
 end
