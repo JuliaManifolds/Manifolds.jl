@@ -43,11 +43,12 @@ function exp!(S::Sphere, y, x, v)
 end
 
 function log!(S::Sphere, v, x, y)
-    θ = acos(dot(x, y))
+    dot_xy = dot(x, y)
+    θ = acos(dot_xy)
     if θ ≈ 0.0
         zero_tangent_vector!(S, v, x)
     else
-        v .= (θ/sin(θ)) .* (y .- cos(θ).*x)
+        v .= (θ/sin(θ)) .* (y .- dot_xy.*x)
     end
     return v
 end
