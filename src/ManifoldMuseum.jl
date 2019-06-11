@@ -5,7 +5,10 @@ import Base: isapprox,
     log,
     eltype,
     similar,
-    convert
+    convert,
+    +,
+    -,
+    *
 import LinearAlgebra: dot,
     norm
 import Markdown: @doc_str

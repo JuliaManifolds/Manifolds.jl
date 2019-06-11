@@ -21,16 +21,20 @@ function test_manifold(M::Manifold, pts::AbstractVector)
 
     @testset "log/exp tests" begin
         @test isapprox(M, pts[2], exp(M, pts[1], tv1))
+        @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
+        @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
         for x ∈ pts
             @test isapprox(M, zero_tangent_vector(M, x), log(M, pts[1], pts[1]))
         end
         zero_tangent_vector!(M, tv1, pts[1])
-        @test isapprox(tv1, zero_tangent_vector(M, pts[1]))
+        @test isapprox(M, pts[1], tv1, zero_tangent_vector(M, pts[1]))
         log!(M, tv1, pts[1], pts[2])
         @test norm(M, pts[1], tv1) ≈ sqrt(dot(M, pts[1], tv1, tv1))
 
         @test isapprox(M, exp(M, pts[1], tv1, 1), pts[2])
         @test isapprox(M, exp(M, pts[1], tv1, 0), pts[1])
+
+        @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
     end
 
     @testset "linear algebra in tangent space" begin
@@ -65,6 +69,8 @@ function test_arraymanifold()
     @test dot(A,x,v2,w2; atol=10^(-15)) == dot(M,x,v,w)
     @test_throws DomainError is_manifold_point(M,2*y)
     @test_throws DomainError is_tangent_vector(M,y,v; atol=10^(-15))
+
+    test_manifold(A, [x, y, z])
 end
 
 @testset "Sphere" begin

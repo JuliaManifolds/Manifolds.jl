@@ -34,10 +34,21 @@ array_value(x::AbstractArray) = x
 array_value(x::ArrayMPoint) = x.value
 array_value(v::ArrayTVector) = v.value
 
+(+)(v1::ArrayTVector, v2::ArrayTVector) = ArrayTVector(v1.value + v2.value)
+(-)(v1::ArrayTVector, v2::ArrayTVector) = ArrayTVector(v1.value - v2.value)
+(*)(a::Number, v::ArrayTVector) = ArrayTVector(a*v.value)
+
 function isapprox(M::ArrayManifold, x, y; kwargs...)
     is_manifold_point(M, x; kwargs...)
     is_manifold_point(M, y; kwargs...)
     return isapprox(M.manifold, array_value(x), array_value(y); kwargs...)
+end
+
+function isapprox(M::ArrayManifold, x, v, w; kwargs...)
+    is_manifold_point(M, x; kwargs...)
+    is_tangent_vector(M, x, v; kwargs...)
+    is_tangent_vector(M, x, w; kwargs...)
+    return isapprox(M.manifold, array_value(x), array_value(v), array_value(w); kwargs...)
 end
 
 function project_tangent!(M::ArrayManifold, w, x, v; kwargs...)
