@@ -42,10 +42,29 @@ function test_manifold(M::Manifold, pts::AbstractVector)
     @testset "ForwardDiff support" begin
         exp_f(t) = distance(M, pts[1], exp(M, pts[1], t*tv1))
         d12 = distance(M, pts[1], pts[2])
-        for t ∈ 0.0:0.1:1.0
+        for t ∈ 0.1:0.1:1.0
             @test d12 ≈ ForwardDiff.derivative(exp_f, t)
         end
     end
+end
+
+function test_arraymanifold()
+    M = ManifoldMuseum.Sphere(2)
+    A = ArrayManifold(M)
+    x = [1., 0., 0.]
+    y = 1/sqrt(2)*[1., 1., 0.]
+    z = [0., 1., 0.]
+    v = log(M,x,y)
+    v2 = log(A,x,y)
+    y2 = exp(A,x,v2)
+    w = log(M,x,z)
+    w2 = log(A,x,z; atol=10^(-15))
+    @test isapprox(y2.value,y)
+    @test distance(A,x,y) == distance(M,x,y)
+    @test norm(A,x,v) == norm(M,x,v)
+    @test dot(A,x,v2,w2; atol=10^(-15)) == dot(M,x,v,w)
+    @test_throws DomainError is_manifold_point(M,2*y)
+    @test_throws DomainError is_tangent_vector(M,y,v; atol=10^(-15))
 end
 
 @testset "Sphere" begin
@@ -61,4 +80,5 @@ end
                           convert(T, [0.0, 1.0, 0.0]),
                           convert(T, [0.0, 0.0, 1.0])])
     end
+    test_arraymanifold()
 end
