@@ -1,6 +1,6 @@
 module ManifoldMuseum
 
-import Base: isapprox, exp, log, eltype, similar
+import Base: isapprox, exp, log, eltype, similar, +, -, *
 import LinearAlgebra: dot, norm
 import Markdown: @doc_str
 
