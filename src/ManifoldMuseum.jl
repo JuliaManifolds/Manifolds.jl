@@ -1,6 +1,6 @@
 module ManifoldMuseum
 
-import Base: isapprox, exp, log
+import Base: isapprox, exp, log, eltype, similar
 import LinearAlgebra: dot, norm
 import Markdown: @doc_str
 
@@ -200,7 +200,7 @@ an error is thrown.
 The default is to return `true`, i.e. if no checks are implmented,
 the assumption is to be optimistic.
 """
-is_manifold_point(M::Manifold,x; kwargs...) = true
+is_manifold_point(M::Manifold, x; kwargs...) = true
 is_manifold_point(M::Manifold, x::MPoint) = error("A validation for a $(typeof(x)) on $(typeof(M)) not implemented.")
 
 """
@@ -213,7 +213,7 @@ vector an error should be thrown.
 The default is to return `true`, i.e. if no checks are implmented,
 the assumption is to be optimistic.
 """
-is_tangent_vector(M::Manifold,x,v; kwargs...) = true
+is_tangent_vector(M::Manifold, x, v; kwargs...) = true
 is_tangent_vector(M::Manifold, x::MPoint, v::TVector) = error("A validation for a $(typeof(v)) in the tangent space of a $(typeof(x)) on $(typeof(M)) not implemented.")
 
 include("ArrayManifold.jl")
