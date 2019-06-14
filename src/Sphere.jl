@@ -64,7 +64,7 @@ zero_tangent_vector!(S::Sphere, v, x) = (v .= zero(x))
 Uniform distribution on given sphere. Generated points will be of similar
 type to `x`.
 """
-function uniform_sphere_distribution(S::Sphere, x)
+function uniform_distribution(S::Sphere, x)
 	d = Distributions.MvNormal(zero(x), 1.0)
 	return ProjectedPointDistribution(S, d, proj!, x)
 end
@@ -113,7 +113,7 @@ end
 Normal distribution in ambient space with standard deviation `σ`
 projected to tangent space at `x`.
 """
-function gaussian_sphere_tvector_distribution(S::Sphere, x, σ)
+function normal_tvector_distribution(S::Sphere, x, σ)
 	d = Distributions.MvNormal(zero(x), σ)
 	return ProjectedTVectorDistribution(S, x, d, project_tangent!, x)
 end

@@ -67,8 +67,8 @@ function test_arraymanifold()
     @test distance(A,x,y) == distance(M,x,y)
     @test norm(A,x,v) == norm(M,x,v)
     @test dot(A,x,v2,w2; atol=10^(-15)) == dot(M,x,v,w)
-    @test_throws DomainError is_manifold_point(M,2*y)
-    @test_throws DomainError is_tangent_vector(M,y,v; atol=10^(-15))
+    @test_throws DomainError ManifoldMuseum.is_manifold_point(M,2*y)
+    @test_throws DomainError ManifoldMuseum.is_tangent_vector(M,y,v; atol=10^(-15))
 
     test_manifold(A, [x, y, z])
 end
@@ -88,21 +88,21 @@ end
     end
 
     @testset "Distribution tests" begin
-        usd_vector = ManifoldMuseum.uniform_sphere_distribution(M, [1.0, 0.0, 0.0])
+        usd_vector = ManifoldMuseum.uniform_distribution(M, [1.0, 0.0, 0.0])
         @test isa(rand(usd_vector), Vector)
         for _ in 1:10
             @test norm(rand(usd_vector)) ≈ 1.0
         end
-        usd_mvector = ManifoldMuseum.uniform_sphere_distribution(M, @MVector [1.0, 0.0, 0.0])
+        usd_mvector = ManifoldMuseum.uniform_distribution(M, @MVector [1.0, 0.0, 0.0])
         @test isa(rand(usd_mvector), MVector)
 
         x = [1.0, 0.0, 0.0]
-        gtsd_vector = ManifoldMuseum.gaussian_sphere_tvector_distribution(M, x, 1.0)
+        gtsd_vector = ManifoldMuseum.normal_tvector_distribution(M, x, 1.0)
         @test isa(rand(gtsd_vector), Vector)
         for _ in 1:10
             @test dot(x, rand(gtsd_vector)) ≈ 0.0
         end
-        gtsd_mvector = ManifoldMuseum.gaussian_sphere_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
+        gtsd_mvector = ManifoldMuseum.normal_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
         @test isa(rand(gtsd_mvector), MVector)
     end
 
