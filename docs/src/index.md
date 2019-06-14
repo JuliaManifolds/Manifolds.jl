@@ -12,7 +12,6 @@ Order = [:type, :function]
 ```
 
 ## Decorators
-
 ### ArrayManifold
 ```@autodocs
 Modules = [ManifoldMuseum]
