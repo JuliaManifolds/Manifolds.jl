@@ -29,6 +29,8 @@ embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
 dot(S::Sphere, x, w, v) = dot(w, v)
 
+proj!(S::Sphere, x) = (x ./= norm(x))
+
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v).*x)
 distance(S::Sphere, x, y) = acos(dot(x, y))
 
@@ -53,15 +55,19 @@ function log!(S::Sphere, v, x, y)
     return v
 end
 
-random_point(S::Sphere{N}) where N = (x = randn(N+1); x / norm(x))
-
-function random_tangent_vector(S::Sphere{N}, x) where N
-    v = randn(N+1)
-    return project_tangent!(S, v, x, v)
-end
-
 zero_tangent_vector(S::Sphere, x) = zero(x)
 zero_tangent_vector!(S::Sphere, v, x) = (v .= zero(x))
+
+"""
+	uniform_sphere_distribution(S::Sphere, x)
+
+Uniform distribution on given sphere. Generated points will be of similar
+type to `x`.
+"""
+function uniform_distribution(S::Sphere, x)
+	d = Distributions.MvNormal(zero(x), 1.0)
+	return ProjectedPointDistribution(S, d, proj!, x)
+end
 
 """
     is_manifold_point(S,x; kwargs...)
@@ -99,4 +105,15 @@ function is_tangent_vector(S::Sphere{N},x,v; kwargs...) where N
             "The vector $(v) is not a tangent vector to $(x) on $(S), since it is not orthogonal in the embedding."
         ))
     end
+end
+
+"""
+	gaussian_sphere_tvector_distribution(S::Sphere, x, σ)
+
+Normal distribution in ambient space with standard deviation `σ`
+projected to tangent space at `x`.
+"""
+function normal_tvector_distribution(S::Sphere, x, σ)
+	d = Distributions.MvNormal(zero(x), σ)
+	return ProjectedTVectorDistribution(S, x, d, project_tangent!, x)
 end

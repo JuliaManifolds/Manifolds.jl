@@ -1,9 +1,22 @@
 module ManifoldMuseum
 
-import Base: isapprox, exp, log, eltype, similar, +, -, *
-import LinearAlgebra: dot, norm
+import Base: isapprox,
+    exp,
+    log,
+    eltype,
+    similar,
+    convert,
+    +,
+    -,
+    *
+import LinearAlgebra: dot,
+    norm
 import Markdown: @doc_str
+import Distributions: _rand!
+import Random: rand
+using Random: AbstractRNG
 using SimpleTraits
+
 """
     Manifold
 
@@ -178,9 +191,6 @@ function vector_transport(M::Manifold, x, v, y)
     return vto
 end
 
-random_point(M::Manifold) = error("Not implemented")
-random_tangent_vector(M::Manifold, x) = error("Not implemented")
-
 """
     injectivity_radius(M::Manifold, x)
 
@@ -242,7 +252,9 @@ is_tangent_vector(M::Manifold, x::MPoint, v::TVector) = error("A validation for 
 
 include("ArrayManifold.jl")
 
+include("DistributionsBase.jl")
 include("Sphere.jl")
+include("ProjectedDistribution.jl")
 
 export Manifold,
     IsDecoratorManifold
