@@ -21,13 +21,13 @@ returns the dimension of the manifold $\mathbb S^n$, i.e. $n$.
 dimension(S::Sphere{N}) where {N} = N
 
 @doc doc"""
-    dot(S,x,w,v)
+    inner(S,x,w,v)
 
 compute the inner product of the two tangent vectors `w,v` from the tangent
 plane at `x` on the sphere `S=`$\mathbb S^n$ using the restriction of the metric from the
 embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
-dot(S::Sphere, x, w, v) = dot(w, v)
+inner(S::Sphere, x, w, v) = dot(w, v)
 
 proj!(S::Sphere, x) = (x ./= norm(x))
 

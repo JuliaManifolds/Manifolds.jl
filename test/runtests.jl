@@ -1,5 +1,6 @@
 using ManifoldMuseum
 
+using LinearAlgebra
 using DoubleFloats
 using ForwardDiff
 using StaticArrays
@@ -29,7 +30,7 @@ function test_manifold(M::Manifold, pts::AbstractVector)
         zero_tangent_vector!(M, tv1, pts[1])
         @test isapprox(M, pts[1], tv1, zero_tangent_vector(M, pts[1]))
         log!(M, tv1, pts[1], pts[2])
-        @test norm(M, pts[1], tv1) ≈ sqrt(dot(M, pts[1], tv1, tv1))
+        @test norm(M, pts[1], tv1) ≈ sqrt(inner(M, pts[1], tv1, tv1))
 
         @test isapprox(M, exp(M, pts[1], tv1, 1), pts[2])
         @test isapprox(M, exp(M, pts[1], tv1, 0), pts[1])
@@ -66,7 +67,7 @@ function test_arraymanifold()
     @test isapprox(y2.value,y)
     @test distance(A,x,y) == distance(M,x,y)
     @test norm(A,x,v) == norm(M,x,v)
-    @test dot(A,x,v2,w2; atol=10^(-15)) == dot(M,x,v,w)
+    @test inner(A,x,v2,w2; atol=10^(-15)) == inner(M,x,v,w)
     @test_throws DomainError ManifoldMuseum.is_manifold_point(M,2*y)
     @test_throws DomainError ManifoldMuseum.is_tangent_vector(M,y,v; atol=10^(-15))
 
