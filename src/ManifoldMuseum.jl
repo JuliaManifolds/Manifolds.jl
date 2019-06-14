@@ -139,18 +139,18 @@ end
 distance(M::Manifold, x, y) = norm(M, x, log(M, x, y))
 
 """
-    dot(M::Manifold, x, v, w)
+    inner(M::Manifold, x, v, w)
 
 Inner product of tangent vectors `v` and `w` at point `x` from manifold `M`.
 """
-dot(M::Manifold, x, v, w) = error("dot: Inner product not implemented on a $(typeof(M)) for input point $(typeof(x)) and tangent vectors $(typeof(v)) and $(typeof(w)).")
+inner(M::Manifold, x, v, w) = error("inner: Inner product not implemented on a $(typeof(M)) for input point $(typeof(x)) and tangent vectors $(typeof(v)) and $(typeof(w)).")
 
 """
     norm(M::Manifold, x, v)
 
 Norm of tangent vector `v` at point `x` from manifold `M`.
 """
-norm(M::Manifold, x, v) = sqrt(dot(M, x, v, v))
+norm(M::Manifold, x, v) = sqrt(inner(M, x, v, v))
 
 """
     angle(M::Manifold, x, v, w)
@@ -278,7 +278,7 @@ export Manifold,
     IsDecoratorManifold
 export dimension,
     distance,
-    dot,
+    inner,
     exp,
     exp!,
     geodesic,

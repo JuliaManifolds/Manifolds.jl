@@ -64,11 +64,11 @@ function distance(M::ArrayManifold, x, y; kwargs...)
     return distance(M.manifold, array_value(x), array_value(y))
 end
 
-function dot(M::ArrayManifold, x, v, w; kwargs...)
+function inner(M::ArrayManifold, x, v, w; kwargs...)
     is_manifold_point(M, x; kwargs...)
     is_tangent_vector(M, x, v; kwargs...)
     is_tangent_vector(M, x, w; kwargs...)
-    return dot(M.manifold, array_value(x), array_value(v), array_value(w))
+    return inner(M.manifold, array_value(x), array_value(v), array_value(w))
 end
 
 function exp!(M::ArrayManifold, y, x, v; kwargs...)
