@@ -3,7 +3,7 @@ module ManifoldMuseum
 import Base: isapprox, exp, log, eltype, similar, +, -, *
 import LinearAlgebra: dot, norm
 import Markdown: @doc_str
-
+using SimpleTraits
 """
     Manifold
 
@@ -44,6 +44,30 @@ representations, semantic verification or even dispatch for different
 representations of cotangent vectors and their types on a manifold.
 """
 abstract type CoTVector end
+
+"""
+    IsDecoratorManifold
+
+A `Trait` to mark a manifold as a decorator type. For any function that is only
+implemented for a decorator (i.e. a Manifold with `@traitimpl
+IsDecoratorManifold{M}`), a specific function should be implemented as a
+`@traitfn`, that transparently passes down through decorators, i.e.
+
+```
+@traitfn myFeature(M::Mt, k...) where {Mt; IsDecoratorManifold{Mt}} = myFeature(M.manifold, k...)
+```
+or the shorter version
+```
+@traitfn myFeature(M::::IsDecoratorManifold, k...) = myFeature(M.manifold, k...)
+```
+such that decorators act just as pass throughs for other decorator functions and
+```
+myFeature(M::MyManifold, k...) = #... my explicit implementation
+```
+then implements the feature itself.
+"""
+@traitdef IsDecoratorManifold{M}
+
 
 """
     isapprox(M::Manifold, x, y; kwargs...)
@@ -221,18 +245,14 @@ include("ArrayManifold.jl")
 include("Sphere.jl")
 
 export Manifold,
-    MPoint,
-    TVector,
-    CoTVector
-export manifold_dimension,
+    IsDecoratorManifold
+export dimension,
     distance,
     dot,
     exp,
     exp!,
     geodesic,
     isapprox,
-    is_manifold_point,
-    is_tangent_vector,
     log,
     log!,
     norm,
