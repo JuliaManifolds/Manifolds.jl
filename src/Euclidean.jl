@@ -24,8 +24,8 @@ function inverse_local_metric(M::MetricManifold{<:Manifold,TransformedEuclideanM
    return metric(M).g⁻¹
 end
 
-dot(::Euclidean, x, v, w) = dot(v, w)
-dot(M::MetricManifold{<:Manifold,EuclideanMetric}, args...) = dot(manifold(M), args...)
+inner(::Euclidean, x, v, w) = dot(v, w)
+inner(M::MetricManifold{<:Manifold,EuclideanMetric}, args...) = inner(manifold(M), args...)
 
 exp!(M::Euclidean, y, x, v) = y .= x + v
 exp!(M::MetricManifold{<:Euclidean,EuclideanMetric}, args...) = exp!(manifold(M), args...)

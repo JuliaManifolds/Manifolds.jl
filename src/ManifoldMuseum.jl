@@ -157,7 +157,7 @@ norm(M::Manifold, x, v) = sqrt(inner(M, x, v, v))
 
 Angle between tangent vectors `v` and `w` at point `x` from manifold `M`.
 """
-angle(M::Manifold, x, v, w) = dot(M, x, v, w) / norm(M, x, v) / norm(M, x, w)
+angle(M::Manifold, x, v, w) = inner(M, x, v, w) / norm(M, x, v) / norm(M, x, w)
 
 """
     exp!(M::Manifold, y, x, v, t=1)

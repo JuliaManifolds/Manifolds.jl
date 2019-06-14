@@ -17,7 +17,7 @@ local_metric(M::MetricManifold, x) = error("Not implemented")
 
 inverse_local_metric(M::MetricManifold, x) = inv(local_metric(M, x))
 
-dot(M::MetricManifold, x, v, w) = dot(v, local_matrix(M, x) * w)
+inner(M::MetricManifold, x, v, w) = dot(v, local_matrix(M, x) * w)
 
 exp!(M::MetricManifold, y, x, v) = error("Not implemented")
 
