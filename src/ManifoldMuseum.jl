@@ -18,6 +18,10 @@ import Distributions: _rand!
 import Random: rand
 using Random: AbstractRNG
 using SimpleTraits
+using ForwardDiff
+import Einsum: @einsum
+import DifferentialEquations: ODEProblem,
+    solve
 
 """
     Manifold

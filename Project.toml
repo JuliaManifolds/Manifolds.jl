@@ -4,8 +4,11 @@ authors = ["Seth Axen <seth.axen@gmail.com>", "Ronny Bergmann <manopt@ronnybergm
 version = "0.1.0"
 
 [deps]
+DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Einsum = "b7d42ee7-0b51-5a75-98ca-779d3107e4c0"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 SimpleTraits = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
