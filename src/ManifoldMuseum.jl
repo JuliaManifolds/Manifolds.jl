@@ -87,6 +87,19 @@ then implements the feature itself.
 """
 @traitdef IsDecoratorManifold{M}
 
+"""
+    manifold(M::Manifold; recurse::Bool=false)
+
+If `M` is a decorator manifold, return the underlying manifold. if `recurse` is
+`true`, continue un-decorating until a non-decorator manifold is encountered.
+"""
+function manifold end
+
+@traitfn function manifold(M::MT; recurse::Bool=false) where {MT<:Manifold;IsDecoratorManifold{MT}}
+    return recurse ? manifold(M.manifold; recurse=recurse) : M.manifold
+end
+
+@traitfn manifold(M::MT; kwargs...) where {MT<:Manifold;!IsDecoratorManifold{MT}} = M
 
 @doc doc"""
     manifold_dimension(M::Manifold)
@@ -98,6 +111,10 @@ function manifold_dimension end
 
 @traitfn function manifold_dimension(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}}
     error("manifold_dimension not implemented for a $(typeof(M)).")
+end
+
+@traitfn function manifold_dimension(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}}
+    manifold_dimension(manifold(M; recurse=true))
 end
 
 """

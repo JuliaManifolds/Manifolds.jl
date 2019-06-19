@@ -9,7 +9,7 @@ struct MetricManifold{M<:Manifold,G<:Metric} <: Manifold
     metric::G
 end
 
-manifold(M::MetricManifold) = M.manifold
+@traitimpl IsDecoratorManifold{MetricManifold}
 
 metric(M::MetricManifold) = M.metric
 
