@@ -88,6 +88,18 @@ then implements the feature itself.
 @traitdef IsDecoratorManifold{M}
 
 
+@doc doc"""
+    manifold_dimension(M::Manifold)
+
+The dimension $n$ of real space $\mathbb R^n$ to which the neighborhood
+of each point of the manifold is homeomorphic.
+"""
+function manifold_dimension end
+
+@traitfn function manifold_dimension(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}}
+    error("manifold_dimension not implemented for a $(typeof(M)).")
+end
+
 """
     isapprox(M::Manifold, x, y; kwargs...)
 
@@ -194,8 +206,6 @@ function log(M::Manifold, x, y)
     return v
 end
 
-manifold_dimension(M::Manifold) = error("manifold_dimension not implemented for a $(typeof(M)).")
-
 vector_transport!(M::Manifold, vto, x, v, y) = project_tangent!(M, vto, x, v)
 
 function vector_transport(M::Manifold, x, v, y)
@@ -280,7 +290,7 @@ include("ProjectedDistribution.jl")
 
 export Manifold,
     IsDecoratorManifold
-export dimension,
+export manifold_dimension,
     distance,
     inner,
     exp,

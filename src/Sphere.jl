@@ -14,11 +14,11 @@ struct Sphere{N} <: Manifold end
 Sphere(n::Int) = Sphere{n}()
 
 @doc doc"""
-    dimension(S::Sphere)
+    manifold_dimension(S::Sphere)
 
 returns the dimension of the manifold $\mathbb S^n$, i.e. $n$.
 """
-dimension(S::Sphere{N}) where {N} = N
+manifold_dimension(S::Sphere{N}) where {N} = N
 
 @doc doc"""
     inner(S,x,w,v)

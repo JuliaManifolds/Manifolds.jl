@@ -3,7 +3,7 @@ struct Euclidean{T<:Tuple} <: Manifold where {T} end
 Euclidean(n::Int) = Euclidean{Tuple{n}}()
 Euclidean(m::Int, n::Int) = Euclidean{Tuple{m,n}}()
 
-@generated dimension(::Euclidean{T}) where {T} = *(T.parameters...)
+@generated manifold_dimension(::Euclidean{T}) where {T} = *(T.parameters...)
 
 struct EuclideanMetric <: RiemannianMetric end
 
