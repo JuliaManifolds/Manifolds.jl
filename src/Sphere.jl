@@ -38,7 +38,7 @@ project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v).*x)
 distance(S::Sphere, x, y) = acos(dot(x, y))
 
 function distance(M::MetricManifold{<:Sphere,EuclideanMetric}, args...)
-    return distance(manifold(M), args...)
+    return distance(base_manifold(M), args...)
 end
 
 function exp!(S::Sphere, y, x, v)
@@ -51,7 +51,7 @@ function exp!(S::Sphere, y, x, v)
     return y
 end
 
-exp!(M::MetricManifold{<:Sphere,EuclideanMetric}, args...) = exp!(manifold(M), args...)
+exp!(M::MetricManifold{<:Sphere,EuclideanMetric}, args...) = exp!(base_manifold(M), args...)
 
 function log!(S::Sphere, v, x, y)
     dot_xy = dot(x, y)
@@ -64,7 +64,7 @@ function log!(S::Sphere, v, x, y)
     return v
 end
 
-log!(M::MetricManifold{<:Sphere,EuclideanMetric}, args...) = log!(manifold(M), args...)
+log!(M::MetricManifold{<:Sphere,EuclideanMetric}, args...) = log!(base_manifold(M), args...)
 
 injectivity_radius(S::Sphere, args...) = π
 

@@ -128,7 +128,7 @@ end
         x, v, w = randn(n), randn(n), randn(n)
 
         @test manifold_dimension(M) == n
-        @test manifold(M) === E
+        @test base_manifold(M) === E
         @test metric(M) === g
         @test local_metric(M, x) ≈ G
         @test inverse_local_metric(M, x) ≈ invG
@@ -157,7 +157,7 @@ end
         ManifoldMuseum.manifold_dimension(::TestSphere{N}) where {N} = N
         function ManifoldMuseum.local_metric(M::MetricManifold{<:TestSphere,<:TestSphericalMetric}, x)
             θ, ϕ = x
-            r = manifold(M).r
+            r = base_manifold(M).r
             return Diagonal([r^2, r^2 * sin(θ)^2])
         end
         sph_to_cart(r, θ, ϕ) = r .* [cos(ϕ)*sin(θ), sin(ϕ)*sin(θ), cos(θ)]
@@ -176,7 +176,7 @@ end
         v, w = normalize(randn(n)), normalize(randn(n))
 
         @test manifold_dimension(M) == n
-        @test manifold(M) === Sr
+        @test base_manifold(M) === Sr
         @test metric(M) === g
         @test local_metric(M, x) ≈ G
         @test inverse_local_metric(M, x) ≈ invG

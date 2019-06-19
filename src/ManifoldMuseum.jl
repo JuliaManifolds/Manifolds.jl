@@ -93,18 +93,17 @@ then implements the feature itself.
 @traitdef IsDecoratorManifold{M}
 
 """
-    manifold(M::Manifold; recurse::Bool=false)
+    base_manifold(M::Manifold)
 
-If `M` is a decorator manifold, return the underlying manifold. if `recurse` is
-`true`, continue un-decorating until a non-decorator manifold is encountered.
+Strip all decorators on `M`, returning the underlying topological manifold.
 """
 function manifold end
 
-@traitfn function manifold(M::MT; recurse::Bool=false) where {MT<:Manifold;IsDecoratorManifold{MT}}
-    return recurse ? manifold(M.manifold; recurse=recurse) : M.manifold
+@traitfn function base_manifold(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}}
+    return base_manifold(M.manifold)
 end
 
-@traitfn manifold(M::MT; kwargs...) where {MT<:Manifold;!IsDecoratorManifold{MT}} = M
+@traitfn base_manifold(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}} = M
 
 @doc doc"""
     manifold_dimension(M::Manifold)
@@ -119,7 +118,7 @@ function manifold_dimension end
 end
 
 @traitfn function manifold_dimension(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}}
-    manifold_dimension(manifold(M; recurse=true))
+    manifold_dimension(base_manifold(M))
 end
 
 """
@@ -314,7 +313,7 @@ export Manifold,
     IsDecoratorManifold,
     Euclidean
 export manifold_dimension,
-    manifold,
+    base_manifold,
     distance,
     inner,
     exp,
