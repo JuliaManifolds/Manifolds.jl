@@ -34,10 +34,11 @@ end
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = one(eltype(x))
 
 inner(::Euclidean, x, v, w) = dot(v, w)
-inner(M::MetricManifold{<:Manifold,EuclideanMetric}, args...) = inner(manifold(M), args...)
+inner(::MetricManifold{<:Manifold,EuclideanMetric}, x, v, w) = dot(v, w)
+
+norm(::Euclidean, x, v) = norm(v)
+norm(::MetricManifold{<:Manifold,EuclideanMetric}, x, v) = norm(v)
 
 exp!(M::Euclidean, y, x, v) = y .= x + v
-exp!(M::MetricManifold{<:Euclidean,EuclideanMetric}, args...) = exp!(manifold(M), args...)
 
 log!(M::Euclidean, v, x, y) = v .= y - x
-log!(M::MetricManifold{<:Euclidean,EuclideanMetric}, args...) = log!(manifold(M), args...)
