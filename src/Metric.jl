@@ -24,6 +24,8 @@ local_metric(M::MetricManifold, x) = error("Local metric not implemented on $(ty
 inverse_local_metric(M::MetricManifold, x) = inv(local_metric(M, x))
 
 inner(M::MetricManifold, x, v, w) = dot(v, local_matrix(M, x) * w)
+det_local_metric(M::MetricManifold, x) = det(local_metric(M, x))
+
 
 function christofell_second(M::MetricManifold, x)
     n = size(x, 1)

@@ -15,6 +15,7 @@ function inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x)
     return local_metric(M, x)
 end
 
+det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = one(eltype(x))
 
 inner(::Euclidean, x, v, w) = dot(v, w)
 inner(M::MetricManifold{<:Manifold,EuclideanMetric}, args...) = inner(manifold(M), args...)

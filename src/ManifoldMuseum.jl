@@ -333,5 +333,6 @@ export Metric,
     isriemannianmanifold,
     local_metric,
     inverse_local_metric
+    det_local_metric,
 
 end # module
