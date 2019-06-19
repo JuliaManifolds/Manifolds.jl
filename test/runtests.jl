@@ -109,3 +109,110 @@ end
 
     test_arraymanifold()
 end
+
+@testset "Metric" begin
+    @testset "Scaled Euclidean" begin
+        struct TestEuclidean{N} <: Manifold end
+        struct TestEuclideanMetric <: Metric end
+        ManifoldMuseum.manifold_dimension(::TestEuclidean{N}) where {N} = N
+        function ManifoldMuseum.local_metric(M::MetricManifold{<:TestEuclidean,<:TestEuclideanMetric}, x)
+            return Diagonal(1.0:manifold_dimension(M))
+        end
+
+        n = 3
+        E = TestEuclidean{n}()
+        g = TestEuclideanMetric()
+        M = MetricManifold(E, g)
+        G = Diagonal(1.0:n)
+        invG = inv(G)
+        x, v, w = randn(n), randn(n), randn(n)
+
+        @test manifold_dimension(M) == n
+        @test manifold(M) === E
+        @test metric(M) === g
+        @test local_metric(M, x) ≈ G
+        @test inverse_local_metric(M, x) ≈ invG
+        @test det_local_metric(M, x) ≈ *(1.0:n...)
+        @test inner(M, x, v, w) ≈ dot(v, G * w)
+        @test norm(M, x, v) ≈ sqrt(dot(v, G * v))
+
+        for t=0:.5:10
+            @test exp(M, x, v, t) ≈ x + t * v
+        end
+
+        @test christofell_symbols_first(M, x) == zeros(n, n, n)
+        @test christofell_symbols_second(M, x) == zeros(n, n, n)
+        @test riemann_tensor(M, x) == zeros(n, n, n, n)
+        @test ricci_tensor(M, x) == zeros(n, n)
+        @test ricci_curvature(M, x) == 0
+        @test gaussian_curvature(M, x) == 0
+        @test einstein_tensor(M, x) == zeros(n, n)
+    end
+
+    @testset "Scaled Sphere" begin
+        struct TestSphere{N,T} <: Manifold
+            r::T
+        end
+        struct TestSphericalMetric <: Metric end
+        ManifoldMuseum.manifold_dimension(::TestSphere{N}) where {N} = N
+        function ManifoldMuseum.local_metric(M::MetricManifold{<:TestSphere,<:TestSphericalMetric}, x)
+            θ, ϕ = x
+            r = manifold(M).r
+            return Diagonal([r^2, r^2 * sin(θ)^2])
+        end
+        sph_to_cart(r, θ, ϕ) = r .* [cos(ϕ)*sin(θ), sin(ϕ)*sin(θ), cos(θ)]
+
+        n = 2
+        m = n + 1
+        r = 10 * rand()
+        x = [π * rand(), 2π * rand()]
+        θ, ϕ = x
+        Sr = TestSphere{n,Float64}(r)
+        S = ManifoldMuseum.Sphere(n)
+        g = TestSphericalMetric()
+        M = MetricManifold(Sr, g)
+        G = Diagonal([1, sin(θ)^2]) .* r^2
+        invG = Diagonal([1, 1 / sin(θ)^2]) ./ r^2
+        v, w = normalize(randn(n)), normalize(randn(n))
+
+        @test manifold_dimension(M) == n
+        @test manifold(M) === Sr
+        @test metric(M) === g
+        @test local_metric(M, x) ≈ G
+        @test inverse_local_metric(M, x) ≈ invG
+        @test det_local_metric(M, x) ≈ r^4 * sin(θ)^2
+        @test inner(M, x, v, w) ≈ dot(v, G * w)
+        @test norm(M, x, v) ≈ sqrt(dot(v, G * v))
+
+        xcart = sph_to_cart(1, θ, ϕ)
+        vcart = [cos(ϕ)*cos(θ) -sin(ϕ)*sin(θ);
+                 sin(ϕ)*cos(θ)  cos(ϕ)*sin(θ);
+                 -sin(θ) 0] * v
+
+        for t=0:.2:7
+            @test isapprox(sph_to_cart(r, exp(M, x, v, t)...),
+                           r .* exp(S, xcart, vcart, t); atol=1e-3, rtol=1e-3)
+        end
+
+        Γ = christofell_symbols_second(M, x)
+        for i=1:n
+            for j=1:n
+                for k=1:n
+                    if (i,j,k) == (2,2,1)
+                        @test Γ[i,j,k] ≈ -cos(θ)*sin(θ)
+                    elseif (i,j,k) == (2,1,2) || (i,j,k) == (1,2,2)
+                        @test Γ[i,j,k] ≈ cot(θ)
+                    else
+                        @test Γ[i,j,k] ≈ 0
+                    end
+                end
+            end
+        end
+        R = riemann_tensor(M, x)
+        @test R[2,1,2,1] ≈ sin(θ)^2
+        @test ricci_tensor(M, x) ≈ G ./ r^2
+        @test ricci_curvature(M, x) ≈ 2 / r^2
+        @test gaussian_curvature(M, x) ≈ 1 / r^2
+        @test einstein_tensor(M, x) == ricci_tensor(M, x) - gaussian_curvature(M, x)  .* G
+    end
+end
