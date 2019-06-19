@@ -7,13 +7,14 @@ Euclidean(m::Int, n::Int) = Euclidean{Tuple{m,n}}()
 
 struct EuclideanMetric <: RiemannianMetric end
 
+function local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x)
+    return Diagonal(ones(eltype(x), length(x)))
 end
 
+function inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x)
+    return local_metric(M, x)
 end
 
-local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x)= I
-
-inverse_local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x) = I
 
 inner(::Euclidean, x, v, w) = dot(v, w)
 inner(M::MetricManifold{<:Manifold,EuclideanMetric}, args...) = inner(manifold(M), args...)
