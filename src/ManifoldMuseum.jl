@@ -20,8 +20,10 @@ import Random: rand
 using Random: AbstractRNG
 using SimpleTraits
 using ForwardDiff
-import Einsum: @einsum
+import TensorOperations: @tensor
 import DifferentialEquations: ODEProblem,
+    AutoVern9,
+    Rodas5,
     solve
 
 """
