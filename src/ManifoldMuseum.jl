@@ -307,7 +307,8 @@ include("Sphere.jl")
 include("ProjectedDistribution.jl")
 
 export Manifold,
-    IsDecoratorManifold
+    IsDecoratorManifold,
+    Euclidean
 export manifold_dimension,
     distance,
     inner,
@@ -327,10 +328,10 @@ export manifold,
 export Metric,
     RiemannianMetric,
     LorentzMetric,
+    EuclideanMetric,
     IsRiemannianManifold,
     isriemannianmanifold,
     local_metric,
     inverse_local_metric
-export Euclidean, EuclideanMetric, TransformedEuclideanMetric
 
 end # module
