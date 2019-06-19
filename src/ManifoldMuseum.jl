@@ -12,8 +12,10 @@ import Base: isapprox,
     *
 import LinearAlgebra: dot,
     norm,
+    det,
     I,
-    UniformScaling
+    UniformScaling,
+    Diagonal
 import Markdown: @doc_str
 import Distributions: _rand!
 import Random: rand
@@ -312,6 +314,7 @@ export Manifold,
     IsDecoratorManifold,
     Euclidean
 export manifold_dimension,
+    manifold,
     distance,
     inner,
     exp,
@@ -321,20 +324,19 @@ export manifold_dimension,
     log,
     log!,
     norm,
-    angle,
     injectivity_radius,
     zero_tangent_vector,
     zero_tangent_vector!
-export MetricManifold
-export manifold,
 export Metric,
     RiemannianMetric,
     LorentzMetric,
     EuclideanMetric,
+    MetricManifold,
     IsRiemannianManifold,
     isriemannianmanifold,
+    metric,
     local_metric,
-    inverse_local_metric
+    inverse_local_metric,
     det_local_metric,
 
 end # module
