@@ -2,7 +2,7 @@ abstract type Metric end
 
 abstract type RiemannianMetric <: Metric end
 
-abstract type LorentzianMetric <: Metric end
+abstract type LorentzMetric <: Metric end
 
 struct MetricManifold{M<:Manifold,G<:Metric} <: Manifold
     manifold::M

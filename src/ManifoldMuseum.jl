@@ -322,9 +322,11 @@ export manifold_dimension,
     injectivity_radius,
     zero_tangent_vector,
     zero_tangent_vector!
-export Metric, RiemannianMetric, LorentzianMetric
 export MetricManifold
 export manifold,
+export Metric,
+    RiemannianMetric,
+    LorentzMetric,
     local_metric,
     inverse_local_metric
 export Euclidean, EuclideanMetric, TransformedEuclideanMetric
