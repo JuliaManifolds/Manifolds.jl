@@ -65,6 +65,65 @@ function christofell_symbols_second(M::MetricManifold, x)
     return Γ₂
 end
 
+"""
+    riemann_tensor(M::MetricManifold, x)
+
+Compute the Riemann tensor, also known as the Riemann curvature tensor,
+at the point `x`.
+"""
+function riemann_tensor(M::MetricManifold, x)
+    n = size(x, 1)
+    Γ = christofell_symbols_second(M, x)
+    ∂Γ = Array(reshape(ForwardDiff.jacobian(x -> christofell_symbols_second(M, x), x), n, n, n, n))
+    @tensor R[i,j,k,l] := ∂Γ[i,k,l,j] - ∂Γ[i,j,l,k] + Γ[j,s,l] * Γ[i,k,s] - Γ[k,s,l] * Γ[i,j,s]
+    return R
+end
+
+"""
+    ricci_tensor(M::MetricManifold, x)
+
+Compute the Ricci tensor, also known as the Ricci curvature tensor,
+of the manifold `M` at the point `x`.
+"""
+function ricci_tensor(M::MetricManifold, x)
+    R = riemann_tensor(M, x)
+    @tensor Ric[i,j] := R[i,l,j,l]
+    return Ric
+end
+
+"""
+    ricci_curvature(M::MetricManifold, x)
+
+Compute the Ricci scalar curvature of the manifold `M` at the point `x`.
+"""
+function ricci_curvature(M::MetricManifold, x)
+    ginv = inverse_local_metric(M, x)
+    Ric = ricci_tensor(M, x)
+    S = sum(ginv .* Ric)
+    return S
+end
+
+"""
+    gaussian_curvature(M::MetricManifold, x)
+
+Compute the Gaussian curvature of the manifold `M` at the point `x`.
+"""
+gaussian_curvature(M::MetricManifold, x) = ricci_curvature(M, x) / 2
+
+"""
+    einstein_tensor(M::MetricManifold, x)
+
+Compute the Einstein tensor of the manifold `M` at the point `x`.
+"""
+function einstein_tensor(M::MetricManifold, x)
+    Ric = ricci_tensor(M, x)
+    g = local_metric(M, x)
+    ginv = inverse_local_metric(M, x)
+    S = sum(ginv .* Ric)
+    G = Ric - g .* S / 2
+    return G
+end
+
 function exp_diffeq_system!(du, u, p, t)
     n = Int(size(u, 1) / 2)
     M = p

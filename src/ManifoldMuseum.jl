@@ -338,5 +338,12 @@ export Metric,
     local_metric,
     inverse_local_metric,
     det_local_metric,
+    christofell_symbols_first,
+    christofell_symbols_second,
+    riemann_tensor,
+    ricci_tensor,
+    einstein_tensor,
+    ricci_curvature,
+    gaussian_curvature
 
 end # module
