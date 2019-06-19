@@ -327,6 +327,8 @@ export manifold,
 export Metric,
     RiemannianMetric,
     LorentzMetric,
+    IsRiemannianManifold,
+    isriemannianmanifold,
     local_metric,
     inverse_local_metric
 export Euclidean, EuclideanMetric, TransformedEuclideanMetric

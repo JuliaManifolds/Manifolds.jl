@@ -11,6 +11,12 @@ end
 
 @traitimpl IsDecoratorManifold{MetricManifold}
 
+@traitdef IsRiemannianManifold{M}
+@traitimpl IsRiemannianManifold{M} <- isriemannianmanifold(M)
+
+isriemannianmanifold(::Type{MT}) where {MT<:Manifold} = false
+isriemannianmanifold(::Type{MetricManifold{MT,GT}}) where {MT,GT<:RiemannianMetric} = true
+
 metric(M::MetricManifold) = M.metric
 
 local_metric(M::MetricManifold, x) = error("Not implemented")
