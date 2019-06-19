@@ -163,7 +163,6 @@ end
         sph_to_cart(r, θ, ϕ) = r .* [cos(ϕ)*sin(θ), sin(ϕ)*sin(θ), cos(θ)]
 
         n = 2
-        m = n + 1
         r = 10 * rand()
         x = [π * rand(), 2π * rand()]
         θ, ϕ = x
@@ -189,7 +188,7 @@ end
                  sin(ϕ)*cos(θ)  cos(ϕ)*sin(θ);
                  -sin(θ) 0] * v
 
-        for t=0:.2:7
+        for t=0:.1:1
             @test isapprox(sph_to_cart(r, exp(M, x, v, t)...),
                            r .* exp(S, xcart, vcart, t); atol=1e-3, rtol=1e-3)
         end
@@ -213,6 +212,6 @@ end
         @test ricci_tensor(M, x) ≈ G ./ r^2
         @test ricci_curvature(M, x) ≈ 2 / r^2
         @test gaussian_curvature(M, x) ≈ 1 / r^2
-        @test einstein_tensor(M, x) == ricci_tensor(M, x) - gaussian_curvature(M, x)  .* G
+        @test einstein_tensor(M, x) ≈ ricci_tensor(M, x) - gaussian_curvature(M, x)  .* G
     end
 end
