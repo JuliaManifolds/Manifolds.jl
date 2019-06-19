@@ -1,9 +1,38 @@
+@doc doc"""
+    Metric
+
+Abstract type for the pseudo-Riemannian metric tensor $g$, a family of smoothly
+    varying inner products on the tangent space. See [`inner`](@ref).
+"""
 abstract type Metric end
 
+@doc doc"""
+    RiemannianMetric <: Metric
+
+Abstract type for Riemannian metrics, a family of positive definite inner
+    products. The positive definite property means that for $v \in T_x M$,
+    the inner product $g(v,v) > 0$.
+"""
 abstract type RiemannianMetric <: Metric end
 
+"""
+    LorentzMetric <: Metric
+
+Abstract type for Lorentz metrics, which have a single temporal dimension.
+"""
 abstract type LorentzMetric <: Metric end
 
+"""
+    MetricManifold{M<:Manifold,G<:Metric} <: Manifold
+
+Equip a manifold with a metric. Such a manifold is generally called pseudo-
+or semi-Riemannian. Each `MetricManifold` must implement
+[`local_metric`](@ref).
+
+# Constructor
+
+    MetricManifold(manifold, metric)
+"""
 struct MetricManifold{M<:Manifold,G<:Metric} <: Manifold
     manifold::M
     metric::G
@@ -17,13 +46,36 @@ end
 isriemannianmanifold(::Type{MT}) where {MT<:Manifold} = false
 isriemannianmanifold(::Type{MetricManifold{MT,GT}}) where {MT,GT<:RiemannianMetric} = true
 
+@doc doc"""
+    metric(M::MetricManifold)
+
+Get the metric $g$ of the manifold `M`.
+"""
 metric(M::MetricManifold) = M.metric
 
+@doc doc"""
+    local_metric(M::MetricManifold, x)
+
+Local matrix representation at the point `x` of the metric tensor $g$ on the
+manifold `M`, usually written $G=g_{ij}$. The matrix has the property that
+$g(v,w)=v^T G w = v^i w^j g_{ij}$, where the latter expression uses Einstein
+summation notation.
+"""
 local_metric(M::MetricManifold, x) = error("Local metric not implemented on $(typeof(M)) for point $(typeof(x))")
 
+@doc doc"""
+    inverse_local_metric(M::MetricManifold, x)
+
+Local matrix representation of the inverse metric (cometric) tensor $g^{-1}$,
+usually written $g^{ij}$
+"""
 inverse_local_metric(M::MetricManifold, x) = inv(local_metric(M, x))
 
-inner(M::MetricManifold, x, v, w) = dot(v, local_matrix(M, x) * w)
+@doc doc"""
+    det_local_metric(M::MetricManifold, x)
+
+Determinant of local matrix representation of the metric tensor $g$
+"""
 det_local_metric(M::MetricManifold, x) = det(local_metric(M, x))
 
 inner(M::MetricManifold, x, v, w) = dot(v, local_metric(M, x) * w)

@@ -1,3 +1,19 @@
+@doc doc"""
+    Euclidean{T<:Tuple} <: Manifold
+
+Euclidean vector space $\mathbb R^n$.
+
+# Constructor
+
+    Euclidean(n)
+
+generates the $n$-dimensional vector space $\mathbb R^n$.
+
+   Euclidean(m, n)
+
+generates the $mn$-dimensional vector space $\mathbb R^{m \times n}$, whose
+elements are interpreted as $m \times n$ matrices.
+"""
 struct Euclidean{T<:Tuple} <: Manifold where {T} end
 
 Euclidean(n::Int) = Euclidean{Tuple{n}}()
