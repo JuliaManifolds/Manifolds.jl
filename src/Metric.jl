@@ -19,7 +19,7 @@ isriemannianmanifold(::Type{MetricManifold{MT,GT}}) where {MT,GT<:RiemannianMetr
 
 metric(M::MetricManifold) = M.metric
 
-local_metric(M::MetricManifold, x) = error("Not implemented")
+local_metric(M::MetricManifold, x) = error("Local metric not implemented on $(typeof(M)) for point $(typeof(x))")
 
 inverse_local_metric(M::MetricManifold, x) = inv(local_metric(M, x))
 

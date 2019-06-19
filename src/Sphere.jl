@@ -29,9 +29,12 @@ embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
 inner(S::Sphere, x, w, v) = dot(w, v)
 
+norm(S::Sphere, x, v) = norm(v)
+
 proj!(S::Sphere, x) = (x ./= norm(x))
 
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v).*x)
+
 distance(S::Sphere, x, y) = acos(dot(x, y))
 
 function distance(M::MetricManifold{<:Sphere,EuclideanMetric}, args...)
@@ -62,6 +65,8 @@ function log!(S::Sphere, v, x, y)
 end
 
 log!(M::MetricManifold{<:Sphere,EuclideanMetric}, args...) = log!(manifold(M), args...)
+
+injectivity_radius(S::Sphere, args...) = π
 
 zero_tangent_vector(S::Sphere, x) = zero(x)
 zero_tangent_vector!(S::Sphere, v, x) = (v .= zero(x))
