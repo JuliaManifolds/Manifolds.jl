@@ -141,8 +141,8 @@ end
             @test exp(M, x, v, t) ≈ x + t * v
         end
 
-        @test christofell_symbols_first(M, x) == zeros(n, n, n)
-        @test christofell_symbols_second(M, x) == zeros(n, n, n)
+        @test christoffel_symbols_first(M, x) == zeros(n, n, n)
+        @test christoffel_symbols_second(M, x) == zeros(n, n, n)
         @test riemann_tensor(M, x) == zeros(n, n, n, n)
         @test ricci_tensor(M, x) == zeros(n, n)
         @test ricci_curvature(M, x) == 0
@@ -194,7 +194,7 @@ end
                            r .* exp(S, xcart, vcart, t); atol=1e-3, rtol=1e-3)
         end
 
-        Γ = christofell_symbols_second(M, x)
+        Γ = christoffel_symbols_second(M, x)
         for i=1:n
             for j=1:n
                 for k=1:n
