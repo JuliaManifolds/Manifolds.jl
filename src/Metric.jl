@@ -11,14 +11,16 @@ abstract type Metric end
 
 Abstract type for Riemannian metrics, a family of positive definite inner
     products. The positive definite property means that for $v \in T_x M$,
-    the inner product $g(v,v) > 0$.
+    the inner product $g(v,v) > 0$ whenever $v$ is not the zero vector.
 """
 abstract type RiemannianMetric <: Metric end
 
-"""
+@doc doc"""
     LorentzMetric <: Metric
 
-Abstract type for Lorentz metrics, which have a single temporal dimension.
+Abstract type for Lorentz metrics, which have a single time dimension.
+    These metrics assume the spacelike convention with the time dimension
+    being last, giving the signature $(++...+-)$.
 """
 abstract type LorentzMetric <: Metric end
 
