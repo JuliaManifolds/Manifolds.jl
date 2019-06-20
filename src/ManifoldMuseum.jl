@@ -16,13 +16,14 @@ import LinearAlgebra: dot,
     I,
     UniformScaling,
     Diagonal
+using StaticArrays
 import Markdown: @doc_str
 import Distributions: _rand!
 import Random: rand
 using Random: AbstractRNG
 using SimpleTraits
 using ForwardDiff
-import TensorOperations: @tensor
+import Einsum: @einsum
 import DifferentialEquations: ODEProblem,
     AutoVern9,
     Rodas5,

@@ -126,28 +126,31 @@ end
         M = MetricManifold(E, g)
         G = Diagonal(1.0:n)
         invG = inv(G)
-        x, v, w = randn(n), randn(n), randn(n)
-
         @test manifold_dimension(M) == n
         @test base_manifold(M) === E
         @test metric(M) === g
-        @test local_metric(M, x) ≈ G
-        @test inverse_local_metric(M, x) ≈ invG
-        @test det_local_metric(M, x) ≈ *(1.0:n...)
-        @test inner(M, x, v, w) ≈ dot(v, G * w)
-        @test norm(M, x, v) ≈ sqrt(dot(v, G * v))
 
-        for t=0:.5:10
-            @test exp(M, x, v, t) ≈ x + t * v
+        for vtype in (Vector, SVector{n}, MVector{n})
+            x, v, w = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
+
+            @test local_metric(M, x) ≈ G
+            @test inverse_local_metric(M, x) ≈ invG
+            @test det_local_metric(M, x) ≈ *(1.0:n...)
+            @test inner(M, x, v, w) ≈ dot(v, G * w)
+            @test norm(M, x, v) ≈ sqrt(dot(v, G * v))
+
+            for t=0:.5:10
+                @test exp(M, x, v, t) ≈ x + t * v
+            end
+
+            @test christoffel_symbols_first(M, x) ≈ zeros(n, n, n)
+            @test christoffel_symbols_second(M, x) ≈ zeros(n, n, n)
+            @test riemann_tensor(M, x) ≈ zeros(n, n, n, n)
+            @test ricci_tensor(M, x) ≈ zeros(n, n)
+            @test ricci_curvature(M, x) ≈ 0
+            @test gaussian_curvature(M, x) ≈ 0
+            @test einstein_tensor(M, x) ≈ zeros(n, n)
         end
-
-        @test christoffel_symbols_first(M, x) == zeros(n, n, n)
-        @test christoffel_symbols_second(M, x) == zeros(n, n, n)
-        @test riemann_tensor(M, x) == zeros(n, n, n, n)
-        @test ricci_tensor(M, x) == zeros(n, n)
-        @test ricci_curvature(M, x) == 0
-        @test gaussian_curvature(M, x) == 0
-        @test einstein_tensor(M, x) == zeros(n, n)
     end
 
     @testset "Scaled Sphere" begin
@@ -157,63 +160,104 @@ end
         struct TestSphericalMetric <: Metric end
         ManifoldMuseum.manifold_dimension(::TestSphere{N}) where {N} = N
         function ManifoldMuseum.local_metric(M::MetricManifold{<:TestSphere,<:TestSphericalMetric}, x)
-            θ, ϕ = x
             r = base_manifold(M).r
-            return Diagonal([r^2, r^2 * sin(θ)^2])
+            d = similar(x)
+            d[1] = r^2
+            d[2] = d[1] * sin(x[1])^2
+            return Diagonal(d)
         end
         sph_to_cart(r, θ, ϕ) = r .* [cos(ϕ)*sin(θ), sin(ϕ)*sin(θ), cos(θ)]
 
         n = 2
         r = 10 * rand()
-        x = [π * rand(), 2π * rand()]
-        θ, ϕ = x
+        θ, ϕ = π * rand(), 2π * rand()
         Sr = TestSphere{n,Float64}(r)
         S = ManifoldMuseum.Sphere(n)
         g = TestSphericalMetric()
         M = MetricManifold(Sr, g)
-        G = Diagonal([1, sin(θ)^2]) .* r^2
-        invG = Diagonal([1, 1 / sin(θ)^2]) ./ r^2
-        v, w = normalize(randn(n)), normalize(randn(n))
 
         @test manifold_dimension(M) == n
         @test base_manifold(M) === Sr
         @test metric(M) === g
-        @test local_metric(M, x) ≈ G
-        @test inverse_local_metric(M, x) ≈ invG
-        @test det_local_metric(M, x) ≈ r^4 * sin(θ)^2
-        @test inner(M, x, v, w) ≈ dot(v, G * w)
-        @test norm(M, x, v) ≈ sqrt(dot(v, G * v))
 
-        xcart = sph_to_cart(1, θ, ϕ)
-        vcart = [cos(ϕ)*cos(θ) -sin(ϕ)*sin(θ);
-                 sin(ϕ)*cos(θ)  cos(ϕ)*sin(θ);
-                 -sin(θ) 0] * v
+        for vtype in (Vector, SVector{n}, MVector{n})
+            x = vtype([θ, ϕ])
+            G = Diagonal(vtype([1, sin(θ)^2])) .* r^2
+            invG = Diagonal(vtype([1, 1 / sin(θ)^2])) ./ r^2
+            v, w = normalize(randn(n)), normalize(randn(n))
 
-        for t=0:.1:1
-            @test isapprox(sph_to_cart(r, exp(M, x, v, t)...),
-                           r .* exp(S, xcart, vcart, t); atol=1e-3, rtol=1e-3)
-        end
+            @test local_metric(M, x) ≈ G
+            @test inverse_local_metric(M, x) ≈ invG
+            @test det_local_metric(M, x) ≈ r^4 * sin(θ)^2
+            @test inner(M, x, v, w) ≈ dot(v, G * w)
+            @test norm(M, x, v) ≈ sqrt(dot(v, G * v))
 
-        Γ = christoffel_symbols_second(M, x)
-        for i=1:n
-            for j=1:n
-                for k=1:n
-                    if (i,j,k) == (2,2,1)
-                        @test Γ[i,j,k] ≈ -cos(θ)*sin(θ)
-                    elseif (i,j,k) == (2,1,2) || (i,j,k) == (1,2,2)
-                        @test Γ[i,j,k] ≈ cot(θ)
-                    else
-                        @test Γ[i,j,k] ≈ 0
+            xcart = sph_to_cart(1, θ, ϕ)
+            vcart = [cos(ϕ)*cos(θ) -sin(ϕ)*sin(θ);
+                     sin(ϕ)*cos(θ)  cos(ϕ)*sin(θ);
+                     -sin(θ) 0] * v
+
+            for t=0:.1:1
+                @test isapprox(sph_to_cart(r, exp(M, x, v, t)...),
+                               r .* exp(S, xcart, vcart, t); atol=1e-3, rtol=1e-3)
+            end
+
+            Γ₁ = christoffel_symbols_first(M, x)
+            for i=1:n
+                for j=1:n
+                    for k=1:n
+                        if (i,j,k) == (1,2,2) || (i,j,k) == (2,1,2)
+                            @test Γ₁[i,j,k] ≈ r^2*cos(θ)*sin(θ)
+                        elseif (i,j,k) == (2,2,1)
+                            @test Γ₁[i,j,k] ≈ -r^2*cos(θ)*sin(θ)
+                        else
+                            @test Γ₁[i,j,k] ≈ 0
+                        end
                     end
                 end
             end
+
+            Γ₂ = christoffel_symbols_second(M, x)
+            for i=1:n
+                for j=1:n
+                    for k=1:n
+                        if (i,j,k) == (2,2,1)
+                            @test Γ₂[i,j,k] ≈ -cos(θ)*sin(θ)
+                        elseif (i,j,k) == (1,2,2) || (i,j,k) == (2,1,2)
+                            @test Γ₂[i,j,k] ≈ cot(θ)
+                        else
+                            @test Γ₂[i,j,k] ≈ 0
+                        end
+                    end
+                end
+            end
+
+            R = riemann_tensor(M, x)
+            for i=1:n
+                for j=1:n
+                    for k=1:n
+                        for l=1:n
+                            if (i,j,k,l) == (1,1,2,2)
+                                @test R[i,j,k,l] ≈ -1
+                            elseif (i,j,k,l) == (1,2,1,2)
+                                @test R[i,j,k,l] ≈ 1
+                            elseif (i,j,k,l) == (2,1,2,1)
+                                @test R[i,j,k,l] ≈ sin(θ)^2
+                            elseif (i,j,k,l) == (2,2,1,1)
+                                @test R[i,j,k,l] ≈ -sin(θ)^2
+                            else
+                                @test R[i,j,k,l] ≈ 0
+                            end
+                        end
+                    end
+                end
+            end
+
+            @test ricci_tensor(M, x) ≈ G ./ r^2
+            @test ricci_curvature(M, x) ≈ 2 / r^2
+            @test gaussian_curvature(M, x) ≈ 1 / r^2
+            @test einstein_tensor(M, x) ≈ ricci_tensor(M, x) - gaussian_curvature(M, x)  .* G
         end
-        R = riemann_tensor(M, x)
-        @test R[2,1,2,1] ≈ sin(θ)^2
-        @test ricci_tensor(M, x) ≈ G ./ r^2
-        @test ricci_curvature(M, x) ≈ 2 / r^2
-        @test gaussian_curvature(M, x) ≈ 1 / r^2
-        @test einstein_tensor(M, x) ≈ ricci_tensor(M, x) - gaussian_curvature(M, x)  .* G
     end
 
     @testset "Has Metric" begin

@@ -26,7 +26,7 @@ struct EuclideanMetric <: RiemannianMetric end
 @traitimpl HasMetric{Euclidean,EuclideanMetric}
 
 function local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x)
-    return Diagonal(ones(eltype(x), length(x)))
+    return Diagonal(ones(SVector{size(x, 1),eltype(x)}))
 end
 
 function inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x)

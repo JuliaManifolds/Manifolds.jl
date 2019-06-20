@@ -110,6 +110,12 @@ det_local_metric(M::MetricManifold, x) = det(local_metric(M, x))
 @traitfn distance(M::MMT, x, y) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}} = norm(M, x, log(M, x, y))
 @traitfn distance(M::MMT, x, y) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = distance(M.manifold, x, y)
 
+function local_metric_jacobian(M::MetricManifold, x)
+    n = size(x, 1)
+    ∂g = reshape(ForwardDiff.jacobian(x -> local_metric(M, x), x), n, n, n)
+    return ∂g
+end
+
 @doc doc"""
     christoffel_symbols_first(M::MetricManifold, x)
 
@@ -122,9 +128,10 @@ where $g_{ij,k}=\frac{\partial}{\partial x^k} g_{ij}$ is the coordinate
 derivative of the local representation of the metric tensor.
 """
 function christoffel_symbols_first(M::MetricManifold, x)
-    n = size(x, 1)
-    ∂g = Array(reshape(ForwardDiff.jacobian(x -> local_metric(M, x), x), n, n, n))
-    @tensor Γ[i,j,k] := 1/2 * (∂g[k,j,i] + ∂g[i,k,j] - ∂g[i,j,k])
+    ∂g = local_metric_jacobian(M, x)
+    n = size(∂g, 1)
+    Γ = similar(∂g, Size(n, n, n))
+    @einsum Γ[i,j,k] = 1/2 * (∂g[k,j,i] + ∂g[i,k,j] - ∂g[i,j,k])
     return Γ
 end
 
@@ -140,10 +147,10 @@ where $\Gamma_{ijk}$ are the Christoffel symbols of the first kind, and
 $g^{k\ell}$ is the inverse of the local representation of the metric tensor.
 """
 function christoffel_symbols_second(M::MetricManifold, x)
-    n = size(x, 1)
     ginv = inverse_local_metric(M, x)
     Γ₁ = christoffel_symbols_first(M, x)
-    @tensor Γ₂[i,j,l] := ginv[k,l] * Γ₁[i,j,k]
+    Γ₂ = similar(Γ₁)
+    @einsum Γ₂[i,j,l] = ginv[k,l] * Γ₁[i,j,k]
     return Γ₂
 end
 
@@ -156,8 +163,9 @@ at the point `x`.
 function riemann_tensor(M::MetricManifold, x)
     n = size(x, 1)
     Γ = christoffel_symbols_second(M, x)
-    ∂Γ = Array(reshape(ForwardDiff.jacobian(x -> christoffel_symbols_second(M, x), x), n, n, n, n))
-    @tensor R[i,j,k,l] := ∂Γ[i,k,l,j] - ∂Γ[i,j,l,k] + Γ[j,s,l] * Γ[i,k,s] - Γ[k,s,l] * Γ[i,j,s]
+    ∂Γ = reshape(ForwardDiff.jacobian(x -> christoffel_symbols_second(M, x), x), n, n, n, n) ./ n
+    R = similar(∂Γ, Size(n, n, n, n))
+    @einsum R[i,j,k,l] = ∂Γ[i,k,l,j] - ∂Γ[i,j,l,k] + Γ[i,k,s] * Γ[s,j,l] - Γ[i,j,s] * Γ[s,k,l]
     return R
 end
 
@@ -169,7 +177,9 @@ of the manifold `M` at the point `x`.
 """
 function ricci_tensor(M::MetricManifold, x)
     R = riemann_tensor(M, x)
-    @tensor Ric[i,j] := R[i,l,j,l]
+    n = size(R, 1)
+    Ric = similar(R, Size(n, n))
+    @einsum Ric[i,j] = R[i,l,j,l]
     return Ric
 end
 
@@ -213,7 +223,8 @@ function exp_diffeq_system!(du, u, p, t)
     dx = view(u, n+1:2n)
     du[1:n] .= dx
     Γ = christoffel_symbols_second(M, x)
-    @tensor d²x[k] := -Γ[i,j,k] * dx[i] * dx[j]
+    d²x = similar(du, Size(n))
+    @einsum d²x[k] = -Γ[i,j,k] * dx[i] * dx[j]
     du[n+1:end] .= d²x
 end
 
