@@ -38,13 +38,34 @@ struct MetricManifold{M<:Manifold,G<:Metric} <: Manifold
     metric::G
 end
 
+convert(::Type{MT},M::MetricManifold{MT,GT}) where {MT,GT} = M.manifold
+
 @traitimpl IsDecoratorManifold{MetricManifold}
 
-@traitdef IsRiemannianManifold{M}
-@traitimpl IsRiemannianManifold{M} <- isriemannianmanifold(M)
+"""
+    HasMetric
 
-isriemannianmanifold(::Type{MT}) where {MT<:Manifold} = false
-isriemannianmanifold(::Type{MetricManifold{MT,GT}}) where {MT,GT<:RiemannianMetric} = true
+A `Trait` to mark a `Manifold` `M` as being shorthand for a `MetricManifold{M,G}`
+with metric `G`. This can be used to forward functions called on the
+`MetricManifold` to the already-imlemented functions for the `Manifold`.
+
+For example,
+
+```
+@traitfn myFeature(M::MMT, k...) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = myFeature(M.manifold, k...)
+```
+
+forwards the function `myFeature` from `M` to the already-implemented
+    `myFeature` on the base manifold `M.manifold`. A manifold with a default
+    metric can then be written
+
+```
+struct MyManifold{T} <: Manifold end
+struct MyMetric{S} <: Metric end
+@traitimpl HasMetric{MyManifold,MyMetric}
+```
+"""
+@traitdef HasMetric{M,G}
 
 @doc doc"""
     metric(M::MetricManifold)
@@ -78,7 +99,14 @@ Determinant of local matrix representation of the metric tensor $g$
 """
 det_local_metric(M::MetricManifold, x) = det(local_metric(M, x))
 
-inner(M::MetricManifold, x, v, w) = dot(v, local_metric(M, x) * w)
+@traitfn inner(M::MMT, x, v, w) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}} = dot(v, local_metric(M, x) * w)
+@traitfn inner(M::MMT, x, v, w) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = inner(M.manifold, x, v, w)
+
+@traitfn norm(M::MMT, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}} = sqrt(inner(M, x, v, v))
+@traitfn norm(M::MMT, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = norm(M.manifold, x, v)
+
+@traitfn distance(M::MMT, x, y) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}} = norm(M, x, log(M, x, y))
+@traitfn distance(M::MMT, x, y) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = distance(M.manifold, x, y)
 
 @doc doc"""
     christofell_symbols_first(M::MetricManifold, x)
@@ -196,7 +224,11 @@ function exp_ode_solution(M::MetricManifold, x, v; kwargs...)
     return sol
 end
 
-function exp!(M::MetricManifold, y, x, v)
+@traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}}
     sol = exp_ode_solution(M, x, v)
     y .= sol.u[end][1:size(y, 1)]
 end
+
+@traitfn exp!(M::MMT, y, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = exp!(M.manifold, y, x, v)
+
+@traitfn log!(M::MMT, v, x, y) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = log!(M.manifold, v, x, y)

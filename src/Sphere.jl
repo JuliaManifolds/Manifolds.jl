@@ -13,6 +13,8 @@ generates the $\mathbb S^{n}\subset \mathbb R^{n+1}$
 struct Sphere{N} <: Manifold end
 Sphere(n::Int) = Sphere{n}()
 
+@traitimpl HasMetric{Sphere,EuclideanMetric}
+
 @doc doc"""
     manifold_dimension(S::Sphere)
 
@@ -37,10 +39,6 @@ project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v).*x)
 
 distance(S::Sphere, x, y) = acos(dot(x, y))
 
-function distance(M::MetricManifold{<:Sphere,EuclideanMetric}, args...)
-    return distance(base_manifold(M), args...)
-end
-
 function exp!(S::Sphere, y, x, v)
     nv = norm(S, x, v)
     if nv ≈ 0.0
@@ -50,8 +48,6 @@ function exp!(S::Sphere, y, x, v)
     end
     return y
 end
-
-exp!(M::MetricManifold{<:Sphere,EuclideanMetric}, args...) = exp!(base_manifold(M), args...)
 
 function log!(S::Sphere, v, x, y)
     dot_xy = dot(x, y)
@@ -63,8 +59,6 @@ function log!(S::Sphere, v, x, y)
     end
     return v
 end
-
-log!(M::MetricManifold{<:Sphere,EuclideanMetric}, args...) = log!(base_manifold(M), args...)
 
 injectivity_radius(S::Sphere, args...) = π
 

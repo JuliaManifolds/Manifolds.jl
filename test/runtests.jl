@@ -4,6 +4,7 @@ using LinearAlgebra
 using DoubleFloats
 using ForwardDiff
 using StaticArrays
+using SimpleTraits
 using Test
 
 """
@@ -213,5 +214,30 @@ end
         @test ricci_curvature(M, x) ≈ 2 / r^2
         @test gaussian_curvature(M, x) ≈ 1 / r^2
         @test einstein_tensor(M, x) ≈ ricci_tensor(M, x) - gaussian_curvature(M, x)  .* G
+    end
+
+    @testset "Has Metric" begin
+        struct BaseManifold{N} <: Manifold end
+        struct BaseManifoldMetric{M} <: Metric end
+        ManifoldMuseum.manifold_dimension(::BaseManifold{N}) where {N} = N
+        @traitimpl HasMetric{BaseManifold,BaseManifoldMetric}
+        ManifoldMuseum.inner(::BaseManifold, x, v, w) = 2 * dot(v,w)
+        ManifoldMuseum.exp!(::BaseManifold, y, x, v) = y .= x + 2 * v
+        ManifoldMuseum.log!(::BaseManifold, v, x, y) = v .= (y - x) / 2
+
+        M = BaseManifold{3}()
+        g = BaseManifoldMetric{3}()
+        MM = MetricManifold(M, g)
+        x = randn(3)
+        v = randn(3)
+        w = randn(3)
+        y = similar(x)
+
+        @test inner(M, x, v, w) == 2 * dot(v,w)
+        @test inner(MM, x, v, w) === inner(M, x, v, w)
+        @test exp(M, x, v) == x + 2 * v
+        @test exp!(MM, y, x, v) === exp!(M, y, x, v)
+        @test log(M, x, y) == (y - x) / 2
+        @test log!(MM, v, x, y) === log!(M, v, x, y)
     end
 end

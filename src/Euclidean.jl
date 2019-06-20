@@ -23,6 +23,8 @@ Euclidean(m::Int, n::Int) = Euclidean{Tuple{m,n}}()
 
 struct EuclideanMetric <: RiemannianMetric end
 
+@traitimpl HasMetric{Euclidean,EuclideanMetric}
+
 function local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x)
     return Diagonal(ones(eltype(x), length(x)))
 end
