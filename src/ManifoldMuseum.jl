@@ -220,6 +220,14 @@ end
 
 exp(M::Manifold, x, v, t) = exp(M, x, t*v)
 
+"""
+    exp(M::Manifold, x, v, T::AbstractVector)
+
+Exponential map of tangent vector `t*v` at point `x` from manifold `M` for
+each `t` in `T`.
+"""
+exp(M::Manifold, x, v, T::AbstractVector) = [exp(M, x, v, t) for t in T]
+
 log!(M::Manifold, v, x, y) = error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
 
 function log(M::Manifold, x, y)
@@ -227,6 +235,30 @@ function log(M::Manifold, x, y)
     log!(M, v, x, y)
     return v
 end
+
+"""
+    geodesic(M::Manifold, x, v)
+
+Get the geodesic with initial point `x` and initial velocity `v`. The geodesic
+is the curve of constant velocity that is locally distance-minimizing. This
+function returns a function of time, which may be a `Real` or an
+`AbstractVector`.
+"""
+geodesic(M::Manifold, x, v) = t -> exp(M, x, v, t)
+geodesic(M::Manifold, x, v, t) = exp(M, x, v, t)
+geodesic(M::Manifold, x, v, T::AbstractVector) = exp(M, x, v, T)
+
+"""
+    shortest_geodesic(M::Manifold, x, y)
+
+Get a geodesic with initial point `x` and point `y` at `t=1` whose length is
+the shortest path between the two points. When there are multiple shortest
+geodesics, there is no guarantee which will be returned. This function returns
+a function of time, which may be a `Real` or an `AbstractVector`.
+"""
+shortest_geodesic(M::Manifold, x, y) = geodesic(M, x, log(M, x, y))
+shortest_geodesic(M::Manifold, x, y, t) = geodesic(M, x, log(M, x, y), t)
+shortest_geodesic(M::Manifold, x, y, T::AbstractVector) = geodesic(M, x, log(M, x, y), T)
 
 vector_transport!(M::Manifold, vto, x, v, y) = project_tangent!(M, vto, x, v)
 
@@ -252,8 +284,6 @@ injectivity_radius(M::Manifold) = Inf
 
 zero_tangent_vector(M::Manifold, x) = log(M, x, x)
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
-
-geodesic(M::Manifold, x, y, t) = exp(M, x, log(M, x, y), t)
 
 """
     similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where N
@@ -320,6 +350,7 @@ export manifold_dimension,
     exp,
     exp!,
     geodesic,
+    shortest_geodesic,
     isapprox,
     log,
     log!,

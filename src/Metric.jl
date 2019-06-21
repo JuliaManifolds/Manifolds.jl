@@ -216,6 +216,13 @@ function einstein_tensor(M::MetricManifold, x)
     return G
 end
 
+"""
+    solve_exp_ode(M::MetricManifold, x, v, tspan; solver=AutoVern9(Rodas5()), kwargs...)
+
+Numerically integrate the exponential map on the manifold over the provided
+timespan. The arguments `tspan` and `solver` follow the `OrdinaryDiffEq`
+conventions. `kwargs...` specify keyword arguments to be passed to `solve`.
+"""
 function solve_exp_ode(M::MetricManifold, x, v, tspan; solver=AutoVern9(Rodas5()), kwargs...)
     u0 = x
     du0 = Base.convert(typeof(x), v)
@@ -234,6 +241,11 @@ function solve_exp_ode(M::MetricManifold, x, v, tspan; solver=AutoVern9(Rodas5()
     return sol
 end
 
+@traitfn function exp(M::MMT, x, v, T::AbstractVector) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}}
+    sol = solve_exp_ode(M, x, v, extrema(T); dense=false, saveat=T)
+    return [sol.u[i].x[2] for i in 1:length(T)]
+end
+
 @traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}}
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, x, v, tspan; dense=false, saveat=[1.0])
@@ -242,4 +254,5 @@ end
 
 @traitfn exp!(M::MMT, y, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = exp!(M.manifold, y, x, v)
 
+@traitfn log!(M::MMT, v, x, y) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}} = error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
 @traitfn log!(M::MMT, v, x, y) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = log!(M.manifold, v, x, y)

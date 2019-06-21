@@ -139,9 +139,9 @@ end
             @test inner(M, x, v, w) ≈ dot(v, G * w)
             @test norm(M, x, v) ≈ sqrt(dot(v, G * v))
 
-            for t=0:.5:10
-                @test exp(M, x, v, t) ≈ x + t * v
-            end
+            T = 0:.5:10
+            @test exp(M, x, v, T) ≈ [x + t * v for t in T]
+            @test geodesic(M, x, v, T) ≈ [x + t * v for t in T]
 
             @test christoffel_symbols_first(M, x) ≈ zeros(n, n, n)
             @test christoffel_symbols_second(M, x) ≈ zeros(n, n, n)
@@ -166,7 +166,7 @@ end
             d[2] = d[1] * sin(x[1])^2
             return Diagonal(d)
         end
-        sph_to_cart(r, θ, ϕ) = r .* [cos(ϕ)*sin(θ), sin(ϕ)*sin(θ), cos(θ)]
+        sph_to_cart(θ, ϕ) = [cos(ϕ)*sin(θ), sin(ϕ)*sin(θ), cos(θ)]
 
         n = 2
         r = 10 * rand()
@@ -192,15 +192,16 @@ end
             @test inner(M, x, v, w) ≈ dot(v, G * w)
             @test norm(M, x, v) ≈ sqrt(dot(v, G * v))
 
-            xcart = sph_to_cart(1, θ, ϕ)
+            xcart = sph_to_cart(θ, ϕ)
             vcart = [cos(ϕ)*cos(θ) -sin(ϕ)*sin(θ);
                      sin(ϕ)*cos(θ)  cos(ϕ)*sin(θ);
                      -sin(θ) 0] * v
 
-            for t=0:.1:1
-                @test isapprox(sph_to_cart(r, exp(M, x, v, t)...),
-                               r .* exp(S, xcart, vcart, t); atol=1e-3, rtol=1e-3)
-            end
+            T = 0:.1:1
+            @test isapprox([sph_to_cart(yi...) for yi in exp(M, x, v, T)],
+                           exp(S, xcart, vcart, T); atol=1e-3, rtol=1e-3)
+            @test isapprox([sph_to_cart(yi...) for yi in geodesic(M, x, v, T)],
+                           geodesic(S, xcart, vcart, T); atol=1e-3, rtol=1e-3)
 
             Γ₁ = christoffel_symbols_first(M, x)
             for i=1:n, j=1:n, k=1:n
