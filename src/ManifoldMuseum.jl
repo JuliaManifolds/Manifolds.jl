@@ -273,6 +273,8 @@ export dimension,
     log!,
     norm,
     injectivity_radius,
+    retract,
+    retract!,
     zero_tangent_vector,
     zero_tangent_vector!
 

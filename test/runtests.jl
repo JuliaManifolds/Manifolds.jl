@@ -32,8 +32,12 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test isapprox(M, pts[2], exp(M, pts[1], tv1))
         @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
         @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
+        @test is_manifold_point(M, retract(M, pts[1], tv1))
+        new_pt = exp(M, pts[1], tv1)
+        retract!(M, new_pt, pts[1], tv1)
+        @test is_manifold_point(M, new_pt)
         for x ∈ pts
-            @test isapprox(M, zero_tangent_vector(M, x), log(M, pts[1], pts[1]))
+            @test isapprox(M, zero_tangent_vector(M, x), log(M, x, x); atol = eps(eltype(x)))
         end
         zero_tangent_vector!(M, tv1, pts[1])
         @test isapprox(M, pts[1], tv1, zero_tangent_vector(M, pts[1]))
@@ -58,6 +62,12 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         for t ∈ 0.1:0.1:1.0
             @test d12 ≈ ForwardDiff.derivative(exp_f, t)
         end
+    end
+
+    @testset "eltype" begin
+        tv1 = log(M, pts[1], pts[2])
+        @test eltype(tv1) == eltype(pts[1])
+        @test eltype(exp(M, pts[1], tv1)) == eltype(pts[1])
     end
 end
 
@@ -91,9 +101,11 @@ end
              Vector{Double64},
              MVector{3, Double64}]
     for T in types
-        test_manifold(M, [convert(T, [1.0, 0.0, 0.0]),
-                          convert(T, [0.0, 1.0, 0.0]),
-                          convert(T, [0.0, 0.0, 1.0])])
+        @testset "Type $T" begin
+            test_manifold(M, [convert(T, [1.0, 0.0, 0.0]),
+                              convert(T, [0.0, 1.0, 0.0]),
+                              convert(T, [0.0, 0.0, 1.0])])
+        end
     end
 
     @testset "Distribution tests" begin
@@ -119,29 +131,33 @@ end
 end
 
 @testset "Rotations" begin
-    M = ManifoldMuseum.Rotations(2)
+    M_qr = ManifoldMuseum.Rotations(2)
+    M_polar = ManifoldMuseum.Rotations(2, ManifoldMuseum.retract_polar!)
+
     types = [Matrix{Float64},
              MMatrix{2, 2, Float64},
              Matrix{Float32},
              MMatrix{2, 2, Float32}]
-    for T in types
-        angles = (0.0, π/2, 2π/3)
-        pts = [convert(T, [cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)]) for ϕ in angles]
-        test_manifold(M, pts; test_forward_diff = false)
 
-        v = log(M, pts[1], pts[2])
-        @test norm(M, pts[1], v) ≈ angles[2] - angles[1]
-    end
+    for M in (M_qr, M_polar)
+        for T in types
+            angles = (0.0, π/2, 2π/3)
+            pts = [convert(T, [cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)]) for ϕ in angles]
+            test_manifold(M, pts; test_forward_diff = false)
 
-    @testset "Distribution tests" begin
-        x = [1.0 0.0; 0.0 1.0]
-        gtsd_vector = ManifoldMuseum.normal_tvector_distribution(M, x, 1.0)
-        @test isa(rand(gtsd_vector), Matrix)
-        for _ in 1:10
-            @test is_tangent_vector(M, x, rand(gtsd_vector))
+            v = log(M, pts[1], pts[2])
+            @test norm(M, pts[1], v) ≈ angles[2] - angles[1]
         end
-        gtsd_mvector = ManifoldMuseum.normal_tvector_distribution(M, (MMatrix{2, 2}(x)), 1.0)
-        @test isa(rand(gtsd_mvector), MMatrix)
-    end
 
+        @testset "Distribution tests" begin
+            x = [1.0 0.0; 0.0 1.0]
+            gtsd_vector = ManifoldMuseum.normal_tvector_distribution(M, x, 1.0)
+            @test isa(rand(gtsd_vector), Matrix)
+            for _ in 1:10
+                @test is_tangent_vector(M, x, rand(gtsd_vector))
+            end
+            gtsd_mvector = ManifoldMuseum.normal_tvector_distribution(M, (MMatrix{2, 2}(x)), 1.0)
+            @test isa(rand(gtsd_mvector), MMatrix)
+        end
+    end
 end
