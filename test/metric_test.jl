@@ -1,0 +1,160 @@
+
+@testset "scaled Euclidean metric" begin
+    struct TestEuclidean{N} <: Manifold end
+    struct TestEuclideanMetric <: Metric end
+    ManifoldMuseum.manifold_dimension(::TestEuclidean{N}) where {N} = N
+    function ManifoldMuseum.local_metric(M::MetricManifold{<:TestEuclidean,<:TestEuclideanMetric}, x)
+        return Diagonal(1.0:manifold_dimension(M))
+    end
+
+    n = 3
+    E = TestEuclidean{n}()
+    g = TestEuclideanMetric()
+    M = MetricManifold(E, g)
+    G = Diagonal(1.0:n)
+    invG = inv(G)
+    @test manifold_dimension(M) == n
+    @test base_manifold(M) === E
+    @test metric(M) === g
+
+    for vtype in (Vector, SVector{n}, MVector{n})
+        x, v, w = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
+
+        @test local_metric(M, x) ≈ G
+        @test inverse_local_metric(M, x) ≈ invG
+        @test det_local_metric(M, x) ≈ *(1.0:n...)
+        @test inner(M, x, v, w) ≈ dot(v, G * w)
+        @test norm(M, x, v) ≈ sqrt(dot(v, G * v))
+
+        T = 0:.5:10
+        @test exp(M, x, v, T) ≈ [x + t * v for t in T]
+        @test geodesic(M, x, v, T) ≈ [x + t * v for t in T]
+
+        @test christoffel_symbols_first(M, x) ≈ zeros(n, n, n)
+        @test christoffel_symbols_second(M, x) ≈ zeros(n, n, n)
+        @test riemann_tensor(M, x) ≈ zeros(n, n, n, n)
+        @test ricci_tensor(M, x) ≈ zeros(n, n)
+        @test ricci_curvature(M, x) ≈ 0
+        @test gaussian_curvature(M, x) ≈ 0
+        @test einstein_tensor(M, x) ≈ zeros(n, n)
+    end
+end
+
+@testset "scaled Sphere metric" begin
+    struct TestSphere{N,T} <: Manifold
+        r::T
+    end
+    struct TestSphericalMetric <: Metric end
+    ManifoldMuseum.manifold_dimension(::TestSphere{N}) where {N} = N
+    function ManifoldMuseum.local_metric(M::MetricManifold{<:TestSphere,<:TestSphericalMetric}, x)
+        r = base_manifold(M).r
+        d = similar(x)
+        d[1] = r^2
+        d[2] = d[1] * sin(x[1])^2
+        return Diagonal(d)
+    end
+    sph_to_cart(θ, ϕ) = [cos(ϕ)*sin(θ), sin(ϕ)*sin(θ), cos(θ)]
+
+    n = 2
+    r = 10 * rand()
+    θ, ϕ = π * rand(), 2π * rand()
+    Sr = TestSphere{n,Float64}(r)
+    S = ManifoldMuseum.Sphere(n)
+    g = TestSphericalMetric()
+    M = MetricManifold(Sr, g)
+
+    @test manifold_dimension(M) == n
+    @test base_manifold(M) === Sr
+    @test metric(M) === g
+
+    for vtype in (Vector, SVector{n}, MVector{n})
+        x = vtype([θ, ϕ])
+        G = Diagonal(vtype([1, sin(θ)^2])) .* r^2
+        invG = Diagonal(vtype([1, 1 / sin(θ)^2])) ./ r^2
+        v, w = normalize(randn(n)), normalize(randn(n))
+
+        @test local_metric(M, x) ≈ G
+        @test inverse_local_metric(M, x) ≈ invG
+        @test det_local_metric(M, x) ≈ r^4 * sin(θ)^2
+        @test inner(M, x, v, w) ≈ dot(v, G * w)
+        @test norm(M, x, v) ≈ sqrt(dot(v, G * v))
+
+        xcart = sph_to_cart(θ, ϕ)
+        vcart = [cos(ϕ)*cos(θ) -sin(ϕ)*sin(θ);
+                 sin(ϕ)*cos(θ)  cos(ϕ)*sin(θ);
+                 -sin(θ) 0] * v
+
+        T = 0:.1:1
+        @test isapprox([sph_to_cart(yi...) for yi in exp(M, x, v, T)],
+                       exp(S, xcart, vcart, T); atol=1e-3, rtol=1e-3)
+        @test isapprox([sph_to_cart(yi...) for yi in geodesic(M, x, v, T)],
+                       geodesic(S, xcart, vcart, T); atol=1e-3, rtol=1e-3)
+
+        Γ₁ = christoffel_symbols_first(M, x)
+        for i=1:n, j=1:n, k=1:n
+            if (i,j,k) == (1,2,2) || (i,j,k) == (2,1,2)
+                @test Γ₁[i,j,k] ≈ r^2*cos(θ)*sin(θ)
+            elseif (i,j,k) == (2,2,1)
+                @test Γ₁[i,j,k] ≈ -r^2*cos(θ)*sin(θ)
+            else
+                @test Γ₁[i,j,k] ≈ 0
+            end
+        end
+
+        Γ₂ = christoffel_symbols_second(M, x)
+        for i=1:n, j=1:n, k=1:n
+            if (i,j,k) == (2,2,1)
+                @test Γ₂[i,j,k] ≈ -cos(θ)*sin(θ)
+            elseif (i,j,k) == (1,2,2) || (i,j,k) == (2,1,2)
+                @test Γ₂[i,j,k] ≈ cot(θ)
+            else
+                @test Γ₂[i,j,k] ≈ 0
+            end
+        end
+
+        R = riemann_tensor(M, x)
+        for i=1:n, j=1:n, k=1:n, l=1:n
+            if (i,j,k,l) == (1,1,2,2)
+                @test R[i,j,k,l] ≈ -1
+            elseif (i,j,k,l) == (1,2,1,2)
+                @test R[i,j,k,l] ≈ 1
+            elseif (i,j,k,l) == (2,1,2,1)
+                @test R[i,j,k,l] ≈ sin(θ)^2
+            elseif (i,j,k,l) == (2,2,1,1)
+                @test R[i,j,k,l] ≈ -sin(θ)^2
+            else
+                @test R[i,j,k,l] ≈ 0
+            end
+        end
+
+        @test ricci_tensor(M, x) ≈ G ./ r^2
+        @test ricci_curvature(M, x) ≈ 2 / r^2
+        @test gaussian_curvature(M, x) ≈ 1 / r^2
+        @test einstein_tensor(M, x) ≈ ricci_tensor(M, x) - gaussian_curvature(M, x)  .* G
+    end
+end
+
+@testset "HasMetric trait" begin
+    struct BaseManifold{N} <: Manifold end
+    struct BaseManifoldMetric{M} <: Metric end
+    ManifoldMuseum.manifold_dimension(::BaseManifold{N}) where {N} = N
+    @traitimpl HasMetric{BaseManifold,BaseManifoldMetric}
+    ManifoldMuseum.inner(::BaseManifold, x, v, w) = 2 * dot(v,w)
+    ManifoldMuseum.exp!(::BaseManifold, y, x, v) = y .= x + 2 * v
+    ManifoldMuseum.log!(::BaseManifold, v, x, y) = v .= (y - x) / 2
+
+    M = BaseManifold{3}()
+    g = BaseManifoldMetric{3}()
+    MM = MetricManifold(M, g)
+    x = randn(3)
+    v = randn(3)
+    w = randn(3)
+    y = similar(x)
+
+    @test inner(M, x, v, w) == 2 * dot(v,w)
+    @test inner(MM, x, v, w) === inner(M, x, v, w)
+    @test exp(M, x, v) == x + 2 * v
+    @test exp!(MM, y, x, v) === exp!(M, y, x, v)
+    @test log(M, x, y) == (y - x) / 2
+    @test log!(MM, v, x, y) === log!(M, v, x, y)
+end
