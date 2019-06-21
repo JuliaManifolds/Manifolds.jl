@@ -216,10 +216,9 @@ function einstein_tensor(M::MetricManifold, x)
     return G
 end
 
-function solve_exp_ode(M::MetricManifold, x, v, args...; kwargs...)
+function solve_exp_ode(M::MetricManifold, x, v, tspan; solver=AutoVern9(Rodas5()), kwargs...)
     u0 = x
     du0 = Base.convert(typeof(x), v)
-    tspan = (0.0, 1.0)
 
     function exp_problem(du, u, p, t)
         n = size(u, 1)
@@ -231,13 +230,14 @@ function solve_exp_ode(M::MetricManifold, x, v, args...; kwargs...)
     end
 
     prob = SecondOrderODEProblem(exp_problem, du0, u0, tspan, (M,))
-    sol = solve(prob, args...; kwargs...)
+    sol = solve(prob, solver; kwargs...)
     return sol
 end
 
 @traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}}
-    sol = solve_exp_ode(M, x, v)
-    y .= sol.u[end].x[2]
+    tspan = (0.0, 1.0)
+    sol = solve_exp_ode(M, x, v, tspan; dense=false, saveat=[1.0])
+    y .= sol.u[1].x[2]
 end
 
 @traitfn exp!(M::MMT, y, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = exp!(M.manifold, y, x, v)
