@@ -59,14 +59,14 @@ zero_tangent_vector(S::Sphere, x) = zero(x)
 zero_tangent_vector!(S::Sphere, v, x) = (v .= zero(x))
 
 """
-	uniform_sphere_distribution(S::Sphere, x)
+    uniform_sphere_distribution(S::Sphere, x)
 
 Uniform distribution on given sphere. Generated points will be of similar
 type to `x`.
 """
 function uniform_distribution(S::Sphere, x)
-	d = Distributions.MvNormal(zero(x), 1.0)
-	return ProjectedPointDistribution(S, d, proj!, x)
+    d = Distributions.MvNormal(zero(x), 1.0)
+    return ProjectedPointDistribution(S, d, proj!, x)
 end
 
 """
@@ -105,16 +105,16 @@ function is_tangent_vector(S::Sphere{N},x,v; kwargs...) where N
             "The vector $(v) is not a tangent vector to $(x) on $(S), since it is not orthogonal in the embedding."
         ))
     end
-	return true
+    return true
 end
 
 """
-	gaussian_sphere_tvector_distribution(S::Sphere, x, σ)
+    gaussian_sphere_tvector_distribution(S::Sphere, x, σ)
 
 Normal distribution in ambient space with standard deviation `σ`
 projected to tangent space at `x`.
 """
 function normal_tvector_distribution(S::Sphere, x, σ)
-	d = Distributions.MvNormal(zero(x), σ)
-	return ProjectedTVectorDistribution(S, x, d, project_tangent!, x)
+    d = Distributions.MvNormal(zero(x), σ)
+    return ProjectedTVectorDistribution(S, x, d, project_tangent!, x)
 end
