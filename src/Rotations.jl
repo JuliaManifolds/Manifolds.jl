@@ -18,16 +18,19 @@ Rotations(n::Int, retract!::TRetr = retract_qr!) where TRetr = Rotations{n,TRetr
 @doc doc"""
     manifold_dimension(S::Rotations)
 
-returns the dimension of the manifold $\mathrm{SO}(n)$, i.e. $\frac{n(n-1), 2}$.
+returns the dimension of the manifold $\mathrm{SO}(n)$, i.e. $\frac{n(n-1)}{2}$.
 """
 manifold_dimension(S::Rotations{N}) where {N} = div(N*(N-1), 2)
 
 @doc doc"""
-    inner(S,x,w,v)
+    inner(S, x, w, v)
 
-compute the inner product of the two tangent vectors `w,v` from the tangent
+compute the inner product of the two tangent vectors `w, v` from the tangent
 plane at `x` on the special orthogonal space `S=`$\mathrm{SO}(n)$ using the
-restriction of the metric from the embedding, i.e. $ (v,w)_x = \frac{1,2}v^\mathrm{T}w $.
+restriction of the metric from the embedding, i.e. $ (v,w)_x = \frac{1}{2}v^\mathrm{T}w $.
+Tangent vectors are represented by matrices. The factor 1/2 is chosen to make
+the length of a tangent vector equal to the angle between the rotation at which
+it is tangent and the rotation it points at.
 """
 inner(S::Rotations, x, w, v) = dot(w, v)/2
 
