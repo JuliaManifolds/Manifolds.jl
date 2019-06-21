@@ -19,6 +19,11 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     isapprox(M, pts[1], pts[2]) && error("Points 1 and 2 are equal")
     isapprox(M, pts[1], pts[3]) && error("Points 1 and 3 are equal")
 
+    @testset "dimension" begin
+        @test isa(manifold_dimension(M), Integer)
+        @test manifold_dimension(M) ≥ 0
+    end
+
     tv1 = log(M, pts[1], pts[2])
 
     @testset "is_manifold_point / is_tangent_vector" begin

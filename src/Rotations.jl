@@ -16,11 +16,11 @@ end
 Rotations(n::Int, retract!::TRetr = retract_qr!) where TRetr = Rotations{n,TRetr}(retract!)
 
 @doc doc"""
-    dimension(S::Rotations)
+    manifold_dimension(S::Rotations)
 
 returns the dimension of the manifold $\mathrm{SO}(n)$, i.e. $\frac{n(n-1), 2}$.
 """
-dimension(S::Rotations{N}) where {N} = div(N*(N-1), 2)
+manifold_dimension(S::Rotations{N}) where {N} = div(N*(N-1), 2)
 
 @doc doc"""
     inner(S,x,w,v)
