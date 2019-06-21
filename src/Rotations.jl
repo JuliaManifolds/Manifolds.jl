@@ -6,14 +6,12 @@ real-valued orthogonal matrices with determinant $+1$.
 
 # Constructor
 
-    Rotations(n, retract! = rectract_qr!)
+    Rotations(n)
 
 generates the $\mathrm{SO}(n) \subset \mathbb R^{n\times n}$
 """
-struct Rotations{N, TRetr<:Function} <: Manifold
-    retract!::TRetr
-end
-Rotations(n::Int, retract!::TRetr = retract_qr!) where TRetr = Rotations{n,TRetr}(retract!)
+struct Rotations{N} <: Manifold end
+Rotations(n::Int) = Rotations{n}()
 
 @doc doc"""
     manifold_dimension(S::Rotations)
@@ -65,24 +63,28 @@ function log!(S::Rotations, v::TV, x, y) where TV
     return v
 end
 
+struct PolarRetraction <: AbstractRetractionMethod end
+
 @doc doc"""
-    retract_polar!(M::Rotations, y, x, v)
+    retract_polar!(M::Rotations, y, x, v, method::PolarRetraction)
 
 This SVD-based retraction is a second-order approximation of the exponential map.
 """
-function retract_polar!(M::Rotations, y, x, v)
+function retract!(M::Rotations, y, x, v, method::PolarRetraction)
     A = x + x*v
     S = svd(A)
     y .= S.U * transpose(S.V)
     return y
 end
 
+struct QRRetraction <: AbstractRetractionMethod end
+
 @doc doc"""
-    retract_qr!(M, y, x, v)
+    retract!(M, y, x, v, method::QRRetraction)
 
 This QR-based retraction is a first-order approximation of the exponential map.
 """
-function retract_qr!(M::Rotations, y::AbstractArray{T}, x, v) where T
+function retract!(M::Rotations, y::AbstractArray{T}, x, v, method::QRRetraction) where T
     A = x + x*v
     qr_decomp = qr(A)
     d = diag(qr_decomp.R)
@@ -91,7 +93,7 @@ function retract_qr!(M::Rotations, y::AbstractArray{T}, x, v) where T
     return y
 end
 
-retract!(M::Rotations, y, x, v) = M.retract!(M, y, x, v)
+retract!(M::Rotations, y, x, v) = retract!(M, y, x, v, QRRetraction())
 
 zero_tangent_vector(S::Rotations, x) = zero(x)
 zero_tangent_vector!(S::Rotations, v, x) = (v .= zero(x))

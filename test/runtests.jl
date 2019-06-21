@@ -7,13 +7,21 @@ using StaticArrays
 using Test
 
 """
-    test_manifold(m::Manifold, pts::AbstractVector)
+    test_manifold(m::Manifold, pts::AbstractVector;
+        test_forward_diff = true,
+        retraction_methods = [])
 
 Tests general properties of manifold `m`, given at least three different points
 that lie on it (contained in `pts`).
+
+# Arguments
+- `test_forward_diff = true`: if true, automatic differentiation using ForwardDiff is
+tested.
+- `retraction_methods = []`: retraction methods that will be tested.
 """
 function test_manifold(M::Manifold, pts::AbstractVector;
-    test_forward_diff = true)
+    test_forward_diff = true,
+    retraction_methods = [])
     # log/exp
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
     isapprox(M, pts[1], pts[2]) && error("Points 1 and 2 are equal")
@@ -38,6 +46,11 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
         @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
         @test is_manifold_point(M, retract(M, pts[1], tv1))
+        @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0))
+        for retr_method ∈ retraction_methods
+            @test is_manifold_point(M, retract(M, pts[1], tv1, retr_method))
+            @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0, retr_method))
+        end
         new_pt = exp(M, pts[1], tv1)
         retract!(M, new_pt, pts[1], tv1)
         @test is_manifold_point(M, new_pt)
@@ -136,33 +149,35 @@ end
 end
 
 @testset "Rotations" begin
-    M_qr = ManifoldMuseum.Rotations(2)
-    M_polar = ManifoldMuseum.Rotations(2, ManifoldMuseum.retract_polar!)
+    M = ManifoldMuseum.Rotations(2)
 
     types = [Matrix{Float64},
              MMatrix{2, 2, Float64},
              Matrix{Float32},
              MMatrix{2, 2, Float32}]
 
-    for M in (M_qr, M_polar)
-        for T in types
-            angles = (0.0, π/2, 2π/3)
-            pts = [convert(T, [cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)]) for ϕ in angles]
-            test_manifold(M, pts; test_forward_diff = false)
+    retraction_methods = [ManifoldMuseum.PolarRetraction(),
+                          ManifoldMuseum.QRRetraction()]
 
-            v = log(M, pts[1], pts[2])
-            @test norm(M, pts[1], v) ≈ angles[2] - angles[1]
-        end
+    for T in types
+        angles = (0.0, π/2, 2π/3)
+        pts = [convert(T, [cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)]) for ϕ in angles]
+        test_manifold(M, pts;
+            test_forward_diff = false,
+            retraction_methods = retraction_methods)
 
-        @testset "Distribution tests" begin
-            x = [1.0 0.0; 0.0 1.0]
-            gtsd_vector = ManifoldMuseum.normal_tvector_distribution(M, x, 1.0)
-            @test isa(rand(gtsd_vector), Matrix)
-            for _ in 1:10
-                @test is_tangent_vector(M, x, rand(gtsd_vector))
-            end
-            gtsd_mvector = ManifoldMuseum.normal_tvector_distribution(M, (MMatrix{2, 2}(x)), 1.0)
-            @test isa(rand(gtsd_mvector), MMatrix)
+        v = log(M, pts[1], pts[2])
+        @test norm(M, pts[1], v) ≈ angles[2] - angles[1]
+    end
+
+    @testset "Distribution tests" begin
+        x = [1.0 0.0; 0.0 1.0]
+        gtsd_vector = ManifoldMuseum.normal_tvector_distribution(M, x, 1.0)
+        @test isa(rand(gtsd_vector), Matrix)
+        for _ in 1:10
+            @test is_tangent_vector(M, x, rand(gtsd_vector))
         end
+        gtsd_mvector = ManifoldMuseum.normal_tvector_distribution(M, (MMatrix{2, 2}(x)), 1.0)
+        @test isa(rand(gtsd_mvector), MMatrix)
     end
 end

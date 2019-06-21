@@ -102,30 +102,54 @@ Keyword arguments can be used to specify tolerances.
 """
 isapprox(M::Manifold, x, v, w; kwargs...) = isapprox(v, w; kwargs...)
 
+abstract type AbstractRetractionMethod end
+
 """
-    retract!(M::Manifold, y, x, v, t=1)
+    ExponentialRetraction
+
+Retraction using the exponential map.
+"""
+struct ExponentialRetraction <: AbstractRetractionMethod end
+
+"""
+    retract!(M::Manifold, y, x, v, [t=1], [method::AbstractRetractionMethod=ExponentialRetraction()])
 
 Retraction (cheaper, approximate version of exponential map) of tangent
 vector `t*v` at point `x` from manifold `M`.
 Result is saved to `y`.
-"""
-retract!(M::Manifold, y, x, v) = exp!(M, y, x, v)
 
-retract!(M::Manifold, y, x, v, t) = retract!(M, y, x, t*v)
+Retraction method can be specified by the last argument. Please look at the
+documentation of respective manifolds for available methods.
+"""
+retract!(M::Manifold, y, x, v, method::ExponentialRetraction) = exp!(M, y, x, v)
+
+retract!(M::Manifold, y, x, v) = retract!(M, y, x, v, ExponentialRetraction())
+
+retract!(M::Manifold, y, x, v, t::Number) = retract!(M, y, x, t*v)
+
+retract!(M::Manifold, y, x, v, t::Number, method::AbstractRetractionMethod) = retract!(M, y, x, t*v, method)
 
 """
-    retract(M::Manifold, x, v, t=1)
+    retract(M::Manifold, x, v, [t=1], [method::AbstractRetractionMethod])
 
 Retraction (cheaper, approximate version of exponential map) of tangent
 vector `t*v` at point `x` from manifold `M`.
 """
+function retract(M::Manifold, x, v, method::AbstractRetractionMethod)
+    xr = similar_result(M, retract, x, v)
+    retract!(M, xr, x, v, method)
+    return xr
+end
+
 function retract(M::Manifold, x, v)
     xr = similar_result(M, retract, x, v)
     retract!(M, xr, x, v)
     return xr
 end
 
-retract(M::Manifold, x, v, t) = retract(M, x, t*v)
+retract(M::Manifold, x, v, t::Number) = retract(M, x, t*v)
+
+retract(M::Manifold, x, v, t::Number, method::AbstractRetractionMethod) = retract(M, x, t*v, method)
 
 project_tangent!(M::Manifold, w, x, v) = error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)) with input $(typof(v)).")
 
