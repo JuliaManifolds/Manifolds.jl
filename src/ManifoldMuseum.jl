@@ -25,8 +25,7 @@ using SimpleTraits
 using ForwardDiff
 import Einsum: @einsum
 import DifferentialEquations: ODEProblem,
-    AutoVern9,
-    Rodas5,
+    SecondOrderODEProblem,
     solve
 
 """

@@ -216,30 +216,28 @@ function einstein_tensor(M::MetricManifold, x)
     return G
 end
 
-function exp_diffeq_system!(du, u, p, t)
-    n = Int(size(u, 1) / 2)
-    M = p
-    x = view(u, 1:n)
-    dx = view(u, n+1:2n)
-    du[1:n] .= dx
-    Γ = christoffel_symbols_second(M, x)
-    d²x = similar(du, Size(n))
-    @einsum d²x[k] = -Γ[i,j,k] * dx[i] * dx[j]
-    du[n+1:end] .= d²x
-end
-
-function exp_ode_solution(M::MetricManifold, x, v; kwargs...)
-    u₀ = [x..., v...]
+function solve_exp_ode(M::MetricManifold, x, v, args...; kwargs...)
+    u0 = x
+    du0 = Base.convert(typeof(x), v)
     tspan = (0.0, 1.0)
 
-    prob = ODEProblem(exp_diffeq_system!, u₀, tspan, M)
-    sol = solve(prob, AutoVern9(Rodas5()); kwargs...)
+    function exp_problem(du, u, p, t)
+        n = size(u, 1)
+        M = p[1]
+        Γ = christoffel_symbols_second(M, u)
+        ddu = similar(u)
+        @einsum ddu[k] = -Γ[i,j,k] * du[i] * du[j]
+        return Base.convert(typeof(u), ddu)
+    end
+
+    prob = SecondOrderODEProblem(exp_problem, du0, u0, tspan, (M,))
+    sol = solve(prob, args...; kwargs...)
     return sol
 end
 
 @traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}}
-    sol = exp_ode_solution(M, x, v)
-    y .= sol.u[end][1:size(y, 1)]
+    sol = solve_exp_ode(M, x, v)
+    y .= sol.u[end].x[2]
 end
 
 @traitfn exp!(M::MMT, y, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = exp!(M.manifold, y, x, v)
