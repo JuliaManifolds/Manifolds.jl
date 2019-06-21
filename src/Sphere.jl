@@ -105,6 +105,7 @@ function is_tangent_vector(S::Sphere{N},x,v; kwargs...) where N
             "The vector $(v) is not a tangent vector to $(x) on $(S), since it is not orthogonal in the embedding."
         ))
     end
+	return true
 end
 
 """

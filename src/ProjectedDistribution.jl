@@ -47,7 +47,7 @@ function ProjectedTVectorDistribution(M::Manifold, x, d::Distribution, project_t
 end
 
 function rand(rng::AbstractRNG, d::ProjectedTVectorDistribution{TResult}) where TResult
-	v = convert(TResult, rand(rng, d.d))
+	v = convert(TResult, reshape(rand(rng, d.d), size(d.x)))
 	d.project_tangent!(d.manifold, v, d.x, v)
     return v
 end

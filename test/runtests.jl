@@ -12,13 +12,21 @@ using Test
 Tests general properties of manifold `m`, given at least three different points
 that lie on it (contained in `pts`).
 """
-function test_manifold(M::Manifold, pts::AbstractVector)
+function test_manifold(M::Manifold, pts::AbstractVector;
+    test_forward_diff = true)
     # log/exp
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
     isapprox(M, pts[1], pts[2]) && error("Points 1 and 2 are equal")
     isapprox(M, pts[1], pts[3]) && error("Points 1 and 3 are equal")
 
     tv1 = log(M, pts[1], pts[2])
+
+    @testset "is_manifold_point / is_tangent_vector" begin
+        for pt ∈ pts
+            @test is_manifold_point(M, pt)
+        end
+        @test is_tangent_vector(M, pts[1], tv1)
+    end
 
     @testset "log/exp tests" begin
         @test isapprox(M, pts[2], exp(M, pts[1], tv1))
@@ -44,7 +52,7 @@ function test_manifold(M::Manifold, pts::AbstractVector)
         @test isapprox(M, pts[1], 0*tv1, tv1-tv1)
     end
 
-    @testset "ForwardDiff support" begin
+    test_forward_diff && @testset "ForwardDiff support" begin
         exp_f(t) = distance(M, pts[1], exp(M, pts[1], t*tv1))
         d12 = distance(M, pts[1], pts[2])
         for t ∈ 0.1:0.1:1.0
@@ -101,11 +109,39 @@ end
         gtsd_vector = ManifoldMuseum.normal_tvector_distribution(M, x, 1.0)
         @test isa(rand(gtsd_vector), Vector)
         for _ in 1:10
-            @test dot(x, rand(gtsd_vector)) ≈ 0.0
+            @test is_tangent_vector(M, x, rand(gtsd_vector))
         end
         gtsd_mvector = ManifoldMuseum.normal_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
         @test isa(rand(gtsd_mvector), MVector)
     end
 
     test_arraymanifold()
+end
+
+@testset "Rotations" begin
+    M = ManifoldMuseum.Rotations(2)
+    types = [Matrix{Float64},
+             MMatrix{2, 2, Float64},
+             Matrix{Float32},
+             MMatrix{2, 2, Float32}]
+    for T in types
+        angles = (0.0, π/2, 2π/3)
+        pts = [convert(T, [cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)]) for ϕ in angles]
+        test_manifold(M, pts; test_forward_diff = false)
+
+        v = log(M, pts[1], pts[2])
+        @test norm(M, pts[1], v) ≈ angles[2] - angles[1]
+    end
+
+    @testset "Distribution tests" begin
+        x = [1.0 0.0; 0.0 1.0]
+        gtsd_vector = ManifoldMuseum.normal_tvector_distribution(M, x, 1.0)
+        @test isa(rand(gtsd_vector), Matrix)
+        for _ in 1:10
+            @test is_tangent_vector(M, x, rand(gtsd_vector))
+        end
+        gtsd_mvector = ManifoldMuseum.normal_tvector_distribution(M, (MMatrix{2, 2}(x)), 1.0)
+        @test isa(rand(gtsd_mvector), MMatrix)
+    end
+
 end

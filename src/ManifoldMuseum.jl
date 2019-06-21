@@ -14,6 +14,7 @@ import LinearAlgebra: dot,
 import Markdown: @doc_str
 import Distributions: _rand!
 import Random: rand
+using LinearAlgebra
 using Random: AbstractRNG
 using SimpleTraits
 
@@ -253,6 +254,7 @@ is_tangent_vector(M::Manifold, x::MPoint, v::TVector) = error("A validation for 
 include("ArrayManifold.jl")
 
 include("DistributionsBase.jl")
+include("Rotations.jl")
 include("Sphere.jl")
 include("ProjectedDistribution.jl")
 
@@ -265,6 +267,8 @@ export dimension,
     exp!,
     geodesic,
     isapprox,
+    is_manifold_point,
+    is_tangent_vector,
     log,
     log!,
     norm,
