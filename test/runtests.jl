@@ -203,53 +203,39 @@ end
             end
 
             Γ₁ = christoffel_symbols_first(M, x)
-            for i=1:n
-                for j=1:n
-                    for k=1:n
-                        if (i,j,k) == (1,2,2) || (i,j,k) == (2,1,2)
-                            @test Γ₁[i,j,k] ≈ r^2*cos(θ)*sin(θ)
-                        elseif (i,j,k) == (2,2,1)
-                            @test Γ₁[i,j,k] ≈ -r^2*cos(θ)*sin(θ)
-                        else
-                            @test Γ₁[i,j,k] ≈ 0
-                        end
-                    end
+            for i=1:n, j=1:n, k=1:n
+                if (i,j,k) == (1,2,2) || (i,j,k) == (2,1,2)
+                    @test Γ₁[i,j,k] ≈ r^2*cos(θ)*sin(θ)
+                elseif (i,j,k) == (2,2,1)
+                    @test Γ₁[i,j,k] ≈ -r^2*cos(θ)*sin(θ)
+                else
+                    @test Γ₁[i,j,k] ≈ 0
                 end
             end
 
             Γ₂ = christoffel_symbols_second(M, x)
-            for i=1:n
-                for j=1:n
-                    for k=1:n
-                        if (i,j,k) == (2,2,1)
-                            @test Γ₂[i,j,k] ≈ -cos(θ)*sin(θ)
-                        elseif (i,j,k) == (1,2,2) || (i,j,k) == (2,1,2)
-                            @test Γ₂[i,j,k] ≈ cot(θ)
-                        else
-                            @test Γ₂[i,j,k] ≈ 0
-                        end
-                    end
+            for i=1:n, j=1:n, k=1:n
+                if (i,j,k) == (2,2,1)
+                    @test Γ₂[i,j,k] ≈ -cos(θ)*sin(θ)
+                elseif (i,j,k) == (1,2,2) || (i,j,k) == (2,1,2)
+                    @test Γ₂[i,j,k] ≈ cot(θ)
+                else
+                    @test Γ₂[i,j,k] ≈ 0
                 end
             end
 
             R = riemann_tensor(M, x)
-            for i=1:n
-                for j=1:n
-                    for k=1:n
-                        for l=1:n
-                            if (i,j,k,l) == (1,1,2,2)
-                                @test R[i,j,k,l] ≈ -1
-                            elseif (i,j,k,l) == (1,2,1,2)
-                                @test R[i,j,k,l] ≈ 1
-                            elseif (i,j,k,l) == (2,1,2,1)
-                                @test R[i,j,k,l] ≈ sin(θ)^2
-                            elseif (i,j,k,l) == (2,2,1,1)
-                                @test R[i,j,k,l] ≈ -sin(θ)^2
-                            else
-                                @test R[i,j,k,l] ≈ 0
-                            end
-                        end
-                    end
+            for i=1:n, j=1:n, k=1:n, l=1:n
+                if (i,j,k,l) == (1,1,2,2)
+                    @test R[i,j,k,l] ≈ -1
+                elseif (i,j,k,l) == (1,2,1,2)
+                    @test R[i,j,k,l] ≈ 1
+                elseif (i,j,k,l) == (2,1,2,1)
+                    @test R[i,j,k,l] ≈ sin(θ)^2
+                elseif (i,j,k,l) == (2,2,1,1)
+                    @test R[i,j,k,l] ≈ -sin(θ)^2
+                else
+                    @test R[i,j,k,l] ≈ 0
                 end
             end
 
