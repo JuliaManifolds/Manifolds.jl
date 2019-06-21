@@ -228,7 +228,6 @@ function solve_exp_ode(M::MetricManifold, x, v, tspan; solver=AutoVern9(Rodas5()
     du0 = Base.convert(typeof(x), v)
 
     function exp_problem(du, u, p, t)
-        n = size(u, 1)
         M = p[1]
         Γ = christoffel_symbols_second(M, u)
         ddu = similar(u)
