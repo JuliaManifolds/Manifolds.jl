@@ -3,6 +3,7 @@ using ManifoldMuseum
 using LinearAlgebra
 using DoubleFloats
 using ForwardDiff
+using ReverseDiff
 using StaticArrays
 using Test
 
@@ -21,6 +22,7 @@ tested.
 """
 function test_manifold(M::Manifold, pts::AbstractVector;
     test_forward_diff = true,
+    test_reverse_diff = true,
     retraction_methods = [])
     # log/exp
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
@@ -80,6 +82,24 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         for t ∈ 0.1:0.1:1.0
             @test d12 ≈ ForwardDiff.derivative(exp_f, t)
         end
+
+        retract_f(t) = distance(M, pts[1], retract(M, pts[1], t*tv1))
+        for t ∈ 0.1:0.1:1.0
+            @test d12 ≈ ForwardDiff.derivative(retract_f, t)
+        end
+    end
+
+    test_reverse_diff && @testset "ReverseDiff support" begin
+        exp_f(t) = distance(M, pts[1], exp(M, pts[1], t[1]*tv1))
+        d12 = distance(M, pts[1], pts[2])
+        for t ∈ 0.1:0.1:1.0
+            @test d12 ≈ ReverseDiff.gradient(exp_f, [t])[1]
+        end
+
+        retract_f(t) = distance(M, pts[1], retract(M, pts[1], t[1]*tv1))
+        for t ∈ 0.1:0.1:1.0
+            @test d12 ≈ ReverseDiff.gradient(retract_f, [t])[1]
+        end
     end
 
     @testset "eltype" begin
@@ -113,16 +133,21 @@ end
 @testset "Sphere" begin
     M = ManifoldMuseum.Sphere(2)
     types = [Vector{Float64},
+             SizedVector{3, Float64},
              MVector{3, Float64},
              Vector{Float32},
+             SizedVector{3, Float32},
              MVector{3, Float32},
              Vector{Double64},
-             MVector{3, Double64}]
+             MVector{3, Double64},
+             SizedVector{3, Double64}]
     for T in types
         @testset "Type $T" begin
-            test_manifold(M, [convert(T, [1.0, 0.0, 0.0]),
-                              convert(T, [0.0, 1.0, 0.0]),
-                              convert(T, [0.0, 0.0, 1.0])])
+            test_manifold(M,
+                          [convert(T, [1.0, 0.0, 0.0]),
+                           convert(T, [0.0, 1.0, 0.0]),
+                           convert(T, [0.0, 0.0, 1.0])],
+                          test_reverse_diff = isa(T, Vector))
         end
     end
 
@@ -152,8 +177,10 @@ end
     M = ManifoldMuseum.Rotations(2)
 
     types = [Matrix{Float64},
+             SizedMatrix{2, 2, Float64},
              MMatrix{2, 2, Float64},
              Matrix{Float32},
+             SizedMatrix{2, 2, Float32},
              MMatrix{2, 2, Float32}]
 
     retraction_methods = [ManifoldMuseum.PolarRetraction(),
@@ -164,6 +191,7 @@ end
         pts = [convert(T, [cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)]) for ϕ in angles]
         test_manifold(M, pts;
             test_forward_diff = false,
+            test_reverse_diff = false,
             retraction_methods = retraction_methods)
 
         v = log(M, pts[1], pts[2])
