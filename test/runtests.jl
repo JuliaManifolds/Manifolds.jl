@@ -195,7 +195,7 @@ end
             retraction_methods = retraction_methods)
 
         v = log(M, pts[1], pts[2])
-        @test norm(M, pts[1], v) ≈ angles[2] - angles[1]
+        @test norm(M, pts[1], v) ≈ (angles[2] - angles[1])*sqrt(2)
     end
 
     @testset "Distribution tests" begin

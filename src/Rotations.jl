@@ -26,11 +26,9 @@ manifold_dimension(S::Rotations{N}) where {N} = div(N*(N-1), 2)
 compute the inner product of the two tangent vectors `w, v` from the tangent
 plane at `x` on the special orthogonal space `S=`$\mathrm{SO}(n)$ using the
 restriction of the metric from the embedding, i.e. $ (v,w)_x = \frac{1}{2}v^\mathrm{T}w $.
-Tangent vectors are represented by matrices. The factor 1/2 is chosen to make
-the length of a tangent vector equal to the angle between the rotation at which
-it is tangent and the rotation it points at.
+Tangent vectors are represented by matrices.
 """
-inner(S::Rotations, x, w, v) = dot(w, v)/2
+inner(S::Rotations, x, w, v) = dot(w, v)
 
 project_tangent!(S::Rotations, w, x, v) = w .= (transpose(v).-v)./2
 
@@ -124,7 +122,7 @@ end
     is_tangent_vector(S,x,v; kwargs... )
 
 checks whether `v` is a tangent vector to `x` on the [`Rotations`](@ref)
-space `S`, i.e. atfer [`is_manifold_point`](@ref)`(S,x)`, `v` has to be of same
+space `S`, i.e. after [`is_manifold_point`](@ref)`(S,x)`, `v` has to be of same
 dimension as `x` and orthogonal to `x`.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
