@@ -10,7 +10,8 @@ using Test
 """
     test_manifold(m::Manifold, pts::AbstractVector;
         test_forward_diff = true,
-        retraction_methods = [])
+        retraction_methods = [],
+        inverse_retraction_methods = [])
 
 Tests general properties of manifold `m`, given at least three different points
 that lie on it (contained in `pts`).
@@ -23,7 +24,8 @@ tested.
 function test_manifold(M::Manifold, pts::AbstractVector;
     test_forward_diff = true,
     test_reverse_diff = true,
-    retraction_methods = [])
+    retraction_methods = [],
+    inverse_retraction_methods = [])
     # log/exp
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
     isapprox(M, pts[1], pts[2]) && error("Points 1 and 2 are equal")
@@ -58,6 +60,10 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test is_manifold_point(M, new_pt)
         for x ∈ pts
             @test isapprox(M, zero_tangent_vector(M, x), log(M, x, x); atol = eps(eltype(x)))
+            @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x); atol = eps(eltype(x)))
+            for inv_retr_method ∈ inverse_retraction_methods
+                @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method); atol = eps(eltype(x)))
+            end
         end
         zero_tangent_vector!(M, tv1, pts[1])
         @test isapprox(M, pts[1], tv1, zero_tangent_vector(M, pts[1]))
@@ -186,16 +192,30 @@ end
     retraction_methods = [ManifoldMuseum.PolarRetraction(),
                           ManifoldMuseum.QRRetraction()]
 
+    inverse_retraction_methods = [ManifoldMuseum.PolarInverseRetraction(),
+                                  ManifoldMuseum.QRInverseRetraction()]
+
     for T in types
         angles = (0.0, π/2, 2π/3)
         pts = [convert(T, [cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)]) for ϕ in angles]
         test_manifold(M, pts;
             test_forward_diff = false,
             test_reverse_diff = false,
-            retraction_methods = retraction_methods)
+            retraction_methods = retraction_methods,
+            inverse_retraction_methods = inverse_retraction_methods)
 
         v = log(M, pts[1], pts[2])
         @test norm(M, pts[1], v) ≈ (angles[2] - angles[1])*sqrt(2)
+
+        if eltype(T) isa Float64
+            v12_polar = inverse_retract(M, pts[1], pts[2], ManifoldMuseum.PolarInverseRetraction())
+            p2_polar = retract(M, pts[1], v12_polar, ManifoldMuseum.PolarRetraction())
+            @test isapprox(M, pts[2], p2_polar)
+
+            v12_qr = inverse_retract(M, pts[1], pts[2], ManifoldMuseum.QRInverseRetraction())
+            p2_qr = retract(M, pts[1], v12_qr, ManifoldMuseum.QRRetraction())
+            @test isapprox(M, pts[2], p2_qr)
+        end
     end
 
     @testset "Distribution tests" begin

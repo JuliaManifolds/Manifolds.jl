@@ -151,6 +151,50 @@ retract(M::Manifold, x, v, t::Number) = retract(M, x, t*v)
 
 retract(M::Manifold, x, v, t::Number, method::AbstractRetractionMethod) = retract(M, x, t*v, method)
 
+abstract type AbstractInverseRetractionMethod end
+
+"""
+    LogarithmicInverseRetraction
+
+Inverse retraction using the logarithmic map.
+"""
+struct LogarithmicInverseRetraction <: AbstractInverseRetractionMethod end
+
+"""
+    inverse_retract!(M::Manifold, v, x, y, [method::AbstractInverseRetractionMethod=LogarithmicInverseRetraction()])
+
+Inverse retraction (cheaper, approximate version of logarithmic map) of points
+`x` and `y`.
+Result is saved to `y`.
+
+Inverse retraction method can be specified by the last argument. Please look
+at the documentation of respective manifolds for available methods.
+"""
+inverse_retract!(M::Manifold, v, x, y, method::LogarithmicInverseRetraction) = log!(M, v, x, y)
+
+inverse_retract!(M::Manifold, v, x, y) = inverse_retract!(M, v, x, y, LogarithmicInverseRetraction())
+
+"""
+    inverse_retract(M::Manifold, x, y, [method::AbstractInverseRetractionMethod])
+
+Inverse retraction (cheaper, approximate version of logarithmic map) of points
+`x` and `y` from manifold `M`.
+
+Inverse retraction method can be specified by the last argument. Please look
+at the documentation of respective manifolds for available methods.
+"""
+function inverse_retract(M::Manifold, x, y, method::AbstractInverseRetractionMethod)
+    vr = similar_result(M, inverse_retract, x, y)
+    inverse_retract!(M, vr, x, y, method)
+    return vr
+end
+
+function inverse_retract(M::Manifold, x, y)
+    vr = similar_result(M, inverse_retract, x, y)
+    inverse_retract!(M, vr, x, y)
+    return vr
+end
+
 project_tangent!(M::Manifold, w, x, v) = error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)) with input $(typof(v)).")
 
 function project_tangent(M::Manifold, x, v)
@@ -286,10 +330,13 @@ export Manifold,
     IsDecoratorManifold
 export dimension,
     distance,
-    inner,
     exp,
     exp!,
     geodesic,
+    injectivity_radius,
+    inner,
+    inverse_retract,
+    inverse_retract!,
     isapprox,
     is_manifold_point,
     is_tangent_vector,
@@ -297,7 +344,6 @@ export dimension,
     log!,
     manifold_dimension,
     norm,
-    injectivity_radius,
     retract,
     retract!,
     zero_tangent_vector,

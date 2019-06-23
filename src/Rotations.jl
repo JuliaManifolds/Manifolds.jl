@@ -93,6 +93,54 @@ end
 
 retract!(M::Rotations, y, x, v) = retract!(M, y, x, v, QRRetraction())
 
+struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
+
+@doc doc"""
+    inverse_retract!(M, v, x, y, ::PolarInverseRetraction)
+
+Compute a vector from the tagent space $T_x\mathrm{SO}(n)$
+of the point `x` on the [`Rotations`](@ref) manifold `M`
+with which the point `y` can be reached by the
+[`PolarRetraction`](@ref) from the point `x` after time 1.
+
+The formula reads
+$v = -\frac{1}{2}(x^{\mathrm{T}}ys - (x^{\mathrm{T}}ys)^{\mathrm{T}})$
+where $s$ is the solution to the Sylvester equation
+$x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2\mathrm{I}_n = 0.$
+"""
+function inverse_retract!(M::Rotations, v, x, y, method::PolarInverseRetraction)
+    A = transpose(x) * y
+    H = 2 * one(x)
+    B = sylvester(collect(A), collect(transpose(A)), collect(H))
+    C = A * B
+    v .= (transpose(C) .- C)./2
+    return v
+end
+
+struct QRInverseRetraction <: AbstractInverseRetractionMethod end
+
+@doc doc"""
+    inverseRetractionQR(M,x,y)
+
+Compute a vector from the tagent space $T_x\mathrm{SO}(n)$
+of the point `x` on the [`Rotations`](@ref) manifold `M`
+with which the point `y` can be reached by the
+[`QRRetraction`](@ref) from the point `x` after time 1.
+"""
+function inverse_retract!(M::Rotations, v, x, y, ::QRInverseRetraction)
+    A = transpose(x) * y
+    R = zero(v)
+    for i = 1:manifold_dimension(M)
+        b = zeros(i)
+        b[end] = 1
+        b[1:(end-1)] = - transpose(R[1:(i-1), 1:(i-1)]) * A[i, 1:(i-1)]
+        R[1:i, i] = A[1:i, 1:i] \ b
+    end
+    C =  A * R
+    v .= (C .- transpose(C))./2
+    return v
+end
+
 zero_tangent_vector(S::Rotations, x) = zero(x)
 zero_tangent_vector!(S::Rotations, v, x) = (v .= zero(x))
 
