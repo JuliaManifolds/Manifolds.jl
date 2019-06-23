@@ -24,7 +24,7 @@ using Random: AbstractRNG
 using SimpleTraits
 using ForwardDiff
 import Einsum: @einsum
-import OrdinaryDiffEq: SecondOrderODEProblem,
+import OrdinaryDiffEq: ODEProblem,
     AutoVern9,
     Rodas5,
     solve

@@ -224,31 +224,43 @@ timespan. The arguments `tspan` and `solver` follow the `OrdinaryDiffEq`
 conventions. `kwargs...` specify keyword arguments to be passed to `solve`.
 """
 function solve_exp_ode(M::MetricManifold, x, v, tspan; solver=AutoVern9(Rodas5()), kwargs...)
-    u0 = x
-    du0 = Base.convert(typeof(x), v)
+    n = length(x)
+    iv = SVector{n}(1:n)
+    ix = SVector{n}(n+1:2n)
+    u0 = similar(x, 2n)
+    u0[iv] .= v
+    u0[ix] .= x
 
-    function exp_problem(du, u, p, t)
+    function exp_problem(u, p, t)
         M = p[1]
-        Γ = christoffel_symbols_second(M, u)
-        ddu = similar(u)
-        @einsum ddu[k] = -Γ[i,j,k] * du[i] * du[j]
-        return Base.convert(typeof(u), ddu)
+        dx = u[iv]
+        x = u[ix]
+        ddx = similar(u, Size(n))
+        du = similar(u)
+        Γ = christoffel_symbols_second(M, x)
+        @einsum ddx[k] = -Γ[i,j,k] * dx[i] * dx[j]
+        du[iv] .= ddx
+        du[ix] .= dx
+        return Base.convert(typeof(u), du)
     end
 
-    prob = SecondOrderODEProblem(exp_problem, du0, u0, tspan, (M,))
+    p = (M,)
+    prob = ODEProblem(exp_problem, u0, tspan, p)
     sol = solve(prob, solver; kwargs...)
     return sol
 end
 
 @traitfn function exp(M::MMT, x, v, T::AbstractVector) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}}
     sol = solve_exp_ode(M, x, v, extrema(T); dense=false, saveat=T)
-    return [sol.u[i].x[2] for i in 1:length(T)]
+    n = length(x)
+    return [sol.u[i][n+1:end] for i in 1:length(T)]
 end
 
 @traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}}
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, x, v, tspan; dense=false, saveat=[1.0])
-    y .= sol.u[1].x[2]
+    n = length(x)
+    y .= sol.u[1][n+1:end]
 end
 
 @traitfn exp!(M::MMT, y, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = exp!(M.manifold, y, x, v)
