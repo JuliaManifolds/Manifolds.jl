@@ -38,6 +38,7 @@ array_value(v::ArrayTVector) = v.value
 
 (+)(v1::ArrayTVector, v2::ArrayTVector) = ArrayTVector(v1.value + v2.value)
 (-)(v1::ArrayTVector, v2::ArrayTVector) = ArrayTVector(v1.value - v2.value)
+(-)(v::ArrayTVector) = ArrayTVector(-v.value)
 (*)(a::Number, v::ArrayTVector) = ArrayTVector(a*v.value)
 
 function isapprox(M::ArrayManifold, x, y; kwargs...)

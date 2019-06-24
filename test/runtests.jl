@@ -24,6 +24,7 @@ tested.
 function test_manifold(M::Manifold, pts::AbstractVector;
     test_forward_diff = true,
     test_reverse_diff = true,
+    test_tangent_vector_broadcasting = true,
     retraction_methods = [],
     inverse_retraction_methods = [])
     # log/exp
@@ -84,10 +85,20 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
     end
 
-    @testset "linear algebra in tangent space" begin
+    @testset "basic linear algebra in tangent space" begin
         @test isapprox(M, pts[1], 0*tv1, zero_tangent_vector(M, pts[1]))
         @test isapprox(M, pts[1], 2*tv1, tv1+tv1)
         @test isapprox(M, pts[1], 0*tv1, tv1-tv1)
+        @test isapprox(M, pts[1], (-1)*tv1, -tv1)
+    end
+
+    test_tangent_vector_broadcasting && @testset "broadcasted linear algebra in tangent space" begin
+        @test isapprox(M, pts[1], 3*tv1, 2 .* tv1 .+ tv1)
+        @test isapprox(M, pts[1], -tv1, tv1 .- 2 .* tv1)
+        @test isapprox(M, pts[1], -tv1, .-tv1)
+        v = similar(tv1)
+        v .= 2 .* tv1 .+ tv1
+        @test v ≈ 3*tv1
     end
 
     test_forward_diff && @testset "ForwardDiff support" begin
@@ -141,7 +152,8 @@ function test_arraymanifold()
     @test_throws DomainError ManifoldMuseum.is_manifold_point(M,2*y)
     @test_throws DomainError ManifoldMuseum.is_tangent_vector(M,y,v; atol=10^(-15))
 
-    test_manifold(A, [x, y, z])
+    test_manifold(A, [x, y, z],
+        test_tangent_vector_broadcasting = false)
 end
 
 @testset "Sphere" begin
