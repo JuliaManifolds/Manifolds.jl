@@ -111,9 +111,17 @@ $x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2\mathrm{I}_n = 0.$
 function inverse_retract!(M::Rotations, v, x, y, method::PolarInverseRetraction)
     A = transpose(x) * y
     H = 2 * one(x)
-    B = sylvester(collect(A), collect(transpose(A)), collect(H))
-    C = A * B
-    v .= (transpose(C) .- C)./2
+    try
+        B = sylvester(collect(A), collect(transpose(A)), collect(H))
+        C = A * B
+        v .= (transpose(C) .- C)./2
+    catch e
+        if isa(e, LinearAlgebra.LAPACKException)
+            throw(OutOfInjectivityRadiusError())
+        else
+            rethrow()
+        end
+    end
     return v
 end
 

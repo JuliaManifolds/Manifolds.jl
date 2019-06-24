@@ -196,7 +196,7 @@ end
                                   ManifoldMuseum.QRInverseRetraction()]
 
     for T in types
-        angles = (0.0, π/2, 2π/3)
+        angles = (0.0, π/2, 2π/3, π/4)
         pts = [convert(T, [cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)]) for ϕ in angles]
         test_manifold(M, pts;
             test_forward_diff = false,
@@ -207,15 +207,13 @@ end
         v = log(M, pts[1], pts[2])
         @test norm(M, pts[1], v) ≈ (angles[2] - angles[1])*sqrt(2)
 
-        if eltype(T) isa Float64
-            v12_polar = inverse_retract(M, pts[1], pts[2], ManifoldMuseum.PolarInverseRetraction())
-            p2_polar = retract(M, pts[1], v12_polar, ManifoldMuseum.PolarRetraction())
-            @test isapprox(M, pts[2], p2_polar)
+        v14_polar = inverse_retract(M, pts[1], pts[4], ManifoldMuseum.PolarInverseRetraction())
+        p4_polar = retract(M, pts[1], v14_polar, ManifoldMuseum.PolarRetraction())
+        @test isapprox(M, pts[4], p4_polar)
 
-            v12_qr = inverse_retract(M, pts[1], pts[2], ManifoldMuseum.QRInverseRetraction())
-            p2_qr = retract(M, pts[1], v12_qr, ManifoldMuseum.QRRetraction())
-            @test isapprox(M, pts[2], p2_qr)
-        end
+        # v14_qr = inverse_retract(M, pts[1], pts[4], ManifoldMuseum.QRInverseRetraction())
+        # p4_qr = retract(M, pts[1], v14_qr, ManifoldMuseum.QRRetraction())
+        # @test isapprox(M, pts[4], p4_qr)
     end
 
     @testset "Distribution tests" begin

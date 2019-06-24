@@ -102,6 +102,14 @@ Keyword arguments can be used to specify tolerances.
 """
 isapprox(M::Manifold, x, v, w; kwargs...) = isapprox(v, w; kwargs...)
 
+"""
+    OutOfInjectivityRadiusError
+
+An error thrown when a function (for example logarithmic map or inverse
+retraction) is given arguments outside of its injectivity radius.
+"""
+struct OutOfInjectivityRadiusError <: Exception end
+
 abstract type AbstractRetractionMethod end
 
 """
