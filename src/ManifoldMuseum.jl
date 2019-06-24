@@ -275,6 +275,14 @@ Distance such that `log(M, x, y)` is defined for all points within this radius.
 """
 injectivity_radius(M::Manifold, x) = 1.0
 
+"""
+    injectivity_radius(M::Manifold, x, R::AbstractInverseRetractionMethod)
+
+Distance such that `retract(M, x, y, R)` is defined for all points within
+this radius.
+"""
+injectivity_radius(M::Manifold, x, ::AbstractInverseRetractionMethod) = injectivity_radius(M, x)
+
 zero_tangent_vector(M::Manifold, x) = log(M, x, x)
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 

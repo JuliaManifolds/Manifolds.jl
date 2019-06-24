@@ -36,6 +36,14 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test manifold_dimension(M) ≥ 0
     end
 
+    @testset "injectivity radius" begin
+        @test injectivity_radius(M, pts[1]) > 0
+        for irm ∈ inverse_retraction_methods
+            @test injectivity_radius(M, pts[1], irm) > 0
+            @test injectivity_radius(M, pts[1], irm) ≤ injectivity_radius(M, pts[1])
+        end
+    end
+
     tv1 = log(M, pts[1], pts[2])
 
     @testset "is_manifold_point / is_tangent_vector" begin

@@ -61,6 +61,8 @@ function log!(S::Rotations, v::TV, x, y) where TV
     return v
 end
 
+injectivity_radius(M::Rotations, x) = π*sqrt(2.0)
+
 struct PolarRetraction <: AbstractRetractionMethod end
 
 @doc doc"""
@@ -94,6 +96,8 @@ end
 retract!(M::Rotations, y, x, v) = retract!(M, y, x, v, QRRetraction())
 
 struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
+
+injectivity_radius(::Rotations, x, ::PolarInverseRetraction) = π*sqrt(2.0)/2
 
 @doc doc"""
     inverse_retract!(M, v, x, y, ::PolarInverseRetraction)
