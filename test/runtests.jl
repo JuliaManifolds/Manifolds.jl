@@ -211,9 +211,9 @@ end
         p4_polar = retract(M, pts[1], v14_polar, ManifoldMuseum.PolarRetraction())
         @test isapprox(M, pts[4], p4_polar)
 
-        # v14_qr = inverse_retract(M, pts[1], pts[4], ManifoldMuseum.QRInverseRetraction())
-        # p4_qr = retract(M, pts[1], v14_qr, ManifoldMuseum.QRRetraction())
-        # @test isapprox(M, pts[4], p4_qr)
+        v14_qr = inverse_retract(M, pts[1], pts[4], ManifoldMuseum.QRInverseRetraction())
+        p4_qr = retract(M, pts[1], v14_qr, ManifoldMuseum.QRRetraction())
+        @test isapprox(M, pts[4], p4_qr)
     end
 
     @testset "Distribution tests" begin

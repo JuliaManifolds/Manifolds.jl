@@ -135,10 +135,10 @@ of the point `x` on the [`Rotations`](@ref) manifold `M`
 with which the point `y` can be reached by the
 [`QRRetraction`](@ref) from the point `x` after time 1.
 """
-function inverse_retract!(M::Rotations, v, x, y, ::QRInverseRetraction)
+function inverse_retract!(M::Rotations{N}, v, x, y, ::QRInverseRetraction) where N
     A = transpose(x) * y
     R = zero(v)
-    for i = 1:manifold_dimension(M)
+    for i = 1:N
         b = zeros(i)
         b[end] = 1
         b[1:(end-1)] = - transpose(R[1:(i-1), 1:(i-1)]) * A[i, 1:(i-1)]
