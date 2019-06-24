@@ -25,7 +25,7 @@ manifold_dimension(S::Rotations{N}) where {N} = div(N*(N-1), 2)
 
 compute the inner product of the two tangent vectors `w, v` from the tangent
 plane at `x` on the special orthogonal space `S=`$\mathrm{SO}(n)$ using the
-restriction of the metric from the embedding, i.e. $ (v,w)_x = \frac{1}{2}v^\mathrm{T}w $.
+restriction of the metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 Tangent vectors are represented by matrices.
 """
 inner(S::Rotations, x, w, v) = dot(w, v)
