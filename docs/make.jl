@@ -11,5 +11,6 @@ makedocs(
             "Sphere" => "manifolds/sphere.md",
             "Rotations" => "manifolds/rotations.md",
         ],
+        "Distributions" => "distributions.md"
     ]
 )

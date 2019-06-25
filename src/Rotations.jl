@@ -63,17 +63,28 @@ end
 
 injectivity_radius(M::Rotations, x) = π*sqrt(2.0)
 
-"""
+@doc doc"""
     PolarRetraction
 
 Retraction on the rotations manifold using the polar method.
+This SVD-based retraction is a second-order approximation of the
+exponential map. Let
+
+$USV = x + xv$
+
+be the singular value decomposition, then the formula reads
+
+$\operatorname{retr}_x v = UV^\mathrm{T}$
+
+Retraction is performed by the function [`retract!(::Rotations, y, x, v, ::PolarRetraction)`](@ref)
 """
 struct PolarRetraction <: AbstractRetractionMethod end
 
 @doc doc"""
     retract_polar!(M::Rotations, y, x, v, method::PolarRetraction)
 
-This SVD-based retraction is a second-order approximation of the exponential map.
+Compute the SVD-based retraction [`PolarRetraction`](@ref), a second-order
+approximation of the exponential map.
 """
 function retract!(M::Rotations, y, x, v, method::PolarRetraction)
     A = x + x*v
@@ -233,9 +244,12 @@ function normal_tvector_distribution(S::Rotations, x, σ)
 end
 
 """
-    NormalRotationDistribution(M::Rotations, )
+    NormalRotationDistribution(M::Rotations, d::Distribution, x::TResult)
 
-return a random point on the manifold [`Rotations`](@ref) `M`.
+Distribution that returns a random point on the manifold [`Rotations`](@ref)
+`M`. Random point is generated using base distribution `d` and the type
+of the result is adjusted to `TResult`.
+
 See [`normal_rotation_distribution`](@ref) for details.
 """
 struct NormalRotationDistribution{TResult, TM<:Rotations, TD<:Distribution} <: MPointDistribution{TM}
