@@ -23,6 +23,7 @@
         @test local_metric(M, x) ≈ G
         @test inverse_local_metric(M, x) ≈ invG
         @test det_local_metric(M, x) ≈ *(1.0:n...)
+        @test log_local_metric_density(M, x) ≈ sum(log.(1.0:n)) / 2
         @test inner(M, x, v, w) ≈ dot(v, G * w)
         @test norm(M, x, v) ≈ sqrt(dot(v, G * v))
 
@@ -76,6 +77,7 @@ end
         @test local_metric(M, x) ≈ G
         @test inverse_local_metric(M, x) ≈ invG
         @test det_local_metric(M, x) ≈ r^4 * sin(θ)^2
+        @test log_local_metric_density(M, x) ≈ 2log(r) + log(sin(θ))
         @test inner(M, x, v, w) ≈ dot(v, G * w)
         @test norm(M, x, v) ≈ sqrt(dot(v, G * v))
 

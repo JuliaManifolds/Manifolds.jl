@@ -109,6 +109,14 @@ Determinant of local matrix representation of the metric tensor $g$
 """
 det_local_metric(M::MetricManifold, x) = det(local_metric(M, x))
 
+@doc doc"""
+    log_local_metric_density(M::MetricManifold, x)
+
+Return the natural logarithm of the metric density $\rho$ of `M` at `x`, which
+is given by $\rho=\log \sqrt{|\det [g_{ij}]|}$.
+"""
+log_local_metric_density(M::MetricManifold, x) = log(abs(det_local_metric(M, x))) / 2
+
 function local_metric_jacobian(M::MetricManifold, x)
     n = size(x, 1)
     ∂g = reshape(ForwardDiff.jacobian(x -> local_metric(M, x), x), n, n, n)
@@ -168,7 +176,7 @@ $\Gamma_{ijk} = \frac{1}{2} \left[g_{kj,i} + g_{ik,j} - g_{ij,k}\right],$
 
 where $g_{ij,k}=\frac{\partial}{\partial x^k} g_{ij}$ is the coordinate
 derivative of the local representation of the metric tensor. The dimensions of
-the resulting multi-dimensional array are ordered $(i,j,k)$
+the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
 function christoffel_symbols_first(M::MetricManifold, x)
     ∂g = local_metric_jacobian(M, x)

@@ -35,6 +35,8 @@ end
 
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = one(eltype(x))
 
+log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = zero(eltype(x))
+
 inner(::Euclidean, x, v, w) = dot(v, w)
 inner(::MetricManifold{<:Manifold,EuclideanMetric}, x, v, w) = dot(v, w)
 
