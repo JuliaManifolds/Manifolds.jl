@@ -313,7 +313,7 @@ end
                                                 !HasMetric{MT,GT}}
     sol = solve_exp_ode(M, x, v, extrema(T); dense=false, saveat=T)
     n = length(x)
-    return [sol.u[i][n+1:end] for i in 1:length(T)]
+    return map(i -> sol.u[i][n+1:end], 1:length(T))
 end
 
 """

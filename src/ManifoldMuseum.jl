@@ -231,7 +231,7 @@ exp(M::Manifold, x, v, t::Real) = exp(M, x, t*v)
 Exponential map of tangent vector `t*v` at point `x` from manifold `M` for
 each `t` in `T`.
 """
-exp(M::Manifold, x, v, T::AbstractVector) = [exp(M, x, v, t) for t in T]
+exp(M::Manifold, x, v, T::AbstractVector) = map(geodesic(M, x, v), T)
 
 log!(M::Manifold, v, x, y) = error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
 
