@@ -132,9 +132,24 @@ end
 @traitfn function norm(M::MMT, x, v) where {MT<:Manifold,
                                             GT<:Metric,
                                             MMT<:MetricManifold{MT,GT};
+                                            !HasMetric{MT,GT}}
+    return sqrt(inner(M, x, v, v))
+end
+
+@traitfn function norm(M::MMT, x, v) where {MT<:Manifold,
+                                            GT<:Metric,
+                                            MMT<:MetricManifold{MT,GT};
                                             HasMetric{MT,GT}}
     return norm(M.manifold, x, v)
 end
+
+@traitfn function distance(M::MMT, x, y) where {MT<:Manifold,
+                                                GT<:Metric,
+                                                MMT<:MetricManifold{MT,GT};
+                                                !HasMetric{MT,GT}}
+    return norm(M, x, log(M, x, y))
+end
+
 
 @traitfn function distance(M::MMT, x, y) where {MT<:Manifold,
                                                 GT<:Metric,
@@ -345,6 +360,13 @@ end
                                                MMT<:MetricManifold{MT,GT};
                                                HasMetric{MT,GT}}
     return exp!(M.manifold, y, x, v)
+end
+
+@traitfn function log!(M::MMT, v, x, y) where {MT<:Manifold,
+                                               GT<:Metric,
+                                               MMT<:MetricManifold{MT,GT};
+                                               !HasMetric{MT,GT}}
+    error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
 end
 
 @traitfn function log!(M::MMT, v, x, y) where {MT<:Manifold,
