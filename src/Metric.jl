@@ -117,6 +117,13 @@ is given by $\rho=\log \sqrt{|\det [g_{ij}]|}$.
 """
 log_local_metric_density(M::MetricManifold, x) = log(abs(det_local_metric(M, x))) / 2
 
+@doc doc"""
+    local_metric_jacobian(M::MetricManifold, x)
+
+Get partial derivatives of the local metric of `M` at `x` with respect to the
+coordinates of `x`, $\frac{\partial}{\partial x^k} g_{ij} = g_{ij,k}$. The
+dimensions of the resulting multi-dimensional array are ordered $(i,j,k)$.
+"""
 function local_metric_jacobian(M::MetricManifold, x)
     n = size(x, 1)
     ∂g = reshape(ForwardDiff.jacobian(x -> local_metric(M, x), x), n, n, n)
