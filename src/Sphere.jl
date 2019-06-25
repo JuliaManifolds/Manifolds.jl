@@ -18,7 +18,7 @@ Sphere(n::Int) = Sphere{n}()
 @doc doc"""
     manifold_dimension(S::Sphere)
 
-returns the dimension of the manifold $\mathbb S^n$, i.e. $n$.
+Return the dimension of the manifold $\mathbb S^n$, i.e. $n$.
 """
 manifold_dimension(S::Sphere{N}) where {N} = N
 

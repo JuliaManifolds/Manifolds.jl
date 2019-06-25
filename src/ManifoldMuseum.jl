@@ -98,7 +98,7 @@ then implements the feature itself.
 
 Strip all decorators on `M`, returning the underlying topological manifold.
 """
-function manifold end
+function base_manifold end
 
 @traitfn function base_manifold(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}}
     return base_manifold(M.manifold)
@@ -252,7 +252,7 @@ function returns a function of time, which may be a `Real` or an
 geodesic(M::Manifold, x, v) = t -> exp(M, x, v, t)
 
 """
-    geodesic(M::Manifold, x, y, t)
+    geodesic(M::Manifold, x, v, t)
 
 Get the point at time `t` traveling from `x` along the geodesic with initial
 point `x` and velocity `v`.
@@ -260,7 +260,7 @@ point `x` and velocity `v`.
 geodesic(M::Manifold, x, v, t) = exp(M, x, v, t)
 
 """
-    geodesic(M::Manifold, x, y, T::AbstractVector)
+    geodesic(M::Manifold, x, v, T::AbstractVector)
 
 Get the points for each `t` in `T` traveling from `x` along the geodesic with
 initial point `x` and velocity `v`.
