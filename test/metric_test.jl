@@ -102,28 +102,28 @@ end
         end
 
         Γ₂ = christoffel_symbols_second(M, x)
-        for i=1:n, j=1:n, k=1:n
-            if (i,j,k) == (2,2,1)
-                @test Γ₂[i,j,k] ≈ -cos(θ)*sin(θ)
-            elseif (i,j,k) == (1,2,2) || (i,j,k) == (2,1,2)
-                @test Γ₂[i,j,k] ≈ cot(θ)
+        for l=1:n, i=1:n, j=1:n
+            if (l,i,j) == (1,2,2)
+                @test Γ₂[l,i,j] ≈ -cos(θ)*sin(θ)
+            elseif (l,i,j) == (2,1,2) || (l,i,j) == (2,2,1)
+                @test Γ₂[l,i,j] ≈ cot(θ)
             else
-                @test Γ₂[i,j,k] ≈ 0
+                @test Γ₂[l,i,j] ≈ 0
             end
         end
 
         R = riemann_tensor(M, x)
-        for i=1:n, j=1:n, k=1:n, l=1:n
-            if (i,j,k,l) == (1,1,2,2)
-                @test R[i,j,k,l] ≈ -1
-            elseif (i,j,k,l) == (1,2,1,2)
-                @test R[i,j,k,l] ≈ 1
-            elseif (i,j,k,l) == (2,1,2,1)
-                @test R[i,j,k,l] ≈ sin(θ)^2
-            elseif (i,j,k,l) == (2,2,1,1)
-                @test R[i,j,k,l] ≈ -sin(θ)^2
+        for l=1:n, i=1:n, j=1:n, k=1:n
+            if (l,i,j,k) == (2,1,1,2)
+                @test R[l,i,j,k] ≈ -1
+            elseif (l,i,j,k) == (2,1,2,1)
+                @test R[l,i,j,k] ≈ 1
+            elseif (l,i,j,k) == (1,2,1,2)
+                @test R[l,i,j,k] ≈ sin(θ)^2
+            elseif (l,i,j,k) == (1,2,2,1)
+                @test R[l,i,j,k] ≈ -sin(θ)^2
             else
-                @test R[i,j,k,l] ≈ 0
+                @test R[l,i,j,k] ≈ 0
             end
         end
 

@@ -87,7 +87,7 @@ metric(M::MetricManifold) = M.metric
 
 Local matrix representation at the point `x` of the metric tensor $g$ on the
 manifold `M`, usually written $g_{ij}$. The matrix has the property that
-$g(v,w)=v^T [g_{ij}] w = g_{ij} v^i w^j$, where the latter expression uses
+$g(v, w)=v^T [g_{ij}] w = g_{ij} v^i w^j$, where the latter expression uses
 Einstein summation notation.
 """
 function local_metric(M::MetricManifold, x)
@@ -166,7 +166,8 @@ The Christoffel symbols are (in Einstein summation convention)
 $\Gamma_{ijk} = \frac{1}{2} \left[g_{kj,i} + g_{ik,j} - g_{ij,k}\right],$
 
 where $g_{ij,k}=\frac{\partial}{\partial x^k} g_{ij}$ is the coordinate
-derivative of the local representation of the metric tensor.
+derivative of the local representation of the metric tensor. The dimensions of
+the resulting multi-dimensional array are ordered $(i,j,k)$
 """
 function christoffel_symbols_first(M::MetricManifold, x)
     ∂g = local_metric_jacobian(M, x)
@@ -186,12 +187,13 @@ $\Gamma^{l}_{ij} = g^{kl} \Gamma_{ijk},$
 
 where $\Gamma_{ijk}$ are the Christoffel symbols of the first kind, and
 $g^{kl}$ is the inverse of the local representation of the metric tensor.
+The dimensions of the resulting multi-dimensional array are ordered $(l,i,j)$.
 """
 function christoffel_symbols_second(M::MetricManifold, x)
     ginv = inverse_local_metric(M, x)
     Γ₁ = christoffel_symbols_first(M, x)
     Γ₂ = similar(Γ₁)
-    @einsum Γ₂[i,j,l] = ginv[k,l] * Γ₁[i,j,k]
+    @einsum Γ₂[l,i,j] = ginv[k,l] * Γ₁[i,j,k]
     return Γ₂
 end
 
@@ -199,7 +201,8 @@ end
     riemann_tensor(M::MetricManifold, x)
 
 Compute the Riemann tensor $R^l_{ijk}$, also known as the Riemann curvature
-tensor, at the point `x`.
+tensor, at the point `x`. The dimensions of the resulting multi-dimensional
+array are ordered $(l,i,j,k)$.
 """
 function riemann_tensor(M::MetricManifold, x)
     n = size(x, 1)
@@ -209,7 +212,7 @@ function riemann_tensor(M::MetricManifold, x)
         n, n, n, n
     ) ./ n
     R = similar(∂Γ, Size(n, n, n, n))
-    @einsum R[i,j,k,l] = ∂Γ[i,k,l,j] - ∂Γ[i,j,l,k] + Γ[i,k,s] * Γ[s,j,l] - Γ[i,j,s] * Γ[s,k,l]
+    @einsum R[l,i,j,k] = ∂Γ[l,i,k,j] - ∂Γ[l,i,j,k] + Γ[s,i,k] * Γ[l,s,j] - Γ[s,i,j] * Γ[l,s,k]
     return R
 end
 
@@ -223,7 +226,7 @@ function ricci_tensor(M::MetricManifold, x)
     R = riemann_tensor(M, x)
     n = size(R, 1)
     Ric = similar(R, Size(n, n))
-    @einsum Ric[i,j] = R[i,l,j,l]
+    @einsum Ric[i,j] = R[l,i,l,j]
     return Ric
 end
 
@@ -293,7 +296,7 @@ function solve_exp_ode(M::MetricManifold,
         ddx = similar(u, Size(n))
         du = similar(u)
         Γ = christoffel_symbols_second(M, x)
-        @einsum ddx[k] = -Γ[i,j,k] * dx[i] * dx[j]
+        @einsum ddx[k] = -Γ[k,i,j] * dx[i] * dx[j]
         du[iv] .= ddx
         du[ix] .= dx
         return Base.convert(typeof(u), du)
