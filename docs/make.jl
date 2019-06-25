@@ -9,6 +9,7 @@ makedocs(
         "Home" => "index.md",
         "Manifolds" => [
             "Sphere" => "manifolds/sphere.md",
+            "Rotations" => "manifolds/rotations.md",
         ],
     ]
 )

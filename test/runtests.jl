@@ -26,7 +26,9 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_reverse_diff = true,
     test_tangent_vector_broadcasting = true,
     retraction_methods = [],
-    inverse_retraction_methods = [])
+    inverse_retraction_methods = [],
+    point_distributions = [],
+    tvector_distributions = [])
     # log/exp
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
     isapprox(M, pts[1], pts[2]) && error("Points 1 and 2 are equal")
@@ -132,6 +134,23 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test eltype(tv1) == eltype(pts[1])
         @test eltype(exp(M, pts[1], tv1)) == eltype(pts[1])
     end
+
+    @testset "point distributions" begin
+        for pd ∈ point_distributions
+            for _ in 1:10
+                @test is_manifold_point(M, rand(pd))
+            end
+        end
+    end
+
+    @testset "tangent vector distributions" begin
+        for tvd ∈ tvector_distributions
+            support = ManifoldMuseum.get_support(tvd)
+            for _ in 1:10
+                @test is_tangent_vector(M, support.x, rand(tvd))
+            end
+        end
+    end
 end
 
 function test_arraymanifold()
@@ -169,29 +188,21 @@ end
              SizedVector{3, Double64}]
     for T in types
         @testset "Type $T" begin
+            pts = [convert(T, [1.0, 0.0, 0.0]),
+                   convert(T, [0.0, 1.0, 0.0]),
+                   convert(T, [0.0, 0.0, 1.0])]
             test_manifold(M,
-                          [convert(T, [1.0, 0.0, 0.0]),
-                           convert(T, [0.0, 1.0, 0.0]),
-                           convert(T, [0.0, 0.0, 1.0])],
-                          test_reverse_diff = isa(T, Vector))
+                          pts,
+                          test_reverse_diff = isa(T, Vector),
+                          point_distributions = [ManifoldMuseum.uniform_distribution(M, pts[1])],
+                          tvector_distributions = [ManifoldMuseum.normal_tvector_distribution(M, pts[1], 1.0)])
         end
     end
 
     @testset "Distribution tests" begin
-        usd_vector = ManifoldMuseum.uniform_distribution(M, [1.0, 0.0, 0.0])
-        @test isa(rand(usd_vector), Vector)
-        for _ in 1:10
-            @test norm(rand(usd_vector)) ≈ 1.0
-        end
         usd_mvector = ManifoldMuseum.uniform_distribution(M, @MVector [1.0, 0.0, 0.0])
         @test isa(rand(usd_mvector), MVector)
 
-        x = [1.0, 0.0, 0.0]
-        gtsd_vector = ManifoldMuseum.normal_tvector_distribution(M, x, 1.0)
-        @test isa(rand(gtsd_vector), Vector)
-        for _ in 1:10
-            @test is_tangent_vector(M, x, rand(gtsd_vector))
-        end
         gtsd_mvector = ManifoldMuseum.normal_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
         @test isa(rand(gtsd_mvector), MVector)
     end
@@ -222,7 +233,9 @@ end
             test_forward_diff = false,
             test_reverse_diff = false,
             retraction_methods = retraction_methods,
-            inverse_retraction_methods = inverse_retraction_methods)
+            inverse_retraction_methods = inverse_retraction_methods,
+            point_distributions = [ManifoldMuseum.normal_rotation_distribution(M, pts[1], 1.0)],
+            tvector_distributions = [ManifoldMuseum.normal_tvector_distribution(M, pts[1], 1.0)])
 
         v = log(M, pts[1], pts[2])
         @test norm(M, pts[1], v) ≈ (angles[2] - angles[1])*sqrt(2)
@@ -237,13 +250,10 @@ end
     end
 
     @testset "Distribution tests" begin
-        x = [1.0 0.0; 0.0 1.0]
-        gtsd_vector = ManifoldMuseum.normal_tvector_distribution(M, x, 1.0)
-        @test isa(rand(gtsd_vector), Matrix)
-        for _ in 1:10
-            @test is_tangent_vector(M, x, rand(gtsd_vector))
-        end
-        gtsd_mvector = ManifoldMuseum.normal_tvector_distribution(M, (MMatrix{2, 2}(x)), 1.0)
+        usd_mmatrix = ManifoldMuseum.normal_rotation_distribution(M, (@MMatrix [1.0 0.0; 0.0 1.0]), 1.0)
+        @test isa(rand(usd_mmatrix), MMatrix)
+
+        gtsd_mvector = ManifoldMuseum.normal_tvector_distribution(M, (@MMatrix [1.0 0.0; 0.0 1.0]), 1.0)
         @test isa(rand(gtsd_mvector), MMatrix)
     end
 end

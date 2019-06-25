@@ -44,3 +44,13 @@ from manifold of type `TM`.
 """
 abstract type TVectorDistribution{TM<:Manifold, T} <: Distribution{TVectorvariate, TVectorSupport{TM, T}}
 end
+
+
+"""
+    get_support(d::TVectorDistribution)
+
+Get the object of type `TVectorSupport` for the distribution `d`.
+"""
+function get_support(::T) where T<:TVectorDistribution
+    error("get_support not implemented for type $T")
+end

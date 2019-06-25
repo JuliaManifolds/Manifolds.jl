@@ -63,6 +63,11 @@ end
 
 injectivity_radius(M::Rotations, x) = π*sqrt(2.0)
 
+"""
+    PolarRetraction
+
+Retraction on the rotations manifold using the polar method.
+"""
 struct PolarRetraction <: AbstractRetractionMethod end
 
 @doc doc"""
@@ -77,6 +82,11 @@ function retract!(M::Rotations, y, x, v, method::PolarRetraction)
     return y
 end
 
+"""
+    QRRetraction
+
+Retraction on the rotations manifold using the QR method.
+"""
 struct QRRetraction <: AbstractRetractionMethod end
 
 @doc doc"""
@@ -95,6 +105,11 @@ end
 
 retract!(M::Rotations, y, x, v) = retract!(M, y, x, v, QRRetraction())
 
+"""
+    PolarInverseRetraction
+
+Inverse retraction on the rotations manifold using the polar method.
+"""
 struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
 
 injectivity_radius(::Rotations, x, ::PolarInverseRetraction) = π*sqrt(2.0)/2
@@ -109,7 +124,9 @@ with which the point `y` can be reached by the
 
 The formula reads
 $v = -\frac{1}{2}(x^{\mathrm{T}}ys - (x^{\mathrm{T}}ys)^{\mathrm{T}})$
+
 where $s$ is the solution to the Sylvester equation
+
 $x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2\mathrm{I}_n = 0.$
 """
 function inverse_retract!(M::Rotations, v, x, y, method::PolarInverseRetraction)
@@ -129,10 +146,15 @@ function inverse_retract!(M::Rotations, v, x, y, method::PolarInverseRetraction)
     return v
 end
 
+"""
+    QRInverseRetraction
+
+Inverse retraction on the rotations manifold using the QR method.
+"""
 struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
 @doc doc"""
-    inverseRetractionQR(M,x,y)
+    inverse_retract!(M::Rotations, x, y, ::QRInverseRetraction)
 
 Compute a vector from the tagent space $T_x\mathrm{SO}(n)$
 of the point `x` on the [`Rotations`](@ref) manifold `M`
@@ -208,4 +230,75 @@ projected to tangent space at `x`.
 function normal_tvector_distribution(S::Rotations, x, σ)
     d = Distributions.MvNormal(reshape(zero(x), :), σ)
     return ProjectedTVectorDistribution(S, x, d, project_tangent!, x)
+end
+
+"""
+    NormalRotationDistribution(M::Rotations, )
+
+return a random point on the manifold [`Rotations`](@ref) `M`.
+See [`normal_rotation_distribution`](@ref) for details.
+"""
+struct NormalRotationDistribution{TResult, TM<:Rotations, TD<:Distribution} <: MPointDistribution{TM}
+    manifold::TM
+    distr::TD
+end
+
+function NormalRotationDistribution(M::Rotations, d::Distribution, x::TResult) where TResult
+    return NormalRotationDistribution{TResult, typeof(M), typeof(d)}(M, d)
+end
+
+function _fix_random_rotation(A::AbstractMatrix)
+    s=diag(sign.(qr(A).R))
+    D=Diagonal(s)
+    C = qr(A).Q*D
+    if det(C) < 0
+        C[:,[1,2]] = C[:,[2,1]]
+    end
+    return C
+end
+
+function rand(rng::AbstractRNG, d::NormalRotationDistribution{TResult,Rotations{N}}) where {TResult,N}
+    if N==1
+        return convert(TResult, ones(1,1))
+    else
+        A = reshape(rand(rng, d.distr), (N, N))
+        return convert(TResult, _fix_random_rotation(A))
+    end
+end
+
+function _rand!(rng::AbstractRNG, d::NormalRotationDistribution{TResult,Rotations{N}}, x::AbstractArray{<:Number}) where {TResult,N}
+    if N==1
+        x .= ones(1,1)
+    else
+        rand!(rng, d.distr, x)
+        x .= _fix_random_rotation(x)
+    end
+    return x
+end
+
+@doc doc"""
+    normal_rotation_distribution(M::Rotations, x, σ::Real)
+
+return a random point on the manifold [`Rotations`](@ref) `M`
+by generating a (Gaussian) random orthogonal matrix with determinant $+1$. Let
+
+$QR = A$
+
+be the QR decomposition of a random matrix $A$, then the formula reads
+
+$x = QD$
+
+where $D$ is a diagonal matrix with the signs of the diagonal entries of $R$,
+i.e.
+
+$D_{ij}=\begin{cases} \operatorname{sgn}(R_{ij}) & \text{if} \; i=j \\ 0 & \, \text{otherwise} \end{cases}.$
+
+It can happen that the matrix gets -1 as a determinant. In this case, the first
+and second columns are swapped.
+
+The argument `x` is used to determine the type of returned points.
+"""
+function normal_rotation_distribution(M::Rotations{N}, x, σ::Real) where N
+    d = Distributions.MvNormal(zeros(N*N), σ)
+    return NormalRotationDistribution(M, d, x)
 end

@@ -1,9 +1,10 @@
 
 """
-    ProjectedPointDistribution(m::Manifold, d, proj!)
+    ProjectedPointDistribution(m::Manifold, d, proj!, x)
 
 Generates a random point in ambient space of `m` and projects it to `m`
-using function `proj!`. Generated arrays are of type `TResult`.
+using function `proj!`. Generated arrays are of type `TResult`, which can be
+specified by providing the `x` argument.
 """
 struct ProjectedPointDistribution{TResult, TM<:Manifold, TD<:Distribution, TProj} <: MPointDistribution{TM}
     manifold::TM
@@ -44,6 +45,10 @@ end
 
 function ProjectedTVectorDistribution(M::Manifold, x, d::Distribution, project_tangent!, xt::TResult) where TResult
     return ProjectedTVectorDistribution{TResult, typeof(M), typeof(x), typeof(d), typeof(project_tangent!)}(M, x, d, project_tangent!)
+end
+
+function get_support(tvd::ProjectedTVectorDistribution)
+    return TVectorSupport(tvd.manifold, tvd.x)
 end
 
 function rand(rng::AbstractRNG, d::ProjectedTVectorDistribution{TResult}) where TResult
