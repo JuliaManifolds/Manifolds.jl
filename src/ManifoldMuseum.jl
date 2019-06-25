@@ -166,7 +166,7 @@ end
 
 retract(M::Manifold, x, v, t) = retract(M, x, t*v)
 
-project_tangent!(M::Manifold, w, x, v) = error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)) with input $(typof(v)).")
+project_tangent!(M::Manifold, w, x, v) = error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)) with input $(typeof(v)).")
 
 function project_tangent(M::Manifold, x, v)
     vt = similar_result(M, project_tangent, v, x)
@@ -317,7 +317,12 @@ Infimum of the injectivity radii of all manifold points.
 """
 injectivity_radius(M::Manifold) = Inf
 
-zero_tangent_vector(M::Manifold, x) = log(M, x, x)
+function zero_tangent_vector(M::Manifold, x)
+    v = similar_result(M, zero_tangent_vector, x)
+    zero_tangent_vector!(M, v, x)
+    return v
+end
+
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 
 """

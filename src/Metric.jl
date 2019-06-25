@@ -126,22 +126,8 @@ end
 @traitfn function norm(M::MMT, x, v) where {MT<:Manifold,
                                             GT<:Metric,
                                             MMT<:MetricManifold{MT,GT};
-                                            !HasMetric{MT,GT}}
-    return sqrt(inner(M, x, v, v))
-end
-
-@traitfn function norm(M::MMT, x, v) where {MT<:Manifold,
-                                            GT<:Metric,
-                                            MMT<:MetricManifold{MT,GT};
                                             HasMetric{MT,GT}}
     return norm(M.manifold, x, v)
-end
-
-@traitfn function distance(M::MMT, x, y) where {MT<:Manifold,
-                                                GT<:Metric,
-                                                MMT<:MetricManifold{MT,GT};
-                                                !HasMetric{MT,GT}}
-    return norm(M, x, log(M, x, y))
 end
 
 @traitfn function distance(M::MMT, x, y) where {MT<:Manifold,
@@ -346,13 +332,63 @@ end
 @traitfn function log!(M::MMT, v, x, y) where {MT<:Manifold,
                                                GT<:Metric,
                                                MMT<:MetricManifold{MT,GT};
-                                               !HasMetric{MT,GT}}
-    error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
-end
-
-@traitfn function log!(M::MMT, v, x, y) where {MT<:Manifold,
-                                               GT<:Metric,
-                                               MMT<:MetricManifold{MT,GT};
                                                HasMetric{MT,GT}}
     return log!(M.manifold, v, x, y)
+end
+
+@traitfn function retract!(M::MMT,
+                           y,
+                           x,
+                           v,
+                           args...) where {MT<:Manifold,
+                                           GT<:Metric,
+                                           MMT<:MetricManifold{MT,GT};
+                                           HasMetric{MT,GT}}
+    return retract!(M.manifold, y, x, v, args...)
+end
+
+@traitfn function project_tangent!(M::MMT,
+                                   w,
+                                   x,
+                                   v) where {MT<:Manifold,
+                                             GT<:Metric,
+                                             MMT<:MetricManifold{MT,GT};
+                                             HasMetric{MT,GT}}
+    return project_tangent!(M.manifold, w, x, v)
+end
+
+@traitfn function injectivity_radius(M::MMT,
+                                     args...) where {MT<:Manifold,
+                                                     GT<:Metric,
+                                                     MMT<:MetricManifold{MT,GT};
+                                                     HasMetric{MT,GT}}
+    return injectivity_radius(M.manifold, args...)
+end
+
+@traitfn function zero_tangent_vector!(M::MMT,
+                                       v,
+                                       x) where {MT<:Manifold,
+                                                 GT<:Metric,
+                                                 MMT<:MetricManifold{MT,GT};
+                                                 HasMetric{MT,GT}}
+    return zero_tangent_vector!(M.manifold, v, x)
+end
+
+@traitfn function is_manifold_point(M::MMT,
+                                    x;
+                                    kwargs...) where {MT<:Manifold,
+                                                      GT<:Metric,
+                                                      MMT<:MetricManifold{MT,GT};
+                                                      HasMetric{MT,GT}}
+    return is_manifold_point(M.manifold, x; kwargs...)
+end
+
+@traitfn function is_tangent_vector(M::MMT,
+                                    x,
+                                    v;
+                                    kwargs...) where {MT<:Manifold,
+                                                      GT<:Metric,
+                                                      MMT<:MetricManifold{MT,GT};
+                                                      HasMetric{MT,GT}}
+    return is_tangent_vector(M.manifold, x, v; kwargs...)
 end

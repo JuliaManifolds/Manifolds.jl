@@ -142,6 +142,7 @@ end
     ManifoldMuseum.inner(::BaseManifold, x, v, w) = 2 * dot(v,w)
     ManifoldMuseum.exp!(::BaseManifold, y, x, v) = y .= x + 2 * v
     ManifoldMuseum.log!(::BaseManifold, v, x, y) = v .= (y - x) / 2
+    ManifoldMuseum.project_tangent!(::BaseManifold, w, x, v) = w .= 2 .* v
 
     M = BaseManifold{3}()
     g = BaseManifoldMetric{3}()
@@ -153,8 +154,18 @@ end
 
     @test inner(M, x, v, w) == 2 * dot(v,w)
     @test inner(MM, x, v, w) === inner(M, x, v, w)
+    @test norm(MM, x, v) === norm(M, x, v)
+    @test distance(MM, x, y) === distance(M, x, y)
     @test exp(M, x, v) == x + 2 * v
     @test exp!(MM, y, x, v) === exp!(M, y, x, v)
     @test log(M, x, y) == (y - x) / 2
     @test log!(MM, v, x, y) === log!(M, v, x, y)
+    @test ManifoldMuseum.retract!(MM, y, x, v) === ManifoldMuseum.retract!(M, y, x, v)
+    @test ManifoldMuseum.retract!(MM, y, x, v, 1) === ManifoldMuseum.retract!(M, y, x, v, 1)
+    @test ManifoldMuseum.project_tangent!(MM, w, x, v) === ManifoldMuseum.project_tangent!(M, w, x, v)
+    @test zero_tangent_vector!(MM, v, x) === zero_tangent_vector!(M, v, x)
+    @test injectivity_radius(MM, x) === injectivity_radius(M, x)
+    @test injectivity_radius(MM) === injectivity_radius(M)
+    @test ManifoldMuseum.is_manifold_point(MM, x) === ManifoldMuseum.is_manifold_point(M, x)
+    @test ManifoldMuseum.is_tangent_vector(MM, x, v) === ManifoldMuseum.is_tangent_vector(M, x, v)
 end
