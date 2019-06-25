@@ -208,7 +208,7 @@ angle(M::Manifold, x, v, w) = acos(inner(M, x, v, w) / norm(M, x, v) / norm(M, x
 Exponential map of tangent vector `t*v` at point `x` from manifold `M`.
 Result is saved to `y`.
 """
-exp!(M::Manifold, y, x, v, t) = exp!(M::Manifold, y, x, t*v)
+exp!(M::Manifold, y, x, v, t::Real) = exp!(M::Manifold, y, x, t*v)
 
 exp!(M::Manifold, y, x, v) = error("Exponential map not implemented on a $(typeof(M)) for input point $(x) and tangent vector $(v).")
 
@@ -223,7 +223,7 @@ function exp(M::Manifold, x, v)
     return y
 end
 
-exp(M::Manifold, x, v, t) = exp(M, x, t*v)
+exp(M::Manifold, x, v, t::Real) = exp(M, x, t*v)
 
 """
     exp(M::Manifold, x, v, T::AbstractVector)
@@ -257,7 +257,7 @@ geodesic(M::Manifold, x, v) = t -> exp(M, x, v, t)
 Get the point at time `t` traveling from `x` along the geodesic with initial
 point `x` and velocity `v`.
 """
-geodesic(M::Manifold, x, v, t) = exp(M, x, v, t)
+geodesic(M::Manifold, x, v, t::Real) = exp(M, x, v, t)
 
 """
     geodesic(M::Manifold, x, v, T::AbstractVector)
@@ -283,7 +283,7 @@ shortest_geodesic(M::Manifold, x, y) = geodesic(M, x, log(M, x, y))
 Get the point at time `t` traveling from `x` along a shortest geodesic
 connecting `x` and `y`, where `y` is reached at `t=1`.
 """
-shortest_geodesic(M::Manifold, x, y, t) = geodesic(M, x, log(M, x, y), t)
+shortest_geodesic(M::Manifold, x, y, t::Real) = geodesic(M, x, log(M, x, y), t)
 
 """
     shortest_geodesic(M::Manifold, x, y, T::AbstractVector)
