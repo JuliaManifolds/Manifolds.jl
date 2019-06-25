@@ -79,15 +79,15 @@ IsDecoratorManifold{M}`), a specific function should be implemented as a
 `@traitfn`, that transparently passes down through decorators, i.e.
 
 ```
-@traitfn myFeature(M::Mt, k...) where {Mt; IsDecoratorManifold{Mt}} = myFeature(M.manifold, k...)
+@traitfn my_feature(M::MT, k...) where {MT; IsDecoratorManifold{MT}} = my_feature(M.manifold, k...)
 ```
 or the shorter version
 ```
-@traitfn myFeature(M::::IsDecoratorManifold, k...) = myFeature(M.manifold, k...)
+@traitfn my_feature(M::::IsDecoratorManifold, k...) = my_feature(M.manifold, k...)
 ```
 such that decorators act just as pass throughs for other decorator functions and
 ```
-myFeature(M::MyManifold, k...) = #... my explicit implementation
+my_feature(M::MyManifold, k...) = #... my explicit implementation
 ```
 then implements the feature itself.
 """

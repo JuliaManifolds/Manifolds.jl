@@ -55,16 +55,16 @@ called on the `MetricManifold` to the already-imlemented functions for the
 For example,
 
 ```
-@traitfn myFeature(M::MMT, k...) where {MT<:Manifold,
-                                        GT<:Metric,
-                                        MMT<:MetricManifold{MT,GT};
-                                        HasMetric{MT,GT}}
-    return myFeature(M.manifold, k...)
+@traitfn function my_feature(M::MMT, k...) where {MT<:Manifold,
+                                                  GT<:Metric,
+                                                  MMT<:MetricManifold{MT,GT};
+                                                  HasMetric{MT,GT}}
+    return my_feature(M.manifold, k...)
 end
 ```
 
-forwards the function `myFeature` from `M` to the already-implemented
-`myFeature` on the base manifold `M.manifold`. A manifold with a default
+forwards the function `my_feature` from `M` to the already-implemented
+`my_feature` on the base manifold `M.manifold`. A manifold with a default
 metric can then be written
 
 ```
