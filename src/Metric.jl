@@ -257,8 +257,9 @@ end
                   solver=AutoVern9(Rodas5()),
                   kwargs...)
 
-Approximate the exponential map on the manifold over the provided timespan by
-solving the ordinary differential equation
+Approximate the exponential map on the manifold over the provided timespan
+assuming the Levi-Civita connection by solving the ordinary differential
+equation
 
 $\frac{d^2}{dt^2} x^k + \Gamma^k_{ij} \frac{d}{dt} x_i \frac{d}{dt} x_j = 0,$
 
@@ -266,6 +267,10 @@ where $\Gamma^k_{ij}$ are the Christoffel symbols of the second kind, and
 the Einstein summation convention is assumed. The arguments `tspan` and
 `solver` follow the `OrdinaryDiffEq` conventions. `kwargs...` specify keyword
 arguments that will be passed to `OrdinaryDiffEq.solve`.
+
+Currently, the numerical integration is only accurate when using a single
+coordinate chart that covers the entire manifold. This excludes coordinates
+in an embedded space.
 """
 function solve_exp_ode(M::MetricManifold,
                        x,
@@ -310,6 +315,19 @@ end
     n = length(x)
     return [sol.u[i][n+1:end] for i in 1:length(T)]
 end
+
+"""
+    exp(M::MetricManifold, x, v, args...)
+
+If the [`HasMetric`](@ref) trait is defined for `M`, compute the exponential
+map of the base manifold. Otherwise, numerically integrate the exponential
+map assuming the Levi-Civita connection. See [`solve_exp_ode`](@ref)
+
+Currently, the numerical integration is only accurate when using a single
+coordinate chart that covers the entire manifold. This excludes coordinates
+in an embedded space.
+"""
+function exp end
 
 @traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,
                                                GT<:Metric,
