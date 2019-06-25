@@ -2,7 +2,7 @@
     Metric
 
 Abstract type for the pseudo-Riemannian metric tensor $g$, a family of smoothly
-    varying inner products on the tangent space. See [`inner`](@ref).
+varying inner products on the tangent space. See [`inner`](@ref).
 """
 abstract type Metric end
 
@@ -10,17 +10,17 @@ abstract type Metric end
     RiemannianMetric <: Metric
 
 Abstract type for Riemannian metrics, a family of positive definite inner
-    products. The positive definite property means that for $v \in T_x M$,
-    the inner product $g(v,v) > 0$ whenever $v$ is not the zero vector.
+products. The positive definite property means that for $v \in T_x M$, the
+inner product $g(v,v) > 0$ whenever $v$ is not the zero vector.
 """
 abstract type RiemannianMetric <: Metric end
 
 @doc doc"""
     LorentzMetric <: Metric
 
-Abstract type for Lorentz metrics, which have a single time dimension.
-    These metrics assume the spacelike convention with the time dimension
-    being last, giving the signature $(++...+-)$.
+Abstract type for Lorentz metrics, which have a single time dimension. These
+metrics assume the spacelike convention with the time dimension being last,
+giving the signature $(++...+-)$.
 """
 abstract type LorentzMetric <: Metric end
 
@@ -47,19 +47,25 @@ convert(::Type{MT},M::MetricManifold{MT,GT}) where {MT,GT} = M.manifold
 """
     HasMetric
 
-A `Trait` to mark a `Manifold` `M` as being shorthand for a `MetricManifold{M,G}`
-with metric `G`. This can be used to forward functions called on the
-`MetricManifold` to the already-imlemented functions for the `Manifold`.
+A `Trait` to mark a `Manifold` `M` as being shorthand for a
+`MetricManifold{M,G}` with metric `G`. This can be used to forward functions
+called on the `MetricManifold` to the already-imlemented functions for the
+`Manifold`.
 
 For example,
 
 ```
-@traitfn myFeature(M::MMT, k...) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = myFeature(M.manifold, k...)
+@traitfn myFeature(M::MMT, k...) where {MT<:Manifold,
+                                        GT<:Metric,
+                                        MMT<:MetricManifold{MT,GT};
+                                        HasMetric{MT,GT}}
+    return myFeature(M.manifold, k...)
+end
 ```
 
 forwards the function `myFeature` from `M` to the already-implemented
-    `myFeature` on the base manifold `M.manifold`. A manifold with a default
-    metric can then be written
+`myFeature` on the base manifold `M.manifold`. A manifold with a default
+metric can then be written
 
 ```
 struct MyManifold{T} <: Manifold end
@@ -80,17 +86,19 @@ metric(M::MetricManifold) = M.metric
     local_metric(M::MetricManifold, x)
 
 Local matrix representation at the point `x` of the metric tensor $g$ on the
-manifold `M`, usually written $G=g_{ij}$. The matrix has the property that
-$g(v,w)=v^T G w = v^i w^j g_{ij}$, where the latter expression uses Einstein
-summation notation.
+manifold `M`, usually written $g_{ij}$. The matrix has the property that
+$g(v,w)=v^T [g_{ij}] w = g_{ij} v^i w^j$, where the latter expression uses
+Einstein summation notation.
 """
-local_metric(M::MetricManifold, x) = error("Local metric not implemented on $(typeof(M)) for point $(typeof(x))")
+function local_metric(M::MetricManifold, x)
+    error("Local metric not implemented on $(typeof(M)) for point $(typeof(x))")
+end
 
 @doc doc"""
     inverse_local_metric(M::MetricManifold, x)
 
-Local matrix representation of the inverse metric (cometric) tensor $g^{-1}$,
-usually written $g^{ij}$
+Local matrix representation of the inverse metric (cometric) tensor, usually
+written $g^{ij}$
 """
 inverse_local_metric(M::MetricManifold, x) = inv(local_metric(M, x))
 
@@ -101,14 +109,47 @@ Determinant of local matrix representation of the metric tensor $g$
 """
 det_local_metric(M::MetricManifold, x) = det(local_metric(M, x))
 
-@traitfn inner(M::MMT, x, v, w) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}} = dot(v, local_metric(M, x) * w)
-@traitfn inner(M::MMT, x, v, w) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = inner(M.manifold, x, v, w)
+@traitfn function inner(M::MMT, x, v, w) where {MT<:Manifold,
+                                                GT<:Metric,
+                                                MMT<:MetricManifold{MT,GT};
+                                                !HasMetric{MT,GT}}
+    return dot(v, local_metric(M, x) * w)
+end
 
-@traitfn norm(M::MMT, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}} = sqrt(inner(M, x, v, v))
-@traitfn norm(M::MMT, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = norm(M.manifold, x, v)
+@traitfn function inner(M::MMT, x, v, w) where {MT<:Manifold,
+                                                GT<:Metric,
+                                                MMT<:MetricManifold{MT,GT};
+                                                HasMetric{MT,GT}}
+    return inner(M.manifold, x, v, w)
+end
 
-@traitfn distance(M::MMT, x, y) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}} = norm(M, x, log(M, x, y))
-@traitfn distance(M::MMT, x, y) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = distance(M.manifold, x, y)
+@traitfn function norm(M::MMT, x, v) where {MT<:Manifold,
+                                            GT<:Metric,
+                                            MMT<:MetricManifold{MT,GT};
+                                            !HasMetric{MT,GT}}
+    return sqrt(inner(M, x, v, v))
+end
+
+@traitfn function norm(M::MMT, x, v) where {MT<:Manifold,
+                                            GT<:Metric,
+                                            MMT<:MetricManifold{MT,GT};
+                                            HasMetric{MT,GT}}
+    return norm(M.manifold, x, v)
+end
+
+@traitfn function distance(M::MMT, x, y) where {MT<:Manifold,
+                                                GT<:Metric,
+                                                MMT<:MetricManifold{MT,GT};
+                                                !HasMetric{MT,GT}}
+    return norm(M, x, log(M, x, y))
+end
+
+@traitfn function distance(M::MMT, x, y) where {MT<:Manifold,
+                                                GT<:Metric,
+                                                MMT<:MetricManifold{MT,GT};
+                                                HasMetric{MT,GT}}
+    return distance(M.manifold, x, y)
+end
 
 function local_metric_jacobian(M::MetricManifold, x)
     n = size(x, 1)
@@ -131,7 +172,7 @@ function christoffel_symbols_first(M::MetricManifold, x)
     ∂g = local_metric_jacobian(M, x)
     n = size(∂g, 1)
     Γ = similar(∂g, Size(n, n, n))
-    @einsum Γ[i,j,k] = 1/2 * (∂g[k,j,i] + ∂g[i,k,j] - ∂g[i,j,k])
+    @einsum Γ[i,j,k] = 1 / 2 * (∂g[k,j,i] + ∂g[i,k,j] - ∂g[i,j,k])
     return Γ
 end
 
@@ -141,10 +182,10 @@ end
 Compute the Christoffel symbols of the second kind in local coordinates.
 The Christoffel symbols are (in Einstein summation convention)
 
-$\Gamma^{\ell}_{ij} = \Gamma_{ijk} g^{k\ell},$
+$\Gamma^{l}_{ij} = g^{kl} \Gamma_{ijk},$
 
 where $\Gamma_{ijk}$ are the Christoffel symbols of the first kind, and
-$g^{k\ell}$ is the inverse of the local representation of the metric tensor.
+$g^{kl}$ is the inverse of the local representation of the metric tensor.
 """
 function christoffel_symbols_second(M::MetricManifold, x)
     ginv = inverse_local_metric(M, x)
@@ -154,16 +195,19 @@ function christoffel_symbols_second(M::MetricManifold, x)
     return Γ₂
 end
 
-"""
+@doc doc"""
     riemann_tensor(M::MetricManifold, x)
 
-Compute the Riemann tensor, also known as the Riemann curvature tensor,
-at the point `x`.
+Compute the Riemann tensor $R^l_{ijk}$, also known as the Riemann curvature
+tensor, at the point `x`.
 """
 function riemann_tensor(M::MetricManifold, x)
     n = size(x, 1)
     Γ = christoffel_symbols_second(M, x)
-    ∂Γ = reshape(ForwardDiff.jacobian(x -> christoffel_symbols_second(M, x), x), n, n, n, n) ./ n
+    ∂Γ = reshape(
+        ForwardDiff.jacobian(x -> christoffel_symbols_second(M, x), x),
+        n, n, n, n
+    ) ./ n
     R = similar(∂Γ, Size(n, n, n, n))
     @einsum R[i,j,k,l] = ∂Γ[i,k,l,j] - ∂Γ[i,j,l,k] + Γ[i,k,s] * Γ[s,j,l] - Γ[i,j,s] * Γ[s,k,l]
     return R
@@ -217,13 +261,24 @@ function einstein_tensor(M::MetricManifold, x)
 end
 
 """
-    solve_exp_ode(M::MetricManifold, x, v, tspan; solver=AutoVern9(Rodas5()), kwargs...)
+    solve_exp_ode(M::MetricManifold,
+                  x,
+                  v,
+                  tspan;
+                  solver=AutoVern9(Rodas5()),
+                  kwargs...)
 
 Numerically integrate the exponential map on the manifold over the provided
 timespan. The arguments `tspan` and `solver` follow the `OrdinaryDiffEq`
-conventions. `kwargs...` specify keyword arguments to be passed to `solve`.
+conventions. `kwargs...` specify keyword arguments that will be passed to
+`OrdinaryDiffEq.solve`.
 """
-function solve_exp_ode(M::MetricManifold, x, v, tspan; solver=AutoVern9(Rodas5()), kwargs...)
+function solve_exp_ode(M::MetricManifold,
+                       x,
+                       v,
+                       tspan;
+                       solver=AutoVern9(Rodas5()),
+                       kwargs...)
     n = length(x)
     iv = SVector{n}(1:n)
     ix = SVector{n}(n+1:2n)
@@ -250,20 +305,46 @@ function solve_exp_ode(M::MetricManifold, x, v, tspan; solver=AutoVern9(Rodas5()
     return sol
 end
 
-@traitfn function exp(M::MMT, x, v, T::AbstractVector) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}}
+@traitfn function exp(M::MMT,
+                      x,
+                      v,
+                      T::AbstractVector) where {MT<:Manifold,
+                                                GT<:Metric,
+                                                MMT<:MetricManifold{MT,GT};
+                                                !HasMetric{MT,GT}}
     sol = solve_exp_ode(M, x, v, extrema(T); dense=false, saveat=T)
     n = length(x)
     return [sol.u[i][n+1:end] for i in 1:length(T)]
 end
 
-@traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}}
+@traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,
+                                               GT<:Metric,
+                                               MMT<:MetricManifold{MT,GT};
+                                               !HasMetric{MT,GT}}
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, x, v, tspan; dense=false, saveat=[1.0])
     n = length(x)
     y .= sol.u[1][n+1:end]
+    return y
 end
 
-@traitfn exp!(M::MMT, y, x, v) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = exp!(M.manifold, y, x, v)
+@traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,
+                                               GT<:Metric,
+                                               MMT<:MetricManifold{MT,GT};
+                                               HasMetric{MT,GT}}
+    return exp!(M.manifold, y, x, v)
+end
 
-@traitfn log!(M::MMT, v, x, y) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};!HasMetric{MT,GT}} = error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
-@traitfn log!(M::MMT, v, x, y) where {MT<:Manifold,GT<:Metric,MMT<:MetricManifold{MT,GT};HasMetric{MT,GT}} = log!(M.manifold, v, x, y)
+@traitfn function log!(M::MMT, v, x, y) where {MT<:Manifold,
+                                               GT<:Metric,
+                                               MMT<:MetricManifold{MT,GT};
+                                               !HasMetric{MT,GT}}
+    error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
+end
+
+@traitfn function log!(M::MMT, v, x, y) where {MT<:Manifold,
+                                               GT<:Metric,
+                                               MMT<:MetricManifold{MT,GT};
+                                               HasMetric{MT,GT}}
+    return log!(M.manifold, v, x, y)
+end
