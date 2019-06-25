@@ -109,6 +109,12 @@ Determinant of local matrix representation of the metric tensor $g$
 """
 det_local_metric(M::MetricManifold, x) = det(local_metric(M, x))
 
+function local_metric_jacobian(M::MetricManifold, x)
+    n = size(x, 1)
+    ∂g = reshape(ForwardDiff.jacobian(x -> local_metric(M, x), x), n, n, n)
+    return ∂g
+end
+
 @traitfn function inner(M::MMT, x, v, w) where {MT<:Manifold,
                                                 GT<:Metric,
                                                 MMT<:MetricManifold{MT,GT};
@@ -135,12 +141,6 @@ end
                                                 MMT<:MetricManifold{MT,GT};
                                                 HasMetric{MT,GT}}
     return distance(M.manifold, x, y)
-end
-
-function local_metric_jacobian(M::MetricManifold, x)
-    n = size(x, 1)
-    ∂g = reshape(ForwardDiff.jacobian(x -> local_metric(M, x), x), n, n, n)
-    return ∂g
 end
 
 @doc doc"""
