@@ -208,7 +208,7 @@ angle(M::Manifold, x, v, w) = acos(inner(M, x, v, w) / norm(M, x, v) / norm(M, x
 Exponential map of tangent vector `t*v` at point `x` from manifold `M`.
 Result is saved to `y`.
 """
-exp!(M::Manifold, y, x, v, t::Real) = exp!(M::Manifold, y, x, t*v)
+exp!(M::Manifold, y, x, v, t::Real) = exp!(M, y, x, t*v)
 
 exp!(M::Manifold, y, x, v) = error("Exponential map not implemented on a $(typeof(M)) for input point $(x) and tangent vector $(v).")
 
