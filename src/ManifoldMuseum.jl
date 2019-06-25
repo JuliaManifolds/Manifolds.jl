@@ -218,9 +218,9 @@ exp!(M::Manifold, y, x, v) = error("Exponential map not implemented on a $(typeo
 Exponential map of tangent vector `t*v` at point `x` from manifold `M`.
 """
 function exp(M::Manifold, x, v)
-    y = similar_result(M, exp, x, v)
-    exp!(M, y, x, v)
-    return y
+    x2 = similar_result(M, x, v)
+    exp!(M, x2, x, v)
+    return x2
 end
 
 exp(M::Manifold, x, v, t::Real) = exp(M, x, t*v)
