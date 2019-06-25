@@ -174,8 +174,6 @@ function project_tangent(M::Manifold, x, v)
     return vt
 end
 
-distance(M::Manifold, x, y) = norm(M, x, log(M, x, y))
-
 """
     inner(M::Manifold, x, v, w)
 
@@ -189,6 +187,13 @@ inner(M::Manifold, x, v, w) = error("inner: Inner product not implemented on a $
 Norm of tangent vector `v` at point `x` from manifold `M`.
 """
 norm(M::Manifold, x, v) = sqrt(inner(M, x, v, v))
+
+"""
+    distance(M::Manifold, x, y)
+
+Shortest distance between the points `x` and `y` on manifold `M`.
+"""
+distance(M::Manifold, x, y) = norm(M, x, log(M, x, y))
 
 """
     angle(M::Manifold, x, v, w)
@@ -239,13 +244,27 @@ end
 """
     geodesic(M::Manifold, x, v)
 
-Get the geodesic with initial point `x` and initial velocity `v`. The geodesic
+Get the geodesic with initial point `x` and velocity `v`. The geodesic
 is the curve of constant velocity that is locally distance-minimizing. This
 function returns a function of time, which may be a `Real` or an
 `AbstractVector`.
 """
 geodesic(M::Manifold, x, v) = t -> exp(M, x, v, t)
+
+"""
+    geodesic(M::Manifold, x, y, t)
+
+Get the point at time `t` traveling from `x` along the geodesic with initial
+point `x` and velocity `v`.
+"""
 geodesic(M::Manifold, x, v, t) = exp(M, x, v, t)
+
+"""
+    geodesic(M::Manifold, x, y, T::AbstractVector)
+
+Get the points for each `t` in `T` traveling from `x` along the geodesic with
+initial point `x` and velocity `v`.
+"""
 geodesic(M::Manifold, x, v, T::AbstractVector) = exp(M, x, v, T)
 
 """
@@ -257,8 +276,24 @@ geodesics, there is no guarantee which will be returned. This function returns
 a function of time, which may be a `Real` or an `AbstractVector`.
 """
 shortest_geodesic(M::Manifold, x, y) = geodesic(M, x, log(M, x, y))
+
+"""
+    shortest_geodesic(M::Manifold, x, y, t)
+
+Get the point at time `t` traveling from `x` along a shortest geodesic
+connecting `x` and `y`, where `y` is reached at `t=1`.
+"""
 shortest_geodesic(M::Manifold, x, y, t) = geodesic(M, x, log(M, x, y), t)
-shortest_geodesic(M::Manifold, x, y, T::AbstractVector) = geodesic(M, x, log(M, x, y), T)
+
+"""
+    shortest_geodesic(M::Manifold, x, y, T::AbstractVector)
+
+Get the points for each `t` in `T` traveling from `x` along a shortest geodesic
+connecting `x` and `y`, where `y` is reached at `t=1`.
+"""
+function shortest_geodesic(M::Manifold, x, y, T::AbstractVector)
+    return geodesic(M, x, log(M, x, y), T)
+end
 
 vector_transport!(M::Manifold, vto, x, v, y) = project_tangent!(M, vto, x, v)
 

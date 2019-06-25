@@ -22,20 +22,20 @@ returns the dimension of the manifold $\mathbb S^n$, i.e. $n$.
 """
 manifold_dimension(S::Sphere{N}) where {N} = N
 
+proj!(S::Sphere, x) = (x ./= norm(x))
+
+project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v) .* x)
+
 @doc doc"""
-    inner(S,x,w,v)
+    inner(S::Sphere, x, w, v)
 
 compute the inner product of the two tangent vectors `w,v` from the tangent
-plane at `x` on the sphere `S=`$\mathbb S^n$ using the restriction of the metric from the
-embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
+plane at `x` on the sphere `S=`$\mathbb S^n$ using the restriction of the
+metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
 inner(S::Sphere, x, w, v) = dot(w, v)
 
 norm(S::Sphere, x, v) = norm(v)
-
-proj!(S::Sphere, x) = (x ./= norm(x))
-
-project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v).*x)
 
 distance(S::Sphere, x, y) = acos(dot(x, y))
 

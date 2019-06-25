@@ -11,7 +11,7 @@ abstract type Metric end
 
 Abstract type for Riemannian metrics, a family of positive definite inner
 products. The positive definite property means that for $v \in T_x M$, the
-inner product $g(v,v) > 0$ whenever $v$ is not the zero vector.
+inner product $g(v, v) > 0$ whenever $v$ is not the zero vector.
 """
 abstract type RiemannianMetric <: Metric end
 
@@ -88,7 +88,7 @@ metric(M::MetricManifold) = M.metric
 Local matrix representation at the point `x` of the metric tensor $g$ on the
 manifold `M`, usually written $g_{ij}$. The matrix has the property that
 $g(v, w)=v^T [g_{ij}] w = g_{ij} v^i w^j$, where the latter expression uses
-Einstein summation notation.
+Einstein summation convention.
 """
 function local_metric(M::MetricManifold, x)
     error("Local metric not implemented on $(typeof(M)) for point $(typeof(x))")
@@ -263,7 +263,7 @@ function einstein_tensor(M::MetricManifold, x)
     return G
 end
 
-"""
+@doc doc"""
     solve_exp_ode(M::MetricManifold,
                   x,
                   v,
@@ -271,10 +271,15 @@ end
                   solver=AutoVern9(Rodas5()),
                   kwargs...)
 
-Numerically integrate the exponential map on the manifold over the provided
-timespan. The arguments `tspan` and `solver` follow the `OrdinaryDiffEq`
-conventions. `kwargs...` specify keyword arguments that will be passed to
-`OrdinaryDiffEq.solve`.
+Approximate the exponential map on the manifold over the provided timespan by
+solving the ordinary differential equation
+
+$\frac{d^2}{dt^2} x^k + \Gamma^k_{ij} \frac{d}{dt} x_i \frac{d}{dt} x_j = 0,$
+
+where $\Gamma^k_{ij}$ are the Christoffel symbols of the second kind, and
+the Einstein summation convention is assumed. The arguments `tspan` and
+`solver` follow the `OrdinaryDiffEq` conventions. `kwargs...` specify keyword
+arguments that will be passed to `OrdinaryDiffEq.solve`.
 """
 function solve_exp_ode(M::MetricManifold,
                        x,
