@@ -6,16 +6,19 @@ version = "0.1.0"
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Einsum = "b7d42ee7-0b51-5a75-98ca-779d3107e4c0"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
+OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 SimpleTraits = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [extras]
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
-StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]

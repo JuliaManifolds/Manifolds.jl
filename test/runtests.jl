@@ -5,6 +5,7 @@ using DoubleFloats
 using ForwardDiff
 using ReverseDiff
 using StaticArrays
+using SimpleTraits
 using Test
 
 """
@@ -257,3 +258,5 @@ end
         @test isa(rand(gtsd_mvector), MMatrix)
     end
 end
+
+include("metric_test.jl")

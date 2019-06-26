@@ -21,3 +21,8 @@ Order = [:type, :function]
 ### Lie Group
 
 ### Metric
+```@autodocs
+Modules = [ManifoldMuseum]
+Pages = ["Metric.jl"]
+Order = [:type, :function]
+```

@@ -13,25 +13,30 @@ generates the $\mathbb S^{n}\subset \mathbb R^{n+1}$
 struct Sphere{N} <: Manifold end
 Sphere(n::Int) = Sphere{n}()
 
+@traitimpl HasMetric{Sphere,EuclideanMetric}
+
 @doc doc"""
     manifold_dimension(S::Sphere)
 
-returns the dimension of the manifold $\mathbb S^n$, i.e. $n$.
+Return the dimension of the manifold $\mathbb S^n$, i.e. $n$.
 """
 manifold_dimension(S::Sphere{N}) where {N} = N
 
+proj!(S::Sphere, x) = (x ./= norm(x))
+
+project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v) .* x)
+
 @doc doc"""
-    inner(S,x,w,v)
+    inner(S::Sphere, x, w, v)
 
 compute the inner product of the two tangent vectors `w,v` from the tangent
-plane at `x` on the sphere `S=`$\mathbb S^n$ using the restriction of the metric from the
-embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
+plane at `x` on the sphere `S=`$\mathbb S^n$ using the restriction of the
+metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
 inner(S::Sphere, x, w, v) = dot(w, v)
 
-proj!(S::Sphere, x) = (x ./= norm(x))
+norm(S::Sphere, x, v) = norm(v)
 
-project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v).*x)
 distance(S::Sphere, x, y) = acos(dot(x, y))
 
 function exp!(S::Sphere, y, x, v)
@@ -54,6 +59,8 @@ function log!(S::Sphere, v, x, y)
     end
     return v
 end
+
+injectivity_radius(S::Sphere, args...) = π
 
 zero_tangent_vector(S::Sphere, x) = zero(x)
 zero_tangent_vector!(S::Sphere, v, x) = (v .= zero(x))

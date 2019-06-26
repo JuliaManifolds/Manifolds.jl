@@ -14,6 +14,8 @@ convert(::Type{ArrayManifold{M}},m::M) where M <: Manifold = ArrayManifold(M)
 
 manifold_dimension(M::ArrayManifold) = manifold_dimension(M.manifold)
 
+@traitimpl IsDecoratorManifold{ArrayManifold}
+
 struct ArrayMPoint{V <: AbstractArray{<:Number}} <: MPoint
     value::V
 end
