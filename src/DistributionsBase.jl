@@ -47,10 +47,10 @@ end
 
 
 """
-    domain(d::TVectorDistribution)
+    support(d::TVectorDistribution)
 
 Get the object of type `TVectorSupport` for the distribution `d`.
 """
-function domain(::T) where T<:TVectorDistribution
-    error("domain not implemented for type $T")
+function Distributions.support(::T) where T<:TVectorDistribution
+    error("support not implemented for type $T")
 end

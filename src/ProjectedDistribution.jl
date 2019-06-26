@@ -47,7 +47,7 @@ function ProjectedTVectorDistribution(M::Manifold, x, d::Distribution, project_t
     return ProjectedTVectorDistribution{TResult, typeof(M), typeof(x), typeof(d), typeof(project_tangent!)}(M, x, d, project_tangent!)
 end
 
-function domain(tvd::ProjectedTVectorDistribution)
+function support(tvd::ProjectedTVectorDistribution)
     return TVectorSupport(tvd.manifold, tvd.x)
 end
 

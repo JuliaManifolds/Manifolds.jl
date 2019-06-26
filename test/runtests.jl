@@ -145,9 +145,9 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
     @testset "tangent vector distributions" begin
         for tvd ∈ tvector_distributions
-            support = ManifoldMuseum.domain(tvd)
+            supp = ManifoldMuseum.support(tvd)
             for _ in 1:10
-                @test is_tangent_vector(M, support.x, rand(tvd))
+                @test is_tangent_vector(M, supp.x, rand(tvd))
             end
         end
     end

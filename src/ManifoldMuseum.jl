@@ -12,7 +12,7 @@ import Base: isapprox,
 import LinearAlgebra: dot,
     norm
 import Markdown: @doc_str
-import Distributions: _rand!
+import Distributions: _rand!, support
 import Random: rand
 using LinearAlgebra
 using Random: AbstractRNG
