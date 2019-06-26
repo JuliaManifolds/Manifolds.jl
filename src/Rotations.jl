@@ -25,7 +25,10 @@ manifold_dimension(S::Rotations{N}) where {N} = div(N*(N-1), 2)
 
 compute the inner product of the two tangent vectors `w, v` from the tangent
 plane at `x` on the special orthogonal space `S=`$\mathrm{SO}(n)$ using the
-restriction of the metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
+restriction of the metric from the embedding, i.e.
+
+$ (v,w)_x = v^\mathrm{T}w = (v, w)_x = \mathrm{tr}(v^T w) $.
+
 Tangent vectors are represented by matrices.
 """
 inner(S::Rotations, x, w, v) = dot(w, v)
@@ -49,12 +52,12 @@ compute the logarithmic map on the [`Rotations`](@ref) manifold
 ```
 where $\operatorname{Log}$ denotes the matrix logarithm
 and save the result to `v`.
+
+For antipodal rotations the function returns one of the tangent vectors that
+point at `y`.
 """
 function log!(S::Rotations, v::TV, x, y) where TV
     U = transpose(x) * y
-    if (x != y) && (abs.(U) == one(U))
-        throw( ErrorException("The points $x and $y are antipodal, thus these input parameters are invalid.") )
-    end
     # MMatrix doesn't have `log` defined
     U1 = TV(real(log(Array(U))))
     v .= (U1 .- transpose(U1))./2
@@ -96,7 +99,8 @@ end
 """
     QRRetraction
 
-Retraction on the rotations manifold using the QR method.
+Retraction on the rotations manifold using the QR method, a first order
+approximation of the exponential map.
 """
 struct QRRetraction <: AbstractRetractionMethod end
 
@@ -280,7 +284,7 @@ function rand(rng::AbstractRNG, d::NormalRotationDistribution{TResult,Rotations{
     end
 end
 
-function _rand!(rng::AbstractRNG, d::NormalRotationDistribution{TResult,Rotations{N}}, x::AbstractArray{<:Number}) where {TResult,N}
+function _rand!(rng::AbstractRNG, d::NormalRotationDistribution{TResult,Rotations{N}}, x::AbstractArray{<:Real}) where {TResult,N}
     if N==1
         x .= ones(1,1)
     else

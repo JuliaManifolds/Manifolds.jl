@@ -133,9 +133,9 @@ retract!(M::Manifold, y, x, v, method::ExponentialRetraction) = exp!(M, y, x, v)
 
 retract!(M::Manifold, y, x, v) = retract!(M, y, x, v, ExponentialRetraction())
 
-retract!(M::Manifold, y, x, v, t::Number) = retract!(M, y, x, t*v)
+retract!(M::Manifold, y, x, v, t::Real) = retract!(M, y, x, t*v)
 
-retract!(M::Manifold, y, x, v, t::Number, method::AbstractRetractionMethod) = retract!(M, y, x, t*v, method)
+retract!(M::Manifold, y, x, v, t::Real, method::AbstractRetractionMethod) = retract!(M, y, x, t*v, method)
 
 """
     retract(M::Manifold, x, v, [t=1], [method::AbstractRetractionMethod])
@@ -155,9 +155,9 @@ function retract(M::Manifold, x, v)
     return xr
 end
 
-retract(M::Manifold, x, v, t::Number) = retract(M, x, t*v)
+retract(M::Manifold, x, v, t::Real) = retract(M, x, t*v)
 
-retract(M::Manifold, x, v, t::Number, method::AbstractRetractionMethod) = retract(M, x, t*v, method)
+retract(M::Manifold, x, v, t::Real, method::AbstractRetractionMethod) = retract(M, x, t*v, method)
 
 abstract type AbstractInverseRetractionMethod end
 
