@@ -41,9 +41,9 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
     @testset "injectivity radius" begin
         @test injectivity_radius(M, pts[1]) > 0
-        for irm ∈ inverse_retraction_methods
-            @test injectivity_radius(M, pts[1], irm) > 0
-            @test injectivity_radius(M, pts[1], irm) ≤ injectivity_radius(M, pts[1])
+        for rm ∈ retraction_methods
+            @test injectivity_radius(M, pts[1], rm) > 0
+            @test injectivity_radius(M, pts[1], rm) ≤ injectivity_radius(M, pts[1])
         end
     end
 

@@ -268,20 +268,21 @@ function vector_transport(M::Manifold, x, v, y)
     return vto
 end
 
-"""
+@doc doc"""
     injectivity_radius(M::Manifold, x)
 
-Distance such that `log(M, x, y)` is defined for all points within this radius.
+Distance $d$ such that `exp(M, x, v)` is injective for all tangent
+vectors shorter than $d$ (has a left inverse).
 """
 injectivity_radius(M::Manifold, x) = 1.0
 
-"""
-    injectivity_radius(M::Manifold, x, R::AbstractInverseRetractionMethod)
+@doc doc"""
+    injectivity_radius(M::Manifold, x, R::AbstractRetractionMethod)
 
-Distance such that `inverse_retract(M, x, y, R)` is injective for all points
-within this radius (has a left inverse).
+Distance $d$ such that `retract(M, x, v, R)` is injective for all tangent
+vectors shorter than $d$ (has a left inverse).
 """
-injectivity_radius(M::Manifold, x, ::AbstractInverseRetractionMethod) = injectivity_radius(M, x)
+injectivity_radius(M::Manifold, x, ::AbstractRetractionMethod) = injectivity_radius(M, x)
 
 zero_tangent_vector(M::Manifold, x) = log(M, x, x)
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)

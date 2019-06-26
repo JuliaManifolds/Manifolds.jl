@@ -27,7 +27,7 @@ compute the inner product of the two tangent vectors `w, v` from the tangent
 plane at `x` on the special orthogonal space `S=`$\mathrm{SO}(n)$ using the
 restriction of the metric from the embedding, i.e.
 
-$v^\mathrm{T}w = (v, w)_x = \operatorname{tr}(v^T w)$.
+$(v, w)_x = \operatorname{tr}(v^T w)$.
 
 Tangent vectors are represented by matrices.
 """
@@ -127,7 +127,7 @@ Inverse retraction on the rotations manifold using the polar method.
 """
 struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
 
-injectivity_radius(::Rotations, x, ::PolarInverseRetraction) = π*sqrt(2.0)/2
+injectivity_radius(::Rotations, x, ::PolarRetraction) = π*sqrt(2.0)/2
 
 @doc doc"""
     inverse_retract!(M, v, x, y, ::PolarInverseRetraction)
