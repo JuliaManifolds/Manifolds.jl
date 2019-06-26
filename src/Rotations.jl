@@ -27,7 +27,7 @@ compute the inner product of the two tangent vectors `w, v` from the tangent
 plane at `x` on the special orthogonal space `S=`$\mathrm{SO}(n)$ using the
 restriction of the metric from the embedding, i.e.
 
-$(v,w)_x = v^\mathrm{T}w = (v, w)_x = \operatorname{tr}(v^T w)$.
+$v^\mathrm{T}w = (v, w)_x = \operatorname{tr}(v^T w)$.
 
 Tangent vectors are represented by matrices.
 """
