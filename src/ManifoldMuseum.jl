@@ -278,8 +278,8 @@ injectivity_radius(M::Manifold, x) = 1.0
 """
     injectivity_radius(M::Manifold, x, R::AbstractInverseRetractionMethod)
 
-Distance such that `retract(M, x, y, R)` is defined for all points within
-this radius.
+Distance such that `inverse_retract(M, x, y, R)` is injective for all points
+within this radius (has a left inverse).
 """
 injectivity_radius(M::Manifold, x, ::AbstractInverseRetractionMethod) = injectivity_radius(M, x)
 
