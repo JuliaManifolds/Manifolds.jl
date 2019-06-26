@@ -12,6 +12,8 @@ end
 convert(::Type{M},m::ArrayManifold{M}) where M <: Manifold = m.manifold
 convert(::Type{ArrayManifold{M}},m::M) where M <: Manifold = ArrayManifold(M)
 
+@traitimpl IsDecoratorManifold{ArrayManifold}
+
 struct ArrayMPoint{V <: AbstractArray{<:Number}} <: MPoint
     value::V
 end

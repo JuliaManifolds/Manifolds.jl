@@ -4,6 +4,7 @@ using LinearAlgebra
 using DoubleFloats
 using ForwardDiff
 using StaticArrays
+using SimpleTraits
 using Test
 
 """
@@ -109,3 +110,5 @@ end
 
     test_arraymanifold()
 end
+
+include("metric_test.jl")

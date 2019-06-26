@@ -3,6 +3,7 @@ module ManifoldMuseum
 import Base: isapprox,
     exp,
     log,
+    angle,
     eltype,
     similar,
     convert,
@@ -10,12 +11,23 @@ import Base: isapprox,
     -,
     *
 import LinearAlgebra: dot,
-    norm
+    norm,
+    det,
+    I,
+    UniformScaling,
+    Diagonal
+using StaticArrays
 import Markdown: @doc_str
 import Distributions: _rand!
 import Random: rand
 using Random: AbstractRNG
 using SimpleTraits
+using ForwardDiff
+import Einsum: @einsum
+import OrdinaryDiffEq: ODEProblem,
+    AutoVern9,
+    Rodas5,
+    solve
 
 """
     Manifold
@@ -67,20 +79,48 @@ IsDecoratorManifold{M}`), a specific function should be implemented as a
 `@traitfn`, that transparently passes down through decorators, i.e.
 
 ```
-@traitfn myFeature(M::Mt, k...) where {Mt; IsDecoratorManifold{Mt}} = myFeature(M.manifold, k...)
+@traitfn my_feature(M::MT, k...) where {MT; IsDecoratorManifold{MT}} = my_feature(M.manifold, k...)
 ```
 or the shorter version
 ```
-@traitfn myFeature(M::::IsDecoratorManifold, k...) = myFeature(M.manifold, k...)
+@traitfn my_feature(M::::IsDecoratorManifold, k...) = my_feature(M.manifold, k...)
 ```
 such that decorators act just as pass throughs for other decorator functions and
 ```
-myFeature(M::MyManifold, k...) = #... my explicit implementation
+my_feature(M::MyManifold, k...) = #... my explicit implementation
 ```
 then implements the feature itself.
 """
 @traitdef IsDecoratorManifold{M}
 
+"""
+    base_manifold(M::Manifold)
+
+Strip all decorators on `M`, returning the underlying topological manifold.
+"""
+function base_manifold end
+
+@traitfn function base_manifold(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}}
+    return base_manifold(M.manifold)
+end
+
+@traitfn base_manifold(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}} = M
+
+@doc doc"""
+    manifold_dimension(M::Manifold)
+
+The dimension $n$ of real space $\mathbb R^n$ to which the neighborhood
+of each point of the manifold is homeomorphic.
+"""
+function manifold_dimension end
+
+@traitfn function manifold_dimension(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}}
+    error("manifold_dimension not implemented for a $(typeof(M)).")
+end
+
+@traitfn function manifold_dimension(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}}
+    manifold_dimension(base_manifold(M))
+end
 
 """
     isapprox(M::Manifold, x, y; kwargs...)
@@ -126,15 +166,13 @@ end
 
 retract(M::Manifold, x, v, t) = retract(M, x, t*v)
 
-project_tangent!(M::Manifold, w, x, v) = error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)) with input $(typof(v)).")
+project_tangent!(M::Manifold, w, x, v) = error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)) with input $(typeof(v)).")
 
 function project_tangent(M::Manifold, x, v)
     vt = similar_result(M, project_tangent, v, x)
     project_tangent!(M, vt, x, v)
     return vt
 end
-
-distance(M::Manifold, x, y) = norm(M, x, log(M, x, y))
 
 """
     inner(M::Manifold, x, v, w)
@@ -151,12 +189,26 @@ Norm of tangent vector `v` at point `x` from manifold `M`.
 norm(M::Manifold, x, v) = sqrt(inner(M, x, v, v))
 
 """
+    distance(M::Manifold, x, y)
+
+Shortest distance between the points `x` and `y` on manifold `M`.
+"""
+distance(M::Manifold, x, y) = norm(M, x, log(M, x, y))
+
+"""
+    angle(M::Manifold, x, v, w)
+
+Angle between tangent vectors `v` and `w` at point `x` from manifold `M`.
+"""
+angle(M::Manifold, x, v, w) = acos(inner(M, x, v, w) / norm(M, x, v) / norm(M, x, w))
+
+"""
     exp!(M::Manifold, y, x, v, t=1)
 
 Exponential map of tangent vector `t*v` at point `x` from manifold `M`.
 Result is saved to `y`.
 """
-exp!(M::Manifold, y, x, v, t) = exp!(M::Manifold, y, x, t*v)
+exp!(M::Manifold, y, x, v, t::Real) = exp!(M, y, x, t*v)
 
 exp!(M::Manifold, y, x, v) = error("Exponential map not implemented on a $(typeof(M)) for input point $(x) and tangent vector $(v).")
 
@@ -171,7 +223,15 @@ function exp(M::Manifold, x, v)
     return x2
 end
 
-exp(M::Manifold, x, v, t) = exp(M, x, t*v)
+exp(M::Manifold, x, v, t::Real) = exp(M, x, t*v)
+
+"""
+    exp(M::Manifold, x, v, T::AbstractVector)
+
+Exponential map of tangent vector `t*v` at point `x` from manifold `M` for
+each `t` in `T`.
+"""
+exp(M::Manifold, x, v, T::AbstractVector) = map(geodesic(M, x, v), T)
 
 log!(M::Manifold, v, x, y) = error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
 
@@ -181,7 +241,59 @@ function log(M::Manifold, x, y)
     return v
 end
 
-manifold_dimension(M::Manifold) = error("manifold_dimension not implemented for a $(typeof(M)).")
+"""
+    geodesic(M::Manifold, x, v)
+
+Get the geodesic with initial point `x` and velocity `v`. The geodesic
+is the curve of constant velocity that is locally distance-minimizing. This
+function returns a function of time, which may be a `Real` or an
+`AbstractVector`.
+"""
+geodesic(M::Manifold, x, v) = t -> exp(M, x, v, t)
+
+"""
+    geodesic(M::Manifold, x, v, t)
+
+Get the point at time `t` traveling from `x` along the geodesic with initial
+point `x` and velocity `v`.
+"""
+geodesic(M::Manifold, x, v, t::Real) = exp(M, x, v, t)
+
+"""
+    geodesic(M::Manifold, x, v, T::AbstractVector)
+
+Get the points for each `t` in `T` traveling from `x` along the geodesic with
+initial point `x` and velocity `v`.
+"""
+geodesic(M::Manifold, x, v, T::AbstractVector) = exp(M, x, v, T)
+
+"""
+    shortest_geodesic(M::Manifold, x, y)
+
+Get a geodesic with initial point `x` and point `y` at `t=1` whose length is
+the shortest path between the two points. When there are multiple shortest
+geodesics, there is no guarantee which will be returned. This function returns
+a function of time, which may be a `Real` or an `AbstractVector`.
+"""
+shortest_geodesic(M::Manifold, x, y) = geodesic(M, x, log(M, x, y))
+
+"""
+    shortest_geodesic(M::Manifold, x, y, t)
+
+Get the point at time `t` traveling from `x` along a shortest geodesic
+connecting `x` and `y`, where `y` is reached at `t=1`.
+"""
+shortest_geodesic(M::Manifold, x, y, t::Real) = geodesic(M, x, log(M, x, y), t)
+
+"""
+    shortest_geodesic(M::Manifold, x, y, T::AbstractVector)
+
+Get the points for each `t` in `T` traveling from `x` along a shortest geodesic
+connecting `x` and `y`, where `y` is reached at `t=1`.
+"""
+function shortest_geodesic(M::Manifold, x, y, T::AbstractVector)
+    return geodesic(M, x, log(M, x, y), T)
+end
 
 vector_transport!(M::Manifold, vto, x, v, y) = project_tangent!(M, vto, x, v)
 
@@ -196,12 +308,22 @@ end
 
 Distance such that `log(M, x, y)` is defined for all points within this radius.
 """
-injectivity_radius(M::Manifold, x) = 1.0
+injectivity_radius(M::Manifold, x) = Inf
 
-zero_tangent_vector(M::Manifold, x) = log(M, x, x)
+"""
+    injectivity_radius(M::Manifold, x)
+
+Infimum of the injectivity radii of all manifold points.
+"""
+injectivity_radius(M::Manifold) = Inf
+
+function zero_tangent_vector(M::Manifold, x)
+    v = similar_result(M, zero_tangent_vector, x)
+    zero_tangent_vector!(M, v, x)
+    return v
+end
+
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
-
-geodesic(M::Manifold, x, y, t) = exp(M, x, log(M, x, y), t)
 
 """
     similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where N
@@ -253,17 +375,22 @@ is_tangent_vector(M::Manifold, x::MPoint, v::TVector) = error("A validation for 
 include("ArrayManifold.jl")
 
 include("DistributionsBase.jl")
+include("Metric.jl")
+include("Euclidean.jl")
 include("Sphere.jl")
 include("ProjectedDistribution.jl")
 
 export Manifold,
-    IsDecoratorManifold
-export dimension,
+    IsDecoratorManifold,
+    Euclidean
+export manifold_dimension,
+    base_manifold,
     distance,
     inner,
     exp,
     exp!,
     geodesic,
+    shortest_geodesic,
     isapprox,
     log,
     log!,
@@ -271,5 +398,23 @@ export dimension,
     injectivity_radius,
     zero_tangent_vector,
     zero_tangent_vector!
+export Metric,
+    RiemannianMetric,
+    LorentzMetric,
+    EuclideanMetric,
+    MetricManifold,
+    HasMetric,
+    metric,
+    local_metric,
+    inverse_local_metric,
+    det_local_metric,
+    log_local_metric_density,
+    christoffel_symbols_first,
+    christoffel_symbols_second,
+    riemann_tensor,
+    ricci_tensor,
+    einstein_tensor,
+    ricci_curvature,
+    gaussian_curvature
 
 end # module
