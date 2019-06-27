@@ -395,11 +395,21 @@ end
                            y,
                            x,
                            v,
-                           args...) where {MT<:Manifold,
+                           t::Real) where {MT<:Manifold,
                                            GT<:Metric,
                                            MMT<:MetricManifold{MT,GT};
                                            HasMetric{MT,GT}}
-    return retract!(M.manifold, y, x, v, args...)
+    return retract!(M.manifold, y, x, v, t)
+end
+
+@traitfn function retract!(M::MMT,
+                           y,
+                           x,
+                           v) where {MT<:Manifold,
+                                           GT<:Metric,
+                                           MMT<:MetricManifold{MT,GT};
+                                           HasMetric{MT,GT}}
+    return retract!(M.manifold, y, x, v)
 end
 
 @traitfn function project_tangent!(M::MMT,

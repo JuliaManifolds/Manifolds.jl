@@ -18,8 +18,9 @@ import LinearAlgebra: dot,
     Diagonal
 using StaticArrays
 import Markdown: @doc_str
-import Distributions: _rand!
+import Distributions: _rand!, support
 import Random: rand
+using LinearAlgebra
 using Random: AbstractRNG
 using SimpleTraits
 using ForwardDiff
@@ -142,29 +143,105 @@ Keyword arguments can be used to specify tolerances.
 isapprox(M::Manifold, x, v, w; kwargs...) = isapprox(v, w; kwargs...)
 
 """
-    retract!(M::Manifold, y, x, v, t=1)
+    OutOfInjectivityRadiusError
+
+An error thrown when a function (for example logarithmic map or inverse
+retraction) is given arguments outside of its injectivity radius.
+"""
+struct OutOfInjectivityRadiusError <: Exception end
+
+abstract type AbstractRetractionMethod end
+
+"""
+    ExponentialRetraction
+
+Retraction using the exponential map.
+"""
+struct ExponentialRetraction <: AbstractRetractionMethod end
+
+"""
+    retract!(M::Manifold, y, x, v, [t=1], [method::AbstractRetractionMethod=ExponentialRetraction()])
 
 Retraction (cheaper, approximate version of exponential map) of tangent
 vector `t*v` at point `x` from manifold `M`.
 Result is saved to `y`.
-"""
-retract!(M::Manifold, y, x, v) = exp!(M, y, x, v)
 
-retract!(M::Manifold, y, x, v, t) = retract!(M, y, x, t*v)
+Retraction method can be specified by the last argument. Please look at the
+documentation of respective manifolds for available methods.
+"""
+retract!(M::Manifold, y, x, v, method::ExponentialRetraction) = exp!(M, y, x, v)
+
+retract!(M::Manifold, y, x, v) = retract!(M, y, x, v, ExponentialRetraction())
+
+retract!(M::Manifold, y, x, v, t::Real) = retract!(M, y, x, t*v)
+
+retract!(M::Manifold, y, x, v, t::Real, method::AbstractRetractionMethod) = retract!(M, y, x, t*v, method)
 
 """
-    retract(M::Manifold, x, v, t=1)
+    retract(M::Manifold, x, v, [t=1], [method::AbstractRetractionMethod])
 
 Retraction (cheaper, approximate version of exponential map) of tangent
 vector `t*v` at point `x` from manifold `M`.
 """
+function retract(M::Manifold, x, v, method::AbstractRetractionMethod)
+    xr = similar_result(M, retract, x, v)
+    retract!(M, xr, x, v, method)
+    return xr
+end
+
 function retract(M::Manifold, x, v)
     xr = similar_result(M, retract, x, v)
     retract!(M, xr, x, v)
     return xr
 end
 
-retract(M::Manifold, x, v, t) = retract(M, x, t*v)
+retract(M::Manifold, x, v, t::Real) = retract(M, x, t*v)
+
+retract(M::Manifold, x, v, t::Real, method::AbstractRetractionMethod) = retract(M, x, t*v, method)
+
+abstract type AbstractInverseRetractionMethod end
+
+"""
+    LogarithmicInverseRetraction
+
+Inverse retraction using the logarithmic map.
+"""
+struct LogarithmicInverseRetraction <: AbstractInverseRetractionMethod end
+
+"""
+    inverse_retract!(M::Manifold, v, x, y, [method::AbstractInverseRetractionMethod=LogarithmicInverseRetraction()])
+
+Inverse retraction (cheaper, approximate version of logarithmic map) of points
+`x` and `y`.
+Result is saved to `y`.
+
+Inverse retraction method can be specified by the last argument. Please look
+at the documentation of respective manifolds for available methods.
+"""
+inverse_retract!(M::Manifold, v, x, y, method::LogarithmicInverseRetraction) = log!(M, v, x, y)
+
+inverse_retract!(M::Manifold, v, x, y) = inverse_retract!(M, v, x, y, LogarithmicInverseRetraction())
+
+"""
+    inverse_retract(M::Manifold, x, y, [method::AbstractInverseRetractionMethod])
+
+Inverse retraction (cheaper, approximate version of logarithmic map) of points
+`x` and `y` from manifold `M`.
+
+Inverse retraction method can be specified by the last argument. Please look
+at the documentation of respective manifolds for available methods.
+"""
+function inverse_retract(M::Manifold, x, y, method::AbstractInverseRetractionMethod)
+    vr = similar_result(M, inverse_retract, x, y)
+    inverse_retract!(M, vr, x, y, method)
+    return vr
+end
+
+function inverse_retract(M::Manifold, x, y)
+    vr = similar_result(M, inverse_retract, x, y)
+    inverse_retract!(M, vr, x, y)
+    return vr
+end
 
 project_tangent!(M::Manifold, w, x, v) = error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)) with input $(typeof(v)).")
 
@@ -303,12 +380,21 @@ function vector_transport(M::Manifold, x, v, y)
     return vto
 end
 
-"""
+@doc doc"""
     injectivity_radius(M::Manifold, x)
 
-Distance such that `log(M, x, y)` is defined for all points within this radius.
+Distance $d$ such that `exp(M, x, v)` is injective for all tangent
+vectors shorter than $d$ (has a left inverse).
 """
 injectivity_radius(M::Manifold, x) = Inf
+
+@doc doc"""
+    injectivity_radius(M::Manifold, x, R::AbstractRetractionMethod)
+
+Distance $d$ such that `retract(M, x, v, R)` is injective for all tangent
+vectors shorter than $d$ (has a left inverse).
+"""
+injectivity_radius(M::Manifold, x, ::AbstractRetractionMethod) = injectivity_radius(M, x)
 
 """
     injectivity_radius(M::Manifold, x)
@@ -377,6 +463,7 @@ include("ArrayManifold.jl")
 include("DistributionsBase.jl")
 include("Metric.jl")
 include("Euclidean.jl")
+include("Rotations.jl")
 include("Sphere.jl")
 include("ProjectedDistribution.jl")
 
@@ -386,16 +473,23 @@ export Manifold,
 export manifold_dimension,
     base_manifold,
     distance,
-    inner,
     exp,
     exp!,
     geodesic,
     shortest_geodesic,
+    injectivity_radius,
+    inner,
+    inverse_retract,
+    inverse_retract!,
     isapprox,
+    is_manifold_point,
+    is_tangent_vector,
     log,
     log!,
+    manifold_dimension,
     norm,
-    injectivity_radius,
+    retract,
+    retract!,
     zero_tangent_vector,
     zero_tangent_vector!
 export Metric,
