@@ -1,4 +1,4 @@
-using ManifoldMuseum
+using Manifolds
 
 using LinearAlgebra
 using DoubleFloats
@@ -146,7 +146,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
     @testset "tangent vector distributions" begin
         for tvd ∈ tvector_distributions
-            supp = ManifoldMuseum.support(tvd)
+            supp = Manifolds.support(tvd)
             for _ in 1:10
                 @test is_tangent_vector(M, supp.x, rand(tvd))
             end
@@ -155,7 +155,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 end
 
 function test_arraymanifold()
-    M = ManifoldMuseum.Sphere(2)
+    M = Manifolds.Sphere(2)
     A = ArrayManifold(M)
     x = [1., 0., 0.]
     y = 1/sqrt(2)*[1., 1., 0.]
@@ -169,15 +169,15 @@ function test_arraymanifold()
     @test distance(A,x,y) == distance(M,x,y)
     @test norm(A,x,v) == norm(M,x,v)
     @test inner(A,x,v2,w2; atol=10^(-15)) == inner(M,x,v,w)
-    @test_throws DomainError ManifoldMuseum.is_manifold_point(M,2*y)
-    @test_throws DomainError ManifoldMuseum.is_tangent_vector(M,y,v; atol=10^(-15))
+    @test_throws DomainError Manifolds.is_manifold_point(M,2*y)
+    @test_throws DomainError Manifolds.is_tangent_vector(M,y,v; atol=10^(-15))
 
     test_manifold(A, [x, y, z],
         test_tangent_vector_broadcasting = false)
 end
 
 @testset "Sphere" begin
-    M = ManifoldMuseum.Sphere(2)
+    M = Manifolds.Sphere(2)
     types = [Vector{Float64},
              SizedVector{3, Float64},
              MVector{3, Float64},
@@ -195,16 +195,16 @@ end
             test_manifold(M,
                           pts,
                           test_reverse_diff = isa(T, Vector),
-                          point_distributions = [ManifoldMuseum.uniform_distribution(M, pts[1])],
-                          tvector_distributions = [ManifoldMuseum.normal_tvector_distribution(M, pts[1], 1.0)])
+                          point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
+                          tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
         end
     end
 
     @testset "Distribution tests" begin
-        usd_mvector = ManifoldMuseum.uniform_distribution(M, @MVector [1.0, 0.0, 0.0])
+        usd_mvector = Manifolds.uniform_distribution(M, @MVector [1.0, 0.0, 0.0])
         @test isa(rand(usd_mvector), MVector)
 
-        gtsd_mvector = ManifoldMuseum.normal_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
+        gtsd_mvector = Manifolds.normal_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
         @test isa(rand(gtsd_mvector), MVector)
     end
 
@@ -212,7 +212,7 @@ end
 end
 
 @testset "Rotations" begin
-    M = ManifoldMuseum.Rotations(2)
+    M = Manifolds.Rotations(2)
 
     types = [Matrix{Float64},
              SizedMatrix{2, 2, Float64},
@@ -221,11 +221,11 @@ end
              SizedMatrix{2, 2, Float32},
              MMatrix{2, 2, Float32}]
 
-    retraction_methods = [ManifoldMuseum.PolarRetraction(),
-                          ManifoldMuseum.QRRetraction()]
+    retraction_methods = [Manifolds.PolarRetraction(),
+                          Manifolds.QRRetraction()]
 
-    inverse_retraction_methods = [ManifoldMuseum.PolarInverseRetraction(),
-                                  ManifoldMuseum.QRInverseRetraction()]
+    inverse_retraction_methods = [Manifolds.PolarInverseRetraction(),
+                                  Manifolds.QRInverseRetraction()]
 
     for T in types
         angles = (0.0, π/2, 2π/3, π/4)
@@ -235,26 +235,26 @@ end
             test_reverse_diff = false,
             retraction_methods = retraction_methods,
             inverse_retraction_methods = inverse_retraction_methods,
-            point_distributions = [ManifoldMuseum.normal_rotation_distribution(M, pts[1], 1.0)],
-            tvector_distributions = [ManifoldMuseum.normal_tvector_distribution(M, pts[1], 1.0)])
+            point_distributions = [Manifolds.normal_rotation_distribution(M, pts[1], 1.0)],
+            tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
 
         v = log(M, pts[1], pts[2])
         @test norm(M, pts[1], v) ≈ (angles[2] - angles[1])*sqrt(2)
 
-        v14_polar = inverse_retract(M, pts[1], pts[4], ManifoldMuseum.PolarInverseRetraction())
-        p4_polar = retract(M, pts[1], v14_polar, ManifoldMuseum.PolarRetraction())
+        v14_polar = inverse_retract(M, pts[1], pts[4], Manifolds.PolarInverseRetraction())
+        p4_polar = retract(M, pts[1], v14_polar, Manifolds.PolarRetraction())
         @test isapprox(M, pts[4], p4_polar)
 
-        v14_qr = inverse_retract(M, pts[1], pts[4], ManifoldMuseum.QRInverseRetraction())
-        p4_qr = retract(M, pts[1], v14_qr, ManifoldMuseum.QRRetraction())
+        v14_qr = inverse_retract(M, pts[1], pts[4], Manifolds.QRInverseRetraction())
+        p4_qr = retract(M, pts[1], v14_qr, Manifolds.QRRetraction())
         @test isapprox(M, pts[4], p4_qr)
     end
 
     @testset "Distribution tests" begin
-        usd_mmatrix = ManifoldMuseum.normal_rotation_distribution(M, (@MMatrix [1.0 0.0; 0.0 1.0]), 1.0)
+        usd_mmatrix = Manifolds.normal_rotation_distribution(M, (@MMatrix [1.0 0.0; 0.0 1.0]), 1.0)
         @test isa(rand(usd_mmatrix), MMatrix)
 
-        gtsd_mvector = ManifoldMuseum.normal_tvector_distribution(M, (@MMatrix [1.0 0.0; 0.0 1.0]), 1.0)
+        gtsd_mvector = Manifolds.normal_tvector_distribution(M, (@MMatrix [1.0 0.0; 0.0 1.0]), 1.0)
         @test isa(rand(gtsd_mvector), MMatrix)
     end
 end

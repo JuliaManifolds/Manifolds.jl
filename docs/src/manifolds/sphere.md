@@ -1,7 +1,7 @@
 # Sphere
 
 ```@autodocs
-Modules = [ManifoldMuseum]
+Modules = [Manifolds]
 Pages = ["Sphere.jl"]
 Order = [:type, :function]
 ```

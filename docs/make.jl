@@ -1,10 +1,10 @@
-using ManifoldMuseum, Documenter
+using Manifolds, Documenter
 
 makedocs(
     # for development, we disable prettyurls
     format = Documenter.HTML(prettyurls = false),
-    modules = [ManifoldMuseum],
-    sitename = "Manifold Museum",
+    modules = [Manifolds],
+    sitename = "Manifolds",
     pages = [
         "Home" => "index.md",
         "Manifolds" => [

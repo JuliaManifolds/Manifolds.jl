@@ -1,20 +1,20 @@
-# Manifold Museum
+# Manifolds
 
-The __Manifold Museum__ aims to provide both a unified interface to define and
+Package __Manifolds__ aims to provide both a unified interface to define and
 use manifolds as well as a library of manifolds to use for your projects.
 
 ## Interface
 
 ```@autodocs
-Modules = [ManifoldMuseum]
-Pages = ["ManifoldMuseum.jl"]
+Modules = [Manifolds]
+Pages = ["Manifolds.jl"]
 Order = [:type, :function]
 ```
 
 ## Decorators
 ### ArrayManifold
 ```@autodocs
-Modules = [ManifoldMuseum]
+Modules = [Manifolds]
 Pages = ["ArrayManifold.jl"]
 Order = [:type, :function]
 ```
@@ -22,7 +22,7 @@ Order = [:type, :function]
 
 ### Metric
 ```@autodocs
-Modules = [ManifoldMuseum]
+Modules = [Manifolds]
 Pages = ["Metric.jl"]
 Order = [:type, :function]
 ```
