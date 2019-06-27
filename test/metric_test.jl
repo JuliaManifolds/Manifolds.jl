@@ -2,8 +2,8 @@
 @testset "scaled Euclidean metric" begin
     struct TestEuclidean{N} <: Manifold end
     struct TestEuclideanMetric <: Metric end
-    ManifoldMuseum.manifold_dimension(::TestEuclidean{N}) where {N} = N
-    function ManifoldMuseum.local_metric(M::MetricManifold{<:TestEuclidean,<:TestEuclideanMetric}, x)
+    Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
+    function Manifolds.local_metric(M::MetricManifold{<:TestEuclidean,<:TestEuclideanMetric}, x)
         return Diagonal(1.0:manifold_dimension(M))
     end
 
@@ -46,8 +46,8 @@ end
         r::T
     end
     struct TestSphericalMetric <: Metric end
-    ManifoldMuseum.manifold_dimension(::TestSphere{N}) where {N} = N
-    function ManifoldMuseum.local_metric(M::MetricManifold{<:TestSphere,<:TestSphericalMetric}, x)
+    Manifolds.manifold_dimension(::TestSphere{N}) where {N} = N
+    function Manifolds.local_metric(M::MetricManifold{<:TestSphere,<:TestSphericalMetric}, x)
         r = base_manifold(M).r
         d = similar(x)
         d[1] = r^2
@@ -60,7 +60,7 @@ end
     r = 10 * rand()
     θ, ϕ = π * rand(), 2π * rand()
     Sr = TestSphere{n,Float64}(r)
-    S = ManifoldMuseum.Sphere(n)
+    S = Manifolds.Sphere(n)
     g = TestSphericalMetric()
     M = MetricManifold(Sr, g)
 
@@ -139,12 +139,12 @@ end
 @testset "HasMetric trait" begin
     struct BaseManifold{N} <: Manifold end
     struct BaseManifoldMetric{M} <: Metric end
-    ManifoldMuseum.manifold_dimension(::BaseManifold{N}) where {N} = N
+    Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
     @traitimpl HasMetric{BaseManifold,BaseManifoldMetric}
-    ManifoldMuseum.inner(::BaseManifold, x, v, w) = 2 * dot(v,w)
-    ManifoldMuseum.exp!(::BaseManifold, y, x, v) = y .= x + 2 * v
-    ManifoldMuseum.log!(::BaseManifold, v, x, y) = v .= (y - x) / 2
-    ManifoldMuseum.project_tangent!(::BaseManifold, w, x, v) = w .= 2 .* v
+    Manifolds.inner(::BaseManifold, x, v, w) = 2 * dot(v,w)
+    Manifolds.exp!(::BaseManifold, y, x, v) = y .= x + 2 * v
+    Manifolds.log!(::BaseManifold, v, x, y) = v .= (y - x) / 2
+    Manifolds.project_tangent!(::BaseManifold, w, x, v) = w .= 2 .* v
 
     M = BaseManifold{3}()
     g = BaseManifoldMetric{3}()
@@ -162,12 +162,12 @@ end
     @test exp!(MM, y, x, v) === exp!(M, y, x, v)
     @test log(M, x, y) == (y - x) / 2
     @test log!(MM, v, x, y) === log!(M, v, x, y)
-    @test ManifoldMuseum.retract!(MM, y, x, v) === ManifoldMuseum.retract!(M, y, x, v)
-    @test ManifoldMuseum.retract!(MM, y, x, v, 1) === ManifoldMuseum.retract!(M, y, x, v, 1)
-    @test ManifoldMuseum.project_tangent!(MM, w, x, v) === ManifoldMuseum.project_tangent!(M, w, x, v)
+    @test Manifolds.retract!(MM, y, x, v) === Manifolds.retract!(M, y, x, v)
+    @test Manifolds.retract!(MM, y, x, v, 1) === Manifolds.retract!(M, y, x, v, 1)
+    @test Manifolds.project_tangent!(MM, w, x, v) === Manifolds.project_tangent!(M, w, x, v)
     @test zero_tangent_vector!(MM, v, x) === zero_tangent_vector!(M, v, x)
     @test injectivity_radius(MM, x) === injectivity_radius(M, x)
     @test injectivity_radius(MM) === injectivity_radius(M)
-    @test ManifoldMuseum.is_manifold_point(MM, x) === ManifoldMuseum.is_manifold_point(M, x)
-    @test ManifoldMuseum.is_tangent_vector(MM, x, v) === ManifoldMuseum.is_tangent_vector(M, x, v)
+    @test Manifolds.is_manifold_point(MM, x) === Manifolds.is_manifold_point(M, x)
+    @test Manifolds.is_tangent_vector(MM, x, v) === Manifolds.is_tangent_vector(M, x, v)
 end

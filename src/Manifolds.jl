@@ -1,4 +1,4 @@
-module ManifoldMuseum
+module Manifolds
 
 import Base: isapprox,
     exp,
