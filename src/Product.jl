@@ -52,6 +52,10 @@ function uview_element(x::AbstractArray, range, shape::Size{S}) where S
     return SizedAbstractArray{Tuple{S...}}(uview(x, range))
 end
 
+function suview_element(x::AbstractArray, range, shape::Size)
+    return reshape(uview(x, range), shape)
+end
+
 function det_local_metric(M::MetricManifold{Product{<:Manifold,TRanges,TSizes},ProductMetric}, x) where {TRanges, TSizes}
     dets = map(ziptuples(M.manifolds, TRanges, TSizes)) do d
         return det_local_metric(d[1], view_element(x, d[2], d[3]))
@@ -62,9 +66,9 @@ end
 function inner(M::Product{TM, TRanges, TSizes}, x, v, w) where {TM, TRanges, TSizes}
     subproducts = map(ziptuples(M.manifolds, TRanges, TSizes)) do t
         inner(t[1],
-             uview_element(x, t[2], t[3]),
-             uview_element(v, t[2], t[3]),
-             uview_element(w, t[2], t[3]))
+             suview_element(x, t[2], t[3]),
+             suview_element(v, t[2], t[3]),
+             suview_element(w, t[2], t[3]))
     end
     return sum(subproducts)
 end
@@ -73,8 +77,8 @@ function exp!(M::Product{TM, TRanges, TSizes}, y, x, v) where {TM, TRanges, TSiz
     map(ziptuples(M.manifolds, TRanges, TSizes)) do t
         exp!(t[1],
              uview_element(y, t[2], t[3]),
-             uview_element(x, t[2], t[3]),
-             uview_element(v, t[2], t[3]))
+             suview_element(x, t[2], t[3]),
+             suview_element(v, t[2], t[3]))
     end
     return y
 end
@@ -83,8 +87,8 @@ function log!(M::Product{TM, TRanges, TSizes}, v, x, y) where {TM, TRanges, TSiz
     map(ziptuples(M.manifolds, TRanges, TSizes)) do t
         log!(t[1],
              uview_element(v, t[2], t[3]),
-             uview_element(x, t[2], t[3]),
-             uview_element(y, t[2], t[3]))
+             suview_element(x, t[2], t[3]),
+             suview_element(y, t[2], t[3]))
     end
     return v
 end
