@@ -15,6 +15,10 @@ Sphere(n::Int) = Sphere{n}()
 
 @traitimpl HasMetric{Sphere,EuclideanMetric}
 
+function representation_size(::Sphere{N}, ::Type{T}) where {N,T<:Union{MPoint, TVector, CoTVector}}
+    return Size(N+1,)
+end
+
 @doc doc"""
     manifold_dimension(S::Sphere)
 
@@ -62,8 +66,10 @@ end
 
 injectivity_radius(S::Sphere, args...) = π
 
-zero_tangent_vector(S::Sphere, x) = zero(x)
-zero_tangent_vector!(S::Sphere, v, x) = (v .= zero(x))
+function zero_tangent_vector!(S::Sphere, v, x)
+    fill!(v, 0)
+    return v
+end
 
 """
     uniform_sphere_distribution(S::Sphere, x)

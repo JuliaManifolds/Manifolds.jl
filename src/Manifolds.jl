@@ -24,6 +24,7 @@ using LinearAlgebra
 using Random: AbstractRNG
 using SimpleTraits
 using ForwardDiff
+using UnsafeArrays
 import Einsum: @einsum
 import OrdinaryDiffEq: ODEProblem,
     AutoVern9,
@@ -114,6 +115,16 @@ The dimension $n$ of real space $\mathbb R^n$ to which the neighborhood
 of each point of the manifold is homeomorphic.
 """
 function manifold_dimension end
+
+@doc doc"""
+    representation_size(M::Manifold, ::Type{T}) where {T}
+
+The size of array representing an object of type `T` on manifold `M`,
+for example point, tangent vector or cotangent vector.
+"""
+function representation_size(M::Manifold, ::Type{T}) where {T}
+    error("representation_size not implemented for manifold $(typeof(M)) and type $(T).")
+end
 
 @traitfn function manifold_dimension(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}}
     error("manifold_dimension not implemented for a $(typeof(M)).")
@@ -458,11 +469,14 @@ the assumption is to be optimistic.
 is_tangent_vector(M::Manifold, x, v; kwargs...) = true
 is_tangent_vector(M::Manifold, x::MPoint, v::TVector) = error("A validation for a $(typeof(v)) in the tangent space of a $(typeof(x)) on $(typeof(M)) not implemented.")
 
+include("utils.jl")
+
 include("ArrayManifold.jl")
 
 include("DistributionsBase.jl")
 include("Metric.jl")
 include("Euclidean.jl")
+include("Product.jl")
 include("Rotations.jl")
 include("Sphere.jl")
 include("ProjectedDistribution.jl")

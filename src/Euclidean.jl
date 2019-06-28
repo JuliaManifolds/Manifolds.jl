@@ -19,6 +19,10 @@ struct Euclidean{T<:Tuple} <: Manifold where {T} end
 Euclidean(n::Int) = Euclidean{Tuple{n}}()
 Euclidean(m::Int, n::Int) = Euclidean{Tuple{m,n}}()
 
+function representation_size(::Euclidean{S}, ::Type{T}) where {S,T<:Union{MPoint, TVector, CoTVector}}
+    return Size(S.parameters[1]...)
+end
+
 @generated manifold_dimension(::Euclidean{T}) where {T} = *(T.parameters...)
 
 struct EuclideanMetric <: RiemannianMetric end

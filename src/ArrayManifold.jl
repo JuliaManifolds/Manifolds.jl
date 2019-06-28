@@ -12,6 +12,10 @@ end
 convert(::Type{M},m::ArrayManifold{M}) where M <: Manifold = m.manifold
 convert(::Type{ArrayManifold{M}},m::M) where M <: Manifold = ArrayManifold(M)
 
+function representation_size(M::ArrayManifold, ::Type{T}) where {T}
+    return representation_size(M.manifold, T)
+end
+
 manifold_dimension(M::ArrayManifold) = manifold_dimension(M.manifold)
 
 @traitimpl IsDecoratorManifold{ArrayManifold}

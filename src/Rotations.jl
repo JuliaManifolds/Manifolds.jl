@@ -13,6 +13,11 @@ generates the $\mathrm{SO}(n) \subset \mathbb R^{n\times n}$
 struct Rotations{N} <: Manifold end
 Rotations(n::Int) = Rotations{n}()
 
+function representation_size(::Rotations{N}, ::Type{T}) where {N,T<:Union{MPoint, TVector, CoTVector}}
+    return (N, N)
+end
+
+
 @doc doc"""
     manifold_dimension(S::Rotations)
 

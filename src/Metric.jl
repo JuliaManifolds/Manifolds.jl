@@ -40,6 +40,11 @@ struct MetricManifold{M<:Manifold,G<:Metric} <: Manifold
     metric::G
 end
 
+function representation_size(M::MetricManifold, ::Type{T}) where {T}
+    return representation_size(M.manifold, T)
+end
+
+
 convert(::Type{MT},M::MetricManifold{MT,GT}) where {MT,GT} = M.manifold
 
 @traitimpl IsDecoratorManifold{MetricManifold}
