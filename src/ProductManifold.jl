@@ -18,7 +18,7 @@ end
 
 function ProductManifold(manifolds...)
     sizes = map(m -> representation_size(m, MPoint), manifolds)
-    lengths = map(s -> prod(s), sizes)
+    lengths = map(prod, sizes)
     ranges = UnitRange{Int64}[]
     k = 1
     for len ∈ lengths
@@ -31,7 +31,7 @@ function ProductManifold(manifolds...)
 end
 
 function representation_size(M::ProductManifold, ::Type{T}) where {T}
-    return (sum(map(m -> representation_size(m, T), M.manifolds)),)
+    return (mapreduce(m -> representation_size(m, T), +, M.manifolds),)
 end
 
 manifold_dimension(M::ProductManifold) = sum(map(m -> manifold_dimension(m), M.manifolds))

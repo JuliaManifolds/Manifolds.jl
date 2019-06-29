@@ -122,8 +122,14 @@ function manifold_dimension end
 The size of array representing an object of type `T` on manifold `M`,
 for example point, tangent vector or cotangent vector.
 """
-function representation_size(M::Manifold, ::Type{T}) where {T}
+function representation_size end
+
+@traitfn function representation_size(M::MT, ::Type{T}) where {MT<:Manifold,T;!IsDecoratorManifold{MT}}
     error("representation_size not implemented for manifold $(typeof(M)) and type $(T).")
+end
+
+@traitfn function representation_size(M::MT, ::Type{T}) where {MT<:Manifold,T;IsDecoratorManifold{MT}}
+    return representation_size(base_manifold(M), T)
 end
 
 @traitfn function manifold_dimension(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}}
