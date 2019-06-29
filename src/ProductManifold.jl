@@ -26,12 +26,81 @@ function ProductManifold(manifolds...)
         k += len
     end
     TRanges = tuple(ranges...)
-    TSizes = tuple(sizes...)
+    TSizes = Tuple{map(s -> Tuple{s...}, sizes)...}
     return ProductManifold{typeof(manifolds), TRanges, TSizes}(manifolds)
 end
 
+struct ProductView{TM<:ProductManifold,T,N,TData<:AbstractArray{T,N},TV<:Tuple} <: AbstractArray{T,N}
+    M::TM
+    data::TData
+    views::TV
+end
+
+# The two-argument version of this constructor is substantially faster than
+# the generic one.
+function ProductView(M::ProductManifold{TM, TRanges, Tuple{Size1, Size2}}, data::TData) where {TM, TRanges, Size1, Size2, T, N, TData<:AbstractArray{T,N}}
+    #println("PV2")
+    views = (SizedAbstractArray{Size1}(view(data, TRanges[1])),
+             SizedAbstractArray{Size2}(view(data, TRanges[2])))
+    return ProductView{typeof(M), T, N, TData, typeof(views)}(M, data, views)
+end
+
+function ProductView(M::ProductManifold{TM, TRanges, TSizes}, data::TData) where {TM, TRanges, TSizes, TData<:AbstractArray}
+    #println("PVn")
+    views = map(ziptuples(TRanges, TSizes)) do t
+        SizedAbstractArray{t[2]}(view(data, t[1]))
+    end
+    return ProductView{ProductManifold{TM, TRanges, TSizes}, TData, typeof(views)}(M, data, views)
+end
+
+Base.BroadcastStyle(::Type{<:ProductView}) = Broadcast.ArrayStyle{ProductView}()
+
+function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{ProductView}}, ::Type{ElType}) where ElType
+    # Scan the inputs for the ProductView:
+    A = find_pv(bc)
+    return ProductView(A.M, similar(A.data, ElType))
+end
+
+Base.dataids(x::ProductView) = Base.dataids(x.data)
+
+"""
+    find_pv(x...)
+
+`A = find_pv(x...)` returns the first `ProductView` among the arguments.
+"""
+find_pv(bc::Base.Broadcast.Broadcasted) = find_pv(bc.args)
+find_pv(args::Tuple) = find_pv(find_pv(args[1]), Base.tail(args))
+find_pv(x) = x
+find_pv(a::ProductView, rest) = a
+find_pv(::Any, rest) = find_pv(rest)
+
+size(x::ProductView) = size(x.data)
+Base.@propagate_inbounds getindex(x::ProductView, i) = getindex(x.data, i)
+Base.@propagate_inbounds setindex!(x::ProductView, val, i) = setindex!(x.data, val, i)
+
+(+)(v1::ProductView, v2::ProductView) = ProductView(v1.M, v1.data + v2.data)
+(-)(v1::ProductView, v2::ProductView) = ProductView(v1.M, v1.data - v2.data)
+(-)(v::ProductView) = ProductView(v.M, -v.data)
+(*)(a::Number, v::ProductView) = ProductView(v.M, a*v.data)
+
+eltype(::Type{ProductView{TM, TData, TV}}) where {TM, TData, TV} = eltype(TData)
+similar(x::ProductView) = ProductView(x.M, similar(x.data))
+similar(x::ProductView, ::Type{T}) where T = ProductView(x.M, similar(x.data, T))
+
+function isapprox(M::ProductManifold, x, y; kwargs...)
+    return mapreduce(&, ziptuples(M.manifolds, x.views, y.views)) do t
+        return isapprox(t[1], t[2], t[3]; kwargs...)
+    end
+end
+
+function isapprox(M::ProductManifold, x, v, w; kwargs...)
+    return mapreduce(&, ziptuples(M.manifolds, x.views, v.views, w.views)) do t
+        return isapprox(t[1], t[2], t[3], t[4]; kwargs...)
+    end
+end
+
 function representation_size(M::ProductManifold, ::Type{T}) where {T}
-    return (mapreduce(m -> representation_size(m, T), +, M.manifolds),)
+    return (mapreduce(m -> sum(representation_size(m, T)), +, M.manifolds),)
 end
 
 manifold_dimension(M::ProductManifold) = sum(map(m -> manifold_dimension(m), M.manifolds))
@@ -48,47 +117,22 @@ function inverse_local_metric(M::MetricManifold{<:ProductManifold,ProductMetric}
     error("TODO")
 end
 
-function uview_element(x::AbstractArray, range, shape::Size{S}) where S
-    return SizedAbstractArray{Tuple{S...}}(uview(x, range))
-end
-
-function suview_element(x::AbstractArray, range, shape::Size)
-    return reshape(uview(x, range), shape)
-end
-
-function det_local_metric(M::MetricManifold{ProductManifold{<:Manifold,TRanges,TSizes},ProductMetric}, x) where {TRanges, TSizes}
-    dets = map(ziptuples(M.manifolds, TRanges, TSizes)) do d
-        return det_local_metric(d[1], view_element(x, d[2], d[3]))
-    end
+function det_local_metric(M::MetricManifold{ProductManifold, ProductMetric}, x::ProductView)
+    dets = map(det_local_metric, M.manifolds, x.views)
     return prod(dets)
 end
 
-function inner(M::ProductManifold{TM, TRanges, TSizes}, x, v, w) where {TM, TRanges, TSizes}
-    subproducts = map(ziptuples(M.manifolds, TRanges, TSizes)) do t
-        inner(t[1],
-             suview_element(x, t[2], t[3]),
-             suview_element(v, t[2], t[3]),
-             suview_element(w, t[2], t[3]))
-    end
+function inner(M::ProductManifold, x::ProductView, v::ProductView, w::ProductView)
+    subproducts = map(inner, M.manifolds, x.views, v.views, w.views)
     return sum(subproducts)
 end
 
-function exp!(M::ProductManifold{TM, TRanges, TSizes}, y, x, v) where {TM, TRanges, TSizes}
-    map(ziptuples(M.manifolds, TRanges, TSizes)) do t
-        exp!(t[1],
-             uview_element(y, t[2], t[3]),
-             suview_element(x, t[2], t[3]),
-             suview_element(v, t[2], t[3]))
-    end
+function exp!(M::ProductManifold, y::ProductView, x::ProductView, v::ProductView)
+    map(exp!, M.manifolds, y.views, x.views, v.views)
     return y
 end
 
-function log!(M::ProductManifold{TM, TRanges, TSizes}, v, x, y) where {TM, TRanges, TSizes}
-    map(ziptuples(M.manifolds, TRanges, TSizes)) do t
-        log!(t[1],
-             uview_element(v, t[2], t[3]),
-             suview_element(x, t[2], t[3]),
-             suview_element(y, t[2], t[3]))
-    end
+function log!(M::ProductManifold, v::ProductView, x::ProductView, y::ProductView)
+    map(log!, M.manifolds, v.views, x.views, y.views)
     return v
 end

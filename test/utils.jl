@@ -40,6 +40,16 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test manifold_dimension(M) ≥ 0
     end
 
+    @testset "representation" begin
+        for T ∈ (Manifolds.MPoint, Manifolds.TVector, Manifolds.CoTVector)
+            repr = Manifolds.representation_size(M, T)
+            @test isa(repr, Tuple)
+            for rs ∈ repr
+                @test rs > 0
+            end
+        end
+    end
+
     @testset "injectivity radius" begin
         @test injectivity_radius(M, pts[1]) > 0
         for rm ∈ retraction_methods

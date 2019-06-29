@@ -27,6 +27,19 @@ lengths, the result is trimmed to the length of the shorter tuple.
     ex
 end
 
+"""
+    ziptuples(a, b, c, d)
+
+Zips tuples `a`, `b`, `c` and `d` in a fast, type-stable way. If they have
+different lengths, the result is trimmed to the length of the shorter tuple.
+"""
+@generated function ziptuples(a::NTuple{N,Any}, b::NTuple{M,Any}, c::NTuple{L,Any}, d::NTuple{K,Any}) where {N,M,L,K}
+    ex = Expr(:tuple)
+    for i = 1:min(N, M, L, K)
+        push!(ex.args, :((a[$i], b[$i], c[$i], d[$i])))
+    end
+    ex
+end
 
 # conversion of SizedAbstractArray from StaticArrays.jl
 """
@@ -91,7 +104,6 @@ import Base.Array
 @inline convert(::Type{AbstractArray{T}}, sa::SizedAbstractArray{S,T}) where {T,S} = sa.data
 @inline convert(::Type{AbstractArray{T,N}}, sa::SizedAbstractArray{S,T,N}) where {T,S,N} = sa.data
 
-import Base: getindex, setindex!
 Base.@propagate_inbounds getindex(a::SizedAbstractArray, i::Int) = getindex(a.data, i)
 Base.@propagate_inbounds setindex!(a::SizedAbstractArray, v, i::Int) = setindex!(a.data, v, i)
 

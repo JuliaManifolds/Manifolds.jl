@@ -19,8 +19,12 @@ struct Euclidean{T<:Tuple} <: Manifold where {T} end
 Euclidean(n::Int) = Euclidean{Tuple{n}}()
 Euclidean(m::Int, n::Int) = Euclidean{Tuple{m,n}}()
 
-function representation_size(::Euclidean{S}, ::Type{T}) where {S,T<:Union{MPoint, TVector, CoTVector}}
-    return Size(S.parameters[1]...)
+function representation_size(::Euclidean{Tuple{n}}, ::Type{T}) where {n,T<:Union{MPoint, TVector, CoTVector}}
+    return (n,)
+end
+
+function representation_size(::Euclidean{Tuple{m,n}}, ::Type{T}) where {m,n,T<:Union{MPoint, TVector, CoTVector}}
+    return (m,n)
 end
 
 @generated manifold_dimension(::Euclidean{T}) where {T} = *(T.parameters...)
@@ -41,9 +45,10 @@ det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = one(eltype(
 
 log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = zero(eltype(x))
 
-inner(::Euclidean, x, v, w) = dot(v, w)
-inner(::MetricManifold{<:Manifold,EuclideanMetric}, x, v, w) = dot(v, w)
+@inline inner(::Euclidean, x, v, w) = dot(v, w)
+@inline inner(::MetricManifold{<:Manifold,EuclideanMetric}, x, v, w) = dot(v, w)
 
+distance(::Euclidean, x, y) = norm(x-y)
 norm(::Euclidean, x, v) = norm(v)
 norm(::MetricManifold{<:Manifold,EuclideanMetric}, x, v) = norm(v)
 

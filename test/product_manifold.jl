@@ -14,9 +14,10 @@ include("utils.jl")
 
     for T in types
         @testset "Type $T" begin
-            pts = [convert(T, [1.0, 0.0, 0.0, 0.0, 0.0]),
+            pts_base = [convert(T, [1.0, 0.0, 0.0, 0.0, 0.0]),
                    convert(T, [0.0, 1.0, 0.0, 1.0, 0.0]),
                    convert(T, [0.0, 0.0, 1.0, 0.0, 0.1])]
+            pts = map(p -> Manifolds.ProductView(M, p), pts_base)
             test_manifold(M,
                           pts,
                           test_reverse_diff = isa(T, Vector))

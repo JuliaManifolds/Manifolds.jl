@@ -16,7 +16,7 @@ Sphere(n::Int) = Sphere{n}()
 @traitimpl HasMetric{Sphere,EuclideanMetric}
 
 function representation_size(::Sphere{N}, ::Type{T}) where {N,T<:Union{MPoint, TVector, CoTVector}}
-    return Size(N+1,)
+    return (N+1,)
 end
 
 @doc doc"""
@@ -37,7 +37,7 @@ compute the inner product of the two tangent vectors `w,v` from the tangent
 plane at `x` on the sphere `S=`$\mathbb S^n$ using the restriction of the
 metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
-inner(S::Sphere, x, w, v) = dot(w, v)
+@inline inner(S::Sphere, x, w, v) = dot(w, v)
 
 norm(S::Sphere, x, v) = norm(v)
 
