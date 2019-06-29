@@ -1,5 +1,5 @@
 @doc doc"""
-    Product{TM<:Tuple, TRanges<:Tuple, TSizes<:Tuple} <: Manifold
+    ProductManifold{TM<:Tuple, TRanges<:Tuple, TSizes<:Tuple} <: Manifold
 
 Product manifold $M_1 \times M_2 \times \dots \times M_n$ with product geometry.
 `TRanges` and `TSizes` statically define the relationship between representation
@@ -8,15 +8,15 @@ and cotangent vectors of respective manifolds.
 
 # Constructor
 
-    Product(M_1, M_2, ..., M_n)
+    ProductManifold(M_1, M_2, ..., M_n)
 
 generates the product manifold $M_1 \times M_2 \times \dots \times M_n$
 """
-struct Product{TM<:Tuple, TRanges, TSizes} <: Manifold
+struct ProductManifold{TM<:Tuple, TRanges, TSizes} <: Manifold
     manifolds::TM
 end
 
-function Product(manifolds...)
+function ProductManifold(manifolds...)
     sizes = map(m -> representation_size(m, MPoint), manifolds)
     lengths = map(s -> prod(s), sizes)
     ranges = UnitRange{Int64}[]
@@ -27,24 +27,24 @@ function Product(manifolds...)
     end
     TRanges = tuple(ranges...)
     TSizes = tuple(sizes...)
-    return Product{typeof(manifolds), TRanges, TSizes}(manifolds)
+    return ProductManifold{typeof(manifolds), TRanges, TSizes}(manifolds)
 end
 
-function representation_size(M::Product, ::Type{T}) where {T}
+function representation_size(M::ProductManifold, ::Type{T}) where {T}
     return (sum(map(m -> representation_size(m, T), M.manifolds)),)
 end
 
-manifold_dimension(M::Product) = sum(map(m -> manifold_dimension(m), M.manifolds))
+manifold_dimension(M::ProductManifold) = sum(map(m -> manifold_dimension(m), M.manifolds))
 
 struct ProductMetric <: Metric end
 
-@traitimpl HasMetric{Product,ProductMetric}
+@traitimpl HasMetric{ProductManifold,ProductMetric}
 
-function local_metric(::MetricManifold{<:Product,ProductMetric}, x)
+function local_metric(::MetricManifold{<:ProductManifold,ProductMetric}, x)
     error("TODO")
 end
 
-function inverse_local_metric(M::MetricManifold{<:Product,ProductMetric}, x)
+function inverse_local_metric(M::MetricManifold{<:ProductManifold,ProductMetric}, x)
     error("TODO")
 end
 
@@ -56,14 +56,14 @@ function suview_element(x::AbstractArray, range, shape::Size)
     return reshape(uview(x, range), shape)
 end
 
-function det_local_metric(M::MetricManifold{Product{<:Manifold,TRanges,TSizes},ProductMetric}, x) where {TRanges, TSizes}
+function det_local_metric(M::MetricManifold{ProductManifold{<:Manifold,TRanges,TSizes},ProductMetric}, x) where {TRanges, TSizes}
     dets = map(ziptuples(M.manifolds, TRanges, TSizes)) do d
         return det_local_metric(d[1], view_element(x, d[2], d[3]))
     end
     return prod(dets)
 end
 
-function inner(M::Product{TM, TRanges, TSizes}, x, v, w) where {TM, TRanges, TSizes}
+function inner(M::ProductManifold{TM, TRanges, TSizes}, x, v, w) where {TM, TRanges, TSizes}
     subproducts = map(ziptuples(M.manifolds, TRanges, TSizes)) do t
         inner(t[1],
              suview_element(x, t[2], t[3]),
@@ -73,7 +73,7 @@ function inner(M::Product{TM, TRanges, TSizes}, x, v, w) where {TM, TRanges, TSi
     return sum(subproducts)
 end
 
-function exp!(M::Product{TM, TRanges, TSizes}, y, x, v) where {TM, TRanges, TSizes}
+function exp!(M::ProductManifold{TM, TRanges, TSizes}, y, x, v) where {TM, TRanges, TSizes}
     map(ziptuples(M.manifolds, TRanges, TSizes)) do t
         exp!(t[1],
              uview_element(y, t[2], t[3]),
@@ -83,7 +83,7 @@ function exp!(M::Product{TM, TRanges, TSizes}, y, x, v) where {TM, TRanges, TSiz
     return y
 end
 
-function log!(M::Product{TM, TRanges, TSizes}, v, x, y) where {TM, TRanges, TSizes}
+function log!(M::ProductManifold{TM, TRanges, TSizes}, v, x, y) where {TM, TRanges, TSizes}
     map(ziptuples(M.manifolds, TRanges, TSizes)) do t
         log!(t[1],
              uview_element(v, t[2], t[3]),
