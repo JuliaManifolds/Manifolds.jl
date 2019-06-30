@@ -30,6 +30,7 @@ function add_manifold(M::Manifold, pts, name;
     SUITE["manifolds"][name]["isapprox (pt)"] = @benchmarkable isapprox($M, $(pts[1]), $(pts[2]))
     SUITE["manifolds"][name]["isapprox (tv)"] = @benchmarkable isapprox($M, $(pts[1]), $tv1, $tv2)
     SUITE["manifolds"][name]["2 * tv1 + 3 * tv2"] = @benchmarkable 2 * $tv1 + 3 * $tv2
+    SUITE["manifolds"][name]["tv = 2 * tv1 + 3 * tv2"] = @benchmarkable $tv = 2 * $tv1 + 3 * $tv2
     if test_tangent_vector_broadcasting
         SUITE["manifolds"][name]["tv = 2 .* tv1 .+ 3 .* tv2"] = @benchmarkable $tv = 2 .* $tv1 .+ 3 .* $tv2
         SUITE["manifolds"][name]["tv .= 2 .* tv1 .+ 3 .* tv2"] = @benchmarkable $tv .= 2 .* $tv1 .+ 3 .* $tv2
@@ -81,7 +82,7 @@ function add_manifold_benchmarks()
     pts_prd_base = [[1.0, 0.0, 0.0, 0.0, 0.0],
                     [0.0, 1.0, 0.0, 1.0, 0.0],
                     [0.0, 0.0, 1.0, 0.0, 0.1]]
-    pts_prod = map(p -> Manifolds.ProductView(m_prod, p), pts_prd_base)
+    pts_prod = map(p -> Manifolds.ProductArray(m_prod, p), pts_prd_base)
 
     add_manifold(m_prod, pts_prod, "ProductManifold")
 end

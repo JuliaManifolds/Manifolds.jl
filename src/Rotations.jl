@@ -64,7 +64,7 @@ point at `y`.
 function log!(S::Rotations, v::TV, x, y) where TV
     U = transpose(x) * y
     # MMatrix doesn't have `log` defined
-    U1 = TV(real(log(Array(U))))
+    U1 = real(log(Array(U)))
     v .= (U1 .- transpose(U1))./2
     return v
 end

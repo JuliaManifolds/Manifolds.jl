@@ -61,8 +61,8 @@ struct SizedAbstractArray{S<:Tuple, T, N, M, TData<:AbstractArray{T,M}} <: Stati
         new{S,T,N,M,TData}(a)
     end
 
-    function SizedAbstractArray{S, T, N, M, TData}(::UndefInitializer) where {S, T, N, M, TData<:AbstractArray}
-        new{S, T, N, M, TData}(TData(undef, S.parameters...))
+    function SizedAbstractArray{S, T, N, M}(::UndefInitializer) where {S, T, N, M, TData<:AbstractArray}
+        new{S, T, N, M, Array{T, M}}(Array{T, M}(undef, S.parameters...))
     end
 end
 
@@ -72,7 +72,6 @@ end
 
 @inline SizedAbstractArray{S,T,N}(::UndefInitializer) where {S,T,N} = SizedAbstractArray{S,T,N,N}(undef)
 @inline SizedAbstractArray{S,T}(::UndefInitializer) where {S,T} = SizedAbstractArray{S,T,StaticArrays.tuple_length(S),StaticArrays.tuple_length(S)}(undef)
-
 @generated function (::Type{SizedAbstractArray{S,T,N,M,TData}})(x::NTuple{L,Any}) where {S,T,N,M,TData,L}
     if L != StaticArrays.tuple_prod(S)
         error("Dimension mismatch")
@@ -80,7 +79,7 @@ end
     exprs = [:(a[$i] = x[$i]) for i = 1:L]
     return quote
         $(Expr(:meta, :inline))
-        a = SizedAbstractArray{S,T,N,M,TData}(undef)
+        a = SizedAbstractArray{S,T,N,M}(undef)
         @inbounds $(Expr(:block, exprs...))
         return a
     end
@@ -127,3 +126,5 @@ package.
 function promote_rule(::Type{<:SizedAbstractArray{S,T,N,M,TDataA}}, ::Type{<:SizedAbstractArray{S,U,N,M,TDataB}}) where {S,T,U,N,M,TDataA,TDataB}
     SizedAbstractArray{S,promote_type(T,U),N,M,T,promote_type(TDataA, TDataB)}
 end
+
+@inline copy(a::SizedAbstractArray) = typeof(a)(copy(a.data))
