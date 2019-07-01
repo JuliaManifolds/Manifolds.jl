@@ -18,6 +18,22 @@ end
 
 ProductManifold(manifolds::Manifold...) = ProductManifold{typeof(manifolds)}(manifolds)
 
+function cross(M1::Manifold, M2::Manifold)
+    return ProductManifold(M1, M2)
+end
+
+function cross(M1::ProductManifold, M2::Manifold)
+    return ProductManifold(M1.manifolds..., M2)
+end
+
+function cross(M1::Manifold, M2::ProductManifold)
+    return ProductManifold(M1, M2.manifolds...)
+end
+
+function cross(M1::ProductManifold, M2::ProductManifold)
+    return ProductManifold(M1.manifolds..., M2.manifolds...)
+end
+
 struct ShapeSpecification{TRanges, TSizes} end
 
 function ShapeSpecification(manifolds::Manifold...)

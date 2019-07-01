@@ -18,6 +18,7 @@ import Base: isapprox,
 import LinearAlgebra: dot,
     norm,
     det,
+    cross,
     I,
     UniformScaling,
     Diagonal

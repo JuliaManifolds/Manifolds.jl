@@ -4,6 +4,7 @@ include("utils.jl")
     M1 = Manifolds.Sphere(2)
     M2 = Manifolds.Euclidean(2)
     Mse = Manifolds.ProductManifold(M1, M2)
+    @test Mse == M1 × M2
     shape_se = Manifolds.ShapeSpecification(M1, M2)
 
     types = [Vector{Float64},
