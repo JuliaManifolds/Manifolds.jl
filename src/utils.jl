@@ -65,7 +65,7 @@ struct SizedAbstractArray{S<:Tuple, T, N, M, TData<:AbstractArray{T,M}} <: Stati
         new{S, T, N, 1, Array{T, 1}}(Array{T, 1}(undef, StaticArrays.tuple_prod(S)))
     end
     function SizedAbstractArray{S, T, N, N}(::UndefInitializer) where {S, T, N, TData<:AbstractArray}
-        new{S, T, N, N, Array{T, N}}(Array{T, N}(undef, S.parameters...))
+        new{S, T, N, N, Array{T, N}}(Array{T, N}(undef, size_to_tuple(S)...))
     end
 end
 
@@ -109,13 +109,13 @@ import Base.Array
 Base.@propagate_inbounds getindex(a::SizedAbstractArray, i::Int) = getindex(a.data, i)
 Base.@propagate_inbounds setindex!(a::SizedAbstractArray, v, i::Int) = setindex!(a.data, v, i)
 
-SizedVector{S,T,M} = SizedAbstractArray{Tuple{S},T,1,M}
-@inline SizedVector{S}(a::AbstractArray{T,M}) where {S,T,M} = SizedAbstractArray{Tuple{S},T,1,M}(a)
-@inline SizedVector{S}(x::NTuple{L,T}) where {S,T,L} = SizedAbstractArray{Tuple{S},T,1,1}(x)
+SizedAbstractVector{S,T,M} = SizedAbstractArray{Tuple{S},T,1,M}
+@inline SizedAbstractVector{S}(a::AbstractArray{T,M}) where {S,T,M} = SizedAbstractArray{Tuple{S},T,1,M}(a)
+@inline SizedAbstractVector{S}(x::NTuple{L,T}) where {S,T,L} = SizedAbstractArray{Tuple{S},T,1,1}(x)
 
-SizedMatrix{S1,S2,T,M} = SizedAbstractArray{Tuple{S1,S2},T,2,M}
-@inline SizedMatrix{S1,S2}(a::AbstractArray{T,M}) where {S1,S2,T,M} = SizedAbstractArray{Tuple{S1,S2},T,2,M}(a)
-@inline SizedMatrix{S1,S2}(x::NTuple{L,T}) where {S1,S2,T,L} = SizedAbstractArray{Tuple{S1,S2},T,2,2}(x)
+SizedAbstractMatrix{S1,S2,T,M} = SizedAbstractArray{Tuple{S1,S2},T,2,M}
+@inline SizedAbstractMatrix{S1,S2}(a::AbstractArray{T,M}) where {S1,S2,T,M} = SizedAbstractArray{Tuple{S1,S2},T,2,M}(a)
+@inline SizedAbstractMatrix{S1,S2}(x::NTuple{L,T}) where {S1,S2,T,L} = SizedAbstractArray{Tuple{S1,S2},T,2,2}(x)
 
 """
     Size(dims)(array)
@@ -131,3 +131,16 @@ function promote_rule(::Type{<:SizedAbstractArray{S,T,N,M,TDataA}}, ::Type{<:Siz
 end
 
 @inline copy(a::SizedAbstractArray) = typeof(a)(copy(a.data))
+
+similar(::Type{<:SizedAbstractArray{S,T,N,M}},::Type{T2}) where {S,T,N,M,T2} = SizedAbstractArray{S,T2,N,M}(undef)
+similar(::Type{SA},::Type{T},s::Size{S}) where {SA<:SizedAbstractArray,T,S} = sizedabstractarray_similar_type(T,s,StaticArrays.length_val(s))(undef)
+sizedabstractarray_similar_type(::Type{T},s::Size{S},::Type{Val{D}}) where {T,S,D} = SizedAbstractArray{Tuple{S...},T,D,length(s)}
+
+"""
+    size_to_tuple(::Type{S}) where S<:Tuple
+
+Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
+"""
+@generated function size_to_tuple(::Type{S}) where S<:Tuple
+    return tuple(S.parameters...)
+end
