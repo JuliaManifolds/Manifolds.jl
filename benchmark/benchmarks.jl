@@ -46,10 +46,14 @@ function add_manifold(M::Manifold, pts, name;
         SUITE["manifolds"][name]["tv .= 2 .* tv1 .+ 3 .* tv2"] = @benchmarkable $tv .= 2 .* $tv1 .+ 3 .* $tv2
     end
     for pd ∈ point_distributions
-        SUITE["manifolds"][name]["point distribution "*string(pd)] = @benchmarkable rand($pd)
+        distr_name = string(pd)
+        distr_name = distr_name[1:min(length(distr_name), 50)]
+        SUITE["manifolds"][name]["point distribution "*distr_name] = @benchmarkable rand($pd)
     end
     for tvd ∈ point_distributions
-        SUITE["manifolds"][name]["tangent vector distribution "*string(tvd)] = @benchmarkable rand($tvd)
+        distr_name = string(tvd)
+        distr_name = distr_name[1:min(length(distr_name), 50)]
+        SUITE["manifolds"][name]["tangent vector distribution "*distr_name] = @benchmarkable rand($tvd)
     end
 end
 
@@ -74,11 +78,16 @@ function add_manifold_benchmarks()
                   MVector{2,Float64}([3.0, -2.0])],
                   "Euclidean{2} -- MVector")
 
+    ud_sphere = Manifolds.uniform_distribution(s2, Size(3)([1.0, 0.0, 0.0]))
+    gtd_sphere = Manifolds.normal_tvector_distribution(s2, Size(3)([1.0, 0.0, 0.0]), 1.0)
+
     add_manifold(s2,
                  [Size(3)([1.0, 0.0, 0.0]),
                   Size(3)([0.0, 1.0, 0.0]),
                   Size(3)([0.0, 0.0, 1.0])],
-                  "Sphere{2} -- SizedArray")
+                 "Sphere{2} -- SizedArray";
+                 point_distributions = [ud_sphere],
+                 tvector_distributions = [gtd_sphere])
 
     add_manifold(array_s2,
                  [Size(3)([1.0, 0.0, 0.0]),
