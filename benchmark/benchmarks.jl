@@ -102,11 +102,12 @@ function add_manifold_benchmarks()
                  inverse_retraction_methods = inverse_retraction_methods_rot)
 
     m_prod = Manifolds.ProductManifold(s2, r2)
+    shape_s2r2 = Manifolds.ShapeSpecification(s2, r2)
 
     pts_prd_base = [[1.0, 0.0, 0.0, 0.0, 0.0],
                     [0.0, 1.0, 0.0, 1.0, 0.0],
                     [0.0, 0.0, 1.0, 0.0, 0.1]]
-    pts_prod = map(p -> Manifolds.ProductArray(m_prod, p), pts_prd_base)
+    pts_prod = map(p -> Manifolds.ProductArray(shape_s2r2, p), pts_prd_base)
 
     add_manifold(m_prod, pts_prod, "ProductManifold")
 end

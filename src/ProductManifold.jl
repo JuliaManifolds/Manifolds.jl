@@ -12,11 +12,15 @@ and cotangent vectors of respective manifolds.
 
 generates the product manifold $M_1 \times M_2 \times \dots \times M_n$
 """
-struct ProductManifold{TM<:Tuple, TRanges, TSizes} <: Manifold
+struct ProductManifold{TM<:Tuple} <: Manifold
     manifolds::TM
 end
 
-function ProductManifold(manifolds...)
+ProductManifold(manifolds::Manifold...) = ProductManifold{typeof(manifolds)}(manifolds)
+
+struct ShapeSpecification{TRanges, TSizes} end
+
+function ShapeSpecification(manifolds::Manifold...)
     sizes = map(m -> representation_size(m, MPoint), manifolds)
     lengths = map(prod, sizes)
     ranges = UnitRange{Int64}[]
@@ -27,28 +31,31 @@ function ProductManifold(manifolds...)
     end
     TRanges = tuple(ranges...)
     TSizes = Tuple{map(s -> Tuple{s...}, sizes)...}
-    return ProductManifold{typeof(manifolds), TRanges, TSizes}(manifolds)
+    return ShapeSpecification{TRanges, TSizes}()
 end
 
-struct ProductArray{TM<:ProductManifold,T,N,TData<:AbstractArray{T,N},TV<:Tuple} <: AbstractArray{T,N}
-    M::TM
+struct ProductArray{TM<:ShapeSpecification,T,N,TData<:AbstractArray{T,N},TV<:Tuple} <: AbstractArray{T,N}
     data::TData
     views::TV
 end
 
 # The two-argument version of this constructor is substantially faster than
 # the generic one.
-function ProductArray(M::ProductManifold{TM, TRanges, Tuple{Size1, Size2}}, data::TData) where {TM, TRanges, Size1, Size2, T, N, TData<:AbstractArray{T,N}}
+function ProductArray(M::Type{ShapeSpecification{TRanges, Tuple{Size1, Size2}}}, data::TData) where {TRanges, Size1, Size2, T, N, TData<:AbstractArray{T,N}}
     views = (SizedAbstractArray{Size1}(view(data, TRanges[1])),
              SizedAbstractArray{Size2}(view(data, TRanges[2])))
-    return ProductArray{typeof(M), T, N, TData, typeof(views)}(M, data, views)
+    return ProductArray{M, T, N, TData, typeof(views)}(data, views)
 end
 
-function ProductArray(M::ProductManifold{TM, TRanges, TSizes}, data::TData) where {TM, TRanges, TSizes, T, N, TData<:AbstractArray{T,N}}
-    views = map(ziptuples(TRanges, tuple(TSizes.parameters...))) do t
-        SizedAbstractArray{t[2]}(view(data, t[1]))
-    end
-    return ProductArray{typeof(M), T, N, TData, typeof(views)}(M, data, views)
+function ProductArray(M::Type{ShapeSpecification{TRanges, Tuple{Size1, Size2, Size3}}}, data::TData) where {TRanges, Size1, Size2, Size3, T, N, TData<:AbstractArray{T,N}}
+    views = (SizedAbstractArray{Size1}(view(data, TRanges[1])),
+             SizedAbstractArray{Size2}(view(data, TRanges[2])),
+             SizedAbstractArray{Size3}(view(data, TRanges[3])))
+    return ProductArray{M, T, N, TData, typeof(views)}(data, views)
+end
+
+function ProductArray(M::ShapeSpecification{TRanges, TSizes}, data::TData) where {TM, TRanges, TSizes, T, N, TData<:AbstractArray{T,N}}
+    return ProductArray(typeof(M), data)
 end
 
 """
@@ -57,7 +64,7 @@ end
 Construct a product point from product manifold `M` based on point `pts`
 represented by arrays.
 """
-function prod_point(M::ProductManifold, pts...)
+function prod_point(M::ShapeSpecification, pts...)
     data = mapreduce(vcat, pts) do pt
         reshape(pt, :)
     end
@@ -75,12 +82,11 @@ function proj_product_array(x::ProductArray, i::Integer)
     return copy(x.views[i])
 end
 
-Base.BroadcastStyle(::Type{<:ProductArray}) = Broadcast.ArrayStyle{ProductArray}()
+Base.BroadcastStyle(::Type{<:ProductArray{ShapeSpec}}) where ShapeSpec<:ShapeSpecification = Broadcast.ArrayStyle{ProductArray{ShapeSpec}}()
 
-function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{ProductArray}}, ::Type{ElType}) where ElType
-    # Scan the inputs for the ProductArray:
+function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{ProductArray{ShapeSpec}}}, ::Type{ElType}) where {ShapeSpec, ElType}
     A = find_pv(bc)
-    return ProductArray(A.M, similar(A.data, ElType))
+    return ProductArray(ShapeSpec, similar(A.data, ElType))
 end
 
 Base.dataids(x::ProductArray) = Base.dataids(x.data)
@@ -90,24 +96,24 @@ Base.dataids(x::ProductArray) = Base.dataids(x.data)
 
 `A = find_pv(x...)` returns the first `ProductArray` among the arguments.
 """
-find_pv(bc::Base.Broadcast.Broadcasted) = find_pv(bc.args)
-find_pv(args::Tuple) = find_pv(find_pv(args[1]), Base.tail(args))
-find_pv(x) = x
-find_pv(a::ProductArray, rest) = a
-find_pv(::Any, rest) = find_pv(rest)
+@inline find_pv(bc::Base.Broadcast.Broadcasted) = find_pv(bc.args)
+@inline find_pv(args::Tuple) = find_pv(find_pv(args[1]), Base.tail(args))
+@inline find_pv(x) = x
+@inline find_pv(a::ProductArray, rest) = a
+@inline find_pv(::Any, rest) = find_pv(rest)
 
 size(x::ProductArray) = size(x.data)
 Base.@propagate_inbounds getindex(x::ProductArray, i) = getindex(x.data, i)
 Base.@propagate_inbounds setindex!(x::ProductArray, val, i) = setindex!(x.data, val, i)
 
-(+)(v1::ProductArray, v2::ProductArray) = ProductArray(v1.M, v1.data + v2.data)
-(-)(v1::ProductArray, v2::ProductArray) = ProductArray(v1.M, v1.data - v2.data)
-(-)(v::ProductArray) = ProductArray(v.M, -v.data)
-(*)(a::Number, v::ProductArray) = ProductArray(v.M, a*v.data)
+(+)(v1::ProductArray{ShapeSpec}, v2::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, v1.data + v2.data)
+(-)(v1::ProductArray{ShapeSpec}, v2::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, v1.data - v2.data)
+(-)(v::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, -v.data)
+(*)(a::Number, v::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, a*v.data)
 
 eltype(::Type{ProductArray{TM, TData, TV}}) where {TM, TData, TV} = eltype(TData)
-similar(x::ProductArray) = ProductArray(x.M, similar(x.data))
-similar(x::ProductArray, ::Type{T}) where T = ProductArray(x.M, similar(x.data, T))
+similar(x::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, similar(x.data))
+similar(x::ProductArray{ShapeSpec}, ::Type{T}) where {ShapeSpec<:ShapeSpecification, T} = ProductArray(ShapeSpec, similar(x.data, T))
 
 function isapprox(M::ProductManifold, x, y; kwargs...)
     return all(t -> isapprox(t...; kwargs...), ziptuples(M.manifolds, x.views, y.views))
