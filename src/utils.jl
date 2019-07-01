@@ -41,6 +41,20 @@ different lengths, the result is trimmed to the length of the shorter tuple.
     ex
 end
 
+"""
+    ziptuples(a, b, c, d, e)
+
+Zips tuples `a`, `b`, `c`, `d` and `e` in a fast, type-stable way. If they have
+different lengths, the result is trimmed to the length of the shorter tuple.
+"""
+@generated function ziptuples(a::NTuple{N,Any}, b::NTuple{M,Any}, c::NTuple{L,Any}, d::NTuple{K,Any}, e::NTuple{J,Any}) where {N,M,L,K,J}
+    ex = Expr(:tuple)
+    for i = 1:min(N, M, L, K, J)
+        push!(ex.args, :((a[$i], b[$i], c[$i], d[$i], e[$i])))
+    end
+    ex
+end
+
 # conversion of SizedArray from StaticArrays.jl
 """
     SizedAbstractArray{Tuple{dims...}}(array)

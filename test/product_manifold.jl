@@ -13,6 +13,8 @@ include("utils.jl")
              SizedVector{5, Float32},
              MVector{5, Float32}]
 
+    retraction_methods = [Manifolds.ProductRetraction(Manifolds.ExponentialRetraction(), Manifolds.ExponentialRetraction())]
+    inverse_retraction_methods = [Manifolds.InverseProductRetraction(Manifolds.LogarithmicInverseRetraction(), Manifolds.LogarithmicInverseRetraction())]
     for T in types
         @testset "Type $T" begin
             pts_base = [convert(T, [1.0, 0.0, 0.0, 0.0, 0.0]),
@@ -20,8 +22,10 @@ include("utils.jl")
                         convert(T, [0.0, 0.0, 1.0, 0.0, 0.1])]
             pts = map(p -> Manifolds.ProductArray(shape_se, p), pts_base)
             test_manifold(Mse,
-                          pts,
-                          test_reverse_diff = isa(T, Vector))
+                          pts;
+                          test_reverse_diff = isa(T, Vector),
+                          retraction_methods = retraction_methods,
+                          inverse_retraction_methods = inverse_retraction_methods)
         end
     end
 

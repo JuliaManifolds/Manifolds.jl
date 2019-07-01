@@ -242,6 +242,36 @@ function distance(M::ProductManifold, x, y)
     return sqrt(sum(map(distance, M.manifolds, x.parts, y.parts).^2))
 end
 
+function injectivity_radius(M::ProductManifold, x)
+    return min(map(injectivity_radius, M.manifolds, x.parts)...)
+end
+
+function injectivity_radius(M::ProductManifold)
+    return min(map(injectivity_radius, M.manifolds)...)
+end
+
+struct ProductRetraction{TR<:Tuple} <: AbstractRetractionMethod
+    retractions::TR
+end
+
+ProductRetraction(retractions::AbstractRetractionMethod...) = ProductRetraction{typeof(retractions)}(retractions)
+
+function retract!(M::ProductManifold, y, x, v, method::ProductRetraction)
+    map(retract!, M.manifolds, y.parts, x.parts, v.parts, method.retractions)
+    return y
+end
+
+struct InverseProductRetraction{TR<:Tuple} <: AbstractInverseRetractionMethod
+    inverse_retractions::TR
+end
+
+InverseProductRetraction(inverse_retractions::AbstractInverseRetractionMethod...) = InverseProductRetraction{typeof(inverse_retractions)}(inverse_retractions)
+
+function inverse_retract!(M::ProductManifold, v, x, y, method::InverseProductRetraction)
+    map(inverse_retract!, M.manifolds, v.parts, x.parts, y.parts, method.inverse_retractions)
+    return v
+end
+
 """
     is_manifold_point(M::ProductManifold, x; kwargs...)
 
