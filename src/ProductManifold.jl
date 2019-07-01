@@ -238,6 +238,10 @@ function log(M::ProductManifold, x::ProductMPoint, y::ProductMPoint)
     return ProductTVector(map(log, M.manifolds, x.parts, y.parts)...)
 end
 
+function distance(M::ProductManifold, x, y)
+    return sqrt(sum(map(distance, M.manifolds, x.parts, y.parts).^2))
+end
+
 """
     is_manifold_point(M::ProductManifold, x; kwargs...)
 
