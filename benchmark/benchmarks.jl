@@ -12,7 +12,9 @@ Random.seed!(12334)
 function add_manifold(M::Manifold, pts, name;
     test_tangent_vector_broadcasting = true,
     retraction_methods = [],
-    inverse_retraction_methods = [])
+    inverse_retraction_methods = [],
+    point_distributions = [],
+    tvector_distributions = [])
 
     SUITE["manifolds"][name] = BenchmarkGroup()
     tv = log(M, pts[1], pts[2])
@@ -22,8 +24,16 @@ function add_manifold(M::Manifold, pts, name;
     SUITE["manifolds"][name]["similar"] = @benchmarkable similar($(pts[1]))
     SUITE["manifolds"][name]["log"] = @benchmarkable log($M, $(pts[1]), $(pts[2]))
     SUITE["manifolds"][name]["log!"] = @benchmarkable log!($M, $tv, $(pts[1]), $(pts[2]))
+    for iretr ∈ inverse_retraction_methods
+        SUITE["manifolds"][name]["inverse_retract: "*string(iretr)] = @benchmarkable inverse_retract($M, $(pts[1]), $(pts[2]), $iretr)
+        SUITE["manifolds"][name]["inverse_retract!: "*string(iretr)] = @benchmarkable inverse_retract!($M, $tv, $(pts[1]), $(pts[2]), $iretr)
+    end
     SUITE["manifolds"][name]["exp"] = @benchmarkable exp($M, $(pts[1]), $tv1)
-    SUITE["manifolds"][name]["exp"] = @benchmarkable exp!($M, $p, $(pts[1]), $tv1)
+    SUITE["manifolds"][name]["exp!"] = @benchmarkable exp!($M, $p, $(pts[1]), $tv1)
+    for retr ∈ retraction_methods
+        SUITE["manifolds"][name]["retract: "*string(retr)] = @benchmarkable retract($M, $(pts[1]), $tv1, $retr)
+        SUITE["manifolds"][name]["retract!: "*string(retr)] = @benchmarkable retract!($M, $p, $(pts[1]), $tv1, $retr)
+    end
     SUITE["manifolds"][name]["norm"] = @benchmarkable norm($M, $(pts[1]), $tv1)
     SUITE["manifolds"][name]["inner"] = @benchmarkable inner($M, $(pts[1]), $tv1, $tv2)
     SUITE["manifolds"][name]["distance"] = @benchmarkable distance($M, $(pts[1]), $(pts[2]))
@@ -34,6 +44,12 @@ function add_manifold(M::Manifold, pts, name;
     if test_tangent_vector_broadcasting
         SUITE["manifolds"][name]["tv = 2 .* tv1 .+ 3 .* tv2"] = @benchmarkable $tv = 2 .* $tv1 .+ 3 .* $tv2
         SUITE["manifolds"][name]["tv .= 2 .* tv1 .+ 3 .* tv2"] = @benchmarkable $tv .= 2 .* $tv1 .+ 3 .* $tv2
+    end
+    for pd ∈ point_distributions
+        SUITE["manifolds"][name]["point distribution "*string(pd)] = @benchmarkable rand($pd)
+    end
+    for tvd ∈ point_distributions
+        SUITE["manifolds"][name]["tangent vector distribution "*string(tvd)] = @benchmarkable rand($tvd)
     end
 end
 
@@ -68,14 +84,22 @@ function add_manifold_benchmarks()
                  [Size(3)([1.0, 0.0, 0.0]),
                   Size(3)([0.0, 1.0, 0.0]),
                   Size(3)([0.0, 0.0, 1.0])],
-                  "ArrayManifold{Sphere{2}} -- SizedArray";
-                  test_tangent_vector_broadcasting = false)
+                 "ArrayManifold{Sphere{2}} -- SizedArray";
+                 test_tangent_vector_broadcasting = false)
+
+    retraction_methods_rot = [Manifolds.PolarRetraction(),
+                              Manifolds.QRRetraction()]
+
+    inverse_retraction_methods_rot = [Manifolds.PolarInverseRetraction(),
+                                      Manifolds.QRInverseRetraction()]
 
     so2 = Manifolds.Rotations(2)
     angles = (0.0, π/2, 2π/3)
     add_manifold(so2,
                  [Size(2, 2)([cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)]) for ϕ in angles],
-                  "Rotations(2) -- SizedArray")
+                 "Rotations(2) -- SizedArray",
+                 retraction_methods = retraction_methods_rot,
+                 inverse_retraction_methods = inverse_retraction_methods_rot)
 
     m_prod = Manifolds.ProductManifold(s2, r2)
 
