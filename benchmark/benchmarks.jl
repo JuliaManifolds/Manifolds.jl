@@ -66,10 +66,12 @@ function add_manifold_benchmarks()
     array_s2 = ArrayManifold(s2)
     r2 = Manifolds.Euclidean(2)
 
-    add_manifold(s2,
-                 [Size(2)([1.0, 1.0]),
-                 Size(2)([-2.0, 3.0]),
-                 Size(2)([3.0, -2.0])],
+    pts_r2 = [Size(2)([1.0, 1.0]),
+              Size(2)([-2.0, 3.0]),
+              Size(2)([3.0, -2.0])]
+
+    add_manifold(r2,
+                 pts_r2,
                  "Euclidean{2} -- SizedArray")
 
     add_manifold(r2,
@@ -81,10 +83,12 @@ function add_manifold_benchmarks()
     ud_sphere = Manifolds.uniform_distribution(s2, Size(3)([1.0, 0.0, 0.0]))
     gtd_sphere = Manifolds.normal_tvector_distribution(s2, Size(3)([1.0, 0.0, 0.0]), 1.0)
 
+    pts_s2 = [Size(3)([1.0, 0.0, 0.0]),
+              Size(3)([0.0, 1.0, 0.0]),
+              Size(3)([0.0, 0.0, 1.0])]
+
     add_manifold(s2,
-                 [Size(3)([1.0, 0.0, 0.0]),
-                  Size(3)([0.0, 1.0, 0.0]),
-                  Size(3)([0.0, 0.0, 1.0])],
+                 pts_s2,
                  "Sphere{2} -- SizedArray";
                  point_distributions = [ud_sphere],
                  tvector_distributions = [gtd_sphere])
@@ -117,8 +121,11 @@ function add_manifold_benchmarks()
                     [0.0, 1.0, 0.0, 1.0, 0.0],
                     [0.0, 0.0, 1.0, 0.0, 0.1]]
     pts_prod = map(p -> Manifolds.ProductArray(shape_s2r2, p), pts_prd_base)
+    add_manifold(m_prod, pts_prod, "ProductManifold with ProductArray")
 
-    add_manifold(m_prod, pts_prod, "ProductManifold")
+    # pts_prod_mpoints = [Manifolds.ProductMPoint(p[1], p[2]) for p in zip(pts_s2, pts_r2)]
+    # add_manifold(m_prod, pts_prod_mpoints, "ProductManifold with MPoint";
+    #     test_tangent_vector_broadcasting = false)
 end
 
 add_manifold_benchmarks()

@@ -34,9 +34,17 @@ function ShapeSpecification(manifolds::Manifold...)
     return ShapeSpecification{TRanges, TSizes}()
 end
 
+"""
+    ProductArray(shape::ShapeSpecification, data)
+
+An array-based representation for points and tangent vectors on the
+product manifold. `data` contains underlying representation of points
+arranged according to `TRanges` and `TSizes` from `shape`.
+Internal views for each specific sub-point are created and stored in `parts`.
+"""
 struct ProductArray{TM<:ShapeSpecification,T,N,TData<:AbstractArray{T,N},TV<:Tuple} <: AbstractArray{T,N}
     data::TData
-    views::TV
+    parts::TV
 end
 
 # The two-argument version of this constructor is substantially faster than
@@ -74,12 +82,12 @@ function prod_point(M::ShapeSpecification, pts...)
 end
 
 """
-    proj_product_array(x::ProductArray, i::Integer)
+    proj_product(x::ProductArray, i::Integer)
 
 Project the product array `x` to its `i`th component. A new array is returned.
 """
-function proj_product_array(x::ProductArray, i::Integer)
-    return copy(x.views[i])
+function proj_product(x::ProductArray, i::Integer)
+    return copy(x.parts[i])
 end
 
 Base.BroadcastStyle(::Type{<:ProductArray{ShapeSpec}}) where ShapeSpec<:ShapeSpecification = Broadcast.ArrayStyle{ProductArray{ShapeSpec}}()
@@ -115,12 +123,73 @@ eltype(::Type{ProductArray{TM, TData, TV}}) where {TM, TData, TV} = eltype(TData
 similar(x::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, similar(x.data))
 similar(x::ProductArray{ShapeSpec}, ::Type{T}) where {ShapeSpec<:ShapeSpecification, T} = ProductArray(ShapeSpec, similar(x.data, T))
 
+"""
+    ProductMPoint(parts)
+
+A more general but slower representation of points on a product manifold.
+"""
+struct ProductMPoint{TM<:Tuple} <: MPoint
+    parts::TM
+end
+
+ProductMPoint(points...) = ProductMPoint{typeof(points)}(points)
+eltype(x::ProductMPoint) = eltype(Tuple{map(eltype, x.parts)...})
+similar(x::ProductMPoint) = ProductMPoint(map(similar, x.parts)...)
+similar(x::ProductMPoint, ::Type{T}) where T = ProductMPoint(map(t -> similar(t, T), x.parts)...)
+
+function proj_product(x::ProductMPoint, i::Integer)
+    return x.parts[i]
+end
+
+"""
+    ProductTVector(parts)
+
+A more general but slower representation of tangent vectors on a product
+manifold.
+"""
+struct ProductTVector{TM<:Tuple} <: TVector
+    parts::TM
+end
+
+ProductTVector(vectors...) = ProductTVector{typeof(vectors)}(vectors)
+eltype(x::ProductTVector) = eltype(Tuple{map(eltype, x.parts)...})
+similar(x::ProductTVector) = ProductTVector(map(similar, x.parts)...)
+similar(x::ProductTVector, ::Type{T}) where T = ProductTVector(map(t -> similar(t, T), x.parts)...)
+
+(+)(v1::ProductTVector, v2::ProductTVector) = ProductTVector(map(+, v1.parts, v2.parts)...)
+(-)(v1::ProductTVector, v2::ProductTVector) = ProductTVector(map(-, v1.parts, v2.parts)...)
+(-)(v::ProductTVector) = ProductTVector(map(-, v.parts))
+(*)(a::Number, v::ProductTVector) = ProductTVector(map(t -> a*t, v.parts))
+
+function proj_product(x::ProductTVector, i::Integer)
+    return x.parts[i]
+end
+
+"""
+    ProductCoTVector(parts)
+
+A more general but slower representation of cotangent vectors on a product
+manifold.
+"""
+struct ProductCoTVector{TM<:Tuple} <: CoTVector
+    parts::TM
+end
+
+ProductCoTVector(covectors...) = ProductCoTVector{typeof(covectors)}(covectors)
+eltype(x::ProductCoTVector) = eltype(Tuple{map(eltype, x.parts)...})
+similar(x::ProductCoTVector) = ProductCoTVector(map(similar, x.parts)...)
+similar(x::ProductCoTVector, ::Type{T}) where T = ProductCoTVector(map(t -> similar(t, T), x.parts)...)
+
+function proj_product(x::ProductCoTVector, i::Integer)
+    return x.parts[i]
+end
+
 function isapprox(M::ProductManifold, x, y; kwargs...)
-    return all(t -> isapprox(t...; kwargs...), ziptuples(M.manifolds, x.views, y.views))
+    return all(t -> isapprox(t...; kwargs...), ziptuples(M.manifolds, x.parts, y.parts))
 end
 
 function isapprox(M::ProductManifold, x, v, w; kwargs...)
-    return all(t -> isapprox(t...; kwargs...), ziptuples(M.manifolds, x.views, v.views, w.views))
+    return all(t -> isapprox(t...; kwargs...), ziptuples(M.manifolds, x.parts, v.parts, w.parts))
 end
 
 function representation_size(M::ProductManifold, ::Type{T}) where {T}
@@ -142,21 +211,63 @@ function inverse_local_metric(M::MetricManifold{<:ProductManifold,ProductMetric}
 end
 
 function det_local_metric(M::MetricManifold{ProductManifold, ProductMetric}, x::ProductArray)
-    dets = map(det_local_metric, M.manifolds, x.views)
+    dets = map(det_local_metric, M.manifolds, x.parts)
     return prod(dets)
 end
 
-function inner(M::ProductManifold, x::ProductArray, v::ProductArray, w::ProductArray)
-    subproducts = map(inner, M.manifolds, x.views, v.views, w.views)
+function inner(M::ProductManifold, x, v, w)
+    subproducts = map(inner, M.manifolds, x.parts, v.parts, w.parts)
     return sum(subproducts)
 end
 
-function exp!(M::ProductManifold, y::ProductArray, x::ProductArray, v::ProductArray)
-    map(exp!, M.manifolds, y.views, x.views, v.views)
+function exp!(M::ProductManifold, y, x, v)
+    map(exp!, M.manifolds, y.parts, x.parts, v.parts)
     return y
 end
 
-function log!(M::ProductManifold, v::ProductArray, x::ProductArray, y::ProductArray)
-    map(log!, M.manifolds, v.views, x.views, y.views)
+function exp(M::ProductManifold, x::ProductMPoint, v::ProductTVector)
+    return ProductMPoint(map(exp, M.manifolds, x.parts, v.parts)...)
+end
+
+function log!(M::ProductManifold, v, x, y)
+    map(log!, M.manifolds, v.parts, x.parts, y.parts)
     return v
+end
+
+function log(M::ProductManifold, x::ProductMPoint, y::ProductMPoint)
+    return ProductTVector(map(log, M.manifolds, x.parts, y.parts)...)
+end
+
+"""
+    is_manifold_point(M::ProductManifold, x; kwargs...)
+
+Check whether `x` is a valid point on the [`ProductManifold`](@ref) `M`.
+
+The tolerance for the last test can be set using the ´kwargs...`.
+"""
+function is_manifold_point(M::ProductManifold, x::MPoint; kwargs...)
+    return all(t -> is_manifold_point(t...; kwargs...), ziptuples(M.manifolds, x.parts))
+end
+
+function is_manifold_point(M::ProductManifold, x::ProductArray; kwargs...)
+    return all(t -> is_manifold_point(t...; kwargs...), ziptuples(M.manifolds, x.parts))
+end
+
+"""
+    is_tangent_vector(M::ProductManifold, x, v; kwargs... )
+
+Check whether `v` is a tangent vector to `x` on the [`ProductManifold`](@ref)
+`M`, i.e. atfer [`is_manifold_point`](@ref)`(M, x)`, and all projections to
+base manifolds must be respective tangent vectors.
+
+The tolerance for the last test can be set using the ´kwargs...`.
+"""
+function is_tangent_vector(M::ProductManifold, x::MPoint, v::TVector; kwargs...)
+    is_manifold_point(M, x)
+    return all(t -> is_tangent_vector(t...; kwargs...), ziptuples(M.manifolds, x.parts, v.parts))
+end
+
+function is_tangent_vector(M::ProductManifold, x::ProductArray, v::ProductArray; kwargs...)
+    is_manifold_point(M, x)
+    return all(t -> is_tangent_vector(t...; kwargs...), ziptuples(M.manifolds, x.parts, v.parts))
 end

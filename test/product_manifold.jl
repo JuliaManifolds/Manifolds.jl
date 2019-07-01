@@ -62,8 +62,26 @@ include("utils.jl")
             @test isapprox(Mse, p[1], p[2])
         end
         for p in zip(pts_sphere, pts_r2, pts_prod)
-            @test isapprox(M1, p[1], Manifolds.proj_product_array(p[3], 1))
-            @test isapprox(M2, p[2], Manifolds.proj_product_array(p[3], 2))
+            @test isapprox(M1, p[1], Manifolds.proj_product(p[3], 1))
+            @test isapprox(M2, p[2], Manifolds.proj_product(p[3], 2))
         end
+    end
+
+    @testset "ProductMPoint" begin
+        Ts = SizedVector{3, Float64}
+        Tr2 = SizedVector{2, Float64}
+        pts_sphere = [convert(Ts, [1.0, 0.0, 0.0]),
+                      convert(Ts, [0.0, 1.0, 0.0]),
+                      convert(Ts, [0.0, 0.0, 1.0])]
+        pts_r2 = [convert(Tr2, [0.0, 0.0]),
+                  convert(Tr2, [1.0, 0.0]),
+                  convert(Tr2, [0.0, 0.1])]
+
+        pts = [Manifolds.ProductMPoint(p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
+        test_manifold(Mse,
+                      pts,
+                      test_tangent_vector_broadcasting = false,
+                      test_forward_diff = false,
+                      test_reverse_diff = false)
     end
 end

@@ -41,7 +41,7 @@ different lengths, the result is trimmed to the length of the shorter tuple.
     ex
 end
 
-# conversion of SizedAbstractArray from StaticArrays.jl
+# conversion of SizedArray from StaticArrays.jl
 """
     SizedAbstractArray{Tuple{dims...}}(array)
 
@@ -61,8 +61,11 @@ struct SizedAbstractArray{S<:Tuple, T, N, M, TData<:AbstractArray{T,M}} <: Stati
         new{S,T,N,M,TData}(a)
     end
 
-    function SizedAbstractArray{S, T, N, M}(::UndefInitializer) where {S, T, N, M, TData<:AbstractArray}
-        new{S, T, N, M, Array{T, M}}(Array{T, M}(undef, S.parameters...))
+    function SizedAbstractArray{S, T, N, 1}(::UndefInitializer) where {S, T, N, TData<:AbstractArray}
+        new{S, T, N, 1, Array{T, 1}}(Array{T, 1}(undef, StaticArrays.tuple_prod(S)))
+    end
+    function SizedAbstractArray{S, T, N, N}(::UndefInitializer) where {S, T, N, TData<:AbstractArray}
+        new{S, T, N, N, Array{T, N}}(Array{T, N}(undef, S.parameters...))
     end
 end
 
