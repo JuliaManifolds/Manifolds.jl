@@ -20,7 +20,6 @@ include("utils.jl")
         angles = (0.0, π/2, 2π/3, π/4)
         pts = [convert(T, [cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)]) for ϕ in angles]
         test_manifold(M, pts;
-            test_forward_diff = false,
             test_reverse_diff = false,
             retraction_methods = retraction_methods,
             inverse_retraction_methods = inverse_retraction_methods,
@@ -46,4 +45,23 @@ include("utils.jl")
         gtsd_mvector = Manifolds.normal_tvector_distribution(M, (@MMatrix [1.0 0.0; 0.0 1.0]), 1.0)
         @test isa(rand(gtsd_mvector), MMatrix)
     end
+
+    Random.seed!(42)
+    for n ∈ (3, 4, 5)
+        @testset "Rotations: SO($n)" begin
+            SOn = Manifolds.Rotations(n)
+            ptd = Manifolds.normal_rotation_distribution(SOn, Matrix(1.0I, n, n), 1.0)
+            tvd = Manifolds.normal_tvector_distribution(SOn, Matrix(1.0I, n, n), 1.0)
+            pts = [rand(ptd) for _ in 1:3]
+            test_manifold(SOn, pts;
+                test_forward_diff = n==3,
+                test_reverse_diff = false,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                point_distributions = [ptd],
+                tvector_distributions = [tvd],
+                exp_log_atol_multiplier = 6)
+        end
+    end
+
 end

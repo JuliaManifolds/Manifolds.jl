@@ -45,6 +45,26 @@ function exp!(S::Rotations, y, x, v)
     return y
 end
 
+function exp!(S::Rotations{2}, y, x, v)
+    α = norm(S, x, v)/sqrt(2)
+    expv = [cos(α) sin(α); -sin(α) cos(α)]
+    y .= x * expv
+    return y
+end
+
+function exp!(S::Rotations{3}, y, x, v)
+    v_norm = norm(S, x, v)
+    if v_norm ≈ 0
+        y .= x
+    else
+        α = v_norm/sqrt(2)
+        K = v/α
+        expv = Matrix{eltype(y)}(I, 3, 3) .+ sin(α).*K .+ (1-cos(α)).*(K^2)
+        y .= x * expv
+    end
+    return y
+end
+
 @doc doc"""
     log!(M, v, x, y)
 
@@ -66,6 +86,24 @@ function log!(S::Rotations, v::TV, x, y) where TV
     # MMatrix doesn't have `log` defined
     U1 = real(log(Array(U)))
     v .= (U1 .- transpose(U1))./2
+    return v
+end
+
+function log!(S::Rotations{2}, v, x, y)
+    U = transpose(x) * y
+    α = asin(U[1,2])
+    v .= [0 α; -α 0]
+    return v
+end
+
+function log!(S::Rotations{3}, v, x, y)
+    U = transpose(x) * y
+    θ = acos((tr(U)-1)/2)
+    if θ ≈ 0
+        fill!(v, 0)
+    else
+        v .= θ/(2*sin(θ)) .* (U .- transpose(U))
+    end
     return v
 end
 

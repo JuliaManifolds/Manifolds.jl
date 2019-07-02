@@ -3,6 +3,7 @@ using Manifolds
 using LinearAlgebra
 using DoubleFloats
 using ForwardDiff
+using Random
 using ReverseDiff
 using StaticArrays
 using SimpleTraits
@@ -29,7 +30,8 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     retraction_methods = [],
     inverse_retraction_methods = [],
     point_distributions = [],
-    tvector_distributions = [])
+    tvector_distributions = [],
+    exp_log_atol_multiplier = 1)
     # log/exp
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
     isapprox(M, pts[1], pts[2]) && error("Points 1 and 2 are equal")
@@ -81,10 +83,10 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         retract!(M, new_pt, pts[1], tv1)
         @test is_manifold_point(M, new_pt)
         for x ∈ pts
-            @test isapprox(M, zero_tangent_vector(M, x), log(M, x, x); atol = eps(eltype(x)))
-            @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x); atol = eps(eltype(x)))
+            @test isapprox(M, zero_tangent_vector(M, x), log(M, x, x); atol = eps(eltype(x)) * exp_log_atol_multiplier)
+            @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x); atol = eps(eltype(x)) * exp_log_atol_multiplier)
             for inv_retr_method ∈ inverse_retraction_methods
-                @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method); atol = eps(eltype(x)))
+                @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method); atol = eps(eltype(x)) * exp_log_atol_multiplier)
             end
         end
         zero_tangent_vector!(M, tv1, pts[1])
@@ -117,26 +119,26 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_forward_diff && @testset "ForwardDiff support" begin
         exp_f(t) = distance(M, pts[1], exp(M, pts[1], t*tv1))
         d12 = distance(M, pts[1], pts[2])
-        for t ∈ 0.1:0.1:1.0
+        for t ∈ 0.1:0.1:0.9
             @test d12 ≈ ForwardDiff.derivative(exp_f, t)
         end
 
         retract_f(t) = distance(M, pts[1], retract(M, pts[1], t*tv1))
-        for t ∈ 0.1:0.1:1.0
-            @test d12 ≈ ForwardDiff.derivative(retract_f, t)
+        for t ∈ 0.1:0.1:0.9
+            @test ForwardDiff.derivative(retract_f, t) ≥ 0
         end
     end
 
     test_reverse_diff && @testset "ReverseDiff support" begin
         exp_f(t) = distance(M, pts[1], exp(M, pts[1], t[1]*tv1))
         d12 = distance(M, pts[1], pts[2])
-        for t ∈ 0.1:0.1:1.0
+        for t ∈ 0.1:0.1:0.9
             @test d12 ≈ ReverseDiff.gradient(exp_f, [t])[1]
         end
 
         retract_f(t) = distance(M, pts[1], retract(M, pts[1], t[1]*tv1))
-        for t ∈ 0.1:0.1:1.0
-            @test d12 ≈ ReverseDiff.gradient(retract_f, [t])[1]
+        for t ∈ 0.1:0.1:0.9
+            @test ReverseDiff.gradient(retract_f, [t])[1] ≥ 0
         end
     end
 
