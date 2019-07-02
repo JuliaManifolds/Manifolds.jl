@@ -321,3 +321,87 @@ function is_tangent_vector(M::ProductManifold, x::ProductArray, v::ProductArray;
     is_manifold_point(M, x)
     return all(t -> is_tangent_vector(t...; kwargs...), ziptuples(M.manifolds, x.parts, v.parts))
 end
+
+"""
+    ProductPointDistribution(M::ProductManifold, distributions)
+
+Product distribution on manifold `M`, combined from `distributions`.
+"""
+struct ProductPointDistribution{TM<:ProductManifold, TD<:(NTuple{N,Distribution} where N)} <: MPointDistribution{TM}
+    manifold::TM
+    distributions::TD
+end
+
+function ProductPointDistribution(M::ProductManifold, distributions::MPointDistribution...)
+    return ProductPointDistribution{typeof(M), typeof(distributions)}(M, distributions)
+end
+
+function ProductPointDistribution(distributions::MPointDistribution...)
+    M = ProductManifold(map(d -> support(d).manifold, distributions)...)
+    return ProductPointDistribution(M, distributions...)
+end
+
+function support(d::ProductPointDistribution)
+    return MPointSupport(d.manifold)
+end
+
+function rand(rng::AbstractRNG, d::ProductPointDistribution)
+    return ProductMPoint(map(d -> rand(rng, d), d.distributions)...)
+end
+
+function _rand!(rng::AbstractRNG, d::ProductPointDistribution, x::AbstractArray{<:Number})
+    x .= rand(rng, d)
+    return x
+end
+
+function _rand!(rng::AbstractRNG, d::ProductPointDistribution, x::ProductMPoint)
+    map(t -> _rand!(rng, t[1], t[2]), d.distributions, x.parts)
+    return x
+end
+
+"""
+    ProductTVectorDistribution([m::ProductManifold], [x], distrs...)
+
+Generates a random tangent vector at point `x` from manifold `m` using the
+product distribution of given distributions.
+
+Manifold and `x` can be automatically inferred from distributions `distrs`.
+"""
+struct ProductTVectorDistribution{TM<:ProductManifold, TD<:(NTuple{N,Distribution} where N), TX} <: TVectorDistribution{TM, TX}
+    manifold::TM
+    x::TX
+    distributions::TD
+end
+
+function ProductTVectorDistribution(M::ProductManifold, x::Union{AbstractArray, MPoint}, distributions::TVectorDistribution...)
+    return ProductTVectorDistribution{typeof(M), typeof(distributions), typeof(x)}(M, x, distributions)
+end
+
+function ProductTVectorDistribution(M::ProductManifold, distributions::TVectorDistribution...)
+    x = ProductMPoint(map(d -> support(d).x, distributions))
+    return ProductTVectorDistribution(M, x, distributions...)
+end
+
+function ProductTVectorDistribution(distributions::TVectorDistribution...)
+    M = ProductManifold(map(d -> support(d).manifold, distributions)...)
+    x = ProductMPoint(map(d -> support(d).x, distributions)...)
+    return ProductTVectorDistribution(M, x, distributions...)
+end
+
+function support(tvd::ProductTVectorDistribution)
+    return TVectorSupport(tvd.manifold, ProductMPoint(map(d -> support(d).x, tvd.distributions)...))
+end
+
+function rand(rng::AbstractRNG, d::ProductTVectorDistribution)
+    return ProductTVector(map(d -> rand(rng, d), d.distributions)...)
+end
+
+function _rand!(rng::AbstractRNG, d::ProductTVectorDistribution, v::AbstractArray{<:Number})
+    v .= rand(rng, d)
+    return v
+end
+
+function _rand!(rng::AbstractRNG, d::ProductTVectorDistribution, v::ProductTVector)
+    map(t -> _rand!(rng, t[1], t[2]), d.distributions, v.parts)
+    return v
+end

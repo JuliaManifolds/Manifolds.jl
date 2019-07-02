@@ -22,11 +22,17 @@ include("utils.jl")
                         convert(T, [0.0, 1.0, 0.0, 1.0, 0.0]),
                         convert(T, [0.0, 0.0, 1.0, 0.0, 0.1])]
             pts = map(p -> Manifolds.ProductArray(shape_se, p), pts_base)
+            distr_M1 = Manifolds.uniform_distribution(M1, pts_base[1][1:3])
+            distr_M2 = Manifolds.projected_distribution(M2, Distributions.MvNormal(zero(pts_base[1][4:5]), 1.0))
+            distr_tv_M1 = Manifolds.normal_tvector_distribution(M1, pts_base[1][1:3], 1.0)
+            distr_tv_M2 = Manifolds.normal_tvector_distribution(M2, pts_base[1][4:5], 1.0)
             test_manifold(Mse,
                           pts;
                           test_reverse_diff = isa(T, Vector),
                           retraction_methods = retraction_methods,
-                          inverse_retraction_methods = inverse_retraction_methods)
+                          inverse_retraction_methods = inverse_retraction_methods,
+                          point_distributions = [Manifolds.ProductPointDistribution(distr_M1, distr_M2)],
+                          tvector_distributions = [Manifolds.ProductTVectorDistribution(distr_tv_M1, distr_tv_M2)])
         end
     end
 

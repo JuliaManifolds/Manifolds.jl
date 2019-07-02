@@ -1,6 +1,7 @@
 using Manifolds
 
 using LinearAlgebra
+using Distributions
 using DoubleFloats
 using ForwardDiff
 using Random

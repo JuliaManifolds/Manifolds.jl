@@ -55,3 +55,35 @@ norm(::MetricManifold{<:Manifold,EuclideanMetric}, x, v) = norm(v)
 exp!(M::Euclidean, y, x, v) = (y .= x + v)
 
 log!(M::Euclidean, v, x, y) = (v .= y - x)
+
+proj!(M::Euclidean, x) = x
+
+function project_tangent!(M::Euclidean, w, x, v)
+    w .= v
+    return w
+end
+
+"""
+    projected_distribution(M::Euclidean, d, [x])
+
+Wraps standard distribution `d` into a manifold-valued distribution. Generated
+points will be of similar type to `x`. By default, the type is not changed.
+"""
+function projected_distribution(M::Euclidean, d, x)
+    return ProjectedPointDistribution(M, d, proj!, x)
+end
+
+function projected_distribution(M::Euclidean, d)
+    return ProjectedPointDistribution(M, d, proj!, rand(d))
+end
+
+"""
+    normal_tvector_distribution(S::Euclidean, x, σ)
+
+Normal distribution in ambient space with standard deviation `σ`
+projected to tangent space at `x`.
+"""
+function normal_tvector_distribution(M::Euclidean{Tuple{N}}, x, σ) where N
+    d = Distributions.MvNormal(zero(x), σ)
+    return ProjectedTVectorDistribution(M, x, d, project_tangent!, x)
+end

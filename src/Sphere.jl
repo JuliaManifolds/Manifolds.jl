@@ -72,7 +72,7 @@ function zero_tangent_vector!(S::Sphere, v, x)
 end
 
 """
-    uniform_sphere_distribution(S::Sphere, x)
+    uniform_distribution(S::Sphere, x)
 
 Uniform distribution on given sphere. Generated points will be of similar
 type to `x`.
@@ -122,7 +122,7 @@ function is_tangent_vector(S::Sphere{N},x,v; kwargs...) where N
 end
 
 """
-    gaussian_sphere_tvector_distribution(S::Sphere, x, σ)
+    normal_tvector_distribution(S::Sphere, x, σ)
 
 Normal distribution in ambient space with standard deviation `σ`
 projected to tangent space at `x`.

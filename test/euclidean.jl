@@ -18,7 +18,9 @@ include("utils.jl")
                    convert(T, [0.0, 0.0, 1.0])]
             test_manifold(M,
                           pts,
-                          test_reverse_diff = isa(T, Vector))
+                          test_reverse_diff = isa(T, Vector),
+                          point_distributions = [Manifolds.projected_distribution(M, Distributions.MvNormal(zero(pts[1]), 1.0))],
+                          tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
         end
     end
 
