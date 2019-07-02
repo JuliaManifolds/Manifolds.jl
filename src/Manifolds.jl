@@ -495,7 +495,8 @@ include("ProjectedDistribution.jl")
 
 export Manifold,
     IsDecoratorManifold,
-    Euclidean
+    Euclidean,
+    Sphere
 export manifold_dimension,
     base_manifold,
     distance,
@@ -514,6 +515,8 @@ export manifold_dimension,
     log!,
     manifold_dimension,
     norm,
+    project_tangent,
+    project_tangent!,
     retract,
     retract!,
     zero_tangent_vector,

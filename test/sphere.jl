@@ -1,7 +1,7 @@
 include("utils.jl")
 
 function test_arraymanifold()
-    M = Manifolds.Sphere(2)
+    M = Sphere(2)
     A = ArrayManifold(M)
     x = [1., 0., 0.]
     y = 1/sqrt(2)*[1., 1., 0.]
@@ -15,15 +15,15 @@ function test_arraymanifold()
     @test distance(A,x,y) == distance(M,x,y)
     @test norm(A,x,v) == norm(M,x,v)
     @test inner(A,x,v2,w2; atol=10^(-15)) == inner(M,x,v,w)
-    @test_throws DomainError Manifolds.is_manifold_point(M,2*y)
-    @test_throws DomainError Manifolds.is_tangent_vector(M,y,v; atol=10^(-15))
+    @test_throws DomainError is_manifold_point(M,2*y)
+    @test_throws DomainError is_tangent_vector(M,y,v; atol=10^(-15))
 
     test_manifold(A, [x, y, z],
         test_tangent_vector_broadcasting = false)
 end
 
 @testset "Sphere" begin
-    M = Manifolds.Sphere(2)
+    M = Sphere(2)
     types = [Vector{Float64},
              SizedVector{3, Float64},
              MVector{3, Float64},
@@ -41,6 +41,7 @@ end
             test_manifold(M,
                           pts,
                           test_reverse_diff = isa(T, Vector),
+                          test_project_tangent = true,
                           point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
                           tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
         end

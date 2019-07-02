@@ -28,6 +28,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_forward_diff = true,
     test_reverse_diff = true,
     test_tangent_vector_broadcasting = true,
+    test_project_tangent = false,
     retraction_methods = [],
     inverse_retraction_methods = [],
     point_distributions = [],
@@ -115,6 +116,13 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         v = similar(tv1)
         v .= 2 .* tv1 .+ tv1
         @test v ≈ 3*tv1
+    end
+
+    test_project_tangent && @testset "project_tangent test" begin
+        @test isapprox(M, pts[1], tv1, project_tangent(M, pts[1], tv1))
+        tv = similar(tv1)
+        project_tangent!(M, tv, pts[1], tv1)
+        @test isapprox(M, pts[1], tv, tv1)
     end
 
     test_forward_diff && @testset "ForwardDiff support" begin

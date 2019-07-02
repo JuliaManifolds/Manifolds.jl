@@ -162,12 +162,12 @@ end
     @test exp!(MM, y, x, v) === exp!(M, y, x, v)
     @test log(M, x, y) == (y - x) / 2
     @test log!(MM, v, x, y) === log!(M, v, x, y)
-    @test Manifolds.retract!(MM, y, x, v) === Manifolds.retract!(M, y, x, v)
-    @test Manifolds.retract!(MM, y, x, v, 1) === Manifolds.retract!(M, y, x, v, 1)
-    @test Manifolds.project_tangent!(MM, w, x, v) === Manifolds.project_tangent!(M, w, x, v)
+    @test retract!(MM, y, x, v) === retract!(M, y, x, v)
+    @test retract!(MM, y, x, v, 1) === retract!(M, y, x, v, 1)
+    @test project_tangent!(MM, w, x, v) === project_tangent!(M, w, x, v)
     @test zero_tangent_vector!(MM, v, x) === zero_tangent_vector!(M, v, x)
     @test injectivity_radius(MM, x) === injectivity_radius(M, x)
     @test injectivity_radius(MM) === injectivity_radius(M)
-    @test Manifolds.is_manifold_point(MM, x) === Manifolds.is_manifold_point(M, x)
-    @test Manifolds.is_tangent_vector(MM, x, v) === Manifolds.is_tangent_vector(M, x, v)
+    @test is_manifold_point(MM, x) === is_manifold_point(M, x)
+    @test is_tangent_vector(MM, x, v) === is_tangent_vector(M, x, v)
 end

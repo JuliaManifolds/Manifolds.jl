@@ -21,6 +21,7 @@ include("utils.jl")
         pts = [convert(T, [cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)]) for ϕ in angles]
         test_manifold(M, pts;
             test_reverse_diff = false,
+            test_project_tangent = true,
             retraction_methods = retraction_methods,
             inverse_retraction_methods = inverse_retraction_methods,
             point_distributions = [Manifolds.normal_rotation_distribution(M, pts[1], 1.0)],
