@@ -19,6 +19,11 @@ Pages = ["ArrayManifold.jl"]
 Order = [:type, :function]
 ```
 ### Lie Group
+```@autodocs
+Modules = [Manifolds]
+Pages = ["Group.jl"]
+Order = [:type, :function]
+```
 
 ### Metric
 ```@autodocs
