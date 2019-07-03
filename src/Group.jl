@@ -239,27 +239,6 @@ identity(::AbstractGroupManifold{MultiplicationOperation}, x) = one(x)
 
 left_action(::AbstractGroupManifold{MultiplicationOperation}, x, p) = x * p
 
-@traitfn function right_action(G::GT, x, p) where {O<:MultiplicationOperation,
-                                                   GT<:AbstractGroupManifold{O};
-                                                   !IsMatrixGroup{GT}}
-    return left_action(G, inv(G, x), p)
-end
-
-@doc doc"""
-    right_action(G::GT, x, p) where {O<:MultiplicationOperation,
-                                     GT<:AbstractGroupManifold{O};
-                                     IsMatrixGroup{GT}}
-
-For an element $p$ of some set, compute the right action of group element $x$
-on $p$, i.e. $p \cdot x$. For a matrix manifold under the multiplication
-operation, the right action can be computed by $p \cdot x = x^T \cdot p$.
-"""
-@traitfn function right_action(G::GT, x, p) where {O<:MultiplicationOperation,
-                                                   GT<:AbstractGroupManifold{O};
-                                                   IsMatrixGroup{GT}}
-    return adjoint(x) * p
-end
-
 compose(::AbstractGroupManifold{MultiplicationOperation}, x...) = *(x...)
 
 /(::AbstractGroupManifold{MultiplicationOperation}, x, y) = x / y
