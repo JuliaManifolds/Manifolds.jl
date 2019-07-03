@@ -99,7 +99,7 @@ function log!(::CompactSymplectic1, v, y)
     @assert length(v) == 4 && length(y) == 4
     vi = SVector{3}(2:4)
     @inbounds begin
-        sinθv = view(y, vi)
+        sinθv = y[vi]
         θ = atan(norm(sinθv), y[1])
         v[1] = 0
         v[vi] .= (θ ≈ 0 ? 1 + θ^2 / 6 : θ / sin(θ)) .* sinθv
