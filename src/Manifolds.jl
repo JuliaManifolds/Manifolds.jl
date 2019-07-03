@@ -471,6 +471,8 @@ include("Group.jl")
 include("Euclidean.jl")
 include("Rotations.jl")
 include("Sphere.jl")
+include("SpecialOrthogonal.jl")
+include("CompactSymplectic.jl")
 include("ProjectedDistribution.jl")
 
 export Manifold,

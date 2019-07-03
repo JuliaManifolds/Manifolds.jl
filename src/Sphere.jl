@@ -16,32 +16,6 @@ show(io::IO, S::Sphere{N}) where {N} = print(io, "Sphere($(N))");
 
 @traitimpl HasMetric{Sphere,EuclideanMetric}
 
-const CompactSymplectic1 = GroupManifold{Sphere{3},QuaternionMultiplicationOperation}
-
-function CompactSymplectic1()
-    return CompactSymplectic1(Sphere(3), QuaternionMultiplicationOperation())
-end
-
-@doc doc"""
-    CompactSymplectic1 <: GroupManifold{Sphere{3},QuaternionMultiplicationOperation}
-
-The compact symplectic group $Sp(1)$, which is also the quaternionic unitary
-group, is the group of 1-dimensional matrices whose elements are quaternions.
-Topologically, the base manifold is the 3-Sphere. Elements are represented
-as quaternions with the elements $q=[s, v_1, v_2, v_3]$.
-
-# Constructor
-
-    CompactSymplectic1()
-    CompactSymplectic(1)
-"""
-function CompactSymplectic(n::Int)
-    n == 1 || error("CompactSymplectic($(n)) is not implemented.")
-    return CompactSymplectic1()
-end
-
-show(io::IO, ::CompactSymplectic1) = print(io, "CompactSymplectic(1)");
-
 @doc doc"""
     manifold_dimension(S::Sphere)
 
