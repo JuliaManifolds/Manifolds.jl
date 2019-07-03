@@ -8,9 +8,22 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "Manifolds" => [
-            "Sphere" => "manifolds/sphere.md",
-            "Rotations" => "manifolds/rotations.md",
+            "Basic manifolds" => [
+                "Euclidean" => "manifolds/euclidean.md",
+                "Rotations" => "manifolds/rotations.md",
+                "Sphere" => "manifolds/sphere.md"
+            ],
+            "Combined manifolds" => [
+                "Product manifold" => "manifolds/product.md"
+            ],
+            "Manifold decorators" => [
+                "Array manifold" => "manifolds/array.md",
+                "Metric manifold" => "manifolds/metric.md"
+            ]
         ],
-        "Distributions" => "distributions.md"
+        "Distributions" => "distributions.md",
+        "Library" => [
+            "Internals" => "lib/internals.md"
+        ]
     ]
 )

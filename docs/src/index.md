@@ -12,17 +12,8 @@ Order = [:type, :function]
 ```
 
 ## Decorators
-### ArrayManifold
-```@autodocs
-Modules = [Manifolds]
-Pages = ["ArrayManifold.jl"]
-Order = [:type, :function]
-```
-### Lie Group
 
-### Metric
-```@autodocs
-Modules = [Manifolds]
-Pages = ["Metric.jl"]
-Order = [:type, :function]
-```
+* [Array manifold](@ref)
+* [Metric manifold](@ref)
+
+### Lie Group

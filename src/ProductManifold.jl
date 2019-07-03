@@ -10,7 +10,9 @@ and cotangent vectors of respective manifolds.
 
     ProductManifold(M_1, M_2, ..., M_n)
 
-generates the product manifold $M_1 \times M_2 \times \dots \times M_n$
+generates the product manifold $M_1 \times M_2 \times \dots \times M_n$.
+Alternatively, the same manifold can be contructed using the `×` operator:
+`M_1 × M_2 × M_3`.
 """
 struct ProductManifold{TM<:Tuple} <: Manifold
     manifolds::TM
@@ -34,6 +36,12 @@ function cross(M1::ProductManifold, M2::ProductManifold)
     return ProductManifold(M1.manifolds..., M2.manifolds...)
 end
 
+"""
+    ShapeSpecification(manifolds::Manifold...)
+
+A structure for specifying array size and offset information for linear
+storage of points and tangent vectors on the product manifold of `manifolds`.
+"""
 struct ShapeSpecification{TRanges, TSizes} end
 
 function ShapeSpecification(manifolds::Manifold...)
@@ -216,16 +224,6 @@ manifold_dimension(M::ProductManifold) = sum(map(m -> manifold_dimension(m), M.m
 
 struct ProductMetric <: Metric end
 
-@traitimpl HasMetric{ProductManifold,ProductMetric}
-
-function local_metric(::MetricManifold{<:ProductManifold,ProductMetric}, x)
-    error("TODO")
-end
-
-function inverse_local_metric(M::MetricManifold{<:ProductManifold,ProductMetric}, x)
-    error("TODO")
-end
-
 function det_local_metric(M::MetricManifold{ProductManifold, ProductMetric}, x::ProductArray)
     dets = map(det_local_metric, M.manifolds, x.parts)
     return prod(dets)
@@ -266,6 +264,11 @@ function injectivity_radius(M::ProductManifold)
     return min(map(injectivity_radius, M.manifolds)...)
 end
 
+"""
+    ProductRetraction(retractions::AbstractRetractionMethod...)
+
+Product retraction of `retractions`. Works on [`ProductManifold`](@ref).
+"""
 struct ProductRetraction{TR<:Tuple} <: AbstractRetractionMethod
     retractions::TR
 end
@@ -281,6 +284,12 @@ struct InverseProductRetraction{TR<:Tuple} <: AbstractInverseRetractionMethod
     inverse_retractions::TR
 end
 
+"""
+    InverseProductRetraction(inverse_retractions::AbstractInverseRetractionMethod...)
+
+Product inverse retraction of `inverse_retractions`.
+Works on [`ProductManifold`](@ref).
+"""
 InverseProductRetraction(inverse_retractions::AbstractInverseRetractionMethod...) = InverseProductRetraction{typeof(inverse_retractions)}(inverse_retractions)
 
 function inverse_retract!(M::ProductManifold, v, x, y, method::InverseProductRetraction)
