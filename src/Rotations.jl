@@ -56,7 +56,7 @@ Tangent vectors are represented by matrices.
 """
 inner(S::Rotations, x, w, v) = dot(w, v)
 
-project_tangent!(S::Rotations, w, x, v) = w .= (transpose(v).-v)./2
+project_tangent!(S::Rotations, w, x, v) = w .= (v - transpose(v)) / 2
 
 function exp!(S::Rotations, y, x, v)
     y .= x * exp(v)
@@ -83,7 +83,7 @@ function log!(S::Rotations, v::TV, x, y) where TV
     U = transpose(x) * y
     # MMatrix doesn't have `log` defined
     U1 = TV(real(log(Array(U))))
-    v .= (U1 .- transpose(U1))./2
+    project_tangent!(S, v, x, U1)
     return v
 end
 
@@ -173,7 +173,7 @@ function inverse_retract!(M::Rotations, v, x, y, method::PolarInverseRetraction)
     try
         B = sylvester(collect(A), collect(transpose(A)), collect(H))
         C = A * B
-        v .= (transpose(C) .- C)./2
+        project_tangent!(M, v, x, -C)
     catch e
         if isa(e, LinearAlgebra.LAPACKException)
             throw(OutOfInjectivityRadiusError())
@@ -209,7 +209,7 @@ function inverse_retract!(M::Rotations{N}, v, x, y, ::QRInverseRetraction) where
         R[1:i, i] = A[1:i, 1:i] \ b
     end
     C =  A * R
-    v .= (C .- transpose(C))./2
+    project_tangent!(M, v, x, C)
     return v
 end
 
