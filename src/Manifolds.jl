@@ -4,12 +4,16 @@ import Base: isapprox,
     exp,
     log,
     angle,
+    inv,
+    identity,
     eltype,
     similar,
     convert,
     +,
     -,
-    *
+    *,
+    /,
+    \
 import LinearAlgebra: dot,
     norm,
     det,
@@ -462,6 +466,7 @@ include("ArrayManifold.jl")
 
 include("DistributionsBase.jl")
 include("Metric.jl")
+include("Group.jl")
 include("Euclidean.jl")
 include("Rotations.jl")
 include("Sphere.jl")
@@ -510,5 +515,18 @@ export Metric,
     einstein_tensor,
     ricci_curvature,
     gaussian_curvature
+export AbstractGroupManifold,
+    GroupManifold,
+    IsMatrixGroup,
+    AbstractGroupOperation,
+    AdditionOperation,
+    MultiplicationOperation,
+    LeftInvariantCanonicalMetric,
+    RightInvariantCanonicalMetric,
+    left_action,
+    right_action,
+    compose,
+    conjugate,
+    lie_bracket
 
 end # module
