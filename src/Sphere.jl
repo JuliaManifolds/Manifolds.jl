@@ -12,6 +12,7 @@ generates the $\mathbb S^{n}\subset \mathbb R^{n+1}$
 """
 struct Sphere{N} <: Manifold end
 Sphere(n::Int) = Sphere{n}()
+show(io::IO, S::Sphere{N}) where {N} = print(io, "Sphere($(N))");
 
 @traitimpl HasMetric{Sphere,EuclideanMetric}
 

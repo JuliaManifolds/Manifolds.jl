@@ -13,6 +13,10 @@ generates the $\mathrm{SO}(n) \subset \mathbb R^{n\times n}$
 struct Rotations{N} <: Manifold end
 Rotations(n::Int) = Rotations{n}()
 
+show(io::IO, R::Rotations{N}) where {N} = print(io, "Rotations($(N))")
+
+@traitimpl HasMetric{Rotations,EuclideanMetric}
+
 """
     SpecialOrthogonal{N} <: GroupManifold{Rotations{N},MultiplicationOperation}
 
