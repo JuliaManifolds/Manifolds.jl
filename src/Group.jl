@@ -296,7 +296,7 @@ end
 end
 
 _log(x) = log(x)
-_log(x::StaticArray) = log(Matrix(x))
+_log(x::StaticMatrix) = log(Matrix(x))
 
 @traitfn function log!(G::GT,
                        v,
