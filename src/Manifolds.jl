@@ -127,6 +127,9 @@ function manifold_dimension end
 
 The size of array representing an object of type `T` on manifold `M`,
 for example point, tangent vector or cotangent vector.
+The second argument should in these cases be equal to, respectively,
+`MPoint`, `TVector` and `CoTVector`, regardless of the type used to represent
+said objects.
 """
 function representation_size end
 
