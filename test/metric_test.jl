@@ -42,11 +42,13 @@ struct TestEuclideanMetric <: Metric end
     end
 end
 
+struct TestSphere{N,T} <: Manifold
+    r::T
+end
+
+struct TestSphericalMetric <: Metric end
+
 @testset "scaled Sphere metric" begin
-    struct TestSphere{N,T} <: Manifold
-        r::T
-    end
-    struct TestSphericalMetric <: Metric end
     Manifolds.manifold_dimension(::TestSphere{N}) where {N} = N
     function Manifolds.local_metric(M::MetricManifold{<:TestSphere,<:TestSphericalMetric}, x)
         r = base_manifold(M).r
@@ -137,9 +139,10 @@ end
     end
 end
 
+struct BaseManifold{N} <: Manifold end
+struct BaseManifoldMetric{M} <: Metric end
+
 @testset "HasMetric trait" begin
-    struct BaseManifold{N} <: Manifold end
-    struct BaseManifoldMetric{M} <: Metric end
     Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
     @traitimpl HasMetric{BaseManifold,BaseManifoldMetric}
     Manifolds.inner(::BaseManifold, x, v, w) = 2 * dot(v,w)
