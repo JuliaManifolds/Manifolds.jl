@@ -46,22 +46,29 @@ function exp!(S::Rotations, y, x, v)
 end
 
 function exp!(S::Rotations{2}, y, x, v)
-    α = norm(S, x, v)/sqrt(2)
-    expv = [cos(α) sin(α); -sin(α) cos(α)]
-    y .= x * expv
+    α = norm(S, x, v) / sqrt(2)
+    @assert size(y) == (2, 2)
+    @inbounds begin
+        sinα, cosα = sincos(α)
+        y[1] = cosα
+        y[2] = -sinα
+        y[3] = sinα
+        y[4] = cosα
+    end
+    y .= x * y
     return y
 end
 
 function exp!(S::Rotations{3}, y, x, v)
-    v_norm = norm(S, x, v)
-    if v_norm ≈ 0
-        y .= x
+    α = norm(S, x, v) / sqrt(2)
+    if α ≈ 0
+        a = 1 - α^2 / 6
+        b = α / 2
     else
-        α = v_norm/sqrt(2)
-        K = v/α
-        expv = Matrix{eltype(y)}(I, 3, 3) .+ sin(α).*K .+ (1-cos(α)).*(K^2)
-        y .= x * expv
+        a = sin(α) / α
+        b = (1-cos(α)) / α^2
     end
+    y .= x .+ x * (a .* v .+ b .* (v^2))
     return y
 end
 
