@@ -1,7 +1,8 @@
 
+struct TestEuclidean{N} <: Manifold end
+struct TestEuclideanMetric <: Metric end
+
 @testset "scaled Euclidean metric" begin
-    struct TestEuclidean{N} <: Manifold end
-    struct TestEuclideanMetric <: Metric end
     Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
     function Manifolds.local_metric(M::MetricManifold{<:TestEuclidean,<:TestEuclideanMetric}, x)
         return Diagonal(1.0:manifold_dimension(M))
