@@ -113,11 +113,25 @@ function ProductArray(M::ShapeSpecification{TRanges, TSizes}, data::TData) where
     return ProductArray(typeof(M), data)
 end
 
-"""
-    prod_point(M::ProductManifold, pts...)
+@doc doc"""
+    prod_point(M::ShapeSpecification, pts...)
 
 Construct a product point from product manifold `M` based on point `pts`
-represented by arrays.
+represented by [`ProductArray`](@ref).
+
+# Example
+To construct a point on the product manifold $S^2 \times \mathbb{R}^2$
+from points on the sphere and in the euclidean space represented by,
+respectively, `[1.0, 0.0, 0.0]` and `[-3.0, 2.0]` you need to construct shape
+specification first. It describes how linear storage of `ProductArray`
+corresponds to array representations expected by `Sphere(2)` and `Euclidean(2)`.
+
+    M1 = Sphere(2)
+    M2 = Euclidean(2)
+    Mshape = Manifolds.ShapeSpecification(M1, M2)
+
+Next, the desired point on the product manifold can be obtained by calling
+`Manifolds.prod_point(Mshape, [1.0, 0.0, 0.0], [-3.0, 2.0])`.
 """
 function prod_point(M::ShapeSpecification, pts...)
     data = mapreduce(vcat, pts) do pt
