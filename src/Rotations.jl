@@ -88,11 +88,10 @@ and save the result to `v`.
 For antipodal rotations the function returns one of the tangent vectors that
 point at `y`.
 """
-function log!(S::Rotations, v::TV, x, y) where TV
+function log!(S::Rotations, v, x, y)
     U = transpose(x) * y
-    # MMatrix doesn't have `log` defined
-    U1 = real(log(Array(U)))
-    v .= (U1 .- transpose(U1))./2
+    v .= real(log(Matrix(U)))
+    project_tangent!(S, v, x, v)
     return v
 end
 
