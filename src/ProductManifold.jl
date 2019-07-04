@@ -41,6 +41,29 @@ end
 
 A structure for specifying array size and offset information for linear
 storage of points and tangent vectors on the product manifold of `manifolds`.
+
+For example, consider the shape specification for the product of
+a sphere and group of rotations:
+
+```julia-repl
+julia> M1 = Sphere(2)
+Sphere{2}()
+
+julia> M3 = Rotations(2)
+Rotations{2}()
+
+julia> shape = Manifolds.ShapeSpecification(M1, M3)
+Manifolds.ShapeSpecification{(1:3, 4:7),Tuple{Tuple{3},Tuple{2,2}}}()
+```
+
+`TRanges` contains ranges in the linear storage that correspond to a specific
+manifold. `Sphere(2)` needs three numbers and is first, so it is allocated the
+first three elements of the linear storage (`1:3`). `Rotations(2)` needs four
+numbers and is second, so the next four numbers are allocated to it (`4:7`).
+`TSizes` describe how the linear storage must be reshaped to correctly
+represent points. In this case, `Sphere(2)` expects a three-element vector, so
+the corresponding size is `Tuple{3}`. On the other hand, `Rotations(2)`
+expects two-by-two matrices, so its size specification is `Tuple{2,2}`.
 """
 struct ShapeSpecification{TRanges, TSizes} end
 
