@@ -56,6 +56,11 @@ exp!(M::Euclidean, y, x, v) = (y .= x + v)
 
 log!(M::Euclidean, v, x, y) = (v .= y - x)
 
+function zero_tangent_vector!(M::Euclidean, v, x)
+    fill!(v, 0)
+    return v
+end
+
 proj!(M::Euclidean, x) = x
 
 function project_tangent!(M::Euclidean, w, x, v)
