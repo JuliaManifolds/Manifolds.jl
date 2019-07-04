@@ -60,16 +60,11 @@ function hamilton_prod(x, y)
     return z
 end
 
-function inv(::CompactSymplectic1, x)
-    @assert length(x) == 4
-    y = similar(x)
-    vi = SVector{3}(2:4)
-    @inbounds begin
-        y[1] = x[1]
-        y[vi] .= -x[vi]
-    end
-    return y
-end
+hamilton_prod(::Identity{G}, x) where {G<:AbstractGroupManifold{QuaternionMultiplicationOperation}} = x
+hamilton_prod(x, ::Identity{G}) where {G<:AbstractGroupManifold{QuaternionMultiplicationOperation}} = x
+hamilton_prod(e::E, ::E) where {G<:AbstractGroupManifold{QuaternionMultiplicationOperation},E<:Identity{G}} = e
+
+inv(e::Identity{G}) where {G<:AbstractGroupManifold{QuaternionMultiplicationOperation}} = e
 
 function identity(::CompactSymplectic1, x)
     e = similar(x, 4)
@@ -81,9 +76,22 @@ function identity(::CompactSymplectic1, x)
     return e
 end
 
+function inv(::CompactSymplectic1, x)
+    @assert length(x) == 4
+    y = similar(x)
+    vi = SVector{3}(2:4)
+    @inbounds begin
+        y[1] = x[1]
+        y[vi] .= -x[vi]
+    end
+    return y
+end
+
+inv(::G, e::Identity{G}) where {G<:CompactSymplectic1} = inv(e)
+
 left_action(::CompactSymplectic1, x, p) = hamilton_prod(x, p)
 
-function exp!(::CompactSymplectic1, y, v)
+function exp!(::GT, y, ::Identity{GT}, v) where {GT<:CompactSymplectic1}
       @assert length(v) == 4 && length(y) == 4
       vi = SVector{3}(2:4)
       @inbounds begin
@@ -95,7 +103,7 @@ function exp!(::CompactSymplectic1, y, v)
       return y
 end
 
-function log!(::CompactSymplectic1, v, y)
+function log!(::GT, v, ::Identity{GT}, y) where {GT<:CompactSymplectic1}
     @assert length(v) == 4 && length(y) == 4
     vi = SVector{3}(2:4)
     @inbounds begin

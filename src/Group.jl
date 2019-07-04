@@ -54,6 +54,17 @@ that the group is a subgroup of the General Linear Group.
 @traitdef IsMatrixGroup{G}
 
 @doc doc"""
+    Identity
+
+The identity element of any group.
+"""
+struct Identity{G<:AbstractGroupManifold}
+    group::G
+end
+
+(e::Identity)(x) = identity(e.group, x)
+
+@doc doc"""
     inv(G::AbstractGroupManifold, x)
 
 Inverse $x^{-1}$ of an element $x$, such that
@@ -62,6 +73,8 @@ $x \cdot x^{-1} = x^{-1} \cdot x = e$.
 function inv(G::AbstractGroupManifold, x)
     error("inv not implemented on $(typeof(G)) for point $(typeof(x))")
 end
+
+inv(::AbstractGroupManifold, e::Identity) = e
 
 @doc doc"""
     identity(G::AbstractGroupManifold, x)
@@ -94,14 +107,25 @@ function right_action(G::AbstractGroupManifold, x, p)
     return left_action(G, inv(G, x), p)
 end
 
+# Adapted from `afoldl` in `operators.jl` in Julia base.
+# expand recursively up to a point, then switch to a loop.
+group_afoldl(op, G, a) = a
+group_afoldl(op, G, a, b) = op(G,a,b)
+group_afoldl(op, G, a, b, c...) = group_afoldl(op, G, op(G, a, b), c...)
+
+function group_afoldl(op,G,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,qs...)
+    y = op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,a,b),c),d),e),f),g),h),i),j),k),l),m),n),o),p)
+    return op(G, y, reduce((x, y)->op(G, x, y), qs))
+end
+
 """
-    compose(G::AbstractGroupManifold, x...)
+    compose(G::AbstractGroupManifold, xs...)
 
 Compose elements of `G` using their left translation upon each other.
 """
-function compose(G::AbstractGroupManifold, x...)
-    return reduce((x, y)->left_action(G, x, y), x)
-end
+compose(G::AbstractGroupManifold, xs...) = group_afoldl(compose, G, xs...)
+compose(G::AbstractGroupManifold, x) = x
+compose(G::AbstractGroupManifold, x, y) = left_action(G, x, y)
 
 *(G::AbstractGroupManifold, x, y) = compose(G, x, y)
 
@@ -141,57 +165,24 @@ end
 Exponential map of tangent vector `v` at the identity element of group `G`.
 Result is saved to `y`.
 """
-function exp!(G::AbstractGroupManifold, y, v)
-    error("Exponential map not implemented on $(typeof(G)) for point $(typeof(y)) and tangent vector $(typeof(v))")
+function exp!(G::AbstractGroupManifold, y, x::Identity, v)
+    error("Exponential map not implemented on $(typeof(G)) for identity $(typeof(x)), point $(typeof(y)), and tangent vector $(typeof(v))")
 end
 
-"""
-    exp!(G::AbstractGroupManifold, y, v, t::Real)
-
-Exponential map of tangent vector `t*v` at the identity element of group `G`.
-Result is saved to `y`.
-"""
-exp!(G::AbstractGroupManifold, y, v, t::Real) = exp!(G, y, t*v)
-
 function exp!(G::AbstractGroupManifold, y, x, v)
-    exp!(G, y, \(G, x, v))
+    exp!(G, y, Identity(G), \(G, x, v))
     y .= compose(G, x, y)
     return y
 end
 
-"""
-    exp(G::AbstractGroupManifold, v)
-
-Exponential map of tangent vector `v` at the identity element of group `G`.
-"""
-function exp(G::AbstractGroupManifold, v)
-    y = similar(v)
-    exp!(G, y, v)
-    return y
-end
-
-"""
-    exp(G::AbstractGroupManifold, v, t::Real)
-
-Exponential map of tangent vector `t*v` at the identity element of group `G`.
-"""
-exp(G::AbstractGroupManifold, v, t::Real) = exp(G, t*v)
-
-function log!(G::AbstractGroupManifold, v, y)
-    error("Logarithmic map not implemented on $(typeof(G)) for point $(typeof(y)) and vector $(typeof(v))")
+function log!(G::AbstractGroupManifold, v, x::Identity, y)
+    error("Logarithmic map not implemented on $(typeof(G)) for identity $(typeof(x)), point $(typeof(y)), and vector $(typeof(v))")
 end
 
 function log!(G::AbstractGroupManifold, v, x, y)
-    log!(G, v, \(G, x, y))
+    log!(G, v, Identity(G), \(G, x, y))
     v .= left_action(G, x, v)
 end
-
-function log(G::AbstractGroupManifold, y)
-    v = similar_result(G, log, y)
-    log!(G, v, y)
-    return v
-end
-
 
 """
     AdditionOperation <: AbstractGroupOperation
@@ -200,9 +191,16 @@ Group operation that consists of simple addition.
 """
 struct AdditionOperation <: AbstractGroupOperation end
 
-inv(::AbstractGroupManifold{AdditionOperation}, x) = -x
++(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
++(::Identity{G}, x) where {G<:AbstractGroupManifold{AdditionOperation}} = x
++(x, ::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = x
++(e::E, ::E) where {G<:AbstractGroupManifold{AdditionOperation},E<:Identity{G}} = e
+
+-(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
 
 identity(::AbstractGroupManifold{AdditionOperation}, x) = zero(x)
+
+inv(::AbstractGroupManifold{AdditionOperation}, x) = -x
 
 left_action(::AbstractGroupManifold{AdditionOperation}, x, p) = x + p
 
@@ -213,18 +211,25 @@ For an element $p$ of some set, compute the right action of group element $x$
 on $p$, i.e. $p \cdot x$. For an `AdditionOperation`, the right and left
 actions are the same.
 """
-function right_action(G::AbstractGroupManifold{AdditionOperation}, x, p)
-    return left_action(G, x, p)
-end
-
-compose(::AbstractGroupManifold{AdditionOperation}, x...) = +(x...)
+right_action(::AbstractGroupManifold{AdditionOperation}, x, p) = p + x
 
 lie_bracket(::AbstractGroupManifold{AdditionOperation}, v, w) = zero(v)
 
-exp!(::AbstractGroupManifold{AdditionOperation}, y, v) = y .= v
+function exp!(::GT,
+              y,
+              ::Identity{GT},
+              v) where {GT<:AbstractGroupManifold{AdditionOperation}}
+    y .= v
+    return y
+end
 
-log!(::AbstractGroupManifold{AdditionOperation}, v, y) = v .= y
-
+function log!(::GT,
+              v,
+              ::Identity{GT},
+              y) where {GT<:AbstractGroupManifold{AdditionOperation}}
+    v .= y
+    return v
+end
 
 """
     MultiplicationOperation <: AbstractGroupOperation
@@ -233,13 +238,27 @@ Group operation that consists of multiplication.
 """
 struct MultiplicationOperation <: AbstractGroupOperation end
 
-inv(::AbstractGroupManifold{MultiplicationOperation}, x) = inv(x)
+*(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
+*(::Identity{G}, x) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
+*(x, ::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
+*(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
+
+/(x, ::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
+/(::Identity{G}, x) where {G<:AbstractGroupManifold{MultiplicationOperation}} = inv(x)
+/(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
+
+\(x, ::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = inv(x)
+\(::Identity{G}, x) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
+\(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
+
+inv(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
 
 identity(::AbstractGroupManifold{MultiplicationOperation}, x) = one(x)
 
-left_action(::AbstractGroupManifold{MultiplicationOperation}, x, p) = x * p
+inv(::AbstractGroupManifold{MultiplicationOperation}, x) = inv(x)
+inv(::AbstractGroupManifold{MultiplicationOperation}, x::Identity) = x
 
-compose(::AbstractGroupManifold{MultiplicationOperation}, x...) = *(x...)
+left_action(::AbstractGroupManifold{MultiplicationOperation}, x, p) = x * p
 
 /(::AbstractGroupManifold{MultiplicationOperation}, x, y) = x / y
 
@@ -257,15 +276,21 @@ end
     return v * w - w * v
 end
 
-@traitfn function exp!(G::GT, y, v) where {O<:MultiplicationOperation,
-                                           GT<:AbstractGroupManifold{O};
-                                           !IsMatrixGroup{GT}}
-    error("Exponential map not implemented on $(typeof(G)) for point $(typeof(y)) and tangent vector $(typeof(v))")
+@traitfn function exp!(G::GT,
+                       y,
+                       ::Identity{GT},
+                       v) where {O<:MultiplicationOperation,
+                                 GT<:AbstractGroupManifold{O};
+                                 !IsMatrixGroup{GT}}
+    error("Exponential map not implemented on $(typeof(G)) for identity $(typeof(x)), point $(typeof(y)), and tangent vector $(typeof(v))")
 end
 
-@traitfn function exp!(G::GT, y, v) where {O<:MultiplicationOperation,
-                                           GT<:AbstractGroupManifold{O};
-                                           IsMatrixGroup{GT}}
+@traitfn function exp!(G::GT,
+                       y,
+                       ::Identity{GT},
+                       v) where {O<:MultiplicationOperation,
+                                 GT<:AbstractGroupManifold{O};
+                                 IsMatrixGroup{GT}}
     y .= exp(v)
     return y
 end
@@ -273,15 +298,21 @@ end
 _log(x) = log(x)
 _log(x::StaticArray) = log(Matrix(x))
 
-@traitfn function log!(G::GT, v, y) where {O<:MultiplicationOperation,
-                                           GT<:AbstractGroupManifold{O};
-                                           !IsMatrixGroup{GT}}
-    error("Logarithmic map not implemented on $(typeof(G)) for point $(typeof(y)) and vector $(typeof(v))")
+@traitfn function log!(G::GT,
+                       v,
+                       ::Identity{GT},
+                       y) where {O<:MultiplicationOperation,
+                                 GT<:AbstractGroupManifold{O};
+                                 !IsMatrixGroup{GT}}
+    error("Logarithmic map not implemented on $(typeof(G)) for identity $(typeof(x)), point $(typeof(y)), and vector $(typeof(v))")
 end
 
-@traitfn function log!(G::GT, v, y) where {O<:MultiplicationOperation,
-                                           GT<:AbstractGroupManifold{O};
-                                           IsMatrixGroup{GT}}
+@traitfn function log!(G::GT,
+                       v,
+                       ::Identity{GT},
+                       y) where {O<:MultiplicationOperation,
+                                 GT<:AbstractGroupManifold{O};
+                                 IsMatrixGroup{GT}}
     w = _log(y)
     v .= isreal(v) ? real(w) : w
     return v
