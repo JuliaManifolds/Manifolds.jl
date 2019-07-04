@@ -257,7 +257,7 @@ function representation_size(M::ProductManifold, ::Type{T}) where {T}
     return (mapreduce(m -> sum(representation_size(m, T)), +, M.manifolds),)
 end
 
-manifold_dimension(M::ProductManifold) = sum(map(m -> manifold_dimension(m), M.manifolds))
+manifold_dimension(M::ProductManifold) = mapreduce(m -> manifold_dimension(m), +, M.manifolds)
 
 struct ProductMetric <: Metric end
 
@@ -269,6 +269,15 @@ end
 function inner(M::ProductManifold, x, v, w)
     subproducts = map(inner, M.manifolds, x.parts, v.parts, w.parts)
     return sum(subproducts)
+end
+
+function norm(M::ProductManifold, x, v)
+    norms_squared = map(norm, M.manifolds, x.parts, v.parts).^2
+    return sqrt(sum(norms_squared))
+end
+
+function distance(M::ProductManifold, x, y)
+    return sqrt(sum(map(distance, M.manifolds, x.parts, y.parts).^2))
 end
 
 function exp!(M::ProductManifold, y, x, v)
@@ -287,10 +296,6 @@ end
 
 function log(M::ProductManifold, x::ProductMPoint, y::ProductMPoint)
     return ProductTVector(map(log, M.manifolds, x.parts, y.parts)...)
-end
-
-function distance(M::ProductManifold, x, y)
-    return sqrt(sum(map(distance, M.manifolds, x.parts, y.parts).^2))
 end
 
 function injectivity_radius(M::ProductManifold, x)
