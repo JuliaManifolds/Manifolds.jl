@@ -48,14 +48,14 @@ end
 function exp!(S::Rotations{2}, y, x, v)
     α = sign(v[1,2]) * norm(S, x, v) / sqrt(2)
     @assert size(y) == (2, 2)
+    @assert size(x) == (2, 2)
     @inbounds begin
         sinα, cosα = sincos(α)
-        y[1] = cosα
-        y[2] = -sinα
-        y[3] = sinα
-        y[4] = cosα
+        y[1] = x[1]*cosα - x[3]*sinα
+        y[2] = x[2]*cosα - x[4]*sinα
+        y[3] = x[1]*sinα + x[3]*cosα
+        y[4] = x[2]*sinα + x[4]*cosα
     end
-    y .= x * y
     return y
 end
 
