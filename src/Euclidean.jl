@@ -61,7 +61,7 @@ function zero_tangent_vector!(M::Euclidean, v, x)
     return v
 end
 
-proj!(M::Euclidean, x) = x
+project_point!(M::Euclidean, x) = x
 
 function project_tangent!(M::Euclidean, w, x, v)
     w .= v
@@ -75,11 +75,11 @@ Wraps standard distribution `d` into a manifold-valued distribution. Generated
 points will be of similar type to `x`. By default, the type is not changed.
 """
 function projected_distribution(M::Euclidean, d, x)
-    return ProjectedPointDistribution(M, d, proj!, x)
+    return ProjectedPointDistribution(M, d, project_point!, x)
 end
 
 function projected_distribution(M::Euclidean, d)
-    return ProjectedPointDistribution(M, d, proj!, rand(d))
+    return ProjectedPointDistribution(M, d, project_point!, rand(d))
 end
 
 """

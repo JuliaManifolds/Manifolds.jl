@@ -26,7 +26,7 @@ Return the dimension of the manifold $\mathbb S^n$, i.e. $n$.
 """
 manifold_dimension(S::Sphere{N}) where {N} = N
 
-proj!(S::Sphere, x) = (x ./= norm(x))
+project_point!(S::Sphere, x) = (x ./= norm(x))
 
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v) .* x)
 
@@ -79,7 +79,7 @@ type to `x`.
 """
 function uniform_distribution(S::Sphere, x)
     d = Distributions.MvNormal(zero(x), 1.0)
-    return ProjectedPointDistribution(S, d, proj!, x)
+    return ProjectedPointDistribution(S, d, project_point!, x)
 end
 
 """

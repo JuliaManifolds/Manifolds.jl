@@ -269,6 +269,14 @@ function inverse_retract(M::Manifold, x, y)
     return vr
 end
 
+project_point!(M::Manifold, x) = error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)).")
+
+function project_point(M::Manifold, x)
+    y = similar_result(M, project_point, x)
+    project_tangent!(M, y, x)
+    return y
+end
+
 project_tangent!(M::Manifold, w, x, v) = error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)) with input $(typeof(v)).")
 
 function project_tangent(M::Manifold, x, v)
@@ -518,6 +526,8 @@ export manifold_dimension,
     log!,
     manifold_dimension,
     norm,
+    project_point,
+    project_point!,
     project_tangent,
     project_tangent!,
     retract,
