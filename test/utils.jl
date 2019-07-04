@@ -72,9 +72,11 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     end
 
     @testset "log/exp tests" begin
+        tv2 = log(M, pts[2], pts[1])
         @test isapprox(M, pts[2], exp(M, pts[1], tv1))
         @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
         @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
+        @test isapprox(M, pts[1], exp(M, pts[2], tv2))
         @test is_manifold_point(M, retract(M, pts[1], tv1))
         @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0))
         for retr_method ∈ retraction_methods
