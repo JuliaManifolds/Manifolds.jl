@@ -124,12 +124,12 @@ Base.@propagate_inbounds getindex(a::SizedAbstractArray, i::Int) = getindex(a.da
 Base.@propagate_inbounds setindex!(a::SizedAbstractArray, v, i::Int) = setindex!(a.data, v, i)
 
 SizedAbstractVector{S,T,M} = SizedAbstractArray{Tuple{S},T,1,M}
-@inline SizedAbstractVector{S}(a::AbstractArray{T,M}) where {S,T,M} = SizedAbstractArray{Tuple{S},T,1,M}(a)
-@inline SizedAbstractVector{S}(x::NTuple{L,T}) where {S,T,L} = SizedAbstractArray{Tuple{S},T,1,1}(x)
+@inline SizedAbstractVector{S}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}} = SizedAbstractArray{Tuple{S},T,1,M,TData}(a)
+@inline SizedAbstractVector{S}(x::NTuple{L,T}) where {S,T,L} = SizedAbstractArray{Tuple{S},T,1,1,Vector{T}}(x)
 
 SizedAbstractMatrix{S1,S2,T,M} = SizedAbstractArray{Tuple{S1,S2},T,2,M}
-@inline SizedAbstractMatrix{S1,S2}(a::AbstractArray{T,M}) where {S1,S2,T,M} = SizedAbstractArray{Tuple{S1,S2},T,2,M}(a)
-@inline SizedAbstractMatrix{S1,S2}(x::NTuple{L,T}) where {S1,S2,T,L} = SizedAbstractArray{Tuple{S1,S2},T,2,2}(x)
+@inline SizedAbstractMatrix{S1,S2}(a::TData) where {S1,S2,T,M,TData<:AbstractArray{T,M}} = SizedAbstractArray{Tuple{S1,S2},T,2,M,TData}(a)
+@inline SizedAbstractMatrix{S1,S2}(x::NTuple{L,T}) where {S1,S2,T,L} = SizedAbstractArray{Tuple{S1,S2},T,2,2,Matrix{2}}(x)
 
 """
     Size(dims)(array)
