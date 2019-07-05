@@ -1,4 +1,5 @@
-using LinearAlgebra: svd, eig
+using LinearAlgebra: svd, eig, eigen
+
 @doc doc"""
     SymmetricPositiveDefinite{N} <: Manifold
 
@@ -95,6 +96,32 @@ function log!(P::Metricmanifold{SymmetricPositiveDefinite{N},LinearAffineMetric}
 	v = xSqrt * Ue*Se*transpose(Ue) * xSqrt
 	v = 0.5*( v + transpose(v) ) )
     return v
+end
+
+function vector_transport!(M::SymmetricPositiveDefinite,vto, x, v, y, ::ParallelTransport)
+  if norm(x-y)<1e-13
+    vto = v
+    return vto
+  end
+  svd1 = svd(x)
+  U = svd1.U
+  S = svd1.S
+  Ssqrt = sqrt.(S)
+  SsqrtInv = Diagonal( 1 ./ Ssqrt )
+  Ssqrt = Diagonal( Ssqrt )
+  xSqrt = U*Ssqrt*transpose(U)
+  xSqrtInv = U*SsqrtInv*transpose(U)
+  tv = xSqrtInv * v * xSqrtInv
+  ty = xSqrtInv * y * xSqrtInv
+  svd2 = svd( 0.5*( ty + transpose(ty) ) )
+  Se = Diagonal( log.(svd2.S) )
+  Ue = svd2.U
+  ty2 = Ue*Se*transpose(Ue)
+  eig1 = eigen(  0.5 * (ty2 + transpose(ty2) )  )
+  Sf = Diagonal( exp.(eig1.values) )
+  Uf = eig1.vectors
+  vto = xSqrt*Uf*Sf*transpose(Uf)*(0.5*(tv+transpose(tv)))*Uf*Sf*transpose(Uf)*xSqrt
+  return vto
 end
 
 injectivity_radius(P::SymmetricPositiveDefinite, args...) = Infπ

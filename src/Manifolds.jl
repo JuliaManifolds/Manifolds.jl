@@ -256,7 +256,7 @@ end
 
 Inner product of tangent vectors `v` and `w` at point `x` from manifold `M`.
 """
-inner(M::Manifold, x, v, w) = error("inner: Inner product not implemented on a $(typeof(M)) for input point $(typeof(x)) and tangent vectors $(typeof(v)) and $(typeof(w)).")
+inner(M::Manifold, x, v, w) = error("Inner product not implemented on a $(typeof(M)) for input point $(typeof(x)) and tangent vectors $(typeof(v)) and $(typeof(w)).")
 
 """
     norm(M::Manifold, x, v)
@@ -372,11 +372,20 @@ function shortest_geodesic(M::Manifold, x, y, T::AbstractVector)
     return geodesic(M, x, log(M, x, y), T)
 end
 
-vector_transport!(M::Manifold, vto, x, v, y) = project_tangent!(M, vto, x, v)
+abstract type VectorTransportMethod end
 
-function vector_transport(M::Manifold, x, v, y)
+struct ParallelTransport <: VectorTransportMethod end
+struct VectorProjection <: VectorTransportMethod end
+
+vector_transport!(M::Manifold, vto, x, v, y) = vector_transport!(M,vto,x,v,y,::ParallelTransport)
+
+vector_transport!(M::Manifold, vto, x, v, y, method::VectorTransportMethod) = error("No vector transport method $(typeof(method)) on $(typeof(M)) for two points $(typeof(x)) and $(typeof(y)) and a tangent vector $(typeof(v)).")
+
+vector_transport!(M::Manifold, vto, x, v, y, ::VectorProjection) = project_tangent!(M, vto, x, v)
+
+function vector_transport(M::Manifold, x, v, y, method::VectorTransportMethod=ParallelTransport)
     vto = similar_result(M, vector_transport, v, x, y)
-    vector_transport!(M, vto, x, y, v)
+    vector_transport!(M, vto, x, y, v, method)
     return vto
 end
 
@@ -465,6 +474,7 @@ include("Metric.jl")
 include("Euclidean.jl")
 include("Rotations.jl")
 include("Sphere.jl")
+include("SymmetricPositiveDefinite.jl")
 include("ProjectedDistribution.jl")
 
 export Manifold,
