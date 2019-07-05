@@ -85,8 +85,8 @@ include("utils.jl")
             @test isapprox(Mse, p[1], p[2])
         end
         for p in zip(pts_sphere, pts_r2, pts_prod)
-            @test isapprox(M1, p[1], Manifolds.proj_product(p[3], 1))
-            @test isapprox(M2, p[2], Manifolds.proj_product(p[3], 2))
+            @test isapprox(M1, p[1], Manifolds.submanifold_component(p[3], 1))
+            @test isapprox(M2, p[2], Manifolds.submanifold_component(p[3], 2))
         end
     end
 

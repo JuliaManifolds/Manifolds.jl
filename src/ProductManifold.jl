@@ -180,11 +180,11 @@ function prod_point(M::ShapeSpecification, pts...)
 end
 
 """
-    proj_product(x::ProductArray, i::Integer)
+    submanifold_component(x::ProductArray, i::Integer)
 
 Project the product array `x` to its `i`th component. A new array is returned.
 """
-function proj_product(x::ProductArray, i::Integer)
+function submanifold_component(x::ProductArray, i::Integer)
     return x.parts[i]
 end
 
@@ -235,7 +235,7 @@ eltype(x::ProductMPoint) = eltype(Tuple{map(eltype, x.parts)...})
 similar(x::ProductMPoint) = ProductMPoint(map(similar, x.parts)...)
 similar(x::ProductMPoint, ::Type{T}) where T = ProductMPoint(map(t -> similar(t, T), x.parts)...)
 
-function proj_product(x::ProductMPoint, i::Integer)
+function submanifold_component(x::ProductMPoint, i::Integer)
     return x.parts[i]
 end
 
@@ -259,7 +259,7 @@ similar(x::ProductTVector, ::Type{T}) where T = ProductTVector(map(t -> similar(
 (-)(v::ProductTVector) = ProductTVector(map(-, v.parts))
 (*)(a::Number, v::ProductTVector) = ProductTVector(map(t -> a*t, v.parts))
 
-function proj_product(x::ProductTVector, i::Integer)
+function submanifold_component(x::ProductTVector, i::Integer)
     return x.parts[i]
 end
 
@@ -278,7 +278,7 @@ eltype(x::ProductCoTVector) = eltype(Tuple{map(eltype, x.parts)...})
 similar(x::ProductCoTVector) = ProductCoTVector(map(similar, x.parts)...)
 similar(x::ProductCoTVector, ::Type{T}) where T = ProductCoTVector(map(t -> similar(t, T), x.parts)...)
 
-function proj_product(x::ProductCoTVector, i::Integer)
+function submanifold_component(x::ProductCoTVector, i::Integer)
     return x.parts[i]
 end
 
