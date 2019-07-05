@@ -42,6 +42,8 @@ include("utils.jl")
 
     @test submanifold(Mser, 2) == M2
     @test submanifold(Mser, Val((1, 3))) == M1 × M3
+    @test submanifold(Mser, 2:3) == M2 × M3
+    @test submanifold(Mser, [1, 3]) == M1 × M3
     @inferred submanifold(Mser, Val((1, 3)))
 
     # testing the slower generic constructor

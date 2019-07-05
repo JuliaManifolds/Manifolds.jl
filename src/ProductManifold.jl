@@ -57,6 +57,18 @@ function submanifold(M::ProductManifold, i::Val)
 end
 
 """
+    submanifold(M::ProductManifold, i::AbstractVector)
+
+Extract the factor of the product manifold `M` indicated by indices in `i`.
+For example, for `i` equal to `[1, 3]` the product manifold constructed
+from the first and the third factor is returned.
+
+This function is not type-stable, for better preformance use
+`submanifold(M::ProductManifold, i::Val)`.
+"""
+submanifold(M::ProductManifold, i::AbstractVector) = submanifold(M, Val(tuple(i...)))
+
+"""
     ShapeSpecification(manifolds::Manifold...)
 
 A structure for specifying array size and offset information for linear
