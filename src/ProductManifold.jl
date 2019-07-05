@@ -148,7 +148,7 @@ end
 Project the product array `x` to its `i`th component. A new array is returned.
 """
 function proj_product(x::ProductArray, i::Integer)
-    return copy(x.parts[i])
+    return x.parts[i]
 end
 
 Base.BroadcastStyle(::Type{<:ProductArray{ShapeSpec}}) where ShapeSpec<:ShapeSpecification = Broadcast.ArrayStyle{ProductArray{ShapeSpec}}()
