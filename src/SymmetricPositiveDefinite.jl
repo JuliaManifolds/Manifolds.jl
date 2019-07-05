@@ -36,21 +36,19 @@ returns the dimension of the manifold [`SymmetricPositiveDefinite`](@ref) $\math
 
 """
 struct LinearAffineMetric <: Metric end
-@traitimpl HasMetric{SymmetricPositiveDefinite, LogEuclidean}
 
 @doc doc"""
 
 """
 struct LogEuclideanMetric <: Metric end
-@traitimpl HasMetric{SymmetricPositiveDefinite, LogEuclidean}
 
-distance(P::SymmetricPositiveDefinite{N},x,y) = distance(MetricManifold(S,LinearAffineMetric)},x,y)
+distance(P::SymmetricPositiveDefinite{N},x,y) = distance(MetricManifold(P,LinearAffineMetric),x,y)
 function distance(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},x,y)
     s = real.( eigen( x,y ).values )
     return any(s .<= eps() ) ? 0 : sqrt(  sum( abs.(log.(s)).^2 )  )
 end
 
-inner(P::SymmetricPositiveDefinite{N}, x, w, v) = inner(MetricManifold(S,LinearAffineMetric),x,w,v)
+inner(P::SymmetricPositiveDefinite{N}, x, w, v) = inner(MetricManifold(P,LinearAffineMetric),x,w,v)
 function inner(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},x,w,v)
 	svd1 = svd(x)
 	U = svd1.U
@@ -63,7 +61,7 @@ norm(P::SymmetricPositiveDefinite{N},x,v) = sqrt( inner(P,x,v,v) )
 norm(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},x,v) = sqrt( inner(P,x,v,v) )
 
 function exp!(P::SymmetricPositiveDefinite{N},y,x,v) = exp!(MetricManifold(SymmetricPositiveDefinite,LinearAffineMetric),y,x,v)
-function exp!(P::Metricmanifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, y, x, v)
+function exp!(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, y, x, v)
 	svd1 = svd(x)
 	U = svd1.U
 	S = svd1.S
@@ -76,12 +74,12 @@ function exp!(P::Metricmanifold{SymmetricPositiveDefinite{N},LinearAffineMetric}
    	Se = Diagonal( exp.(eig1.values) )
     Ue = eig1.vectors
     y = xSqrt*Ue*Se*transpose(Ue)*xSqrt
-    y = 0.5*( y + transpose(y) ) ) # numerical stabilization
+    y = 0.5*( y + transpose(y) ) # numerical stabilization
     return y
 end
 
-function log!(P::SymmetricPositiveDefinite{N}, v, x, y) = exp!(MetricManifold(SymmetricPositiveDefinite,LinearAffineMetric),y,x,v)
-function log!(P::Metricmanifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, v, x, y)
+function log!(P::SymmetricPositiveDefinite{N}, v, x, y) = exp!(MetricManifold(P,LinearAffineMetric),y,x,v)
+function log!(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, v, x, y)
     svd1 = svd( x )
 	U = svd1.U
 	S = svd1.S
@@ -94,7 +92,7 @@ function log!(P::Metricmanifold{SymmetricPositiveDefinite{N},LinearAffineMetric}
 	Se = Diagonal( log.(max.(svd2.S,eps()) ) )
 	Ue = svd2.U
 	v = xSqrt * Ue*Se*transpose(Ue) * xSqrt
-	v = 0.5*( v + transpose(v) ) )
+	v = 0.5*( v + transpose(v) )
     return v
 end
 
