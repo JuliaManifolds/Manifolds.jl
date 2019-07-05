@@ -37,6 +37,24 @@ function cross(M1::ProductManifold, M2::ProductManifold)
 end
 
 """
+    submanifold(M::ProductManifold, i::Integer)
+
+Extract the `i`th factor of the product manifold `M`.
+"""
+function submanifold(M::ProductManifold, i::Integer)
+    return M.manifolds[i]
+end
+
+"""
+    submanifold(M::ProductManifold, i::AbstractVector)
+
+Extract the factor of the product manifold `M` indicated by indices in `i`.
+"""
+function submanifold(M::ProductManifold, i::AbstractVector)
+    return ProductManifold(M.manifolds[i]...)
+end
+
+"""
     ShapeSpecification(manifolds::Manifold...)
 
 A structure for specifying array size and offset information for linear

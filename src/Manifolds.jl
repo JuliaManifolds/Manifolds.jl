@@ -532,6 +532,7 @@ export manifold_dimension,
     project_tangent!,
     retract,
     retract!,
+    submanifold,
     zero_tangent_vector,
     zero_tangent_vector!
 export Metric,

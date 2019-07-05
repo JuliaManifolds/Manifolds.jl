@@ -40,6 +40,9 @@ include("utils.jl")
     Mser = Manifolds.ProductManifold(M1, M2, M3)
     shape_ser = Manifolds.ShapeSpecification(M1, M2, M3)
 
+    @test submanifold(Mser, 2) == M2
+    @test submanifold(Mser, [1, 3]) == M1 × M3
+
     pts_sphere = [[1.0, 0.0, 0.0],
                   [0.0, 1.0, 0.0],
                   [0.0, 0.0, 1.0]]
