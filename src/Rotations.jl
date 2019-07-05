@@ -104,7 +104,7 @@ end
 
 function log!(S::Rotations{3}, v, x, y)
     U = transpose(x) * y
-    θ = acos((tr(U)-1)/2)
+    θ = acos(clamp((tr(U)-1)/2, -1, 1))
     if θ ≈ 0
         fill!(v, 0)
     else
