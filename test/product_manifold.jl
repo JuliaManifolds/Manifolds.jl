@@ -1,9 +1,9 @@
 include("utils.jl")
 
 @testset "Product manifold" begin
-    M1 = Manifolds.Sphere(2)
-    M2 = Manifolds.Euclidean(2)
-    Mse = Manifolds.ProductManifold(M1, M2)
+    M1 = Sphere(2)
+    M2 = Euclidean(2)
+    Mse = ProductManifold(M1, M2)
     @test Mse == M1 × M2
     shape_se = Manifolds.ShapeSpecification(M1, M2)
 
@@ -37,7 +37,7 @@ include("utils.jl")
     end
 
     M3 = Manifolds.Rotations(2)
-    Mser = Manifolds.ProductManifold(M1, M2, M3)
+    Mser = ProductManifold(M1, M2, M3)
     shape_ser = Manifolds.ShapeSpecification(M1, M2, M3)
 
     @test submanifold(Mser, 2) == M2
@@ -47,7 +47,7 @@ include("utils.jl")
     @inferred submanifold(Mser, Val((1, 3)))
 
     # testing the slower generic constructor
-    Mprod4 = Manifolds.ProductManifold(M2, M2, M2, M2)
+    Mprod4 = ProductManifold(M2, M2, M2, M2)
     shape4 = Manifolds.ShapeSpecification(Mprod4.manifolds...)
     data_x4 = rand(8)
     @test Manifolds.ProductArray(shape4, data_x4).data === data_x4

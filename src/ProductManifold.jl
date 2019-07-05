@@ -294,7 +294,7 @@ function representation_size(M::ProductManifold, ::Type{T}) where {T}
     return (mapreduce(m -> sum(representation_size(m, T)), +, M.manifolds),)
 end
 
-manifold_dimension(M::ProductManifold) = mapreduce(m -> manifold_dimension(m), +, M.manifolds)
+manifold_dimension(M::ProductManifold) = mapreduce(manifold_dimension, +, M.manifolds)
 
 struct ProductMetric <: Metric end
 

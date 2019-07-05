@@ -507,7 +507,8 @@ include("ProjectedDistribution.jl")
 export Manifold,
     IsDecoratorManifold,
     Euclidean,
-    Sphere
+    Sphere,
+    ProductManifold
 export ×,
     base_manifold,
     distance,
