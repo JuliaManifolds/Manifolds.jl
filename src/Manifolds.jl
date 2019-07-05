@@ -509,7 +509,6 @@ export Manifold,
     Euclidean,
     Sphere
 export ×,
-    manifold_dimension,
     base_manifold,
     distance,
     exp,
