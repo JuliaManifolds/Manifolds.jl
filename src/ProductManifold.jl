@@ -129,7 +129,12 @@ function ProductArray(M::Type{ShapeSpecification{TRanges, Tuple{Size1, Size2, Si
     return ProductArray{M, T, N, TData, typeof(views)}(data, views)
 end
 
-function ProductArray(M::ShapeSpecification{TRanges, TSizes}, data::TData) where {TM, TRanges, TSizes, T, N, TData<:AbstractArray{T,N}}
+function ProductArray(M::Type{ShapeSpecification{TRanges, TSizes}}, data::TData) where {TRanges, TSizes, T, N, TData<:AbstractArray{T,N}}
+    views = map((size, range) -> SizedAbstractArray{size}(view(data, range)), size_to_tuple(TSizes), TRanges)
+    return ProductArray{M, T, N, TData, typeof(views)}(data, views)
+end
+
+function ProductArray(M::ShapeSpecification{TRanges, TSizes}, data::TData) where {TM, TRanges, TSizes, TData<:AbstractArray}
     return ProductArray(typeof(M), data)
 end
 

@@ -44,6 +44,12 @@ include("utils.jl")
     @test submanifold(Mser, Val((1, 3))) == M1 × M3
     @inferred submanifold(Mser, Val((1, 3)))
 
+    # testing the slower generic constructor
+    Mprod4 = Manifolds.ProductManifold(M2, M2, M2, M2)
+    shape4 = Manifolds.ShapeSpecification(Mprod4.manifolds...)
+    data_x4 = rand(8)
+    @test Manifolds.ProductArray(shape4, data_x4).data === data_x4
+
     pts_sphere = [[1.0, 0.0, 0.0],
                   [0.0, 1.0, 0.0],
                   [0.0, 0.0, 1.0]]
