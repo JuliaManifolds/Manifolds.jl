@@ -46,12 +46,14 @@ function submanifold(M::ProductManifold, i::Integer)
 end
 
 """
-    submanifold(M::ProductManifold, i::AbstractVector)
+    submanifold(M::ProductManifold, i::Val)
 
 Extract the factor of the product manifold `M` indicated by indices in `i`.
+For example, for `i` equal to `Val((1, 3))` the product manifold constructed
+from the first and the third factor is returned.
 """
-function submanifold(M::ProductManifold, i::AbstractVector)
-    return ProductManifold(M.manifolds[i]...)
+function submanifold(M::ProductManifold, i::Val)
+    return ProductManifold(select_from_tuple(M.manifolds, i))
 end
 
 """

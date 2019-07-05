@@ -41,7 +41,8 @@ include("utils.jl")
     shape_ser = Manifolds.ShapeSpecification(M1, M2, M3)
 
     @test submanifold(Mser, 2) == M2
-    @test submanifold(Mser, [1, 3]) == M1 × M3
+    @test submanifold(Mser, Val((1, 3))) == M1 × M3
+    @inferred submanifold(Mser, Val((1, 3)))
 
     pts_sphere = [[1.0, 0.0, 0.0],
                   [0.0, 1.0, 0.0],

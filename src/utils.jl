@@ -1,5 +1,19 @@
 
 """
+    select_from_tuple(t::NTuple{N, Any}, positions::Val{P})
+
+Selects elements of tuple `t` at positions specified by the second argument.
+For example `select_from_tuple(("a", "b", "c"), Val((3, 1, 1)))` returns
+`("c", "a", "a")`.
+"""
+@generated function select_from_tuple(t::NTuple{N, Any}, positions::Val{P}) where {N, P}
+    for k in P
+        (k < 0 || k > N) && error("positions must be between 1 and $N")
+    end
+    return Expr(:tuple, [Expr(:ref, :t, k) for k in P]...)
+end
+
+"""
     ziptuples(a, b)
 
 Zips tuples `a` and `b` in a fast, type-stable way. If they have different
