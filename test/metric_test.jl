@@ -1,7 +1,8 @@
 
+struct TestEuclidean{N} <: Manifold end
+struct TestEuclideanMetric <: Metric end
+
 @testset "scaled Euclidean metric" begin
-    struct TestEuclidean{N} <: Manifold end
-    struct TestEuclideanMetric <: Metric end
     Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
     function Manifolds.local_metric(M::MetricManifold{<:TestEuclidean,<:TestEuclideanMetric}, x)
         return Diagonal(1.0:manifold_dimension(M))
@@ -41,11 +42,13 @@
     end
 end
 
+struct TestSphere{N,T} <: Manifold
+    r::T
+end
+
+struct TestSphericalMetric <: Metric end
+
 @testset "scaled Sphere metric" begin
-    struct TestSphere{N,T} <: Manifold
-        r::T
-    end
-    struct TestSphericalMetric <: Metric end
     Manifolds.manifold_dimension(::TestSphere{N}) where {N} = N
     function Manifolds.local_metric(M::MetricManifold{<:TestSphere,<:TestSphericalMetric}, x)
         r = base_manifold(M).r
@@ -136,9 +139,10 @@ end
     end
 end
 
+struct BaseManifold{N} <: Manifold end
+struct BaseManifoldMetric{M} <: Metric end
+
 @testset "HasMetric trait" begin
-    struct BaseManifold{N} <: Manifold end
-    struct BaseManifoldMetric{M} <: Metric end
     Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
     @traitimpl HasMetric{BaseManifold,BaseManifoldMetric}
     Manifolds.inner(::BaseManifold, x, v, w) = 2 * dot(v,w)
@@ -162,12 +166,12 @@ end
     @test exp!(MM, y, x, v) === exp!(M, y, x, v)
     @test log(M, x, y) == (y - x) / 2
     @test log!(MM, v, x, y) === log!(M, v, x, y)
-    @test Manifolds.retract!(MM, y, x, v) === Manifolds.retract!(M, y, x, v)
-    @test Manifolds.retract!(MM, y, x, v, 1) === Manifolds.retract!(M, y, x, v, 1)
-    @test Manifolds.project_tangent!(MM, w, x, v) === Manifolds.project_tangent!(M, w, x, v)
+    @test retract!(MM, y, x, v) === retract!(M, y, x, v)
+    @test retract!(MM, y, x, v, 1) === retract!(M, y, x, v, 1)
+    @test project_tangent!(MM, w, x, v) === project_tangent!(M, w, x, v)
     @test zero_tangent_vector!(MM, v, x) === zero_tangent_vector!(M, v, x)
     @test injectivity_radius(MM, x) === injectivity_radius(M, x)
     @test injectivity_radius(MM) === injectivity_radius(M)
-    @test Manifolds.is_manifold_point(MM, x) === Manifolds.is_manifold_point(M, x)
-    @test Manifolds.is_tangent_vector(MM, x, v) === Manifolds.is_tangent_vector(M, x, v)
+    @test is_manifold_point(MM, x) === is_manifold_point(M, x)
+    @test is_tangent_vector(MM, x, v) === is_tangent_vector(M, x, v)
 end
