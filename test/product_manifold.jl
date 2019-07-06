@@ -85,8 +85,8 @@ include("utils.jl")
             @test isapprox(Mse, p[1], p[2])
         end
         for p in zip(pts_sphere, pts_r2, pts_prod)
-            @test isapprox(M1, p[1], Manifolds.submanifold_component(p[3], 1))
-            @test isapprox(M2, p[2], Manifolds.submanifold_component(p[3], 2))
+            @test isapprox(M1, p[1], submanifold_component(p[3], 1))
+            @test isapprox(M2, p[2], submanifold_component(p[3], 2))
         end
     end
 
@@ -100,7 +100,7 @@ include("utils.jl")
                   convert(Tr2, [1.0, 0.0]),
                   convert(Tr2, [0.0, 0.1])]
 
-        pts = [Manifolds.ProductMPoint(p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
+        pts = [ProductMPoint(p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
         test_manifold(Mse,
                       pts,
                       test_tangent_vector_broadcasting = false,

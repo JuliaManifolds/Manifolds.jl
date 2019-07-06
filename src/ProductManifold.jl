@@ -225,6 +225,16 @@ similar(x::ProductArray{ShapeSpec}, ::Type{T}) where {ShapeSpec<:ShapeSpecificat
     ProductMPoint(parts)
 
 A more general but slower representation of points on a product manifold.
+
+# Example:
+
+A product point on a product manifold `Sphere(2) × Euclidean(2)` might be
+created as
+
+    ProductMPoint([1.0, 0.0, 0.0], [2.0, 3.0])
+
+where `[1.0, 0.0, 0.0]` is the part corresponding to the sphere factor
+and `[2.0, 3.0]` is the part corresponding to the euclidean manifold.
 """
 struct ProductMPoint{TM<:Tuple} <: MPoint
     parts::TM
