@@ -9,10 +9,12 @@ import Base: isapprox,
     convert,
     +,
     -,
-    *
+    *,
+    ∘
 import LinearAlgebra: dot,
     norm,
     det,
+    pinv,
     I,
     UniformScaling,
     Diagonal
@@ -463,6 +465,7 @@ include("ArrayManifold.jl")
 include("DistributionsBase.jl")
 include("Metric.jl")
 include("Euclidean.jl")
+include("Map.jl")
 include("Rotations.jl")
 include("Sphere.jl")
 include("ProjectedDistribution.jl")
