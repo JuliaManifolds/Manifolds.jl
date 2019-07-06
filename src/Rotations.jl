@@ -17,6 +17,10 @@ show(io::IO, R::Rotations{N}) where {N} = print(io, "Rotations($(N))")
 
 @traitimpl HasMetric{Rotations,EuclideanMetric}
 
+function representation_size(::Rotations{N}, ::Type{T}) where {N,T<:Union{MPoint, TVector, CoTVector}}
+    return (N, N)
+end
+
 @doc doc"""
     manifold_dimension(S::Rotations)
 
@@ -37,10 +41,37 @@ Tangent vectors are represented by matrices.
 """
 inner(S::Rotations, x, w, v) = dot(w, v)
 
-project_tangent!(S::Rotations, w, x, v) = w .= (v - transpose(v)) / 2
+project_tangent!(S::Rotations, w, x, v) = w .= (v .- transpose(v)) ./ 2
 
 function exp!(S::Rotations, y, x, v)
     y .= x * exp(v)
+    return y
+end
+
+function exp!(S::Rotations{2}, y, x, v)
+    α = sign(v[1,2]) * norm(S, x, v) / sqrt(2)
+    @assert size(y) == (2, 2)
+    @assert size(x) == (2, 2)
+    @inbounds begin
+        sinα, cosα = sincos(α)
+        y[1] = x[1]*cosα - x[3]*sinα
+        y[2] = x[2]*cosα - x[4]*sinα
+        y[3] = x[1]*sinα + x[3]*cosα
+        y[4] = x[2]*sinα + x[4]*cosα
+    end
+    return y
+end
+
+function exp!(S::Rotations{3}, y, x, v)
+    α = norm(S, x, v) / sqrt(2)
+    if α ≈ 0
+        a = 1 - α^2 / 6
+        b = α / 2
+    else
+        a = sin(α) / α
+        b = (1-cos(α)) / α^2
+    end
+    y .= x .+ x * (a .* v .+ b .* (v^2))
     return y
 end
 
@@ -60,11 +91,28 @@ and save the result to `v`.
 For antipodal rotations the function returns one of the tangent vectors that
 point at `y`.
 """
-function log!(S::Rotations, v::TV, x, y) where TV
+function log!(S::Rotations, v, x, y)
     U = transpose(x) * y
-    # MMatrix doesn't have `log` defined
-    U1 = TV(real(log(Array(U))))
-    project_tangent!(S, v, x, U1)
+    v .= real(log(Matrix(U)))
+    project_tangent!(S, v, x, v)
+    return v
+end
+
+function log!(S::Rotations{2}, v, x, y)
+    U = transpose(x) * y
+    α = asin(U[1,2])
+    v .= [0 α; -α 0]
+    return v
+end
+
+function log!(S::Rotations{3}, v, x, y)
+    U = transpose(x) * y
+    θ = acos(clamp((tr(U)-1)/2, -1, 1))
+    if θ ≈ 0
+        fill!(v, 0)
+    else
+        v .= θ/(2*sin(θ)) .* (U .- transpose(U))
+    end
     return v
 end
 

@@ -16,6 +16,10 @@ function ProjectedPointDistribution(M::Manifold, d::Distribution, proj!, x::TRes
     return ProjectedPointDistribution{TResult, typeof(M), typeof(d), typeof(proj!)}(M, d, proj!)
 end
 
+function support(d::ProjectedPointDistribution)
+    return MPointSupport(d.manifold)
+end
+
 function rand(rng::AbstractRNG, d::ProjectedPointDistribution{TResult}) where TResult
     x = convert(TResult, rand(rng, d.d))
     d.proj!(d.manifold, x)
@@ -36,7 +40,7 @@ Generates a random tangent vector in ambient space of `m` and projects it
 to `m` using function `project_tangent!`.
 Generated arrays are of type `TResult`.
 """
-struct ProjectedTVectorDistribution{TResult, TM<:Manifold, TX, TD<:Distribution, TProj} <: MPointDistribution{TM}
+struct ProjectedTVectorDistribution{TResult, TM<:Manifold, TX, TD<:Distribution, TProj} <: TVectorDistribution{TM, TX}
     manifold::TM
     x::TX
     d::TD

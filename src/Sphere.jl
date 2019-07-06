@@ -16,6 +16,10 @@ show(io::IO, S::Sphere{N}) where {N} = print(io, "Sphere($(N))");
 
 @traitimpl HasMetric{Sphere,EuclideanMetric}
 
+function representation_size(::Sphere{N}, ::Type{T}) where {N,T<:Union{MPoint, TVector, CoTVector}}
+    return (N+1,)
+end
+
 @doc doc"""
     manifold_dimension(S::Sphere)
 
@@ -23,7 +27,7 @@ Return the dimension of the manifold $\mathbb S^n$, i.e. $n$.
 """
 manifold_dimension(S::Sphere{N}) where {N} = N
 
-proj!(S::Sphere, x) = (x ./= norm(x))
+project_point!(S::Sphere, x) = (x ./= norm(x))
 
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v) .* x)
 
@@ -34,7 +38,7 @@ compute the inner product of the two tangent vectors `w,v` from the tangent
 plane at `x` on the sphere `S=`$\mathbb S^n$ using the restriction of the
 metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
-inner(S::Sphere, x, w, v) = dot(w, v)
+@inline inner(S::Sphere, x, w, v) = dot(w, v)
 
 norm(S::Sphere, x, v) = norm(v)
 
@@ -63,18 +67,20 @@ end
 
 injectivity_radius(S::Sphere, args...) = π
 
-zero_tangent_vector(S::Sphere, x) = zero(x)
-zero_tangent_vector!(S::Sphere, v, x) = (v .= zero(x))
+function zero_tangent_vector!(S::Sphere, v, x)
+    fill!(v, 0)
+    return v
+end
 
 """
-    uniform_sphere_distribution(S::Sphere, x)
+    uniform_distribution(S::Sphere, x)
 
 Uniform distribution on given sphere. Generated points will be of similar
 type to `x`.
 """
 function uniform_distribution(S::Sphere, x)
     d = Distributions.MvNormal(zero(x), 1.0)
-    return ProjectedPointDistribution(S, d, proj!, x)
+    return ProjectedPointDistribution(S, d, project_point!, x)
 end
 
 """
@@ -117,7 +123,7 @@ function is_tangent_vector(S::Sphere{N},x,v; kwargs...) where N
 end
 
 """
-    gaussian_sphere_tvector_distribution(S::Sphere, x, σ)
+    normal_tvector_distribution(S::Sphere, x, σ)
 
 Normal distribution in ambient space with standard deviation `σ`
 projected to tangent space at `x`.

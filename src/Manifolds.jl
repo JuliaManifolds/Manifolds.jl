@@ -8,8 +8,13 @@ import Base: isapprox,
     identity,
     eltype,
     similar,
+    getindex,
+    setindex!,
+    size,
+    copy,
     convert,
     show,
+    dataids,
     +,
     -,
     *,
@@ -18,6 +23,7 @@ import Base: isapprox,
 import LinearAlgebra: dot,
     norm,
     det,
+    cross,
     I,
     UniformScaling,
     Diagonal
@@ -29,6 +35,7 @@ using LinearAlgebra
 using Random: AbstractRNG
 using SimpleTraits
 using ForwardDiff
+using UnsafeArrays
 import Einsum: @einsum
 import OrdinaryDiffEq: ODEProblem,
     AutoVern9,
@@ -119,6 +126,25 @@ The dimension $n$ of real space $\mathbb R^n$ to which the neighborhood
 of each point of the manifold is homeomorphic.
 """
 function manifold_dimension end
+
+@doc doc"""
+    representation_size(M::Manifold, ::Type{T}) where {T}
+
+The size of array representing an object of type `T` on manifold `M`,
+for example point, tangent vector or cotangent vector.
+The second argument should in these cases be equal to, respectively,
+`MPoint`, `TVector` and `CoTVector`, regardless of the type used to represent
+said objects.
+"""
+function representation_size end
+
+@traitfn function representation_size(M::MT, ::Type{T}) where {MT<:Manifold,T;!IsDecoratorManifold{MT}}
+    error("representation_size not implemented for manifold $(typeof(M)) and type $(T).")
+end
+
+@traitfn function representation_size(M::MT, ::Type{T}) where {MT<:Manifold,T;IsDecoratorManifold{MT}}
+    return representation_size(base_manifold(M), T)
+end
 
 @traitfn function manifold_dimension(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}}
     error("manifold_dimension not implemented for a $(typeof(M)).")
@@ -246,6 +272,14 @@ function inverse_retract(M::Manifold, x, y)
     vr = similar_result(M, inverse_retract, x, y)
     inverse_retract!(M, vr, x, y)
     return vr
+end
+
+project_point!(M::Manifold, x) = error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)).")
+
+function project_point(M::Manifold, x)
+    y = similar_result(M, project_point, x)
+    project_tangent!(M, y, x)
+    return y
 end
 
 project_tangent!(M::Manifold, w, x, v) = error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)) with input $(typeof(v)).")
@@ -463,12 +497,15 @@ the assumption is to be optimistic.
 is_tangent_vector(M::Manifold, x, v; kwargs...) = true
 is_tangent_vector(M::Manifold, x::MPoint, v::TVector) = error("A validation for a $(typeof(v)) in the tangent space of a $(typeof(x)) on $(typeof(M)) not implemented.")
 
+include("utils.jl")
+
 include("ArrayManifold.jl")
 
 include("DistributionsBase.jl")
 include("Metric.jl")
 include("Group.jl")
 include("Euclidean.jl")
+include("ProductManifold.jl")
 include("Rotations.jl")
 include("Sphere.jl")
 include("SpecialOrthogonal.jl")
@@ -477,8 +514,13 @@ include("ProjectedDistribution.jl")
 
 export Manifold,
     IsDecoratorManifold,
-    Euclidean
-export manifold_dimension,
+    Euclidean,
+    Sphere,
+    ProductManifold,
+    ProductMPoint,
+    ProductTVector,
+    ProductCoTVector
+export ×,
     base_manifold,
     distance,
     exp,
@@ -496,8 +538,14 @@ export manifold_dimension,
     log!,
     manifold_dimension,
     norm,
+    project_point,
+    project_point!,
+    project_tangent,
+    project_tangent!,
     retract,
     retract!,
+    submanifold,
+    submanifold_component,
     zero_tangent_vector,
     zero_tangent_vector!
 export Metric,
