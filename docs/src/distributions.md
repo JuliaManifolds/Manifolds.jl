@@ -7,3 +7,7 @@ Modules = [Manifolds]
 Pages = ["DistributionsBase.jl"]
 Order = [:type, :function]
 ```
+```@docs
+Manifolds.ProjectedPointDistribution
+Manifolds.ProjectedTVectorDistribution
+```
