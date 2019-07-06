@@ -173,6 +173,13 @@ end
     return distance(M.manifold, x, y)
 end
 
+function zero_tangent_vector(M::MMT, x, v) where {MT<:Manifold,
+                                            GT<:Metric,
+                                            MMT<:MetricManifold{MT,GT}}
+    return zero_tangent_vector(M.manifold, x, v, v)
+end
+
+
 @doc doc"""
     christoffel_symbols_first(M::MetricManifold, x)
 

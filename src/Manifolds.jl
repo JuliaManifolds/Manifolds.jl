@@ -377,7 +377,7 @@ abstract type VectorTransportMethod end
 struct ParallelTransport <: VectorTransportMethod end
 struct VectorProjection <: VectorTransportMethod end
 
-vector_transport!(M::Manifold, vto, x, v, y) = vector_transport!(M,vto,x,v,y,::ParallelTransport)
+vector_transport!(M::Manifold, vto, x, v, y) = vector_transport!(M,vto,x,v,y,ParallelTransport)
 
 vector_transport!(M::Manifold, vto, x, v, y, method::VectorTransportMethod) = error("No vector transport method $(typeof(method)) on $(typeof(M)) for two points $(typeof(x)) and $(typeof(y)) and a tangent vector $(typeof(v)).")
 
@@ -418,7 +418,9 @@ function zero_tangent_vector(M::Manifold, x)
     return v
 end
 
-zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
+@traitfn zero_tangent_vector!(M::MT, v, x) where {MT <: Manifold; !IsDecoratorManifold{MT}} = log!(M, v, x, x)
+
+@traitfn zero_tangent_vector!(M::MT, v, x) where {MT <: Manifold; IsDecoratorManifold{MT}} = zero_tangent_vector!(base_manifold(M), v, x)
 
 """
     similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where N

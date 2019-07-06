@@ -1,4 +1,4 @@
-using LinearAlgebra: svd, eig, eigen
+using LinearAlgebra: svd, eigen
 
 @doc doc"""
     SymmetricPositiveDefinite{N} <: Manifold
@@ -30,107 +30,200 @@ returns the dimension of the manifold [`SymmetricPositiveDefinite`](@ref) $\math
     \frac{n(n+1)}{2}    
 ```
 """
-@generated manifold_dimension(::SymmetricPositiveDefinite{N}) where {N} = N*(N+1)/2
+@generated manifold_dimension(::SymmetricPositiveDefinite{N}) where {N} = div(N*(N+1), 2)
 
 @doc doc"""
+    LinearAffineMetric <: Metric
 
+The linear affine metric is the metric for symmetric positive definite matrices, that employs
+matrix logarithms and exponentials, which yields a linear and affine metric.
 """
 struct LinearAffineMetric <: Metric end
 
 @doc doc"""
+    LogEuclideanMetric <: Metric
 
+The LogEuclidean Metric consists of the Euclidean metric applied to all elements after mapping them
+into the Lie Algebra, i.e. performing a matrix logarithm beforehand.
 """
 struct LogEuclideanMetric <: Metric end
 
-distance(P::SymmetricPositiveDefinite{N},x,y) = distance(MetricManifold(P,LinearAffineMetric),x,y)
-function distance(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},x,y)
+@doc doc"""
+    distance(P,x,y)
+
+computes the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between `x` and `y`,
+which defaults to the [`LinearAffineMetric`](@ref) induces distance.
+"""
+distance(P::SymmetricPositiveDefinite{N},x,y) where N = distance(MetricManifold(P,LinearAffineMetric),x,y)
+@doc doc"""
+    distance(lP,x,y)
+
+computes the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between `x` and `y`,
+as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
+
+```math
+d_{\mathcal P(n)}(x,y) = \lVert \operatorname{Log}(x^{-\frac{1}{2}}yx^{-\frac{1}{2}})\rVert.
+```
+"""
+function distance(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},x,y) where N
     s = real.( eigen( x,y ).values )
     return any(s .<= eps() ) ? 0 : sqrt(  sum( abs.(log.(s)).^2 )  )
 end
 
-inner(P::SymmetricPositiveDefinite{N}, x, w, v) = inner(MetricManifold(P,LinearAffineMetric),x,w,v)
-function inner(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},x,w,v)
-	svd1 = svd(x)
-	U = svd1.U
-	S = svd1.S
-	SInv = Diagonal( 1 ./ S )
-	return tr( w * U * SInv * transpose(U) * v * U * SInv * transpose(U) )
+@doc doc"""
+    inner(P,x,v,w)
+
+compute the inner product of `v`, `w` in the tangent space of `x` on the [`SymmetricPositiveDefinite`](@ref)
+manifold `P`, which defaults to the [`LinearAffineMetric`](@ref).
+"""
+inner(P::SymmetricPositiveDefinite{N}, x, w, v) where N = inner(MetricManifold(P,LinearAffineMetric),x,w,v)
+@doc doc"""
+    inner(P,x,v,w)
+
+compute the inner product of `v`, `w` in the tangent space of `x` on the [`SymmetricPositiveDefinite`](@ref)
+manifold `P`, as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
+
+```math
+( v, w)_x = \operatorname{tr}(x^{-1}\xi x^{-1}\nu ),
+```
+"""
+function inner(P::MetricManifold{SymmetricPositiveDefinite{N}, LinearAffineMetric}, x, w, v) where N
+    F = factorize(x)
+    return tr( (w / F) * (v / F ))
 end
+@doc doc"""
+    exp!(P,y,x,v)
 
-norm(P::SymmetricPositiveDefinite{N},x,v) = sqrt( inner(P,x,v,v) )
-norm(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},x,v) = sqrt( inner(P,x,v,v) )
+compute the exponential map from `x` with tangent vector `v` on the [`SymmetricPositiveDefinite`](@ref)
+manifold with its default metric, [`LinearAffineMetric`](@ref) and modify `y`.
+"""
+exp!(P::SymmetricPositiveDefinite{N},y,x,v) where N = exp!(MetricManifold(SymmetricPositiveDefinite,LinearAffineMetric),y,x,v)
+@doc doc"""
+    exp!(P,y,x,v)
 
-function exp!(P::SymmetricPositiveDefinite{N},y,x,v) = exp!(MetricManifold(SymmetricPositiveDefinite,LinearAffineMetric),y,x,v)
-function exp!(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, y, x, v)
-	svd1 = svd(x)
-	U = svd1.U
-	S = svd1.S
+compute the exponential map from `x` with tangent vector `v` on the [`SymmetricPositiveDefinite`](@ref)
+as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref) and modify `y`. The formula reads
+
+```math
+    \exp_x v = x^{\frac{1}{2}}\operatorname{Exp}(x^{-\frac{1}{2}} v x^{-\frac{1}{2}})x^{\frac{1}{2}},
+```
+where $\operatorname{Exp}$ denotes to the matrix exponential.
+"""
+function exp!(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, y, x, v) where N
+    e = eigen(Symmetric(x))
+    U = e.vectors
+    S = e.values
     Ssqrt = Diagonal( sqrt.(S) )
     SsqrtInv = Diagonal( 1 ./ sqrt.(S) )
     xSqrt = U*Ssqrt*transpose(U);
     xSqrtInv = U*SsqrtInv*transpose(U)
-    T = xSqrtInv * (t.*ξ.value) * xSqrtInv
-    eig1 = eigen(0.5*( T + transpose(T) ) ) # numerical stabilization
-   	Se = Diagonal( exp.(eig1.values) )
+    T = xSqrtInv * v * xSqrtInv
+    eig1 = eigen( ( T + transpose(T) )/2 ) # numerical stabilization
+    Se = Diagonal( exp.(eig1.values) )
     Ue = eig1.vectors
     y = xSqrt*Ue*Se*transpose(Ue)*xSqrt
-    y = 0.5*( y + transpose(y) ) # numerical stabilization
+    y = ( y + transpose(y) )/2 # numerical stabilization
     return y
 end
 
-function log!(P::SymmetricPositiveDefinite{N}, v, x, y) = exp!(MetricManifold(P,LinearAffineMetric),y,x,v)
-function log!(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, v, x, y)
-    svd1 = svd( x )
-	U = svd1.U
-	S = svd1.S
+@doc doc"""
+    log!(P,v,x,y)
+
+compute the logarithmic map at `x` to `y` on the [`SymmetricPositiveDefinite`](@ref)
+manifold with its default metric, [`LinearAffineMetric`](@ref) and modify `v`.
+"""
+log!(P::SymmetricPositiveDefinite{N}, v, x, y) where N = log!(MetricManifold(P,LinearAffineMetric),y,x,v)
+@doc doc"""
+    log!(P,v,x,y)
+
+compute the exponential map from `x` to `y` on the [`SymmetricPositiveDefinite`](@ref)
+as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref) and modify `v`. The formula reads
+
+```math
+\log_x y = x^{\frac{1}{2}}\operatorname{Log}(x^{-\frac{1}{2}} y x^{-\frac{1}{2}})x^{\frac{1}{2}},
+```
+where $\operatorname{Log}$ denotes to the matrix logarithm.
+"""
+function log!(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, v, x, y) where N
+    e = eigen(Symmetric(x))
+    U = e.vectors
+    S = e.values
     Ssqrt = Diagonal( sqrt.(S) )
     SsqrtInv = Diagonal( 1 ./ sqrt.(S) )
     xSqrt = U*Ssqrt*transpose(U)
     xSqrtInv = U*SsqrtInv*transpose(U)
     T = xSqrtInv * getValue(y) * xSqrtInv
-	svd2 = svd(0.5*(T+transpose(T)))
-	Se = Diagonal( log.(max.(svd2.S,eps()) ) )
-	Ue = svd2.U
-	v = xSqrt * Ue*Se*transpose(Ue) * xSqrt
-	v = 0.5*( v + transpose(v) )
+    e2 = eigen( Symmetric(T) )
+    Se = Diagonal( log.(max.(e2.values,eps()) ) )
+    Ue = e2.vectors
+    v = xSqrt * Ue*Se*transpose(Ue) * xSqrt
+    v = ( v + transpose(v) )/2
     return v
 end
 
-function vector_transport!(M::SymmetricPositiveDefinite,vto, x, v, y, ::ParallelTransport)
-  if norm(x-y)<1e-13
-    vto = v
+@doc doc"""
+    vector_transport(P,vto,x,v,y,::ParallelTransport)
+
+compute the parallel transport on the [`SymmetricPositiveDefinite`](@ref) with its default metric, [`LinearAffineMetric`](@ref).
+"""
+vector_transport!(::SymmetricPositiveDefinite{N},vto, x, v, y, m) where N = vector_transport!(MetricManifold(P,LinearAffineMetric),vto, x, v, y, m)
+@doc doc"""
+    vector_transport(P,vto,x,v,y,::ParallelTransport)
+
+compute the parallel transport on the [`SymmetricPositiveDefinite`](@ref) as a [`MetricManifold`](@ref) with the [`LinearAffineMetric`](@ref).
+The formula reads
+
+```math
+P_{x\to y}(v) = x^{\frac{1}{2}}
+\operatorname{Exp}\bigl(
+\frac{1}{2}x^{-\frac{1}{2}}\log_x(y)x^{-\frac{1}{2}}
+\bigr)
+x^{-\frac{1}{2}}v x^{-\frac{1}{2}}
+\operatorname{Exp}\bigl(
+\frac{1}{2}x^{-\frac{1}{2}}\log_x(y)x^{-\frac{1}{2}}
+\bigr)
+x^{\frac{1}{2}},
+```
+
+where $\operatorname{Exp}$ denotes the matrix exponential
+and `log` the logarithmic map.
+"""
+function vector_transport!(::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, vto, x, v, y, ::ParallelTransport) where N
+    if norm(x-y)<1e-13
+        vto = v
+        return vto
+    end
+    e = eigen(Symmetric(x))
+    U = e.vectors
+    S = e.values
+    Ssqrt = sqrt.(S)
+    SsqrtInv = Diagonal( 1 ./ Ssqrt )
+    Ssqrt = Diagonal( Ssqrt )
+    xSqrt = U*Ssqrt*transpose(U)
+    xSqrtInv = U*SsqrtInv*transpose(U)
+    tv = xSqrtInv * v * xSqrtInv
+    ty = xSqrtInv * y * xSqrtInv
+    e2 = svd( ( ty + transpose(ty) )/2 )
+    Se = Diagonal( log.(e2.values) )
+    Ue = e2.vectors
+    ty2 = Ue*Se*transpose(Ue)
+    eig1 = eigen(  (ty2 + transpose(ty2))/2  )
+    Sf = Diagonal( exp.(eig1.values) )
+    Uf = eig1.vectors
+    vto = xSqrt*Uf*Sf*transpose(Uf)*(0.5*(tv+transpose(tv)))*Uf*Sf*transpose(Uf)*xSqrt
     return vto
-  end
-  svd1 = svd(x)
-  U = svd1.U
-  S = svd1.S
-  Ssqrt = sqrt.(S)
-  SsqrtInv = Diagonal( 1 ./ Ssqrt )
-  Ssqrt = Diagonal( Ssqrt )
-  xSqrt = U*Ssqrt*transpose(U)
-  xSqrtInv = U*SsqrtInv*transpose(U)
-  tv = xSqrtInv * v * xSqrtInv
-  ty = xSqrtInv * y * xSqrtInv
-  svd2 = svd( 0.5*( ty + transpose(ty) ) )
-  Se = Diagonal( log.(svd2.S) )
-  Ue = svd2.U
-  ty2 = Ue*Se*transpose(Ue)
-  eig1 = eigen(  0.5 * (ty2 + transpose(ty2) )  )
-  Sf = Diagonal( exp.(eig1.values) )
-  Uf = eig1.vectors
-  vto = xSqrt*Uf*Sf*transpose(Uf)*(0.5*(tv+transpose(tv)))*Uf*Sf*transpose(Uf)*xSqrt
-  return vto
 end
 
-injectivity_radius(P::SymmetricPositiveDefinite, args...) = Infπ
+@doc doc"""
+    injectivity_radius(P)
+
+return the injectivity radius of the [`SymmetricPositiveDefinite`](@ref). Since `P`  is a Hadamard manifold,
+the injectivity radius is $\infty$.
+"""
+injectivity_radius(P::SymmetricPositiveDefinite, args...) = Inf
 
 zero_tangent_vector(P::SymmetricPositiveDefinite, x) = zero(x)
-zero_tangent_vector(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},x) = zero(x)
-zero_tangent_vector(P::MetricManifold{SymmetricPositiveDefinite{N},LogEuclidean},x) = zero(x)
-
-zero_tangent_vector!(P::SymmetricPositiveDefinite, v, x) = (v .= zero(x))
-zero_tangent_vector!(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},v, x) = (v .= zero(x))
-zero_tangent_vector!(P::MetricManifold{SymmetricPositiveDefinite{N},LogEuclidean},v, x) = (v .= zero(x))
+zero_tangent_vector!(P::SymmetricPositiveDefinite, v, x) = fill!(v, 0)
 
 """
     is_manifold_point(S,x; kwargs...)
@@ -139,7 +232,7 @@ checks, whether `x` is a valid point on the [`SymmetricPositiveDefinite{N}`](@re
 of size `(N,N)`, symmetric and positive definite.
 The tolerance for the second to last test can be set using the ´kwargs...`.
 """
-function is_manifold_point(P::SymmetricPositiveDefinite{N},x; kwargs...) where {N}
+function is_manifold_point(P::SymmetricPositiveDefinite{N},x; kwargs...) where N
     if size(x) != (N,N)
         throw(DomainError(size(x),"The point $(x) does not lie on $P, since its size is not $( (N,N) )."))
     end
@@ -155,9 +248,9 @@ end
 """
     is_tangent_vector(S,x,v; kwargs... )
 
-checks whether `v` is a tangent vector to `x` on the [`Sphere`](@ref) `S`, i.e.
+checks whether `v` is a tangent vector to `x` on the [`SymmetricPositiveDefinite`](@ref) `S`, i.e.
 atfer [`is_manifold_point`](@ref)`(S,x)`, `v` has to be of same dimension as `x`
-and orthogonal to `x`.
+and a symmetric matrix, i.e. this stores tangent vetors as elements of the corresponding Lie group.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
 function is_tangent_vector(P::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
