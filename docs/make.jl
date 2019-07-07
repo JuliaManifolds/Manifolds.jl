@@ -22,6 +22,7 @@ makedocs(
             ]
         ],
         "Distributions" => "distributions.md",
+        "Maps" => "maps.md",
         "Library" => [
             "Internals" => "lib/internals.md"
         ]
