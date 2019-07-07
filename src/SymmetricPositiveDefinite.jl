@@ -1,4 +1,4 @@
-using LinearAlgebra: svd, eigen
+using LinearAlgebra: eigen, cholesky
 
 export SymmetricPositiveDefinite, LinearAffineMetric, LogEuclideanMetric
 
@@ -91,7 +91,7 @@ manifold `P`, as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). T
 """
 function inner(P::MetricManifold{SymmetricPositiveDefinite{N}, LinearAffineMetric}, x, w, v) where N
     F = factorize(x)
-    return tr( (w / F) * (v / F ))
+    return tr( ( Symmetric(w) / F ) * ( Symmetric(v) / F ) )
 end
 @doc doc"""
     exp!(P,y,x,v)
@@ -117,13 +117,14 @@ function exp!(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}
     S = e.values
     Ssqrt = Diagonal( sqrt.(S) )
     SsqrtInv = Diagonal( 1 ./ sqrt.(S) )
-    xSqrt = U*Ssqrt*transpose(U);
-    xSqrtInv = U*SsqrtInv*transpose(U)
-    T = xSqrtInv * v * xSqrtInv
+    xSqrt = Symmetric(U*Ssqrt*transpose(U))
+    xSqrtInv = Symmetric(U*SsqrtInv*transpose(U))
+    T = Symmetric(xSqrtInv * v * xSqrtInv)
     eig1 = eigen( T ) # numerical stabilization
     Se = Diagonal( exp.(eig1.values) )
     Ue = eig1.vectors
-    y = xSqrt*Ue*Se*transpose(Ue)*xSqrt
+    xue = xSqrt*Ue
+    copyto!(y, xue*Se*transpose(xue) )
     return y
 end
 
@@ -133,7 +134,7 @@ end
 compute the logarithmic map at `x` to `y` on the [`SymmetricPositiveDefinite`](@ref)
 manifold with its default metric, [`LinearAffineMetric`](@ref) and modify `v`.
 """
-log!(P::SymmetricPositiveDefinite{N}, v, x, y) where N = log!(MetricManifold(P,LinearAffineMetric()),y,x,v)
+log!(P::SymmetricPositiveDefinite{N}, v, x, y) where N = log!(MetricManifold(P,LinearAffineMetric()),v, x, y)
 @doc doc"""
     log!(P,v,x,y)
 
@@ -149,15 +150,16 @@ function log!(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}
     e = eigen(Symmetric(x))
     U = e.vectors
     S = e.values
-    Ssqrt = Diagonal( sqrt.(S) )
-    SsqrtInv = Diagonal( 1 ./ sqrt.(S) )
-    xSqrt = U*Ssqrt*transpose(U)
-    xSqrtInv = U*SsqrtInv*transpose(U)
-    T = xSqrtInv * y * xSqrtInv
-    e2 = eigen( (T + transpose(T))/2 )
-    Se = Diagonal( log.(max.(e2.values,eps()) ) )
+    Ssqrt = Symmetric( Matrix( Diagonal( sqrt.(S) ) ) )
+    SsqrtInv = Symmetric( Matrix( Diagonal( 1 ./ sqrt.(S) ) ) )
+    xSqrt = Symmetric( U*Ssqrt*transpose(U) )
+    xSqrtInv = Symmetric( U*SsqrtInv*transpose(U) )
+    T = Symmetric( xSqrtInv * y * xSqrtInv )
+    e2 = eigen( T )
+    Se = Matrix( Diagonal( log.(max.(e2.values,eps()) ) ) )
     Ue = e2.vectors
-    v = xSqrt * Ue*Se*transpose(Ue) * xSqrt
+    xue = xSqrt*Ue
+    copyto!(v, Symmetric(xue*Se*transpose(xue)))
     return v
 end
 
@@ -204,18 +206,19 @@ function vector_transport!(::MetricManifold{SymmetricPositiveDefinite{N},LinearA
     Ssqrt = sqrt.(S)
     SsqrtInv = Diagonal( 1 ./ Ssqrt )
     Ssqrt = Diagonal( Ssqrt )
-    xSqrt = U*Ssqrt*transpose(U)
-    xSqrtInv = U*SsqrtInv*transpose(U)
-    tv = xSqrtInv * v * xSqrtInv
-    ty = xSqrtInv * y * xSqrtInv
+    xSqrt = Symmetric(U*Ssqrt*transpose(U))
+    xSqrtInv = Symmetric(U*SsqrtInv*transpose(U))
+    tv = Symmetric(xSqrtInv * v * xSqrtInv)
+    ty = Symmetric(xSqrtInv * y * xSqrtInv)
     e2 = eigen( ty )
     Se = Diagonal( log.(e2.values) )
     Ue = e2.vectors
-    ty2 = Ue*Se*transpose(Ue)
+    ty2 = Symmetric(Ue*Se*transpose(Ue))
     e3 = eigen( ty2 )
     Sf = Diagonal( exp.(e3.values) )
     Uf = e3.vectors
-    vto = xSqrt*Uf*Sf*transpose(Uf)*(0.5*(tv+transpose(tv)))*Uf*Sf*transpose(Uf)*xSqrt
+    xue = xSqrt*Uf*Sf*transpose(Uf)
+    copyto!(vto, xue * tv * transpose(xue) )
     return vto
 end
 
@@ -244,7 +247,7 @@ function is_manifold_point(P::SymmetricPositiveDefinite{N},x; kwargs...) where N
     if !isapprox(norm(x-transpose(x)), 0.; kwargs...)
         throw(DomainError(norm(x), "The point $x does not lie on the sphere $P since its not a symmetric matrix:"))
     end
-    if ! all( eigvals(x) > 0 )
+    if ! all( eigvals(x) .> 0 )
         throw(DomainError(norm(x), "The point $x does not lie on the sphere $P since its not a positive definite matrix."))
     end
     return true
