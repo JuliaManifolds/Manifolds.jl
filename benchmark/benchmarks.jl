@@ -24,12 +24,19 @@ function add_manifold(M::Manifold, pts, name;
     SUITE["manifolds"][name]["similar"] = @benchmarkable similar($(pts[1]))
     SUITE["manifolds"][name]["log"] = @benchmarkable log($M, $(pts[1]), $(pts[2]))
     SUITE["manifolds"][name]["log!"] = @benchmarkable log!($M, $tv, $(pts[1]), $(pts[2]))
+    SUITE["manifolds"][name]["Log"] = @benchmarkable Manifolds.Logarithm($M, $(pts[1]))($(pts[2]))
+    log_map = Manifolds.Logarithm(M, pts[1])
+    SUITE["manifolds"][name]["instantiated_Log"] = @benchmarkable $(log_map)($(pts[2]))
+
     for iretr ∈ inverse_retraction_methods
         SUITE["manifolds"][name]["inverse_retract: "*string(iretr)] = @benchmarkable inverse_retract($M, $(pts[1]), $(pts[2]), $iretr)
         SUITE["manifolds"][name]["inverse_retract!: "*string(iretr)] = @benchmarkable inverse_retract!($M, $tv, $(pts[1]), $(pts[2]), $iretr)
     end
     SUITE["manifolds"][name]["exp"] = @benchmarkable exp($M, $(pts[1]), $tv1)
     SUITE["manifolds"][name]["exp!"] = @benchmarkable exp!($M, $p, $(pts[1]), $tv1)
+    SUITE["manifolds"][name]["Exp"] = @benchmarkable Manifolds.Exponential($M, $(pts[1]))($tv1)
+    exp_map = Manifolds.Exponential(M, pts[1])
+    SUITE["manifolds"][name]["instantiated_Exp"] = @benchmarkable $(exp_map)($tv1)
     for retr ∈ retraction_methods
         SUITE["manifolds"][name]["retract: "*string(retr)] = @benchmarkable retract($M, $(pts[1]), $tv1, $retr)
         SUITE["manifolds"][name]["retract!: "*string(retr)] = @benchmarkable retract!($M, $p, $(pts[1]), $tv1, $retr)
