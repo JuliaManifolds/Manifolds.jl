@@ -56,7 +56,7 @@ struct LogEuclideanMetric <: Metric end
 computes the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between `x` and `y`,
 which defaults to the [`LinearAffineMetric`](@ref) induces distance.
 """
-distance(P::SymmetricPositiveDefinite{N},x,y) where N = distance(MetricManifold(P,LinearAffineMetric),x,y)
+distance(P::SymmetricPositiveDefinite{N},x,y) where N = distance(MetricManifold(P,LinearAffineMetric()),x,y)
 @doc doc"""
     distance(lP,x,y)
 
@@ -78,7 +78,7 @@ end
 compute the inner product of `v`, `w` in the tangent space of `x` on the [`SymmetricPositiveDefinite`](@ref)
 manifold `P`, which defaults to the [`LinearAffineMetric`](@ref).
 """
-inner(P::SymmetricPositiveDefinite{N}, x, w, v) where N = inner(MetricManifold(P,LinearAffineMetric),x,w,v)
+inner(P::SymmetricPositiveDefinite{N}, x, w, v) where N = inner(MetricManifold(P,LinearAffineMetric()),x,w,v)
 @doc doc"""
     inner(P,x,v,w)
 
@@ -99,7 +99,7 @@ end
 compute the exponential map from `x` with tangent vector `v` on the [`SymmetricPositiveDefinite`](@ref)
 manifold with its default metric, [`LinearAffineMetric`](@ref) and modify `y`.
 """
-exp!(P::SymmetricPositiveDefinite{N},y,x,v) where N = exp!(MetricManifold(SymmetricPositiveDefinite,LinearAffineMetric),y,x,v)
+exp!(P::SymmetricPositiveDefinite{N},y,x,v) where N = exp!(MetricManifold(P,LinearAffineMetric()),y,x,v)
 @doc doc"""
     exp!(P,y,x,v)
 
@@ -120,11 +120,10 @@ function exp!(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}
     xSqrt = U*Ssqrt*transpose(U);
     xSqrtInv = U*SsqrtInv*transpose(U)
     T = xSqrtInv * v * xSqrtInv
-    eig1 = eigen( ( T + transpose(T) )/2 ) # numerical stabilization
+    eig1 = eigen( T ) # numerical stabilization
     Se = Diagonal( exp.(eig1.values) )
     Ue = eig1.vectors
     y = xSqrt*Ue*Se*transpose(Ue)*xSqrt
-    y = ( y + transpose(y) )/2 # numerical stabilization
     return y
 end
 
@@ -134,7 +133,7 @@ end
 compute the logarithmic map at `x` to `y` on the [`SymmetricPositiveDefinite`](@ref)
 manifold with its default metric, [`LinearAffineMetric`](@ref) and modify `v`.
 """
-log!(P::SymmetricPositiveDefinite{N}, v, x, y) where N = log!(MetricManifold(P,LinearAffineMetric),y,x,v)
+log!(P::SymmetricPositiveDefinite{N}, v, x, y) where N = log!(MetricManifold(P,LinearAffineMetric()),y,x,v)
 @doc doc"""
     log!(P,v,x,y)
 
@@ -154,23 +153,27 @@ function log!(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}
     SsqrtInv = Diagonal( 1 ./ sqrt.(S) )
     xSqrt = U*Ssqrt*transpose(U)
     xSqrtInv = U*SsqrtInv*transpose(U)
-    T = xSqrtInv * getValue(y) * xSqrtInv
-    e2 = eigen( Symmetric(T) )
+    T = xSqrtInv * y * xSqrtInv
+    e2 = eigen( (T + transpose(T))/2 )
     Se = Diagonal( log.(max.(e2.values,eps()) ) )
     Ue = e2.vectors
     v = xSqrt * Ue*Se*transpose(Ue) * xSqrt
-    v = ( v + transpose(v) )/2
     return v
 end
+
+function representation_size(::SymmetricPositiveDefinite{N}, ::Type{T}) where {N, T<:Union{MPoint, TVector, CoTVector}}
+    return (N,N)
+end
+
 
 @doc doc"""
     vector_transport(P,vto,x,v,y,::ParallelTransport)
 
 compute the parallel transport on the [`SymmetricPositiveDefinite`](@ref) with its default metric, [`LinearAffineMetric`](@ref).
 """
-vector_transport!(::SymmetricPositiveDefinite{N},vto, x, v, y, m) where N = vector_transport!(MetricManifold(P,LinearAffineMetric),vto, x, v, y, m)
+vector_transport!(P::SymmetricPositiveDefinite{N},vto, x, v, y, m) where N = vector_transport!(MetricManifold(P,LinearAffineMetric()),vto, x, v, y, m)
 @doc doc"""
-    vector_transport(P,vto,x,v,y,::ParallelTransport)
+    vector_transport!(P,vto,x,v,y,::ParallelTransport)
 
 compute the parallel transport on the [`SymmetricPositiveDefinite`](@ref) as a [`MetricManifold`](@ref) with the [`LinearAffineMetric`](@ref).
 The formula reads
@@ -205,13 +208,13 @@ function vector_transport!(::MetricManifold{SymmetricPositiveDefinite{N},LinearA
     xSqrtInv = U*SsqrtInv*transpose(U)
     tv = xSqrtInv * v * xSqrtInv
     ty = xSqrtInv * y * xSqrtInv
-    e2 = svd( ( ty + transpose(ty) )/2 )
+    e2 = eigen( ty )
     Se = Diagonal( log.(e2.values) )
     Ue = e2.vectors
     ty2 = Ue*Se*transpose(Ue)
-    eig1 = eigen(  (ty2 + transpose(ty2))/2  )
-    Sf = Diagonal( exp.(eig1.values) )
-    Uf = eig1.vectors
+    e3 = eigen( ty2 )
+    Sf = Diagonal( exp.(e3.values) )
+    Uf = e3.vectors
     vto = xSqrt*Uf*Sf*transpose(Uf)*(0.5*(tv+transpose(tv)))*Uf*Sf*transpose(Uf)*xSqrt
     return vto
 end
