@@ -29,6 +29,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_reverse_diff = true,
     test_tangent_vector_broadcasting = true,
     test_project_tangent = false,
+    test_representation_size = true,
     retraction_methods = [],
     inverse_retraction_methods = [],
     point_distributions = [],
@@ -44,7 +45,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test manifold_dimension(M) ≥ 0
     end
 
-    @testset "representation" begin
+    test_representation_size && @testset "representation" begin
         for T ∈ (Manifolds.MPoint, Manifolds.TVector, Manifolds.CoTVector)
             repr = Manifolds.representation_size(M, T)
             @test isa(repr, Tuple)

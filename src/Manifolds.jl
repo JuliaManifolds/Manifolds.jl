@@ -503,6 +503,7 @@ include("ProductManifold.jl")
 include("Rotations.jl")
 include("Sphere.jl")
 include("ProjectedDistribution.jl")
+include("VectorBundle.jl")
 
 export Manifold,
     IsDecoratorManifold,
@@ -511,7 +512,15 @@ export Manifold,
     ProductManifold,
     ProductMPoint,
     ProductTVector,
-    ProductCoTVector
+    ProductCoTVector,
+    VectorSpace,
+    VectorSpaceManifold,
+    TangentSpace,
+    CotangentSpace,
+    VectorBundle,
+    VectorBundleRepr,
+    VectorBundleTVector,
+    TangentBundle
 export ×,
     base_manifold,
     distance,
