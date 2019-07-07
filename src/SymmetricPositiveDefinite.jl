@@ -1,12 +1,14 @@
 using LinearAlgebra: svd, eigen
 
+export SymmetricPositiveDefinite, LinearAffineMetric, LogEuclideanMetric
+
 @doc doc"""
     SymmetricPositiveDefinite{N} <: Manifold
 
 The manifold of symmetric positive definite matrices, i.e.
 
 ```math
-\mathcal P(n) \coloneqq
+\mathcal P(n) =
 \bigl\{
     x \in \mathbb R^{n\\times n} :
     \xi^\mathrm{T}x\xi > 0 \text{ for all } \xi \in \mathbb R^{n}\backslash\{0\}

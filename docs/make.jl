@@ -11,7 +11,8 @@ makedocs(
             "Basic manifolds" => [
                 "Euclidean" => "manifolds/euclidean.md",
                 "Rotations" => "manifolds/rotations.md",
-                "Sphere" => "manifolds/sphere.md"
+                "Sphere" => "manifolds/sphere.md",
+                "Symmetric Positive Definite" => "manifolds/symmetricpositivedefinite.md"
             ],
             "Combined manifolds" => [
                 "Product manifold" => "manifolds/product.md"
