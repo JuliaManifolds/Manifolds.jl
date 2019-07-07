@@ -25,6 +25,7 @@ Get the manifold to which inputs to the map `m` belong. By default, this is
 assumed to be stored in the field `m.domain`.
 """
 domain(m::AbstractMap) = m.domain
+domain(::AbstractMap{M}) where {M<:Euclidean} = M()
 
 """
     codomain(m::AbstractMap)
@@ -33,6 +34,7 @@ Get the manifold to which outputs to the map `m` belong. By default, this is
 assumed to be stored in the field `m.codomain`.
 """
 codomain(m::AbstractMap) = m.codomain
+codomain(::AbstractMap{M,N}) where {M,N<:Euclidean} = N()
 
 @doc doc"""
     AbstractCurve{M} = AbstractMap{Euclidean{Tuple{1}},M}
@@ -352,19 +354,13 @@ Geodesic curve $\gamma(t)$ on manifold $M$:
 
     Geodesic(M::Manifold, x, v)
 """
-struct Geodesic{MT,ET<:Exp,PT,VT} <: AbstractCurve{MT}
-    domain::MT
-    Exp::ET
+struct Geodesic{MT,PT,VT} <: AbstractCurve{MT}
+    codomain::MT
     x₀::PT
     v₀::VT
 end
 
-Geodesic(M, x, v) = Geodesic(M, Exp(M, x), x, v)
-
-(g::Geodesic)(t::Real) = g.Exp(t*g.v₀)
-(g::Geodesic)(T::AbstractVector) = map(t -> g.Exp(t*g.v₀), T)
-
-codomain(g::Geodesic) = codomain(g.Exp)
+(g::Geodesic)(t::Real) = Exp(codomain(g), g.x₀)(t * g.v₀)
 
 function show(io::IO, mime::MIME"text/plain", m::Geodesic)
     print(io, "𝛾: ℝ ⟶ 𝑀\n",
@@ -393,8 +389,8 @@ $t=[0,1]$ is the shortest distance on the manifold between those two points.
 
     ShortestGeodesic(M::Manifold, x, y)
 """
-struct ShortestGeodesic{MT,GT<:Geodesic,IT,FT} <: AbstractCurve{MT}
-    domain::MT
+struct ShortestGeodesic{MT,GT,IT,FT} <: AbstractCurve{MT}
+    codomain::MT
     geodesic::GT
     x₀::IT
     x₁::FT
@@ -406,8 +402,6 @@ function ShortestGeodesic(M, x, y)
 end
 
 (g::ShortestGeodesic)(t) = g.geodesic(t)
-
-codomain(g::ShortestGeodesic) = codomain(g.geodesic)
 
 function show(io::IO, mime::MIME"text/plain", m::ShortestGeodesic)
     print(io, "𝛾: ℝ ⟶ 𝑀\n",
