@@ -213,9 +213,3 @@ end
 show(io::IO, m::ShortestGeodesic) = print(io, "ShortestGeodesic(", m.domain, ", ", m.geodesic.Exp.point, ", ", m.geodesic.tvector, ")")
 
 codomain(g::ShortestGeodesic) = codomain(g.geodesic)
-
-function derivation(γ::AbstractCurve{MT}) where {MT}
-    dim = manifold_dimension(domain(γ))
-    TM = Euclidean(dim)
-    return FunctionMap(domain(γ), TM, t -> ForwardDiff.derivative(γ, t))
-end
