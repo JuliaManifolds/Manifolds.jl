@@ -24,6 +24,9 @@ include("utils.jl")
                       ProductRepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
                       ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, 2.0, -1.0]))]
             @inferred ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0]))
+            for pt ∈ pts_tb
+                @test bundle_projection(TB, pt) ≈ pt.parts[1]
+            end
             test_manifold(MT,
                           pts_ts,
                           test_reverse_diff = isa(T, Vector))

@@ -14,7 +14,8 @@ makedocs(
                 "Sphere" => "manifolds/sphere.md"
             ],
             "Combined manifolds" => [
-                "Product manifold" => "manifolds/product.md"
+                "Product manifold" => "manifolds/product.md",
+                "Vector bundle" => "manifolds/vector_bundle.md"
             ],
             "Manifold decorators" => [
                 "Array manifold" => "manifolds/array.md",
@@ -23,6 +24,7 @@ makedocs(
         ],
         "Distributions" => "distributions.md",
         "Library" => [
+            "Public" => "lib/public.md",
             "Internals" => "lib/internals.md"
         ]
     ]

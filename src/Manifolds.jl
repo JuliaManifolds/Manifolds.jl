@@ -520,6 +520,7 @@ export Manifold,
     TangentBundle
 export ×,
     base_manifold,
+    bundle_projection,
     distance,
     exp,
     exp!,

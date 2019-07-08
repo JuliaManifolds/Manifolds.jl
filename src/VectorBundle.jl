@@ -89,7 +89,7 @@ end
 """
     VectorBundle(M::Manifold, type::VectorSpaceType)
 
-Vector bundle on manifold `M` of type `type.`
+Vector bundle on manifold `M` of type `type`.
 """
 struct VectorBundle{TVS<:VectorSpaceType, TM<:Manifold} <: Manifold
     type::TVS
@@ -104,6 +104,19 @@ end
 
 TangentBundle(M::Manifold) = VectorBundle(TangentSpaceType(), M)
 CotangentBundle(M::Manifold) = VectorBundle(CotangentSpaceType(), M)
+
+"""
+    bundle_projection(M::VectorBundle, x::ProductRepr)
+
+Bundle projection of point `x` from the vector bundle `M`.
+"""
+function bundle_projection(M::VectorBundle, x::ProductRepr)
+    return x.parts[1]
+end
+
+function bundle_projection(M::VectorBundle, x::ProductArray)
+    return x.parts[1]
+end
 
 function isapprox(M::VectorBundle, x, y; kwargs...)
     return isapprox(M.M, x.parts[1], y.parts[1]; kwargs...) && isapprox(x.parts[2], y.parts[2]; kwargs...)
