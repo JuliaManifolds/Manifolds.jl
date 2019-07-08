@@ -31,7 +31,7 @@ expects two-by-two matrices, so its size specification is `Tuple{2,2}`.
 struct ShapeSpecification{TRanges, TSizes} end
 
 function ShapeSpecification(manifolds::Manifold...)
-    sizes = map(m -> representation_size(m, MPoint), manifolds)
+    sizes = map(m -> representation_size(m), manifolds)
     lengths = map(prod, sizes)
     ranges = UnitRange{Int64}[]
     k = 1

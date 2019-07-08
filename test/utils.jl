@@ -46,12 +46,16 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     end
 
     test_representation_size && @testset "representation" begin
-        for T ∈ (Manifolds.MPoint, Manifolds.TVector, Manifolds.CoTVector)
-            repr = Manifolds.representation_size(M, T)
+        function test_repr(repr)
             @test isa(repr, Tuple)
             for rs ∈ repr
                 @test rs > 0
             end
+        end
+
+        test_repr(Manifolds.representation_size(M))
+        for T ∈ (Manifolds.TangentSpaceType(), Manifolds.CotangentSpaceType())
+            test_repr(Manifolds.representation_size(M, T))
         end
     end
 

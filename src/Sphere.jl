@@ -15,7 +15,7 @@ Sphere(n::Int) = Sphere{n}()
 
 @traitimpl HasMetric{Sphere,EuclideanMetric}
 
-function representation_size(::Sphere{N}, ::Type{T}) where {N,T<:Union{MPoint, TVector, CoTVector}}
+function representation_size(::Sphere{N}) where N
     return (N+1,)
 end
 

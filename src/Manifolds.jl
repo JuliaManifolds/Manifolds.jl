@@ -123,22 +123,20 @@ of each point of the manifold is homeomorphic.
 function manifold_dimension end
 
 @doc doc"""
-    representation_size(M::Manifold, ::Type{T}) where {T}
+    representation_size(M::Manifold, [VS::VectorSpaceType])
 
-The size of array representing an object of type `T` on manifold `M`,
-for example point, tangent vector or cotangent vector.
-The second argument should in these cases be equal to, respectively,
-`MPoint`, `TVector` and `CoTVector`, regardless of the type used to represent
-said objects.
+The size of array representing a point on manifold `M`,
+Representation sizes of tangent vectors can be obtained by calling the method
+with the second argument.
 """
 function representation_size end
 
-@traitfn function representation_size(M::MT, ::Type{T}) where {MT<:Manifold,T;!IsDecoratorManifold{MT}}
-    error("representation_size not implemented for manifold $(typeof(M)) and type $(T).")
+@traitfn function representation_size(M::MT) where {MT<:Manifold,T;!IsDecoratorManifold{MT}}
+    error("representation_size not implemented for manifold $(typeof(M)).")
 end
 
-@traitfn function representation_size(M::MT, ::Type{T}) where {MT<:Manifold,T;IsDecoratorManifold{MT}}
-    return representation_size(base_manifold(M), T)
+@traitfn function representation_size(M::MT) where {MT<:Manifold,T;IsDecoratorManifold{MT}}
+    return representation_size(base_manifold(M))
 end
 
 @traitfn function manifold_dimension(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}}

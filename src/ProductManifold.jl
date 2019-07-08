@@ -76,8 +76,8 @@ function isapprox(M::ProductManifold, x, v, w; kwargs...)
     return all(t -> isapprox(t...; kwargs...), ziptuples(M.manifolds, x.parts, v.parts, w.parts))
 end
 
-function representation_size(M::ProductManifold, ::Type{T}) where {T}
-    return (mapreduce(m -> prod(representation_size(m, T)), +, M.manifolds),)
+function representation_size(M::ProductManifold)
+    return (mapreduce(m -> prod(representation_size(m)), +, M.manifolds),)
 end
 
 manifold_dimension(M::ProductManifold) = mapreduce(manifold_dimension, +, M.manifolds)
@@ -169,7 +169,7 @@ Check whether `x` is a valid point on the [`ProductManifold`](@ref) `M`.
 
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function is_manifold_point(M::ProductManifold, x::MPoint; kwargs...)
+function is_manifold_point(M::ProductManifold, x::ProductRepr; kwargs...)
     return all(t -> is_manifold_point(t...; kwargs...), ziptuples(M.manifolds, x.parts))
 end
 
@@ -186,7 +186,7 @@ base manifolds must be respective tangent vectors.
 
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function is_tangent_vector(M::ProductManifold, x::MPoint, v::TVector; kwargs...)
+function is_tangent_vector(M::ProductManifold, x::ProductRepr, v::ProductRepr; kwargs...)
     is_manifold_point(M, x)
     return all(t -> is_tangent_vector(t...; kwargs...), ziptuples(M.manifolds, x.parts, v.parts))
 end

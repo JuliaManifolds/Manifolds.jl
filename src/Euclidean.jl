@@ -19,11 +19,11 @@ struct Euclidean{T<:Tuple} <: Manifold where {T} end
 Euclidean(n::Int) = Euclidean{Tuple{n}}()
 Euclidean(m::Int, n::Int) = Euclidean{Tuple{m,n}}()
 
-function representation_size(::Euclidean{Tuple{n}}, ::Type{T}) where {n,T<:Union{MPoint, TVector, CoTVector}}
+function representation_size(::Euclidean{Tuple{n}}) where {n}
     return (n,)
 end
 
-function representation_size(::Euclidean{Tuple{m,n}}, ::Type{T}) where {m,n,T<:Union{MPoint, TVector, CoTVector}}
+function representation_size(::Euclidean{Tuple{m,n}}) where {m,n}
     return (m,n)
 end
 

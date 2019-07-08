@@ -27,8 +27,8 @@ end
 
 manifold_dimension(M::Manifold, ::TCoTSpaceType) = manifold_dimension(M)
 
-function representation_size(M::Manifold, VS::TCoTSpaceType, ::Type{T}) where {T}
-    representation_size(M, T)
+function representation_size(M::Manifold, VS::TCoTSpaceType)
+    representation_size(M)
 end
 
 """
@@ -59,8 +59,8 @@ end
 
 manifold_dimension(M::VectorSpaceManifold) = manifold_dimension(M.M, M.VS)
 
-function representation_size(M::VectorSpaceManifold, ::Type{T}) where {T}
-    representation_size(M.M, M.VS, T)
+function representation_size(M::VectorSpaceManifold)
+    representation_size(M.M, M.VS)
 end
 
 @inline inner(::VectorSpaceManifold{<:TCoTSpaceType}, x, v, w) = dot(v, w)
@@ -96,9 +96,9 @@ struct VectorBundle{TVS<:VectorSpaceType, TM<:Manifold} <: Manifold
     M::TM
 end
 
-function representation_size(M::VectorBundle, ::Type{T}) where {T}
-    len_manifold = prod(representation_size(M.M, T))
-    len_vs = prod(representation_size(M.M, M.type, T))
+function representation_size(M::VectorBundle)
+    len_manifold = prod(representation_size(M.M))
+    len_vs = prod(representation_size(M.M, M.type))
     return (len_manifold + len_vs,)
 end
 
