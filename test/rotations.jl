@@ -32,7 +32,7 @@ include("utils.jl")
 
     for T in types
         angles = (0.0, π/2, 2π/3, π/4)
-        pts = [convert(T, [cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)]) for ϕ in angles]
+        pts = [convert(T, [cos(ϕ) -sin(ϕ); sin(ϕ) cos(ϕ)]) for ϕ in angles]
         test_manifold(M, pts;
             test_reverse_diff = false,
             test_project_tangent = true,

@@ -81,27 +81,27 @@ function exp!(S::Rotations, y, x, v)
 end
 
 function exp!(S::Rotations{2}, y, x, v)
-    α = sign(v[1,2]) * norm(S, x, v) / sqrt(2)
+    θ = vee(S, x, v)[1]
     @assert size(y) == (2, 2)
     @assert size(x) == (2, 2)
     @inbounds begin
-        sinα, cosα = sincos(α)
-        y[1] = x[1]*cosα - x[3]*sinα
-        y[2] = x[2]*cosα - x[4]*sinα
-        y[3] = x[1]*sinα + x[3]*cosα
-        y[4] = x[2]*sinα + x[4]*cosα
+        sinθ, cosθ = sincos(θ)
+        y[1] = x[1] * cosθ + x[3] * sinθ
+        y[2] = x[2] * cosθ + x[4] * sinθ
+        y[3] = x[3] * cosθ - x[1] * sinθ
+        y[4] = x[4] * cosθ - x[2] * sinθ
     end
     return y
 end
 
 function exp!(S::Rotations{3}, y, x, v)
-    α = norm(S, x, v) / sqrt(2)
-    if α ≈ 0
-        a = 1 - α^2 / 6
-        b = α / 2
+    θ = norm(S, x, v) / sqrt(2)
+    if θ ≈ 0
+        a = 1 - θ^2 / 6
+        b = θ / 2
     else
-        a = sin(α) / α
-        b = (1-cos(α)) / α^2
+        a = sin(θ) / θ
+        b = (1 - cos(θ)) / θ^2
     end
     y .= x .+ x * (a .* v .+ b .* (v^2))
     return y
@@ -132,15 +132,9 @@ end
 
 function log!(S::Rotations{2}, v, x, y)
     U = transpose(x) * y
-    @assert size(v) == (2, 2)
     @assert size(U) == (2, 2)
-    @inbounds begin
-        α = atan(U[3], U[1])
-        v[1] = 0
-        v[2] = -α
-        v[3] = α
-        v[4] = 0
-    end
+    @inbounds θ = atan(U[2], U[1])
+    hat!(S, v, x, θ)
     return v
 end
 
