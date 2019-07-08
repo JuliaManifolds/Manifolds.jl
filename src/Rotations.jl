@@ -97,8 +97,15 @@ end
 
 function log!(S::Rotations{2}, v, x, y)
     U = transpose(x) * y
-    α = asin(U[1,2])
-    v .= [0 α; -α 0]
+    @assert size(v) == (2, 2)
+    @assert size(U) == (2, 2)
+    @inbounds begin
+        α = atan(U[3], U[1])
+        v[1] = 0
+        v[2] = -α
+        v[3] = α
+        v[4] = 0
+    end
     return v
 end
 
