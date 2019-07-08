@@ -26,13 +26,10 @@ include("utils.jl")
             @inferred ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0]))
             test_manifold(MT,
                           pts_ts,
-                          test_reverse_diff = isa(T, Vector),
-                          test_project_tangent = false)
+                          test_reverse_diff = isa(T, Vector))
             test_manifold(TB,
                           pts_tb,
                           test_reverse_diff = isa(T, Vector),
-                          test_project_tangent = false,
-                          test_representation_size = false,
                           test_tangent_vector_broadcasting = false)
         end
     end

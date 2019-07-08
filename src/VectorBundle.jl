@@ -57,7 +57,7 @@ function project_vector!(M::VectorSpaceManifold{<:TCoTSpaceType}, v, w)
     return v
 end
 
-manifold_dimension(M::VectorSpaceManifold{<:TCoTSpaceType}) = manifold_dimension(M.M)
+manifold_dimension(M::VectorSpaceManifold) = manifold_dimension(M.M, M.VS)
 
 function representation_size(M::VectorSpaceManifold, ::Type{T}) where {T}
     representation_size(M.M, M.VS, T)
@@ -96,9 +96,10 @@ struct VectorBundle{TVS<:VectorSpaceType, TM<:Manifold} <: Manifold
     M::TM
 end
 
-function representation_size(M::ProductManifold, ::Type{T}) where {T}
-
-    return (prod(representation_size(M) + prod(representation_size(vsm))),)
+function representation_size(M::VectorBundle, ::Type{T}) where {T}
+    len_manifold = prod(representation_size(M.M, T))
+    len_vs = prod(representation_size(M.M, M.type, T))
+    return (len_manifold + len_vs,)
 end
 
 TangentBundle(M::Manifold) = VectorBundle(TangentSpaceType(), M)
@@ -162,6 +163,6 @@ end
 
 function project_tangent!(M::VectorBundle, w, x, v)
     project_tangent!(M.M, w.parts[1], x.parts[1], v.parts[1])
-    project_tangent!(M.M, w.parts[2], x.parts[1], v.parts[2])
+    project_tangent!(M.M, w.parts[2], x.parts[2], v.parts[2])
     return w
 end

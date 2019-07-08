@@ -126,6 +126,25 @@ function add_manifold_benchmarks()
     pts_prod_mpoints = [Manifolds.ProductRepr(p[1], p[2]) for p in zip(pts_s2, pts_r2)]
     add_manifold(m_prod, pts_prod_mpoints, "ProductManifold with MPoint";
         test_tangent_vector_broadcasting = false)
+
+    # vector spaces and bundles
+    begin
+        T = MVector{3, Float64}
+        x = convert(T, [1.0, 0.0, 0.0])
+        TB = TangentBundle(s2)
+        MT = VectorSpaceManifold(Manifolds.TangentSpaceType(), s2, x)
+
+        pts_ts = [convert(T, [0.0, -1.0, -1.0]),
+                  convert(T, [0.0, 1.0, 0.0]),
+                  convert(T, [0.0, 0.0, 1.0])]
+        pts_tb = [ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
+                  ProductRepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
+                  ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, 2.0, -1.0]))]
+        add_manifold(MT, pts_ts, "Tangent space of S² using MVectors")
+        add_manifold(TB, pts_tb, "Tangent bundle of S² using MVectors, ProductRepr";
+            test_tangent_vector_broadcasting = false)
+    end
+
 end
 
 add_manifold_benchmarks()
