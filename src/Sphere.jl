@@ -44,23 +44,15 @@ norm(S::Sphere, x, v) = norm(v)
 distance(S::Sphere, x, y) = acos(dot(x, y))
 
 function exp!(S::Sphere, y, x, v)
-    nv = norm(S, x, v)
-    if nv ≈ 0.0
-        y .= x
-    else
-        y .= cos(nv).*x .+ (sin(nv)/nv).*v
-    end
+    θ = norm(S, x, v)
+    y .= cos(θ) .* x .+ usinc(θ) .* v
     return y
 end
 
 function log!(S::Sphere, v, x, y)
-    dot_xy = dot(x, y)
-    θ = acos(dot_xy)
-    if θ ≈ 0.0
-        zero_tangent_vector!(S, v, x)
-    else
-        v .= (θ/sin(θ)) .* (y .- dot_xy.*x)
-    end
+    cosθ = dot(x, y)
+    θ = acos(cosθ)
+    v .= (y .- cosθ .* x) ./ usinc(θ)
     return v
 end
 

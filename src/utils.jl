@@ -1,3 +1,11 @@
+@doc doc"""
+    usinc(x::Real)
+
+Unnormalized version of `sinc` function, i.e.
+$\operatorname{usinc}(x) = \frac{\sin(x)}{x}$. This is equivalent to
+`sinc(x/π)`.
+"""
+usinc(x::Real) = x == 0 ? one(x) : isinf(x) ? zero(x) : sin(x) / x
 
 """
     select_from_tuple(t::NTuple{N, Any}, positions::Val{P})
