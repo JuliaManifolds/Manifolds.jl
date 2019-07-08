@@ -445,6 +445,34 @@ end
 
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 
+hat!(M::Manifold, V, x, v) = error("hat! operator not defined for manifold $(typeof(M)), vector $(typeof(v)), and matrix $(typeof(V))")
+
+"""
+    hat(M::Manifold, x, v)
+
+Convert the tangentvector `v` at point `x` on matrix manifold `M` to the
+equivalent matrix representation.
+"""
+function hat(M::Manifold, x, v)
+    V = MMatrix{representation_size(M,TVector)...,eltype(v)}(undef)
+    hat!(M, V, x, v)
+    return V
+end
+
+vee!(M::Manifold, v, x, V) = error("vee! operator not defined for manifold $(typeof(M)), matrix $(typeof(V)), and vector $(typeof(v))")
+
+"""
+    vee(M::Manifold, x, V)
+
+Convert the tangent vector `V` represented as a matrix at point `x` on matrix
+manifold `M` to the equivalent vector representation.
+"""
+function vee(M::Manifold, x, V)
+    v = MVector{manifold_dimension(M),eltype(V)}(undef)
+    vee!(M, v, x, V)
+    return v
+end
+
 """
     similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where N
 

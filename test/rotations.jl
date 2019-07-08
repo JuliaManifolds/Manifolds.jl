@@ -16,6 +16,20 @@ include("utils.jl")
     inverse_retraction_methods = [Manifolds.PolarInverseRetraction(),
                                   Manifolds.QRInverseRetraction()]
 
+    @testset "vee/hat" begin
+        M = Manifolds.Rotations(2)
+        v = randn(1)
+        V = Manifolds.hat(M, I, v)
+        @test isa(V, MMatrix)
+        @test norm(M, I, V) / sqrt(2) ≈ norm(v)
+        @test Manifolds.vee(M, I, V) == v
+
+        V = project_tangent(M, I, randn(2, 2))
+        v = Manifolds.vee(M, I, V)
+        @test isa(v, MVector)
+        @test Manifolds.hat(M, I, v) == V
+    end
+
     for T in types
         angles = (0.0, π/2, 2π/3, π/4)
         pts = [convert(T, [cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)]) for ϕ in angles]
@@ -27,8 +41,7 @@ include("utils.jl")
             point_distributions = [Manifolds.normal_rotation_distribution(M, pts[1], 1.0)],
             tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
 
-        v = project_tangent(M, I, randn(2, 2))
-        v .*= (norm(M, I, v) / sqrt(2)) * π
+        v = Manifolds.hat(M, pts[1], [Float64(π)])
         x = exp(M, pts[1], v)
         @test isapprox(x, exp(M, pts[1], log(M, pts[1], x)))
 
@@ -67,6 +80,21 @@ include("utils.jl")
                 point_distributions = [ptd],
                 tvector_distributions = [tvd],
                 exp_log_atol_multiplier = 6)
+
+            if (n == 3)
+                @testset "vee/hat" begin
+                    v = randn(3)
+                    V = Manifolds.hat(SOn, I, v)
+                    @test isa(V, MMatrix)
+                    @test norm(SOn, I, V) / sqrt(2) ≈ norm(v)
+                    @test Manifolds.vee(SOn, I, V) == v
+
+                    V = project_tangent(SOn, I, randn(3, 3))
+                    v = Manifolds.vee(SOn, I, V)
+                    @test isa(v, MVector)
+                    @test Manifolds.hat(SOn, I, v) == V
+                end
+            end
 
             v = project_tangent(SOn, I, randn(n, n))
             v .*= (norm(SOn, I, v) / sqrt(2)) * π

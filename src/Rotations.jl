@@ -40,6 +40,41 @@ inner(S::Rotations, x, w, v) = dot(w, v)
 
 project_tangent!(S::Rotations, w, x, v) = w .= (v .- transpose(v))./2
 
+function hat!(S::Rotations{2}, Ω, x, θ::Real)
+    @assert length(Ω) == 4
+    @inbounds begin
+        Ω[1] = 0;  Ω[3] = -θ
+        Ω[2] = θ;  Ω[4] = 0
+    end
+    return Ω
+end
+
+hat!(S::Rotations{2}, Ω, x, ω) = hat!(S, Ω, x, ω[1])
+
+function hat!(S::Rotations{3}, Ω, x, ω)
+    @assert length(ω) == 3
+    @assert length(Ω) == 9
+    @inbounds begin
+        Ω[1] = 0;      Ω[4] = -ω[3];  Ω[7] = ω[2]
+        Ω[2] = ω[3];   Ω[5] = 0;      Ω[8] = -ω[1]
+        Ω[3] = -ω[2];  Ω[6] = ω[1];   Ω[9] = 0
+    end
+    return Ω
+end
+
+vee!(S::Rotations{2}, ω, x, Ω) = (ω[1] = Ω[2])
+
+function vee!(S::Rotations{3}, ω, x, Ω)
+    @assert length(Ω) == 9
+    @assert length(ω) == 3
+    @inbounds begin
+        ω[1] = Ω[6]
+        ω[2] = Ω[7]
+        ω[3] = Ω[2]
+    end
+    return ω
+end
+
 function exp!(S::Rotations, y, x, v)
     y .= x * exp(v)
     return y
