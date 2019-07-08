@@ -41,7 +41,7 @@ metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 
 norm(S::Sphere, x, v) = norm(v)
 
-distance(S::Sphere, x, y) = acos(dot(x, y))
+distance(S::Sphere, x, y) = acos(clamp(dot(x, y), -1, 1))
 
 function exp!(S::Sphere, y, x, v)
     θ = norm(S, x, v)
