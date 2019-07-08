@@ -44,6 +44,8 @@ end
                           test_project_tangent = true,
                           point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
                           tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
+
+            @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end
     end
 

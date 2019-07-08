@@ -27,6 +27,11 @@ include("utils.jl")
             point_distributions = [Manifolds.normal_rotation_distribution(M, pts[1], 1.0)],
             tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
 
+        v = project_tangent(M, I, randn(2, 2))
+        v .*= (norm(M, I, v) / sqrt(2)) * π
+        x = exp(M, pts[1], v)
+        @test isapprox(x, exp(M, pts[1], log(M, pts[1], x)))
+
         v = log(M, pts[1], pts[2])
         @test norm(M, pts[1], v) ≈ (angles[2] - angles[1])*sqrt(2)
 
@@ -62,6 +67,11 @@ include("utils.jl")
                 point_distributions = [ptd],
                 tvector_distributions = [tvd],
                 exp_log_atol_multiplier = 6)
+
+            v = project_tangent(SOn, I, randn(n, n))
+            v .*= (norm(SOn, I, v) / sqrt(2)) * π
+            x = exp(SOn, pts[1], v)
+            @test isapprox(x, exp(SOn, pts[1], log(SOn, pts[1], x)))
         end
     end
 
