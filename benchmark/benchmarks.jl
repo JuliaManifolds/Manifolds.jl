@@ -123,7 +123,7 @@ function add_manifold_benchmarks()
     pts_prod = map(p -> Manifolds.ProductArray(shape_s2r2, p), pts_prd_base)
     add_manifold(m_prod, pts_prod, "ProductManifold with ProductArray")
 
-    pts_prod_mpoints = [Manifolds.ProductMPoint(p[1], p[2]) for p in zip(pts_s2, pts_r2)]
+    pts_prod_mpoints = [Manifolds.ProductRepr(p[1], p[2]) for p in zip(pts_s2, pts_r2)]
     add_manifold(m_prod, pts_prod_mpoints, "ProductManifold with MPoint";
         test_tangent_vector_broadcasting = false)
 end

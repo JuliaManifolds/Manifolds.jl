@@ -90,7 +90,7 @@ include("utils.jl")
         end
     end
 
-    @testset "ProductMPoint" begin
+    @testset "ProductRepr" begin
         Ts = SizedVector{3, Float64}
         Tr2 = SizedVector{2, Float64}
         pts_sphere = [convert(Ts, [1.0, 0.0, 0.0]),
@@ -100,7 +100,7 @@ include("utils.jl")
                   convert(Tr2, [1.0, 0.0]),
                   convert(Tr2, [0.0, 0.1])]
 
-        pts = [ProductMPoint(p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
+        pts = [ProductRepr(p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
         test_manifold(Mse,
                       pts,
                       test_tangent_vector_broadcasting = false,

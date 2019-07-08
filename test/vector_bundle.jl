@@ -14,16 +14,16 @@ include("utils.jl")
              SizedVector{3, Double64}]
     for T in types
         x = convert(T, [1.0, 0.0, 0.0])
-        TS = TangentSpace(M, x)
         TB = TangentBundle(M)
-        MT = VectorSpaceManifold(TS)
+        MT = VectorSpaceManifold(Manifolds.TangentSpaceType(), M, x)
         @testset "Type $T" begin
             pts_ts = [convert(T, [0.0, -1.0, -1.0]),
                       convert(T, [0.0, 1.0, 0.0]),
                       convert(T, [0.0, 0.0, 1.0])]
-            pts_tb = [VectorBundleRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
-                      VectorBundleRepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
-                      VectorBundleRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, 2.0, -1.0]))]
+            pts_tb = [ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
+                      ProductRepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
+                      ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, 2.0, -1.0]))]
+            @inferred ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0]))
             test_manifold(MT,
                           pts_ts,
                           test_reverse_diff = isa(T, Vector),
@@ -32,7 +32,8 @@ include("utils.jl")
                           pts_tb,
                           test_reverse_diff = isa(T, Vector),
                           test_project_tangent = false,
-                          test_representation_size = false)
+                          test_representation_size = false,
+                          test_tangent_vector_broadcasting = false)
         end
     end
 

@@ -52,9 +52,9 @@ distance(::Euclidean, x, y) = norm(x-y)
 norm(::Euclidean, x, v) = norm(v)
 norm(::MetricManifold{<:Manifold,EuclideanMetric}, x, v) = norm(v)
 
-exp!(M::Euclidean, y, x, v) = (y .= x + v)
+exp!(M::Euclidean, y, x, v) = (y .= x .+ v)
 
-log!(M::Euclidean, v, x, y) = (v .= y - x)
+log!(M::Euclidean, v, x, y) = (v .= y .- x)
 
 function zero_tangent_vector!(M::Euclidean, v, x)
     fill!(v, 0)

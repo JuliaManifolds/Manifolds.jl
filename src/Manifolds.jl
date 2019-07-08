@@ -494,6 +494,7 @@ is_tangent_vector(M::Manifold, x::MPoint, v::TVector) = error("A validation for 
 
 include("utils.jl")
 
+include("ProductRepresentations.jl")
 include("ArrayManifold.jl")
 
 include("DistributionsBase.jl")
@@ -510,10 +511,8 @@ export Manifold,
     Euclidean,
     Sphere,
     ProductManifold,
-    ProductMPoint,
-    ProductTVector,
-    ProductCoTVector,
-    VectorSpace,
+    ProductRepr,
+    VectorSpaceType,
     VectorSpaceManifold,
     TangentSpace,
     CotangentSpace,
