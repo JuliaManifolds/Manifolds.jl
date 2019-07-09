@@ -81,23 +81,20 @@ include("utils.jl")
                 tvector_distributions = [tvd],
                 exp_log_atol_multiplier = 6)
 
-            if (n == 3)
-                @testset "vee/hat" begin
-                    v = randn(3)
-                    V = Manifolds.hat(SOn, I, v)
-                    @test isa(V, MMatrix)
-                    @test norm(SOn, I, V) / sqrt(2) ≈ norm(v)
-                    @test Manifolds.vee(SOn, I, V) == v
+            @testset "vee/hat" begin
+                v = randn(manifold_dimension(SOn))
+                V = Manifolds.hat(SOn, I, v)
+                @test isa(V, MMatrix)
+                @test norm(SOn, I, V) / sqrt(2) ≈ norm(v)
+                @test Manifolds.vee(SOn, I, V) == v
 
-                    V = project_tangent(SOn, I, randn(3, 3))
-                    v = Manifolds.vee(SOn, I, V)
-                    @test isa(v, MVector)
-                    @test Manifolds.hat(SOn, I, v) == V
-                end
+                V = project_tangent(SOn, I, randn(n, n))
+                v = Manifolds.vee(SOn, I, V)
+                @test isa(v, MVector)
+                @test Manifolds.hat(SOn, I, v) == V
             end
 
-            v = project_tangent(SOn, I, randn(n, n))
-            v .*= (norm(SOn, I, v) / sqrt(2)) * π
+            v = Manifolds.hat(SOn, pts[1], π * normalize(randn(manifold_dimension(SOn))))
             x = exp(SOn, pts[1], v)
             @test isapprox(x, exp(SOn, pts[1], log(SOn, pts[1], x)))
         end
