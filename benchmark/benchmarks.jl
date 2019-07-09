@@ -132,7 +132,7 @@ function add_manifold_benchmarks()
         T = MVector{3, Float64}
         x = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(s2)
-        MT = VectorSpaceManifold(Manifolds.TangentSpaceType(), s2, x)
+        MT = VectorSpaceManifold(Manifolds.TangentSpace, s2, x)
 
         pts_ts = [convert(T, [0.0, -1.0, -1.0]),
                   convert(T, [0.0, 1.0, 0.0]),

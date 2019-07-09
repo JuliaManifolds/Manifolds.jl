@@ -76,6 +76,14 @@ function inner(M::ArrayManifold, x, v, w; kwargs...)
     return inner(M.manifold, array_value(x), array_value(v), array_value(w))
 end
 
+function exp(M::ArrayManifold, x, v; kwargs...)
+    is_manifold_point(M, x; kwargs...)
+    is_tangent_vector(M, x, v; kwargs...)
+    y = ArrayMPoint(exp(M.manifold, array_value(x), array_value(v)))
+    is_manifold_point(M, y; kwargs...)
+    return y
+end
+
 function exp!(M::ArrayManifold, y, x, v; kwargs...)
     is_manifold_point(M, x; kwargs...)
     is_tangent_vector(M, x, v; kwargs...)
@@ -121,6 +129,10 @@ function vector_transport(M::ArrayManifold, x, v, y)
                             array_value(y))
 end
 
-export ArrayManifold,
-    ArrayMPoint,
-    ArrayTVector
+function is_manifold_point(M::ArrayManifold, x::MPoint; kwargs...)
+    return is_manifold_point(M.manifold, array_value(x); kwargs...)
+end
+
+function is_tangent_vector(M::ArrayManifold, x::MPoint, v::TVector; kwargs...)
+    return is_tangent_vector(M.manifold, array_value(x), array_value(v); kwargs...)
+end

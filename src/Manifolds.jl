@@ -327,7 +327,7 @@ exp!(M::Manifold, y, x, v) = error("Exponential map not implemented on a $(typeo
 Exponential map of tangent vector `t*v` at point `x` from manifold `M`.
 """
 function exp(M::Manifold, x, v)
-    x2 = similar_result(M, x, v)
+    x2 = similar_result(M, exp, x, v)
     exp!(M, x2, x, v)
     return x2
 end
@@ -447,7 +447,7 @@ zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
     similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where N
 
 Returns type of element of the array that will represent the result of
-function `f` for manifold `M` on given arguments (passed at a tuple)
+function `f` for manifold `M` on given arguments (passed at a tuple).
 """
 function similar_result_type(M::Manifold, f, args::NTuple{N,Any}) where N
     T = typeof(reduce(+, one(eltype(eti)) for eti ∈ args))
@@ -504,6 +504,10 @@ include("Sphere.jl")
 include("ProjectedDistribution.jl")
 include("VectorBundle.jl")
 
+export ArrayManifold,
+    ArrayMPoint,
+    ArrayTVector
+
 export Manifold,
     IsDecoratorManifold,
     Euclidean,
@@ -545,6 +549,8 @@ export ×,
     retract!,
     submanifold,
     submanifold_component,
+    zero_vector,
+    zero_vector!,
     zero_tangent_vector,
     zero_tangent_vector!
 export Metric,

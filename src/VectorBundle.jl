@@ -12,9 +12,34 @@ struct CotangentSpaceType <: VectorSpaceType end
 
 TCoTSpaceType = Union{TangentSpaceType, CotangentSpaceType}
 
-function similar_result(M::Manifold, VS::VectorSpaceType, f, x1::AbstractArray, x...)
-    return similar_result(M, f, x1, x...)
+const TangentSpace = TangentSpaceType()
+const CotangentSpace = CotangentSpaceType()
+
+"""
+    similar_result_type(M::Manifold, VS::VectorSpaceType, f, args::NTuple{N,Any}) where N
+
+Returns type of element of the array that will represent the result of
+function `f` for representing an operation with result in the vector space `VS`
+for manifold `M` on given arguments (passed at a tuple).
+"""
+function similar_result_type(M::Manifold, VS::VectorSpaceType, f, args::NTuple{N,Any}) where N
+    T = typeof(reduce(+, one(eltype(eti)) for eti ∈ args))
+    return T
 end
+
+"""
+    similar_result(M::Manifold, VS::VectorSpaceType, f, x...)
+
+Allocates an array for the result of function `f` that is
+an element of the vector space of type `VS` on manifold `M`
+and arguments `x...` for implementing the non-modifying operation
+using the modifying operation.
+"""
+function similar_result(M::Manifold, VS::VectorSpaceType, f, x...)
+    T = similar_result_type(M, VS, f, x)
+    return similar(x[1], T)
+end
+
 
 """
     manifold_dimension(M::Manifold, VS::VectorSpaceType)
@@ -29,6 +54,33 @@ manifold_dimension(M::Manifold, ::TCoTSpaceType) = manifold_dimension(M)
 
 function representation_size(M::Manifold, VS::TCoTSpaceType)
     representation_size(M)
+end
+
+"""
+    zero_vector!(M::Manifold, VS::VectorSpaceType, v, x)
+
+Save the zero vector from the vector space of type `VS` at point `x`
+from manifold `M` to `v`.
+"""
+function zero_vector!(M::Manifold, VS::VectorSpaceType, v, x)
+    error("zero_vector! not implemented for manifold $(typeof(M)), vector space of type $(typeof(VS)), vector of type $(typeof(v)) and point of type $(typeof(x)).")
+end
+
+function zero_vector!(M::Manifold, VS::TangentSpaceType, v, x)
+    zero_tangent_vector!(M, v, x)
+    return v
+end
+
+"""
+    zero_vector(M::Manifold, VS::VectorSpaceType, x)
+
+Compute the zero vector from the vector space of type `VS` at point `x`
+from manifold `M`.
+"""
+function zero_vector(M::Manifold, VS::VectorSpaceType, x)
+    v = similar_result(M, VS, zero_vector, x)
+    zero_vector!(M, VS, v, x)
+    return v
 end
 
 """
@@ -102,8 +154,8 @@ function representation_size(M::VectorBundle)
     return (len_manifold + len_vs,)
 end
 
-TangentBundle(M::Manifold) = VectorBundle(TangentSpaceType(), M)
-CotangentBundle(M::Manifold) = VectorBundle(CotangentSpaceType(), M)
+TangentBundle(M::Manifold) = VectorBundle(TangentSpace, M)
+CotangentBundle(M::Manifold) = VectorBundle(CotangentSpace, M)
 
 """
     bundle_projection(M::VectorBundle, x::ProductRepr)

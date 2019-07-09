@@ -54,7 +54,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         end
 
         test_repr(Manifolds.representation_size(M))
-        for T ∈ (Manifolds.TangentSpaceType(), Manifolds.CotangentSpaceType())
+        for T ∈ (Manifolds.TangentSpace, Manifolds.CotangentSpace)
             test_repr(Manifolds.representation_size(M, T))
         end
     end
@@ -107,6 +107,13 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test isapprox(M, exp(M, pts[1], tv1, 0), pts[1])
 
         @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
+    end
+
+    @testset "vector spaces tests" begin
+        tv = zero_tangent_vector(M, pts[1])
+        @test isapprox(M, pts[1], tv, zero_vector(M, Manifolds.TangentSpace, pts[1]))
+        zero_vector!(M, Manifolds.TangentSpace, tv, pts[1])
+        @test isapprox(M, pts[1], tv, zero_tangent_vector(M, pts[1]))
     end
 
     @testset "basic linear algebra in tangent space" begin

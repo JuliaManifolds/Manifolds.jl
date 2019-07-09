@@ -15,7 +15,7 @@ include("utils.jl")
     for T in types
         x = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)
-        MT = VectorSpaceManifold(Manifolds.TangentSpaceType(), M, x)
+        MT = VectorSpaceManifold(Manifolds.TangentSpace, M, x)
         @testset "Type $T" begin
             pts_ts = [convert(T, [0.0, -1.0, -1.0]),
                       convert(T, [0.0, 1.0, 0.0]),
@@ -29,7 +29,8 @@ include("utils.jl")
             end
             test_manifold(MT,
                           pts_ts,
-                          test_reverse_diff = isa(T, Vector))
+                          test_reverse_diff = isa(T, Vector),
+                          test_project_tangent = true)
             test_manifold(TB,
                           pts_tb,
                           test_reverse_diff = isa(T, Vector),
