@@ -7,6 +7,9 @@ $\operatorname{usinc}(x) = \frac{\sin(x)}{x}$. This is equivalent to
 """
 usinc(x::Real) = x == 0 ? one(x) : isinf(x) ? zero(x) : sin(x) / x
 
+_eigen(x) = eigen(x)
+_eigen(x::StaticMatrix) = eigen(Matrix(x))
+
 """
     select_from_tuple(t::NTuple{N, Any}, positions::Val{P})
 

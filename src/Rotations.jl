@@ -108,8 +108,16 @@ end
 function log!(S::Rotations{3}, v, x, y)
     U = transpose(x) * y
     cosθ = (tr(U) - 1) / 2
-    θ = acos(clamp(cosθ, -1, 1))
-    v .= (U .- transpose(U)) ./ (2 * usinc(θ))
+    if cosθ ≈ -1
+        eig = _eigen(U)
+        ival = findfirst(λ -> isapprox(λ, 1), eig.values)
+        vi = SVector{3}(1:3)
+        ax = eig.vectors[vi, ival]
+        hat!(S, v, x, π * ax)
+    else
+        usincθ = cosθ >= 1 ? one(cosθ) : sqrt(1 - cosθ^2) / acos(cosθ)
+        v .= (U .- transpose(U)) ./ (2 * usincθ)
+    end
     return v
 end
 
