@@ -450,7 +450,7 @@ hat!(M::Manifold, V, x, v) = error("hat! operator not defined for manifold $(typ
 """
     hat(M::Manifold, x, v)
 
-Convert the tangentvector `v` at point `x` on matrix manifold `M` to the
+Convert the tangent vector `v` at point `x` on matrix manifold `M` to the
 equivalent matrix representation.
 """
 function hat(M::Manifold, x, v)
@@ -567,7 +567,11 @@ export ×,
     submanifold,
     submanifold_component,
     zero_tangent_vector,
-    zero_tangent_vector!
+    zero_tangent_vector!,
+    hat!,
+    hat,
+    vee!,
+    vee
 export Metric,
     RiemannianMetric,
     LorentzMetric,

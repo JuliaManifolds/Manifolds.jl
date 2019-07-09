@@ -42,84 +42,6 @@ norm(S::Rotations, x, v) = norm(v)
 
 project_tangent!(S::Rotations, w, x, v) = w .= (v .- transpose(v))./2
 
-function hat!(S::Rotations{2}, Ω, x, θ::Real)
-    @assert length(Ω) == 4
-    @inbounds begin
-        Ω[1] = 0;  Ω[3] = -θ
-        Ω[2] = θ;  Ω[4] = 0
-    end
-    return Ω
-end
-
-hat!(S::Rotations{2}, Ω, x, ω) = hat!(S, Ω, x, ω[1])
-
-@doc doc"""
-    hat(S::Rotations, x, ω)
-
-Convert the tangent vector $\omega$ at point $x$ on rotations group
-$\mathrm{SO}(n)$ to the equivalent matrix representation. See [`vee`](@ref)
-for the conventions used.
-"""
-function hat end
-
-function hat!(S::Rotations{N}, Ω, x, ω) where {N}
-    @assert size(Ω) == (N, N)
-    @assert length(ω) == manifold_dimension(S)
-    @inbounds begin
-        Ω[1,1] = 0;      Ω[1,2] = -ω[3];  Ω[1,3] = ω[2]
-        Ω[2,1] = ω[3];   Ω[2,2] = 0;      Ω[2,3] = -ω[1]
-        Ω[3,1] = -ω[2];  Ω[3,2] = ω[1];   Ω[3,3] = 0
-        k = 4
-        for i=4:N
-            for j=1:i-1
-                Ω[i,j] = ω[k]
-                Ω[j,i] = -ω[k]
-                k += 1
-            end
-            Ω[i,i] = 0
-        end
-    end
-    return Ω
-end
-
-@doc doc"""
-    vee(S::Rotations, x, Ω)
-
-Convert the tangent vector $\Omega$ at point $x$ on rotations group
-$\mathrm{SO}(n)$ represented as a matrix to the equivalent vector
-representation $\omega=\Omega^\vee$. The basis on the Lie algebra
-$\mathfrak{so}(n)$ is chosen such that for $\mathrm{SO}(2)$,
-$\omega=\theta=\Omega_{21}$ is the angle of rotation, and for $\mathrm{SO}(3)$,
-$\omega = (\Omega_{32}, \Omega_{13}, \Omega_{21}) = \theta u$ is the
-angular velocity and axis-angle representation, where $u$ is the unit vector
-along the axis of rotation.
-
-For $\mathrm{SO}(n)$ where $n \ge 4$, the additional elements of $\omega$ are
-$\omega_{i (i - 3)/2 + j + 1} = \Omega_{ij}$, for $i \in [4, n], j \in [1,i)$.
-"""
-function vee end
-
-vee!(S::Rotations{2}, ω, x, Ω) = (ω[1] = Ω[2])
-
-function vee!(S::Rotations{N}, ω, x, Ω) where {N}
-    @assert size(Ω) == (N, N)
-    @assert length(ω) == manifold_dimension(S)
-    @inbounds begin
-        ω[1] = Ω[3,2]
-        ω[2] = Ω[1,3]
-        ω[3] = Ω[2,1]
-
-        k = 4
-        for i=4:N
-            for j=1:i-1
-                ω[k] = Ω[i,j]
-                k += 1
-            end
-        end
-    end
-    return ω
-end
-
 function exp!(S::Rotations, y, x, v)
     y .= x * exp(v)
     return y
@@ -319,6 +241,84 @@ end
 
 zero_tangent_vector(S::Rotations, x) = zero(x)
 zero_tangent_vector!(S::Rotations, v, x) = (v .= zero(x))
+
+function hat!(S::Rotations{2}, Ω, x, θ::Real)
+    @assert length(Ω) == 4
+    @inbounds begin
+        Ω[1] = 0;  Ω[3] = -θ
+        Ω[2] = θ;  Ω[4] = 0
+    end
+    return Ω
+end
+
+hat!(S::Rotations{2}, Ω, x, ω) = hat!(S, Ω, x, ω[1])
+
+@doc doc"""
+    hat(S::Rotations, x, ω)
+
+Convert the tangent vector $\omega$ at point $x$ on rotations group
+$\mathrm{SO}(n)$ to the equivalent matrix representation. See [`vee`](@ref)
+for the conventions used.
+"""
+function hat end
+
+function hat!(S::Rotations{N}, Ω, x, ω) where {N}
+    @assert size(Ω) == (N, N)
+    @assert length(ω) == manifold_dimension(S)
+    @inbounds begin
+        Ω[1,1] = 0;      Ω[1,2] = -ω[3];  Ω[1,3] = ω[2]
+        Ω[2,1] = ω[3];   Ω[2,2] = 0;      Ω[2,3] = -ω[1]
+        Ω[3,1] = -ω[2];  Ω[3,2] = ω[1];   Ω[3,3] = 0
+        k = 4
+        for i=4:N
+            for j=1:i-1
+                Ω[i,j] = ω[k]
+                Ω[j,i] = -ω[k]
+                k += 1
+            end
+            Ω[i,i] = 0
+        end
+    end
+    return Ω
+end
+
+@doc doc"""
+    vee(S::Rotations, x, Ω)
+
+Convert the tangent vector $\Omega$ at point $x$ on rotations group
+$\mathrm{SO}(n)$ represented as a matrix to the equivalent vector
+representation $\omega=\Omega^\vee$. The basis on the Lie algebra
+$\mathfrak{so}(n)$ is chosen such that for $\mathrm{SO}(2)$,
+$\omega=\theta=\Omega_{21}$ is the angle of rotation, and for $\mathrm{SO}(3)$,
+$\omega = (\Omega_{32}, \Omega_{13}, \Omega_{21}) = \theta u$ is the
+angular velocity and axis-angle representation, where $u$ is the unit vector
+along the axis of rotation.
+
+For $\mathrm{SO}(n)$ where $n \ge 4$, the additional elements of $\omega$ are
+$\omega_{i (i - 3)/2 + j + 1} = \Omega_{ij}$, for $i \in [4, n], j \in [1,i)$.
+"""
+function vee end
+
+vee!(S::Rotations{2}, ω, x, Ω) = (ω[1] = Ω[2])
+
+function vee!(S::Rotations{N}, ω, x, Ω) where {N}
+    @assert size(Ω) == (N, N)
+    @assert length(ω) == manifold_dimension(S)
+    @inbounds begin
+        ω[1] = Ω[3,2]
+        ω[2] = Ω[1,3]
+        ω[3] = Ω[2,1]
+
+        k = 4
+        for i=4:N
+            for j=1:i-1
+                ω[k] = Ω[i,j]
+                k += 1
+            end
+        end
+    end
+    return ω
+end
 
 """
     is_manifold_point(S,x; kwargs...)
