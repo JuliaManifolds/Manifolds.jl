@@ -121,6 +121,36 @@ function log!(S::Rotations{3}, v, x, y)
     return v
 end
 
+function cos_angle_4d_rotation_matrix(R)
+    trR = tr(R)
+    a = trR / 4
+    b = sqrt(tr((R .- transpose(R))^2) / 16 - a^2 + 1)
+    return b < 0 ? (a + b, a - b) : (a - b, a + b)
+end
+
+function log!(S::Rotations{4}, v, x, y)
+    U = transpose(x) * y
+    cosθ₁, cosθ₂ = cos_angle_4d_rotation_matrix(U)
+    θ₁ = acos(clamp(cosθ₁, -1, 1))
+    θ₂ = acos(clamp(cosθ₂, -1, 1))
+    if θ₁ ≈ π && θ₂ ≈ 0
+        B₁² = Symmetric((U - I) ./ 2)
+        P = MMatrix{4,4}(eigvecs(B₁²))
+        E = MMatrix{4,4}(zeros(eltype(U), (4, 4)))
+        θ₁ = acos(clamp(cosθ₁, -1, 1))
+        @inbounds begin
+            E[2, 1] = -θ₁
+            E[1, 2] = θ₁
+        end
+        v .= P * E * transpose(P)
+    else
+        v .= real(log(Matrix(U)))
+    end
+    project_tangent!(S, v, x, v)
+    return v
+end
+
+
 injectivity_radius(M::Rotations, x) = π*sqrt(2.0)
 
 @doc doc"""
