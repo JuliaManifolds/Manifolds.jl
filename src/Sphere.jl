@@ -51,16 +51,21 @@ end
 
 function log!(S::Sphere, v, x, y)
     cosθ = dot(x, y)
-    if cosθ > -1
+    if cosθ ≈ -1
+        fill!(v, 0)
+        if x[1] ≈ 1
+            v[2] = 1
+        else
+            v[1] = 1
+        end
+        copyto!(v, v .- dot(x, v) .* x)
+        v .*= π / norm(v)
+    else
         cosθ = cosθ > 1 ? one(cosθ) : cosθ
         θ = acos(cosθ)
         v .= (y .- cosθ .* x) ./ usinc(θ)
-        project_tangent!(S, v, x, v)
-    else
-        v .= randn(3)
-        copyto!(v, v .- dot(x, v) .* x)
-        v .*= π / norm(v)
     end
+    project_tangent!(S, v, x, v)
     return v
 end
 

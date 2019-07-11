@@ -57,5 +57,22 @@ end
         @test isa(rand(gtsd_mvector), MVector)
     end
 
+    @testset "log edge case" begin
+        n = manifold_dimension(M)
+        x = normalize(randn(n + 1))
+        v = log(M, x, -x)
+        @test norm(v) ≈ π
+        @test isapprox(dot(x, v), 0; atol=eps())
+        vexp = normalize(project_tangent(M, x, [1, zeros(n)...]))
+        @test v ≈ π * vexp
+
+        x = [1, zeros(n)...]
+        v = log(M, x, -x)
+        @test norm(v) ≈ π
+        @test isapprox(dot(x, v), 0; atol=eps())
+        vexp = normalize(project_tangent(M, x, [0, 1, zeros(n - 1)...]))
+        @test v ≈ π * vexp
+    end
+
     test_arraymanifold()
 end
