@@ -43,6 +43,8 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     @testset "dimension" begin
         @test isa(manifold_dimension(M), Integer)
         @test manifold_dimension(M) ≥ 0
+        @test manifold_dimension(M) == manifold_dimension(M, Manifolds.TangentSpace)
+        @test manifold_dimension(M) == manifold_dimension(M, Manifolds.CotangentSpace)
     end
 
     test_representation_size && @testset "representation" begin
@@ -169,6 +171,16 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         tv1 = log(M, pts[1], pts[2])
         @test eltype(tv1) == eltype(pts[1])
         @test eltype(exp(M, pts[1], tv1)) == eltype(pts[1])
+    end
+
+    @testset "copyto!" begin
+        p2 = similar(pts[1])
+        copyto!(p2, pts[2])
+        @test isapprox(M, p2, pts[2])
+
+        tv2 = similar(tv1)
+        copyto!(tv2, log(M, pts[2], pts[3]))
+        @test isapprox(M, pts[2], tv2, log(M, pts[2], pts[3]))
     end
 
     @testset "point distributions" begin

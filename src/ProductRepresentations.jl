@@ -177,6 +177,11 @@ eltype(x::ProductRepr) = eltype(Tuple{map(eltype, x.parts)...})
 similar(x::ProductRepr) = ProductRepr(map(similar, x.parts)...)
 similar(x::ProductRepr, ::Type{T}) where T = ProductRepr(map(t -> similar(t, T), x.parts)...)
 
+function copyto!(x::ProductRepr, y::ProductRepr)
+    map(copyto!, x.parts, y.parts)
+    return x
+end
+
 function submanifold_component(x::ProductRepr, i::Integer)
     return x.parts[i]
 end

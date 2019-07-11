@@ -24,6 +24,10 @@ convert(::Type{ArrayMPoint{V}},x::V) where V <: AbstractArray{<:Number} = ArrayP
 eltype(::Type{ArrayMPoint{V}}) where V = eltype(V)
 similar(x::ArrayMPoint) = ArrayMPoint(similar(x.value))
 similar(x::ArrayMPoint, ::Type{T}) where T = ArrayMPoint(similar(x.value, T))
+function copyto!(x::ArrayMPoint, y::ArrayMPoint)
+    copyto!(x.value, y.value)
+    return x
+end
 
 struct ArrayTVector{V <: AbstractArray{<:Number}} <: TVector
     value::V
@@ -33,6 +37,10 @@ convert(::Type{ArrayTVector{V}},v::V) where V <: AbstractArray{<:Number} = Array
 eltype(::Type{ArrayTVector{V}}) where V = eltype(V)
 similar(x::ArrayTVector) = ArrayTVector(similar(x.value))
 similar(x::ArrayTVector, ::Type{T}) where T = ArrayTVector(similar(x.value, T))
+function copyto!(x::ArrayTVector, y::ArrayTVector)
+    copyto!(x.value, y.value)
+    return x
+end
 
 array_value(x::AbstractArray) = x
 array_value(x::ArrayMPoint) = x.value
