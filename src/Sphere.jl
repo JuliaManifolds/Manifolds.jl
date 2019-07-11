@@ -71,6 +71,17 @@ function zero_tangent_vector!(S::Sphere, v, x)
     return v
 end
 
+function vector_transport!(M::Sphere, vto, x, v, y)
+    v_xy = log(M, x, y)
+    vl = norm(M, x, v_xy)
+    vto .= v
+    if vl > 0
+        factor = 2*dot(v, y)/(norm(x + y)^2)
+        vto .-= factor.*(x .+ y)
+    end
+    return vto
+end
+
 """
     uniform_distribution(S::Sphere, x)
 

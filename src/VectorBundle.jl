@@ -191,24 +191,22 @@ function distance(M::VectorBundle, x, y)
     vsm = VectorSpaceManifold(M.type, M.M, x.parts[1])
 
     dist_man = distance(M.M, x.parts[1], y.parts[1])
-    dist_vec = distance(vsm, x.parts[2], y.parts[2])
+    vy_x = vector_transport(M.M, y.parts[1], y.parts[2], x.parts[1])
+    dist_vec = distance(vsm, x.parts[2], vy_x)
 
     return sqrt(dist_man^2 + dist_vec^2)
 end
 
 function exp!(M::VectorBundle, y, x, v)
-    vsm = VectorSpaceManifold(M.type, M.M, x.parts[1])
-
     exp!(M.M, y.parts[1], x.parts[1], v.parts[1])
-    exp!(vsm, y.parts[2], x.parts[2], v.parts[2])
+    vector_transport!(M.M, y.parts[2], x.parts[1], x.parts[2] + v.parts[2], y.parts[1])
     return y
 end
 
 function log!(M::VectorBundle, v, x, y)
-    vsm = VectorSpaceManifold(M.type, M.M, x.parts[1])
-
     log!(M.M, v.parts[1], x.parts[1], y.parts[1])
-    log!(vsm, v.parts[2], x.parts[2], y.parts[2])
+    vector_transport!(M.M, v.parts[2], y.parts[1], y.parts[2], x.parts[1])
+    copyto!(v.parts[2], v.parts[2] - x.parts[2])
     return v
 end
 
@@ -228,6 +226,6 @@ end
 
 function project_tangent!(M::VectorBundle, w, x, v)
     project_tangent!(M.M, w.parts[1], x.parts[1], v.parts[1])
-    project_tangent!(M.M, w.parts[2], x.parts[2], v.parts[2])
+    project_tangent!(M.M, w.parts[2], x.parts[1], v.parts[2])
     return w
 end

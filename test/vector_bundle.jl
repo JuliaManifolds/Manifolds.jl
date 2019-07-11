@@ -34,7 +34,8 @@ include("utils.jl")
             test_manifold(TB,
                           pts_tb,
                           test_reverse_diff = isa(T, Vector),
-                          test_tangent_vector_broadcasting = false)
+                          test_tangent_vector_broadcasting = false,
+                          test_project_tangent = true)
         end
     end
 

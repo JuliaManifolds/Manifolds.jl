@@ -408,7 +408,7 @@ vector_transport!(M::Manifold, vto, x, v, y) = project_tangent!(M, vto, x, v)
 
 function vector_transport(M::Manifold, x, v, y)
     vto = similar_result(M, vector_transport, v, x, y)
-    vector_transport!(M, vto, x, y, v)
+    vector_transport!(M, vto, x, v, y)
     return vto
 end
 
