@@ -66,7 +66,7 @@ function zero_vector!(M::Manifold, VS::VectorSpaceType, v, x)
     error("zero_vector! not implemented for manifold $(typeof(M)), vector space of type $(typeof(VS)), vector of type $(typeof(v)) and point of type $(typeof(x)).")
 end
 
-function zero_vector!(M::Manifold, VS::TangentSpaceType, v, x)
+function zero_vector!(M::Manifold, VS::TCoTSpaceType, v, x)
     zero_tangent_vector!(M, v, x)
     return v
 end
@@ -84,59 +84,55 @@ function zero_vector(M::Manifold, VS::VectorSpaceType, x)
 end
 
 """
-    VectorSpaceManifold(M::Manifold, VS::VectorSpaceType, point)
+    project_vector!(M::Manifold, VS::VectorSpaceType, v, x, w)
 
-Manifold corresponding to the vector space `VS` (for example tangent space
-or cotangent space) at point `point` from manifold `M`.
+Project vector `w` from the vector space of type `VS` at point `x`
+and save the result to `v`.
 """
-struct VectorSpaceManifold{TVS<:VectorSpaceType, TM<:Manifold, TP} <: Manifold
-    VS::TVS
-    M::TM
-    point::TP
+function project_vector!(M::Manifold, VS::VectorSpaceType, v, x, w)
+    error("project_vector! not implemented for vector space manifold $(typeof(M)), vector space of type $(typeof(VS)), output vector of type $(typeof(v)) and input vector at point $(typeof(x)) with type of w $(typeof(w)).")
 end
 
 """
-    project_vector!(vs::VectorSpaceManifold, v, w)
+    inner(M::Manifold, VS::VectorSpaceType, x, v, w)
 
-Project vector `w` from the vector space `vs` and save the result to `v`.
+Inner product of vectors `v` and `w` from the vector space of type `VS`
+at point `x` from manifold `M`.
 """
-function project_vector!(M::VectorSpaceManifold, v, w)
-    error("project_vector! not implemented for vector space manifold $(typeof(M)) and vectors of type $(typeof(v)) and $(typeof(w)).")
+function inner(M::Manifold, VS::VectorSpaceType, x, v, w)
+    error("inner not defined for manifold of type $(typeof(M)), vector space of type $(typeof(VS)), point of type $(typeof(x)) and vectors of types $(typeof(v)) and $(typeof(w)).")
 end
 
-function project_vector!(M::VectorSpaceManifold{<:TCoTSpaceType}, v, w)
-    project_tangent!(M.M, v, Ms.point, w)
+function inner(M::Manifold, VS::TCoTSpaceType, x, v, w)
+    return inner(M, x, v, w)
+end
+
+function project_vector!(M::Manifold, VS::TCoTSpaceType, v, x, w)
+    project_tangent!(M, v, x, w)
     return v
 end
 
-manifold_dimension(M::VectorSpaceManifold) = manifold_dimension(M.M, M.VS)
-
-function representation_size(M::VectorSpaceManifold)
-    representation_size(M.M, M.VS)
+"""
+    distance(M::Manifold, VS::VectorSpaceType, x, y)
+"""
+function distance(M::Manifold, VS::VectorSpaceType, x, y)
+    error("distance not defined for manifold of type $(typeof(M)), vector space of type $(typeof(VS)) and vectors of types $(typeof(x)) and $(typeof(y)).")
 end
 
-@inline inner(::VectorSpaceManifold{<:TCoTSpaceType}, x, v, w) = dot(v, w)
+distance(M::Manifold, VS::TCoTSpaceType, x, y) = norm(x-y)
 
-distance(::VectorSpaceManifold, x, y) = norm(x-y)
-norm(::VectorSpaceManifold{TCoTSpaceType}, x, v) = norm(v)
 
-exp!(M::VectorSpaceManifold, y, x, v) = (y .= x .+ v)
+"""
+    norm(M::Manifold, VS::VectorSpaceType, x, v)
 
-log!(M::VectorSpaceManifold, v, x, y) = (v .= y .- x)
-
-function zero_tangent_vector!(M::VectorSpaceManifold, v, x)
-    fill!(v, 0)
-    return v
+Norm of the vector `v` from the vector space of type `VS` at point `x`
+from manifold `M`.
+"""
+function norm(M::Manifold, VS::VectorSpaceType, x, v)
+    error("norm not defined for manifold of type $(typeof(M)), vector space of type $(typeof(VS)) and vectors of types $(typeof(x)) and $(typeof(v)).")
 end
 
-function project_point!(M::VectorSpaceManifold{<:TCoTSpaceType}, x)
-    project_tangent!(M.M, x, M.point, x)
-end
-
-function project_tangent!(M::VectorSpaceManifold{<:TCoTSpaceType}, w, x, v)
-    project_tangent!(M.M, w, M.point, v)
-end
-
+norm(M::Manifold, VS::TCoTSpaceType, x, v) = norm(v)
 
 """
     VectorBundle(M::Manifold, type::VectorSpaceType)
@@ -181,18 +177,14 @@ end
 manifold_dimension(M::VectorBundle) = manifold_dimension(M.M) + manifold_dimension(M.M, M.type)
 
 function inner(M::VectorBundle, x, v, w)
-    vsm = VectorSpaceManifold(M.type, M.M, x.parts[1])
-
     return inner(M.M, x.parts[1], v.parts[1], w.parts[1]) +
-           inner(vsm, x.parts[2], v.parts[2], w.parts[2])
+           inner(M.M, M.type, x.parts[2], v.parts[2], w.parts[2])
 end
 
 function distance(M::VectorBundle, x, y)
-    vsm = VectorSpaceManifold(M.type, M.M, x.parts[1])
-
     dist_man = distance(M.M, x.parts[1], y.parts[1])
     vy_x = vector_transport(M.M, y.parts[1], y.parts[2], x.parts[1])
-    dist_vec = distance(vsm, x.parts[2], vy_x)
+    dist_vec = distance(M.M, M.type, x.parts[2], vy_x)
 
     return sqrt(dist_man^2 + dist_vec^2)
 end
@@ -211,10 +203,8 @@ function log!(M::VectorBundle, v, x, y)
 end
 
 function zero_tangent_vector!(M::VectorBundle, v, x)
-    vsm = VectorSpaceManifold(M.type, M.M, x.parts[1])
-
     zero_tangent_vector!(M.M, v.parts[1], x.parts[1])
-    zero_tangent_vector!(vsm, v.parts[2], x.parts[2])
+    zero_vector!(M.M, M.type, v.parts[2], x.parts[2])
     return v
 end
 
