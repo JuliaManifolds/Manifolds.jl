@@ -7,8 +7,23 @@ $\operatorname{usinc}(x) = \frac{\sin(x)}{x}$. This is equivalent to
 """
 usinc(x::Real) = x == 0 ? one(x) : isinf(x) ? zero(x) : sin(x) / x
 
-_eigen(x) = eigen(x)
-_eigen(x::StaticMatrix) = eigen(Matrix(x))
+"""
+    eigen_safe(x)
+
+Compute the eigendecomposition of `x`. If `x` is a `StaticMatrix`, it is
+converted to a `Matrix` before the decomposition.
+"""
+eigen_safe(x) = eigen(x)
+eigen_safe(x::StaticMatrix) = eigen(convert(Matrix, x))
+
+"""
+    log_safe(x)
+
+Compute the matrix logarithm of `x`. If `x` is a `StaticMatrix`, it is
+converted to a `Matrix` before computing the log.
+"""
+log_safe(x) = log(x)
+log_safe(x::StaticMatrix) = log(convert(Matrix, x))
 
 """
     select_from_tuple(t::NTuple{N, Any}, positions::Val{P})

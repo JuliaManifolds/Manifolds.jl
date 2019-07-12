@@ -92,7 +92,7 @@ point at `y`.
 """
 function log!(S::Rotations, v, x, y)
     U = transpose(x) * y
-    v .= real(log(Matrix(U)))
+    v .= real(log_safe(U))
     project_tangent!(S, v, x, v)
     return v
 end
@@ -109,7 +109,7 @@ function log!(S::Rotations{3}, v, x, y)
     U = transpose(x) * y
     cosθ = (tr(U) - 1) / 2
     if cosθ ≈ -1
-        eig = _eigen(U)
+        eig = eigen_safe(U)
         ival = findfirst(λ -> isapprox(λ, 1), eig.values)
         vi = SVector{3}(1:3)
         ax = eig.vectors[vi, ival]
@@ -144,7 +144,7 @@ function log!(S::Rotations{4}, v, x, y)
         end
         v .= P * E * transpose(P)
     else
-        v .= real(log(Matrix(U)))
+        v .= real(log_safe(U))
     end
     project_tangent!(S, v, x, v)
     return v
