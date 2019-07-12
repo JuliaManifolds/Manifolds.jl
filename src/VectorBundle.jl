@@ -150,13 +150,16 @@ function representation_size(M::VectorBundle)
     return (len_manifold + len_vs,)
 end
 
+TangentBundle{M} = VectorBundle{TangentSpaceType,M}
 TangentBundle(M::Manifold) = VectorBundle(TangentSpace, M)
+
+CotangentBundle{M} = VectorBundle{CotangentSpaceType,M}
 CotangentBundle(M::Manifold) = VectorBundle(CotangentSpace, M)
 
 """
     bundle_projection(M::VectorBundle, x::ProductRepr)
 
-Bundle projection of point `x` from the vector bundle `M`.
+Projection of point `x` from the bundle `M` to the base manifold.
 Returns the point on the base manifold `M.M` at which the vector part
 of `x` is attached.
 """

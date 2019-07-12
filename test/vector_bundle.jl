@@ -30,5 +30,6 @@ include("utils.jl")
                           test_project_tangent = true)
         end
     end
-
+    @test TangentBundle{Sphere{2}} == VectorBundle{Manifolds.TangentSpaceType, Sphere{2}}
+    @test CotangentBundle{Sphere{2}} == VectorBundle{Manifolds.CotangentSpaceType, Sphere{2}}
 end

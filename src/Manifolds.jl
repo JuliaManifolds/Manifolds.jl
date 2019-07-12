@@ -521,7 +521,8 @@ export Manifold,
     VectorBundle,
     VectorBundleRepr,
     VectorBundleTVector,
-    TangentBundle
+    TangentBundle,
+    CotangentBundle
 export ×,
     base_manifold,
     bundle_projection,
