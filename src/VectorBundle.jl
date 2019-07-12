@@ -158,12 +158,8 @@ CotangentBundle(M::Manifold) = VectorBundle(CotangentSpace, M)
 
 Bundle projection of point `x` from the vector bundle `M`.
 """
-function bundle_projection(M::VectorBundle, x::ProductRepr)
-    return x.parts[1]
-end
-
-function bundle_projection(M::VectorBundle, x::ProductArray)
-    return x.parts[1]
+function bundle_projection(M::VectorBundle, x)
+    return submanifold_component(x, 1)
 end
 
 function isapprox(M::VectorBundle, x, y; kwargs...)

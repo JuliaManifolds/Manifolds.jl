@@ -1,6 +1,6 @@
 include("utils.jl")
 
-@testset "Tangent space" begin
+@testset "Tangent bundle" begin
     M = Sphere(2)
 
     types = [Vector{Float64},
