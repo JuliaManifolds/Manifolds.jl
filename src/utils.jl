@@ -195,6 +195,6 @@ sizedabstractarray_similar_type(::Type{T},s::Size{S},::Type{Val{D}}) where {T,S,
 
 Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
 """
-@generated function size_to_tuple(::Type{S}) where S<:Tuple
+Base.@pure function size_to_tuple(::Type{S}) where S<:Tuple
     return tuple(S.parameters...)
 end
