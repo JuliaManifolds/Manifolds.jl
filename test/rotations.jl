@@ -41,9 +41,11 @@ include("utils.jl")
             point_distributions = [Manifolds.normal_rotation_distribution(M, pts[1], 1.0)],
             tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
 
-        # v = Manifolds.hat(M, pts[1], [Float64(π)])
-        # x = exp(M, pts[1], v)
-        # @test isapprox(x, exp(M, pts[1], log(M, pts[1], x)))
+        @testset "log edge cases" begin
+            v = Manifolds.hat(M, pts[1], [Float64(π)])
+            x = exp(M, pts[1], v)
+            @test isapprox(x, exp(M, pts[1], log(M, pts[1], x)))
+        end
 
         v = log(M, pts[1], pts[2])
         @test norm(M, pts[1], v) ≈ (angles[2] - angles[1])*sqrt(2)
