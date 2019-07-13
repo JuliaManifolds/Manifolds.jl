@@ -68,7 +68,7 @@ include("utils.jl")
     end
 
     Random.seed!(42)
-    for n ∈ (3,)
+    for n ∈ (3, 4)
         @testset "Rotations: SO($n)" begin
             SOn = Manifolds.Rotations(n)
             ptd = Manifolds.normal_rotation_distribution(SOn, Matrix(1.0I, n, n), 1.0)
