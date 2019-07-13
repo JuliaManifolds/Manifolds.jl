@@ -115,10 +115,10 @@ struct SizedAbstractArray{S<:Tuple, T, N, M, TData<:AbstractArray{T,M}} <: Stati
         new{S,T,N,M,TData}(a)
     end
 
-    function SizedAbstractArray{S, T, N, 1}(::UndefInitializer) where {S, T, N, TData<:AbstractArray}
+    function SizedAbstractArray{S, T, N, 1}(::UndefInitializer) where {S, T, N}
         new{S, T, N, 1, Array{T, 1}}(Array{T, 1}(undef, StaticArrays.tuple_prod(S)))
     end
-    function SizedAbstractArray{S, T, N, N}(::UndefInitializer) where {S, T, N, TData<:AbstractArray}
+    function SizedAbstractArray{S, T, N, N}(::UndefInitializer) where {S, T, N}
         new{S, T, N, N, Array{T, N}}(Array{T, N}(undef, size_to_tuple(S)...))
     end
 end
