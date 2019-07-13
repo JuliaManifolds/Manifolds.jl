@@ -120,6 +120,25 @@ function log!(S::Rotations{3}, v, x, y)
     return v
 end
 
+@doc doc"""
+    cos_angle_4d_rotation_matrix(R)
+
+4D rotations can be described by two orthogonal planes that are unchanged by
+the action of the rotation (vectors within a plane rotate only within the
+plane). The cosines of the two angles of rotation about these planes may be
+obtained from the distinct real parts of the eigenvalues of the rotation
+matrix. This function computes these more efficiently by solving the system
+
+```math
+\begin{aligned}
+\cos\theta_1 + \cos\theta_2 &= \frac{1}{2} \operatorname{tr}(R)\\
+\cos\theta_1 \cos\theta_2 &= \frac{1}{8} \operatorname{tr}(R)^2
+                           - \frac{1}{16} \operatorname{tr}((R - R^T)^2) - 1.
+\end{aligned}
+```
+
+By convention, the returned values are sorted in increasing order.
+"""
 function cos_angle_4d_rotation_matrix(R)
     trR = tr(R)
     a = trR / 4
