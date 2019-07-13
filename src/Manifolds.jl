@@ -454,7 +454,7 @@ Convert the tangent vector `v` at point `x` on matrix manifold `M` to the
 equivalent matrix representation.
 """
 function hat(M::Manifold, x, v)
-    V = MMatrix{representation_size(M,TVector)...,eltype(v)}(undef)
+    V = MArray{Tuple{representation_size(M,TVector)...},eltype(v)}(undef)
     hat!(M, V, x, v)
     return V
 end
