@@ -134,8 +134,9 @@ function log!(S::Rotations{4}, v, x, y)
     θ₂ = acos(clamp(cosθ₂, -1, 1))
     if θ₁ ≈ π && θ₂ ≈ 0
         B₁² = Symmetric((U - I) ./ 2)
-        P = MMatrix{4,4}(eigvecs(B₁²))
-        E = MMatrix{4,4}(zeros(eltype(U), (4, 4)))
+        P = eigvecs(B₁²)
+        E = similar(U)
+        fill!(E, 0)
         θ₁ = acos(clamp(cosθ₁, -1, 1))
         @inbounds begin
             E[2, 1] = -θ₁
