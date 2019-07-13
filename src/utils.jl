@@ -1,11 +1,28 @@
 @doc doc"""
-    usinc(x::Real)
+    usinc(θ::Real)
 
 Unnormalized version of `sinc` function, i.e.
-$\operatorname{usinc}(x) = \frac{\sin(x)}{x}$. This is equivalent to
-`sinc(x/π)`.
+$\operatorname{usinc}(\theta) = \frac{\sin(\theta)}{\theta}$. This is
+equivalent to `sinc(θ/π)`.
 """
-usinc(x::Real) = x == 0 ? one(x) : isinf(x) ? zero(x) : sin(x) / x
+@inline usinc(θ::Real) = θ == 0 ? one(θ) : isinf(θ) ? zero(θ) : sin(θ) / θ
+
+@doc doc"""
+    usinc_from_cos(x::Real)
+
+Unnormalized version of `sinc` function, i.e.
+$\operatorname{usinc}(\theta) = \frac{\sin(\theta)}{\theta}$, computed from
+$x = cos(\theta)$.
+"""
+@inline function usinc_from_cos(x::Real)
+    if x >= 1
+        return one(x)
+    elseif x <= -1
+        return zero(x)
+    else
+        return sqrt(1 - x^2) / acos(x)
+    end
+end
 
 """
     eigen_safe(x)

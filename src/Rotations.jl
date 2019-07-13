@@ -115,8 +115,7 @@ function log!(S::Rotations{3}, v, x, y)
         ax = eig.vectors[vi, ival]
         hat!(S, v, x, π * ax)
     else
-        usincθ = cosθ >= 1 ? one(cosθ) : sqrt(1 - cosθ^2) / acos(cosθ)
-        v .= (U .- transpose(U)) ./ (2 * usincθ)
+        v .= (U .- transpose(U)) ./ (2 * usinc_from_cos(cosθ))
     end
     return v
 end
