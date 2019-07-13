@@ -13,8 +13,13 @@ usinc(x::Real) = x == 0 ? one(x) : isinf(x) ? zero(x) : sin(x) / x
 Compute the eigendecomposition of `x`. If `x` is a `StaticMatrix`, it is
 converted to a `Matrix` before the decomposition.
 """
-eigen_safe(x) = eigen(x)
-eigen_safe(x::StaticMatrix) = eigen(convert(Matrix, x))
+@inline eigen_safe(x; kwargs...) = eigen(x; kwargs...)
+
+@inline function eigen_safe(x::StaticMatrix; kwargs...)
+    s = size(x)
+    E = eigen!(Matrix(parent(x)); kwargs...)
+    return Eigen(SizedVector{s[1]}(E.values), SizedMatrix{s...}(E.vectors))
+end
 
 """
     log_safe(x)
@@ -22,8 +27,12 @@ eigen_safe(x::StaticMatrix) = eigen(convert(Matrix, x))
 Compute the matrix logarithm of `x`. If `x` is a `StaticMatrix`, it is
 converted to a `Matrix` before computing the log.
 """
-log_safe(x) = log(x)
-log_safe(x::StaticMatrix) = log(convert(Matrix, x))
+@inline log_safe(x) = log(x)
+
+@inline function log_safe(x::StaticMatrix)
+    s = Size(x)
+    return SizedMatrix{s[1],s[2]}(log(Matrix(parent(x))))
+end
 
 """
     select_from_tuple(t::NTuple{N, Any}, positions::Val{P})
