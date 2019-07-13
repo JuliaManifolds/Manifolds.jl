@@ -116,8 +116,8 @@ include("utils.jl")
             end
 
             v = Manifolds.hat(SOn, pts[1], π * normalize(randn(manifold_dimension(SOn))))
-            x = exp(SOn, pts[1], v)
-            @test x ≈ exp(SOn, pts[1], log(SOn, pts[1], x))
+            # x = exp(SOn, pts[1], v)
+            # @test x ≈ exp(SOn, pts[1], log(SOn, pts[1], x))
         end
     end
 
