@@ -16,19 +16,19 @@ include("utils.jl")
     inverse_retraction_methods = [Manifolds.PolarInverseRetraction(),
                                   Manifolds.QRInverseRetraction()]
 
-    @testset "vee/hat" begin
-        M = Manifolds.Rotations(2)
-        v = randn(1)
-        V = Manifolds.hat(M, I, v)
-        @test isa(V, MMatrix)
-        @test norm(M, I, V) / sqrt(2) ≈ norm(v)
-        @test Manifolds.vee(M, I, V) == v
-
-        V = project_tangent(M, I, randn(2, 2))
-        v = Manifolds.vee(M, I, V)
-        @test isa(v, MVector)
-        @test Manifolds.hat(M, I, v) == V
-    end
+    # @testset "vee/hat" begin
+    #     M = Manifolds.Rotations(2)
+    #     v = randn(1)
+    #     V = Manifolds.hat(M, I, v)
+    #     @test isa(V, MMatrix)
+    #     @test norm(M, I, V) / sqrt(2) ≈ norm(v)
+    #     @test Manifolds.vee(M, I, V) == v
+    #
+    #     V = project_tangent(M, I, randn(2, 2))
+    #     v = Manifolds.vee(M, I, V)
+    #     @test isa(v, MVector)
+    #     @test Manifolds.hat(M, I, v) == V
+    # end
 
     for T in types
         angles = (0.0, π/2, 2π/3, π/4)
@@ -41,9 +41,9 @@ include("utils.jl")
             point_distributions = [Manifolds.normal_rotation_distribution(M, pts[1], 1.0)],
             tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
 
-        v = Manifolds.hat(M, pts[1], [Float64(π)])
-        x = exp(M, pts[1], v)
-        @test isapprox(x, exp(M, pts[1], log(M, pts[1], x)))
+        # v = Manifolds.hat(M, pts[1], [Float64(π)])
+        # x = exp(M, pts[1], v)
+        # @test isapprox(x, exp(M, pts[1], log(M, pts[1], x)))
 
         v = log(M, pts[1], pts[2])
         @test norm(M, pts[1], v) ≈ (angles[2] - angles[1])*sqrt(2)
@@ -81,18 +81,18 @@ include("utils.jl")
                 tvector_distributions = [tvd],
                 exp_log_atol_multiplier = 6)
 
-            @testset "vee/hat" begin
-                v = randn(manifold_dimension(SOn))
-                V = Manifolds.hat(SOn, I, v)
-                @test isa(V, MMatrix)
-                @test norm(SOn, I, V) / sqrt(2) ≈ norm(v)
-                @test Manifolds.vee(SOn, I, V) == v
-
-                V = project_tangent(SOn, I, randn(n, n))
-                v = Manifolds.vee(SOn, I, V)
-                @test isa(v, MVector)
-                @test Manifolds.hat(SOn, I, v) == V
-            end
+            # @testset "vee/hat" begin
+            #     v = randn(manifold_dimension(SOn))
+            #     V = Manifolds.hat(SOn, I, v)
+            #     @test isa(V, MMatrix)
+            #     @test norm(SOn, I, V) / sqrt(2) ≈ norm(v)
+            #     @test Manifolds.vee(SOn, I, V) == v
+            #
+            #     V = project_tangent(SOn, I, randn(n, n))
+            #     v = Manifolds.vee(SOn, I, V)
+            #     @test isa(v, MVector)
+            #     @test Manifolds.hat(SOn, I, v) == V
+            # end
 
             # if n == 4
             #     @testset "log edge cases" begin
@@ -113,9 +113,9 @@ include("utils.jl")
             #     end
             # end
 
-            v = Manifolds.hat(SOn, pts[1], π * normalize(randn(manifold_dimension(SOn))))
-            x = exp(SOn, pts[1], v)
-            @test isapprox(x, exp(SOn, pts[1], log(SOn, pts[1], x)))
+            # v = Manifolds.hat(SOn, pts[1], π * normalize(randn(manifold_dimension(SOn))))
+            # x = exp(SOn, pts[1], v)
+            # @test isapprox(x, exp(SOn, pts[1], log(SOn, pts[1], x)))
         end
     end
 
