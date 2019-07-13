@@ -38,8 +38,6 @@ Tangent vectors are represented by matrices.
 """
 inner(S::Rotations, x, w, v) = dot(w, v)
 
-norm(S::Rotations, x, v) = norm(v)
-
 project_tangent!(S::Rotations, w, x, v) = w .= (v .- transpose(v))./2
 
 function exp!(S::Rotations, y, x, v)
