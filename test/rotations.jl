@@ -68,7 +68,7 @@ include("utils.jl")
     end
 
     Random.seed!(42)
-    for n ∈ (3, 4)
+    for n ∈ (3, 4, 5)
         @testset "Rotations: SO($n)" begin
             SOn = Manifolds.Rotations(n)
             ptd = Manifolds.normal_rotation_distribution(SOn, Matrix(1.0I, n, n), 1.0)
@@ -116,9 +116,11 @@ include("utils.jl")
             end
 
             v = Manifolds.hat(SOn, pts[1], π * normalize(randn(manifold_dimension(SOn))))
-            x = exp(SOn, pts[1], v)
-            # v2 = log(SOn, pts[1], x)
-            # @test x ≈ exp(SOn, pts[1], v2)
+            if n != 5
+                x = exp(SOn, pts[1], v)
+                v2 = log(SOn, pts[1], x)
+                @test x ≈ exp(SOn, pts[1], v2)
+            end
         end
     end
 
