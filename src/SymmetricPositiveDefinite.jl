@@ -272,7 +272,7 @@ function tangent_orthonormal_basis(M::MetricManifold{SymmetricPositiveDefinite{n
         for i=1:n for j= i:n
     ]
     λ = eigvals(v)
-    κ = [ -1/4 * (λ[i]-λ[j])^2 for i=1:n M.n for j= i:n ]
+    κ = [ -1/4 * (λ[i]-λ[j])^2 for i=1:n for j= i:n ]
   return Ξ,κ
 end
 
