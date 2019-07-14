@@ -92,9 +92,9 @@ function angles_4d_skew_sym_matrix(A)
         K2 = A[1,2] * A[3,4] - A[1,3] * A[2,4] + A[1,4] * A[2,3]
     end
     a = sqrt(K1^2 - K2^2)
-    θ₁ = sqrt(K1 + a)
-    θ₂ = sqrt(K1 - a)
-    return θ₁ > θ₂ ? (θ₁, θ₂) : (θ₂, θ₁)
+    α = sqrt(K1 + a)
+    β = sqrt(K1 - a)
+    return α > β ? (α, β) : (β, α)
 end
 
 function exp!(S::Rotations{4}, y, x, v)
@@ -195,8 +195,8 @@ matrix. This function computes these more efficiently by solving the system
 
 ```math
 \begin{aligned}
-\cos\theta_1 + \cos\theta_2 &= \frac{1}{2} \operatorname{tr}(R)\\
-\cos\theta_1 \cos\theta_2 &= \frac{1}{8} \operatorname{tr}(R)^2
+\cos\alpha + \cos\beta &= \frac{1}{2} \operatorname{tr}(R)\\
+\cos\alpha + \cos\beta &= \frac{1}{8} \operatorname{tr}(R)^2
                            - \frac{1}{16} \operatorname{tr}((R - R^T)^2) - 1.
 \end{aligned}
 ```
@@ -213,18 +213,18 @@ end
 
 function log!(S::Rotations{4}, v, x, y)
     U = transpose(x) * y
-    cosθ₁, cosθ₂ = cos_angles_4d_rotation_matrix(U)
-    θ₁ = acos(clamp(cosθ₁, -1, 1))
-    θ₂ = acos(clamp(cosθ₂, -1, 1))
-    if θ₁ ≈ π && θ₂ ≈ 0
-        B₁² = Symmetric((U - I) ./ 2)
-        P = eigvecs(B₁²)
+    cosα, cosβ = cos_angles_4d_rotation_matrix(U)
+    α = acos(clamp(cosα, -1, 1))
+    β = acos(clamp(cosβ, -1, 1))
+    if α ≈ π && β ≈ 0
+        A² = Symmetric((U - I) ./ 2)
+        P = eigvecs(A²)
         E = similar(U)
         fill!(E, 0)
-        θ₁ = acos(clamp(cosθ₁, -1, 1))
+        α = acos(clamp(cosα, -1, 1))
         @inbounds begin
-            E[2, 1] = -θ₁
-            E[1, 2] = θ₁
+            E[2, 1] = -α
+            E[1, 2] = α
         end
         v .= P * E * transpose(P)
     else
