@@ -57,19 +57,45 @@ computes the distance on the [`SymmetricPositiveDefinite`](@ref) manifold betwee
 which defaults to the [`LinearAffineMetric`](@ref) induces distance.
 """
 distance(P::SymmetricPositiveDefinite{N},x,y) where N = distance(MetricManifold(P,LinearAffineMetric()),x,y)
+
 @doc doc"""
-    distance(lP,x,y)
+    distance(P,x,y)
 
 computes the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between `x` and `y`,
 as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
 
 ```math
-d_{\mathcal P(n)}(x,y) = \lVert \operatorname{Log}(x^{-\frac{1}{2}}yx^{-\frac{1}{2}})\rVert.
+d_{\mathcal P(n)}(x,y) = \lVert \operatorname{Log}(x^{-\frac{1}{2}}yx^{-\frac{1}{2}})\rVert_{\mathrm{F}}.,
 ```
+where $\operatorname{Log}$ denotes the matrix logarithm and $\lVert\cdot\rVert_{\mathrm{F}}$ denotes the
+matrix Frobenius norm.
 """
 function distance(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},x,y) where N
     s = real.( eigen( x,y ).values )
     return any(s .<= eps() ) ? 0 : sqrt(  sum( abs.(log.(s)).^2 )  )
+end
+
+@doc doc"""
+    distance(P,x,y)
+
+computes the distance on the [`SymmetricPositiveDefinite](@ref) manifold between
+`x` and `y` as a [`MetricManifold`](@ref) with [`LogEuclideanMetric`](@ref).
+The formula reads
+
+```math
+    d_{\mathcal P(n)}(x,y) = \lVert \Log x - \Log y \rVert_{\mathrm{F}}
+```
+where $\operatorname{Log}$ denotes the matrix logarithm and $\lVert\cdot\rVert_{\mathrm{F}}$ denotes the
+matrix Frobenius norm.
+"""
+function distance(P::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric},x,y) where N
+    eX = eigen(Symmetric(x))
+    UX = e.vectors
+    SX = e.values
+    eY = eigen(Symmetric(y))
+    UY = e.vectors
+    SY = e.values
+    return norm( UX*Diagonal(log.(SX))*transpose(UX) - UY*Diagonal(log.(SY))*transpose(UY))
 end
 
 @doc doc"""
@@ -231,6 +257,14 @@ returns a orthonormal basis `Ξ` in the tangent space of `x` on the
 with eigenvalues `κ` and where the direction `v` has curvature `0`.
 """
 tangent_orthonormal_basis(P::SymmetricPositiveDefinite{n},x,v) where n = tangent_orthonormal_basis(MetricManifold(P,LinearAffineMetric()),x,v)
+@doc doc"""
+    [Ξ,κ] = tangent_orthonormal_basis(M,x)
+
+returns a orthonormal basis `Ξ` in the tangent space of `x` on the
+[`MetricManifold`](@ref of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
+[`LinearAffineMetric`](ref) that diagonalizes the curvature tensor $R(u,v)w$
+with eigenvalues `κ` and where the direction `v` has curvature `0`.
+"""
 function tangent_orthonormal_basis(M::MetricManifold{SymmetricPositiveDefinite{n},LinearAffineMetric},x,v) where n
     xSqrt = sqrt(x) 
     V = eigvecs(v)
