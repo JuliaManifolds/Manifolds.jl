@@ -141,8 +141,8 @@ By convention, the returned values are sorted in increasing order.
 function cos_angle_4d_rotation_matrix(R)
     trR = tr(R)
     a = trR / 4
-    b = sqrt(tr((R .- transpose(R))^2) / 16 - a^2 + 1)
-    return b < 0 ? (a + b, a - b) : (a - b, a + b)
+    b = sqrt(clamp(tr((R .- transpose(R))^2) / 16 - a^2 + 1, 0, Inf))
+    return (a + b, a - b)
 end
 
 function log!(S::Rotations{4}, v, x, y)
