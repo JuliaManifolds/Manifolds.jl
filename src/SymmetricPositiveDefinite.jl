@@ -1,4 +1,4 @@
-using LinearAlgebra: eigen, cholesky
+using LinearAlgebra: eigen, eigvecs
 
 export SymmetricPositiveDefinite, LinearAffineMetric, LogEuclideanMetric
 
@@ -220,6 +220,26 @@ function vector_transport!(::MetricManifold{SymmetricPositiveDefinite{N},LinearA
     xue = xSqrt*Uf*Sf*transpose(Uf)
     copyto!(vto, xue * tv * transpose(xue) )
     return vto
+end
+
+@doc doc"""
+    [Ξ,κ] = tangent_orthonormal_basis(M,x)
+
+returns a orthonormal basis `Ξ` in the tangent space of `x` on the
+[`SymmetricPositiveDefinite`](@ref) manifold `M` with the defrault metric, the
+[`LinearAffineMetric`](ref) that diagonalizes the curvature tensor $R(u,v)w$
+with eigenvalues `κ` and where the direction `v` has curvature `0`.
+"""
+tangent_orthonormal_basis(P::SymmetricPositiveDefinite{n},x,v) where n = tangent_orthonormal_basis(MetricManifold(P,LinearAffineMetric()),x,v)
+function tangent_orthonormal_basis(M::MetricManifold{SymmetricPositiveDefinite{n},LinearAffineMetric},x,v) where n
+    xSqrt = sqrt(x) 
+    V = eigvecs(v)
+    Ξ = [ (i==j ? 1/2 : 1/sqrt(2))*( V[:,i] * transpose(V[:,j])  +  V[:,j] * transpose(V[:,i]) )
+        for i=1:n for j= i:n
+    ]
+    λ = eigvals(v)
+    κ = [ -1/4 * (λ[i]-λ[j])^2 for i=1:n M.n for j= i:n ]
+  return Ξ,κ
 end
 
 @doc doc"""
