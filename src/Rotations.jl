@@ -74,6 +74,71 @@ function exp!(S::Rotations{3}, y, x, v)
 end
 
 @doc doc"""
+    angles_4d_skew_sym_matrix(A)
+
+The Lie algebra of $\mathrm{SO}(4)$ consists of 4x4 skew-symmetric matrices.
+The unique imaginary components of their eigenvalues are the angles of the two
+plane rotations. This function computes these more efficiently than
+`eigenvalues`.
+
+By convention, the returned values are sorted in decreasing order
+(corresponding to the same ordering of _angles_ as
+[`cos_angles_4d_rotation_matrix`](@ref)).
+"""
+function angles_4d_skew_sym_matrix(A)
+    @assert size(A) == (4, 4)
+    @inbounds begin
+        K1 = (A[1,2]^2 + A[1,3]^2 + A[2,3]^2 + A[1,4]^2 + A[2,4]^2 + A[3,4]^2) / 2
+        K2 = A[1,2] * A[3,4] - A[1,3] * A[2,4] + A[1,4] * A[2,3]
+    end
+    a = sqrt(K1^2 - K2^2)
+    θ₁ = sqrt(K1 + a)
+    θ₂ = sqrt(K1 - a)
+    return θ₁ > θ₂ ? (θ₁, θ₂) : (θ₂, θ₁)
+end
+
+function exp!(S::Rotations{4}, y, x, v)
+    T = eltype(v)
+    α, β = angles_4d_skew_sym_matrix(v)
+    sinα, cosα = sincos(α)
+    sinβ, cosβ = sincos(β)
+    α² = α^2
+    β² = β^2
+    Δ = β² - α²
+    if !isapprox(Δ, 0; atol=1e-6)  # Case α > β ≥ 0
+        sincα = sinα / α
+        sincβ = β == 0 ? one(T) : sinβ / β
+        a₀ = (β² * cosα - α² * cosβ) / Δ
+        a₁ = (β² * sincα - α² * sincβ) / Δ
+        a₂ = (cosα - cosβ) / Δ
+        a₃ = (sincα - sincβ) / Δ
+    elseif α == 0 # Case α = β = 0
+        a₀ = one(T)
+        a₁ = one(T)
+        a₂ = T(1/2)
+        a₃ = T(1/6)
+    else  # Case α ⪆ β ≥ 0, α ≠ 0
+        sincα = sinα / α
+        r = β / α
+        c = 1 / (1 + r)
+        d = α * (α - β) / 2
+        if α < 1e-2
+            e = @evalpoly(α², T(1/3), T(-1/30), T(1/840), T(-1/45360))
+        else
+            e = (sincα - cosα) / α²
+        end
+        a₀ = (α * sinα + (1 + r - d) * cosα) * c
+        a₁ = ((3 - d) * sincα - (2 - r) * cosα) * c
+        a₂ = (sincα - (1 - r) / 2 * cosα) * c
+        a₃ = (e + (1 - r) * (e - sincα / 2)) * c
+    end
+
+    v² = v * v
+    y .= a₀ .* x .+ x * (a₁ .* v .+ a₂ .* v² .+ a₃ .* (v² * v))
+    return y
+end
+
+@doc doc"""
     log!(M, v, x, y)
 
 compute the logarithmic map on the [`Rotations`](@ref) manifold
@@ -120,7 +185,7 @@ function log!(S::Rotations{3}, v, x, y)
 end
 
 @doc doc"""
-    cos_angle_4d_rotation_matrix(R)
+    cos_angles_4d_rotation_matrix(R)
 
 4D rotations can be described by two orthogonal planes that are unchanged by
 the action of the rotation (vectors within a plane rotate only within the
@@ -136,9 +201,10 @@ matrix. This function computes these more efficiently by solving the system
 \end{aligned}
 ```
 
-By convention, the returned values are sorted in increasing order.
+By convention, the returned values are sorted in increasing order. See
+[`angles_4d_skew_sym_matrix`](@ref)
 """
-function cos_angle_4d_rotation_matrix(R)
+function cos_angles_4d_rotation_matrix(R)
     trR = tr(R)
     a = trR / 4
     b = sqrt(clamp(tr((R .- transpose(R))^2) / 16 - a^2 + 1, 0, Inf))
@@ -147,7 +213,7 @@ end
 
 function log!(S::Rotations{4}, v, x, y)
     U = transpose(x) * y
-    cosθ₁, cosθ₂ = cos_angle_4d_rotation_matrix(U)
+    cosθ₁, cosθ₂ = cos_angles_4d_rotation_matrix(U)
     θ₁ = acos(clamp(cosθ₁, -1, 1))
     θ₂ = acos(clamp(cosθ₂, -1, 1))
     if θ₁ ≈ π && θ₂ ≈ 0

@@ -97,7 +97,7 @@ include("utils.jl")
             end
 
             if n == 4
-                @testset "log edge cases" begin
+                @testset "exp/log edge cases" begin
                     vs = [
                               [0, 0, π, 0, 0, π],  # θ = (π, π)
                               [0, 0, π, 0, 0, 0],  # θ = (π, 0)
@@ -114,6 +114,8 @@ include("utils.jl")
                         @testset "rotation vector $v" begin
                             V = Manifolds.hat(SOn, I, v)
                             x = exp(V)
+                            @test x ≈ exp(SOn, one(x), V)
+                            @test ForwardDiff.derivative(t -> exp(SOn, one(x), t*V), 0) ≈ V
                             x2 = exp(log(SOn, one(x), x))
                             @test isapprox(x, x2; atol = 1e-6)
                         end
