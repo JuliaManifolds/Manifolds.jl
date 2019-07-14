@@ -17,7 +17,6 @@ function representation_size(::Rotations{N}, ::Type{T}) where {N,T<:Union{MPoint
     return (N, N)
 end
 
-
 @doc doc"""
     manifold_dimension(S::Rotations)
 
@@ -37,6 +36,8 @@ $(v, w)_x = \operatorname{tr}(v^T w)$.
 Tangent vectors are represented by matrices.
 """
 inner(S::Rotations, x, w, v) = dot(w, v)
+
+norm(S::Rotations, x, v) = norm(v)
 
 project_tangent!(S::Rotations, w, x, v) = w .= (v .- transpose(v))./2
 
