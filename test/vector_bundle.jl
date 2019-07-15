@@ -32,4 +32,10 @@ include("utils.jl")
     end
     @test TangentBundle{Sphere{2}} == VectorBundle{Manifolds.TangentSpaceType, Sphere{2}}
     @test CotangentBundle{Sphere{2}} == VectorBundle{Manifolds.CotangentSpaceType, Sphere{2}}
+
+    @testset "tensor product" begin
+        TT = Manifolds.TensorProductType(TangentSpace, TangentSpace)
+        @test vector_space_dimension(VectorBundleFibers(TT, Sphere(2))) == 4
+        @test vector_space_dimension(VectorBundleFibers(TT, Sphere(3))) == 9
+    end
 end

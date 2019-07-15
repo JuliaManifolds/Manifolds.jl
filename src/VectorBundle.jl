@@ -4,6 +4,25 @@
 
 Abstract type for tangent space, cotangent space, their tensor products,
 exterior products etc.
+
+Every vector space `VS` is supposed to provide:
+* a method of constucting vectors,
+* basic operations: addition, subtraction, multiplication by a scalar
+  and negation (unary minus),
+* zero_vector!(VS, v, x) to construct zero vectors at point `x`,
+* `similar(v, T)` for vector `v`,
+* `copyto!(v, w)` for vectors `v` and `w`,
+* `eltype(v)` for vector `v`,
+* `vector_space_dimension(::VectorBundleFibers{<:typeof(VS)})`.
+
+Optionally:
+* inner product via `inner` (used to provide Riemannian metric on vector
+  bundles),
+* flat_isomorphism! and sharp_isomorphism!,
+* norm (by default uses `inner`),
+* project_vector! (for embedded vector spaces),
+* representation_size (if support for `ProductArray` is desired),
+* broadcasting for basic operations.
 """
 abstract type VectorSpaceType end
 
@@ -14,6 +33,18 @@ TCoTSpaceType = Union{TangentSpaceType, CotangentSpaceType}
 
 const TangentSpace = TangentSpaceType()
 const CotangentSpace = CotangentSpaceType()
+
+"""
+    TensorProductType(spaces::VectorSpaceType...)
+
+Vector space type corresponding to the tensor product of given vector space
+types.
+"""
+struct TensorProductType{TS<:Tuple} <: VectorSpaceType
+    spaces::TS
+end
+
+TensorProductType(spaces::VectorSpaceType...) = TensorProductType{typeof(spaces)}(spaces)
 
 """
     VectorBundleFibers(VS::VectorSpaceType, M::Manifold)
@@ -78,7 +109,17 @@ function similar_result(M::VectorBundleFibers, f, x...)
     return similar(x[1], T)
 end
 
-norm(M::VectorBundleFibers{<:TCoTSpaceType}, x, v) = norm(v)
+norm(M::VectorBundleFibers, x, v) = sqrt(inner(M, x, v, v))
+
+norm(M::VectorBundleFibers{<:TangentSpaceType}, x, v) = norm(M.M, x, v)
+
+"""
+    vector_distance(M::VectorBundleFibers, x, v, w)
+
+Distance between vectors `v` and `w` from the vector space at point `x`
+from the manifold `M.M`, that is the base manifold of `M`.
+"""
+vector_distance(M::VectorBundleFibers, x, v, w) = norm(M, x, v-w)
 
 """
     inner(M::VectorBundleFibers, x, v, w)
@@ -110,6 +151,14 @@ function vector_space_dimension(M::VectorBundleFibers)
 end
 
 vector_space_dimension(M::VectorBundleFibers{<:TCoTSpaceType}) = manifold_dimension(M.M)
+
+function vector_space_dimension(M::VectorBundleFibers{<:TensorProductType})
+    dim = 1
+    for space in M.VS.spaces
+        dim *= vector_space_dimension(VectorBundleFibers(space, M.M))
+    end
+    return dim
+end
 
 function representation_size(M::VectorBundleFibers{<:TCoTSpaceType})
     representation_size(M.M)
@@ -212,25 +261,10 @@ function inner(M::VectorBundle, x, v, w)
            inner(M.VS, x.parts[2], v.parts[2], w.parts[2])
 end
 
-
-"""
-    vector_distance(M::VectorBundle, x, v, w)
-
-Distance between vectors `v` and `w` from the tangent space at point `x`
-from the manifold `M.M`, that is the base manifold of bundle `M`.
-"""
-function vector_distance(M::VectorBundle, x, v, w)
-    error("vector_distance not defined for vector bundle of type $(typeof(M)), " *
-        "point of type $(typeof(x)) and vectors of types $(typeof(v)) " *
-        "and $(typeof(w)).")
-end
-
-vector_distance(M::VectorBundle{<:TCoTSpaceType}, x, v, w) = norm(v-w)
-
 function distance(M::VectorBundle, x, y)
     dist_man = distance(M.M, x.parts[1], y.parts[1])
     vy_x = vector_transport(M.M, y.parts[1], y.parts[2], x.parts[1])
-    dist_vec = vector_distance(M, x.parts[1], x.parts[2], vy_x)
+    dist_vec = vector_distance(M.VS, x.parts[1], x.parts[2], vy_x)
 
     return sqrt(dist_man^2 + dist_vec^2)
 end
