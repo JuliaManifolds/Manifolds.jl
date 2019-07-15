@@ -16,23 +16,23 @@ const TangentSpace = TangentSpaceType()
 const CotangentSpace = CotangentSpaceType()
 
 """
-    ManifoldVectorSpace(VS::VectorSpaceType, M::Manifold)
+    VectorBundleFibers(VS::VectorSpaceType, M::Manifold)
 
-Type representing a family of vector spaces of the vector bundle over `M`
-with vectors spaces of type `M`. In contrast with `VectorBundle`, operations
-on `ManifoldVectorSpace` expect point-like and vector-like parts to be
+Type representing a family of vector spaces (fibers) of a vector bundle over `M`
+with vector spaces of type `VS`. In contrast with `VectorBundle`, operations
+on `VectorBundleFibers` expect point-like and vector-like parts to be
 passed separately instead of being bundled together. It can be thought of
 as a representation of vector spaces from a vector bundle but without
 storing the point at which a vector space is attached (which is specified
 separately in various functions).
 """
-struct ManifoldVectorSpace{TVS<:VectorSpaceType, TM<:Manifold}
+struct VectorBundleFibers{TVS<:VectorSpaceType, TM<:Manifold}
     VS::TVS
     M::TM
 end
 
 @doc doc"""
-    flat_isomorphism!(M::ManifoldVectorSpace, v, x, w)
+    flat_isomorphism!(M::VectorBundleFibers, v, x, w)
 
 Compute the flat isomorphism (one of the musical isomorphisms) of vector `w`
 from the vector space of type `M` at point `x` from manifold `M.M`.
@@ -41,118 +41,118 @@ The function can be used for example to transform vectors
 from the tangent bundle to vectors from the cotangent bundle
 $\flat \colon TM \to T^{*}M$
 """
-function flat_isomorphism!(M::ManifoldVectorSpace, v, x, w)
+function flat_isomorphism!(M::VectorBundleFibers, v, x, w)
     error("flat_isomorphism! not implemented for manifold vector space
         of type $(typeof(M)), vector of type $(typeof(v)), point of " *
         "type $(typeof(x)) and vector of type $(typeof(w)).")
 end
 
-function flat_isomorphism(M::ManifoldVectorSpace, x, w)
+function flat_isomorphism(M::VectorBundleFibers, x, w)
     v = similar_result(M, flat_isomorphism, w, x)
     flat_isomorphism!(M, v, x, w)
     return v
 end
 
 """
-    similar_result_type(M::ManifoldVectorSpace, f, args::NTuple{N,Any}) where N
+    similar_result_type(M::VectorBundleFibers, f, args::NTuple{N,Any}) where N
 
 Returns type of element of the array that will represent the result of
 function `f` for representing an operation with result in the vector space `VS`
 for manifold `M` on given arguments (passed at a tuple).
 """
-function similar_result_type(M::ManifoldVectorSpace, f, args::NTuple{N,Any}) where N
+function similar_result_type(M::VectorBundleFibers, f, args::NTuple{N,Any}) where N
     T = typeof(reduce(+, one(eltype(eti)) for eti ∈ args))
     return T
 end
 
 """
-    similar_result(M::ManifoldVectorSpace, f, x...)
+    similar_result(M::VectorBundleFibers, f, x...)
 
 Allocates an array for the result of function `f` that is
 an element of the vector space of type `M.VS` on manifold `M.M`
 and arguments `x...` for implementing the non-modifying operation
 using the modifying operation.
 """
-function similar_result(M::ManifoldVectorSpace, f, x...)
+function similar_result(M::VectorBundleFibers, f, x...)
     T = similar_result_type(M, f, x)
     return similar(x[1], T)
 end
 
-norm(M::ManifoldVectorSpace{<:TCoTSpaceType}, x, v) = norm(v)
+norm(M::VectorBundleFibers{<:TCoTSpaceType}, x, v) = norm(v)
 
 """
-    inner(M::ManifoldVectorSpace, x, v, w)
+    inner(M::VectorBundleFibers, x, v, w)
 
 Inner product of vectors `v` and `w` from the vector space of type `VS`
 at point `x` from manifold `M`.
 """
-function inner(M::ManifoldVectorSpace, x, v, w)
+function inner(M::VectorBundleFibers, x, v, w)
     error("inner not defined for vector space family of type $(typeof(M)), " *
         "point of type $(typeof(x)) and " *
         "vectors of types $(typeof(v)) and $(typeof(w)).")
 end
 
-function inner(M::ManifoldVectorSpace{<:TangentSpaceType}, x, v, w)
+function inner(M::VectorBundleFibers{<:TangentSpaceType}, x, v, w)
     return inner(M.M, x, v, w)
 end
 
-function inner(M::ManifoldVectorSpace{<:CotangentSpaceType}, x, v, w)
+function inner(M::VectorBundleFibers{<:CotangentSpaceType}, x, v, w)
     return inner(M.M, x, flat_isomorphism(M, x, v), flat_isomorphism(M, x, w))
 end
 
 """
-    vector_space_dimension(M::ManifoldVectorSpace)
+    vector_space_dimension(M::VectorBundleFibers)
 
 Dimension of the vector space of type `M`.
 """
-function vector_space_dimension(M::ManifoldVectorSpace)
+function vector_space_dimension(M::VectorBundleFibers)
     error("vector_space_dimension not implemented for vector space family $(typeof(M)).")
 end
 
-vector_space_dimension(M::ManifoldVectorSpace{<:TCoTSpaceType}) = manifold_dimension(M.M)
+vector_space_dimension(M::VectorBundleFibers{<:TCoTSpaceType}) = manifold_dimension(M.M)
 
-function representation_size(M::ManifoldVectorSpace{<:TCoTSpaceType})
+function representation_size(M::VectorBundleFibers{<:TCoTSpaceType})
     representation_size(M.M)
 end
 
 """
-    zero_vector!(M::ManifoldVectorSpace, v, x)
+    zero_vector!(M::VectorBundleFibers, v, x)
 
 Save the zero vector from the vector space of type `VS` at point `x`
 from manifold `M` to `v`.
 """
-function zero_vector!(M::ManifoldVectorSpace, v, x)
+function zero_vector!(M::VectorBundleFibers, v, x)
     error("zero_vector! not implemented for manifold $(typeof(M)), vector space of type $(typeof(VS)), vector of type $(typeof(v)) and point of type $(typeof(x)).")
 end
 
-function zero_vector!(M::ManifoldVectorSpace{<:TangentSpaceType}, v, x)
+function zero_vector!(M::VectorBundleFibers{<:TangentSpaceType}, v, x)
     zero_tangent_vector!(M.M, v, x)
     return v
 end
 
 """
-    zero_vector(M::ManifoldVectorSpace, x)
+    zero_vector(M::VectorBundleFibers, x)
 
 Compute the zero vector from the vector space of type `VS` at point `x`
 from manifold `M.M`.
 """
-function zero_vector(M::ManifoldVectorSpace, x)
+function zero_vector(M::VectorBundleFibers, x)
     v = similar_result(M, zero_vector, x)
     zero_vector!(M, v, x)
     return v
 end
 
 """
-    project_vector!(M::ManifoldVectorSpace, v, x, w)
+    project_vector!(M::VectorBundleFibers, v, x, w)
 
 Project vector `w` from the vector space of type `VS` at point `x`
 and save the result to `v`.
 """
-function project_vector!(M::ManifoldVectorSpace, v, x, w)
+function project_vector!(M::VectorBundleFibers, v, x, w)
     error("project_vector! not implemented for vector space manifold $(typeof(M)), vector space of type $(typeof(VS)), output vector of type $(typeof(v)) and input vector at point $(typeof(x)) with type of w $(typeof(w)).")
 end
 
-function project_vector!(M::ManifoldVectorSpace{<:TangentSpaceType}, v, x, w)
+function project_vector!(M::VectorBundleFibers{<:TangentSpaceType}, v, x, w)
     project_tangent!(M, v, x, w)
     return v
 end
@@ -165,11 +165,11 @@ Vector bundle on manifold `M` of type `type`.
 struct VectorBundle{TVS<:VectorSpaceType, TM<:Manifold} <: Manifold
     type::TVS
     M::TM
-    VS::ManifoldVectorSpace{TVS, TM}
+    VS::VectorBundleFibers{TVS, TM}
 end
 
 function VectorBundle(VS::TVS, M::TM) where{TVS<:VectorSpaceType, TM<:Manifold}
-    return VectorBundle{TVS, TM}(VS, M, ManifoldVectorSpace(VS, M))
+    return VectorBundle{TVS, TM}(VS, M, VectorBundleFibers(VS, M))
 end
 
 function representation_size(M::VectorBundle)

@@ -43,8 +43,8 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     @testset "dimension" begin
         @test isa(manifold_dimension(M), Integer)
         @test manifold_dimension(M) ≥ 0
-        @test manifold_dimension(M) == vector_space_dimension(Manifolds.ManifoldVectorSpace(Manifolds.TangentSpace, M))
-        @test manifold_dimension(M) == vector_space_dimension(Manifolds.ManifoldVectorSpace(Manifolds.CotangentSpace, M))
+        @test manifold_dimension(M) == vector_space_dimension(Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M))
+        @test manifold_dimension(M) == vector_space_dimension(Manifolds.VectorBundleFibers(Manifolds.CotangentSpace, M))
     end
 
     test_representation_size && @testset "representation" begin
@@ -57,7 +57,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
         test_repr(Manifolds.representation_size(M))
         for VS ∈ (Manifolds.TangentSpace, Manifolds.CotangentSpace)
-            test_repr(Manifolds.representation_size(Manifolds.ManifoldVectorSpace(VS, M)))
+            test_repr(Manifolds.representation_size(Manifolds.VectorBundleFibers(VS, M)))
         end
     end
 
@@ -113,7 +113,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
     @testset "vector spaces tests" begin
         tv = zero_tangent_vector(M, pts[1])
-        mts = Manifolds.ManifoldVectorSpace(Manifolds.TangentSpace, M)
+        mts = Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M)
         @test isapprox(M, pts[1], tv, zero_vector(mts, pts[1]))
         zero_vector!(mts, tv, pts[1])
         @test isapprox(M, pts[1], tv, zero_tangent_vector(M, pts[1]))
