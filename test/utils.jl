@@ -30,6 +30,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_tangent_vector_broadcasting = true,
     test_project_tangent = false,
     test_representation_size = true,
+    test_musical_isomorphisms = false,
     retraction_methods = [],
     inverse_retraction_methods = [],
     point_distributions = [],
@@ -166,6 +167,14 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         for t ∈ 0.1:0.1:0.9
             @test ReverseDiff.gradient(retract_f, [t])[1] ≥ 0
         end
+    end
+
+    test_musical_isomorphisms && @testset "Musical isomorphisms" begin
+        tv_m = log(M, pts[1], pts[2])
+        tbf = TangentBundleFibers(M)
+        ctbf = CotangentBundleFibers(M)
+        ctv_m = flat_isomorphism(tbf, pts[1], tv_m)
+        tv_m_back = sharp_isomorphism(ctbf, pts[1], ctv_m)
     end
 
     @testset "eltype" begin

@@ -162,6 +162,18 @@ function inverse_retract!(M::ProductManifold, v, x, y, method::InverseProductRet
     return v
 end
 
+function flat_isomorphism!(M::TangentBundleFibers{<:ProductManifold}, v, x, w)
+    tbfs = map(m -> TangentBundleFibers(m), M.M.manifolds)
+    map(flat_isomorphism!, tbfs, v.parts, x.parts, w.parts)
+    return v
+end
+
+function sharp_isomorphism!(M::CotangentBundleFibers{<:ProductManifold}, v, x, w)
+    tbfs = map(m -> CotangentBundleFibers(m), M.M.manifolds)
+    map(sharp_isomorphism!, tbfs, v.parts, x.parts, w.parts)
+    return v
+end
+
 """
     is_manifold_point(M::ProductManifold, x; kwargs...)
 

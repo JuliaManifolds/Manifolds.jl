@@ -82,6 +82,16 @@ function vector_transport!(M::Sphere, vto, x, v, y)
     return vto
 end
 
+function flat_isomorphism!(M::TangentBundleFibers{<:Sphere}, v, x, w)
+    copyto!(v, w)
+    return v
+end
+
+function sharp_isomorphism!(M::CotangentBundleFibers{<:Sphere}, v, x, w)
+    copyto!(v, w)
+    return v
+end
+
 """
     uniform_distribution(S::Sphere, x)
 

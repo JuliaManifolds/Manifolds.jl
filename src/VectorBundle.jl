@@ -73,14 +73,36 @@ from the tangent bundle to vectors from the cotangent bundle
 $\flat \colon TM \to T^{*}M$
 """
 function flat_isomorphism!(M::VectorBundleFibers, v, x, w)
-    error("flat_isomorphism! not implemented for manifold vector space
-        of type $(typeof(M)), vector of type $(typeof(v)), point of " *
+    error("flat_isomorphism! not implemented for vector bundle fibers space " *
+        "of type $(typeof(M)), vector of type $(typeof(v)), point of " *
         "type $(typeof(x)) and vector of type $(typeof(w)).")
 end
 
 function flat_isomorphism(M::VectorBundleFibers, x, w)
     v = similar_result(M, flat_isomorphism, w, x)
     flat_isomorphism!(M, v, x, w)
+    return v
+end
+
+@doc doc"""
+    sharp_isomorphism!(M::VectorBundleFibers, v, x, w)
+
+Compute the sharp isomorphism (one of the musical isomorphisms) of vector `w`
+from the vector space of type `M` at point `x` from manifold `M.M`.
+
+The function can be used for example to transform vectors
+from the cotangent bundle to vectors from the tangent bundle
+$\sharp \colon T^{*}M \to TM$
+"""
+function sharp_isomorphism!(M::VectorBundleFibers, v, x, w)
+    error("sharp_isomorphism! not implemented for vector bundle fibers space " *
+        "of type $(typeof(M)), vector of type $(typeof(v)), point of " *
+        "type $(typeof(x)) and vector of type $(typeof(w)).")
+end
+
+function sharp_isomorphism(M::VectorBundleFibers, x, w)
+    v = similar_result(M, sharp_isomorphism, w, x)
+    sharp_isomorphism!(M, v, x, w)
     return v
 end
 
@@ -226,6 +248,12 @@ function representation_size(M::VectorBundle)
     len_vs = prod(representation_size(M.VS))
     return (len_manifold + len_vs,)
 end
+
+TangentBundleFibers{M} = VectorBundleFibers{TangentSpaceType,M}
+TangentBundleFibers(M::Manifold) = VectorBundleFibers(TangentSpace, M)
+
+CotangentBundleFibers{M} = VectorBundleFibers{CotangentSpaceType,M}
+CotangentBundleFibers(M::Manifold) = VectorBundleFibers(CotangentSpace, M)
 
 TangentBundle{M} = VectorBundle{TangentSpaceType,M}
 TangentBundle(M::Manifold) = VectorBundle(TangentSpace, M)

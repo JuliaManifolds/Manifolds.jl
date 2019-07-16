@@ -20,6 +20,7 @@ include("utils.jl")
                           pts,
                           test_reverse_diff = isa(T, Vector),
                           test_project_tangent = true,
+                          test_musical_isomorphisms = true,
                           point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
                           tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
         end

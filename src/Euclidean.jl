@@ -68,6 +68,16 @@ function project_tangent!(M::Euclidean, w, x, v)
     return w
 end
 
+function flat_isomorphism!(M::TangentBundleFibers{<:Euclidean}, v, x, w)
+    copyto!(v, w)
+    return v
+end
+
+function sharp_isomorphism!(M::CotangentBundleFibers{<:Euclidean}, v, x, w)
+    copyto!(v, w)
+    return v
+end
+
 """
     projected_distribution(M::Euclidean, d, [x])
 

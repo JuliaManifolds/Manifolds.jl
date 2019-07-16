@@ -495,6 +495,7 @@ include("utils.jl")
 
 include("ProductRepresentations.jl")
 include("ArrayManifold.jl")
+include("VectorBundle.jl")
 
 include("DistributionsBase.jl")
 include("Metric.jl")
@@ -503,7 +504,6 @@ include("ProductManifold.jl")
 include("Rotations.jl")
 include("Sphere.jl")
 include("ProjectedDistribution.jl")
-include("VectorBundle.jl")
 
 export ArrayManifold,
     ArrayMPoint,
@@ -521,13 +521,17 @@ export Manifold,
     VectorBundle,
     VectorBundleFibers,
     TangentBundle,
-    CotangentBundle
+    CotangentBundle,
+    TangentBundleFibers,
+    CotangentBundleFibers
 export ×,
     base_manifold,
     bundle_projection,
     distance,
     exp,
     exp!,
+    flat_isomorphism,
+    sharp_isomorphism,
     geodesic,
     shortest_geodesic,
     injectivity_radius,
