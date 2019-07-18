@@ -445,32 +445,46 @@ end
 
 zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
 
-hat!(M::Manifold, V, x, v) = error("hat! operator not defined for manifold $(typeof(M)), vector $(typeof(v)), and matrix $(typeof(V))")
+hat!(M::Manifold, v, x, vⁱ) = error("hat! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), and matrix $(typeof(v))")
 
-"""
-    hat(M::Manifold, x, v)
+@doc doc"""
+    hat(M::Manifold, x, vⁱ)
 
-Convert the tangent vector `v` at point `x` on matrix manifold `M` to the
-equivalent matrix representation.
+Given a basis $e_i$ on the tangent space at a point $x$ and tangent
+component vector $v^i$, compute the equivalent vector representation
+$v=v^i e_i$, where Einstein summation notation is used:
+
+$\wedge: v^i \mapsto v^i e_i$
+
+For matrix manifolds, this converts a vector representation of the tangent
+vector to a matrix representation. The [`vee`](@ref) map is the `hat` map's
+inverse.
 """
-function hat(M::Manifold, x, v)
-    V = MArray{Tuple{representation_size(M,TVector)...},eltype(v)}(undef)
-    hat!(M, V, x, v)
-    return V
+function hat(M::Manifold, x, vⁱ)
+    v = MArray{Tuple{representation_size(M,TVector)...},eltype(vⁱ)}(undef)
+    hat!(M, v, x, vⁱ)
+    return v
 end
 
-vee!(M::Manifold, v, x, V) = error("vee! operator not defined for manifold $(typeof(M)), matrix $(typeof(V)), and vector $(typeof(v))")
+vee!(M::Manifold, vⁱ, x, v) = error("vee! operator not defined for manifold $(typeof(M)), matrix $(typeof(v)), and vector $(typeof(vⁱ))")
 
-"""
-    vee(M::Manifold, x, V)
+@doc doc"""
+    vee(M::Manifold, x, v)
 
-Convert the tangent vector `V` represented as a matrix at point `x` on matrix
-manifold `M` to the equivalent vector representation.
+Given a basis $e_i$ on the tangent space at a point $x$ and tangent
+vector $v$, compute the vector components $v^i$, such that $v = v^i e_i$, where
+Einstein summation notation is used:
+
+$\vee: v^i e_i \mapsto v^i$
+
+For matrix manifolds, this converts a  matrix representation of the tangent
+vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
+inverse.
 """
-function vee(M::Manifold, x, V)
-    v = MVector{manifold_dimension(M),eltype(V)}(undef)
-    vee!(M, v, x, V)
-    return v
+function vee(M::Manifold, x, v)
+    vⁱ = MVector{manifold_dimension(M),eltype(v)}(undef)
+    vee!(M, vⁱ, x, v)
+    return vⁱ
 end
 
 """

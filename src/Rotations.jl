@@ -378,9 +378,9 @@ hat!(S::Rotations{2}, Ω, x, ω) = hat!(S, Ω, x, ω[1])
 @doc doc"""
     hat(S::Rotations, x, ω)
 
-Convert the tangent vector $\omega$ at point $x$ on rotations group
-$\mathrm{SO}(n)$ to the equivalent matrix representation. See [`vee`](@ref)
-for the conventions used.
+Convert the unique tangent vector components $\omega$ at point $x$ on rotations
+group $\mathrm{SO}(n)$ to the matrix representation $\Omega$ of the tangent
+vector. See [`vee`](@ref) for the conventions used.
 """
 function hat end
 
@@ -407,11 +407,13 @@ end
 @doc doc"""
     vee(S::Rotations, x, Ω)
 
-Convert the tangent vector $\Omega$ at point $x$ on rotations group
-$\mathrm{SO}(n)$ represented as a matrix to the equivalent vector
-representation $\omega=\Omega^\vee$. The basis on the Lie algebra
-$\mathfrak{so}(n)$ is chosen such that for $\mathrm{SO}(2)$,
-$\omega=\theta=\Omega_{21}$ is the angle of rotation, and for $\mathrm{SO}(3)$,
+Extract the unique tangent vector components $\omega$ at point $x$ on rotations
+group $\mathrm{SO}(n)$ from the matrix representation $\Omega$ of the tangent
+vector.
+
+The basis on the Lie algebra $\mathfrak{so}(n)$ is chosen such that for
+$\mathrm{SO}(2)$, $\omega=\theta=\Omega_{21}$ is the angle of rotation, and
+for $\mathrm{SO}(3)$,
 $\omega = (\Omega_{32}, \Omega_{13}, \Omega_{21}) = \theta u$ is the
 angular velocity and axis-angle representation, where $u$ is the unit vector
 along the axis of rotation.
