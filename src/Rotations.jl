@@ -18,36 +18,36 @@ function representation_size(::Rotations{N}, ::Type{T}) where {N,T<:Union{MPoint
 end
 
 @doc doc"""
-    manifold_dimension(S::Rotations)
+    manifold_dimension(M::Rotations)
 
 returns the dimension of the manifold $\mathrm{SO}(n)$, i.e. $\frac{n(n-1)}{2}$.
 """
-manifold_dimension(S::Rotations{N}) where {N} = div(N*(N-1), 2)
+manifold_dimension(M::Rotations{N}) where {N} = div(N*(N-1), 2)
 
 @doc doc"""
-    inner(S, x, w, v)
+    inner(M, x, w, v)
 
 compute the inner product of the two tangent vectors `w, v` from the tangent
-plane at `x` on the special orthogonal space `S=`$\mathrm{SO}(n)$ using the
+plane at `x` on the special orthogonal space `M=`$\mathrm{SO}(n)$ using the
 restriction of the metric from the embedding, i.e.
 
 $(v, w)_x = \operatorname{tr}(v^T w)$.
 
 Tangent vectors are represented by matrices.
 """
-inner(S::Rotations, x, w, v) = dot(w, v)
+inner(M::Rotations, x, w, v) = dot(w, v)
 
-norm(S::Rotations, x, v) = norm(v)
+norm(M::Rotations, x, v) = norm(v)
 
-project_tangent!(S::Rotations, w, x, v) = w .= (v .- transpose(v))./2
+project_tangent!(M::Rotations, w, x, v) = w .= (v .- transpose(v))./2
 
-function exp!(S::Rotations, y, x, v)
+function exp!(M::Rotations, y, x, v)
     y .= x * exp(v)
     return y
 end
 
-function exp!(S::Rotations{2}, y, x, v)
-    θ = vee(S, x, v)[1]
+function exp!(M::Rotations{2}, y, x, v)
+    θ = vee(M, x, v)[1]
     @assert size(y) == (2, 2)
     @assert size(x) == (2, 2)
     @inbounds begin
@@ -60,8 +60,8 @@ function exp!(S::Rotations{2}, y, x, v)
     return y
 end
 
-function exp!(S::Rotations{3}, y, x, v)
-    θ = norm(S, x, v) / sqrt(2)
+function exp!(M::Rotations{3}, y, x, v)
+    θ = norm(M, x, v) / sqrt(2)
     if θ ≈ 0
         a = 1 - θ^2 / 6
         b = θ / 2
@@ -79,7 +79,7 @@ end
 The Lie algebra of $\mathrm{SO}(4)$ consists of 4x4 skew-symmetric matrices.
 The unique imaginary components of their eigenvalues are the angles of the two
 plane rotations. This function computes these more efficiently than
-`eigenvalues`.
+`eigvals`.
 
 By convention, the returned values are sorted in decreasing order
 (corresponding to the same ordering of _angles_ as
@@ -95,7 +95,16 @@ function angles_4d_skew_sym_matrix(A)
     return sqrt(halfb + sqrtdisc), sqrt(halfb - sqrtdisc)
 end
 
-function exp!(S::Rotations{4}, y, x, v)
+@doc doc"""
+    exp!(M::Rotations{4}, y, x, v)
+
+Exponential map of tangent vector `v` at point `x` from $\mathrm{SO}(4)$
+manifold `M`. Result is saved to `y`.
+
+The algorithm used is a more numerically stable form of those proposed in
+[[Gallier, 2003](#Gallier2003)] and [[Andrica, 2013](#Andrica2013)].
+"""
+function exp!(M::Rotations{4}, y, x, v)
     T = eltype(v)
     α, β = angles_4d_skew_sym_matrix(v)
     sinα, cosα = sincos(α)
@@ -137,37 +146,37 @@ function exp!(S::Rotations{4}, y, x, v)
 end
 
 @doc doc"""
-    log!(M, v, x, y)
+    log!(M::Rotations, v, x, y)
 
 compute the logarithmic map on the [`Rotations`](@ref) manifold
 `M`$=\mathrm{SO}(n)$, which is given by
 ```math
-\operatorname{log}_{x} y =
+\log_{x} y =
   \frac{1}{2} \bigl(\operatorname{Log}(x^{\mathrm{T}}y)
   - (\operatorname{Log} x^{\mathrm{T}}y)^{\mathrm{T}}),
 ```
-where $\operatorname{Log}$ denotes the matrix logarithm
-and save the result to `v`.
+where $\operatorname{Log}$ denotes the matrix logarithm, and save the result
+to `v`.
 
 For antipodal rotations the function returns one of the tangent vectors that
 point at `y`.
 """
-function log!(S::Rotations, v, x, y)
+function log!(M::Rotations, v, x, y)
     U = transpose(x) * y
     v .= real(log_safe(U))
-    project_tangent!(S, v, x, v)
+    project_tangent!(M, v, x, v)
     return v
 end
 
-function log!(S::Rotations{2}, v, x, y)
+function log!(M::Rotations{2}, v, x, y)
     U = transpose(x) * y
     @assert size(U) == (2, 2)
     @inbounds θ = atan(U[2], U[1])
-    hat!(S, v, x, θ)
+    hat!(M, v, x, θ)
     return v
 end
 
-function log!(S::Rotations{3}, v, x, y)
+function log!(M::Rotations{3}, v, x, y)
     U = transpose(x) * y
     cosθ = (tr(U) - 1) / 2
     if cosθ ≈ -1
@@ -175,7 +184,7 @@ function log!(S::Rotations{3}, v, x, y)
         ival = findfirst(λ -> isapprox(λ, 1), eig.values)
         vi = SVector{3}(1:3)
         ax = eig.vectors[vi, ival]
-        hat!(S, v, x, π * ax)
+        hat!(M, v, x, π * ax)
     else
         v .= (U .- transpose(U)) ./ (2 * usinc_from_cos(cosθ))
     end
@@ -200,7 +209,8 @@ matrix. This function computes these more efficiently by solving the system
 ```
 
 By convention, the returned values are sorted in increasing order. See
-[`angles_4d_skew_sym_matrix`](@ref)
+[`angles_4d_skew_sym_matrix`](@ref). For derivation of the above, see
+[[Gallier, 2013]](#Gallier2003).
 """
 function cos_angles_4d_rotation_matrix(R)
     trR = tr(R)
@@ -209,7 +219,7 @@ function cos_angles_4d_rotation_matrix(R)
     return (a + b, a - b)
 end
 
-function log!(S::Rotations{4}, v, x, y)
+function log!(M::Rotations{4}, v, x, y)
     U = transpose(x) * y
     cosα, cosβ = cos_angles_4d_rotation_matrix(U)
     α = acos(clamp(cosα, -1, 1))
@@ -228,10 +238,9 @@ function log!(S::Rotations{4}, v, x, y)
     else
         v .= real(log_safe(U))
     end
-    project_tangent!(S, v, x, v)
+    project_tangent!(M, v, x, v)
     return v
 end
-
 
 injectivity_radius(M::Rotations, x) = π*sqrt(2.0)
 
@@ -359,10 +368,10 @@ function inverse_retract!(M::Rotations{N}, v, x, y, ::QRInverseRetraction) where
     return v
 end
 
-zero_tangent_vector(S::Rotations, x) = zero(x)
-zero_tangent_vector!(S::Rotations, v, x) = (v .= zero(x))
+zero_tangent_vector(M::Rotations, x) = zero(x)
+zero_tangent_vector!(M::Rotations, v, x) = (v .= zero(x))
 
-function hat!(S::Rotations{2}, Ω, x, θ::Real)
+function hat!(M::Rotations{2}, Ω, x, θ::Real)
     @assert length(Ω) == 4
     @inbounds begin
         Ω[1] = 0;  Ω[3] = -θ
@@ -371,20 +380,18 @@ function hat!(S::Rotations{2}, Ω, x, θ::Real)
     return Ω
 end
 
-hat!(S::Rotations{2}, Ω, x, ω) = hat!(S, Ω, x, ω[1])
+hat!(M::Rotations{2}, Ω, x, ω) = hat!(M, Ω, x, ω[1])
 
 @doc doc"""
-    hat(S::Rotations, x, ω)
+    hat!(M::Rotations, Ω, x, ω)
 
 Convert the unique tangent vector components $\omega$ at point $x$ on rotations
 group $\mathrm{SO}(n)$ to the matrix representation $\Omega$ of the tangent
-vector. See [`vee`](@ref) for the conventions used.
+vector. See [`vee!`](@ref) for the conventions used.
 """
-function hat end
-
-function hat!(S::Rotations{N}, Ω, x, ω) where {N}
+function hat!(M::Rotations{N}, Ω, x, ω) where {N}
     @assert size(Ω) == (N, N)
-    @assert length(ω) == manifold_dimension(S)
+    @assert length(ω) == manifold_dimension(M)
     @inbounds begin
         Ω[1,1] = 0;      Ω[1,2] = -ω[3];  Ω[1,3] = ω[2]
         Ω[2,1] = ω[3];   Ω[2,2] = 0;      Ω[2,3] = -ω[1]
@@ -402,8 +409,10 @@ function hat!(S::Rotations{N}, Ω, x, ω) where {N}
     return Ω
 end
 
+vee!(M::Rotations{2}, ω, x, Ω) = (ω[1] = Ω[2])
+
 @doc doc"""
-    vee(S::Rotations, x, Ω)
+    vee!(M::Rotations, ω, x, Ω)
 
 Extract the unique tangent vector components $\omega$ at point $x$ on rotations
 group $\mathrm{SO}(n)$ from the matrix representation $\Omega$ of the tangent
@@ -419,13 +428,9 @@ along the axis of rotation.
 For $\mathrm{SO}(n)$ where $n \ge 4$, the additional elements of $\omega$ are
 $\omega_{i (i - 3)/2 + j + 1} = \Omega_{ij}$, for $i \in [4, n], j \in [1,i)$.
 """
-function vee end
-
-vee!(S::Rotations{2}, ω, x, Ω) = (ω[1] = Ω[2])
-
-function vee!(S::Rotations{N}, ω, x, Ω) where {N}
+function vee!(M::Rotations{N}, ω, x, Ω) where {N}
     @assert size(Ω) == (N, N)
-    @assert length(ω) == manifold_dimension(S)
+    @assert length(ω) == manifold_dimension(M)
     @inbounds begin
         ω[1] = Ω[3,2]
         ω[2] = Ω[1,3]
@@ -443,17 +448,17 @@ function vee!(S::Rotations{N}, ω, x, Ω) where {N}
 end
 
 """
-    is_manifold_point(S,x; kwargs...)
+    is_manifold_point(M,x; kwargs...)
 
-checks, whether `x` is a valid point on the [`Rotations`](@ref) `S`,
-i.e. is an array of size [`manifold_dimension`](@ref)`(S)` and represents a
+checks, whether `x` is a valid point on the [`Rotations`](@ref) `M`,
+i.e. is an array of size [`manifold_dimension`](@ref)`(M)` and represents a
 valid rotation.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function is_manifold_point(S::Rotations{N},x; kwargs...) where {N}
+function is_manifold_point(M::Rotations{N},x; kwargs...) where {N}
     if size(x) != (N, N)
         throw(DomainError(size(x),
-            "The point $(x) does not lie on $S, since its size is not $((N, N))."))
+            "The point $(x) does not lie on $M, since its size is not $((N, N))."))
     end
     if !isapprox(det(x), 1; kwargs...)
         throw(DomainError(norm(x), "The determinant of $x has to be +1 but it is $(det(x))"))
@@ -465,35 +470,35 @@ function is_manifold_point(S::Rotations{N},x; kwargs...) where {N}
 end
 
 """
-    is_tangent_vector(S,x,v; kwargs... )
+    is_tangent_vector(M,x,v; kwargs... )
 
 checks whether `v` is a tangent vector to `x` on the [`Rotations`](@ref)
-space `S`, i.e. after [`is_manifold_point`](@ref)`(S,x)`, `v` has to be of same
+space `M`, i.e. after [`is_manifold_point`](@ref)`(M,x)`, `v` has to be of same
 dimension as `x` and orthogonal to `x`.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function is_tangent_vector(S::Rotations{N},x,v; kwargs...) where N
-    is_manifold_point(S,x)
+function is_tangent_vector(M::Rotations{N},x,v; kwargs...) where N
+    is_manifold_point(M,x)
     if size(v) != (N, N)
         throw(DomainError(size(v),
-            "The array $(v) is not a tangent to a point on $S since its size does not match $((N, N))."))
+            "The array $(v) is not a tangent to a point on $M since its size does not match $((N, N))."))
     end
     if !isapprox(transpose(v)+v, zero(v); kwargs...)
         throw(DomainError(size(v),
-            "The array $(v) is not a tangent to a point on $S since it is not skew-symmetric."))
+            "The array $(v) is not a tangent to a point on $M since it is not skew-symmetric."))
     end
     return true
 end
 
 """
-    gaussian_tvector_distribution(S::Rotations, x, σ)
+    gaussian_tvector_distribution(M::Rotations, x, σ)
 
 Normal distribution in ambient space with standard deviation `σ`
 projected to tangent space at `x`.
 """
-function normal_tvector_distribution(S::Rotations, x, σ)
+function normal_tvector_distribution(M::Rotations, x, σ)
     d = Distributions.MvNormal(reshape(zero(x), :), σ)
-    return ProjectedTVectorDistribution(S, x, d, project_tangent!, x)
+    return ProjectedTVectorDistribution(M, x, d, project_tangent!, x)
 end
 
 """
