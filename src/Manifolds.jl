@@ -581,11 +581,7 @@ export ×,
     submanifold,
     submanifold_component,
     zero_tangent_vector,
-    zero_tangent_vector!,
-    hat!,
-    hat,
-    vee!,
-    vee
+    zero_tangent_vector!
 export Metric,
     RiemannianMetric,
     LorentzMetric,

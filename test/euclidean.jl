@@ -24,20 +24,4 @@ include("utils.jl")
                           tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
         end
     end
-
-    M = Euclidean(2, 3)
-    @testset "vee/hat" begin
-        exp_dim = manifold_dimension(M)
-        exp_size = (2, 3)
-        v = randn(exp_dim)
-        V = Manifolds.hat(M, I, v)
-        @test length(V) == length(v)
-        @test size(V) == exp_size
-        @test Manifolds.vee(M, I, V) == v
-
-        v = Manifolds.vee(M, I, V)
-        @test length(v) == length(V)
-        @test size(v) == (exp_dim,)
-        @test Manifolds.hat(M, I, v) == V
-    end
 end

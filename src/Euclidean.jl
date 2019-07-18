@@ -61,24 +61,6 @@ function zero_tangent_vector!(M::Euclidean, v, x)
     return v
 end
 
-function hat(E::Euclidean{Tuple{N,M}}, x, v) where {N,M}
-    return reshape(v, representation_size(E, TVector))
-end
-
-function hat!(E::Euclidean{Tuple{N,M}}, V, x, v) where {N,M}
-    V .= reshape(v, representation_size(E, TVector))
-    return V
-end
-
-function vee(E::Euclidean{Tuple{N,M}}, x, V) where {N,M}
-    return reshape(V, *(representation_size(E, TVector)...))
-end
-
-function vee!(E::Euclidean{Tuple{N,M}}, v, x, V) where {N,M}
-    v .= reshape(V, *(representation_size(E, TVector)...))
-    return v
-end
-
 project_point!(M::Euclidean, x) = x
 
 function project_tangent!(M::Euclidean, w, x, v)
