@@ -88,13 +88,11 @@ By convention, the returned values are sorted in decreasing order
 function angles_4d_skew_sym_matrix(A)
     @assert size(A) == (4, 4)
     @inbounds begin
-        K1 = (A[1,2]^2 + A[1,3]^2 + A[2,3]^2 + A[1,4]^2 + A[2,4]^2 + A[3,4]^2) / 2
-        K2 = A[1,2] * A[3,4] - A[1,3] * A[2,4] + A[1,4] * A[2,3]
+        halfb = (A[1,2]^2 + A[1,3]^2 + A[2,3]^2 + A[1,4]^2 + A[2,4]^2 + A[3,4]^2) / 2
+        c² = (A[1,2] * A[3,4] - A[1,3] * A[2,4] + A[1,4] * A[2,3])^2
     end
-    a = sqrt(K1^2 - K2^2)
-    α = sqrt(K1 + a)
-    β = sqrt(K1 - a)
-    return α > β ? (α, β) : (β, α)
+    sqrtdisc = sqrt(halfb^2 - c²)
+    return sqrt(halfb + sqrtdisc), sqrt(halfb - sqrtdisc)
 end
 
 function exp!(S::Rotations{4}, y, x, v)
