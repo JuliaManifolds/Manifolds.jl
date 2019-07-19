@@ -89,9 +89,9 @@ function angles_4d_skew_sym_matrix(A)
     @assert size(A) == (4, 4)
     @inbounds begin
         halfb = (A[1,2]^2 + A[1,3]^2 + A[2,3]^2 + A[1,4]^2 + A[2,4]^2 + A[3,4]^2) / 2
-        c² = (A[1,2] * A[3,4] - A[1,3] * A[2,4] + A[1,4] * A[2,3])^2
+        c = (A[1,2] * A[3,4] - A[1,3] * A[2,4] + A[1,4] * A[2,3])^2
     end
-    sqrtdisc = sqrt(halfb^2 - c²)
+    sqrtdisc = sqrt(halfb^2 - c)
     return sqrt(halfb + sqrtdisc), sqrt(halfb - sqrtdisc)
 end
 
