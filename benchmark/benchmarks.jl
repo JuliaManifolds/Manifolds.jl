@@ -109,10 +109,19 @@ function add_manifold_benchmarks()
     so2 = Manifolds.Rotations(2)
     angles = (0.0, π/2, 2π/3)
     add_manifold(so2,
-                 [Size(2, 2)([cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)]) for ϕ in angles],
+                 [Size(2, 2)([cos(ϕ) -sin(ϕ); sin(ϕ) cos(ϕ)]) for ϕ in angles],
                  "Rotations(2) -- SizedArray",
                  retraction_methods = retraction_methods_rot,
                  inverse_retraction_methods = inverse_retraction_methods_rot)
+
+    so3 = Manifolds.Rotations(3)
+    angles = (0.0, π/2, 2π/3)
+    add_manifold(so3,
+                 [Size(3, 3)([cos(ϕ) -sin(ϕ) 0; sin(ϕ) cos(ϕ) 0; 0 0 1]) for ϕ in angles],
+                 "Rotations(3) -- SizedArray",
+                 retraction_methods = retraction_methods_rot,
+                 inverse_retraction_methods = inverse_retraction_methods_rot)
+
 
     m_prod = Manifolds.ProductManifold(s2, r2)
     shape_s2r2 = Manifolds.ShapeSpecification(s2, r2)

@@ -23,6 +23,8 @@ include("utils.jl")
                           test_musical_isomorphisms = true,
                           point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
                           tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
+
+            @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end
     end
 
@@ -33,4 +35,22 @@ include("utils.jl")
         gtsd_mvector = Manifolds.normal_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
         @test isa(rand(gtsd_mvector), MVector)
     end
+
+    @testset "log edge case" begin
+        n = manifold_dimension(M)
+        x = normalize(randn(n + 1))
+        v = log(M, x, -x)
+        @test norm(v) ≈ π
+        @test isapprox(dot(x, v), 0; atol=1e-12)
+        vexp = normalize(project_tangent(M, x, [1, zeros(n)...]))
+        @test v ≈ π * vexp
+
+        x = [1, zeros(n)...]
+        v = log(M, x, -x)
+        @test norm(v) ≈ π
+        @test isapprox(dot(x, v), 0; atol=1e-12)
+        vexp = normalize(project_tangent(M, x, [0, 1, zeros(n - 1)...]))
+        @test v ≈ π * vexp
+    end
+
 end

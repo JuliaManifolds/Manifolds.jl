@@ -41,26 +41,31 @@ metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 
 norm(S::Sphere, x, v) = norm(v)
 
-distance(S::Sphere, x, y) = acos(dot(x, y))
+distance(S::Sphere, x, y) = acos(clamp(dot(x, y), -1, 1))
 
 function exp!(S::Sphere, y, x, v)
-    nv = norm(S, x, v)
-    if nv ≈ 0.0
-        y .= x
-    else
-        y .= cos(nv).*x .+ (sin(nv)/nv).*v
-    end
+    θ = norm(S, x, v)
+    y .= cos(θ) .* x .+ usinc(θ) .* v
     return y
 end
 
 function log!(S::Sphere, v, x, y)
-    dot_xy = dot(x, y)
-    θ = acos(dot_xy)
-    if θ ≈ 0.0
-        zero_tangent_vector!(S, v, x)
+    cosθ = dot(x, y)
+    if cosθ ≈ -1
+        fill!(v, 0)
+        if x[1] ≈ 1
+            v[2] = 1
+        else
+            v[1] = 1
+        end
+        copyto!(v, v .- dot(x, v) .* x)
+        v .*= π / norm(v)
     else
-        v .= (θ/sin(θ)) .* (y .- dot_xy.*x)
+        cosθ = cosθ > 1 ? one(cosθ) : cosθ
+        θ = acos(cosθ)
+        v .= (y .- cosθ .* x) ./ usinc(θ)
     end
+    project_tangent!(S, v, x, v)
     return v
 end
 
