@@ -1,3 +1,55 @@
+@doc doc"""
+    usinc(θ::Real)
+
+Unnormalized version of `sinc` function, i.e.
+$\operatorname{usinc}(\theta) = \frac{\sin(\theta)}{\theta}$. This is
+equivalent to `sinc(θ/π)`.
+"""
+@inline usinc(θ::Real) = θ == 0 ? one(θ) : isinf(θ) ? zero(θ) : sin(θ) / θ
+
+@doc doc"""
+    usinc_from_cos(x::Real)
+
+Unnormalized version of `sinc` function, i.e.
+$\operatorname{usinc}(\theta) = \frac{\sin(\theta)}{\theta}$, computed from
+$x = cos(\theta)$.
+"""
+@inline function usinc_from_cos(x::Real)
+    if x >= 1
+        return one(x)
+    elseif x <= -1
+        return zero(x)
+    else
+        return sqrt(1 - x^2) / acos(x)
+    end
+end
+
+"""
+    eigen_safe(x)
+
+Compute the eigendecomposition of `x`. If `x` is a `StaticMatrix`, it is
+converted to a `Matrix` before the decomposition.
+"""
+@inline eigen_safe(x; kwargs...) = eigen(x; kwargs...)
+
+@inline function eigen_safe(x::StaticMatrix; kwargs...)
+    s = size(x)
+    E = eigen!(Matrix(parent(x)); kwargs...)
+    return Eigen(SizedVector{s[1]}(E.values), SizedMatrix{s...}(E.vectors))
+end
+
+"""
+    log_safe(x)
+
+Compute the matrix logarithm of `x`. If `x` is a `StaticMatrix`, it is
+converted to a `Matrix` before computing the log.
+"""
+@inline log_safe(x) = log(x)
+
+@inline function log_safe(x::StaticMatrix)
+    s = Size(x)
+    return SizedMatrix{s[1],s[2]}(log(Matrix(parent(x))))
+end
 
 """
     select_from_tuple(t::NTuple{N, Any}, positions::Val{P})
@@ -89,10 +141,10 @@ struct SizedAbstractArray{S<:Tuple, T, N, M, TData<:AbstractArray{T,M}} <: Stati
         new{S,T,N,M,TData}(a)
     end
 
-    function SizedAbstractArray{S, T, N, 1}(::UndefInitializer) where {S, T, N, TData<:AbstractArray}
+    function SizedAbstractArray{S, T, N, 1}(::UndefInitializer) where {S, T, N}
         new{S, T, N, 1, Array{T, 1}}(Array{T, 1}(undef, StaticArrays.tuple_prod(S)))
     end
-    function SizedAbstractArray{S, T, N, N}(::UndefInitializer) where {S, T, N, TData<:AbstractArray}
+    function SizedAbstractArray{S, T, N, N}(::UndefInitializer) where {S, T, N}
         new{S, T, N, N, Array{T, N}}(Array{T, N}(undef, size_to_tuple(S)...))
     end
 end
@@ -169,6 +221,6 @@ sizedabstractarray_similar_type(::Type{T},s::Size{S},::Type{Val{D}}) where {T,S,
 
 Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
 """
-@generated function size_to_tuple(::Type{S}) where S<:Tuple
+Base.@pure function size_to_tuple(::Type{S}) where S<:Tuple
     return tuple(S.parameters...)
 end
