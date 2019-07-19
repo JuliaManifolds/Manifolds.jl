@@ -24,5 +24,4 @@ include("utils.jl")
                           tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
         end
     end
-
 end

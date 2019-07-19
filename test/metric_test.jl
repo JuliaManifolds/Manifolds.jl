@@ -89,11 +89,15 @@ struct TestSphericalMetric <: Metric end
                  sin(ϕ)*cos(θ)  cos(ϕ)*sin(θ);
                  -sin(θ) 0] * v
 
-        T = 0:.1:1
-        @test isapprox([sph_to_cart(yi...) for yi in exp(M, x, v, T)],
-                       exp(S, xcart, vcart, T); atol=1e-3, rtol=1e-3)
-        @test isapprox([sph_to_cart(yi...) for yi in geodesic(M, x, v, T)],
-                       geodesic(S, xcart, vcart, T); atol=1e-3, rtol=1e-3)
+        if !Sys.iswindows() || Sys.ARCH == :x86_64
+            @testset "numerically integrated geodesics for $vtype" begin
+                T = 0:.1:1
+                @test isapprox([sph_to_cart(yi...) for yi in exp(M, x, v, T)],
+                               exp(S, xcart, vcart, T); atol=1e-3, rtol=1e-3)
+                @test isapprox([sph_to_cart(yi...) for yi in geodesic(M, x, v, T)],
+                               geodesic(S, xcart, vcart, T); atol=1e-3, rtol=1e-3)
+            end
+        end
 
         Γ₁ = christoffel_symbols_first(M, x)
         for i=1:n, j=1:n, k=1:n
