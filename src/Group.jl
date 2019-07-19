@@ -8,11 +8,13 @@ abstract type AbstractGroupOperation end
 @doc doc"""
     AbstractGroupManifold{<:AbstractGroupOperation} <: Manifold
 
-Abstract type for a Lie group (a group that is also a smooth manifold with a
-smooth binary operation). `AbstractGroupManifold`s must implement at least
-`inv`(@ref), `identity`(@ref), and `left_action`(@ref).
+Abstract type for a Lie group, a group that is also a smooth manifold with a
+smooth binary operation.
 
-Group manifolds by default assume a [`LeftInvariantCanonicalMetric`](@ref)
+`AbstractGroupManifold`s must implement at least [`inv`](@ref),
+[`identity`](@ref), and [`left_action`](@ref).
+
+Group manifolds by default assume a left-invariant canonical metric
 $g_x(v,w) = g_e(x \cdot v, x \cdot w) = (x \cdot v)^T (x \cdot w)$, where
 $g_x$ is the metric tensor at a point $x$, $g_e$ is the metric tensor at the
 identity element $e$, and $x \cdot v$ is the left action of the $x$ on the

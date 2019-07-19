@@ -17,3 +17,5 @@ Order = [:type, :function]
 * [Metric manifold](@ref)
 
 ### Lie Group
+
+* [Group manifold](@ref)
