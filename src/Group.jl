@@ -378,14 +378,14 @@ struct MultiplicationOperation <: AbstractGroupOperation end
 *(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
 *(::Identity{G}, x) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
 *(x, ::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
-*(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = x
+*(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
 
 /(x, ::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
 /(::Identity{G}, x) where {G<:AbstractGroupManifold{MultiplicationOperation}} = inv(x)
 /(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
 
 \(x, ::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = inv(x)
-\(::Identity{G}, g) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
+\(::Identity{G}, x) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
 \(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
 
 inv(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
