@@ -255,12 +255,27 @@ $\operatorname{ad}_v (w) = d(\operatorname{Ad})_e (v) (w)$
 adjoint_diff(G, ve, we) = lie_bracket(G, ve, we)
 
 @doc doc"""
-    lie_bracket(G, ve, we)
+    lie_bracket(G, e::Identity, ve, we)
 
 Compute the Lie bracket of the vectors $v,w \in T_e G = \mathfrak{g}$.
 """
-function lie_bracket(G, ve, we)
-    error("lie_bracket not implemented on $(typeof(G)) for vectors $(typeof(ve)) and $(typeof(we))")
+function lie_bracket(G, e::Identity, ve, we)
+    error("lie_bracket not implemented on $(typeof(G)) for identity $(typeof(e)), vectors $(typeof(ve)) and $(typeof(we))")
+end
+
+@doc doc"""
+    lie_bracket(G, x, vx, wx)
+
+Compute the Lie bracket of the vectors $v,w \in T_x G$.
+"""
+function lie_bracket(G, x, vx, wx)
+    e = Identity(G)
+    ze = lie_bracket(G,
+                     e,
+                     inverse_translate_diff(G, x, x, vx, Left()),
+                     inverse_translate_diff(G, x, x, wx, Left()),
+                    )
+    return translate_diff(G, x, e, ze)
 end
 
 function inner(G::AbstractGroupManifold, e::Identity, ve, we)
@@ -335,7 +350,7 @@ compose(::AbstractGroupManifold{AdditionOperation}, x, y) = x + y
 translate_diff(::AbstractGroupManifold{AdditionOperation}, x, y, vy, ::Left) = vy
 translate_diff(::AbstractGroupManifold{AdditionOperation}, x, y, vy, ::Right) = vy
 
-lie_bracket(::AbstractGroupManifold{AdditionOperation}, v, w) = zero(v)
+lie_bracket(::AbstractGroupManifold{AdditionOperation}, e::Identity, ve, we) = zero(ve)
 
 function exp!(::GT,
               y,
@@ -395,15 +410,15 @@ function translate_diff(::AbstractGroupManifold{MultiplicationOperation},
     return vy * x
 end
 
-@traitfn function lie_bracket(G::GT, ve, we) where {O<:MultiplicationOperation,
-                                                    GT<:AbstractGroupManifold{O};
-                                                    !IsMatrixGroup{GT}}
+@traitfn function lie_bracket(G::GT, e::Identity{GT}, ve, we) where {O<:MultiplicationOperation,
+                                                                     GT<:AbstractGroupManifold{O};
+                                                                     !IsMatrixGroup{GT}}
     error("lie_bracket not implemented on $(GT) for vectors $(typeof(ve)) and $(typeof(we))")
 end
 
-@traitfn function lie_bracket(G::GT, ve, we) where {O<:MultiplicationOperation,
-                                                   GT<:AbstractGroupManifold{O};
-                                                   IsMatrixGroup{GT}}
+@traitfn function lie_bracket(G::GT, e::Identity{GT}, ve, we) where {O<:MultiplicationOperation,
+                                                                     GT<:AbstractGroupManifold{O};
+                                                                     IsMatrixGroup{GT}}
     return ve * we - we * ve
 end
 
