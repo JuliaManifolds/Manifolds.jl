@@ -89,7 +89,25 @@ end
 
 inv(::G, e::Identity{G}) where {G<:CompactSymplectic1} = inv(e)
 
-left_action(::CompactSymplectic1, x, p) = hamilton_prod(x, p)
+compose(::CompactSymplectic1, x, y) = hamilton_prod(x, y)
+
+function translate_diff(::CompactSymplectic1,
+                        x,
+                        y,
+                        vy,
+                        ::Left)
+    return hamilton_prod(x, vy)
+end
+
+function translate_diff(::CompactSymplectic1,
+                        x,
+                        y,
+                        vy,
+                        ::Right)
+    return hamilton_prod(vy, x)
+end
+
+@inline inner(::CompactSymplectic1, ::Identity, ve, we) = dot(ve, we)
 
 function exp!(::GT, y, ::Identity{GT}, v) where {GT<:CompactSymplectic1}
       @assert length(v) == 4 && length(y) == 4
@@ -98,7 +116,7 @@ function exp!(::GT, y, ::Identity{GT}, v) where {GT<:CompactSymplectic1}
           θu = v[vi]
           θ = norm(θu)
           y[1] = cos(θ)
-          y[vi] .= (θ ≈ 0 ? 1 - θ^2 / 6 : sin(θ) / θ) .* θu
+          y[vi] .= θu .* usinc(θ)
       end
       return y
 end
@@ -110,7 +128,7 @@ function log!(::GT, v, ::Identity{GT}, y) where {GT<:CompactSymplectic1}
         sinθv = y[vi]
         θ = atan(norm(sinθv), y[1])
         v[1] = 0
-        v[vi] .= (θ ≈ 0 ? 1 + θ^2 / 6 : θ / sin(θ)) .* sinθv
+        v[vi] .= sinθv ./ usinc(θ)
     end
     return v
 end

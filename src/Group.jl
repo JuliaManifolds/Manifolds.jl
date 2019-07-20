@@ -12,14 +12,9 @@ Abstract type for a Lie group, a group that is also a smooth manifold with a
 smooth binary operation.
 
 `AbstractGroupManifold`s must implement at least [`inv`](@ref),
-[`identity`](@ref), and [`left_action`](@ref).
+[`identity`](@ref), [`compose`](@ref), and [`translate_diff`](@ref).
 
-Group manifolds by default assume a left-invariant canonical metric
-$g_x(v,w) = g_e(x \cdot v, x \cdot w) = (x \cdot v)^T (x \cdot w)$, where
-$g_x$ is the metric tensor at a point $x$, $g_e$ is the metric tensor at the
-identity element $e$, and $x \cdot v$ is the left action of the $x$ on the
-tangent vector $v$. This behavior can be changed by reimplementing
-[`inner`](@ref), [`exp!`](@ref), and [`log!`](@ref).
+Group manifolds by default assume a left-invariant canonical metric.
 """
 abstract type AbstractGroupManifold{O<:AbstractGroupOperation} <: Manifold end
 
@@ -45,6 +40,11 @@ struct LeftInvariantCanonicalMetric <: RiemannianMetric end
 struct RightInvariantCanonicalMetric <: RiemannianMetric end
 
 @traitimpl HasMetric{GroupManifold,LeftInvariantCanonicalMetric}
+
+abstract type ActionDirection end
+
+struct Left <: ActionDirection end
+struct Right <: ActionDirection end
 
 """
     IsMatrixGroup
@@ -88,27 +88,6 @@ function identity(G::AbstractGroupManifold, x)
     error("identity not implemented on $(typeof(G)) for point $(typeof(x))")
 end
 
-@doc doc"""
-    left_action(G::AbstractGroupManifold, x, p)
-
-For an element $p$ of some set, compute the left action of group element $x$
-on $p$, i.e. $x \cdot p$.
-"""
-function left_action(G::AbstractGroupManifold, x, p)
-    error("left_action not implemented on $(typeof(G)) for point $(typeof(x)) and object $(typeof(p))")
-end
-
-@doc doc"""
-    right_action(G::AbstractGroupManifold, x, p)
-
-For an element $p$ of some set, compute the right action of group element $x$
-on $p$, i.e. $p \cdot x$. The default right action is constructed from the left
-action, i.e. $p \cdot x = x^{-1} \cdot p$.
-"""
-function right_action(G::AbstractGroupManifold, x, p)
-    return left_action(G, inv(G, x), p)
-end
-
 # Adapted from `afoldl` in `operators.jl` in Julia base.
 # expand recursively up to a point, then switch to a loop.
 group_afoldl(op, G, a) = a
@@ -127,63 +106,210 @@ Compose elements of `G` using their left translation upon each other.
 """
 compose(G::AbstractGroupManifold, xs...) = group_afoldl(compose, G, xs...)
 compose(G::AbstractGroupManifold, x) = x
-compose(G::AbstractGroupManifold, x, y) = left_action(G, x, y)
-
-*(G::AbstractGroupManifold, x, y) = compose(G, x, y)
-
-/(G::AbstractGroupManifold, x, y) = compose(G, x, inv(G, y))
-
-\(G::AbstractGroupManifold, x, y) = compose(G, inv(G, x), y)
+compose(G::AbstractGroupManifold, x, y) = error("compose not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y))")
 
 @doc doc"""
-    conjugate(G::AbstractGroupManifold, x, y)
+    translate(G::AbstractGroupManifold, x, y, [conv::ActionDirection=Left()])
 
-Compute the conjugate of the element $y$ by element $x$, i.e.
-$x \cdot y \cdot x^{-1}$
+For group elements $x,y \in G$, translate $y$ by $x$ with the specified
+convention, either left $L_x$ or right $R_x$, defined as
+
+```math
+\begin{aligned}
+L_x &\colon y \mapsto x \cdot y\\
+R_x &\colon y \mapsto y \cdot x.
+\end{aligned}
+```
 """
-function conjugate(G::AbstractGroupManifold, x, y)
-    return compose(G, x, y, inv(G, x))
+translate(G::AbstractGroupManifold, x, y, conv::Left) = compose(G, x, y)
+translate(G::AbstractGroupManifold, x, y, conv::Right) = compose(G, y, x)
+translate(G::AbstractGroupManifold, x, y) = translate(G, x, y, Left())
+
+@doc doc"""
+    inverse_translate(G::AbstractGroupManifold, x, y, [conv::ActionDirection=Left()])
+
+For group elements $x,y \in G$, inverse translate $y$ by $x$ with the specified
+convention, either left $L_x^{-1}$ or right $R_x^{-1}$, defined as
+
+```math
+\begin{aligned}
+L_x^{-1} &\colon y \mapsto x^{-1} \cdot y\\
+R_x^{-1} &\colon y \mapsto y \cdot x^{-1}.
+\end{aligned}
+```
+"""
+function inverse_translate(G::AbstractGroupManifold,
+                           x,
+                           y,
+                           conv::ActionDirection)
+    return translate(G, inv(G, x), y, conv)
 end
 
-function adjoint_representation(G::AbstractGroupManifold, x, v)
-    return left_action(G, left_action(G, x, v), inv(G, x))
+function inverse_translate(G::AbstractGroupManifold, x, y)
+    return inverse_translate(G, x, y, Left())
 end
 
-function adjoint_representation_derivative(G::AbstractGroupManifold, v, w)
-    return lie_bracket(G, v, w)
+@doc doc"""
+    translate_diff(G::AbstractGroupManifold, x, y, vy, [conv::ActionDirection=Left()])
+
+For group elements $x,y \in G$ and tangent vector $v_y \in T_y G$, compute the
+action of the differential of the translation by $x$ on $v_y$, written as
+$(d\tau_x)_y (v_y)$, with the specified left or right convention. The
+differential transports vectors:
+
+```math
+\begin{aligned}
+(dL_x)_y (v_y) &\colon T_y G \to T_{x \cdot y} G\\
+(dR_x)_y (v_y) &\colon T_y G \to T_{y \cdot x} G\\
+\end{aligned}
+```
+"""
+function translate_diff(G::AbstractGroupManifold,
+                        x,
+                        y,
+                        vy,
+                        conv::ActionDirection)
+    return error("translate_diff not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y)), vector $(typeof(vy)), and direction $(typeof(conv))")
 end
 
-function lie_bracket(G::AbstractGroupManifold, v, w)
-    error("lie_bracket not implemented on $(typeof(G)) for vectors $(typeof(v)) and $(typeof(w))")
+translate_diff(G, x, y, vy) = translate_diff(G, x, y, vy, Left())
+
+@doc doc"""
+    inverse_translate_diff(G::AbstractGroupManifold, x, y, vy, [conv::ActionDirection=Left()])
+
+For group elements $x,y \in G$ and tangent vector $v_y \in T_y G$, compute the
+inverse of the action of the differential of the translation by $x$ on $v_y$,
+written as $((d\tau_x)_y)^{-1} (v_y) = (d\tau_{x^{-1}})_y (v_y)$, with the
+specified left or right convention. The differential transports vectors:
+
+```math
+\begin{aligned}
+((dL_x)_y)^{-1} (v_y) &\colon T_y G \to T_{x^{-1} \cdot y} G\\
+((dR_x)_y)^{-1} (v_y) &\colon T_y G \to T_{y \cdot x^{-1}} G\\
+\end{aligned}
+```
+"""
+function inverse_translate_diff(G::AbstractGroupManifold,
+                                x,
+                                y,
+                                vy,
+                                conv::ActionDirection)
+    return translate_diff(G, inv(G, x), y, vy, conv)
 end
 
-function inner(G::AbstractGroupManifold, x, v, w)
-    return dot(left_action(G, x, v), left_action(G, x, w))
+inverse_translate_diff(G, x, y, vy) = inverse_translate_diff(G, x, y, vy, Left())
+
+function vector_transport!(G::AbstractGroupManifold, vy, x, vx, y)
+    yxinv = inverse_translate(G, x, y, Right())
+    vy .= translate_diff(G, yxinv, x, vx, Left())
+    return vy
+end
+
+@doc doc"""
+    conj(G::AbstractGroupManifold, x, y)
+
+For group elements $x,y \in G$, compute the group homomorphism $\phi_x$
+
+$\phi_x \colon y \mapsto x \cdot y \cdot x^{-1},$
+
+called left conjugation of $y$ by $x$.
+"""
+function conj(G::AbstractGroupManifold, x, y)
+    return translate(G, x, inverse_translate(G, x, y, Right()), Left())
+end
+
+@doc doc"""
+    conj_diff(G::AbstractGroupManifold, x, y, vy)
+
+For group elements $x,y \in G$ and vector $v_y \in T_y G$, compute the
+action of the differential of the conjugation [`conj`](@ref) $\phi_x$ at $y$ on
+$v_y$, written as $(d\phi_x)_y (v_y)$.
+"""
+function conj_diff(G::AbstractGroupManifold, x, y, vy)
+    yxinv = inverse_translate(G, x, y, Right())
+    vyxinv = inverse_translate_diff(G, x, y, vy, Right())
+    return translate_diff(G, x, vyxinv, vyxinv, Left())
+end
+
+@doc doc"""
+    adjoint(G::AbstractGroupManifold, x, ve)
+
+For group element $x \in G$ and vector $v_e \in \mathfrak{g} = T_e G$, compute
+the action of the adjoint representation $\operatorname{Ad}_x$ of $G$ at $x$ on
+$v_e$, defined as a special case of [`conj_diff`](@ref):
+
+$\operatorname{Ad}_x = (d\phi_x)_e \colon \mathfrak{g} \to \mathfrak{g}$
+"""
+adjoint(G::AbstractGroupManifold, x, ve) = conj_diff(G, x, Identity(G), ve)
+
+@doc doc"""
+    adjoint_diff(G::AbstractGroupManifold, ve, we)
+
+For Lie algebra vectors $v, w \in \mathfrak{g} = T_e G$, compute the
+the action of the adjoint representation $\operatorname{ad}_v$ of
+$\mathfrak{g}$ at $v$ on $w$. $\operatorname{ad}_v$ is defined as the derivative
+of the [`adjoint`](@ref) representation on the group:
+
+$\operatorname{ad}_v (w) = d(\operatorname{Ad})_e (v) (w)$
+"""
+adjoint_diff(G, ve, we) = lie_bracket(G, ve, we)
+
+@doc doc"""
+    lie_bracket(G, ve, we)
+
+Compute the Lie bracket of the vectors $v,w \in T_e G = \mathfrak{g}$.
+"""
+function lie_bracket(G, ve, we)
+    error("lie_bracket not implemented on $(typeof(G)) for vectors $(typeof(ve)) and $(typeof(we))")
+end
+
+function inner(G::AbstractGroupManifold, e::Identity, ve, we)
+    error("inner not implemented on $(typeof(G)) for identity $(typeof(e)) and vectors $(typeof(ve)) and $(typeof(we))")
+end
+
+@doc doc"""
+    inner(G::AbstractGroupManifold, x, vx, wx)
+
+Compute the inner product of vectors $v_x, w_x \in T_x G$, assuming a left-
+invariant metric, i.e.
+
+$g(v_x, w_x)_x = g((dL_{x^{-1}})_x v_x, (dL_{x^{-1}})_x w_x)_e = g(v_e, w_e)_e$
+"""
+function inner(G::AbstractGroupManifold, x, vx, wx)
+    return inner(G,
+                 Identity(G),
+                 inverse_translate_diff(G, x, x, vx, Left()),
+                 inverse_translate_diff(G, x, x, wx, Left()),
+                )
 end
 
 """
-    exp!(G::AbstractGroupManifold, y, v)
+    exp!(G::AbstractGroupManifold, h, e::Identity, ve)
 
-Exponential map of tangent vector `v` at the identity element of group `G`.
+Exponential map of tangent vector `ve` at the identity element `e` of group `G`.
 Result is saved to `y`.
 """
-function exp!(G::AbstractGroupManifold, y, x::Identity, v)
-    error("Exponential map not implemented on $(typeof(G)) for identity $(typeof(x)), point $(typeof(y)), and tangent vector $(typeof(v))")
+function exp!(G::AbstractGroupManifold, y, e::Identity, ve)
+    error("Exponential map not implemented on $(typeof(G)) for identity $(typeof(e)), point $(typeof(y)), and tangent vector $(typeof(ve))")
 end
 
-function exp!(G::AbstractGroupManifold, y, x, v)
-    exp!(G, y, Identity(G), \(G, x, v))
-    y .= compose(G, x, y)
+function exp!(G::AbstractGroupManifold, y, x, vx)
+    ve = inverse_translate_diff(G, x, x, vx, Left())
+    exp!(G, y, Identity(G), ve)
+    copyto!(y, translate(G, x, y, Left()))
     return y
 end
 
-function log!(G::AbstractGroupManifold, v, x::Identity, y)
-    error("Logarithmic map not implemented on $(typeof(G)) for identity $(typeof(x)), point $(typeof(y)), and vector $(typeof(v))")
+function log!(G::AbstractGroupManifold, ve, e::Identity, y)
+    error("Logarithmic map not implemented on $(typeof(G)) for identity $(typeof(e)), point $(typeof(y)), and vector $(typeof(ve))")
 end
 
-function log!(G::AbstractGroupManifold, v, x, y)
-    log!(G, v, Identity(G), \(G, x, y))
-    v .= left_action(G, x, v)
+function log!(G::AbstractGroupManifold, vx, x, y)
+    e = Identity(G)
+    xinvy = inverse_translate(G, x, y, Left())
+    log!(G, vx, e, xinvy)
+    vx .= translate_diff(G, x, e, vx, Left())
+    return vx
 end
 
 """
@@ -204,33 +330,27 @@ identity(::AbstractGroupManifold{AdditionOperation}, x) = zero(x)
 
 inv(::AbstractGroupManifold{AdditionOperation}, x) = -x
 
-left_action(::AbstractGroupManifold{AdditionOperation}, x, p) = x + p
+compose(::AbstractGroupManifold{AdditionOperation}, x, y) = x + y
 
-@doc doc"""
-    right_action(::AbstractGroupManifold{AdditionOperation}, x, p)
-
-For an element $p$ of some set, compute the right action of group element $x$
-on $p$, i.e. $p \cdot x$. For an `AdditionOperation`, the right and left
-actions are the same.
-"""
-right_action(::AbstractGroupManifold{AdditionOperation}, x, p) = p + x
+translate_diff(::AbstractGroupManifold{AdditionOperation}, x, y, vy, ::Left) = vy
+translate_diff(::AbstractGroupManifold{AdditionOperation}, x, y, vy, ::Right) = vy
 
 lie_bracket(::AbstractGroupManifold{AdditionOperation}, v, w) = zero(v)
 
 function exp!(::GT,
               y,
               ::Identity{GT},
-              v) where {GT<:AbstractGroupManifold{AdditionOperation}}
-    y .= v
+              ve) where {GT<:AbstractGroupManifold{AdditionOperation}}
+    y .= ve
     return y
 end
 
 function log!(::GT,
-              v,
+              ve,
               ::Identity{GT},
               y) where {GT<:AbstractGroupManifold{AdditionOperation}}
-    v .= y
-    return v
+    ve .= y
+    return ve
 end
 
 """
@@ -243,14 +363,14 @@ struct MultiplicationOperation <: AbstractGroupOperation end
 *(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
 *(::Identity{G}, x) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
 *(x, ::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
-*(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
+*(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = x
 
 /(x, ::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
 /(::Identity{G}, x) where {G<:AbstractGroupManifold{MultiplicationOperation}} = inv(x)
 /(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
 
 \(x, ::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = inv(x)
-\(::Identity{G}, x) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
+\(::Identity{G}, g) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
 \(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
 
 inv(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
@@ -258,64 +378,70 @@ inv(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
 identity(::AbstractGroupManifold{MultiplicationOperation}, x) = one(x)
 
 inv(::AbstractGroupManifold{MultiplicationOperation}, x) = inv(x)
-inv(::AbstractGroupManifold{MultiplicationOperation}, x::Identity) = x
 
-left_action(::AbstractGroupManifold{MultiplicationOperation}, x, p) = x * p
-
-/(::AbstractGroupManifold{MultiplicationOperation}, x, y) = x / y
-
-\(::AbstractGroupManifold{MultiplicationOperation}, x, y) = x \ y
-
-@traitfn function lie_bracket(G::GT, v, w) where {O<:MultiplicationOperation,
-                                                  GT<:AbstractGroupManifold{O};
-                                                  !IsMatrixGroup{GT}}
-    error("lie_bracket not implemented on $(GT) for vectors $(typeof(v)) and $(typeof(w))")
+function translate_diff(::AbstractGroupManifold{MultiplicationOperation},
+                        x,
+                        y,
+                        vy,
+                        ::Left)
+    return x * vy
 end
 
-@traitfn function lie_bracket(G::GT, v, w) where {O<:MultiplicationOperation,
-                                                  GT<:AbstractGroupManifold{O};
-                                                  IsMatrixGroup{GT}}
-    return v * w - w * v
+function translate_diff(::AbstractGroupManifold{MultiplicationOperation},
+                        x,
+                        y,
+                        vy,
+                        ::Right)
+    return vy * x
+end
+
+@traitfn function lie_bracket(G::GT, ve, we) where {O<:MultiplicationOperation,
+                                                    GT<:AbstractGroupManifold{O};
+                                                    !IsMatrixGroup{GT}}
+    error("lie_bracket not implemented on $(GT) for vectors $(typeof(ve)) and $(typeof(we))")
+end
+
+@traitfn function lie_bracket(G::GT, ve, we) where {O<:MultiplicationOperation,
+                                                   GT<:AbstractGroupManifold{O};
+                                                   IsMatrixGroup{GT}}
+    return ve * we - we * ve
 end
 
 @traitfn function exp!(G::GT,
                        y,
                        ::Identity{GT},
-                       v) where {O<:MultiplicationOperation,
-                                 GT<:AbstractGroupManifold{O};
-                                 !IsMatrixGroup{GT}}
-    error("Exponential map not implemented on $(typeof(G)) for identity $(typeof(x)), point $(typeof(y)), and tangent vector $(typeof(v))")
+                       ve) where {O<:MultiplicationOperation,
+                                  GT<:AbstractGroupManifold{O};
+                                  !IsMatrixGroup{GT}}
+    error("Exponential map not implemented on $(typeof(G)) for identity $(typeof(x)), point $(typeof(y)), and tangent vector $(typeof(ve))")
 end
 
 @traitfn function exp!(G::GT,
                        y,
                        ::Identity{GT},
-                       v) where {O<:MultiplicationOperation,
-                                 GT<:AbstractGroupManifold{O};
-                                 IsMatrixGroup{GT}}
-    y .= exp(v)
+                       ve) where {O<:MultiplicationOperation,
+                                  GT<:AbstractGroupManifold{O};
+                                  IsMatrixGroup{GT}}
+    y .= exp(ve)
     return y
 end
 
-_log(x) = log(x)
-_log(x::StaticMatrix) = log(Matrix(x))
-
 @traitfn function log!(G::GT,
-                       v,
+                       ve,
                        ::Identity{GT},
                        y) where {O<:MultiplicationOperation,
                                  GT<:AbstractGroupManifold{O};
                                  !IsMatrixGroup{GT}}
-    error("Logarithmic map not implemented on $(typeof(G)) for identity $(typeof(x)), point $(typeof(y)), and vector $(typeof(v))")
+    error("Logarithmic map not implemented on $(typeof(G)) for identity $(typeof(x)), point $(typeof(y)), and vector $(typeof(ve))")
 end
 
 @traitfn function log!(G::GT,
-                       v,
+                       ve,
                        ::Identity{GT},
                        y) where {O<:MultiplicationOperation,
                                  GT<:AbstractGroupManifold{O};
                                  IsMatrixGroup{GT}}
-    w = _log(y)
-    v .= isreal(v) ? real(w) : w
-    return v
+    w = log_safe(y)
+    ve .= isreal(ve) ? real(w) : w
+    return ve
 end
