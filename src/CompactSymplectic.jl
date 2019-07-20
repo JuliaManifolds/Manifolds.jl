@@ -6,31 +6,29 @@ the Hamilton product.
 """
 struct QuaternionMultiplicationOperation <: AbstractGroupOperation end
 
-const CompactSymplectic1 = GroupManifold{Sphere{3},QuaternionMultiplicationOperation}
-
-function CompactSymplectic1()
-    return CompactSymplectic1(Sphere(3), QuaternionMultiplicationOperation())
-end
-
 @doc doc"""
-    CompactSymplectic1 <: GroupManifold{Sphere{3},QuaternionMultiplicationOperation}
+    CompactSymplectic <: AbstractGroupManifold{QuaternionMultiplicationOperation}
 
-The compact symplectic group $Sp(1)$, which is also the quaternionic unitary
-group, is the group of 1-dimensional matrices whose elements are quaternions.
-Topologically, the base manifold is the 3-Sphere. Elements are represented
-as quaternions with the elements $q=[s, v_1, v_2, v_3]$.
+The compact symplectic group $Sp(n)$, which is also the quaternionic unitary
+group, is the group of $n \times n$ matrices whose elements are quaternions.
+Topologically, $Sp(1)$ is the 3-Sphere. Quaternion elements are represented
+with the elements $q=[s, v_1, v_2, v_3]$.
 
 # Constructor
 
-    CompactSymplectic1()
-    CompactSymplectic(1)
+    CompactSymplectic(n)
 """
-function CompactSymplectic(n::Int)
-    n == 1 || error("CompactSymplectic($(n)) is not implemented.")
-    return CompactSymplectic1()
-end
+struct CompactSymplectic{N} <: AbstractGroupManifold{QuaternionMultiplicationOperation} end
 
-show(io::IO, ::CompactSymplectic1) = print(io, "CompactSymplectic(1)");
+CompactSymplectic(n) = CompactSymplectic{n}()
+
+@traitimpl IsDecoratorManifold{CompactSymplectic{1}}
+
+base_manifold(::CompactSymplectic{1}) = Sphere(3)
+
+function show(io::IO, ::CompactSymplectic{N}) where {N}
+    print(io, "CompactSymplectic($N)")
+end
 
 function hamilton_prod!(z, x, y)
     @assert length(x) == 4 && length(y) == 4 && length(z) == 4
@@ -66,7 +64,7 @@ hamilton_prod(e::E, ::E) where {G<:AbstractGroupManifold{QuaternionMultiplicatio
 
 inv(e::Identity{G}) where {G<:AbstractGroupManifold{QuaternionMultiplicationOperation}} = e
 
-function identity(::CompactSymplectic1, x)
+function identity(::CompactSymplectic{1}, x)
     e = similar(x, 4)
     vi = SVector{3}(2:4)
     @inbounds begin
@@ -76,7 +74,7 @@ function identity(::CompactSymplectic1, x)
     return e
 end
 
-function inv(::CompactSymplectic1, x)
+function inv(::CompactSymplectic{1}, x)
     @assert length(x) == 4
     y = similar(x)
     vi = SVector{3}(2:4)
@@ -87,11 +85,11 @@ function inv(::CompactSymplectic1, x)
     return y
 end
 
-inv(::G, e::Identity{G}) where {G<:CompactSymplectic1} = inv(e)
+inv(::G, e::Identity{G}) where {G<:CompactSymplectic{1}} = inv(e)
 
-compose(::CompactSymplectic1, x, y) = hamilton_prod(x, y)
+compose(::CompactSymplectic{1}, x, y) = hamilton_prod(x, y)
 
-function translate_diff(::CompactSymplectic1,
+function translate_diff(::CompactSymplectic{1},
                         x,
                         y,
                         vy,
@@ -99,7 +97,7 @@ function translate_diff(::CompactSymplectic1,
     return hamilton_prod(x, vy)
 end
 
-function translate_diff(::CompactSymplectic1,
+function translate_diff(::CompactSymplectic{1},
                         x,
                         y,
                         vy,
@@ -107,9 +105,9 @@ function translate_diff(::CompactSymplectic1,
     return hamilton_prod(vy, x)
 end
 
-@inline inner(::CompactSymplectic1, ::Identity, ve, we) = dot(ve, we)
+@inline inner(::CompactSymplectic{1}, ::Identity, ve, we) = dot(ve, we)
 
-function exp!(::GT, y, ::Identity{GT}, v) where {GT<:CompactSymplectic1}
+function exp!(::GT, y, ::Identity{GT}, v) where {GT<:CompactSymplectic{1}}
       @assert length(v) == 4 && length(y) == 4
       vi = SVector{3}(2:4)
       @inbounds begin
@@ -121,7 +119,7 @@ function exp!(::GT, y, ::Identity{GT}, v) where {GT<:CompactSymplectic1}
       return y
 end
 
-function log!(::GT, v, ::Identity{GT}, y) where {GT<:CompactSymplectic1}
+function log!(::GT, v, ::Identity{GT}, y) where {GT<:CompactSymplectic{1}}
     @assert length(v) == 4 && length(y) == 4
     vi = SVector{3}(2:4)
     @inbounds begin
