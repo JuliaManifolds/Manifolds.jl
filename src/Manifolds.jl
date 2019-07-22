@@ -32,8 +32,8 @@ using Random: AbstractRNG
 using SimpleTraits
 using ForwardDiff
 using UnsafeArrays
-import Einsum: @einsum
-import OrdinaryDiffEq: ODEProblem,
+using Einsum: @einsum
+using OrdinaryDiffEq: ODEProblem,
     AutoVern9,
     Rodas5,
     solve
