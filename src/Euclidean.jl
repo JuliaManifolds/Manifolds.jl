@@ -68,13 +68,13 @@ function project_tangent!(M::Euclidean, w, x, v)
     return w
 end
 
-function flat_isomorphism!(M::TangentBundleFibers{<:Euclidean}, v, x, w)
-    copyto!(v, w)
+function flat_isomorphism!(M::Euclidean, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
+    copyto!(v.data, w.data)
     return v
 end
 
-function sharp_isomorphism!(M::CotangentBundleFibers{<:Euclidean}, v, x, w)
-    copyto!(v, w)
+function sharp_isomorphism!(M::Euclidean, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
+    copyto!(v.data, w.data)
     return v
 end
 

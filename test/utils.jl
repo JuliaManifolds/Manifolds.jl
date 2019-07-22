@@ -171,10 +171,10 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
     test_musical_isomorphisms && @testset "Musical isomorphisms" begin
         tv_m = log(M, pts[1], pts[2])
-        tbf = TangentBundleFibers(M)
-        ctbf = CotangentBundleFibers(M)
-        ctv_m = flat_isomorphism(tbf, pts[1], tv_m)
-        tv_m_back = sharp_isomorphism(ctbf, pts[1], ctv_m)
+        ctv_m = flat_isomorphism(M, pts[1], FVector(TangentSpace, tv_m))
+        @test ctv_m.type == CotangentSpace
+        tv_m_back = sharp_isomorphism(M, pts[1], ctv_m)
+        @test tv_m_back.type == TangentSpace
     end
 
     @testset "eltype" begin

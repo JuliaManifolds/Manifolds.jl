@@ -3,6 +3,25 @@ include("utils.jl")
 @testset "Tangent bundle" begin
     M = Sphere(2)
 
+    @testset "FVector" begin
+        tvs = ([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
+        fv_tvs = map(v -> FVector(TangentSpace, v), tvs)
+        fv1 = fv_tvs[1]
+        tv1s = similar(fv_tvs[1])
+        @test isa(tv1s, FVector)
+        @test tv1s.type == TangentSpace
+        @test size(tv1s.data) == size(tvs[1])
+        @test eltype(tv1s) == eltype(tvs[1])
+        @test isa(fv1 + fv1, FVector)
+        @test (fv1 + fv1).type == TangentSpace
+        @test isa(fv1 - fv1, FVector)
+        @test (fv1 - fv1).type == TangentSpace
+        @test isa(-fv1, FVector)
+        @test (-fv1).type == TangentSpace
+        @test isa(2*fv1, FVector)
+        @test (2*fv1).type == TangentSpace
+    end
+
     types = [Vector{Float64},
              SizedVector{3, Float64},
              MVector{3, Float64},
@@ -38,4 +57,5 @@ include("utils.jl")
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(2))) == 4
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(3))) == 9
     end
+
 end

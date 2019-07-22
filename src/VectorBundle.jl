@@ -62,8 +62,32 @@ struct VectorBundleFibers{TVS<:VectorSpaceType, TM<:Manifold}
     M::TM
 end
 
+"""
+    FVector(x, type::VectorSpaceType)
+
+Decorator indicating that the vector `x` from a fiber of a tangent bundle
+is of type `type`.
+"""
+struct FVector{TType<:VectorSpaceType,TData}
+    type::TType
+    data::TData
+end
+
+size(x::FVector) = size(x.data)
+Base.@propagate_inbounds getindex(x::FVector, i) = getindex(x.data, i)
+Base.@propagate_inbounds setindex!(x::FVector, val, i) = setindex!(x.data, val, i)
+
+(+)(v1::FVector, v2::FVector) = FVector(v1.type, v1.data + v2.data)
+(-)(v1::FVector, v2::FVector) = FVector(v1.type, v1.data - v2.data)
+(-)(v::FVector) = FVector(v.type, -v.data)
+(*)(a::Number, v::FVector) = FVector(v.type, a*v.data)
+
+eltype(::Type{FVector{TType,TData}}) where {TType<:VectorSpaceType,TData} = eltype(TData)
+similar(x::FVector) = FVector(x.type, similar(x.data))
+similar(x::FVector, ::Type{T}) where {T} = FVector(x.type, similar(x.data, T))
+
 @doc doc"""
-    flat_isomorphism!(M::VectorBundleFibers, v, x, w)
+    flat_isomorphism!(M::Manifold, v::FVector, x, w::FVector)
 
 Compute the flat isomorphism (one of the musical isomorphisms) of vector `w`
 from the vector space of type `M` at point `x` from manifold `M.M`.
@@ -72,20 +96,24 @@ The function can be used for example to transform vectors
 from the tangent bundle to vectors from the cotangent bundle
 $\flat \colon TM \to T^{*}M$
 """
-function flat_isomorphism!(M::VectorBundleFibers, v, x, w)
+function flat_isomorphism!(M::Manifold, v::FVector, x, w::FVector)
     error("flat_isomorphism! not implemented for vector bundle fibers space " *
         "of type $(typeof(M)), vector of type $(typeof(v)), point of " *
         "type $(typeof(x)) and vector of type $(typeof(w)).")
 end
 
-function flat_isomorphism(M::VectorBundleFibers, x, w)
+function flat_isomorphism(M::Manifold, x, w::FVector)
     v = similar_result(M, flat_isomorphism, w, x)
     flat_isomorphism!(M, v, x, w)
     return v
 end
 
+function similar_result(M::Manifold, ::typeof(flat_isomorphism), w::FVector{TangentSpaceType}, x)
+    return FVector(CotangentSpace, similar(w.data))
+end
+
 @doc doc"""
-    sharp_isomorphism!(M::VectorBundleFibers, v, x, w)
+    sharp_isomorphism!(M::Manifold, v::FVector, x, w::FVector)
 
 Compute the sharp isomorphism (one of the musical isomorphisms) of vector `w`
 from the vector space of type `M` at point `x` from manifold `M.M`.
@@ -94,16 +122,20 @@ The function can be used for example to transform vectors
 from the cotangent bundle to vectors from the tangent bundle
 $\sharp \colon T^{*}M \to TM$
 """
-function sharp_isomorphism!(M::VectorBundleFibers, v, x, w)
+function sharp_isomorphism!(M::Manifold, v::FVector, x, w::FVector)
     error("sharp_isomorphism! not implemented for vector bundle fibers space " *
         "of type $(typeof(M)), vector of type $(typeof(v)), point of " *
         "type $(typeof(x)) and vector of type $(typeof(w)).")
 end
 
-function sharp_isomorphism(M::VectorBundleFibers, x, w)
+function sharp_isomorphism(M::Manifold, x, w::FVector)
     v = similar_result(M, sharp_isomorphism, w, x)
     sharp_isomorphism!(M, v, x, w)
     return v
+end
+
+function similar_result(M::Manifold, ::typeof(sharp_isomorphism), w::FVector{CotangentSpaceType}, x)
+    return FVector(TangentSpace, similar(w.data))
 end
 
 """
