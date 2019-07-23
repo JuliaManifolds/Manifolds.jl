@@ -41,6 +41,16 @@ norm(M::Rotations, x, v) = norm(v)
 
 project_tangent!(M::Rotations, w, x, v) = w .= (v .- transpose(v))./2
 
+function flat_isomorphism!(M::Rotations, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
+    copyto!(v.data, w.data)
+    return v
+end
+
+function sharp_isomorphism!(M::Rotations, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
+    copyto!(v.data, w.data)
+    return v
+end
+
 function exp!(M::Rotations, y, x, v)
     y .= x * exp(v)
     return y
@@ -461,7 +471,7 @@ function is_manifold_point(M::Rotations{N},x; kwargs...) where {N}
             "The point $(x) does not lie on $M, since its size is not $((N, N))."))
     end
     if !isapprox(det(x), 1; kwargs...)
-        throw(DomainError(norm(x), "The determinant of $x has to be +1 but it is $(det(x))"))
+        throw(DomainError(det(x), "The determinant of $x has to be +1 but it is $(det(x))"))
     end
     if !isapprox(transpose(x)*x, one(x); kwargs...)
         throw(DomainError(norm(x), "$x has to be orthogonal but it's not"))
