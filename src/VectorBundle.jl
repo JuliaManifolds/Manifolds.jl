@@ -74,9 +74,9 @@ struct VectorSpaceAtPoint{TFiber<:VectorBundleFibers, TX}
 end
 
 """
-    FVector(x, type::VectorSpaceType)X
+    FVector(type::VectorSpaceType, data)
 
-Decorator indicating that the vector `x` from a fiber of a tangent bundle
+Decorator indicating that the vector `data` from a fiber of a vector bundle
 is of type `type`.
 """
 struct FVector{TType<:VectorSpaceType,TData}
@@ -267,7 +267,7 @@ function project_vector!(M::VectorBundleFibers, v, x, w)
 end
 
 function project_vector!(M::VectorBundleFibers{<:TangentSpaceType}, v, x, w)
-    project_tangent!(M, v, x, w)
+    project_tangent!(M.M, v, x, w)
     return v
 end
 

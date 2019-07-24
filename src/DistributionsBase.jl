@@ -4,7 +4,7 @@ using Distributions
 struct MPointvariate <: VariateForm
 end
 
-struct TVectorvariate <: VariateForm
+struct FVectorvariate <: VariateForm
 end
 
 """
@@ -26,31 +26,31 @@ abstract type MPointDistribution{TM<:Manifold} <: Distribution{MPointvariate, MP
 end
 
 """
-    TVectorSupport(manifold::Manifold, x)
+    FVectorSupport(space::Manifold, VectorBundleFibers)
 
 Value support for tangent vector-valued distributions (values from tangent
 space at point `x` from given manifold).
 """
-struct TVectorSupport{TM<:Manifold, T} <: ValueSupport
-    manifold::TM
+struct FVectorSupport{TSpace<:VectorBundleFibers, T} <: ValueSupport
+    space::TSpace
     x::T
 end
 
 """
-    TVectorDistribution{TM<:Manifold, T}
+    FVectorDistribution{TSpace<:VectorBundleFibers, T}
 
 An abstract distribution for tangent vectors at point of type `T`
-from manifold of type `TM`.
+from vector space of type `TSpace`.
 """
-abstract type TVectorDistribution{TM<:Manifold, T} <: Distribution{TVectorvariate, TVectorSupport{TM, T}}
+abstract type FVectorDistribution{TSpace<:VectorBundleFibers, T} <: Distribution{FVectorvariate, FVectorSupport{TSpace, T}}
 end
 
 
 """
-    support(d::TVectorDistribution)
+    support(d::FVectorDistribution)
 
-Get the object of type `TVectorSupport` for the distribution `d`.
+Get the object of type `FVectorSupport` for the distribution `d`.
 """
-function Distributions.support(::T) where T<:TVectorDistribution
+function Distributions.support(::T) where T<:FVectorDistribution
     error("support not implemented for type $T")
 end

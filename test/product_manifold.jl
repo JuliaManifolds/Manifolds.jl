@@ -33,7 +33,7 @@ include("utils.jl")
                           retraction_methods = retraction_methods,
                           inverse_retraction_methods = inverse_retraction_methods,
                           point_distributions = [Manifolds.ProductPointDistribution(distr_M1, distr_M2)],
-                          tvector_distributions = [Manifolds.ProductTVectorDistribution(distr_tv_M1, distr_tv_M2)])
+                          tvector_distributions = [Manifolds.ProductFVectorDistribution(distr_tv_M1, distr_tv_M2)])
         end
     end
 

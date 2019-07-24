@@ -249,48 +249,51 @@ function _rand!(rng::AbstractRNG, d::ProductPointDistribution, x::ProductRepr)
 end
 
 """
-    ProductTVectorDistribution([m::ProductManifold], [x], distrs...)
+    ProductFVectorDistribution([type::VectorBundleFibers], [x], distrs...)
 
-Generates a random tangent vector at point `x` from manifold `m` using the
-product distribution of given distributions.
+Generates a random vector at point `x` from vector space (a fiber of a tangent
+bundle) of type `type` using the product distribution of given distributions.
 
-Manifold and `x` can be automatically inferred from distributions `distrs`.
+Vector space type and `x` can be automatically inferred from distributions `distrs`.
 """
-struct ProductTVectorDistribution{TM<:ProductManifold, TD<:(NTuple{N,Distribution} where N), TX} <: TVectorDistribution{TM, TX}
-    manifold::TM
+struct ProductFVectorDistribution{TSpace<:VectorBundleFibers{<:VectorSpaceType, <:ProductManifold}, TD<:(NTuple{N,Distribution} where N), TX} <: FVectorDistribution{TSpace, TX}
+    type::TSpace
     x::TX
     distributions::TD
 end
 
-function ProductTVectorDistribution(M::ProductManifold, x::Union{AbstractArray, MPoint, ProductRepr}, distributions::TVectorDistribution...)
-    return ProductTVectorDistribution{typeof(M), typeof(distributions), typeof(x)}(M, x, distributions)
+function ProductFVectorDistribution(type::VectorBundleFibers{<:VectorSpaceType, <:ProductManifold}, x::Union{AbstractArray, MPoint, ProductRepr}, distributions::FVectorDistribution...)
+    return ProductFVectorDistribution{typeof(type), typeof(distributions), typeof(x)}(type, x, distributions)
 end
 
-function ProductTVectorDistribution(M::ProductManifold, distributions::TVectorDistribution...)
+function ProductFVectorDistribution(type::VectorBundleFibers{<:VectorSpaceType, <:ProductManifold}, distributions::FVectorDistribution...)
     x = ProductRepr(map(d -> support(d).x, distributions))
-    return ProductTVectorDistribution(M, x, distributions...)
+    return ProductFVectorDistribution(type, x, distributions...)
 end
 
-function ProductTVectorDistribution(distributions::TVectorDistribution...)
-    M = ProductManifold(map(d -> support(d).manifold, distributions)...)
+function ProductFVectorDistribution(distributions::FVectorDistribution...)
+    M = ProductManifold(map(d -> support(d).space.M, distributions)...)
+    VS = support(distributions[1]).space.VS
+    all(d -> support(d).space.VS == VS, distributions) || error("Not all distributions have support in vector spaces of the same type, which is currently not supported")
+    # Probably worth considering sum spaces in the future?
     x = ProductRepr(map(d -> support(d).x, distributions)...)
-    return ProductTVectorDistribution(M, x, distributions...)
+    return ProductFVectorDistribution(VectorBundleFibers(VS, M), x, distributions...)
 end
 
-function support(tvd::ProductTVectorDistribution)
-    return TVectorSupport(tvd.manifold, ProductRepr(map(d -> support(d).x, tvd.distributions)...))
+function support(tvd::ProductFVectorDistribution)
+    return FVectorSupport(tvd.type, ProductRepr(map(d -> support(d).x, tvd.distributions)...))
 end
 
-function rand(rng::AbstractRNG, d::ProductTVectorDistribution)
+function rand(rng::AbstractRNG, d::ProductFVectorDistribution)
     return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
 end
 
-function _rand!(rng::AbstractRNG, d::ProductTVectorDistribution, v::AbstractArray{<:Number})
+function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::AbstractArray{<:Number})
     v .= rand(rng, d)
     return v
 end
 
-function _rand!(rng::AbstractRNG, d::ProductTVectorDistribution, v::ProductRepr)
+function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::ProductRepr)
     map(t -> _rand!(rng, t[1], t[2]), d.distributions, v.parts)
     return v
 end

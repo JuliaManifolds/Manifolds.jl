@@ -501,14 +501,14 @@ function is_tangent_vector(M::Rotations{N},x,v; kwargs...) where N
 end
 
 """
-    gaussian_tvector_distribution(M::Rotations, x, σ)
+    normal_tvector_distribution(M::Rotations, x, σ)
 
 Normal distribution in ambient space with standard deviation `σ`
 projected to tangent space at `x`.
 """
 function normal_tvector_distribution(M::Rotations, x, σ)
     d = Distributions.MvNormal(reshape(zero(x), :), σ)
-    return ProjectedTVectorDistribution(M, x, d, project_tangent!, x)
+    return ProjectedFVectorDistribution(TangentBundleFibers(M), x, d, project_vector!, x)
 end
 
 """

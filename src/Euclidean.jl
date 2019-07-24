@@ -100,5 +100,5 @@ projected to tangent space at `x`.
 """
 function normal_tvector_distribution(M::Euclidean{Tuple{N}}, x, σ) where N
     d = Distributions.MvNormal(zero(x), σ)
-    return ProjectedTVectorDistribution(M, x, d, project_tangent!, x)
+    return ProjectedFVectorDistribution(TangentBundleFibers(M), x, d, project_vector!, x)
 end

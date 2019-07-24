@@ -155,5 +155,5 @@ projected to tangent space at `x`.
 """
 function normal_tvector_distribution(S::Sphere, x, σ)
     d = Distributions.MvNormal(zero(x), σ)
-    return ProjectedTVectorDistribution(S, x, d, project_tangent!, x)
+    return ProjectedFVectorDistribution(TangentBundleFibers(S), x, d, project_vector!, x)
 end
