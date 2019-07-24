@@ -504,6 +504,9 @@ end
 Allocates an array for the result of function `f` on manifold `M`
 and arguments `x...` for implementing the non-modifying operation
 using the modifying operation.
+
+Usefulness of passing a function is demonstrated by methods that allocate
+results of musical isomorphisms.
 """
 function similar_result(M::Manifold, f, x...)
     T = similar_result_type(M, f, x)

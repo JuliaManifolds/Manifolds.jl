@@ -63,7 +63,18 @@ struct VectorBundleFibers{TVS<:VectorSpaceType, TM<:Manifold}
 end
 
 """
-    FVector(x, type::VectorSpaceType)
+    VectorSpaceAtPoint(fiber::VectorBundleFibers, x)
+
+A vector space (fiber type `fiber` of a vector bundle) at point `x` from
+the manifold `fiber.M`.
+"""
+struct VectorSpaceAtPoint{TFiber<:VectorBundleFibers, TX}
+    fiber::TFiber
+    x::TX
+end
+
+"""
+    FVector(x, type::VectorSpaceType)X
 
 Decorator indicating that the vector `x` from a fiber of a tangent bundle
 is of type `type`.
