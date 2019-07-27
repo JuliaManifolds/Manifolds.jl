@@ -129,6 +129,10 @@ domain(m::CompositeMap) = domain(m.g)
 
 codomain(m::CompositeMap) = codomain(m.f)
 
+inv(m::CompositeMap) = inv(m.g) ∘ inv(m.f)
+
+pinv(m::CompositeMap) = pinv(m.g) ∘ pinv(m.f)
+
 function show(io::IO, mime::MIME"text/plain", m::CompositeMap)
     print(io, "𝑓∘𝑔: 𝑀 ⟶ 𝑁 ⟶ 𝑃\n",
               "𝑀 = $(repr(mime, domain(m)))\n",
