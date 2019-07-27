@@ -87,12 +87,12 @@ function vector_transport!(M::Sphere, vto, x, v, y)
     return vto
 end
 
-function flat_isomorphism!(M::Sphere, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
+function flat!(M::Sphere, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
     copyto!(v.data, w.data)
     return v
 end
 
-function sharp_isomorphism!(M::Sphere, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
+function sharp!(M::Sphere, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
     copyto!(v.data, w.data)
     return v
 end

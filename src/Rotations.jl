@@ -41,12 +41,12 @@ norm(M::Rotations, x, v) = norm(v)
 
 project_tangent!(M::Rotations, w, x, v) = w .= (v .- transpose(v))./2
 
-function flat_isomorphism!(M::Rotations, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
+function flat!(M::Rotations, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
     copyto!(v.data, w.data)
     return v
 end
 
-function sharp_isomorphism!(M::Rotations, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
+function sharp!(M::Rotations, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
     copyto!(v.data, w.data)
     return v
 end

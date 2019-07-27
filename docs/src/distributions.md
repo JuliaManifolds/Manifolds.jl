@@ -9,5 +9,5 @@ Order = [:type, :function]
 ```
 ```@docs
 Manifolds.ProjectedPointDistribution
-Manifolds.ProjectedTVectorDistribution
+Manifolds.ProjectedFVectorDistribution
 ```

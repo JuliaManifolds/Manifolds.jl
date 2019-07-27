@@ -171,9 +171,9 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
     test_musical_isomorphisms && @testset "Musical isomorphisms" begin
         tv_m = log(M, pts[1], pts[2])
-        ctv_m = flat_isomorphism(M, pts[1], FVector(TangentSpace, tv_m))
+        ctv_m = flat(M, pts[1], FVector(TangentSpace, tv_m))
         @test ctv_m.type == CotangentSpace
-        tv_m_back = sharp_isomorphism(M, pts[1], ctv_m)
+        tv_m_back = sharp(M, pts[1], ctv_m)
         @test tv_m_back.type == TangentSpace
     end
 

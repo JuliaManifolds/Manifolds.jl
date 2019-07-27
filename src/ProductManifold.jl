@@ -162,17 +162,17 @@ function inverse_retract!(M::ProductManifold, v, x, y, method::InverseProductRet
     return v
 end
 
-function flat_isomorphism!(M::ProductManifold, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
+function flat!(M::ProductManifold, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
     vfs = map(u -> FVector(CotangentSpace, u), v.data.parts)
     wfs = map(u -> FVector(TangentSpace, u), w.data.parts)
-    map(flat_isomorphism!, M.manifolds, vfs, x.parts, wfs)
+    map(flat!, M.manifolds, vfs, x.parts, wfs)
     return v
 end
 
-function sharp_isomorphism!(M::ProductManifold, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
+function sharp!(M::ProductManifold, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
     vfs = map(u -> FVector(TangentSpace, u), v.data.parts)
     wfs = map(u -> FVector(CotangentSpace, u), w.data.parts)
-    map(sharp_isomorphism!, M.manifolds, vfs, x.parts, wfs)
+    map(sharp!, M.manifolds, vfs, x.parts, wfs)
     return v
 end
 

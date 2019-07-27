@@ -2,14 +2,14 @@
 """
     VectorSpaceType
 
-Abstract type for tangent space, cotangent space, their tensor products,
-exterior products etc.
+Abstract type for tangent spaces, cotangent spaces, their tensor products,
+exterior products, etc.
 
 Every vector space `VS` is supposed to provide:
-* a method of constucting vectors,
+* a method of constructing vectors,
 * basic operations: addition, subtraction, multiplication by a scalar
   and negation (unary minus),
-* zero_vector!(VS, v, x) to construct zero vectors at point `x`,
+* `zero_vector!(VS, v, x)` to construct zero vectors at point `x`,
 * `similar(v, T)` for vector `v`,
 * `copyto!(v, w)` for vectors `v` and `w`,
 * `eltype(v)` for vector `v`,
@@ -18,10 +18,10 @@ Every vector space `VS` is supposed to provide:
 Optionally:
 * inner product via `inner` (used to provide Riemannian metric on vector
   bundles),
-* flat_isomorphism! and sharp_isomorphism!,
-* norm (by default uses `inner`),
-* project_vector! (for embedded vector spaces),
-* representation_size (if support for `ProductArray` is desired),
+* `flat!` and `sharp!`,
+* `norm` (by default uses `inner`),
+* `project_vector!` (for embedded vector spaces),
+* `representation_size` (if support for `ProductArray` is desired),
 * broadcasting for basic operations.
 """
 abstract type VectorSpaceType end
@@ -98,7 +98,7 @@ similar(x::FVector) = FVector(x.type, similar(x.data))
 similar(x::FVector, ::Type{T}) where {T} = FVector(x.type, similar(x.data, T))
 
 @doc doc"""
-    flat_isomorphism!(M::Manifold, v::FVector, x, w::FVector)
+    flat!(M::Manifold, v::FVector, x, w::FVector)
 
 Compute the flat isomorphism (one of the musical isomorphisms) of vector `w`
 from the vector space of type `M` at point `x` from manifold `M.M`.
@@ -107,24 +107,24 @@ The function can be used for example to transform vectors
 from the tangent bundle to vectors from the cotangent bundle
 $\flat \colon TM \to T^{*}M$
 """
-function flat_isomorphism!(M::Manifold, v::FVector, x, w::FVector)
-    error("flat_isomorphism! not implemented for vector bundle fibers space " *
+function flat!(M::Manifold, v::FVector, x, w::FVector)
+    error("flat! not implemented for vector bundle fibers space " *
         "of type $(typeof(M)), vector of type $(typeof(v)), point of " *
         "type $(typeof(x)) and vector of type $(typeof(w)).")
 end
 
-function flat_isomorphism(M::Manifold, x, w::FVector)
-    v = similar_result(M, flat_isomorphism, w, x)
-    flat_isomorphism!(M, v, x, w)
+function flat(M::Manifold, x, w::FVector)
+    v = similar_result(M, flat, w, x)
+    flat!(M, v, x, w)
     return v
 end
 
-function similar_result(M::Manifold, ::typeof(flat_isomorphism), w::FVector{TangentSpaceType}, x)
+function similar_result(M::Manifold, ::typeof(flat), w::FVector{TangentSpaceType}, x)
     return FVector(CotangentSpace, similar(w.data))
 end
 
 @doc doc"""
-    sharp_isomorphism!(M::Manifold, v::FVector, x, w::FVector)
+    sharp!(M::Manifold, v::FVector, x, w::FVector)
 
 Compute the sharp isomorphism (one of the musical isomorphisms) of vector `w`
 from the vector space of type `M` at point `x` from manifold `M.M`.
@@ -133,19 +133,19 @@ The function can be used for example to transform vectors
 from the cotangent bundle to vectors from the tangent bundle
 $\sharp \colon T^{*}M \to TM$
 """
-function sharp_isomorphism!(M::Manifold, v::FVector, x, w::FVector)
-    error("sharp_isomorphism! not implemented for vector bundle fibers space " *
+function sharp!(M::Manifold, v::FVector, x, w::FVector)
+    error("sharp! not implemented for vector bundle fibers space " *
         "of type $(typeof(M)), vector of type $(typeof(v)), point of " *
         "type $(typeof(x)) and vector of type $(typeof(w)).")
 end
 
-function sharp_isomorphism(M::Manifold, x, w::FVector)
-    v = similar_result(M, sharp_isomorphism, w, x)
-    sharp_isomorphism!(M, v, x, w)
+function sharp(M::Manifold, x, w::FVector)
+    v = similar_result(M, sharp, w, x)
+    sharp!(M, v, x, w)
     return v
 end
 
-function similar_result(M::Manifold, ::typeof(sharp_isomorphism), w::FVector{CotangentSpaceType}, x)
+function similar_result(M::Manifold, ::typeof(sharp), w::FVector{CotangentSpaceType}, x)
     return FVector(TangentSpace, similar(w.data))
 end
 
@@ -203,7 +203,7 @@ function inner(M::VectorBundleFibers{<:TangentSpaceType}, x, v, w)
 end
 
 function inner(M::VectorBundleFibers{<:CotangentSpaceType}, x, v, w)
-    return inner(M.M, x, flat_isomorphism(M, x, v), flat_isomorphism(M, x, w))
+    return inner(M.M, x, flat(M, x, v), flat(M, x, w))
 end
 
 """
