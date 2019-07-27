@@ -9,19 +9,19 @@ Every vector space `VS` is supposed to provide:
 * a method of constructing vectors,
 * basic operations: addition, subtraction, multiplication by a scalar
   and negation (unary minus),
-* `zero_vector!(VS, v, x)` to construct zero vectors at point `x`,
+* [`zero_vector!(VS, v, x)`](@ref) to construct zero vectors at point `x`,
 * `similar(v, T)` for vector `v`,
 * `copyto!(v, w)` for vectors `v` and `w`,
 * `eltype(v)` for vector `v`,
-* `vector_space_dimension(::VectorBundleFibers{<:typeof(VS)})`.
+* [`vector_space_dimension(::VectorBundleFibers{<:typeof(VS)}) where VS`](@ref).
 
 Optionally:
 * inner product via `inner` (used to provide Riemannian metric on vector
   bundles),
-* `flat!` and `sharp!`,
+* [`flat!`](@ref) and [`sharp!`](@ref),
 * `norm` (by default uses `inner`),
-* `project_vector!` (for embedded vector spaces),
-* `representation_size` (if support for `ProductArray` is desired),
+* [`project_vector!`](@ref) (for embedded vector spaces),
+* [`representation_size`](@ref) (if support for [`ProductArray`](@ref) is desired),
 * broadcasting for basic operations.
 """
 abstract type VectorSpaceType end
@@ -282,7 +282,7 @@ struct VectorBundle{TVS<:VectorSpaceType, TM<:Manifold} <: Manifold
     VS::VectorBundleFibers{TVS, TM}
 end
 
-function VectorBundle(VS::TVS, M::TM) where{TVS<:VectorSpaceType, TM<:Manifold}
+function VectorBundle(VS::TVS, M::TM) where {TVS<:VectorSpaceType, TM<:Manifold}
     return VectorBundle{TVS, TM}(VS, M, VectorBundleFibers(VS, M))
 end
 
