@@ -1,11 +1,15 @@
 """
     AbstractMap{D,CoD}
 
-Abstract type for maps between elements of sets that are [`Manifold`](@ref)s.
-Every map has a domain of type `D`, which is the manifold to which inputs
-belong and a codomain `CoD`, which is the manifold to which outputs belong.
+Abstract type for maps between elements of sets.
+Every map has a domain of type `D`, which is the set to which inputs
+belong and a codomain `CoD`, which is the set to which outputs belong. Note
+that maps are not required to be total. That is, the true (co)domain may be
+a subset of the provided (co)domain.
+
 Every new map type must implement [`domain`](@ref) and [`codomain`](@ref) and
-be callable.
+be callable. Optionally, `inv` and [`pinv`](@ref) may be used to specify
+a map that is a true inverse or pseudo-inverse, respectively.
 
 Maps can be composed in the same way as functions using the ∘ command. See
 [`CompositeMap`](@ref).
@@ -36,20 +40,28 @@ assumed to be stored in the field `m.codomain`.
 codomain(m::AbstractMap) = m.codomain
 codomain(::AbstractMap{M,N}) where {M,N<:Euclidean} = N()
 
+"""
+    pinv(m::AbstractMap)
+
+Get the pseudo-inverse of the map `m`. The pseudo-inverse is generally a left-
+or right-inverse of the original map.
+"""
+pinv(m::AbstractMap) = inv(m)
+
 @doc doc"""
     AbstractCurve{M} = AbstractMap{Euclidean{Tuple{1}},M}
 
 An alias for a curve, a map from 1-D real space to a manifold, i.e.
-$\phi: \mathbb R \to M$
+$\phi \colon \mathbb R \to M$
 """
-AbstractCurve{M} = AbstractMap{Euclidean{Tuple{1}},M}
+AbstractCurve{M} = AbstractMap{RealScalars,M}
 
 @doc doc"""
     AbstractField{M,T<:Tuple} = AbstractMap{M,Euclidean{T}}
 
 An alias for a generic field, a map from a point on a manifold `M` to real
 space of some dimension stored in `T`,
-i.e. $\phi: M \to \mathbb R^{m \times \dots \times n}$
+i.e. $\phi \colon M \to \mathbb R^{m \times \dots \times n}$
 """
 AbstractField{M,T<:Tuple} = AbstractMap{M,Euclidean{T}}
 
@@ -57,7 +69,7 @@ AbstractField{M,T<:Tuple} = AbstractMap{M,Euclidean{T}}
     AbstractScalarField{M} = AbstractField{M,Tuple{1}}
 
 An alias for a scalar field, a map from a point on a manifold `M` to 1-D real
-space, i.e. $\phi: M \to \mathbb R$
+space, i.e. $\phi \colon M \to \mathbb R$
 """
 AbstractScalarField{M} = AbstractField{M,Tuple{1}}
 
@@ -65,7 +77,7 @@ AbstractScalarField{M} = AbstractField{M,Tuple{1}}
     AbstractVectorField{M,N} = AbstractField{M,Tuple{N}}
 
 An alias for a vector field, a map from a point on a manifold `M` to
-$n$-dimensional vectors, i.e. $\phi: M \to \mathbb R^n$
+$n$-dimensional vectors, i.e. $\phi \colon M \to \mathbb R^n$
 """
 AbstractVectorField{M,N} = AbstractField{M,Tuple{N}}
 
@@ -74,20 +86,20 @@ AbstractVectorField{M,N} = AbstractField{M,Tuple{N}}
 
 An alias for a field that maps from a point on a manifold `M` to a vector space
 represented as $p \times q$-dimensional matrices,
-i.e. $\phi: M \to \mathbb R^{p \times q}$
+i.e. $\phi \colon M \to \mathbb R^{p \times q}$
 """
 AbstractMatrixField{M,P,Q} = AbstractField{M,Tuple{P,Q}}
 
 @doc doc"""
     CompositeMap{D,CoD,F,G} <: AbstractMap{D,CoD}
 
-A map that is a composition of two maps. Given two maps $f: B \to C$ and
-$g: A \to B$, this implements the map
+A map that is a composition of two maps. Given two maps $f \colon B \to C$ and
+$g \colon A \to B$, this implements the map
 
 ```math
 \begin{aligned}
-f \circ g =\ &h: A \to C\\
-             &h: x \mapsto f(g(x))
+h = f \circ g & \colon A \to C\\
+              & \colon x \mapsto f(g(x))
 \end{aligned}
 ```
 
@@ -129,7 +141,8 @@ end
 """
     FunctionMap{D,CoD,F} <: AbstractMap{D,CoD}
 
-A map that wraps a generic callable, annotating it with a domain and codomain.
+A map that wraps a generic callable, annotating it with a [`domain`](@ref) and
+[`codomain`](@ref).
 
 # Constructor
 
@@ -142,199 +155,220 @@ struct FunctionMap{D,CoD,F} <: AbstractMap{D,CoD}
 end
 
 FunctionMap(domain::D, codomain::CoD, m::AbstractMap{D,CoD}) where {D,CoD} = m
+FunctionMap(domain::D, ::D, ::typeof(identity)) where {D} = Identity(domain)
 
 (m::FunctionMap)(x...) = m.f(x...)
 
-"""
-    PseudoInvertibleFunctionMap{D,CoD,F,PIF} <: AbstractMap{D,CoD}
-
-An abstract type for a map that wraps a callable `f` and its pseudo-inverse
-`g`, which is either a left-, right-, or true inverse of `f`. `f` is also a
-pseudo-inverse of `g`.
-"""
-abstract type PseudoInvertibleFunctionMap{D,CoD,F,PIF} <: AbstractMap{D,CoD} end
-
-"""
-    Bijection{D,CoD,F,IF} <: PseudoInvertibleFunctionMap{D,CoD,F,IF}
-
-A one-to-one and onto (injective and surjective) map with a known true inverse.
-The inverse map is also a bijection and can be retrieved with `inv`.
-
-# Constructor
-
-    Bijection(domain, codomain, f, invf)
-"""
-struct Bijection{D,CoD,F,IF} <: PseudoInvertibleFunctionMap{D,CoD,F,IF}
-    domain::D
-    codomain::CoD
-    f::F
-    invf::IF
-end
-
-function Bijection(f::F, invf::IF) where {D,CoD,F<:AbstractMap{D,CoD},IF}
-    return Bijection(domain(f), codomain(f), f, invf)
-end
-
-function ∘(f::Bijection, g::Bijection)
-    return Bijection(domain(g), codomain(f), f.f ∘ g.f, g.invf ∘ f.invf)
-end
-
-(m::Bijection)(x...) = m.f(x...)
-
-inv(m::Bijection) = Bijection(codomain(m), domain(m), m.invf, m.f)
-
-pinv(m::Bijection) = inv(m)
-
 @doc doc"""
-    Injection{D,CoD,F,IF} <: PseudoInvertibleFunctionMap{D,CoD,F,IF}
+    ProductMap{D,CoD,TP<:Tuple} <: AbstractMap{D,CoD}
 
-An injective (one-to-one) map with a known left inverse such that an injection
-$f$ composed with its left inverse $g$ produces the identity map:
-$g ∘ f: x \mapsto x$.
+Given maps $f_i$ with respective domains $M_i$ and codomains $N_i$, construct
+the product map $g$, such that
 
-# Constructor
+```math
+\begin{aligned}
+g &\colon \times_i M_i \to \times_i N_i\\
+  &\colon (x_1, x_2, \dots) \mapsto (f_1(x_1), f_2(x_2), \dots)
+\end{aligned}
+```
 
-    Injection(domain, codomain, f, linvf)
-"""
-struct Injection{D,CoD,F,LIF} <: PseudoInvertibleFunctionMap{D,CoD,F,LIF}
-    domain::D
-    codomain::CoD
-    f::F
-    linvf::LIF
-end
-
-function Injection(f::F, linvf::LIF) where {D,CoD,F<:AbstractMap{D,CoD},LIF}
-    return Injection(domain(f), codomain(f), f, linvf)
-end
-
-function ∘(f::Injection, g::Injection)
-    return Injection(domain(g), codomain(f), f.f ∘ g.f, g.linvf ∘ f.linvf)
-end
-
-(m::Injection)(x...) = m.f(x...)
-
-@doc doc"""
-    Surjection{D,CoD,F,RIF} <: PseudoInvertibleFunctionMap{D,CoD,F,RIF}
-
-A surjective map (onto) with a known right inverse such that the right inverse
-$g$ of a surjection $f$ composed with $f$ produces the identity map:
-$f ∘ g: x \mapsto x$.
-
-The pseudo-inverse of a surjection is an injection and can be retrieved with
-`pinv`.
+Such a map may also be created using `cross` or `×`.
 
 # Constructor
 
-    Surjection(domain, codomain, f, rinvf)
+    ProductMap(maps::AbstractMap...)
 """
-struct Surjection{D,CoD,F,RIF} <: PseudoInvertibleFunctionMap{D,CoD,F,RIF}
+struct ProductMap{D,CoD,TP<:Tuple} <: AbstractMap{D,CoD}
     domain::D
     codomain::CoD
-    f::F
-    rinvf::RIF
+    maps::TP
 end
 
-function Surjection(f::F, rinvf::RIF) where {D,CoD,F<:AbstractMap{D,CoD},RIF}
-    return Surjection(domain(f), codomain(f), f, rinvf)
+function ProductMap(maps::AbstractMap...)
+    d = mapreduce(domain, cross, maps)
+    cod = mapreduce(codomain, cross, maps)
+    ProductMap(d, cod, maps)
 end
 
-function ∘(f::Surjection, g::Surjection)
-    return Surjection(domain(g), codomain(f), f.f ∘ g.f, g.rinvf ∘ f.rinvf)
+function cross(M1::AbstractMap, M2::AbstractMap)
+    return ProductMap(M1, M2)
 end
 
-(m::Surjection)(x...) = m.f(x...)
-
-pinv(m::Surjection) = Injection(codomain(m), domain(m), m.rinvf, m.f)
-
-# Composition rules for combinations of injections, surjections, and bijections
-
-function ∘(f::Bijection, g::Injection)
-    return Injection(domain(g), codomain(f), f.f ∘ g.f, g.linvf ∘ f.invf)
+function cross(M1::ProductMap, M2::AbstractMap)
+    return ProductMap(M1.maps..., M2)
 end
 
-function ∘(f::Injection, g::Bijection)
-    return Injection(domain(g), codomain(f), f.f ∘ g.f, g.invf ∘ f.linvf)
+function cross(M1::AbstractMap, M2::ProductMap)
+    return ProductMap(M1, M2.maps...)
 end
 
-function ∘(f::Surjection, g::Bijection)
-    return Surjection(domain(g), codomain(f), f.f ∘ g.f, g.invf ∘ f.rinvf)
+function cross(M1::ProductMap, M2::ProductMap)
+    return ProductMap(M1.maps..., M2.maps...)
 end
 
-function ∘(f::Bijection, g::Surjection)
-    return Surjection(domain(g), codomain(f), f.f ∘ g.f, g.rinvf ∘ f.invf)
+(m::ProductMap)(xs...) = map((f, x) -> f(x), m.maps, xs)
+(m::ProductMap)(x::Tuple) = m(x...)
+(m::ProductMap)(x) = m(x.parts...)
+
+pinv(m::ProductMap) = ProductMap(pinv.(m.maps)...)
+
+inv(m::ProductMap) = ProductMap(codomain(m), domain(m), inv.(m.maps))
+
+"""
+    IdentityMap{D} <: AbstractMap{D,D}
+
+Construct the identity map on `D`, which returns its inputs.
+
+# Constructor
+
+    IdentityMap(M)
+"""
+struct IdentityMap{D} <: AbstractMap{D,D}
+    domain::D
+end
+
+codomain(id::IdentityMap) = domain(id)
+
+(::IdentityMap)(x) = identity(x)
+(::IdentityMap)(x...) = identity(x)
+
+inv(id::IdentityMap) = id
+
+∘(f::AbstractMap{D}, ::IdentityMap{D}) where {D} = f
+∘(::IdentityMap{CoD}, f::AbstractMap{D,CoD}) where {D,CoD} = f
+∘(id::IdentityMap{D}, ::IdentityMap{D}) where {D} = id
+
+cross(id1::IdentityMap, id2::IdentityMap) = IdentityMap(domain(id1) × domain(id2))
+
+function show(io::IO, mime::MIME"text/plain", id::IdentityMap)
+    print(io, "idₘ: 𝑀 ⟶ 𝑀\n",
+              "𝑀 = $(repr(mime, domain(id)))")
 end
 
 @doc doc"""
-    Exponential{TMT,MT,PT} <: AbstractMap{TMT,MT}
+    Inclusion{D,CoD} <: AbstractMap{D,CoD}
 
-Riemannian exponential map from the tangent space $T_x M$ at a point $x \in M$
-to $M$:
-
-$\mathrm{Exp}_x: T_x M \to M$
+Construct the inclusion map $\iota$ from `D` to `CoD`, which identifies the
+input in the domain as belonging to the codomain. By default, this is just the
+identity map. However, it may be specialized to convert types of points where
+sensible.
 
 # Constructor
 
-    Exponential(M::Manifold, x)
+    Inclusion(domain, codomain)
 """
-struct Exponential{TMT,MT,PT} <: AbstractMap{TMT,MT}
+struct Inclusion{D,CoD} <: AbstractMap{D,CoD}
+    domain::D
+    codomain::CoD
+end
+
+Inclusion(domain::D, ::D) where {D} = Identity(domain)
+
+(::Inclusion)(x) = identity(x)
+
+pinv(𝜄::Inclusion) = Inclusion(codomain(𝜄), domain(𝜄))
+
+function show(io::IO, mime::MIME"text/plain", 𝜄::Inclusion)
+    print(io, "𝜄: 𝑀 ↪ 𝑁\n",
+              "𝑀 = $(repr(mime, domain(𝜄)))\n",
+              "𝑁 = $(repr(mime, codomain(𝜄)))")
+end
+
+@doc doc"""
+    RiemannianExponential{MT,TMT,MMT} <: AbstractMap{TMT,MMT}
+
+Riemannian exponential map from a point on the tangent bundle $T M$ to
+to $M \times M$:
+
+```math
+\begin{aligned}
+\mathrm{Exp} &\colon T M \to M \times M \\
+             &\colon (x, v_x) \mapsto (x, y)\\
+\mathrm{where\ }& x, y \in M, v_x \in T_x M
+\end{aligned}
+```
+
+The abbreviated map name `Exp` is also available.
+
+# Constructor
+
+    RiemannianExponential(M::Manifold)
+"""
+struct RiemannianExponential{MT,TMT,MMT} <: AbstractMap{TMT,MMT}
+    manifold::MT
     domain::TMT
-    codomain::MT
-    point::PT
+    codomain::MMT
 end
 
-const Exp = Exponential
+const Exp = RiemannianExponential
 
-function Exponential(M::MT, x::PT) where {MT,PT}
-    shape = representation_size(M, MPoint)
-    TM = Euclidean(shape...)
-    return Exponential(TM, M, x)
+function RiemannianExponential(M::Manifold)
+    shape = representation_size(M, TVector)
+    TₓM = Euclidean(shape...)
+    TM = M × TₓM
+    M² = M × M
+    return RiemannianExponential(M, TM, M²)
 end
 
-(m::Exponential)(v) = exp(m.codomain, m.point, v)
+(m::RiemannianExponential)(x, vₓ) = (x, exp(m.manifold, x, vₓ))
+(m::RiemannianExponential)(x::Tuple) = m(x...)
+(m::RiemannianExponential)(x) = ProductMPoint(x.parts[1], m(x.parts...))
 
-function show(io::IO, mime::MIME"text/plain", m::Exponential)
-    print(io, "Expₓ: 𝑇ₓ𝑀 ⟶ 𝑀,  𝑥 ∈ 𝑀\n",
-              "𝑀 = $(repr(mime, codomain(m)))\n",
-              "𝑥 = $(repr(mime, m.point))")
+pinv(m::Exp) = Log(m.manifold)
+
+function show(io::IO, mime::MIME"text/plain", m::RiemannianExponential)
+    print(io, "Exp: 𝑇𝑀 ⟶ 𝑀 × 𝑀\n",
+              "𝑀 = $(repr(mime, m.manifold))")
 end
 
 @doc doc"""
-    Logarithm{MT,TMT,PT} <: AbstractMap{MT,TMT}
+    RiemannianLogarithm{MT,MMT,TMT} <: AbstractMap{MMT,TMT}
 
 Riemannian logarithm map, which is the right inverse of the Riemannian
 exponential, defined as
 
 ```math
 \begin{aligned}
-\mathrm{Log}_x:& M \to T_x M\\
-\mathrm{Exp}_x \circ \mathrm{Log}_x:& y \mapsto y
+\mathrm{Log} &\colon M \times M \to T M\\
+             &\colon (x, y) \mapsto (x, v_x)\\
+\mathrm{Exp} \circ \mathrm{Log} &\colon (x, y) \mapsto (x, y)\\
+\mathrm{where\ }& x,y \in M, v_x \in T_x M
 \end{aligned}
 ```
 
+The abbreviated map name `Log` is also available.
+
 # Constructor
 
-    Logarithm(M::Manifold, x)
+    RiemannianLogarithm(M::Manifold)
 """
-struct Logarithm{MT,TMT,PT} <: AbstractMap{MT,TMT}
-    domain::MT
+struct RiemannianLogarithm{MT,MMT,TMT} <: AbstractMap{MMT,TMT}
+    manifold::MT
+    domain::MMT
     codomain::TMT
-    point::PT
 end
 
-const Log = Logarithm
+const Log = RiemannianLogarithm
 
-function Logarithm(M::MT, x::PT) where {MT,PT}
+function RiemannianLogarithm(M)
     shape = representation_size(M, TVector)
-    TM = Euclidean(shape...)
-    return Logarithm(M, TM, x)
+    TₓM = Euclidean(shape...)
+    TM = M × TₓM
+    M² = M × M
+    return RiemannianLogarithm(M, M², TM)
 end
 
-(m::Logarithm)(x) = log(m.domain, m.point, x)
+(m::RiemannianLogarithm)(x, y) = (x, log(m.manifold, x, y))
+(m::RiemannianLogarithm)(x::Tuple) = m(x...)
+(m::RiemannianLogarithm)(x) = ProductMPoint(x.parts[1], m(x.parts...))
 
-function show(io::IO, mime::MIME"text/plain", m::Logarithm)
-    print(io, "Logₓ: 𝑀 ⟶ 𝑇ₓ𝑀,  𝑥 ∈ 𝑀\n",
-              "𝑀 = $(repr(mime, domain(m)))\n",
-              "𝑥 = $(repr(mime, m.point))")
+inv(m::Log) = Exp(m.manifold)
+
+∘(e::Exp{M}, l::Log{M}) where {M} = IdentityMap(domain(l))
+
+function show(io::IO, mime::MIME"text/plain", m::RiemannianLogarithm)
+    print(io, "Log: 𝑀 × 𝑀 ⟶ 𝑇𝑀\n",
+              "𝑀 = $(repr(mime, m.manifold))")
 end
 
 @doc doc"""
@@ -344,9 +378,9 @@ Geodesic curve $\gamma(t)$ on manifold $M$:
 
 ```math
 \begin{aligned}
-&\gamma: \mathbb R \to M\\
-&\gamma(0) = x \in M\\
-&\gamma\dot(0) = v \in T_x M
+\gamma &\colon \mathbb R \to M\\
+\gamma(0) &= x \in M\\
+\dot\gamma(0) &= v \in T_x M
 \end{aligned}
 ```
 
@@ -360,7 +394,7 @@ struct Geodesic{MT,PT,VT} <: AbstractCurve{MT}
     v₀::VT
 end
 
-(g::Geodesic)(t::Real) = Exp(codomain(g), g.x₀)(t * g.v₀)
+(g::Geodesic)(t::Real) = Exp(codomain(g))(g.x₀, t * g.v₀)[2]
 
 function show(io::IO, mime::MIME"text/plain", m::Geodesic)
     print(io, "𝛾: ℝ ⟶ 𝑀\n",
@@ -376,9 +410,9 @@ Geodesic curve $\gamma(t)$ on manifold $M$:
 
 ```math
 \begin{aligned}
-&\gamma: \mathbb R \to M\\
-&\gamma(0) = x \in M\\
-&\gamma(1) = y \in M,
+\gamma &\colon \mathbb R \to M\\
+\gamma(0) &= x \in M\\
+\gamma(1) &= y \in M,
 \end{aligned}
 ```
 
@@ -397,7 +431,7 @@ struct ShortestGeodesic{MT,GT,IT,FT} <: AbstractCurve{MT}
 end
 
 function ShortestGeodesic(M, x, y)
-    v = Log(M, x)(y)
+    v = Log(M)(x, y)[2]
     return ShortestGeodesic(M, Geodesic(M, x, v), x, y)
 end
 

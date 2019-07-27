@@ -35,6 +35,7 @@ using Random: AbstractRNG
 using SimpleTraits
 using ForwardDiff
 using UnsafeArrays
+import UnicodeFun: to_superscript
 import Einsum: @einsum
 import OrdinaryDiffEq: ODEProblem,
     AutoVern9,
@@ -512,6 +513,9 @@ include("ProjectedDistribution.jl")
 export Manifold,
     IsDecoratorManifold,
     Euclidean,
+    RealScalars,
+    RealVectors,
+    RealMatrices,
     Sphere,
     ProductManifold,
     ProductMPoint,

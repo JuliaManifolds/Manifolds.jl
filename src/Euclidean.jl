@@ -19,6 +19,20 @@ struct Euclidean{T<:Tuple} <: Manifold where {T} end
 Euclidean(n::Int) = Euclidean{Tuple{n}}()
 Euclidean(m::Int, n::Int) = Euclidean{Tuple{m,n}}()
 
+const RealScalars = Euclidean{Tuple{1}}
+
+RealVectors{N} = Euclidean{Tuple{N}}
+RealVectors(n) = Euclidean(n)
+
+RealMatrices{N,M} = Euclidean{Tuple{N,M}}
+RealMatrices(n, m) = Euclidean(n, m)
+
+show(io::IO, mime::MIME"text/plain", ::RealScalars) = print(io, "ℝ")
+
+function show(io::IO, mime::MIME"text/plain", ::Euclidean{T}) where {T}
+    print(io, "ℝ", mapreduce(to_superscript, (n,m)->"$(n)ˣ$(m)", T.parameters))
+end
+
 function representation_size(::Euclidean{Tuple{n}}, ::Type{T}) where {n,T<:Union{MPoint, TVector, CoTVector}}
     return (n,)
 end
