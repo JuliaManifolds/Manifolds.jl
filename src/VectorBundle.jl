@@ -150,124 +150,124 @@ function similar_result(M::Manifold, ::typeof(sharp), w::FVector{CotangentSpaceT
 end
 
 """
-    similar_result_type(M::VectorBundleFibers, f, args::NTuple{N,Any}) where N
+    similar_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where N
 
 Returns type of element of the array that will represent the result of
 function `f` for representing an operation with result in the vector space `VS`
 for manifold `M` on given arguments (passed at a tuple).
 """
-function similar_result_type(M::VectorBundleFibers, f, args::NTuple{N,Any}) where N
+function similar_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where N
     T = typeof(reduce(+, one(eltype(eti)) for eti ∈ args))
     return T
 end
 
 """
-    similar_result(M::VectorBundleFibers, f, x...)
+    similar_result(B::VectorBundleFibers, f, x...)
 
 Allocates an array for the result of function `f` that is
 an element of the vector space of type `M.VS` on manifold `M.M`
 and arguments `x...` for implementing the non-modifying operation
 using the modifying operation.
 """
-function similar_result(M::VectorBundleFibers, f, x...)
-    T = similar_result_type(M, f, x)
+function similar_result(B::VectorBundleFibers, f, x...)
+    T = similar_result_type(B, f, x)
     return similar(x[1], T)
 end
 
-norm(M::VectorBundleFibers, x, v) = sqrt(inner(M, x, v, v))
+norm(B::VectorBundleFibers, x, v) = sqrt(inner(B, x, v, v))
 
-norm(M::VectorBundleFibers{<:TangentSpaceType}, x, v) = norm(M.M, x, v)
+norm(B::VectorBundleFibers{<:TangentSpaceType}, x, v) = norm(B.M, x, v)
 
 """
-    vector_distance(M::VectorBundleFibers, x, v, w)
+    vector_distance(B::VectorBundleFibers, x, v, w)
 
 Distance between vectors `v` and `w` from the vector space at point `x`
 from the manifold `M.M`, that is the base manifold of `M`.
 """
-vector_distance(M::VectorBundleFibers, x, v, w) = norm(M, x, v-w)
+vector_distance(B::VectorBundleFibers, x, v, w) = norm(B, x, v-w)
 
 """
-    inner(M::VectorBundleFibers, x, v, w)
+    inner(B::VectorBundleFibers, x, v, w)
 
-Inner product of vectors `v` and `w` from the vector space of type `VS`
-at point `x` from manifold `M`.
+Inner product of vectors `v` and `w` from the vector space of type `B.VS`
+at point `x` from manifold `B.M`.
 """
-function inner(M::VectorBundleFibers, x, v, w)
-    error("inner not defined for vector space family of type $(typeof(M)), " *
+function inner(B::VectorBundleFibers, x, v, w)
+    error("inner not defined for vector space family of type $(typeof(B)), " *
         "point of type $(typeof(x)) and " *
         "vectors of types $(typeof(v)) and $(typeof(w)).")
 end
 
-function inner(M::VectorBundleFibers{<:TangentSpaceType}, x, v, w)
-    return inner(M.M, x, v, w)
+function inner(B::VectorBundleFibers{<:TangentSpaceType}, x, v, w)
+    return inner(B.M, x, v, w)
 end
 
-function inner(M::VectorBundleFibers{<:CotangentSpaceType}, x, v, w)
-    return inner(M.M, x, flat(M, x, v), flat(M, x, w))
+function inner(B::VectorBundleFibers{<:CotangentSpaceType}, x, v, w)
+    return inner(B.M, x, flat(B, x, v), flat(B, x, w))
 end
 
 """
-    vector_space_dimension(M::VectorBundleFibers)
+    vector_space_dimension(B::VectorBundleFibers)
 
-Dimension of the vector space of type `M`.
+Dimension of the vector space of type `B`.
 """
-function vector_space_dimension(M::VectorBundleFibers)
-    error("vector_space_dimension not implemented for vector space family $(typeof(M)).")
+function vector_space_dimension(B::VectorBundleFibers)
+    error("vector_space_dimension not implemented for vector space family $(typeof(B)).")
 end
 
-vector_space_dimension(M::VectorBundleFibers{<:TCoTSpaceType}) = manifold_dimension(M.M)
+vector_space_dimension(B::VectorBundleFibers{<:TCoTSpaceType}) = manifold_dimension(B.M)
 
-function vector_space_dimension(M::VectorBundleFibers{<:TensorProductType})
+function vector_space_dimension(B::VectorBundleFibers{<:TensorProductType})
     dim = 1
-    for space in M.VS.spaces
-        dim *= vector_space_dimension(VectorBundleFibers(space, M.M))
+    for space in B.VS.spaces
+        dim *= vector_space_dimension(VectorBundleFibers(space, B.M))
     end
     return dim
 end
 
-function representation_size(M::VectorBundleFibers{<:TCoTSpaceType})
-    representation_size(M.M)
+function representation_size(B::VectorBundleFibers{<:TCoTSpaceType})
+    representation_size(B.M)
 end
 
 """
-    zero_vector!(M::VectorBundleFibers, v, x)
+    zero_vector!(B::VectorBundleFibers, v, x)
 
-Save the zero vector from the vector space of type `VS` at point `x`
-from manifold `M` to `v`.
+Save the zero vector from the vector space of type `B.VS` at point `x`
+from manifold `B.M` to `v`.
 """
-function zero_vector!(M::VectorBundleFibers, v, x)
-    error("zero_vector! not implemented for manifold $(typeof(M)), vector space of type $(typeof(VS)), vector of type $(typeof(v)) and point of type $(typeof(x)).")
+function zero_vector!(B::VectorBundleFibers, v, x)
+    error("zero_vector! not implemented for vector space family of type $(typeof(B)).")
 end
 
-function zero_vector!(M::VectorBundleFibers{<:TangentSpaceType}, v, x)
-    zero_tangent_vector!(M.M, v, x)
+function zero_vector!(B::VectorBundleFibers{<:TangentSpaceType}, v, x)
+    zero_tangent_vector!(B.M, v, x)
     return v
 end
 
 """
-    zero_vector(M::VectorBundleFibers, x)
+    zero_vector(B::VectorBundleFibers, x)
 
-Compute the zero vector from the vector space of type `VS` at point `x`
-from manifold `M.M`.
+Compute the zero vector from the vector space of type `B.VS` at point `x`
+from manifold `B.M`.
 """
-function zero_vector(M::VectorBundleFibers, x)
-    v = similar_result(M, zero_vector, x)
-    zero_vector!(M, v, x)
+function zero_vector(B::VectorBundleFibers, x)
+    v = similar_result(B, zero_vector, x)
+    zero_vector!(B, v, x)
     return v
 end
 
 """
-    project_vector!(M::VectorBundleFibers, v, x, w)
+    project_vector!(B::VectorBundleFibers, v, x, w)
 
-Project vector `w` from the vector space of type `VS` at point `x`
+Project vector `w` from the vector space of type `B.VS` at point `x`
 and save the result to `v`.
 """
-function project_vector!(M::VectorBundleFibers, v, x, w)
-    error("project_vector! not implemented for vector space manifold $(typeof(M)), vector space of type $(typeof(VS)), output vector of type $(typeof(v)) and input vector at point $(typeof(x)) with type of w $(typeof(w)).")
+function project_vector!(B::VectorBundleFibers, v, x, w)
+    error("project_vector! not implemented for vector space family of type $(typeof(B)), output vector of type $(typeof(v)) and input vector at point $(typeof(x)) with type of w $(typeof(w)).")
 end
 
-function project_vector!(M::VectorBundleFibers{<:TangentSpaceType}, v, x, w)
-    project_tangent!(M.M, v, x, w)
+function project_vector!(B::VectorBundleFibers{<:TangentSpaceType}, v, x, w)
+    project_tangent!(B.M, v, x, w)
     return v
 end
 
@@ -286,9 +286,9 @@ function VectorBundle(VS::TVS, M::TM) where {TVS<:VectorSpaceType, TM<:Manifold}
     return VectorBundle{TVS, TM}(VS, M, VectorBundleFibers(VS, M))
 end
 
-function representation_size(M::VectorBundle)
-    len_manifold = prod(representation_size(M.M))
-    len_vs = prod(representation_size(M.VS))
+function representation_size(B::VectorBundle)
+    len_manifold = prod(representation_size(B.M))
+    len_vs = prod(representation_size(B.VS))
     return (len_manifold + len_vs,)
 end
 
@@ -305,68 +305,68 @@ CotangentBundle{M} = VectorBundle{CotangentSpaceType,M}
 CotangentBundle(M::Manifold) = VectorBundle(CotangentSpace, M)
 
 """
-    bundle_projection(M::VectorBundle, x::ProductRepr)
+    bundle_projection(B::VectorBundle, x::ProductRepr)
 
 Projection of point `x` from the bundle `M` to the base manifold.
-Returns the point on the base manifold `M.M` at which the vector part
+Returns the point on the base manifold `B.M` at which the vector part
 of `x` is attached.
 """
-function bundle_projection(M::VectorBundle, x)
+function bundle_projection(B::VectorBundle, x)
     return submanifold_component(x, 1)
 end
 
-function isapprox(M::VectorBundle, x, y; kwargs...)
-    return isapprox(M.M, x.parts[1], y.parts[1]; kwargs...) &&
+function isapprox(B::VectorBundle, x, y; kwargs...)
+    return isapprox(B.M, x.parts[1], y.parts[1]; kwargs...) &&
         isapprox(x.parts[2], y.parts[2]; kwargs...)
 end
 
-function isapprox(M::VectorBundle, x, v, w; kwargs...)
-    return isapprox(M.M, v.parts[1], w.parts[1]; kwargs...) &&
-        isapprox(M.M, x.parts[1], v.parts[2], w.parts[2]; kwargs...)
+function isapprox(B::VectorBundle, x, v, w; kwargs...)
+    return isapprox(B.M, v.parts[1], w.parts[1]; kwargs...) &&
+        isapprox(B.M, x.parts[1], v.parts[2], w.parts[2]; kwargs...)
 end
 
-manifold_dimension(M::VectorBundle) = manifold_dimension(M.M) + vector_space_dimension(M.VS)
+manifold_dimension(B::VectorBundle) = manifold_dimension(B.M) + vector_space_dimension(B.VS)
 
-function inner(M::VectorBundle, x, v, w)
-    return inner(M.M, x.parts[1], v.parts[1], w.parts[1]) +
-           inner(M.VS, x.parts[2], v.parts[2], w.parts[2])
+function inner(B::VectorBundle, x, v, w)
+    return inner(B.M, x.parts[1], v.parts[1], w.parts[1]) +
+           inner(B.VS, x.parts[2], v.parts[2], w.parts[2])
 end
 
-function distance(M::VectorBundle, x, y)
-    dist_man = distance(M.M, x.parts[1], y.parts[1])
-    vy_x = vector_transport(M.M, y.parts[1], y.parts[2], x.parts[1])
-    dist_vec = vector_distance(M.VS, x.parts[1], x.parts[2], vy_x)
+function distance(B::VectorBundle, x, y)
+    dist_man = distance(B.M, x.parts[1], y.parts[1])
+    vy_x = vector_transport(B.M, y.parts[1], y.parts[2], x.parts[1])
+    dist_vec = vector_distance(B.VS, x.parts[1], x.parts[2], vy_x)
 
     return sqrt(dist_man^2 + dist_vec^2)
 end
 
-function exp!(M::VectorBundle, y, x, v)
-    exp!(M.M, y.parts[1], x.parts[1], v.parts[1])
-    vector_transport!(M.M, y.parts[2], x.parts[1], x.parts[2] + v.parts[2], y.parts[1])
+function exp!(B::VectorBundle, y, x, v)
+    exp!(B.M, y.parts[1], x.parts[1], v.parts[1])
+    vector_transport!(B.M, y.parts[2], x.parts[1], x.parts[2] + v.parts[2], y.parts[1])
     return y
 end
 
-function log!(M::VectorBundle, v, x, y)
-    log!(M.M, v.parts[1], x.parts[1], y.parts[1])
-    vector_transport!(M.M, v.parts[2], y.parts[1], y.parts[2], x.parts[1])
+function log!(B::VectorBundle, v, x, y)
+    log!(B.M, v.parts[1], x.parts[1], y.parts[1])
+    vector_transport!(B.M, v.parts[2], y.parts[1], y.parts[2], x.parts[1])
     copyto!(v.parts[2], v.parts[2] - x.parts[2])
     return v
 end
 
-function zero_tangent_vector!(M::VectorBundle, v, x)
-    zero_tangent_vector!(M.M, v.parts[1], x.parts[1])
-    zero_vector!(M.VS, v.parts[2], x.parts[2])
+function zero_tangent_vector!(B::VectorBundle, v, x)
+    zero_tangent_vector!(B.M, v.parts[1], x.parts[1])
+    zero_vector!(B.VS, v.parts[2], x.parts[2])
     return v
 end
 
-function project_point!(M::VectorBundle, x)
-    project_point!(M.M, x.parts[1])
-    project_tangent!(M.M, x.parts[2], x.parts[1], x.parts[2])
+function project_point!(B::VectorBundle, x)
+    project_point!(B.M, x.parts[1])
+    project_tangent!(B.M, x.parts[2], x.parts[1], x.parts[2])
     return x
 end
 
-function project_tangent!(M::VectorBundle, w, x, v)
-    project_tangent!(M.M, w.parts[1], x.parts[1], v.parts[1])
-    project_tangent!(M.M, w.parts[2], x.parts[1], v.parts[2])
+function project_tangent!(B::VectorBundle, w, x, v)
+    project_tangent!(B.M, w.parts[1], x.parts[1], v.parts[1])
+    project_tangent!(B.M, w.parts[2], x.parts[1], v.parts[2])
     return w
 end
