@@ -179,12 +179,12 @@ norm(B::VectorBundleFibers, x, v) = sqrt(inner(B, x, v, v))
 norm(B::VectorBundleFibers{<:TangentSpaceType}, x, v) = norm(B.M, x, v)
 
 """
-    vector_distance(B::VectorBundleFibers, x, v, w)
+    distance(B::VectorBundleFibers, x, v, w)
 
 Distance between vectors `v` and `w` from the vector space at point `x`
 from the manifold `M.M`, that is the base manifold of `M`.
 """
-vector_distance(B::VectorBundleFibers, x, v, w) = norm(B, x, v-w)
+distance(B::VectorBundleFibers, x, v, w) = norm(B, x, v-w)
 
 """
     inner(B::VectorBundleFibers, x, v, w)
@@ -335,7 +335,7 @@ end
 function distance(B::VectorBundle, x, y)
     dist_man = distance(B.M, x.parts[1], y.parts[1])
     vy_x = vector_transport(B.M, y.parts[1], y.parts[2], x.parts[1])
-    dist_vec = vector_distance(B.VS, x.parts[1], x.parts[2], vy_x)
+    dist_vec = distance(B.VS, x.parts[1], x.parts[2], vy_x)
 
     return sqrt(dist_man^2 + dist_vec^2)
 end
