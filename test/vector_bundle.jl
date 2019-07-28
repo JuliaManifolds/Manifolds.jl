@@ -49,8 +49,21 @@ include("utils.jl")
                           test_project_tangent = true)
         end
     end
+
     @test TangentBundle{Sphere{2}} == VectorBundle{Manifolds.TangentSpaceType, Sphere{2}}
     @test CotangentBundle{Sphere{2}} == VectorBundle{Manifolds.CotangentSpaceType, Sphere{2}}
+
+    @testset "spaces at point" begin
+        x = [1.0, 0.0, 0.0]
+        t_x = TangentSpaceAtPoint(M, x)
+        ct_x = CotangentSpaceAtPoint(M, x)
+        @test t_x.fiber.M == M
+        @test ct_x.fiber.M == M
+        @test t_x.fiber.VS == TangentSpace
+        @test ct_x.fiber.VS == CotangentSpace
+        @test t_x.x == x
+        @test ct_x.x == x
+    end
 
     @testset "tensor product" begin
         TT = Manifolds.TensorProductType(TangentSpace, TangentSpace)

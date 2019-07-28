@@ -74,6 +74,26 @@ struct VectorSpaceAtPoint{TFiber<:VectorBundleFibers, TX}
 end
 
 """
+    TangentSpaceAtPoint(M::Manifold, x)
+
+Return an object of type [`VectorSpaceAtPoint`](@ref) representing tangent
+space at `x`.
+"""
+function TangentSpaceAtPoint(M::Manifold, x)
+    return VectorSpaceAtPoint(TangentBundleFibers(M), x)
+end
+
+"""
+    CotangentSpaceAtPoint(M::Manifold, x)
+
+Return an object of type [`VectorSpaceAtPoint`](@ref) representing cotangent
+space at `x`.
+"""
+function CotangentSpaceAtPoint(M::Manifold, x)
+    return VectorSpaceAtPoint(CotangentBundleFibers(M), x)
+end
+
+"""
     FVector(type::VectorSpaceType, data)
 
 Decorator indicating that the vector `data` from a fiber of a vector bundle
@@ -174,10 +194,6 @@ function similar_result(B::VectorBundleFibers, f, x...)
     return similar(x[1], T)
 end
 
-norm(B::VectorBundleFibers, x, v) = sqrt(inner(B, x, v, v))
-
-norm(B::VectorBundleFibers{<:TangentSpaceType}, x, v) = norm(B.M, x, v)
-
 """
     distance(B::VectorBundleFibers, x, v, w)
 
@@ -205,6 +221,10 @@ end
 function inner(B::VectorBundleFibers{<:CotangentSpaceType}, x, v, w)
     return inner(B.M, x, flat(B, x, v), flat(B, x, w))
 end
+
+norm(B::VectorBundleFibers, x, v) = sqrt(inner(B, x, v, v))
+
+norm(B::VectorBundleFibers{<:TangentSpaceType}, x, v) = norm(B.M, x, v)
 
 """
     vector_space_dimension(B::VectorBundleFibers)
