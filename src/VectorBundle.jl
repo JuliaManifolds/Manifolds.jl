@@ -185,7 +185,7 @@ end
     similar_result(B::VectorBundleFibers, f, x...)
 
 Allocates an array for the result of function `f` that is
-an element of the vector space of type `M.VS` on manifold `M.M`
+an element of the vector space of type `B.VS` on manifold `B.M`
 and arguments `x...` for implementing the non-modifying operation
 using the modifying operation.
 """
