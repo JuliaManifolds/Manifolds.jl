@@ -7,8 +7,8 @@ domains and codomains. The base type is [`AbstractMap`](@ref), which has a
 Maps in __Manifolds__ are not required to be total. That is, given a domain $M$
 and codomain $N$, a function $f \colon M \to N$ is not required to be defined on
 all of $M$ or to cover all of $N$. Consequently, it is left to the user to
-ensure that sensible inputs are provided to the maps and that inverses and
-pseudo-inverses are used appropriately.
+ensure that sensible inputs are provided to the maps and that true, left-, and
+right-inverses are defined and used appropriately.
 
 ```@autodocs
 Modules = [Manifolds]

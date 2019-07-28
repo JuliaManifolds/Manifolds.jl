@@ -7,11 +7,11 @@ belong and a codomain `CoD`, which is the set to which outputs belong. Note
 that maps are not required to be total. That is, the true (co)domain may be
 a subset of the provided (co)domain.
 
-Every new map type must implement [`domain`](@ref) and [`codomain`](@ref) and
-be callable. Optionally, `inv` and [`pinv`](@ref) may be used to specify
-a map that is a true inverse or pseudo-inverse, respectively.
+Every new map type must implement [`domain`](@ref) and [`codomain`](@ref) and be
+callable. Optionally, [`inv`](@ref), [`linv`](@ref), and [`rinv`](@ref) may be
+used to specify a map that is a true, left-, or right-inverse, respectively.
 
-Maps can be composed in the same way as functions using the ∘ command. See
+Maps can be composed in the same way as functions using the `∘` command. See
 [`CompositeMap`](@ref).
 """
 abstract type AbstractMap{D,CoD} end
@@ -40,13 +40,32 @@ assumed to be stored in the field `m.codomain`.
 codomain(m::AbstractMap) = m.codomain
 codomain(::AbstractMap{M,N}) where {M,N<:Euclidean} = N()
 
-"""
-    pinv(m::AbstractMap)
+@doc doc"""
+    inv(f::AbstractMap)
 
-Get the pseudo-inverse of the map `m`. The pseudo-inverse is generally a left-
-or right-inverse of the original map.
+For a _total_ map $f \colon M \to M$, return its true inverse $g$, such that
+$g \circ f = f \circ g = \mathrm{id}_M \colon M \to M$, where $\mathrm{id}_M$
+is the identity map on $M$.
 """
-pinv(m::AbstractMap) = inv(m)
+function inv end
+
+@doc doc"""
+    linv(f::AbstractMap)
+
+For a map $f \colon M \to N$, return its left inverse $g$, such that
+$g \circ f = \mathrm{id}_N \colon N \to N$, where $\mathrm{id}_N$ is the
+identity map on $N$.
+"""
+linv(f::AbstractMap) = inv(f)
+
+@doc doc"""
+    rinv(f::AbstractMap)
+
+For a map $f \colon M \to N$, return its right inverse $g$, such that
+$f \circ g = \mathrm{id}_M \colon M \to M$, where $\mathrm{id}_M$ is the
+identity map on $M$.
+"""
+rinv(f::AbstractMap) = inv(f)
 
 @doc doc"""
     AbstractCurve{M} = AbstractMap{Euclidean{Tuple{1}},M}
@@ -131,7 +150,9 @@ codomain(m::CompositeMap) = codomain(m.f)
 
 inv(m::CompositeMap) = inv(m.g) ∘ inv(m.f)
 
-pinv(m::CompositeMap) = pinv(m.g) ∘ pinv(m.f)
+linv(m::CompositeMap) = linv(m.g) ∘ linv(m.f)
+
+rinv(m::CompositeMap) = rinv(m.g) ∘ rinv(m.f)
 
 function show(io::IO, mime::MIME"text/plain", m::CompositeMap)
     print(io, "𝑓∘𝑔: 𝑀 ⟶ 𝑁 ⟶ 𝑃\n",
@@ -159,7 +180,7 @@ struct FunctionMap{D,CoD,F} <: AbstractMap{D,CoD}
 end
 
 FunctionMap(domain::D, codomain::CoD, m::AbstractMap{D,CoD}) where {D,CoD} = m
-FunctionMap(domain::D, ::D, ::typeof(identity)) where {D} = Identity(domain)
+FunctionMap(domain::D, ::D, ::typeof(identity)) where {D} = IdentityMap(domain)
 
 (m::FunctionMap)(x...) = m.f(x...)
 
@@ -214,9 +235,11 @@ end
 (m::ProductMap)(x::Tuple) = m(x...)
 (m::ProductMap)(x) = m(x.parts...)
 
-pinv(m::ProductMap) = ProductMap(pinv.(m.maps)...)
-
 inv(m::ProductMap) = ProductMap(codomain(m), domain(m), inv.(m.maps))
+
+linv(m::ProductMap) = ProductMap(codomain(m), domain(m), linv.(m.maps))
+
+rinv(m::ProductMap) = ProductMap(codomain(m), domain(m), rinv.(m.maps))
 
 """
     IdentityMap{D} <: AbstractMap{D,D}
@@ -266,11 +289,15 @@ struct Inclusion{D,CoD} <: AbstractMap{D,CoD}
     codomain::CoD
 end
 
-Inclusion(domain::D, ::D) where {D} = Identity(domain)
+Inclusion(domain::D, ::D) where {D} = IdentityMap(domain)
 
 (::Inclusion)(x) = identity(x)
 
-pinv(𝜄::Inclusion) = Inclusion(codomain(𝜄), domain(𝜄))
+linv(𝜄::Inclusion) = Inclusion(codomain(𝜄), domain(𝜄))
+
+rinv(𝜄::Inclusion) = Inclusion(codomain(𝜄), domain(𝜄))
+
+∘(::Inclusion{N,M}, 𝜄::Inclusion{M,N}) where {M,N} = IdentityMap(domain(𝜄))
 
 function show(io::IO, mime::MIME"text/plain", 𝜄::Inclusion)
     print(io, "𝜄: 𝑀 ↪ 𝑁\n",
@@ -318,8 +345,6 @@ end
 (m::RiemannianExponential)(x::Tuple) = m(x...)
 (m::RiemannianExponential)(x) = ProductMPoint(x.parts[1], m(x.parts...))
 
-pinv(m::Exp) = Log(m.manifold)
-
 function show(io::IO, mime::MIME"text/plain", m::RiemannianExponential)
     print(io, "Exp: 𝑇𝑀 ⟶ 𝑀 × 𝑀\n",
               "𝑀 = $(repr(mime, m.manifold))")
@@ -366,9 +391,11 @@ end
 (m::RiemannianLogarithm)(x::Tuple) = m(x...)
 (m::RiemannianLogarithm)(x) = ProductMPoint(x.parts[1], m(x.parts...))
 
-inv(m::Log) = Exp(m.manifold)
+linv(m::Log) = Exp(m.manifold)
 
-∘(e::Exp{M}, l::Log{M}) where {M} = IdentityMap(domain(l))
+rinv(m::Exp) = Log(m.manifold)
+
+∘(::Exp{M}, l::Log{M}) where {M} = IdentityMap(domain(l))
 
 function show(io::IO, mime::MIME"text/plain", m::RiemannianLogarithm)
     print(io, "Log: 𝑀 × 𝑀 ⟶ 𝑇𝑀\n",

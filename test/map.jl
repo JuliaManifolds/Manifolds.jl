@@ -72,6 +72,12 @@
 
         x = normalize(randn(3))
         @test ϕ(x) === x
+
+        ψ = Manifolds.Inclusion(N, M)
+        @test linv(ϕ) === ψ
+        @test rinv(ϕ) === ψ
+        @test ψ ∘ ϕ === IdentityMap(M)
+        @test ϕ ∘ ψ === IdentityMap(N)
     end
 
     @testset "RiemannianExponential" begin
@@ -84,6 +90,9 @@
         @test Manifolds.domain(f) === M × Euclidean(3)
         @test Manifolds.codomain(f) === M × M
         @test f(x, v) == g(x, v)
+
+        @test rinv(f) === Manifolds.Log(M)
+        @test (f ∘ Manifolds.Log(M)) === IdentityMap(M × M)
     end
 
     @testset "RiemannianLogarithm" begin
@@ -97,8 +106,7 @@
         @test Manifolds.codomain(f) === M × Euclidean(3)
         @test f(x, y) == g(x, y)
 
-        @test inv(f) === Manifolds.Exp(M)
-        @test pinv(f) === Manifolds.Exp(M)
+        @test linv(f) === Manifolds.Exp(M)
     end
 
     @testset "Geodesic" begin
