@@ -16,6 +16,7 @@ import Base: isapprox,
     dataids,
     +,
     -,
+    *,
     ∘
 import LinearAlgebra: dot,
     norm,
