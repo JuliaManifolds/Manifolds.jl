@@ -565,5 +565,15 @@ export Metric,
     einstein_tensor,
     ricci_curvature,
     gaussian_curvature
+export AbstractMap,
+    FunctionMap,
+    CompositeMap,
+    ProductMap,
+    IdentityMap,
+    Inclusion,
+    domain,
+    codomain,
+    linv,
+    rinv
 
 end # module
