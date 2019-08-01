@@ -1,3 +1,4 @@
+include("utils.jl")
 
 struct TestEuclidean{N} <: Manifold end
 struct TestEuclideanMetric <: Metric end
@@ -153,6 +154,14 @@ struct BaseManifoldMetric{M} <: Metric end
     Manifolds.exp!(::BaseManifold, y, x, v) = y .= x + 2 * v
     Manifolds.log!(::BaseManifold, v, x, y) = v .= (y - x) / 2
     Manifolds.project_tangent!(::BaseManifold, w, x, v) = w .= 2 .* v
+    function Manifolds.flat!(::BaseManifold, v::FVector{Manifolds.CotangentSpaceType}, x, w::FVector{Manifolds.TangentSpaceType})
+        v.data .= 2 .* w.data
+        return v
+    end
+    function Manifolds.sharp!(::BaseManifold, v::FVector{Manifolds.TangentSpaceType}, x, w::FVector{Manifolds.CotangentSpaceType})
+        v.data .= w.data ./ 2
+        return v
+    end
 
     M = BaseManifold{3}()
     g = BaseManifoldMetric{3}()
@@ -178,4 +187,13 @@ struct BaseManifoldMetric{M} <: Metric end
     @test injectivity_radius(MM) === injectivity_radius(M)
     @test is_manifold_point(MM, x) === is_manifold_point(M, x)
     @test is_tangent_vector(MM, x, v) === is_tangent_vector(M, x, v)
+
+    cov = flat(M, x, FVector(TangentSpace, v))
+    cow = flat(M, x, FVector(TangentSpace, w))
+    @test cov.data ≈ flat(MM, x, FVector(TangentSpace, v)).data
+    cotspace = CotangentBundleFibers(M)
+    @test cov.data ≈ 2 * v
+    @test inner(M, x, v, w) ≈ inner(cotspace, x, cov.data, cow.data)
+    @test inner(MM, x, v, w) ≈ inner(cotspace, x, cov.data, cow.data)
+    @test sharp(M, x, cov).data ≈ v
 end

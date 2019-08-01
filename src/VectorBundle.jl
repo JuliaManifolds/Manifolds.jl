@@ -219,7 +219,10 @@ function inner(B::VectorBundleFibers{<:TangentSpaceType}, x, v, w)
 end
 
 function inner(B::VectorBundleFibers{<:CotangentSpaceType}, x, v, w)
-    return inner(B.M, x, flat(B, x, v), flat(B, x, w))
+    return inner(B.M,
+                 x,
+                 sharp(B.M, x, FVector(CotangentSpace, v)).data,
+                 sharp(B.M, x, FVector(CotangentSpace, w)).data)
 end
 
 norm(B::VectorBundleFibers, x, v) = sqrt(inner(B, x, v, v))
