@@ -149,7 +149,7 @@ end
                                                                                           MMT<:MetricManifold{MT,GT};
                                                                                           !HasMetric{MT,GT}}
     ginv = inverse_local_metric(B.M, x)
-    return dot(ginv * v, ginv * w)
+    return dot(v, ginv * w)
 end
 
 @traitfn function inner(B::VectorBundleFibers{<:CotangentSpaceType, MMT}, x, v, w) where {MT<:Manifold,
