@@ -31,6 +31,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_project_tangent = false,
     test_representation_size = true,
     test_musical_isomorphisms = false,
+    test_vector_transport = false,
     retraction_methods = [],
     inverse_retraction_methods = [],
     point_distributions = [],
@@ -141,6 +142,16 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         tv = similar(tv1)
         project_tangent!(M, tv, pts[1], tv1)
         @test isapprox(M, pts[1], tv, tv1)
+    end
+
+    test_vector_transport && @testset "vector transport" begin
+        v1 = log(M, pts[1], pts[2])
+        v2 = log(M, pts[1], pts[3])
+        v1t1 = vector_transport_to(M, pts[1], v1, pts[3])
+        v1t2 = vector_transport_direction(M, pts[1], v1, v2)
+        @test is_tangent_vector(M, pts[3], v1t1)
+        @test is_tangent_vector(M, pts[3], v1t2)
+        @test isapprox(M, pts[3], v1t1, v1t2)
     end
 
     test_forward_diff && @testset "ForwardDiff support" begin

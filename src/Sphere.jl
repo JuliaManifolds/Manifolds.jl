@@ -76,7 +76,7 @@ function zero_tangent_vector!(S::Sphere, v, x)
     return v
 end
 
-function vector_transport!(M::Sphere, vto, x, v, y)
+function vector_transport_to!(M::Sphere, vto, x, v, y)
     v_xy = log(M, x, y)
     vl = norm(M, x, v_xy)
     vto .= v

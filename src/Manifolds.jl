@@ -268,7 +268,7 @@ function inverse_retract(M::Manifold, x, y)
     return vr
 end
 
-project_point!(M::Manifold, x) = error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)).")
+project_point!(M::Manifold, x) = error("project_point! not implemented for a $(typeof(M)) and point $(typeof(x)).")
 
 function project_point(M::Manifold, x)
     y = similar_result(M, project_point, x)
@@ -405,11 +405,69 @@ function shortest_geodesic(M::Manifold, x, y, T::AbstractVector)
     return geodesic(M, x, log(M, x, y), T)
 end
 
-vector_transport!(M::Manifold, vto, x, v, y) = project_tangent!(M, vto, x, v)
+"""
+    vector_transport_to!(M::Manifold, vto, x, v, y)
 
-function vector_transport(M::Manifold, x, v, y)
-    vto = similar_result(M, vector_transport, v, x, y)
-    vector_transport!(M, vto, x, v, y)
+Vector transport of vector `v` at point `x` to point `y`. The result is saved
+to `vto`. By default, [`project_tangent!`](@ref) is used but this may change in
+the future.
+"""
+vector_transport_to!(M::Manifold, vto, x, v, y) = project_tangent!(M, vto, y, v)
+
+"""
+    vector_transport_to(M::Manifold, x, v, y)
+
+Vector transport of vector `v` at point `x` to point `y`.
+"""
+function vector_transport_to(M::Manifold, x, v, y)
+    vto = similar_result(M, vector_transport_to, v, x, y)
+    vector_transport_to!(M, vto, x, v, y)
+    return vto
+end
+
+"""
+    vector_transport_direction!(M::Manifold, vto, x, v, vdir)
+
+Vector transport of vector `v` at point `x` in the direction indicated
+by the tangent vector `vdir` at point `x`. The result is saved to `vto`.
+By default, `exp` and `vector_transport_to!` are used.
+"""
+function vector_transport_direction!(M::Manifold, vto, x, v, vdir)
+    y = exp(M, x, vdir)
+    return vector_transport_to!(M, vto, x, v, y)
+end
+
+"""
+    vector_transport_direction(M::Manifold, x, v, vdir)
+
+Vector transport of vector `v` at point `x` in the direction indicated
+by the tangent vector `vdir` at point `x`.
+"""
+function vector_transport_direction(M::Manifold, x, v, vdir)
+    vto = similar_result(M, vector_transport_direction, v, x, vdir)
+    vector_transport_direction!(M, vto, x, v, vdir)
+    return vto
+end
+
+"""
+    vector_transport_along!(M::Manifold, vto, x, v, c)
+
+Vector transport of vector `v` at point `x` along the curve `c` such that
+`c(0)` is equal to `x` to point `c(1)`. The result is saved to `vto`.
+"""
+function vector_transport_along!(M::Manifold, vto, x, v, c)
+    error("vector_transport_along! not implemented for manifold $(typeof(M)), vector $(typeof(vto)), point $(typeof(x)), vector $(typeof(v)) and curve $(typeof(c)).")
+end
+
+"""
+    vector_transport_along(M::Manifold, x, v, c)
+
+Vector transport of vector `v` at point `x` along the curve `c` such that
+`c(0)` is equal to `x` to point `c(1)`.
+"""
+function vector_transport_along(M::Manifold, x, v, c)
+    vto = similar_result(M, vector_transport_along, v, x, c)
+    vector_transport_along!(M, vto, x, v, c)
     return vto
 end
 
@@ -603,6 +661,10 @@ export ×,
     submanifold,
     submanifold_component,
     vector_space_dimension,
+    vector_transport_direction,
+    vector_transport_direction!,
+    vector_transport_to,
+    vector_transport_to!,
     zero_vector,
     zero_vector!,
     zero_tangent_vector,
