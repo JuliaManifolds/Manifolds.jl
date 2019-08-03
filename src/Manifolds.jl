@@ -269,16 +269,48 @@ function inverse_retract(M::Manifold, x, y)
     return vr
 end
 
+"""
+    project_point!(M::Manifold, x)
+
+Project point from the ambient space onto the manifold `M`. The point `x`
+is modified. The function works only for selected embedded manifolds and
+is *not* required to return the closest point.
+"""
 project_point!(M::Manifold, x) = error("project_point! not implemented for a $(typeof(M)) and point $(typeof(x)).")
 
+"""
+    project_point(M::Manifold, x)
+
+Project point from the ambient space onto the manifold `M`. The point `x`
+is not modified. The function works only for selected embedded manifolds and
+is *not* required to return the closest point.
+"""
 function project_point(M::Manifold, x)
     y = similar_result(M, project_point, x)
     project_tangent!(M, y, x)
     return y
 end
 
+"""
+    project_tangent!(M::Manifold, w, x, v)
+
+Project ambient space representation of a vector `v` to a tangent vector
+at point `x` from the manifold `M`. The result is saved in vector `w`.
+
+The function works only for selected embedded manifolds and
+is *not* required to return the closest vector.
+"""
 project_tangent!(M::Manifold, w, x, v) = error("project onto tangent space not implemented for a $(typeof(M)) and point $(typeof(x)) with input $(typeof(v)).")
 
+"""
+    project_tangent(M::Manifold, x, v)
+
+Project ambient space representation of a vector `v` to a tangent vector
+at point `x` from the manifold `M`.
+
+The function works only for selected embedded manifolds and
+is *not* required to return the closest vector.
+"""
 function project_tangent(M::Manifold, x, v)
     vt = similar_result(M, project_tangent, v, x)
     project_tangent!(M, vt, x, v)
@@ -623,6 +655,7 @@ export Manifold,
     VectorSpaceType,
     TangentSpace,
     CotangentSpace,
+    VectorSpaceAtPoint,
     TangentSpaceAtPoint,
     CotangentSpaceAtPoint,
     VectorBundle,
@@ -639,7 +672,9 @@ export ×,
     exp,
     exp!,
     flat,
+    flat!,
     sharp,
+    sharp!,
     geodesic,
     shortest_geodesic,
     injectivity_radius,
