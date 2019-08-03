@@ -62,6 +62,8 @@ struct VectorBundleFibers{TVS<:VectorSpaceType, TM<:Manifold}
     M::TM
 end
 
+base_manifold(B::VectorBundleFibers) = base_manifold(B.M)
+
 """
     VectorSpaceAtPoint(fiber::VectorBundleFibers, x)
 
@@ -72,6 +74,8 @@ struct VectorSpaceAtPoint{TFiber<:VectorBundleFibers, TX}
     fiber::TFiber
     x::TX
 end
+
+base_manifold(B::VectorSpaceAtPoint) = base_manifold(B.fiber)
 
 """
     TangentSpaceAtPoint(M::Manifold, x)
@@ -304,6 +308,8 @@ struct VectorBundle{TVS<:VectorSpaceType, TM<:Manifold} <: Manifold
     M::TM
     VS::VectorBundleFibers{TVS, TM}
 end
+
+base_manifold(B::VectorBundle) = base_manifold(B.M)
 
 function VectorBundle(VS::TVS, M::TM) where {TVS<:VectorSpaceType, TM<:Manifold}
     return VectorBundle{TVS, TM}(VS, M, VectorBundleFibers(VS, M))

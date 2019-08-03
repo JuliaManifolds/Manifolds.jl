@@ -34,6 +34,7 @@ include("utils.jl")
     for T in types
         x = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)
+        @test base_manifold(TB) == M
         @testset "Type $T" begin
             pts_tb = [ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
                       ProductRepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
@@ -53,10 +54,13 @@ include("utils.jl")
     @test TangentBundle{Sphere{2}} == VectorBundle{Manifolds.TangentSpaceType, Sphere{2}}
     @test CotangentBundle{Sphere{2}} == VectorBundle{Manifolds.CotangentSpaceType, Sphere{2}}
 
+    @test base_manifold(TangentBundle(M)) == M
     @testset "spaces at point" begin
         x = [1.0, 0.0, 0.0]
         t_x = TangentSpaceAtPoint(M, x)
         ct_x = CotangentSpaceAtPoint(M, x)
+        @test base_manifold(t_x) == M
+        @test base_manifold(ct_x) == M
         @test t_x.fiber.M == M
         @test ct_x.fiber.M == M
         @test t_x.fiber.VS == TangentSpace

@@ -106,6 +106,7 @@ then implements the feature itself.
     base_manifold(M::Manifold)
 
 Strip all decorators on `M`, returning the underlying topological manifold.
+Also used for vector bundles.
 """
 function base_manifold end
 
