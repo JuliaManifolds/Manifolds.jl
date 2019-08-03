@@ -514,5 +514,5 @@ end
                                                                 GT<:Metric,
                                                                 MMT<:MetricManifold{MT,GT};
                                                                 HasMetric{MT,GT}}
-    return flat!(M.manifold, v, x, w)
+    return sharp!(M.manifold, v, x, w)
 end
