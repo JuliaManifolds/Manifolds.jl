@@ -1,9 +1,21 @@
 
 using Distributions
 
+"""
+    MPointvariate
+
+Structure that subtypes `VariateForm`, indicating that a single sample
+is a point on a manifold.
+"""
 struct MPointvariate <: VariateForm
 end
 
+"""
+    FVectorvariate
+
+Structure that subtypes `VariateForm`, indicating that a single sample
+is a vector from a fiber of a vector bundle.
+"""
 struct FVectorvariate <: VariateForm
 end
 
