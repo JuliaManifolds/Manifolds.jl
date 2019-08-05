@@ -16,12 +16,18 @@ include("utils.jl")
 
     retraction_methods = [Manifolds.ProductRetraction(Manifolds.ExponentialRetraction(), Manifolds.ExponentialRetraction())]
     inverse_retraction_methods = [Manifolds.InverseProductRetraction(Manifolds.LogarithmicInverseRetraction(), Manifolds.LogarithmicInverseRetraction())]
-    for T in types
+
+    reshapers = (Manifolds.StaticReshaper(), Manifolds.ArrayReshaper())
+
+    for T in types, reshaper in reshapers
+        if reshaper == reshapers[2] && T != Vector{Float64}
+            continue
+        end
         @testset "Type $T" begin
             pts_base = [convert(T, [1.0, 0.0, 0.0, 0.0, 0.0]),
                         convert(T, [0.0, 1.0, 0.0, 1.0, 0.0]),
                         convert(T, [0.0, 0.0, 1.0, 0.0, 0.1])]
-            pts = map(p -> Manifolds.ProductArray(shape_se, p), pts_base)
+            pts = map(p -> Manifolds.ProductArray(shape_se, p, reshaper), pts_base)
             distr_M1 = Manifolds.uniform_distribution(M1, pts_base[1][1:3])
             distr_M2 = Manifolds.projected_distribution(M2, Distributions.MvNormal(zero(pts_base[1][4:5]), 1.0))
             distr_tv_M1 = Manifolds.normal_tvector_distribution(M1, pts_base[1][1:3], 1.0)
@@ -40,6 +46,14 @@ include("utils.jl")
     Mser = ProductManifold(M1, M2, M3)
     shape_ser = Manifolds.ShapeSpecification(M1, M2, M3)
 
+    @testset "high-dimensional product manifold" begin
+        Mhigh = Euclidean(100000)
+        shape_high = Manifolds.ShapeSpecification(M1, Mhigh)
+        a = Manifolds.ProductArray(shape_high, collect(1.0:100003.0), reshapers[2])
+        b = a.parts[2].^2
+        @test b[1] == 16
+    end
+
     @test submanifold(Mser, 2) == M2
     @test submanifold(Mser, Val((1, 3))) == M1 × M3
     @test submanifold(Mser, 2:3) == M2 × M3
@@ -50,7 +64,7 @@ include("utils.jl")
     Mprod4 = ProductManifold(M2, M2, M2, M2)
     shape4 = Manifolds.ShapeSpecification(Mprod4.manifolds...)
     data_x4 = rand(8)
-    @test Manifolds.ProductArray(shape4, data_x4).data === data_x4
+    @test Manifolds.ProductArray(shape4, data_x4, reshapers[1]).data === data_x4
 
     pts_sphere = [[1.0, 0.0, 0.0],
                   [0.0, 1.0, 0.0],
@@ -60,7 +74,7 @@ include("utils.jl")
               [0.0, 0.1]]
     angles = (0.0, π/2, 2π/3)
     pts_rot = [[cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)] for ϕ in angles]
-    pts = [Manifolds.prod_point(shape_ser, p[1], p[2], p[3]) for p in zip(pts_sphere, pts_r2, pts_rot)]
+    pts = [Manifolds.prod_point(shape_ser, reshapers[1], p[1], p[2], p[3]) for p in zip(pts_sphere, pts_r2, pts_rot)]
     test_manifold(Mser,
                   pts,
                   test_forward_diff = false,
@@ -73,14 +87,14 @@ include("utils.jl")
         pts_base = [convert(T, [1.0, 0.0, 0.0, 0.0, 0.0]),
                     convert(T, [0.0, 1.0, 0.0, 1.0, 0.0]),
                     convert(T, [0.0, 0.0, 1.0, 0.0, 0.1])]
-        pts = map(p -> Manifolds.ProductArray(shape_se, p), pts_base)
+        pts = map(p -> Manifolds.ProductArray(shape_se, p, reshapers[1]), pts_base)
         pts_sphere = [convert(Ts, [1.0, 0.0, 0.0]),
                       convert(Ts, [0.0, 1.0, 0.0]),
                       convert(Ts, [0.0, 0.0, 1.0])]
         pts_r2 = [convert(Tr2, [0.0, 0.0]),
                   convert(Tr2, [1.0, 0.0]),
                   convert(Tr2, [0.0, 0.1])]
-        pts_prod = [Manifolds.prod_point(shape_se, p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
+        pts_prod = [Manifolds.prod_point(shape_se, reshapers[1], p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
         for p in zip(pts, pts_prod)
             @test isapprox(Mse, p[1], p[2])
         end

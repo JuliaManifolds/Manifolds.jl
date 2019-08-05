@@ -125,12 +125,17 @@ function add_manifold_benchmarks()
 
     m_prod = Manifolds.ProductManifold(s2, r2)
     shape_s2r2 = Manifolds.ShapeSpecification(s2, r2)
+    reshaper_static = Manifolds.StaticReshaper()
+    reshaper_array = Manifolds.ArrayReshaper()
 
     pts_prd_base = [[1.0, 0.0, 0.0, 0.0, 0.0],
                     [0.0, 1.0, 0.0, 1.0, 0.0],
                     [0.0, 0.0, 1.0, 0.0, 0.1]]
-    pts_prod = map(p -> Manifolds.ProductArray(shape_s2r2, p), pts_prd_base)
-    add_manifold(m_prod, pts_prod, "ProductManifold with ProductArray")
+    pts_prod_static = map(p -> Manifolds.ProductArray(shape_s2r2, p, reshaper_static), pts_prd_base)
+    add_manifold(m_prod, pts_prod_static, "ProductManifold with ProductArray (static)")
+
+    pts_prod_array = map(p -> Manifolds.ProductArray(shape_s2r2, p, reshaper_array), pts_prd_base)
+    add_manifold(m_prod, pts_prod_array, "ProductManifold with ProductArray (array)")
 
     pts_prod_mpoints = [Manifolds.ProductMPoint(p[1], p[2]) for p in zip(pts_s2, pts_r2)]
     add_manifold(m_prod, pts_prod_mpoints, "ProductManifold with MPoint";
