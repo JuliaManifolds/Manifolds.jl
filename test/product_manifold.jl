@@ -5,7 +5,6 @@ include("utils.jl")
     M2 = Euclidean(2)
     Mse = ProductManifold(M1, M2)
     @test Mse == M1 × M2
-    shape_se = Manifolds.ShapeSpecification(M1, M2)
 
     types = [Vector{Float64},
              SizedVector{5, Float64},
@@ -16,7 +15,14 @@ include("utils.jl")
 
     retraction_methods = [Manifolds.ProductRetraction(Manifolds.ExponentialRetraction(), Manifolds.ExponentialRetraction())]
     inverse_retraction_methods = [Manifolds.InverseProductRetraction(Manifolds.LogarithmicInverseRetraction(), Manifolds.LogarithmicInverseRetraction())]
-    for T in types
+
+    reshapers = (Manifolds.StaticReshaper(), Manifolds.ArrayReshaper())
+
+    for T in types, reshaper in reshapers
+        if reshaper == reshapers[2] && T != Vector{Float64}
+            continue
+        end
+        shape_se = Manifolds.ShapeSpecification(reshaper, M1, M2)
         @testset "Type $T" begin
             pts_base = [convert(T, [1.0, 0.0, 0.0, 0.0, 0.0]),
                         convert(T, [0.0, 1.0, 0.0, 1.0, 0.0]),
@@ -38,7 +44,22 @@ include("utils.jl")
 
     M3 = Manifolds.Rotations(2)
     Mser = ProductManifold(M1, M2, M3)
-    shape_ser = Manifolds.ShapeSpecification(M1, M2, M3)
+    shape_ser = Manifolds.ShapeSpecification(reshapers[1], M1, M2, M3)
+
+    @testset "ShapeSpecification detailed reshapers" begin
+        shape_ser_3_test = Manifolds.ShapeSpecification((reshapers[1], reshapers[2], reshapers[1]), M1, M2, M3)
+        @test shape_ser_3_test.reshapers[1] == reshapers[1]
+        @test shape_ser_3_test.reshapers[2] == reshapers[2]
+        @test shape_ser_3_test.reshapers[3] == reshapers[1]
+    end
+
+    @testset "high-dimensional product manifold" begin
+        Mhigh = Euclidean(100000)
+        shape_high = Manifolds.ShapeSpecification(reshapers[2], M1, Mhigh)
+        a = Manifolds.ProductArray(shape_high, collect(1.0:100003.0))
+        b = a.parts[2].^2
+        @test b[1] == 16
+    end
 
     @test submanifold(Mser, 2) == M2
     @test submanifold(Mser, Val((1, 3))) == M1 × M3
@@ -48,7 +69,7 @@ include("utils.jl")
 
     # testing the slower generic constructor
     Mprod4 = ProductManifold(M2, M2, M2, M2)
-    shape4 = Manifolds.ShapeSpecification(Mprod4.manifolds...)
+    shape4 = Manifolds.ShapeSpecification(reshapers[1], Mprod4.manifolds...)
     data_x4 = rand(8)
     @test Manifolds.ProductArray(shape4, data_x4).data === data_x4
 
@@ -67,6 +88,8 @@ include("utils.jl")
                   test_reverse_diff = false)
 
     @testset "prod_point" begin
+        shape_se = Manifolds.ShapeSpecification(reshapers[1], M1, M2)
+
         Ts = SizedVector{3, Float64}
         Tr2 = SizedVector{2, Float64}
         T = SizedVector{5, Float64}
