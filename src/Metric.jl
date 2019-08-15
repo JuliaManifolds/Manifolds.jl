@@ -144,6 +144,21 @@ end
     return inner(M.manifold, x, v, w)
 end
 
+@traitfn function inner(B::VectorBundleFibers{<:CotangentSpaceType, MMT}, x, v, w) where {MT<:Manifold,
+                                                                                          GT<:Metric,
+                                                                                          MMT<:MetricManifold{MT,GT};
+                                                                                          !HasMetric{MT,GT}}
+    ginv = inverse_local_metric(B.M, x)
+    return dot(v, ginv * w)
+end
+
+@traitfn function inner(B::VectorBundleFibers{<:CotangentSpaceType, MMT}, x, v, w) where {MT<:Manifold,
+                                                                                          GT<:Metric,
+                                                                                          MMT<:MetricManifold{MT,GT};
+                                                                                          HasMetric{MT,GT}}
+    return inner(VectorBundleFibers(B.VS, B.M.manifold), x, v, w)
+end
+
 @traitfn function norm(M::MMT, x, v) where {MT<:Manifold,
                                             GT<:Metric,
                                             MMT<:MetricManifold{MT,GT};
@@ -456,4 +471,48 @@ end
                                                       MMT<:MetricManifold{MT,GT};
                                                       HasMetric{MT,GT}}
     return is_tangent_vector(M.manifold, x, v; kwargs...)
+end
+
+@traitfn function flat!(M::MMT,
+                        v::FVector{CotangentSpaceType},
+                        x,
+                        w::FVector{TangentSpaceType}) where {MT<:Manifold,
+                                                             GT<:Metric,
+                                                             MMT<:MetricManifold{MT,GT};
+                                                             !HasMetric{MT,GT}}
+    g = local_metric(M, x)
+    copyto!(v, g*w)
+    return v
+end
+
+@traitfn function flat!(M::MMT,
+                        v::FVector{CotangentSpaceType},
+                        x,
+                        w::FVector{TangentSpaceType}) where {MT<:Manifold,
+                                                             GT<:Metric,
+                                                             MMT<:MetricManifold{MT,GT};
+                                                             HasMetric{MT,GT}}
+    return flat!(M.manifold, v, x, w)
+end
+
+@traitfn function sharp!(M::MMT,
+                         v::FVector{TangentSpaceType},
+                         x,
+                         w::FVector{CotangentSpaceType}) where {MT<:Manifold,
+                                                                GT<:Metric,
+                                                                MMT<:MetricManifold{MT,GT};
+                                                                !HasMetric{MT,GT}}
+    ginv = inverse_local_metric(M, x)
+    copyto!(v, ginv*w)
+    return v
+end
+
+@traitfn function sharp!(M::MMT,
+                         v::FVector{TangentSpaceType},
+                         x,
+                         w::FVector{CotangentSpaceType}) where {MT<:Manifold,
+                                                                GT<:Metric,
+                                                                MMT<:MetricManifold{MT,GT};
+                                                                HasMetric{MT,GT}}
+    return sharp!(M.manifold, v, x, w)
 end

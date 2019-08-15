@@ -29,6 +29,9 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_reverse_diff = true,
     test_tangent_vector_broadcasting = true,
     test_project_tangent = false,
+    test_representation_size = true,
+    test_musical_isomorphisms = false,
+    test_vector_transport = false,
     retraction_methods = [],
     inverse_retraction_methods = [],
     point_distributions = [],
@@ -42,15 +45,21 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     @testset "dimension" begin
         @test isa(manifold_dimension(M), Integer)
         @test manifold_dimension(M) ≥ 0
+        @test manifold_dimension(M) == vector_space_dimension(Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M))
+        @test manifold_dimension(M) == vector_space_dimension(Manifolds.VectorBundleFibers(Manifolds.CotangentSpace, M))
     end
 
-    @testset "representation" begin
-        for T ∈ (Manifolds.MPoint, Manifolds.TVector, Manifolds.CoTVector)
-            repr = Manifolds.representation_size(M, T)
+    test_representation_size && @testset "representation" begin
+        function test_repr(repr)
             @test isa(repr, Tuple)
             for rs ∈ repr
                 @test rs > 0
             end
+        end
+
+        test_repr(Manifolds.representation_size(M))
+        for VS ∈ (Manifolds.TangentSpace, Manifolds.CotangentSpace)
+            test_repr(Manifolds.representation_size(Manifolds.VectorBundleFibers(VS, M)))
         end
     end
 
@@ -104,6 +113,14 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
     end
 
+    @testset "vector spaces tests" begin
+        tv = zero_tangent_vector(M, pts[1])
+        mts = Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M)
+        @test isapprox(M, pts[1], tv, zero_vector(mts, pts[1]))
+        zero_vector!(mts, tv, pts[1])
+        @test isapprox(M, pts[1], tv, zero_tangent_vector(M, pts[1]))
+    end
+
     @testset "basic linear algebra in tangent space" begin
         @test isapprox(M, pts[1], 0*tv1, zero_tangent_vector(M, pts[1]))
         @test isapprox(M, pts[1], 2*tv1, tv1+tv1)
@@ -125,6 +142,16 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         tv = similar(tv1)
         project_tangent!(M, tv, pts[1], tv1)
         @test isapprox(M, pts[1], tv, tv1)
+    end
+
+    test_vector_transport && @testset "vector transport" begin
+        v1 = log(M, pts[1], pts[2])
+        v2 = log(M, pts[1], pts[3])
+        v1t1 = vector_transport_to(M, pts[1], v1, pts[3])
+        v1t2 = vector_transport_direction(M, pts[1], v1, v2)
+        @test is_tangent_vector(M, pts[3], v1t1)
+        @test is_tangent_vector(M, pts[3], v1t2)
+        @test isapprox(M, pts[3], v1t1, v1t2)
     end
 
     test_forward_diff && @testset "ForwardDiff support" begin
@@ -153,10 +180,28 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         end
     end
 
+    test_musical_isomorphisms && @testset "Musical isomorphisms" begin
+        tv_m = log(M, pts[1], pts[2])
+        ctv_m = flat(M, pts[1], FVector(TangentSpace, tv_m))
+        @test ctv_m.type == CotangentSpace
+        tv_m_back = sharp(M, pts[1], ctv_m)
+        @test tv_m_back.type == TangentSpace
+    end
+
     @testset "eltype" begin
         tv1 = log(M, pts[1], pts[2])
         @test eltype(tv1) == eltype(pts[1])
         @test eltype(exp(M, pts[1], tv1)) == eltype(pts[1])
+    end
+
+    @testset "copyto!" begin
+        p2 = similar(pts[1])
+        copyto!(p2, pts[2])
+        @test isapprox(M, p2, pts[2])
+
+        tv2 = similar(tv1)
+        copyto!(tv2, log(M, pts[2], pts[3]))
+        @test isapprox(M, pts[2], tv2, log(M, pts[2], pts[3]))
     end
 
     @testset "point distributions" begin

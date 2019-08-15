@@ -35,10 +35,11 @@ include("utils.jl")
             test_manifold(Mse,
                           pts;
                           test_reverse_diff = isa(T, Vector),
+                          test_musical_isomorphisms = true,
                           retraction_methods = retraction_methods,
                           inverse_retraction_methods = inverse_retraction_methods,
                           point_distributions = [Manifolds.ProductPointDistribution(distr_M1, distr_M2)],
-                          tvector_distributions = [Manifolds.ProductTVectorDistribution(distr_tv_M1, distr_tv_M2)])
+                          tvector_distributions = [Manifolds.ProductFVectorDistribution(distr_tv_M1, distr_tv_M2)])
         end
     end
 
@@ -113,7 +114,7 @@ include("utils.jl")
         end
     end
 
-    @testset "ProductMPoint" begin
+    @testset "ProductRepr" begin
         Ts = SizedVector{3, Float64}
         Tr2 = SizedVector{2, Float64}
         pts_sphere = [convert(Ts, [1.0, 0.0, 0.0]),
@@ -123,9 +124,10 @@ include("utils.jl")
                   convert(Tr2, [1.0, 0.0]),
                   convert(Tr2, [0.0, 0.1])]
 
-        pts = [ProductMPoint(p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
+        pts = [ProductRepr(p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
         test_manifold(Mse,
                       pts,
+                      test_musical_isomorphisms = true,
                       test_tangent_vector_broadcasting = false,
                       test_forward_diff = false,
                       test_reverse_diff = false)

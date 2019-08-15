@@ -13,7 +13,7 @@ generates the $\mathrm{SO}(n) \subset \mathbb R^{n\times n}$
 struct Rotations{N} <: Manifold end
 Rotations(n::Int) = Rotations{n}()
 
-function representation_size(::Rotations{N}, ::Type{T}) where {N,T<:Union{MPoint, TVector, CoTVector}}
+function representation_size(::Rotations{N}) where N
     return (N, N)
 end
 
@@ -40,6 +40,16 @@ inner(M::Rotations, x, w, v) = dot(w, v)
 norm(M::Rotations, x, v) = norm(v)
 
 project_tangent!(M::Rotations, w, x, v) = w .= (v .- transpose(v))./2
+
+function flat!(M::Rotations, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
+    copyto!(v.data, w.data)
+    return v
+end
+
+function sharp!(M::Rotations, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
+    copyto!(v.data, w.data)
+    return v
+end
 
 function exp!(M::Rotations, y, x, v)
     y .= x * exp(v)
@@ -461,7 +471,7 @@ function is_manifold_point(M::Rotations{N},x; kwargs...) where {N}
             "The point $(x) does not lie on $M, since its size is not $((N, N))."))
     end
     if !isapprox(det(x), 1; kwargs...)
-        throw(DomainError(norm(x), "The determinant of $x has to be +1 but it is $(det(x))"))
+        throw(DomainError(det(x), "The determinant of $x has to be +1 but it is $(det(x))"))
     end
     if !isapprox(transpose(x)*x, one(x); kwargs...)
         throw(DomainError(norm(x), "$x has to be orthogonal but it's not"))
@@ -491,14 +501,14 @@ function is_tangent_vector(M::Rotations{N},x,v; kwargs...) where N
 end
 
 """
-    gaussian_tvector_distribution(M::Rotations, x, σ)
+    normal_tvector_distribution(M::Rotations, x, σ)
 
 Normal distribution in ambient space with standard deviation `σ`
 projected to tangent space at `x`.
 """
 function normal_tvector_distribution(M::Rotations, x, σ)
     d = Distributions.MvNormal(reshape(zero(x), :), σ)
-    return ProjectedTVectorDistribution(M, x, d, project_tangent!, x)
+    return ProjectedFVectorDistribution(TangentBundleFibers(M), x, d, project_vector!, x)
 end
 
 """
