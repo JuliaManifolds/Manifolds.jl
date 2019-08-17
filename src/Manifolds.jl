@@ -13,6 +13,7 @@ import Base: isapprox,
     copyto!,
     convert,
     dataids,
+    promote_rule,
     +,
     -,
     *

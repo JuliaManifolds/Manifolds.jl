@@ -168,9 +168,9 @@ end
     end
 end
 
-@inline SizedAbstractArray{S,T,N}(x::Tuple) where {S,T,N} = SizedAbstractArray{S,T,N,N}(x)
-@inline SizedAbstractArray{S,T}(x::Tuple) where {S,T} = SizedAbstractArray{S,T,StaticArrays.tuple_length(S),StaticArrays.tuple_length(S)}(x)
-@inline SizedAbstractArray{S}(x::NTuple{L,T}) where {S,T,L} = SizedAbstractArray{S,T,StaticArrays.tuple_length(S),StaticArrays.tuple_length(S)}(x)
+@inline SizedAbstractArray{S,T,N}(x::Tuple) where {S,T,N} = SizedAbstractArray{S,T,N,N,Array{T,N}}(collect(x))
+@inline SizedAbstractArray{S,T}(x::Tuple) where {S,T} = SizedAbstractArray{S,T,StaticArrays.tuple_length(S)}(x)
+@inline SizedAbstractArray{S}(x::NTuple{L,T}) where {S,T,L} = SizedAbstractArray{S,T}(x)
 
 # Overide some problematic default behaviour
 @inline convert(::Type{SA}, sa::SizedAbstractArray) where {SA<:SizedAbstractArray} = SA(sa.data)
@@ -178,13 +178,13 @@ end
 
 # Back to Array (unfortunately need both convert and construct to overide other methods)
 import Base.Array
-@inline Array(sa::SizedAbstractArray) = Array(sa.data)
-@inline Array{T}(sa::SizedAbstractArray{S,T}) where {T,S} = Array(sa.data)
-@inline Array{T,N}(sa::SizedAbstractArray{S,T,N}) where {T,S,N} = Array(sa.data)
+@inline Array(sa::SizedAbstractArray{S}) where {S} = Array(reshape(sa.data, size_to_tuple(S)))
+@inline Array{T}(sa::SizedAbstractArray{S,T}) where {T,S} = Array(reshape(sa.data, size_to_tuple(S)))
+@inline Array{T,N}(sa::SizedAbstractArray{S,T,N}) where {T,S,N} = Array(reshape(sa.data, size_to_tuple(S)))
 
-@inline convert(::Type{AbstractArray}, sa::SizedAbstractArray) = sa.data
-@inline convert(::Type{AbstractArray{T}}, sa::SizedAbstractArray{S,T}) where {T,S} = sa.data
-@inline convert(::Type{AbstractArray{T,N}}, sa::SizedAbstractArray{S,T,N}) where {T,S,N} = sa.data
+@inline convert(::Type{Array}, sa::SizedAbstractArray{S}) where {S} = Array(reshape(sa.data, size_to_tuple(S)))
+@inline convert(::Type{Array{T}}, sa::SizedAbstractArray{S,T}) where {T,S} = Array(reshape(sa.data, size_to_tuple(S)))
+@inline convert(::Type{Array{T,N}}, sa::SizedAbstractArray{S,T,N}) where {T,S,N} = Array(reshape(sa.data, size_to_tuple(S)))
 
 Base.@propagate_inbounds getindex(a::SizedAbstractArray, i::Int) = getindex(a.data, i)
 Base.@propagate_inbounds setindex!(a::SizedAbstractArray, v, i::Int) = setindex!(a.data, v, i)
@@ -195,7 +195,9 @@ SizedAbstractVector{S,T,M} = SizedAbstractArray{Tuple{S},T,1,M}
 
 SizedAbstractMatrix{S1,S2,T,M} = SizedAbstractArray{Tuple{S1,S2},T,2,M}
 @inline SizedAbstractMatrix{S1,S2}(a::TData) where {S1,S2,T,M,TData<:AbstractArray{T,M}} = SizedAbstractArray{Tuple{S1,S2},T,2,M,TData}(a)
-@inline SizedAbstractMatrix{S1,S2}(x::NTuple{L,T}) where {S1,S2,T,L} = SizedAbstractArray{Tuple{S1,S2},T,2,2,Matrix{2}}(x)
+@inline SizedAbstractMatrix{S1,S2}(x::NTuple{L,T}) where {S1,S2,T,L} = SizedAbstractArray{Tuple{S1,S2},T,2,2,Matrix{T}}(x)
+
+Base.dataids(sa::SizedAbstractArray) = Base.dataids(sa.data)
 
 """
     Size(dims)(array)
@@ -207,7 +209,8 @@ package.
 (::Size{S})(a::AbstractArray) where {S} = SizedAbstractArray{Tuple{S...}}(a)
 
 function promote_rule(::Type{<:SizedAbstractArray{S,T,N,M,TDataA}}, ::Type{<:SizedAbstractArray{S,U,N,M,TDataB}}) where {S,T,U,N,M,TDataA,TDataB}
-    SizedAbstractArray{S,promote_type(T,U),N,M,T,promote_type(TDataA, TDataB)}
+    TU = promote_type(T,U)
+    SizedAbstractArray{S,TU,N,M,promote_type(TDataA, TDataB)::Type{<:AbstractArray{TU}}}
 end
 
 @inline copy(a::SizedAbstractArray) = typeof(a)(copy(a.data))
