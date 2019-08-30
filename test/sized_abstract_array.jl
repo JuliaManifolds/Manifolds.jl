@@ -103,7 +103,12 @@ using Test
         B = SizedAbstractArray{Tuple{2,3,StaticArrays.Dynamic()}, Int, 3}(A)
         @test size(B) == size(A)
         @test axes(B) == (SOneTo(2), SOneTo(3), axes(A, 3))
+        @test axes(B, 1) == SOneTo(2)
+        @test axes(B, 2) == SOneTo(3)
         @test B[1,:,:] == A[1,:,:]
-        @test_broken B[:,:,2] == A[:,:,2]
+        inds = @SVector [2, 1]
+        @test B[1,inds,:] == A[1,inds,:]
+        @test B[:,:,2] == A[:,:,2]
+        @test B[:,:,@SVector [2, 3]] == A[:,:,[2, 3]]
     end
 end

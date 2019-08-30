@@ -268,8 +268,15 @@ SizedAbstractMatrix{S1,S2,T,M} = SizedAbstractArray{Tuple{S1,S2},T,2,M}
 
 Base.dataids(sa::SizedAbstractArray) = Base.dataids(sa.data)
 
-@inline size(sa::SizedAbstractArray) = size(sa.data)
+@inline size(sa::SizedAbstractArray{S}) where S = size(hasdynamic_val(S), sa)
+@inline size(::Val{:dynamic_true}, sa::SizedAbstractArray) = size(sa.data)
+@inline size(::Val{:dynamic_false}, sa::SizedAbstractArray{S}) where S = size_to_tuple(S)
+
 @inline length(sa::SizedAbstractArray) = length(sa.data)
+
+@inline length(sa::SizedAbstractArray{S}) where S = length(hasdynamic_val(S), sa)
+@inline length(::Val{:dynamic_true}, sa::SizedAbstractArray) = length(sa.data)
+@inline length(::Val{:dynamic_false}, sa::SizedAbstractArray{S}) where S = length(S)
 
 @generated function _sized_abstract_array_axes(::Type{S}, ax::Tuple) where S<:Tuple
     exprs = Any[]
@@ -311,15 +318,61 @@ end
 
 function _getindex(::Val{:dynamic_false}, sa::SizedAbstractArray, inds::Int...)
     @boundscheck checkbounds(sa, inds...)
-    _getindex_scalar(Size(sa), sa, inds...)
+    StaticArrays._getindex_scalar(Size(sa), sa, inds...)
 end
 
 Base.@propagate_inbounds function getindex(sa::SizedAbstractArray{S}, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...) where S
     _getindex(hasdynamic_val(S), all_dynamic_fixed_val(S, inds...), sa, inds...)
 end
 
-function _getindex(::Val{:dynamic_true}, ::Val{:dynamic_fixed_true}, sa::SizedAbstractArray{S}, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...) where S
-    error("TODO")
+Base.@propagate_inbounds function _getindex(::Val{:dynamic_true}, ::Val{:dynamic_fixed_true}, sa::SizedAbstractArray, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...)
+    return _getindex_all_static(sa, inds...)
+end
+
+function _get_indices(i::Tuple{}, j::Int)
+    return ()
+end
+
+function _get_indices(i::Tuple, j::Int, i1::Type{Int}, inds...)
+    return (:(inds[$j]), _get_indices(i, j+1, inds...)...)
+end
+
+function _get_indices(i::Tuple, j::Int, i1::Type{T}, inds...) where T<:StaticArray{<:Tuple, Int}
+    return (:(inds[$j][$(i[1])]), _get_indices(i[2:end], j+1, inds...)...)
+end
+
+function _get_indices(i::Tuple, j::Int, i1::Type{Colon}, inds...)
+    return (i[1], _get_indices(i[2:end], j+1, inds...)...)
+end
+
+Base.@propagate_inbounds @generated function _getindex_all_static(sa::SizedAbstractArray{S,T}, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...) where {S,T}
+    #error("TODO")
+    newsize = new_out_size_nongen(S, inds...)
+    exprs = Vector{Expr}(undef, length(newsize))
+
+    indices = CartesianIndices(newsize)
+    exprs = similar(indices, Expr)
+    for current_ind ∈ indices
+        cinds = _get_indices(current_ind.I, 1, inds...)
+        exprs[current_ind.I...] = :(getindex(sa.data, $(cinds...)))
+    end
+    Tnewsize = Tuple{newsize...}
+    return :(SArray{$Tnewsize,$T}(tuple($(exprs...))))
+end
+
+function new_out_size_nongen(::Type{Size}, inds...) where Size
+    os = []
+    map(Size.parameters, inds) do s, i
+        if i == Int
+        elseif i <: StaticVector
+            push!(os, i.parameters[1].parameters[1])
+        elseif i == Colon
+            push!(os, s)
+        else
+            error("Unknown index type: $i")
+        end
+    end
+    return tuple(os...)
 end
 
 @generated function new_out_size(::Type{Size}, inds...) where Size
@@ -337,13 +390,12 @@ end
     return Tuple{os...}
 end
 
-
-function _getindex(::Val{:dynamic_true}, ::Val{:dynamic_fixed_false}, sa::SizedAbstractArray{S}, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...) where S
+@inline function _getindex(::Val{:dynamic_true}, ::Val{:dynamic_fixed_false}, sa::SizedAbstractArray{S}, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...) where S
     newsize = new_out_size(S, inds...)
     return SizedAbstractArray{newsize}(getindex(sa.data, inds...))
 end
 
-function _getindex(::Val{:dynamic_false}, ::Val, sa::SizedAbstractArray, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...)
+@inline function _getindex(::Val{:dynamic_false}, ::Val, sa::SizedAbstractArray, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...)
     _getindex(sa, index_sizes(Size(sa), inds...), inds)
 end
 
