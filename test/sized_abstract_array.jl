@@ -97,18 +97,4 @@ using Test
         @test @inferred(promote_type(SizedAbstractVector{2,Int,1,Vector{Int}}, SizedAbstractVector{2,Float64,1,Vector{Float64}})) === SizedAbstractVector{2,Float64,1,Vector{Float64}}
         @test @inferred(promote_type(SizedAbstractMatrix{2,3,Float32,2,Matrix{Float32}}, SizedAbstractMatrix{2,3,Complex{Float64},2,Matrix{Complex{Float64}}})) === SizedAbstractMatrix{2,3,Complex{Float64},2,Matrix{Complex{Float64}}}
     end
-
-    @testset "dynamically sized axes" begin
-        A = rand(Int, 2, 3, 4)
-        B = SizedAbstractArray{Tuple{2,3,StaticArrays.Dynamic()}, Int, 3}(A)
-        @test size(B) == size(A)
-        @test axes(B) == (SOneTo(2), SOneTo(3), axes(A, 3))
-        @test axes(B, 1) == SOneTo(2)
-        @test axes(B, 2) == SOneTo(3)
-        @test B[1,:,:] == A[1,:,:]
-        inds = @SVector [2, 1]
-        @test B[1,inds,:] == A[1,inds,:]
-        @test B[:,:,2] == A[:,:,2]
-        @test B[:,:,@SVector [2, 3]] == A[:,:,[2, 3]]
-    end
 end

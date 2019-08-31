@@ -2,6 +2,7 @@
 include("utils.jl")
 
 include("sized_abstract_array.jl")
+include("hybrid_abstract_array.jl")
 
 # starting with tests of simple manifolds
 include("euclidean.jl")

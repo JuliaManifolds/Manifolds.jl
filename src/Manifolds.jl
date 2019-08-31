@@ -632,6 +632,8 @@ is_tangent_vector(M::Manifold, x, v; kwargs...) = true
 is_tangent_vector(M::Manifold, x::MPoint, v::TVector) = error("A validation for a $(typeof(v)) in the tangent space of a $(typeof(x)) on $(typeof(M)) not implemented.")
 
 include("utils.jl")
+include("SizedAbstractArray.jl")
+include("HybridAbstractArray.jl")
 
 include("ProductRepresentations.jl")
 include("ArrayManifold.jl")
