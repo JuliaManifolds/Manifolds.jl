@@ -135,9 +135,6 @@ end
     return HybridAbstractArray{S,T,N,M,typeof(a)}(a)
 end
 
-Base.@propagate_inbounds getindex(a::HybridAbstractArray, i::Int...) = getindex(a.data, i...)
-Base.@propagate_inbounds setindex!(a::HybridAbstractArray, v, i::Int...) = setindex!(a.data, v, i...)
-
 HybridAbstractVector{S,T,M} = HybridAbstractArray{Tuple{S},T,1,M}
 @inline HybridAbstractVector{S}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}} = HybridAbstractArray{Tuple{S},T,1,M,TData}(a)
 @inline HybridAbstractVector{S}(x::NTuple{L,T}) where {S,T,L} = HybridAbstractArray{Tuple{S},T,1,1,Vector{T}}(x)
@@ -173,7 +170,6 @@ end
     return HybridAbstractArray{S}(getindex(sa.data, :))
 end
 
-# disambiguation
 Base.@propagate_inbounds function getindex(sa::HybridAbstractArray{S}, inds::Int...) where S
     return getindex(sa.data, inds...)
 end
@@ -258,6 +254,11 @@ end
 
 import StaticArrays._setindex!_scalar
 
+Base.@propagate_inbounds function setindex!(a::HybridAbstractArray, value, inds::Int...)
+    Base.@boundscheck checkbounds(a, inds...)
+    _setindex!_scalar(Size(a), a, value, inds...)
+end
+
 @generated function _setindex!_scalar(::Size{S}, a::HybridAbstractArray, value, inds::Int...) where S
     if length(inds) == 0
         return quote
@@ -274,8 +275,8 @@ import StaticArrays._setindex!_scalar
         else
             ind_expr = :($ind_expr + $stride * (inds[$i] - 1))
         end
-        if S[i] == StaticArrays.Dynamic
-            stride = :($stride * size(a.data, i))
+        if isa(S[i], StaticArrays.Dynamic)
+            stride = :($stride * size(a.data, $i))
         else
             stride = :($stride * $(S[i]))
         end
@@ -297,3 +298,5 @@ end
 similar(::Type{<:HybridAbstractArray{S,T,N,M}},::Type{T2}) where {S,T,N,M,T2} = HybridAbstractArray{S,T2,N,M}(undef)
 similar(::Type{SA},::Type{T},s::Size{S}) where {SA<:HybridAbstractArray,T,S} = hybridabstractarray_similar_type(T,s,StaticArrays.length_val(s))(undef)
 hybridabstractarray_similar_type(::Type{T},s::Size{S},::Type{Val{D}}) where {T,S,D} = HybridAbstractArray{Tuple{S...},T,D,length(s)}
+
+Size(::Type{<:HybridAbstractArray{S}}) where {S} = Size(S)
