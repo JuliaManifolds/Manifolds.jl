@@ -47,9 +47,11 @@ struct HybridAbstractArray{S<:Tuple, T, N, M, TData<:AbstractArray{T,M}} <: Abst
     data::TData
 
     function HybridAbstractArray{S, T, N, M, TData}(a::TData) where {S, T, N, M, TData<:AbstractArray{T,M}}
-        dynamic_nodivisible = hasdynamic(S) && mod(length(a), tuple_nodynamic_prod(S)) != 0
-        nodynamic_notequal = !hasdynamic(S) && length(a) != StaticArrays.tuple_prod(S)
-        if nodynamic_notequal || dynamic_nodivisible
+        tnp = tuple_nodynamic_prod(S)
+        lena = length(a)
+        dynamic_nodivisible = hasdynamic(S) && tnp != 0 && mod(lena, tnp) != 0
+        nodynamic_notequal = !hasdynamic(S) && lena != StaticArrays.tuple_prod(S)
+        if nodynamic_notequal || dynamic_nodivisible || (tnp == 0 && lena != 0)
             error("Dimensions $(size(a)) don't match static size $S")
         end
         new{S,T,N,M,TData}(a)
@@ -300,3 +302,172 @@ similar(::Type{SA},::Type{T},s::Size{S}) where {SA<:HybridAbstractArray,T,S} = h
 hybridabstractarray_similar_type(::Type{T},s::Size{S},::Type{Val{D}}) where {T,S,D} = HybridAbstractArray{Tuple{S...},T,D,length(s)}
 
 Size(::Type{<:HybridAbstractArray{S}}) where {S} = Size(S)
+
+
+###############################
+# BROADCAST
+###############################
+
+import Base.Broadcast: BroadcastStyle
+using Base.Broadcast: AbstractArrayStyle, Broadcasted, DefaultArrayStyle
+
+# Add a new BroadcastStyle for StaticArrays, derived from AbstractArrayStyle
+# A constructor that changes the style parameter N (array dimension) is also required
+struct HybridArrayStyle{N} <: AbstractArrayStyle{N} end
+HybridArrayStyle{M}(::Val{N}) where {M,N} = HybridArrayStyle{N}()
+BroadcastStyle(::Type{<:HybridAbstractArray{<:Tuple, <:Any, N}}) where {N} = HybridArrayStyle{N}()
+# Precedence rules
+BroadcastStyle(::HybridAbstractArray{M}, ::DefaultArrayStyle{N}) where {M,N} =
+    DefaultArrayStyle(Val(max(M, N)))
+BroadcastStyle(::HybridAbstractArray{M}, ::DefaultArrayStyle{0}) where {M} =
+    HybridArrayStyle{M}()
+
+BroadcastStyle(::HybridAbstractArray{M}, ::StaticArrays.StaticArrayStyle{N}) where {M,N} =
+    StaticArrays.Hybrid(Val(max(M, N)))
+BroadcastStyle(::HybridAbstractArray{M}, ::StaticArrays.StaticArrayStyle{0}) where {M} =
+    HybridArrayStyle{M}()
+
+# copy overload
+@inline function Base.copy(B::Broadcasted{HybridArrayStyle{M}}) where M
+    flat = Broadcast.flatten(B); as = flat.args; f = flat.f
+    argsizes = StaticArrays.broadcast_sizes(as...)
+    destsize = StaticArrays.combine_sizes(argsizes)
+    if Length(destsize) === Length{StaticArrays.Dynamic()}()
+        # destination dimension cannot be determined statically; fall back to generic broadcast
+        return HybridAbstractArray{StaticArrays.size_tuple(destsize)}(copy(convert(Broadcasted{DefaultArrayStyle{M}}, B)))
+    end
+    _broadcast(f, destsize, argsizes, as...)
+end
+# copyto! overloads
+@inline Base.copyto!(dest, B::Broadcasted{<:HybridArrayStyle}) = _copyto!(dest, B)
+@inline Base.copyto!(dest::AbstractArray, B::Broadcasted{<:HybridArrayStyle}) = _copyto!(dest, B)
+@inline function _copyto!(dest, B::Broadcasted{HybridArrayStyle{M}}) where M
+    flat = Broadcast.flatten(B); as = flat.args; f = flat.f
+    argsizes = StaticArrays.broadcast_sizes(as...)
+    destsize = StaticArrays.combine_sizes((Size(dest), argsizes...))
+    if Length(destsize) === Length{StaticArrays.Dynamic()}()
+        # destination dimension cannot be determined statically; fall back to generic broadcast!
+        return copyto!(dest, convert(Broadcasted{DefaultArrayStyle{M}}, B))
+    end
+    StaticArrays._broadcast!(f, destsize, dest, argsizes, as...)
+end
+
+
+###############################
+# LINEAR ALGEBRA
+###############################
+
+const HybridMatrixLike{T} = Union{
+    HybridAbstractMatrix{<:Any, <:Any, T},
+    Transpose{T, <:HybridAbstractMatrix{T}},
+    Adjoint{T, <:HybridAbstractMatrix{T}},
+    Symmetric{T, <:HybridAbstractMatrix{T}},
+    Hermitian{T, <:HybridAbstractMatrix{T}},
+    Diagonal{T, <:HybridAbstractMatrix{<:Any, T}}
+}
+
+const HybridVecOrMatLike{T} = Union{HybridAbstractVector{<:Any, T}, HybridMatrixLike{T}}
+
+# Binary ops
+# Between arrays
+@inline +(a::HybridAbstractArray, b::HybridAbstractArray) = a .+ b
+@inline +(a::AbstractArray, b::HybridAbstractArray) = a .+ b
+@inline +(a::HybridAbstractArray, b::AbstractArray) = a .+ b
+
+@inline -(a::HybridAbstractArray, b::HybridAbstractArray) = a .- b
+@inline -(a::AbstractArray, b::HybridAbstractArray) = a .- b
+@inline -(a::HybridAbstractArray, b::AbstractArray) = a .- b
+
+# Scalar-array
+@inline *(a::Number, b::HybridAbstractArray) = a .* b
+@inline *(a::HybridAbstractArray, b::Number) = a .* b
+
+@inline /(a::HybridAbstractArray, b::Number) = a ./ b
+@inline \(a::Number, b::HybridAbstractArray) = a .\ b
+
+@inline vcat(a::HybridVecOrMatLike) = a
+@inline vcat(a::HybridVecOrMatLike, b::HybridVecOrMatLike) = _vcat(Size(a), Size(b), a, b)
+@inline vcat(a::HybridVecOrMatLike, b::HybridVecOrMatLike, c::HybridVecOrMatLike...) = vcat(vcat(a,b), vcat(c...))
+
+@generated function _vcat(::Size{Sa}, ::Size{Sb}, a::HybridVecOrMatLike, b::HybridVecOrMatLike) where {Sa, Sb}
+    if Size(Sa)[2] != Size(Sb)[2]
+        throw(DimensionMismatch("Tried to vcat arrays of size $Sa and $Sb"))
+    end
+
+    if a <: HybridAbstractVector && b <: HybridAbstractVector
+        Snew = (Sa[1] + Sb[1],)
+    else
+        Snew = (Sa[1] + Sb[1], Size(Sa)[2])
+    end
+
+    return quote
+        Base.@_inline_meta
+        @inbounds return similar_type(a, promote_type(eltype(a), eltype(b)), Size($Snew))(hcat(a.data, b.data))
+    end
+end
+
+@inline hcat(a::HybridVecOrMatLike, b::HybridVecOrMatLike) = _hcat(Size(a), Size(b), a, b)
+@inline hcat(a::HybridVecOrMatLike, b::HybridVecOrMatLike, c::HybridVecOrMatLike...) = hcat(hcat(a,b), hcat(c...))
+
+@generated function _hcat(::Size{Sa}, ::Size{Sb}, a::HybridVecOrMatLike, b::HybridVecOrMatLike) where {Sa, Sb}
+    if Sa[1] != Sb[1]
+        throw(DimensionMismatch("Tried to hcat arrays of size $Sa and $Sb"))
+    end
+
+    Snew = (Sa[1], Size(Sa)[2] + Size(Sb)[2])
+
+    return quote
+        Base.@_inline_meta
+        return similar_type(a, promote_type(eltype(a), eltype(b)), Size($Snew))(hcat(a.data, b.data))
+    end
+end
+
+@generated function _broadcast(f, ::Size{newsize}, s::Tuple{Vararg{Size}}, a...) where newsize
+    first_staticarray = 0
+    for i = 1:length(a)
+        if a[i] <: StaticArray
+            first_staticarray = a[i]
+            break
+        end
+    end
+    if first_staticarray == 0
+        for i = 1:length(a)
+            if a[i] <: HybridAbstractArray
+                first_staticarray = a[i]
+                break
+            end
+        end
+    end
+
+    exprs = Array{Expr}(undef, newsize)
+    more = prod(newsize) > 0
+    current_ind = ones(Int, length(newsize))
+    sizes = [sz.parameters[1] for sz ∈ s.parameters]
+
+    while more
+        exprs_vals = [(!(a[i] <: AbstractArray) ? :(StaticArrays.scalar_getindex(a[$i])) : :(a[$i][$(StaticArrays.broadcasted_index(sizes[i], current_ind))])) for i = 1:length(sizes)]
+        exprs[current_ind...] = :(f($(exprs_vals...)))
+
+        # increment current_ind (maybe use CartesianIndices?)
+        current_ind[1] += 1
+        for i ∈ 1:length(newsize)
+            if current_ind[i] > newsize[i]
+                if i == length(newsize)
+                    more = false
+                    break
+                else
+                    current_ind[i] = 1
+                    current_ind[i+1] += 1
+                end
+            else
+                break
+            end
+        end
+    end
+
+    return quote
+        Base.@_inline_meta
+        @inbounds elements = tuple($(exprs...))
+        @inbounds return similar_type($first_staticarray, eltype(elements), Size(newsize))(elements)
+    end
+end
