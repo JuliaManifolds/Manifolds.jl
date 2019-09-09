@@ -81,7 +81,7 @@ Base.dataids(sa::SizedAbstractArray) = Base.dataids(sa.data)
 """
     Size(dims)(array)
 
-Creates a `SizedAbstractArray` or `HybridAbstractArray` wrapping `array`
+Creates a `SizedAbstractArray` or `HybridArray` wrapping `array`
 with the specified statically-known `dims`, so to take advantage of the
 (faster) methods defined by the static array package.
 """
@@ -89,7 +89,7 @@ with the specified statically-known `dims`, so to take advantage of the
     if isa(S, NTuple{<:Any,Int})
         return :(SizedAbstractArray{Tuple{S...}}(a))
     else
-        return :(HybridAbstractArray{Tuple{S...}}(a))
+        return :(HybridArray{Tuple{S...}}(a))
     end
 end
 

@@ -35,7 +35,7 @@ end
 
 # conversion of SizedArray from StaticArrays.jl
 """
-    HybridAbstractArray{Tuple{dims...}}(array)
+    HybridArray{Tuple{dims...}}(array)
 
 Wraps an `AbstractArray` with a static size, so to take advantage of the (faster)
 methods defined by the static array package. The size is checked once upon
@@ -43,10 +43,10 @@ construction to determine if the number of elements (`length`) match, but the
 array may be reshaped.
 (Also, `Size(dims...)(array)` acheives the same thing)
 """
-struct HybridAbstractArray{S<:Tuple, T, N, M, TData<:AbstractArray{T,M}} <: AbstractArray{T, N}
+struct HybridArray{S<:Tuple, T, N, M, TData<:AbstractArray{T,M}} <: AbstractArray{T, N}
     data::TData
 
-    function HybridAbstractArray{S, T, N, M, TData}(a::TData) where {S, T, N, M, TData<:AbstractArray{T,M}}
+    function HybridArray{S, T, N, M, TData}(a::TData) where {S, T, N, M, TData<:AbstractArray{T,M}}
         tnp = tuple_nodynamic_prod(S)
         lena = length(a)
         dynamic_nodivisible = hasdynamic(S) && tnp != 0 && mod(lena, tnp) != 0
@@ -57,99 +57,99 @@ struct HybridAbstractArray{S<:Tuple, T, N, M, TData<:AbstractArray{T,M}} <: Abst
         new{S,T,N,M,TData}(a)
     end
 
-    function HybridAbstractArray{S, T, N, 1}(::UndefInitializer) where {S, T, N}
+    function HybridArray{S, T, N, 1}(::UndefInitializer) where {S, T, N}
         new{S, T, N, 1, Array{T, 1}}(Array{T, 1}(undef, StaticArrays.tuple_prod(S)))
     end
-    function HybridAbstractArray{S, T, N, N}(::UndefInitializer) where {S, T, N}
+    function HybridArray{S, T, N, N}(::UndefInitializer) where {S, T, N}
         new{S, T, N, N, Array{T, N}}(Array{T, N}(undef, size_to_tuple(S)...))
     end
 end
 
-@inline HybridAbstractArray{S,T,N}(a::TData) where {S,T,N,M,TData<:AbstractArray{T,M}} = HybridAbstractArray{S,T,N,M,TData}(a)
-@inline HybridAbstractArray{S,T}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}} = HybridAbstractArray{S,T,StaticArrays.tuple_length(S),M,TData}(a)
-@inline HybridAbstractArray{S}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}} = HybridAbstractArray{S,T,StaticArrays.tuple_length(S),M,TData}(a)
+@inline HybridArray{S,T,N}(a::TData) where {S,T,N,M,TData<:AbstractArray{T,M}} = HybridArray{S,T,N,M,TData}(a)
+@inline HybridArray{S,T}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}} = HybridArray{S,T,StaticArrays.tuple_length(S),M,TData}(a)
+@inline HybridArray{S}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}} = HybridArray{S,T,StaticArrays.tuple_length(S),M,TData}(a)
 
-@inline HybridAbstractArray{S,T,N}(::UndefInitializer) where {S,T,N} = HybridAbstractArray{S,T,N,N}(undef)
-@inline HybridAbstractArray{S,T}(::UndefInitializer) where {S,T} = HybridAbstractArray{S,T,StaticArrays.tuple_length(S),StaticArrays.tuple_length(S)}(undef)
-@generated function (::Type{HybridAbstractArray{S,T,N,M,TData}})(x::NTuple{L,Any}) where {S,T,N,M,TData,L}
+@inline HybridArray{S,T,N}(::UndefInitializer) where {S,T,N} = HybridArray{S,T,N,N}(undef)
+@inline HybridArray{S,T}(::UndefInitializer) where {S,T} = HybridArray{S,T,StaticArrays.tuple_length(S),StaticArrays.tuple_length(S)}(undef)
+@generated function (::Type{HybridArray{S,T,N,M,TData}})(x::NTuple{L,Any}) where {S,T,N,M,TData,L}
     if L != StaticArrays.tuple_prod(S)
         error("Dimension mismatch")
     end
     exprs = [:(a[$i] = x[$i]) for i = 1:L]
     return quote
         $(Expr(:meta, :inline))
-        a = HybridAbstractArray{S,T,N,M}(undef)
+        a = HybridArray{S,T,N,M}(undef)
         @inbounds $(Expr(:block, exprs...))
         return a
     end
 end
 
-@inline HybridAbstractArray{S,T,N}(x::Tuple) where {S,T,N} = HybridAbstractArray{S,T,N,N,Array{T,N}}(x)
-@inline HybridAbstractArray{S,T}(x::Tuple) where {S,T} = HybridAbstractArray{S,T,StaticArrays.tuple_length(S)}(x)
-@inline HybridAbstractArray{S}(x::NTuple{L,T}) where {S,T,L} = HybridAbstractArray{S,T}(x)
+@inline HybridArray{S,T,N}(x::Tuple) where {S,T,N} = HybridArray{S,T,N,N,Array{T,N}}(x)
+@inline HybridArray{S,T}(x::Tuple) where {S,T} = HybridArray{S,T,StaticArrays.tuple_length(S)}(x)
+@inline HybridArray{S}(x::NTuple{L,T}) where {S,T,L} = HybridArray{S,T}(x)
 
-Base.@propagate_inbounds (::Type{HybridAbstractArray{S,T,N,M,TData}})(a::AbstractArray) where {S,T,N,M,TData<:AbstractArray{<:Any,M}} = convert(HybridAbstractArray{S,T,N,M,TData}, a)
-Base.@propagate_inbounds (::Type{HybridAbstractArray{S,T,N,M}})(a::AbstractArray) where {S,T,N,M} = convert(HybridAbstractArray{S,T,N,M}, a)
-Base.@propagate_inbounds (::Type{HybridAbstractArray{S,T,N}})(a::AbstractArray) where {S,T,N} = convert(HybridAbstractArray{S,T,N}, a)
-Base.@propagate_inbounds (::Type{HybridAbstractArray{S,T}})(a::AbstractArray) where {S,T} = convert(HybridAbstractArray{S,T,StaticArrays.tuple_length(S)}, a)
+Base.@propagate_inbounds (::Type{HybridArray{S,T,N,M,TData}})(a::AbstractArray) where {S,T,N,M,TData<:AbstractArray{<:Any,M}} = convert(HybridArray{S,T,N,M,TData}, a)
+Base.@propagate_inbounds (::Type{HybridArray{S,T,N,M}})(a::AbstractArray) where {S,T,N,M} = convert(HybridArray{S,T,N,M}, a)
+Base.@propagate_inbounds (::Type{HybridArray{S,T,N}})(a::AbstractArray) where {S,T,N} = convert(HybridArray{S,T,N}, a)
+Base.@propagate_inbounds (::Type{HybridArray{S,T}})(a::AbstractArray) where {S,T} = convert(HybridArray{S,T,StaticArrays.tuple_length(S)}, a)
 
 # Overide some problematic default behaviour
-@inline convert(::Type{SA}, sa::HybridAbstractArray) where {SA<:HybridAbstractArray} = SA(sa.data)
-@inline convert(::Type{SA}, sa::SA) where {SA<:HybridAbstractArray} = sa
+@inline convert(::Type{SA}, sa::HybridArray) where {SA<:HybridArray} = SA(sa.data)
+@inline convert(::Type{SA}, sa::SA) where {SA<:HybridArray} = sa
 
 # Back to Array (unfortunately need both convert and construct to overide other methods)
 import Base.Array
-@inline Array(sa::HybridAbstractArray{S}) where {S} = Array(reshape(sa.data, size_to_tuple(S)))
-@inline Array{T}(sa::HybridAbstractArray{S,T}) where {T,S} = Array(reshape(sa.data, size_to_tuple(S)))
-@inline Array{T,N}(sa::HybridAbstractArray{S,T,N}) where {T,S,N} = Array(reshape(sa.data, size_to_tuple(S)))
+@inline Array(sa::HybridArray{S}) where {S} = Array(reshape(sa.data, size_to_tuple(S)))
+@inline Array{T}(sa::HybridArray{S,T}) where {T,S} = Array(reshape(sa.data, size_to_tuple(S)))
+@inline Array{T,N}(sa::HybridArray{S,T,N}) where {T,S,N} = Array(reshape(sa.data, size_to_tuple(S)))
 
-@inline convert(::Type{Array}, sa::HybridAbstractArray{S}) where {S} = Array(reshape(sa.data, size_to_tuple(S)))
-@inline convert(::Type{Array{T}}, sa::HybridAbstractArray{S,T}) where {T,S} = Array(reshape(sa.data, size_to_tuple(S)))
-@inline convert(::Type{Array{T,N}}, sa::HybridAbstractArray{S,T,N}) where {T,S,N} = Array(reshape(sa.data, size_to_tuple(S)))
+@inline convert(::Type{Array}, sa::HybridArray{S}) where {S} = Array(reshape(sa.data, size_to_tuple(S)))
+@inline convert(::Type{Array{T}}, sa::HybridArray{S,T}) where {T,S} = Array(reshape(sa.data, size_to_tuple(S)))
+@inline convert(::Type{Array{T,N}}, sa::HybridArray{S,T,N}) where {T,S,N} = Array(reshape(sa.data, size_to_tuple(S)))
 
-@inline function convert(::Type{HybridAbstractArray{S,T,N,M,TData}}, a::AbstractArray) where {S,T,N,M,U,TData<:AbstractArray{U,M}}
+@inline function convert(::Type{HybridArray{S,T,N,M,TData}}, a::AbstractArray) where {S,T,N,M,U,TData<:AbstractArray{U,M}}
     # TODO: dimension checking
     as = convert(TData, a)
-    return HybridAbstractArray{S,T,N,M,TData}(as)
+    return HybridArray{S,T,N,M,TData}(as)
 end
 
-@inline function convert(::Type{HybridAbstractArray{S,T,N,M}}, a::TData) where {S,T,N,M,U,TData<:AbstractArray{U,M}}
+@inline function convert(::Type{HybridArray{S,T,N,M}}, a::TData) where {S,T,N,M,U,TData<:AbstractArray{U,M}}
     # TODO: dimension checking
     as = similar(a, T)
     copyto!(as, a)
-    return HybridAbstractArray{S,T,N,M,typeof(as)}(as)
+    return HybridArray{S,T,N,M,typeof(as)}(as)
 end
 
-@inline function convert(::Type{HybridAbstractArray{S,T,N,M}}, a::TData) where {S,T,N,M,TData<:AbstractArray{T,M}}
+@inline function convert(::Type{HybridArray{S,T,N,M}}, a::TData) where {S,T,N,M,TData<:AbstractArray{T,M}}
     # TODO: dimension checking?
-    return HybridAbstractArray{S,T,N,M,typeof(a)}(a)
+    return HybridArray{S,T,N,M,typeof(a)}(a)
 end
 
-@inline function convert(::Type{HybridAbstractArray{S,T,N}}, a::TData) where {S,T,N,M,U,TData<:AbstractArray{U,M}}
+@inline function convert(::Type{HybridArray{S,T,N}}, a::TData) where {S,T,N,M,U,TData<:AbstractArray{U,M}}
     # TODO: dimension checking
     as = similar(a, T)
     copyto!(as, a)
-    return HybridAbstractArray{S,T,N,M,typeof(as)}(as)
+    return HybridArray{S,T,N,M,typeof(as)}(as)
 end
 
-@inline function convert(::Type{HybridAbstractArray{S,T,N}}, a::TData) where {S,T,N,M,TData<:AbstractArray{T,M}}
+@inline function convert(::Type{HybridArray{S,T,N}}, a::TData) where {S,T,N,M,TData<:AbstractArray{T,M}}
     # TODO: dimension checking?
-    return HybridAbstractArray{S,T,N,M,typeof(a)}(a)
+    return HybridArray{S,T,N,M,typeof(a)}(a)
 end
 
-HybridAbstractVector{S,T,M} = HybridAbstractArray{Tuple{S},T,1,M}
-@inline HybridAbstractVector{S}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}} = HybridAbstractArray{Tuple{S},T,1,M,TData}(a)
-@inline HybridAbstractVector{S}(x::NTuple{L,T}) where {S,T,L} = HybridAbstractArray{Tuple{S},T,1,1,Vector{T}}(x)
+HybridVector{S,T,M} = HybridArray{Tuple{S},T,1,M}
+@inline HybridVector{S}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}} = HybridArray{Tuple{S},T,1,M,TData}(a)
+@inline HybridVector{S}(x::NTuple{L,T}) where {S,T,L} = HybridArray{Tuple{S},T,1,1,Vector{T}}(x)
 
-HybridAbstractMatrix{S1,S2,T,M} = HybridAbstractArray{Tuple{S1,S2},T,2,M}
-@inline HybridAbstractMatrix{S1,S2}(a::TData) where {S1,S2,T,M,TData<:AbstractArray{T,M}} = HybridAbstractArray{Tuple{S1,S2},T,2,M,TData}(a)
-@inline HybridAbstractMatrix{S1,S2}(x::NTuple{L,T}) where {S1,S2,T,L} = HybridAbstractArray{Tuple{S1,S2},T,2,2,Matrix{T}}(x)
+HybridMatrix{S1,S2,T,M} = HybridArray{Tuple{S1,S2},T,2,M}
+@inline HybridMatrix{S1,S2}(a::TData) where {S1,S2,T,M,TData<:AbstractArray{T,M}} = HybridArray{Tuple{S1,S2},T,2,M,TData}(a)
+@inline HybridMatrix{S1,S2}(x::NTuple{L,T}) where {S1,S2,T,L} = HybridArray{Tuple{S1,S2},T,2,2,Matrix{T}}(x)
 
-Base.dataids(sa::HybridAbstractArray) = Base.dataids(sa.data)
+Base.dataids(sa::HybridArray) = Base.dataids(sa.data)
 
-@inline size(sa::HybridAbstractArray{S}) where S = size(sa.data)
+@inline size(sa::HybridArray{S}) where S = size(sa.data)
 
-@inline length(sa::HybridAbstractArray) = length(sa.data)
+@inline length(sa::HybridArray) = length(sa.data)
 
 @generated function _sized_abstract_array_axes(::Type{S}, ax::Tuple) where S<:Tuple
     exprs = Any[]
@@ -163,24 +163,24 @@ Base.dataids(sa::HybridAbstractArray) = Base.dataids(sa.data)
     return Expr(:tuple, exprs...)
 end
 
-function axes(sa::HybridAbstractArray{S}) where S
+function axes(sa::HybridArray{S}) where S
     ax = axes(sa.data)
     return _sized_abstract_array_axes(S, ax)
 end
 
-@inline function getindex(sa::HybridAbstractArray{S}, ::Colon) where S
-    return HybridAbstractArray{S}(getindex(sa.data, :))
+@inline function getindex(sa::HybridArray{S}, ::Colon) where S
+    return HybridArray{S}(getindex(sa.data, :))
 end
 
-Base.@propagate_inbounds function getindex(sa::HybridAbstractArray{S}, inds::Int...) where S
+Base.@propagate_inbounds function getindex(sa::HybridArray{S}, inds::Int...) where S
     return getindex(sa.data, inds...)
 end
 
-Base.@propagate_inbounds function getindex(sa::HybridAbstractArray{S}, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...) where S
+Base.@propagate_inbounds function getindex(sa::HybridArray{S}, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...) where S
     _getindex(all_dynamic_fixed_val(S, inds...), sa, inds...)
 end
 
-Base.@propagate_inbounds function _getindex(::Val{:dynamic_fixed_true}, sa::HybridAbstractArray, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...)
+Base.@propagate_inbounds function _getindex(::Val{:dynamic_fixed_true}, sa::HybridArray, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...)
     return _getindex_all_static(sa, inds...)
 end
 
@@ -200,7 +200,7 @@ function _get_indices(i::Tuple, j::Int, i1::Type{Colon}, inds...)
     return (i[1], _get_indices(i[2:end], j+1, inds...)...)
 end
 
-@generated function _getindex_all_static(sa::HybridAbstractArray{S,T}, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...) where {S,T}
+@generated function _getindex_all_static(sa::HybridArray{S,T}, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...) where {S,T}
     newsize = new_out_size_nongen(S, inds...)
     exprs = Vector{Expr}(undef, length(newsize))
 
@@ -247,21 +247,21 @@ end
     return Tuple{os...}
 end
 
-@inline function _getindex(::Val{:dynamic_fixed_false}, sa::HybridAbstractArray{S}, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...) where S
+@inline function _getindex(::Val{:dynamic_fixed_false}, sa::HybridArray{S}, inds::Union{Int, StaticArray{<:Tuple, Int}, Colon}...) where S
     newsize = new_out_size(S, inds...)
-    return HybridAbstractArray{newsize}(getindex(sa.data, inds...))
+    return HybridArray{newsize}(getindex(sa.data, inds...))
 end
 
 # setindex stuff
 
 import StaticArrays._setindex!_scalar
 
-Base.@propagate_inbounds function setindex!(a::HybridAbstractArray, value, inds::Int...)
+Base.@propagate_inbounds function setindex!(a::HybridArray, value, inds::Int...)
     Base.@boundscheck checkbounds(a, inds...)
     _setindex!_scalar(Size(a), a, value, inds...)
 end
 
-@generated function _setindex!_scalar(::Size{S}, a::HybridAbstractArray, value, inds::Int...) where S
+@generated function _setindex!_scalar(::Size{S}, a::HybridArray, value, inds::Int...) where S
     if length(inds) == 0
         return quote
             @_propagate_inbounds_meta
@@ -290,18 +290,18 @@ end
     end
 end
 
-function promote_rule(::Type{<:HybridAbstractArray{S,T,N,M,TDataA}}, ::Type{<:HybridAbstractArray{S,U,N,M,TDataB}}) where {S,T,U,N,M,TDataA,TDataB}
+function promote_rule(::Type{<:HybridArray{S,T,N,M,TDataA}}, ::Type{<:HybridArray{S,U,N,M,TDataB}}) where {S,T,U,N,M,TDataA,TDataB}
     TU = promote_type(T,U)
-    HybridAbstractArray{S,TU,N,M,promote_type(TDataA, TDataB)::Type{<:AbstractArray{TU}}}
+    HybridArray{S,TU,N,M,promote_type(TDataA, TDataB)::Type{<:AbstractArray{TU}}}
 end
 
-@inline copy(a::HybridAbstractArray) = typeof(a)(copy(a.data))
+@inline copy(a::HybridArray) = typeof(a)(copy(a.data))
 
-similar(::Type{<:HybridAbstractArray{S,T,N,M}},::Type{T2}) where {S,T,N,M,T2} = HybridAbstractArray{S,T2,N,M}(undef)
-similar(::Type{SA},::Type{T},s::Size{S}) where {SA<:HybridAbstractArray,T,S} = hybridabstractarray_similar_type(T,s,StaticArrays.length_val(s))(undef)
-hybridabstractarray_similar_type(::Type{T},s::Size{S},::Type{Val{D}}) where {T,S,D} = HybridAbstractArray{Tuple{S...},T,D,length(s)}
+similar(::Type{<:HybridArray{S,T,N,M}},::Type{T2}) where {S,T,N,M,T2} = HybridArray{S,T2,N,M}(undef)
+similar(::Type{SA},::Type{T},s::Size{S}) where {SA<:HybridArray,T,S} = hybridabstractarray_similar_type(T,s,StaticArrays.length_val(s))(undef)
+hybridabstractarray_similar_type(::Type{T},s::Size{S},::Type{Val{D}}) where {T,S,D} = HybridArray{Tuple{S...},T,D,length(s)}
 
-Size(::Type{<:HybridAbstractArray{S}}) where {S} = Size(S)
+Size(::Type{<:HybridArray{S}}) where {S} = Size(S)
 
 
 ###############################
@@ -315,16 +315,16 @@ using Base.Broadcast: AbstractArrayStyle, Broadcasted, DefaultArrayStyle
 # A constructor that changes the style parameter N (array dimension) is also required
 struct HybridArrayStyle{N} <: AbstractArrayStyle{N} end
 HybridArrayStyle{M}(::Val{N}) where {M,N} = HybridArrayStyle{N}()
-BroadcastStyle(::Type{<:HybridAbstractArray{<:Tuple, <:Any, N}}) where {N} = HybridArrayStyle{N}()
+BroadcastStyle(::Type{<:HybridArray{<:Tuple, <:Any, N}}) where {N} = HybridArrayStyle{N}()
 # Precedence rules
-BroadcastStyle(::HybridAbstractArray{M}, ::DefaultArrayStyle{N}) where {M,N} =
+BroadcastStyle(::HybridArray{M}, ::DefaultArrayStyle{N}) where {M,N} =
     DefaultArrayStyle(Val(max(M, N)))
-BroadcastStyle(::HybridAbstractArray{M}, ::DefaultArrayStyle{0}) where {M} =
+BroadcastStyle(::HybridArray{M}, ::DefaultArrayStyle{0}) where {M} =
     HybridArrayStyle{M}()
 
-BroadcastStyle(::HybridAbstractArray{M}, ::StaticArrays.StaticArrayStyle{N}) where {M,N} =
+BroadcastStyle(::HybridArray{M}, ::StaticArrays.StaticArrayStyle{N}) where {M,N} =
     StaticArrays.Hybrid(Val(max(M, N)))
-BroadcastStyle(::HybridAbstractArray{M}, ::StaticArrays.StaticArrayStyle{0}) where {M} =
+BroadcastStyle(::HybridArray{M}, ::StaticArrays.StaticArrayStyle{0}) where {M} =
     HybridArrayStyle{M}()
 
 # copy overload
@@ -334,7 +334,7 @@ BroadcastStyle(::HybridAbstractArray{M}, ::StaticArrays.StaticArrayStyle{0}) whe
     destsize = StaticArrays.combine_sizes(argsizes)
     if Length(destsize) === Length{StaticArrays.Dynamic()}()
         # destination dimension cannot be determined statically; fall back to generic broadcast
-        return HybridAbstractArray{StaticArrays.size_tuple(destsize)}(copy(convert(Broadcasted{DefaultArrayStyle{M}}, B)))
+        return HybridArray{StaticArrays.size_tuple(destsize)}(copy(convert(Broadcasted{DefaultArrayStyle{M}}, B)))
     end
     _broadcast(f, destsize, argsizes, as...)
 end
@@ -358,32 +358,32 @@ end
 ###############################
 
 const HybridMatrixLike{T} = Union{
-    HybridAbstractMatrix{<:Any, <:Any, T},
-    Transpose{T, <:HybridAbstractMatrix{T}},
-    Adjoint{T, <:HybridAbstractMatrix{T}},
-    Symmetric{T, <:HybridAbstractMatrix{T}},
-    Hermitian{T, <:HybridAbstractMatrix{T}},
-    Diagonal{T, <:HybridAbstractMatrix{<:Any, T}}
+    HybridMatrix{<:Any, <:Any, T},
+    Transpose{T, <:HybridMatrix{T}},
+    Adjoint{T, <:HybridMatrix{T}},
+    Symmetric{T, <:HybridMatrix{T}},
+    Hermitian{T, <:HybridMatrix{T}},
+    Diagonal{T, <:HybridMatrix{<:Any, T}}
 }
 
-const HybridVecOrMatLike{T} = Union{HybridAbstractVector{<:Any, T}, HybridMatrixLike{T}}
+const HybridVecOrMatLike{T} = Union{HybridVector{<:Any, T}, HybridMatrixLike{T}}
 
 # Binary ops
 # Between arrays
-@inline +(a::HybridAbstractArray, b::HybridAbstractArray) = a .+ b
-@inline +(a::AbstractArray, b::HybridAbstractArray) = a .+ b
-@inline +(a::HybridAbstractArray, b::AbstractArray) = a .+ b
+@inline +(a::HybridArray, b::HybridArray) = a .+ b
+@inline +(a::AbstractArray, b::HybridArray) = a .+ b
+@inline +(a::HybridArray, b::AbstractArray) = a .+ b
 
-@inline -(a::HybridAbstractArray, b::HybridAbstractArray) = a .- b
-@inline -(a::AbstractArray, b::HybridAbstractArray) = a .- b
-@inline -(a::HybridAbstractArray, b::AbstractArray) = a .- b
+@inline -(a::HybridArray, b::HybridArray) = a .- b
+@inline -(a::AbstractArray, b::HybridArray) = a .- b
+@inline -(a::HybridArray, b::AbstractArray) = a .- b
 
 # Scalar-array
-@inline *(a::Number, b::HybridAbstractArray) = a .* b
-@inline *(a::HybridAbstractArray, b::Number) = a .* b
+@inline *(a::Number, b::HybridArray) = a .* b
+@inline *(a::HybridArray, b::Number) = a .* b
 
-@inline /(a::HybridAbstractArray, b::Number) = a ./ b
-@inline \(a::Number, b::HybridAbstractArray) = a .\ b
+@inline /(a::HybridArray, b::Number) = a ./ b
+@inline \(a::Number, b::HybridArray) = a .\ b
 
 @inline vcat(a::HybridVecOrMatLike) = a
 @inline vcat(a::HybridVecOrMatLike, b::HybridVecOrMatLike) = _vcat(Size(a), Size(b), a, b)
@@ -394,7 +394,7 @@ const HybridVecOrMatLike{T} = Union{HybridAbstractVector{<:Any, T}, HybridMatrix
         throw(DimensionMismatch("Tried to vcat arrays of size $Sa and $Sb"))
     end
 
-    if a <: HybridAbstractVector && b <: HybridAbstractVector
+    if a <: HybridVector && b <: HybridVector
         Snew = (Sa[1] + Sb[1],)
     else
         Snew = (Sa[1] + Sb[1], Size(Sa)[2])
@@ -432,7 +432,7 @@ end
     end
     if first_staticarray == 0
         for i = 1:length(a)
-            if a[i] <: HybridAbstractArray
+            if a[i] <: HybridArray
                 first_staticarray = a[i]
                 break
             end
@@ -444,8 +444,18 @@ end
     current_ind = ones(Int, length(newsize))
     sizes = [sz.parameters[1] for sz ∈ s.parameters]
 
+    make_expr(i) = begin
+        if !(a[i] <: AbstractArray)
+            return :(StaticArrays.scalar_getindex(a[$i]))
+        elseif hasdynamic(Tuple{sizes[i]...})
+            return :(a[$i][$(current_ind...)])
+        else
+            :(a[$i][$(StaticArrays.broadcasted_index(sizes[i], current_ind))])
+        end
+    end
+
     while more
-        exprs_vals = [(!(a[i] <: AbstractArray) ? :(StaticArrays.scalar_getindex(a[$i])) : :(a[$i][$(StaticArrays.broadcasted_index(sizes[i], current_ind))])) for i = 1:length(sizes)]
+        exprs_vals = [make_expr(i) for i = 1:length(sizes)]
         exprs[current_ind...] = :(f($(exprs_vals...)))
 
         # increment current_ind (maybe use CartesianIndices?)

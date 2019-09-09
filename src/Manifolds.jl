@@ -633,7 +633,7 @@ is_tangent_vector(M::Manifold, x::MPoint, v::TVector) = error("A validation for 
 
 include("utils.jl")
 include("SizedAbstractArray.jl")
-include("HybridAbstractArray.jl")
+include("HybridArray.jl")
 
 include("ProductRepresentations.jl")
 include("ArrayManifold.jl")
