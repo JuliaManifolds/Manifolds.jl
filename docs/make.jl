@@ -31,5 +31,6 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/JuliaNLSolvers/Manifolds.jl.git"
+    repo = "github.com/JuliaNLSolvers/Manifolds.jl.git",
+    julia = "1.2"
 )
