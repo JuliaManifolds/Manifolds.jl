@@ -77,7 +77,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         for pt ∈ pts
             @test is_manifold_point(M, pt)
         end
-        @test is_tangent_vector(M, pts[1], tv1)
+        @test is_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1])))
     end
 
     @testset "log/exp tests" begin
@@ -122,7 +122,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     end
 
     @testset "basic linear algebra in tangent space" begin
-        @test isapprox(M, pts[1], 0*tv1, zero_tangent_vector(M, pts[1]))
+        @test isapprox(M, pts[1], 0*tv1, zero_tangent_vector(M, pts[1]); atol = eps(eltype(pts[1])))
         @test isapprox(M, pts[1], 2*tv1, tv1+tv1)
         @test isapprox(M, pts[1], 0*tv1, tv1-tv1)
         @test isapprox(M, pts[1], (-1)*tv1, -tv1)

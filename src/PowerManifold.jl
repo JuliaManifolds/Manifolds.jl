@@ -13,7 +13,7 @@ equal to width and height of the image.
 
 While the size of the manifold is static, points on the power manifold
 would not be represented by statically-sized arrays. Operations on small
-power manifolds might be faster if they are represented as [`ProductManifold`](@ref).
+power manifolds might be faster if they are represented as [`PowerManifold`](@ref).
 
 # Constructor
 
@@ -140,39 +140,38 @@ struct PowerRetraction{TR<:AbstractRetractionMethod} <: AbstractRetractionMethod
 end
 
 function retract!(M::PowerManifold, y, x, v, method::PowerRetraction)
-    map(retract!, M.manifolds, y.parts, x.parts, v.parts, method.retractions)
+    power_map(M, NamedTuple(), y, x, v) do _M, _y, _x, _v
+        retract!(_M, _y, _x, _v, method.retraction)
+    end
     return y
 end
 
 """
     InversePowerRetraction(inverse_retractions::AbstractInverseRetractionMethod...)
 
-Product inverse retraction of `inverse_retractions`.
+Power inverse retraction of `inverse_retractions`.
 Works on [`PowerManifold`](@ref).
 """
 struct InversePowerRetraction{TR<:AbstractInverseRetractionMethod} <: AbstractInverseRetractionMethod
     inverse_retraction::TR
 end
 
-function inverse_retract!(M::PowerManifold, v, x, y, method::InverseProductRetraction)
-    map(inverse_retract!, M.manifolds, v.parts, x.parts, y.parts, method.inverse_retractions)
+function inverse_retract!(M::PowerManifold, v, x, y, method::InversePowerRetraction)
+    power_map(M, NamedTuple(), v, x, y) do _M, _v, _x, _y
+        inverse_retract!(_M, _v, _x, _y, method.inverse_retraction)
+    end
     return v
 end
 
 function flat!(M::PowerManifold, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
-    vfs = map(u -> FVector(CotangentSpace, u), v.data.parts)
-    wfs = map(u -> FVector(TangentSpace, u), w.data.parts)
-    map(flat!, M.manifolds, vfs, x.parts, wfs)
+    error("TODO")
     return v
 end
 
 function sharp!(M::PowerManifold, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
-    vfs = map(u -> FVector(TangentSpace, u), v.data.parts)
-    wfs = map(u -> FVector(CotangentSpace, u), w.data.parts)
-    map(sharp!, M.manifolds, vfs, x.parts, wfs)
+    error("TODO")
     return v
 end
-
 
 """
     is_manifold_point(M::ProductManifold, x; kwargs...)
@@ -182,11 +181,7 @@ Check whether `x` is a valid point on the [`ProductManifold`](@ref) `M`.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
 function is_manifold_point(M::PowerManifold, x; kwargs...)
-    return all(t -> is_manifold_point(t...; kwargs...), ziptuples(M.manifolds, x.parts))
-end
-
-function is_manifold_point(M::PowerManifold, x; kwargs...)
-    return all(t -> is_manifold_point(t...; kwargs...), ziptuples(M.manifolds, x.parts))
+    return power_mapreduce(is_manifold_point, &, M, kwargs.data, true, x)
 end
 
 """
@@ -199,15 +194,9 @@ base manifolds must be respective tangent vectors.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
 function is_tangent_vector(M::PowerManifold, x, v; kwargs...)
-    is_manifold_point(M, x)
-    return all(t -> is_tangent_vector(t...; kwargs...), ziptuples(M.manifolds, x.parts, v.parts))
+    ispoint = is_manifold_point(M, x)
+    return power_mapreduce(is_tangent_vector, &, M, kwargs.data, true, x, v)
 end
-
-function is_tangent_vector(M::ProductManifold, x, v; kwargs...)
-    is_manifold_point(M, x)
-    return all(t -> is_tangent_vector(t...; kwargs...), ziptuples(M.manifolds, x.parts, v.parts))
-end
-
 
 """
     PowerPointDistribution(M::PowerManifold, distribution)

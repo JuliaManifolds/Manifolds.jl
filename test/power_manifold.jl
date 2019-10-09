@@ -10,8 +10,8 @@ using HybridArrays
     types1 = [Array{Float64,2},
               HybridArray{Tuple{3,StaticArrays.Dynamic()}, Float64, 2}]
 
-    #retraction_methods = [Manifolds.ProductRetraction(Manifolds.ExponentialRetraction(), Manifolds.ExponentialRetraction())]
-    #inverse_retraction_methods = [Manifolds.InverseProductRetraction(Manifolds.LogarithmicInverseRetraction(), Manifolds.LogarithmicInverseRetraction())]
+    retraction_methods = [Manifolds.PowerRetraction(Manifolds.ExponentialRetraction())]
+    inverse_retraction_methods = [Manifolds.InversePowerRetraction(Manifolds.LogarithmicInverseRetraction())]
 
     sphere_dist = Manifolds.uniform_distribution(Ms, @SVector [1.0, 0.0, 0.0])
     power_dist = Manifolds.PowerPointDistribution(Ms1, sphere_dist, randn(Float64, 3, 5))
@@ -22,8 +22,8 @@ using HybridArrays
                           pts;
                           test_reverse_diff = true,
                           test_musical_isomorphisms = false,
-                          retraction_methods = [],
-                          inverse_retraction_methods = [],
+                          retraction_methods = retraction_methods,
+                          inverse_retraction_methods = inverse_retraction_methods,
                           point_distributions = [power_dist],
                           tvector_distributions = [])
         end
