@@ -27,6 +27,7 @@ import LinearAlgebra: dot,
     UniformScaling,
     Diagonal
 using StaticArrays
+using HybridArrays
 import Markdown: @doc_str
 import Distributions: _rand!, support
 import Random: rand
@@ -642,6 +643,7 @@ include("DistributionsBase.jl")
 include("Metric.jl")
 include("Euclidean.jl")
 include("ProductManifold.jl")
+include("PowerManifold.jl")
 include("Rotations.jl")
 include("Sphere.jl")
 include("ProjectedDistribution.jl")
@@ -655,6 +657,7 @@ export Manifold,
     Euclidean,
     Sphere,
     ProductManifold,
+    PowerManifold,
     ProductRepr,
     VectorSpaceType,
     TangentSpace,

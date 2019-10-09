@@ -27,7 +27,7 @@ function rand(rng::AbstractRNG, d::ProjectedPointDistribution{TResult}) where TR
 end
 
 function _rand!(rng::AbstractRNG, d::ProjectedPointDistribution, x::AbstractArray{<:Number})
-    rand!(rng, d.d, x)
+    _rand!(rng, d.d, x)
     d.proj!(d.manifold, x)
     return x
 end
