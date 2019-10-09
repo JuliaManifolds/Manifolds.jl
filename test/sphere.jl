@@ -22,6 +22,7 @@ include("utils.jl")
                           test_project_tangent = true,
                           test_musical_isomorphisms = true,
                           test_vector_transport = true,
+                          test_mutating_rand = isa(T, Vector),
                           point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
                           tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
 

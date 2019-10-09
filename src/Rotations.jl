@@ -549,12 +549,7 @@ function rand(rng::AbstractRNG, d::NormalRotationDistribution{TResult,Rotations{
 end
 
 function _rand!(rng::AbstractRNG, d::NormalRotationDistribution{TResult,Rotations{N}}, x::AbstractArray{<:Real}) where {TResult,N}
-    if N==1
-        x .= ones(1,1)
-    else
-        rand!(rng, d.distr, x)
-        x .= _fix_random_rotation(x)
-    end
+    x .= rand(rng, d)
     return x
 end
 

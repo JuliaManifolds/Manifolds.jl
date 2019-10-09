@@ -79,6 +79,7 @@ include("utils.jl")
                 test_forward_diff = n==3,
                 test_reverse_diff = false,
                 test_musical_isomorphisms = true,
+                test_mutating_rand = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [ptd],
