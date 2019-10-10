@@ -32,6 +32,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_representation_size = true,
     test_musical_isomorphisms = false,
     test_vector_transport = false,
+    test_mutating_rand = false,
     retraction_methods = [],
     inverse_retraction_methods = [],
     point_distributions = [],
@@ -205,9 +206,14 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     end
 
     @testset "point distributions" begin
+        prand = similar(pts[1])
         for pd ∈ point_distributions
             for _ in 1:10
                 @test is_manifold_point(M, rand(pd))
+                if test_mutating_rand
+                    rand!(pd, prand)
+                    @test is_manifold_point(M, prand)
+                end
             end
         end
     end
