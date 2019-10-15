@@ -341,17 +341,6 @@ end
     return map(i -> sol.u[i][n+1:end], 1:length(T))
 end
 
-@traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,
-                                               GT<:Metric,
-                                               MMT<:MetricManifold{MT,GT};
-                                               !HasMetric{MT,GT}}
-    tspan = (0.0, 1.0)
-    sol = solve_exp_ode(M, x, v, tspan; dense=false, saveat=[1.0])
-    n = length(x)
-    y .= sol.u[1][n+1:end]
-    return y
-end
-
 """
     exp(M::MetricManifold, x, v, args...)
 
@@ -364,6 +353,17 @@ coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
 """
 function exp end
+
+@traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,
+                                               GT<:Metric,
+                                               MMT<:MetricManifold{MT,GT};
+                                               !HasMetric{MT,GT}}
+    tspan = (0.0, 1.0)
+    sol = solve_exp_ode(M, x, v, tspan; dense=false, saveat=[1.0])
+    n = length(x)
+    y .= sol.u[1][n+1:end]
+    return y
+end
 
 @traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,
                                                GT<:Metric,
