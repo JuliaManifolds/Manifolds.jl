@@ -23,6 +23,7 @@ import LinearAlgebra: dot,
     I,
     UniformScaling,
     Diagonal
+using Requires
 using StaticArrays
 import Markdown: @doc_str
 import Distributions: _rand!, support
@@ -30,13 +31,8 @@ import Random: rand
 using LinearAlgebra
 using Random: AbstractRNG
 using SimpleTraits
-using ForwardDiff
 using UnsafeArrays
 using Einsum: @einsum
-using OrdinaryDiffEq: ODEProblem,
-    AutoVern9,
-    Rodas5,
-    solve
 
 """
     Manifold
@@ -641,6 +637,21 @@ include("ProductManifold.jl")
 include("Rotations.jl")
 include("Sphere.jl")
 include("ProjectedDistribution.jl")
+
+function __init__()
+    @require ForwardDiff="f6369f11-7733-5829-9624-2563aa707210" begin
+        using ForwardDiff
+        include("forward_diff.jl")
+    end
+
+    @require OrdinaryDiffEq="1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
+        using OrdinaryDiffEq: ODEProblem,
+            AutoVern9,
+            Rodas5,
+            solve
+        include("ode.jl")
+    end
+end
 
 export ArrayManifold,
     ArrayMPoint,
