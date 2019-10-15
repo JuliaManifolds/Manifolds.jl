@@ -124,7 +124,10 @@ Get partial derivatives of the local metric of `M` at `x` with respect to the
 coordinates of `x`, $\frac{\partial}{\partial x^k} g_{ij} = g_{ij,k}$. The
 dimensions of the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
-function local_metric_jacobian end
+function local_metric_jacobian(M, x)
+    error("local_metric_jacobian not implemented on $(typeof(M)) for point $(typeof(x)). For a suitable default, enter `using ForwardDiff`.")
+end
+
 
 @traitfn function inner(M::MMT, x, v, w) where {MT<:Manifold,
                                                 GT<:Metric,
@@ -232,7 +235,9 @@ for manifold `M` at `x` with respect to the coordinates of `x`,
 $\frac{\partial}{\partial x^l} \Gamma^{k}_{ij} = \Gamma^{k}_{ij,l}.$
 The dimensions of the resulting multi-dimensional array are ordered $(i,j,k,l)$.
 """
-function christoffel_symbols_second_jacobian end
+function christoffel_symbols_second_jacobian(M, x)
+    error("christoffel_symbols_second_jacobian not implemented on $(typeof(M)) for point $(typeof(x)). For a suitable default, enter `using ForwardDiff`.")
+end
 
 @doc doc"""
     riemann_tensor(M::MetricManifold, x)
@@ -295,6 +300,56 @@ function einstein_tensor(M::MetricManifold, x)
     S = sum(ginv .* Ric)
     G = Ric - g .* S / 2
     return G
+end
+
+@doc doc"""
+    solve_exp_ode(M::MetricManifold,
+                  x,
+                  v,
+                  tspan;
+                  solver=AutoVern9(Rodas5()),
+                  kwargs...)
+
+Approximate the exponential map on the manifold over the provided timespan
+assuming the Levi-Civita connection by solving the ordinary differential
+equation
+
+$\frac{d^2}{dt^2} x^k + \Gamma^k_{ij} \frac{d}{dt} x_i \frac{d}{dt} x_j = 0,$
+
+where $\Gamma^k_{ij}$ are the Christoffel symbols of the second kind, and
+the Einstein summation convention is assumed. The arguments `tspan` and
+`solver` follow the `OrdinaryDiffEq` conventions. `kwargs...` specify keyword
+arguments that will be passed to `OrdinaryDiffEq.solve`.
+
+Currently, the numerical integration is only accurate when using a single
+coordinate chart that covers the entire manifold. This excludes coordinates
+in an embedded space.
+"""
+function solve_exp_ode(M, x, v, tspan; kwargs...)
+    error("solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(x)), vector $(typeof(y)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq`.")
+end
+
+@traitfn function exp(M::MMT,
+                      x,
+                      v,
+                      T::AbstractVector) where {MT<:Manifold,
+                                                GT<:Metric,
+                                                MMT<:MetricManifold{MT,GT};
+                                                !HasMetric{MT,GT}}
+    sol = solve_exp_ode(M, x, v, extrema(T); dense=false, saveat=T)
+    n = length(x)
+    return map(i -> sol.u[i][n+1:end], 1:length(T))
+end
+
+@traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,
+                                               GT<:Metric,
+                                               MMT<:MetricManifold{MT,GT};
+                                               !HasMetric{MT,GT}}
+    tspan = (0.0, 1.0)
+    sol = solve_exp_ode(M, x, v, tspan; dense=false, saveat=[1.0])
+    n = length(x)
+    y .= sol.u[1][n+1:end]
+    return y
 end
 
 """
