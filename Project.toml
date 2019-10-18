@@ -7,12 +7,11 @@ version = "0.1.0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Einsum = "b7d42ee7-0b51-5a75-98ca-779d3107e4c0"
-ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 HybridArrays = "1baab800-613f-4b0a-84e4-9cd3431bfbb9"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
-OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 SimpleTraits = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 UnsafeArrays = "c4a57d5a-5b31-53a6-b365-19f8c011fbd6"
@@ -24,8 +23,9 @@ julia = "1.0"
 [extras]
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "DoubleFloats", "ForwardDiff", "ReverseDiff"]
+test = ["Test", "DoubleFloats", "ForwardDiff", "OrdinaryDiffEq", "ReverseDiff"]

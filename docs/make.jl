@@ -29,3 +29,7 @@ makedocs(
         ]
     ]
 )
+
+deploydocs(
+    repo = "github.com/JuliaNLSolvers/Manifolds.jl.git",
+)

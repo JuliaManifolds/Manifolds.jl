@@ -38,6 +38,7 @@ include("utils.jl")
                           test_musical_isomorphisms = true,
                           retraction_methods = retraction_methods,
                           inverse_retraction_methods = inverse_retraction_methods,
+                          test_mutating_rand = isa(T, Vector),
                           point_distributions = [Manifolds.ProductPointDistribution(distr_M1, distr_M2)],
                           tvector_distributions = [Manifolds.ProductFVectorDistribution(distr_tv_M1, distr_tv_M2)])
         end

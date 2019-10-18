@@ -1,3 +1,5 @@
+using ForwardDiff, OrdinaryDiffEq
+
 include("utils.jl")
 
 struct TestEuclidean{N} <: Manifold end

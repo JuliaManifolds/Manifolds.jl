@@ -124,11 +124,10 @@ Get partial derivatives of the local metric of `M` at `x` with respect to the
 coordinates of `x`, $\frac{\partial}{\partial x^k} g_{ij} = g_{ij,k}$. The
 dimensions of the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
-function local_metric_jacobian(M::MetricManifold, x)
-    n = size(x, 1)
-    ∂g = reshape(ForwardDiff.jacobian(x -> local_metric(M, x), x), n, n, n)
-    return ∂g
+function local_metric_jacobian(M, x)
+    error("local_metric_jacobian not implemented on $(typeof(M)) for point $(typeof(x)). For a suitable default, enter `using ForwardDiff`.")
 end
+
 
 @traitfn function inner(M::MMT, x, v, w) where {MT<:Manifold,
                                                 GT<:Metric,
@@ -229,6 +228,18 @@ function christoffel_symbols_second(M::MetricManifold, x)
 end
 
 @doc doc"""
+    christoffel_symbols_second_jacobian(M::MetricManifold, x)
+
+Get partial derivatives of the Christoffel symbols of the second kind
+for manifold `M` at `x` with respect to the coordinates of `x`,
+$\frac{\partial}{\partial x^l} \Gamma^{k}_{ij} = \Gamma^{k}_{ij,l}.$
+The dimensions of the resulting multi-dimensional array are ordered $(i,j,k,l)$.
+"""
+function christoffel_symbols_second_jacobian(M, x)
+    error("christoffel_symbols_second_jacobian not implemented on $(typeof(M)) for point $(typeof(x)). For a suitable default, enter `using ForwardDiff`.")
+end
+
+@doc doc"""
     riemann_tensor(M::MetricManifold, x)
 
 Compute the Riemann tensor $R^l_{ijk}$, also known as the Riemann curvature
@@ -238,10 +249,7 @@ array are ordered $(l,i,j,k)$.
 function riemann_tensor(M::MetricManifold, x)
     n = size(x, 1)
     Γ = christoffel_symbols_second(M, x)
-    ∂Γ = reshape(
-        ForwardDiff.jacobian(x -> christoffel_symbols_second(M, x), x),
-        n, n, n, n
-    ) ./ n
+    ∂Γ = christoffel_symbols_second_jacobian(M, x) ./ n
     R = similar(∂Γ, Size(n, n, n, n))
     @einsum R[l,i,j,k] = ∂Γ[l,i,k,j] - ∂Γ[l,i,j,k] + Γ[s,i,k] * Γ[l,s,j] - Γ[s,i,j] * Γ[l,s,k]
     return R
@@ -317,36 +325,8 @@ Currently, the numerical integration is only accurate when using a single
 coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
 """
-function solve_exp_ode(M::MetricManifold,
-                       x,
-                       v,
-                       tspan;
-                       solver=AutoVern9(Rodas5()),
-                       kwargs...)
-    n = length(x)
-    iv = SVector{n}(1:n)
-    ix = SVector{n}(n+1:2n)
-    u0 = similar(x, 2n)
-    u0[iv] .= v
-    u0[ix] .= x
-
-    function exp_problem(u, p, t)
-        M = p[1]
-        dx = u[iv]
-        x = u[ix]
-        ddx = similar(u, Size(n))
-        du = similar(u)
-        Γ = christoffel_symbols_second(M, x)
-        @einsum ddx[k] = -Γ[k,i,j] * dx[i] * dx[j]
-        du[iv] .= ddx
-        du[ix] .= dx
-        return Base.convert(typeof(u), du)
-    end
-
-    p = (M,)
-    prob = ODEProblem(exp_problem, u0, tspan, p)
-    sol = solve(prob, solver; kwargs...)
-    return sol
+function solve_exp_ode(M, x, v, tspan; kwargs...)
+    error("solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(x)), vector $(typeof(y)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq`.")
 end
 
 @traitfn function exp(M::MMT,
