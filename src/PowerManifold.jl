@@ -13,7 +13,7 @@ equal to width and height of the image.
 
 While the size of the manifold is static, points on the power manifold
 would not be represented by statically-sized arrays. Operations on small
-power manifolds might be faster if they are represented as [`PowerManifold`](@ref).
+power manifolds might be faster if they are represented as [`ProductManifold`](@ref).
 
 # Constructor
 
