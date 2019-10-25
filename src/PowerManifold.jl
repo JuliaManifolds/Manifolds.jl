@@ -30,45 +30,76 @@ function PowerManifold(manifold::Manifold, size::Tuple)
 end
 
 function power_mapreduce(f, op, M::PowerManifold, kwargs::NamedTuple, init, x...)
-    return power_mapreduce(f, op, M, kwargs, init, representation_size(M.manifold), x...)
+    return _power_mapreduce(f, op, M, kwargs, init, representation_size(M.manifold), x...)
 end
 
-function power_mapreduce(f, op, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, init, rep_size::Tuple{Int}) where {N}
+function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, init, rep_size::Tuple{Int}) where {N}
     return mapreduce(i -> f(M.manifold; kwargs...), op, Base.OneTo(N); init=init)
 end
 
-function power_mapreduce(f, op, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, init, rep_size::Tuple{Int}, x1) where {N}
-    return mapreduce(i -> f(M.manifold, view(x1, :, i); kwargs...), op, Base.OneTo(N); init=init)
+function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, SizeTuple}, kwargs::NamedTuple, init, rep_size::Tuple) where {SizeTuple}
+    return mapreduce(i -> f(M.manifold; kwargs...), op, Base.product(map(Base.OneTo, SizeTuple.parameters)...); init=init)
 end
 
-function power_mapreduce(f, op, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, init, rep_size::Tuple{Int}, x1, x2) where {N}
+function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, init, rep_size::Tuple{Int}, x1) where {N}
+    return mapreduce(i -> f(M.manifold, view(x1, :, i...); kwargs...), op, Base.OneTo(N); init=init)
+end
+
+function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, SizeTuple}, kwargs::NamedTuple, init, rep_size::Tuple, x1) where {SizeTuple}
+    return mapreduce(i -> f(M.manifold, view(x1, :, i...); kwargs...), op, Base.product(map(Base.OneTo, SizeTuple.parameters)...); init=init)
+end
+
+function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, init, rep_size::Tuple{Int}, x1, x2) where {N}
     return mapreduce(i -> f(M.manifold, view(x1, :, i), view(x2, :, i); kwargs...), op, Base.OneTo(N); init=init)
 end
 
-function power_mapreduce(f, op, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, init, rep_size::Tuple{Int}, x1, x2, x3) where {N}
+function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, SizeTuple}, kwargs::NamedTuple, init, rep_size::Tuple, x1, x2) where {SizeTuple}
+    return mapreduce(i -> f(M.manifold, view(x1, :, i...), view(x2, :, i...); kwargs...), op, Base.product(map(Base.OneTo, SizeTuple.parameters)...); init=init)
+end
+
+function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, init, rep_size::Tuple{Int}, x1, x2, x3) where {N}
     return mapreduce(i -> f(M.manifold, view(x1, :, i), view(x2, :, i), view(x3, :, i); kwargs...), op, Base.OneTo(N); init=init)
 end
 
+function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, SizeTuple}, kwargs::NamedTuple, init, rep_size::Tuple, x1, x2, x3) where {SizeTuple}
+    return mapreduce(i -> f(M.manifold, view(x1, :, i...), view(x2, :, i...), view(x3, :, i...); kwargs...), op, Base.product(map(Base.OneTo, SizeTuple.parameters)...); init=init)
+end
 
 
 function power_map(f, M::PowerManifold, kwargs::NamedTuple, x::AbstractArray...)
-    return power_map(f, M, kwargs, representation_size(M.manifold), x...)
+    return _power_map(f, M, kwargs, representation_size(M.manifold), x...)
 end
 
-function power_map(f, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, rep_size::Tuple{Int}) where {N}
+function _power_map(f, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, rep_size::Tuple) where {N}
     return map(i -> f(M.manifold; kwargs...), Base.OneTo(N))
 end
 
-function power_map(f, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, rep_size::Tuple{Int}, x1::AbstractArray) where {N}
+function _power_map(f, M::PowerManifold{<:Manifold, SizeTuple}, kwargs::NamedTuple, rep_size::Tuple) where {SizeTuple}
+    return map(i -> f(M.manifold; kwargs...), Base.product(map(Base.OneTo, SizeTuple.parameters)...))
+end
+
+function _power_map(f, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, rep_size::Tuple{Int}, x1::AbstractArray) where {N}
     return map(i -> f(M.manifold, view(x1, :, i); kwargs...), Base.OneTo(N))
 end
 
-function power_map(f, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, rep_size::Tuple{Int}, x1::AbstractArray, x2::AbstractArray) where {N}
+function _power_map(f, M::PowerManifold{<:Manifold, SizeTuple}, kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray) where {SizeTuple}
+    return map(i -> f(M.manifold, view(x1, :, i...); kwargs...), Base.product(map(Base.OneTo, SizeTuple.parameters)...))
+end
+
+function _power_map(f, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, rep_size::Tuple{Int}, x1::AbstractArray, x2::AbstractArray) where {N}
     return map(i -> f(M.manifold, view(x1, :, i), view(x2, :, i); kwargs...), Base.OneTo(N))
 end
 
-function power_map(f, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, rep_size::Tuple{Int}, x1::AbstractArray, x2::AbstractArray, x3::AbstractArray) where {N}
+function _power_map(f, M::PowerManifold{<:Manifold, SizeTuple}, kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray, x2::AbstractArray) where {SizeTuple}
+    return map(i -> f(M.manifold, view(x1, :, i...), view(x2, :, i...); kwargs...), Base.product(map(Base.OneTo, SizeTuple.parameters)...))
+end
+
+function _power_map(f, M::PowerManifold{<:Manifold, Tuple{N}}, kwargs::NamedTuple, rep_size::Tuple{Int}, x1::AbstractArray, x2::AbstractArray, x3::AbstractArray) where {N}
     return map(i -> f(M.manifold, view(x1, :, i), view(x2, :, i), view(x3, :, i); kwargs...), Base.OneTo(N))
+end
+
+function _power_map(f, M::PowerManifold{<:Manifold, SizeTuple}, kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray, x2::AbstractArray, x3::AbstractArray) where {SizeTuple}
+    return map(i -> f(M.manifold, view(x1, :, i...), view(x2, :, i...), view(x3, :, i...); kwargs...), Base.product(map(Base.OneTo, SizeTuple.parameters)...))
 end
 
 
