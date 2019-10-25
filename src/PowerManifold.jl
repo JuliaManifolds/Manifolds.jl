@@ -232,34 +232,27 @@ bundle) of type `type` using the power distribution of `distr`.
 
 Vector space type and `x` can be automatically inferred from distribution `distr`.
 """
-struct PowerFVectorDistribution{TSpace<:VectorBundleFibers{<:VectorSpaceType, <:PowerManifold}, TD<:(NTuple{N,Distribution} where N), TX} <: FVectorDistribution{TSpace, TX}
+struct PowerFVectorDistribution{TSpace<:VectorBundleFibers{<:VectorSpaceType, <:PowerManifold}, TD<:FVectorDistribution, TX} <: FVectorDistribution{TSpace, TX}
     type::TSpace
     x::TX
     distribution::TD
 end
 
-function PowerFVectorDistribution(type::VectorBundleFibers{<:VectorSpaceType, <:PowerManifold}, x::AbstractArray, distribution::FVectorDistribution)
-    return PowerFVectorDistribution{typeof(type), typeof(distribution), typeof(x)}(type, x, distribution)
-end
-
-function PowerFVectorDistribution(type::VectorBundleFibers{<:VectorSpaceType, <:PowerManifold}, distribution::FVectorDistribution)
-    error("TODO")
-end
-
-function PowerFVectorDistribution(distributions::FVectorDistribution)
-    error("TODO")
-end
-
 function support(tvd::PowerFVectorDistribution)
-    error("TODO")
-    return FVectorSupport(tvd.type, ProductRepr(map(d -> support(d).x, tvd.distributions)...))
+    return FVectorSupport(tvd.type, tvd.x)
 end
 
 function rand(rng::AbstractRNG, d::PowerFVectorDistribution)
-    error("TODO")
+    fv = zero_vector(d.type, d.x)
+    _rand!(rng, d, fv)
+    return fv
 end
 
 function _rand!(rng::AbstractRNG, d::PowerFVectorDistribution, v::AbstractArray)
-    error("TODO")
+    manifold = d.type.M
+    power_map(manifold, NamedTuple(), v, d.x) do M, u, x
+        copyto!(d.distribution.x, x)
+        _rand!(rng, d.distribution, u)
+    end
     return v
 end

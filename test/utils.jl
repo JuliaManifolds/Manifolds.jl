@@ -37,7 +37,8 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     inverse_retraction_methods = [],
     point_distributions = [],
     tvector_distributions = [],
-    exp_log_atol_multiplier = 1)
+    exp_log_atol_multiplier = 1,
+    rand_tvector_atol_multiplier = 1)
     # log/exp
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
     isapprox(M, pts[1], pts[2]) && error("Points 1 and 2 are equal")
@@ -222,7 +223,8 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         for tvd ∈ tvector_distributions
             supp = Manifolds.support(tvd)
             for _ in 1:10
-                @test is_tangent_vector(M, supp.x, rand(tvd))
+                randtv = rand(tvd)
+                @test is_tangent_vector(M, supp.x, randtv; atol = rand_tvector_atol_multiplier * eps(eltype(randtv)))
             end
         end
     end
