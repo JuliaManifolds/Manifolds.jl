@@ -34,243 +34,58 @@ function PowerManifold(manifold::Manifold, size::Tuple)
     return PowerManifold{typeof(manifold), Tuple{size...}}(manifold)
 end
 
-@inline function power_mapreduce(f, op, M::PowerManifold, kwargs::NamedTuple, init, x...)
-    return _power_mapreduce(f, op, M, kwargs, init, representation_size(M.manifold), x...)
+function get_iterator(M::PowerManifold{<:Manifold, Tuple{N}}) where N
+    return 1:N
 end
 
-function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, Tuple{N}},
-    kwargs::NamedTuple, init, rep_size::Tuple) where {N}
-
-    return Base._mapreduce_dim(op, (;init=init), Base.OneTo(N), :) do i
-        f(M.manifold; kwargs...)
-    end
+@generated function get_iterator(M::PowerManifold{<:Manifold, SizeTuple}) where SizeTuple
+    return Base.product(map(Base.OneTo, tuple(SizeTuple.parameters...))...)
 end
 
-function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, SizeTuple},
-    kwargs::NamedTuple, init, rep_size::Tuple) where {SizeTuple}
-
-    iterator = Base.product(map(Base.OneTo, SizeTuple.parameters)...)
-    return Base.mapfoldl_impl(op, (;init=init), iterator) do i
-        f(M.manifold; kwargs...)
-    end
+@inline function _read(rep_size::Tuple, x::AbstractArray, i::Int)
+    return _read(rep_size, x, (i,))
 end
 
-function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, Tuple{N}},
-    kwargs::NamedTuple, init, rep_size::Tuple, x1) where {N}
-
-    return Base._mapreduce_dim(op, (;init=init), Base.OneTo(N), :) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i...); kwargs...)
-    end
+@inline function _read(rep_size::Tuple, x::AbstractArray, i::Tuple)
+    return view(x, rep_size_to_colons(rep_size)..., i...)
 end
 
-function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, SizeTuple},
-    kwargs::NamedTuple, init, rep_size::Tuple, x1) where {SizeTuple}
-
-    iterator = Base.product(map(Base.OneTo, SizeTuple.parameters)...)
-    return Base.mapfoldl_impl(op, (;init=init), iterator) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i...); kwargs...)
-    end
+@inline function _read(rep_size::Tuple, x::HybridArray, i::Tuple)
+    return x[rep_size_to_colons(rep_size)..., i...]
 end
 
-function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, Tuple{N}},
-    kwargs::NamedTuple, init, rep_size::Tuple, x1, x2) where {N}
-
-    return Base._mapreduce_dim(op, (;init=init), Base.OneTo(N), :) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i),
-                      view(x2, rep_size_to_colons(rep_size)..., i); kwargs...)
-    end
+@inline function _write(rep_size::Tuple, x::AbstractArray, i::Int)
+    return _write(rep_size, x, (i,))
 end
 
-function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, SizeTuple},
-    kwargs::NamedTuple, init, rep_size::Tuple, x1, x2) where {SizeTuple}
-
-    iterator = Base.product(map(Base.OneTo, SizeTuple.parameters)...)
-    return Base.mapfoldl_impl(op, (;init=init), iterator) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i...),
-                      view(x2, rep_size_to_colons(rep_size)..., i...); kwargs...)
-    end
+@inline function _write(rep_size::Tuple, x::AbstractArray, i::Tuple)
+    return view(x, rep_size_to_colons(rep_size)..., i...)
 end
-
-function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, Tuple{N}},
-    kwargs::NamedTuple, init, rep_size::Tuple, x1, x2, x3) where {N}
-
-    return Base._mapreduce_dim(op, (;init=init), Base.OneTo(N), :) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i),
-                      view(x2, rep_size_to_colons(rep_size)..., i),
-                      view(x3, rep_size_to_colons(rep_size)..., i); kwargs...)
-    end
-end
-
-function _power_mapreduce(f, op, M::PowerManifold{<:Manifold, SizeTuple},
-    kwargs::NamedTuple, init, rep_size::Tuple, x1, x2, x3) where {SizeTuple}
-
-    iterator = Base.product(map(Base.OneTo, SizeTuple.parameters)...)
-    return Base.mapfoldl_impl(op, (;init=init), iterator) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i...),
-                      view(x2, rep_size_to_colons(rep_size)..., i...),
-                      view(x3, rep_size_to_colons(rep_size)..., i...); kwargs...)
-    end
-end
-
-
-@inline function power_map(f, M::PowerManifold, kwargs::NamedTuple, x::AbstractArray...)
-    return _power_map(f, M, kwargs, representation_size(M.manifold), x...)
-end
-
-@inline function _power_map(f, M::PowerManifold{<:Manifold, Tuple{N}},
-    kwargs::NamedTuple, rep_size::Tuple) where {N}
-
-    return map(Base.OneTo(N)) do i
-        f(M.manifold; kwargs...)
-    end
-end
-
-function _power_map(f, M::PowerManifold{<:Manifold, SizeTuple},
-    kwargs::NamedTuple, rep_size::Tuple) where {SizeTuple}
-
-    return map(Base.product(map(Base.OneTo, SizeTuple.parameters)...)) do i
-        f(M.manifold; kwargs...)
-    end
-end
-
-@inline function _power_map(f, M::PowerManifold{<:Manifold, Tuple{N}},
-    kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray) where {N}
-
-    return map(Base.OneTo(N)) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i); kwargs...)
-    end
-end
-
-function _power_map(f, M::PowerManifold{<:Manifold, SizeTuple},
-    kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray) where {SizeTuple}
-
-    return map(Base.product(map(Base.OneTo, SizeTuple.parameters)...)) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i...); kwargs...)
-    end
-end
-
-@inline function _power_map(f, M::PowerManifold{<:Manifold, Tuple{N}},
-    kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray, x2::AbstractArray) where {N}
-
-    return map(Base.OneTo(N)) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i),
-                      view(x2, rep_size_to_colons(rep_size)..., i); kwargs...)
-    end
-end
-
-function _power_map(f, M::PowerManifold{<:Manifold, SizeTuple},
-    kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray, x2::AbstractArray) where {SizeTuple}
-
-    return map(Base.product(map(Base.OneTo, SizeTuple.parameters)...)) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i...),
-                      view(x2, rep_size_to_colons(rep_size)..., i...); kwargs...)
-    end
-end
-
-function _power_map(f, M::PowerManifold{<:Manifold, Tuple{N}},
-    kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray, x2::AbstractArray, x3::AbstractArray) where {N}
-
-    return map(Base.OneTo(N)) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i),
-                      view(x2, rep_size_to_colons(rep_size)..., i),
-                      view(x3, rep_size_to_colons(rep_size)..., i); kwargs...)
-    end
-end
-
-function _power_map(f, M::PowerManifold{<:Manifold, SizeTuple},
-    kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray, x2::AbstractArray, x3::AbstractArray) where {SizeTuple}
-
-    return map(Base.product(map(Base.OneTo, SizeTuple.parameters)...)) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i...),
-                      view(x2, rep_size_to_colons(rep_size)..., i...),
-                      view(x3, rep_size_to_colons(rep_size)..., i...); kwargs...)
-    end
-end
-
-
-
-@inline function power_foreach(f, M::PowerManifold, kwargs::NamedTuple, x::AbstractArray...)
-    return _power_foreach(f, M, kwargs, representation_size(M.manifold), x...)
-end
-
-@inline function _power_foreach(f, M::PowerManifold{<:Manifold, Tuple{N}},
-    kwargs::NamedTuple, rep_size::Tuple) where {N}
-
-    for i in 1:N
-        f(M.manifold; kwargs...)
-    end
-end
-
-function _power_foreach(f, M::PowerManifold{<:Manifold, SizeTuple},
-    kwargs::NamedTuple, rep_size::Tuple) where {SizeTuple}
-
-    return foreach(Base.product(map(Base.OneTo, SizeTuple.parameters)...)) do i
-        f(M.manifold; kwargs...)
-    end
-end
-
-@inline function _power_foreach(f, M::PowerManifold{<:Manifold, Tuple{N}},
-    kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray) where {N}
-
-    for i in 1:N
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i); kwargs...)
-    end
-end
-
-function _power_foreach(f, M::PowerManifold{<:Manifold, SizeTuple},
-    kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray) where {SizeTuple}
-
-    return foreach(Base.product(map(Base.OneTo, SizeTuple.parameters)...)) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i...); kwargs...)
-    end
-end
-
-@inline function _power_foreach(f, M::PowerManifold{<:Manifold, Tuple{N}},
-    kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray, x2::AbstractArray) where {N}
-
-    for i in 1:N
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i),
-                      view(x2, rep_size_to_colons(rep_size)..., i); kwargs...)
-    end
-end
-
-function _power_foreach(f, M::PowerManifold{<:Manifold, SizeTuple},
-    kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray, x2::AbstractArray) where {SizeTuple}
-
-    return foreach(Base.product(map(Base.OneTo, SizeTuple.parameters)...)) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i...),
-                      view(x2, rep_size_to_colons(rep_size)..., i...); kwargs...)
-    end
-end
-
-@inline function _power_foreach(f, M::PowerManifold{<:Manifold, Tuple{N}},
-    kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray, x2::AbstractArray, x3::AbstractArray) where {N}
-
-    for i in 1:N
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i),
-                      view(x2, rep_size_to_colons(rep_size)..., i),
-                      view(x3, rep_size_to_colons(rep_size)..., i); kwargs...)
-    end
-end
-
-function _power_foreach(f, M::PowerManifold{<:Manifold, SizeTuple},
-    kwargs::NamedTuple, rep_size::Tuple, x1::AbstractArray, x2::AbstractArray, x3::AbstractArray) where {SizeTuple}
-
-    return foreach(Base.product(map(Base.OneTo, SizeTuple.parameters)...)) do i
-        f(M.manifold, view(x1, rep_size_to_colons(rep_size)..., i...),
-                      view(x2, rep_size_to_colons(rep_size)..., i...),
-                      view(x3, rep_size_to_colons(rep_size)..., i...); kwargs...)
-    end
-end
-
 
 
 function isapprox(M::PowerManifold, x, y; kwargs...)
-    return power_mapreduce(isapprox, &, M, kwargs.data, true, x, y)
+    result = true
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        result &= isapprox(M.manifold,
+            _read(rep_size, x, i),
+            _read(rep_size, y, i);
+            kwargs...)
+    end
+    return result
 end
 
 function isapprox(M::PowerManifold, x, v, w; kwargs...)
-    return power_mapreduce(isapprox, &, M, kwargs.data, true, x, v, w)
+    result = true
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        result &= isapprox(M.manifold,
+            _read(rep_size, x, i),
+            _read(rep_size, v, i),
+            _read(rep_size, w, i);
+            kwargs...)
+    end
+    return result
 end
 
 function representation_size(M::PowerManifold{<:Manifold, TSize}) where TSize
@@ -285,42 +100,101 @@ end
 struct PowerMetric <: Metric end
 
 function det_local_metric(M::MetricManifold{PowerManifold, PowerMetric}, x::AbstractArray)
-    dets = power_mapreduce(det_local_metric, +, M.manifold, NamedTuple(), zero(eltype(x)), x)
-    return prod(dets)
+    result = one(eltype(x))
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        result *= det_local_metric(M.manifold,
+            _read(rep_size, x, i))
+    end
+    return result
 end
 
 function inner(M::PowerManifold, x, v, w)
-    return power_mapreduce(inner, +, M, NamedTuple(), zero(eltype(x)), x, v, w)
+    result = zero(eltype(v))
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        result += inner(M.manifold,
+            _read(rep_size, x, i),
+            _read(rep_size, v, i),
+            _read(rep_size, w, i))
+    end
+    return result
 end
 
 function norm(M::PowerManifold, x, v)
-    norms_squared = power_map(norm, M, NamedTuple(), x, v).^2
-    return sqrt(sum(norms_squared))
+    sum_squares = zero(eltype(v))
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        sum_squares += norm(M.manifold,
+            _read(rep_size, x, i),
+            _read(rep_size, v, i))^2
+    end
+    return sqrt(sum_squares)
 end
 
 function distance(M::PowerManifold, x, y)
-    dists_squared = power_map(distance, M, NamedTuple(), x, y).^2
-    return sqrt(sum(dists_squared))
+    sum_squares = zero(eltype(x))
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        sum_squares += distance(M.manifold,
+            _read(rep_size, x, i),
+            _read(rep_size, y, i))^2
+    end
+    return sqrt(sum_squares)
 end
 
 function exp!(M::PowerManifold, y, x, v)
-    power_foreach(exp!, M, NamedTuple(), y, x, v)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        exp!(M.manifold,
+            _write(rep_size, y, i),
+            _read(rep_size, x, i),
+            _read(rep_size, v, i))
+    end
     return y
 end
 
 function log!(M::PowerManifold, v, x, y)
-    power_foreach(log!, M, NamedTuple(), v, x, y)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        log!(M.manifold,
+            _write(rep_size, v, i),
+            _read(rep_size, x, i),
+            _read(rep_size, y, i))
+    end
     return v
 end
 
 function injectivity_radius(M::PowerManifold, x)
-    radii = power_map(injectivity_radius, M, NamedTuple(), x)
-    return minimum(radii)
+    radius = 0.0
+    initialized = false
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        cur_rad = injectivity_radius(M.manifold,
+            _read(rep_size, x, i))
+        if initialized
+            radius = min(cur_rad, radius)
+        else
+            radius = cur_rad
+            initialized = true
+        end
+    end
+    return radius
 end
 
 function injectivity_radius(M::PowerManifold)
-    radii = power_map(injectivity_radius, M, NamedTuple())
-    return minimum(radii)
+    radius = 0.0
+    initialized = false
+    for i in get_iterator(M)
+        cur_rad = injectivity_radius(M.manifold)
+        if initialized
+            radius = min(cur_rad, radius)
+        else
+            radius = cur_rad
+            initialized = true
+        end
+    end
+    return radius
 end
 
 """
@@ -333,8 +207,13 @@ struct PowerRetraction{TR<:AbstractRetractionMethod} <: AbstractRetractionMethod
 end
 
 function retract!(M::PowerManifold, y, x, v, method::PowerRetraction)
-    power_foreach(M, NamedTuple(), y, x, v) do _M, _y, _x, _v
-        retract!(_M, _y, _x, _v, method.retraction)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        retract!(M.manifold,
+            _write(rep_size, y, i),
+            _read(rep_size, x, i),
+            _read(rep_size, v, i),
+            method.retraction)
     end
     return y
 end
@@ -350,8 +229,13 @@ struct InversePowerRetraction{TR<:AbstractInverseRetractionMethod} <: AbstractIn
 end
 
 function inverse_retract!(M::PowerManifold, v, x, y, method::InversePowerRetraction)
-    power_foreach(M, NamedTuple(), v, x, y) do _M, _v, _x, _y
-        inverse_retract!(_M, _v, _x, _y, method.inverse_retraction)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        inverse_retract!(M.manifold,
+            _write(rep_size, v, i),
+            _read(rep_size, x, i),
+            _read(rep_size, y, i),
+            method.inverse_retraction)
     end
     return v
 end
@@ -374,7 +258,13 @@ Check whether `x` is a valid point on the [`ProductManifold`](@ref) `M`.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
 function is_manifold_point(M::PowerManifold, x; kwargs...)
-    return power_mapreduce(is_manifold_point, &, M, kwargs.data, true, x)
+    result = true
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        result &= is_manifold_point(M.manifold,
+            _read(rep_size, x, i); kwargs...)
+    end
+    return result
 end
 
 """
@@ -387,8 +277,14 @@ base manifolds must be respective tangent vectors.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
 function is_tangent_vector(M::PowerManifold, x, v; kwargs...)
-    ispoint = is_manifold_point(M, x)
-    return power_mapreduce(is_tangent_vector, &, M, kwargs.data, true, x, v)
+    result = true
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        result &= is_tangent_vector(M.manifold,
+            _read(rep_size, x, i),
+            _read(rep_size, v, i); kwargs...)
+    end
+    return result
 end
 
 """
@@ -413,7 +309,12 @@ function rand(rng::AbstractRNG, d::PowerPointDistribution)
 end
 
 function _rand!(rng::AbstractRNG, d::PowerPointDistribution, x::AbstractArray)
-    power_foreach((M, u) -> _rand!(rng, d.distribution, u), d.manifold, NamedTuple(), x)
+    rep_size = representation_size(d.manifold.manifold)
+    for i in get_iterator(d.manifold)
+        _rand!(rng,
+            d.distribution,
+            _write(rep_size, x, i))
+    end
     return x
 end
 
@@ -442,10 +343,10 @@ function rand(rng::AbstractRNG, d::PowerFVectorDistribution)
 end
 
 function _rand!(rng::AbstractRNG, d::PowerFVectorDistribution, v::AbstractArray)
-    manifold = d.type.M
-    power_foreach(manifold, NamedTuple(), v, d.x) do M, u, x
-        copyto!(d.distribution.x, x)
-        _rand!(rng, d.distribution, u)
+    rep_size = representation_size(d.type.M.manifold)
+    for i in get_iterator(d.type.M)
+        copyto!(d.distribution.x, _read(rep_size, d.x, i))
+        _rand!(rng, d.distribution, _read(rep_size, v, i))
     end
     return v
 end
