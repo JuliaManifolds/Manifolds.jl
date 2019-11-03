@@ -241,12 +241,24 @@ function inverse_retract!(M::PowerManifold, v, x, y, method::InversePowerRetract
 end
 
 function flat!(M::PowerManifold, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
-    error("TODO")
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        flat!(M.manifold,
+            FVector(CotangentSpace, _write(rep_size, v.data, i)),
+            _read(rep_size, x, i),
+            FVector(TangentSpace, _read(rep_size, w.data, i)))
+    end
     return v
 end
 
 function sharp!(M::PowerManifold, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
-    error("TODO")
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        sharp!(M.manifold,
+            FVector(TangentSpace, _write(rep_size, v.data, i)),
+            _read(rep_size, x, i),
+            FVector(CotangentSpace, _read(rep_size, w.data, i)))
+    end
     return v
 end
 

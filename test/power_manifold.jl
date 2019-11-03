@@ -49,7 +49,7 @@ Random.seed!(42)
             test_manifold(Ms1,
                           pts1;
                           test_reverse_diff = true,
-                          test_musical_isomorphisms = false,
+                          test_musical_isomorphisms = true,
                           retraction_methods = retraction_methods,
                           inverse_retraction_methods = inverse_retraction_methods,
                           point_distributions = [power_s1_pt_dist],
@@ -63,7 +63,7 @@ Random.seed!(42)
             test_manifold(Ms2,
                           pts2;
                           test_reverse_diff = true,
-                          test_musical_isomorphisms = false,
+                          test_musical_isomorphisms = true,
                           retraction_methods = retraction_methods,
                           inverse_retraction_methods = inverse_retraction_methods,
                           point_distributions = [power_s2_pt_dist],
@@ -78,7 +78,7 @@ Random.seed!(42)
             test_manifold(Mr1,
                           pts1;
                           test_reverse_diff = false,
-                          test_musical_isomorphisms = false,
+                          test_musical_isomorphisms = true,
                           retraction_methods = retraction_methods,
                           inverse_retraction_methods = inverse_retraction_methods,
                           point_distributions = [power_r1_pt_dist],
@@ -92,7 +92,7 @@ Random.seed!(42)
             test_manifold(Mr2,
                           pts2;
                           test_reverse_diff = false,
-                          test_musical_isomorphisms = false,
+                          test_musical_isomorphisms = true,
                           retraction_methods = retraction_methods,
                           inverse_retraction_methods = inverse_retraction_methods,
                           point_distributions = [power_r2_pt_dist],
