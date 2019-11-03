@@ -78,21 +78,6 @@ SizedAbstractMatrix{S1,S2,T,M} = SizedAbstractArray{Tuple{S1,S2},T,2,M}
 
 Base.dataids(sa::SizedAbstractArray) = Base.dataids(sa.data)
 
-"""
-    Size(dims)(array)
-
-Creates a `SizedAbstractArray` or `HybridArray` wrapping `array`
-with the specified statically-known `dims`, so to take advantage of the
-(faster) methods defined by the static array package.
-"""
-@generated function (::Size{S})(a::AbstractArray) where {S}
-    if isa(S, NTuple{<:Any,Int})
-        return :(SizedAbstractArray{Tuple{S...}}(a))
-    else
-        return :(HybridArray{Tuple{S...}}(a))
-    end
-end
-
 function promote_rule(::Type{<:SizedAbstractArray{S,T,N,M,TDataA}}, ::Type{<:SizedAbstractArray{S,U,N,M,TDataB}}) where {S,T,U,N,M,TDataA,TDataB}
     TU = promote_type(T,U)
     SizedAbstractArray{S,TU,N,M,promote_type(TDataA, TDataB)::Type{<:AbstractArray{TU}}}
