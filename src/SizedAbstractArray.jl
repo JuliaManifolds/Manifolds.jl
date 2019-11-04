@@ -8,7 +8,6 @@ Wraps an `AbstractArray` with a static size, so to take advantage of the (faster
 methods defined by the static array package. The size is checked once upon
 construction to determine if the number of elements (`length`) match, but the
 array may be reshaped.
-(Also, `Size(dims...)(array)` acheives the same thing)
 """
 struct SizedAbstractArray{S<:Tuple, T, N, M, TData<:AbstractArray{T,M}} <: StaticArray{S, T, N}
     data::TData

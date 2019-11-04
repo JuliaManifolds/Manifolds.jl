@@ -521,7 +521,7 @@ vectors shorter than $d$ (has a left inverse).
 injectivity_radius(M::Manifold, x, ::AbstractRetractionMethod) = injectivity_radius(M, x)
 
 """
-    injectivity_radius(M::Manifold, x)
+    injectivity_radius(M::Manifold)
 
 Infimum of the injectivity radii of all manifold points.
 """
