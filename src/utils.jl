@@ -120,8 +120,3 @@ different lengths, the result is trimmed to the length of the shorter tuple.
     end
     ex
 end
-
-# TODO: move to HybridArrays
-@inline function Base.zero(a::HA) where {S, Sel, HA <: HybridArrays.SSubArray{S, Sel}}
-    return StaticArrays.zeros(SArray{S, Sel})
-end
