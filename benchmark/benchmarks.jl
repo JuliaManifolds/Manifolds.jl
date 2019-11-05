@@ -156,11 +156,11 @@ function add_manifold_benchmarks()
     # power manifolds
     begin
         Ms = Sphere(2)
-        Ms1 = PowerManifold(Ms, (5,))
-        Ms2 = PowerManifold(Ms, (5,7))
+        Ms1 = PowerManifold(Ms, 5)
+        Ms2 = PowerManifold(Ms, 5, 7)
         Mr = Manifolds.Rotations(3)
-        Mr1 = PowerManifold(Mr, (5,))
-        Mr2 = PowerManifold(Mr, (5,7))
+        Mr1 = PowerManifold(Mr, 5)
+        Mr2 = PowerManifold(Mr, 5, 7)
 
         types_s1 = [Array{Float64,2},
                     HybridArray{Tuple{3,StaticArrays.Dynamic()}, Float64, 2}]

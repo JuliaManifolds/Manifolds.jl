@@ -17,7 +17,7 @@ power manifolds might be faster if they are represented as [`ProductManifold`](@
 
 # Constructor
 
-    PowerManifold(M, (N_1, N_2, ..., N_n))
+    PowerManifold(M, N_1, N_2, ..., N_n)
 
 generates the power manifold $M^{N_1 \times N_2 \times \dots \times N_n}$.
 """
@@ -30,7 +30,7 @@ end
     return ntuple(i -> Colon(), N)
 end
 
-function PowerManifold(manifold::Manifold, size::Tuple)
+function PowerManifold(manifold::Manifold, size::Int...)
     return PowerManifold{typeof(manifold), Tuple{size...}}(manifold)
 end
 
