@@ -480,7 +480,7 @@ to `vto`. By default, the method `m` is [`ParallelTransport`](@ref).
 vector_transport_to!(M::Manifold, vto, x, v, y) = vector_transport_to!(M,vto,x,v,y,ParallelTransport())
 vector_transport_to!(M::Manifold, vto, x, v, y, m::ProjectTangent) = project_tangent!(M, vto, y, v)
 
-function vector_transport_to!(M::Manifold, vto, x, v, y, m::T) where {T <: AbstractVectorTransportMethod}
+function vector_transport_to!(M::Manifold, vto, x, v, y, m::AbstractVectorTransportMethod)
     error("vector transport from a point of type $(typeof(x)) to a type $(typeof(y)) on a $(typeof(M)) for a vector of type $(v) and the $(typeof(m)) not yet implemented.")
 end
 

@@ -15,9 +15,10 @@ include("utils.jl")
             ]
         pts = [convert(T, a) for a in ptsF]
         test_manifold(M, pts;
+                test_vector_transport = true,
                 test_forward_diff = false,
                 test_reverse_diff = false,
-                exp_log_atol_multiplier = 4
+                exp_log_atol_multiplier = 8
         )
     end
 end

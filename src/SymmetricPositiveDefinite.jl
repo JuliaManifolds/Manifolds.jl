@@ -197,7 +197,7 @@ end
 
 compute the vector transport on the [`SymmetricPositiveDefinite`](@ref) with its default metric, [`LinearAffineMetric`](@ref) and method `m`, which defaults to [`ParallelTransport`](@ref).
 """
-vector_transport_to!(P::SymmetricPositiveDefinite{N},vto, x, v, y, m=ParallelTransport()) where N = vector_transport_to!(MetricManifold(P,LinearAffineMetric()),vto, x, v, y, m)
+vector_transport_to!(P::SymmetricPositiveDefinite{N},vto, x, v, y, m::AbstractVectorTransportMethod) where N = vector_transport_to!(MetricManifold(P,LinearAffineMetric()),vto, x, v, y, m)
 @doc doc"""
     vector_transport_to!(P,vto,x,v,y,::ParallelTransport)
 
@@ -242,7 +242,8 @@ function vector_transport_to!(::MetricManifold{SymmetricPositiveDefinite{N},Line
     Sf = Diagonal( exp.(e3.values) )
     Uf = e3.vectors
     xue = xSqrt*Uf*Sf*transpose(Uf)
-    copyto!(vto, xue * tv * transpose(xue) )
+    vtp = xue * ( 0.5*(tv + transpose(tv)) ) * transpose(xue)
+    copyto!(vto, vtp) # symmetrize
     return vto
 end
 
