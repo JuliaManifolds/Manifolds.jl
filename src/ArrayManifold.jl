@@ -24,6 +24,10 @@ convert(::Type{ArrayMPoint{V}},x::V) where V <: AbstractArray{<:Number} = ArrayP
 eltype(::Type{ArrayMPoint{V}}) where V = eltype(V)
 similar(x::ArrayMPoint) = ArrayMPoint(similar(x.value))
 similar(x::ArrayMPoint, ::Type{T}) where T = ArrayMPoint(similar(x.value, T))
+function copyto!(x::ArrayMPoint, y::ArrayMPoint)
+    copyto!(x.value, y.value)
+    return x
+end
 
 struct ArrayTVector{V <: AbstractArray{<:Number}} <: TVector
     value::V
@@ -33,6 +37,10 @@ convert(::Type{ArrayTVector{V}},v::V) where V <: AbstractArray{<:Number} = Array
 eltype(::Type{ArrayTVector{V}}) where V = eltype(V)
 similar(x::ArrayTVector) = ArrayTVector(similar(x.value))
 similar(x::ArrayTVector, ::Type{T}) where T = ArrayTVector(similar(x.value, T))
+function copyto!(x::ArrayTVector, y::ArrayTVector)
+    copyto!(x.value, y.value)
+    return x
+end
 
 array_value(x::AbstractArray) = x
 array_value(x::ArrayMPoint) = x.value
@@ -76,6 +84,14 @@ function inner(M::ArrayManifold, x, v, w; kwargs...)
     return inner(M.manifold, array_value(x), array_value(v), array_value(w))
 end
 
+function exp(M::ArrayManifold, x, v; kwargs...)
+    is_manifold_point(M, x; kwargs...)
+    is_tangent_vector(M, x, v; kwargs...)
+    y = ArrayMPoint(exp(M.manifold, array_value(x), array_value(v)))
+    is_manifold_point(M, y; kwargs...)
+    return y
+end
+
 function exp!(M::ArrayManifold, y, x, v; kwargs...)
     is_manifold_point(M, x; kwargs...)
     is_tangent_vector(M, x, v; kwargs...)
@@ -114,13 +130,25 @@ function zero_tangent_vector(M::ArrayManifold, x; kwargs...)
     return w
 end
 
-function vector_transport(M::ArrayManifold, x, v, y)
-    return vector_transport(M.manifold,
-                            array_value(x),
-                            array_value(v),
-                            array_value(y))
+function vector_transport_to(M::ArrayManifold, x, v, y)
+    return vector_transport_to(M.manifold,
+                               array_value(x),
+                               array_value(v),
+                               array_value(y))
 end
 
-export ArrayManifold,
-    ArrayMPoint,
-    ArrayTVector
+function vector_transport_to!(M::ArrayManifold, vto, x, v, y)
+    return vector_transport_to!(M.manifold,
+                                array_value(vto),
+                                array_value(x),
+                                array_value(v),
+                                array_value(y))
+end
+
+function is_manifold_point(M::ArrayManifold, x::MPoint; kwargs...)
+    return is_manifold_point(M.manifold, array_value(x); kwargs...)
+end
+
+function is_tangent_vector(M::ArrayManifold, x::MPoint, v::TVector; kwargs...)
+    return is_tangent_vector(M.manifold, array_value(x), array_value(v); kwargs...)
+end

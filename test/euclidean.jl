@@ -20,6 +20,9 @@ include("utils.jl")
                           pts,
                           test_reverse_diff = isa(T, Vector),
                           test_project_tangent = true,
+                          test_musical_isomorphisms = true,
+                          test_vector_transport = true,
+                          test_mutating_rand = isa(T, Vector),
                           point_distributions = [Manifolds.projected_distribution(M, Distributions.MvNormal(zero(pts[1]), 1.0))],
                           tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
         end

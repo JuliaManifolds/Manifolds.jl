@@ -19,13 +19,7 @@ struct Euclidean{T<:Tuple} <: Manifold where {T} end
 Euclidean(n::Int) = Euclidean{Tuple{n}}()
 Euclidean(m::Int, n::Int) = Euclidean{Tuple{m,n}}()
 
-function representation_size(::Euclidean{Tuple{n}}, ::Type{T}) where {n,T<:Union{MPoint, TVector, CoTVector}}
-    return (n,)
-end
-
-function representation_size(::Euclidean{Tuple{m,n}}, ::Type{T}) where {m,n,T<:Union{MPoint, TVector, CoTVector}}
-    return (m,n)
-end
+@generated representation_size(::Euclidean{T}) where {T} = Tuple(T.parameters...)
 
 @generated manifold_dimension(::Euclidean{T}) where {T} = *(T.parameters...)
 
@@ -33,13 +27,9 @@ struct EuclideanMetric <: RiemannianMetric end
 
 @traitimpl HasMetric{Euclidean,EuclideanMetric}
 
-function local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x)
-    return Diagonal(ones(SVector{size(x, 1),eltype(x)}))
-end
+local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x) = Diagonal(ones(SVector{size(x, 1),eltype(x)}))
 
-function inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x)
-    return local_metric(M, x)
-end
+inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = local_metric(M, x)
 
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = one(eltype(x))
 
@@ -52,9 +42,9 @@ distance(::Euclidean, x, y) = norm(x-y)
 norm(::Euclidean, x, v) = norm(v)
 norm(::MetricManifold{<:Manifold,EuclideanMetric}, x, v) = norm(v)
 
-exp!(M::Euclidean, y, x, v) = (y .= x + v)
+exp!(M::Euclidean, y, x, v) = (y .= x .+ v)
 
-log!(M::Euclidean, v, x, y) = (v .= y - x)
+log!(M::Euclidean, v, x, y) = (v .= y .- x)
 
 function zero_tangent_vector!(M::Euclidean, v, x)
     fill!(v, 0)
@@ -66,6 +56,16 @@ project_point!(M::Euclidean, x) = x
 function project_tangent!(M::Euclidean, w, x, v)
     w .= v
     return w
+end
+
+function flat!(M::Euclidean, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
+    copyto!(v.data, w.data)
+    return v
+end
+
+function sharp!(M::Euclidean, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
+    copyto!(v.data, w.data)
+    return v
 end
 
 """
@@ -90,5 +90,5 @@ projected to tangent space at `x`.
 """
 function normal_tvector_distribution(M::Euclidean{Tuple{N}}, x, σ) where N
     d = Distributions.MvNormal(zero(x), σ)
-    return ProjectedTVectorDistribution(M, x, d, project_tangent!, x)
+    return ProjectedFVectorDistribution(TangentBundleFibers(M), x, d, project_vector!, x)
 end

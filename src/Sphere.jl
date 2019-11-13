@@ -15,7 +15,7 @@ Sphere(n::Int) = Sphere{n}()
 
 @traitimpl HasMetric{Sphere,EuclideanMetric}
 
-function representation_size(::Sphere{N}, ::Type{T}) where {N,T<:Union{MPoint, TVector, CoTVector}}
+function representation_size(::Sphere{N}) where N
     return (N+1,)
 end
 
@@ -73,6 +73,27 @@ injectivity_radius(S::Sphere, args...) = π
 
 function zero_tangent_vector!(S::Sphere, v, x)
     fill!(v, 0)
+    return v
+end
+
+function vector_transport_to!(M::Sphere, vto, x, v, y)
+    v_xy = log(M, x, y)
+    vl = norm(M, x, v_xy)
+    vto .= v
+    if vl > 0
+        factor = 2*dot(v, y)/(norm(x + y)^2)
+        vto .-= factor.*(x .+ y)
+    end
+    return vto
+end
+
+function flat!(M::Sphere, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
+    copyto!(v.data, w.data)
+    return v
+end
+
+function sharp!(M::Sphere, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
+    copyto!(v.data, w.data)
     return v
 end
 
@@ -134,5 +155,5 @@ projected to tangent space at `x`.
 """
 function normal_tvector_distribution(S::Sphere, x, σ)
     d = Distributions.MvNormal(zero(x), σ)
-    return ProjectedTVectorDistribution(S, x, d, project_tangent!, x)
+    return ProjectedFVectorDistribution(TangentBundleFibers(S), x, d, project_vector!, x)
 end

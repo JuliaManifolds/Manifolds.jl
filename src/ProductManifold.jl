@@ -68,230 +68,6 @@ This function is not type-stable, for better preformance use
 """
 submanifold(M::ProductManifold, i::AbstractVector) = submanifold(M, Val(tuple(i...)))
 
-"""
-    ShapeSpecification(manifolds::Manifold...)
-
-A structure for specifying array size and offset information for linear
-storage of points and tangent vectors on the product manifold of `manifolds`.
-
-For example, consider the shape specification for the product of
-a sphere and group of rotations:
-
-```julia-repl
-julia> M1 = Sphere(2)
-Sphere{2}()
-
-julia> M3 = Rotations(2)
-Rotations{2}()
-
-julia> shape = Manifolds.ShapeSpecification(M1, M3)
-Manifolds.ShapeSpecification{(1:3, 4:7),Tuple{Tuple{3},Tuple{2,2}}}()
-```
-
-`TRanges` contains ranges in the linear storage that correspond to a specific
-manifold. `Sphere(2)` needs three numbers and is first, so it is allocated the
-first three elements of the linear storage (`1:3`). `Rotations(2)` needs four
-numbers and is second, so the next four numbers are allocated to it (`4:7`).
-`TSizes` describe how the linear storage must be reshaped to correctly
-represent points. In this case, `Sphere(2)` expects a three-element vector, so
-the corresponding size is `Tuple{3}`. On the other hand, `Rotations(2)`
-expects two-by-two matrices, so its size specification is `Tuple{2,2}`.
-"""
-struct ShapeSpecification{TRanges, TSizes} end
-
-function ShapeSpecification(manifolds::Manifold...)
-    sizes = map(m -> representation_size(m, MPoint), manifolds)
-    lengths = map(prod, sizes)
-    ranges = UnitRange{Int64}[]
-    k = 1
-    for len ∈ lengths
-        push!(ranges, k:(k+len-1))
-        k += len
-    end
-    TRanges = tuple(ranges...)
-    TSizes = Tuple{map(s -> Tuple{s...}, sizes)...}
-    return ShapeSpecification{TRanges, TSizes}()
-end
-
-"""
-    ProductArray(shape::ShapeSpecification, data)
-
-An array-based representation for points and tangent vectors on the
-product manifold. `data` contains underlying representation of points
-arranged according to `TRanges` and `TSizes` from `shape`.
-Internal views for each specific sub-point are created and stored in `parts`.
-"""
-struct ProductArray{TM<:ShapeSpecification,T,N,TData<:AbstractArray{T,N},TV<:Tuple} <: AbstractArray{T,N}
-    data::TData
-    parts::TV
-end
-
-# The two-argument version of this constructor is substantially faster than
-# the generic one.
-function ProductArray(M::Type{ShapeSpecification{TRanges, Tuple{Size1, Size2}}}, data::TData) where {TRanges, Size1, Size2, T, N, TData<:AbstractArray{T,N}}
-    views = (SizedAbstractArray{Size1}(view(data, TRanges[1])),
-             SizedAbstractArray{Size2}(view(data, TRanges[2])))
-    return ProductArray{M, T, N, TData, typeof(views)}(data, views)
-end
-
-function ProductArray(M::Type{ShapeSpecification{TRanges, Tuple{Size1, Size2, Size3}}}, data::TData) where {TRanges, Size1, Size2, Size3, T, N, TData<:AbstractArray{T,N}}
-    views = (SizedAbstractArray{Size1}(view(data, TRanges[1])),
-             SizedAbstractArray{Size2}(view(data, TRanges[2])),
-             SizedAbstractArray{Size3}(view(data, TRanges[3])))
-    return ProductArray{M, T, N, TData, typeof(views)}(data, views)
-end
-
-function ProductArray(M::Type{ShapeSpecification{TRanges, TSizes}}, data::TData) where {TRanges, TSizes, T, N, TData<:AbstractArray{T,N}}
-    views = map((size, range) -> SizedAbstractArray{size}(view(data, range)), size_to_tuple(TSizes), TRanges)
-    return ProductArray{M, T, N, TData, typeof(views)}(data, views)
-end
-
-function ProductArray(M::ShapeSpecification{TRanges, TSizes}, data::TData) where {TM, TRanges, TSizes, TData<:AbstractArray}
-    return ProductArray(typeof(M), data)
-end
-
-@doc doc"""
-    prod_point(M::ShapeSpecification, pts...)
-
-Construct a product point from product manifold `M` based on point `pts`
-represented by [`ProductArray`](@ref).
-
-# Example
-To construct a point on the product manifold $S^2 \times \mathbb{R}^2$
-from points on the sphere and in the euclidean space represented by,
-respectively, `[1.0, 0.0, 0.0]` and `[-3.0, 2.0]` you need to construct shape
-specification first. It describes how linear storage of `ProductArray`
-corresponds to array representations expected by `Sphere(2)` and `Euclidean(2)`.
-
-    M1 = Sphere(2)
-    M2 = Euclidean(2)
-    Mshape = Manifolds.ShapeSpecification(M1, M2)
-
-Next, the desired point on the product manifold can be obtained by calling
-`Manifolds.prod_point(Mshape, [1.0, 0.0, 0.0], [-3.0, 2.0])`.
-"""
-function prod_point(M::ShapeSpecification, pts...)
-    data = mapreduce(vcat, pts) do pt
-        reshape(pt, :)
-    end
-    # Array(data) is used to ensure that the data is mutable
-    # `mapreduce` can return `SArray` for some arguments
-    return ProductArray(M, Array(data))
-end
-
-"""
-    submanifold_component(x::ProductArray, i::Integer)
-
-Project the product array `x` to its `i`th component. A new array is returned.
-"""
-function submanifold_component(x::ProductArray, i::Integer)
-    return x.parts[i]
-end
-
-Base.BroadcastStyle(::Type{<:ProductArray{ShapeSpec}}) where ShapeSpec<:ShapeSpecification = Broadcast.ArrayStyle{ProductArray{ShapeSpec}}()
-
-function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{ProductArray{ShapeSpec}}}, ::Type{ElType}) where {ShapeSpec, ElType}
-    A = find_pv(bc)
-    return ProductArray(ShapeSpec, similar(A.data, ElType))
-end
-
-Base.dataids(x::ProductArray) = Base.dataids(x.data)
-
-"""
-    find_pv(x...)
-
-`A = find_pv(x...)` returns the first `ProductArray` among the arguments.
-"""
-@inline find_pv(bc::Base.Broadcast.Broadcasted) = find_pv(bc.args)
-@inline find_pv(args::Tuple) = find_pv(find_pv(args[1]), Base.tail(args))
-@inline find_pv(x) = x
-@inline find_pv(a::ProductArray, rest) = a
-@inline find_pv(::Any, rest) = find_pv(rest)
-
-size(x::ProductArray) = size(x.data)
-Base.@propagate_inbounds getindex(x::ProductArray, i) = getindex(x.data, i)
-Base.@propagate_inbounds setindex!(x::ProductArray, val, i) = setindex!(x.data, val, i)
-
-(+)(v1::ProductArray{ShapeSpec}, v2::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, v1.data + v2.data)
-(-)(v1::ProductArray{ShapeSpec}, v2::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, v1.data - v2.data)
-(-)(v::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, -v.data)
-(*)(a::Number, v::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, a*v.data)
-
-eltype(::Type{ProductArray{TM, TData, TV}}) where {TM, TData, TV} = eltype(TData)
-similar(x::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, similar(x.data))
-similar(x::ProductArray{ShapeSpec}, ::Type{T}) where {ShapeSpec<:ShapeSpecification, T} = ProductArray(ShapeSpec, similar(x.data, T))
-
-"""
-    ProductMPoint(parts)
-
-A more general but slower representation of points on a product manifold.
-
-# Example:
-
-A product point on a product manifold `Sphere(2) × Euclidean(2)` might be
-created as
-
-    ProductMPoint([1.0, 0.0, 0.0], [2.0, 3.0])
-
-where `[1.0, 0.0, 0.0]` is the part corresponding to the sphere factor
-and `[2.0, 3.0]` is the part corresponding to the euclidean manifold.
-"""
-struct ProductMPoint{TM<:Tuple} <: MPoint
-    parts::TM
-end
-
-ProductMPoint(points...) = ProductMPoint{typeof(points)}(points)
-eltype(x::ProductMPoint) = eltype(Tuple{map(eltype, x.parts)...})
-similar(x::ProductMPoint) = ProductMPoint(map(similar, x.parts)...)
-similar(x::ProductMPoint, ::Type{T}) where T = ProductMPoint(map(t -> similar(t, T), x.parts)...)
-
-function submanifold_component(x::ProductMPoint, i::Integer)
-    return x.parts[i]
-end
-
-"""
-    ProductTVector(parts)
-
-A more general but slower representation of tangent vectors on a product
-manifold.
-"""
-struct ProductTVector{TM<:Tuple} <: TVector
-    parts::TM
-end
-
-ProductTVector(vectors...) = ProductTVector{typeof(vectors)}(vectors)
-eltype(x::ProductTVector) = eltype(Tuple{map(eltype, x.parts)...})
-similar(x::ProductTVector) = ProductTVector(map(similar, x.parts)...)
-similar(x::ProductTVector, ::Type{T}) where T = ProductTVector(map(t -> similar(t, T), x.parts)...)
-
-(+)(v1::ProductTVector, v2::ProductTVector) = ProductTVector(map(+, v1.parts, v2.parts)...)
-(-)(v1::ProductTVector, v2::ProductTVector) = ProductTVector(map(-, v1.parts, v2.parts)...)
-(-)(v::ProductTVector) = ProductTVector(map(-, v.parts))
-(*)(a::Number, v::ProductTVector) = ProductTVector(map(t -> a*t, v.parts))
-
-function submanifold_component(x::ProductTVector, i::Integer)
-    return x.parts[i]
-end
-
-"""
-    ProductCoTVector(parts)
-
-A more general but slower representation of cotangent vectors on a product
-manifold.
-"""
-struct ProductCoTVector{TM<:Tuple} <: CoTVector
-    parts::TM
-end
-
-ProductCoTVector(covectors...) = ProductCoTVector{typeof(covectors)}(covectors)
-eltype(x::ProductCoTVector) = eltype(Tuple{map(eltype, x.parts)...})
-similar(x::ProductCoTVector) = ProductCoTVector(map(similar, x.parts)...)
-similar(x::ProductCoTVector, ::Type{T}) where T = ProductCoTVector(map(t -> similar(t, T), x.parts)...)
-
-function submanifold_component(x::ProductCoTVector, i::Integer)
-    return x.parts[i]
-end
-
 function isapprox(M::ProductManifold, x, y; kwargs...)
     return all(t -> isapprox(t...; kwargs...), ziptuples(M.manifolds, x.parts, y.parts))
 end
@@ -300,8 +76,8 @@ function isapprox(M::ProductManifold, x, v, w; kwargs...)
     return all(t -> isapprox(t...; kwargs...), ziptuples(M.manifolds, x.parts, v.parts, w.parts))
 end
 
-function representation_size(M::ProductManifold, ::Type{T}) where {T}
-    return (mapreduce(m -> sum(representation_size(m, T)), +, M.manifolds),)
+function representation_size(M::ProductManifold)
+    return (mapreduce(m -> prod(representation_size(m)), +, M.manifolds),)
 end
 
 manifold_dimension(M::ProductManifold) = mapreduce(manifold_dimension, +, M.manifolds)
@@ -332,8 +108,8 @@ function exp!(M::ProductManifold, y, x, v)
     return y
 end
 
-function exp(M::ProductManifold, x::ProductMPoint, v::ProductTVector)
-    return ProductMPoint(map(exp, M.manifolds, x.parts, v.parts)...)
+function exp(M::ProductManifold, x::ProductRepr, v::ProductRepr)
+    return ProductRepr(map(exp, M.manifolds, x.parts, v.parts)...)
 end
 
 function log!(M::ProductManifold, v, x, y)
@@ -341,8 +117,8 @@ function log!(M::ProductManifold, v, x, y)
     return v
 end
 
-function log(M::ProductManifold, x::ProductMPoint, y::ProductMPoint)
-    return ProductTVector(map(log, M.manifolds, x.parts, y.parts)...)
+function log(M::ProductManifold, x::ProductRepr, y::ProductRepr)
+    return ProductRepr(map(log, M.manifolds, x.parts, y.parts)...)
 end
 
 function injectivity_radius(M::ProductManifold, x)
@@ -386,6 +162,21 @@ function inverse_retract!(M::ProductManifold, v, x, y, method::InverseProductRet
     return v
 end
 
+function flat!(M::ProductManifold, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
+    vfs = map(u -> FVector(CotangentSpace, u), v.data.parts)
+    wfs = map(u -> FVector(TangentSpace, u), w.data.parts)
+    map(flat!, M.manifolds, vfs, x.parts, wfs)
+    return v
+end
+
+function sharp!(M::ProductManifold, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
+    vfs = map(u -> FVector(TangentSpace, u), v.data.parts)
+    wfs = map(u -> FVector(CotangentSpace, u), w.data.parts)
+    map(sharp!, M.manifolds, vfs, x.parts, wfs)
+    return v
+end
+
+
 """
     is_manifold_point(M::ProductManifold, x; kwargs...)
 
@@ -393,7 +184,7 @@ Check whether `x` is a valid point on the [`ProductManifold`](@ref) `M`.
 
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function is_manifold_point(M::ProductManifold, x::MPoint; kwargs...)
+function is_manifold_point(M::ProductManifold, x::ProductRepr; kwargs...)
     return all(t -> is_manifold_point(t...; kwargs...), ziptuples(M.manifolds, x.parts))
 end
 
@@ -410,7 +201,7 @@ base manifolds must be respective tangent vectors.
 
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function is_tangent_vector(M::ProductManifold, x::MPoint, v::TVector; kwargs...)
+function is_tangent_vector(M::ProductManifold, x::ProductRepr, v::ProductRepr; kwargs...)
     is_manifold_point(M, x)
     return all(t -> is_tangent_vector(t...; kwargs...), ziptuples(M.manifolds, x.parts, v.parts))
 end
@@ -444,7 +235,7 @@ function support(d::ProductPointDistribution)
 end
 
 function rand(rng::AbstractRNG, d::ProductPointDistribution)
-    return ProductMPoint(map(d -> rand(rng, d), d.distributions)...)
+    return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
 end
 
 function _rand!(rng::AbstractRNG, d::ProductPointDistribution, x::AbstractArray{<:Number})
@@ -452,54 +243,57 @@ function _rand!(rng::AbstractRNG, d::ProductPointDistribution, x::AbstractArray{
     return x
 end
 
-function _rand!(rng::AbstractRNG, d::ProductPointDistribution, x::ProductMPoint)
+function _rand!(rng::AbstractRNG, d::ProductPointDistribution, x::ProductRepr)
     map(t -> _rand!(rng, t[1], t[2]), d.distributions, x.parts)
     return x
 end
 
 """
-    ProductTVectorDistribution([m::ProductManifold], [x], distrs...)
+    ProductFVectorDistribution([type::VectorBundleFibers], [x], distrs...)
 
-Generates a random tangent vector at point `x` from manifold `m` using the
-product distribution of given distributions.
+Generates a random vector at point `x` from vector space (a fiber of a tangent
+bundle) of type `type` using the product distribution of given distributions.
 
-Manifold and `x` can be automatically inferred from distributions `distrs`.
+Vector space type and `x` can be automatically inferred from distributions `distrs`.
 """
-struct ProductTVectorDistribution{TM<:ProductManifold, TD<:(NTuple{N,Distribution} where N), TX} <: TVectorDistribution{TM, TX}
-    manifold::TM
+struct ProductFVectorDistribution{TSpace<:VectorBundleFibers{<:VectorSpaceType, <:ProductManifold}, TD<:(NTuple{N,Distribution} where N), TX} <: FVectorDistribution{TSpace, TX}
+    type::TSpace
     x::TX
     distributions::TD
 end
 
-function ProductTVectorDistribution(M::ProductManifold, x::Union{AbstractArray, MPoint}, distributions::TVectorDistribution...)
-    return ProductTVectorDistribution{typeof(M), typeof(distributions), typeof(x)}(M, x, distributions)
+function ProductFVectorDistribution(type::VectorBundleFibers{<:VectorSpaceType, <:ProductManifold}, x::Union{AbstractArray, MPoint, ProductRepr}, distributions::FVectorDistribution...)
+    return ProductFVectorDistribution{typeof(type), typeof(distributions), typeof(x)}(type, x, distributions)
 end
 
-function ProductTVectorDistribution(M::ProductManifold, distributions::TVectorDistribution...)
-    x = ProductMPoint(map(d -> support(d).x, distributions))
-    return ProductTVectorDistribution(M, x, distributions...)
+function ProductFVectorDistribution(type::VectorBundleFibers{<:VectorSpaceType, <:ProductManifold}, distributions::FVectorDistribution...)
+    x = ProductRepr(map(d -> support(d).x, distributions))
+    return ProductFVectorDistribution(type, x, distributions...)
 end
 
-function ProductTVectorDistribution(distributions::TVectorDistribution...)
-    M = ProductManifold(map(d -> support(d).manifold, distributions)...)
-    x = ProductMPoint(map(d -> support(d).x, distributions)...)
-    return ProductTVectorDistribution(M, x, distributions...)
+function ProductFVectorDistribution(distributions::FVectorDistribution...)
+    M = ProductManifold(map(d -> support(d).space.M, distributions)...)
+    VS = support(distributions[1]).space.VS
+    all(d -> support(d).space.VS == VS, distributions) || error("Not all distributions have support in vector spaces of the same type, which is currently not supported")
+    # Probably worth considering sum spaces in the future?
+    x = ProductRepr(map(d -> support(d).x, distributions)...)
+    return ProductFVectorDistribution(VectorBundleFibers(VS, M), x, distributions...)
 end
 
-function support(tvd::ProductTVectorDistribution)
-    return TVectorSupport(tvd.manifold, ProductMPoint(map(d -> support(d).x, tvd.distributions)...))
+function support(tvd::ProductFVectorDistribution)
+    return FVectorSupport(tvd.type, ProductRepr(map(d -> support(d).x, tvd.distributions)...))
 end
 
-function rand(rng::AbstractRNG, d::ProductTVectorDistribution)
-    return ProductTVector(map(d -> rand(rng, d), d.distributions)...)
+function rand(rng::AbstractRNG, d::ProductFVectorDistribution)
+    return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
 end
 
-function _rand!(rng::AbstractRNG, d::ProductTVectorDistribution, v::AbstractArray{<:Number})
+function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::AbstractArray{<:Number})
     v .= rand(rng, d)
     return v
 end
 
-function _rand!(rng::AbstractRNG, d::ProductTVectorDistribution, v::ProductTVector)
+function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::ProductRepr)
     map(t -> _rand!(rng, t[1], t[2]), d.distributions, v.parts)
     return v
 end

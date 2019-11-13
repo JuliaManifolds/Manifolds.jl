@@ -36,6 +36,7 @@ include("utils.jl")
         test_manifold(M, pts;
             test_reverse_diff = false,
             test_project_tangent = true,
+            test_musical_isomorphisms = true,
             retraction_methods = retraction_methods,
             inverse_retraction_methods = inverse_retraction_methods,
             point_distributions = [Manifolds.normal_rotation_distribution(M, pts[1], 1.0)],
@@ -77,6 +78,8 @@ include("utils.jl")
             test_manifold(SOn, pts;
                 test_forward_diff = n==3,
                 test_reverse_diff = false,
+                test_musical_isomorphisms = true,
+                test_mutating_rand = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [ptd],
