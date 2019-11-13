@@ -1,4 +1,4 @@
-# Sphere
+# Euclidean Space
 
 ```@autodocs
 Modules = [Manifolds]

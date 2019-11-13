@@ -363,7 +363,7 @@ end
 
 function distance(B::VectorBundle, x, y)
     dist_man = distance(B.M, x.parts[1], y.parts[1])
-    vy_x = vector_transport_to(B.M, y.parts[1], y.parts[2], x.parts[1])
+    vy_x = vector_transport_to(B.M, y.parts[1], y.parts[2], x.parts[1], ProjectTangent())
     dist_vec = distance(B.VS, x.parts[1], x.parts[2], vy_x)
 
     return sqrt(dist_man^2 + dist_vec^2)
@@ -371,13 +371,13 @@ end
 
 function exp!(B::VectorBundle, y, x, v)
     exp!(B.M, y.parts[1], x.parts[1], v.parts[1])
-    vector_transport_to!(B.M, y.parts[2], x.parts[1], x.parts[2] + v.parts[2], y.parts[1])
+    vector_transport_to!(B.M, y.parts[2], x.parts[1], x.parts[2] + v.parts[2], y.parts[1], ProjectTangent())
     return y
 end
 
 function log!(B::VectorBundle, v, x, y)
     log!(B.M, v.parts[1], x.parts[1], y.parts[1])
-    vector_transport_to!(B.M, v.parts[2], y.parts[1], y.parts[2], x.parts[1])
+    vector_transport_to!(B.M, v.parts[2], y.parts[1], y.parts[2], x.parts[1], ProjectTangent())
     copyto!(v.parts[2], v.parts[2] - x.parts[2])
     return v
 end

@@ -435,68 +435,119 @@ function shortest_geodesic(M::Manifold, x, y, T::AbstractVector)
 end
 
 """
-    vector_transport_to!(M::Manifold, vto, x, v, y)
+    [Ξ,κ] = tangent_orthonormal_basis(M,x,v)
+
+returns both an orthonormal basis `Ξ` for the tangent space of `x` on the
+[`Manifold`](@ref) `M`, which as its first direction contains a normalized
+tangent vector of `v` as well as the sectional curvatures `κ` required for
+computing Jacobi fields, i.e. the first value (along `v`) is zero.
+"""
+tangent_orthonormal_basis(M::Manifold,x,v) = error("A tangent orthonormal basis not implemented on $(typeof(M)) at $(typeof(x)) with first direction $(typeof(v)).")
+
+"""
+    AbstractVectorTransportMethod
+
+An abstract type, ehich method to use for a vector transport, i.e. within
+[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref) or
+[`vector_transport_along`](@ref). 
+"""
+abstract type AbstractVectorTransportMethod end
+
+"""
+    ParallelTransport <: AbstractVectorTransportMethod
+
+Specify to use parallel transport as vector transport method within
+[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref) or
+[`vector_transport_along`](@ref). 
+"""
+struct ParallelTransport <: AbstractVectorTransportMethod end
+
+"""
+    ProjectTangent <: AbstractVectorTransportMethod
+
+Specify to use projection onto tangent space as vector transport method within
+[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref) or
+[`vector_transport_along`](@ref). See [`project_tangent`](@ref) for details.
+"""
+struct ProjectTangent <: AbstractVectorTransportMethod end
+
+"""
+    vector_transport_to!(M::Manifold, vto, x, v, y [, m])
 
 Vector transport of vector `v` at point `x` to point `y`. The result is saved
-to `vto`. By default, [`project_tangent!`](@ref) is used but this may change in
-the future.
+to `vto`. By default, the method `m` is [`ParallelTransport`](@ref).
 """
-vector_transport_to!(M::Manifold, vto, x, v, y) = project_tangent!(M, vto, y, v)
+vector_transport_to!(M::Manifold, vto, x, v, y) = vector_transport_to!(M,vto,x,v,y,ParallelTransport())
+vector_transport_to!(M::Manifold, vto, x, v, y, m::ProjectTangent) = project_tangent!(M, vto, y, v)
+
+function vector_transport_to!(M::Manifold, vto, x, v, y, m::T) where {T <: AbstractVectorTransportMethod}
+    error("vector transport from a point of type $(typeof(x)) to a type $(typeof(y)) on a $(typeof(M)) for a vector of type $(v) and the $(typeof(m)) not yet implemented.")
+end
+
 
 """
-    vector_transport_to(M::Manifold, x, v, y)
+    vector_transport_to(M::Manifold, x, v, y[,method=::ParallelTransport])
 
-Vector transport of vector `v` at point `x` to point `y`.
+Vector transport of vector `v` at point `x` to point `y` using the method `m`,
+which defaults to [`ParallelTransport`](@ref).
 """
-function vector_transport_to(M::Manifold, x, v, y)
+vector_transport_to(M::Manifold, x, v, y) = vector_transport_to(M,x,v,y,ParallelTransport())
+function vector_transport_to(M::Manifold, x, v, y,m)
     vto = similar_result(M, vector_transport_to, v, x, y)
-    vector_transport_to!(M, vto, x, v, y)
+    vector_transport_to!(M, vto, x, v, y,m)
     return vto
 end
 
 """
-    vector_transport_direction!(M::Manifold, vto, x, v, vdir)
+    vector_transport_direction!(M::Manifold, vto, x, v, vdir[, m=::ParallelTransport])
 
 Vector transport of vector `v` at point `x` in the direction indicated
 by the tangent vector `vdir` at point `x`. The result is saved to `vto`.
-By default, `exp` and `vector_transport_to!` are used.
+By default, `exp` and `vector_transport_to!` are used with the method `m` which
+defaults to [`ParallelTransport`](@ref)..
 """
-function vector_transport_direction!(M::Manifold, vto, x, v, vdir)
+vector_transport_direction!(M::Manifold, vto, x, v, vdir) = vector_transport_direction!(M,vto,x,v,vdir,ParallelTransport())
+function vector_transport_direction!(M::Manifold, vto, x, v, vdir,m)
     y = exp(M, x, vdir)
-    return vector_transport_to!(M, vto, x, v, y)
+    return vector_transport_to!(M, vto, x, v, y, m)
 end
 
 """
-    vector_transport_direction(M::Manifold, x, v, vdir)
+    vector_transport_direction(M::Manifold, x, v, vdir[, m=::ParallelTransport])
 
 Vector transport of vector `v` at point `x` in the direction indicated
-by the tangent vector `vdir` at point `x`.
+by the tangent vector `vdir` at point `x` using the method `m`, which defaults to [`ParallelTransport`](@ref).
 """
-function vector_transport_direction(M::Manifold, x, v, vdir)
+vector_transport_direction(M::Manifold, x, v, vdir) = vector_transport_direction(M,x,v,vdir,ParallelTransport())
+function vector_transport_direction(M::Manifold, x, v, vdir, m)
     vto = similar_result(M, vector_transport_direction, v, x, vdir)
-    vector_transport_direction!(M, vto, x, v, vdir)
+    vector_transport_direction!(M, vto, x, v, vdir,m)
     return vto
 end
 
 """
-    vector_transport_along!(M::Manifold, vto, x, v, c)
+    vector_transport_along!(M::Manifold, vto, x, v, c[,m=::ParallelTransport])
 
 Vector transport of vector `v` at point `x` along the curve `c` such that
-`c(0)` is equal to `x` to point `c(1)`. The result is saved to `vto`.
+`c(0)` is equal to `x` to point `c(1)` using the method `m`, which defaults to
+[`ParallelTransport`](@ref). The result is saved to `vto`.
 """
-function vector_transport_along!(M::Manifold, vto, x, v, c)
-    error("vector_transport_along! not implemented for manifold $(typeof(M)), vector $(typeof(vto)), point $(typeof(x)), vector $(typeof(v)) and curve $(typeof(c)).")
+vector_transport_along!(M::Manifold, vto, x, v, c) = vector_transport_along(M,x,v,c,ParallelTransport())
+function vector_transport_along!(M::Manifold, vto, x, v, c, m::T) where T <: AbstractVectorTransportMethod
+    error("vector_transport_along! not implemented for manifold $(typeof(M)), vector $(typeof(vto)), point $(typeof(x)), vector $(typeof(v)) along curve $(typeof(c)) with method $(typeof(m)).")
 end
 
 """
-    vector_transport_along(M::Manifold, x, v, c)
+    vector_transport_along(M::Manifold, x, v, c[,m])
 
 Vector transport of vector `v` at point `x` along the curve `c` such that
 `c(0)` is equal to `x` to point `c(1)`.
+The default method `m` used is [`ParallelTransport`](@ref).
 """
-function vector_transport_along(M::Manifold, x, v, c)
+vector_transport_along(M::Manifold, x, v, c) = vector_transport_along(M,x,v,c,ParallelTransport())
+function vector_transport_along(M::Manifold, x, v, c, m)
     vto = similar_result(M, vector_transport_along, v, x, c)
-    vector_transport_along!(M, vto, x, v, c)
+    vector_transport_along!(M, vto, x, v, c, m)
     return vto
 end
 
@@ -664,6 +715,7 @@ export Manifold,
     IsDecoratorManifold,
     Euclidean,
     Sphere,
+    SymmetricPositiveDefinite,
     ProductManifold,
     ProductRepr,
     VectorSpaceType,
@@ -678,7 +730,10 @@ export Manifold,
     TangentBundle,
     CotangentBundle,
     TangentBundleFibers,
-    CotangentBundleFibers
+    CotangentBundleFibers,
+    AbstractVectorTransportMethod,
+    ParallelTransport,
+    ProjectTangent
 export ×,
     base_manifold,
     bundle_projection,
@@ -725,6 +780,8 @@ export Metric,
     EuclideanMetric,
     MetricManifold,
     HasMetric,
+    LinearAffineMetric,
+    LogEuclideanMetric,
     metric,
     local_metric,
     inverse_local_metric,

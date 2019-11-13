@@ -1,6 +1,4 @@
-using LinearAlgebra: eigen, eigvecs
-
-export SymmetricPositiveDefinite, LinearAffineMetric, LogEuclideanMetric
+using LinearAlgebra: eigen, eigvals, eigvecs, Symmetric, Diagonal, factorize, tr, norm
 
 @doc doc"""
     SymmetricPositiveDefinite{N} <: Manifold
@@ -71,7 +69,7 @@ where $\operatorname{Log}$ denotes the matrix logarithm and $\lVert\cdot\rVert_{
 matrix Frobenius norm.
 """
 function distance(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},x,y) where N
-    s = real.( eigen( x,y ).values )
+    s = real.( eigvals( x,y ) )
     return any(s .<= eps() ) ? 0 : sqrt(  sum( abs.(log.(s)).^2 )  )
 end
 
@@ -90,11 +88,11 @@ matrix Frobenius norm.
 """
 function distance(P::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric},x,y) where N
     eX = eigen(Symmetric(x))
-    UX = e.vectors
-    SX = e.values
+    UX = eX.vectors
+    SX = eX.values
     eY = eigen(Symmetric(y))
-    UY = e.vectors
-    SY = e.values
+    UY = eY.vectors
+    SY = eY.values
     return norm( UX*Diagonal(log.(SX))*transpose(UX) - UY*Diagonal(log.(SY))*transpose(UY))
 end
 
@@ -189,19 +187,19 @@ function log!(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}
     return v
 end
 
-function representation_size(::SymmetricPositiveDefinite{N}, ::Type{T}) where {N, T<:Union{MPoint, TVector, CoTVector}}
+function representation_size(::SymmetricPositiveDefinite{N}) where N
     return (N,N)
 end
 
 
 @doc doc"""
-    vector_transport(P,vto,x,v,y,::ParallelTransport)
+    vector_transport_to(P,vto,x,v,y,m)
 
-compute the parallel transport on the [`SymmetricPositiveDefinite`](@ref) with its default metric, [`LinearAffineMetric`](@ref).
+compute the vector transport on the [`SymmetricPositiveDefinite`](@ref) with its default metric, [`LinearAffineMetric`](@ref) and method `m`, which defaults to [`ParallelTransport`](@ref).
 """
-vector_transport!(P::SymmetricPositiveDefinite{N},vto, x, v, y, m) where N = vector_transport!(MetricManifold(P,LinearAffineMetric()),vto, x, v, y, m)
+vector_transport_to!(P::SymmetricPositiveDefinite{N},vto, x, v, y, m=ParallelTransport()) where N = vector_transport_to!(MetricManifold(P,LinearAffineMetric()),vto, x, v, y, m)
 @doc doc"""
-    vector_transport!(P,vto,x,v,y,::ParallelTransport)
+    vector_transport_to!(P,vto,x,v,y,::ParallelTransport)
 
 compute the parallel transport on the [`SymmetricPositiveDefinite`](@ref) as a [`MetricManifold`](@ref) with the [`LinearAffineMetric`](@ref).
 The formula reads
@@ -221,7 +219,7 @@ x^{\frac{1}{2}},
 where $\operatorname{Exp}$ denotes the matrix exponential
 and `log` the logarithmic map.
 """
-function vector_transport!(::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, vto, x, v, y, ::ParallelTransport) where N
+function vector_transport_to!(::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, vto, x, v, y, ::ParallelTransport) where N
     if norm(x-y)<1e-13
         vto = v
         return vto
@@ -249,7 +247,7 @@ function vector_transport!(::MetricManifold{SymmetricPositiveDefinite{N},LinearA
 end
 
 @doc doc"""
-    [Ξ,κ] = tangent_orthonormal_basis(M,x)
+    [Ξ,κ] = tangent_orthonormal_basis(M,x,v)
 
 returns a orthonormal basis `Ξ` in the tangent space of `x` on the
 [`SymmetricPositiveDefinite`](@ref) manifold `M` with the defrault metric, the
@@ -258,7 +256,7 @@ with eigenvalues `κ` and where the direction `v` has curvature `0`.
 """
 tangent_orthonormal_basis(P::SymmetricPositiveDefinite{n},x,v) where n = tangent_orthonormal_basis(MetricManifold(P,LinearAffineMetric()),x,v)
 @doc doc"""
-    [Ξ,κ] = tangent_orthonormal_basis(M,x)
+    [Ξ,κ] = tangent_orthonormal_basis(M,x,v)
 
 returns a orthonormal basis `Ξ` in the tangent space of `x` on the
 [`MetricManifold`](@ref of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
@@ -296,10 +294,10 @@ The tolerance for the second to last test can be set using the ´kwargs...`.
 """
 function is_manifold_point(P::SymmetricPositiveDefinite{N},x; kwargs...) where N
     if size(x) != (N,N)
-        throw(DomainError(size(x),"The point $(x) does not lie on $P, since its size is not $( (N,N) )."))
+        throw(DomainError(size(x),"The point $(x) does not lie on $(P), since its size is not $((N,N))."))
     end
     if !isapprox(norm(x-transpose(x)), 0.; kwargs...)
-        throw(DomainError(norm(x), "The point $x does not lie on the sphere $P since its not a symmetric matrix:"))
+        throw(DomainError(norm(x), "The point $(x) does not lie on the sphere $(P) since its not a symmetric matrix:"))
     end
     if ! all( eigvals(x) .> 0 )
         throw(DomainError(norm(x), "The point $x does not lie on the sphere $P since its not a positive definite matrix."))
@@ -319,11 +317,11 @@ function is_tangent_vector(P::SymmetricPositiveDefinite{N},x,v; kwargs...) where
     is_manifold_point(P,x)
     if size(v) != (N,N)
         throw(DomainError(size(v),
-            "The vector $(v) is not a tangent to a point on $S since its size does not match $( (N,N) )."))
+            "The vector $(v) is not a tangent to a point on $(P) since its size does not match $((N,N))."))
     end
     if !isapprox(norm(v-transpose(v)), 0.; kwargs...)
         throw(DomainError(size(v),
-            "The vector $(v) is not a tangent to a point on $S (represented as an element of the Lie algebrasince its not symmetric."))
+            "The vector $(v) is not a tangent to a point on $(P) (represented as an element of the Lie algebrasince its not symmetric."))
     end
     return true
 end
