@@ -492,9 +492,9 @@ Vector transport of vector `v` at point `x` to point `y` using the method `m`,
 which defaults to [`ParallelTransport`](@ref).
 """
 vector_transport_to(M::Manifold, x, v, y) = vector_transport_to(M,x,v,y,ParallelTransport())
-function vector_transport_to(M::Manifold, x, v, y,m)
+function vector_transport_to(M::Manifold, x, v, y, m)
     vto = similar_result(M, vector_transport_to, v, x, y)
-    vector_transport_to!(M, vto, x, v, y,m)
+    vector_transport_to!(M, vto, x, v, y, m)
     return vto
 end
 
