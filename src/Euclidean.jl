@@ -19,13 +19,7 @@ struct Euclidean{T<:Tuple} <: Manifold where {T} end
 Euclidean(n::Int) = Euclidean{Tuple{n}}()
 Euclidean(m::Int, n::Int) = Euclidean{Tuple{m,n}}()
 
-function representation_size(::Euclidean{Tuple{n}}) where {n}
-    return (n,)
-end
-
-function representation_size(::Euclidean{Tuple{m,n}}) where {m,n}
-    return (m,n)
-end
+@generated representation_size(::Euclidean{T}) where {T} = Tuple(T.parameters...)
 
 @generated manifold_dimension(::Euclidean{T}) where {T} = *(T.parameters...)
 
@@ -33,13 +27,9 @@ struct EuclideanMetric <: RiemannianMetric end
 
 @traitimpl HasMetric{Euclidean,EuclideanMetric}
 
-function local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x)
-    return Diagonal(ones(SVector{size(x, 1),eltype(x)}))
-end
+local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x) = Diagonal(ones(SVector{size(x, 1),eltype(x)}))
 
-function inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x)
-    return local_metric(M, x)
-end
+inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = local_metric(M, x)
 
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = one(eltype(x))
 
