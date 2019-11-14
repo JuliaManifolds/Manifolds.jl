@@ -233,9 +233,9 @@ x^{\frac{1}{2}},
 where $\operatorname{Exp}$ denotes the matrix exponential
 and [`log`](@ref) the logarithmic map.
 """
-function vector_transport_to!(::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, vto, x, v, y, ::ParallelTransport) where N
-    if norm(x-y)<2*eps(Float32)
-        vto = v
+function vector_transport_to!(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, vto, x, v, y, ::ParallelTransport) where N
+    if distance(M,x,y)<2*eps(eltype(x))
+        copyto!(vto, v)
         return vto
     end
     e = eigen(Symmetric(x))
@@ -256,8 +256,8 @@ function vector_transport_to!(::MetricManifold{SymmetricPositiveDefinite{N},Line
     Sf = Diagonal( exp.(e3.values) )
     Uf = e3.vectors
     xue = xSqrt*Uf*Sf*transpose(Uf)
-    vtp = xue * ( 0.5*(tv + transpose(tv)) ) * transpose(xue)
-    copyto!(vto, vtp) # symmetrize
+    vtp = xue * ( 0.5*(tv + transpose(tv)) ) * transpose(xue) #symmetrize
+    copyto!(vto, vtp)
     return vto
 end
 
