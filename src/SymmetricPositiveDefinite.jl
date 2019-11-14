@@ -17,7 +17,7 @@ The manifold of symmetric positive definite matrices, i.e.
 
     SymmetricPositiveDefinite(n)
 
-generates the $\mathcal P(n) \subset \mathbb R^{n\times n}$
+generates the manifold $\mathcal P(n) \subset \mathbb R^{n\times n}$
 """
 struct SymmetricPositiveDefinite{N} <: Manifold end
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
@@ -76,7 +76,7 @@ end
 @doc doc"""
     distance(P,x,y)
 
-computes the distance on the [`SymmetricPositiveDefinite](@ref) manifold between
+computes the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between
 `x` and `y` as a [`MetricManifold`](@ref) with [`LogEuclideanMetric`](@ref).
 The formula reads
 
@@ -231,7 +231,8 @@ x^{\frac{1}{2}},
 ```
 
 where $\operatorname{Exp}$ denotes the matrix exponential
-and [`log`](@ref) the logarithmic map.
+and `log` the logarithmic map on [`SymmetricPositiveDefinite`](@ref)
+(again with respect to the metric mentioned).
 """
 function vector_transport_to!(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, vto, x, v, y, ::ParallelTransport) where N
     if distance(M,x,y)<2*eps(eltype(x))
@@ -266,10 +267,10 @@ end
 
 returns a orthonormal basis `Ξ` in the tangent space of `x` on the
 [`SymmetricPositiveDefinite`](@ref) manifold `M` with the defrault metric, the
-[`LinearAffineMetric`](ref) that diagonalizes the curvature tensor $R(u,v)w$
+[`LinearAffineMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
 with eigenvalues `κ` and where the direction `v` has curvature `0`.
 """
-tangent_orthonormal_basis(P::SymmetricPositiveDefinite{n},x,v) where n = tangent_orthonormal_basis(MetricManifold(P,LinearAffineMetric()),x,v)
+tangent_orthonormal_basis(P::SymmetricPositiveDefinite{N},x,v) where N = tangent_orthonormal_basis(MetricManifold(P,LinearAffineMetric()),x,v)
 
 @doc doc"""
     [Ξ,κ] = tangent_orthonormal_basis(M,x,v)
@@ -277,10 +278,10 @@ tangent_orthonormal_basis(P::SymmetricPositiveDefinite{n},x,v) where n = tangent
 returns a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`manifold_dimension`](@ref) of `M`) in the tangent space of `x` on the
 [`MetricManifold`](@ref of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
-[`LinearAffineMetric`](ref) that diagonalizes the curvature tensor $R(u,v)w$
+[`LinearAffineMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
 with eigenvalues `κ` and where the direction `v` has curvature `0`.
 """
-function tangent_orthonormal_basis(M::MetricManifold{SymmetricPositiveDefinite{n},LinearAffineMetric},x,v) where n
+function tangent_orthonormal_basis(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},x,v) where N
     xSqrt = sqrt(x) 
     V = eigvecs(v)
     Ξ = [ (i==j ? 1/2 : 1/sqrt(2))*( V[:,i] * transpose(V[:,j])  +  V[:,j] * transpose(V[:,i]) )
@@ -297,7 +298,7 @@ end
 return the injectivity radius of the [`SymmetricPositiveDefinite`](@ref). Since `P`  is a Hadamard manifold,
 the injectivity radius is $\infty$.
 """
-injectivity_radius(P::SymmetricPositiveDefinite, args...) = Inf
+injectivity_radius(P::SymmetricPositiveDefinite{N}, args...) where N = Inf
 
 @doc doc"""
     zero_tangent_vector(P,x)
@@ -305,21 +306,22 @@ injectivity_radius(P::SymmetricPositiveDefinite, args...) = Inf
 returns the zero tangent vector in the tangent space of the symmetric positive
 definite matrix `x` on the [`SymmetricPositiveDefinite`](@ref) manifold `P`.
 """
-zero_tangent_vector(P::SymmetricPositiveDefinite, x) = zero(x)
+zero_tangent_vector(P::SymmetricPositiveDefinite{N}, x) where N = zero(x)
 
 @doc doc"""
-    zero_tangent_vector(P,x)
+    zero_tangent_vector(P,v,x)
 
 returns the zero tangent vector in the variable `v` from the tangent space of
 the symmetric positive definite matrix `x` on
 the [`SymmetricPositiveDefinite`](@ref) manifold `P`.
+THe result is returned also in place in the variable `v`.
 """
-zero_tangent_vector!(P::SymmetricPositiveDefinite, v, x) = fill!(v, 0)
+zero_tangent_vector!(P::SymmetricPositiveDefinite{N}, v, x) where N = fill!(v, 0)
 
 """
     is_manifold_point(S,x; kwargs...)
 
-checks, whether `x` is a valid point on the [`SymmetricPositiveDefinite{N}`](@ref) `P`, i.e. is a matrix
+checks, whether `x` is a valid point on the [`SymmetricPositiveDefinite`](@ref) `P`, i.e. is a matrix
 of size `(N,N)`, symmetric and positive definite.
 The tolerance for the second to last test can be set using the ´kwargs...`.
 """
