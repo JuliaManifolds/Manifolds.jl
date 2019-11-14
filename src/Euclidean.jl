@@ -9,10 +9,10 @@ Euclidean vector space $\mathbb R^n$.
 
 generates the $n$-dimensional vector space $\mathbb R^n$.
 
-   Euclidean(n₁,n₂,...)
+    Euclidean(n₁,n₂,...,nᵢ)
 
-generates the $mn$-dimensional vector space $\mathbb R^{n_1\times n_2\times \cdots}$, whose
-elements are interpreted as $n_1 \times,n_2\times\cdots$ arrays, e.g. for
+generates the $n_1n_2\cdot\ldots n_i$-dimensional vector space $\mathbb R^{n_1, n_2, \ldots, n_i}$, whose
+elements are interpreted as $n_1 \times,n_2\times\cdots\times n_i$ arrays, e.g. for
 two parameters as matrices.
 """
 struct Euclidean{T<:Tuple} <: Manifold where {T} end
@@ -65,7 +65,7 @@ and higher order arrays, the matrix and ternsor Frobenius norm, respectively.
 """
 distance(::Euclidean, x, y) = norm(x-y)
 """
-    nrom(M::Euclidean,x,v)
+    norm(M::Euclidean,x,v)
 
 compute the norm of a tangent vector `v` at `x` on the [`Euclidean`](@ref)
 manifold `M`, i.e. since every tangent space can be identified with `M` itself
