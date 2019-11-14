@@ -15,6 +15,10 @@ SimpleTraits = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 UnsafeArrays = "c4a57d5a-5b31-53a6-b365-19f8c011fbd6"
 
+[compat]
+DoubleFloats = ">= 0.9.2"
+julia = "1.0"
+
 [extras]
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
@@ -24,7 +28,3 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "DoubleFloats", "ForwardDiff", "OrdinaryDiffEq", "ReverseDiff"]
-
-[compat]
-julia = "1.0"
-DoubleFloats = ">= 0.9.2"
