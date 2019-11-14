@@ -103,6 +103,7 @@ compute the inner product of `v`, `w` in the tangent space of `x` on the [`Symme
 manifold `P`, which defaults to the [`LinearAffineMetric`](@ref).
 """
 inner(P::SymmetricPositiveDefinite{N}, x, w, v) where N = inner(MetricManifold(P,LinearAffineMetric()),x,w,v)
+
 @doc doc"""
     inner(P,x,v,w)
 
@@ -117,6 +118,7 @@ function inner(P::MetricManifold{SymmetricPositiveDefinite{N}, LinearAffineMetri
     F = factorize(x)
     return tr( ( Symmetric(w) / F ) * ( Symmetric(v) / F ) )
 end
+
 @doc doc"""
     exp!(P,y,x,v)
 
@@ -124,6 +126,7 @@ compute the exponential map from `x` with tangent vector `v` on the [`SymmetricP
 manifold with its default metric, [`LinearAffineMetric`](@ref) and modify `y`.
 """
 exp!(P::SymmetricPositiveDefinite{N},y,x,v) where N = exp!(MetricManifold(P,LinearAffineMetric()),y,x,v)
+
 @doc doc"""
     exp!(P,y,x,v)
 
@@ -159,6 +162,7 @@ compute the logarithmic map at `x` to `y` on the [`SymmetricPositiveDefinite`](@
 manifold with its default metric, [`LinearAffineMetric`](@ref) and modify `v`.
 """
 log!(P::SymmetricPositiveDefinite{N}, v, x, y) where N = log!(MetricManifold(P,LinearAffineMetric()),v, x, y)
+
 @doc doc"""
     log!(P,v,x,y)
 
@@ -187,21 +191,31 @@ function log!(P::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}
     return v
 end
 
+@doc doc"""
+    representation_size(M)
+
+returns the size of an array representing an element on the
+[`SymmetricPositiveDefinite`](@ref) manifold `M`,
+i.e. $n\times n$, the size of such a symmetric positive definite matrix on
+$\mathcal M = \mathcal P(n)$.
+"""
 function representation_size(::SymmetricPositiveDefinite{N}) where N
     return (N,N)
 end
 
-
 @doc doc"""
-    vector_transport_to(P,vto,x,v,y,m)
+    vector_transport_to(P,vto,x,v,y,m::AbstractVectorTransportMethod=ParallelTransport())
 
-compute the vector transport on the [`SymmetricPositiveDefinite`](@ref) with its default metric, [`LinearAffineMetric`](@ref) and method `m`, which defaults to [`ParallelTransport`](@ref).
+compute the vector transport on the [`SymmetricPositiveDefinite`](@ref) with its
+default metric, [`LinearAffineMetric`](@ref) and method `m`, which defaults to [`ParallelTransport`](@ref).
 """
 vector_transport_to!(P::SymmetricPositiveDefinite{N},vto, x, v, y, m=ParallelTransport()) where N = vector_transport_to!(MetricManifold(P,LinearAffineMetric()),vto, x, v, y, m)
+
 @doc doc"""
     vector_transport_to!(P,vto,x,v,y,::ParallelTransport)
 
-compute the parallel transport on the [`SymmetricPositiveDefinite`](@ref) as a [`MetricManifold`](@ref) with the [`LinearAffineMetric`](@ref).
+compute the parallel transport on the [`SymmetricPositiveDefinite`](@ref) as a
+[`MetricManifold`](@ref) with the [`LinearAffineMetric`](@ref).
 The formula reads
 
 ```math
@@ -217,7 +231,7 @@ x^{\frac{1}{2}},
 ```
 
 where $\operatorname{Exp}$ denotes the matrix exponential
-and `log` the logarithmic map.
+and [`log`](@ref) the logarithmic map.
 """
 function vector_transport_to!(::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, vto, x, v, y, ::ParallelTransport) where N
     if norm(x-y)<1e-13
@@ -255,10 +269,12 @@ returns a orthonormal basis `Ξ` in the tangent space of `x` on the
 with eigenvalues `κ` and where the direction `v` has curvature `0`.
 """
 tangent_orthonormal_basis(P::SymmetricPositiveDefinite{n},x,v) where n = tangent_orthonormal_basis(MetricManifold(P,LinearAffineMetric()),x,v)
+
 @doc doc"""
     [Ξ,κ] = tangent_orthonormal_basis(M,x,v)
 
-returns a orthonormal basis `Ξ` in the tangent space of `x` on the
+returns a orthonormal basis `Ξ` as a vector of tangent vectors (of length
+[`manifold_dimension`](@ref) of `M`) in the tangent space of `x` on the
 [`MetricManifold`](@ref of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
 [`LinearAffineMetric`](ref) that diagonalizes the curvature tensor $R(u,v)w$
 with eigenvalues `κ` and where the direction `v` has curvature `0`.
@@ -282,7 +298,21 @@ the injectivity radius is $\infty$.
 """
 injectivity_radius(P::SymmetricPositiveDefinite, args...) = Inf
 
+@doc doc"""
+    zero_tangent_vector(P,x)
+
+returns the zero tangent vector in the tangent space of the symmetric positive
+definite matrix `x` on the [`SymmetricPositiveDefinite`](@ref) manifold `P`.
+"""
 zero_tangent_vector(P::SymmetricPositiveDefinite, x) = zero(x)
+
+@doc doc"""
+    zero_tangent_vector(P,x)
+
+returns the zero tangent vector in the variable `v` from the tangent space of
+the symmetric positive definite matrix `x` on
+the [`SymmetricPositiveDefinite`](@ref) manifold `P`.
+"""
 zero_tangent_vector!(P::SymmetricPositiveDefinite, v, x) = fill!(v, 0)
 
 """

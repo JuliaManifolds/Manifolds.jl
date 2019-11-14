@@ -130,7 +130,7 @@ function zero_tangent_vector(M::ArrayManifold, x; kwargs...)
     return w
 end
 
-function vector_transport_to(M::ArrayManifold, x, v, y, m)
+function vector_transport_to(M::ArrayManifold, x, v, y, m::AbstractVectorTransportMethod)
     return vector_transport_to(M.manifold,
                                array_value(x),
                                array_value(v),
@@ -138,7 +138,7 @@ function vector_transport_to(M::ArrayManifold, x, v, y, m)
                                m)
 end
 
-function vector_transport_to!(M::ArrayManifold, vto, x, v, y,m)
+function vector_transport_to!(M::ArrayManifold, vto, x, v, y, m::AbstractVectorTransportMethod)
     return vector_transport_to!(M.manifold,
                                 array_value(vto),
                                 array_value(x),

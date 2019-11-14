@@ -447,7 +447,7 @@ tangent_orthonormal_basis(M::Manifold,x,v) = error("A tangent orthonormal basis 
 """
     AbstractVectorTransportMethod
 
-An abstract type, ehich method to use for a vector transport, i.e. within
+An abstract type, which method to use for a vector transport, i.e. within
 [`vector_transport_to`](@ref), [`vector_transport_direction`](@ref) or
 [`vector_transport_along`](@ref). 
 """
@@ -472,12 +472,20 @@ Specify to use projection onto tangent space as vector transport method within
 struct ProjectTangent <: AbstractVectorTransportMethod end
 
 """
-    vector_transport_to!(M::Manifold, vto, x, v, y [, m])
+    vector_transport_to!(M::Manifold, vto, x, v, y, m::AbstractVectorTransportMethod=ParallelTransport())
 
 Vector transport of vector `v` at point `x` to point `y`. The result is saved
 to `vto`. By default, the method `m` is [`ParallelTransport`](@ref).
 """
 vector_transport_to!(M::Manifold, vto, x, v, y) = vector_transport_to!(M,vto,x,v,y,ParallelTransport())
+
+"""
+    vector_transport_to!(M::Manifold, vto, x, v, y, ProjectTangent())
+
+Implements a default projection based vector transport, that projects a tangent
+vector `v` at `x` on a [`Manifold`](@ref) `M` onto the tangent space at `y` by
+interperting `v` as an element of the embedding and projecting back.
+"""
 vector_transport_to!(M::Manifold, vto, x, v, y, m::ProjectTangent) = project_tangent!(M, vto, y, v)
 
 function vector_transport_to!(M::Manifold, vto, x, v, y, m::T) where {T <: AbstractVectorTransportMethod}
@@ -486,7 +494,7 @@ end
 
 
 """
-    vector_transport_to(M::Manifold, x, v, y[,method=::ParallelTransport])
+    vector_transport_to(M::Manifold, x, v, y, m::AbstractVectorTransportMethod=ParallelTransport())
 
 Vector transport of vector `v` at point `x` to point `y` using the method `m`,
 which defaults to [`ParallelTransport`](@ref).
@@ -499,12 +507,12 @@ function vector_transport_to(M::Manifold, x, v, y, m)
 end
 
 """
-    vector_transport_direction!(M::Manifold, vto, x, v, vdir[, m=::ParallelTransport])
+    vector_transport_direction!(M::Manifold, vto, x, v, vdir, m=::ParallelTransport])
 
 Vector transport of vector `v` at point `x` in the direction indicated
 by the tangent vector `vdir` at point `x`. The result is saved to `vto`.
 By default, `exp` and `vector_transport_to!` are used with the method `m` which
-defaults to [`ParallelTransport`](@ref)..
+defaults to [`ParallelTransport`](@ref).
 """
 vector_transport_direction!(M::Manifold, vto, x, v, vdir) = vector_transport_direction!(M,vto,x,v,vdir,ParallelTransport())
 function vector_transport_direction!(M::Manifold, vto, x, v, vdir,m)
