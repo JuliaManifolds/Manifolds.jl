@@ -234,7 +234,7 @@ where $\operatorname{Exp}$ denotes the matrix exponential
 and [`log`](@ref) the logarithmic map.
 """
 function vector_transport_to!(::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, vto, x, v, y, ::ParallelTransport) where N
-    if norm(x-y)<1e-13
+    if norm(x-y)<2*eps(Float32)
         vto = v
         return vto
     end
