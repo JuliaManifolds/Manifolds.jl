@@ -105,46 +105,27 @@ Strip all decorators on `M`, returning the underlying topological manifold.
 Also used for vector bundles.
 """
 function base_manifold end
-
-@traitfn function base_manifold(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}}
-    return base_manifold(M.manifold)
-end
-
+@traitfn base_manifold(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}} = base_manifold(M.manifold)
 @traitfn base_manifold(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}} = M
 
-@doc doc"""
+"""
     manifold_dimension(M::Manifold)
 
-The dimension $n$ of real space $\mathbb R^n$ to which the neighborhood
+The dimension `n` of Euclidean space to which the neighborhood
 of each point of the manifold is homeomorphic.
 """
 function manifold_dimension end
+@traitfn manifold_dimension(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}} = manifold_dimension(base_manifold(M))
+@traitfn manifold_dimension(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}} = error("manifold_dimension not implemented for a $(typeof(M)).")
 
-@traitfn function manifold_dimension(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}}
-    error("manifold_dimension not implemented for a $(typeof(M)).")
-end
+"""
+    representation_size(M::Manifold)
 
-@traitfn function manifold_dimension(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}}
-    manifold_dimension(base_manifold(M))
-end
-
-
-@doc doc"""
-    representation_size(M::Manifold, [VS::VectorSpaceType])
-
-The size of array representing a point on manifold `M`,
-Representation sizes of tangent vectors can be obtained by calling the method
-with the second argument.
+The size of array representing a point on manifold `M`.
 """
 function representation_size end
-
-@traitfn function representation_size(M::MT) where {MT<:Manifold,T;!IsDecoratorManifold{MT}}
-    error("representation_size not implemented for manifold $(typeof(M)).")
-end
-
-@traitfn function representation_size(M::MT) where {MT<:Manifold,T;IsDecoratorManifold{MT}}
-    return representation_size(base_manifold(M))
-end
+@traitfn representation_size(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}} = representation_size(base_manifold(M))
+@traitfn representation_size(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}} = error("representation_size not implemented for manifold $(typeof(M)).")
 
 """
     isapprox(M::Manifold, x, y; kwargs...)
@@ -541,7 +522,7 @@ Vector transport of vector `v` at point `x` along the curve `c` such that
 `c(0)` is equal to `x` to point `c(1)` using the method `m`, which defaults to
 [`ParallelTransport`](@ref). The result is saved to `vto`.
 """
-vector_transport_along!(M::Manifold, vto, x, v, c) = vector_transport_along(M,x,v,c,ParallelTransport())
+vector_transport_along!(M::Manifold, vto, x, v, c) = vector_transport_along!(M, vto, x, v, c, ParallelTransport())
 function vector_transport_along!(M::Manifold, vto, x, v, c, m::AbstractVectorTransportMethod)
     error("vector_transport_along! not implemented for manifold $(typeof(M)), vector $(typeof(vto)), point $(typeof(x)), vector $(typeof(v)) along curve $(typeof(c)) with method $(typeof(m)).")
 end
@@ -590,7 +571,6 @@ function zero_tangent_vector(M::Manifold, x)
 end
 
 @traitfn zero_tangent_vector!(M::MT, v, x) where {MT <: Manifold; !IsDecoratorManifold{MT}} = log!(M, v, x, x)
-
 @traitfn zero_tangent_vector!(M::MT, v, x) where {MT <: Manifold; IsDecoratorManifold{MT}} = zero_tangent_vector!(base_manifold(M), v, x)
 
 hat!(M::Manifold, v, x, vⁱ) = error("hat! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), and matrix $(typeof(v))")
@@ -691,15 +671,17 @@ include("utils.jl")
 include("ProductRepresentations.jl")
 include("ArrayManifold.jl")
 include("VectorBundle.jl")
+include("Metric.jl")
 
 include("DistributionsBase.jl")
-include("Metric.jl")
-include("Euclidean.jl")
+include("ProjectedDistribution.jl")
+
 include("ProductManifold.jl")
+
+include("Euclidean.jl")
 include("Rotations.jl")
 include("Sphere.jl")
 include("SymmetricPositiveDefinite.jl")
-include("ProjectedDistribution.jl")
 
 function __init__()
     @require ForwardDiff="f6369f11-7733-5829-9624-2563aa707210" begin
@@ -745,8 +727,7 @@ export Manifold,
     AbstractVectorTransportMethod,
     ParallelTransport,
     ProjectTangent
-export ×,
-    base_manifold,
+export base_manifold,
     bundle_projection,
     distance,
     exp,
@@ -758,16 +739,16 @@ export ×,
     sharp,
     sharp!,
     vee,
-    vee!
+    vee!,
     geodesic,
     shortest_geodesic,
     injectivity_radius,
-    inner,
     inverse_retract,
     inverse_retract!,
-    isapprox,
     is_manifold_point,
     is_tangent_vector,
+    isapprox,
+    inner,
     log,
     log!,
     manifold_dimension,
@@ -776,9 +757,9 @@ export ×,
     project_point!,
     project_tangent,
     project_tangent!,
+    representation_size,
     retract,
     retract!,
-    representation_size,
     submanifold,
     submanifold_component,
     vector_space_dimension,
