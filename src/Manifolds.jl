@@ -501,7 +501,7 @@ Vector transport of vector `v` at point `x` to point `y` using the method `m`,
 which defaults to [`ParallelTransport`](@ref).
 """
 vector_transport_to(M::Manifold, x, v, y) = vector_transport_to(M,x,v,y,ParallelTransport())
-function vector_transport_to(M::Manifold, x, v, y, m)
+function vector_transport_to(M::Manifold, x, v, y, m::AbstractVectorTransportMethod)
     vto = similar_result(M, vector_transport_to, v, x, y)
     vector_transport_to!(M, vto, x, v, y, m)
     return vto
@@ -516,7 +516,7 @@ By default, `exp` and `vector_transport_to!` are used with the method `m` which
 defaults to [`ParallelTransport`](@ref).
 """
 vector_transport_direction!(M::Manifold, vto, x, v, vdir) = vector_transport_direction!(M,vto,x,v,vdir,ParallelTransport())
-function vector_transport_direction!(M::Manifold, vto, x, v, vdir,m)
+function vector_transport_direction!(M::Manifold, vto, x, v, vdir,m::AbstractVectorTransportMethod)
     y = exp(M, x, vdir)
     return vector_transport_to!(M, vto, x, v, y, m)
 end
@@ -528,7 +528,7 @@ Vector transport of vector `v` at point `x` in the direction indicated
 by the tangent vector `vdir` at point `x` using the method `m`, which defaults to [`ParallelTransport`](@ref).
 """
 vector_transport_direction(M::Manifold, x, v, vdir) = vector_transport_direction(M,x,v,vdir,ParallelTransport())
-function vector_transport_direction(M::Manifold, x, v, vdir, m)
+function vector_transport_direction(M::Manifold, x, v, vdir, m::AbstractVectorTransportMethod)
     vto = similar_result(M, vector_transport_direction, v, x, vdir)
     vector_transport_direction!(M, vto, x, v, vdir,m)
     return vto
@@ -542,7 +542,7 @@ Vector transport of vector `v` at point `x` along the curve `c` such that
 [`ParallelTransport`](@ref). The result is saved to `vto`.
 """
 vector_transport_along!(M::Manifold, vto, x, v, c) = vector_transport_along(M,x,v,c,ParallelTransport())
-function vector_transport_along!(M::Manifold, vto, x, v, c, m::T) where T <: AbstractVectorTransportMethod
+function vector_transport_along!(M::Manifold, vto, x, v, c, m::AbstractVectorTransportMethod)
     error("vector_transport_along! not implemented for manifold $(typeof(M)), vector $(typeof(vto)), point $(typeof(x)), vector $(typeof(v)) along curve $(typeof(c)) with method $(typeof(m)).")
 end
 
@@ -554,7 +554,7 @@ Vector transport of vector `v` at point `x` along the curve `c` such that
 The default method `m` used is [`ParallelTransport`](@ref).
 """
 vector_transport_along(M::Manifold, x, v, c) = vector_transport_along(M,x,v,c,ParallelTransport())
-function vector_transport_along(M::Manifold, x, v, c, m)
+function vector_transport_along(M::Manifold, x, v, c, m::AbstractVectorTransportMethod)
     vto = similar_result(M, vector_transport_along, v, x, c)
     vector_transport_along!(M, vto, x, v, c, m)
     return vto
