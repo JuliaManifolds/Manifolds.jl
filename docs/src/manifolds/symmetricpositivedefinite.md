@@ -22,13 +22,13 @@ The manifold can be equipped with different metrics
 
 ## Common and Metric Independent functions
 ```@docs
-injectivity_radius(P::SymmetricPositiveDefinite{N},a::Vararg{Any,N} where N) where N
-is_manifold_point(P::SymmetricPositiveDefinite{N},x; kwargs...) where N
-is_tangent_vector(P::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
-manifold_dimension(P::SymmetricPositiveDefinite{N}) where N
-representation_size(::SymmetricPositiveDefinite{N}) where N
-zero_tangent_vector(P::SymmetricPositiveDefinite{N},x) where N
-zero_tangent_vector!(P::SymmetricPositiveDefinite{N}, v, x) where N
+injectivity_radius(::SymmetricPositiveDefinite{N},a::Vararg{Any,N} where N) where N
+is_manifold_point(::SymmetricPositiveDefinite{N},x; kwargs...) where N
+is_tangent_vector(::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
+manifold_dimension(::SymmetricPositiveDefinite{N}) where N 
+representation_size(::SymmetricPositiveDefinite) 
+zero_tangent_vector(::SymmetricPositiveDefinite{N},x) where N
+zero_tangent_vector!(::SymmetricPositiveDefinite{N}, v, x) where N
 ```
 
 ## Default Metric
