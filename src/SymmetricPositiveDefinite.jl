@@ -331,7 +331,7 @@ function is_manifold_point(M::SymmetricPositiveDefinite{N},x; kwargs...) where N
         throw(DomainError(norm(x), "The point $(x) does not lie on $(M) since its not a symmetric matrix:"))
     end
     if ! all( eigvals(x) .> 0 )
-        throw(DomainError(norm(x), "The point $x does not lie on $P since its not a positive definite matrix."))
+        throw(DomainError(norm(x), "The point $x does not lie on $(M) since its not a positive definite matrix."))
     end
     return true
 end
