@@ -120,6 +120,15 @@ of each point of the manifold is homeomorphic.
 """
 function manifold_dimension end
 
+@traitfn function manifold_dimension(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}}
+    error("manifold_dimension not implemented for a $(typeof(M)).")
+end
+
+@traitfn function manifold_dimension(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}}
+    manifold_dimension(base_manifold(M))
+end
+
+
 @doc doc"""
     representation_size(M::Manifold, [VS::VectorSpaceType])
 
@@ -135,14 +144,6 @@ end
 
 @traitfn function representation_size(M::MT) where {MT<:Manifold,T;IsDecoratorManifold{MT}}
     return representation_size(base_manifold(M))
-end
-
-@traitfn function manifold_dimension(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}}
-    error("manifold_dimension not implemented for a $(typeof(M)).")
-end
-
-@traitfn function manifold_dimension(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}}
-    manifold_dimension(base_manifold(M))
 end
 
 """
@@ -488,7 +489,7 @@ interperting `v` as an element of the embedding and projecting back.
 """
 vector_transport_to!(M::Manifold, vto, x, v, y, m::ProjectTangent) = project_tangent!(M, vto, y, v)
 
-function vector_transport_to!(M::Manifold, vto, x, v, y, m::T) where {T <: AbstractVectorTransportMethod}
+function vector_transport_to!(M::Manifold, vto, x, v, y, m::AbstractVectorTransportMethod)
     error("vector transport from a point of type $(typeof(x)) to a type $(typeof(y)) on a $(typeof(M)) for a vector of type $(v) and the $(typeof(m)) not yet implemented.")
 end
 
@@ -750,8 +751,12 @@ export ×,
     exp!,
     flat,
     flat!,
+    hat!,
+    hat,
     sharp,
     sharp!,
+    vee,
+    vee!
     geodesic,
     shortest_geodesic,
     injectivity_radius,
@@ -774,6 +779,8 @@ export ×,
     submanifold,
     submanifold_component,
     vector_space_dimension,
+    vector_transport_along,
+    vector_transport_along!,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,

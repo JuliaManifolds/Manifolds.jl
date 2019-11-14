@@ -2,6 +2,7 @@
 include("utils.jl")
 
 # starting with tests of simple manifolds
+include("manifold_test.jl")
 include("euclidean.jl")
 include("sphere.jl")
 include("rotations.jl")

@@ -209,7 +209,7 @@ end
 compute the vector transport on the [`SymmetricPositiveDefinite`](@ref) with its
 default metric, [`LinearAffineMetric`](@ref) and method `m`, which defaults to [`ParallelTransport`](@ref).
 """
-vector_transport_to!(P::SymmetricPositiveDefinite{N},vto, x, v, y, m=ParallelTransport()) where N = vector_transport_to!(MetricManifold(P,LinearAffineMetric()),vto, x, v, y, m)
+vector_transport_to!(P::SymmetricPositiveDefinite{N},vto, x, v, y, m::AbstractVectorTransportMethod) where N = vector_transport_to!(MetricManifold(P,LinearAffineMetric()),vto, x, v, y, m)
 
 @doc doc"""
     vector_transport_to!(P,vto,x,v,y,::ParallelTransport)
@@ -256,7 +256,8 @@ function vector_transport_to!(::MetricManifold{SymmetricPositiveDefinite{N},Line
     Sf = Diagonal( exp.(e3.values) )
     Uf = e3.vectors
     xue = xSqrt*Uf*Sf*transpose(Uf)
-    copyto!(vto, xue * tv * transpose(xue) )
+    vtp = xue * ( 0.5*(tv + transpose(tv)) ) * transpose(xue)
+    copyto!(vto, vtp) # symmetrize
     return vto
 end
 
@@ -323,14 +324,14 @@ of size `(N,N)`, symmetric and positive definite.
 The tolerance for the second to last test can be set using the ´kwargs...`.
 """
 function is_manifold_point(P::SymmetricPositiveDefinite{N},x; kwargs...) where N
-    if size(x) != (N,N)
-        throw(DomainError(size(x),"The point $(x) does not lie on $(P), since its size is not $((N,N))."))
+    if size(x) != representation_size(P)
+        throw(DomainError(size(x),"The point $(x) does not lie on $(P), since its size is not $(representation_size(P))."))
     end
     if !isapprox(norm(x-transpose(x)), 0.; kwargs...)
-        throw(DomainError(norm(x), "The point $(x) does not lie on the sphere $(P) since its not a symmetric matrix:"))
+        throw(DomainError(norm(x), "The point $(x) does not lie on $(P) since its not a symmetric matrix:"))
     end
     if ! all( eigvals(x) .> 0 )
-        throw(DomainError(norm(x), "The point $x does not lie on the sphere $P since its not a positive definite matrix."))
+        throw(DomainError(norm(x), "The point $x does not lie on $P since its not a positive definite matrix."))
     end
     return true
 end
@@ -345,13 +346,13 @@ The tolerance for the last test can be set using the ´kwargs...`.
 """
 function is_tangent_vector(P::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
     is_manifold_point(P,x)
-    if size(v) != (N,N)
+    if size(v) != representation_size(P)
         throw(DomainError(size(v),
-            "The vector $(v) is not a tangent to a point on $(P) since its size does not match $((N,N))."))
+            "The vector $(v) is not a tangent to a point on $(P) since its size does not match $(representation_size(P))."))
     end
     if !isapprox(norm(v-transpose(v)), 0.; kwargs...)
         throw(DomainError(size(v),
-            "The vector $(v) is not a tangent to a point on $(P) (represented as an element of the Lie algebrasince its not symmetric."))
+            "The vector $(v) is not a tangent to a point on $(P) (represented as an element of the Lie algebra) since its not symmetric."))
     end
     return true
 end
