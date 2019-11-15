@@ -356,11 +356,52 @@ end
 
 manifold_dimension(B::VectorBundle) = manifold_dimension(B.M) + vector_space_dimension(B.VS)
 
+@doc doc"""
+    inner(B::VectorBundle, x, v, w)
+
+Inner product of tangent vectors `v` and `w` at point `x` from the
+vector bundle `B` over manifold `B.VS` (denoted $M$).
+
+Notation:
+  * The point $x = (p_x, \xi_x)$ where $p_x \in M$ and $\xi_x$ belongs to the
+    fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
+    canonical projection of that vector bundle $B$.
+  * The tangent vector $v = (\xi_{v,M}, \xi_{v,F}) \in T_{x}B$ where
+    $\xi_{v,M}$ is a tangent vector from the tangent space $T_{p_x}M$ and
+    $\xi_{v,F}$ is a tangent vector from the tangent space $T_{\xi_x}F$ (isomorphic to $F$).
+    Similarly for the other tangent vector $w = (\xi_{w,M}, \xi_{w,F}) \in T_{x}B$.
+
+The inner product is calculated as
+
+$\langle v, w \rangle_{B} = \langle \xi_{v,M}, \xi_{w,M} \rangle_{M} + \langle \xi_{v,F}, \xi_{w,F} \rangle_{F}.$
+"""
 function inner(B::VectorBundle, x, v, w)
     return inner(B.M, x.parts[1], v.parts[1], w.parts[1]) +
            inner(B.VS, x.parts[2], v.parts[2], w.parts[2])
 end
 
+@doc doc"""
+    distance(B::VectorBundle, x, y)
+
+Distance between points $x$ and $y$ from the
+vector bundle `B` over manifold `B.VS` (denoted $M$).
+
+Notation:
+  * The point $x = (p_x, \xi_x)$ where $p_x \in M$ and $\xi_x$ belongs to the
+    fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
+    canonical projection of that vector bundle $B$.
+    Similarly, $y = (p_y, \xi_y)$.
+
+The distance is calculated as
+
+$d_B(x, y) = \sqrt{d_M(p_x, p_y)^2 + d_F(\xi_x, \xi_{y\to x})^2}$
+
+where $d_M$ is the distance on manifold $M$, $d_F$ is the distance
+between two vectors from the fiber $F$ and $\xi_{y\to x}$ is the result
+of parallel transport of vector $\xi_y$ to point $p_x$. The default
+behavior of [`vector_transport_to`](@ref) is used to compute the vector
+transport.
+"""
 function distance(B::VectorBundle, x, y)
     dist_man = distance(B.M, x.parts[1], y.parts[1])
     vy_x = vector_transport_to(B.M, y.parts[1], y.parts[2], x.parts[1])
@@ -369,12 +410,56 @@ function distance(B::VectorBundle, x, y)
     return sqrt(dist_man^2 + dist_vec^2)
 end
 
+@doc doc"""
+    exp!(B::VectorBundle, y, x, v)
+
+Exponential map of tangent vector $v$ at point $x$ from
+vector bundle `B` over manifold `B.VS` (denoted $M$).
+The result overwrites the point `y`.
+
+Notation:
+  * The point $x = (p_x, \xi_x)$ where $p_x \in M$ and $\xi_x$ belongs to the
+    fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
+    canonical projection of that vector bundle $B$.
+  * The tangent vector $v = (\xi_{v,M}, \xi_{v,F}) \in T_{x}B$ where
+    $\xi_{v,M}$ is a tangent vector from the tangent space $T_{p_x}M$ and
+    $\xi_{v,F}$ is a tangent vector from the tangent space $T_{\xi_x}F$ (isomorphic to $F$).
+
+The exponential map is calculated as
+
+$\exp_{x}(v) = (\exp_{p_x}(\xi_{v,M}), \xi_{\exp})$
+
+where $\xi_{\exp}$ is the result of vector transport of $\xi_x + \xi_{v,F}$
+to the point $\exp_{p_x}(\xi_{v,M})$.
+The sum $\xi_x + \xi_{v,F}$ corresponds to the exponential map in the vector space $F$.
+"""
 function exp!(B::VectorBundle, y, x, v)
     exp!(B.M, y.parts[1], x.parts[1], v.parts[1])
     vector_transport_to!(B.M, y.parts[2], x.parts[1], x.parts[2] + v.parts[2], y.parts[1])
     return y
 end
 
+@doc doc"""
+    log!(B::VectorBundle, v, x, y)
+
+Logarithmic map of the point $y$ at point $x$ from
+vector bundle `B` over manifold `B.VS` (denoted $M$).
+The result overwrites the tangent vector `v`.
+
+Notation:
+  * The point $x = (p_x, \xi_x)$ where $p_x \in M$ and $\xi_x$ belongs to the
+    fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
+    canonical projection of that vector bundle $B$.
+    Similarly, $y = (p_y, \xi_y)$.
+
+The logarithmic map is calculated as
+
+$\log_{x}(y) = (\log_{p_x}(p_y), \xi_{\log} - \xi_x)$
+
+where $\xi_{\log}$ is the result of vector transport of $\xi_y$
+to the point $p_x$.
+The difference $\xi_{\log} - \xi_x$ corresponds to the logarithmic map in the vector space $F$.
+"""
 function log!(B::VectorBundle, v, x, y)
     log!(B.M, v.parts[1], x.parts[1], y.parts[1])
     vector_transport_to!(B.M, v.parts[2], y.parts[1], y.parts[2], x.parts[1])
@@ -382,18 +467,71 @@ function log!(B::VectorBundle, v, x, y)
     return v
 end
 
+@doc doc"""
+    zero_tangent_vector!(B::VectorBundle, v, x)
+
+Zero tangent vector at point $x$ from the vector bundle `B`
+over manifold `B.VS` (denoted $M$). The zero vector belongs to the space $T_{x}B$
+The result overwrites the tangent vector `v`.
+
+Notation:
+  * The point $x = (p_x, \xi_x)$ where $p_x \in M$ and $\xi_x$ belongs to the
+    fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
+    canonical projection of that vector bundle $B$.
+
+The zero vector is calculated as
+
+$\mathbf{0}_{x} = (\mathbf{0}_{p_x}, \mathbf{0}_F)$
+
+where $\mathbf{0}_{p_x}$ is the zero tangent vector from $T_{p_x}M$ and
+$\mathbf{0}_F$ is the zero element of the vector space $F$.
+"""
 function zero_tangent_vector!(B::VectorBundle, v, x)
     zero_tangent_vector!(B.M, v.parts[1], x.parts[1])
     zero_vector!(B.VS, v.parts[2], x.parts[2])
     return v
 end
 
+@doc doc"""
+    project_point!(B::VectorBundle, x)
+
+Project the point $x$ from the ambient space of the vector bundle `B`
+over manifold `B.VS` (denoted $M$) to the vector bundle.
+
+Notation:
+  * The point $x = (p_x, \xi_x)$ where $p_x$ belongs to the ambient space of $M$
+    and $\xi_x$ belongs to the ambient space of the
+    fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
+    canonical projection of that vector bundle $B$.
+
+The projection is calculated by projecting the point $p_x$ to the manifold $M$
+and then projecting the vector $\xi_x$ to the tangent space $T_{p_x}M$.
+"""
 function project_point!(B::VectorBundle, x)
     project_point!(B.M, x.parts[1])
     project_tangent!(B.M, x.parts[2], x.parts[1], x.parts[2])
     return x
 end
 
+@doc doc"""
+    project_tangent!(B::VectorBundle, w, x, v)
+
+Project the element $v$ of the ambient space of the tangent space $T_x B$
+to the tangent space $T_x B$.
+The results overwrites $w$.
+
+Notation:
+  * The point $x = (p_x, \xi_x)$ where $p_x \in M$ and $\xi_x$ belongs to the
+    fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
+    canonical projection of that vector bundle $B$.
+  * The vector $x = (\xi_{v,M}, \xi_{v,F})$ where $p_x$ belongs to the ambient space of $T_{p_x}M$
+    and $\xi_{v,F}$ belongs to the ambient space of the
+    fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
+    canonical projection of that vector bundle $B$.
+
+The projection is calculated by projecting $\xi_{v,M}$ to tangent space $T_{p_x}M$
+and then projecting the vector $\xi_{v,F}$ to the fiber $F$.
+"""
 function project_tangent!(B::VectorBundle, w, x, v)
     project_tangent!(B.M, w.parts[1], x.parts[1], v.parts[1])
     project_tangent!(B.M, w.parts[2], x.parts[1], v.parts[2])
