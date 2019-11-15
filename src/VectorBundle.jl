@@ -229,6 +229,12 @@ function inner(B::VectorBundleFibers{<:CotangentSpaceType}, x, v, w)
                  sharp(B.M, x, FVector(CotangentSpace, w)).data)
 end
 
+"""
+    norm(B::VectorBundleFibers, x, v)
+
+Norm of the vector `v` from the vector space of type `B.VS`
+at point `x` from manifold `B.M`.
+"""
 norm(B::VectorBundleFibers, x, v) = sqrt(inner(B, x, v, v))
 
 norm(B::VectorBundleFibers{<:TangentSpaceType}, x, v) = norm(B.M, x, v)
