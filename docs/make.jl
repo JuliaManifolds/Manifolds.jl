@@ -14,6 +14,7 @@ makedocs(
                 "Sphere" => "manifolds/sphere.md"
             ],
             "Combined manifolds" => [
+                "Power manifold" => "manifolds/power.md",
                 "Product manifold" => "manifolds/product.md",
                 "Vector bundle" => "manifolds/vector_bundle.md"
             ],
