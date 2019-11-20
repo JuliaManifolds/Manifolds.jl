@@ -58,6 +58,11 @@ function project_tangent!(M::Euclidean, w, x, v)
     return w
 end
 
+function vector_transport_to!(M::Euclidean, vto, x, v, y, ::ParallelTransport)
+    vto .= v
+    return vto
+end
+
 function flat!(M::Euclidean, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
     copyto!(v.data, w.data)
     return v

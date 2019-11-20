@@ -42,7 +42,7 @@ end
 
 convert(::Type{MT},M::MetricManifold{MT,GT}) where {MT,GT} = M.manifold
 
-@traitimpl IsDecoratorManifold{MetricManifold}
+is_decorator_manifold(M::MetricManifold) = Val(true)
 
 """
     HasMetric
@@ -434,23 +434,23 @@ end
     return zero_tangent_vector!(M.manifold, v, x)
 end
 
-@traitfn function is_manifold_point(M::MMT,
+@traitfn function manifold_point_error(M::MMT,
                                     x;
                                     kwargs...) where {MT<:Manifold,
                                                       GT<:Metric,
                                                       MMT<:MetricManifold{MT,GT};
                                                       HasMetric{MT,GT}}
-    return is_manifold_point(M.manifold, x; kwargs...)
+    return manifold_point_error(M.manifold, x; kwargs...)
 end
 
-@traitfn function is_tangent_vector(M::MMT,
+@traitfn function tangent_vector_error(M::MMT,
                                     x,
                                     v;
                                     kwargs...) where {MT<:Manifold,
                                                       GT<:Metric,
                                                       MMT<:MetricManifold{MT,GT};
                                                       HasMetric{MT,GT}}
-    return is_tangent_vector(M.manifold, x, v; kwargs...)
+    return tangent_vector_error(M.manifold, x, v; kwargs...)
 end
 
 @traitfn function flat!(M::MMT,
