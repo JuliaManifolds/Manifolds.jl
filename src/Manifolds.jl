@@ -679,6 +679,7 @@ include("ProjectedDistribution.jl")
 include("ProductManifold.jl")
 
 include("Euclidean.jl")
+iclude("CholeskySpace.jl")
 include("Rotations.jl")
 include("Sphere.jl")
 include("SymmetricPositiveDefinite.jl")
@@ -706,9 +707,6 @@ export Manifold,
     MPoint,
     TVector,
     IsDecoratorManifold,
-    Euclidean,
-    Sphere,
-    SymmetricPositiveDefinite,
     ProductManifold,
     ProductRepr,
     VectorSpaceType,
@@ -727,6 +725,12 @@ export Manifold,
     AbstractVectorTransportMethod,
     ParallelTransport,
     ProjectTangent
+export
+    Euclidean,
+    CholeskySpace
+    Sphere,
+    SymmetricPositiveDefinite
+    
 export base_manifold,
     bundle_projection,
     distance,
@@ -782,6 +786,7 @@ export Metric,
     HasMetric,
     LinearAffineMetric,
     LogEuclideanMetric,
+    LogCholeskyMetric,
     metric,
     local_metric,
     inverse_local_metric,

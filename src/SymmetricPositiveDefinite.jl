@@ -1,4 +1,4 @@
-using LinearAlgebra: eigen, eigvals, eigvecs, Symmetric, Diagonal, factorize, tr, norm
+using LinearAlgebra: diagm, diag, eigen, eigvals, eigvecs, Symmetric, Diagonal, factorize, tr, norm, cholesky, LowerTriangular
 
 @doc doc"""
     SymmetricPositiveDefinite{N} <: Manifold
@@ -38,7 +38,10 @@ returns the dimension of the manifold [`SymmetricPositiveDefinite`](@ref) $\math
 The linear affine metric is the metric for symmetric positive definite matrices, that employs
 matrix logarithms and exponentials, which yields a linear and affine metric.
 """
-struct LinearAffineMetric <: Metric end
+struct LinearAffineMetric <: RiemannianMetric end
+# Make this metric default, i.e. automatically convert
+convert(SymmetricPositiveDefinite{N},M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
+convert(MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},M::SymmetricPositiveDefinite{N}) where N = MetricManifold(M, LinearAffineMetric())
 
 @doc doc"""
     LogEuclideanMetric <: Metric
@@ -46,7 +49,31 @@ struct LinearAffineMetric <: Metric end
 The LogEuclidean Metric consists of the Euclidean metric applied to all elements after mapping them
 into the Lie Algebra, i.e. performing a matrix logarithm beforehand.
 """
-struct LogEuclideanMetric <: Metric end
+struct LogEuclideanMetric <: RiemannianMetric end
+
+@doc doc"""
+    LogCholeskyMetric <: Metric
+
+The Log-Cholesky metric imposes a metric based on the Cholesky decomposition as
+introduced by
+> Lin, Zenhua: Riemannian Geometry of Symmetric Positive Definite Matrices via
+> Cholesky Decomposition, arXiv: 1908.09326
+"""
+struct LogCholeskyMetric <: RiemannianMetric end
+CholeskyToSPD(l,w) = (l*l', w*l' + l*w')
+TangentCholeskyToSPD!(l,w) = (w .= w*l' + l*w')
+function SPDToCholesky(x,v)
+    l = cholesky(x).L
+    a = l\v
+    w = l * ( transpose(l\(a')) )
+    return (l, LowerTriangular(w) + diagm(w)/2 )
+end
+function SPDToCholesky(x,l,v)
+    a = l\v
+    w = l * ( transpose(l\(a')) )
+    return (l, LowerTriangular(w) + diagm(w)/2 )
+end
+toCholeskySpaceTangent()
 
 @doc doc"""
     distance(M,x,y)
@@ -71,6 +98,21 @@ matrix Frobenius norm.
 function distance(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},x,y) where N
     s = real.( eigvals( x,y ) )
     return any(s .<= eps() ) ? 0 : sqrt(  sum( abs.(log.(s)).^2 )  )
+end
+
+@doc doc"""
+    distance(M,x,y)
+
+computes the distance on the manifold of [`SymmetricPositiveDefinite`](@ref)
+nmatrices, i.e. between two symmetric positive definite matrices `x` and `y`
+with respect to the [`LogCholeskyMetric`](@ref). The formula reads
+
+````math
+    d_{\mathcal P(n)}(x,y) = 
+````
+"""
+function distance(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,y) where N
+ # TODO
 end
 
 @doc doc"""
@@ -107,8 +149,9 @@ inner(M::SymmetricPositiveDefinite{N}, x, w, v) where N = inner(MetricManifold(M
 @doc doc"""
     inner(M,x,v,w)
 
-compute the inner product of `v`, `w` in the tangent space of `x` on the [`SymmetricPositiveDefinite`](@ref)
-manifold `M`, as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
+compute the inner product of `v`, `w` in the tangent space of `x` on
+the [`SymmetricPositiveDefinite`](@ref) manifold `M`, as
+a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
 
 ```math
 ( v, w)_x = \operatorname{tr}(x^{-1}\xi x^{-1}\nu ),
@@ -117,6 +160,23 @@ manifold `M`, as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). T
 function inner(M::MetricManifold{SymmetricPositiveDefinite{N}, LinearAffineMetric}, x, w, v) where N
     F = factorize(x)
     return tr( ( Symmetric(w) / F ) * ( Symmetric(v) / F ) )
+end
+
+@doc doc"""
+    inner(M,x,v,w)
+
+compute the inner product of two matrices `v`, `w` in the tangent space of `x`
+on the [`SymmetricPositiveDefinite`](@ref) manifold `M`, as
+a [`MetricManifold`](@ref) with [`LogCholeskyMetric`](@ref). The formula reads
+
+````math
+    ( v,w)_x = 
+````
+"""
+function inner(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,v,w) where N
+    (l,vl) = SPDToCholesky(x,v)
+    (l,wl) = SPDToCholesky(x,l,w)
+    return inner(CholeskySpace{N}(), l, vl, wl)
 end
 
 @doc doc"""
@@ -156,6 +216,26 @@ function exp!(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}
 end
 
 @doc doc"""
+    exp!(M,y,x,v)
+
+compute the exponential map on the [`SymmetricPositiveDefinite`](@ref) `M` with
+[`LogCholeskyMetric`](@ref) from `x` into direction `v` and store the result in
+`y`. The formula reads
+
+````math
+\exp_x v = (\exp_l w)(\exp_l w)^\mathrm{T}
+````
+where $\exp_lw$ is the exponential map on [`CholeskySpace`](@ref), $l$ is the
+cholesky decomposition of $x$  and $w = l(l^{-1}vl^\mathrm{T}$.
+"""
+function exp!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, y, x, v) where N
+    (l,w) = SPDToCholesky(x,v) 
+    exp!(CholesySpace{N}(),y,l,w)
+    y .= y*y'
+    return y
+end
+
+@doc doc"""
     log!(M,v,x,y)
 
 compute the logarithmic map at `x` to `y` on the [`SymmetricPositiveDefinite`](@ref)
@@ -191,6 +271,25 @@ function log!(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}
     return v
 end
 
+@doc doc"""
+    log!(M,v,x,y)
+
+computes the logarithmic map o [`SymmetricPositiveDefinite`](@ref) `M` with
+respect to the [`LogCholeskyMetric`](@ref). The formula can be adapted from
+the [`CholeskySpace`](@ref) as
+````math
+\log_xy = lw\mathrm{T} + wl^{\mathrm{T}},
+````
+where $l$ is the colesky factor of $x$ and $w=\log_lk$ for $k$ the cholesky factor
+of $y$ and the just mentioned logarithmic map is the one on [`CholeskySpace`](@ref).
+"""
+function log(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},v,x,y) where N
+    l = cholesky(x).L
+    k = cholesky(y).L
+    log!(CholeskySpace{N}(), v, l, k)
+    TangentCholeskyToSPD!(l, v)
+    return v
+end
 @doc doc"""
     representation_size(M)
 
