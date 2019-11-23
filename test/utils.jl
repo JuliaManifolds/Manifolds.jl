@@ -37,7 +37,8 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     inverse_retraction_methods = [],
     point_distributions = [],
     tvector_distributions = [],
-    exp_log_atol_multiplier = 1)
+    exp_log_atol_multiplier = 1,
+    rand_tvector_atol_multiplier = 1)
     # log/exp
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
     isapprox(M, pts[1], pts[2]) && error("Points 1 and 2 are equal")
@@ -66,6 +67,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
     @testset "injectivity radius" begin
         @test injectivity_radius(M, pts[1]) > 0
+        @test injectivity_radius(M, pts[1]) ≥ injectivity_radius(M)
         for rm ∈ retraction_methods
             @test injectivity_radius(M, pts[1], rm) > 0
             @test injectivity_radius(M, pts[1], rm) ≤ injectivity_radius(M, pts[1])
@@ -78,7 +80,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         for pt ∈ pts
             @test is_manifold_point(M, pt)
         end
-        @test is_tangent_vector(M, pts[1], tv1)
+        @test is_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1])))
     end
 
     @testset "log/exp tests" begin
@@ -123,7 +125,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     end
 
     @testset "basic linear algebra in tangent space" begin
-        @test isapprox(M, pts[1], 0*tv1, zero_tangent_vector(M, pts[1]))
+        @test isapprox(M, pts[1], 0*tv1, zero_tangent_vector(M, pts[1]); atol = eps(eltype(pts[1])))
         @test isapprox(M, pts[1], 2*tv1, tv1+tv1)
         @test isapprox(M, pts[1], 0*tv1, tv1-tv1)
         @test isapprox(M, pts[1], (-1)*tv1, -tv1)
@@ -223,7 +225,8 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         for tvd ∈ tvector_distributions
             supp = Manifolds.support(tvd)
             for _ in 1:10
-                @test is_tangent_vector(M, supp.x, rand(tvd))
+                randtv = rand(tvd)
+                @test is_tangent_vector(M, supp.x, randtv; atol = rand_tvector_atol_multiplier * eps(eltype(randtv)))
             end
         end
     end

@@ -63,7 +63,7 @@ function rand(rng::AbstractRNG, d::ProjectedFVectorDistribution{TResult}) where 
 end
 
 function _rand!(rng::AbstractRNG, d::ProjectedFVectorDistribution, v::AbstractArray{<:Number})
-    _rand!(rng, d.d, v)
-    d.project_vector!(d.type, v, d.x, v)
+    # calling _rand!(rng, d.d, v) doesn't work for all arrays types
+    copyto!(v, rand(rng, d))
     return v
 end

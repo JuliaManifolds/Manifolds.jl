@@ -8,4 +8,7 @@ submanifold_component
 Manifolds.ProductArray
 ProductRepr
 Manifolds.prod_point
+Manifolds.StaticReshaper
+Manifolds.ArrayReshaper
+Manifolds.make_reshape
 ```

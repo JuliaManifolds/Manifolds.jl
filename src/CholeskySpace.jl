@@ -48,8 +48,6 @@ distance(::CholeskySpace{N},x,y) where N = sqrt(
   sum( (LowerTriangular(x) - LowerTriangular(y)).^2 ) + sum( (log.(diag(x)) - log(diag(y))).^2 )
 )
 
-norm(M::CholeskySpace{N},x,v) = sqrt(inner(M,x,v,v))
-
 @doc doc"""
     exp!(M,y,x,v)
 
@@ -93,7 +91,7 @@ end
 returns the zero tangent vector on the [`CholeskySpace`](@ref) `M` at `x` in
 the variable `v`.
 """
-function zero_tangent_vector!(M::CholeskySpace{N},v,x)
+function zero_tangent_vector!(M::CholeskySpace{N},v,x) where N
     fill!(v,0)
     return v
 end

@@ -9,10 +9,13 @@ import Base: isapprox,
     getindex,
     setindex!,
     size,
+    length,
     copy,
     copyto!,
     convert,
     dataids,
+    axes,
+    promote_rule,
     +,
     -,
     *
@@ -25,6 +28,7 @@ import LinearAlgebra: dot,
     Diagonal
 using Requires
 using StaticArrays
+using HybridArrays
 import Markdown: @doc_str
 import Distributions: _rand!, support
 import Random: rand
@@ -558,7 +562,7 @@ vectors shorter than $d$ (has a left inverse).
 injectivity_radius(M::Manifold, x, ::AbstractRetractionMethod) = injectivity_radius(M, x)
 
 """
-    injectivity_radius(M::Manifold, x)
+    injectivity_radius(M::Manifold)
 
 Infimum of the injectivity radii of all manifold points.
 """
@@ -667,6 +671,7 @@ is_tangent_vector(M::Manifold, x, v; kwargs...) = true
 is_tangent_vector(M::Manifold, x::MPoint, v::TVector) = error("A validation for a $(typeof(v)) in the tangent space of a $(typeof(x)) on $(typeof(M)) not implemented.")
 
 include("utils.jl")
+include("SizedAbstractArray.jl")
 
 include("ProductRepresentations.jl")
 include("ArrayManifold.jl")
@@ -677,9 +682,10 @@ include("DistributionsBase.jl")
 include("ProjectedDistribution.jl")
 
 include("ProductManifold.jl")
+include("PowerManifold.jl")
 
 include("Euclidean.jl")
-iclude("CholeskySpace.jl")
+include("CholeskySpace.jl")
 include("Rotations.jl")
 include("Sphere.jl")
 include("SymmetricPositiveDefinite.jl")
@@ -708,6 +714,7 @@ export Manifold,
     TVector,
     IsDecoratorManifold,
     ProductManifold,
+    PowerManifold,
     ProductRepr,
     VectorSpaceType,
     TangentSpace,

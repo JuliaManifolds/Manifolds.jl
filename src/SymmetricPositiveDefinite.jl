@@ -40,8 +40,8 @@ matrix logarithms and exponentials, which yields a linear and affine metric.
 """
 struct LinearAffineMetric <: RiemannianMetric end
 # Make this metric default, i.e. automatically convert
-convert(SymmetricPositiveDefinite{N},M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
-convert(MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},M::SymmetricPositiveDefinite{N}) where N = MetricManifold(M, LinearAffineMetric())
+convert(::Type{SymmetricPositiveDefinite{N}},M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
+convert(::Type{MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}},M::SymmetricPositiveDefinite{N}) where N = MetricManifold(M, LinearAffineMetric())
 
 @doc doc"""
     LogEuclideanMetric <: Metric
@@ -73,7 +73,6 @@ function SPDToCholesky(x,l,v)
     w = l * ( transpose(l\(a')) )
     return (l, LowerTriangular(w) + diagm(w)/2 )
 end
-toCholeskySpaceTangent()
 
 @doc doc"""
     distance(M,x,y)

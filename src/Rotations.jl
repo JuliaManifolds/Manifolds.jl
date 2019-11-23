@@ -1,3 +1,5 @@
+import LinearAlgebra: norm
+
 @doc doc"""
     Rotations{N} <: Manifold
 
@@ -252,7 +254,9 @@ function log!(M::Rotations{4}, v, x, y)
     return v
 end
 
-injectivity_radius(M::Rotations, x) = π*sqrt(2.0)
+injectivity_radius(M::Rotations, x) = injectivity_radius(M)
+
+injectivity_radius(M::Rotations) = π*sqrt(2.0)
 
 @doc doc"""
     PolarRetraction
