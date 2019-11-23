@@ -62,17 +62,19 @@ introduced by
 """
 struct LogCholeskyMetric <: RiemannianMetric end
 cholesky_to_spd(l,w) = (l*l', w*l' + l*w')
-tangent_cholesky_to_tangent_spd(l,w) = (w .= w*l' + l*w')
+tangent_cholesky_to_tangent_spd!(l,w) = (w .= w*l' + l*w')
 function spd_to_cholesky(x,v)
     l = cholesky(x).L
     a = l\v
     w = l * ( transpose(l\(a')) )
-    return (l, LowerTriangular(w) + Diagonal(w)/2 )
+    # strictly lower triangular plus half diagonal
+    return (l, LowerTriangular(w) - Diagonal(w)/2 )
 end
 function spd_to_cholesky(x,l,v)
     a = l\v
     w = l * ( transpose(l\(a')) )
-    return (l, LowerTriangular(w) + Diagonal(w)/2 )
+    # strictly lower triangular plus half diagonal
+    return (l, LowerTriangular(w) - Diagonal(w)/2 )
 end
 
 @doc doc"""
@@ -108,12 +110,15 @@ nmatrices, i.e. between two symmetric positive definite matrices `x` and `y`
 with respect to the [`LogCholeskyMetric`](@ref). The formula reads
 
 ````math
-    d_{\mathcal P(n)}(x,y) = 
+d_{\mathcal P(n)}(x,y) = \sqrt{
+ \lVert \lfloor l \rfloor - \lfloor k \rfloor \rVert_{\mathrm{F}}^2
+ + \lVert \log(\operatorname{diag}(l)) - \log(\operatorname{diag}(k))\rVert_{\mathrm{F}}^2 },
 ````
+where $l$ and $k$ are the cholesky factors of $x$ and $y$, respectively,
+$\lfloor\cdit\rfloor$ denbotes the lower triangulr matrix of its argument,
+and $\lVert\cdot\rVert_{\mathrm{F}}$ denotes the Frobenius norm.
 """
-function distance(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,y) where N
- # TODO
-end
+distance(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,y) where N = distance(CholeskySpace{N}(), cholesky(x).L, cholesky(x).L)
 
 @doc doc"""
     distance(M,x,y)
@@ -287,7 +292,7 @@ function log(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},v
     l = cholesky(x).L
     k = cholesky(y).L
     log!(CholeskySpace{N}(), v, l, k)
-    tangent_cholesky_to_tangent_spd(l, v)
+    tangent_cholesky_to_tangent_spd!(l, v)
     return v
 end
 @doc doc"""
@@ -359,6 +364,26 @@ function vector_transport_to!(M::MetricManifold{SymmetricPositiveDefinite{N},Lin
     return vto
 end
 
+@doc doc"""
+    vector_transport_to!(M,vto,x,v,y,::ParallelTransport)
+
+parallely transport the tangent vector `v` at `x` along the geodesic to `y`
+with respect to the [`SymmetricPositiveDefinite`](@ref) manifold `M` and
+[`LogCholeskyMetric`](@ref). The formula reads
+
+````math
+    \mathcal P_{x\to y}(v) = \lfloor v \rfloor ,
+````
+where $l$ and $k$ are the cholesky factors of $x$ and $y$, respectively,
+$\lfloor\cdit\rfloor$ denbotes the lower triangulr matrix of its argument,
+and $\operatorname{diag}$ extracts the diagonal matrix.
+"""
+function vector_transport_to!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, vto, x, v, y, ::ParallelTransport) where N
+    (l,v) = spd_to_cholesky(x,v)
+    # the first two terms are the strictly lower triangular
+    vto .= LowerTriangular(v) - Diagonal(v) + Diagonal(l)*Diagonal(1 ./ diag(cholesky(y)))*Diagonal(v)
+    return vto
+end
 @doc doc"""
     [Ξ,κ] = tangent_orthonormal_basis(M,x,v)
 
