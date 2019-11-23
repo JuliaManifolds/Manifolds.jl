@@ -40,8 +40,9 @@ matrix logarithms and exponentials, which yields a linear and affine metric.
 """
 struct LinearAffineMetric <: RiemannianMetric end
 # Make this metric default, i.e. automatically convert
-convert(::Type{SymmetricPositiveDefinite{N}},M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
-convert(::Type{MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}},M::SymmetricPositiveDefinite{N}) where N = MetricManifold(M, LinearAffineMetric())
+convert(::Type{SymmetricPositiveDefinite{N}}, M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
+convert(::Type{SymmetricPositiveDefinite}, M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
+convert(::Type{MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}}, M::SymmetricPositiveDefinite{N}) where N = MetricManifold(M, LinearAffineMetric())
 
 @doc doc"""
     LogEuclideanMetric <: Metric
@@ -56,22 +57,22 @@ struct LogEuclideanMetric <: RiemannianMetric end
 
 The Log-Cholesky metric imposes a metric based on the Cholesky decomposition as
 introduced by
-> Lin, Zenhua: Riemannian Geometry of Symmetric Positive Definite Matrices via
-> Cholesky Decomposition, arXiv: 1908.09326
+> Lin, Zenhua: "Riemannian Geometry of Symmetric Positive Definite Matrices via
+> Cholesky Decomposition", arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
 """
 struct LogCholeskyMetric <: RiemannianMetric end
-CholeskyToSPD(l,w) = (l*l', w*l' + l*w')
-TangentCholeskyToSPD!(l,w) = (w .= w*l' + l*w')
-function SPDToCholesky(x,v)
+cholesky_to_spd(l,w) = (l*l', w*l' + l*w')
+tangent_cholesky_to_tangent_spd(l,w) = (w .= w*l' + l*w')
+function spd_to_cholesky(x,v)
     l = cholesky(x).L
     a = l\v
     w = l * ( transpose(l\(a')) )
-    return (l, LowerTriangular(w) + diagm(w)/2 )
+    return (l, LowerTriangular(w) + Diagonal(w)/2 )
 end
-function SPDToCholesky(x,l,v)
+function spd_to_cholesky(x,l,v)
     a = l\v
     w = l * ( transpose(l\(a')) )
-    return (l, LowerTriangular(w) + diagm(w)/2 )
+    return (l, LowerTriangular(w) + Diagonal(w)/2 )
 end
 
 @doc doc"""
@@ -173,8 +174,8 @@ a [`MetricManifold`](@ref) with [`LogCholeskyMetric`](@ref). The formula reads
 ````
 """
 function inner(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,v,w) where N
-    (l,vl) = SPDToCholesky(x,v)
-    (l,wl) = SPDToCholesky(x,l,w)
+    (l,vl) = spd_to_cholesky(x,v)
+    (l,wl) = spd_to_cholesky(x,l,w)
     return inner(CholeskySpace{N}(), l, vl, wl)
 end
 
@@ -228,7 +229,7 @@ where $\exp_lw$ is the exponential map on [`CholeskySpace`](@ref), $l$ is the
 cholesky decomposition of $x$  and $w = l(l^{-1}vl^\mathrm{T}$.
 """
 function exp!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, y, x, v) where N
-    (l,w) = SPDToCholesky(x,v) 
+    (l,w) = spd_to_cholesky(x,v) 
     exp!(CholesySpace{N}(),y,l,w)
     y .= y*y'
     return y
@@ -286,7 +287,7 @@ function log(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},v
     l = cholesky(x).L
     k = cholesky(y).L
     log!(CholeskySpace{N}(), v, l, k)
-    TangentCholeskyToSPD!(l, v)
+    tangent_cholesky_to_tangent_spd(l, v)
     return v
 end
 @doc doc"""
@@ -381,10 +382,10 @@ function tangent_orthonormal_basis(M::MetricManifold{SymmetricPositiveDefinite{N
     xSqrt = sqrt(x) 
     V = eigvecs(v)
     Ξ = [ (i==j ? 1/2 : 1/sqrt(2))*( V[:,i] * transpose(V[:,j])  +  V[:,j] * transpose(V[:,i]) )
-        for i=1:n for j= i:n
+        for i=1:N for j= i:N
     ]
     λ = eigvals(v)
-    κ = [ -1/4 * (λ[i]-λ[j])^2 for i=1:n for j= i:n ]
+    κ = [ -1/4 * (λ[i]-λ[j])^2 for i=1:N for j= i:N ]
   return Ξ,κ
 end
 

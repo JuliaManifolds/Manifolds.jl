@@ -734,7 +734,7 @@ export Manifold,
     ProjectTangent
 export
     Euclidean,
-    CholeskySpace
+    CholeskySpace,
     Sphere,
     SymmetricPositiveDefinite
     

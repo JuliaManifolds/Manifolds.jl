@@ -45,7 +45,7 @@ d_{\mathcal M}(x,y) = \sqrt{
 ````
 """
 distance(::CholeskySpace{N},x,y) where N = sqrt(
-  sum( (LowerTriangular(x) - LowerTriangular(y)).^2 ) + sum( (log.(diag(x)) - log(diag(y))).^2 )
+  sum( (LowerTriangular(x) - LowerTriangular(y)).^2 ) + sum( (log.(diag(x)) - log.(diag(y))).^2 )
 )
 
 @doc doc"""
@@ -63,7 +63,7 @@ where $\lfloor x\rfloor$ denotes the lower triangular matrix of $x$ and
 $\opertorname{diag}(x)$ the diagonal matrix of $x$
 """
 function exp!(::CholeskySpace{N},y,x,v) where N
-    y .= LowerTriangular(x) + LowerTriangular(v) + diagm(x)*diagm(exp.(diag(v)./diag(x)))
+    y .= LowerTriangular(x) + LowerTriangular(v) + Diagonal(x)*Diagonal(exp.(diag(v)./diag(x)))
     return y
 end
 @doc doc"""
@@ -81,7 +81,7 @@ where $\lfloor x\rfloor$ denotes the lower triangular matrix of $x$ and
 $\opertorname{diag}(x)$ the diagonal matrix of $x$
 """
 function log!(::CholeskySpace{N},v,x,y) where N
-    v .= LowerTriangular(y) + LowerTriangular(x) + diagm(x)*diagm(log.(diag(y)./diag(x)))
+    v .= LowerTriangular(y) + LowerTriangular(x) + Diagonal(x)*Diagonal(log.(diag(y)./diag(x)))
     return v
 end
 
