@@ -1,4 +1,5 @@
-using LinearAlgebra: diagm, diag, eigen, eigvals, eigvecs, Symmetric, Diagonal, factorize, tr, norm, cholesky, LowerTriangular
+using LinearAlgebra: diagm, diag, eigen, eigvals, eigvecs, Symmetric, Diagonal, factorize, tr, norm, cholesky, LowerTriangular, UpperTriangular
+
 
 @doc doc"""
     CholeskySpace{N} <: Manifold
@@ -10,11 +11,16 @@ are for example summarized in Table 1 of
 > Cholesky Decomposition, arXiv: 1908.09326
 """
 struct CholeskySpace{N} <: Manifold end
-CholeskySpace(n::Int) = CholeskySpace{N}()
+CholeskySpace(n::Int) = CholeskySpace{n}()
+
+# two small helper for strictly lower and upper triangulars
+strictlyLowerTriangular(x) = LowerTriangular(x) - Diagonal(diag(x))
+strictlyUpperTriangular(x) = UpperTriangular(x) - Diagonal(diag(x))
+
 
 @generated representation_size(::CholeskySpace{N}) where N = (N,N)
 
-@generated manifold_dimension(::CholeskySpace{N}) where N = N*(N+1)/2
+@generated manifold_dimension(::CholeskySpace{N}) where N = div(N*(N+1), 2)
 
 @doc doc"""
     inner(M,x,v,w)
@@ -28,7 +34,7 @@ The formula reads
     g_{x}(v,w) = \sum_{i>j} v_{ij}w_{ij} + \sum_{j=1}^m v_{ii}w_{ii}x_{ii}^{-2}
 ````
 """
-inner(::CholeskySpace{N},x,v,w) where N = sum(LowerTriangular(v).*LowerTriangular(w)) + sum(diag(v).*diag(w)./( diag(x).^2 ))
+inner(::CholeskySpace{N},x,v,w) where N = sum(strictlyLowerTriangular(v).*strictlyLowerTriangular(w)) + sum(diag(v).*diag(w)./( diag(x).^2 ))
 
 @doc doc"""
     distance(M,x,y)
@@ -45,7 +51,7 @@ d_{\mathcal M}(x,y) = \sqrt{
 ````
 """
 distance(::CholeskySpace{N},x,y) where N = sqrt(
-  sum( (LowerTriangular(x) - LowerTriangular(y)).^2 ) + sum( (log.(diag(x)) - log.(diag(y))).^2 )
+  sum( (strictlyLowerTriangular(x) - strictlyLowerTriangular(y)).^2 ) + sum( (log.(diag(x)) - log.(diag(y))).^2 )
 )
 
 @doc doc"""
@@ -63,7 +69,7 @@ where $\lfloor x\rfloor$ denotes the lower triangular matrix of $x$ and
 $\opertorname{diag}(x)$ the diagonal matrix of $x$
 """
 function exp!(::CholeskySpace{N},y,x,v) where N
-    y .= LowerTriangular(x) + LowerTriangular(v) + Diagonal(x)*Diagonal(exp.(diag(v)./diag(x)))
+    y .= strictlyLowerTriangular(x) + strictlyLowerTriangular(v) + Diagonal(x)*Diagonal(exp.(diag(v)./diag(x)))
     return y
 end
 @doc doc"""
@@ -81,7 +87,7 @@ where $\lfloor x\rfloor$ denotes the lower triangular matrix of $x$ and
 $\opertorname{diag}(x)$ the diagonal matrix of $x$
 """
 function log!(::CholeskySpace{N},v,x,y) where N
-    v .= LowerTriangular(y) + LowerTriangular(x) + Diagonal(x)*Diagonal(log.(diag(y)./diag(x)))
+    v .= strictlyLowerTriangular(y) - strictlyLowerTriangular(x) + Diagonal(x)*Diagonal(log.(diag(y)./diag(x)))
     return v
 end
 
@@ -94,4 +100,46 @@ the variable `v`.
 function zero_tangent_vector!(M::CholeskySpace{N},v,x) where N
     fill!(v,0)
     return v
+end
+
+@doc doc"""
+    is_manifold_point(M,x;kwargs...)
+
+check whether the matrix `x` lies on the [`CholeskySpace`](@ref) `M`, i.e.
+it's size fits the manifold, it is a lower triangular matrix and has positive
+entries on the diagonal.
+The tolerance for the tests can be set using the ´kwargs...`.
+"""
+
+function is_manifold_point(M::CholeskySpace{N}, x; kwargs...) where N
+    if size(x) != representation_size(M)
+        throw(DomainError(size(x),"The point $(x) does not lie on $(M), since its size is not $(representation_size(M))."))
+    end
+    if !isapprox( norm(UpperTriangular(x) - Diagonal(x)), 0.; kwargs...)
+        throw(DomainError(norm(UpperTriangular(x) - Diagonal(x)), "The point $(x) does not lie on $(M), since it strictly upper triangular nonzero entries"))
+    end
+    if any( diag(x) .<= 0)
+        throw(DomainError(min(diag(x)...), "The point $(x) does not lie on $(M), since it hast nonpositive entries on the diagonal"))
+    end
+    return true
+end
+"""
+    is_tangent_vector(M,x,v; kwargs... )
+
+checks whether `v` is a tangent vector to `x` on the [`CholeskySpace`](@ref) `M`, i.e.
+atfer [`is_manifold_point`](@ref)`(M,x)`, `v` has to be of same dimension as `x`
+and a symmetric matrix.
+The tolerance for the tests can be set using the ´kwargs...`.
+"""
+function is_tangent_vector(M::CholeskySpace{N}, x,v; kwargs...) where N
+    is_manifold_point(M,x)
+    if size(v) != representation_size(M)
+        throw(DomainError(size(v),
+            "The vector $(v) is not a tangent to a point on $(M) since its size does not match $(representation_size(M))."))
+    end
+    if !isapprox(norm(v-transpose(v)), 0.; kwargs...)
+        throw(DomainError(size(v),
+            "The vector $(v) is not a tangent to a point on $(M) (represented as an element of the Lie algebra) since its not symmetric."))
+    end
+    return true
 end
