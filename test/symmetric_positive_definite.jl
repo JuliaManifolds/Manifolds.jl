@@ -1,14 +1,14 @@
 include("utils.jl")
 
-@testset "Symmetric Positive Definite" begin
-    M1 = Manifolds.SymmetricPositiveDefinite(3)
-    M2 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LinearAffineMetric())
-    M3 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
+M1 = Manifolds.SymmetricPositiveDefinite(3)
+M2 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LinearAffineMetric())
+M3 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
 
-    types = [ Matrix{Float32},
-            Matrix{Float64},
-        ]
-    for M in [M1, M2, M3]
+types = [ Matrix{Float32},
+        Matrix{Float64},
+    ]
+for M in [M1, M2, M3]
+    @testset "$(typeof(M))" begin
         for T in types
             A(α) = [1. 0. 0.; 0. cos(α) sin(α); 0. -sin(α) cos(α)]
             ptsF = [#
