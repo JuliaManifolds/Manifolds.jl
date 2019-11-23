@@ -1,4 +1,4 @@
-using LinearAlgebra: diagm, diag, eigen, eigvals, eigvecs, Symmetric, Diagonal, factorize, tr, norm, cholesky, LowerTriangular
+using LinearAlgebra: diagm, diag, eigen, eigvals, eigvecs, Symmetric, Diagonal, factorize, tr, cholesky, LowerTriangular
 
 @doc doc"""
     SymmetricPositiveDefinite{N} <: Manifold
@@ -39,6 +39,7 @@ The linear affine metric is the metric for symmetric positive definite matrices,
 matrix logarithms and exponentials, which yields a linear and affine metric.
 """
 struct LinearAffineMetric <: RiemannianMetric end
+@traitimpl HasMetric{SymmetricPositiveDefinite,LinearAffineMetric}
 # Make this metric default, i.e. automatically convert
 convert(::Type{SymmetricPositiveDefinite{N}}, M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
 convert(::Type{SymmetricPositiveDefinite}, M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
@@ -61,20 +62,15 @@ introduced by
 > Cholesky Decomposition", arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
 """
 struct LogCholeskyMetric <: RiemannianMetric end
+
 cholesky_to_spd(l,w) = (l*l', w*l' + l*w')
 tangent_cholesky_to_tangent_spd!(l,w) = (w .= w*l' + l*w')
-function spd_to_cholesky(x,v)
-    l = cholesky(x).L
-    a = l\v
-    w = l * ( transpose(l\(a')) )
-    # strictly lower triangular plus half diagonal
-    return (l, LowerTriangular(w) - Diagonal(w)/2 )
-end
+spd_to_cholesky(x,v) = spd_to_cholesky(x,cholesky(x).L,v)
 function spd_to_cholesky(x,l,v)
     a = l\v
-    w = l * ( transpose(l\(a')) )
+    w = transpose(l\(a'))
     # strictly lower triangular plus half diagonal
-    return (l, LowerTriangular(w) - Diagonal(w)/2 )
+    return (l, l*(LowerTriangular(w) - Diagonal(w)/2) )
 end
 
 @doc doc"""
@@ -118,7 +114,7 @@ where $l$ and $k$ are the cholesky factors of $x$ and $y$, respectively,
 $\lfloor\cdit\rfloor$ denbotes the lower triangulr matrix of its argument,
 and $\lVert\cdot\rVert_{\mathrm{F}}$ denotes the Frobenius norm.
 """
-distance(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,y) where N = distance(CholeskySpace{N}(), cholesky(x).L, cholesky(x).L)
+distance(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,y) where N = distance(CholeskySpace{N}(), cholesky(x).L, cholesky(y).L)
 
 @doc doc"""
     distance(M,x,y)
@@ -183,6 +179,7 @@ function inner(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}
     (l,wl) = spd_to_cholesky(x,l,w)
     return inner(CholeskySpace{N}(), l, vl, wl)
 end
+norm(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,v) where N = sqrt(inner(M,x,v,v))
 
 @doc doc"""
     exp!(M,y,x,v)
@@ -235,7 +232,7 @@ cholesky decomposition of $x$  and $w = l(l^{-1}vl^\mathrm{T}$.
 """
 function exp!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, y, x, v) where N
     (l,w) = spd_to_cholesky(x,v) 
-    exp!(CholesySpace{N}(),y,l,w)
+    exp!(CholeskySpace{N}(),y,l,w)
     y .= y*y'
     return y
 end
@@ -372,16 +369,17 @@ with respect to the [`SymmetricPositiveDefinite`](@ref) manifold `M` and
 [`LogCholeskyMetric`](@ref). The formula reads
 
 ````math
-    \mathcal P_{x\to y}(v) = \lfloor v \rfloor ,
+    \mathcal P_{x\to y}(v) = \lfloor v \rfloor  + \operatorname{diag}(k)\operatorname{diag}(l)^{-1}\operatorname{diag}(x),
 ````
 where $l$ and $k$ are the cholesky factors of $x$ and $y$, respectively,
-$\lfloor\cdit\rfloor$ denbotes the lower triangulr matrix of its argument,
+$\lfloor\cdit\rfloor$ denbotes the lower triangular matrix,
 and $\operatorname{diag}$ extracts the diagonal matrix.
 """
 function vector_transport_to!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, vto, x, v, y, ::ParallelTransport) where N
-    (l,v) = spd_to_cholesky(x,v)
-    # the first two terms are the strictly lower triangular
-    vto .= LowerTriangular(v) - Diagonal(v) + Diagonal(l)*Diagonal(1 ./ diag(cholesky(y)))*Diagonal(v)
+    k = cholesky(y).L
+    (l,w) = spd_to_cholesky(x,v)
+    vector_transport_to!(CholeskySpace{N}(),vto,l , w , k, ParallelTransport())
+    tangent_cholesky_to_tangent_spd!(k,vto)
     return vto
 end
 @doc doc"""
@@ -421,6 +419,8 @@ return the injectivity radius of the [`SymmetricPositiveDefinite`](@ref). Since 
 the injectivity radius is $\infty$.
 """
 injectivity_radius(M::SymmetricPositiveDefinite{N}, args...) where N = Inf
+injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric}, args...) where N = Inf
+injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, args...) where N = Inf
 
 @doc doc"""
     zero_tangent_vector(M,x)
