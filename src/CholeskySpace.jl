@@ -103,6 +103,23 @@ function zero_tangent_vector!(M::CholeskySpace{N},v,x) where N
 end
 
 @doc doc"""
+    vector_transport!(M,vto,x,v,y)
+
+parallely transport the tangent vector `v` at `x` along the geodesic to `y`
+on respect to the [`CholeskySpace`](@ref) manifold `M`. The formula reads
+
+````math
+    \mathcal P_{x\to y}(v) = \lfloor v \rfloor  + \operatorname{diag}(y)\operatorname{diag}(x)^{-1}\operatorname{diag}(v),
+````
+where $\lfloor\cdit\rfloor$ denbotes the lower triangular matrix,
+and $\operatorname{diag}$ extracts the diagonal matrix.
+"""
+function vector_transport_to!(::CholeskySpace{N}, vto, x, v, y, ::ParallelTransport) where N
+    vto .= strictlyLowerTriangular(x) + Diagonal(diag(y))*Diagonal(1 ./ diag(x))*Diagonal(v)
+    return vto
+end
+
+@doc doc"""
     is_manifold_point(M,x;kwargs...)
 
 check whether the matrix `x` lies on the [`CholeskySpace`](@ref) `M`, i.e.
@@ -115,7 +132,7 @@ function is_manifold_point(M::CholeskySpace{N}, x; kwargs...) where N
     if size(x) != representation_size(M)
         throw(DomainError(size(x),"The point $(x) does not lie on $(M), since its size is not $(representation_size(M))."))
     end
-    if !isapprox( norm(UpperTriangular(x) - Diagonal(x)), 0.; kwargs...)
+    if !isapprox( norm(strictlyUpperTriangular(x)), 0.; kwargs...)
         throw(DomainError(norm(UpperTriangular(x) - Diagonal(x)), "The point $(x) does not lie on $(M), since it strictly upper triangular nonzero entries"))
     end
     if any( diag(x) .<= 0)
