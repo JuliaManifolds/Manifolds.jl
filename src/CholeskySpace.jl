@@ -87,7 +87,7 @@ where $\lfloor x\rfloor$ denotes the lower triangular matrix of $x$ and
 $\opertorname{diag}(x)$ the diagonal matrix of $x$
 """
 function log!(::CholeskySpace{N},v,x,y) where N
-    v .= strictlyLowerTriangular(y) - strictlyLowerTriangular(x) + Diagonal(x)*Diagonal(log.(diag(y)./diag(x)))
+    v .= strictlyLowerTriangular(y) - strictlyLowerTriangular(x) + Diagonal(diag(x))*Diagonal(log.(diag(y)./diag(x)))
     return v
 end
 

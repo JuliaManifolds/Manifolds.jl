@@ -216,6 +216,8 @@ function exp!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
     y .= y*y'
     return y
 end
+# take the same retractions as for the default
+retract!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},y,args...) where N = retract!(M.manifold,y,args...)
 
 @doc doc"""
     log!(M,v,x,y)
@@ -439,4 +441,4 @@ function is_tangent_vector(M::SymmetricPositiveDefinite{N},x,v; kwargs...) where
     end
     return true
 end
-is_tangent_vector(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x; kwargs...) where N = is_manifold_point(M.manifold,x;kwargs...)
+is_tangent_vector(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,v; kwargs...) where N = is_tangent_vector(M.manifold,x,v;kwargs...)

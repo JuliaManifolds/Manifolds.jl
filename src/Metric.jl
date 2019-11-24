@@ -64,16 +64,6 @@ to `MetricManifold{MyManifold{T},MyMetric{S}}`.
 """
 @traitdef DefaultMetric{M,G}
 
-# Make this metric default, i.e. automatically convert
-@traitfn convert(::Type{MT}, M::MMT) where {MT<:Manifold,
-                                   GT<:Metric,
-                                   MMT<:MetricManifold{MT,GT};
-                                   DefaultMetric{MT,GT}} = M.manifold
-@traitfn convert(::Type{MMT}, M::MT) where {MT<:Manifold,
-                                   GT<:Metric,
-                                   MMT<:MetricManifold{MT,GT};
-                                   DefaultMetric{MT,GT}} = MetricManifold(M, GT())
-
 @doc doc"""
     metric(M::MetricManifold)
 
@@ -360,15 +350,16 @@ in an embedded space.
 """
 function exp end
 
-# @traitfn function exp!(M:::MetricManifold{MT,GT}, y, x, v) where {MT<:Manifold,
-#                                                GT<:Metric;
-#                                                !DefaultMetric{MT,GT}}
-#     tspan = (0.0, 1.0)
-#     sol = solve_exp_ode(M, x, v, tspan; dense=false, saveat=[1.0])
-#     n = length(x)
-#     y .= sol.u[1][n+1:end]
-#     return y
-# end
+@traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,
+                                               GT<:Metric,
+                                               MMT<:MetricManifold{MT,GT};
+                                               !DefaultMetric{MT,GT}}
+    tspan = (0.0, 1.0)
+    sol = solve_exp_ode(M, x, v, tspan; dense=false, saveat=[1.0])
+    n = length(x)
+    y .= sol.u[1][n+1:end]
+    return y
+end
 
 @traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,
                                                GT<:Metric,
@@ -384,19 +375,14 @@ end
     return log!(M.manifold, v, x, y)
 end
 
-@traitfn function retract!(M::MMT,
-                           y,
-                           args...) where {MT<:Manifold,
+@traitfn function retract!(M::MMT,y, args...) where {MT<:Manifold,
                                            GT<:Metric,
                                            MMT<:MetricManifold{MT,GT};
                                            DefaultMetric{MT,GT}}
-    return retract!(M.manifold, y, arg...)
+    return retract!(M.manifold, y, args...)
 end
 
-@traitfn function project_tangent!(M::MMT,
-                                   w,
-                                   x,
-                                   v) where {MT<:Manifold,
+@traitfn function project_tangent!(M::MMT, w, x, v) where {MT<:Manifold,
                                              GT<:Metric,
                                              MMT<:MetricManifold{MT,GT};
                                              DefaultMetric{MT,GT}}
