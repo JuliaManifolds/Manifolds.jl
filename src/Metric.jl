@@ -264,7 +264,7 @@ end
 # Most of these can be reduced as soon as we have the final THTT decorator
 
 inner(M::MMT, x, v, w) where {MMT<:MetricManifold} = dot(v, local_metric(M, x) * w)
-norm(M::MMT, x, v) where {MMT<:MetricManifold} = norm(base_manifold(M), x, v)
+norm(M::MMT, x, v) where {MMT<:MetricManifold} = norm(sqrt(inner(M,x,v,v)))
 distance(M::MMT, x, y) where {MMT<:MetricManifold} = distance(base_manifold(M), x, y)
 zero_tangent_vector(M::MMT, x, v) where {MMT<:MetricManifold} = zero_tangent_vector(base_manifold(M), x, v, v)
 log!(M::MMT, v, x, y) where {MMT<:MetricManifold} = log!(base_manifold(M), v, x, y)

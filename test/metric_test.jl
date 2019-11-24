@@ -155,6 +155,7 @@ struct BaseManifoldMetric{M} <: Metric end
     Manifolds.exp!(::BaseManifold, y, x, v) = y .= x + 2 * v
     Manifolds.log!(::BaseManifold, v, x, y) = v .= (y - x) / 2
     Manifolds.project_tangent!(::BaseManifold, w, x, v) = w .= 2 .* v
+    Manifolds.local_metric(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}},x) where N = one(x*x')
     function Manifolds.flat!(::BaseManifold, v::FVector{Manifolds.CotangentSpaceType}, x, w::FVector{Manifolds.TangentSpaceType})
         v.data .= 2 .* w.data
         return v
@@ -167,6 +168,7 @@ struct BaseManifoldMetric{M} <: Metric end
     M = BaseManifold{3}()
     g = BaseManifoldMetric{3}()
     MM = MetricManifold(M, g)
+
     x = randn(3)
     v = randn(3)
     w = randn(3)
