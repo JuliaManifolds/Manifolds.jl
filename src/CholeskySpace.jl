@@ -7,8 +7,8 @@ using LinearAlgebra: diagm, diag, eigen, eigvals, eigvecs, Symmetric, Diagonal, 
 the manifold of lower triangular matrices with positive diagonal and
 a metric based on the cholesky decomposition. The formulae for this manifold
 are for example summarized in Table 1 of
-> Lin, Zenhua: Riemannian Geometry of Symmetric Positive Definite Matrices via
-> Cholesky Decomposition, arXiv: 1908.09326
+> Lin, Zenhua: "Riemannian Geometry of Symmetric Positive Definite Matrices via
+> Cholesky Decomposition", arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
 """
 struct CholeskySpace{N} <: Manifold end
 CholeskySpace(n::Int) = CholeskySpace{n}()
@@ -46,7 +46,7 @@ reads
 ````math
 d_{\mathcal M}(x,y) = \sqrt{
 \sum_{i>j} (x_{ij}-y_{ij})^2 + 
-\sum_{j=1}^m (\log x_{jj} - \log_{y_jj})^2
+\sum_{j=1}^m (\log x_{jj} - \log y_jj)^2
 }
 ````
 """
@@ -59,14 +59,14 @@ distance(::CholeskySpace{N},x,y) where N = sqrt(
 
 compute the exponential map on the [`CholeskySpace`](@ref) `M` eminating from
 the lower triangular matrix with positive diagonal `x` towards the lower triangular
-matrx `v` and return the result in `y`. The formula reads
+matrix `v` and return the result in `y`. The formula reads
 
 ````math
 \exp_x v = \lfloor x \rfloor + \lfloor v \rfloor
-+\operatorname{diag}(x)\operatorname{diag}(x)\exp{ \operatorname{diag}(v)\operatorname{diag}(x)^{-1}}
++\operatorname{diag}(x)\operatorname{diag}(x)\exp\bigl( \operatorname{diag}(v)\operatorname{diag}(x)^{-1}\bigr)
 ````
-where $\lfloor x\rfloor$ denotes the lower triangular matrix of $x$ and
-$\opertorname{diag}(x)$ the diagonal matrix of $x$
+where $\lfloor x\rfloor$ denotes the strictly lower triangular matrix of $x$ and
+$\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
 function exp!(::CholeskySpace{N},y,x,v) where N
     y .= strictlyLowerTriangular(x) + strictlyLowerTriangular(v) + Diagonal(x)*Diagonal(exp.(diag(v)./diag(x)))
@@ -80,11 +80,11 @@ the lower triangular matrix with positive diagonal `x` towards the lower triangu
 matrx `v` and return the result in `y`. The formula reads
 
 ````math
-\exp_x v = \lfloor x \rfloor - \lfloor y \rfloor
-+\operatorname{diag}(x)\log{ \operatorname{diag}(y)\operatorname{diag}(x)^{-1}}
+\log_x v = \lfloor x \rfloor - \lfloor y \rfloor
++\operatorname{diag}(x)\log\bigl(\operatorname{diag}(y)\operatorname{diag}(x)^{-1}\bigr)
 ````
-where $\lfloor x\rfloor$ denotes the lower triangular matrix of $x$ and
-$\opertorname{diag}(x)$ the diagonal matrix of $x$
+where $\lfloor x\rfloor$ denotes the strictly lower triangular matrix of $x$ and
+$\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
 function log!(::CholeskySpace{N},v,x,y) where N
     v .= strictlyLowerTriangular(y) - strictlyLowerTriangular(x) + Diagonal(diag(x))*Diagonal(log.(diag(y)./diag(x)))
@@ -111,7 +111,7 @@ on respect to the [`CholeskySpace`](@ref) manifold `M`. The formula reads
 ````math
     \mathcal P_{x\to y}(v) = \lfloor v \rfloor  + \operatorname{diag}(y)\operatorname{diag}(x)^{-1}\operatorname{diag}(v),
 ````
-where $\lfloor\cdit\rfloor$ denbotes the lower triangular matrix,
+where $\lfloor\cdot\rfloor$ denotes the strictly lower triangular matrix,
 and $\operatorname{diag}$ extracts the diagonal matrix.
 """
 function vector_transport_to!(::CholeskySpace{N}, vto, x, v, y, ::ParallelTransport) where N
@@ -125,7 +125,7 @@ end
 check whether the matrix `x` lies on the [`CholeskySpace`](@ref) `M`, i.e.
 it's size fits the manifold, it is a lower triangular matrix and has positive
 entries on the diagonal.
-The tolerance for the tests can be set using the ´kwargs...`.
+The tolerance for the tests can be set using the `kwargs...`.
 """
 
 function is_manifold_point(M::CholeskySpace{N}, x; kwargs...) where N
@@ -146,7 +146,7 @@ end
 checks whether `v` is a tangent vector to `x` on the [`CholeskySpace`](@ref) `M`, i.e.
 atfer [`is_manifold_point`](@ref)`(M,x)`, `v` has to be of same dimension as `x`
 and a symmetric matrix.
-The tolerance for the tests can be set using the ´kwargs...`.
+The tolerance for the tests can be set using the `kwargs...`.
 """
 function is_tangent_vector(M::CholeskySpace{N}, x,v; kwargs...) where N
     is_manifold_point(M,x)

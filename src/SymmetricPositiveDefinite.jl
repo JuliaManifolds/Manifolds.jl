@@ -8,8 +8,8 @@ The manifold of symmetric positive definite matrices, i.e.
 ```math
 \mathcal P(n) =
 \bigl\{
-    x \in \mathbb R^{n\\times n} :
-    \xi^\mathrm{T}x\xi > 0 \text{ for all } \xi \in \mathbb R^{n}\backslash\{0\}
+x \in \mathbb R^{n\times n} :
+\xi^\mathrm{T}x\xi > 0 \text{ for all } \xi \in \mathbb R^{n}\backslash\{0\}
 \bigr\}
 ```
 
@@ -103,10 +103,10 @@ with respect to the [`LogCholeskyMetric`](@ref). The formula reads
 ````math
 d_{\mathcal P(n)}(x,y) = \sqrt{
  \lVert \lfloor l \rfloor - \lfloor k \rfloor \rVert_{\mathrm{F}}^2
- + \lVert \log(\operatorname{diag}(l)) - \log(\operatorname{diag}(k))\rVert_{\mathrm{F}}^2 },
+ + \lVert \log(\operatorname{diag}(l)) - \log(\operatorname{diag}(k))\rVert_{\mathrm{F}}^2 }\ \ ,
 ````
 where $l$ and $k$ are the cholesky factors of $x$ and $y$, respectively,
-$\lfloor\cdit\rfloor$ denbotes the lower triangulr matrix of its argument,
+$\lfloor\cdot\rfloor$ denbotes the strictly lower triangular matrix of its argument,
 and $\lVert\cdot\rVert_{\mathrm{F}}$ denotes the Frobenius norm.
 """
 distance(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,y) where N = distance(CholeskySpace{N}(), cholesky(x).L, cholesky(y).L)
@@ -158,8 +158,12 @@ on the [`SymmetricPositiveDefinite`](@ref) manifold `M`, as
 a [`MetricManifold`](@ref) with [`LogCholeskyMetric`](@ref). The formula reads
 
 ````math
-    ( v,w)_x = 
+    (v,w)_x = (p_l(w),p_l(v))_l,
 ````
+where the right hand side is the inner product on the [`CholeskySpace`](@ref),
+$l$ is the cholesky factor of $x$,
+$p_l(w) = l (l^{-1}wl^{-\mathrm{T}})_{\frac{1}{2}}$, and $(\cdot)_\frac{1}{2}$
+denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$
 """
 function inner(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,v,w) where N
     (l,vl) = spd_to_cholesky(x,v)
@@ -208,7 +212,9 @@ compute the exponential map on the [`SymmetricPositiveDefinite`](@ref) `M` with
 \exp_x v = (\exp_l w)(\exp_l w)^\mathrm{T}
 ````
 where $\exp_lw$ is the exponential map on [`CholeskySpace`](@ref), $l$ is the
-cholesky decomposition of $x$  and $w = l(l^{-1}vl^\mathrm{T}$.
+cholesky decomposition of $x$, $w = l(l^{-1}vl^{-\mathrm{T}})_\frac{1}{2}$,
+and $(\cdot)_\frac{1}{2}$
+denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$.
 """
 function exp!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, y, x, v) where N
     (l,w) = spd_to_cholesky(x,v) 
@@ -254,7 +260,7 @@ computes the logarithmic map o [`SymmetricPositiveDefinite`](@ref) `M` with
 respect to the [`LogCholeskyMetric`](@ref). The formula can be adapted from
 the [`CholeskySpace`](@ref) as
 ````math
-\log_xy = lw\mathrm{T} + wl^{\mathrm{T}},
+\log_xy = lw^{\mathrm{T}} + wl^{\mathrm{T}},
 ````
 where $l$ is the colesky factor of $x$ and $w=\log_lk$ for $k$ the cholesky factor
 of $y$ and the just mentioned logarithmic map is the one on [`CholeskySpace`](@ref).
@@ -334,14 +340,16 @@ end
 
 parallely transport the tangent vector `v` at `x` along the geodesic to `y`
 with respect to the [`SymmetricPositiveDefinite`](@ref) manifold `M` and
-[`LogCholeskyMetric`](@ref). The formula reads
+[`LogCholeskyMetric`](@ref). The parallel transport is based on the parallel
+transport on [`CholeskySpace`](@ref): Let $l$ and $k$ denote the cholesky
+factors of `x` and `y`, respectively and $w = l(l^{-1}vl^{-\mathrm{T}})_\frac{1}{2}$,
+where $(\cdot)_\frac{1}{2}$ denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$.
+With $u$ the parallel transport on [`CholeskySpace`](@ref) from $l$ to $k$ the
+formula hear reads
 
 ````math
-    \mathcal P_{x\to y}(v) = \lfloor v \rfloor  + \operatorname{diag}(k)\operatorname{diag}(l)^{-1}\operatorname{diag}(x),
+    \mathcal P_{x\to y}(v) = ku^{\mathrm{T}} + uk^{\mathrm{T}}
 ````
-where $l$ and $k$ are the cholesky factors of $x$ and $y$, respectively,
-$\lfloor\cdit\rfloor$ denbotes the lower triangular matrix,
-and $\operatorname{diag}$ extracts the diagonal matrix.
 """
 function vector_transport_to!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, vto, x, v, y, ::ParallelTransport) where N
     k = cholesky(y).L

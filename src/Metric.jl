@@ -382,6 +382,13 @@ end
     return retract!(M.manifold, y, args...)
 end
 
+@traitfn function retract!(M::MMT,y, v, x, t::Real) where {MT<:Manifold,
+                                           GT<:Metric,
+                                           MMT<:MetricManifold{MT,GT};
+                                           DefaultMetric{MT,GT}}
+    return retract!(M.manifold, y, v, x, t)
+end
+
 @traitfn function project_tangent!(M::MMT, w, x, v) where {MT<:Manifold,
                                              GT<:Metric,
                                              MMT<:MetricManifold{MT,GT};
