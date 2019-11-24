@@ -1,4 +1,4 @@
-using LinearAlgebra: diagm, diag, eigen, eigvals, eigvecs, Symmetric, Diagonal, factorize, tr, norm, cholesky, LowerTriangular, UpperTriangular
+using LinearAlgebra: diag, eigen, eigvals, eigvecs, Symmetric, Diagonal, tr, norm, cholesky, LowerTriangular, UpperTriangular
 
 
 @doc doc"""
@@ -45,7 +45,7 @@ reads
 
 ````math
 d_{\mathcal M}(x,y) = \sqrt{
-\sum_{i>j} (x_{ij}-y_{ij})^2 + 
+\sum_{i>j} (x_{ij}-y_{ij})^2 +
 \sum_{j=1}^m (\log x_{jj} - \log y_jj)^2
 }
 ````

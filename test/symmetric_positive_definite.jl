@@ -6,6 +6,9 @@ M3 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogCholesk
 
 types = [ Matrix{Float32},
         Matrix{Float64},
+        MMatrix{3,3,Float32},
+        # linear algebra in StataicArrays is a little too inaccurate for MMatrix{3,3,Float64}
+        # MMatrix{3,3,Float64}
     ]
 for M in [M1, M2, M3]
     @testset "$(typeof(M))" begin

@@ -1,4 +1,4 @@
-using LinearAlgebra: diagm, diag, eigen, eigvals, eigvecs, Symmetric, Diagonal, factorize, tr, cholesky, LowerTriangular
+using LinearAlgebra: diag, eigen, eigvals, eigvecs, Symmetric, Diagonal, tr, cholesky, LowerTriangular
 
 @doc doc"""
     SymmetricPositiveDefinite{N} <: Manifold
@@ -66,7 +66,7 @@ end
 
 returns the dimension of the manifold [`SymmetricPositiveDefinite`](@ref) $\mathcal P(n), N\in \mathbb N$, i.e.
 ```math
-    \frac{n(n+1)}{2}    
+    \frac{n(n+1)}{2}
 ```
 """
 @generated manifold_dimension(::SymmetricPositiveDefinite{N}) where {N} = div(N*(N+1), 2)
@@ -213,7 +213,7 @@ and $(\cdot)_\frac{1}{2}$
 denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$.
 """
 function exp!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, y, x, v) where N
-    (l,w) = spd_to_cholesky(x,v) 
+    (l,w) = spd_to_cholesky(x,v)
     exp!(CholeskySpace{N}(),y,l,w)
     y .= y*y'
     return y
@@ -364,7 +364,7 @@ returns a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 with eigenvalues `κ` and where the direction `v` has curvature `0`.
 """
 function tangent_orthonormal_basis(M::SymmetricPositiveDefinite{N},x,v) where N
-    xSqrt = sqrt(x) 
+    xSqrt = sqrt(x)
     V = eigvecs(v)
     Ξ = [ (i==j ? 1/2 : 1/sqrt(2))*( V[:,i] * transpose(V[:,j])  +  V[:,j] * transpose(V[:,i]) )
         for i=1:N for j= i:N
