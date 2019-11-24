@@ -45,35 +45,34 @@ convert(::Type{MT},M::MetricManifold{MT,GT}) where {MT,GT} = M.manifold
 @traitimpl IsDecoratorManifold{MetricManifold}
 
 """
-    HasMetric
+    DefaultMetric
 
-A `Trait` to mark a `Manifold` `M` as being shorthand for a
-`MetricManifold{M,G}` with metric `G`. This can be used to forward functions
-called on the `MetricManifold` to the already-imlemented functions for the
-`Manifold`.
+A Trait to indicate that a metric `G` is the default metric for a `Manifold`
+`M`, i.e. as `M::Manifold` being shorthand for a
+`MetricManifold{M,G}`. this is accomplished by introducing conversions.
 
-For example,
-
-```
-@traitfn function my_feature(M::MMT, k...) where {MT<:Manifold,
-                                                  GT<:Metric,
-                                                  MMT<:MetricManifold{MT,GT};
-                                                  HasMetric{MT,GT}}
-    return my_feature(M.manifold, k...)
-end
-```
-
-forwards the function `my_feature` from `M` to the already-implemented
-`my_feature` on the base manifold `M.manifold`. A manifold with a default
-metric can then be written
+Accordingly you have to 
 
 ```
 struct MyManifold{T} <: Manifold end
 struct MyMetric{S} <: Metric end
-@traitimpl HasMetric{MyManifold,MyMetric}
+@traitimpl DefaultMetric{MyManifold,MyMetric}
 ```
+
+and then only implent your functions for `MyManifold` when you actually refer
+to `MetricManifold{MyManifold{T},MyMetric{S}}`.
 """
-@traitdef HasMetric{M,G}
+@traitdef DefaultMetric{M,G}
+
+# Make this metric default, i.e. automatically convert
+@traitfn convert(::Type{MT}, M::MMT) where {MT<:Manifold,
+                                   GT<:Metric,
+                                   MMT<:MetricManifold{MT,GT};
+                                   DefaultMetric{MT,GT}} = M.manifold
+@traitfn convert(::Type{MMT}, M::MT) where {MT<:Manifold,
+                                   GT<:Metric,
+                                   MMT<:MetricManifold{MT,GT};
+                                   DefaultMetric{MT,GT}} = MetricManifold(M, GT())
 
 @doc doc"""
     metric(M::MetricManifold)
@@ -132,21 +131,21 @@ end
 @traitfn function inner(M::MMT, x, v, w) where {MT<:Manifold,
                                                 GT<:Metric,
                                                 MMT<:MetricManifold{MT,GT};
-                                                !HasMetric{MT,GT}}
+                                                !DefaultMetric{MT,GT}}
     return dot(v, local_metric(M, x) * w)
 end
 
 @traitfn function inner(M::MMT, x, v, w) where {MT<:Manifold,
                                                 GT<:Metric,
                                                 MMT<:MetricManifold{MT,GT};
-                                                HasMetric{MT,GT}}
+                                                DefaultMetric{MT,GT}}
     return inner(M.manifold, x, v, w)
 end
 
 @traitfn function inner(B::VectorBundleFibers{<:CotangentSpaceType, MMT}, x, v, w) where {MT<:Manifold,
                                                                                           GT<:Metric,
                                                                                           MMT<:MetricManifold{MT,GT};
-                                                                                          !HasMetric{MT,GT}}
+                                                                                          !DefaultMetric{MT,GT}}
     ginv = inverse_local_metric(B.M, x)
     return dot(v, ginv * w)
 end
@@ -154,28 +153,28 @@ end
 @traitfn function inner(B::VectorBundleFibers{<:CotangentSpaceType, MMT}, x, v, w) where {MT<:Manifold,
                                                                                           GT<:Metric,
                                                                                           MMT<:MetricManifold{MT,GT};
-                                                                                          HasMetric{MT,GT}}
+                                                                                          DefaultMetric{MT,GT}}
     return inner(VectorBundleFibers(B.VS, B.M.manifold), x, v, w)
 end
 
 @traitfn function norm(M::MMT, x, v) where {MT<:Manifold,
                                             GT<:Metric,
                                             MMT<:MetricManifold{MT,GT};
-                                            !HasMetric{MT,GT}}
+                                            !DefaultMetric{MT,GT}}
     return sqrt(inner(M, x, v, v))
 end
 
 @traitfn function norm(M::MMT, x, v) where {MT<:Manifold,
                                             GT<:Metric,
                                             MMT<:MetricManifold{MT,GT};
-                                            HasMetric{MT,GT}}
+                                            DefaultMetric{MT,GT}}
     return norm(M.manifold, x, v)
 end
 
 @traitfn function distance(M::MMT, x, y) where {MT<:Manifold,
                                                 GT<:Metric,
                                                 MMT<:MetricManifold{MT,GT};
-                                                !HasMetric{MT,GT}}
+                                                !DefaultMetric{MT,GT}}
     return norm(M, x, log(M, x, y))
 end
 
@@ -183,7 +182,7 @@ end
 @traitfn function distance(M::MMT, x, y) where {MT<:Manifold,
                                                 GT<:Metric,
                                                 MMT<:MetricManifold{MT,GT};
-                                                HasMetric{MT,GT}}
+                                                DefaultMetric{MT,GT}}
     return distance(M.manifold, x, y)
 end
 
@@ -342,7 +341,7 @@ end
                       T::AbstractVector) where {MT<:Manifold,
                                                 GT<:Metric,
                                                 MMT<:MetricManifold{MT,GT};
-                                                !HasMetric{MT,GT}}
+                                                !DefaultMetric{MT,GT}}
     sol = solve_exp_ode(M, x, v, extrema(T); dense=false, saveat=T)
     n = length(x)
     return map(i -> sol.u[i][n+1:end], 1:length(T))
@@ -351,7 +350,7 @@ end
 """
     exp(M::MetricManifold, x, v, args...)
 
-If the [`HasMetric`](@ref) trait is defined for `M`, compute the exponential
+If the [`DefaultMetric`](@ref) trait is defined for `M`, compute the exponential
 map of the base manifold. Otherwise, numerically integrate the exponential
 map assuming the Levi-Civita connection. See [`solve_exp_ode`](@ref)
 
@@ -361,57 +360,37 @@ in an embedded space.
 """
 function exp end
 
-@traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,
-                                               GT<:Metric,
-                                               MMT<:MetricManifold{MT,GT};
-                                               !HasMetric{MT,GT}}
-    tspan = (0.0, 1.0)
-    sol = solve_exp_ode(M, x, v, tspan; dense=false, saveat=[1.0])
-    n = length(x)
-    y .= sol.u[1][n+1:end]
-    return y
-end
+# @traitfn function exp!(M:::MetricManifold{MT,GT}, y, x, v) where {MT<:Manifold,
+#                                                GT<:Metric;
+#                                                !DefaultMetric{MT,GT}}
+#     tspan = (0.0, 1.0)
+#     sol = solve_exp_ode(M, x, v, tspan; dense=false, saveat=[1.0])
+#     n = length(x)
+#     y .= sol.u[1][n+1:end]
+#     return y
+# end
 
 @traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,
                                                GT<:Metric,
                                                MMT<:MetricManifold{MT,GT};
-                                               HasMetric{MT,GT}}
+                                               DefaultMetric{MT,GT}}
     return exp!(M.manifold, y, x, v)
 end
 
 @traitfn function log!(M::MMT, v, x, y) where {MT<:Manifold,
                                                GT<:Metric,
                                                MMT<:MetricManifold{MT,GT};
-                                               !HasMetric{MT,GT}}
-    error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
-end
-
-@traitfn function log!(M::MMT, v, x, y) where {MT<:Manifold,
-                                               GT<:Metric,
-                                               MMT<:MetricManifold{MT,GT};
-                                               HasMetric{MT,GT}}
+                                               DefaultMetric{MT,GT}}
     return log!(M.manifold, v, x, y)
 end
 
 @traitfn function retract!(M::MMT,
                            y,
-                           x,
-                           v,
-                           t::Real) where {MT<:Manifold,
+                           args...) where {MT<:Manifold,
                                            GT<:Metric,
                                            MMT<:MetricManifold{MT,GT};
-                                           HasMetric{MT,GT}}
-    return retract!(M.manifold, y, x, v, t)
-end
-
-@traitfn function retract!(M::MMT,
-                           y,
-                           x,
-                           v) where {MT<:Manifold,
-                                           GT<:Metric,
-                                           MMT<:MetricManifold{MT,GT};
-                                           HasMetric{MT,GT}}
-    return retract!(M.manifold, y, x, v)
+                                           DefaultMetric{MT,GT}}
+    return retract!(M.manifold, y, arg...)
 end
 
 @traitfn function project_tangent!(M::MMT,
@@ -420,15 +399,22 @@ end
                                    v) where {MT<:Manifold,
                                              GT<:Metric,
                                              MMT<:MetricManifold{MT,GT};
-                                             HasMetric{MT,GT}}
+                                             DefaultMetric{MT,GT}}
     return project_tangent!(M.manifold, w, x, v)
+end
+
+@traitfn function vector_transport_to!(M::MMT, vto, x, v, y, m::AbstractVectorTransportMethod) where {MT<:Manifold,
+                                                     GT<:Metric,
+                                                     MMT<:MetricManifold{MT,GT};
+                                                     DefaultMetric{MT,GT}}
+    return vector_transport_to!(M.manifold, vto, x, v, y, m)
 end
 
 @traitfn function injectivity_radius(M::MMT,
                                      args...) where {MT<:Manifold,
                                                      GT<:Metric,
                                                      MMT<:MetricManifold{MT,GT};
-                                                     HasMetric{MT,GT}}
+                                                     DefaultMetric{MT,GT}}
     return injectivity_radius(M.manifold, args...)
 end
 
@@ -437,7 +423,7 @@ end
                                        x) where {MT<:Manifold,
                                                  GT<:Metric,
                                                  MMT<:MetricManifold{MT,GT};
-                                                 HasMetric{MT,GT}}
+                                                 DefaultMetric{MT,GT}}
     return zero_tangent_vector!(M.manifold, v, x)
 end
 
@@ -446,7 +432,7 @@ end
                                     kwargs...) where {MT<:Manifold,
                                                       GT<:Metric,
                                                       MMT<:MetricManifold{MT,GT};
-                                                      HasMetric{MT,GT}}
+                                                      DefaultMetric{MT,GT}}
     return is_manifold_point(M.manifold, x; kwargs...)
 end
 
@@ -456,7 +442,7 @@ end
                                     kwargs...) where {MT<:Manifold,
                                                       GT<:Metric,
                                                       MMT<:MetricManifold{MT,GT};
-                                                      HasMetric{MT,GT}}
+                                                      DefaultMetric{MT,GT}}
     return is_tangent_vector(M.manifold, x, v; kwargs...)
 end
 
@@ -466,7 +452,7 @@ end
                         w::FVector{TangentSpaceType}) where {MT<:Manifold,
                                                              GT<:Metric,
                                                              MMT<:MetricManifold{MT,GT};
-                                                             !HasMetric{MT,GT}}
+                                                             !DefaultMetric{MT,GT}}
     g = local_metric(M, x)
     copyto!(v, g*w)
     return v
@@ -478,7 +464,7 @@ end
                         w::FVector{TangentSpaceType}) where {MT<:Manifold,
                                                              GT<:Metric,
                                                              MMT<:MetricManifold{MT,GT};
-                                                             HasMetric{MT,GT}}
+                                                             DefaultMetric{MT,GT}}
     return flat!(M.manifold, v, x, w)
 end
 
@@ -488,7 +474,7 @@ end
                          w::FVector{CotangentSpaceType}) where {MT<:Manifold,
                                                                 GT<:Metric,
                                                                 MMT<:MetricManifold{MT,GT};
-                                                                !HasMetric{MT,GT}}
+                                                                !DefaultMetric{MT,GT}}
     ginv = inverse_local_metric(M, x)
     copyto!(v, ginv*w)
     return v
@@ -500,6 +486,6 @@ end
                          w::FVector{CotangentSpaceType}) where {MT<:Manifold,
                                                                 GT<:Metric,
                                                                 MMT<:MetricManifold{MT,GT};
-                                                                HasMetric{MT,GT}}
+                                                                DefaultMetric{MT,GT}}
     return sharp!(M.manifold, v, x, w)
 end

@@ -23,23 +23,13 @@ struct SymmetricPositiveDefinite{N} <: Manifold end
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
 
 @doc doc"""
-    manifold_dimension(::SymmetricPositiveDefinite{N})
-
-returns the dimension of the manifold [`SymmetricPositiveDefinite`](@ref) $\mathcal P(n), N\in \mathbb N$, i.e.
-```math
-    \frac{n(n+1)}{2}    
-```
-"""
-@generated manifold_dimension(::SymmetricPositiveDefinite{N}) where {N} = div(N*(N+1), 2)
-
-@doc doc"""
     LinearAffineMetric <: Metric
 
 The linear affine metric is the metric for symmetric positive definite matrices, that employs
 matrix logarithms and exponentials, which yields a linear and affine metric.
 """
 struct LinearAffineMetric <: RiemannianMetric end
-@traitimpl HasMetric{SymmetricPositiveDefinite,LinearAffineMetric}
+@traitimpl DefaultMetric{SymmetricPositiveDefinite,LinearAffineMetric}
 # Make this metric default, i.e. automatically convert
 convert(::Type{SymmetricPositiveDefinite{N}}, M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
 convert(::Type{SymmetricPositiveDefinite}, M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
@@ -74,12 +64,17 @@ function spd_to_cholesky(x,l,v)
 end
 
 @doc doc"""
-    distance(M,x,y)
+    manifold_dimension(M)
 
-computes the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between `x` and `y`,
-which defaults to the [`LinearAffineMetric`](@ref) induces distance.
+returns the dimension of the manifold [`SymmetricPositiveDefinite`](@ref) $\mathcal P(n), N\in \mathbb N$, i.e.
+```math
+    \frac{n(n+1)}{2}    
+```
 """
-distance(M::SymmetricPositiveDefinite{N},x,y) where N = distance(MetricManifold(M,LinearAffineMetric()),x,y)
+@generated manifold_dimension(::SymmetricPositiveDefinite{N}) where {N} = div(N*(N+1), 2)
+@generated manifold_dimension(::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}) where {N} = div(N*(N+1), 2)
+@generated manifold_dimension(::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric}) where {N} = div(N*(N+1), 2)
+
 
 @doc doc"""
     distance(M,x,y)
@@ -93,7 +88,7 @@ d_{\mathcal P(n)}(x,y) = \lVert \operatorname{Log}(x^{-\frac{1}{2}}yx^{-\frac{1}
 where $\operatorname{Log}$ denotes the matrix logarithm and $\lVert\cdot\rVert_{\mathrm{F}}$ denotes the
 matrix Frobenius norm.
 """
-function distance(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},x,y) where N
+function distance(M::SymmetricPositiveDefinite{N},x,y) where N
     s = real.( eigvals( x,y ) )
     return any(s .<= eps() ) ? 0 : sqrt(  sum( abs.(log.(s)).^2 )  )
 end
@@ -142,14 +137,6 @@ end
 @doc doc"""
     inner(M,x,v,w)
 
-compute the inner product of `v`, `w` in the tangent space of `x` on the [`SymmetricPositiveDefinite`](@ref)
-manifold `M`, which defaults to the [`LinearAffineMetric`](@ref).
-"""
-inner(M::SymmetricPositiveDefinite{N}, x, w, v) where N = inner(MetricManifold(M,LinearAffineMetric()),x,w,v)
-
-@doc doc"""
-    inner(M,x,v,w)
-
 compute the inner product of `v`, `w` in the tangent space of `x` on
 the [`SymmetricPositiveDefinite`](@ref) manifold `M`, as
 a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
@@ -158,7 +145,7 @@ a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
 ( v, w)_x = \operatorname{tr}(x^{-1}\xi x^{-1}\nu ),
 ```
 """
-function inner(M::MetricManifold{SymmetricPositiveDefinite{N}, LinearAffineMetric}, x, w, v) where N
+function inner(M::SymmetricPositiveDefinite{N}, x, w, v) where N
     F = factorize(x)
     return tr( ( Symmetric(w) / F ) * ( Symmetric(v) / F ) )
 end
@@ -179,15 +166,8 @@ function inner(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}
     (l,wl) = spd_to_cholesky(x,l,w)
     return inner(CholeskySpace{N}(), l, vl, wl)
 end
-norm(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,v) where N = sqrt(inner(M,x,v,v))
-
-@doc doc"""
-    exp!(M,y,x,v)
-
-compute the exponential map from `x` with tangent vector `v` on the [`SymmetricPositiveDefinite`](@ref)
-manifold with its default metric, [`LinearAffineMetric`](@ref) and modify `y`.
-"""
-exp!(M::SymmetricPositiveDefinite{N},y,x,v) where N = exp!(MetricManifold(M,LinearAffineMetric()),y,x,v)
+#explicitly necessary: norm?
+#norm(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,v) where N = sqrt(inner(M,x,v,v))
 
 @doc doc"""
     exp!(M,y,x,v)
@@ -200,7 +180,7 @@ as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref) and modify `y`. 
 ```
 where $\operatorname{Exp}$ denotes to the matrix exponential.
 """
-function exp!(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, y, x, v) where N
+function exp!(M::SymmetricPositiveDefinite{N}, y, x, v) where N
     e = eigen(Symmetric(x))
     U = e.vectors
     S = e.values
@@ -240,14 +220,6 @@ end
 @doc doc"""
     log!(M,v,x,y)
 
-compute the logarithmic map at `x` to `y` on the [`SymmetricPositiveDefinite`](@ref)
-manifold with its default metric, [`LinearAffineMetric`](@ref) and modify `v`.
-"""
-log!(M::SymmetricPositiveDefinite{N}, v, x, y) where N = log!(MetricManifold(M,LinearAffineMetric()),v, x, y)
-
-@doc doc"""
-    log!(M,v,x,y)
-
 compute the exponential map from `x` to `y` on the [`SymmetricPositiveDefinite`](@ref)
 as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref) and modify `v`. The formula reads
 
@@ -256,7 +228,7 @@ as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref) and modify `v`. 
 ```
 where $\operatorname{Log}$ denotes to the matrix logarithm.
 """
-function log!(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, v, x, y) where N
+function log!(M::SymmetricPositiveDefinite{N}, v, x, y) where N
     e = eigen(Symmetric(x))
     U = e.vectors
     S = e.values
@@ -285,13 +257,14 @@ the [`CholeskySpace`](@ref) as
 where $l$ is the colesky factor of $x$ and $w=\log_lk$ for $k$ the cholesky factor
 of $y$ and the just mentioned logarithmic map is the one on [`CholeskySpace`](@ref).
 """
-function log(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},v,x,y) where N
+function log!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, v, x, y) where N
     l = cholesky(x).L
     k = cholesky(y).L
     log!(CholeskySpace{N}(), v, l, k)
     tangent_cholesky_to_tangent_spd!(l, v)
     return v
 end
+
 @doc doc"""
     representation_size(M)
 
@@ -301,14 +274,7 @@ i.e. $n\times n$, the size of such a symmetric positive definite matrix on
 $\mathcal M = \mathcal P(n)$.
 """
 representation_size(::SymmetricPositiveDefinite{N}) where N = (N,N)
-
-@doc doc"""
-    vector_transport_to(M,vto,x,v,y,m::AbstractVectorTransportMethod=ParallelTransport())
-
-compute the vector transport on the [`SymmetricPositiveDefinite`](@ref) with its
-default metric, [`LinearAffineMetric`](@ref) and method `m`, which defaults to [`ParallelTransport`](@ref).
-"""
-vector_transport_to!(M::SymmetricPositiveDefinite{N},vto, x, v, y, m::AbstractVectorTransportMethod) where N = vector_transport_to!(MetricManifold(M,LinearAffineMetric()),vto, x, v, y, m)
+representation_size(::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}) where N = (N,N)
 
 @doc doc"""
     vector_transport_to!(M,vto,x,v,y,::ParallelTransport)
@@ -333,7 +299,7 @@ where $\operatorname{Exp}$ denotes the matrix exponential
 and `log` the logarithmic map on [`SymmetricPositiveDefinite`](@ref)
 (again with respect to the metric mentioned).
 """
-function vector_transport_to!(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, vto, x, v, y, ::ParallelTransport) where N
+function vector_transport_to!(M::SymmetricPositiveDefinite{N}, vto, x, v, y, ::ParallelTransport) where N
     if distance(M,x,y)<2*eps(eltype(x))
         copyto!(vto, v)
         return vto
@@ -382,15 +348,6 @@ function vector_transport_to!(M::MetricManifold{SymmetricPositiveDefinite{N},Log
     tangent_cholesky_to_tangent_spd!(k,vto)
     return vto
 end
-@doc doc"""
-    [Ξ,κ] = tangent_orthonormal_basis(M,x,v)
-
-returns a orthonormal basis `Ξ` in the tangent space of `x` on the
-[`SymmetricPositiveDefinite`](@ref) manifold `M` with the defrault metric, the
-[`LinearAffineMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
-with eigenvalues `κ` and where the direction `v` has curvature `0`.
-"""
-tangent_orthonormal_basis(M::SymmetricPositiveDefinite{N},x,v) where N = tangent_orthonormal_basis(MetricManifold(M,LinearAffineMetric()),x,v)
 
 @doc doc"""
     [Ξ,κ] = tangent_orthonormal_basis(M,x,v)
@@ -401,7 +358,7 @@ returns a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`LinearAffineMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
 with eigenvalues `κ` and where the direction `v` has curvature `0`.
 """
-function tangent_orthonormal_basis(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},x,v) where N
+function tangent_orthonormal_basis(M::SymmetricPositiveDefinite{N},x,v) where N
     xSqrt = sqrt(x) 
     V = eigvecs(v)
     Ξ = [ (i==j ? 1/2 : 1/sqrt(2))*( V[:,i] * transpose(V[:,j])  +  V[:,j] * transpose(V[:,i]) )
@@ -419,7 +376,6 @@ return the injectivity radius of the [`SymmetricPositiveDefinite`](@ref). Since 
 the injectivity radius is $\infty$.
 """
 injectivity_radius(M::SymmetricPositiveDefinite{N}, args...) where N = Inf
-injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric}, args...) where N = Inf
 injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, args...) where N = Inf
 
 @doc doc"""
@@ -429,6 +385,7 @@ returns the zero tangent vector in the tangent space of the symmetric positive
 definite matrix `x` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
 """
 zero_tangent_vector(M::SymmetricPositiveDefinite{N}, x) where N = zero(x)
+zero_tangent_vector(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, x) where N = zero(x)
 
 @doc doc"""
     zero_tangent_vector(M,v,x)
@@ -439,6 +396,7 @@ the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
 THe result is returned also in place in the variable `v`.
 """
 zero_tangent_vector!(M::SymmetricPositiveDefinite{N}, v, x) where N = fill!(v, 0)
+zero_tangent_vector!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, v, x) where N = fill!(v, 0)
 
 """
     is_manifold_point(M,x; kwargs...)
@@ -459,6 +417,7 @@ function is_manifold_point(M::SymmetricPositiveDefinite{N},x; kwargs...) where N
     end
     return true
 end
+is_manifold_point(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x; kwargs...) where N = is_manifold_point(M.manifold,x;kwargs...)
 
 """
     is_tangent_vector(M,x,v; kwargs... )
@@ -480,3 +439,4 @@ function is_tangent_vector(M::SymmetricPositiveDefinite{N},x,v; kwargs...) where
     end
     return true
 end
+is_tangent_vector(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x; kwargs...) where N = is_manifold_point(M.manifold,x;kwargs...)
