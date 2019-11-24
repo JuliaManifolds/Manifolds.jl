@@ -124,13 +124,7 @@ where $\operatorname{Log}$ denotes the matrix logarithm and $\lVert\cdot\rVert_{
 matrix Frobenius norm.
 """
 function distance(M::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric},x,y) where N
-    eX = eigen(Symmetric(x))
-    UX = eX.vectors
-    SX = eX.values
-    eY = eigen(Symmetric(y))
-    UY = eY.vectors
-    SY = eY.values
-    return norm( UX*Diagonal(log.(SX))*transpose(UX) - UY*Diagonal(log.(SY))*transpose(UY))
+    return norm(log(Symmetric(x)) - log(Symmetric(y)))
 end
 
 @doc doc"""
@@ -145,8 +139,8 @@ a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
 ```
 """
 function inner(M::SymmetricPositiveDefinite{N}, x, w, v) where N
-    F = factorize(x)
-    return tr( ( Symmetric(w) / F ) * ( Symmetric(v) / F ) )
+    F = cholesky(Symmetric(x)).L
+    return tr((Symmetric(w) / F) * (Symmetric(v) / F))
 end
 
 @doc doc"""
@@ -243,13 +237,13 @@ function log!(M::SymmetricPositiveDefinite{N}, v, x, y) where N
     e = eigen(Symmetric(x))
     U = e.vectors
     S = e.values
-    Ssqrt = Symmetric( Matrix( Diagonal( sqrt.(S) ) ) )
-    SsqrtInv = Symmetric( Matrix( Diagonal( 1 ./ sqrt.(S) ) ) )
+    Ssqrt = Diagonal( sqrt.(S) )
+    SsqrtInv = Diagonal( 1 ./ sqrt.(S) )
     xSqrt = Symmetric( U*Ssqrt*transpose(U) )
     xSqrtInv = Symmetric( U*SsqrtInv*transpose(U) )
     T = Symmetric( xSqrtInv * y * xSqrtInv )
     e2 = eigen( T )
-    Se = Matrix( Diagonal( log.(max.(e2.values,eps()) ) ) )
+    Se = Diagonal( log.(max.(e2.values,eps()) ) )
     Ue = e2.vectors
     xue = xSqrt*Ue
     copyto!(v, Symmetric(xue*Se*transpose(xue)))
@@ -333,7 +327,7 @@ function vector_transport_to!(M::SymmetricPositiveDefinite{N}, vto, x, v, y, ::P
     Sf = Diagonal( exp.(e3.values) )
     Uf = e3.vectors
     xue = xSqrt*Uf*Sf*transpose(Uf)
-    vtp = xue * ( 0.5*(tv + transpose(tv)) ) * transpose(xue) #symmetrize
+    vtp = Symmetric(xue*tv*transpose(xue))
     copyto!(vto, vtp)
     return vto
 end
