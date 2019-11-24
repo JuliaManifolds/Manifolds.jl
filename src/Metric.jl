@@ -268,7 +268,8 @@ norm(M::MMT, x, v) where {MMT<:MetricManifold} = norm(sqrt(inner(M,x,v,v)))
 distance(M::MMT, x, y) where {MMT<:MetricManifold} = distance(base_manifold(M), x, y)
 zero_tangent_vector(M::MMT, x, v) where {MMT<:MetricManifold} = zero_tangent_vector(base_manifold(M), x, v, v)
 log!(M::MMT, v, x, y) where {MMT<:MetricManifold} = log!(base_manifold(M), v, x, y)
-retract!(M::MMT,y, args...) where {MMT<:MetricManifold} = retract!(base_manifold(M), y, args...)
+retract!(M::MMT, y, x, v, t::Real,args...) where {MMT<:MetricManifold} = retract!(base_manifold(M), y, x,v,t::Real, args...)
+retract!(M::MMT, y, x, v) where {MMT<:MetricManifold} = retract!(base_manifold(M), y, x, v)
 project_tangent!(M::MMT, w, x, v) where {MMT<:MetricManifold} = project_tangent!(base_manifold(M), w, x, v)
 is_approx(M::MMT,args...; kwargs...) where {MMT<:MetricManifold} = is_approx(base_manifold(M),args...; kwargs...)
 function vector_transport_to!(M::MMT, vto, x, v, y, m::AbstractVectorTransportMethod) where {MMT<:MetricManifold}
@@ -293,12 +294,12 @@ end
 
 function flat!(M::MMT, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType}) where {MMT<:MetricManifold}
     g = local_metric(M, x)
-    copyto!(v, g*w)
+    copyto!(v.data, g*w.data)
     return v
 end
 
 function sharp!(M::MMT, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType}) where {MMT<:MetricManifold}
     ginv = inverse_local_metric(M, x)
-    copyto!(v, ginv*w)
+    copyto!(v.data, ginv*w.data)
     return v
 end

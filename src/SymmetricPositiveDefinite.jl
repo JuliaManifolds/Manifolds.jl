@@ -243,9 +243,8 @@ function log!(M::SymmetricPositiveDefinite{N}, v, x, y) where N
     T = Symmetric( xSqrtInv * y * xSqrtInv )
     e2 = eigen( T )
     Se = Diagonal( log.(max.(e2.values,eps()) ) )
-    Ue = e2.vectors
-    xue = xSqrt*Ue
-    copyto!(v, Symmetric(xue*Se*transpose(xue)))
+    xue = xSqrt*e2.vectors
+    mul!(v,xue,Se*transpose(xue))
     return v
 end
 

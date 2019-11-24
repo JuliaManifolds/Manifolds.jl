@@ -155,7 +155,8 @@ struct BaseManifoldMetric{M} <: Metric end
     Manifolds.exp!(::BaseManifold, y, x, v) = y .= x + 2 * v
     Manifolds.log!(::BaseManifold, v, x, y) = v .= (y - x) / 2
     Manifolds.project_tangent!(::BaseManifold, w, x, v) = w .= 2 .* v
-    Manifolds.local_metric(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}},x) where N = one(x*x')
+    Manifolds.local_metric(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}},x) where N = 2*one(x*x')
+    Manifolds.exp!(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x, v) where N = exp!(base_manifold(M), y, x, v)
     function Manifolds.flat!(::BaseManifold, v::FVector{Manifolds.CotangentSpaceType}, x, w::FVector{Manifolds.TangentSpaceType})
         v.data .= 2 .* w.data
         return v
@@ -169,9 +170,9 @@ struct BaseManifoldMetric{M} <: Metric end
     g = BaseManifoldMetric{3}()
     MM = MetricManifold(M, g)
 
-    x = randn(3)
-    v = randn(3)
-    w = randn(3)
+    x = [0.1 0.2 0.4]
+    v = [0.5 0.7 0.11]
+    w = [0.13 0.17 0.19]
     y = similar(x)
 
     @test inner(M, x, v, w) == 2 * dot(v,w)
