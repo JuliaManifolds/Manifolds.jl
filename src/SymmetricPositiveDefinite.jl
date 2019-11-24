@@ -56,8 +56,7 @@ cholesky_to_spd(l,w) = (l*l', w*l' + l*w')
 tangent_cholesky_to_tangent_spd!(l,w) = (w .= w*l' + l*w')
 spd_to_cholesky(x,v) = spd_to_cholesky(x,cholesky(x).L,v)
 function spd_to_cholesky(x,l,v)
-    a = l\v
-    w = transpose(l\(a'))
+    w = inv(l)*v*inv(transpose(l))
     # strictly lower triangular plus half diagonal
     return (l, l*(LowerTriangular(w) - Diagonal(w)/2) )
 end
