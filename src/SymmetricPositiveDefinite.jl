@@ -29,7 +29,6 @@ The linear affine metric is the metric for symmetric positive definite matrices,
 matrix logarithms and exponentials, which yields a linear and affine metric.
 """
 struct LinearAffineMetric <: RiemannianMetric end
-@traitimpl DefaultMetric{SymmetricPositiveDefinite,LinearAffineMetric}
 # Make this metric default, i.e. automatically convert
 convert(::Type{SymmetricPositiveDefinite{N}}, M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
 convert(::Type{SymmetricPositiveDefinite}, M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
@@ -170,8 +169,10 @@ function inner(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}
     (l,wl) = spd_to_cholesky(x,l,w)
     return inner(CholeskySpace{N}(), l, vl, wl)
 end
-#explicitly necessary: norm?
-#norm(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,v) where N = sqrt(inner(M,x,v,v))
+inner(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, x,v,w) where {N} = inner(base_manifold(M),x,v,w)
+
+norm(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, x,v) where {N} = norm(base_manifold(M), x,v)
+norm(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, x,v) where {N} = sqrt(inner(M,x,v,v))
 
 @doc doc"""
     exp!(M,y,x,v)
@@ -200,6 +201,8 @@ function exp!(M::SymmetricPositiveDefinite{N}, y, x, v) where N
     copyto!(y, xue*Se*transpose(xue) )
     return y
 end
+
+exp!(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, args...) where {N} = exp!(base_manifold(M), args...)
 
 @doc doc"""
     exp!(M,y,x,v)

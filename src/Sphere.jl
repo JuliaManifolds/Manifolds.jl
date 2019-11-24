@@ -13,8 +13,6 @@ generates the $\mathbb S^{n}\subset \mathbb R^{n+1}$
 struct Sphere{N} <: Manifold end
 Sphere(n::Int) = Sphere{n}()
 
-@traitimpl DefaultMetric{Sphere,EuclideanMetric}
-
 function representation_size(::Sphere{N}) where N
     return (N+1,)
 end

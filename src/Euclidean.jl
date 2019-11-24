@@ -43,8 +43,6 @@ tangent space (as a plane in the embedding) uses this metric (in the embedding).
 """
 struct EuclideanMetric <: RiemannianMetric end
 
-@traitimpl DefaultMetric{Euclidean,EuclideanMetric}
-
 local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x) = Diagonal(ones(SVector{size(x, 1),eltype(x)}))
 
 inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = local_metric(M, x)

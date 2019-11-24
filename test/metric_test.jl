@@ -149,9 +149,8 @@ end
 struct BaseManifold{N} <: Manifold end
 struct BaseManifoldMetric{M} <: Metric end
 
-@testset "DefaultMetric trait" begin
+@testset "Metric decorator" begin
     Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
-    @traitimpl DefaultMetric{BaseManifold,BaseManifoldMetric}
     Manifolds.inner(::BaseManifold, x, v, w) = 2 * dot(v,w)
     Manifolds.exp!(::BaseManifold, y, x, v) = y .= x + 2 * v
     Manifolds.log!(::BaseManifold, v, x, y) = v .= (y - x) / 2
