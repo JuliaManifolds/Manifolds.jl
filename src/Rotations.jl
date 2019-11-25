@@ -259,9 +259,8 @@ injectivity_radius(M::Rotations, x) = injectivity_radius(M)
 injectivity_radius(M::Rotations) = π*sqrt(2.0)
 
 @doc doc"""
-    PolarRetraction
+    retract_polar!(M::Rotations, y, x, v, method::PolarRetraction)
 
-Retraction on the rotations manifold using the polar method.
 This SVD-based retraction is a second-order approximation of the
 exponential map. Let
 
@@ -273,28 +272,12 @@ $\operatorname{retr}_x v = UV^\mathrm{T}$
 
 Retraction is performed by the function [`retract!(::Rotations, y, x, v, ::PolarRetraction)`](@ref)
 """
-struct PolarRetraction <: AbstractRetractionMethod end
-
-@doc doc"""
-    retract_polar!(M::Rotations, y, x, v, method::PolarRetraction)
-
-Compute the SVD-based retraction [`PolarRetraction`](@ref), a second-order
-approximation of the exponential map.
-"""
 function retract!(M::Rotations, y, x, v, method::PolarRetraction)
     A = x + x*v
     S = svd(A)
     y .= S.U * transpose(S.V)
     return y
 end
-
-"""
-    QRRetraction
-
-Retraction on the rotations manifold using the QR method, a first order
-approximation of the exponential map.
-"""
-struct QRRetraction <: AbstractRetractionMethod end
 
 @doc doc"""
     retract!(M, y, x, v, method::QRRetraction)
@@ -312,17 +295,10 @@ end
 
 retract!(M::Rotations, y, x, v) = retract!(M, y, x, v, QRRetraction())
 
-"""
-    PolarInverseRetraction
-
-Inverse retraction on the rotations manifold using the polar method.
-"""
-struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
-
 injectivity_radius(::Rotations, x, ::PolarRetraction) = π*sqrt(2.0)/2
 
 @doc doc"""
-    inverse_retract!(M, v, x, y, ::PolarInverseRetraction)
+    inverse_retract!(M, v, x, y, ::InversePolarRetraction)
 
 Compute a vector from the tagent space $T_x\mathrm{SO}(n)$
 of the point `x` on the [`Rotations`](@ref) manifold `M`
@@ -336,7 +312,7 @@ where $s$ is the solution to the Sylvester equation
 
 $x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2\mathrm{I}_n = 0.$
 """
-function inverse_retract!(M::Rotations, v, x, y, method::PolarInverseRetraction)
+function inverse_retract!(M::Rotations, v, x, y, method::InversePolarRetraction)
     A = transpose(x) * y
     H = 2 * one(x)
     try
@@ -353,22 +329,15 @@ function inverse_retract!(M::Rotations, v, x, y, method::PolarInverseRetraction)
     return v
 end
 
-"""
-    QRInverseRetraction
-
-Inverse retraction on the rotations manifold using the QR method.
-"""
-struct QRInverseRetraction <: AbstractInverseRetractionMethod end
-
 @doc doc"""
-    inverse_retract!(M::Rotations, x, y, ::QRInverseRetraction)
+    inverse_retract!(M::Rotations, x, y, ::InverseQRRetraction)
 
 Compute a vector from the tagent space $T_x\mathrm{SO}(n)$
 of the point `x` on the [`Rotations`](@ref) manifold `M`
 with which the point `y` can be reached by the
 [`QRRetraction`](@ref) from the point `x` after time 1.
 """
-function inverse_retract!(M::Rotations{N}, v, x, y, ::QRInverseRetraction) where N
+function inverse_retract!(M::Rotations{N}, v, x, y, ::InverseQRRetraction) where N
     A = transpose(x) * y
     R = zero(v)
     for i = 1:N

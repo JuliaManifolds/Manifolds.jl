@@ -161,6 +161,22 @@ struct OutOfInjectivityRadiusError <: Exception end
 abstract type AbstractRetractionMethod end
 
 """
+    PolarRetraction <: AbstractRetractionMethod
+
+Retractions that are based on singular value decompositions of the matrix / matrices
+for point and tangent vector on a [`Manifold`](@ref)
+"""
+struct PolarRetraction <: AbstractRetractionMethod end
+
+"""
+    QRRetraction <: AbstractRetractionMethod
+
+Retractions that are based on a QR decomposition of the
+matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
+"""
+struct QRRetraction <: AbstractRetractionMethod end
+
+"""
     ExponentialRetraction
 
 Retraction using the exponential map.
@@ -215,6 +231,23 @@ abstract type AbstractInverseRetractionMethod end
 Inverse retraction using the logarithmic map.
 """
 struct LogarithmicInverseRetraction <: AbstractInverseRetractionMethod end
+
+"""
+    InversePolarRetraction <: AbstractInverseRetractionMethod
+
+Inverse retractions that are based on a singular value decomposition of the
+matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
+"""
+struct InversePolarRetraction <: AbstractInverseRetractionMethod end
+
+"""
+    InverseQRRetraction <: AbstractInverseRetractionMethod
+
+Inverse retractions that are based on a QR decomposition of the
+matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
+"""
+struct InverseQRRetraction <: AbstractInverseRetractionMethod end
+
 
 """
     inverse_retract!(M::Manifold, v, x, y, [method::AbstractInverseRetractionMethod=LogarithmicInverseRetraction()])
