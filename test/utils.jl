@@ -160,6 +160,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test is_tangent_vector(M, pts[3], v1t1)
         @test is_tangent_vector(M, pts[3], v1t2)
         @test isapprox(M, pts[3], v1t1, v1t2)
+        @test isapprox(M, pts[1], vector_transport_to(M, pts[1], v1, pts[1]), v1)
     end
 
     test_forward_diff && @testset "ForwardDiff support" begin

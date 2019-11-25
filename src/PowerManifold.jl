@@ -283,12 +283,16 @@ end
     tangent_vector_error(M::ProductManifold, x, v; kwargs... )
 
 Check whether `v` is a tangent vector to `x` on the [`ProductManifold`](@ref)
-`M`, i.e. atfer [`is_manifold_point`](@ref)`(M, x)`, and all projections to
+`M`, i.e. atfer [`manifold_point_error`](@ref)`(M, x)`, and all projections to
 base manifolds must be respective tangent vectors.
 
 The tolerance for the last test can be set using the ´kwargs...`.
 """
 function tangent_vector_error(M::PowerManifold, x, v; kwargs...)
+    mpe = manifold_point_error(M, x)
+    if mpe !== nothing
+        return mpe
+    end
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         imp = tangent_vector_error(M.manifold,

@@ -29,7 +29,8 @@ import LinearAlgebra: dot,
 
 using ManifoldsBase
 using ManifoldsBase: AbstractRetractionMethod,
-    AbstractInverseRetractionMethod
+    AbstractInverseRetractionMethod,
+    AbstractVectorTransportMethod
 import ManifoldsBase: base_manifold,
     check_manifold_point,
     check_tangent_vector,
@@ -55,6 +56,7 @@ import ManifoldsBase: base_manifold,
     project_point!,
     project_tangent,
     project_tangent!,
+    representation_size,
     retract,
     retract!,
     tangent_vector_error,
@@ -127,15 +129,19 @@ include("SizedAbstractArray.jl")
 
 include("ProductRepresentations.jl")
 include("VectorBundle.jl")
+include("Metric.jl")
 
 include("DistributionsBase.jl")
-include("Metric.jl")
-include("Euclidean.jl")
+include("ProjectedDistribution.jl")
+
 include("ProductManifold.jl")
 include("PowerManifold.jl")
+
+include("Euclidean.jl")
+include("CholeskySpace.jl")
 include("Rotations.jl")
 include("Sphere.jl")
-include("ProjectedDistribution.jl")
+include("SymmetricPositiveDefinite.jl")
 
 function __init__()
     @require ForwardDiff="f6369f11-7733-5829-9624-2563aa707210" begin
@@ -157,8 +163,9 @@ export ArrayManifold,
     ArrayTVector
 
 export Manifold,
-    Euclidean,
-    Sphere,
+    MPoint,
+    TVector,
+    IsDecoratorManifold,
     ProductManifold,
     PowerManifold,
     ProductRepr,
@@ -174,26 +181,38 @@ export Manifold,
     TangentBundle,
     CotangentBundle,
     TangentBundleFibers,
-    CotangentBundleFibers
-export ×,
-    base_manifold,
+    CotangentBundleFibers,
+    AbstractVectorTransportMethod,
+    ParallelTransport,
+    ProjectTangent
+export
+    Euclidean,
+    CholeskySpace,
+    Sphere,
+    SymmetricPositiveDefinite
+
+export base_manifold,
     bundle_projection,
     distance,
     exp,
     exp!,
     flat,
     flat!,
+    hat!,
+    hat,
     sharp,
     sharp!,
+    vee,
+    vee!,
     geodesic,
     shortest_geodesic,
     injectivity_radius,
-    inner,
     inverse_retract,
     inverse_retract!,
-    isapprox,
     is_manifold_point,
     is_tangent_vector,
+    isapprox,
+    inner,
     log,
     log!,
     manifold_dimension,
@@ -202,11 +221,15 @@ export ×,
     project_point!,
     project_tangent,
     project_tangent!,
+    representation_size,
     retract,
     retract!,
     submanifold,
     submanifold_component,
+    tangent_orthonormal_basis,
     vector_space_dimension,
+    vector_transport_along,
+    vector_transport_along!,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,
@@ -220,7 +243,9 @@ export Metric,
     LorentzMetric,
     EuclideanMetric,
     MetricManifold,
-    HasMetric,
+    LinearAffineMetric,
+    LogEuclideanMetric,
+    LogCholeskyMetric,
     metric,
     local_metric,
     inverse_local_metric,

@@ -1,4 +1,4 @@
 docs/build
-# Manifest.toml
+Manifest.toml
 benchmark/tune.json
 benchmark/results*

@@ -13,8 +13,6 @@ generates the $\mathbb S^{n}\subset \mathbb R^{n+1}$
 struct Sphere{N} <: Manifold end
 Sphere(n::Int) = Sphere{n}()
 
-@traitimpl HasMetric{Sphere,EuclideanMetric}
-
 function representation_size(::Sphere{N}) where N
     return (N+1,)
 end
@@ -129,7 +127,7 @@ end
     tangent_vector_error(S,x,v; kwargs... )
 
 checks whether `v` is a tangent vector to `x` on the [`Sphere`](@ref) `S`, i.e.
-atfer [`is_manifold_point`](@ref)`(S,x)`, `v` has to be of same dimension as `x`
+after [`manifold_point_error`](@ref)`(S,x)`, `v` has to be of same dimension as `x`
 and orthogonal to `x`.
 The tolerance for the last test can be set using the ´kwargs...`.
 """

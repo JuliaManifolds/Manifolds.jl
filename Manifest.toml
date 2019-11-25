@@ -34,9 +34,9 @@ version = "1.1.0"
 
 [[DataStructures]]
 deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "1fe8fad5fc84686dcbc674aa255bc867a64f8132"
+git-tree-sha1 = "a1b652fb77ae8ca7ea328fa7ba5aa151036e5c10"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.5"
+version = "0.17.6"
 
 [[Dates]]
 deps = ["Printf"]
@@ -111,9 +111,7 @@ version = "0.5.2"
 
 [[ManifoldsBase]]
 deps = ["LinearAlgebra", "Markdown"]
-git-tree-sha1 = "c6b022f4fc5d1270794834a6bbbba9100a615b82"
-repo-rev = "master"
-repo-url = "https://github.com/JuliaNLSolvers/ManifoldsBase.jl"
+git-tree-sha1 = "6c1c9346aaada21c921fc8927b79acdfab859ec5"
 uuid = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
 version = "0.1.0"
 
@@ -144,9 +142,9 @@ version = "0.9.10"
 
 [[Parsers]]
 deps = ["Dates", "Test"]
-git-tree-sha1 = "a23968e107c0544aca91bfab6f7dd34de1206a54"
+git-tree-sha1 = "0139ba59ce9bc680e2925aec5b7db79065d60556"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "0.3.9"
+version = "0.3.10"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]

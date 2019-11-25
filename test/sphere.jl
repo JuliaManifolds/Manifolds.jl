@@ -2,6 +2,11 @@ include("utils.jl")
 
 @testset "Sphere" begin
     M = Sphere(2)
+    @testset "Sphere Basics" begin
+        @test representation_size(M) == (3,)
+        @test !is_manifold_point(M, [1., 0., 0., 0.])
+        @test !is_tangent_vector(M, [1.,0.,0.], [0., 0., 1., 0.])
+    end
     types = [Vector{Float64},
              SizedVector{3, Float64},
              MVector{3, Float64},

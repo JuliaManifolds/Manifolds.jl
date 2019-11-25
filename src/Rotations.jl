@@ -1,3 +1,5 @@
+import LinearAlgebra: norm
+
 @doc doc"""
     Rotations{N} <: Manifold
 
@@ -485,7 +487,7 @@ end
     tangent_vector_error(M,x,v; kwargs... )
 
 checks whether `v` is a tangent vector to `x` on the [`Rotations`](@ref)
-space `M`, i.e. after [`is_manifold_point`](@ref)`(M,x)`, `v` has to be of same
+space `M`, i.e. after [`manifold_point_error`](@ref)`(M,x)`, `v` has to be of same
 dimension as `x` and orthogonal to `x`.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
