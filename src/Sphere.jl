@@ -13,8 +13,6 @@ generates the $\mathbb S^{n}\subset \mathbb R^{n+1}$
 struct Sphere{N} <: Manifold end
 Sphere(n::Int) = Sphere{n}()
 
-@traitimpl HasMetric{Sphere,EuclideanMetric}
-
 function representation_size(::Sphere{N}) where N
     return (N+1,)
 end
@@ -76,7 +74,7 @@ function zero_tangent_vector!(S::Sphere, v, x)
     return v
 end
 
-function vector_transport_to!(M::Sphere, vto, x, v, y)
+function vector_transport_to!(M::Sphere, vto, x, v, y,::ParallelTransport)
     v_xy = log(M, x, y)
     vl = norm(M, x, v_xy)
     vto .= v

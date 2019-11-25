@@ -1,3 +1,5 @@
+import LinearAlgebra: norm
+
 @doc doc"""
     Rotations{N} <: Manifold
 

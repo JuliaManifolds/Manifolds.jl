@@ -109,45 +109,27 @@ Strip all decorators on `M`, returning the underlying topological manifold.
 Also used for vector bundles.
 """
 function base_manifold end
-
-@traitfn function base_manifold(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}}
-    return base_manifold(M.manifold)
-end
-
+@traitfn base_manifold(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}} = base_manifold(M.manifold)
 @traitfn base_manifold(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}} = M
 
-@doc doc"""
+"""
     manifold_dimension(M::Manifold)
 
-The dimension $n$ of real space $\mathbb R^n$ to which the neighborhood
+The dimension `n` of Euclidean space to which the neighborhood
 of each point of the manifold is homeomorphic.
 """
 function manifold_dimension end
+@traitfn manifold_dimension(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}} = manifold_dimension(base_manifold(M))
+@traitfn manifold_dimension(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}} = error("manifold_dimension not implemented for a $(typeof(M)).")
 
-@doc doc"""
-    representation_size(M::Manifold, [VS::VectorSpaceType])
+"""
+    representation_size(M::Manifold)
 
-The size of array representing a point on manifold `M`,
-Representation sizes of tangent vectors can be obtained by calling the method
-with the second argument.
+The size of array representing a point on manifold `M`.
 """
 function representation_size end
-
-@traitfn function representation_size(M::MT) where {MT<:Manifold,T;!IsDecoratorManifold{MT}}
-    error("representation_size not implemented for manifold $(typeof(M)).")
-end
-
-@traitfn function representation_size(M::MT) where {MT<:Manifold,T;IsDecoratorManifold{MT}}
-    return representation_size(base_manifold(M))
-end
-
-@traitfn function manifold_dimension(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}}
-    error("manifold_dimension not implemented for a $(typeof(M)).")
-end
-
-@traitfn function manifold_dimension(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}}
-    manifold_dimension(base_manifold(M))
-end
+@traitfn representation_size(M::MT) where {MT<:Manifold;IsDecoratorManifold{MT}} = representation_size(base_manifold(M))
+@traitfn representation_size(M::MT) where {MT<:Manifold;!IsDecoratorManifold{MT}} = error("representation_size not implemented for manifold $(typeof(M)).")
 
 """
     isapprox(M::Manifold, x, y; kwargs...)
@@ -322,7 +304,7 @@ end
 
 Inner product of tangent vectors `v` and `w` at point `x` from manifold `M`.
 """
-inner(M::Manifold, x, v, w) = error("inner: Inner product not implemented on a $(typeof(M)) for input point $(typeof(x)) and tangent vectors $(typeof(v)) and $(typeof(w)).")
+inner(M::Manifold, x, v, w) = error("Inner product not implemented on a $(typeof(M)) for input point $(typeof(x)) and tangent vectors $(typeof(v)) and $(typeof(w)).")
 
 """
     norm(M::Manifold, x, v)
@@ -439,68 +421,127 @@ function shortest_geodesic(M::Manifold, x, y, T::AbstractVector)
 end
 
 """
-    vector_transport_to!(M::Manifold, vto, x, v, y)
+    [Ξ,κ] = tangent_orthonormal_basis(M,x,v)
+
+returns both an orthonormal basis `Ξ` for the tangent space of `x` on the
+[`Manifold`](@ref) `M`, which as its first direction contains a normalized
+tangent vector of `v` as well as the sectional curvatures `κ` required for
+computing Jacobi fields, i.e. the first value (along `v`) is zero.
+"""
+tangent_orthonormal_basis(M::Manifold,x,v) = error("A tangent orthonormal basis not implemented on $(typeof(M)) at $(typeof(x)) with first direction $(typeof(v)).")
+
+"""
+    AbstractVectorTransportMethod
+
+An abstract type, which method to use for a vector transport, i.e. within
+[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref) or
+[`vector_transport_along`](@ref). 
+"""
+abstract type AbstractVectorTransportMethod end
+
+"""
+    ParallelTransport <: AbstractVectorTransportMethod
+
+Specify to use parallel transport as vector transport method within
+[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref) or
+[`vector_transport_along`](@ref). 
+"""
+struct ParallelTransport <: AbstractVectorTransportMethod end
+
+"""
+    ProjectTangent <: AbstractVectorTransportMethod
+
+Specify to use projection onto tangent space as vector transport method within
+[`vector_transport_to`](@ref), [`vector_transport_direction`](@ref) or
+[`vector_transport_along`](@ref). See [`project_tangent`](@ref) for details.
+"""
+struct ProjectTangent <: AbstractVectorTransportMethod end
+
+"""
+    vector_transport_to!(M::Manifold, vto, x, v, y, m::AbstractVectorTransportMethod=ParallelTransport())
 
 Vector transport of vector `v` at point `x` to point `y`. The result is saved
-to `vto`. By default, [`project_tangent!`](@ref) is used but this may change in
-the future.
+to `vto`. By default, the method `m` is [`ParallelTransport`](@ref).
 """
-vector_transport_to!(M::Manifold, vto, x, v, y) = project_tangent!(M, vto, y, v)
+vector_transport_to!(M::Manifold, vto, x, v, y) = vector_transport_to!(M,vto,x,v,y,ParallelTransport())
 
 """
-    vector_transport_to(M::Manifold, x, v, y)
+    vector_transport_to!(M::Manifold, vto, x, v, y, ProjectTangent())
 
-Vector transport of vector `v` at point `x` to point `y`.
+Implements a default projection based vector transport, that projects a tangent
+vector `v` at `x` on a [`Manifold`](@ref) `M` onto the tangent space at `y` by
+interperting `v` as an element of the embedding and projecting back.
 """
-function vector_transport_to(M::Manifold, x, v, y)
+vector_transport_to!(M::Manifold, vto, x, v, y, m::ProjectTangent) = project_tangent!(M, vto, y, v)
+
+function vector_transport_to!(M::Manifold, vto, x, v, y, m::AbstractVectorTransportMethod)
+    error("vector transport from a point of type $(typeof(x)) to a type $(typeof(y)) on a $(typeof(M)) for a vector of type $(v) and the $(typeof(m)) not yet implemented.")
+end
+
+
+"""
+    vector_transport_to(M::Manifold, x, v, y, m::AbstractVectorTransportMethod=ParallelTransport())
+
+Vector transport of vector `v` at point `x` to point `y` using the method `m`,
+which defaults to [`ParallelTransport`](@ref).
+"""
+vector_transport_to(M::Manifold, x, v, y) = vector_transport_to(M,x,v,y,ParallelTransport())
+function vector_transport_to(M::Manifold, x, v, y, m::AbstractVectorTransportMethod)
     vto = similar_result(M, vector_transport_to, v, x, y)
-    vector_transport_to!(M, vto, x, v, y)
+    vector_transport_to!(M, vto, x, v, y, m)
     return vto
 end
 
 """
-    vector_transport_direction!(M::Manifold, vto, x, v, vdir)
+    vector_transport_direction!(M::Manifold, vto, x, v, vdir, m=::ParallelTransport])
 
 Vector transport of vector `v` at point `x` in the direction indicated
 by the tangent vector `vdir` at point `x`. The result is saved to `vto`.
-By default, `exp` and `vector_transport_to!` are used.
+By default, `exp` and `vector_transport_to!` are used with the method `m` which
+defaults to [`ParallelTransport`](@ref).
 """
-function vector_transport_direction!(M::Manifold, vto, x, v, vdir)
+vector_transport_direction!(M::Manifold, vto, x, v, vdir) = vector_transport_direction!(M,vto,x,v,vdir,ParallelTransport())
+function vector_transport_direction!(M::Manifold, vto, x, v, vdir,m::AbstractVectorTransportMethod)
     y = exp(M, x, vdir)
-    return vector_transport_to!(M, vto, x, v, y)
+    return vector_transport_to!(M, vto, x, v, y, m)
 end
 
 """
-    vector_transport_direction(M::Manifold, x, v, vdir)
+    vector_transport_direction(M::Manifold, x, v, vdir[, m=::ParallelTransport])
 
 Vector transport of vector `v` at point `x` in the direction indicated
-by the tangent vector `vdir` at point `x`.
+by the tangent vector `vdir` at point `x` using the method `m`, which defaults to [`ParallelTransport`](@ref).
 """
-function vector_transport_direction(M::Manifold, x, v, vdir)
+vector_transport_direction(M::Manifold, x, v, vdir) = vector_transport_direction(M,x,v,vdir,ParallelTransport())
+function vector_transport_direction(M::Manifold, x, v, vdir, m::AbstractVectorTransportMethod)
     vto = similar_result(M, vector_transport_direction, v, x, vdir)
-    vector_transport_direction!(M, vto, x, v, vdir)
+    vector_transport_direction!(M, vto, x, v, vdir,m)
     return vto
 end
 
 """
-    vector_transport_along!(M::Manifold, vto, x, v, c)
+    vector_transport_along!(M::Manifold, vto, x, v, c[,m=::ParallelTransport])
 
 Vector transport of vector `v` at point `x` along the curve `c` such that
-`c(0)` is equal to `x` to point `c(1)`. The result is saved to `vto`.
+`c(0)` is equal to `x` to point `c(1)` using the method `m`, which defaults to
+[`ParallelTransport`](@ref). The result is saved to `vto`.
 """
-function vector_transport_along!(M::Manifold, vto, x, v, c)
-    error("vector_transport_along! not implemented for manifold $(typeof(M)), vector $(typeof(vto)), point $(typeof(x)), vector $(typeof(v)) and curve $(typeof(c)).")
+vector_transport_along!(M::Manifold, vto, x, v, c) = vector_transport_along!(M, vto, x, v, c, ParallelTransport())
+function vector_transport_along!(M::Manifold, vto, x, v, c, m::AbstractVectorTransportMethod)
+    error("vector_transport_along! not implemented for manifold $(typeof(M)), vector $(typeof(vto)), point $(typeof(x)), vector $(typeof(v)) along curve $(typeof(c)) with method $(typeof(m)).")
 end
 
 """
-    vector_transport_along(M::Manifold, x, v, c)
+    vector_transport_along(M::Manifold, x, v, c[,m])
 
 Vector transport of vector `v` at point `x` along the curve `c` such that
 `c(0)` is equal to `x` to point `c(1)`.
+The default method `m` used is [`ParallelTransport`](@ref).
 """
-function vector_transport_along(M::Manifold, x, v, c)
+vector_transport_along(M::Manifold, x, v, c) = vector_transport_along(M,x,v,c,ParallelTransport())
+function vector_transport_along(M::Manifold, x, v, c, m::AbstractVectorTransportMethod)
     vto = similar_result(M, vector_transport_along, v, x, c)
-    vector_transport_along!(M, vto, x, v, c)
+    vector_transport_along!(M, vto, x, v, c, m)
     return vto
 end
 
@@ -533,7 +574,8 @@ function zero_tangent_vector(M::Manifold, x)
     return v
 end
 
-zero_tangent_vector!(M::Manifold, v, x) = log!(M, v, x, x)
+@traitfn zero_tangent_vector!(M::MT, v, x) where {MT <: Manifold; !IsDecoratorManifold{MT}} = log!(M, v, x, x)
+@traitfn zero_tangent_vector!(M::MT, v, x) where {MT <: Manifold; IsDecoratorManifold{MT}} = zero_tangent_vector!(base_manifold(M), v, x)
 
 hat!(M::Manifold, v, x, vⁱ) = error("hat! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), and matrix $(typeof(v))")
 
@@ -634,15 +676,19 @@ include("SizedAbstractArray.jl")
 include("ProductRepresentations.jl")
 include("ArrayManifold.jl")
 include("VectorBundle.jl")
+include("Metric.jl")
 
 include("DistributionsBase.jl")
-include("Metric.jl")
-include("Euclidean.jl")
+include("ProjectedDistribution.jl")
+
 include("ProductManifold.jl")
 include("PowerManifold.jl")
+
+include("Euclidean.jl")
+include("CholeskySpace.jl")
 include("Rotations.jl")
 include("Sphere.jl")
-include("ProjectedDistribution.jl")
+include("SymmetricPositiveDefinite.jl")
 
 function __init__()
     @require ForwardDiff="f6369f11-7733-5829-9624-2563aa707210" begin
@@ -664,9 +710,9 @@ export ArrayManifold,
     ArrayTVector
 
 export Manifold,
+    MPoint,
+    TVector,
     IsDecoratorManifold,
-    Euclidean,
-    Sphere,
     ProductManifold,
     PowerManifold,
     ProductRepr,
@@ -682,26 +728,38 @@ export Manifold,
     TangentBundle,
     CotangentBundle,
     TangentBundleFibers,
-    CotangentBundleFibers
-export ×,
-    base_manifold,
+    CotangentBundleFibers,
+    AbstractVectorTransportMethod,
+    ParallelTransport,
+    ProjectTangent
+export
+    Euclidean,
+    CholeskySpace,
+    Sphere,
+    SymmetricPositiveDefinite
+    
+export base_manifold,
     bundle_projection,
     distance,
     exp,
     exp!,
     flat,
     flat!,
+    hat!,
+    hat,
     sharp,
     sharp!,
+    vee,
+    vee!,
     geodesic,
     shortest_geodesic,
     injectivity_radius,
-    inner,
     inverse_retract,
     inverse_retract!,
-    isapprox,
     is_manifold_point,
     is_tangent_vector,
+    isapprox,
+    inner,
     log,
     log!,
     manifold_dimension,
@@ -710,11 +768,15 @@ export ×,
     project_point!,
     project_tangent,
     project_tangent!,
+    representation_size,
     retract,
     retract!,
     submanifold,
     submanifold_component,
+    tangent_orthonormal_basis,
     vector_space_dimension,
+    vector_transport_along,
+    vector_transport_along!,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,
@@ -728,7 +790,9 @@ export Metric,
     LorentzMetric,
     EuclideanMetric,
     MetricManifold,
-    HasMetric,
+    LinearAffineMetric,
+    LogEuclideanMetric,
+    LogCholeskyMetric,
     metric,
     local_metric,
     inverse_local_metric,
