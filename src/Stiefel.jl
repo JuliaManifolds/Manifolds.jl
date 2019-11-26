@@ -6,10 +6,10 @@ using LinearAlgebra: diag, qr, tr, svd, mul!, lyap
 The Stiefel manifold consists of all $m\times n$, $m\geq n$ orthonormal matrices, i.e.
 
 ````math
-\mathcal M = \{ x \in \mathbb K^{m\times n} : \overline{x}^{\mathrm{T}}x = I_k \}
+\mathcal M = \{ x \in \mathbb K^{m\times n} : \overline{x}^{\mathrm{T}}x = I_n \}
 ````
 where $\mathbb K \in \{\mathbb R, \mathbb C\}$ and
-$I_k \in \mathbb R^{n\times n}$ denotes the unit matrix.
+$I_n \in \mathbb R^{n\times n}$ denotes the unit matrix.
 
 The tangent space at a point $x\in\mathcal M$ is given by
 ````math
@@ -51,7 +51,6 @@ function check_tangent_vector(S::Stiefel{M,N,T},x,v; kwargs...) where {M,N,T}
             "The matrix $(v) is does not lie in the tangent space of $(x) on the Stiefel manifold of dimension (m,n), since x'v + v'x is not the zero matrix.")
     end
 end
-
 @doc doc"""
     exp!(M,y, x, v)
 

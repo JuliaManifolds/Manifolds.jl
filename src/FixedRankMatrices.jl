@@ -1,4 +1,4 @@
-using LinearAlgebra: diag, Diagonal, svd, SVD
+using LinearAlgebra: diag, Diagonal, svd, SVD, rank, dot
 
 @doc doc"""
     FixedRankMatrices{M,N,K} <: Manifold
@@ -35,8 +35,8 @@ This representation follows
 > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
 > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
-struct FixedRankMatrices{M,N,K} <: Manifold end
-FixedRankMatrices(m::Int, n::Int, k::Int) = FixedRankMatrices{m,n,k}()
+struct FixedRankMatrices{M,N,K,T} <: Manifold end
+FixedRankMatrices(m::Int, n::Int, k::Int, T::Type = Type{Real}) = FixedRankMatrices{m,n,k,T}()
 
 @doc doc"""
     SVDMPoint <: MPoint
@@ -83,10 +83,10 @@ struct UMVTVector{T} <: TVector
     M::Matrix{T}
     Vt::Matrix{T}
 end
-UMVTVector(U,M,Vt,k::Int) = UMVTVector(U[:,1:k],S[1:k],Vt[1:k,:])
+UMVTVector(U,M,Vt,k::Int) = UMVTVector(U[:,1:k],M[1:k,1:k],Vt[1:k,:])
 UMVTVector(U,M,Vt) = UMVTVector{eltype(U)}(U,M,Vt)
 
-function check_manifold_point(F::FixedRankMatrices{M,N,k},x; kwargs...) where {M,N,k}
+function check_manifold_point(F::FixedRankMatrices{M,N,k,T},x; kwargs...) where {M,N,k,T}
     r = rank(x; kwargs...)
     s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(M),$(N)) witk rank $(k), "
     if size(x) != (M,N)
@@ -97,7 +97,8 @@ function check_manifold_point(F::FixedRankMatrices{M,N,k},x; kwargs...) where {M
     end 
     return check_manifold_point(F,SVDMPoint(x,k))
 end
-function check_manifold_point(F::FixedRankMatrices{M,N,k},x::SVDMPoint{T}) where {M,N,k,T}
+
+function check_manifold_point(F::FixedRankMatrices{M,N,k,T}, x::SVDMPoint) where {M,N,k,T}
     s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(M),$(N)) witk rank $(k), "
     if (size(x.U) != (M,k)) || (length(x.S) != k) || (size(x.Vt) != (k,N))
         return DomainError([size(x.U)...,length(x.S),size(x.Vt)], string(s, "since the dimensions do not fit (expected $([N,k,k,k,M]))."))
@@ -110,7 +111,7 @@ function check_manifold_point(F::FixedRankMatrices{M,N,k},x::SVDMPoint{T}) where
     end
 end
 
-function check_tangent_vector(F::FixedRankMatrices{M,N,k},x::SVDMPoint{T},v::UMVTVector{T}) where {M,N,k,T}
+function check_tangent_vector(F::FixedRankMatrices{M,N,k,T}, x::SVDMPoint, v::UMVTVector) where {M,N,k,T}
     c = check_manifold_point(x)
     if c != nothing
         return c
@@ -125,3 +126,52 @@ function check_tangent_vector(F::FixedRankMatrices{M,N,k},x::SVDMPoint{T},v::UMV
         return DomainError(norm(v.Vt*x.Vt-zeros(k,k)), "The tangent vector $(v) is not a tangent vector to $(x) on the fixed rank matrices since v.V'x.V is not zero.")
     end
 end
+
+function inner(::FixedRankMatrices{M,N,k,T}, x::SVDMPoint, v::UMVTVector, w::UMVTVector) where {M,N,k,T}
+    return dot(v.U,w.U) + dot(v.M,w.M) + dot(v.Vt,w.Vt)
+end
+
+manifold_dimension(::FixedRankMatrices{M,N,k,T}) where {M,N,k,T <: Real} = (M+N-k)*k
+manifold_dimension(::FixedRankMatrices{M,N,k,T}) where {M,N,k,T <: Complex{U} where U} = 2*(M+N-k)*k
+
+@doc doc"""
+    project_tangent!(M,vto,x,A)
+
+project the matrix $A\in\mathbb R^{m,n}$ or a [`UMVTVector`](@ref) (e.g. from
+another tangent space) onto the tangent space at $x$, further
+decomposing the result into $v=UMV$, i.e. a [`UMVTVector`](@ref) following
+Section 3 in 
+> Bart Vandereycken: "Low-rank matrix completion by Riemannian Optimization,
+> SIAM Journal on Optiomoization, 23(2), pp. 1214–1236, 2013.
+> doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
+> arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
+"""
+function project_tangent!(::FixedRankMatrices{M,N,k,T}, vto::UMVTVector, x::SVDMPoint, A::Matrix) where {M,N,k,T}
+    vto.M .= x.U * A * x.Vt'
+    vto.U .= A * x.Vt' - x.U
+    vto.Vt .= x.U' * A - x.U' * A * x.Vt' * x.Vt
+    return vto
+end
+project_tangent!(F::FixedRankMatrices{M,N,k,T}, vto::UMVTVector, x::SVDMPoint, v::UMVTVector) where {M,N,k,T} = project_tangent!(F,vto,x, v.U*v.M.v.Vt)
+
+@doc doc"""
+    retract!(M, y, x, v, ::PolarRetraction)
+
+compute an SVD-based retraction on the [`FixedRankMatrices`](@ref) manifold
+by computing
+````math
+    y = U_kS_kV_k^\mathrm{T},
+````
+where $U_kS_kV_k^\mathmr{T}$ is the shortened singular value decomposition $USV=x+v$,
+in the sense that $S_k$ is the diagonal matrix of size $k\times k$ with the $k$ largest
+singular values and $U$ and $V$ are shortened accordingly.
+"""
+function retract!(::FixedRankMatrices{M,N,k,T}, y::SVDMPoint, x::SVDMPoint, v::UMVTVector, ::PolarRetraction) where {M,N,k,T}
+    s = svd( x.U * Diagonal(x.S) * x.Vt + (x.U * v.M * x.Vt + v.U*x.Vt + v.U*v.Vt) )
+    y.U .= s.U[:,1:k]
+    y.S .= s.S[1:k]
+    y.Vt .= s.Vt[1:k,:]
+    return y
+end
+
+zero_tangent_vector(::FixedRankMatrices{m,n,k,T},x::SVDMPoint) where {m,n,k,T} = UMTVector(zeros(T,n,k), zeros(T,k,k), zeros(T,k,m))
