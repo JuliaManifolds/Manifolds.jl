@@ -107,13 +107,13 @@ function uniform_distribution(S::Sphere, x)
 end
 
 """
-    manifold_point_error(S,x; kwargs...)
+    check_manifold_point(S,x; kwargs...)
 
 checks, whether `x` is a valid point on the [`Sphere`](@ref) `S`, i.e. is a vector
 of length [`manifold_dimension`](@ref)`(S)+1` (approximately) of unit length.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function manifold_point_error(S::Sphere{N},x; kwargs...) where {N}
+function check_manifold_point(S::Sphere{N},x; kwargs...) where {N}
     if length(x) != N+1
         return DomainError(size(x),"The point $(x) does not lie on $S, since its size is not $(N+1).")
     end
@@ -124,15 +124,15 @@ function manifold_point_error(S::Sphere{N},x; kwargs...) where {N}
 end
 
 """
-    tangent_vector_error(S,x,v; kwargs... )
+    check_tangent_vector(S,x,v; kwargs... )
 
 checks whether `v` is a tangent vector to `x` on the [`Sphere`](@ref) `S`, i.e.
-after [`manifold_point_error`](@ref)`(S,x)`, `v` has to be of same dimension as `x`
+after [`check_manifold_point`](@ref)`(S,x)`, `v` has to be of same dimension as `x`
 and orthogonal to `x`.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function tangent_vector_error(S::Sphere{N},x,v; kwargs...) where N
-    perr = manifold_point_error(S,x)
+function check_tangent_vector(S::Sphere{N},x,v; kwargs...) where N
+    perr = check_manifold_point(S,x)
     perr === nothing || return perr
     if length(v) != N+1
         return DomainError(size(v),

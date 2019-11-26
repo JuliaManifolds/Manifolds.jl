@@ -263,16 +263,16 @@ function sharp!(M::PowerManifold, v::FVector{TangentSpaceType}, x, w::FVector{Co
 end
 
 """
-    manifold_point_error(M::ProductManifold, x; kwargs...)
+    check_manifold_point(M::ProductManifold, x; kwargs...)
 
 Check whether `x` is a valid point on the [`ProductManifold`](@ref) `M`.
 
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function manifold_point_error(M::PowerManifold, x; kwargs...)
+function check_manifold_point(M::PowerManifold, x; kwargs...)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        imp = manifold_point_error(M.manifold,
+        imp = check_manifold_point(M.manifold,
             _read(rep_size, x, i); kwargs...)
         imp === nothing || return imp
     end
@@ -280,22 +280,22 @@ function manifold_point_error(M::PowerManifold, x; kwargs...)
 end
 
 """
-    tangent_vector_error(M::ProductManifold, x, v; kwargs... )
+    check_tangent_vector(M::ProductManifold, x, v; kwargs... )
 
 Check whether `v` is a tangent vector to `x` on the [`ProductManifold`](@ref)
-`M`, i.e. atfer [`manifold_point_error`](@ref)`(M, x)`, and all projections to
+`M`, i.e. atfer [`check_manifold_point`](@ref)`(M, x)`, and all projections to
 base manifolds must be respective tangent vectors.
 
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function tangent_vector_error(M::PowerManifold, x, v; kwargs...)
-    mpe = manifold_point_error(M, x)
+function check_tangent_vector(M::PowerManifold, x, v; kwargs...)
+    mpe = check_manifold_point(M, x)
     if mpe !== nothing
         return mpe
     end
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        imp = tangent_vector_error(M.manifold,
+        imp = check_tangent_vector(M.manifold,
             _read(rep_size, x, i),
             _read(rep_size, v, i); kwargs...)
         imp === nothing || return imp

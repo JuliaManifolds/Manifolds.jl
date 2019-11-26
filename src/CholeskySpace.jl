@@ -120,7 +120,7 @@ function vector_transport_to!(::CholeskySpace{N}, vto, x, v, y, ::ParallelTransp
 end
 
 @doc doc"""
-    manifold_point_error(M,x;kwargs...)
+    check_manifold_point(M,x;kwargs...)
 
 check whether the matrix `x` lies on the [`CholeskySpace`](@ref) `M`, i.e.
 it's size fits the manifold, it is a lower triangular matrix and has positive
@@ -128,7 +128,7 @@ entries on the diagonal.
 The tolerance for the tests can be set using the `kwargs...`.
 """
 
-function manifold_point_error(M::CholeskySpace{N}, x; kwargs...) where N
+function check_manifold_point(M::CholeskySpace{N}, x; kwargs...) where N
     if size(x) != representation_size(M)
         return DomainError(size(x),"The point $(x) does not lie on $(M), since its size is not $(representation_size(M)).")
     end
@@ -141,15 +141,15 @@ function manifold_point_error(M::CholeskySpace{N}, x; kwargs...) where N
     return nothing
 end
 """
-    tangent_vector_error(M,x,v; kwargs... )
+    check_tangent_vector(M,x,v; kwargs... )
 
 checks whether `v` is a tangent vector to `x` on the [`CholeskySpace`](@ref) `M`, i.e.
-atfer [`manifold_point_error`](@ref)`(M,x)`, `v` has to be of same dimension as `x`
+atfer [`check_manifold_point`](@ref)`(M,x)`, `v` has to be of same dimension as `x`
 and a symmetric matrix.
 The tolerance for the tests can be set using the `kwargs...`.
 """
-function tangent_vector_error(M::CholeskySpace{N}, x,v; kwargs...) where N
-    mpe = manifold_point_error(M, x)
+function check_tangent_vector(M::CholeskySpace{N}, x,v; kwargs...) where N
+    mpe = check_manifold_point(M, x)
     if mpe !== nothing
         return mpe
     end

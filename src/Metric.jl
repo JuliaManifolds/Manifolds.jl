@@ -281,11 +281,11 @@ end
 function zero_tangent_vector!(M::MMT, v, x) where {MMT<:MetricManifold}
     return zero_tangent_vector!(base_manifold(M), v, x)
 end
-function manifold_point_error(M::MMT, x; kwargs...) where {MMT<:MetricManifold}
-    return manifold_point_error(base_manifold(M), x; kwargs...)
+function check_manifold_point(M::MMT, x; kwargs...) where {MMT<:MetricManifold}
+    return check_manifold_point(base_manifold(M), x; kwargs...)
 end
-function tangent_vector_error(M::MMT, x, v; kwargs...) where {MMT<:MetricManifold}
-    return tangent_vector_error(base_manifold(M), x, v; kwargs...)
+function check_tangent_vector(M::MMT, x, v; kwargs...) where {MMT<:MetricManifold}
+    return check_tangent_vector(base_manifold(M), x, v; kwargs...)
 end
 function inner(B::VectorBundleFibers{<:CotangentSpaceType, MMT}, x, v, w) where {MMT<:MetricManifold}
     ginv = inverse_local_metric(B.M, x)

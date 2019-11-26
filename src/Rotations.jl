@@ -462,14 +462,14 @@ function vee!(M::Rotations{N}, ω, x, Ω) where {N}
 end
 
 """
-    tangent_vector_error(M,x; kwargs...)
+    check_tangent_vector(M,x; kwargs...)
 
 checks, whether `x` is a valid point on the [`Rotations`](@ref) `M`,
 i.e. is an array of size [`manifold_dimension`](@ref)`(M)` and represents a
 valid rotation.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function tangent_vector_error(M::Rotations{N},x; kwargs...) where {N}
+function check_tangent_vector(M::Rotations{N},x; kwargs...) where {N}
     if size(x) != (N, N)
         return DomainError(size(x),
             "The point $(x) does not lie on $M, since its size is not $((N, N)).")
@@ -484,15 +484,15 @@ function tangent_vector_error(M::Rotations{N},x; kwargs...) where {N}
 end
 
 """
-    tangent_vector_error(M,x,v; kwargs... )
+    check_tangent_vector(M,x,v; kwargs... )
 
 checks whether `v` is a tangent vector to `x` on the [`Rotations`](@ref)
-space `M`, i.e. after [`manifold_point_error`](@ref)`(M,x)`, `v` has to be of same
+space `M`, i.e. after [`check_manifold_point`](@ref)`(M,x)`, `v` has to be of same
 dimension as `x` and orthogonal to `x`.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function tangent_vector_error(M::Rotations{N},x,v; kwargs...) where N
-    perr = manifold_point_error(M,x)
+function check_tangent_vector(M::Rotations{N},x,v; kwargs...) where N
+    perr = check_manifold_point(M,x)
     perr === nothing || return perr
     if size(v) != (N, N)
         return DomainError(size(v),

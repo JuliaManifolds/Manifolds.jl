@@ -23,8 +23,8 @@ The manifold can be equipped with different metrics
 ## Common and Metric Independent functions
 ```@docs
 injectivity_radius(::SymmetricPositiveDefinite{N},a::Vararg{Any,N} where N) where N
-manifold_point_error(::SymmetricPositiveDefinite{N},x; kwargs...) where N
-tangent_vector_error(::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
+check_manifold_point(::SymmetricPositiveDefinite{N},x; kwargs...) where N
+check_tangent_vector(::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
 manifold_dimension(::SymmetricPositiveDefinite{N}) where N
 representation_size(::SymmetricPositiveDefinite)
 zero_tangent_vector(::SymmetricPositiveDefinite{N},x) where N

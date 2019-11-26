@@ -404,13 +404,13 @@ zero_tangent_vector!(M::SymmetricPositiveDefinite{N}, v, x) where N = fill!(v, 0
 zero_tangent_vector!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, v, x) where N = fill!(v, 0)
 
 """
-    manifold_point_error(M,x; kwargs...)
+    check_manifold_point(M,x; kwargs...)
 
 checks, whether `x` is a valid point on the [`SymmetricPositiveDefinite`](@ref) `M`, i.e. is a matrix
 of size `(N,N)`, symmetric and positive definite.
 The tolerance for the second to last test can be set using the ´kwargs...`.
 """
-function manifold_point_error(M::SymmetricPositiveDefinite{N},x; kwargs...) where N
+function check_manifold_point(M::SymmetricPositiveDefinite{N},x; kwargs...) where N
     if size(x) != representation_size(M)
         return DomainError(size(x),"The point $(x) does not lie on $(M), since its size is not $(representation_size(M)).")
     end
@@ -422,18 +422,18 @@ function manifold_point_error(M::SymmetricPositiveDefinite{N},x; kwargs...) wher
     end
     return nothing
 end
-manifold_point_error(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x; kwargs...) where N = manifold_point_error(M.manifold,x;kwargs...)
+check_manifold_point(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x; kwargs...) where N = check_manifold_point(M.manifold,x;kwargs...)
 
 """
-    tangent_vector_error(M,x,v; kwargs... )
+    check_tangent_vector(M,x,v; kwargs... )
 
 checks whether `v` is a tangent vector to `x` on the [`SymmetricPositiveDefinite`](@ref) `M`, i.e.
-atfer [`manifold_point_error`](@ref)`(M,x)`, `v` has to be of same dimension as `x`
+atfer [`check_manifold_point`](@ref)`(M,x)`, `v` has to be of same dimension as `x`
 and a symmetric matrix, i.e. this stores tangent vetors as elements of the corresponding Lie group.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function tangent_vector_error(M::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
-    mpe = manifold_point_error(M,x)
+function check_tangent_vector(M::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
+    mpe = check_manifold_point(M,x)
     mpe === nothing || return mpe
     if size(v) != representation_size(M)
         return DomainError(size(v),
@@ -445,4 +445,4 @@ function tangent_vector_error(M::SymmetricPositiveDefinite{N},x,v; kwargs...) wh
     end
     return nothing
 end
-tangent_vector_error(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,v; kwargs...) where N = tangent_vector_error(M.manifold,x,v;kwargs...)
+check_tangent_vector(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,v; kwargs...) where N = check_tangent_vector(M.manifold,x,v;kwargs...)
