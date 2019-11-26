@@ -86,7 +86,7 @@ end
 UMVTVector(U,M,Vt,k::Int) = UMVTVector(U[:,1:k],S[1:k],Vt[1:k,:])
 UMVTVector(U,M,Vt) = UMVTVector{eltype(U)}(U,M,Vt)
 
-function check_manifold_point(F::FixedRankMatrices{M,N,k},x; kwargs...) where {M,N,k} =
+function check_manifold_point(F::FixedRankMatrices{M,N,k},x; kwargs...) where {M,N,k}
     r = rank(x; kwargs...)
     s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(M),$(N)) witk rank $(k), "
     if size(x) != (M,N)
