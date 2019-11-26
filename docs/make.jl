@@ -10,9 +10,11 @@ makedocs(
         "Manifolds" => [
             "Basic manifolds" => [
                 "Euclidean" => "manifolds/euclidean.md",
+                "Fixed Rank Matrices" => "manifolds/fixedrankmatrices.md",
                 "Cholesky Space" => "manifolds/choleskyspace.md",
                 "Rotations" => "manifolds/rotations.md",
                 "Sphere" => "manifolds/sphere.md",
+                "Stiefel" => "manifolds/stiefel.md",
                 "Symmetric Positive Definite" => "manifolds/symmetricpositivedefinite.md"
             ],
             "Combined manifolds" => [
