@@ -298,7 +298,7 @@ retract!(M::Rotations, y, x, v) = retract!(M, y, x, v, QRRetraction())
 injectivity_radius(::Rotations, x, ::PolarRetraction) = π*sqrt(2.0)/2
 
 @doc doc"""
-    inverse_retract!(M, v, x, y, ::InversePolarRetraction)
+    inverse_retract!(M, v, x, y, ::PolarInverseRetraction)
 
 Compute a vector from the tagent space $T_x\mathrm{SO}(n)$
 of the point `x` on the [`Rotations`](@ref) manifold `M`
@@ -312,7 +312,7 @@ where $s$ is the solution to the Sylvester equation
 
 $x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2\mathrm{I}_n = 0.$
 """
-function inverse_retract!(M::Rotations, v, x, y, method::InversePolarRetraction)
+function inverse_retract!(M::Rotations, v, x, y, method::PolarInverseRetraction)
     A = transpose(x) * y
     H = 2 * one(x)
     try
@@ -330,14 +330,14 @@ function inverse_retract!(M::Rotations, v, x, y, method::InversePolarRetraction)
 end
 
 @doc doc"""
-    inverse_retract!(M::Rotations, x, y, ::InverseQRRetraction)
+    inverse_retract!(M::Rotations, x, y, ::QRInverseRetraction)
 
 Compute a vector from the tagent space $T_x\mathrm{SO}(n)$
 of the point `x` on the [`Rotations`](@ref) manifold `M`
 with which the point `y` can be reached by the
 [`QRRetraction`](@ref) from the point `x` after time 1.
 """
-function inverse_retract!(M::Rotations{N}, v, x, y, ::InverseQRRetraction) where N
+function inverse_retract!(M::Rotations{N}, v, x, y, ::QRInverseRetraction) where N
     A = transpose(x) * y
     R = zero(v)
     for i = 1:N

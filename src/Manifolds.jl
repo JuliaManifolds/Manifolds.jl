@@ -177,7 +177,7 @@ matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
 struct QRRetraction <: AbstractRetractionMethod end
 
 """
-    ExponentialRetraction
+    ExponentialRetraction <: AbstractRetractionMethod
 
 Retraction using the exponential map.
 """
@@ -226,27 +226,27 @@ retract(M::Manifold, x, v, t::Real, method::AbstractRetractionMethod) = retract(
 abstract type AbstractInverseRetractionMethod end
 
 """
-    LogarithmicInverseRetraction
+    LogarithmicInverseRetraction <: AbstractRetractionMethod
 
 Inverse retraction using the logarithmic map.
 """
 struct LogarithmicInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
-    InversePolarRetraction <: AbstractInverseRetractionMethod
+    PolarInverseRetraction <: AbstractInverseRetractionMethod
 
 Inverse retractions that are based on a singular value decomposition of the
 matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
 """
-struct InversePolarRetraction <: AbstractInverseRetractionMethod end
+struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
-    InverseQRRetraction <: AbstractInverseRetractionMethod
+    QRInverseRetraction <: AbstractInverseRetractionMethod
 
 Inverse retractions that are based on a QR decomposition of the
 matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
 """
-struct InverseQRRetraction <: AbstractInverseRetractionMethod end
+struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
 
 """
@@ -717,9 +717,11 @@ include("ProjectedDistribution.jl")
 include("ProductManifold.jl")
 include("PowerManifold.jl")
 
-include("Euclidean.jl")
 include("CholeskySpace.jl")
+include("FixedRankMatrices.jl")
+include("Euclidean.jl")
 include("Rotations.jl")
+include("Stiefel.jl")
 include("Sphere.jl")
 include("SymmetricPositiveDefinite.jl")
 
@@ -766,9 +768,13 @@ export Manifold,
     ParallelTransport,
     ProjectTangent
 export
+    SVDMPoint,
+    UMVTVector,
     Euclidean,
+    FixedRankMatrices,
     CholeskySpace,
     Sphere,
+    Stiefel,
     SymmetricPositiveDefinite
     
 export base_manifold,

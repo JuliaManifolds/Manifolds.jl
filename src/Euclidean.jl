@@ -1,3 +1,5 @@
+import LinearAlgebra: norm
+
 @doc doc"""
     Euclidean{T<:Tuple} <: Manifold
 

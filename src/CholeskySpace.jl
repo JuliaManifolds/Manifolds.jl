@@ -1,4 +1,4 @@
-using LinearAlgebra: diag, eigen, eigvals, eigvecs, Symmetric, Diagonal, tr, norm, cholesky, LowerTriangular, UpperTriangular
+using LinearAlgebra: diag, eigen, eigvals, eigvecs, Symmetric, tr, cholesky, LowerTriangular, UpperTriangular
 
 
 @doc doc"""

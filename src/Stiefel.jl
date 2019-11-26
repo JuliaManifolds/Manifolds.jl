@@ -1,4 +1,4 @@
-using LinearAlgebra: Diagonal, diag, qr, tr, svd, mul!, lyap
+using LinearAlgebra: diag, qr, tr, svd, mul!, lyap
 
 @doc doc"""
     Stiefel{m,n,T} <: Manifold
@@ -13,8 +13,9 @@ $I_k \in \mathbb R^{n\times n}$ denotes the unit matrix.
 
 The tangent space at a point $x\in\mathcal M$ is given by
 ````math
-T_x\mathcal M = \{ v \in \mathbb{K}^{m\times n} : x^{\mathrm{T}}v + v^{\mathrm{T}}x=0\}.
+T_x\mathcal M = \{ v \in \mathbb{K}^{m\times n} : x^{\mathrm{T}}v + v^{\mathrm{T}}x=0_n\},
 ````
+where $0_n$ is the $n\times n$ zero matrix.
 
 # Constructor
     Stiefel(m,n,T=Real)
@@ -24,56 +25,39 @@ generate the (real-valued) Stiefel manifold of $m\times n$ dimensional orthonorm
 struct Stiefel{M,N,T} <: Manifold end
 Stiefel(m::Int, n::Int,T::Type = Type{Real} ) = Stiefel{m,n,T}()
 
-
-@doc doc"""
-    inverse_retract!(M, v, x, y, ::InversePolarRetration)
-
-compute the inverse retraction based on a singular value decomposition
-for two points `x`, `y` on the [`Stiefel`](@ref) manifold `M` and return
-the resulting tangent vector in `v`.
-The formula reads
-````math
-v = ys-x$,
-````
-where $s$ is the solution to the Lyapunov equation
-````math
-$x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2\mathrm{I}_k = 0.
-````
-"""
-function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::InversePolarRetration) where {M,N,T}
-  v .= y*lyap(x'*y, -2*one(x'*x)) - x
-  return v
+function check_manifold_point(S::Stiefel{M,N,T},x; kwargs...) where {M,N,T}
+    if any( size(x) != representation_size(S) )
+        return DomainError(size(x),
+            "The matrix $(x) is does not lie on the Stiefel manifold of dimension (m,n), since its dimensions are wrong.")
+    end
+    c = x'*x
+    if !isapprox(c, one(c); kwargs...)
+        return DomainError(norm(c-one(c)),
+            "The point $(x) does not lie on the Stiefel manifold of dimension (m,n), because x'x is not the unit matrix.")
+    end
 end
 
-@doc doc"""
-    inverse_retract!(M, v, x, y, ::InverseQRRetraction)
-
-compute the inverse retraction based on a qr decomposition
-for two points `x`, `y` on the [`Stiefel`](@ref) manifold `M` and return
-the resulting tangent vector in `v`. The computation follows Algorithm 1 in
-
-> T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
-> Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
-> doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
-"""
-function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::InversePolarRetration) where {M,N,T}
-  A = x'*y
-  R = zeros(N,N)
-  for i = 1:N
-    b = zeros(i)
-    b[i] = 1
-    b[1:(end-1)] = - transpose(R[1:(i-1), 1:(i-1)]) * A[i, 1:(i-1)]
-    R[1:i, i] = A[1:i, 1:i] \ b
-  end
-  v .= y*R-x
-  return v
+function check_tangent_vector(S::Stiefel{M,N,T},x,v; kwargs...) where {M,N,T}
+    t = check_manifold_point(S,x)
+    if (t != nothing)
+        return t
+    end
+    if any( size(v) != representation_size(S) )
+        return DomainError(size(v),
+            "The matrix $(v) is does not lie in the tangent space of $(x) on the Stiefel manifold of dimension (m,n), since its dimensions are wrong.")
+    end
+    if !isapprox(x'*v + v'*x, zeros(N,N); kwargs...)
+        return DomainError(norm(x'*v + v'*x),
+            "The matrix $(v) is does not lie in the tangent space of $(x) on the Stiefel manifold of dimension (m,n), since x'v + v'x is not the zero matrix.")
+    end
 end
 
 @doc doc"""
     exp!(M,y, x, v)
 
-compute the exponential map on the [`Stiefel`](@ref)`{m,n,T}`` manifold `M`$ eminating
-from `x` into tangent direction `v` and store the result in `y`
+compute the exponential map on the [`Stiefel`](@ref)`{m,n,T}`() manifold `M`
+eminating from `x` into tangent direction `v` and store the result in `y`.
+The formula reads
 
 $\operatorname{exp}_{x} v = \begin{pmatrix}
    x\\v
@@ -90,8 +74,52 @@ $0_n$ are the identity matrix and the zero matrix of dimension $n \times n$,
 respectively.
 """
 function exp!(M::Stiefel{m,n,T}, y, x, v) where {m,n,T}
-    y .= [x v] * exp([x'v-v'*v; one(zeros(n,n)) x'*v]) * [exp(-x'v); zeros(n,n)]
+    y .= [x v] * exp([x'v-v'*v; one(zeros(T,n,n)) x'*v]) * [exp(-x'v); zeros(T,n,n)]
     return y
+end
+
+@doc doc"""
+    inverse_retract!(M, v, x, y, ::PolarInverseRetraction)
+
+compute the inverse retraction based on a singular value decomposition
+for two points `x`, `y` on the [`Stiefel`](@ref) manifold `M` and return
+the resulting tangent vector in `v`.
+The formula reads
+````math
+v = ys-x$,
+````
+where $s$ is the solution to the Lyapunov equation
+````math
+$x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2\mathrm{I}_k = 0.
+````
+"""
+function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::PolarInverseRetraction) where {M,N,T}
+  v .= y*lyap(x'*y, -2*one(x'*x)) - x
+  return v
+end
+
+@doc doc"""
+    inverse_retract!(M, v, x, y, ::QRInverseRetraction)
+
+compute the inverse retraction based on a qr decomposition
+for two points `x`, `y` on the [`Stiefel`](@ref) manifold `M` and return
+the resulting tangent vector in `v`. The computation follows Algorithm 1 in
+
+> T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
+> Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
+> doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
+"""
+function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::QRInverseRetraction) where {M,N,T}
+  A = x'*y
+  R = zeros(T,N,N)
+  for i = 1:N
+    b = zeros(i)
+    b[i] = 1
+    b[1:(end-1)] = - transpose(R[1:(i-1), 1:(i-1)]) * A[i, 1:(i-1)]
+    R[1:i, i] = A[1:i, 1:i] \ b
+  end
+  v .= y*R-x
+  return v
 end
 
 @doc doc"""
@@ -102,7 +130,7 @@ tangent space of `x` on the [`Stiefel`](@ref) manifold `M`. The formula reads
 ````math
  (v,w)_x = \operatorname{trace}({\bar v}^{\mathrm{T}}w).
 """
-inner(M::Stiefel{M,N,T}, x, v, w) where {M,N,T} = real(tr(v'*w))
+inner(::Stiefel{M,N,T}, x, v, w) where {M,N,T} = real(tr(v'*w))
 
 @doc doc"""
     manifold_dimension(M)
