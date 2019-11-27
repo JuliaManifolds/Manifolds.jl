@@ -93,7 +93,7 @@ $0_n$ are the identity matrix and the zero matrix of dimension $n \times n$,
 respectively.
 """
 function exp!(M::Stiefel{m,n,T}, y, x, v) where {m,n,T}
-    y .= [x v] * exp([x'v-v'*v; one(zeros(T,n,n)) x'*v]) * [exp(-x'v); zeros(T,n,n)]
+    y .= [x v] * exp([x'v   -v'*v; one(zeros(T,n,n))   x'*v]) * [exp(-x'v); zeros(T,n,n)]
     return y
 end
 
@@ -173,10 +173,11 @@ manifold_dimension(::Stiefel{M,N,Complex}) where {M,N} = 2*M*N - N*N
 project `v` onto the tangent space of `x` to the [`Stiefel`](@ref) manifold `M`.
 The formula reads
 ````math
-\operatorname{proj}_{\mathcal M}(x,v) = q - \frac{1}{2} v ( \bar{x}^\mathrm{T} + \bar{v}^\mathrm{T}x )$
+\operatorname{proj}_{\mathcal M}(x,v) = q - \frac{1}{2} v \bigl(
+ (\bar{x}^\mathrm{T})^\mathrm{T}\bar{v}^\mathrm{T}x \bigr)$
 ````
 """
-project_tangent!(::Stiefel{M,N,T}, w, x, v) where {M,N,T} = ( w.= v - x * 0.5 * ( x'*v + v'*x ) )
+project_tangent!(::Stiefel{M,N,T}, w, x, v) where {M,N,T} = ( w.= v - x * (0.5 * ( x'*v + v'*x )) )
 
 @doc doc"""
     retract!(M, y, x, v, ::PolarRetraction)
@@ -217,3 +218,5 @@ function retract!(::Stiefel{M,N,T}, y, x, v, ::QRRetraction) where {M,N,T}
 end
 
 representation_size(::Stiefel{M,N,T}) where {M,N,T} = (M,N)
+
+zero_tangent_vector!(::Stiefel{M,N,T},v,x) where {M,N,T} = fill!(v,0)

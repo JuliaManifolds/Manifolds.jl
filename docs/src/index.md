@@ -21,5 +21,3 @@ Order = [:type, :function]
 
 * [Array manifold](@ref)
 * [Metric manifold](@ref)
-
-### Lie Group

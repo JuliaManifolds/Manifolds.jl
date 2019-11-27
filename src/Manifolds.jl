@@ -193,13 +193,7 @@ function __init__()
     end
 end
 
-export ArrayManifold,
-    ArrayMPoint,
-    ArrayTVector
-
 export Manifold,
-    MPoint,
-    TVector,
     ProductManifold,
     PowerManifold,
     ProductRepr,
@@ -215,7 +209,7 @@ export Manifold,
     TangentBundle,
     CotangentBundle,
     TangentBundleFibers,
-    CotangentBundleFibers,
+    CotangentBundleFibers
 export
     SVDMPoint,
     UMVTVector,
@@ -225,6 +219,12 @@ export
     Sphere,
     Stiefel,
     SymmetricPositiveDefinite
+
+export
+    PolarRetraction,
+    PolarInverseRetraction,
+    QRRetraction,
+    QRInverseRetraction
 
 export base_manifold,
     bundle_projection,
