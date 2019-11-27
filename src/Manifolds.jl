@@ -124,6 +124,39 @@ function vee(M::Manifold, x, v)
     return vⁱ
 end
 
+"""
+    PolarRetraction <: AbstractRetractionMethod
+
+Retractions that are based on singular value decompositions of the matrix / matrices
+for point and tangent vector on a [`Manifold`](@ref)
+"""
+struct PolarRetraction <: AbstractRetractionMethod end
+
+"""
+    QRRetraction <: AbstractRetractionMethod
+
+Retractions that are based on a QR decomposition of the
+matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
+"""
+struct QRRetraction <: AbstractRetractionMethod end
+
+"""
+    PolarInverseRetraction <: AbstractInverseRetractionMethod
+
+Inverse retractions that are based on a singular value decomposition of the
+matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
+"""
+struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
+
+"""
+    QRInverseRetraction <: AbstractInverseRetractionMethod
+
+Inverse retractions that are based on a QR decomposition of the
+matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
+"""
+struct QRInverseRetraction <: AbstractInverseRetractionMethod end
+
+
 include("utils.jl")
 include("SizedAbstractArray.jl")
 
