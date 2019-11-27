@@ -26,14 +26,22 @@ struct Stiefel{M,N,T} <: Manifold end
 Stiefel(m::Int, n::Int,T::Type = Real) = Stiefel{m,n,T}()
 
 function check_manifold_point(S::Stiefel{M,N,T},x; kwargs...) where {M,N,T}
+    if (T <: Real) && !(eltype(x) <: Real)
+        return DomainError(eltype(x),
+            "The matrix $(x) is not a real-valued matrix, so it does noe lie on the Stiefel manifold of dimension ($(M),$(N)).")
+    end
+    if (T <: Complex) && !(eltype(x) <: Real) && !(eltype(x) <: Complex)
+        return DomainError(eltype(x),
+            "The matrix $(x) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Stiefel manifold of dimension ($(M),$(N)).")
+    end
     if any( size(x) != representation_size(S) )
         return DomainError(size(x),
-            "The matrix $(x) is does not lie on the Stiefel manifold of dimension (m,n), since its dimensions are wrong.")
+            "The matrix $(x) is does not lie on the Stiefel manifold of dimension ($(M),$(N)), since its dimensions are wrong.")
     end
     c = x'*x
     if !isapprox(c, one(c); kwargs...)
         return DomainError(norm(c-one(c)),
-            "The point $(x) does not lie on the Stiefel manifold of dimension (m,n), because x'x is not the unit matrix.")
+            "The point $(x) does not lie on the Stiefel manifold of dimension ($(M),$(N)), because x'x is not the unit matrix.")
     end
 end
 
@@ -42,13 +50,21 @@ function check_tangent_vector(S::Stiefel{M,N,T},x,v; kwargs...) where {M,N,T}
     if (t != nothing)
         return t
     end
+    if (T <: Real) && !(eltype(v) <: Real)
+        return DomainError(eltype(v),
+            "The matrix $(v) is not a real-valued matrix, so it can not be a tangent vector to the Stiefel manifold of dimension ($(M),$(N)).")
+    end
+    if (T <: Complex) && !(eltype(v) <: Real) && !(eltype(v) <: Complex)
+        return DomainError(eltype(v),
+            "The matrix $(v) is neiter real- nor complex-valued matrix, so it can not bea tangent vectorto the complex Stiefel manifold of dimension ($(M),$(N)).")
+    end
     if any( size(v) != representation_size(S) )
         return DomainError(size(v),
-            "The matrix $(v) is does not lie in the tangent space of $(x) on the Stiefel manifold of dimension (m,n), since its dimensions are wrong.")
+            "The matrix $(v) is does not lie in the tangent space of $(x) on the Stiefel manifold of dimension ($(M),$(N)), since its dimensions are wrong.")
     end
     if !isapprox(x'*v + v'*x, zeros(N,N); kwargs...)
         return DomainError(norm(x'*v + v'*x),
-            "The matrix $(v) is does not lie in the tangent space of $(x) on the Stiefel manifold of dimension (m,n), since x'v + v'x is not the zero matrix.")
+            "The matrix $(v) is does not lie in the tangent space of $(x) on the Stiefel manifold of dimension ($(M),$(N)), since x'v + v'x is not the zero matrix.")
     end
 end
 @doc doc"""
@@ -144,7 +160,7 @@ and for $\mathbb{K}=\mathbb{C}$
 $2nk - k^2.$
 """
 manifold_dimension(::Stiefel{M,N,Real}) where {M,N} = M*N - div(M*(N+1),2)
-manifold_dimension(::Stiefel{M,N,Complex}) where {M,N} = M*N - N*N
+manifold_dimension(::Stiefel{M,N,Complex}) where {M,N} = 2*M*N - M*(N+1)
 
 
 @doc doc"""

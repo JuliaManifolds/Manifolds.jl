@@ -88,6 +88,16 @@ end
 UMVTVector(U,M,Vt,k::Int) = UMVTVector(U[:,1:k],M[1:k,1:k],Vt[1:k,:])
 UMVTVector(U,M,Vt) = UMVTVector{eltype(U)}(U,M,Vt)
 
+*(v::UMVTVector, s::N) where {N <: Number} = UMVTVector(v.U*s, v.M*s,  v.Vpt*s)
+*(s::N, v::UMVTVector) where {N <: Number} = UMVTVector(s*v.U, s*v.M, s*v.Vpt) 
+/(v::UMVTVector, s::N) where {N <: Number} = UMVTVector(v.U/s, v.M/s, v.Vt/s)
+/(s::N, v::UMVTVector) where {N <: Number} = UMVTVector(v.U/s, v.M/s, v.Vt/s)
++(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U + w.U, v.M + w.M, v.Vt + w.Vt)
+-(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U - w.U, v.M - w.M, v.Vt - w.Vt)
+-(v::UMVTVector) = UMVTVector(-v.U, -v.M, -v.Vt)
++(v::UMVTVector) = UMVTVector(v.U, v.M, v.Vt)
+
+
 function check_manifold_point(F::FixedRankMatrices{M,N,k,T},x; kwargs...) where {M,N,k,T}
     r = rank(x; kwargs...)
     s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(M),$(N)) witk rank $(k), "
@@ -175,7 +185,7 @@ function retract!(::FixedRankMatrices{M,N,k,T}, y::SVDMPoint, x::SVDMPoint, v::U
     return y
 end
 
-function zero_tangent_vector!(::FixedRankMatrices{m,n,k,T},v::UMVPoint x::SVDMPoint) where {m,n,k,T}
+function zero_tangent_vector!(::FixedRankMatrices{m,n,k,T},v::UMVTVector, x::SVDMPoint) where {m,n,k,T}
     v.U .= zeros(T,n,k)
     v.M .= zeros(T,k,k)
     v.Vt = zeros(T,k,m)
