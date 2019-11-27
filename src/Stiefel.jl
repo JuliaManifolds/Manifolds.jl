@@ -1,4 +1,5 @@
-using LinearAlgebra: diag, qr, tr, svd, mul!, lyap
+using LinearAlgebra: diag, qr, tr, svd, mul!, zeros
+using MatrixEquations: arec
 
 @doc doc"""
     Stiefel{m,n,T} <: Manifold
@@ -102,18 +103,27 @@ end
 
 compute the inverse retraction based on a singular value decomposition
 for two points `x`, `y` on the [`Stiefel`](@ref) manifold `M` and return
-the resulting tangent vector in `v`.
-The formula reads
+the resulting tangent vector in `v`. This follows the wolloing approach:
+From the Polar retraction we know that
 ````math
-v = ys-x$,
+    \operatorname{retr}_x^{-1}y = ys - q 
 ````
-where $s$ is the solution to the Lyapunov equation
+if such a symmetric positive definite $n\times n$ matrix exists. Since $ys-q$ is
+    also a tangent vector at $x$ we obtain
 ````math
 $x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2\mathrm{I}_k = 0.
 ````
+Setting $m=x^\mathrm{T}y$ this yields $(-m)s + s(-m^\mathrm{T}) + 2I = 0$,
+a continuous-time algebraic Riccati equation (arec). This follows Algorithm 2 in
+
+> T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
+> Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
+> doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
 """
 function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::PolarInverseRetraction) where {M,N,T}
-  v .= y*lyap(x'*y, -2*one(x'*x)) - x
+   # arec (A,Q,R) solves A'X + XA + XRX + Q = 0
+    s,t = arec( -(x'*y)', zero(y'*y), 2*one(y'*y) )
+    v .= y*s-x
   return v
 end
 

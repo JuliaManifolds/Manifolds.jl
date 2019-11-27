@@ -47,7 +47,8 @@ include("utils.jl")
                           pts_tb,
                           test_reverse_diff = isa(T, Vector),
                           test_tangent_vector_broadcasting = false,
-                          test_project_tangent = true)
+                          test_project_tangent = true,
+                          projection_atol_multiplier = 4)
         end
     end
 

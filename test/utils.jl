@@ -37,7 +37,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_musical_isomorphisms = false,
     test_vector_transport = false,
     test_mutating_rand = false,
-    default_inverse_retraction_method = LogarithmicInverseRetracion(),
+    default_inverse_retraction_method = ManifoldsBase.LogarithmicInverseRetraction(),
     retraction_methods = [],
     inverse_retraction_methods = [],
     point_distributions = [],
