@@ -3,7 +3,7 @@
 The symmetric positive definite matrices
 
 ```math
-\mathcal P(n) = \bigl\{ A \in \mathbb R^{n\times n}\ \big|\ 
+\mathcal P(n) = \bigl\{ A \in \mathbb R^{n\times n}\ \big|\
 A = A^{\mathrm{T}} \text{ and }
 x^{\mathrm{T}}Ax > 0 \text{ for } 0\neq x \in\mathbb R^n \bigr\}
 ```
@@ -14,7 +14,7 @@ SymmetricPositiveDefinite
 
 can -- for example -- be illustrated as ellipsoids:  since the eigen values are all positive
 they can be taken as lengths of the axes of an ellipsoids while the directions are given by
-the eigenvectors. 
+the eigenvectors.
 
 ![An example set of data](../assets/images/SPDSignal.png)
 
@@ -23,10 +23,10 @@ The manifold can be equipped with different metrics
 ## Common and Metric Independent functions
 ```@docs
 injectivity_radius(::SymmetricPositiveDefinite{N},a::Vararg{Any,N} where N) where N
-is_manifold_point(::SymmetricPositiveDefinite{N},x; kwargs...) where N
-is_tangent_vector(::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
-manifold_dimension(::SymmetricPositiveDefinite{N}) where N 
-representation_size(::SymmetricPositiveDefinite) 
+check_manifold_point(::SymmetricPositiveDefinite{N},x; kwargs...) where N
+check_tangent_vector(::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
+manifold_dimension(::SymmetricPositiveDefinite{N}) where N
+representation_size(::SymmetricPositiveDefinite)
 zero_tangent_vector(::SymmetricPositiveDefinite{N},x) where N
 zero_tangent_vector!(::SymmetricPositiveDefinite{N}, v, x) where N
 ```

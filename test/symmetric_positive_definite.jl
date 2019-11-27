@@ -36,13 +36,13 @@ for M in [M1, M2, M3]
             pt2f = [1. 0. 0.; 0. 0. 0.; 0. 0. 1.]; # not positive Definite
             pt3f = [2. 0. 1.; 0. 1. 0.; 0. 0. 4.]; # not symmetric
             pt4 = [2. 1. 0.; 1. 2. 0.; 0. 0. 4.]
-            @test_throws DomainError is_manifold_point(M,pt1f)
-            @test_throws DomainError is_manifold_point(M,pt2f)
-            @test_throws DomainError is_manifold_point(M,pt3f)
+            @test !is_manifold_point(M,pt1f)
+            @test !is_manifold_point(M,pt2f)
+            @test !is_manifold_point(M,pt3f)
             @test is_manifold_point(M, pt4)
-            @test_throws DomainError is_tangent_vector(M,pt4, pt1f)
+            @test !is_tangent_vector(M,pt4, pt1f)
             @test is_tangent_vector(M,pt4, pt2f)
-            @test_throws DomainError is_tangent_vector(M,pt4, pt3f)
+            @test !is_tangent_vector(M,pt4, pt3f)
         end
     end
 end

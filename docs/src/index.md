@@ -6,7 +6,13 @@ use manifolds as well as a library of manifolds to use for your projects.
 ## Interface
 
 ```@autodocs
-Modules = [Manifolds]
+Modules = [ManifoldsBase]
+Pages = ["ManifoldsBase.jl"]
+Order = [:type, :function]
+```
+
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
 Pages = ["Manifolds.jl"]
 Order = [:type, :function]
 ```

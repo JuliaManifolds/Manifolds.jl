@@ -120,7 +120,7 @@ function vector_transport_to!(::CholeskySpace{N}, vto, x, v, y, ::ParallelTransp
 end
 
 @doc doc"""
-    is_manifold_point(M,x;kwargs...)
+    check_manifold_point(M,x;kwargs...)
 
 check whether the matrix `x` lies on the [`CholeskySpace`](@ref) `M`, i.e.
 it's size fits the manifold, it is a lower triangular matrix and has positive
@@ -128,35 +128,38 @@ entries on the diagonal.
 The tolerance for the tests can be set using the `kwargs...`.
 """
 
-function is_manifold_point(M::CholeskySpace{N}, x; kwargs...) where N
+function check_manifold_point(M::CholeskySpace{N}, x; kwargs...) where N
     if size(x) != representation_size(M)
-        throw(DomainError(size(x),"The point $(x) does not lie on $(M), since its size is not $(representation_size(M))."))
+        return DomainError(size(x),"The point $(x) does not lie on $(M), since its size is not $(representation_size(M)).")
     end
     if !isapprox( norm(strictlyUpperTriangular(x)), 0.; kwargs...)
-        throw(DomainError(norm(UpperTriangular(x) - Diagonal(x)), "The point $(x) does not lie on $(M), since it strictly upper triangular nonzero entries"))
+        return DomainError(norm(UpperTriangular(x) - Diagonal(x)), "The point $(x) does not lie on $(M), since it strictly upper triangular nonzero entries")
     end
     if any( diag(x) .<= 0)
-        throw(DomainError(min(diag(x)...), "The point $(x) does not lie on $(M), since it hast nonpositive entries on the diagonal"))
+        return DomainError(min(diag(x)...), "The point $(x) does not lie on $(M), since it hast nonpositive entries on the diagonal")
     end
-    return true
+    return nothing
 end
 """
-    is_tangent_vector(M,x,v; kwargs... )
+    check_tangent_vector(M,x,v; kwargs... )
 
 checks whether `v` is a tangent vector to `x` on the [`CholeskySpace`](@ref) `M`, i.e.
-atfer [`is_manifold_point`](@ref)`(M,x)`, `v` has to be of same dimension as `x`
+atfer [`check_manifold_point`](@ref)`(M,x)`, `v` has to be of same dimension as `x`
 and a symmetric matrix.
 The tolerance for the tests can be set using the `kwargs...`.
 """
-function is_tangent_vector(M::CholeskySpace{N}, x,v; kwargs...) where N
-    is_manifold_point(M,x)
+function check_tangent_vector(M::CholeskySpace{N}, x,v; kwargs...) where N
+    mpe = check_manifold_point(M, x)
+    if mpe !== nothing
+        return mpe
+    end
     if size(v) != representation_size(M)
-        throw(DomainError(size(v),
-            "The vector $(v) is not a tangent to a point on $(M) since its size does not match $(representation_size(M))."))
+        return DomainError(size(v),
+            "The vector $(v) is not a tangent to a point on $(M) since its size does not match $(representation_size(M)).")
     end
     if !isapprox(norm(v-transpose(v)), 0.; kwargs...)
-        throw(DomainError(size(v),
-            "The vector $(v) is not a tangent to a point on $(M) (represented as an element of the Lie algebra) since its not symmetric."))
+        return DomainError(size(v),
+            "The vector $(v) is not a tangent to a point on $(M) (represented as an element of the Lie algebra) since its not symmetric.")
     end
-    return true
+    return nothing
 end

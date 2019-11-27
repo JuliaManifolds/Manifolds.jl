@@ -1,9 +1,9 @@
-using Manifolds, Documenter
+using Manifolds, ManifoldsBase, Documenter
 
 makedocs(
     # for development, we disable prettyurls
     format = Documenter.HTML(prettyurls = false),
-    modules = [Manifolds],
+    modules = [Manifolds, ManifoldsBase],
     sitename = "Manifolds",
     pages = [
         "Home" => "index.md",

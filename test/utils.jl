@@ -1,4 +1,5 @@
 using Manifolds
+using ManifoldsBase
 
 using LinearAlgebra
 using Distributions
@@ -79,8 +80,12 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     @testset "is_manifold_point / is_tangent_vector" begin
         for pt ∈ pts
             @test is_manifold_point(M, pt)
+            @test check_manifold_point(M, pt) === nothing
+            @test check_manifold_point(M, pt) === nothing
         end
         @test is_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1])))
+        @test check_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1]))) === nothing
+        @test check_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1]))) === nothing
     end
 
     @testset "log/exp tests" begin

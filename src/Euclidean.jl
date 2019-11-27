@@ -96,8 +96,8 @@ log!(M::Euclidean, v, x, y) = (v .= y .- x)
     zero_tangent_vector!(M::Euclidean, v, x)
 
 compute a zero vector in the tangent space of `x` on the [`Euclidean`](@ref)
-manifold `M`, whcih here is just a zero filled array the same size as the 
-in place parameter `v` which is assumed to have the same `size` as `x`.    
+manifold `M`, whcih here is just a zero filled array the same size as the
+in place parameter `v` which is assumed to have the same `size` as `x`.
 """
 function zero_tangent_vector!(M::Euclidean, v, x)
     fill!(v, 0)
