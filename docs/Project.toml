@@ -1,5 +1,7 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+ManifoldsBase = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
 
 [compat]
-Documenter = "0.22"
+Documenter = "0.24"
+ManifoldsBase = "0.2"

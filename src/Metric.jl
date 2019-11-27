@@ -42,7 +42,7 @@ end
 
 convert(::Type{MT},M::MetricManifold{MT,GT}) where {MT,GT} = base_manifold(M)
 
-@traitimpl IsDecoratorManifold{MetricManifold}
+is_decorator_manifold(M::MetricManifold) = Val(true)
 
 
 @doc doc"""
@@ -264,7 +264,7 @@ end
 # Most of these can be reduced as soon as we have the final THTT decorator
 
 inner(M::MMT, x, v, w) where {MMT<:MetricManifold} = dot(v, local_metric(M, x) * w)
-norm(M::MMT, x, v) where {MMT<:MetricManifold} = norm(sqrt(inner(M,x,v,v)))
+norm(M::MMT, x, v) where {MMT<:MetricManifold} = sqrt(inner(M,x,v,v))
 distance(M::MMT, x, y) where {MMT<:MetricManifold} = distance(base_manifold(M), x, y)
 zero_tangent_vector(M::MMT, x, v) where {MMT<:MetricManifold} = zero_tangent_vector(base_manifold(M), x, v, v)
 log!(M::MMT, v, x, y) where {MMT<:MetricManifold} = log!(base_manifold(M), v, x, y)
@@ -281,11 +281,11 @@ end
 function zero_tangent_vector!(M::MMT, v, x) where {MMT<:MetricManifold}
     return zero_tangent_vector!(base_manifold(M), v, x)
 end
-function is_manifold_point(M::MMT, x; kwargs...) where {MMT<:MetricManifold}
-    return is_manifold_point(base_manifold(M), x; kwargs...)
+function check_manifold_point(M::MMT, x; kwargs...) where {MMT<:MetricManifold}
+    return check_manifold_point(base_manifold(M), x; kwargs...)
 end
-function is_tangent_vector(M::MMT, x, v; kwargs...) where {MMT<:MetricManifold}
-    return is_tangent_vector(base_manifold(M), x, v; kwargs...)
+function check_tangent_vector(M::MMT, x, v; kwargs...) where {MMT<:MetricManifold}
+    return check_tangent_vector(base_manifold(M), x, v; kwargs...)
 end
 function inner(B::VectorBundleFibers{<:CotangentSpaceType, MMT}, x, v, w) where {MMT<:MetricManifold}
     ginv = inverse_local_metric(B.M, x)
