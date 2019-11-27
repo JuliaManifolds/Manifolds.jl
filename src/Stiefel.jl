@@ -23,7 +23,7 @@ where $0_n$ is the $n\times n$ zero matrix.
 generate the (real-valued) Stiefel manifold of $m\times n$ dimensional orthonormal matrices.
 """
 struct Stiefel{M,N,T} <: Manifold end
-Stiefel(m::Int, n::Int,T::Type = Type{Real} ) = Stiefel{m,n,T}()
+Stiefel(m::Int, n::Int,T::Type = Real) = Stiefel{m,n,T}()
 
 function check_manifold_point(S::Stiefel{M,N,T},x; kwargs...) where {M,N,T}
     if any( size(x) != representation_size(S) )
@@ -110,7 +110,7 @@ the resulting tangent vector in `v`. The computation follows Algorithm 1 in
 """
 function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::QRInverseRetraction) where {M,N,T}
   A = x'*y
-  R = zeros(T,N,N)
+  R = zeros(typeof(one(eltype(x))*one(eltype(y))),N,N)
   for i = 1:N
     b = zeros(i)
     b[i] = 1
@@ -129,7 +129,7 @@ tangent space of `x` on the [`Stiefel`](@ref) manifold `M`. The formula reads
 ````math
  (v,w)_x = \operatorname{trace}({\bar v}^{\mathrm{T}}w).
 """
-inner(::Stiefel{M,N,T}, x, v, w) where {M,N,T} = real(tr(v'*w))
+inner(::Stiefel{M,N,T}, x, v, w) where {M,N,T} = real(dot(v,w))
 
 @doc doc"""
     manifold_dimension(M)
@@ -143,8 +143,8 @@ and for $\mathbb{K}=\mathbb{C}$
 
 $2nk - k^2.$
 """
-manifold_dimension(::Stiefel{M,N,T}) where {M,N,T<:Real} = M*N - div(M*(N+1),2)
-manifold_dimension(::Stiefel{M,N,T}) where {M,N,T<:Complex} = M*N - N*N
+manifold_dimension(::Stiefel{M,N,Real}) where {M,N} = M*N - div(M*(N+1),2)
+manifold_dimension(::Stiefel{M,N,Complex}) where {M,N} = M*N - N*N
 
 
 @doc doc"""

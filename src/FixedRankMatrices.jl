@@ -31,12 +31,12 @@ where $0_k$ is the $k\times k$ zero matrix. See [`UMVTVector`](@ref) for details
 
 This representation follows
 > Bart Vandereycken: "Low-rank matrix completion by Riemannian Optimization,
-> SIAM Journal on Optiomoization, 23(2), pp. 1214–1236, 2013.
+> SIAM Journal on Optimization, 23(2), pp. 1214–1236, 2013.
 > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
 > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
 struct FixedRankMatrices{M,N,K,T} <: Manifold end
-FixedRankMatrices(m::Int, n::Int, k::Int, T::Type = Type{Real}) = FixedRankMatrices{m,n,k,T}()
+FixedRankMatrices(m::Int, n::Int, k::Int, T::Type = Real) = FixedRankMatrices{m,n,k,T}()
 
 @doc doc"""
     SVDMPoint <: MPoint
@@ -47,9 +47,9 @@ $V^\mathrm{T}$. The storage might also be shortened to just $k$ singular values
 and accordingly shortened $U$ (columns) and $V^\mathrm{T}$ (rows)
 
 # Constructors
-* `SVDMPoint(A)` for a matrix `A`, stores its svd factors
-* `SVDMPoint(S)` for an `SVD` object, stores its svd factors
-* `SVDMPoint(U,S,Vt)` for the svd factors to initialize the `SVDMPoint``
+* `SVDMPoint(A)` for a matrix `A`, stores its svd factors (i.e. implicitly $k=\min\{m,n\})
+* `SVDMPoint(S)` for an `SVD` object, stores its svd factors (i.e. implicitly $k=\min\{m,n\})
+* `SVDMPoint(U,S,Vt)` for the svd factors to initialize the `SVDMPoint`` (i.e. implicitly $k=\min\{m,n\})
 * `SVDMPoint(A,k)` for a matrix `A`, stores its svd factors shortened to the
   best rank $k$ approximation
 * `SVDMPoint(S,k)` for an `SVD` object, stores its svd factors shortened to the
@@ -57,15 +57,17 @@ and accordingly shortened $U$ (columns) and $V^\mathrm{T}$ (rows)
 * `SVDMPoint(U,S,Vt,k)` for the svd factors to initialize the `SVDMPoint`,
   stores its svd factors shortened to the best rank $k$ approximation
 """
-struct SVDMPoint{T} <: MPoint
-    U::Matrix{T}
-    S::Vector{T}
-    Vt::Matrix{T}
+struct SVDMPoint{TU<:AbstractMatrix, TS<:AbstractVector, TVt<:AbstractMatrix} <: MPoint
+    U::TU
+    S::TS
+    Vt::TVt
 end
-SVDMPoint(A::Matrix,args...) = SVDMPoint(svd(A),args...)
-SVDMPoint(S::SVD,args...) = SVDMPoint(S.U,S.S,S.Vt,args...)
-SVDMPoint(U,S,Vt,k::Int) = SVDMPoint(U[:,1:k],S[1:k],Vt[1:k,:])
+SVDMPoint(A::AbstractMatrix) = SVDMPoint(svd(A))
+SVDMPoint(S::SVD) = SVDMPoint(S.U,S.S,S.Vt)
 SVDMPoint(U,S,Vt) = SVDMPoint{eltype(U)}(U,S,Vt)
+SVDMPoint(A::Matrix,k::Int) = SVDMPoint(svd(A),k)
+SVDMPoint(S::SVD,k::Int) = SVDMPoint(S.U,S.S,S.Vt,k)
+SVDMPoint(U,S,Vt,k::Int) = SVDMPoint(U[:,1:k],S[1:k],Vt[1:k,:])
 
 @doc doc"""
     UMVTVector <: TVector
@@ -78,10 +80,10 @@ together with its base point, see for example [`FixedRankMatrices`](@ref)
 * `UMVTVector(U,S,Vt,k)` store the umv factors after shortening them down to
   inner dimensions $k$, i.e. in $UMV^\mathrm{T}$, $M\in\mathbb R^{k\times k}$
 """
-struct UMVTVector{T} <: TVector
-    U::Matrix{T}
-    M::Matrix{T}
-    Vt::Matrix{T}
+struct UMVTVector{TU<:AbstractMatrix, TM<:AbstractMatrix, TVt<:AbstractMatrix} <: TVector
+    U::TU
+    M::TM
+    Vt::TVt
 end
 UMVTVector(U,M,Vt,k::Int) = UMVTVector(U[:,1:k],M[1:k,1:k],Vt[1:k,:])
 UMVTVector(U,M,Vt) = UMVTVector{eltype(U)}(U,M,Vt)
@@ -131,9 +133,8 @@ function inner(::FixedRankMatrices{M,N,k,T}, x::SVDMPoint, v::UMVTVector, w::UMV
     return dot(v.U,w.U) + dot(v.M,w.M) + dot(v.Vt,w.Vt)
 end
 
-manifold_dimension(::FixedRankMatrices{M,N,k,T}) where {M,N,k,T <: Real} = (M+N-k)*k
-manifold_dimension(::FixedRankMatrices{M,N,k,T}) where {M,N,k,T <: Complex{U} where U} = 2*(M+N-k)*k
-
+manifold_dimension(::FixedRankMatrices{M,N,k,Real}) where {M,N,k} = (M+N-k)*k
+manifold_dimension(::FixedRankMatrices{M,N,k,Complex}) where {M,N,k} = 2*(M+N-k)*k
 @doc doc"""
     project_tangent!(M,vto,x,A)
 
@@ -146,7 +147,7 @@ Section 3 in
 > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
 > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
-function project_tangent!(::FixedRankMatrices{M,N,k,T}, vto::UMVTVector, x::SVDMPoint, A::Matrix) where {M,N,k,T}
+function project_tangent!(::FixedRankMatrices{M,N,k,T}, vto::UMVTVector, x::SVDMPoint, A::AbstractMatrix) where {M,N,k,T}
     vto.M .= x.U * A * x.Vt'
     vto.U .= A * x.Vt' - x.U
     vto.Vt .= x.U' * A - x.U' * A * x.Vt' * x.Vt
@@ -174,4 +175,9 @@ function retract!(::FixedRankMatrices{M,N,k,T}, y::SVDMPoint, x::SVDMPoint, v::U
     return y
 end
 
-zero_tangent_vector(::FixedRankMatrices{m,n,k,T},x::SVDMPoint) where {m,n,k,T} = UMTVector(zeros(T,n,k), zeros(T,k,k), zeros(T,k,m))
+function zero_tangent_vector!(::FixedRankMatrices{m,n,k,T},v::UMVPoint x::SVDMPoint) where {m,n,k,T}
+    v.U .= zeros(T,n,k)
+    v.M .= zeros(T,k,k)
+    v.Vt = zeros(T,k,m)
+    return v
+end
