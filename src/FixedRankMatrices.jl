@@ -1,5 +1,5 @@
 using LinearAlgebra: diag, Diagonal, svd, SVD, rank, dot
-
+import Base: \
 @doc doc"""
     FixedRankMatrices{M,N,K} <: Manifold
 

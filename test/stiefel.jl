@@ -12,8 +12,7 @@ include("utils.jl")
         @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0., 0., 1., 0.])
     end
     types =  [ Matrix{Float32},
-            Matrix{Float64},
-            MMatrix{3,2,Float32}
+            Matrix{Float64}
         ]
     for T in types
         @testset "Type $T" begin
