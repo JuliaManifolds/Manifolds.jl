@@ -6,8 +6,8 @@ include("utils.jl")
     @testset "Stiefel Basics" begin
         @test representation_size(M) == (3,2)
         @test representation_size(Mc) == (3,2)
-        @test manifold_dimension(M) == 2
-        @test manifold_dimension(Mc) == 4
+        @test manifold_dimension(M) == 3
+        @test manifold_dimension(Mc) == 8
         @test_throws DomainError is_manifold_point(M,[1., 0., 0., 0.])
         @test_throws DomainError is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0., 0., 1., 0.])
     end

@@ -17,6 +17,10 @@ T_x\mathcal M = \{ v \in \mathbb{K}^{m\times n} : x^{\mathrm{T}}v + v^{\mathrm{T
 ````
 where $0_n$ is the $n\times n$ zero matrix.
 
+The metric is either inherited from $\mathbb R^{m,n}$ for the real-valued case
+or the one inherited from interpreting the complex valued entries in the Gaussian
+plane $\mathbb R^2$ and then ober all entries as before.
+
 # Constructor
     Stiefel(m,n,T=Real)
 
@@ -159,8 +163,8 @@ and for $\mathbb{K}=\mathbb{C}$
 
 $2nk - k^2.$
 """
-manifold_dimension(::Stiefel{M,N,Real}) where {M,N} = M*N - div(M*(N+1),2)
-manifold_dimension(::Stiefel{M,N,Complex}) where {M,N} = 2*M*N - M*(N+1)
+manifold_dimension(::Stiefel{M,N,Real}) where {M,N} = M*N - div(N*(N+1),2)
+manifold_dimension(::Stiefel{M,N,Complex}) where {M,N} = 2*M*N - N*N
 
 
 @doc doc"""
