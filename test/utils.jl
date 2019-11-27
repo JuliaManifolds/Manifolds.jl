@@ -25,6 +25,9 @@ tested.
 - `retraction_methods = []`: retraction methods that will be tested.
 """
 function test_manifold(M::Manifold, pts::AbstractVector;
+    test_exp_log = true,
+    test_log_yields_tangent = true,
+    test_injectivity_radius=true,
     test_forward_diff = true,
     test_reverse_diff = true,
     test_tangent_vector_broadcasting = true,
@@ -65,7 +68,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         end
     end
 
-    @testset "injectivity radius" begin
+    test_injectivity_radius && @testset "injectivity radius" begin
         @test injectivity_radius(M, pts[1]) > 0
         @test injectivity_radius(M, pts[1]) ≥ injectivity_radius(M)
         for rm ∈ retraction_methods
@@ -74,16 +77,19 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         end
     end
 
-    tv1 = log(M, pts[1], pts[2])
-
-    @testset "is_manifold_point / is_tangent_vector" begin
+    @testset "is_manifold_point" begin
         for pt ∈ pts
             @test is_manifold_point(M, pt)
         end
+    end
+
+    test_log_yields_tangent && @testset "is_tangent_vector" begin
+        tv1 = log(M, pts[1], pts[2])
         @test is_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1])))
     end
 
-    @testset "log/exp tests" begin
+    test_exp_log &&@testset "log/exp tests" begin
+        tv1 = log(M, pts[1], pts[2])
         tv2 = log(M, pts[2], pts[1])
         @test isapprox(M, pts[2], exp(M, pts[1], tv1))
         @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
