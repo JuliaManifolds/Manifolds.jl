@@ -148,6 +148,7 @@ end
 
 struct BaseManifold{N} <: Manifold end
 struct BaseManifoldMetric{M} <: Metric end
+struct DefaultBaseManifoldMetric <: Metric end
 
 @testset "Metric decorator" begin
     Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
@@ -157,6 +158,7 @@ struct BaseManifoldMetric{M} <: Metric end
     Manifolds.project_tangent!(::BaseManifold, w, x, v) = w .= 2 .* v
     Manifolds.local_metric(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}},x) where N = 2*one(x*x')
     Manifolds.exp!(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x, v) where N = exp!(base_manifold(M), y, x, v)
+    Manifolds.is_default_metric(M::BaseManifold,G::DefaultBaseManifoldMetric) = Val{true}
     function Manifolds.flat!(::BaseManifold, v::FVector{Manifolds.CotangentSpaceType}, x, w::FVector{Manifolds.TangentSpaceType})
         v.data .= 2 .* w.data
         return v
@@ -169,6 +171,8 @@ struct BaseManifoldMetric{M} <: Metric end
     M = BaseManifold{3}()
     g = BaseManifoldMetric{3}()
     MM = MetricManifold(M, g)
+    g2 = DefaultBaseManifoldMetric()
+    MM2 = MetricManifold(M,g2)
     is_default_metric(::BaseManifold,g::BaseManifoldMetric) = Val{true}
 
     x = [0.1 0.2 0.4]
@@ -179,19 +183,36 @@ struct BaseManifoldMetric{M} <: Metric end
     @test inner(M, x, v, w) == 2 * dot(v,w)
     @test inner(MM, x, v, w) === inner(M, x, v, w)
     @test norm(MM, x, v) === norm(M, x, v)
-    @test distance(MM, x, y) === distance(M, x, y)
     @test exp(M, x, v) == x + 2 * v
     @test exp!(MM, y, x, v) === exp!(M, y, x, v)
-    @test log(M, x, y) == (y - x) / 2
-    @test log!(MM, v, x, y) === log!(M, v, x, y)
     @test retract!(MM, y, x, v) === retract!(M, y, x, v)
     @test retract!(MM, y, x, v, 1) === retract!(M, y, x, v, 1)
-    @test project_tangent!(MM, w, x, v) === project_tangent!(M, w, x, v)
+    # without a definition for the metric from the embedding, no projection possible
+    @test_throws ErrorException log!(MM, w, x, y) === project_tangent!(M, w, x, y)
+    @test_throws ErrorException project_tangent!(MM, w, x, v) === project_tangent!(M, w, x, v)
+    @test_throws ErrorException project_point!(MM, y, x) === project_point!(M, y, x)
+    @test_throws ErrorException vector_transport_to!(MM, w, x, v, y) === vector_transport_to!(M, w, x, v, y)
+    # these always fall back anyways.
     @test zero_tangent_vector!(MM, v, x) === zero_tangent_vector!(M, v, x)
     @test injectivity_radius(MM, x) === injectivity_radius(M, x)
     @test injectivity_radius(MM) === injectivity_radius(M)
     @test is_manifold_point(MM, x) === is_manifold_point(M, x)
     @test is_tangent_vector(MM, x, v) === is_tangent_vector(M, x, v)
+
+    @test inner(MM2, x, v, w) === inner(M, x, v, w)
+    @test norm(MM2, x, v) === norm(M, x, v)
+    @test distance(MM2, x, y) === distance(M, x, y)
+    @test exp!(MM2, y, x, v) === exp!(M, y, x, v)
+    @test log!(MM2, v, x, y) === log!(M, v, x, y)
+    @test retract!(MM2, y, x, v) === retract!(M, y, x, v)
+    @test retract!(MM2, y, x, v, 1) === retract!(M, y, x, v, 1)
+    @test project_tangent!(MM2, w, x, v) === project_tangent!(M, w, x, v)
+    @test zero_tangent_vector!(MM2, v, x) === zero_tangent_vector!(M, v, x)
+    @test injectivity_radius(MM2, x) === injectivity_radius(M, x)
+    @test injectivity_radius(MM2) === injectivity_radius(M)
+    @test is_manifold_point(MM2, x) === is_manifold_point(M, x)
+    @test is_tangent_vector(MM2, x, v) === is_tangent_vector(M, x, v)
+
 
     cov = flat(M, x, FVector(TangentSpace, v))
     cow = flat(M, x, FVector(TangentSpace, w))

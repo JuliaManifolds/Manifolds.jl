@@ -45,7 +45,7 @@ struct MetricManifold{M<:Manifold,G<:Metric} <: Manifold
     metric::G
 end
 
-is_decorator_manifold(M::MetricManifold) = Val(true)
+is_decorator_manifold(M::MMT) where {MMT <: MetricManifold}= Val(true)
 
 """
     is_default_metric(M,G)
@@ -53,16 +53,27 @@ is_decorator_manifold(M::MetricManifold) = Val(true)
 indicate, whether the [`Metric`](@ref) `G` is the default metric for
 the [`Manifold`](@ref) `M`. This means that any occurence of
 [`MetricManifold`](@ref)(M,G) where `is_default_metric(M,G) = Val{true}`
-falls back to just be called with `M` such that the [`manifold`](@ref) `M`
+falls back to just be called with `M` such that the [`Manifold`](@ref) `M`
 implicitly has this metric, for example if this was the first one implemented
 or is the one most commonly assumed to be used.
 """
 is_default_metric(M::Manifold,G::Metric) = Val(false)
+"""
+    is_default_metric(MM)
 
+indicate, whether the [`Metric`](@ref) `G` is the default metric for
+the [`Manifold`](@ref) `M` within the [`MetricManifold`](@ref) `M`.
+This means that any occurence of
+[`MetricManifold`](@ref)`(M,G)` where `is_default_metric(M,G) = Val{true}`
+falls back to just be called with `M` such that the [`Manifold`](@ref) `M`
+implicitly has this metric, for example if this was the first one implemented
+or is the one most commonly assumed to be used.
+"""
+is_default_metric(M::MMT) where {MMT <: MetricManifold} = is_default_metric(base_manifold(M),metric(M))
 # this automatically undecorates
 convert(::Type{MT},M::MetricManifold{<:MT,GT}) where {MT <: Manifold,GT} = base_manifold(M)
 # this should austomatically decorate at least for simple cases
-convert(T::Type{MetricManifold{MT,GT}},M::MT) where {MT,GT} = _convert_with_default(T,M,is_default_metric(M,GT))
+convert(T::Type{MetricManifold{MT,GT}},M::MT) where {MT,GT} = _convert_with_default(T,M,is_default_metric(M))
 _convert_with_default(T::Type{Metric},M::Manifold,::Val{true}) where {MT <: Manifold} = MetricManifold(M,T())
 _convert_with_default(T::Type{Metric},M::MT,::Val{false}) where {MT <: Manifold} = error("Can not convert $(M) to a MetricManifold{$(MT),$(T)}, since $(T) is not the default metric.")
 
@@ -262,26 +273,48 @@ function exp(M::MMT, x, v, T::AbstractVector) where {MMT<:MetricManifold}
     return map(i -> sol.u[i][n+1:end], 1:length(T))
 end
 
+exp!(M::MetricManifold, y, x, v, t) = exp!(M, is_default_metric(M), y, x, v,t)
+exp!(M::MMT, ::Val{true}, y, x, v) where {MMT<:MetricManifold} = exp!(base_manifold(M),y,x,v)
 """
-    exp(M::MetricManifold, x, v, args...)
+    exp(MM::MetricManifold, x, v, args...)
 
 Numerically integrate the exponential map assuming the Levi-Civita connection.
-See [`solve_exp_ode`](@ref)
+See [`solve_exp_ode`](@ref) if the [`Metric`](@ref) `G` of the [`MetricManifold`](@ref){M,G}`
+is not marked as the default one.
 
 Currently, the numerical integration is only accurate when using a single
 coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
 """
-function exp!(M::MMT, y, x, v) where {MMT<:MetricManifold}
+function exp!(M::MMT, ::Val{false}, y, x, v) where {MMT<:MetricManifold}
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, x, v, tspan; dense=false, saveat=[1.0])
     n = length(x)
     y .= sol.u[1][n+1:end]
     return y
 end
-inner(M::MMT, x, v, w) where {MMT<:MetricManifold} = dot(v, local_metric(M, x) * w)
 
-#
+inner(M::MMT, x, v, w) where {MMT <: MetricManifold}= inner(M, is_default_metric(M), x, v, w)
+inner(M::MMT, ::Val{false}, x, v, w) where {MMT <: MetricManifold}= dot(v, local_metric(M, x) * w)
+inner(M::MMT, ::Val{true}, x, v, w) where {MMT <: MetricManifold} = inner(base_manifold(M), x,v,w)
+
+log!(M::MMT, w, x, y) where {MMT <: MetricManifold} = log!(M, is_default_metric(M), w, x, y)
+log!(M::MMT, ::Val{true}, w, x, y) where {MMT <: MetricManifold} = log!(base_manifold(M), w, x, y)
+log!(M::MMT, ::Val{false}, w, x, y) where {MMT <: MetricManifold} = error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y)).")
+
+
+project_point!(M::MMT, y, x) where {MMT <: MetricManifold} = project_point!(M, is_default_metric(M), y, x)
+project_point!(M::MMT, ::Val{true}, y, x) where {MMT <: MetricManifold} = project_point!(base_manifold(M), y, x)
+project_point!(M::MMT, ::Val{false}, y, x) where {MMT <: MetricManifold} = error("project_point! not implemented on $(typeof(M)) for point $(typeof(x))")
+
+project_tangent!(M::MMT, w, x, v) where {MMT <: MetricManifold} = project_tangent!(M, is_default_metric(M), w, x, v)
+project_tangent!(M::MMT, ::Val{true}, w, x, v) where {MMT <: MetricManifold} = project_tangent!(base_manifold(M), w, x, v)
+project_tangent!(M::MMT, ::Val{false}, w, x, v) where {MMT <: MetricManifold} = error("project_tangent! not implemented for a $(typeof(M)) and tangent $(typeof(v)) at point $(typeof(x)).")
+
+vector_transport_to!(M::MMT, vto, x, v, y, m::AbstractVectorTransportMethod) where {MMT <: MetricManifold} = vector_transport_to!(M, is_default_metric(M), vto, x, v, y, m)
+vector_transport_to!(M::MMT, ::Val{true}, vto, x, v, y, m)  where {MMT <: MetricManifold}= vector_transport_to!(base_manifold(M), vto, x, v, y, m)
+vector_transport_to!(M::MMT, ::Val{false}, vto, x, v, y, m)  where {MMT <: MetricManifold}= error("vector transport from a point of type $(typeof(x)) to a type $(typeof(y)) on a $(typeof(M)) for a vector of type $(v) and the $(typeof(m)) not yet implemented.")
+
 function inner(B::VectorBundleFibers{<:CotangentSpaceType, MMT}, x, v, w) where {MMT<:MetricManifold}
     ginv = inverse_local_metric(B.M, x)
     return dot(v, ginv * w)
@@ -300,15 +333,7 @@ function sharp!(M::MMT, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpa
 end
 
 # These are independent of the metric and hence can always fall back to M
-function injectivity_radius(M::MMT, args...) where {MMT<:MetricManifold}
-    return injectivity_radius(base_manifold(M), args...)
-end
-function zero_tangent_vector!(M::MMT, v, x) where {MMT<:MetricManifold}
-    return zero_tangent_vector!(base_manifold(M), v, x)
-end
-function check_manifold_point(M::MMT, x; kwargs...) where {MMT<:MetricManifold}
-    return check_manifold_point(base_manifold(M), x; kwargs...)
-end
-function check_tangent_vector(M::MMT, x, v; kwargs...) where {MMT<:MetricManifold}
-    return check_tangent_vector(base_manifold(M), x, v; kwargs...)
-end
+injectivity_radius(M::MMT, args...) where {MMT <: MetricManifold} = injectivity_radius(base_manifold(M), args...)
+zero_tangent_vector!(M::MMT, v, x) where {MMT <: MetricManifold} = zero_tangent_vector!(base_manifold(M), v, x)
+check_manifold_point(M::MMT, x; kwargs...) where {MMT <: MetricManifold} = check_manifold_point(base_manifold(M), x; kwargs...)
+check_tangent_vector(M::MMT, x, v; kwargs...) where {MMT <: MetricManifold} = check_tangent_vector(base_manifold(M), x, v; kwargs...)
