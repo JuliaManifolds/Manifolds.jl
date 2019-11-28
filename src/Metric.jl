@@ -266,14 +266,15 @@ in an embedded space.
 function solve_exp_ode(M, x, v, tspan; kwargs...)
     error("solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(x)), vector $(typeof(v)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq`.")
 end
-
-function exp(M::MMT, x, v, T::AbstractVector) where {MMT<:MetricManifold}
+exp!(M::MMT, y, x, v,t) where {MMT <: MetricManifold} = exp!(M, is_default_metric(M), y, x, v,t)
+exp!(M::MMT, ::Val{true}, y, x, v,t) where {MMT<:MetricManifold} = exp!(base_manifold(M),y,x,v,t)
+function exp(M::MMT, ::Val{false}, x, v, T::AbstractVector) where {MMT<:MetricManifold}
     sol = solve_exp_ode(M, x, v, extrema(T); dense=false, saveat=T)
     n = length(x)
     return map(i -> sol.u[i][n+1:end], 1:length(T))
 end
 
-exp!(M::MetricManifold, y, x, v, t) = exp!(M, is_default_metric(M), y, x, v,t)
+exp!(M::MMT, y, x, v) where {MMT <: MetricManifold}= exp!(M, is_default_metric(M), y, x, v)
 exp!(M::MMT, ::Val{true}, y, x, v) where {MMT<:MetricManifold} = exp!(base_manifold(M),y,x,v)
 """
     exp(MM::MetricManifold, x, v, args...)
