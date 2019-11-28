@@ -169,6 +169,7 @@ struct BaseManifoldMetric{M} <: Metric end
     M = BaseManifold{3}()
     g = BaseManifoldMetric{3}()
     MM = MetricManifold(M, g)
+    is_default_metric(::BaseManifold,g::BaseManifoldMetric) = Val{true}
 
     x = [0.1 0.2 0.4]
     v = [0.5 0.7 0.11]

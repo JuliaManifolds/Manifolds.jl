@@ -27,23 +27,44 @@ abstract type LorentzMetric <: Metric end
 """
     MetricManifold{M<:Manifold,G<:Metric} <: Manifold
 
-Equip a manifold with a metric. Such a manifold is generally called pseudo-
-or semi-Riemannian. Each `MetricManifold` must implement
-[`local_metric`](@ref).
+Equip a [`Manifold`](@ref) explicitly with a [`Metric`](@ref) `G`. 
+
+For a Metric Manifold, by default, assumes, that you implement the linear form
+from [`local_metric`](@ref) in order to evaluate the exponential map.
+
+If the corresponding [`Metric`](@ref) `G` yields closed form formulae for e.g.
+the exponential map and this is implemented directly (without solving the ode),
+you of course can still implement that directly.
 
 # Constructor
-
     MetricManifold(manifold, metric)
-"""
+
+    """
 struct MetricManifold{M<:Manifold,G<:Metric} <: Manifold
     manifold::M
     metric::G
 end
 
-convert(::Type{MT},M::MetricManifold{MT,GT}) where {MT,GT} = base_manifold(M)
-
 is_decorator_manifold(M::MetricManifold) = Val(true)
 
+"""
+    is_default_metric(M,G)
+
+indicate, whether the [`Metric`](@ref) `G` is the default metric for
+the [`Manifold`](@ref) `M`. This means that any occurence of
+[`MetricManifold`](@ref)(M,G) where `is_default_metric(M,G) = Val{true}`
+falls back to just be called with `M` such that the [`manifold`](@ref) `M`
+implicitly has this metric, for example if this was the first one implemented
+or is the one most commonly assumed to be used.
+"""
+is_default_metric(M::Manifold,G::Metric) = Val(false)
+
+# this automatically undecorates
+convert(::Type{MT},M::MetricManifold{MT,GT}) where {MT <: Manifold,GT} = base_manifold(M)
+# this should austomatically decorate at least for simple cases
+convert(T::Type{MetricManifold{MT,GT}},M::MT) where {MT,GT} = _convert_with_default(T,M,is_default_metric(M,GT))
+_convert_with_default(T::Type{Metric},M::Manifold,::Val{true}) where {MT <: Manifold} = MetricManifold(M,T())
+_convert_with_default(T::Type{Metric},M::MT,::Val{false}) where {MT <: Manifold} = error("Can not convert $(M) to a MetricManifold{$(MT),$(T)}, since $(T) is not the default metric.")
 
 @doc doc"""
     metric(M::MetricManifold)
@@ -258,35 +279,9 @@ function exp!(M::MMT, y, x, v) where {MMT<:MetricManifold}
     y .= sol.u[1][n+1:end]
     return y
 end
-
-# Introduce the default to fall back to just base without metric.
-#
-# Most of these can be reduced as soon as we have the final THTT decorator
-
 inner(M::MMT, x, v, w) where {MMT<:MetricManifold} = dot(v, local_metric(M, x) * w)
-norm(M::MMT, x, v) where {MMT<:MetricManifold} = sqrt(inner(M,x,v,v))
-distance(M::MMT, x, y) where {MMT<:MetricManifold} = distance(base_manifold(M), x, y)
-zero_tangent_vector(M::MMT, x, v) where {MMT<:MetricManifold} = zero_tangent_vector(base_manifold(M), x, v, v)
-log!(M::MMT, v, x, y) where {MMT<:MetricManifold} = log!(base_manifold(M), v, x, y)
-retract!(M::MMT, y, x, v, t::Real,args...) where {MMT<:MetricManifold} = retract!(base_manifold(M), y, x,v,t::Real, args...)
-retract!(M::MMT, y, x, v) where {MMT<:MetricManifold} = retract!(base_manifold(M), y, x, v)
-project_tangent!(M::MMT, w, x, v) where {MMT<:MetricManifold} = project_tangent!(base_manifold(M), w, x, v)
-is_approx(M::MMT,args...; kwargs...) where {MMT<:MetricManifold} = is_approx(base_manifold(M),args...; kwargs...)
-function vector_transport_to!(M::MMT, vto, x, v, y, m::AbstractVectorTransportMethod) where {MMT<:MetricManifold}
-    return vector_transport_to!(base_manifold(M), vto, x, v, y, m)
-end
-function injectivity_radius(M::MMT, args...) where {MMT<:MetricManifold}
-    return injectivity_radius(base_manifold(M), args...)
-end
-function zero_tangent_vector!(M::MMT, v, x) where {MMT<:MetricManifold}
-    return zero_tangent_vector!(base_manifold(M), v, x)
-end
-function check_manifold_point(M::MMT, x; kwargs...) where {MMT<:MetricManifold}
-    return check_manifold_point(base_manifold(M), x; kwargs...)
-end
-function check_tangent_vector(M::MMT, x, v; kwargs...) where {MMT<:MetricManifold}
-    return check_tangent_vector(base_manifold(M), x, v; kwargs...)
-end
+
+#
 function inner(B::VectorBundleFibers{<:CotangentSpaceType, MMT}, x, v, w) where {MMT<:MetricManifold}
     ginv = inverse_local_metric(B.M, x)
     return dot(v, ginv * w)
@@ -302,4 +297,18 @@ function sharp!(M::MMT, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpa
     ginv = inverse_local_metric(M, x)
     copyto!(v.data, ginv*w.data)
     return v
+end
+
+# These are independent of the metric and hence can always fall back to M
+function injectivity_radius(M::MMT, args...) where {MMT<:MetricManifold}
+    return injectivity_radius(base_manifold(M), args...)
+end
+function zero_tangent_vector!(M::MMT, v, x) where {MMT<:MetricManifold}
+    return zero_tangent_vector!(base_manifold(M), v, x)
+end
+function check_manifold_point(M::MMT, x; kwargs...) where {MMT<:MetricManifold}
+    return check_manifold_point(base_manifold(M), x; kwargs...)
+end
+function check_tangent_vector(M::MMT, x, v; kwargs...) where {MMT<:MetricManifold}
+    return check_tangent_vector(base_manifold(M), x, v; kwargs...)
 end
