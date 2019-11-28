@@ -121,7 +121,7 @@ a continuous-time algebraic Riccati equation (arec). This follows Algorithm 2 in
 > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
 """
 function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::PolarInverseRetraction) where {M,N,T}
-   # arec (A,Q,R) solves A'X + XA + XRX + Q = 0
+   # arec (A,R,Q) solves A'X + XA + XRX + Q = 0
     s,t = arec( -(x'*y)', zero(y'*y), 2*one(y'*y) )
     v .= y*s-x
   return v
@@ -187,7 +187,7 @@ The formula reads
  (\bar{x}^\mathrm{T})^\mathrm{T}\bar{v}^\mathrm{T}x \bigr)$
 ````
 """
-project_tangent!(::Stiefel{M,N,T}, w, x, v) where {M,N,T} = ( w.= v - x * (0.5 * ( x'*v + v'*x )) )
+project_tangent!(::Stiefel{M,N,T}, w, x, v) where {M,N,T} = ( w.= v - x * Symmetric( x'*v ) )
 
 @doc doc"""
     retract!(M, y, x, v, ::PolarRetraction)
