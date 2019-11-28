@@ -60,7 +60,7 @@ or is the one most commonly assumed to be used.
 is_default_metric(M::Manifold,G::Metric) = Val(false)
 
 # this automatically undecorates
-convert(::Type{MT},M::MetricManifold{MT,GT}) where {MT <: Manifold,GT} = base_manifold(M)
+convert(::Type{MT},M::MetricManifold{<:MT,GT}) where {MT <: Manifold,GT} = base_manifold(M)
 # this should austomatically decorate at least for simple cases
 convert(T::Type{MetricManifold{MT,GT}},M::MT) where {MT,GT} = _convert_with_default(T,M,is_default_metric(M,GT))
 _convert_with_default(T::Type{Metric},M::Manifold,::Val{true}) where {MT <: Manifold} = MetricManifold(M,T())
