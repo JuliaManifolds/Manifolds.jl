@@ -77,7 +77,6 @@ import Distributions: _rand!, support
 import Random: rand
 using LinearAlgebra
 using Random: AbstractRNG
-using SimpleTraits
 using UnsafeArrays
 using Einsum: @einsum
 
