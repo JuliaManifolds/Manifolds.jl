@@ -158,7 +158,7 @@ struct DefaultBaseManifoldMetric <: Metric end
     Manifolds.project_tangent!(::BaseManifold, w, x, v) = w .= 2 .* v
     Manifolds.local_metric(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}},x) where N = 2*one(x*x')
     Manifolds.exp!(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x, v) where N = exp!(base_manifold(M), y, x, v)
-    Manifolds.is_default_metric(M::BaseManifold,G::DefaultBaseManifoldMetric) = Val{true}
+    Manifolds.is_default_metric(M::BaseManifold,G::DefaultBaseManifoldMetric) = Val(true)
     function Manifolds.flat!(::BaseManifold, v::FVector{Manifolds.CotangentSpaceType}, x, w::FVector{Manifolds.TangentSpaceType})
         v.data .= 2 .* w.data
         return v
@@ -173,7 +173,6 @@ struct DefaultBaseManifoldMetric <: Metric end
     MM = MetricManifold(M, g)
     g2 = DefaultBaseManifoldMetric()
     MM2 = MetricManifold(M,g2)
-    is_default_metric(::BaseManifold,g::BaseManifoldMetric) = Val{true}
 
     x = [0.1 0.2 0.4]
     v = [0.5 0.7 0.11]
