@@ -8,7 +8,6 @@ using ForwardDiff
 using Random
 using ReverseDiff
 using StaticArrays
-using SimpleTraits
 using Test
 
 """
