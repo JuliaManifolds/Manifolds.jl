@@ -71,7 +71,6 @@ or is the one most commonly assumed to be used.
 """
 is_default_metric(M::MMT) where {MMT <: MetricManifold} = is_default_metric(base_manifold(M),metric(M))
 # this automatically undecorates
-convert(::Type{MT},M::MetricManifold{<:MT,GT}) where {MT <: Manifold,GT} = base_manifold(M)
 # this should automatically decorate at least for simple cases
 convert(T::Type{MetricManifold{MT,GT}},M::MT) where {MT,GT} = _convert_with_default(M,GT,is_default_metric(M,GT()))
 _convert_with_default(M::MT,T::Type{<:Metric},::Val{true}) where {MT <: Manifold} = MetricManifold(M,T())
@@ -315,6 +314,19 @@ project_tangent!(M::MMT, ::Val{false}, w, x, v) where {MMT <: MetricManifold} = 
 vector_transport_to!(M::MMT, vto, x, v, y, m::AbstractVectorTransportMethod) where {MMT <: MetricManifold} = vector_transport_to!(M, is_default_metric(M), vto, x, v, y, m)
 vector_transport_to!(M::MMT, ::Val{true}, vto, x, v, y, m)  where {MMT <: MetricManifold}= vector_transport_to!(base_manifold(M), vto, x, v, y, m)
 vector_transport_to!(M::MMT, ::Val{false}, vto, x, v, y, m)  where {MMT <: MetricManifold}= error("vector transport from a point of type $(typeof(x)) to a type $(typeof(y)) on a $(typeof(M)) for a vector of type $(v) and the $(typeof(m)) not yet implemented.")
+
+projected_distribution(M::MMT, d, x) where {MMT <: MetricManifold} = projected_distribution(M, is_default_metric(M), d,x)
+projected_distribution(M::MMT, ::Val{true}, d, x) where {MMT <: MetricManifold} = projected_distribution(base_manifold(M), d,x)
+projected_distribution(M::MMT, ::Val{false}, d, x) where {MMT <: MetricManifold} =error("projected_distribution not implemented for a $(typeof(M)) and tangent $(typeof(v)) at point $(typeof(x)).")
+
+projected_distribution(M::MMT, d) where {MMT <: MetricManifold} = projected_distribution(M, is_default_metric(M), d)
+projected_distribution(M::MMT, ::Val{true}, d) where {MMT <: MetricManifold} = projected_distribution(base_manifold(M), d)
+projected_distribution(M::MMT, ::Val{false}, d) where {MMT <: MetricManifold} =error("projected_distribution not implemented for a $(typeof(M)) and tangent $(typeof(v)) at point $(typeof(x)).")
+
+normal_tvector_distribution(M::MMT, x, σ) where {MMT <: MetricManifold} = normal_tvector_distribution(M, is_default_metric(M), x, σ)
+normal_tvector_distribution(M::MMT, ::Val{true}, x, σ) where {MMT <: MetricManifold} = normal_tvector_distribution(base_manifold(M), x, σ)
+normal_tvector_distribution(M::MMT, ::Val{false}, x, σ) where {MMT <: MetricManifold} =error("projected_distribution not implemented for a $(typeof(M)) and tangent $(typeof(v)) at point $(typeof(x)).")
+
 
 function inner(B::VectorBundleFibers{<:CotangentSpaceType, MMT}, x, v, w) where {MMT<:MetricManifold}
     ginv = inverse_local_metric(B.M, x)

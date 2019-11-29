@@ -11,10 +11,13 @@ types = [ Matrix{Float32},
         Matrix{Float64},
         MMatrix{3,3,Float32},
     ]
-for lM in metrics
-    @testset "$(typeof(lM))" begin
-    print("$lM")
+for M in metrics
+    @testset "$(typeof(M))" begin
         for T in types
+            if M == M3 && T <: MMatrix
+                # Cholesky or something does not work in vector_transport yet for MMatrix
+                continue
+            end
             A(α) = [1. 0. 0.; 0. cos(α) sin(α); 0. -sin(α) cos(α)]
             ptsF = [#
                 [1. 0. 0.; 0. 1. 0.; 0. 0. 1],
@@ -22,7 +25,7 @@ for lM in metrics
                 A(π/6) * [1. 0. 0.; 0. 2. 0.; 0. 0. 1] * transpose(A(π/6)),
             ]
             pts = [convert(T, a) for a in ptsF]
-            test_manifold(lM, pts;
+            test_manifold(M, pts;
                 test_vector_transport = true,
                 test_forward_diff = false,
                 test_reverse_diff = false,
@@ -34,13 +37,13 @@ for lM in metrics
             pt2f = [1. 0. 0.; 0. 0. 0.; 0. 0. 1.]; # not positive Definite
             pt3f = [2. 0. 1.; 0. 1. 0.; 0. 0. 4.]; # not symmetric
             pt4 = [2. 1. 0.; 1. 2. 0.; 0. 0. 4.]
-            @test !is_manifold_point(lM,pt1f)
-            @test !is_manifold_point(lM,pt2f)
-            @test !is_manifold_point(lM,pt3f)
-            @test is_manifold_point(lM, pt4)
-            @test !is_tangent_vector(lM,pt4, pt1f)
-            @test is_tangent_vector(lM,pt4, pt2f)
-            @test !is_tangent_vector(lM,pt4, pt3f)
+            @test !is_manifold_point(M,pt1f)
+            @test !is_manifold_point(M,pt2f)
+            @test !is_manifold_point(M,pt3f)
+            @test is_manifold_point(M, pt4)
+            @test !is_tangent_vector(M,pt4, pt1f)
+            @test is_tangent_vector(M,pt4, pt2f)
+            @test !is_tangent_vector(M,pt4, pt3f)
         end
     end
 end

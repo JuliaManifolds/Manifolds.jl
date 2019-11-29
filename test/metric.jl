@@ -183,8 +183,6 @@ struct DefaultBaseManifoldMetric <: Metric end
     @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2),metric(MM2))
     @test is_default_metric(MM2) == Val{true}()
   
-    @test convert(typeof(M),MM) == M
-    @test convert(typeof(M),MM2) == M
     @test convert(typeof(MM2),M) == MM2
     @test_throws ErrorException convert(typeof(MM),M)
 
