@@ -73,9 +73,9 @@ is_default_metric(M::MMT) where {MMT <: MetricManifold} = is_default_metric(base
 # this automatically undecorates
 convert(::Type{MT},M::MetricManifold{<:MT,GT}) where {MT <: Manifold,GT} = base_manifold(M)
 # this should automatically decorate at least for simple cases
-convert(T::Type{MetricManifold{MT,GT}},M::MT) where {MT,GT} = _convert_with_default(T,M,is_default_metric(M))
-_convert_with_default(T::Type{Metric},M::Manifold,::Val{true}) where {MT <: Manifold} = MetricManifold(M,T())
-_convert_with_default(T::Type{Metric},M::MT,::Val{false}) where {MT <: Manifold} = error("Can not convert $(M) to a MetricManifold{$(MT),$(T)}, since $(T) is not the default metric.")
+convert(T::Type{MetricManifold{MT,GT}},M::MT) where {MT,GT} = _convert_with_default(M,GT,is_default_metric(M,GT()))
+_convert_with_default(M::MT,T::Type{<:Metric},::Val{true}) where {MT <: Manifold} = MetricManifold(M,T())
+_convert_with_default(M::MT,T::Type{<:Metric},::Val{false}) where {MT <: Manifold} = error("Can not convert $(M) to a MetricManifold{$(MT),$(T)}, since $(T) is not the default metric.")
 
 @doc doc"""
     metric(M::MetricManifold)
@@ -266,9 +266,9 @@ in an embedded space.
 function solve_exp_ode(M, x, v, tspan; kwargs...)
     error("solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(x)), vector $(typeof(v)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq`.")
 end
-exp(M::MMT, x, v,t) where {MMT <: MetricManifold} = exp!(M, is_default_metric(M), x, v,t)
-exp(M::MMT, ::Val{true}, y, x, v,t) where {MMT<:MetricManifold} = exp!(base_manifold(M), x, v, t)
-function exp(M::MMT, ::Val{false}, x, v, T::AbstractVector) where {MMT<:MetricManifold}
+exp(M::MMT, x, v, T::AbstractVector{T} where T) where {MMT <: MetricManifold} = exp(M, is_default_metric(M), x, v, T)
+exp(M::MMT, ::Val{true}, x, v, T::AbstractVector{T} where T) where {MMT<:MetricManifold} = exp(base_manifold(M), x, v, T)
+function exp(M::MMT, ::Val{false}, x, v, T::AbstractVector{T} where T) where {MMT<:MetricManifold}
     sol = solve_exp_ode(M, x, v, extrema(T); dense=false, saveat=T)
     n = length(x)
     return map(i -> sol.u[i][n+1:end], 1:length(T))

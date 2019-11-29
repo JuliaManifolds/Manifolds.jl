@@ -156,8 +156,10 @@ struct DefaultBaseManifoldMetric <: Metric end
     Manifolds.exp!(::BaseManifold, y, x, v) = y .= x + 2 * v
     Manifolds.log!(::BaseManifold, v, x, y) = v .= (y - x) / 2
     Manifolds.project_tangent!(::BaseManifold, w, x, v) = w .= 2 .* v
+    Manifolds.project_point!(::BaseManifold, y, x) = (y .= x)
     Manifolds.local_metric(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}},x) where N = 2*one(x*x')
     Manifolds.exp!(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x, v) where N = exp!(base_manifold(M), y, x, v)
+    Manifolds.vector_transport_to!(::BaseManifold, vto, x, v, y, ::ParallelTransport) = (vto .= v)
     Manifolds.is_default_metric(M::BaseManifold,G::DefaultBaseManifoldMetric) = Val(true)
     function Manifolds.flat!(::BaseManifold, v::FVector{Manifolds.CotangentSpaceType}, x, w::FVector{Manifolds.TangentSpaceType})
         v.data .= 2 .* w.data
@@ -173,6 +175,18 @@ struct DefaultBaseManifoldMetric <: Metric end
     MM = MetricManifold(M, g)
     g2 = DefaultBaseManifoldMetric()
     MM2 = MetricManifold(M,g2)
+
+    @test is_decorator_manifold(MM) == Val{true}()
+    @test is_decorator_manifold(MM2) == Val{true}()
+    @test is_decorator_manifold(M) == Val{false}()
+    @test is_default_metric(MM) == is_default_metric(base_manifold(MM),metric(MM))
+    @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2),metric(MM2))
+    @test is_default_metric(MM2) == Val{true}()
+  
+    @test convert(typeof(M),MM) == M
+    @test convert(typeof(M),MM2) == M
+    @test convert(typeof(MM2),M) == MM2
+    @test_throws ErrorException convert(typeof(MM),M)
 
     x = [0.1 0.2 0.4]
     v = [0.5 0.7 0.11]
@@ -198,6 +212,10 @@ struct DefaultBaseManifoldMetric <: Metric end
     @test is_manifold_point(MM, x) === is_manifold_point(M, x)
     @test is_tangent_vector(MM, x, v) === is_tangent_vector(M, x, v)
 
+    @test_throws ErrorException local_metric(MM2,x)
+    @test_throws ErrorException local_metric_jacobian(MM2,x)
+    @test_throws ErrorException christoffel_symbols_second_jacobian(MM2,x)
+
     @test inner(MM2, x, v, w) === inner(M, x, v, w)
     @test norm(MM2, x, v) === norm(M, x, v)
     @test distance(MM2, x, y) === distance(M, x, y)
@@ -205,7 +223,10 @@ struct DefaultBaseManifoldMetric <: Metric end
     @test log!(MM2, v, x, y) === log!(M, v, x, y)
     @test retract!(MM2, y, x, v) === retract!(M, y, x, v)
     @test retract!(MM2, y, x, v, 1) === retract!(M, y, x, v, 1)
+    
+    @test project_point!(MM2, y, x) === project_point!(M, y, x)
     @test project_tangent!(MM2, w, x, v) === project_tangent!(M, w, x, v)
+    @test vector_transport_to!(MM2, w, x, v, y) == vector_transport_to!(M, w, x, v, y)
     @test zero_tangent_vector!(MM2, v, x) === zero_tangent_vector!(M, v, x)
     @test injectivity_radius(MM2, x) === injectivity_radius(M, x)
     @test injectivity_radius(MM2) === injectivity_radius(M)
