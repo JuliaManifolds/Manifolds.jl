@@ -182,7 +182,8 @@ export Manifold,
     CotangentBundleFibers,
     AbstractVectorTransportMethod,
     ParallelTransport,
-    ProjectTangent
+    ProjectTangent,
+    ProjectedPointDistribution
 export
     Euclidean,
     CholeskySpace,

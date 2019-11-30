@@ -302,9 +302,9 @@ log!(M::MMT, w, x, y) where {MMT <: MetricManifold} = log!(M, is_default_metric(
 log!(M::MMT, ::Val{true}, w, x, y) where {MMT <: MetricManifold} = log!(base_manifold(M), w, x, y)
 log!(M::MMT, ::Val{false}, w, x, y) where {MMT <: MetricManifold} = error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y)).")
 
-tangent_orthogonal_basis(M::MMT, x, v) where {MMT <: MetricManifold} = tangent_orthogonal_basis(M, is_default_metric(M), x, v)
-tangent_orthogonal_basis(M::MMT, ::Val{true}, x, v) where {MMT <: MetricManifold} = tangent_orthogonal_basis(base_manifold(M), x, v)
-tangent_orthogonal_basis(M::MMT, ::Val{false}, x, v) where {MMT <: MetricManifold} = error("tangent_orthogonal_basis not implemented on $(typeof(M)) for point $(typeof(x)) and tangent vector $(typeof(v)).")
+tangent_orthonormal_basis(M::MMT, x, v) where {MMT <: MetricManifold} = tangent_orthonormal_basis(M, is_default_metric(M), x, v)
+tangent_orthonormal_basis(M::MMT, ::Val{true}, x, v) where {MMT <: MetricManifold} = tangent_orthonormal_basis(base_manifold(M), x, v)
+tangent_orthonormal_basis(M::MMT, ::Val{false}, x, v) where {MMT <: MetricManifold} = error("tangent_orthogonal_basis not implemented on $(typeof(M)) for point $(typeof(x)) and tangent vector $(typeof(v)).")
 
 project_point!(M::MMT, y, x) where {MMT <: MetricManifold} = project_point!(M, is_default_metric(M), y, x)
 project_point!(M::MMT, ::Val{true}, y, x) where {MMT <: MetricManifold} = project_point!(base_manifold(M), y, x)

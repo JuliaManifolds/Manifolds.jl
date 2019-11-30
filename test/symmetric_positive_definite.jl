@@ -5,6 +5,11 @@ include("utils.jl")
     M3 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
     M4 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogEuclideanMetric())
 
+    @test is_default_metric(M2)
+    @test is_default_metric(M1, Manifolds.LinearAffineMetric())
+    @test !is_default_metric(M1, Manifolds.LogCholeskyMetric())
+    @test !is_default_metric(M3)
+
     metrics = [M1, M2, M3]
     types = [ Matrix{Float32},
             Matrix{Float64},
@@ -49,9 +54,17 @@ include("utils.jl")
     end
     x = [1. 0. 0.; 0. 1. 0.; 0. 0. 1]
     y = [2. 0. 0.; 0. 2. 0.; 0. 0. 1]
+    @testset "Convert SPD to Cholesky" begin
+        v = log(M1,x,v)
+        (l,w) = Manifolds.spd_to_cholesky(x,v)
+        (xs,vs) = Manifolds.cholesky_to_spd(l,w)
+        @test isapprox(xs,x)
+        @test isapprox(vs,v)
+    end
     @testset "Preliminary tests for LogEuclidean" begin
         @test representation_size(M4) == (3,3)
         @test isapprox( distance(M4,x,y), sqrt(2)log(2))
+        @test manifold_dimension(M4) == manifold_dimension(M1)
     end
     @testset "Test for tangent ONB on LinearAffineMetric" begin
         v = log(M2,x,y)

@@ -1,4 +1,5 @@
 using ForwardDiff, OrdinaryDiffEq
+using LinearAlgebra: I
 
 include("utils.jl")
 
@@ -164,6 +165,10 @@ struct DefaultBaseManifoldMetric <: Metric end
     Manifolds.exp!(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x, v) where N = exp!(base_manifold(M), y, x, v)
     Manifolds.vector_transport_to!(::BaseManifold, vto, x, v, y, ::ParallelTransport) = (vto .= v)
     Manifolds.is_default_metric(M::BaseManifold,G::DefaultBaseManifoldMetric) = Val(true)
+    Manifolds.tangent_orthonormal_basis(M::BaseManifold{N},x,v) where {N} = ( [(Matrix(I, N, N)[:,i]) for i in 1:N], zeros(N))
+    Manifolds.projected_distribution(M::BaseManifold, d) = ProjectedPointDistribution(M, d, project_point!, rand(d))
+    Manifolds.projected_distribution(M::BaseManifold, d, x) = ProjectedPointDistribution(M, d, project_point!, x)
+
     function Manifolds.flat!(::BaseManifold, v::FVector{Manifolds.CotangentSpaceType}, x, w::FVector{Manifolds.TangentSpaceType})
         v.data .= 2 .* w.data
         return v
@@ -188,16 +193,20 @@ struct DefaultBaseManifoldMetric <: Metric end
   
     @test convert(typeof(MM2),M) == MM2
     @test_throws ErrorException convert(typeof(MM),M)
-
     x = [0.1 0.2 0.4]
     v = [0.5 0.7 0.11]
     w = [0.13 0.17 0.19]
     y = similar(x)
+    
+    # Test fallbacks
+    @test_throws ErrorException vee!(M,w,x,v)
+    @test_throws ErrorException hat!(M,w,x,v)
 
     @test inner(M, x, v, w) == 2 * dot(v,w)
     @test inner(MM, x, v, w) === inner(M, x, v, w)
     @test norm(MM, x, v) === norm(M, x, v)
     @test exp(M, x, v) == x + 2 * v
+    @test exp(MM2, x, v) == exp(M, x, v)
     @test exp!(MM, y, x, v) === exp!(M, y, x, v)
     @test retract!(MM, y, x, v) === retract!(M, y, x, v)
     @test retract!(MM, y, x, v, 1) === retract!(M, y, x, v, 1)
@@ -241,7 +250,12 @@ struct DefaultBaseManifoldMetric <: Metric end
     @test is_manifold_point(MM2, x) === is_manifold_point(M, x)
     @test is_tangent_vector(MM2, x, v) === is_tangent_vector(M, x, v)
 
-
+    a = Manifolds.projected_distribution(M, Distributions.MvNormal(zero(zeros(3)), 1.0))
+    b = Manifolds.projected_distribution(MM2, Distributions.MvNormal(zero(zeros(3)), 1.0))
+    @test isapprox(Matrix(a.d.Σ), Matrix(b.d.Σ))
+    @test isapprox(a.d.μ, b.d.μ)
+    @test tangent_orthonormal_basis(M,x,v) == tangent_orthonormal_basis(MM2,x,v)
+    @test_throws ErrorException tangent_orthonormal_basis(MM,x,v)
     cov = flat(M, x, FVector(TangentSpace, v))
     cow = flat(M, x, FVector(TangentSpace, w))
     @test cov.data ≈ flat(MM, x, FVector(TangentSpace, v)).data
