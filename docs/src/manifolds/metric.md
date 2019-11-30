@@ -29,10 +29,13 @@ In order to distinguish different metrics on one manifold, one can introduce
 two [`Metric`](@ref)s and use this type to dispatch on the metric, see 
 [`SymmetricPositiveDefinite`](@ref). To avoid overhead, one [`Metric`](@ref)
 can then be marked as being the default, i.e. the one that is used, when no
-[`MetricManifold`](@ref) decorator is present. This avoids reimplementation of the first
-existing metric, access for the default metric functions (without an [`MetricManifold`](@ref)
-overhead) as well as the transparent fallback of the corresponding [`MetricManifold`](@ref)
-with default metric to the undecorated implementations.
+[`MetricManifold`](@ref) decorator is present. This avoids reimplementation of
+the first existing metric, access to the metric-dependent functions that were
+implemented using the undecorated manifold as well as the transparent fallback
+of the corresponding [`MetricManifold`](@ref) with default metric to the
+undecorated implementations. This does not cause any runtime overhead. Introducing
+a default [`Metric`](@ref) serves a better readability of the code when working
+with different metrics.
 
 ## Implementation of Metrics
 

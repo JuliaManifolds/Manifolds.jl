@@ -275,6 +275,7 @@ $\mathcal M = \mathcal P(n)$.
 """
 representation_size(::SymmetricPositiveDefinite{N}) where N = (N,N)
 representation_size(::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}) where N = (N,N)
+representation_size(::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric}) where N = (N,N)
 
 @doc doc"""
     vector_transport_to!(M,vto,x,v,y,::ParallelTransport)

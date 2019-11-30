@@ -21,6 +21,9 @@ struct TestEuclideanMetric <: Metric end
     @test base_manifold(M) === E
     @test metric(M) === g
 
+    @test_throws ErrorException local_metric_jacobian(E, zeros(3))
+    @test_throws ErrorException christoffel_symbols_second_jacobian(E, zeros(3))
+
     for vtype in (Vector, SVector{n}, MVector{n})
         x, v, w = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
 
@@ -203,6 +206,9 @@ struct DefaultBaseManifoldMetric <: Metric end
     @test_throws ErrorException project_tangent!(MM, w, x, v) === project_tangent!(M, w, x, v)
     @test_throws ErrorException project_point!(MM, y, x) === project_point!(M, y, x)
     @test_throws ErrorException vector_transport_to!(MM, w, x, v, y) === vector_transport_to!(M, w, x, v, y)
+    # without DiffEq, these error
+    # @test_throws ErrorException exp(MM,x, v, 1:3)
+    # @test_throws ErrorException exp!(MM, y, x, v)
     # these always fall back anyways.
     @test zero_tangent_vector!(MM, v, x) === zero_tangent_vector!(M, v, x)
     @test injectivity_radius(MM, x) === injectivity_radius(M, x)
@@ -213,6 +219,10 @@ struct DefaultBaseManifoldMetric <: Metric end
     @test_throws ErrorException local_metric(MM2,x)
     @test_throws ErrorException local_metric_jacobian(MM2,x)
     @test_throws ErrorException christoffel_symbols_second_jacobian(MM2,x)
+    # MM falls back to nondefault error
+    @test_throws ErrorException projected_distribution(MM,1,x)
+    @test_throws ErrorException projected_distribution(MM,1)
+    @test_throws ErrorException normal_tvector_distribution(MM,x,0.2)
 
     @test inner(MM2, x, v, w) === inner(M, x, v, w)
     @test norm(MM2, x, v) === norm(M, x, v)
@@ -236,8 +246,10 @@ struct DefaultBaseManifoldMetric <: Metric end
     cow = flat(M, x, FVector(TangentSpace, w))
     @test cov.data ≈ flat(MM, x, FVector(TangentSpace, v)).data
     cotspace = CotangentBundleFibers(M)
+    cotspace2 = CotangentBundleFibers(MM)
     @test cov.data ≈ 2 * v
     @test inner(M, x, v, w) ≈ inner(cotspace, x, cov.data, cow.data)
     @test inner(MM, x, v, w) ≈ inner(cotspace, x, cov.data, cow.data)
+    @test inner(MM, x, v, w) ≈ inner(cotspace2, x, cov.data, cow.data)
     @test sharp(M, x, cov).data ≈ v
 end
