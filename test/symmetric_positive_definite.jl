@@ -5,10 +5,10 @@ include("utils.jl")
     M3 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
     M4 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogEuclideanMetric())
 
-    @test is_default_metric(M2)
-    @test is_default_metric(M1, Manifolds.LinearAffineMetric())
-    @test !is_default_metric(M1, Manifolds.LogCholeskyMetric())
-    @test !is_default_metric(M3)
+    @test is_default_metric(M2) == Val{true}()
+    @test is_default_metric(M1, Manifolds.LinearAffineMetric()) == Val{true}()
+    @test is_default_metric(M1, Manifolds.LogCholeskyMetric()) == Val{false}()
+    @test is_default_metric(M3) == Val{false}()
 
     metrics = [M1, M2, M3]
     types = [ Matrix{Float32},
@@ -55,7 +55,7 @@ include("utils.jl")
     x = [1. 0. 0.; 0. 1. 0.; 0. 0. 1]
     y = [2. 0. 0.; 0. 2. 0.; 0. 0. 1]
     @testset "Convert SPD to Cholesky" begin
-        v = log(M1,x,v)
+        v = log(M1,x,y)
         (l,w) = Manifolds.spd_to_cholesky(x,v)
         (xs,vs) = Manifolds.cholesky_to_spd(l,w)
         @test isapprox(xs,x)
