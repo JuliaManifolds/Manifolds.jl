@@ -132,5 +132,20 @@ include("utils.jl")
             @test x ≈ exp(SOn, pts[1], v2)
         end
     end
-
+    @testset "Test Manifold Point and Tangent Vector checks" begin
+        for x in [1, [2. 0.;0. 1.], [1. 0.5; 0. 1.]]
+            @test_throws DomainError is_manifold_point(M,x,true)
+            @test !is_manifold_point(M,x)
+        end
+        x = one(zeros(2,2))
+        @test is_manifold_point(M,x)
+        @test is_manifold_point(M,x,true)
+        for v in [1, [0. 1.;0. 0.]]
+            @test_throws DomainError is_tangent_vector(M,x,v,true)
+            @test !is_tangent_vector(M,x,v)
+        end
+        v = [0. 1.;-1. 0.]
+        @test is_tangent_vector(M,x,v)
+        @test is_tangent_vector(M,x,v,true)
+    end
 end
