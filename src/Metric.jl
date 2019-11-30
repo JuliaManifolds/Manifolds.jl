@@ -61,13 +61,13 @@ is_default_metric(M::Manifold,G::Metric) = Val(false)
 """
     is_default_metric(MM)
 
-indicate, whether the [`Metric`](@ref) `G` is the default metric for
-the [`Manifold`](@ref) `M` within the [`MetricManifold`](@ref) `M`.
+indicate, whether the [`Metric`](@ref) `MM.G` is the default metric for
+the [`Manifold`](@ref) `MM.M` within the [`MetricManifold`](@ref) `MM`.
 This means that any occurence of
-[`MetricManifold`](@ref)`(M,G)` where `is_default_metric(M,G) = Val{true}`
-falls back to just be called with `M` such that the [`Manifold`](@ref) `M`
-implicitly has this metric, for example if this was the first one implemented
-or is the one most commonly assumed to be used.
+[`MetricManifold`](@ref)`(MM.M,MM.G)` where `is_default_metric(MM.M,MM.G) = Val{true}`
+falls back to just be called with `MM.MM` such that the [`Manifold`](@ref) `MM.M`
+implicitly has the metric `MM.G`, for example if this was the first one
+implemented or is the one most commonly assumed to be used.
 """
 is_default_metric(M::MMT) where {MMT <: MetricManifold} = is_default_metric(base_manifold(M),metric(M))
 # this automatically undecorates
