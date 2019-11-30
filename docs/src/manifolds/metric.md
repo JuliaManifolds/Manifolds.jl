@@ -6,7 +6,7 @@ However, often there is an implicitly assumed (default) metric, like the usual
 inner product on [`Euclidean`](@ref) space. This decorator takes this into
 account. It is not necessary to use this decorator, if you imlement just one (or
 the first) metric. If you later introduce a second, the old (first) one can be
-used with or without a metricx. The decorator acts transparent in that sense;
+used with or without a metric. The decorator acts transparent in that sense;
 see [`is_decorator_manifold`](@ref) for details.
 
 This manifold decorator servers two purposes: to implement different metrics
