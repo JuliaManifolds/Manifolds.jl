@@ -359,7 +359,7 @@ end
 
 returns a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`manifold_dimension`](@ref) of `M`) in the tangent space of `x` on the
-[`MetricManifold`](@ref of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
+[`MetricManifold`](@ref) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
 [`LinearAffineMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
 with eigenvalues `κ` and where the direction `v` has curvature `0`.
 """
