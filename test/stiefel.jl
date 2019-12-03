@@ -29,7 +29,7 @@ include("utils.jl")
                           test_vector_transport = false,
                           test_forward_diff = false,
                           test_reverse_diff = false,
-                          projection_atol_multiplier = 10,
+                          projection_atol_multiplier = 15,
                           retraction_methods = [PolarRetraction(), QRRetraction()],
                           inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()]
             )
