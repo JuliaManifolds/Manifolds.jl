@@ -1,5 +1,5 @@
 using LinearAlgebra: diag, eigen, eigvals, eigvecs, Symmetric, Diagonal, tr, cholesky, LowerTriangular
-
+using ManifoldsBase: ParallelTransport
 @doc doc"""
     SymmetricPositiveDefinite{N} <: Manifold
 
@@ -64,14 +64,14 @@ end
 @doc doc"""
     manifold_dimension(M)
 
-returns the dimension of the manifold [`SymmetricPositiveDefinite`](@ref) $\mathcal P(n), N\in \mathbb N$, i.e.
+returns the dimension of the manifold [`SymmetricPositiveDefinite`](@ref) $\mathcal P(n), n\in \mathbb N$, i.e.
 ```math
     \frac{n(n+1)}{2}
 ```
 """
-@generated manifold_dimension(::SymmetricPositiveDefinite{N}) where {N} = div(N*(N+1), 2)
-@generated manifold_dimension(::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}) where {N} = div(N*(N+1), 2)
-@generated manifold_dimension(::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric}) where {N} = div(N*(N+1), 2)
+@generated manifold_dimension(M::SymmetricPositiveDefinite{N}) where {N} = div(N*(N+1), 2)
+@generated manifold_dimension(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}) where {N} = div(N*(N+1), 2)
+@generated manifold_dimension(M::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric}) where {N} = div(N*(N+1), 2)
 
 
 @doc doc"""
@@ -403,7 +403,7 @@ THe result is returned also in place in the variable `v`.
 zero_tangent_vector!(M::SymmetricPositiveDefinite{N}, v, x) where N = fill!(v, 0)
 zero_tangent_vector!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, v, x) where N = fill!(v, 0)
 
-"""
+@doc doc"""
     check_manifold_point(M,x; kwargs...)
 
 checks, whether `x` is a valid point on the [`SymmetricPositiveDefinite`](@ref) `M`, i.e. is a matrix

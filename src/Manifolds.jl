@@ -45,6 +45,7 @@ import ManifoldsBase: base_manifold,
     inverse_retract!,
     isapprox,
     is_manifold_point,
+    injectivity_radius,
     is_tangent_vector,
     is_decorator_manifold,
     log,
@@ -59,7 +60,6 @@ import ManifoldsBase: base_manifold,
     representation_size,
     retract,
     retract!,
-    check_tangent_vector,
     vector_transport_along,
     vector_transport_along!,
     vector_transport_direction,
@@ -140,6 +140,7 @@ include("PowerManifold.jl")
 include("Euclidean.jl")
 include("CholeskySpace.jl")
 include("Rotations.jl")
+include("Grassmann.jl")
 include("Sphere.jl")
 include("SymmetricPositiveDefinite.jl")
 

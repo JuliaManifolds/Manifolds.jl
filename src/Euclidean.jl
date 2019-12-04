@@ -24,7 +24,7 @@ Euclidean(n::Vararg{Int,N}) where N = Euclidean{Tuple{n...}}()
 returns the array dimensions required to represent an element on the
 [`Euclidean`](@ref) manifold `M`, i.e. the vector of all array dimensions.
 """
-@generated representation_size(::Euclidean{T}) where {T} = Tuple(T.parameters...)
+@generated representation_size(::Euclidean{T}) where T = Tuple(T.parameters...)
 
 """
     manifold_dimension(M::Euclidean{T})
