@@ -215,7 +215,7 @@ denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}
 function exp!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, y, x, v) where N
     (l,w) = spd_to_cholesky(x,v)
     z = exp!(CholeskySpace{N}(),y,l,w)
-    mul!(y,z,z')
+    y .= z*z'
     return y
 end
 # take the same retractions as for the default

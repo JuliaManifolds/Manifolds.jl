@@ -8,14 +8,15 @@ types = [ Matrix{Float32},
         Matrix{Float64},
         MMatrix{3,3,Float32},
         # linear algebra in StataicArrays is a little too inaccurate for MMatrix{3,3,Float64}
-        # MMatrix{3,3,Float64}
+        MMatrix{3,3,Float64}
     ]
 for M in [M1, M2, M3]
     @testset "$(typeof(M))" begin
         for T in types
-            if M == M3 && T <: MMatrix
-                #TODO fix the issue that causes this failure
-                continue
+            exp_log_atol_multiplier = 8.0
+            if T <: MMatrix{3,3,Float64}
+                # eigendecomposition of 3x3 SPD matrices from StaticArrays is not very accurate
+                exp_log_atol_multiplier = 5.0e7
             end
             A(α) = [1. 0. 0.; 0. cos(α) sin(α); 0. -sin(α) cos(α)]
             ptsF = [#
@@ -28,7 +29,7 @@ for M in [M1, M2, M3]
                 test_vector_transport = true,
                 test_forward_diff = false,
                 test_reverse_diff = false,
-                exp_log_atol_multiplier = 8
+                exp_log_atol_multiplier = exp_log_atol_multiplier
             )
         end
         @testset "Test Error cases in is_manifold_point and is_tangent_vector" begin
