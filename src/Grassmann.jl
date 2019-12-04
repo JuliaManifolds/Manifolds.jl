@@ -1,4 +1,5 @@
-using LinearAlgebra: svd, qr
+using LinearAlgebra: svd, qr, Diagonal, det
+using ManifoldsBase: PolarRetraction, QRRetraction, 
 import LinearAlgebra: norm
 @doc doc"""
     Grassmann{n,k} <: Manifold
@@ -83,6 +84,31 @@ function check_tangent_vector(G::Grassmann{M,N,T},x,v; kwargs...) where {M,N,T}
             "The matrix $(v) is does not lie in the tangent space of $(x) on the Grassmann manifold of dimension ($(M),$(N)), since x'v + v'x is not the zero matrix.")
     end
 end
+
+@doc doc"""
+    distance(M,x,y)
+
+compute the Riemannian distance on [`Grassmann`](@ref) manifold `M`$= \mathrm{Gr}(k,n)$.
+Let $USV = {\bar x}^\mathrm{T}y$ denote the SVD decomposition of
+$x'y$. Then the distance is given by
+````math
+d_{\mathrm{GR}(k,n)}(x,y) = \operatorname{norm}(\operatorname{Re}(b)).
+````
+where
+
+$b_{i}=\begin{cases} 0 & \text{if} \; S_i≧1 \\ \operatorname{acos}(S_i) & \, \text{if} \; S_i<1 \end{cases}.$
+"""
+function distance(M::Grassmannian{N,K,T}, x, y) where {N,K,T}
+    if x==y
+		return 0
+  	else
+    	a = svd(x'*y).S
+    	b = zero(a)
+    	b[a.<1] = (acos.(a[a.<1])).^2
+		return sqrt(sum(b))
+  	end
+end
+
 @doc doc"""
     exp!(M, y, x, v)
 
@@ -100,6 +126,7 @@ which yields that $y$ is the matrix $Q$ of the QR decomposition $z=QR$ of $z$.
 function exp(M::Grassmannian{N,K,T},y, x, v) where {N,K,T}
     d = svd(v)
     z = x * d.V * cos.(Diagonal(d.S)) * (d.V)' + (d.U) * sin.(Diagonal(d.S)) * (d.V)'
+    # reorthonormalize 
     y .= qr(z).Q
 end
 
@@ -115,6 +142,111 @@ The formula reads
 """
 inner(::Grassmann{M,N,T}, x, v, w) where {M,N,T} = real(dot(v,w))
 
-injectivity_radius(::Graddmann{M,K,T},x) where {N,K,T} = sqrt(K)
-injectivity_radius(::Graddmann{M,K,T}) where {N,K,T} = sqrt(K)
+@doc doc"""
+     inverse_retract!(M, v, x, y, ::PolarInverseRetraction)
+
+ compute the inverse retraction valid for the `::PolarRetraction`.
+ 
+````math
+\operatorname{retr}_x^{-1}y = y*(\bar{x}^\mathrm{T}y)^{-1} - x
+````
+ """
+inverse_retract!(::Grassmann{M,N,T}, v, x, y, ::PolarInverseRetraction) where {M,N,T} = ( v .= y/(x'*y) - x)
+
+@doc doc"""
+     inverse_retract!(M, v, x, y, ::QRInverseRetraction)
+
+ compute the inverse retraction valid for the `::QRRetraction`.
+ 
+````math
+\operatorname{retr}_x^{-1}y = y*(\bar{x}^\mathrm{T}y)^{-1} - x
+````
+ """
+inverse_retract!(::Grassmann{M,N,T}, v, x, y, ::QRInverseRetraction) where {M,N,T} = ( v .= y/(x'*y) - x)
+
+@doc doc"""
+    log!(M, v, x, y)
+
+compute the logarithmic map on the [`Grassmann`](@ref) manifold
+$\mathcal M=\mathrm{Gr}(n,k)$, i.e. the tangent vector `v` whose corresponding
+[`geodesic`](@ref) starting from [`GrPoint`](@ref) `x` reaches the
+[`GrPoint`](@ref) `y` after time 1 on `M`. The formula reads
+````math
+v = V\cdot \operatorname{atan}(S) \cdot {\bar U}^\mathrm{T},
+````
+where $U$ and $V$ are the unitary matrices and $S$ is a diagonal matrix containing the
+singular values of the SVD-decomposition of
+
+$USV = ({\bar y}^\mathrm{T}x)^{-1} ( {\bar y}^\mathrm{T} - {\bar y}^\mathrm{T}x{\bar x}^\mathrm{T} )$
+
+and the $\operatorname{atan}$ is meant elementwise.
+"""
+function log!(M::Grassmann{N,K,T}, v, x, y) where {N,K,T}
+    z = y'*x
+  	if det(z)≠0
+        d = svd( z\(y' - z*x'), full = false)
+        v .= d.V * atan.(Diagonal(d.S)) * (d.U')
+        return v   
+  	else
+   		throw( ErrorException("The points $x and $y are antipodal, thus these input parameters are invalid.") )
+  	end
 end
+
+@doc doc"""
+    manifoldDimension(M)
+
+return the dimension of the real-valued [`Grassmannian`](@ref)`(n,k)` manifold `M`,
+i.e. $k(n-k)$
+"""
+function manifoldDimension(M::Grassmann{N,K,Real}) where {N,K} = K*(N-K)
+
+@doc doc"""
+    manifoldDimension(M)
+
+return the dimension of the complex-valued [`Grassmannian`](@ref)`(n,k)` manifold `M`,
+i.e. $2k(n-k)$
+"""
+function manifoldDimension(M::Grassmann{N,K,Complex}) where {N,K} 2*K*(N-K)
+
+project_tangent!(M::Grassmann{N,K,T},v, x, w) where {N,K,T} = ( v .= w - x*x'*w )
+
+@doc doc"""
+     retract!(M, y, x, v, ::PolarRetraction)
+
+ compute the SVD-based retraction [`PolarRetraction`](@ref) on the
+ [`Grassmann`](@ref) manifold `M`. With $USV = x + v$ the retraction reads
+ ````math
+ y = \operatorname{retr}_x v = U\bar{V}^\mathrm{T}.
+ ````
+ """
+ function retract!(::Grassmann{M,N,T}, y, x, v, ::PolarRetraction) where {M,N,T}
+     s = svd(x+v)
+     mul!(y, s.U, s.V')
+     return y
+ end
+
+ @doc doc"""
+     retract!(M, y, x, v, ::QRRetraction )
+
+ compute the QR-based retraction [`QRRetraction`](@ref) on the
+ [`Grassmann`](@ref) manifold `M`. With $QR = x + v$ the retraction reads
+ ````math
+ y = \operatorname{retr}_xv = QD,
+ ````
+ where D is a $m\times n$ matrix with 
+ ````math
+ $D = \operatorname{diag( (\operatorname{sgn}(R_{ii}+0,5)_{i=1}^n )$
+ ````
+ """
+ function retract!(::Grassmann{M,N,T}, y, x, v, ::QRRetraction) where {M,N,T}
+     qrfac = qr(x+v)
+     d = diag(qrfac.R)
+     D = Diagonal( sign.( sign.(d .+ convert(T, 0.5))) )
+     y .= zeros(M,N)
+     y[1:N,1:N] .= D
+     y .= qrfac.Q * D
+     return y
+ end
+
+representation_size(::Grassmann{N,K,T}) where {N, K, T} = (N,K)
+zero_tangent_vector!(::Grassmann{N,K,T},v,x) where {N,K,T} = fill!(v,0)
