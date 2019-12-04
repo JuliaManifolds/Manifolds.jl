@@ -22,6 +22,8 @@ The metric is either inherited from $\mathbb R^{m,n}$ for the real-valued case
 or the one inherited from interpreting the complex valued entries in the Gaussian
 plane $\mathbb R^2$ and then ober all entries as before.
 
+The manifold is named after [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
+
 # Constructor
     Stiefel(m,n,T=Real)
 
