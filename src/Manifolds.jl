@@ -642,6 +642,7 @@ include("ProductManifold.jl")
 include("PowerManifold.jl")
 include("Rotations.jl")
 include("Sphere.jl")
+include("Symmetric.jl")
 include("ProjectedDistribution.jl")
 
 function __init__()
@@ -667,6 +668,7 @@ export Manifold,
     IsDecoratorManifold,
     Euclidean,
     Sphere,
+    Symmetric,
     ProductManifold,
     PowerManifold,
     ProductRepr,
