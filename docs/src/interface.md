@@ -7,7 +7,7 @@ and even first own manifolds just using the interface.
 
 The following functions are currently available from the interface.
 If a manifold that you implement for your own package fits this interface,
-we happily look forward for a
+we happily look forward to a
 [Pull Request](https://github.com/JuliaNLSolvers/Manifolds.jl/compare) to add it here.
 
 ```@autodocs

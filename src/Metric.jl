@@ -34,7 +34,7 @@ from [`local_metric`](@ref) in order to evaluate the exponential map.
 
 If the corresponding [`Metric`](@ref) `G` yields closed form formulae for e.g.
 the exponential map and this is implemented directly (without solving the ode),
-you of course can still implement that directly.
+you can of course still implement that directly.
 
 # Constructor
     MetricManifold(manifold, metric)
@@ -52,7 +52,7 @@ is_decorator_manifold(M::MMT) where {MMT <: MetricManifold}= Val(true)
 
 indicate, whether the [`Metric`](@ref) `G` is the default metric for
 the [`Manifold`](@ref) `M`. This means that any occurence of
-[`MetricManifold`](@ref)(M,G) where `is_default_metric(M,G) = Val{true}`
+[`MetricManifold`](@ref)(M,G) where `typeof(is_default_metric(M,G)) = Val{true}`
 falls back to just be called with `M` such that the [`Manifold`](@ref) `M`
 implicitly has this metric, for example if this was the first one implemented
 or is the one most commonly assumed to be used.
@@ -64,7 +64,7 @@ is_default_metric(M::Manifold,G::Metric) = Val(false)
 indicate, whether the [`Metric`](@ref) `MM.G` is the default metric for
 the [`Manifold`](@ref) `MM.M` within the [`MetricManifold`](@ref) `MM`.
 This means that any occurence of
-[`MetricManifold`](@ref)`(MM.M,MM.G)` where `is_default_metric(MM.M,MM.G) = Val{true}`
+[`MetricManifold`](@ref)`(MM.M,MM.G)` where `typeof(is_default_metric(MM.M,MM.G)) = Val{true}`
 falls back to just be called with `MM.MM` such that the [`Manifold`](@ref) `MM.M`
 implicitly has the metric `MM.G`, for example if this was the first one
 implemented or is the one most commonly assumed to be used.
