@@ -42,6 +42,8 @@ the [`Euclidean`](@ref) manifold itself, or the [`Sphere`](@ref), where every
 tangent space (as a plane in the embedding) uses this metric (in the embedding).
 """
 struct EuclideanMetric <: RiemannianMetric end
+is_default_metric(::Euclidean{T},::EuclideanMetric) where {T} = Val(true)
+
 
 local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x) = Diagonal(ones(SVector{size(x, 1),eltype(x)}))
 

@@ -8,7 +8,6 @@ using ForwardDiff
 using Random
 using ReverseDiff
 using StaticArrays
-using SimpleTraits
 using Test
 
 """
@@ -21,9 +20,23 @@ Tests general properties of manifold `m`, given at least three different points
 that lie on it (contained in `pts`).
 
 # Arguments
-- `test_forward_diff = true`: if true, automatic differentiation using ForwardDiff is
-tested.
+- `exp_log_atol_multiplier = 1`, change absolute tolerance of exp/log tests
+- `inverse_retraction_methods = []`: inverse retraction methods that will be tested.
+- `point_distributions = []` : point distributions to test
+-  tvector_distributions = []` : tangent vector distributions to test
+- `rand_tvector_atol_multiplier = 1` : chage absolute tolerance in testing that
+  random tangent vectors are tangent vectors
 - `retraction_methods = []`: retraction methods that will be tested.
+- `test_forward_diff = true`: if true, automatic differentiation using
+  ForwardDiff is tested.
+- `test_forward_diff = true`: if true, automatic differentiation using
+  ReverseDiff is tested.
+- `test_musical_isomorphisms = false` : test musical isomorphisms 
+- `test_project_tangent = false` : test projections on tangent spaces
+- `test_representation_size = true` : test repersentation size of points/tvectprs
+- `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace
+- `test_vector_transport = false` : test vector transport
+- `test_mutating_rand = false` : test the mutating random function for points on manifolds
 """
 function test_manifold(M::Manifold, pts::AbstractVector;
     test_forward_diff = true,

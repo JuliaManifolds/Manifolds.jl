@@ -29,10 +29,7 @@ The linear affine metric is the metric for symmetric positive definite matrices,
 matrix logarithms and exponentials, which yields a linear and affine metric.
 """
 struct LinearAffineMetric <: RiemannianMetric end
-# Make this metric default, i.e. automatically convert
-convert(::Type{SymmetricPositiveDefinite{N}}, M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
-convert(::Type{SymmetricPositiveDefinite}, M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
-convert(::Type{MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}}, M::SymmetricPositiveDefinite{N}) where N = MetricManifold(M, LinearAffineMetric())
+is_default_metric(::SymmetricPositiveDefinite,::LinearAffineMetric) = Val(true)
 
 @doc doc"""
     LogEuclideanMetric <: Metric
@@ -278,6 +275,7 @@ $\mathcal M = \mathcal P(n)$.
 """
 representation_size(::SymmetricPositiveDefinite{N}) where N = (N,N)
 representation_size(::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}) where N = (N,N)
+representation_size(::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric}) where N = (N,N)
 
 @doc doc"""
     vector_transport_to!(M,vto,x,v,y,::ParallelTransport)
