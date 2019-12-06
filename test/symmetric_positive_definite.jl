@@ -14,11 +14,17 @@ include("utils.jl")
     types = [ Matrix{Float32},
             Matrix{Float64},
             MMatrix{3,3,Float32},
+            MMatrix{3,3,Float64}
         ]
     for M in metrics
         @testset "$(typeof(M))" begin
             @test representation_size(M) == (3,3)
             for T in types
+                exp_log_atol_multiplier = 8.0
+                if T <: MMatrix{3,3,Float64}
+                    # eigendecomposition of 3x3 SPD matrices from StaticArrays is not very accurate
+                    exp_log_atol_multiplier = 5.0e7
+                end
                 if M == M3 && T <: MMatrix
                     # Cholesky or something does not work in vector_transport yet for MMatrix
                     continue
@@ -34,7 +40,7 @@ include("utils.jl")
                     test_vector_transport = true,
                     test_forward_diff = false,
                     test_reverse_diff = false,
-                    exp_log_atol_multiplier = 8
+                    exp_log_atol_multiplier = exp_log_atol_multiplier
                 )
             end
             @testset "Test Error cases in is_manifold_point and is_tangent_vector" begin
