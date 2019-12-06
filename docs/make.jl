@@ -7,6 +7,7 @@ makedocs(
     sitename = "Manifolds",
     pages = [
         "Home" => "index.md",
+        "ManifoldsBase.jl" => "interface.md",
         "Manifolds" => [
             "Basic manifolds" => [
                 "Euclidean" => "manifolds/euclidean.md",

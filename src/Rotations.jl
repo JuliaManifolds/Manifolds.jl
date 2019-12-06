@@ -423,14 +423,14 @@ function vee!(M::Rotations{N}, ω, x, Ω) where {N}
 end
 
 """
-    check_tangent_vector(M,x; kwargs...)
+    check_manifold_point(M,x; kwargs...)
 
 checks, whether `x` is a valid point on the [`Rotations`](@ref) `M`,
 i.e. is an array of size [`manifold_dimension`](@ref)`(M)` and represents a
 valid rotation.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function check_tangent_vector(M::Rotations{N},x; kwargs...) where {N}
+function check_manifold_point(M::Rotations{N},x; kwargs...) where {N}
     if size(x) != (N, N)
         return DomainError(size(x),
             "The point $(x) does not lie on $M, since its size is not $((N, N)).")

@@ -17,19 +17,15 @@ include("utils.jl")
     for T in types
         @testset "Type $T" begin
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            y = exp(M,x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
+            y = exp(M,x, [0.0 0.0; 1.0 0.0; 0.0 1.0])
             z = [1/sqrt(2) 1/sqrt(2); 1/sqrt(2) -1/sqrt(2); 0. 0.]
             pts = convert.(T, [x,y,z])
             test_manifold(M,
                           pts,
-                          test_exp_log = false,
-                          default_inverse_retraction_method = PolarInverseRetraction(),
-                          test_log_yields_tangent = false,
                           test_project_tangent = true,
                           test_vector_transport = false,
                           test_forward_diff = false,
                           test_reverse_diff = false,
-                          projection_atol_multiplier = 10,
                           retraction_methods = [PolarRetraction(), QRRetraction()],
                           inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()]
             )

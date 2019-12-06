@@ -31,6 +31,7 @@ using ManifoldsBase
 using ManifoldsBase: Manifold,
     MPoint,
     TVector,
+    CoTVector,
     ArrayCoTVector,
     ArrayManifold,
     ArrayMPoint,
@@ -85,7 +86,6 @@ import Distributions: _rand!, support
 import Random: rand
 using LinearAlgebra
 using Random: AbstractRNG
-using SimpleTraits
 using UnsafeArrays
 using Einsum: @einsum
 
@@ -257,7 +257,7 @@ export base_manifold,
     exp!,
     flat,
     flat!,
-    gaussian_curvature
+    gaussian_curvature,
     geodesic,
     hat,
     hat!,
@@ -276,6 +276,7 @@ export base_manifold,
     manifold_dimension,
     metric,
     norm,
+    normal_tvector_distribution,
     project_point,
     project_point!,
     project_tangent,
