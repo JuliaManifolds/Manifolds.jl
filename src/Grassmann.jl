@@ -1,12 +1,12 @@
 using LinearAlgebra: svd, qr, Diagonal, det
 import LinearAlgebra: norm
 @doc doc"""
-    Grassmann{n,k} <: Manifold
+    Grassmann{n,k,T} <: Manifold
 
 The Grassmann manifold $\operatorname{Gr}(n,k)$ consists of all $k$-dimensional
 subspaces of $\mathbb F^n$, where $\mathbb F \in \{\mathbb R, \mathbb C\}$ is
-either the real- (or complex-) valued subspaced of the $n$-dimensional (complex)
-space.
+either the real- (or complex-) valued subspaces of the ($2$)$n$-dimensional
+(complex) space.
 
 The manifold can be represented as
 ````math
@@ -129,7 +129,7 @@ y = Q,
 where $Q$ of the QR decomposition $z=QR$ of $z$. This last step is for numerical
 stability reasons.
 """
-function exp(M::Grassmann{N,K,T},y, x, v) where {N,K,T}
+function exp!(M::Grassmann{N,K,T},y, x, v) where {N,K,T}
     d = svd(v)
     z = x * d.V * cos.(Diagonal(d.S)) * (d.V)' + (d.U) * sin.(Diagonal(d.S)) * (d.V)'
     # reorthonormalize 
@@ -193,7 +193,7 @@ function log!(M::Grassmann{N,K,T}, v, x, y) where {N,K,T}
         v .= d.V * atan.(Diagonal(d.S)) * (d.U')
         return v   
   	else
-   		throw( ErrorException("The points $x and $y are antipodal, thus these input parameters are invalid.") )
+   		throw( DomainError(rank(y'x),"The points x=$x and y=$y are antipodal (y'x has no full rank), thus these input parameters are invalid.") )
   	end
 end
 
