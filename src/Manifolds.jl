@@ -31,9 +31,16 @@ using ManifoldsBase
 using ManifoldsBase: Manifold,
     MPoint,
     TVector,
+    ArrayCoTVector,
+    ArrayManifold,
+    ArrayMPoint,
+    ArrayTVector,
+    ArrayCoTVector,
     AbstractRetractionMethod,
     AbstractInverseRetractionMethod,
-    AbstractVectorTransportMethod
+    AbstractVectorTransportMethod,
+    ParallelTransport,
+    ProjectionTransport#
 import ManifoldsBase: base_manifold,
     check_manifold_point,
     check_tangent_vector,
@@ -82,7 +89,36 @@ using SimpleTraits
 using UnsafeArrays
 using Einsum: @einsum
 
-hat!(M::Manifold, v, x, vⁱ) = error("hat! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), and matrix $(typeof(v))")
+"""
+    QRRetraction
+
+A retraction using the QR decomposition of a tangent vectors representation as
+a matrix.
+"""
+struct QRRetraction <: AbstractRetractionMethod end
+
+"""
+    QRInverseRetraction
+
+Inverse retraction to the [`QRRetraction`](@ref)
+"""
+struct QRInverseRetraction <: AbstractInverseRetractionMethod end
+
+@doc doc"""
+    PolarRetraction
+
+A retraction using the QR decomposition of a tangent vectors representation as
+a matrix.
+"""
+struct PolarRetraction <: AbstractRetractionMethod end
+
+"""
+    PolarInverseRetraction
+
+Inverse retraction on the rotations manifold using the polar method.
+"""
+struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
+
 
 @doc doc"""
     hat(M::Manifold, x, vⁱ)
@@ -103,8 +139,8 @@ function hat(M::Manifold, x, vⁱ)
     hat!(M, v, x, vⁱ)
     return v
 end
+hat!(M::Manifold, v, x, vⁱ) = error("hat! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), and matrix $(typeof(v))")
 
-vee!(M::Manifold, vⁱ, x, v) = error("vee! operator not defined for manifold $(typeof(M)), matrix $(typeof(v)), and vector $(typeof(vⁱ))")
 
 @doc doc"""
     vee(M::Manifold, x, v)
@@ -124,6 +160,7 @@ function vee(M::Manifold, x, v)
     vee!(M, vⁱ, x, v)
     return vⁱ
 end
+vee!(M::Manifold, vⁱ, x, v) = error("vee! operator not defined for manifold $(typeof(M)), matrix $(typeof(v)), and vector $(typeof(vⁱ))")
 
 include("utils.jl")
 include("SizedAbstractArray.jl")
@@ -140,8 +177,8 @@ include("PowerManifold.jl")
 
 include("Euclidean.jl")
 include("CholeskySpace.jl")
-include("Rotations.jl")
 include("Grassmann.jl")
+include("Rotations.jl")
 include("Sphere.jl")
 include("SymmetricPositiveDefinite.jl")
 
@@ -162,22 +199,20 @@ end
 # Base Types
 export Manifold,
     MPoint,
-    TVector
+    TVector,
+    CoTVector
 # decorator manifolds
 export ArrayManifold,
     ArrayMPoint,
     ArrayTVector,
-    AbstractVectorTransportMethod,
+    ArrayCoTVector,
     CotangentBundle,
     CotangentSpaceAtPoint,
     CotangentBundleFibers,
     CotangentSpace,
-    FVector,
-    IsDecoratorManifold,
-    ParallelTransport,
-    ProjectTangent
-    ProductManifold,
+    FVector,    
     PowerManifold,
+    ProductManifold,
     ProductRepr,
     TangentBundle,
     TangentBundleFibers,
@@ -186,11 +221,11 @@ export ArrayManifold,
     VectorSpaceAtPoint,
     VectorSpaceType,
     VectorBundle,
-    VectorBundleFibers,
+    VectorBundleFibers
 # Manifolds
-export
-    Euclidean,
+export Euclidean,
     CholeskySpace,
+    Grassmann,
     Sphere,
     SymmetricPositiveDefinite
 # Types
@@ -201,8 +236,16 @@ export Metric,
     MetricManifold,
     LinearAffineMetric,
     LogEuclideanMetric,
-    LogCholeskyMetric
-
+    LogCholeskyMetric,
+    AbstractVectorTransportMethod,
+    ParallelTransport,
+    ProjectionTransport,
+    AbstractRetractionMethod,
+    QRRetraction,
+    PolarRetraction,
+    AbstractInverseRetractionMethod,
+    QRInverseRetraction,
+    PolarInverseRetraction
 export base_manifold,
     bundle_projection,
     christoffel_symbols_first,
