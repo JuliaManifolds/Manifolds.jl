@@ -1,4 +1,4 @@
-using LinearAlgebra: svd, qr, Diagonal, det
+using LinearAlgebra: svd, qr, diag, Diagonal, det
 import LinearAlgebra: norm
 @doc doc"""
     Grassmann{n,k,T} <: Manifold
@@ -80,7 +80,8 @@ function check_tangent_vector(G::Grassmann{N,K,T},x,v; kwargs...) where {N,K,T}
         return DomainError(size(v),
             "The matrix $(v) is does not lie in the tangent space of $(x) on the Grassmann manifold of dimension ($(N),$(K)), since its dimensions are wrong.")
     end
-    if !isapprox(x'*v + v'*x, zeros(N,N); kwargs...)
+    print("Testing $(x) and $(v)")
+    if !isapprox(x'*v + v'*x, zeros(K,K); kwargs...)
         return DomainError(norm(x'*v + v'*x),
             "The matrix $(v) is does not lie in the tangent space of $(x) on the Grassmann manifold of dimension ($(N),$(K)), since x'v + v'x is not the zero matrix.")
     end
@@ -131,9 +132,9 @@ stability reasons.
 """
 function exp!(M::Grassmann{N,K,T},y, x, v) where {N,K,T}
     d = svd(v)
-    z = x * d.V * cos.(Diagonal(d.S)) * (d.V)' + (d.U) * sin.(Diagonal(d.S)) * (d.V)'
-    # reorthonormalize 
-    y = copyto!(y,qr(z).Q)
+    z =  x * d.V * cos.(Diagonal(d.S)) * (d.V)' + (d.U) * sin.(Diagonal(d.S)) * (d.V)'
+    # reorthonormalize
+    y = copyto!(y, Array(qr(z).Q) )
 end
 
 @doc doc"""
@@ -255,9 +256,9 @@ function retract!(::Grassmann{N,K,T}, y, x, v, ::QRRetraction) where {N,K,T}
     qrfac = qr(x+v)
     d = diag(qrfac.R)
     D = Diagonal( sign.( sign.(d .+ convert(T, 0.5))) )
-    y .= zeros(M,N)
-    y[1:N,1:N] .= D
-    y .= qrfac.Q * D
+    y .= zeros(N,K)
+    y[1:K,1:K] .= D
+    y .= Array(qrfac.Q) * D
     return y
 end
 

@@ -39,6 +39,9 @@ that lie on it (contained in `pts`).
 - `test_mutating_rand = false` : test the mutating random function for points on manifolds
 """
 function test_manifold(M::Manifold, pts::AbstractVector;
+    test_exp_log = true,
+    test_log_yields_tangent = true,
+    test_injectivity_radius=true,
     test_forward_diff = true,
     test_reverse_diff = true,
     test_tangent_vector_broadcasting = true,
@@ -47,13 +50,15 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_musical_isomorphisms = false,
     test_vector_transport = false,
     test_mutating_rand = false,
+    default_inverse_retraction_method = ManifoldsBase.LogarithmicInverseRetraction(),
     retraction_methods = [],
     inverse_retraction_methods = [],
     point_distributions = [],
     tvector_distributions = [],
     exp_log_atol_multiplier = 1,
+    projection_atol_multiplier = 1,
     rand_tvector_atol_multiplier = 1)
-    # log/exp
+
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
     isapprox(M, pts[1], pts[2]) && error("Points 1 and 2 are equal")
     isapprox(M, pts[1], pts[3]) && error("Points 1 and 3 are equal")
@@ -79,7 +84,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         end
     end
 
-    @testset "injectivity radius" begin
+    test_injectivity_radius && @testset "injectivity radius" begin
         @test injectivity_radius(M, pts[1]) > 0
         @test injectivity_radius(M, pts[1]) ≥ injectivity_radius(M)
         for rm ∈ retraction_methods
@@ -87,24 +92,28 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             @test injectivity_radius(M, pts[1], rm) ≤ injectivity_radius(M, pts[1])
         end
     end
-    tv1 = log(M, pts[1], pts[2])
 
-    @testset "is_manifold_point / is_tangent_vector" begin
+    @testset "is_manifold_point" begin
         for pt ∈ pts
             @test is_manifold_point(M, pt)
             @test check_manifold_point(M, pt) === nothing
             @test check_manifold_point(M, pt) === nothing
         end
+    end
+
+    tv1 = inverse_retract(M,pts[1],pts[2],default_inverse_retraction_method)
+    test_log_yields_tangent && @testset "is_tangent_vector" begin
         @test is_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1])))
         @test check_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1]))) === nothing
         @test check_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1]))) === nothing
     end
 
-    @testset "log/exp tests" begin
+    test_exp_log &&@testset "log/exp tests" begin
+        tv1 = log(M, pts[1], pts[2])
         tv2 = log(M, pts[2], pts[1])
         @test isapprox(M, pts[2], exp(M, pts[1], tv1))
-        @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
-        @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
+        @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
+        @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
         @test isapprox(M, pts[1], exp(M, pts[2], tv2))
         @test is_manifold_point(M, retract(M, pts[1], tv1))
         @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0))
@@ -116,19 +125,19 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         retract!(M, new_pt, pts[1], tv1)
         @test is_manifold_point(M, new_pt)
         for x ∈ pts
-            @test isapprox(M, x, zero_tangent_vector(M, x), log(M, x, x); atol = eps(eltype(x)) * exp_log_atol_multiplier)
-            @test isapprox(M, x, zero_tangent_vector(M, x), inverse_retract(M, x, x); atol = eps(eltype(x)) * exp_log_atol_multiplier)
+            @test isapprox(M, zero_tangent_vector(M, x), log(M, x, x); atol = eps(eltype(x)) * exp_log_atol_multiplier)
+            @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x); atol = eps(eltype(x)) * exp_log_atol_multiplier)
             for inv_retr_method ∈ inverse_retraction_methods
-                @test isapprox(M, x, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method); atol = eps(eltype(x)) * exp_log_atol_multiplier)
+                @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method); atol = eps(eltype(x)) * exp_log_atol_multiplier)
             end
         end
         zero_tangent_vector!(M, tv1, pts[1])
-        @test isapprox(M, pts[1], tv1, zero_tangent_vector(M, pts[1]))
+        @test isapprox(M, pts[1], tv1, zero_tangent_vector(M, pts[1]); atol = eps(eltype(pts[1])) * exp_log_atol_multiplier)
         log!(M, tv1, pts[1], pts[2])
         @test norm(M, pts[1], tv1) ≈ sqrt(inner(M, pts[1], tv1, tv1))
 
-        @test isapprox(M, exp(M, pts[1], tv1, 1), pts[2])
-        @test isapprox(M, exp(M, pts[1], tv1, 0), pts[1])
+        @test isapprox(M, exp(M, pts[1], tv1, 1), pts[2]; atol = eps(eltype(pts[1])) * exp_log_atol_multiplier)
+        @test isapprox(M, exp(M, pts[1], tv1, 0), pts[1]; atol = eps(eltype(pts[1])) * exp_log_atol_multiplier)
 
         @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
     end
@@ -158,15 +167,15 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     end
 
     test_project_tangent && @testset "project_tangent test" begin
-        @test isapprox(M, pts[1], tv1, project_tangent(M, pts[1], tv1))
+        @test isapprox(M, pts[1], tv1, project_tangent(M, pts[1], tv1); atol = eps(eltype(pts[1])) * projection_atol_multiplier)
         tv = similar(tv1)
         project_tangent!(M, tv, pts[1], tv1)
-        @test isapprox(M, pts[1], tv, tv1)
+        @test isapprox(M, pts[1], tv, tv1; atol = eps(eltype(pts[1])) * projection_atol_multiplier)
     end
 
     test_vector_transport && @testset "vector transport" begin
-        v1 = log(M, pts[1], pts[2])
-        v2 = log(M, pts[1], pts[3])
+        v1 = inverse_retract(M, pts[1], pts[2],default_inverse_retraction_method)
+        v2 = inverse_retract(M, pts[1], pts[3],default_inverse_retraction_method)
         v1t1 = vector_transport_to(M, pts[1], v1, pts[3])
         v1t2 = vector_transport_direction(M, pts[1], v1, v2)
         @test is_tangent_vector(M, pts[3], v1t1)
@@ -202,7 +211,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     end
 
     test_musical_isomorphisms && @testset "Musical isomorphisms" begin
-        tv_m = log(M, pts[1], pts[2])
+        tv_m = inverse_retract(M, pts[1], pts[2],default_inverse_retraction_method)
         ctv_m = flat(M, pts[1], FVector(TangentSpace, tv_m))
         @test ctv_m.type == CotangentSpace
         tv_m_back = sharp(M, pts[1], ctv_m)
@@ -210,7 +219,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     end
 
     @testset "eltype" begin
-        tv1 = log(M, pts[1], pts[2])
+        tv1 = inverse_retract(M, pts[1], pts[2],default_inverse_retraction_method)
         @test eltype(tv1) == eltype(pts[1])
         @test eltype(exp(M, pts[1], tv1)) == eltype(pts[1])
     end
@@ -221,8 +230,8 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test isapprox(M, p2, pts[2])
 
         tv2 = similar(tv1)
-        copyto!(tv2, log(M, pts[2], pts[3]))
-        @test isapprox(M, pts[2], tv2, log(M, pts[2], pts[3]))
+        copyto!(tv2, inverse_retract(M, pts[2], pts[3],default_inverse_retraction_method))
+        @test isapprox(M, pts[2], tv2, inverse_retract(M, pts[2], pts[3],default_inverse_retraction_method))
     end
 
     @testset "point distributions" begin
