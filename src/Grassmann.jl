@@ -44,45 +44,45 @@ generate the Grassmann manifold $\operatorname{Gr}(n,k)$ (on $\mathbb R^n$).
 struct Grassmann{N,K,T} <: Manifold end
 Grassmann(n::Int, k::Int, T::Type = Real) = Grassmann{n, k, T}()
 
-function check_manifold_point(G::Grassmann{M,N,T},x; kwargs...) where {M,N,T}
+function check_manifold_point(G::Grassmann{N,K,T},x; kwargs...) where {N,K,T}
     if (T <: Real) && !(eltype(x) <: Real)
         return DomainError(eltype(x),
-            "The matrix $(x) is not a real-valued matrix, so it does noe lie on the Grassmann manifold of dimension ($(M),$(N)).")
+            "The matrix $(x) is not a real-valued matrix, so it does noe lie on the Grassmann manifold of dimension ($(N),$(K)).")
     end
     if (T <: Complex) && !(eltype(x) <: Real) && !(eltype(x) <: Complex)
         return DomainError(eltype(x),
-            "The matrix $(x) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Grassmann manifold of dimension ($(M),$(N)).")
+            "The matrix $(x) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Grassmann manifold of dimension ($(N),$(K)).")
     end
     if any( size(x) != representation_size(G) )
         return DomainError(size(x),
-            "The matrix $(x) is does not lie on the Grassmann manifold of dimension ($(M),$(N)), since its dimensions are wrong.")
+            "The matrix $(x) is does not lie on the Grassmann manifold of dimension ($(N),$(K)), since its dimensions are wrong.")
     end
     c = x'*x
     if !isapprox(c, one(c); kwargs...)
         return DomainError(norm(c-one(c)),
-            "The point $(x) does not lie on the Grassmann manifold of dimension ($(M),$(N)), because x'x is not the unit matrix.")
+            "The point $(x) does not lie on the Grassmann manifold of dimension ($(N),$(K)), because x'x is not the unit matrix.")
     end
 end
-function check_tangent_vector(G::Grassmann{M,N,T},x,v; kwargs...) where {M,N,T}
+function check_tangent_vector(G::Grassmann{N,K,T},x,v; kwargs...) where {N,K,T}
     t = check_manifold_point(G,x)
     if (t != nothing)
         return t
     end
     if (T <: Real) && !(eltype(v) <: Real)
         return DomainError(eltype(v),
-            "The matrix $(v) is not a real-valued matrix, so it can not be a tangent vector to the Grassmann manifold of dimension ($(M),$(N)).")
+            "The matrix $(v) is not a real-valued matrix, so it can not be a tangent vector to the Grassmann manifold of dimension ($(N),$(K)).")
     end
     if (T <: Complex) && !(eltype(v) <: Real) && !(eltype(v) <: Complex)
         return DomainError(eltype(v),
-            "The matrix $(v) is neiter real- nor complex-valued matrix, so it can not bea tangent vector to the complex Grassmann manifold of dimension ($(M),$(N)).")
+            "The matrix $(v) is neiter real- nor complex-valued matrix, so it can not bea tangent vector to the complex Grassmann manifold of dimension ($(N),$(K)).")
     end
     if any( size(v) != representation_size(G) )
         return DomainError(size(v),
-            "The matrix $(v) is does not lie in the tangent space of $(x) on the Grassmann manifold of dimension ($(M),$(N)), since its dimensions are wrong.")
+            "The matrix $(v) is does not lie in the tangent space of $(x) on the Grassmann manifold of dimension ($(N),$(K)), since its dimensions are wrong.")
     end
     if !isapprox(x'*v + v'*x, zeros(N,N); kwargs...)
         return DomainError(norm(x'*v + v'*x),
-            "The matrix $(v) is does not lie in the tangent space of $(x) on the Grassmann manifold of dimension ($(M),$(N)), since x'v + v'x is not the zero matrix.")
+            "The matrix $(v) is does not lie in the tangent space of $(x) on the Grassmann manifold of dimension ($(N),$(K)), since x'v + v'x is not the zero matrix.")
     end
 end
 
@@ -146,7 +146,7 @@ The formula reads
 (v,w)_x = \operatorname{trace}({\bar v}^{\mathrm{T}}w).
 ````
 """
-inner(::Grassmann{M,N,T}, x, v, w) where {M,N,T} = real(dot(v,w))
+inner(::Grassmann{N,K,T}, x, v, w) where {N,K,T} = real(dot(v,w))
 
 @doc doc"""
     inverse_retract!(M, v, x, y, ::PolarInverseRetraction)
@@ -157,7 +157,7 @@ compute the inverse retraction valid for the [`PolarRetraction`](@ref).
 \operatorname{retr}_x^{-1}y = y*(\bar{x}^\mathrm{T}y)^{-1} - x
 ````
 """
-inverse_retract!(::Grassmann{M,N,T}, v, x, y, ::PolarInverseRetraction) where {M,N,T} = ( v .= y/(x'*y) - x)
+inverse_retract!(::Grassmann{N,K,T}, v, x, y, ::PolarInverseRetraction) where {N,K,T} = ( v .= y/(x'*y) - x)
 
 @doc doc"""
     inverse_retract!(M, v, x, y, ::QRInverseRetraction)
@@ -168,7 +168,9 @@ compute the inverse retraction valid for the [`QRRetraction`](@ref) as
 \operatorname{retr}_x^{-1}y = y*(\bar{x}^\mathrm{T}y)^{-1} - x.
 ````
 """
-inverse_retract!(::Grassmann{M,N,T}, v, x, y, ::QRInverseRetraction) where {M,N,T} = ( v .= y/(x'*y) - x)
+inverse_retract!(::Grassmann{N,K,T}, v, x, y, ::QRInverseRetraction) where {N,K,T} = ( v .= y/(x'*y) - x)
+
+isapprox(M::Grassmann{N,K,T}, x, y; kwargs...) where {N,K,T} = isapprox(distance(M,x,y),0; kwargs...)
 
 @doc doc"""
     log!(M, v, x, y)
@@ -230,34 +232,34 @@ compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 y = \operatorname{retr}_x v = U\bar{V}^\mathrm{T}.
 ````
 """
- function retract!(::Grassmann{M,N,T}, y, x, v, ::PolarRetraction) where {M,N,T}
-     s = svd(x+v)
-     mul!(y, s.U, s.V')
-     return y
- end
+function retract!(::Grassmann{N,K,T}, y, x, v, ::PolarRetraction) where {N,K,T}
+    s = svd(x+v)
+    mul!(y, s.U, s.V')
+   return y
+end
 
- @doc doc"""
-     retract!(M, y, x, v, ::QRRetraction )
+@doc doc"""
+    retract!(M, y, x, v, ::QRRetraction )
 
- compute the QR-based retraction [`QRRetraction`](@ref) on the
- [`Grassmann`](@ref) manifold `M`. With $QR = x + v$ the retraction reads
- ````math
- y = \operatorname{retr}_xv = QD,
- ````
- where D is a $m\times n$ matrix with 
- ````math
- D = \operatorname{diag}( \operatorname{sgn}(R_{ii}+0,5)_{i=1}^n )
- ````
- """
- function retract!(::Grassmann{M,N,T}, y, x, v, ::QRRetraction) where {M,N,T}
-     qrfac = qr(x+v)
-     d = diag(qrfac.R)
-     D = Diagonal( sign.( sign.(d .+ convert(T, 0.5))) )
-     y .= zeros(M,N)
-     y[1:N,1:N] .= D
-     y .= qrfac.Q * D
-     return y
- end
+compute the QR-based retraction [`QRRetraction`](@ref) on the
+[`Grassmann`](@ref) manifold `M`. With $QR = x + v$ the retraction reads
+````math
+y = \operatorname{retr}_xv = QD,
+````
+where D is a $m\times n$ matrix with 
+````math
+D = \operatorname{diag}( \operatorname{sgn}(R_{ii}+0,5)_{i=1}^n )
+````
+"""
+function retract!(::Grassmann{N,K,T}, y, x, v, ::QRRetraction) where {N,K,T}
+    qrfac = qr(x+v)
+    d = diag(qrfac.R)
+    D = Diagonal( sign.( sign.(d .+ convert(T, 0.5))) )
+    y .= zeros(M,N)
+    y[1:N,1:N] .= D
+    y .= qrfac.Q * D
+    return y
+end
 
 @generated representation_size(::Grassmann{N,K,T}) where {N, K, T} = (N,K)
 zero_tangent_vector!(::Grassmann{N,K,T},v,x) where {N,K,T} = fill!(v,0)
