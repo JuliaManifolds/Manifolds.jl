@@ -17,8 +17,10 @@ include("utils.jl")
     for T in types
         @testset "Type $T" begin
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            y = exp(M,x, [0.0 0.0; 1.0 0.0; 0.0 1.0])
-            z = [1/sqrt(2) 1/sqrt(2); 1/sqrt(2) -1/sqrt(2); 0. 0.]
+            sp = [ 1.0 0.0; 0.0 1.0; 1.0 1.0]
+            y = svd(sp).U*svd(sp).Vt
+            sp2 = [ 1.0 1.0; 1.0 0.0; 0.0 1.0]
+            z = svd(sp2).U*svd(sp2).Vt
             pts = convert.(T, [x,y,z])
             test_manifold(M,
                           pts,
