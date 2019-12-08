@@ -107,15 +107,15 @@ function hat(M::Manifold, x, vⁱ)
 end
 
 @doc doc"""
-    mean(M,x; weights=1/n*ones(n), stop_tol=10^-8, stop_iter=100 )
+    mean(M,x; weights=1/n*ones(n), stop_tol=10^-7, stop_iter=100 )
 
-computes the Riemannian center of mass also known as Karcher mean of the
-[`Vector`](@ref) 'x'  of points on the [`Manifold`](@ref) `M`. This function
+computes the Riemannian center of mass also known as Karcher mean of the vector
+`x` of `n` points on the [`Manifold`](@ref) `M`. This function
 uses the gradient descent scheme. Optionally one can provide
 weights $w_i$ for the weighted Riemannian center of mass.
 The general formula to compute the minimizer reads
 ````math
-\argmin{y\in\mathcal M} \frac{1}{2}\sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
+\argmin_{y\in\mathcal M} \frac{1}{2}\sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
 ````
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemian [`distance`](@ref).
 
@@ -126,8 +126,7 @@ check the [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom
 The algorithm is further described in 
 > Afsari, B; Tron, R.; Vidal, R.: On the Convergence of Gradient
 > Descent for Finding the Riemannian Center of Mass,
-> SIAM Journal on Control and Optimization, Volume 51, Issue 3,
-> pp. 2230–2260, 
+> SIAM Journal on Control and Optimization (2013), 51(3), pp. 2230–2260, 
 > doi: [10.1137/12086282X](https://doi.org/10.1137/12086282X),
 > arxiv: [1201.0925](https://arxiv.org/abs/1201.0925">1201.0925)
 """
@@ -148,15 +147,15 @@ function mean(M::Manifold, x::Vector{T};
 end
 
 @doc doc"""
-    median(M,x; weights=1/n*ones(n), stop_tol=10^-8, stop_iter=100, use_rand = true )
+    median(M,x; weights=1/n*ones(n), stop_tol=10^-10, stop_iter=10000, use_rand = false )
 
-computes the Riemannian median of the [`Vector`](@ref) 'x'  of points on the
+computes the Riemannian median of the vector `x`  of `n` points on the
 [`Manifold`](@ref) `M`. This function is nonsmooth (i.e nondifferentiable) and
 uses a cyclic procimal point scheme. Optionally one can provide
 weights $w_i$ for the weighted Riemannian median. The general formula to compute
 the minimizer reads
 ````math
-\argmin{y\in\mathcal M}\sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
+\argmin_{y\in\mathcal M}\sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
 ````
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemian [`distance`](@ref).
 
@@ -168,9 +167,9 @@ faster.  For more stopping criterai and details check the
 
 The algorithm is further described in Algorithm 4.3 and 4.4 in 
 > Bačák, M: Computing Medians and Means in Hadamard Spaces.
-> SIAM Journal on Optimization, Volume 24, Number 3, pp. 1542–1566,
+> SIAM Journal on Optimization (2014), 24(3), pp. 1542–1566,
 > doi: [10.1137/140953393](https://doi.org/10.1137/140953393),
-> arxiv: [1210.2145](https://arxiv.org/abs/1210.2145>
+> arxiv: [1210.2145](https://arxiv.org/abs/1210.2145)
 """
 function median(M::Manifold, x::Vector{T};
     weights=1/length(x)*ones(length(x)),
@@ -182,7 +181,6 @@ function median(M::Manifold, x::Vector{T};
     y=x[1]
     yOld = y
     order = 1:n
-    print(order)
     iter = 0
     while ( ( iter==0 || distance(M,y,yOld) > stop_atol ) && (iter < stop_iter) )
         iter += 1
