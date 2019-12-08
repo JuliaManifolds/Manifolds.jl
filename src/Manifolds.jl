@@ -133,15 +133,16 @@ The algorithm is further described in
 """
 function mean(M::Manifold, x::Vector{T};
     weights=1/length(x)*ones(length(x)),
-    stop_atol=10^-8,
+    stop_atol=10^-7,
     stop_iter=100
     ) where {T}
     iter = 0
     y=x[1]
     yOld = y
     while ( ( iter==0 || distance(M,y,yOld) > stop_atol ) && (iter < stop_iter) )
+        iter += 1
         yOld = y
-        y = exp(M,yOld,  sum( weights.*log.(Ref(M), Ref(yOld),x) )  )
+        y = exp(M,yOld,  1/2*sum( weights.*log.(Ref(M), Ref(yOld),x) )  )
     end
     return y
 end
@@ -173,16 +174,18 @@ The algorithm is further described in Algorithm 4.3 and 4.4 in
 """
 function median(M::Manifold, x::Vector{T};
     weights=1/length(x)*ones(length(x)),
-    stop_atol=10^-8,
-    stop_iter=100,
+    stop_atol=10^-10,
+    stop_iter=10000,
     use_random = false
     ) where {T}
     n = length(x)
     y=x[1]
     yOld = y
-    order = 1:length(n)
+    order = 1:n
+    print(order)
     iter = 0
     while ( ( iter==0 || distance(M,y,yOld) > stop_atol ) && (iter < stop_iter) )
+        iter += 1
         λ = 1/(iter+1)
         yOld = y
         order = use_random ? randperm(n) : order
