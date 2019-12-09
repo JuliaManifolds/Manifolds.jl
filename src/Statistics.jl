@@ -1,4 +1,5 @@
 using Random: shuffle!
+using StatsBase: AbstractWeights, weights, values
 @doc doc"""
     mean(M,x; weights=1/n*ones(n), stop_iter=100, kwargs... )
 
@@ -24,13 +25,13 @@ The algorithm is further described in
 > doi: [10.1137/12086282X](https://doi.org/10.1137/12086282X),
 > arxiv: [1201.0925](https://arxiv.org/abs/1201.0925">1201.0925)
 """
-function mean(M::Manifold, x::AbstractVector; kwargs...)
+function mean(M::Manifold, x::AbstractVector, w::AbstractWeights = weights(ones(length(x)) / length(x)); kwargs...)
     y = x[1]
-    return mean!(M, y, x; kwargs...)
+    return mean!(M, y, x, w; kwargs...)
 end
 mean(M::Euclidean, x, w) = mean(x,w)
-function mean!(M::Manifold, y, x::AbstractVector;
-            weights = ones(length(x)) / length(x),
+mean(M::Euclidean, x) = mean(x)
+function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = weights(ones(length(x)) / length(x));
             stop_iter=100,
             kwargs...
         ) where {T}
@@ -39,7 +40,7 @@ function mean!(M::Manifold, y, x::AbstractVector;
     for i=1:stop_iter
         yold = y
         log!.(Ref(M), v, Ref(yold), x)
-        y = exp(M, yold, sum( weights.*v ) / 2 )
+        y = exp(M, yold, sum( values(w).*v ) / 2 )
         isapprox(M,y,yold; kwargs...) && break
     end
     return y
@@ -72,12 +73,11 @@ The algorithm is further described in Algorithm 4.3 and 4.4 in
 > doi: [10.1137/140953393](https://doi.org/10.1137/140953393),
 > arxiv: [1210.2145](https://arxiv.org/abs/1210.2145)
 """
-function median(M::Manifold, x::AbstractVector; kwargs...)
+function median(M::Manifold, x::AbstractVector, w::AbstractWeights = weights(ones(length(x)) / length(x)); kwargs...)
     y = x[1]
     return median!(M, y, x; kwargs...)
 end
-function median!(M::Manifold, y, x::AbstractVector;
-            weights= ones(length(x)) / length(x),
+function median!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = weights(ones(length(x)) / length(x));
             stop_iter=10000,
             use_random = false,
             kwargs...
@@ -92,14 +92,15 @@ function median!(M::Manifold, y, x::AbstractVector;
         use_random && shuffle!(order)
         v = zero_tangent_vector(M,y)
         for i=1:n
-            t = min( λ * weights[order[i]] / distance(M,y,x[order[i]]) , 1 )
+            t = min( λ * w[order[i]] / distance(M,y,x[order[i]]) , 1 )
             exp!( M, y, yold, t*log!(M, v, y, x[order[i]]) )
         end
         isapprox(M,y,yold; kwargs...) && break
     end
     return y
 end
-
+median(M::Euclidean,x) = median(x)
+median(M::Euclidean,x,w) = median(x,w)
 @doc doc"""
     var(M,x, corrected::Bool=true, mean=mean(M,x))
 
