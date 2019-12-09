@@ -72,7 +72,8 @@ import ManifoldsBase: base_manifold,
     vector_transport_to,
     vector_transport_to!,
     zero_tangent_vector,
-    zero_tangent_vector!
+    zero_tangent_vector!,
+    similar_result
 
 using Requires
 using StaticArrays
