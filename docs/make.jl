@@ -12,7 +12,7 @@ makedocs(
                 "Euclidean" => "manifolds/euclidean.md",
                 "Rotations" => "manifolds/rotations.md",
                 "Sphere" => "manifolds/sphere.md",
-                "Symmetric" => "manifolds/symmetric.md"
+                "Symmetric Matrices" => "manifolds/symmetric.md"
             ],
             "Combined manifolds" => [
                 "Power manifold" => "manifolds/power.md",

@@ -1,5 +1,5 @@
 @doc doc"""
-    Symmetric{N} <: Manifold
+    SymmetricMatrices{N} <: Manifold
 
 The manifold $ Sym (N)$ consisting of the real-valued, symmetric matrices of sice $ n\times n$, i.e. the set 
 
@@ -10,94 +10,94 @@ Being slightly unefficient, the matrices are safed as $n\times n$ arrays despite
 
 # Constructor
 
-    Symmetric(n)
+    SymmetricMatrices(n)
 
 """
-struct Symmetric{N} <: Manifold end
-Symmetric(n::Int) = Symmetric{n}()
+struct SymmetricMatrices{N} <: Manifold end
+SymmetricMatrices(n::Int) = SymmetricMatrices{n}()
 
 @traitimpl HasMetric{Symmetric,EuclideanMetric}
 
-function representation_size(::Symmetric{N}) where N
+function representation_size(::SymmetricMatrices{N}) where N
     return (N,N)
 end
 
 @doc doc"""
-    manifold_dimension(M::Symmetric)
+    manifold_dimension(M::SymmetricMatrices{n})
 
 Return the dimension of the manifold $M=\text{Sym}(n)$, i.e. $\frac{n(n+1)}{2}$.
 """
-manifold_dimension(M::Symmetric{N}) where {N} = N*(N+1)/2
+manifold_dimension(M::SymmetricMatrices{N}) where {N} = N*(N+1)/2
 
-project_point!(M::Symmetric, x) = (x += transpose(x))
+project_point!(M::SymmetricMatrices, x) = (x += transpose(x))
 
-project_tangent!(M::Symmetric, w, x, v) = (x -= transpose(x))
+project_tangent!(M::SymmetricMatrices, w, x, v) = (x -= transpose(x))
 
 @doc doc"""
-    inner(M::Symmetric, x, w, v)
+    inner(M::SymmetricMatrices, x, w, v)
 
 compute the inner product of the two tangent vectors `w,v` from the tangent
 plane at `x` on the manifold $M=\text{Sym}(n)$ using the restriction of the
 metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
-inner(M::Symmetric, x, w, v) = dot(w, v)
+inner(M::SymmetricMatrices, x, w, v) = dot(w, v)
 
-norm(M::Symmetric, x, v) = norm(v)
+norm(M::SymmetricMatrices, x, v) = norm(v)
 
 """
-    distance(M::Symmetric, x, y)
+    distance(M::SymmetricMatrices, x, y)
 
 by using the inherited metric, i.e. taking the Frobenius-norm of the difference.
 
 """
 
-distance(M::Symmetric, x, y) = norm(x-y)
+distance(M::SymmetricMatrices, x, y) = norm(x-y)
 
-function exp!(M::Symmetric, y, x, v)rans
+function exp!(M::SymmetricMatrices, y, x, v)
     y = x + v
     return y
 end
 
-function log!(M::Symmetric, v, x, y)
+function log!(M::SymmetricMatrices, v, x, y)
     v = y-x
     return v
 end
 
-function zero_tangent_vector!(M::Symmetric, v, x)
+function zero_tangent_vector!(M::SymmetricMatrices, v, x)
     fill!(v, 0)
     return v
 end
 
 
 @doc doc"""
-    vector_transport_to!(M::Symmetric, vto, x, v, y)
+    vector_transport_to!(M::SymmetricMatrices, vto, x, v, y)
 compute the vector transport of the tangential vector v from the point $x\in M=\text{Sym}(n)$
 to the point $y\in M$. The result is stored in vto.
-Since the metric is inherited from the embedding space, it is just the identity.
+Since the metric is inherited from the embedding space, this is just the identity.
 """
-function vector_transport_to!(M::Symmetric, vto, x, v, y)
+function vector_transport_to!(M::SymmetricMatrices, vto, x, v, y)
     vto=v
     return vto
 end
 
-function flat!(M::Symmetric, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
+function flat!(M::SymmetricMatrices, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
     copyto!(v.data, w.data)
     return v
 end
 
-function sharp!(M::Symmetric, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
+function sharp!(M::SymmetricMatrices, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
     copyto!(v.data, w.data)
     return v
 end
 
 
 @doc doc"""
-    is_manifold_point(M::Symmetric,x)
+    is_manifold_point(M::SymmetricMatrices,x)
 
 checks, whether `x` is a valid point in the symmetric matrices $\text{Sym}(n)$, i.e. is a symmetric matrix
 of size `(n,n)`.
 """
-function is_manifold_point(M::Symmetric{N},x; kwargs...) where {N}
+function is_manifold_point(M::SymmetricMatrices{N},x; kwargs...) where {N}
     if size(x) != (N,N)
         throw(DomainError(size(x),"The point $(x) does not lie on $M, since its size is not ($N,$N)."))
     end
@@ -110,10 +110,10 @@ end
 """
     is_tangent_vector(M,x,v; kwargs... )
 
-checks whether `v` is a tangent vector to `x` on the [`Symmetric`](@ref) matrices `M`, i.e.
+checks whether `v` is a tangent vector to `x` on the [`SymmetricMatrices`](@ref) matrices `M`, i.e.
 after [`is_manifold_point`](@ref)`(S,x)`, `v` has to be a symmetric matrix of dimension `(n,n)`.
 """
-function is_tangent_vector(M::Symmetric{N},x,v; kwargs...) where N
+function is_tangent_vector(M::SymmetricMatrices{N},x,v; kwargs...) where N
     is_manifold_point(M,x)
     if size(v) != (N,N)
         throw(DomainError(size(v),
