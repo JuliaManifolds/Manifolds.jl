@@ -35,13 +35,11 @@ function mean!(M::Manifold, y, x::AbstractVector;
             kwargs...
         ) where {T}
     yold = y
-    print(weights)
-    v = fill(zero_tangent_vector(M,y),length(x))
+    v = zero_tangent_vector.(Ref(M), fill(y,length(x)))
     for i=1:stop_iter
         yold = y
         log!.(Ref(M), v, Ref(yold), x)
         y = exp(M, yold, sum( weights.*v ) / 2 )
-        print("\n$(i) $(y) | $(yold)\n: $(sum(weights.*v ) / 2 ) $(isapprox(M,y,yold; kwargs...)) | $(sum( distance.(Ref(M),Ref(y),x).^2 ))\n")
         isapprox(M,y,yold; kwargs...) && break
     end
     return y
@@ -103,7 +101,7 @@ function median!(M::Manifold, y, x::AbstractVector;
 end
 
 @doc doc"""
-    var(M,x, corrected::Bool=true, mean=nothing)
+    var(M,x, corrected::Bool=true, mean=mean(M,x))
 
 compute the variance of the points in `x` on the [`Manifold`](@ref) `M`, i.e.
 ````
@@ -114,5 +112,4 @@ and $m=n-1$ if `corrected=true` and $m=n$ otherwise.
 
 A mean might be provided and is otherwise computed.
 """
-var(M::Manifold, x::AbstractVector, corrected::Bool=true, mean=nothing) = var(M,x,corrected,mean(M,x))
-var(M::Manifold, x::AbstractVector, corrected::Bool=true, mean) = sum( distance.(Ref(M), Ref(mean), x).^2 )/(length(x)-Int(corrected))
+var(M::Manifold, x::AbstractVector, corrected::Bool=true, mean=mean(M,x)) = sum( distance.(Ref(M), Ref(mean), x).^2 )/(length(x)-Int(corrected))
