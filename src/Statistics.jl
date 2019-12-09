@@ -24,13 +24,16 @@ The algorithm is further described in
 > doi: [10.1137/12086282X](https://doi.org/10.1137/12086282X),
 > arxiv: [1201.0925](https://arxiv.org/abs/1201.0925">1201.0925)
 """
-function mean(M::Manifold, x::AbstractVector};
+function mean(M::Manifold, y, x::AbstractVector}; kwargs...)
+    y = x[1]
+    return mean!(M, y, x; kwargs...)
+end
+function mean!(M::Manifold, y, x::AbstractVector};
             weights= ones(length(x)) / length(x),
             stop_iter=100,
             kwargs...
         ) where {T}
     iter = 0
-    y=x[1]
     yold = y
     v = fill(zero_tangent_vector(M,x),5)
     for i=1:stop_iter
@@ -68,14 +71,17 @@ The algorithm is further described in Algorithm 4.3 and 4.4 in
 > doi: [10.1137/140953393](https://doi.org/10.1137/140953393),
 > arxiv: [1210.2145](https://arxiv.org/abs/1210.2145)
 """
-function median(M::Manifold, x::AbstractVector;
+function median(M::Manifold, x::AbstractVector; kwargs...)
+    y = x[1]
+    return median!(M,y,x; kwargs...)
+end
+function median!(M::Manifold, y, x::AbstractVector;
             weights= ones(length(x)) / length(x),
             stop_iter=10000,
             use_random = false,
             kwargs...
         ) where {T}
     n = length(x)
-    y=x[1]
     yold = y
     order = collect(1:n)
     iter = 0
