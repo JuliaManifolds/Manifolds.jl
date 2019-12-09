@@ -24,21 +24,24 @@ The algorithm is further described in
 > doi: [10.1137/12086282X](https://doi.org/10.1137/12086282X),
 > arxiv: [1201.0925](https://arxiv.org/abs/1201.0925">1201.0925)
 """
-function mean(M::Manifold, y, x::AbstractVector}; kwargs...)
+function mean(M::Manifold, x::AbstractVector; kwargs...)
     y = x[1]
     return mean!(M, y, x; kwargs...)
 end
-function mean!(M::Manifold, y, x::AbstractVector};
-            weights= ones(length(x)) / length(x),
+mean(M::Euclidean, x, w) = mean(x,w)
+function mean!(M::Manifold, y, x::AbstractVector;
+            weights = ones(length(x)) / length(x),
             stop_iter=100,
             kwargs...
         ) where {T}
-    iter = 0
     yold = y
-    v = fill(zero_tangent_vector(M,x),5)
+    print(weights)
+    v = fill(zero_tangent_vector(M,y),length(x))
     for i=1:stop_iter
-        v = weights.*log!.*(Ref(M), v, Ref(yold), x)
-        yold, y = y, exp(M, yold, sum( v ) / 2 )
+        yold = y
+        log!.(Ref(M), v, Ref(yold), x)
+        y = exp(M, yold, sum( weights.*v ) / 2 )
+        print("\n$(i) $(y) | $(yold)\n: $(sum(weights.*v ) / 2 ) $(isapprox(M,y,yold; kwargs...)) | $(sum( distance.(Ref(M),Ref(y),x).^2 ))\n")
         isapprox(M,y,yold; kwargs...) && break
     end
     return y
@@ -73,7 +76,7 @@ The algorithm is further described in Algorithm 4.3 and 4.4 in
 """
 function median(M::Manifold, x::AbstractVector; kwargs...)
     y = x[1]
-    return median!(M,y,x; kwargs...)
+    return median!(M, y, x; kwargs...)
 end
 function median!(M::Manifold, y, x::AbstractVector;
             weights= ones(length(x)) / length(x),
@@ -89,11 +92,27 @@ function median!(M::Manifold, y, x::AbstractVector;
         λ = 1/(iter+1)
         yold = y
         use_random && shuffle!(order)
+        v = zero_tangent_vector(M,y)
         for i=1:n
             t = min( λ * weights[order[i]] / distance(M,y,x[order[i]]) , 1 )
-            exp!( M, y, yold, t*log(M, y, x[order[i]]) )
+            exp!( M, y, yold, t*log!(M, v, y, x[order[i]]) )
         end
         isapprox(M,y,yold; kwargs...) && break
     end
     return y
 end
+
+@doc doc"""
+    var(M,x, corrected::Bool=true, mean=nothing)
+
+compute the variance of the points in `x` on the [`Manifold`](@ref) `M`, i.e.
+````
+    \frac{1}{m}\sum_{i=1}^n d_{\mathcal M}(m,x_i),
+````
+where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref)
+and $m=n-1$ if `corrected=true` and $m=n$ otherwise.
+
+A mean might be provided and is otherwise computed.
+"""
+var(M::Manifold, x::AbstractVector, corrected::Bool=true, mean=nothing) = var(M,x,corrected,mean(M,x))
+var(M::Manifold, x::AbstractVector, corrected::Bool=true, mean) = sum( distance.(Ref(M), Ref(mean), x).^2 )/(length(x)-Int(corrected))
