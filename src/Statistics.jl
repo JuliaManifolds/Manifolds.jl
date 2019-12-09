@@ -95,7 +95,7 @@ computes the [`median`](@ref) in-place in `y` where the initial value of `y` is
 the starting point of the algorithm.
 """
 function median!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = weights(ones(length(x)) / length(x));
-            stop_iter=10000,
+            stop_iter=100000,
             use_random = false,
             kwargs...
         ) where {T}
@@ -103,19 +103,17 @@ function median!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = weights
     yold = similar_result(M,median,y)
     copyto!(yold,y)
     order = collect(1:n)
-    iter = 0
     v = zero_tangent_vector(M,y)
     for i=1:stop_iter
-        λ = 1/(iter+1)
+        λ = n/(2*i)
         copyto!(yold,y)
         use_random && shuffle!(order)
-        zero_tangent_vector!(M,v,y)
-        for i=1:n
-            t = min( λ * w[order[i]] / distance(M,y,x[order[i]]) , 1 )
-            log!(M, v, y, x[order[i]])
-            exp!( M, y, y, t* v)
+        for j=1:n
+            t = min( λ * w[order[j]] / distance(M,y,x[order[j]]) , 1 )
+            log!(M, v, y, x[order[j]])
+            y = exp(M, y, t* v)
         end
-        isapprox(M,y,yold; kwargs...) && break
+        isapprox(M, y, yold; kwargs...) && break
     end
     return y
 end
