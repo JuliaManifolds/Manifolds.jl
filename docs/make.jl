@@ -36,4 +36,5 @@ makedocs(
 
 deploydocs(
     repo = "github.com/JuliaNLSolvers/Manifolds.jl.git",
+    push_preview = true,
 )
