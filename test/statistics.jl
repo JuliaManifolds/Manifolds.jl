@@ -1,5 +1,5 @@
 include("utils.jl")
-
+using StatsBase: weights
 @testset "Median and Mean" begin
     M = Sphere(2)
     p = [0.,0.,1.]
@@ -21,4 +21,12 @@ include("utils.jl")
     @test isapprox(M, mean(M,x), geodesic(M,x[1],x[2],π/4))
     @test var(M,x) == var(M,x,true,mean(M,x))
     @test var(M,x) ≈ 2*(π/4)^2
+
+
+    x = [1., 2., 3., 4.,]
+    w = weights(  ones(length(x)) / length(x)  )
+    @test mean(Euclidean(1),x) == mean(x)
+    @test mean(Euclidean(1),x,w) == mean(x,w)
+    @test median(Euclidean(1),x) == median(x)
+    @test median(Euclidean(1),x,w) == median(x,w)
 end

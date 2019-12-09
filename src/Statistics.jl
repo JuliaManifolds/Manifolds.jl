@@ -31,8 +31,8 @@ function mean(M::Manifold, x::AbstractVector, w::AbstractWeights = weights(ones(
     copyto!(y,x0)
     return mean!(M, y, x, w; kwargs...)
 end
-mean(M::Euclidean, x, w) = mean(x,w)
-mean(M::Euclidean, x) = mean(x)
+mean(M::Euclidean, x::AbstractVector, w::AbstractWeights) = mean(x,w)
+mean(M::Euclidean, x::AbstractVector) = mean(x)
 @doc doc"""
     mean!(M,y,x,w)
 
@@ -117,8 +117,8 @@ function median!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = weights
     end
     return y
 end
-median(M::Euclidean,x) = median(x)
-median(M::Euclidean,x,w) = median(x,w)
+median(M::Euclidean, x::AbstractVector, w::AbstractWeights) = median(x,w)
+median(M::Euclidean, x::AbstractVector) = median(x)
 @doc doc"""
     var(M,x, corrected::Bool=true, mean=mean(M,x))
 
