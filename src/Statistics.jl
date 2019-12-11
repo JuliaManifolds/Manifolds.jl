@@ -1,7 +1,7 @@
 using Random: shuffle!
-using StatsBase: AbstractWeights, weights, values
+using StatsBase: AbstractWeights, Weights, values, varcorrection
 @doc doc"""
-    mean(M,x, weights=1/n*ones(n);, stop_iter=100, kwargs... )
+    mean(M,x; weights=Weights(ones(n),n), x0=x[1], stop_iter=100, kwargs... )
 
 computes the Riemannian center of mass also known as Karcher mean of the vector
 `x` of `n` points on the [`Manifold`](@ref) `M`. This function
@@ -24,28 +24,28 @@ The algorithm is further described in
 > Descent for Finding the Riemannian Center of Mass,
 > SIAM Journal on Control and Optimization (2013), 51(3), pp. 2230–2260, 
 > doi: [10.1137/12086282X](https://doi.org/10.1137/12086282X),
-> arxiv: [1201.0925](https://arxiv.org/abs/1201.0925">1201.0925)
+> arxiv: [1201.0925](https://arxiv.org/abs/1201.0925)
 """
-function mean(M::Manifold, x::AbstractVector, w::AbstractWeights = weights(ones(length(x)) / length(x)); x0 = x[1], kwargs...)
+function mean(M::Manifold, x::AbstractVector, w::AbstractWeights = Weights(ones(length(x)), length(x)); x0 = x[1], kwargs...)
     y = similar_result(M, mean, x0)
     copyto!(y,x0)
     return mean!(M, y, x, w; kwargs...)
 end
-mean(M::Euclidean, x::AbstractVector, w::AbstractWeights) = mean(x,w)
-mean(M::Euclidean, x::AbstractVector) = mean(x)
 @doc doc"""
     mean!(M,y,x,w)
 
 computes the [`mean`](@ref) in-place in `y` where the initial value of `y` is
 the starting point of the algorithm.
 """
-function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = weights(ones(length(x)) / length(x));
+function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = Weights(ones(length(x)), length(x));
             stop_iter=100,
             kwargs...
         ) where {T}
     yold = similar_result(M, mean, y)
     copyto!(yold,y)
-    v = zero_tangent_vector.(Ref(M), fill(y,length(x)))
+    v0 = zero_tangent_vector(M, y)
+    v = map(_ -> copy(v0), x)
+    #v = zero_tangent_vector.(Ref(M), fill(y,length(x)))
     for i=1:stop_iter
         copyto!(yold,y)
         log!.(Ref(M), v, Ref(yold), x)
@@ -56,7 +56,7 @@ function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = weights(o
 end
 
 @doc doc"""
-    median(M,x weights=1/n*ones(n); stop_iter=10000, use_rand = false )
+    median(M,x weights=1/n*ones(n); stop_iter=10000, shuffle=nothing )
 
 computes the Riemannian median of the vector `x`  of `n` points on the
 [`Manifold`](@ref) `M`. This function is nonsmooth (i.e nondifferentiable) and
@@ -69,7 +69,7 @@ the minimizer reads
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 
 The cyclic proximal point can be run with a random cyclic order by setting
-`use_rand` to `true`
+`shuffle` to a random number generator, e.g. `GLOBAL_RNG`.
 
 Optionally you can provide `x0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform and
@@ -83,10 +83,10 @@ The algorithm is further described in Algorithm 4.3 and 4.4 in
 > doi: [10.1137/140953393](https://doi.org/10.1137/140953393),
 > arxiv: [1210.2145](https://arxiv.org/abs/1210.2145)
 """
-function median(M::Manifold, x::AbstractVector, w::AbstractWeights = weights(ones(length(x)) / length(x)); x0=x[1], kwargs...)
+function median(M::Manifold, x::AbstractVector, w::AbstractWeights = Weights(ones(length(x)), length(x)); x0=x[1], kwargs...)
     y = similar_result(M, median, x[1])
     copyto!(y,x0)
-    return median!(M, y, x; kwargs...)
+    return median!(M, y, x, w; kwargs...)
 end
 @doc doc"""
     median!(M,y,x,w)
@@ -94,42 +94,104 @@ end
 computes the [`median`](@ref) in-place in `y` where the initial value of `y` is
 the starting point of the algorithm.
 """
-function median!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = weights(ones(length(x)) / length(x));
-            stop_iter=100000,
-            use_random = false,
-            kwargs...
-        ) where {T}
+function median!(M::Manifold, y, x::AbstractVector,
+    w::AbstractWeights = Weights(ones(length(x)), length(x));
+    stop_iter=100000,
+    shuffle_rng = nothing,
+    kwargs...
+) where {T}
     n = length(x)
     yold = similar_result(M,median,y)
     copyto!(yold,y)
     order = collect(1:n)
+    (length(w) != n) && error("The number of weights ($(length(w))) does not math the number of points for the median ($(n)).")
     v = zero_tangent_vector(M,y)
     for i=1:stop_iter
-        λ = n/(2*i)
+        λ = n/i
         copyto!(yold,y)
-        use_random && shuffle!(order)
-        for j=1:n
-            t = min( λ * w[order[j]] / distance(M,y,x[order[j]]) , 1 )
-            log!(M, v, y, x[order[j]])
-            y = exp(M, y, t* v)
+        (shuffle_rng != nothing) && shuffle!(shuffle_rng, order)
+        for j in order
+            @inbounds t = min( λ * w[j]/w.sum, distance(M,y,x[j]) )
+            log!(M, v, y, x[j])
+            y = exp(M, y, v, t)
         end
         isapprox(M, y, yold; kwargs...) && break
     end
     return y
 end
-median(M::Euclidean, x::AbstractVector, w::AbstractWeights) = median(x,w)
-median(M::Euclidean, x::AbstractVector) = median(x)
-@doc doc"""
-    var(M,x, corrected::Bool=true, mean=mean(M,x))
 
-compute the variance of the points in the  vector `x` of length `n`
-on the [`Manifold`](@ref) `M`, i.e.
-````
-    \frac{1}{n'}\sum_{i=1}^n d_{\mathcal M}^2(m,x_i),
-````
-where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref)
-and $n'=n-1$ if `corrected=true` and $n'=n$ otherwise.
+function var(
+    M::Manifold,
+    x::AbstractVector,
+    w::AbstractWeights = Weights(ones(length(x)), length(x)),
+    m = nothing;
+    corrected::Bool = false,
+    kwargs...
+)
+    if m === nothing
+        m = mean(M,x,w; kwargs...)
+    end
+    wv = convert(Vector, w)
+    sqdist = wv .* distance.(Ref(M), Ref(m), x) .^ 2
+    s = sum(sqdist)
+    if w isa Weights
+        n = length(x)
+        c = varcorrection(n, corrected) * n / w.sum  # This is what `UnitWeights` is for but not released yet
+    else
+        c = varcorrection(w, corrected)
+    end
+    return c * s
+end
 
-A mean might be provided and is otherwise computed.
-"""
-var(M::Manifold, x::AbstractVector, corrected::Bool=true, mean=mean(M,x)) = sum( distance.(Ref(M), Ref(mean), x).^2 )/(length(x)-Int(corrected))
+function var(
+    M::Manifold,
+    x::AbstractVector,
+    mean; kwargs...
+)
+    n = length(x)
+    w = Weights(ones(n), n)
+    return var(M, x, w, mean; kwargs...)
+end
+
+function std(
+    M::Manifold,
+    x::AbstractVector,
+    w::AbstractWeights,
+    mean = mean(M, x, w);
+    corrected::Bool = true,
+    kwargs...
+)
+    return sqrt(var(M, x, w, mean; corrected = corrected, kwargs...))
+end
+
+function std(
+    M::Manifold,
+    x::AbstractVector,
+    mean = mean(M, x, Weights(ones(length(x)),length(x)));
+    corrected::Bool = true,
+    kwargs...
+)
+    return sqrt(var(M, x, mean; corrected = corrected, kwargs...))
+end
+
+function mean_and_var(
+    M::Manifold,
+    x::AbstractVector,
+    w::AbstractWeights = Weights(ones(length(x)), length(x));
+    kwargs...
+)
+    m = mean(M, x, w; kwargs...)
+    v = var(M, x, w, m; kwargs...)
+    return m, v
+end
+
+function mean_and_std(
+    M::Manifold,
+    x::AbstractVector,
+    w::AbstractWeights = Weights(ones(length(x)), length(x));
+    kwargs...
+)
+    m = mean(M, x, w; kwargs...)
+    s = std(M, x, w, m; kwargs...)
+    return m, s
+end

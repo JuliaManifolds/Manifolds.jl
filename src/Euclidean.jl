@@ -1,3 +1,5 @@
+using StatsBase: AbstractWeights
+
 @doc doc"""
     Euclidean{T<:Tuple} <: Manifold
 
@@ -183,3 +185,8 @@ function normal_tvector_distribution(M::Euclidean{Tuple{N}}, x, σ) where N
     d = Distributions.MvNormal(zero(x), σ)
     return ProjectedFVectorDistribution(TangentBundleFibers(M), x, d, project_vector!, x)
 end
+
+mean(M::Euclidean, x::AbstractVector, w::AbstractWeights) = mean(x,w)
+mean(M::Euclidean, x::AbstractVector) = mean(x)
+median(M::Euclidean, x::AbstractVector, w::AbstractWeights) = median(x,w)
+median(M::Euclidean, x::AbstractVector) = median(x)

@@ -1,5 +1,6 @@
 include("utils.jl")
 using StatsBase: weights
+using Random: GLOBAL_RNG
 @testset "Median and Mean" begin
     M = Sphere(2)
     p = [0.,0.,1.]
@@ -9,19 +10,20 @@ using StatsBase: weights
     @test is_manifold_point(M,y; atol=10^-9)
     @test isapprox(M,y,p; atol=10^-7)
     z = median(M,x; atol=10^-12)
-    z2 = median(M,x; use_random=true, atol=10^-12)
+    z2 = median(M,x; shuffle_rng=GLOBAL_RNG, atol=10^-12)
+    @test_throws ErrorException median(M,x, weights(ones(length(x)+1)))
     @test is_manifold_point(M,z)
     @test is_manifold_point(M,z2)
-    @test isapprox(M,z,z2; atol=7*10^-5)
+    @test isapprox(M,z,z2; atol=4*10^-5)
 
     x = fill([0.,0.,1.],5)
     @test var(M,x) == 0.
     
     x = [ [1., 0., 0.], [0., 1., 0.] ]
     @test isapprox(M, mean(M,x), geodesic(M,x[1],x[2],π/4))
-    @test var(M,x) == var(M,x,true,mean(M,x))
-    @test var(M,x) ≈ 2*(π/4)^2
-
+    @test var(M,x) == var(M,x,mean(M,x))
+    @test var(M,x; corrected = true) == var(M,x,mean(M,x); corrected = true)
+    @test var(M,x) ≈ (π/4)^2
 
     x = [1., 2., 3., 4.,]
     w = weights(  ones(length(x)) / length(x)  )
