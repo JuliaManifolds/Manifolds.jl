@@ -13,6 +13,10 @@ The general formula to compute the minimizer reads
 ````
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 
+Note that any provided weights are normalized to
+$\displaystyle\sum_{i=1}^n w_i=1$.
+
+
 Optionally you can provide `x0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform and
 the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the inimal change
@@ -45,7 +49,6 @@ function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = Weights(o
     copyto!(yold,y)
     v0 = zero_tangent_vector(M, y)
     v = map(_ -> copy(v0), x)
-    #v = zero_tangent_vector.(Ref(M), fill(y,length(x)))
     for i=1:stop_iter
         copyto!(yold,y)
         log!.(Ref(M), v, Ref(yold), x)

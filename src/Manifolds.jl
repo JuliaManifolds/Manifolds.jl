@@ -25,6 +25,8 @@ import Statistics: mean,
     median!,
     var,
     std
+import StatsBase: mean_and_std,
+    mean_and_var
 import LinearAlgebra: dot,
     norm,
     det,
