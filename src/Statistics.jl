@@ -100,7 +100,7 @@ the starting point of the algorithm.
 function median!(M::Manifold, y, x::AbstractVector,
     w::AbstractWeights = Weights(ones(length(x)), length(x));
     stop_iter=100000,
-    shuffle_rng = nothing,
+    shuffle_rng::Union{Nothing,AbstractRNG} = nothing,
     kwargs...
 ) where {T}
     n = length(x)
