@@ -109,7 +109,7 @@ function median!(M::Manifold, y, x::AbstractVector,
     for i=1:stop_iter
         λ = n/i
         copyto!(yold,y)
-        (shuffle_rng != nothing) && shuffle!(shuffle_rng, order)
+        (shuffle_rng !== nothing) && shuffle!(shuffle_rng, order)
         for j in order
             @inbounds t = min( λ * w[j]/w.sum, distance(M,y,x[j]) )
             log!(M, v, y, x[j])
