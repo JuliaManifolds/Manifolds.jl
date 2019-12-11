@@ -16,7 +16,6 @@ where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 Note that any provided weights are normalized to
 $\displaystyle\sum_{i=1}^n w_i=1$.
 
-
 Optionally you can provide `x0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform and
 the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal change
@@ -130,8 +129,10 @@ compute the (weighted) variance of a `Vector` `x` of `n` data points on the
 [`Manifold`](@ref) `M`, i.e.
 
 ````math
-\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m)
-```` 
+\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m),
+````
+where `c` is a correction term, see
+[Statistics.var](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.var).
 The (weighted) mean of `x` can be specified as `m`, and the corrected variance
 can be activated by setting `corrected=true`. All further `kwargs...` are passed
 to the computation of the mean (if that is not provided).
@@ -167,7 +168,9 @@ compute the variance of a `Vector` `x` of `n` data points on the
 ````math
 \frac{1}{c} \sum_{i=1}^n d_{\mathcal M}^2 (x_i,m),
 ```` 
-where `m` is the provideed mean of `x`. The corrected variance
+where `c` is a correction term, see
+[Statistics.var](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.var).
+and `m` is the provideed mean of `x`. The corrected variance
 can be activated by setting `corrected=true`.
 """
 function var(
@@ -191,8 +194,10 @@ compute the (weighted) standard deviation of a `Vector` `x` of `n` data points o
 [`Manifold`](@ref) `M`, i.e.
 
 ````math
-\sqrt{\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m)}
+\sqrt{\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m)},
 ```` 
+where `c` is a correction term, see
+[Statistics.var](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.var).
 The (weighted) mean of `x` can be specified as `m`, and the corrected variance
 can be activated by setting `corrected=true`. All further `kwargs...` are passed
 to the computation of the mean (if that is not provided).
@@ -216,7 +221,9 @@ compute the variance of a `Vector` `x` of `n` data points on the
 ````math
 \sqrt{\frac{1}{c} \sum_{i=1}^n d_{\mathcal M}^2 (x_i,m)},
 ```` 
-where `m` is the provideed mean of `x`. The corrected variance
+where `c` is a correction term, see
+[Statistics.var](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.var).
+and `m` is the provideed mean of `x`. The corrected variance
 can be activated by setting `corrected=true`.
 """
 function std(
