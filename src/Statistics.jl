@@ -22,10 +22,10 @@ the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal chang
 between two iterates is small. For more stopping criteria
 check the [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
-The algorithm is further described in 
+The algorithm is further described in
 > Afsari, B; Tron, R.; Vidal, R.: On the Convergence of Gradient
 > Descent for Finding the Riemannian Center of Mass,
-> SIAM Journal on Control and Optimization (2013), 51(3), pp. 2230–2260, 
+> SIAM Journal on Control and Optimization (2013), 51(3), pp. 2230–2260,
 > doi: [10.1137/12086282X](https://doi.org/10.1137/12086282X),
 > arxiv: [1201.0925](https://arxiv.org/abs/1201.0925)
 """
@@ -79,7 +79,7 @@ the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal chang
 between two iterates is small. For more stopping criteria
 check the [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
-The algorithm is further described in Algorithm 4.3 and 4.4 in 
+The algorithm is further described in Algorithm 4.3 and 4.4 in
 > Bačák, M: Computing Medians and Means in Hadamard Spaces.
 > SIAM Journal on Optimization (2014), 24(3), pp. 1542–1566,
 > doi: [10.1137/140953393](https://doi.org/10.1137/140953393),
@@ -167,7 +167,7 @@ compute the variance of a `Vector` `x` of `n` data points on the
 
 ````math
 \frac{1}{c} \sum_{i=1}^n d_{\mathcal M}^2 (x_i,m),
-```` 
+````
 where `c` is a correction term, see
 [Statistics.var](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.var).
 and `m` is the provideed mean of `x`. The corrected variance
@@ -195,7 +195,7 @@ compute the (weighted) standard deviation of a `Vector` `x` of `n` data points o
 
 ````math
 \sqrt{\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m)},
-```` 
+````
 where `c` is a correction term, see
 [Statistics.var](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.var).
 The (weighted) mean of `x` can be specified as `m`, and the corrected variance
@@ -220,7 +220,7 @@ compute the variance of a `Vector` `x` of `n` data points on the
 
 ````math
 \sqrt{\frac{1}{c} \sum_{i=1}^n d_{\mathcal M}^2 (x_i,m)},
-```` 
+````
 where `c` is a correction term, see
 [Statistics.var](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.var).
 and `m` is the provideed mean of `x`. The corrected variance
