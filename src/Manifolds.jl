@@ -23,7 +23,8 @@ import Statistics: mean,
     mean!,
     median,
     median!,
-    var
+    var,
+    std
 import LinearAlgebra: dot,
     norm,
     det,
@@ -79,7 +80,7 @@ using Requires
 using StaticArrays
 using HybridArrays
 using Markdown: @doc_str
-import Distributions: _rand!, support, std
+import Distributions: _rand!, support
 import Random: rand
 using LinearAlgebra
 using Random: AbstractRNG
@@ -225,9 +226,11 @@ export base_manifold,
     log!,
     manifold_dimension,
     mean,
+    mean!,
     mean_and_var,
     mean_and_std,
     median,
+    median!,
     norm,
     normal_tvector_distribution,
     project_point,
