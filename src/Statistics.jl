@@ -19,7 +19,7 @@ $\displaystyle\sum_{i=1}^n w_i=1$.
 
 Optionally you can provide `x0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform and
-the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the inimal change
+the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal change
 between two iterates is small. For more stopping criteria
 check the [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
