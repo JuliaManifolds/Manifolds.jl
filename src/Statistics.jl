@@ -115,7 +115,7 @@ function median!(M::Manifold, y, x::AbstractVector,
         (shuffle_rng !== nothing) && shuffle!(shuffle_rng, order)
         for j in order
             @inbounds t = min( λ * w[j]/w.sum, distance(M,y,x[j]) )
-            log!(M, v, y, x[j])
+            @inbounds log!(M, v, y, x[j])
             y = exp(M, y, v, t)
         end
         isapprox(M, y, yold; kwargs...) && break
