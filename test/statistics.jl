@@ -1,8 +1,18 @@
 include("utils.jl")
 using StatsBase: weights
 using Random: GLOBAL_RNG, seed!
+import ManifoldsBase: manifold_dimension, exp!, log!, distance, zero_tangent_vector!
+
+struct TestStatsSphere{N} <: Manifold end
+TestStatsSphere(N) = TestStatsSphere{N}()
+manifold_dimension(M::TestStatsSphere{N}) where {N} = manifold_dimension(Sphere(N))
+exp!(M::TestStatsSphere{N}, args...; kwargs...) where {N} = exp!(Sphere(N), args...; kwargs...)
+log!(M::TestStatsSphere{N}, args...; kwargs...) where {N} = log!(Sphere(N), args...; kwargs...)
+distance(M::TestStatsSphere{N}, args...; kwargs...) where {N} = distance(Sphere(N), args...; kwargs...)
+zero_tangent_vector!(M::TestStatsSphere{N}, args...; kwargs...) where {N} = zero_tangent_vector!(Sphere(N), args...; kwargs...)
+
 @testset "Median and Mean" begin
-    M = Sphere(2)
+    M = TestStatsSphere(2)
     p = [0.,0.,1.]
     n=3
     x = [ exp(M,p,2/n*[cos(α), sin(α), 0.]) for α = range(0,2*π - 2*π/n, length=n) ]
