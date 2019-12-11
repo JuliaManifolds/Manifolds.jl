@@ -11,7 +11,7 @@ log!(M::TestStatsSphere{N}, args...; kwargs...) where {N} = log!(Sphere(N), args
 distance(M::TestStatsSphere{N}, args...; kwargs...) where {N} = distance(Sphere(N), args...; kwargs...)
 zero_tangent_vector!(M::TestStatsSphere{N}, args...; kwargs...) where {N} = zero_tangent_vector!(Sphere(N), args...; kwargs...)
 
-@testset "Median and Mean" begin
+@testset "Statistics" begin
     M = TestStatsSphere(2)
     p = [0.,0.,1.]
     n=3
