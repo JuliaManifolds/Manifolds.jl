@@ -189,7 +189,7 @@ end
 mean(M::Euclidean, x::AbstractVector, w::AbstractWeights) = mean(x,w)
 mean(M::Euclidean, x::AbstractVector) = mean(x)
 mean!(M::Euclidean, y, x::AbstractVector) = mean!(y,x)
-mean(M::Euclidean, x::AbstractVector) = mean(x)
+mean!(M::Euclidean, y, x::AbstractVector, w::AbstractWeights) = mean!(y,x,w)
 median(M::Euclidean, x::AbstractVector, w::AbstractWeights) = median(x,w)
 median(M::Euclidean, x::AbstractVector) = median(x)
 median!(M::Euclidean, y, x::AbstractVector, w::AbstractWeights) = copyto!(y, median(x, w))
