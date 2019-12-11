@@ -26,6 +26,7 @@ makedocs(
                 "Metric manifold" => "manifolds/metric.md"
             ]
         ],
+        "Statistics" => "statistics.md",
         "Distributions" => "distributions.md",
         "Library" => [
             "Public" => "lib/public.md",
