@@ -119,17 +119,29 @@ function median!(M::Manifold, y, x::AbstractVector,
     end
     return y
 end
+@doc doc"""
+    var(M,x,w=Weights(ones(n),n),m=nothing; corrected=false, kwargs...)
 
+compute the (weighted) variance of a `Vector` `x` of `n` data points on the
+[`Manifold`](@ref) `M`, i.e.
+
+````math
+\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m)
+```` 
+The (weighted) mean of `x` can be specified as `m`, and the corrected variance
+can be activated by setting `corrected=true`. All further `kwargs...` are passed
+to the computation of the mean (if that is not provided).
+"""
 function var(
     M::Manifold,
     x::AbstractVector,
-    w::AbstractWeights = Weights(ones(length(x)), length(x)),
+    w::AbstractWeights,
     m = nothing;
     corrected::Bool = false,
     kwargs...
 )
-    if m === nothing
-        m = mean(M,x,w; kwargs...)
+    if (m === nothing)
+        m = mean(M, x, w; kwargs...)
     end
     wv = convert(Vector, w)
     sqdist = wv .* distance.(Ref(M), Ref(m), x) .^ 2
@@ -142,38 +154,79 @@ function var(
     end
     return c * s
 end
+@doc doc"""
+    var(M,x,m; corrected=false, kwargs...)
 
+compute the variance of a `Vector` `x` of `n` data points on the
+[`Manifold`](@ref) `M`, i.e.
+
+````math
+\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m),
+```` 
+where `m` is the provideed mean of `x`. The corrected variance
+can be activated by setting `corrected=true`.
+"""
 function var(
     M::Manifold,
     x::AbstractVector,
-    mean; kwargs...
+    m = nothing;
+    corrected::Bool = false,
+    kwargs...
 )
+    if (m === nothing)
+        m = mean(M, x; kwargs...)
+    end
     n = length(x)
     w = Weights(ones(n), n)
-    return var(M, x, w, mean; kwargs...)
+    return var(M, x, w, m; corrected = corrected, kwargs...)
 end
+@doc doc"""
+    std(M,x,w=Weights(ones(n),n),m=nothing; corrected=false, kwargs...)
 
+compute the (weighted) standard deviation of a `Vector` `x` of `n` data points on the
+[`Manifold`](@ref) `M`, i.e.
+
+````math
+\sqrt{\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m)}
+```` 
+The (weighted) mean of `x` can be specified as `m`, and the corrected variance
+can be activated by setting `corrected=true`. All further `kwargs...` are passed
+to the computation of the mean (if that is not provided).
+"""
 function std(
     M::Manifold,
     x::AbstractVector,
     w::AbstractWeights,
-    mean = mean(M, x, w);
+    m = nothing;
     corrected::Bool = true,
     kwargs...
 )
-    return sqrt(var(M, x, w, mean; corrected = corrected, kwargs...))
+    return sqrt(var(M, x, w, m; corrected = corrected, kwargs...))
 end
+@doc doc"""
+    std(M,x,m; corrected=false, kwargs...)
 
+compute the variance of a `Vector` `x` of `n` data points on the
+[`Manifold`](@ref) `M`, i.e.
+
+````math
+\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m),
+```` 
+where `m` is the provideed mean of `x`. The corrected variance
+can be activated by setting `corrected=true`.
+"""
 function std(
     M::Manifold,
     x::AbstractVector,
-    mean = mean(M, x, Weights(ones(length(x)),length(x)));
+    m = nothing;
     corrected::Bool = true,
     kwargs...
 )
-    return sqrt(var(M, x, mean; corrected = corrected, kwargs...))
+    return sqrt(var(M, x, m; corrected = corrected, kwargs...))
 end
+@doc doc"""
 
+"""
 function mean_and_var(
     M::Manifold,
     x::AbstractVector,

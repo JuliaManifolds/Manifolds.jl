@@ -79,7 +79,7 @@ using Requires
 using StaticArrays
 using HybridArrays
 using Markdown: @doc_str
-import Distributions: _rand!, support
+import Distributions: _rand!, support, std
 import Random: rand
 using LinearAlgebra
 using Random: AbstractRNG
@@ -225,6 +225,8 @@ export base_manifold,
     log!,
     manifold_dimension,
     mean,
+    mean_and_var,
+    mean_and_std,
     median,
     norm,
     normal_tvector_distribution,
@@ -236,6 +238,7 @@ export base_manifold,
     representation_size,
     retract,
     retract!,
+    std,
     submanifold,
     submanifold_component,
     tangent_orthonormal_basis,
