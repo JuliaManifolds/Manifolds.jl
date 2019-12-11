@@ -72,7 +72,7 @@ the minimizer reads
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 
 The cyclic proximal point can be run with a random cyclic order by setting
-`shuffle` to a random number generator, e.g. `GLOBAL_RNG`.
+`shuffle_rng` to a random number generator, e.g. `GLOBAL_RNG`.
 
 Optionally you can provide `x0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform and
