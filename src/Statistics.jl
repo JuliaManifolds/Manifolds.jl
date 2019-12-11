@@ -59,7 +59,7 @@ function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = Weights(o
 end
 
 @doc doc"""
-    median(M,x weights=1/n*ones(n); stop_iter=10000, shuffle=nothing )
+    median(M, x, weights=1/n*ones(n); stop_iter=10000, shuffle=nothing)
 
 computes the Riemannian median of the vector `x`  of `n` points on the
 [`Manifold`](@ref) `M`. This function is nonsmooth (i.e nondifferentiable) and
