@@ -33,7 +33,7 @@ zero_tangent_vector!(M::TestStatsSphere{N}, args...; kwargs...) where {N} = zero
 
     x = fill([0.,0.,1.],5)
     @test var(M,x) == 0.
-    
+
     x = [ [1., 0., 0.], [0., 1., 0.] ]
     @test isapprox(M, mean(M,x), geodesic(M,x[1],x[2],π/4))
     @test var(M,x) == var(M,x,mean(M,x))
@@ -41,17 +41,19 @@ zero_tangent_vector!(M::TestStatsSphere{N}, args...; kwargs...) where {N} = zero
     @test var(M,x) ≈ (π/4)^2
     @test var(M,x; corrected = true) ≈ std(M,x; corrected = true)^2
     @test std(M,x, weights(  ones(length(x)) / length(x)  ); corrected = true)^2 ≈ std(M,x; corrected = true)^2
-    
+
     m = mean(M,x)
     s = std(M,x,m)
     (m2,s2) = mean_and_std(M,x)
     @test isapprox(M,m,m2)
     @test s ≈ s2
 
-    x = [1., 2., 3., 4.,]
-    w = weights(  ones(length(x)) / length(x)  )
-    @test mean(Euclidean(1),x) == mean(x)
-    @test mean(Euclidean(1),x,w) == mean(x,w)
-    @test median(Euclidean(1),x) == median(x)
-    @test median(Euclidean(1),x,w) == median(x,w)
+    @testset "Euclidean fallbacks" begin
+        x = [1., 2., 3., 4.,]
+        w = weights(  ones(length(x)) / length(x)  )
+        @test mean(Euclidean(1),x) == mean(x)
+        @test mean(Euclidean(1),x,w) == mean(x,w)
+        @test median(Euclidean(1),x) == median(x)
+        @test median(Euclidean(1),x,w) == median(x,w)
+    end
 end
