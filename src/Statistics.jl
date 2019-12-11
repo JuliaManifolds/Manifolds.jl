@@ -161,7 +161,7 @@ compute the variance of a `Vector` `x` of `n` data points on the
 [`Manifold`](@ref) `M`, i.e.
 
 ````math
-\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m),
+\frac{1}{c} \sum_{i=1}^n d_{\mathcal M}^2 (x_i,m),
 ```` 
 where `m` is the provideed mean of `x`. The corrected variance
 can be activated by setting `corrected=true`.
@@ -210,7 +210,7 @@ compute the variance of a `Vector` `x` of `n` data points on the
 [`Manifold`](@ref) `M`, i.e.
 
 ````math
-\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m),
+\frac{1}{c} \sum_{i=1}^n d_{\mathcal M}^2 (x_i,m),
 ```` 
 where `m` is the provideed mean of `x`. The corrected variance
 can be activated by setting `corrected=true`.
@@ -225,7 +225,9 @@ function std(
     return sqrt(var(M, x, m; corrected = corrected, kwargs...))
 end
 @doc doc"""
+    m,v = mean_and_var(M,x,w)
 
+compute the [`mean`](@ref) `m` and the [`var`](@ref)iance `v` simultaneously.
 """
 function mean_and_var(
     M::Manifold,
@@ -237,7 +239,12 @@ function mean_and_var(
     v = var(M, x, w, m; kwargs...)
     return m, v
 end
+@doc doc"""
+    m,s = mean_and_std(M,x,w)
 
+compute the [`mean`](@ref) `m` and the standard deviation [`std`](@ref) `s`
+simultaneously.
+"""
 function mean_and_std(
     M::Manifold,
     x::AbstractVector,

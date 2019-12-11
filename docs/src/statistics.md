@@ -1,7 +1,7 @@
 # Statistics
 
 ```@autodocs
-Modules = [Manifolds]
-Pages = ["Statistcs.jl"]
+Modules = [Manifolds,ManifoldsBase]
+Pages = ["Statistics.jl"]
 Order = [:type, :function]
 ```
