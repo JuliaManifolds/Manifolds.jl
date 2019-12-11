@@ -109,12 +109,13 @@ function median!(M::Manifold, y, x::AbstractVector,
     order = collect(1:n)
     (length(w) != n) && error("The number of weights ($(length(w))) does not match the number of points for the median ($(n)).")
     v = zero_tangent_vector(M,y)
+    wv = convert(Vector, w) ./ w.sum
     for i=1:stop_iter
         λ = n/i
         copyto!(yold,y)
         (shuffle_rng !== nothing) && shuffle!(shuffle_rng, order)
         for j in order
-            @inbounds t = min( λ * w[j]/w.sum, distance(M,y,x[j]) )
+            @inbounds t = min( λ * wv[j], distance(M,y,x[j]) )
             @inbounds log!(M, v, y, x[j])
             y = exp(M, y, v, t)
         end
