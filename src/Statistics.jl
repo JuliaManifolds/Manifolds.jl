@@ -1,7 +1,7 @@
 using Random: shuffle!
 using StatsBase: AbstractWeights, Weights, values, varcorrection
 @doc doc"""
-    mean(M,x; weights=Weights(ones(n),n), x0=x[1], stop_iter=100, kwargs... )
+    mean(M, x, weights=Weights(ones(n)); x0=x[1], stop_iter=100, kwargs... )
 
 computes the Riemannian center of mass also known as Karcher mean of the vector
 `x` of `n` points on the [`Manifold`](@ref) `M`. This function
