@@ -74,7 +74,7 @@ function test_median(M, x, yexp = nothing; rng=GLOBAL_RNG, kwargs...)
             @test is_manifold_point(M, median(M, x, w; shuffle_rng=rng, kwargs...); atol = 10^-9)
             @test isapprox(M, median(M, x, w; shuffle_rng = rng, kwargs...), y; atol = 10^-5)
         end
-        @test_throws DimensionMismatch median(M, x, pweights(ones(n + 1)); kwargs...)
+        @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
     end
 end
 
