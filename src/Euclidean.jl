@@ -186,11 +186,32 @@ function normal_tvector_distribution(M::Euclidean{Tuple{N}}, x, σ) where N
     return ProjectedFVectorDistribution(TangentBundleFibers(M), x, d, project_vector!, x)
 end
 
-mean(M::Euclidean, x::AbstractVector, w::AbstractWeights) = mean(x,w)
-mean(M::Euclidean, x::AbstractVector) = mean(x)
-mean!(M::Euclidean, y, x::AbstractVector) = mean!(y,x)
-mean!(M::Euclidean, y, x::AbstractVector, w::AbstractWeights) = mean!(y,x,w)
-median(M::Euclidean, x::AbstractVector, w::AbstractWeights) = median(x,w)
-median(M::Euclidean, x::AbstractVector) = median(x)
-median!(M::Euclidean, y, x::AbstractVector, w::AbstractWeights) = copyto!(y, median(x, w))
-median!(M::Euclidean, y, x::AbstractVector) = copyto!(y, median(x))
+mean(M::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = mean(x, w)
+mean(M::Euclidean, x::AbstractVector; kwargs...) = mean(x)
+mean!(M::Euclidean, y, x::AbstractVector; kwargs...) = mean!(y,x)
+
+median(M::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = median(x,w)
+median!(M::Euclidean, y, x::AbstractVector, w::AbstractWeights; kwargs...) = copyto!(y, median(x, w))
+median!(M::Euclidean, y, x::AbstractVector; kwargs...) = copyto!(y, median(x))
+
+function var(
+    M::Euclidean{Tuple{1}},
+    x::AbstractVector{<:Number},
+    w::AbstractWeights,
+    m = mean(M, x, w);
+    corrected = false,
+    kwargs...
+)
+    return var(x, w; mean=m, corrected=corrected)
+end
+
+function std(
+    M::Euclidean{Tuple{1}},
+    x::AbstractVector{<:Number},
+    w::AbstractWeights,
+    m = mean(M, x, w);
+    corrected = false,
+    kwargs...
+)
+    return std(x, w; mean=m, corrected=corrected)
+end
