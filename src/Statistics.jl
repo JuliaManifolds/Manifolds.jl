@@ -204,13 +204,13 @@ function std(
     x::AbstractVector,
     w::AbstractWeights,
     m = nothing;
-    corrected::Bool = true,
+    corrected::Bool = false,
     kwargs...
 )
     return sqrt(var(M, x, w, m; corrected = corrected, kwargs...))
 end
 @doc doc"""
-    std(M,x,m; corrected=false, kwargs...)
+    std(M,x,m; corrected=true, kwargs...)
 
 compute the variance of a `Vector` `x` of `n` data points on the
 [`Manifold`](@ref) `M`, i.e.
@@ -220,8 +220,7 @@ compute the variance of a `Vector` `x` of `n` data points on the
 ````
 where `c` is a correction term, see
 [Statistics.var](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.var).
-and `m` is the provideed mean of `x`. The corrected variance
-can be activated by setting `corrected=true`.
+and `m` is the provideed mean of `x`.
 """
 function std(
     M::Manifold,
@@ -241,10 +240,11 @@ function mean_and_var(
     M::Manifold,
     x::AbstractVector,
     w::AbstractWeights = (n = length(x); ProbabilityWeights(ones(n), n));
+    corrected = false,
     kwargs...
 )
     m = mean(M, x, w; kwargs...)
-    v = var(M, x, w, m; kwargs...)
+    v = var(M, x, w, m; corrected = corrected, kwargs...)
     return m, v
 end
 @doc doc"""
@@ -256,10 +256,21 @@ simultaneously.
 function mean_and_std(
     M::Manifold,
     x::AbstractVector,
-    w::AbstractWeights = Weights(ones(length(x)), length(x));
+    w::AbstractWeights;
+    corrected = false,
     kwargs...
 )
     m = mean(M, x, w; kwargs...)
-    s = std(M, x, w, m; kwargs...)
+    s = std(M, x, w, m; corrected = corrected, kwargs...)
     return m, s
+end
+
+function mean_and_std(
+    M::Manifold,
+    x::AbstractVector;
+    corrected = true,
+    kwargs...
+)
+    m, v = mean_and_var(M, x; corrected = corrected, kwargs...)
+    return m, √v
 end
