@@ -6,18 +6,18 @@ import ManifoldsBase: manifold_dimension, exp!, log!, distance, zero_tangent_vec
 struct TestStatsSphere{N} <: Manifold end
 TestStatsSphere(N) = TestStatsSphere{N}()
 manifold_dimension(M::TestStatsSphere{N}) where {N} = manifold_dimension(Sphere(N))
-exp!(M::TestStatsSphere{N}, args...; kwargs...) where {N} = exp!(Sphere(N), args...; kwargs...)
-log!(M::TestStatsSphere{N}, args...; kwargs...) where {N} = log!(Sphere(N), args...; kwargs...)
-distance(M::TestStatsSphere{N}, args...; kwargs...) where {N} = distance(Sphere(N), args...; kwargs...)
-zero_tangent_vector!(M::TestStatsSphere{N}, args...; kwargs...) where {N} = zero_tangent_vector!(Sphere(N), args...; kwargs...)
+exp!(M::TestStatsSphere{N}, w, x, y; kwargs...) where {N} = exp!(Sphere(N), w, x, y; kwargs...)
+log!(M::TestStatsSphere{N}, y, x, v; kwargs...) where {N} = log!(Sphere(N), y, x, v; kwargs...)
+distance(M::TestStatsSphere{N}, x, y; kwargs...) where {N} = distance(Sphere(N), x, y; kwargs...)
+zero_tangent_vector!(M::TestStatsSphere{N},  v, x; kwargs...) where {N} = zero_tangent_vector!(Sphere(N),  v, x; kwargs...)
 
 struct TestStatsEuclidean{N} <: Manifold end
 TestStatsEuclidean(N) = TestStatsEuclidean{N}()
 manifold_dimension(M::TestStatsEuclidean{N}) where {N} = manifold_dimension(Euclidean(N))
-exp!(M::TestStatsEuclidean{N}, args...; kwargs...) where {N} = exp!(Euclidean(N), args...; kwargs...)
-log!(M::TestStatsEuclidean{N}, args...; kwargs...) where {N} = log!(Euclidean(N), args...; kwargs...)
-distance(M::TestStatsEuclidean{N}, args...; kwargs...) where {N} = distance(Euclidean(N), args...; kwargs...)
-zero_tangent_vector!(M::TestStatsEuclidean{N}, args...; kwargs...) where {N} = zero_tangent_vector!(Euclidean(N), args...; kwargs...)
+exp!(M::TestStatsEuclidean{N}, y, x, v; kwargs...) where {N} = exp!(Euclidean(N), y, x, v; kwargs...)
+log!(M::TestStatsEuclidean{N}, w, x, y; kwargs...) where {N} = log!(Euclidean(N), w, x, y; kwargs...)
+distance(M::TestStatsEuclidean{N}, x, y; kwargs...) where {N} = distance(Euclidean(N), x, y; kwargs...)
+zero_tangent_vector!(M::TestStatsEuclidean{N},  v, x; kwargs...) where {N} = zero_tangent_vector!(Euclidean(N),  v, x; kwargs...)
 
 function test_mean(M, x, yexp = nothing; kwargs...)
     @testset "mean unweighted" begin
