@@ -188,11 +188,8 @@ end
 
 mean(M::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = mean(x, w)
 mean(M::Euclidean, x::AbstractVector; kwargs...) = mean(x)
-mean!(M::Euclidean, y, x::AbstractVector; kwargs...) = mean!(y,x)
 
 median(M::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = median(x,w)
-median!(M::Euclidean, y, x::AbstractVector, w::AbstractWeights; kwargs...) = copyto!(y, median(x, w))
-median!(M::Euclidean, y, x::AbstractVector; kwargs...) = copyto!(y, median(x))
 
 function var(
     M::Euclidean{Tuple{1}},
