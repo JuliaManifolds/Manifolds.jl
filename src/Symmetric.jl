@@ -1,7 +1,7 @@
 @doc doc"""
     SymmetricMatrices{N,T} <: Manifold
 
-The manifold $ Sym (N)$ consisting of the `T`-valued, symmetric matrices of sice $ n\times n$, i.e. the set 
+The manifold $ Sym (N)$ consisting of the `TA`-valued, symmetric matrices of sice $ n\times n$, i.e. the set 
 
 $\text{Sym}(n) = \bigl\{A \in T^{n\times n} \big| A^{\mathrm{T}} = A \bigr\}$
 
@@ -16,8 +16,6 @@ Being slightly unefficient, the matrices are safed as $n\times n$ arrays despite
 struct SymmetricMatrices{N,T} <: Manifold end
 SymmetricMatrices(N::Int,T::Type = Real) = SymmetricMatrices{N,T}()
 
-@traitimpl HasMetric{Symmetric,EuclideanMetric}
-
 function representation_size(::SymmetricMatrices{N,T}) where {N,T}
     return (N,N)
 end
@@ -25,9 +23,20 @@ end
 @doc doc"""
     manifold_dimension(M::SymmetricMatrices{n,T})
 
-Return the dimension of the manifold $M=\text{Sym}(n)$, i.e. $\frac{n(n+1)}{2}$.
+Return the dimension of the manifold $M=\text{Sym}(n)$.
+In case of real-valued matrices (```T <: Real```), this is $\frac{n(n+1)}{2}$.
+In the complex case (```T <: Complex```), this yields $n(n+1)$.
 """
-manifold_dimension(M::SymmetricMatrices{N,T}) where {N,T} = div(N*(N+1), 2)
+function manifold_dimension(M::SymmetricMatrices{N,T}) where {N,T}
+    if ( T <: Real)
+        dim = div(N*(N+1), 2)
+    elseif (T <: Complex)
+        dim = N*(N+1)
+    else
+        return DomainError(T, "The matrix entries are neither Real nor Complex, so the dimension cannot be determined.")
+    end
+    return dim
+end
 
 project_point!(M::SymmetricMatrices, x) = (x .= 1/2 * (x + transpose(x)))
 
@@ -101,8 +110,8 @@ function is_manifold_point(M::SymmetricMatrices{N,T},x; kwargs...) where {N,T}
     if (T != eltype(x))
         throw(DomainError(eltype(x),"The matrix $(x) does not lie on $M, since its values are not of type $T."))
     end
-    if size(x) != (N,N)
-        throw(DomainError(size(x),"The point $(x) does not lie on $M, since its size is not ($N,$N)."))
+    if size(x) != manifold_dimension(M)
+        throw(DomainError(size(x),"The point $(x) does not lie on $M, since its size does not match manifold_dimension(M)."))
     end
     if x != transpose(x)
         throw(DomainError(norm(x-transpose(x)), "The point $(x) does not lie on $M, since it is not symmetric."))
@@ -121,9 +130,9 @@ function is_tangent_vector(M::SymmetricMatrices{N,T},x,v; kwargs...) where {N,T}
     if (T != eltype(v))
         throw(DomainError(eltype(v),"The matrix $(v) is not a tangent to a point on $M, since its values are not of type $T."))
     end
-    if size(v) != (N,N)
+    if size(v) != manifold_dimension(M)
         throw(DomainError(size(v),
-            "The vector $(v) is not a tangent to a point on $(M) since its size does not match ($(N),$(N))."))
+            "The vector $(v) is not a tangent to a point on $(M) since its size does not match manifold_dimension(M)."))
     end
     if v != transpose(v)
         throw(DomainError(norm(v-transpose(v)),

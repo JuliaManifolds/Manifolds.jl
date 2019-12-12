@@ -14,7 +14,7 @@ makedocs(
                 "Cholesky Space" => "manifolds/choleskyspace.md",
                 "Rotations" => "manifolds/rotations.md",
                 "Sphere" => "manifolds/sphere.md",
-                "Symmetric Matrices" => "manifolds/symmetric.md"
+                "Symmetric Matrices" => "manifolds/symmetric.md",
                 "Symmetric Positive Definite" => "manifolds/symmetricpositivedefinite.md"
             ],
             "Combined manifolds" => [
