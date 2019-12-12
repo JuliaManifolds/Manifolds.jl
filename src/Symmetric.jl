@@ -29,9 +29,9 @@ Return the dimension of the manifold $M=\text{Sym}(n)$, i.e. $\frac{n(n+1)}{2}$.
 """
 manifold_dimension(M::SymmetricMatrices{N,T}) where {N,T} = div(N*(N+1), 2)
 
-project_point!(M::SymmetricMatrices, x) = (x += transpose(x))
+project_point!(M::SymmetricMatrices, x) = (x .= 1/2 * (x + transpose(x)))
 
-project_tangent!(M::SymmetricMatrices, w, x, v) = (x -= transpose(x))
+project_tangent!(M::SymmetricMatrices, w, x, v) = (x .= 1/2 * (x + transpose(x)))
 
 @doc doc"""
     inner(M::SymmetricMatrices, x, w, v)
@@ -76,7 +76,7 @@ to the point $y\in M$. The result is stored in vto.
 Since the metric is inherited from the embedding space, this is just the identity.
 """
 function vector_transport_to!(M::SymmetricMatrices, vto, x, v, y)
-    vto=v
+    vto .= v
     return vto
 end
 
