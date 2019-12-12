@@ -144,12 +144,12 @@ include("SymmetricPositiveDefinite.jl")
 
 function __init__()
     @require ForwardDiff="f6369f11-7733-5829-9624-2563aa707210" begin
-        using ForwardDiff
+        using .ForwardDiff
         include("forward_diff.jl")
     end
 
     @require OrdinaryDiffEq="1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
-        using OrdinaryDiffEq: ODEProblem,
+        using .OrdinaryDiffEq: ODEProblem,
             AutoVern9,
             Rodas5,
             solve
