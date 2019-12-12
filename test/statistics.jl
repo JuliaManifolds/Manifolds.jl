@@ -11,6 +11,14 @@ log!(M::TestStatsSphere{N}, args...; kwargs...) where {N} = log!(Sphere(N), args
 distance(M::TestStatsSphere{N}, args...; kwargs...) where {N} = distance(Sphere(N), args...; kwargs...)
 zero_tangent_vector!(M::TestStatsSphere{N}, args...; kwargs...) where {N} = zero_tangent_vector!(Sphere(N), args...; kwargs...)
 
+struct TestStatsEuclidean{N} <: Manifold end
+TestStatsEuclidean(N) = TestStatsEuclidean{N}()
+manifold_dimension(M::TestStatsEuclidean{N}) where {N} = manifold_dimension(Euclidean(N))
+exp!(M::TestStatsEuclidean{N}, args...; kwargs...) where {N} = exp!(Euclidean(N), args...; kwargs...)
+log!(M::TestStatsEuclidean{N}, args...; kwargs...) where {N} = log!(Euclidean(N), args...; kwargs...)
+distance(M::TestStatsEuclidean{N}, args...; kwargs...) where {N} = distance(Euclidean(N), args...; kwargs...)
+zero_tangent_vector!(M::TestStatsEuclidean{N}, args...; kwargs...) where {N} = zero_tangent_vector!(Euclidean(N), args...; kwargs...)
+
 function test_mean(M, x, yexp = nothing; kwargs...)
     @testset "mean unweighted" begin
         y = mean(M, x; kwargs...)
@@ -180,12 +188,70 @@ end
         end
     end
 
-    @testset "Euclidean fallbacks" begin
-        x = [1., 2., 3., 4.,]
-        w = pweights(  ones(length(x)) / length(x)  )
-        @test mean(Euclidean(1),x) == mean(x)
-        @test mean(Euclidean(1),x,w) == mean(x,w)
-        @test median(Euclidean(1),x) == median(x)
-        @test median(Euclidean(1),x,w) == median(x,w)
+    @testset "TestStatsEuclidean{N}" begin
+        @testset "N=1" begin
+            M = TestStatsEuclidean(1)
+
+            rng = MersenneTwister(42)
+            x = [randn(rng, 1) for _ in 1:10]
+            vx = vcat(x...)
+
+            test_mean(M, x, mean(x))
+            test_median(M, x; rng = MersenneTwister(1212), atol = 10^-12)
+            test_var(M, x, var(vx))
+            test_std(M, x, std(vx))
+
+            w = pweights(rand(rng, 10))
+            @test mean(M, x, w) ≈ [mean(vx, w)]
+            @test var(M, x, w) ≈ var(vx, w)
+            @test std(M, x, w) ≈ std(vx, w)
+        end
+
+        @testset "N=5" begin
+            M = TestStatsEuclidean(5)
+
+            rng = MersenneTwister(42)
+            x = [randn(rng, 5) for _ in 1:10]
+            test_mean(M, x, mean(x))
+            test_var(M, x, sum(var(x)))
+            test_std(M, x, sqrt(sum(std(x).^2)))
+
+            w = pweights(rand(rng, 10))
+            ax = hcat(x...)
+            @test mean(M, x, w) ≈ mean(ax, w; dims=2)
+            @test var(M, x, w) ≈ sum(var(ax, w, 2))
+            @test std(M, x, w) ≈ sqrt(sum(std(ax, w, 2).^2))
+        end
+    end
+
+    @testset "Euclidean statistics" begin
+        @testset "N=1" begin
+            @testset "scalar" begin
+                x = [1., 2., 3., 4.,]
+                w = pweights(  ones(length(x)) / length(x)  )
+                @test mean(Euclidean(1),x) ≈ mean(x)
+                @test mean(Euclidean(1),x,w) ≈ mean(x,w)
+                @test median(Euclidean(1),x) ≈ median(x)
+                @test median(Euclidean(1),x,w) ≈ median(x,w)
+                @test var(Euclidean(1),x) ≈ var(x)
+                @test var(Euclidean(1),x,w) ≈ var(x,w)
+                @test std(Euclidean(1),x) ≈ std(x)
+                @test std(Euclidean(1),x,w) ≈ std(x,w)
+            end
+
+            @testset "vector" begin
+                x = [[1.], [2.], [3.], [4.]]
+                vx = vcat(x...)
+                w = pweights(  ones(length(x)) / length(x)  )
+                @test mean(Euclidean(1),x) ≈ mean(x)
+                @test mean(Euclidean(1),x,w) ≈ [mean(vx,w)]
+                @test median(Euclidean(1),x; shuffle_rng = MersenneTwister(1212), atol = 10^-12) ≈ [median(vx)]
+                @test median(Euclidean(1),x,w; shuffle_rng = MersenneTwister(1212), atol = 10^-12) ≈ [median(vx,w)]
+                @test var(Euclidean(1),x) ≈ var(vx)
+                @test var(Euclidean(1),x,w) ≈ var(vx,w)
+                @test std(Euclidean(1),x) ≈ std(vx)
+                @test std(Euclidean(1),x,w) ≈ std(vx,w)
+            end
+        end
     end
 end
