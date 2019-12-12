@@ -125,7 +125,7 @@ function median!(M::Manifold, y, x::AbstractVector,
     return y
 end
 @doc doc"""
-    var(M,x,w=ProbabilityWeights(ones(n),n),m=nothing; corrected=false, kwargs...)
+    var(M, x, w::AbstractWeights, m=nothing; corrected=false, kwargs...)
 
 compute the (weighted) variance of a `Vector` `x` of `n` data points on the
 [`Manifold`](@ref) `M`, i.e.
@@ -157,7 +157,7 @@ function var(
     return c * s
 end
 @doc doc"""
-    var(M,x,m; corrected=false, kwargs...)
+    var(M, x, m=nothing; corrected=true, kwargs...)
 
 compute the variance of a `Vector` `x` of `n` data points on the
 [`Manifold`](@ref) `M`, i.e.
@@ -167,14 +167,14 @@ compute the variance of a `Vector` `x` of `n` data points on the
 ````
 where `c` is a correction term, see
 [Statistics.var](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.var).
-and `m` is the provideed mean of `x`. The corrected variance
-can be activated by setting `corrected=true`.
+and `m` is the provideed mean of `x`. The uncorrected variance
+can be activated by setting `corrected=false`.
 """
 function var(
     M::Manifold,
     x::AbstractVector,
     m = nothing;
-    corrected::Bool = false,
+    corrected::Bool = true,
     kwargs...
 )
     if (m === nothing)
@@ -185,7 +185,7 @@ function var(
     return var(M, x, w, m; corrected = corrected, kwargs...)
 end
 @doc doc"""
-    std(M,x,w=ProbabilityWeights(ones(n),n),m=nothing; corrected=false, kwargs...)
+    std(M, x, w::AbstractWeights, m=nothing; corrected=false, kwargs...)
 
 compute the (weighted) standard deviation of a `Vector` `x` of `n` data points on the
 [`Manifold`](@ref) `M`, i.e.
@@ -210,7 +210,7 @@ function std(
     return sqrt(var(M, x, w, m; corrected = corrected, kwargs...))
 end
 @doc doc"""
-    std(M,x,m; corrected=true, kwargs...)
+    std(M, x, m=nothing; corrected=true, kwargs...)
 
 compute the variance of a `Vector` `x` of `n` data points on the
 [`Manifold`](@ref) `M`, i.e.
@@ -231,15 +231,17 @@ function std(
 )
     return sqrt(var(M, x, m; corrected = corrected, kwargs...))
 end
+
 @doc doc"""
-    mean_and_var(M,x,w) -> (mean, var)
+    mean_and_var(M, x, w; corrected = false, kwargs...) -> (mean, var)
+    mean_and_var(M, x; corrected = true, kwargs...) -> (mean, var)
 
 compute the [`mean`](@ref) `m` and the [`var`](@ref)iance `v` simultaneously.
 """
 function mean_and_var(
     M::Manifold,
     x::AbstractVector,
-    w::AbstractWeights = (n = length(x); ProbabilityWeights(ones(n), n));
+    w::AbstractWeights;
     corrected = false,
     kwargs...
 )
@@ -247,8 +249,23 @@ function mean_and_var(
     v = var(M, x, w, m; corrected = corrected, kwargs...)
     return m, v
 end
+
+function mean_and_var(
+    M::Manifold,
+    x::AbstractVector;
+    corrected = true,
+    kwargs...
+)
+    n = length(x)
+    w = ProbabilityWeights(ones(n), n)
+    m = mean(M, x, w; kwargs...)
+    v = var(M, x, w, m; corrected = corrected, kwargs...)
+    return m, v
+end
+
 @doc doc"""
-    mean_and_std(M,x,w) -> (mean, std)
+    mean_and_std(M, x, w; corrected = false, kwargs...) -> (mean, std)
+    mean_and_std(M, x; corrected = true, kwargs...) -> (mean, std)
 
 compute the [`mean`](@ref) `m` and the standard deviation [`std`](@ref) `s`
 simultaneously.

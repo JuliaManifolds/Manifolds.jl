@@ -77,14 +77,14 @@ function test_var(M, x, vexp = nothing; kwargs...)
         if vexp !== nothing
             @test v ≈ vexp
         end
-        @test v == var(M, x; corrected = false, kwargs...)
+        @test v == var(M, x; corrected = true, kwargs...)
         _, v2 = mean_and_var(M, x; kwargs...)
         @test v2 == v
         m = mean(M, x; kwargs...)
         @test var(M, x, m; kwargs...) == var(M, x; kwargs...)
-        @test var(M, x; corrected = true, kwargs...) == var(M, x, m; corrected = true, kwargs...)
-        @test var(M, x; corrected = true, kwargs...) ≈ var(M, x; kwargs...) * n / (n - 1)
-        @test var(M, x, m; corrected = true, kwargs...) ≈ var(M, x, m; kwargs...) * n / (n - 1)
+        @test var(M, x; corrected = false, kwargs...) == var(M, x, m; corrected = false, kwargs...)
+        @test var(M, x; corrected = false, kwargs...) ≈ var(M, x; kwargs...) * (n - 1) / n
+        @test var(M, x, m; corrected = false, kwargs...) ≈ var(M, x, m; kwargs...) * (n - 1) / n
     end
 
     @testset "var weighted" begin
@@ -93,7 +93,7 @@ function test_var(M, x, vexp = nothing; kwargs...)
         w2 = pweights(ones(n))
         w3 = pweights(2 * ones(n))
 
-        v = var(M, x; kwargs...)
+        v = var(M, x; corrected = false, kwargs...)
         for w in (w1, w2, w3)
             @test var(M, x, w; kwargs...) ≈ v
             @test var(M, x, w; corrected = false, kwargs...) ≈ v
@@ -174,7 +174,7 @@ end
         @test isapprox(M, mean(M, x), geodesic(M, x[1], x[2], θ))
         test_mean(M, x, [1.0, 1.0, 0.0] / √2)
         test_median(M, x, [1.0, 1.0, 0.0] / √2; rng = MersenneTwister(1212), atol = 10^-12)
-        test_var(M, x, θ^2)
+        test_var(M, x, θ^2 * 2)
         test_std(M, x, θ * √2)
     end
 
