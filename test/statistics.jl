@@ -148,34 +148,36 @@ function test_std(M, x, sexp = nothing; kwargs...)
 end
 
 @testset "Statistics" begin
-    M = TestStatsSphere(2)
+    @testset "TestStatsSphere" begin
+        M = TestStatsSphere(2)
 
-    @testset "consistency" begin
-        p = [0.,0.,1.]
-        n=3
-        x = [ exp(M,p,2/n*[cos(α), sin(α), 0.]) for α = range(0,2*π - 2*π/n, length=n) ]
-        test_mean(M, x)
-        test_median(M, x; rng = MersenneTwister(1212), atol = 10^-12)
-        test_var(M, x)
-        test_std(M, x)
-    end
+        @testset "consistency" begin
+            p = [0.,0.,1.]
+            n=3
+            x = [ exp(M,p,2/n*[cos(α), sin(α), 0.]) for α = range(0,2*π - 2*π/n, length=n) ]
+            test_mean(M, x)
+            test_median(M, x; rng = MersenneTwister(1212), atol = 10^-12)
+            test_var(M, x)
+            test_std(M, x)
+        end
 
-    @testset "zero variance" begin
-        x = fill([0.,0.,1.], 5)
-        test_mean(M, x, [0.,0.,1.])
-        test_median(M, x, [0.,0.,1.]; rng = MersenneTwister(1212), atol = 10^-12)
-        test_var(M, x, 0.0)
-        test_std(M, x, 0.0)
-    end
+        @testset "zero variance" begin
+            x = fill([0.,0.,1.], 5)
+            test_mean(M, x, [0.,0.,1.])
+            test_median(M, x, [0.,0.,1.]; rng = MersenneTwister(1212), atol = 10^-12)
+            test_var(M, x, 0.0)
+            test_std(M, x, 0.0)
+        end
 
-    @testset "two points" begin
-        x = [ [1., 0., 0.], [0., 1., 0.] ]
-        θ = π / 4
-        @test isapprox(M, mean(M, x), geodesic(M, x[1], x[2], θ))
-        test_mean(M, x, [1.0, 1.0, 0.0] / √2)
-        test_median(M, x, [1.0, 1.0, 0.0] / √2; rng = MersenneTwister(1212), atol = 10^-12)
-        test_var(M, x, θ^2 * 2)
-        test_std(M, x, θ * √2)
+        @testset "two points" begin
+            x = [ [1., 0., 0.], [0., 1., 0.] ]
+            θ = π / 4
+            @test isapprox(M, mean(M, x), geodesic(M, x[1], x[2], θ))
+            test_mean(M, x, [1.0, 1.0, 0.0] / √2)
+            test_median(M, x, [1.0, 1.0, 0.0] / √2; rng = MersenneTwister(1212), atol = 10^-12)
+            test_var(M, x, θ^2 * 2)
+            test_std(M, x, θ * √2)
+        end
     end
 
     @testset "Euclidean fallbacks" begin
