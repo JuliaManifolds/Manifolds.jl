@@ -85,12 +85,12 @@ function test_var(M, x, vexp = nothing; kwargs...)
         if vexp !== nothing
             @test v ≈ vexp
         end
-        @test v == var(M, x; corrected = true, kwargs...)
+        @test v ≈ var(M, x; corrected = true, kwargs...)
         _, v2 = mean_and_var(M, x; kwargs...)
-        @test v2 == v
+        @test v2 ≈ v
         m = mean(M, x; kwargs...)
-        @test var(M, x, m; kwargs...) == var(M, x; kwargs...)
-        @test var(M, x; corrected = false, kwargs...) == var(M, x, m; corrected = false, kwargs...)
+        @test var(M, x, m; kwargs...) ≈ var(M, x; kwargs...)
+        @test var(M, x; corrected = false, kwargs...) ≈ var(M, x, m; corrected = false, kwargs...)
         @test var(M, x; corrected = false, kwargs...) ≈ var(M, x; kwargs...) * (n - 1) / n
         @test var(M, x, m; corrected = false, kwargs...) ≈ var(M, x, m; kwargs...) * (n - 1) / n
     end
@@ -105,10 +105,10 @@ function test_var(M, x, vexp = nothing; kwargs...)
         for w in (w1, w2, w3)
             @test var(M, x, w; kwargs...) ≈ v
             @test var(M, x, w; corrected = false, kwargs...) ≈ v
-            @test mean_and_var(M, x, w; kwargs...)[2] == var(M, x, w; kwargs...)
+            @test mean_and_var(M, x, w; kwargs...)[2] ≈ var(M, x, w; kwargs...)
             m = mean(M, x, w; kwargs...)
-            @test var(M, x, w, m; kwargs...) == var(M, x, w; kwargs...)
-            @test var(M, x, w; corrected = true, kwargs...) == var(M, x, w, m; corrected = true, kwargs...)
+            @test var(M, x, w, m; kwargs...) ≈ var(M, x, w; kwargs...)
+            @test var(M, x, w; corrected = true, kwargs...) ≈ var(M, x, w, m; corrected = true, kwargs...)
             @test var(M, x, w; corrected = true, kwargs...) ≈ var(M, x, w; kwargs...) * n / (n - 1)
             @test var(M, x, w, m; corrected = true, kwargs...) ≈ var(M, x, w, m; kwargs...) * n / (n - 1)
         end
@@ -123,13 +123,13 @@ function test_std(M, x, sexp = nothing; kwargs...)
         if sexp !== nothing
             @test s ≈ sexp
         end
-        @test s == std(M, x; corrected = true, kwargs...)
+        @test s ≈ std(M, x; corrected = true, kwargs...)
         @test s ≈ √var(M, x; corrected = true, kwargs...)
         _, s2 = mean_and_std(M, x; kwargs...)
-        @test s2 == s
+        @test s2 ≈ s
         m = mean(M, x; kwargs...)
-        @test std(M, x, m; kwargs...) == std(M, x; kwargs...)
-        @test std(M, x; corrected = false, kwargs...) == std(M, x, m; corrected = false, kwargs...)
+        @test std(M, x, m; kwargs...) ≈ std(M, x; kwargs...)
+        @test std(M, x; corrected = false, kwargs...) ≈ std(M, x, m; corrected = false, kwargs...)
         @test std(M, x; corrected = false, kwargs...) ≈ std(M, x; kwargs...) * sqrt((n - 1) / n)
         @test std(M, x, m; corrected = false, kwargs...) ≈ std(M, x, m; kwargs...) * sqrt((n - 1) / n)
     end
@@ -144,10 +144,10 @@ function test_std(M, x, sexp = nothing; kwargs...)
         for w in (w1, w2, w3)
             @test std(M, x, w; kwargs...) ≈ s
             @test std(M, x, w; corrected = false, kwargs...) ≈ s
-            @test mean_and_std(M, x, w; kwargs...)[2] == std(M, x, w; kwargs...)
+            @test mean_and_std(M, x, w; kwargs...)[2] ≈ std(M, x, w; kwargs...)
             m = mean(M, x, w; kwargs...)
-            @test std(M, x, w, m; kwargs...) == std(M, x, w; kwargs...)
-            @test std(M, x, w; corrected = true, kwargs...) == std(M, x, w, m; corrected = true, kwargs...)
+            @test std(M, x, w, m; kwargs...) ≈ std(M, x, w; kwargs...)
+            @test std(M, x, w; corrected = true, kwargs...) ≈ std(M, x, w, m; corrected = true, kwargs...)
             @test std(M, x, w; corrected = true, kwargs...) ≈ std(M, x, w; kwargs...) * sqrt(n / (n - 1))
             @test std(M, x, w, m; corrected = true, kwargs...) ≈ std(M, x, w, m; kwargs...) * sqrt(n / (n - 1))
         end
