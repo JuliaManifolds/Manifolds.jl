@@ -232,7 +232,7 @@ function std(
     return sqrt(var(M, x, m; corrected = corrected, kwargs...))
 end
 @doc doc"""
-    m,v = mean_and_var(M,x,w)
+    mean_and_var(M,x,w) -> (mean, var)
 
 compute the [`mean`](@ref) `m` and the [`var`](@ref)iance `v` simultaneously.
 """
@@ -248,7 +248,7 @@ function mean_and_var(
     return m, v
 end
 @doc doc"""
-    m,s = mean_and_std(M,x,w)
+    mean_and_std(M,x,w) -> (mean, std)
 
 compute the [`mean`](@ref) `m` and the standard deviation [`std`](@ref) `s`
 simultaneously.
