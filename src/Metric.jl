@@ -27,53 +27,54 @@ abstract type LorentzMetric <: Metric end
 """
     MetricManifold{M<:Manifold,G<:Metric} <: Manifold
 
-Equip a manifold with a metric. Such a manifold is generally called pseudo-
-or semi-Riemannian. Each `MetricManifold` must implement
-[`local_metric`](@ref).
+Equip a [`Manifold`](@ref) explicitly with a [`Metric`](@ref) `G`. 
+
+For a Metric Manifold, by default, assumes, that you implement the linear form
+from [`local_metric`](@ref) in order to evaluate the exponential map.
+
+If the corresponding [`Metric`](@ref) `G` yields closed form formulae for e.g.
+the exponential map and this is implemented directly (without solving the ode),
+you can of course still implement that directly.
 
 # Constructor
-
     MetricManifold(manifold, metric)
-"""
+
+    """
 struct MetricManifold{M<:Manifold,G<:Metric} <: Manifold
     manifold::M
     metric::G
 end
 
-convert(::Type{MT},M::MetricManifold{MT,GT}) where {MT,GT} = M.manifold
-
-@traitimpl IsDecoratorManifold{MetricManifold}
+is_decorator_manifold(M::MMT) where {MMT <: MetricManifold}= Val(true)
 
 """
-    HasMetric
+    is_default_metric(M,G)
 
-A `Trait` to mark a `Manifold` `M` as being shorthand for a
-`MetricManifold{M,G}` with metric `G`. This can be used to forward functions
-called on the `MetricManifold` to the already-imlemented functions for the
-`Manifold`.
-
-For example,
-
-```
-@traitfn function my_feature(M::MMT, k...) where {MT<:Manifold,
-                                                  GT<:Metric,
-                                                  MMT<:MetricManifold{MT,GT};
-                                                  HasMetric{MT,GT}}
-    return my_feature(M.manifold, k...)
-end
-```
-
-forwards the function `my_feature` from `M` to the already-implemented
-`my_feature` on the base manifold `M.manifold`. A manifold with a default
-metric can then be written
-
-```
-struct MyManifold{T} <: Manifold end
-struct MyMetric{S} <: Metric end
-@traitimpl HasMetric{MyManifold,MyMetric}
-```
+indicate, whether the [`Metric`](@ref) `G` is the default metric for
+the [`Manifold`](@ref) `M`. This means that any occurence of
+[`MetricManifold`](@ref)(M,G) where `typeof(is_default_metric(M,G)) = Val{true}`
+falls back to just be called with `M` such that the [`Manifold`](@ref) `M`
+implicitly has this metric, for example if this was the first one implemented
+or is the one most commonly assumed to be used.
 """
-@traitdef HasMetric{M,G}
+is_default_metric(M::Manifold,G::Metric) = Val(false)
+"""
+    is_default_metric(MM)
+
+indicate, whether the [`Metric`](@ref) `MM.G` is the default metric for
+the [`Manifold`](@ref) `MM.M` within the [`MetricManifold`](@ref) `MM`.
+This means that any occurence of
+[`MetricManifold`](@ref)`(MM.M,MM.G)` where `typeof(is_default_metric(MM.M,MM.G)) = Val{true}`
+falls back to just be called with `MM.MM` such that the [`Manifold`](@ref) `MM.M`
+implicitly has the metric `MM.G`, for example if this was the first one
+implemented or is the one most commonly assumed to be used.
+"""
+is_default_metric(M::MMT) where {MMT <: MetricManifold} = is_default_metric(base_manifold(M),metric(M))
+# this automatically undecorates
+# this should automatically decorate at least for simple cases
+convert(T::Type{MetricManifold{MT,GT}},M::MT) where {MT,GT} = _convert_with_default(M,GT,is_default_metric(M,GT()))
+_convert_with_default(M::MT,T::Type{<:Metric},::Val{true}) where {MT <: Manifold} = MetricManifold(M,T())
+_convert_with_default(M::MT,T::Type{<:Metric},::Val{false}) where {MT <: Manifold} = error("Can not convert $(M) to a MetricManifold{$(MT),$(T)}, since $(T) is not the default metric.")
 
 @doc doc"""
     metric(M::MetricManifold)
@@ -126,65 +127,6 @@ dimensions of the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
 function local_metric_jacobian(M, x)
     error("local_metric_jacobian not implemented on $(typeof(M)) for point $(typeof(x)). For a suitable default, enter `using ForwardDiff`.")
-end
-
-
-@traitfn function inner(M::MMT, x, v, w) where {MT<:Manifold,
-                                                GT<:Metric,
-                                                MMT<:MetricManifold{MT,GT};
-                                                !HasMetric{MT,GT}}
-    return dot(v, local_metric(M, x) * w)
-end
-
-@traitfn function inner(M::MMT, x, v, w) where {MT<:Manifold,
-                                                GT<:Metric,
-                                                MMT<:MetricManifold{MT,GT};
-                                                HasMetric{MT,GT}}
-    return inner(M.manifold, x, v, w)
-end
-
-@traitfn function inner(B::VectorBundleFibers{<:CotangentSpaceType, MMT}, x, v, w) where {MT<:Manifold,
-                                                                                          GT<:Metric,
-                                                                                          MMT<:MetricManifold{MT,GT};
-                                                                                          !HasMetric{MT,GT}}
-    ginv = inverse_local_metric(B.M, x)
-    return dot(v, ginv * w)
-end
-
-@traitfn function inner(B::VectorBundleFibers{<:CotangentSpaceType, MMT}, x, v, w) where {MT<:Manifold,
-                                                                                          GT<:Metric,
-                                                                                          MMT<:MetricManifold{MT,GT};
-                                                                                          HasMetric{MT,GT}}
-    return inner(VectorBundleFibers(B.VS, B.M.manifold), x, v, w)
-end
-
-@traitfn function norm(M::MMT, x, v) where {MT<:Manifold,
-                                            GT<:Metric,
-                                            MMT<:MetricManifold{MT,GT};
-                                            !HasMetric{MT,GT}}
-    return sqrt(inner(M, x, v, v))
-end
-
-@traitfn function norm(M::MMT, x, v) where {MT<:Manifold,
-                                            GT<:Metric,
-                                            MMT<:MetricManifold{MT,GT};
-                                            HasMetric{MT,GT}}
-    return norm(M.manifold, x, v)
-end
-
-@traitfn function distance(M::MMT, x, y) where {MT<:Manifold,
-                                                GT<:Metric,
-                                                MMT<:MetricManifold{MT,GT};
-                                                !HasMetric{MT,GT}}
-    return norm(M, x, log(M, x, y))
-end
-
-
-@traitfn function distance(M::MMT, x, y) where {MT<:Manifold,
-                                                GT<:Metric,
-                                                MMT<:MetricManifold{MT,GT};
-                                                HasMetric{MT,GT}}
-    return distance(M.manifold, x, y)
 end
 
 @doc doc"""
@@ -303,12 +245,7 @@ function einstein_tensor(M::MetricManifold, x)
 end
 
 @doc doc"""
-    solve_exp_ode(M::MetricManifold,
-                  x,
-                  v,
-                  tspan;
-                  solver=AutoVern9(Rodas5()),
-                  kwargs...)
+    solve_exp_ode(M::MetricManifold, x, v, tspan; solver=AutoVern9(Rodas5()), kwargs...)
 
 Approximate the exponential map on the manifold over the provided timespan
 assuming the Levi-Civita connection by solving the ordinary differential
@@ -326,38 +263,30 @@ coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
 """
 function solve_exp_ode(M, x, v, tspan; kwargs...)
-    error("solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(x)), vector $(typeof(y)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq`.")
+    error("solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(x)), vector $(typeof(v)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq`.")
 end
-
-@traitfn function exp(M::MMT,
-                      x,
-                      v,
-                      T::AbstractVector) where {MT<:Manifold,
-                                                GT<:Metric,
-                                                MMT<:MetricManifold{MT,GT};
-                                                !HasMetric{MT,GT}}
+exp(M::MMT, x, v, T::AbstractVector{T} where T) where {MMT <: MetricManifold} = exp(M, is_default_metric(M), x, v, T)
+exp(M::MMT, ::Val{true}, x, v, T::AbstractVector{T} where T) where {MMT<:MetricManifold} = exp(base_manifold(M), x, v, T)
+function exp(M::MMT, ::Val{false}, x, v, T::AbstractVector{T} where T) where {MMT<:MetricManifold}
     sol = solve_exp_ode(M, x, v, extrema(T); dense=false, saveat=T)
     n = length(x)
     return map(i -> sol.u[i][n+1:end], 1:length(T))
 end
 
+exp!(M::MMT, y, x, v) where {MMT <: MetricManifold}= exp!(M, is_default_metric(M), y, x, v)
+exp!(M::MMT, ::Val{true}, y, x, v) where {MMT<:MetricManifold} = exp!(base_manifold(M),y,x,v)
 """
-    exp(M::MetricManifold, x, v, args...)
+    exp(MM::MetricManifold, x, v, args...)
 
-If the [`HasMetric`](@ref) trait is defined for `M`, compute the exponential
-map of the base manifold. Otherwise, numerically integrate the exponential
-map assuming the Levi-Civita connection. See [`solve_exp_ode`](@ref)
+Numerically integrate the exponential map assuming the Levi-Civita connection.
+See [`solve_exp_ode`](@ref) if the [`Metric`](@ref) `G` of the [`MetricManifold`](@ref){M,G}`
+is not marked as the default one.
 
 Currently, the numerical integration is only accurate when using a single
 coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
 """
-function exp end
-
-@traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,
-                                               GT<:Metric,
-                                               MMT<:MetricManifold{MT,GT};
-                                               !HasMetric{MT,GT}}
+function exp!(M::MMT, ::Val{false}, y, x, v) where {MMT<:MetricManifold}
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, x, v, tspan; dense=false, saveat=[1.0])
     n = length(x)
@@ -365,134 +294,62 @@ function exp end
     return y
 end
 
-@traitfn function exp!(M::MMT, y, x, v) where {MT<:Manifold,
-                                               GT<:Metric,
-                                               MMT<:MetricManifold{MT,GT};
-                                               HasMetric{MT,GT}}
-    return exp!(M.manifold, y, x, v)
+inner(M::MMT, x, v, w) where {MMT <: MetricManifold}= inner(M, is_default_metric(M), x, v, w)
+inner(M::MMT, ::Val{false}, x, v, w) where {MMT <: MetricManifold}= dot(v, local_metric(M, x) * w)
+inner(M::MMT, ::Val{true}, x, v, w) where {MMT <: MetricManifold} = inner(base_manifold(M), x,v,w)
+
+log!(M::MMT, w, x, y) where {MMT <: MetricManifold} = log!(M, is_default_metric(M), w, x, y)
+log!(M::MMT, ::Val{true}, w, x, y) where {MMT <: MetricManifold} = log!(base_manifold(M), w, x, y)
+log!(M::MMT, ::Val{false}, w, x, y) where {MMT <: MetricManifold} = error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y)).")
+
+tangent_orthonormal_basis(M::MMT, x, v) where {MMT <: MetricManifold} = tangent_orthonormal_basis(M, is_default_metric(M), x, v)
+tangent_orthonormal_basis(M::MMT, ::Val{true}, x, v) where {MMT <: MetricManifold} = tangent_orthonormal_basis(base_manifold(M), x, v)
+tangent_orthonormal_basis(M::MMT, ::Val{false}, x, v) where {MMT <: MetricManifold} = error("tangent_orthogonal_basis not implemented on $(typeof(M)) for point $(typeof(x)) and tangent vector $(typeof(v)).")
+
+project_point!(M::MMT, y, x) where {MMT <: MetricManifold} = project_point!(M, is_default_metric(M), y, x)
+project_point!(M::MMT, ::Val{true}, y, x) where {MMT <: MetricManifold} = project_point!(base_manifold(M), y, x)
+project_point!(M::MMT, ::Val{false}, y, x) where {MMT <: MetricManifold} = error("project_point! not implemented on $(typeof(M)) for point $(typeof(x))")
+
+project_tangent!(M::MMT, w, x, v) where {MMT <: MetricManifold} = project_tangent!(M, is_default_metric(M), w, x, v)
+project_tangent!(M::MMT, ::Val{true}, w, x, v) where {MMT <: MetricManifold} = project_tangent!(base_manifold(M), w, x, v)
+project_tangent!(M::MMT, ::Val{false}, w, x, v) where {MMT <: MetricManifold} = error("project_tangent! not implemented for a $(typeof(M)) and tangent $(typeof(v)) at point $(typeof(x)).")
+
+vector_transport_to!(M::MMT, vto, x, v, y, m::AbstractVectorTransportMethod) where {MMT <: MetricManifold} = vector_transport_to!(M, is_default_metric(M), vto, x, v, y, m)
+vector_transport_to!(M::MMT, ::Val{true}, vto, x, v, y, m)  where {MMT <: MetricManifold}= vector_transport_to!(base_manifold(M), vto, x, v, y, m)
+vector_transport_to!(M::MMT, ::Val{false}, vto, x, v, y, m)  where {MMT <: MetricManifold}= error("vector transport from a point of type $(typeof(x)) to a type $(typeof(y)) on a $(typeof(M)) for a vector of type $(v) and the $(typeof(m)) not yet implemented.")
+
+projected_distribution(M::MMT, d, x) where {MMT <: MetricManifold} = projected_distribution(M, is_default_metric(M), d,x)
+projected_distribution(M::MMT, ::Val{true}, d, x) where {MMT <: MetricManifold} = projected_distribution(base_manifold(M), d,x)
+projected_distribution(M::MMT, ::Val{false}, d, x) where {MMT <: MetricManifold} =error("projected_distribution not implemented for a $(typeof(M)) and with $(typeof(d)) at point $(typeof(x)).")
+
+projected_distribution(M::MMT, d) where {MMT <: MetricManifold} = projected_distribution(M, is_default_metric(M), d)
+projected_distribution(M::MMT, ::Val{true}, d) where {MMT <: MetricManifold} = projected_distribution(base_manifold(M), d)
+projected_distribution(M::MMT, ::Val{false}, d) where {MMT <: MetricManifold} =error("projected_distribution not implemented for a $(typeof(M)) with $(typeof(d)).")
+
+normal_tvector_distribution(M::MMT, x, σ) where {MMT <: MetricManifold} = normal_tvector_distribution(M, is_default_metric(M), x, σ)
+normal_tvector_distribution(M::MMT, ::Val{true}, x, σ) where {MMT <: MetricManifold} = normal_tvector_distribution(base_manifold(M), x, σ)
+normal_tvector_distribution(M::MMT, ::Val{false}, x, σ) where {MMT <: MetricManifold} =error("normal_tvector_distribution not implemented for a $(typeof(M)) at point $(typeof(x)) with standard deviation $(typeof(σ)).")
+
+
+function inner(B::VectorBundleFibers{<:CotangentSpaceType, MMT}, x, v, w) where {MMT<:MetricManifold}
+    ginv = inverse_local_metric(B.M, x)
+    return dot(v, ginv * w)
 end
 
-@traitfn function log!(M::MMT, v, x, y) where {MT<:Manifold,
-                                               GT<:Metric,
-                                               MMT<:MetricManifold{MT,GT};
-                                               !HasMetric{MT,GT}}
-    error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y))")
-end
-
-@traitfn function log!(M::MMT, v, x, y) where {MT<:Manifold,
-                                               GT<:Metric,
-                                               MMT<:MetricManifold{MT,GT};
-                                               HasMetric{MT,GT}}
-    return log!(M.manifold, v, x, y)
-end
-
-@traitfn function retract!(M::MMT,
-                           y,
-                           x,
-                           v,
-                           t::Real) where {MT<:Manifold,
-                                           GT<:Metric,
-                                           MMT<:MetricManifold{MT,GT};
-                                           HasMetric{MT,GT}}
-    return retract!(M.manifold, y, x, v, t)
-end
-
-@traitfn function retract!(M::MMT,
-                           y,
-                           x,
-                           v) where {MT<:Manifold,
-                                           GT<:Metric,
-                                           MMT<:MetricManifold{MT,GT};
-                                           HasMetric{MT,GT}}
-    return retract!(M.manifold, y, x, v)
-end
-
-@traitfn function project_tangent!(M::MMT,
-                                   w,
-                                   x,
-                                   v) where {MT<:Manifold,
-                                             GT<:Metric,
-                                             MMT<:MetricManifold{MT,GT};
-                                             HasMetric{MT,GT}}
-    return project_tangent!(M.manifold, w, x, v)
-end
-
-@traitfn function injectivity_radius(M::MMT,
-                                     args...) where {MT<:Manifold,
-                                                     GT<:Metric,
-                                                     MMT<:MetricManifold{MT,GT};
-                                                     HasMetric{MT,GT}}
-    return injectivity_radius(M.manifold, args...)
-end
-
-@traitfn function zero_tangent_vector!(M::MMT,
-                                       v,
-                                       x) where {MT<:Manifold,
-                                                 GT<:Metric,
-                                                 MMT<:MetricManifold{MT,GT};
-                                                 HasMetric{MT,GT}}
-    return zero_tangent_vector!(M.manifold, v, x)
-end
-
-@traitfn function is_manifold_point(M::MMT,
-                                    x;
-                                    kwargs...) where {MT<:Manifold,
-                                                      GT<:Metric,
-                                                      MMT<:MetricManifold{MT,GT};
-                                                      HasMetric{MT,GT}}
-    return is_manifold_point(M.manifold, x; kwargs...)
-end
-
-@traitfn function is_tangent_vector(M::MMT,
-                                    x,
-                                    v;
-                                    kwargs...) where {MT<:Manifold,
-                                                      GT<:Metric,
-                                                      MMT<:MetricManifold{MT,GT};
-                                                      HasMetric{MT,GT}}
-    return is_tangent_vector(M.manifold, x, v; kwargs...)
-end
-
-@traitfn function flat!(M::MMT,
-                        v::FVector{CotangentSpaceType},
-                        x,
-                        w::FVector{TangentSpaceType}) where {MT<:Manifold,
-                                                             GT<:Metric,
-                                                             MMT<:MetricManifold{MT,GT};
-                                                             !HasMetric{MT,GT}}
+function flat!(M::MMT, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType}) where {MMT<:MetricManifold}
     g = local_metric(M, x)
-    copyto!(v, g*w)
+    copyto!(v.data, g*w.data)
     return v
 end
 
-@traitfn function flat!(M::MMT,
-                        v::FVector{CotangentSpaceType},
-                        x,
-                        w::FVector{TangentSpaceType}) where {MT<:Manifold,
-                                                             GT<:Metric,
-                                                             MMT<:MetricManifold{MT,GT};
-                                                             HasMetric{MT,GT}}
-    return flat!(M.manifold, v, x, w)
-end
-
-@traitfn function sharp!(M::MMT,
-                         v::FVector{TangentSpaceType},
-                         x,
-                         w::FVector{CotangentSpaceType}) where {MT<:Manifold,
-                                                                GT<:Metric,
-                                                                MMT<:MetricManifold{MT,GT};
-                                                                !HasMetric{MT,GT}}
+function sharp!(M::MMT, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType}) where {MMT<:MetricManifold}
     ginv = inverse_local_metric(M, x)
-    copyto!(v, ginv*w)
+    copyto!(v.data, ginv*w.data)
     return v
 end
 
-@traitfn function sharp!(M::MMT,
-                         v::FVector{TangentSpaceType},
-                         x,
-                         w::FVector{CotangentSpaceType}) where {MT<:Manifold,
-                                                                GT<:Metric,
-                                                                MMT<:MetricManifold{MT,GT};
-                                                                HasMetric{MT,GT}}
-    return sharp!(M.manifold, v, x, w)
-end
+# These are independent of the metric and hence can always fall back to M
+injectivity_radius(M::MMT, args...) where {MMT <: MetricManifold} = injectivity_radius(base_manifold(M), args...)
+zero_tangent_vector!(M::MMT, v, x) where {MMT <: MetricManifold} = zero_tangent_vector!(base_manifold(M), v, x)
+check_manifold_point(M::MMT, x; kwargs...) where {MMT <: MetricManifold} = check_manifold_point(base_manifold(M), x; kwargs...)
+check_tangent_vector(M::MMT, x, v; kwargs...) where {MMT <: MetricManifold} = check_tangent_vector(base_manifold(M), x, v; kwargs...)

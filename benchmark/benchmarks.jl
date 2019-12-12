@@ -1,4 +1,5 @@
 using Manifolds
+using ManifoldsBase
 using BenchmarkTools
 using StaticArrays
 using HybridArrays
@@ -162,18 +163,18 @@ function add_manifold_benchmarks()
         Mr1 = PowerManifold(Mr, 5)
         Mr2 = PowerManifold(Mr, 5, 7)
 
-        types_s1 = [Array{Float64,2},
-                    HybridArray{Tuple{3,StaticArrays.Dynamic()}, Float64, 2}]
-        types_s2 = [Array{Float64,3},
-                    HybridArray{Tuple{3,StaticArrays.Dynamic(),StaticArrays.Dynamic()}, Float64, 3}]
+        types_s1 = (Array{Float64,2},
+                    HybridArray{Tuple{3,StaticArrays.Dynamic()}, Float64, 2})
+        types_s2 = (Array{Float64,3},
+                    HybridArray{Tuple{3,StaticArrays.Dynamic(),StaticArrays.Dynamic()}, Float64, 3})
 
-        types_r1 = [Array{Float64,3},
-                    HybridArray{Tuple{3,3,StaticArrays.Dynamic()}, Float64, 3}]
-        types_r2 = [Array{Float64,4},
-                    HybridArray{Tuple{3,3,StaticArrays.Dynamic(),StaticArrays.Dynamic()}, Float64, 4}]
+        types_r1 = (Array{Float64,3},
+                    HybridArray{Tuple{3,3,StaticArrays.Dynamic()}, Float64, 3})
+        types_r2 = (Array{Float64,4},
+                    HybridArray{Tuple{3,3,StaticArrays.Dynamic(),StaticArrays.Dynamic()}, Float64, 4})
 
-        retraction_methods = [Manifolds.PowerRetraction(Manifolds.ExponentialRetraction())]
-        inverse_retraction_methods = [Manifolds.InversePowerRetraction(Manifolds.LogarithmicInverseRetraction())]
+        retraction_methods = [Manifolds.PowerRetraction(ManifoldsBase.ExponentialRetraction())]
+        inverse_retraction_methods = [Manifolds.InversePowerRetraction(ManifoldsBase.LogarithmicInverseRetraction())]
 
         sphere_dist = Manifolds.uniform_distribution(Ms, @SVector [1.0, 0.0, 0.0])
         power_s1_pt_dist = Manifolds.PowerPointDistribution(Ms1, sphere_dist, randn(Float64, 3, 5))
@@ -212,6 +213,28 @@ function add_manifold_benchmarks()
             pts2 = [convert(T, rand(power_r2_pt_dist)) for _ in 1:3]
             add_manifold(Mr2, pts2, "power manifold SO(3)^(5,7), type $(trim(string(T)))";
                 test_tangent_vector_broadcasting = true)
+        end
+
+        types_spd = (Matrix{Float64},
+            MMatrix{3,3,Float64})
+
+        A(α) = [1. 0. 0.; 0. cos(α) sin(α); 0. -sin(α) cos(α)]
+        pts_spd = [#
+            [1. 0. 0.; 0. 1. 0.; 0. 0. 1],
+            [2. 0. 0.; 0. 2. 0.; 0. 0. 1],
+            A(π/6) * [1. 0. 0.; 0. 2. 0.; 0. 0. 1] * transpose(A(π/6)),
+        ]
+
+        M_spd_1 = Manifolds.SymmetricPositiveDefinite(3)
+        M_spd_2 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LinearAffineMetric())
+        M_spd_3 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
+
+        for T in types_spd
+            pts = [convert(T, a) for a in pts_spd]
+            for M in (M_spd_1, M_spd_2, M_spd_3)
+                add_manifold(M, pts, "SPD manifold $(trim(string(M))), type $(trim(string(T)))";
+                    test_tangent_vector_broadcasting = true)
+            end
         end
 
     end

@@ -13,8 +13,8 @@ include("utils.jl")
              SizedVector{5, Float32},
              MVector{5, Float32}]
 
-    retraction_methods = [Manifolds.ProductRetraction(Manifolds.ExponentialRetraction(), Manifolds.ExponentialRetraction())]
-    inverse_retraction_methods = [Manifolds.InverseProductRetraction(Manifolds.LogarithmicInverseRetraction(), Manifolds.LogarithmicInverseRetraction())]
+    retraction_methods = [Manifolds.ProductRetraction(ManifoldsBase.ExponentialRetraction(), ManifoldsBase.ExponentialRetraction())]
+    inverse_retraction_methods = [Manifolds.InverseProductRetraction(ManifoldsBase.LogarithmicInverseRetraction(), ManifoldsBase.LogarithmicInverseRetraction())]
 
     reshapers = (Manifolds.StaticReshaper(), Manifolds.ArrayReshaper())
 

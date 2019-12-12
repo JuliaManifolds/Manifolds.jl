@@ -13,8 +13,6 @@ generates the $\mathbb S^{n}\subset \mathbb R^{n+1}$
 struct Sphere{N} <: Manifold end
 Sphere(n::Int) = Sphere{n}()
 
-@traitimpl HasMetric{Sphere,EuclideanMetric}
-
 function representation_size(::Sphere{N}) where N
     return (N+1,)
 end
@@ -76,7 +74,7 @@ function zero_tangent_vector!(S::Sphere, v, x)
     return v
 end
 
-function vector_transport_to!(M::Sphere, vto, x, v, y)
+function vector_transport_to!(M::Sphere, vto, x, v, y, ::ParallelTransport)
     v_xy = log(M, x, y)
     vl = norm(M, x, v_xy)
     vto .= v
@@ -109,42 +107,43 @@ function uniform_distribution(S::Sphere, x)
 end
 
 """
-    is_manifold_point(S,x; kwargs...)
+    check_manifold_point(S,x; kwargs...)
 
 checks, whether `x` is a valid point on the [`Sphere`](@ref) `S`, i.e. is a vector
 of length [`manifold_dimension`](@ref)`(S)+1` (approximately) of unit length.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function is_manifold_point(S::Sphere{N},x; kwargs...) where {N}
+function check_manifold_point(S::Sphere{N},x; kwargs...) where {N}
     if length(x) != N+1
-        throw(DomainError(size(x),"The point $(x) does not lie on $S, since its size is not $(N+1)."))
+        return DomainError(size(x),"The point $(x) does not lie on $S, since its size is not $(N+1).")
     end
     if !isapprox(norm(x), 1.; kwargs...)
-        throw(DomainError(norm(x), "The point $(x) does not lie on the sphere $(S) since its norm is not 1."))
+        return DomainError(norm(x), "The point $(x) does not lie on the sphere $(S) since its norm is not 1.")
     end
-    return true
+    return nothing
 end
 
 """
-    is_tangent_vector(S,x,v; kwargs... )
+    check_tangent_vector(S,x,v; kwargs... )
 
 checks whether `v` is a tangent vector to `x` on the [`Sphere`](@ref) `S`, i.e.
-atfer [`is_manifold_point`](@ref)`(S,x)`, `v` has to be of same dimension as `x`
+after [`check_manifold_point`](@ref)`(S,x)`, `v` has to be of same dimension as `x`
 and orthogonal to `x`.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function is_tangent_vector(S::Sphere{N},x,v; kwargs...) where N
-    is_manifold_point(S,x)
+function check_tangent_vector(S::Sphere{N},x,v; kwargs...) where N
+    perr = check_manifold_point(S,x)
+    perr === nothing || return perr
     if length(v) != N+1
-        throw(DomainError(size(v),
-            "The vector $(v) is not a tangent to a point on $S since its size does not match $(N+1)."))
+        return DomainError(size(v),
+            "The vector $(v) is not a tangent to a point on $S since its size does not match $(N+1).")
     end
     if !isapprox( abs(dot(x,v)), 0.; kwargs...)
-        throw(DomainError(abs(dot(x,v)),
+        return DomainError(abs(dot(x,v)),
             "The vector $(v) is not a tangent vector to $(x) on $(S), since it is not orthogonal in the embedding."
-        ))
+        )
     end
-    return true
+    return nothing
 end
 
 """

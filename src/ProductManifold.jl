@@ -178,37 +178,55 @@ end
 
 
 """
-    is_manifold_point(M::ProductManifold, x; kwargs...)
+    check_manifold_point(M::ProductManifold, x; kwargs...)
 
 Check whether `x` is a valid point on the [`ProductManifold`](@ref) `M`.
 
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function is_manifold_point(M::ProductManifold, x::ProductRepr; kwargs...)
-    return all(t -> is_manifold_point(t...; kwargs...), ziptuples(M.manifolds, x.parts))
+function check_manifold_point(M::ProductManifold, x::ProductRepr; kwargs...)
+    for t ∈ ziptuples(M.manifolds, x.parts)
+        err = check_manifold_point(t...; kwargs...)
+        err === nothing || return err
+    end
+    return nothing
 end
 
-function is_manifold_point(M::ProductManifold, x::ProductArray; kwargs...)
-    return all(t -> is_manifold_point(t...; kwargs...), ziptuples(M.manifolds, x.parts))
+function check_manifold_point(M::ProductManifold, x::ProductArray; kwargs...)
+    for t ∈ ziptuples(M.manifolds, x.parts)
+        err = check_manifold_point(t...; kwargs...)
+        err === nothing || return err
+    end
+    return nothing
 end
 
 """
-    is_tangent_vector(M::ProductManifold, x, v; kwargs... )
+    check_tangent_vector(M::ProductManifold, x, v; kwargs... )
 
 Check whether `v` is a tangent vector to `x` on the [`ProductManifold`](@ref)
-`M`, i.e. atfer [`is_manifold_point`](@ref)`(M, x)`, and all projections to
+`M`, i.e. atfer [`check_manifold_point`](@ref)`(M, x)`, and all projections to
 base manifolds must be respective tangent vectors.
 
 The tolerance for the last test can be set using the ´kwargs...`.
 """
-function is_tangent_vector(M::ProductManifold, x::ProductRepr, v::ProductRepr; kwargs...)
-    is_manifold_point(M, x)
-    return all(t -> is_tangent_vector(t...; kwargs...), ziptuples(M.manifolds, x.parts, v.parts))
+function check_tangent_vector(M::ProductManifold, x::ProductRepr, v::ProductRepr; kwargs...)
+    perr = check_manifold_point(M, x)
+    perr === nothing || return perr
+    for t ∈ ziptuples(M.manifolds, x.parts, v.parts)
+        err = check_tangent_vector(t...; kwargs...)
+        err === nothing || return err
+    end
+    return nothing
 end
 
-function is_tangent_vector(M::ProductManifold, x::ProductArray, v::ProductArray; kwargs...)
-    is_manifold_point(M, x)
-    return all(t -> is_tangent_vector(t...; kwargs...), ziptuples(M.manifolds, x.parts, v.parts))
+function check_tangent_vector(M::ProductManifold, x::ProductArray, v::ProductArray; kwargs...)
+    perr = check_manifold_point(M, x)
+    perr === nothing || return perr
+    for t ∈ ziptuples(M.manifolds, x.parts, v.parts)
+        err = check_tangent_vector(t...; kwargs...)
+        err === nothing || return err
+    end
+    return nothing
 end
 
 """

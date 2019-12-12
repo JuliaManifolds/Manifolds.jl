@@ -1,4 +1,5 @@
 using Manifolds
+using ManifoldsBase
 
 using LinearAlgebra
 using Distributions
@@ -7,7 +8,6 @@ using ForwardDiff
 using Random
 using ReverseDiff
 using StaticArrays
-using SimpleTraits
 using Test
 
 """
@@ -20,9 +20,23 @@ Tests general properties of manifold `m`, given at least three different points
 that lie on it (contained in `pts`).
 
 # Arguments
-- `test_forward_diff = true`: if true, automatic differentiation using ForwardDiff is
-tested.
+- `exp_log_atol_multiplier = 1`, change absolute tolerance of exp/log tests
+- `inverse_retraction_methods = []`: inverse retraction methods that will be tested.
+- `point_distributions = []` : point distributions to test
+-  tvector_distributions = []` : tangent vector distributions to test
+- `rand_tvector_atol_multiplier = 1` : chage absolute tolerance in testing that
+  random tangent vectors are tangent vectors
 - `retraction_methods = []`: retraction methods that will be tested.
+- `test_forward_diff = true`: if true, automatic differentiation using
+  ForwardDiff is tested.
+- `test_forward_diff = true`: if true, automatic differentiation using
+  ReverseDiff is tested.
+- `test_musical_isomorphisms = false` : test musical isomorphisms 
+- `test_project_tangent = false` : test projections on tangent spaces
+- `test_representation_size = true` : test repersentation size of points/tvectprs
+- `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace
+- `test_vector_transport = false` : test vector transport
+- `test_mutating_rand = false` : test the mutating random function for points on manifolds
 """
 function test_manifold(M::Manifold, pts::AbstractVector;
     test_forward_diff = true,
@@ -79,8 +93,12 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     @testset "is_manifold_point / is_tangent_vector" begin
         for pt ∈ pts
             @test is_manifold_point(M, pt)
+            @test check_manifold_point(M, pt) === nothing
+            @test check_manifold_point(M, pt) === nothing
         end
         @test is_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1])))
+        @test check_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1]))) === nothing
+        @test check_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1]))) === nothing
     end
 
     @testset "log/exp tests" begin
@@ -99,10 +117,10 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         retract!(M, new_pt, pts[1], tv1)
         @test is_manifold_point(M, new_pt)
         for x ∈ pts
-            @test isapprox(M, zero_tangent_vector(M, x), log(M, x, x); atol = eps(eltype(x)) * exp_log_atol_multiplier)
-            @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x); atol = eps(eltype(x)) * exp_log_atol_multiplier)
+            @test isapprox(M, x, zero_tangent_vector(M, x), log(M, x, x); atol = eps(eltype(x)) * exp_log_atol_multiplier)
+            @test isapprox(M, x, zero_tangent_vector(M, x), inverse_retract(M, x, x); atol = eps(eltype(x)) * exp_log_atol_multiplier)
             for inv_retr_method ∈ inverse_retraction_methods
-                @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method); atol = eps(eltype(x)) * exp_log_atol_multiplier)
+                @test isapprox(M, x, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method); atol = eps(eltype(x)) * exp_log_atol_multiplier)
             end
         end
         zero_tangent_vector!(M, tv1, pts[1])
@@ -155,6 +173,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test is_tangent_vector(M, pts[3], v1t1)
         @test is_tangent_vector(M, pts[3], v1t2)
         @test isapprox(M, pts[3], v1t1, v1t2)
+        @test isapprox(M, pts[1], vector_transport_to(M, pts[1], v1, pts[1]), v1)
     end
 
     test_forward_diff && @testset "ForwardDiff support" begin

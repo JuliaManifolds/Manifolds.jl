@@ -1,7 +1,7 @@
 # Array manifold
 
 ```@autodocs
-Modules = [Manifolds]
+Modules = [ManifoldsBase]
 Pages = ["ArrayManifold.jl"]
 Order = [:type, :function]
 ```

@@ -1,18 +1,21 @@
-using Manifolds, Documenter
+using Manifolds, ManifoldsBase, Documenter
 
 makedocs(
     # for development, we disable prettyurls
     format = Documenter.HTML(prettyurls = false),
-    modules = [Manifolds],
+    modules = [Manifolds, ManifoldsBase],
     sitename = "Manifolds",
     pages = [
         "Home" => "index.md",
+        "ManifoldsBase.jl" => "interface.md",
         "Manifolds" => [
             "Basic manifolds" => [
                 "Euclidean" => "manifolds/euclidean.md",
+                "Cholesky Space" => "manifolds/choleskyspace.md",
                 "Rotations" => "manifolds/rotations.md",
                 "Sphere" => "manifolds/sphere.md",
                 "Symmetric Matrices" => "manifolds/symmetric.md"
+                "Symmetric Positive Definite" => "manifolds/symmetricpositivedefinite.md"
             ],
             "Combined manifolds" => [
                 "Power manifold" => "manifolds/power.md",
@@ -34,4 +37,5 @@ makedocs(
 
 deploydocs(
     repo = "github.com/JuliaNLSolvers/Manifolds.jl.git",
+    push_preview = true,
 )
