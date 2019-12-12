@@ -1,5 +1,5 @@
 module Manifolds
- 
+
 import Base: isapprox,
     exp,
     log,
