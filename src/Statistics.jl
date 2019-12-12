@@ -1,4 +1,3 @@
-using Random: shuffle!
 using StatsBase: AbstractWeights, Weights, ProbabilityWeights, values, varcorrection
 @doc doc"""
     mean(M, x, weights=Weights(ones(n)); x0=x[1], stop_iter=100, kwargs... )
@@ -60,7 +59,7 @@ function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = (n = leng
 end
 
 @doc doc"""
-    median(M, x, weights=Weights(ones(n)); stop_iter=10000, shuffle=nothing)
+    median(M, x, weights=Weights(ones(n)); stop_iter=10000)
 
 computes the Riemannian median of the vector `x`  of `n` points on the
 [`Manifold`](@ref) `M`. This function is nonsmooth (i.e nondifferentiable) and
@@ -71,9 +70,6 @@ the minimizer reads
 \argmin_{y\in\mathcal M}\sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
 ````
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
-
-The cyclic proximal point can be run with a random cyclic order by setting
-`shuffle_rng` to a random number generator, e.g. `GLOBAL_RNG`.
 
 Optionally you can provide `x0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform and
@@ -100,23 +96,20 @@ the starting point of the algorithm.
 """
 function median!(M::Manifold, y, x::AbstractVector,
     w::AbstractWeights = (n = length(x); Weights(ones(n), n));
-    stop_iter=100000,
-    shuffle_rng::Union{Nothing,AbstractRNG} = nothing,
+    stop_iter=1000000,
     kwargs...
 ) where {T}
     n = length(x)
     yold = similar_result(M,median,y)
     copyto!(yold,y)
-    order = collect(1:n)
     (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     v = zero_tangent_vector(M,y)
     wv = convert(Vector, w) ./ w.sum
     for i=1:stop_iter
-        λ = n/i
+        λ =  .5 / i
         copyto!(yold,y)
-        (shuffle_rng !== nothing) && shuffle!(shuffle_rng, order)
-        for j in order
-            @inbounds t = min( λ * wv[j], distance(M,y,x[j]) )
+        for j in 1:n
+            @inbounds t = min( λ * wv[j] / distance(M,y,x[j]), 1. )
             @inbounds log!(M, v, y, x[j])
             y = exp(M, y, v, t)
         end

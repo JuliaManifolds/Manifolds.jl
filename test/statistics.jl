@@ -49,17 +49,13 @@ function test_mean(M, x, yexp = nothing; kwargs...)
     end
 end
 
-function test_median(M, x, yexp = nothing; rng=GLOBAL_RNG, kwargs...)
+function test_median(M, x, yexp = nothing; kwargs...)
     @testset "median unweighted" begin
         y = median(M, x; kwargs...)
         @test is_manifold_point(M, y; atol=10^-9)
         if yexp !== nothing
             @test isapprox(M, y, yexp; atol=10^-5)
         end
-
-        y2 = median(M, x; shuffle_rng=rng, kwargs...)
-        @test is_manifold_point(M, y2; atol = 10^-9)
-        @test isapprox(M, y, y2; atol = 10^-4)
     end
 
     @testset "median weighted" begin
@@ -71,8 +67,6 @@ function test_median(M, x, yexp = nothing; rng=GLOBAL_RNG, kwargs...)
         for w in (w1, w2, w3)
             @test is_manifold_point(M, median(M, x, w; kwargs...); atol = 10^-9)
             @test isapprox(M, median(M, x, w; kwargs...), y; atol = 10^-4)
-            @test is_manifold_point(M, median(M, x, w; shuffle_rng=rng, kwargs...); atol = 10^-9)
-            @test isapprox(M, median(M, x, w; shuffle_rng = rng, kwargs...), y; atol = 10^-4)
         end
         @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
     end
@@ -164,7 +158,7 @@ end
             n=3
             x = [ exp(M,p,π/6*[cos(α), sin(α), 0.]) for α = range(0,2*π - 2*π/n, length=n) ]
             test_mean(M, x)
-            test_median(M, x; rng = MersenneTwister(1212), atol = 10^-12)
+            test_median(M, x; atol = 10^-12)
             test_var(M, x)
             test_std(M, x)
         end
@@ -172,19 +166,19 @@ end
         @testset "zero variance" begin
             x = fill([0.,0.,1.], 5)
             test_mean(M, x, [0.,0.,1.])
-            test_median(M, x, [0.,0.,1.]; rng = MersenneTwister(1212), atol = 10^-12)
+            test_median(M, x, [0.,0.,1.]; atol = 10^-12)
             test_var(M, x, 0.0)
             test_std(M, x, 0.0)
         end
 
         @testset "two points" begin
-            x = [ [1., 0., 0.], [0., 1., 0.] ]
+            x = [ [1., 0., 0.], [1.0, 1.0, 0.0] / √2, [0., 1., 0.] ]
             θ = π / 4
-            @test isapprox(M, mean(M, x), geodesic(M, x[1], x[2], θ))
+            @test isapprox(M, mean(M, x), geodesic(M, x[1], x[3], θ))
             test_mean(M, x, [1.0, 1.0, 0.0] / √2)
-            test_median(M, x, [1.0, 1.0, 0.0] / √2; rng = MersenneTwister(1212), atol = 10^-12)
-            test_var(M, x, θ^2 * 2)
-            test_std(M, x, θ * √2)
+            test_median(M, x, [1.0, 1.0, 0.0] / √2; atol = 10^-12)
+            test_var(M, x, θ^2)
+            test_std(M, x, θ)
         end
     end
 
@@ -197,7 +191,7 @@ end
             vx = vcat(x...)
 
             test_mean(M, x, mean(x))
-            test_median(M, x; rng = MersenneTwister(1212), atol = 10^-12)
+            test_median(M, x; atol = 10^-12)
             test_var(M, x, var(vx))
             test_std(M, x, std(vx))
 
@@ -240,7 +234,7 @@ end
                 @test std(M,x,w) ≈ std(x,w)
 
                 test_mean(M, x)
-                test_median(M, x; rng = MersenneTwister(1212), atol = 10^-12)
+                test_median(M, x; atol = 10^-12)
                 test_var(M, x)
                 test_std(M, x)
             end
@@ -251,15 +245,13 @@ end
                 w = pweights(  ones(length(x)) / length(x)  )
                 @test mean(M,x) ≈ mean(x)
                 @test mean(M,x,w) ≈ [mean(vx,w)]
-                @test median(M,x; shuffle_rng = MersenneTwister(1212), atol = 10^-12) ≈ [median(vx)]
-                @test median(M,x,w; shuffle_rng = MersenneTwister(1212), atol = 10^-12) ≈ [median(vx,w)]
                 @test var(M,x) ≈ var(vx)
                 @test var(M,x,w) ≈ var(vx,w)
                 @test std(M,x) ≈ std(vx)
                 @test std(M,x,w) ≈ std(vx,w)
 
                 test_mean(M, x)
-                test_median(M, x; rng = MersenneTwister(1212), atol = 10^-12)
+                test_median(M, x; atol = 10^-12)
                 test_var(M, x)
                 test_std(M, x)
             end
