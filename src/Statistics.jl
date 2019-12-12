@@ -106,7 +106,7 @@ function median!(M::Manifold, y, x::AbstractVector,
     yold = similar_result(M,median,y)
     copyto!(yold,y)
     order = collect(1:n)
-    (length(w) != n) && error("The number of weights ($(length(w))) does not match the number of points for the median ($(n)).")
+    (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     v = zero_tangent_vector(M,y)
     wv = convert(Vector, w) ./ w.sum
     for i=1:stop_iter
