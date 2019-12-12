@@ -48,10 +48,12 @@ function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = (n = leng
     copyto!(yold,y)
     v0 = zero_tangent_vector(M, y)
     v = map(_ -> copy(v0), x)
+    wreg = convert(Vector, w) ./ (2 * w.sum)
     for i=1:stop_iter
         copyto!(yold,y)
         log!.(Ref(M), v, Ref(yold), x)
-        exp!(M, y, yold, sum( values(w).*v ) / 2 )
+        vreg = sum(wreg .* v)
+        exp!(M, y, yold, vreg)
         isapprox(M,y,yold; kwargs...) && break
     end
     return y
