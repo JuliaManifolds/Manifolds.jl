@@ -59,7 +59,7 @@ function test_median(M, x, yexp = nothing; rng=GLOBAL_RNG, kwargs...)
 
         y2 = median(M, x; shuffle_rng=rng, kwargs...)
         @test is_manifold_point(M, y2; atol = 10^-9)
-        @test isapprox(M, y, y2; atol = 10^-5)
+        @test isapprox(M, y, y2; atol = 10^-4)
     end
 
     @testset "median weighted" begin
@@ -70,9 +70,9 @@ function test_median(M, x, yexp = nothing; rng=GLOBAL_RNG, kwargs...)
         y = median(M, x; kwargs...)
         for w in (w1, w2, w3)
             @test is_manifold_point(M, median(M, x, w; kwargs...); atol = 10^-9)
-            @test isapprox(M, median(M, x, w; kwargs...), y; atol = 10^-5)
+            @test isapprox(M, median(M, x, w; kwargs...), y; atol = 10^-4)
             @test is_manifold_point(M, median(M, x, w; shuffle_rng=rng, kwargs...); atol = 10^-9)
-            @test isapprox(M, median(M, x, w; shuffle_rng = rng, kwargs...), y; atol = 10^-5)
+            @test isapprox(M, median(M, x, w; shuffle_rng = rng, kwargs...), y; atol = 10^-4)
         end
         @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
     end
@@ -162,7 +162,7 @@ end
         @testset "consistency" begin
             p = [0.,0.,1.]
             n=3
-            x = [ exp(M,p,2/n*[cos(α), sin(α), 0.]) for α = range(0,2*π - 2*π/n, length=n) ]
+            x = [ exp(M,p,π/6*[cos(α), sin(α), 0.]) for α = range(0,2*π - 2*π/n, length=n) ]
             test_mean(M, x)
             test_median(M, x; rng = MersenneTwister(1212), atol = 10^-12)
             test_var(M, x)
