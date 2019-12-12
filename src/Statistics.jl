@@ -29,7 +29,7 @@ The algorithm is further described in
 > doi: [10.1137/12086282X](https://doi.org/10.1137/12086282X),
 > arxiv: [1201.0925](https://arxiv.org/abs/1201.0925)
 """
-function mean(M::Manifold, x::AbstractVector, w::AbstractWeights = Weights(ones(length(x)), length(x)); x0 = x[1], kwargs...)
+function mean(M::Manifold, x::AbstractVector, w::AbstractWeights = (n = length(x); Weights(ones(n), n)); x0 = x[1], kwargs...)
     y = similar_result(M, mean, x0)
     copyto!(y,x0)
     return mean!(M, y, x, w; kwargs...)
@@ -40,7 +40,7 @@ end
 computes the [`mean`](@ref) in-place in `y` where the initial value of `y` is
 the starting point of the algorithm.
 """
-function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = Weights(ones(length(x)), length(x));
+function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = (n = length(x); Weights(ones(n), n));
             stop_iter=100,
             kwargs...
         ) where {T}
@@ -58,7 +58,7 @@ function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = Weights(o
 end
 
 @doc doc"""
-    median(M, x, weights=1/n*ones(n); stop_iter=10000, shuffle=nothing)
+    median(M, x, weights=Weights(ones(n)); stop_iter=10000, shuffle=nothing)
 
 computes the Riemannian median of the vector `x`  of `n` points on the
 [`Manifold`](@ref) `M`. This function is nonsmooth (i.e nondifferentiable) and
@@ -85,7 +85,7 @@ The algorithm is further described in Algorithm 4.3 and 4.4 in
 > doi: [10.1137/140953393](https://doi.org/10.1137/140953393),
 > arxiv: [1210.2145](https://arxiv.org/abs/1210.2145)
 """
-function median(M::Manifold, x::AbstractVector, w::AbstractWeights = Weights(ones(length(x)), length(x)); x0=x[1], kwargs...)
+function median(M::Manifold, x::AbstractVector, w::AbstractWeights = (n = length(x); Weights(ones(n), n)); x0=x[1], kwargs...)
     y = similar_result(M, median, x[1])
     copyto!(y,x0)
     return median!(M, y, x, w; kwargs...)
@@ -97,7 +97,7 @@ computes the [`median`](@ref) in-place in `y` where the initial value of `y` is
 the starting point of the algorithm.
 """
 function median!(M::Manifold, y, x::AbstractVector,
-    w::AbstractWeights = Weights(ones(length(x)), length(x));
+    w::AbstractWeights = (n = length(x); Weights(ones(n), n));
     stop_iter=100000,
     shuffle_rng::Union{Nothing,AbstractRNG} = nothing,
     kwargs...
