@@ -101,6 +101,7 @@ function median!(M::Manifold, y, x::AbstractVector,
 ) where {T}
     n = length(x)
     yold = similar_result(M,median,y)
+    ytmp = copy(yold)
     (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     v = zero_tangent_vector(M,y)
     wv = convert(Vector, w) ./ w.sum
@@ -110,7 +111,8 @@ function median!(M::Manifold, y, x::AbstractVector,
         for j in 1:n
             @inbounds t = min( λ * wv[j] / distance(M,y,x[j]), 1. )
             @inbounds log!(M, v, y, x[j])
-            y = exp(M, y, v, t)
+            exp!(M, ytmp, y, v, t)
+            copyto!(y,ytmp)
         end
         isapprox(M, y, yold; kwargs...) && break
     end
