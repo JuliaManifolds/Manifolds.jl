@@ -1,5 +1,5 @@
 using Random: shuffle!
-using StatsBase: AbstractWeights, Weights, values, varcorrection
+using StatsBase: AbstractWeights, Weights, ProbabilityWeights, values, varcorrection
 @doc doc"""
     mean(M, x, weights=Weights(ones(n)); x0=x[1], stop_iter=100, kwargs... )
 
@@ -123,7 +123,7 @@ function median!(M::Manifold, y, x::AbstractVector,
     return y
 end
 @doc doc"""
-    var(M,x,w=Weights(ones(n),n),m=nothing; corrected=false, kwargs...)
+    var(M,x,w=ProbabilityWeights(ones(n),n),m=nothing; corrected=false, kwargs...)
 
 compute the (weighted) variance of a `Vector` `x` of `n` data points on the
 [`Manifold`](@ref) `M`, i.e.
@@ -151,12 +151,7 @@ function var(
     wv = convert(Vector, w)
     sqdist = wv .* distance.(Ref(M), Ref(m), x) .^ 2
     s = sum(sqdist)
-    if w isa Weights
-        n = length(x)
-        c = varcorrection(n, corrected) * n / w.sum  # This is what `UnitWeights` is for but not released yet
-    else
-        c = varcorrection(w, corrected)
-    end
+    c = varcorrection(w, corrected)
     return c * s
 end
 @doc doc"""
@@ -184,11 +179,11 @@ function var(
         m = mean(M, x; kwargs...)
     end
     n = length(x)
-    w = Weights(ones(n), n)
+    w = ProbabilityWeights(ones(n), n)
     return var(M, x, w, m; corrected = corrected, kwargs...)
 end
 @doc doc"""
-    std(M,x,w=Weights(ones(n),n),m=nothing; corrected=false, kwargs...)
+    std(M,x,w=ProbabilityWeights(ones(n),n),m=nothing; corrected=false, kwargs...)
 
 compute the (weighted) standard deviation of a `Vector` `x` of `n` data points on the
 [`Manifold`](@ref) `M`, i.e.
@@ -243,7 +238,7 @@ compute the [`mean`](@ref) `m` and the [`var`](@ref)iance `v` simultaneously.
 function mean_and_var(
     M::Manifold,
     x::AbstractVector,
-    w::AbstractWeights = Weights(ones(length(x)), length(x));
+    w::AbstractWeights = (n = length(x); ProbabilityWeights(ones(n), n));
     kwargs...
 )
     m = mean(M, x, w; kwargs...)
