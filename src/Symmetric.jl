@@ -159,17 +159,17 @@ end
 Checks whether `x` is a valid point in the [`SymmetricMatrices`]{N,T} `M`, i.e. is a symmetric matrix
 of size `(N,N)` with values of type `T`.
 """
-function is_manifold_point(M::SymmetricMatrices{N,T},x; kwargs...) where {N,T}
+function check_manifold_point(M::SymmetricMatrices{N,T},x) where {N,T}
     if (T <: eltype(x))
-        throw(DomainError(eltype(x),"The matrix $(x) does not lie on $M, since its values are not of type $T."))
+        return DomainError(eltype(x),"The matrix $(x) does not lie on $M, since its values are not of type $T.")
     end
-    if size(x) != manifold_dimension(M)
-        throw(DomainError(size(x),"The point $(x) does not lie on $M, since its size does not match manifold_dimension(M)."))
+    if size(x) != (N,N)
+        return DomainError(size(x),"The point $(x) does not lie on $M, since its size does not match manifold_dimension(M).")
     end
     if x != transpose(x)
-        throw(DomainError(norm(x-transpose(x)), "The point $(x) does not lie on $M, since it is not symmetric."))
+        return DomainError(norm(x-transpose(x)), "The point $(x) does not lie on $M, since it is not symmetric.")
     end
-    return true
+    return nothing
 end
 
 """
@@ -178,20 +178,22 @@ end
 Checks whether `v` is a tangent vector to `x` on the [`SymmetricMatrices`](@ref){N,T} matrices `M`, i.e.
 after [`is_manifold_point`](@ref)`(M,x)`, `v` has to be a symmetric matrix of dimension `(N,N)`.
 """
-function is_tangent_vector(M::SymmetricMatrices{N,T},x,v; kwargs...) where {N,T}
-    is_manifold_point(M,x)
-    if (T <: eltype(v))
-        throw(DomainError(eltype(v),"The matrix $(v) is not a tangent to a point on $M, since its values are not of type $T."))
+function check_tangent_vector(M::SymmetricMatrices{N,T},x,v; kwargs...) where {N,T}
+    if (check_manifold_point(M,x) != nothing)
+        return check_manifold_point(M,x)
     end
-    if size(v) != manifold_dimension(M)
-        throw(DomainError(size(v),
-            "The vector $(v) is not a tangent to a point on $(M) since its size does not match manifold_dimension(M)."))
+    
+    if (T <: eltype(v))
+        return DomainError(eltype(v),"The matrix $(v) is not a tangent to a point on $M, since its values are not of type $T.")
+    end
+    if size(v) != (N,N)
+        return DomainError(size(v),
+            "The vector $(v) is not a tangent to a point on $(M) since its size does not match manifold_dimension(M).")
     end
     if v != transpose(v)
-        throw(DomainError(norm(v-transpose(v)),
-            "The vector $(v) is not a tangent vector to $(x) on $(M), since it is not symmetric."
-        ))
+        return DomainError(norm(v-transpose(v)),
+            "The vector $(v) is not a tangent vector to $(x) on $(M), since it is not symmetric.")
     end
-    return true
+    return nothing
 end
 
