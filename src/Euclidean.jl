@@ -65,7 +65,7 @@ compute the Euclidean distance between two points on the [`Euclidean`](@ref)
 manifold `M`, i.e. for vectors it's just the norm of the difference, for matrices
 and higher order arrays, the matrix and ternsor Frobenius norm, respectively.
 """
-distance(::Euclidean, x, y) = norm(x-y)
+distance(::Euclidean, x, y) = norm(x .- y)
 """
     norm(M::Euclidean,x,v)
 
