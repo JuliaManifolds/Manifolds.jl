@@ -171,7 +171,7 @@ end
             test_std(M, x, 0.0)
         end
 
-        @testset "two points" begin
+        @testset "three points" begin
             x = [ [1., 0., 0.], [1.0, 1.0, 0.0] / √2, [0., 1., 0.] ]
             θ = π / 4
             @test isapprox(M, mean(M, x), geodesic(M, x[1], x[3], θ))
