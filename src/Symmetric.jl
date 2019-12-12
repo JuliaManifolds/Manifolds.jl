@@ -154,19 +154,21 @@ end
 
 
 @doc doc"""
-    is_manifold_point(M::SymmetricMatrices,x)
+    is_manifold_point(M::SymmetricMatrices,x; kwargs...)
 
 Checks whether `x` is a valid point in the [`SymmetricMatrices`]{N,T} `M`, i.e. is a symmetric matrix
 of size `(N,N)` with values of type `T`.
+
+The tolerance for the symmetry of `x` can be set using `kwargs`.
 """
-function check_manifold_point(M::SymmetricMatrices{N,T},x) where {N,T}
+function check_manifold_point(M::SymmetricMatrices{N,T},x; kwargs...) where {N,T}
     if (T <: eltype(x))
         return DomainError(eltype(x),"The matrix $(x) does not lie on $M, since its values are not of type $T.")
     end
     if size(x) != (N,N)
         return DomainError(size(x),"The point $(x) does not lie on $M, since its size does not match manifold_dimension(M).")
     end
-    if x != transpose(x)
+    if !isapprox(norm(x-transpose(x)),0.; kwargs...)
         return DomainError(norm(x-transpose(x)), "The point $(x) does not lie on $M, since it is not symmetric.")
     end
     return nothing
@@ -177,12 +179,14 @@ end
 
 Checks whether `v` is a tangent vector to `x` on the [`SymmetricMatrices`](@ref){N,T} matrices `M`, i.e.
 after [`is_manifold_point`](@ref)`(M,x)`, `v` has to be a symmetric matrix of dimension `(N,N)`.
+
+The tolerance for the symmetry of `x` can be set using `kwargs`.
 """
 function check_tangent_vector(M::SymmetricMatrices{N,T},x,v; kwargs...) where {N,T}
-    if (check_manifold_point(M,x) != nothing)
-        return check_manifold_point(M,x)
+    if (check_manifold_point(M,x;kwargs...) != nothing)
+        return check_manifold_point(M,x;kwargs...)
     end
-    
+
     if (T <: eltype(v))
         return DomainError(eltype(v),"The matrix $(v) is not a tangent to a point on $M, since its values are not of type $T.")
     end
@@ -190,7 +194,7 @@ function check_tangent_vector(M::SymmetricMatrices{N,T},x,v; kwargs...) where {N
         return DomainError(size(v),
             "The vector $(v) is not a tangent to a point on $(M) since its size does not match manifold_dimension(M).")
     end
-    if v != transpose(v)
+    if !isapprox(norm(v-transpose(v)),0.; kwargs...)
         return DomainError(norm(v-transpose(v)),
             "The vector $(v) is not a tangent vector to $(x) on $(M), since it is not symmetric.")
     end
