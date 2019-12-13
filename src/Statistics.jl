@@ -299,7 +299,7 @@ function var(
         m = mean(M, x; kwargs...)
     end
     n = length(x)
-    w = ProbabilityWeights(ones(n), n)
+    w = _var_weights(n)
     return var(M, x, w, m; corrected = corrected, kwargs...)
 end
 @doc doc"""
@@ -375,7 +375,7 @@ function mean_and_var(
     kwargs...
 )
     n = length(x)
-    w = ProbabilityWeights(ones(n), n)
+    w = _var_weights(n)
     m = mean(M, x, w; kwargs...)
     v = var(M, x, w, m; corrected = corrected, kwargs...)
     return m, v
