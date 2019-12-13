@@ -89,6 +89,12 @@ using Random: AbstractRNG
 using UnsafeArrays
 using Einsum: @einsum
 
+abstract type AbstractMethod end
+
+struct GradientMethod <: AbstractMethod end
+
+struct CyclicProximalPointMethod <: AbstractMethod end
+
 hat!(M::Manifold, v, x, vⁱ) = error("hat! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), and matrix $(typeof(v))")
 
 @doc doc"""
