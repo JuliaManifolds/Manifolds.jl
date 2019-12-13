@@ -274,6 +274,7 @@ function var(
     c = varcorrection(w, corrected)
     return c * s
 end
+
 @doc doc"""
     var(M, x, m=nothing; corrected=true, kwargs...)
 
@@ -302,6 +303,7 @@ function var(
     w = _var_weights(n)
     return var(M, x, w, m; corrected = corrected, kwargs...)
 end
+
 @doc doc"""
     std(M, x, w::AbstractWeights, m=nothing; corrected=false, kwargs...)
 
@@ -327,6 +329,7 @@ function std(
 )
     return sqrt(var(M, x, w, m; corrected = corrected, kwargs...))
 end
+
 @doc doc"""
     std(M, x, m=nothing; corrected=true, kwargs...)
 
