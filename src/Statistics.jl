@@ -1,4 +1,8 @@
 using StatsBase: AbstractWeights, Weights, ProbabilityWeights, values, varcorrection
+
+_mean_weights(n::Int) = Weights(ones(n), n)
+_var_weights(n::Int) = ProbabilityWeights(ones(n), n)
+
 @doc doc"""
     mean(M, x, weights=Weights(ones(n)); x0=x[1], stop_iter=100, kwargs... )
 
