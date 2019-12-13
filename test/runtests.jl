@@ -13,3 +13,4 @@ include("power_manifold.jl")
 include("vector_bundle.jl")
 
 include("metric.jl")
+include("statistics.jl")

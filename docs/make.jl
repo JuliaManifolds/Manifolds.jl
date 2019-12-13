@@ -27,6 +27,7 @@ makedocs(
                 "Metric manifold" => "manifolds/metric.md"
             ]
         ],
+        "Statistics" => "statistics.md",
         "Distributions" => "distributions.md",
         "Library" => [
             "Public" => "lib/public.md",
@@ -37,4 +38,5 @@ makedocs(
 
 deploydocs(
     repo = "github.com/JuliaNLSolvers/Manifolds.jl.git",
+    push_preview = true,
 )
