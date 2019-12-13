@@ -1,3 +1,5 @@
+using StatsBase: AbstractWeights
+
 @doc doc"""
     Euclidean{T<:Tuple} <: Manifold
 
@@ -63,7 +65,7 @@ compute the Euclidean distance between two points on the [`Euclidean`](@ref)
 manifold `M`, i.e. for vectors it's just the norm of the difference, for matrices
 and higher order arrays, the matrix and ternsor Frobenius norm, respectively.
 """
-distance(::Euclidean, x, y) = norm(x-y)
+distance(::Euclidean, x, y) = norm(x .- y)
 """
     norm(M::Euclidean,x,v)
 
@@ -182,4 +184,31 @@ projected to tangent space at `x`.
 function normal_tvector_distribution(M::Euclidean{Tuple{N}}, x, σ) where N
     d = Distributions.MvNormal(zero(x), σ)
     return ProjectedFVectorDistribution(TangentBundleFibers(M), x, d, project_vector!, x)
+end
+
+mean(M::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = mean(x, w)
+mean(M::Euclidean, x::AbstractVector; kwargs...) = mean(x)
+
+median(M::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = median(x,w)
+
+function var(
+    M::Euclidean{Tuple{1}},
+    x::AbstractVector{<:Number},
+    w::AbstractWeights,
+    m = mean(M, x, w);
+    corrected = false,
+    kwargs...
+)
+    return var(x, w; mean=m, corrected=corrected)
+end
+
+function std(
+    M::Euclidean{Tuple{1}},
+    x::AbstractVector{<:Number},
+    w::AbstractWeights,
+    m = mean(M, x, w);
+    corrected = false,
+    kwargs...
+)
+    return std(x, w; mean=m, corrected=corrected)
 end

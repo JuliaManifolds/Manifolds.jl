@@ -19,6 +19,14 @@ import Base: isapprox,
     +,
     -,
     *
+import Statistics: mean,
+    mean!,
+    median,
+    median!,
+    var,
+    std
+import StatsBase: mean_and_std,
+    mean_and_var
 import LinearAlgebra: dot,
     norm,
     det,
@@ -67,7 +75,8 @@ import ManifoldsBase: base_manifold,
     vector_transport_to,
     vector_transport_to!,
     zero_tangent_vector,
-    zero_tangent_vector!
+    zero_tangent_vector!,
+    similar_result
 
 using Requires
 using StaticArrays
@@ -141,6 +150,8 @@ include("CholeskySpace.jl")
 include("Rotations.jl")
 include("Sphere.jl")
 include("SymmetricPositiveDefinite.jl")
+
+include("Statistics.jl")
 
 function __init__()
     @require ForwardDiff="f6369f11-7733-5829-9624-2563aa707210" begin
@@ -216,6 +227,12 @@ export base_manifold,
     log,
     log!,
     manifold_dimension,
+    mean,
+    mean!,
+    mean_and_var,
+    mean_and_std,
+    median,
+    median!,
     norm,
     normal_tvector_distribution,
     project_point,
@@ -226,9 +243,11 @@ export base_manifold,
     representation_size,
     retract,
     retract!,
+    std,
     submanifold,
     submanifold_component,
     tangent_orthonormal_basis,
+    var,
     vector_space_dimension,
     vector_transport_along,
     vector_transport_along!,
