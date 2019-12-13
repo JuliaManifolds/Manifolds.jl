@@ -80,7 +80,6 @@ function check_tangent_vector(G::Grassmann{N,K,T},x,v; kwargs...) where {N,K,T}
         return DomainError(size(v),
             "The matrix $(v) is does not lie in the tangent space of $(x) on the Grassmann manifold of dimension ($(N),$(K)), since its dimensions are wrong.")
     end
-    print("Testing $(x) and $(v)")
     if !isapprox(x'*v + v'*x, zeros(K,K); kwargs...)
         return DomainError(norm(x'*v + v'*x),
             "The matrix $(v) is does not lie in the tangent space of $(x) on the Grassmann manifold of dimension ($(N),$(K)), since x'v + v'x is not the zero matrix.")
@@ -101,13 +100,12 @@ where
 $b_{i}=\begin{cases} 0 & \text{if} \; S_i≧1 \\ \operatorname{acos}(S_i) & \, \text{if} \; S_i<1 \end{cases}.$
 """
 function distance(M::Grassmann{N,K,T}, x, y) where {N,K,T}
-    if x==y
-		return 0
+    if x ≈ y
+		return 0.
   	else
-    	a = svd(x'*y).S
-    	b = zero(a)
-    	b[a.<1] = (acos.(a[a.<1])).^2
-		return sqrt(sum(b))
+        a = svd(x'*y).S
+        a[a .> 1] .= 1
+		return sqrt(sum( (acos.(a)).^2 ))
   	end
 end
 
@@ -131,10 +129,14 @@ where $Q$ of the QR decomposition $z=QR$ of $z$. This last step is for numerical
 stability reasons.
 """
 function exp!(M::Grassmann{N,K,T},y, x, v) where {N,K,T}
+    if norm(M,x,v) ≈ 0
+        return (y .= x)
+    end
     d = svd(v)
-    z =  x * d.V * cos.(Diagonal(d.S)) * (d.V)' + (d.U) * sin.(Diagonal(d.S)) * (d.V)'
+    z =  x * d.V * cos.(Diagonal(d.S)) * d.Vt + d.U * Diagonal(sin.(d.S)) * d.Vt
     # reorthonormalize
     y = copyto!(y, Array(qr(z).Q) )
+    return y
 end
 
 @doc doc"""
@@ -171,7 +173,7 @@ compute the inverse retraction valid for the [`QRRetraction`](@ref) as
 """
 inverse_retract!(::Grassmann{N,K,T}, v, x, y, ::QRInverseRetraction) where {N,K,T} = ( v .= y/(x'*y) - x)
 
-isapprox(M::Grassmann{N,K,T}, x, y; kwargs...) where {N,K,T} = isapprox(distance(M,x,y),0; kwargs...)
+isapprox(M::Grassmann{N,K,T}, x, y; kwargs...) where {N,K,T} = isapprox(distance(M,x,y),0.; kwargs...)
 
 @doc doc"""
     log!(M, v, x, y)
@@ -192,8 +194,8 @@ and the $\operatorname{atan}$ is meant elementwise.
 function log!(M::Grassmann{N,K,T}, v, x, y) where {N,K,T}
     z = y'*x
   	if det(z)≠0
-        d = svd( z\(y' - z*x'), full = false)
-        v .= d.V * atan.(Diagonal(d.S)) * (d.U')
+        d = svd( (z\(y' - z*x'))', full = false)
+        v .= d.U * Diagonal(atan.(d.S)) * d.Vt
         return v   
   	else
    		throw( DomainError(rank(y'x),"The points x=$x and y=$y are antipodal (y'x has no full rank), thus these input parameters are invalid.") )

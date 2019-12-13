@@ -11,25 +11,26 @@ include("utils.jl")
         @test !is_manifold_point(M,[1., 0., 0., 0.])
         @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0., 0., 1., 0.])
     end
-    types = [ Matrix{Float32},
+    types = [ #Matrix{Float32},
               Matrix{Float64}
     ]
     for T in types
         @testset "Type $T" begin
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            sp = [ 1.0 0.0; 0.0 1.0; 1.0 1.0]
-            y = svd(sp).U*svd(sp).Vt
-            sp2 = [ 1.0 1.0; 1.0 0.0; 0.0 1.0]
-            z = svd(sp2).U*svd(sp2).Vt
+            v = [0.0 0.0; 0.0 0.0; 0.0 1.0]
+            y = exp(M,x,v)
+            w = [0.0 0.0; 1.0 -1.0; 1.0 0.0]
+            z = exp(M,x,w)
             pts = convert.(T, [x,y,z])
             test_manifold(M,
                           pts,
+                          test_exp_log = false,
                           test_project_tangent = true,
                           test_vector_transport = false,
                           test_forward_diff = false,
                           test_reverse_diff = false,
                           retraction_methods = [PolarRetraction(), QRRetraction()],
-                          inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()]
+                          inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()],
             )
         end
     end
