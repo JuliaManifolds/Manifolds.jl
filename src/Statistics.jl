@@ -121,19 +121,38 @@ function mean!(
 end
 
 @doc doc"""
-    median(M, x, weights=Weights(ones(n)); stop_iter=10000)
+    median(M::Manifold, x::AbstractVector; kwargs...)
+    median(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
 
-computes the Riemannian median of the vector `x`  of `n` points on the
-[`Manifold`](@ref) `M`. This function is nonsmooth (i.e nondifferentiable) and
-uses a cyclic proximal point scheme. Optionally one can provide
-weights $w_i$ for the weighted Riemannian median. The general formula to compute
-the minimizer reads
+Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
+[`Manifold`](@ref) `M`, defined as the point that satisfies the minimizer
 ````math
-\argmin_{y\in\mathcal M}\sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
+\argmin_{y\in\mathcal M} \frac{1}{\sum w} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
 ````
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
+This function is nonsmooth (i.e nondifferentiable).
 
-Optionally you can provide `x0`, the starting point (by default set to the first
+In the general case, the [`CyclicProximalPointMethod`](@ref) is used to compute the
+median. However, this default may overloaded for specific manifolds.
+
+    median(M::Manifold, x::AbstractVector, method::AbstractMethod; kwargs...)
+    median(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod; kwargs...)
+
+Compute the median using the specified `method`.
+
+    median(
+        M::Manifold,
+        x::AbstractVector,
+        w::AbstractWeights,
+        method::CyclicProximalPointMethod;
+        x0=x[1],
+        stop_iter=1000000,
+        kwargs...
+    )
+
+Compute the median using [`CyclicProximalPointMethod`](@ref).
+
+Optionally. provide `x0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform and
 the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal change
 between two iterates is small. For more stopping criteria
@@ -145,22 +164,64 @@ The algorithm is further described in Algorithm 4.3 and 4.4 in
 > doi: [10.1137/140953393](https://doi.org/10.1137/140953393),
 > arxiv: [1210.2145](https://arxiv.org/abs/1210.2145)
 """
-function median(M::Manifold, x::AbstractVector, w::AbstractWeights = (n = length(x); Weights(ones(n), n)); x0=x[1], kwargs...)
-    y = similar_result(M, median, x[1])
-    copyto!(y,x0)
-    return median!(M, y, x, w; kwargs...)
-end
+median
+
 @doc doc"""
-    median!(M,y,x,w)
+    median!(M::Manifold, y, x::AbstractVector; kwargs...)
+    median!(M::Manifold, y, x::AbstractVector, w::AbstractWeights; kwargs...)
+    median!(M::Manifold, y, x::AbstractVector, method::AbstractMethod; kwargs...)
+    median!(M::Manifold, y, x::AbstractVector, w::AbstractWeights, method::AbstractMethod; kwargs...)
 
 computes the [`median`](@ref) in-place in `y` where the initial value of `y` is
 the starting point of the algorithm.
 """
-function median!(M::Manifold, y, x::AbstractVector,
-    w::AbstractWeights = (n = length(x); Weights(ones(n), n));
+median!
+
+function median(M::Manifold, x::AbstractVector; kwargs...)
+    y = similar_result(M, median, x[1])
+    return median!(M, y, x; kwargs...)
+end
+
+function median(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
+    y = similar_result(M, median, x[1])
+    return median!(M, y, x, w; kwargs...)
+end
+
+function median(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod; kwargs...)
+    y = similar_result(M, median, x[1])
+    return median!(M, y, x, w, method; kwargs...)
+end
+
+function median(M::Manifold, x::AbstractVector, method::AbstractMethod; kwargs...)
+    y = similar_result(M, median, x[1])
+    return median!(M, y, x, median; kwargs...)
+end
+
+function median!(M::Manifold, y, x::AbstractVector; kwargs...)
+    w = _mean_weights(length(x))
+    return median!(M, y, x, w; kwargs...)
+end
+
+function median!(M::Manifold, y, x::AbstractVector, method::AbstractMethod; kwargs...)
+    w = _mean_weights(length(x))
+    return median!(M, y, x, w, method; kwargs...)
+end
+
+function median!(M::Manifold, y, x::AbstractVector, w::AbstractWeights; kwargs...)
+    return median!(M, y, x, w, CyclicProximalPointMethod(); kwargs...)
+end
+
+function median!(
+    M::Manifold,
+    y,
+    x::AbstractVector,
+    w::AbstractWeights,
+    ::CyclicProximalPointMethod;
+    x0=x[1],
     stop_iter=1000000,
     kwargs...
 ) where {T}
+    x0 === nothing || copyto!(y, x0)
     n = length(x)
     yold = similar_result(M,median,y)
     ytmp = copy(yold)
@@ -180,6 +241,7 @@ function median!(M::Manifold, y, x::AbstractVector,
     end
     return y
 end
+
 @doc doc"""
     var(M, x, w::AbstractWeights, m=nothing; corrected=false, kwargs...)
 
