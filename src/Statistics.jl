@@ -4,22 +4,38 @@ _mean_weights(n::Int) = Weights(ones(n), n)
 _var_weights(n::Int) = ProbabilityWeights(ones(n), n)
 
 @doc doc"""
-    mean(M, x, weights=Weights(ones(n)); x0=x[1], stop_iter=100, kwargs... )
+    mean(M::Manifold, x::AbstractVector; kwargs...)
+    mean(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
 
-computes the Riemannian center of mass also known as Karcher mean of the vector
-`x` of `n` points on the [`Manifold`](@ref) `M`. This function
-uses the gradient descent scheme. Optionally one can provide
-weights $w_i$ for the weighted Riemannian center of mass.
-The general formula to compute the minimizer reads
+Compute the (optionally weighted) Riemannian center of mass also known as
+Karcher mean of the vector `x` of points on the [`Manifold`](@ref) `M`, defined
+as the point that satisfies the minimizer
 ````math
-\argmin_{y\in\mathcal M} \frac{1}{2}\sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
+\argmin_{y\in\mathcal M} \frac{1}{2 \sum w}\sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
 ````
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 
-Note that any provided weights are normalized to
-$\displaystyle\sum_{i=1}^n w_i=1$.
+In the general case, the [`GradientMethod`](@ref) is used to compute the mean.
+However, this default may overloaded for specific manifolds.
 
-Optionally you can provide `x0`, the starting point (by default set to the first
+    mean(M::Manifold, x::AbstractVector, method::AbstractMethod; kwargs...)
+    mean(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod; kwargs...)
+
+Compute the mean using the specified `method`.
+
+    mean(
+        M::Manifold,
+        x::AbstractVector,
+        w::AbstractWeights,
+        method::GradientMethod;
+        x0=x[1],
+        stop_iter=100,
+        kwargs...
+    )
+
+Compute the mean using the gradient descent scheme [`GradientMethod`](@ref).
+
+Optionally. provide `x0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform and
 the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal change
 between two iterates is small. For more stopping criteria
@@ -32,21 +48,63 @@ The algorithm is further described in
 > doi: [10.1137/12086282X](https://doi.org/10.1137/12086282X),
 > arxiv: [1201.0925](https://arxiv.org/abs/1201.0925)
 """
-function mean(M::Manifold, x::AbstractVector, w::AbstractWeights = (n = length(x); Weights(ones(n), n)); x0 = x[1], kwargs...)
-    y = similar_result(M, mean, x0)
-    copyto!(y,x0)
+mean
+
+@doc doc"""
+    mean!(M::Manifold, y, x::AbstractVector; kwargs...)
+    mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights; kwargs...)
+    mean!(M::Manifold, y, x::AbstractVector, method::AbstractMethod; kwargs...)
+    mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights, method::AbstractMethod; kwargs...)
+
+Compute the [`mean`](@ref) in-place in `y`.
+"""
+mean!
+
+function mean(M::Manifold, x::AbstractVector; kwargs...)
+    y = similar_result(M, mean, x[1])
+    return mean!(M, y, x; kwargs...)
+end
+
+function mean(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
+    y = similar_result(M, mean, x[1])
     return mean!(M, y, x, w; kwargs...)
 end
-@doc doc"""
-    mean!(M,y,x,w)
 
-computes the [`mean`](@ref) in-place in `y` where the initial value of `y` is
-the starting point of the algorithm.
-"""
-function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights = (n = length(x); Weights(ones(n), n));
-            stop_iter=100,
-            kwargs...
-        ) where {T}
+function mean(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod; kwargs...)
+    y = similar_result(M, mean, x[1])
+    return mean!(M, y, x, w, method; kwargs...)
+end
+
+function mean(M::Manifold, x::AbstractVector, method::AbstractMethod; kwargs...)
+    y = similar_result(M, mean, x[1])
+    return mean!(M, y, x, method; kwargs...)
+end
+
+function mean!(M::Manifold, y, x::AbstractVector; kwargs...)
+    w = _mean_weights(length(x))
+    return mean!(M, y, x, w; kwargs...)
+end
+
+function mean!(M::Manifold, y, x::AbstractVector, method::AbstractMethod; kwargs...)
+    w = _mean_weights(length(x))
+    return mean!(M, y, x, w, method; kwargs...)
+end
+
+function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights; kwargs...)
+    return mean!(M, y, x, w, GradientMethod(); kwargs...)
+end
+
+function mean!(
+    M::Manifold,
+    y,
+    x::AbstractVector,
+    w::AbstractWeights,
+    ::GradientMethod;
+    x0 = x[1],
+    stop_iter=100,
+    kwargs...
+) where {T}
+    x0 === nothing || copyto!(y, x0)
     yold = similar_result(M, mean, y)
     copyto!(yold,y)
     v0 = zero_tangent_vector(M, y)
