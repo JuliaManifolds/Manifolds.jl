@@ -128,19 +128,19 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         retract!(M, new_pt, pts[1], tv1)
         @test is_manifold_point(M, new_pt)
         for x ∈ pts
-            @test isapprox(M, zero_tangent_vector(M, x), log(M, x, x);
+            @test isapprox(M, x, zero_tangent_vector(M, x), log(M, x, x);
                 atol = eps(eltype(x)) * exp_log_atol_multiplier,
-                rtol = exp_log_atol_multiplier > 0 ? sqrt(eps(eltype(x)))*exp_log_rtol_multiplier : 0
+                rtol = exp_log_atol_multiplier == 0. ? sqrt(eps(eltype(x)))*exp_log_rtol_multiplier : 0
             )
-            @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x);
+            @test isapprox(M, x, zero_tangent_vector(M, x), inverse_retract(M, x, x);
                 atol = eps(eltype(x)) * exp_log_atol_multiplier,
-                rtol = exp_log_atol_multiplier > 0 ? sqrt(eps(eltype(x)))*exp_log_rtol_multiplier : 0
+                rtol = exp_log_atol_multiplier == 0. ? sqrt(eps(eltype(x)))*exp_log_rtol_multiplier : 0.
             )
             for inv_retr_method ∈ inverse_retraction_methods
-                @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method);
-                atol = exp_log_atol_multiplier > 0 ? eps(eltype(x)) * exp_log_atol_multiplier : 0,
-                rtol = exp_log_atol_multiplier > 0 ? sqrt(eps(eltype(x)))*exp_log_rtol_multiplier : 0
-            )
+                @test isapprox(M, x, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method);
+                    atol = eps(eltype(x)) * exp_log_atol_multiplier,
+                    rtol = exp_log_atol_multiplier == 0 ? sqrt(eps(eltype(x)))*exp_log_rtol_multiplier : 0
+                )
             end
         end
         zero_tangent_vector!(M, tv1, pts[1])

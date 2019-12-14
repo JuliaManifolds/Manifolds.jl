@@ -133,7 +133,7 @@ function exp!(M::Grassmann{N,K,T},y, x, v) where {N,K,T}
         return (y .= x)
     end
     d = svd(v)
-    z =  x * d.V * cos.(Diagonal(d.S)) * d.Vt + d.U * Diagonal(sin.(d.S)) * d.Vt
+    z =  x * d.V * Diagonal(cos.(d.S)) * d.Vt + d.U * Diagonal(sin.(d.S)) * d.Vt
     # reorthonormalize
     y = copyto!(y, Array(qr(z).Q) )
     return y
@@ -193,13 +193,10 @@ and the $\operatorname{atan}$ is meant elementwise.
 """
 function log!(M::Grassmann{N,K,T}, v, x, y) where {N,K,T}
     z = y'*x
-  	if det(z)≠0
-        d = svd( (z\(y' - z*x'))', full = false)
-        v .= d.U * Diagonal(atan.(d.S)) * d.Vt
-        return v   
-  	else
-   		throw( DomainError(rank(y'x),"The points x=$x and y=$y are antipodal (y'x has no full rank), thus these input parameters are invalid.") )
-  	end
+    At = y' - z*x'
+    Bt = z\At
+    d = svd(Bt')
+    return (v .= d.U * Diagonal(atan.(d.S)) * d.Vt)
 end
 
 @doc doc"""
