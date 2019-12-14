@@ -63,8 +63,7 @@ papers:
 struct GeodesicInterpolationMethod <: AbstractMethod end
 
 @doc doc"""
-    mean(M::Manifold, x::AbstractVector; kwargs...)
-    mean(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
+    mean(M::Manifold, x::AbstractVector, [w::AbstractWeights]; kwargs...)
 
 Compute the (optionally weighted) Riemannian center of mass also known as
 Karcher mean of the vector `x` of points on the [`Manifold`](@ref) `M`, defined
@@ -77,8 +76,7 @@ where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 In the general case, the [`GradientMethod`](@ref) is used to compute the mean.
 However, this default may overloaded for specific manifolds.
 
-    mean(M::Manifold, x::AbstractVector, method::AbstractMethod; kwargs...)
-    mean(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod; kwargs...)
+    mean(M::Manifold, x::AbstractVector, [w::AbstractWeights], method::AbstractMethod; kwargs...)
 
 Compute the mean using the specified `method`.
 
@@ -110,10 +108,8 @@ The algorithm is further described in
 mean
 
 @doc doc"""
-    mean!(M::Manifold, y, x::AbstractVector; kwargs...)
-    mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights; kwargs...)
-    mean!(M::Manifold, y, x::AbstractVector, method::AbstractMethod; kwargs...)
-    mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights, method::AbstractMethod; kwargs...)
+    mean!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights]; kwargs...)
+    mean!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights], method::AbstractMethod; kwargs...)
 
 Compute the [`mean`](@ref) in-place in `y`.
 """
@@ -228,8 +224,7 @@ function mean!(
 end
 
 @doc doc"""
-    median(M::Manifold, x::AbstractVector; kwargs...)
-    median(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
+    median(M::Manifold, x::AbstractVector, [w::AbstractWeights]; kwargs...)
 
 Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
 [`Manifold`](@ref) `M`, defined as the point that satisfies the minimizer
@@ -242,8 +237,7 @@ This function is nonsmooth (i.e nondifferentiable).
 In the general case, the [`CyclicProximalPointMethod`](@ref) is used to compute the
 median. However, this default may overloaded for specific manifolds.
 
-    median(M::Manifold, x::AbstractVector, method::AbstractMethod; kwargs...)
-    median(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod; kwargs...)
+    median(M::Manifold, x::AbstractVector, [w::AbstractWeights], method::AbstractMethod; kwargs...)
 
 Compute the median using the specified `method`.
 
@@ -274,10 +268,8 @@ The algorithm is further described in Algorithm 4.3 and 4.4 in
 median
 
 @doc doc"""
-    median!(M::Manifold, y, x::AbstractVector; kwargs...)
-    median!(M::Manifold, y, x::AbstractVector, w::AbstractWeights; kwargs...)
-    median!(M::Manifold, y, x::AbstractVector, method::AbstractMethod; kwargs...)
-    median!(M::Manifold, y, x::AbstractVector, w::AbstractWeights, method::AbstractMethod; kwargs...)
+    median!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights]; kwargs...)
+    median!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights], method::AbstractMethod; kwargs...)
 
 computes the [`median`](@ref) in-place in `y` where the initial value of `y` is
 the starting point of the algorithm.
