@@ -586,12 +586,14 @@ function normal_rotation_distribution(M::Rotations{N}, x, σ::Real) where N
 end
 
 @doc doc"""
-    mean!(M::Rotations, y, x::AbstractVector, w::AbstractWeights; shuffle_rng=nothing, kwargs...)
+    mean(M::Rotations, x::AbstractVector, w::AbstractWeights; shuffle_rng=nothing, kwargs...)
 
 Compute the Riemannian mean of `x` using [`GeodesicInterpolationMethod`](@ref).
 If any `x` are not within $\frac{\pi}{2 \sqrt 2}$ of the estimated mean, then
 the estimate is used as the initial guess for the gradient method.
 """
+mean(::Rotations, args...)
+
 function mean!(M::Rotations, y, x::AbstractVector, w::AbstractWeights; shuffle_rng = nothing, kwargs...)
     mean!(M, y, x, w, GeodesicInterpolationMethod(); shuffle_rng = shuffle_rng, kwargs...)
     for i in eachindex(x)

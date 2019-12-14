@@ -75,7 +75,7 @@ between two iterates is small. For more stopping criteria check the
 
 The algorithm is further described in [[Afsari et al, 2013]](#Afsari2013).
 """
-mean
+mean(::Manifold, args...)
 
 @doc doc"""
     mean!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights]; kwargs...)
@@ -83,7 +83,7 @@ mean
 
 Compute the [`mean`](@ref) in-place in `y`.
 """
-mean!
+mean!(::Manifold, args...)
 
 function mean(M::Manifold, x::AbstractVector; kwargs...)
     y = similar_result(M, mean, x[1])
@@ -233,7 +233,7 @@ change between two iterates is small. For more stopping criteria check the
 The algorithm is further described in Algorithm 4.3 and 4.4 in
 [[Bačák, 2014]](#Bačák2014)
 """
-median
+median(::Manifold, args...)
 
 @doc doc"""
     median!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights]; kwargs...)
@@ -241,7 +241,7 @@ median
 
 computes the [`median`](@ref) in-place in `y`.
 """
-median!
+median!(::Manifold, args...)
 
 function median(M::Manifold, x::AbstractVector; kwargs...)
     y = similar_result(M, median, x[1])
