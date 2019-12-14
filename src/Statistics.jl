@@ -32,7 +32,7 @@ about the mean with corresponding radius:
 * [`SymmetricPositiveDefinite`](@ref) with the [`LinearAffineMetric`](@ref): $\infty$
 * [`Sphere`](@ref): $\frac{\pi}{2}$
 * `Grassmannian`: $\frac{\pi}{4}$
-* `Stiefel`/['Rotations'](@ref): $\frac{\pi}{2 \sqrt 2}$
+* `Stiefel`/[`Rotations`](@ref): $\frac{\pi}{2 \sqrt 2}$
 
 For more information on the geodesic interpolation method, see the following
 papers:
