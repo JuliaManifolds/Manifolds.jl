@@ -37,27 +37,27 @@ points are in an open geodesic ball about the mean with corresponding radius:
 For more information on the geodesic interpolation method, see the following
 papers:
 
-1. Ho J.,; Cheng G.; Salehian H.; Vemuri B. C.; Recursive Karcher expectation
-   estimators and geometric law of large numbers.  
+1. Ho J.; Cheng G.; Salehian H.; Vemuri B. C.; Recursive Karcher expectation
+   estimators and geometric law of large numbers.
    Proceedings of the 16th International Conference on Artificial Intelligence
-   and Statistics (2013), pp. 325–332.  
-   [pdf](http://proceedings.mlr.press/v31/ho13a.pdf)
+   and Statistics (2013), pp. 325–332.
+   [pdf](http://proceedings.mlr.press/v31/ho13a.pdf).
 2. Salehian H.; Chakraborty R.; Ofori E.; Vaillancourt D.; An efficient
    recursive estimator of the Fréchet mean on a hypersphere with applications
-   to Medical Image Analysis.  
-   Mathematical Foundations of Computational Anatomy (2015).  
-   [pdf](https://www-sop.inria.fr/asclepios/events/MFCA15/Papers/MFCA15_4_2.pdf)
+   to Medical Image Analysis.
+   Mathematical Foundations of Computational Anatomy (2015).
+   [pdf](https://www-sop.inria.fr/asclepios/events/MFCA15/Papers/MFCA15_4_2.pdf).
 3. Chakraborty R.; Vemuri B. C.; Recursive Fréchet Mean Computation on the
-   Grassmannian and Its Applications to Computer Vision.  
+   Grassmannian and Its Applications to Computer Vision.
    Proceedings of the IEEE International Conference on Computer Vision (ICCV) (2015),
-   pp. 4229-4237.  
-   doi: [10.1109/ICCV.2015.481](https://doi.org/10.1109/ICCV.2015.481)  
-   [pdf](http://openaccess.thecvf.com/content_iccv_2015/html/Chakraborty_Recursive_Frechet_Mean_ICCV_2015_paper.html)
+   pp. 4229-4237.
+   doi: [10.1109/ICCV.2015.481](https://doi.org/10.1109/ICCV.2015.481),
+   [link](http://openaccess.thecvf.com/content_iccv_2015/html/Chakraborty_Recursive_Frechet_Mean_ICCV_2015_paper.html).
 4. Chakraborty R.; Vemuri B. C.; Statistics on the (compact) Stiefel manifold:
-   Theory and Applications.  
-   The Annals of Statistics (2019), 47(1), pp. 415-438.  
-   doi: [10.1214/18-AOS1692](https://doi.org/10.1214/18-AOS1692)  
-   arxiv: [1708.00045](https://arxiv.org/abs/1708.00045)
+   Theory and Applications.
+   The Annals of Statistics (2019), 47(1), pp. 415-438.
+   doi: [10.1214/18-AOS1692](https://doi.org/10.1214/18-AOS1692),
+   arxiv: [1708.00045](https://arxiv.org/abs/1708.00045).
 """
 struct GeodesicInterpolationMethod <: AbstractMethod end
 
