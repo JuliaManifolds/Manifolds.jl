@@ -254,10 +254,11 @@ Compute the median using the specified `method`.
 Compute the median using [`CyclicProximalPointMethod`](@ref).
 
 Optionally, provide `x0`, the starting point (by default set to the first
-data point). `stop_iter` denotes the maximal number of iterations to perform and
-the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal change
-between two iterates is small. For more stopping criteria
-check the [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
+data point). Set `x0` to `nothing` to use the intitial value of `y` as the
+starting point. `stop_iter` denotes the maximal number of iterations to perform
+and the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal
+change between two iterates is small. For more stopping criteria check the
+[`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
 The algorithm is further described in Algorithm 4.3 and 4.4 in
 > Bačák, M: Computing Medians and Means in Hadamard Spaces.
@@ -271,8 +272,7 @@ median
     median!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights]; kwargs...)
     median!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights], method::AbstractMethod; kwargs...)
 
-computes the [`median`](@ref) in-place in `y` where the initial value of `y` is
-the starting point of the algorithm.
+computes the [`median`](@ref) in-place in `y`.
 """
 median!
 
