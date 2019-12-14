@@ -189,7 +189,8 @@ end
 mean(M::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
 mean(M::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = mean(x, w)
 mean(M::Euclidean, x::AbstractVector; kwargs...) = mean(x)
-mean(M::Euclidean, x::AbstractVector, w::AbstractWeights; kwargs...) = sum(w .* x) ./ w.sum
+mean!(M::Euclidean, y, x::AbstractVector, w::AbstractWeights; kwargs...) =
+    mean!(M::Euclidean, y, x, w, GeodesicInterpolationMethod(); kwargs...)
 
 median(M::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = median(x)
 median(M::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = median(x, w)
