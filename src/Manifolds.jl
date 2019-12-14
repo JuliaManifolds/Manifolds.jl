@@ -91,8 +91,18 @@ using Einsum: @einsum
 
 abstract type AbstractMethod end
 
+"""
+    GradientMethod <: AbstractMethod
+
+Method for optimizing using gradient descent.
+"""
 struct GradientMethod <: AbstractMethod end
 
+"""
+    CyclicProximalPointMethod <: AbstractMethod
+
+Method for optimizing using the cyclic proximal point technique.
+"""
 struct CyclicProximalPointMethod <: AbstractMethod end
 
 hat!(M::Manifold, v, x, vⁱ) = error("hat! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), and matrix $(typeof(v))")
