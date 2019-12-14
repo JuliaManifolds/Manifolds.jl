@@ -157,8 +157,6 @@ function normal_tvector_distribution(S::Sphere, x, σ)
     return ProjectedFVectorDistribution(TangentBundleFibers(S), x, d, project_vector!, x)
 end
 
-struct GeodesicInterpolationMethod <: AbstractMethod end
-
 """
     mean!(
         S::Sphere,

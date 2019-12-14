@@ -4,6 +4,65 @@ _mean_weights(n::Int) = Weights(ones(n), n)
 _var_weights(n::Int) = ProbabilityWeights(ones(n), n)
 
 @doc doc"""
+    GeodesicInterpolationMethod <: AbstractMethod
+
+Repeated weighted geodesic interpolation method for estimating the Riemannian
+center of mass.
+
+The algorithm proceeds with the following simple online update:
+
+```math
+\begin{align}
+\mu_1 &= x_1\\
+t_k &= \frac{w_k}{\sum_{i=1}^k w_i}\\
+\mu_{k} &= \gamma_{\mu_{k-1}}(x_k; t_k),
+\end{align}
+```
+
+where $x_k$ are points, $w_k$ are weights, $\mu_k$ is the $k$th estimate of the
+mean, and $\gamma_x(y; t)$ is the point at time $t$ along the
+[`shortest_geodesic`](@ref) between points $x,y \in \mathcal M$. The algorithm
+terminates when all $x_k$ have been considered. In the [`Euclidean`](@ref) case,
+this exactly computes the weighted mean.
+
+The algorithm has been shown to converge asymptotically with the sample size for
+the following manifolds when all sampled points are in an open geodesic ball
+about the mean with corresponding radius:
+
+* [`Euclidean`](@ref): $\infty$
+* [`SymmetricPositiveDefinite`](@ref) with the [`LinearAffineMetric`](@ref): $\infty$
+* [`Sphere`](@ref): $\frac{\pi}{2}$
+* `Grassmannian`: $\frac{\pi}{4}$
+* `Stiefel`/['Rotations'](@ref): $\frac{\pi}{2 \sqrt 2}$
+
+For more information on the geodesic interpolation method, see the following
+papers:
+
+1. Ho J.,; Cheng G.; Salehian H.; Vemuri B. C.; Recursive Karcher expectation
+   estimators and geometric law of large numbers.  
+   Proceedings of the 16th International Conference on Artificial Intelligence
+   and Statistics (2013), pp. 325–332.  
+   [pdf](http://proceedings.mlr.press/v31/ho13a.pdf)
+2. Salehian H.; Chakraborty R.; Ofori E.; Vaillancourt D.; An efficient
+   recursive estimator of the Fréchet mean on a hypersphere with applications
+   to Medical Image Analysis.  
+   Mathematical Foundations of Computational Anatomy (2015).  
+   [pdf](https://www-sop.inria.fr/asclepios/events/MFCA15/Papers/MFCA15_4_2.pdf)
+3. Chakraborty R.; Vemuri B. C.; Recursive Fréchet Mean Computation on the
+   Grassmannian and Its Applications to Computer Vision.  
+   Proceedings of the IEEE International Conference on Computer Vision (ICCV) (2015),
+   pp. 4229-4237.  
+   doi: [10.1109/ICCV.2015.481](https://doi.org/10.1109/ICCV.2015.481)  
+   [pdf](http://openaccess.thecvf.com/content_iccv_2015/html/Chakraborty_Recursive_Frechet_Mean_ICCV_2015_paper.html)
+4. Chakraborty R.; Vemuri B. C.; Statistics on the (compact) Stiefel manifold:
+   Theory and Applications.  
+   The Annals of Statistics (2019), 47(1), pp. 415-438.  
+   doi: [10.1214/18-AOS1692](https://doi.org/10.1214/18-AOS1692)  
+   arxiv: [1708.00045](https://arxiv.org/abs/1708.00045)
+"""
+struct GeodesicInterpolationMethod <: AbstractMethod end
+
+@doc doc"""
     mean(M::Manifold, x::AbstractVector; kwargs...)
     mean(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
 
