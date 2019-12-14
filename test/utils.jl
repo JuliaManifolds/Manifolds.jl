@@ -20,11 +20,13 @@ Tests general properties of manifold `m`, given at least three different points
 that lie on it (contained in `pts`).
 
 # Arguments
-- `exp_log_atol_multiplier = 1`, change absolute tolerance of exp/log tests
+- `exp_log_atol_multiplier = 0`, change absolute tolerance of exp/log tests (0 use default, i.e. deactivate atol and use rtol)
+- `exp_log_rtol_multiplier = 1`, change the relative tolerance of exp/log tests (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
 - `inverse_retraction_methods = []`: inverse retraction methods that will be tested.
 - `point_distributions = []` : point distributions to test
+- `projection_tvector_atol_multiplier = 0` : chage absolute tolerance in testing projections (0 use default, i.e. deactivate atol and use rtol)
 -  tvector_distributions = []` : tangent vector distributions to test
-- `rand_tvector_atol_multiplier = 1` : chage absolute tolerance in testing that
+- `rand_tvector_atol_multiplier = 0` : chage absolute tolerance in testing random vectors (0 use default, i.e. deactivate atol and use rtol)
   random tangent vectors are tangent vectors
 - `retraction_methods = []`: retraction methods that will be tested.
 - `test_forward_diff = true`: if true, automatic differentiation using
@@ -55,9 +57,10 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     inverse_retraction_methods = [],
     point_distributions = [],
     tvector_distributions = [],
-    exp_log_atol_multiplier = 1,
-    projection_atol_multiplier = 1,
-    rand_tvector_atol_multiplier = 1)
+    exp_log_atol_multiplier = 0,
+    exp_log_rtol_multiplier = 1,
+    projection_atol_multiplier = 0,
+    rand_tvector_atol_multiplier = 0)
 
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
     isapprox(M, pts[1], pts[2]) && error("Points 1 and 2 are equal")
@@ -125,10 +128,19 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         retract!(M, new_pt, pts[1], tv1)
         @test is_manifold_point(M, new_pt)
         for x ∈ pts
-            @test isapprox(M, zero_tangent_vector(M, x), log(M, x, x); atol = eps(eltype(x)) * exp_log_atol_multiplier)
-            @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x); atol = eps(eltype(x)) * exp_log_atol_multiplier)
+            @test isapprox(M, zero_tangent_vector(M, x), log(M, x, x);
+                atol = eps(eltype(x)) * exp_log_atol_multiplier,
+                rtol = exp_log_atol_multiplier > 0 ? sqrt(eps(eltype(x)))*exp_log_rtol_multiplier : 0
+            )
+            @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x);
+                atol = eps(eltype(x)) * exp_log_atol_multiplier,
+                rtol = exp_log_atol_multiplier > 0 ? sqrt(eps(eltype(x)))*exp_log_rtol_multiplier : 0
+            )
             for inv_retr_method ∈ inverse_retraction_methods
-                @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method); atol = eps(eltype(x)) * exp_log_atol_multiplier)
+                @test isapprox(M, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method);
+                atol = exp_log_atol_multiplier > 0 ? eps(eltype(x)) * exp_log_atol_multiplier : 0,
+                rtol = exp_log_atol_multiplier > 0 ? sqrt(eps(eltype(x)))*exp_log_rtol_multiplier : 0
+            )
             end
         end
         zero_tangent_vector!(M, tv1, pts[1])
