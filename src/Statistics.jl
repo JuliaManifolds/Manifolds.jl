@@ -25,11 +25,11 @@ terminates when all $x_k$ have been considered. In the [`Euclidean`](@ref) case,
 this exactly computes the weighted mean.
 
 The algorithm has been shown to converge asymptotically with the sample size for
-the following manifolds when all sampled points are in an open geodesic ball
-about the mean with corresponding radius:
+the following manifolds equipped with their default metrics when all sampled
+points are in an open geodesic ball about the mean with corresponding radius:
 
 * [`Euclidean`](@ref): $\infty$
-* [`SymmetricPositiveDefinite`](@ref) with the [`LinearAffineMetric`](@ref): $\infty$
+* [`SymmetricPositiveDefinite`](@ref): $\infty$
 * [`Sphere`](@ref): $\frac{\pi}{2}$
 * `Grassmannian`: $\frac{\pi}{4}$
 * `Stiefel`/[`Rotations`](@ref): $\frac{\pi}{2 \sqrt 2}$
