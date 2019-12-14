@@ -11,11 +11,11 @@ center of mass.
 The algorithm proceeds with the following simple online update:
 
 ```math
-\begin{align}
+\begin{aligned}
 \mu_1 &= x_1\\
 t_k &= \frac{w_k}{\sum_{i=1}^k w_i}\\
 \mu_{k} &= \gamma_{\mu_{k-1}}(x_k; t_k),
-\end{align}
+\end{aligned}
 ```
 
 where $x_k$ are points, $w_k$ are weights, $\mu_k$ is the $k$th estimate of the
