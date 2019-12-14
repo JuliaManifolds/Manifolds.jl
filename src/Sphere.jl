@@ -158,59 +158,6 @@ function normal_tvector_distribution(S::Sphere, x, σ)
 end
 
 """
-    mean!(
-        S::Sphere,
-        y,
-        x::AbstractVector,
-        w::AbstractWeights,
-        method::GeodesicInterpolationMethod;
-        shuffle_rng=nothing,
-        kwargs...,
-    )
-
-Compute the Riemannian mean (center of mass) of `x`. The algorithm is adapted
-from the below paper to handle the weighted mean. It uses repeated weighted
-geodesic interpolation and converges to the Riemannian mean when all `x` are
-within a distance of π/2 of the mean.
-
-If `shuffle_rng` is provided, it is used to shuffle the order in which the
-points are considered for computing the mean.
-
-For more information on the geodesic interpolation method, see the below paper:
-> Salehian H et al: An efficient recursive estimator of the
-> Fréchet mean on a hypersphere with applications to Medical Image Analysis,
-> Mathematical Foundations of Computational Anatomy (2015).
-"""
-function mean!(
-        S::Sphere,
-        y,
-        x::AbstractVector,
-        w::AbstractWeights,
-        ::GeodesicInterpolationMethod;
-        shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
-        kwargs...,
-)
-    n = length(x)
-    (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
-    order = shuffle_rng === nothing ? (1:n) : shuffle(shuffle_rng, 1:n)
-    @inbounds begin
-        j = order[1]
-        s = w[j]
-        copyto!(y, x[j])
-    end
-    v = zero_tangent_vector(S, y)
-    ytmp = similar_result(S, mean, y)
-    @inbounds for i in 2:n
-        j = order[i]
-        s += w[j]
-        log!(S, v, y, x[j])
-        exp!(S, ytmp, y, v, w[j] / s)
-        copyto!(y, ytmp)
-    end
-    return y
-end
-
-"""
     mean!(S::Sphere, y, x::AbstractVector, w::AbstractWeights; shuffle_rng=nothing, kwargs...)
 
 Compute the Riemannian mean of `x` using weighted geodesic interpolation. If any

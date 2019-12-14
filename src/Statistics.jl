@@ -179,6 +179,54 @@ function mean!(
     return y
 end
 
+"""
+    mean!(
+        M::Manifold,
+        y,
+        x::AbstractVector,
+        w::AbstractWeights,
+        method::GeodesicInterpolationMethod;
+        shuffle_rng=nothing,
+        kwargs...,
+    )
+
+Estimate the Riemannian center of mass of `x` in an online fashion using
+repeated weighted geodesic interpolation. See
+[`GeodesicInterpolationMethod`](@ref) for details.
+
+If `shuffle_rng` is provided, it is used to shuffle the order in which the
+points are considered for computing the mean.
+"""
+function mean!(
+        M::Manifold,
+        y,
+        x::AbstractVector,
+        w::AbstractWeights,
+        ::GeodesicInterpolationMethod;
+        shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
+        kwargs...,
+)
+    n = length(x)
+    (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
+    order = shuffle_rng === nothing ? (1:n) : shuffle(shuffle_rng, 1:n)
+    @inbounds begin
+        j = order[1]
+        s = w[j]
+        copyto!(y, x[j])
+    end
+    v = zero_tangent_vector(M, y)
+    ytmp = similar_result(M, mean, y)
+    @inbounds for i in 2:n
+        j = order[i]
+        s += w[j]
+        t = w[j] / s
+        log!(M, v, y, x[j])
+        exp!(M, ytmp, y, v, t)
+        copyto!(y, ytmp)
+    end
+    return y
+end
+
 @doc doc"""
     median(M::Manifold, x::AbstractVector; kwargs...)
     median(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
