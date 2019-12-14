@@ -128,7 +128,7 @@ function mean!(
     x0 = x[1],
     stop_iter=100,
     kwargs...
-) where {T}
+)
     x0 === nothing || copyto!(y, x0)
     yold = similar_result(M, mean, y)
     copyto!(yold,y)
@@ -286,7 +286,7 @@ function median!(
     x0=x[1],
     stop_iter=1000000,
     kwargs...
-) where {T}
+)
     x0 === nothing || copyto!(y, x0)
     n = length(x)
     yold = similar_result(M,median,y)
