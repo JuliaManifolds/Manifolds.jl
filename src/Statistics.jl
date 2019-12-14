@@ -94,7 +94,7 @@ Compute the mean using the specified `method`.
 
 Compute the mean using the gradient descent scheme [`GradientMethod`](@ref).
 
-Optionally. provide `x0`, the starting point (by default set to the first
+Optionally, provide `x0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform and
 the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal change
 between two iterates is small. For more stopping criteria
@@ -259,7 +259,7 @@ Compute the median using the specified `method`.
 
 Compute the median using [`CyclicProximalPointMethod`](@ref).
 
-Optionally. provide `x0`, the starting point (by default set to the first
+Optionally, provide `x0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform and
 the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal change
 between two iterates is small. For more stopping criteria
