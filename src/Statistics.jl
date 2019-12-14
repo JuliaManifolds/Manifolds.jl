@@ -1,7 +1,6 @@
 using StatsBase: AbstractWeights, Weights, ProbabilityWeights, values, varcorrection
 
-_mean_weights(n::Int) = Weights(ones(n), n)
-_var_weights(n::Int) = ProbabilityWeights(ones(n), n)
+_unit_weights(n::Int) = ProbabilityWeights(ones(n), n)
 
 @doc doc"""
     GeodesicInterpolationMethod <: AbstractMethod
@@ -136,12 +135,12 @@ function mean(M::Manifold, x::AbstractVector, method::AbstractMethod; kwargs...)
 end
 
 function mean!(M::Manifold, y, x::AbstractVector; kwargs...)
-    w = _mean_weights(length(x))
+    w = _unit_weights(length(x))
     return mean!(M, y, x, w; kwargs...)
 end
 
 function mean!(M::Manifold, y, x::AbstractVector, method::AbstractMethod; kwargs...)
-    w = _mean_weights(length(x))
+    w = _unit_weights(length(x))
     return mean!(M, y, x, w, method; kwargs...)
 end
 
@@ -297,12 +296,12 @@ function median(M::Manifold, x::AbstractVector, method::AbstractMethod; kwargs..
 end
 
 function median!(M::Manifold, y, x::AbstractVector; kwargs...)
-    w = _mean_weights(length(x))
+    w = _unit_weights(length(x))
     return median!(M, y, x, w; kwargs...)
 end
 
 function median!(M::Manifold, y, x::AbstractVector, method::AbstractMethod; kwargs...)
-    w = _mean_weights(length(x))
+    w = _unit_weights(length(x))
     return median!(M, y, x, w, method; kwargs...)
 end
 
@@ -399,7 +398,7 @@ function var(
         m = mean(M, x; kwargs...)
     end
     n = length(x)
-    w = _var_weights(n)
+    w = _unit_weights(n)
     return var(M, x, w, m; corrected = corrected, kwargs...)
 end
 
@@ -477,7 +476,7 @@ function mean_and_var(
     kwargs...
 )
     n = length(x)
-    w = _var_weights(n)
+    w = _unit_weights(n)
     m = mean(M, x, w; kwargs...)
     v = var(M, x, w, m; corrected = corrected, kwargs...)
     return m, v
