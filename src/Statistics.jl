@@ -69,12 +69,12 @@ Compute the (optionally weighted) Riemannian center of mass also known as
 Karcher mean of the vector `x` of points on the [`Manifold`](@ref) `M`, defined
 as the point that satisfies the minimizer
 ````math
-\argmin_{y\in\mathcal M} \frac{1}{2 \sum w}\sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
+\argmin_{y\in\mathcal M} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
 ````
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 
 In the general case, the [`GradientMethod`](@ref) is used to compute the mean.
-However, this default may overloaded for specific manifolds.
+However, this default may be overloaded for specific manifolds.
 
     mean(M::Manifold, x::AbstractVector, [w::AbstractWeights], method::AbstractMethod; kwargs...)
 
@@ -229,13 +229,13 @@ end
 Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
 [`Manifold`](@ref) `M`, defined as the point that satisfies the minimizer
 ````math
-\argmin_{y\in\mathcal M} \frac{1}{\sum w} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
+\argmin_{y\in\mathcal M} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
 ````
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 This function is nonsmooth (i.e nondifferentiable).
 
 In the general case, the [`CyclicProximalPointMethod`](@ref) is used to compute the
-median. However, this default may overloaded for specific manifolds.
+median. However, this default may be overloaded for specific manifolds.
 
     median(M::Manifold, x::AbstractVector, [w::AbstractWeights], method::AbstractMethod; kwargs...)
 
