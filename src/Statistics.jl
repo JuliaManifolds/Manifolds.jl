@@ -293,11 +293,11 @@ function median!(
     stop_iter=1000000,
     kwargs...
 )
-    x0 === nothing || copyto!(y, x0)
     n = length(x)
+    (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
+    x0 === nothing || copyto!(y, x0)
     yold = similar_result(M,median,y)
     ytmp = copy(yold)
-    (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     v = zero_tangent_vector(M,y)
     wv = convert(Vector, w) ./ w.sum
     for i=1:stop_iter
