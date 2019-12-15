@@ -19,6 +19,14 @@ import Base: isapprox,
     +,
     -,
     *
+import Statistics: mean,
+    mean!,
+    median,
+    median!,
+    var,
+    std
+import StatsBase: mean_and_std,
+    mean_and_var
 import LinearAlgebra: dot,
     norm,
     det,
@@ -67,7 +75,8 @@ import ManifoldsBase: base_manifold,
     vector_transport_to,
     vector_transport_to!,
     zero_tangent_vector,
-    zero_tangent_vector!
+    zero_tangent_vector!,
+    similar_result
 
 using Requires
 using StaticArrays
@@ -77,7 +86,6 @@ import Distributions: _rand!, support
 import Random: rand
 using LinearAlgebra
 using Random: AbstractRNG
-using SimpleTraits
 using UnsafeArrays
 using Einsum: @einsum
 
@@ -178,14 +186,16 @@ include("Stiefel.jl")
 include("Sphere.jl")
 include("SymmetricPositiveDefinite.jl")
 
+include("Statistics.jl")
+
 function __init__()
     @require ForwardDiff="f6369f11-7733-5829-9624-2563aa707210" begin
-        using ForwardDiff
+        using .ForwardDiff
         include("forward_diff.jl")
     end
 
     @require OrdinaryDiffEq="1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
-        using OrdinaryDiffEq: ODEProblem,
+        using .OrdinaryDiffEq: ODEProblem,
             AutoVern9,
             Rodas5,
             solve
@@ -194,6 +204,8 @@ function __init__()
 end
 
 export Manifold,
+    MPoint,
+    TVector,
     ProductManifold,
     PowerManifold,
     ProductRepr,
@@ -209,7 +221,11 @@ export Manifold,
     TangentBundle,
     CotangentBundle,
     TangentBundleFibers,
-    CotangentBundleFibers
+    CotangentBundleFibers,
+    AbstractVectorTransportMethod,
+    ParallelTransport,
+    ProjectTangent,
+    ProjectedPointDistribution
 export
     SVDMPoint,
     UMVTVector,
@@ -244,6 +260,7 @@ export base_manifold,
     injectivity_radius,
     inverse_retract,
     inverse_retract!,
+    is_default_metric,
     is_manifold_point,
     is_tangent_vector,
     isapprox,
@@ -251,17 +268,27 @@ export base_manifold,
     log,
     log!,
     manifold_dimension,
+    mean,
+    mean!,
+    mean_and_var,
+    mean_and_std,
+    median,
+    median!,
     norm,
+    normal_tvector_distribution,
     project_point,
     project_point!,
     project_tangent,
     project_tangent!,
+    projected_distribution,
     representation_size,
     retract,
     retract!,
+    std,
     submanifold,
     submanifold_component,
     tangent_orthonormal_basis,
+    var,
     vector_space_dimension,
     vector_transport_along,
     vector_transport_along!,
@@ -284,10 +311,12 @@ export Metric,
     metric,
     local_metric,
     inverse_local_metric,
+    local_metric_jacobian,
     det_local_metric,
     log_local_metric_density,
     christoffel_symbols_first,
     christoffel_symbols_second,
+    christoffel_symbols_second_jacobian,
     riemann_tensor,
     ricci_tensor,
     einstein_tensor,

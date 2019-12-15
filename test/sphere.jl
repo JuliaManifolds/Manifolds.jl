@@ -6,6 +6,10 @@ include("utils.jl")
         @test representation_size(M) == (3,)
         @test !is_manifold_point(M, [1., 0., 0., 0.])
         @test !is_tangent_vector(M, [1.,0.,0.], [0., 0., 1., 0.])
+        @test_throws DomainError is_manifold_point(M, [2.,0.,0.],true)
+        @test !is_manifold_point(M, [2.,0.,0.])
+        @test !is_tangent_vector(M,[1.,0.,0.],[1.,0.,0.])
+        @test_throws DomainError is_tangent_vector(M,[1.,0.,0.],[1.,0.,0.],true)
     end
     types = [Vector{Float64},
              SizedVector{3, Float64},

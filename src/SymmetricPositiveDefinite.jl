@@ -29,10 +29,7 @@ The linear affine metric is the metric for symmetric positive definite matrices,
 matrix logarithms and exponentials, which yields a linear and affine metric.
 """
 struct LinearAffineMetric <: RiemannianMetric end
-# Make this metric default, i.e. automatically convert
-convert(::Type{SymmetricPositiveDefinite{N}}, M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
-convert(::Type{SymmetricPositiveDefinite}, M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}) where N = M.manifold
-convert(::Type{MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}}, M::SymmetricPositiveDefinite{N}) where N = MetricManifold(M, LinearAffineMetric())
+is_default_metric(::SymmetricPositiveDefinite,::LinearAffineMetric) = Val(true)
 
 @doc doc"""
     LogEuclideanMetric <: Metric
@@ -214,8 +211,8 @@ denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}
 """
 function exp!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, y, x, v) where N
     (l,w) = spd_to_cholesky(x,v)
-    z = exp!(CholeskySpace{N}(),y,l,w)
-    mul!(y,z,z')
+    z = exp(CholeskySpace{N}(),l,w)
+    y .= z*z'
     return y
 end
 # take the same retractions as for the default
@@ -278,6 +275,7 @@ $\mathcal M = \mathcal P(n)$.
 """
 representation_size(::SymmetricPositiveDefinite{N}) where N = (N,N)
 representation_size(::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}) where N = (N,N)
+representation_size(::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric}) where N = (N,N)
 
 @doc doc"""
     vector_transport_to!(M,vto,x,v,y,::ParallelTransport)
@@ -359,7 +357,7 @@ end
 
 returns a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`manifold_dimension`](@ref) of `M`) in the tangent space of `x` on the
-[`MetricManifold`](@ref of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
+[`MetricManifold`](@ref) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
 [`LinearAffineMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
 with eigenvalues `κ` and where the direction `v` has curvature `0`.
 """
