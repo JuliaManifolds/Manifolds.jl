@@ -1,5 +1,4 @@
-using LinearAlgebra: diag, qr, tr, svd, mul!, zeros
-using MatrixEquations: arec
+using LinearAlgebra: diag, qr, tr, svd, mul!, zeros, lyap
 
 @doc doc"""
     Stiefel{m,n,T} <: Manifold
@@ -123,9 +122,10 @@ a continuous-time algebraic Riccati equation (arec). This follows Algorithm 2 in
 > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
 """
 function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::PolarInverseRetraction) where {M,N,T}
-   # arec (A,R,Q) solves A'X + XA + XRX + Q = 0
-    s,t = arec( -(x'*y)', zero(y'*y), 2*one(y'*y) )
-    v .= y*s-x
+    A = x'*y
+    H = -2*one(x'*x)
+    B = lyap(A,H)
+    v .= y*B - x
   return v
 end
 

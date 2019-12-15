@@ -11,9 +11,13 @@ include("utils.jl")
         @test !is_manifold_point(M,[1., 0., 0., 0.])
         @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0., 0., 1., 0.])
     end
-    types =  [ Matrix{Float32},
-            Matrix{Float64}
-        ]
+    types = [Matrix{Float64},
+              MMatrix{3, 2, Float64},
+              SizedMatrix{3, 2, Float64},
+              Matrix{Float32},
+              MMatrix{3, 2, Float32},
+              SizedMatrix{3, 2, Float64},
+            ]
     for T in types
         @testset "Type $T" begin
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
