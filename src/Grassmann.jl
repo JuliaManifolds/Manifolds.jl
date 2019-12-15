@@ -3,20 +3,22 @@ import LinearAlgebra: norm
 @doc doc"""
     Grassmann{n,k,T} <: Manifold
 
-The Grassmann manifold $\operatorname{Gr}(n,k)$ consists of all $k$-dimensional
-subspaces of $\mathbb F^n$, where $\mathbb F \in \{\mathbb R, \mathbb C\}$ is
-either the real- (or complex-) valued subspaces of the ($2$)$n$-dimensional
-(complex) space.
+The Grassmann manifold $\operatorname{Gr}(n,k)$ consists of all subspaces span
+by $k$ linear independent vectors $\mathbb F^n$, where $\mathbb F \in \{\mathbb R, \mathbb C\}$ is
+either the real- (or complex-) valued vectors. This yields all $k$-dimensional
+subspaces of $\mathbb R^n$ for the real-valued case and all $2k$-dimensional
+subspaces of $\mathbb C^n$ for the second.
 
 The manifold can be represented as
 ````math
 \operatorname{Gr}(n,k) \coloneqq \bigl\{ \operatorname{span}(x)
 : x \in \mathbb F^{n\times k}, \bar{x}^\mathrm{T}x = I_k\},
 ````
-where $\bar\cdot$ denotes the complex conjugate and $I_k$ is the $k\times k$
-identity matrix. This means, that the columns of $x$ form an orthonormal basis
-of the subspace, that is a point on $\operatorname{Gr}(n,k)$, and hence the
-subspace can actually be represented by a whole equivalence class of representers.
+where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transposed and
+$I_k$ is the $k\times k$ identity matrix. This means, that the columns of $x$
+form an orthonormal basis of the subspace, that is a point on
+$\operatorname{Gr}(n,k)$, and hence the subspace can actually be represented by
+a whole equivalence class of representers.
 Another interpretation is, that
 ````math
 \operatorname{Gr}(n,k) = \operatorname{St}(n,k) / \operatorname{O}(k),
@@ -27,8 +29,8 @@ the orthogonal group $\operatorname{O}(k)$ of orthogonal $k\times k$ matrices.
 The tangent space at a point (subspace) $x$ is given by
 ````math
 T_x\mathrm{Gr}(n,k) = \bigl\{
-v \in \mathbb{F^{n\times k} : 
-{\bar v}^\mathrm{T}x + {\bar x}^\mathrm{T}v = 0_{k} \bigr\},
+ v \in \mathbb{F}^{n\times k} : 
+ {\bar v}^{\mathrm{T}}x + {\bar x}^{\mathrm{T}}v = 0_{k} \bigr\},
 ````
 where $0_{k}$ denotes the $k\times k$ zero matrix.
 
@@ -39,7 +41,8 @@ The manifold is named after
 
     Grassmann(n,k,T=Real)
 
-generate the Grassmann manifold $\operatorname{Gr}(n,k)$ (on $\mathbb R^n$).
+generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
+case $\mathbb F = \mathbb R$ is the default.
 """
 struct Grassmann{N,K,T} <: Manifold end
 Grassmann(n::Int, k::Int, T::Type = Real) = Grassmann{n, k, T}()
@@ -89,11 +92,13 @@ end
 @doc doc"""
     distance(M,x,y)
 
-compute the Riemannian distance on [`Grassmann`](@ref) manifold `M`$= \mathrm{Gr}(k,n)$.
+computes the Riemannian distance on [`Grassmann`](@ref) manifold `M`$= \mathrm{Gr}(n,k)$.
+
 Let $USV = {\bar x}^\mathrm{T}y$ denote the SVD decomposition of
-$x'y$. Then the distance is given by
+${\bar x}^\mathrm{T}y$, where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex
+conjugate transposed. Then the distance is given by
 ````math
-d_{\mathrm{GR}(k,n)}(x,y) = \operatorname{norm}(\operatorname{Re}(b)).
+d_{\mathrm{GR}(n,k)}(x,y) = \operatorname{norm}(\operatorname{Re}(b)).
 ````
 where
 
@@ -120,13 +125,13 @@ Then the exponential map is written using
 ````math
 z = x V\cos(S){\bar V}^\mathrm{T} + U\sin(S){\bar V}^\mathrm{T},
 ````
-where cosine and sine are applied element wise to the diagonal entries of $S$,
-as
+where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transposed.
+The cosine and sine are applied element wise to the diagonal entries of $S$.
+A final QR decomposition $z=QR$ is performed for numerical stability reasons,
+yielding the result as
 ````math
-y = Q,
+y = Q.
 ````
-where $Q$ of the QR decomposition $z=QR$ of $z$. This last step is for numerical
-stability reasons.
 """
 function exp!(M::Grassmann{N,K,T},y, x, v) where {N,K,T}
     if norm(M,x,v) ≈ 0
@@ -146,30 +151,33 @@ compute the inner product for two tangent vectors `v`, `w` from the
 tangent space of `x` on the [`Grassmann`](@ref) manifold `M`.
 The formula reads
 ````math
-(v,w)_x = \operatorname{trace}({\bar v}^{\mathrm{T}}w).
+(v,w)_x = \operatorname{trace}({\bar v}^{\mathrm{T}}w),
 ````
+where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transposed.
 """
 inner(::Grassmann{N,K,T}, x, v, w) where {N,K,T} = real(dot(v,w))
 
 @doc doc"""
     inverse_retract!(M, v, x, y, ::PolarInverseRetraction)
 
-compute the inverse retraction valid for the [`PolarRetraction`](@ref).
+compute the inverse retraction for the [`PolarRetraction`](@ref)
 
 ````math
-\operatorname{retr}_x^{-1}y = y*(\bar{x}^\mathrm{T}y)^{-1} - x
+\operatorname{retr}_x^{-1}y = y*(\bar{x}^\mathrm{T}y)^{-1} - x,
 ````
+where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transposed.
 """
 inverse_retract!(::Grassmann{N,K,T}, v, x, y, ::PolarInverseRetraction) where {N,K,T} = ( v .= y/(x'*y) - x)
 
 @doc doc"""
     inverse_retract!(M, v, x, y, ::QRInverseRetraction)
 
-compute the inverse retraction valid for the [`QRRetraction`](@ref) as
+compute the inverse retraction valid of the [`QRRetraction`](@ref)
 
 ````math
-\operatorname{retr}_x^{-1}y = y*(\bar{x}^\mathrm{T}y)^{-1} - x.
+\operatorname{retr}_x^{-1}y = y*(\bar{x}^\mathrm{T}y)^{-1} - x,
 ````
+where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transposed.
 """
 inverse_retract!(::Grassmann{N,K,T}, v, x, y, ::QRInverseRetraction) where {N,K,T} = ( v .= y/(x'*y) - x)
 
@@ -184,12 +192,13 @@ $\mathcal M=\mathrm{Gr}(n,k)$, i.e. the tangent vector `v` whose corresponding
 ````math
 v = V\cdot \operatorname{atan}(S) \cdot {\bar U}^\mathrm{T},
 ````
-where $U$ and $V$ are the unitary matrices and $S$ is a diagonal matrix containing the
-singular values of the SVD-decomposition of
-
-$USV = ({\bar y}^\mathrm{T}x)^{-1} ( {\bar y}^\mathrm{T} - {\bar y}^\mathrm{T}x{\bar x}^\mathrm{T} )$
-
-and the $\operatorname{atan}$ is meant elementwise.
+where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transposed,
+$U$ and $V$ are the unitary matrices, and $S$ is a diagonal matrix containing
+the singular values of the SVD-decomposition of
+````math
+USV = ({\bar y}^\mathrm{T}x)^{-1} ( {\bar y}^\mathrm{T} - {\bar y}^\mathrm{T}x{\bar x}^\mathrm{T} ).
+````
+In this formula the $\operatorname{atan}$ is meant elementwise.
 """
 function log!(M::Grassmann{N,K,T}, v, x, y) where {N,K,T}
     z = y'*x
@@ -229,8 +238,9 @@ project_tangent!(M::Grassmann{N,K,T},v, x, w) where {N,K,T} = ( v .= w - x*x'*w 
 compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 [`Grassmann`](@ref) manifold `M`. With $USV = x + v$ the retraction reads
 ````math
-y = \operatorname{retr}_x v = U\bar{V}^\mathrm{T}.
+y = \operatorname{retr}_x v = U\bar{V}^\mathrm{T},
 ````
+where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transposed.
 """
 function retract!(::Grassmann{N,K,T}, y, x, v, ::PolarRetraction) where {N,K,T}
     s = svd(x+v)
@@ -248,7 +258,7 @@ y = \operatorname{retr}_xv = QD,
 ````
 where D is a $m\times n$ matrix with 
 ````math
-D = \operatorname{diag}( \operatorname{sgn}(R_{ii}+0,5)_{i=1}^n )
+D = \operatorname{diag}( \operatorname{sgn}(R_{ii}+0,5)_{i=1}^n ).
 ````
 """
 function retract!(::Grassmann{N,K,T}, y, x, v, ::QRRetraction) where {N,K,T}
