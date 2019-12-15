@@ -100,6 +100,18 @@ function exp!(M::Stiefel{m,n,T}, y, x, v) where {m,n,T}
 end
 
 @doc doc"""
+    inner(M,x,ξ,ν)
+
+compute the inner product for two tangent vectors `v`, `w` from the
+tangent space of `x` on the [`Stiefel`](@ref) manifold `M`. The formula reads
+
+````math
+ (v,w)_x = \operatorname{trace}({\bar v}^{\mathrm{T}}w).
+ ````
+ """
+inner(::Stiefel{M,N,T}, x, v, w) where {M,N,T} = real(dot(v,w))
+
+@doc doc"""
     inverse_retract!(M, v, x, y, ::PolarInverseRetraction)
 
 compute the inverse retraction based on a singular value decomposition
@@ -112,14 +124,16 @@ From the Polar retraction we know that
 if such a symmetric positive definite $n\times n$ matrix exists. Since $ys-q$ is
     also a tangent vector at $x$ we obtain
 ````math
-$x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2\mathrm{I}_k = 0.
+x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2\mathrm{I}_k = 0.
 ````
-Setting $m=x^\mathrm{T}y$ this yields $(-m)s + s(-m^\mathrm{T}) + 2I = 0$,
-a continuous-time algebraic Riccati equation (arec). This follows Algorithm 2 in
+This can either be solved by a Lyaponov approach or a continuous-time
+algebraic Riccati equation as described in 
 
 > T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
 > Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
 > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
+
+This implementation follows the Loyapnov approach.
 """
 function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::PolarInverseRetraction) where {M,N,T}
     A = x'*y
@@ -154,16 +168,6 @@ function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::QRInverseRetraction) wher
 end
 
 @doc doc"""
-    inner(M,x,ξ,ν)
-
-compute the inner product for two tangent vectors `v`, `w` from the
-tangent space of `x` on the [`Stiefel`](@ref) manifold `M`. The formula reads
-````math
- (v,w)_x = \operatorname{trace}({\bar v}^{\mathrm{T}}w).
-"""
-inner(::Stiefel{M,N,T}, x, v, w) where {M,N,T} = real(dot(v,w))
-
-@doc doc"""
     manifold_dimension(M)
 
 return the dimension of the [`Stiefel`](@ref) manifold `M`.
@@ -185,9 +189,10 @@ manifold_dimension(::Stiefel{M,N,Complex}) where {M,N} = 2*M*N - N*N
 project `v` onto the tangent space of `x` to the [`Stiefel`](@ref) manifold `M`.
 The formula reads
 ````math
-\operatorname{proj}_{\mathcal M}(x,v) = q - \frac{1}{2} v \bigl(
- (\bar{x}^\mathrm{T})^\mathrm{T}\bar{v}^\mathrm{T}x \bigr)$
+\operatorname{proj}_{\mathcal M}(x,v) = v - x \operatorname{Sym}(\bar{x}^{\mathrm{T}}v),
 ````
+where $\operatorname{Sym}(y)$ is the symmetrization of $y$, e.g. by
+$\operatorname{Sym}(y) = \frac{\bar y^{\mathrm{T}}+y}{2}$.
 """
 project_tangent!(::Stiefel{M,N,T}, w, x, v) where {M,N,T} = ( w.= v - x * Symmetric( x'*v ) )
 
@@ -216,7 +221,7 @@ y = \operatorname{retr}_xv = QD,
 ````
 where D is a $m\times n$ matrix with 
 ````math
-$D = \operatorname{diag( (\operatorname{sgn}(R_{ii}+0,5)_{i=1}^n )$
+D = \operatorname{diag}\bigl(\operatorname{sgn}(R_{ii}+0,5)_{i=1}^n \bigr).
 ````
 """
 function retract!(::Stiefel{M,N,T}, y, x, v, ::QRRetraction) where {M,N,T}
