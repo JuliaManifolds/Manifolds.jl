@@ -129,17 +129,23 @@ function mean!(
     stop_iter=100,
     kwargs...
 )
+    n = length(x)
+    (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
     x0 === nothing || copyto!(y, x0)
     yold = similar_result(M, mean, y)
     copyto!(yold,y)
-    v0 = zero_tangent_vector(M, y)
-    v = map(_ -> copy(v0), x)
-    wreg = convert(Vector, w) ./ (2 * w.sum)
+    v = zero_tangent_vector(M, y)
+    vtmp = copy(v)
+    α = w ./ cumsum(w)
     for i=1:stop_iter
         copyto!(yold,y)
-        log!.(Ref(M), v, Ref(yold), x)
-        vreg = sum(wreg .* v)
-        exp!(M, y, yold, vreg)
+        # Online weighted mean
+        @inbounds log!(M, v, yold, x[1])
+        @inbounds for j in 2:n
+            log!(M, vtmp, yold, x[j])
+            v .+= α[j] .* (vtmp .- v)
+        end
+        exp!(M, y, yold, v, 0.5)
         isapprox(M,y,yold; kwargs...) && break
     end
     return y
