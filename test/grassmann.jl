@@ -10,6 +10,9 @@ include("utils.jl")
         @test manifold_dimension(Mc) == 4
         @test !is_manifold_point(M,[1., 0., 0., 0.])
         @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0., 0., 1., 0.])
+        @test_throws DomainError is_manifold_point(Grassmann(3,2), [2. 0.; 0. 1.; 0. 0.],true)
+        @test_throws DomainError is_tangent_vector(Grassmann(3,2), [2. 0.; 0. 1.; 0. 0.],zeros(3,2),true)
+        @test_throws DomainError is_tangent_vector(Grassmann(3,2), [1. 0.; 0. 1.; 0. 0.],ones(3,2),true)
     end
     types = [Matrix{Float64},
              MMatrix{3, 2, Float64},
