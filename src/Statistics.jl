@@ -29,10 +29,35 @@ the following manifolds equipped with their default metrics when all sampled
 points are in an open geodesic ball about the mean with corresponding radius:
 
 * [`Euclidean`](@ref): $\infty$
-* [`SymmetricPositiveDefinite`](@ref) [[Ho et al, 2013]](#Ho2013): $\infty$
-* [`Sphere`](@ref) [[Salehian et al, 2015]](#Salehian2015): $\frac{\pi}{2}$
-* `Grassmannian` [[Chakraborty and Vemuri, 2015]](#ChakrabortyVemuri2015): $\frac{\pi}{4}$
-* `Stiefel`/[`Rotations`](@ref) [[Chakraborty and Vemuri, 2019]](#ChakrabortyVemuri2019): $\frac{\pi}{2 \sqrt 2}$
+* [`SymmetricPositiveDefinite`](@ref): $\infty$
+* [`Sphere`](@ref): $\frac{\pi}{2}$
+* `Grassmannian`: $\frac{\pi}{4}$
+* `Stiefel`/[`Rotations`](@ref): $\frac{\pi}{2 \sqrt 2}$
+
+For more information on the geodesic interpolation method, see the following
+papers:
+
+1. Ho J.; Cheng G.; Salehian H.; Vemuri B. C.; Recursive Karcher expectation
+   estimators and geometric law of large numbers.
+   Proceedings of the 16th International Conference on Artificial Intelligence
+   and Statistics (2013), pp. 325–332.
+   [pdf](http://proceedings.mlr.press/v31/ho13a.pdf).
+2. Salehian H.; Chakraborty R.; Ofori E.; Vaillancourt D.; An efficient
+   recursive estimator of the Fréchet mean on a hypersphere with applications
+   to Medical Image Analysis.
+   Mathematical Foundations of Computational Anatomy (2015).
+   [pdf](https://www-sop.inria.fr/asclepios/events/MFCA15/Papers/MFCA15_4_2.pdf).
+3. Chakraborty R.; Vemuri B. C.; Recursive Fréchet Mean Computation on the
+   Grassmannian and Its Applications to Computer Vision.
+   Proceedings of the IEEE International Conference on Computer Vision (ICCV) (2015),
+   pp. 4229-4237.
+   doi: [10.1109/ICCV.2015.481](https://doi.org/10.1109/ICCV.2015.481),
+   [link](http://openaccess.thecvf.com/content_iccv_2015/html/Chakraborty_Recursive_Frechet_Mean_ICCV_2015_paper.html).
+4. Chakraborty R.; Vemuri B. C.; Statistics on the (compact) Stiefel manifold:
+   Theory and Applications.
+   The Annals of Statistics (2019), 47(1), pp. 415-438.
+   doi: [10.1214/18-AOS1692](https://doi.org/10.1214/18-AOS1692),
+   arxiv: [1708.00045](https://arxiv.org/abs/1708.00045).
 """
 struct GeodesicInterpolationMethod <: AbstractMethod end
 
@@ -73,7 +98,12 @@ point. `stop_iter` denotes the maximal number of iterations to perform and the
 between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
-The algorithm is further described in [[Afsari et al, 2013]](#Afsari2013).
+The algorithm is further described in
+> Afsari, B; Tron, R.; Vidal, R.: On the Convergence of Gradient
+> Descent for Finding the Riemannian Center of Mass,
+> SIAM Journal on Control and Optimization (2013), 51(3), pp. 2230–2260,
+> doi: [10.1137/12086282X](https://doi.org/10.1137/12086282X),
+> arxiv: [1201.0925](https://arxiv.org/abs/1201.0925)
 """
 mean(::Manifold, args...)
 
@@ -237,7 +267,10 @@ change between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
 The algorithm is further described in Algorithm 4.3 and 4.4 in
-[[Bačák, 2014]](#Bačák2014)
+> Bačák, M: Computing Medians and Means in Hadamard Spaces.
+> SIAM Journal on Optimization (2014), 24(3), pp. 1542–1566,
+> doi: [10.1137/140953393](https://doi.org/10.1137/140953393),
+> arxiv: [1210.2145](https://arxiv.org/abs/1210.2145)
 """
 median(::Manifold, args...)
 
