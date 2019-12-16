@@ -1,5 +1,5 @@
 using LinearAlgebra: diag, Diagonal, svd, SVD, rank, dot
-import Base: \, /, +, -, *
+import Base: \, /, +, -, *, similar, one
 @doc doc"""
     FixedRankMatrices{M,N,K} <: Manifold
 
@@ -101,7 +101,6 @@ UMVTVector(U,M,Vt) = UMVTVector{eltype(U)}(U,M,Vt)
 -(v::UMVTVector) = UMVTVector(-v.U, -v.M, -v.Vt)
 +(v::UMVTVector) = UMVTVector(v.U, v.M, v.Vt)
 
-
 function check_manifold_point(F::FixedRankMatrices{M,N,k,T},x; kwargs...) where {M,N,k,T}
     r = rank(x; kwargs...)
     s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(M),$(N)) witk rank $(k), "
@@ -117,9 +116,9 @@ end
 function check_manifold_point(F::FixedRankMatrices{M,N,k,T}, x::SVDMPoint) where {M,N,k,T}
     s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(M),$(N)) witk rank $(k), "
     if (size(x.U) != (M,k)) || (length(x.S) != k) || (size(x.Vt) != (k,N))
-        return DomainError([size(x.U)...,length(x.S),size(x.Vt)], string(s, "since the dimensions do not fit (expected $([N,k,k,k,M]))."))
+        return DomainError([size(x.U)...,length(x.S),size(x.Vt)...], string(s, "since the dimensions do not fit (expected $(N)x$(M) rank $(k) got $(size(x.U,1))x$(size(x.Vt,2)) rank $(size(x.S))."))
     end
-    if !isapprox(x.U'*x.U,one(zeros(M,M)))
+    if !isapprox(x.U'*x.U,one(zeros(N,N)))
         return DomainError(norm(x.U'*x.U-one(zeros(M,M))), string(s," since U is not orthonormal/unitary."))
     end
     if !isapprox(x.Vt'*x.Vt, one(zeros(N,N)))
@@ -128,12 +127,12 @@ function check_manifold_point(F::FixedRankMatrices{M,N,k,T}, x::SVDMPoint) where
 end
 
 function check_tangent_vector(F::FixedRankMatrices{M,N,k,T}, x::SVDMPoint, v::UMVTVector) where {M,N,k,T}
-    c = check_manifold_point(x)
+    c = check_manifold_point(F,x)
     if c != nothing
         return c
     end
     if (size(v.U) != (M,k)) || (size(v.Vt) != (k,N)) || (size(v.M) != (k,k))
-        return DomainError(cat(size(v.U),size(v.M),size(v.Vt),dims=1), "The tangent vector $(v) is not a tangent vector to $(x) on the fixed rank matrices since the matrix dimensions to not fit (expected $([M,k,k,k,k,N])).")
+        return DomainError(cat(size(v.U),size(v.M),size(v.Vt),dims=1), "The tangent vector $(v) is not a tangent vector to $(x) on the fixed rank matrices since the matrix dimensions to not fit (expected $(M)x$(k), $(k)x$(k), $(k)x$(N)).")
     end
     if !isapprox(v.U'*x.U, zeros(k,k))
         return DomainError(norm(v.U'*x.U-zeros(k,k)), "The tangent vector $(v) is not a tangent vector to $(x) on the fixed rank matrices since v.U'x.U is not zero. ")
@@ -191,6 +190,8 @@ function project_tangent!(::FixedRankMatrices{M,N,k,T}, vto::UMVTVector, x::SVDM
 end
 project_tangent!(F::FixedRankMatrices{M,N,k,T}, vto::UMVTVector, x::SVDMPoint, v::UMVTVector) where {M,N,k,T} = project_tangent!(F,vto,x, v.U*v.M.v.Vt)
 
+representation_size(F::FixedRankMatrices{M,N,k,T}) where {M,N,k,T} = (M,N)
+
 @doc doc"""
     retract!(M, y, x, v, ::PolarRetraction)
 
@@ -210,6 +211,14 @@ function retract!(::FixedRankMatrices{M,N,k,T}, y::SVDMPoint, x::SVDMPoint, v::U
     y.Vt .= s.Vt[1:k,:]
     return y
 end
+
+similar(x::SVDMPoint) = SVDMPoint(similar(x.U), similar(x.S), similar(x.Vt))
+similar(x::SVDMPoint, ::Type{T}) where T = SVDMPoint(similar(x.U,T), similar(x.S,T), similar(x.Vt,T))
+similar(v::UMVTVector) = UMVTVector(similar(v.U), similar(v.M), similar(v.Vt))
+similar(v::UMVTVector, ::Type{T}) where T = UMVTVector(similar(v.U,T), similar(v.M,T), similar(v.Vt,T))
+
+one(x::SVDMPoint) = SVDMPoint(one(zeros(size(x.U,1),size(x.U,1))), ones(length(x.S)), one(zeros(size(x.Vt,1),size(x.Vt,1))), length(x.S))
+one(v::UMVTVector) = UMVTVector(one(zeros(size(v.U,1),size(v.U,1))), one(zeros(size(v.M))), one(zeros(size(v.Vt,1),size(v.Vt,1))), size(v.M,1))
 
 function zero_tangent_vector!(::FixedRankMatrices{m,n,k,T},v::UMVTVector, x::SVDMPoint) where {m,n,k,T}
     v.U .= zeros(T,n,k)
