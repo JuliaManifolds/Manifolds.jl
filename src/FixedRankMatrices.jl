@@ -147,6 +147,9 @@ function inner(::FixedRankMatrices{M,N,k,T}, x::SVDMPoint, v::UMVTVector, w::UMV
     return dot(v.U,w.U) + dot(v.M,w.M) + dot(v.Vt,w.Vt)
 end
 
+isapprox(::FixedRankMatrices, x::SVDMPoint, y::SVDMPoint; kwargs...) = isapprox(x.U*Diagonal(x.S)*x.Vt, y.U*Diagonal(y.S)*y.Vt, kwargs...)
+isapprox(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector; kwargs...) = isapprox(x.U*v.M*x.Vt + v.U*x.Vt + x.U*v.Vt, x.U*w.M*x.Vt + w.U*x.Vt + x.U*w.Vt; kwargs...)
+
 @doc doc"""
     manifold_dimension(M::FixedRankMatrices{M,N,k,Real})
 
@@ -224,9 +227,14 @@ eltype(v::UMVTVector) = typeof(one(eltype(v.U)) + one(eltype(v.M)) + one(eltype(
 one(x::SVDMPoint) = SVDMPoint(one(zeros(size(x.U,1),size(x.U,1))), ones(length(x.S)), one(zeros(size(x.Vt,1),size(x.Vt,1))), length(x.S))
 one(v::UMVTVector) = UMVTVector(one(zeros(size(v.U,1),size(v.U,1))), one(zeros(size(v.M))), one(zeros(size(v.Vt,1),size(v.Vt,1))), size(v.M,1))
 
-function zero_tangent_vector!(::FixedRankMatrices{m,n,k,T},v::UMVTVector, x::SVDMPoint) where {m,n,k,T}
+function zero_tangent_vector!(::FixedRankMatrices{m,n,k,T}, v::UMVTVector, x::SVDMPoint) where {m,n,k,T}
     v.U .= zeros(T,n,k)
     v.M .= zeros(T,k,k)
     v.Vt = zeros(T,k,m)
+    return v
+end
+
+function zero_tangent_vector(::FixedRankMatrices{m,n,k,T}, x::SVDMPoint) where {m,n,k,T}
+    v = UMVTVector( zeros(T,n,k), zeros(T,k,k), zeros(T,k,m))
     return v
 end

@@ -31,7 +31,7 @@ that lie on it (contained in `pts`).
   ForwardDiff is tested.
 - `test_forward_diff = true`: if true, automatic differentiation using
   ReverseDiff is tested.
-- `test_musical_isomorphisms = false` : test musical isomorphisms 
+- `test_musical_isomorphisms = false` : test musical isomorphisms
 - `test_project_tangent = false` : test projections on tangent spaces
 - `test_representation_size = true` : test repersentation size of points/tvectprs
 - `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace
@@ -101,10 +101,13 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         end
     end
 
-    tv1 = inverse_retract(M,pts[1],pts[2],default_inverse_retraction_method)
+    if default_inverse_retraction_method != nothing
+        tv1 = inverse_retract(M,pts[1],pts[2],default_inverse_retraction_method)
+    else
+        tv1 = zero_tangent_vector(M,pts[1]) # no other available
+    end
     test_log_yields_tangent && @testset "is_tangent_vector" begin
         @test is_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1])))
-        @test check_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1]))) === nothing
         @test check_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1]))) === nothing
     end
 
