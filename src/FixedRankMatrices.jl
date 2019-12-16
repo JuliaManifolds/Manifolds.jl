@@ -5,7 +5,7 @@ import Base: \, /, +, -, *
 
 The manifold of $m\times n$ real-valued matrices of fixed rank $k$, i.e.
 ````math
-\mathcal M = \{ x \in \mathbb R^{m\times n} : \operatorname{rank}(x) = k \}
+\mathcal M = \{ x \in \mathbb R^{m\times n} : \operatorname{rank}(x) = k \}.
 ````
 
 # Representation with 3 matrix factors
@@ -29,6 +29,9 @@ T_x\mathcal M = \bigl\{ UMV^\mathrm{T} + U_xV^\mathrm{T} + UV_x^\mathrm{T} :
 \bigr\},
 ````
 where $0_k$ is the $k\times k$ zero matrix. See [`UMVTVector`](@ref) for details.
+
+The (default) metric of this manifold is obtained by restricting the metric
+on $\mathbb R^{m\times n}$ to the tangent bundle.
 
 This representation follows
 > Bart Vandereycken: "Low-rank matrix completion by Riemannian Optimization,
@@ -144,8 +147,30 @@ function inner(::FixedRankMatrices{M,N,k,T}, x::SVDMPoint, v::UMVTVector, w::UMV
     return dot(v.U,w.U) + dot(v.M,w.M) + dot(v.Vt,w.Vt)
 end
 
+@doc doc"""
+    manifold_dimension(M::FixedRankMatrices{M,N,k,Real})
+
+returns the manifold dimension for the real-valued matrices of dimension `M`x`N`
+    of rank `k`, namely
+
+````math
+k(M+N-k)
+````
+"""
 manifold_dimension(::FixedRankMatrices{M,N,k,Real}) where {M,N,k} = (M+N-k)*k
+
+@doc doc"""
+    manifold_dimension(M::FixedRankMatrices{M,N,k,Real})
+
+returns the manifold dimension for the complex-valued matrices of dimension `M`x`N`
+    of rank `k`, namely
+
+````math
+2k(M+N-k)
+````
+"""
 manifold_dimension(::FixedRankMatrices{M,N,k,Complex}) where {M,N,k} = 2*(M+N-k)*k
+
 @doc doc"""
     project_tangent!(M,vto,x,A)
 
