@@ -119,7 +119,7 @@ for two points `x`, `y` on the [`Stiefel`](@ref) manifold `M` and return
 the resulting tangent vector in `v`. This follows the folloing approach:
 From the Polar retraction we know that
 ````math
-    \operatorname{retr}_x^{-1}y = ys - q 
+    \operatorname{retr}_x^{-1}y = ys - q
 ````
 if such a symmetric positive definite $n\times n$ matrix exists. Since $ys-q$ is
     also a tangent vector at $x$ we obtain
@@ -127,7 +127,7 @@ if such a symmetric positive definite $n\times n$ matrix exists. Since $ys-q$ is
 x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2I_k = 0.
 ````
 This can either be solved by a Lyapunov approach or a continuous-time
-algebraic Riccati equation as described in 
+algebraic Riccati equation as described in
 
 > T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
 > Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
@@ -219,12 +219,12 @@ compute the QR-based retraction [`QRRetraction`](@ref) on the
 ````math
 y = \operatorname{retr}_xv = QD,
 ````
-where D is a $m\times n$ matrix with 
+where D is a $m\times n$ matrix with
 ````math
 D = \operatorname{diag}\bigl(\operatorname{sgn}(R_{ii}+0,5)_{i=1}^n \bigr),
 ````
 where $\operatorname{sgn}(x) = \begin{cases} 1 &\text{ for } x > 0,\\ 0 & \text{ for } x = 0,\\ -1&\text{ for } x < 0.
-\end{cases}$ 
+\end{cases}$
 """
 function retract!(::Stiefel{M,N,T}, y, x, v, ::QRRetraction) where {M,N,T}
     qrfac = qr(x+v)

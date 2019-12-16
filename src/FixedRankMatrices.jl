@@ -19,7 +19,7 @@ values of $x = USV^\mathrm{T}$. In other words, $U$ and $V$ are from the manifol
 The tangent space $T_x\mathcal M$ at a point $x\in\mathcal M$ with $x=USV^\mathrm{T}$
 is given by
 ````math
-T_x\mathcal M = \bigl\{ UMV^\mathrm{T} + U_xV^\mathrm{T} + UV_x^\mathrm{T} : 
+T_x\mathcal M = \bigl\{ UMV^\mathrm{T} + U_xV^\mathrm{T} + UV_x^\mathrm{T} :
     M \in \mathbb R^{k\times k},
     U_x \in \mathbb R^{m\times k},
     V_x \in \mathbb R^{n\times k}
@@ -89,11 +89,12 @@ struct UMVTVector{TU<:AbstractMatrix, TM<:AbstractMatrix, TVt<:AbstractMatrix} <
     M::TM
     Vt::TVt
 end
+
 UMVTVector(U,M,Vt,k::Int) = UMVTVector(U[:,1:k],M[1:k,1:k],Vt[1:k,:])
 UMVTVector(U,M,Vt) = UMVTVector{eltype(U)}(U,M,Vt)
 
 *(v::UMVTVector, s::Number) = UMVTVector(v.U*s, v.M*s,  v.Vpt*s)
-*(s::Number, v::UMVTVector) = UMVTVector(s*v.U, s*v.M, s*v.Vpt) 
+*(s::Number, v::UMVTVector) = UMVTVector(s*v.U, s*v.M, s*v.Vpt)
 /(v::UMVTVector, s::Number) = UMVTVector(v.U/s, v.M/s, v.Vt/s)
 \(s::Number, v::UMVTVector) = UMVTVector(s\v.U, s\v.M, s\v.Vt)
 +(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U + w.U, v.M + w.M, v.Vt + w.Vt)
@@ -106,10 +107,10 @@ function check_manifold_point(F::FixedRankMatrices{M,N,k,T},x; kwargs...) where 
     s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(M),$(N)) witk rank $(k), "
     if size(x) != (M,N)
         return DomainError(size(x), string(s,"since its size is wrong."))
-    end  
+    end
     if r > k
         return DomainError(r, string(s, "since its rank is too large."))
-    end 
+    end
     return check_manifold_point(F,SVDMPoint(x,k))
 end
 
@@ -176,7 +177,7 @@ manifold_dimension(::FixedRankMatrices{M,N,k,Complex}) where {M,N,k} = 2*(M+N-k)
 project the matrix $A\in\mathbb R^{m,n}$ or a [`UMVTVector`](@ref) (e.g. from
 another tangent space) onto the tangent space at $x$, further
 decomposing the result into $v=UMV$, i.e. a [`UMVTVector`](@ref) following
-Section 3 in 
+Section 3 in
 > Bart Vandereycken: "Low-rank matrix completion by Riemannian Optimization,
 > SIAM Journal on Optiomoization, 23(2), pp. 1214–1236, 2013.
 > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
@@ -216,6 +217,9 @@ similar(x::SVDMPoint) = SVDMPoint(similar(x.U), similar(x.S), similar(x.Vt))
 similar(x::SVDMPoint, ::Type{T}) where T = SVDMPoint(similar(x.U,T), similar(x.S,T), similar(x.Vt,T))
 similar(v::UMVTVector) = UMVTVector(similar(v.U), similar(v.M), similar(v.Vt))
 similar(v::UMVTVector, ::Type{T}) where T = UMVTVector(similar(v.U,T), similar(v.M,T), similar(v.Vt,T))
+
+eltype(x::SVDMPoint) = typeof(one(eltype(x.U)) + one(eltype(x.S)) + one(eltype(x.Vt)))
+eltype(v::UMVTVector) = typeof(one(eltype(v.U)) + one(eltype(v.M)) + one(eltype(v.Vt)))
 
 one(x::SVDMPoint) = SVDMPoint(one(zeros(size(x.U,1),size(x.U,1))), ones(length(x.S)), one(zeros(size(x.Vt,1),size(x.Vt,1))), length(x.S))
 one(v::UMVTVector) = UMVTVector(one(zeros(size(v.U,1),size(v.U,1))), one(zeros(size(v.M))), one(zeros(size(v.Vt,1),size(v.Vt,1))), size(v.M,1))
