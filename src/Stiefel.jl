@@ -6,14 +6,14 @@ using LinearAlgebra: diag, qr, tr, svd, mul!, zeros, lyap
 The Stiefel manifold consists of all $m\times n$, $m\geq n$ orthonormal matrices, i.e.
 
 ````math
-\mathcal M = \{ x \in \mathbb K^{m\times n} : \overline{x}^{\mathrm{T}}x = I_n \}
+\mathcal M = \{ x \in \mathbb F^{m\times n} : \overline{x}^{\mathrm{T}}x = I_n \}
 ````
-where $\mathbb K \in \{\mathbb R, \mathbb C\}$ and
+where $\mathbb F \in \{\mathbb R, \mathbb C\}$ and
 $I_n \in \mathbb R^{n\times n}$ denotes the $n \times n$ identity matrix.
 
 The tangent space at a point $x\in\mathcal M$ is given by
 ````math
-T_x\mathcal M = \{ v \in \mathbb{K}^{m\times n} : x^{\mathrm{T}}v + v^{\mathrm{T}}x=0_n\},
+T_x\mathcal M = \{ v \in \mathbb{F}^{m\times n} : x^{\mathrm{T}}v + v^{\mathrm{T}}x=0_n\},
 ````
 where $0_n$ is the $n\times n$ zero matrix.
 
@@ -126,14 +126,14 @@ if such a symmetric positive definite $n\times n$ matrix exists. Since $ys-q$ is
 ````math
 x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2I_k = 0.
 ````
-This can either be solved by a Lyaponov approach or a continuous-time
+This can either be solved by a Lyapunov approach or a continuous-time
 algebraic Riccati equation as described in 
 
 > T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
 > Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
 > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
 
-This implementation follows the Loyapnov approach.
+This implementation follows the Lyapunov approach.
 """
 function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::PolarInverseRetraction) where {M,N,T}
     A = x'*y
@@ -238,4 +238,4 @@ end
 
 representation_size(::Stiefel{M,N,T}) where {M,N,T} = (M,N)
 
-zero_tangent_vector!(::Stiefel{M,N,T},v,x) where {M,N,T} = fill!(v,0)
+zero_tangent_vector!(::Stiefel,v,x) = fill!(v,0)

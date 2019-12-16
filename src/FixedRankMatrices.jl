@@ -13,7 +13,7 @@ The manifold of $m\times n$ real-valued matrices of fixed rank $k$, i.e.
 A point $x\in\mathcal M$ can be stored using orthonormal matrices
 $U\in\mathbb R^{m\times k}$, $V\in\mathbb R^{n\times k}$ as well as the $k$ singular
 values of $x = USV^\mathrm{T}$. In other words, $U$ and $V$ are from the manifolds
-[`Stiefel`](@ref)`(n,k)` and [`Stiefel`](@ref)`(m,k)`, respectively; see
+[`Stiefel`](@ref)`(m,k)` and [`Stiefel`](@ref)`(n,k)`, respectively; see
 [`SVDMPoint`](@ref) for details
 
 The tangent space $T_x\mathcal M$ at a point $x\in\mathcal M$ with $x=USV^\mathrm{T}$
