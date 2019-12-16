@@ -106,8 +106,8 @@ compute the inner product for two tangent vectors `v`, `w` from the
 tangent space of `x` on the [`Stiefel`](@ref) manifold `M`. The formula reads
 
 ````math
- (v,w)_x = \operatorname{trace}({\bar v}^{\mathrm{T}}w).
- ````
+(v,w)_x = \operatorname{trace}({\bar v}^{\mathrm{T}}w).
+````
  """
 inner(::Stiefel{M,N,T}, x, v, w) where {M,N,T} = real(dot(v,w))
 
