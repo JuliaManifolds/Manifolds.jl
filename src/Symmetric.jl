@@ -57,15 +57,26 @@ The value of the variable `x` is overwritten.
 project_point!(M::SymmetricMatrices, x) = (x .= 1/2 * (x + transpose(x)))
 
 @doc doc"""
-    project_tangent!(M::SymmetricMatrices,v)
+    project_tangent!(M::SymmetricMatrices, w, x, v)
     
 Implements the [`project_tangent!`](@ref project_tangent!(B::VectorBundle, w, x, v)) of the matrix `v` onto the tangent space of the manifold of [`SymmetricMatrices`](@ref),
-i.e. the [`SymmetricMatrices`](@ref) itself. The function therefore overwrites `v` to be 
+i.e. the [`SymmetricMatrices`](@ref) itself. The result is stored in `w`:
 
-$v_{new} = \frac{1}{2} \left( v_{old} + v_{old}^{\mathrm{T}} \right).$
+$w = \frac{1}{2} \left( v + v^{\mathrm{T}} \right).$
 
 """
-project_tangent!(M::SymmetricMatrices, w, x, v) = (x .= 1/2 * (x + transpose(x)))
+project_tangent!(M::SymmetricMatrices, w, x, v) = (w .= 1/2 * (v + transpose(v)))
+
+
+@doc doc"""
+    inner(M::SymmetricMatrices, x, w, v)
+
+compute the inner product of the two [`TVector`] `w,v` from the tangent
+plane at `x` on the [`SymmetricMatrices`](@ref) `M` using the restriction of the
+metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
+"""
+@inline inner(M::SymmetricMatrices, x, w, v) = dot(w, v)
+
 
 norm(M::SymmetricMatrices, x, v) = norm(v)
 
@@ -120,7 +131,7 @@ of the [`TVector`](@ref) v from the [`MPoint`](@ref) `x` on the [`SymmetricMatri
 to the [`MPoint`](@ref) $y\in M$. The result is stored in `vto`.
 Since the metric is inherited from the embedding space, this is just the identity.
 """
-function vector_transport_to!(M::SymmetricMatrices, vto, x, v, y)
+function vector_transport_to!(M::SymmetricMatrices, vto, x, v, y, ::ParallelTransport)
     vto .= v
     return vto
 end
