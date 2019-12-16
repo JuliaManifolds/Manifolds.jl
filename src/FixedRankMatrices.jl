@@ -173,7 +173,7 @@ by computing
 ````math
     y = U_kS_kV_k^\mathrm{T},
 ````
-where $U_kS_kV_k^\mathmr{T}$ is the shortened singular value decomposition $USV=x+v$,
+where $U_k S_k V_k^\mathrm{T}$ is the shortened singular value decomposition $USV=x+v$,
 in the sense that $S_k$ is the diagonal matrix of size $k\times k$ with the $k$ largest
 singular values and $U$ and $V$ are shortened accordingly.
 """
