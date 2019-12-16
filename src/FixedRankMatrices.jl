@@ -42,7 +42,7 @@ FixedRankMatrices(m::Int, n::Int, k::Int, T::Type = Real) = FixedRankMatrices{m,
     SVDMPoint <: MPoint
 
 A point on a certain manifold, where the data is stored in a svd like fashion,
-i.e. in the form $USV^\mathrm{T}$, where this structre stores $U$, $S$ and
+i.e. in the form $USV^\mathrm{T}$, where this structure stores $U$, $S$ and
 $V^\mathrm{T}$. The storage might also be shortened to just $k$ singular values
 and accordingly shortened $U$ (columns) and $V^\mathrm{T}$ (rows)
 
