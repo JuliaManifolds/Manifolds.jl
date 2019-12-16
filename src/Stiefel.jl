@@ -19,7 +19,7 @@ where $0_n$ is the $n\times n$ zero matrix.
 
 The metric is either inherited from $\mathbb R^{m,n}$ for the real-valued case
 or the one inherited from interpreting the complex valued entries in the Gaussian
-plane $\mathbb R^2$ and then ober all entries as before.
+plane $\mathbb R^2$ and then over all entries as before.
 
 The manifold is named after [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
 
@@ -116,7 +116,7 @@ inner(::Stiefel{M,N,T}, x, v, w) where {M,N,T} = real(dot(v,w))
 
 compute the inverse retraction based on a singular value decomposition
 for two points `x`, `y` on the [`Stiefel`](@ref) manifold `M` and return
-the resulting tangent vector in `v`. This follows the wolloing approach:
+the resulting tangent vector in `v`. This follows the folloing approach:
 From the Polar retraction we know that
 ````math
     \operatorname{retr}_x^{-1}y = ys - q 
@@ -124,7 +124,7 @@ From the Polar retraction we know that
 if such a symmetric positive definite $n\times n$ matrix exists. Since $ys-q$ is
     also a tangent vector at $x$ we obtain
 ````math
-x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2\mathrm{I}_k = 0.
+x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2I_k = 0.
 ````
 This can either be solved by a Lyaponov approach or a continuous-time
 algebraic Riccati equation as described in 
@@ -221,8 +221,10 @@ y = \operatorname{retr}_xv = QD,
 ````
 where D is a $m\times n$ matrix with 
 ````math
-D = \operatorname{diag}\bigl(\operatorname{sgn}(R_{ii}+0,5)_{i=1}^n \bigr).
+D = \operatorname{diag}\bigl(\operatorname{sgn}(R_{ii}+0,5)_{i=1}^n \bigr),
 ````
+where $\operatorname{sgn}(x) = \begin{cases} 1 &\text{ for } x > 0,\\ 0 & \text{ for } x = 0,\\ -1&\text{ for } x < 0.
+\end{cases}$ 
 """
 function retract!(::Stiefel{M,N,T}, y, x, v, ::QRRetraction) where {M,N,T}
     qrfac = qr(x+v)

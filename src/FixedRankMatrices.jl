@@ -9,9 +9,10 @@ The manifold of $m\times n$ real-valued matrices of fixed rank $k$, i.e.
 ````
 
 # Representation with 3 matrix factors
+
 A point $x\in\mathcal M$ can be stored using orthonormal matrices
-$U\in\mathbb R^{m\times k}$, $V\in\mathbb R^{n,k}$ as well as the $k$ singular
-values of $x = USV^\mathrm{T}$. To be precise, $U$ and $V$ are from the manifolds
+$U\in\mathbb R^{m\times k}$, $V\in\mathbb R^{n\times k}$ as well as the $k$ singular
+values of $x = USV^\mathrm{T}$. In other words, $U$ and $V$ are from the manifolds
 [`Stiefel`](@ref)`(n,k)` and [`Stiefel`](@ref)`(m,k)`, respectively; see
 [`SVDMPoint`](@ref) for details
 
@@ -47,9 +48,9 @@ $V^\mathrm{T}$. The storage might also be shortened to just $k$ singular values
 and accordingly shortened $U$ (columns) and $V^\mathrm{T}$ (rows)
 
 # Constructors
-* `SVDMPoint(A)` for a matrix `A`, stores its svd factors (i.e. implicitly $k=\min\{m,n\})
-* `SVDMPoint(S)` for an `SVD` object, stores its svd factors (i.e. implicitly $k=\min\{m,n\})
-* `SVDMPoint(U,S,Vt)` for the svd factors to initialize the `SVDMPoint`` (i.e. implicitly $k=\min\{m,n\})
+* `SVDMPoint(A)` for a matrix `A`, stores its svd factors (i.e. implicitly $k=\min\{m,n\}$)
+* `SVDMPoint(S)` for an `SVD` object, stores its svd factors (i.e. implicitly $k=\min\{m,n\}$)
+* `SVDMPoint(U,S,Vt)` for the svd factors to initialize the `SVDMPoint`` (i.e. implicitly $k=\min\{m,n\}$)
 * `SVDMPoint(A,k)` for a matrix `A`, stores its svd factors shortened to the
   best rank $k$ approximation
 * `SVDMPoint(S,k)` for an `SVD` object, stores its svd factors shortened to the
