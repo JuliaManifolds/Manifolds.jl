@@ -19,7 +19,8 @@ where $0_n$ is the $n\times n$ zero matrix.
 
 The metric is either inherited from $\mathbb R^{m,n}$ for the real-valued case
 or the one inherited from interpreting the complex valued entries in the Gaussian
-plane $\mathbb R^2$ and then over all entries as before.
+plane $\mathbb R^2$ and then over all entries as before, i.e. the latter
+may be called an Hermitian metric in the complex-valued matrices.
 
 The manifold is named after [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
 
@@ -106,9 +107,11 @@ compute the inner product for two tangent vectors `v`, `w` from the
 tangent space of `x` on the [`Stiefel`](@ref) manifold `M`. The formula reads
 
 ````math
-(v,w)_x = \operatorname{trace}({\bar v}^{\mathrm{T}}w).
+(v,w)_x = \operatorname{trace}({\bar v}^{\mathrm{T}}w),
 ````
- """
+i.e. the [`EuclideanMetric`](@ref) from the embedding restricted to the tangent
+space. For the complex-valued case this is the Hermitian metric, to be precise.
+"""
 inner(::Stiefel{M,N,T}, x, v, w) where {M,N,T} = real(dot(v,w))
 
 @doc doc"""
