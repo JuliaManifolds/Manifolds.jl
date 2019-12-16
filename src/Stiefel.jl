@@ -9,7 +9,7 @@ The Stiefel manifold consists of all $m\times n$, $m\geq n$ orthonormal matrices
 \mathcal M = \{ x \in \mathbb K^{m\times n} : \overline{x}^{\mathrm{T}}x = I_n \}
 ````
 where $\mathbb K \in \{\mathbb R, \mathbb C\}$ and
-$I_n \in \mathbb R^{n\times n}$ denotes the unit matrix.
+$I_n \in \mathbb R^{n\times n}$ denotes the $n \times n$ identity matrix.
 
 The tangent space at a point $x\in\mathcal M$ is given by
 ````math
