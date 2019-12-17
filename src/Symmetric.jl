@@ -26,24 +26,24 @@ function representation_size(::SymmetricMatrices{N,T}) where {N,T}
 end
 
 @doc doc"""
-    manifold_dimension(M::SymmetricMatrices{n,T})
+    manifold_dimension(M::SymmetricMatrices{n,T}) where {n,T <: Real}
 
-Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M`, i.e. 
-
-* [`T <: Real`]: $\frac{n(n+1)}{2}$
-* [`T <: Complex`]: $n(n+1)$
-
+Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` with real-valued entries, i.e. 
+````math
+    \frac{n(n+1)}{2}
+````
 """
-function manifold_dimension(M::SymmetricMatrices{N,T}) where {N,T}
-    if ( T <: Real)
-        dim = div(N*(N+1), 2)
-    elseif (T <: Complex)
-        dim = N*(N+1)
-    else
-        return DomainError(T, "The matrix entries are neither Real nor Complex, so the dimension cannot be determined.")
-    end
-    return dim
-end
+manifold_dimension(M::SymmetricMatrices{N,Real}) where {N,T} = div(N*(N+1),2)
+
+@doc doc"""
+    manifold_dimension(M::SymmetricMatrices{n,T}) where {n,T <: Complex}
+
+Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` with complex-valued entries, i.e. 
+````math
+    n(n+1)
+````
+"""
+manifold_dimension(M::SymmetricMatrices{N,Complex}) where {N,T} = N*(N+1)
 
 @doc doc"""
     project_point!(M::SymmetricMatrices,x)
