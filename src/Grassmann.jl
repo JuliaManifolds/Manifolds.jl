@@ -29,10 +29,15 @@ the orthogonal group $\operatorname{O}(k)$ of orthogonal $k\times k$ matrices.
 The tangent space at a point (subspace) $x$ is given by
 ````math
 T_x\mathrm{Gr}(n,k) = \bigl\{
- v \in \mathbb{F}^{n\times k} : 
- {\bar v}^{\mathrm{T}}x + {\bar x}^{\mathrm{T}}v = 0_{k} \bigr\},
+v \in \mathbb{F}^{n\times k} :
+{\bar v}^{\mathrm{T}}x + {\bar x}^{\mathrm{T}}v = 0_{k} \bigr\},
 ````
 where $0_{k}$ denotes the $k\times k$ zero matrix.
+
+Note that a point $x\in \operatorname{Gr}(n,k)$ might be represented by
+different matrices (i.e. matrices with orthonormal column vectors that span
+the same subspace). Different representations of $x$ also lead to different
+representation matrices for the tangent space $T_x\mathrm{Gr}(n,k)$
 
 The manifold is named after
 [Hermann G. Graßmann](https://en.wikipedia.org/wiki/Hermann_Grassmann) (1809-1877).
@@ -56,7 +61,7 @@ function check_manifold_point(G::Grassmann{N,K,T},x; kwargs...) where {N,K,T}
         return DomainError(eltype(x),
             "The matrix $(x) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Grassmann manifold of dimension ($(N),$(K)).")
     end
-    if any( size(x) != representation_size(G) )
+    if size(x) != representation_size(G)
         return DomainError(size(x),
             "The matrix $(x) is does not lie on the Grassmann manifold of dimension ($(N),$(K)), since its dimensions are wrong.")
     end
@@ -79,7 +84,7 @@ function check_tangent_vector(G::Grassmann{N,K,T},x,v; kwargs...) where {N,K,T}
         return DomainError(eltype(v),
             "The matrix $(v) is neiter real- nor complex-valued matrix, so it can not bea tangent vector to the complex Grassmann manifold of dimension ($(N),$(K)).")
     end
-    if any( size(v) != representation_size(G) )
+    if size(v) != representation_size(G)
         return DomainError(size(v),
             "The matrix $(v) is does not lie in the tangent space of $(x) on the Grassmann manifold of dimension ($(N),$(K)), since its dimensions are wrong.")
     end
@@ -102,16 +107,16 @@ d_{\mathrm{GR}(n,k)}(x,y) = \operatorname{norm}(\operatorname{Re}(b)).
 ````
 where
 
-$b_{i}=\begin{cases} 0 & \text{if} \; S_i≧1 \\ \operatorname{acos}(S_i) & \, \text{if} \; S_i<1 \end{cases}.$
+$b_{i}=\begin{cases} 0 & \text{if} \; S_i \geq 1\\ \operatorname{acos}(S_i) & \, \text{if} \; S_i<1 \end{cases}.$
 """
 function distance(M::Grassmann{N,K,T}, x, y) where {N,K,T}
     if x ≈ y
-		return 0.
-  	else
+        return 0.
+    else
         a = svd(x'*y).S
         a[a .> 1] .= 1
-		return sqrt(sum( (acos.(a)).^2 ))
-  	end
+        return sqrt(sum( (acos.(a)).^2 ))
+    end
 end
 
 @doc doc"""
@@ -256,7 +261,7 @@ compute the QR-based retraction [`QRRetraction`](@ref) on the
 ````math
 y = \operatorname{retr}_xv = QD,
 ````
-where D is a $m\times n$ matrix with 
+where D is a $m\times n$ matrix with
 ````math
 D = \operatorname{diag}( \operatorname{sgn}(R_{ii}+0,5)_{i=1}^n ).
 ````
