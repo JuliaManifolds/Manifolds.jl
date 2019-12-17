@@ -14,7 +14,7 @@ The manifold can be represented as
 \operatorname{Gr}(n,k) \coloneqq \bigl\{ \operatorname{span}(x)
 : x \in \mathbb F^{n\times k}, \bar{x}^\mathrm{T}x = I_k\},
 ````
-where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transposed and
+where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transpose and
 $I_k$ is the $k\times k$ identity matrix. This means, that the columns of $x$
 form an orthonormal basis of the subspace, that is a point on
 $\operatorname{Gr}(n,k)$, and hence the subspace can actually be represented by
