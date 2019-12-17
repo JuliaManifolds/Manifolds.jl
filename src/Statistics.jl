@@ -299,7 +299,7 @@ end
 
 function median(M::Manifold, x::AbstractVector, method::AbstractMethod; kwargs...)
     y = similar_result(M, median, x[1])
-    return median!(M, y, x, median; kwargs...)
+    return median!(M, y, x, method; kwargs...)
 end
 
 function median!(M::Manifold, y, x::AbstractVector; kwargs...)
