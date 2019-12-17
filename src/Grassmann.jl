@@ -68,7 +68,7 @@ function check_manifold_point(G::Grassmann{N,K,T},x; kwargs...) where {N,K,T}
 end
 function check_tangent_vector(G::Grassmann{N,K,T},x,v; kwargs...) where {N,K,T}
     t = check_manifold_point(G,x)
-    if (t != nothing)
+    if (t !== nothing)
         return t
     end
     if (T <: Real) && !(eltype(v) <: Real)
