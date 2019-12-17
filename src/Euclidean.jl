@@ -201,7 +201,21 @@ median!(::Euclidean{Tuple{1}}, y, x::AbstractVector, w::AbstractWeights; kwargs.
 var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
 var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T} = sum(var(x; mean=m, kwargs...))
 
-function mean_and_var(::Euclidean, x::AbstractVector; kwargs...)
+function mean_and_var(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...)
     m, v = mean_and_var(x; kwargs...)
     return m, sum(v)
 end
+
+function mean_and_var(
+    ::Euclidean{Tuple{1}},
+    x::AbstractVector{<:Number},
+    w::AbstractWeights;
+    corrected = false,
+    kwargs...,
+)
+    m, v = mean_and_var(x, w; corrected = corrected, kwargs...)
+    return m, sum(v)
+end
+
+mean_and_var(M::Euclidean, x::AbstractVector, w::AbstractWeights; kwargs...) =
+    mean_and_var(M, x, w, GeodesicInterpolationMethod(); kwargs...)
