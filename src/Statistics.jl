@@ -415,6 +415,17 @@ std(M::Manifold, args...; kwargs...) = sqrt(var(M, args...; kwargs...))
     mean_and_var(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...) -> (mean, var)
 
 Compute the [`mean`](@ref) and the [`var`](@ref)iance simultaneously.
+
+    mean_and_var(
+        M::Manifold,
+        x::AbstractVector
+        [w::AbstractWeights,]
+        method::AbstractMethod;
+        kwargs...,
+    ) -> (mean, var)
+
+Use the `method` for simultaneously computing the mean and variance. To use
+a mean-specific method, call [`mean`](@ref) and then [`var`](@ref).
 """
 mean_and_var(M::Manifold, args...)
 
@@ -430,11 +441,28 @@ function mean_and_var(M::Manifold, x::AbstractVector; corrected=true, kwargs...)
     return m, v
 end
 
+function mean_and_var(M::Manifold, x::AbstractVector, method::AbstractMethod; corrected=true, kwargs...)
+    n = length(x)
+    w = _unit_weights(n)
+    return mean_and_var(M, x, w, method; corrected = corrected, kwargs...)
+end
+
 @doc doc"""
     mean_and_std(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...) -> (mean, std)
 
 Compute the [`mean`](@ref) and the standard deviation [`std`](@ref)
 simultaneously.
+
+    mean_and_std(
+        M::Manifold,
+        x::AbstractVector
+        [w::AbstractWeights,]
+        method::AbstractMethod;
+        kwargs...,
+    ) -> (mean, var)
+
+Use the `method` for simultaneously computing the mean and standard deviation.
+To use a mean-specific method, call [`mean`](@ref) and then [`std`](@ref).
 """
 function mean_and_std(M::Manifold, args...; kwargs...)
     m, v = mean_and_var(M, args...; kwargs...)
