@@ -424,7 +424,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
         @testset "Rotations default" begin
             rng = MersenneTwister(47)
             R = Manifolds.Rotations(3)
-            x0 = diagm(ones(3))
+            x0 = collect(Diagonal(ones(3)))
             v1 = hat(R, x0, [1.0, 0.0, 0.0])
             v2 = hat(R, x0, [0.0, 1.0, 0.0])
             x = [exp(R, x0, v1, π/2*(1:4)); exp(R, x0, v2, π/2*(1:4))]
