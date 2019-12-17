@@ -1,7 +1,9 @@
 include("utils.jl")
-using StatsBase: pweights
+using StatsBase: AbstractWeights, pweights
 using Random: GLOBAL_RNG, seed!
 import ManifoldsBase: manifold_dimension, exp!, log!, distance, zero_tangent_vector!
+using Manifolds: AbstractMethod, GradientMethod, CyclicProximalPointMethod
+import Manifolds: mean!, median!
 
 struct TestStatsSphere{N} <: Manifold end
 TestStatsSphere(N) = TestStatsSphere{N}()
@@ -149,7 +151,58 @@ function test_std(M, x, sexp = nothing; kwargs...)
     end
 end
 
+struct TestStatsOverload1 <: Manifold end
+struct TestStatsOverload2 <: Manifold end
+struct TestStatsOverload3 <: Manifold end
+struct TestStatsMethod1 <: AbstractMethod end
+
+mean!(M::TestStatsOverload1, y, x::AbstractVector, w::AbstractWeights, method::GradientMethod) = fill!(y, 3)
+mean!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights) = fill!(y, 4)
+mean!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights, method::GradientMethod) = fill!(y, 3)
+mean!(M::TestStatsOverload3, y, x::AbstractVector, w::AbstractWeights, method::TestStatsMethod1 = TestStatsMethod1()) = fill!(y, 5)
+
+median!(M::TestStatsOverload1, y, x::AbstractVector, w::AbstractWeights, method::CyclicProximalPointMethod) = fill!(y, 3)
+median!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights) = fill!(y, 4)
+median!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights, method::CyclicProximalPointMethod) = fill!(y, 3)
+median!(M::TestStatsOverload3, y, x::AbstractVector, w::AbstractWeights, method::TestStatsMethod1 = TestStatsMethod1()) = fill!(y, 5)
+
 @testset "Statistics" begin
+    @testset "defaults and overloads" begin
+        w = pweights([2.0])
+        x = [[0.0]]
+        @testset "mean" begin
+            M = TestStatsOverload1()
+            @test mean(M, x) == [3.0]
+            @test mean(M, x, w) == [3.0]
+            @test mean(M, x, w, GradientMethod()) == [3.0]
+            @test mean(M, x, GradientMethod()) == [3.0]
+            M = TestStatsOverload2()
+            @test mean(M, x) == [4.0]
+            @test mean(M, x, w) == [4.0]
+            @test mean(M, x, w, GradientMethod()) == [3.0]
+            @test mean(M, x, GradientMethod()) == [3.0]
+            M = TestStatsOverload3()
+            @test mean(M, x) == [5.0]
+            @test mean(M, x, w) == [5.0]
+        end
+
+        @testset "median" begin
+            M = TestStatsOverload1()
+            @test median(M, x) == [3.0]
+            @test median(M, x, w) == [3.0]
+            @test median(M, x, w, CyclicProximalPointMethod()) == [3.0]
+            @test median(M, x, CyclicProximalPointMethod()) == [3.0]
+            M = TestStatsOverload2()
+            @test median(M, x) == [4.0]
+            @test median(M, x, w) == [4.0]
+            @test median(M, x, w, CyclicProximalPointMethod()) == [3.0]
+            @test median(M, x, CyclicProximalPointMethod()) == [3.0]
+            M = TestStatsOverload3()
+            @test median(M, x) == [5.0]
+            @test median(M, x, w) == [5.0]
+        end
+    end
+
     @testset "TestStatsSphere" begin
         M = TestStatsSphere(2)
 
