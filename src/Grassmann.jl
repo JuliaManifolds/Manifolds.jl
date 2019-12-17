@@ -210,7 +210,8 @@ function log!(M::Grassmann{N,K,T}, v, x, y) where {N,K,T}
     At = y' - z*x'
     Bt = z\At
     d = svd(Bt')
-    return (v .= d.U * Diagonal(atan.(d.S)) * d.Vt)
+    v .= d.U * Diagonal(atan.(d.S)) * d.Vt
+    return v
 end
 
 @doc doc"""
