@@ -451,22 +451,16 @@ a mean-specific method, call [`mean`](@ref) and then [`var`](@ref).
 """
 mean_and_var(M::Manifold, args...)
 
-function mean_and_var(M::Manifold, x::AbstractVector, w::AbstractWeights; corrected=false, kwargs...)
-    m = mean(M, x, w; kwargs...)
+function mean_and_var(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod...; corrected=false, kwargs...)
+    m = mean(M, x, w, method...; kwargs...)
     v = var(M, x, w, m; corrected = corrected)
     return m, v
 end
 
-function mean_and_var(M::Manifold, x::AbstractVector; corrected=true, kwargs...)
-    m = mean(M, x; kwargs...)
-    v = var(M, x, m; corrected = corrected)
-    return m, v
-end
-
-function mean_and_var(M::Manifold, x::AbstractVector, method::AbstractMethod; corrected=true, kwargs...)
+function mean_and_var(M::Manifold, x::AbstractVector, method::AbstractMethod...; corrected=true, kwargs...)
     n = length(x)
     w = _unit_weights(n)
-    return mean_and_var(M, x, w, method; corrected = corrected, kwargs...)
+    return mean_and_var(M, x, w, method...; corrected = corrected, kwargs...)
 end
 
 @doc doc"""

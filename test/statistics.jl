@@ -21,7 +21,7 @@ log!(M::TestStatsEuclidean{N}, w, x, y; kwargs...) where {N} = log!(Euclidean(N)
 distance(M::TestStatsEuclidean{N}, x, y; kwargs...) where {N} = distance(Euclidean(N), x, y; kwargs...)
 zero_tangent_vector!(M::TestStatsEuclidean{N},  v, x; kwargs...) where {N} = zero_tangent_vector!(Euclidean(N),  v, x; kwargs...)
 
-function test_mean(M, x, yexp = nothing; kwargs...)
+function test_mean(M, x, yexp = nothing, method...; kwargs...)
     @testset "mean unweighted" begin
         y = mean(M, x; kwargs...)
         @test is_manifold_point(M, y; atol=10^-9)
@@ -208,9 +208,9 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
 
         @testset "var" begin
             M = TestStatsOverload1()
-            @test mean_and_var(M, x) == ([3.0], 9)
+            @test mean_and_var(M, x) == ([4.0], 9)
             @test mean_and_var(M, x, w) == ([4.0], 4)
-            @test mean_and_std(M, x) == ([3.0], 3.0)
+            @test mean_and_std(M, x) == ([4.0], 3.0)
             @test mean_and_std(M, x, w) == ([4.0], 2.0)
             @test var(M, x) == 9
             @test var(M, x, 2) == 9
