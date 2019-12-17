@@ -140,7 +140,7 @@ function exp!(M::Grassmann{N,K,T},y, x, v) where {N,K,T}
     d = svd(v)
     z =  x * d.V * Diagonal(cos.(d.S)) * d.Vt + d.U * Diagonal(sin.(d.S)) * d.Vt
     # reorthonormalize
-    y = copyto!(y, Array(qr(z).Q) )
+    copyto!(y, Array(qr(z).Q) )
     return y
 end
 
