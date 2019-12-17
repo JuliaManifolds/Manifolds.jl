@@ -3,7 +3,7 @@ import LinearAlgebra: norm
 @doc doc"""
     Grassmann{n,k,T} <: Manifold
 
-The Grassmann manifold $\operatorname{Gr}(n,k)$ consists of all subspaces span
+The Grassmann manifold $\operatorname{Gr}(n,k)$ consists of all subspaces spanned
 by $k$ linear independent vectors $\mathbb F^n$, where $\mathbb F \in \{\mathbb R, \mathbb C\}$ is
 either the real- (or complex-) valued vectors. This yields all $k$-dimensional
 subspaces of $\mathbb R^n$ for the real-valued case and all $2k$-dimensional
