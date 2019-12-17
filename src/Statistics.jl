@@ -1,4 +1,4 @@
-using StatsBase: AbstractWeights, Weights, ProbabilityWeights, values, varcorrection
+using StatsBase: AbstractWeights, Weights, ProbabilityWeights, values, varcorrection, covm
 
 _unit_weights(n::Int) = ProbabilityWeights(ones(n), n)
 
@@ -403,6 +403,44 @@ can be activated by setting `corrected=true`.
 std(M::Manifold, args...; kwargs...) = sqrt(var(M, args...; kwargs...))
 
 @doc doc"""
+    cov(M, x, m=mean(M, x); corrected=true, kwargs...)
+    cov(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false, kwargs...)
+
+Compute the (optionally weighted) covariance of a `Vector` `x` of `n` data
+points on the [`Manifold`](@ref) `M`, i.e.
+
+````math
+\frac{1}{c} \sum_{i=1}^n w_i (\log_{\mu} x_i) (\log_{\mu} x_i)^\mathrm{T},
+````
+
+where `c` is a correction term, see
+[Statistics.cov](https://juliastats.org/StatsBase.jl/stable/cov/#Statistics.cov).
+The mean of `x` can be specified as `m`, and the corrected covariance
+can be activated by setting `corrected=true`. All further `kwargs...` are passed
+to the computation of the mean (if that is not provided).
+
+!!! note
+    This function currently only supports manifolds with real vector
+    representations.
+"""
+cov(M::Manifold, args...)
+
+function cov(M::Manifold, x::AbstractVector, w::AbstractWeights, m; corrected::Bool=false)
+    v0 = zero_tangent_vector(M, m)
+    v = hcat(log.(Ref(M), Ref(m), x)...)
+    return covm(v, v0, w, 2; corrected = corrected)
+end
+
+function cov(M::Manifold, x::AbstractVector, m; corrected::Bool = true)
+    n = length(x)
+    w = _unit_weights(n)
+    return cov(M, x, w, m; corrected = corrected)
+end
+
+cov(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...) = mean_and_cov(M, x, w; kwargs...)[2]
+cov(M::Manifold, x::AbstractVector; kwargs...) = mean_and_cov(M, x; kwargs...)[2]
+
+@doc doc"""
     mean_and_var(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...) -> (mean, var)
 
 Compute the [`mean`](@ref) and the [`var`](@ref)iance simultaneously. See those
@@ -518,4 +556,97 @@ To use a mean-specific method, call [`mean`](@ref) and then [`std`](@ref).
 function mean_and_std(M::Manifold, args...; kwargs...)
     m, v = mean_and_var(M, args...; kwargs...)
     return m, sqrt(v)
+end
+
+@doc doc"""
+    mean_and_cov(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...) -> (mean, cov)
+
+Compute the [`mean`](@ref) and the [`cov`](@ref)ariance simultaneously. See
+those functions for a description of the arguments.
+
+!!! note
+    This function currently only supports manifolds with real vector
+    representations.
+
+    mean_and_cov(
+        M::Manifold,
+        x::AbstractVector
+        [w::AbstractWeights,]
+        method::AbstractMethod;
+        kwargs...,
+    ) -> (mean, cov)
+
+Use the `method` for simultaneously computing the mean and covariance. To use
+a mean-specific method, call [`mean`](@ref) and then [`cov`](@ref).
+"""
+mean_and_cov(M::Manifold, args...)
+
+function mean_and_cov(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod...; corrected=false, kwargs...)
+    m = mean(M, x, w, method...; kwargs...)
+    Σ = cov(M, x, w, m; corrected = corrected)
+    return m, Σ
+end
+
+function mean_and_cov(M::Manifold, x::AbstractVector, method::AbstractMethod...; corrected=true, kwargs...)
+    n = length(x)
+    w = _unit_weights(n)
+    return mean_and_cov(M, x, w, method...; corrected = corrected, kwargs...)
+end
+
+"""
+    moment(M::Manifold, x::AbstractVector, k::Int, [w::AbstractWeights,] m=mean(M, x [, w]))
+
+Compute the `k`th central moment of points in `x` on manifold `M`. Optionally
+provide weights `w` and/or a precomputed [`mean`](@ref).
+"""
+function moment(M::Manifold, x::AbstractVector, k::Int, w::AbstractWeights, m = mean(M, x, k, w))
+    s = sum(eachindex(x, w)) do i
+        return @inbounds w[i] * distance(M, m, x[i])^k
+    end
+    return s / w.sum
+end
+
+function moment(M::Manifold, x::AbstractVector, k::Int, m = mean(M, x))
+    w = _unit_weights(length(x))
+    return moment(M, x, k, w, m)
+end
+
+"""
+    skewness(M::Manifold, x::AbstractVector, k::Int, [w::AbstractWeights,] m=mean(M, x [, w]))
+
+Compute the standardized skewness of points in `x` on manifold `M`. Optionally
+provide weights `w` and/or a precomputed [`mean`](@ref) `m`.
+"""
+function skewness(M::Manifold, x::AbstractVector, w::AbstractWeights)
+    m, s = mean_and_std(M, x, w; corrected = false)
+    return moment(M, x, 3, w, m) / s^3
+end
+
+function skewness(M::Manifold, x::AbstractVector, w::AbstractWeights, m)
+    return moment(M, x, 3, w, m) / std(M, x, w, m; corrected = false)^3
+end
+
+function skewness(M::Manifold, x::AbstractVector, args...)
+    w = _unit_weights(length(x))
+    return skewness(M, x, w, args...)
+end
+
+"""
+    kurtosis(M::Manifold, x::AbstractVector, k::Int, [w::AbstractWeights,] m=mean(M, x [, w]))
+
+Compute the excess kurtosis of points in `x` on manifold `M`. Optionally
+provide weights `w` and/or a precomputed [`mean`](@ref) `m`.
+"""
+function kurtosis(M::Manifold, x::AbstractVector, w::AbstractWeights)
+    m, v = mean_and_var(M, x, w; corrected = false)
+    return moment(M, x, 4, w, m) / v^2 - 3
+end
+
+function kurtosis(M::Manifold, x::AbstractVector, w::AbstractWeights, m)
+    return moment(M, x, 4, w, m) / var(M, x, w, m; corrected = false)^2 - 3
+end
+
+function kurtosis(M::Manifold, x::AbstractVector, args...)
+    w = _unit_weights(length(x))
+    return kurtosis(M, x, w, args...)
 end
