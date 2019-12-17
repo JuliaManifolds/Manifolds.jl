@@ -86,6 +86,7 @@ import Distributions: _rand!, support
 import Random: rand
 using LinearAlgebra
 using Random: AbstractRNG
+using FiniteDifferences
 using UnsafeArrays
 using Einsum: @einsum
 
