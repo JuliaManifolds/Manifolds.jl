@@ -111,7 +111,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test check_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1]))) === nothing
     end
 
-    test_exp_log &&@testset "log/exp tests" begin
+    test_exp_log && @testset "log/exp tests" begin
         tv1 = log(M, pts[1], pts[2])
         tv2 = log(M, pts[2], pts[1])
         @test isapprox(M, pts[2], exp(M, pts[1], tv1))
