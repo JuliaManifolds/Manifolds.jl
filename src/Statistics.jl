@@ -100,8 +100,8 @@ point. `stop_iter` denotes the maximal number of iterations to perform and the
 between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
-Optionally, pass functions matching the signature of [`retract!`](@ref) and/or
-[`inverse_retract!`](@ref) to perform the (inverse) retraction.
+Optionally, pass `retraction` and `inverse_retraction` method types to specify
+the (inverse) retraction.
 
 The algorithm is further described in
 > Afsari, B; Tron, R.; Vidal, R.: On the Convergence of Gradient
@@ -193,8 +193,8 @@ repeated weighted geodesic interpolation. See
 If `shuffle_rng` is provided, it is used to shuffle the order in which the
 points are considered for computing the mean.
 
-Optionally, pass functions matching the signature of [`retract!`](@ref) and/or
-[`inverse_retract!`](@ref) to perform the (inverse) retraction.
+Optionally, pass `retraction` and `inverse_retraction` method types to specify
+the (inverse) retraction.
 """
 function mean!(
         M::Manifold,
@@ -267,8 +267,8 @@ and the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal
 change between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
-Optionally, pass functions matching the signature of [`retract!`](@ref) and/or
-[`inverse_retract!`](@ref) to perform the (inverse) retraction.
+Optionally, pass `retraction` and `inverse_retraction` method types to specify
+the (inverse) retraction.
 
 The algorithm is further described in Algorithm 4.3 and 4.4 in
 > Bačák, M: Computing Medians and Means in Hadamard Spaces.
@@ -487,9 +487,8 @@ Use the repeated weighted geodesic interpolation to estimate the mean.
 Simultaneously, use a Welford-like recursion to estimate the variance.
 
 If `shuffle_rng` is provided, it is used to shuffle the order in which the
-points are considered. Optionally, pass functions matching the signature of
-[`retract!`](@ref) and/or [`inverse_retract!`](@ref) to perform the (inverse)
-retraction.
+points are considered. Optionally, pass `retraction` and `inverse_retraction`
+method types to specify the (inverse) retraction.
 
 See [`GeodesicInterpolationMethod`](@ref) for details on the geodesic
 interpolation method.
