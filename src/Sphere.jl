@@ -170,7 +170,7 @@ function mean!(S::Sphere, y, x::AbstractVector, w::AbstractWeights; shuffle_rng 
     mean!(S, y, x, w, GeodesicInterpolationMethod(); shuffle_rng = shuffle_rng, kwargs...)
     for i in eachindex(x)
         @inbounds if distance(S, y, x[i]) ≥ π/2
-            return mean!(S, y, x, w, GradientMethod(); x0 = nothing, kwargs...)
+            return mean!(S, y, x, w, GradientMethod(); x0 = y, kwargs...)
         end
     end
     return y

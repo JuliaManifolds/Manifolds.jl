@@ -598,7 +598,7 @@ function mean!(M::Rotations, y, x::AbstractVector, w::AbstractWeights; shuffle_r
     mean!(M, y, x, w, GeodesicInterpolationMethod(); shuffle_rng = shuffle_rng, kwargs...)
     for i in eachindex(x)
         @inbounds if distance(M, y, x[i]) ≥ π/2/√2
-            return mean!(M, y, x, w, GradientMethod(); x0 = nothing, kwargs...)
+            return mean!(M, y, x, w, GradientMethod(); x0 = y, kwargs...)
         end
     end
     return y

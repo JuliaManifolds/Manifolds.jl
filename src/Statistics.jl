@@ -94,8 +94,7 @@ Compute the mean using the specified `method`.
 Compute the mean using the gradient descent scheme [`GradientMethod`](@ref).
 
 Optionally, provide `x0`, the starting point (by default set to the first data
-point). Set `x0` to `nothing` to use the intitial value of `y` as the starting
-point. `stop_iter` denotes the maximal number of iterations to perform and the
+point). `stop_iter` denotes the maximal number of iterations to perform and the
 `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal change
 between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
@@ -153,7 +152,7 @@ function mean!(
 )
     n = length(x)
     (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
-    x0 === nothing || copyto!(y, x0)
+    y === x0 || copyto!(y, x0)
     yold = similar_result(M, mean, y)
     copyto!(yold,y)
     v = zero_tangent_vector(M, y)
@@ -261,8 +260,7 @@ Compute the median using the specified `method`.
 Compute the median using [`CyclicProximalPointMethod`](@ref).
 
 Optionally, provide `x0`, the starting point (by default set to the first
-data point). Set `x0` to `nothing` to use the intitial value of `y` as the
-starting point. `stop_iter` denotes the maximal number of iterations to perform
+data point). `stop_iter` denotes the maximal number of iterations to perform
 and the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal
 change between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
@@ -319,7 +317,7 @@ function median!(
 )
     n = length(x)
     (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
-    x0 === nothing || copyto!(y, x0)
+    y === x0 || copyto!(y, x0)
     yold = similar_result(M,median,y)
     ytmp = copy(yold)
     v = zero_tangent_vector(M,y)
