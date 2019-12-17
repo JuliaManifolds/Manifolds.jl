@@ -62,7 +62,7 @@ papers:
 struct GeodesicInterpolationMethod <: AbstractMethod end
 
 @doc doc"""
-    mean(M::Manifold, x::AbstractVector, [w::AbstractWeights]; kwargs...)
+    mean(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...)
 
 Compute the (optionally weighted) Riemannian center of mass also known as
 Karcher mean of the vector `x` of points on the [`Manifold`](@ref) `M`, defined
@@ -108,8 +108,8 @@ The algorithm is further described in
 mean(::Manifold, args...)
 
 @doc doc"""
-    mean!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights]; kwargs...)
-    mean!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights], method::AbstractMethod; kwargs...)
+    mean!(M::Manifold, y, x::AbstractVector [, w::AbstractWeights]; kwargs...)
+    mean!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights,] method::AbstractMethod; kwargs...)
 
 Compute the [`mean`](@ref) in-place in `y`.
 """
@@ -186,7 +186,7 @@ end
         M::Manifold,
         y,
         x::AbstractVector,
-        w::AbstractWeights,
+        [w::AbstractWeights,]
         method::GeodesicInterpolationMethod;
         shuffle_rng=nothing,
         kwargs...,
@@ -230,7 +230,7 @@ function mean!(
 end
 
 @doc doc"""
-    median(M::Manifold, x::AbstractVector, [w::AbstractWeights]; kwargs...)
+    median(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...)
 
 Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
 [`Manifold`](@ref) `M`, defined as the point that satisfies the minimizer
@@ -243,14 +243,14 @@ This function is nonsmooth (i.e nondifferentiable).
 In the general case, the [`CyclicProximalPointMethod`](@ref) is used to compute the
 median. However, this default may be overloaded for specific manifolds.
 
-    median(M::Manifold, x::AbstractVector, [w::AbstractWeights], method::AbstractMethod; kwargs...)
+    median(M::Manifold, x::AbstractVector, [w::AbstractWeights,] method::AbstractMethod; kwargs...)
 
 Compute the median using the specified `method`.
 
     median(
         M::Manifold,
         x::AbstractVector,
-        w::AbstractWeights,
+        [w::AbstractWeights,]
         method::CyclicProximalPointMethod;
         x0=x[1],
         stop_iter=1000000,
@@ -275,8 +275,8 @@ The algorithm is further described in Algorithm 4.3 and 4.4 in
 median(::Manifold, args...)
 
 @doc doc"""
-    median!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights]; kwargs...)
-    median!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights], method::AbstractMethod; kwargs...)
+    median!(M::Manifold, y, x::AbstractVector [, w::AbstractWeights]; kwargs...)
+    median!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights,] method::AbstractMethod; kwargs...)
 
 computes the [`median`](@ref) in-place in `y`.
 """
@@ -348,17 +348,18 @@ function median!(
 end
 
 @doc doc"""
-    var(M, x, w::AbstractWeights, m=nothing; corrected=false, kwargs...)
+    var(M, x, m=mean(M, x); corrected=true, kwargs...)
+    var(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false, kwargs...)
 
-compute the (weighted) variance of a `Vector` `x` of `n` data points on the
-[`Manifold`](@ref) `M`, i.e.
+compute the (optionally weighted) variance of a `Vector` `x` of `n` data points
+on the [`Manifold`](@ref) `M`, i.e.
 
 ````math
 \frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m),
 ````
 where `c` is a correction term, see
 [Statistics.var](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.var).
-The (weighted) mean of `x` can be specified as `m`, and the corrected variance
+The mean of `x` can be specified as `m`, and the corrected variance
 can be activated by setting `corrected=true`. All further `kwargs...` are passed
 to the computation of the mean (if that is not provided).
 """
@@ -366,154 +367,72 @@ function var(
     M::Manifold,
     x::AbstractVector,
     w::AbstractWeights,
-    m = nothing;
+    m;
     corrected::Bool = false,
-    kwargs...
 )
-    if (m === nothing)
-        m = mean(M, x, w; kwargs...)
-    end
     wv = convert(Vector, w)
-    sqdist = wv .* distance.(Ref(M), Ref(m), x) .^ 2
-    s = sum(sqdist)
+    s = sum(eachindex(x, w)) do i
+        return @inbounds w[i] * distance(M, m, x[i])^2
+    end
     c = varcorrection(w, corrected)
     return c * s
 end
 
-@doc doc"""
-    var(M, x, m=nothing; corrected=true, kwargs...)
-
-compute the variance of a `Vector` `x` of `n` data points on the
-[`Manifold`](@ref) `M`, i.e.
-
-````math
-\frac{1}{c} \sum_{i=1}^n d_{\mathcal M}^2 (x_i,m),
-````
-where `c` is a correction term, see
-[Statistics.var](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.var).
-and `m` is the provideed mean of `x`. The uncorrected variance
-can be activated by setting `corrected=false`.
-"""
 function var(
     M::Manifold,
     x::AbstractVector,
-    m = nothing;
+    m;
     corrected::Bool = true,
-    kwargs...
 )
-    if (m === nothing)
-        m = mean(M, x; kwargs...)
-    end
     n = length(x)
     w = _unit_weights(n)
-    return var(M, x, w, m; corrected = corrected, kwargs...)
+    return var(M, x, w, m; corrected = corrected)
 end
 
-@doc doc"""
-    std(M, x, w::AbstractWeights, m=nothing; corrected=false, kwargs...)
+var(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...) = mean_and_var(M, x, w; kwargs...)[2]
+var(M::Manifold, x::AbstractVector; kwargs...) = mean_and_var(M, x; kwargs...)[2]
 
-compute the (weighted) standard deviation of a `Vector` `x` of `n` data points on the
-[`Manifold`](@ref) `M`, i.e.
+@doc doc"""
+    std(M, x, m=mean(M, x); corrected=true, kwargs...)
+    std(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false, kwargs...)
+
+compute the optionally weighted standard deviation of a `Vector` `x` of `n` data
+points on the [`Manifold`](@ref) `M`, i.e.
 
 ````math
 \sqrt{\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m)},
 ````
 where `c` is a correction term, see
-[Statistics.var](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.var).
-The (weighted) mean of `x` can be specified as `m`, and the corrected variance
-can be activated by setting `corrected=true`. All further `kwargs...` are passed
-to the computation of the mean (if that is not provided).
+[Statistics.std](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.std).
+The mean of `x` can be specified as `m`, and the corrected variance
+can be activated by setting `corrected=true`.
 """
-function std(
-    M::Manifold,
-    x::AbstractVector,
-    w::AbstractWeights,
-    m = nothing;
-    corrected::Bool = false,
-    kwargs...
-)
-    return sqrt(var(M, x, w, m; corrected = corrected, kwargs...))
-end
+std(M::Manifold, x::AbstractVector, args...; kwargs...) = sqrt(var(M, x, args...; kwargs...))
 
 @doc doc"""
-    std(M, x, m=nothing; corrected=true, kwargs...)
+    mean_and_var(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...) -> (mean, var)
 
-compute the variance of a `Vector` `x` of `n` data points on the
-[`Manifold`](@ref) `M`, i.e.
-
-````math
-\sqrt{\frac{1}{c} \sum_{i=1}^n d_{\mathcal M}^2 (x_i,m)},
-````
-where `c` is a correction term, see
-[Statistics.var](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.var).
-and `m` is the provideed mean of `x`.
+Compute the [`mean`](@ref) and the [`var`](@ref)iance simultaneously.
 """
-function std(
-    M::Manifold,
-    x::AbstractVector,
-    m = nothing;
-    corrected::Bool = true,
-    kwargs...
-)
-    return sqrt(var(M, x, m; corrected = corrected, kwargs...))
-end
-
-@doc doc"""
-    mean_and_var(M, x, w; corrected = false, kwargs...) -> (mean, var)
-    mean_and_var(M, x; corrected = true, kwargs...) -> (mean, var)
-
-compute the [`mean`](@ref) `m` and the [`var`](@ref)iance `v` simultaneously.
-"""
-function mean_and_var(
-    M::Manifold,
-    x::AbstractVector,
-    w::AbstractWeights;
-    corrected = false,
-    kwargs...
-)
+function mean_and_var(M::Manifold, x::AbstractVector, w::AbstractWeights; corrected=false, kwargs...)
     m = mean(M, x, w; kwargs...)
-    v = var(M, x, w, m; corrected = corrected, kwargs...)
+    v = var(M, x, w, m; corrected = corrected)
     return m, v
 end
 
-function mean_and_var(
-    M::Manifold,
-    x::AbstractVector;
-    corrected = true,
-    kwargs...
-)
-    n = length(x)
-    w = _unit_weights(n)
-    m = mean(M, x, w; kwargs...)
-    v = var(M, x, w, m; corrected = corrected, kwargs...)
+function mean_and_var(M::Manifold, x::AbstractVector; corrected=true, kwargs...)
+    m = mean(M, x; kwargs...)
+    v = var(M, x, m; corrected = corrected)
     return m, v
 end
 
 @doc doc"""
-    mean_and_std(M, x, w; corrected = false, kwargs...) -> (mean, std)
-    mean_and_std(M, x; corrected = true, kwargs...) -> (mean, std)
+    mean_and_std(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...) -> (mean, std)
 
-compute the [`mean`](@ref) `m` and the standard deviation [`std`](@ref) `s`
+Compute the [`mean`](@ref) and the standard deviation [`std`](@ref)
 simultaneously.
 """
-function mean_and_std(
-    M::Manifold,
-    x::AbstractVector,
-    w::AbstractWeights;
-    corrected = false,
-    kwargs...
-)
-    m = mean(M, x, w; kwargs...)
-    s = std(M, x, w, m; corrected = corrected, kwargs...)
-    return m, s
-end
-
-function mean_and_std(
-    M::Manifold,
-    x::AbstractVector;
-    corrected = true,
-    kwargs...
-)
-    m, v = mean_and_var(M, x; corrected = corrected, kwargs...)
-    return m, √v
+function mean_and_std(M::Manifold, x::AbstractVector, args...; kwargs...)
+    m, v = mean_and_var(M, x, args...; kwargs...)
+    return m, sqrt(v)
 end
