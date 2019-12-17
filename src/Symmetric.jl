@@ -3,9 +3,9 @@
 
 The [`Manifold`](@ref) $ Sym (N)$ consisting of the `T`-valued, symmetric matrices of size $ n\times n$, i.e. the set 
 
-$\text{Sym}(n) = \bigl\{A \in \mathbb K^{n\times n} \big| A^{\mathrm{T}} = A \bigr\}$
+$\operatorname{Sym}(n) = \bigl\{A \in \mathbb F^{n\times n} \big| A^{\mathrm{T}} = A \bigr\}$
 
-where $\mathbb K \in \{ \mathbb R, \mathbb C\}$.
+where $\mathbb F \in \{ \mathbb R, \mathbb C\}$.
 For `T`, there is a distinction between 
 * `T = Real`: real-valued matrix entries
 * `T = Complex`: complex-valued matrix entries
@@ -59,7 +59,7 @@ project_point!(M::SymmetricMatrices, x) = (x .= 1/2 * (x + transpose(x)))
 @doc doc"""
     project_tangent!(M::SymmetricMatrices, w, x, v)
     
-Implements the [`project_tangent!`](@ref project_tangent!(B::VectorBundle, w, x, v)) of the matrix `v` onto the tangent space of the manifold of [`SymmetricMatrices`](@ref),
+Implements the [`project_tangent!`](@ref project_tangent!(M::Manifold, w, x, v)) of the matrix `v` onto the tangent space of the manifold of [`SymmetricMatrices`](@ref),
 i.e. the [`SymmetricMatrices`](@ref) itself. The result is stored in `w`:
 
 $w = \frac{1}{2} \left( v + v^{\mathrm{T}} \right).$
@@ -71,7 +71,7 @@ project_tangent!(M::SymmetricMatrices, w, x, v) = (w .= 1/2 * (v + transpose(v))
 @doc doc"""
     inner(M::SymmetricMatrices, x, w, v)
 
-compute the inner product of the two [`TVector`] `w,v` from the tangent
+compute the inner product of the two tangent vectors `w,v` from the tangent
 plane at `x` on the [`SymmetricMatrices`](@ref) `M` using the restriction of the
 metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
@@ -91,13 +91,13 @@ distance(M::SymmetricMatrices, x, y) = norm(x-y)
 
 @doc doc"""
     exp!(M::SymmetricMatrices, y, x, v)
-Computes the exponential map [`exp!`](@ref exp!(M::Manifold, y, x, v, t=1)) of the [`TVector`](@ref) `v` at
-[`MPoint`](@ref) `x` lying on the [`SymmetricMatrices`](@ref) manifold `M`. 
+Computes the exponential map [`exp!`](@ref exp!(M::Manifold, y, x, v, t=1)) of the tangent vector `v` at
+manifold point `x` lying on the [`SymmetricMatrices`](@ref) manifold `M`. 
 The result is saved in `y`. 
 For the [`SymmetricMatrices`](@ref), the exponential map is simply the sum, i.e. 
-
+````math
     y .= x + v
-
+````
 """
 function exp!(M::SymmetricMatrices, y, x, v)
     y .= x + v
@@ -106,12 +106,12 @@ end
 
 @doc doc"""
     log!(M::SymmetricMatrices, v, x, y)
-Computes the logarithmic map from the [`MPoint`](@ref) `x` to the [`MPoint`](@ref) `y`, both lying on the [`SymmetricMatrices`](@ref) manifold `M`. 
+Computes the logarithmic map from the manifold point `x` to the manifold point `y`, both lying on the [`SymmetricMatrices`](@ref) manifold `M`. 
 The result is saved in `v`. 
 For the [`SymmetricMatrices`](@ref), the logarithmic map is simply the difference, i.e. 
-
+````math
     v .= y-x
-
+````
 """
 function log!(M::SymmetricMatrices, v, x, y)
     v .= y-x
@@ -126,9 +126,9 @@ end
 
 @doc doc"""
     vector_transport_to!(M::SymmetricMatrices, vto, x, v, y)
-Computes the vector transport [`vector_transport_to!`](@ref vector_transport_to!(M::Manifold, vto, x, v, y, ProjectionTransport())) 
-of the [`TVector`](@ref) v from the [`MPoint`](@ref) `x` on the [`SymmetricMatrices`](@ref) `M`
-to the [`MPoint`](@ref) $y\in M$. The result is stored in `vto`.
+Computes the [`vector_transport_to!`](@ref vector_transport_to!(M::Manifold, vto, x, v, y, ProjectionTransport())) 
+of the tangent vector `v` from the manifold point `x` on the [`SymmetricMatrices`](@ref) `M`
+to the manifold point $y\in M$. The result is stored in `vto`.
 Since the metric is inherited from the embedding space, this is just the identity.
 """
 function vector_transport_to!(M::SymmetricMatrices, vto, x, v, y, ::ParallelTransport)
@@ -139,7 +139,7 @@ end
 @doc doc"""
     flat!(M::SymmetricMatrices, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
 Computes the [`flat!`](@ref flat!(M::Manifold, v::FVector, x, w::FVector)) isomorphism of the [`SymmetricMatrices`](@ref) manifold `M` 
-on the [`MPoint`](@ref) `x` and [`TVector`](@ref) `w`. 
+on the manifold point `x` and tangent vector `w`. 
 The result is stored in `v`. 
 
 As `M` is already a vector space over $\mathbb R$, this returns just the vector `w`.
@@ -152,7 +152,7 @@ end
 @doc doc"""
     sharp!(M::SymmetricMatrices, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
 Computes the [`sharp!`](@ref sharp!(M::Manifold, v::FVector, x, w::FVector)) isomorphism of the [`SymmetricMatrices`](@ref) manifold `M` 
-on the [`MPoint`](@ref) `x` and [`CoTVector`](@ref) `w`. 
+on the manifold point `x` and cotangent vector `w`. 
 The result is stored in `v`. 
 
 As `M` is already a vector space over $\mathbb R$, this returns just the vector `w`.
@@ -166,7 +166,7 @@ end
 @doc doc"""
     check_manifold_point(M::SymmetricMatrices,x; kwargs...)
 
-Checks whether `x` is a valid [`MPoint`](@ref) on the [`SymmetricMatrices`](@ref) `M`, i.e. is a symmetric matrix
+Checks whether `x` is a valid manifold point on the [`SymmetricMatrices`](@ref) `M`, i.e. is a symmetric matrix
 of size `(N,N)` with values of type `T`.
 
 The tolerance for the symmetry of `x` can be set using `kwargs`.
@@ -187,7 +187,7 @@ end
 """
     check_tangent_vector(M::SymmetricMatrices,x,v; kwargs... )
 
-Checks whether `v` is a valid [`TVector`](@ref) to [`MPoint`](@ref) `x` on the [`SymmetricMatrices`](@ref) matrices `M`, i.e.
+Checks whether `v` is a valid tangent vector to manifold point `x` on the [`SymmetricMatrices`](@ref) matrices `M`, i.e.
 after [`is_manifold_point`](@ref)(M,x), `v` has to be a symmetric matrix of dimension `(N,N)`.
 
 The tolerance for the symmetry of `x` can be set using `kwargs`.

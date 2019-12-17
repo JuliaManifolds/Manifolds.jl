@@ -5,6 +5,7 @@ include("utils.jl")
     A = [1 2 3; 4 5 6; 7 8 9]
     A_sym = [1 2 3; 2 5 -1; 3 -1 9]
     B_sym = [1 2 3; 2 5 1; 3 1 -1]
+    X = zeros(3,3)
     @testset "Real Symmetric Matrices Basics" begin
         @test representation_size(M) == (3,3)
         @test check_manifold_point(M,B_sym)==nothing
@@ -13,11 +14,12 @@ include("utils.jl")
         @test_throws DomainError is_tangent_vector(M,B_sym,A,true)
         @test manifold_dimension(M) == 6
     end
-    B_sym = [1 2 3; 2 5 1; 3 1 -1]
     types = [ Matrix{Float32},
             Matrix{Float64},
             MMatrix{3,3,Float32},
-            MMatrix{3,3,Float64}
+            MMatrix{3,3,Float64},
+            SizedMatrix{3,3,Float32},
+            SizedMatrix{3,3,Float64},
         ]
     for T in types
         pts = [convert(T,A_sym),convert(T,B_sym),convert(T,X)]

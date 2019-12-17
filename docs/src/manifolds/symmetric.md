@@ -1,4 +1,4 @@
-# Symmetric
+# Symmetric matrices
 
 
 ```@autodocs
