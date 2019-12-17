@@ -448,6 +448,65 @@ function mean_and_var(M::Manifold, x::AbstractVector, method::AbstractMethod; co
 end
 
 @doc doc"""
+    mean_and_var(
+        M::Manifold,
+        x::AbstractVector
+        [w::AbstractWeights,]
+        method::GeodesicInterpolationMethod;
+        shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
+        kwargs...,
+    ) -> (mean, var)
+
+Use the repeated weighted geodesic interpolation to estimate the mean.
+Simultaneously, use a Welford-like recursion to estimate the variance.
+
+If `shuffle_rng` is provided, it is used to shuffle the order in which the
+points are considered.
+
+See [`GeodesicInterpolationMethod`](@ref) for details on the geodesic
+interpolation method.
+
+!!! note
+    The Welford algorithm for the variance is experimental and is not guaranteed
+    to give accurate results except on [`Euclidean`](@ref).
+"""
+function mean_and_var(
+        M::Manifold,
+        x::AbstractVector,
+        w::AbstractWeights,
+        ::GeodesicInterpolationMethod;
+        shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
+        corrected = false,
+        kwargs...,
+)
+    n = length(x)
+    (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+    order = shuffle_rng === nothing ? (1:n) : shuffle(shuffle_rng, 1:n)
+    @inbounds begin
+        j = order[1]
+        s = w[j]
+        y = copy(x[j])
+    end
+    v = zero_tangent_vector(M, y)
+    M₂ = zero(eltype(v))
+    ytmp = similar_result(M, mean, y)
+    @inbounds for i in 2:n
+        j = order[i]
+        snew = s + w[j]
+        t = w[j] / snew
+        log!(M, v, y, x[j])
+        exp!(M, ytmp, y, v, t)
+        d = norm(M, y, v)
+        copyto!(y, ytmp)
+        M₂ += t * s * d^2
+        s = snew
+    end
+    c = varcorrection(w, corrected)
+    σ² = c * M₂
+    return y, σ²
+end
+
+@doc doc"""
     mean_and_std(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...) -> (mean, std)
 
 Compute the [`mean`](@ref) and the standard deviation [`std`](@ref)
