@@ -86,8 +86,8 @@ Compute the mean using the specified `method`.
         method::GradientMethod;
         x0=x[1],
         stop_iter=100,
-        retract! = retract!,
-        inverse_retract! = inverse_retract!,
+        retraction::AbstractRetractionMethod = ExponentialRetraction(),
+        inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
         kwargs...,
     )
 
@@ -147,8 +147,8 @@ function mean!(
     ::GradientMethod;
     x0 = x[1],
     stop_iter=100,
-    retract! = retract!,
-    inverse_retract! = inverse_retract!,
+    retraction::AbstractRetractionMethod = ExponentialRetraction(),
+    inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
     kwargs...
 )
     n = length(x)
@@ -162,12 +162,12 @@ function mean!(
     for i=1:stop_iter
         copyto!(yold,y)
         # Online weighted mean
-        @inbounds inverse_retract!(M, v, yold, x[1])
+        @inbounds inverse_retract!(M, v, yold, x[1], inverse_retraction)
         @inbounds for j in 2:n
-            inverse_retract!(M, vtmp, yold, x[j])
+            inverse_retract!(M, vtmp, yold, x[j], inverse_retraction)
             v .+= α[j] .* (vtmp .- v)
         end
-        retract!(M, y, yold, v, 0.5)
+        retract!(M, y, yold, v, 0.5, retraction)
         isapprox(M,y,yold; kwargs...) && break
     end
     return y
@@ -181,8 +181,8 @@ end
         [w::AbstractWeights,]
         method::GeodesicInterpolationMethod;
         shuffle_rng=nothing,
-        retract! = retract!,
-        inverse_retract! = inverse_retract!,
+        retraction::AbstractRetractionMethod = ExponentialRetraction(),
+        inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
         kwargs...,
     )
 
@@ -203,8 +203,8 @@ function mean!(
         w::AbstractWeights,
         ::GeodesicInterpolationMethod;
         shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
-        retract! = retract!,
-        inverse_retract! = inverse_retract!,
+        retraction::AbstractRetractionMethod = ExponentialRetraction(),
+        inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
         kwargs...,
 )
     n = length(x)
@@ -221,8 +221,8 @@ function mean!(
         j = order[i]
         s += w[j]
         t = w[j] / s
-        inverse_retract!(M, v, y, x[j])
-        retract!(M, ytmp, y, v, t)
+        inverse_retract!(M, v, y, x[j], inverse_retraction)
+        retract!(M, ytmp, y, v, t, retraction)
         copyto!(y, ytmp)
     end
     return y
@@ -253,8 +253,8 @@ Compute the median using the specified `method`.
         method::CyclicProximalPointMethod;
         x0=x[1],
         stop_iter=1000000,
-        retract! = retract!,
-        inverse_retract! = inverse_retract!,
+        retraction::AbstractRetractionMethod = ExponentialRetraction(),
+        inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
         kwargs...,
     )
 
@@ -313,8 +313,8 @@ function median!(
     ::CyclicProximalPointMethod;
     x0=x[1],
     stop_iter=1000000,
-    retract! = retract!,
-    inverse_retract! = inverse_retract!,
+    retraction::AbstractRetractionMethod = ExponentialRetraction(),
+    inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
     kwargs...
 )
     n = length(x)
@@ -329,8 +329,8 @@ function median!(
         copyto!(yold,y)
         for j in 1:n
             @inbounds t = min( λ * wv[j] / distance(M,y,x[j]), 1. )
-            @inbounds inverse_retract!(M, v, y, x[j])
-            retract!(M, ytmp, y, v, t)
+            @inbounds inverse_retract!(M, v, y, x[j], inverse_retraction)
+            retract!(M, ytmp, y, v, t, retraction)
             copyto!(y,ytmp)
         end
         isapprox(M, y, yold; kwargs...) && break
@@ -440,8 +440,8 @@ end
         [w::AbstractWeights,]
         method::GeodesicInterpolationMethod;
         shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
-        retract! = retract!,
-        inverse_retract! = inverse_retract!,
+        retraction::AbstractRetractionMethod = ExponentialRetraction(),
+        inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
         kwargs...,
     ) -> (mean, var)
 
@@ -467,8 +467,8 @@ function mean_and_var(
         ::GeodesicInterpolationMethod;
         shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
         corrected = false,
-        retract! = retract!,
-        inverse_retract! = inverse_retract!,
+        retraction::AbstractRetractionMethod = ExponentialRetraction(),
+        inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
         kwargs...,
 )
     n = length(x)
@@ -486,8 +486,8 @@ function mean_and_var(
         j = order[i]
         snew = s + w[j]
         t = w[j] / snew
-        inverse_retract!(M, v, y, x[j])
-        retract!(M, ytmp, y, v, t)
+        inverse_retract!(M, v, y, x[j], inverse_retraction)
+        retract!(M, ytmp, y, v, t, retraction)
         d = norm(M, y, v)
         copyto!(y, ytmp)
         M₂ += t * s * d^2

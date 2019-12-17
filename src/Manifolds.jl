@@ -38,7 +38,9 @@ import LinearAlgebra: dot,
 using ManifoldsBase
 using ManifoldsBase: AbstractRetractionMethod,
     AbstractInverseRetractionMethod,
-    AbstractVectorTransportMethod
+    AbstractVectorTransportMethod,
+    ExponentialRetraction,
+    LogarithmicInverseRetraction
 import ManifoldsBase: base_manifold,
     check_manifold_point,
     check_tangent_vector,
