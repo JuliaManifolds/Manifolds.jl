@@ -86,7 +86,9 @@ Compute the mean using the specified `method`.
         method::GradientMethod;
         x0=x[1],
         stop_iter=100,
-        kwargs...
+        retract! = retract!,
+        inverse_retract! = inverse_retract!,
+        kwargs...,
     )
 
 Compute the mean using the gradient descent scheme [`GradientMethod`](@ref).
@@ -97,6 +99,9 @@ point. `stop_iter` denotes the maximal number of iterations to perform and the
 `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal change
 between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
+
+Optionally, pass functions matching the signature of [`retract!`](@ref) and/or
+[`inverse_retract!`](@ref) to perform the (inverse) retraction.
 
 The algorithm is further described in
 > Afsari, B; Tron, R.; Vidal, R.: On the Convergence of Gradient
@@ -157,6 +162,8 @@ function mean!(
     ::GradientMethod;
     x0 = x[1],
     stop_iter=100,
+    retract! = retract!,
+    inverse_retract! = inverse_retract!,
     kwargs...
 )
     n = length(x)
@@ -170,12 +177,12 @@ function mean!(
     for i=1:stop_iter
         copyto!(yold,y)
         # Online weighted mean
-        @inbounds log!(M, v, yold, x[1])
+        @inbounds inverse_retract!(M, v, yold, x[1])
         @inbounds for j in 2:n
-            log!(M, vtmp, yold, x[j])
+            inverse_retract!(M, vtmp, yold, x[j])
             v .+= α[j] .* (vtmp .- v)
         end
-        exp!(M, y, yold, v, 0.5)
+        retract!(M, y, yold, v, 0.5)
         isapprox(M,y,yold; kwargs...) && break
     end
     return y
@@ -189,6 +196,8 @@ end
         [w::AbstractWeights,]
         method::GeodesicInterpolationMethod;
         shuffle_rng=nothing,
+        retract! = retract!,
+        inverse_retract! = inverse_retract!,
         kwargs...,
     )
 
@@ -198,6 +207,9 @@ repeated weighted geodesic interpolation. See
 
 If `shuffle_rng` is provided, it is used to shuffle the order in which the
 points are considered for computing the mean.
+
+Optionally, pass functions matching the signature of [`retract!`](@ref) and/or
+[`inverse_retract!`](@ref) to perform the (inverse) retraction.
 """
 function mean!(
         M::Manifold,
@@ -206,6 +218,8 @@ function mean!(
         w::AbstractWeights,
         ::GeodesicInterpolationMethod;
         shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
+        retract! = retract!,
+        inverse_retract! = inverse_retract!,
         kwargs...,
 )
     n = length(x)
@@ -222,8 +236,8 @@ function mean!(
         j = order[i]
         s += w[j]
         t = w[j] / s
-        log!(M, v, y, x[j])
-        exp!(M, ytmp, y, v, t)
+        inverse_retract!(M, v, y, x[j])
+        retract!(M, ytmp, y, v, t)
         copyto!(y, ytmp)
     end
     return y
@@ -254,7 +268,9 @@ Compute the median using the specified `method`.
         method::CyclicProximalPointMethod;
         x0=x[1],
         stop_iter=1000000,
-        kwargs...
+        retract! = retract!,
+        inverse_retract! = inverse_retract!,
+        kwargs...,
     )
 
 Compute the median using [`CyclicProximalPointMethod`](@ref).
@@ -265,6 +281,9 @@ starting point. `stop_iter` denotes the maximal number of iterations to perform
 and the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal
 change between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
+
+Optionally, pass functions matching the signature of [`retract!`](@ref) and/or
+[`inverse_retract!`](@ref) to perform the (inverse) retraction.
 
 The algorithm is further described in Algorithm 4.3 and 4.4 in
 > Bačák, M: Computing Medians and Means in Hadamard Spaces.
@@ -324,6 +343,8 @@ function median!(
     ::CyclicProximalPointMethod;
     x0=x[1],
     stop_iter=1000000,
+    retract! = retract!,
+    inverse_retract! = inverse_retract!,
     kwargs...
 )
     n = length(x)
@@ -338,8 +359,8 @@ function median!(
         copyto!(yold,y)
         for j in 1:n
             @inbounds t = min( λ * wv[j] / distance(M,y,x[j]), 1. )
-            @inbounds log!(M, v, y, x[j])
-            exp!(M, ytmp, y, v, t)
+            @inbounds inverse_retract!(M, v, y, x[j])
+            retract!(M, ytmp, y, v, t)
             copyto!(y,ytmp)
         end
         isapprox(M, y, yold; kwargs...) && break
@@ -414,7 +435,8 @@ std(M::Manifold, args...; kwargs...) = sqrt(var(M, args...; kwargs...))
 @doc doc"""
     mean_and_var(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...) -> (mean, var)
 
-Compute the [`mean`](@ref) and the [`var`](@ref)iance simultaneously.
+Compute the [`mean`](@ref) and the [`var`](@ref)iance simultaneously. See those
+functions for a description of the arguments.
 
     mean_and_var(
         M::Manifold,
@@ -454,6 +476,8 @@ end
         [w::AbstractWeights,]
         method::GeodesicInterpolationMethod;
         shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
+        retract! = retract!,
+        inverse_retract! = inverse_retract!,
         kwargs...,
     ) -> (mean, var)
 
@@ -461,7 +485,9 @@ Use the repeated weighted geodesic interpolation to estimate the mean.
 Simultaneously, use a Welford-like recursion to estimate the variance.
 
 If `shuffle_rng` is provided, it is used to shuffle the order in which the
-points are considered.
+points are considered. Optionally, pass functions matching the signature of
+[`retract!`](@ref) and/or [`inverse_retract!`](@ref) to perform the (inverse)
+retraction.
 
 See [`GeodesicInterpolationMethod`](@ref) for details on the geodesic
 interpolation method.
@@ -477,6 +503,8 @@ function mean_and_var(
         ::GeodesicInterpolationMethod;
         shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
         corrected = false,
+        retract! = retract!,
+        inverse_retract! = inverse_retract!,
         kwargs...,
 )
     n = length(x)
@@ -494,8 +522,8 @@ function mean_and_var(
         j = order[i]
         snew = s + w[j]
         t = w[j] / snew
-        log!(M, v, y, x[j])
-        exp!(M, ytmp, y, v, t)
+        inverse_retract!(M, v, y, x[j])
+        retract!(M, ytmp, y, v, t)
         d = norm(M, y, v)
         copyto!(y, ytmp)
         M₂ += t * s * d^2
