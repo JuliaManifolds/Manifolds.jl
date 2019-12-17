@@ -1,8 +1,8 @@
 include("utils.jl")
 using StatsBase: AbstractWeights, pweights
 using Random: GLOBAL_RNG, seed!
-import ManifoldsBase: manifold_dimension, exp!, log!, distance, zero_tangent_vector!
-using Manifolds: AbstractMethod, GradientMethod, CyclicProximalPointMethod
+import ManifoldsBase: manifold_dimension, exp!, log!, inner, zero_tangent_vector!
+using Manifolds: AbstractMethod, GradientMethod, CyclicProximalPointMethod, GeodesicInterpolationMethod
 import Manifolds: mean!, median!, var, mean_and_var
 
 struct TestStatsSphere{N} <: Manifold end
@@ -10,7 +10,7 @@ TestStatsSphere(N) = TestStatsSphere{N}()
 manifold_dimension(M::TestStatsSphere{N}) where {N} = manifold_dimension(Sphere(N))
 exp!(M::TestStatsSphere{N}, w, x, y; kwargs...) where {N} = exp!(Sphere(N), w, x, y; kwargs...)
 log!(M::TestStatsSphere{N}, y, x, v; kwargs...) where {N} = log!(Sphere(N), y, x, v; kwargs...)
-distance(M::TestStatsSphere{N}, x, y; kwargs...) where {N} = distance(Sphere(N), x, y; kwargs...)
+inner(M::TestStatsSphere{N}, x, v, w; kwargs...) where {N} = inner(Sphere(N), x, v, w; kwargs...)
 zero_tangent_vector!(M::TestStatsSphere{N},  v, x; kwargs...) where {N} = zero_tangent_vector!(Sphere(N),  v, x; kwargs...)
 
 struct TestStatsEuclidean{N} <: Manifold end
@@ -18,7 +18,7 @@ TestStatsEuclidean(N) = TestStatsEuclidean{N}()
 manifold_dimension(M::TestStatsEuclidean{N}) where {N} = manifold_dimension(Euclidean(N))
 exp!(M::TestStatsEuclidean{N}, y, x, v; kwargs...) where {N} = exp!(Euclidean(N), y, x, v; kwargs...)
 log!(M::TestStatsEuclidean{N}, w, x, y; kwargs...) where {N} = log!(Euclidean(N), w, x, y; kwargs...)
-distance(M::TestStatsEuclidean{N}, x, y; kwargs...) where {N} = distance(Euclidean(N), x, y; kwargs...)
+inner(M::TestStatsEuclidean{N}, x, v, w; kwargs...) where {N} = inner(Euclidean(N), x, v, w; kwargs...)
 zero_tangent_vector!(M::TestStatsEuclidean{N},  v, x; kwargs...) where {N} = zero_tangent_vector!(Euclidean(N),  v, x; kwargs...)
 
 function test_mean(M, x, yexp = nothing, method...; kwargs...)
@@ -333,6 +333,107 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
                 test_var(M, x)
                 test_std(M, x)
             end
+        end
+    end
+
+    @testset "GeodesicInterpolationMethod" begin
+        @testset "mean" begin
+            rng = MersenneTwister(1212)
+            @testset "exact for Euclidean" begin
+                M = Euclidean(2, 2)
+                x = [randn(rng, 2, 2) for _ = 1:10]
+                w = pweights([rand(rng) for _ = 1:10])
+                @test mean(M, x, GeodesicInterpolationMethod()) ≈ mean(x)
+                @test mean(M, x, w, GeodesicInterpolationMethod()) ≈ mean(M, x, w, GradientMethod())
+            end
+
+            @testset "three points" begin
+                S = Sphere(2)
+                x = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0] / √2]
+                @test mean(S, [x[1], x[1]], GeodesicInterpolationMethod()) ≈ x[1]
+                @test mean(S, x[1:2], GeodesicInterpolationMethod()) ≈ x[3]
+                @test mean(S, x[1:2], pweights([1, 0]), GeodesicInterpolationMethod()) ≈ x[1]
+                @test mean(S, x[1:2], pweights([0, 1]), GeodesicInterpolationMethod()) ≈ x[2]
+                @test mean(S, x[1:2], pweights([1, 2]), GeodesicInterpolationMethod()) ≈ shortest_geodesic(S, x[1], x[2], 2/3)
+                m = mean(S, x, pweights([1, 2, 3]), GeodesicInterpolationMethod())
+                @test m ≈ shortest_geodesic(S, shortest_geodesic(S, x[1], x[2], 2/3), x[3], 1/2)
+            end
+
+            @testset "resumable" begin
+                S = Sphere(2)
+                x = [normalize(randn(rng, 3)) for _= 1:10]
+                w = pweights([rand(rng) for _ = 1:10])
+                ypart = mean(S, x[1:5], pweights(w[1:5]), GeodesicInterpolationMethod())
+                yfull = mean(S, x, w, GeodesicInterpolationMethod())
+                x2 = [[ypart]; x[6:end]]
+                w2 = pweights([sum(w[1:5]); w[6:end]])
+                @test mean(S, x2, w2, GeodesicInterpolationMethod()) ≈ yfull
+            end
+        end
+
+        @testset "welford" begin
+            rng = MersenneTwister(56)
+
+            @testset "exact for Euclidean" begin
+                M = TestStatsEuclidean(4)
+                x = [randn(rng, 4) for _ = 1:10]
+                w = pweights([rand(rng) for _ = 1:10])
+                m1, v1 = mean_and_var(M, x, GeodesicInterpolationMethod())
+                @test m1 ≈ mean(x)
+                @test v1 ≈ sum(var(x))
+                m2, v2 = mean_and_var(M, x, w, GeodesicInterpolationMethod())
+                @test m2 ≈ mean(M, x, w, GradientMethod())
+                @test v2 ≈ var(M, x, w)
+            end
+
+            @testset "three points" begin
+                S = Sphere(2)
+                x = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0] / √2]
+                m1, v1 = mean_and_var(S, [x[1], x[1]], GeodesicInterpolationMethod())
+                @test m1 ≈ x[1]
+                @test v1 ≈ 0 atol=1e-6
+                m2, v2 = mean_and_var(S, x[1:2], GeodesicInterpolationMethod())
+                @test m2 ≈ x[3]
+                @test v2 ≈ (π/4)^2 * 2 / (2 - 1)
+                m3, v3 = mean_and_var(S, x[1:2], pweights([1, 0]), GeodesicInterpolationMethod())
+                @test m3 ≈ x[1]
+                @test v3 ≈ 0 atol=1e-6
+                m4, v4 = mean_and_var(S, x[1:2], pweights([0, 1]), GeodesicInterpolationMethod())
+                @test m4 ≈ x[2]
+                @test v4 ≈ 0 atol=1e-6
+                m5, v5 = mean_and_var(S, x, pweights([1, 2, 3]), GeodesicInterpolationMethod())
+                @test m5 ≈ shortest_geodesic(S, shortest_geodesic(S, x[1], x[2], 2/3), x[3], 1/2)
+                @test v5 ≈ var(S, x, pweights([1, 2, 3]), m5)
+            end
+        end
+
+        @testset "Sphere default" begin
+            rng = MersenneTwister(47)
+            S = Sphere(2)
+            x0 = [1.0, 0, 0]
+            x = [normalize(randn(rng, 3)) for _=1:10]
+            x = [x; -x]
+            w = pweights([rand(rng) for _ = 1:length(x)])
+            m = mean(S, x, w)
+            mg = mean(S, x, w, GeodesicInterpolationMethod())
+            mf = mean(S, x, w, GradientMethod(); x0 = mg)
+            @test m != mg
+            @test m == mf
+        end
+
+        @testset "Rotations default" begin
+            rng = MersenneTwister(47)
+            R = Manifolds.Rotations(3)
+            x0 = diagm(ones(3))
+            v1 = hat(R, x0, [1.0, 0.0, 0.0])
+            v2 = hat(R, x0, [0.0, 1.0, 0.0])
+            x = [exp(R, x0, v1, π/2*(1:4)); exp(R, x0, v2, π/2*(1:4))]
+            w = pweights([rand(rng) for _ = 1:length(x)])
+            m = mean(R, x, w)
+            mg = mean(R, x, w, GeodesicInterpolationMethod())
+            mf = mean(R, x, w, GradientMethod(); x0 = mg)
+            @test m != mg
+            @test m == mf
         end
     end
 end
