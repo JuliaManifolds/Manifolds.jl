@@ -3,7 +3,7 @@ using StatsBase: AbstractWeights, pweights
 using Random: GLOBAL_RNG, seed!
 import ManifoldsBase: manifold_dimension, exp!, log!, distance, zero_tangent_vector!
 using Manifolds: AbstractMethod, GradientMethod, CyclicProximalPointMethod
-import Manifolds: mean!, median!
+import Manifolds: mean!, median!, var, mean_and_var
 
 struct TestStatsSphere{N} <: Manifold end
 TestStatsSphere(N) = TestStatsSphere{N}()
@@ -166,6 +166,10 @@ median!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights) = fill!
 median!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights, method::CyclicProximalPointMethod) = fill!(y, 3)
 median!(M::TestStatsOverload3, y, x::AbstractVector, w::AbstractWeights, method::TestStatsMethod1 = TestStatsMethod1()) = fill!(y, 5)
 
+var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, m; corrected = false) = 4 + 5*corrected
+mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights; corrected = false, kwargs...) = [4.0], 4 + 5*corrected
+mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::TestStatsMethod1; corrected = false, kwargs...) = [5.0], 9 + 7*corrected
+
 @testset "Statistics" begin
     @testset "defaults and overloads" begin
         w = pweights([2.0])
@@ -200,6 +204,27 @@ median!(M::TestStatsOverload3, y, x::AbstractVector, w::AbstractWeights, method:
             M = TestStatsOverload3()
             @test median(M, x) == [5.0]
             @test median(M, x, w) == [5.0]
+        end
+
+        @testset "var" begin
+            M = TestStatsOverload1()
+            @test mean_and_var(M, x) == ([3.0], 9)
+            @test mean_and_var(M, x, w) == ([4.0], 4)
+            @test mean_and_std(M, x) == ([3.0], 3.0)
+            @test mean_and_std(M, x, w) == ([4.0], 2.0)
+            @test var(M, x) == 9
+            @test var(M, x, 2) == 9
+            @test var(M, x, w) == 4
+            @test var(M, x, w, 2) == 4
+            @test std(M, x) == 3.0
+            @test std(M, x, 2) == 3.0
+            @test std(M, x, w) == 2.0
+            @test std(M, x, w, 2) == 2.0
+
+            @test mean_and_var(M, x, TestStatsMethod1()) == ([5.0], 16)
+            @test mean_and_var(M, x, w, TestStatsMethod1()) == ([5.0], 9)
+            @test mean_and_std(M, x, TestStatsMethod1()) == ([5.0], 4.0)
+            @test mean_and_std(M, x, w, TestStatsMethod1()) == ([5.0], 3.0)
         end
     end
 
