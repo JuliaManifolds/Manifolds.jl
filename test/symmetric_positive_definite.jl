@@ -79,9 +79,9 @@ include("utils.jl")
         (X,k) = tangent_orthonormal_basis(base_manifold(M2),x,v)
         @test isapprox(0.0,first(k))
         for i = 1:length(X)
-            @test isapprox(1.0, norm(M2,x,X[1]))
+            @test isapprox(1.0, norm(M2,x,X[i]))
             for j=i+1:length(X)
-                @test isapprox(0.0, inner(M2,x,X[1],X[2]))
+                @test isapprox(0.0, inner(M2,x,X[i],X[j]))
             end
         end
     end
