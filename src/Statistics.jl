@@ -120,34 +120,19 @@ Compute the [`mean`](@ref) in-place in `y`.
 """
 mean!(::Manifold, args...)
 
-function mean(M::Manifold, x::AbstractVector; kwargs...)
+function mean(M::Manifold, x::AbstractVector, method::AbstractMethod...; kwargs...)
     y = similar_result(M, mean, x[1])
-    return mean!(M, y, x; kwargs...)
+    return mean!(M, y, x, method...; kwargs...)
 end
 
-function mean(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
+function mean(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod...; kwargs...)
     y = similar_result(M, mean, x[1])
-    return mean!(M, y, x, w; kwargs...)
+    return mean!(M, y, x, w, method...; kwargs...)
 end
 
-function mean(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod; kwargs...)
-    y = similar_result(M, mean, x[1])
-    return mean!(M, y, x, w, method; kwargs...)
-end
-
-function mean(M::Manifold, x::AbstractVector, method::AbstractMethod; kwargs...)
-    y = similar_result(M, mean, x[1])
-    return mean!(M, y, x, method; kwargs...)
-end
-
-function mean!(M::Manifold, y, x::AbstractVector; kwargs...)
+function mean!(M::Manifold, y, x::AbstractVector, method::AbstractMethod...; kwargs...)
     w = _unit_weights(length(x))
-    return mean!(M, y, x, w; kwargs...)
-end
-
-function mean!(M::Manifold, y, x::AbstractVector, method::AbstractMethod; kwargs...)
-    w = _unit_weights(length(x))
-    return mean!(M, y, x, w, method; kwargs...)
+    return mean!(M, y, x, w, method...; kwargs...)
 end
 
 function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights; kwargs...)
@@ -301,34 +286,19 @@ computes the [`median`](@ref) in-place in `y`.
 """
 median!(::Manifold, args...)
 
-function median(M::Manifold, x::AbstractVector; kwargs...)
+function median(M::Manifold, x::AbstractVector, method::AbstractMethod...; kwargs...)
     y = similar_result(M, median, x[1])
-    return median!(M, y, x; kwargs...)
+    return median!(M, y, x, method...; kwargs...)
 end
 
-function median(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
+function median(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod...; kwargs...)
     y = similar_result(M, median, x[1])
-    return median!(M, y, x, w; kwargs...)
+    return median!(M, y, x, w, method...; kwargs...)
 end
 
-function median(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod; kwargs...)
-    y = similar_result(M, median, x[1])
-    return median!(M, y, x, w, method; kwargs...)
-end
-
-function median(M::Manifold, x::AbstractVector, method::AbstractMethod; kwargs...)
-    y = similar_result(M, median, x[1])
-    return median!(M, y, x, method; kwargs...)
-end
-
-function median!(M::Manifold, y, x::AbstractVector; kwargs...)
+function median!(M::Manifold, y, x::AbstractVector, method::AbstractMethod...; kwargs...)
     w = _unit_weights(length(x))
-    return median!(M, y, x, w; kwargs...)
-end
-
-function median!(M::Manifold, y, x::AbstractVector, method::AbstractMethod; kwargs...)
-    w = _unit_weights(length(x))
-    return median!(M, y, x, w, method; kwargs...)
+    return median!(M, y, x, w, method...; kwargs...)
 end
 
 function median!(M::Manifold, y, x::AbstractVector, w::AbstractWeights; kwargs...)
