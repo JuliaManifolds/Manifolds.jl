@@ -363,6 +363,8 @@ The mean of `x` can be specified as `m`, and the corrected variance
 can be activated by setting `corrected=true`. All further `kwargs...` are passed
 to the computation of the mean (if that is not provided).
 """
+var(M::Manifold, args...)
+
 function var(
     M::Manifold,
     x::AbstractVector,
@@ -407,13 +409,15 @@ where `c` is a correction term, see
 The mean of `x` can be specified as `m`, and the corrected variance
 can be activated by setting `corrected=true`.
 """
-std(M::Manifold, x::AbstractVector, args...; kwargs...) = sqrt(var(M, x, args...; kwargs...))
+std(M::Manifold, args...; kwargs...) = sqrt(var(M, args...; kwargs...))
 
 @doc doc"""
     mean_and_var(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...) -> (mean, var)
 
 Compute the [`mean`](@ref) and the [`var`](@ref)iance simultaneously.
 """
+mean_and_var(M::Manifold, args...)
+
 function mean_and_var(M::Manifold, x::AbstractVector, w::AbstractWeights; corrected=false, kwargs...)
     m = mean(M, x, w; kwargs...)
     v = var(M, x, w, m; corrected = corrected)
@@ -432,7 +436,7 @@ end
 Compute the [`mean`](@ref) and the standard deviation [`std`](@ref)
 simultaneously.
 """
-function mean_and_std(M::Manifold, x::AbstractVector, args...; kwargs...)
-    m, v = mean_and_var(M, x, args...; kwargs...)
+function mean_and_std(M::Manifold, args...; kwargs...)
+    m, v = mean_and_var(M, args...; kwargs...)
     return m, sqrt(v)
 end
