@@ -151,8 +151,6 @@ Inverse retraction on the rotations manifold using the polar method.
 """
 struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
 
-hat!(M::Manifold, v, x, vⁱ) = error("hat! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), and matrix $(typeof(v))")
-
 @doc doc"""
     hat(M::Manifold, x, vⁱ)
 
@@ -245,7 +243,7 @@ export ArrayManifold,
     CotangentSpaceAtPoint,
     CotangentBundleFibers,
     CotangentSpace,
-    FVector,    
+    FVector,
     PowerManifold,
     ProductManifold,
     ProjectedPointDistribution,
