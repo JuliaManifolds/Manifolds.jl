@@ -419,6 +419,13 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             mf = mean(S, x, w, GradientMethod(); x0 = mg)
             @test m != mg
             @test m == mf
+
+            μ = randn(rng, 3) .* 10
+            x = [normalize(randn(rng, 3) .+ μ) for _=1:10]
+            w = pweights([rand(rng) for _ = 1:length(x)])
+            m = mean(S, x, w)
+            mg = mean(S, x, w, GeodesicInterpolationMethod())
+            @test m == mg
         end
 
         @testset "Rotations default" begin
@@ -434,6 +441,14 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             mf = mean(R, x, w, GradientMethod(); x0 = mg)
             @test m != mg
             @test m == mf
+
+            μ = project_point(R, randn(3, 3))
+            d = normal_tvector_distribution(R, μ, 0.1)
+            x = [exp(R, μ, rand(rng, d)) for _ = 1:10]
+            w = pweights([rand(rng) for _ = 1:length(x)])
+            m = mean(R, x, w)
+            mg = mean(R, x, w, GeodesicInterpolationMethod())
+            @test m == mg
         end
     end
 end
