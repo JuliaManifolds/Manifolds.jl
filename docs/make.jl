@@ -12,6 +12,7 @@ makedocs(
             "Basic manifolds" => [
                 "Euclidean" => "manifolds/euclidean.md",
                 "Cholesky Space" => "manifolds/choleskyspace.md",
+                "Grassmannian" => "manifolds/grassmann.md",
                 "Rotations" => "manifolds/rotations.md",
                 "Sphere" => "manifolds/sphere.md",
                 "Symmetric Positive Definite" => "manifolds/symmetricpositivedefinite.md"

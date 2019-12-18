@@ -4,6 +4,7 @@ include("sized_abstract_array.jl")
 
 # starting with tests of simple manifolds
 include("euclidean.jl")
+include("grassmann.jl")
 include("sphere.jl")
 include("rotations.jl")
 include("symmetric_positive_definite.jl")

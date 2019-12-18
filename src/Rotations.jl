@@ -259,23 +259,6 @@ injectivity_radius(M::Rotations, x) = injectivity_radius(M)
 injectivity_radius(M::Rotations) = π*sqrt(2.0)
 
 @doc doc"""
-    PolarRetraction
-
-Retraction on the rotations manifold using the polar method.
-This SVD-based retraction is a second-order approximation of the
-exponential map. Let
-
-$USV = x + xv$
-
-be the singular value decomposition, then the formula reads
-
-$\operatorname{retr}_x v = UV^\mathrm{T}$
-
-Retraction is performed by the function [`retract!(::Rotations, y, x, v, ::PolarRetraction)`](@ref)
-"""
-struct PolarRetraction <: AbstractRetractionMethod end
-
-@doc doc"""
     retract_polar!(M::Rotations, y, x, v, method::PolarRetraction)
 
 Compute the SVD-based retraction [`PolarRetraction`](@ref), a second-order
@@ -287,14 +270,6 @@ function retract!(M::Rotations, y, x, v, method::PolarRetraction)
     y .= S.U * transpose(S.V)
     return y
 end
-
-"""
-    QRRetraction
-
-Retraction on the rotations manifold using the QR method, a first order
-approximation of the exponential map.
-"""
-struct QRRetraction <: AbstractRetractionMethod end
 
 @doc doc"""
     retract!(M, y, x, v, method::QRRetraction)
@@ -311,13 +286,6 @@ function retract!(M::Rotations, y::AbstractArray{T}, x, v, method::QRRetraction)
 end
 
 retract!(M::Rotations, y, x, v) = retract!(M, y, x, v, QRRetraction())
-
-"""
-    PolarInverseRetraction
-
-Inverse retraction on the rotations manifold using the polar method.
-"""
-struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
 
 injectivity_radius(::Rotations, x, ::PolarRetraction) = π*sqrt(2.0)/2
 
@@ -352,13 +320,6 @@ function inverse_retract!(M::Rotations, v, x, y, method::PolarInverseRetraction)
     end
     return v
 end
-
-"""
-    QRInverseRetraction
-
-Inverse retraction on the rotations manifold using the QR method.
-"""
-struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
 @doc doc"""
     inverse_retract!(M::Rotations, x, y, ::QRInverseRetraction)
