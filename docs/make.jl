@@ -30,7 +30,8 @@ makedocs(
         "Distributions" => "distributions.md",
         "Library" => [
             "Public" => "lib/public.md",
-            "Internals" => "lib/internals.md"
+            "Internals" => "lib/internals.md",
+            "Automatic Differentiation" => "lib/autodiff.md"
         ]
     ]
 )
