@@ -134,6 +134,7 @@ function vee(M::Manifold, x, v)
 end
 
 include("utils.jl")
+include("autodiff.jl")
 include("SizedAbstractArray.jl")
 
 include("ProductRepresentations.jl")
