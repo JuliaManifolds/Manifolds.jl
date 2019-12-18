@@ -41,6 +41,12 @@ inner(M::Rotations, x, w, v) = dot(w, v)
 
 norm(M::Rotations, x, v) = norm(v)
 
+function project_point!(M::Rotations, y, x)
+    F = svd(x)
+    y .= F.U * F.Vt
+    return y
+end
+
 project_tangent!(M::Rotations, w, x, v) = w .= (v .- transpose(v))./2
 
 function flat!(M::Rotations, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
