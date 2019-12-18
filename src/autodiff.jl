@@ -9,7 +9,7 @@ const _adbackends = Symbol[]
 """
     adbackend(backend::Symbol = :default) -> Symbol
 
-Check if autodiff `backend` is valid (see [`adbackends()`](@ref)) and return
+Check if autodiff `backend` is valid (see [`adbackends`](@ref)) and return
 formatted. Note that `backend=:default` returns the current backend.
 """
 adbackend() = _current_adbackend.backend
@@ -22,7 +22,7 @@ function adbackend(backend::Val{T}) where {T}
 end
 
 """
-    adbackends!(backend::Symbol)
+    adbackend!(backend::Symbol)
 
 Set current backend for autodiff to `backend`.
 """
