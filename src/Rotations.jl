@@ -588,9 +588,10 @@ end
 @doc doc"""
     mean(M::Rotations, x::AbstractVector[, w::AbstractWeights]; shuffle_rng=nothing, kwargs...)
 
-Compute the Riemannian mean of `x` using [`GeodesicInterpolationMethod`](@ref).
-If any `x` are not within $\frac{\pi}{2 \sqrt 2}$ of the estimated mean, then
-the estimate is used as the initial guess for the gradient method.
+Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+[`GeodesicInterpolationMethod`](@ref). If any `x` are not within
+$\frac{\pi}{2 \sqrt 2}$ of the estimated mean, then the estimate is used to
+initialize mean computation using the [`GradientMethod`](@ref).
 """
 mean(::Rotations, args...)
 

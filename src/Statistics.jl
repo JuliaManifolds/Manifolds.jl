@@ -20,7 +20,8 @@ t_k &= \frac{w_k}{\sum_{i=1}^k w_i}\\
 
 where $x_k$ are points, $w_k$ are weights, $\mu_k$ is the $k$th estimate of the
 mean, and $\gamma_x(y; t)$ is the point at time $t$ along the
-[`shortest_geodesic`](@ref) between points $x,y \in \mathcal M$. The algorithm
+[`shortest_geodesic`](@ref shortest_geodesic(::Manifold, ::Any, ::Any, ::Real))
+between points $x,y \in \mathcal M$. The algorithm
 terminates when all $x_k$ have been considered. In the [`Euclidean`](@ref) case,
 this exactly computes the weighted mean.
 
@@ -58,6 +59,13 @@ papers:
 >    The Annals of Statistics (2019), 47(1), pp. 415-438.
 >    doi: [10.1214/18-AOS1692](https://doi.org/10.1214/18-AOS1692),
 >    arxiv: [1708.00045](https://arxiv.org/abs/1708.00045).
+
+For more information on the weighted Welford algorithm on a Euclidean manifold,
+see:
+
+> West D. H. D.; Updating Mean and Variance Estimates: An Improved Method.
+> Communications of the ACM (1979), 22(9), pp. 532–535.
+> doi: [10.1145/359146.359153](https://doi.org/10.1145/359146.359153).
 """
 struct GeodesicInterpolationMethod <: AbstractMethod end
 
