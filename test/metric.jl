@@ -121,7 +121,7 @@ struct TestSphericalMetric <: Metric end
             elseif (i,j,k) == (2,2,1)
                 @test Γ₁[i,j,k] ≈ -r^2*cos(θ)*sin(θ)
             else
-                @test Γ₁[i,j,k] ≈ 0
+                @test Γ₁[i,j,k] ≈ 0 atol=1e-6
             end
         end
 
@@ -132,7 +132,7 @@ struct TestSphericalMetric <: Metric end
             elseif (l,i,j) == (2,1,2) || (l,i,j) == (2,2,1)
                 @test Γ₂[l,i,j] ≈ cot(θ)
             else
-                @test Γ₂[l,i,j] ≈ 0
+                @test Γ₂[l,i,j] ≈ 0 atol=1e-6
             end
         end
 
@@ -147,7 +147,7 @@ struct TestSphericalMetric <: Metric end
             elseif (l,i,j,k) == (1,2,2,1)
                 @test R[l,i,j,k] ≈ -sin(θ)^2
             else
-                @test R[l,i,j,k] ≈ 0
+                @test R[l,i,j,k] ≈ 0 atol=1e-6
             end
         end
 
