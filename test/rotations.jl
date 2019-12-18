@@ -84,7 +84,7 @@ include("utils.jl")
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [ptd],
                 tvector_distributions = [tvd],
-                exp_log_atol_multiplier = 6)
+                exp_log_atol_multiplier = 12)
 
             @testset "vee/hat" begin
                 v = randn(manifold_dimension(SOn))
