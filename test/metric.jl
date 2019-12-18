@@ -1,4 +1,4 @@
-using ForwardDiff, OrdinaryDiffEq
+using FiniteDifferences, ForwardDiff, OrdinaryDiffEq
 using LinearAlgebra: I
 
 include("utils.jl")
@@ -46,6 +46,15 @@ struct TestEuclideanMetric <: Metric end
         @test ricci_curvature(M, x) ≈ 0 atol=1e-6
         @test gaussian_curvature(M, x) ≈ 0 atol=1e-6
         @test einstein_tensor(M, x) ≈ zeros(n, n) atol=1e-6
+
+        fdm = forward_fdm(2, 1)
+        @test christoffel_symbols_first(M, x; backend=fdm) ≈ zeros(n, n, n) atol=1e-6
+        @test christoffel_symbols_second(M, x; backend=fdm) ≈ zeros(n, n, n) atol=1e-6
+        @test riemann_tensor(M, x; backend=fdm) ≈ zeros(n, n, n, n) atol=1e-6
+        @test ricci_tensor(M, x; backend=fdm) ≈ zeros(n, n) atol=1e-6
+        @test ricci_curvature(M, x; backend=fdm) ≈ 0 atol=1e-6
+        @test gaussian_curvature(M, x; backend=fdm) ≈ 0 atol=1e-6
+        @test einstein_tensor(M, x; backend=fdm) ≈ zeros(n, n) atol=1e-6
 
         @test christoffel_symbols_first(M, x; backend=:forwarddiff) ≈ zeros(n, n, n) atol=1e-6
         @test christoffel_symbols_second(M, x; backend=:forwarddiff) ≈ zeros(n, n, n) atol=1e-6
