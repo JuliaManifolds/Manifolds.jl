@@ -130,13 +130,13 @@ compute the inner product of `v`, `w` in the tangent space of `x` on
 the [`SymmetricPositiveDefinite`](@ref) manifold `M`, as
 a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
 
-```math
-( v, w)_x = \operatorname{tr}(x^{-1}\xi x^{-1}\nu ),
-```
+````math
+(v, w)_x = \operatorname{tr}(x^{-1} v x^{-1} w),
+````
 """
-function inner(M::SymmetricPositiveDefinite{N}, x, w, v) where N
-    F = cholesky(Symmetric(x)).L
-    return tr((Symmetric(w) / F) * (Symmetric(v) / F))
+function inner(M::SymmetricPositiveDefinite, x, v, w)
+    F = cholesky(Symmetric(x))
+    return tr((F \ Symmetric(v)) * (F \ Symmetric(w)))
 end
 
 @doc doc"""
