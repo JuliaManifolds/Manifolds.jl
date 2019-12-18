@@ -62,7 +62,7 @@ papers:
 struct GeodesicInterpolationMethod <: AbstractMethod end
 
 @doc doc"""
-    mean(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...)
+    mean(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
 Compute the (optionally weighted) Riemannian center of mass also known as
 Karcher mean of the vector `x` of points on the [`Manifold`](@ref) `M`, defined
@@ -75,14 +75,14 @@ where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 In the general case, the [`GradientMethod`](@ref) is used to compute the mean.
 However, this default may be overloaded for specific manifolds.
 
-    mean(M::Manifold, x::AbstractVector, [w::AbstractWeights], method::AbstractMethod; kwargs...)
+    mean(M::Manifold, x::AbstractVector[, w::AbstractWeights], method::AbstractMethod; kwargs...)
 
 Compute the mean using the specified `method`.
 
     mean(
         M::Manifold,
         x::AbstractVector,
-        w::AbstractWeights,
+        [w::AbstractWeights,]
         method::GradientMethod;
         x0=x[1],
         stop_iter=100,
@@ -112,8 +112,8 @@ The algorithm is further described in
 mean(::Manifold, args...)
 
 @doc doc"""
-    mean!(M::Manifold, y, x::AbstractVector [, w::AbstractWeights]; kwargs...)
-    mean!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights,] method::AbstractMethod; kwargs...)
+    mean!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights]; kwargs...)
+    mean!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights], method::AbstractMethod; kwargs...)
 
 Compute the [`mean`](@ref) in-place in `y`.
 """
@@ -228,7 +228,7 @@ function mean!(
 end
 
 @doc doc"""
-    median(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...)
+    median(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
 Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
 [`Manifold`](@ref) `M`, defined as the point that satisfies the minimizer
@@ -241,7 +241,7 @@ This function is nonsmooth (i.e nondifferentiable).
 In the general case, the [`CyclicProximalPointMethod`](@ref) is used to compute the
 median. However, this default may be overloaded for specific manifolds.
 
-    median(M::Manifold, x::AbstractVector, [w::AbstractWeights,] method::AbstractMethod; kwargs...)
+    median(M::Manifold, x::AbstractVector[, w::AbstractWeights], method::AbstractMethod; kwargs...)
 
 Compute the median using the specified `method`.
 
@@ -277,8 +277,8 @@ The algorithm is further described in Algorithm 4.3 and 4.4 in
 median(::Manifold, args...)
 
 @doc doc"""
-    median!(M::Manifold, y, x::AbstractVector [, w::AbstractWeights]; kwargs...)
-    median!(M::Manifold, y, x::AbstractVector, [w::AbstractWeights,] method::AbstractMethod; kwargs...)
+    median!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights]; kwargs...)
+    median!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights], method::AbstractMethod; kwargs...)
 
 computes the [`median`](@ref) in-place in `y`.
 """
@@ -439,7 +439,7 @@ cov(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...) = mean_and_co
 cov(M::Manifold, x::AbstractVector; kwargs...) = mean_and_cov(M, x; kwargs...)[2]
 
 @doc doc"""
-    mean_and_var(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...) -> (mean, var)
+    mean_and_var(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...) -> (mean, var)
 
 Compute the [`mean`](@ref) and the [`var`](@ref)iance simultaneously. See those
 functions for a description of the arguments.
@@ -534,7 +534,7 @@ function mean_and_var(
 end
 
 @doc doc"""
-    mean_and_std(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...) -> (mean, std)
+    mean_and_std(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...) -> (mean, std)
 
 Compute the [`mean`](@ref) and the standard deviation [`std`](@ref)
 simultaneously.
@@ -556,7 +556,7 @@ function mean_and_std(M::Manifold, args...; kwargs...)
 end
 
 @doc doc"""
-    mean_and_cov(M::Manifold, x::AbstractVector [, w::AbstractWeights]; kwargs...) -> (mean, cov)
+    mean_and_cov(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...) -> (mean, cov)
 
 Compute the [`mean`](@ref) and the [`cov`](@ref)ariance simultaneously. See
 those functions for a description of the arguments.
@@ -591,7 +591,7 @@ function mean_and_cov(M::Manifold, x::AbstractVector, method::AbstractMethod...;
 end
 
 """
-    moment(M::Manifold, x::AbstractVector, k::Int, [w::AbstractWeights,] m=mean(M, x [, w]))
+    moment(M::Manifold, x::AbstractVector, k::Int[, w::AbstractWeights], m=mean(M, x[, w]))
 
 Compute the `k`th central moment of points in `x` on manifold `M`. Optionally
 provide weights `w` and/or a precomputed [`mean`](@ref).
@@ -609,7 +609,7 @@ function moment(M::Manifold, x::AbstractVector, k::Int, m = mean(M, x))
 end
 
 """
-    skewness(M::Manifold, x::AbstractVector, k::Int, [w::AbstractWeights,] m=mean(M, x [, w]))
+    skewness(M::Manifold, x::AbstractVector, k::Int[, w::AbstractWeights], m=mean(M, x[, w]))
 
 Compute the standardized skewness of points in `x` on manifold `M`. Optionally
 provide weights `w` and/or a precomputed [`mean`](@ref) `m`.
@@ -629,7 +629,7 @@ function skewness(M::Manifold, x::AbstractVector, args...)
 end
 
 """
-    kurtosis(M::Manifold, x::AbstractVector, k::Int, [w::AbstractWeights,] m=mean(M, x [, w]))
+    kurtosis(M::Manifold, x::AbstractVector, k::Int[, w::AbstractWeights], m=mean(M, x[, w]))
 
 Compute the excess kurtosis of points in `x` on manifold `M`. Optionally
 provide weights `w` and/or a precomputed [`mean`](@ref) `m`.

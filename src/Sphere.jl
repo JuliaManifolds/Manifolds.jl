@@ -158,7 +158,7 @@ function normal_tvector_distribution(S::Sphere, x, σ)
 end
 
 @doc doc"""
-    mean(S::Sphere, x::AbstractVector, w::AbstractWeights; shuffle_rng=nothing, kwargs...)
+    mean(S::Sphere, x::AbstractVector[, w::AbstractWeights]; shuffle_rng=nothing, kwargs...)
 
 Compute the Riemannian mean of `x` using [`GeodesicInterpolationMethod`](@ref).
 If any `x` are not within $\frac{\pi}{2}$ of the estimated mean, then the
