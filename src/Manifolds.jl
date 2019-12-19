@@ -258,6 +258,7 @@ export ArrayManifold,
 export Euclidean,
     CholeskySpace,
     Grassmann,
+    Rotations,
     Sphere,
     SymmetricPositiveDefinite
 # Types
