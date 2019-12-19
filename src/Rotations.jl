@@ -570,22 +570,19 @@ function normal_rotation_distribution(M::Rotations{N}, x, σ::Real) where N
     return NormalRotationDistribution(M, d, x)
 end
 
-@doc doc"""
-    mean(M::Rotations, x::AbstractVector[, w::AbstractWeights]; shuffle_rng=nothing, kwargs...)
+"""
+    mean(
+        M::Rotations,
+        x::AbstractVector,
+        [w::AbstractWeights,]
+        method = GeodesicInterpolationWithinRadius(π/2/√2);
+        kwargs...,
+    )
 
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
-[`GeodesicInterpolation`](@ref). If any `x` are not within
-$\frac{\pi}{2 \sqrt 2}$ of the estimated mean, then the estimate is used to
-initialize mean computation using the [`GradientDescent`](@ref).
+[`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::Rotations, args...)
 
-function mean!(M::Rotations, y, x::AbstractVector, w::AbstractVector; shuffle_rng = nothing, kwargs...)
-    mean!(M, y, x, w, GeodesicInterpolation(); shuffle_rng = shuffle_rng, kwargs...)
-    for i in eachindex(x)
-        @inbounds if distance(M, y, x[i]) ≥ π/2/√2
-            return mean!(M, y, x, w, GradientDescent(); x0 = y, kwargs...)
-        end
-    end
-    return y
-end
+mean!(M::Rotations, y, x::AbstractVector, w::AbstractVector; kwargs...) =
+    mean!(M, y, x, w, GeodesicInterpolationWithinRadius(π/2/√2); kwargs...)

@@ -157,22 +157,19 @@ function normal_tvector_distribution(S::Sphere, x, σ)
     return ProjectedFVectorDistribution(TangentBundleFibers(S), x, d, project_vector!, x)
 end
 
-@doc doc"""
-    mean(S::Sphere, x::AbstractVector[, w::AbstractWeights]; shuffle_rng=nothing, kwargs...)
+"""
+    mean(
+        S::Sphere,
+        x::AbstractVector,
+        [w::AbstractWeights,]
+        method = GeodesicInterpolationWithinRadius(π/2);
+        kwargs...,
+    )
 
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
-[`GeodesicInterpolation`](@ref). If any `x` are not within $\frac{\pi}{2}$
-of the estimated mean, then the estimate is used to initialize mean computation
-using the [`GradientDescent`](@ref).
+[`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::Sphere, args...)
 
-function mean!(S::Sphere, y, x::AbstractVector, w::AbstractVector; shuffle_rng = nothing, kwargs...)
-    mean!(S, y, x, w, GeodesicInterpolation(); shuffle_rng = shuffle_rng, kwargs...)
-    for i in eachindex(x)
-        @inbounds if distance(S, y, x[i]) ≥ π/2
-            return mean!(S, y, x, w, GradientDescent(); x0 = y, kwargs...)
-        end
-    end
-    return y
-end
+mean!(S::Sphere, y, x::AbstractVector, w::AbstractVector; kwargs...) =
+    mean!(S, y, x, w, GeodesicInterpolationWithinRadius(π/2); kwargs...)
