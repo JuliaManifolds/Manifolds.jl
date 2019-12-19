@@ -27,7 +27,8 @@ this exactly computes the weighted mean.
 
 The algorithm has been shown to converge asymptotically with the sample size for
 the following manifolds equipped with their default metrics when all sampled
-points are in an open geodesic ball about the mean with corresponding radius:
+points are in an open geodesic ball about the mean with corresponding radius
+(see [`GeodesicInterpolationWithinRadius`](@ref)):
 
 * All simply connected complete Riemannian manifolds with non-positive sectional
   curvature at radius $\infty$, in particular:
@@ -76,6 +77,26 @@ see:
 >    doi: [10.1145/359146.359153](https://doi.org/10.1145/359146.359153).
 """
 struct GeodesicInterpolation <: AbstractEstimationMethod end
+
+"""
+    GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
+
+Estimation of Riemannian center of mass using [`GeodesicInterpolation`](@ref)
+with fallback to [`GradientDescent`](@ref) if any points are outside of a
+geodesic ball of specified `radius` around the mean.
+
+# Constructor
+
+    GeodesicInterpolationWithinRadius(radius)
+"""
+struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
+    radius::T
+
+    function GeodesicInterpolationWithinRadius(radius::T) where {T}
+        radius > 0 || throw(DomainError("The radius must be strictly postive, received $(radius)."))
+        return new{T}(radius)
+    end
+end
 
 @doc doc"""
     mean(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
@@ -240,6 +261,43 @@ function mean!(
         inverse_retract!(M, v, y, x[j], inverse_retraction)
         retract!(M, ytmp, y, v, t, retraction)
         copyto!(y, ytmp)
+    end
+    return y
+end
+
+"""
+    mean(
+        M::Manifold,
+        x::AbstractVector,
+        [w::AbstractWeights,]
+        method::GeodesicInterpolationWithinRadius;
+        kwargs...,
+    )
+
+Estimate the Riemannian center of mass of `x` using
+[`GeodesicInterpolationWithinRadius`](@ref).
+
+See [`mean`](@ref mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation))
+for a description of `kwargs`.
+"""
+mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolationWithinRadius)
+
+function mean!(
+    M::Manifold,
+    y,
+    x::AbstractVector,
+    w::AbstractVector,
+    method::GeodesicInterpolationWithinRadius;
+    shuffle_rng = nothing,
+    kwargs...,
+)
+    mean!(M, y, x, w, GeodesicInterpolation(); shuffle_rng = shuffle_rng, kwargs...)
+    radius = method.radius
+    injectivity_radius(M) ≤ radius && return y
+    for i in eachindex(x)
+        @inbounds if distance(M, y, x[i]) ≥ radius
+            return mean!(M, y, x, w, GradientDescent(); x0 = y, kwargs...)
+        end
     end
     return y
 end
@@ -510,6 +568,52 @@ function mean_and_var(
     c = varcorrection(w, corrected)
     σ² = c * M₂
     return y, σ²
+end
+
+"""
+    mean_and_var(
+        M::Manifold,
+        x::AbstractVector
+        [w::AbstractWeights,]
+        method::GeodesicInterpolationWithinRadius;
+        kwargs...,
+    ) -> (mean, var)
+
+Use repeated weighted geodesic interpolation to estimate the mean.
+Simultaneously, use a Welford-like recursion to estimate the variance.
+
+See [`GeodesicInterpolationWithinRadius`](@ref) and
+[`mean_and_var`](@ref mean_and_var(::Manifold, ::AbstractVector, ::AbstractWeights, ::GeodesicInterpolation))
+for more information.
+"""
+function mean_and_var(
+        M::Manifold,
+        x::AbstractVector,
+        w::AbstractWeights,
+        method::GeodesicInterpolationWithinRadius;
+        shuffle_rng = nothing,
+        corrected = false,
+        kwargs...,
+)
+    y, v = mean_and_var(
+        M,
+        x,
+        w,
+        GeodesicInterpolation();
+        shuffle_rng = shuffle_rng,
+        corrected = corrected,
+        kwargs...,
+    )
+    radius = method.radius
+    injectivity_radius(M, y) ≤ radius && return y, v
+    for i in eachindex(x)
+        @inbounds if distance(M, y, x[i]) ≥ radius
+            mean!(M, y, x, w, GradientDescent(); x0 = y, kwargs...)
+            v = var(M, x, w, y; corrected = corrected)
+            return y, v
+        end
+    end
+    return y, v
 end
 
 @doc doc"""
