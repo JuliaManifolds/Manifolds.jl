@@ -2,6 +2,6 @@
 
 ```@autodocs
 Modules = [Manifolds,ManifoldsBase]
-Pages = ["Statistics.jl"]
+Pages = ["statistics.jl"]
 Order = [:type, :function]
 ```
