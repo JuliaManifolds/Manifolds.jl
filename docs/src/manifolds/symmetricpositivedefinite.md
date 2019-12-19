@@ -25,7 +25,7 @@ check_manifold_point(::SymmetricPositiveDefinite{N},x; kwargs...) where N
 check_tangent_vector(::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
 manifold_dimension(::SymmetricPositiveDefinite{N}) where N
 representation_size(::SymmetricPositiveDefinite{N}) where N
-zero_tangent_vector(:SymmetricPositiveDefinite{N},x) where N
+zero_tangent_vector(::SymmetricPositiveDefinite{N},x) where N
 zero_tangent_vector!(::SymmetricPositiveDefinite{N}, v, x) where N
 ```
 
@@ -43,7 +43,7 @@ any call of the following functions with
 ```@docs
 distance(P::SymmetricPositiveDefinite{N},x,y) where N
 exp!(P::SymmetricPositiveDefinite{N}, y, x, v) where N
-inner(P::SymmetricPositiveDefinite{N}, x, w, v) where N
+inner(P::SymmetricPositiveDefinite, x, w, v)
 log!(P::SymmetricPositiveDefinite{N}, v, x, y) where N
 tangent_orthonormal_basis(P::SymmetricPositiveDefinite{N},x,v) where N
 vector_transport_to!(P::SymmetricPositiveDefinite{N},vto, x, v, y, m::ParallelTransport) where N

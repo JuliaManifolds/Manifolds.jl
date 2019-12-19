@@ -30,13 +30,13 @@ the following manifolds equipped with their default metrics when all sampled
 points are in an open geodesic ball about the mean with corresponding radius:
 
 * All simply connected complete Riemannian manifolds with non-positive sectional
-curvature at radius $\infty$, in particular
+  curvature at radius $\infty$, in particular:
     + [`Euclidean`](@ref)
     + [`SymmetricPositiveDefinite`](@ref)
 * Other manifolds:
     + [`Sphere`](@ref): $\frac{\pi}{2}$
     + [`Grassmann`](@ref): $\frac{\pi}{4}$
-    + `Stiefel`/[`Rotations`](@ref): $\frac{\pi}{2 \sqrt 2}$
+    + [`Stiefel`](@ref)/[`Rotations`](@ref): $\frac{\pi}{2 \sqrt 2}$
 
 For more information on the geodesic interpolation method, see the following
 papers:
@@ -189,9 +189,8 @@ function mean!(
 end
 
 """
-    mean!(
+    mean(
         M::Manifold,
-        y,
         x::AbstractVector,
         [w::AbstractWeights,]
         method::GeodesicInterpolationMethod;
@@ -211,6 +210,8 @@ points are considered for computing the mean.
 Optionally, pass `retraction` and `inverse_retraction` method types to specify
 the (inverse) retraction.
 """
+mean(::Manifold, ::AbstractVector, ::AbstractWeights, ::GeodesicInterpolationMethod)
+
 function mean!(
         M::Manifold,
         y,

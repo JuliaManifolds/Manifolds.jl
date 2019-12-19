@@ -391,7 +391,7 @@ zero_tangent_vector(M::SymmetricPositiveDefinite{N}, x) where N = zero(x)
 zero_tangent_vector(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, x) where N = zero(x)
 
 @doc doc"""
-    zero_tangent_vector(M,v,x)
+    zero_tangent_vector!(M,v,x)
 
 returns the zero tangent vector in the variable `v` from the tangent space of
 the symmetric positive definite matrix `x` on
