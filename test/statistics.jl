@@ -458,15 +458,18 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
 
         @testset "SymmetricPositiveDefinite default" begin
             rng = MersenneTwister(36)
-            P = SymmetricPositiveDefinite(3)
-            x0 = collect(exp(Symmetric(randn(rng, 3, 3) * 0.1)))
-            x = [exp(P, x0, Symmetric(randn(rng, 3, 3) * 0.1)) for _=1:10]
-            w = pweights([rand(rng) for _ = 1:length(x)])
-            m = mean(P, x, w)
-            mg = mean(P, x, w, GeodesicInterpolation())
-            mf = mean(P, x, w, GradientDescent())
-            @test m == mg
-            @test m != mf
+            P1 = SymmetricPositiveDefinite(3)
+            P2 = MetricManifold(P1, LinearAffineMetric())
+            @testset "$P" for P in [P1, P2]
+                x0 = collect(exp(Symmetric(randn(rng, 3, 3) * 0.1)))
+                x = [exp(P, x0, Symmetric(randn(rng, 3, 3) * 0.1)) for _=1:10]
+                w = pweights([rand(rng) for _ = 1:length(x)])
+                m = mean(P, x, w)
+                mg = mean(P, x, w, GeodesicInterpolation())
+                mf = mean(P, x, w, GradientDescent())
+                @test m == mg
+                @test m != mf
+            end
         end
 
         @testset "Sphere default" begin
