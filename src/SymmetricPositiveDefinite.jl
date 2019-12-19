@@ -456,13 +456,3 @@ mean(::SymmetricPositiveDefinite, args...)
 
 mean!(M::SymmetricPositiveDefinite, y, x::AbstractVector, w::AbstractVector; kwargs...) =
     mean!(M, y, x, w, GeodesicInterpolation(); kwargs...)
-
-function mean!(
-    M::MetricManifold{<:SymmetricPositiveDefinite,LinearAffineMetric},
-    y,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-)
-    return mean!(base_manifold(M), y, x, w; kwargs...)
-end
