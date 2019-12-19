@@ -1,4 +1,4 @@
-using StatsBase: AbstractWeights, Weights, ProbabilityWeights, values, varcorrection
+using StatsBase: AbstractWeights, ProbabilityWeights, values, varcorrection
 
 _unit_weights(n::Int) = ProbabilityWeights(ones(n), n)
 
@@ -140,7 +140,7 @@ function mean(M::Manifold, x::AbstractVector, method...; kwargs...)
     return mean!(M, y, x, method...; kwargs...)
 end
 
-function mean(M::Manifold, x::AbstractVector, w::AbstractWeights, method...; kwargs...)
+function mean(M::Manifold, x::AbstractVector, w::AbstractVector, method...; kwargs...)
     y = similar_result(M, mean, x[1])
     return mean!(M, y, x, w, method...; kwargs...)
 end
@@ -150,7 +150,7 @@ function mean!(M::Manifold, y, x::AbstractVector, method...; kwargs...)
     return mean!(M, y, x, w, method...; kwargs...)
 end
 
-function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights; kwargs...)
+function mean!(M::Manifold, y, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(M, y, x, w, GradientDescent(); kwargs...)
 end
 
@@ -158,7 +158,7 @@ function mean!(
     M::Manifold,
     y,
     x::AbstractVector,
-    w::AbstractWeights,
+    w::AbstractVector,
     ::GradientDescent;
     x0 = x[1],
     stop_iter=100,
@@ -210,13 +210,13 @@ points are considered for computing the mean.
 Optionally, pass `retraction` and `inverse_retraction` method types to specify
 the (inverse) retraction.
 """
-mean(::Manifold, ::AbstractVector, ::AbstractWeights, ::GeodesicInterpolation)
+mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation)
 
 function mean!(
         M::Manifold,
         y,
         x::AbstractVector,
-        w::AbstractWeights,
+        w::AbstractVector,
         ::GeodesicInterpolation;
         shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
         retraction::AbstractRetractionMethod = ExponentialRetraction(),
@@ -306,7 +306,7 @@ function median(M::Manifold, x::AbstractVector, method...; kwargs...)
     return median!(M, y, x, method...; kwargs...)
 end
 
-function median(M::Manifold, x::AbstractVector, w::AbstractWeights, method...; kwargs...)
+function median(M::Manifold, x::AbstractVector, w::AbstractVector, method...; kwargs...)
     y = similar_result(M, median, x[1])
     return median!(M, y, x, w, method...; kwargs...)
 end
@@ -316,7 +316,7 @@ function median!(M::Manifold, y, x::AbstractVector, method...; kwargs...)
     return median!(M, y, x, w, method...; kwargs...)
 end
 
-function median!(M::Manifold, y, x::AbstractVector, w::AbstractWeights; kwargs...)
+function median!(M::Manifold, y, x::AbstractVector, w::AbstractVector; kwargs...)
     return median!(M, y, x, w, CyclicProximalPoint(); kwargs...)
 end
 
@@ -324,7 +324,7 @@ function median!(
     M::Manifold,
     y,
     x::AbstractVector,
-    w::AbstractWeights,
+    w::AbstractVector,
     ::CyclicProximalPoint;
     x0=x[1],
     stop_iter=1000000,

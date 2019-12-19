@@ -167,7 +167,7 @@ using the [`GradientDescent`](@ref).
 """
 mean(::Sphere, args...)
 
-function mean!(S::Sphere, y, x::AbstractVector, w::AbstractWeights; shuffle_rng = nothing, kwargs...)
+function mean!(S::Sphere, y, x::AbstractVector, w::AbstractVector; shuffle_rng = nothing, kwargs...)
     mean!(S, y, x, w, GeodesicInterpolation(); shuffle_rng = shuffle_rng, kwargs...)
     for i in eachindex(x)
         @inbounds if distance(S, y, x[i]) ≥ π/2

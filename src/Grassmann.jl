@@ -290,7 +290,7 @@ mean computation using the [`GradientDescent`](@ref).
 """
 mean(::Grassmann, args...)
 
-function mean!(M::Grassmann, y, x::AbstractVector, w::AbstractWeights; shuffle_rng = nothing, kwargs...)
+function mean!(M::Grassmann, y, x::AbstractVector, w::AbstractVector; shuffle_rng = nothing, kwargs...)
     mean!(M, y, x, w, GeodesicInterpolation(); shuffle_rng = shuffle_rng, kwargs...)
     for i in eachindex(x)
         @inbounds if distance(M, y, x[i]) ≥ π/4
