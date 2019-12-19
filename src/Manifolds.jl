@@ -103,21 +103,33 @@ using Random: AbstractRNG
 using UnsafeArrays
 using Einsum: @einsum
 
-abstract type AbstractMethod end
+"""
+    AbstractOptimizationMethod
+
+Abstract type for defining optimization methods.
+"""
+abstract type AbstractOptimizationMethod end
 
 """
-    GradientMethod <: AbstractMethod
+    GradientDescent <: AbstractOptimizationMethod
 
 Method for optimizing using gradient descent.
 """
-struct GradientMethod <: AbstractMethod end
+struct GradientDescent <: AbstractOptimizationMethod end
 
 """
-    CyclicProximalPointMethod <: AbstractMethod
+    CyclicProximalPoint <: AbstractOptimizationMethod
 
 Method for optimizing using the cyclic proximal point technique.
 """
-struct CyclicProximalPointMethod <: AbstractMethod end
+struct CyclicProximalPoint <: AbstractOptimizationMethod end
+
+"""
+    AbstractEstimationMethod
+
+Abstract type for defining statistical estimation methods.
+"""
+abstract type AbstractEstimationMethod end
 
 """
     QRRetraction
@@ -278,7 +290,13 @@ export Metric,
     PolarRetraction,
     AbstractInverseRetractionMethod,
     QRInverseRetraction,
-    PolarInverseRetraction
+    PolarInverseRetraction,
+    AbstractOptimizationMethod,
+    GradientDescent,
+    CyclicProximalPoint,
+    AbstractEstimationMethod,
+    GeodesicInterpolation,
+    AbstractStatsMethod
 export base_manifold,
     bundle_projection,
     christoffel_symbols_first,

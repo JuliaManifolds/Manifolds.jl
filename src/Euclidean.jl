@@ -190,7 +190,7 @@ mean(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
 mean(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = mean(x, w)
 mean(::Euclidean, x::AbstractVector; kwargs...) = mean(x)
 mean!(M::Euclidean, y, x::AbstractVector, w::AbstractWeights; kwargs...) =
-    mean!(M, y, x, w, GeodesicInterpolationMethod(); kwargs...)
+    mean!(M, y, x, w, GeodesicInterpolation(); kwargs...)
 
 median(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = median(x)
 median(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = median(x, w)
@@ -218,4 +218,4 @@ function mean_and_var(
 end
 
 mean_and_var(M::Euclidean, x::AbstractVector, w::AbstractWeights; kwargs...) =
-    mean_and_var(M, x, w, GeodesicInterpolationMethod(); kwargs...)
+    mean_and_var(M, x, w, GeodesicInterpolation(); kwargs...)

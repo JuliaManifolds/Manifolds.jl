@@ -449,13 +449,13 @@ check_tangent_vector(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyM
     mean(M::SymmetricPositiveDefinite, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
 Compute the Riemannian
-[`mean`](@ref mean(::Manifold, ::AbstractVector, ::AbstractWeights, ::GeodesicInterpolationMethod))
-of `x` using [`GeodesicInterpolationMethod`](@ref).
+[`mean`](@ref mean(::Manifold, ::AbstractVector, ::AbstractWeights, ::GeodesicInterpolation))
+of `x` using [`GeodesicInterpolation`](@ref).
 """
 mean(::SymmetricPositiveDefinite, args...)
 
 mean!(M::SymmetricPositiveDefinite, y, x::AbstractVector, w::AbstractWeights; kwargs...) =
-    mean!(M, y, x, w, GeodesicInterpolationMethod(); kwargs...)
+    mean!(M, y, x, w, GeodesicInterpolation(); kwargs...)
 
 function mean!(
     M::MetricManifold{<:SymmetricPositiveDefinite,LinearAffineMetric},

@@ -2,8 +2,15 @@ using StatsBase: AbstractWeights, Weights, ProbabilityWeights, values, varcorrec
 
 _unit_weights(n::Int) = ProbabilityWeights(ones(n), n)
 
+"""
+    AbstractStatsMethod = Union{AbstractOptimizationMethod,AbstractEstimationMethod}
+
+Union type for methods for stats functions.
+"""
+const AbstractStatsMethod = Union{AbstractOptimizationMethod,AbstractEstimationMethod}
+
 @doc doc"""
-    GeodesicInterpolationMethod <: AbstractMethod
+    GeodesicInterpolation <: AbstractStatsMethod
 
 Repeated weighted geodesic interpolation method for estimating the Riemannian
 center of mass.
@@ -75,7 +82,7 @@ see:
 > Communications of the ACM (1979), 22(9), pp. 532–535.
 > doi: [10.1145/359146.359153](https://doi.org/10.1145/359146.359153).
 """
-struct GeodesicInterpolationMethod <: AbstractMethod end
+struct GeodesicInterpolation <: AbstractEstimationMethod end
 
 @doc doc"""
     mean(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
@@ -88,10 +95,10 @@ as the point that satisfies the minimizer
 ````
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 
-In the general case, the [`GradientMethod`](@ref) is used to compute the mean.
+In the general case, the [`GradientDescent`](@ref) is used to compute the mean.
 However, this default may be overloaded for specific manifolds.
 
-    mean(M::Manifold, x::AbstractVector[, w::AbstractWeights], method::AbstractMethod; kwargs...)
+    mean(M::Manifold, x::AbstractVector[, w::AbstractWeights], method::AbstractStatsMethod; kwargs...)
 
 Compute the mean using the specified `method`.
 
@@ -99,7 +106,7 @@ Compute the mean using the specified `method`.
         M::Manifold,
         x::AbstractVector,
         [w::AbstractWeights,]
-        method::GradientMethod;
+        method::GradientDescent;
         x0=x[1],
         stop_iter=100,
         retraction::AbstractRetractionMethod = ExponentialRetraction(),
@@ -107,7 +114,7 @@ Compute the mean using the specified `method`.
         kwargs...,
     )
 
-Compute the mean using the gradient descent scheme [`GradientMethod`](@ref).
+Compute the mean using the gradient descent scheme [`GradientDescent`](@ref).
 
 Optionally, provide `x0`, the starting point (by default set to the first data
 point). `stop_iter` denotes the maximal number of iterations to perform and the
@@ -129,29 +136,29 @@ mean(::Manifold, args...)
 
 @doc doc"""
     mean!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights]; kwargs...)
-    mean!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights], method::AbstractMethod; kwargs...)
+    mean!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights], method::AbstractStatsMethod; kwargs...)
 
 Compute the [`mean`](@ref) in-place in `y`.
 """
 mean!(::Manifold, args...)
 
-function mean(M::Manifold, x::AbstractVector, method::AbstractMethod...; kwargs...)
+function mean(M::Manifold, x::AbstractVector, method::AbstractStatsMethod...; kwargs...)
     y = similar_result(M, mean, x[1])
     return mean!(M, y, x, method...; kwargs...)
 end
 
-function mean(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod...; kwargs...)
+function mean(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractStatsMethod...; kwargs...)
     y = similar_result(M, mean, x[1])
     return mean!(M, y, x, w, method...; kwargs...)
 end
 
-function mean!(M::Manifold, y, x::AbstractVector, method::AbstractMethod...; kwargs...)
+function mean!(M::Manifold, y, x::AbstractVector, method::AbstractStatsMethod...; kwargs...)
     w = _unit_weights(length(x))
     return mean!(M, y, x, w, method...; kwargs...)
 end
 
 function mean!(M::Manifold, y, x::AbstractVector, w::AbstractWeights; kwargs...)
-    return mean!(M, y, x, w, GradientMethod(); kwargs...)
+    return mean!(M, y, x, w, GradientDescent(); kwargs...)
 end
 
 function mean!(
@@ -159,7 +166,7 @@ function mean!(
     y,
     x::AbstractVector,
     w::AbstractWeights,
-    ::GradientMethod;
+    ::GradientDescent;
     x0 = x[1],
     stop_iter=100,
     retraction::AbstractRetractionMethod = ExponentialRetraction(),
@@ -193,7 +200,7 @@ end
         M::Manifold,
         x::AbstractVector,
         [w::AbstractWeights,]
-        method::GeodesicInterpolationMethod;
+        method::GeodesicInterpolation;
         shuffle_rng=nothing,
         retraction::AbstractRetractionMethod = ExponentialRetraction(),
         inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
@@ -202,7 +209,7 @@ end
 
 Estimate the Riemannian center of mass of `x` in an online fashion using
 repeated weighted geodesic interpolation. See
-[`GeodesicInterpolationMethod`](@ref) for details.
+[`GeodesicInterpolation`](@ref) for details.
 
 If `shuffle_rng` is provided, it is used to shuffle the order in which the
 points are considered for computing the mean.
@@ -210,14 +217,14 @@ points are considered for computing the mean.
 Optionally, pass `retraction` and `inverse_retraction` method types to specify
 the (inverse) retraction.
 """
-mean(::Manifold, ::AbstractVector, ::AbstractWeights, ::GeodesicInterpolationMethod)
+mean(::Manifold, ::AbstractVector, ::AbstractWeights, ::GeodesicInterpolation)
 
 function mean!(
         M::Manifold,
         y,
         x::AbstractVector,
         w::AbstractWeights,
-        ::GeodesicInterpolationMethod;
+        ::GeodesicInterpolation;
         shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
         retraction::AbstractRetractionMethod = ExponentialRetraction(),
         inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
@@ -255,10 +262,10 @@ Compute the (optionally weighted) Riemannian median of the vector `x` of points 
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 This function is nonsmooth (i.e nondifferentiable).
 
-In the general case, the [`CyclicProximalPointMethod`](@ref) is used to compute the
+In the general case, the [`CyclicProximalPoint`](@ref) is used to compute the
 median. However, this default may be overloaded for specific manifolds.
 
-    median(M::Manifold, x::AbstractVector[, w::AbstractWeights], method::AbstractMethod; kwargs...)
+    median(M::Manifold, x::AbstractVector[, w::AbstractWeights], method::AbstractStatsMethod; kwargs...)
 
 Compute the median using the specified `method`.
 
@@ -266,7 +273,7 @@ Compute the median using the specified `method`.
         M::Manifold,
         x::AbstractVector,
         [w::AbstractWeights,]
-        method::CyclicProximalPointMethod;
+        method::CyclicProximalPoint;
         x0=x[1],
         stop_iter=1000000,
         retraction::AbstractRetractionMethod = ExponentialRetraction(),
@@ -274,7 +281,7 @@ Compute the median using the specified `method`.
         kwargs...,
     )
 
-Compute the median using [`CyclicProximalPointMethod`](@ref).
+Compute the median using [`CyclicProximalPoint`](@ref).
 
 Optionally, provide `x0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform
@@ -295,29 +302,29 @@ median(::Manifold, args...)
 
 @doc doc"""
     median!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights]; kwargs...)
-    median!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights], method::AbstractMethod; kwargs...)
+    median!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights], method::AbstractStatsMethod; kwargs...)
 
 computes the [`median`](@ref) in-place in `y`.
 """
 median!(::Manifold, args...)
 
-function median(M::Manifold, x::AbstractVector, method::AbstractMethod...; kwargs...)
+function median(M::Manifold, x::AbstractVector, method::AbstractStatsMethod...; kwargs...)
     y = similar_result(M, median, x[1])
     return median!(M, y, x, method...; kwargs...)
 end
 
-function median(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod...; kwargs...)
+function median(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractStatsMethod...; kwargs...)
     y = similar_result(M, median, x[1])
     return median!(M, y, x, w, method...; kwargs...)
 end
 
-function median!(M::Manifold, y, x::AbstractVector, method::AbstractMethod...; kwargs...)
+function median!(M::Manifold, y, x::AbstractVector, method::AbstractStatsMethod...; kwargs...)
     w = _unit_weights(length(x))
     return median!(M, y, x, w, method...; kwargs...)
 end
 
 function median!(M::Manifold, y, x::AbstractVector, w::AbstractWeights; kwargs...)
-    return median!(M, y, x, w, CyclicProximalPointMethod(); kwargs...)
+    return median!(M, y, x, w, CyclicProximalPoint(); kwargs...)
 end
 
 function median!(
@@ -325,7 +332,7 @@ function median!(
     y,
     x::AbstractVector,
     w::AbstractWeights,
-    ::CyclicProximalPointMethod;
+    ::CyclicProximalPoint;
     x0=x[1],
     stop_iter=1000000,
     retraction::AbstractRetractionMethod = ExponentialRetraction(),
@@ -427,7 +434,7 @@ functions for a description of the arguments.
         M::Manifold,
         x::AbstractVector
         [w::AbstractWeights,]
-        method::AbstractMethod;
+        method::AbstractStatsMethod;
         kwargs...,
     ) -> (mean, var)
 
@@ -436,13 +443,13 @@ a mean-specific method, call [`mean`](@ref) and then [`var`](@ref).
 """
 mean_and_var(M::Manifold, args...)
 
-function mean_and_var(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractMethod...; corrected=false, kwargs...)
+function mean_and_var(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractStatsMethod...; corrected=false, kwargs...)
     m = mean(M, x, w, method...; kwargs...)
     v = var(M, x, w, m; corrected = corrected)
     return m, v
 end
 
-function mean_and_var(M::Manifold, x::AbstractVector, method::AbstractMethod...; corrected=true, kwargs...)
+function mean_and_var(M::Manifold, x::AbstractVector, method::AbstractStatsMethod...; corrected=true, kwargs...)
     n = length(x)
     w = _unit_weights(n)
     return mean_and_var(M, x, w, method...; corrected = corrected, kwargs...)
@@ -453,7 +460,7 @@ end
         M::Manifold,
         x::AbstractVector
         [w::AbstractWeights,]
-        method::GeodesicInterpolationMethod;
+        method::GeodesicInterpolation;
         shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
         retraction::AbstractRetractionMethod = ExponentialRetraction(),
         inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
@@ -467,7 +474,7 @@ If `shuffle_rng` is provided, it is used to shuffle the order in which the
 points are considered. Optionally, pass `retraction` and `inverse_retraction`
 method types to specify the (inverse) retraction.
 
-See [`GeodesicInterpolationMethod`](@ref) for details on the geodesic
+See [`GeodesicInterpolation`](@ref) for details on the geodesic
 interpolation method.
 
 !!! note
@@ -478,7 +485,7 @@ function mean_and_var(
         M::Manifold,
         x::AbstractVector,
         w::AbstractWeights,
-        ::GeodesicInterpolationMethod;
+        ::GeodesicInterpolation;
         shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
         corrected = false,
         retraction::AbstractRetractionMethod = ExponentialRetraction(),
@@ -522,7 +529,7 @@ simultaneously.
         M::Manifold,
         x::AbstractVector
         [w::AbstractWeights,]
-        method::AbstractMethod;
+        method::AbstractStatsMethod;
         kwargs...,
     ) -> (mean, var)
 

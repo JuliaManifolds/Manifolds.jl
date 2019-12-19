@@ -161,17 +161,17 @@ end
     mean(S::Sphere, x::AbstractVector[, w::AbstractWeights]; shuffle_rng=nothing, kwargs...)
 
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
-[`GeodesicInterpolationMethod`](@ref). If any `x` are not within $\frac{\pi}{2}$
+[`GeodesicInterpolation`](@ref). If any `x` are not within $\frac{\pi}{2}$
 of the estimated mean, then the estimate is used to initialize mean computation
-using the [`GradientMethod`](@ref).
+using the [`GradientDescent`](@ref).
 """
 mean(::Sphere, args...)
 
 function mean!(S::Sphere, y, x::AbstractVector, w::AbstractWeights; shuffle_rng = nothing, kwargs...)
-    mean!(S, y, x, w, GeodesicInterpolationMethod(); shuffle_rng = shuffle_rng, kwargs...)
+    mean!(S, y, x, w, GeodesicInterpolation(); shuffle_rng = shuffle_rng, kwargs...)
     for i in eachindex(x)
         @inbounds if distance(S, y, x[i]) ≥ π/2
-            return mean!(S, y, x, w, GradientMethod(); x0 = y, kwargs...)
+            return mean!(S, y, x, w, GradientDescent(); x0 = y, kwargs...)
         end
     end
     return y
