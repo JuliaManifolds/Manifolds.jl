@@ -3,7 +3,7 @@ using StatsBase: AbstractWeights, Weights, ProbabilityWeights, values, varcorrec
 _unit_weights(n::Int) = ProbabilityWeights(ones(n), n)
 
 @doc doc"""
-    GeodesicInterpolation <: AbstractStatsMethod
+    GeodesicInterpolation <: AbstractEstimationMethod
 
 Repeated weighted geodesic interpolation method for estimating the Riemannian
 center of mass.
