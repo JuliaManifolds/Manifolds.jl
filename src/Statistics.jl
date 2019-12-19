@@ -531,7 +531,7 @@ end
 Compute the `k`th central moment of points in `x` on manifold `M`. Optionally
 provide weights `w` and/or a precomputed [`mean`](@ref).
 """
-function moment(M::Manifold, x::AbstractVector, k::Int, w::AbstractWeights, m = mean(M, x, k, w))
+function moment(M::Manifold, x::AbstractVector, k::Int, w::AbstractWeights, m = mean(M, x, w))
     s = sum(eachindex(x, w)) do i
         return @inbounds w[i] * distance(M, m, x[i])^k
     end
