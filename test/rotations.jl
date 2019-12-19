@@ -158,6 +158,7 @@ include("utils.jl")
         M = Manifolds.Rotations(3)
         x = collect(reshape(1.0:9.0, (3, 3)))
         x2 = project_point(M, x)
-        @test is_manifold_point(M, x2)
+        @show x2
+        @test is_manifold_point(M, x2, true)
     end
 end
