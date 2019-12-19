@@ -41,9 +41,28 @@ inner(M::Rotations, x, w, v) = dot(w, v)
 
 norm(M::Rotations, x, v) = norm(v)
 
-function project_point!(M::Rotations, y, x)
+@doc doc"""
+    project_point!(M::Rotations, y, x; check_det = true)
+
+Project `x` to the nearest point on manifold `M` and store in `y`.
+
+Given the singular value decomposition $x = U \Sigma V^\mathrm{T}$, with the
+singular values sorted in descending order, the projection is
+
+$y = U \operatorname{diag}\left[1,1,\dots,\det(U V^\mathrm{T})\right] V^\mathrm{T}$
+
+The diagonal matrix ensures that the $det(y) = +1$. If `x` is expected to be
+almost special orthogonal, then you may avoid this check with `check_det = false`.
+"""
+function project_point!(M::Rotations{N}, y, x; check_det = true) where {N}
     F = svd(x)
-    y .= F.U * F.Vt
+    copyto!(y, F.U * F.Vt)
+    if check_det && det(y) < 0
+        d = similar(F.S)
+        @inbounds fill!(view(d, 1:N-1), 1)
+        @inbounds d[N] = -1
+        copyto!(y, F.U * Diagonal(d) * F.Vt)
+    end
     return y
 end
 
@@ -272,8 +291,7 @@ approximation of the exponential map.
 """
 function retract!(M::Rotations, y, x, v, method::PolarRetraction)
     A = x + x*v
-    S = svd(A)
-    y .= S.U * transpose(S.V)
+    project_point!(M, y, A; check_det = false)
     return y
 end
 

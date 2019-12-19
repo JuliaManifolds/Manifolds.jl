@@ -153,12 +153,15 @@ include("utils.jl")
         M = Manifolds.Rotations(2)
         x = Matrix{Float64}(I, 2, 2)
         x1 = project_point(M, x)
-        @test is_manifold_point(M, x1)
+        @test is_manifold_point(M, x1, true)
 
         M = Manifolds.Rotations(3)
         x = collect(reshape(1.0:9.0, (3, 3)))
         x2 = project_point(M, x)
-        @show x2
         @test is_manifold_point(M, x2, true)
+
+        rng = MersenneTwister(44);
+        x3 = project_point(M, randn(rng, 3,3))
+        @test is_manifold_point(M, x3, true)
     end
 end
