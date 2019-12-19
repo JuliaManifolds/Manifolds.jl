@@ -75,4 +75,13 @@ log!(P::MetricManifold{SymmetricPositiveDefinite{N}, LogCholeskyMetric}, v, x, y
 vector_transport_to!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, vto, x, v, y, ::ParallelTransport) where N
 ```
 
+## Statistics
+
+```@autodocs
+Modules = [Manifolds]
+Pages   = ["SymmetricPositiveDefinite.jl"]
+Order = [:function]
+Filter = t -> t === mean
+```
+
 ### Literature

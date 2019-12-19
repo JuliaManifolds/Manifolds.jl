@@ -279,3 +279,23 @@ end
 
 @generated representation_size(::Grassmann{N,K,T}) where {N, K, T} = (N,K)
 zero_tangent_vector!(::Grassmann{N,K,T},v,x) where {N,K,T} = fill!(v,0)
+
+@doc doc"""
+    mean(M::Grassmann, x::AbstractVector[, w::AbstractWeights]; shuffle_rng=nothing, kwargs...)
+
+Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+[`GeodesicInterpolationMethod`](@ref). If any `x` are not within
+$\frac{\pi}{4}$ of the estimated mean, then the estimate is used to initialize
+mean computation using the [`GradientMethod`](@ref).
+"""
+mean(::Grassmann, args...)
+
+function mean!(M::Grassmann, y, x::AbstractVector, w::AbstractWeights; shuffle_rng = nothing, kwargs...)
+    mean!(M, y, x, w, GeodesicInterpolationMethod(); shuffle_rng = shuffle_rng, kwargs...)
+    for i in eachindex(x)
+        @inbounds if distance(M, y, x[i]) ≥ π/4
+            return mean!(M, y, x, w, GradientMethod(); x0 = y, kwargs...)
+        end
+    end
+    return y
+end

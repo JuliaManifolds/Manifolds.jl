@@ -444,3 +444,25 @@ function check_tangent_vector(M::SymmetricPositiveDefinite{N},x,v; kwargs...) wh
     return nothing
 end
 check_tangent_vector(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,v; kwargs...) where N = check_tangent_vector(M.manifold,x,v;kwargs...)
+
+"""
+    mean(M::SymmetricPositiveDefinite, x::AbstractVector[, w::AbstractWeights]; kwargs...)
+
+Compute the Riemannian
+[`mean`](@ref mean(::Manifold, ::AbstractVector, ::AbstractWeights, ::GeodesicInterpolationMethod))
+of `x` using [`GeodesicInterpolationMethod`](@ref).
+"""
+mean(::SymmetricPositiveDefinite, args...)
+
+mean!(M::SymmetricPositiveDefinite, y, x::AbstractVector, w::AbstractWeights; kwargs...) =
+    mean!(M, y, x, w, GeodesicInterpolationMethod(); kwargs...)
+
+function mean!(
+    M::MetricManifold{<:SymmetricPositiveDefinite,LinearAffineMetric},
+    y,
+    x::AbstractVector,
+    w::AbstractWeights;
+    kwargs...,
+)
+    return mean!(base_manifold(M), y, x, w; kwargs...)
+end

@@ -456,6 +456,19 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             end
         end
 
+        @testset "SymmetricPositiveDefinite default" begin
+            rng = MersenneTwister(36)
+            P = SymmetricPositiveDefinite(3)
+            x0 = collect(exp(Symmetric(randn(rng, 3, 3) * 0.1)))
+            x = [exp(P, x0, Symmetric(randn(rng, 3, 3) * 0.1)) for _=1:10]
+            w = pweights([rand(rng) for _ = 1:length(x)])
+            m = mean(P, x, w)
+            mg = mean(P, x, w, GeodesicInterpolationMethod())
+            mf = mean(P, x, w, GradientMethod())
+            @test m == mg
+            @test m != mf
+        end
+
         @testset "Sphere default" begin
             rng = MersenneTwister(47)
             S = Sphere(2)
@@ -497,6 +510,25 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(R, x, w)
             mg = mean(R, x, w, GeodesicInterpolationMethod())
+            @test m == mg
+        end
+
+        @testset "Grassmann default" begin
+            rng = MersenneTwister(47)
+            G = Manifolds.Grassmann(3, 2)
+            x0 = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            x = [exp(G, x0, project_tangent(G, x0, randn(rng, 3, 2) * 10)) for _= 1:10]
+            w = pweights([rand(rng) for _ = 1:length(x)])
+            m = mean(G, x, w)
+            mg = mean(G, x, w, GeodesicInterpolationMethod())
+            mf = mean(G, x, w, GradientMethod(); x0 = mg)
+            @test m != mg
+            @test m == mf
+
+            x = [exp(G, x0, project_tangent(G, x0, randn(rng, 3, 2) * 0.01)) for _= 1:10]
+            w = pweights([rand(rng) for _ = 1:length(x)])
+            m = mean(G, x, w)
+            mg = mean(G, x, w, GeodesicInterpolationMethod())
             @test m == mg
         end
     end
