@@ -71,9 +71,9 @@ papers:
 For more information on the weighted Welford algorithm on a Euclidean manifold,
 see:
 
-> West D. H. D.; Updating Mean and Variance Estimates: An Improved Method.
-> Communications of the ACM (1979), 22(9), pp. 532–535.
-> doi: [10.1145/359146.359153](https://doi.org/10.1145/359146.359153).
+> 6. West D. H. D.; Updating Mean and Variance Estimates: An Improved Method.
+>    Communications of the ACM (1979), 22(9), pp. 532–535.
+>    doi: [10.1145/359146.359153](https://doi.org/10.1145/359146.359153).
 """
 struct GeodesicInterpolation <: AbstractEstimationMethod end
 
