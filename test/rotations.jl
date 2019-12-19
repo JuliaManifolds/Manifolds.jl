@@ -133,7 +133,7 @@ include("utils.jl")
         end
     end
     @testset "Test Manifold Point and Tangent Vector checks" begin
-        M = Rotations(2)
+        M = Manifolds.Rotations(2)
         for x in [1, [2. 0.;0. 1.], [1. 0.5; 0. 1.]]
             @test_throws DomainError is_manifold_point(M,x,true)
             @test !is_manifold_point(M,x)
@@ -150,13 +150,13 @@ include("utils.jl")
         @test is_tangent_vector(M,x,v,true)
     end
     @testset "Project point" begin
-        M = Rotations(2)
-        x = ones(4)
+        M = Manifolds.Rotations(2)
+        x = Matrix{Float64}(I, 2, 2)
         x1 = project_point(M, x)
         @test is_manifold_point(M, x1)
 
-        M = Rotations(3)
-        x = reshape(1:9, (3, 3))
+        M = Manifolds.Rotations(3)
+        x = collect(reshape(1.0:9.0, (3, 3)))
         x2 = project_point(M, x)
         @test is_manifold_point(M, x2)
     end
