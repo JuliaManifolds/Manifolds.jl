@@ -151,6 +151,49 @@ function test_std(M, x, sexp = nothing; kwargs...)
     end
 end
 
+function test_moments(M, x)
+    n = length(x)
+    @testset "moments unweighted" begin
+        m = mean(M, x)
+        for i in 1:5
+            @test moment(M, x, i) ≈ mean(distance.(Ref(M), Ref(m), x).^i)
+            @test moment(M, x, i, m) ≈ moment(M, x, i)
+        end
+        @test moment(M, x, 2) ≈ var(M, x; corrected = false)
+        @test skewness(M, x) ≈ moment(M, x, 3) / moment(M, x, 2)^(3/2)
+        @test kurtosis(M, x) ≈ moment(M, x, 4) / moment(M, x, 2)^2 - 3
+
+        @test moment(M, x, 2, m) ≈ var(M, x; corrected = false)
+        @test skewness(M, x, m) ≈ moment(M, x, 3) / moment(M, x, 2)^(3/2)
+        @test kurtosis(M, x, m) ≈ moment(M, x, 4) / moment(M, x, 2)^2 - 3
+    end
+
+    @testset "moments weighted" begin
+        n = length(x)
+        w1 = pweights(ones(n) / n)
+        w2 = pweights(ones(n))
+        w3 = pweights(2 * ones(n))
+
+        for w in (w1, w2, w3)
+            m = mean(M, x, w)
+            for i in 1:5
+                @test moment(M, x, i, w) ≈ mean(distance.(Ref(M), Ref(m), x).^i, w)
+                @test moment(M, x, i, w, m) ≈ moment(M, x, i, w)
+            end
+            @test moment(M, x, 2, w) ≈ var(M, x, w; corrected = false)
+            @test skewness(M, x, w) ≈ moment(M, x, 3, w) / moment(M, x, 2, w)^(3/2)
+            @test kurtosis(M, x, w) ≈ moment(M, x, 4, w) / moment(M, x, 2, w)^2 - 3
+
+            @test moment(M, x, 2, w, m) ≈ var(M, x, w; corrected = false)
+            @test skewness(M, x, w, m) ≈ moment(M, x, 3, w) / moment(M, x, 2, w)^(3/2)
+            @test kurtosis(M, x, w, m) ≈ moment(M, x, 4, w) / moment(M, x, 2, w)^2 - 3
+        end
+        @test_throws DimensionMismatch moment(M, x, 3, pweights(ones(n + 1)))
+        @test_throws DimensionMismatch skewness(M, x, pweights(ones(n + 1)))
+        @test_throws DimensionMismatch kurtosis(M, x, pweights(ones(n + 1)))
+    end
+end
+
 struct TestStatsOverload1 <: Manifold end
 struct TestStatsOverload2 <: Manifold end
 struct TestStatsOverload3 <: Manifold end
@@ -239,6 +282,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             test_median(M, x; atol = 10^-12)
             test_var(M, x)
             test_std(M, x)
+            test_moments(M, x)
         end
 
         @testset "zero variance" begin
@@ -257,6 +301,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             test_median(M, x, [1.0, 1.0, 0.0] / √2; atol = 10^-12)
             test_var(M, x, θ^2)
             test_std(M, x, θ)
+            test_moments(M, x)
         end
     end
 
@@ -272,6 +317,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             test_median(M, x; atol = 10^-12)
             test_var(M, x, var(vx))
             test_std(M, x, std(vx))
+            test_moments(M, x)
 
             w = pweights(rand(rng, 10))
             @test mean(M, x, w) ≈ [mean(vx, w)]
@@ -287,6 +333,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             test_mean(M, x, mean(x))
             test_var(M, x, sum(var(x)))
             test_std(M, x, sqrt(sum(std(x).^2)))
+            test_moments(M, x)
 
             w = pweights(rand(rng, 10))
             ax = hcat(x...)
@@ -315,6 +362,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
                 test_median(M, x; atol = 10^-12)
                 test_var(M, x)
                 test_std(M, x)
+                test_moments(M, x)
             end
 
             @testset "vector" begin
@@ -332,6 +380,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
                 test_median(M, x; atol = 10^-12)
                 test_var(M, x)
                 test_std(M, x)
+                test_moments(M, x)
             end
         end
     end
