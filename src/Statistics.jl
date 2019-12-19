@@ -29,11 +29,14 @@ The algorithm has been shown to converge asymptotically with the sample size for
 the following manifolds equipped with their default metrics when all sampled
 points are in an open geodesic ball about the mean with corresponding radius:
 
-* [`Euclidean`](@ref): $\infty$
-* [`SymmetricPositiveDefinite`](@ref): $\infty$
-* [`Sphere`](@ref): $\frac{\pi}{2}$
-* `Grassmannian`: $\frac{\pi}{4}$
-* `Stiefel`/[`Rotations`](@ref): $\frac{\pi}{2 \sqrt 2}$
+* All simply connected complete Riemannian manifolds with non-positive sectional
+curvature at radius $\infty$, in particular
+    + [`Euclidean`](@ref)
+    + [`SymmetricPositiveDefinite`](@ref)
+* Other manifolds:
+    + [`Sphere`](@ref): $\frac{\pi}{2}$
+    + [`Grassmann`](@ref): $\frac{\pi}{4}$
+    + `Stiefel`/[`Rotations`](@ref): $\frac{\pi}{2 \sqrt 2}$
 
 For more information on the geodesic interpolation method, see the following
 papers:
@@ -54,7 +57,12 @@ papers:
 >    pp. 4229-4237.
 >    doi: [10.1109/ICCV.2015.481](https://doi.org/10.1109/ICCV.2015.481),
 >    [link](http://openaccess.thecvf.com/content_iccv_2015/html/Chakraborty_Recursive_Frechet_Mean_ICCV_2015_paper.html).
-> 4. Chakraborty R.; Vemuri B. C.; Statistics on the (compact) Stiefel manifold:
+> 4. Cheng G.; Ho J.; Salehian H.; Vemuri B. C.; Recursive Computation of the
+>    Fréchet Mean on Non-positively Curved Riemannian Manifolds with Applications.
+>    Riemannian Computing in Computer Vision. Springer, Cham (2016) pp. 21-43.
+>    doi: [10.1007/978-3-319-22957-7_2](https://doi.org/10.1007/978-3-319-22957-7_2),
+>    [pdf](https://www.cise.ufl.edu/~vemuri/paperphp/article.php?y=2016&i=5).
+> 5. Chakraborty R.; Vemuri B. C.; Statistics on the (compact) Stiefel manifold:
 >    Theory and Applications.
 >    The Annals of Statistics (2019), 47(1), pp. 415-438.
 >    doi: [10.1214/18-AOS1692](https://doi.org/10.1214/18-AOS1692),
