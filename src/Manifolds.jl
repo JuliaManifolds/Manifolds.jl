@@ -295,8 +295,7 @@ export Metric,
     GradientDescent,
     CyclicProximalPoint,
     AbstractEstimationMethod,
-    GeodesicInterpolation,
-    AbstractStatsMethod
+    GeodesicInterpolation
 export base_manifold,
     bundle_projection,
     christoffel_symbols_first,

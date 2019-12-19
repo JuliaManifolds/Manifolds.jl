@@ -2,13 +2,6 @@ using StatsBase: AbstractWeights, Weights, ProbabilityWeights, values, varcorrec
 
 _unit_weights(n::Int) = ProbabilityWeights(ones(n), n)
 
-"""
-    AbstractStatsMethod = Union{AbstractOptimizationMethod,AbstractEstimationMethod}
-
-Union type for methods for stats functions.
-"""
-const AbstractStatsMethod = Union{AbstractOptimizationMethod,AbstractEstimationMethod}
-
 @doc doc"""
     GeodesicInterpolation <: AbstractStatsMethod
 
@@ -98,7 +91,7 @@ where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 In the general case, the [`GradientDescent`](@ref) is used to compute the mean.
 However, this default may be overloaded for specific manifolds.
 
-    mean(M::Manifold, x::AbstractVector[, w::AbstractWeights], method::AbstractStatsMethod; kwargs...)
+    mean(M::Manifold, x::AbstractVector[, w::AbstractWeights], method; kwargs...)
 
 Compute the mean using the specified `method`.
 
@@ -136,23 +129,23 @@ mean(::Manifold, args...)
 
 @doc doc"""
     mean!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights]; kwargs...)
-    mean!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights], method::AbstractStatsMethod; kwargs...)
+    mean!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights], method; kwargs...)
 
 Compute the [`mean`](@ref) in-place in `y`.
 """
 mean!(::Manifold, args...)
 
-function mean(M::Manifold, x::AbstractVector, method::AbstractStatsMethod...; kwargs...)
+function mean(M::Manifold, x::AbstractVector, method...; kwargs...)
     y = similar_result(M, mean, x[1])
     return mean!(M, y, x, method...; kwargs...)
 end
 
-function mean(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractStatsMethod...; kwargs...)
+function mean(M::Manifold, x::AbstractVector, w::AbstractWeights, method...; kwargs...)
     y = similar_result(M, mean, x[1])
     return mean!(M, y, x, w, method...; kwargs...)
 end
 
-function mean!(M::Manifold, y, x::AbstractVector, method::AbstractStatsMethod...; kwargs...)
+function mean!(M::Manifold, y, x::AbstractVector, method...; kwargs...)
     w = _unit_weights(length(x))
     return mean!(M, y, x, w, method...; kwargs...)
 end
@@ -265,7 +258,7 @@ This function is nonsmooth (i.e nondifferentiable).
 In the general case, the [`CyclicProximalPoint`](@ref) is used to compute the
 median. However, this default may be overloaded for specific manifolds.
 
-    median(M::Manifold, x::AbstractVector[, w::AbstractWeights], method::AbstractStatsMethod; kwargs...)
+    median(M::Manifold, x::AbstractVector[, w::AbstractWeights], method; kwargs...)
 
 Compute the median using the specified `method`.
 
@@ -302,23 +295,23 @@ median(::Manifold, args...)
 
 @doc doc"""
     median!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights]; kwargs...)
-    median!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights], method::AbstractStatsMethod; kwargs...)
+    median!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights], method; kwargs...)
 
 computes the [`median`](@ref) in-place in `y`.
 """
 median!(::Manifold, args...)
 
-function median(M::Manifold, x::AbstractVector, method::AbstractStatsMethod...; kwargs...)
+function median(M::Manifold, x::AbstractVector, method...; kwargs...)
     y = similar_result(M, median, x[1])
     return median!(M, y, x, method...; kwargs...)
 end
 
-function median(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractStatsMethod...; kwargs...)
+function median(M::Manifold, x::AbstractVector, w::AbstractWeights, method...; kwargs...)
     y = similar_result(M, median, x[1])
     return median!(M, y, x, w, method...; kwargs...)
 end
 
-function median!(M::Manifold, y, x::AbstractVector, method::AbstractStatsMethod...; kwargs...)
+function median!(M::Manifold, y, x::AbstractVector, method...; kwargs...)
     w = _unit_weights(length(x))
     return median!(M, y, x, w, method...; kwargs...)
 end
@@ -434,7 +427,7 @@ functions for a description of the arguments.
         M::Manifold,
         x::AbstractVector
         [w::AbstractWeights,]
-        method::AbstractStatsMethod;
+        method;
         kwargs...,
     ) -> (mean, var)
 
@@ -443,13 +436,13 @@ a mean-specific method, call [`mean`](@ref) and then [`var`](@ref).
 """
 mean_and_var(M::Manifold, args...)
 
-function mean_and_var(M::Manifold, x::AbstractVector, w::AbstractWeights, method::AbstractStatsMethod...; corrected=false, kwargs...)
+function mean_and_var(M::Manifold, x::AbstractVector, w::AbstractWeights, method...; corrected=false, kwargs...)
     m = mean(M, x, w, method...; kwargs...)
     v = var(M, x, w, m; corrected = corrected)
     return m, v
 end
 
-function mean_and_var(M::Manifold, x::AbstractVector, method::AbstractStatsMethod...; corrected=true, kwargs...)
+function mean_and_var(M::Manifold, x::AbstractVector, method...; corrected=true, kwargs...)
     n = length(x)
     w = _unit_weights(n)
     return mean_and_var(M, x, w, method...; corrected = corrected, kwargs...)
@@ -529,7 +522,7 @@ simultaneously.
         M::Manifold,
         x::AbstractVector
         [w::AbstractWeights,]
-        method::AbstractStatsMethod;
+        method;
         kwargs...,
     ) -> (mean, var)
 
