@@ -152,7 +152,7 @@ mean(::Manifold, args...)
     mean!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights]; kwargs...)
     mean!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights], method; kwargs...)
 
-Compute the [`mean`](@ref) in-place in `y`.
+Compute the [`mean`](@ref mean(::Manifold, args...)) in-place in `y`.
 """
 mean!(::Manifold, args...)
 
@@ -478,8 +478,8 @@ std(M::Manifold, args...; kwargs...) = sqrt(var(M, args...; kwargs...))
 @doc doc"""
     mean_and_var(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...) -> (mean, var)
 
-Compute the [`mean`](@ref) and the [`var`](@ref)iance simultaneously. See those
-functions for a description of the arguments.
+Compute the [`mean`](@ref mean(::Manifold, args...)) and the [`var`](@ref)iance
+simultaneously. See those functions for a description of the arguments.
 
     mean_and_var(
         M::Manifold,
@@ -490,7 +490,8 @@ functions for a description of the arguments.
     ) -> (mean, var)
 
 Use the `method` for simultaneously computing the mean and variance. To use
-a mean-specific method, call [`mean`](@ref) and then [`var`](@ref).
+a mean-specific method, call [`mean`](@ref mean(::Manifold, args...)) and then
+[`var`](@ref).
 """
 mean_and_var(M::Manifold, args...)
 
@@ -619,8 +620,8 @@ end
 @doc doc"""
     mean_and_std(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...) -> (mean, std)
 
-Compute the [`mean`](@ref) and the standard deviation [`std`](@ref)
-simultaneously.
+Compute the [`mean`](@ref mean(::Manifold, args...)) and the standard deviation
+[`std`](@ref) simultaneously.
 
     mean_and_std(
         M::Manifold,
@@ -631,7 +632,8 @@ simultaneously.
     ) -> (mean, var)
 
 Use the `method` for simultaneously computing the mean and standard deviation.
-To use a mean-specific method, call [`mean`](@ref) and then [`std`](@ref).
+To use a mean-specific method, call [`mean`](@ref mean(::Manifold, args...)) and
+then [`std`](@ref).
 """
 function mean_and_std(M::Manifold, args...; kwargs...)
     m, v = mean_and_var(M, args...; kwargs...)
@@ -642,7 +644,8 @@ end
     moment(M::Manifold, x::AbstractVector, k::Int[, w::AbstractWeights], m=mean(M, x[, w]))
 
 Compute the `k`th central moment of points in `x` on manifold `M`. Optionally
-provide weights `w` and/or a precomputed [`mean`](@ref).
+provide weights `w` and/or a precomputed
+[`mean`](@ref mean(::Manifold, args...)).
 """
 function moment(M::Manifold, x::AbstractVector, k::Int, w::AbstractWeights, m = mean(M, x, w))
     s = sum(eachindex(x, w)) do i
@@ -660,7 +663,8 @@ end
     skewness(M::Manifold, x::AbstractVector, k::Int[, w::AbstractWeights], m=mean(M, x[, w]))
 
 Compute the standardized skewness of points in `x` on manifold `M`. Optionally
-provide weights `w` and/or a precomputed [`mean`](@ref) `m`.
+provide weights `w` and/or a precomputed
+[`mean`](@ref mean(::Manifold, args...)) `m`.
 """
 function skewness(M::Manifold, x::AbstractVector, w::AbstractWeights)
     m, s = mean_and_std(M, x, w; corrected = false)
@@ -680,7 +684,8 @@ end
     kurtosis(M::Manifold, x::AbstractVector, k::Int[, w::AbstractWeights], m=mean(M, x[, w]))
 
 Compute the excess kurtosis of points in `x` on manifold `M`. Optionally
-provide weights `w` and/or a precomputed [`mean`](@ref) `m`.
+provide weights `w` and/or a precomputed
+[`mean`](@ref mean(::Manifold, args...)) `m`.
 """
 function kurtosis(M::Manifold, x::AbstractVector, w::AbstractWeights)
     m, v = mean_and_var(M, x, w; corrected = false)
