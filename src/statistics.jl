@@ -338,7 +338,7 @@ function median!(
     yold = similar_result(M,median,y)
     ytmp = copy(yold)
     v = zero_tangent_vector(M,y)
-    wv = convert(Vector, w) ./ w.sum
+    wv = convert(Vector, w) ./ sum(w)
     for i=1:stop_iter
         λ =  .5 / i
         copyto!(yold,y)
@@ -544,7 +544,7 @@ function moment(M::Manifold, x::AbstractVector, k::Int, w::AbstractWeights, m = 
     s = sum(eachindex(x, w)) do i
         return @inbounds w[i] * distance(M, m, x[i])^k
     end
-    return s / w.sum
+    return s / sum(w)
 end
 
 function moment(M::Manifold, x::AbstractVector, k::Int, m = mean(M, x))
