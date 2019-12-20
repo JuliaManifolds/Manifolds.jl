@@ -26,11 +26,10 @@ injectivity_radius(::SymmetricPositiveDefinite{N},a::Vararg{Any,N} where N) wher
 check_manifold_point(::SymmetricPositiveDefinite{N},x; kwargs...) where N
 check_tangent_vector(::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
 manifold_dimension(::SymmetricPositiveDefinite{N}) where N
-representation_size(::SymmetricPositiveDefinite)
-zero_tangent_vector(::SymmetricPositiveDefinite{N},x) where N
+representation_size(::SymmetricPositiveDefinite{N}) where N
+zero_tangent_vector(:SymmetricPositiveDefinite{N},x) where N
 zero_tangent_vector!(::SymmetricPositiveDefinite{N}, v, x) where N
 ```
-
 
 ## Default Metric: Linear Affine Metric
 

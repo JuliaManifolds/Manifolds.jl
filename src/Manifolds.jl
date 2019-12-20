@@ -36,9 +36,20 @@ import LinearAlgebra: dot,
     Diagonal
 
 using ManifoldsBase
-using ManifoldsBase: AbstractRetractionMethod,
+using ManifoldsBase: Manifold,
+    MPoint,
+    TVector,
+    CoTVector,
+    ArrayCoTVector,
+    ArrayManifold,
+    ArrayMPoint,
+    ArrayTVector,
+    ArrayCoTVector,
+    AbstractRetractionMethod,
     AbstractInverseRetractionMethod,
-    AbstractVectorTransportMethod
+    AbstractVectorTransportMethod,
+    ParallelTransport,
+    ProjectionTransport#
 import ManifoldsBase: base_manifold,
     check_manifold_point,
     check_tangent_vector,
@@ -46,19 +57,17 @@ import ManifoldsBase: base_manifold,
     exp,
     exp!,
     geodesic,
-    shortest_geodesic,
     injectivity_radius,
     inner,
-    inverse_retract,
-    inverse_retract!,
     isapprox,
     is_manifold_point,
     is_tangent_vector,
     is_decorator_manifold,
+    inverse_retract,
+    inverse_retract!,
     log,
     log!,
     manifold_dimension,
-    check_manifold_point,
     norm,
     project_point,
     project_point!,
@@ -67,7 +76,7 @@ import ManifoldsBase: base_manifold,
     representation_size,
     retract,
     retract!,
-    check_tangent_vector,
+    shortest_geodesic,
     vector_transport_along,
     vector_transport_along!,
     vector_transport_direction,
@@ -89,7 +98,36 @@ using Random: AbstractRNG
 using UnsafeArrays
 using Einsum: @einsum
 
-hat!(M::Manifold, v, x, vⁱ) = error("hat! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), and matrix $(typeof(v))")
+"""
+    QRRetraction
+
+A retraction using the QR decomposition of a tangent vectors representation as
+a matrix.
+"""
+struct QRRetraction <: AbstractRetractionMethod end
+
+"""
+    QRInverseRetraction
+
+Inverse retraction to the [`QRRetraction`](@ref)
+"""
+struct QRInverseRetraction <: AbstractInverseRetractionMethod end
+
+@doc doc"""
+    PolarRetraction
+
+A retraction using the QR decomposition of a tangent vectors representation as
+a matrix.
+"""
+struct PolarRetraction <: AbstractRetractionMethod end
+
+"""
+    PolarInverseRetraction
+
+Inverse retraction on the rotations manifold using the polar method.
+"""
+struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
+
 
 @doc doc"""
     hat(M::Manifold, x, vⁱ)
@@ -110,8 +148,8 @@ function hat(M::Manifold, x, vⁱ)
     hat!(M, v, x, vⁱ)
     return v
 end
+hat!(M::Manifold, v, x, vⁱ) = error("hat! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), and matrix $(typeof(v))")
 
-vee!(M::Manifold, vⁱ, x, v) = error("vee! operator not defined for manifold $(typeof(M)), matrix $(typeof(v)), and vector $(typeof(vⁱ))")
 
 @doc doc"""
     vee(M::Manifold, x, v)
@@ -131,6 +169,7 @@ function vee(M::Manifold, x, v)
     vee!(M, vⁱ, x, v)
     return vⁱ
 end
+vee!(M::Manifold, vⁱ, x, v) = error("vee! operator not defined for manifold $(typeof(M)), matrix $(typeof(v)), and vector $(typeof(vⁱ))")
 
 """
     PolarRetraction <: AbstractRetractionMethod
@@ -179,8 +218,9 @@ include("ProductManifold.jl")
 include("PowerManifold.jl")
 
 include("CholeskySpace.jl")
-include("FixedRankMatrices.jl")
 include("Euclidean.jl")
+include("FixedRankMatrices.jl")
+include("Grassmann.jl")
 include("Rotations.jl")
 include("Stiefel.jl")
 include("Sphere.jl")
@@ -203,18 +243,33 @@ function __init__()
     end
 end
 
+# Base Types
 export Manifold,
     MPoint,
     TVector,
-    ProductManifold,
-    PowerManifold,
-    ProductRepr,
-    VectorSpaceType,
-    TangentSpace,
-    CotangentSpace,
-    VectorSpaceAtPoint,
-    TangentSpaceAtPoint,
+    CoTVector,
+    SVDMPoint,
+    UMVTVector
+# decorator manifolds
+export ArrayManifold,
+    ArrayMPoint,
+    ArrayTVector,
+    ArrayCoTVector,
+    CotangentBundle,
     CotangentSpaceAtPoint,
+    CotangentBundleFibers,
+    CotangentSpace,
+    FVector,
+    PowerManifold,
+    ProductManifold,
+    ProjectedPointDistribution,
+    ProductRepr,
+    TangentBundle,
+    TangentBundleFibers,
+    TangentSpace,
+    TangentSpaceAtPoint,
+    VectorSpaceAtPoint,
+    VectorSpaceType,
     VectorBundle,
     VectorBundleFibers,
     FVector,
@@ -224,50 +279,66 @@ export Manifold,
     CotangentBundleFibers,
     AbstractVectorTransportMethod,
     ParallelTransport,
-    ProjectTangent,
     ProjectedPointDistribution
-export
-    SVDMPoint,
-    UMVTVector,
+# Manifolds
+export CholeskySpace,
     Euclidean,
     FixedRankMatrices,
-    CholeskySpace,
+    Grassmann,
     Sphere,
     Stiefel,
     SymmetricPositiveDefinite
-
-export
-    PolarRetraction,
-    PolarInverseRetraction,
+# Types
+export Metric,
+    RiemannianMetric,
+    LorentzMetric,
+    EuclideanMetric,
+    MetricManifold,
+    LinearAffineMetric,
+    LogEuclideanMetric,
+    LogCholeskyMetric,
+    AbstractVectorTransportMethod,
+    ParallelTransport,
+    ProjectionTransport,
+    AbstractRetractionMethod,
     QRRetraction,
-    QRInverseRetraction
-
+    PolarRetraction,
+    AbstractInverseRetractionMethod,
+    QRInverseRetraction,
+    PolarInverseRetraction
 export base_manifold,
     bundle_projection,
+    christoffel_symbols_first,
+    christoffel_symbols_second,
+    christoffel_symbols_second_jacobian,
+    det_local_metric,
     distance,
+    einstein_tensor,
     exp,
     exp!,
     flat,
     flat!,
-    hat!,
-    hat,
-    sharp,
-    sharp!,
-    vee,
-    vee!,
+    gaussian_curvature,
     geodesic,
-    shortest_geodesic,
+    hat,
+    hat!,
     injectivity_radius,
+    inner,
+    inverse_local_metric,
     inverse_retract,
     inverse_retract!,
+    isapprox,
+    is_decorator_manifold,
     is_default_metric,
     is_manifold_point,
     is_tangent_vector,
-    isapprox,
-    inner,
+    local_metric,
+    local_metric_jacobian,
     log,
     log!,
+    log_local_metric_density,
     manifold_dimension,
+    metric,
     mean,
     mean!,
     mean_and_var,
@@ -276,15 +347,21 @@ export base_manifold,
     median!,
     norm,
     normal_tvector_distribution,
+    one,
     project_point,
     project_point!,
     project_tangent,
     project_tangent!,
     projected_distribution,
-    one,
+    ricci_curvature,
+    ricci_tensor,
     representation_size,
     retract,
     retract!,
+    riemann_tensor,
+    sharp,
+    sharp!,
+    shortest_geodesic,
     std,
     submanifold,
     submanifold_component,
@@ -297,31 +374,10 @@ export base_manifold,
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
+    vee,
+    vee!,
     zero_vector,
     zero_vector!,
     zero_tangent_vector,
     zero_tangent_vector!
-export Metric,
-    RiemannianMetric,
-    LorentzMetric,
-    EuclideanMetric,
-    MetricManifold,
-    LinearAffineMetric,
-    LogEuclideanMetric,
-    LogCholeskyMetric,
-    metric,
-    local_metric,
-    inverse_local_metric,
-    local_metric_jacobian,
-    det_local_metric,
-    log_local_metric_density,
-    christoffel_symbols_first,
-    christoffel_symbols_second,
-    christoffel_symbols_second_jacobian,
-    riemann_tensor,
-    ricci_tensor,
-    einstein_tensor,
-    ricci_curvature,
-    gaussian_curvature
-
 end # module
