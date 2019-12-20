@@ -1,4 +1,4 @@
-using ForwardDiff, OrdinaryDiffEq
+using FiniteDifferences, ForwardDiff, OrdinaryDiffEq
 using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
 import Manifolds: mean!, median!
@@ -24,8 +24,8 @@ struct TestEuclideanMetric <: Metric end
     @test base_manifold(M) === E
     @test metric(M) === g
 
-    @test_throws ErrorException local_metric_jacobian(E, zeros(3))
-    @test_throws ErrorException christoffel_symbols_second_jacobian(E, zeros(3))
+    @test_throws MethodError local_metric_jacobian(E, zeros(3))
+    @test_throws MethodError christoffel_symbols_second_jacobian(E, zeros(3))
 
     for vtype in (Vector, SVector{n}, MVector{n})
         x, v, w = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
@@ -41,13 +41,30 @@ struct TestEuclideanMetric <: Metric end
         @test exp(M, x, v, T) ≈ [x + t * v for t in T]
         @test geodesic(M, x, v, T) ≈ [x + t * v for t in T]
 
-        @test christoffel_symbols_first(M, x) ≈ zeros(n, n, n)
-        @test christoffel_symbols_second(M, x) ≈ zeros(n, n, n)
-        @test riemann_tensor(M, x) ≈ zeros(n, n, n, n)
-        @test ricci_tensor(M, x) ≈ zeros(n, n)
-        @test ricci_curvature(M, x) ≈ 0
-        @test gaussian_curvature(M, x) ≈ 0
-        @test einstein_tensor(M, x) ≈ zeros(n, n)
+        @test christoffel_symbols_first(M, x) ≈ zeros(n, n, n) atol=1e-6
+        @test christoffel_symbols_second(M, x) ≈ zeros(n, n, n) atol=1e-6
+        @test riemann_tensor(M, x) ≈ zeros(n, n, n, n) atol=1e-6
+        @test ricci_tensor(M, x) ≈ zeros(n, n) atol=1e-6
+        @test ricci_curvature(M, x) ≈ 0 atol=1e-6
+        @test gaussian_curvature(M, x) ≈ 0 atol=1e-6
+        @test einstein_tensor(M, x) ≈ zeros(n, n) atol=1e-6
+
+        fdm = forward_fdm(2, 1)
+        @test christoffel_symbols_first(M, x; backend=fdm) ≈ zeros(n, n, n) atol=1e-6
+        @test christoffel_symbols_second(M, x; backend=fdm) ≈ zeros(n, n, n) atol=1e-6
+        @test riemann_tensor(M, x; backend=fdm) ≈ zeros(n, n, n, n) atol=1e-6
+        @test ricci_tensor(M, x; backend=fdm) ≈ zeros(n, n) atol=1e-6
+        @test ricci_curvature(M, x; backend=fdm) ≈ 0 atol=1e-6
+        @test gaussian_curvature(M, x; backend=fdm) ≈ 0 atol=1e-6
+        @test einstein_tensor(M, x; backend=fdm) ≈ zeros(n, n) atol=1e-6
+
+        @test christoffel_symbols_first(M, x; backend=:forwarddiff) ≈ zeros(n, n, n) atol=1e-6
+        @test christoffel_symbols_second(M, x; backend=:forwarddiff) ≈ zeros(n, n, n) atol=1e-6
+        @test riemann_tensor(M, x; backend=:forwarddiff) ≈ zeros(n, n, n, n) atol=1e-6
+        @test ricci_tensor(M, x; backend=:forwarddiff) ≈ zeros(n, n) atol=1e-6
+        @test ricci_curvature(M, x; backend=:forwarddiff) ≈ 0 atol=1e-6
+        @test gaussian_curvature(M, x; backend=:forwarddiff) ≈ 0 atol=1e-6
+        @test einstein_tensor(M, x; backend=:forwarddiff) ≈ zeros(n, n) atol=1e-6
     end
 end
 
@@ -115,7 +132,7 @@ struct TestSphericalMetric <: Metric end
             elseif (i,j,k) == (2,2,1)
                 @test Γ₁[i,j,k] ≈ -r^2*cos(θ)*sin(θ)
             else
-                @test Γ₁[i,j,k] ≈ 0
+                @test Γ₁[i,j,k] ≈ 0 atol=1e-6
             end
         end
 
@@ -126,7 +143,7 @@ struct TestSphericalMetric <: Metric end
             elseif (l,i,j) == (2,1,2) || (l,i,j) == (2,2,1)
                 @test Γ₂[l,i,j] ≈ cot(θ)
             else
-                @test Γ₂[l,i,j] ≈ 0
+                @test Γ₂[l,i,j] ≈ 0 atol=1e-6
             end
         end
 
@@ -141,7 +158,7 @@ struct TestSphericalMetric <: Metric end
             elseif (l,i,j,k) == (1,2,2,1)
                 @test R[l,i,j,k] ≈ -sin(θ)^2
             else
-                @test R[l,i,j,k] ≈ 0
+                @test R[l,i,j,k] ≈ 0 atol=1e-6
             end
         end
 
