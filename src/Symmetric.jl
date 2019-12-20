@@ -1,7 +1,7 @@
 @doc doc"""
-    SymmetricMatrices{N,T} <: Manifold
+    SymmetricMatrices{n,T} <: Manifold
 
-The [`Manifold`](@ref) $ Sym (N)$ consisting of the `T`-valued, symmetric matrices of size $ n\times n$, i.e. the set 
+The [`Manifold`](@ref) $ \operatorname{Sym} (n)$ consisting of the `T`-valued, symmetric matrices of size $ n\times n$, i.e. the set 
 
 $\operatorname{Sym}(n) = \bigl\{A \in \mathbb F^{n\times n} \big| A^{\mathrm{T}} = A \bigr\}$
 
@@ -73,7 +73,10 @@ project_tangent!(M::SymmetricMatrices, w, x, v) = (w .= 1/2 * (v + transpose(v))
 
 compute the inner product of the two tangent vectors `w,v` from the tangent
 plane at `x` on the [`SymmetricMatrices`](@ref) `M` using the restriction of the
-metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
+metric from the embedding, i.e. 
+````math
+(v,w)_x = \operatorname{tr}(v^{\mathrm{T}}w)
+````
 """
 @inline inner(M::SymmetricMatrices, x, w, v) = dot(w, v)
 
@@ -96,7 +99,7 @@ manifold point `x` lying on the [`SymmetricMatrices`](@ref) manifold `M`.
 The result is saved in `y`. 
 For the [`SymmetricMatrices`](@ref), the exponential map is simply the sum, i.e. 
 ````math
-    y .= x + v
+    y = x + v
 ````
 """
 function exp!(M::SymmetricMatrices, y, x, v)
