@@ -279,3 +279,20 @@ end
 
 @generated representation_size(::Grassmann{N,K,T}) where {N, K, T} = (N,K)
 zero_tangent_vector!(::Grassmann{N,K,T},v,x) where {N,K,T} = fill!(v,0)
+
+"""
+    mean(
+        M::Grassmann{N,K,Real},
+        x::AbstractVector,
+        [w::AbstractWeights,]
+        method = GeodesicInterpolationWithinRadius(π/4);
+        kwargs...,
+    ) where {N,K}
+
+Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+[`GeodesicInterpolationWithinRadius`](@ref).
+"""
+mean(::Grassmann{N,K,Real} where {N,K}, args...)
+
+mean!(M::Grassmann{N,K,T}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N,K,T<:Real} =
+    mean!(M, y, x, w, GeodesicInterpolationWithinRadius(π/4); kwargs...)

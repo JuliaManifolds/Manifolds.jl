@@ -41,6 +41,31 @@ inner(M::Rotations, x, w, v) = dot(w, v)
 
 norm(M::Rotations, x, v) = norm(v)
 
+@doc doc"""
+    project_point!(M::Rotations, y, x; check_det = true)
+
+Project `x` to the nearest point on manifold `M` and store in `y`.
+
+Given the singular value decomposition $x = U \Sigma V^\mathrm{T}$, with the
+singular values sorted in descending order, the projection is
+
+$y = U \operatorname{diag}\left[1,1,\dots,\det(U V^\mathrm{T})\right] V^\mathrm{T}$
+
+The diagonal matrix ensures that the $det(y) = +1$. If `x` is expected to be
+almost special orthogonal, then you may avoid this check with `check_det = false`.
+"""
+function project_point!(M::Rotations{N}, y, x; check_det = true) where {N}
+    F = svd(x)
+    copyto!(y, F.U * F.Vt)
+    if check_det && det(y) < 0
+        d = similar(F.S)
+        @inbounds fill!(view(d, 1:N-1), 1)
+        @inbounds d[N] = -1
+        copyto!(y, F.U * Diagonal(d) * F.Vt)
+    end
+    return y
+end
+
 project_tangent!(M::Rotations, w, x, v) = w .= (v .- transpose(v))./2
 
 function flat!(M::Rotations, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
@@ -114,7 +139,18 @@ Exponential map of tangent vector `v` at point `x` from $\mathrm{SO}(4)$
 manifold `M`. Result is saved to `y`.
 
 The algorithm used is a more numerically stable form of those proposed in
-[[Gallier, 2003](#Gallier2003)] and [[Andrica, 2013](#Andrica2013)].
+[^Gallier2002] and [^Andrica2013].
+
+[^Gallier2002]:
+    > Gallier J.; Xu D.; Computing exponentials of skew-symmetric matrices
+    > and logarithms of orthogonal matrices.
+    > International Journal of Robotics and Automation (2002), 17(4), pp. 1-11.
+    > [pdf](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.35.3205).
+[^Andrica2013]:
+    > Andrica D.; Rohan R.-A.; Computing the Rodrigues coefficients of the
+    > exponential map of the Lie groups of matrices.
+    > Balkan Journal of Geometry and Its Applications (2013), 18(2), pp. 1-2.
+    > [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
 """
 function exp!(M::Rotations{4}, y, x, v)
     T = eltype(v)
@@ -274,8 +310,7 @@ Retraction is performed by the function [`retract!(::Rotations, y, x, v, ::Polar
 """
 function retract!(M::Rotations, y, x, v, method::PolarRetraction)
     A = x + x*v
-    S = svd(A)
-    y .= S.U * transpose(S.V)
+    project_point!(M, y, A; check_det = false)
     return y
 end
 
@@ -553,3 +588,20 @@ function normal_rotation_distribution(M::Rotations{N}, x, σ::Real) where N
     d = Distributions.MvNormal(zeros(N*N), σ)
     return NormalRotationDistribution(M, d, x)
 end
+
+"""
+    mean(
+        M::Rotations,
+        x::AbstractVector,
+        [w::AbstractWeights,]
+        method = GeodesicInterpolationWithinRadius(π/2/√2);
+        kwargs...,
+    )
+
+Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+[`GeodesicInterpolationWithinRadius`](@ref).
+"""
+mean(::Rotations, args...)
+
+mean!(M::Rotations, y, x::AbstractVector, w::AbstractVector; kwargs...) =
+    mean!(M, y, x, w, GeodesicInterpolationWithinRadius(π/2/√2); kwargs...)

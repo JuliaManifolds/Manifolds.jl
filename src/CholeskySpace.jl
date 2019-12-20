@@ -6,9 +6,11 @@ using LinearAlgebra: diag, eigen, eigvals, eigvecs, Symmetric, tr, cholesky, Low
 
 the manifold of lower triangular matrices with positive diagonal and
 a metric based on the cholesky decomposition. The formulae for this manifold
-are for example summarized in Table 1 of
-> Lin, Zenhua: "Riemannian Geometry of Symmetric Positive Definite Matrices via
-> Cholesky Decomposition", arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
+are for example summarized in Table 1 of [^Lin2019].
+
+[^Lin2019]:
+    > Lin, Zenhua: "Riemannian Geometry of Symmetric Positive Definite Matrices via
+    > Cholesky Decomposition", arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
 """
 struct CholeskySpace{N} <: Manifold end
 CholeskySpace(n::Int) = CholeskySpace{n}()

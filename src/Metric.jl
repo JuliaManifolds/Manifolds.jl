@@ -27,7 +27,7 @@ abstract type LorentzMetric <: Metric end
 """
     MetricManifold{M<:Manifold,G<:Metric} <: Manifold
 
-Equip a [`Manifold`](@ref) explicitly with a [`Metric`](@ref) `G`. 
+Equip a [`Manifold`](@ref) explicitly with a [`Metric`](@ref) `G`.
 
 For a Metric Manifold, by default, assumes, that you implement the linear form
 from [`local_metric`](@ref) in order to evaluate the exponential map.
@@ -119,18 +119,20 @@ is given by $\rho=\log \sqrt{|\det [g_{ij}]|}$.
 log_local_metric_density(M::MetricManifold, x) = log(abs(det_local_metric(M, x))) / 2
 
 @doc doc"""
-    local_metric_jacobian(M::MetricManifold, x)
+    local_metric_jacobian(M::MetricManifold, x; backend=:default)
 
 Get partial derivatives of the local metric of `M` at `x` with respect to the
 coordinates of `x`, $\frac{\partial}{\partial x^k} g_{ij} = g_{ij,k}$. The
 dimensions of the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
-function local_metric_jacobian(M, x)
-    error("local_metric_jacobian not implemented on $(typeof(M)) for point $(typeof(x)). For a suitable default, enter `using ForwardDiff`.")
+function local_metric_jacobian(M, x; backend=:default)
+    n = size(x, 1)
+    ∂g = reshape(_jacobian(x -> local_metric(M, x), x, backend), n, n, n)
+    return ∂g
 end
 
 @doc doc"""
-    christoffel_symbols_first(M::MetricManifold, x)
+    christoffel_symbols_first(M::MetricManifold, x; backend=:default)
 
 Compute the Christoffel symbols of the first kind in local coordinates.
 The Christoffel symbols are (in Einstein summation convention)
@@ -141,8 +143,8 @@ where $g_{ij,k}=\frac{\partial}{\partial x^k} g_{ij}$ is the coordinate
 derivative of the local representation of the metric tensor. The dimensions of
 the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
-function christoffel_symbols_first(M::MetricManifold, x)
-    ∂g = local_metric_jacobian(M, x)
+function christoffel_symbols_first(M::MetricManifold, x; backend = :default)
+    ∂g = local_metric_jacobian(M, x; backend = backend)
     n = size(∂g, 1)
     Γ = similar(∂g, Size(n, n, n))
     @einsum Γ[i,j,k] = 1 / 2 * (∂g[k,j,i] + ∂g[i,k,j] - ∂g[i,j,k])
@@ -150,7 +152,7 @@ function christoffel_symbols_first(M::MetricManifold, x)
 end
 
 @doc doc"""
-    christoffel_symbols_second(M::MetricManifold, x)
+    christoffel_symbols_second(M::MetricManifold, x; backend=:default)
 
 Compute the Christoffel symbols of the second kind in local coordinates.
 The Christoffel symbols are (in Einstein summation convention)
@@ -161,24 +163,29 @@ where $\Gamma_{ijk}$ are the Christoffel symbols of the first kind, and
 $g^{kl}$ is the inverse of the local representation of the metric tensor.
 The dimensions of the resulting multi-dimensional array are ordered $(l,i,j)$.
 """
-function christoffel_symbols_second(M::MetricManifold, x)
+function christoffel_symbols_second(M::MetricManifold, x; backend = :default)
     ginv = inverse_local_metric(M, x)
-    Γ₁ = christoffel_symbols_first(M, x)
+    Γ₁ = christoffel_symbols_first(M, x; backend = backend)
     Γ₂ = similar(Γ₁)
     @einsum Γ₂[l,i,j] = ginv[k,l] * Γ₁[i,j,k]
     return Γ₂
 end
 
 @doc doc"""
-    christoffel_symbols_second_jacobian(M::MetricManifold, x)
+    christoffel_symbols_second_jacobian(M::MetricManifold, x; backend = :default)
 
 Get partial derivatives of the Christoffel symbols of the second kind
 for manifold `M` at `x` with respect to the coordinates of `x`,
 $\frac{\partial}{\partial x^l} \Gamma^{k}_{ij} = \Gamma^{k}_{ij,l}.$
 The dimensions of the resulting multi-dimensional array are ordered $(i,j,k,l)$.
 """
-function christoffel_symbols_second_jacobian(M, x)
-    error("christoffel_symbols_second_jacobian not implemented on $(typeof(M)) for point $(typeof(x)). For a suitable default, enter `using ForwardDiff`.")
+function christoffel_symbols_second_jacobian(M::MetricManifold, x; backend = :default)
+    n = size(x, 1)
+    ∂Γ = reshape(
+        _jacobian(x -> christoffel_symbols_second(M, x; backend = backend), x, backend),
+        n, n, n, n
+    )
+    return ∂Γ
 end
 
 @doc doc"""
@@ -188,23 +195,23 @@ Compute the Riemann tensor $R^l_{ijk}$, also known as the Riemann curvature
 tensor, at the point `x`. The dimensions of the resulting multi-dimensional
 array are ordered $(l,i,j,k)$.
 """
-function riemann_tensor(M::MetricManifold, x)
+function riemann_tensor(M::MetricManifold, x; backend = :default)
     n = size(x, 1)
-    Γ = christoffel_symbols_second(M, x)
-    ∂Γ = christoffel_symbols_second_jacobian(M, x) ./ n
+    Γ = christoffel_symbols_second(M, x; backend = backend)
+    ∂Γ = christoffel_symbols_second_jacobian(M, x; backend = backend) ./ n
     R = similar(∂Γ, Size(n, n, n, n))
     @einsum R[l,i,j,k] = ∂Γ[l,i,k,j] - ∂Γ[l,i,j,k] + Γ[s,i,k] * Γ[l,s,j] - Γ[s,i,j] * Γ[l,s,k]
     return R
 end
 
 """
-    ricci_tensor(M::MetricManifold, x)
+    ricci_tensor(M::MetricManifold, x; backend = :default)
 
 Compute the Ricci tensor, also known as the Ricci curvature tensor,
 of the manifold `M` at the point `x`.
 """
-function ricci_tensor(M::MetricManifold, x)
-    R = riemann_tensor(M, x)
+function ricci_tensor(M::MetricManifold, x; kwargs...)
+    R = riemann_tensor(M, x; kwargs...)
     n = size(R, 1)
     Ric = similar(R, Size(n, n))
     @einsum Ric[i,j] = R[l,i,l,j]
@@ -212,31 +219,31 @@ function ricci_tensor(M::MetricManifold, x)
 end
 
 """
-    ricci_curvature(M::MetricManifold, x)
+    ricci_curvature(M::MetricManifold, x; backend = :default)
 
 Compute the Ricci scalar curvature of the manifold `M` at the point `x`.
 """
-function ricci_curvature(M::MetricManifold, x)
+function ricci_curvature(M::MetricManifold, x; backend = :default)
     ginv = inverse_local_metric(M, x)
-    Ric = ricci_tensor(M, x)
+    Ric = ricci_tensor(M, x; backend = backend)
     S = sum(ginv .* Ric)
     return S
 end
 
 """
-    gaussian_curvature(M::MetricManifold, x)
+    gaussian_curvature(M::MetricManifold, x; backend = :default)
 
 Compute the Gaussian curvature of the manifold `M` at the point `x`.
 """
-gaussian_curvature(M::MetricManifold, x) = ricci_curvature(M, x) / 2
+gaussian_curvature(M::MetricManifold, x; kwargs...) = ricci_curvature(M, x; kwargs...) / 2
 
 """
-    einstein_tensor(M::MetricManifold, x)
+    einstein_tensor(M::MetricManifold, x; backend = :default)
 
 Compute the Einstein tensor of the manifold `M` at the point `x`.
 """
-function einstein_tensor(M::MetricManifold, x)
-    Ric = ricci_tensor(M, x)
+function einstein_tensor(M::MetricManifold, x; backend = :default)
+    Ric = ricci_tensor(M, x; backend = backend)
     g = local_metric(M, x)
     ginv = inverse_local_metric(M, x)
     S = sum(ginv .* Ric)
@@ -245,7 +252,7 @@ function einstein_tensor(M::MetricManifold, x)
 end
 
 @doc doc"""
-    solve_exp_ode(M::MetricManifold, x, v, tspan; solver=AutoVern9(Rodas5()), kwargs...)
+    solve_exp_ode(M::MetricManifold, x, v, tspan; backend=:default, solver=AutoVern9(Rodas5()), kwargs...)
 
 Approximate the exponential map on the manifold over the provided timespan
 assuming the Levi-Civita connection by solving the ordinary differential
@@ -353,3 +360,12 @@ injectivity_radius(M::MMT, args...) where {MMT <: MetricManifold} = injectivity_
 zero_tangent_vector!(M::MMT, v, x) where {MMT <: MetricManifold} = zero_tangent_vector!(base_manifold(M), v, x)
 check_manifold_point(M::MMT, x; kwargs...) where {MMT <: MetricManifold} = check_manifold_point(base_manifold(M), x; kwargs...)
 check_tangent_vector(M::MMT, x, v; kwargs...) where {MMT <: MetricManifold} = check_tangent_vector(base_manifold(M), x, v; kwargs...)
+
+# statistics
+mean!(M::MMT, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = mean!(M, is_default_metric(M), y, x, w; kwargs...)
+mean!(M::MMT, ::Val{true}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = mean!(base_manifold(M), y, x, w; kwargs...)
+mean!(M::MMT, ::Val{false}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = mean!(M, y, x, w, GradientDescentEstimation(); kwargs...)
+
+median!(M::MMT, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = median!(M, is_default_metric(M), y, x, w; kwargs...)
+median!(M::MMT, ::Val{true}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = median!(base_manifold(M), y, x, w; kwargs...)
+median!(M::MMT, ::Val{false}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = median!(M, y, x, w, CyclicProximalPointEstimation(); kwargs...)

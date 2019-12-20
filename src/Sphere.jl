@@ -156,3 +156,20 @@ function normal_tvector_distribution(S::Sphere, x, σ)
     d = Distributions.MvNormal(zero(x), σ)
     return ProjectedFVectorDistribution(TangentBundleFibers(S), x, d, project_vector!, x)
 end
+
+"""
+    mean(
+        S::Sphere,
+        x::AbstractVector,
+        [w::AbstractWeights,]
+        method = GeodesicInterpolationWithinRadius(π/2);
+        kwargs...,
+    )
+
+Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+[`GeodesicInterpolationWithinRadius`](@ref).
+"""
+mean(::Sphere, args...)
+
+mean!(S::Sphere, y, x::AbstractVector, w::AbstractVector; kwargs...) =
+    mean!(S, y, x, w, GeodesicInterpolationWithinRadius(π/2); kwargs...)

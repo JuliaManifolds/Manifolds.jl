@@ -26,7 +26,10 @@ import Statistics: mean,
     var,
     std
 import StatsBase: mean_and_std,
-    mean_and_var
+    mean_and_var,
+    moment,
+    kurtosis,
+    skewness
 import LinearAlgebra: dot,
     norm,
     det,
@@ -48,8 +51,10 @@ using ManifoldsBase: Manifold,
     AbstractRetractionMethod,
     AbstractInverseRetractionMethod,
     AbstractVectorTransportMethod,
+    ExponentialRetraction,
+    LogarithmicInverseRetraction
     ParallelTransport,
-    ProjectionTransport#
+    ProjectionTransport
 import ManifoldsBase: base_manifold,
     check_manifold_point,
     check_tangent_vector,
@@ -95,6 +100,7 @@ import Distributions: _rand!, support
 import Random: rand
 using LinearAlgebra
 using Random: AbstractRNG
+using FiniteDifferences
 using UnsafeArrays
 using Einsum: @einsum
 
@@ -174,6 +180,7 @@ struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
 
 include("utils.jl")
+include("autodiff.jl")
 include("SizedAbstractArray.jl")
 
 include("ProductRepresentations.jl")
@@ -195,7 +202,7 @@ include("Stiefel.jl")
 include("Sphere.jl")
 include("SymmetricPositiveDefinite.jl")
 
-include("Statistics.jl")
+include("statistics.jl")
 
 function __init__()
     @require ForwardDiff="f6369f11-7733-5829-9624-2563aa707210" begin
@@ -254,6 +261,7 @@ export CholeskySpace,
     Euclidean,
     FixedRankMatrices,
     Grassmann,
+    Rotations,
     Sphere,
     Stiefel,
     SymmetricPositiveDefinite
@@ -274,7 +282,12 @@ export Metric,
     PolarRetraction,
     AbstractInverseRetractionMethod,
     QRInverseRetraction,
-    PolarInverseRetraction
+    PolarInverseRetraction,
+    AbstractEstimationMethod,
+    GradientDescentEstimation,
+    CyclicProximalPointEstimation,
+    GeodesicInterpolation,
+    GeodesicInterpolationWithinRadius
 export base_manifold,
     bundle_projection,
     christoffel_symbols_first,
@@ -301,6 +314,9 @@ export base_manifold,
     is_default_metric,
     is_manifold_point,
     is_tangent_vector,
+    isapprox,
+    inner,
+    kurtosis,
     local_metric,
     local_metric_jacobian,
     log,
@@ -314,6 +330,7 @@ export base_manifold,
     mean_and_std,
     median,
     median!,
+    moment,
     norm,
     normal_tvector_distribution,
     one,
@@ -331,6 +348,7 @@ export base_manifold,
     sharp,
     sharp!,
     shortest_geodesic,
+    skewness,
     std,
     submanifold,
     submanifold_component,
