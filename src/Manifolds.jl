@@ -95,6 +95,7 @@ import Distributions: _rand!, support
 import Random: rand
 using LinearAlgebra
 using Random: AbstractRNG
+using FiniteDifferences
 using UnsafeArrays
 using Einsum: @einsum
 
@@ -172,6 +173,7 @@ end
 vee!(M::Manifold, vⁱ, x, v) = error("vee! operator not defined for manifold $(typeof(M)), matrix $(typeof(v)), and vector $(typeof(vⁱ))")
 
 include("utils.jl")
+include("autodiff.jl")
 include("SizedAbstractArray.jl")
 
 include("ProductRepresentations.jl")

@@ -1,4 +1,4 @@
-using ForwardDiff, OrdinaryDiffEq
+using FiniteDifferences, ForwardDiff, OrdinaryDiffEq
 using LinearAlgebra: I
 
 include("utils.jl")
@@ -22,8 +22,8 @@ struct TestEuclideanMetric <: Metric end
     @test base_manifold(M) === E
     @test metric(M) === g
 
-    @test_throws ErrorException local_metric_jacobian(E, zeros(3))
-    @test_throws ErrorException christoffel_symbols_second_jacobian(E, zeros(3))
+    @test_throws MethodError local_metric_jacobian(E, zeros(3))
+    @test_throws MethodError christoffel_symbols_second_jacobian(E, zeros(3))
 
     for vtype in (Vector, SVector{n}, MVector{n})
         x, v, w = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
@@ -39,13 +39,30 @@ struct TestEuclideanMetric <: Metric end
         @test exp(M, x, v, T) ≈ [x + t * v for t in T]
         @test geodesic(M, x, v, T) ≈ [x + t * v for t in T]
 
-        @test christoffel_symbols_first(M, x) ≈ zeros(n, n, n)
-        @test christoffel_symbols_second(M, x) ≈ zeros(n, n, n)
-        @test riemann_tensor(M, x) ≈ zeros(n, n, n, n)
-        @test ricci_tensor(M, x) ≈ zeros(n, n)
-        @test ricci_curvature(M, x) ≈ 0
-        @test gaussian_curvature(M, x) ≈ 0
-        @test einstein_tensor(M, x) ≈ zeros(n, n)
+        @test christoffel_symbols_first(M, x) ≈ zeros(n, n, n) atol=1e-6
+        @test christoffel_symbols_second(M, x) ≈ zeros(n, n, n) atol=1e-6
+        @test riemann_tensor(M, x) ≈ zeros(n, n, n, n) atol=1e-6
+        @test ricci_tensor(M, x) ≈ zeros(n, n) atol=1e-6
+        @test ricci_curvature(M, x) ≈ 0 atol=1e-6
+        @test gaussian_curvature(M, x) ≈ 0 atol=1e-6
+        @test einstein_tensor(M, x) ≈ zeros(n, n) atol=1e-6
+
+        fdm = forward_fdm(2, 1)
+        @test christoffel_symbols_first(M, x; backend=fdm) ≈ zeros(n, n, n) atol=1e-6
+        @test christoffel_symbols_second(M, x; backend=fdm) ≈ zeros(n, n, n) atol=1e-6
+        @test riemann_tensor(M, x; backend=fdm) ≈ zeros(n, n, n, n) atol=1e-6
+        @test ricci_tensor(M, x; backend=fdm) ≈ zeros(n, n) atol=1e-6
+        @test ricci_curvature(M, x; backend=fdm) ≈ 0 atol=1e-6
+        @test gaussian_curvature(M, x; backend=fdm) ≈ 0 atol=1e-6
+        @test einstein_tensor(M, x; backend=fdm) ≈ zeros(n, n) atol=1e-6
+
+        @test christoffel_symbols_first(M, x; backend=:forwarddiff) ≈ zeros(n, n, n) atol=1e-6
+        @test christoffel_symbols_second(M, x; backend=:forwarddiff) ≈ zeros(n, n, n) atol=1e-6
+        @test riemann_tensor(M, x; backend=:forwarddiff) ≈ zeros(n, n, n, n) atol=1e-6
+        @test ricci_tensor(M, x; backend=:forwarddiff) ≈ zeros(n, n) atol=1e-6
+        @test ricci_curvature(M, x; backend=:forwarddiff) ≈ 0 atol=1e-6
+        @test gaussian_curvature(M, x; backend=:forwarddiff) ≈ 0 atol=1e-6
+        @test einstein_tensor(M, x; backend=:forwarddiff) ≈ zeros(n, n) atol=1e-6
     end
 end
 
@@ -113,7 +130,7 @@ struct TestSphericalMetric <: Metric end
             elseif (i,j,k) == (2,2,1)
                 @test Γ₁[i,j,k] ≈ -r^2*cos(θ)*sin(θ)
             else
-                @test Γ₁[i,j,k] ≈ 0
+                @test Γ₁[i,j,k] ≈ 0 atol=1e-6
             end
         end
 
@@ -124,7 +141,7 @@ struct TestSphericalMetric <: Metric end
             elseif (l,i,j) == (2,1,2) || (l,i,j) == (2,2,1)
                 @test Γ₂[l,i,j] ≈ cot(θ)
             else
-                @test Γ₂[l,i,j] ≈ 0
+                @test Γ₂[l,i,j] ≈ 0 atol=1e-6
             end
         end
 
@@ -139,7 +156,7 @@ struct TestSphericalMetric <: Metric end
             elseif (l,i,j,k) == (1,2,2,1)
                 @test R[l,i,j,k] ≈ -sin(θ)^2
             else
-                @test R[l,i,j,k] ≈ 0
+                @test R[l,i,j,k] ≈ 0 atol=1e-6
             end
         end
 
@@ -190,14 +207,14 @@ struct DefaultBaseManifoldMetric <: Metric end
     @test is_default_metric(MM) == is_default_metric(base_manifold(MM),metric(MM))
     @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2),metric(MM2))
     @test is_default_metric(MM2) == Val{true}()
-  
+
     @test convert(typeof(MM2),M) == MM2
     @test_throws ErrorException convert(typeof(MM),M)
     x = [0.1 0.2 0.4]
     v = [0.5 0.7 0.11]
     w = [0.13 0.17 0.19]
     y = similar(x)
-    
+
     # Test fallbacks
     @test_throws ErrorException vee!(M,w,x,v)
     @test_throws ErrorException hat!(M,w,x,v)
@@ -240,7 +257,7 @@ struct DefaultBaseManifoldMetric <: Metric end
     @test log!(MM2, v, x, y) === log!(M, v, x, y)
     @test retract!(MM2, y, x, v) === retract!(M, y, x, v)
     @test retract!(MM2, y, x, v, 1) === retract!(M, y, x, v, 1)
-    
+
     @test project_point!(MM2, y, x) === project_point!(M, y, x)
     @test project_tangent!(MM2, w, x, v) === project_tangent!(M, w, x, v)
     @test vector_transport_to!(MM2, w, x, v, y) == vector_transport_to!(M, w, x, v, y)
