@@ -1,5 +1,7 @@
 using ForwardDiff, OrdinaryDiffEq
 using LinearAlgebra: I
+using StatsBase: AbstractWeights, pweights
+import Manifolds: mean!, median!
 
 include("utils.jl")
 
@@ -168,6 +170,10 @@ struct DefaultBaseManifoldMetric <: Metric end
     Manifolds.tangent_orthonormal_basis(M::BaseManifold{N},x,v) where {N} = ( [(Matrix(I, N, N)[:,i]) for i in 1:N], zeros(N))
     Manifolds.projected_distribution(M::BaseManifold, d) = ProjectedPointDistribution(M, d, project_point!, rand(d))
     Manifolds.projected_distribution(M::BaseManifold, d, x) = ProjectedPointDistribution(M, d, project_point!, x)
+    Manifolds.mean!(M::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...) = fill!(y, 1)
+    Manifolds.median!(M::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...) = fill!(y, 2)
+    Manifolds.mean!(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N} = fill!(y, 3)
+    Manifolds.median!(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N} = fill!(y, 4)
 
     function Manifolds.flat!(::BaseManifold, v::FVector{Manifolds.CotangentSpaceType}, x, w::FVector{Manifolds.TangentSpaceType})
         v.data .= 2 .* w.data
@@ -190,14 +196,14 @@ struct DefaultBaseManifoldMetric <: Metric end
     @test is_default_metric(MM) == is_default_metric(base_manifold(MM),metric(MM))
     @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2),metric(MM2))
     @test is_default_metric(MM2) == Val{true}()
-  
+
     @test convert(typeof(MM2),M) == MM2
     @test_throws ErrorException convert(typeof(MM),M)
     x = [0.1 0.2 0.4]
     v = [0.5 0.7 0.11]
     w = [0.13 0.17 0.19]
     y = similar(x)
-    
+
     # Test fallbacks
     @test_throws ErrorException vee!(M,w,x,v)
     @test_throws ErrorException hat!(M,w,x,v)
@@ -240,7 +246,7 @@ struct DefaultBaseManifoldMetric <: Metric end
     @test log!(MM2, v, x, y) === log!(M, v, x, y)
     @test retract!(MM2, y, x, v) === retract!(M, y, x, v)
     @test retract!(MM2, y, x, v, 1) === retract!(M, y, x, v, 1)
-    
+
     @test project_point!(MM2, y, x) === project_point!(M, y, x)
     @test project_tangent!(MM2, w, x, v) === project_tangent!(M, w, x, v)
     @test vector_transport_to!(MM2, w, x, v, y) == vector_transport_to!(M, w, x, v, y)
@@ -266,4 +272,14 @@ struct DefaultBaseManifoldMetric <: Metric end
     @test inner(MM, x, v, w) ≈ inner(cotspace, x, cov.data, cow.data)
     @test inner(MM, x, v, w) ≈ inner(cotspace2, x, cov.data, cow.data)
     @test sharp(M, x, cov).data ≈ v
+
+    xsample = [[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
+    w = pweights([0.5, 0.5])
+    @test mean(M, xsample, w) ≈ ones(3)
+    @test mean(MM2, xsample, w) ≈ ones(3)
+    @test mean(MM, xsample, w) ≈ 3 .* ones(3)
+
+    @test median(M, xsample, w) ≈ 2 .* ones(3)
+    @test median(MM2, xsample, w) ≈ 2 * ones(3)
+    @test median(MM, xsample, w) ≈ 4 .* ones(3)
 end
