@@ -21,7 +21,7 @@ Being slightly inefficient, the matrices are safed as $n\times n$ arrays despite
 struct SymmetricMatrices{N,T} <: Manifold end
 SymmetricMatrices(N::Int,T::Type = Real) = SymmetricMatrices{N,T}()
 
-function representation_size(::SymmetricMatrices{N,T}) where {N}
+function representation_size(::SymmetricMatrices{N}) where {N}
     return (N,N)
 end
 
@@ -33,7 +33,7 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` with real-val
     \frac{n(n+1)}{2}
 ````
 """
-manifold_dimension(M::SymmetricMatrices{N,Real}) where {N,T} = div(N*(N+1),2)
+manifold_dimension(M::SymmetricMatrices{N,Real}) where {N} = div(N*(N+1),2)
 
 @doc doc"""
     manifold_dimension(M::SymmetricMatrices{n,Complex})
