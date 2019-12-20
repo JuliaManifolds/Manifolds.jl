@@ -3,14 +3,14 @@ using StatsBase: AbstractWeights, ProbabilityWeights, values, varcorrection
 """
     GradientDescentEstimation <: AbstractEstimationMethod
 
-Method for optimizing using gradient descent.
+Method for estimation using gradient descent.
 """
 struct GradientDescentEstimation <: AbstractEstimationMethod end
 
 """
     CyclicProximalPointEstimation <: AbstractEstimationMethod
 
-Method for optimizing using the cyclic proximal point technique.
+Method for estimation using the cyclic proximal point technique.
 """
 struct CyclicProximalPointEstimation <: AbstractEstimationMethod end
 
