@@ -104,6 +104,13 @@ using FiniteDifferences
 using UnsafeArrays
 using Einsum: @einsum
 
+"""
+    AbstractEstimationMethod
+
+Abstract type for defining statistical estimation methods.
+"""
+abstract type AbstractEstimationMethod end
+
 @doc doc"""
     hat(M::Manifold, x, vⁱ)
 
