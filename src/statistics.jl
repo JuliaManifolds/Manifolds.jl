@@ -329,7 +329,7 @@ function mean!(
 )
     mean!(M, y, x, w, GeodesicInterpolation(); shuffle_rng = shuffle_rng, kwargs...)
     radius = method.radius
-    injectivity_radius(M) ≤ radius && return y
+    injectivity_radius(M, y) ≤ radius && return y
     for i in eachindex(x)
         @inbounds if distance(M, y, x[i]) ≥ radius
             return mean!(M, y, x, w, GradientDescentEstimation(); x0 = y, kwargs...)
