@@ -2,7 +2,7 @@ include("utils.jl")
 using StatsBase: AbstractWeights, pweights
 using Random: GLOBAL_RNG, seed!
 import ManifoldsBase: manifold_dimension, exp!, log!, inner, zero_tangent_vector!
-using Manifolds: AbstractEstimationMethod, GradientDescentEstimation, CyclicProximalPointEstimation, GeodesicInterpolation
+using Manifolds: AbstractEstimationMethod, GradientDescentEstimation, CyclicProximalPointEstimation, GeodesicInterpolation, GeodesicInterpolationWithinRadius
 import Manifolds: mean!, median!, var, mean_and_var
 
 struct TestStatsSphere{N} <: Manifold end
@@ -453,6 +453,26 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
                 m5, v5 = mean_and_var(S, x, pweights([1, 2, 3]), GeodesicInterpolation())
                 @test m5 ≈ shortest_geodesic(S, shortest_geodesic(S, x[1], x[2], 2/3), x[3], 1/2)
                 @test v5 ≈ var(S, x, pweights([1, 2, 3]), m5)
+            end
+
+            @testset "within radius" begin
+                rng = MersenneTwister(47)
+                S = Sphere(2)
+                x = [[1.0, 0, 0], [0, 1.0, 0]]
+                m = mean(S, x, GeodesicInterpolation())
+                mg = mean(S, x, GradientDescentEstimation(); x0 = m)
+                vg = var(S, x, mg)
+
+                @test mean(S, x, GeodesicInterpolationWithinRadius(Inf)) == m
+                @test mean(S, x, GeodesicInterpolationWithinRadius(π)) == m
+                @test mean(S, x, GeodesicInterpolationWithinRadius(π/8)) != m
+                @test mean(S, x, GeodesicInterpolationWithinRadius(π/8)) == mg
+
+                m, v = mean_and_var(S, x, GeodesicInterpolation())
+                @test mean_and_var(S, x, GeodesicInterpolationWithinRadius(Inf)) == (m, v)
+                @test mean_and_var(S, x, GeodesicInterpolationWithinRadius(π)) == (m, v)
+                @test mean_and_var(S, x, GeodesicInterpolationWithinRadius(π/8)) != (m, v)
+                @test mean_and_var(S, x, GeodesicInterpolationWithinRadius(π/8)) == (mg, vg)
             end
         end
 
