@@ -2,7 +2,7 @@ include("utils.jl")
 using StatsBase: AbstractWeights, pweights
 using Random: GLOBAL_RNG, seed!
 import ManifoldsBase: manifold_dimension, exp!, log!, inner, zero_tangent_vector!
-using Manifolds: AbstractOptimizationMethod, AbstractEstimationMethod, GradientDescent, CyclicProximalPoint, GeodesicInterpolation
+using Manifolds: AbstractEstimationMethod, GradientDescentEstimation, CyclicProximalPointEstimation, GeodesicInterpolation
 import Manifolds: mean!, median!, var, mean_and_var
 
 struct TestStatsSphere{N} <: Manifold end
@@ -197,16 +197,16 @@ end
 struct TestStatsOverload1 <: Manifold end
 struct TestStatsOverload2 <: Manifold end
 struct TestStatsOverload3 <: Manifold end
-struct TestStatsMethod1 <: AbstractOptimizationMethod end
+struct TestStatsMethod1 <: AbstractEstimationMethod end
 
-mean!(M::TestStatsOverload1, y, x::AbstractVector, w::AbstractWeights, method::GradientDescent) = fill!(y, 3)
+mean!(M::TestStatsOverload1, y, x::AbstractVector, w::AbstractWeights, method::GradientDescentEstimation) = fill!(y, 3)
 mean!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights) = fill!(y, 4)
-mean!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights, method::GradientDescent) = fill!(y, 3)
+mean!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights, method::GradientDescentEstimation) = fill!(y, 3)
 mean!(M::TestStatsOverload3, y, x::AbstractVector, w::AbstractWeights, method::TestStatsMethod1 = TestStatsMethod1()) = fill!(y, 5)
 
-median!(M::TestStatsOverload1, y, x::AbstractVector, w::AbstractWeights, method::CyclicProximalPoint) = fill!(y, 3)
+median!(M::TestStatsOverload1, y, x::AbstractVector, w::AbstractWeights, method::CyclicProximalPointEstimation) = fill!(y, 3)
 median!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights) = fill!(y, 4)
-median!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights, method::CyclicProximalPoint) = fill!(y, 3)
+median!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights, method::CyclicProximalPointEstimation) = fill!(y, 3)
 median!(M::TestStatsOverload3, y, x::AbstractVector, w::AbstractWeights, method::TestStatsMethod1 = TestStatsMethod1()) = fill!(y, 5)
 
 var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, m; corrected = false) = 4 + 5*corrected
@@ -221,13 +221,13 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             M = TestStatsOverload1()
             @test mean(M, x) == [3.0]
             @test mean(M, x, w) == [3.0]
-            @test mean(M, x, w, GradientDescent()) == [3.0]
-            @test mean(M, x, GradientDescent()) == [3.0]
+            @test mean(M, x, w, GradientDescentEstimation()) == [3.0]
+            @test mean(M, x, GradientDescentEstimation()) == [3.0]
             M = TestStatsOverload2()
             @test mean(M, x) == [4.0]
             @test mean(M, x, w) == [4.0]
-            @test mean(M, x, w, GradientDescent()) == [3.0]
-            @test mean(M, x, GradientDescent()) == [3.0]
+            @test mean(M, x, w, GradientDescentEstimation()) == [3.0]
+            @test mean(M, x, GradientDescentEstimation()) == [3.0]
             M = TestStatsOverload3()
             @test mean(M, x) == [5.0]
             @test mean(M, x, w) == [5.0]
@@ -237,13 +237,13 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             M = TestStatsOverload1()
             @test median(M, x) == [3.0]
             @test median(M, x, w) == [3.0]
-            @test median(M, x, w, CyclicProximalPoint()) == [3.0]
-            @test median(M, x, CyclicProximalPoint()) == [3.0]
+            @test median(M, x, w, CyclicProximalPointEstimation()) == [3.0]
+            @test median(M, x, CyclicProximalPointEstimation()) == [3.0]
             M = TestStatsOverload2()
             @test median(M, x) == [4.0]
             @test median(M, x, w) == [4.0]
-            @test median(M, x, w, CyclicProximalPoint()) == [3.0]
-            @test median(M, x, CyclicProximalPoint()) == [3.0]
+            @test median(M, x, w, CyclicProximalPointEstimation()) == [3.0]
+            @test median(M, x, CyclicProximalPointEstimation()) == [3.0]
             M = TestStatsOverload3()
             @test median(M, x) == [5.0]
             @test median(M, x, w) == [5.0]
@@ -393,7 +393,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
                 x = [randn(rng, 2, 2) for _ = 1:10]
                 w = pweights([rand(rng) for _ = 1:10])
                 @test mean(M, x, GeodesicInterpolation()) ≈ mean(x)
-                @test mean(M, x, w, GeodesicInterpolation()) ≈ mean(M, x, w, GradientDescent())
+                @test mean(M, x, w, GeodesicInterpolation()) ≈ mean(M, x, w, GradientDescentEstimation())
             end
 
             @testset "three points" begin
@@ -431,7 +431,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
                 @test m1 ≈ mean(x)
                 @test v1 ≈ sum(var(x))
                 m2, v2 = mean_and_var(M, x, w, GeodesicInterpolation())
-                @test m2 ≈ mean(M, x, w, GradientDescent())
+                @test m2 ≈ mean(M, x, w, GradientDescentEstimation())
                 @test v2 ≈ var(M, x, w)
             end
 
@@ -466,7 +466,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
                 w = pweights([rand(rng) for _ = 1:length(x)])
                 m = mean(P, x, w)
                 mg = mean(P, x, w, GeodesicInterpolation())
-                mf = mean(P, x, w, GradientDescent())
+                mf = mean(P, x, w, GradientDescentEstimation())
                 @test m == mg
                 @test m != mf
             end
@@ -481,7 +481,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(S, x, w)
             mg = mean(S, x, w, GeodesicInterpolation())
-            mf = mean(S, x, w, GradientDescent(); x0 = mg)
+            mf = mean(S, x, w, GradientDescentEstimation(); x0 = mg)
             @test m != mg
             @test m == mf
 
@@ -503,7 +503,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(R, x, w)
             mg = mean(R, x, w, GeodesicInterpolation())
-            mf = mean(R, x, w, GradientDescent(); x0 = mg)
+            mf = mean(R, x, w, GradientDescentEstimation(); x0 = mg)
             @test m != mg
             @test m == mf
 
@@ -524,7 +524,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(G, x, w)
             mg = mean(G, x, w, GeodesicInterpolation())
-            mf = mean(G, x, w, GradientDescent(); x0 = mg)
+            mf = mean(G, x, w, GradientDescentEstimation(); x0 = mg)
             @test m != mg
             @test m == mf
 

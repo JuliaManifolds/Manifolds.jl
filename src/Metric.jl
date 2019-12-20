@@ -357,8 +357,8 @@ check_tangent_vector(M::MMT, x, v; kwargs...) where {MMT <: MetricManifold} = ch
 # statistics
 mean!(M::MMT, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = mean!(M, is_default_metric(M), y, x, w; kwargs...)
 mean!(M::MMT, ::Val{true}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = mean!(base_manifold(M), y, x, w; kwargs...)
-mean!(M::MMT, ::Val{false}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = mean!(M, y, x, w, GradientDescent(); kwargs...)
+mean!(M::MMT, ::Val{false}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = mean!(M, y, x, w, GradientDescentEstimation(); kwargs...)
 
 median!(M::MMT, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = median!(M, is_default_metric(M), y, x, w; kwargs...)
 median!(M::MMT, ::Val{true}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = median!(base_manifold(M), y, x, w; kwargs...)
-median!(M::MMT, ::Val{false}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = median!(M, y, x, w, CyclicProximalPoint(); kwargs...)
+median!(M::MMT, ::Val{false}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = median!(M, y, x, w, CyclicProximalPointEstimation(); kwargs...)

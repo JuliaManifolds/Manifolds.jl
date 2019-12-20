@@ -1,5 +1,19 @@
 using StatsBase: AbstractWeights, ProbabilityWeights, values, varcorrection
 
+"""
+    GradientDescentEstimation <: AbstractEstimationMethod
+
+Method for optimizing using gradient descent.
+"""
+struct GradientDescentEstimation <: AbstractEstimationMethod end
+
+"""
+    CyclicProximalPointEstimation <: AbstractEstimationMethod
+
+Method for optimizing using the cyclic proximal point technique.
+"""
+struct CyclicProximalPointEstimation <: AbstractEstimationMethod end
+
 _unit_weights(n::Int) = ProbabilityWeights(ones(n), n)
 
 @doc doc"""
@@ -84,7 +98,7 @@ struct GeodesicInterpolation <: AbstractEstimationMethod end
     GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
 
 Estimation of Riemannian center of mass using [`GeodesicInterpolation`](@ref)
-with fallback to [`GradientDescent`](@ref) if any points are outside of a
+with fallback to [`GradientDescentEstimation`](@ref) if any points are outside of a
 geodesic ball of specified `radius` around the mean.
 
 # Constructor
@@ -111,7 +125,7 @@ as the point that satisfies the minimizer
 ````
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 
-In the general case, the [`GradientDescent`](@ref) is used to compute the mean.
+In the general case, the [`GradientDescentEstimation`](@ref) is used to compute the mean.
 However, this default may be overloaded for specific manifolds.
 
     mean(M::Manifold, x::AbstractVector[, w::AbstractWeights], method; kwargs...)
@@ -122,7 +136,7 @@ Compute the mean using the specified `method`.
         M::Manifold,
         x::AbstractVector,
         [w::AbstractWeights,]
-        method::GradientDescent;
+        method::GradientDescentEstimation;
         x0=x[1],
         stop_iter=100,
         retraction::AbstractRetractionMethod = ExponentialRetraction(),
@@ -130,7 +144,7 @@ Compute the mean using the specified `method`.
         kwargs...,
     )
 
-Compute the mean using the gradient descent scheme [`GradientDescent`](@ref).
+Compute the mean using the gradient descent scheme [`GradientDescentEstimation`](@ref).
 
 Optionally, provide `x0`, the starting point (by default set to the first data
 point). `stop_iter` denotes the maximal number of iterations to perform and the
@@ -176,7 +190,7 @@ function mean!(M::Manifold, y, x::AbstractVector, method...; kwargs...)
 end
 
 function mean!(M::Manifold, y, x::AbstractVector, w::AbstractVector; kwargs...)
-    return mean!(M, y, x, w, GradientDescent(); kwargs...)
+    return mean!(M, y, x, w, GradientDescentEstimation(); kwargs...)
 end
 
 function mean!(
@@ -184,7 +198,7 @@ function mean!(
     y,
     x::AbstractVector,
     w::AbstractVector,
-    ::GradientDescent;
+    ::GradientDescentEstimation;
     x0 = x[1],
     stop_iter=100,
     retraction::AbstractRetractionMethod = ExponentialRetraction(),
@@ -299,7 +313,7 @@ function mean!(
     injectivity_radius(M) ≤ radius && return y
     for i in eachindex(x)
         @inbounds if distance(M, y, x[i]) ≥ radius
-            return mean!(M, y, x, w, GradientDescent(); x0 = y, kwargs...)
+            return mean!(M, y, x, w, GradientDescentEstimation(); x0 = y, kwargs...)
         end
     end
     return y
@@ -316,7 +330,7 @@ Compute the (optionally weighted) Riemannian median of the vector `x` of points 
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 This function is nonsmooth (i.e nondifferentiable).
 
-In the general case, the [`CyclicProximalPoint`](@ref) is used to compute the
+In the general case, the [`CyclicProximalPointEstimation`](@ref) is used to compute the
 median. However, this default may be overloaded for specific manifolds.
 
     median(M::Manifold, x::AbstractVector[, w::AbstractWeights], method; kwargs...)
@@ -327,7 +341,7 @@ Compute the median using the specified `method`.
         M::Manifold,
         x::AbstractVector,
         [w::AbstractWeights,]
-        method::CyclicProximalPoint;
+        method::CyclicProximalPointEstimation;
         x0=x[1],
         stop_iter=1000000,
         retraction::AbstractRetractionMethod = ExponentialRetraction(),
@@ -335,7 +349,7 @@ Compute the median using the specified `method`.
         kwargs...,
     )
 
-Compute the median using [`CyclicProximalPoint`](@ref).
+Compute the median using [`CyclicProximalPointEstimation`](@ref).
 
 Optionally, provide `x0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform
@@ -380,7 +394,7 @@ function median!(M::Manifold, y, x::AbstractVector, method...; kwargs...)
 end
 
 function median!(M::Manifold, y, x::AbstractVector, w::AbstractVector; kwargs...)
-    return median!(M, y, x, w, CyclicProximalPoint(); kwargs...)
+    return median!(M, y, x, w, CyclicProximalPointEstimation(); kwargs...)
 end
 
 function median!(
@@ -388,7 +402,7 @@ function median!(
     y,
     x::AbstractVector,
     w::AbstractVector,
-    ::CyclicProximalPoint;
+    ::CyclicProximalPointEstimation;
     x0=x[1],
     stop_iter=1000000,
     retraction::AbstractRetractionMethod = ExponentialRetraction(),
@@ -614,7 +628,7 @@ function mean_and_var(
     injectivity_radius(M, y) ≤ radius && return y, v
     for i in eachindex(x)
         @inbounds if distance(M, y, x[i]) ≥ radius
-            mean!(M, y, x, w, GradientDescent(); x0 = y, kwargs...)
+            mean!(M, y, x, w, GradientDescentEstimation(); x0 = y, kwargs...)
             v = var(M, x, w, y; corrected = corrected)
             return y, v
         end

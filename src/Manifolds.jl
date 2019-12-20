@@ -104,27 +104,6 @@ using UnsafeArrays
 using Einsum: @einsum
 
 """
-    AbstractOptimizationMethod
-
-Abstract type for defining optimization methods.
-"""
-abstract type AbstractOptimizationMethod end
-
-"""
-    GradientDescent <: AbstractOptimizationMethod
-
-Method for optimizing using gradient descent.
-"""
-struct GradientDescent <: AbstractOptimizationMethod end
-
-"""
-    CyclicProximalPoint <: AbstractOptimizationMethod
-
-Method for optimizing using the cyclic proximal point technique.
-"""
-struct CyclicProximalPoint <: AbstractOptimizationMethod end
-
-"""
     AbstractEstimationMethod
 
 Abstract type for defining statistical estimation methods.
@@ -291,10 +270,9 @@ export Metric,
     AbstractInverseRetractionMethod,
     QRInverseRetraction,
     PolarInverseRetraction,
-    AbstractOptimizationMethod,
-    GradientDescent,
-    CyclicProximalPoint,
     AbstractEstimationMethod,
+    GradientDescentEstimation,
+    CyclicProximalPointEstimation,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius
 export base_manifold,
