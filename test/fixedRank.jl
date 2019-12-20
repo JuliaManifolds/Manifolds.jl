@@ -60,18 +60,21 @@ include("utils.jl")
             for p in [x,y,z]
                 push!(pts, SVDMPoint( convert.( T , [ p.U, p.S, p.Vt ] )... )   )
             end
-            test_manifold(M,
-                          pts,
-                          test_exp_log = false,
-                          default_inverse_retraction_method = nothing,
-                          test_log_yields_tangent = false,
-                          test_project_tangent = true,
-                          test_vector_transport = false,
-                          test_forward_diff = false,
-                          test_reverse_diff = false,
-                          projection_atol_multiplier = 15,
-                          retraction_methods = [PolarRetraction()]
-            )
+            for p in pts
+                @test is_manifold_point(M,p)
+            end
+            # test_manifold(M,
+            #               pts,
+            #               test_exp_log = false,
+            #               default_inverse_retraction_method = nothing,
+            #               test_log_yields_tangent = false,
+            #               test_project_tangent = true,
+            #               test_vector_transport = false,
+            #               test_forward_diff = false,
+            #               test_reverse_diff = false,
+            #               projection_atol_multiplier = 15,
+            #               retraction_methods = [PolarRetraction()]
+            # )
         end
     end
 end
