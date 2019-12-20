@@ -1,5 +1,7 @@
 using FiniteDifferences, ForwardDiff, OrdinaryDiffEq
 using LinearAlgebra: I
+using StatsBase: AbstractWeights, pweights
+import Manifolds: mean!, median!
 
 include("utils.jl")
 
@@ -185,6 +187,10 @@ struct DefaultBaseManifoldMetric <: Metric end
     Manifolds.tangent_orthonormal_basis(M::BaseManifold{N},x,v) where {N} = ( [(Matrix(I, N, N)[:,i]) for i in 1:N], zeros(N))
     Manifolds.projected_distribution(M::BaseManifold, d) = ProjectedPointDistribution(M, d, project_point!, rand(d))
     Manifolds.projected_distribution(M::BaseManifold, d, x) = ProjectedPointDistribution(M, d, project_point!, x)
+    Manifolds.mean!(M::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...) = fill!(y, 1)
+    Manifolds.median!(M::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...) = fill!(y, 2)
+    Manifolds.mean!(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N} = fill!(y, 3)
+    Manifolds.median!(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N} = fill!(y, 4)
 
     function Manifolds.flat!(::BaseManifold, v::FVector{Manifolds.CotangentSpaceType}, x, w::FVector{Manifolds.TangentSpaceType})
         v.data .= 2 .* w.data
@@ -283,4 +289,14 @@ struct DefaultBaseManifoldMetric <: Metric end
     @test inner(MM, x, v, w) ≈ inner(cotspace, x, cov.data, cow.data)
     @test inner(MM, x, v, w) ≈ inner(cotspace2, x, cov.data, cow.data)
     @test sharp(M, x, cov).data ≈ v
+
+    xsample = [[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
+    w = pweights([0.5, 0.5])
+    @test mean(M, xsample, w) ≈ ones(3)
+    @test mean(MM2, xsample, w) ≈ ones(3)
+    @test mean(MM, xsample, w) ≈ 3 .* ones(3)
+
+    @test median(M, xsample, w) ≈ 2 .* ones(3)
+    @test median(MM2, xsample, w) ≈ 2 * ones(3)
+    @test median(MM, xsample, w) ≈ 4 .* ones(3)
 end

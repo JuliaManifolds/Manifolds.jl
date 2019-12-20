@@ -13,3 +13,5 @@ Modules = [Manifolds]
 Pages = ["CholeskySpace.jl"]
 Order = [:function]
 ```
+
+## Literature

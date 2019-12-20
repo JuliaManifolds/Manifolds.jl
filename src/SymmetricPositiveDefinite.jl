@@ -43,9 +43,11 @@ struct LogEuclideanMetric <: RiemannianMetric end
     LogCholeskyMetric <: Metric
 
 The Log-Cholesky metric imposes a metric based on the Cholesky decomposition as
-introduced by
-> Lin, Zenhua: "Riemannian Geometry of Symmetric Positive Definite Matrices via
-> Cholesky Decomposition", arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
+introduced by [^Lin2019].
+
+[^Lin2019]:
+    > Lin, Zenhua: "Riemannian Geometry of Symmetric Positive Definite Matrices via
+    > Cholesky Decomposition", arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
 """
 struct LogCholeskyMetric <: RiemannianMetric end
 
@@ -130,13 +132,13 @@ compute the inner product of `v`, `w` in the tangent space of `x` on
 the [`SymmetricPositiveDefinite`](@ref) manifold `M`, as
 a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
 
-```math
-( v, w)_x = \operatorname{tr}(x^{-1}\xi x^{-1}\nu ),
-```
+````math
+(v, w)_x = \operatorname{tr}(x^{-1} v x^{-1} w),
+````
 """
-function inner(M::SymmetricPositiveDefinite{N}, x, w, v) where N
-    F = cholesky(Symmetric(x)).L
-    return tr((Symmetric(w) / F) * (Symmetric(v) / F))
+function inner(M::SymmetricPositiveDefinite, x, v, w)
+    F = cholesky(Symmetric(x))
+    return tr((F \ Symmetric(v)) * (F \ Symmetric(w)))
 end
 
 @doc doc"""
@@ -391,7 +393,7 @@ zero_tangent_vector(M::SymmetricPositiveDefinite{N}, x) where N = zero(x)
 zero_tangent_vector(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, x) where N = zero(x)
 
 @doc doc"""
-    zero_tangent_vector(M,v,x)
+    zero_tangent_vector!(M,v,x)
 
 returns the zero tangent vector in the variable `v` from the tangent space of
 the symmetric positive definite matrix `x` on
@@ -444,3 +446,20 @@ function check_tangent_vector(M::SymmetricPositiveDefinite{N},x,v; kwargs...) wh
     return nothing
 end
 check_tangent_vector(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,v; kwargs...) where N = check_tangent_vector(M.manifold,x,v;kwargs...)
+
+"""
+    mean(
+        M::SymmetricPositiveDefinite,
+        x::AbstractVector,
+        [w::AbstractWeights,]
+        method = GeodesicInterpolation();
+        kwargs...,
+    )
+
+Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+[`GeodesicInterpolation`](@ref).
+"""
+mean(::SymmetricPositiveDefinite, args...)
+
+mean!(M::SymmetricPositiveDefinite, y, x::AbstractVector, w::AbstractVector; kwargs...) =
+    mean!(M, y, x, w, GeodesicInterpolation(); kwargs...)

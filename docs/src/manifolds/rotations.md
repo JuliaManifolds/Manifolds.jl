@@ -18,18 +18,3 @@ Order = [:type, :function]
 ```
 
 ## Literature
-
-```@raw html
-<ul>
-  <li id="Gallier2003">[<a>Gallier, 2003</a>]
-    J. Gallier and D. Xu, “Computing exponentials of skew-symmetric matrices
-    and logarithms of orthogonal matrices,” <i>International Journal of
-    Robotics and Automation</i>, vol. 18, no. 1, pp. 10–20, 2003.
-  </li>
-  <li id="Andrica2013">[<a>Andrica, 2013</a>]
-    D. Andrica and R.-A. Rohan, “Computing the Rodrigues coefficients of the
-    exponential map of the Lie groups of matrices,” <i>Balkan Journal of
-    Geometry and Its Applications</i>, vol. 18, no. 2, pp. 1–10, 2013.
-  </li>
-</ul>
-```

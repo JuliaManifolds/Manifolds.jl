@@ -360,3 +360,12 @@ injectivity_radius(M::MMT, args...) where {MMT <: MetricManifold} = injectivity_
 zero_tangent_vector!(M::MMT, v, x) where {MMT <: MetricManifold} = zero_tangent_vector!(base_manifold(M), v, x)
 check_manifold_point(M::MMT, x; kwargs...) where {MMT <: MetricManifold} = check_manifold_point(base_manifold(M), x; kwargs...)
 check_tangent_vector(M::MMT, x, v; kwargs...) where {MMT <: MetricManifold} = check_tangent_vector(base_manifold(M), x, v; kwargs...)
+
+# statistics
+mean!(M::MMT, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = mean!(M, is_default_metric(M), y, x, w; kwargs...)
+mean!(M::MMT, ::Val{true}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = mean!(base_manifold(M), y, x, w; kwargs...)
+mean!(M::MMT, ::Val{false}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = mean!(M, y, x, w, GradientDescentEstimation(); kwargs...)
+
+median!(M::MMT, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = median!(M, is_default_metric(M), y, x, w; kwargs...)
+median!(M::MMT, ::Val{true}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = median!(base_manifold(M), y, x, w; kwargs...)
+median!(M::MMT, ::Val{false}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {MMT <: MetricManifold} = median!(M, y, x, w, CyclicProximalPointEstimation(); kwargs...)

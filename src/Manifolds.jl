@@ -26,7 +26,10 @@ import Statistics: mean,
     var,
     std
 import StatsBase: mean_and_std,
-    mean_and_var
+    mean_and_var,
+    moment,
+    kurtosis,
+    skewness
 import LinearAlgebra: dot,
     norm,
     det,
@@ -48,8 +51,10 @@ using ManifoldsBase: Manifold,
     AbstractRetractionMethod,
     AbstractInverseRetractionMethod,
     AbstractVectorTransportMethod,
+    ExponentialRetraction,
+    LogarithmicInverseRetraction
     ParallelTransport,
-    ProjectionTransport#
+    ProjectionTransport
 import ManifoldsBase: base_manifold,
     check_manifold_point,
     check_tangent_vector,
@@ -100,6 +105,13 @@ using UnsafeArrays
 using Einsum: @einsum
 
 """
+    AbstractEstimationMethod
+
+Abstract type for defining statistical estimation methods.
+"""
+abstract type AbstractEstimationMethod end
+
+"""
     QRRetraction
 
 A retraction using the QR decomposition of a tangent vectors representation as
@@ -128,7 +140,6 @@ struct PolarRetraction <: AbstractRetractionMethod end
 Inverse retraction on the rotations manifold using the polar method.
 """
 struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
-
 
 @doc doc"""
     hat(M::Manifold, x, vⁱ)
@@ -193,7 +204,7 @@ include("Rotations.jl")
 include("Sphere.jl")
 include("SymmetricPositiveDefinite.jl")
 
-include("Statistics.jl")
+include("statistics.jl")
 
 function __init__()
     @require ForwardDiff="f6369f11-7733-5829-9624-2563aa707210" begin
@@ -223,7 +234,7 @@ export ArrayManifold,
     CotangentSpaceAtPoint,
     CotangentBundleFibers,
     CotangentSpace,
-    FVector,    
+    FVector,
     PowerManifold,
     ProductManifold,
     ProjectedPointDistribution,
@@ -240,6 +251,7 @@ export ArrayManifold,
 export Euclidean,
     CholeskySpace,
     Grassmann,
+    Rotations,
     Sphere,
     SymmetricPositiveDefinite
 # Types
@@ -259,7 +271,12 @@ export Metric,
     PolarRetraction,
     AbstractInverseRetractionMethod,
     QRInverseRetraction,
-    PolarInverseRetraction
+    PolarInverseRetraction,
+    AbstractEstimationMethod,
+    GradientDescentEstimation,
+    CyclicProximalPointEstimation,
+    GeodesicInterpolation,
+    GeodesicInterpolationWithinRadius
 export base_manifold,
     bundle_projection,
     christoffel_symbols_first,
@@ -286,6 +303,9 @@ export base_manifold,
     is_default_metric,
     is_manifold_point,
     is_tangent_vector,
+    isapprox,
+    inner,
+    kurtosis,
     local_metric,
     local_metric_jacobian,
     log,
@@ -299,6 +319,7 @@ export base_manifold,
     mean_and_std,
     median,
     median!,
+    moment,
     norm,
     normal_tvector_distribution,
     project_point,
@@ -315,6 +336,7 @@ export base_manifold,
     sharp,
     sharp!,
     shortest_geodesic,
+    skewness,
     std,
     submanifold,
     submanifold_component,

@@ -186,29 +186,36 @@ function normal_tvector_distribution(M::Euclidean{Tuple{N}}, x, σ) where N
     return ProjectedFVectorDistribution(TangentBundleFibers(M), x, d, project_vector!, x)
 end
 
-mean(M::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = mean(x, w)
-mean(M::Euclidean, x::AbstractVector; kwargs...) = mean(x)
+mean(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
+mean(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = mean(x, w)
+mean(::Euclidean, x::AbstractVector; kwargs...) = mean(x)
+mean!(M::Euclidean, y, x::AbstractVector, w::AbstractVector; kwargs...) =
+    mean!(M, y, x, w, GeodesicInterpolation(); kwargs...)
 
-median(M::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = median(x,w)
+median(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = median(x)
+median(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = median(x, w)
+median!(::Euclidean{Tuple{1}}, y, x::AbstractVector; kwargs...) = copyto!(y, [median(vcat(x...))])
+median!(::Euclidean{Tuple{1}}, y, x::AbstractVector, w::AbstractWeights; kwargs...) =
+    copyto!(y, [median(vcat(x...), w)])
 
-function var(
-    M::Euclidean{Tuple{1}},
-    x::AbstractVector{<:Number},
-    w::AbstractWeights,
-    m = mean(M, x, w);
-    corrected = false,
-    kwargs...
-)
-    return var(x, w; mean=m, corrected=corrected)
+var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
+var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T} = sum(var(x; mean=m, kwargs...))
+
+function mean_and_var(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...)
+    m, v = mean_and_var(x; kwargs...)
+    return m, sum(v)
 end
 
-function std(
-    M::Euclidean{Tuple{1}},
+function mean_and_var(
+    ::Euclidean{Tuple{1}},
     x::AbstractVector{<:Number},
-    w::AbstractWeights,
-    m = mean(M, x, w);
+    w::AbstractWeights;
     corrected = false,
-    kwargs...
+    kwargs...,
 )
-    return std(x, w; mean=m, corrected=corrected)
+    m, v = mean_and_var(x, w; corrected = corrected, kwargs...)
+    return m, sum(v)
 end
+
+mean_and_var(M::Euclidean, x::AbstractVector, w::AbstractWeights; kwargs...) =
+    mean_and_var(M, x, w, GeodesicInterpolation(); kwargs...)
