@@ -176,7 +176,7 @@ of size `(N,N)` with values of type `T`.
 The tolerance for the symmetry of `x` can be set using `kwargs`.
 """
 function check_manifold_point(M::SymmetricMatrices{N,T},x; kwargs...) where {N,T}
-    if (T <: eltype(x))
+    if !(eltype(x) <: T)
         return DomainError(eltype(x),"The matrix $(x) does not lie on $M, since its values are not of type $T.")
     end
     if size(x) != (N,N)
@@ -197,11 +197,11 @@ after [`is_manifold_point`](@ref)(M,x), `v` has to be a symmetric matrix of dime
 The tolerance for the symmetry of `x` can be set using `kwargs`.
 """
 function check_tangent_vector(M::SymmetricMatrices{N,T},x,v; kwargs...) where {N,T}
-    if (check_manifold_point(M,x;kwargs...) != nothing)
+    if (check_manifold_point(M,x;kwargs...) !== nothing)
         return check_manifold_point(M,x;kwargs...)
     end
 
-    if (T <: eltype(v))
+    if !(eltype(v) <: T)
         return DomainError(eltype(v),"The matrix $(v) is not a tangent to a point on $M, since its values are not of type $T.")
     end
     if size(v) != (N,N)
