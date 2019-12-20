@@ -139,7 +139,18 @@ Exponential map of tangent vector `v` at point `x` from $\mathrm{SO}(4)$
 manifold `M`. Result is saved to `y`.
 
 The algorithm used is a more numerically stable form of those proposed in
-[[Gallier, 2003](#Gallier2003)] and [[Andrica, 2013](#Andrica2013)].
+[^Gallier2002] and [^Andrica2013].
+
+[^Gallier2002]:
+    > Gallier J.; Xu D.; Computing exponentials of skew-symmetric matrices
+    > and logarithms of orthogonal matrices.
+    > International Journal of Robotics and Automation (2002), 17(4), pp. 1-11.
+    > [pdf](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.35.3205).
+[^Andrica2013]:
+    > Andrica D.; Rohan R.-A.; Computing the Rodrigues coefficients of the
+    > exponential map of the Lie groups of matrices.
+    > Balkan Journal of Geometry and Its Applications (2013), 18(2), pp. 1-2.
+    > [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
 """
 function exp!(M::Rotations{4}, y, x, v)
     T = eltype(v)
