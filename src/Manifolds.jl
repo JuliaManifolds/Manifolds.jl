@@ -98,37 +98,6 @@ using Random: AbstractRNG
 using UnsafeArrays
 using Einsum: @einsum
 
-"""
-    QRRetraction
-
-A retraction using the QR decomposition of a tangent vectors representation as
-a matrix.
-"""
-struct QRRetraction <: AbstractRetractionMethod end
-
-"""
-    QRInverseRetraction
-
-Inverse retraction to the [`QRRetraction`](@ref)
-"""
-struct QRInverseRetraction <: AbstractInverseRetractionMethod end
-
-@doc doc"""
-    PolarRetraction
-
-A retraction using the QR decomposition of a tangent vectors representation as
-a matrix.
-"""
-struct PolarRetraction <: AbstractRetractionMethod end
-
-"""
-    PolarInverseRetraction
-
-Inverse retraction on the rotations manifold using the polar method.
-"""
-struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
-
-
 @doc doc"""
     hat(M::Manifold, x, vⁱ)
 
