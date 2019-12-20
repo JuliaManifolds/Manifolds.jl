@@ -141,7 +141,6 @@ include("CholeskySpace.jl")
 include("Rotations.jl")
 include("Sphere.jl")
 include("Symmetric.jl")
-include("ProjectedDistribution.jl")
 include("SymmetricPositiveDefinite.jl")
 
 function __init__()
@@ -164,7 +163,6 @@ export ArrayManifold,
     ArrayTVector
 
 export Manifold,
-    IsDecoratorManifold,
     Euclidean,
     Sphere,
     SymmetricMatrices,

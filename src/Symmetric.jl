@@ -26,7 +26,7 @@ function representation_size(::SymmetricMatrices{N,T}) where {N,T}
 end
 
 @doc doc"""
-    manifold_dimension(M::SymmetricMatrices{n,T}) where {n,T <: Real}
+    manifold_dimension(M::SymmetricMatrices{n,Real})
 
 Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` with real-valued entries, i.e. 
 ````math
@@ -36,7 +36,7 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` with real-val
 manifold_dimension(M::SymmetricMatrices{N,Real}) where {N,T} = div(N*(N+1),2)
 
 @doc doc"""
-    manifold_dimension(M::SymmetricMatrices{n,T}) where {n,T <: Complex}
+    manifold_dimension(M::SymmetricMatrices{n,Complex})
 
 Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` with complex-valued entries, i.e. 
 ````math
@@ -49,9 +49,9 @@ manifold_dimension(M::SymmetricMatrices{N,Complex}) where {N,T} = N*(N+1)
     project_point!(M::SymmetricMatrices,x)
     
 Implements the [`project_point`](@ref project_point!(M::Manifold, x)) of an arbitrary matrix `x` onto the manifold of [`SymmetricMatrices`](@ref), i.e. 
-
-$x_{new} = \frac{1}{2} \left( x_{old} + x_{old}^{\mathrm{T}} \right).$
-
+````math
+x_{new} = \frac{1}{2} \left( x_{old} + x_{old}^{\mathrm{T}} \right).$
+````
 The value of the variable `x` is overwritten.
 """
 project_point!(M::SymmetricMatrices, x) = (x .= 1/2 * (x + transpose(x)))
@@ -61,8 +61,9 @@ project_point!(M::SymmetricMatrices, x) = (x .= 1/2 * (x + transpose(x)))
     
 Implements the [`project_tangent!`](@ref project_tangent!(M::Manifold, w, x, v)) of the matrix `v` onto the tangent space of the manifold of [`SymmetricMatrices`](@ref),
 i.e. the [`SymmetricMatrices`](@ref) itself. The result is stored in `w`:
-
-$w = \frac{1}{2} \left( v + v^{\mathrm{T}} \right).$
+````math
+w = \frac{1}{2} \left( v + v^{\mathrm{T}} \right)
+````
 
 """
 project_tangent!(M::SymmetricMatrices, w, x, v) = (w .= 1/2 * (v + transpose(v)))
@@ -113,7 +114,7 @@ Computes the logarithmic map from the manifold point `x` to the manifold point `
 The result is saved in `v`. 
 For the [`SymmetricMatrices`](@ref), the logarithmic map is simply the difference, i.e. 
 ````math
-    v .= y-x
+    v = y-x
 ````
 """
 function log!(M::SymmetricMatrices, v, x, y)
