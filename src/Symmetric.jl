@@ -21,7 +21,7 @@ Being slightly inefficient, the matrices are safed as $n\times n$ arrays despite
 struct SymmetricMatrices{N,T} <: Manifold end
 SymmetricMatrices(N::Int,T::Type = Real) = SymmetricMatrices{N,T}()
 
-function representation_size(::SymmetricMatrices{N,T}) where {N,T}
+function representation_size(::SymmetricMatrices{N,T}) where {N}
     return (N,N)
 end
 
@@ -43,7 +43,7 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` with complex-
     n(n+1)
 ````
 """
-manifold_dimension(M::SymmetricMatrices{N,Complex}) where {N,T} = N*(N+1)
+manifold_dimension(M::SymmetricMatrices{N,Complex}) where {N} = N*(N+1)
 
 @doc doc"""
     project_point!(M::SymmetricMatrices,x)
@@ -54,7 +54,7 @@ x_{new} = \frac{1}{2} \left( x_{old} + x_{old}^{\mathrm{T}} \right).$
 ````
 The value of the variable `x` is overwritten.
 """
-project_point!(M::SymmetricMatrices, x) = (x .= 1/2 * (x + transpose(x)))
+project_point!(M::SymmetricMatrices, x) = (x .= (x + transpose(x))./2)
 
 @doc doc"""
     project_tangent!(M::SymmetricMatrices, w, x, v)
@@ -66,7 +66,7 @@ w = \frac{1}{2} \left( v + v^{\mathrm{T}} \right)
 ````
 
 """
-project_tangent!(M::SymmetricMatrices, w, x, v) = (w .= 1/2 * (v + transpose(v)))
+project_tangent!(M::SymmetricMatrices, w, x, v) = (w .= (v .+ transpose(v))./2 )
 
 
 @doc doc"""
@@ -104,7 +104,7 @@ For the [`SymmetricMatrices`](@ref), the exponential map is simply the sum, i.e.
 ````
 """
 function exp!(M::SymmetricMatrices, y, x, v)
-    y .= x + v
+    y .= x .+ v
     return y
 end
 
@@ -118,7 +118,7 @@ For the [`SymmetricMatrices`](@ref), the logarithmic map is simply the differenc
 ````
 """
 function log!(M::SymmetricMatrices, v, x, y)
-    v .= y-x
+    v .= y.-x
     return v
 end
 
@@ -136,7 +136,7 @@ to the manifold point $y\in M$. The result is stored in `vto`.
 Since the metric is inherited from the embedding space, this is just the identity.
 """
 function vector_transport_to!(M::SymmetricMatrices, vto, x, v, y, ::ParallelTransport)
-    vto .= v
+    copyto!(vto,v)
     return vto
 end
 
