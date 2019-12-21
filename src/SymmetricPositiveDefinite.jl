@@ -218,7 +218,7 @@ function exp!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
     return y
 end
 # take the same retractions as for the default
-retract!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},y,args...) where N = retract!(M.manifold,y,args...)
+retract!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},y,x,v,m::AbstractRetractionMethod) where N = retract!(M.manifold,y,args...)
 
 @doc doc"""
     log!(M,v,x,y)

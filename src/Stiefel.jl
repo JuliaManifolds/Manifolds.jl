@@ -95,8 +95,8 @@ where $\exp$ denotes matrix exponential, and $I_n$ and
 $0_n$ are the identity matrix and the zero matrix of dimension $n \times n$,
 respectively.
 """
-function exp!(M::Stiefel{m,n,T}, y, x, v) where {m,n,T}
-    y .= [x v] * exp([x'v   -v'*v; one(zeros(T,n,n))   x'*v]) * [exp(-x'v); zeros(T,n,n)]
+function exp!(M::Stiefel{m,n}, y, x, v) where {m,n}
+    y .= [x v] * exp([x'v   -v'*v; one(zeros(eltype(x),n,n))   x'*v]) * [exp(-x'v); zeros(eltype(x),n,n)]
     return y
 end
 
@@ -112,7 +112,7 @@ tangent space of `x` on the [`Stiefel`](@ref) manifold `M`. The formula reads
 i.e. the [`EuclideanMetric`](@ref) from the embedding restricted to the tangent
 space. For the complex-valued case this is the Hermitian metric, to be precise.
 """
-inner(::Stiefel{M,N,T}, x, v, w) where {M,N,T} = real(dot(v,w))
+inner(::Stiefel, x, v, w) = real(dot(v,w))
 
 @doc doc"""
     inverse_retract!(M, v, x, y, ::PolarInverseRetraction)

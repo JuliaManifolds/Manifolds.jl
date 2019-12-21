@@ -108,10 +108,10 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         end
     end
 
-    if default_inverse_retraction_method != nothing
-        tv1 = inverse_retract(M,pts[1],pts[2],default_inverse_retraction_method)
-    else
+    if default_inverse_retraction_method === nothing
         tv1 = zero_tangent_vector(M,pts[1]) # no other available
+    else
+        tv1 = inverse_retract(M,pts[1],pts[2],default_inverse_retraction_method)
     end
     test_log_yields_tangent && @testset "is_tangent_vector" begin
         @test is_tangent_vector(M, pts[1], tv1; atol = eps(eltype(pts[1])))
@@ -125,15 +125,8 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
         @test isapprox(M, pts[2], exp(M, pts[1], tv1, 1))
         @test isapprox(M, pts[1], exp(M, pts[2], tv2))
-        @test is_manifold_point(M, retract(M, pts[1], tv1))
-        @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0))
-        for retr_method ∈ retraction_methods
-            @test is_manifold_point(M, retract(M, pts[1], tv1, retr_method))
-            @test isapprox(M, pts[1], retract(M, pts[1], tv1, 0, retr_method))
-        end
-        new_pt = exp(M, pts[1], tv1)
-        retract!(M, new_pt, pts[1], tv1)
-        @test is_manifold_point(M, new_pt)
+        @test is_manifold_point(M, exp(M, pts[1], tv1))
+        @test isapprox(M, pts[1], exp(M, pts[1], tv1, 0))
         for x ∈ pts
             @test isapprox(M, x, zero_tangent_vector(M, x), log(M, x, x);
                 atol = eps(eltype(x)) * exp_log_atol_multiplier,
@@ -143,12 +136,6 @@ function test_manifold(M::Manifold, pts::AbstractVector;
                 atol = eps(eltype(x)) * exp_log_atol_multiplier,
                 rtol = exp_log_atol_multiplier == 0. ? sqrt(eps(eltype(x)))*exp_log_rtol_multiplier : 0.
             )
-            for inv_retr_method ∈ inverse_retraction_methods
-                @test isapprox(M, x, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method);
-                    atol = eps(eltype(x)) * exp_log_atol_multiplier,
-                    rtol = exp_log_atol_multiplier == 0 ? sqrt(eps(eltype(x)))*exp_log_rtol_multiplier : 0
-                )
-            end
         end
         zero_tangent_vector!(M, tv1, pts[1])
         @test isapprox(M, pts[1], tv1, zero_tangent_vector(M, pts[1]); atol = eps(eltype(pts[1])) * exp_log_atol_multiplier)
@@ -159,6 +146,24 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test isapprox(M, exp(M, pts[1], tv1, 0), pts[1]; atol = eps(eltype(pts[1])) * exp_log_atol_multiplier)
 
         @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
+    end
+    
+    @testset "(inverse &) retraction tests" begin
+        for x ∈ pts
+            for retr_method ∈ retraction_methods
+                @test is_manifold_point(M, retract(M, x, tv1, retr_method))
+                @test isapprox(M, pts[1], retract(M, x, tv1, 0, retr_method))
+                new_pt = similar(x)
+                retract!(M, new_pt, x, tv1, retr_method)
+                @test is_manifold_point(M, new_pt)
+            end
+            for inv_retr_method ∈ inverse_retraction_methods
+                @test isapprox(M, x, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method);
+                    atol = eps(eltype(x)) * exp_log_atol_multiplier,
+                    rtol = exp_log_atol_multiplier == 0 ? sqrt(eps(eltype(x)))*exp_log_rtol_multiplier : 0
+                )
+            end
+        end
     end
 
     test_vector_spaces && @testset "vector spaces tests" begin
@@ -192,9 +197,11 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test isapprox(M, pts[1], tv, tv1; atol = eps(eltype(pts[1])) * projection_atol_multiplier)
     end
 
-    test_vector_transport && (!isnothing(default_inverse_retraction_method)) && @testset "vector transport" begin
+    test_vector_transport && !( default_inverse_retraction_method === nothing) && @testset "vector transport" begin
+        v1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
+        v2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
         v1t1 = vector_transport_to(M, pts[1], v1, pts[3])
-        v1t2 = vector_transport_direction(M, pts[1], v1, v2)
+        v1t2 = vector_transport_direction(M, pts[1], tv1, v2)
         @test is_tangent_vector(M, pts[3], v1t1)
         @test is_tangent_vector(M, pts[3], v1t2)
         @test isapprox(M, pts[3], v1t1, v1t2)
@@ -256,10 +263,10 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test isapprox(M, p2, pts[2])
 
         tv2 = similar(tv1)
-        if isnothing(default_inverse_retraction_method)
+        if default_inverse_retraction_method === nothing
             tv3 = zero_tangent_vector(M,pts[2])
             copyto!(tv2, tv3)
-            @test isapprox(M, pts[2], tv2, zero_tangent_vector(M,pts[2]) )
+            @test isapprox(M, pts[2], tv2, zero_tangent_vector(M,pts[2]))
         else
             tv3 = inverse_retract(M, pts[2], pts[3], default_inverse_retraction_method)
             copyto!(tv2, tv3)

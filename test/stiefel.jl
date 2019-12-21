@@ -24,6 +24,8 @@ include("utils.jl")
             y = exp(M,x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
             z = [1/sqrt(2) 1/sqrt(2); 1/sqrt(2) -1/sqrt(2); 0. 0.]
             pts = convert.(T, [x,y,z])
+            v = inverse_retract(M,x,y,PolarInverseRetraction())
+            @test inner(M,x,v,v) == norm(M,x,v)^2
             test_manifold(M,
                           pts,
                           test_exp_log = false,
@@ -34,8 +36,8 @@ include("utils.jl")
                           test_forward_diff = false,
                           test_reverse_diff = false,
                           projection_atol_multiplier = 15,
-                          retraction_methods = [PolarRetraction(), QRRetraction()],
-                          inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()]
+                          #retraction_methods = [PolarRetraction(), QRRetraction()],
+                          #inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()]
             )
         end
     end
