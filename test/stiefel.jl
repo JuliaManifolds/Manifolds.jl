@@ -26,6 +26,10 @@ include("utils.jl")
             pts = convert.(T, [x,y,z])
             v = inverse_retract(M,x,y,PolarInverseRetraction())
             @test inner(M,x,v,v) == norm(M,x,v)^2
+            @test !is_manifold_point(M,2*x)
+            @test_throws DomainError !is_manifold_point(M,2*x,true)
+            @test !is_tangent_vector(M,2*x,v)
+            @test_throws DomainError !is_tangent_vector(M,2*x,v,true)
             test_manifold(M,
                           pts,
                           test_exp_log = false,

@@ -74,6 +74,7 @@ include("utils.jl")
         TT = Manifolds.TensorProductType(TangentSpace, TangentSpace)
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(2))) == 4
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(3))) == 9
+        @test base_manifold(VectorBundleFibers(TT, Sphere(2))) == M
     end
 
 end

@@ -5,6 +5,9 @@ include("utils.jl")
     Mc = FixedRankMatrices(3,2,2,Complex)
     x = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
     v = UMVTVector([0. 0.; 0. 0.; 1. 1.], [1. 0.; 0. 1.],zeros(2,2))
+    @test inner(M,x,v,v) == norm(M,x,v)^2   
+    @test x == SVDMPoint(x.U,x.S,x.Vt)
+    @test v == UMVTVector(v.U, v.M, v.Vt)
     @testset "Fixed Rank Matrices – Basics" begin
         @test representation_size(M) == (3,2)
         @test representation_size(Mc) == (3,2)
@@ -91,6 +94,12 @@ include("utils.jl")
                 @test -v == UMVTVector(-v.U, -v.M, -v.Vt)
                 w = UMVTVector(v.U, v.M, v.Vt)
                 @test v == w
+                w = similar(v,eltype(v))
+                zero_tangent_vector!(M,w,x)
+                oneP = SVDMPoint(one(zeros(3, 3)), ones(2), one(zeros(2, 2)), 2)
+                @test oneP == one(x)
+                oneV = UMVTVector(one(zeros(3,3)),one(zeros(2,2)),one(zeros(2,2)),2)
+                @test oneV == one(V)
             end
             test_manifold(M,
                           pts,

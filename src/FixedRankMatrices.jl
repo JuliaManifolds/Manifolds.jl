@@ -227,8 +227,8 @@ similar(v::UMVTVector, ::Type{T}) where T = UMVTVector(similar(v.U,T), similar(v
 eltype(x::SVDMPoint) = typeof(one(eltype(x.U)) + one(eltype(x.S)) + one(eltype(x.Vt)))
 eltype(v::UMVTVector) = typeof(one(eltype(v.U)) + one(eltype(v.M)) + one(eltype(v.Vt)))
 
-one(x::SVDMPoint) = SVDMPoint(one(zeros(size(x.U,1),size(x.U,1))), ones(length(x.S)), one(zeros(size(x.Vt,1),size(x.Vt,1))), length(x.S))
-one(v::UMVTVector) = UMVTVector(one(zeros(size(v.U,1),size(v.U,1))), one(zeros(size(v.M))), one(zeros(size(v.Vt,1),size(v.Vt,1))), size(v.M,1))
+one(x::SVDMPoint) = SVDMPoint(one(zeros(size(x.U,1),size(x.U,1))), ones(length(x.S)), one(zeros(size(x.Vt,2),size(x.Vt,2))), length(x.S))
+one(v::UMVTVector) = UMVTVector(one(zeros(size(v.U,1),size(v.U,1))), one(zeros(size(v.M))), one(zeros(size(v.Vt,2),size(v.Vt,2))), size(v.M,1))
 
 function copyto!(x::SVDMPoint, y::SVDMPoint)
     copyto!(x.U, y.U)
@@ -242,9 +242,9 @@ function copyto!(v::UMVTVector, w::UMVTVector)
 end
 
 function zero_tangent_vector!(::FixedRankMatrices{m,n,k}, v::UMVTVector, x::SVDMPoint) where {m,n,k}
-    v.U = zeros(eltype(v.U),m,k)
-    v.M = zeros(eltype(v.M),k,k)
-    v.Vt = zeros(eltype(v.Vt),k,n)
+    v.U .= zeros(eltype(v.U),m,k)
+    v.M .= zeros(eltype(v.M),k,k)
+    v.Vt .= zeros(eltype(v.Vt),k,n)
     return v
 end
 
