@@ -95,10 +95,10 @@ UMVTVector(U,M,Vt,k::Int) = UMVTVector(U[:,1:k],M[1:k,1:k],Vt[1:k,:])
 UMVTVector(U,M,Vt) = UMVTVector{eltype(U)}(U,M,Vt)
 
 # here the division in M corrects for the first factor in UMV + x.U*Vt + U*x.Vt, where x is the base point to v.  
-*(v::UMVTVector, s::Number) = UMVTVector(v.U*s, v.M/(s != 0 ? s : 1),  v.Vt*s)
-*(s::Number, v::UMVTVector) = UMVTVector(s*v.U, 1/(s != 0 ? s : 1)*v.M, s*v.Vt)
-/(v::UMVTVector, s::Number) = UMVTVector(v.U/s, v.M*s, v.Vt/s)
-\(s::Number, v::UMVTVector) = UMVTVector(s\v.U, s*v.M, s\v.Vt)
+*(v::UMVTVector, s::Number) = UMVTVector(v.U*s, v.M*s,  v.Vt*s)
+*(s::Number, v::UMVTVector) = UMVTVector(s*v.U, s*v.M, s*v.Vt)
+/(v::UMVTVector, s::Number) = UMVTVector(v.U/s, v.M/s, v.Vt/s)
+\(s::Number, v::UMVTVector) = UMVTVector(s\v.U, s\v.M, s\v.Vt)
 +(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U + w.U, v.M + w.M, v.Vt + w.Vt)
 -(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U - w.U, v.M - w.M, v.Vt - w.Vt)
 -(v::UMVTVector) = UMVTVector(-v.U, -v.M, -v.Vt)
@@ -190,7 +190,6 @@ Section 3 in
 > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
 function project_tangent!(::FixedRankMatrices{M,N,k,T}, vto::UMVTVector, x::SVDMPoint, A::AbstractMatrix) where {M,N,k,T}
-    L = projSt(x.U, v.)
     vto.M .= x.U * A * x.Vt'
     vto.U .= A * x.Vt' - x.U
     vto.Vt .= x.U' * A - x.U' * A * x.Vt' * x.Vt
@@ -242,14 +241,14 @@ function copyto!(v::UMVTVector, w::UMVTVector)
     copyto!(v.Vt, w.Vt)
 end
 
-function zero_tangent_vector!(::FixedRankMatrices{m,n,k,T}, v::UMVTVector, x::SVDMPoint) where {m,n,k,T}
-    v.U .= zeros(eltype(v.U),n,k)
-    v.M .= zeros(eltype(v.M),k,k)
-    v.Vt = zeros(eltype(v.Vt),k,m)
+function zero_tangent_vector!(::FixedRankMatrices{m,n,k}, v::UMVTVector, x::SVDMPoint) where {m,n,k}
+    v.U = zeros(eltype(v.U),m,k)
+    v.M = zeros(eltype(v.M),k,k)
+    v.Vt = zeros(eltype(v.Vt),k,n)
     return v
 end
 
-function zero_tangent_vector(::FixedRankMatrices{m,n,k,T}, x::SVDMPoint) where {m,n,k,T}
-    v = UMVTVector( zeros(eltype(x.U),n,k), zeros(eltype(x.S),k,k), zeros(eltype(x.Vt),k,m))
+function zero_tangent_vector(::FixedRankMatrices{m,n,k}, x::SVDMPoint) where {m,n,k}
+    v = UMVTVector( zeros(eltype(x.U),m,k), zeros(eltype(x.S),k,k), zeros(eltype(x.Vt),k,n))
     return v
 end

@@ -12,14 +12,15 @@ using Test
 
 """
     test_manifold(m::Manifold, pts::AbstractVector;
-        test_forward_diff = true,
-        retraction_methods = [],
-        inverse_retraction_methods = [])
+    args
+    )
 
 Tests general properties of manifold `m`, given at least three different points
 that lie on it (contained in `pts`).
 
 # Arguments
+- `default_inverse_retraction_method = ManifoldsBase.LogarithmicInverseRetraction()` - default method for inverse retractions ([`log`](@ref))
+- `default_retraction_method = ManifoldsBase.ExponentialRetraction()` - default method for retractions ([`exp`](@ref))
 - `exp_log_atol_multiplier = 0`, change absolute tolerance of exp/log tests (0 use default, i.e. deactivate atol and use rtol)
 - `exp_log_rtol_multiplier = 1`, change the relative tolerance of exp/log tests (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
 - `inverse_retraction_methods = []`: inverse retraction methods that will be tested.
@@ -34,11 +35,12 @@ that lie on it (contained in `pts`).
 - `test_forward_diff = true`: if true, automatic differentiation using
   ReverseDiff is tested.
 - `test_musical_isomorphisms = false` : test musical isomorphisms
+- `test_mutating_rand = false` : test the mutating random function for points on manifolds
 - `test_project_tangent = false` : test projections on tangent spaces
 - `test_representation_size = true` : test repersentation size of points/tvectprs
 - `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace
 - `test_vector_transport = false` : test vector transport
-- `test_mutating_rand = false` : test the mutating random function for points on manifolds
+- `test_vector_spaces = true` : test Vector bundle of this manifold
 """
 function test_manifold(M::Manifold, pts::AbstractVector;
     test_exp_log = true,
@@ -52,6 +54,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_musical_isomorphisms = false,
     test_vector_transport = false,
     test_mutating_rand = false,
+    test_vector_spaces = true, 
     default_inverse_retraction_method = ManifoldsBase.LogarithmicInverseRetraction(),
     default_retraction_method = ManifoldsBase.ExponentialRetraction(),
     retraction_methods = [],
@@ -158,7 +161,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], tv1)
     end
 
-    @testset "vector spaces tests" begin
+    test_vector_spaces && @testset "vector spaces tests" begin
         tv = zero_tangent_vector(M, pts[1])
         mts = Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M)
         @test isapprox(M, pts[1], tv, zero_vector(mts, pts[1]))

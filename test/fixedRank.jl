@@ -24,12 +24,9 @@ include("utils.jl")
         @test is_manifold_point(M,x)
         @test is_tangent_vector(M,x,v)
     end
-    types = [ [ Matrix{Float64}, Vector{Float64}, Matrix{Float64} ],
-            #   MMatrix{3, 2, Float64},
-            #   SizedMatrix{3, 2, Float64},
-            #   Matrix{Float32},
-            #   MMatrix{3, 2, Float32},
-            #   SizedMatrix{3, 2, Float64},
+    types = [
+                [ Matrix{Float64}, Vector{Float64}, Matrix{Float64} ],
+                [ Matrix{Float32}, Vector{Float32}, Matrix{Float32} ]
             ]
     for T in types
         @testset "Type $T" begin
@@ -86,10 +83,10 @@ include("utils.jl")
                 w = UMVTVector(v.U, 2*v.M, v.Vt)
                 @test v+w == UMVTVector(2*v.U, 3*v.M, 2*v.Vt)
                 @test v-w == UMVTVector(0*v.U, -v.M, 0*v.Vt)
-                @test 2*v == UMVTVector(2*v.U, 1/2*v.M, 2*v.Vt)
-                @test v*2 == UMVTVector(v.U*2, v.M/2, v.Vt*2)
-                @test 2\v == UMVTVector(2\v.U, 2*v.M, 2\v.Vt)
-                @test v/2 == UMVTVector(v.U/2, v.M*2, v.Vt/2)
+                @test 2*v == UMVTVector(2*v.U, 2*v.M, 2*v.Vt)
+                @test v*2 == UMVTVector(v.U*2, v.M*2, v.Vt*2)
+                @test 2\v == UMVTVector(2\v.U, 2\v.M, 2\v.Vt)
+                @test v/2 == UMVTVector(v.U/2, v.M/2, v.Vt/2)
                 @test +v == v
                 @test -v == UMVTVector(-v.U, -v.M, -v.Vt)
                 w = UMVTVector(v.U, v.M, v.Vt)
@@ -101,10 +98,11 @@ include("utils.jl")
                           default_inverse_retraction_method = nothing,
                           default_retraction_method = PolarRetraction(),
                           test_log_yields_tangent = false,
-                          test_project_tangent = true,
+                          test_project_tangent = false,
                           test_vector_transport = false,
                           test_forward_diff = false,
                           test_reverse_diff = false,
+                          test_vector_spaces = false,
                           test_tangent_vector_broadcasting = false, #broadcast not so easy for 3 matrix type
                           projection_atol_multiplier = 15,
                           retraction_methods = [PolarRetraction()]
