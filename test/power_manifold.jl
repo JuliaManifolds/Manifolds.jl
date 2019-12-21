@@ -50,8 +50,8 @@ Random.seed!(42)
                 pts1;
                 test_reverse_diff = true,
                 test_musical_isomorphisms = true,
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
+                #retraction_methods = retraction_methods,
+                #inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_s1_pt_dist],
                 tvector_distributions = [power_s1_tv_dist],
                 rand_tvector_atol_multiplier = 6.0,
@@ -67,8 +67,8 @@ Random.seed!(42)
                 pts2;
                 test_reverse_diff = true,
                 test_musical_isomorphisms = true,
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
+                #retraction_methods = retraction_methods,
+                #inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_s2_pt_dist],
                 tvector_distributions = [power_s2_tv_dist],
                 rand_tvector_atol_multiplier = 6.0,
@@ -84,8 +84,8 @@ Random.seed!(42)
                 pts1;
                 test_reverse_diff = false,
                 test_musical_isomorphisms = true,
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
+                #retraction_methods = retraction_methods,
+                #inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_r1_pt_dist],
                 tvector_distributions = [power_r1_tv_dist],
                 rand_tvector_atol_multiplier = 5.0,
@@ -101,8 +101,8 @@ Random.seed!(42)
                 pts2;
                 test_reverse_diff = false,
                 test_musical_isomorphisms = true,
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
+                #retraction_methods = retraction_methods,
+                #inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_r2_pt_dist],
                 tvector_distributions = [power_r2_tv_dist],
                 rand_tvector_atol_multiplier = 5.0,

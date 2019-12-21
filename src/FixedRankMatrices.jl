@@ -117,20 +117,20 @@ function check_manifold_point(F::FixedRankMatrices{M,N,k},x; kwargs...) where {M
     return check_manifold_point(F,SVDMPoint(x,k))
 end
 
-function check_manifold_point(F::FixedRankMatrices{M,N,k}, x::SVDMPoint) where {M,N,k}
+function check_manifold_point(F::FixedRankMatrices{M,N,k}, x::SVDMPoint; kwargs...) where {M,N,k}
     s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(M),$(N)) witk rank $(k), "
     if (size(x.U) != (M,k)) || (length(x.S) != k) || (size(x.Vt) != (k,N))
         return DomainError([size(x.U)...,length(x.S),size(x.Vt)...], string(s, "since the dimensions do not fit (expected $(N)x$(M) rank $(k) got $(size(x.U,1))x$(size(x.Vt,2)) rank $(size(x.S))."))
     end
-    if !isapprox(x.U'*x.U,one(zeros(N,N)))
+    if !isapprox(x.U'*x.U,one(zeros(N,N)); kwargs...)
         return DomainError(norm(x.U'*x.U-one(zeros(N,N))), string(s," since U is not orthonormal/unitary."))
     end
-    if !isapprox(x.Vt'*x.Vt, one(zeros(N,N)))
+    if !isapprox(x.Vt'*x.Vt, one(zeros(N,N)); kwargs...)
         return DomainError(norm(x.Vt'*x.Vt-one(zeros(N,N))), string(s," since V is not orthonormal/unitary."))
     end
 end
 
-function check_tangent_vector(F::FixedRankMatrices{M,N,k}, x::SVDMPoint, v::UMVTVector) where {M,N,k}
+function check_tangent_vector(F::FixedRankMatrices{M,N,k}, x::SVDMPoint, v::UMVTVector; kwargs...) where {M,N,k}
     c = check_manifold_point(F,x)
     if c !== nothing
         return c
@@ -138,10 +138,10 @@ function check_tangent_vector(F::FixedRankMatrices{M,N,k}, x::SVDMPoint, v::UMVT
     if (size(v.U) != (M,k)) || (size(v.Vt) != (k,N)) || (size(v.M) != (k,k))
         return DomainError(cat(size(v.U),size(v.M),size(v.Vt),dims=1), "The tangent vector $(v) is not a tangent vector to $(x) on the fixed rank matrices since the matrix dimensions to not fit (expected $(M)x$(k), $(k)x$(k), $(k)x$(N)).")
     end
-    if !isapprox(v.U'*x.U, zeros(k,k))
+    if !isapprox(v.U'*x.U, zeros(k,k); kwargs...)
         return DomainError(norm(v.U'*x.U-zeros(k,k)), "The tangent vector $(v) is not a tangent vector to $(x) on the fixed rank matrices since v.U'x.U is not zero. ")
     end
-    if !isapprox(v.Vt*x.Vt', zeros(k,k))
+    if !isapprox(v.Vt*x.Vt', zeros(k,k); kwargs...)
         return DomainError(norm(v.Vt*x.Vt-zeros(k,k)), "The tangent vector $(v) is not a tangent vector to $(x) on the fixed rank matrices since v.V'x.V is not zero.")
     end
 end
