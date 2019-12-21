@@ -30,6 +30,8 @@ include("utils.jl")
             @test_throws DomainError !is_manifold_point(M,2*x,true)
             @test !is_tangent_vector(M,2*x,v)
             @test_throws DomainError !is_tangent_vector(M,2*x,v,true)
+            @test !is_tangent_vector(M,x,y)
+            @test_throws DomainError is_tangent_vector(M,x,y,true)
             test_manifold(M,
                           pts,
                           test_exp_log = false,
