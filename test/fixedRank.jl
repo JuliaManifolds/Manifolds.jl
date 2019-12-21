@@ -99,7 +99,7 @@ include("utils.jl")
                 oneP = SVDMPoint(one(zeros(3, 3)), ones(2), one(zeros(2, 2)), 2)
                 @test oneP == one(x)
                 oneV = UMVTVector(one(zeros(3,3)),one(zeros(2,2)),one(zeros(2,2)),2)
-                @test oneV == one(V)
+                @test oneV == one(v)
             end
             test_manifold(M,
                           pts,
