@@ -155,14 +155,20 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     @testset "(inverse &) retraction tests" begin
         for x ∈ pts
             for retr_method ∈ retraction_methods
-                @test is_manifold_point(M, retract(M, x, tv1, retr_method))
+                @test is_manifold_point(M, retract(M, x, tv1, retr_method);
+                    atol = eps(eltype(x)) * retraction_atol_multiplier,
+                    rtol = retraction_atol_multiplier == 0 ? sqrt(eps(eltype(x)))*retraction_rtol_multiplier : 0
+                )
                 @test isapprox(M, x, retract(M, x, tv1, 0, retr_method);
                     atol = eps(eltype(x)) * retraction_atol_multiplier,
                     rtol = retraction_atol_multiplier == 0 ? sqrt(eps(eltype(x)))*retraction_rtol_multiplier : 0
                 )
                 new_pt = similar(x)
                 retract!(M, new_pt, x, tv1, retr_method)
-                @test is_manifold_point(M, new_pt)
+                @test is_manifold_point(M, new_pt;
+                    atol = eps(eltype(x)) * retraction_atol_multiplier,
+                    rtol = retraction_atol_multiplier == 0 ? sqrt(eps(eltype(x)))*retraction_rtol_multiplier : 0
+                )
             end
             for inv_retr_method ∈ inverse_retraction_methods
                 @test isapprox(M, x, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method);
