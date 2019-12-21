@@ -1,5 +1,5 @@
 using LinearAlgebra: diag, Diagonal, svd, SVD, rank, dot
-import Base: \, /, +, -, *, similar, one
+import Base: \, /, +, -, *, ==, similar, one, copyto!
 @doc doc"""
     FixedRankMatrices{M,N,K} <: Manifold
 
@@ -72,6 +72,7 @@ SVDMPoint(U,S,Vt) = SVDMPoint{eltype(U)}(U,S,Vt)
 SVDMPoint(A::Matrix,k::Int) = SVDMPoint(svd(A),k)
 SVDMPoint(S::SVD,k::Int) = SVDMPoint(S.U,S.S,S.Vt,k)
 SVDMPoint(U,S,Vt,k::Int) = SVDMPoint(U[:,1:k],S[1:k],Vt[1:k,:])
+==(x::SVDMPoint, y::SVDMPoint) = (x.U==y.U) && (x.S==y.S) && (x.Vt==y.Vt)
 
 @doc doc"""
     UMVTVector <: TVector
@@ -93,43 +94,45 @@ end
 UMVTVector(U,M,Vt,k::Int) = UMVTVector(U[:,1:k],M[1:k,1:k],Vt[1:k,:])
 UMVTVector(U,M,Vt) = UMVTVector{eltype(U)}(U,M,Vt)
 
-*(v::UMVTVector, s::Number) = UMVTVector(v.U*s, v.M*s,  v.Vpt*s)
-*(s::Number, v::UMVTVector) = UMVTVector(s*v.U, s*v.M, s*v.Vpt)
-/(v::UMVTVector, s::Number) = UMVTVector(v.U/s, v.M/s, v.Vt/s)
-\(s::Number, v::UMVTVector) = UMVTVector(s\v.U, s\v.M, s\v.Vt)
+# here the division in M corrects for the first factor in UMV + x.U*Vt + U*x.Vt, where x is the base point to v.  
+*(v::UMVTVector, s::Number) = UMVTVector(v.U*s, v.M/(s != 0 ? s : 1),  v.Vt*s)
+*(s::Number, v::UMVTVector) = UMVTVector(s*v.U, 1/(s != 0 ? s : 1)*v.M, s*v.Vt)
+/(v::UMVTVector, s::Number) = UMVTVector(v.U/s, v.M*s, v.Vt/s)
+\(s::Number, v::UMVTVector) = UMVTVector(s\v.U, s*v.M, s\v.Vt)
 +(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U + w.U, v.M + w.M, v.Vt + w.Vt)
 -(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U - w.U, v.M - w.M, v.Vt - w.Vt)
 -(v::UMVTVector) = UMVTVector(-v.U, -v.M, -v.Vt)
 +(v::UMVTVector) = UMVTVector(v.U, v.M, v.Vt)
+==(v::UMVTVector,w::UMVTVector) = (v.U==w.U) && (v.M==w.M) && (v.Vt==w.Vt)
 
-function check_manifold_point(F::FixedRankMatrices{M,N,k,T},x; kwargs...) where {M,N,k,T}
+function check_manifold_point(F::FixedRankMatrices{M,N,k},x; kwargs...) where {M,N,k}
     r = rank(x; kwargs...)
     s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(M),$(N)) witk rank $(k), "
     if size(x) != (M,N)
         return DomainError(size(x), string(s,"since its size is wrong."))
     end
     if r > k
-        return DomainError(r, string(s, "since its rank is too large."))
+        return DomainError(r, string(s, "since its rank is too large ($(r))."))
     end
     return check_manifold_point(F,SVDMPoint(x,k))
 end
 
-function check_manifold_point(F::FixedRankMatrices{M,N,k,T}, x::SVDMPoint) where {M,N,k,T}
+function check_manifold_point(F::FixedRankMatrices{M,N,k}, x::SVDMPoint) where {M,N,k}
     s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(M),$(N)) witk rank $(k), "
     if (size(x.U) != (M,k)) || (length(x.S) != k) || (size(x.Vt) != (k,N))
         return DomainError([size(x.U)...,length(x.S),size(x.Vt)...], string(s, "since the dimensions do not fit (expected $(N)x$(M) rank $(k) got $(size(x.U,1))x$(size(x.Vt,2)) rank $(size(x.S))."))
     end
     if !isapprox(x.U'*x.U,one(zeros(N,N)))
-        return DomainError(norm(x.U'*x.U-one(zeros(M,M))), string(s," since U is not orthonormal/unitary."))
+        return DomainError(norm(x.U'*x.U-one(zeros(N,N))), string(s," since U is not orthonormal/unitary."))
     end
     if !isapprox(x.Vt'*x.Vt, one(zeros(N,N)))
         return DomainError(norm(x.Vt'*x.Vt-one(zeros(N,N))), string(s," since V is not orthonormal/unitary."))
     end
 end
 
-function check_tangent_vector(F::FixedRankMatrices{M,N,k,T}, x::SVDMPoint, v::UMVTVector) where {M,N,k,T}
+function check_tangent_vector(F::FixedRankMatrices{M,N,k}, x::SVDMPoint, v::UMVTVector) where {M,N,k}
     c = check_manifold_point(F,x)
-    if c != nothing
+    if c !== nothing
         return c
     end
     if (size(v.U) != (M,k)) || (size(v.Vt) != (k,N)) || (size(v.M) != (k,k))
@@ -143,7 +146,7 @@ function check_tangent_vector(F::FixedRankMatrices{M,N,k,T}, x::SVDMPoint, v::UM
     end
 end
 
-function inner(::FixedRankMatrices{M,N,k,T}, x::SVDMPoint, v::UMVTVector, w::UMVTVector) where {M,N,k,T}
+function inner(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector)
     return dot(v.U,w.U) + dot(v.M,w.M) + dot(v.Vt,w.Vt)
 end
 
@@ -187,12 +190,13 @@ Section 3 in
 > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
 function project_tangent!(::FixedRankMatrices{M,N,k,T}, vto::UMVTVector, x::SVDMPoint, A::AbstractMatrix) where {M,N,k,T}
+    L = projSt(x.U, v.)
     vto.M .= x.U * A * x.Vt'
     vto.U .= A * x.Vt' - x.U
     vto.Vt .= x.U' * A - x.U' * A * x.Vt' * x.Vt
     return vto
 end
-project_tangent!(F::FixedRankMatrices{M,N,k,T}, vto::UMVTVector, x::SVDMPoint, v::UMVTVector) where {M,N,k,T} = project_tangent!(F,vto,x, v.U*v.M.v.Vt)
+project_tangent!(F::FixedRankMatrices{M,N,k,T}, vto::UMVTVector, x::SVDMPoint, v::UMVTVector) where {M,N,k,T} = project_tangent!(F,vto,x, v.U * v.M * v.Vt)
 
 representation_size(F::FixedRankMatrices{M,N,k,T}) where {M,N,k,T} = (M,N)
 
@@ -227,14 +231,25 @@ eltype(v::UMVTVector) = typeof(one(eltype(v.U)) + one(eltype(v.M)) + one(eltype(
 one(x::SVDMPoint) = SVDMPoint(one(zeros(size(x.U,1),size(x.U,1))), ones(length(x.S)), one(zeros(size(x.Vt,1),size(x.Vt,1))), length(x.S))
 one(v::UMVTVector) = UMVTVector(one(zeros(size(v.U,1),size(v.U,1))), one(zeros(size(v.M))), one(zeros(size(v.Vt,1),size(v.Vt,1))), size(v.M,1))
 
+function copyto!(x::SVDMPoint, y::SVDMPoint)
+    copyto!(x.U, y.U)
+    copyto!(x.S, y.S)
+    copyto!(x.Vt, y.Vt)
+end
+function copyto!(v::UMVTVector, w::UMVTVector)
+    copyto!(v.U, w.U)
+    copyto!(v.M, w.M)
+    copyto!(v.Vt, w.Vt)
+end
+
 function zero_tangent_vector!(::FixedRankMatrices{m,n,k,T}, v::UMVTVector, x::SVDMPoint) where {m,n,k,T}
-    v.U .= zeros(T,n,k)
-    v.M .= zeros(T,k,k)
-    v.Vt = zeros(T,k,m)
+    v.U .= zeros(eltype(v.U),n,k)
+    v.M .= zeros(eltype(v.M),k,k)
+    v.Vt = zeros(eltype(v.Vt),k,m)
     return v
 end
 
 function zero_tangent_vector(::FixedRankMatrices{m,n,k,T}, x::SVDMPoint) where {m,n,k,T}
-    v = UMVTVector( zeros(T,n,k), zeros(T,k,k), zeros(T,k,m))
+    v = UMVTVector( zeros(eltype(x.U),n,k), zeros(eltype(x.S),k,k), zeros(eltype(x.Vt),k,m))
     return v
 end
