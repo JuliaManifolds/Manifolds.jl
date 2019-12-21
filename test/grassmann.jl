@@ -33,8 +33,8 @@ include("utils.jl")
                           test_vector_transport = false,
                           test_forward_diff = false,
                           test_reverse_diff = false,
-                          #retraction_methods = [PolarRetraction(), QRRetraction()],
-                          #inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()],
+                          retraction_methods = [PolarRetraction(), QRRetraction()],
+                          inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()],
                           exp_log_atol_multiplier = 10.0
             )
         end

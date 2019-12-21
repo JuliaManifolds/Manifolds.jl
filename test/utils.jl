@@ -152,7 +152,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         for x ∈ pts
             for retr_method ∈ retraction_methods
                 @test is_manifold_point(M, retract(M, x, tv1, retr_method))
-                @test isapprox(M, pts[1], retract(M, x, tv1, 0, retr_method))
+                @test isapprox(M, x, retract(M, x, tv1, 0, retr_method))
                 new_pt = similar(x)
                 retract!(M, new_pt, x, tv1, retr_method)
                 @test is_manifold_point(M, new_pt)
