@@ -202,6 +202,7 @@ include("CholeskySpace.jl")
 include("Grassmann.jl")
 include("Rotations.jl")
 include("Sphere.jl")
+include("Symmetric.jl")
 include("SymmetricPositiveDefinite.jl")
 
 include("statistics.jl")
@@ -222,6 +223,9 @@ function __init__()
 end
 # Base Types
 export Manifold,
+    Euclidean,
+    Sphere,
+    SymmetricMatrices,
     MPoint,
     TVector,
     CoTVector
