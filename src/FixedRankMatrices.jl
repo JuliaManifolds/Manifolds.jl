@@ -150,7 +150,7 @@ function inner(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector)
     return dot(v.U,w.U) + dot(v.M,w.M) + dot(v.Vt,w.Vt)
 end
 
-isapprox(::FixedRankMatrices, x::SVDMPoint, y::SVDMPoint; kwargs...) = isapprox(x.U*Diagonal(x.S)*x.Vt, y.U*Diagonal(y.S)*y.Vt, kwargs...)
+isapprox(::FixedRankMatrices, x::SVDMPoint, y::SVDMPoint; kwargs...) = isapprox( x.U*Diagonal(x.S)*x.Vt, y.U*Diagonal(y.S)*y.Vt; kwargs...)
 isapprox(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector; kwargs...) = isapprox(x.U*v.M*x.Vt + v.U*x.Vt + x.U*v.Vt, x.U*w.M*x.Vt + w.U*x.Vt + x.U*w.Vt; kwargs...)
 
 @doc doc"""

@@ -23,6 +23,8 @@ that lie on it (contained in `pts`).
 - `default_retraction_method = ManifoldsBase.ExponentialRetraction()` - default method for retractions ([`exp`](@ref))
 - `exp_log_atol_multiplier = 0`, change absolute tolerance of exp/log tests (0 use default, i.e. deactivate atol and use rtol)
 - `exp_log_rtol_multiplier = 1`, change the relative tolerance of exp/log tests (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
+- `retraction_atol_multiplier = 0`, change absolute tolerance of (inverse) retraction tests (0 use default, i.e. deactivate atol and use rtol)
+- `retraction_rtol_multiplier = 1`, change the relative tolerance of (inverse) retraction tests (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
 - `inverse_retraction_methods = []`: inverse retraction methods that will be tested.
 - `point_distributions = []` : point distributions to test
 - `projection_tvector_atol_multiplier = 0` : chage absolute tolerance in testing projections (0 use default, i.e. deactivate atol and use rtol)
@@ -63,6 +65,8 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     tvector_distributions = [],
     exp_log_atol_multiplier = 0,
     exp_log_rtol_multiplier = 1,
+    retraction_atol_multiplier = 0,
+    retraction_rtol_multiplier = 1,
     projection_atol_multiplier = 0,
     rand_tvector_atol_multiplier = 0)
 
@@ -152,15 +156,18 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         for x ∈ pts
             for retr_method ∈ retraction_methods
                 @test is_manifold_point(M, retract(M, x, tv1, retr_method))
-                @test isapprox(M, x, retract(M, x, tv1, 0, retr_method))
+                @test isapprox(M, x, retract(M, x, tv1, 0, retr_method);
+                    atol = eps(eltype(x)) * retraction_atol_multiplier,
+                    rtol = retraction_atol_multiplier == 0 ? sqrt(eps(eltype(x)))*retraction_rtol_multiplier : 0
+                )
                 new_pt = similar(x)
                 retract!(M, new_pt, x, tv1, retr_method)
                 @test is_manifold_point(M, new_pt)
             end
             for inv_retr_method ∈ inverse_retraction_methods
                 @test isapprox(M, x, zero_tangent_vector(M, x), inverse_retract(M, x, x, inv_retr_method);
-                    atol = eps(eltype(x)) * exp_log_atol_multiplier,
-                    rtol = exp_log_atol_multiplier == 0 ? sqrt(eps(eltype(x)))*exp_log_rtol_multiplier : 0
+                    atol = eps(eltype(x)) * retraction_atol_multiplier,
+                    rtol = retraction_atol_multiplier == 0 ? sqrt(eps(eltype(x)))*retraction_rtol_multiplier : 0
                 )
             end
         end

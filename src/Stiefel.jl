@@ -100,6 +100,9 @@ function exp!(M::Stiefel{m,n}, y, x, v) where {m,n}
     return y
 end
 
+isapprox(M::Stiefel, x, v, w; kwargs...) = isapprox(sqrt(inner(M,x,zero_tangent_vector(M,x),v-w)),0;kwargs...)
+isapprox(M::Stiefel, x, y; kwargs...) = isapprox(norm(x-y), 0;kwargs...)
+
 @doc doc"""
     inner(M,x,ξ,ν)
 
@@ -233,9 +236,7 @@ function retract!(::Stiefel{M,N,T}, y, x, v, ::QRRetraction) where {M,N,T}
     qrfac = qr(x+v)
     d = diag(qrfac.R)
     D = Diagonal( sign.( sign.(d .+ convert(T, 0.5))) )
-    y .= zeros(M,N)
-    y[1:N,1:N] .= D
-    y .= qrfac.Q * D
+    y .= Matrix(qrfac.Q) * D
     return y
 end
 

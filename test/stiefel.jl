@@ -36,6 +36,7 @@ include("utils.jl")
                           test_forward_diff = false,
                           test_reverse_diff = false,
                           projection_atol_multiplier = 15,
+                          retraction_atol_multiplier = 10,
                           retraction_methods = [PolarRetraction(), QRRetraction()],
                           inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()]
             )
