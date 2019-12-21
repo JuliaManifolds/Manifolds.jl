@@ -68,7 +68,6 @@ struct SVDMPoint{TU<:AbstractMatrix, TS<:AbstractVector, TVt<:AbstractMatrix} <:
 end
 SVDMPoint(A::AbstractMatrix) = SVDMPoint(svd(A))
 SVDMPoint(S::SVD) = SVDMPoint(S.U,S.S,S.Vt)
-SVDMPoint(U,S,Vt) = SVDMPoint{eltype(U)}(U,S,Vt)
 SVDMPoint(A::Matrix,k::Int) = SVDMPoint(svd(A),k)
 SVDMPoint(S::SVD,k::Int) = SVDMPoint(S.U,S.S,S.Vt,k)
 SVDMPoint(U,S,Vt,k::Int) = SVDMPoint(U[:,1:k],S[1:k],Vt[1:k,:])
@@ -92,7 +91,6 @@ struct UMVTVector{TU<:AbstractMatrix, TM<:AbstractMatrix, TVt<:AbstractMatrix} <
 end
 
 UMVTVector(U,M,Vt,k::Int) = UMVTVector(U[:,1:k],M[1:k,1:k],Vt[1:k,:])
-UMVTVector(U,M,Vt) = UMVTVector{eltype(U)}(U,M,Vt)
 
 # here the division in M corrects for the first factor in UMV + x.U*Vt + U*x.Vt, where x is the base point to v.  
 *(v::UMVTVector, s::Number) = UMVTVector(v.U*s, v.M*s,  v.Vt*s)
