@@ -17,6 +17,7 @@ makedocs(
                 "Rotations" => "manifolds/rotations.md",
                 "Sphere" => "manifolds/sphere.md",
                 "Stiefel" => "manifolds/stiefel.md",
+                "Symmetric Matrices" => "manifolds/symmetric.md",
                 "Symmetric Positive Definite" => "manifolds/symmetricpositivedefinite.md"
             ],
             "Combined manifolds" => [

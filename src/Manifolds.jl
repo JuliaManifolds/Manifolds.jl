@@ -207,6 +207,7 @@ include("Grassmann.jl")
 include("Rotations.jl")
 include("Stiefel.jl")
 include("Sphere.jl")
+include("Symmetric.jl")
 include("SymmetricPositiveDefinite.jl")
 
 include("statistics.jl")
@@ -228,6 +229,9 @@ end
 
 # Base Types
 export Manifold,
+    Euclidean,
+    Sphere,
+    SymmetricMatrices,
     MPoint,
     TVector,
     CoTVector,
