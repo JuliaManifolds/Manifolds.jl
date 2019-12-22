@@ -177,24 +177,35 @@ manifold_dimension(::FixedRankMatrices{M,N,k,Complex}) where {M,N,k} = 2*(M+N-k)
 
 @doc doc"""
     project_tangent!(M,vto,x,A)
+    project_tangent!(M,vto,x,v)
 
-project the matrix $A\in\mathbb R^{m,n}$ or a [`UMVTVector`](@ref) (e.g. from
-another tangent space) onto the tangent space at $x$, further
-decomposing the result into $v=UMV$, i.e. a [`UMVTVector`](@ref) following
-Section 3 in
-> Bart Vandereycken: "Low-rank matrix completion by Riemannian Optimization,
-> SIAM Journal on Optiomoization, 23(2), pp. 1214–1236, 2013.
-> doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
-> arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
+project the matrix $A\in\mathbb R^{m,n}$ or a [`UMVTVector`](@ref) `v`from the embedding or
+another tangent spaceonto the tangent space at $x$, further decomposing the result into
+$v=UMV$, i.e. a [`UMVTVector`](@ref) following Section 3 in [^Vandereycken2013].
+
+[^Vandereycken2013]:
+    > Bart Vandereycken: "Low-rank matrix completion by Riemannian Optimization,
+    > SIAM Journal on Optiomoization, 23(2), pp. 1214–1236, 2013.
+    > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
+    > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
-function project_tangent!(::FixedRankMatrices{M,N,k,T}, vto::UMVTVector, x::SVDMPoint, A::AbstractMatrix) where {M,N,k,T}
-    vto.M .= x.U * A * x.Vt'
-    vto.U .= A * x.Vt' - x.U
-    vto.Vt .= x.U' * A - x.U' * A * x.Vt' * x.Vt
+function project_tangent!(
+    ::FixedRankMatrices,
+    vto::UMVTVector,
+    x::SVDMPoint,
+    A::AbstractMatrix
+)
+    av = A*(x.Vt')
+    uTav = x.U'*av
+    aTu = A'*x.U
+    vto.M .= uTav
+    vto.U .= A * x.Vt' - x.U*uTav
+    vto.Vt .= (aTu - x.Vt'*uTav')'
     return vto
 end
-project_tangent!(F::FixedRankMatrices{M,N,k,T}, vto::UMVTVector, x::SVDMPoint, v::UMVTVector) where {M,N,k,T} = project_tangent!(F,vto,x, v.U * v.M * v.Vt)
-
+function project_tangent!(F::FixedRankMatrices, vto::UMVTVector, x::SVDMPoint, v::UMVTVector)
+    return project_tangent!(F,vto,x, v.U * v.M * v.Vt)
+end
 representation_size(F::FixedRankMatrices{M,N,k,T}) where {M,N,k,T} = (M,N)
 
 @doc doc"""

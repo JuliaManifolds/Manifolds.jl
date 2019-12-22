@@ -107,7 +107,7 @@ include("utils.jl")
                           default_inverse_retraction_method = nothing,
                           default_retraction_method = PolarRetraction(),
                           test_is_tangent = false,
-                          test_project_tangent = false,
+                          test_project_tangent = true,
                           test_vector_transport = false,
                           test_forward_diff = false,
                           test_reverse_diff = false,
