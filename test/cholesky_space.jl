@@ -16,10 +16,10 @@ include("utils.jl")
             ]
         pts = [convert(T, a) for a in ptsF]
         test_manifold(M, pts;
-                test_vector_transport = true,
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                exp_log_atol_multiplier = 8
+            test_vector_transport = true,
+            test_forward_diff = false,
+            test_reverse_diff = false,
+            exp_log_atol_multiplier = 8.0,
         )
     end
     @testset "Test Error cases in is_manifold_point and is_tangent_vector" begin

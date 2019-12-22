@@ -5,6 +5,9 @@ include("utils.jl")
     M2 = Euclidean(2)
     Mse = ProductManifold(M1, M2)
     @test Mse == M1 × M2
+    @test Mse == ProductManifold(M1) × M2
+    @test Mse == ProductManifold(M1) × ProductManifold(M2)
+    @test Mse == M1 × ProductManifold(M2)
 
     types = [Vector{Float64},
              SizedVector{5, Float64},

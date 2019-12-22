@@ -106,7 +106,7 @@ include("utils.jl")
                           test_exp_log = false,
                           default_inverse_retraction_method = nothing,
                           default_retraction_method = PolarRetraction(),
-                          test_log_yields_tangent = false,
+                          test_is_tangent = false,
                           test_project_tangent = false,
                           test_vector_transport = false,
                           test_forward_diff = false,
