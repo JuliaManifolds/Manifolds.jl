@@ -133,13 +133,14 @@ if such a symmetric positive definite $n\times n$ matrix exists. Since $ys-q$ is
 x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2I_k = 0.
 ````
 This can either be solved by a Lyapunov approach or a continuous-time
-algebraic Riccati equation as described in
-
-> T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
-> Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
-> doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
+algebraic Riccati equation as described in [^KanekoFioriTanaka2013]
 
 This implementation follows the Lyapunov approach.
+
+[^KanekoFioriTanaka2013]:
+    > T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
+    > Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
+    > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
 """
 function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::PolarInverseRetraction) where {M,N,T}
     A = x'*y
@@ -154,11 +155,13 @@ end
 
 compute the inverse retraction based on a qr decomposition
 for two points `x`, `y` on the [`Stiefel`](@ref) manifold `M` and return
-the resulting tangent vector in `v`. The computation follows Algorithm 1 in
+the resulting tangent vector in `v`. The computation follows Algorithm 1
+in [^KanekoFioriTanaka2013].
 
-> T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
-> Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
-> doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
+[^KanekoFioriTanaka2013]:
+    > T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
+    > Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
+    > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
 """
 function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::QRInverseRetraction) where {M,N,T}
   A = x'*y

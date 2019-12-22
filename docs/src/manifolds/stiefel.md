@@ -10,11 +10,6 @@ Order = [:type, :function]
 
 ````@raw html
 <ul>
-<li id="KanekoFioriTanaka2013">
-T. Kaneko, S. Fiori and T. Tanaka, “Empirical Arithmetic Averaging over the
-Compact Stiefel Manifold”, <emph>IEEE Transactions on Signal Processing</emph>, 2013,
-doi: <a href="https://doi.org/10.1109/TSP.2012.2226167">10.1109/TSP.2012.2226167</a>.
-</li>
 <li id="SatoTawi2013">
 H. Sato and T. Iawi, “A complex singular value decomposition algorithm based on
 the Riemannian Newton method”, in: <emph>IEEE 52nd Annual Conference on Decision and
