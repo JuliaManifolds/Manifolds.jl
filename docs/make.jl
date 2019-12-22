@@ -25,7 +25,8 @@ makedocs(
             ],
             "Manifold decorators" => [
                 "Array manifold" => "manifolds/array.md",
-                "Metric manifold" => "manifolds/metric.md"
+                "Metric manifold" => "manifolds/metric.md",
+                "Group manifold" => "manifolds/group.md"
             ]
         ],
         "Statistics" => "statistics.md",
