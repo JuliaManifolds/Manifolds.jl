@@ -149,6 +149,8 @@ function exp!(M::Grassmann{N,K,T},y, x, v) where {N,K,T}
     return y
 end
 
+injectivity_radius(::Grassmann) = π/2
+
 @doc doc"""
     inner(M,x,v,w)
 

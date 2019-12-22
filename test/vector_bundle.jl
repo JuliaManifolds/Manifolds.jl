@@ -43,13 +43,16 @@ include("utils.jl")
             for pt ∈ pts_tb
                 @test bundle_projection(TB, pt) ≈ pt.parts[1]
             end
-            test_manifold(TB,
-                          pts_tb,
-                          test_reverse_diff = isa(T, Vector),
-                          test_forward_diff = isa(T, Vector),
-                          test_tangent_vector_broadcasting = false,
-                          test_project_tangent = true,
-                          projection_atol_multiplier = 4)
+            test_manifold(
+                TB,
+                pts_tb,
+                test_injectivity_radius = false,
+                test_reverse_diff = isa(T, Vector),
+                test_forward_diff = isa(T, Vector),
+                test_tangent_vector_broadcasting = false,
+                test_project_tangent = true,
+                projection_atol_multiplier = 4
+            )
         end
     end
 

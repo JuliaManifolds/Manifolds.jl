@@ -35,6 +35,7 @@ include("utils.jl")
         pts = [convert(T, [cos(ϕ) -sin(ϕ); sin(ϕ) cos(ϕ)]) for ϕ in angles]
         test_manifold(M, pts;
             test_reverse_diff = false,
+            test_injectivity_radius = false,
             test_project_tangent = true,
             test_musical_isomorphisms = true,
             retraction_methods = retraction_methods,
@@ -78,6 +79,7 @@ include("utils.jl")
             test_manifold(SOn, pts;
                 test_forward_diff = n==3,
                 test_reverse_diff = false,
+                test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
                 test_mutating_rand = true,
                 retraction_methods = retraction_methods,

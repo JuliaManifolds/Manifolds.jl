@@ -30,6 +30,7 @@ include("utils.jl")
                 M,
                 pts,
                 test_exp_log = true,
+                test_injectivity_radius = false,
                 test_project_tangent = true,
                 test_vector_transport = false,
                 test_forward_diff = false,

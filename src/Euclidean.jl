@@ -59,6 +59,9 @@ log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = zer
 @inline inner(::Euclidean, x, v, w) = dot(v, w)
 @inline inner(::MetricManifold{<:Manifold,EuclideanMetric}, x, v, w) = dot(v, w)
 
+injectivity_radius(::Euclidean) = Inf
+
+
 """
     distance(M::Euclidean,x,y)
 

@@ -105,6 +105,7 @@ include("utils.jl")
                           pts,
                           test_exp_log = false,
                           default_inverse_retraction_method = nothing,
+                          test_injectivity_radius = false,
                           default_retraction_method = PolarRetraction(),
                           test_is_tangent = false,
                           test_project_tangent = true,

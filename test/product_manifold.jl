@@ -35,15 +35,17 @@ include("utils.jl")
             distr_M2 = Manifolds.projected_distribution(M2, Distributions.MvNormal(zero(pts_base[1][4:5]), 1.0))
             distr_tv_M1 = Manifolds.normal_tvector_distribution(M1, pts_base[1][1:3], 1.0)
             distr_tv_M2 = Manifolds.normal_tvector_distribution(M2, pts_base[1][4:5], 1.0)
-            test_manifold(Mse,
-                          pts;
-                          test_reverse_diff = isa(T, Vector),
-                          test_musical_isomorphisms = true,
-                          retraction_methods = retraction_methods,
-                          inverse_retraction_methods = inverse_retraction_methods,
-                          test_mutating_rand = isa(T, Vector),
-                          point_distributions = [Manifolds.ProductPointDistribution(distr_M1, distr_M2)],
-                          tvector_distributions = [Manifolds.ProductFVectorDistribution(distr_tv_M1, distr_tv_M2)])
+            test_manifold(
+                Mse,
+                pts;
+                test_reverse_diff = isa(T, Vector),
+                test_musical_isomorphisms = true,
+                test_injectivity_radius = false,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                test_mutating_rand = isa(T, Vector),
+                point_distributions = [Manifolds.ProductPointDistribution(distr_M1, distr_M2)],
+                tvector_distributions = [Manifolds.ProductFVectorDistribution(distr_tv_M1, distr_tv_M2)])
         end
     end
 
@@ -87,10 +89,13 @@ include("utils.jl")
     angles = (0.0, π/2, 2π/3)
     pts_rot = [[cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)] for ϕ in angles]
     pts = [Manifolds.prod_point(shape_ser, p[1], p[2], p[3]) for p in zip(pts_sphere, pts_r2, pts_rot)]
-    test_manifold(Mser,
-                  pts,
-                  test_forward_diff = false,
-                  test_reverse_diff = false)
+    test_manifold(
+        Mser,
+        pts,
+        test_injectivity_radius = false,
+        test_forward_diff = false,
+        test_reverse_diff = false
+    )
 
     @testset "prod_point" begin
         shape_se = Manifolds.ShapeSpecification(reshapers[1], M1, M2)
@@ -129,11 +134,14 @@ include("utils.jl")
                   convert(Tr2, [0.0, 0.1])]
 
         pts = [ProductRepr(p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
-        test_manifold(Mse,
-                      pts,
-                      test_musical_isomorphisms = true,
-                      test_tangent_vector_broadcasting = false,
-                      test_forward_diff = false,
-                      test_reverse_diff = false)
+        test_manifold(
+            Mse,
+            pts,
+            test_injectivity_radius = false,
+            test_musical_isomorphisms = true,
+            test_tangent_vector_broadcasting = false,
+            test_forward_diff = false,
+            test_reverse_diff = false
+        )
     end
 end

@@ -16,6 +16,7 @@ include("utils.jl")
             ]
         pts = [convert(T, a) for a in ptsF]
         test_manifold(M, pts;
+            test_injectivity_radius = false,
             test_vector_transport = true,
             test_forward_diff = false,
             test_reverse_diff = false,

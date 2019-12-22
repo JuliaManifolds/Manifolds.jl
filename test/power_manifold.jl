@@ -54,6 +54,7 @@ Random.seed!(42)
                 pts1;
                 test_reverse_diff = true,
                 test_musical_isomorphisms = true,
+                test_injectivity_radius = false,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_s1_pt_dist],
@@ -72,6 +73,7 @@ Random.seed!(42)
                 pts2;
                 test_reverse_diff = true,
                 test_musical_isomorphisms = true,
+                test_injectivity_radius = false,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_s2_pt_dist],
@@ -89,6 +91,7 @@ Random.seed!(42)
             test_manifold(Mr1,
                 pts1;
                 test_reverse_diff = false,
+                test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
@@ -107,6 +110,7 @@ Random.seed!(42)
                 Mr2,
                 pts2;
                 test_reverse_diff = false,
+                test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,

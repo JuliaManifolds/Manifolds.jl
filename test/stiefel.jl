@@ -32,20 +32,22 @@ include("utils.jl")
             @test_throws DomainError !is_tangent_vector(M,2*x,v,true)
             @test !is_tangent_vector(M,x,y)
             @test_throws DomainError is_tangent_vector(M,x,y,true)
-            test_manifold(M,
-                          pts,
-                          test_exp_log = false,
-                          default_inverse_retraction_method = PolarInverseRetraction(),
-                          test_is_tangent = true,
-                          test_project_tangent = true,
-                          test_vector_transport = false,
-                          test_forward_diff = false,
-                          test_reverse_diff = false,
-                          projection_atol_multiplier = 15.0,
-                          retraction_atol_multiplier = 10.0,
-                          is_tangent_atol_multiplier = 4*10.0^2,
-                          retraction_methods = [PolarRetraction(), QRRetraction()],
-                          inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()]
+            test_manifold(
+                M,
+                pts,
+                test_exp_log = false,
+                default_inverse_retraction_method = PolarInverseRetraction(),
+                test_injectivity_radius = false,
+                test_is_tangent = true,
+                test_project_tangent = true,
+                test_vector_transport = false,
+                test_forward_diff = false,
+                test_reverse_diff = false,
+                projection_atol_multiplier = 15.0,
+                retraction_atol_multiplier = 10.0,
+                is_tangent_atol_multiplier = 4*10.0^2,
+                retraction_methods = [PolarRetraction(), QRRetraction()],
+                inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()]
             )
         end
     end
