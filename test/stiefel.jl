@@ -43,7 +43,7 @@ include("utils.jl")
                           test_reverse_diff = false,
                           projection_atol_multiplier = 15.0,
                           retraction_atol_multiplier = 10.0,
-                          test_is_tangent_atol_multiplier = 4*10.0^2,
+                          is_tangent_atol_multiplier = 4*10.0^2,
                           retraction_methods = [PolarRetraction(), QRRetraction()],
                           inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()]
             )

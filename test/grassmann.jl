@@ -37,7 +37,7 @@ include("utils.jl")
                 retraction_methods = [PolarRetraction(), QRRetraction()],
                 inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()],
                 exp_log_atol_multiplier = 10.0,
-                test_is_tangent_atol_multiplier = 10.0,
+                is_tangent_atol_multiplier = 10.0,
             )
         end
     end

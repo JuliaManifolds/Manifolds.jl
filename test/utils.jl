@@ -69,7 +69,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     retraction_rtol_multiplier = 1,
     projection_atol_multiplier = 0,
     rand_tvector_atol_multiplier = 0,
-    test_is_tangent_atol_multiplier=1,
+    is_tangent_atol_multiplier=1,
 )
 
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
@@ -123,11 +123,11 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
     test_is_tangent && @testset "is_tangent_vector" begin
         for (x,v) in zip(pts,tv)
-            if !( check_tangent_vector(M, x,v; atol = test_is_tangent_atol_multiplier*eps(eltype(x)))  === nothing )
-                print( check_tangent_vector(M, x,v; atol = test_is_tangent_atol_multiplier*eps(eltype(x))) )
+            if !( check_tangent_vector(M, x,v; atol = is_tangent_atol_multiplier*eps(eltype(x)))  === nothing )
+                print( check_tangent_vector(M, x,v; atol = is_tangent_atol_multiplier*eps(eltype(x))) )
             end
-            @test is_tangent_vector(M, x, v; atol = test_is_tangent_atol_multiplier*eps(eltype(x)))
-            @test check_tangent_vector(M, x,v; atol = test_is_tangent_atol_multiplier*eps(eltype(x))) === nothing
+            @test is_tangent_vector(M, x, v; atol = is_tangent_atol_multiplier*eps(eltype(x)))
+            @test check_tangent_vector(M, x,v; atol = is_tangent_atol_multiplier*eps(eltype(x))) === nothing
         end
     end
 
