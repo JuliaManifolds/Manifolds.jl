@@ -204,6 +204,7 @@ include("CholeskySpace.jl")
 include("Euclidean.jl")
 include("FixedRankMatrices.jl")
 include("Grassmann.jl")
+include("Hyperbolic.jl")
 include("Rotations.jl")
 include("Stiefel.jl")
 include("Sphere.jl")
@@ -231,6 +232,7 @@ end
 export Manifold,
     Euclidean,
     Sphere,
+    Hyperbolic,
     SymmetricMatrices,
     MPoint,
     TVector,
