@@ -338,6 +338,39 @@ function mean!(
     return y
 end
 
+function mean!(
+    M::Manifold,
+    y,
+    x::AbstractVector,
+    w::AbstractVector,
+    ::CyclicProximalPointEstimation;
+    x0=x[1],
+    stop_iter=1000000,
+    retraction::AbstractRetractionMethod = ExponentialRetraction(),
+    inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
+    kwargs...
+)
+    n = length(x)
+    (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
+    copyto!(y, x0)
+    yold = similar_result(M,median,y)
+    ytmp = copy(yold)
+    v = zero_tangent_vector(M,y)
+    wv = convert(Vector, w) ./ sum(w)
+    for i=1:stop_iter
+        λ =  .5 / i
+        copyto!(yold,y)
+        for j in 1:n
+            @inbounds t = (2*λ*wv[j]) / (1 + 2*λ*wv[j])
+            @inbounds inverse_retract!(M, v, y, x[j], inverse_retraction)
+            retract!(M, ytmp, y, v, t, retraction)
+            copyto!(y,ytmp)
+        end
+        isapprox(M, y, yold; kwargs...) && break
+    end
+    return y
+end
+
 @doc doc"""
     median(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
