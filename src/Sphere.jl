@@ -114,7 +114,7 @@ of length [`manifold_dimension`](@ref)`(S)+1` (approximately) of unit length.
 The tolerance for the last test can be set using the ´kwargs...`.
 """
 function check_manifold_point(S::Sphere{N},x; kwargs...) where {N}
-    if length(x) != N+1
+    if size(x) != representation_size(S)
         return DomainError(size(x),"The point $(x) does not lie on $S, since its size is not $(N+1).")
     end
     if !isapprox(norm(x), 1.; kwargs...)
@@ -134,7 +134,7 @@ The tolerance for the last test can be set using the ´kwargs...`.
 function check_tangent_vector(S::Sphere{N},x,v; kwargs...) where N
     perr = check_manifold_point(S,x)
     perr === nothing || return perr
-    if length(v) != N+1
+    if size(v) != representation_size(S)
         return DomainError(size(v),
             "The vector $(v) is not a tangent to a point on $S since its size does not match $(N+1).")
     end

@@ -180,6 +180,7 @@ struct DefaultBaseManifoldMetric <: Metric end
     Manifolds.log!(::BaseManifold, v, x, y) = v .= (y - x) / 2
     Manifolds.project_tangent!(::BaseManifold, w, x, v) = w .= 2 .* v
     Manifolds.project_point!(::BaseManifold, y, x) = (y .= x)
+    Manifolds.injectivity_radius(::BaseManifold) = Inf
     Manifolds.local_metric(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}},x) where N = 2*one(x*x')
     Manifolds.exp!(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x, v) where N = exp!(base_manifold(M), y, x, v)
     Manifolds.vector_transport_to!(::BaseManifold, vto, x, v, y, ::ParallelTransport) = (vto .= v)

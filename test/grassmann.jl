@@ -26,16 +26,19 @@ include("utils.jl")
             w = [0.0 1.0; -1.0 0.0; 1.0 0.0]
             z = exp(M,x,w)
             pts = convert.(T, [x,y,z])
-            test_manifold(M,
-                          pts,
-                          test_exp_log = true,
-                          test_project_tangent = true,
-                          test_vector_transport = false,
-                          test_forward_diff = false,
-                          test_reverse_diff = false,
-                          retraction_methods = [PolarRetraction(), QRRetraction()],
-                          inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()],
-                          exp_log_atol_multiplier = 10.0
+            test_manifold(
+                M,
+                pts,
+                test_exp_log = true,
+                test_injectivity_radius = false,
+                test_project_tangent = true,
+                test_vector_transport = false,
+                test_forward_diff = false,
+                test_reverse_diff = false,
+                retraction_methods = [PolarRetraction(), QRRetraction()],
+                inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()],
+                exp_log_atol_multiplier = 10.0,
+                is_tangent_atol_multiplier = 10.0,
             )
         end
     end

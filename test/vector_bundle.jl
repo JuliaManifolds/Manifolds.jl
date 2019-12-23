@@ -43,11 +43,16 @@ include("utils.jl")
             for pt ∈ pts_tb
                 @test bundle_projection(TB, pt) ≈ pt.parts[1]
             end
-            test_manifold(TB,
-                          pts_tb,
-                          test_reverse_diff = isa(T, Vector),
-                          test_tangent_vector_broadcasting = false,
-                          test_project_tangent = true)
+            test_manifold(
+                TB,
+                pts_tb,
+                test_injectivity_radius = false,
+                test_reverse_diff = isa(T, Vector),
+                test_forward_diff = isa(T, Vector),
+                test_tangent_vector_broadcasting = false,
+                test_project_tangent = true,
+                projection_atol_multiplier = 4
+            )
         end
     end
 
@@ -73,6 +78,7 @@ include("utils.jl")
         TT = Manifolds.TensorProductType(TangentSpace, TangentSpace)
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(2))) == 4
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(3))) == 9
+        @test base_manifold(VectorBundleFibers(TT, Sphere(2))) == M
     end
 
 end

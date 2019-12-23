@@ -1,0 +1,122 @@
+include("utils.jl")
+
+@testset "fixed Rank" begin
+    M = FixedRankMatrices(3,2,2)
+    Mc = FixedRankMatrices(3,2,2,Complex)
+    x = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
+    v = UMVTVector([0. 0.; 0. 0.; 1. 1.], [1. 0.; 0. 1.],zeros(2,2))
+    @test inner(M,x,v,v) == norm(M,x,v)^2   
+    @test x == SVDMPoint(x.U,x.S,x.Vt)
+    @test v == UMVTVector(v.U, v.M, v.Vt)
+    @testset "Fixed Rank Matrices – Basics" begin
+        @test representation_size(M) == (3,2)
+        @test representation_size(Mc) == (3,2)
+        @test manifold_dimension(M) == 6
+        @test manifold_dimension(Mc) == 12
+        @test !is_manifold_point(M, SVDMPoint([1. 0.; 0. 0.],2))
+        @test_throws DomainError is_manifold_point(M, SVDMPoint([1. 0.; 0. 0.],2), true)
+
+        @test !is_tangent_vector(M, SVDMPoint( [1. 0.; 0. 1.; 0. 0.] ), UMVTVector( zeros(2,1), zeros(1,2), zeros(2,2) )  )
+        @test !is_tangent_vector(M, SVDMPoint([1. 0.; 0. 0.],2),v)
+        @test_throws DomainError is_tangent_vector(M, SVDMPoint([1. 0.; 0. 0.],2), v, true)
+        @test !is_tangent_vector(M, x, UMVTVector(x.U, v.M, x.Vt,2))
+        @test_throws DomainError is_tangent_vector(M, x, UMVTVector(x.U, v.M, x.Vt,2), true)
+        @test !is_tangent_vector(M, x, UMVTVector(v.U, v.M, x.Vt,2))
+        @test_throws DomainError is_tangent_vector(M, x, UMVTVector(v.U, v.M, x.Vt,2), true)
+
+        @test is_manifold_point(M,x)
+        @test is_tangent_vector(M,x,v)
+    end
+    types = [
+                [ Matrix{Float64}, Vector{Float64}, Matrix{Float64} ],
+                [ Matrix{Float32}, Vector{Float32}, Matrix{Float32} ]
+            ]
+    for T in types
+        @testset "Type $T" begin
+            y = retract(M, x, v, PolarRetraction())
+            z = SVDMPoint( [1/sqrt(2) 1/sqrt(2); 1/sqrt(2) -1/sqrt(2); 0. 0.] )
+            pts = []
+            for p in [x,y,z]
+                push!(pts, SVDMPoint( convert.( T , [ p.U, p.S, p.Vt ] )... )   )
+            end
+            for p in pts
+                @test is_manifold_point(M,p)
+            end
+            @testset "SVD MPoint Basics" begin
+                s = svd(x.U*Diagonal(x.S)*x.Vt)
+                x2 = SVDMPoint(s)
+                x3 = SVDMPoint(s.U, s.S, s.Vt)
+                @test SVDMPoint(x.U, x.S, x.Vt) == x
+                @test x.S == x2.S
+                @test x.U == x2.U
+                @test x.Vt == x2.Vt
+                @test x == x2
+                @test x2.U == x3.U
+                @test x2.S == x3.S
+                @test x2.Vt == x3.Vt
+                @test x2 == x3
+                y = SVDMPoint([1. 0.; 0. 0.; 0. 0.], 1)
+                s2 = svd([1. 0.; 0. 0.; 0. 0.])
+                y2 = SVDMPoint(s2,1)
+                y3 = SVDMPoint(s2.U, s2.S, s2.Vt,1)
+                @test y.S == y2.S
+                @test y.U == y2.U
+                @test y.Vt == y2.Vt
+                @test y == y2
+                @test y2.U == y3.U
+                @test y2.S == y3.S
+                @test y2.Vt == y3.Vt
+                @test y2==y3
+
+                @test is_manifold_point(M,x)
+                xM = x.U*Diagonal(x.S)*x.Vt
+                @test is_manifold_point(M,xM)
+                @test !is_manifold_point(M,xM[1:2,:])
+                @test_throws DomainError is_manifold_point(M,xM[1:2,:], true)
+                @test_throws DomainError is_manifold_point(FixedRankMatrices(3,2,1), x, true)
+                @test_throws DomainError is_manifold_point(FixedRankMatrices(3,2,1), xM, true)
+                xF1 = SVDMPoint(2*x.U, x.S, x.Vt)
+                @test !is_manifold_point(M,xF1)
+                @test_throws DomainError is_manifold_point(M,xF1,true)
+                xF2 = SVDMPoint(x.U, x.S, 2*x.Vt)
+                @test !is_manifold_point(M,xF2)
+                @test_throws DomainError is_manifold_point(M,xF2,true)
+            end
+            @testset "UMV TVector Basics" begin
+                w = UMVTVector(v.U, 2*v.M, v.Vt)
+                @test v+w == UMVTVector(2*v.U, 3*v.M, 2*v.Vt)
+                @test v-w == UMVTVector(0*v.U, -v.M, 0*v.Vt)
+                @test 2*v == UMVTVector(2*v.U, 2*v.M, 2*v.Vt)
+                @test v*2 == UMVTVector(v.U*2, v.M*2, v.Vt*2)
+                @test 2\v == UMVTVector(2\v.U, 2\v.M, 2\v.Vt)
+                @test v/2 == UMVTVector(v.U/2, v.M/2, v.Vt/2)
+                @test +v == v
+                @test -v == UMVTVector(-v.U, -v.M, -v.Vt)
+                w = UMVTVector(v.U, v.M, v.Vt)
+                @test v == w
+                w = similar(v,eltype(v))
+                zero_tangent_vector!(M,w,x)
+                oneP = SVDMPoint(one(zeros(3, 3)), ones(2), one(zeros(2, 2)), 2)
+                @test oneP == one(x)
+                oneV = UMVTVector(one(zeros(3,3)),one(zeros(2,2)),one(zeros(2,2)),2)
+                @test oneV == one(v)
+            end
+            test_manifold(M,
+                          pts,
+                          test_exp_log = false,
+                          default_inverse_retraction_method = nothing,
+                          test_injectivity_radius = false,
+                          default_retraction_method = PolarRetraction(),
+                          test_is_tangent = false,
+                          test_project_tangent = true,
+                          test_vector_transport = false,
+                          test_forward_diff = false,
+                          test_reverse_diff = false,
+                          test_vector_spaces = false,
+                          test_tangent_vector_broadcasting = false, #broadcast not so easy for 3 matrix type
+                          projection_atol_multiplier = 15,
+                          retraction_methods = [PolarRetraction()]
+            )
+        end
+    end
+end

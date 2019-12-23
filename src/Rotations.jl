@@ -297,8 +297,16 @@ injectivity_radius(M::Rotations) = π*sqrt(2.0)
 @doc doc"""
     retract_polar!(M::Rotations, y, x, v, method::PolarRetraction)
 
-Compute the SVD-based retraction [`PolarRetraction`](@ref), a second-order
-approximation of the exponential map.
+This SVD-based retraction is a second-order approximation of the
+exponential map. Let
+
+$USV = x + xv$
+
+be the singular value decomposition, then the formula reads
+
+$\operatorname{retr}_x v = UV^\mathrm{T}$
+
+Retraction is performed by the function [`retract!(::Rotations, y, x, v, ::PolarRetraction)`](@ref)
 """
 function retract!(M::Rotations, y, x, v, method::PolarRetraction)
     A = x + x*v

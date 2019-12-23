@@ -114,36 +114,6 @@ Abstract type for defining statistical estimation methods.
 """
 abstract type AbstractEstimationMethod end
 
-"""
-    QRRetraction
-
-A retraction using the QR decomposition of a tangent vectors representation as
-a matrix.
-"""
-struct QRRetraction <: AbstractRetractionMethod end
-
-"""
-    QRInverseRetraction
-
-Inverse retraction to the [`QRRetraction`](@ref)
-"""
-struct QRInverseRetraction <: AbstractInverseRetractionMethod end
-
-@doc doc"""
-    PolarRetraction
-
-A retraction using the QR decomposition of a tangent vectors representation as
-a matrix.
-"""
-struct PolarRetraction <: AbstractRetractionMethod end
-
-"""
-    PolarInverseRetraction
-
-Inverse retraction on the rotations manifold using the polar method.
-"""
-struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
-
 @doc doc"""
     hat(M::Manifold, x, vⁱ)
 
@@ -186,6 +156,39 @@ function vee(M::Manifold, x, v)
 end
 vee!(M::Manifold, vⁱ, x, v) = error("vee! operator not defined for manifold $(typeof(M)), matrix $(typeof(v)), and vector $(typeof(vⁱ))")
 
+"""
+    PolarRetraction <: AbstractRetractionMethod
+
+Retractions that are based on singular value decompositions of the matrix / matrices
+for point and tangent vector on a [`Manifold`](@ref)
+"""
+struct PolarRetraction <: AbstractRetractionMethod end
+
+"""
+    QRRetraction <: AbstractRetractionMethod
+
+Retractions that are based on a QR decomposition of the
+matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
+"""
+struct QRRetraction <: AbstractRetractionMethod end
+
+"""
+    PolarInverseRetraction <: AbstractInverseRetractionMethod
+
+Inverse retractions that are based on a singular value decomposition of the
+matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
+"""
+struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
+
+"""
+    QRInverseRetraction <: AbstractInverseRetractionMethod
+
+Inverse retractions that are based on a QR decomposition of the
+matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
+"""
+struct QRInverseRetraction <: AbstractInverseRetractionMethod end
+
+
 include("utils.jl")
 include("autodiff.jl")
 include("SizedAbstractArray.jl")
@@ -200,10 +203,12 @@ include("ProjectedDistribution.jl")
 include("ProductManifold.jl")
 include("PowerManifold.jl")
 
-include("Euclidean.jl")
 include("CholeskySpace.jl")
+include("Euclidean.jl")
+include("FixedRankMatrices.jl")
 include("Grassmann.jl")
 include("Rotations.jl")
+include("Stiefel.jl")
 include("Sphere.jl")
 include("Symmetric.jl")
 include("SymmetricPositiveDefinite.jl")
@@ -230,6 +235,7 @@ function __init__()
         include("ode.jl")
     end
 end
+
 # Base Types
 export Manifold,
     Euclidean,
@@ -237,7 +243,9 @@ export Manifold,
     SymmetricMatrices,
     MPoint,
     TVector,
-    CoTVector
+    CoTVector,
+    SVDMPoint,
+    UMVTVector
 # decorator manifolds
 export ArrayManifold,
     ArrayMPoint,
@@ -259,13 +267,23 @@ export ArrayManifold,
     VectorSpaceAtPoint,
     VectorSpaceType,
     VectorBundle,
-    VectorBundleFibers
+    VectorBundleFibers,
+    FVector,
+    TangentBundle,
+    CotangentBundle,
+    TangentBundleFibers,
+    CotangentBundleFibers,
+    AbstractVectorTransportMethod,
+    ParallelTransport,
+    ProjectedPointDistribution
 # Manifolds
-export Euclidean,
-    CholeskySpace,
+export CholeskySpace,
+    Euclidean,
+    FixedRankMatrices,
     Grassmann,
     Rotations,
     Sphere,
+    Stiefel,
     SymmetricPositiveDefinite
 # Types
 export Metric,
@@ -335,6 +353,7 @@ export base_manifold,
     moment,
     norm,
     normal_tvector_distribution,
+    one,
     project_point,
     project_point!,
     project_tangent,

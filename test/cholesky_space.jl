@@ -16,10 +16,11 @@ include("utils.jl")
             ]
         pts = [convert(T, a) for a in ptsF]
         test_manifold(M, pts;
-                test_vector_transport = true,
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                exp_log_atol_multiplier = 8
+            test_injectivity_radius = false,
+            test_vector_transport = true,
+            test_forward_diff = false,
+            test_reverse_diff = false,
+            exp_log_atol_multiplier = 8.0,
         )
     end
     @testset "Test Error cases in is_manifold_point and is_tangent_vector" begin
@@ -27,12 +28,19 @@ include("utils.jl")
         pt2f = [1. 0. 0.; 0. -1. 0.; 0. 0. 1.]; # nonpos diag
         pt3f = [2. 0. 1.; 0. 1. 0.; 0. 0. 4.]; # no lower and nonsym
         pt4 = [2. 0. 0.; 1. 2. 0.; 0. 0. 4.]
-        @test !is_manifold_point(M,pt1f)
-        @test !is_manifold_point(M,pt2f)
+        @test !is_manifold_point(M, pt1f)
+        @test_throws DomainError is_manifold_point(M, pt1f, true)
+        @test !is_manifold_point(M, pt2f)
+        @test_throws DomainError is_manifold_point(M, pt2f, true)
         @test !is_manifold_point(M,pt3f)
+        @test_throws DomainError is_manifold_point(M,pt3f, true)
         @test is_manifold_point(M, pt4)
+        @test !is_tangent_vector(M,pt3f, pt1f)
+        @test_throws DomainError is_tangent_vector(M,pt3f, pt1f, true)
         @test !is_tangent_vector(M,pt4, pt1f)
-        @test is_tangent_vector(M,pt4, pt2f)
+        @test_throws DomainError is_tangent_vector(M,pt4, pt1f, true)
         @test !is_tangent_vector(M,pt4, pt3f)
+        @test_throws DomainError is_tangent_vector(M,pt4, pt3f, true)
+        @test is_tangent_vector(M,pt4, pt2f)
     end
 end
