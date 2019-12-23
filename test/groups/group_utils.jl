@@ -28,7 +28,7 @@ function test_action(
             @test isapprox(G, compose_left(G, e_ap, ap), ap)
             @test isapprox(G, compose_left(G, ap, e), ap)
             @test isapprox(G, compose_left(G, ap, e_ap), ap)
-            inv_ap = inv(ap)
+            inv_ap = inv(G, ap)
             @test isapprox(G, compose_left(G, ap, inv_ap), e_ap; atol = atol_inv)
             @test isapprox(G, compose_left(G, inv_ap, ap), e_ap; atol = atol_inv)
             ap2 = similar(e_ap)

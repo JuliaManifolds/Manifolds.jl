@@ -218,6 +218,8 @@ include("groups/group_action.jl")
 
 include("groups/special_orthogonal.jl")
 include("groups/rotation_action.jl")
+include("groups/euclidean_group.jl")
+include("groups/translation_action.jl")
 
 include("statistics.jl")
 
@@ -392,6 +394,7 @@ export AbstractGroupOperation,
     AbstractGroupManifold,
     LeftInvariantCanonicalMetric,
     RightInvariantCanonicalMetric,
+    BiInvariantCanonicalMetric,
     ActionDirection,
     LeftAction,
     RightAction,
@@ -415,5 +418,7 @@ export AbstractGroupOperation,
     optimal_alignment!,
     center_of_orbit,
     SpecialOrthogonal,
-    RotationAction
+    RotationAction,
+    EuclideanGroup,
+    TranslationAction
 end # module

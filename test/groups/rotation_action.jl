@@ -1,5 +1,5 @@
 
-include("utils.jl")
+include("../utils.jl")
 include("group_utils.jl")
 
 @testset "Rotation action" begin
@@ -20,6 +20,11 @@ include("group_utils.jl")
                Vector{Float32},
                SizedVector{2, Float32},
                MVector{2, Float32}]
+
+
+    @test action_on(A) == Euclidean(2)
+    @test base_group(A) == G
+    @test base_manifold(G) == M
 
     for (T_A, T_M) in zip(types_a, types_m)
         angles = (0.0, π/2, 2π/3, π/4)
