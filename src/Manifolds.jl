@@ -213,11 +213,11 @@ include("Sphere.jl")
 include("Symmetric.jl")
 include("SymmetricPositiveDefinite.jl")
 
-include("Group.jl")
-include("GroupAction.jl")
+include("groups/group.jl")
+include("groups/group_action.jl")
 
-include("SpecialOrthogonal.jl")
-include("RotationAction.jl")
+include("groups/special_orthogonal.jl")
+include("groups/rotation_action.jl")
 
 include("statistics.jl")
 
