@@ -49,6 +49,14 @@ The right-invariant canonical metric on a Lie group.
 struct RightInvariantCanonicalMetric <: RiemannianMetric end
 
 """
+    BiInvariantCanonicalMetric()
+
+The bi-invariant canonical metric on a Lie group.
+"""
+struct BiInvariantCanonicalMetric <: RiemannianMetric end
+
+
+"""
     ActionDirection
 
 Direction of action on a manifold, either [`LeftAction`](@ref) or
@@ -140,7 +148,23 @@ This composition is left-associative.
 """
 compose_left(G::AbstractGroupManifold, xs...) = _group_afoldl(compose_left, G, xs...)
 compose_left(G::AbstractGroupManifold, x) = x
-compose_left(G::AbstractGroupManifold, x, y) = error("compose_left not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y))")
+function compose_left(G::AbstractGroupManifold, x, y)
+    z = similar_result(G, compose_left, x, y)
+    compose_left!(G, z, x, y)
+    return z
+end
+
+"""
+    compose_left!(G::AbstractGroupManifold, z, x, y)
+
+Compose elements `x` and `y` of `G` using their left translation upon each other.
+The result is saved in `z`.
+
+`z` may alias with one or both of `x` and `y`.
+"""
+function compose_left!(G::AbstractGroupManifold, z, x, y)
+    error("compose_left not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y))")
+end
 
 @doc doc"""
     translate(G::AbstractGroupManifold, x, y[, conv::ActionDirection=LeftAction()])
@@ -157,6 +181,23 @@ R_x &\colon y \mapsto y \cdot x.
 translate(G::AbstractGroupManifold, x, y, conv::LeftAction) = compose_left(G, x, y)
 translate(G::AbstractGroupManifold, x, y, conv::RightAction) = compose_left(G, y, x)
 translate(G::AbstractGroupManifold, x, y) = translate(G, x, y, LeftAction())
+
+@doc doc"""
+    translate!(G::AbstractGroupManifold, z, x, y[, conv::ActionDirection=LeftAction()])
+
+For group elements $x,y \in G$, translate $y$ by $x$ with the specified
+convention, either left $L_x$ or right $R_x$, defined as
+```math
+\begin{aligned}
+L_x &\colon y \mapsto x \cdot y\\
+R_x &\colon y \mapsto y \cdot x.
+\end{aligned}
+```
+Result of the operation is saved in `z`.
+"""
+translate!(G::AbstractGroupManifold, z, x, y, conv::LeftAction) = compose_left!(G, z, x, y)
+translate!(G::AbstractGroupManifold, z, x, y, conv::RightAction) = compose_left!(G, z, y, x)
+translate!(G::AbstractGroupManifold, z, x, y) = translate!(G, z, x, y, LeftAction())
 
 @doc doc"""
     inverse_translate(G::AbstractGroupManifold, x, y, [conv::ActionDirection=Left()])
@@ -181,6 +222,30 @@ function inverse_translate(G::AbstractGroupManifold, x, y)
     return inverse_translate(G, x, y, LeftAction())
 end
 
+@doc doc"""
+    inverse_translate!(G::AbstractGroupManifold, z, x, y, [conv::ActionDirection=Left()])
+
+For group elements $x,y \in G$, inverse translate $y$ by $x$ with the specified
+convention, either left $L_x^{-1}$ or right $R_x^{-1}$, defined as
+```math
+\begin{aligned}
+L_x^{-1} &\colon y \mapsto x^{-1} \cdot y\\
+R_x^{-1} &\colon y \mapsto y \cdot x^{-1}.
+\end{aligned}
+```
+Result is saved in `z`.
+"""
+function inverse_translate!(G::AbstractGroupManifold,
+                            z,
+                            x,
+                            y,
+                            conv::ActionDirection)
+    return translate(G, z, inv(G, x), y, conv)
+end
+
+function inverse_translate!(G::AbstractGroupManifold, z, x, y)
+    return inverse_translate!(G, z, x, y, LeftAction())
+end
 
 """
     AdditionOperation <: AbstractGroupOperation
@@ -211,6 +276,11 @@ end
 inv(::AbstractGroupManifold{AdditionOperation}, x) = -x
 
 compose_left(::AbstractGroupManifold{AdditionOperation}, x, y) = x + y
+function compose_left!(::AbstractGroupManifold{AdditionOperation}, z, x, y)
+    z .= x .+ y
+    return z
+end
+
 
 """
     MultiplicationOperation <: AbstractGroupOperation
@@ -250,3 +320,7 @@ end
 inv(::AbstractGroupManifold{MultiplicationOperation}, x) = inv(x)
 
 compose_left(::AbstractGroupManifold{MultiplicationOperation}, x, y) = x * y
+function compose_left!(::AbstractGroupManifold{MultiplicationOperation}, z, x, y)
+    #TODO: z might alias with x or y, we might be able to optimize it if it doesn't.
+    copyto!(z, x*y)
+end

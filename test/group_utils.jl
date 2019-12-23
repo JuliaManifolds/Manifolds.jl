@@ -57,6 +57,52 @@ function test_action(
         end
     end
 
+    @testset "Mutable apply_action!" begin
+        N = length(a_pts)
+        for p in m_pts
+            for i in 1:N
+                aip = similar(p)
+                apply_action!(A, aip, p, a_pts[i])
+                @test isapprox(M, apply_action(A, p, a_pts[i]), aip)
+            end
+        end
+    end
+
+    @testset "Mutable inv!" begin
+        for ap in a_pts
+            ai = similar(ap)
+            inv!(G, ai, ap)
+            @test isapprox(G, compose_left(G, ai, ap), e(ap))
+            @test isapprox(G, compose_left(G, ap, ai), e(ap))
+        end
+    end
+
+    @testset "Translate vs compose_left" begin
+        N = length(a_pts)
+        for i in 1:N
+            ai = a_pts[i]
+            aip = a_pts[mod1(i+1, N)]
+            @test isapprox(G, translate(G, ai, aip), compose_left(G, ai, aip))
+            @test isapprox(G, translate(G, ai, aip, LeftAction()), compose_left(G, ai, aip))
+            @test isapprox(G, translate(G, aip, ai, RightAction()), compose_left(G, ai, aip))
+        end
+    end
+
+    @testset "Translate mutation" begin
+        N = length(a_pts)
+        for i in 1:N
+            ai = a_pts[i]
+            aip = a_pts[mod1(i+1, N)]
+            as = similar(ai)
+            translate!(G, as, ai, aip)
+            @test isapprox(G, as, translate(G, ai, aip))
+            translate!(G, as, ai, aip, LeftAction())
+            @test isapprox(G, as, translate(G, ai, aip, LeftAction()))
+            translate!(G, as, ai, aip, RightAction())
+            @test isapprox(G, as, translate(G, ai, aip, RightAction()))
+        end
+    end
+
     @testset "Action of group identity" begin
         e_ap = e(a_pts[1])
         for p in m_pts
