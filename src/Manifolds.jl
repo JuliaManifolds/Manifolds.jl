@@ -105,6 +105,22 @@ using UnsafeArrays
 using Einsum: @einsum
 
 """
+    Field
+
+An abstract type to represent the field matrix manifolds are build upon,
+following the idea of [TensorKit](https://github.com/Jutho/TensorKit.jl)
+in order to hace concrete field types to dispatch on. The two most common
+field types are `RealNumbers` (`ℝ` for short) and `ComplexNumbers` (`ℂ`).
+"""
+abstract type Field end
+
+struct RealNumbers <: Field end
+struct ComplexNumbers <: Field end
+
+const ℝ = RealNumbers()
+const ℂ = ComplexNumbers()
+
+"""
     AbstractEstimationMethod
 
 Abstract type for defining statistical estimation methods.
@@ -236,7 +252,8 @@ export Manifold,
     TVector,
     CoTVector,
     SVDMPoint,
-    UMVTVector
+    UMVTVector,
+    ℝ, ℂ
 # decorator manifolds
 export ArrayManifold,
     ArrayMPoint,

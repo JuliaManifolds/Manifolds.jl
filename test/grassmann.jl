@@ -2,7 +2,7 @@ include("utils.jl")
 
 @testset "Grassmann" begin
     M = Grassmann(3,2)
-    Mc = Grassmann(3,2,Complex)
+    Mc = Grassmann(3,2,ℂ)
     @testset "Grassmann Basics" begin
         @test representation_size(M) == (3,2)
         @test representation_size(Mc) == (3,2)
@@ -13,6 +13,7 @@ include("utils.jl")
         @test_throws DomainError is_manifold_point(Grassmann(3,2), [2. 0.; 0. 1.; 0. 0.],true)
         @test_throws DomainError is_tangent_vector(Grassmann(3,2), [2. 0.; 0. 1.; 0. 0.],zeros(3,2),true)
         @test_throws DomainError is_tangent_vector(Grassmann(3,2), [1. 0.; 0. 1.; 0. 0.],ones(3,2),true)
+        @test injectivity_radius(M) == π/2
     end
     types = [Matrix{Float64},
              MMatrix{3, 2, Float64},

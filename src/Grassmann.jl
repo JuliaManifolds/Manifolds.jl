@@ -50,14 +50,14 @@ generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
 case $\mathbb F = \mathbb R$ is the default.
 """
 struct Grassmann{N,K,T} <: Manifold end
-Grassmann(n::Int, k::Int, T::Type = Real) = Grassmann{n, k, T}()
+Grassmann(n::Int, k::Int, T::Field=ℝ) = Grassmann{n,k,T}()
 
 function check_manifold_point(G::Grassmann{N,K,T},x; kwargs...) where {N,K,T}
-    if (T <: Real) && !(eltype(x) <: Real)
+    if (T===ℝ) && !(eltype(x) <: Real)
         return DomainError(eltype(x),
             "The matrix $(x) is not a real-valued matrix, so it does noe lie on the Grassmann manifold of dimension ($(N),$(K)).")
     end
-    if (T <: Complex) && !(eltype(x) <: Real) && !(eltype(x) <: Complex)
+    if (T===ℂ) && !(eltype(x) <: Real) && !(eltype(x) <: Complex)
         return DomainError(eltype(x),
             "The matrix $(x) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Grassmann manifold of dimension ($(N),$(K)).")
     end
@@ -71,16 +71,17 @@ function check_manifold_point(G::Grassmann{N,K,T},x; kwargs...) where {N,K,T}
             "The point $(x) does not lie on the Grassmann manifold of dimension ($(N),$(K)), because x'x is not the unit matrix.")
     end
 end
+
 function check_tangent_vector(G::Grassmann{N,K,T},x,v; kwargs...) where {N,K,T}
     t = check_manifold_point(G,x)
     if (t !== nothing)
         return t
     end
-    if (T <: Real) && !(eltype(v) <: Real)
+    if (T===ℝ) && !(eltype(v) <: Real)
         return DomainError(eltype(v),
             "The matrix $(v) is not a real-valued matrix, so it can not be a tangent vector to the Grassmann manifold of dimension ($(N),$(K)).")
     end
-    if (T <: Complex) && !(eltype(v) <: Real) && !(eltype(v) <: Complex)
+    if (T===ℂ) && !(eltype(v) <: Real) && !(eltype(v) <: Complex)
         return DomainError(eltype(v),
             "The matrix $(v) is neiter real- nor complex-valued matrix, so it can not bea tangent vector to the complex Grassmann manifold of dimension ($(N),$(K)).")
     end
@@ -109,7 +110,7 @@ where
 
 $b_{i}=\begin{cases} 0 & \text{if} \; S_i \geq 1\\ \operatorname{acos}(S_i) & \, \text{if} \; S_i<1 \end{cases}.$
 """
-function distance(M::Grassmann{N,K,T}, x, y) where {N,K,T}
+function distance(M::Grassmann, x, y)
     if x ≈ y
         return 0.
     else
@@ -138,7 +139,7 @@ yielding the result as
 y = Q.
 ````
 """
-function exp!(M::Grassmann{N,K,T},y, x, v) where {N,K,T}
+function exp!(M::Grassmann,y, x, v)
     if norm(M,x,v) ≈ 0
         return (y .= x)
     end
@@ -162,7 +163,7 @@ The formula reads
 ````
 where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transposed.
 """
-inner(::Grassmann{N,K,T}, x, v, w) where {N,K,T} = real(dot(v,w))
+inner(::Grassmann, x, v, w) = real(dot(v,w))
 
 @doc doc"""
     inverse_retract!(M, v, x, y, ::PolarInverseRetraction)
@@ -174,7 +175,7 @@ compute the inverse retraction for the [`PolarRetraction`](@ref)
 ````
 where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transposed.
 """
-inverse_retract!(::Grassmann{N,K,T}, v, x, y, ::PolarInverseRetraction) where {N,K,T} = ( v .= y/(x'*y) - x)
+inverse_retract!(::Grassmann, v, x, y, ::PolarInverseRetraction) = ( v .= y/(x'*y) - x)
 
 @doc doc"""
     inverse_retract!(M, v, x, y, ::QRInverseRetraction)
@@ -211,7 +212,7 @@ USV = ({\bar y}^\mathrm{T}x)^{-1} ( {\bar y}^\mathrm{T} - {\bar y}^\mathrm{T}x{\
 ````
 In this formula the $\operatorname{atan}$ is meant elementwise.
 """
-function log!(M::Grassmann{N,K,T}, v, x, y) where {N,K,T}
+function log!(M::Grassmann, v, x, y)
     z = y'*x
     At = y' - z*x'
     Bt = z\At
@@ -229,7 +230,7 @@ i.e.
 k(n-k)
 ````
 """
-manifold_dimension(M::Grassmann{N,K,Real}) where {N,K} = K*(N-K)
+manifold_dimension(M::Grassmann{N,K,ℝ}) where {N,K} = K*(N-K)
 
 @doc doc"""
     manifold_dimension(M)
@@ -240,9 +241,9 @@ i.e.
 2k(n-k)
 ````
 """
-manifold_dimension(M::Grassmann{N,K,Complex}) where {N,K} = 2*K*(N-K)
+manifold_dimension(M::Grassmann{N,K,ℂ}) where {N,K} = 2*K*(N-K)
 
-project_tangent!(M::Grassmann{N,K,T},v, x, w) where {N,K,T} = ( v .= w - x*x'*w )
+project_tangent!(M::Grassmann,v, x, w) = ( v .= w - x*x'*w )
 
 @doc doc"""
     retract!(M, y, x, v, ::PolarRetraction)
@@ -254,7 +255,7 @@ y = \operatorname{retr}_x v = U\bar{V}^\mathrm{T},
 ````
 where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transposed.
 """
-function retract!(::Grassmann{N,K,T}, y, x, v, ::PolarRetraction) where {N,K,T}
+function retract!(::Grassmann, y, x, v, ::PolarRetraction)
     s = svd(x+v)
     mul!(y, s.U, s.V')
    return y
@@ -273,22 +274,22 @@ where D is a $m\times n$ matrix with
 D = \operatorname{diag}( \operatorname{sgn}(R_{ii}+0,5)_{i=1}^n ).
 ````
 """
-function retract!(::Grassmann{N,K,T}, y, x, v, ::QRRetraction) where {N,K,T}
+function retract!(::Grassmann{N,K}, y, x, v, ::QRRetraction) where {N,K}
     qrfac = qr(x+v)
     d = diag(qrfac.R)
-    D = Diagonal( sign.( sign.(d .+ convert(T, 0.5))) )
+    D = Diagonal( sign.( sign.(d .+ 0.5)) )
     y .= zeros(N,K)
     y[1:K,1:K] .= D
     y .= Array(qrfac.Q) * D
     return y
 end
 
-@generated representation_size(::Grassmann{N,K,T}) where {N, K, T} = (N,K)
-zero_tangent_vector!(::Grassmann{N,K,T},v,x) where {N,K,T} = fill!(v,0)
+@generated representation_size(::Grassmann{N,K}) where {N, K} = (N,K)
+zero_tangent_vector!(::Grassmann,v,x) = fill!(v,0)
 
 """
     mean(
-        M::Grassmann{N,K,Real},
+        M::Grassmann{N,K,ℝ},
         x::AbstractVector,
         [w::AbstractWeights,]
         method = GeodesicInterpolationWithinRadius(π/4);
@@ -298,7 +299,7 @@ zero_tangent_vector!(::Grassmann{N,K,T},v,x) where {N,K,T} = fill!(v,0)
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
-mean(::Grassmann{N,K,Real} where {N,K}, args...)
+mean(::Grassmann{N,K,ℝ} where {N,K}, args...)
 
-mean!(M::Grassmann{N,K,T}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N,K,T<:Real} =
+mean!(M::Grassmann{N,K,ℝ}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N,K} =
     mean!(M, y, x, w, GeodesicInterpolationWithinRadius(π/4); kwargs...)

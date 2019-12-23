@@ -12,14 +12,14 @@ Euclidean vector space $\mathbb R^n$.
 
 generates the $n$-dimensional vector space $\mathbb R^n$.
 
-    Euclidean(n₁,n₂,...,nᵢ)
+    Euclidean(n₁,n₂,...,nᵢ; field=ℝ)
 
-generates the $n_1n_2\cdot\ldots n_i$-dimensional vector space $\mathbb R^{n_1, n_2, \ldots, n_i}$, whose
+generates the (2*)$n_1n_2\cdot\ldots n_i$-dimensional vector space $\mathbb F^{n_1, n_2, \ldots, n_i}$, whose
 elements are interpreted as $n_1 \times,n_2\times\cdots\times n_i$ arrays, e.g. for
-two parameters as matrices.
+two parameters as matrices. The default `field=ℝ` can also be set to `field=ℂ`.
 """
-struct Euclidean{T<:Tuple} <: Manifold where {T} end
-Euclidean(n::Vararg{Int,N}) where N = Euclidean{Tuple{n...}}()
+struct Euclidean{N<:Tuple,T} <: Manifold where {N, T<: Field} end
+Euclidean(n::Vararg{Int,N};field::Field=ℝ) where N = Euclidean{Tuple{n...},field}()
 
 """
     representation_size(M::Euclidean{T})
@@ -27,7 +27,7 @@ Euclidean(n::Vararg{Int,N}) where N = Euclidean{Tuple{n...}}()
 returns the array dimensions required to represent an element on the
 [`Euclidean`](@ref) manifold `M`, i.e. the vector of all array dimensions.
 """
-@generated representation_size(::Euclidean{T}) where T = Tuple(T.parameters...)
+@generated representation_size(::Euclidean{N}) where N = Tuple(N.parameters...)
 
 """
     manifold_dimension(M::Euclidean{T})
@@ -35,7 +35,8 @@ returns the array dimensions required to represent an element on the
 returns the manifold dimension of the [`Euclidean`](@ref) manifold `M`, i.e.
 the product of all array dimensions.
 """
-@generated manifold_dimension(::Euclidean{T}) where {T} = *(T.parameters...)
+@generated manifold_dimension(::Euclidean{N,ℝ}) where {N} = *(N.parameters...)
+@generated manifold_dimension(::Euclidean{N,ℂ}) where {N} = 2*( *(N.parameters...) )
 
 """
     EuclideanMetric <: RiemannianMetric
@@ -43,10 +44,13 @@ the product of all array dimensions.
 a general type for any manifold that employs the Euclidean Metric, for example
 the [`Euclidean`](@ref) manifold itself, or the [`Sphere`](@ref), where every
 tangent space (as a plane in the embedding) uses this metric (in the embedding).
+
+Since the metric is independent of the field type, this metric is also used for
+the Hermitian metrics, i.e. metrics that are analogous to the Euclidean but where
+the field type of the manifold is `ℂ`.
 """
 struct EuclideanMetric <: RiemannianMetric end
-is_default_metric(::Euclidean{T},::EuclideanMetric) where {T} = Val(true)
-
+is_default_metric(::Euclidean,::EuclideanMetric) = Val(true)
 
 local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x) = Diagonal(ones(SVector{size(x, 1),eltype(x)}))
 
@@ -60,7 +64,6 @@ log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = zer
 @inline inner(::MetricManifold{<:Manifold,EuclideanMetric}, x, v, w) = dot(v, w)
 
 injectivity_radius(::Euclidean) = Inf
-
 
 """
     distance(M::Euclidean,x,y)
