@@ -1,4 +1,4 @@
-using LinearAlgebra: diag, eigen, eigvals, eigvecs, Symmetric, Diagonal, tr, norm, cholesky, LowerTriangular, UpperTriangular
+using LinearAlgebra: diag, eigen, eigvals, eigvecs, Symmetric, tr, cholesky, LowerTriangular, UpperTriangular
 
 
 @doc doc"""
@@ -71,7 +71,7 @@ where $\lfloor x\rfloor$ denotes the strictly lower triangular matrix of $x$ and
 $\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
 function exp!(::CholeskySpace{N},y,x,v) where N
-    y .= strictlyLowerTriangular(x) + strictlyLowerTriangular(v) + Diagonal(x)*Diagonal(exp.(diag(v)./diag(x)))
+    y .= strictlyLowerTriangular(x) + strictlyLowerTriangular(v) + Diagonal(diag(x))*Diagonal(exp.(diag(v)./diag(x)))
     return y
 end
 @doc doc"""
@@ -159,9 +159,8 @@ function check_tangent_vector(M::CholeskySpace{N}, x,v; kwargs...) where N
         return DomainError(size(v),
             "The vector $(v) is not a tangent to a point on $(M) since its size does not match $(representation_size(M)).")
     end
-    if !isapprox(norm(v-transpose(v)), 0.; kwargs...)
-        return DomainError(size(v),
-            "The vector $(v) is not a tangent to a point on $(M) (represented as an element of the Lie algebra) since its not symmetric.")
+    if !isapprox( norm(strictlyUpperTriangular(v)), 0.; kwargs...)
+        return DomainError(norm(UpperTriangular(v) - Diagonal(v)), "The matrix $(v) is not a tangent vector at $(x) (represented as an element of the Lie algebra) since it is not lower triangular.")
     end
     return nothing
 end

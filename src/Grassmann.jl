@@ -149,6 +149,8 @@ function exp!(M::Grassmann{N,K,T},y, x, v) where {N,K,T}
     return y
 end
 
+injectivity_radius(::Grassmann) = π/2
+
 @doc doc"""
     inner(M,x,v,w)
 
@@ -184,9 +186,13 @@ compute the inverse retraction valid of the [`QRRetraction`](@ref)
 ````
 where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transposed.
 """
-inverse_retract!(::Grassmann{N,K,T}, v, x, y, ::QRInverseRetraction) where {N,K,T} = ( v .= y/(x'*y) - x)
+inverse_retract!(::Grassmann, v, x, y, ::QRInverseRetraction) = ( v .= y/(x'*y) - x)
 
-isapprox(M::Grassmann{N,K,T}, x, y; kwargs...) where {N,K,T} = isapprox(distance(M,x,y),0.; kwargs...)
+isapprox(M::Grassmann, x, v, w; kwargs...) = isapprox(
+    sqrt(inner(M,x,zero_tangent_vector(M,x),v-w)),0;
+    kwargs...
+)
+isapprox(M::Grassmann, x, y; kwargs...) = isapprox(distance(M,x,y),0.; kwargs...)
 
 @doc doc"""
     log!(M, v, x, y)

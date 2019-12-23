@@ -8,10 +8,14 @@ Random.seed!(42)
 
     Ms = Sphere(2)
     Ms1 = PowerManifold(Ms, 5)
+    @test manifold_dimension(Ms1) == 10
     Ms2 = PowerManifold(Ms, 5, 7)
+    @test manifold_dimension(Ms2) == 70
     Mr = Manifolds.Rotations(3)
     Mr1 = PowerManifold(Mr, 5)
+    @test manifold_dimension(Mr1) == 15
     Mr2 = PowerManifold(Mr, 5, 7)
+    @test manifold_dimension(Mr2) == 105
 
     types_s1 = [Array{Float64,2},
                 HybridArray{Tuple{3,StaticArrays.Dynamic()}, Float64, 2}]
@@ -47,28 +51,37 @@ Random.seed!(42)
         @testset "Type $(trim(string(T)))..." begin
             pts1 = [convert(T, rand(power_s1_pt_dist)) for _ in 1:3]
             test_manifold(Ms1,
-                          pts1;
-                          test_reverse_diff = true,
-                          test_musical_isomorphisms = true,
-                          retraction_methods = retraction_methods,
-                          inverse_retraction_methods = inverse_retraction_methods,
-                          point_distributions = [power_s1_pt_dist],
-                          tvector_distributions = [power_s1_tv_dist],
-                          rand_tvector_atol_multiplier = 6.0)
+                pts1;
+                test_reverse_diff = true,
+                test_musical_isomorphisms = true,
+                test_injectivity_radius = false,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                point_distributions = [power_s1_pt_dist],
+                tvector_distributions = [power_s1_tv_dist],
+                rand_tvector_atol_multiplier = 6.0,
+                retraction_atol_multiplier = 12.0,
+                is_tangent_atol_multiplier = 12.0,
+            )
         end
     end
     for T in types_s2
         @testset "Type $(trim(string(T)))..." begin
             pts2 = [convert(T, rand(power_s2_pt_dist)) for _ in 1:3]
-            test_manifold(Ms2,
-                          pts2;
-                          test_reverse_diff = true,
-                          test_musical_isomorphisms = true,
-                          retraction_methods = retraction_methods,
-                          inverse_retraction_methods = inverse_retraction_methods,
-                          point_distributions = [power_s2_pt_dist],
-                          tvector_distributions = [power_s2_tv_dist],
-                          rand_tvector_atol_multiplier = 6.0)
+            test_manifold(
+                Ms2,
+                pts2;
+                test_reverse_diff = true,
+                test_musical_isomorphisms = true,
+                test_injectivity_radius = false,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                point_distributions = [power_s2_pt_dist],
+                tvector_distributions = [power_s2_tv_dist],
+                rand_tvector_atol_multiplier = 6.0,
+                retraction_atol_multiplier = 12,
+                is_tangent_atol_multiplier = 12.0,
+            )
         end
     end
 
@@ -76,28 +89,37 @@ Random.seed!(42)
         @testset "Type $(trim(string(T)))..." begin
             pts1 = [convert(T, rand(power_r1_pt_dist)) for _ in 1:3]
             test_manifold(Mr1,
-                          pts1;
-                          test_reverse_diff = false,
-                          test_musical_isomorphisms = true,
-                          retraction_methods = retraction_methods,
-                          inverse_retraction_methods = inverse_retraction_methods,
-                          point_distributions = [power_r1_pt_dist],
-                          tvector_distributions = [power_r1_tv_dist],
-                          rand_tvector_atol_multiplier = 5.0)
+                pts1;
+                test_reverse_diff = false,
+                test_injectivity_radius = false,
+                test_musical_isomorphisms = true,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                point_distributions = [power_r1_pt_dist],
+                tvector_distributions = [power_r1_tv_dist],
+                rand_tvector_atol_multiplier = 5.0,
+                retraction_atol_multiplier = 12,
+                is_tangent_atol_multiplier = 12.0
+            )
         end
     end
     for T in types_r2
         @testset "Type $(trim(string(T)))..." begin
             pts2 = [convert(T, rand(power_r2_pt_dist)) for _ in 1:3]
-            test_manifold(Mr2,
-                          pts2;
-                          test_reverse_diff = false,
-                          test_musical_isomorphisms = true,
-                          retraction_methods = retraction_methods,
-                          inverse_retraction_methods = inverse_retraction_methods,
-                          point_distributions = [power_r2_pt_dist],
-                          tvector_distributions = [power_r2_tv_dist],
-                          rand_tvector_atol_multiplier = 5.0)
+            test_manifold(
+                Mr2,
+                pts2;
+                test_reverse_diff = false,
+                test_injectivity_radius = false,
+                test_musical_isomorphisms = true,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                point_distributions = [power_r2_pt_dist],
+                tvector_distributions = [power_r2_tv_dist],
+                rand_tvector_atol_multiplier = 5.0,
+                retraction_atol_multiplier = 12,
+                is_tangent_atol_multiplier = 12.0,
+            )
         end
     end
 

@@ -8,3 +8,8 @@ Modules = [Manifolds, ManifoldsBase]
 Pages = ["Manifolds.jl"]
 Order = [:type, :function]
 ```
+
+## Decorators
+
+* [Array manifold](@ref)
+* [Metric manifold](@ref)

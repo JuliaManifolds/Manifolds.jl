@@ -37,13 +37,15 @@ include("utils.jl")
     for T in types
         pts = [convert(T,A_sym),convert(T,B_sym),convert(T,X)]
         @testset "Type $T" begin
-            test_manifold(M,
-                          pts,
-                          test_reverse_diff = isa(T, Vector),
-                          test_project_tangent = true,
-                          test_musical_isomorphisms = true,
-                          test_vector_transport = true
-                          )
+            test_manifold(
+                M,
+                pts,
+                test_injectivity_radius = false,
+                test_reverse_diff = isa(T, Vector),
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_vector_transport = true
+            )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end # testset type $T
     end # for 

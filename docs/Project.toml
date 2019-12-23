@@ -4,4 +4,4 @@ ManifoldsBase = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
 
 [compat]
 Documenter = "0.24"
-ManifoldsBase = "0.2"
+ManifoldsBase = "0.3"

@@ -211,14 +211,12 @@ cholesky decomposition of $x$, $w = l(l^{-1}vl^{-\mathrm{T}})_\frac{1}{2}$,
 and $(\cdot)_\frac{1}{2}$
 denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$.
 """
-function exp!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, y, x, v) where N
+function exp!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, y, x, v) where {N}
     (l,w) = spd_to_cholesky(x,v)
     z = exp(CholeskySpace{N}(),l,w)
     y .= z*z'
     return y
 end
-# take the same retractions as for the default
-retract!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},y,args...) where N = retract!(M.manifold,y,args...)
 
 @doc doc"""
     log!(M,v,x,y)
