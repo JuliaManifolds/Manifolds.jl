@@ -21,4 +21,6 @@ include("metric.jl")
 include("statistics.jl")
 
 # Lie groups and actions
+include("groups/groups_general.jl")
 include("groups/rotation_action.jl")
+include("groups/translation_action.jl")

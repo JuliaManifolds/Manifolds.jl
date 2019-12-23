@@ -1,7 +1,7 @@
 @doc doc"""
     RotationAction(M::Manifold, SOn::SpecialOrthogonal)
 
-Space of actions of the [`SpectialOrthogonal`](@ref) group `\mathrm{SO}(N)`
+Space of actions of the [`SpecialOrthogonal`](@ref) group `\mathrm{SO}(N)`
 on a Euclidean-like manifold `M` of dimension `N`.
 """
 struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal} <: AbstractActionOnManifold

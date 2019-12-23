@@ -392,6 +392,7 @@ export base_manifold,
 # Lie groups and actions
 export AbstractGroupOperation,
     AbstractGroupManifold,
+    GroupManifold,
     LeftInvariantCanonicalMetric,
     RightInvariantCanonicalMetric,
     BiInvariantCanonicalMetric,

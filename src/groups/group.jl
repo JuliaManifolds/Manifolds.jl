@@ -113,8 +113,8 @@ end
 
 inv(::AbstractGroupManifold, e::Identity) = e
 
-function group_id!(G::AbstractGroupManifold, x)
-    error("group_id! not implemented on $(typeof(G)) for point $(typeof(x))")
+function group_id!(G::AbstractGroupManifold, y, x)
+    error("group_id! not implemented on $(typeof(G)) for points $(typeof(y)) and $(typeof(x))")
 end
 
 @doc doc"""

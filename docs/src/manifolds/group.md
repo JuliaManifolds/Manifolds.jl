@@ -11,7 +11,7 @@ though their behavior may be customized for a specific group.
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["Group.jl"]
+Pages = ["groups/group.jl"]
 Order = [:type, :function]
 ```
 
@@ -19,22 +19,36 @@ Order = [:type, :function]
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["SpecialOrthogonal.jl"]
+Pages = ["groups/special_orthogonal.jl"]
 Order = [:type, :function]
 ```
+## Euclidean group
 
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/euclidean_group.jl"]
+Order = [:type, :function]
+```
 
 # Group actions
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["GroupAction.jl"]
+Pages = ["groups/group_action.jl"]
 Order = [:type, :function]
 ```
 ## Rotation action
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["RotationAction.jl"]
+Pages = ["groups/rotation_action.jl"]
+Order = [:type, :function]
+```
+
+## Translation action
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/translation_action.jl"]
 Order = [:type, :function]
 ```
