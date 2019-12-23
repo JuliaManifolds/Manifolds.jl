@@ -12,7 +12,7 @@ include("utils.jl")
     @test project_point!(E,x) == x
     @test manifold_dimension(Ec) == 2*manifold_dimension(E)
     
-    manifolds = [ E, EM ]
+    manifolds = [ E, EM, Ec ]
     types = [Vector{Float64},
              SizedVector{3, Float64},
              MVector{3, Float64},

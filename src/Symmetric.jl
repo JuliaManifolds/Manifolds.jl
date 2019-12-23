@@ -19,7 +19,7 @@ Being slightly inefficient, the matrices are safed as $n\times n$ arrays despite
 
 """
 struct SymmetricMatrices{N,T} <: Manifold end
-SymmetricMatrices(n::Int,t::Field=ℝ) = SymmetricMatrices{n,t}()
+SymmetricMatrices(n::Int,t::AbstractField=ℝ) = SymmetricMatrices{n,t}()
 
 representation_size(::SymmetricMatrices{N}) where {N} = (N,N)
 

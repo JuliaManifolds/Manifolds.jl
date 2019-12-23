@@ -50,7 +50,7 @@ generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
 case $\mathbb F = \mathbb R$ is the default.
 """
 struct Grassmann{N,K,T} <: Manifold end
-Grassmann(n::Int, k::Int, T::Field=ℝ) = Grassmann{n,k,T}()
+Grassmann(n::Int, k::Int, T::AbstractField=ℝ) = Grassmann{n,k,T}()
 
 function check_manifold_point(G::Grassmann{N,K,T},x; kwargs...) where {N,K,T}
     if (T===ℝ) && !(eltype(x) <: Real)

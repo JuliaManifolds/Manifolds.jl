@@ -44,7 +44,7 @@ generate the manifold of `m`-by-`n` real-valued matrices of rank `k`.
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
 struct FixedRankMatrices{M,N,K,T} <: Manifold end
-FixedRankMatrices(m::Int, n::Int, k::Int, t::Field=ℝ) = FixedRankMatrices{m,n,k,t}()
+FixedRankMatrices(m::Int, n::Int, k::Int, t::AbstractField=ℝ) = FixedRankMatrices{m,n,k,t}()
 
 @doc doc"""
     SVDMPoint <: MPoint

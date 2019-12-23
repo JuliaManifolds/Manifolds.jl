@@ -30,7 +30,7 @@ The manifold is named after [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Ed
 generate the (real-valued) Stiefel manifold of $m\times n$ dimensional orthonormal matrices.
 """
 struct Stiefel{M,N,T} <: Manifold end
-Stiefel(m::Int, n::Int,t::Field=ℝ) = Stiefel{m,n,t}()
+Stiefel(m::Int, n::Int,t::AbstractField=ℝ) = Stiefel{m,n,t}()
 
 function check_manifold_point(S::Stiefel{M,N,T},x; kwargs...) where {M,N,T}
     if (T===ℝ) && !(eltype(x) <: Real)

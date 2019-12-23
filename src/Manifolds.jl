@@ -105,17 +105,17 @@ using UnsafeArrays
 using Einsum: @einsum
 
 """
-    Field
+    AbstractField
 
 An abstract type to represent the field matrix manifolds are build upon,
 following the idea of [TensorKit](https://github.com/Jutho/TensorKit.jl)
 in order to hace concrete field types to dispatch on. The two most common
 field types are `RealNumbers` (`ℝ` for short) and `ComplexNumbers` (`ℂ`).
 """
-abstract type Field end
+abstract type AbstractField end
 
-struct RealNumbers <: Field end
-struct ComplexNumbers <: Field end
+struct RealNumbers <: AbstractField end
+struct ComplexNumbers <: AbstractField end
 
 const ℝ = RealNumbers()
 const ℂ = ComplexNumbers()

@@ -18,8 +18,8 @@ generates the (2*)$n_1n_2\cdot\ldots n_i$-dimensional vector space $\mathbb F^{n
 elements are interpreted as $n_1 \times,n_2\times\cdots\times n_i$ arrays, e.g. for
 two parameters as matrices. The default `field=ℝ` can also be set to `field=ℂ`.
 """
-struct Euclidean{N<:Tuple,T} <: Manifold where {N, T<: Field} end
-Euclidean(n::Vararg{Int,N};field::Field=ℝ) where N = Euclidean{Tuple{n...},field}()
+struct Euclidean{N<:Tuple,T} <: Manifold where {N, T<: AbstractField} end
+Euclidean(n::Vararg{Int,N};field::AbstractField=ℝ) where N = Euclidean{Tuple{n...},field}()
 
 """
     representation_size(M::Euclidean{T})
