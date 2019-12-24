@@ -217,6 +217,7 @@ include("ProductManifold.jl")
 include("PowerManifold.jl")
 
 include("CholeskySpace.jl")
+include("Circle.jl")
 include("Euclidean.jl")
 include("FixedRankMatrices.jl")
 include("Grassmann.jl")
@@ -246,6 +247,7 @@ end
 # Base Types
 export Manifold,
     Euclidean,
+    Circle,
     Sphere,
     SymmetricMatrices,
     MPoint,
@@ -321,6 +323,7 @@ export base_manifold,
     christoffel_symbols_first,
     christoffel_symbols_second,
     christoffel_symbols_second_jacobian,
+    complex_dot,
     det_local_metric,
     distance,
     einstein_tensor,
@@ -378,6 +381,7 @@ export base_manifold,
     shortest_geodesic,
     skewness,
     std,
+    sym_rem,
     submanifold,
     submanifold_component,
     tangent_orthonormal_basis,
