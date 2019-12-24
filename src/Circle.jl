@@ -132,6 +132,8 @@ project_tangent!(::Circle{ℂ}, w, x, v) = (w = v - complex_dot(x,v)*x )
 
 representation_size(::Circle) = (1,)
 
+similar_result(M::Circle{ℝ}, f, x...) = zero(x[1])
+
 function sharp!(M::Circle, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
     copyto!(v.data, w.data)
     return v
