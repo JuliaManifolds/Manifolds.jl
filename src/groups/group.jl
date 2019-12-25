@@ -9,7 +9,7 @@ abstract type AbstractGroupOperation end
     AbstractGroupManifold{<:AbstractGroupOperation} <: Manifold
 
 Abstract type for a Lie group, a group that is also a smooth manifold with a
-smooth binary operation.
+[smooth binary operation](@ref AbstractGroupOperation).
 `AbstractGroupManifold`s must implement at least [`inv`](@ref),
 [`group_id`](@ref), [`compose_left`](@ref), and [`translate_diff`](@ref).
 Group manifolds by default assume a left-invariant canonical metric.
@@ -32,7 +32,7 @@ struct GroupManifold{M<:Manifold,O<:AbstractGroupOperation} <: AbstractGroupMani
     op::O
 end
 
-is_decorator_manifold(M::GM) where {GM<:GroupManifold} = Val(true)
+is_decorator_manifold(::GroupManifold) = Val(true)
 
 """
     LeftInvariantCanonicalMetric()
@@ -100,7 +100,7 @@ function inv!(G::AbstractGroupManifold, y, x)
     error("inv not implemented on $(typeof(G)) for point $(typeof(x))")
 end
 
-function inv(G::AbstractGroupManifold, y, e::Identity)
+function inv!(G::AbstractGroupManifold, y, e::Identity)
     indentity!(G, y)
     return y
 end
@@ -240,7 +240,8 @@ function inverse_translate!(G::AbstractGroupManifold,
                             x,
                             y,
                             conv::ActionDirection)
-    return translate(G, z, inv(G, x), y, conv)
+    inv!(G, z, x)
+    return translate!(G, z, z, y, conv)
 end
 
 function inverse_translate!(G::AbstractGroupManifold, z, x, y)
@@ -262,7 +263,7 @@ struct AdditionOperation <: AbstractGroupOperation end
 -(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
 
 function group_id!(::AbstractGroupManifold{AdditionOperation}, y, x)
-    copyto!(y, zero(x))
+    fill!(y, 0)
     return y
 end
 
