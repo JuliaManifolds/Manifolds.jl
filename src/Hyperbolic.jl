@@ -24,6 +24,20 @@ struct Hyperbolic{N} <: Manifold end
 Hyperbolic(n::Int) = Hyperbolic{n}()
 
 """
+    MinkowskiMetric <: LorentzMetric
+
+The Minkowski metric is a [`LorentzMetric`](@ref) with, i.e.
+
+````math
+\langle a,b\rangle_{\mathrm{M}} = -a_{n+1}b_{n+1} +
+\displaystyle\sum_{k=1}^n a_kb_k.
+````
+It is also the default metric e.g. for the [`Hyperbolic`](@ref) space
+"""
+struct MinkowskiMetric <: LorentzMetric end
+is_default_metric(::Hyperbolic,MinkowskiMetric) = Val(true)
+
+"""
     check_manifold_point(S,x; kwargs...)
 
 checks, whether `x` is a valid point on the [`Hyperbolic`](@ref) `M`, i.e. is a vector with
@@ -105,7 +119,7 @@ inner product on $\mathbb R^{n+1}$.
 @doc doc"""
     log!(M, v, x, y)
 
-computes the logarithmic map on the [`Hyperbolic`](@ref) space $\mathbb H^n$, i.e., `v` 
+computes the logarithmic map on the [`Hyperbolic`](@ref) space $\mathbb H^n$, i.e., `v`
 corresponds to the tangent vector representing the [`geodesic`](@ref) starting from `x`
 reaches `y` after time 1 on the [`Hyperbolic`](@ref) space `M`.
 The formula reads for $x\neq y$
@@ -134,8 +148,7 @@ computes the Minkowski inner product of two Vectors `a` and `b` of same length
 `n+1`, i.e.
 
 ````math
-\langle a,b\rangle_{\mathrm{M}} = -a_{n+1}b_{n+1} +
-\displaystyle\sum_{k=1}^n a_kb_k.
+\langle a,b\rangle_{\mathrm{M}} = -a_{n+1}b_{n+1} + \displaystyle\sum_{k=1}^n a_kb_k.
 ````
 """
 minkowski_dot(a::AbstractVector,b::AbstractVector) = -a[end]*b[end] + sum( a[1:end-1].*b[1:end-1] )
