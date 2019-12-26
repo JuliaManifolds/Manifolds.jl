@@ -41,8 +41,10 @@ function test_action(
         N = length(a_pts)
         for i in 1:N
             assoc_l = compose_left(G, a_pts[i], a_pts[mod1(i+1, N)], a_pts[mod1(i+2, N)])
-            assoc_r = compose_left(G, compose_left(G, a_pts[i], a_pts[mod1(i+1, N)]), a_pts[mod1(i+2, N)])
+            assoc_l2 = compose_left(G, compose_left(G, a_pts[i], a_pts[mod1(i+1, N)]), a_pts[mod1(i+2, N)])
+            assoc_r = compose_left(G, a_pts[i], compose_left(G, a_pts[mod1(i+1, N)]), a_pts[mod1(i+2, N)])
             @test isapprox(G, assoc_l, assoc_r)
+            @test isapprox(G, assoc_l, assoc_l2)
         end
     end
 

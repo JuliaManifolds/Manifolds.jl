@@ -124,24 +124,20 @@ function identity(G::AbstractGroupManifold, x)
     return y
 end
 
-# Adapted from `afoldl` in `operators.jl` in Julia base.
-# expand recursively up to a point, then switch to a loop.
-_group_afoldl(op, G, a) = a
-_group_afoldl(op, G, a, b) = op(G,a,b)
-_group_afoldl(op, G, a, b, c...) = _group_afoldl(op, G, op(G, a, b), c...)
-
-function _group_afoldl(op,G,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,qs...)
-    y = op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,op(G,a,b),c),d),e),f),g),h),i),j),k),l),m),n),o),p)
-    return op(G, y, reduce((x, y)->op(G, x, y), qs))
-end
-
 """
     compose_left(G::AbstractGroupManifold, xs...)
 
 Compose elements of `G` using their left translation upon each other.
 This composition is left-associative.
 """
-compose_left(G::AbstractGroupManifold, xs...) = _group_afoldl(compose_left, G, xs...)
+function compose_left(G::AbstractGroupManifold, xs...)
+    y = copy(xs[1])
+    for x in xs[2:end]
+        compose_left!(G, y, y, x)
+    end
+    return y
+end
+
 compose_left(G::AbstractGroupManifold, x) = x
 function compose_left(G::AbstractGroupManifold, x, y)
     z = similar_result(G, compose_left, x, y)
