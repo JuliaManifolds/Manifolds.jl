@@ -57,8 +57,16 @@ end
         identity!(G, y, x)
         @test y ≈ zero(x)
         @test compose_left(G, x, x) ≈ x + x
+        @test compose_left(G, x, ge) ≈ x
+        @test compose_left(G, ge, x) ≈ x
+        @test compose_left(G, ge, ge) == ge
         compose_left!(G, y, x, x)
         @test y ≈ x + x
+        compose_left!(G, y, x, ge)
+        @test y ≈ x
+        compose_left!(G, y, ge, x)
+        @test y ≈ x
+        @test_throws ErrorException compose_left!(G, y, ge, ge)
     end
 
     @testset "Multiplication operation" begin
@@ -77,8 +85,16 @@ end
         identity!(G, y, x)
         @test y ≈ one(x)
         @test compose_left(G, x, x) ≈ x * x
+        @test compose_left(G, x, ge) ≈ x
+        @test compose_left(G, ge, x) ≈ x
+        @test compose_left(G, ge, ge) == ge
         compose_left!(G, y, x, x)
         @test y ≈ x * x
+        compose_left!(G, y, x, ge)
+        @test y ≈ x
+        compose_left!(G, y, ge, x)
+        @test y ≈ x
+        @test_throws ErrorException compose_left!(G, y, ge, ge)
 
         @testset "identity optimization" begin
             x2 = copy(x)
