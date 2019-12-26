@@ -56,17 +56,17 @@ complex-valued case.
 distance(::Circle{ℝ}, x, y) = abs(sym_rem(x-y))
 distance(::Circle{ℂ}, x, y) = acos(clamp(complex_dot(x, y), -1, 1))
 
-exp!(::Circle{ℝ}, x, v) = sym_rem(x+v)
-function exp!(M::Circle{ℂ}, y, x, v)
+exp(::Circle{ℝ}, x, v) = sym_rem(x+v)
+function exp(M::Circle{ℂ}, x, v)
     θ = norm(M, x, v)
-    y .= cos(θ)*x + usinc(θ)*v
-    return y
+    return cos(θ)*x + usinc(θ)*v
 end
 
-function flat!(M::Circle, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
+function flat!(::Circle, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
     copyto!(v.data, w.data)
     return v
 end
+flat(M::Circle, x, w::FVector{TangentSpaceType}) = FVector(CotangentSpace,w.data)
 
 injectivity_radius(::Circle, args...) = π
 
@@ -88,20 +88,22 @@ for the complex case interpreting complex numbers in the Gaussian plane.
 @inline inner(::Circle{ℝ}, x, w, v) = v*w
 @inline inner(::Circle{ℂ}, x, w, v) = complex_dot(w, v)
 
-log!(::Circle{ℝ}, v, x, y) = (v = sym_rem(y-x))
-function log!(M::Circle{ℂ}, v, x, y)
+inverse_retract(M::Circle, x, y) = inverse_retract(M, x, y, LogarithmicInverseRetraction())
+inverse_retract(M::Circle, x, y, method::LogarithmicInverseRetraction) = log(M,x,y)
+
+log(::Circle{ℝ}, x, y) = sym_rem(y-x)
+function log(M::Circle{ℂ}, x, y)
     cosθ = complex_dot(x, y)
     if cosθ ≈ -1
         v = real(x) ≈ 1 ? 1im : 1+0im
-        copyto!(v, v - complex_dot(x, v)* x)
+        v = v - complex_dot(x, v)* x
         v *= π / norm(v)
     else
         cosθ = cosθ > 1 ? one(cosθ) : cosθ
         θ = acos(cosθ)
         v = (y - cosθ*x)/usinc(θ)
     end
-    project_tangent!(M, v, x, v)
-    return v
+    return project_tangent(M, x, v)
 end
 
 @doc doc"""
@@ -119,25 +121,26 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` on the
 mean modulo 2π.
 """
 mean(::Circle, args...)
-
-mean!(::Circle,y,x::AbstractVector,w::AbstractVector; kwargs...) = (y.= sym_rem(sum(w.*x)))
+mean(::Circle,y,x::AbstractVector,w::AbstractVector; kwargs...) = sym_rem(sum(w.*x))
 
 @inline norm(::Circle, x, v) = abs(v)
 
-project_point!(::Circle{ℝ}, x) = (x = sym_rem(x))
-project_point!(::Circle{ℂ}, x) = (x = x/abs(x))
+project_point(::Circle{ℝ}, x) = sym_rem(x)
+project_point(::Circle{ℂ}, x) = x/abs(x)
 
-project_tangent!(::Circle{ℝ}, w, x, v) = (w = v)
-project_tangent!(::Circle{ℂ}, w, x, v) = (w = v - complex_dot(x,v)*x )
+project_tangent(::Circle{ℝ}, x, v) = v
+project_tangent(::Circle{ℂ}, x, v) = v - complex_dot(x,v)*x
+
+retract(M::Circle,x,y) = retract(M, x, y, ExponentialRetraction())
+retract(M::Circle,x,y,m::ExponentialRetraction) = exp(M,x,y)
 
 representation_size(::Circle) = (1,)
-
-similar_result(M::Circle{ℝ}, f, x...) = zero(x[1])
 
 function sharp!(M::Circle, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
     copyto!(v.data, w.data)
     return v
 end
+sharp(M::Circle, x, w::FVector{CotangentSpaceType}) = FVector(TangentSpace,w.data)
 
 @doc doc"""
     sym_rem(x,[T=π])
@@ -145,12 +148,12 @@ end
 symmetric remainder of `x` with respect to the interall 2*`T`, i.e.
 `(x+T)%2T`, where the default for `T` is $\pi$
 """
-function sym_rem(x, T=π)
-  return rem(x, 2*T,RoundNearest)
+function sym_rem(x::N, T=π) where N
+  return rem(x, convert(N,2*T),RoundNearest)
 end
 
-vector_transport_to!(::Circle{ℝ}, vto, x, v, y, ::ParallelTransport) = (vto .= v)
-function vector_transport_to!(M::Circle{ℂ}, vto, x, v, y, ::ParallelTransport)
+vector_transport_to(::Circle{ℝ}, x, v, y, ::ParallelTransport) = v
+function vector_transport_to(M::Circle{ℂ}, x, v, y, ::ParallelTransport)
     v_xy = log(M, x, y)
     vl = norm(M, x, v_xy)
     vto = v
@@ -160,8 +163,10 @@ function vector_transport_to!(M::Circle{ℂ}, vto, x, v, y, ::ParallelTransport)
     end
     return vto
 end
-
-function zero_tangent_vector!(::Circle, v, x)
-    fill!(v, zero(x))
-    return v
+vector_transport_along(M::Circle,x,v,c) = vector_transport_along!(M,zero(v),x,v,c)
+function vector_transport_direction(M::Circle,x,v,vdir,m::AbstractVectorTransportMethod)
+    y = exp(M, x, vdir)
+    return vector_transport_to(M, x, v, y, m)
 end
+
+zero_tangent_vector(M::Circle,x) = zero(x)

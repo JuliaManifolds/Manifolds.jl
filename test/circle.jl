@@ -17,9 +17,13 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
+                test_forward_diff = false,
+                test_reverse_diff = false,
+                test_vector_spaces = false,
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                is_mutating=false
             )
         end
     end
@@ -39,13 +43,20 @@ include("utils.jl")
     types = [Complex{Float64}, Complex{Float32}]
     for T in types
         @testset "Type $T" begin
-            pts = convert.(Ref(T), [sqrt(2.0)-sqrt(2.0)im, 0+0im, sqrt(2.0)+sqrt(2.0)im])
+            a = 1/sqrt(2.0)
+            pts = convert.(Ref(T), [a-a*im, 1+0im, a+a*im])
             test_manifold(
                 Mc,
                 pts,
+                test_forward_diff = false,
+                test_reverse_diff = false,
+                test_vector_spaces = false,
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                is_mutating=false,
+                exp_log_atol_multiplier = 2.0,
+                is_tangent_atol_multiplier = 2.0,
             )
         end
     end

@@ -57,6 +57,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_vector_transport = false,
     test_mutating_rand = false,
     test_vector_spaces = true,
+    is_mutating = true,
     default_inverse_retraction_method = ManifoldsBase.LogarithmicInverseRetraction(),
     default_retraction_method = ManifoldsBase.ExponentialRetraction(),
     retraction_methods = [],
@@ -153,9 +154,17 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             )
         end
         atolp1 = exp_log_atol_multiplier * eps(real(eltype(pts[1])))
-        zero_tangent_vector!(M, v1, pts[1])
+        if is_mutating
+            zero_tangent_vector!(M, v1, pts[1])
+        else
+            v1 = zero_tangent_vector(M,pts[1])
+        end
         @test isapprox(M, pts[1], v1, zero_tangent_vector(M, pts[1]); atol = atolp1)
-        log!(M, v1, pts[1], pts[2])
+        if is_mutating
+            log!(M, v1, pts[1], pts[2])
+        else
+            v1 = log(M,pts[1],pts[2])
+        end
         @test norm(M, pts[1], v1) ≈ sqrt(inner(M, pts[1], v1, v1))
 
         @test isapprox(M, exp(M, pts[1], v1, 1), pts[2]; atol = atolp1)
@@ -173,8 +182,12 @@ function test_manifold(M::Manifold, pts::AbstractVector;
                     atol = epsx * retraction_atol_multiplier,
                     rtol = retraction_atol_multiplier == 0 ? sqrt(epsx)*retraction_rtol_multiplier : 0
                 )
-                new_pt = similar(x)
-                retract!(M, new_pt, x, v, retr_method)
+                if is_mutating
+                    new_pt = similar(x)
+                    retract!(M, new_pt, x, v, retr_method)
+                else
+                    new_pt = retract(M, x, v, retr_method)
+                end
                 @test is_manifold_point(M, new_pt)
             end
         end
@@ -213,8 +226,12 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             @test isapprox(M, x, 3*v, 2 .* v .+ v)
             @test isapprox(M, x, -v, v .- 2 .* v)
             @test isapprox(M, x, -v, .-v)
-            w = similar(v)
-            w .= 2 .* v .+ v
+            if (isa(v, AbstractArray))
+                w = similar(v)
+                w .= 2 .* v .+ v
+            else
+                w = 2*v+v
+            end
             @test w ≈ 3*v
         end
     end
@@ -223,19 +240,24 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         for (x,v) in zip(pts,tv)
             atol = eps(real(eltype(x))) * projection_atol_multiplier
             @test isapprox(M, x, v, project_tangent(M, x, v); atol = atol)
-            v2 = similar(v)
-            project_tangent!(M, v2, x, v)
+            if is_mutating
+                v2 = similar(v)
+                project_tangent!(M, v2, x, v)
+            else
+                v2 = project_tangent(M, x, v)
+            end
             @test isapprox(M, x, v2, v; atol = atol)
         end
     end
 
     test_vector_transport && !( default_inverse_retraction_method === nothing) && @testset "vector transport" begin
+        tvatol = is_tangent_atol_multiplier*eps(real(eltype(pts[1])))
         v1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
         v2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
         v1t1 = vector_transport_to(M, pts[1], v1, pts[3])
         v1t2 = vector_transport_direction(M, pts[1], v1, v2)
-        @test is_tangent_vector(M, pts[3], v1t1)
-        @test is_tangent_vector(M, pts[3], v1t2)
+        @test is_tangent_vector(M, pts[3], v1t1; atol=tvatol)
+        @test is_tangent_vector(M, pts[3], v1t2; atol=tvatol)
         @test isapprox(M, pts[3], v1t1, v1t2)
         @test isapprox(M, pts[1], vector_transport_to(M, pts[1], v1, pts[1]), v1)
     end
@@ -290,7 +312,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         end
     end
 
-    @testset "copyto!" begin
+    is_mutating && @testset "copyto!" begin
         for (x,v) in zip(pts,tv)
             x2 = similar(x)
             copyto!(x2, x)
@@ -310,7 +332,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         end
     end
 
-    @testset "point distributions" begin
+    is_mutating && @testset "point distributions" begin
         for x in pts
             prand = similar(x)
             for pd ∈ point_distributions

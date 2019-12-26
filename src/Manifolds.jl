@@ -121,6 +121,9 @@ struct ComplexNumbers <: AbstractField end
 const ℝ = RealNumbers()
 const ℂ = ComplexNumbers()
 
+Base.show(io::IO, ::RealNumbers) = print(io, "ℝ")
+Base.show(io::IO, ::ComplexNumbers) = print(io, "ℂ")
+
 """
     AbstractEstimationMethod
 
