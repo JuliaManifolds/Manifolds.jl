@@ -25,6 +25,16 @@ include("utils.jl")
                 test_vector_transport = true,
                 is_mutating=false
             )
+            ptsS = SVector.(pts)
+            test_manifold(
+                M,
+                ptsS,
+                test_forward_diff = false,
+                test_reverse_diff = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_vector_transport = true,
+            )
         end
     end
     Mc = Circle(ℂ)
