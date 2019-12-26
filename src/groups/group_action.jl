@@ -24,23 +24,23 @@ function action_on(A::AbstractActionOnManifold)
 end
 
 """
-    apply_action(A::ActionOnManifold, x, a)
+    apply(A::ActionOnManifold, x, a)
 
 Apply action `a` of type `A` to the point `x`.
 The result is saved in `y`.
 """
-function apply_action!(A::AbstractActionOnManifold, y, x, a)
-    error("Function apply_action! is not yet defined for types $(typeof(A)), $(typeof(y)), $(typeof(x)) and $(typeof(a)).")
+function apply!(A::AbstractActionOnManifold, y, x, a)
+    error("Function apply! is not yet defined for types $(typeof(A)), $(typeof(y)), $(typeof(x)) and $(typeof(a)).")
 end
 
 """
-    apply_action(A::AbstractActionOnManifold, x, a)
+    apply(A::AbstractActionOnManifold, x, a)
 
 Apply action `a` of type `A` to the point `x`.
 """
-function apply_action(A::AbstractActionOnManifold, x, a)
-    y = similar_result(A, apply_action, x, a)
-    apply_action!(A, y, x)
+function apply(A::AbstractActionOnManifold, x, a)
+    y = similar_result(A, apply, x, a)
+    apply!(A, y, x)
     return y
 end
 

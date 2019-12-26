@@ -9,12 +9,12 @@ struct TranslationAction{TM<:Manifold,TRn<:TranslationGroup} <: AbstractActionOn
     Rn::TRn
 end
 
-function apply_action!(A::TranslationAction, y, x, a)
+function apply!(A::TranslationAction, y, x, a)
     y .= x .+ a
     return y
 end
 
-function apply_action(A::TranslationAction, x, a)
+function apply(A::TranslationAction, x, a)
     return a + x
 end
 

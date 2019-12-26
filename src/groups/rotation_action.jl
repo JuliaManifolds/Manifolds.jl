@@ -9,12 +9,12 @@ struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal} <: AbstractActionOnMa
     SOn::TSO
 end
 
-function apply_action!(A::RotationAction, y, x, a)
+function apply!(A::RotationAction, y, x, a)
     mul!(y, a, x)
     return y
 end
 
-function apply_action(A::RotationAction, x, a)
+function apply(A::RotationAction, x, a)
     return a * x
 end
 

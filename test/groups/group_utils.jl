@@ -52,20 +52,20 @@ function test_action(
         N = length(a_pts)
         for p in m_pts
             for i in 1:N
-                aip = apply_action(A, p, a_pts[mod1(i+1, N)])
+                aip = apply(A, p, a_pts[mod1(i+1, N)])
                 acg = compose_left(G, a_pts[i], a_pts[mod1(i+1, N)])
-                @test isapprox(M, apply_action(A, p, acg), apply_action(A, aip, a_pts[i]))
+                @test isapprox(M, apply(A, p, acg), apply(A, aip, a_pts[i]))
             end
         end
     end
 
-    @testset "Mutable apply_action!" begin
+    @testset "Mutable apply!" begin
         N = length(a_pts)
         for p in m_pts
             for i in 1:N
                 aip = similar(p)
-                apply_action!(A, aip, p, a_pts[i])
-                @test isapprox(M, apply_action(A, p, a_pts[i]), aip)
+                apply!(A, aip, p, a_pts[i])
+                @test isapprox(M, apply(A, p, a_pts[i]), aip)
             end
         end
     end
@@ -108,8 +108,8 @@ function test_action(
     @testset "Action of group identity" begin
         e_ap = e(a_pts[1])
         for p in m_pts
-            @test isapprox(M, p, apply_action(A, p, e))
-            @test isapprox(M, p, apply_action(A, p, e_ap))
+            @test isapprox(M, p, apply(A, p, e))
+            @test isapprox(M, p, apply(A, p, e_ap))
         end
     end
 
