@@ -218,7 +218,7 @@ include("groups/group_action.jl")
 
 include("groups/special_orthogonal.jl")
 include("groups/rotation_action.jl")
-include("groups/euclidean_group.jl")
+include("groups/translation_group.jl")
 include("groups/translation_action.jl")
 
 include("statistics.jl")
@@ -420,6 +420,6 @@ export AbstractGroupOperation,
     center_of_orbit,
     SpecialOrthogonal,
     RotationAction,
-    EuclideanGroup,
+    TranslationGroup,
     TranslationAction
 end # module

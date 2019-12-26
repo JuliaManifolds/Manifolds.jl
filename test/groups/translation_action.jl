@@ -4,7 +4,7 @@ include("group_utils.jl")
 
 @testset "Translation action" begin
     M = Euclidean(2,3)
-    G = EuclideanGroup(2,3)
+    G = TranslationGroup(2,3)
     A = TranslationAction(Euclidean(2,3), G)
 
     types_a = [Matrix{Float64},
