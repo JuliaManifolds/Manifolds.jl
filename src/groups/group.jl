@@ -302,6 +302,11 @@ function identity!(::AbstractGroupManifold{MultiplicationOperation}, y, x)
     return y
 end
 
+function identity!(::AbstractGroupManifold{MultiplicationOperation}, y, x::AbstractMatrix)
+    copyto!(y, I)
+    return y
+end
+
 identity(::AbstractGroupManifold{MultiplicationOperation}, x) = one(x)
 
 function inv!(::AbstractGroupManifold{MultiplicationOperation}, y, x)

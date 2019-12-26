@@ -79,5 +79,13 @@ end
         @test compose_left(G, x, x) ≈ x * x
         compose_left!(G, y, x, x)
         @test y ≈ x * x
+
+        @testset "identity optimization" begin
+            x2 = copy(x)
+            identity!(G, x2, x)
+            x3 = copy(x)
+            invoke(identity!, Tuple{AbstractGroupManifold{Manifolds.MultiplicationOperation}, Any, AbstractMatrix}, G, x3, x)
+            @test isapprox(G, x2, x3)
+        end
     end
 end
