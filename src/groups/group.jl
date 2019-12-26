@@ -1,7 +1,23 @@
-"""
+@doc doc"""
     AbstractGroupOperation
 
-Abstract type for smooth binary operations on elements of a Lie group.
+Abstract type for smooth binary operations $\mu$ on elements of a Lie group $G$.
+```math
+\mu \colon G \times G \to G.
+```
+An operation can be either defined for a specific [`AbstractGroupManifold`](@ref)
+or in general, by defining for an operation `Op` the following methods:
+
+    group_id!(::AbstractGroupManifold{Op}, y, x)
+    group_id(::AbstractGroupManifold{Op}, x)
+    inv!(::AbstractGroupManifold{Op}, y, x)
+    inv(::AbstractGroupManifold{Op}, x)
+    compose_left(::AbstractGroupManifold{Op}, x, y)
+    compose_left!(::AbstractGroupManifold{Op}, z, x, y)
+
+Note that a manifold is connected with an operation by wrapping it with
+a decorator, [`AbstractGroupManifold`](@ref). In typical cases the concrete
+wrapper [`GroupManifold`](@ref) can be used.
 """
 abstract type AbstractGroupOperation end
 
