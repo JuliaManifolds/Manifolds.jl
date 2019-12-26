@@ -8,8 +8,8 @@ Abstract type for smooth binary operations $\mu$ on elements of a Lie group $G$.
 An operation can be either defined for a specific [`AbstractGroupManifold`](@ref)
 or in general, by defining for an operation `Op` the following methods:
 
-    group_id!(::AbstractGroupManifold{Op}, y, x)
-    group_id(::AbstractGroupManifold{Op}, x)
+    identity!(::AbstractGroupManifold{Op}, y, x)
+    identity(::AbstractGroupManifold{Op}, x)
     inv!(::AbstractGroupManifold{Op}, y, x)
     inv(::AbstractGroupManifold{Op}, x)
     compose_left(::AbstractGroupManifold{Op}, x, y)
@@ -27,7 +27,7 @@ abstract type AbstractGroupOperation end
 Abstract type for a Lie group, a group that is also a smooth manifold with a
 [smooth binary operation](@ref AbstractGroupOperation).
 `AbstractGroupManifold`s must implement at least [`inv`](@ref),
-[`group_id`](@ref), [`compose_left`](@ref), and [`translate_diff`](@ref).
+[`identity`](@ref), [`compose_left`](@ref), and [`translate_diff`](@ref).
 Group manifolds by default forward metric-related operations to the wrapped
 manifold.
 """
@@ -83,7 +83,7 @@ struct Identity{G<:AbstractGroupManifold}
     group::G
 end
 
-(e::Identity)(x) = group_id(e.group, x)
+(e::Identity)(x) = identity(e.group, x)
 
 @doc doc"""
     inv(G::AbstractGroupManifold, x)
@@ -108,19 +108,19 @@ end
 
 inv(::AbstractGroupManifold, e::Identity) = e
 
-function group_id!(G::AbstractGroupManifold, y, x)
-    error("group_id! not implemented on $(typeof(G)) for points $(typeof(y)) and $(typeof(x))")
+function identity!(G::AbstractGroupManifold, y, x)
+    error("identity! not implemented on $(typeof(G)) for points $(typeof(y)) and $(typeof(x))")
 end
 
 @doc doc"""
-    group_id(G::AbstractGroupManifold, x)
+    identity(G::AbstractGroupManifold, x)
 
 Identity element $e$, such that for any element $x$,
 $x \cdot e = e \cdot x = x$. The returned element is of a similar type to `x`.
 """
-function group_id(G::AbstractGroupManifold, x)
+function identity(G::AbstractGroupManifold, x)
     y = similar_result(G, inv, x)
-    group_id!(G, y, x)
+    identity!(G, y, x)
     return y
 end
 
@@ -257,12 +257,12 @@ struct AdditionOperation <: AbstractGroupOperation end
 
 -(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
 
-function group_id!(::AbstractGroupManifold{AdditionOperation}, y, x)
+function identity!(::AbstractGroupManifold{AdditionOperation}, y, x)
     fill!(y, 0)
     return y
 end
 
-group_id(::AbstractGroupManifold{AdditionOperation}, x) = zero(x)
+identity(::AbstractGroupManifold{AdditionOperation}, x) = zero(x)
 
 function inv!(::AbstractGroupManifold{AdditionOperation}, y, x)
     copyto!(y, -x)
@@ -301,12 +301,12 @@ struct MultiplicationOperation <: AbstractGroupOperation end
 # this is different from inv(G, e::Identity{G})
 inv(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
 
-function group_id!(::AbstractGroupManifold{MultiplicationOperation}, y, x)
+function identity!(::AbstractGroupManifold{MultiplicationOperation}, y, x)
     copyto!(y, one(x))
     return y
 end
 
-group_id(::AbstractGroupManifold{MultiplicationOperation}, x) = one(x)
+identity(::AbstractGroupManifold{MultiplicationOperation}, x) = one(x)
 
 function inv!(::AbstractGroupManifold{MultiplicationOperation}, y, x)
     copyto!(y, inv(x))

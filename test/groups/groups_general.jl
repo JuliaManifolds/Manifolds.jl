@@ -18,8 +18,8 @@ end
         @test_throws ErrorException inv!(G, x, x)
         @test_throws ErrorException inv(G, x)
 
-        @test_throws ErrorException group_id!(G, x, x)
-        @test_throws ErrorException group_id(G, x)
+        @test_throws ErrorException identity!(G, x, x)
+        @test_throws ErrorException identity(G, x)
 
         @test compose_left(G, x) === x
         @test_throws ErrorException compose_left(G, x, x)
@@ -52,9 +52,9 @@ end
         @test +ge === ge
         @test ge(x) ≈ zero(x)
         @test inv(G, x) ≈ -x
-        @test group_id(G, x) ≈ zero(x)
+        @test identity(G, x) ≈ zero(x)
         y = similar(x)
-        group_id!(G, y, x)
+        identity!(G, y, x)
         @test y ≈ zero(x)
         @test compose_left(G, x, x) ≈ x + x
         compose_left!(G, y, x, x)
@@ -72,9 +72,9 @@ end
         @test *(ge) === ge
         @test ge(x) ≈ one(x)
         @test inv(G, x) ≈ inv(x)
-        @test group_id(G, x) ≈ one(x)
+        @test identity(G, x) ≈ one(x)
         y = similar(x)
-        group_id!(G, y, x)
+        identity!(G, y, x)
         @test y ≈ one(x)
         @test compose_left(G, x, x) ≈ x * x
         compose_left!(G, y, x, x)
