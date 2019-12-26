@@ -12,7 +12,8 @@ Abstract type for a Lie group, a group that is also a smooth manifold with a
 [smooth binary operation](@ref AbstractGroupOperation).
 `AbstractGroupManifold`s must implement at least [`inv`](@ref),
 [`group_id`](@ref), [`compose_left`](@ref), and [`translate_diff`](@ref).
-Group manifolds by default assume a left-invariant canonical metric.
+Group manifolds by default forward metric-related operations to the wrapped
+manifold.
 """
 abstract type AbstractGroupManifold{O<:AbstractGroupOperation} <: Manifold end
 
@@ -33,28 +34,6 @@ struct GroupManifold{M<:Manifold,O<:AbstractGroupOperation} <: AbstractGroupMani
 end
 
 is_decorator_manifold(::GroupManifold) = Val(true)
-
-"""
-    LeftInvariantCanonicalMetric()
-
-The left-invariant canonical metric on a Lie group.
-"""
-struct LeftInvariantCanonicalMetric <: RiemannianMetric end
-
-"""
-    RightInvariantCanonicalMetric()
-
-The right-invariant canonical metric on a Lie group.
-"""
-struct RightInvariantCanonicalMetric <: RiemannianMetric end
-
-"""
-    BiInvariantCanonicalMetric()
-
-The bi-invariant canonical metric on a Lie group.
-"""
-struct BiInvariantCanonicalMetric <: RiemannianMetric end
-
 
 """
     ActionDirection
