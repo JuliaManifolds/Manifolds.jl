@@ -44,11 +44,15 @@ function apply(A::AbstractActionOnManifold, x, a)
     return y
 end
 
-"""
+@doc doc"""
     optimal_alignment(A::AbstractActionOnManifold, x1, x2)
 
 Calculate an action element of action `A` acts upon `x1` to produce
-the element closest to `x2`.
+the element closest to `x2` in the metric of the G-manifold:
+```math
+\arg\min_{g \in G} d_M(g \cdot x_1, x_2)
+```
+where $G$ is the group that acts on the G-manifold $M$.
 """
 function optimal_alignment(A::AbstractActionOnManifold, x1, x2)
     error("optimal_alignment not implemented for $(typeof(A)) and points $(typeof(x1)) and $(typeof(x2)).")
