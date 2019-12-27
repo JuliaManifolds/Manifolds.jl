@@ -43,8 +43,13 @@ function check_tangent_vector(M::Circle{ℂ},x,v; kwargs...)
     return nothing
 end
 
-complex_dot(a::Number,b::Number) = (real(a)*real(b) + imag(a)*imag(b))
+@doc doc"""
+    complex_dot(a,b)
+
+compute the inner product of two (complex) numbers with in the complex plane.
+"""
 complex_dot(a,b) = dot(real.(a),real.(b)) + dot(imag.(a),imag.(b))
+complex_dot(a::Number,b::Number) = (real(a)*real(b) + imag(a)*imag(b))
 
 @doc doc"""
     distance(::Circle,x,y)
@@ -54,10 +59,25 @@ the absolute value of the symmetric remainder of `x` and `y` for the real-valued
 case and the angle between both complex numbers in the Gaussian plane for the
 complex-valued case.
 """
+distance(::Circle,args...)
 distance(::Circle{ℝ}, x::Real, y::Real) = abs(sym_rem(x-y))
 distance(::Circle{ℝ}, x, y) = abs(sum(sym_rem.(x-y)))
 distance(::Circle{ℂ}, x, y) = acos(clamp(complex_dot(x, y), -1, 1))
 
+@doc doc"""
+    exp(M,x,v)
+
+compute the exponential map on the [`Circle`](@ref).
+````math
+\exp_xv = (x+v)_{2\pi},
+````
+where $(\cdot)$ is the (symmetric) remainder with respect to division by $2\pi$,
+i.e. in $[-\pi,\pi)$.
+
+For the complex-valued case the formula is the same as for the [`Sphere`](@ref)
+applied to valuedin the complex plane.
+"""
+exp(::Circle,args...)
 exp(::Circle{ℝ}, x::Real, v::Real) = sym_rem(x+v)
 exp!(::Circle{ℝ}, y, x, v) = (y .= sym_rem(x+v))
 function exp(M::Circle{ℂ}, x::Number, v::Number)
@@ -76,6 +96,12 @@ function flat!(::Circle, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSp
 end
 flat(M::Circle, x::Number, w::FVector{TangentSpaceType}) = FVector(CotangentSpace,w.data)
 
+@doc doc"""
+    injectivity_radius(M)
+    injectivity_radius(M,x)
+
+returns the injectivity radius on the [`Circle`](@ref) `M`, i.e. $\pi$.
+"""
 injectivity_radius(::Circle, args...) = π
 
 @doc doc"""
@@ -93,6 +119,8 @@ for the real case and
 ````
 for the complex case interpreting complex numbers in the Gaussian plane.
 """
+inner(::Circle,args...)
+
 @inline inner(::Circle{ℝ}, x, w, v) = dot(v,w)
 @inline inner(::Circle{ℝ}, x::Real, w::Real, v::Real) = v*w
 @inline inner(::Circle{ℂ}, x, w, v) = complex_dot(w, v)
@@ -100,6 +128,20 @@ for the complex case interpreting complex numbers in the Gaussian plane.
 inverse_retract(M::Circle, x::Number, y::Number) = inverse_retract(M, x, y, LogarithmicInverseRetraction())
 inverse_retract(M::Circle, x::Number, y::Number, method::LogarithmicInverseRetraction) = log(M,x,y)
 
+@doc doc"""
+    log(M,x,y)
+
+computes the logarithmic map on the [`Circle`](@ref) `M`.
+````math
+\exp_xv = (y,x)_{2\pi},
+````
+where $(\cdot)$ is the (symmetric) remainder with respect to division by $2\pi$,
+i.e. in $[-\pi,\pi)$.
+
+For the complex-valued case the formula is the same as for the [`Sphere`](@ref)
+applied to valuedin the complex plane.
+"""
+log(::Circle,args...)
 log(::Circle{ℝ}, x::Real, y::Real) = sym_rem(y-x)
 log!(::Circle{ℝ}, v, x, y) = (v .= sym_rem(y-x))
 function log(M::Circle{ℂ}, x::Number, y::Number)
