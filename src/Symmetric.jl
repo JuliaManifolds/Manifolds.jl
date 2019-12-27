@@ -19,31 +19,29 @@ Being slightly inefficient, the matrices are safed as $n\times n$ arrays despite
 
 """
 struct SymmetricMatrices{N,T} <: Manifold end
-SymmetricMatrices(N::Int,T::Type = Real) = SymmetricMatrices{N,T}()
+SymmetricMatrices(n::Int,t::AbstractField=ℝ) = SymmetricMatrices{n,t}()
 
-function representation_size(::SymmetricMatrices{N}) where {N}
-    return (N,N)
-end
+representation_size(::SymmetricMatrices{N}) where {N} = (N,N)
 
 @doc doc"""
-    manifold_dimension(M::SymmetricMatrices{n,Real})
+    manifold_dimension(M::SymmetricMatrices{n,ℝ})
 
 Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` with real-valued entries, i.e. 
 ````math
     \frac{n(n+1)}{2}
 ````
 """
-manifold_dimension(M::SymmetricMatrices{N,Real}) where {N} = div(N*(N+1),2)
+manifold_dimension(M::SymmetricMatrices{N,ℝ}) where {N} = div(N*(N+1),2)
 
 @doc doc"""
-    manifold_dimension(M::SymmetricMatrices{n,Complex})
+    manifold_dimension(M::SymmetricMatrices{n,ℂ})
 
 Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` with complex-valued entries, i.e. 
 ````math
     n(n+1)
 ````
 """
-manifold_dimension(M::SymmetricMatrices{N,Complex}) where {N} = N*(N+1)
+manifold_dimension(M::SymmetricMatrices{N,ℂ}) where {N} = N*(N+1)
 
 @doc doc"""
     project_point!(M::SymmetricMatrices,x)
@@ -176,8 +174,11 @@ of size `(N,N)` with values of type `T`.
 The tolerance for the symmetry of `x` can be set using `kwargs`.
 """
 function check_manifold_point(M::SymmetricMatrices{N,T},x; kwargs...) where {N,T}
-    if !(eltype(x) <: T)
-        return DomainError(eltype(x),"The matrix $(x) does not lie on $M, since its values are not of type $T.")
+    if (T===ℝ) && !(eltype(x) <: Real)
+        return DomainError(eltype(x),"The matrix $(x) does not lie on $M, since its values are not real.")
+    end
+    if (T===ℂ) && !(eltype(x) <: Real) && !(eltype(x) <: Complex)
+        return DomainError(eltype(x),"The matrix $(x) does not lie on $M, since its values are not complex.")
     end
     if size(x) != (N,N)
         return DomainError(size(x),"The point $(x) does not lie on $M, since its size does not match manifold_dimension(M).")
@@ -200,9 +201,11 @@ function check_tangent_vector(M::SymmetricMatrices{N,T},x,v; kwargs...) where {N
     if (check_manifold_point(M,x;kwargs...) !== nothing)
         return check_manifold_point(M,x;kwargs...)
     end
-
-    if !(eltype(v) <: T)
-        return DomainError(eltype(v),"The matrix $(v) is not a tangent to a point on $M, since its values are not of type $T.")
+    if (T===ℝ) && !(eltype(v) <: Real)
+        return DomainError(eltype(v),"The matrix $(v) is not a tangent to a point on $M, since its values are not real.")
+    end
+    if (T===ℂ) && !(eltype(v) <: Real) && !(eltype(v) <: Complex)
+        return DomainError(eltype(v),"The matrix $(v) is not a tangent to a point on $M, since its values are not complex.")
     end
     if size(v) != (N,N)
         return DomainError(size(v),
@@ -214,4 +217,3 @@ function check_tangent_vector(M::SymmetricMatrices{N,T},x,v; kwargs...) where {N
     end
     return nothing
 end
-

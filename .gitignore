@@ -1,4 +1,3 @@
 docs/build
-Manifest.toml
 benchmark/tune.json
 benchmark/results*

@@ -1,13 +1,12 @@
 using LinearAlgebra: diag, Diagonal, svd, SVD, rank, dot
 import Base: \, /, +, -, *, ==, similar, one, copyto!
 @doc doc"""
-    FixedRankMatrices{M,N,K} <: Manifold
+    FixedRankMatrices{M,N,K,T} <: Manifold
 
-The manifold of $m\times n$ real-valued matrices of fixed rank $k$, i.e.
+The manifold of $m\times n$ real-valued (complex-valued) matrices of fixed rank $k$, i.e.
 ````math
 \mathcal M = \{ x \in \mathbb R^{m\times n} : \operatorname{rank}(x) = k \}.
 ````
-
 # Representation with 3 matrix factors
 
 A point $x\in\mathcal M$ can be stored using orthonormal matrices
@@ -31,16 +30,21 @@ T_x\mathcal M = \bigl\{ UMV^\mathrm{T} + U_xV^\mathrm{T} + UV_x^\mathrm{T} :
 where $0_k$ is the $k\times k$ zero matrix. See [`UMVTVector`](@ref) for details.
 
 The (default) metric of this manifold is obtained by restricting the metric
-on $\mathbb R^{m\times n}$ to the tangent bundle.
+on $\mathbb R^{m\times n}$ to the tangent bundle. This implementation follows[^Vandereycken2013].
 
-This representation follows
-> Bart Vandereycken: "Low-rank matrix completion by Riemannian Optimization,
-> SIAM Journal on Optimization, 23(2), pp. 1214–1236, 2013.
-> doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
-> arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
+# Constructor
+    FixedRankMatrics(m,n,k,t=ℝ)
+
+generate the manifold of `m`-by-`n` real-valued matrices of rank `k`.
+
+[^Vandereycken2013]:
+    > Bart Vandereycken: "Low-rank matrix completion by Riemannian Optimization,
+    > SIAM Journal on Optiomoization, 23(2), pp. 1214–1236, 2013.
+    > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
+    > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
 struct FixedRankMatrices{M,N,K,T} <: Manifold end
-FixedRankMatrices(m::Int, n::Int, k::Int, T::Type = Real) = FixedRankMatrices{m,n,k,T}()
+FixedRankMatrices(m::Int, n::Int, k::Int, t::AbstractField=ℝ) = FixedRankMatrices{m,n,k,t}()
 
 @doc doc"""
     SVDMPoint <: MPoint
@@ -152,7 +156,7 @@ isapprox(::FixedRankMatrices, x::SVDMPoint, y::SVDMPoint; kwargs...) = isapprox(
 isapprox(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector; kwargs...) = isapprox(x.U*v.M*x.Vt + v.U*x.Vt + x.U*v.Vt, x.U*w.M*x.Vt + w.U*x.Vt + x.U*w.Vt; kwargs...)
 
 @doc doc"""
-    manifold_dimension(M::FixedRankMatrices{M,N,k,Real})
+    manifold_dimension(M::FixedRankMatrices{M,N,k,ℝ})
 
 returns the manifold dimension for the real-valued matrices of dimension `M`x`N`
     of rank `k`, namely
@@ -161,10 +165,10 @@ returns the manifold dimension for the real-valued matrices of dimension `M`x`N`
 k(M+N-k)
 ````
 """
-manifold_dimension(::FixedRankMatrices{M,N,k,Real}) where {M,N,k} = (M+N-k)*k
+manifold_dimension(::FixedRankMatrices{M,N,k,ℝ}) where {M,N,k} = (M+N-k)*k
 
 @doc doc"""
-    manifold_dimension(M::FixedRankMatrices{M,N,k,Real})
+    manifold_dimension(M::FixedRankMatrices{M,N,k,ℂ})
 
 returns the manifold dimension for the complex-valued matrices of dimension `M`x`N`
     of rank `k`, namely
@@ -173,7 +177,7 @@ returns the manifold dimension for the complex-valued matrices of dimension `M`x
 2k(M+N-k)
 ````
 """
-manifold_dimension(::FixedRankMatrices{M,N,k,Complex}) where {M,N,k} = 2*(M+N-k)*k
+manifold_dimension(::FixedRankMatrices{M,N,k,ℂ}) where {M,N,k} = 2*(M+N-k)*k
 
 @doc doc"""
     project_tangent!(M,vto,x,A)
@@ -206,7 +210,7 @@ end
 function project_tangent!(F::FixedRankMatrices, vto::UMVTVector, x::SVDMPoint, v::UMVTVector)
     return project_tangent!(F,vto,x, v.U * v.M * v.Vt)
 end
-representation_size(F::FixedRankMatrices{M,N,k,T}) where {M,N,k,T} = (M,N)
+representation_size(F::FixedRankMatrices{M,N}) where {M,N} = (M,N)
 
 @doc doc"""
     retract!(M, y, x, v, ::PolarRetraction)
@@ -220,7 +224,7 @@ where $U_k S_k V_k^\mathrm{T}$ is the shortened singular value decomposition $US
 in the sense that $S_k$ is the diagonal matrix of size $k\times k$ with the $k$ largest
 singular values and $U$ and $V$ are shortened accordingly.
 """
-function retract!(::FixedRankMatrices{M,N,k,T}, y::SVDMPoint, x::SVDMPoint, v::UMVTVector, ::PolarRetraction) where {M,N,k,T}
+function retract!(::FixedRankMatrices{M,N,k}, y::SVDMPoint, x::SVDMPoint, v::UMVTVector, ::PolarRetraction) where {M,N,k}
     s = svd( x.U * Diagonal(x.S) * x.Vt + (x.U * v.M * x.Vt + v.U*x.Vt + v.U*v.Vt) )
     y.U .= s.U[:,1:k]
     y.S .= s.S[1:k]
