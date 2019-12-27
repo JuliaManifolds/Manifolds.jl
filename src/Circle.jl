@@ -22,7 +22,7 @@ function check_manifold_point(M::Circle{ℝ},x; kwargs...)
     return nothing
 end
 function check_manifold_point(M::Circle{ℂ},x; kwargs...)
-    if !isapprox(abs(x), 1.; kwargs...)
+    if !isapprox(sum(abs.(x)), 1.; kwargs...)
         return DomainError(abs(x), "The point $(x) does not lie on the $(M) since its norm is not 1.")
     end
     return nothing
@@ -44,7 +44,7 @@ function check_tangent_vector(M::Circle{ℂ},x,v; kwargs...)
 end
 
 complex_dot(a::Number,b::Number) = (real(a)*real(b) + imag(a)*imag(b))
-complex_dot(a,b) = abs(dot(a,b))
+complex_dot(a,b) = dot(real.(a),real.(b)) + dot(imag.(a),imag.(b))
 
 @doc doc"""
     distance(::Circle,x,y)
@@ -97,8 +97,8 @@ for the complex case interpreting complex numbers in the Gaussian plane.
 @inline inner(::Circle{ℝ}, x::Real, w::Real, v::Real) = v*w
 @inline inner(::Circle{ℂ}, x, w, v) = complex_dot(w, v)
 
-inverse_retract(M::Circle, x, y) = inverse_retract(M, x, y, LogarithmicInverseRetraction())
-inverse_retract(M::Circle, x, y, method::LogarithmicInverseRetraction) = log(M,x,y)
+inverse_retract(M::Circle, x::Number, y::Number) = inverse_retract(M, x, y, LogarithmicInverseRetraction())
+inverse_retract(M::Circle, x::Number, y::Number, method::LogarithmicInverseRetraction) = log(M,x,y)
 
 log(::Circle{ℝ}, x::Real, y::Real) = sym_rem(y-x)
 log!(::Circle{ℝ}, v, x, y) = (v .= sym_rem(y-x))
@@ -124,7 +124,7 @@ function log!(M::Circle{ℂ}, v, x, y)
     else
         cosθ = cosθ > 1 ? one(cosθ) : cosθ
         θ = acos(cosθ)
-        v .-= (y - cosθ*x)/usinc(θ)
+        v .= (y - cosθ*x)/usinc(θ)
     end
     project_tangent!(M, v, x, v)
     return v
@@ -198,7 +198,7 @@ function vector_transport_to!(M::Circle{ℂ}, vto, x, v, y, ::ParallelTransport)
     vl = norm(M, x, v_xy)
     vto .= v
     if vl > 0
-        factor = 2*complex_dot(v, y)/(abs(x + y)^2)
+        factor = 2*complex_dot(v, y)/(sum(abs.(x + y).^2))
         vto .-= factor.*(x + y)
     end
     return vto

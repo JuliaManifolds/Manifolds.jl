@@ -68,6 +68,18 @@ include("utils.jl")
                 exp_log_atol_multiplier = 2.0,
                 is_tangent_atol_multiplier = 2.0,
             )
+            ptsS = SVector.(pts)
+            test_manifold(
+                Mc,
+                ptsS,
+                test_forward_diff = false,
+                test_reverse_diff = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_vector_transport = true,
+                exp_log_atol_multiplier = 2.0,
+                is_tangent_atol_multiplier = 2.0,
+            )
         end
     end
 end
