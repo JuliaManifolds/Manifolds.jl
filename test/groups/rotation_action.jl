@@ -22,7 +22,7 @@ include("group_utils.jl")
                MVector{2, Float32}]
 
 
-    @test action_on(A) == Euclidean(2)
+    @test g_manifold(A) == Euclidean(2)
     @test base_group(A) == G
     @test base_manifold(G) == M
 

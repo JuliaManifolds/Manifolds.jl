@@ -15,12 +15,12 @@ function base_group(A::AbstractActionOnManifold)
 end
 
 """
-    action_on(A::AbstractActionOnManifold)
+    g_manifold(A::AbstractActionOnManifold)
 
 The manifold the action `A` acts upon.
 """
-function action_on(A::AbstractActionOnManifold)
-    error("action_on not implemented for $(typeof(A)).")
+function g_manifold(A::AbstractActionOnManifold)
+    error("g_manifold not implemented for $(typeof(A)).")
 end
 
 """
@@ -91,5 +91,5 @@ function center_of_orbit(
     )
 
     alignments = map(p -> optimal_alignment(A, q, p), pts)
-    return mean(action_on(A), alignments, mean_method)
+    return mean(g_manifold(A), alignments, mean_method)
 end

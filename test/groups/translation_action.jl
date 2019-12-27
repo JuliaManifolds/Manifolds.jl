@@ -21,7 +21,7 @@ include("group_utils.jl")
                SizedMatrix{2, 3, Float32},
                MMatrix{2, 3, Float32}]
 
-    @test action_on(A) == M
+    @test g_manifold(A) == M
     @test base_group(A) == G
     @test base_manifold(G) == M
 

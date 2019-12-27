@@ -22,7 +22,7 @@ function base_group(A::RotationAction)
     return A.SOn
 end
 
-function action_on(A::RotationAction)
+function g_manifold(A::RotationAction)
     return A.M
 end
 

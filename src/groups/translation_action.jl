@@ -22,6 +22,6 @@ function base_group(A::TranslationAction)
     return A.Rn
 end
 
-function action_on(A::TranslationAction)
+function g_manifold(A::TranslationAction)
     return A.M
 end

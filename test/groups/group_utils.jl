@@ -18,7 +18,7 @@ function test_action(
     )
 
     G = base_group(A)
-    M = action_on(A)
+    M = g_manifold(A)
     e = Identity(G)
     @testset "Type calculation and adding identity element" begin
         for ap in a_pts
