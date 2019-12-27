@@ -23,7 +23,7 @@ generates the $\mathbb H^{n}\subset \mathbb R^{n+1}$
 struct Hyperbolic{N} <: Manifold end
 Hyperbolic(n::Int) = Hyperbolic{n}()
 
-"""
+@doc doc"""
     MinkowskiMetric <: LorentzMetric
 
 The Minkowski metric is a [`LorentzMetric`](@ref) with, i.e.
