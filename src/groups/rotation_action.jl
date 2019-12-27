@@ -9,12 +9,12 @@ struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal} <: AbstractActionOnMa
     SOn::TSO
 end
 
-function apply!(A::RotationAction, y, x, a)
+function apply!(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N}}, y, x, a) where N
     mul!(y, a, x)
     return y
 end
 
-function apply(A::RotationAction, x, a)
+function apply(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N}}, x, a) where N
     return a * x
 end
 
@@ -26,7 +26,7 @@ function g_manifold(A::RotationAction)
     return A.M
 end
 
-function optimal_alignment(A::RotationAction{<:Euclidean}, x1, x2)
+function optimal_alignment(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N}}, x1, x2) where N
     is_manifold_point(A.M, x1, true)
     is_manifold_point(A.M, x2, true)
 
