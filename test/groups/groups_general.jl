@@ -12,6 +12,7 @@ end
     @testset "Not implemented operation" begin
         G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
         x = [1.0, 2.0]
+        v = [2.0, 3.0]
 
         @test is_decorator_manifold(G) === Val(true)
 
@@ -39,6 +40,20 @@ end
         @test_throws ErrorException inverse_translate!(G, x, x, x)
         @test_throws ErrorException inverse_translate!(G, x, x, x, LeftAction())
         @test_throws ErrorException inverse_translate!(G, x, x, x, RightAction())
+
+        @test_throws ErrorException translate_diff(G, x, x, v)
+        @test_throws ErrorException translate_diff(G, x, x, v, LeftAction())
+        @test_throws ErrorException translate_diff(G, x, x, v, RightAction())
+        @test_throws ErrorException translate_diff!(G, v, x, x, v)
+        @test_throws ErrorException translate_diff!(G, v, x, x, v, LeftAction())
+        @test_throws ErrorException translate_diff!(G, v, x, x, v, RightAction())
+
+        @test_throws ErrorException inverse_translate_diff(G, x, x, v)
+        @test_throws ErrorException inverse_translate_diff(G, x, x, v, LeftAction())
+        @test_throws ErrorException inverse_translate_diff(G, x, x, v, RightAction())
+        @test_throws ErrorException inverse_translate_diff!(G, v, x, x, v)
+        @test_throws ErrorException inverse_translate_diff!(G, v, x, x, v, LeftAction())
+        @test_throws ErrorException inverse_translate_diff!(G, v, x, x, v, RightAction())
     end
 
     @testset "Addition operation" begin

@@ -18,6 +18,7 @@ function test_action(
     )
 
     G = base_group(A)
+    GM = base_manifold(G)
     M = g_manifold(A)
     e = Identity(G)
     @testset "Type calculation and adding identity element" begin
@@ -103,6 +104,25 @@ function test_action(
             translate!(G, as, ai, aip, RightAction())
             @test isapprox(G, as, translate(G, ai, aip, RightAction()))
         end
+    end
+
+    @testset "translate_diff" begin
+        tv = log(GM, a_pts[1], a_pts[2])
+        tvd = translate_diff(G, a_pts[2], a_pts[1], tv)
+        @test is_tangent_vector(G, compose_left(G, a_pts[1], a_pts[2]), tvd)
+        tvdi = inverse_translate_diff(G, inv(G, a_pts[2]), a_pts[1], tv)
+        @test isapprox(G, a_pts[1], tvd, tvdi)
+    end
+
+    @testset "mutating translate_diff!" begin
+        tv = log(GM, a_pts[1], a_pts[2])
+        tvd = similar(tv)
+        translate_diff!(G, tvd, a_pts[2], a_pts[1], tv)
+        @test isapprox(GM, a_pts[1], tvd, translate_diff(G, a_pts[2], a_pts[1], tv))
+
+        tvdi = similar(tv)
+        inverse_translate_diff!(G, tvdi, inv(G, a_pts[2]), a_pts[1], tv)
+        @test isapprox(GM, a_pts[1], tvd, tvdi)
     end
 
     @testset "Action of group identity" begin
