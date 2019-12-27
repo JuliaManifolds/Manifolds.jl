@@ -256,12 +256,12 @@ end
 
 For group elements $x,y \in G$ and tangent vector $v_y \in T_y G$, compute the
 action of the differential of the translation by $x$ on $v_y$, written as
-$(d\tau_x)_y (v_y)$, with the specified left or right convention. The
+$(\mathrm{d}\tau_x)_y (v_y)$, with the specified left or right convention. The
 differential transports vectors:
 ```math
 \begin{aligned}
-(dL_x)_y (v_y) &\colon T_y G \to T_{x \cdot y} G\\
-(dR_x)_y (v_y) &\colon T_y G \to T_{y \cdot x} G\\
+(\mathrm{d}L_x)_y (v_y) &\colon T_y G \to T_{x \cdot y} G\\
+(\mathrm{d}R_x)_y (v_y) &\colon T_y G \to T_{y \cdot x} G\\
 \end{aligned}
 ```
 """
@@ -288,12 +288,12 @@ end
 
 For group elements $x,y \in G$ and tangent vector $v_y \in T_y G$, compute the
 inverse of the action of the differential of the translation by $x$ on $v_y$,
-written as $((d\tau_x)_y)^{-1} (v_y) = (d\tau_{x^{-1}})_y (v_y)$, with the
+written as $((\mathrm{d}\tau_x)_y)^{-1} (v_y) = (\mathrm{d}\tau_{x^{-1}})_y (v_y)$, with the
 specified left or right convention. The differential transports vectors:
 ```math
 \begin{aligned}
-((dL_x)_y)^{-1} (v_y) &\colon T_y G \to T_{x^{-1} \cdot y} G\\
-((dR_x)_y)^{-1} (v_y) &\colon T_y G \to T_{y \cdot x^{-1}} G\\
+((\mathrm{d}L_x)_y)^{-1} (v_y) &\colon T_y G \to T_{x^{-1} \cdot y} G\\
+((\mathrm{d}R_x)_y)^{-1} (v_y) &\colon T_y G \to T_{y \cdot x^{-1}} G\\
 \end{aligned}
 ```
 """
