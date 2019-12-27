@@ -11,7 +11,7 @@ abstract type AbstractActionOnManifold end
 The group that acts in action `A`.
 """
 function base_group(A::AbstractActionOnManifold)
-    error("Function base_group is not yet defined for type $(typeof(A)).")
+    error("base_group not implemented for $(typeof(A)).")
 end
 
 """
@@ -20,7 +20,7 @@ end
 The manifold the action `A` acts upon.
 """
 function action_on(A::AbstractActionOnManifold)
-    error("Function action_on is not yet defined for type $(typeof(A)).")
+    error("action_on not implemented for $(typeof(A)).")
 end
 
 """
@@ -30,7 +30,7 @@ Apply action `a` to the point `x`. The action is specified by `A`.
 The result is saved in `y`.
 """
 function apply!(A::AbstractActionOnManifold, y, x, a)
-    error("Function apply! is not yet defined for types $(typeof(A)), $(typeof(y)), $(typeof(x)) and $(typeof(a)).")
+    error("apply! not implemented for action $(typeof(A)) and points $(typeof(y)), $(typeof(x)) and $(typeof(a)).")
 end
 
 """
@@ -51,7 +51,7 @@ Calculate an action element of action `A` acts upon `x1` to produce
 the element closest to `x2`.
 """
 function optimal_alignment(A::AbstractActionOnManifold, x1, x2)
-    error("Function optimal_alignment is not yet defined for types $(typeof(A)), $(typeof(x1)) and $(typeof(x2)).")
+    error("optimal_alignment not implemented for $(typeof(A)) and points $(typeof(x1)) and $(typeof(x2)).")
 end
 
 """
