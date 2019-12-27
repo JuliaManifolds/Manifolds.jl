@@ -30,14 +30,14 @@ The manifold is named after [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Ed
 generate the (real-valued) Stiefel manifold of $m\times n$ dimensional orthonormal matrices.
 """
 struct Stiefel{M,N,T} <: Manifold end
-Stiefel(m::Int, n::Int,T::Type = Real) = Stiefel{m,n,T}()
+Stiefel(m::Int, n::Int,t::AbstractField=ℝ) = Stiefel{m,n,t}()
 
 function check_manifold_point(S::Stiefel{M,N,T},x; kwargs...) where {M,N,T}
-    if (T <: Real) && !(eltype(x) <: Real)
+    if (T===ℝ) && !(eltype(x) <: Real)
         return DomainError(eltype(x),
             "The matrix $(x) is not a real-valued matrix, so it does noe lie on the Stiefel manifold of dimension ($(M),$(N)).")
     end
-    if (T <: Complex) && !(eltype(x) <: Real) && !(eltype(x) <: Complex)
+    if (T===ℂ) && !(eltype(x) <: Real) && !(eltype(x) <: Complex)
         return DomainError(eltype(x),
             "The matrix $(x) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Stiefel manifold of dimension ($(M),$(N)).")
     end
@@ -57,11 +57,11 @@ function check_tangent_vector(S::Stiefel{M,N,T},x,v; kwargs...) where {M,N,T}
     if (t != nothing)
         return t
     end
-    if (T <: Real) && !(eltype(v) <: Real)
+    if (T===ℝ) && !(eltype(v) <: Real)
         return DomainError(eltype(v),
             "The matrix $(v) is not a real-valued matrix, so it can not be a tangent vector to the Stiefel manifold of dimension ($(M),$(N)).")
     end
-    if (T <: Complex) && !(eltype(v) <: Real) && !(eltype(v) <: Complex)
+    if (T===ℂ) && !(eltype(v) <: Real) && !(eltype(v) <: Complex)
         return DomainError(eltype(v),
             "The matrix $(v) is neiter real- nor complex-valued matrix, so it can not bea tangent vectorto the complex Stiefel manifold of dimension ($(M),$(N)).")
     end
@@ -142,7 +142,7 @@ This implementation follows the Lyapunov approach.
     > Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
     > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
 """
-function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::PolarInverseRetraction) where {M,N,T}
+function inverse_retract!(::Stiefel, v, x, y, ::PolarInverseRetraction)
     A = x'*y
     H = -2*one(x'*x)
     B = lyap(A,H)
@@ -163,7 +163,7 @@ in [^KanekoFioriTanaka2013].
     > Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
     > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
 """
-function inverse_retract!(::Stiefel{M,N,T}, v, x, y, ::QRInverseRetraction) where {M,N,T}
+function inverse_retract!(::Stiefel{M,N}, v, x, y, ::QRInverseRetraction) where {M,N}
   A = x'*y
   R = zeros(typeof(one(eltype(x))*one(eltype(y))),N,N)
   for i = 1:N
@@ -188,8 +188,8 @@ and for $\mathbb{K}=\mathbb{C}$
 
 $2nk - k^2.$
 """
-manifold_dimension(::Stiefel{M,N,Real}) where {M,N} = M*N - div(N*(N+1),2)
-manifold_dimension(::Stiefel{M,N,Complex}) where {M,N} = 2*M*N - N*N
+manifold_dimension(::Stiefel{M,N,ℝ}) where {M,N} = M*N - div(N*(N+1),2)
+manifold_dimension(::Stiefel{M,N,ℂ}) where {M,N} = 2*M*N - N*N
 
 
 @doc doc"""
@@ -203,7 +203,7 @@ The formula reads
 where $\operatorname{Sym}(y)$ is the symmetrization of $y$, e.g. by
 $\operatorname{Sym}(y) = \frac{\bar y^{\mathrm{T}}+y}{2}$.
 """
-project_tangent!(::Stiefel{M,N,T}, w, x, v) where {M,N,T} = ( w.= v - x * Symmetric( x'*v ) )
+project_tangent!(::Stiefel, w, x, v) = ( w.= v - x * Symmetric( x'*v ) )
 
 @doc doc"""
     retract!(M, y, x, v, ::PolarRetraction)
@@ -214,7 +214,7 @@ compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 y = \operatorname{retr}_x v = U\bar{V}^\mathrm{T}.
 ````
 """
-function retract!(::Stiefel{M,N,T}, y, x, v, ::PolarRetraction) where {M,N,T}
+function retract!(::Stiefel, y, x, v, ::PolarRetraction)
     s = svd(x+v)
     mul!(y, s.U, s.V')
     return y
@@ -235,14 +235,14 @@ D = \operatorname{diag}\bigl(\operatorname{sgn}(R_{ii}+0,5)_{i=1}^n \bigr),
 where $\operatorname{sgn}(x) = \begin{cases} 1 &\text{ for } x > 0,\\ 0 & \text{ for } x = 0,\\ -1&\text{ for } x < 0.
 \end{cases}$
 """
-function retract!(::Stiefel{M,N,T}, y, x, v, ::QRRetraction) where {M,N,T}
+function retract!(::Stiefel, y, x, v, ::QRRetraction)
     qrfac = qr(x+v)
     d = diag(qrfac.R)
-    D = Diagonal( sign.( sign.(d .+ convert(T, 0.5))) )
+    D = Diagonal( sign.( sign.(d .+ 0.5)) )
     y .= Matrix(qrfac.Q) * D
     return y
 end
 
-representation_size(::Stiefel{M,N,T}) where {M,N,T} = (M,N)
+representation_size(::Stiefel{M,N}) where {M,N} = (M,N)
 
 zero_tangent_vector!(::Stiefel,v,x) = fill!(v,0)

@@ -9,6 +9,7 @@ Random.seed!(42)
     Ms = Sphere(2)
     Ms1 = PowerManifold(Ms, 5)
     @test manifold_dimension(Ms1) == 10
+    @test injectivity_radius(Ms1) == π
     Ms2 = PowerManifold(Ms, 5, 7)
     @test manifold_dimension(Ms2) == 70
     Mr = Manifolds.Rotations(3)
@@ -50,6 +51,7 @@ Random.seed!(42)
     for T in types_s1
         @testset "Type $(trim(string(T)))..." begin
             pts1 = [convert(T, rand(power_s1_pt_dist)) for _ in 1:3]
+            @test injectivity_radius(Ms1,pts1[1]) == π
             test_manifold(Ms1,
                 pts1;
                 test_reverse_diff = true,
