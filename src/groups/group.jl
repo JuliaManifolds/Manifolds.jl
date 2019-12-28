@@ -86,10 +86,11 @@ end
 (e::Identity)(x) = identity(e.group, x)
 
 @doc doc"""
-    inv(G::AbstractGroupManifold, x)
+    inv!(G::AbstractGroupManifold, y, x)
 
 Inverse $x^{-1}$ of an element $x$, such that
 $x \circ x^{-1} = x^{-1} \circ x = e$.
+The result is saved to `y`.
 """
 function inv!(G::AbstractGroupManifold, y, x)
     error("inv not implemented on $(typeof(G)) for point $(typeof(x))")
@@ -100,6 +101,12 @@ function inv!(G::AbstractGroupManifold, y, e::Identity)
     return y
 end
 
+@doc doc"""
+    inv(G::AbstractGroupManifold, x)
+
+Inverse $x^{-1}$ of an element $x$, such that
+$x \circ x^{-1} = x^{-1} \circ x = e$.
+"""
 function inv(G::AbstractGroupManifold, x)
     y = similar_result(G, inv, x)
     inv!(G, y, x)
