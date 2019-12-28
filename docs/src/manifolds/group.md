@@ -22,11 +22,11 @@ Modules = [Manifolds]
 Pages = ["groups/special_orthogonal.jl"]
 Order = [:type, :function]
 ```
-## Euclidean group
+## Translation group
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["groups/euclidean_group.jl"]
+Pages = ["groups/translation_group.jl"]
 Order = [:type, :function]
 ```
 

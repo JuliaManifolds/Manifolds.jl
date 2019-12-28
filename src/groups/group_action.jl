@@ -24,9 +24,9 @@ function g_manifold(A::AbstractActionOnManifold)
 end
 
 """
-    apply(A::ActionOnManifold, x, a)
+    apply(A::AbstractActionOnManifold, x, a)
 
-Apply action `a` to the point `x`. The action is specified by `A`.
+Apply action `a` to the point `x` with the rule specified by `A`.
 The result is saved in `y`.
 """
 function apply!(A::AbstractActionOnManifold, y, x, a)
@@ -47,7 +47,7 @@ end
 @doc doc"""
     optimal_alignment(A::AbstractActionOnManifold, x1, x2)
 
-Calculate an action element of action `A` acts upon `x1` to produce
+Calculate an action element of action `A` that acts upon `x1` to produce
 the element closest to `x2` in the metric of the G-manifold:
 ```math
 \arg\min_{g \in G} d_M(g \cdot x_1, x_2)
