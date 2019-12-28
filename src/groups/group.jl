@@ -89,7 +89,7 @@ end
     inv(G::AbstractGroupManifold, x)
 
 Inverse $x^{-1}$ of an element $x$, such that
-$x \cdot x^{-1} = x^{-1} \cdot x = e$.
+$x \circ x^{-1} = x^{-1} \circ x = e$.
 """
 function inv!(G::AbstractGroupManifold, y, x)
     error("inv not implemented on $(typeof(G)) for point $(typeof(x))")
@@ -116,7 +116,7 @@ end
     identity(G::AbstractGroupManifold, x)
 
 Identity element $e$, such that for any element $x$,
-$x \cdot e = e \cdot x = x$. The returned element is of a similar type to `x`.
+$x \circ e = e \circ x = x$. The returned element is of a similar type to `x`.
 """
 function identity(G::AbstractGroupManifold, x)
     y = similar_result(G, inv, x)
@@ -182,8 +182,8 @@ For group elements $x,y \in G$, translate $y$ by $x$ with the specified
 convention, either left $L_x$ or right $R_x$, defined as
 ```math
 \begin{aligned}
-L_x &\colon y \mapsto x \cdot y\\
-R_x &\colon y \mapsto y \cdot x.
+L_x &\colon y \mapsto x \circ y\\
+R_x &\colon y \mapsto y \circ x.
 \end{aligned}
 ```
 """
@@ -198,8 +198,8 @@ For group elements $x,y \in G$, translate $y$ by $x$ with the specified
 convention, either left $L_x$ or right $R_x$, defined as
 ```math
 \begin{aligned}
-L_x &\colon y \mapsto x \cdot y\\
-R_x &\colon y \mapsto y \cdot x.
+L_x &\colon y \mapsto x \circ y\\
+R_x &\colon y \mapsto y \circ x.
 \end{aligned}
 ```
 Result of the operation is saved in `z`.
@@ -215,8 +215,8 @@ For group elements $x,y \in G$, inverse translate $y$ by $x$ with the specified
 convention, either left $L_x^{-1}$ or right $R_x^{-1}$, defined as
 ```math
 \begin{aligned}
-L_x^{-1} &\colon y \mapsto x^{-1} \cdot y\\
-R_x^{-1} &\colon y \mapsto y \cdot x^{-1}.
+L_x^{-1} &\colon y \mapsto x^{-1} \circ y\\
+R_x^{-1} &\colon y \mapsto y \circ x^{-1}.
 \end{aligned}
 ```
 """
@@ -238,8 +238,8 @@ For group elements $x,y \in G$, inverse translate $y$ by $x$ with the specified
 convention, either left $L_x^{-1}$ or right $R_x^{-1}$, defined as
 ```math
 \begin{aligned}
-L_x^{-1} &\colon y \mapsto x^{-1} \cdot y\\
-R_x^{-1} &\colon y \mapsto y \cdot x^{-1}.
+L_x^{-1} &\colon y \mapsto x^{-1} \circ y\\
+R_x^{-1} &\colon y \mapsto y \circ x^{-1}.
 \end{aligned}
 ```
 Result is saved in `z`.
@@ -266,8 +266,8 @@ $(\mathrm{d}\tau_x)_y (v_y)$, with the specified left or right convention. The
 differential transports vectors:
 ```math
 \begin{aligned}
-(\mathrm{d}L_x)_y (v_y) &\colon T_y G \to T_{x \cdot y} G\\
-(\mathrm{d}R_x)_y (v_y) &\colon T_y G \to T_{y \cdot x} G\\
+(\mathrm{d}L_x)_y (v_y) &\colon T_y G \to T_{x \circ y} G\\
+(\mathrm{d}R_x)_y (v_y) &\colon T_y G \to T_{y \circ x} G\\
 \end{aligned}
 ```
 """
@@ -298,8 +298,8 @@ written as $((\mathrm{d}\tau_x)_y)^{-1} (v_y) = (\mathrm{d}\tau_{x^{-1}})_y (v_y
 specified left or right convention. The differential transports vectors:
 ```math
 \begin{aligned}
-((\mathrm{d}L_x)_y)^{-1} (v_y) &\colon T_y G \to T_{x^{-1} \cdot y} G\\
-((\mathrm{d}R_x)_y)^{-1} (v_y) &\colon T_y G \to T_{y \cdot x^{-1}} G\\
+((\mathrm{d}L_x)_y)^{-1} (v_y) &\colon T_y G \to T_{x^{-1} \circ y} G\\
+((\mathrm{d}R_x)_y)^{-1} (v_y) &\colon T_y G \to T_{y \circ x^{-1}} G\\
 \end{aligned}
 ```
 """
