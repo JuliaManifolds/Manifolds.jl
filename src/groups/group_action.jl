@@ -74,8 +74,8 @@ end
     center_of_orbit(
         A::AbstractGroupAction,
         pts,
-        q
-        [, mean_method::AbstractEstimationMethod = GradientDescentEstimation()]
+        q,
+        mean_method::AbstractEstimationMethod = GradientDescentEstimation()
     )
 
 Calculate an action element of action `A` that constitutes mean element of orbit
