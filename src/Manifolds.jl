@@ -85,6 +85,7 @@ import ManifoldsBase: base_manifold,
     representation_size,
     retract,
     retract!,
+    similar_result,
     shortest_geodesic,
     vector_transport_along,
     vector_transport_along!,
@@ -107,6 +108,25 @@ using Random: AbstractRNG
 using FiniteDifferences
 using UnsafeArrays
 using Einsum: @einsum
+
+"""
+    AbstractField
+
+An abstract type to represent the field matrix manifolds are build upon,
+following the idea of [TensorKit](https://github.com/Jutho/TensorKit.jl)
+in order to hace concrete field types to dispatch on. The two most common
+field types are `RealNumbers` (`ℝ` for short) and `ComplexNumbers` (`ℂ`).
+"""
+abstract type AbstractField end
+
+struct RealNumbers <: AbstractField end
+struct ComplexNumbers <: AbstractField end
+
+const ℝ = RealNumbers()
+const ℂ = ComplexNumbers()
+
+Base.show(io::IO, ::RealNumbers) = print(io, "ℝ")
+Base.show(io::IO, ::ComplexNumbers) = print(io, "ℂ")
 
 """
     AbstractEstimationMethod
@@ -205,6 +225,7 @@ include("ProductManifold.jl")
 include("PowerManifold.jl")
 
 include("CholeskySpace.jl")
+include("Circle.jl")
 include("Euclidean.jl")
 include("FixedRankMatrices.jl")
 include("Grassmann.jl")
@@ -242,13 +263,15 @@ end
 # Base Types
 export Manifold,
     Euclidean,
+    Circle,
     Sphere,
     SymmetricMatrices,
     MPoint,
     TVector,
     CoTVector,
     SVDMPoint,
-    UMVTVector
+    UMVTVector,
+    ℝ, ℂ
 # decorator manifolds
 export ArrayManifold,
     ArrayMPoint,
@@ -316,6 +339,7 @@ export base_manifold,
     christoffel_symbols_first,
     christoffel_symbols_second,
     christoffel_symbols_second_jacobian,
+    complex_dot,
     det_local_metric,
     distance,
     einstein_tensor,
@@ -371,8 +395,10 @@ export base_manifold,
     sharp,
     sharp!,
     shortest_geodesic,
+    similar_result,
     skewness,
     std,
+    sym_rem,
     submanifold,
     submanifold_component,
     tangent_orthonormal_basis,

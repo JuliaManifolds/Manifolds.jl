@@ -2,7 +2,7 @@ include("utils.jl")
 
 @testset "Stiefel" begin
     M = Stiefel(3,2)
-    Mc = Stiefel(3,2,Complex)
+    Mc = Stiefel(3,2,ℂ)
     @testset "Stiefel Basics" begin
         @test representation_size(M) == (3,2)
         @test representation_size(Mc) == (3,2)

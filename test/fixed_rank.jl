@@ -2,7 +2,7 @@ include("utils.jl")
 
 @testset "fixed Rank" begin
     M = FixedRankMatrices(3,2,2)
-    Mc = FixedRankMatrices(3,2,2,Complex)
+    Mc = FixedRankMatrices(3,2,2,ℂ)
     x = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
     v = UMVTVector([0. 0.; 0. 0.; 1. 1.], [1. 0.; 0. 1.],zeros(2,2))
     @test inner(M,x,v,v) == norm(M,x,v)^2   

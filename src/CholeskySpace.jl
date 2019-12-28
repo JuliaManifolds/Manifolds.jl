@@ -19,7 +19,6 @@ CholeskySpace(n::Int) = CholeskySpace{n}()
 strictlyLowerTriangular(x) = LowerTriangular(x) - Diagonal(diag(x))
 strictlyUpperTriangular(x) = UpperTriangular(x) - Diagonal(diag(x))
 
-
 @generated representation_size(::CholeskySpace{N}) where N = (N,N)
 
 @generated manifold_dimension(::CholeskySpace{N}) where N = div(N*(N+1), 2)
@@ -36,7 +35,7 @@ The formula reads
     g_{x}(v,w) = \sum_{i>j} v_{ij}w_{ij} + \sum_{j=1}^m v_{ii}w_{ii}x_{ii}^{-2}
 ````
 """
-inner(::CholeskySpace{N},x,v,w) where N = sum(strictlyLowerTriangular(v).*strictlyLowerTriangular(w)) + sum(diag(v).*diag(w)./( diag(x).^2 ))
+inner(::CholeskySpace,x,v,w) = sum(strictlyLowerTriangular(v).*strictlyLowerTriangular(w)) + sum(diag(v).*diag(w)./( diag(x).^2 ))
 
 @doc doc"""
     distance(M,x,y)
@@ -52,10 +51,12 @@ d_{\mathcal M}(x,y) = \sqrt{
 }
 ````
 """
-distance(::CholeskySpace{N},x,y) where N = sqrt(
-  sum( (strictlyLowerTriangular(x) - strictlyLowerTriangular(y)).^2 ) + sum( (log.(diag(x)) - log.(diag(y))).^2 )
-)
-
+function distance(::CholeskySpace,x,y)
+    return sqrt(
+        sum( (strictlyLowerTriangular(x) - strictlyLowerTriangular(y)).^2 )
+        + sum( (log.(diag(x)) - log.(diag(y))).^2 )
+    )
+end
 @doc doc"""
     exp!(M,y,x,v)
 
@@ -70,7 +71,7 @@ matrix `v` and return the result in `y`. The formula reads
 where $\lfloor x\rfloor$ denotes the strictly lower triangular matrix of $x$ and
 $\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
-function exp!(::CholeskySpace{N},y,x,v) where N
+function exp!(::CholeskySpace,y,x,v)
     y .= strictlyLowerTriangular(x) + strictlyLowerTriangular(v) + Diagonal(diag(x))*Diagonal(exp.(diag(v)./diag(x)))
     return y
 end
@@ -88,7 +89,7 @@ matrx `v` and return the result in `y`. The formula reads
 where $\lfloor x\rfloor$ denotes the strictly lower triangular matrix of $x$ and
 $\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
-function log!(::CholeskySpace{N},v,x,y) where N
+function log!(::CholeskySpace,v,x,y)
     v .= strictlyLowerTriangular(y) - strictlyLowerTriangular(x) + Diagonal(diag(x))*Diagonal(log.(diag(y)./diag(x)))
     return v
 end
@@ -99,7 +100,7 @@ end
 returns the zero tangent vector on the [`CholeskySpace`](@ref) `M` at `x` in
 the variable `v`.
 """
-function zero_tangent_vector!(M::CholeskySpace{N},v,x) where N
+function zero_tangent_vector!(M::CholeskySpace,v,x)
     fill!(v,0)
     return v
 end
@@ -116,7 +117,7 @@ on respect to the [`CholeskySpace`](@ref) manifold `M`. The formula reads
 where $\lfloor\cdot\rfloor$ denotes the strictly lower triangular matrix,
 and $\operatorname{diag}$ extracts the diagonal matrix.
 """
-function vector_transport_to!(::CholeskySpace{N}, vto, x, v, y, ::ParallelTransport) where N
+function vector_transport_to!(::CholeskySpace, vto, x, v, y, ::ParallelTransport)
     vto .= strictlyLowerTriangular(x) + Diagonal(diag(y))*Diagonal(1 ./ diag(x))*Diagonal(v)
     return vto
 end
@@ -130,7 +131,7 @@ entries on the diagonal.
 The tolerance for the tests can be set using the `kwargs...`.
 """
 
-function check_manifold_point(M::CholeskySpace{N}, x; kwargs...) where N
+function check_manifold_point(M::CholeskySpace, x; kwargs...)
     if size(x) != representation_size(M)
         return DomainError(size(x),"The point $(x) does not lie on $(M), since its size is not $(representation_size(M)).")
     end
@@ -150,7 +151,7 @@ atfer [`check_manifold_point`](@ref)`(M,x)`, `v` has to be of same dimension as 
 and a symmetric matrix.
 The tolerance for the tests can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::CholeskySpace{N}, x,v; kwargs...) where N
+function check_tangent_vector(M::CholeskySpace, x,v; kwargs...)
     mpe = check_manifold_point(M, x)
     if mpe !== nothing
         return mpe
