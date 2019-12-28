@@ -13,6 +13,7 @@ end
         G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
         x = [1.0, 2.0]
         v = [2.0, 3.0]
+        eg = Identity(G)
 
         @test is_decorator_manifold(G) === Val(true)
 
@@ -23,9 +24,15 @@ end
         @test_throws ErrorException identity(G, x)
 
         @test compose_left(G, x) === x
+        @test compose_left(G, eg, eg) == eg
         @test_throws ErrorException compose_left(G, x, x)
+        @test compose_left(G, eg, x) == x
+        @test compose_left(G, x, eg) == x
+        @test compose_left!(G, x, eg, x) == x
+        @test compose_left!(G, x, x, eg) == x
         @test_throws ErrorException compose_left!(G, x, x, x)
         @test_throws ErrorException compose_left(G, x, x, x)
+        @test_throws ErrorException compose_left!(G, x, eg, eg)
 
         @test_throws ErrorException translate(G, x, x)
         @test_throws ErrorException translate(G, x, x, LeftAction())

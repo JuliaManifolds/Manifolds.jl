@@ -146,6 +146,8 @@ function compose_left(G::AbstractGroupManifold, x, y)
 end
 compose_left(G::GT, ::Identity{GT}, y) where GT<:AbstractGroupManifold = y
 compose_left(G::GT, x, ::Identity{GT}) where GT<:AbstractGroupManifold = x
+compose_left(G::GT, x::Identity{GT}, ::Identity{GT}) where GT<:AbstractGroupManifold = x
+
 
 """
     compose_left!(G::AbstractGroupManifold, z, x, y)
@@ -167,6 +169,10 @@ end
 function compose_left!(G::GT, z, x, y::Identity{GT}) where GT<:AbstractGroupManifold
     copyto!(z, x)
     return z
+end
+
+function compose_left!(G::GT, z, x::Identity{GT}, y::Identity{GT}) where GT<:AbstractGroupManifold
+    error("compose_left! not implemented on $(typeof(G)) for elements $(typeof(z)), $(typeof(x)) and $(typeof(y))")
 end
 
 @doc doc"""
@@ -361,7 +367,7 @@ function compose_left!(::GT, z, x, y::Identity{GT}) where GT<:AbstractGroupManif
     return z
 end
 function compose_left!(G::GT, z, x::Identity{GT}, y::Identity{GT}) where GT<:AbstractGroupManifold{AdditionOperation}
-    error("compose_left not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y))")
+    error("compose_left! not implemented on $(typeof(G)) for elements $(typeof(z)), $(typeof(x)) and $(typeof(y))")
 end
 
 translate_diff(::AbstractGroupManifold{AdditionOperation}, x, y, vy, ::Union{LeftAction,RightAction}) = vy
@@ -437,7 +443,7 @@ function compose_left!(::GT, z, x, y::Identity{GT}) where GT<:AbstractGroupManif
     return z
 end
 function compose_left!(G::GT, z, x::Identity{GT}, y::Identity{GT}) where GT<:AbstractGroupManifold{MultiplicationOperation}
-    error("compose_left not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y))")
+    error("compose_left! not implemented on $(typeof(G)) for elements $(typeof(z)), $(typeof(x)) and $(typeof(y))")
 end
 
 function translate_diff(::AbstractGroupManifold{MultiplicationOperation},
