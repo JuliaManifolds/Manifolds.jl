@@ -49,7 +49,7 @@ end
 
 function log!(S::Sphere, v, x, y)
     cosθ = dot(x, y)
-    if cosθ ≈ -1
+    if cosθ ≈ -1 # appr. opposing points, return deterministic choice from set-valued log
         fill!(v, 0)
         if x[1] ≈ 1
             v[2] = 1
