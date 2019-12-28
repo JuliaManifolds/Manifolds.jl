@@ -11,8 +11,15 @@ vectors in $\mathbb R^{n+1}$ using the Minkowsi metric, i.e.
 ```
 
 where $\langle\cdot,\cdot\rangle_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref)
-is Minkowski inner product, and this inner product in the embedded space yields
-the Riemannian metric when restricted to the tangent bundle $T\mathbb H^n$.
+is Minkowski inner product. The tangent space $T_x\mathbb H^n$ is given by
+
+````math
+T_x\mathbb H^n \coloneqq \bigl\{
+v \in \mathbb R^{n+1} \ \bigl |\ \langle x,v\rangle_{\mathrm{M}} = 0
+\bigr\}.
+````
+The Minkowski inner product inntroduces the [`MinkowskiMetric`](@ref), which is
+a Riemannian metric on the tangent bundle $T\mathbb H^n$.
 
 # Constructor
 
@@ -32,10 +39,15 @@ The Minkowski metric is a [`LorentzMetric`](@ref) with, i.e.
 \langle a,b\rangle_{\mathrm{M}} = -a_{n+1}b_{n+1} +
 \displaystyle\sum_{k=1}^n a_kb_k.
 ````
-It is also the default metric e.g. for the [`Hyperbolic`](@ref) space
+It is also the default metric e.g. for the [`Hyperbolic`](@ref) space.
+
+!!! note
+    While the `MinkowskiMetric` itself is not positive definite in the whole embedded space,
+    it is positive definite when restricted to a tangent space $T_x\mathcal M$,
+    $x\in\mathcal M$, of the [`Hyperbolic`](@ref) space $\mathcal M$.
 """
 struct MinkowskiMetric <: LorentzMetric end
-is_default_metric(::Hyperbolic,MinkowskiMetric) = Val(true)
+is_default_metric(::Hyperbolic,::MinkowskiMetric) = Val(true)
 
 """
     check_manifold_point(S,x; kwargs...)
@@ -107,10 +119,10 @@ end
 injectivity_radius(H::Hyperbolic, args...) = Inf
 
 @doc doc"""
-    dot(M, x, v, w)
+    inner(M, x, v, w)
 
 compute the Riemannian inner product for two tangent vectors `v` and `w`
-from $T_x\mathcal M$ of the [`Hyperbolic`](@ref) space $\mathbb H^n$ given by
+from $T_x\mathbb H^n$ of the [`Hyperbolic`](@ref) space $\mathbb H^n$ given by
 $\langle w, v \rangle_{\mathrm{M}}$ the [`minkowski_dot`](@ref) Minkowski
 inner product on $\mathbb R^{n+1}$.
 """
