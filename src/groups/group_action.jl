@@ -1,51 +1,51 @@
 """
-    AbstractActionOnManifold
+    AbstractGroupAction
 
 An abstract group action on a manifold.
 """
-abstract type AbstractActionOnManifold end
+abstract type AbstractGroupAction end
 
 """
-    base_group(A::AbstractActionOnManifold)
+    base_group(A::AbstractGroupAction)
 
 The group that acts in action `A`.
 """
-function base_group(A::AbstractActionOnManifold)
+function base_group(A::AbstractGroupAction)
     error("base_group not implemented for $(typeof(A)).")
 end
 
 """
-    g_manifold(A::AbstractActionOnManifold)
+    g_manifold(A::AbstractGroupAction)
 
 The manifold the action `A` acts upon.
 """
-function g_manifold(A::AbstractActionOnManifold)
+function g_manifold(A::AbstractGroupAction)
     error("g_manifold not implemented for $(typeof(A)).")
 end
 
 """
-    apply(A::AbstractActionOnManifold, x, a)
+    apply(A::AbstractGroupAction, x, a)
 
 Apply action `a` to the point `x` with the rule specified by `A`.
 The result is saved in `y`.
 """
-function apply!(A::AbstractActionOnManifold, y, x, a)
+function apply!(A::AbstractGroupAction, y, x, a)
     error("apply! not implemented for action $(typeof(A)) and points $(typeof(y)), $(typeof(x)) and $(typeof(a)).")
 end
 
 """
-    apply(A::AbstractActionOnManifold, x, a)
+    apply(A::AbstractGroupAction, x, a)
 
 Apply action `a` to the point `x`. The action is specified by `A`.
 """
-function apply(A::AbstractActionOnManifold, x, a)
+function apply(A::AbstractGroupAction, x, a)
     y = similar_result(A, apply, x, a)
     apply!(A, y, x)
     return y
 end
 
 @doc doc"""
-    optimal_alignment(A::AbstractActionOnManifold, x1, x2)
+    optimal_alignment(A::AbstractGroupAction, x1, x2)
 
 Calculate an action element of action `A` that acts upon `x1` to produce
 the element closest to `x2` in the metric of the G-manifold:
@@ -54,25 +54,25 @@ the element closest to `x2` in the metric of the G-manifold:
 ```
 where $G$ is the group that acts on the G-manifold $M$.
 """
-function optimal_alignment(A::AbstractActionOnManifold, x1, x2)
+function optimal_alignment(A::AbstractGroupAction, x1, x2)
     error("optimal_alignment not implemented for $(typeof(A)) and points $(typeof(x1)) and $(typeof(x2)).")
 end
 
 """
-    optimal_alignment!(A::AbstractActionOnManifold, y, x1, x2)
+    optimal_alignment!(A::AbstractGroupAction, y, x1, x2)
 
 Calculate an action element of action `A` that acts upon `x1` to produce
 the element closest to `x2`.
 The result is written to `y`.
 """
-function optimal_alignment!(A::AbstractActionOnManifold, y, x1, x2)
+function optimal_alignment!(A::AbstractGroupAction, y, x1, x2)
     copyto!(y, optimal_alignment(A, x1, x2))
     return y
 end
 
 @doc doc"""
     center_of_orbit(
-        A::AbstractActionOnManifold,
+        A::AbstractGroupAction,
         pts,
         q
         [, mean_method::AbstractEstimationMethod = GradientDescentEstimation()]
@@ -88,7 +88,7 @@ The function is useful for computing means on quotients of manifolds
 by a Lie group action.
 """
 function center_of_orbit(
-        A::AbstractActionOnManifold,
+        A::AbstractGroupAction,
         pts::AbstractVector,
         q,
         mean_method::AbstractEstimationMethod = GradientDescentEstimation()

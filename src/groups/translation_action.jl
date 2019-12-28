@@ -4,7 +4,7 @@
 Space of actions of the [`TranslationGroup`](@ref) `Rn`
 on a Euclidean-like manifold `M`.
 """
-struct TranslationAction{TM<:Manifold,TRn<:TranslationGroup} <: AbstractActionOnManifold
+struct TranslationAction{TM<:Manifold,TRn<:TranslationGroup} <: AbstractGroupAction
     M::TM
     Rn::TRn
 end

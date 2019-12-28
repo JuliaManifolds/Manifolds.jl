@@ -4,7 +4,7 @@
 Space of actions of the [`SpecialOrthogonal`](@ref) group $\mathrm{SO}(N)$
 on a Euclidean-like manifold `M` of dimension `N`.
 """
-struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal} <: AbstractActionOnManifold
+struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal} <: AbstractGroupAction
     M::TM
     SOn::TSO
 end

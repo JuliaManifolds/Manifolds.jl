@@ -1,7 +1,7 @@
 
 
 """
-    test_action(A::AbstractActionOnManifold,
+    test_action(A::AbstractGroupAction,
         a_pts::AbstractVector,
         m_pts::AbstractVector)
 
@@ -10,7 +10,7 @@ that lie on it (contained in `a_pts`) and three different point that lie
 on the manifold it acts upon (contained in `m_pts`).
 """
 function test_action(
-        A::AbstractActionOnManifold,
+        A::AbstractGroupAction,
         a_pts::AbstractVector,
         m_pts::AbstractVector;
         atol_inv = 1e-10,
