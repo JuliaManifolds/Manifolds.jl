@@ -1,7 +1,7 @@
 @doc doc"""
     TranslationGroup{N} <: GroupManifold{Euclidean{N},AdditionOperation}
 
-Translation group `\mathrm{R}(N)` represented by translation arrays.
+Translation group `\mathrm{T}(N)` represented by translation arrays.
 
 # Constructor
     TranslationGroup(n)
