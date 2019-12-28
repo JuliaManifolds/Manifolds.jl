@@ -258,25 +258,25 @@ function inverse_translate!(G::AbstractGroupManifold, z, x, y)
 end
 
 @doc doc"""
-    translate_diff(G::AbstractGroupManifold, x, y, vy[, conv::ActionDirection=LeftAction()])
+    translate_diff(G::AbstractGroupManifold, x, y, v[, conv::ActionDirection=LeftAction()])
 
-For group elements $x,y \in G$ and tangent vector $v_y \in T_y G$, compute the
-action of the differential of the translation by $x$ on $v_y$, written as
-$(\mathrm{d}\tau_x)_y (v_y)$, with the specified left or right convention. The
+For group elements $x,y \in G$ and tangent vector $v \in T_y G$, compute the
+action of the differential of the translation by $x$ on $v$, written as
+$(\mathrm{d}\tau_x)_y (v)$, with the specified left or right convention. The
 differential transports vectors:
 ```math
 \begin{aligned}
-(\mathrm{d}L_x)_y (v_y) &\colon T_y G \to T_{x \circ y} G\\
-(\mathrm{d}R_x)_y (v_y) &\colon T_y G \to T_{y \circ x} G\\
+(\mathrm{d}L_x)_y (v) &\colon T_y G \to T_{x \circ y} G\\
+(\mathrm{d}R_x)_y (v) &\colon T_y G \to T_{y \circ x} G\\
 \end{aligned}
 ```
 """
 function translate_diff(G::AbstractGroupManifold,
                         x,
                         y,
-                        vy,
+                        v,
                         conv::ActionDirection = LeftAction())
-    return error("translate_diff not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y)), vector $(typeof(vy)), and direction $(typeof(conv))")
+    return error("translate_diff not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y)), vector $(typeof(v)), and direction $(typeof(conv))")
 end
 
 
@@ -284,40 +284,40 @@ function translate_diff!(G::AbstractGroupManifold,
                          vout,
                          x,
                          y,
-                         vy,
+                         v,
                          conv::ActionDirection = LeftAction())
-    return error("translate_diff! not implemented on $(typeof(G)) for elements $(typeof(vout)), $(typeof(x)) and $(typeof(y)), vector $(typeof(vy)), and direction $(typeof(conv))")
+    return error("translate_diff! not implemented on $(typeof(G)) for elements $(typeof(vout)), $(typeof(x)) and $(typeof(y)), vector $(typeof(v)), and direction $(typeof(conv))")
 end
 
 @doc doc"""
-    inverse_translate_diff(G::AbstractGroupManifold, x, y, vy[, conv::ActionDirection=Left()])
+    inverse_translate_diff(G::AbstractGroupManifold, x, y, v[, conv::ActionDirection=Left()])
 
-For group elements $x,y \in G$ and tangent vector $v_y \in T_y G$, compute the
-inverse of the action of the differential of the translation by $x$ on $v_y$,
-written as $((\mathrm{d}\tau_x)_y)^{-1} (v_y) = (\mathrm{d}\tau_{x^{-1}})_y (v_y)$, with the
+For group elements $x,y \in G$ and tangent vector $v \in T_y G$, compute the
+inverse of the action of the differential of the translation by $x$ on $v$,
+written as $((\mathrm{d}\tau_x)_y)^{-1} (v) = (\mathrm{d}\tau_{x^{-1}})_y (v)$, with the
 specified left or right convention. The differential transports vectors:
 ```math
 \begin{aligned}
-((\mathrm{d}L_x)_y)^{-1} (v_y) &\colon T_y G \to T_{x^{-1} \circ y} G\\
-((\mathrm{d}R_x)_y)^{-1} (v_y) &\colon T_y G \to T_{y \circ x^{-1}} G\\
+((\mathrm{d}L_x)_y)^{-1} (v) &\colon T_y G \to T_{x^{-1} \circ y} G\\
+((\mathrm{d}R_x)_y)^{-1} (v) &\colon T_y G \to T_{y \circ x^{-1}} G\\
 \end{aligned}
 ```
 """
 function inverse_translate_diff(G::AbstractGroupManifold,
                                 x,
                                 y,
-                                vy,
+                                v,
                                 conv::ActionDirection = LeftAction())
-    return translate_diff(G, inv(G, x), y, vy, conv)
+    return translate_diff(G, inv(G, x), y, v, conv)
 end
 
 function inverse_translate_diff!(G::AbstractGroupManifold,
                                  vout,
                                  x,
                                  y,
-                                 vy,
+                                 v,
                                  conv::ActionDirection = LeftAction())
-    return translate_diff!(G, vout, inv(G, x), y, vy, conv)
+    return translate_diff!(G, vout, inv(G, x), y, v, conv)
 end
 
 
@@ -370,15 +370,15 @@ function compose_left!(G::GT, z, x::Identity{GT}, y::Identity{GT}) where GT<:Abs
     error("compose_left! not implemented on $(typeof(G)) for elements $(typeof(z)), $(typeof(x)) and $(typeof(y))")
 end
 
-translate_diff(::AbstractGroupManifold{AdditionOperation}, x, y, vy, ::Union{LeftAction,RightAction}) = vy
-function translate_diff!(::AbstractGroupManifold{AdditionOperation}, vout, x, y, vy, ::Union{LeftAction,RightAction})
-    copyto!(vout, vy)
+translate_diff(::AbstractGroupManifold{AdditionOperation}, x, y, v, ::Union{LeftAction,RightAction}) = v
+function translate_diff!(::AbstractGroupManifold{AdditionOperation}, vout, x, y, v, ::Union{LeftAction,RightAction})
+    copyto!(vout, v)
     return vout
 end
 
-inverse_translate_diff(::AbstractGroupManifold{AdditionOperation}, x, y, vy, ::Union{LeftAction,RightAction}) = vy
-function inverse_translate_diff!(::AbstractGroupManifold{AdditionOperation}, vout, x, y, vy, ::Union{LeftAction,RightAction})
-    copyto!(vout, vy)
+inverse_translate_diff(::AbstractGroupManifold{AdditionOperation}, x, y, v, ::Union{LeftAction,RightAction}) = v
+function inverse_translate_diff!(::AbstractGroupManifold{AdditionOperation}, vout, x, y, v, ::Union{LeftAction,RightAction})
+    copyto!(vout, v)
     return vout
 end
 
@@ -449,36 +449,36 @@ end
 function translate_diff(::AbstractGroupManifold{MultiplicationOperation},
                         x,
                         y,
-                        vy,
+                        v,
                         ::LeftAction)
-    return x * vy
+    return x * v
 end
 
 function translate_diff!(::AbstractGroupManifold{MultiplicationOperation},
                          vout,
                          x,
                          y,
-                         vy,
+                         v,
                          ::LeftAction)
-    copyto!(vout, x * vy)
+    copyto!(vout, x * v)
     return vout
 end
 
 function translate_diff(::AbstractGroupManifold{MultiplicationOperation},
                         x,
                         y,
-                        vy,
+                        v,
                         ::RightAction)
-    return vy * x
+    return v * x
 end
 
 function translate_diff!(::AbstractGroupManifold{MultiplicationOperation},
                          vout,
                          x,
                          y,
-                         vy,
+                         v,
                          ::RightAction)
-    copyto!(vout, vy * x)
+    copyto!(vout, v * x)
     return vout
 end
 
@@ -486,35 +486,35 @@ end
 function inverse_translate_diff(::AbstractGroupManifold{MultiplicationOperation},
                                 x,
                                 y,
-                                vy,
+                                v,
                                 ::LeftAction)
-    return x \ vy
+    return x \ v
 end
 
 function inverse_translate_diff!(::AbstractGroupManifold{MultiplicationOperation},
                                  vout,
                                  x,
                                  y,
-                                 vy,
+                                 v,
                                  ::LeftAction)
-    copyto!(vout, x \ vy)
+    copyto!(vout, x \ v)
     return vout
 end
 
 function inverse_translate_diff(::AbstractGroupManifold{MultiplicationOperation},
                                 x,
                                 y,
-                                vy,
+                                v,
                                 ::RightAction)
-    return vy / x
+    return v / x
 end
 
 function inverse_translate_diff!(::AbstractGroupManifold{MultiplicationOperation},
                                  vout,
                                  x,
                                  y,
-                                 vy,
+                                 v,
                                  ::RightAction)
-    copyto!(vout, vy / x)
+    copyto!(vout, v / x)
     return vout
 end
