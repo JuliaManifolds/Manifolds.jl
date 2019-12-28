@@ -146,7 +146,7 @@ log(::Circle{ℝ}, x::Real, y::Real) = sym_rem(y-x)
 log!(::Circle{ℝ}, v, x, y) = (v .= sym_rem(y-x))
 function log(M::Circle{ℂ}, x::Number, y::Number)
     cosθ = complex_dot(x, y)
-    if cosθ ≈ -1
+    if cosθ ≈ -1  # appr. opposing points, return deterministic choice from set-valued log
         v = real(x) ≈ 1 ? 1im : 1+0im
         v = v - complex_dot(x, v)* x
         v *= π / norm(v)
@@ -160,9 +160,9 @@ end
 function log!(M::Circle{ℂ}, v, x, y)
     cosθ = complex_dot(x, y)
     if cosθ ≈ -1
-        v .= real(x) ≈ 1 ? 1im : 1+0im
+        v .= sum(real.(x)) ≈ 1 ? 1.0im : 1.0+0.0im
         v .= v - complex_dot(x, v)* x
-        v *= π / norm(v)
+        v .*= π / norm(v)
     else
         cosθ = cosθ > 1 ? one(cosθ) : cosθ
         θ = acos(cosθ)
@@ -220,8 +220,8 @@ sharp(M::Circle, x::Number, w::FVector{CotangentSpaceType}) = FVector(TangentSpa
 symmetric remainder of `x` with respect to the interall 2*`T`, i.e.
 `(x+T)%2T`, where the default for `T` is $\pi$
 """
-sym_rem(x::N, T=π) where {N<:Number} = rem(x, convert(N,2*T),RoundNearest)
-sym_rem(x, T=π) where N = rem.(x, Ref(convert(eltype(x),2*T)),Ref(RoundNearest))
+sym_rem(x::N, T=π) where {N<:Number} = (x≈T ? convert(N,-T) : rem(x, convert(N,2*T),RoundNearest))
+sym_rem(x, T=π) where N = sym_rem.(x, Ref(T))
 
 vector_transport_to(::Circle{ℝ}, x::Real, v::Real, y::Real, ::ParallelTransport) = v
 function vector_transport_to(M::Circle{ℂ}, x::Number, v::Number, y::Number, ::ParallelTransport)

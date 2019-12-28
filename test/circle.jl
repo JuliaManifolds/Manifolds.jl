@@ -9,6 +9,22 @@ include("utils.jl")
         @test_throws DomainError is_manifold_point(M, 9., true)
         @test !is_tangent_vector(M, 9., 0.)
         @test_throws DomainError is_tangent_vector(M, 9., 0., true)
+        @test flat(M,0.0, FVector(TangentSpace,1.0)) == FVector(CotangentSpace,1.0)
+        @test sharp(M,0.0, FVector(CotangentSpace,1.0)) == FVector(TangentSpace,1.0)
+        @test vector_transport_to(M,0.0,1.0,1.0, ParallelTransport()) == 1.0
+        @test retract(M,0.0,1.0) == exp(M,0.0,1.0)
+        v = MVector(0.0)
+        x = SVector(0.0)
+        log!(M,v,x,SVector(π/4))
+        @test norm(M,x,v) ≈ π/4
+        @test is_tangent_vector(M,x,v)
+        @test project_point(M,1.0) == 1.0
+        x = MVector(0.0)
+        project_point!(M,x)
+        @test x == MVector(0.0)
+        x .+= 2*π
+        project_point!(M,x)
+        @test x == MVector(0.0)
     end
     types = [Float64, Float32]
     for T in types
@@ -49,6 +65,24 @@ include("utils.jl")
         @test_throws DomainError is_tangent_vector(Mc, 1+1im, 0., true)
         @test !is_tangent_vector(Mc, 1im, 2im)
         @test_throws DomainError is_tangent_vector(Mc, 1im, 2im, true)
+        @test flat(Mc,0.0+0.0im, FVector(TangentSpace,1.0im)) == FVector(CotangentSpace,1.0im)
+        @test sharp(Mc,0.0+0.0im, FVector(CotangentSpace,1.0im)) == FVector(TangentSpace,1.0im)
+        @test norm(Mc,1.0,log(Mc, 1.0,-1.0)) ≈ π
+        @test is_tangent_vector(Mc,1.0,log(Mc,1.0,-1.0))
+        v = MVector(0.0+0.0im)
+        x = SVector(1.0+0.0im)
+        log!(Mc,v,x,SVector(-1.0+0.0im))
+        @test norm(Mc,SVector(1.0),v) ≈ π
+        @test is_tangent_vector(Mc,x,v)
+        @test project_point(Mc,1.0) == 1.0
+        project_point(Mc,1/sqrt(2.0) + 1/sqrt(2.0) * im) == 1/sqrt(2.0) + 1/sqrt(2.0) * im
+        x = MVector(1.0+0.0im)
+        project_point!(Mc,x)
+        @test x == MVector(1.0+0.0im)
+        x .*= 2
+        project_point!(Mc,x)
+        @test x == MVector(1.0+0.0im)
+
     end
     types = [Complex{Float64}, Complex{Float32}]
     for T in types
