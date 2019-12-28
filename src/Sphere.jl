@@ -111,7 +111,7 @@ end
 
 checks, whether `x` is a valid point on the [`Sphere`](@ref) `S`, i.e. is a vector
 of length [`manifold_dimension`](@ref)`(S)+1` (approximately) of unit length.
-The tolerance for the last test can be set using the ´kwargs...`.
+The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_manifold_point(S::Sphere{N},x; kwargs...) where {N}
     if size(x) != representation_size(S)
@@ -129,7 +129,7 @@ end
 checks whether `v` is a tangent vector to `x` on the [`Sphere`](@ref) `S`, i.e.
 after [`check_manifold_point`](@ref)`(S,x)`, `v` has to be of same dimension as `x`
 and orthogonal to `x`.
-The tolerance for the last test can be set using the ´kwargs...`.
+The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(S::Sphere{N},x,v; kwargs...) where N
     perr = check_manifold_point(S,x)

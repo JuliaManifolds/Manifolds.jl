@@ -471,7 +471,7 @@ end
 checks, whether `x` is a valid point on the [`Rotations`](@ref) `M`,
 i.e. is an array of size [`manifold_dimension`](@ref)`(M)` and represents a
 valid rotation.
-The tolerance for the last test can be set using the ´kwargs...`.
+The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_manifold_point(M::Rotations{N},x; kwargs...) where {N}
     if size(x) != (N, N)
@@ -493,7 +493,7 @@ end
 checks whether `v` is a tangent vector to `x` on the [`Rotations`](@ref)
 space `M`, i.e. after [`check_manifold_point`](@ref)`(M,x)`, `v` has to be of same
 dimension as `x` and orthogonal to `x`.
-The tolerance for the last test can be set using the ´kwargs...`.
+The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(M::Rotations{N},x,v; kwargs...) where N
     perr = check_manifold_point(M,x)

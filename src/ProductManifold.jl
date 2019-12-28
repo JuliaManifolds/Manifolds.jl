@@ -182,7 +182,7 @@ end
 
 Check whether `x` is a valid point on the [`ProductManifold`](@ref) `M`.
 
-The tolerance for the last test can be set using the ´kwargs...`.
+The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_manifold_point(M::ProductManifold, x::ProductRepr; kwargs...)
     for t ∈ ziptuples(M.manifolds, x.parts)
@@ -207,7 +207,7 @@ Check whether `v` is a tangent vector to `x` on the [`ProductManifold`](@ref)
 `M`, i.e. atfer [`check_manifold_point`](@ref)`(M, x)`, and all projections to
 base manifolds must be respective tangent vectors.
 
-The tolerance for the last test can be set using the ´kwargs...`.
+The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(M::ProductManifold, x::ProductRepr, v::ProductRepr; kwargs...)
     perr = check_manifold_point(M, x)

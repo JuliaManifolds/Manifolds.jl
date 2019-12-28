@@ -225,6 +225,7 @@ include("Circle.jl")
 include("Euclidean.jl")
 include("FixedRankMatrices.jl")
 include("Grassmann.jl")
+include("Hyperbolic.jl")
 include("Rotations.jl")
 include("Stiefel.jl")
 include("Sphere.jl")
@@ -253,6 +254,7 @@ export Manifold,
     Euclidean,
     Circle,
     Sphere,
+    Hyperbolic,
     SymmetricMatrices,
     MPoint,
     TVector,
@@ -303,6 +305,7 @@ export CholeskySpace,
 export Metric,
     RiemannianMetric,
     LorentzMetric,
+    MinkowskiMetric,
     EuclideanMetric,
     MetricManifold,
     LinearAffineMetric,

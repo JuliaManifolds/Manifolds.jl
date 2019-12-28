@@ -406,7 +406,7 @@ zero_tangent_vector!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyM
 
 checks, whether `x` is a valid point on the [`SymmetricPositiveDefinite`](@ref) `M`, i.e. is a matrix
 of size `(N,N)`, symmetric and positive definite.
-The tolerance for the second to last test can be set using the ´kwargs...`.
+The tolerance for the second to last test can be set using the `kwargs...`.
 """
 function check_manifold_point(M::SymmetricPositiveDefinite{N},x; kwargs...) where N
     if size(x) != representation_size(M)
@@ -428,7 +428,7 @@ check_manifold_point(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyM
 checks whether `v` is a tangent vector to `x` on the [`SymmetricPositiveDefinite`](@ref) `M`, i.e.
 atfer [`check_manifold_point`](@ref)`(M,x)`, `v` has to be of same dimension as `x`
 and a symmetric matrix, i.e. this stores tangent vetors as elements of the corresponding Lie group.
-The tolerance for the last test can be set using the ´kwargs...`.
+The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(M::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
     mpe = check_manifold_point(M,x)
