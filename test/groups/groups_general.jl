@@ -61,6 +61,11 @@ end
         @test_throws ErrorException inverse_translate_diff!(G, v, x, x, v, RightAction())
     end
 
+    @testset "Action direction" begin
+        @test switch_direction(LeftAction()) == RightAction()
+        @test switch_direction(RightAction()) == LeftAction()
+    end
+
     @testset "Addition operation" begin
         G = GroupManifold(NotImplementedManifold(), Manifolds.AdditionOperation())
         x = [1.0, 2.0]

@@ -73,6 +73,16 @@ Right action of a group on a manifold.
 """
 struct RightAction <: ActionDirection end
 
+"""
+    switch_direction(::ActionDirection)
+
+Returns a [`RightAction`](@ref) when given a [`LeftAction`](@ref)
+and vice versa.
+"""
+switch_direction(::ActionDirection)
+
+switch_direction(::LeftAction) = RightAction()
+switch_direction(::RightAction) = LeftAction()
 
 @doc doc"""
     Identity(group::AbstractGroupManifold)

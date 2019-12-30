@@ -17,13 +17,26 @@ function RotationAction(M::Manifold, SOn::SpecialOrthogonal, ::TAD = LeftAction(
     return RotationAction{typeof(M), typeof(SOn), TAD}(M, SOn)
 end
 
-function apply!(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N}}, y, x, a) where N
+function switch_direction(A::RotationAction{TM,TSO,TAD}) where {TM,TSO,TAD}
+    return RotationAction(A.M, A.SOn, switch_direction(TAD()))
+end
+
+function apply!(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},LeftAction}, y, x, a) where N
     mul!(y, a, x)
     return y
 end
 
-function apply(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N}}, x, a) where N
+function apply!(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},RightAction}, y, x, a) where N
+    mul!(y, x, a)
+    return y
+end
+
+function apply(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},LeftAction}, x, a) where N
     return a * x
+end
+
+function apply(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},RightAction}, x, a) where N
+    return x * a
 end
 
 function base_group(A::RotationAction)
@@ -34,7 +47,7 @@ function g_manifold(A::RotationAction)
     return A.M
 end
 
-function optimal_alignment(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N}}, x1, x2) where N
+function optimal_alignment(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},LeftAction}, x1, x2) where N
     is_manifold_point(A.M, x1, true)
     is_manifold_point(A.M, x2, true)
 

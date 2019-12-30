@@ -22,6 +22,14 @@ function test_action(
     M = g_manifold(A)
     e = Identity(G)
 
+    @testset "Action direction" begin
+        if isa(A, AbstractGroupAction{LeftAction})
+            @test isa(switch_direction(A), AbstractGroupAction{RightAction})
+        else
+            @test isa(switch_direction(A), AbstractGroupAction{LeftAction})
+        end
+    end
+
     @testset "Type calculation and adding identity element" begin
         for ap in a_pts
             e_ap = e(ap)
