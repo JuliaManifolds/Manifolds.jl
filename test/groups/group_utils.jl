@@ -25,13 +25,13 @@ function test_action(
         for ap in a_pts
             e_ap = e(ap)
             @test isapprox(G, e_ap, identity(G, ap))
-            @test isapprox(G, compose_left(G, e, ap), ap)
-            @test isapprox(G, compose_left(G, e_ap, ap), ap)
-            @test isapprox(G, compose_left(G, ap, e), ap)
-            @test isapprox(G, compose_left(G, ap, e_ap), ap)
+            @test isapprox(G, compose(G, e, ap), ap)
+            @test isapprox(G, compose(G, e_ap, ap), ap)
+            @test isapprox(G, compose(G, ap, e), ap)
+            @test isapprox(G, compose(G, ap, e_ap), ap)
             inv_ap = inv(G, ap)
-            @test isapprox(G, compose_left(G, ap, inv_ap), e_ap; atol = atol_inv)
-            @test isapprox(G, compose_left(G, inv_ap, ap), e_ap; atol = atol_inv)
+            @test isapprox(G, compose(G, ap, inv_ap), e_ap; atol = atol_inv)
+            @test isapprox(G, compose(G, inv_ap, ap), e_ap; atol = atol_inv)
             ap2 = similar(e_ap)
             identity!(G, ap2, e_ap)
             @test isapprox(G, ap2, e_ap)
@@ -41,11 +41,9 @@ function test_action(
     @testset "Associativity" begin
         N = length(a_pts)
         for i in 1:N
-            assoc_l = compose_left(G, a_pts[i], a_pts[mod1(i+1, N)], a_pts[mod1(i+2, N)])
-            assoc_l2 = compose_left(G, compose_left(G, a_pts[i], a_pts[mod1(i+1, N)]), a_pts[mod1(i+2, N)])
-            assoc_r = compose_left(G, a_pts[i], compose_left(G, a_pts[mod1(i+1, N)]), a_pts[mod1(i+2, N)])
+            assoc_l = compose(G, compose(G, a_pts[i], a_pts[mod1(i+1, N)]), a_pts[mod1(i+2, N)])
+            assoc_r = compose(G, a_pts[i], compose(G, a_pts[mod1(i+1, N)], a_pts[mod1(i+2, N)]))
             @test isapprox(G, assoc_l, assoc_r)
-            @test isapprox(G, assoc_l, assoc_l2)
         end
     end
 
@@ -54,7 +52,7 @@ function test_action(
         for p in m_pts
             for i in 1:N
                 aip = apply(A, p, a_pts[mod1(i+1, N)])
-                acg = compose_left(G, a_pts[i], a_pts[mod1(i+1, N)])
+                acg = compose(G, a_pts[i], a_pts[mod1(i+1, N)])
                 @test isapprox(M, apply(A, p, acg), apply(A, aip, a_pts[i]))
             end
         end
@@ -75,19 +73,19 @@ function test_action(
         for ap in a_pts
             ai = similar(ap)
             inv!(G, ai, ap)
-            @test isapprox(G, compose_left(G, ai, ap), e(ap))
-            @test isapprox(G, compose_left(G, ap, ai), e(ap))
+            @test isapprox(G, compose(G, ai, ap), e(ap))
+            @test isapprox(G, compose(G, ap, ai), e(ap))
         end
     end
 
-    @testset "Translate vs compose_left" begin
+    @testset "Translate vs compose" begin
         N = length(a_pts)
         for i in 1:N
             ai = a_pts[i]
             aip = a_pts[mod1(i+1, N)]
-            @test isapprox(G, translate(G, ai, aip), compose_left(G, ai, aip))
-            @test isapprox(G, translate(G, ai, aip, LeftAction()), compose_left(G, ai, aip))
-            @test isapprox(G, translate(G, aip, ai, RightAction()), compose_left(G, ai, aip))
+            @test isapprox(G, translate(G, ai, aip), compose(G, ai, aip))
+            @test isapprox(G, translate(G, ai, aip, LeftAction()), compose(G, ai, aip))
+            @test isapprox(G, translate(G, aip, ai, RightAction()), compose(G, ai, aip))
         end
     end
 
@@ -109,7 +107,7 @@ function test_action(
     @testset "translate_diff" begin
         tv = log(GM, a_pts[1], a_pts[2])
         tvd = translate_diff(G, a_pts[2], a_pts[1], tv)
-        @test is_tangent_vector(G, compose_left(G, a_pts[1], a_pts[2]), tvd)
+        @test is_tangent_vector(G, compose(G, a_pts[1], a_pts[2]), tvd)
         tvdi = inverse_translate_diff(G, inv(G, a_pts[2]), a_pts[1], tv)
         @test isapprox(G, a_pts[1], tvd, tvdi)
     end

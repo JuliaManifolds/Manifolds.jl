@@ -23,16 +23,14 @@ end
         @test_throws ErrorException identity!(G, x, x)
         @test_throws ErrorException identity(G, x)
 
-        @test compose_left(G, x) === x
-        @test compose_left(G, eg, eg) == eg
-        @test_throws ErrorException compose_left(G, x, x)
-        @test compose_left(G, eg, x) == x
-        @test compose_left(G, x, eg) == x
-        @test compose_left!(G, x, eg, x) == x
-        @test compose_left!(G, x, x, eg) == x
-        @test_throws ErrorException compose_left!(G, x, x, x)
-        @test_throws ErrorException compose_left(G, x, x, x)
-        @test_throws ErrorException compose_left!(G, x, eg, eg)
+        @test compose(G, eg, eg) == eg
+        @test_throws ErrorException compose(G, x, x)
+        @test compose(G, eg, x) == x
+        @test compose(G, x, eg) == x
+        @test compose!(G, x, eg, x) == x
+        @test compose!(G, x, x, eg) == x
+        @test_throws ErrorException compose!(G, x, x, x)
+        @test_throws ErrorException compose!(G, x, eg, eg)
 
         @test_throws ErrorException translate(G, x, x)
         @test_throws ErrorException translate(G, x, x, LeftAction())
@@ -78,17 +76,17 @@ end
         y = similar(x)
         identity!(G, y, x)
         @test y ≈ zero(x)
-        @test compose_left(G, x, x) ≈ x + x
-        @test compose_left(G, x, ge) ≈ x
-        @test compose_left(G, ge, x) ≈ x
-        @test compose_left(G, ge, ge) == ge
-        compose_left!(G, y, x, x)
+        @test compose(G, x, x) ≈ x + x
+        @test compose(G, x, ge) ≈ x
+        @test compose(G, ge, x) ≈ x
+        @test compose(G, ge, ge) == ge
+        compose!(G, y, x, x)
         @test y ≈ x + x
-        compose_left!(G, y, x, ge)
+        compose!(G, y, x, ge)
         @test y ≈ x
-        compose_left!(G, y, ge, x)
+        compose!(G, y, ge, x)
         @test y ≈ x
-        @test_throws ErrorException compose_left!(G, y, ge, ge)
+        @test_throws ErrorException compose!(G, y, ge, ge)
     end
 
     @testset "Multiplication operation" begin
@@ -106,17 +104,17 @@ end
         y = similar(x)
         identity!(G, y, x)
         @test y ≈ one(x)
-        @test compose_left(G, x, x) ≈ x * x
-        @test compose_left(G, x, ge) ≈ x
-        @test compose_left(G, ge, x) ≈ x
-        @test compose_left(G, ge, ge) == ge
-        compose_left!(G, y, x, x)
+        @test compose(G, x, x) ≈ x * x
+        @test compose(G, x, ge) ≈ x
+        @test compose(G, ge, x) ≈ x
+        @test compose(G, ge, ge) == ge
+        compose!(G, y, x, x)
         @test y ≈ x * x
-        compose_left!(G, y, x, ge)
+        compose!(G, y, x, ge)
         @test y ≈ x
-        compose_left!(G, y, ge, x)
+        compose!(G, y, ge, x)
         @test y ≈ x
-        @test_throws ErrorException compose_left!(G, y, ge, ge)
+        @test_throws ErrorException compose!(G, y, ge, ge)
 
         @testset "identity optimization" begin
             x2 = copy(x)

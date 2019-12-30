@@ -12,8 +12,8 @@ or in general, by defining for an operation `Op` the following methods:
     identity(::AbstractGroupManifold{Op}, x)
     inv!(::AbstractGroupManifold{Op}, y, x)
     inv(::AbstractGroupManifold{Op}, x)
-    compose_left(::AbstractGroupManifold{Op}, x, y)
-    compose_left!(::AbstractGroupManifold{Op}, z, x, y)
+    compose(::AbstractGroupManifold{Op}, x, y)
+    compose!(::AbstractGroupManifold{Op}, z, x, y)
 
 Note that a manifold is connected with an operation by wrapping it with
 a decorator, [`AbstractGroupManifold`](@ref). In typical cases the concrete
@@ -27,7 +27,7 @@ abstract type AbstractGroupOperation end
 Abstract type for a Lie group, a group that is also a smooth manifold with a
 [smooth binary operation](@ref AbstractGroupOperation).
 `AbstractGroupManifold`s must implement at least [`inv`](@ref),
-[`identity`](@ref), [`compose_left`](@ref), and [`translate_diff`](@ref).
+[`identity`](@ref), [`compose`](@ref), and [`translate_diff`](@ref).
 Group manifolds by default forward metric-related operations to the wrapped
 manifold.
 """
@@ -131,55 +131,40 @@ function identity(G::AbstractGroupManifold, x)
     return y
 end
 
-"""
-    compose_left(G::AbstractGroupManifold, xs...)
-
-Compose elements of `G` using their left translation upon each other.
-This composition is left-associative.
-"""
-function compose_left(G::AbstractGroupManifold, xs...)
-    y = copy(xs[1])
-    for x in xs[2:end]
-        compose_left!(G, y, y, x)
-    end
-    return y
-end
-
-compose_left(G::AbstractGroupManifold, x) = x
-function compose_left(G::AbstractGroupManifold, x, y)
-    z = similar_result(G, compose_left, x, y)
-    compose_left!(G, z, x, y)
+function compose(G::AbstractGroupManifold, x, y)
+    z = similar_result(G, compose, x, y)
+    compose!(G, z, x, y)
     return z
 end
-compose_left(G::GT, ::Identity{GT}, y) where GT<:AbstractGroupManifold = y
-compose_left(G::GT, x, ::Identity{GT}) where GT<:AbstractGroupManifold = x
-compose_left(G::GT, x::Identity{GT}, ::Identity{GT}) where GT<:AbstractGroupManifold = x
+compose(G::GT, ::Identity{GT}, y) where GT<:AbstractGroupManifold = y
+compose(G::GT, x, ::Identity{GT}) where GT<:AbstractGroupManifold = x
+compose(G::GT, x::Identity{GT}, ::Identity{GT}) where GT<:AbstractGroupManifold = x
 
 
 """
-    compose_left!(G::AbstractGroupManifold, z, x, y)
+    compose!(G::AbstractGroupManifold, z, x, y)
 
 Compose elements `x` and `y` of `G` using their left translation upon each other.
 The result is saved in `z`.
 
 `z` may alias with one or both of `x` and `y`.
 """
-function compose_left!(G::AbstractGroupManifold, z, x, y)
-    error("compose_left not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y))")
+function compose!(G::AbstractGroupManifold, z, x, y)
+    error("compose not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y))")
 end
 
-function compose_left!(G::GT, z, x::Identity{GT}, y) where GT<:AbstractGroupManifold
+function compose!(G::GT, z, x::Identity{GT}, y) where GT<:AbstractGroupManifold
     copyto!(z, y)
     return z
 end
 
-function compose_left!(G::GT, z, x, y::Identity{GT}) where GT<:AbstractGroupManifold
+function compose!(G::GT, z, x, y::Identity{GT}) where GT<:AbstractGroupManifold
     copyto!(z, x)
     return z
 end
 
-function compose_left!(G::GT, z, x::Identity{GT}, y::Identity{GT}) where GT<:AbstractGroupManifold
-    error("compose_left! not implemented on $(typeof(G)) for elements $(typeof(z)), $(typeof(x)) and $(typeof(y))")
+function compose!(G::GT, z, x::Identity{GT}, y::Identity{GT}) where GT<:AbstractGroupManifold
+    error("compose! not implemented on $(typeof(G)) for elements $(typeof(z)), $(typeof(x)) and $(typeof(y))")
 end
 
 @doc doc"""
@@ -194,8 +179,8 @@ R_x &\colon y \mapsto y \circ x.
 \end{aligned}
 ```
 """
-translate(G::AbstractGroupManifold, x, y, conv::LeftAction) = compose_left(G, x, y)
-translate(G::AbstractGroupManifold, x, y, conv::RightAction) = compose_left(G, y, x)
+translate(G::AbstractGroupManifold, x, y, conv::LeftAction) = compose(G, x, y)
+translate(G::AbstractGroupManifold, x, y, conv::RightAction) = compose(G, y, x)
 translate(G::AbstractGroupManifold, x, y) = translate(G, x, y, LeftAction())
 
 @doc doc"""
@@ -211,8 +196,8 @@ R_x &\colon y \mapsto y \circ x.
 ```
 Result of the operation is saved in `z`.
 """
-translate!(G::AbstractGroupManifold, z, x, y, conv::LeftAction) = compose_left!(G, z, x, y)
-translate!(G::AbstractGroupManifold, z, x, y, conv::RightAction) = compose_left!(G, z, y, x)
+translate!(G::AbstractGroupManifold, z, x, y, conv::LeftAction) = compose!(G, z, x, y)
+translate!(G::AbstractGroupManifold, z, x, y, conv::RightAction) = compose!(G, z, y, x)
 translate!(G::AbstractGroupManifold, z, x, y) = translate!(G, z, x, y, LeftAction())
 
 @doc doc"""
@@ -356,25 +341,25 @@ end
 
 inv(::AbstractGroupManifold{AdditionOperation}, x) = -x
 
-compose_left(::AbstractGroupManifold{AdditionOperation}, x, y) = x + y
-compose_left(::GT, x, ::Identity{GT}) where GT<:AbstractGroupManifold{AdditionOperation} = x
-compose_left(::GT, ::Identity{GT}, y) where GT<:AbstractGroupManifold{AdditionOperation} = y
-compose_left(G::GT, x::Identity{GT}, ::Identity{GT}) where GT<:AbstractGroupManifold{AdditionOperation} = x
+compose(::AbstractGroupManifold{AdditionOperation}, x, y) = x + y
+compose(::GT, x, ::Identity{GT}) where GT<:AbstractGroupManifold{AdditionOperation} = x
+compose(::GT, ::Identity{GT}, y) where GT<:AbstractGroupManifold{AdditionOperation} = y
+compose(G::GT, x::Identity{GT}, ::Identity{GT}) where GT<:AbstractGroupManifold{AdditionOperation} = x
 
-function compose_left!(::AbstractGroupManifold{AdditionOperation}, z, x, y)
+function compose!(::AbstractGroupManifold{AdditionOperation}, z, x, y)
     z .= x .+ y
     return z
 end
-function compose_left!(::GT, z, x::Identity{GT}, y) where GT<:AbstractGroupManifold{AdditionOperation}
+function compose!(::GT, z, x::Identity{GT}, y) where GT<:AbstractGroupManifold{AdditionOperation}
     copyto!(z, y)
     return z
 end
-function compose_left!(::GT, z, x, y::Identity{GT}) where GT<:AbstractGroupManifold{AdditionOperation}
+function compose!(::GT, z, x, y::Identity{GT}) where GT<:AbstractGroupManifold{AdditionOperation}
     copyto!(z, x)
     return z
 end
-function compose_left!(G::GT, z, x::Identity{GT}, y::Identity{GT}) where GT<:AbstractGroupManifold{AdditionOperation}
-    error("compose_left! not implemented on $(typeof(G)) for elements $(typeof(z)), $(typeof(x)) and $(typeof(y))")
+function compose!(G::GT, z, x::Identity{GT}, y::Identity{GT}) where GT<:AbstractGroupManifold{AdditionOperation}
+    error("compose! not implemented on $(typeof(G)) for elements $(typeof(z)), $(typeof(x)) and $(typeof(y))")
 end
 
 translate_diff(::AbstractGroupManifold{AdditionOperation}, x, y, v, ::Union{LeftAction,RightAction}) = v
@@ -431,26 +416,26 @@ end
 
 inv(::AbstractGroupManifold{MultiplicationOperation}, x) = inv(x)
 
-compose_left(::AbstractGroupManifold{MultiplicationOperation}, x, y) = x * y
-compose_left(::GT, x, ::Identity{GT}) where GT<:AbstractGroupManifold{MultiplicationOperation} = x
-compose_left(::GT, ::Identity{GT}, y) where GT<:AbstractGroupManifold{MultiplicationOperation} = y
-compose_left(G::GT, x::Identity{GT}, ::Identity{GT}) where GT<:AbstractGroupManifold{MultiplicationOperation} = x
+compose(::AbstractGroupManifold{MultiplicationOperation}, x, y) = x * y
+compose(::GT, x, ::Identity{GT}) where GT<:AbstractGroupManifold{MultiplicationOperation} = x
+compose(::GT, ::Identity{GT}, y) where GT<:AbstractGroupManifold{MultiplicationOperation} = y
+compose(G::GT, x::Identity{GT}, ::Identity{GT}) where GT<:AbstractGroupManifold{MultiplicationOperation} = x
 
-function compose_left!(::AbstractGroupManifold{MultiplicationOperation}, z, x, y)
+function compose!(::AbstractGroupManifold{MultiplicationOperation}, z, x, y)
     #TODO: z might alias with x or y, we might be able to optimize it if it doesn't.
     copyto!(z, x*y)
     return z
 end
-function compose_left!(::GT, z, x::Identity{GT}, y) where GT<:AbstractGroupManifold{MultiplicationOperation}
+function compose!(::GT, z, x::Identity{GT}, y) where GT<:AbstractGroupManifold{MultiplicationOperation}
     copyto!(z, y)
     return z
 end
-function compose_left!(::GT, z, x, y::Identity{GT}) where GT<:AbstractGroupManifold{MultiplicationOperation}
+function compose!(::GT, z, x, y::Identity{GT}) where GT<:AbstractGroupManifold{MultiplicationOperation}
     copyto!(z, x)
     return z
 end
-function compose_left!(G::GT, z, x::Identity{GT}, y::Identity{GT}) where GT<:AbstractGroupManifold{MultiplicationOperation}
-    error("compose_left! not implemented on $(typeof(G)) for elements $(typeof(z)), $(typeof(x)) and $(typeof(y))")
+function compose!(G::GT, z, x::Identity{GT}, y::Identity{GT}) where GT<:AbstractGroupManifold{MultiplicationOperation}
+    error("compose! not implemented on $(typeof(G)) for elements $(typeof(z)), $(typeof(x)) and $(typeof(y))")
 end
 
 function translate_diff(::AbstractGroupManifold{MultiplicationOperation},
