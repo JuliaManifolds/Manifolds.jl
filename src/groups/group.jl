@@ -1,9 +1,9 @@
 @doc doc"""
     AbstractGroupOperation
 
-Abstract type for smooth binary operations $\mu$ on elements of a Lie group $G$.
+Abstract type for smooth binary operations $\circ$ on elements of a Lie group $G$.
 ```math
-\mu \colon G \times G \to G.
+\circ \colon G \times G \to G.
 ```
 An operation can be either defined for a specific [`AbstractGroupManifold`](@ref)
 or in general, by defining for an operation `Op` the following methods:
