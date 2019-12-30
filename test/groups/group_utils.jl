@@ -21,6 +21,7 @@ function test_action(
     GM = base_manifold(G)
     M = g_manifold(A)
     e = Identity(G)
+
     @testset "Type calculation and adding identity element" begin
         for ap in a_pts
             e_ap = e(ap)
@@ -36,6 +37,10 @@ function test_action(
             identity!(G, ap2, e_ap)
             @test isapprox(G, ap2, e_ap)
         end
+
+        @test inv(G, e) == e
+        b = similar(a_pts[1])
+        @test_throws ErrorException inv!(G, b, e)
     end
 
     @testset "Associativity" begin
@@ -136,7 +141,7 @@ function test_action(
         b = similar(a_pts[1])
         compose!(A, b, a_pts[1], a_pts[2])
         @test isapprox(G, a12, b)
-        
+
         if isa(A, AbstractGroupAction{LeftAction})
             x_a = apply(A, apply(A, m_pts[1], a_pts[2]), a_pts[1])
             x_b = apply(A, m_pts[1], a12)

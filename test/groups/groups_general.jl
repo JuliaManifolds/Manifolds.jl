@@ -125,3 +125,23 @@ end
         end
     end
 end
+
+struct NotImplementedAction <: AbstractGroupAction{LeftAction}
+end
+
+@testset "General group action tests" begin
+    @testset "Not implemented operations" begin
+        A = NotImplementedAction()
+        x = [1.0, 2.0]
+        a = [1.0, 2.0]
+
+        @test_throws ErrorException base_group(A)
+        @test_throws ErrorException g_manifold(A)
+        @test_throws ErrorException apply(A, x, a)
+        @test_throws ErrorException apply!(A, x, x, a)
+        @test_throws ErrorException compose(A, a, a)
+        @test_throws ErrorException compose!(A, a, a, a)
+        @test_throws ErrorException optimal_alignment(A, x, x)
+        @test_throws ErrorException optimal_alignment!(A, a, x, x)
+    end
+end

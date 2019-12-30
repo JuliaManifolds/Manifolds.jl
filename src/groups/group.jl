@@ -96,9 +96,8 @@ function inv!(G::AbstractGroupManifold, y, x)
     error("inv not implemented on $(typeof(G)) for point $(typeof(x))")
 end
 
-function inv!(G::AbstractGroupManifold, y, e::Identity)
-    indentity!(G, y)
-    return y
+function inv!(G::AG, y, e::Identity{AG}) where AG<:AbstractGroupManifold
+    error("inv! not implemented on $(typeof(G)) for elements $(typeof(y)) and $(typeof(e))")
 end
 
 @doc doc"""
@@ -113,7 +112,7 @@ function inv(G::AbstractGroupManifold, x)
     return y
 end
 
-inv(::AbstractGroupManifold, e::Identity) = e
+inv(::AG, e::Identity{AG}) where AG<:AbstractGroupManifold = e
 
 function identity!(G::AbstractGroupManifold, y, x)
     error("identity! not implemented on $(typeof(G)) for points $(typeof(y)) and $(typeof(x))")
@@ -339,7 +338,12 @@ function inv!(::AbstractGroupManifold{AdditionOperation}, y, x)
     return y
 end
 
+function inv!(G::AG, y, x::Identity{AG}) where AG<:AbstractGroupManifold{AdditionOperation}
+    error("inv! not implemented on $(typeof(G)) for elements $(typeof(y)) and $(typeof(x))")
+end
+
 inv(::AbstractGroupManifold{AdditionOperation}, x) = -x
+inv(::AG, e::Identity{AG}) where AG<:AbstractGroupManifold{AdditionOperation} = e
 
 compose(::AbstractGroupManifold{AdditionOperation}, x, y) = x + y
 compose(::GT, x, ::Identity{GT}) where GT<:AbstractGroupManifold{AdditionOperation} = x
@@ -414,7 +418,12 @@ function inv!(::AbstractGroupManifold{MultiplicationOperation}, y, x)
     return y
 end
 
+function inv!(G::AG, y, x::Identity{AG}) where AG<:AbstractGroupManifold{MultiplicationOperation}
+    error("inv! not implemented on $(typeof(G)) for elements $(typeof(y)) and $(typeof(x))")
+end
+
 inv(::AbstractGroupManifold{MultiplicationOperation}, x) = inv(x)
+inv(::AG, e::Identity{AG}) where AG<:AbstractGroupManifold{MultiplicationOperation} = e
 
 compose(::AbstractGroupManifold{MultiplicationOperation}, x, y) = x * y
 compose(::GT, x, ::Identity{GT}) where GT<:AbstractGroupManifold{MultiplicationOperation} = x
