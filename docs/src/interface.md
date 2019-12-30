@@ -11,7 +11,7 @@ we happily look forward to a
 [Pull Request](https://github.com/JuliaNLSolvers/Manifolds.jl/compare) to add it here.
 
 ```@autodocs
-Modules = [ManifoldsBase]
+Modules = [Manifolds, ManifoldsBase]
 Pages = ["ManifoldsBase.jl"]
 Order = [:type, :function]
 ```
