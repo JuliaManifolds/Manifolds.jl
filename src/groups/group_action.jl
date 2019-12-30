@@ -3,7 +3,7 @@
 
 An abstract group action on a manifold.
 """
-abstract type AbstractGroupAction end
+abstract type AbstractGroupAction{AD<:ActionDirection} end
 
 """
     base_group(A::AbstractGroupAction)
@@ -42,6 +42,22 @@ function apply(A::AbstractGroupAction, x, a)
     y = similar_result(A, apply, x, a)
     apply!(A, y, x)
     return y
+end
+
+function compose(A::AbstractGroupAction{LeftAction}, a, b)
+    return compose(base_group(A), a, b)
+end
+
+function compose(A::AbstractGroupAction{RightAction}, a, b)
+    return compose(base_group(A), b, a)
+end
+
+function compose!(A::AbstractGroupAction{LeftAction}, y, a, b)
+    return compose!(base_group(A), y, a, b)
+end
+
+function compose!(A::AbstractGroupAction{RightAction}, y, a, b)
+    return compose!(base_group(A), y, b, a)
 end
 
 @doc doc"""

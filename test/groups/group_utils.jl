@@ -131,6 +131,26 @@ function test_action(
         end
     end
 
+    @testset "Action composition" begin
+        a12 = compose(A, a_pts[1], a_pts[2])
+        b = similar(a_pts[1])
+        compose!(A, b, a_pts[1], a_pts[2])
+        @test isapprox(G, a12, b)
+        
+        if isa(A, AbstractGroupAction{LeftAction})
+            x_a = apply(A, apply(A, m_pts[1], a_pts[2]), a_pts[1])
+            x_b = apply(A, m_pts[1], a12)
+            @test isapprox(M, x_a, x_b)
+        elseif isa(A, AbstractGroupAction{RightAction})
+            x_a = apply(A, apply(A, m_pts[1], a_pts[1]), a_pts[2])
+            x_b = apply(A, m_pts[1], a12)
+            @test isapprox(M, x_a, x_b)
+        else
+            # most likely a bug in testset
+            @test false
+        end
+    end
+
     test_optimal_alignment && @testset "Center of orbit" begin
         act = center_of_orbit(A, [m_pts[1]], m_pts[2])
         act_opt = optimal_alignment(A, m_pts[2], m_pts[1])

@@ -1,10 +1,10 @@
 @doc doc"""
     TranslationAction(M::Manifold, Rn::TranslationGroup)
 
-Space of actions of the [`TranslationGroup`](@ref) `Rn`
+Space of left actions of the [`TranslationGroup`](@ref) `Rn`
 on a Euclidean-like manifold `M`.
 """
-struct TranslationAction{TM<:Manifold,TRn<:TranslationGroup} <: AbstractGroupAction
+struct TranslationAction{TM<:Manifold,TRn<:TranslationGroup} <: AbstractGroupAction{LeftAction}
     M::TM
     Rn::TRn
 end

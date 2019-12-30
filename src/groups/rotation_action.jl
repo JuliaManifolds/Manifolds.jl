@@ -1,12 +1,20 @@
 @doc doc"""
-    RotationAction(M::Manifold, SOn::SpecialOrthogonal)
+    RotationAction(
+        M::Manifold,
+        SOn::SpecialOrthogonal,
+        AD::ActionDirection = LeftAction(),
+    )
 
 Space of actions of the [`SpecialOrthogonal`](@ref) group $\mathrm{SO}(N)$
 on a Euclidean-like manifold `M` of dimension `N`.
 """
-struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal} <: AbstractGroupAction
+struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal,TAD<:ActionDirection} <: AbstractGroupAction{TAD}
     M::TM
     SOn::TSO
+end
+
+function RotationAction(M::Manifold, SOn::SpecialOrthogonal, ::TAD = LeftAction()) where {TAD<:ActionDirection}
+    return RotationAction{typeof(M), typeof(SOn), TAD}(M, SOn)
 end
 
 function apply!(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N}}, y, x, a) where N
