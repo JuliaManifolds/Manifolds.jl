@@ -103,7 +103,7 @@ $x \circ x^{-1} = x^{-1} \circ x = e$.
 The result is saved to `y`.
 """
 function inv!(G::AbstractGroupManifold, y, x)
-    error("inv not implemented on $(typeof(G)) for point $(typeof(x))")
+    error("inv! not implemented on $(typeof(G)) for point $(typeof(x))")
 end
 
 function inv!(G::AG, y, e::Identity{AG}) where AG<:AbstractGroupManifold

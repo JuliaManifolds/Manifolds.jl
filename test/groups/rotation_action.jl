@@ -34,7 +34,7 @@ include("group_utils.jl")
         m_pts = [convert(T_M, [0.0, 1.0]), convert(T_M, [-1.0, 0.0]), convert(T_M, [1.0, 1.0])]
 
         atol_inv = if eltype(T_M) == Float32
-            1e-7
+            2e-7
         else
             1e-15
         end

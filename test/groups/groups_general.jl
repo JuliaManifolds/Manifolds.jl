@@ -18,7 +18,9 @@ end
         @test is_decorator_manifold(G) === Val(true)
 
         @test_throws ErrorException inv!(G, x, x)
+        @test_throws ErrorException inv!(G, x, eg)
         @test_throws ErrorException inv(G, x)
+        @test inv(G, eg) == eg
 
         @test_throws ErrorException identity!(G, x, x)
         @test_throws ErrorException identity(G, x)
@@ -103,8 +105,17 @@ end
         @test ge * ge === ge
         @test inv(ge) === ge
         @test *(ge) === ge
+
+        @test x / ge ≈ x
+        @test ge \ x ≈ x
+        @test ge / ge === ge
+        @test ge \ ge === ge
+        @test ge / x ≈ inv(x)
+        @test x \ ge ≈ inv(x)
+
         @test ge(x) ≈ one(x)
         @test inv(G, x) ≈ inv(x)
+        @test inv(G, ge) === ge
         @test identity(G, x) ≈ one(x)
         y = similar(x)
         identity!(G, y, x)
