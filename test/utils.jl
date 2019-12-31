@@ -165,12 +165,20 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         else
             v1 = log(M,pts[1],pts[2])
         end
-        @test norm(M, pts[1], v1) ≈ sqrt(inner(M, pts[1], v1, v1))
 
         @test isapprox(M, exp(M, pts[1], v1, 1), pts[2]; atol = atolp1)
         @test isapprox(M, exp(M, pts[1], v1, 0), pts[1]; atol = atolp1)
 
         @test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], v1)
+
+        v3 = log(M, pts[1], pts[3])
+
+        @test real(inner(M, pts[1], v1, v3)) ≈ real(inner(M, pts[1], v3, v1))
+        @test imag(inner(M, pts[1], v1, v3)) ≈ -imag(inner(M, pts[1], v3, v1))
+        @test imag(inner(M, pts[1], v1, v1)) ≈ 0
+
+        @test norm(M, pts[1], v1) isa Real
+        @test norm(M, pts[1], v1) ≈ sqrt(inner(M, pts[1], v1, v1))
     end
 
     @testset "(inverse &) retraction tests" begin
