@@ -66,9 +66,7 @@ include("utils.jl")
             @test injectivity_radius(M) == π/2
         end
         types = [Matrix{ComplexF64},
-                 MMatrix{3, 2, ComplexF64},
-                 Matrix{ComplexF32},
-                 MMatrix{3, 2, ComplexF32}]
+                 MMatrix{3, 2, ComplexF64}]
         @testset "Type $T" for T in types
             x = [0.5+0.5im 0.5+0.5im; 0.5+0.5im -0.5-0.5im; 0.0 0.0]
             v = [0.0 0.0; 0.0 0.0; 0.0 1.0]
