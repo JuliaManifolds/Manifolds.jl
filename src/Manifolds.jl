@@ -16,9 +16,13 @@ import Base: isapprox,
     dataids,
     axes,
     promote_rule,
+    inv,
     +,
     -,
-    *
+    *,
+    \,
+    /,
+    identity
 import Statistics: mean,
     mean!,
     median,
@@ -232,6 +236,14 @@ include("Sphere.jl")
 include("Symmetric.jl")
 include("SymmetricPositiveDefinite.jl")
 
+include("groups/group.jl")
+include("groups/group_action.jl")
+
+include("groups/special_orthogonal.jl")
+include("groups/rotation_action.jl")
+include("groups/translation_group.jl")
+include("groups/translation_action.jl")
+
 include("statistics.jl")
 
 function __init__()
@@ -407,4 +419,42 @@ export base_manifold,
     zero_vector!,
     zero_tangent_vector,
     zero_tangent_vector!
+
+# Lie groups and actions
+export AbstractGroupAction,
+    AbstractGroupOperation,
+    AbstractGroupManifold,
+    ActionDirection,
+    GroupManifold,
+    Identity,
+    LeftAction,
+    RightAction,
+    RotationAction,
+    SpecialOrthogonal,
+    TranslationGroup,
+    TranslationAction
+
+export apply,
+    apply!,
+    base_group,
+    center_of_orbit,
+    compose,
+    compose!,
+    g_manifold,
+    identity,
+    identity!,
+    inv,
+    inv!,
+    inverse_translate,
+    inverse_translate!,
+    inverse_translate_diff,
+    inverse_translate_diff!,
+    optimal_alignment,
+    optimal_alignment!,
+    switch_direction,
+    translate,
+    translate!,
+    translate_diff,
+    translate_diff!
+
 end # module

@@ -2,10 +2,20 @@
 
 Documentation for `Manifolds.jl`'s internal methods and types.
 
+## Types
+
 ```@docs
 Manifolds.SizedAbstractArray
-Manifolds.ziptuples
+```
+
+## Functions
+
+```@docs
+Manifolds.eigen_safe
+Manifolds.find_pv
+Manifolds.log_safe
 Manifolds.size_to_tuple
 Manifolds.select_from_tuple
-Manifolds.find_pv
+Manifolds.usinc
+Manifolds.ziptuples
 ```
