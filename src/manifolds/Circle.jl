@@ -130,11 +130,11 @@ compute the inner product of the two tangent vectors `w,v` from the tangent plan
 the [`Circle`](@ref) `M` using the restriction of the metric from the embedding,
 i.e.
 ````math
-\langle v,w\rangle_x = w*v
+g_x(v,w) = w*v
 ````
 for the real case and
 ````math
-\langle v,w\rangle_x = v^\mathrm{T}w
+g_x(v,w) = v^\mathrm{T}w
 ````
 for the complex case interpreting complex numbers in the Gaussian plane.
 """

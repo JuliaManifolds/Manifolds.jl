@@ -152,7 +152,7 @@ include("ProjectedDistribution.jl")
 include("ProductManifold.jl")
 include("PowerManifold.jl")
 
-include("CholeskySpace.jl")
+include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
 include("Euclidean.jl")
 include("FixedRankMatrices.jl")
