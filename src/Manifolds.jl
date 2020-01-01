@@ -246,6 +246,7 @@ include("groups/special_orthogonal.jl")
 include("groups/rotation_action.jl")
 include("groups/translation_group.jl")
 include("groups/translation_action.jl")
+include("groups/special_euclidean.jl")
 
 include("statistics.jl")
 
