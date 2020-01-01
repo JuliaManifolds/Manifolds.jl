@@ -28,6 +28,13 @@ function g_manifold(A::AbstractGroupAction)
 end
 
 """
+    direction(::AbstractGroupAction{AD}) -> AD
+
+Get the direction of the action
+"""
+direction(::AbstractGroupAction{AD}) where {AD} = AD()
+
+"""
     apply!(A::AbstractGroupAction, y, a, x)
 
 Apply action `a` to the point `x` with the rule specified by `A`.
