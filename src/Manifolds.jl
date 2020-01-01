@@ -242,10 +242,12 @@ include("groups/group_action.jl")
 include("groups/group_operation_action.jl")
 include("groups/semidirect_product_group.jl")
 
-include("groups/special_orthogonal.jl")
-include("groups/rotation_action.jl")
 include("groups/translation_group.jl")
+include("groups/special_orthogonal.jl")
+
 include("groups/translation_action.jl")
+include("groups/rotation_action.jl")
+
 include("groups/special_euclidean.jl")
 
 include("statistics.jl")
@@ -436,6 +438,7 @@ export AbstractGroupAction,
     RightAction,
     RotationAction,
     SemidirectProductGroup,
+    SpecialEuclidean,
     SpecialOrthogonal,
     TranslationGroup,
     TranslationAction
