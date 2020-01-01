@@ -240,6 +240,7 @@ include("SymmetricPositiveDefinite.jl")
 include("groups/group.jl")
 include("groups/group_action.jl")
 include("groups/group_operation_action.jl")
+include("groups/semidirect_product_group.jl")
 
 include("groups/special_orthogonal.jl")
 include("groups/rotation_action.jl")
@@ -428,10 +429,12 @@ export AbstractGroupAction,
     AbstractGroupManifold,
     ActionDirection,
     GroupManifold,
+    GroupOperationAction,
     Identity,
     LeftAction,
     RightAction,
     RotationAction,
+    SemidirectProductGroup,
     SpecialOrthogonal,
     TranslationGroup,
     TranslationAction
@@ -448,6 +451,10 @@ export apply,
     identity!,
     inv,
     inv!,
+    inverse_apply,
+    inverse_apply!,
+    inverse_apply_diff,
+    inverse_apply_diff!,
     inverse_translate,
     inverse_translate!,
     inverse_translate_diff,
