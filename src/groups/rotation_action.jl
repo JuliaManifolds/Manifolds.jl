@@ -17,6 +17,8 @@ function RotationAction(M::Manifold, SOn::SpecialOrthogonal, ::TAD = LeftAction(
     return RotationAction{typeof(M), typeof(SOn), TAD}(M, SOn)
 end
 
+const RotationActionOnVector{N,F,TAD} = RotationAction{<:Union{Euclidean{Tuple{N},F},TranslationGroup{Tuple{N},F}},SpecialOrthogonal{N},TAD}
+
 function switch_direction(A::RotationAction{TM,TSO,TAD}) where {TM,TSO,TAD}
     return RotationAction(A.M, A.SOn, switch_direction(TAD()))
 end
