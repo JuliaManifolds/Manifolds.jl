@@ -6,12 +6,12 @@ Translation group $\mathrm{T}(N)$ represented by translation arrays.
 # Constructor
     TranslationGroup(n)
 """
-const TranslationGroup{T<:Tuple} = GroupManifold{Euclidean{T},AdditionOperation}
+const TranslationGroup{T<:Tuple,F} = GroupManifold{Euclidean{T,F},AdditionOperation}
 
-function TranslationGroup(n...)
-    return TranslationGroup{Tuple{n...}}(Euclidean(n...), AdditionOperation())
+function TranslationGroup(n...; field::AbstractField=ℝ)
+    return TranslationGroup{Tuple{n...},field}(Euclidean(n...; field=field), AdditionOperation())
 end
 
-function show(io::IO, ::TranslationGroup{N}) where {N}
-    print(io, "TranslationGroup($(N))")
+function show(io::IO, ::TranslationGroup{N,F}) where {N,F}
+    print(io, "TranslationGroup($(join(N.parameters, ", ")); field = $(F))")
 end
