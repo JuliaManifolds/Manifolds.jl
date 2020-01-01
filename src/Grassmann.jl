@@ -299,7 +299,6 @@ zero_tangent_vector!(::Grassmann,v,x) = fill!(v,0)
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
-mean(::Grassmann{N,K,ℝ} where {N,K}, args...)
-
+mean(::Grassmann{N,K,ℝ} where {N,K}, ::Any...)
 mean!(M::Grassmann{N,K,ℝ}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N,K} =
     mean!(M, y, x, w, GeodesicInterpolationWithinRadius(π/4); kwargs...)

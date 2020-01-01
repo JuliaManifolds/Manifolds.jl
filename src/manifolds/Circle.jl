@@ -22,7 +22,7 @@ checks whether `x` is a point on the [`Circle`](@ref) `M`.
 For thge real-valued case, `x` is an angle and henceit checks that $x \in [-\pi,\pi)$.
 for the complex-valued case its a unit number, $x \in \mathbb C$ with $\lvert x \rvert = 1$.
 """
-check_manifold_point(::Circle, args...)
+check_manifold_point(::Circle, ::Any...)
 function check_manifold_point(M::Circle{ℝ},x; kwargs...)
     if !isapprox(sym_rem(x),x;kwargs...)
         return DomainError(x,"The point $(x) does not lie on $(M), since its is not in [-π,π).")
@@ -71,20 +71,20 @@ complex_dot(a,b) = dot(real.(a),real.(b)) + dot(imag.(a),imag.(b))
 complex_dot(a::Number,b::Number) = (real(a)*real(b) + imag(a)*imag(b))
 
 @doc doc"""
-    distance(M,x,y)
+    distance(M::Circle, x, y)
 
 compute the distance on the [`Circle`](@ref) `M`, which is
 the absolute value of the symmetric remainder of `x` and `y` for the real-valued
 case and the angle between both complex numbers in the Gaussian plane for the
 complex-valued case.
 """
-distance(::Circle, args...)
+distance(::Circle, ::Any...)
 distance(::Circle{ℝ}, x::Real, y::Real) = abs(sym_rem(x-y))
 distance(::Circle{ℝ}, x, y) = abs(sum(sym_rem.(x-y)))
 distance(::Circle{ℂ}, x, y) = acos(clamp(complex_dot(x, y), -1, 1))
 
 @doc doc"""
-    exp(M,x,v)
+    exp(M::Circle, x, v)
 
 compute the exponential map on the [`Circle`](@ref).
 ````math
@@ -160,7 +160,7 @@ i.e. in $[-\pi,\pi)$.
 For the complex-valued case the formula is the same as for the [`Sphere`](@ref)
 applied to valuedin the complex plane.
 """
-log(::Circle,args...)
+log(::Circle, ::Any...)
 log(::Circle{ℝ}, x::Real, y::Real) = sym_rem(y-x)
 log!(::Circle{ℝ}, v, x, y) = (v .= sym_rem(y-x))
 function log(M::Circle{ℂ}, x::Number, y::Number)
@@ -206,7 +206,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` on the
 [`Circle`](@ref) $\mathbb S^1$ by the wrapped mean, i.e. the remainder of the
 mean modulo 2π.
 """
-mean(::Circle, args...)
+mean(::Circle, ::Any)
 mean(::Circle,x::Array{<:Real},w::AbstractVector; kwargs...) = sym_rem(sum(w.*x))
 
 @inline norm(::Circle, x, v) = sum(abs.(v))
@@ -298,7 +298,6 @@ function vector_transport_to!(M::Circle{ℂ}, vto, x, v, y, ::ParallelTransport)
     end
     return vto
 end
-
 
 vector_transport_along(M::Circle,x::Number,v::Number,c) = vector_transport_along!(M,zero(v),x,v,c)
 function vector_transport_direction(M::Circle,x::Number,v::Number,vdir::Number,m::AbstractVectorTransportMethod)

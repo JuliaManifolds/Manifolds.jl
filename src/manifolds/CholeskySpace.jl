@@ -94,7 +94,7 @@ The formula reads
 where $\lfloor x\rfloor$ denotes the strictly lower triangular matrix of $x$ and
 $\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
-exp(::CholeskySpace,args...)
+exp(::CholeskySpace, ::Any...)
 function exp!(::CholeskySpace,y,x,v)
     y .= strictlyLowerTriangular(x) + strictlyLowerTriangular(v) + Diagonal(diag(x))*Diagonal(exp.(diag(v)./diag(x)))
     return y
@@ -129,7 +129,7 @@ The formula reads
 where $\lfloor x\rfloor$ denotes the strictly lower triangular matrix of $x$ and
 $\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
-log(::Cholesky, args...)
+log(::Cholesky, ::Any...)
 function log!(::CholeskySpace,v,x,y)
     v .= strictlyLowerTriangular(y) - strictlyLowerTriangular(x) + Diagonal(diag(x))*Diagonal(log.(diag(y)./diag(x)))
     return v
@@ -167,8 +167,7 @@ on to the [`CholeskySpace`](@ref) manifold `M`. The formula reads
 where $\lfloor\cdot\rfloor$ denotes the strictly lower triangular matrix,
 and $\operatorname{diag}$ extracts the diagonal matrix.
 """
-vector_transport_to(::CholeskySpace,args...)
-
+vector_transport_to(::CholeskySpace, ::Any...)
 function vector_transport_to!(::CholeskySpace, vto, x, v, y, ::ParallelTransport)
     vto .= strictlyLowerTriangular(x) + Diagonal(diag(y))*Diagonal(1 ./ diag(x))*Diagonal(v)
     return vto
@@ -179,8 +178,7 @@ end
 
 returns the zero tangent vector on the [`CholeskySpace`](@ref) `M` at `x`.
 """
-zero_tangent_vector(M::CholeskySpace, args...)
-
+zero_tangent_vector(M::CholeskySpace, ::Any...)
 function zero_tangent_vector!(M::CholeskySpace,v,x)
     fill!(v,0)
     return v

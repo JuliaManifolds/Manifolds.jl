@@ -184,8 +184,7 @@ manifold_dimension(::Hyperbolic{N}) where {N} = N
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` on the
 [`Hyperbolic`](@ref) space using [`CyclicProximalPointEstimation`](@ref).
 """
-mean(::Hyperbolic, args...)
-
+mean(::Hyperbolic, ::Any...)
 mean!(M::Hyperbolic, y, x::AbstractVector, w::AbstractVector; kwargs...) =
     mean!(M, y, x, w,  CyclicProximalPointEstimation(); kwargs...)
 

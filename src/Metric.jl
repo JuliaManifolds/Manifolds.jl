@@ -283,7 +283,7 @@ end
 exp!(M::MMT, y, x, v) where {MMT <: MetricManifold}= exp!(M, is_default_metric(M), y, x, v)
 exp!(M::MMT, ::Val{true}, y, x, v) where {MMT<:MetricManifold} = exp!(base_manifold(M),y,x,v)
 """
-    exp(MM::MetricManifold, x, v, args...)
+    exp(MM::MetricManifold, x, v, ::Any)
 
 Numerically integrate the exponential map assuming the Levi-Civita connection.
 See [`solve_exp_ode`](@ref) if the [`Metric`](@ref) `G` of the [`MetricManifold`](@ref){M,G}`

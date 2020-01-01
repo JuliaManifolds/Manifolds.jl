@@ -601,7 +601,7 @@ end
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
-mean(::Rotations, args...)
+mean(::Rotations, ::Any)
 
 mean!(M::Rotations, y, x::AbstractVector, w::AbstractVector; kwargs...) =
     mean!(M, y, x, w, GeodesicInterpolationWithinRadius(π/2/√2); kwargs...)

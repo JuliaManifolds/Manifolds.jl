@@ -457,7 +457,7 @@ check_tangent_vector(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyM
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolation`](@ref).
 """
-mean(::SymmetricPositiveDefinite, args...)
+mean(::SymmetricPositiveDefinite, ::Any)
 
 mean!(M::SymmetricPositiveDefinite, y, x::AbstractVector, w::AbstractVector; kwargs...) =
     mean!(M, y, x, w, GeodesicInterpolation(); kwargs...)

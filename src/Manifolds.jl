@@ -154,7 +154,7 @@ include("PowerManifold.jl")
 
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
-include("Euclidean.jl")
+include("manifolds/Euclidean.jl")
 include("FixedRankMatrices.jl")
 include("Grassmann.jl")
 include("Hyperbolic.jl")
