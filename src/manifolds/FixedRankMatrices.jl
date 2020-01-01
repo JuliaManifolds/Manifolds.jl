@@ -1,7 +1,7 @@
 using LinearAlgebra: diag, Diagonal, svd, SVD, rank, dot
 import Base: \, /, +, -, *, ==, similar, one, copyto!
 @doc doc"""
-    FixedRankMatrices{M,N,K,T} <: Manifold
+    FixedRankMatrices{m,n,k,T} <: Manifold
 
 The manifold of $m\times n$ real-valued (complex-valued) matrices of fixed rank $k$, i.e.
 ````math
@@ -126,15 +126,15 @@ function check_manifold_point(M::FixedRankMatrices{m,n,k},x; kwargs...) where {m
     return nothing
 end
 function check_manifold_point(F::FixedRankMatrices{m,n,k}, x::SVDMPoint; kwargs...) where {m,n,k}
-    s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(M),$(N)) witk rank $(k), "
-    if (size(x.U) != (M,k)) || (length(x.S) != k) || (size(x.Vt) != (k,N))
-        return DomainError([size(x.U)...,length(x.S),size(x.Vt)...], string(s, "since the dimensions do not fit (expected $(N)x$(M) rank $(k) got $(size(x.U,1))x$(size(x.Vt,2)) rank $(size(x.S))."))
+    s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(m),$(n)) witk rank $(k), "
+    if (size(x.U) != (m,k)) || (length(x.S) != k) || (size(x.Vt) != (k,n))
+        return DomainError([size(x.U)...,length(x.S),size(x.Vt)...], string(s, "since the dimensions do not fit (expected $(n)x$(m) rank $(k) got $(size(x.U,1))x$(size(x.Vt,2)) rank $(size(x.S))."))
     end
-    if !isapprox(x.U'*x.U,one(zeros(N,N)); kwargs...)
-        return DomainError(norm(x.U'*x.U-one(zeros(N,N))), string(s," since U is not orthonormal/unitary."))
+    if !isapprox(x.U'*x.U,one(zeros(n,n)); kwargs...)
+        return DomainError(norm(x.U'*x.U-one(zeros(n,n))), string(s," since U is not orthonormal/unitary."))
     end
-    if !isapprox(x.Vt'*x.Vt, one(zeros(N,N)); kwargs...)
-        return DomainError(norm(x.Vt'*x.Vt-one(zeros(N,N))), string(s," since V is not orthonormal/unitary."))
+    if !isapprox(x.Vt'*x.Vt, one(zeros(n,n)); kwargs...)
+        return DomainError(norm(x.Vt'*x.Vt-one(zeros(n,n))), string(s," since V is not orthonormal/unitary."))
     end
     return nothing
 end
@@ -207,7 +207,7 @@ manifold_dimension(::FixedRankMatrices{M,N,k,ℂ}) where {M,N,k} = 2*(M+N-k)*k
     project_tangent(M, x, v)
 
 project the matrix $A\in\mathbb R^{m,n}$ or a [`UMVTVector`](@ref) `v` from the embedding or
-another tangent space onto the tangent space at $x$ on the [`FixedRankMatrices`](@ref),
+another tangent space onto the tangent space at $x$ on the [`FixedRankMatrices`](@ref) `M`,
 further decomposing the result into $v=UMV$, i.e. a [`UMVTVector`](@ref) following
 Section 3 in [^Vandereycken2013].
 
