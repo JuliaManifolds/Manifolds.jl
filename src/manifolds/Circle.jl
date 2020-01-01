@@ -1,5 +1,5 @@
 @doc doc"""
-    Circle{T} <: Manifold
+    Circle{F} <: Manifold
 
 The circle $\mathbb S^1$ as a manifold ere manifold represented by
 real-valued data in $[-\pi,\pi)$ or complex-valued data $z\in \mathbb C$ of absolute value
@@ -16,7 +16,7 @@ struct Circle{F} <: Manifold where {F <: AbstractField} end
 Circle(f::AbstractField=ℝ) = Circle{f}()
 
 @doc doc"""
-    check_manifold_point(M,x)
+    check_manifold_point(M::Circle, x)
 
 checks whether `x` is a point on the [`Circle`](@ref) `M`.
 For thge real-valued case, `x` is an angle and henceit checks that $x \in [-\pi,\pi)$.
@@ -37,7 +37,7 @@ function check_manifold_point(M::Circle{ℂ},x; kwargs...)
     return nothing
 end
 """
-    check_tangent_vector(M,x,v)
+    check_tangent_vector(M::Circle, x, v)
 
 check whether `v` is a tangent vector in the tangent space of `x` on the
 [`Circle`](@ref) `M`.
@@ -46,7 +46,7 @@ the whole real line.
 For the complex-alued case `v` has to lie on the line parallel to the tangent line at `x`
 in the complex place, i.e. the inner product is zero.
 """
-check_tangent_vector(::Circle{ℝ}, args...; kwargs...)
+check_tangent_vector(::Circle{ℝ}, ::Any...; ::Any...)
 function check_tangent_vector(M::Circle{ℝ}, x, v; kwargs...)
     perr = check_manifold_point(M,x)
     return perr # if x is valid all v that are real numbers are valid
@@ -63,7 +63,7 @@ function check_tangent_vector(M::Circle{ℂ},x,v; kwargs...)
 end
 
 @doc doc"""
-    complex_dot(a,b)
+    complex_dot(a, b)
 
 compute the inner product of two (complex) numbers with in the complex plane.
 """
@@ -96,7 +96,7 @@ i.e. in $[-\pi,\pi)$.
 For the complex-valued case the formula is the same as for the [`Sphere`](@ref)
 applied to valuedin the complex plane.
 """
-exp(::Circle, args...)
+exp(::Circle, ::Any...)
 exp(::Circle{ℝ}, x::Real, v::Real) = sym_rem(x+v)
 exp!(::Circle{ℝ}, y, x, v) = (y .= sym_rem(x+v))
 function exp(M::Circle{ℂ}, x::Number, v::Number)
@@ -116,15 +116,15 @@ end
 flat(M::Circle, x::Number, w::FVector{TangentSpaceType}) = FVector(CotangentSpace,w.data)
 
 @doc doc"""
-    injectivity_radius(M)
-    injectivity_radius(M,x)
+    injectivity_radius(M::Circle)
+    injectivity_radius(M::Circle, x)
 
 returns the injectivity radius on the [`Circle`](@ref) `M`, i.e. $\pi$.
 """
 injectivity_radius(::Circle, args...) = π
 
 @doc doc"""
-    inner(M, x, w, v)
+    inner(M::Circle, x, w, v)
 
 compute the inner product of the two tangent vectors `w,v` from the tangent plane at `x` on
 the [`Circle`](@ref) `M` using the restriction of the metric from the embedding,
@@ -138,8 +138,7 @@ g_x(v,w) = v^\mathrm{T}w
 ````
 for the complex case interpreting complex numbers in the Gaussian plane.
 """
-inner(::Circle,args...)
-
+inner(::Circle, ::Any...)
 @inline inner(::Circle{ℝ}, x, w, v) = dot(v,w)
 @inline inner(::Circle{ℝ}, x::Real, w::Real, v::Real) = v*w
 @inline inner(::Circle{ℂ}, x, w, v) = complex_dot(w, v)
@@ -148,7 +147,7 @@ inverse_retract(M::Circle, x::Number, y::Number) = inverse_retract(M, x, y, Loga
 inverse_retract(M::Circle, x::Number, y::Number, ::LogarithmicInverseRetraction) = log(M,x,y)
 
 @doc doc"""
-    log(M,x,y)
+    log(M::Circle, x, y)
 
 computes the logarithmic map on the [`Circle`](@ref) `M`.
 ````math
@@ -192,7 +191,7 @@ function log!(M::Circle{ℂ}, v, x, y)
 end
 
 @doc doc"""
-    manifold_dimension(M)
+    manifold_dimension(M::Circle)
 
 Return the dimension of the [`Circle`](@ref) `M`,
 i.e. $\operatorname{dim}(\mathbb S^1) = 1$.
@@ -212,14 +211,14 @@ mean(::Circle,x::Array{<:Real},w::AbstractVector; kwargs...) = sym_rem(sum(w.*x)
 @inline norm(::Circle, x, v) = sum(abs.(v))
 
 @doc doc"""
-    project_point(M,x)
+    project_point(M::Circle, x)
 
 project a point `x` onto the [`Circle`](@ref) `M`.
 For the real-valued case this is the remainder with respect to modulus $2\pi$.
 For the complex-valued case the result is the projection of `x` onto the unit circle in the
 complex plane.
 """
-project_point(::Circle, args...)
+project_point(::Circle, ::Any)
 project_point(::Circle{ℝ}, x::Real) = sym_rem(x)
 project_point(::Circle{ℂ}, x::Number) = x/abs(x)
 
@@ -227,7 +226,7 @@ project_point!(::Circle{ℝ}, x) = (x .= sym_rem(x))
 project_point!(::Circle{ℂ}, x) = (x .= x/sum(abs.(x)))
 
 @doc doc"""
-    project_tangent(M,x,v)
+    project_tangent(M::Circle, x, v)
 
 project a value `v` onto the tangent space of the point `x` on the [`Circle`](@ref) `M`.
 
@@ -262,7 +261,7 @@ sym_rem(x::N, T=π) where {N<:Number} = (x≈T ? convert(N,-T) : rem(x, convert(
 sym_rem(x, T=π) where N = sym_rem.(x, Ref(T))
 
 @doc doc"""
-    vector_transport_to(M,x,v,y,::ParallelTransport)
+    vector_transport_to(M::Circle, x, v, y, ::ParallelTransport)
 
 computes the parallel transport of `v` from the tangent space at `x` to the tangent space at
 `y` on the [`Circle`](@ref) `M`.

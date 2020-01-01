@@ -16,7 +16,7 @@ struct CholeskySpace{N} <: Manifold end
 CholeskySpace(n::Int) = CholeskySpace{n}()
 
 @doc doc"""
-    check_manifold_point(M, x; kwargs...)
+    check_manifold_point(M::CholeskySpace, x; kwargs...)
 
 check whether the matrix `x` lies on the [`CholeskySpace`](@ref) `M`, i.e.
 it's size fits the manifold, it is a lower triangular matrix and has positive
@@ -37,7 +37,7 @@ function check_manifold_point(M::CholeskySpace, x; kwargs...)
 end
 
 """
-    check_tangent_vector(M, x, v; kwargs... )
+    check_tangent_vector(M::CholeskySpace, x, v; kwargs... )
 
 checks whether `v` is a tangent vector to `x` on the [`CholeskySpace`](@ref) `M`, i.e.
 atfer [`check_manifold_point`](@ref)`(M,x)`, `v` has to be of same dimension as `x`
@@ -60,7 +60,7 @@ function check_tangent_vector(M::CholeskySpace, x,v; kwargs...)
 end
 
 @doc doc"""
-    distance(M, x, y)
+    distance(M::CholeskySpace, x, y)
 
 computes the Riemannian distance on the [`CholeskySpace`](@ref) `M` between two
 matrices `x`, `y` that are lower triangular with positive diagonal. The formula
@@ -80,7 +80,7 @@ function distance(::CholeskySpace,x,y)
 end
 
 @doc doc"""
-    exp(M, x, v)
+    exp(M::CholeskySpace, x, v)
 
 compute the exponential map on the [`CholeskySpace`](@ref) `M` eminating from the lower
 triangular matrix with positive diagonal `x` towards the lower triangular matrix `v`
@@ -101,7 +101,7 @@ function exp!(::CholeskySpace,y,x,v)
 end
 
 @doc doc"""
-    inner(M, x, v, w)
+    inner(M::CholeskySpace, x, v, w)
 
 computes the inner product on the [`CholeskySpace`](@ref) `M` at the
 lower triangular matric with positive diagonal `x` and the two tangent vectors
@@ -115,7 +115,7 @@ The formula reads
 inner(::CholeskySpace,x,v,w) = sum(strictlyLowerTriangular(v).*strictlyLowerTriangular(w)) + sum(diag(v).*diag(w)./( diag(x).^2 ))
 
 @doc doc"""
-    log(M, v, x, y)
+    log(M::CholeskySpace, v, x, y)
 
 compute the logarithmic map on the [`CholeskySpace`](@ref) `M` for the geodesic eminating
 from the lower triangular matrix with positive diagonal `x` towards `y`.
@@ -136,14 +136,14 @@ function log!(::CholeskySpace,v,x,y)
 end
 
 @doc doc"""
-    manifold_dimension(M)
+    manifold_dimension(M::CholeskySpace)
 
 returns the manifold dimension for the [`CholeskySpace`](@ref) `M`, i.e. $\frac{N(N+1)}{2}$.
 """
 @generated manifold_dimension(::CholeskySpace{N}) where N = div(N*(N+1), 2)
 
 @doc doc"""
-    reporesentation_size(M)
+    reporesentation_size(M::CholeskySpace)
 
 returns the representation size for the [`CholeskySpace`](@ref)`{N}` `M`, i.e. `(N,N)`.
 """
@@ -154,7 +154,7 @@ strictlyLowerTriangular(x) = LowerTriangular(x) - Diagonal(diag(x))
 strictlyUpperTriangular(x) = UpperTriangular(x) - Diagonal(diag(x))
 
 @doc doc"""
-    vector_transport(M, x, v, y, ::ParallelTransport)
+    vector_transport(M::CholeskySpace, x, v, y, ::ParallelTransport)
 
 parallely transport the tangent vector `v` at `x` along the geodesic to `y`
 on to the [`CholeskySpace`](@ref) manifold `M`. The formula reads
@@ -174,7 +174,7 @@ function vector_transport_to!(::CholeskySpace, vto, x, v, y, ::ParallelTransport
 end
 
 @doc doc"""
-    zero_tangent_vector(M, x)
+    zero_tangent_vector(M::CholeskySpace, x)
 
 returns the zero tangent vector on the [`CholeskySpace`](@ref) `M` at `x`.
 """
