@@ -28,23 +28,23 @@ function g_manifold(A::AbstractGroupAction)
 end
 
 """
-    apply(A::AbstractGroupAction, x, a)
+    apply!(A::AbstractGroupAction, y, a, x)
 
 Apply action `a` to the point `x` with the rule specified by `A`.
 The result is saved in `y`.
 """
-function apply!(A::AbstractGroupAction, y, x, a)
+function apply!(A::AbstractGroupAction, y, a, x)
     error("apply! not implemented for action $(typeof(A)) and points $(typeof(y)), $(typeof(x)) and $(typeof(a)).")
 end
 
 """
-    apply(A::AbstractGroupAction, x, a)
+    apply(A::AbstractGroupAction, a, x)
 
 Apply action `a` to the point `x`. The action is specified by `A`.
 """
-function apply(A::AbstractGroupAction, x, a)
+function apply(A::AbstractGroupAction, a, x)
     y = similar_result(A, apply, x, a)
-    apply!(A, y, x)
+    apply!(A, y, a, x)
     return y
 end
 

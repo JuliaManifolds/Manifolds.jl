@@ -21,12 +21,12 @@ function switch_direction(A::TranslationAction{TM,TRN,TAD}) where {TM,TRN,TAD}
     return TranslationAction(A.M, A.Rn, switch_direction(TAD()))
 end
 
-function apply!(A::TranslationAction, y, x, a)
+function apply!(A::TranslationAction, y, a, x)
     y .= x .+ a
     return y
 end
 
-function apply(A::TranslationAction, x, a)
+function apply(A::TranslationAction, a, x)
     return a + x
 end
 
