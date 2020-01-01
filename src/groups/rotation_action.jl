@@ -19,28 +19,6 @@ end
 
 const RotationActionOnVector{N,F,TAD} = RotationAction{<:Union{Euclidean{Tuple{N},F},TranslationGroup{Tuple{N},F}},SpecialOrthogonal{N},TAD}
 
-function switch_direction(A::RotationAction{TM,TSO,TAD}) where {TM,TSO,TAD}
-    return RotationAction(A.M, A.SOn, switch_direction(TAD()))
-end
-
-function apply!(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},LeftAction}, y, x, a) where N
-    mul!(y, a, x)
-    return y
-end
-
-function apply!(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},RightAction}, y, x, a) where N
-    mul!(y, x, a)
-    return y
-end
-
-function apply(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},LeftAction}, x, a) where N
-    return a * x
-end
-
-function apply(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},RightAction}, x, a) where N
-    return x * a
-end
-
 function base_group(A::RotationAction)
     return A.SOn
 end
@@ -49,7 +27,30 @@ function g_manifold(A::RotationAction)
     return A.M
 end
 
-function optimal_alignment(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},LeftAction}, x1, x2) where N
+function switch_direction(A::RotationAction{TM,TSO,TAD}) where {TM,TSO,TAD}
+    return RotationAction(A.M, A.SOn, switch_direction(TAD()))
+end
+
+function apply!(A::RotationActionOnVector{N,F,LeftAction}, y, a, x) where {N,F}
+    mul!(y, a, x)
+    return y
+end
+
+function apply(A::RotationActionOnVector{N,F,LeftAction}, a, x) where {N,F}
+    return a * x
+end
+
+function inverse_apply!(A::RotationActionOnVector{N,F,LeftAction}, y, a, x) where {N,F}
+    mul!(y, transpose(a), x)
+    return y
+end
+
+function inverse_apply(A::RotationActionOnVector{N,F,LeftAction}, a, x) where {N,F}
+    return transpose(a) * x
+end
+
+
+function optimal_alignment(A::RotationActionOnVector{N,T,LeftAction}, x1, x2) where {N,T}
     is_manifold_point(A.M, x1, true)
     is_manifold_point(A.M, x2, true)
 
