@@ -22,7 +22,8 @@ import Base: isapprox,
     *,
     \,
     /,
-    identity
+    identity,
+    show
 import Statistics: mean,
     mean!,
     median,
