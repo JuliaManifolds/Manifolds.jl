@@ -239,6 +239,7 @@ include("SymmetricPositiveDefinite.jl")
 
 include("groups/group.jl")
 include("groups/group_action.jl")
+include("groups/group_operation_action.jl")
 
 include("groups/special_orthogonal.jl")
 include("groups/rotation_action.jl")
