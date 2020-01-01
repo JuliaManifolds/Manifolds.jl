@@ -55,6 +55,94 @@ function apply(A::AbstractGroupAction, a, x)
     return y
 end
 
+"""
+    inverse_apply!(A::AbstractGroupAction, y, a, x)
+
+Apply inverse of action `a` to the point `x` with the rule specified by `A`.
+The result is saved in `y`.
+"""
+function inverse_apply!(A::AbstractGroupAction, y, a, x)
+    inva = inv(base_group(A), a)
+    apply!(A, y, inva, x)
+    return y
+end
+
+"""
+    inverse_apply(A::AbstractGroupAction, a, x)
+
+Apply inverse of action `a` to the point `x`. The action is specified by `A`.
+"""
+function inverse_apply(A::AbstractGroupAction, a, x)
+    y = similar_result(A, inverse_apply, x, a)
+    inverse_apply!(A, y, a, x)
+    return y
+end
+
+@doc doc"""
+    apply_diff(A::AbstractGroupAction, a, x, v[, conv::ActionDirection=LeftAction()])
+
+For group point $x \in M$ and tangent vector $v \in T_x M$, compute the action of the
+differential of the action of $a \in G$ on $v$, specified by rule `A`. Written as
+$(\mathrm{d}\tau_a)_x (v)$, with the specified left or right convention, the differential
+transports vectors
+
+```math
+\begin{aligned}
+(\mathrm{d}L_a)_x (v) &\colon T_x M \to T_{a \cdot x} M\\
+(\mathrm{d}R_a)_x (v) &\colon T_x M \to T_{x \cdot a} M\\
+\end{aligned}
+```
+"""
+function apply_diff(A::AbstractGroupAction,
+                    a,
+                    x,
+                    v,
+                    conv::ActionDirection = LeftAction())
+    return error("apply_diff not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(x)), vector $(typeof(v)), and direction $(typeof(conv))")
+end
+
+
+function apply_diff!(A::AbstractGroupAction,
+                     vout,
+                     a,
+                     x,
+                     v,
+                     conv::ActionDirection = LeftAction())
+    return error("apply_diff! not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(x)), vectors $(typeof(vout)) and $(typeof(v)), and direction $(typeof(conv))")
+end
+
+@doc doc"""
+    inverse_apply_diff(A::AbstractGroupAction, a, x, v[, conv::ActionDirection=LeftAction()])
+
+For group point $x \in M$ and tangent vector $v \in T_x M$, compute the action of the
+differential of the inverse action of $a \in G$ on $v$, specified by rule `A`. Written as
+$(\mathrm{d}\tau_a)_x^{-1} (v)$, with the specified left or right convention, the
+differential transports vectors
+
+```math
+\begin{aligned}
+(\mathrm{d}L_a)_x^{-1} (v) &\colon T_x M \to T_{a^{-1} \cdot x} M\\
+(\mathrm{d}R_a)_x^{-1} (v) &\colon T_x M \to T_{x \cdot a^{-1}} M\\
+\end{aligned}
+```
+"""
+function inverse_apply_diff(A::AbstractGroupAction,
+                            a,
+                            x,
+                            v,
+                            conv::ActionDirection = LeftAction())
+    return apply_diff(A, inv(base_group(A), a), x, v, conv)
+end
+
+function inverse_apply_diff!(A::AbstractGroupAction,
+                             vout,
+                             a,
+                             x,
+                             v,
+                             conv::ActionDirection = LeftAction())
+    return apply_diff!(A, vout, inv(base_group(A), a), x, v, conv)
+end
+
 function compose(A::AbstractGroupAction{LeftAction}, a, b)
     return compose(base_group(A), a, b)
 end

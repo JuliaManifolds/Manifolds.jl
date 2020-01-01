@@ -49,6 +49,23 @@ function inverse_apply(A::RotationActionOnVector{N,F,LeftAction}, a, x) where {N
     return transpose(a) * x
 end
 
+function apply_diff!(A::RotationActionOnVector{N,F,LeftAction}, vout, a, x, v) where {N,F}
+    mul!(vout, a, v)
+    return vout
+end
+
+function apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, x, v) where {N,F}
+    return a * v
+end
+
+function inverse_apply_diff!(A::RotationActionOnVector{N,F,LeftAction}, vout, a, x, v) where {N,F}
+    mul!(vout, transpose(a), v)
+    return vout
+end
+
+function inverse_apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, x, v) where {N,F}
+    return transpose(a) * v
+end
 
 function optimal_alignment(A::RotationActionOnVector{N,T,LeftAction}, x1, x2) where {N,T}
     is_manifold_point(A.M, x1, true)
