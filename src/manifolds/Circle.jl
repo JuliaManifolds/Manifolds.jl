@@ -231,7 +231,7 @@ project_point!(::Circle{ℂ}, x) = (x .= x/sum(abs.(x)))
 project a value `v` onto the tangent space of the point `x` on the [`Circle`](@ref) `M`.
 
 For the real-valued case this is just the identity.
-For the complex valued case `v` is projeted onto the line in the complex line
+For the complex valued case `v` is projected onto the line in the complex plane
 that is parallel to the tangent to `x` on the unit circle and contains `0`.
 """
 project_tangent(::Circle{ℝ}, x::Real, v::Real) = v
