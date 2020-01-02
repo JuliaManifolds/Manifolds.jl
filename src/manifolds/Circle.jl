@@ -9,7 +9,7 @@ $\lvert z\rvert = 1$.
     Circle(f=ℝ)
 
 generates the ℝ-valued Circle represented by angles, which
-alternatively can be set to use the [`AbstractField`](@ref) `f=ℂ` to obtain the Circle
+alternatively can be set to use the [`AbstractField`](@ref) `f=ℂ` to obtain the `Circle`
 represented by `ℂ`-valued `Circle` of unit numbers.
 """
 struct Circle{F} <: Manifold where {F <: AbstractField} end
