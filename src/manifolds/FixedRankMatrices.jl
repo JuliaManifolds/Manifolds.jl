@@ -240,7 +240,7 @@ end
     representation_size(M::FixedRankMatrices{m,n,k})
 
 returns the element size of a point on the [`FixedRankMatrices`](@ref) `M`, i.e.
-thge size of matrices on this manifold $(m,n)$.
+the size of matrices on this manifold $(m,n)$.
 """
 representation_size(M::FixedRankMatrices{m, n}) where {m,n} = (m,n)
 
