@@ -9,8 +9,8 @@ $\lvert z\rvert = 1$.
     Circle(f=ℝ)
 
 generates the ℝ-valued Circle represented by angles, which
-alternatively can be set to use the [`AbstractField`](@ref) `f=ℂ` to obtain the Circle
-represented by ℂ-valued Circle of unit numbers.
+alternatively can be set to use the [`AbstractField`](@ref) `f=ℂ` to obtain the `Circle`
+represented by `ℂ`-valued `Circle` of unit numbers.
 """
 struct Circle{F} <: Manifold where {F <: AbstractField} end
 Circle(f::AbstractField=ℝ) = Circle{f}()
@@ -19,7 +19,7 @@ Circle(f::AbstractField=ℝ) = Circle{f}()
     check_manifold_point(M::Circle, x)
 
 checks whether `x` is a point on the [`Circle`](@ref) `M`.
-For thge real-valued case, `x` is an angle and henceit checks that $x \in [-\pi,\pi)$.
+For the real-valued case, `x` is an angle and hence it checks that $x \in [-\pi,\pi)$.
 for the complex-valued case its a unit number, $x \in \mathbb C$ with $\lvert x \rvert = 1$.
 """
 check_manifold_point(::Circle, ::Any...)
@@ -43,8 +43,8 @@ check whether `v` is a tangent vector in the tangent space of `x` on the
 [`Circle`](@ref) `M`.
 For the real-valued case represented by angles all `v` are valid, since the tangent space is
 the whole real line.
-For the complex-alued case `v` has to lie on the line parallel to the tangent line at `x`
-in the complex place, i.e. the inner product is zero.
+For the complex-valued case `v` has to lie on the line parallel to the tangent line at `x`
+in the complex plane, i.e. the inner product is zero.
 """
 check_tangent_vector(::Circle{ℝ}, ::Any...; ::Any...)
 function check_tangent_vector(M::Circle{ℝ}, x, v; kwargs...)
@@ -231,7 +231,7 @@ project_point!(::Circle{ℂ}, x) = (x .= x/sum(abs.(x)))
 project a value `v` onto the tangent space of the point `x` on the [`Circle`](@ref) `M`.
 
 For the real-valued case this is just the identity.
-For the complex valued case `v` is projeted onto the line in the complex line
+For the complex valued case `v` is projected onto the line in the complex plane
 that is parallel to the tangent to `x` on the unit circle and contains `0`.
 """
 project_tangent(::Circle{ℝ}, x::Real, v::Real) = v
