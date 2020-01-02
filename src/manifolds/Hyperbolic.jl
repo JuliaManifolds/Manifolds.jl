@@ -47,10 +47,9 @@ It is also the default metric e.g. for the [`Hyperbolic`](@ref) space.
     $x\in\mathcal M$, of the [`Hyperbolic`](@ref) space $\mathcal M$.
 """
 struct MinkowskiMetric <: LorentzMetric end
-is_default_metric(::Hyperbolic,::MinkowskiMetric) = Val(true)
 
 """
-    check_manifold_point(S,x; kwargs...)
+    check_manifold_point(M::Hyperbolic, x; kwargs...)
 
 checks, whether `x` is a valid point on the [`Hyperbolic`](@ref) `M`, i.e. is a vector with
 [`minkowski_dot`](@ref) -1. The tolerance for the last test can be set using the `kwargs...`.
@@ -66,7 +65,7 @@ function check_manifold_point(M::Hyperbolic, x; kwargs...)
 end
 
 """
-    check_tangent_vector(M,x,v; kwargs... )
+    check_tangent_vector(M::Hyperbolic, x, v; kwargs... )
 
 checks whether `v` is a tangent vector to `x` on the [`Hyperbolic`](@ref) `M`, i.e.
 after [`check_manifold_point`](@ref)`(M,x)`, `v` has to be of same dimension as `x`
@@ -88,19 +87,33 @@ function check_tangent_vector(M::Hyperbolic, x, v; kwargs...)
     return nothing
 end
 
-distance(M::Hyperbolic, x, y) = acosh(max(-minkowski_dot(x, y), 1.))
 @doc doc"""
-    exp!(M, y, x, v[, t=1.0])
+    distance(M::Hyperbolic, x, y)
+
+compute the distance on the [`Hyperbolic`](@ref) `M`, which reads
+
+````math
+d_{\mathbb H^n}(x,y) = \operatorname{acosh}( - \langle x, y \rangle_{\mathrm{M}}),
+````
+
+where $\langle\cdot,\cdot\rangle_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref).
+"""
+distance(M::Hyperbolic, x, y) = acosh(max(-minkowski_dot(x, y), 1.))
+
+@doc doc"""
+    exp(M::Hyperbolic, x, v)
 
 computes the exponential map on the [`Hyperbolic`](@ref) space $\mathbb H^n$ eminating from `x`
-towards `v`, which is optionally scaled by `t`. The result is stored in `y`. The formula reads
+towards `v`, which is optionally scaled by `t`. The formula reads
 
 ````math
 \exp_x v = \cosh(\sqrt{\langle v,v\rangle_{\mathrm{M}}})x
 + \sinh(\sqrt{\langle v,v\rangle_{\mathrm{M}}})\frac{v}{\sqrt{\langle v,v\rangle_{\mathrm{M}}}},
 ````
+
 where $\langle\cdot,\cdot\rangle_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref).
 """
+exp(::Hyperbolic, ::Any...)
 function exp!(M::Hyperbolic, y, x, v)
     vn = sqrt(max(minkowski_dot(v, v),0.))
     if vn < eps(eltype(x))
@@ -116,10 +129,15 @@ function flat!(M::Hyperbolic, v::FVector{CotangentSpaceType}, x, w::FVector{Tang
     return v
 end
 
+@doc doc"""
+    injectivity_radius(M::Hyperbolic[, x])
+
+returns the infjectivity radius on the [`Hyperbolic`](@ref), which is always $\infty$.
+"""
 injectivity_radius(H::Hyperbolic, args...) = Inf
 
 @doc doc"""
-    inner(M, x, v, w)
+    inner(M::Hyperbolic, x, v, w)
 
 compute the Riemannian inner product for two tangent vectors `v` and `w`
 from $T_x\mathbb H^n$ of the [`Hyperbolic`](@ref) space $\mathbb H^n$ given by
@@ -128,11 +146,13 @@ inner product on $\mathbb R^{n+1}$.
 """
 @inline inner(M::Hyperbolic, x, w, v) = minkowski_dot(w, v)
 
-@doc doc"""
-    log!(M, v, x, y)
+is_default_metric(::Hyperbolic,::MinkowskiMetric) = Val(true)
 
-computes the logarithmic map on the [`Hyperbolic`](@ref) space $\mathbb H^n$, i.e., `v`
-corresponds to the tangent vector representing the [`geodesic`](@ref) starting from `x`
+@doc doc"""
+    log(M::Hyperbolic, x, y)
+
+computes the logarithmic map on the [`Hyperbolic`](@ref) space $\mathbb H^n$, the tangent
+vector representing the [`geodesic`](@ref) starting from `x`
 reaches `y` after time 1 on the [`Hyperbolic`](@ref) space `M`.
 The formula reads for $x\neq y$
 
@@ -142,6 +162,7 @@ The formula reads for $x\neq y$
 ```
 and is zero otherwise.
 """
+log(::Hyperbolic,::Any...)
 function log!(M::Hyperbolic, v, x, y)
     scp = minkowski_dot(x, y)
     w = y + scp*x
@@ -189,10 +210,10 @@ mean!(M::Hyperbolic, y, x::AbstractVector, w::AbstractVector; kwargs...) =
     mean!(M, y, x, w,  CyclicProximalPointEstimation(); kwargs...)
 
 @doc doc"""
-    project_tangent!(M, w, x, v)
+    project_tangent(M::Hyperbolic, x, v)
 
 perform an orthogonal projection with respect to the Minkowski inner product of `v` onto
-the tangent space at `x` of the [`Hyperbolic`](@ref) space `M`. The result is saved to `w`.
+the tangent space at `x` of the [`Hyperbolic`](@ref) space `M`.
 
 The formula reads
 ````math
@@ -201,8 +222,15 @@ w = v + \langle x,v\rangle_{\mathrm{M}} x,
 where $\langle \cdot, \cdot \rangle_{\mathrm{M}}$ denotes the Minkowski inner
 product in the embedding, see [`minkowski_dot`](@ref).
 """
+project_tangent(::Hyperbolic,::Any...)
 project_tangent!(::Hyperbolic, w, x, v) = (w .= v .+ minkowski_dot(x, v) .* x)
 
+@doc doc"""
+    representation_size(M::Hyperbolic)
+
+returns the representation size on the [`Hyperbolic`](@ref), i.e. for the `n`-diomensional
+hyperbolic manifold the dimention of the embedding, i.e. `n+1`.
+"""
 representation_size(::Hyperbolic{N}) where {N} = (N+1,)
 
 function sharp!(M::Hyperbolic, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
@@ -211,7 +239,7 @@ function sharp!(M::Hyperbolic, v::FVector{TangentSpaceType}, x, w::FVector{Cotan
 end
 
 @doc doc"""
-    vector_transport_to!(M, vto, x, v, y, ::ParallelTransport)
+    vector_transport_to(M::Hyperbolic, x, v, y, ::ParallelTransport)
 
 Compute the paralllel transport of the `v` from the tangent space at `x` on the
 [`Hyperbolic`](@ref) space $\mathbb H^n$ to the tangent at `y` along the [`geodesic`](@ref)
@@ -222,6 +250,11 @@ P_{x\to y}(v) = v - \frac{\langle \log_xy,v\rangle_x}{d^2_{\mathbb H^n}(x,y)}
 \bigl(\log_xy + \log_yx \bigr).
 ````
 """
+function vector_transport_to(M::Hyperbolic, x, v, y, method::ParallelTransport)
+    vto = similar_result(M, vector_transport_to, v, x, y)
+    vector_transport_to!(M, vto, x, v, y, method)
+    return vto
+end
 function vector_transport_to!(M::Hyperbolic, vto, x, v, y, ::ParallelTransport)
     w = log(M,x,y)
     wn = norm(M,x,w)
@@ -233,6 +266,12 @@ function vector_transport_to!(M::Hyperbolic, vto, x, v, y, ::ParallelTransport)
     return vto
 end
 
+@doc doc"""
+    zero_tangent_vector(M::Hyperbolic, x)
+
+return the zero vector from the tangent space at `x` of the [`Hyperbolic`](@ref) `M`.
+"""
+zero_tangent_vector(::HybridArray,::Any...)
 function zero_tangent_vector!(M::Hyperbolic, v, x)
     fill!(v, 0)
     return v
