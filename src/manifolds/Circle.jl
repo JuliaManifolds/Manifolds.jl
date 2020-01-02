@@ -44,7 +44,7 @@ check whether `v` is a tangent vector in the tangent space of `x` on the
 For the real-valued case represented by angles all `v` are valid, since the tangent space is
 the whole real line.
 For the complex-alued case `v` has to lie on the line parallel to the tangent line at `x`
-in the complex place, i.e. the inner product is zero.
+in the complex plane, i.e. the inner product is zero.
 """
 check_tangent_vector(::Circle{ℝ}, ::Any...; ::Any...)
 function check_tangent_vector(M::Circle{ℝ}, x, v; kwargs...)
