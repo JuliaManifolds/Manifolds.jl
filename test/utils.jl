@@ -134,14 +134,17 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     end
 
     test_exp_log && @testset "log/exp tests" begin
+        epsp1p2 = eps(real(Base.promote_eltype(pts[1], pts[2])))
+        atolp1p2 = exp_log_atol_multiplier * epsp1p2
+        rtolp1p2 = exp_log_atol_multiplier == 0. ? sqrt(epsp1p2)*exp_log_rtol_multiplier : 0
         v1 = log(M, pts[1], pts[2])
         v2 = log(M, pts[2], pts[1])
-        @test isapprox(M, pts[2], exp(M, pts[1], v1))
-        @test isapprox(M, pts[1], exp(M, pts[1], v1, 0))
-        @test isapprox(M, pts[2], exp(M, pts[1], v1, 1))
-        @test isapprox(M, pts[1], exp(M, pts[2], v2))
-        @test is_manifold_point(M, exp(M, pts[1], v1))
-        @test isapprox(M, pts[1], exp(M, pts[1], v1, 0))
+        @test isapprox(M, pts[2], exp(M, pts[1], v1); atol = atolp1p2, rtol = rtolp1p2)
+        @test isapprox(M, pts[1], exp(M, pts[1], v1, 0); atol = atolp1p2, rtol = rtolp1p2)
+        @test isapprox(M, pts[2], exp(M, pts[1], v1, 1); atol = atolp1p2, rtol = rtolp1p2)
+        @test isapprox(M, pts[1], exp(M, pts[2], v2); atol = atolp1p2, rtol = rtolp1p2)
+        @test is_manifold_point(M, exp(M, pts[1], v1); atol = atolp1p2, rtol = rtolp1p2)
+        @test isapprox(M, pts[1], exp(M, pts[1], v1, 0); atol = atolp1p2, rtol = rtolp1p2)
         for x ∈ pts
             epsx = eps(real(eltype(x)))
             @test isapprox(M, x, zero_tangent_vector(M, x), log(M, x, x);
