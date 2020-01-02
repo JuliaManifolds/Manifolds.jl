@@ -132,7 +132,7 @@ end
 @doc doc"""
     injectivity_radius(M::Hyperbolic[, x])
 
-returns the infjectivity radius on the [`Hyperbolic`](@ref), which is always $\infty$.
+returns the injectivity radius on the [`Hyperbolic`](@ref), which is always $\infty$.
 """
 injectivity_radius(H::Hyperbolic, args...) = Inf
 
