@@ -1,7 +1,7 @@
 module Manifolds
 
-import Base: +, -, *, angle, axes, convert, copy, copyto!, dataids, eltype, exp, getindex,
-    isapprox, length, log, promote_rule, setindex!, similar, size
+import Base: +, -, *, \, /, angle, axes, convert, copy, copyto!, dataids, eltype, exp,
+    getindex, identity, isapprox, inv, length, log, promote_rule, setindex!, similar, size
 import Distributions: _rand!, support
 import LinearAlgebra: cross, det, Diagonal, dot, norm, I, UniformScaling
 import ManifoldsBase: base_manifold, check_manifold_point, check_tangent_vector
@@ -164,6 +164,14 @@ include("Sphere.jl")
 include("Symmetric.jl")
 include("SymmetricPositiveDefinite.jl")
 
+include("groups/group.jl")
+include("groups/group_action.jl")
+
+include("groups/special_orthogonal.jl")
+include("groups/rotation_action.jl")
+include("groups/translation_group.jl")
+include("groups/translation_action.jl")
+
 include("statistics.jl")
 
 function __init__()
@@ -216,4 +224,12 @@ export base_manifold, bundle_projection, christoffel_symbols_first, christoffel_
     vector_transport_direction, vector_transport_direction!, vector_transport_to,
     vector_transport_to!, vee, vee!, zero_vector, zero_vector!, zero_tangent_vector,
     zero_tangent_vector!
+# Lie group types & functions
+export AbstractGroupAction, AbstractGroupOperation, AbstractGroupManifold, ActionDirection,
+    GroupManifold, Identity, LeftAction, RightAction, RotationAction, SpecialOrthogonal,
+    TranslationGroup, TranslationAction
+export apply, apply!, base_group, center_of_orbit, compose, compose!, g_manifold, identity,
+    identity!, inv, inv!, inverse_translate, inverse_translate!, inverse_translate_diff,
+    inverse_translate_diff!, optimal_alignment, optimal_alignment!, switch_direction,
+    translate, translate!, translate_diff, translate_diff!
 end # module
