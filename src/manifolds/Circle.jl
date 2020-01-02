@@ -19,7 +19,7 @@ Circle(f::AbstractField=ℝ) = Circle{f}()
     check_manifold_point(M::Circle, x)
 
 checks whether `x` is a point on the [`Circle`](@ref) `M`.
-For thge real-valued case, `x` is an angle and henceit checks that $x \in [-\pi,\pi)$.
+For the real-valued case, `x` is an angle and hence it checks that $x \in [-\pi,\pi)$.
 for the complex-valued case its a unit number, $x \in \mathbb C$ with $\lvert x \rvert = 1$.
 """
 check_manifold_point(::Circle, ::Any...)
