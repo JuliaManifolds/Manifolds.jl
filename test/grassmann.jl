@@ -89,7 +89,7 @@ include("utils.jl")
                 test_reverse_diff = false,
                 retraction_methods = [PolarRetraction(), QRRetraction()],
                 inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()],
-                exp_log_atol_multiplier = 5000.0,
+                exp_log_atol_multiplier = eltype(T) === ComplexF32 ? 5000.0 : 10.0,
                 is_tangent_atol_multiplier = 10.0,
             )
 
