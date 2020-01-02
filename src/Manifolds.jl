@@ -158,7 +158,7 @@ include("manifolds/Euclidean.jl")
 include("manifolds/FixedRankMatrices.jl")
 include("manifolds/Grassmann.jl")
 include("manifolds/Hyperbolic.jl")
-include("Rotations.jl")
+include("manifolds/Rotations.jl")
 include("Stiefel.jl")
 include("Sphere.jl")
 include("Symmetric.jl")
@@ -226,8 +226,8 @@ export base_manifold, bundle_projection, christoffel_symbols_first, christoffel_
     zero_tangent_vector!
 # Lie group types & functions
 export AbstractGroupAction, AbstractGroupOperation, AbstractGroupManifold, ActionDirection,
-    GroupManifold, Identity, LeftAction, RightAction, RotationAction, SpecialOrthogonal,
-    TranslationGroup, TranslationAction
+    AdditionOperation, MultiplicationOperation, GroupManifold, Identity, LeftAction,
+    RightAction, RotationAction, SpecialOrthogonal, TranslationGroup, TranslationAction
 export apply, apply!, base_group, center_of_orbit, compose, compose!, g_manifold, identity,
     identity!, inv, inv!, inverse_translate, inverse_translate!, inverse_translate_diff,
     inverse_translate_diff!, optimal_alignment, optimal_alignment!, switch_direction,

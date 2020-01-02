@@ -15,3 +15,8 @@ Modules = [Manifolds, ManifoldsBase]
 Pages = ["ManifoldsBase.jl"]
 Order = [:type, :function]
 ```
+
+As a first manifold, a reduced simplified version of [`Euclidean`](@ref) the interface provides
+```@docs
+ManifoldsBase.DefaultManifold
+```

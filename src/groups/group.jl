@@ -24,8 +24,8 @@ abstract type AbstractGroupOperation end
 @doc doc"""
     AbstractGroupManifold{<:AbstractGroupOperation} <: Manifold
 
-Abstract type for a Lie group, a group that is also a smooth manifold with a
-[smooth binary operation](@ref AbstractGroupOperation).
+Abstract type for a Lie group, a group that is also a smooth manifold with an
+[`AbstractGroupOperation`](@ref), a smooth binary operation.
 `AbstractGroupManifold`s must implement at least [`inv`](@ref),
 [`identity`](@ref), [`compose`](@ref), and [`translate_diff`](@ref).
 Group manifolds by default forward metric-related operations to the wrapped

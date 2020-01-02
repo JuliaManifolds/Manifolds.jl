@@ -17,5 +17,6 @@ Manifolds.log_safe
 Manifolds.size_to_tuple
 Manifolds.select_from_tuple
 Manifolds.usinc
+Manifolds.usinc_from_cos
 Manifolds.ziptuples
 ```

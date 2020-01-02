@@ -13,7 +13,7 @@ Let $L_R\colon \mathrm{SO}(n) \to \mathrm{SO}(n)$ where $R \in \mathrm{SO}(n)$ b
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["Rotations.jl"]
+Pages = ["manifolds/Rotations.jl"]
 Order = [:type, :function]
 ```
 
