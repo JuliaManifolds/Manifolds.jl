@@ -65,8 +65,12 @@ include("utils.jl")
             @test_throws DomainError is_tangent_vector(M, [1. 0.; 0. 1.; 0. 0.],ones(3,2),true)
             @test injectivity_radius(M) == π/2
         end
-        types = [Matrix{ComplexF64},
-                 MMatrix{3, 2, ComplexF64}]
+        types = [
+            Matrix{ComplexF64},
+             MMatrix{3, 2, ComplexF64},
+             Matrix{ComplexF32},
+             MMatrix{3, 2, ComplexF32},
+        ]
         @testset "Type $T" for T in types
             x = [0.5+0.5im 0.5+0.5im; 0.5+0.5im -0.5-0.5im; 0.0 0.0]
             v = [0.0 0.0; 0.0 0.0; 0.0 1.0]
@@ -85,7 +89,7 @@ include("utils.jl")
                 test_reverse_diff = false,
                 retraction_methods = [PolarRetraction(), QRRetraction()],
                 inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()],
-                exp_log_atol_multiplier = 10.0,
+                exp_log_atol_multiplier = 5000.0,
                 is_tangent_atol_multiplier = 10.0,
             )
 
