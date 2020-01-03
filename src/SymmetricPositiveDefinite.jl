@@ -285,7 +285,7 @@ compute the parallel transport on the [`SymmetricPositiveDefinite`](@ref) as a
 The formula reads
 
 ```math
-P_{x\to y}(v) = x^{\frac{1}{2}}
+P_{y\gets x}(v) = x^{\frac{1}{2}}
 \operatorname{Exp}\bigl(
 \frac{1}{2}x^{-\frac{1}{2}}\log_x(y)x^{-\frac{1}{2}}
 \bigr)
@@ -341,7 +341,7 @@ With $u$ the parallel transport on [`CholeskySpace`](@ref) from $l$ to $k$ the
 formula hear reads
 
 ````math
-    \mathcal P_{x\to y}(v) = ku^{\mathrm{T}} + uk^{\mathrm{T}}
+    \mathcal P_{y\gets x}(v) = ku^{\mathrm{T}} + uk^{\mathrm{T}}
 ````
 """
 function vector_transport_to!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, vto, x, v, y, ::ParallelTransport) where N

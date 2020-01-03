@@ -204,11 +204,7 @@ compute the inverse retraction for the [`PolarRetraction`](@ref), on the
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-function inverse_retract(M::Grassmann, x, y, m::PolarInverseRetraction)
-    vr = similar_result(M, inverse_retract, x, y)
-    inverse_retract!(M, vr, x, y, m)
-    return vr
-end
+inverse_retract(M::Grassmann, ::Any, ::Any, ::PolarInverseRetraction)
 inverse_retract!(::Grassmann, v, x, y, ::PolarInverseRetraction) = ( v .= y/(x'*y) - x)
 
 @doc doc"""
@@ -221,11 +217,7 @@ compute the inverse retraction valid of the [`QRRetraction`](@ref)
 ````
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-function inverse_retract(M::Grassmann, x, y, m::QRInverseRetraction)
-    vr = similar_result(M, inverse_retract, x, y)
-    inverse_retract!(M, vr, x, y, m)
-    return vr
-end
+inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 inverse_retract!(::Grassmann, v, x, y, ::QRInverseRetraction) = ( v .= y/(x'*y) - x)
 
 isapprox(M::Grassmann, x, v, w; kwargs...) = isapprox(
@@ -337,11 +329,7 @@ compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-function retract(M::Grassmann, x, v, m::PolarRetraction)
-    xr = similar_result(M, retract, x, v)
-    retract!(M, xr, x, v, m)
-    return xr
-end
+retract(::Grassmann, ::Any, ::Any, ::PolarRetraction)
 function retract!(::Grassmann, y, x, v, ::PolarRetraction)
     s = svd(x+v)
     mul!(y, s.U, s.V')
@@ -361,11 +349,7 @@ where D is a $m\times n$ matrix with
 D = \operatorname{diag}( \operatorname{sgn}(R_{ii}+0,5)_{i=1}^n ).
 ````
 """
-function retract(M::Grassmann, x, v, m::QRRetraction)
-    xr = similar_result(M, retract, x, v)
-    retract!(M, xr, x, v, m)
-    return xr
-end
+retract(M::Grassmann, ::Any, ::Any, ::QRRetraction)
 function retract!(::Grassmann{N,K}, y, x, v, ::QRRetraction) where {N,K}
     qrfac = qr(x+v)
     d = diag(qrfac.R)

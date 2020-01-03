@@ -181,10 +181,7 @@ function __init__()
     end
 
     @require OrdinaryDiffEq="1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
-        using .OrdinaryDiffEq: ODEProblem,
-            AutoVern9,
-            Rodas5,
-            solve
+        using .OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
         include("ode.jl")
     end
 end

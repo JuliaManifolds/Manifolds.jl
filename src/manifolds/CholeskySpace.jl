@@ -154,20 +154,20 @@ strictlyLowerTriangular(x) = LowerTriangular(x) - Diagonal(diag(x))
 strictlyUpperTriangular(x) = UpperTriangular(x) - Diagonal(diag(x))
 
 @doc doc"""
-    vector_transport(M::CholeskySpace, x, v, y, ::ParallelTransport)
+    vector_transport_to(M::CholeskySpace, x, v, y, ::ParallelTransport)
 
 parallely transport the tangent vector `v` at `x` along the geodesic to `y`
 on to the [`CholeskySpace`](@ref) manifold `M`. The formula reads
 
 ````math
-\mathcal P_{x\to y}(v) = \lfloor v \rfloor
+\mathcal P_{y\gets x}(v) = \lfloor v \rfloor
 + \operatorname{diag}(y)\operatorname{diag}(x)^{-1}\operatorname{diag}(v),
 ````
 
 where $\lfloor\cdot\rfloor$ denotes the strictly lower triangular matrix,
 and $\operatorname{diag}$ extracts the diagonal matrix.
 """
-vector_transport_to(::CholeskySpace, ::Any...)
+vector_transport_to(::CholeskySpace, ::Any, ::Any, ::Any, ::ParallelTransport)
 function vector_transport_to!(::CholeskySpace, vto, x, v, y, ::ParallelTransport)
     vto .= strictlyLowerTriangular(x) + Diagonal(diag(y))*Diagonal(1 ./ diag(x))*Diagonal(v)
     return vto
@@ -178,7 +178,7 @@ end
 
 returns the zero tangent vector on the [`CholeskySpace`](@ref) `M` at `x`.
 """
-zero_tangent_vector(M::CholeskySpace, ::Any...)
+zero_tangent_vector(::CholeskySpace, ::Any...)
 function zero_tangent_vector!(M::CholeskySpace,v,x)
     fill!(v,0)
     return v

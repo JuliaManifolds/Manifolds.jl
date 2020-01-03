@@ -325,11 +325,7 @@ where $s$ is the solution to the Sylvester equation
 
 $x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2\mathrm{I}_n = 0.$
 """
-function inverse_retract(M::Rotations, x, y, m::PolarInverseRetraction)
-    vr = similar_result(M, inverse_retract, x, y)
-    inverse_retract!(M, vr, x, y, m)
-    return vr
-end
+inverse_retract(::Rotations, ::Any, ::Any, ::PolarInverseRetraction)
 function inverse_retract!(M::Rotations, v, x, y, method::PolarInverseRetraction)
     A = transpose(x) * y
     H = 2 * one(x)
@@ -354,11 +350,7 @@ Compute a vector from the tagent space $T_x\mathrm{SO}(n)$ of the point `x` on t
 [`Rotations`](@ref) manifold `M` with which the point `y` can be reached by the
 [`QRRetraction`](@ref) from the point `x` after time 1.
 """
-function inverse_retract(M::Rotations, x, y, m::QRInverseRetraction)
-    vr = similar_result(M, inverse_retract, x, y)
-    inverse_retract!(M, vr, x, y, m)
-    return vr
-end
+inverse_retract(::Rotations, ::Any, ::Any, ::QRInverseRetraction)
 function inverse_retract!(M::Rotations{N}, v, x, y, ::QRInverseRetraction) where N
     A = transpose(x) * y
     R = zero(v)
@@ -613,11 +605,7 @@ be the singular value decomposition, then the formula reads
 \operatorname{retr}_x v = UV^\mathrm{T}.
 ````
 """
-function retract(M::Rotations, x, v, m::PolarRetraction)
-    xr = similar_result(M, retract, x, v)
-    retract!(M, xr, x, v, m)
-    return xr
-end
+retract(::Rotations, ::Any, ::Any, ::PolarRetraction)
 function retract!(M::Rotations, y, x, v, method::PolarRetraction)
     A = x + x*v
     project_point!(M, y, A; check_det = false)
@@ -626,7 +614,7 @@ end
 
 @doc doc"""
     retract(M, x, v)
-    retract(M, x, v, method::QRRetraction)
+    retract(M, x, v, ::QRRetraction)
 
 
 compute the SVD-based retraction on the [`Rotations`](@ref) `M` from `x` in direction `v`
@@ -634,11 +622,7 @@ compute the SVD-based retraction on the [`Rotations`](@ref) `M` from `x` in dire
 
 This is also the default retraction on the [`Rotations`](@ref)
 """
-function retract(M::Rotations, x, v, m::QRRetraction)
-    xr = similar_result(M, retract, x, v)
-    retract!(M, xr, x, v, m)
-    return xr
-end
+retract(::Rotations, ::Any, ::Any, ::QRRetraction)
 function retract!(M::Rotations, y::AbstractArray{T}, x, v, method::QRRetraction) where T
     A = x + x*v
     qr_decomp = qr(A)

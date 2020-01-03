@@ -237,7 +237,7 @@ end
 parallel transport the vector `v` from the tangent space at `x` to the tangent space at `y`
 on the [`Euclidean`](@ref) `M`, which simplifies to the identity.
 """
-vector_transport_to(::Euclidean, ::Any...)
+vector_transport_to(::Euclidean, ::Any, ::Any, ::Any, ::ParallelTransport)
 function vector_transport_to!(M::Euclidean, vto, x, v, y, ::ParallelTransport)
     vto .= v
     return vto

@@ -245,7 +245,7 @@ the size of matrices on this manifold $(m,n)$.
 representation_size(M::FixedRankMatrices{m, n}) where {m,n} = (m,n)
 
 @doc doc"""
-    retract(M, y, x, v, ::PolarRetraction)
+    retract(M, x, v, ::PolarRetraction)
 
 compute an SVD-based retraction on the [`FixedRankMatrices`](@ref) `M` by computing
 ````math
@@ -255,7 +255,7 @@ where $U_k S_k V_k^\mathrm{T}$ is the shortened singular value decomposition $US
 in the sense that $S_k$ is the diagonal matrix of size $k\times k$ with the $k$ largest
 singular values and $U$ and $V$ are shortened accordingly.
 """
-retract(::FixedRankMatrices, ::Any...)
+retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)
 function retract!(::FixedRankMatrices{M,N,k}, y::SVDMPoint, x::SVDMPoint, v::UMVTVector, ::PolarRetraction) where {M,N,k}
     s = svd( x.U * Diagonal(x.S) * x.Vt + (x.U * v.M * x.Vt + v.U*x.Vt + v.U*v.Vt) )
     y.U .= s.U[:,1:k]

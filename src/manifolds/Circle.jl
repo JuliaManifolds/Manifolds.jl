@@ -269,12 +269,12 @@ For the real-valued case this results in the identity.
 For the complex-valud case, the formula is the same as for the [`Sphere`](@ref)`(1)` in the
 complex plane.
 ````math
-P_{x\to y}(v) = v - \frac{\langle \log_xy,\xi\rangle_x}{d^2_{\mathbb C}(x,y)}
+P_{y\gets x}(v) = v - \frac{\langle \log_xy,v\rangle_x}{d^2_{\mathbb C}(x,y)}
 \bigl(\log_xy + \log_yx \bigr),
 ````
 where [`log`](@ref) denotes the logarithmic map on `M`.
 """
-vector_transport_to(::Circle, x, v, y, ::ParallelTransport)
+vector_transport_to(::Circle, ::Any, ::Any, ::Any, ::ParallelTransport)
 vector_transport_to(::Circle{ℝ}, x::Real, v::Real, y::Real, ::ParallelTransport) = v
 function vector_transport_to(M::Circle{ℂ}, x::Number, v::Number, y::Number, ::ParallelTransport)
     v_xy = log(M, x, y)

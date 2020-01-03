@@ -246,15 +246,11 @@ Compute the paralllel transport of the `v` from the tangent space at `x` on the
 connecting `x` and `y`. The formula reads
 
 ````math
-P_{x\to y}(v) = v - \frac{\langle \log_xy,v\rangle_x}{d^2_{\mathbb H^n}(x,y)}
+P_{y\gets x}(v) = v - \frac{\langle \log_xy,v\rangle_x}{d^2_{\mathbb H^n}(x,y)}
 \bigl(\log_xy + \log_yx \bigr).
 ````
 """
-function vector_transport_to(M::Hyperbolic, x, v, y, method::ParallelTransport)
-    vto = similar_result(M, vector_transport_to, v, x, y)
-    vector_transport_to!(M, vto, x, v, y, method)
-    return vto
-end
+vector_transport_to(::Hyperbolic, ::Any, ::Any, ::Any, ::ParallelTransport)
 function vector_transport_to!(M::Hyperbolic, vto, x, v, y, ::ParallelTransport)
     w = log(M,x,y)
     wn = norm(M,x,w)
