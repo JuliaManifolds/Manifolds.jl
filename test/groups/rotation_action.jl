@@ -41,12 +41,6 @@ include("group_utils.jl")
         test_action(A_left, a_pts, m_pts;
             test_optimal_alignment = true,
             atol_inv = atol_inv)
-
-        if i == 1
-            test_action(A_right, a_pts, transpose.(m_pts);
-                test_optimal_alignment = false,
-                atol_inv = atol_inv)
-        end
     end
 
 end
