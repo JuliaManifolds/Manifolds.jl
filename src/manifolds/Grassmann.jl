@@ -52,7 +52,7 @@ The manifold is named after
 
     Grassmann(n,k,F=ℝ)
 
-generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
+Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
 case $\mathbb F = \mathbb R$ is the default.
 """
 struct Grassmann{n,k,F} <: Manifold end
@@ -61,7 +61,7 @@ Grassmann(n::Int, k::Int, F::AbstractField=ℝ) = Grassmann{n,k,F}()
 @doc doc"""
     check_manifold_point(M::Grassmann{n,k,F}, x)
 
-check that `x` is representing a point on the [`Grassmann`](@ref) `M`, i.e. its
+Check whether `x` is representing a point on the [`Grassmann`](@ref) `M`, i.e. its
 a `n`-by-`k` matrix of unitary column vectors and of correct `eltype` with respect to `F`.
 """
 function check_manifold_point(M::Grassmann{n,k,F},x; kwargs...) where {n,k,F}
@@ -87,7 +87,7 @@ end
 @doc doc"""
     check_tangent_vector(M::Grassmann{n,k,F}, x, v)
 
-check that `v` is a tangent vector in the tangent space of `x` on the [`Grassmann`](@ref)
+Check whether `v` is a tangent vector in the tangent space of `x` on the [`Grassmann`](@ref)
 `M`, i.e. that `v` is of size and type as well as that
 
 ````math
@@ -123,7 +123,7 @@ end
 @doc doc"""
     distance(M::Grassmann, x, y)
 
-computes the Riemannian distance on [`Grassmann`](@ref) manifold `M`$= \mathrm{Gr}(n,k)$.
+Compute the Riemannian distance on [`Grassmann`](@ref) manifold `M`$= \mathrm{Gr}(n,k)$.
 
 Let $USV = x^\mathrm{H}y$ denote the SVD decomposition of
 $x^\mathrm{H}y$, where $\cdot^{\mathrm{H}}$ denotes the complex
@@ -148,7 +148,7 @@ end
 @doc doc"""
     exp(M::Grassmann, x, v)
 
-compute the exponential map on the [`Grassmann`](@ref) `M`$= \mathrm{Gr}(n,k)$ starting in
+Compute the exponential map on the [`Grassmann`](@ref) `M`$= \mathrm{Gr}(n,k)$ starting in
 `x` with tangent vector (direction) `v`. Let $v = USV$ denote the SVD decomposition of $v$.
 Then the exponential map is written using
 
@@ -181,9 +181,10 @@ injectivity_radius(::Grassmann) = π/2
 @doc doc"""
     inner(M::Grassmann, x, v, w)
 
-compute the inner product for two tangent vectors `v`, `w` from the
+Compute the inner product for two tangent vectors `v`, `w` from the
 tangent space of `x` on the [`Grassmann`](@ref) manifold `M`.
 The formula reads
+
 ````math
 g_x(v,w) = \operatorname{trace}(v^{\mathrm{H}}w),
 ````
@@ -195,7 +196,7 @@ inner(::Grassmann, x, v, w) = dot(v,w)
 @doc doc"""
     inverse_retract(M::Grassmann, x, y, ::PolarInverseRetraction)
 
-compute the inverse retraction for the [`PolarRetraction`](@ref), on the
+Compute the inverse retraction for the [`PolarRetraction`](@ref), on the
 [`Grassmann`](@ref), i.e.,
 
 ````math
@@ -210,7 +211,7 @@ inverse_retract!(::Grassmann, v, x, y, ::PolarInverseRetraction) = ( v .= y/(x'*
 @doc doc"""
     inverse_retract(M, x, y, ::QRInverseRetraction)
 
-compute the inverse retraction valid of the [`QRRetraction`](@ref)
+Compute the inverse retraction valid of the [`QRRetraction`](@ref)
 
 ````math
 \operatorname{retr}_x^{-1}y = y*(x^\mathrm{H}y)^{-1} - x,
@@ -229,7 +230,7 @@ isapprox(M::Grassmann, x, y; kwargs...) = isapprox(distance(M,x,y),0.; kwargs...
 @doc doc"""
     log(M::Grassmann, x, y)
 
-compute the logarithmic map on the [`Grassmann`](@ref) `M`$ = \mathcal M=\mathrm{Gr}(n,k)$,
+Compute the logarithmic map on the [`Grassmann`](@ref) `M`$ = \mathcal M=\mathrm{Gr}(n,k)$,
 i.e. the tangent vector `v` whose corresponding [`geodesic`](@ref) starting from `x`
 reaches `y` after time 1 on `M`. The formula reads
 
@@ -258,8 +259,7 @@ end
 @doc doc"""
     manifold_dimension(M::Grassmann)
 
-return the dimension of the real-valued [`Grassmann`](@ref)`(n,k)` manifold `M`,
-i.e.
+Return the dimension of the real-valued [`Grassmann`](@ref)`(n,k)` manifold `M`, i.e.
 
 ````math
 \operatorname{dim}_{\operatorname{Gr}(n,k)} = k(n-k)
@@ -271,8 +271,7 @@ manifold_dimension(M::Grassmann{n,k,ℝ}) where {n,k} = k*(n - k)
 @doc doc"""
     manifold_dimension(M::Grassmann)
 
-return the dimension of the complex-valued [`Grassmann`](@ref)`(n,k)` manifold `M`,
-i.e.
+Return the dimension of the complex-valued [`Grassmann`](@ref)`(n,k)` manifold `M`, i.e.
 ````math
 \operatorname{dim}_{\operatorname{Gr}(n,k)} = 2k(n-k)
 ````
@@ -298,7 +297,7 @@ mean!(M::Grassmann{n,k,ℝ}, y, x::AbstractVector, w::AbstractVector; kwargs...)
 @doc doc"""
     project_tangent(M::Grassmann, x, w)
 
-project the `n`-by-`k` `w` onto the tangent space of `x` on the [`Grassmann`](@ref) `M`,
+Project the `n`-by-`k` `w` onto the tangent space of `x` on the [`Grassmann`](@ref) `M`,
 which is computed by
 
 ````math
@@ -313,7 +312,7 @@ project_tangent!(M::Grassmann,v, x, w) = ( v .= w - x*x'*w )
 @doc doc"""
     representation_size(M::Grassmann{n,k,F})
 
-returns the represenation size or matrix dimension of a point on the [`Grassmann`](@ref)
+Return the represenation size or matrix dimension of a point on the [`Grassmann`](@ref)
 `M`, i.e. $(n,k)$ for both the real-valued and the complex value case.
 """
 @generated representation_size(::Grassmann{n, k}) where {n,k} = (n,k)
@@ -321,7 +320,7 @@ returns the represenation size or matrix dimension of a point on the [`Grassmann
 @doc doc"""
     retract(M::Grassmann, x, v, ::PolarRetraction)
 
-compute the SVD-based retraction [`PolarRetraction`](@ref) on the
+Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 [`Grassmann`](@ref) `M`. With $USV = x + v$ the retraction reads
 ````math
 \operatorname{retr}_x v = UV^\mathrm{H},
@@ -339,7 +338,7 @@ end
 @doc doc"""
     retract(M::Grassmann, x, v, ::QRRetraction )
 
-compute the QR-based retraction [`QRRetraction`](@ref) on the
+Compute the QR-based retraction [`QRRetraction`](@ref) on the
 [`Grassmann`](@ref) `M`. With $QR = x + v$ the retraction reads
 ````math
 \operatorname{retr}_xv = QD,
@@ -363,7 +362,7 @@ end
 @doc doc"""
     zero_tangent_vector(M::Grassmann, x)
 
-return the zero tangent vector from the tangent space at `x` on the [`Grassmann`](@ref) `M`,
+Return the zero tangent vector from the tangent space at `x` on the [`Grassmann`](@ref) `M`,
 which is given by a zero matrix the same size as `x`.
 """
 zero_tangent_vector(::Grassmann, ::Any...)

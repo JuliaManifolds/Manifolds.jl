@@ -4,9 +4,15 @@ using LinearAlgebra: diag, eigen, eigvals, eigvecs, Symmetric, tr, cholesky, Low
 @doc doc"""
     CholeskySpace{N} <: Manifold
 
-the manifold of lower triangular matrices with positive diagonal and
+The manifold of lower triangular matrices with positive diagonal and
 a metric based on the cholesky decomposition. The formulae for this manifold
 are for example summarized in Table 1 of [^Lin2019].
+
+# Constructor
+
+    CholeskySpace(n)
+
+Generate the manifold of $n\times n$ lower triangular matrices with positive diagonal.
 
 [^Lin2019]:
     > Lin, Zenhua: "Riemannian Geometry of Symmetric Positive Definite Matrices via
@@ -18,7 +24,7 @@ CholeskySpace(n::Int) = CholeskySpace{n}()
 @doc doc"""
     check_manifold_point(M::CholeskySpace, x; kwargs...)
 
-check whether the matrix `x` lies on the [`CholeskySpace`](@ref) `M`, i.e.
+Check whether the matrix `x` lies on the [`CholeskySpace`](@ref) `M`, i.e.
 it's size fits the manifold, it is a lower triangular matrix and has positive
 entries on the diagonal.
 The tolerance for the tests can be set using the `kwargs...`.
@@ -39,7 +45,7 @@ end
 """
     check_tangent_vector(M::CholeskySpace, x, v; kwargs... )
 
-checks whether `v` is a tangent vector to `x` on the [`CholeskySpace`](@ref) `M`, i.e.
+Checks whether `v` is a tangent vector to `x` on the [`CholeskySpace`](@ref) `M`, i.e.
 atfer [`check_manifold_point`](@ref)`(M,x)`, `v` has to be of same dimension as `x`
 and a symmetric matrix.
 The tolerance for the tests can be set using the `kwargs...`.
@@ -62,7 +68,7 @@ end
 @doc doc"""
     distance(M::CholeskySpace, x, y)
 
-computes the Riemannian distance on the [`CholeskySpace`](@ref) `M` between two
+Compute the Riemannian distance on the [`CholeskySpace`](@ref) `M` between two
 matrices `x`, `y` that are lower triangular with positive diagonal. The formula
 reads
 
@@ -82,7 +88,7 @@ end
 @doc doc"""
     exp(M::CholeskySpace, x, v)
 
-compute the exponential map on the [`CholeskySpace`](@ref) `M` eminating from the lower
+Compute the exponential map on the [`CholeskySpace`](@ref) `M` eminating from the lower
 triangular matrix with positive diagonal `x` towards the lower triangular matrix `v`
 The formula reads
 
@@ -103,7 +109,7 @@ end
 @doc doc"""
     inner(M::CholeskySpace, x, v, w)
 
-computes the inner product on the [`CholeskySpace`](@ref) `M` at the
+Compute the inner product on the [`CholeskySpace`](@ref) `M` at the
 lower triangular matric with positive diagonal `x` and the two tangent vectors
 `v`,`w`, i.e they are both lower triangular matrices with arbitrary diagonal.
 The formula reads
@@ -117,7 +123,7 @@ inner(::CholeskySpace,x,v,w) = sum(strictlyLowerTriangular(v).*strictlyLowerTria
 @doc doc"""
     log(M::CholeskySpace, v, x, y)
 
-compute the logarithmic map on the [`CholeskySpace`](@ref) `M` for the geodesic eminating
+Compute the logarithmic map on the [`CholeskySpace`](@ref) `M` for the geodesic eminating
 from the lower triangular matrix with positive diagonal `x` towards `y`.
 The formula reads
 
@@ -138,14 +144,14 @@ end
 @doc doc"""
     manifold_dimension(M::CholeskySpace)
 
-returns the manifold dimension for the [`CholeskySpace`](@ref) `M`, i.e. $\frac{N(N+1)}{2}$.
+Return the manifold dimension for the [`CholeskySpace`](@ref) `M`, i.e. $\frac{N(N+1)}{2}$.
 """
 @generated manifold_dimension(::CholeskySpace{N}) where N = div(N*(N+1), 2)
 
 @doc doc"""
     reporesentation_size(M::CholeskySpace)
 
-returns the representation size for the [`CholeskySpace`](@ref)`{N}` `M`, i.e. `(N,N)`.
+Return the representation size for the [`CholeskySpace`](@ref)`{N}` `M`, i.e. `(N,N)`.
 """
 @generated representation_size(::CholeskySpace{N}) where N = (N,N)
 
@@ -156,7 +162,7 @@ strictlyUpperTriangular(x) = UpperTriangular(x) - Diagonal(diag(x))
 @doc doc"""
     vector_transport_to(M::CholeskySpace, x, v, y, ::ParallelTransport)
 
-parallely transport the tangent vector `v` at `x` along the geodesic to `y`
+Parallely transport the tangent vector `v` at `x` along the geodesic to `y`
 on to the [`CholeskySpace`](@ref) manifold `M`. The formula reads
 
 ````math
@@ -176,7 +182,7 @@ end
 @doc doc"""
     zero_tangent_vector(M::CholeskySpace, x)
 
-returns the zero tangent vector on the [`CholeskySpace`](@ref) `M` at `x`.
+Return the zero tangent vector on the [`CholeskySpace`](@ref) `M` at `x`.
 """
 zero_tangent_vector(::CholeskySpace, ::Any...)
 function zero_tangent_vector!(M::CholeskySpace,v,x)

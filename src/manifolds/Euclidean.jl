@@ -10,11 +10,12 @@ Euclidean vector space $\mathbb R^n$.
 
     Euclidean(n)
 
-generates the $n$-dimensional vector space $\mathbb R^n$.
+Generate the $n$-dimensional vector space $\mathbb R^n$.
 
     Euclidean(n₁,n₂,...,nᵢ; field=ℝ)
 
-generates the (2*)$n_1n_2\cdot\ldots n_i$-dimensional vector space $\mathbb F^{n_1, n_2, \ldots, n_i}$, whose
+Generate the (2*)$n_1n_2\cdot\ldots n_i$-dimensional vector space
+$\mathbb F^{n_1, n_2, \ldots, n_i}$, whose
 elements are interpreted as $n_1 \times,n_2\times\cdots\times n_i$ arrays, e.g. for
 two parameters as matrices. The default `field=ℝ` can also be set to `field=ℂ`.
 """
@@ -24,7 +25,7 @@ Euclidean(n::Vararg{Int,N};field::AbstractField=ℝ) where N = Euclidean{Tuple{n
 """
     EuclideanMetric <: RiemannianMetric
 
-a general type for any manifold that employs the Euclidean Metric, for example
+A general type for any manifold that employs the Euclidean Metric, for example
 the [`Euclidean`](@ref) manifold itself, or the [`Sphere`](@ref), where every
 tangent space (as a plane in the embedding) uses this metric (in the embedding).
 
@@ -41,7 +42,7 @@ det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = one(eltype(
 """
     distance(M::Euclidean, x, y)
 
-compute the Euclidean distance between two points on the [`Euclidean`](@ref)
+Compute the Euclidean distance between two points on the [`Euclidean`](@ref)
 manifold `M`, i.e. for vectors it's just the norm of the difference, for matrices
 and higher order arrays, the matrix and ternsor Frobenius norm, respectively.
 """
@@ -50,7 +51,7 @@ distance(::Euclidean, x, y) = norm(x .- y)
 @doc doc"""
     exp(M::Euclidean, x, v)
 
-compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `x` in direction
+Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `x` in direction
 `v`, which in this case is just
 ````math
 \exp_x v = x + v.
@@ -62,9 +63,9 @@ exp!(M::Euclidean, y, x, v) = (y .= x .+ v)
 """
     flat(M::Euclidean, x, w)
 
-since cotangent and tangent vectors can directly be identified in the [`Euclidean`](@ref)
-case, this yields just the identity for a tangent vector `w` in the tangent space
-of `x` on `M`. The result is returned also in place in `v`.
+Transform a tangent vector into a cotangent. Since they can directly be identified in the
+[`Euclidean`](@ref) case, this yields just the identity for a tangent vector `w` in the
+tangent space of `x` on `M`. The result is returned also in place in `v`.
 """
 flat(::Euclidean,::Any...)
 function flat!(M::Euclidean, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
@@ -75,20 +76,27 @@ end
 @doc doc"""
     injectivity_radius(M::Euclidean)
 
-returns the injectivity radius on the [`Euclidean`](@ref) `M`, which is $\infty$.
+Return the injectivity radius on the [`Euclidean`](@ref) `M`, which is $\infty$.
 """
 injectivity_radius(::Euclidean) = Inf
 
 @doc doc"""
     inner(M::Euclidean, x, v, w)
 
-compute the inner product on the [`Euclidean`](@ref) `M`, which is just
+Compute the inner product on the [`Euclidean`](@ref) `M`, which is just
 the inner product on the real-valued or complex valued vector space
+of arrays (or tensors) of size $n_1\times n_2 \times \cdots \times n_i$, i.e.
 
+````math
+g_x(v,w) = \sum_{k\in I} \overline{v}_{k} w_{k},
+````
+where $I$ is the set of integer vectors $k\in\mathbb N^i$, such that for all
+$1 \leq j \leq i$ it holds $1\leq k_j \leq n_j$.
+
+For the special case of $i\leq 2$, i.e. matrices and vectors, this simplifies to
 ````math
 g_x(v,w) = w^{\mathrm{H}}v,
 ````
-
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 inner(::Euclidean, ::Any...)
@@ -104,7 +112,7 @@ local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x) = Diagonal(ones(SV
 @doc doc"""
     log(M::Euclidean, x, y)
 
-computes the logarithmic map on the [`Euclidean`](@ref) `M` from `x` to `y`,
+Compute the logarithmic map on the [`Euclidean`](@ref) `M` from `x` to `y`,
 which in this case is just
 ````math
 \log_x y = y - x.
@@ -117,7 +125,7 @@ log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = zer
 """
     manifold_dimension(M::Euclidean)
 
-returns the manifold dimension of the [`Euclidean`](@ref) `M`, i.e.
+Return the manifold dimension of the [`Euclidean`](@ref) `M`, i.e.
 the product of all array dimensions.
 """
 @generated manifold_dimension(::Euclidean{N,ℝ}) where {N} = *(N.parameters...)
@@ -157,7 +165,7 @@ median!(::Euclidean{Tuple{1}}, y, x::AbstractVector, w::AbstractWeights; kwargs.
 @doc doc"""
     norm(M::Euclidean, x, v)
 
-compute the norm of a tangent vector `v` at `x` on the [`Euclidean`](@ref)
+Compute the norm of a tangent vector `v` at `x` on the [`Euclidean`](@ref)
 `M`, i.e. since every tangent space can be identified with `M` itself
 in this case, just the (Frobenius) norm of `v`.
 """
@@ -178,7 +186,7 @@ end
 @doc doc"""
     project_point(M::Euclidean, x)
 
-project an arbitrary point `x` onto the [`Euclidean`](@ref) `M`, which
+Project an arbitrary point `x` onto the [`Euclidean`](@ref) `M`, which
 is of course just the identity map.
 """
 project_point(::Euclidean, ::Any...)
@@ -187,7 +195,7 @@ project_point!(M::Euclidean, x) = x
 """
     project_tangent(M::Euclidean, x, v)
 
-project an arbitrary vector `v` into the tangent space of a point `x` on the
+Project an arbitrary vector `v` into the tangent space of a point `x` on the
 [`Euclidean`](@ref) `M`, which is just the identity, since any tangent
 space of `M` can be identified with all of `M`.
 """
@@ -200,7 +208,7 @@ end
 """
     projected_distribution(M::Euclidean, d, [x])
 
-Wraps standard distribution `d` into a manifold-valued distribution. Generated
+Wrap the standard distribution `d` into a manifold-valued distribution. Generated
 points will be of similar type to `x`. By default, the type is not changed.
 """
 function projected_distribution(M::Euclidean, d, x)
@@ -213,7 +221,7 @@ end
 """
     representation_size(M::Euclidean)
 
-returns the array dimensions required to represent an element on the
+Return the array dimensions required to represent an element on the
 [`Euclidean`](@ref) `M`, i.e. the vector of all array dimensions.
 """
 @generated representation_size(::Euclidean{N}) where N = Tuple(N.parameters...)
@@ -234,7 +242,7 @@ end
 """
     vector_transport_to(M::Euclidean, x, v, y, ::ParallelTransport)
 
-parallel transport the vector `v` from the tangent space at `x` to the tangent space at `y`
+Parallely transport the vector `v` from the tangent space at `x` to the tangent space at `y`
 on the [`Euclidean`](@ref) `M`, which simplifies to the identity.
 """
 vector_transport_to(::Euclidean, ::Any, ::Any, ::Any, ::ParallelTransport)
@@ -249,7 +257,7 @@ var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T} = sum(var(x; m
 """
     zero_tangent_vector(M::Euclidean, x)
 
-compute a zero vector in the tangent space of `x` on the [`Euclidean`](@ref)
+Return the zero vector in the tangent space of `x` on the [`Euclidean`](@ref)
 `M`, which here is just a zero filled array the same size as `x`.
 """
 zero_tangent_vector(::Euclidean, ::Any...)

@@ -8,7 +8,7 @@ vectors in $\mathbb R^{n+1}$ of unit length
 
     Sphere(n)
 
-generates the $\mathbb S^{n}\subset \mathbb R^{n+1}$
+Generate the $\mathbb S^{n}\subset \mathbb R^{n+1}$
 """
 struct Sphere{N} <: Manifold end
 Sphere(n::Int) = Sphere{n}()
@@ -93,14 +93,14 @@ end
 @doc doc"""
     injectivity_radius(M::Sphere[, x])
 
-Returns the injectivity radius for the [`Sphere`](@ref) `M`, which is globally $\pi$.
+Return the injectivity radius for the [`Sphere`](@ref) `M`, which is globally $\pi$.
 """
 injectivity_radius(::Sphere, ::Any...) = π
 
 @doc doc"""
     injectivity_radius(M::Sphere, x, ::ProjectionRetraction)
 
-Returns the injectivity radius for the [`ProjectionRetraction`](@ref) on the
+Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
 [`Sphere`](@ref), which is globally $\frac{\pi}{2}$.
 """
 injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π/2
@@ -224,7 +224,7 @@ project_point!(S::Sphere, x) = (x ./= norm(x))
 @doc doc"""
     project_tangent(M::Sphere, x, v)
 
-Project the point point `v` onto the tangent space at `x` on the [`Sphere`](@ref) `M`.
+Project the point `v` onto the tangent space at `x` on the [`Sphere`](@ref) `M`.
 
 ````math
 \operatorname{proj}_{x}(v) = v - \langle x, v \rangle_x
@@ -244,7 +244,7 @@ representation_size(::Sphere{N}) where N = (N+1,)
 @doc doc"""
     retract(M::Sphere, x, y, ::ProjectionRetraction)
 
-compute a retraction that is based on projection, i.e.
+Compute the retraction that is based on projection, i.e.
 
 ````math
 \operatorname{retr}_x(v) = \frac{x+v}{\lVert x+v \rVert_2}

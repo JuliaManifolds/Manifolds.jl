@@ -10,7 +10,7 @@ real-valued orthogonal matrices with determinant $+1$.
 
     Rotations(n)
 
-generates the $\mathrm{SO}(n) \subset \mathbb R^{n\times n}$
+Generate the $\mathrm{SO}(n) \subset \mathbb R^{n\times n}$
 """
 struct Rotations{N} <: Manifold end
 Rotations(n::Int) = Rotations{n}()
@@ -57,7 +57,7 @@ end
 """
     check_manifold_point(M,x; kwargs...)
 
-checks, whether `x` is a valid point on the [`Rotations`](@ref) `M`,
+Check whether `x` is a valid point on the [`Rotations`](@ref) `M`,
 i.e. is an array of size [`manifold_dimension`](@ref)`(M)` and represents a
 valid rotation.
 The tolerance for the last test can be set using the `kwargs...`.
@@ -79,7 +79,7 @@ end
 """
     check_tangent_vector(M,x,v; kwargs... )
 
-checks whether `v` is a tangent vector to `x` on the [`Rotations`](@ref)
+Check whether `v` is a tangent vector to `x` on the [`Rotations`](@ref)
 space `M`, i.e. after [`check_manifold_point`](@ref)`(M,x)`, `v` has to be of same
 dimension as `x` and orthogonal to `x`.
 The tolerance for the last test can be set using the `kwargs...`.
@@ -129,7 +129,7 @@ end
 @doc doc"""
     exp(M::Rotations, x, v)
 
-compute the exponential map on the [`Rotations`](@ref) from `x` into direction
+Compute the exponential map on the [`Rotations`](@ref) from `x` into direction
 `v`, i.e.
 ````math
 \exp_xv = x \operatorname{Exp}(v),
@@ -142,7 +142,7 @@ exp(::Rotations,::Any...)
 @doc doc"""
     exp(M::Rotations{4}, x, v)
 
-Exponential map of tangent vector `v` at point `x` from $\mathrm{SO}(4)$
+Compute the exponential map of tangent vector `v` at point `x` from $\mathrm{SO}(4)$
 manifold `M`.
 
 The algorithm used is a more numerically stable form of those proposed in
@@ -277,7 +277,7 @@ end
     injectivity_radius(M::Rotations)
     injectivity_radius(M::Rotations, x)
 
-returns the injectivity radius on the [`Rotations`](@ref) `M`, which is globally
+Return the injectivity radius on the [`Rotations`](@ref) `M`, which is globally
 
 ````math
     \operatorname{inj}_{\mathrm{SO}(n)}(x) = \pi\sqrt{2}.
@@ -289,7 +289,7 @@ injectivity_radius(M::Rotations, x) = injectivity_radius(M)
 @doc doc"""
     injectivity_radius(M::Rotations, x, ::PolarRetraction)
 
-returns the radius of injectivity for the [`PolarRetraction`](@ref) on the
+Return the radius of injectivity for the [`PolarRetraction`](@ref) on the
 [`Rotations`](@ref) `M` which is $\frac{\pi}{\sqrt{2}}$.
 """
 injectivity_radius(::Rotations, x, ::PolarRetraction) = π/sqrt(2.0)
@@ -297,7 +297,7 @@ injectivity_radius(::Rotations, x, ::PolarRetraction) = π/sqrt(2.0)
 @doc doc"""
     inner(M::Rotations, x, w, v)
 
-compute the inner product of the two tangent vectors `w, v` from the tangent
+Compute the inner product of the two tangent vectors `w, v` from the tangent
 plane at `x` on the special orthogonal space `M=`$\mathrm{SO}(n)$ using the
 restriction of the metric from the embedding, i.e.
 
@@ -368,7 +368,7 @@ end
 @doc doc"""
     log(M::Rotations, x, y)
 
-compute the logarithmic map on the [`Rotations`](@ref) manifold
+Compute the logarithmic map on the [`Rotations`](@ref) manifold
 `M`$=\mathrm{SO}(n)$, which is given by
 ```math
 \log_{x} y =
@@ -435,7 +435,7 @@ end
 @doc doc"""
     manifold_dimension(M::Rotations)
 
-returns the dimension of the manifold $\mathrm{SO}(n)$, i.e. $\frac{n(n-1)}{2}$.
+Return the dimension of the manifold $\mathrm{SO}(n)$, i.e. $\frac{n(n-1)}{2}$.
 """
 manifold_dimension(M::Rotations{N}) where {N} = div(N*(N-1), 2)
 
@@ -459,7 +459,7 @@ mean!(M::Rotations, y, x::AbstractVector, w::AbstractVector; kwargs...) =
 @doc doc"""
     norm(M::Rotations, x, v)
 
-compute the norm of a tangent vector `v` from the tangent space at `x` on the
+Compute the norm of a tangent vector `v` from the tangent space at `x` on the
 [`Rotations`](@ref) `M`. The formula reads
 
 ````math
@@ -474,7 +474,7 @@ norm(M::Rotations, x, v) = norm(v)
 @doc doc"""
     normal_rotation_distribution(M::Rotations, x, σ::Real)
 
-return a random point on the manifold [`Rotations`](@ref) `M`
+Return a random point on the manifold [`Rotations`](@ref) `M`
 by generating a (Gaussian) random orthogonal matrix with determinant $+1$. Let
 
 $QR = A$
@@ -512,7 +512,7 @@ end
 @doc doc"""
     project_point(M::Rotations, x; check_det = true)
 
-project `x` to the nearest point on manifold `M`.
+Project `x` to the nearest point on manifold `M`.
 
 Given the singular value decomposition $x = U \Sigma V^\mathrm{T}$, with the
 singular values sorted in descending order, the projection is
@@ -543,7 +543,7 @@ end
 @doc doc"""
     project_tangent(M::Rotations, x, v)
 
-project the matrix `v` onto the tangent space by making `v` skew symmetric,
+Project the matrix `v` onto the tangent space by making `v` skew symmetric,
 
 ````math
 \operatorname{proj}_x(v) = \frac{v-v^{\mathrm{T}}}{2},
@@ -556,7 +556,7 @@ project_tangent!(M::Rotations, w, x, v) = w .= (v .- transpose(v))./2
 @doc doc"""
     representation_size(M::Rotations)
 
-returns the `size()` of a point on the [`Rotations`](@ref) `M`, i.e. for the
+Return the `size()` of a point on the [`Rotations`](@ref) `M`, i.e. for the
 $\mathrm{SO}(n)$ it's `(n,n)`.
 """
 representation_size(::Rotations{N}) where N = (N, N)
@@ -591,7 +591,7 @@ end
 @doc doc"""
     retract(M::Rotations, x, v, ::PolarRetraction)
 
-compute the SVD-based retraction on the [`Rotations`](@ref) `M` from `x` in direction `v`
+Compute the SVD-based retraction on the [`Rotations`](@ref) `M` from `x` in direction `v`
 (as an element of the Lie group) and is a second-order approximation of the exponential map.
 Let
 
@@ -617,7 +617,7 @@ end
     retract(M, x, v, ::QRRetraction)
 
 
-compute the SVD-based retraction on the [`Rotations`](@ref) `M` from `x` in direction `v`
+Compute the SVD-based retraction on the [`Rotations`](@ref) `M` from `x` in direction `v`
 (as an element of the Lie group) and is a first-order approximation of the exponential map.
 
 This is also the default retraction on the [`Rotations`](@ref)
@@ -673,7 +673,7 @@ vee!(M::Rotations{2}, ω, x, Ω) = (ω[1] = Ω[2])
 @doc doc"""
     zero_tangent_vector(M::Rotations, x)
 
-returns the zero tangent vector from the tangent space art `x` on the [`Rotations`](@ref)
+Return the zero tangent vector from the tangent space art `x` on the [`Rotations`](@ref)
 as an element of the Lie group, i.e. the zero matrix.
 """
 zero_tangent_vector(M::Rotations, x) = zero(x)

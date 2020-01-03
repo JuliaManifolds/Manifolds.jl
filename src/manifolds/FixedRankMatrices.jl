@@ -35,7 +35,7 @@ on $\mathbb R^{m\times n}$ to the tangent bundle. This implementation follows[^V
 # Constructor
     FixedRankMatrics(m,n,k,t=ℝ)
 
-generate the manifold of `m`-by-`n` real-valued matrices of rank `k`.
+Generate the manifold of `m`-by-`n` real-valued matrices of rank `k`.
 
 [^Vandereycken2013]:
     > Bart Vandereycken: "Low-rank matrix completion by Riemannian Optimization,
@@ -109,7 +109,7 @@ UMVTVector(U,M,Vt,k::Int) = UMVTVector(U[:,1:k],M[1:k,1:k],Vt[1:k,:])
 @doc doc"""
     check_manifold_point(M::FixedRankMatrices{m,n,k},x; kwargs...)
 
-check, whether the matrix or [`SVDMPoint`](@ref) `x` ids a valid point on the
+Check whether the matrix or [`SVDMPoint`](@ref) `x` ids a valid point on the
 [`FixedRankMatrices`](@ref)`{m,n,k}` `M`, i.e. is (or represents) an `m`-by`n` matrix of
 rank `k`. For the [`SVDMPoint`](@ref) the internal representation also has to have the right
 shape, i.e. `x.U` and `x.Vt` have to be unitary.
@@ -142,7 +142,7 @@ end
 @doc doc"""
     check_tangent_vector(M:FixedRankMatrices{m,n,k}, x, v)
 
-check whether the tangent [`UMVTVector`](@ref) `v` is from the tangent space of
+Check whether the tangent [`UMVTVector`](@ref) `v` is from the tangent space of
 the [`SVDMPoint`](@ref) `x` on the [`FixedRankMatrices`](@ref) `M`, i.e. that
 `v.U` and `v.Vt` are (columnwise) orthogonal to `x.U` and `x.Vt`, respectively,
 and its dimensions are consistent with `x` and `M`, i.e. correspond to `m`-by-`n`
@@ -167,7 +167,7 @@ end
 @doc doc"""
     inner(M::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector)
 
-compute the inner product of `v` and `w` in the tangent space of `x` on the
+Compute the inner product of `v` and `w` in the tangent space of `x` on the
 [`FixedRankMatrices`](@ref) `M`, which is inherited from the embedding, i.e. can be computed
 using `dot` on the elements (`U`, `Vt`, `M`) of `v` and `w`.
 """
@@ -181,7 +181,7 @@ isapprox(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector; kwargs
 @doc doc"""
     manifold_dimension(M::FixedRankMatrices{m,n,k,ℝ})
 
-returns the manifold dimension for the real-valued [`FixedRankMatrices`](@ref) `M`
+Return the manifold dimension for the real-valued [`FixedRankMatrices`](@ref) `M`
 of dimension `m`x`n` of rank `k`, namely
 
 ````math
@@ -193,7 +193,7 @@ manifold_dimension(::FixedRankMatrices{m,n,k,ℝ}) where {m,n,k} = (m + n - k)*k
 @doc doc"""
     manifold_dimension(M::FixedRankMatrices{m,n,k,ℂ})
 
-returns the manifold dimension for the complex-valued [`FixedRankMatrices`](@ref) `M` of
+Return the manifold dimension for the complex-valued [`FixedRankMatrices`](@ref) `M` of
 dimension `m`x`n` of rank `k`, namely
 
 ````math
@@ -206,7 +206,7 @@ manifold_dimension(::FixedRankMatrices{M,N,k,ℂ}) where {M,N,k} = 2*(M+N-k)*k
     project_tangent(M, x, A)
     project_tangent(M, x, v)
 
-project the matrix $A\in\mathbb R^{m,n}$ or a [`UMVTVector`](@ref) `v` from the embedding or
+Project the matrix $A\in\mathbb R^{m,n}$ or a [`UMVTVector`](@ref) `v` from the embedding or
 another tangent space onto the tangent space at $x$ on the [`FixedRankMatrices`](@ref) `M`,
 further decomposing the result into $v=UMV$, i.e. a [`UMVTVector`](@ref) following
 Section 3 in [^Vandereycken2013].
@@ -239,7 +239,7 @@ end
 @doc doc"""
     representation_size(M::FixedRankMatrices{m,n,k})
 
-returns the element size of a point on the [`FixedRankMatrices`](@ref) `M`, i.e.
+Return the element size of a point on the [`FixedRankMatrices`](@ref) `M`, i.e.
 the size of matrices on this manifold $(m,n)$.
 """
 representation_size(M::FixedRankMatrices{m, n}) where {m,n} = (m,n)
@@ -247,7 +247,7 @@ representation_size(M::FixedRankMatrices{m, n}) where {m,n} = (m,n)
 @doc doc"""
     retract(M, x, v, ::PolarRetraction)
 
-compute an SVD-based retraction on the [`FixedRankMatrices`](@ref) `M` by computing
+Compute an SVD-based retraction on the [`FixedRankMatrices`](@ref) `M` by computing
 ````math
     y = U_kS_kV_k^\mathrm{T},
 ````
@@ -289,7 +289,7 @@ end
 @doc doc"""
     zero_tangent_vector(M::FixedRankMatrices, x::SVDMPoint)
 
-returns a [`UMVTVector`](@ref) representing the zero tangent vector in the tangent space of
+Return a [`UMVTVector`](@ref) representing the zero tangent vector in the tangent space of
 `x` on the [`FixedRankMatrices`](@ref) `M`, for example all three elements of the resulting
 structure are zero matrices.
 """

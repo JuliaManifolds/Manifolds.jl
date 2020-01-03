@@ -8,7 +8,7 @@ $\lvert z\rvert = 1$.
 
     Circle(f=ℝ)
 
-generates the ℝ-valued Circle represented by angles, which
+Generate the ℝ-valued Circle represented by angles, which
 alternatively can be set to use the [`AbstractField`](@ref) `f=ℂ` to obtain the `Circle`
 represented by `ℂ`-valued `Circle` of unit numbers.
 """
@@ -18,7 +18,7 @@ Circle(f::AbstractField=ℝ) = Circle{f}()
 @doc doc"""
     check_manifold_point(M::Circle, x)
 
-checks whether `x` is a point on the [`Circle`](@ref) `M`.
+Check whether `x` is a point on the [`Circle`](@ref) `M`.
 For the real-valued case, `x` is an angle and hence it checks that $x \in [-\pi,\pi)$.
 for the complex-valued case its a unit number, $x \in \mathbb C$ with $\lvert x \rvert = 1$.
 """
@@ -39,7 +39,7 @@ end
 """
     check_tangent_vector(M::Circle, x, v)
 
-check whether `v` is a tangent vector in the tangent space of `x` on the
+Check whether `v` is a tangent vector in the tangent space of `x` on the
 [`Circle`](@ref) `M`.
 For the real-valued case represented by angles all `v` are valid, since the tangent space is
 the whole real line.
@@ -65,7 +65,7 @@ end
 @doc doc"""
     complex_dot(a, b)
 
-compute the inner product of two (complex) numbers with in the complex plane.
+Compute the inner product of two (complex) numbers with in the complex plane.
 """
 complex_dot(a,b) = dot(real.(a),real.(b)) + dot(imag.(a),imag.(b))
 complex_dot(a::Number,b::Number) = (real(a)*real(b) + imag(a)*imag(b))
@@ -73,7 +73,7 @@ complex_dot(a::Number,b::Number) = (real(a)*real(b) + imag(a)*imag(b))
 @doc doc"""
     distance(M::Circle, x, y)
 
-compute the distance on the [`Circle`](@ref) `M`, which is
+Compute the distance on the [`Circle`](@ref) `M`, which is
 the absolute value of the symmetric remainder of `x` and `y` for the real-valued
 case and the angle between both complex numbers in the Gaussian plane for the
 complex-valued case.
@@ -86,7 +86,7 @@ distance(::Circle{ℂ}, x, y) = acos(clamp(complex_dot(x, y), -1, 1))
 @doc doc"""
     exp(M::Circle, x, v)
 
-compute the exponential map on the [`Circle`](@ref).
+Compute the exponential map on the [`Circle`](@ref).
 ````math
 \exp_xv = (x+v)_{2\pi},
 ````
@@ -118,23 +118,27 @@ flat(M::Circle, x::Number, w::FVector{TangentSpaceType}) = FVector(CotangentSpac
 @doc doc"""
     injectivity_radius(M::Circle[, x])
 
-returns the injectivity radius on the [`Circle`](@ref) `M`, i.e. $\pi$.
+Return the injectivity radius on the [`Circle`](@ref) `M`, i.e. $\pi$.
 """
 injectivity_radius(::Circle, args...) = π
 
 @doc doc"""
     inner(M::Circle, x, w, v)
 
-compute the inner product of the two tangent vectors `w,v` from the tangent plane at `x` on
+Compute the inner product of the two tangent vectors `w,v` from the tangent plane at `x` on
 the [`Circle`](@ref) `M` using the restriction of the metric from the embedding,
 i.e.
+
 ````math
 g_x(v,w) = w*v
 ````
+
 for the real case and
-````math
+
+    ````math
 g_x(v,w) = v^\mathrm{T}w
 ````
+
 for the complex case interpreting complex numbers in the Gaussian plane.
 """
 inner(::Circle, ::Any...)
@@ -148,7 +152,7 @@ inverse_retract(M::Circle, x::Number, y::Number, ::LogarithmicInverseRetraction)
 @doc doc"""
     log(M::Circle, x, y)
 
-computes the logarithmic map on the [`Circle`](@ref) `M`.
+Compute the logarithmic map on the [`Circle`](@ref) `M`.
 ````math
 \exp_xv = (y,x)_{2\pi},
 ````
@@ -212,7 +216,7 @@ mean(::Circle,x::Array{<:Real},w::AbstractVector; kwargs...) = sym_rem(sum(w.*x)
 @doc doc"""
     project_point(M::Circle, x)
 
-project a point `x` onto the [`Circle`](@ref) `M`.
+Project a point `x` onto the [`Circle`](@ref) `M`.
 For the real-valued case this is the remainder with respect to modulus $2\pi$.
 For the complex-valued case the result is the projection of `x` onto the unit circle in the
 complex plane.
@@ -227,7 +231,7 @@ project_point!(::Circle{ℂ}, x) = (x .= x/sum(abs.(x)))
 @doc doc"""
     project_tangent(M::Circle, x, v)
 
-project a value `v` onto the tangent space of the point `x` on the [`Circle`](@ref) `M`.
+Project a value `v` onto the tangent space of the point `x` on the [`Circle`](@ref) `M`.
 
 For the real-valued case this is just the identity.
 For the complex valued case `v` is projected onto the line in the complex plane
@@ -253,7 +257,7 @@ sharp(M::Circle, x::Number, w::FVector{CotangentSpaceType}) = FVector(TangentSpa
 @doc doc"""
     sym_rem(x,[T=π])
 
-symmetric remainder of `x` with respect to the interall 2*`T`, i.e.
+Compute symmetric remainder of `x` with respect to the interall 2*`T`, i.e.
 `(x+T)%2T`, where the default for `T` is $\pi$
 """
 sym_rem(x::N, T=π) where {N<:Number} = (x≈T ? convert(N,-T) : rem(x, convert(N,2*T),RoundNearest))
@@ -262,7 +266,7 @@ sym_rem(x, T=π) where N = sym_rem.(x, Ref(T))
 @doc doc"""
     vector_transport_to(M::Circle, x, v, y, ::ParallelTransport)
 
-computes the parallel transport of `v` from the tangent space at `x` to the tangent space at
+Compute the parallel transport of `v` from the tangent space at `x` to the tangent space at
 `y` on the [`Circle`](@ref) `M`.
 For the real-valued case this results in the identity.
 For the complex-valud case, the formula is the same as for the [`Sphere`](@ref)`(1)` in the
