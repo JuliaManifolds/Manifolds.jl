@@ -2,7 +2,7 @@
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["Stiefel.jl"]
+Pages = ["manifolds/Stiefel.jl"]
 Order = [:type, :function]
 ```
 
