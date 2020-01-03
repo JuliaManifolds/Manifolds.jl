@@ -1,3 +1,8 @@
+@doc doc"""
+    GroupOperationAction(group::AbstractGroupManifold, AD::ActionDirection = LeftAction())
+
+Action of a group upon itself via left and right translation.
+"""
 struct GroupOperationAction{G,AD} <: AbstractGroupAction{AD}
     group::G
 end
