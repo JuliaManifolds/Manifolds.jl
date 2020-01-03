@@ -15,6 +15,14 @@ Pages = ["groups/group.jl"]
 Order = [:type, :function]
 ```
 
+## Semidirect product group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/semidirect_product_group.jl"]
+Order = [:type, :function]
+```
+
 ## Special orthogonal group
 
 ```@autodocs
@@ -22,11 +30,20 @@ Modules = [Manifolds]
 Pages = ["groups/special_orthogonal.jl"]
 Order = [:type, :function]
 ```
+
 ## Translation group
 
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/translation_group.jl"]
+Order = [:type, :function]
+```
+
+## Special Euclidean group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/special_euclidean.jl"]
 Order = [:type, :function]
 ```
 
@@ -37,6 +54,15 @@ Modules = [Manifolds]
 Pages = ["groups/group_action.jl"]
 Order = [:type, :function]
 ```
+
+## Group operation action
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/group_operation_action.jl"]
+Order = [:type, :function]
+```
+
 ## Rotation action
 
 ```@autodocs
