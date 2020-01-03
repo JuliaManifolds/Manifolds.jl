@@ -5,12 +5,11 @@ include("utils.jl")
     @test representation_size(M) == (2,2)
     @test injectivity_radius(M) == π*sqrt(2.0)
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0]) == π*sqrt(2.0)
-    types = [Matrix{Float64},
-             SizedMatrix{2, 2, Float64},
-             MMatrix{2, 2, Float64},
-             Matrix{Float32},
-             SizedMatrix{2, 2, Float32},
-             MMatrix{2, 2, Float32}]
+    types = [
+        Matrix{Float64},
+        MMatrix{2, 2, Float64},
+        Matrix{Float32},
+    ]
 
     retraction_methods = [Manifolds.PolarRetraction(),
                           Manifolds.QRRetraction()]

@@ -10,13 +10,11 @@ include("utils.jl")
             @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0., 0., 1., 0.])
         end
 
-        types = [Matrix{Float64},
-                  MMatrix{3, 2, Float64},
-                  SizedMatrix{3, 2, Float64},
-                  Matrix{Float32},
-                  MMatrix{3, 2, Float32},
-                  SizedMatrix{3, 2, Float64},
-                ]
+        types = [
+            Matrix{Float64},
+            MMatrix{3, 2, Float64},
+            Matrix{Float32},
+        ]
         @testset "Type $T" for T in types
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             y = exp(M,x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
@@ -70,13 +68,9 @@ include("utils.jl")
             @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0., 0., 1., 0.])
         end
 
-        types = [Matrix{ComplexF64},
-                  MMatrix{3, 2, ComplexF64},
-                  SizedMatrix{3, 2, ComplexF64},
-                  Matrix{ComplexF32},
-                  MMatrix{3, 2, ComplexF32},
-                  SizedMatrix{3, 2, ComplexF64},
-                ]
+        types = [
+            Matrix{ComplexF64},
+        ]
         @testset "Type $T" for T in types
             x = [0.5+0.5im 0.5+0.5im; 0.5+0.5im -0.5-0.5im; 0.0 0.0]
             y = exp(M, x, [0.0 0.0; 0.0 0.0; 1.0 1.0])

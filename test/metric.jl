@@ -27,7 +27,7 @@ struct TestEuclideanMetric <: Metric end
     @test_throws MethodError local_metric_jacobian(E, zeros(3))
     @test_throws MethodError christoffel_symbols_second_jacobian(E, zeros(3))
 
-    for vtype in (Vector, SVector{n}, MVector{n})
+    for vtype in (Vector, MVector{n})
         x, v, w = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
 
         @test local_metric(M, x) ≈ G
@@ -97,7 +97,7 @@ struct TestSphericalMetric <: Metric end
     @test base_manifold(M) === Sr
     @test metric(M) === g
 
-    for vtype in (Vector, SVector{n}, MVector{n})
+    for vtype in (Vector, MVector{n})
         x = vtype([θ, ϕ])
         G = Diagonal(vtype([1, sin(θ)^2])) .* r^2
         invG = Diagonal(vtype([1, 1 / sin(θ)^2])) ./ r^2

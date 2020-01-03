@@ -9,12 +9,11 @@ include("utils.jl")
     @test Mse == ProductManifold(M1) × ProductManifold(M2)
     @test Mse == M1 × ProductManifold(M2)
 
-    types = [Vector{Float64},
-             SizedVector{5, Float64},
-             MVector{5, Float64},
-             Vector{Float32},
-             SizedVector{5, Float32},
-             MVector{5, Float32}]
+    types = [
+        Vector{Float64},
+        MVector{5, Float64},
+        Vector{Float32},
+    ]
 
     retraction_methods = [Manifolds.ProductRetraction(ManifoldsBase.ExponentialRetraction(), ManifoldsBase.ExponentialRetraction())]
     inverse_retraction_methods = [Manifolds.InverseProductRetraction(ManifoldsBase.LogarithmicInverseRetraction(), ManifoldsBase.LogarithmicInverseRetraction())]
