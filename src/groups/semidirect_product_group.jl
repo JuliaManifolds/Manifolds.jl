@@ -25,14 +25,18 @@ const SemidirectProductGroup{N,H,A,ON,OH} = GroupManifold{ProductManifold{Tuple{
     )
 
 A group that is the semidirect product of a normal group $N$ and a subgroup $H$, written
-$G = N \rtimes_{\theta} H$, where $\theta: H \times N \to N$ is an automorphism action
+$G = N ⋊_{\theta} H$, where $θ: H × N \to N$ is an automorphism action
 of $H$ on $N$. The group $G$ has the composition rule
 
-$g \circ g\prime = (n, h) \circ (n\prime, h\prime) = (n \circ \theta_h(n\prime), h \circ h\prime)$
+````math
+g \circ g′ = (n, h) \circ (n′, h′) = (n \circ θ_h(n′), h \circ h′)
+````
 
 and the inverse
 
-$g^{-1} = (n, h)^{-1} = (\theta_{h^{-1}}(n^{-1}), h^{-1}).$
+````math
+g^{-1} = (n, h)^{-1} = (θ_{h^{-1}}(n^{-1}), h^{-1}).
+````
 """
 function SemidirectProductGroup(
     N::GroupManifold,

@@ -91,17 +91,17 @@ end
 @doc doc"""
     apply_diff(A::AbstractGroupAction, a, x, v[, conv::ActionDirection=LeftAction()])
 
-For group point $x \in M$ and tangent vector $v \in T_x M$, compute the action of the
-differential of the action of $a \in G$ on $v$, specified by rule `A`. Written as
-$(\mathrm{d}\tau_a)_x (v)$, with the specified left or right convention, the differential
+For group point $x ∈ M$ and tangent vector $v ∈ T_x M$, compute the action of the
+differential of the action of $a ∈ G$ on $v$, specified by rule `A`. Written as
+$(\mathrm{d}τ_a)_x (v)$, with the specified left or right convention, the differential
 transports vectors
 
-```math
+````math
 \begin{aligned}
-(\mathrm{d}L_a)_x (v) &\colon T_x M \to T_{a \cdot x} M\\
-(\mathrm{d}R_a)_x (v) &\colon T_x M \to T_{x \cdot a} M\\
+(\mathrm{d}L_a)_x (v) &: T_x M → T_{a ⋅ x} M\\
+(\mathrm{d}R_a)_x (v) &: T_x M → T_{x ⋅ a} M\\
 \end{aligned}
-```
+````
 """
 function apply_diff(A::AbstractGroupAction,
                     a,
@@ -124,17 +124,17 @@ end
 @doc doc"""
     inverse_apply_diff(A::AbstractGroupAction, a, x, v[, conv::ActionDirection=LeftAction()])
 
-For group point $x \in M$ and tangent vector $v \in T_x M$, compute the action of the
-differential of the inverse action of $a \in G$ on $v$, specified by rule `A`. Written as
-$(\mathrm{d}\tau_a)_x^{-1} (v)$, with the specified left or right convention, the
+For group point $x ∈ M$ and tangent vector $v ∈ T_x M$, compute the action of the
+differential of the inverse action of $a ∈ G$ on $v$, specified by rule `A`. Written as
+$(\mathrm{d}τ_a)_x^{-1} (v)$, with the specified left or right convention, the
 differential transports vectors
 
-```math
+````math
 \begin{aligned}
-(\mathrm{d}L_a)_x^{-1} (v) &\colon T_x M \to T_{a^{-1} \cdot x} M\\
-(\mathrm{d}R_a)_x^{-1} (v) &\colon T_x M \to T_{x \cdot a^{-1}} M\\
+(\mathrm{d}L_a)_x^{-1} (v) &: T_x M → T_{a^{-1} ⋅ x} M\\
+(\mathrm{d}R_a)_x^{-1} (v) &: T_x M → T_{x ⋅ a^{-1}} M\\
 \end{aligned}
-```
+````
 """
 function inverse_apply_diff(A::AbstractGroupAction,
                             a,
