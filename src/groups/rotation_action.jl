@@ -39,14 +39,20 @@ end
 function apply(A::RotationActionOnVector{N,F,LeftAction}, a, x) where {N,F}
     return a * x
 end
+function apply(A::RotationActionOnVector{N,F,RightAction}, a, x) where {N,F}
+    return inv(base_group(A), a) * x
+end
 
 function inverse_apply!(A::RotationActionOnVector{N,F,LeftAction}, y, a, x) where {N,F}
-    mul!(y, transpose(a), x)
+    mul!(y, inv(base_group(A), a), x)
     return y
 end
 
 function inverse_apply(A::RotationActionOnVector{N,F,LeftAction}, a, x) where {N,F}
-    return transpose(a) * x
+    return inv(base_group(A), a) * x
+end
+function inverse_apply(A::RotationActionOnVector{N,F,RightAction}, a, x) where {N,F}
+    return a * x
 end
 
 function apply_diff!(A::RotationActionOnVector{N,F,LeftAction}, vout, a, x, v) where {N,F}
@@ -59,12 +65,15 @@ function apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, x, v) where {N
 end
 
 function inverse_apply_diff!(A::RotationActionOnVector{N,F,LeftAction}, vout, a, x, v) where {N,F}
-    mul!(vout, transpose(a), v)
+    mul!(vout, inv(base_group(A), a), v)
     return vout
 end
 
 function inverse_apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, x, v) where {N,F}
-    return transpose(a) * v
+    return inv(base_group(A), a) * v
+end
+function inverse_apply_diff(A::RotationActionOnVector{N,F,RightAction}, a, x, v) where {N,F}
+    return a * v
 end
 
 function optimal_alignment(A::RotationActionOnVector{N,T,LeftAction}, x1, x2) where {N,T}
@@ -77,4 +86,8 @@ function optimal_alignment(A::RotationActionOnVector{N,T,LeftAction}, x1, x2) wh
     UVt = F.U*F.Vt
     Ostar = det(UVt) ≥ 0 ? UVt : F.U*Diagonal([i<L ? 1 : -1 for i in 1:L])*F.Vt
     return convert(typeof(Xmul), Ostar)
+end
+
+function optimal_alignment(A::RotationActionOnVector{N,T,RightAction}, x1, x2) where {N,T}
+    return optimal_alignment(switch_direction(A), x2, x1)
 end

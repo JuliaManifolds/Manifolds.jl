@@ -40,14 +40,24 @@ direction(::AbstractGroupAction{AD}) where {AD} = AD()
 Apply action `a` to the point `x` with the rule specified by `A`.
 The result is saved in `y`.
 """
-function apply!(A::AbstractGroupAction, y, a, x)
+function apply!(A::AbstractGroupAction{LeftAction}, y, a, x)
     error("apply! not implemented for action $(typeof(A)) and points $(typeof(y)), $(typeof(x)) and $(typeof(a)).")
 end
+function apply!(A::AbstractGroupAction{RightAction}, y, a, x)
+    ainv = inv(base_group(A), a)
+    apply!(switch_direction(A), y, ainv, x)
+end
 
-"""
+@doc doc"""
     apply(A::AbstractGroupAction, a, x)
 
 Apply action `a` to the point `x`. The action is specified by `A`.
+Unless otherwise specified, right actions are defined in terms of the left action. For
+point $x ∈ M$ and action $a$,
+
+````math
+x ⋅ a ≐ a^{-1} ⋅ x.
+````
 """
 function apply(A::AbstractGroupAction, a, x)
     y = similar_result(A, apply, x, a)
