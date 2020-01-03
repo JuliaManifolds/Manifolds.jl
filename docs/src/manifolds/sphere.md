@@ -2,6 +2,6 @@
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["Sphere.jl"]
+Pages = ["manifolds/Sphere.jl"]
 Order = [:type, :function]
 ```

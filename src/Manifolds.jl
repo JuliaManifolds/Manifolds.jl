@@ -114,6 +114,13 @@ for point and tangent vector on a [`Manifold`](@ref)
 struct PolarRetraction <: AbstractRetractionMethod end
 
 """
+    ProjectionRetraction <: AbstractRetractionMethod
+
+Retractions that are based on projection and usually addition in the embedding.
+"""
+struct ProjectionRetraction <: AbstractRetractionMethod end
+
+"""
     QRRetraction <: AbstractRetractionMethod
 
 Retractions that are based on a QR decomposition of the
@@ -128,6 +135,13 @@ Inverse retractions that are based on a singular value decomposition of the
 matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
 """
 struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
+
+"""
+    ProjectionInverseRetraction <: AbstractInverseRetractionMethod
+
+Inverse retractions that are based on a projection (or its inversion).
+"""
+struct ProjectionInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
     QRInverseRetraction <: AbstractInverseRetractionMethod
@@ -160,7 +174,7 @@ include("manifolds/Grassmann.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/Rotations.jl")
 include("Stiefel.jl")
-include("Sphere.jl")
+include("manifolds/Sphere.jl")
 include("Symmetric.jl")
 include("SymmetricPositiveDefinite.jl")
 
@@ -201,8 +215,9 @@ export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribut
 export Metric, RiemannianMetric, LorentzMetric, MinkowskiMetric, EuclideanMetric, MetricManifold,
     LinearAffineMetric, LogEuclideanMetric, LogCholeskyMetric
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
-export AbstractRetractionMethod, QRRetraction, PolarRetraction
-export AbstractInverseRetractionMethod, QRInverseRetraction, PolarInverseRetraction
+export AbstractRetractionMethod, QRRetraction, PolarRetraction, ProjectionRetraction
+export AbstractInverseRetractionMethod, QRInverseRetraction, PolarInverseRetraction,
+    ProjectionInverseRetraction
 export AbstractEstimationMethod, GradientDescentEstimation, CyclicProximalPointEstimation,
     GeodesicInterpolation, GeodesicInterpolationWithinRadius
 export base_manifold, bundle_projection, christoffel_symbols_first, christoffel_symbols_second,

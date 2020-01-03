@@ -116,8 +116,7 @@ end
 flat(M::Circle, x::Number, w::FVector{TangentSpaceType}) = FVector(CotangentSpace,w.data)
 
 @doc doc"""
-    injectivity_radius(M::Circle)
-    injectivity_radius(M::Circle, x)
+    injectivity_radius(M::Circle[, x])
 
 returns the injectivity radius on the [`Circle`](@ref) `M`, i.e. $\pi$.
 """

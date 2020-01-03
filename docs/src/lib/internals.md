@@ -11,6 +11,8 @@ Manifolds.SizedAbstractArray
 ## Functions
 
 ```@docs
+Manifolds._gradient
+Manifolds._jacobian
 Manifolds.eigen_safe
 Manifolds.find_pv
 Manifolds.log_safe
