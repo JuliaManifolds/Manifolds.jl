@@ -64,9 +64,9 @@ function test_action(
         N = length(a_pts)
         for p in m_pts
             for i in 1:N
-                aip = apply(A, p, a_pts[mod1(i+1, N)])
+                aip = apply(A, a_pts[mod1(i+1, N)], p)
                 acg = compose(G, a_pts[i], a_pts[mod1(i+1, N)])
-                @test isapprox(M, apply(A, p, acg), apply(A, aip, a_pts[i]))
+                @test isapprox(M, apply(A, acg, p), apply(A, a_pts[i], aip))
             end
         end
     end
@@ -76,8 +76,8 @@ function test_action(
         for p in m_pts
             for i in 1:N
                 aip = similar(p)
-                apply!(A, aip, p, a_pts[i])
-                @test isapprox(M, apply(A, p, a_pts[i]), aip)
+                apply!(A, aip, a_pts[i], p)
+                @test isapprox(M, apply(A, a_pts[i], p), aip)
             end
         end
     end
@@ -139,8 +139,8 @@ function test_action(
     @testset "Action of group identity" begin
         e_ap = e(a_pts[1])
         for p in m_pts
-            @test isapprox(M, p, apply(A, p, e))
-            @test isapprox(M, p, apply(A, p, e_ap))
+            @test isapprox(M, p, apply(A, e, p))
+            @test isapprox(M, p, apply(A, e_ap, p))
         end
     end
 
@@ -151,12 +151,12 @@ function test_action(
         @test isapprox(G, a12, b)
 
         if isa(A, AbstractGroupAction{LeftAction})
-            x_a = apply(A, apply(A, m_pts[1], a_pts[2]), a_pts[1])
-            x_b = apply(A, m_pts[1], a12)
+            x_a = apply(A, a_pts[1], apply(A, a_pts[2], m_pts[1]))
+            x_b = apply(A, a12, m_pts[1])
             @test isapprox(M, x_a, x_b)
         elseif isa(A, AbstractGroupAction{RightAction})
-            x_a = apply(A, apply(A, m_pts[1], a_pts[1]), a_pts[2])
-            x_b = apply(A, m_pts[1], a12)
+            x_a = apply(A, a_pts[2], apply(A, a_pts[1], m_pts[1]))
+            x_b = apply(A, a12, m_pts[1])
             @test isapprox(M, x_a, x_b)
         else
             # most likely a bug in testset
