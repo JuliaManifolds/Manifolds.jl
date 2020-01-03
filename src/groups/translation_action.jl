@@ -5,8 +5,10 @@
         AD::ActionDirection = LeftAction(),
     )
 
-Space of left actions of the [`TranslationGroup`](@ref) $\mathrm{T}(N)$
-on a Euclidean-like manifold `M`.
+Space of actions of the [`TranslationGroup`](@ref) $\mathrm{T}(N)$ on a Euclidean-like
+manifold `M`.
+
+The left and right actions are equivalent.
 """
 struct TranslationAction{TM<:Manifold,TRn<:TranslationGroup,TAD<:ActionDirection} <: AbstractGroupAction{TAD}
     M::TM

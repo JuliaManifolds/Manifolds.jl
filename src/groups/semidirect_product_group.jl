@@ -18,7 +18,7 @@ end
 const SemidirectProductGroup{N,H,A,ON,OH} = GroupManifold{ProductManifold{Tuple{N,H}},SemidirectProductOperation{A,ON,OH}}
 
 @doc doc"""
-    SemidirectProductOperation(
+    SemidirectProductGroup(
         N::GroupManifold,
         H::GroupManifold,
         A::AbstractGroupAction,
