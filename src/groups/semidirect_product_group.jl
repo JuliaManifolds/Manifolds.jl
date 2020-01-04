@@ -64,7 +64,6 @@ function inv!(G::SemidirectProductGroup, y, x)
     apply!(A, y.parts[1], y.parts[2], ninv)
     return y
 end
-
 function inv!(G::AG, y, e::Identity{AG}) where {AG<:SemidirectProductGroup}
     PG = base_manifold(G)
     es = map(Identity, PG.manifolds)
@@ -75,6 +74,15 @@ function identity!(G::SemidirectProductGroup, y, x)
     PG = base_manifold(G)
     map(identity!, PG.manifolds, y.parts, x.parts)
 end
+function identity!(G::GT, y, x::Identity{GT}) where GT<:SemidirectProductGroup
+    PG = base_manifold(G)
+    N = submanifold(PG, 1)
+    H = submanifold(PG, 2)
+    identity!(N, y.parts[1], Identity(N))
+    identity!(H, y.parts[2], Identity(H))
+    return y
+end
+identity!(G::GT, e::Identity{GT}, ::Identity{GT}) where GT<:SemidirectProductGroup = e
 
 function compose!(G::SemidirectProductGroup, z, x, y)
     PG = base_manifold(G)
@@ -86,13 +94,16 @@ function compose!(G::SemidirectProductGroup, z, x, y)
     compose!(N, z.parts[1], x.parts[1], zₙtmp)
     return z
 end
-
-function compose!(G::GT, z::ProductArray, x::Identity{GT}, y::Identity{GT}) where GT<:SemidirectProductGroup
-    PG = base_manifold(G)
-    N = submanifold(PG, 1)
-    H = submanifold(PG, 2)
-    compose!(N, z.parts[1], Identity(N), Identity(N))
-    compose!(H, z.parts[2], Identity(H), Identity(H))
+function compose!(G::GT, z, e::Identity{GT}, ::Identity{GT}) where GT<:SemidirectProductGroup
+    identity!(G, z, e)
+    return z
+end
+function compose!(G::GT, z, ::Identity{GT}, y) where GT<:SemidirectProductGroup
+    copyto!(z, y)
+    return z
+end
+function compose!(G::GT, z, x, ::Identity{GT}) where GT<:SemidirectProductGroup
+    copyto!(z, x)
     return z
 end
 
