@@ -20,7 +20,7 @@ Though it is slighty redundant, usually the matrices are safed as $n\times n$ ar
 Generate the manifold of $n\times n$ symmetric metrices.
 """
 struct SymmetricMatrices{n,F} <: Manifold end
-SymmetricMatrices(n::Int,F::AbstractField=ℝ) = SymmetricMatrices{n,t}()
+SymmetricMatrices(n::Int,F::AbstractField=ℝ) = SymmetricMatrices{n,F}()
 
 @doc doc"""
     check_manifold_point(M::SymmetricMatrices{n,F}, x; kwargs...)
