@@ -81,7 +81,7 @@ function represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
 end
 
 function represent_in_basis(M::Manifold, x, v, B::PrecomputedOrthonormalBasis)
-    return map(vb -> inner(M, x, v, vb), B.vectors)
+    return map(vb -> real(inner(M, x, v, vb)), B.vectors)
 end
 
 """
@@ -106,7 +106,7 @@ function inverse_represent_in_basis(M::Manifold, x, v, B::PrecomputedOrthonormal
     #  2) guarantees a reasonable array type `vout`
     #     (for example scalar * `SizedArray` is an `SArray`)
     vt = v[1] * B.vectors[1]
-    vout = similar(B.vectors, eltype(vt))
+    vout = similar(B.vectors[1], eltype(vt))
     copyto!(vout, vt)
     for i in 2:length(v)
         vout .+= v[i] .* B.vectors[i]
@@ -157,6 +157,7 @@ function basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:svd})
     PS = prod(S)
     dim = manifold_dimension(M)
     # projection
+    # TODO: find a better way to obtain a basis of the ambient space
     vs = [reshape(project_tangent(M, x, _euclidean_basis_vector(x, i)), PS) for i in eachindex(x)]
     O = reduce(hcat, vs)
     # orthogonalization

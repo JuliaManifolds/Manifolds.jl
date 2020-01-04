@@ -29,6 +29,8 @@ include("utils.jl")
 
     for M in manifolds
         basis_types = if M == E
+            (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
+        elseif M == Ec
             (ArbitraryOrthonormalBasis(),)
         else
             ()

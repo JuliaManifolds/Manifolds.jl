@@ -209,7 +209,6 @@ matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
 """
 struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
-
 include("utils.jl")
 include("orthonormal_bases.jl")
 include("autodiff.jl")

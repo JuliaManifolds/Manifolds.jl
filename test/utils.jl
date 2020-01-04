@@ -286,7 +286,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         for i in 1:N
             @test norm(M, x, b.vectors[i]) ≈ 1
             for j in i+1:N
-                @test inner(M, x, b.vectors[i], b.vectors[j]) ≈ 0 atol = sqrt(eps(eltype(x)))
+                @test real(inner(M, x, b.vectors[i], b.vectors[j])) ≈ 0 atol = sqrt(eps(eltype(x)))
             end
         end
         if isa(btype, ProjectedOrthonormalBasis)
@@ -296,15 +296,18 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             end
         end
 
-        v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
+        if !isa(btype, ProjectedOrthonormalBasis)
+            v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
 
-        vb = represent_in_basis(M, x, v1, btype)
-        @test isa(vb, AbstractVector)
-        vbi = inverse_represent_in_basis(M, x, vb, btype)
-        @test isapprox(M, x, v1, vbi)
+            vb = represent_in_basis(M, x, v1, btype)
+            @test isa(vb, AbstractVector{<:Real})
+            @test length(vb) == N
+            vbi = inverse_represent_in_basis(M, x, vb, btype)
+            @test isapprox(M, x, v1, vbi)
 
-        @test represent_in_basis(M, x, v1, b) ≈ represent_in_basis(M, x, v1, btype)
-        @test inverse_represent_in_basis(M, x, vb, b) ≈ inverse_represent_in_basis(M, x, vb, btype)
+            @test represent_in_basis(M, x, v1, b) ≈ represent_in_basis(M, x, v1, btype)
+            @test inverse_represent_in_basis(M, x, vb, b) ≈ inverse_represent_in_basis(M, x, vb, btype)
+        end
     end
 
     test_forward_diff && @testset "ForwardDiff support" begin
