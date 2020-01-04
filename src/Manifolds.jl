@@ -211,6 +211,7 @@ struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
 
 include("utils.jl")
+include("orthonormal_bases.jl")
 include("autodiff.jl")
 include("SizedAbstractArray.jl")
 
@@ -337,7 +338,12 @@ export Metric,
     CyclicProximalPointEstimation,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius
+
+# orthonormal bases
+export AbstractBasis, AbstractOrthonormalBasis, ArbitraryOrthonormalBasis, PrecomputedOrthonormalBasis, ProjectedOrthonormalBasis
+
 export base_manifold,
+    basis,
     bundle_projection,
     christoffel_symbols_first,
     christoffel_symbols_second,
@@ -357,6 +363,7 @@ export base_manifold,
     injectivity_radius,
     inner,
     inverse_local_metric,
+    inverse_represent_in_basis,
     inverse_retract,
     inverse_retract!,
     isapprox,
@@ -391,6 +398,7 @@ export base_manifold,
     projected_distribution,
     ricci_curvature,
     ricci_tensor,
+    represent_in_basis,
     representation_size,
     retract,
     retract!,
