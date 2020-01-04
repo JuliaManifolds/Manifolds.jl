@@ -137,7 +137,7 @@ Identity element $e$, such that for any element $x$,
 $x \circ e = e \circ x = x$. The returned element is of a similar type to `x`.
 """
 function identity(G::AbstractGroupManifold, x)
-    y = similar_result(G, inv, x)
+    y = similar_result(G, identity, x)
     identity!(G, y, x)
     return y
 end
