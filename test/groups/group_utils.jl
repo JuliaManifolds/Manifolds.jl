@@ -93,6 +93,39 @@ function test_group(
             end
         end
     end
+
+    @testset "translation" begin
+        convs = ((), (LeftAction(),), (RightAction(),))
+
+        @test translate(G, g_pts[1], g_pts[2]) ≈ compose(G, g_pts[1], g_pts[2])
+        @test translate(G, g_pts[1], g_pts[2], LeftAction()) ≈ compose(G, g_pts[1], g_pts[2])
+        @test translate(G, g_pts[1], g_pts[2], RightAction()) ≈ compose(G, g_pts[2], g_pts[1])
+
+        for conv in convs
+            @test inverse_translate(G, g_pts[1], translate(G, g_pts[1], g_pts[2], conv...), conv...) ≈ g_pts[2]
+            @test translate(G, g_pts[1], inverse_translate(G, g_pts[1], g_pts[2], conv...), conv...) ≈ g_pts[2]
+        end
+
+        test_mutating && @testset "mutating" begin
+            for conv in convs
+                g = similar(g_pts[1])
+                @test translate!(G, g, g_pts[1], g_pts[2], conv...) === g
+                @test g ≈ translate(G, g_pts[1], g_pts[2], conv...)
+            end
+
+            for conv in convs
+                g = translate(G, g_pts[1], g_pts[2], conv...)
+                g2 = similar(g)
+                @test inverse_translate!(G, g2, g_pts[1], g, conv...) === g2
+                @test g2 ≈ g_pts[2]
+
+                g = inverse_translate(G, g_pts[1], g_pts[2], conv...)
+                g2 = similar(g)
+                @test translate!(G, g2, g_pts[1], g, conv...) === g2
+                @test g2 ≈ g_pts[2]
+            end
+        end
+    end
 end
 
 
