@@ -68,11 +68,13 @@ function inv!(G::AG, y, e::Identity{AG}) where {AG<:SemidirectProductGroup}
     PG = base_manifold(G)
     es = map(Identity, PG.manifolds)
     map(inv!, PG.manifolds, y.parts, es)
+    return y
 end
 
 function identity!(G::SemidirectProductGroup, y, x)
     PG = base_manifold(G)
     map(identity!, PG.manifolds, y.parts, x.parts)
+    return y
 end
 function identity!(G::GT, y, x::Identity{GT}) where GT<:SemidirectProductGroup
     PG = base_manifold(G)
