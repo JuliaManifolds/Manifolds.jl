@@ -23,10 +23,9 @@ The manifold can be equipped with different metrics
 injectivity_radius(::SymmetricPositiveDefinite{N},a::Vararg{Any,N} where N) where N
 check_manifold_point(::SymmetricPositiveDefinite{N},x; kwargs...) where N
 check_tangent_vector(::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
-manifold_dimension(::SymmetricPositiveDefinite{N}) where N
-representation_size(::SymmetricPositiveDefinite{N}) where N
-zero_tangent_vector(::SymmetricPositiveDefinite{N},x) where N
-zero_tangent_vector!(::SymmetricPositiveDefinite{N}, v, x) where N
+manifold_dimension(::SymmetricPositiveDefinite)
+representation_size(::SymmetricPositiveDefinite)
+zero_tangent_vector(::SymmetricPositiveDefinite,x)
 ```
 
 ## Default Metric: Linear Affine Metric
@@ -42,11 +41,11 @@ any call of the following functions with
 
 ```@docs
 distance(P::SymmetricPositiveDefinite{N},x,y) where N
-exp!(P::SymmetricPositiveDefinite{N}, y, x, v) where N
+exp(::SymmetricPositiveDefinite, ::Any...)
 inner(P::SymmetricPositiveDefinite, x, w, v)
-log!(P::SymmetricPositiveDefinite{N}, v, x, y) where N
+log(::SymmetricPositiveDefinite, ::Any...)
 tangent_orthonormal_basis(P::SymmetricPositiveDefinite{N},x,v) where N
-vector_transport_to!(P::SymmetricPositiveDefinite{N},vto, x, v, y, m::ParallelTransport) where N
+vector_transport_to(::SymmetricPositiveDefinite, ::Any, ::Any, ::Any, ::ParallelTransport)
 ```
 
 ## Log Euclidean Metric
@@ -69,10 +68,10 @@ LogCholeskyMetric
 
 ```@docs
 distance(P::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,y) where N
-exp!(P::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, y, x, v) where N
+exp(::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
 inner(P::MetricManifold{SymmetricPositiveDefinite{N}, LogCholeskyMetric}, x, w, v) where N
-log!(P::MetricManifold{SymmetricPositiveDefinite{N}, LogCholeskyMetric}, v, x, y) where N
-vector_transport_to!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, vto, x, v, y, ::ParallelTransport) where N
+log(::MetricManifold{SymmetricPositiveDefinite, LogCholeskyMetric}, ::Any...)
+vector_transport_to(::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any, ::Any, ::Any, ::ParallelTransport)
 ```
 
 ## Statistics
