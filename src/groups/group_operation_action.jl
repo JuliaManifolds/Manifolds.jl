@@ -7,8 +7,11 @@ struct GroupOperationAction{G,AD} <: AbstractGroupAction{AD}
     group::G
 end
 
-function GroupOperationAction(G::AbstractGroupManifold, ::TAD = LeftAction()) where {TAD<:ActionDirection}
-    return GroupOperationAction{typeof(G), TAD}(G)
+function GroupOperationAction(
+    G::AbstractGroupManifold,
+    ::TAD = LeftAction(),
+) where {TAD<:ActionDirection}
+    return GroupOperationAction{typeof(G),TAD}(G)
 end
 
 function show(io::IO, A::GroupOperationAction)
@@ -59,11 +62,11 @@ function optimal_alignment!(A::GroupOperationAction, y, x1, x2)
 end
 
 function center_of_orbit(
-        A::GroupOperationAction,
-        pts::AbstractVector,
-        q,
-        mean_method::AbstractEstimationMethod = GradientDescentEstimation()
-    )
+    A::GroupOperationAction,
+    pts::AbstractVector,
+    q,
+    mean_method::AbstractEstimationMethod = GradientDescentEstimation(),
+)
     m = mean(A.group, pts, mean_method)
     return inverse_apply(switch_direction(A), q, m)
 end

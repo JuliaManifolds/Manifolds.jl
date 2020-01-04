@@ -22,7 +22,7 @@ const SpecialEuclidean{N} = SemidirectProductGroup{
     SpecialOrthogonal{N},
     RotationAction{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N},LeftAction},
     AdditionOperation,
-    MultiplicationOperation
+    MultiplicationOperation,
 }
 
 function SpecialEuclidean(n)

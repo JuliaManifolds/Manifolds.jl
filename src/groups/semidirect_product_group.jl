@@ -9,13 +9,20 @@ Group operation of a semidirect product group. The operation consists of the ope
 `opN` on a normal subgroup `N`, the operation `opH` on a subgroup `H`, and an automorphism
 `action` of elements of `H` on `N`.
 """
-struct SemidirectProductOperation{A<:AbstractGroupAction,ON<:AbstractGroupOperation,OH<:AbstractGroupOperation} <: AbstractGroupOperation
+struct SemidirectProductOperation{
+    A<:AbstractGroupAction,
+    ON<:AbstractGroupOperation,
+    OH<:AbstractGroupOperation,
+} <: AbstractGroupOperation
     action::A
     opN::ON
     opH::OH
 end
 
-const SemidirectProductGroup{N,H,A,ON,OH} = GroupManifold{ProductManifold{Tuple{N,H}},SemidirectProductOperation{A,ON,OH}}
+const SemidirectProductGroup{N,H,A,ON,OH} = GroupManifold{
+    ProductManifold{Tuple{N,H}},
+    SemidirectProductOperation{A,ON,OH},
+}
 
 @doc doc"""
     SemidirectProductGroup(
@@ -76,7 +83,7 @@ function identity!(G::SemidirectProductGroup, y, x)
     map(identity!, PG.manifolds, y.parts, x.parts)
     return y
 end
-function identity!(G::GT, y, x::Identity{GT}) where GT<:SemidirectProductGroup
+function identity!(G::GT, y, x::Identity{GT}) where {GT<:SemidirectProductGroup}
     PG = base_manifold(G)
     N = submanifold(PG, 1)
     H = submanifold(PG, 2)
@@ -84,7 +91,7 @@ function identity!(G::GT, y, x::Identity{GT}) where GT<:SemidirectProductGroup
     identity!(H, y.parts[2], Identity(H))
     return y
 end
-identity!(G::GT, e::Identity{GT}, ::Identity{GT}) where GT<:SemidirectProductGroup = e
+identity!(G::GT, e::Identity{GT}, ::Identity{GT}) where {GT<:SemidirectProductGroup} = e
 
 function compose!(G::SemidirectProductGroup, z, x, y)
     PG = base_manifold(G)
@@ -96,25 +103,25 @@ function compose!(G::SemidirectProductGroup, z, x, y)
     compose!(N, z.parts[1], x.parts[1], zₙtmp)
     return z
 end
-function compose!(G::GT, z, e::Identity{GT}, ::Identity{GT}) where GT<:SemidirectProductGroup
+function compose!(
+    G::GT,
+    z,
+    e::Identity{GT},
+    ::Identity{GT},
+) where {GT<:SemidirectProductGroup}
     identity!(G, z, e)
     return z
 end
-function compose!(G::GT, z, ::Identity{GT}, y) where GT<:SemidirectProductGroup
+function compose!(G::GT, z, ::Identity{GT}, y) where {GT<:SemidirectProductGroup}
     copyto!(z, y)
     return z
 end
-function compose!(G::GT, z, x, ::Identity{GT}) where GT<:SemidirectProductGroup
+function compose!(G::GT, z, x, ::Identity{GT}) where {GT<:SemidirectProductGroup}
     copyto!(z, x)
     return z
 end
 
-function translate_diff!(G::SemidirectProductGroup,
-                         vout,
-                         x,
-                         y,
-                         v,
-                         conv::LeftAction)
+function translate_diff!(G::SemidirectProductGroup, vout, x, y, v, conv::LeftAction)
     PG = base_manifold(G)
     N = submanifold(PG, 1)
     H = submanifold(PG, 2)
@@ -128,11 +135,13 @@ function translate_diff!(G::SemidirectProductGroup,
     return vout
 end
 
-function translate_diff(G::SemidirectProductGroup,
-                        x,
-                        y,
-                        v,
-                        conv::ActionDirection = LeftAction())
+function translate_diff(
+    G::SemidirectProductGroup,
+    x,
+    y,
+    v,
+    conv::ActionDirection = LeftAction(),
+)
     vout = similar_result(base_manifold(G), x, y, v)
     translate_diff!(G, vout, x, y, v, conv)
     return vout
