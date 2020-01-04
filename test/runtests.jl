@@ -1,5 +1,6 @@
 include("autodiff.jl")
 include("utils.jl")
+include("groups/group_utils.jl")
 include("sized_abstract_array.jl")
 
 # starting with tests of simple manifolds
@@ -22,3 +23,8 @@ include("vector_bundle.jl")
 
 include("metric.jl")
 include("statistics.jl")
+
+# Lie groups and actions
+include("groups/groups_general.jl")
+include("groups/rotation_action.jl")
+include("groups/translation_action.jl")
