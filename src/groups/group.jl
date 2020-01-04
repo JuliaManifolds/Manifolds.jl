@@ -143,6 +143,21 @@ function identity(G::AbstractGroupManifold, x)
 end
 identity(::GT, e::Identity{GT}) where GT<:AbstractGroupManifold = e
 
+function isapprox(G::GT, e::Identity{GT}, x; kwargs...) where GT<:AbstractGroupManifold
+    return isapprox(G, identity(G, x), x; kwargs...)
+end
+function isapprox(G::GT, x, ::Identity{GT}; kwargs...) where GT<:AbstractGroupManifold
+    return isapprox(G, identity(G, x), x; kwargs...)
+end
+function isapprox(
+    ::GT,
+    ::Identity{GT},
+    ::Identity{GT};
+    kwargs...,
+) where GT<:AbstractGroupManifold
+    return true
+end
+
 function compose(G::AbstractGroupManifold, x, y)
     z = similar_result(G, compose, x, y)
     compose!(G, z, x, y)
