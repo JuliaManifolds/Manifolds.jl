@@ -36,7 +36,7 @@ struct PowerMetric <: Metric end
 """
     PowerRetraction(retraction::AbstractRetractionMethod)
 
-Power retraction based on `retraction`. Works on [`PowerManifold`](@ref).
+Power retraction based on `retraction`. Works on [`PowerManifold`](@ref)s.
 """
 struct PowerRetraction{TR<:AbstractRetractionMethod} <: AbstractRetractionMethod
     retraction::TR
@@ -44,8 +44,7 @@ end
 """
     InversePowerRetraction(inverse_retractions::AbstractInverseRetractionMethod...)
 
-Power inverse retraction of `inverse_retractions`.
-Works on [`PowerManifold`](@ref).
+Power inverse retraction of `inverse_retractions`. Works on [`PowerManifold`](@ref)s.
 """
 struct InversePowerRetraction{TR<:AbstractInverseRetractionMethod} <: AbstractInverseRetractionMethod
     inverse_retraction::TR
@@ -166,6 +165,14 @@ function exp!(M::PowerManifold, y, x, v)
     return y
 end
 
+@doc doc"""
+    flat(M::PowerManifold, x, w::FVector{TangentSpaceType})
+
+use the musical isomorphism to transform the tangent vector `w` from the tangent space at
+`x` on the [`PowerManifold`](@ref) `M` to a cotangent vector.
+This can be done elementwise, so r every entry of `w` (and `x`) sparately
+"""
+flat(::PowerManifold, ::Any...)
 function flat!(M::PowerManifold, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -184,6 +191,13 @@ end
     return Base.product(map(Base.OneTo, tuple(SizeTuple.parameters...))...)
 end
 
+@doc doc"""
+    injectivity_radius(M::PowerManifold[, x])
+
+the injectivity radius on the [`PowerManifold`](@ref) is for the global case
+equal to the one of its base manifold. For a given point `x` it's equal to the
+minimum of all radii in the array entries.
+"""
 function injectivity_radius(M::PowerManifold, x)
     radius = 0.0
     initialized = false
@@ -200,21 +214,17 @@ function injectivity_radius(M::PowerManifold, x)
     end
     return radius
 end
-function injectivity_radius(M::PowerManifold)
-    radius = 0.0
-    initialized = false
-    for i in get_iterator(M)
-        cur_rad = injectivity_radius(M.manifold)
-        if initialized
-            radius = min(cur_rad, radius)
-        else
-            radius = cur_rad
-            initialized = true
-        end
-    end
-    return radius
-end
+injectivity_radius(M::PowerManifold) = injectivity_radius(M.manifold)
 
+@doc doc"""
+    inverse_retract(M::PowerManifold, x, y, m::InversePowerRetraction)
+
+Compute the inverse retraction from `x` with respect to `y` on the [`PowerManifold`](@ref) `M`
+using an [`InversePowerRetraction`](@ref), which by default encapsulates a inverse retraction
+of the base manifold. Then this method is performed elementwise, so the encapsulated inverse
+retraction method has to be one that is available on the base [`Manifold`](@ref).
+"""
+inverse_retract(::PowerManifold, ::Any...)
 function inverse_retract!(M::PowerManifold, v, x, y, method::InversePowerRetraction)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -295,9 +305,10 @@ end
 @doc doc"""
     manifold_dimension(M::PowerManifold)
 
-Returns the manifold-dimension of the [`PowerManifold`](@ref) `M`$=\mathcal N = (\mathcal M)^{n_1,\ldots,n_d}, i.e. with
-$n=(n_1,\ldots,n_d)$ the array size of the power manifold and $d_{\mathcal M}$
-the dimension of the base manifold $\mathcal M$, the manifold is of dimension
+Returns the manifold-dimension of the [`PowerManifold`](@ref) `M`
+$=\mathcal N = (\mathcal M)^{n_1,\ldots,n_d}, i.e. with $n=(n_1,\ldots,n_d)$ the array
+size of the power manifold and $d_{\mathcal M}$ the dimension of the base manifold
+$\mathcal M$, the manifold is of dimension
 
 ````math
 d_{\mathcal N} = d_{\mathcal M}\prod_{i=1}^d n_i = n_1n_2\cdot\ldots\cdotn_dd_{\mathcal M}.
@@ -371,6 +382,15 @@ function representation_size(M::PowerManifold{<:Manifold, TSize}) where TSize
     return (representation_size(M.manifold)..., size_to_tuple(TSize)...)
 end
 
+@doc doc"""
+    retract(M::PowerManifold, x, v, m::PowerRetraction)
+
+Compute the retraction from `x` with tangent vector `v` on the [`PowerManifold`](@ref) `M`
+using an [`PowerRetraction`](@ref), which by default encapsulates a retraction of the
+base manifold. Then this method is performed elementwise, so the encapsulated retraction
+method has to be one that is available on the base [`Manifold`](@ref).
+"""
+retract(::PowerManifold, ::Any...)
 function retract!(M::PowerManifold, y, x, v, method::PowerRetraction)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -383,6 +403,14 @@ function retract!(M::PowerManifold, y, x, v, method::PowerRetraction)
     return y
 end
 
+@doc doc"""
+    sharp(M::PowerManifold, x, w::FVector{CotangentSpaceType})
+
+Use the musical isomorphism to transform the cotangent vector `w` from the tangent space at
+`x` on the [`PowerManifold`](@ref) `M` to a tangent vector.
+This can be done elementwise, so for every entry of `w` (and `x`) sparately
+"""
+sharp(::PowerManifold, ::Any...)
 function sharp!(M::PowerManifold, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)

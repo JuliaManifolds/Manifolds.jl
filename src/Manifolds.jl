@@ -163,7 +163,7 @@ include("Metric.jl")
 include("DistributionsBase.jl")
 include("ProjectedDistribution.jl")
 
-include("ProductManifold.jl")
+include("manifolds/ProductManifold.jl")
 include("manifolds/PowerManifold.jl")
 
 include("manifolds/CholeskySpace.jl")
