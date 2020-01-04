@@ -26,10 +26,10 @@ function test_group(
 
             test_mutating && @testset "mutating" begin
                 g12, g23, g12_3, g1_23 = similar.(repeat([g_pts[1]], 4))
-                compose!(G, g12, g_pts[1], g_pts[2])
-                compose!(G, g23, g_pts[2], g_pts[3])
-                compose!(G, g12_3, g12, g_pts[3])
-                compose!(G, g1_23, g_pts[1], g23)
+                @test compose!(G, g12, g_pts[1], g_pts[2]) === g12
+                @test compose!(G, g23, g_pts[2], g_pts[3]) === g23
+                @test compose!(G, g12_3, g12, g_pts[3]) === g12_3
+                @test compose!(G, g1_23, g_pts[1], g23) === g1_23
                 @test isapprox(G, g12_3, g1_23)
             end
         end
@@ -37,31 +37,34 @@ function test_group(
         @testset "Identity" begin
             @test isapprox(G, e, e)
             @test identity(G, e) === e
+            @test compose(G, e, e) === e
+            @test copyto!(e, e) === e
+
             for g in g_pts
                 @test isapprox(G, compose(G, g, e), g)
                 @test isapprox(G, compose(G, e, g), g)
 
-                ge = identity(G, e)
+                ge = identity(G, g)
                 @test isapprox(G, compose(G, g, ge), g)
                 @test isapprox(G, compose(G, ge, g), g)
+            end
 
-                @test compose(G, e, e) === e
-
-                test_mutating && @testset "mutating" begin
+            test_mutating && @testset "mutating" begin
+                for g in g_pts
                     h = similar(g)
-                    compose!(G, h, g, e)
+                    @test compose!(G, h, g, e) === h
                     @test isapprox(G, h, g)
                     h = similar(g)
-                    compose!(G, h, e, g)
+                    @test compose!(G, h, e, g) === h
                     @test isapprox(G, h, g)
 
                     ge = similar(g)
-                    identity!(G, ge, e)
+                    @test identity!(G, ge, e) === ge
                     @test isapprox(G, compose(G, g, ge), g)
                     @test isapprox(G, compose(G, ge, g), g)
 
                     ge = similar(g)
-                    compose!(G, ge, e, e)
+                    @test compose!(G, ge, e, e) === ge
                     @test isapprox(G, ge, e)
                 end
             end
@@ -72,17 +75,20 @@ function test_group(
                 ginv = inv(G, g)
                 @test isapprox(G, compose(G, g, ginv), e)
                 @test isapprox(G, compose(G, ginv, g), e)
+                @test isapprox(G, e, compose(G, g, ginv))
+                @test isapprox(G, e, compose(G, ginv, g))
+                @test inv(G, e) === e
 
                 test_mutating && @testset "mutating" begin
                     ginv = similar(g)
-                    inv!(G, ginv, g)
+                    @test inv!(G, ginv, g) === ginv
                     @test isapprox(G, compose(G, g, ginv), e)
                     @test isapprox(G, compose(G, ginv, g), e)
 
                     @test inv(G, e) === e
-                    einv = similar(g)
-                    inv!(G, einv, e)
-                    @test isapprox(G, einv, e)
+                    geinv = similar(g)
+                    @test inv!(G, geinv, e) === geinv
+                    @test isapprox(G, geinv, e)
                 end
             end
         end

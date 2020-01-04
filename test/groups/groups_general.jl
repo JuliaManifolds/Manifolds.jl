@@ -74,6 +74,7 @@ end
 
         x = [1.0, 2.0]
         ge = Identity(G)
+        @test zero(ge) === ge
         @test ge + x ≈ x
         @test x + ge ≈ x
         @test ge + ge === ge
@@ -103,6 +104,7 @@ end
 
         x = [1.0 2.0; 2.0 3.0]
         ge = Identity(G)
+        @test one(ge) === ge
         @test ge * x ≈ x
         @test x * ge ≈ x
         @test ge * ge === ge
