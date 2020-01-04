@@ -8,7 +8,7 @@ Translation group $\mathrm{T}(N)$ represented by translation arrays.
 """
 const TranslationGroup{T<:Tuple,F} = GroupManifold{Euclidean{T,F},AdditionOperation}
 
-function TranslationGroup(n...; field::AbstractField=ℝ)
+function TranslationGroup(n::Int...; field::AbstractField=ℝ)
     return TranslationGroup{Tuple{n...},field}(Euclidean(n...; field=field), AdditionOperation())
 end
 
