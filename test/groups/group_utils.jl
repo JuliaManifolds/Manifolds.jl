@@ -3,11 +3,15 @@
 
 Tests general properties of the group `G`, given at least three different points
 elements of it (contained in `g_pts`).
+Optionally, specify `test_diff` to test differentials of translation, using `v_pts`, which
+must contain at least one tangent vector at `g_pts[1]`.
 """
 function test_group(
     G::AbstractGroupManifold,
-    g_pts::AbstractVector;
+    g_pts::AbstractVector,
+    v_pts::AbstractVector = [];
     test_mutating = true,
+    test_diff = false,
 )
     e = Identity(G)
 
@@ -111,9 +115,7 @@ function test_group(
                 g = similar(g_pts[1])
                 @test translate!(G, g, g_pts[1], g_pts[2], conv...) === g
                 @test g ≈ translate(G, g_pts[1], g_pts[2], conv...)
-            end
 
-            for conv in convs
                 g = translate(G, g_pts[1], g_pts[2], conv...)
                 g2 = similar(g)
                 @test inverse_translate!(G, g2, g_pts[1], g, conv...) === g2
@@ -123,6 +125,39 @@ function test_group(
                 g2 = similar(g)
                 @test translate!(G, g2, g_pts[1], g, conv...) === g2
                 @test g2 ≈ g_pts[2]
+            end
+        end
+    end
+
+    test_diff && @testset "translation differential" begin
+        v = v_pts[1]
+        convs = ((), (LeftAction(),), (RightAction(),))
+        g21 = compose(G, g_pts[2], g_pts[1])
+        g12 = compose(G, g_pts[1], g_pts[2])
+        @test translate_diff(G, g_pts[2], g_pts[1], v) ≈ translate_diff(G, g_pts[2], g_pts[1], v, LeftAction())
+        @test is_tangent_vector(G, g12, translate_diff(G, g_pts[2], g_pts[1], v, LeftAction()))
+        @test is_tangent_vector(G, g21, translate_diff(G, g_pts[2], g_pts[1], v, RightAction()))
+
+        for conv in convs
+            @test inverse_translate_diff(G, g_pts[2], g_pts[1], translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...) ≈ v
+            @test translate_diff(G, g_pts[2], g_pts[1], inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...) ≈ v
+        end
+
+        test_mutating && @testset "mutating" begin
+            for conv in convs
+                vout = similar(v)
+                @test translate_diff!(G, vout, g_pts[2], g_pts[1], v, conv...) === vout
+                @test vout ≈ translate_diff(G, g_pts[2], g_pts[1], v, conv...)
+
+                vout = translate_diff(G, g_pts[2], g_pts[1], v, conv...)
+                vout2 = similar(vout)
+                @test inverse_translate_diff!(G, vout2, g_pts[2], g_pts[1], vout, conv...) === vout2
+                @test vout2 ≈ v
+
+                vout = inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...)
+                vout2 = similar(vout)
+                @test translate_diff!(G, vout2, g_pts[2], g_pts[1], vout, conv...) === vout2
+                @test vout2 ≈ v
             end
         end
     end
