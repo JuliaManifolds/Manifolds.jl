@@ -95,6 +95,8 @@ end
 
 (e::Identity)(x) = identity(e.group, x)
 
+copyto!(e::TE, ::TE) where {TE<:Identity} = e
+
 @doc doc"""
     inv!(G::AbstractGroupManifold, y, x)
 
@@ -139,6 +141,7 @@ function identity(G::AbstractGroupManifold, x)
     identity!(G, y, x)
     return y
 end
+identity(::GT, e::Identity{GT}) where GT<:AbstractGroupManifold = e
 
 function compose(G::AbstractGroupManifold, x, y)
     z = similar_result(G, compose, x, y)
@@ -342,6 +345,7 @@ function identity!(::AbstractGroupManifold{AdditionOperation}, y, x)
 end
 
 identity(::AbstractGroupManifold{AdditionOperation}, x) = zero(x)
+identity(::GT, e::Identity{GT}) where {GT<:AbstractGroupManifold{AdditionOperation}} = e
 
 function inv!(::AbstractGroupManifold{AdditionOperation}, y, x)
     copyto!(y, -x)
@@ -351,6 +355,8 @@ end
 function inv!(G::AG, y, x::Identity{AG}) where AG<:AbstractGroupManifold{AdditionOperation}
     error("inv! not implemented on $(typeof(G)) for elements $(typeof(y)) and $(typeof(x))")
 end
+
+zero(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
 
 inv(::AbstractGroupManifold{AdditionOperation}, x) = -x
 inv(::AG, e::Identity{AG}) where AG<:AbstractGroupManifold{AdditionOperation} = e
@@ -408,6 +414,8 @@ struct MultiplicationOperation <: AbstractGroupOperation end
 \(::Identity{G}, x) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
 \(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
 
+one(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
+
 # this is different from inv(G, e::Identity{G})
 inv(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
 
@@ -422,6 +430,7 @@ function identity!(::AbstractGroupManifold{MultiplicationOperation}, y, x::Abstr
 end
 
 identity(::AbstractGroupManifold{MultiplicationOperation}, x) = one(x)
+identity(::GT, e::Identity{GT}) where {GT<:AbstractGroupManifold{MultiplicationOperation}} = e
 
 function inv!(::AbstractGroupManifold{MultiplicationOperation}, y, x)
     copyto!(y, inv(x))
