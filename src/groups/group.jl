@@ -438,8 +438,7 @@ function identity!(::AbstractGroupManifold{MultiplicationOperation}, y, x)
     copyto!(y, one(x))
     return y
 end
-
-function identity!(::AbstractGroupManifold{MultiplicationOperation}, y, x::AbstractMatrix)
+function identity!(::AbstractGroupManifold{MultiplicationOperation}, y::AbstractMatrix, x)
     copyto!(y, I)
     return y
 end
