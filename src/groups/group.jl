@@ -264,8 +264,7 @@ function inverse_translate!(G::AbstractGroupManifold,
                             x,
                             y,
                             conv::ActionDirection)
-    inv!(G, z, x)
-    return translate!(G, z, z, y, conv)
+    return translate!(G, z, inv(G, x), y, conv)
 end
 
 function inverse_translate!(G::AbstractGroupManifold, z, x, y)
