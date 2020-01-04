@@ -164,7 +164,7 @@ include("DistributionsBase.jl")
 include("ProjectedDistribution.jl")
 
 include("ProductManifold.jl")
-include("PowerManifold.jl")
+include("manifolds/PowerManifold.jl")
 
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
