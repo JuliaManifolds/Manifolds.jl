@@ -11,15 +11,11 @@ include("utils.jl")
         @test !is_tangent_vector(M,[1.,0.,0.],[1.,0.,0.])
         @test_throws DomainError is_tangent_vector(M,[1.,0.,0.],[1.,0.,0.],true)
     end
-    types = [Vector{Float64},
-             SizedVector{3, Float64},
-             MVector{3, Float64},
-             Vector{Float32},
-             SizedVector{3, Float32},
-             MVector{3, Float32},
-             Vector{Double64},
-             MVector{3, Double64},
-             SizedVector{3, Double64}]
+    types = [
+        Vector{Float64},
+        MVector{3, Float64},
+        Vector{Float32},
+    ]
     for T in types
         @testset "Type $T" begin
             pts = [convert(T, [1.0, 0.0, 0.0]),

@@ -13,11 +13,11 @@ include("utils.jl")
     @test injectivity_radius(M1) == Inf
     @test injectivity_radius(M1,one(zeros(3,3))) == Inf
     metrics = [M1, M2, M3]
-    types = [ Matrix{Float32},
-            Matrix{Float64},
-            MMatrix{3,3,Float32},
-            MMatrix{3,3,Float64}
-        ]
+    types = [
+        Matrix{Float64},
+        MMatrix{3,3,Float64},
+        Matrix{Float32},
+    ]
     for M in metrics
         @testset "$(typeof(M))" begin
             @test representation_size(M) == (3,3)

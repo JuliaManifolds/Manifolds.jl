@@ -19,7 +19,6 @@ include("utils.jl")
         Vector{Float64},
         SizedVector{3, Float64},
         Vector{Float32},
-        SizedVector{3, Float32},
     ]
     for T in types
         @testset "Type $T" begin

@@ -7,19 +7,17 @@ include("group_utils.jl")
     G = TranslationGroup(2,3)
     A = TranslationAction(Euclidean(2,3), G)
 
-    types_a = [Matrix{Float64},
-               SizedMatrix{2, 3, Float64},
-               MMatrix{2, 3, Float64},
-               Matrix{Float32},
-               SizedMatrix{2, 3, Float32},
-               MMatrix{2, 3, Float32}]
+    types_a = [
+        Matrix{Float64},
+        MMatrix{2, 3, Float64},
+        Matrix{Float32},
+    ]
 
-    types_m = [Matrix{Float64},
-               SizedMatrix{2, 3, Float64},
-               MMatrix{2, 3, Float64},
-               Matrix{Float32},
-               SizedMatrix{2, 3, Float32},
-               MMatrix{2, 3, Float32}]
+    types_m = [
+        Matrix{Float64},
+        MMatrix{2, 3, Float64},
+        Matrix{Float32},
+    ]
 
     @test g_manifold(A) == M
     @test base_group(A) == G
