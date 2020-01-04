@@ -362,9 +362,9 @@ function inv!(::AbstractGroupManifold{AdditionOperation}, y, x)
     copyto!(y, -x)
     return y
 end
-
-function inv!(G::AG, y, x::Identity{AG}) where AG<:AbstractGroupManifold{AdditionOperation}
-    error("inv! not implemented on $(typeof(G)) for elements $(typeof(y)) and $(typeof(x))")
+function inv!(G::AG, y, e::Identity{AG}) where AG<:AbstractGroupManifold{AdditionOperation}
+    identity!(G, y, e)
+    return y
 end
 
 zero(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
@@ -389,8 +389,9 @@ function compose!(::GT, z, x, y::Identity{GT}) where GT<:AbstractGroupManifold{A
     copyto!(z, x)
     return z
 end
-function compose!(G::GT, z, x::Identity{GT}, y::Identity{GT}) where GT<:AbstractGroupManifold{AdditionOperation}
-    error("compose! not implemented on $(typeof(G)) for elements $(typeof(z)), $(typeof(x)) and $(typeof(y))")
+function compose!(G::GT, z, e::Identity{GT}, ::Identity{GT}) where GT<:AbstractGroupManifold{AdditionOperation}
+    identity!(G, z, e)
+    return z
 end
 
 translate_diff(::AbstractGroupManifold{AdditionOperation}, x, y, v, ::Union{LeftAction,RightAction}) = v
@@ -446,9 +447,9 @@ function inv!(::AbstractGroupManifold{MultiplicationOperation}, y, x)
     copyto!(y, inv(x))
     return y
 end
-
-function inv!(G::AG, y, x::Identity{AG}) where AG<:AbstractGroupManifold{MultiplicationOperation}
-    error("inv! not implemented on $(typeof(G)) for elements $(typeof(y)) and $(typeof(x))")
+function inv!(G::AG, y, e::Identity{AG}) where AG<:AbstractGroupManifold{MultiplicationOperation}
+    identity!(G, y, e)
+    return y
 end
 
 inv(::AbstractGroupManifold{MultiplicationOperation}, x) = inv(x)
@@ -472,8 +473,9 @@ function compose!(::GT, z, x, y::Identity{GT}) where GT<:AbstractGroupManifold{M
     copyto!(z, x)
     return z
 end
-function compose!(G::GT, z, x::Identity{GT}, y::Identity{GT}) where GT<:AbstractGroupManifold{MultiplicationOperation}
-    error("compose! not implemented on $(typeof(G)) for elements $(typeof(z)), $(typeof(x)) and $(typeof(y))")
+function compose!(G::GT, z, e::Identity{GT}, ::Identity{GT}) where GT<:AbstractGroupManifold{MultiplicationOperation}
+    identity!(G, z, e)
+    return z
 end
 
 function translate_diff(::AbstractGroupManifold{MultiplicationOperation},

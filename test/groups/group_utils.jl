@@ -138,7 +138,6 @@ function test_action(
 
         @test inv(G, e) == e
         b = similar(a_pts[1])
-        @test_throws ErrorException inv!(G, b, e)
     end
 
     @testset "Associativity" begin

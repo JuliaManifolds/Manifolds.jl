@@ -95,7 +95,6 @@ end
         @test y ≈ x
         compose!(G, y, ge, x)
         @test y ≈ x
-        @test_throws ErrorException compose!(G, y, ge, ge)
     end
 
     @testset "Multiplication operation" begin
@@ -134,7 +133,6 @@ end
         @test y ≈ x
         compose!(G, y, ge, x)
         @test y ≈ x
-        @test_throws ErrorException compose!(G, y, ge, ge)
 
         @testset "identity optimization" begin
             x2 = copy(x)
