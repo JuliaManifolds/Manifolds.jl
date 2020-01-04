@@ -163,7 +163,7 @@ The formula reads
 ````
 where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transposed.
 """
-inner(::Grassmann, x, v, w) = real(dot(v,w))
+inner(::Grassmann, x, v, w) = dot(v,w)
 
 @doc doc"""
     inverse_retract!(M, v, x, y, ::PolarInverseRetraction)

@@ -115,7 +115,7 @@ tangent space of `x` on the [`Stiefel`](@ref) manifold `M`. The formula reads
 i.e. the [`EuclideanMetric`](@ref) from the embedding restricted to the tangent
 space. For the complex-valued case this is the Hermitian metric, to be precise.
 """
-inner(::Stiefel, x, v, w) = real(dot(v,w))
+inner(::Stiefel, x, v, w) = dot(v, w)
 
 @doc doc"""
     inverse_retract!(M, v, x, y, ::PolarInverseRetraction)

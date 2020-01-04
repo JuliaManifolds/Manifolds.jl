@@ -13,25 +13,20 @@ include("utils.jl")
     @test manifold_dimension(Ec) == 2*manifold_dimension(E)
 
     manifolds = [ E, EM, Ec ]
-    types = [Vector{Float64},
-             SizedVector{3, Float64},
-             MVector{3, Float64},
-             Vector{Float32},
-             SizedVector{3, Float32},
-             MVector{3, Float32},
-             Vector{Double64},
-             MVector{3, Double64},
-             SizedVector{3, Double64}]
+    types = [
+        Vector{Float64},
+        MVector{3, Float64},
+        Vector{Float32},
+        Vector{Double64},
+    ]
 
-    types_complex = [Vector{ComplexF64},
-                     SizedVector{3, ComplexF64},
-                     MVector{3, ComplexF64},
-                     Vector{ComplexF32},
-                     SizedVector{3, ComplexF32},
-                     MVector{3, ComplexF32},
-                     Vector{ComplexDF64},
-                     MVector{3, ComplexDF64},
-                     SizedVector{3, ComplexDF64}]
+    types_complex = [
+        Vector{ComplexF64},
+        MVector{3, ComplexF64},
+        Vector{ComplexF32},
+        Vector{ComplexDF64},
+    ]
+
     for M in manifolds
         for T in types
             @testset "$M Type $T" begin
