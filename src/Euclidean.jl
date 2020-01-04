@@ -168,6 +168,22 @@ function sharp!(M::Euclidean, v::FVector{TangentSpaceType}, x, w::FVector{Cotang
     return v
 end
 
+function basis(M::Euclidean{<:Tuple,F}, x, B::ArbitraryOrthonormalBasis) where F
+    vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
+    return PrecomputedOrthonormalBasis(vecs)
+end
+
+function represent_in_basis(M::Euclidean, x, v, B::ArbitraryOrthonormalBasis)
+    S = representation_size(M)
+    PS = prod(S)
+    return reshape(v, PS)
+end
+
+function inverse_represent_in_basis(M::Euclidean, x, v, B::ArbitraryOrthonormalBasis)
+    S = representation_size(M)
+    return reshape(v, S)
+end
+
 """
     projected_distribution(M::Euclidean, d, [x])
 

@@ -340,7 +340,9 @@ export Metric,
     GeodesicInterpolationWithinRadius
 
 # orthonormal bases
-export AbstractBasis, AbstractOrthonormalBasis, ArbitraryOrthonormalBasis, PrecomputedOrthonormalBasis, ProjectedOrthonormalBasis
+export AbstractBasis, AbstractOrthonormalBasis, ArbitraryOrthonormalBasis,
+    AbstractPrecomputedOrthonormalBasis, PrecomputedOrthonormalBasis,
+    ProjectedOrthonormalBasis
 
 export base_manifold,
     basis,

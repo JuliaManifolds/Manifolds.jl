@@ -29,6 +29,7 @@ that lie on it (contained in `pts`).
 - `point_distributions = []` : point distributions to test
 - `projection_tvector_atol_multiplier = 0` : chage absolute tolerance in testing projections (0 use default, i.e. deactivate atol and use rtol)
 -  tvector_distributions = []` : tangent vector distributions to test
+- `basis_types = ()` : basis types that will be tested
 - `rand_tvector_atol_multiplier = 0` : chage absolute tolerance in testing random vectors (0 use default, i.e. deactivate atol and use rtol)
   random tangent vectors are tangent vectors
 - `retraction_methods = []`: retraction methods that will be tested.
@@ -64,6 +65,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     inverse_retraction_methods = [],
     point_distributions = [],
     tvector_distributions = [],
+    basis_types = (),
     exp_log_atol_multiplier = 0,
     exp_log_rtol_multiplier = 1,
     retraction_atol_multiplier = 0,
@@ -271,6 +273,38 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test is_tangent_vector(M, pts[3], v1t2; atol=tvatol)
         @test isapprox(M, pts[3], v1t1, v1t2)
         @test isapprox(M, pts[1], vector_transport_to(M, pts[1], v1, pts[1]), v1)
+    end
+
+    for btype ∈ basis_types
+        x = pts[1]
+        b = basis(M, x, btype)
+        @test isa(b, AbstractPrecomputedOrthonormalBasis)
+        N = length(b.vectors)
+        @test N == manifold_dimension(M)
+
+        # test orthonormality
+        for i in 1:N
+            @test norm(M, x, b.vectors[i]) ≈ 1
+            for j in i+1:N
+                @test inner(M, x, b.vectors[i], b.vectors[j]) ≈ 0 atol = sqrt(eps(eltype(x)))
+            end
+        end
+        if isa(btype, ProjectedOrthonormalBasis)
+            # check projection idempotency
+            for i in 1:N
+                @test project_tangent(M, x, b.vectors[i]) ≈ b.vectors[i]
+            end
+        end
+
+        v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
+
+        vb = represent_in_basis(M, x, v1, btype)
+        @test isa(vb, AbstractVector)
+        vbi = inverse_represent_in_basis(M, x, vb, btype)
+        @test isapprox(M, x, v1, vbi)
+
+        @test represent_in_basis(M, x, v1, b) ≈ represent_in_basis(M, x, v1, btype)
+        @test inverse_represent_in_basis(M, x, vb, b) ≈ inverse_represent_in_basis(M, x, vb, btype)
     end
 
     test_forward_diff && @testset "ForwardDiff support" begin

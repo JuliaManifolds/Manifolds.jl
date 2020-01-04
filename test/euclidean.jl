@@ -28,6 +28,11 @@ include("utils.jl")
     ]
 
     for M in manifolds
+        basis_types = if M == E
+            (ArbitraryOrthonormalBasis(),)
+        else
+            ()
+        end
         for T in types
             @testset "$M Type $T" begin
                 pts = [convert(T, [1.0, 0.0, 0.0]),
@@ -41,7 +46,8 @@ include("utils.jl")
                               test_vector_transport = true,
                               test_mutating_rand = isa(T, Vector),
                               point_distributions = [Manifolds.projected_distribution(M, Distributions.MvNormal(zero(pts[1]), 1.0))],
-                              tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
+                              tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
+                              basis_types = basis_types)
             end
         end
     end
