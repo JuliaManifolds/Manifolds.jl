@@ -108,10 +108,6 @@ function inv!(G::AbstractGroupManifold, y, x)
     error("inv! not implemented on $(typeof(G)) for point $(typeof(x))")
 end
 
-function inv!(G::AG, y, e::Identity{AG}) where AG<:AbstractGroupManifold
-    error("inv! not implemented on $(typeof(G)) for elements $(typeof(y)) and $(typeof(e))")
-end
-
 @doc doc"""
     inv(G::AbstractGroupManifold, x)
 
