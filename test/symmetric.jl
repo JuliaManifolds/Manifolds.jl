@@ -25,13 +25,11 @@ include("utils.jl")
         @test A_sym2 == project_point!(M,A_sym)
         @test A_sym2 == project_tangent(M,A_sym,A_sym)
     end
-    types = [ Matrix{Float32},
-            Matrix{Float64},
-            MMatrix{3,3,Float32},
-            MMatrix{3,3,Float64},
-            SizedMatrix{3,3,Float32},
-            SizedMatrix{3,3,Float64},
-        ]
+    types = [
+        Matrix{Float64},
+        MMatrix{3,3,Float64},
+        Matrix{Float32},
+    ]
     for T in types
         pts = [convert(T,A_sym),convert(T,B_sym),convert(T,X)]
         @testset "Type $T" begin
@@ -46,5 +44,5 @@ include("utils.jl")
             )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end # testset type $T
-    end # for 
+    end # for
 end # test SymmetricMatrices

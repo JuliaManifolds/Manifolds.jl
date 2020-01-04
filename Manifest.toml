@@ -117,7 +117,7 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 deps = ["LinearAlgebra", "Markdown"]
 git-tree-sha1 = "4ccb02254d187f2233a44ebc01ac01385228dc14"
 uuid = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
-version = "0.3.1"
+version = "0.3.2"
 
 [[Markdown]]
 deps = ["Base64"]

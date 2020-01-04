@@ -8,20 +8,17 @@ include("group_utils.jl")
     A_left = RotationAction(Euclidean(2), G)
     A_right = RotationAction(Euclidean(2), G, RightAction())
 
-    types_a = [Matrix{Float64},
-               SizedMatrix{2, 2, Float64},
-               MMatrix{2, 2, Float64},
-               Matrix{Float32},
-               SizedMatrix{2, 2, Float32},
-               MMatrix{2, 2, Float32}]
+    types_a = [
+        Matrix{Float64},
+        MMatrix{2, 2, Float64},
+        Matrix{Float32},
+    ]
 
-    types_m = [Vector{Float64},
-               SizedVector{2, Float64},
-               MVector{2, Float64},
-               Vector{Float32},
-               SizedVector{2, Float32},
-               MVector{2, Float32}]
-
+    types_m = [
+        Vector{Float64},
+        MVector{2, Float64},
+        Vector{Float32},
+    ]
 
     @test g_manifold(A_left) == Euclidean(2)
     @test base_group(A_left) == G
