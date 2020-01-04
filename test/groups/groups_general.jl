@@ -70,6 +70,8 @@ end
 
     @testset "Addition operation" begin
         G = GroupManifold(NotImplementedManifold(), Manifolds.AdditionOperation())
+        test_group(G, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+
         x = [1.0, 2.0]
         ge = Identity(G)
         @test ge + x ≈ x
@@ -98,6 +100,8 @@ end
 
     @testset "Multiplication operation" begin
         G = GroupManifold(NotImplementedManifold(), Manifolds.MultiplicationOperation())
+        test_group(G, [[1.0 2.0; 3.0 4.0], [2.0 3.0; 4.0 5.0], [3.0 4.0; 5.0 6.0]])
+
         x = [1.0 2.0; 2.0 3.0]
         ge = Identity(G)
         @test ge * x ≈ x

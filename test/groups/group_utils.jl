@@ -1,3 +1,93 @@
+"""
+    test_group(G::AbstractGroupManifold, g_pts::AbstractVector)
+
+Tests general properties of the group `G`, given at least three different points
+elements of it (contained in `g_pts`).
+"""
+function test_group(
+    G::AbstractGroupManifold,
+    g_pts::AbstractVector;
+    test_mutating = true,
+)
+    e = Identity(G)
+
+    @testset "Basic group properties" begin
+        @testset "Closed" begin
+            for g1 in g_pts, g2 in g_pts
+                g3 = compose(G, g1, g2)
+                @test is_manifold_point(G, g3)
+            end
+        end
+
+        @testset "Associative" begin
+            g12_3 = compose(G, compose(G, g_pts[1], g_pts[2]), g_pts[3])
+            g1_23 = compose(G, g_pts[1], compose(G, g_pts[2], g_pts[3]))
+            @test isapprox(G, g12_3, g1_23)
+
+            test_mutating && @testset "mutating" begin
+                g12, g23, g12_3, g1_23 = similar.(repeat([g_pts[1]], 4))
+                compose!(G, g12, g_pts[1], g_pts[2])
+                compose!(G, g23, g_pts[2], g_pts[3])
+                compose!(G, g12_3, g12, g_pts[3])
+                compose!(G, g1_23, g_pts[1], g23)
+                @test isapprox(G, g12_3, g1_23)
+            end
+        end
+
+        @testset "Identity" begin
+            @test isapprox(G, e, e)
+            @test identity(G, e) === e
+            for g in g_pts
+                @test isapprox(G, compose(G, g, e), g)
+                @test isapprox(G, compose(G, e, g), g)
+
+                ge = identity(G, e)
+                @test isapprox(G, compose(G, g, ge), g)
+                @test isapprox(G, compose(G, ge, g), g)
+
+                @test compose(G, e, e) === e
+
+                test_mutating && @testset "mutating" begin
+                    h = similar(g)
+                    compose!(G, h, g, e)
+                    @test isapprox(G, h, g)
+                    h = similar(g)
+                    compose!(G, h, e, g)
+                    @test isapprox(G, h, g)
+
+                    ge = similar(g)
+                    identity!(G, ge, e)
+                    @test isapprox(G, compose(G, g, ge), g)
+                    @test isapprox(G, compose(G, ge, g), g)
+
+                    ge = similar(g)
+                    compose!(G, ge, e, e)
+                    @test isapprox(G, ge, e)
+                end
+            end
+        end
+
+        @testset "Inverse" begin
+            for g in g_pts
+                ginv = inv(G, g)
+                @test isapprox(G, compose(G, g, ginv), e)
+                @test isapprox(G, compose(G, ginv, g), e)
+
+                test_mutating && @testset "mutating" begin
+                    ginv = similar(g)
+                    inv!(G, ginv, g)
+                    @test isapprox(G, compose(G, g, ginv), e)
+                    @test isapprox(G, compose(G, ginv, g), e)
+
+                    @test inv(G, e) === e
+                    einv = similar(g)
+                    inv!(G, einv, e)
+                    @test isapprox(G, einv, e)
+                end
+            end
+        end
+    end
+end
 
 
 """
