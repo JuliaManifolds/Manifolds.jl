@@ -29,8 +29,8 @@ end
         @test_throws ErrorException compose(G, x, x)
         @test compose(G, eg, x) == x
         @test compose(G, x, eg) == x
-        @test compose!(G, x, eg, x) == x
-        @test compose!(G, x, x, eg) == x
+        @test_throws ErrorException compose!(G, x, eg, x)
+        @test_throws ErrorException compose!(G, x, x, eg)
         @test_throws ErrorException compose!(G, x, x, x)
         @test_throws ErrorException compose!(G, x, eg, eg)
 

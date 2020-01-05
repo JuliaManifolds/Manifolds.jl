@@ -165,7 +165,6 @@ compose(G::GT, ::Identity{GT}, y) where GT<:AbstractGroupManifold = y
 compose(G::GT, x, ::Identity{GT}) where GT<:AbstractGroupManifold = x
 compose(G::GT, x::Identity{GT}, ::Identity{GT}) where GT<:AbstractGroupManifold = x
 
-
 """
     compose!(G::AbstractGroupManifold, z, x, y)
 
@@ -176,20 +175,6 @@ The result is saved in `z`.
 """
 function compose!(G::AbstractGroupManifold, z, x, y)
     error("compose not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y))")
-end
-
-function compose!(G::GT, z, x::Identity{GT}, y) where GT<:AbstractGroupManifold
-    copyto!(z, y)
-    return z
-end
-
-function compose!(G::GT, z, x, y::Identity{GT}) where GT<:AbstractGroupManifold
-    copyto!(z, x)
-    return z
-end
-
-function compose!(G::GT, z, x::Identity{GT}, y::Identity{GT}) where GT<:AbstractGroupManifold
-    error("compose! not implemented on $(typeof(G)) for elements $(typeof(z)), $(typeof(x)) and $(typeof(y))")
 end
 
 @doc doc"""
@@ -363,10 +348,6 @@ function inv!(::AbstractGroupManifold{AdditionOperation}, y, x)
     copyto!(y, -x)
     return y
 end
-function inv!(G::AG, y, e::Identity{AG}) where AG<:AbstractGroupManifold{AdditionOperation}
-    identity!(G, y, e)
-    return y
-end
 
 zero(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
 
@@ -463,10 +444,6 @@ function inv!(::AbstractGroupManifold{MultiplicationOperation}, y, x)
     copyto!(y, inv(x))
     return y
 end
-function inv!(G::AG, y, e::Identity{AG}) where AG<:AbstractGroupManifold{MultiplicationOperation}
-    identity!(G, y, e)
-    return y
-end
 
 inv(::AbstractGroupManifold{MultiplicationOperation}, x) = inv(x)
 inv(::AG, e::Identity{AG}) where AG<:AbstractGroupManifold{MultiplicationOperation} = e
@@ -478,18 +455,6 @@ compose(G::GT, x::Identity{GT}, ::Identity{GT}) where GT<:AbstractGroupManifold{
 
 function compose!(::AbstractGroupManifold{MultiplicationOperation}, z, x, y)
     #TODO: z might alias with x or y, we might be able to optimize it if it doesn't.
-    copyto!(z, x*y)
-    return z
-end
-function compose!(::GT, z, x::Identity{GT}, y) where GT<:AbstractGroupManifold{MultiplicationOperation}
-    copyto!(z, y)
-    return z
-end
-function compose!(::GT, z, x, y::Identity{GT}) where GT<:AbstractGroupManifold{MultiplicationOperation}
-    copyto!(z, x)
-    return z
-end
-function compose!(G::GT, z, e::Identity{GT}, ::Identity{GT}) where GT<:AbstractGroupManifold{MultiplicationOperation}
-    identity!(G, z, e)
+    copyto!(z, x * y)
     return z
 end
