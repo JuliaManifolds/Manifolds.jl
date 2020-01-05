@@ -12,7 +12,6 @@ function SpecialOrthogonal(n)
     return SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
 end
 
-# optimized inverseion for the special orthogonal group
 function inv!(G::SpecialOrthogonal, y, x)
     copyto!(y, inv(G, x))
     return y
