@@ -103,6 +103,14 @@ function compose!(G::SemidirectProductGroup, z, x, y)
     compose!(N, z.parts[1], x.parts[1], zₙtmp)
     return z
 end
+function compose!(G::GT, z, ::Identity{GT}, y) where {GT<:SemidirectProductGroup}
+    copyto!(z, y)
+    return z
+end
+function compose!(G::GT, z, x, ::Identity{GT}) where {GT<:SemidirectProductGroup}
+    copyto!(z, x)
+    return z
+end
 function compose!(
     G::GT,
     z,
@@ -110,14 +118,6 @@ function compose!(
     ::Identity{GT},
 ) where {GT<:SemidirectProductGroup}
     identity!(G, z, e)
-    return z
-end
-function compose!(G::GT, z, ::Identity{GT}, y) where {GT<:SemidirectProductGroup}
-    copyto!(z, y)
-    return z
-end
-function compose!(G::GT, z, x, ::Identity{GT}) where {GT<:SemidirectProductGroup}
-    copyto!(z, x)
     return z
 end
 
