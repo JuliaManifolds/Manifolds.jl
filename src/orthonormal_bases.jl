@@ -139,7 +139,7 @@ function basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis)
         vi_norm = norm(M, x, B.vectors[i])
         isapprox(vi_norm, 1) || throw(ArgumentError("vector number $i is not normalized (norm = $vi_norm)"))
         for j in i+1:N
-            dot_val = inner(M, x, B.vectors[i], B.vectors[j])
+            dot_val = real(inner(M, x, B.vectors[i], B.vectors[j]))
             isapprox(dot_val, 0; atol = eps(eltype(x))) || throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
         end
     end
