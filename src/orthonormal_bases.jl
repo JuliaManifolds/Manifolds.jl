@@ -158,7 +158,7 @@ function basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:svd})
     dim = manifold_dimension(M)
     # projection
     # TODO: find a better way to obtain a basis of the ambient space
-    vs = [reshape(project_tangent(M, x, _euclidean_basis_vector(x, i)), PS) for i in eachindex(x)]
+    vs = [convert(Vector, reshape(project_tangent(M, x, _euclidean_basis_vector(x, i)), PS)) for i in eachindex(x)]
     O = reduce(hcat, vs)
     # orthogonalization
     # TODO: try using rank-revealing QR here
