@@ -156,13 +156,13 @@ include("utils.jl")
 include("autodiff.jl")
 include("SizedAbstractArray.jl")
 
-include("ProductRepresentations.jl")
-include("VectorBundle.jl")
-include("Metric.jl")
+include("manifolds/VectorBundle.jl")
 
-include("DistributionsBase.jl")
-include("ProjectedDistribution.jl")
+include("distributions.jl")
+include("projected_distribution.jl")
+include("product_representations.jl")
 
+include("manifolds/MetricManifold.jl")
 include("manifolds/ProductManifold.jl")
 include("manifolds/PowerManifold.jl")
 
@@ -178,9 +178,9 @@ include("manifolds/Sphere.jl")
 include("manifolds/Symmetric.jl")
 include("manifolds/SymmetricPositiveDefinite.jl")
 
+
 include("groups/group.jl")
 include("groups/group_action.jl")
-
 include("groups/special_orthogonal.jl")
 include("groups/rotation_action.jl")
 include("groups/translation_group.jl")
