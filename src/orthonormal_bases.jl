@@ -14,7 +14,7 @@ Abstract type that represents an orthonormal basis on a manifold or a subset of 
 abstract type AbstractOrthonormalBasis <: AbstractBasis end
 
 """
-    AbstractOrthonormalBasis
+    AbstractPrecomputedOrthonormalBasis
 
 Abstract type that represents an orthonormal basis of the tangent space at a point
 on a manifold. Stores tangent vectors in field `.vectors`.
@@ -25,7 +25,7 @@ abstract type AbstractPrecomputedOrthonormalBasis <: AbstractOrthonormalBasis en
     ArbitraryOrthonormalBasis
 
 An arbitrary orthonormal basis on a manifold. This will usually
-be the fastest OrthonormalBasis available for a manifold.
+be the fastest [`OrthonormalBasis`](@ref) available for a manifold.
 """
 struct ArbitraryOrthonormalBasis <: AbstractOrthonormalBasis end
 
@@ -87,7 +87,7 @@ end
 """
     inverse_represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
 
-Convert a one-dimentional vector of coefficients in a basis `B` of
+Convert a one-dimensional vector of coefficients in a basis `B` of
 the tangent space at `x` on manifold `M` to a tangent vector `v` at `x`.
 
 Depending on the basis, `x` may not directly represent a point on the manifold.
@@ -105,7 +105,7 @@ function inverse_represent_in_basis(M::Manifold, x, v, B::PrecomputedOrthonormal
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `vout`
     #     (for example scalar * `SizedArray` is an `SArray`)
-    vt = v[1] * B.vectors[1]
+    vt = v[1] .* B.vectors[1]
     vout = similar(B.vectors[1], eltype(vt))
     copyto!(vout, vt)
     for i in 2:length(v)
