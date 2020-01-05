@@ -168,13 +168,14 @@ function sharp!(M::Euclidean, v::FVector{TangentSpaceType}, x, w::FVector{Cotang
     return v
 end
 
-function basis(M::Euclidean{<:Tuple,F}, x, B::ArbitraryOrthonormalBasis) where F
+function basis(M::Euclidean{<:Tuple, ℝ}, x, B::ArbitraryOrthonormalBasis)
     vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
-    if F == ℝ
-        return PrecomputedOrthonormalBasis(vecs)
-    else
-        return PrecomputedOrthonormalBasis([vecs; im*vecs])
-    end
+    return PrecomputedOrthonormalBasis(vecs)
+end
+
+function basis(M::Euclidean{<:Tuple, ℂ}, x, B::ArbitraryOrthonormalBasis)
+    vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
+    return PrecomputedOrthonormalBasis([vecs; im*vecs])
 end
 
 function represent_in_basis(M::Euclidean{<:Tuple, ℝ}, x, v, B::ArbitraryOrthonormalBasis)
