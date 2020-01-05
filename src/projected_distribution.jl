@@ -36,7 +36,7 @@ end
 
 Generates a random vector from ambient space of manifold `type.manifold`
 at point `x` and projects it to vector space of type `type` using function
-[`project_vector!`](@ref).
+[`project_vector`](@ref).
 Generated arrays are of type `TResult`.
 """
 struct ProjectedFVectorDistribution{TResult, TSpace<:VectorBundleFibers, TX, TD<:Distribution, TProj} <: FVectorDistribution{TSpace, TX}

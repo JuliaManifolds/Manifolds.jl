@@ -20,7 +20,7 @@ Optionally:
   bundles),
 * [`flat`](@ref) and [`sharp`](@ref),
 * `norm` (by default uses `inner`),
-* [`project_vector!`](@ref) (for embedded vector spaces),
+* [`project_vector`](@ref) (for embedded vector spaces),
 * [`representation_size`](@ref) (if support for [`ProductArray`](@ref) is desired),
 * broadcasting for basic operations.
 """
@@ -377,15 +377,16 @@ function project_tangent!(B::VectorBundle, w, x, v)
 end
 
 """
-    project_vector!(B::VectorBundleFibers, v, x, w)
+    project_vector(B::VectorBundleFibers, x, w)
 
 Project vector `w` from the vector space of type `B.VS` at point `x`
 and save the result to `v`.
 """
-function project_vector!(B::VectorBundleFibers, v, x, w)
-    error("project_vector! not implemented for vector space family of type $(typeof(B)), output vector of type $(typeof(v)) and input vector at point $(typeof(x)) with type of w $(typeof(w)).")
+function project_vector(B::VectorBundleFibers, x, w)
+    v = similar_result(B, project_vector, x, w)
+    project_vector!(B, v, x, w)
+    return v
 end
-
 function project_vector!(B::VectorBundleFibers{<:TangentSpaceType}, v, x, w)
     project_tangent!(B.M, v, x, w)
     return v
