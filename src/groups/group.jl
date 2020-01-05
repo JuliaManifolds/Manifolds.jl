@@ -96,6 +96,8 @@ end
 (e::Identity)(x) = identity(e.group, x)
 
 copyto!(e::TE, ::TE) where {TE<:Identity} = e
+copyto!(x, ::TE) where {TE<:Identity} = identity!(e.group, x, e)
+copyto!(x::AbstractArray, e::TE) where {TE<:Identity} = identity!(e.group, x, e)
 
 @doc doc"""
     inv!(G::AbstractGroupManifold, y, x)
@@ -434,7 +436,22 @@ function identity!(::AbstractGroupManifold{MultiplicationOperation}, y, x)
     copyto!(y, one(x))
     return y
 end
+function identity!(
+    G::GT,
+    y,
+    x::Identity{GT}
+) where {GT<:AbstractGroupManifold{MultiplicationOperation}}
+    error("identity! not implemented on $(typeof(G)) for points $(typeof(y)) and $(typeof(x))")
+end
 function identity!(::AbstractGroupManifold{MultiplicationOperation}, y::AbstractMatrix, x)
+    copyto!(y, I)
+    return y
+end
+function identity!(
+    ::GT,
+    y::AbstractMatrix,
+    ::Identity{GT}
+) where {GT<:AbstractGroupManifold{MultiplicationOperation}}
     copyto!(y, I)
     return y
 end
