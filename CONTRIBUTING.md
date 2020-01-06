@@ -18,6 +18,14 @@ If you found a bug or want to propose a feature, we track our issues within the 
 
 ## How Can I Contribute ?
 
+### Add a missing method
+
+Not all methods from the our interface
+[`ManifoldsBase.jl`](https://julianlsolvers.github.io/Manifolds.jl/latest/interface.html)
+have been implemented for every manifold.
+So if you notice a method missing, where you can contribute an implementation,
+even providing a single new method is a good contribution.
+
 ### Provide a new manifold
 A main contribution you can provide is another manifold, that is not yet included in the
 package. A manifold consists of  the parent type
@@ -47,7 +55,7 @@ On the contrary the user will most likely look for the non-mutating version, whe
     struct MyManifold <: Manifold end
     @doc doc"""
         exp(M::MyManifold, x, v)
-    
+
     Describe the function.
     """
     exp(::MyManifold, ::Any...)
