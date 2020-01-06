@@ -1,7 +1,7 @@
 @doc doc"""
     GroupOperationAction(group::AbstractGroupManifold, AD::ActionDirection = LeftAction())
 
-Action of a group upon itself via left and right translation.
+Action of a group upon itself via left or right translation.
 """
 struct GroupOperationAction{G,AD} <: AbstractGroupAction{AD}
     group::G
@@ -27,6 +27,7 @@ function switch_direction(A::GroupOperationAction)
 end
 
 apply!(A::GroupOperationAction, y, a, x) = translate!(A.group, y, a, x, direction(A))
+
 apply(A::GroupOperationAction, a, x) = translate(A.group, a, x, direction(A))
 
 function inverse_apply!(A::GroupOperationAction, y, a, x)
