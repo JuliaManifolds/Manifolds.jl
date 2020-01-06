@@ -8,8 +8,18 @@ and [`ComplexNumbers`](@ref) (`ℂ`).
 """
 abstract type AbstractField end
 
+"""
+    ℝ = RealNumbers()
+
+The [`field`](@ref AbstractField) of real numbers.
+"""
 struct RealNumbers <: AbstractField end
 
+"""
+    ℂ = ComplexNumbers()
+
+The [`field`](@ref AbstractField) of complex number.
+"""
 struct ComplexNumbers <: AbstractField end
 
 const ℝ = RealNumbers()
