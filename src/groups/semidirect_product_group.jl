@@ -142,7 +142,8 @@ function translate_diff(
     v,
     conv::ActionDirection = LeftAction(),
 )
-    vout = zero_tangent_vector(base_manifold(G), translate(G, x, y, conv))
+    #TODO: use zero_tangent_vector here
+    vout = similar_result(base_manifold(G), translate_diff, x, y, v)
     translate_diff!(G, vout, x, y, v, conv)
     return vout
 end
