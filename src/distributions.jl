@@ -13,8 +13,9 @@ end
 """
     FVectorSupport(space::Manifold, VectorBundleFibers)
 
-Value support for tangent vector-valued distributions (values from tangent
-space at point `x` from given manifold).
+Value support for vector bundle fiber-valued distributions (values from a fiber of a vector
+bundle at point `x` from the given manifold).
+For example used for tangent vector-valued distributions.
 """
 struct FVectorSupport{TSpace<:VectorBundleFibers, T} <: ValueSupport
     space::TSpace
@@ -24,8 +25,9 @@ end
 """
     FVectorDistribution{TSpace<:VectorBundleFibers, T}
 
-An abstract distribution for tangent vectors at point of type `T`
-from vector space of type `TSpace`.
+An abstract distribution for vector bundle fiber-valued distributions (values from a fiber
+of a vector bundle at point `x` from the given manifold).
+For example used for tangent vector-valued distributions.
 """
 abstract type FVectorDistribution{TSpace<:VectorBundleFibers, T} <: Distribution{FVectorvariate, FVectorSupport{TSpace, T}}
 end
