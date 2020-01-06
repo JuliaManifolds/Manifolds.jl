@@ -65,8 +65,13 @@ function center_of_orbit(
     A::GroupOperationAction,
     pts::AbstractVector,
     q,
-    mean_method::AbstractEstimationMethod = GradientDescentEstimation(),
+    mean_method::AbstractEstimationMethod,
 )
     m = mean(A.group, pts, mean_method)
+    return inverse_apply(switch_direction(A), q, m)
+end
+
+function center_of_orbit(A::GroupOperationAction, pts::AbstractVector, q)
+    m = mean(A.group, pts)
     return inverse_apply(switch_direction(A), q, m)
 end
