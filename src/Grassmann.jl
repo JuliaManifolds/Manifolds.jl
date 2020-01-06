@@ -224,24 +224,15 @@ end
 @doc doc"""
     manifold_dimension(M)
 
-return the dimension of the real-valued [`Grassmann`](@ref)`(n,k)` manifold `M`,
+return the dimension of the [`Grassmann(n,k,𝔽)`](@ref) manifold `M`
 i.e.
 ````math
-k(n-k)
+\dim(𝔽)k(n-k),
 ````
-"""
-manifold_dimension(M::Grassmann{N,K,ℝ}) where {N,K} = K*(N-K)
 
-@doc doc"""
-    manifold_dimension(M)
-
-return the dimension of the complex-valued [`Grassmann`](@ref)`(n,k)` manifold `M`,
-i.e.
-````math
-2k(n-k)
-````
+where $\dim(𝔽)$ is the [`field_dimension`](@ref).
 """
-manifold_dimension(M::Grassmann{N,K,ℂ}) where {N,K} = 2*K*(N-K)
+manifold_dimension(M::Grassmann{N,K,𝔽}) where {N,K,𝔽} = field_dimension(𝔽)*K*(N-K)
 
 project_tangent!(M::Grassmann,v, x, w) = ( v .= w - x*x'*w )
 

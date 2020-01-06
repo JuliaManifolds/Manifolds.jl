@@ -177,19 +177,20 @@ function inverse_retract!(::Stiefel{M,N}, v, x, y, ::QRInverseRetraction) where 
 end
 
 @doc doc"""
-    manifold_dimension(M)
+    manifold_dimension(M::Stiefel{m,n,𝔽})
 
-return the dimension of the [`Stiefel`](@ref) manifold `M`.
-The dimension for $\mathbb{K}=\mathbb{R}$ is given by
+Return the dimension of the [`Stiefel`](@ref) manifold `M` over field `𝔽`.
+The dimensions are
 
-$nk - \frac{1}{2}k(k+1)$
-
-and for $\mathbb{K}=\mathbb{C}$
-
-$2nk - k^2.$
+````math
+\dim \mathrm{Stiefel}(m, n, ℝ) &= mn - \frac{1}{2}n(n+1)\\
+\dim \mathrm{Stiefel}(m, n, ℂ) &= 2mn - n^2\\
+\dim \mathrm{Stiefel}(m, n, ℍ) &= 4mn - n(2n-1)
+````
 """
 manifold_dimension(::Stiefel{M,N,ℝ}) where {M,N} = M*N - div(N*(N+1),2)
 manifold_dimension(::Stiefel{M,N,ℂ}) where {M,N} = 2*M*N - N*N
+manifold_dimension(::Stiefel{M,N,ℍ}) where {M,N} = 4*M*N - N*(2N-1)
 
 
 @doc doc"""

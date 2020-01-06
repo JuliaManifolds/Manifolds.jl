@@ -156,28 +156,20 @@ isapprox(::FixedRankMatrices, x::SVDMPoint, y::SVDMPoint; kwargs...) = isapprox(
 isapprox(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector; kwargs...) = isapprox(x.U*v.M*x.Vt + v.U*x.Vt + x.U*v.Vt, x.U*w.M*x.Vt + w.U*x.Vt + x.U*w.Vt; kwargs...)
 
 @doc doc"""
-    manifold_dimension(M::FixedRankMatrices{M,N,k,ℝ})
+    manifold_dimension(M::FixedRankMatrices{M,N,k,𝔽})
 
 returns the manifold dimension for the real-valued matrices of dimension `M`x`N`
-    of rank `k`, namely
+of rank `k`, namely
 
 ````math
-k(M+N-k)
+\dim(𝔽)k(M+N-k),
 ````
+
+where $\dim(𝔽)$ is the [`field_dimension`](@ref).
 """
-manifold_dimension(::FixedRankMatrices{M,N,k,ℝ}) where {M,N,k} = (M+N-k)*k
-
-@doc doc"""
-    manifold_dimension(M::FixedRankMatrices{M,N,k,ℂ})
-
-returns the manifold dimension for the complex-valued matrices of dimension `M`x`N`
-    of rank `k`, namely
-
-````math
-2k(M+N-k)
-````
-"""
-manifold_dimension(::FixedRankMatrices{M,N,k,ℂ}) where {M,N,k} = 2*(M+N-k)*k
+function manifold_dimension(::FixedRankMatrices{M,N,k,𝔽}) where {M,N,k,𝔽}
+    return field_dimension(𝔽) * (M+N-k)*k
+end
 
 @doc doc"""
     project_tangent!(M,vto,x,A)

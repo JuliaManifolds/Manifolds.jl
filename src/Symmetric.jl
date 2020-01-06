@@ -24,24 +24,18 @@ SymmetricMatrices(n::Int,t::AbstractField=ℝ) = SymmetricMatrices{n,t}()
 representation_size(::SymmetricMatrices{N}) where {N} = (N,N)
 
 @doc doc"""
-    manifold_dimension(M::SymmetricMatrices{n,ℝ})
+    manifold_dimension(M::SymmetricMatrices{n,𝔽})
 
-Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` with real-valued entries, i.e. 
+Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the field `𝔽`, i.e.
 ````math
-    \frac{n(n+1)}{2}
+    \dim(𝔽) \frac{n(n+1)}{2},
 ````
-"""
-manifold_dimension(M::SymmetricMatrices{N,ℝ}) where {N} = div(N*(N+1),2)
 
-@doc doc"""
-    manifold_dimension(M::SymmetricMatrices{n,ℂ})
-
-Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` with complex-valued entries, i.e. 
-````math
-    n(n+1)
-````
+where $\dim(𝔽)$ is the [`field_dimension`](@ref).
 """
-manifold_dimension(M::SymmetricMatrices{N,ℂ}) where {N} = N*(N+1)
+function manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}
+    return field_dimension(𝔽)*div(N*(N+1),2)
+end
 
 @doc doc"""
     project_point!(M::SymmetricMatrices,x)

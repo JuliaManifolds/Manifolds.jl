@@ -35,8 +35,9 @@ returns the array dimensions required to represent an element on the
 returns the manifold dimension of the [`Euclidean`](@ref) manifold `M`, i.e.
 the product of all array dimensions.
 """
-@generated manifold_dimension(::Euclidean{N,ℝ}) where {N} = *(N.parameters...)
-@generated manifold_dimension(::Euclidean{N,ℂ}) where {N} = 2*( *(N.parameters...) )
+@generated function manifold_dimension(::Euclidean{N,𝔽}) where {N,𝔽}
+    return *(field_dimension(𝔽), N.parameters...)
+end
 
 """
     EuclideanMetric <: RiemannianMetric
