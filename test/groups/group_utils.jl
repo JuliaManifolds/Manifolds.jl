@@ -3,7 +3,13 @@ struct NotImplementedOperation <: AbstractGroupOperation end
 struct NotImplementedManifold <: Manifold end
 
 """
-    test_group(G::AbstractGroupManifold, g_pts::AbstractVector)
+    test_group(
+        G::AbstractGroupManifold,
+        g_pts::AbstractVector,
+        v_pts::AbstractVector = [];
+        test_mutating = true,
+        test_diff = false,
+    )
 
 Tests general properties of the group `G`, given at least three different points
 elements of it (contained in `g_pts`).
