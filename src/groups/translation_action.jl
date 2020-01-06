@@ -23,14 +23,21 @@ function switch_direction(A::TranslationAction{TM,TRN,TAD}) where {TM,TRN,TAD}
     return TranslationAction(A.M, A.Rn, switch_direction(TAD()))
 end
 
-function apply!(A::TranslationAction, y, a, x)
+function apply!(A::TranslationAction{M,G}, y, a, x) where {M,G}
     y .= x .+ a
     return y
 end
+apply!(A::TranslationAction{M,G}, y, e::Identity{G}, x) where {M,G} = copyto!(y, x)
 
-function apply(A::TranslationAction, a, x)
-    return a + x
+apply(A::TranslationAction, a, x) = x + a
+
+function inverse_apply!(A::TranslationAction{M,G}, y, a, x) where {M,G}
+    y .= x .- a
+    return y
 end
+inverse_apply!(A::TranslationAction{M,G}, y, e::Identity{G}, x) where {M,G} = copyto!(y, x)
+
+inverse_apply(A::TranslationAction, a, x) = x - a
 
 function base_group(A::TranslationAction)
     return A.Rn
