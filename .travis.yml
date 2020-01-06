@@ -13,6 +13,10 @@ matrix:
 notifications:
     email: false
 sudo: false
+branches:
+  only:
+    - master
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/ # build tagged releases
 jobs:
   include:
     - stage: "Documentation"
