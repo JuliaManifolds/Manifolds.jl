@@ -1,13 +1,6 @@
 
 include("../utils.jl")
 
-
-struct NotImplementedOperation <: AbstractGroupOperation
-end
-
-struct NotImplementedManifold <: Manifold
-end
-
 @testset "General group tests" begin
     @testset "Not implemented operation" begin
         G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())

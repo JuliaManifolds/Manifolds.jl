@@ -1,3 +1,7 @@
+struct NotImplementedOperation <: AbstractGroupOperation end
+
+struct NotImplementedManifold <: Manifold end
+
 """
     test_group(G::AbstractGroupManifold, g_pts::AbstractVector)
 
