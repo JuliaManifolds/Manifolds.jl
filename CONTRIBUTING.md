@@ -42,7 +42,7 @@ in this case.
 Note that since the first argument is _always_ the [`Manifold`](https://julianlsolvers.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.Manifold), the mutated argument is always the second one in the signature.
 In the example we have `exp(M, x, v)` for the exponential map and `exp!(M, y, v, x)` for the mutating one, that stores the result in `y`.
 
-On the contrary the user will most likely look for the non-mutating version, when looking for help, so it we recommend to add the document string to the non-mutating one, where all different signatures should be collected in one string. This can best be archieved by adding a docstring to the function with arbitrary signature despite the first being your manifold:
+On the contrary the user will most likely look for the non-mutating version, when looking for help, so we recommend to add the documentation string to the non-mutating one, where all different signatures should be collected in one string. This can best be achieved by adding a docstring to the method with a general signature with the first argument being your manifold:
 ````julia
     struct MyManifold <: Manifold end
     @doc doc"""
