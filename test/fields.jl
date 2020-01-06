@@ -9,4 +9,8 @@ using Manifolds
     @test ℂ isa Manifolds.ComplexNumbers
     @test Manifolds.ComplexNumbers() === ℂ
     @test field_dimension(ℂ) == 2
+
+    @test ℍ isa Manifolds.QuaternionNumbers
+    @test Manifolds.QuaternionNumbers() === ℍ
+    @test field_dimension(ℍ) == 4
 end
