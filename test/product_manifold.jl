@@ -123,6 +123,10 @@ include("utils.jl")
     end
 
     @testset "ProductRepr" begin
+        basis_types = (ArbitraryOrthonormalBasis(),
+            ProjectedOrthonormalBasis(:svd)
+        )
+
         Ts = SizedVector{3, Float64}
         Tr2 = SizedVector{2, Float64}
         pts_sphere = [convert(Ts, [1.0, 0.0, 0.0]),
@@ -140,7 +144,8 @@ include("utils.jl")
             test_musical_isomorphisms = true,
             test_tangent_vector_broadcasting = false,
             test_forward_diff = false,
-            test_reverse_diff = false
+            test_reverse_diff = false,
+            basis_types_to_from = basis_types
         )
     end
 end

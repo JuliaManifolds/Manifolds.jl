@@ -230,6 +230,73 @@ function check_tangent_vector(M::ProductManifold, x::ProductArray, v::ProductArr
 end
 
 """
+    PrecomputedProductOrthonormalBasis(parts::NTuple{N,AbstractPrecomputedOrthonormalBasis} where N)
+
+A precomputed orthonormal basis of a tangent space of a product manifold.
+The tuple `parts` stores bases corresponding to multiplied manifolds.
+"""
+struct PrecomputedProductOrthonormalBasis{T<:NTuple{N,AbstractPrecomputedOrthonormalBasis} where N} <: AbstractPrecomputedOrthonormalBasis
+    parts::T
+end
+
+function basis(M::ProductManifold, x, B::ProjectedOrthonormalBasis{:svd})
+    parts = map(t -> basis(t..., B),
+        ziptuples(M.manifolds, x.parts))
+
+    return PrecomputedProductOrthonormalBasis(parts)
+end
+
+function represent_in_basis(M::ProductManifold, x, v, B::PrecomputedProductOrthonormalBasis)
+    reps = map(represent_in_basis, M.manifolds, x.parts, v.parts, B.parts)
+    return vcat(reps...)
+end
+
+function represent_in_basis(M::ProductManifold, x, v, B::ArbitraryOrthonormalBasis)
+    reps = map(t -> represent_in_basis(t..., B), ziptuples(M.manifolds, x.parts, v.parts))
+    return vcat(reps...)
+end
+
+function inverse_represent_in_basis(
+    M::ProductManifold{<:NTuple{N, Any}},
+    x::ProductRepr,
+    v,
+    B::PrecomputedProductOrthonormalBasis
+) where N
+
+    dims = map(manifold_dimension, M)
+    dims_acc = accumulate(+, [1, dims...])
+    parts = ntuple(N) do i
+        inverse_represent_in_basis(
+            M.manifolds[i],
+            submanifold_component(x, i),
+            v[dims_acc[i]:dims_acc[i]+dims[i]-1],
+            B.parts[i]
+        )
+    end
+    return ProductRepr(parts)
+end
+
+function inverse_represent_in_basis(
+    M::ProductManifold{<:NTuple{N, Any}},
+    x::ProductRepr,
+    v,
+    B::ArbitraryOrthonormalBasis
+) where N
+
+    dims = map(manifold_dimension, M.manifolds)
+    dims_acc = accumulate(+, [1, dims...])
+    parts = ntuple(N) do i
+        inverse_represent_in_basis(
+            M.manifolds[i],
+            submanifold_component(x, i),
+            v[dims_acc[i]:dims_acc[i]+dims[i]-1],
+            B
+        )
+    end
+    return ProductRepr(parts)
+end
+
+"""
     ProductPointDistribution(M::ProductManifold, distributions)
 
 Product distribution on manifold `M`, combined from `distributions`.

@@ -95,6 +95,27 @@ function sharp!(M::Sphere, v::FVector{TangentSpaceType}, x, w::FVector{Cotangent
     return v
 end
 
+function represent_in_basis(M::Sphere, x, v, B::ArbitraryOrthonormalBasis)
+    if isapprox(x[end], -1)
+        return v[1:end-1]
+    else
+        xp1 = copy(x)
+        xp1[end] += 1
+        return (2*xp1*dot(xp1, v)/dot(xp1, xp1) - v)[1:end-1]
+    end
+end
+
+function inverse_represent_in_basis(M::Sphere, x, v, B::ArbitraryOrthonormalBasis)
+    if isapprox(x[end], -1)
+        return vcat(x, 0)
+    else
+        xp1 = copy(x)
+        xp1[end] += 1
+        v0 = vcat(v, 0)
+        return 2*xp1*dot(xp1, v0)/dot(xp1, xp1) - v0
+    end
+end
+
 """
     uniform_distribution(S::Sphere, x)
 

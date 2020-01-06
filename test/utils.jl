@@ -65,7 +65,8 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     inverse_retraction_methods = [],
     point_distributions = [],
     tvector_distributions = [],
-    basis_types = (),
+    basis_types_vecs = (),
+    basis_types_to_from = (),
     exp_log_atol_multiplier = 0,
     exp_log_rtol_multiplier = 1,
     retraction_atol_multiplier = 0,
@@ -275,7 +276,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test isapprox(M, pts[1], vector_transport_to(M, pts[1], v1, pts[1]), v1)
     end
 
-    for btype ∈ basis_types
+    for btype ∈ basis_types_vecs
         x = pts[1]
         b = basis(M, x, btype)
         @test isa(b, AbstractPrecomputedOrthonormalBasis)
@@ -298,15 +299,24 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
         if !isa(btype, ProjectedOrthonormalBasis)
             v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
+            vb = represent_in_basis(M, x, v1, btype)
+
+            @test represent_in_basis(M, x, v1, b) ≈ represent_in_basis(M, x, v1, btype)
+            @test inverse_represent_in_basis(M, x, vb, b) ≈ inverse_represent_in_basis(M, x, vb, btype)
+        end
+    end
+
+    for btype ∈ (basis_types_to_from..., basis_types_vecs...)
+        x = pts[1]
+        N = manifold_dimension(M)
+        if !isa(btype, ProjectedOrthonormalBasis)
+            v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
 
             vb = represent_in_basis(M, x, v1, btype)
             @test isa(vb, AbstractVector{<:Real})
             @test length(vb) == N
             vbi = inverse_represent_in_basis(M, x, vb, btype)
             @test isapprox(M, x, v1, vbi)
-
-            @test represent_in_basis(M, x, v1, b) ≈ represent_in_basis(M, x, v1, btype)
-            @test inverse_represent_in_basis(M, x, vb, b) ≈ inverse_represent_in_basis(M, x, vb, btype)
         end
     end
 

@@ -16,6 +16,7 @@ include("utils.jl")
         MVector{3, Float64},
         Vector{Float32},
     ]
+    basis_types = (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types
         @testset "Type $T" begin
             pts = [convert(T, [1.0, 0.0, 0.0]),
@@ -31,6 +32,7 @@ include("utils.jl")
                 test_mutating_rand = isa(T, Vector),
                 point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
                 tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
+                basis_types_to_from = basis_types
             )
 
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
