@@ -59,44 +59,34 @@ end
 
 function inv!(G::SemidirectProductGroup, y, x)
     PG = base_manifold(G)
-    N = submanifold(PG, 1)
-    H = submanifold(PG, 2)
-    A = G.op.action
-    inv!(H, y.parts[2], x.parts[2])
-    ninv = inv(N, x.parts[1])
-    apply!(A, y.parts[1], y.parts[2], ninv)
+    inv!(submanifold(PG, 2), submanifold_component(y, 2), submanifold_component(x, 2))
+    ninv = inv(submanifold(PG, 1), submanifold_component(x, 1))
+    apply!(G.op.action, submanifold_component(y, 1), submanifold_component(y, 2), ninv)
     return y
 end
-function inv!(G::AG, y, e::Identity{AG}) where {AG<:SemidirectProductGroup}
-    PG = base_manifold(G)
-    es = map(Identity, PG.manifolds)
-    map(inv!, PG.manifolds, y.parts, es)
-    return y
-end
+inv!(G::AG, y, e::Identity{AG}) where {AG<:SemidirectProductGroup} = identity!(G, y, e)
 
 function identity!(G::SemidirectProductGroup, y, x)
     PG = base_manifold(G)
-    map(identity!, PG.manifolds, y.parts, x.parts)
+    for i in (1, 2)
+        identity!(
+            submanifold(PG, i),
+            submanifold_component(y, i),
+            submanifold_component(x, i),
+        )
+    end
     return y
 end
-function identity!(G::GT, y, x::Identity{GT}) where {GT<:SemidirectProductGroup}
-    PG = base_manifold(G)
-    N = submanifold(PG, 1)
-    H = submanifold(PG, 2)
-    identity!(N, y.parts[1], Identity(N))
-    identity!(H, y.parts[2], Identity(H))
-    return y
-end
-identity!(G::GT, e::Identity{GT}, ::Identity{GT}) where {GT<:SemidirectProductGroup} = e
+identity!(G::GT, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}} = e
 
 function compose!(G::SemidirectProductGroup, z, x, y)
     PG = base_manifold(G)
     N = submanifold(PG, 1)
     H = submanifold(PG, 2)
     A = G.op.action
-    compose!(H, z.parts[2], x.parts[2], y.parts[2])
-    zₙtmp = apply(A, x.parts[2], y.parts[1])
-    compose!(N, z.parts[1], x.parts[1], zₙtmp)
+    compose!(H, submanifold_component.((z, x, y), 2)...)
+    zₙtmp = apply(A, submanifold_component(x, 2), submanifold_component(y, 1))
+    compose!(N, submanifold_component.((z, x), 1)..., zₙtmp)
     return z
 end
 function compose!(G::GT, z, ::Identity{GT}, y) where {GT<:SemidirectProductGroup}
@@ -107,12 +97,7 @@ function compose!(G::GT, z, x, ::Identity{GT}) where {GT<:SemidirectProductGroup
     copyto!(z, x)
     return z
 end
-function compose!(
-    G::GT,
-    z,
-    e::Identity{GT},
-    ::Identity{GT},
-) where {GT<:SemidirectProductGroup}
+function compose!(G::GT, z, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}}
     identity!(G, z, e)
     return z
 end
@@ -122,11 +107,13 @@ function translate_diff!(G::SemidirectProductGroup, vout, x, y, v, conv::LeftAct
     N = submanifold(PG, 1)
     H = submanifold(PG, 2)
     A = G.op.action
-    nx, hx, ny, hy = x.parts[1], x.parts[2], y.parts[1], y.parts[2]
-    nvout, hvout, nv, hv = vout.parts[1], vout.parts[2], v.parts[1], v.parts[2]
+    nx, hx = submanifold_component.(Ref(x), (1, 2))
+    ny, hy = submanifold_component.(Ref(y), (1, 2))
+    nv, hv = submanifold_component.(Ref(v), (1, 2))
+    nvout, hvout = submanifold_component.(Ref(vout), (1, 2))
     translate_diff!(H, hvout, hx, hy, hv, conv)
-    nw = action_diff(A, hx, ny, nv, conv)
-    nz = action(A, hx, ny, conv)
+    nw = apply_diff(A, hx, ny, nv)
+    nz = apply(A, hx, ny)
     translate_diff!(N, nvout, nx, nz, nw, conv)
     return vout
 end
