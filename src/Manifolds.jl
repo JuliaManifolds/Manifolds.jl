@@ -255,7 +255,9 @@ export Manifold,
     CoTVector,
     SVDMPoint,
     UMVTVector,
-    ℝ, ℂ
+    ℝ,
+    ℂ,
+    ℍ
 # decorator manifolds
 export ArrayManifold,
     ArrayMPoint,

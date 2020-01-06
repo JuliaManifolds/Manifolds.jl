@@ -22,11 +22,20 @@ The [`field`](@ref AbstractField) of complex number.
 """
 struct ComplexNumbers <: AbstractField end
 
+"""
+    ℍ = QuaternionNumbers()
+
+The [`field`](@ref AbstractField) of quaternion numbers.
+"""
+struct QuaternionNumbers <: AbstractField end
+
 const ℝ = RealNumbers()
 const ℂ = ComplexNumbers()
+const ℍ = QuaternionNumbers()
 
 Base.show(io::IO, ::RealNumbers) = print(io, "ℝ")
 Base.show(io::IO, ::ComplexNumbers) = print(io, "ℂ")
+Base.show(io::IO, ::QuaternionNumbers) = print(io, "ℍ")
 
 """
     field_dimension(𝔽::AbstractField)
