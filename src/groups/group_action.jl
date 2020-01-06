@@ -14,10 +14,6 @@ function base_group(A::AbstractGroupAction)
     error("base_group not implemented for $(typeof(A)).")
 end
 
-function similar_result(A::AbstractGroupAction, f, x...)
-    return similar_result(base_group(A), f, x...)
-end
-
 """
     g_manifold(A::AbstractGroupAction)
 
@@ -25,6 +21,10 @@ The manifold the action `A` acts upon.
 """
 function g_manifold(A::AbstractGroupAction)
     error("g_manifold not implemented for $(typeof(A)).")
+end
+
+function similar_result(A::AbstractGroupAction, f, x...)
+    return similar_result(g_manifold(A), f, x...)
 end
 
 """
