@@ -28,3 +28,14 @@ const ℂ = ComplexNumbers()
 Base.show(io::IO, ::RealNumbers) = print(io, "ℝ")
 Base.show(io::IO, ::ComplexNumbers) = print(io, "ℂ")
 
+"""
+    field_dimension(𝔽::AbstractField)
+
+Return the dimension of the [`AbstractField`](@ref).
+The field dimension is the dimension of a real space with which a point on the field can be
+identified. For example, [`ComplexNumbers`](@ref) have a field dimension of 2.
+"""
+field_dimension(𝔽::AbstractField) = error("field_dimension not defined for field $(𝔽)")
+field_dimension(::RealNumbers) = 1
+field_dimension(::ComplexNumbers) = 2
+field_dimension(::QuaternionNumbers) = 4
