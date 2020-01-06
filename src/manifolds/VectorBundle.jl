@@ -118,8 +118,8 @@ CotangentBundle(M::Manifold) = VectorBundle(CotangentSpace, M)
 """
     FVector(type::VectorSpaceType, data)
 
-Decorator indicating that the vector `data` from a fiber of a vector bundle
-is of type `type`.
+Decorator indicating that the vector `data` is from a fiber of a vector bundle
+of type `type`.
 """
 struct FVector{TType<:VectorSpaceType,TData}
     type::TType
@@ -379,8 +379,7 @@ end
 """
     project_vector(B::VectorBundleFibers, x, w)
 
-Project vector `w` from the vector space of type `B.VS` at point `x`
-and save the result to `v`.
+Project vector `w` from the vector space of type `B.VS` at point `x`.
 """
 function project_vector(B::VectorBundleFibers, x, w)
     v = similar_result(B, project_vector, x, w)
@@ -390,6 +389,9 @@ end
 function project_vector!(B::VectorBundleFibers{<:TangentSpaceType}, v, x, w)
     project_tangent!(B.M, v, x, w)
     return v
+end
+function project_vector!(B::VectorBundleFibers, v, x, w)
+    error("project_vector! not implemented for vector space family of type $(typeof(B)), output vector of type $(typeof(v)) and input vector at point $(typeof(x)) with type of w $(typeof(w)).")
 end
 
 Base.@propagate_inbounds setindex!(x::FVector, val, i) = setindex!(x.data, val, i)

@@ -143,7 +143,6 @@ end
 function cross(M1::ProductManifold, M2::ProductManifold)
     return ProductManifold(M1.manifolds..., M2.manifolds...)
 end
-cross(M::Manifold...) = cross(M[1], cross(M[2:end]...))
 
 function det_local_metric(M::MetricManifold{ProductManifold, ProductMetric}, x::ProductArray)
     dets = map(det_local_metric, M.manifolds, x.parts)

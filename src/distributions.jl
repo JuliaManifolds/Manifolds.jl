@@ -41,10 +41,10 @@ struct MPointvariate <: VariateForm
 end
 
 """
-    MPointSupport(manifold::Manifold)
+    MPointSupport(M::Manifold)
 
 Value support for manifold-valued distributions (values from given
-manifold `M`).
+[`Manifold`](@ref) `M`).
 """
 struct MPointSupport{TM<:Manifold} <: ValueSupport
     manifold::TM

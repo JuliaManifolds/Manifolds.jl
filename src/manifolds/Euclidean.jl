@@ -14,10 +14,13 @@ Generate the $n$-dimensional vector space $\mathbb R^n$.
 
     Euclidean(n₁,n₂,...,nᵢ; field=ℝ)
 
-Generate the (2*)$n_1n_2\cdot\ldots n_i$-dimensional vector space
-$\mathbb F^{n_1, n_2, \ldots, n_i}$, whose
-elements are interpreted as $n_1 \times,n_2\times\cdots\times n_i$ arrays, e.g. for
-two parameters as matrices. The default `field=ℝ` can also be set to `field=ℂ`.
+Generate the vector space of $k=n_1n_2\cdot\ldots n_i$ values, i.e. the
+$\mathbb F^{n_1, n_2, \ldots, n_d}$ whose
+elements are interpreted as $n_1 \times,n_2\times\cdots\times n_i$ arrays.
+For $d=2$ we obtain a matrix space.
+The default `field=ℝ` can also be set to `field=ℂ`.
+The dimension of this space is $k$ for the real-valued case and $2k$ for the
+complex-valued case.
 """
 struct Euclidean{N<:Tuple,T} <: Manifold where {N, T<: AbstractField} end
 Euclidean(n::Vararg{Int,N};field::AbstractField=ℝ) where N = Euclidean{Tuple{n...},field}()

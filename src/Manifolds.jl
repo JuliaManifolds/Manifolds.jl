@@ -213,7 +213,7 @@ export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, V
 export VectorBundleFibers
 export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribution
 export Metric, RiemannianMetric, LorentzMetric, MinkowskiMetric, EuclideanMetric, MetricManifold,
-    LinearAffineMetric, LogEuclideanMetric, LogCholeskyMetric
+    LinearAffineMetric, LogEuclideanMetric, LogCholeskyMetric, PowerMetric, ProductMetric
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod, QRRetraction, PolarRetraction, ProjectionRetraction
 export AbstractInverseRetractionMethod, QRInverseRetraction, PolarInverseRetraction,
