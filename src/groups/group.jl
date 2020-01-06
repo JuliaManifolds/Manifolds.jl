@@ -95,9 +95,17 @@ end
 
 (e::Identity)(x) = identity(e.group, x)
 
+# To ensure similar_result_type works
+eltype(e::Identity) = Bool
+
 copyto!(e::TE, ::TE) where {TE<:Identity} = e
 copyto!(x, ::TE) where {TE<:Identity} = identity!(e.group, x, e)
 copyto!(x::AbstractArray, e::TE) where {TE<:Identity} = identity!(e.group, x, e)
+
+# for product groups
+function submanifold_component(e::Identity, i::Integer)
+    return Identity(submanifold(base_manifold(e.group), i))
+end
 
 @doc doc"""
     inv!(G::AbstractGroupManifold, y, x)
@@ -335,6 +343,13 @@ struct AdditionOperation <: AbstractGroupOperation end
 +(e::E, ::E) where {G<:AbstractGroupManifold{AdditionOperation},E<:Identity{G}} = e
 
 -(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
+-(::Identity{G}, x) where {G<:AbstractGroupManifold{AdditionOperation}} = -x
+-(x, ::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = x
+-(e::E, ::E) where {G<:AbstractGroupManifold{AdditionOperation},E<:Identity{G}} = e
+
+*(e::Identity{G}, x) where {G<:AbstractGroupManifold{AdditionOperation}} = e
+*(x, e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
+*(e::E, ::E) where {G<:AbstractGroupManifold{AdditionOperation},E<:Identity{G}} = e
 
 function identity!(::AbstractGroupManifold{AdditionOperation}, y, x)
     fill!(y, 0)
@@ -409,6 +424,31 @@ struct MultiplicationOperation <: AbstractGroupOperation end
 \(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
 
 one(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
+
+function LinearAlgebra.mul!(
+    y,
+    e::Identity{G},
+    x,
+) where {G<:AbstractGroupManifold{MultiplicationOperation}}
+    copyto!(y, x)
+    return y
+end
+function LinearAlgebra.mul!(
+    y,
+    x,
+    e::Identity{G},
+) where {G<:AbstractGroupManifold{MultiplicationOperation}}
+    copyto!(y, x)
+    return y
+end
+function LinearAlgebra.mul!(
+    y,
+    e::E,
+    ::E,
+) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}}
+    identity!(e.group, y, e)
+    return y
+end
 
 # this is different from inv(G, e::Identity{G})
 inv(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
