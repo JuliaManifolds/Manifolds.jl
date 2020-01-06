@@ -1,6 +1,21 @@
 include("../utils.jl")
 include("group_utils.jl")
 
+function _to_affine(p, is_vector = false)
+    d = length(p)
+    N = Int((sqrt(4d + 1) - 1) / 2)
+    P = Matrix{eltype(p)}(undef, N + 1, N + 1)
+    setindex!(P, p.parts[1], 1:N, N + 1)
+    setindex!(P, p.parts[2], 1:N, 1:N)
+    fill!(view(P, N + 1, 1:N), 0)
+    if is_vector
+        P[N+1, N+1] = 0
+    else
+        P[N+1, N+1] = 1
+    end
+    return P
+end
+
 @testset "Special Euclidean group" begin
     G = SpecialEuclidean(3)
     @test repr(G) == "SpecialEuclidean(3)"
@@ -12,17 +27,27 @@ include("group_utils.jl")
     t = Vector{Float64}.([1:3, 2:4, 4:6])
     ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
     tuple_pts = [(ti, exp(Rn, x, hat(Rn, x, ωi))) for (ti, ωi) in zip(t, ω)]
+    tuple_v = ([-1.0, 2.0, 1.0], hat(Rn, x, [1.0, 0.5, -0.5]))
 
     reshapers = (Manifolds.ArrayReshaper(), Manifolds.StaticReshaper())
     for reshaper in reshapers
         shape_se = Manifolds.ShapeSpecification(reshaper, M.manifolds...)
         pts = [Manifolds.prod_point(shape_se, tp...) for tp in tuple_pts]
+        v_pts = [Manifolds.prod_point(shape_se, tuple_v...)]
 
         g1, g2 = pts[1:2]
         t1, R1 = g1.parts
         t2, R2 = g2.parts
         g1g2 = Manifolds.prod_point(shape_se, R1 * t2 + t1, R1 * R2)
         @test compose(G, g1, g2) ≈ g1g2
-        test_group(G, pts)
+        @test _to_affine(g1g2) ≈ _to_affine(g1) * _to_affine(g2)
+
+        w = translate_diff(G, pts[1], Identity(G), v_pts[1])
+        w2 = similar(w)
+        w2.parts[1] .= w.parts[1]
+        w2.parts[2] .= pts[1].parts[2] * w.parts[2]
+        @test _to_affine(w2, true) ≈ _to_affine(pts[1]) * _to_affine(v_pts[1], true)
+
+        test_group(G, pts, v_pts; test_diff = true, diff_convs = [(), (LeftAction(),)])
     end
 end
