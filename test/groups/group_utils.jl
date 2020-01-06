@@ -22,6 +22,7 @@ function test_group(
     v_pts::AbstractVector = [];
     test_mutating = true,
     test_diff = false,
+    diff_convs = [(), (LeftAction(),), (RightAction(),)],
 )
     e = Identity(G)
 
@@ -141,20 +142,19 @@ function test_group(
 
     test_diff && @testset "translation differential" begin
         v = v_pts[1]
-        convs = ((), (LeftAction(),), (RightAction(),))
         g21 = compose(G, g_pts[2], g_pts[1])
         g12 = compose(G, g_pts[1], g_pts[2])
         @test translate_diff(G, g_pts[2], g_pts[1], v) ≈ translate_diff(G, g_pts[2], g_pts[1], v, LeftAction())
         @test is_tangent_vector(G, g12, translate_diff(G, g_pts[2], g_pts[1], v, LeftAction()))
-        @test is_tangent_vector(G, g21, translate_diff(G, g_pts[2], g_pts[1], v, RightAction()))
+        RightAction() in diff_convs && @test is_tangent_vector(G, g21, translate_diff(G, g_pts[2], g_pts[1], v, RightAction()))
 
-        for conv in convs
+        for conv in diff_convs
             @test inverse_translate_diff(G, g_pts[2], g_pts[1], translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...) ≈ v
             @test translate_diff(G, g_pts[2], g_pts[1], inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...) ≈ v
         end
 
         test_mutating && @testset "mutating" begin
-            for conv in convs
+            for conv in diff_convs
                 vout = similar(v)
                 @test translate_diff!(G, vout, g_pts[2], g_pts[1], v, conv...) === vout
                 @test vout ≈ translate_diff(G, g_pts[2], g_pts[1], v, conv...)
