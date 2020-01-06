@@ -57,10 +57,6 @@ function SemidirectProductGroup(
     return GroupManifold(PG, op)
 end
 
-function submanifold_component(e::Identity{<:SemidirectProductOperation}, i::Integer)
-    return Identity(submanifold(base_manifold(e.group), Val(i)))
-end
-
 function inv!(G::SemidirectProductGroup, y, x)
     PG = base_manifold(G)
     N = submanifold(PG, 1)
