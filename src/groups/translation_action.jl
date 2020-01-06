@@ -39,6 +39,14 @@ inverse_apply!(A::TranslationAction{M,G}, y, e::Identity{G}, x) where {M,G} = co
 
 inverse_apply(A::TranslationAction, a, x) = x - a
 
+apply_diff!(A::TranslationAction, vout, a, x, v) = copyto!(vout, v)
+
+apply_diff(A::TranslationAction, a, x, v) = v
+
+inverse_apply_diff!(A::TranslationAction, vout, a, x, v) = copyto!(vout, v)
+
+inverse_apply_diff(A::TranslationAction, a, x, v) = v
+
 function base_group(A::TranslationAction)
     return A.Rn
 end
