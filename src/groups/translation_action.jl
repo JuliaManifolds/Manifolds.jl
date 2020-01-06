@@ -19,6 +19,14 @@ function TranslationAction(M::Manifold, Rn::TranslationGroup, ::TAD = LeftAction
     return TranslationAction{typeof(M), typeof(Rn), TAD}(M, Rn)
 end
 
+function base_group(A::TranslationAction)
+    return A.Rn
+end
+
+function g_manifold(A::TranslationAction)
+    return A.M
+end
+
 function switch_direction(A::TranslationAction{TM,TRN,TAD}) where {TM,TRN,TAD}
     return TranslationAction(A.M, A.Rn, switch_direction(TAD()))
 end
@@ -46,11 +54,3 @@ apply_diff(A::TranslationAction, a, x, v) = v
 inverse_apply_diff!(A::TranslationAction, vout, a, x, v) = copyto!(vout, v)
 
 inverse_apply_diff(A::TranslationAction, a, x, v) = v
-
-function base_group(A::TranslationAction)
-    return A.Rn
-end
-
-function g_manifold(A::TranslationAction)
-    return A.M
-end
