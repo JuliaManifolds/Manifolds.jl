@@ -24,20 +24,18 @@ include("group_utils.jl")
     @test base_manifold(G) == M
 
     for (T_A, T_M) in zip(types_a, types_m)
-        a_pts = [convert(T_A, [0.0 1.0 2.0; 2.0 4.0 1.0]),
-                 convert(T_A, [-1.0 0.0 2.0; -2.0 3.0 3.0]),
-                 convert(T_A, [1.0 1.0 2.0; 3.0 2.0 1.0])]
-        m_pts = [convert(T_M, [0.0 1.0 2.0; 2.0 4.0 1.0]),
-                 convert(T_M, [-1.0 0.0 2.0; -2.0 3.0 3.0]),
-                 convert(T_M, [1.0 1.0 2.0; 3.0 2.0 1.0])]
+        a_pts = convert.(T_A, [[0.0 1.0 2.0; 2.0 4.0 1.0], [-1.0 0.0 2.0; -2.0 3.0 3.0], [1.0 1.0 2.0; 3.0 2.0 1.0]])
+        m_pts = convert.(T_M, [[0.0 1.0 2.0; 2.0 4.0 1.0], [-1.0 0.0 2.0; -2.0 3.0 3.0], [1.0 1.0 2.0; 3.0 2.0 1.0]])
+        v_pts = convert.(T_M, [[0.0 1.0 2.0; 2.0 4.0 1.0], [-1.0 0.0 2.0; -2.0 3.0 3.0], [1.0 1.0 2.0; 3.0 2.0 1.0]])
 
         atol_inv = if eltype(T_M) == Float32
             1e-7
         else
             1e-15
         end
-        test_action(A, a_pts, m_pts;
+        test_action(A, a_pts, m_pts, v_pts;
             test_optimal_alignment = false,
+            test_diff = true,
             atol_inv = atol_inv)
     end
 
