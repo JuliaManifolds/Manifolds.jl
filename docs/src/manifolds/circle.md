@@ -2,6 +2,6 @@
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["Circle.jl"]
+Pages = ["manifolds/Circle.jl"]
 Order = [:type, :function]
 ```

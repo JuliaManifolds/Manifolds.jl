@@ -19,20 +19,21 @@ the eigenvectors.
 The manifold can be equipped with different metrics
 
 ## Common and Metric Independent functions
-```@docs
-injectivity_radius(::SymmetricPositiveDefinite{N},a::Vararg{Any,N} where N) where N
-check_manifold_point(::SymmetricPositiveDefinite{N},x; kwargs...) where N
-check_tangent_vector(::SymmetricPositiveDefinite{N},x,v; kwargs...) where N
-manifold_dimension(::SymmetricPositiveDefinite{N}) where N
-representation_size(::SymmetricPositiveDefinite{N}) where N
-zero_tangent_vector(::SymmetricPositiveDefinite{N},x) where N
-zero_tangent_vector!(::SymmetricPositiveDefinite{N}, v, x) where N
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/SymmetricPositiveDefinite.jl"]
+Order = [:function]
+ Filter = t -> t !== mean
 ```
 
 ## Default Metric: Linear Affine Metric
 
-```@docs
-LinearAffineMetric
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/SymmetricPositiveDefiniteLinearAffine.jl"]
+Order = [:type]
 ```
 
 This metric is also the default metric, i.e.
@@ -40,39 +41,26 @@ any call of the following functions with
 `P=SymmetricPositiveDefinite(3)` will result in
 `MetricManifold(P,LinearAffineMetric())`and hence yield the formulae described in this seciton.
 
-```@docs
-distance(P::SymmetricPositiveDefinite{N},x,y) where N
-exp!(P::SymmetricPositiveDefinite{N}, y, x, v) where N
-inner(P::SymmetricPositiveDefinite, x, w, v)
-log!(P::SymmetricPositiveDefinite{N}, v, x, y) where N
-tangent_orthonormal_basis(P::SymmetricPositiveDefinite{N},x,v) where N
-vector_transport_to!(P::SymmetricPositiveDefinite{N},vto, x, v, y, m::ParallelTransport) where N
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/SymmetricPositiveDefiniteLinearAffine.jl"]
+Order = [:function]
 ```
 
 ## Log Euclidean Metric
 
-```@docs
-LogEuclideanMetric
-```
-
-And we obtain the following functions
-
-```@docs
-distance(P::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric},x,y) where N
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/SymmetricPositiveDefiniteLogEuclidean.jl"]
+Order = [:type, :function]
 ```
 
 ## Log Cholesky Metric
 
-```@docs
-LogCholeskyMetric
-```
-
-```@docs
-distance(P::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},x,y) where N
-exp!(P::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, y, x, v) where N
-inner(P::MetricManifold{SymmetricPositiveDefinite{N}, LogCholeskyMetric}, x, w, v) where N
-log!(P::MetricManifold{SymmetricPositiveDefinite{N}, LogCholeskyMetric}, v, x, y) where N
-vector_transport_to!(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric}, vto, x, v, y, ::ParallelTransport) where N
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/SymmetricPositiveDefiniteLogCholesky.jl"]
+Order = [:type, :function]
 ```
 
 ## Statistics

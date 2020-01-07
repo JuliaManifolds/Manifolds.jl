@@ -20,7 +20,7 @@ Let's first look at the provided types.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
-Pages = ["Metric.jl"]
+Pages = ["manifolds/MetricManifold.jl"]
 Order = [:type]
 ```
 
@@ -47,6 +47,6 @@ mentioned in the last section are used for e.g. the [`exp!`](@ref)onential map.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
-Pages = ["Metric.jl"]
+Pages = ["manifolds/MetricManifold.jl"]
 Order = [:function]
 ```
