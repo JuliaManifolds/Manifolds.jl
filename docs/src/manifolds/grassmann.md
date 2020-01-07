@@ -2,12 +2,12 @@
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["Grassmann.jl"]
+Pages = ["manifolds/Grassmann.jl"]
 Order = [:type]
 ```
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["Grassmann.jl"]
+Pages = ["manifolds/Grassmann.jl"]
 Order = [:function]
 ```

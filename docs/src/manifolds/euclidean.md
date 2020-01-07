@@ -5,12 +5,12 @@ curvature constantly zero everywhere and hence nearly all operations simplify.
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["Euclidean.jl"]
+Pages = ["manifolds/Euclidean.jl"]
 Order = [:type]
 ```
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["Euclidean.jl"]
+Pages = ["manifolds/Euclidean.jl"]
 Order = [:function]
 ```

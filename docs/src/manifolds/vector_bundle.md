@@ -11,10 +11,10 @@ The important difference between functions operating on `VectorBundle` and `Vect
 
 ## FVector
 
-For cases where confusion between different types of vectors is possible, the type [`FVector`](@ref) can be used to express which type of vector space the vector belongs to. It is used for example in musical isomorphisms (the [`flat!`](@ref) and [`sharp!`](@ref) functions) that are used to go from a tangent space to cotangent space and vice versa.
+For cases where confusion between different types of vectors is possible, the type [`FVector`](@ref) can be used to express which type of vector space the vector belongs to. It is used for example in musical isomorphisms (the [`flat`](@ref) and [`sharp`](@ref) functions) that are used to go from a tangent space to cotangent space and vice versa.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
-Pages = ["VectorBundle.jl"]
+Pages = ["manifolds/VectorBundle.jl"]
 Order = [:type, :function]
 ```

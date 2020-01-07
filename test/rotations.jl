@@ -5,6 +5,7 @@ include("utils.jl")
     @test representation_size(M) == (2,2)
     @test injectivity_radius(M) == π*sqrt(2.0)
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0]) == π*sqrt(2.0)
+    @test injectivity_radius(M, [1.0 0.0; 0.0 1.0], PolarRetraction()) ≈ π/sqrt(2)
     types = [
         Matrix{Float64},
         MMatrix{2, 2, Float64},

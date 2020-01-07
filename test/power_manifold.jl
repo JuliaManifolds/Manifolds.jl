@@ -18,6 +18,7 @@ Random.seed!(42)
     Mr2 = PowerManifold(Mr, 5, 7)
     @test manifold_dimension(Mr2) == 105
 
+    @test is_default_metric(Ms1, PowerMetric()) == Val(true)
     types_s1 = [Array{Float64,2},
                 HybridArray{Tuple{3,StaticArrays.Dynamic()}, Float64, 2}]
     types_s2 = [Array{Float64,3},
