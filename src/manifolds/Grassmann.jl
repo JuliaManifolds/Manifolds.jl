@@ -265,9 +265,9 @@ Return the dimension of the [`Grassmann(n,k,𝔽)`](@ref) manifold `M`, i.e.
 \operatorname{dim}_{\operatorname{Gr}(n,k)} = \dim(𝔽)k(n-k),
 ````
 
-where $\dim(𝔽)$ is the [`field_dimension`](@ref).
+where $\dim(𝔽)$ is the [`real_dimension`](@ref).
 """
-manifold_dimension(M::Grassmann{n,k,𝔽}) where {n,k,𝔽} = field_dimension(𝔽)*k*(n - k)
+manifold_dimension(M::Grassmann{n,k,𝔽}) where {n,k,𝔽} = real_dimension(𝔽)*k*(n - k)
 
 """
     mean(

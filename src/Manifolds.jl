@@ -204,7 +204,7 @@ export AbstractEstimationMethod, GradientDescentEstimation, CyclicProximalPointE
     GeodesicInterpolation, GeodesicInterpolationWithinRadius
 export base_manifold, bundle_projection, christoffel_symbols_first, christoffel_symbols_second,
     christoffel_symbols_second_jacobian, complex_dot, det_local_metric, distance,
-    einstein_tensor, exp, exp!, field_dimension, flat, flat!, gaussian_curvature, geodesic,
+    einstein_tensor, exp, exp!, real_dimension, flat, flat!, gaussian_curvature, geodesic,
     hat, hat!, injectivity_radius, inner, inverse_local_metric, inverse_retract,
     inverse_retract!, isapprox, is_decorator_manifold, is_default_metric, is_manifold_point,
     is_tangent_vector, isapprox, inner, kurtosis, local_metric, local_metric_jacobian, log,

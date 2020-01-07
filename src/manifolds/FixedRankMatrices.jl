@@ -188,10 +188,10 @@ of dimension `m`x`n` of rank `k`, namely
 \dim(𝔽)k(m + n - k),
 ````
 
-where $\dim(𝔽)$ is the [`field_dimension`](@ref).
+where $\dim(𝔽)$ is the [`real_dimension`](@ref).
 """
 function manifold_dimension(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽}
-    return field_dimension(𝔽) * (m + n - k)*k
+    return real_dimension(𝔽) * (m + n - k)*k
 end
 
 @doc doc"""

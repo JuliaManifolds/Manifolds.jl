@@ -152,10 +152,10 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the fiel
 \operatorname{dim}_{\operatorname{Sym}(n,𝔽)} = \dim(𝔽) \frac{n(n+1)}{2},
 ````
 
-where $\dim(𝔽)$ is the [`field_dimension`](@ref).
+where $\dim(𝔽)$ is the [`real_dimension`](@ref).
 """
 function manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}
-    return field_dimension(𝔽)*div(N*(N+1),2)
+    return real_dimension(𝔽)*div(N*(N+1),2)
 end
 
 @doc doc"""

@@ -132,7 +132,7 @@ Return the manifold dimension of the [`Euclidean`](@ref) `M`, i.e.
 the product of all array dimensions.
 """
 @generated function manifold_dimension(::Euclidean{N,𝔽}) where {N,𝔽}
-    return *(field_dimension(𝔽), N.parameters...)
+    return *(real_dimension(𝔽), N.parameters...)
 end
 
 mean(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
