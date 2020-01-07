@@ -31,6 +31,8 @@ include("utils.jl")
         x = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)
         @test base_manifold(TB) == M
+        @test manifold_dimension(TB) == 2*manifold_dimension(M)
+        @test representation_size(TB) == (6,)
         @testset "Type $T" begin
             pts_tb = [ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
                       ProductRepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),

@@ -1,117 +1,37 @@
 module Manifolds
 
-import Base: isapprox,
-    exp,
-    log,
-    angle,
-    eltype,
-    similar,
-    getindex,
-    setindex!,
-    size,
-    length,
-    copy,
-    copyto!,
-    convert,
-    dataids,
-    axes,
-    promote_rule,
-    inv,
-    one,
-    zero,
-    +,
-    -,
-    *,
-    \,
-    /,
-    identity,
-    show
-import Statistics: mean,
-    mean!,
-    median,
-    median!,
-    var,
-    std
-import StatsBase: mean_and_std,
-    mean_and_var,
-    moment,
-    kurtosis,
-    skewness
-import LinearAlgebra: dot,
-    norm,
-    det,
-    cross,
-    mul!,
-    I,
-    UniformScaling,
-    Diagonal
+import Base: +, -, *, \, /, angle, axes, convert, copy, copyto!, dataids, eltype, exp,
+    getindex, identity, isapprox, inv, length, log, one, promote_rule, setindex!, show,
+    similar, size, zero
+import Distributions: _rand!, support
+import LinearAlgebra: cross, det, Diagonal, dot, mul!, norm, I, UniformScaling
+import ManifoldsBase: base_manifold, check_manifold_point, check_tangent_vector
+import ManifoldsBase: distance, exp, exp!, geodesic, injectivity_radius, inner
+import ManifoldsBase: isapprox, is_manifold_point, is_tangent_vector, is_decorator_manifold
+import ManifoldsBase: inverse_retract, inverse_retract!, log, log!, manifold_dimension, norm
+import ManifoldsBase: project_point, project_point!, project_tangent, project_tangent!
+import ManifoldsBase: representation_size, retract, retract!, similar_result, shortest_geodesic
+import ManifoldsBase: vector_transport_along, vector_transport_along!, vector_transport_direction,
+    vector_transport_direction!, vector_transport_to, vector_transport_to!
+import ManifoldsBase: zero_tangent_vector, zero_tangent_vector!
+import Random: rand
+import Statistics: mean, mean!, median, median!, std, var
+import StatsBase: kurtosis, mean_and_std, mean_and_var, moment, skewness
 
-using ManifoldsBase
-using ManifoldsBase: Manifold,
-    MPoint,
-    TVector,
-    CoTVector,
-    ArrayCoTVector,
-    ArrayManifold,
-    ArrayMPoint,
-    ArrayTVector,
-    ArrayCoTVector,
-    AbstractRetractionMethod,
-    AbstractInverseRetractionMethod,
-    AbstractVectorTransportMethod,
-    ExponentialRetraction,
-    LogarithmicInverseRetraction
-    ParallelTransport,
-    ProjectionTransport
-import ManifoldsBase: base_manifold,
-    check_manifold_point,
-    check_tangent_vector,
-    distance,
-    exp,
-    exp!,
-    geodesic,
-    injectivity_radius,
-    inner,
-    isapprox,
-    is_manifold_point,
-    is_tangent_vector,
-    is_decorator_manifold,
-    inverse_retract,
-    inverse_retract!,
-    log,
-    log!,
-    manifold_dimension,
-    norm,
-    project_point,
-    project_point!,
-    project_tangent,
-    project_tangent!,
-    representation_size,
-    retract,
-    retract!,
-    similar_result,
-    shortest_geodesic,
-    vector_transport_along,
-    vector_transport_along!,
-    vector_transport_direction,
-    vector_transport_direction!,
-    vector_transport_to,
-    vector_transport_to!,
-    zero_tangent_vector,
-    zero_tangent_vector!,
-    similar_result
-
+using Einsum: @einsum
+using FiniteDifferences
+using HybridArrays
+using LinearAlgebra
+using ManifoldsBase: CoTVector, Manifold, MPoint, TVector
+using ManifoldsBase: ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
+using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
+using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
+using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
+using Markdown: @doc_str
+using Random: AbstractRNG
 using Requires
 using StaticArrays
-using HybridArrays
-using Markdown: @doc_str
-import Distributions: _rand!, support
-import Random: rand
-using LinearAlgebra
-using Random: AbstractRNG
-using FiniteDifferences
 using UnsafeArrays
-using Einsum: @einsum
 
 """
     AbstractField
@@ -146,7 +66,9 @@ Given a basis $e_i$ on the tangent space at a point $x$ and tangent
 component vector $v^i$, compute the equivalent vector representation
 $v=v^i e_i$, where Einstein summation notation is used:
 
-$\wedge: v^i \mapsto v^i e_i$
+````math
+\wedge: v^i \mapsto v^i e_i
+````
 
 For matrix manifolds, this converts a vector representation of the tangent
 vector to a matrix representation. The [`vee`](@ref) map is the `hat` map's
@@ -168,7 +90,9 @@ Given a basis $e_i$ on the tangent space at a point $x$ and tangent
 vector $v$, compute the vector components $v^i$, such that $v = v^i e_i$, where
 Einstein summation notation is used:
 
-$\vee: v^i e_i \mapsto v^i$
+````math
+\vee: v^i e_i \mapsto v^i
+````
 
 For matrix manifolds, this converts a  matrix representation of the tangent
 vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
@@ -179,8 +103,9 @@ function vee(M::Manifold, x, v)
     vee!(M, vⁱ, x, v)
     return vⁱ
 end
-vee!(M::Manifold, vⁱ, x, v) = error("vee! operator not defined for manifold $(typeof(M)), matrix $(typeof(v)), and vector $(typeof(vⁱ))")
-
+function vee!(M::Manifold, vⁱ, x, v)
+    error("vee! operator not defined for manifold $(typeof(M)), matrix $(typeof(v)), and vector $(typeof(vⁱ))")
+end
 """
     PolarRetraction <: AbstractRetractionMethod
 
@@ -188,6 +113,13 @@ Retractions that are based on singular value decompositions of the matrix / matr
 for point and tangent vector on a [`Manifold`](@ref)
 """
 struct PolarRetraction <: AbstractRetractionMethod end
+
+"""
+    ProjectionRetraction <: AbstractRetractionMethod
+
+Retractions that are based on projection and usually addition in the embedding.
+"""
+struct ProjectionRetraction <: AbstractRetractionMethod end
 
 """
     QRRetraction <: AbstractRetractionMethod
@@ -206,6 +138,13 @@ matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
 struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
+    ProjectionInverseRetraction <: AbstractInverseRetractionMethod
+
+Inverse retractions that are based on a projection (or its inversion).
+"""
+struct ProjectionInverseRetraction <: AbstractInverseRetractionMethod end
+
+"""
     QRInverseRetraction <: AbstractInverseRetractionMethod
 
 Inverse retractions that are based on a QR decomposition of the
@@ -218,27 +157,28 @@ include("utils.jl")
 include("autodiff.jl")
 include("SizedAbstractArray.jl")
 
-include("ProductRepresentations.jl")
-include("VectorBundle.jl")
-include("Metric.jl")
+include("manifolds/VectorBundle.jl")
 
-include("DistributionsBase.jl")
-include("ProjectedDistribution.jl")
+include("distributions.jl")
+include("projected_distribution.jl")
+include("product_representations.jl")
 
-include("ProductManifold.jl")
-include("PowerManifold.jl")
+include("manifolds/MetricManifold.jl")
+include("manifolds/ProductManifold.jl")
+include("manifolds/PowerManifold.jl")
 
-include("CholeskySpace.jl")
-include("Circle.jl")
-include("Euclidean.jl")
-include("FixedRankMatrices.jl")
-include("Grassmann.jl")
-include("Hyperbolic.jl")
-include("Rotations.jl")
-include("Stiefel.jl")
-include("Sphere.jl")
-include("Symmetric.jl")
-include("SymmetricPositiveDefinite.jl")
+include("manifolds/CholeskySpace.jl")
+include("manifolds/Circle.jl")
+include("manifolds/Euclidean.jl")
+include("manifolds/FixedRankMatrices.jl")
+include("manifolds/Grassmann.jl")
+include("manifolds/Hyperbolic.jl")
+include("manifolds/Rotations.jl")
+include("manifolds/Stiefel.jl")
+include("manifolds/Sphere.jl")
+include("manifolds/Symmetric.jl")
+include("manifolds/SymmetricPositiveDefinite.jl")
+
 
 include("groups/group.jl")
 include("groups/group_action.jl")
@@ -262,218 +202,56 @@ function __init__()
     end
 
     @require OrdinaryDiffEq="1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
-        using .OrdinaryDiffEq: ODEProblem,
-            AutoVern9,
-            Rodas5,
-            solve
+        using .OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
         include("ode.jl")
     end
 end
-
-# Base Types
-export Manifold,
-    Euclidean,
-    Circle,
-    Sphere,
-    Hyperbolic,
-    SymmetricMatrices,
-    MPoint,
-    TVector,
-    CoTVector,
-    SVDMPoint,
-    UMVTVector,
-    ℝ, ℂ
+#
+export CoTVector, Manifold, MPoint, TVector, Manifold
+export Euclidean, CholeskySpace, Circle, FixedRankMatrices, Grassmann,
+    Hyperbolic, Rotations,Sphere, Stiefel, SymmetricMatrices, SymmetricPositiveDefinite
+export SVDMPoint, UMVTVector, AbstractField, ℝ, ℂ
 # decorator manifolds
-export ArrayManifold,
-    ArrayMPoint,
-    ArrayTVector,
-    ArrayCoTVector,
-    CotangentBundle,
-    CotangentSpaceAtPoint,
-    CotangentBundleFibers,
-    CotangentSpace,
-    FVector,
-    PowerManifold,
-    ProductManifold,
-    ProjectedPointDistribution,
-    ProductRepr,
-    TangentBundle,
-    TangentBundleFibers,
-    TangentSpace,
-    TangentSpaceAtPoint,
-    VectorSpaceAtPoint,
-    VectorSpaceType,
-    VectorBundle,
-    VectorBundleFibers,
-    FVector,
-    TangentBundle,
-    CotangentBundle,
-    TangentBundleFibers,
-    CotangentBundleFibers,
-    AbstractVectorTransportMethod,
-    ParallelTransport,
-    ProjectedPointDistribution
-# Manifolds
-export CholeskySpace,
-    Euclidean,
-    FixedRankMatrices,
-    Grassmann,
-    Rotations,
-    Sphere,
-    Stiefel,
-    SymmetricPositiveDefinite
-# Types
-export Metric,
-    RiemannianMetric,
-    LorentzMetric,
-    MinkowskiMetric,
-    EuclideanMetric,
-    MetricManifold,
-    LinearAffineMetric,
-    LogEuclideanMetric,
-    LogCholeskyMetric,
-    AbstractVectorTransportMethod,
-    ParallelTransport,
-    ProjectionTransport,
-    AbstractRetractionMethod,
-    QRRetraction,
-    PolarRetraction,
-    AbstractInverseRetractionMethod,
-    QRInverseRetraction,
-    PolarInverseRetraction,
-    AbstractEstimationMethod,
-    GradientDescentEstimation,
-    CyclicProximalPointEstimation,
-    GeodesicInterpolation,
-    GeodesicInterpolationWithinRadius
-export base_manifold,
-    bundle_projection,
-    christoffel_symbols_first,
-    christoffel_symbols_second,
-    christoffel_symbols_second_jacobian,
-    complex_dot,
-    det_local_metric,
-    distance,
-    einstein_tensor,
-    exp,
-    exp!,
-    flat,
-    flat!,
-    gaussian_curvature,
-    geodesic,
-    hat,
-    hat!,
-    injectivity_radius,
-    inner,
-    inverse_local_metric,
-    inverse_retract,
-    inverse_retract!,
-    isapprox,
-    is_decorator_manifold,
-    is_default_metric,
-    is_manifold_point,
-    is_tangent_vector,
-    isapprox,
-    inner,
-    kurtosis,
-    local_metric,
-    local_metric_jacobian,
-    log,
-    log!,
-    log_local_metric_density,
-    manifold_dimension,
-    metric,
-    mean,
-    mean!,
-    mean_and_var,
-    mean_and_std,
-    median,
-    median!,
-    moment,
-    norm,
-    normal_tvector_distribution,
-    one,
-    project_point,
-    project_point!,
-    project_tangent,
-    project_tangent!,
-    projected_distribution,
-    ricci_curvature,
-    ricci_tensor,
-    representation_size,
-    retract,
-    retract!,
-    riemann_tensor,
-    sharp,
-    sharp!,
-    shortest_geodesic,
-    similar_result,
-    skewness,
-    std,
-    sym_rem,
-    submanifold,
-    submanifold_component,
-    tangent_orthonormal_basis,
-    var,
-    vector_space_dimension,
-    vector_transport_along,
-    vector_transport_along!,
-    vector_transport_direction,
-    vector_transport_direction!,
-    vector_transport_to,
-    vector_transport_to!,
-    vee,
-    vee!,
-    zero_vector,
-    zero_vector!,
-    zero_tangent_vector,
+export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
+export CotangentBundle, CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
+export PowerManifold, ProductManifold
+export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers
+export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
+export VectorBundleFibers
+export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribution
+export Metric, RiemannianMetric, LorentzMetric, MinkowskiMetric, EuclideanMetric, MetricManifold,
+    LinearAffineMetric, LogEuclideanMetric, LogCholeskyMetric, PowerMetric, ProductMetric
+export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
+export AbstractRetractionMethod, QRRetraction, PolarRetraction, ProjectionRetraction
+export AbstractInverseRetractionMethod, QRInverseRetraction, PolarInverseRetraction,
+    ProjectionInverseRetraction
+export AbstractEstimationMethod, GradientDescentEstimation, CyclicProximalPointEstimation,
+    GeodesicInterpolation, GeodesicInterpolationWithinRadius
+export base_manifold, bundle_projection, christoffel_symbols_first, christoffel_symbols_second,
+    christoffel_symbols_second_jacobian, complex_dot, det_local_metric, distance,
+    einstein_tensor, exp, exp!, flat, flat!, gaussian_curvature, geodesic, hat, hat!,
+    injectivity_radius, inner, inverse_local_metric, inverse_retract, inverse_retract!,
+    isapprox, is_decorator_manifold, is_default_metric, is_manifold_point,
+    is_tangent_vector, isapprox, inner, kurtosis, local_metric, local_metric_jacobian,
+    log, log!, log_local_metric_density, manifold_dimension, metric, mean, mean!,
+    mean_and_var, mean_and_std, median, median!, moment, norm, normal_tvector_distribution,
+    one, project_point, project_point!, project_tangent, project_tangent!,
+    projected_distribution, ricci_curvature, ricci_tensor, representation_size, retract,
+    retract!, riemann_tensor, sharp, sharp!, shortest_geodesic, similar_result, skewness,
+    std, sym_rem, submanifold, submanifold_component, tangent_orthonormal_basis, var,
+    vector_space_dimension, vector_transport_along, vector_transport_along!,
+    vector_transport_direction, vector_transport_direction!, vector_transport_to,
+    vector_transport_to!, vee, vee!, zero_vector, zero_vector!, zero_tangent_vector,
     zero_tangent_vector!
-
-# Lie groups and actions
-export AbstractGroupAction,
-    AbstractGroupOperation,
-    AbstractGroupManifold,
-    ActionDirection,
-    GroupManifold,
-    GroupOperationAction,
-    Identity,
-    LeftAction,
-    RightAction,
-    RotationAction,
-    SemidirectProductGroup,
-    SpecialEuclidean,
-    SpecialOrthogonal,
-    TranslationGroup,
-    TranslationAction
-
-export apply,
-    apply!,
-    apply_diff,
-    apply_diff!,
-    base_group,
-    center_of_orbit,
-    compose,
-    compose!,
-    direction,
-    g_manifold,
-    identity,
-    identity!,
-    inv,
-    inv!,
-    inverse_apply,
-    inverse_apply!,
-    inverse_apply_diff,
-    inverse_apply_diff!,
-    inverse_translate,
-    inverse_translate!,
-    inverse_translate_diff,
-    inverse_translate_diff!,
-    optimal_alignment,
-    optimal_alignment!,
-    switch_direction,
-    translate,
-    translate!,
-    translate_diff,
+# Lie group types & functions
+export AbstractGroupAction, AbstractGroupOperation, AbstractGroupManifold, ActionDirection,
+    AdditionOperation, MultiplicationOperation, GroupManifold, GroupOperationAction,
+    Identity, LeftAction, RightAction, RotationAction, SemidirectProductGroup,
+    SpecialEuclidean, SpecialOrthogonal, TranslationGroup, TranslationAction
+export apply, apply!, apply_diff, apply_diff!, base_group, center_of_orbit, compose,
+    compose!, direction, g_manifold, identity, identity!, inv, inv!, inverse_apply,
+    inverse_apply!, inverse_apply_diff, inverse_apply_diff!, inverse_translate,
+    inverse_translate!, inverse_translate_diff, inverse_translate_diff!, optimal_alignment,
+    optimal_alignment!, switch_direction, translate, translate!, translate_diff,
     translate_diff!
-
 end # module

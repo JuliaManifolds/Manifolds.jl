@@ -10,10 +10,10 @@ makedocs(
         "ManifoldsBase.jl" => "interface.md",
         "Manifolds" => [
             "Basic manifolds" => [
+                "Cholesky Space" => "manifolds/choleskyspace.md",
                 "Circle" => "manifolds/circle.md",
                 "Euclidean" => "manifolds/euclidean.md",
                 "Fixed Rank Matrices" => "manifolds/fixedrankmatrices.md",
-                "Cholesky Space" => "manifolds/choleskyspace.md",
                 "Grassmannian" => "manifolds/grassmann.md",
                 "Hyperbolic Space" => "manifolds/hyperbolic.md",
                 "Rotations" => "manifolds/rotations.md",

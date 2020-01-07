@@ -4,7 +4,7 @@ Following functions and types provide support for manifold-valued and tangent sp
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["DistributionsBase.jl"]
+Pages = ["distributions.jl"]
 Order = [:type, :function]
 ```
 ```@docs

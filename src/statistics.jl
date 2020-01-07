@@ -170,7 +170,7 @@ The algorithm is further described in [^Afsari2013].
     > doi: [10.1137/12086282X](https://doi.org/10.1137/12086282X),
     > arxiv: [1201.0925](https://arxiv.org/abs/1201.0925)
 """
-mean(::Manifold, args...)
+mean(::Manifold, ::Any)
 
 @doc doc"""
     mean!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights]; kwargs...)
@@ -185,7 +185,7 @@ mean(::Manifold, args...)
 
 Compute the [`mean`](@ref mean(::Manifold, args...)) in-place in `y`.
 """
-mean!(::Manifold, args...)
+mean!(::Manifold, ::Any)
 
 function mean(M::Manifold, x::AbstractVector, method::AbstractEstimationMethod...; kwargs...)
     y = similar_result(M, mean, x[1])
@@ -426,7 +426,7 @@ The algorithm is further described in [^Bačák2014].
     > doi: [10.1137/140953393](https://doi.org/10.1137/140953393),
     > arxiv: [1210.2145](https://arxiv.org/abs/1210.2145)
 """
-median(::Manifold, args...)
+median(::Manifold, ::Any)
 
 @doc doc"""
     median!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights]; kwargs...)
@@ -441,7 +441,7 @@ median(::Manifold, args...)
 
 computes the [`median`](@ref) in-place in `y`.
 """
-median!(::Manifold, args...)
+median!(::Manifold, ::Any)
 
 function median(M::Manifold, x::AbstractVector, method::AbstractEstimationMethod...; kwargs...)
     y = similar_result(M, median, x[1])
@@ -517,7 +517,7 @@ The mean of `x` can be specified as `m`, and the corrected variance
 can be activated by setting `corrected=true`. All further `kwargs...` are passed
 to the computation of the mean (if that is not provided).
 """
-var(M::Manifold, args...)
+var(M::Manifold, ::Any)
 
 function var(
     M::Manifold,
@@ -583,7 +583,7 @@ Use the `method` for simultaneously computing the mean and variance. To use
 a mean-specific method, call [`mean`](@ref mean(::Manifold, args...)) and then
 [`var`](@ref).
 """
-mean_and_var(M::Manifold, args...)
+mean_and_var(M::Manifold, ::Any)
 
 function mean_and_var(
     M::Manifold,
