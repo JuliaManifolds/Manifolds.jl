@@ -307,6 +307,10 @@ Tangent vectors are represented by matrices.
 """
 inner(M::Rotations, x, w, v) = dot(w, v)
 
+function inverse_represent_in_basis(M::Rotations, x, v, B::ArbitraryOrthonormalBasis) where N
+    return hat(M, x, v)
+end
+
 @doc doc"""
     inverse_retract(M, x, y, ::PolarInverseRetraction)
 
@@ -552,6 +556,10 @@ where tangent vectors are represented by elements from the Lie group
 """
 project_tangent(::Rotations, ::Any...)
 project_tangent!(M::Rotations, w, x, v) = w .= (v .- transpose(v))./2
+
+function represent_in_basis(M::Rotations, x, v, B::ArbitraryOrthonormalBasis) where N
+    return vee(M, x, v)
+end
 
 @doc doc"""
     representation_size(M::Rotations)

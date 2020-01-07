@@ -18,6 +18,8 @@ include("utils.jl")
     inverse_retraction_methods = [Manifolds.PolarInverseRetraction(),
                                   Manifolds.QRInverseRetraction()]
 
+    basis_types = (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
+
     @testset "vee/hat" begin
         M = Manifolds.Rotations(2)
         v = randn(1)
@@ -43,7 +45,8 @@ include("utils.jl")
             retraction_methods = retraction_methods,
             inverse_retraction_methods = inverse_retraction_methods,
             point_distributions = [Manifolds.normal_rotation_distribution(M, pts[1], 1.0)],
-            tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
+            tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
+            basis_types_to_from = basis_types)
 
         @testset "log edge cases" begin
             v = Manifolds.hat(M, pts[1], [Float64(π)])
@@ -88,6 +91,7 @@ include("utils.jl")
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [ptd],
                 tvector_distributions = [tvd],
+                basis_types_to_from = basis_types,
                 exp_log_atol_multiplier = 20,
                 retraction_atol_multiplier = 12)
 

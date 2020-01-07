@@ -79,6 +79,16 @@ struct PowerFVectorDistribution{
 end
 
 """
+    PrecomputedPowerOrthonormalBasis(bases::AbstractArray{AbstractPrecomputedOrthonormalBasis})
+
+A precomputed orthonormal basis of a tangent space of a power manifold.
+The array `bases` stores bases corresponding to particular parts of the manifold.
+"""
+struct PrecomputedPowerOrthonormalBasis{TB<:AbstractArray{AbstractPrecomputedOrthonormalBasis}} <: AbstractPrecomputedOrthonormalBasis
+    bases::TB
+end
+
+"""
     check_manifold_point(M::ProductManifold, x; kwargs...)
 
 Check whether `x` is a valid point on the [`ProductManifold`](@ref) `M`, i.e.
@@ -257,6 +267,54 @@ function inner(M::PowerManifold, x, v, w)
     return result
 end
 
+
+function inverse_represent_in_basis(
+    M::PowerManifold,
+    x,
+    v,
+    B::PrecomputedPowerOrthonormalBasis
+)
+    dim = manifold_dimension(M.manifold)
+
+    rep_size = representation_size(M.manifold)
+    v_out = similar(x)
+    v_iter = 1
+    for i in get_iterator(M)
+        copyto!(_write(rep_size, v_out, i), inverse_represent_in_basis(
+            M.manifold,
+            _read(rep_size, x, i),
+            v[v_iter:v_iter+dim-1],
+            B.bases[i...]
+        ))
+        v_iter += dim
+    end
+    return v_out
+end
+
+function inverse_represent_in_basis(
+    M::PowerManifold,
+    x,
+    v,
+    B::ArbitraryOrthonormalBasis
+)
+
+    dim = manifold_dimension(M.manifold)
+
+    rep_size = representation_size(M.manifold)
+    v_out = similar(x)
+    v_iter = 1
+    for i in get_iterator(M)
+        copyto!(_write(rep_size, v_out, i), inverse_represent_in_basis(
+            M.manifold,
+            _read(rep_size, x, i),
+            v[v_iter:v_iter+dim-1],
+            B
+        ))
+        v_iter += dim
+    end
+    return v_out
+end
+
 is_default_metric(::PowerManifold,::PowerMetric) = Val(true)
 
 function isapprox(M::PowerManifold, x, y; kwargs...)
@@ -376,6 +434,19 @@ end
 @generated function rep_size_to_colons(rep_size::Tuple)
     N = length(rep_size.parameters)
     return ntuple(i -> Colon(), N)
+end
+
+function represent_in_basis(M::PowerManifold, x, v, B::ArbitraryOrthonormalBasis)
+    rep_size = representation_size(M.manifold)
+    vs = [represent_in_basis(M.manifold, _read(rep_size, x, i), _read(rep_size, v, i), B)
+        for i in get_iterator(M)]
+    return reduce(vcat, reshape(vs, length(vs)))
+end
+function represent_in_basis(M::PowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
+    rep_size = representation_size(M.manifold)
+    vs = [represent_in_basis(M.manifold, _read(rep_size, x, i), _read(rep_size, v, i), B.bases[i...])
+        for i in get_iterator(M)]
+    return reduce(vcat, reshape(vs, length(vs)))
 end
 
 function representation_size(M::PowerManifold{<:Manifold, TSize}) where TSize

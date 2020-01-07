@@ -66,6 +66,17 @@ end
 InverseProductRetraction(inverse_retractions::AbstractInverseRetractionMethod...) = InverseProductRetraction{typeof(inverse_retractions)}(inverse_retractions)
 
 """
+    PrecomputedProductOrthonormalBasis(parts::NTuple{N,AbstractPrecomputedOrthonormalBasis} where N)
+
+A precomputed orthonormal basis of a tangent space of a product manifold.
+The tuple `parts` stores bases corresponding to multiplied manifolds.
+"""
+struct PrecomputedProductOrthonormalBasis{T<:NTuple{N,AbstractPrecomputedOrthonormalBasis} where N} <: AbstractPrecomputedOrthonormalBasis
+    parts::T
+end
+
+
+"""
     check_manifold_point(M::ProductManifold, x; kwargs...)
 
 Check whether `x` is a valid point on the [`ProductManifold`](@ref) `M`.
@@ -143,17 +154,6 @@ end
 function cross(M1::ProductManifold, M2::ProductManifold)
     return ProductManifold(M1.manifolds..., M2.manifolds...)
 end
-
-"""
-    PrecomputedProductOrthonormalBasis(parts::NTuple{N,AbstractPrecomputedOrthonormalBasis} where N)
-
-A precomputed orthonormal basis of a tangent space of a product manifold.
-The tuple `parts` stores bases corresponding to multiplied manifolds.
-"""
-struct PrecomputedProductOrthonormalBasis{T<:NTuple{N,AbstractPrecomputedOrthonormalBasis} where N} <: AbstractPrecomputedOrthonormalBasis
-    parts::T
-end
-
 
 function basis(M::ProductManifold, x, B::ProjectedOrthonormalBasis{:svd})
     parts = map(t -> basis(t..., B),
