@@ -151,13 +151,13 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the numb
 `𝔽`, i.e.
 
 ````math
-\operatorname{dim}_{\operatorname{Sym}(n,𝔽)} = \dim(𝔽) \frac{n(n+1)}{2},
+\dim \operatorname{Sym}(n,𝔽) = \frac{n(n+1)}{2} \dim_ℝ 𝔽,
 ````
 
-where $\dim(𝔽)$ is the [`real_dimension`](@ref) of `𝔽`.
+where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
 function manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}
-    return real_dimension(𝔽)*div(N*(N+1),2)
+    return div(N*(N+1),2)*real_dimension(𝔽)
 end
 
 @doc doc"""

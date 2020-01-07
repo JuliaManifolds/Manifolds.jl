@@ -206,7 +206,7 @@ isapprox(M::Stiefel, x, y; kwargs...) = isapprox(norm(x-y), 0;kwargs...)
     manifold_dimension(M::Stiefel)
 
 Return the dimension of the [`Stiefel`](@ref) manifold `M`=$\operatorname{St}(n,k,𝔽)$.
-The dimension for $\mathbb{F}=\mathbb{R}$ is given by
+The dimension is given by
 
 ````math
 \dim \mathrm{Stiefel}(n, k, ℝ) &= nk - \frac{1}{2}k(k+1)\\

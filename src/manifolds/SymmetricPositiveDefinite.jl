@@ -93,7 +93,7 @@ injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMet
 returns the dimension of
 [`SymmetricPositiveDefinite`](@ref) `M`$=\mathcal P(n), n\in \mathbb N$, i.e.
 ````math
-\operatorname{dim}_{\mathcal P(n)} \frac{n(n+1)}{2}
+\dim \mathcal P(n) = \frac{n(n+1)}{2}
 ````
 """
 @generated manifold_dimension(M::SymmetricPositiveDefinite{N}) where {N} = div(N*(N+1), 2)

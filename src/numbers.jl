@@ -11,21 +11,21 @@ abstract type AbstractNumbers end
 """
     ℝ = RealNumbers()
 
-The field of real [`numbers`](@ref AbstractNumbers).
+The field of real numbers.
 """
 struct RealNumbers <: AbstractNumbers end
 
 """
     ℂ = ComplexNumbers()
 
-The field of complex [`numbers`](@ref AbstractNumbers).
+The field of complex numbers.
 """
 struct ComplexNumbers <: AbstractNumbers end
 
 """
     ℍ = QuaternionNumbers()
 
-The division algebra of quaternion [`numbers`](@ref AbstractNumbers).
+The division algebra of quaternions.
 """
 struct QuaternionNumbers <: AbstractNumbers end
 
@@ -37,16 +37,18 @@ Base.show(io::IO, ::RealNumbers) = print(io, "ℝ")
 Base.show(io::IO, ::ComplexNumbers) = print(io, "ℂ")
 Base.show(io::IO, ::QuaternionNumbers) = print(io, "ℍ")
 
-"""
+@doc doc"""
     real_dimension(𝔽::AbstractNumbers)
 
-Return the real dimension of the [number system](@ref AbstractNumbers) `𝔽`.
-The real dimension is the dimension of a real space with which a number in `𝔽` can be
+Return the real dimension $\dim_ℝ 𝔽$ of the [`AbstractNumbers`] system `𝔽`.
+The real dimension is the dimension of a real vector space with which a number in `𝔽` can be
 identified.
 For example, [`ComplexNumbers`](@ref) have a real dimension of 2, and
 [`QuaternionNumbers`](@ref) have a real dimension of 4.
 """
-real_dimension(𝔽::AbstractNumbers) = error("real_dimension not defined for number system $(𝔽)")
+function real_dimension(𝔽::AbstractNumbers)
+    error("real_dimension not defined for number system $(𝔽)")
+end
 real_dimension(::RealNumbers) = 1
 real_dimension(::ComplexNumbers) = 2
 real_dimension(::QuaternionNumbers) = 4
