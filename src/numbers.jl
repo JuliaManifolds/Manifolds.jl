@@ -37,6 +37,8 @@ Base.show(io::IO, ::RealNumbers) = print(io, "ℝ")
 Base.show(io::IO, ::ComplexNumbers) = print(io, "ℂ")
 Base.show(io::IO, ::QuaternionNumbers) = print(io, "ℍ")
 
+^(𝔽::AbstractNumbers, n) = Euclidean(n...; field = 𝔽)
+
 @doc doc"""
     real_dimension(𝔽::AbstractNumbers)
 

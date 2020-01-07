@@ -1,6 +1,6 @@
 module Manifolds
 
-import Base: +, -, *, \, /, angle, axes, convert, copy, copyto!, dataids, eltype, exp,
+import Base: +, -, *, \, /, ^, angle, axes, convert, copy, copyto!, dataids, eltype, exp,
     getindex, identity, isapprox, inv, length, log, promote_rule, setindex!, similar, size
 import Distributions: _rand!, support
 import LinearAlgebra: cross, det, Diagonal, dot, norm, I, UniformScaling
