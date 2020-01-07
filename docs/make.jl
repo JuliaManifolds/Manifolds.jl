@@ -36,7 +36,7 @@ makedocs(
         "Statistics" => "statistics.md",
         "Distributions" => "distributions.md",
         "Library" => [
-            "Fields" => "lib/fields.md",
+            "Numbers" => "lib/numbers.md",
             "Public" => "lib/public.md",
             "Internals" => "lib/internals.md",
             "Automatic Differentiation" => "lib/autodiff.md"

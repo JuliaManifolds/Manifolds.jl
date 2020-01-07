@@ -1,7 +1,7 @@
-# Fields
+# Numbers
 
 ```@docs
-Manifolds.AbstractField
+Manifolds.AbstractNumbers
 Manifolds.RealNumbers
 Manifolds.ComplexNumbers
 Manifolds.QuaternionNumbers

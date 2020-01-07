@@ -22,8 +22,8 @@ The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is $k$ for the real-valued case and $2k$ for the
 complex-valued case.
 """
-struct Euclidean{N<:Tuple,T} <: Manifold where {N, T<: AbstractField} end
-Euclidean(n::Vararg{Int,N};field::AbstractField=ℝ) where N = Euclidean{Tuple{n...},field}()
+struct Euclidean{N<:Tuple,T} <: Manifold where {N, T<: AbstractNumbers} end
+Euclidean(n::Vararg{Int,N};field::AbstractNumbers=ℝ) where N = Euclidean{Tuple{n...},field}()
 
 """
     EuclideanMetric <: RiemannianMetric

@@ -134,7 +134,7 @@ struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
 
 include("utils.jl")
-include("field.jl")
+include("numbers.jl")
 include("autodiff.jl")
 include("SizedAbstractArray.jl")
 
@@ -185,7 +185,7 @@ end
 export CoTVector, Manifold, MPoint, TVector, Manifold
 export Euclidean, CholeskySpace, Circle, FixedRankMatrices, Grassmann,
     Hyperbolic, Rotations,Sphere, Stiefel, SymmetricMatrices, SymmetricPositiveDefinite
-export SVDMPoint, UMVTVector, AbstractField, ℝ, ℂ, ℍ
+export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
 export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 export CotangentBundle, CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector

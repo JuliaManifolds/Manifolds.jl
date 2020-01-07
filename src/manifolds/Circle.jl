@@ -9,11 +9,11 @@ $\lvert z\rvert = 1$.
     Circle(f=ℝ)
 
 Generate the ℝ-valued Circle represented by angles, which
-alternatively can be set to use the [`AbstractField`](@ref) `f=ℂ` to obtain the `Circle`
+alternatively can be set to use the [`AbstractNumbers`](@ref) `f=ℂ` to obtain the `Circle`
 represented by `ℂ`-valued `Circle` of unit numbers.
 """
-struct Circle{F} <: Manifold where {F <: AbstractField} end
-Circle(f::AbstractField=ℝ) = Circle{f}()
+struct Circle{F} <: Manifold where {F <: AbstractNumbers} end
+Circle(f::AbstractNumbers=ℝ) = Circle{f}()
 
 @doc doc"""
     check_manifold_point(M::Circle, x)

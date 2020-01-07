@@ -1,33 +1,33 @@
 """
-    AbstractField
+    AbstractNumbers
 
 An abstract type to represent the field matrix manifolds are build upon, following the idea
 of [TensorKit](https://github.com/Jutho/TensorKit.jl) in order to have concrete field types
 to dispatch on. The two most common field types are [`RealNumbers`](@ref) (`ℝ` for short)
 and [`ComplexNumbers`](@ref) (`ℂ`).
 """
-abstract type AbstractField end
+abstract type AbstractNumbers end
 
 """
     ℝ = RealNumbers()
 
-The [`field`](@ref AbstractField) of real numbers.
+The [`field`](@ref AbstractNumbers) of real numbers.
 """
-struct RealNumbers <: AbstractField end
+struct RealNumbers <: AbstractNumbers end
 
 """
     ℂ = ComplexNumbers()
 
-The [`field`](@ref AbstractField) of complex number.
+The [`field`](@ref AbstractNumbers) of complex number.
 """
-struct ComplexNumbers <: AbstractField end
+struct ComplexNumbers <: AbstractNumbers end
 
 """
     ℍ = QuaternionNumbers()
 
-The [`field`](@ref AbstractField) of quaternion numbers.
+The [`field`](@ref AbstractNumbers) of quaternion numbers.
 """
-struct QuaternionNumbers <: AbstractField end
+struct QuaternionNumbers <: AbstractNumbers end
 
 const ℝ = RealNumbers()
 const ℂ = ComplexNumbers()
@@ -38,13 +38,13 @@ Base.show(io::IO, ::ComplexNumbers) = print(io, "ℂ")
 Base.show(io::IO, ::QuaternionNumbers) = print(io, "ℍ")
 
 """
-    field_dimension(𝔽::AbstractField)
+    field_dimension(𝔽::AbstractNumbers)
 
-Return the dimension of the [`AbstractField`](@ref).
+Return the dimension of the [`AbstractNumbers`](@ref).
 The field dimension is the dimension of a real space with which a point on the field can be
 identified. For example, [`ComplexNumbers`](@ref) have a field dimension of 2.
 """
-field_dimension(𝔽::AbstractField) = error("field_dimension not defined for field $(𝔽)")
+field_dimension(𝔽::AbstractNumbers) = error("field_dimension not defined for field $(𝔽)")
 field_dimension(::RealNumbers) = 1
 field_dimension(::ComplexNumbers) = 2
 field_dimension(::QuaternionNumbers) = 4

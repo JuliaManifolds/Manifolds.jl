@@ -9,25 +9,25 @@ symmetric matrices of size $ n\times n$, i.e. the set
 ````
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed
 and the field $\mathbb F \in \{ \mathbb R, \mathbb C\}$ is set by the
-[`AbstractField`](@ref) `F`.
+[`AbstractNumbers`](@ref) `F`.
 
 Though it is slighty redundant, usually the matrices are safed as $n\times n$ arrays.
 
 # Constructor
 
-    SymmetricMatrices(n::Int, F::AbstractField=ℝ)
+    SymmetricMatrices(n::Int, F::AbstractNumbers=ℝ)
 
 Generate the manifold of $n\times n$ symmetric metrices.
 """
 struct SymmetricMatrices{n,F} <: Manifold end
-SymmetricMatrices(n::Int,F::AbstractField=ℝ) = SymmetricMatrices{n,F}()
+SymmetricMatrices(n::Int,F::AbstractNumbers=ℝ) = SymmetricMatrices{n,F}()
 
 @doc doc"""
     check_manifold_point(M::SymmetricMatrices{n,F}, x; kwargs...)
 
 Check whether `x` is a valid manifold point on the [`SymmetricMatrices`](@ref) `M`, i.e.
 whether `x` is a symmetric matrix of size `(n,n)` with values from the corresponding
-[`AbstractField`](@ref) `F`.
+[`AbstractNumbers`](@ref) `F`.
 
 The tolerance for the symmetry of `x` can be set using `kwargs...`.
 """
@@ -52,7 +52,7 @@ end
 
 Check whether `v` is a tangent vector to manifold point `x` on the
 [`SymmetricMatrices`](@ref) `M`, i.e. `v` has to be a symmetric matrix of dimension `(n,n)`
-and its values have to be from the correct [`AbstractField`](@ref).
+and its values have to be from the correct [`AbstractNumbers`](@ref).
 
 The tolerance for the symmetry of `x` and `v` can be set using `kwargs...`.
 """

@@ -35,12 +35,12 @@ The manifold is named after
 Generate the (real-valued) Stiefel manifold of $n\times k$ dimensional orthonormal matrices.
 """
 struct Stiefel{n,k,F} <: Manifold end
-Stiefel(n::Int, k::Int,F::AbstractField=ℝ) = Stiefel{n,k,F}()
+Stiefel(n::Int, k::Int,F::AbstractNumbers=ℝ) = Stiefel{n,k,F}()
 @doc doc"""
     check_manifold_point(M::Stiefel, x; kwargs...)
 
 Check whether `x` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$,
-i.e. that it has the right [`AbstractField`](@ref) type and $x^{\mathrm{H}}x$
+i.e. that it has the right [`AbstractNumbers`](@ref) type and $x^{\mathrm{H}}x$
 is (approximatly) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
@@ -68,7 +68,7 @@ end
     check_tangent_vector(M::Stiefel, x, v; kwargs...)
 
 Check whether `v` is a valid tangent vector at `x` on the [`Stiefel`](@ref)
-`M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractField`](@ref) fits and
+`M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](@ref) fits and
 it (approximtly) holds that $x^{\mathrm{H}}v + v^{\mathrm{H}}x = 0$, where
 `kwargs...` is passed to the `isapprox`.
 """

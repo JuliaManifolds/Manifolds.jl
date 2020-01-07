@@ -56,7 +56,7 @@ Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
 case $\mathbb F = \mathbb R$ is the default.
 """
 struct Grassmann{n,k,F} <: Manifold end
-Grassmann(n::Int, k::Int, F::AbstractField=ℝ) = Grassmann{n,k,F}()
+Grassmann(n::Int, k::Int, F::AbstractNumbers=ℝ) = Grassmann{n,k,F}()
 
 @doc doc"""
     check_manifold_point(M::Grassmann{n,k,F}, x)
