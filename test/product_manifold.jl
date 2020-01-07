@@ -8,7 +8,8 @@ include("utils.jl")
     @test Mse == ProductManifold(M1) × M2
     @test Mse == ProductManifold(M1) × ProductManifold(M2)
     @test Mse == M1 × ProductManifold(M2)
-
+    @test injectivity_radius(Mse) ≈ π
+    @test is_default_metric(Mse, ProductMetric()) == Val(true)
     types = [
         Vector{Float64},
         MVector{5, Float64},
@@ -34,6 +35,7 @@ include("utils.jl")
             distr_M2 = Manifolds.projected_distribution(M2, Distributions.MvNormal(zero(pts_base[1][4:5]), 1.0))
             distr_tv_M1 = Manifolds.normal_tvector_distribution(M1, pts_base[1][1:3], 1.0)
             distr_tv_M2 = Manifolds.normal_tvector_distribution(M2, pts_base[1][4:5], 1.0)
+            @test injectivity_radius(Mse, pts[1]) ≈ π
             test_manifold(
                 Mse,
                 pts;

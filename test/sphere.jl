@@ -32,7 +32,9 @@ include("utils.jl")
                 test_mutating_rand = isa(T, Vector),
                 point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
                 tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
-                basis_types_to_from = basis_types
+                basis_types_to_from = basis_types,
+                retraction_methods = [ProjectionRetraction()],
+                inverse_retraction_methods = [ProjectionInverseRetraction()]
             )
 
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
@@ -63,5 +65,4 @@ include("utils.jl")
         vexp = normalize(project_tangent(M, x, [0, 1, zeros(n - 1)...]))
         @test v ≈ π * vexp
     end
-
 end

@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/JuliaNLSolvers/Manifolds.jl.svg?branch=master)](https://travis-ci.org/JuliaNLSolvers/Manifolds.jl/) [![codecov.io](http://codecov.io/github/JuliaNLSolvers/Manifolds.jl/coverage.svg?branch=master)](https://codecov.io/gh/JuliaNLSolvers/Manifolds.jl/)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://julianlsolvers.github.io/Manifolds.jl/latest/)
+[![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 
 Package __Manifolds.jl__ aims to provide both a unified interface to define and
 use manifolds as well as a library of manifolds to use for your projects.

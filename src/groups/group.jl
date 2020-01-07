@@ -24,8 +24,8 @@ abstract type AbstractGroupOperation end
 @doc doc"""
     AbstractGroupManifold{<:AbstractGroupOperation} <: Manifold
 
-Abstract type for a Lie group, a group that is also a smooth manifold with a
-[smooth binary operation](@ref AbstractGroupOperation).
+Abstract type for a Lie group, a group that is also a smooth manifold with an
+[`AbstractGroupOperation`](@ref), a smooth binary operation.
 `AbstractGroupManifold`s must implement at least [`inv`](@ref),
 [`identity`](@ref), [`compose`](@ref), and [`translate_diff`](@ref).
 Group manifolds by default forward metric-related operations to the wrapped
@@ -140,6 +140,12 @@ function identity(G::AbstractGroupManifold, x)
     return y
 end
 
+"""
+    compose(G::AbstractGroupManifold, x, y)
+
+Compose elements `x` and `y` of `G` using their left translation upon each other.
+"""
+compose(::AbstractGroupManifold, ::Any...)
 function compose(G::AbstractGroupManifold, x, y)
     z = similar_result(G, compose, x, y)
     compose!(G, z, x, y)
@@ -149,15 +155,6 @@ compose(G::GT, ::Identity{GT}, y) where GT<:AbstractGroupManifold = y
 compose(G::GT, x, ::Identity{GT}) where GT<:AbstractGroupManifold = x
 compose(G::GT, x::Identity{GT}, ::Identity{GT}) where GT<:AbstractGroupManifold = x
 
-
-"""
-    compose!(G::AbstractGroupManifold, z, x, y)
-
-Compose elements `x` and `y` of `G` using their left translation upon each other.
-The result is saved in `z`.
-
-`z` may alias with one or both of `x` and `y`.
-"""
 function compose!(G::AbstractGroupManifold, z, x, y)
     error("compose not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y))")
 end

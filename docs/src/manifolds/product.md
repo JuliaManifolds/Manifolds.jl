@@ -4,6 +4,6 @@ Product manifold $M = M_1 \times M_2 \times \dots M_n$ of manifolds $M_1, M_2, \
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["ProductManifold.jl"]
+Pages = ["manifolds/ProductManifold.jl"]
 Order = [:type, :function]
 ```

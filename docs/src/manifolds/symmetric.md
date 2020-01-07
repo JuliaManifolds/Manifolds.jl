@@ -3,6 +3,6 @@
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["Symmetric.jl"]
+Pages = ["manifolds/Symmetric.jl"]
 Order = [:type, :function]
 ```

@@ -2,6 +2,6 @@
 -
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["Hyperbolic.jl"]
+Pages = ["manifolds/Hyperbolic.jl"]
 Order = [:type, :function]
 ```

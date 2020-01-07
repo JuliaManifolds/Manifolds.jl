@@ -30,6 +30,9 @@ struct TestEuclideanMetric <: Metric end
     for vtype in (Vector, MVector{n})
         x, v, w = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
 
+        @test check_manifold_point(M,x) == check_manifold_point(E,x)
+        @test check_tangent_vector(M,x,v) == check_tangent_vector(E,x,v)
+
         @test local_metric(M, x) ≈ G
         @test inverse_local_metric(M, x) ≈ invG
         @test det_local_metric(M, x) ≈ *(1.0:n...)
