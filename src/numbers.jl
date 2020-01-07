@@ -1,31 +1,31 @@
 """
     AbstractNumbers
 
-An abstract type to represent the field matrix manifolds are build upon, following the idea
-of [TensorKit](https://github.com/Jutho/TensorKit.jl) in order to have concrete field types
-to dispatch on. The two most common field types are [`RealNumbers`](@ref) (`ℝ` for short)
-and [`ComplexNumbers`](@ref) (`ℂ`).
+An abstract type to represent the number system on which a manifold is built.
+
+This provides concrete number types for dispatch. The two most common number types are
+the fields [`RealNumbers`](@ref) (`ℝ` for short) and [`ComplexNumbers`](@ref) (`ℂ`).
 """
 abstract type AbstractNumbers end
 
 """
     ℝ = RealNumbers()
 
-The [`field`](@ref AbstractNumbers) of real numbers.
+The field of real [`numbers`](@ref AbstractNumbers).
 """
 struct RealNumbers <: AbstractNumbers end
 
 """
     ℂ = ComplexNumbers()
 
-The [`field`](@ref AbstractNumbers) of complex number.
+The field of complex [`numbers`](@ref AbstractNumbers).
 """
 struct ComplexNumbers <: AbstractNumbers end
 
 """
     ℍ = QuaternionNumbers()
 
-The [`field`](@ref AbstractNumbers) of quaternion numbers.
+The division algebra of quaternion [`numbers`](@ref AbstractNumbers).
 """
 struct QuaternionNumbers <: AbstractNumbers end
 
@@ -40,11 +40,13 @@ Base.show(io::IO, ::QuaternionNumbers) = print(io, "ℍ")
 """
     real_dimension(𝔽::AbstractNumbers)
 
-Return the dimension of the [`AbstractNumbers`](@ref).
-The field dimension is the dimension of a real space with which a point on the field can be
-identified. For example, [`ComplexNumbers`](@ref) have a field dimension of 2.
+Return the real dimension of the [number system](@ref AbstractNumbers) `𝔽`.
+The real dimension is the dimension of a real space with which a number in `𝔽` can be
+identified.
+For example, [`ComplexNumbers`](@ref) have a real dimension of 2, and
+[`QuaternionNumbers`](@ref) have a real dimension of 4.
 """
-real_dimension(𝔽::AbstractNumbers) = error("real_dimension not defined for field $(𝔽)")
+real_dimension(𝔽::AbstractNumbers) = error("real_dimension not defined for number system $(𝔽)")
 real_dimension(::RealNumbers) = 1
 real_dimension(::ComplexNumbers) = 2
 real_dimension(::QuaternionNumbers) = 4

@@ -8,7 +8,7 @@ $\lvert z\rvert = 1$.
 
     Circle(f=ℝ)
 
-Generate the ℝ-valued Circle represented by angles, which
+Generate the `ℝ`-valued Circle represented by angles, which
 alternatively can be set to use the [`AbstractNumbers`](@ref) `f=ℂ` to obtain the `Circle`
 represented by `ℂ`-valued `Circle` of unit numbers.
 """
