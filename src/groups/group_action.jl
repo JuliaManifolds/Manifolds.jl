@@ -89,7 +89,7 @@ function inverse_apply(A::AbstractGroupAction, a, x)
 end
 
 @doc doc"""
-    apply_diff(A::AbstractGroupAction, a, x, v[, conv::ActionDirection=LeftAction()])
+    apply_diff(A::AbstractGroupAction, a, x, v)
 
 For group point $x ∈ M$ and tangent vector $v ∈ T_x M$, compute the action of the
 differential of the action of $a ∈ G$ on $v$, specified by rule `A`. Written as
@@ -99,16 +99,15 @@ transports vectors
 ````math
 \begin{aligned}
 (\mathrm{d}L_a)_x (v) &: T_x M → T_{a ⋅ x} M\\
-(\mathrm{d}R_a)_x (v) &: T_x M → T_{x ⋅ a} M\\
+(\mathrm{d}R_a)_x (v) &: T_x M → T_{x ⋅ a} M
 \end{aligned}
 ````
 """
 function apply_diff(A::AbstractGroupAction,
                     a,
                     x,
-                    v,
-                    conv::ActionDirection = LeftAction())
-    return error("apply_diff not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(x)), vector $(typeof(v)), and direction $(typeof(conv))")
+                    v)
+    return error("apply_diff not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(x)), and vector $(typeof(v))")
 end
 
 
@@ -116,13 +115,12 @@ function apply_diff!(A::AbstractGroupAction,
                      vout,
                      a,
                      x,
-                     v,
-                     conv::ActionDirection = LeftAction())
-    return error("apply_diff! not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(x)), vectors $(typeof(vout)) and $(typeof(v)), and direction $(typeof(conv))")
+                     v)
+    return error("apply_diff! not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(x)), vectors $(typeof(vout)) and $(typeof(v))")
 end
 
 @doc doc"""
-    inverse_apply_diff(A::AbstractGroupAction, a, x, v[, conv::ActionDirection=LeftAction()])
+    inverse_apply_diff(A::AbstractGroupAction, a, x, v)
 
 For group point $x ∈ M$ and tangent vector $v ∈ T_x M$, compute the action of the
 differential of the inverse action of $a ∈ G$ on $v$, specified by rule `A`. Written as
@@ -132,25 +130,23 @@ differential transports vectors
 ````math
 \begin{aligned}
 (\mathrm{d}L_a)_x^{-1} (v) &: T_x M → T_{a^{-1} ⋅ x} M\\
-(\mathrm{d}R_a)_x^{-1} (v) &: T_x M → T_{x ⋅ a^{-1}} M\\
+(\mathrm{d}R_a)_x^{-1} (v) &: T_x M → T_{x ⋅ a^{-1}} M
 \end{aligned}
 ````
 """
 function inverse_apply_diff(A::AbstractGroupAction,
                             a,
                             x,
-                            v,
-                            conv::ActionDirection = LeftAction())
-    return apply_diff(A, inv(base_group(A), a), x, v, conv)
+                            v)
+    return apply_diff(A, inv(base_group(A), a), x, v)
 end
 
 function inverse_apply_diff!(A::AbstractGroupAction,
                              vout,
                              a,
                              x,
-                             v,
-                             conv::ActionDirection = LeftAction())
-    return apply_diff!(A, vout, inv(base_group(A), a), x, v, conv)
+                             v)
+    return apply_diff!(A, vout, inv(base_group(A), a), x, v)
 end
 
 function compose(A::AbstractGroupAction{LeftAction}, a, b)
