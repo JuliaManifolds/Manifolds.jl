@@ -115,11 +115,11 @@ metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 @inline inner(S::Sphere, x, w, v) = dot(w, v)
 
 function inverse_represent_in_basis(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where N
-    if isapprox(x[end], -1)
-        return vcat(v, 0)
+    if isapprox(x[1], 1)
+        return vcat(0, v)
     else
-        xp1 = x .+ ntuple(i -> ifelse(i == N+1, 1, 0), N+1)
-        v0 = vcat(v, 0)
+        xp1 = x .+ ntuple(i -> ifelse(i == 1, 1, 0), N+1)
+        v0 = vcat(0, v)
         return 2*xp1*dot(xp1, v0)/dot(xp1, xp1) - v0
     end
 end
@@ -244,11 +244,11 @@ project_tangent(::Sphere, ::Any...)
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v) .* x)
 
 function represent_in_basis(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where N
-    if isapprox(x[end], -1)
-        return v[1:end-1]
+    if isapprox(x[1], 1)
+        return v[2:end]
     else
-        xp1 = x .+ ntuple(i -> ifelse(i == N+1, 1, 0), N+1)
-        return (2*xp1*dot(xp1, v)/dot(xp1, xp1) - v)[1:end-1]
+        xp1 = x .+ ntuple(i -> ifelse(i == 1, 1, 0), N+1)
+        return (2*xp1*dot(xp1, v)/dot(xp1, xp1) - v)[2:end]
     end
 end
 
