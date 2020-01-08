@@ -77,6 +77,7 @@ function test_group(
                     @test identity!(G, ge, e) === ge
                     @test isapprox(G, compose(G, g, ge), g)
                     @test isapprox(G, compose(G, ge, g), g)
+                    @test identity!(G, e, e) === e
 
                     ge = similar(g)
                     @test compose!(G, ge, e, e) === ge

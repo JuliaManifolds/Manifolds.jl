@@ -15,6 +15,7 @@ include("../utils.jl")
         @test_throws ErrorException inv!(G, x, eg)
         @test_throws ErrorException inv(G, x)
         @test inv(G, eg) == eg
+        @test identity(G, eg) === eg
 
         @test_throws ErrorException identity!(G, x, x)
         @test_throws ErrorException identity(G, x)
@@ -69,14 +70,27 @@ include("../utils.jl")
         x = [1.0, 2.0]
         ge = Identity(G)
         @test zero(ge) === ge
+        @test eltype(ge) == Bool
+        @test copyto!(ge, ge) === ge
+        y = similar(x)
+        copyto!(y, ge)
+        @test y ≈ zero(x)
+        @test ge - x === -x
+        @test x - ge === x
+        @test ge - ge === ge
         @test ge + x ≈ x
         @test x + ge ≈ x
         @test ge + ge === ge
         @test -ge === ge
         @test +ge === ge
+        @test ge * 1 === ge
+        @test 1 * ge === ge
+        @test ge * ge === ge
         @test ge(x) ≈ zero(x)
         @test inv(G, x) ≈ -x
+        @test inv(G, ge) === ge
         @test identity(G, x) ≈ zero(x)
+        @test identity(G, ge) === ge
         y = similar(x)
         identity!(G, y, x)
         @test y ≈ zero(x)
@@ -98,6 +112,11 @@ include("../utils.jl")
 
         x = [1.0 2.0; 2.0 3.0]
         ge = Identity(G)
+        @test eltype(ge) == Bool
+        @test copyto!(ge, ge) === ge
+        y = similar(x)
+        copyto!(y, ge)
+        @test y ≈ one(x)
         @test one(ge) === ge
         @test ge * x ≈ x
         @test x * ge ≈ x
@@ -111,14 +130,25 @@ include("../utils.jl")
         @test ge \ ge === ge
         @test ge / x ≈ inv(x)
         @test x \ ge ≈ inv(x)
+        y = similar(x)
+        @test LinearAlgebra.mul!(y, x, ge) === y
+        @test y ≈ x
+        y = similar(x)
+        @test LinearAlgebra.mul!(y, ge, x) === y
+        @test y ≈ x
+        y = similar(x)
+        @test LinearAlgebra.mul!(y, ge, ge) === y
+        @test y ≈ one(y)
 
         @test ge(x) ≈ one(x)
         @test inv(G, x) ≈ inv(x)
         @test inv(G, ge) === ge
         @test identity(G, x) ≈ one(x)
+        @test identity(G, ge) === ge
         y = similar(x)
         identity!(G, y, x)
         @test y ≈ one(x)
+        @test_throws ErrorException identity!(G, [0.0], ge)
         @test compose(G, x, x) ≈ x * x
         @test compose(G, x, ge) ≈ x
         @test compose(G, ge, x) ≈ x
@@ -148,11 +178,18 @@ end
         A = NotImplementedAction()
         x = [1.0, 2.0]
         a = [1.0, 2.0]
+        v = [1.0, 2.0]
 
         @test_throws ErrorException base_group(A)
         @test_throws ErrorException g_manifold(A)
-        @test_throws ErrorException apply(A, x, a)
-        @test_throws ErrorException apply!(A, x, x, a)
+        @test_throws ErrorException apply(A, a, x)
+        @test_throws ErrorException apply!(A, x, a, x)
+        @test_throws ErrorException inverse_apply(A, a, x)
+        @test_throws ErrorException inverse_apply!(A, x, a, x)
+        @test_throws ErrorException apply_diff(A, a, x, v)
+        @test_throws ErrorException apply_diff!(A, v, x, a, v)
+        @test_throws ErrorException inverse_apply_diff(A, a, x, v)
+        @test_throws ErrorException inverse_apply_diff!(A, v, x, a, v)
         @test_throws ErrorException compose(A, a, a)
         @test_throws ErrorException compose!(A, a, a, a)
         @test_throws ErrorException optimal_alignment(A, x, x)

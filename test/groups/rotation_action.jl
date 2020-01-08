@@ -44,7 +44,7 @@ include("group_utils.jl")
             test_diff = true,
             atol_inv = atol_inv)
 
-        test_action(A_right, a_pts, m_pts;
+        test_action(A_right, a_pts, m_pts, v_pts;
             test_optimal_alignment = true,
             test_diff = true,
             atol_inv = atol_inv)
