@@ -9,25 +9,25 @@ symmetric matrices of size $ n\times n$, i.e. the set
 ````
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed
 and the field $\mathbb F \in \{ \mathbb R, \mathbb C\}$ is set by the
-[`AbstractField`](@ref) `F`.
+[`AbstractNumbers`](@ref) `F`.
 
 Though it is slighty redundant, usually the matrices are safed as $n\times n$ arrays.
 
 # Constructor
 
-    SymmetricMatrices(n::Int, F::AbstractField=ℝ)
+    SymmetricMatrices(n::Int, F::AbstractNumbers=ℝ)
 
 Generate the manifold of $n\times n$ symmetric metrices.
 """
 struct SymmetricMatrices{n,F} <: Manifold end
-SymmetricMatrices(n::Int,F::AbstractField=ℝ) = SymmetricMatrices{n,F}()
+SymmetricMatrices(n::Int,F::AbstractNumbers=ℝ) = SymmetricMatrices{n,F}()
 
 @doc doc"""
     check_manifold_point(M::SymmetricMatrices{n,F}, x; kwargs...)
 
 Check whether `x` is a valid manifold point on the [`SymmetricMatrices`](@ref) `M`, i.e.
 whether `x` is a symmetric matrix of size `(n,n)` with values from the corresponding
-[`AbstractField`](@ref) `F`.
+[`AbstractNumbers`](@ref) `F`.
 
 The tolerance for the symmetry of `x` can be set using `kwargs...`.
 """
@@ -52,7 +52,7 @@ end
 
 Check whether `v` is a tangent vector to manifold point `x` on the
 [`SymmetricMatrices`](@ref) `M`, i.e. `v` has to be a symmetric matrix of dimension `(n,n)`
-and its values have to be from the correct [`AbstractField`](@ref).
+and its values have to be from the correct [`AbstractNumbers`](@ref).
 
 The tolerance for the symmetry of `x` and `v` can be set using `kwargs...`.
 """
@@ -145,24 +145,20 @@ function log!(M::SymmetricMatrices, v, x, y)
 end
 
 @doc doc"""
-    manifold_dimension(M::SymmetricMatrices{n,ℝ})
-    manifold_dimension(M::SymmetricMatrices{n,ℂ})
+manifold_dimension(M::SymmetricMatrices{n,𝔽})
 
-Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M`, which
-is for the real-valued case
-
-````math
-\operatorname{dim}_{\operatorname{Sym}(n)} = \frac{n(n+1)}{2}
-````
-
-and for the complex-valued case
+Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the number system
+`𝔽`, i.e.
 
 ````math
-\operatorname{dim}_{\operatorname{Sym}(n)} = n(n+1).
+\dim \operatorname{Sym}(n,𝔽) = \frac{n(n+1)}{2} \dim_ℝ 𝔽,
 ````
+
+where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
-manifold_dimension(M::SymmetricMatrices{N,ℝ}) where {N} = div(N*(N+1),2)
-manifold_dimension(M::SymmetricMatrices{N,ℂ}) where {N} = N*(N+1)
+function manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}
+    return div(N*(N+1),2)*real_dimension(𝔽)
+end
 
 @doc doc"""
     norm(M::SymmetricMatrices, x, v)
