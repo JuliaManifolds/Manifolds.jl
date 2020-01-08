@@ -125,6 +125,8 @@ log!(M::Euclidean, v, x, y) = (v .= y .- x)
 
 log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = zero(eltype(x))
 
+@generated _product_of_dimensions(::Euclidean{N}) where {N} = *(N.parameters...)
+
 """
     manifold_dimension(M::Euclidean)
 
@@ -132,8 +134,8 @@ Return the manifold dimension of the [`Euclidean`](@ref) `M`, i.e.
 the product of all array dimensions and the [`real_dimension`](@ref) of the
 underlying number system.
 """
-@generated function manifold_dimension(::Euclidean{N,𝔽}) where {N,𝔽}
-    return *(real_dimension(𝔽), N.parameters...)
+function manifold_dimension(M::Euclidean{N,𝔽}) where {N,𝔽}
+    return _product_of_dimensions(M) * real_dimension(𝔽)
 end
 
 mean(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
