@@ -23,10 +23,8 @@ function show(io::IO, op::SemidirectProductOperation)
     print(io, "SemidirectProductOperation($(op.action), $(op.opN), $(op.opH))")
 end
 
-const SemidirectProductGroup{N,H,A,ON,OH} = GroupManifold{
-    ProductManifold{Tuple{N,H}},
-    SemidirectProductOperation{A,ON,OH},
-}
+const SemidirectProductGroup{N,H,A,ON,OH} =
+    GroupManifold{ProductManifold{Tuple{N,H}},SemidirectProductOperation{A,ON,OH}}
 
 @doc doc"""
     SemidirectProductGroup(
@@ -49,11 +47,7 @@ and the inverse
 g^{-1} = (n, h)^{-1} = (θ_{h^{-1}}(n^{-1}), h^{-1}).
 ````
 """
-function SemidirectProductGroup(
-    N::GroupManifold,
-    H::GroupManifold,
-    A::AbstractGroupAction,
-)
+function SemidirectProductGroup(N::GroupManifold, H::GroupManifold, A::AbstractGroupAction)
     base_group(A) == H || error("")
     g_manifold(A) == N || error("")
     op = SemidirectProductOperation(A, N.op, H.op)
@@ -64,7 +58,10 @@ end
 function show(io::IO, G::SemidirectProductGroup)
     PG = base_manifold(G)
     action = G.op.action
-    print(io, "SemidirectProductGroup($(submanifold(PG, 1)), $(submanifold(PG, 2)), $(action))")
+    print(
+        io,
+        "SemidirectProductGroup($(submanifold(PG, 1)), $(submanifold(PG, 2)), $(action))",
+    )
 end
 
 function inv!(G::SemidirectProductGroup, y, x)

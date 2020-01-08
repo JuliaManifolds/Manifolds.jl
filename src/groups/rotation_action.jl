@@ -8,20 +8,29 @@
 Space of actions of the [`SpecialOrthogonal`](@ref) group $\mathrm{SO}(n)$ on a
 Euclidean-like manifold `M` of dimension `n`.
 """
-struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal,TAD<:ActionDirection} <: AbstractGroupAction{TAD}
+struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal,TAD<:ActionDirection} <:
+       AbstractGroupAction{TAD}
     M::TM
     SOn::TSO
 end
 
-function RotationAction(M::Manifold, SOn::SpecialOrthogonal, ::TAD = LeftAction()) where {TAD<:ActionDirection}
-    return RotationAction{typeof(M), typeof(SOn), TAD}(M, SOn)
+function RotationAction(
+    M::Manifold,
+    SOn::SpecialOrthogonal,
+    ::TAD = LeftAction(),
+) where {TAD<:ActionDirection}
+    return RotationAction{typeof(M),typeof(SOn),TAD}(M, SOn)
 end
 
 function show(io::IO, A::RotationAction)
     print(io, "RotationAction($(A.M), $(A.SOn), $(direction(A)))")
 end
 
-const RotationActionOnVector{N,F,TAD} = RotationAction{<:Union{Euclidean{Tuple{N},F},TranslationGroup{Tuple{N},F}},SpecialOrthogonal{N},TAD}
+const RotationActionOnVector{N,F,TAD} = RotationAction{
+    <:Union{Euclidean{Tuple{N},F},TranslationGroup{Tuple{N},F}},
+    SpecialOrthogonal{N},
+    TAD,
+}
 
 function base_group(A::RotationAction)
     return A.SOn
@@ -84,8 +93,8 @@ function optimal_alignment(A::RotationActionOnVector{N,T,LeftAction}, x1, x2) wh
     Xmul = x1 * transpose(x2)
     F = svd(Xmul)
     L = size(Xmul)[2]
-    UVt = F.U*F.Vt
-    Ostar = det(UVt) ≥ 0 ? UVt : F.U*Diagonal([i<L ? 1 : -1 for i in 1:L])*F.Vt
+    UVt = F.U * F.Vt
+    Ostar = det(UVt) ≥ 0 ? UVt : F.U * Diagonal([i < L ? 1 : -1 for i = 1:L]) * F.Vt
     return convert(typeof(Xmul), Ostar)
 end
 

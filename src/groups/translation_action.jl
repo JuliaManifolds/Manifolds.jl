@@ -10,13 +10,18 @@ manifold `M`.
 
 The left and right actions are equivalent.
 """
-struct TranslationAction{TM<:Manifold,TRn<:TranslationGroup,TAD<:ActionDirection} <: AbstractGroupAction{TAD}
+struct TranslationAction{TM<:Manifold,TRn<:TranslationGroup,TAD<:ActionDirection} <:
+       AbstractGroupAction{TAD}
     M::TM
     Rn::TRn
 end
 
-function TranslationAction(M::Manifold, Rn::TranslationGroup, ::TAD = LeftAction()) where {TAD<:ActionDirection}
-    return TranslationAction{typeof(M), typeof(Rn), TAD}(M, Rn)
+function TranslationAction(
+    M::Manifold,
+    Rn::TranslationGroup,
+    ::TAD = LeftAction(),
+) where {TAD<:ActionDirection}
+    return TranslationAction{typeof(M),typeof(Rn),TAD}(M, Rn)
 end
 
 function show(io::IO, A::TranslationAction)

@@ -103,19 +103,12 @@ transports vectors
 \end{aligned}
 ````
 """
-function apply_diff(A::AbstractGroupAction,
-                    a,
-                    x,
-                    v)
+function apply_diff(A::AbstractGroupAction, a, x, v)
     return error("apply_diff not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(x)), and vector $(typeof(v))")
 end
 
 
-function apply_diff!(A::AbstractGroupAction,
-                     vout,
-                     a,
-                     x,
-                     v)
+function apply_diff!(A::AbstractGroupAction, vout, a, x, v)
     return error("apply_diff! not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(x)), vectors $(typeof(vout)) and $(typeof(v))")
 end
 
@@ -134,18 +127,11 @@ differential transports vectors
 \end{aligned}
 ````
 """
-function inverse_apply_diff(A::AbstractGroupAction,
-                            a,
-                            x,
-                            v)
+function inverse_apply_diff(A::AbstractGroupAction, a, x, v)
     return apply_diff(A, inv(base_group(A), a), x, v)
 end
 
-function inverse_apply_diff!(A::AbstractGroupAction,
-                             vout,
-                             a,
-                             x,
-                             v)
+function inverse_apply_diff!(A::AbstractGroupAction, vout, a, x, v)
     return apply_diff!(A, vout, inv(base_group(A), a), x, v)
 end
 
@@ -210,11 +196,11 @@ O = \{ g ⋅ q : g ∈ G \}.
 This function is useful for computing means on quotients of manifolds by a Lie group action.
 """
 function center_of_orbit(
-        A::AbstractGroupAction,
-        pts::AbstractVector,
-        q,
-        mean_method::AbstractEstimationMethod = GradientDescentEstimation()
-    )
+    A::AbstractGroupAction,
+    pts::AbstractVector,
+    q,
+    mean_method::AbstractEstimationMethod = GradientDescentEstimation(),
+)
 
     alignments = map(p -> optimal_alignment(A, q, p), pts)
     return mean(g_manifold(A), alignments, mean_method)
