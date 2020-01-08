@@ -7,7 +7,7 @@ include("group_utils.jl")
     A_left = GroupOperationAction(G)
     A_right = GroupOperationAction(G, RightAction())
 
-    types = [Matrix{Float64}, MMatrix{2,2,Float64}, Matrix{Float32}]
+    types = [Matrix{Float64}]
 
     @test g_manifold(A_left) === G
     @test base_group(A_left) == G

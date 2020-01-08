@@ -12,14 +12,10 @@ include("group_utils.jl")
 
     types_a = [
         Matrix{Float64},
-        MMatrix{2, 3, Float64},
-        Matrix{Float32},
     ]
 
     types_m = [
         Matrix{Float64},
-        MMatrix{2, 3, Float64},
-        Matrix{Float32},
     ]
 
     @test g_manifold(A) == M

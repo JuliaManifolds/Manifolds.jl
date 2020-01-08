@@ -13,14 +13,10 @@ include("group_utils.jl")
 
     types_a = [
         Matrix{Float64},
-        MMatrix{2, 2, Float64},
-        Matrix{Float32},
     ]
 
     types_m = [
         Vector{Float64},
-        MVector{2, Float64},
-        Vector{Float32},
     ]
 
     @test g_manifold(A_left) == Euclidean(2)
