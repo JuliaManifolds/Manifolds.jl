@@ -1,12 +1,12 @@
 @doc doc"""
-    SpecialOrthogonal{N} <: GroupManifold{Rotations{N},MultiplicationOperation}
+    SpecialOrthogonal{n} <: GroupManifold{Rotations{n},MultiplicationOperation}
 
-Special orthogonal group `\mathrm{SO}(N)` represented by rotation matrices.
+Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
 
 # Constructor
     SpecialOrthogonal(n)
 """
-const SpecialOrthogonal{N} = GroupManifold{Rotations{N},MultiplicationOperation}
+const SpecialOrthogonal{n} = GroupManifold{Rotations{n},MultiplicationOperation}
 
 function SpecialOrthogonal(n)
     return SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())

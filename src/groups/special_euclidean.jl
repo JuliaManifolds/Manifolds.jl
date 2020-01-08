@@ -3,8 +3,14 @@
 
 Special Euclidean group $\mathrm{SE}(n)$, the group of rigid motions.
 
-``\mathrm{SE}(n)`` is the semidirect product of the [`TranslationGroup`](@ref) and
-[`SpecialOrthogonal`](@ref), i.e. $\mathrm{SE}(n) ≐ \mathrm{T}(n) ⋊ \mathrm{SO}(n)$.
+``\mathrm{SE}(n)`` is the semidirect product of the [`TranslationGroup`](@ref) on $ℝ^n$ and
+[`SpecialOrthogonal(n)`](@ref)
+
+````math
+$\mathrm{SE}(n) ≐ \mathrm{T}(n) ⋊_θ \mathrm{SO}(n)$,
+````
+
+where $θ$ is the canonical action of $\mathrm{SO}(n)$ on $\mathrm{T}(n)$ by vector rotation.
 
 This constructor is equivalent to calling
 

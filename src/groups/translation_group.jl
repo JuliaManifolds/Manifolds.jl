@@ -1,10 +1,13 @@
 @doc doc"""
-    TranslationGroup{N} <: GroupManifold{Euclidean{N},AdditionOperation}
+    TranslationGroup{T<:Tuple,F} <: GroupManifold{Euclidean{T,F},AdditionOperation}
 
-Translation group $\mathrm{T}(N)$ represented by translation arrays.
+Translation group $\mathrm{T}(n)$ represented by translation arrays.
 
 # Constructor
-    TranslationGroup(n)
+    TranslationGroup(n₁,...,nᵢ; field = 𝔽)
+
+Generate the translation group on
+$𝔽^{n₁,\dots,nᵢ}$ = `Euclidean(n₁,...,nᵢ; field = 𝔽)`, which is isomorphic to group itself.
 """
 const TranslationGroup{T<:Tuple,F} = GroupManifold{Euclidean{T,F},AdditionOperation}
 

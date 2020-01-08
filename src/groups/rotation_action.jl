@@ -5,8 +5,8 @@
         AD::ActionDirection = LeftAction(),
     )
 
-Space of actions of the [`SpecialOrthogonal`](@ref) group $\mathrm{SO}(N)$
-on a Euclidean-like manifold `M` of dimension `N`.
+Space of actions of the [`SpecialOrthogonal`](@ref) group $\mathrm{SO}(n)$ on a
+Euclidean-like manifold `M` of dimension `n`.
 """
 struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal,TAD<:ActionDirection} <: AbstractGroupAction{TAD}
     M::TM

@@ -5,7 +5,7 @@
         AD::ActionDirection = LeftAction(),
     )
 
-Space of actions of the [`TranslationGroup`](@ref) $\mathrm{T}(N)$ on a Euclidean-like
+Space of actions of the [`TranslationGroup`](@ref) $\mathrm{T}(n)$ on a Euclidean-like
 manifold `M`.
 
 The left and right actions are equivalent.
