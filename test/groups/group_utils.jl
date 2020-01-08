@@ -204,6 +204,18 @@ function test_action(
     e = Identity(G)
 
     @testset "Basic action properties" begin
+        @testset "Direction" begin
+            if isa(A, AbstractGroupAction{LeftAction})
+                @test direction(A) === LeftAction()
+                @test isa(switch_direction(A), AbstractGroupAction{RightAction})
+                @test direction(switch_direction(A)) === RightAction()
+            else
+                @test direction(A) === RightAction()
+                @test isa(switch_direction(A), AbstractGroupAction{LeftAction})
+                @test direction(switch_direction(A)) === LeftAction()
+            end
+        end
+
         @testset "Closed" begin
             @testset "over actions" begin
                 for a1 in a_pts, a2 in a_pts

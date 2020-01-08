@@ -6,7 +6,6 @@ include("group_utils.jl")
     G = GroupManifold(NotImplementedManifold(), Manifolds.MultiplicationOperation())
     A_left = GroupOperationAction(G)
     A_right = GroupOperationAction(G, RightAction())
-    @test direction(A_left) === LeftAction()
 
     types = [Matrix{Float64}, MMatrix{2,2,Float64}, Matrix{Float32}]
 
