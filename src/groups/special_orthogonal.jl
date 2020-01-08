@@ -24,9 +24,7 @@ end
 inv(G::SpecialOrthogonal, x) = transpose(x)
 inv(::AG, e::Identity{AG}) where {AG<:SpecialOrthogonal} = e
 
-function show(io::IO, ::SpecialOrthogonal{N}) where {N}
-    print(io, "SpecialOrthogonal($(N))")
-end
+show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
 
 translate_diff(::SpecialOrthogonal, x, y, v, ::LeftAction) = v
 translate_diff(::SpecialOrthogonal, x, y, v, ::RightAction) = transpose(x) * v * x

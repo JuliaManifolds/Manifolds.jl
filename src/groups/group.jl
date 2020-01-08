@@ -51,6 +51,8 @@ end
 
 is_decorator_manifold(::GroupManifold) = Val(true)
 
+show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
+
 """
     ActionDirection
 
@@ -92,6 +94,8 @@ The identity element of the group `group`.
 struct Identity{G<:AbstractGroupManifold}
     group::G
 end
+
+show(io::IO, e::Identity) = print(io, "Identity($(e.group))")
 
 (e::Identity)(x) = identity(e.group, x)
 

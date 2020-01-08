@@ -32,4 +32,4 @@ function SpecialEuclidean(n)
     return SemidirectProductGroup(Tn, SOn, A)
 end
 
-show(io::IO, ::SpecialEuclidean{N}) where {N} = print(io, "SpecialEuclidean($(N))")
+show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")

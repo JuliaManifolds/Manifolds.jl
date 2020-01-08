@@ -5,6 +5,7 @@ include("group_utils.jl")
     @testset "real" begin
         G = TranslationGroup(2, 3)
         @test repr(G) == "TranslationGroup(2, 3; field = ℝ)"
+        @test repr(TranslationGroup(2, 3; field = ℂ)) == "TranslationGroup(2, 3; field = ℂ)"
 
         types = [Matrix{Float64}]
         @test base_manifold(G) === Euclidean(2, 3)

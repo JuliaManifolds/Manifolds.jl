@@ -19,6 +19,10 @@ function TranslationAction(M::Manifold, Rn::TranslationGroup, ::TAD = LeftAction
     return TranslationAction{typeof(M), typeof(Rn), TAD}(M, Rn)
 end
 
+function show(io::IO, A::TranslationAction)
+    print(io, "TranslationAction($(A.M), $(A.Rn), $(direction(A)))")
+end
+
 function base_group(A::TranslationAction)
     return A.Rn
 end

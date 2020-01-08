@@ -12,6 +12,8 @@ include("group_utils.jl")
 
     @test g_manifold(A_left) === G
     @test base_group(A_left) == G
+    @test repr(A_left) == "GroupOperationAction($(repr(G)), LeftAction())"
+    @test repr(A_right) == "GroupOperationAction($(repr(G)), RightAction())"
 
     a_pts = []
 

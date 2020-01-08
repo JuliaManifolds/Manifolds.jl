@@ -4,6 +4,7 @@ include("../utils.jl")
 @testset "General group tests" begin
     @testset "Not implemented operation" begin
         G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
+        @test repr(G) == "GroupManifold(NotImplementedManifold(), NotImplementedOperation())"
         x = [1.0, 2.0]
         v = [2.0, 3.0]
         eg = Identity(G)

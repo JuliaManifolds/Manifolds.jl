@@ -17,6 +17,10 @@ function RotationAction(M::Manifold, SOn::SpecialOrthogonal, ::TAD = LeftAction(
     return RotationAction{typeof(M), typeof(SOn), TAD}(M, SOn)
 end
 
+function show(io::IO, A::RotationAction)
+    print(io, "RotationAction($(A.M), $(A.SOn), $(direction(A)))")
+end
+
 const RotationActionOnVector{N,F,TAD} = RotationAction{<:Union{Euclidean{Tuple{N},F},TranslationGroup{Tuple{N},F}},SpecialOrthogonal{N},TAD}
 
 function base_group(A::RotationAction)

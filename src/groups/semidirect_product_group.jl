@@ -19,6 +19,10 @@ struct SemidirectProductOperation{
     opH::OH
 end
 
+function show(io::IO, op::SemidirectProductOperation)
+    print(io, "SemidirectProductOperation($(op.action), $(op.opN), $(op.opH))")
+end
+
 const SemidirectProductGroup{N,H,A,ON,OH} = GroupManifold{
     ProductManifold{Tuple{N,H}},
     SemidirectProductOperation{A,ON,OH},
@@ -55,6 +59,12 @@ function SemidirectProductGroup(
     op = SemidirectProductOperation(A, N.op, H.op)
     PG = ProductManifold(N, H)
     return GroupManifold(PG, op)
+end
+
+function show(io::IO, G::SemidirectProductGroup)
+    PG = base_manifold(G)
+    action = G.op.action
+    print(io, "SemidirectProductGroup($(submanifold(PG, 1)), $(submanifold(PG, 2)), $(action))")
 end
 
 function inv!(G::SemidirectProductGroup, y, x)

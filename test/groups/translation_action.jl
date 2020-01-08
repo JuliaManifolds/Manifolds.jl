@@ -7,6 +7,9 @@ include("group_utils.jl")
     G = TranslationGroup(2,3)
     A = TranslationAction(Euclidean(2,3), G)
 
+    @test repr(A) == "TranslationAction($(repr(G)), LeftAction())"
+    @test repr(switch_direction(A)) == "TranslationAction($(repr(G)), RightAction())"
+
     types_a = [
         Matrix{Float64},
         MMatrix{2, 3, Float64},
