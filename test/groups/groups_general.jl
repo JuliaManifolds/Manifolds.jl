@@ -75,7 +75,7 @@ include("../utils.jl")
         y = similar(x)
         copyto!(y, ge)
         @test y ≈ zero(x)
-        @test ge - x === -x
+        @test ge - x == -x
         @test x - ge === x
         @test ge - ge === ge
         @test ge + x ≈ x

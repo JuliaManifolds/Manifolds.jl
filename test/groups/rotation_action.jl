@@ -8,8 +8,8 @@ include("group_utils.jl")
     A_left = RotationAction(Euclidean(2), G)
     A_right = RotationAction(Euclidean(2), G, RightAction())
 
-    @test repr(A_left) == "RotationAction($(repr(G)), LeftAction())"
-    @test repr(A_right) == "RotationAction($(repr(G)), RightAction())"
+    @test repr(A_left) == "RotationAction($(repr(Euclidean(2))), $(repr(G)), LeftAction())"
+    @test repr(A_right) == "RotationAction($(repr(Euclidean(2))), $(repr(G)), RightAction())"
 
     types_a = [
         Matrix{Float64},
