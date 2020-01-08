@@ -35,12 +35,12 @@ The manifold is named after
 Generate the (real-valued) Stiefel manifold of $n\times k$ dimensional orthonormal matrices.
 """
 struct Stiefel{n,k,F} <: Manifold end
-Stiefel(n::Int, k::Int,F::AbstractField=ℝ) = Stiefel{n,k,F}()
+Stiefel(n::Int, k::Int,F::AbstractNumbers=ℝ) = Stiefel{n,k,F}()
 @doc doc"""
     check_manifold_point(M::Stiefel, x; kwargs...)
 
 Check whether `x` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$,
-i.e. that it has the right [`AbstractField`](@ref) type and $x^{\mathrm{H}}x$
+i.e. that it has the right [`AbstractNumbers`](@ref) type and $x^{\mathrm{H}}x$
 is (approximatly) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
@@ -68,7 +68,7 @@ end
     check_tangent_vector(M::Stiefel, x, v; kwargs...)
 
 Check whether `v` is a valid tangent vector at `x` on the [`Stiefel`](@ref)
-`M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractField`](@ref) fits and
+`M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](@ref) fits and
 it (approximtly) holds that $x^{\mathrm{H}}v + v^{\mathrm{H}}x = 0$, where
 `kwargs...` is passed to the `isapprox`.
 """
@@ -205,18 +205,18 @@ isapprox(M::Stiefel, x, y; kwargs...) = isapprox(norm(x-y), 0;kwargs...)
 @doc doc"""
     manifold_dimension(M::Stiefel)
 
-Return the dimension of the [`Stiefel`](@ref) manifold `M`=$\operatorname{St}(n,k)$.
-The dimension for $\mathbb{F}=\mathbb{R}$ is given by
+Return the dimension of the [`Stiefel`](@ref) manifold `M`=$\operatorname{St}(n,k,𝔽)$.
+The dimension is given by
 
-$nk - \frac{1}{2}k(k+1)$
-
-and for $\mathbb{F}=\mathbb{C}$
-
-$2nk - k^2.$
+````math
+\dim \mathrm{Stiefel}(n, k, ℝ) &= nk - \frac{1}{2}k(k+1)\\
+\dim \mathrm{Stiefel}(n, k, ℂ) &= 2nk - k^2\\
+\dim \mathrm{Stiefel}(n, k, ℍ) &= 4nk - k(2k-1)
+````
 """
 manifold_dimension(::Stiefel{n,k,ℝ}) where {n,k} = n*k - div(k*(k+1),2)
 manifold_dimension(::Stiefel{n,k,ℂ}) where {n,k} = 2*n*k - k*k
-
+manifold_dimension(::Stiefel{n,k,ℍ}) where {n,k} = 4*n*k - k*(2k-1)
 
 @doc doc"""
     project_tangent(M, x, v)
