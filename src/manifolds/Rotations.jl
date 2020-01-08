@@ -308,7 +308,8 @@ Tangent vectors are represented by matrices.
 inner(M::Rotations, x, w, v) = dot(w, v)
 
 function inverse_represent_in_basis(M::Rotations, x, v, B::ArbitraryOrthonormalBasis) where N
-    return hat(M, x, v)
+    T = Base.promote_eltype(x, v)
+    return hat(M, x, v) ./ sqrt(T(2))
 end
 
 @doc doc"""
@@ -558,7 +559,8 @@ project_tangent(::Rotations, ::Any...)
 project_tangent!(M::Rotations, w, x, v) = w .= (v .- transpose(v))./2
 
 function represent_in_basis(M::Rotations, x, v, B::ArbitraryOrthonormalBasis) where N
-    return vee(M, x, v)
+    T = Base.promote_eltype(x, v)
+    return vee(M, x, v) .* sqrt(T(2))
 end
 
 @doc doc"""

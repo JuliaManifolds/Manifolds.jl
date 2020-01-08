@@ -116,7 +116,7 @@ metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 
 function inverse_represent_in_basis(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where N
     if isapprox(x[end], -1)
-        return vcat(x, 0)
+        return vcat(v, 0)
     else
         xp1 = x .+ ntuple(i -> ifelse(i == N+1, 1, 0), N+1)
         v0 = vcat(v, 0)
