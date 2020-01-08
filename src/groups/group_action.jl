@@ -53,7 +53,7 @@ end
 
 Apply action `a` to the point `x`. The action is specified by `A`.
 Unless otherwise specified, right actions are defined in terms of the left action. For
-point $x ∈ M$ and action $a$,
+point $x ∈ M$ and action element $a$, the right action is
 
 ````math
 x ⋅ a ≐ a^{-1} ⋅ x.
@@ -175,7 +175,7 @@ end
 Calculate an action element of action `A` that acts upon `x1` to produce
 the element closest to `x2` in the metric of the G-manifold:
 ```math
-\arg\min_{g \in G} d_M(g \cdot x_1, x_2)
+\arg\min_{g ∈ G} d_M(g ⋅ x_1, x_2)
 ```
 where $G$ is the group that acts on the G-manifold $M$.
 """
@@ -186,8 +186,8 @@ end
 """
     optimal_alignment!(A::AbstractGroupAction, y, x1, x2)
 
-Calculate an action element of action `A` that acts upon `x1` to produce
-the element closest to `x2`.
+Calculate an action element of action `A` that acts upon `x1` to produce the element closest
+to `x2`.
 The result is written to `y`.
 """
 function optimal_alignment!(A::AbstractGroupAction, y, x1, x2)
@@ -203,14 +203,15 @@ end
         mean_method::AbstractEstimationMethod = GradientDescentEstimation()
     )
 
-Calculate an action element of action `A` that constitutes mean element of orbit
-of `q` with respect to given set of points `pts`.
-The mean is calculated using the method `mean_method`.
+Calculate an action element $g$ of action `A` that is the mean element of the orbit of `q`
+with respect to given set of points `pts`. The [`mean`](@ref) is calculated using the method
+`mean_method`.
 
-The orbit of `q` with respect to action of a group `G` is the set
-$O = \{ g\cdot q \colon g \in G \}$.
-The function is useful for computing means on quotients of manifolds
-by a Lie group action.
+The orbit of $q$ with respect to the action of a group $G$ is the set
+````math
+O = \{ g ⋅ q : g ∈ G \}.
+```
+This function is useful for computing means on quotients of manifolds by a Lie group action.
 """
 function center_of_orbit(
         A::AbstractGroupAction,

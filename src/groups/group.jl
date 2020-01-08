@@ -1,9 +1,9 @@
 @doc doc"""
     AbstractGroupOperation
 
-Abstract type for smooth binary operations $\circ$ on elements of a Lie group $G$.
+Abstract type for smooth binary operations $∘$ on elements of a Lie group $G$:
 ```math
-\circ \colon G \times G \to G.
+∘: G × G → G
 ```
 An operation can be either defined for a specific [`AbstractGroupManifold`](@ref)
 or in general, by defining for an operation `Op` the following methods:
@@ -15,9 +15,9 @@ or in general, by defining for an operation `Op` the following methods:
     compose(::AbstractGroupManifold{Op}, x, y)
     compose!(::AbstractGroupManifold{Op}, z, x, y)
 
-Note that a manifold is connected with an operation by wrapping it with
-a decorator, [`AbstractGroupManifold`](@ref). In typical cases the concrete
-wrapper [`GroupManifold`](@ref) can be used.
+Note that a manifold is connected with an operation by wrapping it with a decorator,
+[`AbstractGroupManifold`](@ref). In typical cases the concrete wrapper
+[`GroupManifold`](@ref) can be used.
 """
 abstract type AbstractGroupOperation end
 
@@ -25,20 +25,18 @@ abstract type AbstractGroupOperation end
     AbstractGroupManifold{<:AbstractGroupOperation} <: Manifold
 
 Abstract type for a Lie group, a group that is also a smooth manifold with an
-[`AbstractGroupOperation`](@ref), a smooth binary operation.
-`AbstractGroupManifold`s must implement at least [`inv`](@ref),
-[`identity`](@ref), [`compose`](@ref), and [`translate_diff`](@ref).
-Group manifolds by default forward metric-related operations to the wrapped
-manifold.
+[`AbstractGroupOperation`](@ref), a smooth binary operation. `AbstractGroupManifold`s must
+implement at least [`inv`](@ref), [`identity`](@ref), [`compose`](@ref), and
+[`translate_diff`](@ref). Group manifolds by default forward metric-related operations to
+the wrapped manifold.
 """
 abstract type AbstractGroupManifold{O<:AbstractGroupOperation} <: Manifold end
 
 """
     GroupManifold{M<:Manifold,O<:AbstractGroupOperation} <: AbstractGroupManifold{O}
 
-Decorator for a smooth manifold that equips the manifold with a group
-operation, thus making it a Lie group. See [`AbstractGroupManifold`](@ref) for
-more details.
+Decorator for a smooth manifold that equips the manifold with a group operation, thus making
+it a Lie group. See [`AbstractGroupManifold`](@ref) for more details.
 
 # Constructor
 
@@ -56,8 +54,7 @@ show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op)
 """
     ActionDirection
 
-Direction of action on a manifold, either [`LeftAction`](@ref) or
-[`RightAction`](@ref).
+Direction of action on a manifold, either [`LeftAction`](@ref) or [`RightAction`](@ref).
 """
 abstract type ActionDirection end
 
@@ -78,8 +75,7 @@ struct RightAction <: ActionDirection end
 """
     switch_direction(::ActionDirection)
 
-Returns a [`RightAction`](@ref) when given a [`LeftAction`](@ref)
-and vice versa.
+Returns a [`RightAction`](@ref) when given a [`LeftAction`](@ref) and vice versa.
 """
 switch_direction(::ActionDirection)
 
@@ -87,9 +83,9 @@ switch_direction(::LeftAction) = RightAction()
 switch_direction(::RightAction) = LeftAction()
 
 @doc doc"""
-    Identity(group::AbstractGroupManifold)
+    Identity(G::AbstractGroupManifold)
 
-The identity element of the group `group`.
+The group identity element $e ∈ G$.
 """
 struct Identity{G<:AbstractGroupManifold}
     group::G
@@ -114,8 +110,8 @@ end
 @doc doc"""
     inv!(G::AbstractGroupManifold, y, x)
 
-Inverse $x^{-1}$ of an element $x$, such that
-$x \circ x^{-1} = x^{-1} \circ x = e$.
+Inverse $x^{-1} ∈ G$ of an element $x ∈ G$, such that
+$x \circ x^{-1} = x^{-1} \circ x = e ∈ G$.
 The result is saved to `y`.
 """
 function inv!(G::AbstractGroupManifold, y, x)
@@ -125,8 +121,8 @@ end
 @doc doc"""
     inv(G::AbstractGroupManifold, x)
 
-Inverse $x^{-1}$ of an element $x$, such that
-$x \circ x^{-1} = x^{-1} \circ x = e$.
+Inverse $x^{-1} ∈ G$ of an element $x ∈ G$, such that
+$x \circ x^{-1} = x^{-1} \circ x = e ∈ G$.
 """
 function inv(G::AbstractGroupManifold, x)
     y = similar_result(G, inv, x)
@@ -143,8 +139,8 @@ end
 @doc doc"""
     identity(G::AbstractGroupManifold, x)
 
-Identity element $e$, such that for any element $x$,
-$x \circ e = e \circ x = x$. The returned element is of a similar type to `x`.
+Identity element $e ∈ G$, such that for any element $x ∈ G$, $x \circ e = e \circ x = x$.
+The returned element is of a similar type to `x`.
 """
 function identity(G::AbstractGroupManifold, x)
     y = similar_result(G, identity, x)
@@ -168,10 +164,10 @@ function isapprox(
     return true
 end
 
-"""
+@doc doc"""
     compose(G::AbstractGroupManifold, x, y)
 
-Compose elements `x` and `y` of `G` using their left translation upon each other.
+Compose elements $x,y ∈ G$ using the group operation $x \circ y$.
 """
 compose(::AbstractGroupManifold, ::Any...)
 function compose(G::AbstractGroupManifold, x, y)
@@ -190,12 +186,12 @@ end
 @doc doc"""
     translate(G::AbstractGroupManifold, x, y[, conv::ActionDirection=LeftAction()])
 
-For group elements $x,y \in G$, translate $y$ by $x$ with the specified
-convention, either left $L_x$ or right $R_x$, defined as
+For group elements $x,y ∈ G$, translate $y$ by $x$ with the specified convention, either
+left $L_x$ or right $R_x$, defined as
 ```math
 \begin{aligned}
-L_x &\colon y \mapsto x \circ y\\
-R_x &\colon y \mapsto y \circ x.
+L_x &: y ↦ x \circ y\\
+R_x &: y ↦ y \circ x.
 \end{aligned}
 ```
 """
@@ -206,12 +202,12 @@ translate(G::AbstractGroupManifold, x, y) = translate(G, x, y, LeftAction())
 @doc doc"""
     translate!(G::AbstractGroupManifold, z, x, y[, conv::ActionDirection=LeftAction()])
 
-For group elements $x,y \in G$, translate $y$ by $x$ with the specified
-convention, either left $L_x$ or right $R_x$, defined as
+For group elements $x,y ∈ G$, translate $y$ by $x$ with the specified convention, either
+left $L_x$ or right $R_x$, defined as
 ```math
 \begin{aligned}
-L_x &\colon y \mapsto x \circ y\\
-R_x &\colon y \mapsto y \circ x.
+L_x &: y ↦ x \circ y\\
+R_x &: y ↦ y \circ x.
 \end{aligned}
 ```
 Result of the operation is saved in `z`.
@@ -223,12 +219,12 @@ translate!(G::AbstractGroupManifold, z, x, y) = translate!(G, z, x, y, LeftActio
 @doc doc"""
     inverse_translate(G::AbstractGroupManifold, x, y, [conv::ActionDirection=Left()])
 
-For group elements $x,y \in G$, inverse translate $y$ by $x$ with the specified
-convention, either left $L_x^{-1}$ or right $R_x^{-1}$, defined as
+For group elements $x,y ∈ G$, inverse translate $y$ by $x$ with the specified convention,
+either left $L_x^{-1}$ or right $R_x^{-1}$, defined as
 ```math
 \begin{aligned}
-L_x^{-1} &\colon y \mapsto x^{-1} \circ y\\
-R_x^{-1} &\colon y \mapsto y \circ x^{-1}.
+L_x^{-1} &: y ↦ x^{-1} \circ y\\
+R_x^{-1} &: y ↦ y \circ x^{-1}.
 \end{aligned}
 ```
 """
@@ -246,12 +242,12 @@ end
 @doc doc"""
     inverse_translate!(G::AbstractGroupManifold, z, x, y, [conv::ActionDirection=Left()])
 
-For group elements $x,y \in G$, inverse translate $y$ by $x$ with the specified
-convention, either left $L_x^{-1}$ or right $R_x^{-1}$, defined as
+For group elements $x,y ∈ G$, inverse translate $y$ by $x$ with the specified convention,
+either left $L_x^{-1}$ or right $R_x^{-1}$, defined as
 ```math
 \begin{aligned}
-L_x^{-1} &\colon y \mapsto x^{-1} \circ y\\
-R_x^{-1} &\colon y \mapsto y \circ x^{-1}.
+L_x^{-1} &: y ↦ x^{-1} \circ y\\
+R_x^{-1} &: y ↦ y \circ x^{-1}.
 \end{aligned}
 ```
 Result is saved in `z`.
@@ -271,14 +267,13 @@ end
 @doc doc"""
     translate_diff(G::AbstractGroupManifold, x, y, v[, conv::ActionDirection=LeftAction()])
 
-For group elements $x,y \in G$ and tangent vector $v \in T_y G$, compute the
-action of the differential of the translation by $x$ on $v$, written as
-$(\mathrm{d}\tau_x)_y (v)$, with the specified left or right convention. The
-differential transports vectors:
+For group elements $x,y ∈ G$ and tangent vector $v ∈ T_y G$, compute the action of the
+differential of the translation by $x$ on $v$, written as $(\mathrm{d}τ_x)_y (v)$, with the
+specified left or right convention. The differential transports vectors:
 ```math
 \begin{aligned}
-(\mathrm{d}L_x)_y (v) &\colon T_y G \to T_{x \circ y} G\\
-(\mathrm{d}R_x)_y (v) &\colon T_y G \to T_{y \circ x} G\\
+(\mathrm{d}L_x)_y (v) &: T_y G → T_{x \circ y} G\\
+(\mathrm{d}R_x)_y (v) &: T_y G → T_{y \circ x} G\\
 \end{aligned}
 ```
 """
@@ -303,14 +298,14 @@ end
 @doc doc"""
     inverse_translate_diff(G::AbstractGroupManifold, x, y, v[, conv::ActionDirection=Left()])
 
-For group elements $x,y \in G$ and tangent vector $v \in T_y G$, compute the
-inverse of the action of the differential of the translation by $x$ on $v$,
-written as $((\mathrm{d}\tau_x)_y)^{-1} (v) = (\mathrm{d}\tau_{x^{-1}})_y (v)$, with the
-specified left or right convention. The differential transports vectors:
+For group elements $x,y ∈ G$ and tangent vector $v ∈ T_y G$, compute the inverse of the
+action of the differential of the translation by $x$ on $v$, written as
+$((\mathrm{d}τ_x)_y)^{-1} (v) = (\mathrm{d}τ_{x^{-1}})_y (v)$, with the specified left or
+right convention. The differential transports vectors:
 ```math
 \begin{aligned}
-((\mathrm{d}L_x)_y)^{-1} (v) &\colon T_y G \to T_{x^{-1} \circ y} G\\
-((\mathrm{d}R_x)_y)^{-1} (v) &\colon T_y G \to T_{y \circ x^{-1}} G\\
+((\mathrm{d}L_x)_y)^{-1} (v) &: T_y G → T_{x^{-1} \circ y} G\\
+((\mathrm{d}R_x)_y)^{-1} (v) &: T_y G → T_{y \circ x^{-1}} G\\
 \end{aligned}
 ```
 """

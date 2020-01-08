@@ -36,11 +36,11 @@ const SemidirectProductGroup{N,H,A,ON,OH} = GroupManifold{
     )
 
 A group that is the semidirect product of a normal group $N$ and a subgroup $H$, written
-$G = N ⋊_{\theta} H$, where $θ: H × N \to N$ is an automorphism action
+$G = N ⋊_θ H$, where $θ: H × N \to N$ is an automorphism action
 of $H$ on $N$. The group $G$ has the composition rule
 
 ````math
-g \circ g′ = (n, h) \circ (n′, h′) = (n \circ θ_h(n′), h \circ h′)
+g \circ g' = (n, h) \circ (n', h') = (n \circ θ_h(n'), h \circ h')
 ````
 
 and the inverse
