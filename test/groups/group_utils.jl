@@ -7,19 +7,23 @@ struct NotImplementedManifold <: Manifold end
         G::AbstractGroupManifold,
         g_pts::AbstractVector,
         v_pts::AbstractVector = [];
+        atol = 1e-10,
         test_mutating = true,
         test_diff = false,
+        diff_convs = [(), (LeftAction(),), (RightAction(),)],
     )
 
 Tests general properties of the group `G`, given at least three different points
 elements of it (contained in `g_pts`).
 Optionally, specify `test_diff` to test differentials of translation, using `v_pts`, which
-must contain at least one tangent vector at `g_pts[1]`.
+must contain at least one tangent vector at `g_pts[1]`, and the direction conventions
+specified in `diff_convs`.
 """
 function test_group(
     G::AbstractGroupManifold,
     g_pts::AbstractVector,
     v_pts::AbstractVector = [];
+    atol = 1e-10,
     test_mutating = true,
     test_diff = false,
     diff_convs = [(), (LeftAction(),), (RightAction(),)],
@@ -30,14 +34,14 @@ function test_group(
         @testset "Closed" begin
             for g1 in g_pts, g2 in g_pts
                 g3 = compose(G, g1, g2)
-                @test is_manifold_point(G, g3)
+                @test is_manifold_point(G, g3; atol = atol)
             end
         end
 
         @testset "Associative" begin
             g12_3 = compose(G, compose(G, g_pts[1], g_pts[2]), g_pts[3])
             g1_23 = compose(G, g_pts[1], compose(G, g_pts[2], g_pts[3]))
-            @test isapprox(G, g12_3, g1_23)
+            @test isapprox(G, g12_3, g1_23; atol = atol)
 
             test_mutating && @testset "mutating" begin
                 g12, g23, g12_3, g1_23 = similar.(repeat([g_pts[1]], 4))
@@ -45,7 +49,7 @@ function test_group(
                 @test compose!(G, g23, g_pts[2], g_pts[3]) === g23
                 @test compose!(G, g12_3, g12, g_pts[3]) === g12_3
                 @test compose!(G, g1_23, g_pts[1], g23) === g1_23
-                @test isapprox(G, g12_3, g1_23)
+                @test isapprox(G, g12_3, g1_23; atol = atol)
             end
         end
 
@@ -88,22 +92,22 @@ function test_group(
         @testset "Inverse" begin
             for g in g_pts
                 ginv = inv(G, g)
-                @test isapprox(G, compose(G, g, ginv), e)
-                @test isapprox(G, compose(G, ginv, g), e)
-                @test isapprox(G, e, compose(G, g, ginv))
-                @test isapprox(G, e, compose(G, ginv, g))
+                @test isapprox(G, compose(G, g, ginv), e; atol = atol)
+                @test isapprox(G, compose(G, ginv, g), e; atol = atol)
+                @test isapprox(G, e, compose(G, g, ginv); atol = atol)
+                @test isapprox(G, e, compose(G, ginv, g); atol = atol)
                 @test inv(G, e) === e
 
                 test_mutating && @testset "mutating" begin
                     ginv = similar(g)
                     @test inv!(G, ginv, g) === ginv
-                    @test isapprox(G, compose(G, g, ginv), e)
-                    @test isapprox(G, compose(G, ginv, g), e)
+                    @test isapprox(G, compose(G, g, ginv), e; atol = atol)
+                    @test isapprox(G, compose(G, ginv, g), e; atol = atol)
 
                     @test inv(G, e) === e
                     geinv = similar(g)
                     @test inv!(G, geinv, e) === geinv
-                    @test isapprox(G, geinv, e)
+                    @test isapprox(G, geinv, e; atol = atol)
                 end
             end
         end
@@ -112,30 +116,30 @@ function test_group(
     @testset "translation" begin
         convs = ((), (LeftAction(),), (RightAction(),))
 
-        @test translate(G, g_pts[1], g_pts[2]) ≈ compose(G, g_pts[1], g_pts[2])
-        @test translate(G, g_pts[1], g_pts[2], LeftAction()) ≈ compose(G, g_pts[1], g_pts[2])
-        @test translate(G, g_pts[1], g_pts[2], RightAction()) ≈ compose(G, g_pts[2], g_pts[1])
+        @test translate(G, g_pts[1], g_pts[2]) ≈ compose(G, g_pts[1], g_pts[2]) atol = atol
+        @test translate(G, g_pts[1], g_pts[2], LeftAction()) ≈ compose(G, g_pts[1], g_pts[2]) atol = atol
+        @test translate(G, g_pts[1], g_pts[2], RightAction()) ≈ compose(G, g_pts[2], g_pts[1]) atol = atol
 
         for conv in convs
-            @test inverse_translate(G, g_pts[1], translate(G, g_pts[1], g_pts[2], conv...), conv...) ≈ g_pts[2]
-            @test translate(G, g_pts[1], inverse_translate(G, g_pts[1], g_pts[2], conv...), conv...) ≈ g_pts[2]
+            @test inverse_translate(G, g_pts[1], translate(G, g_pts[1], g_pts[2], conv...), conv...) ≈ g_pts[2] atol = atol
+            @test translate(G, g_pts[1], inverse_translate(G, g_pts[1], g_pts[2], conv...), conv...) ≈ g_pts[2] atol = atol
         end
 
         test_mutating && @testset "mutating" begin
             for conv in convs
                 g = similar(g_pts[1])
                 @test translate!(G, g, g_pts[1], g_pts[2], conv...) === g
-                @test g ≈ translate(G, g_pts[1], g_pts[2], conv...)
+                @test g ≈ translate(G, g_pts[1], g_pts[2], conv...) atol = atol
 
                 g = translate(G, g_pts[1], g_pts[2], conv...)
                 g2 = similar(g)
                 @test inverse_translate!(G, g2, g_pts[1], g, conv...) === g2
-                @test g2 ≈ g_pts[2]
+                @test g2 ≈ g_pts[2] atol = atol
 
                 g = inverse_translate(G, g_pts[1], g_pts[2], conv...)
                 g2 = similar(g)
                 @test translate!(G, g2, g_pts[1], g, conv...) === g2
-                @test g2 ≈ g_pts[2]
+                @test g2 ≈ g_pts[2] atol = atol
             end
         end
     end
@@ -144,30 +148,30 @@ function test_group(
         v = v_pts[1]
         g21 = compose(G, g_pts[2], g_pts[1])
         g12 = compose(G, g_pts[1], g_pts[2])
-        @test translate_diff(G, g_pts[2], g_pts[1], v) ≈ translate_diff(G, g_pts[2], g_pts[1], v, LeftAction())
-        @test is_tangent_vector(G, g12, translate_diff(G, g_pts[2], g_pts[1], v, LeftAction()))
-        RightAction() in diff_convs && @test is_tangent_vector(G, g21, translate_diff(G, g_pts[2], g_pts[1], v, RightAction()))
+        @test translate_diff(G, g_pts[2], g_pts[1], v) ≈ translate_diff(G, g_pts[2], g_pts[1], v, LeftAction()) atol = atol
+        @test is_tangent_vector(G, g12, translate_diff(G, g_pts[2], g_pts[1], v, LeftAction()); atol = atol)
+        RightAction() in diff_convs && @test is_tangent_vector(G, g21, translate_diff(G, g_pts[2], g_pts[1], v, RightAction()); atol = atol)
 
         for conv in diff_convs
-            @test inverse_translate_diff(G, g_pts[2], g_pts[1], translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...) ≈ v
-            @test translate_diff(G, g_pts[2], g_pts[1], inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...) ≈ v
+            @test inverse_translate_diff(G, g_pts[2], g_pts[1], translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...) ≈ v atol = atol
+            @test translate_diff(G, g_pts[2], g_pts[1], inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...) ≈ v atol = atol
         end
 
         test_mutating && @testset "mutating" begin
             for conv in diff_convs
                 vout = similar(v)
                 @test translate_diff!(G, vout, g_pts[2], g_pts[1], v, conv...) === vout
-                @test vout ≈ translate_diff(G, g_pts[2], g_pts[1], v, conv...)
+                @test vout ≈ translate_diff(G, g_pts[2], g_pts[1], v, conv...) atol = atol
 
                 vout = translate_diff(G, g_pts[2], g_pts[1], v, conv...)
                 vout2 = similar(vout)
                 @test inverse_translate_diff!(G, vout2, g_pts[2], g_pts[1], vout, conv...) === vout2
-                @test vout2 ≈ v
+                @test vout2 ≈ v atol = atol
 
                 vout = inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...)
                 vout2 = similar(vout)
                 @test translate_diff!(G, vout2, g_pts[2], g_pts[1], vout, conv...) === vout2
-                @test vout2 ≈ v
+                @test vout2 ≈ v atol = atol
             end
         end
     end
@@ -178,7 +182,7 @@ end
         A::AbstractGroupAction,
         a_pts::AbstractVector,
         m_pts::AbstractVector;
-        atol_inv = 1e-10,
+        atol = 1e-10,
         test_optimal_alignment = false,
         test_mutating = true,
         test_diff = false,
@@ -193,7 +197,7 @@ function test_action(
         a_pts::AbstractVector,
         m_pts::AbstractVector,
         v_pts = [];
-        atol_inv = 1e-10,
+        atol = 1e-10,
         test_optimal_alignment = false,
         test_mutating = true,
         test_diff = false,

@@ -30,7 +30,7 @@ include("group_utils.jl")
         m_pts = convert.(T_M, [[0.0, 1.0], [-1.0, 0.0], [1.0, 1.0]])
         v_pts = convert.(T_M, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
 
-        atol_inv = if eltype(T_M) == Float32
+        atol = if eltype(T_M) == Float32
             2e-7
         else
             1e-15
@@ -38,12 +38,12 @@ include("group_utils.jl")
         test_action(A_left, a_pts, m_pts, v_pts;
             test_optimal_alignment = true,
             test_diff = true,
-            atol_inv = atol_inv)
+            atol = atol)
 
         test_action(A_right, a_pts, m_pts, v_pts;
             test_optimal_alignment = true,
             test_diff = true,
-            atol_inv = atol_inv)
+            atol = atol)
     end
 
 end

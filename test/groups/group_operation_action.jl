@@ -20,7 +20,7 @@ include("group_utils.jl")
         a_pts = convert.(type, [reshape(i:i+3, 2, 2) for i = 1:3])
         m_pts = convert.(type, [reshape(i+2:i+5, 2, 2) for i = 1:3])
 
-        atol_inv = eltype(m_pts[1]) == Float32 ? 1e-5 : 1e-10
+        atol = eltype(m_pts[1]) == Float32 ? 1e-5 : 1e-10
 
         test_action(
             A_left,
@@ -28,7 +28,7 @@ include("group_utils.jl")
             m_pts;
             test_optimal_alignment = false,
             test_diff = false,
-            atol_inv = atol_inv,
+            atol = atol,
         )
 
         test_action(
@@ -37,7 +37,7 @@ include("group_utils.jl")
             m_pts;
             test_optimal_alignment = false,
             test_diff = false,
-            atol_inv = atol_inv,
+            atol = atol,
         )
     end
 end
