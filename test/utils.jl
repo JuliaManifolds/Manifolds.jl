@@ -317,6 +317,16 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             @test length(vb) == N
             vbi = inverse_represent_in_basis(M, x, vb, btype)
             @test isapprox(M, x, v1, vbi)
+
+            vs = [[ifelse(i==j, 1, 0) for j in 1:N] for i in 1:N]
+            vs_invs = [inverse_represent_in_basis(M, x, vu, btype) for vu in vs]
+            # check orthonormality of inverse representation
+            for i in 1:N
+                @test norm(M, x, vs_invs[i]) ≈ 1
+                for j in i+1:N
+                    @test real(inner(M, x, vs_invs[i], vs_invs[j])) ≈ 0 atol = sqrt(eps(eltype(x)))
+                end
+            end
         end
     end
 
