@@ -44,10 +44,7 @@ function switch_direction(A::RotationAction{TM,TSO,TAD}) where {TM,TSO,TAD}
     return RotationAction(A.M, A.SOn, switch_direction(TAD()))
 end
 
-function apply!(A::RotationActionOnVector{N,F,LeftAction}, y, a, x) where {N,F}
-    mul!(y, a, x)
-    return y
-end
+apply!(A::RotationActionOnVector{N,F,LeftAction}, y, a, x) where {N,F} = mul!(y, a, x)
 
 function apply(A::RotationActionOnVector{N,F,LeftAction}, a, x) where {N,F}
     return a * x
@@ -64,12 +61,10 @@ function inverse_apply(A::RotationActionOnVector{N,F,RightAction}, a, x) where {
 end
 
 function apply_diff!(A::RotationActionOnVector{N,F,LeftAction}, vout, a, x, v) where {N,F}
-    mul!(vout, a, v)
-    return vout
+    return mul!(vout, a, v)
 end
 function apply_diff!(A::RotationActionOnVector{N,F,RightAction}, vout, a, x, v) where {N,F}
-    mul!(vout, inv(base_group(A), a), v)
-    return vout
+    return mul!(vout, inv(base_group(A), a), v)
 end
 
 function apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, x, v) where {N,F}

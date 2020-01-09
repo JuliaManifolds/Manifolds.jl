@@ -96,17 +96,10 @@ function compose!(G::SemidirectProductGroup, z, x, y)
     compose!(N, submanifold_component.((z, x), 1)..., zₙtmp)
     return z
 end
-function compose!(G::GT, z, ::Identity{GT}, y) where {GT<:SemidirectProductGroup}
-    copyto!(z, y)
-    return z
-end
-function compose!(G::GT, z, x, ::Identity{GT}) where {GT<:SemidirectProductGroup}
-    copyto!(z, x)
-    return z
-end
+compose!(G::GT, z, ::Identity{GT}, y) where {GT<:SemidirectProductGroup} = copyto!(z, y)
+compose!(G::GT, z, x, ::Identity{GT}) where {GT<:SemidirectProductGroup} = copyto!(z, x)
 function compose!(G::GT, z, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}}
-    identity!(G, z, e)
-    return z
+    return identity!(G, z, e)
 end
 
 function translate_diff!(G::SemidirectProductGroup, vout, x, y, v, conv::LeftAction)

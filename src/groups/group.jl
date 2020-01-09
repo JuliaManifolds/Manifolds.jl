@@ -126,8 +126,7 @@ $x \circ x^{-1} = x^{-1} \circ x = e ∈ G$.
 """
 function inv(G::AbstractGroupManifold, x)
     y = similar_result(G, inv, x)
-    inv!(G, y, x)
-    return y
+    return inv!(G, y, x)
 end
 
 inv(::AG, e::Identity{AG}) where {AG<:AbstractGroupManifold} = e
@@ -144,8 +143,7 @@ The returned element is of a similar type to `x`.
 """
 function identity(G::AbstractGroupManifold, x)
     y = similar_result(G, identity, x)
-    identity!(G, y, x)
-    return y
+    return identity!(G, y, x)
 end
 identity(::GT, e::Identity{GT}) where {GT<:AbstractGroupManifold} = e
 
@@ -172,8 +170,7 @@ Compose elements $x,y ∈ G$ using the group operation $x \circ y$.
 compose(::AbstractGroupManifold, ::Any...)
 function compose(G::AbstractGroupManifold, x, y)
     z = similar_result(G, compose, x, y)
-    compose!(G, z, x, y)
-    return z
+    return compose!(G, z, x, y)
 end
 compose(G::GT, ::Identity{GT}, y) where {GT<:AbstractGroupManifold} = y
 compose(G::GT, x, ::Identity{GT}) where {GT<:AbstractGroupManifold} = x
@@ -357,10 +354,7 @@ end
 identity(::AbstractGroupManifold{AdditionOperation}, x) = zero(x)
 identity(::GT, e::Identity{GT}) where {GT<:AbstractGroupManifold{AdditionOperation}} = e
 
-function inv!(::AbstractGroupManifold{AdditionOperation}, y, x)
-    copyto!(y, -x)
-    return y
-end
+inv!(::AbstractGroupManifold{AdditionOperation}, y, x) = copyto!(y, -x)
 
 zero(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
 
@@ -386,8 +380,7 @@ function compose!(
     x::Identity{GT},
     y,
 ) where {GT<:AbstractGroupManifold{AdditionOperation}}
-    copyto!(z, y)
-    return z
+    return copyto!(z, y)
 end
 function compose!(
     ::GT,
@@ -395,8 +388,7 @@ function compose!(
     x,
     y::Identity{GT},
 ) where {GT<:AbstractGroupManifold{AdditionOperation}}
-    copyto!(z, x)
-    return z
+    return copyto!(z, x)
 end
 function compose!(
     G::GT,
@@ -404,8 +396,7 @@ function compose!(
     e::Identity{GT},
     ::Identity{GT},
 ) where {GT<:AbstractGroupManifold{AdditionOperation}}
-    identity!(G, z, e)
-    return z
+    return identity!(G, z, e)
 end
 
 translate_diff(
@@ -423,8 +414,7 @@ function translate_diff!(
     v,
     ::Union{LeftAction,RightAction},
 )
-    copyto!(vout, v)
-    return vout
+    return copyto!(vout, v)
 end
 
 inverse_translate_diff(
@@ -442,8 +432,7 @@ function inverse_translate_diff!(
     v,
     ::Union{LeftAction,RightAction},
 )
-    copyto!(vout, v)
-    return vout
+    return copyto!(vout, v)
 end
 
 """
@@ -473,33 +462,27 @@ function LinearAlgebra.mul!(
     e::Identity{G},
     x,
 ) where {G<:AbstractGroupManifold{MultiplicationOperation}}
-    copyto!(y, x)
-    return y
+    return copyto!(y, x)
 end
 function LinearAlgebra.mul!(
     y,
     x,
     e::Identity{G},
 ) where {G<:AbstractGroupManifold{MultiplicationOperation}}
-    copyto!(y, x)
-    return y
+    return copyto!(y, x)
 end
 function LinearAlgebra.mul!(
     y,
     e::E,
     ::E,
 ) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}}
-    identity!(e.group, y, e)
-    return y
+    return identity!(e.group, y, e)
 end
 
 # this is different from inv(G, e::Identity{G})
 inv(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
 
-function identity!(::AbstractGroupManifold{MultiplicationOperation}, y, x)
-    copyto!(y, one(x))
-    return y
-end
+identity!(::AbstractGroupManifold{MultiplicationOperation}, y, x) = copyto!(y, one(x))
 function identity!(
     G::GT,
     y,
@@ -508,16 +491,14 @@ function identity!(
     error("identity! not implemented on $(typeof(G)) for points $(typeof(y)) and $(typeof(x))")
 end
 function identity!(::AbstractGroupManifold{MultiplicationOperation}, y::AbstractMatrix, x)
-    copyto!(y, I)
-    return y
+    return copyto!(y, I)
 end
 function identity!(
     ::GT,
     y::AbstractMatrix,
     ::Identity{GT},
 ) where {GT<:AbstractGroupManifold{MultiplicationOperation}}
-    copyto!(y, I)
-    return y
+    return copyto!(y, I)
 end
 
 identity(::AbstractGroupManifold{MultiplicationOperation}, x) = one(x)
@@ -528,6 +509,8 @@ function inv!(::AbstractGroupManifold{MultiplicationOperation}, y, x)
     copyto!(y, inv(x))
     return y
 end
+
+inv!(::AbstractGroupManifold{MultiplicationOperation}, y, x) = copyto!(y, inv(x))
 
 inv(::AbstractGroupManifold{MultiplicationOperation}, x) = inv(x)
 inv(::AG, e::Identity{AG}) where {AG<:AbstractGroupManifold{MultiplicationOperation}} = e

@@ -12,14 +12,8 @@ function SpecialOrthogonal(n)
     return SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
 end
 
-function inv!(G::SpecialOrthogonal, y, x)
-    copyto!(y, inv(G, x))
-    return y
-end
-function inv!(G::AG, y, e::Identity{AG}) where {AG<:SpecialOrthogonal}
-    identity!(G, y, e)
-    return y
-end
+inv!(G::SpecialOrthogonal, y, x) = copyto!(y, inv(G, x))
+inv!(G::AG, y, e::Identity{AG}) where {AG<:SpecialOrthogonal} = identity!(G, y, e)
 
 inv(G::SpecialOrthogonal, x) = transpose(x)
 inv(::AG, e::Identity{AG}) where {AG<:SpecialOrthogonal} = e

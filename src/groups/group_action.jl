@@ -45,7 +45,7 @@ function apply!(A::AbstractGroupAction{LeftAction}, y, a, x)
 end
 function apply!(A::AbstractGroupAction{RightAction}, y, a, x)
     ainv = inv(base_group(A), a)
-    apply!(switch_direction(A), y, ainv, x)
+    return apply!(switch_direction(A), y, ainv, x)
 end
 
 @doc doc"""
@@ -61,8 +61,7 @@ x ⋅ a ≐ a^{-1} ⋅ x.
 """
 function apply(A::AbstractGroupAction, a, x)
     y = similar_result(A, apply, x, a)
-    apply!(A, y, a, x)
-    return y
+    return apply!(A, y, a, x)
 end
 
 """
@@ -73,8 +72,7 @@ The result is saved in `y`.
 """
 function inverse_apply!(A::AbstractGroupAction, y, a, x)
     inva = inv(base_group(A), a)
-    apply!(A, y, inva, x)
-    return y
+    return apply!(A, y, inva, x)
 end
 
 """
@@ -84,8 +82,7 @@ Apply inverse of action `a` to the point `x`. The action is specified by `A`.
 """
 function inverse_apply(A::AbstractGroupAction, a, x)
     y = similar_result(A, inverse_apply, x, a)
-    inverse_apply!(A, y, a, x)
-    return y
+    return inverse_apply!(A, y, a, x)
 end
 
 @doc doc"""
@@ -143,13 +140,8 @@ function compose(A::AbstractGroupAction{RightAction}, a, b)
     return compose(base_group(A), b, a)
 end
 
-function compose!(A::AbstractGroupAction{LeftAction}, y, a, b)
-    return compose!(base_group(A), y, a, b)
-end
-
-function compose!(A::AbstractGroupAction{RightAction}, y, a, b)
-    return compose!(base_group(A), y, b, a)
-end
+compose!(A::AbstractGroupAction{LeftAction}, y, a, b) = compose!(base_group(A), y, a, b)
+compose!(A::AbstractGroupAction{RightAction}, y, a, b) = compose!(base_group(A), y, b, a)
 
 @doc doc"""
     optimal_alignment(A::AbstractGroupAction, x1, x2)
@@ -173,8 +165,7 @@ to `x2`.
 The result is written to `y`.
 """
 function optimal_alignment!(A::AbstractGroupAction, y, x1, x2)
-    copyto!(y, optimal_alignment(A, x1, x2))
-    return y
+    return copyto!(y, optimal_alignment(A, x1, x2))
 end
 
 @doc doc"""
