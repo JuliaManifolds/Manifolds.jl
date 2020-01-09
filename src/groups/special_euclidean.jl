@@ -7,7 +7,7 @@ Special Euclidean group $\mathrm{SE}(n)$, the group of rigid motions.
 [`SpecialOrthogonal(n)`](@ref)
 
 ````math
-$\mathrm{SE}(n) ≐ \mathrm{T}(n) ⋊_θ \mathrm{SO}(n)$,
+\mathrm{SE}(n) ≐ \mathrm{T}(n) ⋊_θ \mathrm{SO}(n),
 ````
 
 where $θ$ is the canonical action of $\mathrm{SO}(n)$ on $\mathrm{T}(n)$ by vector rotation.
