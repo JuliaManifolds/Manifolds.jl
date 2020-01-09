@@ -61,8 +61,11 @@ function hat(M::Manifold, x, vⁱ)
     hat!(M, v, x, vⁱ)
     return v
 end
-hat!(M::Manifold, v, x, vⁱ) = error("hat! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), and matrix $(typeof(v))")
 
+function hat!(M::Manifold, v, x, vⁱ)
+    is_decorator_manifold(M) === Val(true) && return hat!(base_manifold(M), v, x, vⁱ)
+    error("hat! operator not defined for manifold $(typeof(M)), array $(typeof(v)), point $(typeof(x)), and vector $(typeof(vⁱ))")
+end
 
 @doc doc"""
     vee(M::Manifold, x, v)
@@ -84,9 +87,12 @@ function vee(M::Manifold, x, v)
     vee!(M, vⁱ, x, v)
     return vⁱ
 end
+
 function vee!(M::Manifold, vⁱ, x, v)
-    error("vee! operator not defined for manifold $(typeof(M)), matrix $(typeof(v)), and vector $(typeof(vⁱ))")
+    is_decorator_manifold(M) === Val(true) && return vee!(base_manifold(M), vⁱ, x, v)
+    error("vee! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), point $(typeof(x)), and array $(typeof(v))")
 end
+
 """
     PolarRetraction <: AbstractRetractionMethod
 
