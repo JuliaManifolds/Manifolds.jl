@@ -78,7 +78,6 @@ struct RightAction <: ActionDirection end
 Returns a [`RightAction`](@ref) when given a [`LeftAction`](@ref) and vice versa.
 """
 switch_direction(::ActionDirection)
-
 switch_direction(::LeftAction) = RightAction()
 switch_direction(::RightAction) = LeftAction()
 
@@ -155,10 +154,10 @@ function isapprox(G::GT, x, ::Identity{GT}; kwargs...) where {GT<:AbstractGroupM
 end
 function isapprox(
     ::GT,
-    ::Identity{GT},
-    ::Identity{GT};
+    ::E,
+    ::E;
     kwargs...,
-) where {GT<:AbstractGroupManifold}
+) where {GT<:AbstractGroupManifold,E<:Identity{GT}}
     return true
 end
 
@@ -167,14 +166,13 @@ end
 
 Compose elements $x,y ∈ G$ using the group operation $x \circ y$.
 """
-compose(::AbstractGroupManifold, ::Any...)
 function compose(G::AbstractGroupManifold, x, y)
     z = similar_result(G, compose, x, y)
     return compose!(G, z, x, y)
 end
-compose(G::GT, ::Identity{GT}, y) where {GT<:AbstractGroupManifold} = y
-compose(G::GT, x, ::Identity{GT}) where {GT<:AbstractGroupManifold} = x
-compose(G::GT, x::Identity{GT}, ::Identity{GT}) where {GT<:AbstractGroupManifold} = x
+compose(::GT, ::Identity{GT}, y) where {GT<:AbstractGroupManifold} = y
+compose(::GT, x, ::Identity{GT}) where {GT<:AbstractGroupManifold} = x
+compose(::GT, x::Identity{GT}, ::Identity{GT}) where {GT<:AbstractGroupManifold} = x
 
 function compose!(G::AbstractGroupManifold, z, x, y)
     error("compose not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y))")
@@ -228,10 +226,7 @@ R_x^{-1} &: y ↦ y \circ x^{-1}.
 function inverse_translate(G::AbstractGroupManifold, x, y, conv::ActionDirection)
     return translate(G, inv(G, x), y, conv)
 end
-
-function inverse_translate(G::AbstractGroupManifold, x, y)
-    return inverse_translate(G, x, y, LeftAction())
-end
+inverse_translate(G::AbstractGroupManifold, x, y) = inverse_translate(G, x, y, LeftAction())
 
 @doc doc"""
     inverse_translate!(G::AbstractGroupManifold, z, x, y, [conv::ActionDirection=Left()])
@@ -249,7 +244,6 @@ Result is saved in `z`.
 function inverse_translate!(G::AbstractGroupManifold, z, x, y, conv::ActionDirection)
     return translate!(G, z, inv(G, x), y, conv)
 end
-
 function inverse_translate!(G::AbstractGroupManifold, z, x, y)
     return inverse_translate!(G, z, x, y, LeftAction())
 end
@@ -267,25 +261,11 @@ specified left or right convention. The differential transports vectors:
 \end{aligned}
 ```
 """
-function translate_diff(
-    G::AbstractGroupManifold,
-    x,
-    y,
-    v,
-    conv::ActionDirection = LeftAction(),
-)
+function translate_diff(G::AbstractGroupManifold, x, y, v, conv::ActionDirection)
     return error("translate_diff not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y)), vector $(typeof(v)), and direction $(typeof(conv))")
 end
 
-
-function translate_diff!(
-    G::AbstractGroupManifold,
-    vout,
-    x,
-    y,
-    v,
-    conv::ActionDirection = LeftAction(),
-)
+function translate_diff!(G::AbstractGroupManifold, vout, x, y, v, conv::ActionDirection)
     return error("translate_diff! not implemented on $(typeof(G)) for elements $(typeof(vout)), $(typeof(x)) and $(typeof(y)), vector $(typeof(v)), and direction $(typeof(conv))")
 end
 
@@ -303,13 +283,7 @@ right convention. The differential transports vectors:
 \end{aligned}
 ```
 """
-function inverse_translate_diff(
-    G::AbstractGroupManifold,
-    x,
-    y,
-    v,
-    conv::ActionDirection = LeftAction(),
-)
+function inverse_translate_diff(G::AbstractGroupManifold, x, y, v, conv::ActionDirection)
     return translate_diff(G, inv(G, x), y, v, conv)
 end
 
@@ -319,11 +293,10 @@ function inverse_translate_diff!(
     x,
     y,
     v,
-    conv::ActionDirection = LeftAction(),
+    conv::ActionDirection,
 )
     return translate_diff!(G, vout, inv(G, x), y, v, conv)
 end
-
 
 """
     AdditionOperation <: AbstractGroupOperation
@@ -364,11 +337,13 @@ inv(::AG, e::Identity{AG}) where {AG<:AbstractGroupManifold{AdditionOperation}} 
 compose(::AbstractGroupManifold{AdditionOperation}, x, y) = x + y
 compose(::GT, x, ::Identity{GT}) where {GT<:AbstractGroupManifold{AdditionOperation}} = x
 compose(::GT, ::Identity{GT}, y) where {GT<:AbstractGroupManifold{AdditionOperation}} = y
-compose(
-    G::GT,
+function compose(
+    ::GT,
     x::Identity{GT},
     ::Identity{GT},
-) where {GT<:AbstractGroupManifold{AdditionOperation}} = x
+) where {GT<:AbstractGroupManifold{AdditionOperation}}
+    return x
+end
 
 function compose!(::AbstractGroupManifold{AdditionOperation}, z, x, y)
     z .= x .+ y
@@ -399,38 +374,42 @@ function compose!(
     return identity!(G, z, e)
 end
 
-translate_diff(
+function translate_diff(
     ::AbstractGroupManifold{AdditionOperation},
     x,
     y,
     v,
-    ::Union{LeftAction,RightAction},
-) = v
+    ::ActionDirection,
+)
+    return v
+end
 function translate_diff!(
     ::AbstractGroupManifold{AdditionOperation},
     vout,
     x,
     y,
     v,
-    ::Union{LeftAction,RightAction},
+    ::ActionDirection,
 )
     return copyto!(vout, v)
 end
 
-inverse_translate_diff(
+function inverse_translate_diff(
     ::AbstractGroupManifold{AdditionOperation},
     x,
     y,
     v,
-    ::Union{LeftAction,RightAction},
-) = v
+    ::ActionDirection,
+)
+    return v
+end
 function inverse_translate_diff!(
     ::AbstractGroupManifold{AdditionOperation},
     vout,
     x,
     y,
     v,
-    ::Union{LeftAction,RightAction},
+    ::ActionDirection,
 )
     return copyto!(vout, v)
 end
@@ -479,7 +458,6 @@ function LinearAlgebra.mul!(
     return identity!(e.group, y, e)
 end
 
-# this is different from inv(G, e::Identity{G})
 inv(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
 
 identity!(::AbstractGroupManifold{MultiplicationOperation}, y, x) = copyto!(y, one(x))
@@ -502,12 +480,11 @@ function identity!(
 end
 
 identity(::AbstractGroupManifold{MultiplicationOperation}, x) = one(x)
-identity(::GT, e::Identity{GT}) where {GT<:AbstractGroupManifold{MultiplicationOperation}} =
-    e
-
-function inv!(::AbstractGroupManifold{MultiplicationOperation}, y, x)
-    copyto!(y, inv(x))
-    return y
+function identity(
+    ::GT,
+    e::Identity{GT},
+) where {GT<:AbstractGroupManifold{MultiplicationOperation}}
+    return e
 end
 
 inv!(::AbstractGroupManifold{MultiplicationOperation}, y, x) = copyto!(y, inv(x))

@@ -8,14 +8,12 @@ Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
 """
 const SpecialOrthogonal{n} = GroupManifold{Rotations{n},MultiplicationOperation}
 
-function SpecialOrthogonal(n)
-    return SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
-end
+SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
 
 inv!(G::SpecialOrthogonal, y, x) = copyto!(y, inv(G, x))
 inv!(G::AG, y, e::Identity{AG}) where {AG<:SpecialOrthogonal} = identity!(G, y, e)
 
-inv(G::SpecialOrthogonal, x) = transpose(x)
+inv(::SpecialOrthogonal, x) = transpose(x)
 inv(::AG, e::Identity{AG}) where {AG<:SpecialOrthogonal} = e
 
 show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")

@@ -28,13 +28,9 @@ function show(io::IO, A::TranslationAction)
     print(io, "TranslationAction($(A.M), $(A.Rn), $(direction(A)))")
 end
 
-function base_group(A::TranslationAction)
-    return A.Rn
-end
+base_group(A::TranslationAction) = A.Rn
 
-function g_manifold(A::TranslationAction)
-    return A.M
-end
+g_manifold(A::TranslationAction) = A.M
 
 function switch_direction(A::TranslationAction{TM,TRN,TAD}) where {TM,TRN,TAD}
     return TranslationAction(A.M, A.Rn, switch_direction(TAD()))

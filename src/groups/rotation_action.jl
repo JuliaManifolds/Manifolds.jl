@@ -32,13 +32,9 @@ const RotationActionOnVector{N,F,TAD} = RotationAction{
     TAD,
 }
 
-function base_group(A::RotationAction)
-    return A.SOn
-end
+base_group(A::RotationAction) = A.SOn
 
-function g_manifold(A::RotationAction)
-    return A.M
-end
+g_manifold(A::RotationAction) = A.M
 
 function switch_direction(A::RotationAction{TM,TSO,TAD}) where {TM,TSO,TAD}
     return RotationAction(A.M, A.SOn, switch_direction(TAD()))
@@ -46,9 +42,7 @@ end
 
 apply!(A::RotationActionOnVector{N,F,LeftAction}, y, a, x) where {N,F} = mul!(y, a, x)
 
-function apply(A::RotationActionOnVector{N,F,LeftAction}, a, x) where {N,F}
-    return a * x
-end
+apply(A::RotationActionOnVector{N,F,LeftAction}, a, x) where {N,F} = a * x
 function apply(A::RotationActionOnVector{N,F,RightAction}, a, x) where {N,F}
     return inv(base_group(A), a) * x
 end
@@ -56,9 +50,7 @@ end
 function inverse_apply(A::RotationActionOnVector{N,F,LeftAction}, a, x) where {N,F}
     return inv(base_group(A), a) * x
 end
-function inverse_apply(A::RotationActionOnVector{N,F,RightAction}, a, x) where {N,F}
-    return a * x
-end
+inverse_apply(A::RotationActionOnVector{N,F,RightAction}, a, x) where {N,F} = a * x
 
 function apply_diff!(A::RotationActionOnVector{N,F,LeftAction}, vout, a, x, v) where {N,F}
     return mul!(vout, a, v)
@@ -67,9 +59,7 @@ function apply_diff!(A::RotationActionOnVector{N,F,RightAction}, vout, a, x, v) 
     return mul!(vout, inv(base_group(A), a), v)
 end
 
-function apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, x, v) where {N,F}
-    return a * v
-end
+apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, x, v) where {N,F} = a * v
 function apply_diff(A::RotationActionOnVector{N,F,RightAction}, a, x, v) where {N,F}
     return inv(base_group(A), a) * v
 end
@@ -77,9 +67,7 @@ end
 function inverse_apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, x, v) where {N,F}
     return inv(base_group(A), a) * v
 end
-function inverse_apply_diff(A::RotationActionOnVector{N,F,RightAction}, a, x, v) where {N,F}
-    return a * v
-end
+inverse_apply_diff(A::RotationActionOnVector{N,F,RightAction}, a, x, v) where {N,F} = a * v
 
 function optimal_alignment(A::RotationActionOnVector{N,T,LeftAction}, x1, x2) where {N,T}
     is_manifold_point(A.M, x1, true)

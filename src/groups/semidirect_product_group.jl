@@ -118,13 +118,7 @@ function translate_diff!(G::SemidirectProductGroup, vout, x, y, v, conv::LeftAct
     return vout
 end
 
-function translate_diff(
-    G::SemidirectProductGroup,
-    x,
-    y,
-    v,
-    conv::ActionDirection = LeftAction(),
-)
+function translate_diff(G::SemidirectProductGroup, x, y, v, conv::ActionDirection)
     #TODO: use zero_tangent_vector here
     vout = similar_result(base_manifold(G), translate_diff, x, y, v)
     translate_diff!(G, vout, x, y, v, conv)
