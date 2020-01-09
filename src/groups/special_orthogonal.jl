@@ -18,32 +18,20 @@ inv(::AG, e::Identity{AG}) where {AG<:SpecialOrthogonal} = e
 
 show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
 
-translate_diff(::SpecialOrthogonal, x, y, v, ::LeftAction) = v
-translate_diff(::SpecialOrthogonal, x, y, v, ::RightAction) = transpose(x) * v * x
+inverse_translate(G::SpecialOrthogonal, x, y, conv::LeftAction) = inv(G, x) * y
+inverse_translate(G::SpecialOrthogonal, x, y, conv::RightAction) = y * inv(G, x)
 
-function translate_diff!(
-    G::SpecialOrthogonal,
-    vout,
-    x,
-    y,
-    v,
-    conv::ActionDirection = LeftAction(),
-)
-    copyto!(vout, translate_diff(G, x, y, v, conv))
-    return vout
+translate_diff(::SpecialOrthogonal, x, y, v, ::LeftAction) = v
+translate_diff(G::SpecialOrthogonal, x, y, v, ::RightAction) = inv(G, x) * v * x
+
+function translate_diff!(G::SpecialOrthogonal, vout, x, y, v, conv::ActionDirection)
+    return copyto!(vout, translate_diff(G, x, y, v, conv))
 end
 
-inverse_translate_diff(::SpecialOrthogonal, x, y, v, ::LeftAction) = v
-inverse_translate_diff(::SpecialOrthogonal, x, y, v, ::RightAction) = x * v * transpose(x)
+function inverse_translate_diff(G::SpecialOrthogonal, x, y, v, conv::ActionDirection)
+    return translate_diff(G, inv(G, x), y, v, conv)
+end
 
-function inverse_translate_diff!(
-    G::SpecialOrthogonal,
-    vout,
-    x,
-    y,
-    v,
-    conv::ActionDirection = LeftAction(),
-)
-    copyto!(vout, inverse_translate_diff(G, x, y, v, conv))
-    return vout
+function inverse_translate_diff!(G::SpecialOrthogonal, vout, x, y, v, conv::ActionDirection)
+    return copyto!(vout, inverse_translate_diff(G, x, y, v, conv))
 end

@@ -505,24 +505,54 @@ inv(::AbstractGroupManifold{MultiplicationOperation}, x) = inv(x)
 inv(::AG, e::Identity{AG}) where {AG<:AbstractGroupManifold{MultiplicationOperation}} = e
 
 compose(::AbstractGroupManifold{MultiplicationOperation}, x, y) = x * y
-compose(
+function compose(
     ::GT,
     x,
     ::Identity{GT},
-) where {GT<:AbstractGroupManifold{MultiplicationOperation}} = x
-compose(
+) where {GT<:AbstractGroupManifold{MultiplicationOperation}}
+    return x
+end
+function compose(
     ::GT,
     ::Identity{GT},
     y,
-) where {GT<:AbstractGroupManifold{MultiplicationOperation}} = y
-compose(
-    G::GT,
+) where {GT<:AbstractGroupManifold{MultiplicationOperation}}
+    return y
+end
+function compose(
+    ::GT,
     x::Identity{GT},
     ::Identity{GT},
-) where {GT<:AbstractGroupManifold{MultiplicationOperation}} = x
+) where {GT<:AbstractGroupManifold{MultiplicationOperation}}
+    return x
+end
 
-function compose!(::AbstractGroupManifold{MultiplicationOperation}, z, x, y)
-    #TODO: z might alias with x or y, we might be able to optimize it if it doesn't.
-    copyto!(z, x * y)
-    return z
+# TODO: z might alias with x or y, we might be able to optimize it if it doesn't.
+compose!(::AbstractGroupManifold{MultiplicationOperation}, z, x, y) = copyto!(z, x * y)
+
+function inverse_translate(
+    ::AbstractGroupManifold{MultiplicationOperation},
+    x,
+    y,
+    ::LeftAction,
+)
+    return x \ y
+end
+function inverse_translate(
+    ::AbstractGroupManifold{MultiplicationOperation},
+    x,
+    y,
+    ::RightAction,
+)
+    return y / x
+end
+
+function inverse_translate!(
+    G::AbstractGroupManifold{MultiplicationOperation},
+    z,
+    x,
+    y,
+    conv::ActionDirection,
+)
+    return copyto!(z, inverse_translate(G, x, y, conv))
 end
