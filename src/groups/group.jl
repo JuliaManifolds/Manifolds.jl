@@ -264,9 +264,15 @@ specified left or right convention. The differential transports vectors:
 function translate_diff(G::AbstractGroupManifold, x, y, v, conv::ActionDirection)
     return error("translate_diff not implemented on $(typeof(G)) for elements $(typeof(x)) and $(typeof(y)), vector $(typeof(v)), and direction $(typeof(conv))")
 end
+function translate_diff(G::AbstractGroupManifold, x, y, v)
+    return translate_diff(G, x, y, v, LeftAction())
+end
 
 function translate_diff!(G::AbstractGroupManifold, vout, x, y, v, conv::ActionDirection)
     return error("translate_diff! not implemented on $(typeof(G)) for elements $(typeof(vout)), $(typeof(x)) and $(typeof(y)), vector $(typeof(v)), and direction $(typeof(conv))")
+end
+function translate_diff!(G::AbstractGroupManifold, vout, x, y, v)
+    return translate_diff!(G, vout, x, y, v, LeftAction())
 end
 
 @doc doc"""
@@ -286,6 +292,9 @@ right convention. The differential transports vectors:
 function inverse_translate_diff(G::AbstractGroupManifold, x, y, v, conv::ActionDirection)
     return translate_diff(G, inv(G, x), y, v, conv)
 end
+function inverse_translate_diff(G::AbstractGroupManifold, x, y, v)
+    return inverse_translate_diff(G, x, y, v, LeftAction())
+end
 
 function inverse_translate_diff!(
     G::AbstractGroupManifold,
@@ -296,6 +305,9 @@ function inverse_translate_diff!(
     conv::ActionDirection,
 )
     return translate_diff!(G, vout, inv(G, x), y, v, conv)
+end
+function inverse_translate_diff!(G::AbstractGroupManifold, vout, x, y, v)
+    return inverse_translate_diff!(G, vout, x, y, v, LeftAction())
 end
 
 """
