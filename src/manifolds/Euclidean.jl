@@ -125,7 +125,7 @@ log!(M::Euclidean, v, x, y) = (v .= y .- x)
 
 log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = zero(eltype(x))
 
-@generated _product_of_dimensions(::Euclidean{N}) where {N} = *(N.parameters...)
+@generated _product_of_dimensions(::Euclidean{N}) where {N} = prod(N.parameters)
 
 """
     manifold_dimension(M::Euclidean)
@@ -231,7 +231,7 @@ end
 Return the array dimensions required to represent an element on the
 [`Euclidean`](@ref) `M`, i.e. the vector of all array dimensions.
 """
-@generated representation_size(::Euclidean{N}) where N = Tuple(N.parameters...)
+Base.@pure representation_size(::Euclidean{N}) where {N} = tuple(N.parameters...)
 
 """
     sharp(M::Euclidean, x, w)
