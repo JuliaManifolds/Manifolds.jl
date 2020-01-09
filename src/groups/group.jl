@@ -49,6 +49,10 @@ end
 
 is_decorator_manifold(::GroupManifold) = Val(true)
 
+function check_manifold_point(G::GroupManifold, x; kwargs...)
+    return check_manifold_point(base_manifold(G), x; kwargs...)
+end
+
 show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
 """
