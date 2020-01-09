@@ -76,6 +76,12 @@ function flat!(M::Euclidean, v::FVector{CotangentSpaceType}, x, w::FVector{Tange
     return v
 end
 
+function hat(M::Euclidean{N,ℝ}, x, vⁱ) where {N}
+    return reshape(vⁱ, representation_size(TangentBundleFibers(M)))
+end
+
+hat!(::Euclidean{N,ℝ}, v, x, vⁱ) where {N} = copyto!(v, vⁱ)
+
 @doc doc"""
     injectivity_radius(M::Euclidean)
 
@@ -260,6 +266,10 @@ end
 
 var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
 var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T} = sum(var(x; mean=m, kwargs...))
+
+vee!(::Euclidean{N,ℝ}, vⁱ, x, v) where {N} = copyto!(vⁱ, v)
+
+vee(::Euclidean{N,ℝ}, x, v) where {N} = vec(v)
 
 """
     zero_tangent_vector(M::Euclidean, x)
