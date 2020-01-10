@@ -51,13 +51,12 @@ $v=v^i e_i$, where Einstein summation notation is used:
 \wedge: v^i \mapsto v^i e_i
 ````
 
-For matrix manifolds, this converts a vector representation of the tangent
-vector to a matrix representation. The [`vee`](@ref) map is the `hat` map's
+For array manifolds, this converts a vector representation of the tangent
+vector to an array representation. The [`vee`](@ref) map is the `hat` map's
 inverse.
 """
 function hat(M::Manifold, x, vⁱ)
-    repr_size = representation_size(TangentBundleFibers(M))
-    v = MArray{Tuple{repr_size...},eltype(vⁱ)}(undef)
+    v = similar_result(M, hat, x, vⁱ)
     hat!(M, v, x, vⁱ)
     return v
 end
@@ -78,12 +77,12 @@ Einstein summation notation is used:
 \vee: v^i e_i \mapsto v^i
 ````
 
-For matrix manifolds, this converts a  matrix representation of the tangent
+For array manifolds, this converts an array representation of the tangent
 vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
 inverse.
 """
 function vee(M::Manifold, x, v)
-    vⁱ = MVector{manifold_dimension(M),eltype(v)}(undef)
+    vⁱ = similar_result(M, vee, x, v)
     vee!(M, vⁱ, x, v)
     return vⁱ
 end
@@ -91,6 +90,15 @@ end
 function vee!(M::Manifold, vⁱ, x, v)
     is_decorator_manifold(M) === Val(true) && return vee!(base_manifold(M), vⁱ, x, v)
     error("vee! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), point $(typeof(x)), and array $(typeof(v))")
+end
+
+function similar_result(M::Manifold, f::typeof(vee), x, v)
+    T = similar_result_type(M, f, (x, v))
+    return similar(x, T, manifold_dimension(M))
+end
+function similar_result(M::Manifold, f::typeof(vee), x::StaticArray, v)
+    T = similar_result_type(M, f, (x, v))
+    return similar(x, T, Size(manifold_dimension(M)))
 end
 
 """
