@@ -44,7 +44,7 @@ Generate the manifold of `m`-by-`n` real-valued matrices of rank `k`.
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
 struct FixedRankMatrices{M,N,K,T} <: Manifold end
-FixedRankMatrices(m::Int, n::Int, k::Int, t::AbstractField=ℝ) = FixedRankMatrices{m,n,k,t}()
+FixedRankMatrices(m::Int, n::Int, k::Int, t::AbstractNumbers=ℝ) = FixedRankMatrices{m,n,k,t}()
 
 @doc doc"""
     SVDMPoint <: MPoint
@@ -179,28 +179,20 @@ isapprox(::FixedRankMatrices, x::SVDMPoint, y::SVDMPoint; kwargs...) = isapprox(
 isapprox(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector; kwargs...) = isapprox(x.U*v.M*x.Vt + v.U*x.Vt + x.U*v.Vt, x.U*w.M*x.Vt + w.U*x.Vt + x.U*w.Vt; kwargs...)
 
 @doc doc"""
-    manifold_dimension(M::FixedRankMatrices{m,n,k,ℝ})
+    manifold_dimension(M::FixedRankMatrices{m,n,k,𝔽})
 
-Return the manifold dimension for the real-valued [`FixedRankMatrices`](@ref) `M`
+Return the manifold dimension for the `𝔽`-valued [`FixedRankMatrices`](@ref) `M`
 of dimension `m`x`n` of rank `k`, namely
 
 ````math
-k(m + n - k)
+k(m + n - k) \dim_ℝ 𝔽,
 ````
+
+where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
-manifold_dimension(::FixedRankMatrices{m,n,k,ℝ}) where {m,n,k} = (m + n - k)*k
-
-@doc doc"""
-    manifold_dimension(M::FixedRankMatrices{m,n,k,ℂ})
-
-Return the manifold dimension for the complex-valued [`FixedRankMatrices`](@ref) `M` of
-dimension `m`x`n` of rank `k`, namely
-
-````math
-2k(m + n -k)
-````
-"""
-manifold_dimension(::FixedRankMatrices{M,N,k,ℂ}) where {M,N,k} = 2*(M+N-k)*k
+function manifold_dimension(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽}
+    return (m + n - k)*k*real_dimension(𝔽)
+end
 
 @doc doc"""
     project_tangent(M, x, A)

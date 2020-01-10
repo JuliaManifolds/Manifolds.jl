@@ -56,7 +56,7 @@ Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
 case $\mathbb F = \mathbb R$ is the default.
 """
 struct Grassmann{n,k,F} <: Manifold end
-Grassmann(n::Int, k::Int, F::AbstractField=ℝ) = Grassmann{n,k,F}()
+Grassmann(n::Int, k::Int, F::AbstractNumbers=ℝ) = Grassmann{n,k,F}()
 
 @doc doc"""
     check_manifold_point(M::Grassmann{n,k,F}, x)
@@ -259,24 +259,15 @@ end
 @doc doc"""
     manifold_dimension(M::Grassmann)
 
-Return the dimension of the real-valued [`Grassmann`](@ref)`(n,k)` manifold `M`, i.e.
+Return the dimension of the [`Grassmann(n,k,𝔽)`](@ref) manifold `M`, i.e.
 
 ````math
-\operatorname{dim}_{\operatorname{Gr}(n,k)} = k(n-k)
+\dim \operatorname{Gr}(n,k) = k(n-k) \dim_ℝ 𝔽,
 ````
 
+where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
-manifold_dimension(M::Grassmann{n,k,ℝ}) where {n,k} = k*(n - k)
-
-@doc doc"""
-    manifold_dimension(M::Grassmann)
-
-Return the dimension of the complex-valued [`Grassmann`](@ref)`(n,k)` manifold `M`, i.e.
-````math
-\operatorname{dim}_{\operatorname{Gr}(n,k)} = 2k(n-k)
-````
-"""
-manifold_dimension(M::Grassmann{n,k,ℂ}) where {n,k} = 2*k*(n - k)
+manifold_dimension(M::Grassmann{n,k,𝔽}) where {n,k,𝔽} = k*(n - k)*real_dimension(𝔽)
 
 """
     mean(

@@ -19,11 +19,11 @@ $\mathbb F^{n_1, n_2, \ldots, n_d}$ whose
 elements are interpreted as $n_1 \times,n_2\times\cdots\times n_i$ arrays.
 For $d=2$ we obtain a matrix space.
 The default `field=ℝ` can also be set to `field=ℂ`.
-The dimension of this space is $k$ for the real-valued case and $2k$ for the
-complex-valued case.
+The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
+[`real_dimension`](@ref) of the field $𝔽$.
 """
-struct Euclidean{N<:Tuple,T} <: Manifold where {N, T<: AbstractField} end
-Euclidean(n::Vararg{Int,N};field::AbstractField=ℝ) where N = Euclidean{Tuple{n...},field}()
+struct Euclidean{N<:Tuple,T} <: Manifold where {N, T<: AbstractNumbers} end
+Euclidean(n::Vararg{Int,N};field::AbstractNumbers=ℝ) where N = Euclidean{Tuple{n...},field}()
 
 """
     EuclideanMetric <: RiemannianMetric
@@ -125,14 +125,18 @@ log!(M::Euclidean, v, x, y) = (v .= y .- x)
 
 log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = zero(eltype(x))
 
+@generated _product_of_dimensions(::Euclidean{N}) where {N} = *(N.parameters...)
+
 """
     manifold_dimension(M::Euclidean)
 
 Return the manifold dimension of the [`Euclidean`](@ref) `M`, i.e.
-the product of all array dimensions.
+the product of all array dimensions and the [`real_dimension`](@ref) of the
+underlying number system.
 """
-@generated manifold_dimension(::Euclidean{N,ℝ}) where {N} = *(N.parameters...)
-@generated manifold_dimension(::Euclidean{N,ℂ}) where {N} = 2*( *(N.parameters...) )
+function manifold_dimension(M::Euclidean{N,𝔽}) where {N,𝔽}
+    return _product_of_dimensions(M) * real_dimension(𝔽)
+end
 
 mean(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
 mean(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) = mean(x, w)

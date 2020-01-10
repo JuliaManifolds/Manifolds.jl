@@ -114,4 +114,12 @@ include("utils.jl")
             end
         end
     end
+
+    @testset "Quaternion" begin
+        M = Stiefel(3,2,ℍ)
+        @testset "Basics" begin
+            @test representation_size(M) == (3,2)
+            @test manifold_dimension(M) == 18
+        end
+    end
 end

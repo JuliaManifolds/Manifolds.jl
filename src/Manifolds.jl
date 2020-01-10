@@ -1,6 +1,6 @@
 module Manifolds
 
-import Base: +, -, *, \, /, angle, axes, convert, copy, copyto!, dataids, eltype, exp,
+import Base: +, -, *, \, /, ^, angle, axes, convert, copy, copyto!, dataids, eltype, exp,
     getindex, identity, isapprox, inv, length, log, promote_rule, setindex!, similar, size
 import Distributions: _rand!, support
 import LinearAlgebra: cross, det, Diagonal, dot, norm, I, UniformScaling
@@ -32,25 +32,6 @@ using Random: AbstractRNG
 using Requires
 using StaticArrays
 using UnsafeArrays
-
-"""
-    AbstractField
-
-An abstract type to represent the field matrix manifolds are build upon,
-following the idea of [TensorKit](https://github.com/Jutho/TensorKit.jl)
-in order to hace concrete field types to dispatch on. The two most common
-field types are `RealNumbers` (`ℝ` for short) and `ComplexNumbers` (`ℂ`).
-"""
-abstract type AbstractField end
-
-struct RealNumbers <: AbstractField end
-struct ComplexNumbers <: AbstractField end
-
-const ℝ = RealNumbers()
-const ℂ = ComplexNumbers()
-
-Base.show(io::IO, ::RealNumbers) = print(io, "ℝ")
-Base.show(io::IO, ::ComplexNumbers) = print(io, "ℂ")
 
 """
     AbstractEstimationMethod
@@ -153,6 +134,7 @@ matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
 struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
 include("utils.jl")
+include("numbers.jl")
 include("orthonormal_bases.jl")
 include("autodiff.jl")
 include("SizedAbstractArray.jl")
@@ -204,7 +186,7 @@ end
 export CoTVector, Manifold, MPoint, TVector, Manifold
 export Euclidean, CholeskySpace, Circle, FixedRankMatrices, Grassmann,
     Hyperbolic, Rotations,Sphere, Stiefel, SymmetricMatrices, SymmetricPositiveDefinite
-export SVDMPoint, UMVTVector, AbstractField, ℝ, ℂ
+export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
 export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 export CotangentBundle, CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
@@ -226,17 +208,17 @@ export base_manifold, bundle_projection, christoffel_symbols_first, christoffel_
     einstein_tensor, exp, exp!, flat, flat!, gaussian_curvature, geodesic, hat, hat!,
     injectivity_radius, inner, inverse_local_metric, inverse_retract, inverse_retract!,
     isapprox, is_decorator_manifold, is_default_metric, is_manifold_point,
-    is_tangent_vector, isapprox, inner, kurtosis, local_metric, local_metric_jacobian,
-    log, log!, log_local_metric_density, manifold_dimension, metric, mean, mean!,
-    mean_and_var, mean_and_std, median, median!, moment, norm, normal_tvector_distribution,
-    one, project_point, project_point!, project_tangent, project_tangent!,
-    projected_distribution, ricci_curvature, ricci_tensor, representation_size, retract,
-    retract!, riemann_tensor, sharp, sharp!, shortest_geodesic, similar_result, skewness,
-    std, sym_rem, submanifold, submanifold_component, tangent_orthonormal_basis, var,
-    vector_space_dimension, vector_transport_along, vector_transport_along!,
-    vector_transport_direction, vector_transport_direction!, vector_transport_to,
-    vector_transport_to!, vee, vee!, zero_vector, zero_vector!, zero_tangent_vector,
-    zero_tangent_vector!
+    is_tangent_vector, isapprox, inner, kurtosis, local_metric, local_metric_jacobian, log,
+    log!, log_local_metric_density, manifold_dimension, metric, mean, mean!, mean_and_var,
+    mean_and_std, median, median!, moment, norm, normal_tvector_distribution, one,
+    project_point, project_point!, project_tangent, project_tangent!,
+    projected_distribution, real_dimension, ricci_curvature, ricci_tensor,
+    representation_size, retract, retract!, riemann_tensor, sharp, sharp!,
+    shortest_geodesic, similar_result, skewness, std, sym_rem, submanifold,
+    submanifold_component, tangent_orthonormal_basis, var, vector_space_dimension,
+    vector_transport_along, vector_transport_along!, vector_transport_direction,
+    vector_transport_direction!, vector_transport_to, vector_transport_to!, vee, vee!,
+    zero_vector, zero_vector!, zero_tangent_vector, zero_tangent_vector!
 # Lie group types & functions
 export AbstractGroupAction, AbstractGroupOperation, AbstractGroupManifold, ActionDirection,
     AdditionOperation, MultiplicationOperation, GroupManifold, Identity, LeftAction,
