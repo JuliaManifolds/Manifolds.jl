@@ -300,8 +300,8 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         if !isa(btype, ProjectedOrthonormalBasis)
             v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
             vb = get_coordinates(M, x, v1, btype)
-
-            @test get_coordinates(M, x, v1, b) ≈ get_coordinates(M, x, v1, btype)
+            
+            @test get_coordinates(M, x, v1, b) ≈ vb
             @test get_vector(M, x, vb, b) ≈ get_vector(M, x, vb, btype)
         end
     end

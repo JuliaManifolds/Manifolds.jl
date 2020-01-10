@@ -47,6 +47,18 @@ struct ProjectedOrthonormalBasis{Method} <: AbstractOrthonormalBasis end
 
 ProjectedOrthonormalBasis(method::Symbol) = ProjectedOrthonormalBasis{method}()
 
+@doc doc"""
+    DiagonalizingOrthonormalBasis(v)
+
+An orthonormal basis `Ξ` as a vector of tangent vectors (of length determined by
+[`manifold_dimension`](@ref)) in the tangent space that diagonalizes the curvature
+tensor $R(u,v)w$ and where the direction `v` has curvature `0`.
+"""
+struct DiagonalizingOrthonormalBasis{TV} <: AbstractOrthonormalBasis
+    v::TV
+end
+
+
 """
     PrecomputedOrthonormalBasis(vectors::AbstractVector)
 
@@ -56,10 +68,14 @@ struct PrecomputedOrthonormalBasis{TV<:AbstractVector} <: AbstractPrecomputedOrt
     vectors::TV
 end
 
-"""
+@doc doc"""
     DiagonalizingOrthonormalBasis(vectors, kappas)
+
+A precomputed orthonormal basis `Ξ` as a vector of tangent vectors (of length determined
+by [`manifold_dimension`](@ref)) in the tangent space that diagonalizes the curvature
+tensor $R(u,v)w$ with eigenvalues `kappas` and where the direction `v` has curvature `0`.
 """
-struct DiagonalizingOrthonormalBasis{TV<:AbstractVector, TK<:AbstractVector} <: AbstractPrecomputedOrthonormalBasis
+struct PrecomputedDiagonalizingOrthonormalBasis{TV<:AbstractVector, TK<:AbstractVector} <: AbstractPrecomputedOrthonormalBasis
     vectors::TV
     kappas::TK
 end

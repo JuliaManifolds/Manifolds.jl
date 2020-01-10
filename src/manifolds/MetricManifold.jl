@@ -402,9 +402,10 @@ function solve_exp_ode(M, x, v, tspan; kwargs...)
     error("solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(x)), vector $(typeof(v)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq`.")
 end
 
-tangent_orthonormal_basis(M::MMT, x, v) where {MMT <: MetricManifold} = tangent_orthonormal_basis(M, is_default_metric(M), x, v)
-tangent_orthonormal_basis(M::MMT, ::Val{true}, x, v) where {MMT <: MetricManifold} = tangent_orthonormal_basis(base_manifold(M), x, v)
-tangent_orthonormal_basis(M::MMT, ::Val{false}, x, v) where {MMT <: MetricManifold} = error("tangent_orthogonal_basis not implemented on $(typeof(M)) for point $(typeof(x)) and tangent vector $(typeof(v)).")
+basis(M::MMT, x, B::ArbitraryOrthonormalBasis) where {MMT <: MetricManifold} = invoke(basis, Tuple{MMT,Any,AbstractBasis}, M, x, B)
+basis(M::MMT, x, B::AbstractBasis) where {MMT <: MetricManifold} = basis(M, is_default_metric(M), x, B)
+basis(M::MMT, ::Val{true}, x, B::AbstractBasis) where {MMT <: MetricManifold} = basis(base_manifold(M), x, B)
+basis(M::MMT, ::Val{false}, x, B::AbstractBasis) where {MMT <: MetricManifold} = error("tangent_orthogonal_basis not implemented on $(typeof(M)) for point $(typeof(x)) and basis type $(typeof(B)).")
 
 vector_transport_to!(M::MMT, vto, x, v, y, m::AbstractVectorTransportMethod) where {MMT <: MetricManifold} = vector_transport_to!(M, is_default_metric(M), vto, x, v, y, m)
 vector_transport_to!(M::MMT, ::Val{true}, vto, x, v, y, m)  where {MMT <: MetricManifold}= vector_transport_to!(base_manifold(M), vto, x, v, y, m)
