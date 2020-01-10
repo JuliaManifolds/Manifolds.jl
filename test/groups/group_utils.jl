@@ -153,24 +153,28 @@ function test_group(
         RightAction() in diff_convs && @test is_tangent_vector(G, g21, translate_diff(G, g_pts[2], g_pts[1], v, RightAction()); atol = atol)
 
         for conv in diff_convs
-            @test inverse_translate_diff(G, g_pts[2], g_pts[1], translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...) ≈ v atol = atol
-            @test translate_diff(G, g_pts[2], g_pts[1], inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...) ≈ v atol = atol
+            g2g1 = translate(G, g_pts[2], g_pts[1], conv...)
+            g2invg1 = inverse_translate(G, g_pts[2], g_pts[1], conv...)
+            @test inverse_translate_diff(G, g_pts[2], g2g1, translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...) ≈ v atol = atol
+            @test translate_diff(G, g_pts[2], g2invg1, inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...) ≈ v atol = atol
         end
 
         test_mutating && @testset "mutating" begin
             for conv in diff_convs
+                g2g1 = translate(G, g_pts[2], g_pts[1], conv...)
+                g2invg1 = inverse_translate(G, g_pts[2], g_pts[1], conv...)
                 vout = similar(v)
                 @test translate_diff!(G, vout, g_pts[2], g_pts[1], v, conv...) === vout
                 @test vout ≈ translate_diff(G, g_pts[2], g_pts[1], v, conv...) atol = atol
 
                 vout = translate_diff(G, g_pts[2], g_pts[1], v, conv...)
                 vout2 = similar(vout)
-                @test inverse_translate_diff!(G, vout2, g_pts[2], g_pts[1], vout, conv...) === vout2
+                @test inverse_translate_diff!(G, vout2, g_pts[2], g2g1, vout, conv...) === vout2
                 @test vout2 ≈ v atol = atol
 
                 vout = inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...)
                 vout2 = similar(vout)
-                @test translate_diff!(G, vout2, g_pts[2], g_pts[1], vout, conv...) === vout2
+                @test translate_diff!(G, vout2, g_pts[2], g2invg1, vout, conv...) === vout2
                 @test vout2 ≈ v atol = atol
             end
         end
