@@ -1,30 +1,20 @@
 """
-    SemidirectProductOperation(
-        action::AbstractGroupAction,
-        opN::AbstractGroupOperation,
-        oph::AbstractGroupOperation,
-    )
+    SemidirectProductOperation(action::AbstractGroupAction)
 
 Group operation of a semidirect product group. The operation consists of the operation
 `opN` on a normal subgroup `N`, the operation `opH` on a subgroup `H`, and an automorphism
-`action` of elements of `H` on `N`.
+`action` of elements of `H` on `N`. Only the action is stored.
 """
-struct SemidirectProductOperation{
-    A<:AbstractGroupAction,
-    ON<:AbstractGroupOperation,
-    OH<:AbstractGroupOperation,
-} <: AbstractGroupOperation
+struct SemidirectProductOperation{A<:AbstractGroupAction} <: AbstractGroupOperation
     action::A
-    opN::ON
-    opH::OH
 end
 
 function show(io::IO, op::SemidirectProductOperation)
-    print(io, "SemidirectProductOperation($(op.action), $(op.opN), $(op.opH))")
+    print(io, "SemidirectProductOperation($(op.action))")
 end
 
-const SemidirectProductGroup{N,H,A,ON,OH} =
-    GroupManifold{ProductManifold{Tuple{N,H}},SemidirectProductOperation{A,ON,OH}}
+const SemidirectProductGroup{N,H,A} =
+    GroupManifold{ProductManifold{Tuple{N,H}},SemidirectProductOperation{A}}
 
 @doc doc"""
     SemidirectProductGroup(
@@ -50,7 +40,7 @@ g^{-1} = (n, h)^{-1} = (θ_{h^{-1}}(n^{-1}), h^{-1}).
 function SemidirectProductGroup(N::GroupManifold, H::GroupManifold, A::AbstractGroupAction)
     base_group(A) == H || error("")
     g_manifold(A) == N || error("")
-    op = SemidirectProductOperation(A, N.op, H.op)
+    op = SemidirectProductOperation(A)
     PG = ProductManifold(N, H)
     return GroupManifold(PG, op)
 end
