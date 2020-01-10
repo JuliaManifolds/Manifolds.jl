@@ -116,6 +116,58 @@ function flat!(M::SymmetricMatrices, v::FVector{CotangentSpaceType}, x, w::FVect
     return v
 end
 
+function get_coordinates(M::SymmetricMatrices{N, ℝ}, x, v, B::ArbitraryOrthonormalBasis) where N
+    dim = manifold_dimension(M)
+    vout = similar(v, dim)
+    k = 1
+    for i in 1:N, j in i:N
+        scale = ifelse(i==j, 1, sqrt(2))
+        vout[k] = v[i,j]*scale
+        k += 1
+    end
+    return vout
+end
+
+function get_coordinates(M::SymmetricMatrices{N, ℂ}, x, v, B::ArbitraryOrthonormalBasis) where N
+    dim = manifold_dimension(M)
+    vout = similar(v, dim)
+    k = 1
+    for i in 1:N, j in i:N
+        scale = ifelse(i==j, 1, sqrt(2))
+        vout[k] = real(v[i,j]) * scale
+        k += 1
+        vout[k] = imag(v[i,j]) * scale
+        k += 1
+    end
+    return vout
+end
+
+function get_vector(M::SymmetricMatrices{N, ℝ}, x, v, B::ArbitraryOrthonormalBasis) where N
+    dim = manifold_dimension(M)
+    vout = similar_result(M, get_vector, x)
+    k = 1
+    for i in 1:N, j in i:N
+        scale = ifelse(i==j, 1, 1/sqrt(2))
+        vout[i,j] = v[k]*scale
+        vout[j,i] = v[k]*scale
+        k += 1
+    end
+    return vout
+end
+
+function get_vector(M::SymmetricMatrices{N, ℂ}, x, v, B::ArbitraryOrthonormalBasis) where N
+    dim = manifold_dimension(M)
+    vout = similar_result(M, get_vector, x)
+    k = 1
+    for i in 1:N, j in i:N
+        scale = ifelse(i==j, 1, 1/sqrt(2))
+        vout[i,j] = Complex(v[k], v[k+1])*scale
+        vout[i,N+1-j] = vout[i,j]
+        k += 2
+    end
+    return vout
+end
+
 @doc doc"""
     inner(M::SymmetricMatrices, x, w, v)
 

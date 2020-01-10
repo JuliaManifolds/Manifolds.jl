@@ -40,6 +40,16 @@ This metric is the default metric for example for the [`Euclidean`](@ref) manifo
 """
 struct EuclideanMetric <: RiemannianMetric end
 
+function basis(M::Euclidean{<:Tuple, ℝ}, x, B::ArbitraryOrthonormalBasis)
+    vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
+    return PrecomputedOrthonormalBasis(vecs)
+end
+
+function basis(M::Euclidean{<:Tuple, ℂ}, x, B::ArbitraryOrthonormalBasis)
+    vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
+    return PrecomputedOrthonormalBasis([vecs; im*vecs])
+end
+
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = one(eltype(x))
 
 """
@@ -74,6 +84,29 @@ flat(::Euclidean,::Any...)
 function flat!(M::Euclidean, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
     copyto!(v.data, w.data)
     return v
+end
+
+function get_coordinates(M::Euclidean{<:Tuple, ℝ}, x, v, B::ArbitraryOrthonormalBasis)
+    S = representation_size(M)
+    PS = prod(S)
+    return reshape(v, PS)
+end
+
+function get_coordinates(M::Euclidean{<:Tuple, ℂ}, x, v, B::ArbitraryOrthonormalBasis)
+    S = representation_size(M)
+    PS = prod(S)
+    return [reshape(real(v), PS); reshape(imag(v), PS)]
+end
+
+function get_vector(M::Euclidean{<:Tuple, ℝ}, x, v, B::ArbitraryOrthonormalBasis)
+    S = representation_size(M)
+    return reshape(v, S)
+end
+
+function get_vector(M::Euclidean{<:Tuple, ℂ}, x, v, B::ArbitraryOrthonormalBasis)
+    S = representation_size(M)
+    N = div(length(v), 2)
+    return reshape(v[1:N] + im*v[N+1:end], S)
 end
 
 @doc doc"""
@@ -244,39 +277,6 @@ sharp(::Euclidean,::Any...)
 function sharp!(M::Euclidean, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
     copyto!(v.data, w.data)
     return v
-end
-
-function basis(M::Euclidean{<:Tuple, ℝ}, x, B::ArbitraryOrthonormalBasis)
-    vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
-    return PrecomputedOrthonormalBasis(vecs)
-end
-
-function basis(M::Euclidean{<:Tuple, ℂ}, x, B::ArbitraryOrthonormalBasis)
-    vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
-    return PrecomputedOrthonormalBasis([vecs; im*vecs])
-end
-
-function get_coordinates(M::Euclidean{<:Tuple, ℝ}, x, v, B::ArbitraryOrthonormalBasis)
-    S = representation_size(M)
-    PS = prod(S)
-    return reshape(v, PS)
-end
-
-function get_coordinates(M::Euclidean{<:Tuple, ℂ}, x, v, B::ArbitraryOrthonormalBasis)
-    S = representation_size(M)
-    PS = prod(S)
-    return [reshape(real(v), PS); reshape(imag(v), PS)]
-end
-
-function get_vector(M::Euclidean{<:Tuple, ℝ}, x, v, B::ArbitraryOrthonormalBasis)
-    S = representation_size(M)
-    return reshape(v, S)
-end
-
-function get_vector(M::Euclidean{<:Tuple, ℂ}, x, v, B::ArbitraryOrthonormalBasis)
-    S = representation_size(M)
-    N = div(length(v), 2)
-    return reshape(v[1:N] + im*v[N+1:end], S)
 end
 
 """

@@ -30,6 +30,7 @@ include("utils.jl")
         MMatrix{3,3,Float64},
         Matrix{Float32},
     ]
+    bases = (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types
         pts = [convert(T,A_sym),convert(T,B_sym),convert(T,X)]
         @testset "Type $T" begin
@@ -40,7 +41,9 @@ include("utils.jl")
                 test_reverse_diff = isa(T, Vector),
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
-                test_vector_transport = true
+                test_vector_transport = true,
+                basis_types_vecs = bases,
+                basis_types_to_from = bases
             )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end # testset type $T

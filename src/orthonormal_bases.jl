@@ -129,6 +129,18 @@ function basis(M::Manifold, x, B::AbstractBasis)
     error("basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
 end
 
+"""
+    basis(M::Manifold, x, B::ArbitraryOrthonormalBasis)
+
+Compute the basis vectors of an [`ArbitraryOrthonormalBasis`](@ref).
+"""
+function basis(M::Manifold, x, B::ArbitraryOrthonormalBasis)
+    dim = manifold_dimension(M)
+    return PrecomputedOrthonormalBasis(
+        [get_vector(M, x, [ifelse(i == j, 1, 0) for j in 1:dim], B) for i in 1:dim]
+    )
+end
+
 basis(M::Manifold, x, B::AbstractPrecomputedOrthonormalBasis) = B
 
 function basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis)
