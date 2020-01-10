@@ -37,8 +37,8 @@ struct NonManifold <: Manifold end
         m = NonManifold()
         onb = ArbitraryOrthonormalBasis()
 
-        @test_throws ErrorException represent_in_basis(m, [0], [0], onb)
-        @test_throws ErrorException inverse_represent_in_basis(m, [0], [0], onb)
+        @test_throws ErrorException get_coordinates(m, [0], [0], onb)
+        @test_throws ErrorException get_vector(m, [0], [0], onb)
         @test_throws ErrorException basis(m, [0], onb)
     end
 
@@ -47,9 +47,9 @@ struct NonManifold <: Manifold end
         pts = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
         v1 = log(M, pts[1], pts[2])
 
-        vb = represent_in_basis(M, pts[1], v1, ArbitraryOrthonormalBasis())
+        vb = get_coordinates(M, pts[1], v1, ArbitraryOrthonormalBasis())
         @test isa(vb, AbstractVector)
-        vbi = inverse_represent_in_basis(M, pts[1], vb, ArbitraryOrthonormalBasis())
+        vbi = get_vector(M, pts[1], vb, ArbitraryOrthonormalBasis())
         @test isapprox(M, pts[1], v1, vbi)
 
         b = basis(M, pts[1], ArbitraryOrthonormalBasis())
@@ -68,8 +68,8 @@ struct NonManifold <: Manifold end
             @test inner(M, pts[1], v1, b.vectors[i]) ≈ vb[i]
         end
 
-        @test represent_in_basis(M, pts[1], v1, b) ≈ represent_in_basis(M, pts[1], v1, ArbitraryOrthonormalBasis())
-        @test inverse_represent_in_basis(M, pts[1], vb, b) ≈ inverse_represent_in_basis(M, pts[1], vb, ArbitraryOrthonormalBasis())
+        @test get_coordinates(M, pts[1], v1, b) ≈ get_coordinates(M, pts[1], v1, ArbitraryOrthonormalBasis())
+        @test get_vector(M, pts[1], vb, b) ≈ get_vector(M, pts[1], vb, ArbitraryOrthonormalBasis())
 
     end
 end

@@ -252,24 +252,24 @@ function basis(M::Euclidean{<:Tuple, ℂ}, x, B::ArbitraryOrthonormalBasis)
     return PrecomputedOrthonormalBasis([vecs; im*vecs])
 end
 
-function represent_in_basis(M::Euclidean{<:Tuple, ℝ}, x, v, B::ArbitraryOrthonormalBasis)
+function get_coordinates(M::Euclidean{<:Tuple, ℝ}, x, v, B::ArbitraryOrthonormalBasis)
     S = representation_size(M)
     PS = prod(S)
     return reshape(v, PS)
 end
 
-function represent_in_basis(M::Euclidean{<:Tuple, ℂ}, x, v, B::ArbitraryOrthonormalBasis)
+function get_coordinates(M::Euclidean{<:Tuple, ℂ}, x, v, B::ArbitraryOrthonormalBasis)
     S = representation_size(M)
     PS = prod(S)
     return [reshape(real(v), PS); reshape(imag(v), PS)]
 end
 
-function inverse_represent_in_basis(M::Euclidean{<:Tuple, ℝ}, x, v, B::ArbitraryOrthonormalBasis)
+function get_vector(M::Euclidean{<:Tuple, ℝ}, x, v, B::ArbitraryOrthonormalBasis)
     S = representation_size(M)
     return reshape(v, S)
 end
 
-function inverse_represent_in_basis(M::Euclidean{<:Tuple, ℂ}, x, v, B::ArbitraryOrthonormalBasis)
+function get_vector(M::Euclidean{<:Tuple, ℂ}, x, v, B::ArbitraryOrthonormalBasis)
     S = representation_size(M)
     N = div(length(v), 2)
     return reshape(v[1:N] + im*v[N+1:end], S)

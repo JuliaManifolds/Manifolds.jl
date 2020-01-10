@@ -65,7 +65,7 @@ struct DiagonalizingOrthonormalBasis{TV<:AbstractVector, TK<:AbstractVector} <: 
 end
 
 """
-    represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
+    get_coordinates(M::Manifold, x, v, B::AbstractBasis)
 
 Compute a one-dimentional vector of coefficients of the tangent vector `v`
 at point denoted by `x` on manifold `M` in basis `B`.
@@ -74,18 +74,18 @@ Depending on the basis, `x` may not directly represent a point on the manifold.
 For example if a basis transported along a curve is used, `x` may be the coordinate
 along the curve.
 
-See also: [`inverse_represent_in_basis`](@ref), [`basis`](@ref)
+See also: [`get_vector`](@ref), [`basis`](@ref)
 """
-function represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
-    error("represent_in_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
+function get_coordinates(M::Manifold, x, v, B::AbstractBasis)
+    error("get_coordinates not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
 end
 
-function represent_in_basis(M::Manifold, x, v, B::PrecomputedOrthonormalBasis)
+function get_coordinates(M::Manifold, x, v, B::PrecomputedOrthonormalBasis)
     return map(vb -> real(inner(M, x, v, vb)), B.vectors)
 end
 
 """
-    inverse_represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
+    get_vector(M::Manifold, x, v, B::AbstractBasis)
 
 Convert a one-dimensional vector of coefficients in a basis `B` of
 the tangent space at `x` on manifold `M` to a tangent vector `v` at `x`.
@@ -94,13 +94,13 @@ Depending on the basis, `x` may not directly represent a point on the manifold.
 For example if a basis transported along a curve is used, `x` may be the coordinate
 along the curve.
 
-See also: [`represent_in_basis`](@ref), [`basis`](@ref)
+See also: [`get_coordinates`](@ref), [`basis`](@ref)
 """
-function inverse_represent_in_basis(M::Manifold, x, v, B::AbstractBasis)
-    error("inverse_represent_in_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
+function get_vector(M::Manifold, x, v, B::AbstractBasis)
+    error("get_vector not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
 end
 
-function inverse_represent_in_basis(M::Manifold, x, v, B::PrecomputedOrthonormalBasis)
+function get_vector(M::Manifold, x, v, B::PrecomputedOrthonormalBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `vout`
@@ -123,7 +123,7 @@ represented by `x`.
 Returned object derives from [`AbstractBasis`](@ref) and has a field `.vectors`
 that stores tangent vectors.
 
-See also: [`represent_in_basis`](@ref), [`inverse_represent_in_basis`](@ref)
+See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
 function basis(M::Manifold, x, B::AbstractBasis)
     error("basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
@@ -174,10 +174,10 @@ function basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:svd})
 end
 
 # related to DefaultManifold; to be moved to ManifoldsBase.jl in the future
-function represent_in_basis(M::ManifoldsBase.DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
+function get_coordinates(M::ManifoldsBase.DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
     return reshape(v, manifold_dimension(M))
 end
-function inverse_represent_in_basis(M::ManifoldsBase.DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
+function get_vector(M::ManifoldsBase.DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
     return reshape(v, representation_size(M))
 end
 

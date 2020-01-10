@@ -268,7 +268,7 @@ function inner(M::PowerManifold, x, v, w)
 end
 
 
-function inverse_represent_in_basis(
+function get_vector(
     M::PowerManifold,
     x,
     v,
@@ -280,7 +280,7 @@ function inverse_represent_in_basis(
     v_out = similar(x)
     v_iter = 1
     for i in get_iterator(M)
-        copyto!(_write(rep_size, v_out, i), inverse_represent_in_basis(
+        copyto!(_write(rep_size, v_out, i), get_vector(
             M.manifold,
             _read(rep_size, x, i),
             v[v_iter:v_iter+dim-1],
@@ -291,7 +291,7 @@ function inverse_represent_in_basis(
     return v_out
 end
 
-function inverse_represent_in_basis(
+function get_vector(
     M::PowerManifold,
     x,
     v,
@@ -304,7 +304,7 @@ function inverse_represent_in_basis(
     v_out = similar(x)
     v_iter = 1
     for i in get_iterator(M)
-        copyto!(_write(rep_size, v_out, i), inverse_represent_in_basis(
+        copyto!(_write(rep_size, v_out, i), get_vector(
             M.manifold,
             _read(rep_size, x, i),
             v[v_iter:v_iter+dim-1],
@@ -436,15 +436,15 @@ end
     return ntuple(i -> Colon(), N)
 end
 
-function represent_in_basis(M::PowerManifold, x, v, B::ArbitraryOrthonormalBasis)
+function get_coordinates(M::PowerManifold, x, v, B::ArbitraryOrthonormalBasis)
     rep_size = representation_size(M.manifold)
-    vs = [represent_in_basis(M.manifold, _read(rep_size, x, i), _read(rep_size, v, i), B)
+    vs = [get_coordinates(M.manifold, _read(rep_size, x, i), _read(rep_size, v, i), B)
         for i in get_iterator(M)]
     return reduce(vcat, reshape(vs, length(vs)))
 end
-function represent_in_basis(M::PowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
+function get_coordinates(M::PowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
     rep_size = representation_size(M.manifold)
-    vs = [represent_in_basis(M.manifold, _read(rep_size, x, i), _read(rep_size, v, i), B.bases[i...])
+    vs = [get_coordinates(M.manifold, _read(rep_size, x, i), _read(rep_size, v, i), B.bases[i...])
         for i in get_iterator(M)]
     return reduce(vcat, reshape(vs, length(vs)))
 end

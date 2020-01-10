@@ -249,5 +249,5 @@ export apply, apply!, base_group, center_of_orbit, compose, compose!, g_manifold
 export AbstractOrthonormalBasis, AbstractPrecomputedOrthonormalBasis,
     ArbitraryOrthonormalBasis, PrecomputedOrthonormalBasis,
     PrecomputedProductOrthonormalBasis, ProjectedOrthonormalBasis
-export basis, inverse_represent_in_basis, represent_in_basis
+export basis, get_vector, get_coordinates
 end # module

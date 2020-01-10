@@ -114,7 +114,7 @@ metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
 @inline inner(S::Sphere, x, w, v) = dot(w, v)
 
-function inverse_represent_in_basis(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where N
+function get_vector(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where N
     if isapprox(x[1], 1)
         return vcat(0, v)
     else
@@ -244,13 +244,13 @@ project_tangent(::Sphere, ::Any...)
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v) .* x)
 
 @doc doc"""
-    represent_in_basis(M::Sphere, x, v, B::ArbitraryOrthonormalBasis)
+    get_coordinates(M::Sphere, x, v, B::ArbitraryOrthonormalBasis)
 
 Represent the tangent vector `v` at point `x` from a sphere `M` in
 an orthonormal basis by rotating the vector `v` using rotation matrix
 $2\frac{x_p x_p^T}{x_p^T x_p} - I$ where $x_p = x + (1, 0, \dots, 0)$.
 """
-function represent_in_basis(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where N
+function get_coordinates(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where N
     if isapprox(x[1], 1)
         return v[2:end]
     else

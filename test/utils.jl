@@ -299,10 +299,10 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
         if !isa(btype, ProjectedOrthonormalBasis)
             v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
-            vb = represent_in_basis(M, x, v1, btype)
+            vb = get_coordinates(M, x, v1, btype)
 
-            @test represent_in_basis(M, x, v1, b) ≈ represent_in_basis(M, x, v1, btype)
-            @test inverse_represent_in_basis(M, x, vb, b) ≈ inverse_represent_in_basis(M, x, vb, btype)
+            @test get_coordinates(M, x, v1, b) ≈ get_coordinates(M, x, v1, btype)
+            @test get_vector(M, x, vb, b) ≈ get_vector(M, x, vb, btype)
         end
     end
 
@@ -312,14 +312,14 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         if !isa(btype, ProjectedOrthonormalBasis)
             v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
 
-            vb = represent_in_basis(M, x, v1, btype)
+            vb = get_coordinates(M, x, v1, btype)
             @test isa(vb, AbstractVector{<:Real})
             @test length(vb) == N
-            vbi = inverse_represent_in_basis(M, x, vb, btype)
+            vbi = get_vector(M, x, vb, btype)
             @test isapprox(M, x, v1, vbi)
 
             vs = [[ifelse(i==j, 1, 0) for j in 1:N] for i in 1:N]
-            vs_invs = [inverse_represent_in_basis(M, x, vu, btype) for vu in vs]
+            vs_invs = [get_vector(M, x, vu, btype) for vu in vs]
             # check orthonormality of inverse representation
             for i in 1:N
                 @test norm(M, x, vs_invs[i]) ≈ 1
