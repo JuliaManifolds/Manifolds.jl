@@ -20,8 +20,8 @@ SOn = SpecialOrthogonal(n)
 SemidirectProductGroup(Tn, SOn, RotationAction(Tn, SOn))
 ```
 
-Points on $\mathrm{SE}(n)$ are represented as points on the underlying product manifold
-$\mathrm{T}(n) \times \mathrm{SO}(n)$.
+Points on $\mathrm{SE}(n)$ may be represented as points on the underlying product manifold
+$\mathrm{T}(n) \times \mathrm{SO}(n)$ or as affine matrices with size `(n + 1, n + 1)`.
 """
 const SpecialEuclidean{N} = SemidirectProductGroup{
     TranslationGroup{Tuple{N},ℝ},
@@ -39,3 +39,32 @@ function SpecialEuclidean(n)
 end
 
 show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
+
+function _subarray(::SpecialEuclidean{n}, x::AbstractMatrix, ::Val{1}) where {n}
+    return view(x, 1:n, n + 1)
+end
+_subarray(::SpecialEuclidean{n}, x::AbstractMatrix, ::Val{2}) where {n} = view(x, 1:n, 1:n)
+
+function _padpoint!(::SpecialEuclidean{n}, y::AbstractMatrix) where {n}
+    @assert size(y, 1) == n + 1
+    @inbounds fill!(view(y, n + 1, 1:n), 0)
+    @inbounds y[n+1, n+1] = 1
+    return y
+end
+
+function _padvector!(::SpecialEuclidean{n}, v::AbstractMatrix) where {n}
+    @assert size(v, 1) == n + 1
+    @inbounds fill!(view(v, n + 1, 1:n+1), 0)
+    return v
+end
+
+compose(::SpecialEuclidean, x::AbstractMatrix, y::AbstractMatrix) = x * y
+
+function compose!(
+    ::SpecialEuclidean,
+    z::AbstractMatrix,
+    x::AbstractMatrix,
+    y::AbstractMatrix,
+)
+    return mul!(z, x, y)
+end

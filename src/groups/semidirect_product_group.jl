@@ -64,11 +64,17 @@ function show(io::IO, G::SemidirectProductGroup)
     )
 end
 
+_subarray(::SemidirectProductGroup, x, ::Val{i}) where {i} = submanifold_component(x, i)
+_subarray(G::SemidirectProductGroup, x, i::Int) = _subarray(G, x, Val(i))
+_padpoint!(G::SemidirectProductGroup, y) = y
+_padvector!(G::SemidirectProductGroup, v) = v
+
 function inv!(G::SemidirectProductGroup, y, x)
     PG = base_manifold(G)
-    inv!(submanifold(PG, 2), submanifold_component(y, 2), submanifold_component(x, 2))
-    ninv = inv(submanifold(PG, 1), submanifold_component(x, 1))
-    apply!(G.op.action, submanifold_component(y, 1), submanifold_component(y, 2), ninv)
+    inv!(submanifold(PG, 2), _subarray(G, y, Val(2)), _subarray(G, x, Val(2)))
+    ninv = inv(submanifold(PG, 1), _subarray(G, x, Val(1)))
+    apply!(G.op.action, _subarray(G, y, Val(1)), _subarray(G, y, Val(2)), ninv)
+    _padpoint!(G, y)
     return y
 end
 inv!(G::AG, y, e::Identity{AG}) where {AG<:SemidirectProductGroup} = identity!(G, y, e)
@@ -76,12 +82,9 @@ inv!(G::AG, y, e::Identity{AG}) where {AG<:SemidirectProductGroup} = identity!(G
 function identity!(G::SemidirectProductGroup, y, x)
     PG = base_manifold(G)
     for i in (1, 2)
-        identity!(
-            submanifold(PG, i),
-            submanifold_component(y, i),
-            submanifold_component(x, i),
-        )
+        identity!(submanifold(PG, i), _subarray(G, y, Val(i)), _subarray(G, x, Val(i)))
     end
+    _padpoint!(G, y)
     return y
 end
 identity!(G::GT, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}} = e
@@ -91,9 +94,10 @@ function compose!(G::SemidirectProductGroup, z, x, y)
     N = submanifold(PG, 1)
     H = submanifold(PG, 2)
     A = G.op.action
-    compose!(H, submanifold_component.((z, x, y), 2)...)
-    zₙtmp = apply(A, submanifold_component(x, 2), submanifold_component(y, 1))
-    compose!(N, submanifold_component.((z, x), 1)..., zₙtmp)
+    compose!(H, _subarray.(Ref(G), (z, x, y), Val(2))...)
+    zₙtmp = apply(A, _subarray(G, x, Val(2)), _subarray(G, y, Val(1)))
+    compose!(N, _subarray.(Ref(G), (z, x), Val(1))..., zₙtmp)
+    _padpoint!(G, z)
     return z
 end
 compose!(G::GT, z, ::Identity{GT}, y) where {GT<:SemidirectProductGroup} = copyto!(z, y)
@@ -107,14 +111,15 @@ function translate_diff!(G::SemidirectProductGroup, vout, x, y, v, conv::LeftAct
     N = submanifold(PG, 1)
     H = submanifold(PG, 2)
     A = G.op.action
-    nx, hx = submanifold_component.(Ref(x), (1, 2))
-    ny, hy = submanifold_component.(Ref(y), (1, 2))
-    nv, hv = submanifold_component.(Ref(v), (1, 2))
-    nvout, hvout = submanifold_component.(Ref(vout), (1, 2))
+    nx, hx = _subarray.(Ref(G), Ref(x), Val.((1, 2)))
+    ny, hy = _subarray.(Ref(G), Ref(y), Val.((1, 2)))
+    nv, hv = _subarray.(Ref(G), Ref(v), Val.((1, 2)))
+    nvout, hvout = _subarray.(Ref(G), Ref(vout), Val.((1, 2)))
     translate_diff!(H, hvout, hx, hy, hv, conv)
     nw = apply_diff(A, hx, ny, nv)
     nz = apply(A, hx, ny)
     translate_diff!(N, nvout, nx, nz, nw, conv)
+    _padvector!(G, vout)
     return vout
 end
 
@@ -123,4 +128,27 @@ function translate_diff(G::SemidirectProductGroup, x, y, v, conv::ActionDirectio
     vout = similar_result(base_manifold(G), translate_diff, x, y, v)
     translate_diff!(G, vout, x, y, v, conv)
     return vout
+end
+
+function hat!(G::SemidirectProductGroup, V, x, v)
+    PG = base_manifold(G)
+    N = submanifold(PG, 1)
+    H = submanifold(PG, 2)
+    dimN = manifold_dimension(N)
+    dimH = manifold_dimension(H)
+    hat!(N, _subarray(G, V, Val(1)), _subarray(G, x, Val(1)), view(v, 1:dimN))
+    hat!(H, _subarray(G, V, Val(2)), _subarray(G, x, Val(2)), view(v, dimN+1:dimN+dimH))
+    _padvector!(G, V)
+    return V
+end
+
+function vee!(G::SemidirectProductGroup, v, x, V)
+    PG = base_manifold(G)
+    N = submanifold(PG, 1)
+    H = submanifold(PG, 2)
+    dimN = manifold_dimension(N)
+    dimH = manifold_dimension(H)
+    vee!(N, view(v, 1:dimN), _subarray(G, x, Val(1)), _subarray(G, V, Val(1)))
+    vee!(H, view(v, dimN+1:dimN+dimH), _subarray(G, x, Val(2)), _subarray(G, V, Val(2)))
+    return v
 end
