@@ -10,7 +10,7 @@ import ManifoldsBase: distance, exp, exp!, geodesic, injectivity_radius, inner
 import ManifoldsBase: isapprox, is_manifold_point, is_tangent_vector, is_decorator_manifold
 import ManifoldsBase: inverse_retract, inverse_retract!, log, log!, manifold_dimension, norm
 import ManifoldsBase: project_point, project_point!, project_tangent, project_tangent!
-import ManifoldsBase: representation_size, retract, retract!, similar_result, shortest_geodesic
+import ManifoldsBase: representation_size, retract, retract!, similar_result, similar_result_type, shortest_geodesic
 import ManifoldsBase: vector_transport_along, vector_transport_along!, vector_transport_direction,
     vector_transport_direction!, vector_transport_to, vector_transport_to!
 import ManifoldsBase: zero_tangent_vector, zero_tangent_vector!
