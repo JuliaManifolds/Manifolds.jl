@@ -96,7 +96,7 @@ function get_coordinates(M::Manifold, x, v, B::AbstractBasis)
     error("get_coordinates not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
 end
 
-function get_coordinates(M::Manifold, x, v, B::PrecomputedOrthonormalBasis)
+function get_coordinates(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
     return map(vb -> real(inner(M, x, v, vb)), B.vectors)
 end
 
@@ -116,7 +116,7 @@ function get_vector(M::Manifold, x, v, B::AbstractBasis)
     error("get_vector not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
 end
 
-function get_vector(M::Manifold, x, v, B::PrecomputedOrthonormalBasis)
+function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `vout`

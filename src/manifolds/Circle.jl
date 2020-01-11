@@ -15,6 +15,12 @@ represented by `ℂ`-valued `Circle` of unit numbers.
 struct Circle{F} <: Manifold where {F <: AbstractNumbers} end
 Circle(f::AbstractNumbers=ℝ) = Circle{f}()
 
+function basis(M::Circle{ℝ}, x, B::DiagonalizingOrthonormalBasis)
+    sbv = sign(B.v[1])
+    vs = @SVector [@SVector [sbv == 0 ? 1 : sbv]]
+    return PrecomputedDiagonalizingOrthonormalBasis(vs, @SVector [0])
+end
+
 @doc doc"""
     check_manifold_point(M::Circle, x)
 
@@ -120,6 +126,11 @@ function get_coordinates(M::Circle{ℝ}, x, v, B::ArbitraryOrthonormalBasis)
     return v
 end
 
+function get_coordinates(M::Circle{ℝ}, x, v, B::DiagonalizingOrthonormalBasis)
+    sbv = sign(B.v[1])
+    return v .* (sbv == 0 ? 1 : sbv)
+end
+
 function get_coordinates(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
     v, x = v[1], x[1]
     w = imag(v) * real(x) - real(v) * imag(x)
@@ -128,6 +139,11 @@ end
 
 function get_vector(M::Circle{ℝ}, x, v, B::ArbitraryOrthonormalBasis)
     return v
+end
+
+function get_vector(M::Circle{ℝ}, x, v, B::DiagonalizingOrthonormalBasis)
+    sbv = sign(B.v[1])
+    return v .* (sbv == 0 ? 1 : sbv)
 end
 
 function get_vector(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
