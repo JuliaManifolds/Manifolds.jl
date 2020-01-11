@@ -1,13 +1,11 @@
 isapprox(M::ArrayManifold, x, e::Identity; kwargs...) = isapprox(M, e, x; kwargs...)
 function isapprox(M::ArrayManifold, e::Identity, x; kwargs...)
-    is_decorator_group(M) === Val(true) ||
+    is_decorator_group(M) === Val(true) && return isapprox(base_group(M), e, x; kwargs...)
     error("isapprox not implemented for manifold $(typeof(M)) and points $(typeof(e)) and $(typeof(x))")
-    return isapprox(base_group(M), e, x; kwargs...)
 end
 function isapprox(M::ArrayManifold, e::E, ::E; kwargs...) where {E<:Identity}
-    is_decorator_group(M) === Val(true) ||
+    is_decorator_group(M) === Val(true) && return isapprox(base_group(M), e, e; kwargs...)
     error("isapprox not implemented for manifold $(typeof(M)) and points $(typeof(e)) and $(typeof(e))")
-    return isapprox(base_group(M), e, e; kwargs...)
 end
 
 function inv!(M::ArrayManifold, y, x; kwargs...)

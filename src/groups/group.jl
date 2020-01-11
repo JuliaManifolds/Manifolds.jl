@@ -192,14 +192,12 @@ end
 
 isapprox(M::Manifold, x, e::Identity; kwargs...) = isapprox(M, e, x; kwargs...)
 function isapprox(M::Manifold, e::Identity, x; kwargs...)
-    is_decorator_group(M) === Val(true) ||
+    is_decorator_group(M) === Val(true) && return isapprox(base_group(M), e, x; kwargs...)
     error("isapprox not implemented for manifold $(typeof(M)) and points $(typeof(e)) and $(typeof(x))")
-    return isapprox(base_group(M), e, x; kwargs...)
 end
 function isapprox(M::Manifold, e::E, ::E; kwargs...) where {E<:Identity}
-    is_decorator_group(M) === Val(true) ||
+    is_decorator_group(M) === Val(true) && return isapprox(base_group(M), e, e; kwargs...)
     error("isapprox not implemented for manifold $(typeof(M)) and points $(typeof(e)) and $(typeof(e))")
-    return isapprox(base_group(M), e, e; kwargs...)
 end
 function isapprox(G::GT, e::Identity{GT}, x; kwargs...) where {GT<:AbstractGroupManifold}
     return isapprox(G, identity(G, x), x; kwargs...)
