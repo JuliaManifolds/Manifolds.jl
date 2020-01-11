@@ -61,6 +61,7 @@ struct DiagonalizingOrthonormalBasis{TV} <: AbstractOrthonormalBasis
     v::TV
 end
 
+const ArbitraryOrDiagonalizingBasis = Union{ArbitraryOrthonormalBasis, DiagonalizingOrthonormalBasis}
 
 """
     PrecomputedOrthonormalBasis(vectors::AbstractVector)
@@ -100,7 +101,7 @@ function get_coordinates(M::Manifold, x, v, B::AbstractBasis)
 end
 
 function get_coordinates(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
-    return map(vb -> real(inner(M, x, v, vb)), vectors(B))
+    return map(vb -> real(inner(M, x, v, vb)), vectors(M, x, B))
 end
 
 """
@@ -124,7 +125,7 @@ function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `vout`
     #     (for example scalar * `SizedArray` is an `SArray`)
-    bvectors = vectors(B)
+    bvectors = vectors(M, x, B)
     vt = v[1] .* bvectors[1]
     vout = similar(bvectors[1], eltype(vt))
     copyto!(vout, vt)
@@ -167,7 +168,7 @@ function basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis)
     N = length(B)
     M_dim = manifold_dimension(M)
     N == M_dim || throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
-    bvectors = vectors(B)
+    bvectors = vectors(M, x, B)
     for i in 1:N
         vi_norm = norm(M, x, bvectors[i])
         isapprox(vi_norm, 1) || throw(ArgumentError("vector number $i is not normalized (norm = $vi_norm)"))

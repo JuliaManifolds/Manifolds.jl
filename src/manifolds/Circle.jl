@@ -17,7 +17,7 @@ Circle(f::AbstractNumbers=ℝ) = Circle{f}()
 
 function basis(M::Circle{ℝ}, x, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.v[1])
-    vs = @SVector [@SVector [sbv == 0 ? 1 : sbv]]
+    vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
     return PrecomputedDiagonalizingOrthonormalBasis(vs, @SVector [0])
 end
 

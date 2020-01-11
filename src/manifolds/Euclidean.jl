@@ -25,8 +25,6 @@ The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
 struct Euclidean{N<:Tuple,T} <: Manifold where {N, T<: AbstractNumbers} end
 Euclidean(n::Vararg{Int,N};field::AbstractNumbers=ℝ) where N = Euclidean{Tuple{n...},field}()
 
-const ArbitraryOrDiagonalizingBasis = Union{ArbitraryOrthonormalBasis, DiagonalizingOrthonormalBasis}
-
 """
     EuclideanMetric <: RiemannianMetric
 

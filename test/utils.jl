@@ -282,7 +282,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         b = basis(M, x, btype)
         @test isa(b, AbstractPrecomputedOrthonormalBasis)
 
-        bvectors = vectors(b)
+        bvectors = vectors(M, x, b)
         N = length(bvectors)
         @test N == manifold_dimension(M)
 
