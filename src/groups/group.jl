@@ -52,9 +52,16 @@ show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op)
 is_decorator_manifold(::GroupManifold) = Val(true)
 
 function check_manifold_point(G::GroupManifold, x; kwargs...)
-    return check_manifold_point(base_manifold(G), x; kwargs...)
+    return check_manifold_point(G.manifold, x; kwargs...)
 end
 
+function check_tangent_vector(G::GroupManifold, x, v; kwargs...)
+    return check_tangent_vector(G.manifold, x, v; kwargs...)
+end
+
+zero_tangent_vector(G::GroupManifold, x) = zero_tangent_vector(G.manifold, x)
+
+zero_tangent_vector!(G::GroupManifold, y, x) = zero_tangent_vector!(G.manifold, y, x)
 
 """
     ActionDirection
