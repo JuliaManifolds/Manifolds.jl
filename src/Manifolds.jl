@@ -238,7 +238,7 @@ export base_manifold, bundle_projection, christoffel_symbols_first, christoffel_
     submanifold_component, submanifold_components, tangent_orthonormal_basis, var, vector_space_dimension,
     vector_transport_along, vector_transport_along!, vector_transport_direction,
     vector_transport_direction!, vector_transport_to, vector_transport_to!, vee, vee!,
-    zero_vector, zero_vector!, zero_tangent_vector, zero_tangent_vector!
+    zero_vector, zero_vector!, zero_tangent_vector, zero_tangent_vector!, ×
 # Lie group types & functions
 export AbstractGroupAction, AbstractGroupOperation, AbstractGroupManifold, ActionDirection,
     AdditionOperation, MultiplicationOperation, GroupManifold, GroupOperationAction,
