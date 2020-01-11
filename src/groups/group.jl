@@ -125,6 +125,10 @@ end
 zero_tangent_vector(G::GroupManifold, x) = zero_tangent_vector(G.manifold, x)
 zero_tangent_vector!(G::GroupManifold, y, x) = zero_tangent_vector!(G.manifold, y, x)
 
+###################
+# Action directions
+###################
+
 """
     ActionDirection
 
@@ -155,6 +159,10 @@ switch_direction(::ActionDirection)
 switch_direction(::LeftAction) = RightAction()
 switch_direction(::RightAction) = LeftAction()
 
+##################################
+# General Identity element methods
+##################################
+
 @doc doc"""
     Identity(G::AbstractGroupManifold)
 
@@ -177,6 +185,10 @@ eltype(e::Identity) = Bool
 copyto!(e::TE, ::TE) where {TE<:Identity} = e
 copyto!(x, ::TE) where {TE<:Identity} = identity!(e.group, x, e)
 copyto!(x::AbstractArray, e::TE) where {TE<:Identity} = identity!(e.group, x, e)
+
+##########################
+# Group-specific functions
+##########################
 
 @doc doc"""
     inv!(G::AbstractGroupManifold, y, x)
@@ -492,6 +504,10 @@ function inverse_translate_diff!(
     return translate_diff!(G, vout, inv(G, x), y, v, conv)
 end
 
+#################################
+# Overloads for AdditionOperation
+#################################
+
 """
     AdditionOperation <: AbstractGroupOperation
 
@@ -607,6 +623,10 @@ function inverse_translate_diff!(
 )
     return copyto!(vout, v)
 end
+
+#######################################
+# Overloads for MultiplicationOperation
+#######################################
 
 """
     MultiplicationOperation <: AbstractGroupOperation
