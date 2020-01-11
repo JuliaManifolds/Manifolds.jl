@@ -67,7 +67,7 @@ end
 
 Compute the inner product of two (complex) numbers with in the complex plane.
 """
-complex_dot(a,b) = dot(real.(a),real.(b)) + dot(imag.(a),imag.(b))
+complex_dot(a,b) = dot(map(real, a), map(real, b)) + dot(map(imag, a), map(imag, b))
 complex_dot(a::Number,b::Number) = (real(a)*real(b) + imag(a)*imag(b))
 
 @doc doc"""
@@ -114,6 +114,23 @@ function flat!(::Circle, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSp
     return v
 end
 flat(M::Circle, x::Number, w::FVector{TangentSpaceType}) = FVector(CotangentSpace,w.data)
+
+
+function get_coordinates(M::Circle{ℝ}, x, v, B::ArbitraryOrthonormalBasis)
+    return v
+end
+
+function get_coordinates(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
+    return @SVector [imag(v[1] / x[1])]
+end
+
+function get_vector(M::Circle{ℝ}, x, v, B::ArbitraryOrthonormalBasis)
+    return v
+end
+
+function get_vector(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
+    return @SVector [1im * v[1] * x[1]]
+end
 
 @doc doc"""
     injectivity_radius(M::Circle[, x])
@@ -211,7 +228,7 @@ mean modulo 2π.
 mean(::Circle, ::Any)
 mean(::Circle,x::Array{<:Real},w::AbstractVector; kwargs...) = sym_rem(sum(w.*x))
 
-@inline norm(::Circle, x, v) = sum(abs.(v))
+@inline norm(::Circle, x, v) = sum(map(abs, v))
 
 @doc doc"""
     project_point(M::Circle, x)
