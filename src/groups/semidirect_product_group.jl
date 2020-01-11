@@ -17,11 +17,7 @@ const SemidirectProductGroup{N,H,A} =
     GroupManifold{ProductManifold{Tuple{N,H}},SemidirectProductOperation{A}}
 
 @doc doc"""
-    SemidirectProductGroup(
-        N::GroupManifold,
-        H::GroupManifold,
-        A::AbstractGroupAction,
-    )
+    SemidirectProductGroup(N::GroupManifold, H::GroupManifold, A::AbstractGroupAction)
 
 A group that is the semidirect product of a normal group $N$ and a subgroup $H$, written
 $G = N ⋊_θ H$, where $θ: H × N \to N$ is an automorphism action
@@ -41,17 +37,15 @@ function SemidirectProductGroup(N::GroupManifold, H::GroupManifold, A::AbstractG
     base_group(A) == H || error("")
     g_manifold(A) == N || error("")
     op = SemidirectProductOperation(A)
-    PG = ProductManifold(N, H)
-    return GroupManifold(PG, op)
+    M = ProductManifold(N, H)
+    return GroupManifold(M, op)
 end
 
 function show(io::IO, G::SemidirectProductGroup)
-    PG = base_manifold(G)
-    action = G.op.action
-    print(
-        io,
-        "SemidirectProductGroup($(submanifold(PG, 1)), $(submanifold(PG, 2)), $(action))",
-    )
+    M = base_manifold(G)
+    N, H = M.manifolds
+    A = G.op.action
+    print(io, "SemidirectProductGroup($(N), $(H), $(A))")
 end
 
 _padpoint!(G::SemidirectProductGroup, y) = y
