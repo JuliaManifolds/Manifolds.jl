@@ -67,6 +67,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     tvector_distributions = [],
     basis_types_vecs = (),
     basis_types_to_from = (),
+    basis_has_specialized_diagonalizing_get = false,
     exp_log_atol_multiplier = 0,
     exp_log_rtol_multiplier = 1,
     retraction_atol_multiplier = 0,
@@ -297,10 +298,12 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             end
         end
 
-        if !isa(btype, ProjectedOrthonormalBasis)
+        if !isa(btype, ProjectedOrthonormalBasis) &&
+            (basis_has_specialized_diagonalizing_get || !isa(btype, DiagonalizingOrthonormalBasis))
+
             v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
             vb = get_coordinates(M, x, v1, btype)
-            
+
             @test get_coordinates(M, x, v1, b) ≈ vb
             @test get_vector(M, x, vb, b) ≈ get_vector(M, x, vb, btype)
         end
@@ -309,7 +312,9 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     for btype ∈ (basis_types_to_from..., basis_types_vecs...)
         x = pts[1]
         N = manifold_dimension(M)
-        if !isa(btype, ProjectedOrthonormalBasis)
+        if !isa(btype, ProjectedOrthonormalBasis) &&
+            (basis_has_specialized_diagonalizing_get || !isa(btype, DiagonalizingOrthonormalBasis))
+
             v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
 
             vb = get_coordinates(M, x, v1, btype)

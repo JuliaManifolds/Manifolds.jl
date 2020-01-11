@@ -32,6 +32,7 @@ include("utils.jl")
                 test_mutating_rand = isa(T, Vector),
                 point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
                 tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
+                basis_types_vecs = (DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),),
                 basis_types_to_from = basis_types,
                 retraction_methods = [ProjectionRetraction()],
                 inverse_retraction_methods = [ProjectionInverseRetraction()]

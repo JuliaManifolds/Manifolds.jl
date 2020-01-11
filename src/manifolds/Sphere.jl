@@ -13,6 +13,21 @@ Generate the $\mathbb S^{n}\subset \mathbb R^{n+1}$
 struct Sphere{N} <: Manifold end
 Sphere(n::Int) = Sphere{n}()
 
+function basis(M::Sphere{N}, x, B::DiagonalizingOrthonormalBasis) where N
+    A = zeros(N+1, N+1)
+    A[1,:] = transpose(x)
+    A[2,:] = transpose(B.v)
+    V = nullspace(A)
+    κ = ones(N)
+    if !iszero(B.v)
+        # if we have a nonzero direction for the geodesic, add it and it gets curvature zero from the tensor
+		V = cat(B.v/norm(M, x, B.v), V; dims=2)
+        κ[1] = 0.0 # no curvature along the geodesic direction, if x!=y
+    end
+    vecs = [ convert(typeof(x), V[:,i]) for i in 1:N ]
+    return PrecomputedDiagonalizingOrthonormalBasis(vecs, κ)
+end
+
 """
     check_manifold_point(S, x; kwargs...)
 
