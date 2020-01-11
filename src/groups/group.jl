@@ -51,6 +51,23 @@ show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op)
 
 is_decorator_manifold(::GroupManifold) = Val(true)
 
+is_decorator_group(::AbstractGroupManifold) = Val(true)
+is_decorator_group(M::Manifold) = is_decorator_group(M, is_decorator_manifold(M))
+is_decorator_group(M::Manifold, ::Val{true}) = is_decorator_group(M.manifold)
+is_decorator_group(::Manifold, ::Val{false}) = Val(false)
+
+"""
+    base_group(M::Manifold) -> AbstractGroupManifold
+
+Undecorate `M` until an `AbstractGroupManifold` is encountered.
+Return an error if the [`base_manifold`](@ref) is reached without encountering a group.
+"""
+function base_group(M::Manifold)
+    is_decorator_group(M) === Val(true) && return base_group(M.manifold)
+    error("base_group: manifold $(typeof(M)) with base manifold $(typeof(base_manifold(M))) has no base group.")
+end
+base_group(G::AbstractGroupManifold) = G
+
 function check_manifold_point(G::GroupManifold, x; kwargs...)
     return check_manifold_point(G.manifold, x; kwargs...)
 end
