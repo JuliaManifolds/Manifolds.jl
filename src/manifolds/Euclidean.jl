@@ -25,6 +25,8 @@ The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
 struct Euclidean{N<:Tuple,T} <: Manifold where {N, T<: AbstractNumbers} end
 Euclidean(n::Vararg{Int,N};field::AbstractNumbers=ℝ) where N = Euclidean{Tuple{n...},field}()
 
+const ArbitraryOrDiagonalizingBasis = Union{ArbitraryOrthonormalBasis, DiagonalizingOrthonormalBasis}
+
 """
     EuclideanMetric <: RiemannianMetric
 
@@ -48,6 +50,12 @@ end
 function basis(M::Euclidean{<:Tuple, ℂ}, x, B::ArbitraryOrthonormalBasis)
     vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
     return PrecomputedOrthonormalBasis([vecs; im*vecs])
+end
+
+function basis(M::Euclidean, x, B::DiagonalizingOrthonormalBasis)
+    vecs = basis(M, x, ArbitraryOrthonormalBasis()).vectors
+    kappas = zeros(real(eltype(x)), manifold_dimension(M))
+    return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
 end
 
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = one(eltype(x))
@@ -86,24 +94,24 @@ function flat!(M::Euclidean, v::FVector{CotangentSpaceType}, x, w::FVector{Tange
     return v
 end
 
-function get_coordinates(M::Euclidean{<:Tuple, ℝ}, x, v, B::ArbitraryOrthonormalBasis)
+function get_coordinates(M::Euclidean{<:Tuple, ℝ}, x, v, B::ArbitraryOrDiagonalizingBasis)
     S = representation_size(M)
     PS = prod(S)
     return reshape(v, PS)
 end
 
-function get_coordinates(M::Euclidean{<:Tuple, ℂ}, x, v, B::ArbitraryOrthonormalBasis)
+function get_coordinates(M::Euclidean{<:Tuple, ℂ}, x, v, B::ArbitraryOrDiagonalizingBasis)
     S = representation_size(M)
     PS = prod(S)
     return [reshape(real(v), PS); reshape(imag(v), PS)]
 end
 
-function get_vector(M::Euclidean{<:Tuple, ℝ}, x, v, B::ArbitraryOrthonormalBasis)
+function get_vector(M::Euclidean{<:Tuple, ℝ}, x, v, B::ArbitraryOrDiagonalizingBasis)
     S = representation_size(M)
     return reshape(v, S)
 end
 
-function get_vector(M::Euclidean{<:Tuple, ℂ}, x, v, B::ArbitraryOrthonormalBasis)
+function get_vector(M::Euclidean{<:Tuple, ℂ}, x, v, B::ArbitraryOrDiagonalizingBasis)
     S = representation_size(M)
     N = div(length(v), 2)
     return reshape(v[1:N] + im*v[N+1:end], S)
