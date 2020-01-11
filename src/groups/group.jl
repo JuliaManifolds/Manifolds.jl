@@ -27,8 +27,7 @@ abstract type AbstractGroupOperation end
 Abstract type for a Lie group, a group that is also a smooth manifold with an
 [`AbstractGroupOperation`](@ref), a smooth binary operation. `AbstractGroupManifold`s must
 implement at least [`inv`](@ref), [`identity`](@ref), [`compose`](@ref), and
-[`translate_diff`](@ref). Group manifolds by default forward metric-related operations to
-the wrapped manifold.
+[`translate_diff`](@ref).
 """
 abstract type AbstractGroupManifold{O<:AbstractGroupOperation} <: Manifold end
 
@@ -37,6 +36,8 @@ abstract type AbstractGroupManifold{O<:AbstractGroupOperation} <: Manifold end
 
 Decorator for a smooth manifold that equips the manifold with a group operation, thus making
 it a Lie group. See [`AbstractGroupManifold`](@ref) for more details.
+
+Group manifolds by default forward metric-related operations to the wrapped manifold.
 
 # Constructor
 
@@ -74,16 +75,54 @@ if VERSION ≥ v"1.3"
     (::Type{T})(M::Manifold) where {T<:AbstractGroupOperation} = GroupManifold(M, T())
 end
 
+########################
+# GroupManifold forwards
+########################
+
+angle(G::GroupManifold, x, v, w) = angle(G.manifold, x, v, w)
 function check_manifold_point(G::GroupManifold, x; kwargs...)
     return check_manifold_point(G.manifold, x; kwargs...)
 end
-
 function check_tangent_vector(G::GroupManifold, x, v; kwargs...)
     return check_tangent_vector(G.manifold, x, v; kwargs...)
 end
-
+distance(G::GroupManifold, x, y) = distance(G.manifold, x, y)
+exp(G::GroupManifold, x, v, args...) = exp(G.manifold, x, v, args...)
+exp!(G::GroupManifold, y, x, v, args...) = exp!(G.manifold, y, x, v, args...)
+injectivity_radius(G::GroupManifold, args...) = injectivity_radius(G.manifold, args...)
+inner(G::GroupManifold, x, v, w) = inner(G.manifold, x, v, w)
+inverse_retract(G::GroupManifold, x, y) = inverse_retract(G.manifold, x, y)
+inverse_retract!(G::GroupManifold, v, x, y) = inverse_retract!(G.manifold, v, x, y)
+isapprox(G::GroupManifold, x, y) = isapprox(G.manifold, x, y)
+isapprox(G::GroupManifold, x, v, w) = isapprox(G.manifold, x, v, w)
+log(G::GroupManifold, x, y) = log(G.manifold, x, y)
+log!(G::GroupManifold, v, x, y) = log!(G.manifold, v, x, y)
+norm(G::GroupManifold, x, v) = norm(G.manifold, x, v)
+project_point(G::GroupManifold, x) = project_point(G.manifold, x)
+project_point!(G::GroupManifold, y, x) = project_point!(G.manifold, y, x)
+project_tangent(G::GroupManifold, x, v) = project_tangent!(G.manifold, w, x, v)
+project_tangent!(G::GroupManifold, w, x, v) = project_tangent!(G.manifold, w, x, v)
+retract(G::GroupManifold, x, v, args...) = retract(G.manifold, x, v, args...)
+retract!(G::GroupManifold, y, x, v, args...) = retract!(G.manifold, y, x, v, args...)
+function vector_transport_along!(G::GroupManifold, vto, x, v, c, args...)
+    return vector_transport_along!(G.manifold, vto, x, v, c, args...)
+end
+function vector_transport_along(G::GroupManifold, x, v, c, args...)
+    return vector_transport_along(G.manifold, x, v, c, args...)
+end
+function vector_transport_direction!(G::GroupManifold, vto, x, v, vdir, args...)
+    return vector_transport_direction!(G.manifold, vto, x, v, vdir, args...)
+end
+function vector_transport_direction(G::GroupManifold, x, v, vdir, args...)
+    return vector_transport_direction(G.manifold, x, v, vdir, args...)
+end
+function vector_transport_to!(G::GroupManifold, vto, x, v, y, args...)
+    return vector_transport_to!(G.manifold, vto, x, v, y, args...)
+end
+function vector_transport_to(G::GroupManifold, x, v, y, args...)
+    return vector_transport_to(G.manifold, x, v, y, args...)
+end
 zero_tangent_vector(G::GroupManifold, x) = zero_tangent_vector(G.manifold, x)
-
 zero_tangent_vector!(G::GroupManifold, y, x) = zero_tangent_vector!(G.manifold, y, x)
 
 """
