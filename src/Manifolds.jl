@@ -24,7 +24,7 @@ using HybridArrays
 using LinearAlgebra
 using Base.Iterators: repeated
 using ManifoldsBase: CoTVector, Manifold, MPoint, TVector
-using ManifoldsBase: ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
+using ManifoldsBase: ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector, array_value
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
 using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
 using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
@@ -180,6 +180,7 @@ include("manifolds/SymmetricPositiveDefinite.jl")
 include("groups/group.jl")
 include("groups/group_action.jl")
 include("groups/group_operation_action.jl")
+include("groups/array_manifold.jl")
 include("groups/product_group.jl")
 include("groups/semidirect_product_group.jl")
 
