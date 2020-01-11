@@ -235,7 +235,7 @@ export base_manifold, bundle_projection, christoffel_symbols_first, christoffel_
     projected_distribution, real_dimension, ricci_curvature, ricci_tensor,
     representation_size, retract, retract!, riemann_tensor, sharp, sharp!,
     shortest_geodesic, similar_result, skewness, std, sym_rem, submanifold,
-    submanifold_component, tangent_orthonormal_basis, var, vector_space_dimension,
+    submanifold_component, submanifold_components, tangent_orthonormal_basis, var, vector_space_dimension,
     vector_transport_along, vector_transport_along!, vector_transport_direction,
     vector_transport_direction!, vector_transport_to, vector_transport_to!, vee, vee!,
     zero_vector, zero_vector!, zero_tangent_vector, zero_tangent_vector!
