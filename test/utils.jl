@@ -281,20 +281,22 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         x = pts[1]
         b = basis(M, x, btype)
         @test isa(b, AbstractPrecomputedOrthonormalBasis)
-        N = length(b.vectors)
+
+        bvectors = vectors(b)
+        N = length(bvectors)
         @test N == manifold_dimension(M)
 
         # test orthonormality
         for i in 1:N
-            @test norm(M, x, b.vectors[i]) ≈ 1
+            @test norm(M, x, bvectors[i]) ≈ 1
             for j in i+1:N
-                @test real(inner(M, x, b.vectors[i], b.vectors[j])) ≈ 0 atol = sqrt(eps(eltype(x)))
+                @test real(inner(M, x, bvectors[i], bvectors[j])) ≈ 0 atol = sqrt(eps(eltype(x)))
             end
         end
         if isa(btype, ProjectedOrthonormalBasis)
             # check projection idempotency
             for i in 1:N
-                @test project_tangent(M, x, b.vectors[i]) ≈ b.vectors[i]
+                @test project_tangent(M, x, bvectors[i]) ≈ bvectors[i]
             end
         end
 

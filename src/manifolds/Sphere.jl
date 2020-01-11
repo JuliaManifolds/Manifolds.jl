@@ -24,7 +24,7 @@ function basis(M::Sphere{N}, x, B::DiagonalizingOrthonormalBasis) where N
 		V = cat(B.v/norm(M, x, B.v), V; dims=2)
         κ[1] = 0.0 # no curvature along the geodesic direction, if x!=y
     end
-    vecs = [ convert(typeof(x), V[:,i]) for i in 1:N ]
+    vecs = [ V[:,i] for i in 1:N ]
     return PrecomputedDiagonalizingOrthonormalBasis(vecs, κ)
 end
 

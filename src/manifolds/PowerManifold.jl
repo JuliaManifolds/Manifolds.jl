@@ -84,8 +84,22 @@ end
 A precomputed orthonormal basis of a tangent space of a power manifold.
 The array `bases` stores bases corresponding to particular parts of the manifold.
 """
-struct PrecomputedPowerOrthonormalBasis{TB<:AbstractArray{AbstractPrecomputedOrthonormalBasis}} <: AbstractPrecomputedOrthonormalBasis
+struct PrecomputedPowerOrthonormalBasis{TB<:AbstractArray{<:AbstractPrecomputedOrthonormalBasis}} <: AbstractPrecomputedOrthonormalBasis
     bases::TB
+end
+
+function basis(M::PowerManifold, x, B::AbstractBasis)
+    rep_size = representation_size(M.manifold)
+    vs = [basis(M.manifold, _read(rep_size, x, i), B)
+        for i in get_iterator(M)]
+    return PrecomputedPowerOrthonormalBasis(vs)
+end
+
+function basis(M::PowerManifold, x, B::DiagonalizingOrthonormalBasis)
+    rep_size = representation_size(M.manifold)
+    vs = [basis(M.manifold, _read(rep_size, x, i), DiagonalizingOrthonormalBasis(_read(rep_size, B.v, i)))
+        for i in get_iterator(M)]
+    return PrecomputedPowerOrthonormalBasis(vs)
 end
 
 """
@@ -268,6 +282,19 @@ function inner(M::PowerManifold, x, v, w)
 end
 
 
+function get_coordinates(M::PowerManifold, x, v, B::ArbitraryOrthonormalBasis)
+    rep_size = representation_size(M.manifold)
+    vs = [get_coordinates(M.manifold, _read(rep_size, x, i), _read(rep_size, v, i), B)
+        for i in get_iterator(M)]
+    return reduce(vcat, reshape(vs, length(vs)))
+end
+function get_coordinates(M::PowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
+    rep_size = representation_size(M.manifold)
+    vs = [get_coordinates(M.manifold, _read(rep_size, x, i), _read(rep_size, v, i), B.bases[i...])
+        for i in get_iterator(M)]
+    return reduce(vcat, reshape(vs, length(vs)))
+end
+
 function get_vector(
     M::PowerManifold,
     x,
@@ -434,19 +461,6 @@ end
 @generated function rep_size_to_colons(rep_size::Tuple)
     N = length(rep_size.parameters)
     return ntuple(i -> Colon(), N)
-end
-
-function get_coordinates(M::PowerManifold, x, v, B::ArbitraryOrthonormalBasis)
-    rep_size = representation_size(M.manifold)
-    vs = [get_coordinates(M.manifold, _read(rep_size, x, i), _read(rep_size, v, i), B)
-        for i in get_iterator(M)]
-    return reduce(vcat, reshape(vs, length(vs)))
-end
-function get_coordinates(M::PowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
-    rep_size = representation_size(M.manifold)
-    vs = [get_coordinates(M.manifold, _read(rep_size, x, i), _read(rep_size, v, i), B.bases[i...])
-        for i in get_iterator(M)]
-    return reduce(vcat, reshape(vs, length(vs)))
 end
 
 function representation_size(M::PowerManifold{<:Manifold, TSize}) where TSize

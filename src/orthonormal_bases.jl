@@ -17,7 +17,10 @@ abstract type AbstractOrthonormalBasis <: AbstractBasis end
     AbstractPrecomputedOrthonormalBasis
 
 Abstract type that represents an orthonormal basis of the tangent space at a point
-on a manifold. Stores tangent vectors in field `.vectors`.
+on a manifold. Tangent vectors can be obtained using function [`vectors`](@ref).
+
+The vectors are not always fully precomputed because a partially precomputed
+basis may be enough for implementing [`get_vector`](@ref) and [`get_coordinates`](@ref).
 """
 abstract type AbstractPrecomputedOrthonormalBasis <: AbstractOrthonormalBasis end
 
@@ -97,7 +100,7 @@ function get_coordinates(M::Manifold, x, v, B::AbstractBasis)
 end
 
 function get_coordinates(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
-    return map(vb -> real(inner(M, x, v, vb)), B.vectors)
+    return map(vb -> real(inner(M, x, v, vb)), vectors(B))
 end
 
 """
@@ -121,11 +124,12 @@ function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `vout`
     #     (for example scalar * `SizedArray` is an `SArray`)
-    vt = v[1] .* B.vectors[1]
-    vout = similar(B.vectors[1], eltype(vt))
+    bvectors = vectors(B)
+    vt = v[1] .* bvectors[1]
+    vout = similar(bvectors[1], eltype(vt))
     copyto!(vout, vt)
     for i in 2:length(v)
-        vout .+= v[i] .* B.vectors[i]
+        vout .+= v[i] .* bvectors[i]
     end
     return vout
 end
@@ -163,11 +167,12 @@ function basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis)
     N = length(B)
     M_dim = manifold_dimension(M)
     N == M_dim || throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
+    bvectors = vectors(B)
     for i in 1:N
-        vi_norm = norm(M, x, B.vectors[i])
+        vi_norm = norm(M, x, bvectors[i])
         isapprox(vi_norm, 1) || throw(ArgumentError("vector number $i is not normalized (norm = $vi_norm)"))
         for j in i+1:N
-            dot_val = real(inner(M, x, B.vectors[i], B.vectors[j]))
+            dot_val = real(inner(M, x, bvectors[i], bvectors[j]))
             isapprox(dot_val, 0; atol = eps(eltype(x))) || throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
         end
     end
@@ -200,6 +205,18 @@ function basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:svd})
     end
     return PrecomputedOrthonormalBasis(vecs)
 end
+
+"""
+    vectors(M::Manifold, x, B::AbstractBasis)
+
+Get the basis vectors of basis `B` of the tangent space at point `x`.
+"""
+function vectors(M::Manifold, x, B::AbstractBasis)
+    error("vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
+end
+
+vectors(::Manifold, x, B::PrecomputedOrthonormalBasis) = B.vectors
+vectors(::Manifold, x, B::PrecomputedDiagonalizingOrthonormalBasis) = B.vectors
 
 # related to DefaultManifold; to be moved to ManifoldsBase.jl in the future
 function get_coordinates(M::ManifoldsBase.DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
