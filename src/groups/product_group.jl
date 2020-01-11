@@ -12,11 +12,11 @@ const ProductGroup{T} = GroupManifold{ProductManifold{T},ProductOperation}
 
 Decorate a product manifold with a [`ProductOperation`](@ref).
 
-Each submanifold must also be an `[AbstractGroupManifold]` or a decorated instance of one.
-This type is mostly useful for equipping the direct product of group manifolds with an
+Each submanifold must also be an [`AbstractGroupManifold`](@ref) or a decorated instance of
+one. This type is mostly useful for equipping the direct product of group manifolds with an
 [`Identity`](@ref) element.
 
-# Constructors
+# Constructor
     ProductGroup(manifold::ProductManifold)
 """
 function ProductGroup(manifold::ProductManifold)
