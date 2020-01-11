@@ -19,7 +19,7 @@ end
 
 function inv(M::ArrayManifold, x; kwargs...)
     is_manifold_point(M, x, true; kwargs...)
-    y = inv(M.manifold, array_value(x))
+    y = ArrayMPoint(inv(M.manifold, array_value(x)))
     is_manifold_point(M, y, true; kwargs...)
     return y
 end
