@@ -22,8 +22,10 @@ Note that a manifold is connected with an operation by wrapping it with a decora
 abstract type AbstractGroupOperation end
 
 # piping syntax for decoration
-(op::AbstractGroupOperation)(M::Manifold) = GroupManifold(M, op)
-(::Type{T})(M::Manifold) where {T<:AbstractGroupOperation} = GroupManifold(M, T())
+if VERSION ≥ v"1.3"
+    (op::AbstractGroupOperation)(M::Manifold) = GroupManifold(M, op)
+    (::Type{T})(M::Manifold) where {T<:AbstractGroupOperation} = GroupManifold(M, T())
+end
 
 @doc doc"""
     AbstractGroupManifold{<:AbstractGroupOperation} <: Manifold
