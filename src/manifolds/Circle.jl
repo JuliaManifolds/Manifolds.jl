@@ -121,7 +121,9 @@ function get_coordinates(M::Circle{ℝ}, x, v, B::ArbitraryOrthonormalBasis)
 end
 
 function get_coordinates(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
-    return @SVector [imag(v[1] / x[1])]
+    v, x = v[1], x[1]
+    w = imag(v) * real(x) - real(v) * imag(x)
+    return @SVector [w]
 end
 
 function get_vector(M::Circle{ℝ}, x, v, B::ArbitraryOrthonormalBasis)
@@ -228,7 +230,7 @@ mean modulo 2π.
 mean(::Circle, ::Any)
 mean(::Circle,x::Array{<:Real},w::AbstractVector; kwargs...) = sym_rem(sum(w.*x))
 
-@inline norm(::Circle, x, v) = sum(map(abs, v))
+@inline norm(::Circle, x, v) = sum(abs, v)
 
 @doc doc"""
     project_point(M::Circle, x)
