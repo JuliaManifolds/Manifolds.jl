@@ -227,6 +227,19 @@ function flat!(M::ProductManifold, v::FVector{CotangentSpaceType}, x, w::FVector
     return v
 end
 
+function hat!(M::ProductManifold, v, x, vⁱ)
+    dim = manifold_dimension(M)
+    @assert length(vⁱ) == dim
+    i = one(dim)
+    ts = ziptuples(M.manifolds, submanifold_components(M, v), submanifold_components(M, x))
+    for t ∈ ts
+        dim = manifold_dimension(first(t))
+        hat!(t..., @inbounds view(vⁱ, i, i + dim - 1))
+        i += dim
+    end
+    return v
+end
+
 @doc doc"""
     injectivity_radius(M::ProductManifold[, x])
 
@@ -464,4 +477,28 @@ end
 
 function support(tvd::ProductFVectorDistribution)
     return FVectorSupport(tvd.type, ProductRepr(map(d -> support(d).x, tvd.distributions)...))
+end
+
+function vee!(M::ProductManifold, vⁱ, x, v)
+    dim = manifold_dimension(M)
+    @assert length(vⁱ) == dim
+    i = one(dim)
+    ts = ziptuples(M.manifolds, submanifold_components(M, x), submanifold_components(M, v))
+    for t ∈ ts
+        SM = first(t)
+        dim = manifold_dimension(SM)
+        vee!(SM, @inbounds view(vⁱ, i, i + dim - 1), Base.tail(t)...)
+        i += dim
+    end
+    return vⁱ
+end
+
+function zero_tangent_vector!(M::ProductManifold, v, x)
+    map(
+        zero_tangent_vector!,
+        M.manifolds,
+        submanifold_components(M, v),
+        submanifold_components(M, x),
+    )
+    return v
 end
