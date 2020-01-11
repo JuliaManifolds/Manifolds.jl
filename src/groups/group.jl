@@ -21,12 +21,6 @@ Note that a manifold is connected with an operation by wrapping it with a decora
 """
 abstract type AbstractGroupOperation end
 
-# piping syntax for decoration
-if VERSION ≥ v"1.3"
-    (op::AbstractGroupOperation)(M::Manifold) = GroupManifold(M, op)
-    (::Type{T})(M::Manifold) where {T<:AbstractGroupOperation} = GroupManifold(M, T())
-end
-
 @doc doc"""
     AbstractGroupManifold{<:AbstractGroupOperation} <: Manifold
 
@@ -73,6 +67,12 @@ function base_group(M::Manifold)
     error("base_group: manifold $(typeof(M)) with base manifold $(typeof(base_manifold(M))) has no base group.")
 end
 base_group(G::AbstractGroupManifold) = G
+
+# piping syntax for decoration
+if VERSION ≥ v"1.3"
+    (op::AbstractGroupOperation)(M::Manifold) = GroupManifold(M, op)
+    (::Type{T})(M::Manifold) where {T<:AbstractGroupOperation} = GroupManifold(M, T())
+end
 
 function check_manifold_point(G::GroupManifold, x; kwargs...)
     return check_manifold_point(G.manifold, x; kwargs...)
