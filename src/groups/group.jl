@@ -93,8 +93,8 @@ injectivity_radius(G::GroupManifold, args...) = injectivity_radius(G.manifold, a
 inner(G::GroupManifold, x, v, w) = inner(G.manifold, x, v, w)
 inverse_retract(G::GroupManifold, x, y) = inverse_retract(G.manifold, x, y)
 inverse_retract!(G::GroupManifold, v, x, y) = inverse_retract!(G.manifold, v, x, y)
-isapprox(G::GroupManifold, x, y) = isapprox(G.manifold, x, y)
-isapprox(G::GroupManifold, x, v, w) = isapprox(G.manifold, x, v, w)
+isapprox(G::GroupManifold, x, y; kwargs...) = isapprox(G.manifold, x, y; kwargs...)
+isapprox(G::GroupManifold, x, v, w; kwargs...) = isapprox(G.manifold, x, v, w; kwargs...)
 log(G::GroupManifold, x, y) = log(G.manifold, x, y)
 log!(G::GroupManifold, v, x, y) = log!(G.manifold, v, x, y)
 norm(G::GroupManifold, x, v) = norm(G.manifold, x, v)
@@ -263,6 +263,13 @@ function isapprox(
 ) where {GT<:AbstractGroupManifold,E<:Identity{GT}}
     return true
 end
+function isapprox(G::GT, x, e::Identity{GT}; kwargs...) where {GT<:GroupManifold}
+    return isapprox(G, e, x; kwargs...)
+end
+function isapprox(G::GT, e::Identity{GT}, x; kwargs...) where {GT<:GroupManifold}
+    return isapprox(G, identity(G, x), x; kwargs...)
+end
+isapprox(::GT, ::E, ::E; kwargs...) where {GT<:GroupManifold,E<:Identity{GT}} = true
 
 @doc doc"""
     compose(G::AbstractGroupManifold, x, y)
