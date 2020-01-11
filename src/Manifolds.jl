@@ -22,6 +22,7 @@ using Einsum: @einsum
 using FiniteDifferences
 using HybridArrays
 using LinearAlgebra
+using Base.Iterators: repeated
 using ManifoldsBase: CoTVector, Manifold, MPoint, TVector
 using ManifoldsBase: ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
@@ -179,6 +180,7 @@ include("manifolds/SymmetricPositiveDefinite.jl")
 include("groups/group.jl")
 include("groups/group_action.jl")
 include("groups/group_operation_action.jl")
+include("groups/product_group.jl")
 include("groups/semidirect_product_group.jl")
 
 include("groups/translation_group.jl")
@@ -242,7 +244,7 @@ export base_manifold, bundle_projection, christoffel_symbols_first, christoffel_
 # Lie group types & functions
 export AbstractGroupAction, AbstractGroupOperation, AbstractGroupManifold, ActionDirection,
     AdditionOperation, MultiplicationOperation, GroupManifold, GroupOperationAction,
-    Identity, LeftAction, RightAction, RotationAction, SemidirectProductGroup,
+    Identity, LeftAction, ProductGroup, ProductOperation, RightAction, RotationAction, SemidirectProductGroup,
     SpecialEuclidean, SpecialOrthogonal, TranslationGroup, TranslationAction
 export apply, apply!, apply_diff, apply_diff!, base_group, center_of_orbit, compose,
     compose!, direction, g_manifold, identity, identity!, inv, inv!, inverse_apply,

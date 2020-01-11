@@ -133,11 +133,6 @@ copyto!(e::TE, ::TE) where {TE<:Identity} = e
 copyto!(x, ::TE) where {TE<:Identity} = identity!(e.group, x, e)
 copyto!(x::AbstractArray, e::TE) where {TE<:Identity} = identity!(e.group, x, e)
 
-# for product groups
-function submanifold_component(e::Identity, i::Integer)
-    return Identity(submanifold(base_manifold(e.group), i))
-end
-
 @doc doc"""
     inv!(G::AbstractGroupManifold, y, x)
 
