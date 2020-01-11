@@ -38,21 +38,46 @@ end
 
 show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
 
-function _subarray(::SpecialEuclidean{n}, x::AbstractMatrix, ::Val{1}) where {n}
+Base.@propagate_inbounds function submanifold_component(
+    ::SpecialEuclidean{n},
+    x::AbstractMatrix,
+    ::Val{1},
+) where {n}
     return view(x, 1:n, n + 1)
 end
-_subarray(::SpecialEuclidean{n}, x::AbstractMatrix, ::Val{2}) where {n} = view(x, 1:n, 1:n)
+Base.@propagate_inbounds function submanifold_component(
+    ::SpecialEuclidean{n},
+    x::AbstractMatrix,
+    ::Val{2},
+) where {n}
+    return view(x, 1:n, 1:n)
+end
 
-function _padpoint!(::SpecialEuclidean{n}, y::AbstractMatrix) where {n}
-    @assert size(y, 1) == n + 1
-    @inbounds fill!(view(y, n + 1, 1:n), 0)
-    @inbounds y[n+1, n+1] = 1
+function submanifold_components(G::SpecialEuclidean{n}, x::AbstractMatrix) where {n}
+    @assert size(x) == (n + 1, n + 1)
+    @inbounds t = submanifold_component(G, x, Val(1))
+    @inbounds R = submanifold_component(G, x, Val(2))
+    return (t, R)
+end
+
+Base.@propagate_inbounds function _padpoint!(
+    ::SpecialEuclidean{n},
+    y::AbstractMatrix,
+) where {n}
+    for i ∈ 1:n
+        y[n+1, i] = 0
+    end
+    y[n+1, n+1] = 1
     return y
 end
 
-function _padvector!(::SpecialEuclidean{n}, v::AbstractMatrix) where {n}
-    @assert size(v, 1) == n + 1
-    @inbounds fill!(view(v, n + 1, 1:n+1), 0)
+Base.@propagate_inbounds function _padvector!(
+    ::SpecialEuclidean{n},
+    v::AbstractMatrix,
+) where {n}
+    for i ∈ 1:n+1
+        v[n+1, i] = 0
+    end
     return v
 end
 
