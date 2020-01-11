@@ -20,6 +20,9 @@ This type is mostly useful for equipping the direct product of group manifolds w
     ProductGroup(manifold::ProductManifold)
 """
 function ProductGroup(manifold::ProductManifold)
+    if !all(is_decorator_group, manifold.manifolds)
+        error("All submanifolds of product manifold must be or decorate groups.")
+    end
     op = ProductOperation()
     return GroupManifold(manifold, op)
 end
