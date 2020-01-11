@@ -25,6 +25,14 @@ Pages = ["groups/group.jl"]
 Order = [:type, :function]
 ```
 
+### Product group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/product_group.jl"]
+Order = [:type, :function]
+```
+
 ### Semidirect product group
 
 ```@autodocs
