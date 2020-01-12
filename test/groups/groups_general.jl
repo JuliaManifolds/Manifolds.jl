@@ -14,16 +14,12 @@ include("../utils.jl")
         @test_throws ErrorException inv!(G, x, x)
         @test_throws ErrorException inv!(G, x, eg)
         @test_throws ErrorException inv(G, x)
-        @test inv(G, eg) == eg
-        @test identity(G, eg) === eg
 
         @test_throws ErrorException identity!(G, x, x)
         @test_throws ErrorException identity(G, x)
 
-        @test compose(G, eg, eg) == eg
         @test_throws ErrorException compose(G, x, x)
-        @test compose(G, eg, x) == x
-        @test compose(G, x, eg) == x
+        @test_throws ErrorException compose(G, x, eg)
         @test_throws ErrorException compose!(G, x, eg, x)
         @test_throws ErrorException compose!(G, x, x, eg)
         @test_throws ErrorException compose!(G, x, x, x)
