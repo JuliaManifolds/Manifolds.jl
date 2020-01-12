@@ -254,16 +254,16 @@ end
 Identity element $e ∈ G$, such that for any element $x ∈ G$, $x \circ e = e \circ x = x$.
 The returned element is of a similar type to `x`.
 """
-function identity(G::AbstractGroupManifold, x)
-    y = similar_result(G, identity, x)
-    return identity!(G, y, x)
-end
-identity(::GT, e::Identity{GT}) where {GT<:AbstractGroupManifold} = e
 identity(M::Manifold, x) = identity(M, x, is_decorator_manifold(M))
 identity(M::Manifold, x, ::Val{true}) = identity(M.manifold, x)
 function identity(M::Manifold, x, ::Val{false})
     return error("identity not implemented on $(typeof(M)) for points $(typeof(x))")
 end
+function identity(G::AbstractGroupManifold, x)
+    y = similar_result(G, identity, x)
+    return identity!(G, y, x)
+end
+identity(::GT, e::Identity{GT}) where {GT<:AbstractGroupManifold} = e
 
 isapprox(M::Manifold, x, e::Identity; kwargs...) = isapprox(M, e, x; kwargs...)
 function isapprox(M::Manifold, e::Identity, x; kwargs...)
@@ -558,6 +558,8 @@ struct AdditionOperation <: AbstractGroupOperation end
 *(x, e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
 *(e::E, ::E) where {G<:AbstractGroupManifold{AdditionOperation},E<:Identity{G}} = e
 
+zero(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
+
 function identity!(::AbstractGroupManifold{AdditionOperation}, y, x)
     fill!(y, 0)
     return y
@@ -567,8 +569,6 @@ identity(::AbstractGroupManifold{AdditionOperation}, x) = zero(x)
 identity(::GT, e::Identity{GT}) where {GT<:AbstractGroupManifold{AdditionOperation}} = e
 
 inv!(::AbstractGroupManifold{AdditionOperation}, y, x) = copyto!(y, -x)
-
-zero(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
 
 inv(::AbstractGroupManifold{AdditionOperation}, x) = -x
 inv(::AG, e::Identity{AG}) where {AG<:AbstractGroupManifold{AdditionOperation}} = e
@@ -677,6 +677,8 @@ struct MultiplicationOperation <: AbstractGroupOperation end
 \(::Identity{G}, x) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
 \(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
 
+inv(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
+
 one(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
 
 function LinearAlgebra.mul!(
@@ -700,8 +702,6 @@ function LinearAlgebra.mul!(
 ) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}}
     return identity!(e.group, y, e)
 end
-
-inv(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
 
 identity!(::AbstractGroupManifold{MultiplicationOperation}, y, x) = copyto!(y, one(x))
 function identity!(
