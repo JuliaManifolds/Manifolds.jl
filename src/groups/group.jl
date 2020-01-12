@@ -87,12 +87,21 @@ function check_tangent_vector(G::GroupManifold, x, v; kwargs...)
     return check_tangent_vector(G.manifold, x, v; kwargs...)
 end
 distance(G::GroupManifold, x, y) = distance(G.manifold, x, y)
-exp(G::GroupManifold, x, v, args...) = exp(G.manifold, x, v, args...)
-exp!(G::GroupManifold, y, x, v, args...) = exp!(G.manifold, y, x, v, args...)
+exp(G::GroupManifold, x, v) = exp(G.manifold, x, v)
+exp!(G::GroupManifold, y, x, v) = exp!(G.manifold, y, x, v)
 injectivity_radius(G::GroupManifold, args...) = injectivity_radius(G.manifold, args...)
 inner(G::GroupManifold, x, v, w) = inner(G.manifold, x, v, w)
 inverse_retract(G::GroupManifold, x, y) = inverse_retract(G.manifold, x, y)
+function inverse_retract(G::GroupManifold, x, y, method::AbstractInverseRetractionMethod)
+    return inverse_retract(G.manifold, x, y, method)
+end
 inverse_retract!(G::GroupManifold, v, x, y) = inverse_retract!(G.manifold, v, x, y)
+function inverse_retract!(G::GroupManifold, v, x, y, method::AbstractInverseRetractionMethod)
+    return inverse_retract!(G.manifold, v, x, y, method)
+end
+function inverse_retract!(G::GroupManifold, v, x, y, method::LogarithmicInverseRetraction)
+    return inverse_retract!(G.manifold, v, x, y, method)
+end
 isapprox(G::GroupManifold, x, y; kwargs...) = isapprox(G.manifold, x, y; kwargs...)
 isapprox(G::GroupManifold, x, v, w; kwargs...) = isapprox(G.manifold, x, v, w; kwargs...)
 log(G::GroupManifold, x, y) = log(G.manifold, x, y)
@@ -102,8 +111,17 @@ project_point(G::GroupManifold, x) = project_point(G.manifold, x)
 project_point!(G::GroupManifold, y, x) = project_point!(G.manifold, y, x)
 project_tangent(G::GroupManifold, x, v) = project_tangent!(G.manifold, w, x, v)
 project_tangent!(G::GroupManifold, w, x, v) = project_tangent!(G.manifold, w, x, v)
-retract(G::GroupManifold, x, v, args...) = retract(G.manifold, x, v, args...)
-retract!(G::GroupManifold, y, x, v, args...) = retract!(G.manifold, y, x, v, args...)
+retract(G::GroupManifold, x, v) = retract(G.manifold, x, v)
+function retract(G::GroupManifold, x, v, method::AbstractRetractionMethod)
+    return retract(G.manifold, x, v, method)
+end
+retract!(G::GroupManifold, y, x, v) = retract!(G.manifold, y, x, v)
+function retract!(G::GroupManifold, y, x, v, method::AbstractRetractionMethod)
+    return retract!(G.manifold, y, x, v, method)
+end
+function retract!(G::GroupManifold, y, x, v, method::ExponentialRetraction)
+    return retract!(G.manifold, y, x, v, method)
+end
 function vector_transport_along!(G::GroupManifold, vto, x, v, c, args...)
     return vector_transport_along!(G.manifold, vto, x, v, c, args...)
 end
@@ -185,6 +203,10 @@ eltype(e::Identity) = Bool
 copyto!(e::TE, ::TE) where {TE<:Identity} = e
 copyto!(x, ::TE) where {TE<:Identity} = identity!(e.group, x, e)
 copyto!(x::AbstractArray, e::TE) where {TE<:Identity} = identity!(e.group, x, e)
+
+isapprox(x, e::Identity; kwargs...) = isapprox(e::Identity, x; kwargs...)
+isapprox(e::Identity, x; kwargs...) = isapprox(e.group, e, x; kwargs...)
+isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
 ##########################
 # Group-specific functions
