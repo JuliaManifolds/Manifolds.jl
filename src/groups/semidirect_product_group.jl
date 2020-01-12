@@ -154,3 +154,33 @@ function zero_tangent_vector!(G::SemidirectProductGroup, v, x)
     zero_tangent_vector!(H, hv, hx)
     return v
 end
+
+function isapprox(G::SemidirectProductGroup, x, y; kwargs...)
+    M = base_manifold(G)
+    N, H = M.manifolds
+    nx, hx = submanifold_components(G, x)
+    ny, hy = submanifold_components(G, y)
+    return isapprox(N, nx, ny; kwargs...) && isapprox(H, hx, hy; kwargs...)
+end
+function isapprox(G::SemidirectProductGroup, x, v, w; kwargs...)
+    M = base_manifold(G)
+    N, H = M.manifolds
+    nx, hx = submanifold_components(G, x)
+    nv, hv = submanifold_components(G, v)
+    nw, hw = submanifold_components(G, w)
+    return isapprox(N, nx, nv, nw; kwargs...) && isapprox(H, hx, hv, hw; kwargs...)
+end
+function isapprox(G::GT, x, e::Identity{GT}; kwargs...) where {GT<:SemidirectProductGroup}
+    return isapprox(G, e, x; kwargs...)
+end
+function isapprox(G::GT, e::Identity{GT}, x; kwargs...) where {GT<:SemidirectProductGroup}
+    return isapprox(G, identity(G, x), x; kwargs...)
+end
+function isapprox(
+    ::GT,
+    ::E,
+    ::E;
+    kwargs...,
+) where {GT<:SemidirectProductGroup,E<:Identity{GT}}
+    return true
+end
