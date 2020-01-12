@@ -147,6 +147,7 @@ include("product_representations.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/ProductManifold.jl")
 include("manifolds/PowerManifold.jl")
+include("manifolds/GraphManifold.jl")
 
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
