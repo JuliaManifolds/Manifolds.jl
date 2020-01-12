@@ -213,14 +213,15 @@ function test_action(
 
     @testset "Basic action properties" begin
         @testset "Direction" begin
+            Aswitch = switch_direction(A)
             if isa(A, AbstractGroupAction{LeftAction})
                 @test direction(A) === LeftAction()
-                @test isa(switch_direction(A), AbstractGroupAction{RightAction})
-                @test direction(switch_direction(A)) === RightAction()
+                @test isa(Aswitch, AbstractGroupAction{RightAction})
+                @test direction(Aswitch) === RightAction()
             else
                 @test direction(A) === RightAction()
-                @test isa(switch_direction(A), AbstractGroupAction{LeftAction})
-                @test direction(switch_direction(A)) === LeftAction()
+                @test isa(Aswitch, AbstractGroupAction{LeftAction})
+                @test direction(Aswitch) === LeftAction()
             end
         end
 
