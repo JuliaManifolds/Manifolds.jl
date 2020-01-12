@@ -34,7 +34,7 @@ function test_group(
         @testset "Closed" begin
             for g1 in g_pts, g2 in g_pts
                 g3 = compose(G, g1, g2)
-                @test is_manifold_point(G, g3; atol = atol)
+                @test is_manifold_point(G, g3, true; atol = atol)
             end
         end
 
@@ -149,8 +149,8 @@ function test_group(
         g21 = compose(G, g_pts[2], g_pts[1])
         g12 = compose(G, g_pts[1], g_pts[2])
         @test translate_diff(G, g_pts[2], g_pts[1], v) ≈ translate_diff(G, g_pts[2], g_pts[1], v, LeftAction()) atol = atol
-        @test is_tangent_vector(G, g12, translate_diff(G, g_pts[2], g_pts[1], v, LeftAction()); atol = atol)
-        RightAction() in diff_convs && @test is_tangent_vector(G, g21, translate_diff(G, g_pts[2], g_pts[1], v, RightAction()); atol = atol)
+        @test is_tangent_vector(G, g12, translate_diff(G, g_pts[2], g_pts[1], v, LeftAction()), true; atol = atol)
+        RightAction() in diff_convs && @test is_tangent_vector(G, g21, translate_diff(G, g_pts[2], g_pts[1], v, RightAction()), true; atol = atol)
 
         for conv in diff_convs
             g2g1 = translate(G, g_pts[2], g_pts[1], conv...)
@@ -228,13 +228,13 @@ function test_action(
             @testset "over actions" begin
                 for a1 in a_pts, a2 in a_pts
                     a3 = compose(A, a1, a2)
-                    @test is_manifold_point(G, a3)
+                    @test is_manifold_point(G, a3, true; atol = atol)
                 end
             end
             @testset "over g-manifold" begin
                 for a in a_pts, m in m_pts
-                    @test is_manifold_point(M, apply(A, a, m))
-                    @test is_manifold_point(M, inverse_apply(A, a, m))
+                    @test is_manifold_point(M, apply(A, a, m), true; atol = atol)
+                    @test is_manifold_point(M, inverse_apply(A, a, m), true; atol = atol)
                 end
             end
         end
@@ -349,8 +349,8 @@ function test_action(
             for a in a_pts
                 am, av = apply(A, a, m), apply_diff(A, a, m, v)
                 ainvm, ainvv = inverse_apply(A, a, m), inverse_apply_diff(A, a, m, v)
-                @test is_tangent_vector(M, am, av)
-                @test is_tangent_vector(M, ainvm, ainvv)
+                @test is_tangent_vector(M, am, av, true; atol = atol)
+                @test is_tangent_vector(M, ainvm, ainvv, true; atol = atol)
             end
 
             a12 = compose(A, a_pts[1], a_pts[2])
@@ -372,8 +372,8 @@ function test_action(
                     ainvm = inverse_apply(A, a, m)
                     ainvv = similar(v)
                     @test inverse_apply_diff!(A, ainvv, a, m, v) === ainvv
-                    @test is_tangent_vector(M, am, av)
-                    @test is_tangent_vector(M, ainvm, ainvv)
+                    @test is_tangent_vector(M, am, av, true; atol = atol)
+                    @test is_tangent_vector(M, ainvm, ainvv, true; atol = atol)
                 end
 
                 a12 = compose(A, a_pts[1], a_pts[2])
