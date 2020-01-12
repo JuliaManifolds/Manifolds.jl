@@ -38,4 +38,43 @@ include("group_utils.jl")
             atol = atol,
         )
     end
+
+    G = SpecialOrthogonal(3)
+    M = Rotations(3)
+    A_left = GroupOperationAction(G)
+    A_right = GroupOperationAction(G, RightAction())
+
+    x = Matrix{Float64}(I, 3, 3)
+    aω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
+    mω = [2 .* ω for ω in aω]
+    a_pts = [exp(M, x, hat(M, x, ωi)) for ωi in aω]
+    m_pts = [exp(M, x, hat(M, x, ωi)) for ωi in mω]
+    v_pts = [
+        hat(M, x, [-1.0, 2.0, 0.5]),
+        hat(M, x, [2.0, 1.0, 0.5]),
+        hat(M, x, [0.5, 0.5, 0.5]),
+    ]
+
+    @test g_manifold(A_left) === G
+    @test base_group(A_left) == G
+    @test repr(A_left) == "GroupOperationAction($(repr(G)), LeftAction())"
+    @test repr(A_right) == "GroupOperationAction($(repr(G)), RightAction())"
+
+    test_action(
+        A_left,
+        a_pts,
+        m_pts,
+        v_pts;
+        test_optimal_alignment = true,
+        test_diff = true,
+    )
+
+    test_action(
+        A_right,
+        a_pts,
+        m_pts,
+        v_pts;
+        test_optimal_alignment = true,
+        test_diff = true,
+    )
 end
