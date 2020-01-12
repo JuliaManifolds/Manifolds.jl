@@ -190,7 +190,8 @@ export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
 export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 export CotangentBundle, CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
-export PowerManifold, ProductManifold
+export AbstractPowerManifold, PowerManifold, ProductManifold
+export GraphManifold, VertexManifold, EdgeManifold
 export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
