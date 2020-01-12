@@ -38,14 +38,13 @@ or edges.
 """
 struct GraphManifold{
         G<:AbstractSimpleGraph,
-        M<:Manifold,
+        M,
         T<:GraphManifoldType
-    } <: PowerManifold
+    } <: PowerManifold{M, TSize} where {M <: Manifold, TSize}
     graph::G
     manifold::M
     type::T
 end
-
 @doc doc"""
     check_manifold_point(M::GraphManifold,x)
 
