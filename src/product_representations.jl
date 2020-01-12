@@ -246,3 +246,7 @@ end
 (-)(v1::ProductRepr, v2::ProductRepr) = ProductRepr(map(-, v1.parts, v2.parts)...)
 (-)(v::ProductRepr) = ProductRepr(map(-, v.parts))
 (*)(a::Number, v::ProductRepr) = ProductRepr(map(t -> a*t, v.parts))
+
+function Base.convert(::Type{TPR}, x::ProductRepr) where TPR<:ProductRepr
+    return ProductRepr(map(t -> convert(t...), ziptuples(tuple(TPR.parameters[1].parameters...), x.parts)))
+end

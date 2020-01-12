@@ -75,6 +75,19 @@ struct PrecomputedProductOrthonormalBasis{T<:NTuple{N,AbstractPrecomputedOrthono
     parts::T
 end
 
+function basis(M::ProductManifold, x, B::AbstractBasis)
+    parts = map(t -> basis(t..., B),
+        ziptuples(M.manifolds, x.parts))
+
+    return PrecomputedProductOrthonormalBasis(parts)
+end
+
+function basis(M::ProductManifold, x, B::DiagonalizingOrthonormalBasis)
+    vs = map(ziptuples(M.manifolds, x.parts, B.v.parts)) do t
+        return basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
+    end
+    return PrecomputedProductOrthonormalBasis(vs)
+end
 
 """
     check_manifold_point(M::ProductManifold, x; kwargs...)
@@ -154,14 +167,6 @@ end
 function cross(M1::ProductManifold, M2::ProductManifold)
     return ProductManifold(M1.manifolds..., M2.manifolds...)
 end
-
-function basis(M::ProductManifold, x, B::ProjectedOrthonormalBasis{:svd})
-    parts = map(t -> basis(t..., B),
-        ziptuples(M.manifolds, x.parts))
-
-    return PrecomputedProductOrthonormalBasis(parts)
-end
-
 
 function det_local_metric(M::MetricManifold{ProductManifold, ProductMetric}, x::ProductArray)
     dets = map(det_local_metric, M.manifolds, x.parts)
@@ -464,4 +469,16 @@ end
 
 function support(tvd::ProductFVectorDistribution)
     return FVectorSupport(tvd.type, ProductRepr(map(d -> support(d).x, tvd.distributions)...))
+end
+
+function vectors(M::ProductManifold{<:NTuple{N,Manifold}}, x::ProductRepr, B::PrecomputedProductOrthonormalBasis) where {N}
+    BVs = map(t -> vectors(t...), ziptuples(M.manifolds, x.parts, B.parts))
+    zero_tvs = map(t -> zero_tangent_vector(t...), ziptuples(M.manifolds, x.parts))
+    vs = typeof(ProductRepr(zero_tvs...))[]
+    for i in 1:N
+        for k in 1:length(BVs[i])
+            push!(vs, ProductRepr(zero_tvs[1:i-1]..., BVs[i][k], zero_tvs[i+1:end]...))
+        end
+    end
+    return vs
 end
