@@ -397,7 +397,15 @@ function test_action(
 
     test_optimal_alignment && @testset "Center of orbit" begin
         act = center_of_orbit(A, [m_pts[1]], m_pts[2])
+        act2 = center_of_orbit(A, [m_pts[1]], m_pts[2], GradientDescentEstimation())
         act_opt = optimal_alignment(A, m_pts[2], m_pts[1])
-        @test isapprox(G, act, act_opt)
+        @test isapprox(G, act, act_opt; atol = atol)
+        @test isapprox(G, act2, act_opt; atol = atol)
+
+        test_mutating && @testset "mutating" begin
+            act_opt2 = similar(act_opt)
+            optimal_alignment!(A, act_opt2, m_pts[2], m_pts[1])
+            @test isapprox(G, act_opt, act_opt2; atol = atol)
+        end
     end
 end
