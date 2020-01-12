@@ -66,13 +66,22 @@ end
 InverseProductRetraction(inverse_retractions::AbstractInverseRetractionMethod...) = InverseProductRetraction{typeof(inverse_retractions)}(inverse_retractions)
 
 """
-    PrecomputedProductOrthonormalBasis(parts::NTuple{N,AbstractPrecomputedOrthonormalBasis} where N)
+    PrecomputedProductOrthonormalBasis(parts::NTuple{N,AbstractPrecomputedOrthonormalBasis} where N, F::AbstractNumbers = ℝ)
 
 A precomputed orthonormal basis of a tangent space of a product manifold.
 The tuple `parts` stores bases corresponding to multiplied manifolds.
+
+The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct PrecomputedProductOrthonormalBasis{T<:NTuple{N,AbstractPrecomputedOrthonormalBasis} where N} <: AbstractPrecomputedOrthonormalBasis
+struct PrecomputedProductOrthonormalBasis{T<:NTuple{N,AbstractPrecomputedOrthonormalBasis} where N, F<:AbstractNumbers} <: AbstractPrecomputedOrthonormalBasis{F}
     parts::T
+end
+
+function PrecomputedProductOrthonormalBasis(
+    parts::NTuple{N,AbstractPrecomputedOrthonormalBasis},
+    F::AbstractNumbers = ℝ
+) where N
+    return PrecomputedProductOrthonormalBasis{typeof(parts), typeof(F)}(parts)
 end
 
 function basis(M::ProductManifold, x, B::AbstractBasis)

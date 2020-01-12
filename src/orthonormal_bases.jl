@@ -1,87 +1,124 @@
 
 """
-    AbstractBasis
+    AbstractBasis{F<:AbstractNumbers}
 
 Abstract type that represents a basis on a manifold or a subset of it.
+
+The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-abstract type AbstractBasis end
+abstract type AbstractBasis{F<:AbstractNumbers} end
 
 """
-    AbstractOrthonormalBasis
+    number_system(::AbstractBasis)
+
+The number system used as scalars in the given basis.
+"""
+number_system(::AbstractBasis{F}) where F<:AbstractNumbers = F()
+
+"""
+    AbstractOrthonormalBasis{F<:AbstractNumbers}
 
 Abstract type that represents an orthonormal basis on a manifold or a subset of it.
+
+The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-abstract type AbstractOrthonormalBasis <: AbstractBasis end
+abstract type AbstractOrthonormalBasis{F<:AbstractNumbers} <: AbstractBasis{F} end
 
 """
-    AbstractPrecomputedOrthonormalBasis
+    AbstractPrecomputedOrthonormalBasis{F<:AbstractNumbers}
 
 Abstract type that represents an orthonormal basis of the tangent space at a point
 on a manifold. Tangent vectors can be obtained using function [`vectors`](@ref).
 
 The vectors are not always fully precomputed because a partially precomputed
 basis may be enough for implementing [`get_vector`](@ref) and [`get_coordinates`](@ref).
+
+The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-abstract type AbstractPrecomputedOrthonormalBasis <: AbstractOrthonormalBasis end
+abstract type AbstractPrecomputedOrthonormalBasis{F<:AbstractNumbers} <: AbstractOrthonormalBasis{F} end
 
 """
-    ArbitraryOrthonormalBasis
+    ArbitraryOrthonormalBasis(F::AbstractNumbers = ℝ)
 
 An arbitrary orthonormal basis on a manifold. This will usually
 be the fastest [`OrthonormalBasis`](@ref) available for a manifold.
+
+The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct ArbitraryOrthonormalBasis <: AbstractOrthonormalBasis end
+struct ArbitraryOrthonormalBasis{F<:AbstractNumbers} <: AbstractOrthonormalBasis{F} end
+
+ArbitraryOrthonormalBasis(F::AbstractNumbers = ℝ) = ArbitraryOrthonormalBasis{typeof(F)}()
 
 """
-    ProjectedOrthonormalBasis(method::Symbol)
+    ProjectedOrthonormalBasis(method::Symbol, F::AbstractNumbers = ℝ)
 
 An orthonormal basis that comes from orthonormalization of basis vectors
 of the ambient space projected onto the subspace representing the tangent space
 at a given point.
 
+The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
+
 Available methods:
-  - `:gram_schmidt` TODO
+  - `:gram_schmidt` uses a modified Gram-Schmidt orthonormalization.
   - `:svd` uses SVD decomposition to orthogonalize projected vectors.
     The SVD-based method should be more numerically stable at the cost of
     an additional assumption (local metric tensor at a point where the
     basis is calculated has to be diagonal).
 """
-struct ProjectedOrthonormalBasis{Method} <: AbstractOrthonormalBasis end
+struct ProjectedOrthonormalBasis{Method, F<:AbstractNumbers} <: AbstractOrthonormalBasis{F} end
 
-ProjectedOrthonormalBasis(method::Symbol) = ProjectedOrthonormalBasis{method}()
+ProjectedOrthonormalBasis(method::Symbol, F::AbstractNumbers = ℝ) = ProjectedOrthonormalBasis{method, typeof(F)}()
 
 @doc doc"""
-    DiagonalizingOrthonormalBasis(v)
+    DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ)
 
 An orthonormal basis `Ξ` as a vector of tangent vectors (of length determined by
 [`manifold_dimension`](@ref)) in the tangent space that diagonalizes the curvature
 tensor $R(u,v)w$ and where the direction `v` has curvature `0`.
+
+The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct DiagonalizingOrthonormalBasis{TV} <: AbstractOrthonormalBasis
+struct DiagonalizingOrthonormalBasis{TV, F<:AbstractNumbers} <: AbstractOrthonormalBasis{F}
     v::TV
 end
+
+DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ) = DiagonalizingOrthonormalBasis{typeof(v), typeof(F)}(v)
 
 const ArbitraryOrDiagonalizingBasis = Union{ArbitraryOrthonormalBasis, DiagonalizingOrthonormalBasis}
 
 """
-    PrecomputedOrthonormalBasis(vectors::AbstractVector)
+    PrecomputedOrthonormalBasis(vectors::AbstractVector, F::AbstractNumbers = ℝ)
 
 A precomputed orthonormal basis at a point on a manifold.
+
+The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct PrecomputedOrthonormalBasis{TV<:AbstractVector} <: AbstractPrecomputedOrthonormalBasis
+struct PrecomputedOrthonormalBasis{TV<:AbstractVector, F<:AbstractNumbers} <: AbstractPrecomputedOrthonormalBasis{F}
     vectors::TV
 end
 
+PrecomputedOrthonormalBasis(vectors::AbstractVector, F::AbstractNumbers = ℝ) = PrecomputedOrthonormalBasis{typeof(vectors), typeof(F)}(vectors)
+
 @doc doc"""
-    DiagonalizingOrthonormalBasis(vectors, kappas)
+    DiagonalizingOrthonormalBasis(vectors, kappas, F::AbstractNumbers = ℝ)
 
 A precomputed orthonormal basis `Ξ` as a vector of tangent vectors (of length determined
 by [`manifold_dimension`](@ref)) in the tangent space that diagonalizes the curvature
 tensor $R(u,v)w$ with eigenvalues `kappas` and where the direction `v` has curvature `0`.
+
+The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct PrecomputedDiagonalizingOrthonormalBasis{TV<:AbstractVector, TK<:AbstractVector} <: AbstractPrecomputedOrthonormalBasis
+struct PrecomputedDiagonalizingOrthonormalBasis{TV<:AbstractVector, TK<:AbstractVector, F<:AbstractNumbers} <: AbstractPrecomputedOrthonormalBasis{F}
     vectors::TV
     kappas::TK
+end
+
+function PrecomputedDiagonalizingOrthonormalBasis(
+    vectors::AbstractVector,
+    kappas::AbstractVector,
+    F::AbstractNumbers = ℝ
+)
+    return PrecomputedOrthonormalBasis{typeof(vectors), typeof(kappas), typeof(F)}(vectors, kappas)
 end
 
 """
@@ -164,7 +201,7 @@ end
 
 basis(M::Manifold, x, B::AbstractPrecomputedOrthonormalBasis) = B
 
-function basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis)
+function basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis{RealNumbers})
     N = length(B)
     M_dim = manifold_dimension(M)
     N == M_dim || throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
@@ -186,7 +223,7 @@ function _euclidean_basis_vector(x, i)
     return y
 end
 
-function basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:svd})
+function basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:svd, RealNumbers})
     S = representation_size(M)
     PS = prod(S)
     dim = manifold_dimension(M)
@@ -229,4 +266,37 @@ end
 
 function basis(M::ManifoldsBase.DefaultManifold, x, ::ArbitraryOrthonormalBasis)
     return PrecomputedOrthonormalBasis([_euclidean_basis_vector(x, i) for i in eachindex(x)])
+end
+
+function basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,F}; kwargs...) where F<:AbstractNumbers
+    E = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
+    N = length(E)
+    Ξ = empty(E)
+    dim = manifold_dimension(M)
+    N < dim && @warn "Input only has $(N) vectors, but manifold dimension is $(dim)."
+    K = 0
+    @inbounds for n in 1:N
+        Ξₙ = project_tangent(M, x, E[n])
+        for k in 1:K
+            Ξₙ .-= real(inner(M, x, Ξ[k], Ξₙ)) .* Ξ[k]
+        end
+        nrmΞₙ = norm(M, x, Ξₙ)
+        if nrmΞₙ == 0
+            @warn "Input vector $(n) has length 0."
+            @goto skip
+        end
+        Ξₙ ./= nrmΞₙ
+        for k in 1:K
+            if !isapprox(real(inner(M, x, Ξ[k], Ξₙ)), 0; kwargs...)
+                @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
+                @goto skip
+            end
+        end
+        push!(Ξ, Ξₙ)
+        K += 1
+        K * real_dimension(number_system(B)) == dim && return PrecomputedOrthonormalBasis(Ξ, F())
+        @label skip
+    end
+    @warn "gram_schmidt only found $(K) orthonormal basis vectors, but manifold dimension is $(dim)."
+    return PrecomputedOrthonormalBasis(Ξ, F())
 end

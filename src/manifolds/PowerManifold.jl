@@ -79,13 +79,22 @@ struct PowerFVectorDistribution{
 end
 
 """
-    PrecomputedPowerOrthonormalBasis(bases::AbstractArray{AbstractPrecomputedOrthonormalBasis})
+    PrecomputedPowerOrthonormalBasis(bases::AbstractArray{AbstractPrecomputedOrthonormalBasis}, F::AbstractNumbers = ℝ)
 
 A precomputed orthonormal basis of a tangent space of a power manifold.
 The array `bases` stores bases corresponding to particular parts of the manifold.
+
+The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct PrecomputedPowerOrthonormalBasis{TB<:AbstractArray{<:AbstractPrecomputedOrthonormalBasis}} <: AbstractPrecomputedOrthonormalBasis
+struct PrecomputedPowerOrthonormalBasis{TB<:AbstractArray{<:AbstractPrecomputedOrthonormalBasis}, F<:AbstractNumbers} <: AbstractPrecomputedOrthonormalBasis{F}
     bases::TB
+end
+
+function PrecomputedPowerOrthonormalBasis(
+    bases::AbstractArray{<:AbstractPrecomputedOrthonormalBasis},
+    F::AbstractNumbers = ℝ
+) where N
+    return PrecomputedPowerOrthonormalBasis{typeof(bases), typeof(F)}(bases)
 end
 
 function basis(M::PowerManifold, x, B::AbstractBasis)

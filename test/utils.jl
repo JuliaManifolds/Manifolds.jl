@@ -284,13 +284,13 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
         bvectors = vectors(M, x, b)
         N = length(bvectors)
-        @test N == manifold_dimension(M)
+        @test real_dimension(number_system(btype)) * N == manifold_dimension(M)
 
         # test orthonormality
         for i in 1:N
             @test norm(M, x, bvectors[i]) ≈ 1
             for j in i+1:N
-                @test real(inner(M, x, bvectors[i], bvectors[j])) ≈ 0 atol = sqrt(eps(eltype(x)))
+                @test real(inner(M, x, bvectors[i], bvectors[j])) ≈ 0 atol = sqrt(eps(real(eltype(x))))
             end
         end
         if isa(btype, ProjectedOrthonormalBasis)
@@ -331,7 +331,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             for i in 1:N
                 @test norm(M, x, vs_invs[i]) ≈ 1
                 for j in i+1:N
-                    @test real(inner(M, x, vs_invs[i], vs_invs[j])) ≈ 0 atol = sqrt(eps(eltype(x)))
+                    @test real(inner(M, x, vs_invs[i], vs_invs[j])) ≈ 0 atol = sqrt(eps(real(eltype(x))))
                 end
             end
         end

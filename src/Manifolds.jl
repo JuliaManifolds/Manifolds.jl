@@ -232,5 +232,5 @@ export AbstractOrthonormalBasis, AbstractPrecomputedOrthonormalBasis,
     ArbitraryOrthonormalBasis, DiagonalizingOrthonormalBasis,
     PrecomputedDiagonalizingOrthonormalBasis, PrecomputedOrthonormalBasis,
     PrecomputedProductOrthonormalBasis, ProjectedOrthonormalBasis
-export basis, get_vector, get_coordinates, vectors
+export basis, get_vector, get_coordinates, number_system, vectors
 end # module
