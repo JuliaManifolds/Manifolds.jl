@@ -40,7 +40,7 @@ struct GraphManifold{
         G<:AbstractSimpleGraph,
         M<:Manifold,
         T<:GraphManifoldType
-    } <: Manifold
+    } <: PowerManifold
     graph::G
     manifold::M
     type::T
@@ -57,19 +57,47 @@ function check_manifold_point(
     M::GraphManifold{G,TM,VertexGraph},
     x;
     kwargs...) where {G <: AbstractSimpleGraph,TM<:Manifold}
-    for i in nv(M.graph)
-        imp = check_manifold_point(M.manifold, x[i]; kwargs...)
-        imp === nothing || return imp
+    if length(x) != nv(M.graph)
+        return DomainError(length(x), "The number of elements in `x` ($(length(x)) does not match the number of nodes in the graph ($(nv(M.graph))).")
     end
+    return check_manifold_point(PowerManifold(M.manifold,nv(M.graph)), x; kwargs...)
 end
 function check_manifold_point(
     M::GraphManifold{G,TM,EdgeGraph},
     x;
     kwargs...) where {G <: AbstractSimpleGraph,TM<:Manifold}
-    for e in edges(M.graph)
-        imp = check_manifold_point(M.manifold, x[e]; kwargs...)
-        imp === nothing || return imp
+    if length(x) != ne(M.graph)
+        return DomainError(length(x), "The number of elements in `x` ($(length(x)) does not match the number of edges in the graph ($(ne(M.graph))).")
     end
+    return check_manifold_point(PowerManifold(M.manifold,nv(M.graph)), x; kwargs...)
+end
+
+function check_tangent_vector(
+    M::GraphManifold{G,TM,VertexGraph},
+    x,
+    v;
+    kwargs...) where {G <: AbstractSimpleGraph,TM<:Manifold}
+    check_manifold_point(M, x; kwargs...)
+    if length(x) != nv(M.graph)
+        return DomainError(length(x), "The number of elements in `x` ($(length(x)) does not match the number of nodes in the graph ($(nv(M.graph))).")
+    end
+    if length(v) != nv(M.graph)
+        return DomainError(length(v), "The number of elements in `v` ($(length(v)) does not match the number of nodes in the graph ($(nv(M.graph))).")
+    end
+    return check_tangent_vector(PowerManifold(M.manifold,nv(M.graph)), x, v; kwargs...)
+end
+function check_tangent_vector(
+    M::GraphManifold{G,TM,EdgeGraph},
+    x,
+    v;
+    kwargs...) where {G <: AbstractSimpleGraph,TM<:Manifold}
+    if length(x) != ne(M.graph)
+        return DomainError(length(x), "The number of elements in `x` ($(length(x)) does not match the number of edges in the graph ($(ne(M.graph))).")
+    end
+    if length(v) != ne(M.graph)
+        return DomainError(length(v), "The number of elements in `v` ($(length(v)) does not match the number of edges in the graph ($(ne(M.graph))).")
+    end
+    return check_tangent_vector(PowerManifold(M.manifold,ne(M.graph)), x, v; kwargs...)
 end
 
 @doc doc"""
@@ -86,4 +114,5 @@ function incident_log!(M::GraphManifold{G,TM,VertexGraph}, v, x) where {G <: Abs
     for e in edges(M.graph)
         v[src(e)] += log(M.manifold, x[src(e)], x[dst(e)])
     end
+    return v;
 end
