@@ -96,7 +96,13 @@ function inverse_retract(G::GroupManifold, x, y, method::AbstractInverseRetracti
     return inverse_retract(G.manifold, x, y, method)
 end
 inverse_retract!(G::GroupManifold, v, x, y) = inverse_retract!(G.manifold, v, x, y)
-function inverse_retract!(G::GroupManifold, v, x, y, method::AbstractInverseRetractionMethod)
+function inverse_retract!(
+    G::GroupManifold,
+    v,
+    x,
+    y,
+    method::AbstractInverseRetractionMethod,
+)
     return inverse_retract!(G.manifold, v, x, y, method)
 end
 function inverse_retract!(G::GroupManifold, v, x, y, method::LogarithmicInverseRetraction)
@@ -240,7 +246,6 @@ function inv(G::AbstractGroupManifold, x)
     y = similar_result(G, inv, x)
     return inv!(G, y, x)
 end
-inv(::AG, e::Identity{AG}) where {AG<:AbstractGroupManifold} = e
 
 identity!(M::Manifold, y, x) = identity!(M, y, x, is_decorator_manifold(M))
 identity!(M::Manifold, y, x, ::Val{true}) = identity!(M.manifold, y, x)
@@ -263,7 +268,6 @@ function identity(G::AbstractGroupManifold, x)
     y = similar_result(G, identity, x)
     return identity!(G, y, x)
 end
-identity(::GT, e::Identity{GT}) where {GT<:AbstractGroupManifold} = e
 
 isapprox(M::Manifold, x, e::Identity; kwargs...) = isapprox(M, e, x; kwargs...)
 function isapprox(M::Manifold, e::Identity, x; kwargs...)
@@ -307,9 +311,6 @@ function compose(G::AbstractGroupManifold, x, y)
     z = similar_result(G, compose, x, y)
     return compose!(G, z, x, y)
 end
-compose(::GT, ::Identity{GT}, y) where {GT<:AbstractGroupManifold} = y
-compose(::GT, x, ::Identity{GT}) where {GT<:AbstractGroupManifold} = x
-compose(::GT, x::Identity{GT}, ::Identity{GT}) where {GT<:AbstractGroupManifold} = x
 
 compose!(M::Manifold, z, x, y) = compose!(M, z, x, y, is_decorator_manifold(M))
 compose!(M::Manifold, z, x, y, ::Val{true}) = compose!(M.manifold, z, x, y)
@@ -544,112 +545,51 @@ Group operation that consists of simple addition.
 """
 struct AdditionOperation <: AbstractGroupOperation end
 
-+(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
-+(::Identity{G}, x) where {G<:AbstractGroupManifold{AdditionOperation}} = x
-+(x, ::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = x
-+(e::E, ::E) where {G<:AbstractGroupManifold{AdditionOperation},E<:Identity{G}} = e
+const AdditionGroup = AbstractGroupManifold{AdditionOperation}
 
--(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
--(::Identity{G}, x) where {G<:AbstractGroupManifold{AdditionOperation}} = -x
--(x, ::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = x
--(e::E, ::E) where {G<:AbstractGroupManifold{AdditionOperation},E<:Identity{G}} = e
++(e::Identity{G}) where {G<:AdditionGroup} = e
++(::Identity{G}, x) where {G<:AdditionGroup} = x
++(x, ::Identity{G}) where {G<:AdditionGroup} = x
++(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
-*(e::Identity{G}, x) where {G<:AbstractGroupManifold{AdditionOperation}} = e
-*(x, e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
-*(e::E, ::E) where {G<:AbstractGroupManifold{AdditionOperation},E<:Identity{G}} = e
+-(e::Identity{G}) where {G<:AdditionGroup} = e
+-(::Identity{G}, x) where {G<:AdditionGroup} = -x
+-(x, ::Identity{G}) where {G<:AdditionGroup} = x
+-(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
-zero(e::Identity{G}) where {G<:AbstractGroupManifold{AdditionOperation}} = e
+*(e::Identity{G}, x) where {G<:AdditionGroup} = e
+*(x, e::Identity{G}) where {G<:AdditionGroup} = e
+*(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
-function identity!(::AbstractGroupManifold{AdditionOperation}, y, x)
+zero(e::Identity{G}) where {G<:AdditionGroup} = e
+
+function identity!(::AdditionGroup, y, x)
     fill!(y, 0)
     return y
 end
 
-identity(::AbstractGroupManifold{AdditionOperation}, x) = zero(x)
-identity(::GT, e::Identity{GT}) where {GT<:AbstractGroupManifold{AdditionOperation}} = e
+identity(::AdditionGroup, x) = zero(x)
 
-inv!(::AbstractGroupManifold{AdditionOperation}, y, x) = copyto!(y, -x)
+inv!(::AdditionGroup, y, x) = copyto!(y, -x)
 
-inv(::AbstractGroupManifold{AdditionOperation}, x) = -x
-inv(::AG, e::Identity{AG}) where {AG<:AbstractGroupManifold{AdditionOperation}} = e
+inv(::AdditionGroup, x) = -x
 
-compose(::AbstractGroupManifold{AdditionOperation}, x, y) = x + y
-compose(::GT, x, ::Identity{GT}) where {GT<:AbstractGroupManifold{AdditionOperation}} = x
-compose(::GT, ::Identity{GT}, y) where {GT<:AbstractGroupManifold{AdditionOperation}} = y
-function compose(
-    ::GT,
-    x::Identity{GT},
-    ::Identity{GT},
-) where {GT<:AbstractGroupManifold{AdditionOperation}}
-    return x
-end
+compose(::AdditionGroup, x, y) = x + y
 
-function compose!(::AbstractGroupManifold{AdditionOperation}, z, x, y)
+function compose!(::GT, z, x, y) where {GT<:AdditionGroup}
+    x isa Identity{GT} && return copyto!(z, y)
+    y isa Identity{GT} && return copyto!(z, x)
     z .= x .+ y
     return z
 end
-function compose!(
-    ::GT,
-    z,
-    x::Identity{GT},
-    y,
-) where {GT<:AbstractGroupManifold{AdditionOperation}}
-    return copyto!(z, y)
-end
-function compose!(
-    ::GT,
-    z,
-    x,
-    y::Identity{GT},
-) where {GT<:AbstractGroupManifold{AdditionOperation}}
-    return copyto!(z, x)
-end
-function compose!(
-    G::GT,
-    z,
-    e::Identity{GT},
-    ::Identity{GT},
-) where {GT<:AbstractGroupManifold{AdditionOperation}}
-    return identity!(G, z, e)
-end
 
-function translate_diff(
-    ::AbstractGroupManifold{AdditionOperation},
-    x,
-    y,
-    v,
-    ::ActionDirection,
-)
-    return v
-end
-function translate_diff!(
-    ::AbstractGroupManifold{AdditionOperation},
-    vout,
-    x,
-    y,
-    v,
-    ::ActionDirection,
-)
-    return copyto!(vout, v)
-end
+translate_diff(::AdditionGroup, x, y, v, ::ActionDirection) = v
 
-function inverse_translate_diff(
-    ::AbstractGroupManifold{AdditionOperation},
-    x,
-    y,
-    v,
-    ::ActionDirection,
-)
-    return v
-end
-function inverse_translate_diff!(
-    ::AbstractGroupManifold{AdditionOperation},
-    vout,
-    x,
-    y,
-    v,
-    ::ActionDirection,
-)
+translate_diff!(::AdditionGroup, vout, x, y, v, ::ActionDirection) = copyto!(vout, v)
+
+inverse_translate_diff(::AdditionGroup, x, y, v, ::ActionDirection) = v
+
+function inverse_translate_diff!(::AdditionGroup, vout, x, y, v, ::ActionDirection)
     return copyto!(vout, v)
 end
 
@@ -664,126 +604,55 @@ Group operation that consists of multiplication.
 """
 struct MultiplicationOperation <: AbstractGroupOperation end
 
-*(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
-*(::Identity{G}, x) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
-*(x, ::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
-*(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
+const MultiplicationGroup = AbstractGroupManifold{MultiplicationOperation}
 
-/(x, ::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
-/(::Identity{G}, x) where {G<:AbstractGroupManifold{MultiplicationOperation}} = inv(x)
-/(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
+*(e::Identity{G}) where {G<:MultiplicationGroup} = e
+*(::Identity{G}, x) where {G<:MultiplicationGroup} = x
+*(x, ::Identity{G}) where {G<:MultiplicationGroup} = x
+*(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
 
-\(x, ::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = inv(x)
-\(::Identity{G}, x) where {G<:AbstractGroupManifold{MultiplicationOperation}} = x
-\(e::E, ::E) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}} = e
+/(x, ::Identity{G}) where {G<:MultiplicationGroup} = x
+/(::Identity{G}, x) where {G<:MultiplicationGroup} = inv(x)
+/(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
 
-inv(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
+\(x, ::Identity{G}) where {G<:MultiplicationGroup} = inv(x)
+\(::Identity{G}, x) where {G<:MultiplicationGroup} = x
+\(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
 
-one(e::Identity{G}) where {G<:AbstractGroupManifold{MultiplicationOperation}} = e
+inv(e::Identity{G}) where {G<:MultiplicationGroup} = e
 
-function LinearAlgebra.mul!(
-    y,
-    e::Identity{G},
-    x,
-) where {G<:AbstractGroupManifold{MultiplicationOperation}}
-    return copyto!(y, x)
-end
-function LinearAlgebra.mul!(
-    y,
-    x,
-    e::Identity{G},
-) where {G<:AbstractGroupManifold{MultiplicationOperation}}
-    return copyto!(y, x)
-end
-function LinearAlgebra.mul!(
-    y,
-    e::E,
-    ::E,
-) where {G<:AbstractGroupManifold{MultiplicationOperation},E<:Identity{G}}
+one(e::Identity{G}) where {G<:MultiplicationGroup} = e
+
+transpose(e::Identity{G}) where {G<:MultiplicationGroup} = e
+
+LinearAlgebra.det(::Identity{<:MultiplicationGroup}) = 1
+
+LinearAlgebra.mul!(y, e::Identity{G}, x) where {G<:MultiplicationGroup} = copyto!(y, x)
+LinearAlgebra.mul!(y, x, e::Identity{G}) where {G<:MultiplicationGroup} = copyto!(y, x)
+function LinearAlgebra.mul!(y, e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}}
     return identity!(e.group, y, e)
 end
 
-identity!(::AbstractGroupManifold{MultiplicationOperation}, y, x) = copyto!(y, one(x))
-function identity!(
-    G::GT,
-    y,
-    x::Identity{GT},
-) where {GT<:AbstractGroupManifold{MultiplicationOperation}}
+function identity!(G::GT, y, x) where {GT<:MultiplicationGroup}
+    isa(x, Identity{GT}) || return copyto!(y, one(x))
     error("identity! not implemented on $(typeof(G)) for points $(typeof(y)) and $(typeof(x))")
 end
-function identity!(::AbstractGroupManifold{MultiplicationOperation}, y::AbstractMatrix, x)
-    return copyto!(y, I)
-end
-function identity!(
-    ::GT,
-    y::AbstractMatrix,
-    ::Identity{GT},
-) where {GT<:AbstractGroupManifold{MultiplicationOperation}}
-    return copyto!(y, I)
-end
+identity!(::MultiplicationGroup, y::AbstractMatrix, x) = copyto!(y, I)
 
-identity(::AbstractGroupManifold{MultiplicationOperation}, x) = one(x)
-function identity(
-    ::GT,
-    e::Identity{GT},
-) where {GT<:AbstractGroupManifold{MultiplicationOperation}}
-    return e
-end
+identity(::MultiplicationGroup, x) = one(x)
 
-inv!(::AbstractGroupManifold{MultiplicationOperation}, y, x) = copyto!(y, inv(x))
+inv!(G::MultiplicationGroup, y, x) = copyto!(y, inv(G, x))
 
-inv(::AbstractGroupManifold{MultiplicationOperation}, x) = inv(x)
-inv(::AG, e::Identity{AG}) where {AG<:AbstractGroupManifold{MultiplicationOperation}} = e
+inv(::MultiplicationGroup, x) = inv(x)
 
-compose(::AbstractGroupManifold{MultiplicationOperation}, x, y) = x * y
-function compose(
-    ::GT,
-    x,
-    ::Identity{GT},
-) where {GT<:AbstractGroupManifold{MultiplicationOperation}}
-    return x
-end
-function compose(
-    ::GT,
-    ::Identity{GT},
-    y,
-) where {GT<:AbstractGroupManifold{MultiplicationOperation}}
-    return y
-end
-function compose(
-    ::GT,
-    x::Identity{GT},
-    ::Identity{GT},
-) where {GT<:AbstractGroupManifold{MultiplicationOperation}}
-    return x
-end
+compose(::MultiplicationGroup, x, y) = x * y
 
 # TODO: z might alias with x or y, we might be able to optimize it if it doesn't.
-compose!(::AbstractGroupManifold{MultiplicationOperation}, z, x, y) = copyto!(z, x * y)
+compose!(::MultiplicationGroup, z, x, y) = copyto!(z, x * y)
 
-function inverse_translate(
-    ::AbstractGroupManifold{MultiplicationOperation},
-    x,
-    y,
-    ::LeftAction,
-)
-    return x \ y
-end
-function inverse_translate(
-    ::AbstractGroupManifold{MultiplicationOperation},
-    x,
-    y,
-    ::RightAction,
-)
-    return y / x
-end
+inverse_translate(::MultiplicationGroup, x, y, ::LeftAction) = x \ y
+inverse_translate(::MultiplicationGroup, x, y, ::RightAction) = y / x
 
-function inverse_translate!(
-    G::AbstractGroupManifold{MultiplicationOperation},
-    z,
-    x,
-    y,
-    conv::ActionDirection,
-)
+function inverse_translate!(G::MultiplicationGroup, z, x, y, conv::ActionDirection)
     return copyto!(z, inverse_translate(G, x, y, conv))
 end

@@ -51,6 +51,8 @@ end
 _padpoint!(G::SemidirectProductGroup, y) = y
 _padvector!(G::SemidirectProductGroup, v) = v
 
+inv(G::GT, e::Identity{GT}) where {GT<:SemidirectProductGroup} = e
+
 function inv!(G::SemidirectProductGroup, y, x)
     M = base_manifold(G)
     N, H = M.manifolds
@@ -65,6 +67,8 @@ function inv!(G::SemidirectProductGroup, y, x)
 end
 inv!(G::AG, y, e::Identity{AG}) where {AG<:SemidirectProductGroup} = identity!(G, y, e)
 
+identity(G::GT, e::Identity{GT}) where {GT<:SemidirectProductGroup} = e
+
 function identity!(G::SemidirectProductGroup, y, x)
     M = base_manifold(G)
     N, H = M.manifolds
@@ -76,6 +80,10 @@ function identity!(G::SemidirectProductGroup, y, x)
     return y
 end
 identity!(G::GT, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}} = e
+
+compose(G::GT, x, e::Identity{GT}) where {GT<:SemidirectProductGroup} = x
+compose(G::GT, e::Identity{GT}, x) where {GT<:SemidirectProductGroup} = x
+compose(G::GT, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}} = e
 
 function compose!(G::SemidirectProductGroup, z, x, y)
     M = base_manifold(G)

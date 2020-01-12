@@ -10,11 +10,7 @@ const SpecialOrthogonal{n} = GroupManifold{Rotations{n},MultiplicationOperation}
 
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
 
-inv!(G::SpecialOrthogonal, y, x) = copyto!(y, inv(G, x))
-inv!(G::AG, y, e::Identity{AG}) where {AG<:SpecialOrthogonal} = identity!(G, y, e)
-
 inv(::SpecialOrthogonal, x) = transpose(x)
-inv(::AG, e::Identity{AG}) where {AG<:SpecialOrthogonal} = e
 
 show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
 

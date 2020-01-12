@@ -2,7 +2,7 @@ module Manifolds
 
 import Base: +, -, *, \, /, ^, angle, axes, convert, copy, copyto!, dataids, eltype, exp,
     getindex, identity, inv, isapprox, length, log, one, promote_rule, setindex!, show,
-    similar, size, zero
+    similar, size, transpose, zero
 import Distributions: _rand!, support
 import LinearAlgebra: cross, det, Diagonal, dot, mul!, norm, I, UniformScaling
 import ManifoldsBase: base_manifold, check_manifold_point, check_tangent_vector
