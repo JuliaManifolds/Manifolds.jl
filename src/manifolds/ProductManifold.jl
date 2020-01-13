@@ -73,7 +73,7 @@ The tuple `parts` stores bases corresponding to multiplied manifolds.
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct PrecomputedProductOrthonormalBasis{T<:NTuple{N,AbstractPrecomputedOrthonormalBasis} where N, F<:AbstractNumbers} <: AbstractPrecomputedOrthonormalBasis{F}
+struct PrecomputedProductOrthonormalBasis{T<:NTuple{N,AbstractPrecomputedOrthonormalBasis} where N, F} <: AbstractPrecomputedOrthonormalBasis{F}
     parts::T
 end
 
@@ -81,7 +81,7 @@ function PrecomputedProductOrthonormalBasis(
     parts::NTuple{N,AbstractPrecomputedOrthonormalBasis},
     F::AbstractNumbers = ℝ
 ) where N
-    return PrecomputedProductOrthonormalBasis{typeof(parts), typeof(F)}(parts)
+    return PrecomputedProductOrthonormalBasis{typeof(parts), F}(parts)
 end
 
 function basis(M::ProductManifold, x, B::AbstractBasis)

@@ -73,7 +73,7 @@ end
 
 Compute the inner product of two (complex) numbers with in the complex plane.
 """
-complex_dot(a, b) = map(complex_dot, a, b)
+complex_dot(a, b) = dot(map(real, a), map(real, b)) + dot(map(imag, a), map(imag, b))
 complex_dot(a::Number,b::Number) = (real(a)*real(b) + imag(a)*imag(b))
 
 @doc doc"""

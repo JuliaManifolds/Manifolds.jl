@@ -86,7 +86,7 @@ The array `bases` stores bases corresponding to particular parts of the manifold
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct PrecomputedPowerOrthonormalBasis{TB<:AbstractArray{<:AbstractPrecomputedOrthonormalBasis}, F<:AbstractNumbers} <: AbstractPrecomputedOrthonormalBasis{F}
+struct PrecomputedPowerOrthonormalBasis{TB<:AbstractArray{<:AbstractPrecomputedOrthonormalBasis}, F} <: AbstractPrecomputedOrthonormalBasis{F}
     bases::TB
 end
 
@@ -94,7 +94,7 @@ function PrecomputedPowerOrthonormalBasis(
     bases::AbstractArray{<:AbstractPrecomputedOrthonormalBasis},
     F::AbstractNumbers = ℝ
 ) where N
-    return PrecomputedPowerOrthonormalBasis{typeof(bases), typeof(F)}(bases)
+    return PrecomputedPowerOrthonormalBasis{typeof(bases), F}(bases)
 end
 
 function basis(M::PowerManifold, x, B::AbstractBasis)
