@@ -160,6 +160,7 @@ include("manifolds/Stiefel.jl")
 include("manifolds/Sphere.jl")
 include("manifolds/Symmetric.jl")
 include("manifolds/SymmetricPositiveDefinite.jl")
+include("manifolds/Torus.jl")
 
 
 include("groups/group.jl")
@@ -185,7 +186,8 @@ end
 #
 export CoTVector, Manifold, MPoint, TVector, Manifold
 export Euclidean, CholeskySpace, Circle, FixedRankMatrices, Grassmann,
-    Hyperbolic, Rotations,Sphere, Stiefel, SymmetricMatrices, SymmetricPositiveDefinite
+    Hyperbolic, Rotations,Sphere, Stiefel, SymmetricMatrices,
+    SymmetricPositiveDefinite, Torus
 export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
 export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector

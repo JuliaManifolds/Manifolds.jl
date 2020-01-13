@@ -49,7 +49,6 @@ GraphManifold(g::G,M::TM,::EdgeManifold) where {G<:AbstractSimpleGraph, TM <: Ma
 check whether `x` is a valid point on the [`GraphManifold`](@ref)
 """
 check_manifold_point(::GraphManifold,::Any)
-
 function check_manifold_point(
     M::GraphManifold{G,TM,VertexManifold},
     x;
@@ -74,7 +73,6 @@ function check_tangent_vector(
     x,
     v;
     kwargs...) where {G <: AbstractSimpleGraph, TM <: Manifold}
-    check_manifold_point(M, x; kwargs...)
     if length(x) != nv(M.graph)
         return DomainError(length(x), "The number of elements in `x` ($(length(x)) does not match the number of nodes in the graph ($(nv(M.graph))).")
     end
@@ -120,6 +118,13 @@ function incident_log!(M::GraphManifold{G, TM, VertexManifold}, v, x) where {G <
         v[src(e)] += log(M.manifold, x[src(e)], x[dst(e)])
     end
     return v;
+end
+
+function manifold_dimension(M::GraphManifold{<: AbstractSimpleGraph,<: Manifold, VertexManifold})
+    return manifold_dimension(M.manifold)*nv(M.graph)
+end
+function manifold_dimension(M::GraphManifold{<: AbstractSimpleGraph, <: Manifold, EdgeManifold})
+    return manifold_dimension(M.manifold)*ne(M.graph)
 end
 
 function representation_size(M::GraphManifold{<: AbstractSimpleGraph,<: Manifold, VertexManifold})
