@@ -41,6 +41,14 @@ Pages = ["groups/semidirect_product_group.jl"]
 Order = [:type, :function]
 ```
 
+### Circle group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/circle_group.jl"]
+Order = [:type, :function]
+```
+
 ### Special orthogonal group
 
 ```@autodocs

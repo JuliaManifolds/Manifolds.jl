@@ -186,6 +186,7 @@ include("groups/semidirect_product_group.jl")
 
 include("groups/translation_group.jl")
 include("groups/special_orthogonal.jl")
+include("groups/circle_group.jl")
 
 include("groups/translation_action.jl")
 include("groups/rotation_action.jl")
@@ -244,7 +245,7 @@ export base_manifold, bundle_projection, christoffel_symbols_first, christoffel_
     zero_vector, zero_vector!, zero_tangent_vector, zero_tangent_vector!, ×
 # Lie group types & functions
 export AbstractGroupAction, AbstractGroupOperation, AbstractGroupManifold, ActionDirection,
-    AdditionOperation, MultiplicationOperation, GroupManifold, GroupOperationAction,
+    AdditionOperation, CircleGroup, MultiplicationOperation, GroupManifold, GroupOperationAction,
     Identity, LeftAction, ProductGroup, ProductOperation, RightAction, RotationAction, SemidirectProductGroup,
     SpecialEuclidean, SpecialOrthogonal, TranslationGroup, TranslationAction
 export apply, apply!, apply_diff, apply_diff!, base_group, center_of_orbit, compose,
