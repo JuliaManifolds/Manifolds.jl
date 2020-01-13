@@ -201,11 +201,11 @@ end
 
 basis(M::Manifold, x, B::AbstractPrecomputedOrthonormalBasis) = B
 
-function basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis{RealNumbers})
-    N = length(B)
+function basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis{ℝ})
+    bvectors = vectors(M, x, B)
+    N = length(bvectors)
     M_dim = manifold_dimension(M)
     N == M_dim || throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
-    bvectors = vectors(M, x, B)
     for i in 1:N
         vi_norm = norm(M, x, bvectors[i])
         isapprox(vi_norm, 1) || throw(ArgumentError("vector number $i is not normalized (norm = $vi_norm)"))
@@ -215,6 +215,17 @@ function basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis{RealN
         end
     end
     return B
+end
+
+function get_coordinates(M::ArrayManifold, x, v, B::AbstractBasis; kwargs...)
+    is_tangent_vector(M, x, v, true; kwargs...)
+    return get_coordinates(M.manifold, x, v, B)
+end
+
+function get_vector(M::ArrayManifold, x, v, B::AbstractBasis; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
+    size(v) == (manifold_dimension(M),) || error("Incorrect size of vector v")
+    return get_vector(M.manifold, x, v, B)
 end
 
 function _euclidean_basis_vector(x, i)

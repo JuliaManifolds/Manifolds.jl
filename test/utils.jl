@@ -307,7 +307,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             vb = get_coordinates(M, x, v1, btype)
 
             @test get_coordinates(M, x, v1, b) ≈ vb
-            @test get_vector(M, x, vb, b) ≈ get_vector(M, x, vb, btype)
+            @test isapprox(M, x, get_vector(M, x, vb, b), get_vector(M, x, vb, btype))
         end
     end
 

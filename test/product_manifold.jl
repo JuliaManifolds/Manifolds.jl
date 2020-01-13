@@ -149,7 +149,7 @@ include("utils.jl")
             test_tangent_vector_broadcasting = false,
             test_forward_diff = false,
             test_reverse_diff = false,
-            basis_types_vecs = (basis_types[3],),
+            basis_types_vecs = (basis_types[1], basis_types[3],),
             basis_types_to_from = basis_types
         )
     end

@@ -85,9 +85,7 @@ function PrecomputedProductOrthonormalBasis(
 end
 
 function basis(M::ProductManifold, x, B::AbstractBasis)
-    parts = map(t -> basis(t..., B),
-        ziptuples(M.manifolds, x.parts))
-
+    parts = map(t -> basis(t..., B), ziptuples(M.manifolds, x.parts))
     return PrecomputedProductOrthonormalBasis(parts)
 end
 
@@ -96,6 +94,11 @@ function basis(M::ProductManifold, x, B::DiagonalizingOrthonormalBasis)
         return basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
     end
     return PrecomputedProductOrthonormalBasis(vs)
+end
+
+function basis(M::ProductManifold, x, B::ArbitraryOrthonormalBasis)
+    parts = map(t -> basis(t..., B), ziptuples(M.manifolds, x.parts))
+    return PrecomputedProductOrthonormalBasis(parts)
 end
 
 """
@@ -255,7 +258,7 @@ function get_vector(
     B::PrecomputedProductOrthonormalBasis
 ) where N
 
-    dims = map(manifold_dimension, M)
+    dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
     parts = ntuple(N) do i
         get_vector(
