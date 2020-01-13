@@ -263,7 +263,7 @@ project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v) .* x)
 
 Represent the tangent vector `v` at point `x` from a sphere `M` in
 an orthonormal basis by rotating the vector `v` using rotation matrix
-$2\frac{x_p x_p^T}{x_p^T x_p} - I$ where $x_p = x + (1, 0, \dots, 0)$.
+$2\frac{x_p x_p^\mathrm{T}}{x_p^\mathrm{T} x_p} - I$ where $x_p = x + (1, 0, \dots, 0)$.
 """
 function get_coordinates(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where N
     if isapprox(x[1], 1)
