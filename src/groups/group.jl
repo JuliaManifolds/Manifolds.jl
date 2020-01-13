@@ -318,6 +318,9 @@ function compose!(M::Manifold, z, x, y, ::Val{false})
     return error("compose! not implemented on $(typeof(M)) for elements $(typeof(x)) and $(typeof(y))")
 end
 
+_action_order(x, y, conv::LeftAction) = (x, y)
+_action_order(x, y, conv::RightAction) = (y, x)
+
 @doc doc"""
     translate(G::AbstractGroupManifold, x, y[, conv::ActionDirection=LeftAction()])
 
@@ -340,8 +343,9 @@ end
 function translate(M::Manifold, x, y, conv::ActionDirection, ::Val{false})
     return error("translate not implemented on $(typeof(M)) for elements $(typeof(x)) and $(typeof(y)) and direction $(typeof(conv))")
 end
-translate(G::AbstractGroupManifold, x, y, conv::LeftAction) = compose(G, x, y)
-translate(G::AbstractGroupManifold, x, y, conv::RightAction) = compose(G, y, x)
+function translate(G::AbstractGroupManifold, x, y, conv::ActionDirection)
+    return compose(G, _action_order(x, y, conv)...)
+end
 
 @doc doc"""
     translate!(G::AbstractGroupManifold, z, x, y[, conv::ActionDirection=LeftAction()])
@@ -366,8 +370,9 @@ end
 function translate!(M::Manifold, z, x, y, conv::ActionDirection, ::Val{false})
     return error("translate! not implemented on $(typeof(M)) for elements $(typeof(x)) and $(typeof(y)) and direction $(typeof(conv))")
 end
-translate!(G::AbstractGroupManifold, z, x, y, conv::LeftAction) = compose!(G, z, x, y)
-translate!(G::AbstractGroupManifold, z, x, y, conv::RightAction) = compose!(G, z, y, x)
+function translate!(G::AbstractGroupManifold, z, x, y, conv::ActionDirection)
+    return compose!(G, z, _action_order(x, y, conv)...)
+end
 
 @doc doc"""
     inverse_translate(G::AbstractGroupManifold, x, y, [conv::ActionDirection=Left()])
