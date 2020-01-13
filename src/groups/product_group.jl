@@ -20,14 +20,14 @@ one. This type is mostly useful for equipping the direct product of group manifo
     ProductGroup(manifold::ProductManifold)
 """
 function ProductGroup(manifold::ProductManifold)
-    if !all(is_decorator_group, manifold.manifolds)
+    if !all(M -> (is_decorator_group(M) === Val(true)), manifold.manifolds)
         error("All submanifolds of product manifold must be or decorate groups.")
     end
     op = ProductOperation()
     return GroupManifold(manifold, op)
 end
 
-show(io::IO, G::ProductGroup) = print(io, "ProductGroup($(G.manifold.manifolds))")
+show(io::IO, G::ProductGroup) = print(io, "ProductGroup$((G.manifold.manifolds...,))")
 
 function submanifold_components(
     e::Identity{GT},
@@ -198,7 +198,7 @@ function translate_diff(
         submanifold_components(M, x),
         submanifold_components(M, y),
         submanifold_components(M, v),
-        conv,
+        repeated(conv),
     )...)
 end
 function translate_diff(M::ProductManifold, x, y, v, conv::ActionDirection)
