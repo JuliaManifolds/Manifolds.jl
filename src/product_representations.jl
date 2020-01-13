@@ -259,3 +259,11 @@ end
 (-)(v1::ProductRepr, v2::ProductRepr) = ProductRepr(map(-, v1.parts, v2.parts)...)
 (-)(v::ProductRepr) = ProductRepr(map(-, submanifold_components(v)))
 (*)(a::Number, v::ProductRepr) = ProductRepr(map(t -> a*t, submanifold_components(v)))
+
+function isapprox(x::ProductRepr, y::ProductRepr; kwargs...)
+    length(x.parts) == length(y.parts) || return false
+    for (xi, yi) in zip(x.parts, y.parts)
+        isapprox(xi, yi; kwargs...) || return false
+    end
+    return true
+end
