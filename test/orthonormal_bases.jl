@@ -85,7 +85,10 @@ struct NonBasis <: Manifolds.AbstractBasis{ℝ} end
 
     @testset "ArrayManifold basis" begin
         A = ArrayManifold(M)
-        b = basis(A, pts[1], ArbitraryOrthonormalBasis())
+        aonb = ArbitraryOrthonormalBasis()
+        b = basis(A, pts[1], aonb)
+        @test_throws ErrorException get_vector(A, pts[1], [], aonb)
+        @test_throws DimensionMismatch get_coordinates(A, pts[1], [], aonb)
         @test_throws ArgumentError basis(A, pts[1], PrecomputedOrthonormalBasis([pts[1]]))
         @test_throws ArgumentError basis(A, pts[1], PrecomputedOrthonormalBasis([pts[1], pts[1], pts[1]]))
         @test_throws ArgumentError basis(A, pts[1], PrecomputedOrthonormalBasis([2*pts[1], pts[1], pts[1]]))

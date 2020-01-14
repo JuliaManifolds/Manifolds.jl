@@ -45,6 +45,17 @@ include("utils.jl")
                 basis_types_vecs = bases,
                 basis_types_to_from = bases
             )
+            test_manifold(
+                M_complex,
+                pts,
+                test_injectivity_radius = false,
+                test_reverse_diff = isa(T, Vector),
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_vector_transport = true,
+                basis_types_vecs = (ArbitraryOrthonormalBasis(),),
+                basis_types_to_from = (ArbitraryOrthonormalBasis(),)
+            )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end # testset type $T
     end # for
