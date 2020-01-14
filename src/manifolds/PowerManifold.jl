@@ -104,11 +104,12 @@ function basis(M::PowerManifold, x, B::AbstractBasis)
     return PrecomputedPowerOrthonormalBasis(vs)
 end
 
+function basis(M::PowerManifold, x, B::ArbitraryOrthonormalBasis)
+    return invoke(basis, Tuple{PowerManifold, Any, AbstractBasis}, M, x, B)
+end
+
 function basis(M::PowerManifold, x, B::DiagonalizingOrthonormalBasis)
-    rep_size = representation_size(M.manifold)
-    vs = [basis(M.manifold, _read(rep_size, x, i), DiagonalizingOrthonormalBasis(_read(rep_size, B.v, i)))
-        for i in get_iterator(M)]
-    return PrecomputedPowerOrthonormalBasis(vs)
+    return invoke(basis, Tuple{PowerManifold, Any, AbstractBasis}, M, x, B)
 end
 
 """
