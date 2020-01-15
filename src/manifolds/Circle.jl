@@ -131,6 +131,11 @@ function get_coordinates(M::Circle{ℝ}, x, v, B::DiagonalizingOrthonormalBasis)
     return v .* (sbv == 0 ? 1 : sbv)
 end
 
+"""
+    get_coordinates(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
+
+Return tangent vector coordinate in the Lie algebra of the circle.
+"""
 function get_coordinates(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
     v, x = v[1], x[1]
     w = imag(v) * real(x) - real(v) * imag(x)
@@ -146,6 +151,11 @@ function get_vector(M::Circle{ℝ}, x, v, B::DiagonalizingOrthonormalBasis)
     return v .* (sbv == 0 ? 1 : sbv)
 end
 
+"""
+    get_coordinates(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
+
+Return tangent vector from the coordinate in the Lie algebra of the circle.
+"""
 function get_vector(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
     return @SVector [1im * v[1] * x[1]]
 end

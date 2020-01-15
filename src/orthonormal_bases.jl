@@ -41,7 +41,7 @@ abstract type AbstractPrecomputedOrthonormalBasis{F} <: AbstractOrthonormalBasis
     ArbitraryOrthonormalBasis(F::AbstractNumbers = ℝ)
 
 An arbitrary orthonormal basis on a manifold. This will usually
-be the fastest [`OrthonormalBasis`](@ref) available for a manifold.
+be the fastest orthonormal basis available for a manifold.
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
@@ -188,8 +188,9 @@ end
 Compute the basis vectors of the tangent space at a point on manifold `M`
 represented by `x`.
 
-Returned object derives from [`AbstractBasis`](@ref) and has a field `.vectors`
-that stores tangent vectors.
+Returned object derives from [`AbstractBasis`](@ref) and may have a field `.vectors`
+that stores tangent vectors or it may store them implicitly, in which case
+the function [`vectors`](@ref) needs to be used to retrieve the basis vectors.
 
 See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
