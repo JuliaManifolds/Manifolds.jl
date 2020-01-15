@@ -43,6 +43,7 @@ include("utils.jl")
             end
             basis_types = (
                 ArbitraryOrthonormalBasis(),
+                basis(TB, pts_tb[1], ArbitraryOrthonormalBasis()),
                 DiagonalizingOrthonormalBasis(log(TB, pts_tb[1], pts_tb[2])),
             )
             test_manifold(

@@ -35,7 +35,7 @@ makedocs(
         ],
         "Statistics" => "statistics.md",
         "Distributions" => "distributions.md",
-        "Orthonormal bases" => "orthonormal_bases.jmd",
+        "Orthonormal bases" => "orthonormal_bases.md",
         "Library" => [
             "Numbers" => "lib/numbers.md",
             "Public" => "lib/public.md",
