@@ -89,7 +89,13 @@ end
 distance(G::GroupManifold, x, y) = distance(G.manifold, x, y)
 exp(G::GroupManifold, x, v) = exp(G.manifold, x, v)
 exp!(G::GroupManifold, y, x, v) = exp!(G.manifold, y, x, v)
-injectivity_radius(G::GroupManifold, args...) = injectivity_radius(G.manifold, args...)
+injectivity_radius(G::GroupManifold) = injectivity_radius(G.manifold)
+function injectivity_radius(G::GroupManifold, x)
+    return injectivity_radius(G.manifold, x)
+end
+function injectivity_radius(G::GroupManifold, x, method::AbstractRetractionMethod)
+    return injectivity_radius(G.manifold, x, method)
+end
 inner(G::GroupManifold, x, v, w) = inner(G.manifold, x, v, w)
 inverse_retract(G::GroupManifold, x, y) = inverse_retract(G.manifold, x, y)
 function inverse_retract(G::GroupManifold, x, y, method::AbstractInverseRetractionMethod)
