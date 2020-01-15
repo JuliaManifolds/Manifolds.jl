@@ -237,18 +237,13 @@ function flat!(M::ProductManifold, v::FVector{CotangentSpaceType}, x, w::FVector
     return v
 end
 
-@doc doc"""
-    injectivity_radius(M::ProductManifold[, x])
-
-Compute the injectivity radius on the [`ProductManifold`](@ref), which is the
-minimum of the factor manifolds.
-"""
-injectivity_radius(::ProductManifold, ::Any...)
-function injectivity_radius(M::ProductManifold, x)
-    return min(map(injectivity_radius, M.manifolds, x.parts)...)
+function get_coordinates(M::ProductManifold, x, v, B::PrecomputedProductOrthonormalBasis)
+    reps = map(get_coordinates, M.manifolds, x.parts, v.parts, B.parts)
+    return vcat(reps...)
 end
-function injectivity_radius(M::ProductManifold)
-    return min(map(injectivity_radius, M.manifolds)...)
+function get_coordinates(M::ProductManifold, x, v, B::ArbitraryOrthonormalBasis)
+    reps = map(t -> get_coordinates(t..., B), ziptuples(M.manifolds, x.parts, v.parts))
+    return vcat(reps...)
 end
 
 function get_vector(
@@ -291,6 +286,19 @@ function get_vector(
     return ProductRepr(parts)
 end
 
+@doc doc"""
+    injectivity_radius(M::ProductManifold[, x])
+
+Compute the injectivity radius on the [`ProductManifold`](@ref), which is the
+minimum of the factor manifolds.
+"""
+injectivity_radius(::ProductManifold, ::Any...)
+function injectivity_radius(M::ProductManifold, x)
+    return min(map(injectivity_radius, M.manifolds, x.parts)...)
+end
+function injectivity_radius(M::ProductManifold)
+    return min(map(injectivity_radius, M.manifolds)...)
+end
 
 @doc doc"""
     inverse_retract(M::ProductManifold, x, y, m::InverseProductRetraction)
@@ -397,16 +405,6 @@ function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::ProductRepr)
     map(t -> _rand!(rng, t[1], t[2]), d.distributions, v.parts)
     return v
 end
-
-function get_coordinates(M::ProductManifold, x, v, B::PrecomputedProductOrthonormalBasis)
-    reps = map(get_coordinates, M.manifolds, x.parts, v.parts, B.parts)
-    return vcat(reps...)
-end
-function get_coordinates(M::ProductManifold, x, v, B::ArbitraryOrthonormalBasis)
-    reps = map(t -> get_coordinates(t..., B), ziptuples(M.manifolds, x.parts, v.parts))
-    return vcat(reps...)
-end
-
 
 @doc doc"""
     retract(M::ProductManifold, x, v, m::ProductRetraction)

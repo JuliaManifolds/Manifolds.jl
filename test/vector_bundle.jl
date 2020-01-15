@@ -41,6 +41,10 @@ include("utils.jl")
             for pt ∈ pts_tb
                 @test bundle_projection(TB, pt) ≈ pt.parts[1]
             end
+            basis_types = (
+                ArbitraryOrthonormalBasis(),
+                DiagonalizingOrthonormalBasis(log(TB, pts_tb[1], pts_tb[2])),
+            )
             test_manifold(
                 TB,
                 pts_tb,
@@ -49,6 +53,7 @@ include("utils.jl")
                 test_forward_diff = isa(T, Vector),
                 test_tangent_vector_broadcasting = false,
                 test_project_tangent = true,
+                basis_types_vecs = basis_types,
                 projection_atol_multiplier = 4
             )
         end

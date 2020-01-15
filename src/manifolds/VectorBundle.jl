@@ -126,6 +126,16 @@ struct FVector{TType<:VectorSpaceType,TData}
     data::TData
 end
 
+struct PrecomputedVectorBundleOrthonormalBasis{
+    F,
+    TBase<:AbstractPrecomputedOrthonormalBasis{F},
+    TVec<:AbstractPrecomputedOrthonormalBasis{F}
+} <: AbstractPrecomputedOrthonormalBasis{F}
+
+    base_basis::TBase
+    vec_basis::TVec
+end
+
 (+)(v1::FVector, v2::FVector) = FVector(v1.type, v1.data + v2.data)
 (-)(v1::FVector, v2::FVector) = FVector(v1.type, v1.data - v2.data)
 (-)(v::FVector) = FVector(v.type, -v.data)
@@ -134,6 +144,16 @@ end
 base_manifold(B::VectorBundleFibers) = base_manifold(B.M)
 base_manifold(B::VectorSpaceAtPoint) = base_manifold(B.fiber)
 base_manifold(B::VectorBundle) = base_manifold(B.M)
+
+function basis(M::VectorBundle, x, B::DiagonalizingOrthonormalBasis)
+    b1 = basis(M.M, x.parts[1], DiagonalizingOrthonormalBasis(B.v.parts[1]))
+    b2 = basis(M.VS, x.parts[1], DiagonalizingOrthonormalBasis(B.v.parts[2]))
+    return PrecomputedVectorBundleOrthonormalBasis(b1, b2)
+end
+
+function basis(M::TangentBundleFibers, x, B::DiagonalizingOrthonormalBasis)
+    return basis(M.M, x, B)
+end
 
 """
     bundle_projection(B::VectorBundle, x::ProductRepr)
@@ -233,6 +253,40 @@ function flat!(M::Manifold, v::FVector, x, w::FVector)
     error("flat! not implemented for vector bundle fibers space " *
         "of type $(typeof(M)), vector of type $(typeof(v)), point of " *
         "type $(typeof(x)) and vector of type $(typeof(w)).")
+end
+
+function get_coordinates(M::VectorBundle, x, v, B::ArbitraryOrthonormalBasis) where N
+    coord1 = get_coordinates(M.M, x.parts[1], v.parts[1], B)
+    coord2 = get_coordinates(M.VS, x.parts[1], v.parts[2], B)
+    return vcat(coord1, coord2)
+end
+
+function get_coordinates(M::VectorBundle, x, v, B::PrecomputedVectorBundleOrthonormalBasis) where N
+    coord1 = get_coordinates(M.M, x.parts[1], v.parts[1], B.base_basis)
+    coord2 = get_coordinates(M.VS, x.parts[1], v.parts[2], B.vec_basis)
+    return vcat(coord1, coord2)
+end
+
+function get_coordinates(M::TangentBundleFibers, x, v, B::AbstractBasis) where N
+    return get_coordinates(M.M, x, v, B)
+end
+
+function get_vector(M::VectorBundle, x, v, B::ArbitraryOrthonormalBasis) where N
+    mdim = manifold_dimension(M.M)
+    v1 = get_vector(M.M, x.parts[1], v[1:mdim], B)
+    v2 = get_vector(M.VS, x.parts[1], v[mdim+1:end], B)
+    return ProductRepr(v1, v2)
+end
+
+function get_vector(M::VectorBundle, x, v, B::PrecomputedVectorBundleOrthonormalBasis) where N
+    mdim = manifold_dimension(M.M)
+    v1 = get_vector(M.M, x.parts[1], v[1:mdim], B.base_basis)
+    v2 = get_vector(M.VS, x.parts[1], v[mdim+1:end], B.vec_basis)
+    return ProductRepr(v1, v2)
+end
+
+function get_vector(M::TangentBundleFibers, x, v, B::AbstractBasis) where N
+    return get_vector(M.M, x, v, B)
 end
 
 Base.@propagate_inbounds getindex(x::FVector, i) = getindex(x.data, i)
@@ -479,6 +533,22 @@ function vector_space_dimension(B::VectorBundleFibers{<:TensorProductType})
     end
     return dim
 end
+
+function vectors(M::VectorBundle, x, B::PrecomputedVectorBundleOrthonormalBasis)
+    zero_m = zero_tangent_vector(M.M, x.parts[1])
+    zero_f = zero_vector(M.VS, x.parts[1])
+    vs = typeof(ProductRepr(zero_m, zero_f))[]
+    for bv in vectors(M.M, x.parts[1], B.base_basis)
+        push!(vs, ProductRepr(bv, zero_f))
+    end
+    for bv in vectors(M.VS, x.parts[1], B.vec_basis)
+        push!(vs, ProductRepr(zero_m, bv))
+    end
+    return vs
+end
+
+vectors(::VectorBundleFibers, x, B::PrecomputedOrthonormalBasis) = B.vectors
+vectors(::VectorBundleFibers, x, B::PrecomputedDiagonalizingOrthonormalBasis) = B.vectors
 
 """
     zero_vector!(B::VectorBundleFibers, v, x)

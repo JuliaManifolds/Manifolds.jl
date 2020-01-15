@@ -163,13 +163,23 @@ function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
     #  2) guarantees a reasonable array type `vout`
     #     (for example scalar * `SizedArray` is an `SArray`)
     bvectors = vectors(M, x, B)
-    vt = v[1] .* bvectors[1]
-    vout = similar(bvectors[1], eltype(vt))
-    copyto!(vout, vt)
-    for i in 2:length(v)
-        vout .+= v[i] .* bvectors[i]
+    if isa(bvectors[1], ProductRepr)
+        vt = v[1] * bvectors[1]
+        vout = similar(bvectors[1], eltype(vt))
+        copyto!(vout, vt)
+        for i in 2:length(v)
+            vout += v[i] * bvectors[i]
+        end
+        return vout
+    else
+        vt = v[1] .* bvectors[1]
+        vout = similar(bvectors[1], eltype(vt))
+        copyto!(vout, vt)
+        for i in 2:length(v)
+            vout .+= v[i] .* bvectors[i]
+        end
+        return vout
     end
-    return vout
 end
 
 """
