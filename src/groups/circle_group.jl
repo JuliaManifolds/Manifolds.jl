@@ -42,7 +42,7 @@ function inverse_translate(
     return map(/, y, x)
 end
 
-translate_diff(::CircleGroup, x, y, v, ::ActionDirection) = map(*, x, v)
+translate_diff(::GT, x, y, v, ::ActionDirection) where {GT<:CircleGroup} = map(*, x, v)
 function translate_diff(
     ::GT,
     ::Identity{GT},
