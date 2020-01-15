@@ -7,6 +7,17 @@ include("group_utils.jl")
 
     @test base_manifold(G) === Circle{ℂ}()
 
+    @testset "identity overloads" begin
+        @test identity(G, Identity(G)) === Identity(G)
+        @test inv(G, Identity(G)) === Identity(G)
+        y = [Complex(0.0)]
+        @test identity!(G, y, [Complex(1.0)]) === y
+        @test y == [Complex(1.0)]
+        y = [1.0 * im]
+        v = [Complex(0.5)]
+        @test translate_diff(G, Identity(G), y, v) === v
+    end
+
     @testset "scalar points" begin
         pts = [1.0 + 0.0im, 0.0 + 1.0im, (1.0 + 1.0im) / √2]
         vpts = [0.0 + 0.5im]

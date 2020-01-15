@@ -8,8 +8,18 @@ include("../utils.jl")
         x = [1.0, 2.0]
         v = [2.0, 3.0]
         eg = Identity(G)
+        @test repr(eg) === "Identity($(G))"
 
         @test is_decorator_manifold(G) === Val(true)
+
+        @test Manifolds.is_decorator_group(G) === Val(true)
+        @test Manifolds.is_decorator_group(NotImplementedManifold()) === Val(false)
+        @test base_group(G) === G
+
+        if VERSION ≥ v"1.3"
+            @test NotImplementedOperation(NotImplementedManifold()) === G
+            @test (NotImplementedOperation())(NotImplementedManifold()) === G
+        end
 
         @test_throws ErrorException inv!(G, x, x)
         @test_throws ErrorException inv!(G, x, eg)

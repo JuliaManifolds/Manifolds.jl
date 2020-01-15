@@ -32,6 +32,8 @@ include("group_utils.jl")
         else
             1e-15
         end
+        @test apply_diff(A, a_pts[1], m_pts[1], v_pts[1]) === v_pts[1]
+        @test inverse_apply_diff(A, a_pts[1], m_pts[1], v_pts[1]) === v_pts[1]
         test_action(A, a_pts, m_pts, v_pts;
             test_optimal_alignment = false,
             test_diff = true,
