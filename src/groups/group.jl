@@ -80,9 +80,6 @@ end
 ########################
 
 angle(G::GroupManifold, x, v, w) = angle(G.manifold, x, v, w)
-function check_manifold_point(G::GroupManifold, x; kwargs...)
-    return check_manifold_point(G.manifold, x; kwargs...)
-end
 function check_tangent_vector(G::GroupManifold, x, v; kwargs...)
     return check_tangent_vector(G.manifold, x, v; kwargs...)
 end
@@ -219,6 +216,18 @@ copyto!(x::AbstractArray, e::TE) where {TE<:Identity} = identity!(e.group, x, e)
 isapprox(x, e::Identity; kwargs...) = isapprox(e::Identity, x; kwargs...)
 isapprox(e::Identity, x; kwargs...) = isapprox(e.group, e, x; kwargs...)
 isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
+
+function check_manifold_point(M::Manifold, x::Identity; kwargs...)
+    is_decorator_group(M) === Val(true) && return check_manifold_point(base_group(M), x; kwargs...)
+    return DomainError(x, "The identity element $(x) does not belong to $(M).")
+end
+function check_manifold_point(G::GroupManifold, x::Identity; kwargs...)
+    x === Identity(G) && return nothing
+    return DomainError(x, "The identity element $(x) does not belong to $(G).")
+end
+function check_manifold_point(G::GroupManifold, x; kwargs...)
+    return check_manifold_point(G.manifold, x; kwargs...)
+end
 
 ##########################
 # Group-specific functions

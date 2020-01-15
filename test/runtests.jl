@@ -27,6 +27,7 @@ include("statistics.jl")
 
 # Lie groups and actions
 include("groups/groups_general.jl")
+include("groups/array_manifold.jl")
 include("groups/circle_group.jl")
 include("groups/translation_group.jl")
 include("groups/special_orthogonal.jl")

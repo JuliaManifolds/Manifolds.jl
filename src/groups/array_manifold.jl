@@ -1,12 +1,7 @@
-isapprox(M::ArrayManifold, x, e::Identity; kwargs...) = isapprox(M, e, x; kwargs...)
-function isapprox(M::ArrayManifold, e::Identity, x; kwargs...)
-    is_decorator_group(M) === Val(true) && return isapprox(base_group(M), e, x; kwargs...)
-    error("isapprox not implemented for manifold $(typeof(M)) and points $(typeof(e)) and $(typeof(x))")
-end
-function isapprox(M::ArrayManifold, e::E, ::E; kwargs...) where {E<:Identity}
-    is_decorator_group(M) === Val(true) && return isapprox(base_group(M), e, e; kwargs...)
-    error("isapprox not implemented for manifold $(typeof(M)) and points $(typeof(e)) and $(typeof(e))")
-end
+array_value(e::Identity) = e
+
+array_point(x) = ArrayMPoint(x)
+array_point(e::Identity) = e
 
 function inv!(M::ArrayManifold, y, x; kwargs...)
     is_manifold_point(M, x, true; kwargs...)
@@ -17,7 +12,7 @@ end
 
 function inv(M::ArrayManifold, x; kwargs...)
     is_manifold_point(M, x, true; kwargs...)
-    y = ArrayMPoint(inv(M.manifold, array_value(x)))
+    y = array_point(inv(M.manifold, array_value(x)))
     is_manifold_point(M, y, true; kwargs...)
     return y
 end
@@ -31,7 +26,7 @@ end
 
 function identity(M::ArrayManifold, x; kwargs...)
     is_manifold_point(M, x, true; kwargs...)
-    y = ArrayMPoint(identity(M.manifold, array_value(x)))
+    y = array_point(identity(M.manifold, array_value(x)))
     is_manifold_point(M, y, true; kwargs...)
     return y
 end
@@ -39,7 +34,7 @@ end
 function compose(M::ArrayManifold, x, y; kwargs...)
     is_manifold_point(M, x, true; kwargs...)
     is_manifold_point(M, y, true; kwargs...)
-    z = ArrayMPoint(compose(M.manifold, array_value(x), array_value(y)))
+    z = array_point(compose(M.manifold, array_value(x), array_value(y)))
     is_manifold_point(M, z, true; kwargs...)
     return z
 end
@@ -55,7 +50,7 @@ end
 function translate(M::ArrayManifold, x, y, conv::ActionDirection; kwargs...)
     is_manifold_point(M, x, true; kwargs...)
     is_manifold_point(M, y, true; kwargs...)
-    z = ArrayMPoint(translate(M.manifold, array_value(x), array_value(y), conv))
+    z = array_point(translate(M.manifold, array_value(x), array_value(y), conv))
     is_manifold_point(M, z, true; kwargs...)
     return z
 end
@@ -71,7 +66,7 @@ end
 function inverse_translate(M::ArrayManifold, x, y, conv::ActionDirection; kwargs...)
     is_manifold_point(M, x, true; kwargs...)
     is_manifold_point(M, y, true; kwargs...)
-    z = ArrayMPoint(inverse_translate(M.manifold, array_value(x), array_value(y), conv))
+    z = array_point(inverse_translate(M.manifold, array_value(x), array_value(y), conv))
     is_manifold_point(M, z, true; kwargs...)
     return z
 end

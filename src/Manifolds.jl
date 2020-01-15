@@ -5,7 +5,7 @@ import Base: +, -, *, \, /, ^, angle, axes, convert, copy, copyto!, dataids, elt
     similar, size, transpose, zero
 import Distributions: _rand!, support
 import LinearAlgebra: cross, det, Diagonal, dot, mul!, norm, I, UniformScaling
-import ManifoldsBase: base_manifold, check_manifold_point, check_tangent_vector
+import ManifoldsBase: array_value, base_manifold, check_manifold_point, check_tangent_vector
 import ManifoldsBase: distance, exp, exp!, geodesic, injectivity_radius, inner
 import ManifoldsBase: isapprox, is_manifold_point, is_tangent_vector, is_decorator_manifold
 import ManifoldsBase: inverse_retract, inverse_retract!, log, log!, manifold_dimension, norm
@@ -24,7 +24,7 @@ using HybridArrays
 using LinearAlgebra
 using Base.Iterators: repeated
 using ManifoldsBase: CoTVector, Manifold, MPoint, TVector
-using ManifoldsBase: ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector, array_value
+using ManifoldsBase: ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
 using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
 using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
