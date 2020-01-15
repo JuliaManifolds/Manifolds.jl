@@ -123,30 +123,30 @@ function test_group(
     @testset "translation" begin
         convs = ((), (LeftAction(),), (RightAction(),))
 
-        @test translate(G, g_pts[1], g_pts[2]) ≈ compose(G, g_pts[1], g_pts[2]) atol = atol
-        @test translate(G, g_pts[1], g_pts[2], LeftAction()) ≈ compose(G, g_pts[1], g_pts[2]) atol = atol
-        @test translate(G, g_pts[1], g_pts[2], RightAction()) ≈ compose(G, g_pts[2], g_pts[1]) atol = atol
+        @test isapprox(G, translate(G, g_pts[1], g_pts[2]), compose(G, g_pts[1], g_pts[2]); atol = atol)
+        @test isapprox(G, translate(G, g_pts[1], g_pts[2], LeftAction()), compose(G, g_pts[1], g_pts[2]); atol = atol)
+        @test isapprox(G, translate(G, g_pts[1], g_pts[2], RightAction()), compose(G, g_pts[2], g_pts[1]); atol = atol)
 
         for conv in convs
-            @test inverse_translate(G, g_pts[1], translate(G, g_pts[1], g_pts[2], conv...), conv...) ≈ g_pts[2] atol = atol
-            @test translate(G, g_pts[1], inverse_translate(G, g_pts[1], g_pts[2], conv...), conv...) ≈ g_pts[2] atol = atol
+            @test isapprox(G, inverse_translate(G, g_pts[1], translate(G, g_pts[1], g_pts[2], conv...), conv...), g_pts[2]; atol = atol)
+            @test isapprox(G, translate(G, g_pts[1], inverse_translate(G, g_pts[1], g_pts[2], conv...), conv...), g_pts[2]; atol = atol)
         end
 
         test_mutating && @testset "mutating" begin
             for conv in convs
                 g = similar(g_pts[1])
                 @test translate!(G, g, g_pts[1], g_pts[2], conv...) === g
-                @test g ≈ translate(G, g_pts[1], g_pts[2], conv...) atol = atol
+                @test isapprox(G, g, translate(G, g_pts[1], g_pts[2], conv...); atol = atol)
 
                 g = translate(G, g_pts[1], g_pts[2], conv...)
                 g2 = similar(g)
                 @test inverse_translate!(G, g2, g_pts[1], g, conv...) === g2
-                @test g2 ≈ g_pts[2] atol = atol
+                @test isapprox(G, g2, g_pts[2]; atol = atol)
 
                 g = inverse_translate(G, g_pts[1], g_pts[2], conv...)
                 g2 = similar(g)
                 @test translate!(G, g2, g_pts[1], g, conv...) === g2
-                @test g2 ≈ g_pts[2] atol = atol
+                @test isapprox(G, g2, g_pts[2]; atol = atol)
             end
         end
     end
@@ -155,15 +155,15 @@ function test_group(
         v = v_pts[1]
         g21 = compose(G, g_pts[2], g_pts[1])
         g12 = compose(G, g_pts[1], g_pts[2])
-        @test translate_diff(G, g_pts[2], g_pts[1], v) ≈ translate_diff(G, g_pts[2], g_pts[1], v, LeftAction()) atol = atol
+        @test isapprox(G, g12, translate_diff(G, g_pts[2], g_pts[1], v), translate_diff(G, g_pts[2], g_pts[1], v, LeftAction()); atol = atol)
         @test is_tangent_vector(G, g12, translate_diff(G, g_pts[2], g_pts[1], v, LeftAction()), true; atol = atol)
         RightAction() in diff_convs && @test is_tangent_vector(G, g21, translate_diff(G, g_pts[2], g_pts[1], v, RightAction()), true; atol = atol)
 
         for conv in diff_convs
             g2g1 = translate(G, g_pts[2], g_pts[1], conv...)
             g2invg1 = inverse_translate(G, g_pts[2], g_pts[1], conv...)
-            @test inverse_translate_diff(G, g_pts[2], g2g1, translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...) ≈ v atol = atol
-            @test translate_diff(G, g_pts[2], g2invg1, inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...) ≈ v atol = atol
+            @test isapprox(G, g_pts[1], inverse_translate_diff(G, g_pts[2], g2g1, translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...), v; atol = atol)
+            @test isapprox(G, g_pts[1], translate_diff(G, g_pts[2], g2invg1, inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...), v; atol = atol)
         end
 
         test_mutating && @testset "mutating" begin
@@ -172,17 +172,17 @@ function test_group(
                 g2invg1 = inverse_translate(G, g_pts[2], g_pts[1], conv...)
                 vout = similar(v)
                 @test translate_diff!(G, vout, g_pts[2], g_pts[1], v, conv...) === vout
-                @test vout ≈ translate_diff(G, g_pts[2], g_pts[1], v, conv...) atol = atol
+                @test isapprox(G, g2g1, vout, translate_diff(G, g_pts[2], g_pts[1], v, conv...); atol = atol)
 
                 vout = translate_diff(G, g_pts[2], g_pts[1], v, conv...)
                 vout2 = similar(vout)
                 @test inverse_translate_diff!(G, vout2, g_pts[2], g2g1, vout, conv...) === vout2
-                @test vout2 ≈ v atol = atol
+                @test isapprox(G, g_pts[1], vout2, v; atol = atol)
 
                 vout = inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...)
                 vout2 = similar(vout)
                 @test translate_diff!(G, vout2, g_pts[2], g2invg1, vout, conv...) === vout2
-                @test vout2 ≈ v atol = atol
+                @test isapprox(G, g_pts[1], vout2, v; atol = atol)
             end
         end
     end
@@ -365,10 +365,10 @@ function test_action(
             a2m = apply(A, a_pts[2], m)
             a12v = apply_diff(A, a12, m, v)
             a2v = apply_diff(A, a_pts[2], m, v)
-            @test apply_diff(A, a_pts[1], a2m, a2v) ≈ a12v
+            @test isapprox(M, a2m, apply_diff(A, a_pts[1], a2m, a2v), a12v; atol = atol)
 
-            @test apply_diff(A, e, m, v) ≈ v
-            @test inverse_apply_diff(A, e, m, v) ≈ v
+            @test isapprox(M, m, apply_diff(A, e, m, v), v; atol = atol)
+            @test isapprox(M, m, inverse_apply_diff(A, e, m, v), v; atol = atol)
         end
 
         test_mutating && @testset "mutating" begin
@@ -386,18 +386,19 @@ function test_action(
 
                 a12 = compose(A, a_pts[1], a_pts[2])
                 a2m = apply(A, a_pts[2], m)
+                a12m = apply(A, a12, m)
                 a12v, a2v, a1_a2v = similar(v), similar(v), similar(v)
                 @test apply_diff!(A, a12v, a12, m, v) === a12v
                 @test apply_diff!(A, a2v, a_pts[2], m, v) === a2v
                 @test apply_diff!(A, a1_a2v, a_pts[1], a2m, a2v) === a1_a2v
-                @test a1_a2v ≈ a12v
+                @test isapprox(M, a12m, a1_a2v, a12v; atol = atol)
 
                 ev = similar(v)
                 @test apply_diff!(A, ev, e, m, v) === ev
-                @test ev ≈ v
+                @test isapprox(G, m, ev, v; atol = atol)
                 ev = similar(v)
                 @test inverse_apply_diff!(A, ev, e, m, v) === ev
-                @test ev ≈ v
+                @test isapprox(G, m, ev, v; atol = atol)
             end
         end
     end
