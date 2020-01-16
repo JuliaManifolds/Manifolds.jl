@@ -175,7 +175,7 @@ function manifold_dimension(M::GraphManifold{<: AbstractSimpleGraph, <: Manifold
 end
 
 @doc doc"""
-    representationsize(N::GraphManifold{G,M,VertexManifold})
+    representation_size(N::GraphManifold{G,M,VertexManifold})
 
 returns the representation size of a point on the [`GraphManifold`](@ref) on the vertices of $G=(V,E),
 which is the representation size of `M` with $\lvert V \rvert$ added.
