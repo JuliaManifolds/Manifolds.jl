@@ -137,6 +137,8 @@ include("../utils.jl")
         copyto!(y, ge)
         @test y ≈ one(x)
         @test one(ge) === ge
+        @test transpose(ge) === ge
+        @test det(ge) == 1
         @test ge * x ≈ x
         @test x * ge ≈ x
         @test ge * ge === ge
