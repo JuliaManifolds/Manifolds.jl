@@ -21,7 +21,6 @@ using Einsum: @einsum
 using FiniteDifferences
 using HybridArrays
 using LinearAlgebra
-using ManifoldsBase
 using ManifoldsBase: CoTVector, Manifold, MPoint, TVector
 using ManifoldsBase: ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction

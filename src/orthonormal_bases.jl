@@ -279,14 +279,15 @@ vectors(::Manifold, x, B::PrecomputedOrthonormalBasis) = B.vectors
 vectors(::Manifold, x, B::PrecomputedDiagonalizingOrthonormalBasis) = B.vectors
 
 # related to DefaultManifold; to be moved to ManifoldsBase.jl in the future
-function get_coordinates(M::ManifoldsBase.DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
+using ManifoldsBase: DefaultManifold
+function get_coordinates(M::DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
     return reshape(v, manifold_dimension(M))
 end
-function get_vector(M::ManifoldsBase.DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
+function get_vector(M::DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
     return reshape(v, representation_size(M))
 end
 
-function basis(M::ManifoldsBase.DefaultManifold, x, ::ArbitraryOrthonormalBasis)
+function basis(M::DefaultManifold, x, ::ArbitraryOrthonormalBasis)
     return PrecomputedOrthonormalBasis([_euclidean_basis_vector(x, i) for i in eachindex(x)])
 end
 
