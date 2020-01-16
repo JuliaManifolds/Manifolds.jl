@@ -217,7 +217,9 @@ isapprox(e::Identity, x; kwargs...) = isapprox(e.group, e, x; kwargs...)
 isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
 function check_manifold_point(M::Manifold, x::Identity; kwargs...)
-    is_decorator_group(M) === Val(true) && return check_manifold_point(base_group(M), x; kwargs...)
+    if is_decorator_group(M) === Val(true)
+        return check_manifold_point(base_group(M), x; kwargs...)
+    end
     return DomainError(x, "The identity element $(x) does not belong to $(M).")
 end
 function check_manifold_point(G::GroupManifold, x::Identity; kwargs...)
