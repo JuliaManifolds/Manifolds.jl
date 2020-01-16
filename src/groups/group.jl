@@ -79,7 +79,6 @@ end
 # GroupManifold forwards
 ########################
 
-angle(G::GroupManifold, x, v, w) = angle(G.manifold, x, v, w)
 function check_tangent_vector(G::GroupManifold, x, v; kwargs...)
     return check_tangent_vector(G.manifold, x, v; kwargs...)
 end
