@@ -1,7 +1,7 @@
 
 using LightGraphs
 import LightGraphs: AbstractSimpleGraph, is_directed
-import SimpleWeightedGraphs: AbstractSimpleWeightedGraph
+import SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 
 @doc doc"""
     GraphManifoldType
@@ -35,12 +35,12 @@ of a graph `G` depending on the [`GraphManifoldType`](@ref) `T`.
 * `G` is an `AbstractSimpleGraph`
 * `M` is a [`Manifold`](@ref)
 """
-struct GraphManifold{G<:AbstractSimpleGraph, TM, T<:GraphManifoldType} <: AbstractPowerManifold{TM}
+struct GraphManifold{G<:AbstractGraph, TM, T<:GraphManifoldType} <: AbstractPowerManifold{TM}
     graph::G
     manifold::TM
 end
-GraphManifold(g::G,M::TM,::VertexManifold) where {G<:AbstractSimpleGraph, TM <: Manifold} = GraphManifold{G,TM,VertexManifold}(g,M)
-GraphManifold(g::G,M::TM,::EdgeManifold) where {G<:AbstractSimpleGraph, TM <: Manifold} = GraphManifold{G,TM,EdgeManifold}(g,M)
+GraphManifold(g::G,M::TM,::VertexManifold) where {G<:AbstractGraph, TM <: Manifold} = GraphManifold{G,TM,VertexManifold}(g,M)
+GraphManifold(g::G,M::TM,::EdgeManifold) where {G<:AbstractGraph, TM <: Manifold} = GraphManifold{G,TM,EdgeManifold}(g,M)
 
 @doc doc"""
     check_manifold_point(M::GraphManifold,x)
@@ -54,7 +54,7 @@ check_manifold_point(::GraphManifold,::Any...)
 function check_manifold_point(
     M::GraphManifold{G,TM,VertexManifold},
     x;
-    kwargs...) where {G <: AbstractSimpleGraph, TM <: Manifold}
+    kwargs...) where {G <: AbstractGraph, TM <: Manifold}
     if size(x)[end] != nv(M.graph)
         return DomainError(length(x), "The number of elements in `x` ($(length(x)) does not match the number of nodes in the graph ($(nv(M.graph))).")
     end
@@ -63,7 +63,7 @@ end
 function check_manifold_point(
     M::GraphManifold{G,TM,EdgeManifold},
     x;
-    kwargs...) where {G <: AbstractSimpleGraph,TM<:Manifold}
+    kwargs...) where {G <: AbstractGraph,TM<:Manifold}
     if size(x)[end] != ne(M.graph)
         return DomainError(length(x), "The number of elements in `x` ($(length(x)) does not match the number of edges in the graph ($(ne(M.graph))).")
     end
@@ -82,7 +82,7 @@ together with its corresponding einty of `x` passes the
 """
 check_tangent_vector(::GraphManifold,::Any...)
 function check_tangent_vector(
-    M::GraphManifold{<: AbstractSimpleGraph, <: Manifold, VertexManifold}, x, v; kwargs...)
+    M::GraphManifold{<: AbstractGraph, <: Manifold, VertexManifold}, x, v; kwargs...)
     if size(x)[end] != nv(M.graph)
         return DomainError(length(x), "The number of elements in `x` ($(length(x)) does not match the number of nodes in the graph ($(nv(M.graph))).")
     end
@@ -92,7 +92,7 @@ function check_tangent_vector(
     return check_tangent_vector(PowerManifold(M.manifold,nv(M.graph)), x, v; kwargs...)
 end
 function check_tangent_vector(
-    M::GraphManifold{<: AbstractSimpleGraph, <: Manifold, EdgeManifold}, x, v; kwargs...)
+    M::GraphManifold{<: AbstractGraph, <: Manifold, EdgeManifold}, x, v; kwargs...)
     if size(x)[end] != ne(M.graph)
         return DomainError(length(x), "The number of elements in `x` ($(length(x)) does not match the number of edges in the graph ($(ne(M.graph))).")
     end
@@ -102,10 +102,10 @@ function check_tangent_vector(
     return check_tangent_vector(PowerManifold(M.manifold,ne(M.graph)), x, v; kwargs...)
 end
 
-function get_iterator(M::GraphManifold{<: AbstractSimpleGraph, <:Manifold, EdgeManifold})
+function get_iterator(M::GraphManifold{<: AbstractGraph, <:Manifold, EdgeManifold})
     return 1:ne(M.graph)
 end
-function get_iterator(M::GraphManifold{<: AbstractSimpleGraph, <:Manifold, VertexManifold})
+function get_iterator(M::GraphManifold{<: AbstractGraph, <:Manifold, VertexManifold})
     return 1:nv(M.graph)
 end
 
@@ -120,18 +120,18 @@ SimpleDiGraph
 If the internal graph is a `SimpleWeightedGraph` the weighted sum of the
 tangent vectors is computed.
 """
-function incident_log(M::GraphManifold{<:AbstractSimpleWeightedGraph, <:Manifold,  VertexManifold}, x)
+function incident_log(M::GraphManifold{<:AbstractGraph, <:Manifold,  VertexManifold}, x)
     v = zero_tangent_vector(M,x)
     return incident_log!(M, v, x)
 end
-function incident_log!(M::GraphManifold{<:AbstractSimpleGraph, <:Manifold,  VertexManifold}, v, x)
+function incident_log!(M::GraphManifold{<:AbstractGraph, <:Manifold,  VertexManifold}, v, x)
     rep_size = representation_size(M.manifold)
     rsC = rep_size_to_colons(rep_size)
     for e in edges(M.graph)
         vw = _write(rep_size, v, src(e))
-        v[rsC..., src(e)] = log(M.manifold, _read(rep_size, x, src(e)), _read(rep_size, x, dst(e)) )
+        v[rsC..., src(e)] += log(M.manifold, _read(rep_size, x, src(e)), _read(rep_size, x, dst(e)) )
         if !is_directed(M.graph)
-            v[rsC...,dst(e)] += log(M.manifold, _read(rep_size, x, dst(e)), _read(rep_size, x, dst(e)) )
+            v[rsC...,dst(e)] += log(M.manifold, _read(rep_size, x, dst(e)), _read(rep_size, x, src(e)) )
         end
     end
     return v
@@ -140,9 +140,9 @@ function incident_log!(M::GraphManifold{<:AbstractSimpleWeightedGraph, <:Manifol
     rep_size = representation_size(M.manifold)
     rsC = rep_size_to_colons(rep_size)
     for e in edges(M.graph)
-        v[rsC...,src(e)] += M.graph.weight[src(e),dst(e)]*log(M.manifold, _read(rep_size, x, src(e)), _read(rep_size, x, dst(e)))
+        v[rsC...,src(e)] += get_weight(M.graph, src(e), dst(e))*log(M.manifold, _read(rep_size, x, src(e)), _read(rep_size, x, dst(e)))
         if !is_directed(M.graph)
-            v[rsC...,dst(e)] += M.graph.weight[dst(e),src(e)]*log(M.manifold, _read(rep_size, x, dst(e)), _read(rep_size, x, src(e)))
+            v[rsC...,dst(e)] += get_weight(M.graph, dst(e), src(e))*log(M.manifold, _read(rep_size, x, dst(e)), _read(rep_size, x, src(e)))
         end
     end
     return v
@@ -157,7 +157,7 @@ a graph $G=(V,E)$, i.e.
 d_{\mathcal N} = \lvert V \rVert d_{\mathcal M}.
 ````
 """
-function manifold_dimension(M::GraphManifold{<:AbstractSimpleGraph, <:Manifold, VertexManifold})
+function manifold_dimension(M::GraphManifold{<:AbstractGraph, <:Manifold, VertexManifold})
     return manifold_dimension(M.manifold)*nv(M.graph)
 end
 @doc doc"""
@@ -169,7 +169,7 @@ a graph $G=(V,E)$, i.e.
 d_{\mathcal N} = \lvert E \rVert d_{\mathcal M}.
 ````
 """
-function manifold_dimension(M::GraphManifold{<:AbstractSimpleGraph, <:Manifold, EdgeManifold})
+function manifold_dimension(M::GraphManifold{<:AbstractGraph, <:Manifold, EdgeManifold})
     return manifold_dimension(M.manifold)*ne(M.graph)
 end
 
@@ -179,7 +179,7 @@ end
 returns the representation size of a point on the [`GraphManifold`](@ref) on the vertices of $G=(V,E),
 which is the representation size of `M` with $\lvert V \rvert$ added.
 """
-function representation_size(M::GraphManifold{<:AbstractSimpleGraph, <:Manifold, VertexManifold})
+function representation_size(M::GraphManifold{<:AbstractGraph, <:Manifold, VertexManifold})
     return (representation_size(M.manifold)..., nv(M.graph))
 end
 @doc doc"""
@@ -188,13 +188,13 @@ end
 returns the representation size of a point on the [`GraphManifold`](@ref) on the vertices of $G=(V,E),
 which is the representation size of `M` with $\lvert E \rvert$ added.
 """
-function representation_size(M::GraphManifold{<:AbstractSimpleGraph, <:Manifold, EdgeManifold})
+function representation_size(M::GraphManifold{<:AbstractGraph, <:Manifold, EdgeManifold})
     return (representation_size(M.manifold)..., ne(M.graph))
 end
 
-function zero_tangent_vector(M::GraphManifold{<:AbstractSimpleGraph, <:Manifold, VertexManifold}, x)
+function zero_tangent_vector(M::GraphManifold{<:AbstractGraph, <:Manifold, VertexManifold}, x)
     return zero_tangent_vector(PowerManifold(M.manifold,nv(M.graph)), x)
 end
-function zero_tangent_vector(M::GraphManifold{<:AbstractSimpleGraph,<:Manifold,EdgeManifold}, x)
+function zero_tangent_vector(M::GraphManifold{<:AbstractGraph,<:Manifold,EdgeManifold}, x)
     return zero_tangent_vector(PowerManifold(M.manifold,ne(M.graph)), x)
 end
