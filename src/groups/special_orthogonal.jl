@@ -1,33 +1,33 @@
 @doc doc"""
-    SpecialOrthogonal{N} <: GroupManifold{Rotations{N},MultiplicationOperation}
+    SpecialOrthogonal{n} <: GroupManifold{Rotations{n},MultiplicationOperation}
 
-Special orthogonal group `\mathrm{SO}(N)` represented by rotation matrices.
+Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
 
 # Constructor
     SpecialOrthogonal(n)
 """
-const SpecialOrthogonal{N} = GroupManifold{Rotations{N},MultiplicationOperation}
+const SpecialOrthogonal{n} = GroupManifold{Rotations{n},MultiplicationOperation}
 
-function SpecialOrthogonal(n)
-    return SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
+SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
+
+inv(::SpecialOrthogonal, x) = transpose(x)
+
+show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
+
+inverse_translate(G::SpecialOrthogonal, x, y, conv::LeftAction) = inv(G, x) * y
+inverse_translate(G::SpecialOrthogonal, x, y, conv::RightAction) = y * inv(G, x)
+
+translate_diff(::SpecialOrthogonal, x, y, v, ::LeftAction) = v
+translate_diff(G::SpecialOrthogonal, x, y, v, ::RightAction) = inv(G, x) * v * x
+
+function translate_diff!(G::SpecialOrthogonal, vout, x, y, v, conv::ActionDirection)
+    return copyto!(vout, translate_diff(G, x, y, v, conv))
 end
 
-# optimized inverseion for the special orthogonal group
-function inv!(G::SpecialOrthogonal, y, x)
-    copyto!(y, transpose(x))
-    return y
+function inverse_translate_diff(G::SpecialOrthogonal, x, y, v, conv::ActionDirection)
+    return translate_diff(G, inv(G, x), y, v, conv)
 end
 
-function inv!(G::AG, y, x::Identity{AG}) where AG<:SpecialOrthogonal
-    error("inv! not implemented on $(typeof(G)) for elements $(typeof(y)) and $(typeof(x))")
-end
-
-function inv(G::SpecialOrthogonal, x)
-    return transpose(x)
-end
-
-inv(::AG, e::Identity{AG}) where AG<:SpecialOrthogonal = e
-
-function show(io::IO, ::SpecialOrthogonal{N}) where {N}
-    print(io, "SpecialOrthogonal($(N))")
+function inverse_translate_diff!(G::SpecialOrthogonal, vout, x, y, v, conv::ActionDirection)
+    return copyto!(vout, inverse_translate_diff(G, x, y, v, conv))
 end

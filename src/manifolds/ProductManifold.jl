@@ -73,7 +73,7 @@ Check whether `x` is a valid point on the [`ProductManifold`](@ref) `M`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_manifold_point(M::ProductManifold, x::ProductRepr; kwargs...)
-    for t ∈ ziptuples(M.manifolds, x.parts)
+    for t ∈ ziptuples(M.manifolds, submanifold_components(M, x))
         err = check_manifold_point(t...; kwargs...)
         err === nothing || return err
     end
@@ -81,7 +81,7 @@ function check_manifold_point(M::ProductManifold, x::ProductRepr; kwargs...)
 end
 
 function check_manifold_point(M::ProductManifold, x::ProductArray; kwargs...)
-    for t ∈ ziptuples(M.manifolds, x.parts)
+    for t ∈ ziptuples(M.manifolds, submanifold_components(M, x))
         err = check_manifold_point(t...; kwargs...)
         err === nothing || return err
     end
@@ -100,7 +100,8 @@ The tolerance for the last test can be set using the `kwargs...`.
 function check_tangent_vector(M::ProductManifold, x::ProductRepr, v::ProductRepr; kwargs...)
     perr = check_manifold_point(M, x)
     perr === nothing || return perr
-    for t ∈ ziptuples(M.manifolds, x.parts, v.parts)
+    ts = ziptuples(M.manifolds, submanifold_components(M, x), submanifold_components(M, v))
+    for t ∈ ts
         err = check_tangent_vector(t...; kwargs...)
         err === nothing || return err
     end
@@ -110,7 +111,8 @@ end
 function check_tangent_vector(M::ProductManifold, x::ProductArray, v::ProductArray; kwargs...)
     perr = check_manifold_point(M, x)
     perr === nothing || return perr
-    for t ∈ ziptuples(M.manifolds, x.parts, v.parts)
+    ts = ziptuples(M.manifolds, submanifold_components(M, x), submanifold_components(M, v))
+    for t ∈ ts
         err = check_tangent_vector(t...; kwargs...)
         err === nothing || return err
     end
@@ -145,7 +147,7 @@ function cross(M1::ProductManifold, M2::ProductManifold)
 end
 
 function det_local_metric(M::MetricManifold{ProductManifold, ProductMetric}, x::ProductArray)
-    dets = map(det_local_metric, M.manifolds, x.parts)
+    dets = map(det_local_metric, M.manifolds, submanifold_components(M, x))
     return prod(dets)
 end
 
@@ -157,7 +159,13 @@ at `x` on the [`ProductManifold`](@ref) `M`, which is just the sum of the
 internal manifolds that build `M`.
 """
 function inner(M::ProductManifold, x, v, w)
-    subproducts = map(inner, M.manifolds, x.parts, v.parts, w.parts)
+    subproducts = map(
+        inner,
+        M.manifolds,
+        submanifold_components(M, x),
+        submanifold_components(M, v),
+        submanifold_components(M, w),
+    )
     return sum(subproducts)
 end
 
@@ -168,7 +176,14 @@ compute the distance two points `x` and `y` on the [`ProductManifold`](@ref) `M`
 the 2-norm of the elementwise distances on the internal manifolds that build `M`.
 """
 function distance(M::ProductManifold, x, y)
-    return sqrt(sum(map(distance, M.manifolds, x.parts, y.parts).^2))
+    return sqrt(sum(
+        map(
+            distance,
+            M.manifolds,
+            submanifold_components(M, x),
+            submanifold_components(M, y),
+        ) .^ 2,
+    ))
 end
 
 @doc doc"""
@@ -179,10 +194,21 @@ which is the elementwise exponential map on the internal manifolds that build `M
 """
 exp(::ProductManifold, ::Any...)
 function exp(M::ProductManifold, x::ProductRepr, v::ProductRepr)
-    return ProductRepr(map(exp, M.manifolds, x.parts, v.parts)...)
+    return ProductRepr(map(
+        exp,
+        M.manifolds,
+        submanifold_components(M, x),
+        submanifold_components(M, v),
+    )...)
 end
 function exp!(M::ProductManifold, y, x, v)
-    map(exp!, M.manifolds, y.parts, x.parts, v.parts)
+    map(
+        exp!,
+        M.manifolds,
+        submanifold_components(M, y),
+        submanifold_components(M, x),
+        submanifold_components(M, v),
+    )
     return y
 end
 
@@ -195,9 +221,23 @@ This can be done elementwise, so for every entry of `w` (and `x`) sparately
 """
 flat(::ProductManifold, ::Any...)
 function flat!(M::ProductManifold, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
-    vfs = map(u -> FVector(CotangentSpace, u), v.data.parts)
-    wfs = map(u -> FVector(TangentSpace, u), w.data.parts)
-    map(flat!, M.manifolds, vfs, x.parts, wfs)
+    vfs = map(u -> FVector(CotangentSpace, u), submanifold_components(M, v.data))
+    wfs = map(u -> FVector(TangentSpace, u), submanifold_components(M, w.data))
+    map(flat!, M.manifolds, vfs, submanifold_components(M, x), wfs)
+    return v
+end
+
+function hat!(M::ProductManifold, v, x, vⁱ)
+    dim = manifold_dimension(M)
+    @assert length(vⁱ) == dim
+    i = one(dim)
+    ts = ziptuples(M.manifolds, submanifold_components(M, v), submanifold_components(M, x))
+    for t ∈ ts
+        dim = manifold_dimension(first(t))
+        tvⁱ = @inbounds view(vⁱ, i:(i + dim - 1))
+        hat!(t..., tvⁱ)
+        i += dim
+    end
     return v
 end
 
@@ -209,7 +249,7 @@ minimum of the factor manifolds.
 """
 injectivity_radius(::ProductManifold, ::Any...)
 function injectivity_radius(M::ProductManifold, x)
-    return min(map(injectivity_radius, M.manifolds, x.parts)...)
+    return min(map(injectivity_radius, M.manifolds, submanifold_components(M, x))...)
 end
 function injectivity_radius(M::ProductManifold)
     return min(map(injectivity_radius, M.manifolds)...)
@@ -225,17 +265,35 @@ so the encapsulated inverse retraction methods have to be available per factor.
 """
 inverse_retract(::ProductManifold, ::Any, ::Any, ::Any, ::InverseProductRetraction)
 function inverse_retract!(M::ProductManifold, v, x, y, method::InverseProductRetraction)
-    map(inverse_retract!, M.manifolds, v.parts, x.parts, y.parts, method.inverse_retractions)
+    map(
+        inverse_retract!,
+        M.manifolds,
+        submanifold_components(M, v),
+        submanifold_components(M, x),
+        submanifold_components(M, y),
+        method.inverse_retractions,
+    )
     return v
 end
 
 is_default_metric(::ProductManifold,::ProductMetric) = Val(true)
 
 function isapprox(M::ProductManifold, x, y; kwargs...)
-    return all(t -> isapprox(t...; kwargs...), ziptuples(M.manifolds, x.parts, y.parts))
+    return all(
+        t -> isapprox(t...; kwargs...),
+        ziptuples(M.manifolds, submanifold_components(M, x), submanifold_components(M, y)),
+    )
 end
 function isapprox(M::ProductManifold, x, v, w; kwargs...)
-    return all(t -> isapprox(t...; kwargs...), ziptuples(M.manifolds, x.parts, v.parts, w.parts))
+    return all(
+        t -> isapprox(t...; kwargs...),
+        ziptuples(
+            M.manifolds,
+            submanifold_components(M, x),
+            submanifold_components(M, v),
+            submanifold_components(M, w),
+        ),
+    )
 end
 
 @doc doc"""
@@ -246,10 +304,21 @@ which can be computed using the logarithmic maps of the manifolds elementwise.
 """
 log(::ProductManifold, ::Any...)
 function log(M::ProductManifold, x::ProductRepr, y::ProductRepr)
-    return ProductRepr(map(log, M.manifolds, x.parts, y.parts)...)
+    return ProductRepr(map(
+        log,
+        M.manifolds,
+        submanifold_components(M, x),
+        submanifold_components(M, y),
+    )...)
 end
 function log!(M::ProductManifold, v, x, y)
-    map(log!, M.manifolds, v.parts, x.parts, y.parts)
+    map(
+        log!,
+        M.manifolds,
+        submanifold_components(M, v),
+        submanifold_components(M, x),
+        submanifold_components(M, y),
+    )
     return v
 end
 
@@ -269,7 +338,12 @@ Compute the norm of `v` from the tangent space of `x` on the [`ProductManifold`]
 i.e. from the element wise norms the 2-norm is computed.
 """
 function norm(M::ProductManifold, x, v)
-    norms_squared = map(norm, M.manifolds, x.parts, v.parts).^2
+    norms_squared = map(
+        norm,
+        M.manifolds,
+        submanifold_components(M, x),
+        submanifold_components(M, v),
+    ).^2
     return sqrt(sum(norms_squared))
 end
 
@@ -309,7 +383,11 @@ function _rand!(rng::AbstractRNG, d::ProductPointDistribution, x::AbstractArray{
     return x
 end
 function _rand!(rng::AbstractRNG, d::ProductPointDistribution, x::ProductRepr)
-    map(t -> _rand!(rng, t[1], t[2]), d.distributions, x.parts)
+    map(
+        t -> _rand!(rng, t[1], t[2]),
+        d.distributions,
+        submanifold_components(d.manifold, x),
+    )
     return x
 end
 function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::AbstractArray{<:Number})
@@ -317,7 +395,7 @@ function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::AbstractArra
     return v
 end
 function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::ProductRepr)
-    map(t -> _rand!(rng, t[1], t[2]), d.distributions, v.parts)
+    map(t -> _rand!(rng, t[1], t[2]), d.distributions, submanifold_components(d.space.M, v))
     return v
 end
 
@@ -331,10 +409,16 @@ method has to be one that is available on the manifolds.
 """
 retract(::ProductManifold, ::Any...)
 function retract!(M::ProductManifold, y, x, v, method::ProductRetraction)
-    map(retract!, M.manifolds, y.parts, x.parts, v.parts, method.retractions)
+    map(
+        retract!,
+        M.manifolds,
+        submanifold_components(M, y),
+        submanifold_components(M, x),
+        submanifold_components(M, v),
+        method.retractions,
+    )
     return y
 end
-
 
 function representation_size(M::ProductManifold)
     return (mapreduce(m -> prod(representation_size(m)), +, M.manifolds),)
@@ -350,9 +434,9 @@ This can be done elementwise, so vor every entry of `w` (and `x`) sparately
 """
 sharp(::ProductManifold, ::Any...)
 function sharp!(M::ProductManifold, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
-    vfs = map(u -> FVector(TangentSpace, u), v.data.parts)
-    wfs = map(u -> FVector(CotangentSpace, u), w.data.parts)
-    map(sharp!, M.manifolds, vfs, x.parts, wfs)
+    vfs = map(u -> FVector(TangentSpace, u), submanifold_components(M, v.data))
+    wfs = map(u -> FVector(CotangentSpace, u), submanifold_components(M, w.data))
+    map(sharp!, M.manifolds, vfs, submanifold_components(M, x), wfs)
     return v
 end
 
@@ -394,4 +478,29 @@ end
 
 function support(tvd::ProductFVectorDistribution)
     return FVectorSupport(tvd.type, ProductRepr(map(d -> support(d).x, tvd.distributions)...))
+end
+
+function vee!(M::ProductManifold, vⁱ, x, v)
+    dim = manifold_dimension(M)
+    @assert length(vⁱ) == dim
+    i = one(dim)
+    ts = ziptuples(M.manifolds, submanifold_components(M, x), submanifold_components(M, v))
+    for t ∈ ts
+        SM = first(t)
+        dim = manifold_dimension(SM)
+        tvⁱ = @inbounds view(vⁱ, i:(i + dim - 1))
+        vee!(SM, tvⁱ, Base.tail(t)...)
+        i += dim
+    end
+    return vⁱ
+end
+
+function zero_tangent_vector!(M::ProductManifold, v, x)
+    map(
+        zero_tangent_vector!,
+        M.manifolds,
+        submanifold_components(M, v),
+        submanifold_components(M, x),
+    )
+    return v
 end

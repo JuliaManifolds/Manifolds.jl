@@ -1,36 +1,45 @@
 
 include("../utils.jl")
 
-
-struct NotImplementedOperation <: AbstractGroupOperation
-end
-
-struct NotImplementedManifold <: Manifold
-end
-
 @testset "General group tests" begin
     @testset "Not implemented operation" begin
         G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
+        @test repr(G) == "GroupManifold(NotImplementedManifold(), NotImplementedOperation())"
         x = [1.0, 2.0]
         v = [2.0, 3.0]
         eg = Identity(G)
+        @test repr(eg) === "Identity($(G))"
+
+        @test_throws Exception Identity(G, Val(true))
+        @test_throws ErrorException Identity(G, Val(false))
 
         @test is_decorator_manifold(G) === Val(true)
+
+        @test Manifolds.is_decorator_group(G) === Val(true)
+        @test Manifolds.is_decorator_group(NotImplementedManifold()) === Val(false)
+        @test Manifolds.is_decorator_group(G, Val(true)) === Val(false)
+        @test Manifolds.is_decorator_group(G, Val(false)) === Val(false)
+
+        @test base_group(G) === G
+
+        if VERSION ≥ v"1.3"
+            @test NotImplementedOperation(NotImplementedManifold()) === G
+            @test (NotImplementedOperation())(NotImplementedManifold()) === G
+        end
+
+        @test_throws ErrorException copyto!(x, eg)
 
         @test_throws ErrorException inv!(G, x, x)
         @test_throws ErrorException inv!(G, x, eg)
         @test_throws ErrorException inv(G, x)
-        @test inv(G, eg) == eg
 
         @test_throws ErrorException identity!(G, x, x)
         @test_throws ErrorException identity(G, x)
 
-        @test compose(G, eg, eg) == eg
         @test_throws ErrorException compose(G, x, x)
-        @test compose(G, eg, x) == x
-        @test compose(G, x, eg) == x
-        @test compose!(G, x, eg, x) == x
-        @test compose!(G, x, x, eg) == x
+        @test_throws ErrorException compose(G, x, eg)
+        @test_throws ErrorException compose!(G, x, eg, x)
+        @test_throws ErrorException compose!(G, x, x, eg)
         @test_throws ErrorException compose!(G, x, x, x)
         @test_throws ErrorException compose!(G, x, eg, eg)
 
@@ -70,16 +79,32 @@ end
 
     @testset "Addition operation" begin
         G = GroupManifold(NotImplementedManifold(), Manifolds.AdditionOperation())
+        test_group(G, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+
         x = [1.0, 2.0]
         ge = Identity(G)
+        @test zero(ge) === ge
+        @test eltype(ge) == Bool
+        @test copyto!(ge, ge) === ge
+        y = similar(x)
+        copyto!(y, ge)
+        @test y ≈ zero(x)
+        @test ge - x == -x
+        @test x - ge === x
+        @test ge - ge === ge
         @test ge + x ≈ x
         @test x + ge ≈ x
         @test ge + ge === ge
         @test -ge === ge
         @test +ge === ge
+        @test ge * 1 === ge
+        @test 1 * ge === ge
+        @test ge * ge === ge
         @test ge(x) ≈ zero(x)
         @test inv(G, x) ≈ -x
+        @test inv(G, ge) === ge
         @test identity(G, x) ≈ zero(x)
+        @test identity(G, ge) === ge
         y = similar(x)
         identity!(G, y, x)
         @test y ≈ zero(x)
@@ -93,13 +118,27 @@ end
         @test y ≈ x
         compose!(G, y, ge, x)
         @test y ≈ x
-        @test_throws ErrorException compose!(G, y, ge, ge)
+
+        y = identity(G, x)
+        @test isapprox(y, ge; atol=1e-10)
+        @test isapprox(ge, y; atol=1e-10)
+        @test isapprox(ge, ge)
     end
 
     @testset "Multiplication operation" begin
         G = GroupManifold(NotImplementedManifold(), Manifolds.MultiplicationOperation())
+        test_group(G, [[1.0 2.0; 3.0 4.0], [2.0 3.0; 4.0 5.0], [3.0 4.0; 5.0 6.0]])
+
         x = [1.0 2.0; 2.0 3.0]
         ge = Identity(G)
+        @test eltype(ge) == Bool
+        @test copyto!(ge, ge) === ge
+        y = similar(x)
+        copyto!(y, ge)
+        @test y ≈ one(x)
+        @test one(ge) === ge
+        @test transpose(ge) === ge
+        @test det(ge) == 1
         @test ge * x ≈ x
         @test x * ge ≈ x
         @test ge * ge === ge
@@ -112,14 +151,25 @@ end
         @test ge \ ge === ge
         @test ge / x ≈ inv(x)
         @test x \ ge ≈ inv(x)
+        y = similar(x)
+        @test LinearAlgebra.mul!(y, x, ge) === y
+        @test y ≈ x
+        y = similar(x)
+        @test LinearAlgebra.mul!(y, ge, x) === y
+        @test y ≈ x
+        y = similar(x)
+        @test LinearAlgebra.mul!(y, ge, ge) === y
+        @test y ≈ one(y)
 
         @test ge(x) ≈ one(x)
         @test inv(G, x) ≈ inv(x)
         @test inv(G, ge) === ge
         @test identity(G, x) ≈ one(x)
+        @test identity(G, ge) === ge
         y = similar(x)
         identity!(G, y, x)
         @test y ≈ one(x)
+        @test_throws ErrorException identity!(G, [0.0], ge)
         @test compose(G, x, x) ≈ x * x
         @test compose(G, x, ge) ≈ x
         @test compose(G, ge, x) ≈ x
@@ -130,7 +180,6 @@ end
         @test y ≈ x
         compose!(G, y, ge, x)
         @test y ≈ x
-        @test_throws ErrorException compose!(G, y, ge, ge)
 
         @testset "identity optimization" begin
             x2 = copy(x)
@@ -150,11 +199,18 @@ end
         A = NotImplementedAction()
         x = [1.0, 2.0]
         a = [1.0, 2.0]
+        v = [1.0, 2.0]
 
         @test_throws ErrorException base_group(A)
         @test_throws ErrorException g_manifold(A)
-        @test_throws ErrorException apply(A, x, a)
-        @test_throws ErrorException apply!(A, x, x, a)
+        @test_throws ErrorException apply(A, a, x)
+        @test_throws ErrorException apply!(A, x, a, x)
+        @test_throws ErrorException inverse_apply(A, a, x)
+        @test_throws ErrorException inverse_apply!(A, x, a, x)
+        @test_throws ErrorException apply_diff(A, a, x, v)
+        @test_throws ErrorException apply_diff!(A, v, x, a, v)
+        @test_throws ErrorException inverse_apply_diff(A, a, x, v)
+        @test_throws ErrorException inverse_apply_diff!(A, v, x, a, v)
         @test_throws ErrorException compose(A, a, a)
         @test_throws ErrorException compose!(A, a, a, a)
         @test_throws ErrorException optimal_alignment(A, x, x)

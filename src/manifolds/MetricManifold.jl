@@ -46,8 +46,8 @@ inner product $g(v, v) > 0$ whenever $v$ is not the zero vector.
 """
 abstract type RiemannianMetric <: Metric end
 
-check_manifold_point(M::MMT, x; kwargs...) where {MMT <: MetricManifold} = check_manifold_point(base_manifold(M), x; kwargs...)
-check_tangent_vector(M::MMT, x, v; kwargs...) where {MMT <: MetricManifold} = check_tangent_vector(base_manifold(M), x, v; kwargs...)
+check_manifold_point(M::MetricManifold, x; kwargs...) = check_manifold_point(M.manifold, x; kwargs...)
+check_tangent_vector(M::MetricManifold, x, v; kwargs...) = check_tangent_vector(M.manifold, x, v; kwargs...)
 
 @doc doc"""
     christoffel_symbols_first(M::MetricManifold, x; backend=:default)
@@ -410,4 +410,4 @@ vector_transport_to!(M::MMT, vto, x, v, y, m::AbstractVectorTransportMethod) whe
 vector_transport_to!(M::MMT, ::Val{true}, vto, x, v, y, m)  where {MMT <: MetricManifold}= vector_transport_to!(base_manifold(M), vto, x, v, y, m)
 vector_transport_to!(M::MMT, ::Val{false}, vto, x, v, y, m)  where {MMT <: MetricManifold}= error("vector transport from a point of type $(typeof(x)) to a type $(typeof(y)) on a $(typeof(M)) for a vector of type $(v) and the $(typeof(m)) not yet implemented.")
 
-zero_tangent_vector!(M::MMT, v, x) where {MMT <: MetricManifold} = zero_tangent_vector!(base_manifold(M), v, x)
+zero_tangent_vector!(M::MMT, v, x) where {MMT <: MetricManifold} = zero_tangent_vector!(M.manifold, v, x)
