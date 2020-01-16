@@ -27,7 +27,8 @@ include("group_utils.jl")
         @test Manifolds.is_decorator_group(M) === Val(true)
         @test base_group(M) === G
         @test Identity(M) === Identity(G)
-        test_group(G, pts, vpts; test_diff = true)
+        @test_throws DomainError is_manifold_point(M, Identity(TranslationGroup(3)), true)
+        test_group(M, pts, vpts; test_diff = true)
     end
 
     @testset "Group forwards to decorated" begin

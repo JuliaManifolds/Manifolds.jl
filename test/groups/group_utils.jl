@@ -11,7 +11,7 @@ is_decorator_manifold(::NotImplementedGroupDecorator) = Val(true)
 
 """
     test_group(
-        G::AbstractGroupManifold,
+        G,
         g_pts::AbstractVector,
         v_pts::AbstractVector = [];
         atol = 1e-10,
@@ -27,7 +27,7 @@ must contain at least one tangent vector at `g_pts[1]`, and the direction conven
 specified in `diff_convs`.
 """
 function test_group(
-    G::AbstractGroupManifold,
+    G,
     g_pts::AbstractVector,
     v_pts::AbstractVector = [];
     atol = 1e-10,
