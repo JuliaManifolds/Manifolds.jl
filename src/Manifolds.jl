@@ -4,6 +4,7 @@ import Base: +, -, *, \, /, ^, angle, axes, convert, copy, copyto!, dataids, elt
     getindex, identity, isapprox, inv, length, log, promote_rule, setindex!, similar, size
 import Distributions: _rand!, support
 import LinearAlgebra: cross, det, Diagonal, dot, norm, I, UniformScaling
+import ManifoldsBase: Manifold
 import ManifoldsBase: base_manifold, check_manifold_point, check_tangent_vector
 import ManifoldsBase: distance, exp, exp!, geodesic, injectivity_radius, inner
 import ManifoldsBase: isapprox, is_manifold_point, is_tangent_vector, is_decorator_manifold
@@ -21,7 +22,7 @@ using Einsum: @einsum
 using FiniteDifferences
 using HybridArrays
 using LinearAlgebra
-using ManifoldsBase: CoTVector, Manifold, MPoint, TVector
+using ManifoldsBase: CoTVector, MPoint, TVector
 using ManifoldsBase: ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
 using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
@@ -209,7 +210,7 @@ export AbstractEstimationMethod, GradientDescentEstimation, CyclicProximalPointE
 export base_manifold, bundle_projection, christoffel_symbols_first, christoffel_symbols_second,
     christoffel_symbols_second_jacobian, complex_dot, det_local_metric, distance,
     einstein_tensor, exp, exp!, flat, flat!, gaussian_curvature, geodesic, hat, hat!,
-    injectivity_radius, inner, inverse_local_metric, inverse_retract, inverse_retract!,
+    incident_log, injectivity_radius, inner, inverse_local_metric, inverse_retract, inverse_retract!,
     isapprox, is_decorator_manifold, is_default_metric, is_manifold_point,
     is_tangent_vector, isapprox, inner, kurtosis, local_metric, local_metric_jacobian, log,
     log!, log_local_metric_density, manifold_dimension, metric, mean, mean!, mean_and_var,

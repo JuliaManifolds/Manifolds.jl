@@ -1,7 +1,7 @@
 
 using LightGraphs
-import LightGraphs: AbstractSimpleGraph
-import SimpleWeightedGraph: SimpleWeightedGraph
+import LightGraphs: AbstractSimpleGraph, is_directed
+import SimpleWeightedGraphs: AbstractSimpleWeightedGraph
 
 @doc doc"""
     GraphManifoldType
@@ -120,6 +120,8 @@ end
 
 return the tangent vector on the (vertex) [`GraphManifold`](@ref), where at
 each node the sum of the [`log`](@ref)s to incident nodes is computed.
+For a `SimpleGraph`, an egde is interpreted as double edge in the corresponding
+SimpleDiGraph
 
 If the internal graph is a `SimpleWeightedGraph` the weighted sum of the
 tangent vectors is computed.
@@ -131,12 +133,18 @@ end
 function incident_log!(M::GraphManifold{G, TM, VertexManifold}, v, x) where {G <: AbstractSimpleGraph, TM<:Manifold}
     for e in edges(M.graph)
         v[src(e)] += log(M.manifold, x[src(e)], x[dst(e)])
+        if !is_directed(M.graph)
+            v[dst(e)] += log(M.manifold, x[dst(e)], x[src(e)])
+        end
     end
     return v;
 end
-function incident_log!(M::GraphManifold{G, TM, VertexManifold}, v, x) where {G <: SimpleWeightedGraph, TM<:Manifold}
+function incident_log!(M::GraphManifold{G, TM, VertexManifold}, v, x) where {G <: AbstractSimpleWeightedGraph, TM<:Manifold}
     for e in edges(M.graph)
         v[src(e)] += M.graph.weight[src(e),dst(e)]*log(M.manifold, x[src(e)], x[dst(e)])
+        if !is_directed(M.graph)
+            v[dst(e)] += M.graph.weight[dst(e),src(e)]*log(M.manifold, x[dst(e)], x[src(e)])
+        end
     end
     return v;
 end
