@@ -255,7 +255,11 @@ function copyto!(x::ProductRepr, y::ProductRepr)
     return x
 end
 
-(+)(v1::ProductRepr, v2::ProductRepr) = ProductRepr(map(+, v1.parts, v2.parts)...)
-(-)(v1::ProductRepr, v2::ProductRepr) = ProductRepr(map(-, v1.parts, v2.parts)...)
+function (+)(v1::ProductRepr, v2::ProductRepr)
+    return ProductRepr(map(+, submanifold_components(v1), submanifold_components(v2))...)
+end
+function (-)(v1::ProductRepr, v2::ProductRepr)
+    return ProductRepr(map(-, submanifold_components(v1), submanifold_components(v2))...)
+end
 (-)(v::ProductRepr) = ProductRepr(map(-, submanifold_components(v)))
 (*)(a::Number, v::ProductRepr) = ProductRepr(map(t -> a*t, submanifold_components(v)))
