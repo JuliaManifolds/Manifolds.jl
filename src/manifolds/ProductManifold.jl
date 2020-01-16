@@ -234,7 +234,8 @@ function hat!(M::ProductManifold, v, x, vⁱ)
     ts = ziptuples(M.manifolds, submanifold_components(M, v), submanifold_components(M, x))
     for t ∈ ts
         dim = manifold_dimension(first(t))
-        hat!(t..., @inbounds view(vⁱ, i, i + dim - 1))
+        tvⁱ = @inbounds view(vⁱ, i:(i + dim - 1))
+        hat!(t..., tvⁱ)
         i += dim
     end
     return v
@@ -487,7 +488,8 @@ function vee!(M::ProductManifold, vⁱ, x, v)
     for t ∈ ts
         SM = first(t)
         dim = manifold_dimension(SM)
-        vee!(SM, @inbounds view(vⁱ, i, i + dim - 1), Base.tail(t)...)
+        tvⁱ = @inbounds view(vⁱ, i:(i + dim - 1))
+        vee!(SM, tvⁱ, Base.tail(t)...)
         i += dim
     end
     return vⁱ

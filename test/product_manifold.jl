@@ -157,4 +157,19 @@ include("utils.jl")
         @test submanifold_components(Mse, pts[1]) === pts[1].parts
         @test submanifold_components(pts[1]) === pts[1].parts
     end
+
+    @testset "vee/hat" begin
+        M1 = Rotations(3)
+        M2 = Euclidean(3)
+        M = M1 × M2
+        reshaper = Manifolds.ArrayReshaper()
+        shape_se = Manifolds.ShapeSpecification(reshaper, M1, M2)
+
+        e = Matrix{Float64}(I, 3, 3)
+        x = Manifolds.prod_point(shape_se, exp(M1, e, hat(M1, e, [1.0, 2.0, 3.0])), [1.0, 2.0, 3.0])
+        v = [0.1, 0.2, 0.3, -1.0, 2.0, -3.0]
+        V = hat(M, x, v)
+        v2 = vee(M, x, V)
+        @test isapprox(v, v2)
+    end
 end
