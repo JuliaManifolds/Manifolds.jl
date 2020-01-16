@@ -58,9 +58,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[Distributions]]
 deps = ["FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "860962bb355c97afdd7f9529cee7f26333401231"
+git-tree-sha1 = "a700a7dfde8bb3859e358b293772c56f5446e4b2"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.21.11"
+version = "0.22.2"
 
 [[DocStringExtensions]]
 deps = ["LibGit2", "Markdown", "Pkg", "Test"]
@@ -88,9 +88,9 @@ version = "0.8.4"
 
 [[FiniteDifferences]]
 deps = ["LinearAlgebra", "Printf"]
-git-tree-sha1 = "712a747a0106ad1cca0947e3d1e765cf17dee8b8"
+git-tree-sha1 = "13b65a2a59b4ebd907b1d669d915010285c0b3c0"
 uuid = "26cc04aa-876d-5657-8c51-4c34ba976000"
-version = "0.9.0"
+version = "0.9.1"
 
 [[HybridArrays]]
 deps = ["LinearAlgebra", "StaticArrays"]
@@ -211,10 +211,10 @@ deps = ["Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[Requires]]
-deps = ["Test"]
-git-tree-sha1 = "f6fbf4ba64d295e146e49e021207993b6b48c7d1"
+deps = ["UUIDs"]
+git-tree-sha1 = "999513b7dea8ac17359ed50ae8ea089e4464e35e"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
-version = "0.5.2"
+version = "1.0.0"
 
 [[Rmath]]
 deps = ["BinaryProvider", "Libdl", "Random", "Statistics"]
