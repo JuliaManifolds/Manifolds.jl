@@ -10,16 +10,24 @@ include("../utils.jl")
         eg = Identity(G)
         @test repr(eg) === "Identity($(G))"
 
+        @test_throws Exception Identity(G, Val(true))
+        @test_throws ErrorException Identity(G, Val(false))
+
         @test is_decorator_manifold(G) === Val(true)
 
         @test Manifolds.is_decorator_group(G) === Val(true)
         @test Manifolds.is_decorator_group(NotImplementedManifold()) === Val(false)
+        @test Manifolds.is_decorator_group(G, Val(true)) === Val(false)
+        @test Manifolds.is_decorator_group(G, Val(false)) === Val(false)
+
         @test base_group(G) === G
 
         if VERSION ≥ v"1.3"
             @test NotImplementedOperation(NotImplementedManifold()) === G
             @test (NotImplementedOperation())(NotImplementedManifold()) === G
         end
+
+        @test_throws ErrorException copyto!(x, eg)
 
         @test_throws ErrorException inv!(G, x, x)
         @test_throws ErrorException inv!(G, x, eg)
@@ -110,6 +118,11 @@ include("../utils.jl")
         @test y ≈ x
         compose!(G, y, ge, x)
         @test y ≈ x
+
+        y = identity(G, x)
+        @test isapprox(y, ge; atol=1e-10)
+        @test isapprox(ge, y; atol=1e-10)
+        @test isapprox(ge, ge)
     end
 
     @testset "Multiplication operation" begin
