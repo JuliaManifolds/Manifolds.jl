@@ -33,4 +33,21 @@ include("group_utils.jl")
         @test translate_diff(G, pts[2], pts[1], vpts[1]) ≈ pts[2] .* vpts[1]
         test_group(G, pts, vpts; test_diff = true, test_mutating = true)
     end
+
+    @testset "Group forwards to decorated" begin
+        pts = [[1.0 + 0.0im], [0.0 + 1.0im], [(1.0 + 1.0im) / √2]]
+        test_manifold(
+            G,
+            pts,
+            test_forward_diff = false,
+            test_reverse_diff = false,
+            test_vector_spaces = false,
+            test_project_tangent = true,
+            test_musical_isomorphisms = false,
+            test_vector_transport = true,
+            is_mutating = true,
+            exp_log_atol_multiplier = 2.0,
+            is_tangent_atol_multiplier = 2.0,
+        )
+    end
 end
