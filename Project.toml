@@ -29,6 +29,7 @@ FunctionWrappers = "1"
 HybridArrays = ">= 0.3"
 ManifoldsBase = "0.3.2"
 Requires = "0.5, 1"
+SpecialFunctions = "=0.8"
 julia = "1.0"
 
 [extras]
