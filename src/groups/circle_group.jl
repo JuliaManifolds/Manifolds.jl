@@ -56,3 +56,11 @@ end
 function translate_diff!(G::CircleGroup, vout, x, y, v, conv::ActionDirection)
     return copyto!(vout, translate_diff(G, x, y, v, conv))
 end
+
+group_exp(G::CircleGroup, v) = exp(G, Identity(G), v)
+
+group_exp!(G::CircleGroup, y, v) = exp!(G, y, Identity(G), v)
+
+group_log(G::CircleGroup, y) = log(G, Identity(G), y)
+
+group_log!(G::CircleGroup, v, y) = log!(G, v, Identity(G), y)

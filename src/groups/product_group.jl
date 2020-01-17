@@ -263,3 +263,23 @@ function inverse_translate_diff!(M::ProductManifold, vout, x, y, v, conv::Action
     )
     return vout
 end
+
+group_exp(G::ProductGroup, v) = group_exp(G.manifold, v)
+function group_exp(M::ProductManifold, v::ProductRepr)
+    return ProductRepr(map(group_exp, M.manifolds, submanifold_components(M, v))...)
+end
+function group_exp(M::ProductManifold, v)
+    y = similar_result(M, group_exp, v)
+    group_exp!(M, y, v)
+    return y
+end
+
+group_log(G::ProductGroup, y) = group_log(G.manifold, y)
+function group_log(M::ProductManifold, y::ProductRepr)
+    return ProductRepr(map(group_log, M.manifolds, submanifold_components(M, y))...)
+end
+function group_log(M::ProductManifold, y)
+    v = zero_tangent_vector(G, y)
+    group_log!(M, v, y)
+    return v
+end
