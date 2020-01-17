@@ -40,22 +40,6 @@ This metric is the default metric for example for the [`Euclidean`](@ref) manifo
 """
 struct EuclideanMetric <: RiemannianMetric end
 
-function basis(M::Euclidean{<:Tuple, ℝ}, x, B::ArbitraryOrthonormalBasis)
-    vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
-    return PrecomputedOrthonormalBasis(vecs)
-end
-
-function basis(M::Euclidean{<:Tuple, ℂ}, x, B::ArbitraryOrthonormalBasis)
-    vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
-    return PrecomputedOrthonormalBasis([vecs; im*vecs])
-end
-
-function basis(M::Euclidean, x, B::DiagonalizingOrthonormalBasis)
-    vecs = basis(M, x, ArbitraryOrthonormalBasis()).vectors
-    kappas = zeros(real(eltype(x)), manifold_dimension(M))
-    return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
-end
-
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = one(eltype(x))
 
 """
@@ -90,6 +74,22 @@ flat(::Euclidean,::Any...)
 function flat!(M::Euclidean, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
     copyto!(v.data, w.data)
     return v
+end
+
+function get_basis(M::Euclidean{<:Tuple, ℝ}, x, B::ArbitraryOrthonormalBasis)
+    vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
+    return PrecomputedOrthonormalBasis(vecs)
+end
+
+function get_basis(M::Euclidean{<:Tuple, ℂ}, x, B::ArbitraryOrthonormalBasis)
+    vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
+    return PrecomputedOrthonormalBasis([vecs; im*vecs])
+end
+
+function get_basis(M::Euclidean, x, B::DiagonalizingOrthonormalBasis)
+    vecs = get_basis(M, x, ArbitraryOrthonormalBasis()).vectors
+    kappas = zeros(real(eltype(x)), manifold_dimension(M))
+    return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
 end
 
 function get_coordinates(M::Euclidean{<:Tuple, ℝ}, x, v, B::ArbitraryOrDiagonalizingBasis)

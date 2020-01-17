@@ -13,9 +13,9 @@ Manifolds.get_vector(::ProjManifold, x, v, ::ArbitraryOrthonormalBasis) = revers
     x = [sqrt(2)/2 0.0 0.0;
          0.0 sqrt(2)/2 0.0]
 
-    pb = basis(M, x, ProjectedOrthonormalBasis(:svd))
+    pb = get_basis(M, x, ProjectedOrthonormalBasis(:svd))
     @test number_system(pb) == ℝ
-    @test basis(M, x, pb) == pb
+    @test get_basis(M, x, pb) == pb
     N = manifold_dimension(M)
     @test isa(pb, PrecomputedOrthonormalBasis)
     @test length(pb.vectors) == N
@@ -31,7 +31,7 @@ Manifolds.get_vector(::ProjManifold, x, v, ::ArbitraryOrthonormalBasis) = revers
         @test project_tangent(M, x, pb.vectors[i]) ≈ pb.vectors[i]
     end
 
-    aonb = basis(M, x, ArbitraryOrthonormalBasis())
+    aonb = get_basis(M, x, ArbitraryOrthonormalBasis())
     @test size(aonb.vectors) == (5,)
     @test aonb.vectors[1] ≈ [0, 0, 0, 0, 1]
 end
@@ -45,11 +45,11 @@ struct NonBasis <: Manifolds.AbstractBasis{ℝ} end
         m = NonManifold()
         onb = ArbitraryOrthonormalBasis()
 
-        @test_throws ErrorException basis(m, [0], onb)
-        @test_throws ErrorException basis(m, [0], NonBasis())
+        @test_throws ErrorException get_basis(m, [0], onb)
+        @test_throws ErrorException get_basis(m, [0], NonBasis())
         @test_throws ErrorException get_coordinates(m, [0], [0], onb)
         @test_throws ErrorException get_vector(m, [0], [0], onb)
-        @test_throws ErrorException vectors(m, [0], NonBasis())
+        @test_throws ErrorException get_vectors(m, [0], NonBasis())
     end
 
     M = ManifoldsBase.DefaultManifold(3)
@@ -62,7 +62,7 @@ struct NonBasis <: Manifolds.AbstractBasis{ℝ} end
         vbi = get_vector(M, pts[1], vb, ArbitraryOrthonormalBasis())
         @test isapprox(M, pts[1], v1, vbi)
 
-        b = basis(M, pts[1], ArbitraryOrthonormalBasis())
+        b = get_basis(M, pts[1], ArbitraryOrthonormalBasis())
         @test isa(b, PrecomputedOrthonormalBasis)
         N = manifold_dimension(M)
         @test length(b.vectors) == N
@@ -86,11 +86,11 @@ struct NonBasis <: Manifolds.AbstractBasis{ℝ} end
     @testset "ArrayManifold basis" begin
         A = ArrayManifold(M)
         aonb = ArbitraryOrthonormalBasis()
-        b = basis(A, pts[1], aonb)
+        b = get_basis(A, pts[1], aonb)
         @test_throws ErrorException get_vector(A, pts[1], [], aonb)
         @test_throws DimensionMismatch get_coordinates(A, pts[1], [], aonb)
-        @test_throws ArgumentError basis(A, pts[1], PrecomputedOrthonormalBasis([pts[1]]))
-        @test_throws ArgumentError basis(A, pts[1], PrecomputedOrthonormalBasis([pts[1], pts[1], pts[1]]))
-        @test_throws ArgumentError basis(A, pts[1], PrecomputedOrthonormalBasis([2*pts[1], pts[1], pts[1]]))
+        @test_throws ArgumentError get_basis(A, pts[1], PrecomputedOrthonormalBasis([pts[1]]))
+        @test_throws ArgumentError get_basis(A, pts[1], PrecomputedOrthonormalBasis([pts[1], pts[1], pts[1]]))
+        @test_throws ArgumentError get_basis(A, pts[1], PrecomputedOrthonormalBasis([2*pts[1], pts[1], pts[1]]))
     end
 end

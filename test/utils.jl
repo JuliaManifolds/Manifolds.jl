@@ -279,10 +279,10 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
     for btype ∈ basis_types_vecs
         x = pts[1]
-        b = basis(M, x, btype)
+        b = get_basis(M, x, btype)
         @test isa(b, AbstractPrecomputedOrthonormalBasis)
 
-        bvectors = vectors(M, x, b)
+        bvectors = get_vectors(M, x, b)
         N = length(bvectors)
         @test real_dimension(number_system(btype)) * N == manifold_dimension(M)
 

@@ -13,7 +13,7 @@ Generate the $\mathbb S^{n}\subset \mathbb R^{n+1}$
 struct Sphere{N} <: Manifold end
 Sphere(n::Int) = Sphere{n}()
 
-function basis(M::Sphere{N}, x, B::DiagonalizingOrthonormalBasis) where N
+function get_basis(M::Sphere{N}, x, B::DiagonalizingOrthonormalBasis) where N
     A = zeros(N+1, N+1)
     A[1,:] = transpose(x)
     A[2,:] = transpose(B.v)

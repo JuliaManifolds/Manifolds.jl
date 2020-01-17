@@ -83,7 +83,7 @@ include("utils.jl")
     end
     @testset "Test for tangent ONB on LinearAffineMetric" begin
         v = log(M2,x,y)
-        donb = basis(base_manifold(M2), x, DiagonalizingOrthonormalBasis(v))
+        donb = get_basis(base_manifold(M2), x, DiagonalizingOrthonormalBasis(v))
         X = donb.vectors
         k = donb.kappas
         @test isapprox(0.0,first(k))

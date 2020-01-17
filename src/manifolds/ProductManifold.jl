@@ -84,23 +84,6 @@ function PrecomputedProductOrthonormalBasis(
     return PrecomputedProductOrthonormalBasis{typeof(parts), F}(parts)
 end
 
-function basis(M::ProductManifold, x, B::AbstractBasis)
-    parts = map(t -> basis(t..., B), ziptuples(M.manifolds, x.parts))
-    return PrecomputedProductOrthonormalBasis(parts)
-end
-
-function basis(M::ProductManifold, x, B::DiagonalizingOrthonormalBasis)
-    vs = map(ziptuples(M.manifolds, x.parts, B.v.parts)) do t
-        return basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
-    end
-    return PrecomputedProductOrthonormalBasis(vs)
-end
-
-function basis(M::ProductManifold, x, B::ArbitraryOrthonormalBasis)
-    parts = map(t -> basis(t..., B), ziptuples(M.manifolds, x.parts))
-    return PrecomputedProductOrthonormalBasis(parts)
-end
-
 """
     check_manifold_point(M::ProductManifold, x; kwargs...)
 
@@ -188,24 +171,6 @@ function det_local_metric(M::MetricManifold{ProductManifold, ProductMetric}, x::
 end
 
 @doc doc"""
-    inner(M::ProductManifold, x, v, w)
-
-compute the inner product of two tangent vectors `v`, `w` from the tangent space
-at `x` on the [`ProductManifold`](@ref) `M`, which is just the sum of the
-internal manifolds that build `M`.
-"""
-function inner(M::ProductManifold, x, v, w)
-    subproducts = map(
-        inner,
-        M.manifolds,
-        submanifold_components(M, x),
-        submanifold_components(M, v),
-        submanifold_components(M, w),
-    )
-    return sum(subproducts)
-end
-
-@doc doc"""
     distance(M::ProductManifold, x, y)
 
 compute the distance two points `x` and `y` on the [`ProductManifold`](@ref) `M`, which is
@@ -263,18 +228,21 @@ function flat!(M::ProductManifold, v::FVector{CotangentSpaceType}, x, w::FVector
     return v
 end
 
-function hat!(M::ProductManifold, v, x, vⁱ)
-    dim = manifold_dimension(M)
-    @assert length(vⁱ) == dim
-    i = one(dim)
-    ts = ziptuples(M.manifolds, submanifold_components(M, v), submanifold_components(M, x))
-    for t ∈ ts
-        dim = manifold_dimension(first(t))
-        tvⁱ = @inbounds view(vⁱ, i:(i + dim - 1))
-        hat!(t..., tvⁱ)
-        i += dim
+function get_basis(M::ProductManifold, x, B::AbstractBasis)
+    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, x.parts))
+    return PrecomputedProductOrthonormalBasis(parts)
+end
+
+function get_basis(M::ProductManifold, x, B::DiagonalizingOrthonormalBasis)
+    vs = map(ziptuples(M.manifolds, x.parts, B.v.parts)) do t
+        return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
     end
-    return v
+    return PrecomputedProductOrthonormalBasis(vs)
+end
+
+function get_basis(M::ProductManifold, x, B::ArbitraryOrthonormalBasis)
+    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, x.parts))
+    return PrecomputedProductOrthonormalBasis(parts)
 end
 
 function get_coordinates(M::ProductManifold, x, v, B::PrecomputedProductOrthonormalBasis)
@@ -326,6 +294,30 @@ function get_vector(
     return ProductRepr(parts)
 end
 
+function get_vectors(M::ProductManifold{<:NTuple{N,Manifold}}, x::ProductRepr, B::PrecomputedProductOrthonormalBasis) where {N}
+    BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, x.parts, B.parts))
+    zero_tvs = map(t -> zero_tangent_vector(t...), ziptuples(M.manifolds, x.parts))
+    vs = typeof(ProductRepr(zero_tvs...))[]
+    for i in 1:N, k in 1:length(BVs[i])
+        push!(vs, ProductRepr(zero_tvs[1:i-1]..., BVs[i][k], zero_tvs[i+1:end]...))
+    end
+    return vs
+end
+
+function hat!(M::ProductManifold, v, x, vⁱ)
+    dim = manifold_dimension(M)
+    @assert length(vⁱ) == dim
+    i = one(dim)
+    ts = ziptuples(M.manifolds, submanifold_components(M, v), submanifold_components(M, x))
+    for t ∈ ts
+        dim = manifold_dimension(first(t))
+        tvⁱ = @inbounds view(vⁱ, i:(i + dim - 1))
+        hat!(t..., tvⁱ)
+        i += dim
+    end
+    return v
+end
+
 @doc doc"""
     injectivity_radius(M::ProductManifold[, x])
 
@@ -338,6 +330,24 @@ function injectivity_radius(M::ProductManifold, x)
 end
 function injectivity_radius(M::ProductManifold)
     return min(map(injectivity_radius, M.manifolds)...)
+end
+
+@doc doc"""
+    inner(M::ProductManifold, x, v, w)
+
+compute the inner product of two tangent vectors `v`, `w` from the tangent space
+at `x` on the [`ProductManifold`](@ref) `M`, which is just the sum of the
+internal manifolds that build `M`.
+"""
+function inner(M::ProductManifold, x, v, w)
+    subproducts = map(
+        inner,
+        M.manifolds,
+        submanifold_components(M, x),
+        submanifold_components(M, v),
+        submanifold_components(M, w),
+    )
+    return sum(subproducts)
 end
 
 @doc doc"""
@@ -563,16 +573,6 @@ end
 
 function support(tvd::ProductFVectorDistribution)
     return FVectorSupport(tvd.type, ProductRepr(map(d -> support(d).x, tvd.distributions)...))
-end
-
-function vectors(M::ProductManifold{<:NTuple{N,Manifold}}, x::ProductRepr, B::PrecomputedProductOrthonormalBasis) where {N}
-    BVs = map(t -> vectors(t...), ziptuples(M.manifolds, x.parts, B.parts))
-    zero_tvs = map(t -> zero_tangent_vector(t...), ziptuples(M.manifolds, x.parts))
-    vs = typeof(ProductRepr(zero_tvs...))[]
-    for i in 1:N, k in 1:length(BVs[i])
-        push!(vs, ProductRepr(zero_tvs[1:i-1]..., BVs[i][k], zero_tvs[i+1:end]...))
-    end
-    return vs
 end
 
 function vee!(M::ProductManifold, vⁱ, x, v)

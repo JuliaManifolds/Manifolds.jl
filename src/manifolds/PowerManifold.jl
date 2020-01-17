@@ -97,21 +97,6 @@ function PrecomputedPowerOrthonormalBasis(
     return PrecomputedPowerOrthonormalBasis{typeof(bases), F}(bases)
 end
 
-function basis(M::PowerManifold, x, B::AbstractBasis)
-    rep_size = representation_size(M.manifold)
-    vs = [basis(M.manifold, _read(rep_size, x, i), B)
-        for i in get_iterator(M)]
-    return PrecomputedPowerOrthonormalBasis(vs)
-end
-
-function basis(M::PowerManifold, x, B::ArbitraryOrthonormalBasis)
-    return invoke(basis, Tuple{PowerManifold, Any, AbstractBasis}, M, x, B)
-end
-
-function basis(M::PowerManifold, x, B::DiagonalizingOrthonormalBasis)
-    return invoke(basis, Tuple{PowerManifold, Any, AbstractBasis}, M, x, B)
-end
-
 """
     check_manifold_point(M::ProductManifold, x; kwargs...)
 
@@ -218,12 +203,88 @@ function flat!(M::PowerManifold, v::FVector{CotangentSpaceType}, x, w::FVector{T
     return v
 end
 
+function get_basis(M::PowerManifold, x, B::AbstractBasis)
+    rep_size = representation_size(M.manifold)
+    vs = [get_basis(M.manifold, _read(rep_size, x, i), B)
+        for i in get_iterator(M)]
+    return PrecomputedPowerOrthonormalBasis(vs)
+end
+
+function get_basis(M::PowerManifold, x, B::ArbitraryOrthonormalBasis)
+    return invoke(get_basis, Tuple{PowerManifold, Any, AbstractBasis}, M, x, B)
+end
+
+function get_basis(M::PowerManifold, x, B::DiagonalizingOrthonormalBasis)
+    return invoke(get_basis, Tuple{PowerManifold, Any, AbstractBasis}, M, x, B)
+end
+
+
+function get_coordinates(M::PowerManifold, x, v, B::ArbitraryOrthonormalBasis)
+    rep_size = representation_size(M.manifold)
+    vs = [get_coordinates(M.manifold, _read(rep_size, x, i), _read(rep_size, v, i), B)
+        for i in get_iterator(M)]
+    return reduce(vcat, reshape(vs, length(vs)))
+end
+function get_coordinates(M::PowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
+    rep_size = representation_size(M.manifold)
+    vs = [get_coordinates(M.manifold, _read(rep_size, x, i), _read(rep_size, v, i), B.bases[i...])
+        for i in get_iterator(M)]
+    return reduce(vcat, reshape(vs, length(vs)))
+end
+
 function get_iterator(M::PowerManifold{<:Manifold, Tuple{N}}) where N
     return 1:N
 end
 @generated function get_iterator(M::PowerManifold{<:Manifold, SizeTuple}) where SizeTuple
     size_tuple = size_to_tuple(SizeTuple)
     return Base.product(map(Base.OneTo, size_tuple)...)
+end
+
+function get_vector(
+    M::PowerManifold,
+    x,
+    v,
+    B::PrecomputedPowerOrthonormalBasis
+)
+    dim = manifold_dimension(M.manifold)
+
+    rep_size = representation_size(M.manifold)
+    v_out = similar(x)
+    v_iter = 1
+    for i in get_iterator(M)
+        copyto!(_write(rep_size, v_out, i), get_vector(
+            M.manifold,
+            _read(rep_size, x, i),
+            v[v_iter:v_iter+dim-1],
+            B.bases[i...]
+        ))
+        v_iter += dim
+    end
+    return v_out
+end
+
+function get_vector(
+    M::PowerManifold,
+    x,
+    v,
+    B::ArbitraryOrthonormalBasis
+)
+
+    dim = manifold_dimension(M.manifold)
+
+    rep_size = representation_size(M.manifold)
+    v_out = similar(x)
+    v_iter = 1
+    for i in get_iterator(M)
+        copyto!(_write(rep_size, v_out, i), get_vector(
+            M.manifold,
+            _read(rep_size, x, i),
+            v[v_iter:v_iter+dim-1],
+            B
+        ))
+        v_iter += dim
+    end
+    return v_out
 end
 
 @doc doc"""
@@ -290,67 +351,6 @@ function inner(M::PowerManifold, x, v, w)
             _read(rep_size, w, i))
     end
     return result
-end
-
-
-function get_coordinates(M::PowerManifold, x, v, B::ArbitraryOrthonormalBasis)
-    rep_size = representation_size(M.manifold)
-    vs = [get_coordinates(M.manifold, _read(rep_size, x, i), _read(rep_size, v, i), B)
-        for i in get_iterator(M)]
-    return reduce(vcat, reshape(vs, length(vs)))
-end
-function get_coordinates(M::PowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
-    rep_size = representation_size(M.manifold)
-    vs = [get_coordinates(M.manifold, _read(rep_size, x, i), _read(rep_size, v, i), B.bases[i...])
-        for i in get_iterator(M)]
-    return reduce(vcat, reshape(vs, length(vs)))
-end
-
-function get_vector(
-    M::PowerManifold,
-    x,
-    v,
-    B::PrecomputedPowerOrthonormalBasis
-)
-    dim = manifold_dimension(M.manifold)
-
-    rep_size = representation_size(M.manifold)
-    v_out = similar(x)
-    v_iter = 1
-    for i in get_iterator(M)
-        copyto!(_write(rep_size, v_out, i), get_vector(
-            M.manifold,
-            _read(rep_size, x, i),
-            v[v_iter:v_iter+dim-1],
-            B.bases[i...]
-        ))
-        v_iter += dim
-    end
-    return v_out
-end
-
-function get_vector(
-    M::PowerManifold,
-    x,
-    v,
-    B::ArbitraryOrthonormalBasis
-)
-
-    dim = manifold_dimension(M.manifold)
-
-    rep_size = representation_size(M.manifold)
-    v_out = similar(x)
-    v_iter = 1
-    for i in get_iterator(M)
-        copyto!(_write(rep_size, v_out, i), get_vector(
-            M.manifold,
-            _read(rep_size, x, i),
-            v[v_iter:v_iter+dim-1],
-            B
-        ))
-        v_iter += dim
-    end
-    return v_out
 end
 
 is_default_metric(::PowerManifold,::PowerMetric) = Val(true)

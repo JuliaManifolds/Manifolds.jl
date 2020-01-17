@@ -15,12 +15,6 @@ represented by `ℂ`-valued `Circle` of unit numbers.
 struct Circle{F} <: Manifold where {F <: AbstractNumbers} end
 Circle(f::AbstractNumbers=ℝ) = Circle{f}()
 
-function basis(M::Circle{ℝ}, x, B::DiagonalizingOrthonormalBasis)
-    sbv = sign(B.v[1])
-    vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
-    return PrecomputedDiagonalizingOrthonormalBasis(vs, @SVector [0])
-end
-
 @doc doc"""
     check_manifold_point(M::Circle, x)
 
@@ -121,6 +115,11 @@ function flat!(::Circle, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSp
 end
 flat(M::Circle, x::Number, w::FVector{TangentSpaceType}) = FVector(CotangentSpace,w.data)
 
+function get_basis(M::Circle{ℝ}, x, B::DiagonalizingOrthonormalBasis)
+    sbv = sign(B.v[1])
+    vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
+    return PrecomputedDiagonalizingOrthonormalBasis(vs, @SVector [0])
+end
 
 function get_coordinates(M::Circle{ℝ}, x, v, B::ArbitraryOrthonormalBasis)
     return v

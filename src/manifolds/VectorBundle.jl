@@ -145,19 +145,6 @@ base_manifold(B::VectorBundleFibers) = base_manifold(B.M)
 base_manifold(B::VectorSpaceAtPoint) = base_manifold(B.fiber)
 base_manifold(B::VectorBundle) = base_manifold(B.M)
 
-function basis(M::VectorBundle, x, B::DiagonalizingOrthonormalBasis)
-    xp1 = submanifold_component(x, Val(1))
-    bv1 = DiagonalizingOrthonormalBasis(submanifold_component(B.v, Val(1)))
-    b1 = basis(M.M, xp1, bv1)
-    bv2 = DiagonalizingOrthonormalBasis(submanifold_component(B.v, Val(2)))
-    b2 = basis(M.VS, xp1, bv2)
-    return PrecomputedVectorBundleOrthonormalBasis(b1, b2)
-end
-
-function basis(M::TangentBundleFibers, x, B::DiagonalizingOrthonormalBasis)
-    return basis(M.M, x, B)
-end
-
 """
     bundle_projection(B::VectorBundle, x::ProductRepr)
 
@@ -260,6 +247,19 @@ function flat!(M::Manifold, v::FVector, x, w::FVector)
         "type $(typeof(x)) and vector of type $(typeof(w)).")
 end
 
+function get_basis(M::VectorBundle, x, B::DiagonalizingOrthonormalBasis)
+    xp1 = submanifold_component(x, Val(1))
+    bv1 = DiagonalizingOrthonormalBasis(submanifold_component(B.v, Val(1)))
+    b1 = get_basis(M.M, xp1, bv1)
+    bv2 = DiagonalizingOrthonormalBasis(submanifold_component(B.v, Val(2)))
+    b2 = get_basis(M.VS, xp1, bv2)
+    return PrecomputedVectorBundleOrthonormalBasis(b1, b2)
+end
+
+function get_basis(M::TangentBundleFibers, x, B::DiagonalizingOrthonormalBasis)
+    return get_basis(M.M, x, B)
+end
+
 function get_coordinates(M::VectorBundle, x, v, B::ArbitraryOrthonormalBasis) where N
     coord1 = get_coordinates(
         M.M,
@@ -315,6 +315,23 @@ end
 function get_vector(M::TangentBundleFibers, x, v, B::AbstractBasis) where N
     return get_vector(M.M, x, v, B)
 end
+
+function get_vectors(M::VectorBundle, x, B::PrecomputedVectorBundleOrthonormalBasis)
+    xp1 = submanifold_component(x, Val(1))
+    zero_m = zero_tangent_vector(M.M, xp1)
+    zero_f = zero_vector(M.VS, xp1)
+    vs = typeof(ProductRepr(zero_m, zero_f))[]
+    for bv in get_vectors(M.M, xp1, B.base_basis)
+        push!(vs, ProductRepr(bv, zero_f))
+    end
+    for bv in get_vectors(M.VS, xp1, B.vec_basis)
+        push!(vs, ProductRepr(zero_m, bv))
+    end
+    return vs
+end
+
+get_vectors(::VectorBundleFibers, x, B::PrecomputedOrthonormalBasis) = B.vectors
+get_vectors(::VectorBundleFibers, x, B::PrecomputedDiagonalizingOrthonormalBasis) = B.vectors
 
 Base.@propagate_inbounds getindex(x::FVector, i) = getindex(x.data, i)
 
@@ -572,23 +589,6 @@ function vector_space_dimension(B::VectorBundleFibers{<:TensorProductType})
     end
     return dim
 end
-
-function vectors(M::VectorBundle, x, B::PrecomputedVectorBundleOrthonormalBasis)
-    xp1 = submanifold_component(x, Val(1))
-    zero_m = zero_tangent_vector(M.M, xp1)
-    zero_f = zero_vector(M.VS, xp1)
-    vs = typeof(ProductRepr(zero_m, zero_f))[]
-    for bv in vectors(M.M, xp1, B.base_basis)
-        push!(vs, ProductRepr(bv, zero_f))
-    end
-    for bv in vectors(M.VS, xp1, B.vec_basis)
-        push!(vs, ProductRepr(zero_m, bv))
-    end
-    return vs
-end
-
-vectors(::VectorBundleFibers, x, B::PrecomputedOrthonormalBasis) = B.vectors
-vectors(::VectorBundleFibers, x, B::PrecomputedDiagonalizingOrthonormalBasis) = B.vectors
 
 """
     zero_vector!(B::VectorBundleFibers, v, x)

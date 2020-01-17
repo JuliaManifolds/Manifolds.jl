@@ -138,11 +138,11 @@ function get_coordinates(M::Manifold, x, v, B::AbstractBasis)
 end
 
 function get_coordinates(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis{ℝ})
-    return map(vb -> real(inner(M, x, v, vb)), vectors(M, x, B))
+    return map(vb -> real(inner(M, x, v, vb)), get_vectors(M, x, B))
 end
 
 function get_coordinates(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
-    return map(vb -> inner(M, x, v, vb), vectors(M, x, B))
+    return map(vb -> inner(M, x, v, vb), get_vectors(M, x, B))
 end
 
 """
@@ -166,7 +166,7 @@ function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `vout`
     #     (for example scalar * `SizedArray` is an `SArray`)
-    bvectors = vectors(M, x, B)
+    bvectors = get_vectors(M, x, B)
     if isa(bvectors[1], ProductRepr)
         vt = v[1] * bvectors[1]
         vout = similar(bvectors[1], eltype(vt))
@@ -187,7 +187,7 @@ function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
 end
 
 """
-    basis(M::Manifold, x, B::AbstractBasis) -> AbstractBasis
+    get_basis(M::Manifold, x, B::AbstractBasis) -> AbstractBasis
 
 Compute the basis vectors of the tangent space at a point on manifold `M`
 represented by `x`.
@@ -198,26 +198,26 @@ the function [`vectors`](@ref) needs to be used to retrieve the basis vectors.
 
 See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
-function basis(M::Manifold, x, B::AbstractBasis)
+function get_basis(M::Manifold, x, B::AbstractBasis)
     error("basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
 end
 
 """
-    basis(M::Manifold, x, B::ArbitraryOrthonormalBasis)
+    get_basis(M::Manifold, x, B::ArbitraryOrthonormalBasis)
 
 Compute the basis vectors of an [`ArbitraryOrthonormalBasis`](@ref).
 """
-function basis(M::Manifold, x, B::ArbitraryOrthonormalBasis)
+function get_basis(M::Manifold, x, B::ArbitraryOrthonormalBasis)
     dim = manifold_dimension(M)
     return PrecomputedOrthonormalBasis(
         [get_vector(M, x, [ifelse(i == j, 1, 0) for j in 1:dim], B) for i in 1:dim]
     )
 end
 
-basis(M::Manifold, x, B::AbstractPrecomputedOrthonormalBasis) = B
+get_basis(M::Manifold, x, B::AbstractPrecomputedOrthonormalBasis) = B
 
-function basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis{ℝ})
-    bvectors = vectors(M, x, B)
+function get_basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis{ℝ})
+    bvectors = get_vectors(M, x, B)
     N = length(bvectors)
     M_dim = manifold_dimension(M)
     N == M_dim || throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
@@ -249,7 +249,7 @@ function _euclidean_basis_vector(x, i)
     return y
 end
 
-function basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:svd, ℝ})
+function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:svd, ℝ})
     S = representation_size(M)
     PS = prod(S)
     dim = manifold_dimension(M)
@@ -271,16 +271,16 @@ function basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:svd, ℝ})
 end
 
 """
-    vectors(M::Manifold, x, B::AbstractBasis)
+    get_vectors(M::Manifold, x, B::AbstractBasis)
 
 Get the basis vectors of basis `B` of the tangent space at point `x`.
 """
-function vectors(M::Manifold, x, B::AbstractBasis)
+function get_vectors(M::Manifold, x, B::AbstractBasis)
     error("vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
 end
 
-vectors(::Manifold, x, B::PrecomputedOrthonormalBasis) = B.vectors
-vectors(::Manifold, x, B::PrecomputedDiagonalizingOrthonormalBasis) = B.vectors
+get_vectors(::Manifold, x, B::PrecomputedOrthonormalBasis) = B.vectors
+get_vectors(::Manifold, x, B::PrecomputedDiagonalizingOrthonormalBasis) = B.vectors
 
 # related to DefaultManifold; to be moved to ManifoldsBase.jl in the future
 using ManifoldsBase: DefaultManifold
@@ -291,11 +291,11 @@ function get_vector(M::DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
     return reshape(v, representation_size(M))
 end
 
-function basis(M::DefaultManifold, x, ::ArbitraryOrthonormalBasis)
+function get_basis(M::DefaultManifold, x, ::ArbitraryOrthonormalBasis)
     return PrecomputedOrthonormalBasis([_euclidean_basis_vector(x, i) for i in eachindex(x)])
 end
 
-function basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
+function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
     E = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
     N = length(E)
     Ξ = empty(E)
