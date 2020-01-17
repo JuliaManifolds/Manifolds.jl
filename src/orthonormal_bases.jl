@@ -124,7 +124,7 @@ end
 """
     get_coordinates(M::Manifold, x, v, B::AbstractBasis)
 
-Compute a one-dimentional vector of coefficients of the tangent vector `v`
+Compute a one-dimensional vector of coefficients of the tangent vector `v`
 at point denoted by `x` on manifold `M` in basis `B`.
 
 Depending on the basis, `x` may not directly represent a point on the manifold.
