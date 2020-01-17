@@ -13,7 +13,7 @@ abstract type AbstractBasis{F} end
 
 The number system used as scalars in the given basis.
 """
-number_system(::AbstractBasis{F}) where F = F
+number_system(::AbstractBasis{F}) where {F} = F
 
 """
     AbstractOrthonormalBasis{F}
@@ -65,9 +65,10 @@ Available methods:
     an additional assumption (local metric tensor at a point where the
     basis is calculated has to be diagonal).
 """
-struct ProjectedOrthonormalBasis{Method, F} <: AbstractOrthonormalBasis{F} end
+struct ProjectedOrthonormalBasis{Method,F} <: AbstractOrthonormalBasis{F} end
 
-ProjectedOrthonormalBasis(method::Symbol, F::AbstractNumbers = ℝ) = ProjectedOrthonormalBasis{method, F}()
+ProjectedOrthonormalBasis(method::Symbol, F::AbstractNumbers = ℝ) =
+    ProjectedOrthonormalBasis{method,F}()
 
 @doc doc"""
     DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ)
@@ -78,13 +79,15 @@ tensor $R(u,v)w$ and where the direction `v` has curvature `0`.
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct DiagonalizingOrthonormalBasis{TV, F} <: AbstractOrthonormalBasis{F}
+struct DiagonalizingOrthonormalBasis{TV,F} <: AbstractOrthonormalBasis{F}
     v::TV
 end
 
-DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ) = DiagonalizingOrthonormalBasis{typeof(v), F}(v)
+DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ) =
+    DiagonalizingOrthonormalBasis{typeof(v),F}(v)
 
-const ArbitraryOrDiagonalizingBasis = Union{ArbitraryOrthonormalBasis, DiagonalizingOrthonormalBasis}
+const ArbitraryOrDiagonalizingBasis =
+    Union{ArbitraryOrthonormalBasis,DiagonalizingOrthonormalBasis}
 
 """
     PrecomputedOrthonormalBasis(vectors::AbstractVector, F::AbstractNumbers = ℝ)
@@ -93,11 +96,13 @@ A precomputed orthonormal basis at a point on a manifold.
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct PrecomputedOrthonormalBasis{TV<:AbstractVector, F} <: AbstractPrecomputedOrthonormalBasis{F}
+struct PrecomputedOrthonormalBasis{TV<:AbstractVector,F} <:
+       AbstractPrecomputedOrthonormalBasis{F}
     vectors::TV
 end
 
-PrecomputedOrthonormalBasis(vectors::AbstractVector, F::AbstractNumbers = ℝ) = PrecomputedOrthonormalBasis{typeof(vectors), F}(vectors)
+PrecomputedOrthonormalBasis(vectors::AbstractVector, F::AbstractNumbers = ℝ) =
+    PrecomputedOrthonormalBasis{typeof(vectors),F}(vectors)
 
 @doc doc"""
     DiagonalizingOrthonormalBasis(vectors, kappas, F::AbstractNumbers = ℝ)
@@ -108,7 +113,8 @@ tensor $R(u,v)w$ with eigenvalues `kappas` and where the direction `v` has curva
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct PrecomputedDiagonalizingOrthonormalBasis{TV<:AbstractVector, TK<:AbstractVector, F} <: AbstractPrecomputedOrthonormalBasis{F}
+struct PrecomputedDiagonalizingOrthonormalBasis{TV<:AbstractVector,TK<:AbstractVector,F} <:
+       AbstractPrecomputedOrthonormalBasis{F}
     vectors::TV
     kappas::TK
 end
@@ -116,9 +122,12 @@ end
 function PrecomputedDiagonalizingOrthonormalBasis(
     vectors::AbstractVector,
     kappas::AbstractVector,
-    F::AbstractNumbers = ℝ
+    F::AbstractNumbers = ℝ,
 )
-    return PrecomputedDiagonalizingOrthonormalBasis{typeof(vectors), typeof(kappas), F}(vectors, kappas)
+    return PrecomputedDiagonalizingOrthonormalBasis{typeof(vectors),typeof(kappas),F}(
+        vectors,
+        kappas,
+    )
 end
 
 """
@@ -171,7 +180,7 @@ function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
         vt = v[1] * bvectors[1]
         vout = similar(bvectors[1], eltype(vt))
         copyto!(vout, vt)
-        for i in 2:length(v)
+        for i = 2:length(v)
             vout += v[i] * bvectors[i]
         end
         return vout
@@ -179,7 +188,7 @@ function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
         vt = v[1] .* bvectors[1]
         vout = similar(bvectors[1], eltype(vt))
         copyto!(vout, vt)
-        for i in 2:length(v)
+        for i = 2:length(v)
             vout .+= v[i] .* bvectors[i]
         end
         return vout
@@ -209,9 +218,9 @@ Compute the basis vectors of an [`ArbitraryOrthonormalBasis`](@ref).
 """
 function get_basis(M::Manifold, x, B::ArbitraryOrthonormalBasis)
     dim = manifold_dimension(M)
-    return PrecomputedOrthonormalBasis(
-        [get_vector(M, x, [ifelse(i == j, 1, 0) for j in 1:dim], B) for i in 1:dim]
-    )
+    return PrecomputedOrthonormalBasis([
+        get_vector(M, x, [ifelse(i == j, 1, 0) for j = 1:dim], B) for i = 1:dim
+    ])
 end
 
 get_basis(M::Manifold, x, B::AbstractPrecomputedOrthonormalBasis) = B
@@ -220,13 +229,16 @@ function get_basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis{�
     bvectors = get_vectors(M, x, B)
     N = length(bvectors)
     M_dim = manifold_dimension(M)
-    N == M_dim || throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
-    for i in 1:N
+    N == M_dim ||
+    throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
+    for i = 1:N
         vi_norm = norm(M, x, bvectors[i])
-        isapprox(vi_norm, 1) || throw(ArgumentError("vector number $i is not normalized (norm = $vi_norm)"))
-        for j in i+1:N
+        isapprox(vi_norm, 1) ||
+        throw(ArgumentError("vector number $i is not normalized (norm = $vi_norm)"))
+        for j = i+1:N
             dot_val = real(inner(M, x, bvectors[i], bvectors[j]))
-            isapprox(dot_val, 0; atol = eps(eltype(x))) || throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
+            isapprox(dot_val, 0; atol = eps(eltype(x))) ||
+            throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
         end
     end
     return B
@@ -249,21 +261,24 @@ function _euclidean_basis_vector(x, i)
     return y
 end
 
-function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:svd, ℝ})
+function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:svd,ℝ})
     S = representation_size(M)
     PS = prod(S)
     dim = manifold_dimension(M)
     # projection
     # TODO: find a better way to obtain a basis of the ambient space
-    vs = [convert(Vector, reshape(project_tangent(M, x, _euclidean_basis_vector(x, i)), PS)) for i in eachindex(x)]
+    vs = [
+        convert(Vector, reshape(project_tangent(M, x, _euclidean_basis_vector(x, i)), PS))
+        for i in eachindex(x)
+    ]
     O = reduce(hcat, vs)
     # orthogonalization
     # TODO: try using rank-revealing QR here
     decomp = svd(O)
     rotated = Diagonal(decomp.S) * decomp.Vt
-    vecs = [collect(reshape(rotated[i,:], S)) for i in 1:dim]
+    vecs = [collect(reshape(rotated[i, :], S)) for i = 1:dim]
     # normalization
-    for i in 1:dim
+    for i = 1:dim
         i_norm = norm(M, x, vecs[i])
         vecs[i] /= i_norm
     end
@@ -292,7 +307,9 @@ function get_vector(M::DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
 end
 
 function get_basis(M::DefaultManifold, x, ::ArbitraryOrthonormalBasis)
-    return PrecomputedOrthonormalBasis([_euclidean_basis_vector(x, i) for i in eachindex(x)])
+    return PrecomputedOrthonormalBasis([
+        _euclidean_basis_vector(x, i) for i in eachindex(x)
+    ])
 end
 
 function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
@@ -302,9 +319,9 @@ function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,�
     dim = manifold_dimension(M)
     N < dim && @warn "Input only has $(N) vectors, but manifold dimension is $(dim)."
     K = 0
-    @inbounds for n in 1:N
+    @inbounds for n = 1:N
         Ξₙ = project_tangent(M, x, E[n])
-        for k in 1:K
+        for k = 1:K
             Ξₙ .-= real(inner(M, x, Ξ[k], Ξₙ)) .* Ξ[k]
         end
         nrmΞₙ = norm(M, x, Ξₙ)
@@ -313,7 +330,7 @@ function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,�
             @goto skip
         end
         Ξₙ ./= nrmΞₙ
-        for k in 1:K
+        for k = 1:K
             if !isapprox(real(inner(M, x, Ξ[k], Ξₙ)), 0; kwargs...)
                 @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
                 @goto skip

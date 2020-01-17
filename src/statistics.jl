@@ -109,7 +109,8 @@ struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
     radius::T
 
     function GeodesicInterpolationWithinRadius(radius::T) where {T}
-        radius > 0 || throw(DomainError("The radius must be strictly postive, received $(radius)."))
+        radius > 0 ||
+        throw(DomainError("The radius must be strictly postive, received $(radius)."))
         return new{T}(radius)
     end
 end
@@ -187,7 +188,12 @@ Compute the [`mean`](@ref mean(::Manifold, args...)) in-place in `y`.
 """
 mean!(::Manifold, ::Any)
 
-function mean(M::Manifold, x::AbstractVector, method::AbstractEstimationMethod...; kwargs...)
+function mean(
+    M::Manifold,
+    x::AbstractVector,
+    method::AbstractEstimationMethod...;
+    kwargs...,
+)
     y = similar_result(M, mean, x[1])
     return mean!(M, y, x, method...; kwargs...)
 end
@@ -203,7 +209,13 @@ function mean(
     return mean!(M, y, x, w, method...; kwargs...)
 end
 
-function mean!(M::Manifold, y, x::AbstractVector, method::AbstractEstimationMethod...; kwargs...)
+function mean!(
+    M::Manifold,
+    y,
+    x::AbstractVector,
+    method::AbstractEstimationMethod...;
+    kwargs...,
+)
     w = _unit_weights(length(x))
     return mean!(M, y, x, w, method...; kwargs...)
 end
@@ -219,28 +231,29 @@ function mean!(
     w::AbstractVector,
     ::GradientDescentEstimation;
     x0 = x[1],
-    stop_iter=100,
+    stop_iter = 100,
     retraction::AbstractRetractionMethod = ExponentialRetraction(),
     inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
-    kwargs...
+    kwargs...,
 )
     n = length(x)
-    (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+    (length(w) != n) &&
+    throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
     copyto!(y, x0)
     yold = similar_result(M, mean, y)
     v = zero_tangent_vector(M, y)
     vtmp = copy(v)
     α = w ./ cumsum(w)
-    for i=1:stop_iter
-        copyto!(yold,y)
+    for i = 1:stop_iter
+        copyto!(yold, y)
         # Online weighted mean
         @inbounds inverse_retract!(M, v, yold, x[1], inverse_retraction)
-        @inbounds for j in 2:n
+        @inbounds for j = 2:n
             inverse_retract!(M, vtmp, yold, x[j], inverse_retraction)
             v .+= α[j] .* (vtmp .- v)
         end
         retract!(M, y, yold, v, 0.5, retraction)
-        isapprox(M,y,yold; kwargs...) && break
+        isapprox(M, y, yold; kwargs...) && break
     end
     return y
 end
@@ -270,18 +283,19 @@ the (inverse) retraction.
 mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation)
 
 function mean!(
-        M::Manifold,
-        y,
-        x::AbstractVector,
-        w::AbstractVector,
-        ::GeodesicInterpolation;
-        shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
-        retraction::AbstractRetractionMethod = ExponentialRetraction(),
-        inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
-        kwargs...,
+    M::Manifold,
+    y,
+    x::AbstractVector,
+    w::AbstractVector,
+    ::GeodesicInterpolation;
+    shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
+    retraction::AbstractRetractionMethod = ExponentialRetraction(),
+    inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
+    kwargs...,
 )
     n = length(x)
-    (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+    (length(w) != n) &&
+    throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
     order = shuffle_rng === nothing ? (1:n) : shuffle(shuffle_rng, 1:n)
     @inbounds begin
         j = order[1]
@@ -290,7 +304,7 @@ function mean!(
     end
     v = zero_tangent_vector(M, y)
     ytmp = similar_result(M, mean, y)
-    @inbounds for i in 2:n
+    @inbounds for i = 2:n
         j = order[i]
         s += w[j]
         t = w[j] / s
@@ -344,27 +358,28 @@ function mean!(
     x::AbstractVector,
     w::AbstractVector,
     ::CyclicProximalPointEstimation;
-    x0=x[1],
-    stop_iter=1000000,
+    x0 = x[1],
+    stop_iter = 1000000,
     retraction::AbstractRetractionMethod = ExponentialRetraction(),
     inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
-    kwargs...
+    kwargs...,
 )
     n = length(x)
-    (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
+    (length(w) != n) &&
+    throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     copyto!(y, x0)
-    yold = similar_result(M,median,y)
+    yold = similar_result(M, median, y)
     ytmp = copy(yold)
-    v = zero_tangent_vector(M,y)
+    v = zero_tangent_vector(M, y)
     wv = convert(Vector, w) ./ sum(w)
-    for i=1:stop_iter
-        λ =  .5 / i
-        copyto!(yold,y)
-        for j in 1:n
-            @inbounds t = (2*λ*wv[j]) / (1 + 2*λ*wv[j])
+    for i = 1:stop_iter
+        λ = 0.5 / i
+        copyto!(yold, y)
+        for j = 1:n
+            @inbounds t = (2 * λ * wv[j]) / (1 + 2 * λ * wv[j])
             @inbounds inverse_retract!(M, v, y, x[j], inverse_retraction)
             retract!(M, ytmp, y, v, t, retraction)
-            copyto!(y,ytmp)
+            copyto!(y, ytmp)
         end
         isapprox(M, y, yold; kwargs...) && break
     end
@@ -443,7 +458,12 @@ computes the [`median`](@ref) in-place in `y`.
 """
 median!(::Manifold, ::Any)
 
-function median(M::Manifold, x::AbstractVector, method::AbstractEstimationMethod...; kwargs...)
+function median(
+    M::Manifold,
+    x::AbstractVector,
+    method::AbstractEstimationMethod...;
+    kwargs...,
+)
     y = similar_result(M, median, x[1])
     return median!(M, y, x, method...; kwargs...)
 end
@@ -459,7 +479,13 @@ function median(
     return median!(M, y, x, w, method...; kwargs...)
 end
 
-function median!(M::Manifold, y, x::AbstractVector, method::AbstractEstimationMethod...; kwargs...)
+function median!(
+    M::Manifold,
+    y,
+    x::AbstractVector,
+    method::AbstractEstimationMethod...;
+    kwargs...,
+)
     w = _unit_weights(length(x))
     return median!(M, y, x, w, method...; kwargs...)
 end
@@ -474,27 +500,28 @@ function median!(
     x::AbstractVector,
     w::AbstractVector,
     ::CyclicProximalPointEstimation;
-    x0=x[1],
-    stop_iter=1000000,
+    x0 = x[1],
+    stop_iter = 1000000,
     retraction::AbstractRetractionMethod = ExponentialRetraction(),
     inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
-    kwargs...
+    kwargs...,
 )
     n = length(x)
-    (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
+    (length(w) != n) &&
+    throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     copyto!(y, x0)
-    yold = similar_result(M,median,y)
+    yold = similar_result(M, median, y)
     ytmp = copy(yold)
-    v = zero_tangent_vector(M,y)
+    v = zero_tangent_vector(M, y)
     wv = convert(Vector, w) ./ sum(w)
-    for i=1:stop_iter
-        λ =  .5 / i
-        copyto!(yold,y)
-        for j in 1:n
-            @inbounds t = min( λ * wv[j] / distance(M,y,x[j]), 1. )
+    for i = 1:stop_iter
+        λ = 0.5 / i
+        copyto!(yold, y)
+        for j = 1:n
+            @inbounds t = min(λ * wv[j] / distance(M, y, x[j]), 1.0)
             @inbounds inverse_retract!(M, v, y, x[j], inverse_retraction)
             retract!(M, ytmp, y, v, t, retraction)
-            copyto!(y,ytmp)
+            copyto!(y, ytmp)
         end
         isapprox(M, y, yold; kwargs...) && break
     end
@@ -519,13 +546,7 @@ to the computation of the mean (if that is not provided).
 """
 var(M::Manifold, ::Any)
 
-function var(
-    M::Manifold,
-    x::AbstractVector,
-    w::AbstractWeights,
-    m;
-    corrected::Bool = false,
-)
+function var(M::Manifold, x::AbstractVector, w::AbstractWeights, m; corrected::Bool = false)
     wv = convert(Vector, w)
     s = sum(eachindex(x, w)) do i
         return @inbounds w[i] * distance(M, m, x[i])^2
@@ -534,18 +555,14 @@ function var(
     return c * s
 end
 
-function var(
-    M::Manifold,
-    x::AbstractVector,
-    m;
-    corrected::Bool = true,
-)
+function var(M::Manifold, x::AbstractVector, m; corrected::Bool = true)
     n = length(x)
     w = _unit_weights(n)
     return var(M, x, w, m; corrected = corrected)
 end
 
-var(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...) = mean_and_var(M, x, w; kwargs...)[2]
+var(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...) =
+    mean_and_var(M, x, w; kwargs...)[2]
 var(M::Manifold, x::AbstractVector; kwargs...) = mean_and_var(M, x; kwargs...)[2]
 
 @doc doc"""
@@ -590,7 +607,7 @@ function mean_and_var(
     x::AbstractVector,
     w::AbstractWeights,
     method::AbstractEstimationMethod...;
-    corrected=false,
+    corrected = false,
     kwargs...,
 )
     m = mean(M, x, w, method...; kwargs...)
@@ -602,7 +619,7 @@ function mean_and_var(
     M::Manifold,
     x::AbstractVector,
     method::AbstractEstimationMethod...;
-    corrected=true,
+    corrected = true,
     kwargs...,
 )
     n = length(x)
@@ -637,18 +654,19 @@ interpolation method.
     to give accurate results except on [`Euclidean`](@ref).
 """
 function mean_and_var(
-        M::Manifold,
-        x::AbstractVector,
-        w::AbstractWeights,
-        ::GeodesicInterpolation;
-        shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
-        corrected = false,
-        retraction::AbstractRetractionMethod = ExponentialRetraction(),
-        inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
-        kwargs...,
+    M::Manifold,
+    x::AbstractVector,
+    w::AbstractWeights,
+    ::GeodesicInterpolation;
+    shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
+    corrected = false,
+    retraction::AbstractRetractionMethod = ExponentialRetraction(),
+    inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
+    kwargs...,
 )
     n = length(x)
-    (length(w) != n) && throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+    (length(w) != n) &&
+    throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
     order = shuffle_rng === nothing ? (1:n) : shuffle(shuffle_rng, 1:n)
     @inbounds begin
         j = order[1]
@@ -658,7 +676,7 @@ function mean_and_var(
     v = zero_tangent_vector(M, y)
     M₂ = zero(eltype(v))
     ytmp = similar_result(M, mean, y)
-    @inbounds for i in 2:n
+    @inbounds for i = 2:n
         j = order[i]
         snew = s + w[j]
         t = w[j] / snew
@@ -691,13 +709,13 @@ See [`GeodesicInterpolationWithinRadius`](@ref) and
 for more information.
 """
 function mean_and_var(
-        M::Manifold,
-        x::AbstractVector,
-        w::AbstractWeights,
-        method::GeodesicInterpolationWithinRadius;
-        shuffle_rng = nothing,
-        corrected = false,
-        kwargs...,
+    M::Manifold,
+    x::AbstractVector,
+    w::AbstractWeights,
+    method::GeodesicInterpolationWithinRadius;
+    shuffle_rng = nothing,
+    corrected = false,
+    kwargs...,
 )
     y, v = mean_and_var(
         M,
@@ -750,7 +768,13 @@ Compute the `k`th central moment of points in `x` on manifold `M`. Optionally
 provide weights `w` and/or a precomputed
 [`mean`](@ref mean(::Manifold, args...)).
 """
-function moment(M::Manifold, x::AbstractVector, k::Int, w::AbstractWeights, m = mean(M, x, w))
+function moment(
+    M::Manifold,
+    x::AbstractVector,
+    k::Int,
+    w::AbstractWeights,
+    m = mean(M, x, w),
+)
     s = sum(eachindex(x, w)) do i
         return @inbounds w[i] * distance(M, m, x[i])^k
     end

@@ -44,7 +44,8 @@ Generate the manifold of `m`-by-`n` real-valued matrices of rank `k`.
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
 struct FixedRankMatrices{M,N,K,T} <: Manifold end
-FixedRankMatrices(m::Int, n::Int, k::Int, t::AbstractNumbers=ℝ) = FixedRankMatrices{m,n,k,t}()
+FixedRankMatrices(m::Int, n::Int, k::Int, t::AbstractNumbers = ℝ) =
+    FixedRankMatrices{m,n,k,t}()
 
 @doc doc"""
     SVDMPoint <: MPoint
@@ -65,17 +66,17 @@ and accordingly shortened $U$ (columns) and $V^\mathrm{T}$ (rows)
 * `SVDMPoint(U,S,Vt,k)` for the svd factors to initialize the `SVDMPoint`,
   stores its svd factors shortened to the best rank $k$ approximation
 """
-struct SVDMPoint{TU<:AbstractMatrix, TS<:AbstractVector, TVt<:AbstractMatrix} <: MPoint
+struct SVDMPoint{TU<:AbstractMatrix,TS<:AbstractVector,TVt<:AbstractMatrix} <: MPoint
     U::TU
     S::TS
     Vt::TVt
 end
 SVDMPoint(A::AbstractMatrix) = SVDMPoint(svd(A))
-SVDMPoint(S::SVD) = SVDMPoint(S.U,S.S,S.Vt)
-SVDMPoint(A::Matrix,k::Int) = SVDMPoint(svd(A),k)
-SVDMPoint(S::SVD,k::Int) = SVDMPoint(S.U,S.S,S.Vt,k)
-SVDMPoint(U,S,Vt,k::Int) = SVDMPoint(U[:,1:k],S[1:k],Vt[1:k,:])
-==(x::SVDMPoint, y::SVDMPoint) = (x.U==y.U) && (x.S==y.S) && (x.Vt==y.Vt)
+SVDMPoint(S::SVD) = SVDMPoint(S.U, S.S, S.Vt)
+SVDMPoint(A::Matrix, k::Int) = SVDMPoint(svd(A), k)
+SVDMPoint(S::SVD, k::Int) = SVDMPoint(S.U, S.S, S.Vt, k)
+SVDMPoint(U, S, Vt, k::Int) = SVDMPoint(U[:, 1:k], S[1:k], Vt[1:k, :])
+==(x::SVDMPoint, y::SVDMPoint) = (x.U == y.U) && (x.S == y.S) && (x.Vt == y.Vt)
 
 @doc doc"""
     UMVTVector <: TVector
@@ -88,24 +89,24 @@ together with its base point, see for example [`FixedRankMatrices`](@ref)
 * `UMVTVector(U,M,Vt,k)` store the umv factors after shortening them down to
   inner dimensions $k$, i.e. in $UMV^\mathrm{T}$, $M\in\mathbb R^{k\times k}$
 """
-struct UMVTVector{TU<:AbstractMatrix, TM<:AbstractMatrix, TVt<:AbstractMatrix} <: TVector
+struct UMVTVector{TU<:AbstractMatrix,TM<:AbstractMatrix,TVt<:AbstractMatrix} <: TVector
     U::TU
     M::TM
     Vt::TVt
 end
 
-UMVTVector(U,M,Vt,k::Int) = UMVTVector(U[:,1:k],M[1:k,1:k],Vt[1:k,:])
+UMVTVector(U, M, Vt, k::Int) = UMVTVector(U[:, 1:k], M[1:k, 1:k], Vt[1:k, :])
 
 # here the division in M corrects for the first factor in UMV + x.U*Vt + U*x.Vt, where x is the base point to v.
-*(v::UMVTVector, s::Number) = UMVTVector(v.U*s, v.M*s,  v.Vt*s)
-*(s::Number, v::UMVTVector) = UMVTVector(s*v.U, s*v.M, s*v.Vt)
-/(v::UMVTVector, s::Number) = UMVTVector(v.U/s, v.M/s, v.Vt/s)
-\(s::Number, v::UMVTVector) = UMVTVector(s\v.U, s\v.M, s\v.Vt)
+*(v::UMVTVector, s::Number) = UMVTVector(v.U * s, v.M * s, v.Vt * s)
+*(s::Number, v::UMVTVector) = UMVTVector(s * v.U, s * v.M, s * v.Vt)
+/(v::UMVTVector, s::Number) = UMVTVector(v.U / s, v.M / s, v.Vt / s)
+\(s::Number, v::UMVTVector) = UMVTVector(s \ v.U, s \ v.M, s \ v.Vt)
 +(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U + w.U, v.M + w.M, v.Vt + w.Vt)
 -(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U - w.U, v.M - w.M, v.Vt - w.Vt)
 -(v::UMVTVector) = UMVTVector(-v.U, -v.M, -v.Vt)
 +(v::UMVTVector) = UMVTVector(v.U, v.M, v.Vt)
-==(v::UMVTVector,w::UMVTVector) = (v.U==w.U) && (v.M==w.M) && (v.Vt==w.Vt)
+==(v::UMVTVector, w::UMVTVector) = (v.U == w.U) && (v.M == w.M) && (v.Vt == w.Vt)
 @doc doc"""
     check_manifold_point(M::FixedRankMatrices{m,n,k},x; kwargs...)
 
@@ -114,27 +115,43 @@ Check whether the matrix or [`SVDMPoint`](@ref) `x` ids a valid point on the
 rank `k`. For the [`SVDMPoint`](@ref) the internal representation also has to have the right
 shape, i.e. `x.U` and `x.Vt` have to be unitary.
 """
-function check_manifold_point(M::FixedRankMatrices{m,n,k},x; kwargs...) where {m,n,k}
+function check_manifold_point(M::FixedRankMatrices{m,n,k}, x; kwargs...) where {m,n,k}
     r = rank(x; kwargs...)
     s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(m),$(n)) witk rank $(k), "
-    if size(x) != (m,n)
-        return DomainError(size(x), string(s,"since its size is wrong."))
+    if size(x) != (m, n)
+        return DomainError(size(x), string(s, "since its size is wrong."))
     end
     if r > k
         return DomainError(r, string(s, "since its rank is too large ($(r))."))
     end
     return nothing
 end
-function check_manifold_point(F::FixedRankMatrices{m,n,k}, x::SVDMPoint; kwargs...) where {m,n,k}
+function check_manifold_point(
+    F::FixedRankMatrices{m,n,k},
+    x::SVDMPoint;
+    kwargs...,
+) where {m,n,k}
     s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(m),$(n)) witk rank $(k), "
-    if (size(x.U) != (m,k)) || (length(x.S) != k) || (size(x.Vt) != (k,n))
-        return DomainError([size(x.U)...,length(x.S),size(x.Vt)...], string(s, "since the dimensions do not fit (expected $(n)x$(m) rank $(k) got $(size(x.U,1))x$(size(x.Vt,2)) rank $(size(x.S))."))
+    if (size(x.U) != (m, k)) || (length(x.S) != k) || (size(x.Vt) != (k, n))
+        return DomainError(
+            [size(x.U)..., length(x.S), size(x.Vt)...],
+            string(
+                s,
+                "since the dimensions do not fit (expected $(n)x$(m) rank $(k) got $(size(x.U,1))x$(size(x.Vt,2)) rank $(size(x.S)).",
+            ),
+        )
     end
-    if !isapprox(x.U'*x.U,one(zeros(n,n)); kwargs...)
-        return DomainError(norm(x.U'*x.U-one(zeros(n,n))), string(s," since U is not orthonormal/unitary."))
+    if !isapprox(x.U' * x.U, one(zeros(n, n)); kwargs...)
+        return DomainError(
+            norm(x.U' * x.U - one(zeros(n, n))),
+            string(s, " since U is not orthonormal/unitary."),
+        )
     end
-    if !isapprox(x.Vt'*x.Vt, one(zeros(n,n)); kwargs...)
-        return DomainError(norm(x.Vt'*x.Vt-one(zeros(n,n))), string(s," since V is not orthonormal/unitary."))
+    if !isapprox(x.Vt' * x.Vt, one(zeros(n, n)); kwargs...)
+        return DomainError(
+            norm(x.Vt' * x.Vt - one(zeros(n, n))),
+            string(s, " since V is not orthonormal/unitary."),
+        )
     end
     return nothing
 end
@@ -148,19 +165,33 @@ the [`SVDMPoint`](@ref) `x` on the [`FixedRankMatrices`](@ref) `M`, i.e. that
 and its dimensions are consistent with `x` and `M`, i.e. correspond to `m`-by-`n`
 matrices of rank `k`.
 """
-function check_tangent_vector(M::FixedRankMatrices{m,n,k}, x::SVDMPoint, v::UMVTVector; kwargs...) where {m,n,k}
-    c = check_manifold_point(M,x)
+function check_tangent_vector(
+    M::FixedRankMatrices{m,n,k},
+    x::SVDMPoint,
+    v::UMVTVector;
+    kwargs...,
+) where {m,n,k}
+    c = check_manifold_point(M, x)
     if c !== nothing
         return c
     end
-    if (size(v.U) != (m,k)) || (size(v.Vt) != (k,n)) || (size(v.M) != (k,k))
-        return DomainError(cat(size(v.U),size(v.M),size(v.Vt),dims=1), "The tangent vector $(v) is not a tangent vector to $(x) on the fixed rank matrices since the matrix dimensions to not fit (expected $(m)x$(k), $(k)x$(k), $(k)x$(n)).")
+    if (size(v.U) != (m, k)) || (size(v.Vt) != (k, n)) || (size(v.M) != (k, k))
+        return DomainError(
+            cat(size(v.U), size(v.M), size(v.Vt), dims = 1),
+            "The tangent vector $(v) is not a tangent vector to $(x) on the fixed rank matrices since the matrix dimensions to not fit (expected $(m)x$(k), $(k)x$(k), $(k)x$(n)).",
+        )
     end
-    if !isapprox(v.U'*x.U, zeros(k,k); kwargs...)
-        return DomainError(norm(v.U'*x.U-zeros(k,k)), "The tangent vector $(v) is not a tangent vector to $(x) on the fixed rank matrices since v.U'x.U is not zero. ")
+    if !isapprox(v.U' * x.U, zeros(k, k); kwargs...)
+        return DomainError(
+            norm(v.U' * x.U - zeros(k, k)),
+            "The tangent vector $(v) is not a tangent vector to $(x) on the fixed rank matrices since v.U'x.U is not zero. ",
+        )
     end
-    if !isapprox(v.Vt*x.Vt', zeros(k,k); kwargs...)
-        return DomainError(norm(v.Vt*x.Vt-zeros(k,k)), "The tangent vector $(v) is not a tangent vector to $(x) on the fixed rank matrices since v.V'x.V is not zero.")
+    if !isapprox(v.Vt * x.Vt', zeros(k, k); kwargs...)
+        return DomainError(
+            norm(v.Vt * x.Vt - zeros(k, k)),
+            "The tangent vector $(v) is not a tangent vector to $(x) on the fixed rank matrices since v.V'x.V is not zero.",
+        )
     end
 end
 
@@ -172,11 +203,17 @@ Compute the inner product of `v` and `w` in the tangent space of `x` on the
 using `dot` on the elements (`U`, `Vt`, `M`) of `v` and `w`.
 """
 function inner(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector)
-    return dot(v.U,w.U) + dot(v.M,w.M) + dot(v.Vt,w.Vt)
+    return dot(v.U, w.U) + dot(v.M, w.M) + dot(v.Vt, w.Vt)
 end
 
-isapprox(::FixedRankMatrices, x::SVDMPoint, y::SVDMPoint; kwargs...) = isapprox( x.U*Diagonal(x.S)*x.Vt, y.U*Diagonal(y.S)*y.Vt; kwargs...)
-isapprox(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector; kwargs...) = isapprox(x.U*v.M*x.Vt + v.U*x.Vt + x.U*v.Vt, x.U*w.M*x.Vt + w.U*x.Vt + x.U*w.Vt; kwargs...)
+isapprox(::FixedRankMatrices, x::SVDMPoint, y::SVDMPoint; kwargs...) =
+    isapprox(x.U * Diagonal(x.S) * x.Vt, y.U * Diagonal(y.S) * y.Vt; kwargs...)
+isapprox(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector; kwargs...) =
+    isapprox(
+        x.U * v.M * x.Vt + v.U * x.Vt + x.U * v.Vt,
+        x.U * w.M * x.Vt + w.U * x.Vt + x.U * w.Vt;
+        kwargs...,
+    )
 
 @doc doc"""
     manifold_dimension(M::FixedRankMatrices{m,n,k,𝔽})
@@ -191,7 +228,7 @@ k(m + n - k) \dim_ℝ 𝔽,
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
 function manifold_dimension(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽}
-    return (m + n - k)*k*real_dimension(𝔽)
+    return (m + n - k) * k * real_dimension(𝔽)
 end
 
 @doc doc"""
@@ -209,23 +246,28 @@ Section 3 in [^Vandereycken2013].
     > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
-project_tangent(::FixedRankMatrices,::Any...)
+project_tangent(::FixedRankMatrices, ::Any...)
 function project_tangent!(
     ::FixedRankMatrices,
     vto::UMVTVector,
     x::SVDMPoint,
-    A::AbstractMatrix
+    A::AbstractMatrix,
 )
-    av = A*(x.Vt')
-    uTav = x.U'*av
-    aTu = A'*x.U
+    av = A * (x.Vt')
+    uTav = x.U' * av
+    aTu = A' * x.U
     vto.M .= uTav
-    vto.U .= A * x.Vt' - x.U*uTav
-    vto.Vt .= (aTu - x.Vt'*uTav')'
+    vto.U .= A * x.Vt' - x.U * uTav
+    vto.Vt .= (aTu - x.Vt' * uTav')'
     return vto
 end
-function project_tangent!(M::FixedRankMatrices, vto::UMVTVector, x::SVDMPoint, v::UMVTVector)
-    return project_tangent!(M,vto,x, v.U * v.M * v.Vt)
+function project_tangent!(
+    M::FixedRankMatrices,
+    vto::UMVTVector,
+    x::SVDMPoint,
+    v::UMVTVector,
+)
+    return project_tangent!(M, vto, x, v.U * v.M * v.Vt)
 end
 
 @doc doc"""
@@ -234,7 +276,7 @@ end
 Return the element size of a point on the [`FixedRankMatrices`](@ref) `M`, i.e.
 the size of matrices on this manifold $(m,n)$.
 """
-representation_size(M::FixedRankMatrices{m, n}) where {m,n} = (m,n)
+representation_size(M::FixedRankMatrices{m,n}) where {m,n} = (m, n)
 
 @doc doc"""
     retract(M, x, v, ::PolarRetraction)
@@ -248,24 +290,42 @@ in the sense that $S_k$ is the diagonal matrix of size $k\times k$ with the $k$ 
 singular values and $U$ and $V$ are shortened accordingly.
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)
-function retract!(::FixedRankMatrices{M,N,k}, y::SVDMPoint, x::SVDMPoint, v::UMVTVector, ::PolarRetraction) where {M,N,k}
-    s = svd( x.U * Diagonal(x.S) * x.Vt + (x.U * v.M * x.Vt + v.U*x.Vt + v.U*v.Vt) )
-    y.U .= s.U[:,1:k]
+function retract!(
+    ::FixedRankMatrices{M,N,k},
+    y::SVDMPoint,
+    x::SVDMPoint,
+    v::UMVTVector,
+    ::PolarRetraction,
+) where {M,N,k}
+    s = svd(x.U * Diagonal(x.S) * x.Vt + (x.U * v.M * x.Vt + v.U * x.Vt + v.U * v.Vt))
+    y.U .= s.U[:, 1:k]
     y.S .= s.S[1:k]
-    y.Vt .= s.Vt[1:k,:]
+    y.Vt .= s.Vt[1:k, :]
     return y
 end
 
 similar(x::SVDMPoint) = SVDMPoint(similar(x.U), similar(x.S), similar(x.Vt))
-similar(x::SVDMPoint, ::Type{T}) where T = SVDMPoint(similar(x.U,T), similar(x.S,T), similar(x.Vt,T))
+similar(x::SVDMPoint, ::Type{T}) where {T} =
+    SVDMPoint(similar(x.U, T), similar(x.S, T), similar(x.Vt, T))
 similar(v::UMVTVector) = UMVTVector(similar(v.U), similar(v.M), similar(v.Vt))
-similar(v::UMVTVector, ::Type{T}) where T = UMVTVector(similar(v.U,T), similar(v.M,T), similar(v.Vt,T))
+similar(v::UMVTVector, ::Type{T}) where {T} =
+    UMVTVector(similar(v.U, T), similar(v.M, T), similar(v.Vt, T))
 
 eltype(x::SVDMPoint) = typeof(one(eltype(x.U)) + one(eltype(x.S)) + one(eltype(x.Vt)))
 eltype(v::UMVTVector) = typeof(one(eltype(v.U)) + one(eltype(v.M)) + one(eltype(v.Vt)))
 
-one(x::SVDMPoint) = SVDMPoint(one(zeros(size(x.U,1),size(x.U,1))), ones(length(x.S)), one(zeros(size(x.Vt,2),size(x.Vt,2))), length(x.S))
-one(v::UMVTVector) = UMVTVector(one(zeros(size(v.U,1),size(v.U,1))), one(zeros(size(v.M))), one(zeros(size(v.Vt,2),size(v.Vt,2))), size(v.M,1))
+one(x::SVDMPoint) = SVDMPoint(
+    one(zeros(size(x.U, 1), size(x.U, 1))),
+    ones(length(x.S)),
+    one(zeros(size(x.Vt, 2), size(x.Vt, 2))),
+    length(x.S),
+)
+one(v::UMVTVector) = UMVTVector(
+    one(zeros(size(v.U, 1), size(v.U, 1))),
+    one(zeros(size(v.M))),
+    one(zeros(size(v.Vt, 2), size(v.Vt, 2))),
+    size(v.M, 1),
+)
 
 function copyto!(x::SVDMPoint, y::SVDMPoint)
     copyto!(x.U, y.U)
@@ -286,12 +346,20 @@ Return a [`UMVTVector`](@ref) representing the zero tangent vector in the tangen
 structure are zero matrices.
 """
 function zero_tangent_vector(::FixedRankMatrices{m,n,k}, x::SVDMPoint) where {m,n,k}
-    v = UMVTVector( zeros(eltype(x.U),m,k), zeros(eltype(x.S),k,k), zeros(eltype(x.Vt),k,n) )
+    v = UMVTVector(
+        zeros(eltype(x.U), m, k),
+        zeros(eltype(x.S), k, k),
+        zeros(eltype(x.Vt), k, n),
+    )
     return v
 end
-function zero_tangent_vector!(::FixedRankMatrices{m,n,k}, v::UMVTVector, x::SVDMPoint) where {m,n,k}
-    v.U .= zeros(eltype(v.U),m,k)
-    v.M .= zeros(eltype(v.M),k,k)
-    v.Vt .= zeros(eltype(v.Vt),k,n)
+function zero_tangent_vector!(
+    ::FixedRankMatrices{m,n,k},
+    v::UMVTVector,
+    x::SVDMPoint,
+) where {m,n,k}
+    v.U .= zeros(eltype(v.U), m, k)
+    v.M .= zeros(eltype(v.M), k, k)
+    v.Vt .= zeros(eltype(v.Vt), k, n)
     return v
 end

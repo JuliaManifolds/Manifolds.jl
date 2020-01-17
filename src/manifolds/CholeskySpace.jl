@@ -1,4 +1,5 @@
-using LinearAlgebra: diag, eigen, eigvals, eigvecs, Symmetric, tr, cholesky, LowerTriangular, UpperTriangular
+using LinearAlgebra:
+    diag, eigen, eigvals, eigvecs, Symmetric, tr, cholesky, LowerTriangular, UpperTriangular
 
 
 @doc doc"""
@@ -31,13 +32,22 @@ The tolerance for the tests can be set using the `kwargs...`.
 """
 function check_manifold_point(M::CholeskySpace, x; kwargs...)
     if size(x) != representation_size(M)
-        return DomainError(size(x),"The point $(x) does not lie on $(M), since its size is not $(representation_size(M)).")
+        return DomainError(
+            size(x),
+            "The point $(x) does not lie on $(M), since its size is not $(representation_size(M)).",
+        )
     end
-    if !isapprox( norm(strictlyUpperTriangular(x)), 0.; kwargs...)
-        return DomainError(norm(UpperTriangular(x) - Diagonal(x)), "The point $(x) does not lie on $(M), since it strictly upper triangular nonzero entries")
+    if !isapprox(norm(strictlyUpperTriangular(x)), 0.0; kwargs...)
+        return DomainError(
+            norm(UpperTriangular(x) - Diagonal(x)),
+            "The point $(x) does not lie on $(M), since it strictly upper triangular nonzero entries",
+        )
     end
-    if any( diag(x) .<= 0)
-        return DomainError(min(diag(x)...), "The point $(x) does not lie on $(M), since it hast nonpositive entries on the diagonal")
+    if any(diag(x) .<= 0)
+        return DomainError(
+            min(diag(x)...),
+            "The point $(x) does not lie on $(M), since it hast nonpositive entries on the diagonal",
+        )
     end
     return nothing
 end
@@ -50,17 +60,22 @@ atfer [`check_manifold_point`](@ref)`(M,x)`, `v` has to be of same dimension as 
 and a symmetric matrix.
 The tolerance for the tests can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::CholeskySpace, x,v; kwargs...)
+function check_tangent_vector(M::CholeskySpace, x, v; kwargs...)
     mpe = check_manifold_point(M, x)
     if mpe !== nothing
         return mpe
     end
     if size(v) != representation_size(M)
-        return DomainError(size(v),
-            "The vector $(v) is not a tangent to a point on $(M) since its size does not match $(representation_size(M)).")
+        return DomainError(
+            size(v),
+            "The vector $(v) is not a tangent to a point on $(M) since its size does not match $(representation_size(M)).",
+        )
     end
-    if !isapprox( norm(strictlyUpperTriangular(v)), 0.; kwargs...)
-        return DomainError(norm(UpperTriangular(v) - Diagonal(v)), "The matrix $(v) is not a tangent vector at $(x) (represented as an element of the Lie algebra) since it is not lower triangular.")
+    if !isapprox(norm(strictlyUpperTriangular(v)), 0.0; kwargs...)
+        return DomainError(
+            norm(UpperTriangular(v) - Diagonal(v)),
+            "The matrix $(v) is not a tangent vector at $(x) (represented as an element of the Lie algebra) since it is not lower triangular.",
+        )
     end
     return nothing
 end
@@ -78,10 +93,10 @@ d_{\mathcal M}(x,y) = \sqrt{\sum_{i>j} (x_{ij}-y_{ij})^2 +
 }
 ````
 """
-function distance(::CholeskySpace,x,y)
+function distance(::CholeskySpace, x, y)
     return sqrt(
-        sum( (strictlyLowerTriangular(x) - strictlyLowerTriangular(y)).^2 )
-        + sum( (log.(diag(x)) - log.(diag(y))).^2 )
+        sum((strictlyLowerTriangular(x) - strictlyLowerTriangular(y)) .^ 2) +
+        sum((log.(diag(x)) - log.(diag(y))) .^ 2),
     )
 end
 
@@ -101,8 +116,11 @@ where $\lfloor x\rfloor$ denotes the strictly lower triangular matrix of $x$ and
 $\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
 exp(::CholeskySpace, ::Any...)
-function exp!(::CholeskySpace,y,x,v)
-    y .= strictlyLowerTriangular(x) + strictlyLowerTriangular(v) + Diagonal(diag(x))*Diagonal(exp.(diag(v)./diag(x)))
+function exp!(::CholeskySpace, y, x, v)
+    y .=
+        strictlyLowerTriangular(x) +
+        strictlyLowerTriangular(v) +
+        Diagonal(diag(x)) * Diagonal(exp.(diag(v) ./ diag(x)))
     return y
 end
 
@@ -118,7 +136,9 @@ The formula reads
     g_{x}(v,w) = \sum_{i>j} v_{ij}w_{ij} + \sum_{j=1}^m v_{ii}w_{ii}x_{ii}^{-2}
 ````
 """
-inner(::CholeskySpace,x,v,w) = sum(strictlyLowerTriangular(v).*strictlyLowerTriangular(w)) + sum(diag(v).*diag(w)./( diag(x).^2 ))
+inner(::CholeskySpace, x, v, w) =
+    sum(strictlyLowerTriangular(v) .* strictlyLowerTriangular(w)) +
+    sum(diag(v) .* diag(w) ./ (diag(x) .^ 2))
 
 @doc doc"""
     log(M::CholeskySpace, v, x, y)
@@ -136,8 +156,10 @@ where $\lfloor x\rfloor$ denotes the strictly lower triangular matrix of $x$ and
 $\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
 log(::Cholesky, ::Any...)
-function log!(::CholeskySpace,v,x,y)
-    v .= strictlyLowerTriangular(y) - strictlyLowerTriangular(x) + Diagonal(diag(x))*Diagonal(log.(diag(y)./diag(x)))
+function log!(::CholeskySpace, v, x, y)
+    v .=
+        strictlyLowerTriangular(y) - strictlyLowerTriangular(x) +
+        Diagonal(diag(x)) * Diagonal(log.(diag(y) ./ diag(x)))
     return v
 end
 
@@ -146,14 +168,14 @@ end
 
 Return the manifold dimension for the [`CholeskySpace`](@ref) `M`, i.e. $\frac{N(N+1)}{2}$.
 """
-@generated manifold_dimension(::CholeskySpace{N}) where N = div(N*(N+1), 2)
+@generated manifold_dimension(::CholeskySpace{N}) where {N} = div(N * (N + 1), 2)
 
 @doc doc"""
     reporesentation_size(M::CholeskySpace)
 
 Return the representation size for the [`CholeskySpace`](@ref)`{N}` `M`, i.e. `(N,N)`.
 """
-@generated representation_size(::CholeskySpace{N}) where N = (N,N)
+@generated representation_size(::CholeskySpace{N}) where {N} = (N, N)
 
 # two small helper for strictly lower and upper triangulars
 strictlyLowerTriangular(x) = LowerTriangular(x) - Diagonal(diag(x))
@@ -175,7 +197,9 @@ and $\operatorname{diag}$ extracts the diagonal matrix.
 """
 vector_transport_to(::CholeskySpace, ::Any, ::Any, ::Any, ::ParallelTransport)
 function vector_transport_to!(::CholeskySpace, vto, x, v, y, ::ParallelTransport)
-    vto .= strictlyLowerTriangular(x) + Diagonal(diag(y))*Diagonal(1 ./ diag(x))*Diagonal(v)
+    vto .=
+        strictlyLowerTriangular(x) +
+        Diagonal(diag(y)) * Diagonal(1 ./ diag(x)) * Diagonal(v)
     return vto
 end
 
@@ -185,7 +209,7 @@ end
 Return the zero tangent vector on the [`CholeskySpace`](@ref) `M` at `x`.
 """
 zero_tangent_vector(::CholeskySpace, ::Any...)
-function zero_tangent_vector!(M::CholeskySpace,v,x)
-    fill!(v,0)
+function zero_tangent_vector!(M::CholeskySpace, v, x)
+    fill!(v, 0)
     return v
 end

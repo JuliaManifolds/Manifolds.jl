@@ -29,7 +29,11 @@ bundle) of type `type` using the product distribution of given distributions.
 
 Vector space type and `x` can be automatically inferred from distributions `distrs`.
 """
-struct ProductFVectorDistribution{TSpace<:VectorBundleFibers{<:VectorSpaceType, <:ProductManifold}, TD<:(NTuple{N,Distribution} where N), TX} <: FVectorDistribution{TSpace, TX}
+struct ProductFVectorDistribution{
+    TSpace<:VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
+    TD<:(NTuple{N,Distribution} where {N}),
+    TX,
+} <: FVectorDistribution{TSpace,TX}
     type::TSpace
     x::TX
     distributions::TD
@@ -40,7 +44,10 @@ end
 
 Product distribution on manifold `M`, combined from `distributions`.
 """
-struct ProductPointDistribution{TM<:ProductManifold, TD<:(NTuple{N,Distribution} where N)} <: MPointDistribution{TM}
+struct ProductPointDistribution{
+    TM<:ProductManifold,
+    TD<:(NTuple{N,Distribution} where {N}),
+} <: MPointDistribution{TM}
     manifold::TM
     distributions::TD
 end
@@ -53,7 +60,8 @@ Product retraction of `retractions`. Works on [`ProductManifold`](@ref).
 struct ProductRetraction{TR<:Tuple} <: AbstractRetractionMethod
     retractions::TR
 end
-ProductRetraction(retractions::AbstractRetractionMethod...) = ProductRetraction{typeof(retractions)}(retractions)
+ProductRetraction(retractions::AbstractRetractionMethod...) =
+    ProductRetraction{typeof(retractions)}(retractions)
 
 """
     InverseProductRetraction(retractions::AbstractInverseRetractionMethod...)
@@ -63,7 +71,8 @@ Product inverse retraction of `inverse retractions`. Works on [`ProductManifold`
 struct InverseProductRetraction{TR<:Tuple} <: AbstractInverseRetractionMethod
     inverse_retractions::TR
 end
-InverseProductRetraction(inverse_retractions::AbstractInverseRetractionMethod...) = InverseProductRetraction{typeof(inverse_retractions)}(inverse_retractions)
+InverseProductRetraction(inverse_retractions::AbstractInverseRetractionMethod...) =
+    InverseProductRetraction{typeof(inverse_retractions)}(inverse_retractions)
 
 """
     PrecomputedProductOrthonormalBasis(parts::NTuple{N,AbstractPrecomputedOrthonormalBasis} where N, F::AbstractNumbers = ℝ)
@@ -73,15 +82,18 @@ The tuple `parts` stores bases corresponding to multiplied manifolds.
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct PrecomputedProductOrthonormalBasis{T<:NTuple{N,AbstractPrecomputedOrthonormalBasis} where N, F} <: AbstractPrecomputedOrthonormalBasis{F}
+struct PrecomputedProductOrthonormalBasis{
+    T<:NTuple{N,AbstractPrecomputedOrthonormalBasis} where {N},
+    F,
+} <: AbstractPrecomputedOrthonormalBasis{F}
     parts::T
 end
 
 function PrecomputedProductOrthonormalBasis(
     parts::NTuple{N,AbstractPrecomputedOrthonormalBasis},
-    F::AbstractNumbers = ℝ
-) where N
-    return PrecomputedProductOrthonormalBasis{typeof(parts), F}(parts)
+    F::AbstractNumbers = ℝ,
+) where {N}
+    return PrecomputedProductOrthonormalBasis{typeof(parts),F}(parts)
 end
 
 """
@@ -127,7 +139,12 @@ function check_tangent_vector(M::ProductManifold, x::ProductRepr, v::ProductRepr
     return nothing
 end
 
-function check_tangent_vector(M::ProductManifold, x::ProductArray, v::ProductArray; kwargs...)
+function check_tangent_vector(
+    M::ProductManifold,
+    x::ProductArray,
+    v::ProductArray;
+    kwargs...,
+)
     perr = check_manifold_point(M, x)
     perr === nothing || return perr
     ts = ziptuples(M.manifolds, submanifold_components(M, x), submanifold_components(M, v))
@@ -165,7 +182,7 @@ function cross(M1::ProductManifold, M2::ProductManifold)
     return ProductManifold(M1.manifolds..., M2.manifolds...)
 end
 
-function det_local_metric(M::MetricManifold{ProductManifold, ProductMetric}, x::ProductArray)
+function det_local_metric(M::MetricManifold{ProductManifold,ProductMetric}, x::ProductArray)
     dets = map(det_local_metric, M.manifolds, submanifold_components(M, x))
     return prod(dets)
 end
@@ -221,7 +238,12 @@ use the musical isomorphism to transform the tangent vector `w` from the tangent
 This can be done elementwise, so for every entry of `w` (and `x`) sparately
 """
 flat(::ProductManifold, ::Any...)
-function flat!(M::ProductManifold, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
+function flat!(
+    M::ProductManifold,
+    v::FVector{CotangentSpaceType},
+    x,
+    w::FVector{TangentSpaceType},
+)
     vfs = map(u -> FVector(CotangentSpace, u), submanifold_components(M, v.data))
     wfs = map(u -> FVector(TangentSpace, u), submanifold_components(M, w.data))
     map(flat!, M.manifolds, vfs, submanifold_components(M, x), wfs)
@@ -234,7 +256,11 @@ function get_basis(M::ProductManifold, x, B::AbstractBasis)
 end
 
 function get_basis(M::ProductManifold, x, B::DiagonalizingOrthonormalBasis)
-    vs = map(ziptuples(M.manifolds, submanifold_components(x), submanifold_components(B.v))) do t
+    vs = map(ziptuples(
+        M.manifolds,
+        submanifold_components(x),
+        submanifold_components(B.v),
+    )) do t
         return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
     end
     return PrecomputedProductOrthonormalBasis(vs)
@@ -246,20 +272,29 @@ function get_basis(M::ProductManifold, x, B::ArbitraryOrthonormalBasis)
 end
 
 function get_coordinates(M::ProductManifold, x, v, B::PrecomputedProductOrthonormalBasis)
-    reps = map(get_coordinates, M.manifolds, submanifold_components(x), submanifold_components(v), B.parts)
+    reps = map(
+        get_coordinates,
+        M.manifolds,
+        submanifold_components(x),
+        submanifold_components(v),
+        B.parts,
+    )
     return vcat(reps...)
 end
 function get_coordinates(M::ProductManifold, x, v, B::ArbitraryOrthonormalBasis)
-    reps = map(t -> get_coordinates(t..., B), ziptuples(M.manifolds, submanifold_components(x), submanifold_components(v)))
+    reps = map(
+        t -> get_coordinates(t..., B),
+        ziptuples(M.manifolds, submanifold_components(x), submanifold_components(v)),
+    )
     return vcat(reps...)
 end
 
 function get_vector(
-    M::ProductManifold{<:NTuple{N, Any}},
+    M::ProductManifold{<:NTuple{N,Any}},
     x::ProductRepr,
     v,
-    B::PrecomputedProductOrthonormalBasis
-) where N
+    B::PrecomputedProductOrthonormalBasis,
+) where {N}
 
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
@@ -268,18 +303,18 @@ function get_vector(
             M.manifolds[i],
             submanifold_component(x, i),
             v[dims_acc[i]:dims_acc[i]+dims[i]-1],
-            B.parts[i]
+            B.parts[i],
         )
     end
     return ProductRepr(parts)
 end
 
 function get_vector(
-    M::ProductManifold{<:NTuple{N, Any}},
+    M::ProductManifold{<:NTuple{N,Any}},
     x::ProductRepr,
     v,
-    B::ArbitraryOrthonormalBasis
-) where N
+    B::ArbitraryOrthonormalBasis,
+) where {N}
 
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
@@ -288,18 +323,22 @@ function get_vector(
             M.manifolds[i],
             submanifold_component(x, i),
             v[dims_acc[i]:dims_acc[i]+dims[i]-1],
-            B
+            B,
         )
     end
     return ProductRepr(parts)
 end
 
-function get_vectors(M::ProductManifold{<:NTuple{N,Manifold}}, x::ProductRepr, B::PrecomputedProductOrthonormalBasis) where {N}
+function get_vectors(
+    M::ProductManifold{<:NTuple{N,Manifold}},
+    x::ProductRepr,
+    B::PrecomputedProductOrthonormalBasis,
+) where {N}
     xparts = submanifold_components(x)
     BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.parts))
     zero_tvs = map(t -> zero_tangent_vector(t...), ziptuples(M.manifolds, xparts))
     vs = typeof(ProductRepr(zero_tvs...))[]
-    for i in 1:N, k in 1:length(BVs[i])
+    for i = 1:N, k = 1:length(BVs[i])
         push!(vs, ProductRepr(zero_tvs[1:i-1]..., BVs[i][k], zero_tvs[i+1:end]...))
     end
     return vs
@@ -312,7 +351,7 @@ function hat!(M::ProductManifold, v, x, vⁱ)
     ts = ziptuples(M.manifolds, submanifold_components(M, v), submanifold_components(M, x))
     for t ∈ ts
         dim = manifold_dimension(first(t))
-        tvⁱ = @inbounds view(vⁱ, i:(i + dim - 1))
+        tvⁱ = @inbounds view(vⁱ, i:(i+dim-1))
         hat!(t..., tvⁱ)
         i += dim
     end
@@ -372,7 +411,7 @@ function inverse_retract!(M::ProductManifold, v, x, y, method::InverseProductRet
     return v
 end
 
-is_default_metric(::ProductManifold,::ProductMetric) = Val(true)
+is_default_metric(::ProductManifold, ::ProductMetric) = Val(true)
 
 function isapprox(M::ProductManifold, x, y; kwargs...)
     return all(
@@ -434,33 +473,46 @@ Compute the norm of `v` from the tangent space of `x` on the [`ProductManifold`]
 i.e. from the element wise norms the 2-norm is computed.
 """
 function norm(M::ProductManifold, x, v)
-    norms_squared = map(
-        norm,
-        M.manifolds,
-        submanifold_components(M, x),
-        submanifold_components(M, v),
-    ).^2
+    norms_squared =
+        map(
+            norm,
+            M.manifolds,
+            submanifold_components(M, x),
+            submanifold_components(M, v),
+        ) .^ 2
     return sqrt(sum(norms_squared))
 end
 
-function ProductFVectorDistribution(type::VectorBundleFibers{<:VectorSpaceType, <:ProductManifold}, x::Union{AbstractArray, MPoint, ProductRepr}, distributions::FVectorDistribution...)
-    return ProductFVectorDistribution{typeof(type), typeof(distributions), typeof(x)}(type, x, distributions)
+function ProductFVectorDistribution(
+    type::VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
+    x::Union{AbstractArray,MPoint,ProductRepr},
+    distributions::FVectorDistribution...,
+)
+    return ProductFVectorDistribution{typeof(type),typeof(distributions),typeof(x)}(
+        type,
+        x,
+        distributions,
+    )
 end
-function ProductFVectorDistribution(type::VectorBundleFibers{<:VectorSpaceType, <:ProductManifold}, distributions::FVectorDistribution...)
+function ProductFVectorDistribution(
+    type::VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
+    distributions::FVectorDistribution...,
+)
     x = ProductRepr(map(d -> support(d).x, distributions))
     return ProductFVectorDistribution(type, x, distributions...)
 end
 function ProductFVectorDistribution(distributions::FVectorDistribution...)
     M = ProductManifold(map(d -> support(d).space.M, distributions)...)
     VS = support(distributions[1]).space.VS
-    all(d -> support(d).space.VS == VS, distributions) || error("Not all distributions have support in vector spaces of the same type, which is currently not supported")
+    all(d -> support(d).space.VS == VS, distributions) ||
+    error("Not all distributions have support in vector spaces of the same type, which is currently not supported")
     # Probably worth considering sum spaces in the future?
     x = ProductRepr(map(d -> support(d).x, distributions)...)
     return ProductFVectorDistribution(VectorBundleFibers(VS, M), x, distributions...)
 end
 
 function ProductPointDistribution(M::ProductManifold, distributions::MPointDistribution...)
-    return ProductPointDistribution{typeof(M), typeof(distributions)}(M, distributions)
+    return ProductPointDistribution{typeof(M),typeof(distributions)}(M, distributions)
 end
 function ProductPointDistribution(distributions::MPointDistribution...)
     M = ProductManifold(map(d -> support(d).manifold, distributions)...)
@@ -529,7 +581,12 @@ Use the musical isomorphism to transform the cotangent vector `w` from the tange
 This can be done elementwise, so vor every entry of `w` (and `x`) sparately
 """
 sharp(::ProductManifold, ::Any...)
-function sharp!(M::ProductManifold, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
+function sharp!(
+    M::ProductManifold,
+    v::FVector{TangentSpaceType},
+    x,
+    w::FVector{CotangentSpaceType},
+)
     vfs = map(u -> FVector(TangentSpace, u), submanifold_components(M, v.data))
     wfs = map(u -> FVector(CotangentSpace, u), submanifold_components(M, w.data))
     map(sharp!, M.manifolds, vfs, submanifold_components(M, x), wfs)
@@ -573,7 +630,10 @@ function support(d::ProductPointDistribution)
 end
 
 function support(tvd::ProductFVectorDistribution)
-    return FVectorSupport(tvd.type, ProductRepr(map(d -> support(d).x, tvd.distributions)...))
+    return FVectorSupport(
+        tvd.type,
+        ProductRepr(map(d -> support(d).x, tvd.distributions)...),
+    )
 end
 
 function vee!(M::ProductManifold, vⁱ, x, v)
@@ -584,7 +644,7 @@ function vee!(M::ProductManifold, vⁱ, x, v)
     for t ∈ ts
         SM = first(t)
         dim = manifold_dimension(SM)
-        tvⁱ = @inbounds view(vⁱ, i:(i + dim - 1))
+        tvⁱ = @inbounds view(vⁱ, i:(i+dim-1))
         vee!(SM, tvⁱ, Base.tail(t)...)
         i += dim
     end

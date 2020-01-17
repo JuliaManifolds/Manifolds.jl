@@ -58,7 +58,7 @@ Selects elements of tuple `t` at positions specified by the second argument.
 For example `select_from_tuple(("a", "b", "c"), Val((3, 1, 1)))` returns
 `("c", "a", "a")`.
 """
-@generated function select_from_tuple(t::NTuple{N, Any}, positions::Val{P}) where {N, P}
+@generated function select_from_tuple(t::NTuple{N,Any}, positions::Val{P}) where {N,P}
     for k in P
         (k < 0 || k > N) && error("positions must be between 1 and $N")
     end
@@ -92,7 +92,11 @@ end
 Zips tuples `a`, `b` and `c` in a fast, type-stable way. If they have different
 lengths, the result is trimmed to the length of the shorter tuple.
 """
-@generated function ziptuples(a::NTuple{N,Any}, b::NTuple{M,Any}, c::NTuple{L,Any}) where {N,M,L}
+@generated function ziptuples(
+    a::NTuple{N,Any},
+    b::NTuple{M,Any},
+    c::NTuple{L,Any},
+) where {N,M,L}
     ex = Expr(:tuple)
     for i = 1:min(N, M, L)
         push!(ex.args, :((a[$i], b[$i], c[$i])))
@@ -106,7 +110,12 @@ end
 Zips tuples `a`, `b`, `c` and `d` in a fast, type-stable way. If they have
 different lengths, the result is trimmed to the length of the shorter tuple.
 """
-@generated function ziptuples(a::NTuple{N,Any}, b::NTuple{M,Any}, c::NTuple{L,Any}, d::NTuple{K,Any}) where {N,M,L,K}
+@generated function ziptuples(
+    a::NTuple{N,Any},
+    b::NTuple{M,Any},
+    c::NTuple{L,Any},
+    d::NTuple{K,Any},
+) where {N,M,L,K}
     ex = Expr(:tuple)
     for i = 1:min(N, M, L, K)
         push!(ex.args, :((a[$i], b[$i], c[$i], d[$i])))
@@ -120,7 +129,13 @@ end
 Zips tuples `a`, `b`, `c`, `d` and `e` in a fast, type-stable way. If they have
 different lengths, the result is trimmed to the length of the shorter tuple.
 """
-@generated function ziptuples(a::NTuple{N,Any}, b::NTuple{M,Any}, c::NTuple{L,Any}, d::NTuple{K,Any}, e::NTuple{J,Any}) where {N,M,L,K,J}
+@generated function ziptuples(
+    a::NTuple{N,Any},
+    b::NTuple{M,Any},
+    c::NTuple{L,Any},
+    d::NTuple{K,Any},
+    e::NTuple{J,Any},
+) where {N,M,L,K,J}
     ex = Expr(:tuple)
     for i = 1:min(N, M, L, K, J)
         push!(ex.args, :((a[$i], b[$i], c[$i], d[$i], e[$i])))
