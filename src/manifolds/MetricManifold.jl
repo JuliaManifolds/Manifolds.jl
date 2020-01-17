@@ -6,6 +6,12 @@ varying inner products on the tangent space. See [`inner`](@ref).
 """
 abstract type Metric end
 
+# piping syntax for decoration
+if VERSION ≥ v"1.3"
+    (metric::Metric)(M::Manifold) = MetricManifold(M, metric)
+    (::Type{T})(M::Manifold) where {T<:Metric} = MetricManifold(M, T())
+end
+
 """
     MetricManifold{M<:Manifold,G<:Metric} <: Manifold
 

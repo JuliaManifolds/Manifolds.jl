@@ -18,6 +18,12 @@ struct TestEuclideanMetric <: Metric end
     E = TestEuclidean{n}()
     g = TestEuclideanMetric()
     M = MetricManifold(E, g)
+
+    if VERSION ≥ v"1.3"
+        @test E |> TestEuclideanMetric() === M
+        @test E |> TestEuclideanMetric === M
+    end
+
     G = Diagonal(1.0:n)
     invG = inv(G)
     @test manifold_dimension(M) == n
