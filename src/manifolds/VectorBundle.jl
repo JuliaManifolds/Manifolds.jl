@@ -146,8 +146,11 @@ base_manifold(B::VectorSpaceAtPoint) = base_manifold(B.fiber)
 base_manifold(B::VectorBundle) = base_manifold(B.M)
 
 function basis(M::VectorBundle, x, B::DiagonalizingOrthonormalBasis)
-    b1 = basis(M.M, x.parts[1], DiagonalizingOrthonormalBasis(B.v.parts[1]))
-    b2 = basis(M.VS, x.parts[1], DiagonalizingOrthonormalBasis(B.v.parts[2]))
+    xp1 = submanifold_component(x, Val(1))
+    bv1 = DiagonalizingOrthonormalBasis(submanifold_component(B.v, Val(1)))
+    b1 = basis(M.M, xp1, bv1)
+    bv2 = DiagonalizingOrthonormalBasis(submanifold_component(B.v, Val(2)))
+    b2 = basis(M.VS, xp1, bv2)
     return PrecomputedVectorBundleOrthonormalBasis(b1, b2)
 end
 
@@ -258,14 +261,34 @@ function flat!(M::Manifold, v::FVector, x, w::FVector)
 end
 
 function get_coordinates(M::VectorBundle, x, v, B::ArbitraryOrthonormalBasis) where N
-    coord1 = get_coordinates(M.M, x.parts[1], v.parts[1], B)
-    coord2 = get_coordinates(M.VS, x.parts[1], v.parts[2], B)
+    coord1 = get_coordinates(
+        M.M,
+        submanifold_component(x, Val(1)),
+        submanifold_component(v, Val(1)),
+        B
+    )
+    coord2 = get_coordinates(
+        M.VS,
+        submanifold_component(x, Val(1)),
+        submanifold_component(v, Val(2)),
+        B
+    )
     return vcat(coord1, coord2)
 end
 
 function get_coordinates(M::VectorBundle, x, v, B::PrecomputedVectorBundleOrthonormalBasis) where N
-    coord1 = get_coordinates(M.M, x.parts[1], v.parts[1], B.base_basis)
-    coord2 = get_coordinates(M.VS, x.parts[1], v.parts[2], B.vec_basis)
+    coord1 = get_coordinates(
+        M.M,
+        submanifold_component(x, Val(1)),
+        submanifold_component(v, Val(1)),
+        B.base_basis
+    )
+    coord2 = get_coordinates(
+        M.VS,
+        submanifold_component(x, Val(1)),
+        submanifold_component(v, Val(2)),
+        B.vec_basis
+    )
     return vcat(coord1, coord2)
 end
 
@@ -275,15 +298,17 @@ end
 
 function get_vector(M::VectorBundle, x, v, B::ArbitraryOrthonormalBasis) where N
     mdim = manifold_dimension(M.M)
-    v1 = get_vector(M.M, x.parts[1], v[1:mdim], B)
-    v2 = get_vector(M.VS, x.parts[1], v[mdim+1:end], B)
+    xp1 = submanifold_component(x, Val(1))
+    v1 = get_vector(M.M, xp1, v[1:mdim], B)
+    v2 = get_vector(M.VS, xp1, v[mdim+1:end], B)
     return ProductRepr(v1, v2)
 end
 
 function get_vector(M::VectorBundle, x, v, B::PrecomputedVectorBundleOrthonormalBasis) where N
     mdim = manifold_dimension(M.M)
-    v1 = get_vector(M.M, x.parts[1], v[1:mdim], B.base_basis)
-    v2 = get_vector(M.VS, x.parts[1], v[mdim+1:end], B.vec_basis)
+    xp1 = submanifold_component(x, Val(1))
+    v1 = get_vector(M.M, xp1, v[1:mdim], B.base_basis)
+    v2 = get_vector(M.VS, xp1, v[mdim+1:end], B.vec_basis)
     return ProductRepr(v1, v2)
 end
 
@@ -549,13 +574,14 @@ function vector_space_dimension(B::VectorBundleFibers{<:TensorProductType})
 end
 
 function vectors(M::VectorBundle, x, B::PrecomputedVectorBundleOrthonormalBasis)
-    zero_m = zero_tangent_vector(M.M, x.parts[1])
-    zero_f = zero_vector(M.VS, x.parts[1])
+    xp1 = submanifold_component(x, Val(1))
+    zero_m = zero_tangent_vector(M.M, xp1)
+    zero_f = zero_vector(M.VS, xp1)
     vs = typeof(ProductRepr(zero_m, zero_f))[]
-    for bv in vectors(M.M, x.parts[1], B.base_basis)
+    for bv in vectors(M.M, xp1, B.base_basis)
         push!(vs, ProductRepr(bv, zero_f))
     end
-    for bv in vectors(M.VS, x.parts[1], B.vec_basis)
+    for bv in vectors(M.VS, xp1, B.vec_basis)
         push!(vs, ProductRepr(zero_m, bv))
     end
     return vs

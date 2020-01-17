@@ -295,7 +295,7 @@ function basis(M::DefaultManifold, x, ::ArbitraryOrthonormalBasis)
     return PrecomputedOrthonormalBasis([_euclidean_basis_vector(x, i) for i in eachindex(x)])
 end
 
-function basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,F}; kwargs...) where F
+function basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
     E = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
     N = length(E)
     Ξ = empty(E)
@@ -321,9 +321,9 @@ function basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,F}; kw
         end
         push!(Ξ, Ξₙ)
         K += 1
-        K * real_dimension(number_system(B)) == dim && return PrecomputedOrthonormalBasis(Ξ, F)
+        K * real_dimension(number_system(B)) == dim && return PrecomputedOrthonormalBasis(Ξ)
         @label skip
     end
     @warn "gram_schmidt only found $(K) orthonormal basis vectors, but manifold dimension is $(dim)."
-    return PrecomputedOrthonormalBasis(Ξ, F)
+    return PrecomputedOrthonormalBasis(Ξ)
 end
