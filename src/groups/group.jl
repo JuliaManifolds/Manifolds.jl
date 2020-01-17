@@ -555,6 +555,38 @@ function inverse_translate_diff!(
     return translate_diff!(G, vout, inv(G, x), y, v, conv)
 end
 
+group_exp(M::Manifold, v) = group_exp(M, v, is_decorator_manifold(M))
+group_exp(M::Manifold, v, ::Val{true}) = group_exp(M.manifold, v)
+function group_exp(M::Manifold, v, ::Val{false})
+    return error("group_exp not implemented on $(typeof(M)) for vector $(typeof(v)).")
+end
+function group_exp(G::AbstractGroupManifold, v)
+    y = similar_result(G, group_exp, v)
+    return group_exp!(G, y, v)
+end
+
+group_exp!(M::Manifold, y, v) = group_exp!(M, y, v, is_decorator_manifold(M))
+group_exp!(M::Manifold, y, v, ::Val{true}) = group_exp!(M.manifold, y, v)
+function group_exp!(M::Manifold, y, v, ::Val{false})
+    return error("group_exp! not implemented on $(typeof(M)) for vector $(typeof(v)) and element $(typeof(y)).")
+end
+
+group_log(M::Manifold, y) = group_log(M, y, is_decorator_manifold(M))
+group_log(M::Manifold, y, ::Val{true}) = group_log(M.manifold, y)
+function group_log(M::Manifold, y, ::Val{false})
+    return error("group_log not implemented on $(typeof(M)) for element $(typeof(y)).")
+end
+function group_log(G::AbstractGroupManifold, y)
+    v = zero_tangent_vector(G, y)
+    return group_log!(G, v, y)
+end
+
+group_log!(M::Manifold, v, y) = group_log!(M, v, y, is_decorator_manifold(M))
+group_log!(M::Manifold, v, y, ::Val{true}) = group_log!(M.manifold, v, y)
+function group_log!(M::Manifold, v, y, ::Val{false})
+    return error("group_log! not implemented on $(typeof(M)) for element $(typeof(y)) and vector $(typeof(v)).")
+end
+
 #################################
 # Overloads for AdditionOperation
 #################################
@@ -613,6 +645,14 @@ inverse_translate_diff(::AdditionGroup, x, y, v, ::ActionDirection) = v
 function inverse_translate_diff!(::AdditionGroup, vout, x, y, v, ::ActionDirection)
     return copyto!(vout, v)
 end
+
+group_exp(::AdditionGroup, v) = v
+
+group_exp!(::AdditionGroup, y, v) = copyto!(y, v)
+
+group_log(::AdditionGroup, y) = y
+
+group_log!(::AdditionGroup, v, y) = copyto!(v, y)
 
 #######################################
 # Overloads for MultiplicationOperation
@@ -676,4 +716,24 @@ inverse_translate(::MultiplicationGroup, x, y, ::RightAction) = y / x
 
 function inverse_translate!(G::MultiplicationGroup, z, x, y, conv::ActionDirection)
     return copyto!(z, inverse_translate(G, x, y, conv))
+end
+
+function group_exp(::MultiplicationGroup, v)
+    v isa Number || v isa AbstractMatrix && return exp(v)
+    return error("group_exp not implemented on $(typeof(M)) for vector $(typeof(v)).")
+end
+
+function group_exp!(::MultiplicationGroup, y, v)
+    v isa Number || v isa AbstractMatrix && return copyto!(y, exp(v))
+    return error("group_exp! not implemented on $(typeof(M)) for vector $(typeof(v)) and element $(typeof(y)).")
+end
+
+function group_log(G::MultiplicationGroup, y)
+    v isa Number || v isa AbstractMatrix && return log(v)
+    return error("group_log not implemented on $(typeof(M)) for element $(typeof(y)).")
+end
+
+function group_log!(M::MultiplicationGroup, v, y, ::Val{false})
+    y isa Number || y isa AbstractMatrix && return copyto!(v, log(y))
+    return error("group_log! not implemented on $(typeof(M)) for element $(typeof(y)) and vector $(typeof(v)).")
 end
