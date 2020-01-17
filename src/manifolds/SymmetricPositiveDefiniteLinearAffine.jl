@@ -60,10 +60,12 @@ end
 function get_coordinates(M::SymmetricPositiveDefinite{N}, x, v, B::ArbitraryOrthonormalBasis) where N
     dim = manifold_dimension(M)
     vout = similar(v, dim)
+    @assert size(v) == (N, N)
+    @assert dim == div(N*(N+1), 2)
     k = 1
     for i in 1:N, j in i:N
         scale = ifelse(i==j, 1, sqrt(2))
-        vout[k] = v[i,j]*scale
+        @inbounds vout[k] = v[i,j]*scale
         k += 1
     end
     return vout
@@ -73,11 +75,13 @@ get_coordinates(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetri
 function get_vector(M::SymmetricPositiveDefinite{N}, x, v, B::ArbitraryOrthonormalBasis) where N
     dim = manifold_dimension(M)
     vout = similar_result(M, get_vector, x)
+    @assert size(v) == (div(N*(N+1), 2),)
+    @assert size(vout) == (N, N)
     k = 1
     for i in 1:N, j in i:N
         scale = ifelse(i==j, 1, 1/sqrt(2))
-        vout[i,j] = v[k]*scale
-        vout[j,i] = v[k]*scale
+        @inbounds vout[i,j] = v[k]*scale
+        @inbounds vout[j,i] = v[k]*scale
         k += 1
     end
     return vout
