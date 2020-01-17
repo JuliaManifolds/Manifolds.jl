@@ -229,28 +229,28 @@ function flat!(M::ProductManifold, v::FVector{CotangentSpaceType}, x, w::FVector
 end
 
 function get_basis(M::ProductManifold, x, B::AbstractBasis)
-    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, x.parts))
+    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(x)))
     return PrecomputedProductOrthonormalBasis(parts)
 end
 
 function get_basis(M::ProductManifold, x, B::DiagonalizingOrthonormalBasis)
-    vs = map(ziptuples(M.manifolds, x.parts, B.v.parts)) do t
+    vs = map(ziptuples(M.manifolds, submanifold_components(x), submanifold_components(B.v))) do t
         return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
     end
     return PrecomputedProductOrthonormalBasis(vs)
 end
 
 function get_basis(M::ProductManifold, x, B::ArbitraryOrthonormalBasis)
-    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, x.parts))
+    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(x)))
     return PrecomputedProductOrthonormalBasis(parts)
 end
 
 function get_coordinates(M::ProductManifold, x, v, B::PrecomputedProductOrthonormalBasis)
-    reps = map(get_coordinates, M.manifolds, x.parts, v.parts, B.parts)
+    reps = map(get_coordinates, M.manifolds, submanifold_components(x), submanifold_components(v), B.parts)
     return vcat(reps...)
 end
 function get_coordinates(M::ProductManifold, x, v, B::ArbitraryOrthonormalBasis)
-    reps = map(t -> get_coordinates(t..., B), ziptuples(M.manifolds, x.parts, v.parts))
+    reps = map(t -> get_coordinates(t..., B), ziptuples(M.manifolds, submanifold_components(x), submanifold_components(v)))
     return vcat(reps...)
 end
 
@@ -295,8 +295,9 @@ function get_vector(
 end
 
 function get_vectors(M::ProductManifold{<:NTuple{N,Manifold}}, x::ProductRepr, B::PrecomputedProductOrthonormalBasis) where {N}
-    BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, x.parts, B.parts))
-    zero_tvs = map(t -> zero_tangent_vector(t...), ziptuples(M.manifolds, x.parts))
+    xparts = submanifold_components(x)
+    BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.parts))
+    zero_tvs = map(t -> zero_tangent_vector(t...), ziptuples(M.manifolds, xparts))
     vs = typeof(ProductRepr(zero_tvs...))[]
     for i in 1:N, k in 1:length(BVs[i])
         push!(vs, ProductRepr(zero_tvs[1:i-1]..., BVs[i][k], zero_tvs[i+1:end]...))
