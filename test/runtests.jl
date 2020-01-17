@@ -28,5 +28,13 @@ include("statistics.jl")
 
 # Lie groups and actions
 include("groups/groups_general.jl")
+include("groups/array_manifold.jl")
+include("groups/circle_group.jl")
+include("groups/translation_group.jl")
+include("groups/special_orthogonal.jl")
+include("groups/product_group.jl")
+include("groups/semidirect_product_group.jl")
+include("groups/special_euclidean.jl")
+include("groups/group_operation_action.jl")
 include("groups/rotation_action.jl")
 include("groups/translation_action.jl")

@@ -73,4 +73,17 @@ include("utils.jl")
         end
     end
 
+    @testset "hat/vee" begin
+        E = Euclidean(3, 2)
+        x = collect(reshape(1.0:6.0, (3, 2)))
+        v = collect(reshape(7.0:12.0, (3, 2)))
+        @test hat(E, x, vec(v)) ≈ v
+        w = similar(v)
+        @test hat!(E, w, x, vec(v)) === w
+        @test w ≈ v
+        @test vee(E, x, v) ≈ vec(v)
+        w = similar(vec(v))
+        @test vee!(E, w, x, v) === w
+        @test w ≈ vec(v)
+    end
 end

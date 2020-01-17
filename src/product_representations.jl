@@ -166,14 +166,29 @@ function prod_point(M::ShapeSpecification, pts...)
     return ProductArray(M, Array(data))
 end
 
-"""
-    submanifold_component(x::ProductArray, i::Integer)
+@doc doc"""
+    submanifold_component(M::Manifold, x, i::Integer)
+    submanifold_component(M::Manifold, x, ::Val(i)) where {i}
+    submanifold_component(x, i::Integer)
+    submanifold_component(x, ::Val(i)) where {i}
 
-Project the product array `x` to its `i`th component. A new array is returned.
+Project the product array `x` on `M` to its `i`th component. A new array is returned.
 """
-function submanifold_component(x::ProductArray, i::Integer)
-    return x.parts[i]
-end
+submanifold_component(::Any...)
+submanifold_component(M::Manifold, x, i::Integer) = submanifold_component(M, x, Val(i))
+submanifold_component(M::Manifold, x, i::Val) = submanifold_component(x, i)
+submanifold_component(x, ::Val{I}) where {I} = x.parts[I]
+submanifold_component(x, i::Integer) = submanifold_component(x, Val(i))
+
+@doc doc"""
+    submanifold_components(M::Manifold, x)
+    submanifold_components(x)
+
+Get the projected components of `x` on the submanifolds of `M`.
+"""
+submanifold_components(::Any...)
+submanifold_components(M::Manifold, x) = submanifold_components(x)
+submanifold_components(x) = x.parts
 
 Base.BroadcastStyle(::Type{<:ProductArray{ShapeSpec}}) where ShapeSpec<:ShapeSpecification = Broadcast.ArrayStyle{ProductArray{ShapeSpec}}()
 
@@ -229,24 +244,26 @@ struct ProductRepr{TM<:Tuple}
 end
 
 ProductRepr(points...) = ProductRepr{typeof(points)}(points)
-eltype(x::ProductRepr) = eltype(Tuple{map(eltype, x.parts)...})
-similar(x::ProductRepr) = ProductRepr(map(similar, x.parts)...)
-similar(x::ProductRepr, ::Type{T}) where T = ProductRepr(map(t -> similar(t, T), x.parts)...)
+eltype(x::ProductRepr) = eltype(Tuple{map(eltype, submanifold_components(x))...})
+similar(x::ProductRepr) = ProductRepr(map(similar, submanifold_components(x))...)
+function similar(x::ProductRepr, ::Type{T}) where {T}
+    return ProductRepr(map(t -> similar(t, T), submanifold_components(x))...)
+end
 
 function copyto!(x::ProductRepr, y::ProductRepr)
-    map(copyto!, x.parts, y.parts)
+    map(copyto!, submanifold_components(x), submanifold_components(y))
     return x
 end
 
-function submanifold_component(x::ProductRepr, i::Integer)
-    return x.parts[i]
+function (+)(v1::ProductRepr, v2::ProductRepr)
+    return ProductRepr(map(+, submanifold_components(v1), submanifold_components(v2))...)
 end
-
-(+)(v1::ProductRepr, v2::ProductRepr) = ProductRepr(map(+, v1.parts, v2.parts)...)
-(-)(v1::ProductRepr, v2::ProductRepr) = ProductRepr(map(-, v1.parts, v2.parts)...)
-(-)(v::ProductRepr) = ProductRepr(map(-, v.parts))
-(*)(a::Number, v::ProductRepr) = ProductRepr(map(t -> a*t, v.parts))
+function (-)(v1::ProductRepr, v2::ProductRepr)
+    return ProductRepr(map(-, submanifold_components(v1), submanifold_components(v2))...)
+end
+(-)(v::ProductRepr) = ProductRepr(map(-, submanifold_components(v)))
+(*)(a::Number, v::ProductRepr) = ProductRepr(map(t -> a*t, submanifold_components(v)))
 
 function Base.convert(::Type{TPR}, x::ProductRepr) where TPR<:ProductRepr
-    return ProductRepr(map(t -> convert(t...), ziptuples(tuple(TPR.parameters[1].parameters...), x.parts)))
+    return ProductRepr(map(t -> convert(t...), ziptuples(tuple(TPR.parameters[1].parameters...), submanifold_components(x))))
 end

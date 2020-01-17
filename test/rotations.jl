@@ -23,15 +23,16 @@ include("utils.jl")
     @testset "vee/hat" begin
         M = Manifolds.Rotations(2)
         v = randn(1)
-        V = Manifolds.hat(M, I, v)
-        @test isa(V, MMatrix)
-        @test norm(M, I, V) / sqrt(2) ≈ norm(v)
-        @test Manifolds.vee(M, I, V) == v
+        x = Matrix{Float64}(I, 2, 2)
+        V = Manifolds.hat(M, x, v)
+        @test isa(V, AbstractMatrix)
+        @test norm(M, x, V) / sqrt(2) ≈ norm(v)
+        @test Manifolds.vee(M, x, V) == v
 
-        V = project_tangent(M, I, randn(2, 2))
-        v = Manifolds.vee(M, I, V)
-        @test isa(v, MVector)
-        @test Manifolds.hat(M, I, v) == V
+        V = project_tangent(M, x, randn(2, 2))
+        v = Manifolds.vee(M, x, V)
+        @test isa(v, AbstractVector)
+        @test Manifolds.hat(M, x, v) == V
     end
 
     for T in types
@@ -96,16 +97,17 @@ include("utils.jl")
                 retraction_atol_multiplier = 12)
 
             @testset "vee/hat" begin
+                x = Matrix(1.0I, n, n)
                 v = randn(manifold_dimension(SOn))
-                V = Manifolds.hat(SOn, I, v)
-                @test isa(V, MMatrix)
-                @test norm(SOn, I, V) / sqrt(2) ≈ norm(v)
-                @test Manifolds.vee(SOn, I, V) == v
+                V = Manifolds.hat(SOn, x, v)
+                @test isa(V, AbstractMatrix)
+                @test norm(SOn, x, V) / sqrt(2) ≈ norm(v)
+                @test Manifolds.vee(SOn, x, V) == v
 
-                V = project_tangent(SOn, I, randn(n, n))
-                v = Manifolds.vee(SOn, I, V)
-                @test isa(v, MVector)
-                @test Manifolds.hat(SOn, I, v) == V
+                V = project_tangent(SOn, x, randn(n, n))
+                v = Manifolds.vee(SOn, x, V)
+                @test isa(v, AbstractVector)
+                @test Manifolds.hat(SOn, x, v) == V
             end
 
             if n == 4
@@ -124,7 +126,7 @@ include("utils.jl")
                          ]
                     for v in vs
                         @testset "rotation vector $v" begin
-                            V = Manifolds.hat(SOn, I, v)
+                            V = Manifolds.hat(SOn, Matrix(1.0I, n, n), v)
                             x = exp(V)
                             @test x ≈ exp(SOn, one(x), V)
                             @test ForwardDiff.derivative(t -> exp(SOn, one(x), t*V), 0) ≈ V

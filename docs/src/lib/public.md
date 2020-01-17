@@ -5,6 +5,7 @@ Documentation for `Manifolds.jl`'s public interface.
 ```@docs
 Manifolds.ShapeSpecification
 submanifold_component
+submanifold_components
 Manifolds.ProductArray
 ProductRepr
 Manifolds.prod_point

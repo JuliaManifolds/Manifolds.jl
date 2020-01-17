@@ -1,15 +1,16 @@
 module Manifolds
 
 import Base: +, -, *, \, /, ^, angle, axes, convert, copy, copyto!, dataids, eltype, exp,
-    getindex, identity, isapprox, inv, length, log, promote_rule, setindex!, similar, size
+    getindex, identity, inv, isapprox, length, log, one, promote_rule, setindex!, show,
+    similar, size, transpose, zero
 import Distributions: _rand!, support
-import LinearAlgebra: cross, det, Diagonal, dot, norm, I, UniformScaling
-import ManifoldsBase: base_manifold, check_manifold_point, check_tangent_vector
+import LinearAlgebra: cross, det, Diagonal, dot, mul!, norm, I, UniformScaling
+import ManifoldsBase: array_value, base_manifold, check_manifold_point, check_tangent_vector
 import ManifoldsBase: distance, exp, exp!, geodesic, injectivity_radius, inner
 import ManifoldsBase: isapprox, is_manifold_point, is_tangent_vector, is_decorator_manifold
 import ManifoldsBase: inverse_retract, inverse_retract!, log, log!, manifold_dimension, norm
 import ManifoldsBase: project_point, project_point!, project_tangent, project_tangent!
-import ManifoldsBase: representation_size, retract, retract!, similar_result, shortest_geodesic
+import ManifoldsBase: representation_size, retract, retract!, similar_result, similar_result_type, shortest_geodesic
 import ManifoldsBase: vector_transport_along, vector_transport_along!, vector_transport_direction,
     vector_transport_direction!, vector_transport_to, vector_transport_to!
 import ManifoldsBase: zero_tangent_vector, zero_tangent_vector!
@@ -21,6 +22,7 @@ using Einsum: @einsum
 using FiniteDifferences
 using HybridArrays
 using LinearAlgebra
+using Base.Iterators: repeated
 using ManifoldsBase: CoTVector, Manifold, MPoint, TVector
 using ManifoldsBase: ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
@@ -50,18 +52,20 @@ $v=v^i e_i$, where Einstein summation notation is used:
 \wedge: v^i \mapsto v^i e_i
 ````
 
-For matrix manifolds, this converts a vector representation of the tangent
-vector to a matrix representation. The [`vee`](@ref) map is the `hat` map's
+For array manifolds, this converts a vector representation of the tangent
+vector to an array representation. The [`vee`](@ref) map is the `hat` map's
 inverse.
 """
 function hat(M::Manifold, x, vⁱ)
-    repr_size = representation_size(TangentBundleFibers(M))
-    v = MArray{Tuple{repr_size...},eltype(vⁱ)}(undef)
+    v = similar_result(M, hat, x, vⁱ)
     hat!(M, v, x, vⁱ)
     return v
 end
-hat!(M::Manifold, v, x, vⁱ) = error("hat! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), and matrix $(typeof(v))")
 
+function hat!(M::Manifold, v, x, vⁱ)
+    is_decorator_manifold(M) === Val(true) && return hat!(base_manifold(M), v, x, vⁱ)
+    error("hat! operator not defined for manifold $(typeof(M)), array $(typeof(v)), point $(typeof(x)), and vector $(typeof(vⁱ))")
+end
 
 @doc doc"""
     vee(M::Manifold, x, v)
@@ -74,18 +78,30 @@ Einstein summation notation is used:
 \vee: v^i e_i \mapsto v^i
 ````
 
-For matrix manifolds, this converts a  matrix representation of the tangent
+For array manifolds, this converts an array representation of the tangent
 vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
 inverse.
 """
 function vee(M::Manifold, x, v)
-    vⁱ = MVector{manifold_dimension(M),eltype(v)}(undef)
+    vⁱ = similar_result(M, vee, x, v)
     vee!(M, vⁱ, x, v)
     return vⁱ
 end
+
 function vee!(M::Manifold, vⁱ, x, v)
-    error("vee! operator not defined for manifold $(typeof(M)), matrix $(typeof(v)), and vector $(typeof(vⁱ))")
+    is_decorator_manifold(M) === Val(true) && return vee!(base_manifold(M), vⁱ, x, v)
+    error("vee! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), point $(typeof(x)), and array $(typeof(v))")
 end
+
+function similar_result(M::Manifold, f::typeof(vee), x, v)
+    T = similar_result_type(M, f, (x, v))
+    return similar(x, T, manifold_dimension(M))
+end
+function similar_result(M::Manifold, f::typeof(vee), x::StaticArray, v)
+    T = similar_result_type(M, f, (x, v))
+    return similar(x, T, Size(manifold_dimension(M)))
+end
+
 """
     PolarRetraction <: AbstractRetractionMethod
 
@@ -163,10 +179,19 @@ include("manifolds/SymmetricPositiveDefinite.jl")
 
 include("groups/group.jl")
 include("groups/group_action.jl")
-include("groups/special_orthogonal.jl")
-include("groups/rotation_action.jl")
+include("groups/group_operation_action.jl")
+include("groups/array_manifold.jl")
+include("groups/product_group.jl")
+include("groups/semidirect_product_group.jl")
+
 include("groups/translation_group.jl")
+include("groups/special_orthogonal.jl")
+include("groups/circle_group.jl")
+
 include("groups/translation_action.jl")
+include("groups/rotation_action.jl")
+
+include("groups/special_euclidean.jl")
 
 include("statistics.jl")
 
@@ -214,18 +239,21 @@ export base_manifold, bundle_projection, christoffel_symbols_first, christoffel_
     projected_distribution, real_dimension, ricci_curvature, ricci_tensor,
     representation_size, retract, retract!, riemann_tensor, sharp, sharp!,
     shortest_geodesic, similar_result, skewness, std, sym_rem, submanifold,
-    submanifold_component, var, vector_space_dimension,
+    submanifold_component, submanifold_components, var, vector_space_dimension,
     vector_transport_along, vector_transport_along!, vector_transport_direction,
     vector_transport_direction!, vector_transport_to, vector_transport_to!, vee, vee!,
-    zero_vector, zero_vector!, zero_tangent_vector, zero_tangent_vector!
+    zero_vector, zero_vector!, zero_tangent_vector, zero_tangent_vector!, ×
 # Lie group types & functions
 export AbstractGroupAction, AbstractGroupOperation, AbstractGroupManifold, ActionDirection,
-    AdditionOperation, MultiplicationOperation, GroupManifold, Identity, LeftAction,
-    RightAction, RotationAction, SpecialOrthogonal, TranslationGroup, TranslationAction
-export apply, apply!, base_group, center_of_orbit, compose, compose!, g_manifold, identity,
-    identity!, inv, inv!, inverse_translate, inverse_translate!, inverse_translate_diff,
-    inverse_translate_diff!, optimal_alignment, optimal_alignment!, switch_direction,
-    translate, translate!, translate_diff, translate_diff!
+    AdditionOperation, CircleGroup, MultiplicationOperation, GroupManifold, GroupOperationAction,
+    Identity, LeftAction, ProductGroup, ProductOperation, RightAction, RotationAction, SemidirectProductGroup,
+    SpecialEuclidean, SpecialOrthogonal, TranslationGroup, TranslationAction
+export apply, apply!, apply_diff, apply_diff!, base_group, center_of_orbit, compose,
+    compose!, direction, g_manifold, identity, identity!, inv, inv!, inverse_apply,
+    inverse_apply!, inverse_apply_diff, inverse_apply_diff!, inverse_translate,
+    inverse_translate!, inverse_translate_diff, inverse_translate_diff!, optimal_alignment,
+    optimal_alignment!, switch_direction, translate, translate!, translate_diff,
+    translate_diff!
 # Orthonormal bases
 export AbstractBasis, AbstractOrthonormalBasis, AbstractPrecomputedOrthonormalBasis,
     ArbitraryOrthonormalBasis, DiagonalizingOrthonormalBasis,

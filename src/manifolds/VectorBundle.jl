@@ -162,9 +162,7 @@ Projection of point `x` from the bundle `M` to the base manifold.
 Returns the point on the base manifold `B.M` at which the vector part
 of `x` is attached.
 """
-function bundle_projection(B::VectorBundle, x)
-    return submanifold_component(x, 1)
-end
+bundle_projection(B::VectorBundle, x) = submanifold_component(B.M, x, Val(1))
 
 """
     distance(B::VectorBundleFibers, x, v, w)
@@ -196,10 +194,11 @@ behavior of [`vector_transport_to`](@ref) is used to compute the vector
 transport.
 """
 function distance(B::VectorBundle, x, y)
-    dist_man = distance(B.M, x.parts[1], y.parts[1])
-    vy_x = vector_transport_to(B.M, y.parts[1], y.parts[2], x.parts[1])
-    dist_vec = distance(B.VS, x.parts[1], x.parts[2], vy_x)
-
+    px, ξx = submanifold_components(B.M, x)
+    py, ξy = submanifold_components(B.M, y)
+    dist_man = distance(B.M, px, py)
+    vy_x = vector_transport_to(B.M, py, ξy, px)
+    dist_vec = distance(B.VS, px, ξx, vy_x)
     return sqrt(dist_man^2 + dist_vec^2)
 end
 
@@ -229,8 +228,11 @@ The sum $\xi_x + \xi_{v,F}$ corresponds to the exponential map in the vector spa
 """
 exp(::VectorBundle, ::Any)
 function exp!(B::VectorBundle, y, x, v)
-    exp!(B.M, y.parts[1], x.parts[1], v.parts[1])
-    vector_transport_to!(B.M, y.parts[2], x.parts[1], x.parts[2] + v.parts[2], y.parts[1])
+    px, ξx = submanifold_components(B.M, x)
+    py, ξy = submanifold_components(B.M, y)
+    ξvM, ξvF = submanifold_components(B.M, v)
+    exp!(B.M, py, px, ξvM)
+    vector_transport_to!(B.M, ξy, px, ξx + ξvF, py)
     return y
 end
 
@@ -331,16 +333,21 @@ The inner product is calculated as
 $\langle v, w \rangle_{B} = \langle \xi_{v,M}, \xi_{w,M} \rangle_{M} + \langle \xi_{v,F}, \xi_{w,F} \rangle_{F}.$
 """
 function inner(B::VectorBundle, x, v, w)
-    return inner(B.M, x.parts[1], v.parts[1], w.parts[1]) +
-           inner(B.VS, x.parts[2], v.parts[2], w.parts[2])
+    px, ξx = submanifold_components(B.M, x)
+    ξvM, ξvF = submanifold_components(B.M, v)
+    ξwM, ξwF = submanifold_components(B.M, w)
+    return inner(B.M, px, ξvM, ξwM) + inner(B.VS, ξx, ξvF, ξwF)
 end
 function isapprox(B::VectorBundle, x, y; kwargs...)
-    return isapprox(B.M, x.parts[1], y.parts[1]; kwargs...) &&
-        isapprox(x.parts[2], y.parts[2]; kwargs...)
+    px, ξx = submanifold_components(B.M, x)
+    py, ξy = submanifold_components(B.M, y)
+    return isapprox(B.M, px, py; kwargs...) && isapprox(ξx, ξy; kwargs...)
 end
 function isapprox(B::VectorBundle, x, v, w; kwargs...)
-    return isapprox(B.M, v.parts[1], w.parts[1]; kwargs...) &&
-        isapprox(B.M, x.parts[1], v.parts[2], w.parts[2]; kwargs...)
+    px, ξx = submanifold_components(B.M, x)
+    ξvM, ξvF = submanifold_components(B.M, v)
+    ξwM, ξwF = submanifold_components(B.M, w)
+    return isapprox(B.M, ξvM, ξwM; kwargs...) && isapprox(B.M, px, ξvF, ξwF; kwargs...)
 end
 
 @doc doc"""
@@ -365,9 +372,12 @@ The difference $\xi_{\log} - \xi_x$ corresponds to the logarithmic map in the ve
 """
 log(::VectorBundle, ::Any...)
 function log!(B::VectorBundle, v, x, y)
-    log!(B.M, v.parts[1], x.parts[1], y.parts[1])
-    vector_transport_to!(B.M, v.parts[2], y.parts[1], y.parts[2], x.parts[1])
-    copyto!(v.parts[2], v.parts[2] - x.parts[2])
+    px, ξx = submanifold_components(B.M, x)
+    py, ξy = submanifold_components(B.M, y)
+    ξvM, ξvF = submanifold_components(B.M, v)
+    log!(B.M, ξvM, px, py)
+    vector_transport_to!(B.M, ξvF, py, ξy, px)
+    copyto!(ξvF, ξvF - ξx)
     return v
 end
 
@@ -400,8 +410,9 @@ and then projecting the vector $\xi_x$ to the tangent space $T_{p_x}M$.
 """
 project_point(::VectorBundle, ::Any...)
 function project_point!(B::VectorBundle, x)
-    project_point!(B.M, x.parts[1])
-    project_tangent!(B.M, x.parts[2], x.parts[1], x.parts[2])
+    px, ξx = submanifold_components(B.M, x)
+    project_point!(B.M, px)
+    project_tangent!(B.M, ξx, px, ξx)
     return x
 end
 
@@ -425,8 +436,11 @@ and then projecting the vector $\xi_{v,F}$ to the fiber $F$.
 """
 project_tangent(::VectorBundle, ::Any...)
 function project_tangent!(B::VectorBundle, w, x, v)
-    project_tangent!(B.M, w.parts[1], x.parts[1], v.parts[1])
-    project_tangent!(B.M, w.parts[2], x.parts[1], v.parts[2])
+    px, ξx = submanifold_components(B.M, x)
+    ξvM, ξvF = submanifold_components(B.M, v)
+    ξwM, ξwF = submanifold_components(B.M, w)
+    project_tangent!(B.M, ξwM, px, ξvM)
+    project_tangent!(B.M, ξwF, px, ξvF)
     return w
 end
 
@@ -596,7 +610,9 @@ where $\mathbf{0}_{p_x}$ is the zero tangent vector from $T_{p_x}M$ and
 $\mathbf{0}_F$ is the zero element of the vector space $F$.
 """
 function zero_tangent_vector!(B::VectorBundle, v, x)
-    zero_tangent_vector!(B.M, v.parts[1], x.parts[1])
-    zero_vector!(B.VS, v.parts[2], x.parts[2])
+    px, ξx = submanifold_components(B.M, x)
+    ξvM, ξvF = submanifold_components(B.M, v)
+    zero_tangent_vector!(B.M, ξvM, px)
+    zero_vector!(B.VS, ξvF, ξx)
     return v
 end

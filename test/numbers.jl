@@ -3,7 +3,7 @@ using Manifolds
 
 struct NotImplementedNumbers <: Manifolds.AbstractNumbers end
 
-@testset "Fields" begin
+@testset "Number systems" begin
     @test_throws ErrorException real_dimension(NotImplementedNumbers())
 
     @test ℝ isa Manifolds.RealNumbers

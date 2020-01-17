@@ -114,6 +114,11 @@ function get_vector(M::Euclidean{<:Tuple, ℂ}, x, v, B::ArbitraryOrDiagonalizin
     N = div(length(v), 2)
     return reshape(v[1:N] + im*v[N+1:end], S)
 end
+function hat(M::Euclidean{N,ℝ}, x, vⁱ) where {N}
+    return reshape(vⁱ, representation_size(TangentBundleFibers(M)))
+end
+
+hat!(::Euclidean{N,ℝ}, v, x, vⁱ) where {N} = copyto!(v, vⁱ)
 
 @doc doc"""
     injectivity_radius(M::Euclidean)
@@ -164,7 +169,7 @@ log!(M::Euclidean, v, x, y) = (v .= y .- x)
 
 log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = zero(eltype(x))
 
-@generated _product_of_dimensions(::Euclidean{N}) where {N} = *(N.parameters...)
+@generated _product_of_dimensions(::Euclidean{N}) where {N} = prod(N.parameters)
 
 """
     manifold_dimension(M::Euclidean)
@@ -270,7 +275,7 @@ end
 Return the array dimensions required to represent an element on the
 [`Euclidean`](@ref) `M`, i.e. the vector of all array dimensions.
 """
-@generated representation_size(::Euclidean{N}) where N = Tuple(N.parameters...)
+representation_size(::Euclidean{N}) where {N} = size_to_tuple(N)
 
 """
     sharp(M::Euclidean, x, w)
@@ -299,6 +304,10 @@ end
 
 var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
 var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T} = sum(var(x; mean=m, kwargs...))
+
+vee!(::Euclidean{N,ℝ}, vⁱ, x, v) where {N} = copyto!(vⁱ, v)
+
+vee(::Euclidean{N,ℝ}, x, v) where {N} = vec(v)
 
 """
     zero_tangent_vector(M::Euclidean, x)
