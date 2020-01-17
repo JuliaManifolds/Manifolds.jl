@@ -196,7 +196,8 @@ function get_iterator(M::PowerManifold{<:Manifold, Tuple{N}}) where N
     return 1:N
 end
 @generated function get_iterator(M::PowerManifold{<:Manifold, SizeTuple}) where SizeTuple
-    return Base.product(map(Base.OneTo, tuple(SizeTuple.parameters...))...)
+    size_tuple = size_to_tuple(SizeTuple)
+    return Base.product(map(Base.OneTo, size_tuple)...)
 end
 
 @doc doc"""

@@ -87,12 +87,3 @@ end
 similar(::Type{<:SizedAbstractArray{S,T,N,M}},::Type{T2}) where {S,T,N,M,T2} = SizedAbstractArray{S,T2,N,M}(undef)
 similar(::Type{SA},::Type{T},s::Size{S}) where {SA<:SizedAbstractArray,T,S} = sizedabstractarray_similar_type(T,s,StaticArrays.length_val(s))(undef)
 sizedabstractarray_similar_type(::Type{T},s::Size{S},::Type{Val{D}}) where {T,S,D} = SizedAbstractArray{Tuple{S...},T,D,length(s)}
-
-"""
-    size_to_tuple(::Type{S}) where S<:Tuple
-
-Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
-"""
-Base.@pure function size_to_tuple(::Type{S}) where S<:Tuple
-    return tuple(S.parameters...)
-end

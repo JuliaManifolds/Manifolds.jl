@@ -100,7 +100,6 @@ include("utils.jl")
 
     @testset "prod_point" begin
         shape_se = Manifolds.ShapeSpecification(reshapers[1], M1, M2)
-
         Ts = SizedVector{3, Float64}
         Tr2 = SizedVector{2, Float64}
         T = SizedVector{5, Float64}
@@ -122,6 +121,12 @@ include("utils.jl")
             @test isapprox(M1, p[1], submanifold_component(p[3], 1))
             @test isapprox(M2, p[2], submanifold_component(p[3], 2))
         end
+        @test submanifold_component(Mse, pts[1], 1) === pts[1].parts[1]
+        @test submanifold_component(Mse, pts[1], Val(1)) === pts[1].parts[1]
+        @test submanifold_component(pts[1], 1) === pts[1].parts[1]
+        @test submanifold_component(pts[1], Val(1)) === pts[1].parts[1]
+        @test submanifold_components(Mse, pts[1]) === pts[1].parts
+        @test submanifold_components(pts[1]) === pts[1].parts
     end
 
     @testset "ProductRepr" begin
@@ -144,5 +149,27 @@ include("utils.jl")
             test_forward_diff = false,
             test_reverse_diff = false
         )
+        @test eltype(pts[1]) === Float64
+        @test submanifold_component(Mse, pts[1], 1) === pts[1].parts[1]
+        @test submanifold_component(Mse, pts[1], Val(1)) === pts[1].parts[1]
+        @test submanifold_component(pts[1], 1) === pts[1].parts[1]
+        @test submanifold_component(pts[1], Val(1)) === pts[1].parts[1]
+        @test submanifold_components(Mse, pts[1]) === pts[1].parts
+        @test submanifold_components(pts[1]) === pts[1].parts
+    end
+
+    @testset "vee/hat" begin
+        M1 = Rotations(3)
+        M2 = Euclidean(3)
+        M = M1 × M2
+        reshaper = Manifolds.ArrayReshaper()
+        shape_se = Manifolds.ShapeSpecification(reshaper, M1, M2)
+
+        e = Matrix{Float64}(I, 3, 3)
+        x = Manifolds.prod_point(shape_se, exp(M1, e, hat(M1, e, [1.0, 2.0, 3.0])), [1.0, 2.0, 3.0])
+        v = [0.1, 0.2, 0.3, -1.0, 2.0, -3.0]
+        V = hat(M, x, v)
+        v2 = vee(M, x, V)
+        @test isapprox(v, v2)
     end
 end

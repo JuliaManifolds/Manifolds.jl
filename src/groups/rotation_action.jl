@@ -5,56 +5,82 @@
         AD::ActionDirection = LeftAction(),
     )
 
-Space of actions of the [`SpecialOrthogonal`](@ref) group $\mathrm{SO}(N)$
-on a Euclidean-like manifold `M` of dimension `N`.
+Space of actions of the [`SpecialOrthogonal`](@ref) group $\mathrm{SO}(n)$ on a
+Euclidean-like manifold `M` of dimension `n`.
 """
-struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal,TAD<:ActionDirection} <: AbstractGroupAction{TAD}
+struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal,TAD<:ActionDirection} <:
+       AbstractGroupAction{TAD}
     M::TM
     SOn::TSO
 end
 
-function RotationAction(M::Manifold, SOn::SpecialOrthogonal, ::TAD = LeftAction()) where {TAD<:ActionDirection}
-    return RotationAction{typeof(M), typeof(SOn), TAD}(M, SOn)
+function RotationAction(
+    M::Manifold,
+    SOn::SpecialOrthogonal,
+    ::TAD = LeftAction(),
+) where {TAD<:ActionDirection}
+    return RotationAction{typeof(M),typeof(SOn),TAD}(M, SOn)
 end
+
+function show(io::IO, A::RotationAction)
+    print(io, "RotationAction($(A.M), $(A.SOn), $(direction(A)))")
+end
+
+const RotationActionOnVector{N,F,TAD} = RotationAction{
+    <:Union{Euclidean{Tuple{N},F},TranslationGroup{Tuple{N},F}},
+    SpecialOrthogonal{N},
+    TAD,
+}
+
+base_group(A::RotationAction) = A.SOn
+
+g_manifold(A::RotationAction) = A.M
 
 function switch_direction(A::RotationAction{TM,TSO,TAD}) where {TM,TSO,TAD}
     return RotationAction(A.M, A.SOn, switch_direction(TAD()))
 end
 
-function apply!(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},LeftAction}, y, x, a) where N
-    mul!(y, a, x)
-    return y
+apply!(A::RotationActionOnVector{N,F,LeftAction}, y, a, x) where {N,F} = mul!(y, a, x)
+
+apply(A::RotationActionOnVector{N,F,LeftAction}, a, x) where {N,F} = a * x
+function apply(A::RotationActionOnVector{N,F,RightAction}, a, x) where {N,F}
+    return inv(base_group(A), a) * x
 end
 
-function apply!(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},RightAction}, y, x, a) where N
-    mul!(y, x, a)
-    return y
+function inverse_apply(A::RotationActionOnVector{N,F,LeftAction}, a, x) where {N,F}
+    return inv(base_group(A), a) * x
+end
+inverse_apply(A::RotationActionOnVector{N,F,RightAction}, a, x) where {N,F} = a * x
+
+function apply_diff!(A::RotationActionOnVector{N,F,LeftAction}, vout, a, x, v) where {N,F}
+    return mul!(vout, a, v)
+end
+function apply_diff!(A::RotationActionOnVector{N,F,RightAction}, vout, a, x, v) where {N,F}
+    return mul!(vout, inv(base_group(A), a), v)
 end
 
-function apply(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},LeftAction}, x, a) where N
-    return a * x
+apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, x, v) where {N,F} = a * v
+function apply_diff(A::RotationActionOnVector{N,F,RightAction}, a, x, v) where {N,F}
+    return inv(base_group(A), a) * v
 end
 
-function apply(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},RightAction}, x, a) where N
-    return x * a
+function inverse_apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, x, v) where {N,F}
+    return inv(base_group(A), a) * v
 end
+inverse_apply_diff(A::RotationActionOnVector{N,F,RightAction}, a, x, v) where {N,F} = a * v
 
-function base_group(A::RotationAction)
-    return A.SOn
-end
-
-function g_manifold(A::RotationAction)
-    return A.M
-end
-
-function optimal_alignment(A::RotationAction{<:Euclidean{Tuple{N}},SpecialOrthogonal{N},LeftAction}, x1, x2) where N
+function optimal_alignment(A::RotationActionOnVector{N,T,LeftAction}, x1, x2) where {N,T}
     is_manifold_point(A.M, x1, true)
     is_manifold_point(A.M, x2, true)
 
     Xmul = x1 * transpose(x2)
     F = svd(Xmul)
     L = size(Xmul)[2]
-    UVt = F.U*F.Vt
-    Ostar = det(UVt) ≥ 0 ? UVt : F.U*Diagonal([i<L ? 1 : -1 for i in 1:L])*F.Vt
+    UVt = F.U * F.Vt
+    Ostar = det(UVt) ≥ 0 ? UVt : F.U * Diagonal([i < L ? 1 : -1 for i = 1:L]) * F.Vt
     return convert(typeof(Xmul), Ostar)
+end
+
+function optimal_alignment(A::RotationActionOnVector{N,T,RightAction}, x1, x2) where {N,T}
+    return optimal_alignment(switch_direction(A), x2, x1)
 end

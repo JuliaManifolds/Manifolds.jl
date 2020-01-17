@@ -66,6 +66,13 @@ For example `select_from_tuple(("a", "b", "c"), Val((3, 1, 1)))` returns
 end
 
 """
+    size_to_tuple(::Type{S}) where S<:Tuple
+
+Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
+"""
+Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
+
+"""
     ziptuples(a, b)
 
 Zips tuples `a` and `b` in a fast, type-stable way. If they have different
