@@ -119,10 +119,12 @@ end
 function get_coordinates(M::SymmetricMatrices{N, ℝ}, x, v, B::ArbitraryOrthonormalBasis{ℝ}) where N
     dim = manifold_dimension(M)
     vout = similar(v, dim)
+    @assert size(v) == (N, N)
+    @assert dim == div(N*(N+1), 2)
     k = 1
     for i in 1:N, j in i:N
         scale = ifelse(i==j, 1, sqrt(2))
-        vout[k] = v[i,j]*scale
+        @inbounds vout[k] = v[i,j]*scale
         k += 1
     end
     return vout
@@ -131,12 +133,14 @@ end
 function get_coordinates(M::SymmetricMatrices{N, ℂ}, x, v, B::ArbitraryOrthonormalBasis{ℝ}) where N
     dim = manifold_dimension(M)
     vout = similar(v, dim)
+    @assert size(v) == (N, N)
+    @assert dim == N*(N+1)
     k = 1
     for i in 1:N, j in i:N
         scale = ifelse(i==j, 1, sqrt(2))
-        vout[k] = real(v[i,j]) * scale
+        @inbounds vout[k] = real(v[i,j]) * scale
         k += 1
-        vout[k] = imag(v[i,j]) * scale
+        @inbounds vout[k] = imag(v[i,j]) * scale
         k += 1
     end
     return vout
@@ -145,11 +149,13 @@ end
 function get_vector(M::SymmetricMatrices{N, ℝ}, x, v, B::ArbitraryOrthonormalBasis{ℝ}) where N
     dim = manifold_dimension(M)
     vout = similar_result(M, get_vector, x)
+    @assert size(v) == (div(N*(N+1), 2),)
+    @assert size(vout) == (N, N)
     k = 1
     for i in 1:N, j in i:N
         scale = ifelse(i==j, 1, 1/sqrt(2))
-        vout[i,j] = v[k]*scale
-        vout[j,i] = v[k]*scale
+        @inbounds vout[i,j] = v[k]*scale
+        @inbounds vout[j,i] = v[k]*scale
         k += 1
     end
     return vout
@@ -158,11 +164,13 @@ end
 function get_vector(M::SymmetricMatrices{N, ℂ}, x, v, B::ArbitraryOrthonormalBasis{ℝ}) where N
     dim = manifold_dimension(M)
     vout = similar_result(M, get_vector, x, x .* 1im)
+    @assert size(v) == (N*(N+1),)
+    @assert size(vout) == (N, N)
     k = 1
     for i in 1:N, j in i:N
         scale = ifelse(i==j, 1, 1/sqrt(2))
-        vout[i,j] = Complex(v[k], v[k+1])*scale
-        vout[j,i] = vout[i,j]
+        @inbounds vout[i,j] = Complex(v[k], v[k+1])*scale
+        @inbounds vout[j,i] = vout[i,j]
         k += 2
     end
     return vout
