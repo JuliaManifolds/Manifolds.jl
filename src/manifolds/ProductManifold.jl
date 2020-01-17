@@ -485,10 +485,8 @@ function vectors(M::ProductManifold{<:NTuple{N,Manifold}}, x::ProductRepr, B::Pr
     BVs = map(t -> vectors(t...), ziptuples(M.manifolds, x.parts, B.parts))
     zero_tvs = map(t -> zero_tangent_vector(t...), ziptuples(M.manifolds, x.parts))
     vs = typeof(ProductRepr(zero_tvs...))[]
-    for i in 1:N
-        for k in 1:length(BVs[i])
-            push!(vs, ProductRepr(zero_tvs[1:i-1]..., BVs[i][k], zero_tvs[i+1:end]...))
-        end
+    for i in 1:N, k in 1:length(BVs[i])
+        push!(vs, ProductRepr(zero_tvs[1:i-1]..., BVs[i][k], zero_tvs[i+1:end]...))
     end
     return vs
 end
