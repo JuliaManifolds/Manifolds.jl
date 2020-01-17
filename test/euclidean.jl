@@ -28,20 +28,32 @@ include("utils.jl")
     ]
 
     for M in manifolds
+        basis_types = if M == E
+            (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd), DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]))
+        elseif M == Ec
+            (ArbitraryOrthonormalBasis(), DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]))
+        else
+            ()
+        end
         for T in types
             @testset "$M Type $T" begin
                 pts = [convert(T, [1.0, 0.0, 0.0]),
                        convert(T, [0.0, 1.0, 0.0]),
                        convert(T, [0.0, 0.0, 1.0])]
-                test_manifold(M,
-                              pts,
-                              test_reverse_diff = isa(T, Vector),
-                              test_project_tangent = true,
-                              test_musical_isomorphisms = true,
-                              test_vector_transport = true,
-                              test_mutating_rand = isa(T, Vector),
-                              point_distributions = [Manifolds.projected_distribution(M, Distributions.MvNormal(zero(pts[1]), 1.0))],
-                              tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)])
+                test_manifold(
+                    M,
+                    pts,
+                    test_reverse_diff = isa(T, Vector),
+                    test_project_tangent = true,
+                    test_musical_isomorphisms = true,
+                    test_vector_transport = true,
+                    test_mutating_rand = isa(T, Vector),
+                    point_distributions = [Manifolds.projected_distribution(M, Distributions.MvNormal(zero(pts[1]), 1.0))],
+                    tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
+                    basis_types_vecs = basis_types,
+                    basis_types_to_from = basis_types,
+                    basis_has_specialized_diagonalizing_get = true
+                )
             end
         end
     end
@@ -50,12 +62,14 @@ include("utils.jl")
             pts = [convert(T, [1.0im, -1.0im, 1.0]),
                    convert(T, [0.0, 1.0, 1.0im]),
                    convert(T, [0.0, 0.0, 1.0])]
-            test_manifold(Ec,
-                          pts,
-                          test_reverse_diff = isa(T, Vector),
-                          test_project_tangent = true,
-                          test_musical_isomorphisms = true,
-                          test_vector_transport = true)
+            test_manifold(
+                Ec,
+                pts,
+                test_reverse_diff = isa(T, Vector),
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_vector_transport = true
+            )
         end
     end
 

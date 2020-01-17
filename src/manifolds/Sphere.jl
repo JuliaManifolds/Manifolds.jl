@@ -13,6 +13,21 @@ Generate the $\mathbb S^{n}\subset \mathbb R^{n+1}$
 struct Sphere{N} <: Manifold end
 Sphere(n::Int) = Sphere{n}()
 
+function get_basis(M::Sphere{N}, x, B::DiagonalizingOrthonormalBasis) where N
+    A = zeros(N+1, N+1)
+    A[1,:] = transpose(x)
+    A[2,:] = transpose(B.v)
+    V = nullspace(A)
+    κ = ones(N)
+    if !iszero(B.v)
+        # if we have a nonzero direction for the geodesic, add it and it gets curvature zero from the tensor
+		V = cat(B.v/norm(M, x, B.v), V; dims=2)
+        κ[1] = 0.0 # no curvature along the geodesic direction, if x!=y
+    end
+    vecs = [ V[:,i] for i in 1:N ]
+    return PrecomputedDiagonalizingOrthonormalBasis(vecs, κ)
+end
+
 """
     check_manifold_point(S, x; kwargs...)
 
@@ -113,6 +128,16 @@ plane at `x` on the sphere `S=`$\mathbb S^n$ using the restriction of the
 metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
 @inline inner(S::Sphere, x, w, v) = dot(w, v)
+
+function get_vector(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where N
+    if isapprox(x[1], 1)
+        return vcat(0, v)
+    else
+        xp1 = x .+ ntuple(i -> ifelse(i == 1, 1, 0), N+1)
+        v0 = vcat(0, v)
+        return 2*xp1*dot(xp1, v0)/dot(xp1, xp1) - v0
+    end
+end
 
 @doc doc"""
     inverse_retract(M::Sphere, x, y, ::ProjectionInverseRetraction)
@@ -232,6 +257,22 @@ Project the point `v` onto the tangent space at `x` on the [`Sphere`](@ref) `M`.
 """
 project_tangent(::Sphere, ::Any...)
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v) .* x)
+
+@doc doc"""
+    get_coordinates(M::Sphere, x, v, B::ArbitraryOrthonormalBasis)
+
+Represent the tangent vector `v` at point `x` from a sphere `M` in
+an orthonormal basis by rotating the vector `v` using rotation matrix
+$2\frac{x_p x_p^\mathrm{T}}{x_p^\mathrm{T} x_p} - I$ where $x_p = x + (1, 0, \dots, 0)$.
+"""
+function get_coordinates(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where N
+    if isapprox(x[1], 1)
+        return v[2:end]
+    else
+        xp1 = x .+ ntuple(i -> ifelse(i == 1, 1, 0), N+1)
+        return (2*xp1*dot(xp1, v)/dot(xp1, xp1) - v)[2:end]
+    end
+end
 
 @doc doc"""
     representation_size(M::Sphere)

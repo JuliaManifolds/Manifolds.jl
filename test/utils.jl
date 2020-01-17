@@ -29,6 +29,7 @@ that lie on it (contained in `pts`).
 - `point_distributions = []` : point distributions to test
 - `projection_tvector_atol_multiplier = 0` : chage absolute tolerance in testing projections (0 use default, i.e. deactivate atol and use rtol)
 -  tvector_distributions = []` : tangent vector distributions to test
+- `basis_types = ()` : basis types that will be tested
 - `rand_tvector_atol_multiplier = 0` : chage absolute tolerance in testing random vectors (0 use default, i.e. deactivate atol and use rtol)
   random tangent vectors are tangent vectors
 - `retraction_methods = []`: retraction methods that will be tested.
@@ -64,6 +65,9 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     inverse_retraction_methods = [],
     point_distributions = [],
     tvector_distributions = [],
+    basis_types_vecs = (),
+    basis_types_to_from = (),
+    basis_has_specialized_diagonalizing_get = false,
     exp_log_atol_multiplier = 0,
     exp_log_rtol_multiplier = 1,
     retraction_atol_multiplier = 0,
@@ -271,6 +275,66 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @test is_tangent_vector(M, pts[3], v1t2; atol=tvatol)
         @test isapprox(M, pts[3], v1t1, v1t2)
         @test isapprox(M, pts[1], vector_transport_to(M, pts[1], v1, pts[1]), v1)
+    end
+
+    for btype ∈ basis_types_vecs
+        x = pts[1]
+        b = get_basis(M, x, btype)
+        @test isa(b, AbstractPrecomputedOrthonormalBasis)
+
+        bvectors = get_vectors(M, x, b)
+        N = length(bvectors)
+        @test real_dimension(number_system(btype)) * N == manifold_dimension(M)
+
+        # test orthonormality
+        for i in 1:N
+            @test norm(M, x, bvectors[i]) ≈ 1
+            for j in i+1:N
+                @test real(inner(M, x, bvectors[i], bvectors[j])) ≈ 0 atol = sqrt(eps(real(eltype(x))))
+            end
+        end
+        if isa(btype, ProjectedOrthonormalBasis)
+            # check projection idempotency
+            for i in 1:N
+                @test project_tangent(M, x, bvectors[i]) ≈ bvectors[i]
+            end
+        end
+
+        if !isa(btype, ProjectedOrthonormalBasis) &&
+            (basis_has_specialized_diagonalizing_get || !isa(btype, DiagonalizingOrthonormalBasis))
+
+            v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
+            vb = get_coordinates(M, x, v1, btype)
+
+            @test get_coordinates(M, x, v1, b) ≈ vb
+            @test isapprox(M, x, get_vector(M, x, vb, b), get_vector(M, x, vb, btype))
+        end
+    end
+
+    for btype ∈ (basis_types_to_from..., basis_types_vecs...)
+        x = pts[1]
+        N = manifold_dimension(M)
+        if !isa(btype, ProjectedOrthonormalBasis) &&
+            (basis_has_specialized_diagonalizing_get || !isa(btype, DiagonalizingOrthonormalBasis))
+
+            v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
+
+            vb = get_coordinates(M, x, v1, btype)
+            @test isa(vb, AbstractVector{<:Real})
+            @test length(vb) == N
+            vbi = get_vector(M, x, vb, btype)
+            @test isapprox(M, x, v1, vbi)
+
+            vs = [[ifelse(i==j, 1, 0) for j in 1:N] for i in 1:N]
+            vs_invs = [get_vector(M, x, vu, btype) for vu in vs]
+            # check orthonormality of inverse representation
+            for i in 1:N
+                @test norm(M, x, vs_invs[i]) ≈ 1
+                for j in i+1:N
+                    @test real(inner(M, x, vs_invs[i], vs_invs[j])) ≈ 0 atol = sqrt(eps(real(eltype(x))))
+                end
+            end
+        end
     end
 
     test_forward_diff && @testset "ForwardDiff support" begin

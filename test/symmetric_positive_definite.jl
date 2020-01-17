@@ -19,6 +19,11 @@ include("utils.jl")
         Matrix{Float32},
     ]
     for M in metrics
+        basis_types = if M == M3
+            ()
+        else
+            (ArbitraryOrthonormalBasis(),)
+        end
         @testset "$(typeof(M))" begin
             @test representation_size(M) == (3,3)
             for T in types
@@ -42,7 +47,9 @@ include("utils.jl")
                     test_vector_transport = true,
                     test_forward_diff = false,
                     test_reverse_diff = false,
-                    exp_log_atol_multiplier = exp_log_atol_multiplier
+                    exp_log_atol_multiplier = exp_log_atol_multiplier,
+                    basis_types_vecs = basis_types,
+                    basis_types_to_from = basis_types
                 )
             end
             @testset "Test Error cases in is_manifold_point and is_tangent_vector" begin
@@ -76,7 +83,9 @@ include("utils.jl")
     end
     @testset "Test for tangent ONB on LinearAffineMetric" begin
         v = log(M2,x,y)
-        (X,k) = tangent_orthonormal_basis(base_manifold(M2),x,v)
+        donb = get_basis(base_manifold(M2), x, DiagonalizingOrthonormalBasis(v))
+        X = donb.vectors
+        k = donb.kappas
         @test isapprox(0.0,first(k))
         for i = 1:length(X)
             @test isapprox(1.0, norm(M2,x,X[i]))

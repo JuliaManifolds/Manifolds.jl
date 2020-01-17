@@ -18,6 +18,7 @@ include("utils.jl")
             MMatrix{3, 2, Float64},
             Matrix{Float32},
         ]
+        basis_types = (ProjectedOrthonormalBasis(:gram_schmidt),)
         @testset "Type $T" for T in types
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             v = [0.0 0.0; 0.0 0.0; 0.0 1.0]
@@ -36,6 +37,7 @@ include("utils.jl")
                 test_reverse_diff = false,
                 retraction_methods = [PolarRetraction(), QRRetraction()],
                 inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()],
+                basis_types_vecs = basis_types,
                 exp_log_atol_multiplier = 10.0,
                 is_tangent_atol_multiplier = 10.0,
             )

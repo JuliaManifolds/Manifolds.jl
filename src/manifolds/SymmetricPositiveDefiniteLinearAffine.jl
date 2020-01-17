@@ -58,6 +58,60 @@ function exp!(M::SymmetricPositiveDefinite{N}, y, x, v) where N
 end
 
 @doc doc"""
+    [Ξ,κ] = get_basis(M::SymmetricPositiveDefinite, x, B::DiagonalizingOrthonormalBasis)
+    [Ξ,κ] = get_basis(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, x, B::DiagonalizingOrthonormalBasis)
+
+Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
+[`manifold_dimension`](@ref) of `M`) in the tangent space of `x` on the
+[`MetricManifold`](@ref) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
+[`LinearAffineMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
+with eigenvalues `κ` and where the direction `B.v` has curvature `0`.
+"""
+function get_basis(M::SymmetricPositiveDefinite{N}, x, B::DiagonalizingOrthonormalBasis) where N
+    xSqrt = sqrt(x)
+    eigv = eigen(B.v)
+    V = eigv.vectors
+    Ξ = [ (i==j ? 1/2 : 1/sqrt(2))*( V[:,i] * transpose(V[:,j])  +  V[:,j] * transpose(V[:,i]) )
+        for i=1:N for j= i:N
+    ]
+    λ = eigv.values
+    κ = [ -1/4 * (λ[i]-λ[j])^2 for i=1:N for j= i:N ]
+    return PrecomputedDiagonalizingOrthonormalBasis(Ξ, κ)
+end
+get_basis(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, x, B::DiagonalizingOrthonormalBasis) where {N} = get_basis(base_manifold(M), x, B)
+
+function get_coordinates(M::SymmetricPositiveDefinite{N}, x, v, B::ArbitraryOrthonormalBasis) where N
+    dim = manifold_dimension(M)
+    vout = similar(v, dim)
+    @assert size(v) == (N, N)
+    @assert dim == div(N*(N+1), 2)
+    k = 1
+    for i in 1:N, j in i:N
+        scale = ifelse(i==j, 1, sqrt(2))
+        @inbounds vout[k] = v[i,j]*scale
+        k += 1
+    end
+    return vout
+end
+get_coordinates(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, x, v, B::ArbitraryOrthonormalBasis) where {N} = get_coordinates(base_manifold(M), x, v, B)
+
+function get_vector(M::SymmetricPositiveDefinite{N}, x, v, B::ArbitraryOrthonormalBasis) where N
+    dim = manifold_dimension(M)
+    vout = similar_result(M, get_vector, x)
+    @assert size(v) == (div(N*(N+1), 2),)
+    @assert size(vout) == (N, N)
+    k = 1
+    for i in 1:N, j in i:N
+        scale = ifelse(i==j, 1, 1/sqrt(2))
+        @inbounds vout[i,j] = v[k]*scale
+        @inbounds vout[j,i] = v[k]*scale
+        k += 1
+    end
+    return vout
+end
+get_vector(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, x, v, B::ArbitraryOrthonormalBasis) where {N} = get_vector(base_manifold(M), x, v, B)
+
+@doc doc"""
     inner(M::SymmetricPositiveDefinite, x, v, w)
     inner(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, x, v, w)
 
@@ -103,28 +157,6 @@ function log!(M::SymmetricPositiveDefinite{N}, v, x, y) where N
     mul!(v,xue,Se*transpose(xue))
     return v
 end
-
-@doc doc"""
-    [Ξ,κ] = tangent_orthonormal_basis(M::SymmetricPositiveDefinite, x, v)
-    [Ξ,κ] = tangent_orthonormal_basis(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, x, v)
-
-Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
-[`manifold_dimension`](@ref) of `M`) in the tangent space of `x` on the
-[`MetricManifold`](@ref) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
-[`LinearAffineMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
-with eigenvalues `κ` and where the direction `v` has curvature `0`.
-"""
-function tangent_orthonormal_basis(M::SymmetricPositiveDefinite{N},x,v) where N
-    xSqrt = sqrt(x)
-    V = eigvecs(v)
-    Ξ = [ (i==j ? 1/2 : 1/sqrt(2))*( V[:,i] * transpose(V[:,j])  +  V[:,j] * transpose(V[:,i]) )
-        for i=1:N for j= i:N
-    ]
-    λ = eigvals(v)
-    κ = [ -1/4 * (λ[i]-λ[j])^2 for i=1:N for j= i:N ]
-  return Ξ,κ
-end
-tangent_orthonormal_basis(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},args...) where {N} = tangent_orthonormal_basis(base_manifold(M), args...)
 
 @doc doc"""
     vector_transport_to(M::SymmetricPositiveDefinite, x, v, y, ::ParallelTransport)

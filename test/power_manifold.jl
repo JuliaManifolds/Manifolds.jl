@@ -49,10 +49,15 @@ Random.seed!(42)
 
     trim(s::String) = s[1:min(length(s), 20)]
 
+    basis_types = (ArbitraryOrthonormalBasis(),
+        ProjectedOrthonormalBasis(:svd)
+    )
     for T in types_s1
         @testset "Type $(trim(string(T)))..." begin
             pts1 = [convert(T, rand(power_s1_pt_dist)) for _ in 1:3]
             @test injectivity_radius(Ms1,pts1[1]) == π
+            basis_diag = DiagonalizingOrthonormalBasis(log(Ms1, pts1[1], pts1[2]))
+            basis_arb = get_basis(Ms1, pts1[1], ArbitraryOrthonormalBasis())
             test_manifold(Ms1,
                 pts1;
                 test_reverse_diff = true,
@@ -62,6 +67,7 @@ Random.seed!(42)
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_s1_pt_dist],
                 tvector_distributions = [power_s1_tv_dist],
+                basis_types_to_from = (basis_diag, basis_arb, basis_types...),
                 rand_tvector_atol_multiplier = 6.0,
                 retraction_atol_multiplier = 12.0,
                 is_tangent_atol_multiplier = 12.0,
@@ -100,6 +106,7 @@ Random.seed!(42)
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_r1_pt_dist],
                 tvector_distributions = [power_r1_tv_dist],
+                basis_types_to_from = basis_types,
                 rand_tvector_atol_multiplier = 5.0,
                 retraction_atol_multiplier = 12,
                 is_tangent_atol_multiplier = 12.0

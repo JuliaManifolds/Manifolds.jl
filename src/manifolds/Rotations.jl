@@ -236,6 +236,16 @@ function flat!(M::Rotations, v::FVector{CotangentSpaceType}, x, w::FVector{Tange
     return v
 end
 
+function get_coordinates(M::Rotations, x, v, B::ArbitraryOrthonormalBasis) where N
+    T = Base.promote_eltype(x, v)
+    return vee(M, x, v) .* sqrt(T(2))
+end
+
+function get_vector(M::Rotations, x, v, B::ArbitraryOrthonormalBasis) where N
+    T = Base.promote_eltype(x, v)
+    return hat(M, x, v) ./ sqrt(T(2))
+end
+
 function hat!(M::Rotations{2}, Ω, x, θ::Real)
     @assert length(Ω) == 4
     @inbounds begin
