@@ -35,9 +35,9 @@ version = "0.5.8"
 
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "ed2c4abadf84c53d9e58510b5fc48912c2336fbb"
+git-tree-sha1 = "3819f476b6b37ef8ea837070ed831b4ebadfa1e9"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "2.2.0"
+version = "3.2.0"
 
 [[DataAPI]]
 git-tree-sha1 = "674b67f344687a88310213ddfa8a2b3c76cc4252"
@@ -97,12 +97,6 @@ deps = ["LinearAlgebra", "Printf"]
 git-tree-sha1 = "13b65a2a59b4ebd907b1d669d915010285c0b3c0"
 uuid = "26cc04aa-876d-5657-8c51-4c34ba976000"
 version = "0.9.1"
-
-[[FunctionWrappers]]
-deps = ["Compat"]
-git-tree-sha1 = "49bf793ebd37db5adaa7ac1eae96c2c97ec86db5"
-uuid = "069b7b12-0de2-55c6-9aab-29f3d0a68a2e"
-version = "1.0.0"
 
 [[HybridArrays]]
 deps = ["LinearAlgebra", "StaticArrays"]
