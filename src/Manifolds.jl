@@ -227,7 +227,7 @@ export apply, apply!, base_group, center_of_orbit, compose, compose!, g_manifold
     inverse_translate_diff!, optimal_alignment, optimal_alignment!, switch_direction,
     translate, translate!, translate_diff, translate_diff!
 # Orthonormal bases
-export AbstractOrthonormalBasis, AbstractPrecomputedOrthonormalBasis,
+export AbstractBasis, AbstractOrthonormalBasis, AbstractPrecomputedOrthonormalBasis,
     ArbitraryOrthonormalBasis, DiagonalizingOrthonormalBasis,
     PrecomputedDiagonalizingOrthonormalBasis, PrecomputedOrthonormalBasis,
     PrecomputedProductOrthonormalBasis, ProjectedOrthonormalBasis
