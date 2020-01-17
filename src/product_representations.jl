@@ -263,3 +263,7 @@ function (-)(v1::ProductRepr, v2::ProductRepr)
 end
 (-)(v::ProductRepr) = ProductRepr(map(-, submanifold_components(v)))
 (*)(a::Number, v::ProductRepr) = ProductRepr(map(t -> a*t, submanifold_components(v)))
+
+function Base.convert(::Type{TPR}, x::ProductRepr) where TPR<:ProductRepr
+    return ProductRepr(map(t -> convert(t...), ziptuples(tuple(TPR.parameters[1].parameters...), submanifold_components(x))))
+end

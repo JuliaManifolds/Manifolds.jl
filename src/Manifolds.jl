@@ -148,9 +148,9 @@ matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
 """
 struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
-
 include("utils.jl")
 include("numbers.jl")
+include("orthonormal_bases.jl")
 include("autodiff.jl")
 include("SizedAbstractArray.jl")
 
@@ -243,7 +243,7 @@ export base_manifold, bundle_projection, christoffel_symbols_first, christoffel_
     projected_distribution, real_dimension, ricci_curvature, ricci_tensor,
     representation_size, retract, retract!, riemann_tensor, sharp, sharp!,
     shortest_geodesic, similar_result, skewness, std, sym_rem, submanifold,
-    submanifold_component, submanifold_components, tangent_orthonormal_basis, var, vector_space_dimension,
+    submanifold_component, submanifold_components, var, vector_space_dimension,
     vector_transport_along, vector_transport_along!, vector_transport_direction,
     vector_transport_direction!, vector_transport_to, vector_transport_to!, vee, vee!,
     zero_vector, zero_vector!, zero_tangent_vector, zero_tangent_vector!, ×
@@ -258,4 +258,10 @@ export apply, apply!, apply_diff, apply_diff!, base_group, center_of_orbit, comp
     inverse_translate!, inverse_translate_diff, inverse_translate_diff!, optimal_alignment,
     optimal_alignment!, switch_direction, translate, translate!, translate_diff,
     translate_diff!
+# Orthonormal bases
+export AbstractBasis, AbstractOrthonormalBasis, AbstractPrecomputedOrthonormalBasis,
+    ArbitraryOrthonormalBasis, DiagonalizingOrthonormalBasis,
+    PrecomputedDiagonalizingOrthonormalBasis, PrecomputedOrthonormalBasis,
+    PrecomputedProductOrthonormalBasis, ProjectedOrthonormalBasis
+export get_basis, get_coordinates, get_vector, get_vectors, number_system
 end # module
