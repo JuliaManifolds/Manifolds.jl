@@ -197,12 +197,7 @@ use the musical isomorphism to transform the tangent vector `w` from the tangent
 This can be done elementwise, so r every entry of `w` (and `x`) sparately
 """
 flat(::PowerManifold, ::Any...)
-function flat!(
-    M::PowerManifold,
-    v::FVector{CotangentSpaceType},
-    x,
-    w::FVector{TangentSpaceType},
-)
+function flat!(M::PowerManifold, v::CoTFVector, x, w::TFVector)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         flat!(
@@ -518,12 +513,7 @@ Use the musical isomorphism to transform the cotangent vector `w` from the tange
 This can be done elementwise, so for every entry of `w` (and `x`) sparately
 """
 sharp(::PowerManifold, ::Any...)
-function sharp!(
-    M::PowerManifold,
-    v::FVector{TangentSpaceType},
-    x,
-    w::FVector{CotangentSpaceType},
-)
+function sharp!(M::PowerManifold, v::TFVector, x, w::CoTFVector)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         sharp!(

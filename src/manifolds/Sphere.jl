@@ -109,9 +109,7 @@ function exp!(M::Sphere, y, x, v)
     return y
 end
 
-function flat!(M::Sphere, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
-    return copyto!(v, w)
-end
+flat!(M::Sphere, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
 
 @doc doc"""
     injectivity_radius(M::Sphere[, x])
@@ -304,9 +302,7 @@ function retract!(M::Sphere, y, x, v, ::ProjectionRetraction)
     return project_point!(M, y)
 end
 
-function sharp!(M::Sphere, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
-    return copyto!(v, w)
-end
+sharp!(M::Sphere, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
 """
     uniform_distribution(S::Sphere, x)

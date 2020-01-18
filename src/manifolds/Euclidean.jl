@@ -70,14 +70,7 @@ Transform a tangent vector into a cotangent. Since they can directly be identifi
 tangent space of `x` on `M`. The result is returned also in place in `v`.
 """
 flat(::Euclidean, ::Any...)
-function flat!(
-    M::Euclidean,
-    v::FVector{CotangentSpaceType},
-    x,
-    w::FVector{TangentSpaceType},
-)
-    return copyto!(v, w)
-end
+flat!(M::Euclidean, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
 
 function get_basis(M::Euclidean{<:Tuple,ℝ}, x, B::ArbitraryOrthonormalBasis)
     vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
@@ -306,14 +299,7 @@ case, this yields just the identity for a cotangent vector `w` in the tangent sp
 of `x` on `M`.
 """
 sharp(::Euclidean, ::Any...)
-function sharp!(
-    M::Euclidean,
-    v::FVector{TangentSpaceType},
-    x,
-    w::FVector{CotangentSpaceType},
-)
-    return copyto!(v, w)
-end
+sharp!(M::Euclidean, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
 """
     vector_transport_to(M::Euclidean, x, v, y, ::ParallelTransport)

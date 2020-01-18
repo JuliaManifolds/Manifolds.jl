@@ -129,14 +129,7 @@ function exp!(M::Hyperbolic, y, x, v)
     return copyto!(y, cosh(vn) * x + sinh(vn) / vn * v)
 end
 
-function flat!(
-    M::Hyperbolic,
-    v::FVector{CotangentSpaceType},
-    x,
-    w::FVector{TangentSpaceType},
-)
-    return copyto!(v, w)
-end
+flat!(M::Hyperbolic, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
 
 @doc doc"""
     injectivity_radius(M::Hyperbolic[, x])
@@ -242,14 +235,7 @@ hyperbolic manifold the dimention of the embedding, i.e. `n+1`.
 """
 representation_size(::Hyperbolic{N}) where {N} = (N + 1,)
 
-function sharp!(
-    M::Hyperbolic,
-    v::FVector{TangentSpaceType},
-    x,
-    w::FVector{CotangentSpaceType},
-)
-    return copyto!(v, w)
-end
+sharp!(M::Hyperbolic, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
 @doc doc"""
     vector_transport_to(M::Hyperbolic, x, v, y, ::ParallelTransport)

@@ -121,12 +121,14 @@ struct FVector{TType<:VectorSpaceType,TData}
     data::TData
 end
 
+const TFVector = FVector{TangentSpaceType}
+const CoTFVector = FVector{CotangentSpaceType}
+
 struct PrecomputedVectorBundleOrthonormalBasis{
     F,
     TBase<:AbstractPrecomputedOrthonormalBasis{F},
     TVec<:AbstractPrecomputedOrthonormalBasis{F},
 } <: AbstractPrecomputedOrthonormalBasis{F}
-
     base_basis::TBase
     vec_basis::TVec
 end
@@ -575,13 +577,13 @@ function similar_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) wher
     T = typeof(reduce(+, one(eltype(eti)) for eti ∈ args))
     return T
 end
-function similar_result(M::Manifold, ::typeof(flat), w::FVector{TangentSpaceType}, x)
+function similar_result(M::Manifold, ::typeof(flat), w::TFVector, x)
     return FVector(CotangentSpace, similar(w.data))
 end
 
 size(x::FVector) = size(x.data)
 
-function similar_result(M::Manifold, ::typeof(sharp), w::FVector{CotangentSpaceType}, x)
+function similar_result(M::Manifold, ::typeof(sharp), w::CoTFVector, x)
     return FVector(TangentSpace, similar(w.data))
 end
 

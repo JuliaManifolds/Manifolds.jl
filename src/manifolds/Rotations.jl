@@ -237,14 +237,7 @@ function exp!(M::Rotations{4}, y, x, v)
     return y
 end
 
-function flat!(
-    M::Rotations,
-    v::FVector{CotangentSpaceType},
-    x,
-    w::FVector{TangentSpaceType},
-)
-    return copyto!(v, w)
-end
+flat!(M::Rotations, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
 
 function get_coordinates(M::Rotations, x, v, B::ArbitraryOrthonormalBasis) where {N}
     T = Base.promote_eltype(x, v)
@@ -585,14 +578,7 @@ $\mathrm{SO}(n)$ it's `(n,n)`.
 """
 representation_size(::Rotations{N}) where {N} = (N, N)
 
-function sharp!(
-    M::Rotations,
-    v::FVector{TangentSpaceType},
-    x,
-    w::FVector{CotangentSpaceType},
-)
-    return copyto!(v, w)
-end
+sharp!(M::Rotations, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
 function rand(
     rng::AbstractRNG,

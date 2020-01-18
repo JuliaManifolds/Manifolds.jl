@@ -234,12 +234,7 @@ use the musical isomorphism to transform the tangent vector `w` from the tangent
 This can be done elementwise, so for every entry of `w` (and `x`) sparately
 """
 flat(::ProductManifold, ::Any...)
-function flat!(
-    M::ProductManifold,
-    v::FVector{CotangentSpaceType},
-    x,
-    w::FVector{TangentSpaceType},
-)
+function flat!(M::ProductManifold, v::CoTFVector, x, w::TFVector)
     vfs = map(u -> FVector(CotangentSpace, u), submanifold_components(v))
     wfs = map(u -> FVector(TangentSpace, u), submanifold_components(w))
     map(flat!, M.manifolds, vfs, submanifold_components(M, x), wfs)
@@ -575,12 +570,7 @@ Use the musical isomorphism to transform the cotangent vector `w` from the tange
 This can be done elementwise, so vor every entry of `w` (and `x`) sparately
 """
 sharp(::ProductManifold, ::Any...)
-function sharp!(
-    M::ProductManifold,
-    v::FVector{TangentSpaceType},
-    x,
-    w::FVector{CotangentSpaceType},
-)
+function sharp!(M::ProductManifold, v::TFVector, x, w::CoTFVector)
     vfs = map(u -> FVector(TangentSpace, u), submanifold_components(v))
     wfs = map(u -> FVector(CotangentSpace, u), submanifold_components(w))
     map(sharp!, M.manifolds, vfs, submanifold_components(M, x), wfs)

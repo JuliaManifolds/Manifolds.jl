@@ -128,14 +128,7 @@ Compute the [`flat`](@ref flat(M::Manifold, x, w::FVector)) isomorphism of the
 Since `M` is already a vector space over $\mathbb R$, this returns just the vector `w`.
 """
 flat(::SymmetricMatrices, ::Any...)
-function flat!(
-    M::SymmetricMatrices,
-    v::FVector{CotangentSpaceType},
-    x,
-    w::FVector{TangentSpaceType},
-)
-    return copyto!(v, w)
-end
+flat!(M::SymmetricMatrices, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
 
 function get_coordinates(
     M::SymmetricMatrices{N,ℝ},
@@ -316,14 +309,7 @@ Compute the [`sharp`](@ref sharp(M::Manifold, x, w::FVector)) isomorphism of the
 Since `M` is already a vector space over $\mathbb R$, this returns just the vector `w`.
 """
 sharp(::SymmetricMatrices, ::Any...)
-function sharp!(
-    M::SymmetricMatrices,
-    v::FVector{TangentSpaceType},
-    x,
-    w::FVector{CotangentSpaceType},
-)
-    return copyto!(v, w)
-end
+sharp!(M::SymmetricMatrices, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
 @doc doc"""
     vector_transport_to(M::SymmetricMatrices, x, v, y, ::ParallelTransport)

@@ -196,12 +196,7 @@ w^\flat = G_xw,
 where $G_x$ is the local matrix representation of `G`, see [`local_metric`](@ref)
 """
 flat(::MetricManifold, ::Any...)
-function flat!(
-    M::MMT,
-    v::FVector{CotangentSpaceType},
-    x,
-    w::FVector{TangentSpaceType},
-) where {MMT<:MetricManifold}
+function flat!(M::MMT, v::CoTFVector, x, w::TFVector) where {MMT<:MetricManifold}
     g = local_metric(M, x)
     copyto!(v.data, g * w.data)
     return v
@@ -522,12 +517,7 @@ where $G_x$ is the local matrix representation of `G`, i.e. one employs
 [`inverse_local_metric`](@ref) here to obtain $G_x^{-1}$.
 """
 sharp(::MetricManifold, ::Any)
-function sharp!(
-    M::N,
-    v::FVector{TangentSpaceType},
-    x,
-    w::FVector{CotangentSpaceType},
-) where {N<:MetricManifold}
+function sharp!(M::N, v::TFVector, x, w::CoTFVector) where {N<:MetricManifold}
     ginv = inverse_local_metric(M, x)
     copyto!(v.data, ginv * w.data)
     return v

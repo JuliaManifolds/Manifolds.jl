@@ -115,10 +115,9 @@ function exp!(M::Circle{ℂ}, y, x, v)
     return y
 end
 
-function flat!(::Circle, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
-    return copyto!(v, w)
-end
-flat(M::Circle, x::Number, w::FVector{TangentSpaceType}) = FVector(CotangentSpace, w.data)
+flat!(::Circle, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
+
+flat(M::Circle, x::Number, w::TFVector) = FVector(CotangentSpace, w.data)
 
 function get_basis(M::Circle{ℝ}, x, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.v[1])
@@ -294,10 +293,9 @@ retract(M::Circle, x, y, m::ExponentialRetraction) = exp(M, x, y)
 
 representation_size(::Circle) = (1,)
 
-function sharp!(M::Circle, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
-    return copyto!(v, w)
-end
-sharp(M::Circle, x::Number, w::FVector{CotangentSpaceType}) = FVector(TangentSpace, w.data)
+sharp!(M::Circle, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
+
+sharp(M::Circle, x::Number, w::CoTFVector) = FVector(TangentSpace, w.data)
 
 @doc doc"""
     sym_rem(x,[T=π])
