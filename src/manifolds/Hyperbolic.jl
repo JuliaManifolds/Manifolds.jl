@@ -238,7 +238,7 @@ project_tangent!(::Hyperbolic, w, x, v) = (w .= v .+ minkowski_dot(x, v) .* x)
 Return the representation size on the [`Hyperbolic`](@ref), i.e. for the `n`-diomensional
 hyperbolic manifold the dimention of the embedding, i.e. `n+1`.
 """
-representation_size(::Hyperbolic{N}) where {N} = (N + 1,)
+@generated representation_size(::Hyperbolic{N}) where {N} = (N + 1,)
 
 sharp!(M::Hyperbolic, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 

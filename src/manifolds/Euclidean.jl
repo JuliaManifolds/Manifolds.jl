@@ -293,7 +293,7 @@ end
 Return the array dimensions required to represent an element on the
 [`Euclidean`](@ref) `M`, i.e. the vector of all array dimensions.
 """
-representation_size(::Euclidean{N}) where {N} = size_to_tuple(N)
+@generated representation_size(::Euclidean{N}) where {N} = size_to_tuple(N)
 
 """
     sharp(M::Euclidean, x, w)

@@ -293,7 +293,7 @@ project_tangent!(::Circle{ℂ}, w, x, v) = (w .= v - complex_dot(x, v) * x)
 retract(M::Circle, x, y) = retract(M, x, y, ExponentialRetraction())
 retract(M::Circle, x, y, m::ExponentialRetraction) = exp(M, x, y)
 
-representation_size(::Circle) = (1,)
+@generated representation_size(::Circle) = (1,)
 
 sharp(M::Circle, x::Number, w::CoTFVector) = FVector(TangentSpace, w.data)
 

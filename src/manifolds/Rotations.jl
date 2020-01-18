@@ -574,7 +574,7 @@ project_tangent!(M::Rotations, w, x, v) = (w .= (v .- transpose(v)) ./ 2)
 Return the `size()` of a point on the [`Rotations`](@ref) `M`, i.e. for the
 $\mathrm{SO}(n)$ it's `(n,n)`.
 """
-representation_size(::Rotations{N}) where {N} = (N, N)
+@generated representation_size(::Rotations{N}) where {N} = (N, N)
 
 sharp!(M::Rotations, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 

@@ -283,7 +283,7 @@ end
 Return the element size of a point on the [`FixedRankMatrices`](@ref) `M`, i.e.
 the size of matrices on this manifold $(m,n)$.
 """
-representation_size(M::FixedRankMatrices{m,n}) where {m,n} = (m, n)
+@generated representation_size(::FixedRankMatrices{m,n}) where {m,n} = (m, n)
 
 @doc doc"""
     retract(M, x, v, ::PolarRetraction)

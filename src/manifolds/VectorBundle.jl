@@ -584,9 +584,9 @@ end
 size(x::FVector) = size(x.data)
 
 function submanifold_component(M::Manifold, x::FVector, i::Val)
-    return submanifold_components(M, x.data, i)
+    return submanifold_component(M, x.data, i)
 end
-submanifold_component(x::FVector, i::Val) = submanifold_components(x.data, i)
+submanifold_component(x::FVector, i::Val) = submanifold_component(x.data, i)
 
 submanifold_components(M::Manifold, x::FVector) = submanifold_components(M, x.data)
 submanifold_components(x::FVector) = submanifold_components(x.data)

@@ -301,7 +301,7 @@ project_tangent!(M::SymmetricMatrices, w, x, v) = (w .= (v .+ transpose(v)) ./ 2
 Returns the size points on the [`SymmetricMatrices`](@ref) `M` are represented as, i.e.
 for the $n\times n$ it's `(n,n)`.
 """
-representation_size(::SymmetricMatrices{N}) where {N} = (N, N)
+@generated representation_size(::SymmetricMatrices{N}) where {N} = (N, N)
 
 @doc doc"""
     sharp(M::SymmetricMatrices, x, w::FVector{CotangentSpaceType})

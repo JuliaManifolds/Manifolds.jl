@@ -174,7 +174,6 @@ Return the size of an array representing an element on the
 [`SymmetricPositiveDefinite`](@ref) manifold `M`, i.e. $n\times n$, the size of such a
 symmetric positive definite matrix on $\mathcal M = \mathcal P(n)$.
 """
-representation_size(::SymmetricPositiveDefinite{N}) where {N} = (N, N)
 function representation_size(
     ::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
 ) where {N}
@@ -185,6 +184,7 @@ function representation_size(
 ) where {N}
     return (N, N)
 end
+@generated representation_size(::SymmetricPositiveDefinite{N}) where {N} = (N, N)
 
 @doc doc"""
     zero_tangent_vector(M::SymmetricPositiveDefinite,x)

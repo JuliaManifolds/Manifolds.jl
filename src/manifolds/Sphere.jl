@@ -289,7 +289,7 @@ end
 Return the size points on the [`Sphere`](@ref) `M` are represented as, i.e.
 for the `n`-dimensional [`Sphere`](@ref) it is vectors of size `(n+1,)`.
 """
-representation_size(::Sphere{N}) where {N} = (N + 1,)
+@generated representation_size(::Sphere{N}) where {N} = (N + 1,)
 
 @doc doc"""
     retract(M::Sphere, x, y, ::ProjectionRetraction)

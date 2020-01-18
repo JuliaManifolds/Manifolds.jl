@@ -292,10 +292,10 @@ end
 Returns the representation size of the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$,
 i.e. `(n,k)`, which is the matrix dimensions.
 """
-representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
+@generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
 
 @doc doc"""
-    representation_size(M::Stiefel, x)
+    zero_tangent_vector(M::Stiefel, x)
 
 Returns the zero tangent vector from the tangent space at `x` on the [`Stiefel`](@ref)
 `M`=$\operatorname{St}(n,k)$, i.e. an `(n,k)` zero matrix.
