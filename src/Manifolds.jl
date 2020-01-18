@@ -120,8 +120,7 @@ inverse.
 """
 function hat(M::Manifold, x, vⁱ)
     v = similar_result(M, hat, x, vⁱ)
-    hat!(M, v, x, vⁱ)
-    return v
+    return hat!(M, v, x, vⁱ)
 end
 
 function hat!(M::Manifold, v, x, vⁱ)
@@ -146,8 +145,7 @@ inverse.
 """
 function vee(M::Manifold, x, v)
     vⁱ = similar_result(M, vee, x, v)
-    vee!(M, vⁱ, x, v)
-    return vⁱ
+    return vee!(M, vⁱ, x, v)
 end
 
 function vee!(M::Manifold, vⁱ, x, v)

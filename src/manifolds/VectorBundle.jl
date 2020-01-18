@@ -82,9 +82,7 @@ end
 Return an object of type [`VectorSpaceAtPoint`](@ref) representing tangent
 space at `x`.
 """
-function TangentSpaceAtPoint(M::Manifold, x)
-    return VectorSpaceAtPoint(TangentBundleFibers(M), x)
-end
+TangentSpaceAtPoint(M::Manifold, x) = VectorSpaceAtPoint(TangentBundleFibers(M), x)
 
 """
     CotangentSpaceAtPoint(M::Manifold, x)
@@ -92,9 +90,7 @@ end
 Return an object of type [`VectorSpaceAtPoint`](@ref) representing cotangent
 space at `x`.
 """
-function CotangentSpaceAtPoint(M::Manifold, x)
-    return VectorSpaceAtPoint(CotangentBundleFibers(M), x)
-end
+CotangentSpaceAtPoint(M::Manifold, x) = VectorSpaceAtPoint(CotangentBundleFibers(M), x)
 
 """
     VectorBundle(M::Manifold, type::VectorSpaceType)
@@ -237,8 +233,7 @@ $\flat \colon T\mathcal M \to T^{*}\mathcal M$
 """
 function flat(M::Manifold, x, w::FVector)
     v = similar_result(M, flat, w, x)
-    flat!(M, v, x, w)
-    return v
+    return flat!(M, v, x, w)
 end
 function flat!(M::Manifold, v::FVector, x, w::FVector)
     error(
@@ -361,9 +356,7 @@ function inner(B::VectorBundleFibers, x, v, w)
         "vectors of types $(typeof(v)) and $(typeof(w)).",
     )
 end
-function inner(B::VectorBundleFibers{<:TangentSpaceType}, x, v, w)
-    return inner(B.M, x, v, w)
-end
+inner(B::VectorBundleFibers{<:TangentSpaceType}, x, v, w) = inner(B.M, x, v, w)
 function inner(B::VectorBundleFibers{<:CotangentSpaceType}, x, v, w)
     return inner(
         B.M,
@@ -510,12 +503,10 @@ Project vector `w` from the vector space of type `B.VS` at point `x`.
 """
 function project_vector(B::VectorBundleFibers, x, w)
     v = similar_result(B, project_vector, x, w)
-    project_vector!(B, v, x, w)
-    return v
+    return project_vector!(B, v, x, w)
 end
 function project_vector!(B::VectorBundleFibers{<:TangentSpaceType}, v, x, w)
-    project_tangent!(B.M, v, x, w)
-    return v
+    return project_tangent!(B.M, v, x, w)
 end
 function project_vector!(B::VectorBundleFibers, v, x, w)
     error("project_vector! not implemented for vector space family of type $(typeof(B)), output vector of type $(typeof(v)) and input vector at point $(typeof(x)) with type of w $(typeof(w)).")
@@ -523,9 +514,7 @@ end
 
 Base.@propagate_inbounds setindex!(x::FVector, val, i) = setindex!(x.data, val, i)
 
-function representation_size(B::VectorBundleFibers{<:TCoTSpaceType})
-    representation_size(B.M)
-end
+representation_size(B::VectorBundleFibers{<:TCoTSpaceType}) = representation_size(B.M)
 function representation_size(B::VectorBundle)
     len_manifold = prod(representation_size(B.M))
     len_vs = prod(representation_size(B.VS))
@@ -544,8 +533,7 @@ $\sharp \colon T^{*}\mathcal M \to T\mathcal M$
 """
 function sharp(M::Manifold, x, w::FVector)
     v = similar_result(M, sharp, w, x)
-    sharp!(M, v, x, w)
-    return v
+    return sharp!(M, v, x, w)
 end
 
 function sharp!(M::Manifold, v::FVector, x, w::FVector)
@@ -620,8 +608,7 @@ function zero_vector!(B::VectorBundleFibers, v, x)
 end
 
 function zero_vector!(B::VectorBundleFibers{<:TangentSpaceType}, v, x)
-    zero_tangent_vector!(B.M, v, x)
-    return v
+    return zero_tangent_vector!(B.M, v, x)
 end
 
 """
@@ -632,8 +619,7 @@ from manifold `B.M`.
 """
 function zero_vector(B::VectorBundleFibers, x)
     v = similar_result(B, zero_vector, x)
-    zero_vector!(B, v, x)
-    return v
+    return zero_vector!(B, v, x)
 end
 @doc doc"""
     zero_tangent_vector!(B::VectorBundle, v, x)

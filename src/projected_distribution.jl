@@ -27,18 +27,14 @@ end
 
 function rand(rng::AbstractRNG, d::ProjectedPointDistribution{TResult}) where {TResult}
     x = convert(TResult, rand(rng, d.d))
-    d.proj!(d.manifold, x)
-    return x
+    return d.proj!(d.manifold, x)
 end
 function _rand!(rng::AbstractRNG, d::ProjectedPointDistribution, x::AbstractArray{<:Number})
     _rand!(rng, d.d, x)
-    d.proj!(d.manifold, x)
-    return x
+    return d.proj!(d.manifold, x)
 end
 
-function support(d::ProjectedPointDistribution)
-    return MPointSupport(d.manifold)
-end
+support(d::ProjectedPointDistribution) = MPointSupport(d.manifold)
 
 """
     ProjectedFVectorDistribution(type::VectorBundleFibers, x, d, project_vector!)
@@ -84,8 +80,7 @@ end
 
 function rand(rng::AbstractRNG, d::ProjectedFVectorDistribution{TResult}) where {TResult}
     v = convert(TResult, reshape(rand(rng, d.d), size(d.x)))
-    d.project_vector!(d.type, v, d.x, v)
-    return v
+    return d.project_vector!(d.type, v, d.x, v)
 end
 function _rand!(
     rng::AbstractRNG,
@@ -93,10 +88,7 @@ function _rand!(
     v::AbstractArray{<:Number},
 )
     # calling _rand!(rng, d.d, v) doesn't work for all arrays types
-    copyto!(v, rand(rng, d))
-    return v
+    return copyto!(v, rand(rng, d))
 end
 
-function support(tvd::ProjectedFVectorDistribution)
-    return FVectorSupport(tvd.type, tvd.x)
-end
+support(tvd::ProjectedFVectorDistribution) = FVectorSupport(tvd.type, tvd.x)

@@ -172,9 +172,7 @@ function check_tangent_vector(
     kwargs...,
 ) where {m,n,k}
     c = check_manifold_point(M, x)
-    if c !== nothing
-        return c
-    end
+    c === nothing || return c
     if (size(v.U) != (m, k)) || (size(v.Vt) != (k, n)) || (size(v.M) != (k, k))
         return DomainError(
             cat(size(v.U), size(v.M), size(v.Vt), dims = 1),
@@ -341,11 +339,13 @@ function copyto!(x::SVDMPoint, y::SVDMPoint)
     copyto!(x.U, y.U)
     copyto!(x.S, y.S)
     copyto!(x.Vt, y.Vt)
+    return x
 end
 function copyto!(v::UMVTVector, w::UMVTVector)
     copyto!(v.U, w.U)
     copyto!(v.M, w.M)
     copyto!(v.Vt, w.Vt)
+    return v
 end
 
 @doc doc"""

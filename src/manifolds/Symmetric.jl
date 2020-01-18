@@ -69,9 +69,8 @@ and its values have to be from the correct [`AbstractNumbers`](@ref).
 The tolerance for the symmetry of `x` and `v` can be set using `kwargs...`.
 """
 function check_tangent_vector(M::SymmetricMatrices{n,F}, x, v; kwargs...) where {n,F}
-    if (check_manifold_point(M, x; kwargs...) !== nothing)
-        return check_manifold_point(M, x; kwargs...)
-    end
+    t = check_manifold_point(M, x; kwargs...)
+    t === nothing || return t
     if (F === ℝ) && !(eltype(v) <: Real)
         return DomainError(
             eltype(v),
@@ -118,11 +117,7 @@ Compute the exponential map eminating from `x` in tangent direction `v` on the
 ````
 """
 exp(::SymmetricMatrices, ::Any...)
-function exp!(M::SymmetricMatrices, y, x, v)
-    y .= x .+ v
-    return y
-end
-
+exp!(M::SymmetricMatrices, y, x, v) = (y .= x .+ v)
 
 @doc doc"""
     flat(M::SymmetricMatrices, x, w::FVector{TangentSpaceType})
@@ -246,10 +241,7 @@ reads
 ````
 """
 log(::SymmetricMatrices, ::Any...)
-function log!(M::SymmetricMatrices, v, x, y)
-    v .= y .- x
-    return v
-end
+log!(M::SymmetricMatrices, v, x, y) = (v .= y .- x)
 
 @doc doc"""
 manifold_dimension(M::SymmetricMatrices{n,𝔽})
@@ -349,8 +341,7 @@ P_{y\gets x}(v) = v.
 """
 vector_transport_to(::SymmetricMatrices, ::Any...)
 function vector_transport_to!(M::SymmetricMatrices, vto, x, v, y, ::ParallelTransport)
-    copyto!(vto, v)
-    return vto
+    return copyto!(vto, v)
 end
 
 @doc doc"""
@@ -360,7 +351,4 @@ Return the zero tangent vector for the tangent space at `x` on the
 [`SymmetricMatrices`](@ref) `M`, i.e. the zero matrix.
 """
 zero_tangent_vector(::SymmetricMatrices, ::Any...)
-function zero_tangent_vector!(M::SymmetricMatrices, v, x)
-    fill!(v, 0)
-    return v
-end
+zero_tangent_vector!(M::SymmetricMatrices, v, x) = fill!(v, 0)

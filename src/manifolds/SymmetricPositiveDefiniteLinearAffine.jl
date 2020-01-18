@@ -53,8 +53,7 @@ function exp!(M::SymmetricPositiveDefinite{N}, y, x, v) where {N}
     Se = Diagonal(exp.(eig1.values))
     Ue = eig1.vectors
     xue = xSqrt * Ue
-    copyto!(y, xue * Se * transpose(xue))
-    return y
+    return copyto!(y, xue * Se * transpose(xue))
 end
 
 @doc doc"""
@@ -191,8 +190,7 @@ function log!(M::SymmetricPositiveDefinite{N}, v, x, y) where {N}
     e2 = eigen(T)
     Se = Diagonal(log.(max.(e2.values, eps())))
     xue = xSqrt * e2.vectors
-    mul!(v, xue, Se * transpose(xue))
-    return v
+    return mul!(v, xue, Se * transpose(xue))
 end
 
 @doc doc"""
@@ -228,10 +226,7 @@ function vector_transport_to!(
     y,
     ::ParallelTransport,
 ) where {N}
-    if distance(M, x, y) < 2 * eps(eltype(x))
-        copyto!(vto, v)
-        return vto
-    end
+    distance(M, x, y) < 2 * eps(eltype(x)) && copyto!(vto, v)
     e = eigen(Symmetric(x))
     U = e.vectors
     S = e.values
@@ -251,6 +246,5 @@ function vector_transport_to!(
     Uf = e3.vectors
     xue = xSqrt * Uf * Sf * transpose(Uf)
     vtp = Symmetric(xue * tv * transpose(xue))
-    copyto!(vto, vtp)
-    return vto
+    return copyto!(vto, vtp)
 end

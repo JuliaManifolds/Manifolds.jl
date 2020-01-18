@@ -58,9 +58,7 @@ The tolerance for the tests can be set using the `kwargs...`.
 """
 function check_tangent_vector(M::CholeskySpace, x, v; kwargs...)
     mpe = check_manifold_point(M, x)
-    if mpe !== nothing
-        return mpe
-    end
+    mpe !== nothing && return mpe
     if size(v) != representation_size(M)
         return DomainError(
             size(v),
@@ -211,7 +209,4 @@ end
 Return the zero tangent vector on the [`CholeskySpace`](@ref) `M` at `x`.
 """
 zero_tangent_vector(::CholeskySpace, ::Any...)
-function zero_tangent_vector!(M::CholeskySpace, v, x)
-    fill!(v, 0)
-    return v
-end
+zero_tangent_vector!(M::CholeskySpace, v, x) = fill!(v, 0)

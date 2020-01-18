@@ -79,10 +79,8 @@ it (approximtly) holds that $x^{\mathrm{H}}v + v^{\mathrm{H}}x = 0$, where
 `kwargs...` is passed to the `isapprox`.
 """
 function check_tangent_vector(M::Stiefel{n,k,T}, x, v; kwargs...) where {n,k,T}
-    t = check_manifold_point(M, x)
-    if (t !== nothing)
-        return t
-    end
+    mpe = check_manifold_point(M, x)
+    mpe === nothing || return mpe
     if (T === ℝ) && !(eltype(v) <: Real)
         return DomainError(
             eltype(v),
@@ -131,12 +129,12 @@ $0_k$ are the identity matrix and the zero matrix of dimension $k \times k$, res
 """
 exp(::Stiefel, ::Any...)
 function exp!(M::Stiefel{n,k}, y, x, v) where {n,k}
-    y .= (
+    return copyto!(
+        y,
         [x v] *
         exp([x'v -v' * v; one(zeros(eltype(x), k, k)) x' * v]) *
-        [exp(-x'v); zeros(eltype(x), k, k)]
+        [exp(-x'v); zeros(eltype(x), k, k)],
     )
-    return y
 end
 
 @doc doc"""
@@ -186,8 +184,7 @@ function inverse_retract!(::Stiefel, v, x, y, ::PolarInverseRetraction)
     A = x' * y
     H = -2 * one(x' * x)
     B = lyap(A, H)
-    v .= y * B - x
-    return v
+    return copyto!(v, y * B - x)
 end
 
 @doc doc"""
@@ -213,8 +210,7 @@ function inverse_retract!(::Stiefel{n,k}, v, x, y, ::QRInverseRetraction) where 
         b[1:(end-1)] = -transpose(R[1:(i-1), 1:(i-1)]) * A[i, 1:(i-1)]
         R[1:i, i] = A[1:i, 1:i] \ b
     end
-    v .= y * R - x
-    return v
+    return copyto!(v, y * R - x)
 end
 
 function isapprox(M::Stiefel, x, v, w; kwargs...)
@@ -252,7 +248,7 @@ where $\operatorname{Sym}(y)$ is the symmetrization of $y$, e.g. by
 $\operatorname{Sym}(y) = \frac{y^{\mathrm{H}}+y}{2}$.
 """
 project_tangent(::Stiefel, ::Any...)
-project_tangent!(::Stiefel, w, x, v) = (w .= v - x * Symmetric(x' * v))
+project_tangent!(::Stiefel, w, x, v) = copyto!(w, v - x * Symmetric(x' * v))
 
 @doc doc"""
     retract(M, x, v, ::PolarRetraction)
@@ -266,8 +262,7 @@ Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
 function retract!(::Stiefel, y, x, v, ::PolarRetraction)
     s = svd(x + v)
-    mul!(y, s.U, s.V')
-    return y
+    return mul!(y, s.U, s.V')
 end
 
 @doc doc"""
@@ -293,8 +288,7 @@ function retract!(::Stiefel, y, x, v, ::QRRetraction)
     qrfac = qr(x + v)
     d = diag(qrfac.R)
     D = Diagonal(sign.(sign.(d .+ 0.5)))
-    y .= Matrix(qrfac.Q) * D
-    return y
+    return copyto!(y, Matrix(qrfac.Q) * D)
 end
 
 @doc doc"""

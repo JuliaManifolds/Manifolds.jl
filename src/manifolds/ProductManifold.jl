@@ -171,15 +171,9 @@ For the case that more than one is a product manifold of these is build with the
 same approach as above
 """
 cross(::Manifold...)
-function cross(M1::Manifold, M2::Manifold)
-    return ProductManifold(M1, M2)
-end
-function cross(M1::ProductManifold, M2::Manifold)
-    return ProductManifold(M1.manifolds..., M2)
-end
-function cross(M1::Manifold, M2::ProductManifold)
-    return ProductManifold(M1, M2.manifolds...)
-end
+cross(M1::Manifold, M2::Manifold) = ProductManifold(M1, M2)
+cross(M1::ProductManifold, M2::Manifold) = ProductManifold(M1.manifolds..., M2)
+cross(M1::Manifold, M2::ProductManifold) = ProductManifold(M1, M2.manifolds...)
 function cross(M1::ProductManifold, M2::ProductManifold)
     return ProductManifold(M1.manifolds..., M2.manifolds...)
 end
@@ -370,9 +364,7 @@ injectivity_radius(::ProductManifold, ::Any...)
 function injectivity_radius(M::ProductManifold, x)
     return min(map(injectivity_radius, M.manifolds, submanifold_components(M, x))...)
 end
-function injectivity_radius(M::ProductManifold)
-    return min(map(injectivity_radius, M.manifolds)...)
-end
+injectivity_radius(M::ProductManifold) = min(map(injectivity_radius, M.manifolds)...)
 
 @doc doc"""
     inner(M::ProductManifold, x, v, w)
@@ -531,8 +523,7 @@ function rand(rng::AbstractRNG, d::ProductFVectorDistribution)
 end
 
 function _rand!(rng::AbstractRNG, d::ProductPointDistribution, x::AbstractArray{<:Number})
-    x .= rand(rng, d)
-    return x
+    return copyto!(x, rand(rng, d))
 end
 function _rand!(rng::AbstractRNG, d::ProductPointDistribution, x::ProductRepr)
     map(
@@ -543,8 +534,7 @@ function _rand!(rng::AbstractRNG, d::ProductPointDistribution, x::ProductRepr)
     return x
 end
 function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::AbstractArray{<:Number})
-    v .= rand(rng, d)
-    return v
+    return copyto!(v, rand(rng, d))
 end
 function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::ProductRepr)
     map(t -> _rand!(rng, t[1], t[2]), d.distributions, submanifold_components(d.space.M, v))
@@ -602,9 +592,7 @@ end
 
 Extract the `i`th factor of the product manifold `M`.
 """
-function submanifold(M::ProductManifold, i::Integer)
-    return M.manifolds[i]
-end
+submanifold(M::ProductManifold, i::Integer) = M.manifolds[i]
 
 """
     submanifold(M::ProductManifold, i::Val)
@@ -613,9 +601,7 @@ Extract the factor of the product manifold `M` indicated by indices in `i`.
 For example, for `i` equal to `Val((1, 3))` the product manifold constructed
 from the first and the third factor is returned.
 """
-function submanifold(M::ProductManifold, i::Val)
-    return ProductManifold(select_from_tuple(M.manifolds, i))
-end
+submanifold(M::ProductManifold, i::Val) = ProductManifold(select_from_tuple(M.manifolds, i))
 
 """
     submanifold(M::ProductManifold, i::AbstractVector)
@@ -629,9 +615,7 @@ This function is not type-stable, for better preformance use
 """
 submanifold(M::ProductManifold, i::AbstractVector) = submanifold(M, Val(tuple(i...)))
 
-function support(d::ProductPointDistribution)
-    return MPointSupport(d.manifold)
-end
+support(d::ProductPointDistribution) = MPointSupport(d.manifold)
 
 function support(tvd::ProductFVectorDistribution)
     return FVectorSupport(

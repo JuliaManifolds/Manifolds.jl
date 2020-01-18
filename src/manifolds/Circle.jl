@@ -127,9 +127,7 @@ function get_basis(M::Circle{ℝ}, x, B::DiagonalizingOrthonormalBasis)
     return PrecomputedDiagonalizingOrthonormalBasis(vs, @SVector [0])
 end
 
-function get_coordinates(M::Circle{ℝ}, x, v, B::ArbitraryOrthonormalBasis)
-    return v
-end
+get_coordinates(M::Circle{ℝ}, x, v, B::ArbitraryOrthonormalBasis) = v
 
 function get_coordinates(M::Circle{ℝ}, x, v, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.v[1])
@@ -147,9 +145,7 @@ function get_coordinates(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
     return @SVector [w]
 end
 
-function get_vector(M::Circle{ℝ}, x, v, B::ArbitraryOrthonormalBasis)
-    return v
-end
+get_vector(M::Circle{ℝ}, x, v, B::ArbitraryOrthonormalBasis) = v
 
 function get_vector(M::Circle{ℝ}, x, v, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.v[1])
@@ -161,9 +157,7 @@ end
 
 Return tangent vector from the coordinate in the Lie algebra of the circle.
 """
-function get_vector(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
-    return @SVector [1im * v[1] * x[1]]
-end
+get_vector(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis) = @SVector [1im * v[1] * x[1]]
 
 @doc doc"""
     injectivity_radius(M::Circle[, x])
@@ -243,8 +237,7 @@ function log!(M::Circle{ℂ}, v, x, y)
         θ = acos(cosθ)
         v .= (y - cosθ * x) / usinc(θ)
     end
-    project_tangent!(M, v, x, v)
-    return v
+    return project_tangent!(M, v, x, v)
 end
 
 @doc doc"""
@@ -378,7 +371,4 @@ function vector_transport_direction(
 end
 
 zero_tangent_vector(::Circle, x::Number) = zero(x)
-function zero_tangent_vector!(::Circle, v, x)
-    fill!(v, 0)
-    return v
-end
+zero_tangent_vector!(::Circle, v, x) = fill!(v, 0)

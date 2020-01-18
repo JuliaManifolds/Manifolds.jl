@@ -180,8 +180,7 @@ function exp!(M::MMT, ::Val{false}, y, x, v) where {MMT<:MetricManifold}
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, x, v, tspan; dense = false, saveat = [1.0])
     n = length(x)
-    y .= sol.u[1][n+1:end]
-    return y
+    return copyto!(y, sol.u[1][n+1:end])
 end
 
 @doc doc"""

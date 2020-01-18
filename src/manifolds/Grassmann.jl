@@ -105,9 +105,7 @@ denotes the $k\times k$ zero natrix.
 """
 function check_tangent_vector(G::Grassmann{n,k,F}, x, v; kwargs...) where {n,k,F}
     t = check_manifold_point(G, x)
-    if (t !== nothing)
-        return t
-    end
+    t === nothing || return t
     if (F === ℝ) && !(eltype(v) <: Real)
         return DomainError(
             eltype(v),
@@ -150,13 +148,10 @@ where
 $b_{i}=\begin{cases} 0 & \text{if} \; S_i \geq 1\\ \operatorname{acos}(S_i) & \, \text{if} \; S_i<1 \end{cases}.$
 """
 function distance(M::Grassmann, x, y)
-    if x ≈ y
-        return 0.0
-    else
-        a = svd(x' * y).S
-        a[a.>1] .= 1
-        return sqrt(sum((acos.(a)) .^ 2))
-    end
+    x ≈ y && return zero(real(eltype(x)))
+    a = svd(x' * y).S
+    a[a.>1] .= 1
+    return sqrt(sum((acos.(a)) .^ 2))
 end
 
 @doc doc"""
@@ -180,14 +175,11 @@ yielding the result as
 """
 exp(::Grassmann, ::Any...)
 function exp!(M::Grassmann, y, x, v)
-    if norm(M, x, v) ≈ 0
-        return (y .= x)
-    end
+    norm(M, x, v) ≈ 0 && return copyto!(y, x)
     d = svd(v)
     z = x * d.V * Diagonal(cos.(d.S)) * d.Vt + d.U * Diagonal(sin.(d.S)) * d.Vt
     # reorthonormalize
-    copyto!(y, Array(qr(z).Q))
-    return y
+    return copyto!(y, Array(qr(z).Q))
 end
 
 injectivity_radius(::Grassmann) = π / 2
@@ -220,7 +212,9 @@ Compute the inverse retraction for the [`PolarRetraction`](@ref), on the
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inverse_retract(M::Grassmann, ::Any, ::Any, ::PolarInverseRetraction)
-inverse_retract!(::Grassmann, v, x, y, ::PolarInverseRetraction) = (v .= y / (x' * y) - x)
+function inverse_retract!(::Grassmann, v, x, y, ::PolarInverseRetraction)
+    return copyto!(v, y / (x' * y) - x)
+end
 
 @doc doc"""
     inverse_retract(M, x, y, ::QRInverseRetraction)
@@ -233,7 +227,7 @@ Compute the inverse retraction valid of the [`QRRetraction`](@ref)
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
-inverse_retract!(::Grassmann, v, x, y, ::QRInverseRetraction) = (v .= y / (x' * y) - x)
+inverse_retract!(::Grassmann, v, x, y, ::QRInverseRetraction) = copyto!(v, y / (x' * y) - x)
 
 function isapprox(M::Grassmann, x, v, w; kwargs...)
     return isapprox(sqrt(inner(M, x, zero_tangent_vector(M, x), v - w)), 0; kwargs...)
@@ -265,8 +259,7 @@ function log!(M::Grassmann, v, x, y)
     At = y' - z * x'
     Bt = z \ At
     d = svd(Bt')
-    v .= d.U * Diagonal(atan.(d.S)) * d.Vt
-    return v
+    return copyto!(v, d.U * Diagonal(atan.(d.S)) * d.Vt)
 end
 
 @doc doc"""
@@ -318,7 +311,7 @@ which is computed by
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 project_tangent(::Grassmann, ::Any...)
-project_tangent!(M::Grassmann, v, x, w) = (v .= w - x * x' * w)
+project_tangent!(M::Grassmann, v, x, w) = copyto!(v, w - x * x' * w)
 
 @doc doc"""
     representation_size(M::Grassmann{n,k,F})
@@ -342,8 +335,7 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 retract(::Grassmann, ::Any, ::Any, ::PolarRetraction)
 function retract!(::Grassmann, y, x, v, ::PolarRetraction)
     s = svd(x + v)
-    mul!(y, s.U, s.V')
-    return y
+    return mul!(y, s.U, s.V')
 end
 
 @doc doc"""
@@ -366,8 +358,7 @@ function retract!(::Grassmann{N,K}, y, x, v, ::QRRetraction) where {N,K}
     D = Diagonal(sign.(sign.(d .+ 0.5)))
     y .= zeros(N, K)
     y[1:K, 1:K] .= D
-    y .= Array(qrfac.Q) * D
-    return y
+    return copyto!(y, Array(qrfac.Q) * D)
 end
 
 @doc doc"""

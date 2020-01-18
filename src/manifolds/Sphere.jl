@@ -22,7 +22,7 @@ function get_basis(M::Sphere{N}, x, B::DiagonalizingOrthonormalBasis) where {N}
     if !iszero(B.v)
         # if we have a nonzero direction for the geodesic, add it and it gets curvature zero from the tensor
         V = cat(B.v / norm(M, x, B.v), V; dims = 2)
-        κ[1] = 0.0 # no curvature along the geodesic direction, if x!=y
+        κ[1] = 0 # no curvature along the geodesic direction, if x!=y
     end
     vecs = [V[:, i] for i = 1:N]
     return PrecomputedDiagonalizingOrthonormalBasis(vecs, κ)
@@ -139,13 +139,10 @@ metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 @inline inner(S::Sphere, x, w, v) = dot(w, v)
 
 function get_vector(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where {N}
-    if isapprox(x[1], 1)
-        return vcat(0, v)
-    else
-        xp1 = x .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
-        v0 = vcat(0, v)
-        return 2 * xp1 * dot(xp1, v0) / dot(xp1, xp1) - v0
-    end
+    x[1] ≈ 1 && return vcat(0, v)
+    xp1 = x .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
+    v0 = vcat(0, v)
+    return 2 * xp1 * dot(xp1, v0) / dot(xp1, xp1) - v0
 end
 
 @doc doc"""
@@ -196,8 +193,7 @@ function log!(S::Sphere, v, x, y)
         θ = acos(cosθ)
         v .= (y .- cosθ .* x) ./ usinc(θ)
     end
-    project_tangent!(S, v, x, v)
-    return v
+    return project_tangent!(S, v, x, v)
 end
 
 @doc doc"""
@@ -306,8 +302,7 @@ Compute the retraction that is based on projection, i.e.
 retract(::Sphere, ::Any, ::Any, ::ProjectionRetraction)
 function retract!(M::Sphere, y, x, v, ::ProjectionRetraction)
     y .= x .+ v
-    project_point!(M, y)
-    return y
+    return project_point!(M, y)
 end
 
 function sharp!(M::Sphere, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
@@ -340,7 +335,7 @@ vector_transport_to(::Sphere, ::Any, ::Any, ::Any, ::ParallelTransport)
 function vector_transport_to!(M::Sphere, vto, x, v, y, ::ParallelTransport)
     v_xy = log(M, x, y)
     vl = norm(M, x, v_xy)
-    vto .= v
+    copyto!(vto, v)
     if vl > 0
         factor = 2 * dot(v, y) / (norm(x + y)^2)
         vto .-= factor .* (x .+ y)
@@ -355,7 +350,4 @@ Return the zero tangent vector from the tangent space at `x` on the [`Sphere`](@
 which is the zero vector in the embedding.
 """
 zero_tangent_vector(::Sphere, ::Any...)
-function zero_tangent_vector!(S::Sphere, v, x)
-    fill!(v, 0)
-    return v
-end
+zero_tangent_vector!(S::Sphere, v, x) = fill!(v, 0)

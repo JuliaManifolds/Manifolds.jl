@@ -131,9 +131,7 @@ The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(M::PowerManifold, x, v; kwargs...)
     mpe = check_manifold_point(M, x)
-    if mpe !== nothing
-        return mpe
-    end
+    mpe === nothing || return mpe
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         imp = check_tangent_vector(
@@ -254,9 +252,7 @@ function get_coordinates(M::PowerManifold, x, v, B::PrecomputedPowerOrthonormalB
     return reduce(vcat, reshape(vs, length(vs)))
 end
 
-function get_iterator(M::PowerManifold{<:Manifold,Tuple{N}}) where {N}
-    return 1:N
-end
+get_iterator(M::PowerManifold{<:Manifold,Tuple{N}}) where {N} = 1:N
 @generated function get_iterator(M::PowerManifold{<:Manifold,SizeTuple}) where {SizeTuple}
     size_tuple = size_to_tuple(SizeTuple)
     return Base.product(map(Base.OneTo, size_tuple)...)
@@ -284,7 +280,6 @@ function get_vector(M::PowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
 end
 
 function get_vector(M::PowerManifold, x, v, B::ArbitraryOrthonormalBasis)
-
     dim = manifold_dimension(M.manifold)
 
     rep_size = representation_size(M.manifold)
@@ -544,9 +539,7 @@ end
 support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.x)
 support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 
-@inline function _write(rep_size::Tuple, x::AbstractArray, i::Int)
-    return _write(rep_size, x, (i,))
-end
+@inline _write(rep_size::Tuple, x::AbstractArray, i::Int) = _write(rep_size, x, (i,))
 @inline function _write(rep_size::Tuple, x::AbstractArray, i::Tuple)
     return view(x, rep_size_to_colons(rep_size)..., i...)
 end

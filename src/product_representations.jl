@@ -159,9 +159,7 @@ function ProductArray(
     return ProductArray{M,T,N,TData,typeof(views),typeof(reshapers)}(data, views, reshapers)
 end
 
-function ProductArray(M::ShapeSpecification, data)
-    return ProductArray(typeof(M), data, M.reshapers)
-end
+ProductArray(M::ShapeSpecification, data) = ProductArray(typeof(M), data, M.reshapers)
 
 @doc doc"""
     prod_point(M::ShapeSpecification, pts...)

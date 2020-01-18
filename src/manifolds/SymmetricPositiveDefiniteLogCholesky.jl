@@ -67,8 +67,7 @@ function exp!(
 ) where {N}
     (l, w) = spd_to_cholesky(x, v)
     z = exp(CholeskySpace{N}(), l, w)
-    y .= z * z'
-    return y
+    return copyto!(y, z * z')
 end
 
 @doc doc"""
@@ -120,8 +119,7 @@ function log!(
     l = cholesky(x).L
     k = cholesky(y).L
     log!(CholeskySpace{N}(), v, l, k)
-    tangent_cholesky_to_tangent_spd!(l, v)
-    return v
+    return tangent_cholesky_to_tangent_spd!(l, v)
 end
 
 @doc doc"""
@@ -157,6 +155,5 @@ function vector_transport_to!(
     k = cholesky(y).L
     (l, w) = spd_to_cholesky(x, v)
     vector_transport_to!(CholeskySpace{N}(), vto, l, w, k, ParallelTransport())
-    tangent_cholesky_to_tangent_spd!(k, vto)
-    return vto
+    return tangent_cholesky_to_tangent_spd!(k, vto)
 end

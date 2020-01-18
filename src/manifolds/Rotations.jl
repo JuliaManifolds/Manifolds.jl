@@ -170,10 +170,7 @@ The algorithm used is a more numerically stable form of those proposed in
 """
 exp(::Rotations{4}, ::Any...)
 
-function exp!(M::Rotations, y, x, v)
-    y .= x * exp(v)
-    return y
-end
+exp!(M::Rotations, y, x, v) = copyto!(y, x * exp(v))
 function exp!(M::Rotations{2}, y, x, v)
     θ = vee(M, x, v)[1]
     @assert size(y) == (2, 2)
@@ -416,15 +413,13 @@ log(::Rotations, ::Any...)
 function log!(M::Rotations, v, x, y)
     U = transpose(x) * y
     v .= real(log_safe(U))
-    project_tangent!(M, v, x, v)
-    return v
+    return project_tangent!(M, v, x, v)
 end
 function log!(M::Rotations{2}, v, x, y)
     U = transpose(x) * y
     @assert size(U) == (2, 2)
     @inbounds θ = atan(U[2], U[1])
-    hat!(M, v, x, θ)
-    return v
+    return hat!(M, v, x, θ)
 end
 function log!(M::Rotations{3}, v, x, y)
     U = transpose(x) * y
@@ -434,10 +429,9 @@ function log!(M::Rotations{3}, v, x, y)
         ival = findfirst(λ -> isapprox(λ, 1), eig.values)
         vi = SVector{3}(1:3)
         ax = eig.vectors[vi, ival]
-        hat!(M, v, x, π * ax)
-    else
-        v .= (U .- transpose(U)) ./ (2 * usinc_from_cos(cosθ))
+        return hat!(M, v, x, π * ax)
     end
+    v .= ((U .- transpose(U)) ./ (2 * usinc_from_cos(cosθ)))
     return v
 end
 function log!(M::Rotations{4}, v, x, y)
@@ -455,12 +449,11 @@ function log!(M::Rotations{4}, v, x, y)
             E[2, 1] = -α
             E[1, 2] = α
         end
-        v .= P * E * transpose(P)
+        copyto!(v, P * E * transpose(P))
     else
-        v .= real(log_safe(U))
+        copyto!(v, real(log_safe(U)))
     end
-    project_tangent!(M, v, x, v)
-    return v
+    return project_tangent!(M, v, x, v)
 end
 
 @doc doc"""
@@ -583,7 +576,7 @@ Project the matrix `v` onto the tangent space by making `v` skew symmetric,
 where tangent vectors are represented by elements from the Lie group
 """
 project_tangent(::Rotations, ::Any...)
-project_tangent!(M::Rotations, w, x, v) = w .= (v .- transpose(v)) ./ 2
+project_tangent!(M::Rotations, w, x, v) = (w .= (v .- transpose(v)) ./ 2)
 
 @doc doc"""
     representation_size(M::Rotations)
@@ -619,8 +612,7 @@ function _rand!(
     d::NormalRotationDistribution{TResult,Rotations{N}},
     x::AbstractArray{<:Real},
 ) where {TResult,N}
-    x .= rand(rng, d)
-    return x
+    return copyto!(x, rand(rng, d))
 end
 function _fix_random_rotation(A::AbstractMatrix)
     s = diag(sign.(qr(A).R))
@@ -652,8 +644,7 @@ be the singular value decomposition, then the formula reads
 retract(::Rotations, ::Any, ::Any, ::PolarRetraction)
 function retract!(M::Rotations, y, x, v, method::PolarRetraction)
     A = x + x * v
-    project_point!(M, y, A; check_det = false)
-    return y
+    return project_point!(M, y, A; check_det = false)
 end
 
 @doc doc"""
@@ -672,8 +663,7 @@ function retract!(M::Rotations, y::AbstractArray{T}, x, v, method::QRRetraction)
     qr_decomp = qr(A)
     d = diag(qr_decomp.R)
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
-    y .= qr_decomp.Q * D
-    return y
+    return copyto!(y, qr_decomp.Q * D)
 end
 retract!(M::Rotations, y, x, v) = retract!(M, y, x, v, QRRetraction())
 
@@ -703,16 +693,17 @@ function vee!(M::Rotations{N}, ω, x, Ω) where {N}
         ω[3] = Ω[2, 1]
 
         k = 4
-        for i = 4:N
-            for j = 1:i-1
-                ω[k] = Ω[i, j]
-                k += 1
-            end
+        for i = 4:N, j = 1:i-1
+            ω[k] = Ω[i, j]
+            k += 1
         end
     end
     return ω
 end
-vee!(M::Rotations{2}, ω, x, Ω) = (ω[1] = Ω[2])
+function vee!(M::Rotations{2}, ω, x, Ω)
+    ω[1] = Ω[2]
+    return ω
+end
 
 @doc doc"""
     zero_tangent_vector(M::Rotations, x)
@@ -721,4 +712,4 @@ Return the zero tangent vector from the tangent space art `x` on the [`Rotations
 as an element of the Lie group, i.e. the zero matrix.
 """
 zero_tangent_vector(M::Rotations, x) = zero(x)
-zero_tangent_vector!(M::Rotations, v, x) = (v .= zero(x))
+zero_tangent_vector!(M::Rotations, v, x) = fill!(v, 0)

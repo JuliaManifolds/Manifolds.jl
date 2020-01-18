@@ -125,12 +125,8 @@ where $\langle\cdot,\cdot\rangle_{\mathrm{M}}$ denotes the [`minkowski_dot`](@re
 exp(::Hyperbolic, ::Any...)
 function exp!(M::Hyperbolic, y, x, v)
     vn = sqrt(max(minkowski_dot(v, v), 0.0))
-    if vn < eps(eltype(x))
-        y .= x
-        return y
-    end
-    y .= cosh(vn) * x + sinh(vn) / vn * v
-    return y
+    vn < eps(eltype(x)) && return copyto!(y, x)
+    return copyto!(y, cosh(vn) * x + sinh(vn) / vn * v)
 end
 
 function flat!(
@@ -181,10 +177,7 @@ function log!(M::Hyperbolic, v, x, y)
     scp = minkowski_dot(x, y)
     w = y + scp * x
     wn = sqrt(max(scp .^ 2 - 1, 0.0))
-    if wn < eps(eltype(x))
-        zero_tangent_vector!(M, v, x)
-        return v
-    end
+    wn < eps(eltype(x)) && return zero_tangent_vector!(M, v, x)
     v .= acosh(max(1.0, -scp)) / wn .* w
     return v
 end
@@ -276,12 +269,8 @@ vector_transport_to(::Hyperbolic, ::Any, ::Any, ::Any, ::ParallelTransport)
 function vector_transport_to!(M::Hyperbolic, vto, x, v, y, ::ParallelTransport)
     w = log(M, x, y)
     wn = norm(M, x, w)
-    if (wn < eps(eltype(x + y)))
-        copyto!(vto, v)
-        return vto
-    end
-    vto .= v - (inner(M, x, w, v) * (w + log(M, y, x)) / wn^2)
-    return vto
+    wn < eps(eltype(x + y)) && return copyto!(vto, v)
+    return copyto!(vto, v - (inner(M, x, w, v) * (w + log(M, y, x)) / wn^2))
 end
 
 @doc doc"""
@@ -290,7 +279,4 @@ end
 Return the zero vector from the tangent space at `x` of the [`Hyperbolic`](@ref) `M`.
 """
 zero_tangent_vector(::HybridArray, ::Any...)
-function zero_tangent_vector!(M::Hyperbolic, v, x)
-    fill!(v, 0)
-    return v
-end
+zero_tangent_vector!(M::Hyperbolic, v, x) = fill!(v, 0)

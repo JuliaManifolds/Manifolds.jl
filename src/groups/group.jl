@@ -86,9 +86,7 @@ distance(G::GroupManifold, x, y) = distance(G.manifold, x, y)
 exp(G::GroupManifold, x, v) = exp(G.manifold, x, v)
 exp!(G::GroupManifold, y, x, v) = exp!(G.manifold, y, x, v)
 injectivity_radius(G::GroupManifold) = injectivity_radius(G.manifold)
-function injectivity_radius(G::GroupManifold, x)
-    return injectivity_radius(G.manifold, x)
-end
+injectivity_radius(G::GroupManifold, x) = injectivity_radius(G.manifold, x)
 function injectivity_radius(G::GroupManifold, x, method::AbstractRetractionMethod)
     return injectivity_radius(G.manifold, x, method)
 end
@@ -584,10 +582,7 @@ const AdditionGroup = AbstractGroupManifold{AdditionOperation}
 
 zero(e::Identity{G}) where {G<:AdditionGroup} = e
 
-function identity!(::AdditionGroup, y, x)
-    fill!(y, 0)
-    return y
-end
+identity!(::AdditionGroup, y, x) = fill!(y, 0)
 
 identity(::AdditionGroup, x) = zero(x)
 

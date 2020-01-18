@@ -276,10 +276,7 @@ Project an arbitrary vector `v` into the tangent space of a point `x` on the
 space of `M` can be identified with all of `M`.
 """
 project_tangent(::Euclidean, ::Any...)
-function project_tangent!(M::Euclidean, w, x, v)
-    w .= v
-    return w
-end
+project_tangent!(M::Euclidean, w, x, v) = copyto!(w, v)
 
 """
     projected_distribution(M::Euclidean, d, [x])
@@ -327,10 +324,7 @@ Parallely transport the vector `v` from the tangent space at `x` to the tangent 
 on the [`Euclidean`](@ref) `M`, which simplifies to the identity.
 """
 vector_transport_to(::Euclidean, ::Any, ::Any, ::Any, ::ParallelTransport)
-function vector_transport_to!(M::Euclidean, vto, x, v, y, ::ParallelTransport)
-    vto .= v
-    return vto
-end
+vector_transport_to!(M::Euclidean, vto, x, v, y, ::ParallelTransport) = copyto!(vto, v)
 
 var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
 function var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T}
@@ -349,7 +343,4 @@ Return the zero vector in the tangent space of `x` on the [`Euclidean`](@ref)
 """
 zero_tangent_vector(::Euclidean, ::Any...)
 
-function zero_tangent_vector!(M::Euclidean, v, x)
-    fill!(v, 0)
-    return v
-end
+zero_tangent_vector!(M::Euclidean, v, x) = fill!(v, 0)

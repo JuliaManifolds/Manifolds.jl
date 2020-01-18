@@ -51,8 +51,7 @@ function inv(M::ProductManifold, x::ProductRepr)
 end
 function inv(M::ProductManifold, x)
     y = similar_result(M, inv, x)
-    inv!(M, y, x)
-    return y
+    return inv!(M, y, x)
 end
 
 inv!(G::ProductGroup, y, x) = inv!(G.manifold, y, x)
@@ -68,8 +67,7 @@ function identity(M::ProductManifold, x::ProductRepr)
 end
 function identity(M::ProductManifold, x)
     y = similar_result(M, identity, x)
-    identity!(M, y, x)
-    return y
+    return identity!(M, y, x)
 end
 
 identity!(G::ProductGroup, y, x) = identity!(G.manifold, y, x)
@@ -92,8 +90,7 @@ function compose(M::ProductManifold, x::ProductRepr, y::ProductRepr)
 end
 function compose(M::ProductManifold, x, y)
     z = similar_result(M, compose, x, y)
-    compose!(M, z, x, y)
-    return z
+    return compose!(M, z, x, y)
 end
 
 compose!(G::ProductGroup, z, x, y) = compose!(G.manifold, z, x, y)
@@ -125,8 +122,7 @@ function translate(
 end
 function translate(M::ProductManifold, x, y, conv::ActionDirection)
     z = similar_result(M, translate, x, y)
-    translate!(M, z, x, y, conv)
-    return z
+    return translate!(M, z, x, y, conv)
 end
 
 function translate!(G::ProductGroup, z, x, y, conv::ActionDirection)
@@ -163,8 +159,7 @@ function inverse_translate(
 end
 function inverse_translate(M::ProductManifold, x, y, conv::ActionDirection)
     z = similar_result(M, inverse_translate, x, y)
-    inverse_translate!(M, z, x, y, conv)
-    return z
+    return inverse_translate!(M, z, x, y, conv)
 end
 
 function inverse_translate!(G::ProductGroup, z, x, y, conv::ActionDirection)
@@ -203,8 +198,7 @@ function translate_diff(
 end
 function translate_diff(M::ProductManifold, x, y, v, conv::ActionDirection)
     vout = similar_result(M, translate_diff, v, x, y)
-    translate_diff!(M, vout, x, y, v, conv)
-    return vout
+    return translate_diff!(M, vout, x, y, v, conv)
 end
 
 function translate_diff!(G::ProductGroup, vout, x, y, v, conv::ActionDirection)
@@ -244,8 +238,7 @@ function inverse_translate_diff(
 end
 function inverse_translate_diff(M::ProductManifold, x, y, v, conv::ActionDirection)
     vout = similar_result(M, inverse_translate_diff, v, x, y)
-    inverse_translate_diff!(M, vout, x, y, v, conv)
-    return vout
+    return inverse_translate_diff!(M, vout, x, y, v, conv)
 end
 
 function inverse_translate_diff!(G::ProductGroup, vout, x, y, v, conv::ActionDirection)
