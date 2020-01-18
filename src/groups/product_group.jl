@@ -29,19 +29,19 @@ end
 
 show(io::IO, G::ProductGroup) = print(io, "ProductGroup$((G.manifold.manifolds...,))")
 
-function submanifold_components(
-    e::Identity{GT},
-) where {MT<:ProductManifold,GT<:GroupManifold{MT}}
-    M = base_manifold(e.group)
-    return Identity.(M.manifolds)
-end
-
 function submanifold_component(
     e::Identity{GT},
     ::Val{I},
 ) where {I,MT<:ProductManifold,GT<:GroupManifold{MT}}
     M = base_manifold(e.group)
     return Identity(submanifold(M, I))
+end
+
+function submanifold_components(
+    e::Identity{GT},
+) where {MT<:ProductManifold,GT<:GroupManifold{MT}}
+    M = base_manifold(e.group)
+    return Identity.(M.manifolds)
 end
 
 inv(G::ProductGroup, x) = inv(G.manifold, x)

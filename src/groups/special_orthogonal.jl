@@ -10,9 +10,9 @@ const SpecialOrthogonal{n} = GroupManifold{Rotations{n},MultiplicationOperation}
 
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
 
-inv(::SpecialOrthogonal, x) = transpose(x)
-
 show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
+
+inv(::SpecialOrthogonal, x) = transpose(x)
 
 inverse_translate(G::SpecialOrthogonal, x, y, conv::LeftAction) = inv(G, x) * y
 inverse_translate(G::SpecialOrthogonal, x, y, conv::RightAction) = y * inv(G, x)

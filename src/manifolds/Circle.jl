@@ -13,6 +13,7 @@ alternatively can be set to use the [`AbstractNumbers`](@ref) `f=ℂ` to obtain 
 represented by `ℂ`-valued `Circle` of unit numbers.
 """
 struct Circle{F} <: Manifold where {F<:AbstractNumbers} end
+
 Circle(f::AbstractNumbers = ℝ) = Circle{f}()
 
 @doc doc"""
@@ -23,6 +24,7 @@ For the real-valued case, `x` is an angle and hence it checks that $x \in [-\pi,
 for the complex-valued case its a unit number, $x \in \mathbb C$ with $\lvert x \rvert = 1$.
 """
 check_manifold_point(::Circle, ::Any...)
+
 function check_manifold_point(M::Circle{ℝ}, x; kwargs...)
     if !isapprox(sym_rem(x), x; kwargs...)
         return DomainError(
@@ -41,6 +43,7 @@ function check_manifold_point(M::Circle{ℂ}, x; kwargs...)
     end
     return nothing
 end
+
 """
     check_tangent_vector(M::Circle, x, v)
 
@@ -52,6 +55,7 @@ For the complex-valued case `v` has to lie on the line parallel to the tangent l
 in the complex plane, i.e. the inner product is zero.
 """
 check_tangent_vector(::Circle{ℝ}, ::Any...; ::Any...)
+
 function check_tangent_vector(M::Circle{ℝ}, x, v; kwargs...)
     perr = check_manifold_point(M, x)
     return perr # if x is valid all v that are real numbers are valid
@@ -104,20 +108,21 @@ applied to valuedin the complex plane.
 """
 exp(::Circle, ::Any...)
 exp(::Circle{ℝ}, x::Real, v::Real) = sym_rem(x + v)
-exp!(::Circle{ℝ}, y, x, v) = (y .= sym_rem(x + v))
 function exp(M::Circle{ℂ}, x::Number, v::Number)
     θ = norm(M, x, v)
     return cos(θ) * x + usinc(θ) * v
 end
+
+exp!(::Circle{ℝ}, y, x, v) = (y .= sym_rem(x + v))
 function exp!(M::Circle{ℂ}, y, x, v)
     θ = norm(M, x, v)
     y .= cos(θ) * x + usinc(θ) * v
     return y
 end
 
-flat!(::Circle, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
-
 flat(M::Circle, x::Number, w::TFVector) = FVector(CotangentSpace, w.data)
+
+flat!(::Circle, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
 
 function get_basis(M::Circle{ℝ}, x, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.v[1])
@@ -126,16 +131,14 @@ function get_basis(M::Circle{ℝ}, x, B::DiagonalizingOrthonormalBasis)
 end
 
 get_coordinates(M::Circle{ℝ}, x, v, B::ArbitraryOrthonormalBasis) = v
-
 function get_coordinates(M::Circle{ℝ}, x, v, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.v[1])
     return v .* (sbv == 0 ? 1 : sbv)
 end
-
 """
     get_coordinates(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
 
-Return tangent vector coordinate in the Lie algebra of the circle.
+Return tangent vector coordinates in the Lie algebra of the circle.
 """
 function get_coordinates(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
     v, x = v[1], x[1]
@@ -144,16 +147,14 @@ function get_coordinates(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
 end
 
 get_vector(M::Circle{ℝ}, x, v, B::ArbitraryOrthonormalBasis) = v
-
 function get_vector(M::Circle{ℝ}, x, v, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.v[1])
     return v .* (sbv == 0 ? 1 : sbv)
 end
-
 """
-    get_coordinates(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
+    get_vector(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
 
-Return tangent vector from the coordinate in the Lie algebra of the circle.
+Return tangent vector from the coordinates in the Lie algebra of the circle.
 """
 get_vector(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis) = @SVector [1im * v[1] * x[1]]
 
@@ -210,7 +211,6 @@ applied to valuedin the complex plane.
 """
 log(::Circle, ::Any...)
 log(::Circle{ℝ}, x::Real, y::Real) = sym_rem(y - x)
-log!(::Circle{ℝ}, v, x, y) = (v .= sym_rem(y - x))
 function log(M::Circle{ℂ}, x::Number, y::Number)
     cosθ = complex_dot(x, y)
     if cosθ ≈ -1  # appr. opposing points, return deterministic choice from set-valued log
@@ -224,6 +224,8 @@ function log(M::Circle{ℂ}, x::Number, y::Number)
     end
     return project_tangent(M, x, v)
 end
+
+log!(::Circle{ℝ}, v, x, y) = (v .= sym_rem(y - x))
 function log!(M::Circle{ℂ}, v, x, y)
     cosθ = complex_dot(x, y)
     if cosθ ≈ -1
@@ -293,9 +295,9 @@ retract(M::Circle, x, y, m::ExponentialRetraction) = exp(M, x, y)
 
 representation_size(::Circle) = (1,)
 
-sharp!(M::Circle, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
-
 sharp(M::Circle, x::Number, w::CoTFVector) = FVector(TangentSpace, w.data)
+
+sharp!(M::Circle, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
 @doc doc"""
     sym_rem(x,[T=π])
@@ -340,6 +342,7 @@ function vector_transport_to(
     end
     return vto
 end
+
 vector_transport_to!(::Circle{ℝ}, w, x, v, y, ::ParallelTransport) = (w .= v)
 function vector_transport_to!(M::Circle{ℂ}, vto, x, v, y, ::ParallelTransport)
     v_xy = log(M, x, y)
@@ -355,6 +358,7 @@ end
 function vector_transport_along(M::Circle, x::Number, v::Number, c)
     return vector_transport_along!(M, zero(v), x, v, c)
 end
+
 function vector_transport_direction(
     M::Circle,
     x::Number,
@@ -367,4 +371,5 @@ function vector_transport_direction(
 end
 
 zero_tangent_vector(::Circle, x::Number) = zero(x)
+
 zero_tangent_vector!(::Circle, v, x) = fill!(v, 0)

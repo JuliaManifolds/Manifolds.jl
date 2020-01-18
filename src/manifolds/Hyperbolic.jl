@@ -28,6 +28,7 @@ a Riemannian metric on the tangent bundle $T\mathbb H^n$.
 Generate the $\mathbb H^{n}\subset \mathbb R^{n+1}$
 """
 struct Hyperbolic{N} <: Manifold end
+
 Hyperbolic(n::Int) = Hyperbolic{n}()
 
 @doc doc"""
@@ -123,6 +124,7 @@ from `x` towards `v`, which is optionally scaled by `t`. The formula reads
 where $\langle\cdot,\cdot\rangle_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref).
 """
 exp(::Hyperbolic, ::Any...)
+
 function exp!(M::Hyperbolic, y, x, v)
     vn = sqrt(max(minkowski_dot(v, v), 0.0))
     vn < eps(eltype(x)) && return copyto!(y, x)
@@ -165,6 +167,7 @@ The formula reads for $x\neq y$
 and is zero otherwise.
 """
 log(::Hyperbolic, ::Any...)
+
 function log!(M::Hyperbolic, v, x, y)
     scp = minkowski_dot(x, y)
     w = y + scp * x
@@ -207,6 +210,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` on the
 [`Hyperbolic`](@ref) space using [`CyclicProximalPointEstimation`](@ref).
 """
 mean(::Hyperbolic, ::Any...)
+
 function mean!(M::Hyperbolic, y, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(M, y, x, w, CyclicProximalPointEstimation(); kwargs...)
 end
@@ -225,6 +229,7 @@ where $\langle \cdot, \cdot \rangle_{\mathrm{M}}$ denotes the Minkowski inner
 product in the embedding, see [`minkowski_dot`](@ref).
 """
 project_tangent(::Hyperbolic, ::Any...)
+
 project_tangent!(::Hyperbolic, w, x, v) = (w .= v .+ minkowski_dot(x, v) .* x)
 
 @doc doc"""
@@ -250,6 +255,7 @@ P_{y\gets x}(v) = v - \frac{\langle \log_xy,v\rangle_x}{d^2_{\mathbb H^n}(x,y)}
 ````
 """
 vector_transport_to(::Hyperbolic, ::Any, ::Any, ::Any, ::ParallelTransport)
+
 function vector_transport_to!(M::Hyperbolic, vto, x, v, y, ::ParallelTransport)
     w = log(M, x, y)
     wn = norm(M, x, w)
@@ -263,4 +269,5 @@ end
 Return the zero vector from the tangent space at `x` of the [`Hyperbolic`](@ref) `M`.
 """
 zero_tangent_vector(::HybridArray, ::Any...)
+
 zero_tangent_vector!(M::Hyperbolic, v, x) = fill!(v, 0)

@@ -16,6 +16,7 @@ Generate the manifold of $n\times n$ lower triangular matrices with positive dia
     > Cholesky Decomposition", arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
 """
 struct CholeskySpace{N} <: Manifold end
+
 CholeskySpace(n::Int) = CholeskySpace{n}()
 
 @doc doc"""
@@ -110,6 +111,7 @@ where $\lfloor x\rfloor$ denotes the strictly lower triangular matrix of $x$ and
 $\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
 exp(::CholeskySpace, ::Any...)
+
 function exp!(::CholeskySpace, y, x, v)
     y .= (
         strictlyLowerTriangular(x) +
@@ -154,6 +156,7 @@ where $\lfloor x\rfloor$ denotes the strictly lower triangular matrix of $x$ and
 $\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
 log(::Cholesky, ::Any...)
+
 function log!(::CholeskySpace, v, x, y)
     v .= (
         strictlyLowerTriangular(y) - strictlyLowerTriangular(x) +
@@ -176,8 +179,9 @@ Return the representation size for the [`CholeskySpace`](@ref)`{N}` `M`, i.e. `(
 """
 @generated representation_size(::CholeskySpace{N}) where {N} = (N, N)
 
-# two small helper for strictly lower and upper triangulars
+# two small helpers for strictly lower and upper triangulars
 strictlyLowerTriangular(x) = LowerTriangular(x) - Diagonal(diag(x))
+
 strictlyUpperTriangular(x) = UpperTriangular(x) - Diagonal(diag(x))
 
 @doc doc"""
@@ -195,6 +199,7 @@ where $\lfloor\cdot\rfloor$ denotes the strictly lower triangular matrix,
 and $\operatorname{diag}$ extracts the diagonal matrix.
 """
 vector_transport_to(::CholeskySpace, ::Any, ::Any, ::Any, ::ParallelTransport)
+
 function vector_transport_to!(::CholeskySpace, vto, x, v, y, ::ParallelTransport)
     vto .= (
         strictlyLowerTriangular(x) +
@@ -209,4 +214,5 @@ end
 Return the zero tangent vector on the [`CholeskySpace`](@ref) `M` at `x`.
 """
 zero_tangent_vector(::CholeskySpace, ::Any...)
+
 zero_tangent_vector!(M::CholeskySpace, v, x) = fill!(v, 0)

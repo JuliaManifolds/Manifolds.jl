@@ -49,6 +49,7 @@ function show(io::IO, G::SemidirectProductGroup)
 end
 
 _padpoint!(G::SemidirectProductGroup, y) = y
+
 _padvector!(G::SemidirectProductGroup, v) = v
 
 inv(G::GT, e::Identity{GT}) where {GT<:SemidirectProductGroup} = e

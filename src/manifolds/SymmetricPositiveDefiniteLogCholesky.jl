@@ -9,9 +9,13 @@ introduced by [^Lin2019].
     > Cholesky Decomposition", arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
 """
 struct LogCholeskyMetric <: RiemannianMetric end
+
 cholesky_to_spd(l, w) = (l * l', w * l' + l * w')
+
 tangent_cholesky_to_tangent_spd!(l, w) = (w .= w * l' + l * w')
+
 spd_to_cholesky(x, v) = spd_to_cholesky(x, cholesky(x).L, v)
+
 function spd_to_cholesky(x, l, v)
     w = inv(l) * v * inv(transpose(l))
     # strictly lower triangular plus half diagonal
@@ -59,6 +63,7 @@ and $(\cdot)_\frac{1}{2}$
 denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$.
 """
 exp(::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
+
 function exp!(
     M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
     y,
@@ -110,6 +115,7 @@ where $l$ is the colesky factor of $x$ and $w=\log_lk$ for $k$ the cholesky fact
 of $y$ and the just mentioned logarithmic map is the one on [`CholeskySpace`](@ref).
 """
 log(::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
+
 function log!(
     M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
     v,
@@ -123,7 +129,13 @@ function log!(
 end
 
 @doc doc"""
-    vector_transport_to(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, x, v, y, ::ParallelTransport)
+    vector_transport_to(
+        M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric},
+        x,
+        v,
+        y,
+        ::ParallelTransport,
+    )
 
 Parallely transport the tangent vector `v` at `x` along the geodesic to `y` with respect to
 the [`SymmetricPositiveDefinite`](@ref) manifold `M` and [`LogCholeskyMetric`](@ref).
@@ -144,6 +156,7 @@ vector_transport_to(
     ::Any,
     ::ParallelTransport,
 )
+
 function vector_transport_to!(
     M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
     vto,

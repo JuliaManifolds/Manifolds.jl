@@ -33,7 +33,9 @@ The manifold is named after
 Generate the (real-valued) Stiefel manifold of $n\times k$ dimensional orthonormal matrices.
 """
 struct Stiefel{n,k,F} <: Manifold end
+
 Stiefel(n::Int, k::Int, F::AbstractNumbers = ℝ) = Stiefel{n,k,F}()
+
 @doc doc"""
     check_manifold_point(M::Stiefel, x; kwargs...)
 
@@ -128,6 +130,7 @@ $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and $
 $0_k$ are the identity matrix and the zero matrix of dimension $k \times k$, respectively.
 """
 exp(::Stiefel, ::Any...)
+
 function exp!(M::Stiefel{n,k}, y, x, v) where {n,k}
     return copyto!(
         y,
@@ -174,20 +177,6 @@ algebraic Riccati equation as described in [^KanekoFioriTanaka2013]
 
 This implementation follows the Lyapunov approach.
 
-[^KanekoFioriTanaka2013]:
-    > T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
-    > Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
-    > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
-"""
-inverse_retract(::Stiefel, ::Any, ::Any, ::PolarInverseRetraction)
-function inverse_retract!(::Stiefel, v, x, y, ::PolarInverseRetraction)
-    A = x' * y
-    H = -2 * one(x' * x)
-    B = lyap(A, H)
-    return copyto!(v, y * B - x)
-end
-
-@doc doc"""
     inverse_retract(M, x, y, ::QRInverseRetraction)
 
 Compute the inverse retraction based on a qr decomposition
@@ -200,7 +189,14 @@ in [^KanekoFioriTanaka2013].
     > Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
     > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
 """
-inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)
+inverse_retract(::Stiefel, ::Any...)
+
+function inverse_retract!(::Stiefel, v, x, y, ::PolarInverseRetraction)
+    A = x' * y
+    H = -2 * one(x' * x)
+    B = lyap(A, H)
+    return copyto!(v, y * B - x)
+end
 function inverse_retract!(::Stiefel{n,k}, v, x, y, ::QRInverseRetraction) where {n,k}
     A = x' * y
     R = zeros(typeof(one(eltype(x)) * one(eltype(y))), k, k)
@@ -248,6 +244,7 @@ where $\operatorname{Sym}(y)$ is the symmetrization of $y$, e.g. by
 $\operatorname{Sym}(y) = \frac{y^{\mathrm{H}}+y}{2}$.
 """
 project_tangent(::Stiefel, ::Any...)
+
 project_tangent!(::Stiefel, w, x, v) = copyto!(w, v - x * Symmetric(x' * v))
 
 @doc doc"""
@@ -258,14 +255,7 @@ Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 ````math
 \operatorname{retr}_x(v) = U\bar{V}^\mathrm{H}.
 ````
-"""
-retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
-function retract!(::Stiefel, y, x, v, ::PolarRetraction)
-    s = svd(x + v)
-    return mul!(y, s.U, s.V')
-end
 
-@doc doc"""
     retract(M, x, v, ::QRRetraction )
 
 Compute the QR-based retraction [`QRRetraction`](@ref) on the
@@ -283,7 +273,12 @@ where $\operatorname{sgn}(x) = \begin{cases}
 -1& \text{ for } x < 0.
 \end{cases}$
 """
-retract(::Stiefel, ::Any, ::Any, ::QRRetraction)
+retract(::Stiefel, ::Any...)
+
+function retract!(::Stiefel, y, x, v, ::PolarRetraction)
+    s = svd(x + v)
+    return mul!(y, s.U, s.Vt)
+end
 function retract!(::Stiefel, y, x, v, ::QRRetraction)
     qrfac = qr(x + v)
     d = diag(qrfac.R)
@@ -306,4 +301,5 @@ Returns the zero tangent vector from the tangent space at `x` on the [`Stiefel`]
 `M`=$\operatorname{St}(n,k)$, i.e. an `(n,k)` zero matrix.
 """
 zero_tangent_vector(::Stiefel, ::Any...)
+
 zero_tangent_vector!(::Stiefel, v, x) = fill!(v, 0)

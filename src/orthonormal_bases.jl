@@ -147,11 +147,9 @@ See also: [`get_vector`](@ref), [`basis`](@ref)
 function get_coordinates(M::Manifold, x, v, B::AbstractBasis)
     error("get_coordinates not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
 end
-
 function get_coordinates(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis{ℝ})
     return map(vb -> real(inner(M, x, v, vb)), get_vectors(M, x, B))
 end
-
 function get_coordinates(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
     return map(vb -> inner(M, x, v, vb), get_vectors(M, x, B))
 end
@@ -171,7 +169,6 @@ See also: [`get_coordinates`](@ref), [`basis`](@ref)
 function get_vector(M::Manifold, x, v, B::AbstractBasis)
     error("get_vector not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
 end
-
 function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
@@ -212,7 +209,6 @@ See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 function get_basis(M::Manifold, x, B::AbstractBasis)
     error("basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
 end
-
 """
     get_basis(M::Manifold, x, B::ArbitraryOrthonormalBasis)
 
@@ -224,9 +220,7 @@ function get_basis(M::Manifold, x, B::ArbitraryOrthonormalBasis)
         get_vector(M, x, [ifelse(i == j, 1, 0) for j = 1:dim], B) for i = 1:dim
     ])
 end
-
 get_basis(M::Manifold, x, B::AbstractPrecomputedOrthonormalBasis) = B
-
 function get_basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis{ℝ})
     bvectors = get_vectors(M, x, B)
     N = length(bvectors)
@@ -300,10 +294,10 @@ get_vectors(::Manifold, x, B::PrecomputedOrthonormalBasis) = B.vectors
 get_vectors(::Manifold, x, B::PrecomputedDiagonalizingOrthonormalBasis) = B.vectors
 
 # related to DefaultManifold; to be moved to ManifoldsBase.jl in the future
-using ManifoldsBase: DefaultManifold
 function get_coordinates(M::DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
     return reshape(v, manifold_dimension(M))
 end
+
 function get_vector(M::DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
     return reshape(v, representation_size(M))
 end

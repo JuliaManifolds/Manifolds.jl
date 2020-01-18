@@ -36,20 +36,20 @@ function switch_direction(A::TranslationAction{TM,TRN,TAD}) where {TM,TRN,TAD}
     return TranslationAction(A.M, A.Rn, switch_direction(TAD()))
 end
 
+apply(A::TranslationAction, a, x) = x + a
+
 apply!(A::TranslationAction{M,G}, y, a, x) where {M,G} = (y .= x .+ a)
 apply!(A::TranslationAction{M,G}, y, e::Identity{G}, x) where {M,G} = copyto!(y, x)
 
-apply(A::TranslationAction, a, x) = x + a
+inverse_apply(A::TranslationAction, a, x) = x - a
 
 inverse_apply!(A::TranslationAction{M,G}, y, a, x) where {M,G} = (y .= x .- a)
 inverse_apply!(A::TranslationAction{M,G}, y, e::Identity{G}, x) where {M,G} = copyto!(y, x)
 
-inverse_apply(A::TranslationAction, a, x) = x - a
+apply_diff(A::TranslationAction, a, x, v) = v
 
 apply_diff!(A::TranslationAction, vout, a, x, v) = copyto!(vout, v)
 
-apply_diff(A::TranslationAction, a, x, v) = v
+inverse_apply_diff(A::TranslationAction, a, x, v) = v
 
 inverse_apply_diff!(A::TranslationAction, vout, a, x, v) = copyto!(vout, v)
-
-inverse_apply_diff(A::TranslationAction, a, x, v) = v

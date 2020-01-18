@@ -28,20 +28,6 @@ Get the direction of the action
 """
 direction(::AbstractGroupAction{AD}) where {AD} = AD()
 
-"""
-    apply!(A::AbstractGroupAction, y, a, x)
-
-Apply action `a` to the point `x` with the rule specified by `A`.
-The result is saved in `y`.
-"""
-function apply!(A::AbstractGroupAction{LeftAction}, y, a, x)
-    error("apply! not implemented for action $(typeof(A)) and points $(typeof(y)), $(typeof(x)) and $(typeof(a)).")
-end
-function apply!(A::AbstractGroupAction{RightAction}, y, a, x)
-    ainv = inv(base_group(A), a)
-    return apply!(switch_direction(A), y, ainv, x)
-end
-
 @doc doc"""
     apply(A::AbstractGroupAction, a, x)
 
@@ -59,14 +45,17 @@ function apply(A::AbstractGroupAction, a, x)
 end
 
 """
-    inverse_apply!(A::AbstractGroupAction, y, a, x)
+    apply!(A::AbstractGroupAction, y, a, x)
 
-Apply inverse of action `a` to the point `x` with the rule specified by `A`.
+Apply action `a` to the point `x` with the rule specified by `A`.
 The result is saved in `y`.
 """
-function inverse_apply!(A::AbstractGroupAction, y, a, x)
-    inva = inv(base_group(A), a)
-    return apply!(A, y, inva, x)
+function apply!(A::AbstractGroupAction{LeftAction}, y, a, x)
+    error("apply! not implemented for action $(typeof(A)) and points $(typeof(y)), $(typeof(x)) and $(typeof(a)).")
+end
+function apply!(A::AbstractGroupAction{RightAction}, y, a, x)
+    ainv = inv(base_group(A), a)
+    return apply!(switch_direction(A), y, ainv, x)
 end
 
 """
@@ -77,6 +66,17 @@ Apply inverse of action `a` to the point `x`. The action is specified by `A`.
 function inverse_apply(A::AbstractGroupAction, a, x)
     y = similar_result(A, inverse_apply, x, a)
     return inverse_apply!(A, y, a, x)
+end
+
+"""
+    inverse_apply!(A::AbstractGroupAction, y, a, x)
+
+Apply inverse of action `a` to the point `x` with the rule specified by `A`.
+The result is saved in `y`.
+"""
+function inverse_apply!(A::AbstractGroupAction, y, a, x)
+    inva = inv(base_group(A), a)
+    return apply!(A, y, inva, x)
 end
 
 @doc doc"""
@@ -97,7 +97,6 @@ transports vectors
 function apply_diff(A::AbstractGroupAction, a, x, v)
     return error("apply_diff not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(x)), and vector $(typeof(v))")
 end
-
 
 function apply_diff!(A::AbstractGroupAction, vout, a, x, v)
     return error("apply_diff! not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(x)), vectors $(typeof(vout)) and $(typeof(v))")

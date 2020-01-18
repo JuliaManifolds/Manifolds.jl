@@ -11,6 +11,7 @@ vectors in $\mathbb R^{n+1}$ of unit length
 Generate the $\mathbb S^{n}\subset \mathbb R^{n+1}$
 """
 struct Sphere{N} <: Manifold end
+
 Sphere(n::Int) = Sphere{n}()
 
 function get_basis(M::Sphere{N}, x, B::DiagonalizingOrthonormalBasis) where {N}
@@ -103,6 +104,7 @@ where $\lVert v \rVert_x$ is the [`norm`](@ref norm(::Sphere,x,v)) on the
 [`Sphere`](@ref) `M`.
 """
 exp(::Sphere, ::Any...)
+
 function exp!(M::Sphere, y, x, v)
     θ = norm(M, x, v)
     y .= cos(θ) .* x .+ usinc(θ) .* v
@@ -115,15 +117,13 @@ flat!(M::Sphere, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
     injectivity_radius(M::Sphere[, x])
 
 Return the injectivity radius for the [`Sphere`](@ref) `M`, which is globally $\pi$.
-"""
-injectivity_radius(::Sphere, ::Any...) = π
 
-@doc doc"""
     injectivity_radius(M::Sphere, x, ::ProjectionRetraction)
 
 Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
 [`Sphere`](@ref), which is globally $\frac{\pi}{2}$.
 """
+injectivity_radius(::Sphere, ::Any...) = π
 injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π / 2
 
 @doc doc"""
@@ -154,6 +154,7 @@ since $\langle x,v\rangle = 0$ and when $d_{\mathbb S^2}(x,y) \leq \frac{\pi}{2}
 ````
 """
 inverse_retract(::Sphere, ::Any, ::Any, ::ProjectionInverseRetraction)
+
 function inverse_retract!(::Sphere, v, x, y, ::ProjectionInverseRetraction)
     return (v .= y ./ dot(x, y) .- x)
 end
@@ -213,6 +214,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::Sphere, ::Any...)
+
 function mean!(S::Sphere, y, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(S, y, x, w, GeodesicInterpolationWithinRadius(π / 2); kwargs...)
 end
@@ -249,6 +251,7 @@ Project the point `x` from the embedding onto the [`Sphere`](@ref) `M`.
 ````
 """
 project_point(::Sphere, ::Any...)
+
 project_point!(S::Sphere, x) = (x ./= norm(x))
 
 @doc doc"""
@@ -261,6 +264,7 @@ Project the point `v` onto the tangent space at `x` on the [`Sphere`](@ref) `M`.
 ````
 """
 project_tangent(::Sphere, ::Any...)
+
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v) .* x)
 
 @doc doc"""
@@ -297,6 +301,7 @@ Compute the retraction that is based on projection, i.e.
 ````
 """
 retract(::Sphere, ::Any, ::Any, ::ProjectionRetraction)
+
 function retract!(M::Sphere, y, x, v, ::ProjectionRetraction)
     y .= x .+ v
     return project_point!(M, y)
@@ -326,6 +331,7 @@ P_{y\gets x}(v) = v - \frac{\langle \log_xy,v\rangle_x}{d^2_{\mathbb S^n}(x,y)}
 ````
 """
 vector_transport_to(::Sphere, ::Any, ::Any, ::Any, ::ParallelTransport)
+
 function vector_transport_to!(M::Sphere, vto, x, v, y, ::ParallelTransport)
     v_xy = log(M, x, y)
     vl = norm(M, x, v_xy)
@@ -344,4 +350,5 @@ Return the zero tangent vector from the tangent space at `x` on the [`Sphere`](@
 which is the zero vector in the embedding.
 """
 zero_tangent_vector(::Sphere, ::Any...)
+
 zero_tangent_vector!(S::Sphere, v, x) = fill!(v, 0)

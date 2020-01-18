@@ -195,6 +195,7 @@ The group identity element $e ∈ G$.
 struct Identity{G<:AbstractGroupManifold}
     group::G
 end
+
 Identity(M::Manifold) = Identity(M, is_decorator_manifold(M))
 Identity(M::Manifold, ::Val{true}) = Identity(M.manifold)
 Identity(M::Manifold, ::Val{false}) = error("Identity not implemented for manifold $(M)")
@@ -233,19 +234,6 @@ end
 ##########################
 
 @doc doc"""
-    inv!(G::AbstractGroupManifold, y, x)
-
-Inverse $x^{-1} ∈ G$ of an element $x ∈ G$, such that
-$x \circ x^{-1} = x^{-1} \circ x = e ∈ G$.
-The result is saved to `y`.
-"""
-inv!(M::Manifold, y, x) = inv!(M, y, x, is_decorator_manifold(M))
-inv!(M::Manifold, y, x, ::Val{true}) = inv!(M.manifold, y, x)
-function inv!(M::Manifold, y, x, ::Val{false})
-    return error("inv! not implemented on $(typeof(M)) for points $(typeof(x))")
-end
-
-@doc doc"""
     inv(G::AbstractGroupManifold, x)
 
 Inverse $x^{-1} ∈ G$ of an element $x ∈ G$, such that
@@ -261,10 +249,17 @@ function inv(G::AbstractGroupManifold, x)
     return inv!(G, y, x)
 end
 
-identity!(M::Manifold, y, x) = identity!(M, y, x, is_decorator_manifold(M))
-identity!(M::Manifold, y, x, ::Val{true}) = identity!(M.manifold, y, x)
-function identity!(M::Manifold, y, x, ::Val{false})
-    return error("identity! not implemented on $(typeof(M)) for points $(typeof(y)) and $(typeof(x))")
+@doc doc"""
+    inv!(G::AbstractGroupManifold, y, x)
+
+Inverse $x^{-1} ∈ G$ of an element $x ∈ G$, such that
+$x \circ x^{-1} = x^{-1} \circ x = e ∈ G$.
+The result is saved to `y`.
+"""
+inv!(M::Manifold, y, x) = inv!(M, y, x, is_decorator_manifold(M))
+inv!(M::Manifold, y, x, ::Val{true}) = inv!(M.manifold, y, x)
+function inv!(M::Manifold, y, x, ::Val{false})
+    return error("inv! not implemented on $(typeof(M)) for points $(typeof(x))")
 end
 
 @doc doc"""
@@ -281,6 +276,12 @@ end
 function identity(G::AbstractGroupManifold, x)
     y = similar_result(G, identity, x)
     return identity!(G, y, x)
+end
+
+identity!(M::Manifold, y, x) = identity!(M, y, x, is_decorator_manifold(M))
+identity!(M::Manifold, y, x, ::Val{true}) = identity!(M.manifold, y, x)
+function identity!(M::Manifold, y, x, ::Val{false})
+    return error("identity! not implemented on $(typeof(M)) for points $(typeof(y)) and $(typeof(x))")
 end
 
 isapprox(M::Manifold, x, e::Identity; kwargs...) = isapprox(M, e, x; kwargs...)
@@ -582,13 +583,13 @@ const AdditionGroup = AbstractGroupManifold{AdditionOperation}
 
 zero(e::Identity{G}) where {G<:AdditionGroup} = e
 
-identity!(::AdditionGroup, y, x) = fill!(y, 0)
-
 identity(::AdditionGroup, x) = zero(x)
 
-inv!(::AdditionGroup, y, x) = copyto!(y, -x)
+identity!(::AdditionGroup, y, x) = fill!(y, 0)
 
 inv(::AdditionGroup, x) = -x
+
+inv!(::AdditionGroup, y, x) = copyto!(y, -x)
 
 compose(::AdditionGroup, x, y) = x + y
 
@@ -649,17 +650,17 @@ function LinearAlgebra.mul!(y, e::E, ::E) where {G<:MultiplicationGroup,E<:Ident
     return identity!(e.group, y, e)
 end
 
+identity(::MultiplicationGroup, x) = one(x)
+
 function identity!(G::GT, y, x) where {GT<:MultiplicationGroup}
     isa(x, Identity{GT}) || return copyto!(y, one(x))
     error("identity! not implemented on $(typeof(G)) for points $(typeof(y)) and $(typeof(x))")
 end
 identity!(::MultiplicationGroup, y::AbstractMatrix, x) = copyto!(y, I)
 
-identity(::MultiplicationGroup, x) = one(x)
+inv(::MultiplicationGroup, x) = inv(x)
 
 inv!(G::MultiplicationGroup, y, x) = copyto!(y, inv(G, x))
-
-inv(::MultiplicationGroup, x) = inv(x)
 
 compose(::MultiplicationGroup, x, y) = x * y
 

@@ -15,7 +15,6 @@ Reshape array `data` to size `Size` using method provided by `reshaper`.
 function make_reshape(reshaper::AbstractReshaper, ::Type{Size}, data) where {Size}
     error("make_reshape is not defined for reshaper of type $(typeof(reshaper)), size $(Size) and data of type $(typeof(data)).")
 end
-
 function make_reshape(::StaticReshaper, ::Type{Size}, data) where {Size}
     return SizedAbstractArray{Size}(data)
 end
@@ -131,7 +130,6 @@ function ProductArray(
     )
     return ProductArray{M,T,N,TData,typeof(views),typeof(reshapers)}(data, views, reshapers)
 end
-
 function ProductArray(
     M::Type{ShapeSpecification{TRanges,Tuple{Size1,Size2,Size3},TReshapers}},
     data::TData,
@@ -144,7 +142,6 @@ function ProductArray(
     )
     return ProductArray{M,T,N,TData,typeof(views),typeof(reshapers)}(data, views, reshapers)
 end
-
 function ProductArray(
     M::Type{ShapeSpecification{TRanges,TSizes,TReshapers}},
     data::TData,
@@ -158,7 +155,6 @@ function ProductArray(
     )
     return ProductArray{M,T,N,TData,typeof(views),typeof(reshapers)}(data, views, reshapers)
 end
-
 ProductArray(M::ShapeSpecification, data) = ProductArray(typeof(M), data, M.reshapers)
 
 @doc doc"""
@@ -243,7 +239,9 @@ Base.dataids(x::ProductArray) = Base.dataids(x.data)
 @inline find_pv(::Any, rest) = find_pv(rest)
 
 size(x::ProductArray) = size(x.data)
+
 Base.@propagate_inbounds getindex(x::ProductArray, i) = getindex(x.data, i)
+
 Base.@propagate_inbounds setindex!(x::ProductArray, val, i) = setindex!(x.data, val, i)
 
 function (+)(
@@ -252,6 +250,7 @@ function (+)(
 ) where {ShapeSpec<:ShapeSpecification}
     return ProductArray(ShapeSpec, v1.data + v2.data, v1.reshapers)
 end
+
 function (-)(
     v1::ProductArray{ShapeSpec},
     v2::ProductArray{ShapeSpec},
@@ -261,6 +260,7 @@ end
 function (-)(v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
     return ProductArray(ShapeSpec, -v.data, v.reshapers)
 end
+
 function (*)(a::Number, v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
     return ProductArray(ShapeSpec, a * v.data, v.reshapers)
 end
@@ -298,7 +298,9 @@ struct ProductRepr{TM<:Tuple}
 end
 
 ProductRepr(points...) = ProductRepr{typeof(points)}(points)
+
 eltype(x::ProductRepr) = eltype(Tuple{map(eltype, submanifold_components(x))...})
+
 similar(x::ProductRepr) = ProductRepr(map(similar, submanifold_components(x))...)
 function similar(x::ProductRepr, ::Type{T}) where {T}
     return ProductRepr(map(t -> similar(t, T), submanifold_components(x))...)
@@ -312,10 +314,12 @@ end
 function (+)(v1::ProductRepr, v2::ProductRepr)
     return ProductRepr(map(+, submanifold_components(v1), submanifold_components(v2))...)
 end
+
 function (-)(v1::ProductRepr, v2::ProductRepr)
     return ProductRepr(map(-, submanifold_components(v1), submanifold_components(v2))...)
 end
 (-)(v::ProductRepr) = ProductRepr(map(-, submanifold_components(v)))
+
 (*)(a::Number, v::ProductRepr) = ProductRepr(map(t -> a * t, submanifold_components(v)))
 
 function Base.convert(::Type{TPR}, x::ProductRepr) where {TPR<:ProductRepr}

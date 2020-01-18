@@ -11,6 +11,7 @@ real-valued orthogonal matrices with determinant $+1$.
 Generate the $\mathrm{SO}(n) \subset \mathbb R^{n\times n}$
 """
 struct Rotations{N} <: Manifold end
+
 Rotations(n::Int) = Rotations{n}()
 
 """
@@ -27,6 +28,7 @@ struct NormalRotationDistribution{TResult,TM<:Rotations,TD<:Distribution} <:
     manifold::TM
     distr::TD
 end
+
 function NormalRotationDistribution(
     M::Rotations,
     d::Distribution,
@@ -145,10 +147,7 @@ Compute the exponential map on the [`Rotations`](@ref) from `x` into direction
 ````
 
 where $\operatorname{Exp}(v)$  denotes the matrix exponential of $v$.
-"""
-exp(::Rotations, ::Any...)
 
-@doc doc"""
     exp(M::Rotations{4}, x, v)
 
 Compute the exponential map of tangent vector `v` at point `x` from $\mathrm{SO}(4)$
@@ -158,17 +157,17 @@ The algorithm used is a more numerically stable form of those proposed in
 [^Gallier2002] and [^Andrica2013].
 
 [^Gallier2002]:
-    > Gallier J.; Xu D.; Computing exponentials of skew-symmetric matrices
-    > and logarithms of orthogonal matrices.
-    > International Journal of Robotics and Automation (2002), 17(4), pp. 1-11.
-    > [pdf](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.35.3205).
+> Gallier J.; Xu D.; Computing exponentials of skew-symmetric matrices
+> and logarithms of orthogonal matrices.
+> International Journal of Robotics and Automation (2002), 17(4), pp. 1-11.
+> [pdf](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.35.3205).
 [^Andrica2013]:
-    > Andrica D.; Rohan R.-A.; Computing the Rodrigues coefficients of the
-    > exponential map of the Lie groups of matrices.
-    > Balkan Journal of Geometry and Its Applications (2013), 18(2), pp. 1-2.
-    > [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
+> Andrica D.; Rohan R.-A.; Computing the Rodrigues coefficients of the
+> exponential map of the Lie groups of matrices.
+> Balkan Journal of Geometry and Its Applications (2013), 18(2), pp. 1-2.
+> [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
 """
-exp(::Rotations{4}, ::Any...)
+exp(::Rotations, ::Any...)
 
 exp!(M::Rotations, y, x, v) = copyto!(y, x * exp(v))
 function exp!(M::Rotations{2}, y, x, v)
@@ -262,12 +261,14 @@ end
 hat!(M::Rotations{2}, Ω, x, ω) = hat!(M, Ω, x, ω[1])
 
 @doc doc"""
-    hat!(M::Rotations, Ω, x, ω)
+    hat(M::Rotations, x, ω)
 
 Convert the unique tangent vector components $\omega$ at point $x$ on rotations
 group $\mathrm{SO}(n)$ to the matrix representation $\Omega$ of the tangent
-vector. See [`vee!`](@ref) for the conventions used.
+vector. See [`vee`](@ref) for the conventions used.
 """
+hat(M::Rotations, ::Any...)
+
 function hat!(M::Rotations{N}, Ω, x, ω) where {N}
     @assert size(Ω) == (N, N)
     @assert length(ω) == manifold_dimension(M)
@@ -303,15 +304,13 @@ Return the injectivity radius on the [`Rotations`](@ref) `M`, which is globally
 ````math
     \operatorname{inj}_{\mathrm{SO}(n)}(x) = \pi\sqrt{2}.
 ````
-"""
-injectivity_radius(::Rotations) = π * sqrt(2.0)
 
-@doc doc"""
     injectivity_radius(M::Rotations, x, ::PolarRetraction)
 
 Return the radius of injectivity for the [`PolarRetraction`](@ref) on the
 [`Rotations`](@ref) `M` which is $\frac{\pi}{\sqrt{2}}$.
 """
+injectivity_radius(::Rotations) = π * sqrt(2.0)
 injectivity_radius(::Rotations, x, ::PolarRetraction) = π / sqrt(2.0)
 
 @doc doc"""
@@ -330,7 +329,7 @@ inner(M::Rotations, x, w, v) = dot(w, v)
 @doc doc"""
     inverse_retract(M, x, y, ::PolarInverseRetraction)
 
-Compute a vector from the tagent space $T_x\mathrm{SO}(n)$
+Compute a vector from the tangent space $T_x\mathrm{SO}(n)$
 of the point `x` on the [`Rotations`](@ref) manifold `M`
 with which the point `y` can be reached by the
 [`PolarRetraction`](@ref) from the point `x` after time 1.
@@ -344,8 +343,15 @@ The formula reads
 where $s$ is the solution to the Sylvester equation
 
 $x^{\mathrm{T}}ys + s(x^{\mathrm{T}}y)^{\mathrm{T}} + 2\mathrm{I}_n = 0.$
+
+    inverse_retract(M::Rotations, x, y, ::QRInverseRetraction)
+
+Compute a vector from the tangent space $T_x\mathrm{SO}(n)$ of the point `x` on the
+[`Rotations`](@ref) manifold `M` with which the point `y` can be reached by the
+[`QRRetraction`](@ref) from the point `x` after time 1.
 """
 inverse_retract(::Rotations, ::Any, ::Any, ::PolarInverseRetraction)
+
 function inverse_retract!(M::Rotations, v, x, y, method::PolarInverseRetraction)
     A = transpose(x) * y
     H = 2 * one(x)
@@ -362,15 +368,6 @@ function inverse_retract!(M::Rotations, v, x, y, method::PolarInverseRetraction)
     end
     return v
 end
-
-@doc doc"""
-    inverse_retract(M::Rotations, x, y, ::QRInverseRetraction)
-
-Compute a vector from the tagent space $T_x\mathrm{SO}(n)$ of the point `x` on the
-[`Rotations`](@ref) manifold `M` with which the point `y` can be reached by the
-[`QRRetraction`](@ref) from the point `x` after time 1.
-"""
-inverse_retract(::Rotations, ::Any, ::Any, ::QRInverseRetraction)
 function inverse_retract!(M::Rotations{N}, v, x, y, ::QRInverseRetraction) where {N}
     A = transpose(x) * y
     R = zero(v)
@@ -468,10 +465,10 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::Rotations, ::Any)
+
 function mean!(M::Rotations, y, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(M, y, x, w, GeodesicInterpolationWithinRadius(π / 2 / √2); kwargs...)
 end
-
 
 @doc doc"""
     norm(M::Rotations, x, v)
@@ -568,6 +565,7 @@ Project the matrix `v` onto the tangent space by making `v` skew symmetric,
 where tangent vectors are represented by elements from the Lie group
 """
 project_tangent(::Rotations, ::Any...)
+
 project_tangent!(M::Rotations, w, x, v) = (w .= (v .- transpose(v)) ./ 2)
 
 @doc doc"""
@@ -591,6 +589,7 @@ function rand(
         return convert(TResult, _fix_random_rotation(A))
     end
 end
+
 function _rand!(
     rng::AbstractRNG,
     d::NormalRotationDistribution{TResult,Rotations{N}},
@@ -598,6 +597,7 @@ function _rand!(
 ) where {TResult,N}
     return copyto!(x, rand(rng, d))
 end
+
 function _fix_random_rotation(A::AbstractMatrix)
     s = diag(sign.(qr(A).R))
     D = Diagonal(s)
@@ -609,6 +609,14 @@ function _fix_random_rotation(A::AbstractMatrix)
 end
 
 @doc doc"""
+    retract(M, x, v)
+    retract(M, x, v, ::QRRetraction)
+
+Compute the SVD-based retraction on the [`Rotations`](@ref) `M` from `x` in direction `v`
+(as an element of the Lie group) and is a first-order approximation of the exponential map.
+
+This is also the default retraction on the [`Rotations`](@ref)
+
     retract(M::Rotations, x, v, ::PolarRetraction)
 
 Compute the SVD-based retraction on the [`Rotations`](@ref) `M` from `x` in direction `v`
@@ -625,23 +633,8 @@ be the singular value decomposition, then the formula reads
 \operatorname{retr}_x v = UV^\mathrm{T}.
 ````
 """
-retract(::Rotations, ::Any, ::Any, ::PolarRetraction)
-function retract!(M::Rotations, y, x, v, method::PolarRetraction)
-    A = x + x * v
-    return project_point!(M, y, A; check_det = false)
-end
+retract(::Rotations, ::Any...)
 
-@doc doc"""
-    retract(M, x, v)
-    retract(M, x, v, ::QRRetraction)
-
-
-Compute the SVD-based retraction on the [`Rotations`](@ref) `M` from `x` in direction `v`
-(as an element of the Lie group) and is a first-order approximation of the exponential map.
-
-This is also the default retraction on the [`Rotations`](@ref)
-"""
-retract(::Rotations, ::Any, ::Any, ::QRRetraction)
 function retract!(M::Rotations, y::AbstractArray{T}, x, v, method::QRRetraction) where {T}
     A = x + x * v
     qr_decomp = qr(A)
@@ -650,9 +643,13 @@ function retract!(M::Rotations, y::AbstractArray{T}, x, v, method::QRRetraction)
     return copyto!(y, qr_decomp.Q * D)
 end
 retract!(M::Rotations, y, x, v) = retract!(M, y, x, v, QRRetraction())
+function retract!(M::Rotations, y, x, v, method::PolarRetraction)
+    A = x + x * v
+    return project_point!(M, y, A; check_det = false)
+end
 
 @doc doc"""
-    vee!(M::Rotations, ω, x, Ω)
+    vee(M::Rotations, x, Ω)
 
 Extract the unique tangent vector components $\omega$ at point $x$ on rotations
 group $\mathrm{SO}(n)$ from the matrix representation $\Omega$ of the tangent
@@ -668,6 +665,8 @@ along the axis of rotation.
 For $\mathrm{SO}(n)$ where $n \ge 4$, the additional elements of $\omega$ are
 $\omega_{i (i - 3)/2 + j + 1} = \Omega_{ij}$, for $i \in [4, n], j \in [1,i)$.
 """
+vee(::Rotations, ::Any...)
+
 function vee!(M::Rotations{N}, ω, x, Ω) where {N}
     @assert size(Ω) == (N, N)
     @assert length(ω) == manifold_dimension(M)
@@ -696,4 +695,5 @@ Return the zero tangent vector from the tangent space art `x` on the [`Rotations
 as an element of the Lie group, i.e. the zero matrix.
 """
 zero_tangent_vector(M::Rotations, x) = zero(x)
+
 zero_tangent_vector!(M::Rotations, v, x) = fill!(v, 0)

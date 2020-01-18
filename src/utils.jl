@@ -31,7 +31,6 @@ Compute the eigendecomposition of `x`. If `x` is a `StaticMatrix`, it is
 converted to a `Matrix` before the decomposition.
 """
 @inline eigen_safe(x; kwargs...) = eigen(x; kwargs...)
-
 @inline function eigen_safe(x::StaticMatrix; kwargs...)
     s = size(x)
     E = eigen!(Matrix(parent(x)); kwargs...)
@@ -45,7 +44,6 @@ Compute the matrix logarithm of `x`. If `x` is a `StaticMatrix`, it is
 converted to a `Matrix` before computing the log.
 """
 @inline log_safe(x) = log(x)
-
 @inline function log_safe(x::StaticMatrix)
     s = Size(x)
     return SizedMatrix{s[1],s[2]}(log(Matrix(parent(x))))
@@ -73,9 +71,9 @@ Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
 Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
 
 """
-    ziptuples(a, b)
+    ziptuples(a, b[, c[, d[, e]]])
 
-Zips tuples `a` and `b` in a fast, type-stable way. If they have different
+Zips tuples `a`, `b`, and remaining in a fast, type-stable way. If they have different
 lengths, the result is trimmed to the length of the shorter tuple.
 """
 @generated function ziptuples(a::NTuple{N,Any}, b::NTuple{M,Any}) where {N,M}
@@ -85,13 +83,6 @@ lengths, the result is trimmed to the length of the shorter tuple.
     end
     return ex
 end
-
-"""
-    ziptuples(a, b, c)
-
-Zips tuples `a`, `b` and `c` in a fast, type-stable way. If they have different
-lengths, the result is trimmed to the length of the shorter tuple.
-"""
 @generated function ziptuples(
     a::NTuple{N,Any},
     b::NTuple{M,Any},
@@ -103,13 +94,6 @@ lengths, the result is trimmed to the length of the shorter tuple.
     end
     return ex
 end
-
-"""
-    ziptuples(a, b, c, d)
-
-Zips tuples `a`, `b`, `c` and `d` in a fast, type-stable way. If they have
-different lengths, the result is trimmed to the length of the shorter tuple.
-"""
 @generated function ziptuples(
     a::NTuple{N,Any},
     b::NTuple{M,Any},
@@ -122,13 +106,6 @@ different lengths, the result is trimmed to the length of the shorter tuple.
     end
     return ex
 end
-
-"""
-    ziptuples(a, b, c, d, e)
-
-Zips tuples `a`, `b`, `c`, `d` and `e` in a fast, type-stable way. If they have
-different lengths, the result is trimmed to the length of the shorter tuple.
-"""
 @generated function ziptuples(
     a::NTuple{N,Any},
     b::NTuple{M,Any},

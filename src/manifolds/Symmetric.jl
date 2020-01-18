@@ -20,6 +20,7 @@ Though it is slighty redundant, usually the matrices are safed as $n\times n$ ar
 Generate the manifold of $n\times n$ symmetric metrices.
 """
 struct SymmetricMatrices{n,F} <: Manifold end
+
 SymmetricMatrices(n::Int, F::AbstractNumbers = ℝ) = SymmetricMatrices{n,F}()
 
 @doc doc"""
@@ -101,13 +102,13 @@ end
 @doc doc"""
     distance(M::SymmetricMatrices, x, y)
 
-Computeby using the inherited metric, i.e. taking the Frobenius-norm of the difference.
-
+Compute distance using the inherited metric, i.e. taking the Frobenius-norm of the
+difference.
 """
 distance(M::SymmetricMatrices, x, y) = norm(x - y)
 
 @doc doc"""
-    exp!(M::SymmetricMatrices, y, x, v)
+    exp(M::SymmetricMatrices, x, v)
 
 Compute the exponential map eminating from `x` in tangent direction `v` on the
 [`SymmetricMatrices`](@ref) `M`, which reads
@@ -117,6 +118,7 @@ Compute the exponential map eminating from `x` in tangent direction `v` on the
 ````
 """
 exp(::SymmetricMatrices, ::Any...)
+
 exp!(M::SymmetricMatrices, y, x, v) = (y .= x .+ v)
 
 @doc doc"""
@@ -128,6 +130,7 @@ Compute the [`flat`](@ref flat(M::Manifold, x, w::FVector)) isomorphism of the
 Since `M` is already a vector space over $\mathbb R$, this returns just the vector `w`.
 """
 flat(::SymmetricMatrices, ::Any...)
+
 flat!(M::SymmetricMatrices, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
 
 function get_coordinates(
@@ -148,7 +151,6 @@ function get_coordinates(
     end
     return vout
 end
-
 function get_coordinates(
     M::SymmetricMatrices{N,ℂ},
     x,
@@ -189,7 +191,6 @@ function get_vector(
     end
     return vout
 end
-
 function get_vector(
     M::SymmetricMatrices{N,ℂ},
     x,
@@ -233,6 +234,7 @@ reads
 ````
 """
 log(::SymmetricMatrices, ::Any...)
+
 log!(M::SymmetricMatrices, v, x, y) = (v .= y .- x)
 
 @doc doc"""
@@ -275,6 +277,7 @@ Projects `x` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 project_point(::SymmetricMatrices, ::Any...)
+
 project_point!(M::SymmetricMatrices, x) = (x .= (x + transpose(x)) ./ 2)
 
 @doc doc"""
@@ -289,6 +292,7 @@ Project the matrix `v` onto the tangent space at `x` on the [`SymmetricMatrices`
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 project_tangent(::SymmetricMatrices, ::Any...)
+
 project_tangent!(M::SymmetricMatrices, w, x, v) = (w .= (v .+ transpose(v)) ./ 2)
 
 @doc doc"""
@@ -299,7 +303,6 @@ for the $n\times n$ it's `(n,n)`.
 """
 representation_size(::SymmetricMatrices{N}) where {N} = (N, N)
 
-
 @doc doc"""
     sharp(M::SymmetricMatrices, x, w::FVector{CotangentSpaceType})
 
@@ -309,6 +312,7 @@ Compute the [`sharp`](@ref sharp(M::Manifold, x, w::FVector)) isomorphism of the
 Since `M` is already a vector space over $\mathbb R$, this returns just the vector `w`.
 """
 sharp(::SymmetricMatrices, ::Any...)
+
 sharp!(M::SymmetricMatrices, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
 @doc doc"""
@@ -324,6 +328,7 @@ P_{y\gets x}(v) = v.
 ````
 """
 vector_transport_to(::SymmetricMatrices, ::Any...)
+
 function vector_transport_to!(M::SymmetricMatrices, vto, x, v, y, ::ParallelTransport)
     return copyto!(vto, v)
 end
@@ -335,4 +340,5 @@ Return the zero tangent vector for the tangent space at `x` on the
 [`SymmetricMatrices`](@ref) `M`, i.e. the zero matrix.
 """
 zero_tangent_vector(::SymmetricMatrices, ::Any...)
+
 zero_tangent_vector!(M::SymmetricMatrices, v, x) = fill!(v, 0)

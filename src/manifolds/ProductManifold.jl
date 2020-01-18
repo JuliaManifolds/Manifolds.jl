@@ -17,6 +17,7 @@ Alternatively, the same manifold can be contructed using the `×` operator:
 struct ProductManifold{TM<:Tuple} <: Manifold
     manifolds::TM
 end
+
 ProductManifold(manifolds::Manifold...) = ProductManifold{typeof(manifolds)}(manifolds)
 
 struct ProductMetric <: Metric end
@@ -60,6 +61,7 @@ Product retraction of `retractions`. Works on [`ProductManifold`](@ref).
 struct ProductRetraction{TR<:Tuple} <: AbstractRetractionMethod
     retractions::TR
 end
+
 function ProductRetraction(retractions::AbstractRetractionMethod...)
     return ProductRetraction{typeof(retractions)}(retractions)
 end
@@ -72,6 +74,7 @@ Product inverse retraction of `inverse retractions`. Works on [`ProductManifold`
 struct InverseProductRetraction{TR<:Tuple} <: AbstractInverseRetractionMethod
     inverse_retractions::TR
 end
+
 function InverseProductRetraction(inverse_retractions::AbstractInverseRetractionMethod...)
     return InverseProductRetraction{typeof(inverse_retractions)}(inverse_retractions)
 end
@@ -140,7 +143,6 @@ function check_tangent_vector(M::ProductManifold, x::ProductRepr, v::ProductRepr
     end
     return nothing
 end
-
 function check_tangent_vector(
     M::ProductManifold,
     x::ProductArray,
@@ -215,6 +217,7 @@ function exp(M::ProductManifold, x::ProductRepr, v::ProductRepr)
         submanifold_components(M, v),
     )...)
 end
+
 function exp!(M::ProductManifold, y, x, v)
     map(
         exp!,
@@ -234,6 +237,7 @@ use the musical isomorphism to transform the tangent vector `w` from the tangent
 This can be done elementwise, so for every entry of `w` (and `x`) sparately
 """
 flat(::ProductManifold, ::Any...)
+
 function flat!(M::ProductManifold, v::CoTFVector, x, w::TFVector)
     vfs = map(u -> FVector(CotangentSpace, u), submanifold_components(v))
     wfs = map(u -> FVector(TangentSpace, u), submanifold_components(w))
@@ -245,7 +249,6 @@ function get_basis(M::ProductManifold, x, B::AbstractBasis)
     parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(x)))
     return PrecomputedProductOrthonormalBasis(parts)
 end
-
 function get_basis(M::ProductManifold, x, B::DiagonalizingOrthonormalBasis)
     vs = map(ziptuples(
         M.manifolds,
@@ -256,7 +259,6 @@ function get_basis(M::ProductManifold, x, B::DiagonalizingOrthonormalBasis)
     end
     return PrecomputedProductOrthonormalBasis(vs)
 end
-
 function get_basis(M::ProductManifold, x, B::ArbitraryOrthonormalBasis)
     parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(x)))
     return PrecomputedProductOrthonormalBasis(parts)
@@ -286,7 +288,6 @@ function get_vector(
     v,
     B::PrecomputedProductOrthonormalBasis,
 ) where {N}
-
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
     parts = ntuple(N) do i
@@ -299,14 +300,12 @@ function get_vector(
     end
     return ProductRepr(parts)
 end
-
 function get_vector(
     M::ProductManifold{<:NTuple{N,Any}},
     x::ProductRepr,
     v,
     B::ArbitraryOrthonormalBasis,
 ) where {N}
-
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
     parts = ntuple(N) do i
@@ -388,6 +387,7 @@ retraction for each manifold of the product. Then this method is performed eleme
 so the encapsulated inverse retraction methods have to be available per factor.
 """
 inverse_retract(::ProductManifold, ::Any, ::Any, ::Any, ::InverseProductRetraction)
+
 function inverse_retract!(M::ProductManifold, v, x, y, method::InverseProductRetraction)
     map(
         inverse_retract!,
@@ -435,6 +435,7 @@ function log(M::ProductManifold, x::ProductRepr, y::ProductRepr)
         submanifold_components(M, y),
     )...)
 end
+
 function log!(M::ProductManifold, v, x, y)
     map(
         log!,
@@ -445,7 +446,6 @@ function log!(M::ProductManifold, v, x, y)
     )
     return v
 end
-
 
 @doc doc"""
     manifold_dimension(M::ProductManifold)
@@ -545,6 +545,7 @@ base manifolds. Then this method is performed elementwise, so the encapsulated r
 method has to be one that is available on the manifolds.
 """
 retract(::ProductManifold, ::Any...)
+
 function retract!(M::ProductManifold, y, x, v, method::ProductRetraction)
     map(
         retract!,
@@ -561,7 +562,6 @@ function representation_size(M::ProductManifold)
     return (mapreduce(m -> prod(representation_size(m)), +, M.manifolds),)
 end
 
-
 @doc doc"""
     sharp(M::ProductManifold, x, w::FVector{CotangentSpaceType})
 
@@ -570,6 +570,7 @@ Use the musical isomorphism to transform the cotangent vector `w` from the tange
 This can be done elementwise, so vor every entry of `w` (and `x`) sparately
 """
 sharp(::ProductManifold, ::Any...)
+
 function sharp!(M::ProductManifold, v::TFVector, x, w::CoTFVector)
     vfs = map(u -> FVector(TangentSpace, u), submanifold_components(v))
     wfs = map(u -> FVector(CotangentSpace, u), submanifold_components(w))
@@ -586,27 +587,18 @@ submanifold(M::ProductManifold, i::Integer) = M.manifolds[i]
 
 """
     submanifold(M::ProductManifold, i::Val)
+    submanifold(M::ProductManifold, i::AbstractVector)
 
 Extract the factor of the product manifold `M` indicated by indices in `i`.
 For example, for `i` equal to `Val((1, 3))` the product manifold constructed
 from the first and the third factor is returned.
+
+The version with `AbstractVector` is not type-stable, for better preformance use `Val`.
 """
 submanifold(M::ProductManifold, i::Val) = ProductManifold(select_from_tuple(M.manifolds, i))
-
-"""
-    submanifold(M::ProductManifold, i::AbstractVector)
-
-Extract the factor of the product manifold `M` indicated by indices in `i`.
-For example, for `i` equal to `[1, 3]` the product manifold constructed
-from the first and the third factor is returned.
-
-This function is not type-stable, for better preformance use
-`submanifold(M::ProductManifold, i::Val)`.
-"""
 submanifold(M::ProductManifold, i::AbstractVector) = submanifold(M, Val(tuple(i...)))
 
 support(d::ProductPointDistribution) = MPointSupport(d.manifold)
-
 function support(tvd::ProductFVectorDistribution)
     return FVectorSupport(
         tvd.type,

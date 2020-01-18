@@ -83,7 +83,7 @@ using FiniteDifferences
 using HybridArrays
 using LinearAlgebra
 using Base.Iterators: repeated
-using ManifoldsBase: CoTVector, Manifold, MPoint, TVector
+using ManifoldsBase: CoTVector, Manifold, MPoint, TVector, DefaultManifold
 using ManifoldsBase:
     ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
@@ -93,7 +93,7 @@ using Markdown: @doc_str
 using Random: AbstractRNG
 using Requires
 using StaticArrays
-using StatsBase: AbstractWeights
+using StatsBase: AbstractWeights, ProbabilityWeights, values, varcorrection
 using UnsafeArrays
 
 """

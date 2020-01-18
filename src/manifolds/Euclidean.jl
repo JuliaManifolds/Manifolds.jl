@@ -20,6 +20,7 @@ The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
 [`real_dimension`](@ref) of the field $𝔽$.
 """
 struct Euclidean{N<:Tuple,T} <: Manifold where {N,T<:AbstractNumbers} end
+
 function Euclidean(n::Vararg{Int,N}; field::AbstractNumbers = ℝ) where {N}
     return Euclidean{Tuple{n...},field}()
 end
@@ -60,6 +61,7 @@ Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `x` in 
 ````
 """
 exp(::Euclidean, ::Any...)
+
 exp!(M::Euclidean, y, x, v) = (y .= x .+ v)
 
 """
@@ -70,18 +72,17 @@ Transform a tangent vector into a cotangent. Since they can directly be identifi
 tangent space of `x` on `M`. The result is returned also in place in `v`.
 """
 flat(::Euclidean, ::Any...)
+
 flat!(M::Euclidean, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
 
 function get_basis(M::Euclidean{<:Tuple,ℝ}, x, B::ArbitraryOrthonormalBasis)
     vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
     return PrecomputedOrthonormalBasis(vecs)
 end
-
 function get_basis(M::Euclidean{<:Tuple,ℂ}, x, B::ArbitraryOrthonormalBasis)
     vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
     return PrecomputedOrthonormalBasis([vecs; im * vecs])
 end
-
 function get_basis(M::Euclidean, x, B::DiagonalizingOrthonormalBasis)
     vecs = get_basis(M, x, ArbitraryOrthonormalBasis()).vectors
     kappas = zeros(real(eltype(x)), manifold_dimension(M))
@@ -93,7 +94,6 @@ function get_coordinates(M::Euclidean{<:Tuple,ℝ}, x, v, B::ArbitraryOrDiagonal
     PS = prod(S)
     return reshape(v, PS)
 end
-
 function get_coordinates(M::Euclidean{<:Tuple,ℂ}, x, v, B::ArbitraryOrDiagonalizingBasis)
     S = representation_size(M)
     PS = prod(S)
@@ -104,12 +104,12 @@ function get_vector(M::Euclidean{<:Tuple,ℝ}, x, v, B::ArbitraryOrDiagonalizing
     S = representation_size(M)
     return reshape(v, S)
 end
-
 function get_vector(M::Euclidean{<:Tuple,ℂ}, x, v, B::ArbitraryOrDiagonalizingBasis)
     S = representation_size(M)
     N = div(length(v), 2)
     return reshape(v[1:N] + im * v[N+1:end], S)
 end
+
 function hat(M::Euclidean{N,ℝ}, x, vⁱ) where {N}
     return reshape(vⁱ, representation_size(TangentBundleFibers(M)))
 end
@@ -163,6 +163,8 @@ which in this case is just
 \log_x y = y - x.
 ````
 """
+log(::Euclidean, ::Any...)
+
 log!(M::Euclidean, v, x, y) = (v .= y .- x)
 
 log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = zero(eltype(x))
@@ -190,6 +192,7 @@ function mean(
     return mean(x, w)
 end
 mean(::Euclidean, x::AbstractVector; kwargs...) = mean(x)
+
 function mean!(M::Euclidean, y, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(M, y, x, w, GeodesicInterpolation(); kwargs...)
 end
@@ -198,7 +201,6 @@ function mean_and_var(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs
     m, v = mean_and_var(x; kwargs...)
     return m, sum(v)
 end
-
 function mean_and_var(
     ::Euclidean{Tuple{1}},
     x::AbstractVector{<:Number},
@@ -209,7 +211,6 @@ function mean_and_var(
     m, v = mean_and_var(x, w; corrected = corrected, kwargs...)
     return m, sum(v)
 end
-
 function mean_and_var(M::Euclidean, x::AbstractVector, w::AbstractWeights; kwargs...)
     return mean_and_var(M, x, w, GeodesicInterpolation(); kwargs...)
 end
@@ -223,6 +224,7 @@ function median(
 )
     return median(x, w)
 end
+
 function median!(::Euclidean{Tuple{1}}, y, x::AbstractVector; kwargs...)
     return copyto!(y, [median(vcat(x...))])
 end
@@ -258,6 +260,7 @@ Project an arbitrary point `x` onto the [`Euclidean`](@ref) `M`, which
 is of course just the identity map.
 """
 project_point(::Euclidean, ::Any...)
+
 project_point!(M::Euclidean, x) = x
 
 """
@@ -268,6 +271,7 @@ Project an arbitrary vector `v` into the tangent space of a point `x` on the
 space of `M` can be identified with all of `M`.
 """
 project_tangent(::Euclidean, ::Any...)
+
 project_tangent!(M::Euclidean, w, x, v) = copyto!(w, v)
 
 """
@@ -299,6 +303,7 @@ case, this yields just the identity for a cotangent vector `w` in the tangent sp
 of `x` on `M`.
 """
 sharp(::Euclidean, ::Any...)
+
 sharp!(M::Euclidean, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
 """
@@ -308,6 +313,7 @@ Parallely transport the vector `v` from the tangent space at `x` to the tangent 
 on the [`Euclidean`](@ref) `M`, which simplifies to the identity.
 """
 vector_transport_to(::Euclidean, ::Any, ::Any, ::Any, ::ParallelTransport)
+
 vector_transport_to!(M::Euclidean, vto, x, v, y, ::ParallelTransport) = copyto!(vto, v)
 
 var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
@@ -315,9 +321,9 @@ function var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T}
     return sum(var(x; mean = m, kwargs...))
 end
 
-vee!(::Euclidean{N,ℝ}, vⁱ, x, v) where {N} = copyto!(vⁱ, v)
-
 vee(::Euclidean{N,ℝ}, x, v) where {N} = vec(v)
+
+vee!(::Euclidean{N,ℝ}, vⁱ, x, v) where {N} = copyto!(vⁱ, v)
 
 """
     zero_tangent_vector(M::Euclidean, x)

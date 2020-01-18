@@ -38,7 +38,6 @@ end
 @inline function SizedAbstractArray{S}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}}
     return SizedAbstractArray{S,T,StaticArrays.tuple_length(S),M,TData}(a)
 end
-
 @inline function SizedAbstractArray{S,T,N}(::UndefInitializer) where {S,T,N}
     return SizedAbstractArray{S,T,N,N}(undef)
 end
@@ -66,7 +65,6 @@ end
         return a
     end
 end
-
 @inline function SizedAbstractArray{S,T,N}(x::Tuple) where {S,T,N}
     return SizedAbstractArray{S,T,N,N,Array{T,N}}(collect(x))
 end
@@ -105,11 +103,13 @@ end
 end
 
 Base.@propagate_inbounds getindex(a::SizedAbstractArray, i::Int) = getindex(a.data, i)
+
 Base.@propagate_inbounds function setindex!(a::SizedAbstractArray, v, i::Int)
     return setindex!(a.data, v, i)
 end
 
-SizedAbstractVector{S,T,M} = SizedAbstractArray{Tuple{S},T,1,M}
+const SizedAbstractVector{S,T,M} = SizedAbstractArray{Tuple{S},T,1,M}
+
 @inline function SizedAbstractVector{S}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}}
     return SizedAbstractArray{Tuple{S},T,1,M,TData}(a)
 end
@@ -117,7 +117,8 @@ end
     return SizedAbstractArray{Tuple{S},T,1,1,Vector{T}}(x)
 end
 
-SizedAbstractMatrix{S1,S2,T,M} = SizedAbstractArray{Tuple{S1,S2},T,2,M}
+const SizedAbstractMatrix{S1,S2,T,M} = SizedAbstractArray{Tuple{S1,S2},T,2,M}
+
 @inline function SizedAbstractMatrix{S1,S2}(
     a::TData,
 ) where {S1,S2,T,M,TData<:AbstractArray{T,M}}
@@ -145,6 +146,7 @@ end
 function similar(::Type{SA}, ::Type{T}, s::Size{S}) where {SA<:SizedAbstractArray,T,S}
     return sizedabstractarray_similar_type(T, s, StaticArrays.length_val(s))(undef)
 end
+
 function sizedabstractarray_similar_type(
     ::Type{T},
     s::Size{S},

@@ -22,6 +22,7 @@ Generate the power manifold $M^{N_1 \times N_2 \times \dots \times N_n}$.
 struct PowerManifold{TM<:Manifold,TSize} <: Manifold
     manifold::TM
 end
+
 PowerManifold(M::Manifold, size::Int...) = PowerManifold{typeof(M),Tuple{size...}}(M)
 
 @doc doc"""
@@ -41,6 +42,7 @@ Power retraction based on `retraction`. Works on [`PowerManifold`](@ref)s.
 struct PowerRetraction{TR<:AbstractRetractionMethod} <: AbstractRetractionMethod
     retraction::TR
 end
+
 """
     InversePowerRetraction(inverse_retractions::AbstractInverseRetractionMethod...)
 
@@ -82,7 +84,10 @@ struct PowerFVectorDistribution{
 end
 
 """
-    PrecomputedPowerOrthonormalBasis(bases::AbstractArray{AbstractPrecomputedOrthonormalBasis}, F::AbstractNumbers = ℝ)
+    PrecomputedPowerOrthonormalBasis(
+        bases::AbstractArray{AbstractPrecomputedOrthonormalBasis},
+        F::AbstractNumbers = ℝ,
+    )
 
 A precomputed orthonormal basis of a tangent space of a power manifold.
 The array `bases` stores bases corresponding to particular parts of the manifold.
@@ -176,6 +181,7 @@ Compute the exponential map from `x` in direction `v` on the [`PowerManifold`](@
 which can be computed using the base manifolds exponential map elementwise.
 """
 exp(::PowerManifold, ::Any...)
+
 function exp!(M::PowerManifold, y, x, v)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -197,6 +203,7 @@ use the musical isomorphism to transform the tangent vector `w` from the tangent
 This can be done elementwise, so r every entry of `w` (and `x`) sparately
 """
 flat(::PowerManifold, ::Any...)
+
 function flat!(M::PowerManifold, v::CoTFVector, x, w::TFVector)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -215,15 +222,12 @@ function get_basis(M::PowerManifold, x, B::AbstractBasis)
     vs = [get_basis(M.manifold, _read(rep_size, x, i), B) for i in get_iterator(M)]
     return PrecomputedPowerOrthonormalBasis(vs)
 end
-
 function get_basis(M::PowerManifold, x, B::ArbitraryOrthonormalBasis)
     return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, x, B)
 end
-
 function get_basis(M::PowerManifold, x, B::DiagonalizingOrthonormalBasis)
     return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, x, B)
 end
-
 
 function get_coordinates(M::PowerManifold, x, v, B::ArbitraryOrthonormalBasis)
     rep_size = representation_size(M.manifold)
@@ -273,7 +277,6 @@ function get_vector(M::PowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
     end
     return v_out
 end
-
 function get_vector(M::PowerManifold, x, v, B::ArbitraryOrthonormalBasis)
     dim = manifold_dimension(M.manifold)
 
@@ -323,6 +326,7 @@ of the base manifold. Then this method is performed elementwise, so the encapsul
 retraction method has to be one that is available on the base [`Manifold`](@ref).
 """
 inverse_retract(::PowerManifold, ::Any...)
+
 function inverse_retract!(M::PowerManifold, v, x, y, method::InversePowerRetraction)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -392,6 +396,7 @@ Compute the logarithmic map from `x` to `y` on the [`PowerManifold`](@ref) `M`,
 which can be computed using the base manifolds logarithmic map elementwise.
 """
 log(::PowerManifold, ::Any...)
+
 function log!(M::PowerManifold, v, x, y)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -447,6 +452,7 @@ function rand(rng::AbstractRNG, d::PowerPointDistribution)
     _rand!(rng, d, x)
     return x
 end
+
 function _rand!(rng::AbstractRNG, d::PowerFVectorDistribution, v::AbstractArray)
     rep_size = representation_size(d.type.M.manifold)
     for i in get_iterator(d.type.M)
@@ -491,6 +497,7 @@ base manifold. Then this method is performed elementwise, so the encapsulated re
 method has to be one that is available on the base [`Manifold`](@ref).
 """
 retract(::PowerManifold, ::Any...)
+
 function retract!(M::PowerManifold, y, x, v, method::PowerRetraction)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -513,6 +520,7 @@ Use the musical isomorphism to transform the cotangent vector `w` from the tange
 This can be done elementwise, so for every entry of `w` (and `x`) sparately
 """
 sharp(::PowerManifold, ::Any...)
+
 function sharp!(M::PowerManifold, v::TFVector, x, w::CoTFVector)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)

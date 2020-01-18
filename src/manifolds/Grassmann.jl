@@ -54,6 +54,7 @@ Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
 case $\mathbb F = \mathbb R$ is the default.
 """
 struct Grassmann{n,k,F} <: Manifold end
+
 Grassmann(n::Int, k::Int, F::AbstractNumbers = ℝ) = Grassmann{n,k,F}()
 
 @doc doc"""
@@ -174,6 +175,7 @@ yielding the result as
 ````
 """
 exp(::Grassmann, ::Any...)
+
 function exp!(M::Grassmann, y, x, v)
     norm(M, x, v) ≈ 0 && return copyto!(y, x)
     d = svd(v)
@@ -212,6 +214,7 @@ Compute the inverse retraction for the [`PolarRetraction`](@ref), on the
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inverse_retract(M::Grassmann, ::Any, ::Any, ::PolarInverseRetraction)
+
 function inverse_retract!(::Grassmann, v, x, y, ::PolarInverseRetraction)
     return copyto!(v, y / (x' * y) - x)
 end
@@ -227,6 +230,7 @@ Compute the inverse retraction valid of the [`QRRetraction`](@ref)
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
+
 inverse_retract!(::Grassmann, v, x, y, ::QRInverseRetraction) = copyto!(v, y / (x' * y) - x)
 
 function isapprox(M::Grassmann, x, v, w; kwargs...)
@@ -254,6 +258,7 @@ USV = (y^\mathrm{H}x)^{-1} ( y^\mathrm{H} - y^\mathrm{H}xx^\mathrm{H} ).
 In this formula the $\operatorname{atan}$ is meant elementwise.
 """
 log(::Grassmann, ::Any...)
+
 function log!(M::Grassmann, v, x, y)
     z = y' * x
     At = y' - z * x'
@@ -288,6 +293,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::Grassmann{n,k,ℝ} where {n,k}, ::Any...)
+
 function mean!(
     M::Grassmann{n,k,ℝ},
     y,
@@ -311,6 +317,7 @@ which is computed by
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 project_tangent(::Grassmann, ::Any...)
+
 project_tangent!(M::Grassmann, v, x, w) = copyto!(v, w - x * x' * w)
 
 @doc doc"""
@@ -331,14 +338,7 @@ Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
-"""
-retract(::Grassmann, ::Any, ::Any, ::PolarRetraction)
-function retract!(::Grassmann, y, x, v, ::PolarRetraction)
-    s = svd(x + v)
-    return mul!(y, s.U, s.V')
-end
 
-@doc doc"""
     retract(M::Grassmann, x, v, ::QRRetraction )
 
 Compute the QR-based retraction [`QRRetraction`](@ref) on the
@@ -351,7 +351,12 @@ where D is a $m\times n$ matrix with
 D = \operatorname{diag}( \operatorname{sgn}(R_{ii}+0,5)_{i=1}^n ).
 ````
 """
-retract(M::Grassmann, ::Any, ::Any, ::QRRetraction)
+retract(::Grassmann, ::Any...)
+
+function retract!(::Grassmann, y, x, v, ::PolarRetraction)
+    s = svd(x + v)
+    return mul!(y, s.U, s.Vt)
+end
 function retract!(::Grassmann{N,K}, y, x, v, ::QRRetraction) where {N,K}
     qrfac = qr(x + v)
     d = diag(qrfac.R)
@@ -368,4 +373,5 @@ Return the zero tangent vector from the tangent space at `x` on the [`Grassmann`
 which is given by a zero matrix the same size as `x`.
 """
 zero_tangent_vector(::Grassmann, ::Any...)
+
 zero_tangent_vector!(::Grassmann, v, x) = fill!(v, 0)

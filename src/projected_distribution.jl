@@ -29,6 +29,7 @@ function rand(rng::AbstractRNG, d::ProjectedPointDistribution{TResult}) where {T
     x = convert(TResult, rand(rng, d.d))
     return d.proj!(d.manifold, x)
 end
+
 function _rand!(rng::AbstractRNG, d::ProjectedPointDistribution, x::AbstractArray{<:Number})
     _rand!(rng, d.d, x)
     return d.proj!(d.manifold, x)
@@ -82,6 +83,7 @@ function rand(rng::AbstractRNG, d::ProjectedFVectorDistribution{TResult}) where 
     v = convert(TResult, reshape(rand(rng, d.d), size(d.x)))
     return d.project_vector!(d.type, v, d.x, v)
 end
+
 function _rand!(
     rng::AbstractRNG,
     d::ProjectedFVectorDistribution,

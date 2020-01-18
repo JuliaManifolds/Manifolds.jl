@@ -40,6 +40,7 @@ Compute the exponential map from `x` with tangent vector `v` on the
 where $\operatorname{Exp}$ denotes to the matrix exponential.
 """
 exp(::SymmetricPositiveDefinite, ::Any...)
+
 function exp!(M::SymmetricPositiveDefinite{N}, y, x, v) where {N}
     e = eigen(Symmetric(x))
     U = e.vectors
@@ -178,6 +179,7 @@ x^{\frac{1}{2}}\operatorname{Log}(x^{-\frac{1}{2}}yx^{-\frac{1}{2}})x^{\frac{1}{
 where $\operatorname{Log}$ denotes to the matrix logarithm.
 """
 log(::SymmetricPositiveDefinite, ::Any...)
+
 function log!(M::SymmetricPositiveDefinite{N}, v, x, y) where {N}
     e = eigen(Symmetric(x))
     U = e.vectors
@@ -218,6 +220,7 @@ and `log` the logarithmic map on [`SymmetricPositiveDefinite`](@ref)
 (again with respect to the metric mentioned).
 """
 vector_transport_to(::SymmetricPositiveDefinite, ::Any, ::Any, ::Any, ::ParallelTransport)
+
 function vector_transport_to!(
     M::SymmetricPositiveDefinite{N},
     vto,

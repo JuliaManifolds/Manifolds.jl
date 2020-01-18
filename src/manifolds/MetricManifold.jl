@@ -49,6 +49,7 @@ abstract type RiemannianMetric <: Metric end
 function check_manifold_point(M::MetricManifold, x; kwargs...)
     return check_manifold_point(M.manifold, x; kwargs...)
 end
+
 function check_tangent_vector(M::MetricManifold, x, v; kwargs...)
     return check_tangent_vector(M.manifold, x, v; kwargs...)
 end
@@ -147,7 +148,7 @@ Currently, the numerical integration is only accurate when using a single
 coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
 """
-exp(::MetricManifold, ::Any)
+exp(::MetricManifold, ::Any...)
 function exp(M::MMT, x, v, T::AbstractVector{T} where {T}) where {MMT<:MetricManifold}
     return exp(M, is_default_metric(M), x, v, T)
 end
@@ -196,6 +197,7 @@ w^\flat = G_xw,
 where $G_x$ is the local matrix representation of `G`, see [`local_metric`](@ref)
 """
 flat(::MetricManifold, ::Any...)
+
 function flat!(M::MMT, v::CoTFVector, x, w::TFVector) where {MMT<:MetricManifold}
     g = local_metric(M, x)
     copyto!(v.data, g * w.data)
@@ -262,9 +264,11 @@ implemented or is the one most commonly assumed to be used.
 function is_default_metric(M::MMT) where {MMT<:MetricManifold}
     return is_default_metric(base_manifold(M), metric(M))
 end
+
 function convert(T::Type{MetricManifold{MT,GT}}, M::MT) where {MT,GT}
     return _convert_with_default(M, GT, is_default_metric(M, GT()))
 end
+
 function _convert_with_default(M::MT, T::Type{<:Metric}, ::Val{true}) where {MT<:Manifold}
     return MetricManifold(M, T())
 end
@@ -449,7 +453,6 @@ end
 function projected_distribution(M::MMT, ::Val{false}, d, x) where {MMT<:MetricManifold}
     error("projected_distribution not implemented for a $(typeof(M)) and with $(typeof(d)) at point $(typeof(x)).")
 end
-
 function projected_distribution(M::MMT, d) where {MMT<:MetricManifold}
     return projected_distribution(M, is_default_metric(M), d)
 end
@@ -517,6 +520,7 @@ where $G_x$ is the local matrix representation of `G`, i.e. one employs
 [`inverse_local_metric`](@ref) here to obtain $G_x^{-1}$.
 """
 sharp(::MetricManifold, ::Any)
+
 function sharp!(M::N, v::TFVector, x, w::CoTFVector) where {N<:MetricManifold}
     ginv = inverse_local_metric(M, x)
     copyto!(v.data, ginv * w.data)

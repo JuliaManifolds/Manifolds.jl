@@ -18,6 +18,7 @@ x \in \mathbb R^{n\times n} :
 generates the manifold $\mathcal P(n) \subset \mathbb R^{n\times n}$
 """
 struct SymmetricPositiveDefinite{N} <: Manifold end
+
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
 
 include("SymmetricPositiveDefiniteLinearAffine.jl")
@@ -155,6 +156,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolation`](@ref).
 """
 mean(::SymmetricPositiveDefinite, ::Any)
+
 function mean!(
     M::SymmetricPositiveDefinite,
     y,
@@ -197,6 +199,7 @@ function zero_tangent_vector(
 ) where {N,T<:Metric}
     return zero(x)
 end
+
 zero_tangent_vector!(M::SymmetricPositiveDefinite{N}, v, x) where {N} = fill!(v, 0)
 function zero_tangent_vector!(
     M::MetricManifold{SymmetricPositiveDefinite{N},T},

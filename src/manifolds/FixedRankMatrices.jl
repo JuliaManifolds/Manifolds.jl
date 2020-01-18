@@ -253,6 +253,7 @@ Section 3 in [^Vandereycken2013].
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
 project_tangent(::FixedRankMatrices, ::Any...)
+
 function project_tangent!(
     ::FixedRankMatrices,
     vto::UMVTVector,
@@ -296,6 +297,7 @@ in the sense that $S_k$ is the diagonal matrix of size $k\times k$ with the $k$ 
 singular values and $U$ and $V$ are shortened accordingly.
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)
+
 function retract!(
     ::FixedRankMatrices{M,N,k},
     y::SVDMPoint,
@@ -363,6 +365,7 @@ function zero_tangent_vector(::FixedRankMatrices{m,n,k}, x::SVDMPoint) where {m,
     )
     return v
 end
+
 function zero_tangent_vector!(
     ::FixedRankMatrices{m,n,k},
     v::UMVTVector,
