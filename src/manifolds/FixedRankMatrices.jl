@@ -44,8 +44,9 @@ Generate the manifold of `m`-by-`n` real-valued matrices of rank `k`.
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
 struct FixedRankMatrices{M,N,K,T} <: Manifold end
-FixedRankMatrices(m::Int, n::Int, k::Int, t::AbstractNumbers = ℝ) =
-    FixedRankMatrices{m,n,k,t}()
+function FixedRankMatrices(m::Int, n::Int, k::Int, t::AbstractNumbers = ℝ)
+    return FixedRankMatrices{m,n,k,t}()
+end
 
 @doc doc"""
     SVDMPoint <: MPoint
@@ -107,6 +108,7 @@ UMVTVector(U, M, Vt, k::Int) = UMVTVector(U[:, 1:k], M[1:k, 1:k], Vt[1:k, :])
 -(v::UMVTVector) = UMVTVector(-v.U, -v.M, -v.Vt)
 +(v::UMVTVector) = UMVTVector(v.U, v.M, v.Vt)
 ==(v::UMVTVector, w::UMVTVector) = (v.U == w.U) && (v.M == w.M) && (v.Vt == w.Vt)
+
 @doc doc"""
     check_manifold_point(M::FixedRankMatrices{m,n,k},x; kwargs...)
 
@@ -206,14 +208,22 @@ function inner(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector)
     return dot(v.U, w.U) + dot(v.M, w.M) + dot(v.Vt, w.Vt)
 end
 
-isapprox(::FixedRankMatrices, x::SVDMPoint, y::SVDMPoint; kwargs...) =
-    isapprox(x.U * Diagonal(x.S) * x.Vt, y.U * Diagonal(y.S) * y.Vt; kwargs...)
-isapprox(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector; kwargs...) =
-    isapprox(
+function isapprox(::FixedRankMatrices, x::SVDMPoint, y::SVDMPoint; kwargs...)
+    return isapprox(x.U * Diagonal(x.S) * x.Vt, y.U * Diagonal(y.S) * y.Vt; kwargs...)
+end
+function isapprox(
+    ::FixedRankMatrices,
+    x::SVDMPoint,
+    v::UMVTVector,
+    w::UMVTVector;
+    kwargs...,
+)
+    return isapprox(
         x.U * v.M * x.Vt + v.U * x.Vt + x.U * v.Vt,
         x.U * w.M * x.Vt + w.U * x.Vt + x.U * w.Vt;
         kwargs...,
     )
+end
 
 @doc doc"""
     manifold_dimension(M::FixedRankMatrices{m,n,k,𝔽})
@@ -305,11 +315,13 @@ function retract!(
 end
 
 similar(x::SVDMPoint) = SVDMPoint(similar(x.U), similar(x.S), similar(x.Vt))
-similar(x::SVDMPoint, ::Type{T}) where {T} =
-    SVDMPoint(similar(x.U, T), similar(x.S, T), similar(x.Vt, T))
+function similar(x::SVDMPoint, ::Type{T}) where {T}
+    return SVDMPoint(similar(x.U, T), similar(x.S, T), similar(x.Vt, T))
+end
 similar(v::UMVTVector) = UMVTVector(similar(v.U), similar(v.M), similar(v.Vt))
-similar(v::UMVTVector, ::Type{T}) where {T} =
-    UMVTVector(similar(v.U, T), similar(v.M, T), similar(v.Vt, T))
+function similar(v::UMVTVector, ::Type{T}) where {T}
+    return UMVTVector(similar(v.U, T), similar(v.M, T), similar(v.Vt, T))
+end
 
 eltype(x::SVDMPoint) = typeof(one(eltype(x.U)) + one(eltype(x.S)) + one(eltype(x.Vt)))
 eltype(v::UMVTVector) = typeof(one(eltype(v.U)) + one(eltype(v.M)) + one(eltype(v.Vt)))

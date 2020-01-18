@@ -109,9 +109,8 @@ struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
     radius::T
 
     function GeodesicInterpolationWithinRadius(radius::T) where {T}
-        radius > 0 ||
+        radius > 0 && return new{T}(radius)
         throw(DomainError("The radius must be strictly postive, received $(radius)."))
-        return new{T}(radius)
     end
 end
 
@@ -237,8 +236,9 @@ function mean!(
     kwargs...,
 )
     n = length(x)
-    (length(w) != n) &&
-    throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+    if length(w) != n
+        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+    end
     copyto!(y, x0)
     yold = similar_result(M, mean, y)
     v = zero_tangent_vector(M, y)
@@ -294,8 +294,9 @@ function mean!(
     kwargs...,
 )
     n = length(x)
-    (length(w) != n) &&
-    throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+    if length(w) != n
+        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+    end
     order = shuffle_rng === nothing ? (1:n) : shuffle(shuffle_rng, 1:n)
     @inbounds begin
         j = order[1]
@@ -365,8 +366,9 @@ function mean!(
     kwargs...,
 )
     n = length(x)
-    (length(w) != n) &&
-    throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
+    if length(w) != n
+        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
+    end
     copyto!(y, x0)
     yold = similar_result(M, median, y)
     ytmp = copy(yold)
@@ -507,8 +509,9 @@ function median!(
     kwargs...,
 )
     n = length(x)
-    (length(w) != n) &&
-    throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
+    if length(w) != n
+        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
+    end
     copyto!(y, x0)
     yold = similar_result(M, median, y)
     ytmp = copy(yold)
@@ -561,8 +564,9 @@ function var(M::Manifold, x::AbstractVector, m; corrected::Bool = true)
     return var(M, x, w, m; corrected = corrected)
 end
 
-var(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...) =
-    mean_and_var(M, x, w; kwargs...)[2]
+function var(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
+    return mean_and_var(M, x, w; kwargs...)[2]
+end
 var(M::Manifold, x::AbstractVector; kwargs...) = mean_and_var(M, x; kwargs...)[2]
 
 @doc doc"""
@@ -665,8 +669,9 @@ function mean_and_var(
     kwargs...,
 )
     n = length(x)
-    (length(w) != n) &&
-    throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+    if length(w) != n
+        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+    end
     order = shuffle_rng === nothing ? (1:n) : shuffle(shuffle_rng, 1:n)
     @inbounds begin
         j = order[1]

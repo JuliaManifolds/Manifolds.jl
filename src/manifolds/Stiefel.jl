@@ -133,10 +133,11 @@ $0_k$ are the identity matrix and the zero matrix of dimension $k \times k$, res
 """
 exp(::Stiefel, ::Any...)
 function exp!(M::Stiefel{n,k}, y, x, v) where {n,k}
-    y .=
+    y .= (
         [x v] *
         exp([x'v -v' * v; one(zeros(eltype(x), k, k)) x' * v]) *
         [exp(-x'v); zeros(eltype(x), k, k)]
+    )
     return y
 end
 
@@ -218,8 +219,9 @@ function inverse_retract!(::Stiefel{n,k}, v, x, y, ::QRInverseRetraction) where 
     return v
 end
 
-isapprox(M::Stiefel, x, v, w; kwargs...) =
-    isapprox(sqrt(inner(M, x, zero_tangent_vector(M, x), v - w)), 0; kwargs...)
+function isapprox(M::Stiefel, x, v, w; kwargs...)
+    return isapprox(sqrt(inner(M, x, zero_tangent_vector(M, x), v - w)), 0; kwargs...)
+end
 isapprox(M::Stiefel, x, y; kwargs...) = isapprox(norm(x - y), 0; kwargs...)
 
 @doc doc"""

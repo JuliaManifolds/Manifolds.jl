@@ -237,8 +237,9 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 inverse_retract!(::Grassmann, v, x, y, ::QRInverseRetraction) = (v .= y / (x' * y) - x)
 
-isapprox(M::Grassmann, x, v, w; kwargs...) =
-    isapprox(sqrt(inner(M, x, zero_tangent_vector(M, x), v - w)), 0; kwargs...)
+function isapprox(M::Grassmann, x, v, w; kwargs...)
+    return isapprox(sqrt(inner(M, x, zero_tangent_vector(M, x), v - w)), 0; kwargs...)
+end
 isapprox(M::Grassmann, x, y; kwargs...) = isapprox(distance(M, x, y), 0.0; kwargs...)
 
 @doc doc"""
@@ -296,8 +297,15 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::Grassmann{n,k,ℝ} where {n,k}, ::Any...)
-mean!(M::Grassmann{n,k,ℝ}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {n,k} =
-    mean!(M, y, x, w, GeodesicInterpolationWithinRadius(π / 4); kwargs...)
+function mean!(
+    M::Grassmann{n,k,ℝ},
+    y,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+) where {n,k}
+    return mean!(M, y, x, w, GeodesicInterpolationWithinRadius(π / 4); kwargs...)
+end
 
 @doc doc"""
     project_tangent(M::Grassmann, x, w)

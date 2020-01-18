@@ -31,7 +31,6 @@ For example used for tangent vector-valued distributions.
 abstract type FVectorDistribution{TSpace<:VectorBundleFibers,T} <:
               Distribution{FVectorvariate,FVectorSupport{TSpace,T}} end
 
-
 """
     MPointvariate
 

@@ -35,11 +35,13 @@ where $l$ and $k$ are the cholesky factors of $x$ and $y$, respectively,
 $\lfloor\cdot\rfloor$ denbotes the strictly lower triangular matrix of its argument,
 and $\lVert\cdot\rVert_{\mathrm{F}}$ denotes the Frobenius norm.
 """
-distance(
+function distance(
     M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
     x,
     y,
-) where {N} = distance(CholeskySpace{N}(), cholesky(x).L, cholesky(y).L)
+) where {N}
+    return distance(CholeskySpace{N}(), cholesky(x).L, cholesky(y).L)
+end
 
 @doc doc"""
     exp(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, x, v)

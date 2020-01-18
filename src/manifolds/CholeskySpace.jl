@@ -117,10 +117,11 @@ $\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
 exp(::CholeskySpace, ::Any...)
 function exp!(::CholeskySpace, y, x, v)
-    y .=
+    y .= (
         strictlyLowerTriangular(x) +
         strictlyLowerTriangular(v) +
         Diagonal(diag(x)) * Diagonal(exp.(diag(v) ./ diag(x)))
+    )
     return y
 end
 
@@ -136,9 +137,12 @@ The formula reads
     g_{x}(v,w) = \sum_{i>j} v_{ij}w_{ij} + \sum_{j=1}^m v_{ii}w_{ii}x_{ii}^{-2}
 ````
 """
-inner(::CholeskySpace, x, v, w) =
-    sum(strictlyLowerTriangular(v) .* strictlyLowerTriangular(w)) +
-    sum(diag(v) .* diag(w) ./ (diag(x) .^ 2))
+function inner(::CholeskySpace, x, v, w)
+    return (
+        sum(strictlyLowerTriangular(v) .* strictlyLowerTriangular(w)) +
+        sum(diag(v) .* diag(w) ./ (diag(x) .^ 2))
+    )
+end
 
 @doc doc"""
     log(M::CholeskySpace, v, x, y)
@@ -157,9 +161,10 @@ $\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
 log(::Cholesky, ::Any...)
 function log!(::CholeskySpace, v, x, y)
-    v .=
+    v .= (
         strictlyLowerTriangular(y) - strictlyLowerTriangular(x) +
         Diagonal(diag(x)) * Diagonal(log.(diag(y) ./ diag(x)))
+    )
     return v
 end
 
@@ -197,9 +202,10 @@ and $\operatorname{diag}$ extracts the diagonal matrix.
 """
 vector_transport_to(::CholeskySpace, ::Any, ::Any, ::Any, ::ParallelTransport)
 function vector_transport_to!(::CholeskySpace, vto, x, v, y, ::ParallelTransport)
-    vto .=
+    vto .= (
         strictlyLowerTriangular(x) +
         Diagonal(diag(y)) * Diagonal(1 ./ diag(x)) * Diagonal(v)
+    )
     return vto
 end
 

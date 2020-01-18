@@ -196,10 +196,12 @@ inner(::Circle, ::Any...)
 @inline inner(::Circle{ℝ}, x::Real, w::Real, v::Real) = v * w
 @inline inner(::Circle{ℂ}, x, w, v) = complex_dot(w, v)
 
-inverse_retract(M::Circle, x::Number, y::Number) =
-    inverse_retract(M, x, y, LogarithmicInverseRetraction())
-inverse_retract(M::Circle, x::Number, y::Number, ::LogarithmicInverseRetraction) =
-    log(M, x, y)
+function inverse_retract(M::Circle, x::Number, y::Number)
+    return inverse_retract(M, x, y, LogarithmicInverseRetraction())
+end
+function inverse_retract(M::Circle, x::Number, y::Number, ::LogarithmicInverseRetraction)
+    return log(M, x, y)
+end
 
 @doc doc"""
     log(M::Circle, x, y)
@@ -312,8 +314,9 @@ sharp(M::Circle, x::Number, w::FVector{CotangentSpaceType}) = FVector(TangentSpa
 Compute symmetric remainder of `x` with respect to the interall 2*`T`, i.e.
 `(x+T)%2T`, where the default for `T` is $\pi$
 """
-sym_rem(x::N, T = π) where {N<:Number} =
-    (x ≈ T ? convert(N, -T) : rem(x, convert(N, 2 * T), RoundNearest))
+function sym_rem(x::N, T = π) where {N<:Number}
+    return (x ≈ T ? convert(N, -T) : rem(x, convert(N, 2 * T), RoundNearest))
+end
 sym_rem(x, T = π) where {N} = sym_rem.(x, Ref(T))
 
 @doc doc"""
@@ -360,8 +363,9 @@ function vector_transport_to!(M::Circle{ℂ}, vto, x, v, y, ::ParallelTransport)
     return vto
 end
 
-vector_transport_along(M::Circle, x::Number, v::Number, c) =
-    vector_transport_along!(M, zero(v), x, v, c)
+function vector_transport_along(M::Circle, x::Number, v::Number, c)
+    return vector_transport_along!(M, zero(v), x, v, c)
+end
 function vector_transport_direction(
     M::Circle,
     x::Number,

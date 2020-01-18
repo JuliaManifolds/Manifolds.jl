@@ -218,9 +218,11 @@ submanifold_components(::Any...)
 submanifold_components(M::Manifold, x) = submanifold_components(x)
 submanifold_components(x) = x.parts
 
-Base.BroadcastStyle(
+function Base.BroadcastStyle(
     ::Type{<:ProductArray{ShapeSpec}},
-) where {ShapeSpec<:ShapeSpecification} = Broadcast.ArrayStyle{ProductArray{ShapeSpec}}()
+) where {ShapeSpec<:ShapeSpecification}
+    return Broadcast.ArrayStyle{ProductArray{ShapeSpec}}()
+end
 
 function Base.similar(
     bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{ProductArray{ShapeSpec}}},
@@ -247,26 +249,36 @@ size(x::ProductArray) = size(x.data)
 Base.@propagate_inbounds getindex(x::ProductArray, i) = getindex(x.data, i)
 Base.@propagate_inbounds setindex!(x::ProductArray, val, i) = setindex!(x.data, val, i)
 
-(+)(
+function (+)(
     v1::ProductArray{ShapeSpec},
     v2::ProductArray{ShapeSpec},
-) where {ShapeSpec<:ShapeSpecification} =
-    ProductArray(ShapeSpec, v1.data + v2.data, v1.reshapers)
-(-)(
+) where {ShapeSpec<:ShapeSpecification}
+    return ProductArray(ShapeSpec, v1.data + v2.data, v1.reshapers)
+end
+function (-)(
     v1::ProductArray{ShapeSpec},
     v2::ProductArray{ShapeSpec},
-) where {ShapeSpec<:ShapeSpecification} =
-    ProductArray(ShapeSpec, v1.data - v2.data, v1.reshapers)
-(-)(v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification} =
-    ProductArray(ShapeSpec, -v.data, v.reshapers)
-(*)(a::Number, v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification} =
-    ProductArray(ShapeSpec, a * v.data, v.reshapers)
+) where {ShapeSpec<:ShapeSpecification}
+    return ProductArray(ShapeSpec, v1.data - v2.data, v1.reshapers)
+end
+function (-)(v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
+    return ProductArray(ShapeSpec, -v.data, v.reshapers)
+end
+function (*)(a::Number, v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
+    return ProductArray(ShapeSpec, a * v.data, v.reshapers)
+end
 
 eltype(::Type{ProductArray{TM,TData,TV}}) where {TM,TData,TV} = eltype(TData)
-similar(x::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification} =
-    ProductArray(ShapeSpec, similar(x.data), x.reshapers)
-similar(x::ProductArray{ShapeSpec}, ::Type{T}) where {ShapeSpec<:ShapeSpecification,T} =
-    ProductArray(ShapeSpec, similar(x.data, T), x.reshapers)
+
+function similar(x::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
+    return ProductArray(ShapeSpec, similar(x.data), x.reshapers)
+end
+function similar(
+    x::ProductArray{ShapeSpec},
+    ::Type{T},
+) where {ShapeSpec<:ShapeSpecification,T}
+    return ProductArray(ShapeSpec, similar(x.data, T), x.reshapers)
+end
 
 """
     ProductRepr(parts)

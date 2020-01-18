@@ -60,8 +60,9 @@ Product retraction of `retractions`. Works on [`ProductManifold`](@ref).
 struct ProductRetraction{TR<:Tuple} <: AbstractRetractionMethod
     retractions::TR
 end
-ProductRetraction(retractions::AbstractRetractionMethod...) =
-    ProductRetraction{typeof(retractions)}(retractions)
+function ProductRetraction(retractions::AbstractRetractionMethod...)
+    return ProductRetraction{typeof(retractions)}(retractions)
+end
 
 """
     InverseProductRetraction(retractions::AbstractInverseRetractionMethod...)
@@ -71,8 +72,9 @@ Product inverse retraction of `inverse retractions`. Works on [`ProductManifold`
 struct InverseProductRetraction{TR<:Tuple} <: AbstractInverseRetractionMethod
     inverse_retractions::TR
 end
-InverseProductRetraction(inverse_retractions::AbstractInverseRetractionMethod...) =
-    InverseProductRetraction{typeof(inverse_retractions)}(inverse_retractions)
+function InverseProductRetraction(inverse_retractions::AbstractInverseRetractionMethod...)
+    return InverseProductRetraction{typeof(inverse_retractions)}(inverse_retractions)
+end
 
 """
     PrecomputedProductOrthonormalBasis(parts::NTuple{N,AbstractPrecomputedOrthonormalBasis} where N, F::AbstractNumbers = ℝ)
@@ -473,13 +475,14 @@ Compute the norm of `v` from the tangent space of `x` on the [`ProductManifold`]
 i.e. from the element wise norms the 2-norm is computed.
 """
 function norm(M::ProductManifold, x, v)
-    norms_squared =
+    norms_squared = (
         map(
             norm,
             M.manifolds,
             submanifold_components(M, x),
             submanifold_components(M, v),
         ) .^ 2
+    )
     return sqrt(sum(norms_squared))
 end
 
@@ -504,8 +507,9 @@ end
 function ProductFVectorDistribution(distributions::FVectorDistribution...)
     M = ProductManifold(map(d -> support(d).space.M, distributions)...)
     VS = support(distributions[1]).space.VS
-    all(d -> support(d).space.VS == VS, distributions) ||
-    error("Not all distributions have support in vector spaces of the same type, which is currently not supported")
+    if !all(d -> support(d).space.VS == VS, distributions)
+        error("Not all distributions have support in vector spaces of the same type, which is currently not supported")
+    end
     # Probably worth considering sum spaces in the future?
     x = ProductRepr(map(d -> support(d).x, distributions)...)
     return ProductFVectorDistribution(VectorBundleFibers(VS, M), x, distributions...)

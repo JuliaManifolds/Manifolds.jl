@@ -85,11 +85,13 @@ function get_basis(
     κ = [-1 / 4 * (λ[i] - λ[j])^2 for i = 1:N for j = i:N]
     return PrecomputedDiagonalizingOrthonormalBasis(Ξ, κ)
 end
-get_basis(
+function get_basis(
     M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
     x,
     B::DiagonalizingOrthonormalBasis,
-) where {N} = get_basis(base_manifold(M), x, B)
+) where {N}
+    return get_basis(base_manifold(M), x, B)
+end
 
 function get_coordinates(
     M::SymmetricPositiveDefinite{N},
@@ -109,12 +111,14 @@ function get_coordinates(
     end
     return vout
 end
-get_coordinates(
+function get_coordinates(
     M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
     x,
     v,
     B::ArbitraryOrthonormalBasis,
-) where {N} = get_coordinates(base_manifold(M), x, v, B)
+) where {N}
+    return get_coordinates(base_manifold(M), x, v, B)
+end
 
 function get_vector(
     M::SymmetricPositiveDefinite{N},
@@ -135,12 +139,14 @@ function get_vector(
     end
     return vout
 end
-get_vector(
+function get_vector(
     M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
     x,
     v,
     B::ArbitraryOrthonormalBasis,
-) where {N} = get_vector(base_manifold(M), x, v, B)
+) where {N}
+    return get_vector(base_manifold(M), x, v, B)
+end
 
 @doc doc"""
     inner(M::SymmetricPositiveDefinite, x, v, w)

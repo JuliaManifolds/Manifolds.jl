@@ -198,8 +198,9 @@ Compute the Minkowski inner product of two Vectors `a` and `b` of same length
 \langle a,b\rangle_{\mathrm{M}} = -a_{n+1}b_{n+1} + \displaystyle\sum_{k=1}^n a_kb_k.
 ````
 """
-minkowski_dot(a::AbstractVector, b::AbstractVector) =
-    -a[end] * b[end] + sum(a[1:end-1] .* b[1:end-1])
+function minkowski_dot(a::AbstractVector, b::AbstractVector)
+    return -a[end] * b[end] + sum(a[1:end-1] .* b[1:end-1])
+end
 
 @doc doc"""
     manifold_dimension(H::Hyperbolic)
@@ -221,8 +222,9 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` on the
 [`Hyperbolic`](@ref) space using [`CyclicProximalPointEstimation`](@ref).
 """
 mean(::Hyperbolic, ::Any...)
-mean!(M::Hyperbolic, y, x::AbstractVector, w::AbstractVector; kwargs...) =
-    mean!(M, y, x, w, CyclicProximalPointEstimation(); kwargs...)
+function mean!(M::Hyperbolic, y, x::AbstractVector, w::AbstractVector; kwargs...)
+    return mean!(M, y, x, w, CyclicProximalPointEstimation(); kwargs...)
+end
 
 @doc doc"""
     project_tangent(M::Hyperbolic, x, v)

@@ -160,8 +160,9 @@ since $\langle x,v\rangle = 0$ and when $d_{\mathbb S^2}(x,y) \leq \frac{\pi}{2}
 ````
 """
 inverse_retract(::Sphere, ::Any, ::Any, ::ProjectionInverseRetraction)
-inverse_retract!(::Sphere, v, x, y, ::ProjectionInverseRetraction) =
-    (v .= y ./ dot(x, y) .- x)
+function inverse_retract!(::Sphere, v, x, y, ::ProjectionInverseRetraction)
+    return (v .= y ./ dot(x, y) .- x)
+end
 
 @doc doc"""
     log(M::Sphere, x, y)
@@ -219,8 +220,9 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::Sphere, ::Any...)
-mean!(S::Sphere, y, x::AbstractVector, w::AbstractVector; kwargs...) =
-    mean!(S, y, x, w, GeodesicInterpolationWithinRadius(π / 2); kwargs...)
+function mean!(S::Sphere, y, x::AbstractVector, w::AbstractVector; kwargs...)
+    return mean!(S, y, x, w, GeodesicInterpolationWithinRadius(π / 2); kwargs...)
+end
 
 @doc doc"""
     norm(M::Sphere, x, v)

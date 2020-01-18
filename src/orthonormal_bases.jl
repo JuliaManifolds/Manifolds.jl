@@ -67,8 +67,9 @@ Available methods:
 """
 struct ProjectedOrthonormalBasis{Method,F} <: AbstractOrthonormalBasis{F} end
 
-ProjectedOrthonormalBasis(method::Symbol, F::AbstractNumbers = ℝ) =
-    ProjectedOrthonormalBasis{method,F}()
+function ProjectedOrthonormalBasis(method::Symbol, F::AbstractNumbers = ℝ)
+    return ProjectedOrthonormalBasis{method,F}()
+end
 
 @doc doc"""
     DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ)
@@ -83,8 +84,9 @@ struct DiagonalizingOrthonormalBasis{TV,F} <: AbstractOrthonormalBasis{F}
     v::TV
 end
 
-DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ) =
-    DiagonalizingOrthonormalBasis{typeof(v),F}(v)
+function DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ)
+    return DiagonalizingOrthonormalBasis{typeof(v),F}(v)
+end
 
 const ArbitraryOrDiagonalizingBasis =
     Union{ArbitraryOrthonormalBasis,DiagonalizingOrthonormalBasis}
@@ -101,8 +103,9 @@ struct PrecomputedOrthonormalBasis{TV<:AbstractVector,F} <:
     vectors::TV
 end
 
-PrecomputedOrthonormalBasis(vectors::AbstractVector, F::AbstractNumbers = ℝ) =
-    PrecomputedOrthonormalBasis{typeof(vectors),F}(vectors)
+function PrecomputedOrthonormalBasis(vectors::AbstractVector, F::AbstractNumbers = ℝ)
+    return PrecomputedOrthonormalBasis{typeof(vectors),F}(vectors)
+end
 
 @doc doc"""
     DiagonalizingOrthonormalBasis(vectors, kappas, F::AbstractNumbers = ℝ)

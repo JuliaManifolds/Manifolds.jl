@@ -343,8 +343,9 @@ function get_vectors(M::VectorBundle, x, B::PrecomputedVectorBundleOrthonormalBa
 end
 
 get_vectors(::VectorBundleFibers, x, B::PrecomputedOrthonormalBasis) = B.vectors
-get_vectors(::VectorBundleFibers, x, B::PrecomputedDiagonalizingOrthonormalBasis) =
-    B.vectors
+function get_vectors(::VectorBundleFibers, x, B::PrecomputedDiagonalizingOrthonormalBasis)
+    return B.vectors
+end
 
 Base.@propagate_inbounds getindex(x::FVector, i) = getindex(x.data, i)
 

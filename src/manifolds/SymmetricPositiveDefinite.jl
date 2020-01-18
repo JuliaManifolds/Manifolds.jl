@@ -55,11 +55,13 @@ function check_manifold_point(M::SymmetricPositiveDefinite{N}, x; kwargs...) whe
     end
     return nothing
 end
-check_manifold_point(
+function check_manifold_point(
     M::MetricManifold{SymmetricPositiveDefinite{N},T},
     x;
     kwargs...,
-) where {N,T<:Metric} = check_manifold_point(M.manifold, x; kwargs...)
+) where {N,T<:Metric}
+    return check_manifold_point(M.manifold, x; kwargs...)
+end
 
 """
     check_tangent_vector(M::SymmetricPositiveDefinite, x, v; kwargs... )
@@ -107,14 +109,18 @@ Since `M` is a Hadamard manifold with respect to the [`LinearAffineMetric`](@ref
 [`LogCholeskyMetric`](@ref), the injectivity radius is globally $\infty$.
 """
 injectivity_radius(M::SymmetricPositiveDefinite{N}, args...) where {N} = Inf
-injectivity_radius(
+function injectivity_radius(
     M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
     args...,
-) where {N} = Inf
-injectivity_radius(
+) where {N}
+    return Inf
+end
+function injectivity_radius(
     M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
     args...,
-) where {N} = Inf
+) where {N}
+    return Inf
+end
 
 @doc doc"""
     manifold_dimension(M::SymmetricPositiveDefinite)
@@ -125,14 +131,19 @@ returns the dimension of
 \dim \mathcal P(n) = \frac{n(n+1)}{2}
 ````
 """
-@generated manifold_dimension(M::SymmetricPositiveDefinite{N}) where {N} =
-    div(N * (N + 1), 2)
-@generated manifold_dimension(
+@generated function manifold_dimension(M::SymmetricPositiveDefinite{N}) where {N}
+    return div(N * (N + 1), 2)
+end
+@generated function manifold_dimension(
     M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
-) where {N} = div(N * (N + 1), 2)
-@generated manifold_dimension(
+) where {N}
+    return div(N * (N + 1), 2)
+end
+@generated function manifold_dimension(
     M::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric},
-) where {N} = div(N * (N + 1), 2)
+) where {N}
+    return div(N * (N + 1), 2)
+end
 
 """
     mean(
@@ -147,8 +158,15 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolation`](@ref).
 """
 mean(::SymmetricPositiveDefinite, ::Any)
-mean!(M::SymmetricPositiveDefinite, y, x::AbstractVector, w::AbstractVector; kwargs...) =
-    mean!(M, y, x, w, GeodesicInterpolation(); kwargs...)
+function mean!(
+    M::SymmetricPositiveDefinite,
+    y,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+)
+    return mean!(M, y, x, w, GeodesicInterpolation(); kwargs...)
+end
 
 @doc doc"""
     representation_size(M::SymmetricPositiveDefinite)
@@ -158,12 +176,16 @@ Return the size of an array representing an element on the
 symmetric positive definite matrix on $\mathcal M = \mathcal P(n)$.
 """
 representation_size(::SymmetricPositiveDefinite{N}) where {N} = (N, N)
-representation_size(
+function representation_size(
     ::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
-) where {N} = (N, N)
-representation_size(
+) where {N}
+    return (N, N)
+end
+function representation_size(
     ::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric},
-) where {N} = (N, N)
+) where {N}
+    return (N, N)
+end
 
 @doc doc"""
     zero_tangent_vector(M::SymmetricPositiveDefinite,x)
@@ -172,13 +194,17 @@ returns the zero tangent vector in the tangent space of the symmetric positive
 definite matrix `x` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
 """
 zero_tangent_vector(M::SymmetricPositiveDefinite, x) = zero(x)
-zero_tangent_vector(
+function zero_tangent_vector(
     M::MetricManifold{SymmetricPositiveDefinite{N},T},
     x,
-) where {N,T<:Metric} = zero(x)
+) where {N,T<:Metric}
+    return zero(x)
+end
 zero_tangent_vector!(M::SymmetricPositiveDefinite{N}, v, x) where {N} = fill!(v, 0)
-zero_tangent_vector!(
+function zero_tangent_vector!(
     M::MetricManifold{SymmetricPositiveDefinite{N},T},
     v,
     x,
-) where {N,T<:Metric} = fill!(v, 0)
+) where {N,T<:Metric}
+    return fill!(v, 0)
+end

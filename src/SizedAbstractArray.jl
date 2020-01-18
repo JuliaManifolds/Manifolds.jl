@@ -18,28 +18,42 @@ struct SizedAbstractArray{S<:Tuple,T,N,M,TData<:AbstractArray{T,M}} <: StaticArr
         if length(a) != StaticArrays.tuple_prod(S)
             error("Dimensions $(size(a)) don't match static size $S")
         end
-        new{S,T,N,M,TData}(a)
+        return new{S,T,N,M,TData}(a)
     end
 
     function SizedAbstractArray{S,T,N,1}(::UndefInitializer) where {S,T,N}
-        new{S,T,N,1,Array{T,1}}(Array{T,1}(undef, StaticArrays.tuple_prod(S)))
+        return new{S,T,N,1,Array{T,1}}(Array{T,1}(undef, StaticArrays.tuple_prod(S)))
     end
     function SizedAbstractArray{S,T,N,N}(::UndefInitializer) where {S,T,N}
-        new{S,T,N,N,Array{T,N}}(Array{T,N}(undef, size_to_tuple(S)...))
+        return new{S,T,N,N,Array{T,N}}(Array{T,N}(undef, size_to_tuple(S)...))
     end
 end
 
-@inline SizedAbstractArray{S,T,N}(a::TData) where {S,T,N,M,TData<:AbstractArray{T,M}} =
-    SizedAbstractArray{S,T,N,M,TData}(a)
-@inline SizedAbstractArray{S,T}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}} =
-    SizedAbstractArray{S,T,StaticArrays.tuple_length(S),M,TData}(a)
-@inline SizedAbstractArray{S}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}} =
-    SizedAbstractArray{S,T,StaticArrays.tuple_length(S),M,TData}(a)
+@inline function SizedAbstractArray{S,T,N}(
+    a::TData,
+) where {S,T,N,M,TData<:AbstractArray{T,M}}
+    return SizedAbstractArray{S,T,N,M,TData}(a)
+end
+@inline function SizedAbstractArray{S,T}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}}
+    return SizedAbstractArray{S,T,StaticArrays.tuple_length(S),M,TData}(a)
+end
+@inline function SizedAbstractArray{S}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}}
+    return SizedAbstractArray{S,T,StaticArrays.tuple_length(S),M,TData}(a)
+end
 
-@inline SizedAbstractArray{S,T,N}(::UndefInitializer) where {S,T,N} =
-    SizedAbstractArray{S,T,N,N}(undef)
-@inline SizedAbstractArray{S,T}(::UndefInitializer) where {S,T} =
-    SizedAbstractArray{S,T,StaticArrays.tuple_length(S),StaticArrays.tuple_length(S)}(undef)
+@inline function SizedAbstractArray{S,T,N}(::UndefInitializer) where {S,T,N}
+    return SizedAbstractArray{S,T,N,N}(undef)
+end
+@inline function SizedAbstractArray{S,T}(::UndefInitializer) where {S,T}
+    return SizedAbstractArray{
+        S,
+        T,
+        StaticArrays.tuple_length(S),
+        StaticArrays.tuple_length(S),
+    }(
+        undef,
+    )
+end
 @generated function (::Type{SizedAbstractArray{S,T,N,M,TData}})(
     x::NTuple{L,Any},
 ) where {S,T,N,M,TData,L}
@@ -55,48 +69,66 @@ end
     end
 end
 
-@inline SizedAbstractArray{S,T,N}(x::Tuple) where {S,T,N} =
-    SizedAbstractArray{S,T,N,N,Array{T,N}}(collect(x))
-@inline SizedAbstractArray{S,T}(x::Tuple) where {S,T} =
-    SizedAbstractArray{S,T,StaticArrays.tuple_length(S)}(x)
-@inline SizedAbstractArray{S}(x::NTuple{L,T}) where {S,T,L} = SizedAbstractArray{S,T}(x)
+@inline function SizedAbstractArray{S,T,N}(x::Tuple) where {S,T,N}
+    return SizedAbstractArray{S,T,N,N,Array{T,N}}(collect(x))
+end
+@inline function SizedAbstractArray{S,T}(x::Tuple) where {S,T}
+    return SizedAbstractArray{S,T,StaticArrays.tuple_length(S)}(x)
+end
+@inline function SizedAbstractArray{S}(x::NTuple{L,T}) where {S,T,L}
+    return SizedAbstractArray{S,T}(x)
+end
 
 # Overide some problematic default behaviour
-@inline convert(::Type{SA}, sa::SizedAbstractArray) where {SA<:SizedAbstractArray} =
-    SA(sa.data)
+@inline function convert(::Type{SA}, sa::SizedAbstractArray) where {SA<:SizedAbstractArray}
+    return SA(sa.data)
+end
 @inline convert(::Type{SA}, sa::SA) where {SA<:SizedAbstractArray} = sa
 
 # Back to Array (unfortunately need both convert and construct to overide other methods)
 import Base.Array
-@inline Array(sa::SizedAbstractArray{S}) where {S} =
-    Array(reshape(sa.data, size_to_tuple(S)))
-@inline Array{T}(sa::SizedAbstractArray{S,T}) where {T,S} =
-    Array(reshape(sa.data, size_to_tuple(S)))
-@inline Array{T,N}(sa::SizedAbstractArray{S,T,N}) where {T,S,N} =
-    Array(reshape(sa.data, size_to_tuple(S)))
+@inline function Array(sa::SizedAbstractArray{S}) where {S}
+    return Array(reshape(sa.data, size_to_tuple(S)))
+end
+@inline function Array{T}(sa::SizedAbstractArray{S,T}) where {T,S}
+    return Array(reshape(sa.data, size_to_tuple(S)))
+end
+@inline function Array{T,N}(sa::SizedAbstractArray{S,T,N}) where {T,S,N}
+    return Array(reshape(sa.data, size_to_tuple(S)))
+end
 
-@inline convert(::Type{Array}, sa::SizedAbstractArray{S}) where {S} =
-    Array(reshape(sa.data, size_to_tuple(S)))
-@inline convert(::Type{Array{T}}, sa::SizedAbstractArray{S,T}) where {T,S} =
-    Array(reshape(sa.data, size_to_tuple(S)))
-@inline convert(::Type{Array{T,N}}, sa::SizedAbstractArray{S,T,N}) where {T,S,N} =
-    Array(reshape(sa.data, size_to_tuple(S)))
+@inline function convert(::Type{Array}, sa::SizedAbstractArray{S}) where {S}
+    return Array(reshape(sa.data, size_to_tuple(S)))
+end
+@inline function convert(::Type{Array{T}}, sa::SizedAbstractArray{S,T}) where {T,S}
+    return Array(reshape(sa.data, size_to_tuple(S)))
+end
+@inline function convert(::Type{Array{T,N}}, sa::SizedAbstractArray{S,T,N}) where {T,S,N}
+    return Array(reshape(sa.data, size_to_tuple(S)))
+end
 
 Base.@propagate_inbounds getindex(a::SizedAbstractArray, i::Int) = getindex(a.data, i)
-Base.@propagate_inbounds setindex!(a::SizedAbstractArray, v, i::Int) =
-    setindex!(a.data, v, i)
+Base.@propagate_inbounds function setindex!(a::SizedAbstractArray, v, i::Int)
+    return setindex!(a.data, v, i)
+end
 
 SizedAbstractVector{S,T,M} = SizedAbstractArray{Tuple{S},T,1,M}
-@inline SizedAbstractVector{S}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}} =
-    SizedAbstractArray{Tuple{S},T,1,M,TData}(a)
-@inline SizedAbstractVector{S}(x::NTuple{L,T}) where {S,T,L} =
-    SizedAbstractArray{Tuple{S},T,1,1,Vector{T}}(x)
+@inline function SizedAbstractVector{S}(a::TData) where {S,T,M,TData<:AbstractArray{T,M}}
+    return SizedAbstractArray{Tuple{S},T,1,M,TData}(a)
+end
+@inline function SizedAbstractVector{S}(x::NTuple{L,T}) where {S,T,L}
+    return SizedAbstractArray{Tuple{S},T,1,1,Vector{T}}(x)
+end
 
 SizedAbstractMatrix{S1,S2,T,M} = SizedAbstractArray{Tuple{S1,S2},T,2,M}
-@inline SizedAbstractMatrix{S1,S2}(a::TData) where {S1,S2,T,M,TData<:AbstractArray{T,M}} =
-    SizedAbstractArray{Tuple{S1,S2},T,2,M,TData}(a)
-@inline SizedAbstractMatrix{S1,S2}(x::NTuple{L,T}) where {S1,S2,T,L} =
-    SizedAbstractArray{Tuple{S1,S2},T,2,2,Matrix{T}}(x)
+@inline function SizedAbstractMatrix{S1,S2}(
+    a::TData,
+) where {S1,S2,T,M,TData<:AbstractArray{T,M}}
+    return SizedAbstractArray{Tuple{S1,S2},T,2,M,TData}(a)
+end
+@inline function SizedAbstractMatrix{S1,S2}(x::NTuple{L,T}) where {S1,S2,T,L}
+    return SizedAbstractArray{Tuple{S1,S2},T,2,2,Matrix{T}}(x)
+end
 
 Base.dataids(sa::SizedAbstractArray) = Base.dataids(sa.data)
 
@@ -110,9 +142,16 @@ end
 
 @inline copy(a::SizedAbstractArray) = typeof(a)(copy(a.data))
 
-similar(::Type{<:SizedAbstractArray{S,T,N,M}}, ::Type{T2}) where {S,T,N,M,T2} =
-    SizedAbstractArray{S,T2,N,M}(undef)
-similar(::Type{SA}, ::Type{T}, s::Size{S}) where {SA<:SizedAbstractArray,T,S} =
-    sizedabstractarray_similar_type(T, s, StaticArrays.length_val(s))(undef)
-sizedabstractarray_similar_type(::Type{T}, s::Size{S}, ::Type{Val{D}}) where {T,S,D} =
-    SizedAbstractArray{Tuple{S...},T,D,length(s)}
+function similar(::Type{<:SizedAbstractArray{S,T,N,M}}, ::Type{T2}) where {S,T,N,M,T2}
+    return SizedAbstractArray{S,T2,N,M}(undef)
+end
+function similar(::Type{SA}, ::Type{T}, s::Size{S}) where {SA<:SizedAbstractArray,T,S}
+    return sizedabstractarray_similar_type(T, s, StaticArrays.length_val(s))(undef)
+end
+function sizedabstractarray_similar_type(
+    ::Type{T},
+    s::Size{S},
+    ::Type{Val{D}},
+) where {T,S,D}
+    return SizedAbstractArray{Tuple{S...},T,D,length(s)}
+end

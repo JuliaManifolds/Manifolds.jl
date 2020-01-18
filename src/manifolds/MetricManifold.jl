@@ -46,10 +46,12 @@ inner product $g(v, v) > 0$ whenever $v$ is not the zero vector.
 """
 abstract type RiemannianMetric <: Metric end
 
-check_manifold_point(M::MetricManifold, x; kwargs...) =
-    check_manifold_point(M.manifold, x; kwargs...)
-check_tangent_vector(M::MetricManifold, x, v; kwargs...) =
-    check_tangent_vector(M.manifold, x, v; kwargs...)
+function check_manifold_point(M::MetricManifold, x; kwargs...)
+    return check_manifold_point(M.manifold, x; kwargs...)
+end
+function check_tangent_vector(M::MetricManifold, x, v; kwargs...)
+    return check_tangent_vector(M.manifold, x, v; kwargs...)
+end
 
 @doc doc"""
     christoffel_symbols_first(M::MetricManifold, x; backend=:default)
@@ -146,10 +148,18 @@ coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
 """
 exp(::MetricManifold, ::Any)
-exp(M::MMT, x, v, T::AbstractVector{T} where {T}) where {MMT<:MetricManifold} =
-    exp(M, is_default_metric(M), x, v, T)
-exp(M::MMT, ::Val{true}, x, v, T::AbstractVector{T} where {T}) where {MMT<:MetricManifold} =
-    exp(base_manifold(M), x, v, T)
+function exp(M::MMT, x, v, T::AbstractVector{T} where {T}) where {MMT<:MetricManifold}
+    return exp(M, is_default_metric(M), x, v, T)
+end
+function exp(
+    M::MMT,
+    ::Val{true},
+    x,
+    v,
+    T::AbstractVector{T} where {T},
+) where {MMT<:MetricManifold}
+    return exp(base_manifold(M), x, v, T)
+end
 function exp(
     M::MMT,
     ::Val{false},
@@ -163,8 +173,9 @@ function exp(
 end
 
 exp!(M::MMT, y, x, v) where {MMT<:MetricManifold} = exp!(M, is_default_metric(M), y, x, v)
-exp!(M::MMT, ::Val{true}, y, x, v) where {MMT<:MetricManifold} =
-    exp!(base_manifold(M), y, x, v)
+function exp!(M::MMT, ::Val{true}, y, x, v) where {MMT<:MetricManifold}
+    return exp!(base_manifold(M), y, x, v)
+end
 function exp!(M::MMT, ::Val{false}, y, x, v) where {MMT<:MetricManifold}
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, x, v, tspan; dense = false, saveat = [1.0])
@@ -204,17 +215,22 @@ Compute the Gaussian curvature of the manifold `M` at the point `x`.
 """
 gaussian_curvature(M::MetricManifold, x; kwargs...) = ricci_curvature(M, x; kwargs...) / 2
 
-get_basis(M::MMT, x, B::ArbitraryOrthonormalBasis) where {MMT<:MetricManifold} =
-    invoke(get_basis, Tuple{MMT,Any,AbstractBasis}, M, x, B)
-get_basis(M::MMT, x, B::AbstractBasis) where {MMT<:MetricManifold} =
-    get_basis(M, is_default_metric(M), x, B)
-get_basis(M::MMT, ::Val{true}, x, B::AbstractBasis) where {MMT<:MetricManifold} =
-    get_basis(base_manifold(M), x, B)
-get_basis(M::MMT, ::Val{false}, x, B::AbstractBasis) where {MMT<:MetricManifold} =
+function get_basis(M::MMT, x, B::ArbitraryOrthonormalBasis) where {MMT<:MetricManifold}
+    return invoke(get_basis, Tuple{MMT,Any,AbstractBasis}, M, x, B)
+end
+function get_basis(M::MMT, x, B::AbstractBasis) where {MMT<:MetricManifold}
+    return get_basis(M, is_default_metric(M), x, B)
+end
+function get_basis(M::MMT, ::Val{true}, x, B::AbstractBasis) where {MMT<:MetricManifold}
+    return get_basis(base_manifold(M), x, B)
+end
+function get_basis(M::MMT, ::Val{false}, x, B::AbstractBasis) where {MMT<:MetricManifold}
     error("tangent_orthogonal_basis not implemented on $(typeof(M)) for point $(typeof(x)) and basis type $(typeof(B)).")
+end
 
-injectivity_radius(M::MMT, args...) where {MMT<:MetricManifold} =
-    injectivity_radius(base_manifold(M), args...)
+function injectivity_radius(M::MMT, args...) where {MMT<:MetricManifold}
+    return injectivity_radius(base_manifold(M), args...)
+end
 
 @doc doc"""
     inverse_local_metric(M::MetricManifold, x)
@@ -249,14 +265,18 @@ falls back to just be called with `MM.MM` such that the [`Manifold`](@ref) `MM.M
 implicitly has the metric `MM.G`, for example if this was the first one
 implemented or is the one most commonly assumed to be used.
 """
-is_default_metric(M::MMT) where {MMT<:MetricManifold} =
-    is_default_metric(base_manifold(M), metric(M))
-convert(T::Type{MetricManifold{MT,GT}}, M::MT) where {MT,GT} =
-    _convert_with_default(M, GT, is_default_metric(M, GT()))
-_convert_with_default(M::MT, T::Type{<:Metric}, ::Val{true}) where {MT<:Manifold} =
-    MetricManifold(M, T())
-_convert_with_default(M::MT, T::Type{<:Metric}, ::Val{false}) where {MT<:Manifold} =
+function is_default_metric(M::MMT) where {MMT<:MetricManifold}
+    return is_default_metric(base_manifold(M), metric(M))
+end
+function convert(T::Type{MetricManifold{MT,GT}}, M::MT) where {MT,GT}
+    return _convert_with_default(M, GT, is_default_metric(M, GT()))
+end
+function _convert_with_default(M::MT, T::Type{<:Metric}, ::Val{true}) where {MT<:Manifold}
+    return MetricManifold(M, T())
+end
+function _convert_with_default(M::MT, T::Type{<:Metric}, ::Val{false}) where {MT<:Manifold}
     error("Can not convert $(M) to a MetricManifold{$(MT),$(T)}, since $(T) is not the default metric.")
+end
 
 @doc doc"""
     inner(N::MetricManifold{M,G}, x, v, w)
@@ -272,10 +292,12 @@ g_x(v,w) = \langle v, G_x w\rangle,
 where $G_x$ is the local matrix representation of the [`Metric`](@ref) `G`.
 """
 inner(M::MMT, x, v, w) where {MMT<:MetricManifold} = inner(M, is_default_metric(M), x, v, w)
-inner(M::MMT, ::Val{false}, x, v, w) where {MMT<:MetricManifold} =
-    dot(v, local_metric(M, x) * w)
-inner(M::MMT, ::Val{true}, x, v, w) where {MMT<:MetricManifold} =
-    inner(base_manifold(M), x, v, w)
+function inner(M::MMT, ::Val{false}, x, v, w) where {MMT<:MetricManifold}
+    return dot(v, local_metric(M, x) * w)
+end
+function inner(M::MMT, ::Val{true}, x, v, w) where {MMT<:MetricManifold}
+    return inner(base_manifold(M), x, v, w)
+end
 function inner(
     B::VectorBundleFibers{<:CotangentSpaceType,MMT},
     x,
@@ -312,10 +334,12 @@ function local_metric_jacobian(M, x; backend = :default)
 end
 
 log!(M::MMT, w, x, y) where {MMT<:MetricManifold} = log!(M, is_default_metric(M), w, x, y)
-log!(M::MMT, ::Val{true}, w, x, y) where {MMT<:MetricManifold} =
-    log!(base_manifold(M), w, x, y)
-log!(M::MMT, ::Val{false}, w, x, y) where {MMT<:MetricManifold} =
+function log!(M::MMT, ::Val{true}, w, x, y) where {MMT<:MetricManifold}
+    return log!(base_manifold(M), w, x, y)
+end
+function log!(M::MMT, ::Val{false}, w, x, y) where {MMT<:MetricManifold}
     error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y)).")
+end
 
 @doc doc"""
     log_local_metric_density(M::MetricManifold, x)
@@ -325,54 +349,65 @@ is given by $\rho=\log \sqrt{|\det [g_{ij}]|}$.
 """
 log_local_metric_density(M::MetricManifold, x) = log(abs(det_local_metric(M, x))) / 2
 
-mean!(
+function mean!(
     M::MMT,
     y,
     x::AbstractVector,
     w::AbstractVector;
     kwargs...,
-) where {MMT<:MetricManifold} = mean!(M, is_default_metric(M), y, x, w; kwargs...)
-mean!(
+) where {MMT<:MetricManifold}
+    return mean!(M, is_default_metric(M), y, x, w; kwargs...)
+end
+function mean!(
     M::MMT,
     ::Val{true},
     y,
     x::AbstractVector,
     w::AbstractVector;
     kwargs...,
-) where {MMT<:MetricManifold} = mean!(base_manifold(M), y, x, w; kwargs...)
-mean!(
+) where {MMT<:MetricManifold}
+    return mean!(base_manifold(M), y, x, w; kwargs...)
+end
+function mean!(
     M::MMT,
     ::Val{false},
     y,
     x::AbstractVector,
     w::AbstractVector;
     kwargs...,
-) where {MMT<:MetricManifold} = mean!(M, y, x, w, GradientDescentEstimation(); kwargs...)
+) where {MMT<:MetricManifold}
+    return mean!(M, y, x, w, GradientDescentEstimation(); kwargs...)
+end
 
-median!(
+function median!(
     M::MMT,
     y,
     x::AbstractVector,
     w::AbstractVector;
     kwargs...,
-) where {MMT<:MetricManifold} = median!(M, is_default_metric(M), y, x, w; kwargs...)
-median!(
+) where {MMT<:MetricManifold}
+    return median!(M, is_default_metric(M), y, x, w; kwargs...)
+end
+function median!(
     M::MMT,
     ::Val{true},
     y,
     x::AbstractVector,
     w::AbstractVector;
     kwargs...,
-) where {MMT<:MetricManifold} = median!(base_manifold(M), y, x, w; kwargs...)
-median!(
+) where {MMT<:MetricManifold}
+    return median!(base_manifold(M), y, x, w; kwargs...)
+end
+function median!(
     M::MMT,
     ::Val{false},
     y,
     x::AbstractVector,
     w::AbstractVector;
     kwargs...,
-) where {MMT<:MetricManifold} =
-    median!(M, y, x, w, CyclicProximalPointEstimation(); kwargs...)
+) where {MMT<:MetricManifold}
+    return median!(M, y, x, w, CyclicProximalPointEstimation(); kwargs...)
+end
 
 @doc doc"""
     metric(M::MetricManifold)
@@ -381,40 +416,55 @@ Get the metric $g$ of the manifold `M`.
 """
 metric(M::MetricManifold) = M.metric
 
-normal_tvector_distribution(M::MMT, x, σ) where {MMT<:MetricManifold} =
-    normal_tvector_distribution(M, is_default_metric(M), x, σ)
-normal_tvector_distribution(M::MMT, ::Val{true}, x, σ) where {MMT<:MetricManifold} =
-    normal_tvector_distribution(base_manifold(M), x, σ)
-normal_tvector_distribution(M::MMT, ::Val{false}, x, σ) where {MMT<:MetricManifold} =
+function normal_tvector_distribution(M::MMT, x, σ) where {MMT<:MetricManifold}
+    return normal_tvector_distribution(M, is_default_metric(M), x, σ)
+end
+function normal_tvector_distribution(M::MMT, ::Val{true}, x, σ) where {MMT<:MetricManifold}
+    return normal_tvector_distribution(base_manifold(M), x, σ)
+end
+function normal_tvector_distribution(M::MMT, ::Val{false}, x, σ) where {MMT<:MetricManifold}
     error("normal_tvector_distribution not implemented for a $(typeof(M)) at point $(typeof(x)) with standard deviation $(typeof(σ)).")
+end
 
-project_point!(M::MMT, y, x) where {MMT<:MetricManifold} =
-    project_point!(M, is_default_metric(M), y, x)
-project_point!(M::MMT, ::Val{true}, y, x) where {MMT<:MetricManifold} =
-    project_point!(base_manifold(M), y, x)
-project_point!(M::MMT, ::Val{false}, y, x) where {MMT<:MetricManifold} =
+function project_point!(M::MMT, y, x) where {MMT<:MetricManifold}
+    return project_point!(M, is_default_metric(M), y, x)
+end
+function project_point!(M::MMT, ::Val{true}, y, x) where {MMT<:MetricManifold}
+    return project_point!(base_manifold(M), y, x)
+end
+function project_point!(M::MMT, ::Val{false}, y, x) where {MMT<:MetricManifold}
     error("project_point! not implemented on $(typeof(M)) for point $(typeof(x))")
+end
 
-project_tangent!(M::MMT, w, x, v) where {MMT<:MetricManifold} =
-    project_tangent!(M, is_default_metric(M), w, x, v)
-project_tangent!(M::MMT, ::Val{true}, w, x, v) where {MMT<:MetricManifold} =
-    project_tangent!(base_manifold(M), w, x, v)
-project_tangent!(M::MMT, ::Val{false}, w, x, v) where {MMT<:MetricManifold} =
+function project_tangent!(M::MMT, w, x, v) where {MMT<:MetricManifold}
+    return project_tangent!(M, is_default_metric(M), w, x, v)
+end
+function project_tangent!(M::MMT, ::Val{true}, w, x, v) where {MMT<:MetricManifold}
+    return project_tangent!(base_manifold(M), w, x, v)
+end
+function project_tangent!(M::MMT, ::Val{false}, w, x, v) where {MMT<:MetricManifold}
     error("project_tangent! not implemented for a $(typeof(M)) and tangent $(typeof(v)) at point $(typeof(x)).")
+end
 
-projected_distribution(M::MMT, d, x) where {MMT<:MetricManifold} =
-    projected_distribution(M, is_default_metric(M), d, x)
-projected_distribution(M::MMT, ::Val{true}, d, x) where {MMT<:MetricManifold} =
-    projected_distribution(base_manifold(M), d, x)
-projected_distribution(M::MMT, ::Val{false}, d, x) where {MMT<:MetricManifold} =
+function projected_distribution(M::MMT, d, x) where {MMT<:MetricManifold}
+    return projected_distribution(M, is_default_metric(M), d, x)
+end
+function projected_distribution(M::MMT, ::Val{true}, d, x) where {MMT<:MetricManifold}
+    return projected_distribution(base_manifold(M), d, x)
+end
+function projected_distribution(M::MMT, ::Val{false}, d, x) where {MMT<:MetricManifold}
     error("projected_distribution not implemented for a $(typeof(M)) and with $(typeof(d)) at point $(typeof(x)).")
+end
 
-projected_distribution(M::MMT, d) where {MMT<:MetricManifold} =
-    projected_distribution(M, is_default_metric(M), d)
-projected_distribution(M::MMT, ::Val{true}, d) where {MMT<:MetricManifold} =
-    projected_distribution(base_manifold(M), d)
-projected_distribution(M::MMT, ::Val{false}, d) where {MMT<:MetricManifold} =
+function projected_distribution(M::MMT, d) where {MMT<:MetricManifold}
+    return projected_distribution(M, is_default_metric(M), d)
+end
+function projected_distribution(M::MMT, ::Val{true}, d) where {MMT<:MetricManifold}
+    return projected_distribution(base_manifold(M), d)
+end
+function projected_distribution(M::MMT, ::Val{false}, d) where {MMT<:MetricManifold}
     error("projected_distribution not implemented for a $(typeof(M)) with $(typeof(d)).")
+end
 
 """
     ricci_curvature(M::MetricManifold, x; backend = :default)
@@ -506,19 +556,39 @@ function solve_exp_ode(M, x, v, tspan; kwargs...)
     error("solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(x)), vector $(typeof(v)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq`.")
 end
 
-vector_transport_to!(
+function vector_transport_to!(
     M::MMT,
     vto,
     x,
     v,
     y,
     m::AbstractVectorTransportMethod,
-) where {MMT<:MetricManifold} =
-    vector_transport_to!(M, is_default_metric(M), vto, x, v, y, m)
-vector_transport_to!(M::MMT, ::Val{true}, vto, x, v, y, m) where {MMT<:MetricManifold} =
-    vector_transport_to!(base_manifold(M), vto, x, v, y, m)
-vector_transport_to!(M::MMT, ::Val{false}, vto, x, v, y, m) where {MMT<:MetricManifold} =
+) where {MMT<:MetricManifold}
+    return vector_transport_to!(M, is_default_metric(M), vto, x, v, y, m)
+end
+function vector_transport_to!(
+    M::MMT,
+    ::Val{true},
+    vto,
+    x,
+    v,
+    y,
+    m,
+) where {MMT<:MetricManifold}
+    return vector_transport_to!(base_manifold(M), vto, x, v, y, m)
+end
+function vector_transport_to!(
+    M::MMT,
+    ::Val{false},
+    vto,
+    x,
+    v,
+    y,
+    m,
+) where {MMT<:MetricManifold}
     error("vector transport from a point of type $(typeof(x)) to a type $(typeof(y)) on a $(typeof(M)) for a vector of type $(v) and the $(typeof(m)) not yet implemented.")
+end
 
-zero_tangent_vector!(M::MMT, v, x) where {MMT<:MetricManifold} =
-    zero_tangent_vector!(M.manifold, v, x)
+function zero_tangent_vector!(M::MMT, v, x) where {MMT<:MetricManifold}
+    return zero_tangent_vector!(M.manifold, v, x)
+end

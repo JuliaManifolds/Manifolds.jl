@@ -31,26 +31,45 @@ import Base:
     zero
 import Distributions: _rand!, support
 import LinearAlgebra: cross, det, Diagonal, dot, mul!, norm, I, UniformScaling
-import ManifoldsBase: array_value, base_manifold, check_manifold_point, check_tangent_vector
-import ManifoldsBase: distance, exp, exp!, geodesic, injectivity_radius, inner
-import ManifoldsBase: isapprox, is_manifold_point, is_tangent_vector, is_decorator_manifold
-import ManifoldsBase: inverse_retract, inverse_retract!, log, log!, manifold_dimension, norm
-import ManifoldsBase: project_point, project_point!, project_tangent, project_tangent!
 import ManifoldsBase:
+    array_value,
+    base_manifold,
+    check_manifold_point,
+    check_tangent_vector,
+    distance,
+    exp,
+    exp!,
+    geodesic,
+    injectivity_radius,
+    inner,
+    isapprox,
+    is_manifold_point,
+    is_tangent_vector,
+    is_decorator_manifold,
+    inverse_retract,
+    inverse_retract!,
+    log,
+    log!,
+    manifold_dimension,
+    norm,
+    project_point,
+    project_point!,
+    project_tangent,
+    project_tangent!,
     representation_size,
     retract,
     retract!,
     similar_result,
     similar_result_type,
-    shortest_geodesic
-import ManifoldsBase:
+    shortest_geodesic,
     vector_transport_along,
     vector_transport_along!,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,
-    vector_transport_to!
-import ManifoldsBase: zero_tangent_vector, zero_tangent_vector!
+    vector_transport_to!,
+    zero_tangent_vector,
+    zero_tangent_vector!
 import Random: rand
 import Statistics: mean, mean!, median, median!, std, var
 import StatsBase: kurtosis, mean_and_std, mean_and_var, moment, skewness

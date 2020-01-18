@@ -23,8 +23,9 @@ The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
 [`real_dimension`](@ref) of the field $𝔽$.
 """
 struct Euclidean{N<:Tuple,T} <: Manifold where {N,T<:AbstractNumbers} end
-Euclidean(n::Vararg{Int,N}; field::AbstractNumbers = ℝ) where {N} =
-    Euclidean{Tuple{n...},field}()
+function Euclidean(n::Vararg{Int,N}; field::AbstractNumbers = ℝ) where {N}
+    return Euclidean{Tuple{n...},field}()
+end
 
 """
     EuclideanMetric <: RiemannianMetric
@@ -160,8 +161,9 @@ inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = local_m
 
 is_default_metric(::Euclidean, ::EuclideanMetric) = Val(true)
 
-local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x) =
-    Diagonal(ones(SVector{size(x, 1),eltype(x)}))
+function local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x)
+    return Diagonal(ones(SVector{size(x, 1),eltype(x)}))
+end
 
 @doc doc"""
     log(M::Euclidean, x, y)
@@ -190,11 +192,18 @@ function manifold_dimension(M::Euclidean{N,𝔽}) where {N,𝔽}
 end
 
 mean(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
-mean(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) =
-    mean(x, w)
+function mean(
+    ::Euclidean{Tuple{1}},
+    x::AbstractVector{<:Number},
+    w::AbstractWeights;
+    kwargs...,
+)
+    return mean(x, w)
+end
 mean(::Euclidean, x::AbstractVector; kwargs...) = mean(x)
-mean!(M::Euclidean, y, x::AbstractVector, w::AbstractVector; kwargs...) =
-    mean!(M, y, x, w, GeodesicInterpolation(); kwargs...)
+function mean!(M::Euclidean, y, x::AbstractVector, w::AbstractVector; kwargs...)
+    return mean!(M, y, x, w, GeodesicInterpolation(); kwargs...)
+end
 
 function mean_and_var(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...)
     m, v = mean_and_var(x; kwargs...)
@@ -212,16 +221,25 @@ function mean_and_var(
     return m, sum(v)
 end
 
-mean_and_var(M::Euclidean, x::AbstractVector, w::AbstractWeights; kwargs...) =
-    mean_and_var(M, x, w, GeodesicInterpolation(); kwargs...)
+function mean_and_var(M::Euclidean, x::AbstractVector, w::AbstractWeights; kwargs...)
+    return mean_and_var(M, x, w, GeodesicInterpolation(); kwargs...)
+end
 
 median(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = median(x)
-median(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}, w::AbstractWeights; kwargs...) =
-    median(x, w)
-median!(::Euclidean{Tuple{1}}, y, x::AbstractVector; kwargs...) =
-    copyto!(y, [median(vcat(x...))])
-median!(::Euclidean{Tuple{1}}, y, x::AbstractVector, w::AbstractWeights; kwargs...) =
-    copyto!(y, [median(vcat(x...), w)])
+function median(
+    ::Euclidean{Tuple{1}},
+    x::AbstractVector{<:Number},
+    w::AbstractWeights;
+    kwargs...,
+)
+    return median(x, w)
+end
+function median!(::Euclidean{Tuple{1}}, y, x::AbstractVector; kwargs...)
+    return copyto!(y, [median(vcat(x...))])
+end
+function median!(::Euclidean{Tuple{1}}, y, x::AbstractVector, w::AbstractWeights; kwargs...)
+    return copyto!(y, [median(vcat(x...), w)])
+end
 
 @doc doc"""
     norm(M::Euclidean, x, v)
@@ -318,8 +336,9 @@ function vector_transport_to!(M::Euclidean, vto, x, v, y, ::ParallelTransport)
 end
 
 var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
-var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T} =
-    sum(var(x; mean = m, kwargs...))
+function var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T}
+    return sum(var(x; mean = m, kwargs...))
+end
 
 vee!(::Euclidean{N,ℝ}, vⁱ, x, v) where {N} = copyto!(vⁱ, v)
 
