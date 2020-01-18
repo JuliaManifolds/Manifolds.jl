@@ -3,7 +3,7 @@ include("utils.jl")
 @testset "Circle" begin
     M = Circle()
     @testset "Real Circle Basics" begin
-        @test representation_size(M) == (1,)
+        @test representation_size(M) == ()
         @test manifold_dimension(M) == 1
         @test !is_manifold_point(M, 9.)
         @test_throws DomainError is_manifold_point(M, 9., true)
@@ -63,7 +63,7 @@ include("utils.jl")
     end
     Mc = Circle(ℂ)
     @testset "Complex Circle Basics" begin
-        @test representation_size(Mc) == (1,)
+        @test representation_size(Mc) == ()
         @test manifold_dimension(Mc) == 1
         @test is_tangent_vector(Mc, 1im, 0.)
         @test is_manifold_point(Mc, 1im)

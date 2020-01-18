@@ -290,7 +290,7 @@ project_tangent!(::Circle{ℂ}, w, x, v) = (w .= v - complex_dot(x,v)*x)
 retract(M::Circle,x,y) = retract(M, x, y, ExponentialRetraction())
 retract(M::Circle,x,y,m::ExponentialRetraction) = exp(M,x,y)
 
-representation_size(::Circle) = (1,)
+representation_size(::Circle) = ()
 
 function sharp!(M::Circle, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
     copyto!(v.data, w.data)
@@ -305,7 +305,7 @@ Compute symmetric remainder of `x` with respect to the interall 2*`T`, i.e.
 `(x+T)%2T`, where the default for `T` is $\pi$
 """
 sym_rem(x::N, T=π) where {N<:Number} = (x≈T ? convert(N,-T) : rem(x, convert(N,2*T),RoundNearest))
-sym_rem(x, T=π) where N = sym_rem.(x, Ref(T))
+sym_rem(x, T=π) where N = map(sym_rem, x, Ref(T))
 
 @doc doc"""
     vector_transport_to(M::Circle, x, v, y, ::ParallelTransport)

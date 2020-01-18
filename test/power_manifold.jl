@@ -133,4 +133,22 @@ Random.seed!(42)
         end
     end
 
+    @testset "Power manifold of Circle" begin
+        pts_t = [[0.0, 1.0, 2.0], [1.0, 1.0, 2.4], [0.0, 2.0, 1.0]]
+        MT = PowerManifold(Circle(), 3)
+        @test representation_size(MT) == (3,)
+        test_manifold(
+            MT,
+            pts_t;
+            test_reverse_diff = false,
+            test_injectivity_radius = false,
+            test_musical_isomorphisms = true,
+            retraction_methods = retraction_methods,
+            inverse_retraction_methods = inverse_retraction_methods,
+            rand_tvector_atol_multiplier = 5.0,
+            retraction_atol_multiplier = 12,
+            is_tangent_atol_multiplier = 12.0,
+        )
+    end
+
 end
