@@ -225,16 +225,19 @@ function get_basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis{â
     bvectors = get_vectors(M, x, B)
     N = length(bvectors)
     M_dim = manifold_dimension(M)
-    N == M_dim ||
-    throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
+    if N != M_dim
+        throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
+    end
     for i = 1:N
         vi_norm = norm(M, x, bvectors[i])
-        isapprox(vi_norm, 1) ||
-        throw(ArgumentError("vector number $i is not normalized (norm = $vi_norm)"))
+        if !isapprox(vi_norm, 1)
+            throw(ArgumentError("vector number $i is not normalized (norm = $vi_norm)"))
+        end
         for j = i+1:N
             dot_val = real(inner(M, x, bvectors[i], bvectors[j]))
-            isapprox(dot_val, 0; atol = eps(eltype(x))) ||
-            throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
+            if !isapprox(dot_val, 0; atol = eps(eltype(x)))
+                throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
+            end
         end
     end
     return B
