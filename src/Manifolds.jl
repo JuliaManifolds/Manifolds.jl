@@ -218,7 +218,7 @@ export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 export CotangentBundle, CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
 export AbstractPowerManifold, PowerManifold, ProductManifold
-export GraphManifold, VertexManifold, EdgeManifold
+export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers

@@ -20,7 +20,7 @@ include("utils.jl")
         @test !is_tangent_vector(N,x[:,1:2],log(N,x,y))
         @test_throws DomainError is_tangent_vector(N,x[:,1:2],log(N,x,y),true)
         @test !is_tangent_vector(N,x[:,1:2],log(N,x,y)[:,1:2])
-        @test_throws DomainError is_tangent_vector(N,x[:,1:2],log(N,x,y),true)
+        @test_throws DomainError is_tangent_vector(N,x,log(N,x,y)[:,1:2],true)
         @test incident_log(N,x)==cat(x[:,2]-x[:,1], x[:,1]-x[:,2] + x[:,3]-x[:,2], x[:,2]-x[:,3]; dims=2)
 
         pts = [x,y,z]

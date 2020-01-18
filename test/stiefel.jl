@@ -4,10 +4,13 @@ include("utils.jl")
     @testset "Real" begin
         M = Stiefel(3,2)
         @testset "Basics" begin
+            x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             @test representation_size(M) == (3,2)
             @test manifold_dimension(M) == 3
-            @test !is_manifold_point(M, [1., 0., 0., 0.])
-            @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0., 0., 1., 0.])
+            @test_throws DomainError is_manifold_point(M, [1., 0., 0., 0.],true)
+            @test_throws DomainError is_manifold_point(M, 1im*[1.0 0.0; 0.0 1.0; 0.0 0.0],true)
+            @test !is_tangent_vector(M, x, [0., 0., 1., 0.])
+            @test_throws DomainError is_tangent_vector(M, x, 1 * im * zero_tangent_vector(M,x), true)
         end
 
         types = [
@@ -66,8 +69,10 @@ include("utils.jl")
             @test manifold_dimension(M) == 8
             @test !is_manifold_point(M, [1., 0., 0., 0.])
             @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0., 0., 1., 0.])
+            x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            @test_throws DomainError is_manifold_point(M, [:a :b; :c :d; :e :f],true)
+            @test_throws DomainError is_tangent_vector(M, x, [:a :b; :c :d; :e :f], true)
         end
-
         types = [
             Matrix{ComplexF64},
         ]
