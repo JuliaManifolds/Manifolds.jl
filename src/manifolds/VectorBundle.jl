@@ -264,18 +264,10 @@ function get_basis(M::TangentBundleFibers, x, B::DiagonalizingOrthonormalBasis)
 end
 
 function get_coordinates(M::VectorBundle, x, v, B::ArbitraryOrthonormalBasis) where {N}
-    coord1 = get_coordinates(
-        M.M,
-        submanifold_component(x, Val(1)),
-        submanifold_component(v, Val(1)),
-        B,
-    )
-    coord2 = get_coordinates(
-        M.VS,
-        submanifold_component(x, Val(1)),
-        submanifold_component(v, Val(2)),
-        B,
-    )
+    px, ξx = submanifold_components(M.M, x)
+    ξvM, ξvF = submanifold_components(M.M, v)
+    coord1 = get_coordinates(M.M, px, ξvM, B)
+    coord2 = get_coordinates(M.VS, px, ξvF, B)
     return vcat(coord1, coord2)
 end
 
@@ -285,18 +277,10 @@ function get_coordinates(
     v,
     B::PrecomputedVectorBundleOrthonormalBasis,
 ) where {N}
-    coord1 = get_coordinates(
-        M.M,
-        submanifold_component(x, Val(1)),
-        submanifold_component(v, Val(1)),
-        B.base_basis,
-    )
-    coord2 = get_coordinates(
-        M.VS,
-        submanifold_component(x, Val(1)),
-        submanifold_component(v, Val(2)),
-        B.vec_basis,
-    )
+    px, ξx = submanifold_components(M.M, x)
+    ξvM, ξvF = submanifold_components(M.M, v)
+    coord1 = get_coordinates(M.M, px, ξvM, B.base_basis)
+    coord2 = get_coordinates(M.VS, px, ξvF, B.vec_basis)
     return vcat(coord1, coord2)
 end
 
