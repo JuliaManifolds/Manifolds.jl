@@ -1,5 +1,3 @@
-using LinearAlgebra: diag, qr, tr, svd, mul!, zeros, lyap
-
 @doc doc"""
     Stiefel{n,k,T} <: Manifold
 

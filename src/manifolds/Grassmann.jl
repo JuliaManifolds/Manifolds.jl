@@ -1,5 +1,3 @@
-using LinearAlgebra: svd, qr, diag, Diagonal, det
-import LinearAlgebra: norm
 @doc doc"""
     Grassmann{n,k,F} <: Manifold
 

@@ -1,6 +1,3 @@
-using LinearAlgebra:
-    diag, eigen, eigvals, eigvecs, Symmetric, Diagonal, tr, cholesky, LowerTriangular
-using ManifoldsBase: ParallelTransport
 @doc doc"""
     SymmetricPositiveDefinite{N} <: Manifold
 

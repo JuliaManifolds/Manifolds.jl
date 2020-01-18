@@ -1,5 +1,3 @@
-
-
 # conversion of SizedArray from StaticArrays.jl
 """
     SizedAbstractArray{Tuple{dims...}}(array)
@@ -86,7 +84,6 @@ end
 @inline convert(::Type{SA}, sa::SA) where {SA<:SizedAbstractArray} = sa
 
 # Back to Array (unfortunately need both convert and construct to overide other methods)
-import Base.Array
 @inline function Array(sa::SizedAbstractArray{S}) where {S}
     return Array(reshape(sa.data, size_to_tuple(S)))
 end

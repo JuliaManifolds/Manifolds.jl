@@ -1,12 +1,14 @@
 module Manifolds
 
 import Base:
+    Array,
     +,
     -,
     *,
     \,
     /,
     ^,
+    ==,
     angle,
     axes,
     convert,
@@ -24,6 +26,7 @@ import Base:
     one,
     promote_rule,
     setindex!,
+    similar,
     show,
     similar,
     size,
@@ -74,6 +77,7 @@ import Random: rand
 import Statistics: mean, mean!, median, median!, std, var
 import StatsBase: kurtosis, mean_and_std, mean_and_var, moment, skewness
 
+using Distributions
 using Einsum: @einsum
 using FiniteDifferences
 using HybridArrays
@@ -89,6 +93,7 @@ using Markdown: @doc_str
 using Random: AbstractRNG
 using Requires
 using StaticArrays
+using StatsBase: AbstractWeights
 using UnsafeArrays
 
 """

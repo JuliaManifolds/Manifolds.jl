@@ -1,4 +1,3 @@
-
 """
     ProjectedPointDistribution(m::Manifold, d, proj!, x)
 

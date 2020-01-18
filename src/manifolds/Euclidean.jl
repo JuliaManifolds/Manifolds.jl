@@ -1,6 +1,3 @@
-import LinearAlgebra: norm
-using StatsBase: AbstractWeights
-
 @doc doc"""
     Euclidean{T<:Tuple} <: Manifold
 

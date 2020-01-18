@@ -1,6 +1,3 @@
-
-using Distributions
-
 """
     FVectorvariate
 

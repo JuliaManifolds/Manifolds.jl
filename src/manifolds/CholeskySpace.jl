@@ -1,7 +1,3 @@
-using LinearAlgebra:
-    diag, eigen, eigvals, eigvecs, Symmetric, tr, cholesky, LowerTriangular, UpperTriangular
-
-
 @doc doc"""
     CholeskySpace{N} <: Manifold
 

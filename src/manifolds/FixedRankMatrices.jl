@@ -1,5 +1,3 @@
-using LinearAlgebra: diag, Diagonal, svd, SVD, rank, dot
-import Base: \, /, +, -, *, ==, similar, one, copyto!
 @doc doc"""
     FixedRankMatrices{m,n,k,T} <: Manifold
 
