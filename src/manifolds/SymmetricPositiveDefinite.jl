@@ -53,13 +53,6 @@ function check_manifold_point(M::SymmetricPositiveDefinite{N}, x; kwargs...) whe
     end
     return nothing
 end
-function check_manifold_point(
-    M::MetricManifold{SymmetricPositiveDefinite{N},T},
-    x;
-    kwargs...,
-) where {N,T<:Metric}
-    return check_manifold_point(M.manifold, x; kwargs...)
-end
 
 """
     check_tangent_vector(M::SymmetricPositiveDefinite, x, v; kwargs... )
@@ -86,14 +79,6 @@ function check_tangent_vector(M::SymmetricPositiveDefinite{N}, x, v; kwargs...) 
     end
     return nothing
 end
-function check_tangent_vector(
-    M::MetricManifold{SymmetricPositiveDefinite{N},T},
-    x,
-    v;
-    kwargs...,
-) where {N,T<:Metric}
-    return check_tangent_vector(base_manifold(M), x, v; kwargs...)
-end
 
 is_default_metric(::SymmetricPositiveDefinite, ::LinearAffineMetric) = Val(true)
 
@@ -107,18 +92,6 @@ Since `M` is a Hadamard manifold with respect to the [`LinearAffineMetric`](@ref
 [`LogCholeskyMetric`](@ref), the injectivity radius is globally $\infty$.
 """
 injectivity_radius(M::SymmetricPositiveDefinite{N}, args...) where {N} = Inf
-function injectivity_radius(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
-    args...,
-) where {N}
-    return Inf
-end
-function injectivity_radius(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
-    args...,
-) where {N}
-    return Inf
-end
 
 @doc doc"""
     manifold_dimension(M::SymmetricPositiveDefinite)
@@ -130,16 +103,6 @@ returns the dimension of
 ````
 """
 @generated function manifold_dimension(M::SymmetricPositiveDefinite{N}) where {N}
-    return div(N * (N + 1), 2)
-end
-@generated function manifold_dimension(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
-) where {N}
-    return div(N * (N + 1), 2)
-end
-@generated function manifold_dimension(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric},
-) where {N}
     return div(N * (N + 1), 2)
 end
 
@@ -174,16 +137,6 @@ Return the size of an array representing an element on the
 [`SymmetricPositiveDefinite`](@ref) manifold `M`, i.e. $n\times n$, the size of such a
 symmetric positive definite matrix on $\mathcal M = \mathcal P(n)$.
 """
-function representation_size(
-    ::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
-) where {N}
-    return (N, N)
-end
-function representation_size(
-    ::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric},
-) where {N}
-    return (N, N)
-end
 @generated representation_size(::SymmetricPositiveDefinite{N}) where {N} = (N, N)
 
 @doc doc"""
@@ -201,10 +154,3 @@ function zero_tangent_vector(
 end
 
 zero_tangent_vector!(M::SymmetricPositiveDefinite{N}, v, x) where {N} = fill!(v, 0)
-function zero_tangent_vector!(
-    M::MetricManifold{SymmetricPositiveDefinite{N},T},
-    v,
-    x,
-) where {N,T<:Metric}
-    return fill!(v, 0)
-end
