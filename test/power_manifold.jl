@@ -141,6 +141,7 @@ Random.seed!(42)
             MT,
             pts_t;
             test_reverse_diff = false,
+            test_forward_diff = false,
             test_injectivity_radius = false,
             test_musical_isomorphisms = true,
             retraction_methods = retraction_methods,
