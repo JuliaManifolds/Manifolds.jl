@@ -235,7 +235,9 @@ include("manifolds/Stiefel.jl")
 include("manifolds/Sphere.jl")
 include("manifolds/Symmetric.jl")
 include("manifolds/SymmetricPositiveDefinite.jl")
-
+include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
+include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
+include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 
 include("groups/group.jl")
 include("groups/group_action.jl")

@@ -6,6 +6,8 @@ matrix logarithms and exponentials, which yields a linear and affine metric.
 """
 struct LinearAffineMetric <: RiemannianMetric end
 
+is_default_metric(::SymmetricPositiveDefinite, ::LinearAffineMetric) = Val(true)
+
 @doc doc"""
     distance(M::SymmetricPositiveDefinite, x, y)
     distance(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric})

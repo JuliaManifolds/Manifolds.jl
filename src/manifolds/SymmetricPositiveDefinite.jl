@@ -21,10 +21,6 @@ struct SymmetricPositiveDefinite{N} <: Manifold end
 
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
 
-include("SymmetricPositiveDefiniteLinearAffine.jl")
-include("SymmetricPositiveDefiniteLogCholesky.jl")
-include("SymmetricPositiveDefiniteLogEuclidean.jl")
-
 @doc doc"""
     check_manifold_point(M::SymmetricPositiveDefinite, x; kwargs...)
 
@@ -79,8 +75,6 @@ function check_tangent_vector(M::SymmetricPositiveDefinite{N}, x, v; kwargs...) 
     end
     return nothing
 end
-
-is_default_metric(::SymmetricPositiveDefinite, ::LinearAffineMetric) = Val(true)
 
 @doc doc"""
     injectivity_radius(M::SymmetricPositiveDefinite[, x])
