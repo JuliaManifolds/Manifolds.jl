@@ -345,7 +345,6 @@ function vector_transport_to!(M::Circle{ℂ}, vto, x, v, y, ::ParallelTransport)
     return vto
 end
 
-vector_transport_along(M::Circle,x::Number,v::Number,c) = vector_transport_along!(M,zero(v),x,v,c)
 function vector_transport_direction(M::Circle,x::Number,v::Number,vdir::Number,m::AbstractVectorTransportMethod)
     y = exp(M, x, vdir)
     return vector_transport_to(M, x, v, y, m)
