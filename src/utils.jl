@@ -83,7 +83,7 @@ lengths, the result is trimmed to the length of the shorter tuple.
     for i = 1:min(N, M)
         push!(ex.args, :((a[$i], b[$i])))
     end
-    ex
+    return ex
 end
 
 """
@@ -101,7 +101,7 @@ lengths, the result is trimmed to the length of the shorter tuple.
     for i = 1:min(N, M, L)
         push!(ex.args, :((a[$i], b[$i], c[$i])))
     end
-    ex
+    return ex
 end
 
 """
@@ -120,7 +120,7 @@ different lengths, the result is trimmed to the length of the shorter tuple.
     for i = 1:min(N, M, L, K)
         push!(ex.args, :((a[$i], b[$i], c[$i], d[$i])))
     end
-    ex
+    return ex
 end
 
 """
@@ -140,7 +140,7 @@ different lengths, the result is trimmed to the length of the shorter tuple.
     for i = 1:min(N, M, L, K, J)
         push!(ex.args, :((a[$i], b[$i], c[$i], d[$i], e[$i])))
     end
-    ex
+    return ex
 end
 
 # TODO: make a better implementation for StaticArrays
