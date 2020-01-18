@@ -116,8 +116,7 @@ function exp!(M::Circle{ℂ}, y, x, v)
 end
 
 function flat!(::Circle, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
-    copyto!(v.data, w.data)
-    return v
+    return copyto!(v, w)
 end
 flat(M::Circle, x::Number, w::FVector{TangentSpaceType}) = FVector(CotangentSpace, w.data)
 
@@ -296,8 +295,7 @@ retract(M::Circle, x, y, m::ExponentialRetraction) = exp(M, x, y)
 representation_size(::Circle) = (1,)
 
 function sharp!(M::Circle, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
-    copyto!(v.data, w.data)
-    return v
+    return copyto!(v, w)
 end
 sharp(M::Circle, x::Number, w::FVector{CotangentSpaceType}) = FVector(TangentSpace, w.data)
 

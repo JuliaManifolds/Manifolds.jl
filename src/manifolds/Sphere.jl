@@ -110,8 +110,7 @@ function exp!(M::Sphere, y, x, v)
 end
 
 function flat!(M::Sphere, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
-    copyto!(v.data, w.data)
-    return v
+    return copyto!(v, w)
 end
 
 @doc doc"""
@@ -306,8 +305,7 @@ function retract!(M::Sphere, y, x, v, ::ProjectionRetraction)
 end
 
 function sharp!(M::Sphere, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
-    copyto!(v.data, w.data)
-    return v
+    return copyto!(v, w)
 end
 
 """

@@ -136,6 +136,11 @@ end
 (-)(v::FVector) = FVector(v.type, -v.data)
 (*)(a::Number, v::FVector) = FVector(v.type, a * v.data)
 
+function copyto!(y::FVector, x::FVector)
+    copyto!(y.data, x.data)
+    return y
+end
+
 base_manifold(B::VectorBundleFibers) = base_manifold(B.M)
 base_manifold(B::VectorSpaceAtPoint) = base_manifold(B.fiber)
 base_manifold(B::VectorBundle) = base_manifold(B.M)
@@ -579,6 +584,14 @@ size(x::FVector) = size(x.data)
 function similar_result(M::Manifold, ::typeof(sharp), w::FVector{CotangentSpaceType}, x)
     return FVector(TangentSpace, similar(w.data))
 end
+
+function submanifold_component(M::Manifold, x::FVector, i::Val)
+    return submanifold_components(M, x.data, i)
+end
+submanifold_component(x::FVector, i::Val) = submanifold_components(x.data, i)
+
+submanifold_components(M::Manifold, x::FVector) = submanifold_components(M, x.data)
+submanifold_components(x::FVector) = submanifold_components(x.data)
 
 """
     vector_space_dimension(B::VectorBundleFibers)

@@ -243,8 +243,7 @@ function flat!(
     x,
     w::FVector{TangentSpaceType},
 )
-    copyto!(v.data, w.data)
-    return v
+    return copyto!(v, w)
 end
 
 function get_coordinates(M::Rotations, x, v, B::ArbitraryOrthonormalBasis) where {N}
@@ -592,8 +591,7 @@ function sharp!(
     x,
     w::FVector{CotangentSpaceType},
 )
-    copyto!(v.data, w.data)
-    return v
+    return copyto!(v, w)
 end
 
 function rand(

@@ -240,8 +240,8 @@ function flat!(
     x,
     w::FVector{TangentSpaceType},
 )
-    vfs = map(u -> FVector(CotangentSpace, u), submanifold_components(M, v.data))
-    wfs = map(u -> FVector(TangentSpace, u), submanifold_components(M, w.data))
+    vfs = map(u -> FVector(CotangentSpace, u), submanifold_components(v))
+    wfs = map(u -> FVector(TangentSpace, u), submanifold_components(w))
     map(flat!, M.manifolds, vfs, submanifold_components(M, x), wfs)
     return v
 end
@@ -581,8 +581,8 @@ function sharp!(
     x,
     w::FVector{CotangentSpaceType},
 )
-    vfs = map(u -> FVector(TangentSpace, u), submanifold_components(M, v.data))
-    wfs = map(u -> FVector(CotangentSpace, u), submanifold_components(M, w.data))
+    vfs = map(u -> FVector(TangentSpace, u), submanifold_components(v))
+    wfs = map(u -> FVector(CotangentSpace, u), submanifold_components(w))
     map(sharp!, M.manifolds, vfs, submanifold_components(M, x), wfs)
     return v
 end

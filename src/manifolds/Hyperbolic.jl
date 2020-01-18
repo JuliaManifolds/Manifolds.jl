@@ -135,8 +135,7 @@ function flat!(
     x,
     w::FVector{TangentSpaceType},
 )
-    copyto!(v.data, w.data)
-    return v
+    return copyto!(v, w)
 end
 
 @doc doc"""
@@ -249,8 +248,7 @@ function sharp!(
     x,
     w::FVector{CotangentSpaceType},
 )
-    copyto!(v.data, w.data)
-    return v
+    return copyto!(v, w)
 end
 
 @doc doc"""
