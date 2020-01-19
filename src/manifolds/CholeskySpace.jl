@@ -158,11 +158,11 @@ $\operatorname{diag}(x)$ the diagonal matrix of $x$
 log(::Cholesky, ::Any...)
 
 function log!(::CholeskySpace, v, x, y)
-    v .= (
+    return copyto!(
+        v,
         strictlyLowerTriangular(y) - strictlyLowerTriangular(x) +
-        Diagonal(diag(x)) * Diagonal(log.(diag(y) ./ diag(x)))
+        Diagonal(diag(x) .* log.(diag(y) ./ diag(x))),
     )
-    return v
 end
 
 @doc doc"""
@@ -201,11 +201,10 @@ and $\operatorname{diag}$ extracts the diagonal matrix.
 vector_transport_to(::CholeskySpace, ::Any, ::Any, ::Any, ::ParallelTransport)
 
 function vector_transport_to!(::CholeskySpace, vto, x, v, y, ::ParallelTransport)
-    vto .= (
-        strictlyLowerTriangular(x) +
-        Diagonal(diag(y)) * Diagonal(1 ./ diag(x)) * Diagonal(v)
+    return copyto!(
+        vto,
+        strictlyLowerTriangular(x) + Diagonal(diag(y) .* diag(v) ./ diag(x)),
     )
-    return vto
 end
 
 @doc doc"""
