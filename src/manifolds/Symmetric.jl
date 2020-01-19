@@ -20,7 +20,8 @@ Though it is slighty redundant, usually the matrices are safed as $n\times n$ ar
 Generate the manifold of $n\times n$ symmetric metrices.
 """
 struct SymmetricMatrices{n,F} <: Manifold end
-SymmetricMatrices(n::Int,F::AbstractNumbers=ℝ) = SymmetricMatrices{n,F}()
+
+SymmetricMatrices(n::Int, F::AbstractNumbers = ℝ) = SymmetricMatrices{n,F}()
 
 @doc doc"""
     check_manifold_point(M::SymmetricMatrices{n,F}, x; kwargs...)
@@ -31,18 +32,30 @@ whether `x` is a symmetric matrix of size `(n,n)` with values from the correspon
 
 The tolerance for the symmetry of `x` can be set using `kwargs...`.
 """
-function check_manifold_point(M::SymmetricMatrices{n,F},x; kwargs...) where {n,F}
-    if (F===ℝ) && !(eltype(x) <: Real)
-        return DomainError(eltype(x),"The matrix $(x) does not lie on $M, since its values are not real.")
+function check_manifold_point(M::SymmetricMatrices{n,F}, x; kwargs...) where {n,F}
+    if (F === ℝ) && !(eltype(x) <: Real)
+        return DomainError(
+            eltype(x),
+            "The matrix $(x) does not lie on $M, since its values are not real.",
+        )
     end
-    if (F===ℂ) && !(eltype(x) <: Real) && !(eltype(x) <: Complex)
-        return DomainError(eltype(x),"The matrix $(x) does not lie on $M, since its values are not complex.")
+    if (F === ℂ) && !(eltype(x) <: Real) && !(eltype(x) <: Complex)
+        return DomainError(
+            eltype(x),
+            "The matrix $(x) does not lie on $M, since its values are not complex.",
+        )
     end
-    if size(x) != (n,n)
-        return DomainError(size(x),"The point $(x) does not lie on $M since its size ($(size(x))) does not match the representation size ($(representation_size(M))).")
+    if size(x) != (n, n)
+        return DomainError(
+            size(x),
+            "The point $(x) does not lie on $M since its size ($(size(x))) does not match the representation size ($(representation_size(M))).",
+        )
     end
-    if !isapprox(norm(x-transpose(x)),0.; kwargs...)
-        return DomainError(norm(x-transpose(x)), "The point $(x) does not lie on $M, since it is not symmetric.")
+    if !isapprox(norm(x - transpose(x)), 0.0; kwargs...)
+        return DomainError(
+            norm(x - transpose(x)),
+            "The point $(x) does not lie on $M, since it is not symmetric.",
+        )
     end
     return nothing
 end
@@ -57,22 +70,31 @@ and its values have to be from the correct [`AbstractNumbers`](@ref).
 The tolerance for the symmetry of `x` and `v` can be set using `kwargs...`.
 """
 function check_tangent_vector(M::SymmetricMatrices{n,F}, x, v; kwargs...) where {n,F}
-    if (check_manifold_point(M, x;kwargs...) !== nothing)
-        return check_manifold_point(M,x;kwargs...)
+    t = check_manifold_point(M, x; kwargs...)
+    t === nothing || return t
+    if (F === ℝ) && !(eltype(v) <: Real)
+        return DomainError(
+            eltype(v),
+            "The matrix $(v) is not a tangent to a point on $M, since its values are not real.",
+        )
     end
-    if (F===ℝ) && !(eltype(v) <: Real)
-        return DomainError(eltype(v),"The matrix $(v) is not a tangent to a point on $M, since its values are not real.")
+    if (F === ℂ) && !(eltype(v) <: Real) && !(eltype(v) <: Complex)
+        return DomainError(
+            eltype(v),
+            "The matrix $(v) is not a tangent to a point on $M, since its values are not complex.",
+        )
     end
-    if (F===ℂ) && !(eltype(v) <: Real) && !(eltype(v) <: Complex)
-        return DomainError(eltype(v),"The matrix $(v) is not a tangent to a point on $M, since its values are not complex.")
+    if size(v) != (n, n)
+        return DomainError(
+            size(v),
+            "The vector $(v) is not a tangent to a point on $(M) since its size ($(size(v))) does not match the representation size ($(representation_size(M))).",
+        )
     end
-    if size(v) != (n,n)
-        return DomainError(size(v),
-            "The vector $(v) is not a tangent to a point on $(M) since its size ($(size(v))) does not match the representation size ($(representation_size(M))).")
-    end
-    if !isapprox(norm(v-transpose(v)),0.; kwargs...)
-        return DomainError(norm(v-transpose(v)),
-            "The vector $(v) is not a tangent vector to $(x) on $(M), since it is not symmetric.")
+    if !isapprox(norm(v - transpose(v)), 0.0; kwargs...)
+        return DomainError(
+            norm(v - transpose(v)),
+            "The vector $(v) is not a tangent vector to $(x) on $(M), since it is not symmetric.",
+        )
     end
     return nothing
 end
@@ -80,13 +102,13 @@ end
 @doc doc"""
     distance(M::SymmetricMatrices, x, y)
 
-Computeby using the inherited metric, i.e. taking the Frobenius-norm of the difference.
-
+Compute distance using the inherited metric, i.e. taking the Frobenius-norm of the
+difference.
 """
-distance(M::SymmetricMatrices, x, y) = norm(x-y)
+distance(M::SymmetricMatrices, x, y) = norm(x - y)
 
 @doc doc"""
-    exp!(M::SymmetricMatrices, y, x, v)
+    exp(M::SymmetricMatrices, x, v)
 
 Compute the exponential map eminating from `x` in tangent direction `v` on the
 [`SymmetricMatrices`](@ref) `M`, which reads
@@ -96,11 +118,8 @@ Compute the exponential map eminating from `x` in tangent direction `v` on the
 ````
 """
 exp(::SymmetricMatrices, ::Any...)
-function exp!(M::SymmetricMatrices, y, x, v)
-    y .= x .+ v
-    return y
-end
 
+exp!(M::SymmetricMatrices, y, x, v) = (y .= x .+ v)
 
 @doc doc"""
     flat(M::SymmetricMatrices, x, w::FVector{TangentSpaceType})
@@ -111,9 +130,85 @@ Compute the [`flat`](@ref flat(M::Manifold, x, w::FVector)) isomorphism of the
 Since `M` is already a vector space over $\mathbb R$, this returns just the vector `w`.
 """
 flat(::SymmetricMatrices, ::Any...)
-function flat!(M::SymmetricMatrices, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
-    copyto!(v.data, w.data)
-    return v
+
+flat!(M::SymmetricMatrices, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
+
+function get_coordinates(
+    M::SymmetricMatrices{N,ℝ},
+    x,
+    v,
+    B::ArbitraryOrthonormalBasis{ℝ},
+) where {N}
+    dim = manifold_dimension(M)
+    vout = similar(v, dim)
+    @assert size(v) == (N, N)
+    @assert dim == div(N * (N + 1), 2)
+    k = 1
+    for i = 1:N, j = i:N
+        scale = ifelse(i == j, 1, sqrt(2))
+        @inbounds vout[k] = v[i, j] * scale
+        k += 1
+    end
+    return vout
+end
+function get_coordinates(
+    M::SymmetricMatrices{N,ℂ},
+    x,
+    v,
+    B::ArbitraryOrthonormalBasis{ℝ},
+) where {N}
+    dim = manifold_dimension(M)
+    vout = similar(v, dim)
+    @assert size(v) == (N, N)
+    @assert dim == N * (N + 1)
+    k = 1
+    for i = 1:N, j = i:N
+        scale = ifelse(i == j, 1, sqrt(2))
+        @inbounds vout[k] = real(v[i, j]) * scale
+        k += 1
+        @inbounds vout[k] = imag(v[i, j]) * scale
+        k += 1
+    end
+    return vout
+end
+
+function get_vector(
+    M::SymmetricMatrices{N,ℝ},
+    x,
+    v,
+    B::ArbitraryOrthonormalBasis{ℝ},
+) where {N}
+    dim = manifold_dimension(M)
+    vout = similar_result(M, get_vector, x)
+    @assert size(v) == (div(N * (N + 1), 2),)
+    @assert size(vout) == (N, N)
+    k = 1
+    for i = 1:N, j = i:N
+        scale = ifelse(i == j, 1, 1 / sqrt(2))
+        @inbounds vout[i, j] = v[k] * scale
+        @inbounds vout[j, i] = v[k] * scale
+        k += 1
+    end
+    return vout
+end
+function get_vector(
+    M::SymmetricMatrices{N,ℂ},
+    x,
+    v,
+    B::ArbitraryOrthonormalBasis{ℝ},
+) where {N}
+    dim = manifold_dimension(M)
+    vout = similar_result(M, get_vector, x, x .* 1im)
+    @assert size(v) == (N * (N + 1),)
+    @assert size(vout) == (N, N)
+    k = 1
+    for i = 1:N, j = i:N
+        scale = ifelse(i == j, 1, 1 / sqrt(2))
+        @inbounds vout[i, j] = Complex(v[k], v[k+1]) * scale
+        @inbounds vout[j, i] = vout[i, j]
+        k += 2
+    end
+    return vout
 end
 
 @doc doc"""
@@ -139,10 +234,8 @@ reads
 ````
 """
 log(::SymmetricMatrices, ::Any...)
-function log!(M::SymmetricMatrices, v, x, y)
-    v .= y.-x
-    return v
-end
+
+log!(M::SymmetricMatrices, v, x, y) = (v .= y .- x)
 
 @doc doc"""
 manifold_dimension(M::SymmetricMatrices{n,𝔽})
@@ -157,7 +250,7 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the numb
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
 function manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}
-    return div(N*(N+1),2)*real_dimension(𝔽)
+    return div(N * (N + 1), 2) * real_dimension(𝔽)
 end
 
 @doc doc"""
@@ -184,7 +277,8 @@ Projects `x` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 project_point(::SymmetricMatrices, ::Any...)
-project_point!(M::SymmetricMatrices, x) = (x .= (x + transpose(x))./2)
+
+project_point!(M::SymmetricMatrices, x) = (x .= (x + transpose(x)) ./ 2)
 
 @doc doc"""
     project_tangent(M::SymmetricMatrices, x, v)
@@ -198,7 +292,8 @@ Project the matrix `v` onto the tangent space at `x` on the [`SymmetricMatrices`
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 project_tangent(::SymmetricMatrices, ::Any...)
-project_tangent!(M::SymmetricMatrices, w, x, v) = (w .= (v .+ transpose(v))./2 )
+
+project_tangent!(M::SymmetricMatrices, w, x, v) = (w .= (v .+ transpose(v)) ./ 2)
 
 @doc doc"""
     representation_size(M::SymmetricMatrices)
@@ -206,8 +301,7 @@ project_tangent!(M::SymmetricMatrices, w, x, v) = (w .= (v .+ transpose(v))./2 )
 Returns the size points on the [`SymmetricMatrices`](@ref) `M` are represented as, i.e.
 for the $n\times n$ it's `(n,n)`.
 """
-representation_size(::SymmetricMatrices{N}) where {N} = (N,N)
-
+@generated representation_size(::SymmetricMatrices{N}) where {N} = (N, N)
 
 @doc doc"""
     sharp(M::SymmetricMatrices, x, w::FVector{CotangentSpaceType})
@@ -218,10 +312,8 @@ Compute the [`sharp`](@ref sharp(M::Manifold, x, w::FVector)) isomorphism of the
 Since `M` is already a vector space over $\mathbb R$, this returns just the vector `w`.
 """
 sharp(::SymmetricMatrices, ::Any...)
-function sharp!(M::SymmetricMatrices, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
-    copyto!(v.data, w.data)
-    return v
-end
+
+sharp!(M::SymmetricMatrices, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
 @doc doc"""
     vector_transport_to(M::SymmetricMatrices, x, v, y, ::ParallelTransport)
@@ -236,9 +328,9 @@ P_{y\gets x}(v) = v.
 ````
 """
 vector_transport_to(::SymmetricMatrices, ::Any...)
+
 function vector_transport_to!(M::SymmetricMatrices, vto, x, v, y, ::ParallelTransport)
-    copyto!(vto,v)
-    return vto
+    return copyto!(vto, v)
 end
 
 @doc doc"""
@@ -247,8 +339,6 @@ end
 Return the zero tangent vector for the tangent space at `x` on the
 [`SymmetricMatrices`](@ref) `M`, i.e. the zero matrix.
 """
-zero_tangent_vector(::SymmetricMatrices,::Any...)
-function zero_tangent_vector!(M::SymmetricMatrices, v, x)
-    fill!(v, 0)
-    return v
-end
+zero_tangent_vector(::SymmetricMatrices, ::Any...)
+
+zero_tangent_vector!(M::SymmetricMatrices, v, x) = fill!(v, 0)

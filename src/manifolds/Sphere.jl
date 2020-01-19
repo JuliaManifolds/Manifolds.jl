@@ -11,7 +11,23 @@ vectors in $\mathbb R^{n+1}$ of unit length
 Generate the $\mathbb S^{n}\subset \mathbb R^{n+1}$
 """
 struct Sphere{N} <: Manifold end
+
 Sphere(n::Int) = Sphere{n}()
+
+function get_basis(M::Sphere{N}, x, B::DiagonalizingOrthonormalBasis) where {N}
+    A = zeros(N + 1, N + 1)
+    A[1, :] = transpose(x)
+    A[2, :] = transpose(B.v)
+    V = nullspace(A)
+    κ = ones(N)
+    if !iszero(B.v)
+        # if we have a nonzero direction for the geodesic, add it and it gets curvature zero from the tensor
+        V = cat(B.v / norm(M, x, B.v), V; dims = 2)
+        κ[1] = 0 # no curvature along the geodesic direction, if x!=y
+    end
+    vecs = [V[:, i] for i = 1:N]
+    return PrecomputedDiagonalizingOrthonormalBasis(vecs, κ)
+end
 
 """
     check_manifold_point(S, x; kwargs...)
@@ -20,12 +36,18 @@ Check whether `x` is a valid point on the [`Sphere`](@ref) `S`, i.e. is a vector
 of length [`manifold_dimension`](@ref)`(S)+1` (approximately) of unit length.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_manifold_point(S::Sphere{N},x; kwargs...) where {N}
+function check_manifold_point(S::Sphere{N}, x; kwargs...) where {N}
     if size(x) != representation_size(S)
-        return DomainError(size(x),"The point $(x) does not lie on $S, since its size is not $(N+1).")
+        return DomainError(
+            size(x),
+            "The point $(x) does not lie on $S, since its size is not $(N+1).",
+        )
     end
-    if !isapprox(norm(x), 1.; kwargs...)
-        return DomainError(norm(x), "The point $(x) does not lie on the sphere $(S) since its norm is not 1.")
+    if !isapprox(norm(x), 1.0; kwargs...)
+        return DomainError(
+            norm(x),
+            "The point $(x) does not lie on the sphere $(S) since its norm is not 1.",
+        )
     end
     return nothing
 end
@@ -38,16 +60,19 @@ after [`check_manifold_point`](@ref)`(S,x)`, `v` has to be of same dimension as 
 and orthogonal to `x`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(S::Sphere{N},x,v; kwargs...) where N
-    perr = check_manifold_point(S,x)
+function check_tangent_vector(S::Sphere{N}, x, v; kwargs...) where {N}
+    perr = check_manifold_point(S, x)
     perr === nothing || return perr
     if size(v) != representation_size(S)
-        return DomainError(size(v),
-            "The vector $(v) is not a tangent to a point on $S since its size does not match $(N+1).")
+        return DomainError(
+            size(v),
+            "The vector $(v) is not a tangent to a point on $S since its size does not match $(N+1).",
+        )
     end
-    if !isapprox( abs(dot(x,v)), 0.; kwargs...)
-        return DomainError(abs(dot(x,v)),
-            "The vector $(v) is not a tangent vector to $(x) on $(S), since it is not orthogonal in the embedding."
+    if !isapprox(abs(dot(x, v)), 0.0; kwargs...)
+        return DomainError(
+            abs(dot(x, v)),
+            "The vector $(v) is not a tangent vector to $(x) on $(S), since it is not orthogonal in the embedding.",
         )
     end
     return nothing
@@ -79,31 +104,27 @@ where $\lVert v \rVert_x$ is the [`norm`](@ref norm(::Sphere,x,v)) on the
 [`Sphere`](@ref) `M`.
 """
 exp(::Sphere, ::Any...)
+
 function exp!(M::Sphere, y, x, v)
     θ = norm(M, x, v)
     y .= cos(θ) .* x .+ usinc(θ) .* v
     return y
 end
 
-function flat!(M::Sphere, v::FVector{CotangentSpaceType}, x, w::FVector{TangentSpaceType})
-    copyto!(v.data, w.data)
-    return v
-end
+flat!(M::Sphere, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
 
 @doc doc"""
     injectivity_radius(M::Sphere[, x])
 
 Return the injectivity radius for the [`Sphere`](@ref) `M`, which is globally $\pi$.
-"""
-injectivity_radius(::Sphere, ::Any...) = π
 
-@doc doc"""
     injectivity_radius(M::Sphere, x, ::ProjectionRetraction)
 
 Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
 [`Sphere`](@ref), which is globally $\frac{\pi}{2}$.
 """
-injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π/2
+injectivity_radius(::Sphere, ::Any...) = π
+injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π / 2
 
 @doc doc"""
     inner(S::Sphere, x, w, v)
@@ -113,6 +134,13 @@ plane at `x` on the sphere `S=`$\mathbb S^n$ using the restriction of the
 metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
 @inline inner(S::Sphere, x, w, v) = dot(w, v)
+
+function get_vector(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where {N}
+    x[1] ≈ 1 && return vcat(0, v)
+    xp1 = x .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
+    v0 = vcat(0, v)
+    return 2 * xp1 * dot(xp1, v0) / dot(xp1, xp1) - v0
+end
 
 @doc doc"""
     inverse_retract(M::Sphere, x, y, ::ProjectionInverseRetraction)
@@ -126,7 +154,10 @@ since $\langle x,v\rangle = 0$ and when $d_{\mathbb S^2}(x,y) \leq \frac{\pi}{2}
 ````
 """
 inverse_retract(::Sphere, ::Any, ::Any, ::ProjectionInverseRetraction)
-inverse_retract!(::Sphere, v, x, y, ::ProjectionInverseRetraction) = (v .= y./dot(x,y) .- x)
+
+function inverse_retract!(::Sphere, v, x, y, ::ProjectionInverseRetraction)
+    return (v .= y ./ dot(x, y) .- x)
+end
 
 @doc doc"""
     log(M::Sphere, x, y)
@@ -160,8 +191,7 @@ function log!(S::Sphere, v, x, y)
         θ = acos(cosθ)
         v .= (y .- cosθ .* x) ./ usinc(θ)
     end
-    project_tangent!(S, v, x, v)
-    return v
+    return project_tangent!(S, v, x, v)
 end
 
 @doc doc"""
@@ -184,8 +214,10 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::Sphere, ::Any...)
-mean!(S::Sphere, y, x::AbstractVector, w::AbstractVector; kwargs...) =
-    mean!(S, y, x, w, GeodesicInterpolationWithinRadius(π/2); kwargs...)
+
+function mean!(S::Sphere, y, x::AbstractVector, w::AbstractVector; kwargs...)
+    return mean!(S, y, x, w, GeodesicInterpolationWithinRadius(π / 2); kwargs...)
+end
 
 @doc doc"""
     norm(M::Sphere, x, v)
@@ -219,6 +251,7 @@ Project the point `x` from the embedding onto the [`Sphere`](@ref) `M`.
 ````
 """
 project_point(::Sphere, ::Any...)
+
 project_point!(S::Sphere, x) = (x ./= norm(x))
 
 @doc doc"""
@@ -231,7 +264,24 @@ Project the point `v` onto the tangent space at `x` on the [`Sphere`](@ref) `M`.
 ````
 """
 project_tangent(::Sphere, ::Any...)
+
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v) .* x)
+
+@doc doc"""
+    get_coordinates(M::Sphere, x, v, B::ArbitraryOrthonormalBasis)
+
+Represent the tangent vector `v` at point `x` from a sphere `M` in
+an orthonormal basis by rotating the vector `v` using rotation matrix
+$2\frac{x_p x_p^\mathrm{T}}{x_p^\mathrm{T} x_p} - I$ where $x_p = x + (1, 0, \dots, 0)$.
+"""
+function get_coordinates(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where {N}
+    if isapprox(x[1], 1)
+        return v[2:end]
+    else
+        xp1 = x .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
+        return (2*xp1*dot(xp1, v)/dot(xp1, xp1)-v)[2:end]
+    end
+end
 
 @doc doc"""
     representation_size(M::Sphere)
@@ -239,7 +289,7 @@ project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v) .* x)
 Return the size points on the [`Sphere`](@ref) `M` are represented as, i.e.
 for the `n`-dimensional [`Sphere`](@ref) it is vectors of size `(n+1,)`.
 """
-representation_size(::Sphere{N}) where N = (N+1,)
+@generated representation_size(::Sphere{N}) where {N} = (N + 1,)
 
 @doc doc"""
     retract(M::Sphere, x, y, ::ProjectionRetraction)
@@ -251,16 +301,13 @@ Compute the retraction that is based on projection, i.e.
 ````
 """
 retract(::Sphere, ::Any, ::Any, ::ProjectionRetraction)
+
 function retract!(M::Sphere, y, x, v, ::ProjectionRetraction)
     y .= x .+ v
-    project_point!(M, y)
-    return y
+    return project_point!(M, y)
 end
 
-function sharp!(M::Sphere, v::FVector{TangentSpaceType}, x, w::FVector{CotangentSpaceType})
-    copyto!(v.data, w.data)
-    return v
-end
+sharp!(M::Sphere, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
 """
     uniform_distribution(S::Sphere, x)
@@ -284,13 +331,14 @@ P_{y\gets x}(v) = v - \frac{\langle \log_xy,v\rangle_x}{d^2_{\mathbb S^n}(x,y)}
 ````
 """
 vector_transport_to(::Sphere, ::Any, ::Any, ::Any, ::ParallelTransport)
+
 function vector_transport_to!(M::Sphere, vto, x, v, y, ::ParallelTransport)
     v_xy = log(M, x, y)
     vl = norm(M, x, v_xy)
-    vto .= v
+    copyto!(vto, v)
     if vl > 0
-        factor = 2*dot(v, y)/(norm(x + y)^2)
-        vto .-= factor.*(x .+ y)
+        factor = 2 * dot(v, y) / (norm(x + y)^2)
+        vto .-= factor .* (x .+ y)
     end
     return vto
 end
@@ -302,7 +350,5 @@ Return the zero tangent vector from the tangent space at `x` on the [`Sphere`](@
 which is the zero vector in the embedding.
 """
 zero_tangent_vector(::Sphere, ::Any...)
-function zero_tangent_vector!(S::Sphere, v, x)
-    fill!(v, 0)
-    return v
-end
+
+zero_tangent_vector!(S::Sphere, v, x) = fill!(v, 0)

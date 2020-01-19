@@ -1,5 +1,3 @@
-using LinearAlgebra: svd, qr, diag, Diagonal, det
-import LinearAlgebra: norm
 @doc doc"""
     Grassmann{n,k,F} <: Manifold
 
@@ -56,7 +54,8 @@ Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
 case $\mathbb F = \mathbb R$ is the default.
 """
 struct Grassmann{n,k,F} <: Manifold end
-Grassmann(n::Int, k::Int, F::AbstractNumbers=ℝ) = Grassmann{n,k,F}()
+
+Grassmann(n::Int, k::Int, F::AbstractNumbers = ℝ) = Grassmann{n,k,F}()
 
 @doc doc"""
     check_manifold_point(M::Grassmann{n,k,F}, x)
@@ -64,23 +63,31 @@ Grassmann(n::Int, k::Int, F::AbstractNumbers=ℝ) = Grassmann{n,k,F}()
 Check whether `x` is representing a point on the [`Grassmann`](@ref) `M`, i.e. its
 a `n`-by-`k` matrix of unitary column vectors and of correct `eltype` with respect to `F`.
 """
-function check_manifold_point(M::Grassmann{n,k,F},x; kwargs...) where {n,k,F}
-    if (F===ℝ) && !(eltype(x) <: Real)
-        return DomainError(eltype(x),
-            "The matrix $(x) is not a real-valued matrix, so it does noe lie on the Grassmann manifold of dimension ($(n),$(k)).")
+function check_manifold_point(M::Grassmann{n,k,F}, x; kwargs...) where {n,k,F}
+    if (F === ℝ) && !(eltype(x) <: Real)
+        return DomainError(
+            eltype(x),
+            "The matrix $(x) is not a real-valued matrix, so it does noe lie on the Grassmann manifold of dimension ($(n),$(k)).",
+        )
     end
-    if (F===ℂ) && !(eltype(x) <: Real) && !(eltype(x) <: Complex)
-        return DomainError(eltype(x),
-            "The matrix $(x) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Grassmann manifold of dimension ($(n),$(k)).")
+    if (F === ℂ) && !(eltype(x) <: Real) && !(eltype(x) <: Complex)
+        return DomainError(
+            eltype(x),
+            "The matrix $(x) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Grassmann manifold of dimension ($(n),$(k)).",
+        )
     end
     if size(x) != representation_size(M)
-        return DomainError(size(x),
-            "The matrix $(x) is does not lie on the Grassmann manifold of dimension ($(n),$(k)), since its dimensions are wrong.")
+        return DomainError(
+            size(x),
+            "The matrix $(x) is does not lie on the Grassmann manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
+        )
     end
-    c = x'*x
+    c = x' * x
     if !isapprox(c, one(c); kwargs...)
-        return DomainError(norm(c-one(c)),
-            "The point $(x) does not lie on the Grassmann manifold of dimension ($(n),$(k)), because x'x is not the unit matrix.")
+        return DomainError(
+            norm(c - one(c)),
+            "The point $(x) does not lie on the Grassmann manifold of dimension ($(n),$(k)), because x'x is not the unit matrix.",
+        )
     end
 end
 
@@ -97,26 +104,32 @@ Check whether `v` is a tangent vector in the tangent space of `x` on the [`Grass
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and $0_k$
 denotes the $k\times k$ zero natrix.
 """
-function check_tangent_vector(G::Grassmann{n,k,F},x,v; kwargs...) where {n,k,F}
-    t = check_manifold_point(G,x)
-    if (t !== nothing)
-        return t
+function check_tangent_vector(G::Grassmann{n,k,F}, x, v; kwargs...) where {n,k,F}
+    t = check_manifold_point(G, x)
+    t === nothing || return t
+    if (F === ℝ) && !(eltype(v) <: Real)
+        return DomainError(
+            eltype(v),
+            "The matrix $(v) is not a real-valued matrix, so it can not be a tangent vector to the Grassmann manifold of dimension ($(n),$(k)).",
+        )
     end
-    if (F===ℝ) && !(eltype(v) <: Real)
-        return DomainError(eltype(v),
-            "The matrix $(v) is not a real-valued matrix, so it can not be a tangent vector to the Grassmann manifold of dimension ($(n),$(k)).")
-    end
-    if (F===ℂ) && !(eltype(v) <: Real) && !(eltype(v) <: Complex)
-        return DomainError(eltype(v),
-            "The matrix $(v) is neiter real- nor complex-valued matrix, so it can not bea tangent vector to the complex Grassmann manifold of dimension ($(n),$(k)).")
+    if (F === ℂ) && !(eltype(v) <: Real) && !(eltype(v) <: Complex)
+        return DomainError(
+            eltype(v),
+            "The matrix $(v) is neiter real- nor complex-valued matrix, so it can not bea tangent vector to the complex Grassmann manifold of dimension ($(n),$(k)).",
+        )
     end
     if size(v) != representation_size(G)
-        return DomainError(size(v),
-            "The matrix $(v) is does not lie in the tangent space of $(x) on the Grassmann manifold of dimension ($(n),$(k)), since its dimensions are wrong.")
+        return DomainError(
+            size(v),
+            "The matrix $(v) is does not lie in the tangent space of $(x) on the Grassmann manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
+        )
     end
-    if !isapprox(x'*v + v'*x, zeros(k,k); kwargs...)
-        return DomainError(norm(x'*v + v'*x),
-            "The matrix $(v) is does not lie in the tangent space of $(x) on the Grassmann manifold of dimension ($(n),$(k)), since x'v + v'x is not the zero matrix.")
+    if !isapprox(x' * v + v' * x, zeros(k, k); kwargs...)
+        return DomainError(
+            norm(x' * v + v' * x),
+            "The matrix $(v) is does not lie in the tangent space of $(x) on the Grassmann manifold of dimension ($(n),$(k)), since x'v + v'x is not the zero matrix.",
+        )
     end
 end
 
@@ -136,13 +149,10 @@ where
 $b_{i}=\begin{cases} 0 & \text{if} \; S_i \geq 1\\ \operatorname{acos}(S_i) & \, \text{if} \; S_i<1 \end{cases}.$
 """
 function distance(M::Grassmann, x, y)
-    if x ≈ y
-        return 0.
-    else
-        a = svd(x'*y).S
-        a[a .> 1] .= 1
-        return sqrt(sum( (acos.(a)).^2 ))
-    end
+    x ≈ y && return zero(real(eltype(x)))
+    a = svd(x' * y).S
+    a[a.>1] .= 1
+    return sqrt(sum((acos.(a)) .^ 2))
 end
 
 @doc doc"""
@@ -164,19 +174,17 @@ yielding the result as
 \exp_x v = Q.
 ````
 """
-exp(::Grassmann,::Any...)
-function exp!(M::Grassmann,y, x, v)
-    if norm(M,x,v) ≈ 0
-        return (y .= x)
-    end
+exp(::Grassmann, ::Any...)
+
+function exp!(M::Grassmann, y, x, v)
+    norm(M, x, v) ≈ 0 && return copyto!(y, x)
     d = svd(v)
-    z =  x * d.V * Diagonal(cos.(d.S)) * d.Vt + d.U * Diagonal(sin.(d.S)) * d.Vt
+    z = x * d.V * Diagonal(cos.(d.S)) * d.Vt + d.U * Diagonal(sin.(d.S)) * d.Vt
     # reorthonormalize
-    copyto!(y, Array(qr(z).Q) )
-    return y
+    return copyto!(y, Array(qr(z).Q))
 end
 
-injectivity_radius(::Grassmann) = π/2
+injectivity_radius(::Grassmann) = π / 2
 
 @doc doc"""
     inner(M::Grassmann, x, v, w)
@@ -191,7 +199,7 @@ g_x(v,w) = \operatorname{trace}(v^{\mathrm{H}}w),
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-inner(::Grassmann, x, v, w) = dot(v,w)
+inner(::Grassmann, x, v, w) = dot(v, w)
 
 @doc doc"""
     inverse_retract(M::Grassmann, x, y, ::PolarInverseRetraction)
@@ -206,7 +214,10 @@ Compute the inverse retraction for the [`PolarRetraction`](@ref), on the
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inverse_retract(M::Grassmann, ::Any, ::Any, ::PolarInverseRetraction)
-inverse_retract!(::Grassmann, v, x, y, ::PolarInverseRetraction) = ( v .= y/(x'*y) - x)
+
+function inverse_retract!(::Grassmann, v, x, y, ::PolarInverseRetraction)
+    return copyto!(v, y / (x' * y) - x)
+end
 
 @doc doc"""
     inverse_retract(M, x, y, ::QRInverseRetraction)
@@ -219,13 +230,13 @@ Compute the inverse retraction valid of the [`QRRetraction`](@ref)
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
-inverse_retract!(::Grassmann, v, x, y, ::QRInverseRetraction) = ( v .= y/(x'*y) - x)
 
-isapprox(M::Grassmann, x, v, w; kwargs...) = isapprox(
-    sqrt(inner(M,x,zero_tangent_vector(M,x),v-w)),0;
-    kwargs...
-)
-isapprox(M::Grassmann, x, y; kwargs...) = isapprox(distance(M,x,y),0.; kwargs...)
+inverse_retract!(::Grassmann, v, x, y, ::QRInverseRetraction) = copyto!(v, y / (x' * y) - x)
+
+function isapprox(M::Grassmann, x, v, w; kwargs...)
+    return isapprox(sqrt(inner(M, x, zero_tangent_vector(M, x), v - w)), 0; kwargs...)
+end
+isapprox(M::Grassmann, x, y; kwargs...) = isapprox(distance(M, x, y), 0.0; kwargs...)
 
 @doc doc"""
     log(M::Grassmann, x, y)
@@ -246,14 +257,14 @@ USV = (y^\mathrm{H}x)^{-1} ( y^\mathrm{H} - y^\mathrm{H}xx^\mathrm{H} ).
 ````
 In this formula the $\operatorname{atan}$ is meant elementwise.
 """
-log(::Grassmann,::Any...)
+log(::Grassmann, ::Any...)
+
 function log!(M::Grassmann, v, x, y)
-    z = y'*x
-    At = y' - z*x'
-    Bt = z\At
+    z = y' * x
+    At = y' - z * x'
+    Bt = z \ At
     d = svd(Bt')
-    v .= d.U * Diagonal(atan.(d.S)) * d.Vt
-    return v
+    return copyto!(v, d.U * Diagonal(atan.(d.S)) * d.Vt)
 end
 
 @doc doc"""
@@ -267,7 +278,7 @@ Return the dimension of the [`Grassmann(n,k,𝔽)`](@ref) manifold `M`, i.e.
 
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
-manifold_dimension(M::Grassmann{n,k,𝔽}) where {n,k,𝔽} = k*(n - k)*real_dimension(𝔽)
+manifold_dimension(M::Grassmann{n,k,𝔽}) where {n,k,𝔽} = k * (n - k) * real_dimension(𝔽)
 
 """
     mean(
@@ -282,8 +293,16 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::Grassmann{n,k,ℝ} where {n,k}, ::Any...)
-mean!(M::Grassmann{n,k,ℝ}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {n,k} =
-    mean!(M, y, x, w, GeodesicInterpolationWithinRadius(π/4); kwargs...)
+
+function mean!(
+    M::Grassmann{n,k,ℝ},
+    y,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+) where {n,k}
+    return mean!(M, y, x, w, GeodesicInterpolationWithinRadius(π / 4); kwargs...)
+end
 
 @doc doc"""
     project_tangent(M::Grassmann, x, w)
@@ -297,8 +316,9 @@ which is computed by
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-project_tangent(::Grassmann,::Any...)
-project_tangent!(M::Grassmann,v, x, w) = ( v .= w - x*x'*w )
+project_tangent(::Grassmann, ::Any...)
+
+project_tangent!(M::Grassmann, v, x, w) = copyto!(v, w - x * x' * w)
 
 @doc doc"""
     representation_size(M::Grassmann{n,k,F})
@@ -306,7 +326,7 @@ project_tangent!(M::Grassmann,v, x, w) = ( v .= w - x*x'*w )
 Return the represenation size or matrix dimension of a point on the [`Grassmann`](@ref)
 `M`, i.e. $(n,k)$ for both the real-valued and the complex value case.
 """
-@generated representation_size(::Grassmann{n, k}) where {n,k} = (n,k)
+@generated representation_size(::Grassmann{n,k}) where {n,k} = (n, k)
 
 @doc doc"""
     retract(M::Grassmann, x, v, ::PolarRetraction)
@@ -318,15 +338,7 @@ Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
-"""
-retract(::Grassmann, ::Any, ::Any, ::PolarRetraction)
-function retract!(::Grassmann, y, x, v, ::PolarRetraction)
-    s = svd(x+v)
-    mul!(y, s.U, s.V')
-   return y
-end
 
-@doc doc"""
     retract(M::Grassmann, x, v, ::QRRetraction )
 
 Compute the QR-based retraction [`QRRetraction`](@ref) on the
@@ -339,15 +351,19 @@ where D is a $m\times n$ matrix with
 D = \operatorname{diag}( \operatorname{sgn}(R_{ii}+0,5)_{i=1}^n ).
 ````
 """
-retract(M::Grassmann, ::Any, ::Any, ::QRRetraction)
+retract(::Grassmann, ::Any...)
+
+function retract!(::Grassmann, y, x, v, ::PolarRetraction)
+    s = svd(x + v)
+    return mul!(y, s.U, s.Vt)
+end
 function retract!(::Grassmann{N,K}, y, x, v, ::QRRetraction) where {N,K}
-    qrfac = qr(x+v)
+    qrfac = qr(x + v)
     d = diag(qrfac.R)
-    D = Diagonal( sign.( sign.(d .+ 0.5)) )
-    y .= zeros(N,K)
-    y[1:K,1:K] .= D
-    y .= Array(qrfac.Q) * D
-    return y
+    D = Diagonal(sign.(sign.(d .+ 0.5)))
+    y .= zeros(N, K)
+    y[1:K, 1:K] .= D
+    return copyto!(y, Array(qrfac.Q) * D)
 end
 
 @doc doc"""
@@ -357,4 +373,5 @@ Return the zero tangent vector from the tangent space at `x` on the [`Grassmann`
 which is given by a zero matrix the same size as `x`.
 """
 zero_tangent_vector(::Grassmann, ::Any...)
-zero_tangent_vector!(::Grassmann,v,x) = fill!(v,0)
+
+zero_tangent_vector!(::Grassmann, v, x) = fill!(v, 0)

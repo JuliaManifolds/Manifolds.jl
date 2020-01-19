@@ -1,7 +1,6 @@
-# Automatic Differentiation
+# Automatic differentiation
 
-Documentation for `Manifolds.jl`'s methods and types for automatic
-differentiation.
+Documentation for `Manifolds.jl`'s methods and types for automatic differentiation.
 
 ```@docs
 Manifolds.adbackend

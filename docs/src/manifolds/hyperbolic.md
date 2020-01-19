@@ -1,5 +1,5 @@
-# Hyperbolic Space
--
+# Hyperbolic space
+
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["manifolds/Hyperbolic.jl"]

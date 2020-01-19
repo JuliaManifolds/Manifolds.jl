@@ -1,4 +1,4 @@
-# Symmetric Positive Definite Matrices
+# Symmetric positive definite matrices
 
 The symmetric positive definite matrices
 
@@ -10,9 +10,7 @@ The symmetric positive definite matrices
 SymmetricPositiveDefinite
 ```
 
-can -- for example -- be illustrated as ellipsoids:  since the eigen values are all positive
-they can be taken as lengths of the axes of an ellipsoids while the directions are given by
-the eigenvectors.
+can -- for example -- be illustrated as ellipsoids:  since the eigen values are all positive they can be taken as lengths of the axes of an ellipsoids while the directions are given by the eigenvectors.
 
 ![An example set of data](../assets/images/SPDSignal.png)
 
@@ -29,17 +27,13 @@ Order = [:function]
 
 ## Default Metric: Linear Affine Metric
 
-
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["manifolds/SymmetricPositiveDefiniteLinearAffine.jl"]
 Order = [:type]
 ```
 
-This metric is also the default metric, i.e.
-any call of the following functions with
-`P=SymmetricPositiveDefinite(3)` will result in
-`MetricManifold(P,LinearAffineMetric())`and hence yield the formulae described in this seciton.
+This metric is also the default metric, i.e. any call of the following functions with `P=SymmetricPositiveDefinite(3)` will result in `MetricManifold(P,LinearAffineMetric())`and hence yield the formulae described in this seciton.
 
 ```@autodocs
 Modules = [Manifolds]

@@ -1,4 +1,4 @@
-# Public Documentation
+# Public documentation
 
 Documentation for `Manifolds.jl`'s public interface.
 

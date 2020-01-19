@@ -130,6 +130,12 @@ include("utils.jl")
     end
 
     @testset "ProductRepr" begin
+        basis_types = (
+            ArbitraryOrthonormalBasis(),
+            ProjectedOrthonormalBasis(:svd),
+            DiagonalizingOrthonormalBasis(ProductRepr([0.0, 1.0, 0.0], [1.0, 0.0]))
+        )
+
         Ts = SizedVector{3, Float64}
         Tr2 = SizedVector{2, Float64}
         pts_sphere = [convert(Ts, [1.0, 0.0, 0.0]),
@@ -147,7 +153,9 @@ include("utils.jl")
             test_musical_isomorphisms = true,
             test_tangent_vector_broadcasting = false,
             test_forward_diff = false,
-            test_reverse_diff = false
+            test_reverse_diff = false,
+            basis_types_vecs = (basis_types[1], basis_types[3],),
+            basis_types_to_from = basis_types
         )
         @test eltype(pts[1]) === Float64
         @test submanifold_component(Mse, pts[1], 1) === pts[1].parts[1]

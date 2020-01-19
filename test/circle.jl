@@ -13,6 +13,9 @@ include("utils.jl")
         @test sharp(M,0.0, FVector(CotangentSpace,1.0)) == FVector(TangentSpace,1.0)
         @test vector_transport_to(M,0.0,1.0,1.0, ParallelTransport()) == 1.0
         @test retract(M,0.0,1.0) == exp(M,0.0,1.0)
+        @test injectivity_radius(M) ≈ π
+        @test mean(M, [-π/2,0.,π]) ≈ π/2
+        @test mean(M, [-π/2,0.,π],[1., 1., 1.]) == π/2
         v = MVector(0.0)
         x = SVector(0.0)
         log!(M,v,x,SVector(π/4))
@@ -27,6 +30,12 @@ include("utils.jl")
         @test x == MVector(0.0)
     end
     types = [Float64, Float32]
+
+    basis_types = (ArbitraryOrthonormalBasis(),)
+    basis_types_real = (ArbitraryOrthonormalBasis(),
+        DiagonalizingOrthonormalBasis([-1]),
+        DiagonalizingOrthonormalBasis([1])
+    )
     for T in types
         @testset "Type $T" begin
             pts = convert.(Ref(T), [-π/4,0.,π/4])
@@ -39,7 +48,7 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
-                is_mutating=false
+                is_mutating = false
             )
             ptsS = SVector.(pts)
             test_manifold(
@@ -50,6 +59,8 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                basis_types_vecs = basis_types_real,
+                basis_types_to_from = basis_types_real
             )
         end
     end
@@ -100,7 +111,7 @@ include("utils.jl")
                 test_vector_transport = true,
                 is_mutating=false,
                 exp_log_atol_multiplier = 2.0,
-                is_tangent_atol_multiplier = 2.0,
+                is_tangent_atol_multiplier = 2.0
             )
             ptsS = SVector.(pts)
             test_manifold(
@@ -113,6 +124,8 @@ include("utils.jl")
                 test_vector_transport = true,
                 exp_log_atol_multiplier = 2.0,
                 is_tangent_atol_multiplier = 2.0,
+                basis_types_vecs = basis_types,
+                basis_types_to_from = basis_types
             )
         end
     end

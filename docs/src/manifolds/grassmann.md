@@ -1,13 +1,7 @@
-# Grassmann Manifold
+# Grassmann manifold
 
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["manifolds/Grassmann.jl"]
-Order = [:type]
-```
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["manifolds/Grassmann.jl"]
-Order = [:function]
+Order = [:type,:function]
 ```

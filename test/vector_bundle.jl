@@ -20,6 +20,17 @@ include("utils.jl")
         @test (-fv1).type == TangentSpace
         @test isa(2*fv1, FVector)
         @test (2*fv1).type == TangentSpace
+
+        PM = ProductManifold(Sphere(2), Euclidean(2))
+        fv2 = FVector(TangentSpace, ProductRepr([1.0, 0.0, 0.0], [1.0, 2.0]))
+        @test submanifold_component(fv2, 1) == [1, 0, 0]
+        @test submanifold_component(fv2, 2) == [1, 2]
+        @test submanifold_component(fv2, Val(1)) == [1, 0, 0]
+        @test submanifold_component(fv2, Val(2)) == [1, 2]
+        @test submanifold_component(PM, fv2, 1) == [1, 0, 0]
+        @test submanifold_component(PM, fv2, 2) == [1, 2]
+        @test submanifold_component(PM, fv2, Val(1)) == [1, 0, 0]
+        @test submanifold_component(PM, fv2, Val(2)) == [1, 2]
     end
 
     types = [
@@ -41,6 +52,11 @@ include("utils.jl")
             for pt ∈ pts_tb
                 @test bundle_projection(TB, pt) ≈ pt.parts[1]
             end
+            basis_types = (
+                ArbitraryOrthonormalBasis(),
+                get_basis(TB, pts_tb[1], ArbitraryOrthonormalBasis()),
+                DiagonalizingOrthonormalBasis(log(TB, pts_tb[1], pts_tb[2])),
+            )
             test_manifold(
                 TB,
                 pts_tb,
@@ -49,6 +65,7 @@ include("utils.jl")
                 test_forward_diff = isa(T, Vector),
                 test_tangent_vector_broadcasting = false,
                 test_project_tangent = true,
+                basis_types_vecs = basis_types,
                 projection_atol_multiplier = 4
             )
         end
