@@ -256,7 +256,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` on the
 mean modulo 2π.
 """
 mean(::Circle, ::Any)
-mean(::Circle,x::Array{<:Real}; kwargs...) = sym_rem(sum(x))
+mean(::Circle, x::Array{<:Real}; kwargs...) = sym_rem(sum(x))
 mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...) = sym_rem(sum(w .* x))
 
 @inline norm(::Circle, x, v) = sum(abs, v)

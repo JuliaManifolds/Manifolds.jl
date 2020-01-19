@@ -33,6 +33,7 @@ import Base:
     transpose,
     zero
 import Distributions: _rand!, support
+import LightGraphs: AbstractSimpleGraph, is_directed
 import LinearAlgebra: cross, det, Diagonal, dot, mul!, norm, I, UniformScaling
 import ManifoldsBase:
     array_value,
@@ -74,15 +75,17 @@ import ManifoldsBase:
     zero_tangent_vector,
     zero_tangent_vector!
 import Random: rand
+import SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 import Statistics: mean, mean!, median, median!, std, var
 import StatsBase: kurtosis, mean_and_std, mean_and_var, moment, skewness
 
+using Base.Iterators: repeated
 using Distributions
 using Einsum: @einsum
 using FiniteDifferences
 using HybridArrays
 using LinearAlgebra
-using Base.Iterators: repeated
+using LightGraphs
 using ManifoldsBase: CoTVector, Manifold, MPoint, TVector, DefaultManifold
 using ManifoldsBase:
     ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector

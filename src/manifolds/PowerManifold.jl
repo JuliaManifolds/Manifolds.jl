@@ -4,7 +4,7 @@
 An abstract [`Manifold`](@ref) to represent manifolds that are build as powers
 of another [`Manifold`](@ref) `M` to the power `TSize`.
 """
-abstract type AbstractPowerManifold{M <: Manifold} <: Manifold end
+abstract type AbstractPowerManifold{M<:Manifold} <: Manifold end
 
 @doc doc"""
     PowerManifold{TM<:Manifold, TSize<:Tuple} <: AbstractPowerManifold
@@ -27,7 +27,7 @@ power manifolds might be faster if they are represented as [`ProductManifold`](@
 
 Generate the power manifold $M^{N_1 \times N_2 \times \dots \times N_n}$.
 """
-struct PowerManifold{TM, TSize} <: AbstractPowerManifold{TM}
+struct PowerManifold{TM,TSize} <: AbstractPowerManifold{TM}
     manifold::TM
 end
 
@@ -66,7 +66,8 @@ end
 
 Power distribution on manifold `M`, based on `distribution`.
 """
-struct PowerPointDistribution{TM<:AbstractPowerManifold, TD<:MPointDistribution, TX} <: MPointDistribution{TM}
+struct PowerPointDistribution{TM<:AbstractPowerManifold,TD<:MPointDistribution,TX} <:
+       MPointDistribution{TM}
     manifold::TM
     distribution::TD
     x::TX
@@ -81,9 +82,10 @@ bundle) of type `type` using the power distribution of `distr`.
 Vector space type and `x` can be automatically inferred from distribution `distr`.
 """
 struct PowerFVectorDistribution{
-        TSpace<:VectorBundleFibers{<:VectorSpaceType, <:AbstractPowerManifold},
-        TD<:FVectorDistribution, TX
-    } <: FVectorDistribution{TSpace, TX}
+    TSpace<:VectorBundleFibers{<:VectorSpaceType,<:AbstractPowerManifold},
+    TD<:FVectorDistribution,
+    TX,
+} <: FVectorDistribution{TSpace,TX}
     type::TSpace
     x::TX
     distribution::TD
@@ -156,7 +158,10 @@ function check_tangent_vector(M::AbstractPowerManifold, x, v; kwargs...)
     return nothing
 end
 
-function det_local_metric(M::MetricManifold{<:AbstractPowerManifold, PowerMetric}, x::AbstractArray)
+function det_local_metric(
+    M::MetricManifold{<:AbstractPowerManifold,PowerMetric},
+    x::AbstractArray,
+)
     result = one(eltype(x))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)

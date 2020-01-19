@@ -24,7 +24,7 @@ makedocs(
                 "Torus" => "manifolds/torus.md"
             ],
             "Combined manifolds" => [
-                "Graph Manifold" => "manifolds/graph.md",
+                "Graph manifold" => "manifolds/graph.md",
                 "Power manifold" => "manifolds/power.md",
                 "Product manifold" => "manifolds/product.md",
                 "Vector bundle" => "manifolds/vector_bundle.md"
