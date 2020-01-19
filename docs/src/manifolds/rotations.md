@@ -5,7 +5,8 @@ The manifold $\mathrm{SO}(n)$ of orthogonal matrices with determinant $+1$ in $\
 $\mathrm{SO}(n) = \bigl\{R \in \mathbb{R}^{n\times n} \big| RR^{\mathrm{T}} =
 R^{\mathrm{T}}R = \mathrm{I}_n, \det(R) = 1 \bigr\}$
 
-``\mathrm{SO}(n)`` is a subgroup of the orthogonal group $\mathrm{O}(n)$ and also known as the special orthogonal group or the set of rotations group.
+The Lie group $\mathrm{SO}(n)$ is a subgroup of the orthogonal group $\mathrm{O}(n)$ and also known as the special orthogonal group or the set of rotations group.
+See also [`SpecialOrthogonal`](@ref), which is this manifold equipped with the group operation.
 
 Tangent vectors are represented by elements of the corresponding Lie algebra, which is the tangent space at the identity element.
 This convention allows for more efficient operations on tangent vectors.
