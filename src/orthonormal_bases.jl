@@ -27,7 +27,7 @@ abstract type AbstractOrthonormalBasis{F} <: AbstractBasis{F} end
     AbstractPrecomputedOrthonormalBasis{F}
 
 Abstract type that represents an orthonormal basis of the tangent space at a point
-on a manifold. Tangent vectors can be obtained using function [`vectors`](@ref).
+on a manifold. Tangent vectors can be obtained using function [`get_vectors`](@ref).
 
 The vectors are not always fully precomputed because a partially precomputed
 basis may be enough for implementing [`get_vector`](@ref) and [`get_coordinates`](@ref).
@@ -142,7 +142,7 @@ Depending on the basis, `x` may not directly represent a point on the manifold.
 For example if a basis transported along a curve is used, `x` may be the coordinate
 along the curve.
 
-See also: [`get_vector`](@ref), [`basis`](@ref)
+See also: [`get_vector`](@ref), [`get_basis`](@ref)
 """
 function get_coordinates(M::Manifold, x, v, B::AbstractBasis)
     error("get_coordinates not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
@@ -164,7 +164,7 @@ Depending on the basis, `x` may not directly represent a point on the manifold.
 For example if a basis transported along a curve is used, `x` may be the coordinate
 along the curve.
 
-See also: [`get_coordinates`](@ref), [`basis`](@ref)
+See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 """
 function get_vector(M::Manifold, x, v, B::AbstractBasis)
     error("get_vector not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
@@ -202,12 +202,12 @@ represented by `x`.
 
 Returned object derives from [`AbstractBasis`](@ref) and may have a field `.vectors`
 that stores tangent vectors or it may store them implicitly, in which case
-the function [`vectors`](@ref) needs to be used to retrieve the basis vectors.
+the function [`get_vectors`](@ref) needs to be used to retrieve the basis vectors.
 
 See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
 function get_basis(M::Manifold, x, B::AbstractBasis)
-    error("basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
+    error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
 end
 """
     get_basis(M::Manifold, x, B::ArbitraryOrthonormalBasis)
@@ -290,7 +290,7 @@ end
 Get the basis vectors of basis `B` of the tangent space at point `x`.
 """
 function get_vectors(M::Manifold, x, B::AbstractBasis)
-    error("vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
+    error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
 end
 
 get_vectors(::Manifold, x, B::PrecomputedOrthonormalBasis) = B.vectors
@@ -340,6 +340,6 @@ function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,�
         K * real_dimension(number_system(B)) == dim && return PrecomputedOrthonormalBasis(Ξ)
         @label skip
     end
-    @warn "gram_schmidt only found $(K) orthonormal basis vectors, but manifold dimension is $(dim)."
+    @warn "get_basis with bases $(typeof(B)) only found $(K) orthonormal basis vectors, but manifold dimension is $(dim)."
     return PrecomputedOrthonormalBasis(Ξ)
 end
