@@ -10,17 +10,17 @@ makedocs(
         "ManifoldsBase.jl" => "interface.md",
         "Manifolds" => [
             "Basic manifolds" => [
-                "Cholesky Space" => "manifolds/choleskyspace.md",
+                "Cholesky space" => "manifolds/choleskyspace.md",
                 "Circle" => "manifolds/circle.md",
                 "Euclidean" => "manifolds/euclidean.md",
-                "Fixed Rank Matrices" => "manifolds/fixedrankmatrices.md",
+                "Fixed-rank matrices" => "manifolds/fixedrankmatrices.md",
                 "Grassmannian" => "manifolds/grassmann.md",
-                "Hyperbolic Space" => "manifolds/hyperbolic.md",
+                "Hyperbolic space" => "manifolds/hyperbolic.md",
                 "Rotations" => "manifolds/rotations.md",
                 "Sphere" => "manifolds/sphere.md",
                 "Stiefel" => "manifolds/stiefel.md",
-                "Symmetric Matrices" => "manifolds/symmetric.md",
-                "Symmetric Positive Definite" => "manifolds/symmetricpositivedefinite.md"
+                "Symmetric matrices" => "manifolds/symmetric.md",
+                "Symmetric positive definite" => "manifolds/symmetricpositivedefinite.md"
             ],
             "Combined manifolds" => [
                 "Power manifold" => "manifolds/power.md",
@@ -37,10 +37,10 @@ makedocs(
         "Distributions" => "distributions.md",
         "Orthonormal bases" => "orthonormal_bases.md",
         "Library" => [
-            "Numbers" => "lib/numbers.md",
+            "Number systems" => "lib/numbers.md",
             "Public" => "lib/public.md",
             "Internals" => "lib/internals.md",
-            "Automatic Differentiation" => "lib/autodiff.md"
+            "Automatic differentiation" => "lib/autodiff.md"
         ]
     ]
 )
