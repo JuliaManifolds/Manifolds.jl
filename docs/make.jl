@@ -20,9 +20,11 @@ makedocs(
                 "Sphere" => "manifolds/sphere.md",
                 "Stiefel" => "manifolds/stiefel.md",
                 "Symmetric Matrices" => "manifolds/symmetric.md",
-                "Symmetric Positive Definite" => "manifolds/symmetricpositivedefinite.md"
+                "Symmetric Positive Definite" => "manifolds/symmetricpositivedefinite.md",
+                "Torus" => "manifolds/torus.md"
             ],
             "Combined manifolds" => [
+                "Graph Manifold" => "manifolds/graph.md",
                 "Power manifold" => "manifolds/power.md",
                 "Product manifold" => "manifolds/product.md",
                 "Vector bundle" => "manifolds/vector_bundle.md"

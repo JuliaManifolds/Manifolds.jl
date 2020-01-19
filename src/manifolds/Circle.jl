@@ -253,6 +253,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` on the
 mean modulo 2π.
 """
 mean(::Circle, ::Any)
+mean(::Circle,x::Array{<:Real}; kwargs...) = sym_rem(sum(x))
 mean(::Circle,x::Array{<:Real},w::AbstractVector; kwargs...) = sym_rem(sum(w.*x))
 
 @inline norm(::Circle, x, v) = sum(abs, v)
@@ -345,7 +346,6 @@ function vector_transport_to!(M::Circle{ℂ}, vto, x, v, y, ::ParallelTransport)
     return vto
 end
 
-vector_transport_along(M::Circle,x::Number,v::Number,c) = vector_transport_along!(M,zero(v),x,v,c)
 function vector_transport_direction(M::Circle,x::Number,v::Number,vdir::Number,m::AbstractVectorTransportMethod)
     y = exp(M, x, vdir)
     return vector_transport_to(M, x, v, y, m)

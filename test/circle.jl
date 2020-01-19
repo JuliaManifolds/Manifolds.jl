@@ -13,6 +13,9 @@ include("utils.jl")
         @test sharp(M,0.0, FVector(CotangentSpace,1.0)) == FVector(TangentSpace,1.0)
         @test vector_transport_to(M,0.0,1.0,1.0, ParallelTransport()) == 1.0
         @test retract(M,0.0,1.0) == exp(M,0.0,1.0)
+        @test injectivity_radius(M) ≈ π
+        @test mean(M, [-π/2,0.,π]) ≈ π/2
+        @test mean(M, [-π/2,0.,π],[1., 1., 1.]) == π/2
         v = MVector(0.0)
         x = SVector(0.0)
         log!(M,v,x,SVector(π/4))

@@ -163,6 +163,7 @@ include("product_representations.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/ProductManifold.jl")
 include("manifolds/PowerManifold.jl")
+include("manifolds/GraphManifold.jl")
 
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
@@ -175,6 +176,7 @@ include("manifolds/Stiefel.jl")
 include("manifolds/Sphere.jl")
 include("manifolds/Symmetric.jl")
 include("manifolds/SymmetricPositiveDefinite.jl")
+include("manifolds/Torus.jl")
 
 
 include("groups/group.jl")
@@ -209,12 +211,14 @@ end
 #
 export CoTVector, Manifold, MPoint, TVector, Manifold
 export Euclidean, CholeskySpace, Circle, FixedRankMatrices, Grassmann,
-    Hyperbolic, Rotations,Sphere, Stiefel, SymmetricMatrices, SymmetricPositiveDefinite
+    Hyperbolic, Rotations,Sphere, Stiefel, SymmetricMatrices,
+    SymmetricPositiveDefinite, Torus
 export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
 export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 export CotangentBundle, CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
-export PowerManifold, ProductManifold
+export AbstractPowerManifold, PowerManifold, ProductManifold
+export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
@@ -230,7 +234,7 @@ export AbstractEstimationMethod, GradientDescentEstimation, CyclicProximalPointE
 export base_manifold, bundle_projection, christoffel_symbols_first, christoffel_symbols_second,
     christoffel_symbols_second_jacobian, complex_dot, det_local_metric, distance,
     einstein_tensor, exp, exp!, flat, flat!, gaussian_curvature, geodesic, hat, hat!,
-    injectivity_radius, inner, inverse_local_metric, inverse_retract, inverse_retract!,
+    incident_log, injectivity_radius, inner, inverse_local_metric, inverse_retract, inverse_retract!,
     isapprox, is_decorator_manifold, is_default_metric, is_manifold_point,
     is_tangent_vector, isapprox, inner, kurtosis, local_metric, local_metric_jacobian, log,
     log!, log_local_metric_density, manifold_dimension, metric, mean, mean!, mean_and_var,
