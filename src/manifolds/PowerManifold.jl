@@ -1,5 +1,13 @@
 @doc doc"""
-    PowerManifold{TM<:Manifold, TSize<:Tuple} <: Manifold
+    AbstractPowerManifold{M,TSize} <: Manifold
+
+An abstract [`Manifold`](@ref) to represent manifolds that are build as powers
+of another [`Manifold`](@ref) `M` to the power `TSize`.
+"""
+abstract type AbstractPowerManifold{M <: Manifold} <: Manifold end
+
+@doc doc"""
+    PowerManifold{TM<:Manifold, TSize<:Tuple} <: AbstractPowerManifold
 
 The power manifold $\mathcal M^{n_1 \times n_2 \times \dots \times n_d}$ with power geometry
 represented by an array-like structure with $d$ dimensions and sizes $n_1, n_2, \dots, n_d$,
@@ -19,7 +27,7 @@ power manifolds might be faster if they are represented as [`ProductManifold`](@
 
 Generate the power manifold $M^{N_1 \times N_2 \times \dots \times N_n}$.
 """
-struct PowerManifold{TM<:Manifold,TSize} <: Manifold
+struct PowerManifold{TM, TSize} <: AbstractPowerManifold{TM}
     manifold::TM
 end
 
@@ -28,7 +36,7 @@ PowerManifold(M::Manifold, size::Int...) = PowerManifold{typeof(M),Tuple{size...
 @doc doc"""
     PowerMetric <: Metric
 
-Represent the [`Metric`](@ref) on the [`PowerManifold`](@ref), i.e. the inner
+Represent the [`Metric`](@ref) on an [`AbstractPowerManifold`](@ref), i.e. the inner
 product on the tangent space is the sum of the inner product of each elements
 tangent space of the power manifold.
 """
@@ -37,7 +45,7 @@ struct PowerMetric <: Metric end
 """
     PowerRetraction(retraction::AbstractRetractionMethod)
 
-Power retraction based on `retraction`. Works on [`PowerManifold`](@ref)s.
+Power retraction based on `retraction`. Works on [`AbstractPowerManifold`](@ref)s.
 """
 struct PowerRetraction{TR<:AbstractRetractionMethod} <: AbstractRetractionMethod
     retraction::TR
@@ -46,7 +54,7 @@ end
 """
     InversePowerRetraction(inverse_retractions::AbstractInverseRetractionMethod...)
 
-Power inverse retraction of `inverse_retractions`. Works on [`PowerManifold`](@ref)s.
+Power inverse retraction of `inverse_retractions`. Works on [`AbstractPowerManifold`](@ref)s.
 """
 struct InversePowerRetraction{TR<:AbstractInverseRetractionMethod} <:
        AbstractInverseRetractionMethod
@@ -54,12 +62,11 @@ struct InversePowerRetraction{TR<:AbstractInverseRetractionMethod} <:
 end
 
 """
-    PowerPointDistribution(M::PowerManifold, distribution)
+    PowerPointDistribution(M::AbstractPowerManifold, distribution)
 
 Power distribution on manifold `M`, based on `distribution`.
 """
-struct PowerPointDistribution{TM<:PowerManifold,TD<:MPointDistribution,TX} <:
-       MPointDistribution{TM}
+struct PowerPointDistribution{TM<:AbstractPowerManifold, TD<:MPointDistribution, TX} <: MPointDistribution{TM}
     manifold::TM
     distribution::TD
     x::TX
@@ -74,10 +81,9 @@ bundle) of type `type` using the power distribution of `distr`.
 Vector space type and `x` can be automatically inferred from distribution `distr`.
 """
 struct PowerFVectorDistribution{
-    TSpace<:VectorBundleFibers{<:VectorSpaceType,<:PowerManifold},
-    TD<:FVectorDistribution,
-    TX,
-} <: FVectorDistribution{TSpace,TX}
+        TSpace<:VectorBundleFibers{<:VectorSpaceType, <:AbstractPowerManifold},
+        TD<:FVectorDistribution, TX
+    } <: FVectorDistribution{TSpace, TX}
     type::TSpace
     x::TX
     distribution::TD
@@ -109,14 +115,14 @@ function PrecomputedPowerOrthonormalBasis(
 end
 
 """
-    check_manifold_point(M::ProductManifold, x; kwargs...)
+    check_manifold_point(M::AbstractProductManifold, x; kwargs...)
 
-Check whether `x` is a valid point on the [`ProductManifold`](@ref) `M`, i.e.
+Check whether `x` is a valid point on an [`AbstractPowerManifold`](@ref) `M`, i.e.
 each element of `x` has to be a valid point on the base manifold.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_manifold_point(M::PowerManifold, x; kwargs...)
+function check_manifold_point(M::AbstractPowerManifold, x; kwargs...)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         imp = check_manifold_point(M.manifold, _read(rep_size, x, i); kwargs...)
@@ -126,15 +132,15 @@ function check_manifold_point(M::PowerManifold, x; kwargs...)
 end
 
 """
-    check_tangent_vector(M::ProductManifold, x, v; kwargs... )
+    check_tangent_vector(M::AbstractPowerManifold, x, v; kwargs... )
 
-Check whether `v` is a tangent vector to `x` on the [`ProductManifold`](@ref)
+Check whether `v` is a tangent vector to `x` an the [`AbstractPowerManifold`](@ref)
 `M`, i.e. atfer [`check_manifold_point`](@ref)`(M, x)`, and all projections to
 base manifolds must be respective tangent vectors.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::PowerManifold, x, v; kwargs...)
+function check_tangent_vector(M::AbstractPowerManifold, x, v; kwargs...)
     mpe = check_manifold_point(M, x)
     mpe === nothing || return mpe
     rep_size = representation_size(M.manifold)
@@ -150,7 +156,7 @@ function check_tangent_vector(M::PowerManifold, x, v; kwargs...)
     return nothing
 end
 
-function det_local_metric(M::MetricManifold{PowerManifold,PowerMetric}, x::AbstractArray)
+function det_local_metric(M::MetricManifold{<:AbstractPowerManifold, PowerMetric}, x::AbstractArray)
     result = one(eltype(x))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -160,12 +166,12 @@ function det_local_metric(M::MetricManifold{PowerManifold,PowerMetric}, x::Abstr
 end
 
 @doc doc"""
-    distance(M::PowerManifold, x, y)
+    distance(M::AbstractPowerManifold, x, y)
 
-Compute the distance between `x` and `y` on the [`PowerManifold`](@ref),
+Compute the distance between `x` and `y` on an [`AbstractPowerManifold`](@ref),
 i.e. from the element wise distances the Forbenius norm is computed.
 """
-function distance(M::PowerManifold, x, y)
+function distance(M::AbstractPowerManifold, x, y)
     sum_squares = zero(eltype(x))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -175,14 +181,14 @@ function distance(M::PowerManifold, x, y)
 end
 
 @doc doc"""
-    exp(M::PowerManifold, x, v)
+    exp(M::AbstractPowerManifold, x, v)
 
-Compute the exponential map from `x` in direction `v` on the [`PowerManifold`](@ref) `M`,
+Compute the exponential map from `x` in direction `v` on the [`AbstractPowerManifold`](@ref) `M`,
 which can be computed using the base manifolds exponential map elementwise.
 """
-exp(::PowerManifold, ::Any...)
+exp(::AbstractPowerManifold, ::Any...)
 
-function exp!(M::PowerManifold, y, x, v)
+function exp!(M::AbstractPowerManifold, y, x, v)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         exp!(
@@ -196,15 +202,15 @@ function exp!(M::PowerManifold, y, x, v)
 end
 
 @doc doc"""
-    flat(M::PowerManifold, x, w::FVector{TangentSpaceType})
+    flat(M::AbstractPowerManifold, x, w::FVector{TangentSpaceType})
 
 use the musical isomorphism to transform the tangent vector `w` from the tangent space at
-`x` on the [`PowerManifold`](@ref) `M` to a cotangent vector.
+`x` on an [`AbstractPowerManifold`](@ref) `M` to a cotangent vector.
 This can be done elementwise, so r every entry of `w` (and `x`) sparately
 """
-flat(::PowerManifold, ::Any...)
+flat(::AbstractPowerManifold, ::Any...)
 
-function flat!(M::PowerManifold, v::CoTFVector, x, w::TFVector)
+function flat!(M::AbstractPowerManifold, v::CoTFVector, x, w::TFVector)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         flat!(
@@ -294,13 +300,13 @@ function get_vector(M::PowerManifold, x, v, B::ArbitraryOrthonormalBasis)
 end
 
 @doc doc"""
-    injectivity_radius(M::PowerManifold[, x])
+    injectivity_radius(M::AbstractPowerManifold[, x])
 
-the injectivity radius on the [`PowerManifold`](@ref) is for the global case
+the injectivity radius on an [`AbstractPowerManifold`](@ref) is for the global case
 equal to the one of its base manifold. For a given point `x` it's equal to the
 minimum of all radii in the array entries.
 """
-function injectivity_radius(M::PowerManifold, x)
+function injectivity_radius(M::AbstractPowerManifold, x)
     radius = 0.0
     initialized = false
     rep_size = representation_size(M.manifold)
@@ -315,19 +321,19 @@ function injectivity_radius(M::PowerManifold, x)
     end
     return radius
 end
-injectivity_radius(M::PowerManifold) = injectivity_radius(M.manifold)
+injectivity_radius(M::AbstractPowerManifold) = injectivity_radius(M.manifold)
 
 @doc doc"""
-    inverse_retract(M::PowerManifold, x, y, m::InversePowerRetraction)
+    inverse_retract(M::AbstractPowerManifold, x, y, m::InversePowerRetraction)
 
-Compute the inverse retraction from `x` with respect to `y` on the [`PowerManifold`](@ref) `M`
+Compute the inverse retraction from `x` with respect to `y` on an [`AbstractPowerManifold`](@ref) `M`
 using an [`InversePowerRetraction`](@ref), which by default encapsulates a inverse retraction
 of the base manifold. Then this method is performed elementwise, so the encapsulated inverse
 retraction method has to be one that is available on the base [`Manifold`](@ref).
 """
-inverse_retract(::PowerManifold, ::Any...)
+inverse_retract(::AbstractPowerManifold, ::Any...)
 
-function inverse_retract!(M::PowerManifold, v, x, y, method::InversePowerRetraction)
+function inverse_retract!(M::AbstractPowerManifold, v, x, y, method::InversePowerRetraction)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         inverse_retract!(
@@ -342,14 +348,15 @@ function inverse_retract!(M::PowerManifold, v, x, y, method::InversePowerRetract
 end
 
 @doc doc"""
-    inner(M::PowerManifold, x, v, w)
+    inner(M::AbstractPowerManifold, x, v, w)
 
-Compute the inner product of `v` and `w` from the tangent space at `x` on the
-[`PowerManifold`](@ref) `M`, i.e. for each arrays entry the tangent vector entries
-from `v` and `w` are in the tangent space of the corresponding element from `x`.
+Compute the inner product of `v` and `w` from the tangent space at `x` on an
+[`AbstractPowerManifold`](@ref) `M`, i.e. for each arrays entry the tangent
+vector entries from `v` and `w` are in the tangent space of the corresponding
+element from `x`.
 The inner product is then the sum of the elementwise inner products.
 """
-function inner(M::PowerManifold, x, v, w)
+function inner(M::AbstractPowerManifold, x, v, w)
     result = zero(eltype(v))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -363,9 +370,9 @@ function inner(M::PowerManifold, x, v, w)
     return result
 end
 
-is_default_metric(::PowerManifold, ::PowerMetric) = Val(true)
+is_default_metric(::AbstractPowerManifold, ::PowerMetric) = Val(true)
 
-function isapprox(M::PowerManifold, x, y; kwargs...)
+function isapprox(M::AbstractPowerManifold, x, y; kwargs...)
     result = true
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -374,7 +381,7 @@ function isapprox(M::PowerManifold, x, y; kwargs...)
     end
     return result
 end
-function isapprox(M::PowerManifold, x, v, w; kwargs...)
+function isapprox(M::AbstractPowerManifold, x, v, w; kwargs...)
     result = true
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -390,14 +397,14 @@ function isapprox(M::PowerManifold, x, v, w; kwargs...)
 end
 
 @doc doc"""
-    log(M::PowerManifold, x, y)
+    log(M::AbstractPowerManifold, x, y)
 
-Compute the logarithmic map from `x` to `y` on the [`PowerManifold`](@ref) `M`,
+Compute the logarithmic map from `x` to `y` on the [`AbstractPowerManifold`](@ref) `M`,
 which can be computed using the base manifolds logarithmic map elementwise.
 """
-log(::PowerManifold, ::Any...)
+log(::AbstractPowerManifold, ::Any...)
 
-function log!(M::PowerManifold, v, x, y)
+function log!(M::AbstractPowerManifold, v, x, y)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         log!(
@@ -414,13 +421,13 @@ end
 @doc doc"""
     manifold_dimension(M::PowerManifold)
 
-Returns the manifold-dimension of the [`PowerManifold`](@ref) `M`
+Returns the manifold-dimension of an [`PowerManifold`](@ref) `M`
 $=\mathcal N = (\mathcal M)^{n_1,\ldots,n_d}, i.e. with $n=(n_1,\ldots,n_d)$ the array
 size of the power manifold and $d_{\mathcal M}$ the dimension of the base manifold
 $\mathcal M$, the manifold is of dimension
 
 ````math
-d_{\mathcal N} = d_{\mathcal M}\prod_{i=1}^d n_i = n_1n_2\cdot\ldots\cdotn_dd_{\mathcal M}.
+d_{\mathcal N} = d_{\mathcal M}\prod_{i=1}^d n_i = n_1n_2\cdot\ldots\cdot n_d d_{\mathcal M}.
 ````
 """
 function manifold_dimension(M::PowerManifold{<:Manifold,TSize}) where {TSize}
@@ -428,12 +435,13 @@ function manifold_dimension(M::PowerManifold{<:Manifold,TSize}) where {TSize}
 end
 
 @doc doc"""
-    norm(M::PowerManifold, x, v)
+    norm(M::AbstractPowerManifold, x, v)
 
-Compute the norm of `v` from the tangent space of `x` on the [`PowerManifold`](@ref),
-i.e. from the element wise norms the Forbenius norm is computed.
+Compute the norm of `v` from the tangent space of `x` on an
+[`AbstractPowerManifold`](@ref) `M`, i.e. from the element wise norms the
+Frobenius norm is computed.
 """
-function norm(M::PowerManifold, x, v)
+function norm(M::AbstractPowerManifold, x, v)
     sum_squares = zero(eltype(v))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -489,16 +497,16 @@ function representation_size(M::PowerManifold{<:Manifold,TSize}) where {TSize}
 end
 
 @doc doc"""
-    retract(M::PowerManifold, x, v, m::PowerRetraction)
+    retract(M::AbstractPowerManifold, x, v, m::PowerRetraction)
 
-Compute the retraction from `x` with tangent vector `v` on the [`PowerManifold`](@ref) `M`
+Compute the retraction from `x` with tangent vector `v` on an [`AbstractPowerManifold`](@ref) `M`
 using an [`PowerRetraction`](@ref), which by default encapsulates a retraction of the
 base manifold. Then this method is performed elementwise, so the encapsulated retraction
 method has to be one that is available on the base [`Manifold`](@ref).
 """
-retract(::PowerManifold, ::Any...)
+retract(::AbstractPowerManifold, ::Any...)
 
-function retract!(M::PowerManifold, y, x, v, method::PowerRetraction)
+function retract!(M::AbstractPowerManifold, y, x, v, method::PowerRetraction)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         retract!(
@@ -513,15 +521,15 @@ function retract!(M::PowerManifold, y, x, v, method::PowerRetraction)
 end
 
 @doc doc"""
-    sharp(M::PowerManifold, x, w::FVector{CotangentSpaceType})
+    sharp(M::AbstractPowerManifold, x, w::FVector{CotangentSpaceType})
 
 Use the musical isomorphism to transform the cotangent vector `w` from the tangent space at
-`x` on the [`PowerManifold`](@ref) `M` to a tangent vector.
+`x` on an [`AbstractPowerManifold`](@ref) `M` to a tangent vector.
 This can be done elementwise, so for every entry of `w` (and `x`) sparately
 """
-sharp(::PowerManifold, ::Any...)
+sharp(::AbstractPowerManifold, ::Any...)
 
-function sharp!(M::PowerManifold, v::TFVector, x, w::CoTFVector)
+function sharp!(M::AbstractPowerManifold, v::TFVector, x, w::CoTFVector)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         sharp!(

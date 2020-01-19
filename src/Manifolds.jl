@@ -223,6 +223,7 @@ include("product_representations.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/ProductManifold.jl")
 include("manifolds/PowerManifold.jl")
+include("manifolds/GraphManifold.jl")
 
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
@@ -238,6 +239,7 @@ include("manifolds/SymmetricPositiveDefinite.jl")
 include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
+include("manifolds/Torus.jl")
 
 include("groups/group.jl")
 include("groups/group_action.jl")
@@ -280,13 +282,15 @@ export Euclidean,
     Sphere,
     Stiefel,
     SymmetricMatrices,
-    SymmetricPositiveDefinite
+    SymmetricPositiveDefinite,
+    Torus
 export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
 export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
-export PowerManifold, ProductManifold
+export AbstractPowerManifold, PowerManifold, ProductManifold
+export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
@@ -328,6 +332,7 @@ export base_manifold,
     geodesic,
     hat,
     hat!,
+    incident_log,
     injectivity_radius,
     inner,
     inverse_local_metric,

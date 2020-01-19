@@ -9,6 +9,8 @@ using Random
 using ReverseDiff
 using StaticArrays
 using Test
+using LightGraphs
+using SimpleWeightedGraphs
 
 """
     test_manifold(m::Manifold, pts::AbstractVector;
