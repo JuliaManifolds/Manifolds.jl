@@ -33,7 +33,6 @@ import Base:
     transpose,
     zero
 import Distributions: _rand!, support
-import LightGraphs: AbstractSimpleGraph, is_directed
 import LinearAlgebra: cross, det, Diagonal, dot, mul!, norm, I, UniformScaling
 import ManifoldsBase:
     array_value,
@@ -75,7 +74,6 @@ import ManifoldsBase:
     zero_tangent_vector,
     zero_tangent_vector!
 import Random: rand
-import SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 import Statistics: mean, mean!, median, median!, std, var
 import StatsBase: kurtosis, mean_and_std, mean_and_var, moment, skewness
 
@@ -86,6 +84,7 @@ using FiniteDifferences
 using HybridArrays
 using LinearAlgebra
 using LightGraphs
+using LightGraphs: AbstractGraph
 using ManifoldsBase: CoTVector, Manifold, MPoint, TVector, DefaultManifold
 using ManifoldsBase:
     ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
@@ -95,6 +94,7 @@ using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, Projectio
 using Markdown: @doc_str
 using Random: AbstractRNG
 using Requires
+using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
 using StatsBase: AbstractWeights, ProbabilityWeights, values, varcorrection
 using UnsafeArrays
