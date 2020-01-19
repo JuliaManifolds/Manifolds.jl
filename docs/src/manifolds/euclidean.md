@@ -1,16 +1,9 @@
-# Euclidean Space
+# Euclidean space
 
-The Euclidean space $\mathbb R^n$ is a simple model space, since it has
-curvature constantly zero everywhere and hence nearly all operations simplify.
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["manifolds/Euclidean.jl"]
-Order = [:type]
-```
+The Euclidean space $\mathbb R^n$ is a simple model space, since it has curvature constantly zero everywhere; hence, nearly all operations simplify.
 
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["manifolds/Euclidean.jl"]
-Order = [:function]
+Order = [:type,:function]
 ```

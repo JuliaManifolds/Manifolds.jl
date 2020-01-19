@@ -1,6 +1,5 @@
 # Symmetric matrices
 
-
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["manifolds/Symmetric.jl"]

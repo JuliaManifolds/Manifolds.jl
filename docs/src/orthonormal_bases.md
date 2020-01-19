@@ -13,9 +13,9 @@ The main types are:
   [`ArbitraryOrthonormalBasis`](@ref) doesn't require precomputing but [`DiagonalizingOrthonormalBasis`](@ref) and [`DiagonalizingOrthonormalBasis`](@ref) usually do.
 
 The main functions are:
-* [`get_basis`]](@ref) precomputes basis at a certain point.
+* [`get_basis`](@ref) precomputes a basis at a certain point.
 * [`get_coordinates`](@ref) returns coordinates of a tangent vector.
-* [`get_vector`](@ref) returns vector for specified coordinates.
+* [`get_vector`](@ref) returns a vector for the specified coordinates.
 * [`get_vectors`](@ref) returns a vector of basis vectors (calling it should be avoided for high-dimensional manifolds).
 
 ```@autodocs

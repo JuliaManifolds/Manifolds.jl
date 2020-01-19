@@ -1,4 +1,4 @@
-# Numbers
+# Number systems
 
 ```@docs
 Manifolds.AbstractNumbers

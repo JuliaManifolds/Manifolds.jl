@@ -1,4 +1,3 @@
-
 """
     AbstractBasis{F}
 
@@ -13,7 +12,7 @@ abstract type AbstractBasis{F} end
 
 The number system used as scalars in the given basis.
 """
-number_system(::AbstractBasis{F}) where F = F
+number_system(::AbstractBasis{F}) where {F} = F
 
 """
     AbstractOrthonormalBasis{F}
@@ -65,9 +64,11 @@ Available methods:
     an additional assumption (local metric tensor at a point where the
     basis is calculated has to be diagonal).
 """
-struct ProjectedOrthonormalBasis{Method, F} <: AbstractOrthonormalBasis{F} end
+struct ProjectedOrthonormalBasis{Method,F} <: AbstractOrthonormalBasis{F} end
 
-ProjectedOrthonormalBasis(method::Symbol, F::AbstractNumbers = ℝ) = ProjectedOrthonormalBasis{method, F}()
+function ProjectedOrthonormalBasis(method::Symbol, F::AbstractNumbers = ℝ)
+    return ProjectedOrthonormalBasis{method,F}()
+end
 
 @doc doc"""
     DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ)
@@ -78,13 +79,16 @@ tensor $R(u,v)w$ and where the direction `v` has curvature `0`.
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct DiagonalizingOrthonormalBasis{TV, F} <: AbstractOrthonormalBasis{F}
+struct DiagonalizingOrthonormalBasis{TV,F} <: AbstractOrthonormalBasis{F}
     v::TV
 end
 
-DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ) = DiagonalizingOrthonormalBasis{typeof(v), F}(v)
+function DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ)
+    return DiagonalizingOrthonormalBasis{typeof(v),F}(v)
+end
 
-const ArbitraryOrDiagonalizingBasis = Union{ArbitraryOrthonormalBasis, DiagonalizingOrthonormalBasis}
+const ArbitraryOrDiagonalizingBasis =
+    Union{ArbitraryOrthonormalBasis,DiagonalizingOrthonormalBasis}
 
 """
     PrecomputedOrthonormalBasis(vectors::AbstractVector, F::AbstractNumbers = ℝ)
@@ -93,11 +97,14 @@ A precomputed orthonormal basis at a point on a manifold.
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct PrecomputedOrthonormalBasis{TV<:AbstractVector, F} <: AbstractPrecomputedOrthonormalBasis{F}
+struct PrecomputedOrthonormalBasis{TV<:AbstractVector,F} <:
+       AbstractPrecomputedOrthonormalBasis{F}
     vectors::TV
 end
 
-PrecomputedOrthonormalBasis(vectors::AbstractVector, F::AbstractNumbers = ℝ) = PrecomputedOrthonormalBasis{typeof(vectors), F}(vectors)
+function PrecomputedOrthonormalBasis(vectors::AbstractVector, F::AbstractNumbers = ℝ)
+    return PrecomputedOrthonormalBasis{typeof(vectors),F}(vectors)
+end
 
 @doc doc"""
     DiagonalizingOrthonormalBasis(vectors, kappas, F::AbstractNumbers = ℝ)
@@ -108,7 +115,8 @@ tensor $R(u,v)w$ with eigenvalues `kappas` and where the direction `v` has curva
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct PrecomputedDiagonalizingOrthonormalBasis{TV<:AbstractVector, TK<:AbstractVector, F} <: AbstractPrecomputedOrthonormalBasis{F}
+struct PrecomputedDiagonalizingOrthonormalBasis{TV<:AbstractVector,TK<:AbstractVector,F} <:
+       AbstractPrecomputedOrthonormalBasis{F}
     vectors::TV
     kappas::TK
 end
@@ -116,9 +124,12 @@ end
 function PrecomputedDiagonalizingOrthonormalBasis(
     vectors::AbstractVector,
     kappas::AbstractVector,
-    F::AbstractNumbers = ℝ
+    F::AbstractNumbers = ℝ,
 )
-    return PrecomputedDiagonalizingOrthonormalBasis{typeof(vectors), typeof(kappas), F}(vectors, kappas)
+    return PrecomputedDiagonalizingOrthonormalBasis{typeof(vectors),typeof(kappas),F}(
+        vectors,
+        kappas,
+    )
 end
 
 """
@@ -131,16 +142,14 @@ Depending on the basis, `x` may not directly represent a point on the manifold.
 For example if a basis transported along a curve is used, `x` may be the coordinate
 along the curve.
 
-See also: [`get_vector`](@ref), [`get_basis`]](@ref)
+See also: [`get_vector`](@ref), [`get_basis`](@ref)
 """
 function get_coordinates(M::Manifold, x, v, B::AbstractBasis)
     error("get_coordinates not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
 end
-
 function get_coordinates(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis{ℝ})
     return map(vb -> real(inner(M, x, v, vb)), get_vectors(M, x, B))
 end
-
 function get_coordinates(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
     return map(vb -> inner(M, x, v, vb), get_vectors(M, x, B))
 end
@@ -155,12 +164,11 @@ Depending on the basis, `x` may not directly represent a point on the manifold.
 For example if a basis transported along a curve is used, `x` may be the coordinate
 along the curve.
 
-See also: [`get_coordinates`](@ref), [`get_basis`]](@ref)
+See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 """
 function get_vector(M::Manifold, x, v, B::AbstractBasis)
     error("get_vector not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)), tangent vector of type $(typeof(v)) and basis of type $(typeof(B)).")
 end
-
 function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
@@ -171,7 +179,7 @@ function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
         vt = v[1] * bvectors[1]
         vout = similar(bvectors[1], eltype(vt))
         copyto!(vout, vt)
-        for i in 2:length(v)
+        for i = 2:length(v)
             vout += v[i] * bvectors[i]
         end
         return vout
@@ -179,7 +187,7 @@ function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
         vt = v[1] .* bvectors[1]
         vout = similar(bvectors[1], eltype(vt))
         copyto!(vout, vt)
-        for i in 2:length(v)
+        for i = 2:length(v)
             vout .+= v[i] .* bvectors[i]
         end
         return vout
@@ -199,9 +207,8 @@ the function [`get_vectors`](@ref) needs to be used to retrieve the basis vector
 See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
 function get_basis(M::Manifold, x, B::AbstractBasis)
-    error("basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
+    error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
 end
-
 """
     get_basis(M::Manifold, x, B::ArbitraryOrthonormalBasis)
 
@@ -209,24 +216,28 @@ Compute the basis vectors of an [`ArbitraryOrthonormalBasis`](@ref).
 """
 function get_basis(M::Manifold, x, B::ArbitraryOrthonormalBasis)
     dim = manifold_dimension(M)
-    return PrecomputedOrthonormalBasis(
-        [get_vector(M, x, [ifelse(i == j, 1, 0) for j in 1:dim], B) for i in 1:dim]
-    )
+    return PrecomputedOrthonormalBasis([
+        get_vector(M, x, [ifelse(i == j, 1, 0) for j = 1:dim], B) for i = 1:dim
+    ])
 end
-
 get_basis(M::Manifold, x, B::AbstractPrecomputedOrthonormalBasis) = B
-
 function get_basis(M::ArrayManifold, x, B::AbstractPrecomputedOrthonormalBasis{ℝ})
     bvectors = get_vectors(M, x, B)
     N = length(bvectors)
     M_dim = manifold_dimension(M)
-    N == M_dim || throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
-    for i in 1:N
+    if N != M_dim
+        throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
+    end
+    for i = 1:N
         vi_norm = norm(M, x, bvectors[i])
-        isapprox(vi_norm, 1) || throw(ArgumentError("vector number $i is not normalized (norm = $vi_norm)"))
-        for j in i+1:N
+        if !isapprox(vi_norm, 1)
+            throw(ArgumentError("vector number $i is not normalized (norm = $vi_norm)"))
+        end
+        for j = i+1:N
             dot_val = real(inner(M, x, bvectors[i], bvectors[j]))
-            isapprox(dot_val, 0; atol = eps(eltype(x))) || throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
+            if !isapprox(dot_val, 0; atol = eps(eltype(x)))
+                throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
+            end
         end
     end
     return B
@@ -249,21 +260,24 @@ function _euclidean_basis_vector(x, i)
     return y
 end
 
-function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:svd, ℝ})
+function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:svd,ℝ})
     S = representation_size(M)
     PS = prod(S)
     dim = manifold_dimension(M)
     # projection
     # TODO: find a better way to obtain a basis of the ambient space
-    vs = [convert(Vector, reshape(project_tangent(M, x, _euclidean_basis_vector(x, i)), PS)) for i in eachindex(x)]
+    vs = [
+        convert(Vector, reshape(project_tangent(M, x, _euclidean_basis_vector(x, i)), PS))
+        for i in eachindex(x)
+    ]
     O = reduce(hcat, vs)
     # orthogonalization
     # TODO: try using rank-revealing QR here
     decomp = svd(O)
     rotated = Diagonal(decomp.S) * decomp.Vt
-    vecs = [collect(reshape(rotated[i,:], S)) for i in 1:dim]
+    vecs = [collect(reshape(rotated[i, :], S)) for i = 1:dim]
     # normalization
-    for i in 1:dim
+    for i = 1:dim
         i_norm = norm(M, x, vecs[i])
         vecs[i] /= i_norm
     end
@@ -276,23 +290,25 @@ end
 Get the basis vectors of basis `B` of the tangent space at point `x`.
 """
 function get_vectors(M::Manifold, x, B::AbstractBasis)
-    error("vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
+    error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(x)) and basis of type $(typeof(B)).")
 end
 
 get_vectors(::Manifold, x, B::PrecomputedOrthonormalBasis) = B.vectors
 get_vectors(::Manifold, x, B::PrecomputedDiagonalizingOrthonormalBasis) = B.vectors
 
 # related to DefaultManifold; to be moved to ManifoldsBase.jl in the future
-using ManifoldsBase: DefaultManifold
 function get_coordinates(M::DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
     return reshape(v, manifold_dimension(M))
 end
+
 function get_vector(M::DefaultManifold, x, v, ::ArbitraryOrthonormalBasis)
     return reshape(v, representation_size(M))
 end
 
 function get_basis(M::DefaultManifold, x, ::ArbitraryOrthonormalBasis)
-    return PrecomputedOrthonormalBasis([_euclidean_basis_vector(x, i) for i in eachindex(x)])
+    return PrecomputedOrthonormalBasis([
+        _euclidean_basis_vector(x, i) for i in eachindex(x)
+    ])
 end
 
 function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
@@ -302,9 +318,9 @@ function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,�
     dim = manifold_dimension(M)
     N < dim && @warn "Input only has $(N) vectors, but manifold dimension is $(dim)."
     K = 0
-    @inbounds for n in 1:N
+    @inbounds for n = 1:N
         Ξₙ = project_tangent(M, x, E[n])
-        for k in 1:K
+        for k = 1:K
             Ξₙ .-= real(inner(M, x, Ξ[k], Ξₙ)) .* Ξ[k]
         end
         nrmΞₙ = norm(M, x, Ξₙ)
@@ -313,7 +329,7 @@ function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,�
             @goto skip
         end
         Ξₙ ./= nrmΞₙ
-        for k in 1:K
+        for k = 1:K
             if !isapprox(real(inner(M, x, Ξ[k], Ξₙ)), 0; kwargs...)
                 @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
                 @goto skip
@@ -324,6 +340,6 @@ function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,�
         K * real_dimension(number_system(B)) == dim && return PrecomputedOrthonormalBasis(Ξ)
         @label skip
     end
-    @warn "gram_schmidt only found $(K) orthonormal basis vectors, but manifold dimension is $(dim)."
+    @warn "get_basis with bases $(typeof(B)) only found $(K) orthonormal basis vectors, but manifold dimension is $(dim)."
     return PrecomputedOrthonormalBasis(Ξ)
 end
