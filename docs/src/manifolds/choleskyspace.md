@@ -1,6 +1,6 @@
-# Cholesky Space
+# Cholesky space
 
-The Cholesky Space is a Riemannian manifold on the lower triangular matrices.
+The Cholesky space is a Riemannian manifold on the lower triangular matrices.
 
 ```@autodocs
 Modules = [Manifolds]

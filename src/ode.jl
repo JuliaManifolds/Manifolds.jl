@@ -1,10 +1,12 @@
-function solve_exp_ode(M::MetricManifold,
-                       x,
-                       v,
-                       tspan;
-                       solver=AutoVern9(Rodas5()),
-                       backend = :default,
-                       kwargs...)
+function solve_exp_ode(
+    M::MetricManifold,
+    x,
+    v,
+    tspan;
+    solver = AutoVern9(Rodas5()),
+    backend = :default,
+    kwargs...,
+)
     n = length(x)
     iv = SVector{n}(1:n)
     ix = SVector{n}(n+1:2n)
@@ -19,7 +21,7 @@ function solve_exp_ode(M::MetricManifold,
         ddx = allocate(u, Size(n))
         du = allocate(u)
         Γ = christoffel_symbols_second(M, x; backend = backend)
-        @einsum ddx[k] = -Γ[k,i,j] * dx[i] * dx[j]
+        @einsum ddx[k] = -Γ[k, i, j] * dx[i] * dx[j]
         du[iv] .= ddx
         du[ix] .= dx
         return Base.convert(typeof(u), du)

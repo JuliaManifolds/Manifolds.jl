@@ -20,6 +20,17 @@ include("utils.jl")
         @test (-fv1).type == TangentSpace
         @test isa(2*fv1, FVector)
         @test (2*fv1).type == TangentSpace
+
+        PM = ProductManifold(Sphere(2), Euclidean(2))
+        fv2 = FVector(TangentSpace, ProductRepr([1.0, 0.0, 0.0], [1.0, 2.0]))
+        @test submanifold_component(fv2, 1) == [1, 0, 0]
+        @test submanifold_component(fv2, 2) == [1, 2]
+        @test submanifold_component(fv2, Val(1)) == [1, 0, 0]
+        @test submanifold_component(fv2, Val(2)) == [1, 2]
+        @test submanifold_component(PM, fv2, 1) == [1, 0, 0]
+        @test submanifold_component(PM, fv2, 2) == [1, 2]
+        @test submanifold_component(PM, fv2, Val(1)) == [1, 0, 0]
+        @test submanifold_component(PM, fv2, Val(2)) == [1, 2]
     end
 
     types = [

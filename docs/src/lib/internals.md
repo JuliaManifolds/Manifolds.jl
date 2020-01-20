@@ -1,4 +1,4 @@
-# Internal Documentation
+# Internal documentation
 
 Documentation for `Manifolds.jl`'s internal methods and types.
 

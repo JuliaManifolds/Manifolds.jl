@@ -3,13 +3,6 @@ array_value(e::Identity) = e
 array_point(x) = ArrayMPoint(x)
 array_point(e::Identity) = e
 
-function inv!(M::ArrayManifold, y, x; kwargs...)
-    is_manifold_point(M, x, true; kwargs...)
-    inv!(M.manifold, array_value(y), array_value(x))
-    is_manifold_point(M, y, true; kwargs...)
-    return y
-end
-
 function inv(M::ArrayManifold, x; kwargs...)
     is_manifold_point(M, x, true; kwargs...)
     y = array_point(inv(M.manifold, array_value(x)))
@@ -17,9 +10,9 @@ function inv(M::ArrayManifold, x; kwargs...)
     return y
 end
 
-function identity!(M::ArrayManifold, y, x; kwargs...)
+function inv!(M::ArrayManifold, y, x; kwargs...)
     is_manifold_point(M, x, true; kwargs...)
-    identity!(M.manifold, array_value(y), array_value(x))
+    inv!(M.manifold, array_value(y), array_value(x))
     is_manifold_point(M, y, true; kwargs...)
     return y
 end
@@ -27,6 +20,13 @@ end
 function identity(M::ArrayManifold, x; kwargs...)
     is_manifold_point(M, x, true; kwargs...)
     y = array_point(identity(M.manifold, array_value(x)))
+    is_manifold_point(M, y, true; kwargs...)
+    return y
+end
+
+function identity!(M::ArrayManifold, y, x; kwargs...)
+    is_manifold_point(M, x, true; kwargs...)
+    identity!(M.manifold, array_value(y), array_value(x))
     is_manifold_point(M, y, true; kwargs...)
     return y
 end

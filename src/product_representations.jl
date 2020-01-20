@@ -1,4 +1,3 @@
-
 abstract type AbstractReshaper end
 
 """
@@ -13,11 +12,10 @@ struct StaticReshaper <: AbstractReshaper end
 
 Reshape array `data` to size `Size` using method provided by `reshaper`.
 """
-function make_reshape(reshaper::AbstractReshaper, ::Type{Size}, data) where Size
+function make_reshape(reshaper::AbstractReshaper, ::Type{Size}, data) where {Size}
     error("make_reshape is not defined for reshaper of type $(typeof(reshaper)), size $(Size) and data of type $(typeof(data)).")
 end
-
-function make_reshape(::StaticReshaper, ::Type{Size}, data) where Size
+function make_reshape(::StaticReshaper, ::Type{Size}, data) where {Size}
     return SizedAbstractArray{Size}(data)
 end
 
@@ -28,7 +26,7 @@ Reshaper that constructs `Base.ReshapedArray`.
 """
 struct ArrayReshaper <: AbstractReshaper end
 
-function make_reshape(::ArrayReshaper, ::Type{Size}, data) where Size
+function make_reshape(::ArrayReshaper, ::Type{Size}, data) where {Size}
     return reshape(data, size_to_tuple(Size))
 end
 
@@ -75,7 +73,7 @@ represent points. In this case, `Sphere(2)` expects a three-element vector, so
 the corresponding size is `Tuple{3}`. On the other hand, `Rotations(2)`
 expects two-by-two matrices, so its size specification is `Tuple{2,2}`.
 """
-struct ShapeSpecification{TRanges, TSizes, TReshapers}
+struct ShapeSpecification{TRanges,TSizes,TReshapers}
     reshapers::TReshapers
 end
 
@@ -92,9 +90,9 @@ function ShapeSpecification(reshapers, manifolds::Manifold...)
     TSizes = Tuple{map(s -> Tuple{s...}, sizes)...}
     if isa(reshapers, AbstractReshaper)
         rtuple = map(m -> reshapers, manifolds)
-        return ShapeSpecification{TRanges, TSizes, typeof(rtuple)}(rtuple)
+        return ShapeSpecification{TRanges,TSizes,typeof(rtuple)}(rtuple)
     else
-        return ShapeSpecification{TRanges, TSizes, typeof(reshapers)}(reshapers)
+        return ShapeSpecification{TRanges,TSizes,typeof(reshapers)}(reshapers)
     end
 end
 
@@ -106,7 +104,14 @@ product manifold. `data` contains underlying representation of points
 arranged according to `TRanges` and `TSizes` from `shape`.
 Internal views for each specific sub-point are created and stored in `parts`.
 """
-struct ProductArray{TM<:ShapeSpecification,T,N,TData<:AbstractArray{T,N},TV<:Tuple,TReshaper} <: AbstractArray{T,N}
+struct ProductArray{
+    TM<:ShapeSpecification,
+    T,
+    N,
+    TData<:AbstractArray{T,N},
+    TV<:Tuple,
+    TReshaper,
+} <: AbstractArray{T,N}
     data::TData
     parts::TV
     reshapers::TReshaper
@@ -114,27 +119,43 @@ end
 
 # The two-argument version of this constructor is substantially faster than
 # the generic one.
-function ProductArray(M::Type{ShapeSpecification{TRanges, Tuple{Size1, Size2}, TReshapers}}, data::TData, reshapers) where {TRanges, Size1, Size2, TReshapers, T, N, TData<:AbstractArray{T,N}}
-    views = (make_reshape(reshapers[1], Size1, view(data, TRanges[1])),
-             make_reshape(reshapers[2], Size2, view(data, TRanges[2])))
-    return ProductArray{M, T, N, TData, typeof(views), typeof(reshapers)}(data, views, reshapers)
+function ProductArray(
+    M::Type{ShapeSpecification{TRanges,Tuple{Size1,Size2},TReshapers}},
+    data::TData,
+    reshapers,
+) where {TRanges,Size1,Size2,TReshapers,T,N,TData<:AbstractArray{T,N}}
+    views = (
+        make_reshape(reshapers[1], Size1, view(data, TRanges[1])),
+        make_reshape(reshapers[2], Size2, view(data, TRanges[2])),
+    )
+    return ProductArray{M,T,N,TData,typeof(views),typeof(reshapers)}(data, views, reshapers)
 end
-
-function ProductArray(M::Type{ShapeSpecification{TRanges, Tuple{Size1, Size2, Size3}, TReshapers}}, data::TData, reshapers) where {TRanges, Size1, Size2, Size3, TReshapers, T, N, TData<:AbstractArray{T,N}}
-    views = (make_reshape(reshapers[1], Size1, view(data, TRanges[1])),
-             make_reshape(reshapers[2], Size2, view(data, TRanges[2])),
-             make_reshape(reshapers[3], Size3, view(data, TRanges[3])))
-    return ProductArray{M, T, N, TData, typeof(views), typeof(reshapers)}(data, views, reshapers)
+function ProductArray(
+    M::Type{ShapeSpecification{TRanges,Tuple{Size1,Size2,Size3},TReshapers}},
+    data::TData,
+    reshapers,
+) where {TRanges,Size1,Size2,Size3,TReshapers,T,N,TData<:AbstractArray{T,N}}
+    views = (
+        make_reshape(reshapers[1], Size1, view(data, TRanges[1])),
+        make_reshape(reshapers[2], Size2, view(data, TRanges[2])),
+        make_reshape(reshapers[3], Size3, view(data, TRanges[3])),
+    )
+    return ProductArray{M,T,N,TData,typeof(views),typeof(reshapers)}(data, views, reshapers)
 end
-
-function ProductArray(M::Type{ShapeSpecification{TRanges, TSizes, TReshapers}}, data::TData, reshapers) where {TRanges, TSizes, TReshapers, T, N, TData<:AbstractArray{T,N}}
-    views = map((size, range, reshaper) -> make_reshape(reshaper, size, view(data, range)), size_to_tuple(TSizes), TRanges, reshapers)
-    return ProductArray{M, T, N, TData, typeof(views), typeof(reshapers)}(data, views, reshapers)
+function ProductArray(
+    M::Type{ShapeSpecification{TRanges,TSizes,TReshapers}},
+    data::TData,
+    reshapers,
+) where {TRanges,TSizes,TReshapers,T,N,TData<:AbstractArray{T,N}}
+    views = map(
+        (size, range, reshaper) -> make_reshape(reshaper, size, view(data, range)),
+        size_to_tuple(TSizes),
+        TRanges,
+        reshapers,
+    )
+    return ProductArray{M,T,N,TData,typeof(views),typeof(reshapers)}(data, views, reshapers)
 end
-
-function ProductArray(M::ShapeSpecification, data)
-    return ProductArray(typeof(M), data, M.reshapers)
-end
+ProductArray(M::ShapeSpecification, data) = ProductArray(typeof(M), data, M.reshapers)
 
 @doc doc"""
     prod_point(M::ShapeSpecification, pts...)
@@ -190,9 +211,16 @@ submanifold_components(::Any...)
 submanifold_components(M::Manifold, x) = submanifold_components(x)
 submanifold_components(x) = x.parts
 
-Base.BroadcastStyle(::Type{<:ProductArray{ShapeSpec}}) where ShapeSpec<:ShapeSpecification = Broadcast.ArrayStyle{ProductArray{ShapeSpec}}()
+function Base.BroadcastStyle(
+    ::Type{<:ProductArray{ShapeSpec}},
+) where {ShapeSpec<:ShapeSpecification}
+    return Broadcast.ArrayStyle{ProductArray{ShapeSpec}}()
+end
 
-function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{ProductArray{ShapeSpec}}}, ::Type{ElType}) where {ShapeSpec, ElType}
+function Base.similar(
+    bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{ProductArray{ShapeSpec}}},
+    ::Type{ElType},
+) where {ShapeSpec,ElType}
     A = find_pv(bc)
     return ProductArray(ShapeSpec, similar(A.data, ElType), A.reshapers)
 end
@@ -211,17 +239,43 @@ Base.dataids(x::ProductArray) = Base.dataids(x.data)
 @inline find_pv(::Any, rest) = find_pv(rest)
 
 size(x::ProductArray) = size(x.data)
+
 Base.@propagate_inbounds getindex(x::ProductArray, i) = getindex(x.data, i)
+
 Base.@propagate_inbounds setindex!(x::ProductArray, val, i) = setindex!(x.data, val, i)
 
-(+)(v1::ProductArray{ShapeSpec}, v2::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, v1.data + v2.data, v1.reshapers)
-(-)(v1::ProductArray{ShapeSpec}, v2::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, v1.data - v2.data, v1.reshapers)
-(-)(v::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, -v.data, v.reshapers)
-(*)(a::Number, v::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, a*v.data, v.reshapers)
+function (+)(
+    v1::ProductArray{ShapeSpec},
+    v2::ProductArray{ShapeSpec},
+) where {ShapeSpec<:ShapeSpecification}
+    return ProductArray(ShapeSpec, v1.data + v2.data, v1.reshapers)
+end
+
+function (-)(
+    v1::ProductArray{ShapeSpec},
+    v2::ProductArray{ShapeSpec},
+) where {ShapeSpec<:ShapeSpecification}
+    return ProductArray(ShapeSpec, v1.data - v2.data, v1.reshapers)
+end
+function (-)(v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
+    return ProductArray(ShapeSpec, -v.data, v.reshapers)
+end
+
+function (*)(a::Number, v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
+    return ProductArray(ShapeSpec, a * v.data, v.reshapers)
+end
 
 number_eltype(::Type{ProductArray{TM, TData, TV}}) where {TM, TData, TV} = eltype(TData)
-allocate(x::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, allocate(x.data), x.reshapers)
-allocate(x::ProductArray{ShapeSpec}, ::Type{T}) where {ShapeSpec<:ShapeSpecification, T} = ProductArray(ShapeSpec, allocate(x.data, T), x.reshapers)
+
+function allocate(x::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification
+    return ProductArray(ShapeSpec, allocate(x.data), x.reshapers)
+end
+function allocate(
+    x::ProductArray{ShapeSpec},
+    ::Type{T}
+) where {ShapeSpec<:ShapeSpecification, T}
+    return ProductArray(ShapeSpec, allocate(x.data, T), x.reshapers)
+end
 
 """
     ProductRepr(parts)
@@ -262,12 +316,17 @@ end
 function (+)(v1::ProductRepr, v2::ProductRepr)
     return ProductRepr(map(+, submanifold_components(v1), submanifold_components(v2))...)
 end
+
 function (-)(v1::ProductRepr, v2::ProductRepr)
     return ProductRepr(map(-, submanifold_components(v1), submanifold_components(v2))...)
 end
 (-)(v::ProductRepr) = ProductRepr(map(-, submanifold_components(v)))
-(*)(a::Number, v::ProductRepr) = ProductRepr(map(t -> a*t, submanifold_components(v)))
 
-function Base.convert(::Type{TPR}, x::ProductRepr) where TPR<:ProductRepr
-    return ProductRepr(map(t -> convert(t...), ziptuples(tuple(TPR.parameters[1].parameters...), submanifold_components(x))))
+(*)(a::Number, v::ProductRepr) = ProductRepr(map(t -> a * t, submanifold_components(v)))
+
+function Base.convert(::Type{TPR}, x::ProductRepr) where {TPR<:ProductRepr}
+    return ProductRepr(map(
+        t -> convert(t...),
+        ziptuples(tuple(TPR.parameters[1].parameters...), submanifold_components(x)),
+    ))
 end
