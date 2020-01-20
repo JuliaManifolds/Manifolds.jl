@@ -22,8 +22,9 @@ UnsafeArrays = "c4a57d5a-5b31-53a6-b365-19f8c011fbd6"
 [compat]
 DoubleFloats = ">= 0.9.2"
 HybridArrays = ">= 0.3"
-ManifoldsBase = "0.3.2"
+ManifoldsBase = "0.4"
 Requires = "0.5, 1"
+StaticArrays = "0.12"
 julia = "1.0"
 
 [extras]

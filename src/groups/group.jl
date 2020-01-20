@@ -206,7 +206,7 @@ show(io::IO, e::Identity) = print(io, "Identity($(e.group))")
 (e::Identity)(x) = identity(e.group, x)
 
 # To ensure similar_result_type works
-eltype(e::Identity) = Bool
+number_eltype(e::Identity) = Bool
 
 copyto!(e::TE, ::TE) where {TE<:Identity} = e
 copyto!(x, ::TE) where {TE<:Identity} = identity!(e.group, x, e)

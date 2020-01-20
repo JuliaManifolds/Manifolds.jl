@@ -10,9 +10,9 @@ Every vector space `VS` is supposed to provide:
 * basic operations: addition, subtraction, multiplication by a scalar
   and negation (unary minus),
 * [`zero_vector!(VS, v, x)`](@ref) to construct zero vectors at point `x`,
-* `similar(v, T)` for vector `v`,
+* `allocate(v)` and `allocate(v, T)` for vector `v` and type `T`,
 * `copyto!(v, w)` for vectors `v` and `w`,
-* `eltype(v)` for vector `v`,
+* `number_eltype(v)` for vector `v`,
 * [`vector_space_dimension(::VectorBundleFibers{<:typeof(VS)}) where VS`](@ref).
 
 Optionally:
@@ -192,7 +192,8 @@ function distance(B::VectorBundle, x, y)
     return sqrt(dist_man^2 + dist_vec^2)
 end
 
-eltype(::Type{FVector{TType,TData}}) where {TType<:VectorSpaceType,TData} = eltype(TData)
+number_eltype(::Type{FVector{TType,TData}}) where {TType<:VectorSpaceType,TData} = number_eltype(TData)
+number_eltype(v::FVector) = number_eltype(v.data)
 
 @doc doc"""
     exp(B::VectorBundle, x, v)
@@ -537,8 +538,8 @@ function sharp!(M::Manifold, v::FVector, x, w::FVector)
         "type $(typeof(x)) and vector of type $(typeof(w)).")
 end
 
-similar(x::FVector) = FVector(x.type, similar(x.data))
-similar(x::FVector, ::Type{T}) where {T} = FVector(x.type, similar(x.data, T))
+allocate(x::FVector) = FVector(x.type, allocate(x.data))
+allocate(x::FVector, ::Type{T}) where {T} = FVector(x.type, allocate(x.data, T))
 
 """
     similar_result(B::VectorBundleFibers, f, x...)
@@ -550,7 +551,7 @@ using the modifying operation.
 """
 function similar_result(B::VectorBundleFibers, f, x...)
     T = similar_result_type(B, f, x)
-    return similar(x[1], T)
+    return allocate(x[1], T)
 end
 """
     similar_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where N
@@ -560,17 +561,17 @@ function `f` for representing an operation with result in the vector space `VS`
 for manifold `M` on given arguments (passed at a tuple).
 """
 function similar_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where N
-    T = typeof(reduce(+, one(eltype(eti)) for eti ∈ args))
+    T = typeof(reduce(+, one(number_eltype(eti)) for eti ∈ args))
     return T
 end
 function similar_result(M::Manifold, ::typeof(flat), w::FVector{TangentSpaceType}, x)
-    return FVector(CotangentSpace, similar(w.data))
+    return FVector(CotangentSpace, allocate(w.data))
 end
 
 size(x::FVector) = size(x.data)
 
 function similar_result(M::Manifold, ::typeof(sharp), w::FVector{CotangentSpaceType}, x)
-    return FVector(TangentSpace, similar(w.data))
+    return FVector(TangentSpace, allocate(w.data))
 end
 
 """

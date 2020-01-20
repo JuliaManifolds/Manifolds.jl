@@ -219,9 +219,9 @@ Base.@propagate_inbounds setindex!(x::ProductArray, val, i) = setindex!(x.data, 
 (-)(v::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, -v.data, v.reshapers)
 (*)(a::Number, v::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, a*v.data, v.reshapers)
 
-eltype(::Type{ProductArray{TM, TData, TV}}) where {TM, TData, TV} = eltype(TData)
-similar(x::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, similar(x.data), x.reshapers)
-similar(x::ProductArray{ShapeSpec}, ::Type{T}) where {ShapeSpec<:ShapeSpecification, T} = ProductArray(ShapeSpec, similar(x.data, T), x.reshapers)
+number_eltype(::Type{ProductArray{TM, TData, TV}}) where {TM, TData, TV} = eltype(TData)
+allocate(x::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification = ProductArray(ShapeSpec, allocate(x.data), x.reshapers)
+allocate(x::ProductArray{ShapeSpec}, ::Type{T}) where {ShapeSpec<:ShapeSpecification, T} = ProductArray(ShapeSpec, allocate(x.data, T), x.reshapers)
 
 """
     ProductRepr(parts)
@@ -244,10 +244,14 @@ struct ProductRepr{TM<:Tuple}
 end
 
 ProductRepr(points...) = ProductRepr{typeof(points)}(points)
-eltype(x::ProductRepr) = eltype(Tuple{map(eltype, submanifold_components(x))...})
-similar(x::ProductRepr) = ProductRepr(map(similar, submanifold_components(x))...)
-function similar(x::ProductRepr, ::Type{T}) where {T}
-    return ProductRepr(map(t -> similar(t, T), submanifold_components(x))...)
+
+function number_eltype(x::ProductRepr)
+    return typeof(reduce(+, one(number_eltype(eti)) for eti ∈ x.parts))
+end
+
+allocate(x::ProductRepr) = ProductRepr(map(allocate, submanifold_components(x))...)
+function allocate(x::ProductRepr, ::Type{T}) where {T}
+    return ProductRepr(map(t -> allocate(t, T), submanifold_components(x))...)
 end
 
 function copyto!(x::ProductRepr, y::ProductRepr)

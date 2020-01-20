@@ -256,13 +256,13 @@ function retract!(::FixedRankMatrices{M,N,k}, y::SVDMPoint, x::SVDMPoint, v::UMV
     return y
 end
 
-similar(x::SVDMPoint) = SVDMPoint(similar(x.U), similar(x.S), similar(x.Vt))
-similar(x::SVDMPoint, ::Type{T}) where T = SVDMPoint(similar(x.U,T), similar(x.S,T), similar(x.Vt,T))
-similar(v::UMVTVector) = UMVTVector(similar(v.U), similar(v.M), similar(v.Vt))
-similar(v::UMVTVector, ::Type{T}) where T = UMVTVector(similar(v.U,T), similar(v.M,T), similar(v.Vt,T))
+allocate(x::SVDMPoint) = SVDMPoint(allocate(x.U), allocate(x.S), allocate(x.Vt))
+allocate(x::SVDMPoint, ::Type{T}) where T = SVDMPoint(allocate(x.U,T), allocate(x.S,T), allocate(x.Vt,T))
+allocate(v::UMVTVector) = UMVTVector(allocate(v.U), allocate(v.M), allocate(v.Vt))
+allocate(v::UMVTVector, ::Type{T}) where T = UMVTVector(allocate(v.U,T), allocate(v.M,T), allocate(v.Vt,T))
 
-eltype(x::SVDMPoint) = typeof(one(eltype(x.U)) + one(eltype(x.S)) + one(eltype(x.Vt)))
-eltype(v::UMVTVector) = typeof(one(eltype(v.U)) + one(eltype(v.M)) + one(eltype(v.Vt)))
+number_eltype(x::SVDMPoint) = typeof(one(eltype(x.U)) + one(eltype(x.S)) + one(eltype(x.Vt)))
+number_eltype(v::UMVTVector) = typeof(one(eltype(v.U)) + one(eltype(v.M)) + one(eltype(v.Vt)))
 
 one(x::SVDMPoint) = SVDMPoint(one(zeros(size(x.U,1),size(x.U,1))), ones(length(x.S)), one(zeros(size(x.Vt,2),size(x.Vt,2))), length(x.S))
 one(v::UMVTVector) = UMVTVector(one(zeros(size(v.U,1),size(v.U,1))), one(zeros(size(v.M))), one(zeros(size(v.Vt,2),size(v.Vt,2))), size(v.M,1))

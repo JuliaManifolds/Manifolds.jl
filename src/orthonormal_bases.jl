@@ -169,7 +169,7 @@ function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
     bvectors = get_vectors(M, x, B)
     if isa(bvectors[1], ProductRepr)
         vt = v[1] * bvectors[1]
-        vout = similar(bvectors[1], eltype(vt))
+        vout = allocate(bvectors[1], eltype(vt))
         copyto!(vout, vt)
         for i in 2:length(v)
             vout += v[i] * bvectors[i]
@@ -177,7 +177,7 @@ function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
         return vout
     else
         vt = v[1] .* bvectors[1]
-        vout = similar(bvectors[1], eltype(vt))
+        vout = allocate(bvectors[1], eltype(vt))
         copyto!(vout, vt)
         for i in 2:length(v)
             vout .+= v[i] .* bvectors[i]

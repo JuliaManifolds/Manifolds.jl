@@ -5,12 +5,13 @@ import Base: +, -, *, \, /, ^, angle, axes, convert, copy, copyto!, dataids, elt
     similar, size, transpose, zero
 import Distributions: _rand!, support
 import LinearAlgebra: cross, det, Diagonal, dot, mul!, norm, I, UniformScaling
-import ManifoldsBase: array_value, base_manifold, check_manifold_point, check_tangent_vector
+import ManifoldsBase: allocate, array_value, base_manifold, check_manifold_point, check_tangent_vector
 import ManifoldsBase: distance, exp, exp!, geodesic, injectivity_radius, inner
 import ManifoldsBase: isapprox, is_manifold_point, is_tangent_vector, is_decorator_manifold
-import ManifoldsBase: inverse_retract, inverse_retract!, log, log!, manifold_dimension, norm
+import ManifoldsBase: inverse_retract, inverse_retract!, log, log!, manifold_dimension, norm, number_eltype
 import ManifoldsBase: project_point, project_point!, project_tangent, project_tangent!
-import ManifoldsBase: representation_size, retract, retract!, similar_result, similar_result_type, shortest_geodesic
+import ManifoldsBase: representation_size, retract, retract!
+import ManifoldsBase: similar_result, similar_result_type, shortest_geodesic
 import ManifoldsBase: vector_transport_along, vector_transport_along!, vector_transport_direction,
     vector_transport_direction!, vector_transport_to, vector_transport_to!
 import ManifoldsBase: zero_tangent_vector, zero_tangent_vector!
@@ -95,11 +96,11 @@ end
 
 function similar_result(M::Manifold, f::typeof(vee), x, v)
     T = similar_result_type(M, f, (x, v))
-    return similar(x, T, manifold_dimension(M))
+    return allocate(x, T, manifold_dimension(M))
 end
 function similar_result(M::Manifold, f::typeof(vee), x::StaticArray, v)
     T = similar_result_type(M, f, (x, v))
-    return similar(x, T, Size(manifold_dimension(M)))
+    return allocate(x, T, Size(manifold_dimension(M)))
 end
 
 """

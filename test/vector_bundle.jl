@@ -7,11 +7,11 @@ include("utils.jl")
         tvs = ([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
         fv_tvs = map(v -> FVector(TangentSpace, v), tvs)
         fv1 = fv_tvs[1]
-        tv1s = similar(fv_tvs[1])
+        tv1s = allocate(fv_tvs[1])
         @test isa(tv1s, FVector)
         @test tv1s.type == TangentSpace
         @test size(tv1s.data) == size(tvs[1])
-        @test eltype(tv1s) == eltype(tvs[1])
+        @test number_eltype(tv1s) == number_eltype(tvs[1])
         @test isa(fv1 + fv1, FVector)
         @test (fv1 + fv1).type == TangentSpace
         @test isa(fv1 - fv1, FVector)

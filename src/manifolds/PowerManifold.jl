@@ -249,7 +249,7 @@ function get_vector(
     dim = manifold_dimension(M.manifold)
 
     rep_size = representation_size(M.manifold)
-    v_out = similar(x)
+    v_out = allocate(x)
     v_iter = 1
     for i in get_iterator(M)
         copyto!(_write(rep_size, v_out, i), get_vector(
@@ -273,7 +273,7 @@ function get_vector(
     dim = manifold_dimension(M.manifold)
 
     rep_size = representation_size(M.manifold)
-    v_out = similar(x)
+    v_out = allocate(x)
     v_iter = 1
     for i in get_iterator(M)
         copyto!(_write(rep_size, v_out, i), get_vector(
@@ -437,7 +437,7 @@ function rand(rng::AbstractRNG, d::PowerFVectorDistribution)
     return fv
 end
 function rand(rng::AbstractRNG, d::PowerPointDistribution)
-    x = similar(d.x)
+    x = allocate(d.x)
     _rand!(rng, d, x)
     return x
 end

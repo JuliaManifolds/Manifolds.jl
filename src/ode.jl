@@ -8,7 +8,7 @@ function solve_exp_ode(M::MetricManifold,
     n = length(x)
     iv = SVector{n}(1:n)
     ix = SVector{n}(n+1:2n)
-    u0 = similar(x, 2n)
+    u0 = allocate(x, 2n)
     u0[iv] .= v
     u0[ix] .= x
 
@@ -16,8 +16,8 @@ function solve_exp_ode(M::MetricManifold,
         M = p[1]
         dx = u[iv]
         x = u[ix]
-        ddx = similar(u, Size(n))
-        du = similar(u)
+        ddx = allocate(u, Size(n))
+        du = allocate(u)
         Γ = christoffel_symbols_second(M, x; backend = backend)
         @einsum ddx[k] = -Γ[k,i,j] * dx[i] * dx[j]
         du[iv] .= ddx
