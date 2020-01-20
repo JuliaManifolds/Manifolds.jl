@@ -661,7 +661,7 @@ function mean_and_var(
         y = copy(x[j])
     end
     v = zero_tangent_vector(M, y)
-    M₂ = zero(eltype(v))
+    M₂ = zero(number_eltype(v))
     ytmp = similar_result(M, mean, y)
     @inbounds for i = 2:n
         j = order[i]

@@ -14,6 +14,7 @@ Random.seed!(42)
     @test manifold_dimension(Ms2) == 70
     Mr = Manifolds.Rotations(3)
     Mr1 = PowerManifold(Mr, 5)
+    Mrn1 = PowerManifold(Mr, Manifolds.NestedPowerRepresentation(), 5)
     @test manifold_dimension(Mr1) == 15
     Mr2 = PowerManifold(Mr, 5, 7)
     @test manifold_dimension(Mr2) == 105
@@ -26,6 +27,9 @@ Random.seed!(42)
 
     types_r1 = [Array{Float64,3},
                 HybridArray{Tuple{3,3,StaticArrays.Dynamic()}, Float64, 3}]
+
+    types_rn1 = [Vector{Matrix{Float64}},
+                 Vector{MMatrix{3,3,Float64}}]
     types_r2 = [Array{Float64,4},
                 HybridArray{Tuple{3,3,StaticArrays.Dynamic(),StaticArrays.Dynamic()}, Float64, 4}]
 
@@ -42,9 +46,11 @@ Random.seed!(42)
     id_rot = @SMatrix [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
     rotations_dist = Manifolds.normal_rotation_distribution(Mr, id_rot, 1.0)
     power_r1_pt_dist = Manifolds.PowerPointDistribution(Mr1, rotations_dist, randn(Float64, 3, 3, 5))
+    power_rn1_pt_dist = Manifolds.PowerPointDistribution(Mrn1, rotations_dist, [randn(Float64, 3, 3) for i in 1:5])
     power_r2_pt_dist = Manifolds.PowerPointDistribution(Mr2, rotations_dist, randn(Float64, 3, 3, 5, 7))
     rotations_tv_dist = Manifolds.normal_tvector_distribution(Mr, MMatrix(id_rot), 1.0)
     power_r1_tv_dist = Manifolds.PowerFVectorDistribution(TangentBundleFibers(Mr1), rand(power_r1_pt_dist), rotations_tv_dist)
+    power_rn1_tv_dist = Manifolds.PowerFVectorDistribution(TangentBundleFibers(Mrn1), rand(power_rn1_pt_dist), rotations_tv_dist)
     power_r2_tv_dist = Manifolds.PowerFVectorDistribution(TangentBundleFibers(Mr2), rand(power_r2_pt_dist), rotations_tv_dist)
 
     trim(s::String) = s[1:min(length(s), 20)]
@@ -97,7 +103,8 @@ Random.seed!(42)
     for T in types_r1
         @testset "Type $(trim(string(T)))..." begin
             pts1 = [convert(T, rand(power_r1_pt_dist)) for _ in 1:3]
-            test_manifold(Mr1,
+            test_manifold(
+                Mr1,
                 pts1;
                 test_reverse_diff = false,
                 test_injectivity_radius = false,
@@ -106,6 +113,27 @@ Random.seed!(42)
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_r1_pt_dist],
                 tvector_distributions = [power_r1_tv_dist],
+                basis_types_to_from = basis_types,
+                rand_tvector_atol_multiplier = 5.0,
+                retraction_atol_multiplier = 12,
+                is_tangent_atol_multiplier = 12.0
+            )
+        end
+    end
+
+    for T in types_rn1
+        @testset "Type $(trim(string(T)))..." begin
+            pts1 = [convert(T, rand(power_rn1_pt_dist)) for _ in 1:3]
+            test_manifold(
+                Mrn1,
+                pts1;
+                test_reverse_diff = false,
+                test_injectivity_radius = false,
+                test_musical_isomorphisms = true,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                point_distributions = [power_rn1_pt_dist],
+                tvector_distributions = [power_rn1_tv_dist],
                 basis_types_to_from = basis_types,
                 rand_tvector_atol_multiplier = 5.0,
                 retraction_atol_multiplier = 12,
