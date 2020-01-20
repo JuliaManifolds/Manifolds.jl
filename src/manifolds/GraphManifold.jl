@@ -30,7 +30,7 @@ of a graph `G` depending on the [`GraphManifoldType`](@ref) `T`.
 * `G` is an `AbstractSimpleGraph`
 * `M` is a [`Manifold`](@ref)
 """
-struct GraphManifold{G<:AbstractGraph,TM,T<:GraphManifoldType} <: AbstractPowerManifold{TM}
+struct GraphManifold{G<:AbstractGraph,TM,T<:GraphManifoldType} <: AbstractPowerManifold{TM,MultidimentionalArrayPowerRepresentation}
     graph::G
     manifold::TM
 end
@@ -153,12 +153,16 @@ function incident_log!(M::GraphManifold{<:AbstractGraph,<:Manifold,VertexManifol
     rep_size = representation_size(M.manifold)
     rsC = rep_size_to_colons(rep_size)
     for e in edges(M.graph)
-        vw = _write(rep_size, v, src(e))
+        vw = _write(M, rep_size, v, src(e))
         v[rsC..., src(e)] +=
-            log(M.manifold, _read(rep_size, x, src(e)), _read(rep_size, x, dst(e)))
+            log(M.manifold, _read(M, rep_size, x, src(e)), _read(M, rep_size, x, dst(e)))
         if !is_directed(M.graph)
             v[rsC..., dst(e)] +=
-                log(M.manifold, _read(rep_size, x, dst(e)), _read(rep_size, x, src(e)))
+                log(
+                    M.manifold,
+                    _read(M, rep_size, x, dst(e)),
+                    _read(M, rep_size, x, src(e))
+                )
         end
     end
     return v
@@ -173,12 +177,20 @@ function incident_log!(
     for e in edges(M.graph)
         v[rsC..., src(e)] += (
             get_weight(M.graph, src(e), dst(e)) *
-                log(M.manifold, _read(rep_size, x, src(e)), _read(rep_size, x, dst(e)))
+                log(
+                    M.manifold,
+                    _read(M, rep_size, x, src(e)),
+                    _read(M, rep_size, x, dst(e))
+                )
         )
         if !is_directed(M.graph)
             v[rsC..., dst(e)] += (
                 get_weight(M.graph, dst(e), src(e)) *
-                    log(M.manifold, _read(rep_size, x, dst(e)), _read(rep_size, x, src(e)))
+                    log(
+                        M.manifold,
+                        _read(M, rep_size, x, dst(e)),
+                        _read(M, rep_size, x, src(e))
+                    )
             )
         end
     end

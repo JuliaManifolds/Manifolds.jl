@@ -26,12 +26,13 @@ Each element of such array stores a single point or tangent vector.
 struct NestedPowerRepresentation <: AbstractPowerRepresentation end
 
 @doc doc"""
-    AbstractPowerManifold{M,TSize} <: Manifold
+    AbstractPowerManifold{M,TPR} <: Manifold
 
 An abstract [`Manifold`](@ref) to represent manifolds that are build as powers
-of another [`Manifold`](@ref) `M` to the power `TSize`.
+of another [`Manifold`](@ref) `M` with representation type `TPR`, a subtype of
+[`AbstractPowerRepresentation`](@ref).
 """
-abstract type AbstractPowerManifold{M<:Manifold} <: Manifold end
+abstract type AbstractPowerManifold{M<:Manifold,TPR<:AbstractPowerRepresentation} <: Manifold end
 
 @doc doc"""
     PowerManifold{TM<:Manifold, TSize<:Tuple, TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{TM}
@@ -63,7 +64,7 @@ struct PowerManifold{
     TM<:Manifold,
     TSize,
     TPR<:AbstractPowerRepresentation
-} <: AbstractPowerManifold{TM}
+} <: AbstractPowerManifold{TM,TPR}
     manifold::TM
 end
 PowerManifold(M::Manifold, size::Int...) = PowerManifold{typeof(M), Tuple{size...}, MultidimentionalArrayPowerRepresentation}(M)
@@ -154,21 +155,21 @@ function PrecomputedPowerOrthonormalBasis(
     return PrecomputedPowerOrthonormalBasis{typeof(bases),F}(bases)
 end
 
-const PowerManifoldMultidim = PowerManifold{<:Manifold, TSize, MultidimentionalArrayPowerRepresentation} where TSize
-const PowerManifoldNested = PowerManifold{<:Manifold, TSize, NestedPowerRepresentation} where TSize
+const PowerManifoldMultidim = AbstractPowerManifold{<:Manifold, MultidimentionalArrayPowerRepresentation} where TSize
+const PowerManifoldNested = AbstractPowerManifold{<:Manifold, NestedPowerRepresentation} where TSize
 
-function basis(M::PowerManifold, x, B::AbstractBasis)
+function basis(M::AbstractPowerManifold, x, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     vs = [basis(M.manifold, _read(M, rep_size, x, i), B)
         for i in get_iterator(M)]
     return PrecomputedPowerOrthonormalBasis(vs)
 end
 
-function basis(M::PowerManifold, x, B::ArbitraryOrthonormalBasis)
+function basis(M::AbstractPowerManifold, x, B::ArbitraryOrthonormalBasis)
     return invoke(basis, Tuple{PowerManifold, Any, AbstractBasis}, M, x, B)
 end
 
-function basis(M::PowerManifold, x, B::DiagonalizingOrthonormalBasis)
+function basis(M::AbstractPowerManifold, x, B::DiagonalizingOrthonormalBasis)
     return invoke(basis, Tuple{PowerManifold, Any, AbstractBasis}, M, x, B)
 end
 
@@ -288,19 +289,19 @@ function flat!(M::AbstractPowerManifold, v::CoTFVector, x, w::TFVector)
     return v
 end
 
-function get_basis(M::PowerManifold, x, B::AbstractBasis)
+function get_basis(M::AbstractPowerManifold, x, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     vs = [get_basis(M.manifold, _read(M, rep_size, x, i), B) for i in get_iterator(M)]
     return PrecomputedPowerOrthonormalBasis(vs)
 end
-function get_basis(M::PowerManifold, x, B::ArbitraryOrthonormalBasis)
+function get_basis(M::AbstractPowerManifold, x, B::ArbitraryOrthonormalBasis)
     return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, x, B)
 end
-function get_basis(M::PowerManifold, x, B::DiagonalizingOrthonormalBasis)
+function get_basis(M::AbstractPowerManifold, x, B::DiagonalizingOrthonormalBasis)
     return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, x, B)
 end
 
-function get_coordinates(M::PowerManifold, x, v, B::ArbitraryOrthonormalBasis)
+function get_coordinates(M::AbstractPowerManifold, x, v, B::ArbitraryOrthonormalBasis)
     rep_size = representation_size(M.manifold)
     vs = [
         get_coordinates(M.manifold, _read(M, rep_size, x, i), _read(M, rep_size, v, i), B)
@@ -308,7 +309,7 @@ function get_coordinates(M::PowerManifold, x, v, B::ArbitraryOrthonormalBasis)
     ]
     return reduce(vcat, reshape(vs, length(vs)))
 end
-function get_coordinates(M::PowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
+function get_coordinates(M::AbstractPowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
     rep_size = representation_size(M.manifold)
     vs = [
         get_coordinates(
@@ -348,7 +349,7 @@ function get_vector(M::PowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
     end
     return v_out
 end
-function get_vector(M::PowerManifold, x, v, B::ArbitraryOrthonormalBasis)
+function get_vector(M::AbstractPowerManifold, x, v, B::ArbitraryOrthonormalBasis)
     dim = manifold_dimension(M.manifold)
 
     rep_size = representation_size(M.manifold)
@@ -552,7 +553,7 @@ function _rand!(rng::AbstractRNG, d::PowerPointDistribution, x::AbstractArray)
     return x
 end
 
-@inline function _read(M::PowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)
+@inline function _read(M::AbstractPowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)
     return _read(M, rep_size, x, (i,))
 end
 @inline function _read(::PowerManifoldMultidim, rep_size::Tuple, x::AbstractArray, i::Tuple)
@@ -635,7 +636,7 @@ end
 support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.x)
 support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 
-@inline function _write(M::PowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)
+@inline function _write(M::AbstractPowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)
     return _write(M, rep_size, x, (i,))
 end
 @inline function _write(
