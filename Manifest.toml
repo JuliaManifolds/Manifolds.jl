@@ -121,6 +121,7 @@ uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.0"
 
 [[LibGit2]]
+deps = ["Printf"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 
 [[Libdl]]
@@ -147,9 +148,11 @@ version = "0.5.3"
 
 [[ManifoldsBase]]
 deps = ["LinearAlgebra", "Markdown"]
-git-tree-sha1 = "351c4bcae801f3c9a0faa89b4b5a418b8d7f27a5"
+git-tree-sha1 = "697e194b04379066e2c7d9a23ecd30f901f180c6"
+repo-rev = "mbaran/nested-similar"
+repo-url = "https://github.com/JuliaNLSolvers/ManifoldsBase.jl.git"
 uuid = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
-version = "0.3.2"
+version = "0.4.0"
 
 [[Markdown]]
 deps = ["Base64"]
