@@ -70,6 +70,11 @@ include("../utils.jl")
         @test_throws ErrorException inverse_translate_diff!(G, v, x, x, v)
         @test_throws ErrorException inverse_translate_diff!(G, v, x, x, v, LeftAction())
         @test_throws ErrorException inverse_translate_diff!(G, v, x, x, v, RightAction())
+
+        @test_throws ErrorException group_exp(G, v)
+        @test_throws ErrorException group_exp!(G, x, v)
+        @test_throws ErrorException group_log(G, x)
+        @test_throws ErrorException group_log!(G, v, x)
     end
 
     @testset "Action direction" begin
