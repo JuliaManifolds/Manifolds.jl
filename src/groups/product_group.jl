@@ -50,7 +50,7 @@ function inv(M::ProductManifold, x::ProductRepr)
     return ProductRepr(map(inv, M.manifolds, submanifold_components(M, x))...)
 end
 function inv(M::ProductManifold, x)
-    y = similar_result(M, inv, x)
+    y = allocate_result(M, inv, x)
     return inv!(M, y, x)
 end
 
@@ -66,7 +66,7 @@ function identity(M::ProductManifold, x::ProductRepr)
     return ProductRepr(map(identity, M.manifolds, submanifold_components(M, x))...)
 end
 function identity(M::ProductManifold, x)
-    y = similar_result(M, identity, x)
+    y = allocate_result(M, identity, x)
     return identity!(M, y, x)
 end
 
@@ -89,7 +89,7 @@ function compose(M::ProductManifold, x::ProductRepr, y::ProductRepr)
     )...)
 end
 function compose(M::ProductManifold, x, y)
-    z = similar_result(M, compose, x, y)
+    z = allocate_result(M, compose, x, y)
     return compose!(M, z, x, y)
 end
 
@@ -121,7 +121,7 @@ function translate(
     )...)
 end
 function translate(M::ProductManifold, x, y, conv::ActionDirection)
-    z = similar_result(M, translate, x, y)
+    z = allocate_result(M, translate, x, y)
     return translate!(M, z, x, y, conv)
 end
 
@@ -158,7 +158,7 @@ function inverse_translate(
     )...)
 end
 function inverse_translate(M::ProductManifold, x, y, conv::ActionDirection)
-    z = similar_result(M, inverse_translate, x, y)
+    z = allocate_result(M, inverse_translate, x, y)
     return inverse_translate!(M, z, x, y, conv)
 end
 
@@ -197,7 +197,7 @@ function translate_diff(
     )...)
 end
 function translate_diff(M::ProductManifold, x, y, v, conv::ActionDirection)
-    vout = similar_result(M, translate_diff, v, x, y)
+    vout = allocate_result(M, translate_diff, v, x, y)
     return translate_diff!(M, vout, x, y, v, conv)
 end
 
@@ -237,7 +237,7 @@ function inverse_translate_diff(
     )...)
 end
 function inverse_translate_diff(M::ProductManifold, x, y, v, conv::ActionDirection)
-    vout = similar_result(M, inverse_translate_diff, v, x, y)
+    vout = allocate_result(M, inverse_translate_diff, v, x, y)
     return inverse_translate_diff!(M, vout, x, y, v, conv)
 end
 

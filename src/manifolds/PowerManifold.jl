@@ -530,7 +530,7 @@ function rand(rng::AbstractRNG, d::PowerFVectorDistribution)
     return fv
 end
 function rand(rng::AbstractRNG, d::PowerPointDistribution)
-    x = similar_result(d.manifold, rand, d.x)
+    x = allocate_result(d.manifold, rand, d.x)
     _rand!(rng, d, x)
     return x
 end
@@ -621,14 +621,14 @@ function sharp!(M::AbstractPowerManifold, v::TFVector, x, w::CoTFVector)
     return v
 end
 
-function similar_result(M::PowerManifoldNested, f, x...)
-    return [similar_result(M.manifold, f, map(y -> y[i], x)...) for i in get_iterator(M)]
+function allocate_result(M::PowerManifoldNested, f, x...)
+    return [allocate_result(M.manifold, f, map(y -> y[i], x)...) for i in get_iterator(M)]
 end
-function similar_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x)
+function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x)
     alloc = [allocate(w.data[i]) for i in get_iterator(M)]
     return FVector(CotangentSpace, alloc)
 end
-function similar_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector, x)
+function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector, x)
     alloc = [allocate(w.data[i]) for i in get_iterator(M)]
     return FVector(TangentSpace, alloc)
 end
