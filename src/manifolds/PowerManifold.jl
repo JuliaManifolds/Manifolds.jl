@@ -13,6 +13,8 @@ Representation of points and tangent vectors on a power manifold using multidime
 arrays where first dimensions are equal to [`representation_size`](@ref) of the
 wrapped manifold and the following ones are equal to the number of elements in each
 direction.
+
+[`Torus`](@ref) uses this representation.
 """
 struct MultidimentionalArrayPowerRepresentation <: AbstractPowerRepresentation end
 
@@ -22,6 +24,8 @@ struct MultidimentionalArrayPowerRepresentation <: AbstractPowerRepresentation e
 Representation of points and tangent vectors on a power manifold using arrays
 of size equal to `TSize` of a [`PowerManifold`](@ref).
 Each element of such array stores a single point or tangent vector.
+
+[`GraphManifold`](@ref) uses this representation.
 """
 struct NestedPowerRepresentation <: AbstractPowerRepresentation end
 
@@ -155,7 +159,7 @@ function PrecomputedPowerOrthonormalBasis(
     return PrecomputedPowerOrthonormalBasis{typeof(bases),F}(bases)
 end
 
-const PowerManifoldMultidim = AbstractPowerManifold{<:Manifold, MultidimentionalArrayPowerRepresentation} where TSize
+const PowerManifoldMultidimensional = AbstractPowerManifold{<:Manifold, MultidimentionalArrayPowerRepresentation} where TSize
 const PowerManifoldNested = AbstractPowerManifold{<:Manifold, NestedPowerRepresentation} where TSize
 
 function basis(M::AbstractPowerManifold, x, B::AbstractBasis)
@@ -556,10 +560,10 @@ end
 @inline function _read(M::AbstractPowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)
     return _read(M, rep_size, x, (i,))
 end
-@inline function _read(::PowerManifoldMultidim, rep_size::Tuple, x::AbstractArray, i::Tuple)
+@inline function _read(::PowerManifoldMultidimensional, rep_size::Tuple, x::AbstractArray, i::Tuple)
     return view(x, rep_size_to_colons(rep_size)..., i...)
 end
-@inline function _read(::PowerManifoldMultidim, rep_size::Tuple, x::HybridArray, i::Tuple)
+@inline function _read(::PowerManifoldMultidimensional, rep_size::Tuple, x::HybridArray, i::Tuple)
     return x[rep_size_to_colons(rep_size)..., i...]
 end
 @inline function _read(::PowerManifoldNested, rep_size::Tuple, x::AbstractArray, i::Tuple)
@@ -640,7 +644,7 @@ support(d::PowerPointDistribution) = MPointSupport(d.manifold)
     return _write(M, rep_size, x, (i,))
 end
 @inline function _write(
-    M::PowerManifoldMultidim,
+    M::PowerManifoldMultidimensional,
     rep_size::Tuple,
     x::AbstractArray,
     i::Tuple,
