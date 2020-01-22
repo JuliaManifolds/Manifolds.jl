@@ -48,6 +48,8 @@ function show(io::IO, G::SemidirectProductGroup)
     print(io, "SemidirectProductGroup($(N), $(H), $(A))")
 end
 
+submanifold(G::SemidirectProductGroup, i) = submanifold(base_manifold(G), i)
+
 _padpoint!(G::SemidirectProductGroup, y) = y
 
 _padvector!(G::SemidirectProductGroup, v) = v

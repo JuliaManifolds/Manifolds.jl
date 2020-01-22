@@ -29,6 +29,8 @@ end
 
 show(io::IO, G::ProductGroup) = print(io, "ProductGroup$((G.manifold.manifolds...,))")
 
+submanifold(G::ProductGroup, i) = submanifold(base_manifold(G), i)
+
 function submanifold_component(
     e::Identity{GT},
     ::Val{I},
