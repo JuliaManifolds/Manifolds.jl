@@ -152,3 +152,17 @@ function inverse_translate_diff!(
     is_tangent_vector(M, xinvy, vout, true; kwargs...)
     return vout
 end
+
+function group_exp!(M::ArrayManifold, y, v; kwargs...)
+    is_tangent_vector(M, Identity(M), v, true; kwargs...)
+    group_exp!(M.manifold, array_value(y), array_value(v))
+    is_manifold_point(M, y, true; kwargs...)
+    return y
+end
+
+function group_log!(M::ArrayManifold, v, y; kwargs...)
+    is_manifold_point(M, y, true; kwargs...)
+    group_log!(M.manifold, array_value(v), array_value(y))
+    is_tangent_vector(M, Identity(M), v, true; kwargs...)
+    return v
+end
