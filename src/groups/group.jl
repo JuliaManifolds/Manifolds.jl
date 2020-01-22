@@ -586,6 +586,126 @@ function group_log!(M::Manifold, v, y, ::Val{false})
     return error("group_log! not implemented on $(typeof(M)) for element $(typeof(y)) and vector $(typeof(v)).")
 end
 
+############################
+# Group-specific Retractions
+############################
+
+"""
+    GroupExponentialRetraction{D<:ActionDirection} <: AbstractRetractionMethod
+
+Retraction using the group exponential "translated" to any point on the manifold.
+
+# Constructor
+
+    GroupExponentialRetraction(conv::ActionDirection = LeftAction())
+"""
+struct GroupExponentialRetraction{D<:ActionDirection} <: AbstractRetractionMethod end
+
+function GroupExponentialRetraction(conv::ActionDirection = LeftAction())
+    return GroupExponentialRetraction{typeof(conv)}()
+end
+
+"""
+    GroupLogarithmicInverseRetraction{D<:ActionDirection} <: AbstractInverseRetractionMethod
+
+Retraction using the group logarithm "translated" to any point on the manifold.
+
+# Constructor
+
+    GroupLogarithmicInverseRetraction(conv::ActionDirection = LeftAction())
+"""
+struct GroupLogarithmicInverseRetraction{D<:ActionDirection} <:
+       AbstractInverseRetractionMethod end
+
+function GroupLogarithmicInverseRetraction(conv::ActionDirection = LeftAction())
+    return GroupLogarithmicInverseRetraction{typeof(conv)}()
+end
+
+direction(::GroupExponentialRetraction{D}) where {D} = D()
+direction(::GroupLogarithmicInverseRetraction{D}) where {D} = D()
+
+@doc doc"""
+    retract(
+        G::AbstractGroupManifold,
+        x,
+        v,
+        method::GroupExponentialRetraction{<:ActionDirection},
+    )
+
+Compute the retraction using the group exponential "translated" to any point on the
+manifold. With a group translation $τ_x$ in a specified direction, the retraction is
+
+````math
+\operatorname{retr}_x = τ_x \circ \exp_e \circ \mathrm{d}τ_x^{-1}
+````
+"""
+function retract(G::GroupManifold, x, v, method::GroupExponentialRetraction)
+    y = similar_result(G, retract, x, v)
+    return retract!(G, y, x, v, method)
+end
+
+function retract!(G::GroupManifold, y, x, v, method::GroupExponentialRetraction)
+    return invoke(
+        retract!,
+        Tuple{Manifold,typeof(y),typeof(x),typeof(v),typeof(method)},
+        G,
+        y,
+        x,
+        v,
+        method,
+    )
+end
+function retract!(M::Manifold, y, x, v, method::GroupExponentialRetraction)
+    conv = direction(method)
+    vₑ = inverse_translate_diff(M, x, x, v, conv)
+    yₑ = group_exp(M, vₑ)
+    return translate!(M, y, x, yₑ, conv)
+end
+
+@doc doc"""
+    inverse_retract(
+        G::AbstractGroupManifold,
+        x,
+        v,
+        method::GroupLogarithmicInverseRetraction{<:ActionDirection},
+    )
+
+Compute the inverse retraction using the group logarithm "translated" to any point on the
+manifold. With a group translation $τ_x$ in a specified direction, the retraction is
+
+````math
+\operatorname{retr}_x^{-1} = \mathrm{d}τ_x \circ \log_e \circ τ_x^{-1}
+````
+"""
+function inverse_retract(G::GroupManifold, x, y, method::GroupLogarithmicInverseRetraction)
+    v = similar_result(G, inverse_retract, x, y)
+    return inverse_retract!(G, v, x, y, method)
+end
+
+function inverse_retract!(
+    G::GroupManifold,
+    v,
+    x,
+    y,
+    method::GroupLogarithmicInverseRetraction,
+)
+    return invoke(
+        inverse_retract!,
+        Tuple{Manifold,typeof(v),typeof(x),typeof(y),typeof(method)},
+        G,
+        v,
+        x,
+        y,
+        method,
+    )
+end
+function inverse_retract!(M::Manifold, v, x, y, method::GroupLogarithmicInverseRetraction)
+    conv = direction(method)
+    xinvy = inverse_translate(M, x, y, conv)
+    vₑ = group_log(M, xinvy)
+    return translate_diff!(M, v, x, Identity(M), vₑ, conv)
+end
+
 #################################
 # Overloads for AdditionOperation
 #################################

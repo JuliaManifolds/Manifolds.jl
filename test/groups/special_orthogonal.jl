@@ -36,11 +36,19 @@ include("group_utils.jl")
     end
 
     @testset "Group forwards to decorated" begin
-        retraction_methods = [Manifolds.PolarRetraction(),
-                              Manifolds.QRRetraction()]
+        retraction_methods = [
+            Manifolds.PolarRetraction(),
+            Manifolds.QRRetraction(),
+            Manifolds.GroupExponentialRetraction(LeftAction()),
+            Manifolds.GroupExponentialRetraction(RightAction()),
+        ]
 
-        inverse_retraction_methods = [Manifolds.PolarInverseRetraction(),
-                                      Manifolds.QRInverseRetraction()]
+        inverse_retraction_methods = [
+            Manifolds.PolarInverseRetraction(),
+            Manifolds.QRInverseRetraction(),
+            Manifolds.GroupLogarithmicInverseRetraction(LeftAction()),
+            Manifolds.GroupLogarithmicInverseRetraction(RightAction()),
+        ]
 
         test_manifold(G, pts;
             test_reverse_diff = false,
