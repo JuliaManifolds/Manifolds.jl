@@ -171,17 +171,16 @@ exp(::Rotations, ::Any...)
 
 exp!(M::Rotations, y, x, v) = copyto!(y, x * exp(v))
 function exp!(M::Rotations{2}, y, x, v)
-    θ = vee(M, x, v)[1]
     @assert size(y) == (2, 2)
-    @assert size(x) == (2, 2)
+    θ = vee(M, x, v)[1]
+    sinθ, cosθ = sincos(θ)
     @inbounds begin
-        sinθ, cosθ = sincos(θ)
-        y[1] = x[1] * cosθ + x[3] * sinθ
-        y[2] = x[2] * cosθ + x[4] * sinθ
-        y[3] = x[3] * cosθ - x[1] * sinθ
-        y[4] = x[4] * cosθ - x[2] * sinθ
+        y[1] = cosθ
+        y[2] = sinθ
+        y[3] = -sinθ
+        y[4] = cosθ
     end
-    return y
+    return copyto!(y, x * y)
 end
 function exp!(M::Rotations{3}, y, x, v)
     θ = norm(M, x, v) / sqrt(2)
@@ -192,8 +191,8 @@ function exp!(M::Rotations{3}, y, x, v)
         a = sin(θ) / θ
         b = (1 - cos(θ)) / θ^2
     end
-    y .= x .+ x * (a .* v .+ b .* (v^2))
-    return y
+    xinvy = I + a .* v .+ b .* (v^2)
+    return copyto!(y, x * xinvy)
 end
 function exp!(M::Rotations{4}, y, x, v)
     T = eltype(v)
@@ -232,8 +231,8 @@ function exp!(M::Rotations{4}, y, x, v)
     end
 
     v² = v * v
-    y .= a₀ .* x .+ x * (a₁ .* v .+ a₂ .* v² .+ a₃ .* (v² * v))
-    return y
+    xinvy = a₀ * I + a₁ .* v .+ a₂ .* v² .+ a₃ .* (v² * v)
+    return copyto!(y, x * xinvy)
 end
 
 flat!(M::Rotations, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
@@ -247,18 +246,6 @@ function get_vector(M::Rotations, x, v, B::ArbitraryOrthonormalBasis) where {N}
     T = Base.promote_eltype(x, v)
     return hat(M, x, v) ./ sqrt(T(2))
 end
-
-function hat!(M::Rotations{2}, Ω, x, θ::Real)
-    @assert length(Ω) == 4
-    @inbounds begin
-        Ω[1] = 0
-        Ω[3] = -θ
-        Ω[2] = θ
-        Ω[4] = 0
-    end
-    return Ω
-end
-hat!(M::Rotations{2}, Ω, x, ω) = hat!(M, Ω, x, ω[1])
 
 @doc doc"""
     hat(M::Rotations, x, ω)
@@ -294,6 +281,17 @@ function hat!(M::Rotations{N}, Ω, x, ω) where {N}
     end
     return Ω
 end
+function hat!(M::Rotations{2}, Ω, x, θ::Real)
+    @assert length(Ω) == 4
+    @inbounds begin
+        Ω[1] = 0
+        Ω[3] = -θ
+        Ω[2] = θ
+        Ω[4] = 0
+    end
+    return Ω
+end
+hat!(M::Rotations{2}, Ω, x, ω) = hat!(M, Ω, x, ω[1])
 
 @doc doc"""
     injectivity_radius(M::Rotations)
@@ -666,6 +664,7 @@ For $\mathrm{SO}(n)$ where $n \ge 4$, the additional elements of $\omega$ are
 $\omega_{i (i - 3)/2 + j + 1} = \Omega_{ij}$, for $i \in [4, n], j \in [1,i)$.
 """
 vee(::Rotations, ::Any...)
+vee(M::Rotations{2}, x, Ω) = [Ω[2]]
 
 function vee!(M::Rotations{N}, ω, x, Ω) where {N}
     @assert size(Ω) == (N, N)

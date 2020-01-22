@@ -32,10 +32,43 @@ function inverse_translate_diff!(G::SpecialOrthogonal, vout, x, y, v, conv::Acti
     return copyto!(vout, inverse_translate_diff(G, x, y, v, conv))
 end
 
-group_exp(G::SpecialOrthogonal, v) = exp(G, identity(G, v), v)
+group_exp(G::SpecialOrthogonal, v) = exp(G, Identity(G), v)
 
-group_exp!(G::SpecialOrthogonal, y, v) = exp!(G, y, identity(G, v), v)
+group_exp!(G::SpecialOrthogonal, y, v) = exp!(G, y, Identity(G), v)
 
-group_log(G::SpecialOrthogonal, y) = log(G, identity(G, y), y)
+group_log(G::SpecialOrthogonal, y) = log(G, Identity(G), y)
 
-group_log!(G::SpecialOrthogonal, v, y) = log!(G, v, identity(G, y), y)
+group_log!(G::SpecialOrthogonal, v, y) = log!(G, v, Identity(G), y)
+
+function similar_result(
+    ::GT,
+    ::typeof(exp),
+    ::Identity{GT},
+    v,
+) where {n,GT<:SpecialOrthogonal{n}}
+    return similar(v)
+end
+function similar_result(
+    ::GT,
+    ::typeof(log),
+    ::Identity{GT},
+    y,
+) where {n,GT<:SpecialOrthogonal{n}}
+    return similar(y)
+end
+function similar_result(
+    ::GT,
+    ::typeof(hat),
+    ::Identity{GT},
+    vⁱ,
+) where {n,GT<:SpecialOrthogonal{n}}
+    return similar(vⁱ, (n, n))
+end
+function similar_result(
+    ::GT,
+    ::typeof(vee),
+    ::Identity{GT},
+    v,
+) where {n,GT<:SpecialOrthogonal{n}}
+    return similar(v, n)
+end
