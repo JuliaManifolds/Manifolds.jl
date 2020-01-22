@@ -131,7 +131,3 @@ end
 function LinearAlgebra.eigvals(A::StaticArray, B::StaticArray; kwargs...)
     return eigvals(Array(A), Array(B); kwargs...)
 end
-
-_reshape(x, args...) = reshape(x, args...)
-_reshape(x, s::Size{S}) where {S} = reshape(x, S...)
-_reshape(x::StaticArray, s::Size{S}) where {S} = reshape(x, s)
