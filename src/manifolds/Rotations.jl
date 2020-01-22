@@ -285,8 +285,8 @@ function hat!(M::Rotations{2}, Ω, x, θ::Real)
     @assert length(Ω) == 4
     @inbounds begin
         Ω[1] = 0
-        Ω[3] = -θ
         Ω[2] = θ
+        Ω[3] = -θ
         Ω[4] = 0
     end
     return Ω
