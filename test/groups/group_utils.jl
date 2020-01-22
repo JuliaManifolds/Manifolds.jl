@@ -189,34 +189,50 @@ function test_group(
         end
     end
 
-    test_group_exp_log && @testset "group exp/log" begin
-        v = group_log(G, identity(G, g_pts[1]))
-        g = group_exp(G, v)
-        @test isapprox(G, Identity(G), g; atol = atol)
-        for v in ve_pts
+    test_group_exp_log && @testset "group exp/log properties" begin
+        @testset "e = exp(0)" begin
+            v = group_log(G, identity(G, g_pts[1]))
             g = group_exp(G, v)
-            @test is_manifold_point(G, g; atol = atol)
-            v2 = group_log(G, g)
-            @test isapprox(G, Identity(G), v2, v; atol = atol)
-        end
-
-        test_mutating && @testset "mutating" begin
-            v = similar(ve_pts[1])
-            @test group_log!(G, v, identity(G, g_pts[1])) === v
-            g = similar(g_pts[1])
-            @test group_exp!(G, g, v) === g
             @test isapprox(G, Identity(G), g; atol = atol)
-            for v in ve_pts
+
+            test_mutating && @testset "mutating" begin
+                v = similar(ve_pts[1])
+                @test group_log!(G, v, identity(G, g_pts[1])) === v
                 g = similar(g_pts[1])
                 @test group_exp!(G, g, v) === g
-                @test is_manifold_point(G, g; atol = atol)
-                v2 = similar(v)
-                @test group_log!(G, v2, g) === v2
-                @test isapprox(G, Identity(G), v2, v; atol = atol)
+                @test isapprox(G, Identity(G), g; atol = atol)
             end
         end
 
-        @testset "exponential subgroup" begin
+        @testset "v = log(exp(v))" begin
+            for v in ve_pts
+                g = group_exp(G, v)
+                @test is_manifold_point(G, g; atol = atol)
+                v2 = group_log(G, g)
+                @test isapprox(G, Identity(G), v2, v; atol = atol)
+            end
+
+            test_mutating && @testset "mutating" begin
+                for v in ve_pts
+                    g = similar(g_pts[1])
+                    @test group_exp!(G, g, v) === g
+                    @test is_manifold_point(G, g; atol = atol)
+                    @test isapprox(G, g, group_exp(G, v); atol = atol)
+                    v2 = similar(v)
+                    @test group_log!(G, v2, g) === v2
+                    @test isapprox(G, Identity(G), v2, v; atol = atol)
+                end
+            end
+        end
+
+        @testset "inv(g) = exp(-log(g))" begin
+            g = g_pts[1]
+            v = group_log(G, g)
+            ginv = group_exp(G, -v)
+            @test isapprox(G, ginv, inv(G, g); atol = atol)
+        end
+
+        @testset "exp(sv)∘exp(tv) = exp((s+t)v)" begin
             g1 = group_exp(G, 0.2 * ve_pts[1])
             g2 = group_exp(G, 0.3 * ve_pts[1])
             g12 = group_exp(G, 0.5 * ve_pts[1])
