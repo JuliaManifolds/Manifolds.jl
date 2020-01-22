@@ -301,14 +301,14 @@ export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribut
 export Metric,
     RiemannianMetric,
     LorentzMetric,
-    MinkowskiMetric,
     EuclideanMetric,
-    MetricManifold,
     LinearAffineMetric,
-    LogEuclideanMetric,
     LogCholeskyMetric,
+    LogEuclideanMetric,
+    MinkowskiMetric,
     PowerMetric,
-    ProductMetric
+    ProductMetric,
+    MetricManifold
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod, QRRetraction, PolarRetraction, ProjectionRetraction
 export AbstractInverseRetractionMethod,
