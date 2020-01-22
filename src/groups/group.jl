@@ -715,21 +715,21 @@ function inverse_translate!(G::MultiplicationGroup, z, x, y, conv::ActionDirecti
 end
 
 function group_exp(::MultiplicationGroup, v)
-    v isa Number || v isa AbstractMatrix && return exp(v)
+    v isa Union{Number,AbstractMatrix} && return exp(v)
     return error("group_exp not implemented on $(typeof(M)) for vector $(typeof(v)).")
 end
 
 function group_exp!(::MultiplicationGroup, y, v)
-    v isa Number || v isa AbstractMatrix && return copyto!(y, exp(v))
+    v isa Union{Number,AbstractMatrix} && return copyto!(y, exp(v))
     return error("group_exp! not implemented on $(typeof(M)) for vector $(typeof(v)) and element $(typeof(y)).")
 end
 
 function group_log(G::MultiplicationGroup, y)
-    v isa Number || v isa AbstractMatrix && return log(v)
+    y isa Union{Number,AbstractMatrix} && return log_safe(y)
     return error("group_log not implemented on $(typeof(M)) for element $(typeof(y)).")
 end
 
-function group_log!(M::MultiplicationGroup, v, y, ::Val{false})
-    y isa Number || y isa AbstractMatrix && return copyto!(v, log(y))
+function group_log!(M::MultiplicationGroup, v, y)
+    y isa Union{Number,AbstractMatrix} && return copyto!(v, log_safe(y))
     return error("group_log! not implemented on $(typeof(M)) for element $(typeof(y)) and vector $(typeof(v)).")
 end

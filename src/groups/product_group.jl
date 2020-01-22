@@ -35,8 +35,7 @@ function submanifold_component(
     e::Identity{GT},
     ::Val{I},
 ) where {I,MT<:ProductManifold,GT<:GroupManifold{MT}}
-    M = base_manifold(e.group)
-    return Identity(submanifold(M, I))
+    return Identity(submanifold(e.group, I))
 end
 
 function submanifold_components(
@@ -210,7 +209,7 @@ function translate_diff!(M::ProductManifold, vout, x, y, v, conv::ActionDirectio
     map(
         translate_diff!,
         M.manifolds,
-        submanifold_components(vout),
+        submanifold_components(M, vout),
         submanifold_components(M, x),
         submanifold_components(M, y),
         submanifold_components(M, v),
@@ -250,7 +249,7 @@ function inverse_translate_diff!(M::ProductManifold, vout, x, y, v, conv::Action
     map(
         inverse_translate_diff!,
         M.manifolds,
-        submanifold_components(vout),
+        submanifold_components(M, vout),
         submanifold_components(M, x),
         submanifold_components(M, y),
         submanifold_components(M, v),
@@ -259,22 +258,28 @@ function inverse_translate_diff!(M::ProductManifold, vout, x, y, v, conv::Action
     return vout
 end
 
-group_exp(G::ProductGroup, v) = group_exp(G.manifold, v)
 function group_exp(M::ProductManifold, v::ProductRepr)
     return ProductRepr(map(group_exp, M.manifolds, submanifold_components(M, v))...)
 end
 function group_exp(M::ProductManifold, v)
     y = similar_result(M, group_exp, v)
-    group_exp!(M, y, v)
+    return group_exp!(M, y, v)
+end
+
+function group_exp!(M::ProductManifold, y, v)
+    map(group_exp!, M.manifolds, submanifold_components(M, y), submanifold_components(M, v))
     return y
 end
 
-group_log(G::ProductGroup, y) = group_log(G.manifold, y)
 function group_log(M::ProductManifold, y::ProductRepr)
     return ProductRepr(map(group_log, M.manifolds, submanifold_components(M, y))...)
 end
 function group_log(M::ProductManifold, y)
     v = zero_tangent_vector(G, y)
-    group_log!(M, v, y)
+    return group_log!(M, v, y)
+end
+
+function group_log!(M::ProductManifold, v, y)
+    map(group_log!, M.manifolds, submanifold_components(M, v), submanifold_components(M, y))
     return v
 end

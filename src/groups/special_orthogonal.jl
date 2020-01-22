@@ -32,11 +32,7 @@ function inverse_translate_diff!(G::SpecialOrthogonal, vout, x, y, v, conv::Acti
     return copyto!(vout, inverse_translate_diff(G, x, y, v, conv))
 end
 
-group_exp(G::SpecialOrthogonal, v) = exp(G, Identity(G), v)
-
 group_exp!(G::SpecialOrthogonal, y, v) = exp!(G, y, Identity(G), v)
-
-group_log(G::SpecialOrthogonal, y) = log(G, Identity(G), y)
 
 group_log!(G::SpecialOrthogonal, v, y) = log!(G, v, Identity(G), y)
 

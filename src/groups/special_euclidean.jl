@@ -81,16 +81,19 @@ Base.@propagate_inbounds function _padvector!(
     return v
 end
 
-_to_affine(::SpecialEuclidean{N}, x::AbstractMatrix) where {N} = x
-function _to_affine(G::SpecialEuclidean{N}, x) where {N}
-    y = similar(x, (N, N))
+@generated function _toaffine(::GT, ::Identity{GT}) where {n,GT<:SpecialEuclidean{n}}
+    return SDiagonal{n}(I)
+end
+_toaffine(::SpecialEuclidean{n}, x::AbstractMatrix) where {n} = x
+function _toaffine(G::SpecialEuclidean{n}, x) where {n}
+    y = similar(x, (n + 1, n + 1))
     map(copyto!, submanifold_components(G, y), submanifold_components(G, x))
     @inbounds _padpoint!(G, y)
     return y
 end
-_to_affine(::SpecialEuclidean{N}, x, v::AbstractMatrix) where {N} = v
-function _to_affine(G::SpecialEuclidean{N}, x, v) where {N}
-    w = similar(v, (N, N))
+_toaffine(::SpecialEuclidean{n}, x, v::AbstractMatrix) where {n} = v
+function _toaffine(G::SpecialEuclidean{n}, x, v) where {n}
+    w = similar(v, (n + 1, n + 1))
     map(copyto!, submanifold_components(G, w), submanifold_components(G, v))
     @inbounds _padvector!(G, w)
     return w
@@ -114,18 +117,18 @@ function group_exp!(G::SpecialEuclidean, y, v)
     _padpoint!(G, y)
     return y
 end
-
 function group_exp!(G::SpecialEuclidean{2}, y, v)
+    SO2 = submanifold(G, 2)
     b, Ω = submanifold_components(G, v)
     t, R = submanifold_components(G, y)
     @assert size(R) == (2, 2)
     @assert size(t) == (2,)
     @assert size(b) == (2,)
 
-    θ = vee(SOn, e, Ω)[1]
+    θ = vee(SO2, Identity(SO2), Ω)[1]
     sinθ, cosθ = sincos(θ)
     if θ ≈ 0
-        α = 1 - θ^2
+        α = 1 - θ^2 / 6
         β = θ / 2
     else
         α = sinθ / θ
@@ -143,10 +146,8 @@ function group_exp!(G::SpecialEuclidean{2}, y, v)
     end
     return y
 end
-
 function group_exp!(G::SpecialEuclidean{3}, y, v)
-    M = base_manifold(G)
-    SO3 = submanifold(base_manifold(G), Val(2))
+    SO3 = submanifold(G, 2)
     b, Ω = submanifold_components(G, v)
     t, R = submanifold_components(G, y)
     @assert size(R) == (3, 3)
@@ -175,34 +176,29 @@ end
 
 function group_log!(G::SpecialEuclidean, v, y)
     ymat = _toaffine(G, y)
-    logy = log(ymat)
+    logy = real(log(ymat))
     map(copyto!, submanifold_components(G, v), submanifold_components(G, logy))
     _padvector!(G, v)
     return v
 end
-
 function group_log!(G::SpecialEuclidean{2}, v, y)
+    SO2 = submanifold(G, 2)
     b, Ω = submanifold_components(G, v)
     t, R = submanifold_components(G, y)
-    @assert size(Ω) == (2, 2)
     @assert size(b) == (2,)
 
-    @inbounds θ = atan(R[2], R[1])
+    group_log!(SO2, Ω, R)
+    @inbounds θ = Ω[2]
     β = θ / 2
     α = θ ≈ 0 ? 1 - β^2 / 3 : β * cot(β)
 
     @inbounds begin
-        Ω[1] = 0
-        Ω[2] = θ
-        Ω[3] = -θ
-        Ω[4] = 0
-        t[1] = α * t[1] + β * t[2]
-        t[2] = α * t[2] - β * t[1]
+        b[1] = α * t[1] + β * t[2]
+        b[2] = α * t[2] - β * t[1]
         _padvector!(G, v)
     end
     return v
 end
-
 function group_log!(G::SpecialEuclidean{3}, v, y)
     b, Ω = submanifold_components(G, v)
     t, R = submanifold_components(G, y)
@@ -211,7 +207,7 @@ function group_log!(G::SpecialEuclidean{3}, v, y)
 
     trR = tr(R)
     cosθ = (trR - 1) / 2
-    θ = acos(cosθ)
+    θ = acos(clamp(cosθ, -1, 1))
     θ² = θ^2
     if θ ≈ 0
         α = 1 / 2 + θ² / 12
@@ -222,9 +218,9 @@ function group_log!(G::SpecialEuclidean{3}, v, y)
         β = 1 / θ² - (1 + cosθ) / 2 / θ / sinθ
     end
 
-    Jₗ⁻¹ = I - Ω ./ 2 .+ β .* Ω^2
     Ω .= (R .- transpose(R)) .* α
-    copyto!(b, Jₗ⁻¹ * t)
+    Jₗ⁻¹ = I - Ω ./ 2 .+ β .* Ω^2
+    mul!(b, Jₗ⁻¹, t)
     @inbounds _padvector!(G, v)
     return v
 end
