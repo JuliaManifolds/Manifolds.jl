@@ -29,9 +29,11 @@ specified in `diff_convs`.
 function test_group(
     G,
     g_pts::AbstractVector,
-    v_pts::AbstractVector = [];
+    v_pts::AbstractVector = [],
+    ve_pts::AbstractVector = [];
     atol = 1e-10,
     test_mutating = true,
+    test_group_exp_log = true,
     test_diff = false,
     diff_convs = [(), (LeftAction(),), (RightAction(),)],
 )
@@ -184,6 +186,44 @@ function test_group(
                 @test translate_diff!(G, vout2, g_pts[2], g2invg1, vout, conv...) === vout2
                 @test isapprox(G, g_pts[1], vout2, v; atol = atol)
             end
+        end
+    end
+
+    test_group_exp_log && @testset "group exp/log" begin
+        v = group_log(G, identity(G, g_pts[1]))
+        g = group_exp(G, v)
+        @test isapprox(G, Identity(G), g; atol = atol)
+        for v in ve_pts
+            g = group_exp(G, v)
+            @test is_manifold_point(G, g; atol = atol)
+            v2 = group_log(G, g)
+            @test isapprox(G, Identity(G), v2, v; atol = atol)
+        end
+
+        test_mutating && @testset "mutating" begin
+            v = similar(ve_pts[1])
+            @test group_log!(G, v, identity(G, g_pts[1])) === v
+            g = similar(g_pts[1])
+            @test group_exp!(G, g, v) === g
+            @test isapprox(G, Identity(G), g; atol = atol)
+            for v in ve_pts
+                g = similar(g_pts[1])
+                @test group_exp!(G, g, v) === g
+                @test is_manifold_point(G, g; atol = atol)
+                v2 = similar(v)
+                @test group_log!(G, v2, g) === v2
+                @test isapprox(G, Identity(G), v2, v; atol = atol)
+            end
+        end
+
+        @testset "exponential subgroup" begin
+            g1 = group_exp(G, 0.2 * ve_pts[1])
+            g2 = group_exp(G, 0.3 * ve_pts[1])
+            g12 = group_exp(G, 0.5 * ve_pts[1])
+            g1_g2 = compose(G, g1, g2)
+            g2_g1 = compose(G, g2, g1)
+            isapprox(G, g1_g2, g12; atol = atol)
+            isapprox(G, g2_g1, g12; atol = atol)
         end
     end
 end
