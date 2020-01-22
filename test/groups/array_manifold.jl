@@ -54,6 +54,18 @@
     compose!(AG, xy, x2, e)
     @test isapprox(G, xy.value, compose(G, x, e))
 
+    @test group_exp(AG, v2) isa ArrayMPoint
+    @test isapprox(G, group_exp(AG, v2).value, group_exp(G, v))
+    expv = similar(x2)
+    group_exp!(AG, expv, v2)
+    @test isapprox(G, expv.value, group_exp(G, v))
+
+    @test group_log(AG, x2) isa ArrayTVector
+    @test isapprox(G, e, group_log(AG, x2).value, group_log(G, x))
+    logx = similar(v2)
+    group_log!(AG, logx, x2)
+    @test isapprox(G, e, logx.value, group_log(G, x))
+
     for conv in (LeftAction(), RightAction())
         @test translate(AG, x2, y2, conv) isa ArrayMPoint
         @test isapprox(G, translate(AG, x2, y2, conv).value, translate(G, x, y, conv))
