@@ -554,6 +554,43 @@ function inverse_translate_diff!(
     return translate_diff!(G, vout, inv(G, x), y, v, conv)
 end
 
+@doc doc"""
+    group_exp(G::AbstractGroupManifold, v)
+
+Compute the group exponential of the Lie algebra element `v`.
+
+Given an element $v ∈ 𝔤 = T_e G$, where $e$ is the [`identity`](@ref) element of the group
+$G$, and $𝔤$ is its Lie algebra, the group exponential is the map
+
+````math
+\exp_e : 𝔤 → G,
+````
+such that for $t ∈ ℝ$, $γ(t) = \exp_e (t v)$ defines a one-parameter subgroup with the
+following properties:
+
+````math
+\begin{aligned}
+γ(t) &= γ(-t)^{-1}\\
+γ(t + s) &= γ(t) \circ γ(s) = γ(s) \circ γ(t)\\
+γ(0) &= e\\
+\lim_{t → 0} \frac{d}{dt} γ(t) &= v.
+\end{aligned}
+````
+
+In general, the group exponential is distinct from the Riemannian exponential [`exp`](@ref).
+
+    group_exp(G::AbstractGroupManifold{AdditionOperation}, v)
+
+Compute $y = v$.
+
+    group_exp(G::AbstractGroupManifold{MultiplicationOperation}, v)
+
+For number and `AbstractMatrix` types of `v`, compute the usual numeric/matrix exponential,
+
+````math
+\exp_e = \sum_{n=0}^\infty \frac{1}{n!} v^n.
+````
+"""
 group_exp(M::Manifold, v) = group_exp(M, v, is_decorator_manifold(M))
 group_exp(M::Manifold, v, ::Val{true}) = group_exp(M.manifold, v)
 function group_exp(M::Manifold, v, ::Val{false})
@@ -570,6 +607,22 @@ function group_exp!(M::Manifold, y, v, ::Val{false})
     return error("group_exp! not implemented on $(typeof(M)) for vector $(typeof(v)) and element $(typeof(y)).")
 end
 
+@doc doc"""
+    group_log(G::AbstractGroupManifold, y)
+
+Compute the group logarithm of the group element `y`.
+
+Given an element $y ∈ G$, compute the right inverse of the exponential map
+[`group_exp`](@ref), that is, the element $v ∈ 𝔤 = T_e G$, such that $y = \exp_e v$
+
+    group_log(G::AbstractGroupManifold{AdditionOperation}, y)
+
+Compute $v = y$.
+
+    group_log(G::AbstractGroupManifold{MultiplicationOperation}, y)
+
+For number and `AbstractMatrix` types of `y`, compute the usual numeric/matrix logarithm.
+"""
 group_log(M::Manifold, y) = group_log(M, y, is_decorator_manifold(M))
 group_log(M::Manifold, y, ::Val{true}) = group_log(M.manifold, y)
 function group_log(M::Manifold, y, ::Val{false})
