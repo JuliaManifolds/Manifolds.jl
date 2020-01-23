@@ -510,6 +510,40 @@ function ProductPointDistribution(distributions::MPointDistribution...)
     return ProductPointDistribution(M, distributions...)
 end
 
+function project_point(M::ProductManifold, x::ProductRepr)
+    return ProductRepr(map(project_point, M.manifolds, submanifold_components(M, x))...)
+end
+
+function project_point!(M::ProductManifold, y, x)
+    map(
+        project_point!,
+        M.manifolds,
+        submanifold_components(M, y),
+        submanifold_components(M, x),
+    )
+    return y
+end
+
+function project_tangent(M::ProductManifold, x::ProductRepr, v::ProductRepr)
+    return ProductRepr(map(
+        project_tangent,
+        M.manifolds,
+        submanifold_components(M, x),
+        submanifold_components(M, v),
+    )...)
+end
+
+function project_tangent!(M::ProductManifold, w, x, v)
+    map(
+        project_tangent!,
+        M.manifolds,
+        submanifold_components(M, w),
+        submanifold_components(M, x),
+        submanifold_components(M, v),
+    )
+    return w
+end
+
 function rand(rng::AbstractRNG, d::ProductPointDistribution)
     return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
 end
