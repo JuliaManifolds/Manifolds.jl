@@ -245,6 +245,7 @@ include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/Torus.jl")
 
 include("groups/group.jl")
+include("groups/metric.jl")
 include("groups/group_action.jl")
 include("groups/group_operation_action.jl")
 include("groups/array_manifold.jl")
@@ -413,11 +414,14 @@ export AbstractGroupAction,
     GroupManifold,
     GroupOperationAction,
     Identity,
+    InvariantMetric,
     LeftAction,
+    LeftInvariantMetric,
     MultiplicationOperation,
     ProductGroup,
     ProductOperation,
     RightAction,
+    RightInvariantMetric,
     RotationAction,
     SemidirectProductGroup,
     SpecialEuclidean,
@@ -438,6 +442,8 @@ export apply,
     group_exp!,
     group_log,
     group_log!,
+    has_biinvariant_metric,
+    has_invariant_metric,
     identity,
     identity!,
     inv,
