@@ -629,7 +629,7 @@ function group_log(M::Manifold, y, ::Val{false})
     return error("group_log not implemented on $(typeof(M)) for element $(typeof(y)).")
 end
 function group_log(G::AbstractGroupManifold, y)
-    v = zero_tangent_vector(G, y)
+    v = similar_result(G, group_log, y)
     return group_log!(G, v, y)
 end
 
@@ -693,8 +693,10 @@ manifold. With a group translation $τ_x$ in a specified direction, the retracti
 ````
 """
 function retract(G::GroupManifold, x, v, method::GroupExponentialRetraction)
-    y = similar_result(G, retract, x, v)
-    return retract!(G, y, x, v, method)
+    conv = direction(method)
+    vₑ = inverse_translate_diff(G, x, x, v, conv)
+    yₑ = group_exp(G, vₑ)
+    return translate(G, x, yₑ, conv)
 end
 
 function retract!(G::GroupManifold, y, x, v, method::GroupExponentialRetraction)
@@ -731,8 +733,10 @@ manifold. With a group translation $τ_x$ in a specified direction, the retracti
 ````
 """
 function inverse_retract(G::GroupManifold, x, y, method::GroupLogarithmicInverseRetraction)
-    v = similar_result(G, inverse_retract, x, y)
-    return inverse_retract!(G, v, x, y, method)
+    conv = direction(method)
+    xinvy = inverse_translate(G, x, y, conv)
+    vₑ = group_log(G, xinvy)
+    return translate_diff(G, x, Identity(G), vₑ, conv)
 end
 
 function inverse_retract!(
@@ -890,9 +894,4 @@ end
 function group_exp!(G::MultiplicationGroup, y, v)
     v isa Union{Number,AbstractMatrix} && return copyto!(y, exp(v))
     return error("group_exp! not implemented on $(typeof(G)) for vector $(typeof(v)) and element $(typeof(y)).")
-end
-
-function group_log!(G::MultiplicationGroup, v, y)
-    y isa Union{Number,AbstractMatrix} && return copyto!(v, log_safe(y))
-    return error("group_log! not implemented on $(typeof(G)) for element $(typeof(y)) and vector $(typeof(v)).")
 end
