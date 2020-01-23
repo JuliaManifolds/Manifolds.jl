@@ -689,7 +689,7 @@ Compute the retraction using the group exponential "translated" to any point on 
 manifold. With a group translation $τ_x$ in a specified direction, the retraction is
 
 ````math
-\operatorname{retr}_x = τ_x \circ \exp_e \circ \mathrm{d}τ_x^{-1}
+\operatorname{retr}_x = τ_x \circ \exp_e \circ (\mathrm{d}τ_x)_x^{-1}
 ````
 """
 function retract(G::GroupManifold, x, v, method::GroupExponentialRetraction)
@@ -727,7 +727,7 @@ Compute the inverse retraction using the group logarithm "translated" to any poi
 manifold. With a group translation $τ_x$ in a specified direction, the retraction is
 
 ````math
-\operatorname{retr}_x^{-1} = \mathrm{d}τ_x \circ \log_e \circ τ_x^{-1}
+\operatorname{retr}_x^{-1} = (\mathrm{d}τ_x)_e \circ \log_e \circ τ_x^{-1}
 ````
 """
 function inverse_retract(G::GroupManifold, x, y, method::GroupLogarithmicInverseRetraction)
