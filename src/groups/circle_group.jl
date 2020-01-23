@@ -10,6 +10,10 @@ CircleGroup() = GroupManifold(Circle{ℂ}(), MultiplicationOperation())
 
 show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
 
+has_invariant_metric(::CircleGroup, ::ActionDirection) = Val(true)
+
+is_default_metric(::MetricManifold{CircleGroup,EuclideanMetric}) = Val(true)
+
 function compose(G::CircleGroup, x::AbstractVector, y::AbstractVector)
     return map(compose, repeated(G), x, y)
 end

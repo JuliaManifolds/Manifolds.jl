@@ -21,3 +21,7 @@ end
 function show(io::IO, ::TranslationGroup{N,F}) where {N,F}
     print(io, "TranslationGroup($(join(N.parameters, ", ")); field = $(F))")
 end
+
+has_invariant_metric(::TranslationGroup, ::ActionDirection) = Val(true)
+
+is_default_metric(::MetricManifold{TranslationGroup,EuclideanMetric}) = Val(true)
