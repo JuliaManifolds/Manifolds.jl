@@ -4,7 +4,7 @@
 Return `Val(true)` if the metric on the group $G$ is invariant under translations by the
 specified direction, that is, given a group $G$, a left- or right group translation map $τ$,
 and a metric $g_e$ on the Lie algebra, a $τ$-invariant metric at any point $x ∈ G$ is
-defined as
+defined as a metric with the inner product
 
 ````math
 g_x(v, w) = g_{τ_y x}((\mathrm{d}τ_y)_x v, (\mathrm{d}τ_y)_x w),
@@ -37,27 +37,74 @@ function has_biinvariant_metric(M::Manifold)
 end
 
 @doc doc"""
+    check_has_invariant_metric(
+        G::AbstractGroupManifold,
+        x,
+        v,
+        w,
+        ys::AbstractVector,
+        conv::ActionDirection = LeftAction();
+        kwargs...,
+    ) -> Bool
+
+Check whether the metric on the group $G$ is invariant using a set of predefined points.
+Namely, for $x ∈ G$, $v,w \in T_x G$, a metric $g$, and a translation map $τ_y$ in the
+specified direction, check for each $y ∈ G$ that the following condition holds:
+
+````math
+g_x(v, w) ≈ g_{τ_y x}((\mathrm{d}τ_y)_x v, (\mathrm{d}τ_y)_x w).
+````
+
+This is necessary but not sufficient for invariance.
+
+Optionally, `kwargs` passed to `isapprox` may be provided.
+"""
+function check_has_invariant_metric(
+    M::Manifold,
+    x,
+    v,
+    w,
+    ys,
+    conv::ActionDirection = LeftAction();
+    kwargs...,
+)
+    ip = inner(M, x, v, w)
+    for y in ys
+        isapprox(
+            ip,
+            inner(M, translate_diff(M, y, x, v, conv), translate_diff(M, y, x, w, conv));
+            kwargs...,
+        ) || return false
+    end
+    return true
+end
+
+@doc doc"""
     InvariantMetric{G<:Metric,D<:ActionDirection} <: Metric
 
 Extend a metric on the Lie algebra of an [`AbstractGroupManifold`](@ref) to the whole group
 via translation in the specified direction.
 
-Given a group $G$, a left- or right group translation map $τ$, and a metric $g_e$ on the Lie
-algebra, a $τ$-invariant metric at any point $x ∈ G$ is defined as
+Given a group $G$ and a left- or right group translation map $τ$ on the group, a metric $g$
+is $τ$-invariant if it has the inner product
 
 ````math
 g_x(v, w) = g_{τ_y x}((\mathrm{d}τ_y)_x v, (\mathrm{d}τ_y)_x w),
 ````
 
-for $v,w ∈ T_x G$ and all $y ∈ G$, where $(\mathrm{d}τ_y)_x$ is the action of the
+for all $x,y ∈ G$ and $v,w ∈ T_x G$, where $(\mathrm{d}τ_y)_x$ is the action of the
 differential of translation by $y$ evaluated at $x$ (see [`translate_diff`](@ref)).
-Setting $y = x^{-1}$ extends a metric on the Lie algebra to the whole group:
+
+`InvariantMetric` constructs an (assumed) $τ$-invariant metric by extending the inner
+product of an metric $h_e$ on the Lie algebra to the whole group:
 
 ````math
-g_x(v, w) = g_e((\mathrm{d}τ_x)_x^{-1} v, (\mathrm{d}τ_x)_x^{-1} w).
+g_x(v, w) = h_e((\mathrm{d}τ_x)_x^{-1} v, (\mathrm{d}τ_x)_x^{-1} w).
 ````
 
-Note that the above condition is not checked and must be verified for the entire group.
+!!! warning
+    The invariance condition is not checked and must be verified for the entire group.
+    To check the condition for a set of points, use [`check_has_invariant_metric`](@ref).
 
 The convenient aliases [`LeftInvariantMetric`](@ref) and [`RightInvariantMetric`](@ref) are
 provided.
