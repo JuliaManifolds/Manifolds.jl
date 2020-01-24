@@ -16,9 +16,8 @@ branches:
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/ # build tagged releases
 jobs:
   allow_failures:
-    - julia:
-      - 1.4
-      - nightly
+    - julia: 1.4
+    - julia: nightly
   include:
     - stage: "Documentation"
       julia: 1.3
