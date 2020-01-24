@@ -237,6 +237,7 @@ include("manifolds/Hyperbolic.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/Stiefel.jl")
 include("manifolds/Sphere.jl")
+include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Symmetric.jl")
 include("manifolds/SymmetricPositiveDefinite.jl")
 include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
@@ -284,6 +285,7 @@ export Euclidean,
     Rotations,
     Sphere,
     Stiefel,
+    GeneralizedStiefel,
     SymmetricMatrices,
     SymmetricPositiveDefinite,
     Torus
