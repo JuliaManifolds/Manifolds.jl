@@ -41,7 +41,7 @@ that lie on it (contained in `pts`).
 - `retraction_methods = []`: retraction methods that will be tested.
 - `test_forward_diff = true`: if true, automatic differentiation using
   ForwardDiff is tested.
-- `test_forward_diff = true`: if true, automatic differentiation using
+- `test_reverse_diff = true`: if true, automatic differentiation using
   ReverseDiff is tested.
 - `test_musical_isomorphisms = false` : test musical isomorphisms
 - `test_mutating_rand = false` : test the mutating random function for points on manifolds

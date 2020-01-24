@@ -23,7 +23,12 @@ include("utils.jl")
         @test incident_log(N, x) == [x[2]-x[1], x[1]-x[2] + x[3]-x[2], x[2]-x[3]]
 
         pts = [x,y,z]
-        test_manifold(N, pts; test_representation_size = false)
+        test_manifold(
+            N,
+            pts;
+            test_representation_size = false,
+            test_reverse_diff = VERSION > v"1.2",
+        )
 
         NE = GraphManifold(G,M,EdgeManifold())
         @test is_manifold_point(NE, x[1:2])
@@ -35,7 +40,12 @@ include("utils.jl")
         @test !is_tangent_vector(N, x[1:2], log(N, x, y))
         @test_throws DomainError is_tangent_vector(NE, x[1:2], log(N, x, y), true)
 
-        test_manifold(NE, [ x[1:2], y[1:2], z[1:2] ]; test_representation_size = false)
+        test_manifold(
+            NE,
+            [ x[1:2], y[1:2], z[1:2] ];
+            test_representation_size = false,
+            test_reverse_diff = VERSION > v"1.2",
+        )
 
         G2 = SimpleDiGraph(3)
         add_edge!(G2, 1, 2)
