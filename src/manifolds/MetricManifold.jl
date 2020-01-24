@@ -534,7 +534,15 @@ function sharp!(M::N, v::TFVector, x, w::CoTFVector) where {N<:MetricManifold}
 end
 
 @doc doc"""
-    solve_exp_ode(M::MetricManifold, x, v, tspan; backend=:default, solver=AutoVern9(Rodas5()), kwargs...)
+    solve_exp_ode(
+        M::MetricManifold,
+        x,
+        v,
+        tspan;
+        backend = :default,
+        solver = AutoVern9(Rodas5()),
+        kwargs...,
+    )
 
 Approximate the exponential map on the manifold over the provided timespan
 assuming the Levi-Civita connection by solving the ordinary differential
@@ -550,9 +558,16 @@ arguments that will be passed to `OrdinaryDiffEq.solve`.
 Currently, the numerical integration is only accurate when using a single
 coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
+
+!!! note
+    This function only works for Julia 1.1 or greater, when
+    [OrdinaryDiffEq.jl](https://github.com/JuliaDiffEq/OrdinaryDiffEq.jl) is loaded with
+    ```julia
+    using OrdinaryDiffEq
+    ```
 """
 function solve_exp_ode(M, x, v, tspan; kwargs...)
-    error("solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(x)), vector $(typeof(v)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq`.")
+    error("solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(x)), vector $(typeof(v)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq` on Julia 1.1 or greater.")
 end
 
 function vector_transport_to!(
