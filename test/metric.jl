@@ -1,7 +1,8 @@
-using FiniteDifferences, ForwardDiff, OrdinaryDiffEq
+using FiniteDifferences, ForwardDiff
 using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
 import Manifolds: mean!, median!
+VERSION ≥ v"1.1" && using OrdinaryDiffEq
 
 include("utils.jl")
 
@@ -37,12 +38,14 @@ struct TestEuclideanMetric <: Metric end
         @test inverse_local_metric(M, x) ≈ invG
         @test det_local_metric(M, x) ≈ *(1.0:n...)
         @test log_local_metric_density(M, x) ≈ sum(log.(1.0:n)) / 2
-        @test inner(M, x, v, w) ≈ dot(v, G * w)
-        @test norm(M, x, v) ≈ sqrt(dot(v, G * v))
+        @test inner(M, x, v, w) ≈ dot(v, G * w) atol=1e-6
+        @test norm(M, x, v) ≈ sqrt(dot(v, G * v)) atol=1e-6
 
-        T = 0:.5:10
-        @test exp(M, x, v, T) ≈ [x + t * v for t in T]
-        @test geodesic(M, x, v, T) ≈ [x + t * v for t in T]
+        if VERSION ≥ v"1.1"
+            T = 0:.5:10
+            @test exp(M, x, v, T) ≈ [x + t * v for t in T] atol=1e-6
+            @test geodesic(M, x, v, T) ≈ [x + t * v for t in T] atol=1e-6
+        end
 
         @test christoffel_symbols_first(M, x) ≈ zeros(n, n, n) atol=1e-6
         @test christoffel_symbols_second(M, x) ≈ zeros(n, n, n) atol=1e-6
@@ -106,19 +109,19 @@ struct TestSphericalMetric <: Metric end
         invG = Diagonal(vtype([1, 1 / sin(θ)^2])) ./ r^2
         v, w = normalize(randn(n)), normalize(randn(n))
 
-        @test local_metric(M, x) ≈ G
-        @test inverse_local_metric(M, x) ≈ invG
-        @test det_local_metric(M, x) ≈ r^4 * sin(θ)^2
-        @test log_local_metric_density(M, x) ≈ 2log(r) + log(sin(θ))
-        @test inner(M, x, v, w) ≈ dot(v, G * w)
-        @test norm(M, x, v) ≈ sqrt(dot(v, G * v))
+        @test local_metric(M, x) ≈ G atol=1e-6
+        @test inverse_local_metric(M, x) ≈ invG atol=1e-6
+        @test det_local_metric(M, x) ≈ r^4 * sin(θ)^2 atol=1e-6
+        @test log_local_metric_density(M, x) ≈ 2log(r) + log(sin(θ)) atol=1e-6
+        @test inner(M, x, v, w) ≈ dot(v, G * w) atol=1e-6
+        @test norm(M, x, v) ≈ sqrt(dot(v, G * v)) atol=1e-6
 
         xcart = sph_to_cart(θ, ϕ)
         vcart = [cos(ϕ)*cos(θ) -sin(ϕ)*sin(θ);
                  sin(ϕ)*cos(θ)  cos(ϕ)*sin(θ);
                  -sin(θ) 0] * v
 
-        if !Sys.iswindows() || Sys.ARCH == :x86_64
+        if VERSION ≥ v"1.1" && (!Sys.iswindows() || Sys.ARCH == :x86_64)
             @testset "numerically integrated geodesics for $vtype" begin
                 T = 0:.1:1
                 @test isapprox([sph_to_cart(yi...) for yi in exp(M, x, v, T)],
@@ -131,9 +134,9 @@ struct TestSphericalMetric <: Metric end
         Γ₁ = christoffel_symbols_first(M, x)
         for i=1:n, j=1:n, k=1:n
             if (i,j,k) == (1,2,2) || (i,j,k) == (2,1,2)
-                @test Γ₁[i,j,k] ≈ r^2*cos(θ)*sin(θ)
+                @test Γ₁[i,j,k] ≈ r^2*cos(θ)*sin(θ) atol=1e-6
             elseif (i,j,k) == (2,2,1)
-                @test Γ₁[i,j,k] ≈ -r^2*cos(θ)*sin(θ)
+                @test Γ₁[i,j,k] ≈ -r^2*cos(θ)*sin(θ) atol=1e-6
             else
                 @test Γ₁[i,j,k] ≈ 0 atol=1e-6
             end
@@ -142,9 +145,9 @@ struct TestSphericalMetric <: Metric end
         Γ₂ = christoffel_symbols_second(M, x)
         for l=1:n, i=1:n, j=1:n
             if (l,i,j) == (1,2,2)
-                @test Γ₂[l,i,j] ≈ -cos(θ)*sin(θ)
+                @test Γ₂[l,i,j] ≈ -cos(θ)*sin(θ) atol=1e-6
             elseif (l,i,j) == (2,1,2) || (l,i,j) == (2,2,1)
-                @test Γ₂[l,i,j] ≈ cot(θ)
+                @test Γ₂[l,i,j] ≈ cot(θ) atol=1e-6
             else
                 @test Γ₂[l,i,j] ≈ 0 atol=1e-6
             end
@@ -153,22 +156,22 @@ struct TestSphericalMetric <: Metric end
         R = riemann_tensor(M, x)
         for l=1:n, i=1:n, j=1:n, k=1:n
             if (l,i,j,k) == (2,1,1,2)
-                @test R[l,i,j,k] ≈ -1
+                @test R[l,i,j,k] ≈ -1 atol=1e-6
             elseif (l,i,j,k) == (2,1,2,1)
-                @test R[l,i,j,k] ≈ 1
+                @test R[l,i,j,k] ≈ 1 atol=1e-6
             elseif (l,i,j,k) == (1,2,1,2)
-                @test R[l,i,j,k] ≈ sin(θ)^2
+                @test R[l,i,j,k] ≈ sin(θ)^2 atol=1e-6
             elseif (l,i,j,k) == (1,2,2,1)
-                @test R[l,i,j,k] ≈ -sin(θ)^2
+                @test R[l,i,j,k] ≈ -sin(θ)^2 atol=1e-6
             else
                 @test R[l,i,j,k] ≈ 0 atol=1e-6
             end
         end
 
-        @test ricci_tensor(M, x) ≈ G ./ r^2
-        @test ricci_curvature(M, x) ≈ 2 / r^2
-        @test gaussian_curvature(M, x) ≈ 1 / r^2
-        @test einstein_tensor(M, x) ≈ ricci_tensor(M, x) - gaussian_curvature(M, x)  .* G
+        @test ricci_tensor(M, x) ≈ G ./ r^2 atol=1e-6
+        @test ricci_curvature(M, x) ≈ 2 / r^2 atol=1e-6
+        @test gaussian_curvature(M, x) ≈ 1 / r^2 atol=1e-6
+        @test einstein_tensor(M, x) ≈ ricci_tensor(M, x) - gaussian_curvature(M, x)  .* G atol=1e-6
     end
 end
 
