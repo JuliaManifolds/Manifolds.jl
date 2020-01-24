@@ -21,7 +21,9 @@ SemidirectProductGroup(Tn, SOn, RotationAction(Tn, SOn))
 ```
 
 Points on $\mathrm{SE}(n)$ may be represented as points on the underlying product manifold
-$\mathrm{T}(n) \times \mathrm{SO}(n)$ or as affine matrices with size `(n + 1, n + 1)`.
+$\mathrm{T}(n) \times \mathrm{SO}(n)$. For group-specific functions, they may also be
+represented as affine matrices with size `(n + 1, n + 1)` (see [`affine_matrix`](@ref)), for
+which the group operation is [`MultiplicationOperation`](@ref).
 """
 const SpecialEuclidean{N} = SemidirectProductGroup{
     TranslationGroup{Tuple{N},ℝ},
@@ -64,7 +66,7 @@ Base.@propagate_inbounds function _padpoint!(
     ::SpecialEuclidean{n},
     y::AbstractMatrix,
 ) where {n}
-    for i ∈ 1:n
+    for i = 1:n
         y[n+1, i] = 0
     end
     y[n+1, n+1] = 1
@@ -75,29 +77,56 @@ Base.@propagate_inbounds function _padvector!(
     ::SpecialEuclidean{n},
     v::AbstractMatrix,
 ) where {n}
-    for i ∈ 1:n+1
+    for i = 1:n+1
         v[n+1, i] = 0
     end
     return v
 end
 
-@generated function _toaffine(::GT, ::Identity{GT}) where {n,GT<:SpecialEuclidean{n}}
-    return SDiagonal{n}(I)
-end
-_toaffine(::SpecialEuclidean{n}, x::AbstractMatrix) where {n} = x
-function _toaffine(G::SpecialEuclidean{n}, x) where {n}
+@doc doc"""
+    affine_matrix(G::SpecialEuclidean, x) -> AbstractMatrix
+
+Represent the point $x ∈ \mathrm{SE}(n)$ as an affine matrix.
+For $x = (t, R) ∈ \mathrm{SE}(n)$, where $t ∈ \mathrm{T}(n), R ∈ \mathrm{SO}(n)$, the
+affine representation is the $n + 1 × n + 1$ matrix
+
+````math
+\begin{pmatrix}
+R & t \\
+0^\mathrm{T} & 1
+\end{pmatrix}.
+````
+
+    affine_matrix(G::SpecialEuclidean, e, v) -> AbstractMatrix
+
+Represent the Lie algebra element $v ∈ 𝔰𝔢(n) = T_e \mathrm{SE}(n)$ as a (screw) matrix.
+For $v = (b, Ω) ∈ 𝔰𝔢(n)$, where $Ω ∈ 𝔰𝔬(n) = T_e \mathrm{SO}(n)$, the screw representation is
+the $n + 1 × n + 1$ matrix
+
+````math
+\begin{pmatrix}
+Ω & b \\
+0^\mathrm{T} & 0
+\end{pmatrix}.
+````
+"""
+function affine_matrix(G::SpecialEuclidean{n}, x) where {n}
     y = similar(x, (n + 1, n + 1))
     map(copyto!, submanifold_components(G, y), submanifold_components(G, x))
     @inbounds _padpoint!(G, y)
     return y
 end
-_toaffine(::SpecialEuclidean{n}, x, v::AbstractMatrix) where {n} = v
-function _toaffine(G::SpecialEuclidean{n}, x, v) where {n}
+affine_matrix(::SpecialEuclidean{n}, x::AbstractMatrix) where {n} = x
+@generated function affine_matrix(::GT, ::Identity{GT}) where {n,GT<:SpecialEuclidean{n}}
+    return SDiagonal{n}(I)
+end
+function affine_matrix(G::SpecialEuclidean{n}, e, v) where {n}
     w = similar(v, (n + 1, n + 1))
     map(copyto!, submanifold_components(G, w), submanifold_components(G, v))
     @inbounds _padvector!(G, w)
     return w
 end
+affine_matrix(::SpecialEuclidean{n}, e, v::AbstractMatrix) where {n} = v
 
 compose(::SpecialEuclidean, x::AbstractMatrix, y::AbstractMatrix) = x * y
 
@@ -152,7 +181,7 @@ where $θ$ is the same as above.
 group_exp(::SpecialEuclidean, ::Any)
 
 function group_exp!(G::SpecialEuclidean, y, v)
-    vmat = _toaffine(G, Identity(G), v)
+    vmat = affine_matrix(G, Identity(G), v)
     expv = exp(vmat)
     map(copyto!, submanifold_components(G, y), submanifold_components(G, expv))
     _padpoint!(G, y)
@@ -216,7 +245,7 @@ function group_exp!(G::SpecialEuclidean{3}, y, v)
 end
 
 function group_log!(G::SpecialEuclidean, v, y)
-    ymat = _toaffine(G, y)
+    ymat = affine_matrix(G, y)
     logy = real(log(ymat))
     map(copyto!, submanifold_components(G, v), submanifold_components(G, logy))
     _padvector!(G, v)
