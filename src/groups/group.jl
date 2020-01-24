@@ -563,9 +563,9 @@ Given an element $v ∈ 𝔤 = T_e G$, where $e$ is the [`identity`](@ref) eleme
 $G$, and $𝔤$ is its Lie algebra, the group exponential is the map
 
 ````math
-\exp_e : 𝔤 → G,
+\exp : 𝔤 → G,
 ````
-such that for $t ∈ ℝ$, $γ(t) = \exp_e (t v)$ defines a one-parameter subgroup with the
+such that for $t ∈ ℝ$, $γ(t) = \exp (t v)$ defines a one-parameter subgroup with the
 following properties:
 
 ````math
@@ -577,9 +577,13 @@ following properties:
 \end{aligned}
 ````
 
-In general, the group exponential is distinct from the Riemannian exponential [`exp`](@ref).
+!!! note
+    In general, the group exponential map is distinct from the Riemannian exponential map
+    [`exp`](@ref).
 
-    group_exp(G::AbstractGroupManifold{AdditionOperation}, v)
+```
+group_exp(G::AbstractGroupManifold{AdditionOperation}, v)
+```
 
 Compute $y = v$.
 
@@ -588,7 +592,7 @@ Compute $y = v$.
 For number and `AbstractMatrix` types of `v`, compute the usual numeric/matrix exponential,
 
 ````math
-\exp_e = \sum_{n=0}^\infty \frac{1}{n!} v^n.
+\exp v = e^v = \sum_{n=0}^\infty \frac{1}{n!} v^n.
 ````
 """
 group_exp(M::Manifold, v) = group_exp(M, v, is_decorator_manifold(M))
@@ -612,16 +616,29 @@ end
 
 Compute the group logarithm of the group element `y`.
 
-Given an element $y ∈ G$, compute the right inverse of the exponential map
-[`group_exp`](@ref), that is, the element $v ∈ 𝔤 = T_e G$, such that $y = \exp_e v$
+Given an element $y ∈ G$, compute the right inverse of the group exponential map
+[`group_exp`](@ref), that is, the element $\log y = v ∈ 𝔤 = T_e G$, such that $y = \exp v$
 
-    group_log(G::AbstractGroupManifold{AdditionOperation}, y)
+!!! note
+    In general, the group logarithm map is distinct from the Riemannian logarithm map
+    [`log`](@ref).
+
+```
+group_log(G::AbstractGroupManifold{AdditionOperation}, y)
+```
 
 Compute $v = y$.
 
     group_log(G::AbstractGroupManifold{MultiplicationOperation}, y)
 
-For number and `AbstractMatrix` types of `y`, compute the usual numeric/matrix logarithm.
+For number and `AbstractMatrix` types of `y`, compute the usual numeric/matrix logarithm:
+
+````math
+\log y = \sum_{n=1}^\infty \frac{(-1)^{n+1}}{n} (y - e)^n,
+````
+
+where $e$ here is the [`identity`](@ref) element, that is, $1$ for numeric $y$ or the
+identity matrix for matrix $y$.
 """
 group_log(M::Manifold, y) = group_log(M, y, is_decorator_manifold(M))
 group_log(M::Manifold, y, ::Val{true}) = group_log(M.manifold, y)
@@ -646,7 +663,11 @@ end
 """
     GroupExponentialRetraction{D<:ActionDirection} <: AbstractRetractionMethod
 
-Retraction using the group exponential "translated" to any point on the manifold.
+Retraction using the group exponential [`group_exp`](@ref) "translated" to any point on the
+manifold.
+
+For more details, see
+[`retract`](@ref retract(::GroupManifold, x, v, ::GroupExponentialRetraction)).
 
 # Constructor
 
@@ -661,7 +682,11 @@ end
 """
     GroupLogarithmicInverseRetraction{D<:ActionDirection} <: AbstractInverseRetractionMethod
 
-Retraction using the group logarithm "translated" to any point on the manifold.
+Retraction using the group logarithm [`group_log`](@ref) "translated" to any point on the
+manifold.
+
+For more details, see
+[`inverse_retract`](@ref inverse_retract(::GroupManifold, x, y ::GroupLogarithmicInverseRetraction)).
 
 # Constructor
 
@@ -685,12 +710,18 @@ direction(::GroupLogarithmicInverseRetraction{D}) where {D} = D()
         method::GroupExponentialRetraction{<:ActionDirection},
     )
 
-Compute the retraction using the group exponential "translated" to any point on the
-manifold. With a group translation $τ_x$ in a specified direction, the retraction is
+Compute the retraction using the group exponential [`group_exp`](@ref) "translated" to any
+point on the manifold.
+With a group translation ([`translate`](@ref)) $τ_x$ in a specified direction, the
+retraction is
 
 ````math
-\operatorname{retr}_x = τ_x \circ \exp_e \circ (\mathrm{d}τ_x)_x^{-1}
+\operatorname{retr}_x = τ_x \circ \exp \circ (\mathrm{d}τ_x)_x^{-1},
 ````
+
+where $\exp$ is the group exponential ([`group_exp`](@ref)), and $(\mathrm{d}τ_x)_x^{-1}$ is
+the action of the differential of inverse translation $τ_x^{-1}$ evaluated at $x$ (see
+[`inverse_translate_diff`](@ref)).
 """
 function retract(G::GroupManifold, x, v, method::GroupExponentialRetraction)
     conv = direction(method)
@@ -725,12 +756,18 @@ end
         method::GroupLogarithmicInverseRetraction{<:ActionDirection},
     )
 
-Compute the inverse retraction using the group logarithm "translated" to any point on the
-manifold. With a group translation $τ_x$ in a specified direction, the retraction is
+Compute the inverse retraction using the group logarithm [`group_log`](@ref) "translated"
+to any point on the manifold.
+With a group translation ([`translate`](@ref)) $τ_x$ in a specified direction, the
+retraction is
 
 ````math
-\operatorname{retr}_x^{-1} = (\mathrm{d}τ_x)_e \circ \log_e \circ τ_x^{-1}
+\operatorname{retr}_x^{-1} = (\mathrm{d}τ_x)_e \circ \log \circ τ_x^{-1},
 ````
+
+where $\log$ is the group logarithm ([`group_log`](@ref)), and $(\mathrm{d}τ_x)_e$ is the
+action of the differential of translation $τ_x$ evaluated at the identity element
+(see [`translate_diff`](@ref)).
 """
 function inverse_retract(G::GroupManifold, x, y, method::GroupLogarithmicInverseRetraction)
     conv = direction(method)

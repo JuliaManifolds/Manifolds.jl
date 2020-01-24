@@ -104,3 +104,11 @@ Modules = [Manifolds]
 Pages = ["groups/translation_action.jl"]
 Order = [:type, :function]
 ```
+
+## Invariant metrics
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/metric.jl"]
+Order = [:type, :function]
+```

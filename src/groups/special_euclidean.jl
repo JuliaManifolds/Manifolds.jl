@@ -110,6 +110,47 @@ function compose!(
     return mul!(z, x, y)
 end
 
+@doc doc"""
+    group_exp(G::SpecialEuclidean, v)
+
+Compute the group exponential of $v ∈ 𝔰𝔢(n)$. In the [`affine_matrix`](@ref) representation,
+the group exponential is the matrix exponential (see [`group_exp`](@ref)).
+
+    group_exp(G::SpecialEuclidean{2}, v)
+
+The group exponential on $\mathrm{SE}(2)$ for $v = (b, Ω) ∈ 𝔰𝔢(2)$, where $R ∈ 𝔰𝔬(2)$ is
+
+````math
+\exp v = (U(θ) b, \exp Ω) = (t, R),
+````
+
+where $R = \exp Ω$ is the group exponential on $\mathrm{SO}(3)$, and $U(θ)$ is
+
+````math
+U(θ) = \frac{\sin θ}{θ} I_2 + \frac{1 - \cos θ}{θ^2} Ω,
+````
+
+where $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
+(see [`norm`](@ref norm(M::Rotations, x, v))) is the angle of the rotation.
+
+    group_exp(G::SpecialEuclidean{3}, v)
+
+The group exponential on $\mathrm{SE}(3)$ for $v = (b, Ω) ∈ 𝔰𝔢(3)$, where $R ∈ 𝔰𝔬(3)$ is
+
+````math
+\exp v = (U(θ) b, \exp Ω) = (t, R),
+````
+
+where $R = \exp Ω$ is the group exponential on $\mathrm{SO}(3)$, and $U(θ)$ is
+
+````math
+U(θ) = I_3 + \frac{1 - \cos θ}{θ^2} Ω + \frac{θ - \sin θ}{θ^3} Ω^2,
+````
+
+where $θ$ is the same as above.
+"""
+group_exp(::SpecialEuclidean, ::Any)
+
 function group_exp!(G::SpecialEuclidean, y, v)
     vmat = _toaffine(G, Identity(G), v)
     expv = exp(vmat)
