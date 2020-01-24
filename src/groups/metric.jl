@@ -70,11 +70,10 @@ function check_has_invariant_metric(
 )
     ip = inner(M, x, v, w)
     for y in ys
-        isapprox(
-            ip,
-            inner(M, translate_diff(M, y, x, v, conv), translate_diff(M, y, x, w, conv));
-            kwargs...,
-        ) || return false
+        τx = translate(M, y, x, conv)
+        dτv = translate_diff(M, y, x, v, conv)
+        dτw = translate_diff(M, y, x, w, conv)
+        isapprox(ip, inner(M, τx, dτv, dτw); kwargs...) || return false
     end
     return true
 end

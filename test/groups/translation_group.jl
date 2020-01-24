@@ -16,7 +16,7 @@ include("group_utils.jl")
             gpts = convert.(T, pts)
             vgpts = convert.(T, vpts)
             @test compose(G, gpts[1], gpts[2]) ≈ gpts[1] + gpts[2]
-            test_group(G, gpts, vgpts, vgpts; test_diff = true)
+            test_group(G, gpts, vgpts, vgpts; test_diff = true, test_invariance = true)
         end
     end
 
@@ -34,7 +34,7 @@ include("group_utils.jl")
             vgpts = convert.(T, vpts)
             @test compose(G, gpts[1], gpts[2]) ≈ gpts[1] + gpts[2]
             @test translate_diff(G, gpts[2], gpts[1], vgpts[1]) ≈ vgpts[1]
-            test_group(G, gpts, vgpts, vgpts; test_diff = true)
+            test_group(G, gpts, vgpts, vgpts; test_diff = true, test_invariance = true)
         end
     end
 end

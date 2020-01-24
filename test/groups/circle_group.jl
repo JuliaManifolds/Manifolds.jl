@@ -23,7 +23,7 @@ include("group_utils.jl")
         vpts = [0.0 + 0.5im]
         @test compose(G, pts[2], pts[1]) ≈ pts[2] * pts[1]
         @test translate_diff(G, pts[2], pts[1], vpts[1]) ≈ pts[2] * vpts[1]
-        test_group(G, pts, vpts, vpts; test_diff = true, test_mutating = false)
+        test_group(G, pts, vpts, vpts; test_diff = true, test_mutating = false, test_invariance = true)
     end
 
     @testset "vector points" begin
@@ -31,7 +31,7 @@ include("group_utils.jl")
         vpts = [[0.0 + 0.5im]]
         @test compose(G, pts[2], pts[1]) ≈ pts[2] .* pts[1]
         @test translate_diff(G, pts[2], pts[1], vpts[1]) ≈ pts[2] .* vpts[1]
-        test_group(G, pts, vpts, vpts; test_diff = true, test_mutating = true)
+        test_group(G, pts, vpts, vpts; test_diff = true, test_mutating = true, test_invariance = true)
     end
 
     @testset "Group forwards to decorated" begin

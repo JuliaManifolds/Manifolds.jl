@@ -17,6 +17,7 @@ is_decorator_manifold(::NotImplementedGroupDecorator) = Val(true)
         atol = 1e-10,
         test_mutating = true,
         test_diff = false,
+        test_invariance = false,
         diff_convs = [(), (LeftAction(),), (RightAction(),)],
     )
 
@@ -25,6 +26,8 @@ elements of it (contained in `g_pts`).
 Optionally, specify `test_diff` to test differentials of translation, using `v_pts`, which
 must contain at least one tangent vector at `g_pts[1]`, and the direction conventions
 specified in `diff_convs`.
+If the group is equipped with an invariant metric, `test_invariance` indicates that the
+invariance should be checked for the provided points.
 """
 function test_group(
     G,
@@ -35,6 +38,7 @@ function test_group(
     test_mutating = true,
     test_group_exp_log = true,
     test_diff = false,
+    test_invariance = false,
     diff_convs = [(), (LeftAction(),), (RightAction(),)],
 )
     e = Identity(G)
@@ -259,6 +263,33 @@ function test_group(
                 v2 = similar(v_pts[1])
                 @test inverse_retract!(G, v2, g_pts[1], y, Manifolds.GroupLogarithmicInverseRetraction(conv...)) === v2
                 @test isapprox(G, g_pts[1], v2, v_pts[1]; atol = atol)
+            end
+        end
+    end
+
+    test_invariance && @testset "metric invariance" begin
+        if has_invariant_metric(G, LeftAction()) === Val(true)
+            @testset "left-invariant" begin
+                @test check_has_invariant_metric(
+                    G,
+                    g_pts[1],
+                    v_pts[1],
+                    v_pts[end],
+                    g_pts,
+                    LeftAction(),
+                )
+            end
+        end
+        if has_invariant_metric(G, RightAction()) === Val(true)
+            @testset "right-invariant" begin
+                @test check_has_invariant_metric(
+                    G,
+                    g_pts[1],
+                    v_pts[1],
+                    v_pts[end],
+                    g_pts,
+                    RightAction(),
+                )
             end
         end
     end
