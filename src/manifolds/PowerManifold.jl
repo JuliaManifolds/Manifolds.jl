@@ -547,6 +547,10 @@ function sharp!(M::AbstractPowerManifold, v::TFVector, x, w::CoTFVector)
     return v
 end
 
+function show(io::IO, mime::MIME"text/plain", M::PowerManifold{TM,TSize}) where {TM,TSize}
+    print(io, "PowerManifold($(repr(mime, M.manifold)), $(join(TSize.parameters, ", ")))")
+end
+
 support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.x)
 support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 

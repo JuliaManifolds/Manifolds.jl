@@ -343,3 +343,43 @@ function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,â„
     @warn "get_basis with bases $(typeof(B)) only found $(K) orthonormal basis vectors, but manifold dimension is $(dim)."
     return PrecomputedOrthonormalBasis(Îž)
 end
+
+function show(io::IO, ::MIME"text/plain", ::ArbitraryOrthonormalBasis{F}) where {F}
+    print(io, "ArbitraryOrthonormalBasis($(F))")
+end
+function show(
+    io::IO,
+    ::MIME"text/plain",
+    ::ProjectedOrthonormalBasis{method,F},
+) where {method,F}
+    print(io, "ProjectedOrthonormalBasis($(method), $(F))")
+end
+function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis)
+    println(
+        io,
+        "DiagonalizingOrthonormalBasis with scalars in $(number_system(onb)) and 0 curvature in direction:",
+    )
+    show(io, mime, onb.v)
+end
+function show(io::IO, mime::MIME"text/plain", onb::PrecomputedOrthonormalBasis)
+    println(io, "PrecomputedOrthonormalBasis with scalars in $(number_system(onb))")
+    print(io, "Basis vectors:")
+    for v in onb.vectors
+        println(io)
+        show(io, mime, v)
+    end
+    return nothing
+end
+function show(io::IO, mime::MIME"text/plain", onb::PrecomputedDiagonalizingOrthonormalBasis)
+    println(
+        io,
+        "PrecomputedDiagonalizingOrthonormalBasis with scalars in $(number_system(onb))",
+    )
+    println(io, "Basis vectors:")
+    for v in onb.vectors
+        show(io, mime, v)
+        println(io)
+    end
+    println(io, "Eigenvalues:")
+    show(io, mime, onb.kappas)
+end

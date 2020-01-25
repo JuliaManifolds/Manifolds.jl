@@ -267,6 +267,17 @@ end
 
 eltype(::Type{ProductArray{TM,TData,TV}}) where {TM,TData,TV} = eltype(TData)
 
+function show(io::IO, mime::MIME"text/plain", x::ProductArray)
+    summary(io, x)
+    println(io)
+    print(io, "\nSubmanifold components:")
+    for xi in x.parts
+        println(io)
+        show(io, mime, xi)
+    end
+    return nothing
+end
+
 function similar(x::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
     return ProductArray(ShapeSpec, similar(x.data), x.reshapers)
 end
@@ -327,4 +338,14 @@ function Base.convert(::Type{TPR}, x::ProductRepr) where {TPR<:ProductRepr}
         t -> convert(t...),
         ziptuples(tuple(TPR.parameters[1].parameters...), submanifold_components(x)),
     ))
+end
+
+function show(io::IO, mime::MIME"text/plain", x::ProductRepr)
+    summary(io, x)
+    print(io, "\nSubmanifold components:")
+    for xi in x.parts
+        println(io)
+        show(io, mime, xi)
+    end
+    return nothing
 end

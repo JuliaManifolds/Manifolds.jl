@@ -547,6 +547,28 @@ function sharp!(M::Manifold, v::FVector, x, w::FVector)
     )
 end
 
+show(io::IO, ::MIME"text/plain", ::TangentSpaceType) = print(io, "TangentSpace")
+show(io::IO, ::MIME"text/plain", ::CotangentSpaceType) = print(io, "CotangentSpace")
+function show(io::IO, mime::MIME"text/plain", fiber::VectorBundleFibers)
+    print(io, "VectorBundleFibers($(repr(mime, fiber.VS)), $(repr(mime, fiber.M)))")
+end
+function show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
+    summary(io, vs)
+    println(io, "\nFiber:")
+    show(io, mime, vs.fiber)
+    println(io, "\nBase point:")
+    show(io, mime, vs.x)
+end
+function show(io::IO, mime::MIME"text/plain", vb::VectorBundle)
+    print(io, "VectorBundle($(repr(mime, vb.VS)), $(repr(mime, vb.M)))")
+end
+function show(io::IO, mime::MIME"text/plain", vb::TangentBundle)
+    print(io, "TangentBundle($(repr(mime, vb.M)))")
+end
+function show(io::IO, mime::MIME"text/plain", vb::CotangentBundle)
+    print(io, "CotangentBundle($(repr(mime, vb.M)))")
+end
+
 similar(x::FVector) = FVector(x.type, similar(x.data))
 similar(x::FVector, ::Type{T}) where {T} = FVector(x.type, similar(x.data, T))
 

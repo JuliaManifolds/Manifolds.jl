@@ -312,6 +312,28 @@ function retract!(
     return y
 end
 
+function show(io::IO, ::MIME"text/plain", ::FixedRankMatrices{M,N,K,T}) where {M,N,K,T}
+    print(io, "FixedRankMatrices($(M), $(N), $(K), $(T))")
+end
+function show(io::IO, mime::MIME"text/plain", x::SVDMPoint)
+    summary(io, x)
+    println(io, "\nU factor:")
+    show(io, mime, x.U)
+    println(io, "\nsingular values:")
+    show(io, mime, x.S)
+    println(io, "\nVt factor:")
+    show(io, mime, x.Vt)
+end
+function show(io::IO, mime::MIME"text/plain", v::UMVTVector)
+    summary(io, v)
+    println(io, "\nU factor:")
+    show(io, mime, v.U)
+    println(io, "\nM factor:")
+    show(io, mime, v.M)
+    println(io, "\nVt factor:")
+    show(io, mime, v.Vt)
+end
+
 similar(x::SVDMPoint) = SVDMPoint(similar(x.U), similar(x.S), similar(x.Vt))
 function similar(x::SVDMPoint, ::Type{T}) where {T}
     return SVDMPoint(similar(x.U, T), similar(x.S, T), similar(x.Vt, T))

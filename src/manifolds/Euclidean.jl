@@ -306,6 +306,10 @@ sharp(::Euclidean, ::Any...)
 
 sharp!(M::Euclidean, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
+function show(io::IO, ::MIME"text/plain", ::Euclidean{N,F}) where {N,F}
+    print(io, "Euclidean($(join(N.parameters, ", ")); field = $(F))")
+end
+
 """
     vector_transport_to(M::Euclidean, x, v, y, ::ParallelTransport)
 

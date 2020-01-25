@@ -300,6 +300,8 @@ sharp(M::Circle, x::Number, w::CoTFVector) = FVector(TangentSpace, w.data)
 
 sharp!(M::Circle, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
+show(io::IO, ::MIME"text/plain", ::Circle{F}) where {F} = print(io, "Circle($(F))")
+
 @doc doc"""
     sym_rem(x,[T=π])
 

@@ -27,7 +27,25 @@ function ProductGroup(manifold::ProductManifold)
     return GroupManifold(manifold, op)
 end
 
-show(io::IO, G::ProductGroup) = print(io, "ProductGroup$((G.manifold.manifolds...,))")
+function show(io::IO, mime::MIME"text/plain", G::ProductGroup)
+    M = base_manifold(G)
+    length(M.manifolds) == 0 && return println(io, "ProductGroup()")
+    print(io, "ProductGroup(")
+    width = displaysize(io)[2]
+    strings = []
+    one_line_length = 14 + (length(M.manifolds) - 1) * 2
+    for m in M.manifolds
+        s = repr(mime, m)
+        push!(strings, s)
+        one_line_length += length(s)
+    end
+    if one_line_length ≤ width
+        print(io, join(strings, ", "), ")")
+    else
+        print(io, "\n    ", join(strings, ",\n    "), ",\n)")
+    end
+end
+
 
 function submanifold_component(
     e::Identity{GT},

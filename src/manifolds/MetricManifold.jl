@@ -527,6 +527,10 @@ function sharp!(M::N, v::TFVector, x, w::CoTFVector) where {N<:MetricManifold}
     return v
 end
 
+function show(io::IO, mime::MIME"text/plain", M::MetricManifold)
+    print(io, "MetricManifold($(repr(mime, M.manifold)), $(repr(mime, M.metric)))")
+end
+
 @doc doc"""
     solve_exp_ode(
         M::MetricManifold,

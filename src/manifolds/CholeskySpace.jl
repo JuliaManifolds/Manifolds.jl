@@ -179,6 +179,10 @@ Return the representation size for the [`CholeskySpace`](@ref)`{N}` `M`, i.e. `(
 """
 @generated representation_size(::CholeskySpace{N}) where {N} = (N, N)
 
+function show(io::IO, ::MIME"text/plain", ::CholeskySpace{N}) where {N}
+    print(io, "CholeskySpace($(N))")
+end
+
 # two small helpers for strictly lower and upper triangulars
 strictlyLowerTriangular(x) = LowerTriangular(x) - Diagonal(diag(x))
 

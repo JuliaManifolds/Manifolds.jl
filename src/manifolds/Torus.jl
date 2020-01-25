@@ -49,3 +49,7 @@ get_iterator(M::Torus{N}) where {N} = 1:N
 @generated manifold_dimension(::Torus{N}) where {N} = N
 
 @generated representation_size(::Torus{N}) where {N} = (N,)
+
+function show(io::IO, mime::MIME"text/plain", M::Torus{N}) where {N}
+    print(io, "Torus($(repr(mime, M.manifold)), $(N))")
+end
