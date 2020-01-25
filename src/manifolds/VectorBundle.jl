@@ -62,11 +62,11 @@ struct VectorBundleFibers{TVS<:VectorSpaceType,TM<:Manifold}
     M::TM
 end
 
-const TangentBundleFibers{M} = VectorBundleFibers{TangentSpaceType,M}
+const TangentBundleFibers{M} = VectorBundleFibers{TangentSpaceType,M} where {M<:Manifold}
 
 TangentBundleFibers(M::Manifold) = VectorBundleFibers(TangentSpace, M)
 
-const CotangentBundleFibers{M} = VectorBundleFibers{CotangentSpaceType,M}
+const CotangentBundleFibers{M} = VectorBundleFibers{CotangentSpaceType,M} where {M<:Manifold}
 
 CotangentBundleFibers(M::Manifold) = VectorBundleFibers(CotangentSpace, M)
 
@@ -112,11 +112,11 @@ function VectorBundle(VS::TVS, M::TM) where {TVS<:VectorSpaceType,TM<:Manifold}
     return VectorBundle{TVS,TM}(VS, M, VectorBundleFibers(VS, M))
 end
 
-const TangentBundle{M} = VectorBundle{TangentSpaceType,M}
+const TangentBundle{M} = VectorBundle{TangentSpaceType,M} where {M<:Manifold}
 
 TangentBundle(M::Manifold) = VectorBundle(TangentSpace, M)
 
-const CotangentBundle{M} = VectorBundle{CotangentSpaceType,M}
+const CotangentBundle{M} = VectorBundle{CotangentSpaceType,M} where {M<:Manifold}
 
 CotangentBundle(M::Manifold) = VectorBundle(CotangentSpace, M)
 
