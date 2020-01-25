@@ -89,8 +89,8 @@ transports vectors
 
 ````math
 \begin{aligned}
-(\mathrm{d}L_a)_x (v) &: T_x M → T_{a ⋅ x} M\\
-(\mathrm{d}R_a)_x (v) &: T_x M → T_{x ⋅ a} M
+(\mathrm{d}L_a)_x (v) &: T_x ℳ → T_{a ⋅ x} ℳ\\
+(\mathrm{d}R_a)_x (v) &: T_x ℳ → T_{x ⋅ a} ℳ
 \end{aligned}
 ````
 """
@@ -112,8 +112,8 @@ differential transports vectors
 
 ````math
 \begin{aligned}
-(\mathrm{d}L_a)_x^{-1} (v) &: T_x M → T_{a^{-1} ⋅ x} M\\
-(\mathrm{d}R_a)_x^{-1} (v) &: T_x M → T_{x ⋅ a^{-1}} M
+(\mathrm{d}L_a)_x^{-1} (v) &: T_x M → T_{a^{-1} ⋅ x} ℳ\\
+(\mathrm{d}R_a)_x^{-1} (v) &: T_x M → T_{x ⋅ a^{-1}} ℳ
 \end{aligned}
 ````
 """
@@ -139,7 +139,7 @@ the element closest to `x2` in the metric of the G-manifold:
 ```math
 \arg\min_{g ∈ G} d_M(g ⋅ x_1, x_2)
 ```
-where $G$ is the group that acts on the G-manifold $M$.
+where $G$ is the group that acts on the G-manifold $ℳ$.
 """
 function optimal_alignment(A::AbstractGroupAction, x1, x2)
     error("optimal_alignment not implemented for $(typeof(A)) and points $(typeof(x1)) and $(typeof(x2)).")

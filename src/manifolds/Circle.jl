@@ -1,8 +1,8 @@
 @doc doc"""
     Circle{F} <: Manifold
 
-The circle $\mathbb S^1$ as a manifold ere manifold represented by
-real-valued data in $[-\pi,\pi)$ or complex-valued data $z\in \mathbb C$ of absolute value
+The circle $𝕊^1$ as a manifold ere manifold represented by
+real-valued data in $[-\pi,\pi)$ or complex-valued data $z\in ℂ$ of absolute value
 $\lvert z\rvert = 1$.
 # Constructor
 
@@ -21,7 +21,7 @@ Circle(f::AbstractNumbers = ℝ) = Circle{f}()
 
 Check whether `x` is a point on the [`Circle`](@ref) `M`.
 For the real-valued case, `x` is an angle and hence it checks that $x \in [-\pi,\pi)$.
-for the complex-valued case its a unit number, $x \in \mathbb C$ with $\lvert x \rvert = 1$.
+for the complex-valued case its a unit number, $x \in ℂ$ with $\lvert x \rvert = 1$.
 """
 check_manifold_point(::Circle, ::Any...)
 
@@ -100,7 +100,7 @@ Compute the exponential map on the [`Circle`](@ref).
 ````math
 \exp_xv = (x+v)_{2\pi},
 ````
-where $(\cdot)$ is the (symmetric) remainder with respect to division by $2\pi$,
+where $(·)$ is the (symmetric) remainder with respect to division by $2\pi$,
 i.e. in $[-\pi,\pi)$.
 
 For the complex-valued case the formula is the same as for the [`Sphere`](@ref)
@@ -203,7 +203,7 @@ Compute the logarithmic map on the [`Circle`](@ref) `M`.
 ````math
 \exp_xv = (y,x)_{2\pi},
 ````
-where $(\cdot)$ is the (symmetric) remainder with respect to division by $2\pi$,
+where $(·)$ is the (symmetric) remainder with respect to division by $2\pi$,
 i.e. in $[-\pi,\pi)$.
 
 For the complex-valued case the formula is the same as for the [`Sphere`](@ref)
@@ -244,7 +244,7 @@ end
     manifold_dimension(M::Circle)
 
 Return the dimension of the [`Circle`](@ref) `M`,
-i.e. $\operatorname{dim}(\mathbb S^1) = 1$.
+i.e. $\operatorname{dim}(𝕊^1) = 1$.
 """
 manifold_dimension(::Circle) = 1
 
@@ -252,7 +252,7 @@ manifold_dimension(::Circle) = 1
     mean(M::Circle, x::AbstractVector[, w::AbstractWeights])
 
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` on the
-[`Circle`](@ref) $\mathbb S^1$ by the wrapped mean, i.e. the remainder of the
+[`Circle`](@ref) $𝕊^1$ by the wrapped mean, i.e. the remainder of the
 mean modulo 2π.
 """
 mean(::Circle, ::Any)
@@ -320,7 +320,7 @@ For the real-valued case this results in the identity.
 For the complex-valud case, the formula is the same as for the [`Sphere`](@ref)`(1)` in the
 complex plane.
 ````math
-P_{y\gets x}(v) = v - \frac{\langle \log_xy,v\rangle_x}{d^2_{\mathbb C}(x,y)}
+𝒫_{y\gets x}(v) = v - \frac{⟨\log_xy,v⟩_x}{d^2_{ℂ}(x,y)}
 \bigl(\log_xy + \log_yx \bigr),
 ````
 where [`log`](@ref) denotes the logarithmic map on `M`.

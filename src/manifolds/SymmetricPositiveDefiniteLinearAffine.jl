@@ -20,7 +20,7 @@ d_{\mathcal P(n)}(x,y)
 = \lVert \operatorname{Log}(x^{-\frac{1}{2}}yx^{-\frac{1}{2}})\rVert_{\mathrm{F}}.,
 ```
 where $\operatorname{Log}$ denotes the matrix logarithm and
-$\lVert\cdot\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
+$\lVert·\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
 """
 function distance(M::SymmetricPositiveDefinite{N}, x, y) where {N}
     s = real.(eigvals(x, y))
@@ -206,7 +206,7 @@ Compute the parallel transport on the [`SymmetricPositiveDefinite`](@ref) as a
 The formula reads
 
 ```math
-P_{y\gets x}(v) = x^{\frac{1}{2}}
+𝒫_{y\gets x}(v) = x^{\frac{1}{2}}
 \operatorname{Exp}\bigl(
 \frac{1}{2}x^{-\frac{1}{2}}\log_x(y)x^{-\frac{1}{2}}
 \bigr)

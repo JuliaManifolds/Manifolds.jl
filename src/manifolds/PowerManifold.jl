@@ -41,7 +41,7 @@ abstract type AbstractPowerManifold{M<:Manifold,TPR<:AbstractPowerRepresentation
 @doc doc"""
     PowerManifold{TM<:Manifold, TSize<:Tuple, TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{TM}
 
-The power manifold $\mathcal M^{n_1 \times n_2 \times \dots \times n_d}$ with power geometry
+The power manifold $ℳ^{n_1⨉ n_2 ⨉ \dots ⨉ n_d}$ with power geometry
  `TSize` statically defines the number of elements along each axis.
 
 For example, a manifold-valued time series would be represented by a power manifold with
@@ -58,7 +58,7 @@ power manifolds might be faster if they are represented as [`ProductManifold`](@
     PowerManifold(M, N_1, N_2, ..., N_n)
     PowerManifold(M, NestedPowerRepresentation(), N_1, N_2, ..., N_n)
 
-Generate the power manifold $M^{N_1 \times N_2 \times \dots \times N_n}$.
+Generate the power manifold $M^{N_1 ⨉ N_2 ⨉ \dots ⨉ N_n}$.
 By default, the [`MultidimentionalArrayPowerRepresentation`](@ref) of points
 and tangent vectors is used, although a different one, for example
 [`NestedPowerRepresentation`](@ref), can be given as the second argument to the
@@ -496,12 +496,12 @@ end
     manifold_dimension(M::PowerManifold)
 
 Returns the manifold-dimension of an [`PowerManifold`](@ref) `M`
-$=\mathcal N = (\mathcal M)^{n_1,\ldots,n_d}, i.e. with $n=(n_1,\ldots,n_d)$ the array
-size of the power manifold and $d_{\mathcal M}$ the dimension of the base manifold
-$\mathcal M$, the manifold is of dimension
+$=𝒩 = (ℳ)^{n_1,…,n_d}, i.e. with $n=(n_1,…,n_d)$ the array
+size of the power manifold and $d_{ℳ}$ the dimension of the base manifold
+$ℳ$, the manifold is of dimension
 
 ````math
-d_{\mathcal N} = d_{\mathcal M}\prod_{i=1}^d n_i = n_1n_2\cdot\ldots\cdot n_d d_{\mathcal M}.
+d_{𝒩} = d_{ℳ}\prod_{i=1}^d n_i = n_1n_2·…· n_d d_{ℳ}.
 ````
 """
 function manifold_dimension(M::PowerManifold{<:Manifold,TSize}) where {TSize}

@@ -1,7 +1,7 @@
 @doc doc"""
     ProductManifold{TM<:Tuple, TRanges<:Tuple, TSizes<:Tuple} <: Manifold
 
-Product manifold $M_1 \times M_2 \times \dots \times M_n$ with product geometry.
+Product manifold $M_1 ⨉ M_2 ⨉ \dots  ⨉ M_n$ with product geometry.
 `TRanges` and `TSizes` statically define the relationship between representation
 of the product manifold and representations of point, tangent vectors
 and cotangent vectors of respective manifolds.
@@ -10,7 +10,7 @@ and cotangent vectors of respective manifolds.
 
     ProductManifold(M_1, M_2, ..., M_n)
 
-generates the product manifold $M_1 \times M_2 \times \dots \times M_n$.
+generates the product manifold $M_1 ⨉ M_2 ⨉ \dots ⨉ M_n$.
 Alternatively, the same manifold can be contructed using the `×` operator:
 `M_1 × M_2 × M_3`.
 """

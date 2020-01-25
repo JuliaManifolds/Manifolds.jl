@@ -5,10 +5,10 @@ The [`Manifold`](@ref) $ \operatorname{Sym} (n)$ consisting of the real- or comp
 symmetric matrices of size $ n\times n$, i.e. the set
 
 ````math
-\operatorname{Sym}(n) = \bigl\{A \in \mathbb F^{n\times n} \big| A^{\mathrm{H}} = A \bigr\},
+\operatorname{Sym}(n) = \bigl\{A \in 𝔽^{n\times n} \big| A^{\mathrm{H}} = A \bigr\},
 ````
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed
-and the field $\mathbb F \in \{ \mathbb R, \mathbb C\}$ is set by the
+where $·^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed
+and the field $𝔽 \in \{ ℝ, ℂ\}$ is set by the
 [`AbstractNumbers`](@ref) `F`.
 
 Though it is slighty redundant, usually the matrices are safed as $n\times n$ arrays.
@@ -127,7 +127,7 @@ exp!(M::SymmetricMatrices, y, x, v) = (y .= x .+ v)
 Compute the [`flat`](@ref flat(M::Manifold, x, w::FVector)) isomorphism of the
 [`SymmetricMatrices`](@ref) `M` on the manifold point `x` and tangent vector `w`.
 
-Since `M` is already a vector space over $\mathbb R$, this returns just the vector `w`.
+Since `M` is already a vector space over $ℝ$, this returns just the vector `w`.
 """
 flat(::SymmetricMatrices, ::Any...)
 
@@ -220,7 +220,7 @@ metric from the embedding, i.e.
 ````math
 (v,w)_x = \operatorname{tr}(v^{\mathrm{H}}w),
 ````
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $·^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 @inline inner(M::SymmetricMatrices, x, w, v) = dot(w, v)
 
@@ -274,7 +274,7 @@ Projects `x` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
 \operatorname{proj}_{\operatorname{Sym}(n)}(x) = \frac{1}{2} \bigl( x + x^{\mathrm{H}} \bigr),
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $·^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 project_point(::SymmetricMatrices, ::Any...)
 
@@ -289,7 +289,7 @@ Project the matrix `v` onto the tangent space at `x` on the [`SymmetricMatrices`
 \operatorname{proj}_x(v) = \frac{1}{2} \bigl( v + v^{\mathrm{H}} \bigr),
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $·^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 project_tangent(::SymmetricMatrices, ::Any...)
 
@@ -309,7 +309,7 @@ for the $n\times n$ it's `(n,n)`.
 Compute the [`sharp`](@ref sharp(M::Manifold, x, w::FVector)) isomorphism of the
 [`SymmetricMatrices`](@ref) `M` on the manifold point `x` and cotangent vector `w`.
 
-Since `M` is already a vector space over $\mathbb R$, this returns just the vector `w`.
+Since `M` is already a vector space over $ℝ$, this returns just the vector `w`.
 """
 sharp(::SymmetricMatrices, ::Any...)
 
@@ -324,7 +324,7 @@ of `v` from the tangent space at `x` on the [`SymmetricMatrices`](@ref) `M` to `
 Since the metric is inherited from the embedding space, this is just the identity, i.e.
 
 ````math
-P_{y\gets x}(v) = v.
+𝒫_{y\gets x}(v) = v.
 ````
 """
 vector_transport_to(::SymmetricMatrices, ::Any...)

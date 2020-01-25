@@ -285,7 +285,7 @@ metric (see [`is_default_metric`](@ref)) this is done using `log(M, x, v, w)`,
 otherwise the [`local_metric`](@ref)`(M, x)` is employed as
 
 ````math
-g_x(v,w) = \langle v, G_x w\rangle,
+g_x(v,w) = ⟨v, G_x w⟩,
 ````
 where $G_x$ is the local matrix representation of the [`Metric`](@ref) `G`.
 """

@@ -164,7 +164,7 @@ Construct a product point from product manifold `M` based on point `pts`
 represented by [`ProductArray`](@ref).
 
 # Example
-To construct a point on the product manifold $S^2 \times \mathbb{R}^2$
+To construct a point on the product manifold $S^2 \times ℝ^2$
 from points on the sphere and in the euclidean space represented by,
 respectively, `[1.0, 0.0, 0.0]` and `[-3.0, 2.0]` you need to construct shape
 specification first. It describes how linear storage of `ProductArray`

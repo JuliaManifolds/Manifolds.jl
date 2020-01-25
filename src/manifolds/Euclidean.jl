@@ -1,19 +1,19 @@
 @doc doc"""
     Euclidean{T<:Tuple} <: Manifold
 
-Euclidean vector space $\mathbb R^n$.
+Euclidean vector space $ℝ^n$.
 
 # Constructor
 
     Euclidean(n)
 
-Generate the $n$-dimensional vector space $\mathbb R^n$.
+Generate the $n$-dimensional vector space $ℝ^n$.
 
     Euclidean(n₁,n₂,...,nᵢ; field=ℝ)
 
-Generate the vector space of $k=n_1n_2\cdot\ldots n_i$ values, i.e. the
-$\mathbb F^{n_1, n_2, \ldots, n_d}$ whose
-elements are interpreted as $n_1 \times,n_2\times\cdots\times n_i$ arrays.
+Generate the vector space of $k=n_1n_2·… n_i$ values, i.e. the
+$𝔽^{n_1, n_2,…, n_d}$ whose
+elements are interpreted as $n_1 ⨉,n_2 ⨉ … ⨉ n_i$ arrays.
 For $d=2$ we obtain a matrix space.
 The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
@@ -128,19 +128,19 @@ injectivity_radius(::Euclidean) = Inf
 
 Compute the inner product on the [`Euclidean`](@ref) `M`, which is just
 the inner product on the real-valued or complex valued vector space
-of arrays (or tensors) of size $n_1\times n_2 \times \cdots \times n_i$, i.e.
+of arrays (or tensors) of size $n_1 ⨉ n_2  ⨉  …  ⨉ n_i$, i.e.
 
 ````math
 g_x(v,w) = \sum_{k\in I} \overline{v}_{k} w_{k},
 ````
-where $I$ is the set of integer vectors $k\in\mathbb N^i$, such that for all
+where $I$ is the set of integer vectors $k\in ℕ^i$, such that for all
 $1 \leq j \leq i$ it holds $1\leq k_j \leq n_j$.
 
 For the special case of $i\leq 2$, i.e. matrices and vectors, this simplifies to
 ````math
 g_x(v,w) = w^{\mathrm{H}}v,
 ````
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $·^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 inner(::Euclidean, ::Any...)
 @inline inner(::Euclidean, x, v, w) = dot(v, w)

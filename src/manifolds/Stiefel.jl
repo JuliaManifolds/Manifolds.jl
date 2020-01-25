@@ -1,27 +1,27 @@
 @doc doc"""
     Stiefel{n,k,T} <: Manifold
 
-The Stiefel manifold consists of all $n\times k$, $n\geq k$ orthonormal matrices, i.e.
+The Stiefel manifold consists of all $n ⨉ k$, $n\geq k$ orthonormal matrices, i.e.
 
 ````math
-\mathcal M = \{ x \in \mathbb F^{n\times k} : x^{\mathrm{H}}x = I_k \},
+ℳ = \{ x \in 𝔽^{n ⨉ k} : x^{\mathrm{H}}x = I_k \},
 ````
 
-where $\mathbb F \in \{\mathbb R, \mathbb C\}$,
-$\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
-$I_n \in \mathbb R^{n\times n}$ denotes the $k \times k$ identity matrix.
+where $𝔽 \in \{ℝ, ℂ\}$,
+$·^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
+$I_n \in ℝ^{n\times n}$ denotes the $k \times k$ identity matrix.
 
-The tangent space at a point $x\in\mathcal M$ is given by
+The tangent space at a point $x\in ℳ$ is given by
 
 ````math
-T_x\mathcal M = \{ v \in \mathbb{F}^{n\times k} : x^{\mathrm{H}}v + v^{\mathrm{H}}x=0_n\},
+T_x ℳ = \{ v \in 𝔽^{n\times k} : x^{\mathrm{H}}v + v^{\mathrm{H}}x=0_n\},
 ````
 
 where $0_n$ is the $k\times k$ zero matrix.
 
-The metric is either inherited from $\mathbb R^{n,k}$ for the real-valued case
+The metric is either inherited from $ℝ^{n,k}$ for the real-valued case
 or the one inherited from interpreting the complex valued entries in the Gaussian
-plane $\mathbb R^2$ and then over all entries as before, i.e. the latter
+plane $ℝ^2$ and then over all entries as before, i.e. the latter
 may be called an Hermitian metric in the complex-valued matrices.
 
 The manifold is named after
@@ -41,7 +41,7 @@ Stiefel(n::Int, k::Int, F::AbstractNumbers = ℝ) = Stiefel{n,k,F}()
 
 Check whether `x` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$,
 i.e. that it has the right [`AbstractNumbers`](@ref) type and $x^{\mathrm{H}}x$
-is (approximatly) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
+is (approximatly) the identity, where $·^{\mathrm{H}}$ is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_manifold_point(M::Stiefel{n,k,T}, x; kwargs...) where {n,k,T}
@@ -126,7 +126,7 @@ $\operatorname{exp}_{x} v = \begin{pmatrix}
 \begin{pmatrix}  \exp( -x^{\mathrm{H}}v) \\ 0_n\end{pmatrix}$
 
 where $\exp$ denotes matrix exponential,
-$\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and $I_k$ and
+$·^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and $I_k$ and
 $0_k$ are the identity matrix and the zero matrix of dimension $k \times k$, respectively.
 """
 exp(::Stiefel, ::Any...)
@@ -221,9 +221,9 @@ Return the dimension of the [`Stiefel`](@ref) manifold `M`=$\operatorname{St}(n,
 The dimension is given by
 
 ````math
-\dim \mathrm{Stiefel}(n, k, ℝ) &= nk - \frac{1}{2}k(k+1)\\
-\dim \mathrm{Stiefel}(n, k, ℂ) &= 2nk - k^2\\
-\dim \mathrm{Stiefel}(n, k, ℍ) &= 4nk - k(2k-1)
+\dim \mathrm{St}(n, k, ℝ) &= nk - \frac{1}{2}k(k+1)\\
+\dim \mathrm{St}(n, k, ℂ) &= 2nk - k^2\\
+\dim \mathrm{St}(n, k, ℍ) &= 4nk - k(2k-1)
 ````
 """
 manifold_dimension(::Stiefel{n,k,ℝ}) where {n,k} = n * k - div(k * (k + 1), 2)
@@ -237,7 +237,7 @@ Project `v` onto the tangent space of `x` to the [`Stiefel`](@ref) manifold `M`.
 The formula reads
 
 ````math
-\operatorname{proj}_{\mathcal M}(x,v) = v - x \operatorname{Sym}(x^{\mathrm{H}}v),
+\operatorname{proj}_{ℳ}(x,v) = v - x \operatorname{Sym}(x^{\mathrm{H}}v),
 ````
 
 where $\operatorname{Sym}(y)$ is the symmetrization of $y$, e.g. by

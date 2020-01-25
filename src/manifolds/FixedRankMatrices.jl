@@ -1,34 +1,34 @@
 @doc doc"""
     FixedRankMatrices{m,n,k,T} <: Manifold
 
-The manifold of $m\times n$ real-valued (complex-valued) matrices of fixed rank $k$, i.e.
+The manifold of $m ⨉ n$ real-valued (complex-valued) matrices of fixed rank $k$, i.e.
 ````math
-\mathcal M = \{ x \in \mathbb R^{m\times n} : \operatorname{rank}(x) = k \}.
+ℳ = \{ x \in ℝ^{m ⨉ n} : \operatorname{rank}(x) = k \}.
 ````
 # Representation with 3 matrix factors
 
-A point $x\in\mathcal M$ can be stored using orthonormal matrices
-$U\in\mathbb R^{m\times k}$, $V\in\mathbb R^{n\times k}$ as well as the $k$ singular
+A point $x\in ℳ$ can be stored using orthonormal matrices
+$U\in ℝ^{m ⨉ k}$, $V\in ℝ^{n ⨉ k}$ as well as the $k$ singular
 values of $x = USV^\mathrm{T}$. In other words, $U$ and $V$ are from the manifolds
 [`Stiefel`](@ref)`(m,k)` and [`Stiefel`](@ref)`(n,k)`, respectively; see
 [`SVDMPoint`](@ref) for details
 
-The tangent space $T_x\mathcal M$ at a point $x\in\mathcal M$ with $x=USV^\mathrm{T}$
+The tangent space $T_x ℳ$ at a point $x\in ℳ$ with $x=USV^\mathrm{T}$
 is given by
 ````math
-T_x\mathcal M = \bigl\{ UMV^\mathrm{T} + U_xV^\mathrm{T} + UV_x^\mathrm{T} :
-    M \in \mathbb R^{k\times k},
-    U_x \in \mathbb R^{m\times k},
-    V_x \in \mathbb R^{n\times k}
+T_xℳ = \bigl\{ UMV^\mathrm{T} + U_xV^\mathrm{T} + UV_x^\mathrm{T} :
+    M \in ℝ^{k ⨉ k},
+    U_x \in ℝ^{m ⨉ k},
+    V_x \in ℝ^{n ⨉ k}
     \text{ s.t. }
     U_x^\mathrm{T}U = 0_k,
     V_x^\mathrm{T}V = 0_k
 \bigr\},
 ````
-where $0_k$ is the $k\times k$ zero matrix. See [`UMVTVector`](@ref) for details.
+where $0_k$ is the $k ⨉ k$ zero matrix. See [`UMVTVector`](@ref) for details.
 
 The (default) metric of this manifold is obtained by restricting the metric
-on $\mathbb R^{m\times n}$ to the tangent bundle. This implementation follows[^Vandereycken2013].
+on $ℝ^{m ⨉ n}$ to the tangent bundle. This implementation follows[^Vandereycken2013].
 
 # Constructor
     FixedRankMatrics(m,n,k,t=ℝ)
@@ -86,7 +86,7 @@ together with its base point, see for example [`FixedRankMatrices`](@ref)
 # Constructors
 * `UMVTVector(U,M,Vt)` store umv factors to initialize the `UMVTVector`
 * `UMVTVector(U,M,Vt,k)` store the umv factors after shortening them down to
-  inner dimensions $k$, i.e. in $UMV^\mathrm{T}$, $M\in\mathbb R^{k\times k}$
+  inner dimensions $k$, i.e. in $UMV^\mathrm{T}$, $M\in ℝ^{k ⨉ k}$
 """
 struct UMVTVector{TU<:AbstractMatrix,TM<:AbstractMatrix,TVt<:AbstractMatrix} <: TVector
     U::TU
@@ -241,7 +241,7 @@ end
     project_tangent(M, x, A)
     project_tangent(M, x, v)
 
-Project the matrix $A\in\mathbb R^{m,n}$ or a [`UMVTVector`](@ref) `v` from the embedding or
+Project the matrix $A\in ℝ^{m,n}$ or a [`UMVTVector`](@ref) `v` from the embedding or
 another tangent space onto the tangent space at $x$ on the [`FixedRankMatrices`](@ref) `M`,
 further decomposing the result into $v=UMV$, i.e. a [`UMVTVector`](@ref) following
 Section 3 in [^Vandereycken2013].
@@ -293,7 +293,7 @@ Compute an SVD-based retraction on the [`FixedRankMatrices`](@ref) `M` by comput
     y = U_kS_kV_k^\mathrm{T},
 ````
 where $U_k S_k V_k^\mathrm{T}$ is the shortened singular value decomposition $USV=x+v$,
-in the sense that $S_k$ is the diagonal matrix of size $k\times k$ with the $k$ largest
+in the sense that $S_k$ is the diagonal matrix of size $k ⨉ k$ with the $k$ largest
 singular values and $U$ and $V$ are shortened accordingly.
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)

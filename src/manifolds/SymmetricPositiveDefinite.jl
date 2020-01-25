@@ -6,8 +6,8 @@ The manifold of symmetric positive definite matrices, i.e.
 ```math
 \mathcal P(n) =
 \bigl\{
-x \in \mathbb R^{n\times n} :
-\xi^\mathrm{T}x\xi > 0 \text{ for all } \xi \in \mathbb R^{n}\backslash\{0\}
+x \in ℝ^{n\times n} :
+\xi^\mathrm{T}x\xi > 0 \text{ for all } \xi \in ℝ^{n}\backslash\{0\}
 \bigr\}
 ```
 
@@ -15,7 +15,7 @@ x \in \mathbb R^{n\times n} :
 
     SymmetricPositiveDefinite(n)
 
-generates the manifold $\mathcal P(n) \subset \mathbb R^{n\times n}$
+generates the manifold $\mathcal P(n) \subset ℝ^{n\times n}$
 """
 struct SymmetricPositiveDefinite{N} <: Manifold end
 
@@ -91,7 +91,7 @@ injectivity_radius(M::SymmetricPositiveDefinite{N}, args...) where {N} = Inf
     manifold_dimension(M::SymmetricPositiveDefinite)
 
 returns the dimension of
-[`SymmetricPositiveDefinite`](@ref) `M`$=\mathcal P(n), n\in \mathbb N$, i.e.
+[`SymmetricPositiveDefinite`](@ref) `M`$=\mathcal P(n), n\in ℕ$, i.e.
 ````math
 \dim \mathcal P(n) = \frac{n(n+1)}{2}
 ````
@@ -129,7 +129,7 @@ end
 
 Return the size of an array representing an element on the
 [`SymmetricPositiveDefinite`](@ref) manifold `M`, i.e. $n\times n$, the size of such a
-symmetric positive definite matrix on $\mathcal M = \mathcal P(n)$.
+symmetric positive definite matrix on $ℳ = \mathcal P(n)$.
 """
 @generated representation_size(::SymmetricPositiveDefinite{N}) where {N} = (N, N)
 

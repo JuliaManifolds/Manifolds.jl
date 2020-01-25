@@ -1,14 +1,14 @@
 @doc doc"""
     Sphere{N} <: Manifold
 
-The unit sphere manifold $\mathbb S^n$ represented by $n+1$-Tuples, i.e. in by
-vectors in $\mathbb R^{n+1}$ of unit length
+The unit sphere manifold $𝕊^n$ represented by $n+1$-Tuples, i.e. in by
+vectors in $ℝ^{n+1}$ of unit length
 
 # Constructor
 
     Sphere(n)
 
-Generate the $\mathbb S^{n}\subset \mathbb R^{n+1}$
+Generate the $𝕊^{n}\subset ℝ^{n+1}$
 """
 struct Sphere{N} <: Manifold end
 
@@ -86,7 +86,7 @@ The formula is given by the (shorter) great arc length on the (or a) great circl
 both `x` and `y` lie on.
 
 ````math
-d_{\mathbb S^n}(x,y) = \operatorname{acos}(\langle x, y\rangle).
+d_{𝕊^n}(x,y) = \operatorname{acos}(⟨x, y⟩).
 ````
 """
 distance(S::Sphere, x, y) = acos(clamp(dot(x, y), -1, 1))
@@ -130,7 +130,7 @@ injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π / 2
     inner(S::Sphere, x, w, v)
 
 Compute the inner product of the two tangent vectors `w,v` from the tangent
-plane at `x` on the sphere `S=`$\mathbb S^n$ using the restriction of the
+plane at `x` on the sphere `S=`$𝕊^n$ using the restriction of the
 metric from the embedding, i.e. $ (v,w)_x = v^\mathrm{T}w $.
 """
 @inline inner(S::Sphere, x, w, v) = dot(w, v)
@@ -147,10 +147,10 @@ end
 
 Compute the inverse of the projection based retraction on the [`Sphere`](@ref),
 i.e. rearranging $x+v = y\lVert x+d \rVert_2$ yields
-since $\langle x,v\rangle = 0$ and when $d_{\mathbb S^2}(x,y) \leq \frac{\pi}{2}$ that
+since $⟨x,v⟩ = 0$ and when $d_{𝕊^2}(x,y) \leq \frac{\pi}{2}$ that
 
 ````math
-\operatorname{retr}_x^{-1}(y) = \frac{y}{\langle x, y \rangle} - x.
+\operatorname{retr}_x^{-1}(y) = \frac{y}{⟨x, y⟩} - x.
 ````
 """
 inverse_retract(::Sphere, ::Any, ::Any, ::ProjectionInverseRetraction)
@@ -167,8 +167,8 @@ geodesic starting from `x` reaches `y` after time 1.
 The formula reads for $x\neq -y$
 
 ````math
-\log_x y = d_{\mathbb S^n}(x,y)
-\frac{y-\langle x,y\rangle x}{\lVert y-\langle x,y\rangle x \rVert_2},
+\log_x y = d_{𝕊^n}(x,y)
+\frac{y-⟨x,y⟩ x}{\lVert y-⟨x,y⟩ x \rVert_2},
 ````
 and a deterministic choice from the set of tangent vectors is returned if $x=-y$, i.e. for
 opposite points.
@@ -197,7 +197,7 @@ end
 @doc doc"""
     manifold_dimension(S::Sphere)
 
-Return the dimension of the manifold $\mathbb S^n$, i.e. $n$.
+Return the dimension of the manifold $𝕊^n$, i.e. $n$.
 """
 manifold_dimension(S::Sphere{N}) where {N} = N
 
@@ -247,7 +247,7 @@ end
 Project the point `x` from the embedding onto the [`Sphere`](@ref) `M`.
 
 ````math
-\operatorname{proj}_{\mathbb S^n}(x) = \frac{x}{\lVert x \rVert_2}.
+\operatorname{proj}_{𝕊^n}(x) = \frac{x}{\lVert x \rVert_2}.
 ````
 """
 project_point(::Sphere, ::Any...)
@@ -260,7 +260,7 @@ project_point!(S::Sphere, x) = (x ./= norm(x))
 Project the point `v` onto the tangent space at `x` on the [`Sphere`](@ref) `M`.
 
 ````math
-\operatorname{proj}_{x}(v) = v - \langle x, v \rangle_x
+\operatorname{proj}_{x}(v) = v - ⟨x, v⟩_x
 ````
 """
 project_tangent(::Sphere, ::Any...)
@@ -326,7 +326,7 @@ end
 Compute the [`ParallelTransport`](@ref) on the [`Sphere`](@ref) `M`, which is given by
 
 ````math
-P_{y\gets x}(v) = v - \frac{\langle \log_xy,v\rangle_x}{d^2_{\mathbb S^n}(x,y)}
+𝒫_{y\gets x}(v) = v - \frac{⟨\log_xy,v⟩_x}{d^2_{𝕊^n}(x,y)}
 \bigl(\log_xy + \log_yx \bigr).
 ````
 """

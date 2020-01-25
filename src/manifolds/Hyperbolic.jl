@@ -1,31 +1,31 @@
 @doc doc"""
     Hyperbolic{N} <: Manifold
 
-The hyperbolic space $\mathbb H^n$ represented by $n+1$-Tuples, i.e. in by
-vectors in $\mathbb R^{n+1}$ using the Minkowsi metric, i.e.
+The hyperbolic space $ℍ^n$ represented by $n+1$-Tuples, i.e. in by
+vectors in $ℝ^{n+1}$ using the Minkowsi metric, i.e.
 
 ```math
-\mathbb H^n = \Bigl\{x\in\mathbb R^{n+1}
-\ \Big|\ \langle x,x \rangle_{\mathrm{M}}= -x_{n+1}^2
+ℍ^n = \Bigl\{x\in ℝ^{n+1}
+\ \Big|\ ⟨x,x⟩_{\mathrm{M}}= -x_{n+1}^2
 + \displaystyle\sum_{k=1}^n x_k^2 = -1, x_{n+1} > 0\Bigr\},
 ```
 
-where $\langle\cdot,\cdot\rangle_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref)
-is Minkowski inner product. The tangent space $T_x\mathbb H^n$ is given by
+where $⟨·,·⟩_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref)
+is Minkowski inner product. The tangent space $T_x ℍ^n$ is given by
 
 ````math
-T_x\mathbb H^n \coloneqq \bigl\{
-v \in \mathbb R^{n+1} \ \bigl |\ \langle x,v\rangle_{\mathrm{M}} = 0
+T_x ℍ^n \coloneqq \bigl\{
+v \in ℝ^{n+1} \ \bigl |\ ⟨x,v⟩_{\mathrm{M}} = 0
 \bigr\}.
 ````
 The Minkowski inner product inntroduces the [`MinkowskiMetric`](@ref), which is
-a Riemannian metric on the tangent bundle $T\mathbb H^n$.
+a Riemannian metric on the tangent bundle $T ℍ^n$.
 
 # Constructor
 
     Hyperbolic(n)
 
-Generate the $\mathbb H^{n}\subset \mathbb R^{n+1}$
+Generate the $ℍ^{n}\subset ℝ^{n+1}$
 """
 struct Hyperbolic{N} <: Manifold end
 
@@ -37,15 +37,15 @@ Hyperbolic(n::Int) = Hyperbolic{n}()
 The Minkowski metric is a [`LorentzMetric`](@ref) with, i.e.
 
 ````math
-\langle a,b\rangle_{\mathrm{M}} = -a_{n+1}b_{n+1} +
+⟨a,b⟩_{\mathrm{M}} = -a_{n+1}b_{n+1} +
 \displaystyle\sum_{k=1}^n a_kb_k.
 ````
 It is also the default metric e.g. for the [`Hyperbolic`](@ref) space.
 
 !!! note
     While the `MinkowskiMetric` itself is not positive definite in the whole embedded space,
-    it is positive definite when restricted to a tangent space $T_x\mathcal M$,
-    $x\in\mathcal M$, of the [`Hyperbolic`](@ref) space $\mathcal M$.
+    it is positive definite when restricted to a tangent space $T_xℳ$,
+    $x\in ℳ$, of the [`Hyperbolic`](@ref) space $ℳ$.
 """
 struct MinkowskiMetric <: LorentzMetric end
 
@@ -103,25 +103,25 @@ end
 Compute the distance on the [`Hyperbolic`](@ref) `M`, which reads
 
 ````math
-d_{\mathbb H^n}(x,y) = \operatorname{acosh}( - \langle x, y \rangle_{\mathrm{M}}),
+d_{ℍ^n}(x,y) = \operatorname{acosh}( - ⟨x, y⟩_{\mathrm{M}}),
 ````
 
-where $\langle\cdot,\cdot\rangle_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref).
+where $⟨·,·⟩_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref).
 """
 distance(M::Hyperbolic, x, y) = acosh(max(-minkowski_dot(x, y), 1.0))
 
 @doc doc"""
     exp(M::Hyperbolic, x, v)
 
-Compute the exponential map on the [`Hyperbolic`](@ref) space $\mathbb H^n$ eminating
+Compute the exponential map on the [`Hyperbolic`](@ref) space $ℍ^n$ eminating
 from `x` towards `v`, which is optionally scaled by `t`. The formula reads
 
 ````math
-\exp_x v = \cosh(\sqrt{\langle v,v\rangle_{\mathrm{M}}})x
-+ \sinh(\sqrt{\langle v,v\rangle_{\mathrm{M}}})\frac{v}{\sqrt{\langle v,v\rangle_{\mathrm{M}}}},
+\exp_x v = \cosh(\sqrt{⟨v,v⟩_{\mathrm{M}}})x
++ \sinh(\sqrt{⟨v,v⟩_{\mathrm{M}}})\frac{v}{\sqrt{⟨v,v⟩_{\mathrm{M}}}},
 ````
 
-where $\langle\cdot,\cdot\rangle_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref).
+where $⟨·,·⟩_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref).
 """
 exp(::Hyperbolic, ::Any...)
 
@@ -144,9 +144,9 @@ injectivity_radius(H::Hyperbolic, args...) = Inf
     inner(M::Hyperbolic, x, v, w)
 
 Compute the Riemannian inner product for two tangent vectors `v` and `w`
-from $T_x\mathbb H^n$ of the [`Hyperbolic`](@ref) space $\mathbb H^n$ given by
-$\langle w, v \rangle_{\mathrm{M}}$ the [`minkowski_dot`](@ref) Minkowski
-inner product on $\mathbb R^{n+1}$.
+from $T_x ℍ^n$ of the [`Hyperbolic`](@ref) space $ℍ^n$ given by
+$⟨w, v⟩_{\mathrm{M}}$ the [`minkowski_dot`](@ref) Minkowski
+inner product on $ℝ^{n+1}$.
 """
 @inline inner(M::Hyperbolic, x, w, v) = minkowski_dot(w, v)
 
@@ -155,14 +155,14 @@ is_default_metric(::Hyperbolic, ::MinkowskiMetric) = Val(true)
 @doc doc"""
     log(M::Hyperbolic, x, y)
 
-Compute the logarithmic map on the [`Hyperbolic`](@ref) space $\mathbb H^n$, the tangent
+Compute the logarithmic map on the [`Hyperbolic`](@ref) space $ℍ^n$, the tangent
 vector representing the [`geodesic`](@ref) starting from `x`
 reaches `y` after time 1 on the [`Hyperbolic`](@ref) space `M`.
 The formula reads for $x\neq y$
 
 ```math
-\log_x y = d_{\mathbb H^n}(x,y)
-\frac{y-\langle x,y\rangle_{\mathrm{M}} x}{\lVert y-\langle x,y\rangle_{\mathrm{M}} x \rVert_2}
+\log_x y = d_{ℍ^n}(x,y)
+\frac{y-⟨x,y⟩_{\mathrm{M}} x}{\lVert y-⟨x,y⟩_{\mathrm{M}} x \rVert_2}
 ```
 and is zero otherwise.
 """
@@ -183,7 +183,7 @@ Compute the Minkowski inner product of two Vectors `a` and `b` of same length
 `n+1`, i.e.
 
 ````math
-\langle a,b\rangle_{\mathrm{M}} = -a_{n+1}b_{n+1} + \displaystyle\sum_{k=1}^n a_kb_k.
+⟨a,b⟩_{\mathrm{M}} = -a_{n+1}b_{n+1} + \displaystyle\sum_{k=1}^n a_kb_k.
 ````
 """
 function minkowski_dot(a::AbstractVector, b::AbstractVector)
@@ -193,7 +193,7 @@ end
 @doc doc"""
     manifold_dimension(H::Hyperbolic)
 
-Return the dimension of the hyperbolic space manifold $\mathbb H^n$, i.e. $n$.
+Return the dimension of the hyperbolic space manifold $ℍ^n$, i.e. $n$.
 """
 manifold_dimension(::Hyperbolic{N}) where {N} = N
 
@@ -223,9 +223,9 @@ the tangent space at `x` of the [`Hyperbolic`](@ref) space `M`.
 
 The formula reads
 ````math
-w = v + \langle x,v\rangle_{\mathrm{M}} x,
+w = v + ⟨x,v⟩_{\mathrm{M}} x,
 ````
-where $\langle \cdot, \cdot \rangle_{\mathrm{M}}$ denotes the Minkowski inner
+where $⟨·, ·⟩_{\mathrm{M}}$ denotes the Minkowski inner
 product in the embedding, see [`minkowski_dot`](@ref).
 """
 project_tangent(::Hyperbolic, ::Any...)
@@ -246,11 +246,11 @@ sharp!(M::Hyperbolic, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
     vector_transport_to(M::Hyperbolic, x, v, y, ::ParallelTransport)
 
 Compute the paralllel transport of the `v` from the tangent space at `x` on the
-[`Hyperbolic`](@ref) space $\mathbb H^n$ to the tangent at `y` along the [`geodesic`](@ref)
+[`Hyperbolic`](@ref) space $ℍ^n$ to the tangent at `y` along the [`geodesic`](@ref)
 connecting `x` and `y`. The formula reads
 
 ````math
-P_{y\gets x}(v) = v - \frac{\langle \log_xy,v\rangle_x}{d^2_{\mathbb H^n}(x,y)}
+𝒫_{y\gets x}(v) = v - \frac{⟨\log_xy,v⟩_x}{d^2_{ℍ^n}(x,y)}
 \bigl(\log_xy + \log_yx \bigr).
 ````
 """

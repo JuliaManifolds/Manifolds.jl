@@ -2,20 +2,20 @@
     Grassmann{n,k,F} <: Manifold
 
 The Grassmann manifold $\operatorname{Gr}(n,k)$ consists of all subspaces spanned
-by $k$ linear independent vectors $\mathbb F^n$, where
-$\mathbb F \in \{\mathbb R, \mathbb C\}$ is either the real- (or complex-) valued vectors.
-This yields all $k$-dimensional subspaces of $\mathbb R^n$ for the real-valued case and all
-$2k$-dimensional subspaces of $\mathbb C^n$ for the second.
+by $k$ linear independent vectors $𝔽^n$, where
+$𝔽 \in \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
+This yields all $k$-dimensional subspaces of $ℝ^n$ for the real-valued case and all
+$2k$-dimensional subspaces of $ℂ^n$ for the second.
 
 The manifold can be represented as
 
 ````math
 \operatorname{Gr}(n,k) \coloneqq \bigl\{ \operatorname{span}(x)
-: x \in \mathbb F^{n\times k}, \bar{x}^\mathrm{T}x = I_k\},
+: x \in 𝔽^{n ⨉ k}, \bar{x}^\mathrm{T}x = I_k\},
 ````
 
-where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transpose and
-$I_k$ is the $k\times k$ identity matrix. This means, that the columns of $x$
+where ${\bar·}^{\mathrm{T}}$ denotes the complex conjugate transpose and
+$I_k$ is the $k ⨉ k$ identity matrix. This means, that the columns of $x$
 form an orthonormal basis of the subspace, that is a point on
 $\operatorname{Gr}(n,k)$, and hence the subspace can actually be represented by
 a whole equivalence class of representers.
@@ -26,17 +26,17 @@ Another interpretation is, that
 ````
 
 i.e the Grassmann manifold is the quotient of the [`Stiefel`](@ref) manifold and
-the orthogonal group $\operatorname{O}(k)$ of orthogonal $k\times k$ matrices.
+the orthogonal group $\operatorname{O}(k)$ of orthogonal $k ⨉ k$ matrices.
 
 The tangent space at a point (subspace) $x$ is given by
 
 ````math
 T_x\mathrm{Gr}(n,k) = \bigl\{
-v \in \mathbb{F}^{n\times k} :
+v \in 𝔽^{n ⨉ k} :
 {\bar v}^{\mathrm{T}}x + {\bar x}^{\mathrm{T}}v = 0_{k} \bigr\},
 ````
 
-where $0_{k}$ denotes the $k\times k$ zero matrix.
+where $0_{k}$ denotes the $k ⨉ k$ zero matrix.
 
 Note that a point $x\in \operatorname{Gr}(n,k)$ might be represented by
 different matrices (i.e. matrices with orthonormal column vectors that span
@@ -51,7 +51,7 @@ The manifold is named after
     Grassmann(n,k,F=ℝ)
 
 Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
-case $\mathbb F = \mathbb R$ is the default.
+case $𝔽 = ℝ$ is the default.
 """
 struct Grassmann{n,k,F} <: Manifold end
 
@@ -101,8 +101,8 @@ Check whether `v` is a tangent vector in the tangent space of `x` on the [`Grass
     x^{\mathrm{H}}v + v^{\mathrm{H}}x = 0_k,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and $0_k$
-denotes the $k\times k$ zero natrix.
+where $·^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and $0_k$
+denotes the $k ⨉ k$ zero natrix.
 """
 function check_tangent_vector(G::Grassmann{n,k,F}, x, v; kwargs...) where {n,k,F}
     t = check_manifold_point(G, x)
@@ -139,7 +139,7 @@ end
 Compute the Riemannian distance on [`Grassmann`](@ref) manifold `M`$= \mathrm{Gr}(n,k)$.
 
 Let $USV = x^\mathrm{H}y$ denote the SVD decomposition of
-$x^\mathrm{H}y$, where $\cdot^{\mathrm{H}}$ denotes the complex
+$x^\mathrm{H}y$, where $·^{\mathrm{H}}$ denotes the complex
 conjugate transposed or Hermitian. Then the distance is given by
 ````math
 d_{\mathrm{GR}(n,k)}(x,y) = \operatorname{norm}(\operatorname{Re}(b)).
@@ -166,7 +166,7 @@ Then the exponential map is written using
 z = x V\cos(S)V^\mathrm{H} + U\sin(S)V^\mathrm{H},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $·^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 The cosine and sine are applied element wise to the diagonal entries of $S$.
 A final QR decomposition $z=QR$ is performed for numerical stability reasons,
 yielding the result as
@@ -197,7 +197,7 @@ The formula reads
 g_x(v,w) = \operatorname{trace}(v^{\mathrm{H}}w),
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $·^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inner(::Grassmann, x, v, w) = dot(v, w)
 
@@ -211,7 +211,7 @@ Compute the inverse retraction for the [`PolarRetraction`](@ref), on the
 \operatorname{retr}_x^{-1}y = y*(x^\mathrm{H}y)^{-1} - x,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $·^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inverse_retract(M::Grassmann, ::Any, ::Any, ::PolarInverseRetraction)
 
@@ -227,7 +227,7 @@ Compute the inverse retraction valid of the [`QRRetraction`](@ref)
 ````math
 \operatorname{retr}_x^{-1}y = y*(x^\mathrm{H}y)^{-1} - x,
 ````
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $·^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 
@@ -241,15 +241,15 @@ isapprox(M::Grassmann, x, y; kwargs...) = isapprox(distance(M, x, y), 0.0; kwarg
 @doc doc"""
     log(M::Grassmann, x, y)
 
-Compute the logarithmic map on the [`Grassmann`](@ref) `M`$ = \mathcal M=\mathrm{Gr}(n,k)$,
+Compute the logarithmic map on the [`Grassmann`](@ref) `M`$ = ℳ=\mathrm{Gr}(n,k)$,
 i.e. the tangent vector `v` whose corresponding [`geodesic`](@ref) starting from `x`
 reaches `y` after time 1 on `M`. The formula reads
 
 ````math
-\log_xy = V\cdot \operatorname{atan}(S) \cdot U^\mathrm{H},
+\log_xy = V· \operatorname{atan}(S) · U^\mathrm{H},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $·^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 $U$ and $V$ are the unitary matrices, and $S$ is a diagonal matrix containing
 the singular values of the SVD-decomposition of
 ````math
@@ -314,7 +314,7 @@ which is computed by
 \operatorname{proj_x}(w) = w - xx^{\mathrm{H}}w,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $·^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 project_tangent(::Grassmann, ::Any...)
 
@@ -337,7 +337,7 @@ Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 \operatorname{retr}_x v = UV^\mathrm{H},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $·^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 
     retract(M::Grassmann, x, v, ::QRRetraction )
 
@@ -346,7 +346,7 @@ Compute the QR-based retraction [`QRRetraction`](@ref) on the
 ````math
 \operatorname{retr}_xv = QD,
 ````
-where D is a $m\times n$ matrix with
+where D is a $m ⨉ n$ matrix with
 ````math
 D = \operatorname{diag}( \operatorname{sgn}(R_{ii}+0,5)_{i=1}^n ).
 ````

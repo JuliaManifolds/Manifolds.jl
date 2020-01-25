@@ -9,7 +9,7 @@ are for example summarized in Table 1 of [^Lin2019].
 
     CholeskySpace(n)
 
-Generate the manifold of $n\times n$ lower triangular matrices with positive diagonal.
+Generate the manifold of $n⨉ n$ lower triangular matrices with positive diagonal.
 
 [^Lin2019]:
     > Lin, Zenhua: "Riemannian Geometry of Symmetric Positive Definite Matrices via
@@ -83,7 +83,7 @@ matrices `x`, `y` that are lower triangular with positive diagonal. The formula
 reads
 
 ````math
-d_{\mathcal M}(x,y) = \sqrt{\sum_{i>j} (x_{ij}-y_{ij})^2 +
+d_{ℳ}(x,y) = \sqrt{\sum_{i>j} (x_{ij}-y_{ij})^2 +
 \sum_{j=1}^m (\log x_{jj} - \log y_{jj})^2
 }
 ````
@@ -191,11 +191,11 @@ Parallely transport the tangent vector `v` at `x` along the geodesic to `y`
 on to the [`CholeskySpace`](@ref) manifold `M`. The formula reads
 
 ````math
-\mathcal P_{y\gets x}(v) = \lfloor v \rfloor
+\mathcal 𝒫_{y\gets x}(v) = \lfloor v \rfloor
 + \operatorname{diag}(y)\operatorname{diag}(x)^{-1}\operatorname{diag}(v),
 ````
 
-where $\lfloor\cdot\rfloor$ denotes the strictly lower triangular matrix,
+where $\lfloor·\rfloor$ denotes the strictly lower triangular matrix,
 and $\operatorname{diag}$ extracts the diagonal matrix.
 """
 vector_transport_to(::CholeskySpace, ::Any, ::Any, ::Any, ::ParallelTransport)

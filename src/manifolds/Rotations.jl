@@ -1,14 +1,14 @@
 @doc doc"""
     Rotations{N} <: Manifold
 
-Special orthogonal manifold $\mathrm{SO}(n)$ represented by $n\times n$
+Special orthogonal manifold $\mathrm{SO}(n)$ represented by $n ⨉ n$
 real-valued orthogonal matrices with determinant $+1$.
 
 # Constructor
 
     Rotations(n)
 
-Generate the $\mathrm{SO}(n) \subset \mathbb R^{n\times n}$
+Generate the $\mathrm{SO}(n) \subset ℝ^{n ⨉ n}$
 """
 struct Rotations{N} <: Manifold end
 

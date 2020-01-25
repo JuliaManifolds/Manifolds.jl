@@ -179,7 +179,7 @@ distance(B::VectorBundleFibers, x, v, w) = norm(B, x, v - w)
     distance(B::VectorBundle, x, y)
 
 Distance between points $x$ and $y$ from the
-vector bundle `B` over manifold `B.VS` (denoted $M$).
+vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
   * The point $x = (p_x, \xi_x)$ where $p_x \in M$ and $\xi_x$ belongs to the
@@ -191,7 +191,7 @@ The distance is calculated as
 
 $d_B(x, y) = \sqrt{d_M(p_x, p_y)^2 + d_F(\xi_x, \xi_{y\to x})^2}$
 
-where $d_M$ is the distance on manifold $M$, $d_F$ is the distance
+where $d_ℳ$ is the distance on manifold $ℳ$, $d_F$ is the distance
 between two vectors from the fiber $F$ and $\xi_{y\to x}$ is the result
 of parallel transport of vector $\xi_y$ to point $p_x$. The default
 behavior of [`vector_transport_to`](@ref) is used to compute the vector
@@ -213,7 +213,7 @@ number_eltype(v::FVector) = number_eltype(v.data)
     exp(B::VectorBundle, x, v)
 
 Exponential map of tangent vector $v$ at point $x$ from
-vector bundle `B` over manifold `B.VS` (denoted $M$).
+vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
   * The point $x = (p_x, \xi_x)$ where $p_x \in M$ and $\xi_x$ belongs to the
@@ -250,7 +250,7 @@ from the vector space of type `M` at point `x` from the underlying [`Manifold`](
 
 The function can be used for example to transform vectors
 from the tangent bundle to vectors from the cotangent bundle
-$\flat \colon T\mathcal M \to T^{*}\mathcal M$
+$\flat \colon Tℳ \to T^{*}ℳ$
 """
 function flat(M::Manifold, x, w::FVector)
     v = allocate_result(M, flat, w, x)
@@ -369,7 +369,7 @@ end
     inner(B::VectorBundle, x, v, w)
 
 Inner product of tangent vectors `v` and `w` at point `x` from the
-vector bundle `B` over manifold `B.VS` (denoted $M$).
+vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
   * The point $x = (p_x, \xi_x)$ where $p_x \in M$ and $\xi_x$ belongs to the
@@ -382,7 +382,7 @@ Notation:
 
 The inner product is calculated as
 
-$\langle v, w \rangle_{B} = \langle \xi_{v,M}, \xi_{w,M} \rangle_{M} + \langle \xi_{v,F}, \xi_{w,F} \rangle_{F}.$
+$⟨v, w⟩_{B} = ⟨\xi_{v,M}, \xi_{w,M}⟩_{M} + ⟨\xi_{v,F}, \xi_{w,F}⟩_{F}.$
 """
 function inner(B::VectorBundle, x, v, w)
     px, ξx = submanifold_components(B.M, x)
@@ -407,7 +407,7 @@ end
     log(B::VectorBundle, x, y)
 
 Logarithmic map of the point $y$ at point $x$ from
-vector bundle `B` over manifold `B.VS` (denoted $M$).
+vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
   * The point $x = (p_x, \xi_x)$ where $p_x \in M$ and $\xi_x$ belongs to the
@@ -450,15 +450,15 @@ norm(B::VectorBundleFibers{<:TangentSpaceType}, x, v) = norm(B.M, x, v)
     project_point(B::VectorBundle, x)
 
 Project the point $x$ from the ambient space of the vector bundle `B`
-over manifold `B.VS` (denoted $M$) to the vector bundle.
+over manifold `B.VS` (denoted $ℳ$) to the vector bundle.
 
 Notation:
-  * The point $x = (p_x, \xi_x)$ where $p_x$ belongs to the ambient space of $M$
+  * The point $x = (p_x, \xi_x)$ where $p_x$ belongs to the ambient space of $ℳ$
     and $\xi_x$ belongs to the ambient space of the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
 
-The projection is calculated by projecting the point $p_x$ to the manifold $M$
+The projection is calculated by projecting the point $p_x$ to the manifold $ℳ$
 and then projecting the vector $\xi_x$ to the tangent space $T_{p_x}M$.
 """
 project_point(::VectorBundle, ::Any...)
@@ -533,7 +533,7 @@ from the vector space `M` at point `x` from the underlying [`Manifold`](@ref).
 
 The function can be used for example to transform vectors
 from the cotangent bundle to vectors from the tangent bundle
-$\sharp \colon T^{*}\mathcal M \to T\mathcal M$
+$\sharp \colon T^{*}ℳ \to Tℳ$
 """
 function sharp(M::Manifold, x, w::FVector)
     v = allocate_result(M, sharp, w, x)
@@ -637,7 +637,7 @@ end
     zero_tangent_vector(B::VectorBundle, x)
 
 Zero tangent vector at point $x$ from the vector bundle `B`
-over manifold `B.VS` (denoted $M$). The zero vector belongs to the space $T_{x}B$
+over manifold `B.VS` (denoted $ℳ$). The zero vector belongs to the space $T_{x}B$
 
 Notation:
   * The point $x = (p_x, \xi_x)$ where $p_x \in M$ and $\xi_x$ belongs to the
