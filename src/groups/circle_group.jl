@@ -8,7 +8,7 @@ const CircleGroup = GroupManifold{Circle{ℂ},MultiplicationOperation}
 
 CircleGroup() = GroupManifold(Circle{ℂ}(), MultiplicationOperation())
 
-show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
+show(io::IO, ::MIME"text/plain", ::CircleGroup) = print(io, "CircleGroup()")
 
 function compose(G::CircleGroup, x::AbstractVector, y::AbstractVector)
     return map(compose, repeated(G), x, y)

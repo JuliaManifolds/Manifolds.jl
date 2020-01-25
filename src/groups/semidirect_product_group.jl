@@ -9,8 +9,8 @@ struct SemidirectProductOperation{A<:AbstractGroupAction} <: AbstractGroupOperat
     action::A
 end
 
-function show(io::IO, op::SemidirectProductOperation)
-    print(io, "SemidirectProductOperation($(op.action))")
+function show(io::IO, mime::MIME"text/plain", op::SemidirectProductOperation)
+    print(io, "SemidirectProductOperation($(repr(mime, op.action)))")
 end
 
 const SemidirectProductGroup{N,H,A} =
@@ -41,11 +41,14 @@ function SemidirectProductGroup(N::GroupManifold, H::GroupManifold, A::AbstractG
     return GroupManifold(M, op)
 end
 
-function show(io::IO, G::SemidirectProductGroup)
+function show(io::IO, mime::MIME"text/plain", G::SemidirectProductGroup)
     M = base_manifold(G)
     N, H = M.manifolds
     A = G.op.action
-    print(io, "SemidirectProductGroup($(N), $(H), $(A))")
+    print(
+        io,
+        "SemidirectProductGroup($(repr(mime, N)), $(repr(mime, H)), $(repr(mime, A)))",
+    )
 end
 
 _padpoint!(G::SemidirectProductGroup, y) = y

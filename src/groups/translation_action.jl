@@ -24,8 +24,8 @@ function TranslationAction(
     return TranslationAction{typeof(M),typeof(Rn),TAD}(M, Rn)
 end
 
-function show(io::IO, A::TranslationAction)
-    print(io, "TranslationAction($(A.M), $(A.Rn), $(direction(A)))")
+function show(io::IO, ::MIME"text/plain", A::TranslationAction)
+    print(io, "TranslationAction($(repr(mime, A.M)), $(repr(mime, A.Rn)), $(direction(A)))")
 end
 
 base_group(A::TranslationAction) = A.Rn

@@ -14,8 +14,8 @@ function GroupOperationAction(
     return GroupOperationAction{typeof(G),TAD}(G)
 end
 
-function show(io::IO, A::GroupOperationAction)
-    print(io, "GroupOperationAction($(A.group), $(direction(A)))")
+function show(io::IO, mime::MIME"text/plain", A::GroupOperationAction)
+    print(io, "GroupOperationAction($(repr(mime, A.group)), $(direction(A)))")
 end
 
 base_group(A::GroupOperationAction) = A.group

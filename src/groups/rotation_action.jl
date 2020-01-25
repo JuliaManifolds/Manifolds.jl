@@ -22,8 +22,8 @@ function RotationAction(
     return RotationAction{typeof(M),typeof(SOn),TAD}(M, SOn)
 end
 
-function show(io::IO, A::RotationAction)
-    print(io, "RotationAction($(A.M), $(A.SOn), $(direction(A)))")
+function show(io::IO, mime::MIME"text/plain", A::RotationAction)
+    print(io, "RotationAction($(repr(mime, A.M)), $(repr(mime, A.SOn)), $(direction(A)))")
 end
 
 const RotationActionOnVector{N,F,TAD} = RotationAction{
