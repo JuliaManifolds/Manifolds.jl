@@ -33,6 +33,8 @@ end
 
 PowerManifold(M::Manifold, size::Int...) = PowerManifold{typeof(M),Tuple{size...}}(M)
 
+^(M::Manifold, n) = PowerManifold(M, n...)
+
 @doc doc"""
     PowerMetric <: Metric
 

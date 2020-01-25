@@ -12,6 +12,8 @@ end
 
 Torus(n::Int) = Torus{n}(Circle())
 
+^(M::Circle, n::Int) = Torus{n}(M)
+
 @doc doc"""
     check_manifold_point(M::Torus{n},x)
 
