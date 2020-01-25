@@ -38,6 +38,7 @@ makedocs(
         "Statistics" => "statistics.md",
         "Distributions" => "distributions.md",
         "Orthonormal bases" => "orthonormal_bases.md",
+        "Notation" => "notation.md",
         "Library" => [
             "Number systems" => "lib/numbers.md",
             "Public" => "lib/public.md",
