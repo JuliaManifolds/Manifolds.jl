@@ -33,7 +33,7 @@ direction(::AbstractGroupAction{AD}) where {AD} = AD()
 
 Apply action `a` to the point `x`. The action is specified by `A`.
 Unless otherwise specified, right actions are defined in terms of the left action. For
-point $x ∈ M$ and action element $a$, the right action is
+point $x ∈ ℳ$ and action element $a$, the right action is
 
 ````math
 x ⋅ a ≐ a^{-1} ⋅ x.
@@ -82,7 +82,7 @@ end
 @doc doc"""
     apply_diff(A::AbstractGroupAction, a, x, v)
 
-For group point $x ∈ M$ and tangent vector $v ∈ T_x M$, compute the action of the
+For group point $x ∈ ℳ$ and tangent vector $v ∈ T_x ℳ$, compute the action of the
 differential of the action of $a ∈ G$ on $v$, specified by rule `A`. Written as
 $(\mathrm{d}τ_a)_x (v)$, with the specified left or right convention, the differential
 transports vectors
@@ -105,15 +105,15 @@ end
 @doc doc"""
     inverse_apply_diff(A::AbstractGroupAction, a, x, v)
 
-For group point $x ∈ M$ and tangent vector $v ∈ T_x M$, compute the action of the
+For group point $x ∈ ℳ$ and tangent vector $v ∈ T_x ℳ$, compute the action of the
 differential of the inverse action of $a ∈ G$ on $v$, specified by rule `A`. Written as
 $(\mathrm{d}τ_a)_x^{-1} (v)$, with the specified left or right convention, the
 differential transports vectors
 
 ````math
 \begin{aligned}
-(\mathrm{d}L_a)_x^{-1} (v) &: T_x M → T_{a^{-1} ⋅ x} ℳ\\
-(\mathrm{d}R_a)_x^{-1} (v) &: T_x M → T_{x ⋅ a^{-1}} ℳ
+(\mathrm{d}L_a)_x^{-1} (v) &: T_x ℳ → T_{a^{-1} ⋅ x} ℳ\\
+(\mathrm{d}R_a)_x^{-1} (v) &: T_x ℳ → T_{x ⋅ a^{-1}} ℳ
 \end{aligned}
 ````
 """
