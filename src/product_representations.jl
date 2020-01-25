@@ -265,16 +265,16 @@ function (*)(a::Number, v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpeci
     return ProductArray(ShapeSpec, a * v.data, v.reshapers)
 end
 
-eltype(::Type{ProductArray{TM,TData,TV}}) where {TM,TData,TV} = eltype(TData)
+number_eltype(::Type{ProductArray{TM, TData, TV}}) where {TM, TData, TV} = eltype(TData)
 
-function similar(x::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
-    return ProductArray(ShapeSpec, similar(x.data), x.reshapers)
+function allocate(x::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification
+    return ProductArray(ShapeSpec, allocate(x.data), x.reshapers)
 end
-function similar(
+function allocate(
     x::ProductArray{ShapeSpec},
-    ::Type{T},
-) where {ShapeSpec<:ShapeSpecification,T}
-    return ProductArray(ShapeSpec, similar(x.data, T), x.reshapers)
+    ::Type{T}
+) where {ShapeSpec<:ShapeSpecification, T}
+    return ProductArray(ShapeSpec, allocate(x.data, T), x.reshapers)
 end
 
 """
@@ -299,11 +299,13 @@ end
 
 ProductRepr(points...) = ProductRepr{typeof(points)}(points)
 
-eltype(x::ProductRepr) = eltype(Tuple{map(eltype, submanifold_components(x))...})
+function number_eltype(x::ProductRepr)
+    return typeof(reduce(+, one(number_eltype(eti)) for eti ∈ x.parts))
+end
 
-similar(x::ProductRepr) = ProductRepr(map(similar, submanifold_components(x))...)
-function similar(x::ProductRepr, ::Type{T}) where {T}
-    return ProductRepr(map(t -> similar(t, T), submanifold_components(x))...)
+allocate(x::ProductRepr) = ProductRepr(map(allocate, submanifold_components(x))...)
+function allocate(x::ProductRepr, ::Type{T}) where {T}
+    return ProductRepr(map(t -> allocate(t, T), submanifold_components(x))...)
 end
 
 function copyto!(x::ProductRepr, y::ProductRepr)

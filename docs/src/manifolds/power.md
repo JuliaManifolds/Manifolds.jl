@@ -1,4 +1,4 @@
-# Product manifold
+# Power manifold
 
 ```@autodocs
 Modules = [Manifolds]

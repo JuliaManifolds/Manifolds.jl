@@ -9,9 +9,9 @@ Every vector space `VS` is supposed to provide:
 * basic operations: addition, subtraction, multiplication by a scalar
   and negation (unary minus),
 * [`zero_vector!(VS, v, x)`](@ref) to construct zero vectors at point `x`,
-* `similar(v, T)` for vector `v`,
+* `allocate(v)` and `allocate(v, T)` for vector `v` and type `T`,
 * `copyto!(v, w)` for vectors `v` and `w`,
-* `eltype(v)` for vector `v`,
+* `number_eltype(v)` for vector `v`,
 * [`vector_space_dimension(::VectorBundleFibers{<:typeof(VS)}) where VS`](@ref).
 
 Optionally:
@@ -206,7 +206,8 @@ function distance(B::VectorBundle, x, y)
     return sqrt(dist_man^2 + dist_vec^2)
 end
 
-eltype(::Type{FVector{TType,TData}}) where {TType<:VectorSpaceType,TData} = eltype(TData)
+number_eltype(::Type{FVector{TType,TData}}) where {TType<:VectorSpaceType,TData} = number_eltype(TData)
+number_eltype(v::FVector) = number_eltype(v.data)
 
 @doc doc"""
     exp(B::VectorBundle, x, v)
@@ -252,7 +253,7 @@ from the tangent bundle to vectors from the cotangent bundle
 $\flat \colon T\mathcal M \to T^{*}\mathcal M$
 """
 function flat(M::Manifold, x, w::FVector)
-    v = similar_result(M, flat, w, x)
+    v = allocate_result(M, flat, w, x)
     return flat!(M, v, x, w)
 end
 
@@ -504,7 +505,7 @@ end
 Project vector `w` from the vector space of type `B.VS` at point `x`.
 """
 function project_vector(B::VectorBundleFibers, x, w)
-    v = similar_result(B, project_vector, x, w)
+    v = allocate_result(B, project_vector, x, w)
     return project_vector!(B, v, x, w)
 end
 
@@ -535,7 +536,7 @@ from the cotangent bundle to vectors from the tangent bundle
 $\sharp \colon T^{*}\mathcal M \to T\mathcal M$
 """
 function sharp(M::Manifold, x, w::FVector)
-    v = similar_result(M, sharp, w, x)
+    v = allocate_result(M, sharp, w, x)
     return sharp!(M, v, x, w)
 end
 
@@ -547,37 +548,37 @@ function sharp!(M::Manifold, v::FVector, x, w::FVector)
     )
 end
 
-similar(x::FVector) = FVector(x.type, similar(x.data))
-similar(x::FVector, ::Type{T}) where {T} = FVector(x.type, similar(x.data, T))
+allocate(x::FVector) = FVector(x.type, allocate(x.data))
+allocate(x::FVector, ::Type{T}) where {T} = FVector(x.type, allocate(x.data, T))
 
 """
-    similar_result(B::VectorBundleFibers, f, x...)
+    allocate_result(B::VectorBundleFibers, f, x...)
 
 Allocates an array for the result of function `f` that is
 an element of the vector space of type `B.VS` on manifold `B.M`
 and arguments `x...` for implementing the non-modifying operation
 using the modifying operation.
 """
-function similar_result(B::VectorBundleFibers, f, x...)
-    T = similar_result_type(B, f, x)
-    return similar(x[1], T)
+function allocate_result(B::VectorBundleFibers, f, x...)
+    T = allocate_result_type(B, f, x)
+    return allocate(x[1], T)
 end
-function similar_result(M::Manifold, ::typeof(flat), w::TFVector, x)
-    return FVector(CotangentSpace, similar(w.data))
+function allocate_result(M::Manifold, ::typeof(flat), w::TFVector, x)
+    return FVector(CotangentSpace, allocate(w.data))
 end
-function similar_result(M::Manifold, ::typeof(sharp), w::CoTFVector, x)
-    return FVector(TangentSpace, similar(w.data))
+function allocate_result(M::Manifold, ::typeof(sharp), w::CoTFVector, x)
+    return FVector(TangentSpace, allocate(w.data))
 end
 
 """
-    similar_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where N
+    allocate_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where N
 
 Returns type of element of the array that will represent the result of
 function `f` for representing an operation with result in the vector space `VS`
 for manifold `M` on given arguments (passed at a tuple).
 """
-function similar_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where {N}
-    T = typeof(reduce(+, one(eltype(eti)) for eti ∈ args))
+function allocate_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where N
+    T = typeof(reduce(+, one(number_eltype(eti)) for eti ∈ args))
     return T
 end
 
@@ -615,7 +616,7 @@ Compute the zero vector from the vector space of type `B.VS` at point `x`
 from manifold `B.M`.
 """
 function zero_vector(B::VectorBundleFibers, x)
-    v = similar_result(B, zero_vector, x)
+    v = allocate_result(B, zero_vector, x)
     return zero_vector!(B, v, x)
 end
 

@@ -21,7 +21,7 @@ A type for a [`GraphManifold`](@ref) where the data is given on the vertices.
 struct VertexManifold <: GraphManifoldType end
 
 @doc doc"""
-    GraphManifold{G, M, T} <: AbstractPowerManifold{M}
+    GraphManifold{G, M, T} <: AbstractPowerManifold{M,NestedPowerRepresentation}
 
 Build a manifold, that is a [`PowerManifold`](@ref) of the [`Manifold`](@ref) `M` either on the edges or vertices
 of a graph `G` depending on the [`GraphManifoldType`](@ref) `T`.
@@ -30,20 +30,23 @@ of a graph `G` depending on the [`GraphManifoldType`](@ref) `T`.
 * `G` is an `AbstractSimpleGraph`
 * `M` is a [`Manifold`](@ref)
 """
-struct GraphManifold{G<:AbstractGraph,TM,T<:GraphManifoldType} <: AbstractPowerManifold{TM}
+struct GraphManifold{G<:AbstractGraph,TM,T<:GraphManifoldType} <: AbstractPowerManifold{TM,NestedPowerRepresentation}
     graph::G
     manifold::TM
 end
 
-function GraphManifold(g::G, M::TM, ::VertexManifold) where {G<:AbstractGraph,TM<:Manifold}
+function GraphManifold( g::G, M::TM, ::VertexManifold) where {G<:AbstractGraph,TM<:Manifold}
     return GraphManifold{G,TM,VertexManifold}(g, M)
 end
 function GraphManifold(g::G, M::TM, ::EdgeManifold) where {G<:AbstractGraph,TM<:Manifold}
     return GraphManifold{G,TM,EdgeManifold}(g, M)
 end
 
+const EdgeGraphManifold = GraphManifold{<:AbstractGraph,<:Manifold,EdgeManifold}
+const VertexGraphManifold = GraphManifold{<:AbstractGraph,<:Manifold,VertexManifold}
+
 @doc doc"""
-    check_manifold_point(M::GraphManifold,x)
+    check_manifold_point(M::GraphManifold, x)
 
 Check whether `x` is a valid point on the [`GraphManifold`](@ref), i.e. its
 length equals the number of vertices (for [`VertexManifold`](@ref)s) or
@@ -51,35 +54,29 @@ the number of edges (for [`EdgeManifold`](@ref)s) and that each element of `x`
 passes the [`check_manifold_point`](@ref) test for the base manifold `M.manifold`.
 """
 check_manifold_point(::GraphManifold, ::Any...)
-function check_manifold_point(
-    M::GraphManifold{G,TM,VertexManifold},
-    x;
-    kwargs...,
-) where {G<:AbstractGraph,TM<:Manifold}
-    if size(x)[end] != nv(M.graph)
+function check_manifold_point(M::VertexGraphManifold, x; kwargs...)
+    if size(x) != (nv(M.graph),)
         return DomainError(
             length(x),
-            "The number of points in `x` ($(size(x)[end])) does not match the number of nodes in the graph ($(nv(M.graph))).",
+            "The number of points in `x` ($(length(x))) does not match the number of nodes in the graph ($(nv(M.graph))).",
         )
     end
-    return check_manifold_point(PowerManifold(M.manifold, nv(M.graph)), x; kwargs...)
+    PM = PowerManifold(M.manifold, NestedPowerRepresentation(), nv(M.graph))
+    return check_manifold_point(PM, x; kwargs...)
 end
-function check_manifold_point(
-    M::GraphManifold{G,TM,EdgeManifold},
-    x;
-    kwargs...,
-) where {G<:AbstractGraph,TM<:Manifold}
-    if size(x)[end] != ne(M.graph)
+function check_manifold_point(M::EdgeGraphManifold, x; kwargs...)
+    if size(x) != (ne(M.graph),)
         return DomainError(
             length(x),
-            "The number of points in `x` ($(size(x)[end])) does not match the number of edges in the graph ($(ne(M.graph))).",
+            "The number of points in `x` ($(size(x))) does not match the number of edges in the graph ($(ne(M.graph))).",
         )
     end
-    return check_manifold_point(PowerManifold(M.manifold, ne(M.graph)), x; kwargs...)
+    PM = PowerManifold(M.manifold, NestedPowerRepresentation(), ne(M.graph))
+    return check_manifold_point(PM, x; kwargs...)
 end
 
 @doc doc"""
-    check_tangent_vector(M::GraphManifold,x,v)
+    check_tangent_vector(M::GraphManifold, x, v)
 
 Check whether `x` is a valid point on the [`GraphManifold`](@ref), and
 `v` it from its tangent space, i.e. its
@@ -89,49 +86,41 @@ together with its corresponding einty of `x` passes the
 [`check_tangent_vector`](@ref) test for the base manifold `M.manifold`.
 """
 check_tangent_vector(::GraphManifold, ::Any...)
-function check_tangent_vector(
-    M::GraphManifold{<:AbstractGraph,<:Manifold,VertexManifold},
-    x,
-    v;
-    kwargs...,
-)
-    if size(x)[end] != nv(M.graph)
+function check_tangent_vector(M::VertexGraphManifold, x, v; kwargs...)
+    if size(x) != (nv(M.graph),)
         return DomainError(
             length(x),
-            "The number of points in `x` ($(size(x)[end]) does not match the number of nodes in the graph ($(nv(M.graph))).",
+            "The number of points in `x` ($(size(x)) does not match the number of nodes in the graph ($(nv(M.graph))).",
         )
     end
-    if size(v)[end] != nv(M.graph)
+    if size(v) != (nv(M.graph),)
         return DomainError(
             length(v),
-            "The number of points in `v` ($(size(v)[end]) does not match the number of nodes in the graph ($(nv(M.graph))).",
+            "The number of points in `v` ($(size(v)) does not match the number of nodes in the graph ($(nv(M.graph))).",
         )
     end
-    return check_tangent_vector(PowerManifold(M.manifold, nv(M.graph)), x, v; kwargs...)
+    PM = PowerManifold(M.manifold, NestedPowerRepresentation(), nv(M.graph))
+    return check_tangent_vector(PM, x, v; kwargs...)
 end
-function check_tangent_vector(
-    M::GraphManifold{<:AbstractGraph,<:Manifold,EdgeManifold},
-    x,
-    v;
-    kwargs...,
-)
-    if size(x)[end] != ne(M.graph)
+function check_tangent_vector(M::EdgeGraphManifold, x, v; kwargs...)
+    if size(x) != (ne(M.graph),)
         return DomainError(
             length(x),
-            "The number of elements in `x` ($(size(x)[end]) does not match the number of edges in the graph ($(ne(M.graph))).",
+            "The number of elements in `x` ($(size(x)) does not match the number of edges in the graph ($(ne(M.graph))).",
         )
     end
-    if size(v)[end] != ne(M.graph)
+    if size(v) != (ne(M.graph),)
         return DomainError(
             length(v),
-            "The number of elements in `v` ($(size(v)[end]) does not match the number of edges in the graph ($(ne(M.graph))).",
+            "The number of elements in `v` ($(size(v)) does not match the number of edges in the graph ($(ne(M.graph))).",
         )
     end
-    return check_tangent_vector(PowerManifold(M.manifold, ne(M.graph)), x, v; kwargs...)
+    PM = PowerManifold(M.manifold, NestedPowerRepresentation(), ne(M.graph))
+    return check_tangent_vector(PM, x, v; kwargs...)
 end
 
-get_iterator(M::GraphManifold{<:AbstractGraph,<:Manifold,EdgeManifold}) = 1:ne(M.graph)
-get_iterator(M::GraphManifold{<:AbstractGraph,<:Manifold,VertexManifold}) = 1:nv(M.graph)
+get_iterator(M::EdgeGraphManifold) = 1:ne(M.graph)
+get_iterator(M::VertexGraphManifold) = 1:nv(M.graph)
 
 @doc doc"""
     incident_log(M::GraphManifold, x)
@@ -144,21 +133,24 @@ SimpleDiGraph
 If the internal graph is a `SimpleWeightedGraph` the weighted sum of the
 tangent vectors is computed.
 """
-function incident_log(M::GraphManifold{<:AbstractGraph,<:Manifold,VertexManifold}, x)
+function incident_log(M::VertexGraphManifold, x)
     v = zero_tangent_vector(M, x)
     return incident_log!(M, v, x)
 end
 
-function incident_log!(M::GraphManifold{<:AbstractGraph,<:Manifold,VertexManifold}, v, x)
+function incident_log!(M::VertexGraphManifold, v, x)
     rep_size = representation_size(M.manifold)
-    rsC = rep_size_to_colons(rep_size)
     for e in edges(M.graph)
-        vw = _write(rep_size, v, src(e))
-        v[rsC..., src(e)] +=
-            log(M.manifold, _read(rep_size, x, src(e)), _read(rep_size, x, dst(e)))
+        vw = _write(M, rep_size, v, src(e))
+        v[src(e)] +=
+            log(M.manifold, _read(M, rep_size, x, src(e)), _read(M, rep_size, x, dst(e)))
         if !is_directed(M.graph)
-            v[rsC..., dst(e)] +=
-                log(M.manifold, _read(rep_size, x, dst(e)), _read(rep_size, x, src(e)))
+            v[dst(e)] +=
+                log(
+                    M.manifold,
+                    _read(M, rep_size, x, dst(e)),
+                    _read(M, rep_size, x, src(e))
+                )
         end
     end
     return v
@@ -169,16 +161,23 @@ function incident_log!(
     x,
 )
     rep_size = representation_size(M.manifold)
-    rsC = rep_size_to_colons(rep_size)
     for e in edges(M.graph)
-        v[rsC..., src(e)] += (
+        v[src(e)] += (
             get_weight(M.graph, src(e), dst(e)) *
-                log(M.manifold, _read(rep_size, x, src(e)), _read(rep_size, x, dst(e)))
+                log(
+                    M.manifold,
+                    _read(M, rep_size, x, src(e)),
+                    _read(M, rep_size, x, dst(e))
+                )
         )
         if !is_directed(M.graph)
-            v[rsC..., dst(e)] += (
+            v[dst(e)] += (
                 get_weight(M.graph, dst(e), src(e)) *
-                    log(M.manifold, _read(rep_size, x, dst(e)), _read(rep_size, x, src(e)))
+                    log(
+                        M.manifold,
+                        _read(M, rep_size, x, dst(e)),
+                        _read(M, rep_size, x, src(e))
+                    )
             )
         end
     end
@@ -194,7 +193,7 @@ a graph $G=(V,E)$, i.e.
 d_{\mathcal N} = \lvert V \rVert d_{\mathcal M}.
 ````
 """
-function manifold_dimension(M::GraphManifold{<:AbstractGraph,<:Manifold,VertexManifold})
+function manifold_dimension(M::VertexGraphManifold)
     return manifold_dimension(M.manifold) * nv(M.graph)
 end
 @doc doc"""
@@ -206,32 +205,6 @@ a graph $G=(V,E)$, i.e.
 d_{\mathcal N} = \lvert E \rVert d_{\mathcal M}.
 ````
 """
-function manifold_dimension(M::GraphManifold{<:AbstractGraph,<:Manifold,EdgeManifold})
+function manifold_dimension(M::EdgeGraphManifold)
     return manifold_dimension(M.manifold) * ne(M.graph)
-end
-
-@doc doc"""
-    representation_size(N::GraphManifold{G,M,VertexManifold})
-
-returns the representation size of a point on the [`GraphManifold`](@ref) on the vertices of $G=(V,E),
-which is the representation size of `M` with $\lvert V \rvert$ added.
-"""
-function representation_size(M::GraphManifold{<:AbstractGraph,<:Manifold,VertexManifold})
-    return (representation_size(M.manifold)..., nv(M.graph))
-end
-@doc doc"""
-    representation_size(N::GraphManifold{G,M,EdgeManifold})
-
-returns the representation size of a point on the [`GraphManifold`](@ref) on the vertices of $G=(V,E),
-which is the representation size of `M` with $\lvert E \rvert$ added.
-"""
-function representation_size(M::GraphManifold{<:AbstractGraph,<:Manifold,EdgeManifold})
-    return (representation_size(M.manifold)..., ne(M.graph))
-end
-
-function zero_tangent_vector(M::GraphManifold{<:AbstractGraph,<:Manifold,VertexManifold}, x)
-    return zero_tangent_vector(PowerManifold(M.manifold, nv(M.graph)), x)
-end
-function zero_tangent_vector(M::GraphManifold{<:AbstractGraph,<:Manifold,EdgeManifold}, x)
-    return zero_tangent_vector(PowerManifold(M.manifold, ne(M.graph)), x)
 end

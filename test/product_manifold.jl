@@ -157,7 +157,7 @@ include("utils.jl")
             basis_types_vecs = (basis_types[1], basis_types[3],),
             basis_types_to_from = basis_types
         )
-        @test eltype(pts[1]) === Float64
+        @test number_eltype(pts[1]) === Float64
         @test submanifold_component(Mse, pts[1], 1) === pts[1].parts[1]
         @test submanifold_component(Mse, pts[1], Val(1)) === pts[1].parts[1]
         @test submanifold_component(pts[1], 1) === pts[1].parts[1]
