@@ -1,11 +1,11 @@
 # Graph manifold
 
 For a given graph $G(V,E)$ implemented using [`LightGraphs.jl`](https://juliagraphs.github.io/LightGraphs.jl/latest/), the [`GraphManifold`](@ref) models a [`PowerManifold`](@ref) either on the nodes or edges of the graph, depending on the [`GraphManifoldType`](@ref).
-i.e., it's either a $\mathcal M^{\lvert V \rvert}$ for the case of a vertex manifold or a $\mathcal M^{\lvert E \rvert}$ for the case of a edge manifold.
+i.e., it's either a $ℳ^{\lvert V \rvert}$ for the case of a vertex manifold or a $ℳ^{\lvert E \rvert}$ for the case of a edge manifold.
 
 ## Example:
 
-To make a graph manifold over $\mathbb{R}^2$ with three vertices and two edges, one can use
+To make a graph manifold over $ℝ^2$ with three vertices and two edges, one can use
 ```@example
 using Manifolds
 using LightGraphs

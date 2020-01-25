@@ -3,7 +3,7 @@
 The symmetric positive definite matrices
 
 ```math
-\mathcal P(n) = \bigl\{ A \in \mathbb R^{n\times n}\ \big|\ A = A^{\mathrm{T}} \text{ and } x^{\mathrm{T}}Ax > 0 \text{ for } 0\neq x \in\mathbb R^n \bigr\}
+\mathcal P(n) = \bigl\{ A \in ℝ^{n⨉ n}\ \big|\ A = A^{\mathrm{T}} \text{ and } x^{\mathrm{T}}Ax > 0 \text{ for } 0\neq x \inℝ^n \bigr\}
 ```
 
 ```@docs
