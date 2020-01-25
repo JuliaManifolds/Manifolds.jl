@@ -24,7 +24,7 @@ $G = N ⋊_θ H$, where $θ: H × N \to N$ is an automorphism action
 of $H$ on $N$. The group $G$ has the composition rule
 
 ````math
-g ⚬ g' = (n, h) ⚬ (n', h') = (n ⚬ θ_h(n'), h ⚬ h')
+g ◦ g' = (n, h) ◦ (n', h') = (n ◦ θ_h(n'), h ◦ h')
 ````
 
 and the inverse

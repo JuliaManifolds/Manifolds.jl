@@ -237,7 +237,7 @@ end
     inv(G::AbstractGroupManifold, x)
 
 Inverse $x^{-1} ∈ G$ of an element $x ∈ G$, such that
-$x ⚬ x^{-1} = x^{-1} ⚬ x = e ∈ G$.
+$x ◦ x^{-1} = x^{-1} ◦ x = e ∈ G$.
 """
 inv(M::Manifold, x) = inv(M, x, is_decorator_manifold(M))
 inv(M::Manifold, x, ::Val{true}) = inv(M.manifold, x)
@@ -253,7 +253,7 @@ end
     inv!(G::AbstractGroupManifold, y, x)
 
 Inverse $x^{-1} ∈ G$ of an element $x ∈ G$, such that
-$x ⚬ x^{-1} = x^{-1} ⚬ x = e ∈ G$.
+$x ◦ x^{-1} = x^{-1} ◦ x = e ∈ G$.
 The result is saved to `y`.
 """
 inv!(M::Manifold, y, x) = inv!(M, y, x, is_decorator_manifold(M))
@@ -265,7 +265,7 @@ end
 @doc doc"""
     identity(G::AbstractGroupManifold, x)
 
-Identity element $e ∈ G$, such that for any element $x ∈ G$, $x ⚬ e = e ⚬ x = x$.
+Identity element $e ∈ G$, such that for any element $x ∈ G$, $x ◦ e = e ◦ x = x$.
 The returned element is of a similar type to `x`.
 """
 identity(M::Manifold, x) = identity(M, x, is_decorator_manifold(M))
@@ -315,7 +315,7 @@ isapprox(::GT, ::E, ::E; kwargs...) where {GT<:GroupManifold,E<:Identity{GT}} = 
 @doc doc"""
     compose(G::AbstractGroupManifold, x, y)
 
-Compose elements $x,y ∈ G$ using the group operation $x ⚬ y$.
+Compose elements $x,y ∈ G$ using the group operation $x ◦ y$.
 """
 compose(M::Manifold, x, y) = compose(M, x, y, is_decorator_manifold(M))
 compose(M::Manifold, x, y, ::Val{true}) = compose(M.manifold, x, y)
@@ -343,8 +343,8 @@ For group elements $x,y ∈ G$, translate $y$ by $x$ with the specified conventi
 left $L_x$ or right $R_x$, defined as
 ```math
 \begin{aligned}
-L_x &: y ↦ x ⚬ y\\
-R_x &: y ↦ y ⚬ x.
+L_x &: y ↦ x ◦ y\\
+R_x &: y ↦ y ◦ x.
 \end{aligned}
 ```
 """
@@ -369,8 +369,8 @@ For group elements $x,y ∈ G$, translate $y$ by $x$ with the specified conventi
 left $L_x$ or right $R_x$, defined as
 ```math
 \begin{aligned}
-L_x &: y ↦ x ⚬ y\\
-R_x &: y ↦ y ⚬ x.
+L_x &: y ↦ x ◦ y\\
+R_x &: y ↦ y ◦ x.
 \end{aligned}
 ```
 Result of the operation is saved in `z`.
@@ -396,8 +396,8 @@ For group elements $x,y ∈ G$, inverse translate $y$ by $x$ with the specified 
 either left $L_x^{-1}$ or right $R_x^{-1}$, defined as
 ```math
 \begin{aligned}
-L_x^{-1} &: y ↦ x^{-1} ⚬ y\\
-R_x^{-1} &: y ↦ y ⚬ x^{-1}.
+L_x^{-1} &: y ↦ x^{-1} ◦ y\\
+R_x^{-1} &: y ↦ y ◦ x^{-1}.
 \end{aligned}
 ```
 """
@@ -422,8 +422,8 @@ For group elements $x,y ∈ G$, inverse translate $y$ by $x$ with the specified 
 either left $L_x^{-1}$ or right $R_x^{-1}$, defined as
 ```math
 \begin{aligned}
-L_x^{-1} &: y ↦ x^{-1} ⚬ y\\
-R_x^{-1} &: y ↦ y ⚬ x^{-1}.
+L_x^{-1} &: y ↦ x^{-1} ◦ y\\
+R_x^{-1} &: y ↦ y ◦ x^{-1}.
 \end{aligned}
 ```
 Result is saved in `z`.
@@ -450,8 +450,8 @@ differential of the translation by $x$ on $v$, written as $(\mathrm{d}τ_x)_y (v
 specified left or right convention. The differential transports vectors:
 ```math
 \begin{aligned}
-(\mathrm{d}L_x)_y (v) &: T_y G → T_{x ⚬ y} G\\
-(\mathrm{d}R_x)_y (v) &: T_y G → T_{y ⚬ x} G\\
+(\mathrm{d}L_x)_y (v) &: T_y G → T_{x ◦ y} G\\
+(\mathrm{d}R_x)_y (v) &: T_y G → T_{y ◦ x} G\\
 \end{aligned}
 ```
 """
@@ -494,8 +494,8 @@ $((\mathrm{d}τ_x)_y)^{-1} (v) = (\mathrm{d}τ_{x^{-1}})_y (v)$, with the specif
 right convention. The differential transports vectors:
 ```math
 \begin{aligned}
-((\mathrm{d}L_x)_y)^{-1} (v) &: T_y G → T_{x^{-1} ⚬ y} G\\
-((\mathrm{d}R_x)_y)^{-1} (v) &: T_y G → T_{y ⚬ x^{-1}} G\\
+((\mathrm{d}L_x)_y)^{-1} (v) &: T_y G → T_{x^{-1} ◦ y} G\\
+((\mathrm{d}R_x)_y)^{-1} (v) &: T_y G → T_{y ◦ x^{-1}} G\\
 \end{aligned}
 ```
 """
