@@ -560,7 +560,7 @@ var(M::Manifold, x::AbstractVector; kwargs...) = mean_and_var(M, x; kwargs...)[2
 compute the optionally weighted standard deviation of a `Vector` `x` of `n` data
 points on the [`Manifold`](@ref) `M`, i.e.
 
-````math𝒩
+````math
 \sqrt{\frac{1}{c} \sum_{i=1}^n w_i d_{ℳ}^2 (x_i,m)},
 ````
 where `c` is a correction term, see
