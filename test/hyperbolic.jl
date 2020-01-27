@@ -3,6 +3,7 @@ include("utils.jl")
 @testset "Hyperbolic Space" begin
     M = Hyperbolic(2)
     @testset "Hyperbolic Basics" begin
+        @test repr(M) == "Hyperbolic(2)"
         @test representation_size(M) == (3,)
         @test !is_manifold_point(M, [1., 0., 0., 0.])
         @test !is_tangent_vector(M, [0.,0.,1.], [0., 0., 1., 0.])

@@ -4,6 +4,8 @@ include("utils.jl")
     M = Sphere(2)
 
     @testset "FVector" begin
+        @test repr(TangentSpace) == "TangentSpace"
+        @test repr(CotangentSpace) == "CotangentSpace"
         tvs = ([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
         fv_tvs = map(v -> FVector(TangentSpace, v), tvs)
         fv1 = fv_tvs[1]
@@ -41,9 +43,12 @@ include("utils.jl")
     for T in types
         x = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)
+        @test repr(TB) == "TangentBundle(Sphere(2))"
         @test base_manifold(TB) == M
         @test manifold_dimension(TB) == 2*manifold_dimension(M)
         @test representation_size(TB) == (6,)
+        CTB = CotangentBundle(M)
+        @test repr(CTB) == "CotangentBundle(Sphere(2))"
         @testset "Type $T" begin
             pts_tb = [ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
                       ProductRepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
@@ -79,6 +84,7 @@ include("utils.jl")
         x = [1.0, 0.0, 0.0]
         t_x = TangentSpaceAtPoint(M, x)
         ct_x = CotangentSpaceAtPoint(M, x)
+        @test startswith(repr("text/plain", t_x), summary(t_x))
         @test base_manifold(t_x) == M
         @test base_manifold(ct_x) == M
         @test t_x.fiber.M == M
@@ -91,9 +97,11 @@ include("utils.jl")
 
     @testset "tensor product" begin
         TT = Manifolds.TensorProductType(TangentSpace, TangentSpace)
+        @test repr(TT) == "TensorProductType(TangentSpace, TangentSpace)"
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(2))) == 4
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(3))) == 9
         @test base_manifold(VectorBundleFibers(TT, Sphere(2))) == M
+        @test repr(VectorBundleFibers(TT, Sphere(2))) == "VectorBundleFibers(TensorProductType(TangentSpace, TangentSpace), Sphere(2))"
     end
 
 end

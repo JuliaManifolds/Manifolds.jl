@@ -4,6 +4,9 @@ include("utils.jl")
     E = Manifolds.Euclidean(3)
     Ec = Manifolds.Euclidean(3;field=ℂ)
     EM = Manifolds.MetricManifold(E,Manifolds.EuclideanMetric())
+    @test repr(E) == "Euclidean(3; field = ℝ)"
+    @test repr(Ec) == "Euclidean(3; field = ℂ)"
+    @test repr(Euclidean(2, 3; field = ℍ)) == "Euclidean(2, 3; field = ℍ)"
     @test is_default_metric(EM) == Val{true}()
     @test is_default_metric(E,Manifolds.EuclideanMetric()) == Val{true}()
     x = zeros(3)

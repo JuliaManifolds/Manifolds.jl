@@ -4,6 +4,7 @@ include("utils.jl")
     M1 = Sphere(2)
     M2 = Euclidean(2)
     Mse = ProductManifold(M1, M2)
+    @test repr(Mse) == "ProductManifold($(M1), $(M2))"
     @test Mse == M1 × M2
     @test Mse == ProductManifold(M1) × M2
     @test Mse == ProductManifold(M1) × ProductManifold(M2)

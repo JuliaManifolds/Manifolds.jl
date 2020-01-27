@@ -5,6 +5,10 @@ include("utils.jl")
     Mc = FixedRankMatrices(3,2,2,ℂ)
     x = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
     v = UMVTVector([0. 0.; 0. 0.; 1. 1.], [1. 0.; 0. 1.],zeros(2,2))
+    @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ)"
+    @test repr(Mc) == "FixedRankMatrices(3, 2, 2, ℂ)"
+    @test startswith(repr("text/plain", x), summary(x))
+    @test startswith(repr("text/plain", v), summary(v))
     @test inner(M,x,v,v) == norm(M,x,v)^2
     @test x == SVDMPoint(x.U,x.S,x.Vt)
     @test v == UMVTVector(v.U, v.M, v.Vt)
