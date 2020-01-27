@@ -71,6 +71,14 @@ const CotangentBundleFibers{M} = VectorBundleFibers{CotangentSpaceType,M}
 CotangentBundleFibers(M::Manifold) = VectorBundleFibers(CotangentSpace, M)
 
 """
+    AbstractVectorField{M} = AbstractMap{M,TangentBundleFibers{M}}
+
+An alias for a generic field, a map from a point on a manifold `M` to to the
+tangent space at that point.
+"""
+const AbstractVectorField{M} = AbstractMap{M,TangentBundleFibers{M}}
+
+"""
     VectorSpaceAtPoint(fiber::VectorBundleFibers, x)
 
 A vector space (fiber type `fiber` of a vector bundle) at point `x` from

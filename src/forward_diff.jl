@@ -1,6 +1,16 @@
-push!(_adbackends, :forwarddiff)
 
-_gradient(f, x::Number, ::Val{:forwarddiff}) = ForwardDiff.derivative(f, x)
-_gradient(f, x, ::Val{:forwarddiff}) = ForwardDiff.gradient(f, x)
+struct ForwardDiffBackend <: AbstractDiffBackend end
 
-_jacobian(f, x, ::Val{:forwarddiff}) = ForwardDiff.jacobian(f, x)
+function Manifolds._derivative(f::AbstractCurve, x, ::ForwardDiffBackend)
+    return ForwardDiff.derivative(f, x)
+end
+
+function _gradient(f::AbstractRealField, x, ::ForwardDiffBackend)
+    return ForwardDiff.gradient(f, x)
+end
+
+function _jacobian(f::AbstractMap, x, ::ForwardDiffBackend)
+    return ForwardDiff.jacobian(f, x)
+end
+
+push!(_diff_backends, ForwardDiffBackend())

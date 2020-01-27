@@ -82,6 +82,7 @@ import StatsBase: kurtosis, mean_and_std, mean_and_var, moment, skewness
 using Base.Iterators: repeated
 using Distributions
 using Einsum: @einsum
+using FiniteDiff
 using FiniteDifferences
 using HybridArrays
 using LinearAlgebra
@@ -215,8 +216,9 @@ struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
 include("utils.jl")
 include("numbers.jl")
+include("maps.jl")
 include("orthonormal_bases.jl")
-include("autodiff.jl")
+include("differentiation.jl")
 include("SizedAbstractArray.jl")
 
 include("manifolds/VectorBundle.jl")
@@ -470,4 +472,13 @@ export AbstractBasis,
     PrecomputedProductOrthonormalBasis,
     ProjectedOrthonormalBasis
 export get_basis, get_coordinates, get_vector, get_vectors, number_system
+# maps and differentiation
+export AbstractCurve,
+    AbstractMap,
+    AbstractRealField,
+    AbstractVectorField,
+    FunctionCurve,
+    FunctionMap,
+    FunctionRealField
+export codomain, diff_backend, diff_backend!, diff_backends, domain
 end # module
