@@ -6,8 +6,8 @@ The n-dimensionsl torus is the $n$-dimensional product of the [´Circle`](@ref).
 The Circle is stored internally within `manifold`, such that all functions of
 [`AbstractPowerManifold`](@ref) can be used directly.
 """
-struct Torus{N} <: AbstractPowerManifold{Circle}
-    manifold::Circle
+struct Torus{N} <: AbstractPowerManifold{Circle{ℝ},MultidimentionalArrayPowerRepresentation}
+    manifold::Circle{ℝ}
 end
 
 Torus(n::Int) = Torus{n}(Circle())

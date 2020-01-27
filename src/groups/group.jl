@@ -206,8 +206,8 @@ show(io::IO, e::Identity) = print(io, "Identity($(e.group))")
 
 (e::Identity)(x) = identity(e.group, x)
 
-# To ensure similar_result_type works
-eltype(e::Identity) = Bool
+# To ensure allocate_result_type works
+number_eltype(e::Identity) = Bool
 
 copyto!(e::TE, ::TE) where {TE<:Identity} = e
 copyto!(x, ::TE) where {TE<:Identity} = identity!(e.group, x, e)
@@ -247,7 +247,7 @@ function inv(M::Manifold, x, ::Val{false})
     return error("inv not implemented on $(typeof(M)) for points $(typeof(x))")
 end
 function inv(G::AbstractGroupManifold, x)
-    y = similar_result(G, inv, x)
+    y = allocate_result(G, inv, x)
     return inv!(G, y, x)
 end
 
@@ -276,7 +276,7 @@ function identity(M::Manifold, x, ::Val{false})
     return error("identity not implemented on $(typeof(M)) for points $(typeof(x))")
 end
 function identity(G::AbstractGroupManifold, x)
-    y = similar_result(G, identity, x)
+    y = allocate_result(G, identity, x)
     return identity!(G, y, x)
 end
 
@@ -325,7 +325,7 @@ function compose(M::Manifold, x, y, ::Val{false})
     return error("compose not implemented on $(typeof(M)) for elements $(typeof(x)) and $(typeof(y))")
 end
 function compose(G::AbstractGroupManifold, x, y)
-    z = similar_result(G, compose, x, y)
+    z = allocate_result(G, compose, x, y)
     return compose!(G, z, x, y)
 end
 

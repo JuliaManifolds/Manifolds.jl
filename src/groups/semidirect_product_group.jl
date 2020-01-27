@@ -152,7 +152,7 @@ function vee!(G::SemidirectProductGroup, v, x, V)
 end
 
 function zero_tangent_vector(G::SemidirectProductGroup, x)
-    v = similar_result(G, zero_tangent_vector, x)
+    v = allocate_result(G, zero_tangent_vector, x)
     zero_tangent_vector!(G, v, x)
     return v
 end

@@ -51,7 +51,7 @@ function test_group(
             @test isapprox(G, g12_3, g1_23; atol = atol)
 
             test_mutating && @testset "mutating" begin
-                g12, g23, g12_3, g1_23 = similar.(repeat([g_pts[1]], 4))
+                g12, g23, g12_3, g1_23 = allocate.(repeat([g_pts[1]], 4))
                 @test compose!(G, g12, g_pts[1], g_pts[2]) === g12
                 @test compose!(G, g23, g_pts[2], g_pts[3]) === g23
                 @test compose!(G, g12_3, g12, g_pts[3]) === g12_3
@@ -77,19 +77,19 @@ function test_group(
 
             test_mutating && @testset "mutating" begin
                 for g in g_pts
-                    h = similar(g)
+                    h = allocate(g)
                     @test compose!(G, h, g, e) === h
                     @test isapprox(G, h, g)
-                    h = similar(g)
+                    h = allocate(g)
                     @test compose!(G, h, e, g) === h
                     @test isapprox(G, h, g)
 
-                    ge = similar(g)
+                    ge = allocate(g)
                     @test identity!(G, ge, e) === ge
                     @test isapprox(G, compose(G, g, ge), g)
                     @test isapprox(G, compose(G, ge, g), g)
 
-                    ge = similar(g)
+                    ge = allocate(g)
                     @test compose!(G, ge, e, e) === ge
                     @test isapprox(G, ge, e)
                 end
@@ -106,13 +106,13 @@ function test_group(
                 @test inv(G, e) === e
 
                 test_mutating && @testset "mutating" begin
-                    ginv = similar(g)
+                    ginv = allocate(g)
                     @test inv!(G, ginv, g) === ginv
                     @test isapprox(G, compose(G, g, ginv), e; atol = atol)
                     @test isapprox(G, compose(G, ginv, g), e; atol = atol)
 
                     @test inv(G, e) === e
-                    geinv = similar(g)
+                    geinv = allocate(g)
                     @test inv!(G, geinv, e) === geinv
                     @test isapprox(G, geinv, e; atol = atol)
                 end
@@ -134,17 +134,17 @@ function test_group(
 
         test_mutating && @testset "mutating" begin
             for conv in convs
-                g = similar(g_pts[1])
+                g = allocate(g_pts[1])
                 @test translate!(G, g, g_pts[1], g_pts[2], conv...) === g
                 @test isapprox(G, g, translate(G, g_pts[1], g_pts[2], conv...); atol = atol)
 
                 g = translate(G, g_pts[1], g_pts[2], conv...)
-                g2 = similar(g)
+                g2 = allocate(g)
                 @test inverse_translate!(G, g2, g_pts[1], g, conv...) === g2
                 @test isapprox(G, g2, g_pts[2]; atol = atol)
 
                 g = inverse_translate(G, g_pts[1], g_pts[2], conv...)
-                g2 = similar(g)
+                g2 = allocate(g)
                 @test translate!(G, g2, g_pts[1], g, conv...) === g2
                 @test isapprox(G, g2, g_pts[2]; atol = atol)
             end
@@ -170,17 +170,17 @@ function test_group(
             for conv in diff_convs
                 g2g1 = translate(G, g_pts[2], g_pts[1], conv...)
                 g2invg1 = inverse_translate(G, g_pts[2], g_pts[1], conv...)
-                vout = similar(v)
+                vout = allocate(v)
                 @test translate_diff!(G, vout, g_pts[2], g_pts[1], v, conv...) === vout
                 @test isapprox(G, g2g1, vout, translate_diff(G, g_pts[2], g_pts[1], v, conv...); atol = atol)
 
                 vout = translate_diff(G, g_pts[2], g_pts[1], v, conv...)
-                vout2 = similar(vout)
+                vout2 = allocate(vout)
                 @test inverse_translate_diff!(G, vout2, g_pts[2], g2g1, vout, conv...) === vout2
                 @test isapprox(G, g_pts[1], vout2, v; atol = atol)
 
                 vout = inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...)
-                vout2 = similar(vout)
+                vout2 = allocate(vout)
                 @test translate_diff!(G, vout2, g_pts[2], g2invg1, vout, conv...) === vout2
                 @test isapprox(G, g_pts[1], vout2, v; atol = atol)
             end
@@ -266,7 +266,7 @@ function test_action(
             end
 
             test_mutating && @testset "mutating" begin
-                a12, a23, a12_3, a1_23 = similar.(repeat([a_pts[1]], 4))
+                a12, a23, a12_3, a1_23 = allocate.(repeat([a_pts[1]], 4))
                 @test compose!(A, a12, a_pts[1], a_pts[2]) === a12
                 @test compose!(A, a23, a_pts[2], a_pts[3]) === a23
                 @test compose!(A, a12_3, a12, a_pts[3]) === a12_3
@@ -274,7 +274,7 @@ function test_action(
                 @test isapprox(G, a12_3, a1_23)
 
                 for m in m_pts
-                    a12_a3_m, a1_a23_m = similar(m), similar(m)
+                    a12_a3_m, a1_a23_m = allocate(m), allocate(m)
                     @test apply!(A, a12_a3_m, a12, apply(A, a_pts[3], m)) === a12_a3_m
                     @test apply!(A, a1_a23_m, a_pts[1], apply(A, a23, m)) === a1_a23_m
                     @test isapprox(M, a12_a3_m, a1_a23_m)
@@ -303,10 +303,10 @@ function test_action(
 
             test_mutating && @testset "mutating" begin
                 for a in a_pts
-                    h = similar(a)
+                    h = allocate(a)
                     @test compose!(A, h, a, e) === h
                     @test isapprox(G, h, a)
-                    h = similar(a)
+                    h = allocate(a)
                     @test compose!(A, h, e, a) === h
                     @test isapprox(G, h, a)
 
@@ -319,16 +319,16 @@ function test_action(
                     @test isapprox(G, ge, e)
 
                     for m in m_pts
-                        em = similar(m)
+                        em = allocate(m)
                         @test apply!(A, em, e, m) === em
                         @test isapprox(M, em, m)
-                        em = similar(m)
+                        em = allocate(m)
                         @test apply!(A, em, ge, m) === em
                         @test isapprox(M, em, m)
-                        em = similar(m)
+                        em = allocate(m)
                         @test inverse_apply!(A, em, e, m) === em
                         @test isapprox(M, em, m)
-                        em = similar(m)
+                        em = allocate(m)
                         @test inverse_apply!(A, em, ge, m) === em
                         @test isapprox(M, em, m)
                     end
@@ -375,10 +375,10 @@ function test_action(
             for (m, v) in zip(m_pts, v_pts)
                 for a in a_pts
                     am = apply(A, a, m)
-                    av = similar(v)
+                    av = allocate(v)
                     @test apply_diff!(A, av, a, m, v) === av
                     ainvm = inverse_apply(A, a, m)
-                    ainvv = similar(v)
+                    ainvv = allocate(v)
                     @test inverse_apply_diff!(A, ainvv, a, m, v) === ainvv
                     @test is_tangent_vector(M, am, av, true; atol = atol)
                     @test is_tangent_vector(M, ainvm, ainvv, true; atol = atol)
@@ -387,16 +387,16 @@ function test_action(
                 a12 = compose(A, a_pts[1], a_pts[2])
                 a2m = apply(A, a_pts[2], m)
                 a12m = apply(A, a12, m)
-                a12v, a2v, a1_a2v = similar(v), similar(v), similar(v)
+                a12v, a2v, a1_a2v = allocate(v), allocate(v), allocate(v)
                 @test apply_diff!(A, a12v, a12, m, v) === a12v
                 @test apply_diff!(A, a2v, a_pts[2], m, v) === a2v
                 @test apply_diff!(A, a1_a2v, a_pts[1], a2m, a2v) === a1_a2v
                 @test isapprox(M, a12m, a1_a2v, a12v; atol = atol)
 
-                ev = similar(v)
+                ev = allocate(v)
                 @test apply_diff!(A, ev, e, m, v) === ev
                 @test isapprox(G, m, ev, v; atol = atol)
-                ev = similar(v)
+                ev = allocate(v)
                 @test inverse_apply_diff!(A, ev, e, m, v) === ev
                 @test isapprox(G, m, ev, v; atol = atol)
             end
@@ -411,7 +411,7 @@ function test_action(
         @test isapprox(G, act2, act_opt; atol = atol)
 
         test_mutating && @testset "mutating" begin
-            act_opt2 = similar(act_opt)
+            act_opt2 = allocate(act_opt)
             optimal_alignment!(A, act_opt2, m_pts[2], m_pts[1])
             @test isapprox(G, act_opt, act_opt2; atol = atol)
         end
