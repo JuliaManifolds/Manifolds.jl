@@ -294,9 +294,7 @@ i.e. `(n,k)`, which is the matrix dimensions.
 """
 @generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
 
-function show(io::IO, ::MIME"text/plain", ::Stiefel{n,k,F}) where {n,k,F}
-    print(io, "Stiefel($(n), $(k), $(F))")
-end
+show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")
 
 @doc doc"""
     zero_tangent_vector(M::Stiefel, x)

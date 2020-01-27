@@ -27,7 +27,7 @@ function ProductGroup(manifold::ProductManifold)
     return GroupManifold(manifold, op)
 end
 
-function show(io::IO, mime::MIME"text/plain", G::ProductGroup)
+function show(io::IO, G::ProductGroup)
     M = base_manifold(G)
     length(M.manifolds) == 0 && return println(io, "ProductGroup()")
     print(io, "ProductGroup(")
@@ -35,7 +35,7 @@ function show(io::IO, mime::MIME"text/plain", G::ProductGroup)
     strings = []
     one_line_length = 14 + (length(M.manifolds) - 1) * 2
     for m in M.manifolds
-        s = repr(mime, m)
+        s = repr(m)
         push!(strings, s)
         one_line_length += length(s)
     end

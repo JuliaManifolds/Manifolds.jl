@@ -48,9 +48,7 @@ struct GroupManifold{M<:Manifold,O<:AbstractGroupOperation} <: AbstractGroupMani
     op::O
 end
 
-function show(io::IO, mime::MIME"text/plain", G::GroupManifold)
-    print(io, "GroupManifold($(repr(mime, G.manifold)), $(repr(mime, G.op)))")
-end
+show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
 is_decorator_manifold(::GroupManifold) = Val(true)
 

@@ -344,14 +344,10 @@ function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,â„
     return PrecomputedOrthonormalBasis(Îž)
 end
 
-function show(io::IO, ::MIME"text/plain", ::ArbitraryOrthonormalBasis{F}) where {F}
+function show(io::IO, ::ArbitraryOrthonormalBasis{F}) where {F}
     print(io, "ArbitraryOrthonormalBasis($(F))")
 end
-function show(
-    io::IO,
-    ::MIME"text/plain",
-    ::ProjectedOrthonormalBasis{method,F},
-) where {method,F}
+function show(io::IO, ::ProjectedOrthonormalBasis{method,F}) where {method,F}
     print(io, "ProjectedOrthonormalBasis($(method), $(F))")
 end
 function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis)

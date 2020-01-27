@@ -133,7 +133,7 @@ symmetric positive definite matrix on $\mathcal M = \mathcal P(n)$.
 """
 @generated representation_size(::SymmetricPositiveDefinite{N}) where {N} = (N, N)
 
-function show(io::IO, ::MIME"text/plain", ::SymmetricPositiveDefinite{N}) where {N}
+function show(io::IO, ::SymmetricPositiveDefinite{N}) where {N}
     print(io, "SymmetricPositiveDefinite($(N))")
 end
 

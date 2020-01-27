@@ -52,4 +52,4 @@ get_iterator(M::Torus{N}) where {N} = 1:N
 
 @generated representation_size(::Torus{N}) where {N} = (N,)
 
-show(io::IO, ::MIME"text/plain", ::Torus{N}) where {N} = print(io, "Torus($(N))")
+show(io::IO, ::Torus{N}) where {N} = print(io, "Torus($(N))")

@@ -312,7 +312,7 @@ function retract!(
     return y
 end
 
-function show(io::IO, ::MIME"text/plain", ::FixedRankMatrices{M,N,K,T}) where {M,N,K,T}
+function show(io::IO, ::FixedRankMatrices{M,N,K,T}) where {M,N,K,T}
     print(io, "FixedRankMatrices($(M), $(N), $(K), $(T))")
 end
 function show(io::IO, mime::MIME"text/plain", x::SVDMPoint)

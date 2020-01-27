@@ -366,9 +366,7 @@ function retract!(::Grassmann{N,K}, y, x, v, ::QRRetraction) where {N,K}
     return copyto!(y, Array(qrfac.Q) * D)
 end
 
-function show(io::IO, ::MIME"text/plain", ::Grassmann{n,k,F}) where {n,k,F}
-    print(io, "Grassmann($(n), $(k), $(F))")
-end
+show(io::IO, ::Grassmann{n,k,F}) where {n,k,F} = print(io, "Grassmann($(n), $(k), $(F))")
 
 @doc doc"""
     zero_tangent_vector(M::Grassmann, x)

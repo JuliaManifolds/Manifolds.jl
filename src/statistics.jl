@@ -112,7 +112,7 @@ struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
     end
 end
 
-function show(io::IO, ::MIME"text/plain", method::GeodesicInterpolationWithinRadius)
+function show(io::IO, method::GeodesicInterpolationWithinRadius)
     println(io, "GeodesicInterpolationWithinRadius($(method.radius))")
 end
 

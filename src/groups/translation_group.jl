@@ -18,6 +18,6 @@ function TranslationGroup(n::Int...; field::AbstractNumbers = ℝ)
     )
 end
 
-function show(io::IO, ::MIME"text/plain", ::TranslationGroup{N,F}) where {N,F}
+function show(io::IO, ::TranslationGroup{N,F}) where {N,F}
     print(io, "TranslationGroup($(join(N.parameters, ", ")); field = $(F))")
 end

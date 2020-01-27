@@ -548,10 +548,10 @@ function sharp!(M::Manifold, v::FVector, x, w::FVector)
     )
 end
 
-show(io::IO, ::MIME"text/plain", ::TangentSpaceType) = print(io, "TangentSpace")
-show(io::IO, ::MIME"text/plain", ::CotangentSpaceType) = print(io, "CotangentSpace")
-function show(io::IO, mime::MIME"text/plain", fiber::VectorBundleFibers)
-    print(io, "VectorBundleFibers($(repr(mime, fiber.VS)), $(repr(mime, fiber.M)))")
+show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
+show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")
+function show(io::IO, fiber::VectorBundleFibers)
+    print(io, "VectorBundleFibers($(fiber.VS), $(fiber.M))")
 end
 function show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
     summary(io, vs)
@@ -560,15 +560,9 @@ function show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
     println(io, "\nBase point:")
     show(io, mime, vs.x)
 end
-function show(io::IO, mime::MIME"text/plain", vb::VectorBundle)
-    print(io, "VectorBundle($(repr(mime, vb.VS)), $(repr(mime, vb.M)))")
-end
-function show(io::IO, mime::MIME"text/plain", vb::TangentBundle)
-    print(io, "TangentBundle($(repr(mime, vb.M)))")
-end
-function show(io::IO, mime::MIME"text/plain", vb::CotangentBundle)
-    print(io, "CotangentBundle($(repr(mime, vb.M)))")
-end
+show(io::IO, vb::VectorBundle) = print(io, "VectorBundle($(vb.VS), $(vb.M))")
+show(io::IO, vb::TangentBundle) = print(io, "TangentBundle($(vb.M))")
+show(io::IO, vb::CotangentBundle) = print(io, "CotangentBundle($(vb.M))")
 
 allocate(x::FVector) = FVector(x.type, allocate(x.data))
 allocate(x::FVector, ::Type{T}) where {T} = FVector(x.type, allocate(x.data, T))

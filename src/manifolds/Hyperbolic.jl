@@ -242,7 +242,7 @@ hyperbolic manifold the dimention of the embedding, i.e. `n+1`.
 
 sharp!(M::Hyperbolic, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
-show(io::IO, ::MIME"text/plain", ::Hyperbolic{N}) where {N} = print(io, "Hyperbolic($(N))")
+show(io::IO, ::Hyperbolic{N}) where {N} = print(io, "Hyperbolic($(N))")
 
 @doc doc"""
     vector_transport_to(M::Hyperbolic, x, v, y, ::ParallelTransport)

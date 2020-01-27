@@ -315,7 +315,7 @@ sharp(::SymmetricMatrices, ::Any...)
 
 sharp!(M::SymmetricMatrices, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
-function show(io::IO, ::MIME"text/plain", ::SymmetricMatrices{n,F}) where {n,F}
+function show(io::IO, ::SymmetricMatrices{n,F}) where {n,F}
     print(io, "SymmetricMatrices($(n), $(F))")
 end
 
