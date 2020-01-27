@@ -66,7 +66,8 @@ const TangentBundleFibers{M} = VectorBundleFibers{TangentSpaceType,M} where {M<:
 
 TangentBundleFibers(M::Manifold) = VectorBundleFibers(TangentSpace, M)
 
-const CotangentBundleFibers{M} = VectorBundleFibers{CotangentSpaceType,M} where {M<:Manifold}
+const CotangentBundleFibers{M} =
+    VectorBundleFibers{CotangentSpaceType,M} where {M<:Manifold}
 
 CotangentBundleFibers(M::Manifold) = VectorBundleFibers(CotangentSpace, M)
 
@@ -206,7 +207,9 @@ function distance(B::VectorBundle, x, y)
     return sqrt(dist_man^2 + dist_vec^2)
 end
 
-number_eltype(::Type{FVector{TType,TData}}) where {TType<:VectorSpaceType,TData} = number_eltype(TData)
+function number_eltype(::Type{FVector{TType,TData}}) where {TType<:VectorSpaceType,TData}
+    return number_eltype(TData)
+end
 number_eltype(v::FVector) = number_eltype(v.data)
 
 @doc doc"""
@@ -593,7 +596,7 @@ Returns type of element of the array that will represent the result of
 function `f` for representing an operation with result in the vector space `VS`
 for manifold `M` on given arguments (passed at a tuple).
 """
-function allocate_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where N
+function allocate_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where {N}
     T = typeof(reduce(+, one(number_eltype(eti)) for eti ∈ args))
     return T
 end

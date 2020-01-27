@@ -265,7 +265,7 @@ function (*)(a::Number, v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpeci
     return ProductArray(ShapeSpec, a * v.data, v.reshapers)
 end
 
-number_eltype(::Type{ProductArray{TM, TData, TV}}) where {TM, TData, TV} = eltype(TData)
+number_eltype(::Type{ProductArray{TM,TData,TV}}) where {TM,TData,TV} = eltype(TData)
 
 function show(io::IO, mime::MIME"text/plain", x::ProductArray)
     summary(io, x)
@@ -278,13 +278,13 @@ function show(io::IO, mime::MIME"text/plain", x::ProductArray)
     return nothing
 end
 
-function allocate(x::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification
+function allocate(x::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
     return ProductArray(ShapeSpec, allocate(x.data), x.reshapers)
 end
 function allocate(
     x::ProductArray{ShapeSpec},
-    ::Type{T}
-) where {ShapeSpec<:ShapeSpecification, T}
+    ::Type{T},
+) where {ShapeSpec<:ShapeSpecification,T}
     return ProductArray(ShapeSpec, allocate(x.data, T), x.reshapers)
 end
 

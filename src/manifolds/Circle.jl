@@ -311,7 +311,7 @@ Compute symmetric remainder of `x` with respect to the interall 2*`T`, i.e.
 function sym_rem(x::N, T = π) where {N<:Number}
     return (x ≈ T ? convert(N, -T) : rem(x, convert(N, 2 * T), RoundNearest))
 end
-sym_rem(x, T=π) where N = map(sym_rem, x, Ref(T))
+sym_rem(x, T = π) where {N} = map(sym_rem, x, Ref(T))
 
 @doc doc"""
     vector_transport_to(M::Circle, x, v, y, ::ParallelTransport)

@@ -30,12 +30,13 @@ of a graph `G` depending on the [`GraphManifoldType`](@ref) `T`.
 * `G` is an `AbstractSimpleGraph`
 * `M` is a [`Manifold`](@ref)
 """
-struct GraphManifold{G<:AbstractGraph,TM,T<:GraphManifoldType} <: AbstractPowerManifold{TM,NestedPowerRepresentation}
+struct GraphManifold{G<:AbstractGraph,TM,T<:GraphManifoldType} <:
+       AbstractPowerManifold{TM,NestedPowerRepresentation}
     graph::G
     manifold::TM
 end
 
-function GraphManifold( g::G, M::TM, ::VertexManifold) where {G<:AbstractGraph,TM<:Manifold}
+function GraphManifold(g::G, M::TM, ::VertexManifold) where {G<:AbstractGraph,TM<:Manifold}
     return GraphManifold{G,TM,VertexManifold}(g, M)
 end
 function GraphManifold(g::G, M::TM, ::EdgeManifold) where {G<:AbstractGraph,TM<:Manifold}
@@ -145,12 +146,11 @@ function incident_log!(M::VertexGraphManifold, v, x)
         v[src(e)] +=
             log(M.manifold, _read(M, rep_size, x, src(e)), _read(M, rep_size, x, dst(e)))
         if !is_directed(M.graph)
-            v[dst(e)] +=
-                log(
-                    M.manifold,
-                    _read(M, rep_size, x, dst(e)),
-                    _read(M, rep_size, x, src(e))
-                )
+            v[dst(e)] += log(
+                M.manifold,
+                _read(M, rep_size, x, dst(e)),
+                _read(M, rep_size, x, src(e)),
+            )
         end
     end
     return v
@@ -163,21 +163,19 @@ function incident_log!(
     rep_size = representation_size(M.manifold)
     for e in edges(M.graph)
         v[src(e)] += (
-            get_weight(M.graph, src(e), dst(e)) *
-                log(
-                    M.manifold,
-                    _read(M, rep_size, x, src(e)),
-                    _read(M, rep_size, x, dst(e))
-                )
+            get_weight(M.graph, src(e), dst(e)) * log(
+                M.manifold,
+                _read(M, rep_size, x, src(e)),
+                _read(M, rep_size, x, dst(e)),
+            )
         )
         if !is_directed(M.graph)
             v[dst(e)] += (
-                get_weight(M.graph, dst(e), src(e)) *
-                    log(
-                        M.manifold,
-                        _read(M, rep_size, x, dst(e)),
-                        _read(M, rep_size, x, src(e))
-                    )
+                get_weight(M.graph, dst(e), src(e)) * log(
+                    M.manifold,
+                    _read(M, rep_size, x, dst(e)),
+                    _read(M, rep_size, x, src(e)),
+                )
             )
         end
     end
