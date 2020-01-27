@@ -113,7 +113,7 @@ struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
 end
 
 function show(io::IO, method::GeodesicInterpolationWithinRadius)
-    println(io, "GeodesicInterpolationWithinRadius($(method.radius))")
+    print(io, "GeodesicInterpolationWithinRadius($(method.radius))")
 end
 
 @doc doc"""

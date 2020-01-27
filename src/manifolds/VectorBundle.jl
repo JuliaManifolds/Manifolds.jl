@@ -553,6 +553,9 @@ end
 
 show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
 show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")
+function show(io::IO, tpt::TensorProductType)
+    print(io, "TensorProductType(", join(tpt.spaces, ", "), ")")
+end
 function show(io::IO, fiber::VectorBundleFibers)
     print(io, "VectorBundleFibers($(fiber.VS), $(fiber.M))")
 end

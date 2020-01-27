@@ -644,8 +644,11 @@ function sharp!(M::AbstractPowerManifold, v::TFVector, x, w::CoTFVector)
     return v
 end
 
-function show(io::IO, M::PowerManifold{TM,TSize}) where {TM,TSize}
+function show(io::IO, M::PowerManifold{TM,TSize,MultidimentionalArrayPowerRepresentation}) where {TM,TSize}
     print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
+end
+function show(io::IO, M::PowerManifold{TM,TSize,TPR}) where {TM,TSize,TPR}
+    print(io, "PowerManifold($(M.manifold), $(TPR()), $(join(TSize.parameters, ", ")))")
 end
 
 function allocate_result(M::PowerManifoldNested, f, x...)
