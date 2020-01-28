@@ -25,7 +25,7 @@ a Riemannian metric on the tangent bundle $T ℍ^n$.
 
     Hyperbolic(n)
 
-Generate the $ℍ^{n}\subset ℝ^{n+1}$
+Generate the $ℍ^{n} ⊂ ℝ^{n+1}$
 """
 struct Hyperbolic{N} <: Manifold end
 
