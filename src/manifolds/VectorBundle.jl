@@ -189,10 +189,10 @@ Notation:
 
 The distance is calculated as
 
-$d_B(x, y) = \sqrt{d_M(p_x, p_y)^2 + d_F(\xi_x, \xi_{y\to x})^2}$
+$d_B(x, y) = \sqrt{d_M(p_x, p_y)^2 + d_F(\xi_x, \xi_{y→x})^2}$
 
 where $d_ℳ$ is the distance on manifold $ℳ$, $d_F$ is the distance
-between two vectors from the fiber $F$ and $\xi_{y\to x}$ is the result
+between two vectors from the fiber $F$ and $\xi_{y→x}$ is the result
 of parallel transport of vector $\xi_y$ to point $p_x$. The default
 behavior of [`vector_transport_to`](@ref) is used to compute the vector
 transport.
@@ -250,7 +250,7 @@ from the vector space of type `M` at point `x` from the underlying [`Manifold`](
 
 The function can be used for example to transform vectors
 from the tangent bundle to vectors from the cotangent bundle
-$\flat \colon Tℳ \to T^{*}ℳ$
+$\flat \colon Tℳ → T^{*}ℳ$
 """
 function flat(M::Manifold, x, w::FVector)
     v = allocate_result(M, flat, w, x)
@@ -533,7 +533,7 @@ from the vector space `M` at point `x` from the underlying [`Manifold`](@ref).
 
 The function can be used for example to transform vectors
 from the cotangent bundle to vectors from the tangent bundle
-$\sharp \colon T^{*}ℳ \to Tℳ$
+$\sharp \colon T^{*}ℳ → Tℳ$
 """
 function sharp(M::Manifold, x, w::FVector)
     v = allocate_result(M, sharp, w, x)

@@ -1,7 +1,7 @@
 # Vector bundles
 
 Vector bundle $E$ is a manifold that is built on top of another manifold $ℳ$ (base space).
-It is characterized by a continuous function $\Pi \colon E \to ℳ$, such that for each point $x \in ℳ$ the preimage of $x$ by $\Pi$, $\Pi^{-1}(\{x\})$, has a structure of a vector space.
+It is characterized by a continuous function $\Pi \colon E → ℳ$, such that for each point $x \in ℳ$ the preimage of $x$ by $\Pi$, $\Pi^{-1}(\{x\})$, has a structure of a vector space.
 These vector spaces are called fibers.
 Bundle projection can be performed using function [`bundle_projection`](@ref).
 

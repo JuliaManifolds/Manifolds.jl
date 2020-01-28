@@ -20,7 +20,7 @@ const SemidirectProductGroup{N,H,A} =
     SemidirectProductGroup(N::GroupManifold, H::GroupManifold, A::AbstractGroupAction)
 
 A group that is the semidirect product of a normal group $N$ and a subgroup $H$, written
-$G = N ⋊_θ H$, where $θ: H × N \to N$ is an automorphism action
+$G = N ⋊_θ H$, where $θ: H × N → N$ is an automorphism action
 of $H$ on $N$. The group $G$ has the composition rule
 
 ````math
