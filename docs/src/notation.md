@@ -13,7 +13,7 @@ as long as that renders still in $\TeX$ within this documentation.
 | $T^*_x \mathcal M$ | The cotangent space at $x$ | | |
 | $\xi$ | A cotangent vector from $T^*_x \mathcal M$ | $\xi_1, \xi_2,\ldots,\eta,\zeta$ | |
 | $F$ | A fiber | |
-| $\langle\cdot,\cdot\rangle$ | inner product (in $T^*_x \mathcal M$) | $\langle\cdot,\cdot\rangle_x, g_x(\cdot,\cdot)$ |
+| $\langle\cdot,\cdot\rangle$ | inner product (in $T_x \mathcal M$) | $\langle\cdot,\cdot\rangle_x, g_x(\cdot,\cdot)$ |
 | $\mathcal M$ | A manifold | $\mathcal M_1, \mathcal M_2,\ldots,\mathcal N$ | |
 | $\mathcal P_{y\gets x}X$ | parallel Transport |
 | $x$ | A point on $\mathcal M$ | $x_1,x_2,\ldots,y,z$ | |
