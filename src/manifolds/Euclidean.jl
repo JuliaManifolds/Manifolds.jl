@@ -13,7 +13,7 @@ Generate the $n$-dimensional vector space $ℝ^n$.
 
 Generate the vector space of $k=n_1n_2·… n_i$ values, i.e. the
 $𝔽^{n_1, n_2,…, n_d}$ whose
-elements are interpreted as $n_1 ⨉,n_2 ⨉ … ⨉ n_i$ arrays.
+elements are interpreted as $n_1 \times,n_2 \times … \times n_i$ arrays.
 For $d=2$ we obtain a matrix space.
 The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
@@ -128,7 +128,7 @@ injectivity_radius(::Euclidean) = Inf
 
 Compute the inner product on the [`Euclidean`](@ref) `M`, which is just
 the inner product on the real-valued or complex valued vector space
-of arrays (or tensors) of size $n_1 ⨉ n_2  ⨉  …  ⨉ n_i$, i.e.
+of arrays (or tensors) of size $n_1 \times n_2  \times  …  \times n_i$, i.e.
 
 ````math
 g_x(v,w) = \sum_{k ∈ I} \overline{v}_{k} w_{k},

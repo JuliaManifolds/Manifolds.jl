@@ -21,7 +21,7 @@ SemidirectProductGroup(Tn, SOn, RotationAction(Tn, SOn))
 ```
 
 Points on $\mathrm{SE}(n)$ may be represented as points on the underlying product manifold
-$\mathrm{T}(n) ⨉ \mathrm{SO}(n)$ or as affine matrices with size `(n + 1, n + 1)`.
+$\mathrm{T}(n) \times \mathrm{SO}(n)$ or as affine matrices with size `(n + 1, n + 1)`.
 """
 const SpecialEuclidean{N} = SemidirectProductGroup{
     TranslationGroup{Tuple{N},ℝ},

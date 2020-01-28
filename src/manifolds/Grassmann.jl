@@ -11,11 +11,11 @@ The manifold can be represented as
 
 ````math
 \operatorname{Gr}(n,k) :eqq \bigl\{ \operatorname{span}(x)
-: x ∈ 𝔽^{n ⨉ k}, \bar{x}^\mathrm{T}x = I_k\},
+: x ∈ 𝔽^{n \times k}, \bar{x}^\mathrm{T}x = I_k\},
 ````
 
 where ${\bar·}^{\mathrm{T}}$ denotes the complex conjugate transpose and
-$I_k$ is the $k ⨉ k$ identity matrix. This means, that the columns of $x$
+$I_k$ is the $k \times k$ identity matrix. This means, that the columns of $x$
 form an orthonormal basis of the subspace, that is a point on
 $\operatorname{Gr}(n,k)$, and hence the subspace can actually be represented by
 a whole equivalence class of representers.
@@ -26,17 +26,17 @@ Another interpretation is, that
 ````
 
 i.e the Grassmann manifold is the quotient of the [`Stiefel`](@ref) manifold and
-the orthogonal group $\operatorname{O}(k)$ of orthogonal $k ⨉ k$ matrices.
+the orthogonal group $\operatorname{O}(k)$ of orthogonal $k \times k$ matrices.
 
 The tangent space at a point (subspace) $x$ is given by
 
 ````math
 T_x\mathrm{Gr}(n,k) = \bigl\{
-v ∈ 𝔽^{n ⨉ k} :
+v ∈ 𝔽^{n \times k} :
 {\bar v}^{\mathrm{T}}x + {\bar x}^{\mathrm{T}}v = 0_{k} \bigr\},
 ````
 
-where $0_{k}$ denotes the $k ⨉ k$ zero matrix.
+where $0_{k}$ denotes the $k \times k$ zero matrix.
 
 Note that a point $x ∈ \operatorname{Gr}(n,k)$ might be represented by
 different matrices (i.e. matrices with orthonormal column vectors that span
@@ -102,7 +102,7 @@ Check whether `v` is a tangent vector in the tangent space of `x` on the [`Grass
 ````
 
 where $·^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and $0_k$
-denotes the $k ⨉ k$ zero natrix.
+denotes the $k \times k$ zero natrix.
 """
 function check_tangent_vector(G::Grassmann{n,k,F}, x, v; kwargs...) where {n,k,F}
     t = check_manifold_point(G, x)
@@ -346,7 +346,7 @@ Compute the QR-based retraction [`QRRetraction`](@ref) on the
 ````math
 \operatorname{retr}_xv = QD,
 ````
-where D is a $m ⨉ n$ matrix with
+where D is a $m \times n$ matrix with
 ````math
 D = \operatorname{diag}( \operatorname{sgn}(R_{ii}+0,5)_{i=1}^n ).
 ````

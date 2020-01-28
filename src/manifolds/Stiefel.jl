@@ -1,10 +1,10 @@
 @doc doc"""
     Stiefel{n,k,T} <: Manifold
 
-The Stiefel manifold consists of all $n ⨉ k$, $n\geq k$ orthonormal matrices, i.e.
+The Stiefel manifold consists of all $n \times k$, $n\geq k$ orthonormal matrices, i.e.
 
 ````math
-ℳ = \{ x  ∈ 𝔽^{n ⨉ k} : x^{\mathrm{H}}x = I_k \},
+ℳ = \{ x  ∈ 𝔽^{n \times k} : x^{\mathrm{H}}x = I_k \},
 ````
 
 where $𝔽 ∈ \{ℝ, ℂ\}$,
