@@ -533,7 +533,7 @@ singular values sorted in descending order, the projection is
 
 ````math
 \operatorname{proj}_{\mathrm{SO}(n)}(x) =
-U\operatorname{diag}\left[1,1,\dots,\det(U V^\mathrm{T})\right] V^\mathrm{T}
+U\operatorname{diag}\left[1,1,…,\det(U V^\mathrm{T})\right] V^\mathrm{T}
 ````
 
 The diagonal matrix ensures that the determinant of the result is $+1$.

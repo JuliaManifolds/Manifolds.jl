@@ -1,7 +1,7 @@
 # Orthonormal bases
 
 The following functions and types provide support for orthonormal bases of the tangent space of different manifolds.
-An orthonormal basis of the tangent space $T_x ℳ$ of (real) dimension $N$ has a real-coefficient basis $e_1, e_2, \dots, e_N$ if $\mathrm{Re}(g_x(e_i, e_j)) = \delta_{ij}$ for each $i,j \in \{1, 2, \dots, N\}$ where $g_x$ is the Riemannian metric at point $x$.
+An orthonormal basis of the tangent space $T_x ℳ$ of (real) dimension $N$ has a real-coefficient basis $e_1, e_2, …, e_N$ if $\mathrm{Re}(g_x(e_i, e_j)) = \delta_{ij}$ for each $i,j \in \{1, 2, …, N\}$ where $g_x$ is the Riemannian metric at point $x$.
 A vector $v$ from the tangent space $T_x ℳ$ can be expressed as a sum $v = v^i e_i$ where coefficients $v^i$ are calculated as $v^i = \mathrm{Re}(g_x(v, e_i))$.
 
 The main types are:
