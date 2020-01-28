@@ -15,6 +15,10 @@ include("utils.jl")
     @test project_point!(E,x) == x
     @test manifold_dimension(Ec) == 2*manifold_dimension(E)
 
+    @test E^2 === Euclidean(3, 2)
+    @test E^(2,) === Euclidean(3, 2)
+    @test Ec^(4,5) === Euclidean(3, 4, 5; field = ℂ)
+
     manifolds = [ E, EM, Ec ]
     types = [
         Vector{Float64},

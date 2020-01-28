@@ -5,7 +5,6 @@ An abstract representation type of points and tangent vectors on a power manifol
 """
 abstract type AbstractPowerRepresentation end
 
-
 """
     MultidimentionalArrayPowerRepresentation
 
@@ -82,8 +81,6 @@ function PowerManifold(
 ) where {TPR<:AbstractPowerRepresentation}
     PowerManifold{typeof(M),Tuple{size...},TPR}(M)
 end
-
-^(M::Manifold, n) = PowerManifold(M, n...)
 
 @doc doc"""
     PowerMetric <: Metric
@@ -178,6 +175,8 @@ function basis(M::AbstractPowerManifold, x, B::AbstractBasis)
     vs = [basis(M.manifold, _read(M, rep_size, x, i), B) for i in get_iterator(M)]
     return PrecomputedPowerOrthonormalBasis(vs)
 end
+
+^(M::Manifold, n) = PowerManifold(M, n...)
 
 function basis(M::AbstractPowerManifold, x, B::ArbitraryOrthonormalBasis)
     return invoke(basis, Tuple{PowerManifold,Any,AbstractBasis}, M, x, B)

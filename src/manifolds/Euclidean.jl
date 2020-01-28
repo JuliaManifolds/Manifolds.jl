@@ -40,6 +40,11 @@ This metric is the default metric for example for the [`Euclidean`](@ref) manifo
 """
 struct EuclideanMetric <: RiemannianMetric end
 
+^(M::Euclidean, n::Int) = ^(M, (n,))
+function ^(::Euclidean{T,F}, n::NTuple{N,Int}) where {T,F,N}
+    return Euclidean{Tuple{T.parameters...,n...},F}()
+end
+
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = one(eltype(x))
 
 """
