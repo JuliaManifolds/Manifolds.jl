@@ -5,10 +5,10 @@ The [`Manifold`](@ref) $ \operatorname{Sym} (n)$ consisting of the real- or comp
 symmetric matrices of size $ n\times n$, i.e. the set
 
 ````math
-\operatorname{Sym}(n) = \bigl\{A \in 𝔽^{n\times n} \big| A^{\mathrm{H}} = A \bigr\},
+\operatorname{Sym}(n) = \bigl\{A  ∈ 𝔽^{n\times n} \big| A^{\mathrm{H}} = A \bigr\},
 ````
 where $·^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed
-and the field $𝔽 \in \{ ℝ, ℂ\}$ is set by the
+and the field $𝔽 ∈ \{ ℝ, ℂ\}$ is set by the
 [`AbstractNumbers`](@ref) `F`.
 
 Though it is slighty redundant, usually the matrices are safed as $n\times n$ arrays.

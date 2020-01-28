@@ -2,7 +2,7 @@
     Circle{F} <: Manifold
 
 The circle $𝕊^1$ as a manifold ere manifold represented by
-real-valued data in $[-\pi,\pi)$ or complex-valued data $z\in ℂ$ of absolute value
+real-valued data in $[-\pi,\pi)$ or complex-valued data $z ∈ ℂ$ of absolute value
 $\lvert z\rvert = 1$.
 # Constructor
 
@@ -20,8 +20,8 @@ Circle(f::AbstractNumbers = ℝ) = Circle{f}()
     check_manifold_point(M::Circle, x)
 
 Check whether `x` is a point on the [`Circle`](@ref) `M`.
-For the real-valued case, `x` is an angle and hence it checks that $x \in [-\pi,\pi)$.
-for the complex-valued case its a unit number, $x \in ℂ$ with $\lvert x \rvert = 1$.
+For the real-valued case, `x` is an angle and hence it checks that $x  ∈ [-\pi,\pi)$.
+for the complex-valued case its a unit number, $x  ∈ ℂ$ with $\lvert x \rvert = 1$.
 """
 check_manifold_point(::Circle, ::Any...)
 

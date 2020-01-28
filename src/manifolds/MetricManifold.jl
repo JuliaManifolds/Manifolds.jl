@@ -41,7 +41,7 @@ abstract type LorentzMetric <: Metric end
     RiemannianMetric <: Metric
 
 Abstract type for Riemannian metrics, a family of positive definite inner
-products. The positive definite property means that for $v \in T_x ℳ$, the
+products. The positive definite property means that for $v  ∈ T_x ℳ$, the
 inner product $g(v, v) > 0$ whenever $v$ is not the zero vector.
 """
 abstract type RiemannianMetric <: Metric end

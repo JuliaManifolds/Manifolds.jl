@@ -164,7 +164,7 @@ end
 
 Compute the logarithmic map on the [`Sphere`](@ref) `M`, i.e. the tangent vector, whose
 geodesic starting from `x` reaches `y` after time 1.
-The formula reads for $x\neq -y$
+The formula reads for $x ≠ -y$
 
 ````math
 \log_x y = d_{𝕊^n}(x,y)

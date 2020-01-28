@@ -14,7 +14,7 @@ Compute the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between
 The formula reads
 
 ```math
-    d_{\mathcal P(n)}(x,y) = \lVert \Log x - \Log y \rVert_{\mathrm{F}}
+    d_{𝒫(n)}(x,y) = \lVert \Log x - \Log y \rVert_{\mathrm{F}}
 ```
 
 where $\operatorname{Log}$ denotes the matrix logarithm and

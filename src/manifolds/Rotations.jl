@@ -663,7 +663,7 @@ angular velocity and axis-angle representation, where $u$ is the unit vector
 along the axis of rotation.
 
 For $\mathrm{SO}(n)$ where $n \ge 4$, the additional elements of $\omega$ are
-$\omega_{i (i - 3)/2 + j + 1} = \Omega_{ij}$, for $i \in [4, n], j \in [1,i)$.
+$\omega_{i (i - 3)/2 + j + 1} = \Omega_{ij}$, for $i  ∈ [4, n], j ∈ [1,i)$.
 """
 vee(::Rotations, ::Any...)
 

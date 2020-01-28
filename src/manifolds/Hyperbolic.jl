@@ -5,7 +5,7 @@ The hyperbolic space $ℍ^n$ represented by $n+1$-Tuples, i.e. in by
 vectors in $ℝ^{n+1}$ using the Minkowsi metric, i.e.
 
 ```math
-ℍ^n = \Bigl\{x\in ℝ^{n+1}
+ℍ^n = \Bigl\{x ∈ ℝ^{n+1}
 \ \Big|\ ⟨x,x⟩_{\mathrm{M}}= -x_{n+1}^2
 + \displaystyle\sum_{k=1}^n x_k^2 = -1, x_{n+1} > 0\Bigr\},
 ```
@@ -14,8 +14,8 @@ where $⟨·,·⟩_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref)
 is Minkowski inner product. The tangent space $T_x ℍ^n$ is given by
 
 ````math
-T_x ℍ^n \coloneqq \bigl\{
-v \in ℝ^{n+1} \ \bigl |\ ⟨x,v⟩_{\mathrm{M}} = 0
+T_x ℍ^n :eqq \bigl\{
+v ∈ ℝ^{n+1} \ \bigl |\ ⟨x,v⟩_{\mathrm{M}} = 0
 \bigr\}.
 ````
 The Minkowski inner product inntroduces the [`MinkowskiMetric`](@ref), which is
@@ -45,7 +45,7 @@ It is also the default metric e.g. for the [`Hyperbolic`](@ref) space.
 !!! note
     While the `MinkowskiMetric` itself is not positive definite in the whole embedded space,
     it is positive definite when restricted to a tangent space $T_xℳ$,
-    $x\in ℳ$, of the [`Hyperbolic`](@ref) space $ℳ$.
+    $x ∈ ℳ$, of the [`Hyperbolic`](@ref) space $ℳ$.
 """
 struct MinkowskiMetric <: LorentzMetric end
 
@@ -158,7 +158,7 @@ is_default_metric(::Hyperbolic, ::MinkowskiMetric) = Val(true)
 Compute the logarithmic map on the [`Hyperbolic`](@ref) space $ℍ^n$, the tangent
 vector representing the [`geodesic`](@ref) starting from `x`
 reaches `y` after time 1 on the [`Hyperbolic`](@ref) space `M`.
-The formula reads for $x\neq y$
+The formula reads for $x ≠ y$
 
 ```math
 \log_x y = d_{ℍ^n}(x,y)

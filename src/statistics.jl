@@ -33,7 +33,7 @@ t_k &= \frac{w_k}{\sum_{i=1}^k w_i}\\
 where $x_k$ are points, $w_k$ are weights, $\mu_k$ is the $k$th estimate of the
 mean, and $\gamma_x(y; t)$ is the point at time $t$ along the
 [`shortest_geodesic`](@ref shortest_geodesic(::Manifold, ::Any, ::Any, ::Real))
-between points $x,y \in ℳ$. The algorithm
+between points $x,y  ∈ ℳ$. The algorithm
 terminates when all $x_k$ have been considered. In the [`Euclidean`](@ref) case,
 this exactly computes the weighted mean.
 
@@ -119,7 +119,7 @@ Compute the (optionally weighted) Riemannian center of mass also known as
 Karcher mean of the vector `x` of points on the [`Manifold`](@ref) `M`, defined
 as the point that satisfies the minimizer
 ````math
-\argmin_{y\in ℳ} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{ℳ}^2(y,x_i),
+\argmin_{y ∈ ℳ} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{ℳ}^2(y,x_i),
 ````
 where $\mathrm{d}_{ℳ}$ denotes the Riemannian [`distance`](@ref).
 
@@ -386,7 +386,7 @@ end
 Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
 [`Manifold`](@ref) `M`, defined as the point that satisfies the minimizer
 ````math
-\argmin_{y\in ℳ} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{ℳ}(y,x_i),
+\argmin_{y ∈ ℳ} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{ℳ}(y,x_i),
 ````
 where $\mathrm{d}_{ℳ}$ denotes the Riemannian [`distance`](@ref).
 This function is nonsmooth (i.e nondifferentiable).

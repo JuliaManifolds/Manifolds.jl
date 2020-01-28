@@ -4,17 +4,17 @@
 The Stiefel manifold consists of all $n ⨉ k$, $n\geq k$ orthonormal matrices, i.e.
 
 ````math
-ℳ = \{ x \in 𝔽^{n ⨉ k} : x^{\mathrm{H}}x = I_k \},
+ℳ = \{ x  ∈ 𝔽^{n ⨉ k} : x^{\mathrm{H}}x = I_k \},
 ````
 
-where $𝔽 \in \{ℝ, ℂ\}$,
+where $𝔽 ∈ \{ℝ, ℂ\}$,
 $·^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
-$I_n \in ℝ^{n\times n}$ denotes the $k \times k$ identity matrix.
+$I_n ∈ ℝ^{n\times n}$ denotes the $k \times k$ identity matrix.
 
-The tangent space at a point $x\in ℳ$ is given by
+The tangent space at a point $x∈ ℳ$ is given by
 
 ````math
-T_x ℳ = \{ v \in 𝔽^{n\times k} : x^{\mathrm{H}}v + v^{\mathrm{H}}x=0_n\},
+T_x ℳ = \{ v ∈ 𝔽^{n\times k} : x^{\mathrm{H}}v + v^{\mathrm{H}}x=0_n\},
 ````
 
 where $0_n$ is the $k\times k$ zero matrix.

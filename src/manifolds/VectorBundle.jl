@@ -182,7 +182,7 @@ Distance between points $x$ and $y$ from the
 vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
-  * The point $x = (p_x, ξ_x)$ where $p_x \in ℳ$ and $ξ_x$ belongs to the
+  * The point $x = (p_x, ξ_x)$ where $p_x  ∈ ℳ$ and $ξ_x$ belongs to the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
     Similarly, $y = (p_y, ξ_y)$.
@@ -216,10 +216,10 @@ Exponential map of tangent vector $v$ at point $x$ from
 vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
-  * The point $x = (p_x, ξ_x)$ where $p_x \in ℳ$ and $ξ_x$ belongs to the
+  * The point $x = (p_x, ξ_x)$ where $p_x ∈ ℳ$ and $ξ_x$ belongs to the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
-  * The tangent vector $v = (ξ_{v,M}, ξ_{v,F}) \in T_{x}B$ where
+  * The tangent vector $v = (ξ_{v,M}, ξ_{v,F}) ∈ T_{x}B$ where
     $ξ_{v,M}$ is a tangent vector from the tangent space $T_{p_x}ℳ$ and
     $ξ_{v,F}$ is a tangent vector from the tangent space $T_{ξ_x}F$ (isomorphic to $F$).
 
@@ -250,7 +250,7 @@ from the vector space of type `M` at point `x` from the underlying [`Manifold`](
 
 The function can be used for example to transform vectors
 from the tangent bundle to vectors from the cotangent bundle
-$\flat \colon Tℳ → T^{*}ℳ$
+$\flat : Tℳ → T^{*}ℳ$
 """
 function flat(M::Manifold, x, w::FVector)
     v = allocate_result(M, flat, w, x)
@@ -372,13 +372,13 @@ Inner product of tangent vectors `v` and `w` at point `x` from the
 vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
-  * The point $x = (p_x, ξ_x)$ where $p_x \in ℳ$ and $ξ_x$ belongs to the
+  * The point $x = (p_x, ξ_x)$ where $p_x ∈ ℳ$ and $ξ_x$ belongs to the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
-  * The tangent vector $v = (ξ_{v,M}, ξ_{v,F}) \in T_{x}B$ where
+  * The tangent vector $v = (ξ_{v,M}, ξ_{v,F}) ∈ T_{x}B$ where
     $ξ_{v,M}$ is a tangent vector from the tangent space $T_{p_x}ℳ$ and
     $ξ_{v,F}$ is a tangent vector from the tangent space $T_{ξ_x}F$ (isomorphic to $F$).
-    Similarly for the other tangent vector $w = (ξ_{w,M}, ξ_{w,F}) \in T_{x}B$.
+    Similarly for the other tangent vector $w = (ξ_{w,M}, ξ_{w,F}) ∈ T_{x}B$.
 
 The inner product is calculated as
 
@@ -410,7 +410,7 @@ Logarithmic map of the point $y$ at point $x$ from
 vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
-  * The point $x = (p_x, ξ_x)$ where $p_x \in ℳ$ and $ξ_x$ belongs to the
+  * The point $x = (p_x, ξ_x)$ where $p_x ∈ ℳ$ and $ξ_x$ belongs to the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
     Similarly, $y = (p_y, ξ_y)$.
@@ -477,7 +477,7 @@ Project the element $v$ of the ambient space of the tangent space $T_x B$
 to the tangent space $T_x B$.
 
 Notation:
-  * The point $x = (p_x, ξ_x)$ where $p_x \in ℳ$ and $ξ_x$ belongs to the
+  * The point $x = (p_x, ξ_x)$ where $p_x ∈ ℳ$ and $ξ_x$ belongs to the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
   * The vector $x = (ξ_{v,M}, ξ_{v,F})$ where $p_x$ belongs to the ambient space of $T_{p_x}ℳ$
@@ -533,7 +533,7 @@ from the vector space `M` at point `x` from the underlying [`Manifold`](@ref).
 
 The function can be used for example to transform vectors
 from the cotangent bundle to vectors from the tangent bundle
-$\sharp \colon T^{*}ℳ → Tℳ$
+$\sharp : T^{*}ℳ → Tℳ$
 """
 function sharp(M::Manifold, x, w::FVector)
     v = allocate_result(M, sharp, w, x)
@@ -640,7 +640,7 @@ Zero tangent vector at point $x$ from the vector bundle `B`
 over manifold `B.VS` (denoted $ℳ$). The zero vector belongs to the space $T_{x}B$
 
 Notation:
-  * The point $x = (p_x, ξ_x)$ where $p_x \in ℳ$ and $ξ_x$ belongs to the
+  * The point $x = (p_x, ξ_x)$ where $p_x ∈ ℳ$ and $ξ_x$ belongs to the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
 

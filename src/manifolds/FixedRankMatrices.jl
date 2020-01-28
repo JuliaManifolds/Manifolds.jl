@@ -3,23 +3,23 @@
 
 The manifold of $m ⨉ n$ real-valued (complex-valued) matrices of fixed rank $k$, i.e.
 ````math
-ℳ = \{ x \in ℝ^{m ⨉ n} : \operatorname{rank}(x) = k \}.
+ℳ = \{ x  ∈ ℝ^{m ⨉ n} : \operatorname{rank}(x) = k \}.
 ````
 # Representation with 3 matrix factors
 
-A point $x\in ℳ$ can be stored using orthonormal matrices
-$U\in ℝ^{m ⨉ k}$, $V\in ℝ^{n ⨉ k}$ as well as the $k$ singular
+A point $x ∈ ℳ$ can be stored using orthonormal matrices
+$U ∈ ℝ^{m ⨉ k}$, $V ∈ ℝ^{n ⨉ k}$ as well as the $k$ singular
 values of $x = USV^\mathrm{T}$. In other words, $U$ and $V$ are from the manifolds
 [`Stiefel`](@ref)`(m,k)` and [`Stiefel`](@ref)`(n,k)`, respectively; see
 [`SVDMPoint`](@ref) for details
 
-The tangent space $T_x ℳ$ at a point $x\in ℳ$ with $x=USV^\mathrm{T}$
+The tangent space $T_x ℳ$ at a point $x ∈ ℳ$ with $x=USV^\mathrm{T}$
 is given by
 ````math
 T_xℳ = \bigl\{ UMV^\mathrm{T} + U_xV^\mathrm{T} + UV_x^\mathrm{T} :
-    M \in ℝ^{k ⨉ k},
-    U_x \in ℝ^{m ⨉ k},
-    V_x \in ℝ^{n ⨉ k}
+    M  ∈ ℝ^{k ⨉ k},
+    U_x  ∈ ℝ^{m ⨉ k},
+    V_x  ∈ ℝ^{n ⨉ k}
     \text{ s.t. }
     U_x^\mathrm{T}U = 0_k,
     V_x^\mathrm{T}V = 0_k
@@ -86,7 +86,7 @@ together with its base point, see for example [`FixedRankMatrices`](@ref)
 # Constructors
 * `UMVTVector(U,M,Vt)` store umv factors to initialize the `UMVTVector`
 * `UMVTVector(U,M,Vt,k)` store the umv factors after shortening them down to
-  inner dimensions $k$, i.e. in $UMV^\mathrm{T}$, $M\in ℝ^{k ⨉ k}$
+  inner dimensions $k$, i.e. in $UMV^\mathrm{T}$, $M ∈ ℝ^{k ⨉ k}$
 """
 struct UMVTVector{TU<:AbstractMatrix,TM<:AbstractMatrix,TVt<:AbstractMatrix} <: TVector
     U::TU
@@ -241,7 +241,7 @@ end
     project_tangent(M, x, A)
     project_tangent(M, x, v)
 
-Project the matrix $A\in ℝ^{m,n}$ or a [`UMVTVector`](@ref) `v` from the embedding or
+Project the matrix $A ∈ ℝ^{m,n}$ or a [`UMVTVector`](@ref) `v` from the embedding or
 another tangent space onto the tangent space at $x$ on the [`FixedRankMatrices`](@ref) `M`,
 further decomposing the result into $v=UMV$, i.e. a [`UMVTVector`](@ref) following
 Section 3 in [^Vandereycken2013].

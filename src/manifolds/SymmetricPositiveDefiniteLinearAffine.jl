@@ -16,7 +16,7 @@ Compute the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between
 as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
 
 ```math
-d_{\mathcal P(n)}(x,y)
+d_{𝒫(n)}(x,y)
 = \lVert \operatorname{Log}(x^{-\frac{1}{2}}yx^{-\frac{1}{2}})\rVert_{\mathrm{F}}.,
 ```
 where $\operatorname{Log}$ denotes the matrix logarithm and

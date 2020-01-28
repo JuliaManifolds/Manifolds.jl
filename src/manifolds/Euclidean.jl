@@ -131,9 +131,9 @@ the inner product on the real-valued or complex valued vector space
 of arrays (or tensors) of size $n_1 ⨉ n_2  ⨉  …  ⨉ n_i$, i.e.
 
 ````math
-g_x(v,w) = \sum_{k\in I} \overline{v}_{k} w_{k},
+g_x(v,w) = \sum_{k ∈ I} \overline{v}_{k} w_{k},
 ````
-where $I$ is the set of integer vectors $k\in ℕ^i$, such that for all
+where $I$ is the set of integer vectors $k ∈ ℕ^i$, such that for all
 $1 \leq j \leq i$ it holds $1\leq k_j \leq n_j$.
 
 For the special case of $i\leq 2$, i.e. matrices and vectors, this simplifies to

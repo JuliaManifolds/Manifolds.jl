@@ -3,15 +3,15 @@
 
 The Grassmann manifold $\operatorname{Gr}(n,k)$ consists of all subspaces spanned
 by $k$ linear independent vectors $𝔽^n$, where
-$𝔽 \in \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
+$𝔽  ∈ \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
 This yields all $k$-dimensional subspaces of $ℝ^n$ for the real-valued case and all
 $2k$-dimensional subspaces of $ℂ^n$ for the second.
 
 The manifold can be represented as
 
 ````math
-\operatorname{Gr}(n,k) \coloneqq \bigl\{ \operatorname{span}(x)
-: x \in 𝔽^{n ⨉ k}, \bar{x}^\mathrm{T}x = I_k\},
+\operatorname{Gr}(n,k) :eqq \bigl\{ \operatorname{span}(x)
+: x ∈ 𝔽^{n ⨉ k}, \bar{x}^\mathrm{T}x = I_k\},
 ````
 
 where ${\bar·}^{\mathrm{T}}$ denotes the complex conjugate transpose and
@@ -32,13 +32,13 @@ The tangent space at a point (subspace) $x$ is given by
 
 ````math
 T_x\mathrm{Gr}(n,k) = \bigl\{
-v \in 𝔽^{n ⨉ k} :
+v ∈ 𝔽^{n ⨉ k} :
 {\bar v}^{\mathrm{T}}x + {\bar x}^{\mathrm{T}}v = 0_{k} \bigr\},
 ````
 
 where $0_{k}$ denotes the $k ⨉ k$ zero matrix.
 
-Note that a point $x\in \operatorname{Gr}(n,k)$ might be represented by
+Note that a point $x ∈ \operatorname{Gr}(n,k)$ might be represented by
 different matrices (i.e. matrices with orthonormal column vectors that span
 the same subspace). Different representations of $x$ also lead to different
 representation matrices for the tangent space $T_x\mathrm{Gr}(n,k)$
