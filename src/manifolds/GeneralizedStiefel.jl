@@ -1,5 +1,5 @@
 @doc doc"""
-    GeneralizedStiefel{n,k,B,T} <: Manifold
+    GeneralizedStiefel{n,k,T} <: Manifold
 
 The Generalized Stiefel manifold consists of all $n\times k$, $n\geq k$ orthonormal matrices w.r.t. an arbitrary scalar product `B`, i.e.
 
@@ -21,15 +21,15 @@ T_x\mathcal M = \{ v \in \mathbb{F}^{n\times k} : x^{\mathrm{H}}Bv + v^{\mathrm{
 ````
 
 # Constructor
-    Stiefel(n,k,B,F=ℝ)
+    Stiefel(n,k,F=ℝ,B=I_k)
 
 Generate the (real-valued) Generalized Stiefel manifold of $n\times k$ dimensional orthonormal matrices.
 """
-struct GeneralizedStiefel{n,k,F} <: Manifold 
-    B::AbstractMatrix
+struct GeneralizedStiefel{n,k,F,TB<:AbstractMatrix} <: Manifold 
+    B::TB
 end
 
-GeneralizedStiefel(n::Int, k::Int, B::AbstractMatrix = Matrix{Float64}(I,k,k), F::AbstractNumbers = ℝ) = GeneralizedStiefel{n,k,F}(B)
+GeneralizedStiefel(n::Int, k::Int, F::AbstractNumbers = ℝ, B::AbstractMatrix = Matrix{Float64}(I,k,k)) = GeneralizedStiefel{n,k,F}(B)
 
 @doc doc"""
     check_manifold_point(M::GeneralizedStiefel, x; kwargs...)
