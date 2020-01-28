@@ -17,7 +17,7 @@ A
 | ``F`` | A fiber | |
 | ``⟨·,·⟩`` | inner product (in ``T^*_x ℳ``) | ``⟨·,·⟩_x, g_x(·,·)`` |
 | ``ℳ`` | A manifold | ``ℳ_1, ℳ_2,…,𝒩`` | |
-| ``𝒫_{y\gets x}X`` | parallel Transport |
+| ``𝒫_{y←x}X`` | parallel Transport |
 | ``x`` | A point on ℳ | ``x_1,x_2,…,y,z`` | |
 | ``T_x ℳ`` | The tangent space at ``x`` | | |
 | ``X`` | A tangent vector from ``T_x ℳ`` | ``X_1,X_2,…,Y,Z`` | sometimes with the base point in the index, ``X_x``. |

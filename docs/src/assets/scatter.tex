@@ -1,0 +1,9 @@
+\documentclass[tikz]{standalone}
+\usepackage{ifthen, fontspec, fontawesome5,pgfplots}
+\begin{document}
+\begin{tikzpicture}
+    \begin{axis}[axis lines=none]
+          \addplot+[only marks,mark=*,mark options={fill=blue,scale=1,draw=none}] table[x=Column1, y=Column2,col sep=comma] {data.csv};
+    \end{axis}
+\end{tikzpicture}
+\end{document}

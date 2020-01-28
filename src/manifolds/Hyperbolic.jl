@@ -250,7 +250,7 @@ Compute the paralllel transport of the `v` from the tangent space at `x` on the
 connecting `x` and `y`. The formula reads
 
 ````math
-𝒫_{y\gets x}(v) = v - \frac{⟨\log_xy,v⟩_x}{d^2_{ℍ^n}(x,y)}
+𝒫_{y←x}(v) = v - \frac{⟨\log_xy,v⟩_x}{d^2_{ℍ^n}(x,y)}
 \bigl(\log_xy + \log_yx \bigr).
 ````
 """

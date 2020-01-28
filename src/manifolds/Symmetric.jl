@@ -324,7 +324,7 @@ of `v` from the tangent space at `x` on the [`SymmetricMatrices`](@ref) `M` to `
 Since the metric is inherited from the embedding space, this is just the identity, i.e.
 
 ````math
-𝒫_{y\gets x}(v) = v.
+𝒫_{y←x}(v) = v.
 ````
 """
 vector_transport_to(::SymmetricMatrices, ::Any...)

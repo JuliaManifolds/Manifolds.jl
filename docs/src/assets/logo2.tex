@@ -1,0 +1,70 @@
+\documentclass[tikz]{standalone}
+\usepackage{ifthen, fontspec, fontawesome5,pgfplots,amssymb}
+\setmainfont{Tamil MN}
+\usetikzlibrary{arrows.meta, positioning}
+\newboolean{darkmode}
+\setboolean{darkmode}{false}
+\newboolean{lettering}
+\setboolean{lettering}{false}
+\ifthenelse{\boolean{darkmode}}{%
+    \definecolor{fgc}{rgb}{1.0, 1.0, 1.0}
+    \definecolor{bgc}{rgb}{0.0,0.0,0.0}
+}{%
+    \definecolor{fgc}{rgb}{0.0, 0.0, 0.0}
+    \definecolor{bgc}{rgb}{0.9, 0.9, 0.9}
+}
+\definecolor{jblue}{rgb}{0.251, 0.388, 0.847}
+\definecolor{jred}{rgb}{0.796, 0.235, 0.2}
+\definecolor{jgreen}{rgb}{0.22, 0.596, 0.149}
+\definecolor{jpurple}{rgb}{0.584, 0.345, 0.698}
+
+\tikzset{blob/.style={circle, minimum size=1.2cm,line width=0pt}}
+\tikzset{blobred/.style={fill=jred, draw=jred, blob}}
+\tikzset{blobpurple/.style={fill=jgreen, draw=jgreen, blob}}
+\tikzset{blobgreen/.style={fill=jpurple, draw=jpurple, blob}}
+
+\tikzset{geodesic/.style={very thick,jblue,cap=round}}
+\tikzset{geodesic2/.style={very thick,jblue,cap=round,opacity=0.2}}
+\tikzset{tangent/.style={very thick,fgc,->,>={Stealth[round]},line cap=round}}
+\tikzset{tangentsum/.style={very thick,fgc!66!bgc,->,>={Stealth[round]} }}
+\tikzset{tangentvec/.style={very thick,fgc!33!bgc, dash pattern=on 0pt off 2\pgflinewidth, line cap=round}}
+
+\tikzset{rotation/.style={very thick,fgc,->,>={Stealth[round,scale=0.75]},line cap=round}}
+
+\pagecolor{bgc}
+\newcommand{\lp}{0.4}
+\begin{document}
+    \begin{tikzpicture}[scale=2]
+        % centroid of triangle at zero 
+        \draw (-0.5,{-2*sqrt(3)/6}) node (a) {} (0.5,{-2*sqrt(3)/6}) node (b) {} (0.0, {sqrt(3)/6}) node (c) {};
+        \draw[geodesic] (c.center) .. controls +(210:{\lp}) and +(90:{\lp}) .. (a.center) node[pos=0.22] (ca) {};
+        \draw[geodesic] (c.center) .. controls +(-30:{\lp}) and +(90:{\lp}) .. (b.center) node[pos=0.22] (cb) {};
+        \draw[geodesic] (a.center) .. controls +(-30:{\lp}) and +(210:{\lp}) .. (b.center);
+        \draw (a) node[blobred] {};
+        \draw (b) node[blobgreen] {};
+        \draw (c) node[blobpurple] {};
+        \draw[geodesic2] (c.center) .. controls +(210:{\lp}) and +(90:{\lp}) .. (a.center);
+        \draw[geodesic2] (c.center) .. controls +(-30:{\lp}) and +(90:{\lp}) .. (b.center);
+        \draw[geodesic2] (a.center) .. controls +(-30:{\lp}) and +(210:{\lp}) .. (b.center);
+        %tangent
+        \draw (a.center) ++ (75:{0.4}) node (t1) {};
+        \draw (a.center) ++ (345:{0.4}) node (t2) {};
+        \draw (a.center) ++ (30:{0.4*sqrt(2)}) node (t12) {};
+        \draw[tangentvec] (t1.center) -- (t12.center) -- (t2.center);
+        \draw[tangentsum] (a.center) -- ++ (30:{0.4*sqrt(2)}) node (t12) {};
+        \draw[tangent] (a.center) -- ++ (75:{0.4}) node (t1) {};
+        \draw[tangent] (a.center) -- ++ (345:{0.4}) node (t2) {};
+        \draw[rotation] (ca.center) .. controls +(315:0.11) and +(225:0.11) .. (cb.center);
+        \draw (c) node {\large\color{fgc}$\mathfrak g$};
+        \draw (b) node {%
+        \begin{tikzpicture}[scale=0.15]
+            \begin{axis}[axis lines=none]
+                  \addplot[fgc,draw opacity=0.8,only marks,mark=*,mark options={fill=fgc, fill opacity=0.8, scale=1,draw=none}] table[x=Column1, y=Column2,col sep=comma] {data.csv};
+            \end{axis}
+        \end{tikzpicture}
+        };
+    \ifthenelse{\boolean{lettering}}{%
+        \draw (0.0,{-2*sqrt(3)/3}) node (T) {\color{fgc}\Large\bfseries Manifolds.jl};
+    }{}
+    \end{tikzpicture}
+\end{document}

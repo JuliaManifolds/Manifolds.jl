@@ -206,7 +206,7 @@ Compute the parallel transport on the [`SymmetricPositiveDefinite`](@ref) as a
 The formula reads
 
 ```math
-𝒫_{y\gets x}(v) = x^{\frac{1}{2}}
+𝒫_{y←x}(v) = x^{\frac{1}{2}}
 \operatorname{Exp}\bigl(
 \frac{1}{2}x^{-\frac{1}{2}}\log_x(y)x^{-\frac{1}{2}}
 \bigr)

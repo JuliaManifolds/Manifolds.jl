@@ -146,7 +146,7 @@ triangular matrix with the diagonal multiplied by $\frac{1}{2}$. With $u$ the pa
 transport on [`CholeskySpace`](@ref) from $l$ to $k$. The formula hear reads
 
 ````math
-    \mathcal 𝒫_{y\gets x}(v) = ku^{\mathrm{T}} + uk^{\mathrm{T}}.
+    \mathcal 𝒫_{y←x}(v) = ku^{\mathrm{T}} + uk^{\mathrm{T}}.
 ````
 """
 vector_transport_to(

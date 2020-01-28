@@ -191,7 +191,7 @@ Parallely transport the tangent vector `v` at `x` along the geodesic to `y`
 on to the [`CholeskySpace`](@ref) manifold `M`. The formula reads
 
 ````math
-\mathcal 𝒫_{y\gets x}(v) = \lfloor v \rfloor
+\mathcal 𝒫_{y←x}(v) = \lfloor v \rfloor
 + \operatorname{diag}(y)\operatorname{diag}(x)^{-1}\operatorname{diag}(v),
 ````
 

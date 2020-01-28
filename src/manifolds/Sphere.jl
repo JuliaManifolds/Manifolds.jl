@@ -326,7 +326,7 @@ end
 Compute the [`ParallelTransport`](@ref) on the [`Sphere`](@ref) `M`, which is given by
 
 ````math
-𝒫_{y\gets x}(v) = v - \frac{⟨\log_xy,v⟩_x}{d^2_{𝕊^n}(x,y)}
+𝒫_{y←x}(v) = v - \frac{⟨\log_xy,v⟩_x}{d^2_{𝕊^n}(x,y)}
 \bigl(\log_xy + \log_yx \bigr).
 ````
 """

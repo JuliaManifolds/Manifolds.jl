@@ -320,7 +320,7 @@ For the real-valued case this results in the identity.
 For the complex-valud case, the formula is the same as for the [`Sphere`](@ref)`(1)` in the
 complex plane.
 ````math
-𝒫_{y\gets x}(v) = v - \frac{⟨\log_xy,v⟩_x}{d^2_{ℂ}(x,y)}
+𝒫_{y←x}(v) = v - \frac{⟨\log_xy,v⟩_x}{d^2_{ℂ}(x,y)}
 \bigl(\log_xy + \log_yx \bigr),
 ````
 where [`log`](@ref) denotes the logarithmic map on `M`.
