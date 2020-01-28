@@ -6,7 +6,7 @@ The order by terminology. Thy might be used in a plain form within the code or
 when referring to that code. This is for example the case the caligraphic symbols.
 
 Within the documented functions the utf8 symbols are used whenever possible,
-as long as that renders still in TeX within this documentation.
+as long as that renders still in $\TeX$ within this documentation.
 
 A
 
