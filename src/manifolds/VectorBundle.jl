@@ -182,18 +182,18 @@ Distance between points $x$ and $y$ from the
 vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
-  * The point $x = (p_x, \xi_x)$ where $p_x \in ℳ$ and $\xi_x$ belongs to the
+  * The point $x = (p_x, ξ_x)$ where $p_x \in ℳ$ and $ξ_x$ belongs to the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
-    Similarly, $y = (p_y, \xi_y)$.
+    Similarly, $y = (p_y, ξ_y)$.
 
 The distance is calculated as
 
-$d_B(x, y) = \sqrt{d_M(p_x, p_y)^2 + d_F(\xi_x, \xi_{y→x})^2}$
+$d_B(x, y) = \sqrt{d_M(p_x, p_y)^2 + d_F(ξ_x, ξ_{y→x})^2}$
 
 where $d_ℳ$ is the distance on manifold $ℳ$, $d_F$ is the distance
-between two vectors from the fiber $F$ and $\xi_{y→x}$ is the result
-of parallel transport of vector $\xi_y$ to point $p_x$. The default
+between two vectors from the fiber $F$ and $ξ_{y→x}$ is the result
+of parallel transport of vector $ξ_y$ to point $p_x$. The default
 behavior of [`vector_transport_to`](@ref) is used to compute the vector
 transport.
 """
@@ -216,20 +216,20 @@ Exponential map of tangent vector $v$ at point $x$ from
 vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
-  * The point $x = (p_x, \xi_x)$ where $p_x \in ℳ$ and $\xi_x$ belongs to the
+  * The point $x = (p_x, ξ_x)$ where $p_x \in ℳ$ and $ξ_x$ belongs to the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
-  * The tangent vector $v = (\xi_{v,M}, \xi_{v,F}) \in T_{x}B$ where
-    $\xi_{v,M}$ is a tangent vector from the tangent space $T_{p_x}ℳ$ and
-    $\xi_{v,F}$ is a tangent vector from the tangent space $T_{\xi_x}F$ (isomorphic to $F$).
+  * The tangent vector $v = (ξ_{v,M}, ξ_{v,F}) \in T_{x}B$ where
+    $ξ_{v,M}$ is a tangent vector from the tangent space $T_{p_x}ℳ$ and
+    $ξ_{v,F}$ is a tangent vector from the tangent space $T_{ξ_x}F$ (isomorphic to $F$).
 
 The exponential map is calculated as
 
-$\exp_{x}(v) = (\exp_{p_x}(\xi_{v,M}), \xi_{\exp})$
+$\exp_{x}(v) = (\exp_{p_x}(ξ_{v,M}), ξ_{\exp})$
 
-where $\xi_{\exp}$ is the result of vector transport of $\xi_x + \xi_{v,F}$
-to the point $\exp_{p_x}(\xi_{v,M})$.
-The sum $\xi_x + \xi_{v,F}$ corresponds to the exponential map in the vector space $F$.
+where $ξ_{\exp}$ is the result of vector transport of $ξ_x + ξ_{v,F}$
+to the point $\exp_{p_x}(ξ_{v,M})$.
+The sum $ξ_x + ξ_{v,F}$ corresponds to the exponential map in the vector space $F$.
 """
 exp(::VectorBundle, ::Any)
 
@@ -372,17 +372,17 @@ Inner product of tangent vectors `v` and `w` at point `x` from the
 vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
-  * The point $x = (p_x, \xi_x)$ where $p_x \in ℳ$ and $\xi_x$ belongs to the
+  * The point $x = (p_x, ξ_x)$ where $p_x \in ℳ$ and $ξ_x$ belongs to the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
-  * The tangent vector $v = (\xi_{v,M}, \xi_{v,F}) \in T_{x}B$ where
-    $\xi_{v,M}$ is a tangent vector from the tangent space $T_{p_x}ℳ$ and
-    $\xi_{v,F}$ is a tangent vector from the tangent space $T_{\xi_x}F$ (isomorphic to $F$).
-    Similarly for the other tangent vector $w = (\xi_{w,M}, \xi_{w,F}) \in T_{x}B$.
+  * The tangent vector $v = (ξ_{v,M}, ξ_{v,F}) \in T_{x}B$ where
+    $ξ_{v,M}$ is a tangent vector from the tangent space $T_{p_x}ℳ$ and
+    $ξ_{v,F}$ is a tangent vector from the tangent space $T_{ξ_x}F$ (isomorphic to $F$).
+    Similarly for the other tangent vector $w = (ξ_{w,M}, ξ_{w,F}) \in T_{x}B$.
 
 The inner product is calculated as
 
-$⟨v, w⟩_{B} = ⟨\xi_{v,M}, \xi_{w,M}⟩_{M} + ⟨\xi_{v,F}, \xi_{w,F}⟩_{F}.$
+$⟨v, w⟩_{B} = ⟨ξ_{v,M}, ξ_{w,M}⟩_{M} + ⟨ξ_{v,F}, ξ_{w,F}⟩_{F}.$
 """
 function inner(B::VectorBundle, x, v, w)
     px, ξx = submanifold_components(B.M, x)
@@ -410,18 +410,18 @@ Logarithmic map of the point $y$ at point $x$ from
 vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
-  * The point $x = (p_x, \xi_x)$ where $p_x \in ℳ$ and $\xi_x$ belongs to the
+  * The point $x = (p_x, ξ_x)$ where $p_x \in ℳ$ and $ξ_x$ belongs to the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
-    Similarly, $y = (p_y, \xi_y)$.
+    Similarly, $y = (p_y, ξ_y)$.
 
 The logarithmic map is calculated as
 
-$\log_{x}(y) = (\log_{p_x}(p_y), \xi_{\log} - \xi_x)$
+$\log_{x}(y) = (\log_{p_x}(p_y), ξ_{\log} - ξ_x)$
 
-where $\xi_{\log}$ is the result of vector transport of $\xi_y$
+where $ξ_{\log}$ is the result of vector transport of $ξ_y$
 to the point $p_x$.
-The difference $\xi_{\log} - \xi_x$ corresponds to the logarithmic map in the vector space $F$.
+The difference $ξ_{\log} - ξ_x$ corresponds to the logarithmic map in the vector space $F$.
 """
 log(::VectorBundle, ::Any...)
 
@@ -453,13 +453,13 @@ Project the point $x$ from the ambient space of the vector bundle `B`
 over manifold `B.VS` (denoted $ℳ$) to the vector bundle.
 
 Notation:
-  * The point $x = (p_x, \xi_x)$ where $p_x$ belongs to the ambient space of $ℳ$
-    and $\xi_x$ belongs to the ambient space of the
+  * The point $x = (p_x, ξ_x)$ where $p_x$ belongs to the ambient space of $ℳ$
+    and $ξ_x$ belongs to the ambient space of the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
 
 The projection is calculated by projecting the point $p_x$ to the manifold $ℳ$
-and then projecting the vector $\xi_x$ to the tangent space $T_{p_x}ℳ$.
+and then projecting the vector $ξ_x$ to the tangent space $T_{p_x}ℳ$.
 """
 project_point(::VectorBundle, ::Any...)
 
@@ -477,16 +477,16 @@ Project the element $v$ of the ambient space of the tangent space $T_x B$
 to the tangent space $T_x B$.
 
 Notation:
-  * The point $x = (p_x, \xi_x)$ where $p_x \in ℳ$ and $\xi_x$ belongs to the
+  * The point $x = (p_x, ξ_x)$ where $p_x \in ℳ$ and $ξ_x$ belongs to the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
-  * The vector $x = (\xi_{v,M}, \xi_{v,F})$ where $p_x$ belongs to the ambient space of $T_{p_x}ℳ$
-    and $\xi_{v,F}$ belongs to the ambient space of the
+  * The vector $x = (ξ_{v,M}, ξ_{v,F})$ where $p_x$ belongs to the ambient space of $T_{p_x}ℳ$
+    and $ξ_{v,F}$ belongs to the ambient space of the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
 
-The projection is calculated by projecting $\xi_{v,M}$ to tangent space $T_{p_x}ℳ$
-and then projecting the vector $\xi_{v,F}$ to the fiber $F$.
+The projection is calculated by projecting $ξ_{v,M}$ to tangent space $T_{p_x}ℳ$
+and then projecting the vector $ξ_{v,F}$ to the fiber $F$.
 """
 project_tangent(::VectorBundle, ::Any...)
 
@@ -640,7 +640,7 @@ Zero tangent vector at point $x$ from the vector bundle `B`
 over manifold `B.VS` (denoted $ℳ$). The zero vector belongs to the space $T_{x}B$
 
 Notation:
-  * The point $x = (p_x, \xi_x)$ where $p_x \in ℳ$ and $\xi_x$ belongs to the
+  * The point $x = (p_x, ξ_x)$ where $p_x \in ℳ$ and $ξ_x$ belongs to the
     fiber $F=\pi^{-1}(\{p_x\})$ of the vector bundle $B$ where $\pi$ is the
     canonical projection of that vector bundle $B$.
 

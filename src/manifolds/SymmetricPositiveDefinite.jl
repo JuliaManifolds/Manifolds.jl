@@ -7,7 +7,7 @@ The manifold of symmetric positive definite matrices, i.e.
 \mathcal P(n) =
 \bigl\{
 x \in ℝ^{n\times n} :
-\xi^\mathrm{T}x\xi > 0 \text{ for all } \xi \in ℝ^{n}\backslash\{0\}
+ξ^\mathrm{T}xξ > 0 \text{ for all } ξ \in ℝ^{n}\backslash\{0\}
 \bigr\}
 ```
 
