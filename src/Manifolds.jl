@@ -35,6 +35,9 @@ import Base:
 import Distributions: _rand!, support
 import LinearAlgebra: cross, det, Diagonal, dot, mul!, norm, I, UniformScaling
 import ManifoldsBase:
+    allocate,
+    allocate_result,
+    allocate_result_type,
     array_value,
     base_manifold,
     check_manifold_point,
@@ -55,6 +58,7 @@ import ManifoldsBase:
     log!,
     manifold_dimension,
     norm,
+    number_eltype,
     project_point,
     project_point!,
     project_tangent,
@@ -62,8 +66,6 @@ import ManifoldsBase:
     representation_size,
     retract,
     retract!,
-    similar_result,
-    similar_result_type,
     shortest_geodesic,
     vector_transport_along,
     vector_transport_along!,
@@ -122,7 +124,7 @@ vector to an array representation. The [`vee`](@ref) map is the `hat` map's
 inverse.
 """
 function hat(M::Manifold, x, vⁱ)
-    v = similar_result(M, hat, x, vⁱ)
+    v = allocate_result(M, hat, x, vⁱ)
     return hat!(M, v, x, vⁱ)
 end
 
@@ -147,7 +149,7 @@ vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
 inverse.
 """
 function vee(M::Manifold, x, v)
-    vⁱ = similar_result(M, vee, x, v)
+    vⁱ = allocate_result(M, vee, x, v)
     return vee!(M, vⁱ, x, v)
 end
 
@@ -156,13 +158,13 @@ function vee!(M::Manifold, vⁱ, x, v)
     error("vee! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), point $(typeof(x)), and array $(typeof(v))")
 end
 
-function similar_result(M::Manifold, f::typeof(vee), x, v)
-    T = similar_result_type(M, f, (x, v))
-    return similar(x, T, manifold_dimension(M))
+function allocate_result(M::Manifold, f::typeof(vee), x, v)
+    T = allocate_result_type(M, f, (x, v))
+    return allocate(x, T, manifold_dimension(M))
 end
-function similar_result(M::Manifold, f::typeof(vee), x::StaticArray, v)
-    T = similar_result_type(M, f, (x, v))
-    return similar(x, T, Size(manifold_dimension(M)))
+function allocate_result(M::Manifold, f::typeof(vee), x::StaticArray, v)
+    T = allocate_result_type(M, f, (x, v))
+    return allocate(x, T, Size(manifold_dimension(M)))
 end
 
 """
@@ -294,7 +296,9 @@ export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
-export AbstractPowerManifold, PowerManifold, ProductManifold
+export AbstractPowerManifold, AbstractPowerRepresentation,
+    MultidimentionalArrayPowerRepresentation, NestedPowerRepresentation, PowerManifold
+export ProductManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
@@ -320,7 +324,9 @@ export AbstractEstimationMethod,
     CyclicProximalPointEstimation,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius
-export base_manifold,
+export allocate,
+    allocate_result,
+    base_manifold,
     bundle_projection,
     christoffel_symbols_first,
     christoffel_symbols_second,
@@ -367,6 +373,7 @@ export base_manifold,
     moment,
     norm,
     normal_tvector_distribution,
+    number_eltype,
     one,
     project_point,
     project_point!,
@@ -383,7 +390,6 @@ export base_manifold,
     sharp,
     sharp!,
     shortest_geodesic,
-    similar_result,
     skewness,
     std,
     sym_rem,

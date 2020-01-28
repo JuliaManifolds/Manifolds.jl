@@ -19,7 +19,7 @@ The manifold the action `A` acts upon.
 """
 g_manifold(A::AbstractGroupAction) = error("g_manifold not implemented for $(typeof(A)).")
 
-similar_result(A::AbstractGroupAction, f, x...) = similar_result(g_manifold(A), f, x...)
+allocate_result(A::AbstractGroupAction, f, x...) = allocate_result(g_manifold(A), f, x...)
 
 """
     direction(::AbstractGroupAction{AD}) -> AD
@@ -40,7 +40,7 @@ x ⋅ a ≐ a^{-1} ⋅ x.
 ````
 """
 function apply(A::AbstractGroupAction, a, x)
-    y = similar_result(A, apply, x, a)
+    y = allocate_result(A, apply, x, a)
     return apply!(A, y, a, x)
 end
 
@@ -64,7 +64,7 @@ end
 Apply inverse of action `a` to the point `x`. The action is specified by `A`.
 """
 function inverse_apply(A::AbstractGroupAction, a, x)
-    y = similar_result(A, inverse_apply, x, a)
+    y = allocate_result(A, inverse_apply, x, a)
     return inverse_apply!(A, y, a, x)
 end
 
