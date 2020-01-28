@@ -19,6 +19,7 @@ struct ProductManifold{TM<:Tuple} <: Manifold
 end
 
 ProductManifold(manifolds::Manifold...) = ProductManifold{typeof(manifolds)}(manifolds)
+ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
 
 struct ProductMetric <: Metric end
 
@@ -579,8 +580,6 @@ function sharp!(M::ProductManifold, v::TFVector, x, w::CoTFVector)
 end
 
 function show(io::IO, M::ProductManifold)
-    length(M.manifolds) == 0 && return println(io, "ProductManifold()")
-    print(io, "ProductManifold(")
     width = displaysize(io)[2]
     strings = []
     one_line_length = 17 + (length(M.manifolds) - 1) * 2
@@ -589,6 +588,7 @@ function show(io::IO, M::ProductManifold)
         push!(strings, s)
         one_line_length += length(s)
     end
+    print(io, "ProductManifold(")
     if one_line_length ≤ width
         print(io, join(strings, ", "), ")")
     else
