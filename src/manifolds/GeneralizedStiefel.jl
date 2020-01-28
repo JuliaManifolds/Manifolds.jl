@@ -25,10 +25,11 @@ T_x\mathcal M = \{ v \in \mathbb{F}^{n\times k} : x^{\mathrm{H}}Bv + v^{\mathrm{
 
 Generate the (real-valued) Generalized Stiefel manifold of $n\times k$ dimensional orthonormal matrices.
 """
-struct GeneralizedStiefel{n,k,B,F} <: Manifold end
+struct GeneralizedStiefel{n,k,F} <: Manifold 
+    B::AbstractMatrix
+end
 
-#GeneralizedStiefel(n::Int, k::Int, B,F) = GeneralizedStiefel{n,k,B,F}()
-GeneralizedStiefel(n::Int, k::Int, B = I, F::AbstractNumbers = ℝ) = GeneralizedStiefel{n,k,B,F}()
+GeneralizedStiefel(n::Int, k::Int, B::AbstractMatrix = Matrix{Float64}(I,k,k), F::AbstractNumbers = ℝ) = GeneralizedStiefel{n,k,F}(B)
 
 @doc doc"""
     check_manifold_point(M::GeneralizedStiefel, x; kwargs...)
@@ -38,7 +39,7 @@ i.e. that it has the right [`AbstractNumbers`](@ref) type and $x^{\mathrm{H}}Bx$
 is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
-function check_manifold_point(M::GeneralizedStiefel{n,k,B,T}, x; kwargs...) where {n,k,B,T}
+function check_manifold_point(M::GeneralizedStiefel{n,k,T}, x; kwargs...) where {n,k,T}
     if (T === ℝ) && !(eltype(x) <: Real)
         return DomainError(
             eltype(x),
@@ -57,7 +58,7 @@ function check_manifold_point(M::GeneralizedStiefel{n,k,B,T}, x; kwargs...) wher
             "The matrix $(x) is does not lie on the Generalized Stiefel manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
         )
     end
-    c = x' * B * x
+    c = x' * M.B * x
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
             norm(c - one(c)),
@@ -72,4 +73,4 @@ end
 Returns the representation size of the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k,B)$,
 i.e. `(n,k)`, which is the matrix dimensions.
 """
-@generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
+@generated representation_size(::GeneralizedStiefel{n,k}) where {n,k} = (n, k)
