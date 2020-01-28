@@ -103,11 +103,11 @@ triangular matrix with positive diagonal `x` towards the lower triangular matrix
 The formula reads
 
 ````math
-\exp_x v = \lfloor x \rfloor + \lfloor v \rfloor + \operatorname{diag}(x)
+\exp_x v = ⌊ x ⌋ + ⌊ v ⌋ + \operatorname{diag}(x)
 \operatorname{diag}(x)\exp\bigl( \operatorname{diag}(v)\operatorname{diag}(x)^{-1}\bigr),
 ````
 
-where $\lfloor x\rfloor$ denotes the strictly lower triangular matrix of $x$ and
+where $⌊ x⌋$ denotes the strictly lower triangular matrix of $x$ and
 $\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
 exp(::CholeskySpace, ::Any...)
@@ -148,11 +148,11 @@ from the lower triangular matrix with positive diagonal `x` towards `y`.
 The formula reads
 
 ````math
-\log_x v = \lfloor x \rfloor - \lfloor y \rfloor
+\log_x v = ⌊ x ⌋ - ⌊ y ⌋
 +\operatorname{diag}(x)\log\bigl(\operatorname{diag}(y)\operatorname{diag}(x)^{-1}\bigr),
 ````
 
-where $\lfloor x\rfloor$ denotes the strictly lower triangular matrix of $x$ and
+where $⌊ x⌋$ denotes the strictly lower triangular matrix of $x$ and
 $\operatorname{diag}(x)$ the diagonal matrix of $x$
 """
 log(::Cholesky, ::Any...)
@@ -191,11 +191,11 @@ Parallely transport the tangent vector `v` at `x` along the geodesic to `y`
 on to the [`CholeskySpace`](@ref) manifold `M`. The formula reads
 
 ````math
-\mathcal 𝒫_{y←x}(v) = \lfloor v \rfloor
+𝒫_{y←x}(v) = ⌊ v ⌋
 + \operatorname{diag}(y)\operatorname{diag}(x)^{-1}\operatorname{diag}(v),
 ````
 
-where $\lfloor·\rfloor$ denotes the strictly lower triangular matrix,
+where $⌊·⌋$ denotes the strictly lower triangular matrix,
 and $\operatorname{diag}$ extracts the diagonal matrix.
 """
 vector_transport_to(::CholeskySpace, ::Any, ::Any, ::Any, ::ParallelTransport)

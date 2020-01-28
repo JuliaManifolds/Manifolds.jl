@@ -31,12 +31,12 @@ with respect to the [`LogCholeskyMetric`](@ref). The formula reads
 
 ````math
 d_{𝒫(n)}(x,y) = \sqrt{
- \lVert \lfloor l \rfloor - \lfloor k \rfloor \rVert_{\mathrm{F}}^2
+ \lVert ⌊ l ⌋ - ⌊ k ⌋ \rVert_{\mathrm{F}}^2
  + \lVert \log(\operatorname{diag}(l)) - \log(\operatorname{diag}(k))\rVert_{\mathrm{F}}^2 }\ \ ,
 ````
 
 where $l$ and $k$ are the cholesky factors of $x$ and $y$, respectively,
-$\lfloor·\rfloor$ denbotes the strictly lower triangular matrix of its argument,
+$⌊·⌋$ denbotes the strictly lower triangular matrix of its argument,
 and $\lVert·\rVert_{\mathrm{F}}$ denotes the Frobenius norm.
 """
 function distance(
