@@ -33,6 +33,11 @@ include("utils.jl")
             @test sprint(show, "text/plain", Mse2) == "ProductManifold with 4 submanifolds:\n $(M1)\n ⋮\n $(M2)"
         end
 
+        @test sprint(show, "text/plain", ProductManifold(Mse, Mse)) == """
+        ProductManifold with 2 submanifolds:
+         ProductManifold(Sphere(2), Euclidean(2; field = ℝ))
+         ProductManifold(Sphere(2), Euclidean(2; field = ℝ))"""
+
         shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M1)
         p = Manifolds.ProductArray(shape_se, Float64[1, 0, 0])
         @test sprint(show, "text/plain", p) == """
