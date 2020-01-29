@@ -8,7 +8,7 @@ The Stiefel manifold consists of all $n \times k$, $n\geq k$ orthonormal matrice
 ````
 
 where $𝔽 ∈ \{ℝ, ℂ\}$,
-$·^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
+$\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
 $I_n ∈ ℝ^{n\times n}$ denotes the $k \times k$ identity matrix.
 
 The tangent space at a point $x∈ ℳ$ is given by
@@ -41,7 +41,7 @@ Stiefel(n::Int, k::Int, F::AbstractNumbers = ℝ) = Stiefel{n,k,F}()
 
 Check whether `x` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$,
 i.e. that it has the right [`AbstractNumbers`](@ref) type and $x^{\mathrm{H}}x$
-is (approximatly) the identity, where $·^{\mathrm{H}}$ is the complex conjugate
+is (approximatly) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_manifold_point(M::Stiefel{n,k,T}, x; kwargs...) where {n,k,T}
@@ -126,7 +126,7 @@ $\operatorname{exp}_{x} v = \begin{pmatrix}
 \begin{pmatrix}  \exp( -x^{\mathrm{H}}v) \\ 0_n\end{pmatrix}$
 
 where $\exp$ denotes matrix exponential,
-$·^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and $I_k$ and
+$\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and $I_k$ and
 $0_k$ are the identity matrix and the zero matrix of dimension $k \times k$, respectively.
 """
 exp(::Stiefel, ::Any...)

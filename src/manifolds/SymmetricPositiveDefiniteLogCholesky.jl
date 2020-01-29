@@ -36,8 +36,8 @@ d_{𝒫(n)}(x,y) = \sqrt{
 ````
 
 where $l$ and $k$ are the cholesky factors of $x$ and $y$, respectively,
-$⌊·⌋$ denbotes the strictly lower triangular matrix of its argument,
-and $\lVert·\rVert_{\mathrm{F}}$ denotes the Frobenius norm.
+$⌊\cdot⌋$ denbotes the strictly lower triangular matrix of its argument,
+and $\lVert\cdot\rVert_{\mathrm{F}}$ denotes the Frobenius norm.
 """
 function distance(
     M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
@@ -59,7 +59,7 @@ Compute the exponential map on the [`SymmetricPositiveDefinite`](@ref) `M` with
 
 where $\exp_lw$ is the exponential map on [`CholeskySpace`](@ref), $l$ is the cholesky
 decomposition of $x$, $w = l(l^{-1}vl^{-\mathrm{T}})_\frac{1}{2}$,
-and $(·)_\frac{1}{2}$
+and $(\cdot)_\frac{1}{2}$
 denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$.
 """
 exp(::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
@@ -88,7 +88,7 @@ a [`MetricManifold`](@ref) with [`LogCholeskyMetric`](@ref). The formula reads
 
 where the right hand side is the inner product on the [`CholeskySpace`](@ref),
 $l$ is the cholesky factor of $x$,
-$p_l(w) = l (l^{-1}wl^{-\mathrm{T}})_{\frac{1}{2}}$, and $(·)_\frac{1}{2}$
+$p_l(w) = l (l^{-1}wl^{-\mathrm{T}})_{\frac{1}{2}}$, and $(\cdot)_\frac{1}{2}$
 denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$
 """
 function inner(
@@ -141,7 +141,7 @@ Parallely transport the tangent vector `v` at `x` along the geodesic to `y` with
 the [`SymmetricPositiveDefinite`](@ref) manifold `M` and [`LogCholeskyMetric`](@ref).
 The parallel transport is based on the parallel transport on [`CholeskySpace`](@ref):
 Let $l$ and $k$ denote the cholesky factors of `x` and `y`, respectively and
-$w = l(l^{-1}vl^{-\mathrm{T}})_\frac{1}{2}$, where $(·)_\frac{1}{2}$ denotes the lower
+$w = l(l^{-1}vl^{-\mathrm{T}})_\frac{1}{2}$, where $(\cdot)_\frac{1}{2}$ denotes the lower
 triangular matrix with the diagonal multiplied by $\frac{1}{2}$. With $u$ the parallel
 transport on [`CholeskySpace`](@ref) from $l$ to $k$. The formula hear reads
 

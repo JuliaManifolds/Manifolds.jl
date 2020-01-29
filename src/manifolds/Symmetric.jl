@@ -7,7 +7,7 @@ symmetric matrices of size $ n\times n$, i.e. the set
 ````math
 \operatorname{Sym}(n) = \bigl\{A  ∈ 𝔽^{n\times n} \big| A^{\mathrm{H}} = A \bigr\},
 ````
-where $·^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed
+where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed
 and the field $𝔽 ∈ \{ ℝ, ℂ\}$ is set by the
 [`AbstractNumbers`](@ref) `F`.
 
@@ -220,7 +220,7 @@ metric from the embedding, i.e.
 ````math
 (v,w)_x = \operatorname{tr}(v^{\mathrm{H}}w),
 ````
-where $·^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 @inline inner(M::SymmetricMatrices, x, w, v) = dot(w, v)
 
@@ -274,7 +274,7 @@ Projects `x` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
 \operatorname{proj}_{\operatorname{Sym}(n)}(x) = \frac{1}{2} \bigl( x + x^{\mathrm{H}} \bigr),
 ````
 
-where $·^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 project_point(::SymmetricMatrices, ::Any...)
 
@@ -289,7 +289,7 @@ Project the matrix `v` onto the tangent space at `x` on the [`SymmetricMatrices`
 \operatorname{proj}_x(v) = \frac{1}{2} \bigl( v + v^{\mathrm{H}} \bigr),
 ````
 
-where $·^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 project_tangent(::SymmetricMatrices, ::Any...)
 

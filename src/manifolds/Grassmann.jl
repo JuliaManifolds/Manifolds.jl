@@ -14,7 +14,7 @@ The manifold can be represented as
 : x ∈ 𝔽^{n \times k}, \bar{x}^\mathrm{T}x = I_k\},
 ````
 
-where ${\bar·}^{\mathrm{T}}$ denotes the complex conjugate transpose and
+where ${\bar\cdot}^{\mathrm{T}}$ denotes the complex conjugate transpose and
 $I_k$ is the $k \times k$ identity matrix. This means, that the columns of $x$
 form an orthonormal basis of the subspace, that is a point on
 $\operatorname{Gr}(n,k)$, and hence the subspace can actually be represented by
@@ -101,7 +101,7 @@ Check whether `v` is a tangent vector in the tangent space of `x` on the [`Grass
     x^{\mathrm{H}}v + v^{\mathrm{H}}x = 0_k,
 ````
 
-where $·^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and $0_k$
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and $0_k$
 denotes the $k \times k$ zero natrix.
 """
 function check_tangent_vector(G::Grassmann{n,k,F}, x, v; kwargs...) where {n,k,F}
@@ -139,7 +139,7 @@ end
 Compute the Riemannian distance on [`Grassmann`](@ref) manifold `M`$= \mathrm{Gr}(n,k)$.
 
 Let $USV = x^\mathrm{H}y$ denote the SVD decomposition of
-$x^\mathrm{H}y$, where $·^{\mathrm{H}}$ denotes the complex
+$x^\mathrm{H}y$, where $\cdot^{\mathrm{H}}$ denotes the complex
 conjugate transposed or Hermitian. Then the distance is given by
 ````math
 d_{\mathrm{GR}(n,k)}(x,y) = \operatorname{norm}(\operatorname{Re}(b)).
@@ -166,7 +166,7 @@ Then the exponential map is written using
 z = x V\cos(S)V^\mathrm{H} + U\sin(S)V^\mathrm{H},
 ````
 
-where $·^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 The cosine and sine are applied element wise to the diagonal entries of $S$.
 A final QR decomposition $z=QR$ is performed for numerical stability reasons,
 yielding the result as
@@ -197,7 +197,7 @@ The formula reads
 g_x(v,w) = \operatorname{trace}(v^{\mathrm{H}}w),
 ````
 
-where $·^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inner(::Grassmann, x, v, w) = dot(v, w)
 
@@ -211,7 +211,7 @@ Compute the inverse retraction for the [`PolarRetraction`](@ref), on the
 \operatorname{retr}_x^{-1}y = y*(x^\mathrm{H}y)^{-1} - x,
 ````
 
-where $·^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inverse_retract(M::Grassmann, ::Any, ::Any, ::PolarInverseRetraction)
 
@@ -227,7 +227,7 @@ Compute the inverse retraction valid of the [`QRRetraction`](@ref)
 ````math
 \operatorname{retr}_x^{-1}y = y*(x^\mathrm{H}y)^{-1} - x,
 ````
-where $·^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 
@@ -246,10 +246,10 @@ i.e. the tangent vector `v` whose corresponding [`geodesic`](@ref) starting from
 reaches `y` after time 1 on `M`. The formula reads
 
 ````math
-\log_xy = V· \operatorname{atan}(S) · U^\mathrm{H},
+\log_xy = V\cdot \operatorname{atan}(S) \cdot U^\mathrm{H},
 ````
 
-where $·^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 $U$ and $V$ are the unitary matrices, and $S$ is a diagonal matrix containing
 the singular values of the SVD-decomposition of
 ````math
@@ -314,7 +314,7 @@ which is computed by
 \operatorname{proj_x}(w) = w - xx^{\mathrm{H}}w,
 ````
 
-where $·^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 project_tangent(::Grassmann, ::Any...)
 
@@ -337,7 +337,7 @@ Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 \operatorname{retr}_x v = UV^\mathrm{H},
 ````
 
-where $·^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 
     retract(M::Grassmann, x, v, ::QRRetraction )
 

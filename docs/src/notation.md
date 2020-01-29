@@ -16,7 +16,7 @@ as long as that renders still in $\TeX$ within this documentation.
 | $\langle\cdot,\cdot\rangle$ | inner product (in $T_x \mathcal M$) | $\langle\cdot,\cdot\rangle_x, g_x(\cdot,\cdot)$ |
 | $\mathcal M$ | A manifold | $\mathcal M_1, \mathcal M_2,\ldots,\mathcal N$ | |
 | $\mathcal P_{y\gets x}X$ | parallel Transport |
-| $x$ | A point on $\mathcal M$ | $x_1,x_2,\ldots,y,z$ | |
+| $p$ | A point on $\mathcal M$ | $p_1,p_2,\ldots,q$ | |
 | $T_x \mathcal M$ | The tangent space at $x$ | | |
 | $X$ | A tangent vector from $T_x \mathcal M$ | $X_1,X_2,\ldots,Y,Z$ | sometimes with the base point in the index, $X_x$. |
 | $B$ | The Vector bundle | |

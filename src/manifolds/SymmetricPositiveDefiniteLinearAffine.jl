@@ -20,7 +20,7 @@ d_{𝒫(n)}(x,y)
 = \lVert \operatorname{Log}(x^{-\frac{1}{2}}yx^{-\frac{1}{2}})\rVert_{\mathrm{F}}.,
 ```
 where $\operatorname{Log}$ denotes the matrix logarithm and
-$\lVert·\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
+$\lVert\cdot\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
 """
 function distance(M::SymmetricPositiveDefinite{N}, x, y) where {N}
     s = real.(eigvals(x, y))

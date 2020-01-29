@@ -100,7 +100,7 @@ Compute the exponential map on the [`Circle`](@ref).
 ````math
 \exp_xv = (x+v)_{2\pi},
 ````
-where $(·)$ is the (symmetric) remainder with respect to division by $2\pi$,
+where $(\cdot)$ is the (symmetric) remainder with respect to division by $2\pi$,
 i.e. in $[-\pi,\pi)$.
 
 For the complex-valued case the formula is the same as for the [`Sphere`](@ref)
@@ -203,7 +203,7 @@ Compute the logarithmic map on the [`Circle`](@ref) `M`.
 ````math
 \exp_xv = (y,x)_{2\pi},
 ````
-where $(·)$ is the (symmetric) remainder with respect to division by $2\pi$,
+where $(\cdot)$ is the (symmetric) remainder with respect to division by $2\pi$,
 i.e. in $[-\pi,\pi)$.
 
 For the complex-valued case the formula is the same as for the [`Sphere`](@ref)

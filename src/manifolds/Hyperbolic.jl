@@ -10,7 +10,7 @@ vectors in $ℝ^{n+1}$ using the Minkowsi metric, i.e.
 + \displaystyle\sum_{k=1}^n x_k^2 = -1, x_{n+1} > 0\Bigr\},
 ```
 
-where $⟨·,·⟩_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref)
+where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref)
 is Minkowski inner product. The tangent space $T_x ℍ^n$ is given by
 
 ````math
@@ -106,7 +106,7 @@ Compute the distance on the [`Hyperbolic`](@ref) `M`, which reads
 d_{ℍ^n}(x,y) = \operatorname{acosh}( - ⟨x, y⟩_{\mathrm{M}}),
 ````
 
-where $⟨·,·⟩_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref).
+where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref).
 """
 distance(M::Hyperbolic, x, y) = acosh(max(-minkowski_dot(x, y), 1.0))
 
@@ -121,7 +121,7 @@ from `x` towards `v`, which is optionally scaled by `t`. The formula reads
 + \sinh(\sqrt{⟨v,v⟩_{\mathrm{M}}})\frac{v}{\sqrt{⟨v,v⟩_{\mathrm{M}}}},
 ````
 
-where $⟨·,·⟩_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref).
+where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref).
 """
 exp(::Hyperbolic, ::Any...)
 
@@ -225,7 +225,7 @@ The formula reads
 ````math
 w = v + ⟨x,v⟩_{\mathrm{M}} x,
 ````
-where $⟨·, ·⟩_{\mathrm{M}}$ denotes the Minkowski inner
+where $⟨\cdot, \cdot⟩_{\mathrm{M}}$ denotes the Minkowski inner
 product in the embedding, see [`minkowski_dot`](@ref).
 """
 project_tangent(::Hyperbolic, ::Any...)

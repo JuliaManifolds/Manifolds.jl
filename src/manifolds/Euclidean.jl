@@ -11,7 +11,7 @@ Generate the $n$-dimensional vector space $ℝ^n$.
 
     Euclidean(n₁,n₂,...,nᵢ; field=ℝ)
 
-Generate the vector space of $k=n_1n_2·… n_i$ values, i.e. the
+Generate the vector space of $k=n_1n_2\cdot… n_i$ values, i.e. the
 $𝔽^{n_1, n_2,…, n_d}$ whose
 elements are interpreted as $n_1 \times,n_2 \times … \times n_i$ arrays.
 For $d=2$ we obtain a matrix space.
@@ -140,7 +140,7 @@ For the special case of $i\leq 2$, i.e. matrices and vectors, this simplifies to
 ````math
 g_x(v,w) = w^{\mathrm{H}}v,
 ````
-where $·^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 inner(::Euclidean, ::Any...)
 @inline inner(::Euclidean, x, v, w) = dot(v, w)
