@@ -131,3 +131,22 @@ $\operatorname{Sym}(y) = \frac{y^{\mathrm{H}}+y}{2}$.
 project_tangent(::GeneralizedStiefel, ::Any...)
 
 project_tangent!(::GeneralizedStiefel, w, x, v) = copyto!(w, v - x * Symmetric(x' * v))
+
+
+@doc doc"""
+    manifold_dimension(M::GeneralizedStiefel)
+
+Return the dimension of the [`GeneralizedStiefel`](@ref) manifold `M`=$\operatorname{St}(n,k,B,𝔽)$.
+The dimension is given by
+
+````math
+\begin{aligned}
+\dim \mathrm{Stiefel}(n, k, ℝ) &= nk - \frac{1}{2}k(k+1) \\
+\dim \mathrm{Stiefel}(n, k, ℂ) &= 2nk - k^2\\
+\dim \mathrm{Stiefel}(n, k, ℍ) &= 4nk - k(2k-1)
+\end{aligned}
+````
+"""
+manifold_dimension(::GeneralizedStiefel{n,k,ℝ}) where {n,k} = n * k - div(k * (k + 1), 2)
+manifold_dimension(::GeneralizedStiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
+manifold_dimension(::GeneralizedStiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
