@@ -357,6 +357,18 @@ function _show_basis_vector_range(io::IO, vs, range; pre = "", sym = "E")
     return nothing
 end
 
+function _show_basis_vector_range_noheader(io::IO, vs; max_vectors = 4, pre = "", sym = "E")
+    nv = length(vs)
+    if nv ≤ max_vectors
+        _show_basis_vector_range(io, vs, 1:nv; pre = "  ", sym = " E")
+    else
+        halfn = div(max_vectors, 2)
+        _show_basis_vector_range(io, vs, 1:halfn; pre = "  ", sym = " E")
+        print(io, "\n ⋮")
+        _show_basis_vector_range(io, vs, (nv - halfn + 1):nv; pre = "  ", sym = " E")
+    end
+end
+
 function show(io::IO, ::ArbitraryOrthonormalBasis{F}) where {F}
     print(io, "ArbitraryOrthonormalBasis($(F))")
 end
@@ -378,14 +390,7 @@ function show(io::IO, mime::MIME"text/plain", onb::PrecomputedOrthonormalBasis)
         io,
         "PrecomputedOrthonormalBasis with coordinates in $(number_system(onb)) and $(nv) basis vector$(nv == 1 ? "" : "s"):",
     )
-    if nv ≤ 4
-        _show_basis_vector_range(io, onb.vectors, 1:nv; pre = "  ", sym = " E")
-    else
-        _show_basis_vector_range(io, onb.vectors, 1:2; pre = "  ", sym = " E")
-        print(io, "\n ⋮")
-        _show_basis_vector_range(io, onb.vectors, (nv-1):nv; pre = "  ", sym = " E")
-    end
-    return nothing
+    _show_basis_vector_range_noheader(io, onb.vectors; max_vectors = 4, pre = "  ", sym = " E")
 end
 function show(io::IO, mime::MIME"text/plain", onb::PrecomputedDiagonalizingOrthonormalBasis)
     nv = length(onb.vectors)
@@ -394,13 +399,7 @@ function show(io::IO, mime::MIME"text/plain", onb::PrecomputedDiagonalizingOrtho
         "PrecomputedDiagonalizingOrthonormalBasis with coordinates in $(number_system(onb)) and $(nv) basis vector$(nv == 1 ? "" : "s")",
     )
     print(io, "Basis vectors:")
-    if nv ≤ 4
-        _show_basis_vector_range(io, onb.vectors, 1:nv; pre = "  ", sym = " E")
-    else
-        _show_basis_vector_range(io, onb.vectors, 1:2; pre = "  ", sym = " E")
-        print(io, "\n ⋮")
-        _show_basis_vector_range(io, onb.vectors, (nv-1):nv; pre = "  ", sym = " E")
-    end
+    _show_basis_vector_range_noheader(io, onb.vectors; max_vectors = 4, pre = "  ", sym = " E")
     println(io, "\nEigenvalues:")
     sk = sprint(show, "text/plain", onb.kappas, context = io, sizehint = 0)
     sk = replace(sk, '\n' => "\n ")
