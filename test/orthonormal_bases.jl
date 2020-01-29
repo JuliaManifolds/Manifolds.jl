@@ -102,7 +102,7 @@ end
     @test sprint(show, ProjectedOrthonormalBasis(:gram_schmidt, ℂ)) == "ProjectedOrthonormalBasis(:gram_schmidt, ℂ)"
 
     @test sprint(show, "text/plain", DiagonalizingOrthonormalBasis(Float64[1, 2, 3])) == """
-    DiagonalizingOrthonormalBasis with coordinates in ℝ and 0 curvature in direction:
+    DiagonalizingOrthonormalBasis with coordinates in ℝ and eigenvalue 0 in direction:
     3-element Array{Float64,1}:
       1.0
       2.0

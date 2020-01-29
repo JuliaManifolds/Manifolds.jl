@@ -111,7 +111,7 @@ end
 
 A precomputed orthonormal basis `Ξ` as a vector of tangent vectors (of length determined
 by [`manifold_dimension`](@ref)) in the tangent space that diagonalizes the curvature
-tensor $R(u,v)w$ with eigenvalues `kappas` and where the direction `v` has curvature `0`.
+tensor $R(u,v)w$ with eigenvalues `kappas` and where the direction `v` has eigenvalue `0`.
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
@@ -378,7 +378,7 @@ end
 function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis)
     println(
         io,
-        "DiagonalizingOrthonormalBasis with coordinates in $(number_system(onb)) and 0 curvature in direction:",
+        "DiagonalizingOrthonormalBasis with coordinates in $(number_system(onb)) and eigenvalue 0 in direction:",
     )
     sk = sprint(show, "text/plain", onb.v, context = io, sizehint = 0)
     sk = replace(sk, '\n' => "\n ")
