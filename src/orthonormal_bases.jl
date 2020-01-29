@@ -365,7 +365,7 @@ function _show_basis_vector_range_noheader(io::IO, vs; max_vectors = 4, pre = ""
         halfn = div(max_vectors, 2)
         _show_basis_vector_range(io, vs, 1:halfn; pre = "  ", sym = " E")
         print(io, "\n ⋮")
-        _show_basis_vector_range(io, vs, (nv - halfn + 1):nv; pre = "  ", sym = " E")
+        _show_basis_vector_range(io, vs, (nv-halfn+1):nv; pre = "  ", sym = " E")
     end
 end
 
@@ -390,7 +390,13 @@ function show(io::IO, mime::MIME"text/plain", onb::PrecomputedOrthonormalBasis)
         io,
         "PrecomputedOrthonormalBasis with coordinates in $(number_system(onb)) and $(nv) basis vector$(nv == 1 ? "" : "s"):",
     )
-    _show_basis_vector_range_noheader(io, onb.vectors; max_vectors = 4, pre = "  ", sym = " E")
+    _show_basis_vector_range_noheader(
+        io,
+        onb.vectors;
+        max_vectors = 4,
+        pre = "  ",
+        sym = " E",
+    )
 end
 function show(io::IO, mime::MIME"text/plain", onb::PrecomputedDiagonalizingOrthonormalBasis)
     nv = length(onb.vectors)
@@ -399,7 +405,13 @@ function show(io::IO, mime::MIME"text/plain", onb::PrecomputedDiagonalizingOrtho
         "PrecomputedDiagonalizingOrthonormalBasis with coordinates in $(number_system(onb)) and $(nv) basis vector$(nv == 1 ? "" : "s")",
     )
     print(io, "Basis vectors:")
-    _show_basis_vector_range_noheader(io, onb.vectors; max_vectors = 4, pre = "  ", sym = " E")
+    _show_basis_vector_range_noheader(
+        io,
+        onb.vectors;
+        max_vectors = 4,
+        pre = "  ",
+        sym = " E",
+    )
     println(io, "\nEigenvalues:")
     sk = sprint(show, "text/plain", onb.kappas, context = io, sizehint = 0)
     sk = replace(sk, '\n' => "\n ")
