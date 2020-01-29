@@ -206,3 +206,22 @@ d_{\mathcal N} = \lvert E \rVert d_{\mathcal M}.
 function manifold_dimension(M::EdgeGraphManifold)
     return manifold_dimension(M.manifold) * ne(M.graph)
 end
+
+function _show_graph_manifold(io::IO, M; man_desc = "", pre = "")
+    println(io, "GraphManifold\nGraph:")
+    sg = sprint(show, "text/plain", M.graph, context = io, sizehint = 0)
+    sg = replace(sg, '\n' => "\n$(pre)")
+    println(io, pre, sg)
+    println(io, "Manifold$(man_desc):")
+    sm = sprint(show, "text/plain", M.manifold, context = io, sizehint = 0)
+    sm = replace(sm, '\n' => "\n$(pre)")
+    print(io, pre, sm)
+    return nothing
+end
+
+function show(io::IO, mime::MIME"text/plain", M::EdgeGraphManifold)
+    _show_graph_manifold(io, M; man_desc = " on edges", pre = " ")
+end
+function show(io::IO, mime::MIME"text/plain", M::VertexGraphManifold)
+    _show_graph_manifold(io, M; man_desc = " on vertices", pre = " ")
+end
