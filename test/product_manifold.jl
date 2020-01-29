@@ -1,7 +1,7 @@
 include("utils.jl")
 
 @testset "Product manifold" begin
-    @test_throws MethodError PowerManifold()
+    @test_throws MethodError ProductManifold()
     M1 = Sphere(2)
     M2 = Euclidean(2)
     Mse = ProductManifold(M1, M2)
