@@ -150,3 +150,18 @@ The dimension is given by
 manifold_dimension(::GeneralizedStiefel{n,k,ℝ}) where {n,k} = n * k - div(k * (k + 1), 2)
 manifold_dimension(::GeneralizedStiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
 manifold_dimension(::GeneralizedStiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
+
+
+@doc doc"""
+    inner(M::GeneralizedStiefel, x, v, w)
+
+Compute the inner product for two tangent vectors `v`, `w` from the
+tangent space of `x` on the [`GeneralizedStiefel`](@ref) manifold `M`. The formula reads
+
+````math
+(v,w)_x = \operatorname{trace}(v^{\mathrm{H}}Bw),
+````
+i.e. the metric induced by the scalar product `B` from the embedding, restricted to the tangent
+space.
+"""
+inner(M::GeneralizedStiefel, x, v, w) = dot(v, M.B * w)
