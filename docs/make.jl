@@ -4,7 +4,7 @@ makedocs(
     # for development, we disable prettyurls
     format = Documenter.HTML(prettyurls = false),
     modules = [Manifolds, ManifoldsBase],
-    sitename = "Manifolds",
+    sitename = "Manifolds.jl",
     pages = [
         "Home" => "index.md",
         "ManifoldsBase.jl" => "interface.md",
