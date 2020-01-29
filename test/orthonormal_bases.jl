@@ -94,3 +94,92 @@ struct NonBasis <: Manifolds.AbstractBasis{ℝ} end
         @test_throws ArgumentError get_basis(A, pts[1], PrecomputedOrthonormalBasis([2*pts[1], pts[1], pts[1]]))
     end
 end
+
+@testset "Basis show methods" begin
+    @test sprint(show, ArbitraryOrthonormalBasis()) == "ArbitraryOrthonormalBasis(ℝ)"
+    @test sprint(show, ArbitraryOrthonormalBasis(ℂ)) == "ArbitraryOrthonormalBasis(ℂ)"
+    @test sprint(show, ProjectedOrthonormalBasis(:svd)) == "ProjectedOrthonormalBasis(:svd, ℝ)"
+    @test sprint(show, ProjectedOrthonormalBasis(:gram_schmidt, ℂ)) == "ProjectedOrthonormalBasis(:gram_schmidt, ℂ)"
+
+    @test sprint(show, "text/plain", DiagonalizingOrthonormalBasis(Float64[1, 2, 3])) == """
+    DiagonalizingOrthonormalBasis with coordinates in ℝ and 0 curvature in direction:
+    3-element Array{Float64,1}:
+      1.0
+      2.0
+      3.0"""
+
+    M = Euclidean(2, 3)
+    x = collect(reshape(1.0:6.0, (2, 3)))
+    pb = get_basis(M, x, ArbitraryOrthonormalBasis())
+    @test sprint(show, "text/plain", pb) == """
+    PrecomputedOrthonormalBasis with coordinates in ℝ and 6 basis vectors:
+     E1 =
+      2×3 Array{Float64,2}:
+       1.0  0.0  0.0
+       0.0  0.0  0.0
+     E2 =
+      2×3 Array{Float64,2}:
+       0.0  0.0  0.0
+       1.0  0.0  0.0
+     ⋮
+     E5 =
+      2×3 Array{Float64,2}:
+       0.0  0.0  1.0
+       0.0  0.0  0.0
+     E6 =
+      2×3 Array{Float64,2}:
+       0.0  0.0  0.0
+       0.0  0.0  1.0"""
+
+    dpb = PrecomputedDiagonalizingOrthonormalBasis(pb.vectors, Float64[1, 2, 3, 4, 5, 6])
+    @test sprint(show, "text/plain", dpb) == """
+    PrecomputedDiagonalizingOrthonormalBasis with coordinates in ℝ and 6 basis vectors
+    Basis vectors:
+     E1 =
+      2×3 Array{Float64,2}:
+       1.0  0.0  0.0
+       0.0  0.0  0.0
+     E2 =
+      2×3 Array{Float64,2}:
+       0.0  0.0  0.0
+       1.0  0.0  0.0
+     ⋮
+     E5 =
+      2×3 Array{Float64,2}:
+       0.0  0.0  1.0
+       0.0  0.0  0.0
+     E6 =
+      2×3 Array{Float64,2}:
+       0.0  0.0  0.0
+       0.0  0.0  1.0
+    Eigenvalues:
+     6-element Array{Float64,1}:
+      1.0
+      2.0
+      3.0
+      4.0
+      5.0
+      6.0"""
+
+    M = Euclidean(1, 1, 1)
+    x = reshape(Float64[1], (1, 1, 1))
+    pb = get_basis(M, x, ArbitraryOrthonormalBasis())
+    @test sprint(show, "text/plain", pb) == """
+    PrecomputedOrthonormalBasis with coordinates in ℝ and 1 basis vector:
+     E1 =
+      1×1×1 Array{Float64,3}:
+      [:, :, 1] =
+       1.0"""
+
+   dpb = PrecomputedDiagonalizingOrthonormalBasis(pb.vectors, Float64[1])
+   @test sprint(show, "text/plain", dpb) == """
+   PrecomputedDiagonalizingOrthonormalBasis with coordinates in ℝ and 1 basis vector
+   Basis vectors:
+    E1 =
+     1×1×1 Array{Float64,3}:
+     [:, :, 1] =
+      1.0
+   Eigenvalues:
+    1-element Array{Float64,1}:
+     1.0"""
+end

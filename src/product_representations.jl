@@ -267,15 +267,37 @@ end
 
 number_eltype(::Type{ProductArray{TM,TData,TV}}) where {TM,TData,TV} = eltype(TData)
 
-function show(io::IO, mime::MIME"text/plain", x::ProductArray)
-    summary(io, x)
-    println(io)
-    print(io, "\nSubmanifold components:")
-    for xi in x.parts
-        println(io)
-        show(io, mime, xi)
+function _show_component(io::IO, v; pre = "", head = "")
+    sx = sprint(show, "text/plain", v, context = io, sizehint = 0)
+    sx = replace(sx, '\n' => "\n$(pre)")
+    print(io, head, pre, sx)
+end
+
+function _show_component_range(io::IO, vs, range; pre = "", sym = "Component ")
+    for i in range
+        _show_component(io, vs[i]; pre = pre, head = "\n$(sym)$(i) =\n")
     end
     return nothing
+end
+
+function _show_product_repr(io::IO, x; name = "Product representation", nmax = 4)
+    n = length(x.parts)
+    print(io, "$(name) with $(n) submanifold component$(n == 1 ? "" : "s"):")
+    half_nmax = div(nmax, 2)
+    pre = "  "
+    sym = " Component "
+    if n ≤ nmax
+        _show_component_range(io, x.parts, 1:n; pre = pre, sym = sym)
+    else
+        _show_component_range(io, x.parts, 1:half_nmax; pre = pre, sym = sym)
+        print(io, "\n ⋮")
+        _show_component_range(io, x.parts, (n-half_nmax+1):n; pre = pre, sym = sym)
+    end
+    return nothing
+end
+
+function show(io::IO, ::MIME"text/plain", x::ProductArray)
+    _show_product_repr(io, x; name = "ProductArray")
 end
 
 function allocate(x::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
@@ -342,12 +364,6 @@ function Base.convert(::Type{TPR}, x::ProductRepr) where {TPR<:ProductRepr}
     ))
 end
 
-function show(io::IO, mime::MIME"text/plain", x::ProductRepr)
-    summary(io, x)
-    print(io, "\nSubmanifold components:")
-    for xi in x.parts
-        println(io)
-        show(io, mime, xi)
-    end
-    return nothing
+function show(io::IO, ::MIME"text/plain", x::ProductRepr)
+    _show_product_repr(io, x; name = "ProductRepr")
 end

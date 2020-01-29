@@ -344,38 +344,65 @@ function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,�
     return PrecomputedOrthonormalBasis(Ξ)
 end
 
+function _show_basis_vector(io::IO, v; pre = "", head = "")
+    sx = sprint(show, "text/plain", v, context = io, sizehint = 0)
+    sx = replace(sx, '\n' => "\n$(pre)")
+    print(io, head, pre, sx)
+end
+
+function _show_basis_vector_range(io::IO, vs, range; pre = "", sym = "E")
+    for i in range
+        _show_basis_vector(io, vs[i]; pre = pre, head = "\n$(sym)$(i) =\n")
+    end
+    return nothing
+end
+
 function show(io::IO, ::ArbitraryOrthonormalBasis{F}) where {F}
     print(io, "ArbitraryOrthonormalBasis($(F))")
 end
 function show(io::IO, ::ProjectedOrthonormalBasis{method,F}) where {method,F}
-    print(io, "ProjectedOrthonormalBasis($(method), $(F))")
+    print(io, "ProjectedOrthonormalBasis($(repr(method)), $(F))")
 end
 function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis)
     println(
         io,
-        "DiagonalizingOrthonormalBasis with scalars in $(number_system(onb)) and 0 curvature in direction:",
+        "DiagonalizingOrthonormalBasis with coordinates in $(number_system(onb)) and 0 curvature in direction:",
     )
-    show(io, mime, onb.v)
+    sk = sprint(show, "text/plain", onb.v, context = io, sizehint = 0)
+    sk = replace(sk, '\n' => "\n ")
+    print(io, sk)
 end
 function show(io::IO, mime::MIME"text/plain", onb::PrecomputedOrthonormalBasis)
-    println(io, "PrecomputedOrthonormalBasis with scalars in $(number_system(onb))")
-    print(io, "Basis vectors:")
-    for v in onb.vectors
-        println(io)
-        show(io, mime, v)
+    nv = length(onb.vectors)
+    print(
+        io,
+        "PrecomputedOrthonormalBasis with coordinates in $(number_system(onb)) and $(nv) basis vector$(nv == 1 ? "" : "s"):",
+    )
+    if nv ≤ 4
+        _show_basis_vector_range(io, onb.vectors, 1:nv; pre = "  ", sym = " E")
+    else
+        _show_basis_vector_range(io, onb.vectors, 1:2; pre = "  ", sym = " E")
+        print(io, "\n ⋮")
+        _show_basis_vector_range(io, onb.vectors, (nv-1):nv; pre = "  ", sym = " E")
     end
     return nothing
 end
 function show(io::IO, mime::MIME"text/plain", onb::PrecomputedDiagonalizingOrthonormalBasis)
+    nv = length(onb.vectors)
     println(
         io,
-        "PrecomputedDiagonalizingOrthonormalBasis with scalars in $(number_system(onb))",
+        "PrecomputedDiagonalizingOrthonormalBasis with coordinates in $(number_system(onb)) and $(nv) basis vector$(nv == 1 ? "" : "s")",
     )
-    println(io, "Basis vectors:")
-    for v in onb.vectors
-        show(io, mime, v)
-        println(io)
+    print(io, "Basis vectors:")
+    if nv ≤ 4
+        _show_basis_vector_range(io, onb.vectors, 1:nv; pre = "  ", sym = " E")
+    else
+        _show_basis_vector_range(io, onb.vectors, 1:2; pre = "  ", sym = " E")
+        print(io, "\n ⋮")
+        _show_basis_vector_range(io, onb.vectors, (nv-1):nv; pre = "  ", sym = " E")
     end
-    println(io, "Eigenvalues:")
-    show(io, mime, onb.kappas)
+    println(io, "\nEigenvalues:")
+    sk = sprint(show, "text/plain", onb.kappas, context = io, sizehint = 0)
+    sk = replace(sk, '\n' => "\n ")
+    print(io, ' ', sk)
 end
