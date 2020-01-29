@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     TranslationGroup{T<:Tuple,F} <: GroupManifold{Euclidean{T,F},AdditionOperation}
 
 Translation group $\mathrm{T}(n)$ represented by translation arrays.

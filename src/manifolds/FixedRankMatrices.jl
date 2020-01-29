@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     FixedRankMatrices{m,n,k,T} <: Manifold
 
 The manifold of $m \times n$ real-valued (complex-valued) matrices of fixed rank $k$, i.e.
@@ -46,7 +46,7 @@ function FixedRankMatrices(m::Int, n::Int, k::Int, t::AbstractNumbers = ℝ)
     return FixedRankMatrices{m,n,k,t}()
 end
 
-@doc doc"""
+@doc raw"""
     SVDMPoint <: MPoint
 
 A point on a certain manifold, where the data is stored in a svd like fashion,
@@ -77,7 +77,7 @@ SVDMPoint(S::SVD, k::Int) = SVDMPoint(S.U, S.S, S.Vt, k)
 SVDMPoint(U, S, Vt, k::Int) = SVDMPoint(U[:, 1:k], S[1:k], Vt[1:k, :])
 ==(x::SVDMPoint, y::SVDMPoint) = (x.U == y.U) && (x.S == y.S) && (x.Vt == y.Vt)
 
-@doc doc"""
+@doc raw"""
     UMVTVector <: TVector
 
 A tangent vector that can be described as a product $UMV^\mathrm{T}$, at least
@@ -107,7 +107,7 @@ UMVTVector(U, M, Vt, k::Int) = UMVTVector(U[:, 1:k], M[1:k, 1:k], Vt[1:k, :])
 +(v::UMVTVector) = UMVTVector(v.U, v.M, v.Vt)
 ==(v::UMVTVector, w::UMVTVector) = (v.U == w.U) && (v.M == w.M) && (v.Vt == w.Vt)
 
-@doc doc"""
+@doc raw"""
     check_manifold_point(M::FixedRankMatrices{m,n,k},x; kwargs...)
 
 Check whether the matrix or [`SVDMPoint`](@ref) `x` ids a valid point on the
@@ -156,7 +156,7 @@ function check_manifold_point(
     return nothing
 end
 
-@doc doc"""
+@doc raw"""
     check_tangent_vector(M:FixedRankMatrices{m,n,k}, x, v)
 
 Check whether the tangent [`UMVTVector`](@ref) `v` is from the tangent space of
@@ -193,7 +193,7 @@ function check_tangent_vector(
     end
 end
 
-@doc doc"""
+@doc raw"""
     inner(M::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector)
 
 Compute the inner product of `v` and `w` in the tangent space of `x` on the
@@ -221,7 +221,7 @@ function isapprox(
     )
 end
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(M::FixedRankMatrices{m,n,k,𝔽})
 
 Return the manifold dimension for the `𝔽`-valued [`FixedRankMatrices`](@ref) `M`
@@ -237,7 +237,7 @@ function manifold_dimension(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽}
     return (m + n - k) * k * real_dimension(𝔽)
 end
 
-@doc doc"""
+@doc raw"""
     project_tangent(M, x, A)
     project_tangent(M, x, v)
 
@@ -277,7 +277,7 @@ function project_tangent!(
     return project_tangent!(M, vto, x, v.U * v.M * v.Vt)
 end
 
-@doc doc"""
+@doc raw"""
     representation_size(M::FixedRankMatrices{m,n,k})
 
 Return the element size of a point on the [`FixedRankMatrices`](@ref) `M`, i.e.
@@ -285,7 +285,7 @@ the size of matrices on this manifold $(m,n)$.
 """
 @generated representation_size(::FixedRankMatrices{m,n}) where {m,n} = (m, n)
 
-@doc doc"""
+@doc raw"""
     retract(M, x, v, ::PolarRetraction)
 
 Compute an SVD-based retraction on the [`FixedRankMatrices`](@ref) `M` by computing
@@ -350,7 +350,7 @@ function copyto!(v::UMVTVector, w::UMVTVector)
     return v
 end
 
-@doc doc"""
+@doc raw"""
     zero_tangent_vector(M::FixedRankMatrices, x::SVDMPoint)
 
 Return a [`UMVTVector`](@ref) representing the zero tangent vector in the tangent space of

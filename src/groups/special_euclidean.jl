@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     SpecialEuclidean(n)
 
 Special Euclidean group $\mathrm{SE}(n)$, the group of rigid motions.

@@ -14,7 +14,7 @@ struct CyclicProximalPointEstimation <: AbstractEstimationMethod end
 
 _unit_weights(n::Int) = ProbabilityWeights(ones(n), n)
 
-@doc doc"""
+@doc raw"""
     GeodesicInterpolation <: AbstractEstimationMethod
 
 Repeated weighted geodesic interpolation method for estimating the Riemannian
@@ -112,7 +112,7 @@ struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
     end
 end
 
-@doc doc"""
+@doc raw"""
     mean(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
 Compute the (optionally weighted) Riemannian center of mass also known as
@@ -189,7 +189,7 @@ function mean(
     return mean!(M, y, x, w, method...; kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     mean!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights]; kwargs...)
     mean!(
         M::Manifold,
@@ -380,7 +380,7 @@ function mean!(
     return y
 end
 
-@doc doc"""
+@doc raw"""
     median(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
 Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
@@ -456,7 +456,7 @@ function median(
     return median!(M, y, x, w, method...; kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     median!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights]; kwargs...)
     median!(
         M::Manifold,
@@ -518,7 +518,7 @@ function median!(
     return y
 end
 
-@doc doc"""
+@doc raw"""
     var(M, x, m=mean(M, x); corrected=true, kwargs...)
     var(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false, kwargs...)
 
@@ -553,7 +553,7 @@ function var(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
 end
 var(M::Manifold, x::AbstractVector; kwargs...) = mean_and_var(M, x; kwargs...)[2]
 
-@doc doc"""
+@doc raw"""
     std(M, x, m=mean(M, x); corrected=true, kwargs...)
     std(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false, kwargs...)
 
@@ -570,7 +570,7 @@ can be activated by setting `corrected=true`.
 """
 std(M::Manifold, args...; kwargs...) = sqrt(var(M, args...; kwargs...))
 
-@doc doc"""
+@doc raw"""
     mean_and_var(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...) -> (mean, var)
 
 Compute the [`mean`](@ref mean(::Manifold, args...)) and the [`var`](@ref)iance
@@ -613,7 +613,7 @@ function mean_and_var(
     return mean_and_var(M, x, w, method...; corrected = corrected, kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     mean_and_var(
         M::Manifold,
         x::AbstractVector
@@ -725,7 +725,7 @@ function mean_and_var(
     return y, v
 end
 
-@doc doc"""
+@doc raw"""
     mean_and_std(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...) -> (mean, std)
 
 Compute the [`mean`](@ref mean(::Manifold, args...)) and the standard deviation

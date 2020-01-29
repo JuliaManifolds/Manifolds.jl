@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     RotationAction(
         M::Manifold,
         SOn::SpecialOrthogonal,

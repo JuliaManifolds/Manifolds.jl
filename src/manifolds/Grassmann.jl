@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     Grassmann{n,k,F} <: Manifold
 
 The Grassmann manifold $\operatorname{Gr}(n,k)$ consists of all subspaces spanned
@@ -57,7 +57,7 @@ struct Grassmann{n,k,F} <: Manifold end
 
 Grassmann(n::Int, k::Int, F::AbstractNumbers = ℝ) = Grassmann{n,k,F}()
 
-@doc doc"""
+@doc raw"""
     check_manifold_point(M::Grassmann{n,k,F}, x)
 
 Check whether `x` is representing a point on the [`Grassmann`](@ref) `M`, i.e. its
@@ -91,7 +91,7 @@ function check_manifold_point(M::Grassmann{n,k,F}, x; kwargs...) where {n,k,F}
     end
 end
 
-@doc doc"""
+@doc raw"""
     check_tangent_vector(M::Grassmann{n,k,F}, x, v)
 
 Check whether `v` is a tangent vector in the tangent space of `x` on the [`Grassmann`](@ref)
@@ -133,7 +133,7 @@ function check_tangent_vector(G::Grassmann{n,k,F}, x, v; kwargs...) where {n,k,F
     end
 end
 
-@doc doc"""
+@doc raw"""
     distance(M::Grassmann, x, y)
 
 Compute the Riemannian distance on [`Grassmann`](@ref) manifold `M`$= \mathrm{Gr}(n,k)$.
@@ -155,7 +155,7 @@ function distance(M::Grassmann, x, y)
     return sqrt(sum((acos.(a)) .^ 2))
 end
 
-@doc doc"""
+@doc raw"""
     exp(M::Grassmann, x, v)
 
 Compute the exponential map on the [`Grassmann`](@ref) `M`$= \mathrm{Gr}(n,k)$ starting in
@@ -186,7 +186,7 @@ end
 
 injectivity_radius(::Grassmann) = π / 2
 
-@doc doc"""
+@doc raw"""
     inner(M::Grassmann, x, v, w)
 
 Compute the inner product for two tangent vectors `v`, `w` from the
@@ -201,7 +201,7 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 inner(::Grassmann, x, v, w) = dot(v, w)
 
-@doc doc"""
+@doc raw"""
     inverse_retract(M::Grassmann, x, y, ::PolarInverseRetraction)
 
 Compute the inverse retraction for the [`PolarRetraction`](@ref), on the
@@ -219,7 +219,7 @@ function inverse_retract!(::Grassmann, v, x, y, ::PolarInverseRetraction)
     return copyto!(v, y / (x' * y) - x)
 end
 
-@doc doc"""
+@doc raw"""
     inverse_retract(M, x, y, ::QRInverseRetraction)
 
 Compute the inverse retraction valid of the [`QRRetraction`](@ref)
@@ -238,7 +238,7 @@ function isapprox(M::Grassmann, x, v, w; kwargs...)
 end
 isapprox(M::Grassmann, x, y; kwargs...) = isapprox(distance(M, x, y), 0.0; kwargs...)
 
-@doc doc"""
+@doc raw"""
     log(M::Grassmann, x, y)
 
 Compute the logarithmic map on the [`Grassmann`](@ref) `M`$ = ℳ=\mathrm{Gr}(n,k)$,
@@ -267,7 +267,7 @@ function log!(M::Grassmann, v, x, y)
     return copyto!(v, d.U * Diagonal(atan.(d.S)) * d.Vt)
 end
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(M::Grassmann)
 
 Return the dimension of the [`Grassmann(n,k,𝔽)`](@ref) manifold `M`, i.e.
@@ -304,7 +304,7 @@ function mean!(
     return mean!(M, y, x, w, GeodesicInterpolationWithinRadius(π / 4); kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     project_tangent(M::Grassmann, x, w)
 
 Project the `n`-by-`k` `w` onto the tangent space of `x` on the [`Grassmann`](@ref) `M`,
@@ -320,7 +320,7 @@ project_tangent(::Grassmann, ::Any...)
 
 project_tangent!(M::Grassmann, v, x, w) = copyto!(v, w - x * x' * w)
 
-@doc doc"""
+@doc raw"""
     representation_size(M::Grassmann{n,k,F})
 
 Return the represenation size or matrix dimension of a point on the [`Grassmann`](@ref)
@@ -328,7 +328,7 @@ Return the represenation size or matrix dimension of a point on the [`Grassmann`
 """
 @generated representation_size(::Grassmann{n,k}) where {n,k} = (n, k)
 
-@doc doc"""
+@doc raw"""
     retract(M::Grassmann, x, v, ::PolarRetraction)
 
 Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
@@ -366,7 +366,7 @@ function retract!(::Grassmann{N,K}, y, x, v, ::QRRetraction) where {N,K}
     return copyto!(y, Array(qrfac.Q) * D)
 end
 
-@doc doc"""
+@doc raw"""
     zero_tangent_vector(M::Grassmann, x)
 
 Return the zero tangent vector from the tangent space at `x` on the [`Grassmann`](@ref) `M`,

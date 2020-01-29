@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     Circle{F} <: Manifold
 
 The circle $𝕊^1$ as a manifold ere manifold represented by
@@ -16,7 +16,7 @@ struct Circle{F} <: Manifold where {F<:AbstractNumbers} end
 
 Circle(f::AbstractNumbers = ℝ) = Circle{f}()
 
-@doc doc"""
+@doc raw"""
     check_manifold_point(M::Circle, p)
 
 Check whether `p` is a point on the [`Circle`](@ref) `M`.
@@ -71,7 +71,7 @@ function check_tangent_vector(M::Circle{ℂ}, p, X; kwargs...)
     return nothing
 end
 
-@doc doc"""
+@doc raw"""
     complex_dot(a, b)
 
 Compute the inner product of two (complex) numbers with in the complex plane.
@@ -79,7 +79,7 @@ Compute the inner product of two (complex) numbers with in the complex plane.
 complex_dot(a, b) = dot(map(real, a), map(real, b)) + dot(map(imag, a), map(imag, b))
 complex_dot(a::Number, b::Number) = (real(a) * real(b) + imag(a) * imag(b))
 
-@doc doc"""
+@doc raw"""
     distance(M::Circle, p, q)
 
 Compute the distance on the [`Circle`](@ref) `M`, which is
@@ -92,7 +92,7 @@ distance(::Circle{ℝ}, p::Real, q::Real) = abs(sym_rem(p - q))
 distance(::Circle{ℝ}, p, q) = abs(sum(sym_rem.(p - q)))
 distance(::Circle{ℂ}, p, q) = acos(clamp(complex_dot(p, q), -1, 1))
 
-@doc doc"""
+@doc raw"""
     exp(M::Circle, p, X)
 
 Compute the exponential map on the [`Circle`](@ref).
@@ -156,14 +156,14 @@ Return tangent vector from the coordinates in the Lie algebra of the circle.
 """
 get_vector(M::Circle{ℂ}, p, X, B::ArbitraryOrthonormalBasis) = @SVector [1im * X[1] * p[1]]
 
-@doc doc"""
+@doc raw"""
     injectivity_radius(M::Circle[, p])
 
 Return the injectivity radius on the [`Circle`](@ref) `M`, i.e. $\pi$.
 """
 injectivity_radius(::Circle, args...) = π
 
-@doc doc"""
+@doc raw"""
     inner(M::Circle, p, X, Y)
 
 Compute the inner product of the two tangent vectors `X,Y` from the tangent plane at `p` on
@@ -194,7 +194,7 @@ function inverse_retract(M::Circle, x::Number, y::Number, ::LogarithmicInverseRe
     return log(M, x, y)
 end
 
-@doc doc"""
+@doc raw"""
     log(M::Circle, p, q)
 
 Compute the logarithmic map on the [`Circle`](@ref) `M`.
@@ -237,7 +237,7 @@ function log!(M::Circle{ℂ}, X, p, q)
     return project_tangent!(M, X, p, X)
 end
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(M::Circle)
 
 Return the dimension of the [`Circle`](@ref) `M`,
@@ -245,7 +245,7 @@ i.e. $\operatorname{dim}(𝕊^1) = 1$.
 """
 manifold_dimension(::Circle) = 1
 
-@doc doc"""
+@doc raw"""
     mean(M::Circle, x::AbstractVector[, w::AbstractWeights])
 
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` of points on the [`Circle`](@ref) $𝕊^1$,
@@ -257,7 +257,7 @@ mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...) = sym_rem(sum(w .
 
 @inline norm(::Circle, p, X) = sum(abs, X)
 
-@doc doc"""
+@doc raw"""
     project_point(M::Circle, p)
 
 Project a point `p` onto the [`Circle`](@ref) `M`.
@@ -272,7 +272,7 @@ project_point(::Circle{ℂ}, p::Number) = p / abs(p)
 project_point!(::Circle{ℝ}, p) = (p .= sym_rem(p))
 project_point!(::Circle{ℂ}, p) = (p .= p / sum(abs.(p)))
 
-@doc doc"""
+@doc raw"""
     project_tangent(M::Circle, p, X)
 
 Project a value `X` onto the tangent space of the point `p` on the [`Circle`](@ref) `M`.
@@ -296,7 +296,7 @@ sharp(M::Circle, p::Number, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
 
 sharp!(M::Circle, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
-@doc doc"""
+@doc raw"""
     sym_rem(x,[T=π])
 
 Compute symmetric remainder of `x` with respect to the interall 2*`T`, i.e.
@@ -307,7 +307,7 @@ function sym_rem(x::N, T = π) where {N<:Number}
 end
 sym_rem(x, T=π) where N = map(sym_rem, x, Ref(T))
 
-@doc doc"""
+@doc raw"""
     vector_transport_to(M::Circle, p, X, q, ::ParallelTransport)
 
 Compute the parallel transport of `X` from the tangent space at `p` to the tangent space at

@@ -16,7 +16,7 @@ end
 const SemidirectProductGroup{N,H,A} =
     GroupManifold{ProductManifold{Tuple{N,H}},SemidirectProductOperation{A}}
 
-@doc doc"""
+@doc raw"""
     SemidirectProductGroup(N::GroupManifold, H::GroupManifold, A::AbstractGroupAction)
 
 A group that is the semidirect product of a normal group $N$ and a subgroup $H$, written

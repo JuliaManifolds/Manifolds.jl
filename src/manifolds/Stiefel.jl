@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     Stiefel{n,k,T} <: Manifold
 
 The Stiefel manifold consists of all $n \times k$, $n\geq k$ orthonormal matrices, i.e.
@@ -36,7 +36,7 @@ struct Stiefel{n,k,F} <: Manifold end
 
 Stiefel(n::Int, k::Int, F::AbstractNumbers = ℝ) = Stiefel{n,k,F}()
 
-@doc doc"""
+@doc raw"""
     check_manifold_point(M::Stiefel, x; kwargs...)
 
 Check whether `x` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$,
@@ -72,7 +72,7 @@ function check_manifold_point(M::Stiefel{n,k,T}, x; kwargs...) where {n,k,T}
     end
 end
 
-@doc doc"""
+@doc raw"""
     check_tangent_vector(M::Stiefel, x, v; kwargs...)
 
 Check whether `v` is a valid tangent vector at `x` on the [`Stiefel`](@ref)
@@ -109,7 +109,7 @@ function check_tangent_vector(M::Stiefel{n,k,T}, x, v; kwargs...) where {n,k,T}
     end
 end
 
-@doc doc"""
+@doc raw"""
     exp(M, x, v)
 
 Compute the exponential map on the [`Stiefel`](@ref)`{n,k,T}`() manifold `M`
@@ -140,7 +140,7 @@ function exp!(M::Stiefel{n,k}, y, x, v) where {n,k}
     )
 end
 
-@doc doc"""
+@doc raw"""
     inner(M::Stiefel, x, v, w)
 
 Compute the inner product for two tangent vectors `v`, `w` from the
@@ -154,7 +154,7 @@ space. For the complex-valued case this is the Hermitian metric, to be precise.
 """
 inner(::Stiefel, x, v, w) = dot(v, w)
 
-@doc doc"""
+@doc raw"""
     inverse_retract(M::Stiefel, x, y, ::PolarInverseRetraction)
 
 Compute the inverse retraction based on a singular value decomposition
@@ -214,7 +214,7 @@ function isapprox(M::Stiefel, x, v, w; kwargs...)
 end
 isapprox(M::Stiefel, x, y; kwargs...) = isapprox(norm(x - y), 0; kwargs...)
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(M::Stiefel)
 
 Return the dimension of the [`Stiefel`](@ref) manifold `M`=$\operatorname{St}(n,k,𝔽)$.
@@ -230,7 +230,7 @@ manifold_dimension(::Stiefel{n,k,ℝ}) where {n,k} = n * k - div(k * (k + 1), 2)
 manifold_dimension(::Stiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
 manifold_dimension(::Stiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
 
-@doc doc"""
+@doc raw"""
     project_tangent(M, x, v)
 
 Project `v` onto the tangent space of `x` to the [`Stiefel`](@ref) manifold `M`.
@@ -247,7 +247,7 @@ project_tangent(::Stiefel, ::Any...)
 
 project_tangent!(::Stiefel, w, x, v) = copyto!(w, v - x * Symmetric(x' * v))
 
-@doc doc"""
+@doc raw"""
     retract(M, x, v, ::PolarRetraction)
 
 Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
@@ -286,7 +286,7 @@ function retract!(::Stiefel, y, x, v, ::QRRetraction)
     return copyto!(y, Matrix(qrfac.Q) * D)
 end
 
-@doc doc"""
+@doc raw"""
     representation_size(M::Stiefel)
 
 Returns the representation size of the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$,
@@ -294,7 +294,7 @@ i.e. `(n,k)`, which is the matrix dimensions.
 """
 @generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
 
-@doc doc"""
+@doc raw"""
     zero_tangent_vector(M::Stiefel, x)
 
 Returns the zero tangent vector from the tangent space at `x` on the [`Stiefel`](@ref)

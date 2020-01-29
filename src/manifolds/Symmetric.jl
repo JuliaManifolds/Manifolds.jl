@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     SymmetricMatrices{n,F} <: Manifold
 
 The [`Manifold`](@ref) $ \operatorname{Sym} (n)$ consisting of the real- or complex-valued
@@ -23,7 +23,7 @@ struct SymmetricMatrices{n,F} <: Manifold end
 
 SymmetricMatrices(n::Int, F::AbstractNumbers = ℝ) = SymmetricMatrices{n,F}()
 
-@doc doc"""
+@doc raw"""
     check_manifold_point(M::SymmetricMatrices{n,F}, x; kwargs...)
 
 Check whether `x` is a valid manifold point on the [`SymmetricMatrices`](@ref) `M`, i.e.
@@ -99,7 +99,7 @@ function check_tangent_vector(M::SymmetricMatrices{n,F}, x, v; kwargs...) where 
     return nothing
 end
 
-@doc doc"""
+@doc raw"""
     distance(M::SymmetricMatrices, x, y)
 
 Compute distance using the inherited metric, i.e. taking the Frobenius-norm of the
@@ -107,7 +107,7 @@ difference.
 """
 distance(M::SymmetricMatrices, x, y) = norm(x - y)
 
-@doc doc"""
+@doc raw"""
     exp(M::SymmetricMatrices, x, v)
 
 Compute the exponential map eminating from `x` in tangent direction `v` on the
@@ -121,7 +121,7 @@ exp(::SymmetricMatrices, ::Any...)
 
 exp!(M::SymmetricMatrices, y, x, v) = (y .= x .+ v)
 
-@doc doc"""
+@doc raw"""
     flat(M::SymmetricMatrices, x, w::FVector{TangentSpaceType})
 
 Compute the [`flat`](@ref flat(M::Manifold, x, w::FVector)) isomorphism of the
@@ -211,7 +211,7 @@ function get_vector(
     return vout
 end
 
-@doc doc"""
+@doc raw"""
     inner(M::SymmetricMatrices, x, w, v)
 
 Compute the inner product of the two tangent vectors `w`, `v` from the tangent
@@ -224,7 +224,7 @@ where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transpo
 """
 @inline inner(M::SymmetricMatrices, x, w, v) = dot(w, v)
 
-@doc doc"""
+@doc raw"""
     log(M::SymmetricMatrices, x, y)
 Compute the logarithmic map from `x` to `y` on the [`SymmetricMatrices`](@ref) `M`, which
 reads
@@ -237,7 +237,7 @@ log(::SymmetricMatrices, ::Any...)
 
 log!(M::SymmetricMatrices, v, x, y) = (v .= y .- x)
 
-@doc doc"""
+@doc raw"""
 manifold_dimension(M::SymmetricMatrices{n,𝔽})
 
 Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the number system
@@ -253,7 +253,7 @@ function manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}
     return div(N * (N + 1), 2) * real_dimension(𝔽)
 end
 
-@doc doc"""
+@doc raw"""
     norm(M::SymmetricMatrices, x, v)
 
 Compute the norm of the tangent vector `v` from the tangent space at `x` on the
@@ -265,7 +265,7 @@ Compute the norm of the tangent vector `v` from the tangent space at `x` on the
 """
 norm(M::SymmetricMatrices, x, v) = norm(v)
 
-@doc doc"""
+@doc raw"""
     project_point(M::SymmetricMatrices,x)
 
 Projects `x` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
@@ -280,7 +280,7 @@ project_point(::SymmetricMatrices, ::Any...)
 
 project_point!(M::SymmetricMatrices, x) = (x .= (x + transpose(x)) ./ 2)
 
-@doc doc"""
+@doc raw"""
     project_tangent(M::SymmetricMatrices, x, v)
 
 Project the matrix `v` onto the tangent space at `x` on the [`SymmetricMatrices`](@ref) `M`,
@@ -295,7 +295,7 @@ project_tangent(::SymmetricMatrices, ::Any...)
 
 project_tangent!(M::SymmetricMatrices, w, x, v) = (w .= (v .+ transpose(v)) ./ 2)
 
-@doc doc"""
+@doc raw"""
     representation_size(M::SymmetricMatrices)
 
 Returns the size points on the [`SymmetricMatrices`](@ref) `M` are represented as, i.e.
@@ -303,7 +303,7 @@ for the $n\times n$ it's `(n,n)`.
 """
 @generated representation_size(::SymmetricMatrices{N}) where {N} = (N, N)
 
-@doc doc"""
+@doc raw"""
     sharp(M::SymmetricMatrices, x, w::FVector{CotangentSpaceType})
 
 Compute the [`sharp`](@ref sharp(M::Manifold, x, w::FVector)) isomorphism of the
@@ -315,7 +315,7 @@ sharp(::SymmetricMatrices, ::Any...)
 
 sharp!(M::SymmetricMatrices, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
-@doc doc"""
+@doc raw"""
     vector_transport_to(M::SymmetricMatrices, x, v, y, ::ParallelTransport)
 
 Compute the parallel
@@ -333,7 +333,7 @@ function vector_transport_to!(M::SymmetricMatrices, vto, x, v, y, ::ParallelTran
     return copyto!(vto, v)
 end
 
-@doc doc"""
+@doc raw"""
     zero_tangent_vector(M, x)
 
 Return the zero tangent vector for the tangent space at `x` on the

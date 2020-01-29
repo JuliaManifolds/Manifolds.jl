@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     GroupOperationAction(group::AbstractGroupManifold, AD::ActionDirection = LeftAction())
 
 Action of a group upon itself via left or right translation.

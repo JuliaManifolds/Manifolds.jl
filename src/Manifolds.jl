@@ -108,7 +108,7 @@ Abstract type for defining statistical estimation methods.
 """
 abstract type AbstractEstimationMethod end
 
-@doc doc"""
+@doc raw"""
     hat(M::Manifold, x, vⁱ)
 
 Given a basis $e_i$ on the tangent space at a point $x$ and tangent
@@ -133,7 +133,7 @@ function hat!(M::Manifold, v, x, vⁱ)
     error("hat! operator not defined for manifold $(typeof(M)), array $(typeof(v)), point $(typeof(x)), and vector $(typeof(vⁱ))")
 end
 
-@doc doc"""
+@doc raw"""
     vee(M::Manifold, x, v)
 
 Given a basis $e_i$ on the tangent space at a point $x$ and tangent

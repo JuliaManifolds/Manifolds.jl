@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     LogEuclideanMetric <: Metric
 
 The LogEuclidean Metric consists of the Euclidean metric applied to all elements after mapping them
@@ -6,7 +6,7 @@ into the Lie Algebra, i.e. performing a matrix logarithm beforehand.
 """
 struct LogEuclideanMetric <: RiemannianMetric end
 
-@doc doc"""
+@doc raw"""
     distance(M::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric}, x, y)
 
 Compute the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between

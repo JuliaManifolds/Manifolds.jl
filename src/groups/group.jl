@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     AbstractGroupOperation
 
 Abstract type for smooth binary operations $∘$ on elements of a Lie group $G$:
@@ -21,7 +21,7 @@ Note that a manifold is connected with an operation by wrapping it with a decora
 """
 abstract type AbstractGroupOperation end
 
-@doc doc"""
+@doc raw"""
     AbstractGroupManifold{<:AbstractGroupOperation} <: Manifold
 
 Abstract type for a Lie group, a group that is also a smooth manifold with an
@@ -187,7 +187,7 @@ switch_direction(::RightAction) = LeftAction()
 # General Identity element methods
 ##################################
 
-@doc doc"""
+@doc raw"""
     Identity(G::AbstractGroupManifold)
 
 The group identity element $e ∈ G$.
@@ -233,7 +233,7 @@ end
 # Group-specific functions
 ##########################
 
-@doc doc"""
+@doc raw"""
     inv(G::AbstractGroupManifold, x)
 
 Inverse $x^{-1} ∈ G$ of an element $x ∈ G$, such that
@@ -249,7 +249,7 @@ function inv(G::AbstractGroupManifold, x)
     return inv!(G, y, x)
 end
 
-@doc doc"""
+@doc raw"""
     inv!(G::AbstractGroupManifold, y, x)
 
 Inverse $x^{-1} ∈ G$ of an element $x ∈ G$, such that
@@ -262,7 +262,7 @@ function inv!(M::Manifold, y, x, ::Val{false})
     return error("inv! not implemented on $(typeof(M)) for points $(typeof(x))")
 end
 
-@doc doc"""
+@doc raw"""
     identity(G::AbstractGroupManifold, x)
 
 Identity element $e ∈ G$, such that for any element $x ∈ G$, $x \circ e = e \circ x = x$.
@@ -312,7 +312,7 @@ function isapprox(G::GT, e::Identity{GT}, x; kwargs...) where {GT<:GroupManifold
 end
 isapprox(::GT, ::E, ::E; kwargs...) where {GT<:GroupManifold,E<:Identity{GT}} = true
 
-@doc doc"""
+@doc raw"""
     compose(G::AbstractGroupManifold, x, y)
 
 Compose elements $x,y ∈ G$ using the group operation $x \circ y$.
@@ -336,7 +336,7 @@ end
 _action_order(x, y, conv::LeftAction) = (x, y)
 _action_order(x, y, conv::RightAction) = (y, x)
 
-@doc doc"""
+@doc raw"""
     translate(G::AbstractGroupManifold, x, y[, conv::ActionDirection=LeftAction()])
 
 For group elements $x,y ∈ G$, translate $y$ by $x$ with the specified convention, either
@@ -362,7 +362,7 @@ function translate(G::AbstractGroupManifold, x, y, conv::ActionDirection)
     return compose(G, _action_order(x, y, conv)...)
 end
 
-@doc doc"""
+@doc raw"""
     translate!(G::AbstractGroupManifold, z, x, y[, conv::ActionDirection=LeftAction()])
 
 For group elements $x,y ∈ G$, translate $y$ by $x$ with the specified convention, either
@@ -389,7 +389,7 @@ function translate!(G::AbstractGroupManifold, z, x, y, conv::ActionDirection)
     return compose!(G, z, _action_order(x, y, conv)...)
 end
 
-@doc doc"""
+@doc raw"""
     inverse_translate(G::AbstractGroupManifold, x, y, [conv::ActionDirection=Left()])
 
 For group elements $x,y ∈ G$, inverse translate $y$ by $x$ with the specified convention,
@@ -415,7 +415,7 @@ function inverse_translate(G::AbstractGroupManifold, x, y, conv::ActionDirection
     return translate(G, inv(G, x), y, conv)
 end
 
-@doc doc"""
+@doc raw"""
     inverse_translate!(G::AbstractGroupManifold, z, x, y, [conv::ActionDirection=Left()])
 
 For group elements $x,y ∈ G$, inverse translate $y$ by $x$ with the specified convention,
@@ -442,7 +442,7 @@ function inverse_translate!(G::AbstractGroupManifold, z, x, y, conv::ActionDirec
     return translate!(G, z, inv(G, x), y, conv)
 end
 
-@doc doc"""
+@doc raw"""
     translate_diff(G::AbstractGroupManifold, x, y, v[, conv::ActionDirection=LeftAction()])
 
 For group elements $x,y ∈ G$ and tangent vector $v ∈ T_y G$, compute the action of the
@@ -485,7 +485,7 @@ function translate_diff!(M::Manifold, vout, x, y, v, conv::ActionDirection, ::Va
     return error("translate_diff! not implemented on $(typeof(M)) for elements $(typeof(vout)), $(typeof(x)) and $(typeof(y)), vector $(typeof(v)), and direction $(typeof(conv))")
 end
 
-@doc doc"""
+@doc raw"""
     inverse_translate_diff(G::AbstractGroupManifold, x, y, v[, conv::ActionDirection=Left()])
 
 For group elements $x,y ∈ G$ and tangent vector $v ∈ T_y G$, compute the inverse of the

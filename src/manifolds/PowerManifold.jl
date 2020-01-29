@@ -29,7 +29,7 @@ Each element of such array stores a single point or tangent vector.
 """
 struct NestedPowerRepresentation <: AbstractPowerRepresentation end
 
-@doc doc"""
+@doc raw"""
     AbstractPowerManifold{M,TPR} <: Manifold
 
 An abstract [`Manifold`](@ref) to represent manifolds that are build as powers
@@ -38,7 +38,7 @@ of another [`Manifold`](@ref) `M` with representation type `TPR`, a subtype of
 """
 abstract type AbstractPowerManifold{M<:Manifold,TPR<:AbstractPowerRepresentation} <: Manifold end
 
-@doc doc"""
+@doc raw"""
     PowerManifold{TM<:Manifold, TSize<:Tuple, TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{TM}
 
 The power manifold $ℳ^{n_1\times n_2 \times … \times n_d}$ with power geometry
@@ -76,7 +76,7 @@ function PowerManifold(M::Manifold, ::TPR, size::Int...) where TPR<:AbstractPowe
     PowerManifold{typeof(M), Tuple{size...}, TPR}(M)
 end
 
-@doc doc"""
+@doc raw"""
     PowerMetric <: Metric
 
 Represent the [`Metric`](@ref) on an [`AbstractPowerManifold`](@ref), i.e. the inner
@@ -231,7 +231,7 @@ function det_local_metric(
     return result
 end
 
-@doc doc"""
+@doc raw"""
     distance(M::AbstractPowerManifold, x, y)
 
 Compute the distance between `x` and `y` on an [`AbstractPowerManifold`](@ref),
@@ -250,7 +250,7 @@ function distance(M::AbstractPowerManifold, x, y)
     return sqrt(sum_squares)
 end
 
-@doc doc"""
+@doc raw"""
     exp(M::AbstractPowerManifold, x, v)
 
 Compute the exponential map from `x` in direction `v` on the [`AbstractPowerManifold`](@ref) `M`,
@@ -271,7 +271,7 @@ function exp!(M::AbstractPowerManifold, y, x, v)
     return y
 end
 
-@doc doc"""
+@doc raw"""
     flat(M::AbstractPowerManifold, x, w::FVector{TangentSpaceType})
 
 use the musical isomorphism to transform the tangent vector `w` from the tangent space at
@@ -369,7 +369,7 @@ function get_vector(M::AbstractPowerManifold, x, v, B::ArbitraryOrthonormalBasis
     return v_out
 end
 
-@doc doc"""
+@doc raw"""
     injectivity_radius(M::AbstractPowerManifold[, x])
 
 the injectivity radius on an [`AbstractPowerManifold`](@ref) is for the global case
@@ -393,7 +393,7 @@ function injectivity_radius(M::AbstractPowerManifold, x)
 end
 injectivity_radius(M::AbstractPowerManifold) = injectivity_radius(M.manifold)
 
-@doc doc"""
+@doc raw"""
     inverse_retract(M::AbstractPowerManifold, x, y, m::InversePowerRetraction)
 
 Compute the inverse retraction from `x` with respect to `y` on an [`AbstractPowerManifold`](@ref) `M`
@@ -417,7 +417,7 @@ function inverse_retract!(M::AbstractPowerManifold, v, x, y, method::InversePowe
     return v
 end
 
-@doc doc"""
+@doc raw"""
     inner(M::AbstractPowerManifold, x, v, w)
 
 Compute the inner product of `v` and `w` from the tangent space at `x` on an
@@ -470,7 +470,7 @@ function isapprox(M::AbstractPowerManifold, x, v, w; kwargs...)
     return result
 end
 
-@doc doc"""
+@doc raw"""
     log(M::AbstractPowerManifold, x, y)
 
 Compute the logarithmic map from `x` to `y` on the [`AbstractPowerManifold`](@ref) `M`,
@@ -492,7 +492,7 @@ function log!(M::AbstractPowerManifold, v, x, y)
 end
 
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(M::PowerManifold)
 
 Returns the manifold-dimension of an [`PowerManifold`](@ref) `M`
@@ -508,7 +508,7 @@ function manifold_dimension(M::PowerManifold{<:Manifold,TSize}) where {TSize}
     return manifold_dimension(M.manifold) * prod(size_to_tuple(TSize))
 end
 
-@doc doc"""
+@doc raw"""
     norm(M::AbstractPowerManifold, x, v)
 
 Compute the norm of `v` from the tangent space of `x` on an
@@ -579,7 +579,7 @@ function representation_size(M::PowerManifold{<:Manifold,TSize}) where {TSize}
     return (representation_size(M.manifold)..., size_to_tuple(TSize)...)
 end
 
-@doc doc"""
+@doc raw"""
     retract(M::AbstractPowerManifold, x, v, m::PowerRetraction)
 
 Compute the retraction from `x` with tangent vector `v` on an [`AbstractPowerManifold`](@ref) `M`
@@ -603,7 +603,7 @@ function retract!(M::AbstractPowerManifold, y, x, v, method::PowerRetraction)
     return y
 end
 
-@doc doc"""
+@doc raw"""
     sharp(M::AbstractPowerManifold, x, w::FVector{CotangentSpaceType})
 
 Use the musical isomorphism to transform the cotangent vector `w` from the tangent space at

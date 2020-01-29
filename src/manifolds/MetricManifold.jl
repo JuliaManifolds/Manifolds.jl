@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     Metric
 
 Abstract type for the pseudo-Riemannian metric tensor $g$, a family of smoothly
@@ -28,7 +28,7 @@ struct MetricManifold{M<:Manifold,G<:Metric} <: Manifold
     metric::G
 end
 
-@doc doc"""
+@doc raw"""
     LorentzMetric <: Metric
 
 Abstract type for Lorentz metrics, which have a single time dimension. These
@@ -37,7 +37,7 @@ giving the signature $(++...+-)$.
 """
 abstract type LorentzMetric <: Metric end
 
-@doc doc"""
+@doc raw"""
     RiemannianMetric <: Metric
 
 Abstract type for Riemannian metrics, a family of positive definite inner
@@ -54,7 +54,7 @@ function check_tangent_vector(M::MetricManifold, x, v; kwargs...)
     return check_tangent_vector(M.manifold, x, v; kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     christoffel_symbols_first(M::MetricManifold, x; backend=:default)
 
 Compute the Christoffel symbols of the first kind in local coordinates.
@@ -74,7 +74,7 @@ function christoffel_symbols_first(M::MetricManifold, x; backend = :default)
     return Γ
 end
 
-@doc doc"""
+@doc raw"""
     christoffel_symbols_second(M::MetricManifold, x; backend=:default)
 
 Compute the Christoffel symbols of the second kind in local coordinates.
@@ -94,7 +94,7 @@ function christoffel_symbols_second(M::MetricManifold, x; backend = :default)
     return Γ₂
 end
 
-@doc doc"""
+@doc raw"""
     christoffel_symbols_second_jacobian(M::MetricManifold, x; backend = :default)
 
 Get partial derivatives of the Christoffel symbols of the second kind
@@ -114,7 +114,7 @@ function christoffel_symbols_second_jacobian(M::MetricManifold, x; backend = :de
     return ∂Γ
 end
 
-@doc doc"""
+@doc raw"""
     det_local_metric(M::MetricManifold, x)
 
 Return the determinant of local matrix representation of the metric tensor $g$.
@@ -135,7 +135,7 @@ function einstein_tensor(M::MetricManifold, x; backend = :default)
     return G
 end
 
-@doc doc"""
+@doc raw"""
     exp(N::MetricManifold{M,G}, x, v)
 
 Copute the exponential map on the [`Manifold`](@ref) `M` equipped with the [`Metric`](@ref) `G`.
@@ -184,7 +184,7 @@ function exp!(M::MMT, ::Val{false}, y, x, v) where {MMT<:MetricManifold}
     return copyto!(y, sol.u[1][n+1:end])
 end
 
-@doc doc"""
+@doc raw"""
     flat(N::MetricManifold{M,G}, x, w::FVector{TangentSpaceType})
 
 Compute the musical isomorphism to transform the tangent vector `w` from the
@@ -228,7 +228,7 @@ function injectivity_radius(M::MMT, args...) where {MMT<:MetricManifold}
     return injectivity_radius(base_manifold(M), args...)
 end
 
-@doc doc"""
+@doc raw"""
     inverse_local_metric(M::MetricManifold, x)
 
 Return the local matrix representation of the inverse metric (cometric) tensor, usually
@@ -276,7 +276,7 @@ function _convert_with_default(M::MT, T::Type{<:Metric}, ::Val{false}) where {MT
     error("Can not convert $(M) to a MetricManifold{$(MT),$(T)}, since $(T) is not the default metric.")
 end
 
-@doc doc"""
+@doc raw"""
     inner(N::MetricManifold{M,G}, x, v, w)
 
 Compute the inner product of `v`, `w` from the tangent space at `x` on the
@@ -306,7 +306,7 @@ function inner(
     return dot(v, ginv * w)
 end
 
-@doc doc"""
+@doc raw"""
     local_metric(M::MetricManifold, x)
 
 Return the local matrix representation at the point `x` of the metric tensor $g$ on the
@@ -318,7 +318,7 @@ function local_metric(M::MetricManifold, x)
     error("Local metric not implemented on $(typeof(M)) for point $(typeof(x))")
 end
 
-@doc doc"""
+@doc raw"""
     local_metric_jacobian(M::MetricManifold, x; backend=:default)
 
 Get partial derivatives of the local metric of `M` at `x` with respect to the
@@ -339,7 +339,7 @@ function log!(M::MMT, ::Val{false}, w, x, y) where {MMT<:MetricManifold}
     error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(x)) and $(typeof(y)).")
 end
 
-@doc doc"""
+@doc raw"""
     log_local_metric_density(M::MetricManifold, x)
 
 Return the natural logarithm of the metric density $\rho$ of `M` at `x`, which
@@ -407,7 +407,7 @@ function median!(
     return median!(M, y, x, w, CyclicProximalPointEstimation(); kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     metric(M::MetricManifold)
 
 Get the metric $g$ of the manifold `M`.
@@ -489,7 +489,7 @@ function ricci_tensor(M::MetricManifold, x; kwargs...)
     return Ric
 end
 
-@doc doc"""
+@doc raw"""
     riemann_tensor(M::MetricManifold, x)
 
 Compute the Riemann tensor $R^l_{ijk}$, also known as the Riemann curvature
@@ -506,7 +506,7 @@ function riemann_tensor(M::MetricManifold, x; backend = :default)
     return R
 end
 
-@doc doc"""
+@doc raw"""
     sharp(N::MetricManifold{M,G}, x, w::FVector{CotangentSpaceType})
 
 Compute the musical isomorphism to transform the cotangent vector `w` from the
@@ -527,7 +527,7 @@ function sharp!(M::N, v::TFVector, x, w::CoTFVector) where {N<:MetricManifold}
     return v
 end
 
-@doc doc"""
+@doc raw"""
     solve_exp_ode(
         M::MetricManifold,
         x,

@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     LinearAffineMetric <: Metric
 
 The linear affine metric is the metric for symmetric positive definite matrices, that employs
@@ -8,7 +8,7 @@ struct LinearAffineMetric <: RiemannianMetric end
 
 is_default_metric(::SymmetricPositiveDefinite, ::LinearAffineMetric) = Val(true)
 
-@doc doc"""
+@doc raw"""
     distance(M::SymmetricPositiveDefinite, x, y)
     distance(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric})
 
@@ -27,7 +27,7 @@ function distance(M::SymmetricPositiveDefinite{N}, x, y) where {N}
     return any(s .<= eps()) ? 0 : sqrt(sum(abs.(log.(s)) .^ 2))
 end
 
-@doc doc"""
+@doc raw"""
     exp(M::SymmetricPositiveDefinite, x, v)
     exp(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, x, v)
 
@@ -59,7 +59,7 @@ function exp!(M::SymmetricPositiveDefinite{N}, y, x, v) where {N}
     return copyto!(y, xue * Se * transpose(xue))
 end
 
-@doc doc"""
+@doc raw"""
     [Ξ,κ] = get_basis(M::SymmetricPositiveDefinite, x, B::DiagonalizingOrthonormalBasis)
     [Ξ,κ] = get_basis(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, x, B::DiagonalizingOrthonormalBasis)
 
@@ -150,7 +150,7 @@ function get_vector(
     return get_vector(base_manifold(M), x, v, B)
 end
 
-@doc doc"""
+@doc raw"""
     inner(M::SymmetricPositiveDefinite, x, v, w)
     inner(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, x, v, w)
 
@@ -167,7 +167,7 @@ function inner(M::SymmetricPositiveDefinite, x, v, w)
     return tr((F \ Symmetric(v)) * (F \ Symmetric(w)))
 end
 
-@doc doc"""
+@doc raw"""
     log(M::SymmetricPositiveDefinite, x, y)
     log(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, x, y)
 
@@ -197,7 +197,7 @@ function log!(M::SymmetricPositiveDefinite{N}, v, x, y) where {N}
     return mul!(v, xue, Se * transpose(xue))
 end
 
-@doc doc"""
+@doc raw"""
     vector_transport_to(M::SymmetricPositiveDefinite, x, v, y, ::ParallelTransport)
     vector_transport_to(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, x, v, y, ::ParallelTransport)
 

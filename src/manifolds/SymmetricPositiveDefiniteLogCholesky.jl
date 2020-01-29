@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     LogCholeskyMetric <: Metric
 
 The Log-Cholesky metric imposes a metric based on the Cholesky decomposition as
@@ -22,7 +22,7 @@ function spd_to_cholesky(x, l, v)
     return (l, l * (LowerTriangular(w) - Diagonal(w) / 2))
 end
 
-@doc doc"""
+@doc raw"""
     distance(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, x, y)
 
 Compute the distance on the manifold of [`SymmetricPositiveDefinite`](@ref)
@@ -47,7 +47,7 @@ function distance(
     return distance(CholeskySpace{N}(), cholesky(x).L, cholesky(y).L)
 end
 
-@doc doc"""
+@doc raw"""
     exp(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, x, v)
 
 Compute the exponential map on the [`SymmetricPositiveDefinite`](@ref) `M` with
@@ -75,7 +75,7 @@ function exp!(
     return copyto!(y, z * z')
 end
 
-@doc doc"""
+@doc raw"""
     inner(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, x, v, w)
 
 Compute the inner product of two matrices `v`, `w` in the tangent space of `x`
@@ -102,7 +102,7 @@ function inner(
     return inner(CholeskySpace{N}(), l, vl, wl)
 end
 
-@doc doc"""
+@doc raw"""
     log(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, x, y)
 
 Compute the logarithmic map on [`SymmetricPositiveDefinite`](@ref) `M` with
@@ -128,7 +128,7 @@ function log!(
     return tangent_cholesky_to_tangent_spd!(l, v)
 end
 
-@doc doc"""
+@doc raw"""
     vector_transport_to(
         M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric},
         x,

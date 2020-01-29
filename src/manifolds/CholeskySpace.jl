@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     CholeskySpace{N} <: Manifold
 
 The manifold of lower triangular matrices with positive diagonal and
@@ -19,7 +19,7 @@ struct CholeskySpace{N} <: Manifold end
 
 CholeskySpace(n::Int) = CholeskySpace{n}()
 
-@doc doc"""
+@doc raw"""
     check_manifold_point(M::CholeskySpace, p; kwargs...)
 
 Check whether the matrix `p` lies on the [`CholeskySpace`](@ref) `M`, i.e.
@@ -75,7 +75,7 @@ function check_tangent_vector(M::CholeskySpace, p, X; kwargs...)
     return nothing
 end
 
-@doc doc"""
+@doc raw"""
     distance(M::CholeskySpace, p, q)
 
 Compute the Riemannian distance on the [`CholeskySpace`](@ref) `M` between two
@@ -95,7 +95,7 @@ function distance(::CholeskySpace, p, q)
     )
 end
 
-@doc doc"""
+@doc raw"""
     exp(M::CholeskySpace, p, X)
 
 Compute the exponential map on the [`CholeskySpace`](@ref) `M` eminating from the lower
@@ -121,7 +121,7 @@ function exp!(::CholeskySpace, q, p, X)
     return q
 end
 
-@doc doc"""
+@doc raw"""
     inner(M::CholeskySpace, p, X, Y)
 
 Compute the inner product on the [`CholeskySpace`](@ref) `M` at the
@@ -140,7 +140,7 @@ function inner(::CholeskySpace, p, X, Y)
     )
 end
 
-@doc doc"""
+@doc raw"""
     log(M::CholeskySpace, X, p, q)
 
 Compute the logarithmic map on the [`CholeskySpace`](@ref) `M` for the geodesic eminating
@@ -164,14 +164,14 @@ function log!(::CholeskySpace, X, p, q)
     )
 end
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(M::CholeskySpace)
 
 Return the manifold dimension for the [`CholeskySpace`](@ref) `M`, i.e. $\frac{N(N+1)}{2}$.
 """
 @generated manifold_dimension(::CholeskySpace{N}) where {N} = div(N * (N + 1), 2)
 
-@doc doc"""
+@doc raw"""
     reporesentation_size(M::CholeskySpace)
 
 Return the representation size for the [`CholeskySpace`](@ref)`{N}` `M`, i.e. `(N,N)`.
@@ -183,7 +183,7 @@ strictlyLowerTriangular(p) = LowerTriangular(p) - Diagonal(diag(p))
 
 strictlyUpperTriangular(p) = UpperTriangular(p) - Diagonal(diag(p))
 
-@doc doc"""
+@doc raw"""
     vector_transport_to(M::CholeskySpace, p, X, q, ::ParallelTransport)
 
 Parallely transport the tangent vector `X` at `p` along the geodesic to `q`
@@ -206,7 +206,7 @@ function vector_transport_to!(::CholeskySpace, Y, p, X, q, ::ParallelTransport)
     )
 end
 
-@doc doc"""
+@doc raw"""
     zero_tangent_vector(M::CholeskySpace, p)
 
 Return the zero tangent vector on the [`CholeskySpace`](@ref) `M` at `p`.

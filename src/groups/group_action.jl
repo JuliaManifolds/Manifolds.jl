@@ -28,7 +28,7 @@ Get the direction of the action
 """
 direction(::AbstractGroupAction{AD}) where {AD} = AD()
 
-@doc doc"""
+@doc raw"""
     apply(A::AbstractGroupAction, a, x)
 
 Apply action `a` to the point `x`. The action is specified by `A`.
@@ -79,7 +79,7 @@ function inverse_apply!(A::AbstractGroupAction, y, a, x)
     return apply!(A, y, inva, x)
 end
 
-@doc doc"""
+@doc raw"""
     apply_diff(A::AbstractGroupAction, a, x, v)
 
 For group point $x ∈ ℳ$ and tangent vector $v ∈ T_x ℳ$, compute the action of the
@@ -102,7 +102,7 @@ function apply_diff!(A::AbstractGroupAction, vout, a, x, v)
     return error("apply_diff! not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(x)), vectors $(typeof(vout)) and $(typeof(v))")
 end
 
-@doc doc"""
+@doc raw"""
     inverse_apply_diff(A::AbstractGroupAction, a, x, v)
 
 For group point $x ∈ ℳ$ and tangent vector $v ∈ T_x ℳ$, compute the action of the
@@ -131,7 +131,7 @@ compose(A::AbstractGroupAction{RightAction}, a, b) = compose(base_group(A), b, a
 compose!(A::AbstractGroupAction{LeftAction}, y, a, b) = compose!(base_group(A), y, a, b)
 compose!(A::AbstractGroupAction{RightAction}, y, a, b) = compose!(base_group(A), y, b, a)
 
-@doc doc"""
+@doc raw"""
     optimal_alignment(A::AbstractGroupAction, x1, x2)
 
 Calculate an action element of action `A` that acts upon `x1` to produce
@@ -156,7 +156,7 @@ function optimal_alignment!(A::AbstractGroupAction, y, x1, x2)
     return copyto!(y, optimal_alignment(A, x1, x2))
 end
 
-@doc doc"""
+@doc raw"""
     center_of_orbit(
         A::AbstractGroupAction,
         pts,

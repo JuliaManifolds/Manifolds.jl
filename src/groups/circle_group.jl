@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     CircleGroup <: GroupManifold{Circle{ℂ},MultiplicationOperation}
 
 The circle group is the complex circle ([`Circle(ℂ)`](@ref)) equipped with

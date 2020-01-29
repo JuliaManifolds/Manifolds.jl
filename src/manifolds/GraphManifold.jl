@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     GraphManifoldType
 
 This type represents the type of data on the graph that the [`GraphManifold`](@ref)
@@ -6,21 +6,21 @@ represents.
 """
 abstract type GraphManifoldType end
 
-@doc doc"""
+@doc raw"""
     EdgeManifoldManifold <: GraphManifoldType
 
 A type for a [`GraphManifold`](@ref) where the data is given on the edges.
 """
 struct EdgeManifold <: GraphManifoldType end
 
-@doc doc"""
+@doc raw"""
     VectexGraphManifold <: GraphManifoldType
 
 A type for a [`GraphManifold`](@ref) where the data is given on the vertices.
 """
 struct VertexManifold <: GraphManifoldType end
 
-@doc doc"""
+@doc raw"""
     GraphManifold{G, M, T} <: AbstractPowerManifold{M,NestedPowerRepresentation}
 
 Build a manifold, that is a [`PowerManifold`](@ref) of the [`Manifold`](@ref) `M` either on the edges or vertices
@@ -45,7 +45,7 @@ end
 const EdgeGraphManifold = GraphManifold{<:AbstractGraph,<:Manifold,EdgeManifold}
 const VertexGraphManifold = GraphManifold{<:AbstractGraph,<:Manifold,VertexManifold}
 
-@doc doc"""
+@doc raw"""
     check_manifold_point(M::GraphManifold, x)
 
 Check whether `x` is a valid point on the [`GraphManifold`](@ref), i.e. its
@@ -75,7 +75,7 @@ function check_manifold_point(M::EdgeGraphManifold, x; kwargs...)
     return check_manifold_point(PM, x; kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     check_tangent_vector(M::GraphManifold, x, v)
 
 Check whether `x` is a valid point on the [`GraphManifold`](@ref), and
@@ -122,7 +122,7 @@ end
 get_iterator(M::EdgeGraphManifold) = 1:ne(M.graph)
 get_iterator(M::VertexGraphManifold) = 1:nv(M.graph)
 
-@doc doc"""
+@doc raw"""
     incident_log(M::GraphManifold, x)
 
 Return the tangent vector on the (vertex) [`GraphManifold`](@ref), where at
@@ -184,7 +184,7 @@ function incident_log!(
     return v
 end
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(N::GraphManifold{G,M,VertexManifold})
 
 returns the manifold dimension of the [`GraphManifold`](@ref) `N` on the vertices of
@@ -196,7 +196,7 @@ d_{𝒩} = \lvert V \rVert d_ℳ.
 function manifold_dimension(M::VertexGraphManifold)
     return manifold_dimension(M.manifold) * nv(M.graph)
 end
-@doc doc"""
+@doc raw"""
     manifold_dimension(N::GraphManifold{G,M,EdgeManifold})
 
 returns the manifold dimension of the [`GraphManifold`](@ref) `N` on the edges of

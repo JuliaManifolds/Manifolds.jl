@@ -70,7 +70,7 @@ function ProjectedOrthonormalBasis(method::Symbol, F::AbstractNumbers = ℝ)
     return ProjectedOrthonormalBasis{method,F}()
 end
 
-@doc doc"""
+@doc raw"""
     DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ)
 
 An orthonormal basis `Ξ` as a vector of tangent vectors (of length determined by
@@ -106,7 +106,7 @@ function PrecomputedOrthonormalBasis(vectors::AbstractVector, F::AbstractNumbers
     return PrecomputedOrthonormalBasis{typeof(vectors),F}(vectors)
 end
 
-@doc doc"""
+@doc raw"""
     DiagonalizingOrthonormalBasis(vectors, kappas, F::AbstractNumbers = ℝ)
 
 A precomputed orthonormal basis `Ξ` as a vector of tangent vectors (of length determined

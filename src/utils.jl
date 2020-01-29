@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     usinc(θ::Real)
 
 Unnormalized version of `sinc` function, i.e.
@@ -7,7 +7,7 @@ equivalent to `sinc(θ/π)`.
 """
 @inline usinc(θ::Real) = θ == 0 ? one(θ) : isinf(θ) ? zero(θ) : sin(θ) / θ
 
-@doc doc"""
+@doc raw"""
     usinc_from_cos(x::Real)
 
 Unnormalized version of `sinc` function, i.e.

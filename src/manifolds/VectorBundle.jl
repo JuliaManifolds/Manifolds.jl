@@ -175,7 +175,7 @@ Distance between vectors `v` and `w` from the vector space at point `x`
 from the manifold `M.M`, that is the base manifold of `M`.
 """
 distance(B::VectorBundleFibers, x, v, w) = norm(B, x, v - w)
-@doc doc"""
+@doc raw"""
     distance(B::VectorBundle, x, y)
 
 Distance between points $x$ and $y$ from the
@@ -209,7 +209,7 @@ end
 number_eltype(::Type{FVector{TType,TData}}) where {TType<:VectorSpaceType,TData} = number_eltype(TData)
 number_eltype(v::FVector) = number_eltype(v.data)
 
-@doc doc"""
+@doc raw"""
     exp(B::VectorBundle, x, v)
 
 Exponential map of tangent vector $v$ at point $x$ from
@@ -242,7 +242,7 @@ function exp!(B::VectorBundle, y, x, v)
     return y
 end
 
-@doc doc"""
+@doc raw"""
     flat(M::Manifold, x, w::FVector)
 
 Compute the flat isomorphism (one of the musical isomorphisms) of tangent vector `w`
@@ -365,7 +365,7 @@ function inner(B::VectorBundleFibers{<:CotangentSpaceType}, x, v, w)
         sharp(B.M, x, FVector(CotangentSpace, w)).data,
     )
 end
-@doc doc"""
+@doc raw"""
     inner(B::VectorBundle, x, v, w)
 
 Inner product of tangent vectors `v` and `w` at point `x` from the
@@ -403,7 +403,7 @@ function isapprox(B::VectorBundle, x, v, w; kwargs...)
     return isapprox(B.M, ξvM, ξwM; kwargs...) && isapprox(B.M, px, ξvF, ξwF; kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     log(B::VectorBundle, x, y)
 
 Logarithmic map of the point $y$ at point $x$ from
@@ -446,7 +446,7 @@ at point `x` from manifold `B.M`.
 norm(B::VectorBundleFibers, x, v) = sqrt(inner(B, x, v, v))
 norm(B::VectorBundleFibers{<:TangentSpaceType}, x, v) = norm(B.M, x, v)
 
-@doc doc"""
+@doc raw"""
     project_point(B::VectorBundle, x)
 
 Project the point $x$ from the ambient space of the vector bundle `B`
@@ -470,7 +470,7 @@ function project_point!(B::VectorBundle, x)
     return x
 end
 
-@doc doc"""
+@doc raw"""
     project_tangent(B::VectorBundle, x, v)
 
 Project the element $v$ of the ambient space of the tangent space $T_x B$
@@ -525,7 +525,7 @@ function representation_size(B::VectorBundle)
     return (len_manifold + len_vs,)
 end
 
-@doc doc"""
+@doc raw"""
     sharp(M::Manifold, x, w::FVector)
 
 Compute the sharp isomorphism (one of the musical isomorphisms) of vector `w`
@@ -633,7 +633,7 @@ function zero_vector!(B::VectorBundleFibers{<:TangentSpaceType}, v, x)
     return zero_tangent_vector!(B.M, v, x)
 end
 
-@doc doc"""
+@doc raw"""
     zero_tangent_vector(B::VectorBundle, x)
 
 Zero tangent vector at point $x$ from the vector bundle `B`

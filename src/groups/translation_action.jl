@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     TranslationAction(
         M::Manifold,
         Rn::TranslationGroup,

@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     Sphere{N} <: Manifold
 
 The unit sphere manifold $𝕊^n$ represented by $n+1$-Tuples, i.e. in by
@@ -78,7 +78,7 @@ function check_tangent_vector(S::Sphere{N}, x, v; kwargs...) where {N}
     return nothing
 end
 
-@doc doc"""
+@doc raw"""
     distance(M::Sphere, x, y)
 
 Compute the geodesic distance betweeen `x` and `y` on the [`Sphere`](@ref) `M`.
@@ -91,7 +91,7 @@ d_{𝕊^n}(x,y) = \operatorname{acos}(⟨x, y⟩).
 """
 distance(S::Sphere, x, y) = acos(clamp(dot(x, y), -1, 1))
 
-@doc doc"""
+@doc raw"""
     exp(M::Sphere, x, v)
 
 Compute the exponential map from `x` into the tangent direction `v` on the [`Sphere`](@ref)
@@ -113,7 +113,7 @@ end
 
 flat!(M::Sphere, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
 
-@doc doc"""
+@doc raw"""
     injectivity_radius(M::Sphere[, x])
 
 Return the injectivity radius for the [`Sphere`](@ref) `M`, which is globally $\pi$.
@@ -126,7 +126,7 @@ Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
 injectivity_radius(::Sphere, ::Any...) = π
 injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π / 2
 
-@doc doc"""
+@doc raw"""
     inner(S::Sphere, x, w, v)
 
 Compute the inner product of the two tangent vectors `w,v` from the tangent
@@ -142,7 +142,7 @@ function get_vector(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where {N}
     return 2 * xp1 * dot(xp1, v0) / dot(xp1, xp1) - v0
 end
 
-@doc doc"""
+@doc raw"""
     inverse_retract(M::Sphere, x, y, ::ProjectionInverseRetraction)
 
 Compute the inverse of the projection based retraction on the [`Sphere`](@ref),
@@ -159,7 +159,7 @@ function inverse_retract!(::Sphere, v, x, y, ::ProjectionInverseRetraction)
     return (v .= y ./ dot(x, y) .- x)
 end
 
-@doc doc"""
+@doc raw"""
     log(M::Sphere, x, y)
 
 Compute the logarithmic map on the [`Sphere`](@ref) `M`, i.e. the tangent vector, whose
@@ -194,7 +194,7 @@ function log!(S::Sphere, v, x, y)
     return project_tangent!(S, v, x, v)
 end
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(S::Sphere)
 
 Return the dimension of the manifold $𝕊^n$, i.e. $n$.
@@ -219,7 +219,7 @@ function mean!(S::Sphere, y, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(S, y, x, w, GeodesicInterpolationWithinRadius(π / 2); kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     norm(M::Sphere, x, v)
 
 Compute the length of the tangent vector `v` from the tangent space at `x` on the
@@ -241,7 +241,7 @@ function normal_tvector_distribution(S::Sphere, x, σ)
     return ProjectedFVectorDistribution(TangentBundleFibers(S), x, d, project_vector!, x)
 end
 
-@doc doc"""
+@doc raw"""
     project_point(M::Sphere, x)
 
 Project the point `x` from the embedding onto the [`Sphere`](@ref) `M`.
@@ -254,7 +254,7 @@ project_point(::Sphere, ::Any...)
 
 project_point!(S::Sphere, x) = (x ./= norm(x))
 
-@doc doc"""
+@doc raw"""
     project_tangent(M::Sphere, x, v)
 
 Project the point `v` onto the tangent space at `x` on the [`Sphere`](@ref) `M`.
@@ -267,7 +267,7 @@ project_tangent(::Sphere, ::Any...)
 
 project_tangent!(S::Sphere, w, x, v) = (w .= v .- dot(x, v) .* x)
 
-@doc doc"""
+@doc raw"""
     get_coordinates(M::Sphere, x, v, B::ArbitraryOrthonormalBasis)
 
 Represent the tangent vector `v` at point `x` from a sphere `M` in
@@ -283,7 +283,7 @@ function get_coordinates(M::Sphere{N}, x, v, B::ArbitraryOrthonormalBasis) where
     end
 end
 
-@doc doc"""
+@doc raw"""
     representation_size(M::Sphere)
 
 Return the size points on the [`Sphere`](@ref) `M` are represented as, i.e.
@@ -291,7 +291,7 @@ for the `n`-dimensional [`Sphere`](@ref) it is vectors of size `(n+1,)`.
 """
 @generated representation_size(::Sphere{N}) where {N} = (N + 1,)
 
-@doc doc"""
+@doc raw"""
     retract(M::Sphere, x, y, ::ProjectionRetraction)
 
 Compute the retraction that is based on projection, i.e.
@@ -320,7 +320,7 @@ function uniform_distribution(S::Sphere, x)
     return ProjectedPointDistribution(S, d, project_point!, x)
 end
 
-@doc doc"""
+@doc raw"""
     vector_transport_to(M::Sphere, x, v, y, ::ParallelTransport)
 
 Compute the [`ParallelTransport`](@ref) on the [`Sphere`](@ref) `M`, which is given by
@@ -343,7 +343,7 @@ function vector_transport_to!(M::Sphere, vto, x, v, y, ::ParallelTransport)
     return vto
 end
 
-@doc doc"""
+@doc raw"""
     zero_tangent_vector(M::Sphere, x)
 
 Return the zero tangent vector from the tangent space at `x` on the [`Sphere`](@ref) `M`,

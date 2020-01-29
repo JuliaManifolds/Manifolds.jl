@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     ProductManifold{TM<:Tuple, TRanges<:Tuple, TSizes<:Tuple} <: Manifold
 
 Product manifold $M_1 \times M_2 \times …  \times M_n$ with product geometry.
@@ -159,7 +159,7 @@ function check_tangent_vector(
     return nothing
 end
 
-@doc doc"""
+@doc raw"""
     cross(M,N)
     cross(M1, M2, M3,...)
 
@@ -185,7 +185,7 @@ function det_local_metric(M::MetricManifold{ProductManifold,ProductMetric}, x::P
     return prod(dets)
 end
 
-@doc doc"""
+@doc raw"""
     distance(M::ProductManifold, x, y)
 
 compute the distance two points `x` and `y` on the [`ProductManifold`](@ref) `M`, which is
@@ -202,7 +202,7 @@ function distance(M::ProductManifold, x, y)
     ))
 end
 
-@doc doc"""
+@doc raw"""
     exp(M::ProductManifold, x, v)
 
 compute the exponential map from `x` towards `v` on the [`ProductManifold`](@ref) `M`,
@@ -229,7 +229,7 @@ function exp!(M::ProductManifold, y, x, v)
     return y
 end
 
-@doc doc"""
+@doc raw"""
     flat(M::ProductManifold, x, w::FVector{TangentSpaceType})
 
 use the musical isomorphism to transform the tangent vector `w` from the tangent space at
@@ -348,7 +348,7 @@ function hat!(M::ProductManifold, v, x, vⁱ)
     return v
 end
 
-@doc doc"""
+@doc raw"""
     injectivity_radius(M::ProductManifold[, x])
 
 Compute the injectivity radius on the [`ProductManifold`](@ref), which is the
@@ -360,7 +360,7 @@ function injectivity_radius(M::ProductManifold, x)
 end
 injectivity_radius(M::ProductManifold) = min(map(injectivity_radius, M.manifolds)...)
 
-@doc doc"""
+@doc raw"""
     inner(M::ProductManifold, x, v, w)
 
 compute the inner product of two tangent vectors `v`, `w` from the tangent space
@@ -378,7 +378,7 @@ function inner(M::ProductManifold, x, v, w)
     return sum(subproducts)
 end
 
-@doc doc"""
+@doc raw"""
     inverse_retract(M::ProductManifold, x, y, m::InverseProductRetraction)
 
 Compute the inverse retraction from `x` with respect to `y` on the [`ProductManifold`](@ref)
@@ -420,7 +420,7 @@ function isapprox(M::ProductManifold, x, v, w; kwargs...)
     )
 end
 
-@doc doc"""
+@doc raw"""
     log(M::ProductManifold, x, y)
 
 Compute the logarithmic map from `x` to `y` on the [`ProductManifold`](@ref) `M`,
@@ -447,7 +447,7 @@ function log!(M::ProductManifold, v, x, y)
     return v
 end
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(M::ProductManifold)
 
 Return the manifold dimension of the [`ProductManifold`](@ref), which is the sum of the
@@ -455,7 +455,7 @@ manifold dimensions the product is made of.
 """
 manifold_dimension(M::ProductManifold) = mapreduce(manifold_dimension, +, M.manifolds)
 
-@doc doc"""
+@doc raw"""
     norm(M::PowerManifold, x, v)
 
 Compute the norm of `v` from the tangent space of `x` on the [`ProductManifold`](@ref),
@@ -536,7 +536,7 @@ function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::ProductRepr)
     return v
 end
 
-@doc doc"""
+@doc raw"""
     retract(M::ProductManifold, x, v, m::ProductRetraction)
 
 Compute the retraction from `x` with tangent vector `v` on the [`ProductManifold`](@ref) `M`
@@ -562,7 +562,7 @@ function representation_size(M::ProductManifold)
     return (mapreduce(m -> prod(representation_size(m)), +, M.manifolds),)
 end
 
-@doc doc"""
+@doc raw"""
     sharp(M::ProductManifold, x, w::FVector{CotangentSpaceType})
 
 Use the musical isomorphism to transform the cotangent vector `w` from the tangent space at

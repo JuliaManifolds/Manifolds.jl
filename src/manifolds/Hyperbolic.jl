@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     Hyperbolic{N} <: Manifold
 
 The hyperbolic space $ℍ^n$ represented by $n+1$-Tuples, i.e. in by
@@ -31,7 +31,7 @@ struct Hyperbolic{N} <: Manifold end
 
 Hyperbolic(n::Int) = Hyperbolic{n}()
 
-@doc doc"""
+@doc raw"""
     MinkowskiMetric <: LorentzMetric
 
 The Minkowski metric is a [`LorentzMetric`](@ref) with, i.e.
@@ -97,7 +97,7 @@ function check_tangent_vector(M::Hyperbolic, x, v; kwargs...)
     return nothing
 end
 
-@doc doc"""
+@doc raw"""
     distance(M::Hyperbolic, x, y)
 
 Compute the distance on the [`Hyperbolic`](@ref) `M`, which reads
@@ -110,7 +110,7 @@ where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`minkowski_dot`](@ref).
 """
 distance(M::Hyperbolic, x, y) = acosh(max(-minkowski_dot(x, y), 1.0))
 
-@doc doc"""
+@doc raw"""
     exp(M::Hyperbolic, x, v)
 
 Compute the exponential map on the [`Hyperbolic`](@ref) space $ℍ^n$ eminating
@@ -133,14 +133,14 @@ end
 
 flat!(M::Hyperbolic, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
 
-@doc doc"""
+@doc raw"""
     injectivity_radius(M::Hyperbolic[, x])
 
 Return the injectivity radius on the [`Hyperbolic`](@ref), which is always $\infty$.
 """
 injectivity_radius(H::Hyperbolic, args...) = Inf
 
-@doc doc"""
+@doc raw"""
     inner(M::Hyperbolic, x, v, w)
 
 Compute the Riemannian inner product for two tangent vectors `v` and `w`
@@ -152,7 +152,7 @@ inner product on $ℝ^{n+1}$.
 
 is_default_metric(::Hyperbolic, ::MinkowskiMetric) = Val(true)
 
-@doc doc"""
+@doc raw"""
     log(M::Hyperbolic, x, y)
 
 Compute the logarithmic map on the [`Hyperbolic`](@ref) space $ℍ^n$, the tangent
@@ -177,7 +177,7 @@ function log!(M::Hyperbolic, v, x, y)
     return v
 end
 
-@doc doc"""
+@doc raw"""
     minkowski_dot(a,b)
 Compute the Minkowski inner product of two Vectors `a` and `b` of same length
 `n+1`, i.e.
@@ -190,7 +190,7 @@ function minkowski_dot(a::AbstractVector, b::AbstractVector)
     return -a[end] * b[end] + sum(a[1:end-1] .* b[1:end-1])
 end
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(H::Hyperbolic)
 
 Return the dimension of the hyperbolic space manifold $ℍ^n$, i.e. $n$.
@@ -215,7 +215,7 @@ function mean!(M::Hyperbolic, y, x::AbstractVector, w::AbstractVector; kwargs...
     return mean!(M, y, x, w, CyclicProximalPointEstimation(); kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     project_tangent(M::Hyperbolic, x, v)
 
 Perform an orthogonal projection with respect to the Minkowski inner product of `v` onto
@@ -232,7 +232,7 @@ project_tangent(::Hyperbolic, ::Any...)
 
 project_tangent!(::Hyperbolic, w, x, v) = (w .= v .+ minkowski_dot(x, v) .* x)
 
-@doc doc"""
+@doc raw"""
     representation_size(M::Hyperbolic)
 
 Return the representation size on the [`Hyperbolic`](@ref), i.e. for the `n`-diomensional
@@ -242,7 +242,7 @@ hyperbolic manifold the dimention of the embedding, i.e. `n+1`.
 
 sharp!(M::Hyperbolic, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
-@doc doc"""
+@doc raw"""
     vector_transport_to(M::Hyperbolic, x, v, y, ::ParallelTransport)
 
 Compute the paralllel transport of the `v` from the tangent space at `x` on the
@@ -263,7 +263,7 @@ function vector_transport_to!(M::Hyperbolic, vto, x, v, y, ::ParallelTransport)
     return copyto!(vto, v - (inner(M, x, w, v) * (w + log(M, y, x)) / wn^2))
 end
 
-@doc doc"""
+@doc raw"""
     zero_tangent_vector(M::Hyperbolic, x)
 
 Return the zero vector from the tangent space at `x` of the [`Hyperbolic`](@ref) `M`.

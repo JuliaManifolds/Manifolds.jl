@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     Euclidean{T<:Tuple} <: Manifold
 
 Euclidean vector space $ℝ^n$.
@@ -51,7 +51,7 @@ and higher order arrays, the matrix and ternsor Frobenius norm, respectively.
 """
 distance(::Euclidean, x, y) = norm(x .- y)
 
-@doc doc"""
+@doc raw"""
     exp(M::Euclidean, x, v)
 
 Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `x` in direction
@@ -116,14 +116,14 @@ end
 
 hat!(::Euclidean{N,ℝ}, v, x, vⁱ) where {N} = copyto!(v, vⁱ)
 
-@doc doc"""
+@doc raw"""
     injectivity_radius(M::Euclidean)
 
 Return the injectivity radius on the [`Euclidean`](@ref) `M`, which is $\infty$.
 """
 injectivity_radius(::Euclidean) = Inf
 
-@doc doc"""
+@doc raw"""
     inner(M::Euclidean, x, v, w)
 
 Compute the inner product on the [`Euclidean`](@ref) `M`, which is just
@@ -154,7 +154,7 @@ function local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x)
     return Diagonal(ones(SVector{size(x, 1),eltype(x)}))
 end
 
-@doc doc"""
+@doc raw"""
     log(M::Euclidean, x, y)
 
 Compute the logarithmic map on the [`Euclidean`](@ref) `M` from `x` to `y`,
@@ -232,7 +232,7 @@ function median!(::Euclidean{Tuple{1}}, y, x::AbstractVector, w::AbstractWeights
     return copyto!(y, [median(vcat(x...), w)])
 end
 
-@doc doc"""
+@doc raw"""
     norm(M::Euclidean, x, v)
 
 Compute the norm of a tangent vector `v` at `x` on the [`Euclidean`](@ref)
@@ -253,7 +253,7 @@ function normal_tvector_distribution(M::Euclidean{Tuple{N}}, x, σ) where {N}
     return ProjectedFVectorDistribution(TangentBundleFibers(M), x, d, project_vector!, x)
 end
 
-@doc doc"""
+@doc raw"""
     project_point(M::Euclidean, x)
 
 Project an arbitrary point `x` onto the [`Euclidean`](@ref) `M`, which

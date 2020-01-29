@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     Rotations{N} <: Manifold
 
 Special orthogonal manifold $\mathrm{SO}(n)$ represented by $n \times n$
@@ -37,7 +37,7 @@ function NormalRotationDistribution(
     return NormalRotationDistribution{TResult,typeof(M),typeof(d)}(M, d)
 end
 
-@doc doc"""
+@doc raw"""
     angles_4d_skew_sym_matrix(A)
 
 The Lie algebra of $\mathrm{SO}(4)$ consists of 4x4 skew-symmetric matrices.
@@ -109,7 +109,7 @@ function check_tangent_vector(M::Rotations{N}, x, v; kwargs...) where {N}
     return nothing
 end
 
-@doc doc"""
+@doc raw"""
     cos_angles_4d_rotation_matrix(R)
 
 4D rotations can be described by two orthogonal planes that are unchanged by
@@ -137,7 +137,7 @@ function cos_angles_4d_rotation_matrix(R)
     return (a + b, a - b)
 end
 
-@doc doc"""
+@doc raw"""
     exp(M::Rotations, x, v)
 
 Compute the exponential map on the [`Rotations`](@ref) from `x` into direction
@@ -260,7 +260,7 @@ function hat!(M::Rotations{2}, Ω, x, θ::Real)
 end
 hat!(M::Rotations{2}, Ω, x, ω) = hat!(M, Ω, x, ω[1])
 
-@doc doc"""
+@doc raw"""
     hat(M::Rotations, x, ω)
 
 Convert the unique tangent vector components $\omega$ at point $x$ on rotations
@@ -295,7 +295,7 @@ function hat!(M::Rotations{N}, Ω, x, ω) where {N}
     return Ω
 end
 
-@doc doc"""
+@doc raw"""
     injectivity_radius(M::Rotations)
     injectivity_radius(M::Rotations, x)
 
@@ -313,7 +313,7 @@ Return the radius of injectivity for the [`PolarRetraction`](@ref) on the
 injectivity_radius(::Rotations) = π * sqrt(2.0)
 injectivity_radius(::Rotations, x, ::PolarRetraction) = π / sqrt(2.0)
 
-@doc doc"""
+@doc raw"""
     inner(M::Rotations, x, w, v)
 
 Compute the inner product of the two tangent vectors `w, v` from the tangent
@@ -326,7 +326,7 @@ Tangent vectors are represented by matrices.
 """
 inner(M::Rotations, x, w, v) = dot(w, v)
 
-@doc doc"""
+@doc raw"""
     inverse_retract(M, x, y, ::PolarInverseRetraction)
 
 Compute a vector from the tangent space $T_x\mathrm{SO}(n)$
@@ -382,7 +382,7 @@ function inverse_retract!(M::Rotations{N}, v, x, y, ::QRInverseRetraction) where
     return v
 end
 
-@doc doc"""
+@doc raw"""
     log(M::Rotations, x, y)
 
 Compute the logarithmic map on the [`Rotations`](@ref) manifold
@@ -445,7 +445,7 @@ function log!(M::Rotations{4}, v, x, y)
     return project_tangent!(M, v, x, v)
 end
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(M::Rotations)
 
 Return the dimension of the manifold $\mathrm{SO}(n)$, i.e. $\frac{n(n-1)}{2}$.
@@ -470,7 +470,7 @@ function mean!(M::Rotations, y, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(M, y, x, w, GeodesicInterpolationWithinRadius(π / 2 / √2); kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     norm(M::Rotations, x, v)
 
 Compute the norm of a tangent vector `v` from the tangent space at `x` on the
@@ -485,7 +485,7 @@ elements from the Lie group.
 """
 norm(M::Rotations, x, v) = norm(v)
 
-@doc doc"""
+@doc raw"""
     normal_rotation_distribution(M::Rotations, x, σ::Real)
 
 Return a random point on the manifold [`Rotations`](@ref) `M`
@@ -523,7 +523,7 @@ function normal_tvector_distribution(M::Rotations, x, σ)
     return ProjectedFVectorDistribution(TangentBundleFibers(M), x, d, project_vector!, x)
 end
 
-@doc doc"""
+@doc raw"""
     project_point(M::Rotations, x; check_det = true)
 
 Project `x` to the nearest point on manifold `M`.
@@ -554,7 +554,7 @@ function project_point!(M::Rotations{N}, y, x; check_det = true) where {N}
     return y
 end
 
-@doc doc"""
+@doc raw"""
     project_tangent(M::Rotations, x, v)
 
 Project the matrix `v` onto the tangent space by making `v` skew symmetric,
@@ -568,7 +568,7 @@ project_tangent(::Rotations, ::Any...)
 
 project_tangent!(M::Rotations, w, x, v) = (w .= (v .- transpose(v)) ./ 2)
 
-@doc doc"""
+@doc raw"""
     representation_size(M::Rotations)
 
 Return the `size()` of a point on the [`Rotations`](@ref) `M`, i.e. for the
@@ -608,7 +608,7 @@ function _fix_random_rotation(A::AbstractMatrix)
     return C
 end
 
-@doc doc"""
+@doc raw"""
     retract(M, x, v)
     retract(M, x, v, ::QRRetraction)
 
@@ -648,7 +648,7 @@ function retract!(M::Rotations, y, x, v, method::PolarRetraction)
     return project_point!(M, y, A; check_det = false)
 end
 
-@doc doc"""
+@doc raw"""
     vee(M::Rotations, x, Ω)
 
 Extract the unique tangent vector components $\omega$ at point $x$ on rotations
@@ -688,7 +688,7 @@ function vee!(M::Rotations{2}, ω, x, Ω)
     return ω
 end
 
-@doc doc"""
+@doc raw"""
     zero_tangent_vector(M::Rotations, x)
 
 Return the zero tangent vector from the tangent space art `x` on the [`Rotations`](@ref)

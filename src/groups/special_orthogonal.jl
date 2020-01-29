@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     SpecialOrthogonal{n} <: GroupManifold{Rotations{n},MultiplicationOperation}
 
 Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.

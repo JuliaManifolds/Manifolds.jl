@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     SymmetricPositiveDefinite{N} <: Manifold
 
 The manifold of symmetric positive definite matrices, i.e.
@@ -21,7 +21,7 @@ struct SymmetricPositiveDefinite{N} <: Manifold end
 
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
 
-@doc doc"""
+@doc raw"""
     check_manifold_point(M::SymmetricPositiveDefinite, x; kwargs...)
 
 checks, whether `x` is a valid point on the [`SymmetricPositiveDefinite`](@ref) `M`, i.e. is a matrix
@@ -76,7 +76,7 @@ function check_tangent_vector(M::SymmetricPositiveDefinite{N}, x, v; kwargs...) 
     return nothing
 end
 
-@doc doc"""
+@doc raw"""
     injectivity_radius(M::SymmetricPositiveDefinite[, x])
     injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}[, x])
     injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}[, x])
@@ -87,7 +87,7 @@ Since `M` is a Hadamard manifold with respect to the [`LinearAffineMetric`](@ref
 """
 injectivity_radius(M::SymmetricPositiveDefinite{N}, args...) where {N} = Inf
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(M::SymmetricPositiveDefinite)
 
 returns the dimension of
@@ -124,7 +124,7 @@ function mean!(
     return mean!(M, y, x, w, GeodesicInterpolation(); kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     representation_size(M::SymmetricPositiveDefinite)
 
 Return the size of an array representing an element on the
@@ -133,7 +133,7 @@ symmetric positive definite matrix on $ℳ = 𝒫(n)$.
 """
 @generated representation_size(::SymmetricPositiveDefinite{N}) where {N} = (N, N)
 
-@doc doc"""
+@doc raw"""
     zero_tangent_vector(M::SymmetricPositiveDefinite,x)
 
 returns the zero tangent vector in the tangent space of the symmetric positive
