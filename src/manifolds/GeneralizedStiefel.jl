@@ -80,7 +80,7 @@ end
 @doc doc"""
     check_tangent_vector(M::GeneralizedStiefel, x, v; kwargs...)
 
-Check whether `v` is a valid tangent vector at `x` on the [`Stiefel`](@ref)
+Check whether `v` is a valid tangent vector at `x` on the [`GeneralizedStiefel`](@ref)
 `M`=$\operatorname{St}(n,k,B)$, i.e. the [`AbstractNumbers`](@ref) fits,
 `x` is a valid point on `M` and
 it (approximately) holds that $x^{\mathrm{H}}Bv + v^{\mathrm{H}}Bx = 0$, where
@@ -114,3 +114,20 @@ function check_tangent_vector(M::GeneralizedStiefel{n,k,T}, x, v; kwargs...) whe
         )
     end
 end
+
+@doc doc"""
+    project_tangent(M, x, v)
+
+Project `v` onto the tangent space of `x` to the [`GeneralizedStiefel`](@ref) manifold `M`.
+The formula reads
+
+````math
+\operatorname{proj}_{\mathcal M}(x,v) = v - x \operatorname{Sym}(x^{\mathrm{H}}Bv),
+````
+
+where $\operatorname{Sym}(y)$ is the symmetrization of $y$, e.g. by
+$\operatorname{Sym}(y) = \frac{y^{\mathrm{H}}+y}{2}$.
+"""
+project_tangent(::GeneralizedStiefel, ::Any...)
+
+project_tangent!(::GeneralizedStiefel, w, x, v) = copyto!(w, v - x * Symmetric(x' * v))
