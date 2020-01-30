@@ -26,7 +26,6 @@ import Base:
     one,
     promote_rule,
     setindex!,
-    similar,
     show,
     similar,
     size,
@@ -159,10 +158,6 @@ function vee!(M::Manifold, vⁱ, x, v)
 end
 
 function allocate_result(M::Manifold, f::typeof(vee), x, v)
-    T = allocate_result_type(M, f, (x, v))
-    return allocate(x, T, manifold_dimension(M))
-end
-function allocate_result(M::Manifold, f::typeof(vee), x::StaticArray, v)
     T = allocate_result_type(M, f, (x, v))
     return allocate(x, T, Size(manifold_dimension(M)))
 end
