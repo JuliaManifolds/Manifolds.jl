@@ -43,7 +43,7 @@ points are in an open geodesic ball about the mean with corresponding radius
 (see [`GeodesicInterpolationWithinRadius`](@ref)):
 
 * All simply connected complete Riemannian manifolds with non-positive sectional
-  curvature at radius $\infty$ [^Cheng2016], in particular:
+  curvature at radius $∞$ [^Cheng2016], in particular:
     + [`Euclidean`](@ref)
     + [`SymmetricPositiveDefinite`](@ref) [^Ho2013]
 * Other manifolds:

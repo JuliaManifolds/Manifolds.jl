@@ -124,7 +124,7 @@ hat!(::Euclidean{N,ℝ}, v, p, vⁱ) where {N} = copyto!(v, vⁱ)
 @doc raw"""
     injectivity_radius(M::Euclidean)
 
-Returns the injectivity radius on the [`Euclidean`](@ref) `M`, which is $\infty$.
+Returns the injectivity radius on the [`Euclidean`](@ref) `M`, which is $∞$.
 """
 injectivity_radius(::Euclidean) = Inf
 

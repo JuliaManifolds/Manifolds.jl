@@ -83,7 +83,7 @@ end
 
 Return the injectivity radius of the [`SymmetricPositiveDefinite`](@ref).
 Since `M` is a Hadamard manifold with respect to the [`LinearAffineMetric`](@ref) and the
-[`LogCholeskyMetric`](@ref), the injectivity radius is globally $\infty$.
+[`LogCholeskyMetric`](@ref), the injectivity radius is globally $∞$.
 """
 injectivity_radius(M::SymmetricPositiveDefinite{N}, args...) where {N} = Inf
 

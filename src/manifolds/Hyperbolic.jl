@@ -136,7 +136,7 @@ flat!(M::Hyperbolic, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
 @doc raw"""
     injectivity_radius(M::Hyperbolic[, x])
 
-Return the injectivity radius on the [`Hyperbolic`](@ref), which is always $\infty$.
+Return the injectivity radius on the [`Hyperbolic`](@ref), which is always $∞$.
 """
 injectivity_radius(H::Hyperbolic, args...) = Inf
 
