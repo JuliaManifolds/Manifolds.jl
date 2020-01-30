@@ -81,6 +81,7 @@ end
         E = TestEuclidean{n}()
         g = TestEuclideanMetric()
         M = MetricManifold(E, g)
+        @test repr(M) == "MetricManifold(TestEuclidean{3}(), TestEuclideanMetric())"
 
         if VERSION ≥ v"1.3"
             @test E |> TestEuclideanMetric() === M

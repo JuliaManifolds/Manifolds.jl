@@ -89,7 +89,7 @@ include("../utils.jl")
         x = [1.0, 2.0]
         ge = Identity(G)
         @test zero(ge) === ge
-        @test eltype(ge) == Bool
+        @test number_eltype(ge) == Bool
         @test copyto!(ge, ge) === ge
         y = similar(x)
         copyto!(y, ge)
@@ -142,7 +142,7 @@ include("../utils.jl")
 
         x = [1.0 2.0; 2.0 3.0]
         ge = Identity(G)
-        @test eltype(ge) == Bool
+        @test number_eltype(ge) == Bool
         @test copyto!(ge, ge) === ge
         y = similar(x)
         copyto!(y, ge)

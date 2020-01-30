@@ -112,6 +112,10 @@ struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
     end
 end
 
+function show(io::IO, method::GeodesicInterpolationWithinRadius)
+    print(io, "GeodesicInterpolationWithinRadius($(method.radius))")
+end
+
 @doc doc"""
     mean(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
@@ -175,7 +179,7 @@ function mean(
     method::AbstractEstimationMethod...;
     kwargs...,
 )
-    y = similar_result(M, mean, x[1])
+    y = allocate_result(M, mean, x[1])
     return mean!(M, y, x, method...; kwargs...)
 end
 function mean(
@@ -185,7 +189,7 @@ function mean(
     method::AbstractEstimationMethod...;
     kwargs...,
 )
-    y = similar_result(M, mean, x[1])
+    y = allocate_result(M, mean, x[1])
     return mean!(M, y, x, w, method...; kwargs...)
 end
 
@@ -233,7 +237,7 @@ function mean!(
         throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
     end
     copyto!(y, x0)
-    yold = similar_result(M, mean, y)
+    yold = allocate_result(M, mean, y)
     v = zero_tangent_vector(M, y)
     vtmp = copy(v)
     α = w ./ cumsum(w)
@@ -297,7 +301,7 @@ function mean!(
         copyto!(y, x[j])
     end
     v = zero_tangent_vector(M, y)
-    ytmp = similar_result(M, mean, y)
+    ytmp = allocate_result(M, mean, y)
     @inbounds for i = 2:n
         j = order[i]
         s += w[j]
@@ -362,7 +366,7 @@ function mean!(
         throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     end
     copyto!(y, x0)
-    yold = similar_result(M, median, y)
+    yold = allocate_result(M, median, y)
     ytmp = copy(yold)
     v = zero_tangent_vector(M, y)
     wv = convert(Vector, w) ./ sum(w)
@@ -442,7 +446,7 @@ function median(
     method::AbstractEstimationMethod...;
     kwargs...,
 )
-    y = similar_result(M, median, x[1])
+    y = allocate_result(M, median, x[1])
     return median!(M, y, x, method...; kwargs...)
 end
 function median(
@@ -452,7 +456,7 @@ function median(
     method::AbstractEstimationMethod...;
     kwargs...,
 )
-    y = similar_result(M, median, x[1])
+    y = allocate_result(M, median, x[1])
     return median!(M, y, x, w, method...; kwargs...)
 end
 
@@ -500,7 +504,7 @@ function median!(
         throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     end
     copyto!(y, x0)
-    yold = similar_result(M, median, y)
+    yold = allocate_result(M, median, y)
     ytmp = copy(yold)
     v = zero_tangent_vector(M, y)
     wv = convert(Vector, w) ./ sum(w)
@@ -661,8 +665,8 @@ function mean_and_var(
         y = copy(x[j])
     end
     v = zero_tangent_vector(M, y)
-    M₂ = zero(eltype(v))
-    ytmp = similar_result(M, mean, y)
+    M₂ = zero(number_eltype(v))
+    ytmp = allocate_result(M, mean, y)
     @inbounds for i = 2:n
         j = order[i]
         snew = s + w[j]

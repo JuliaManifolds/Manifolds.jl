@@ -1,6 +1,7 @@
 include("utils.jl")
 
 @testset "Product manifold" begin
+    @test_throws MethodError ProductManifold()
     M1 = Sphere(2)
     M2 = Euclidean(2)
     Mse = ProductManifold(M1, M2)
@@ -20,6 +21,134 @@ include("utils.jl")
     inverse_retraction_methods = [Manifolds.InverseProductRetraction(ManifoldsBase.LogarithmicInverseRetraction(), ManifoldsBase.LogarithmicInverseRetraction())]
 
     reshapers = (Manifolds.StaticReshaper(), Manifolds.ArrayReshaper())
+
+    @testset "Show methods" begin
+        Mse2 = ProductManifold(M1, M1, M2, M2)
+        @test sprint(show, Mse2) == "ProductManifold($(M1), $(M1), $(M2), $(M2))"
+        withenv("LINES" => 10, "COLUMNS" => 100) do
+            @test sprint(show, "text/plain", ProductManifold(M1)) == "ProductManifold with 1 submanifold:\n $(M1)"
+            @test sprint(show, "text/plain", Mse2) == "ProductManifold with 4 submanifolds:\n $(M1)\n $(M1)\n $(M2)\n $(M2)"
+        end
+        withenv("LINES" => 7, "COLUMNS" => 100) do
+            @test sprint(show, "text/plain", Mse2) == "ProductManifold with 4 submanifolds:\n $(M1)\n ⋮\n $(M2)"
+        end
+
+        @test sprint(show, "text/plain", ProductManifold(Mse, Mse)) == """
+        ProductManifold with 2 submanifolds:
+         ProductManifold(Sphere(2), Euclidean(2; field = ℝ))
+         ProductManifold(Sphere(2), Euclidean(2; field = ℝ))"""
+
+        shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M1)
+        p = Manifolds.ProductArray(shape_se, Float64[1, 0, 0])
+        @test sprint(show, "text/plain", p) == """
+        ProductArray with 1 submanifold component:
+         Component 1 =
+          3-element view(::Array{Float64,1}, 1:3) with eltype Float64:
+           1.0
+           0.0
+           0.0"""
+
+        shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M1, M1, M2, M2)
+        p = Manifolds.ProductArray(shape_se, Float64[1, 0, 0, 0, 1, 0, 1, 2, 3, 4])
+        @test sprint(show, "text/plain", p) == """
+        ProductArray with 4 submanifold components:
+         Component 1 =
+          3-element view(::Array{Float64,1}, 1:3) with eltype Float64:
+           1.0
+           0.0
+           0.0
+         Component 2 =
+          3-element view(::Array{Float64,1}, 4:6) with eltype Float64:
+           0.0
+           1.0
+           0.0
+         Component 3 =
+          2-element view(::Array{Float64,1}, 7:8) with eltype Float64:
+           1.0
+           2.0
+         Component 4 =
+          2-element view(::Array{Float64,1}, 9:10) with eltype Float64:
+           3.0
+           4.0"""
+
+        shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M1, M1, M2, M2, M2)
+        p = Manifolds.ProductArray(shape_se, Float64[1, 0, 0, 0, 1, 0, 1, 2, 3, 4, 5, 6])
+        @test sprint(show, "text/plain", p) == """
+        ProductArray with 5 submanifold components:
+         Component 1 =
+          3-element view(::Array{Float64,1}, 1:3) with eltype Float64:
+           1.0
+           0.0
+           0.0
+         Component 2 =
+          3-element view(::Array{Float64,1}, 4:6) with eltype Float64:
+           0.0
+           1.0
+           0.0
+         ⋮
+         Component 4 =
+          2-element view(::Array{Float64,1}, 9:10) with eltype Float64:
+           3.0
+           4.0
+         Component 5 =
+          2-element view(::Array{Float64,1}, 11:12) with eltype Float64:
+           5.0
+           6.0"""
+
+       p = Manifolds.ProductRepr(Float64[1, 0, 0])
+       @test sprint(show, "text/plain", p) == """
+       ProductRepr with 1 submanifold component:
+        Component 1 =
+         3-element Array{Float64,1}:
+          1.0
+          0.0
+          0.0"""
+
+        p = Manifolds.ProductRepr(Float64[1, 0, 0], Float64[0, 1, 0], Float64[1, 2], Float64[3, 4])
+        @test sprint(show, "text/plain", p) == """
+        ProductRepr with 4 submanifold components:
+         Component 1 =
+          3-element Array{Float64,1}:
+           1.0
+           0.0
+           0.0
+         Component 2 =
+          3-element Array{Float64,1}:
+           0.0
+           1.0
+           0.0
+         Component 3 =
+          2-element Array{Float64,1}:
+           1.0
+           2.0
+         Component 4 =
+          2-element Array{Float64,1}:
+           3.0
+           4.0"""
+
+        p = Manifolds.ProductRepr(Float64[1, 0, 0], Float64[0, 1, 0], Float64[1, 2], Float64[3, 4], Float64[5, 6])
+        @test sprint(show, "text/plain", p) == """
+        ProductRepr with 5 submanifold components:
+         Component 1 =
+          3-element Array{Float64,1}:
+           1.0
+           0.0
+           0.0
+         Component 2 =
+          3-element Array{Float64,1}:
+           0.0
+           1.0
+           0.0
+         ⋮
+         Component 4 =
+          2-element Array{Float64,1}:
+           3.0
+           4.0
+         Component 5 =
+          2-element Array{Float64,1}:
+           5.0
+           6.0"""
+    end
 
     for T in types, reshaper in reshapers
         if reshaper == reshapers[2] && T != Vector{Float64}
@@ -157,7 +286,7 @@ include("utils.jl")
             basis_types_vecs = (basis_types[1], basis_types[3],),
             basis_types_to_from = basis_types
         )
-        @test eltype(pts[1]) === Float64
+        @test number_eltype(pts[1]) === Float64
         @test submanifold_component(Mse, pts[1], 1) === pts[1].parts[1]
         @test submanifold_component(Mse, pts[1], Val(1)) === pts[1].parts[1]
         @test submanifold_component(pts[1], 1) === pts[1].parts[1]

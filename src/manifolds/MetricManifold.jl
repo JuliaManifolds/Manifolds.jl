@@ -75,7 +75,7 @@ the resulting multi-dimensional array are ordered $(i,j,k)$.
 function christoffel_symbols_first(M::MetricManifold, x; backend = :default)
     ∂g = local_metric_jacobian(M, x; backend = backend)
     n = size(∂g, 1)
-    Γ = similar(∂g, Size(n, n, n))
+    Γ = allocate(∂g, Size(n, n, n))
     @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
     return Γ
 end
@@ -95,7 +95,7 @@ The dimensions of the resulting multi-dimensional array are ordered $(l,i,j)$.
 function christoffel_symbols_second(M::MetricManifold, x; backend = :default)
     ginv = inverse_local_metric(M, x)
     Γ₁ = christoffel_symbols_first(M, x; backend = backend)
-    Γ₂ = similar(Γ₁)
+    Γ₂ = allocate(Γ₁)
     @einsum Γ₂[l, i, j] = ginv[k, l] * Γ₁[i, j, k]
     return Γ₂
 end
@@ -490,7 +490,7 @@ of the manifold `M` at the point `x`.
 function ricci_tensor(M::MetricManifold, x; kwargs...)
     R = riemann_tensor(M, x; kwargs...)
     n = size(R, 1)
-    Ric = similar(R, Size(n, n))
+    Ric = allocate(R, Size(n, n))
     @einsum Ric[i, j] = R[l, i, l, j]
     return Ric
 end
@@ -506,7 +506,7 @@ function riemann_tensor(M::MetricManifold, x; backend = :default)
     n = size(x, 1)
     Γ = christoffel_symbols_second(M, x; backend = backend)
     ∂Γ = christoffel_symbols_second_jacobian(M, x; backend = backend) ./ n
-    R = similar(∂Γ, Size(n, n, n, n))
+    R = allocate(∂Γ, Size(n, n, n, n))
     @einsum R[l, i, j, k] =
         ∂Γ[l, i, k, j] - ∂Γ[l, i, j, k] + Γ[s, i, k] * Γ[l, s, j] - Γ[s, i, j] * Γ[l, s, k]
     return R
@@ -532,6 +532,8 @@ function sharp!(M::N, v::TFVector, x, w::CoTFVector) where {N<:MetricManifold}
     copyto!(v.data, ginv * w.data)
     return v
 end
+
+show(io::IO, M::MetricManifold) = print(io, "MetricManifold($(M.manifold), $(M.metric))")
 
 @doc doc"""
     solve_exp_ode(

@@ -64,7 +64,7 @@ end
                 @test _to_affine(g1g2) ≈ _to_affine(g1) * _to_affine(g2)
 
                 w = translate_diff(G, pts[1], Identity(G), v_pts[1])
-                w2 = similar(w)
+                w2 = allocate(w)
                 w2.parts[1] .= w.parts[1]
                 w2.parts[2] .= pts[1].parts[2] * w.parts[2]
                 @test _to_affine(w2, true) ≈ _to_affine(pts[1]) * _to_affine(v_pts[1], true)

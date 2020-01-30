@@ -2,6 +2,7 @@ include("utils.jl")
 
 @testset "Rotations" begin
     M = Manifolds.Rotations(2)
+    @test repr(M) == "Rotations(2)"
     @test representation_size(M) == (2,2)
     @test injectivity_radius(M) == π*sqrt(2.0)
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0]) == π*sqrt(2.0)

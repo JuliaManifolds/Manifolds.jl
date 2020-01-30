@@ -24,6 +24,11 @@ $x = cos(\theta)$.
     end
 end
 
+allocate(x, s::Size{S}) where {S} = similar(x, S...)
+allocate(x::StaticArray, s::Size{S}) where {S} = similar(x, maybesize(s))
+allocate(x, ::Type{T}, s::Size{S}) where {S,T} = similar(x, T, S...)
+allocate(x::StaticArray, ::Type{T}, s::Size{S}) where {S,T} = similar(x, T, maybesize(s))
+
 """
     eigen_safe(x)
 
@@ -48,6 +53,8 @@ converted to a `Matrix` before computing the log.
     s = Size(x)
     return SizedMatrix{s[1],s[2]}(log(Matrix(parent(x))))
 end
+
+@generated maybesize(s::Size{S}) where {S} = prod(S) > 100 ? S : :(s)
 
 """
     select_from_tuple(t::NTuple{N, Any}, positions::Val{P})

@@ -179,7 +179,7 @@ function get_vector(
     B::ArbitraryOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    vout = similar_result(M, get_vector, x)
+    vout = allocate_result(M, get_vector, x)
     @assert size(v) == (div(N * (N + 1), 2),)
     @assert size(vout) == (N, N)
     k = 1
@@ -198,7 +198,7 @@ function get_vector(
     B::ArbitraryOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    vout = similar_result(M, get_vector, x, x .* 1im)
+    vout = allocate_result(M, get_vector, x, x .* 1im)
     @assert size(v) == (N * (N + 1),)
     @assert size(vout) == (N, N)
     k = 1
@@ -314,6 +314,10 @@ Since `M` is already a vector space over $\mathbb R$, this returns just the vect
 sharp(::SymmetricMatrices, ::Any...)
 
 sharp!(M::SymmetricMatrices, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
+
+function show(io::IO, ::SymmetricMatrices{n,F}) where {n,F}
+    print(io, "SymmetricMatrices($(n), $(F))")
+end
 
 @doc doc"""
     vector_transport_to(M::SymmetricMatrices, x, v, y, ::ParallelTransport)

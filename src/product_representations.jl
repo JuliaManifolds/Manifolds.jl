@@ -265,16 +265,49 @@ function (*)(a::Number, v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpeci
     return ProductArray(ShapeSpec, a * v.data, v.reshapers)
 end
 
-eltype(::Type{ProductArray{TM,TData,TV}}) where {TM,TData,TV} = eltype(TData)
+number_eltype(::Type{ProductArray{TM,TData,TV}}) where {TM,TData,TV} = eltype(TData)
 
-function similar(x::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
-    return ProductArray(ShapeSpec, similar(x.data), x.reshapers)
+function _show_component(io::IO, v; pre = "", head = "")
+    sx = sprint(show, "text/plain", v, context = io, sizehint = 0)
+    sx = replace(sx, '\n' => "\n$(pre)")
+    print(io, head, pre, sx)
 end
-function similar(
+
+function _show_component_range(io::IO, vs, range; pre = "", sym = "Component ")
+    for i in range
+        _show_component(io, vs[i]; pre = pre, head = "\n$(sym)$(i) =\n")
+    end
+    return nothing
+end
+
+function _show_product_repr(io::IO, x; name = "Product representation", nmax = 4)
+    n = length(x.parts)
+    print(io, "$(name) with $(n) submanifold component$(n == 1 ? "" : "s"):")
+    half_nmax = div(nmax, 2)
+    pre = "  "
+    sym = " Component "
+    if n ≤ nmax
+        _show_component_range(io, x.parts, 1:n; pre = pre, sym = sym)
+    else
+        _show_component_range(io, x.parts, 1:half_nmax; pre = pre, sym = sym)
+        print(io, "\n ⋮")
+        _show_component_range(io, x.parts, (n-half_nmax+1):n; pre = pre, sym = sym)
+    end
+    return nothing
+end
+
+function show(io::IO, ::MIME"text/plain", x::ProductArray)
+    _show_product_repr(io, x; name = "ProductArray")
+end
+
+function allocate(x::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
+    return ProductArray(ShapeSpec, allocate(x.data), x.reshapers)
+end
+function allocate(
     x::ProductArray{ShapeSpec},
     ::Type{T},
 ) where {ShapeSpec<:ShapeSpecification,T}
-    return ProductArray(ShapeSpec, similar(x.data, T), x.reshapers)
+    return ProductArray(ShapeSpec, allocate(x.data, T), x.reshapers)
 end
 
 """
@@ -299,11 +332,13 @@ end
 
 ProductRepr(points...) = ProductRepr{typeof(points)}(points)
 
-eltype(x::ProductRepr) = eltype(Tuple{map(eltype, submanifold_components(x))...})
+function number_eltype(x::ProductRepr)
+    return typeof(reduce(+, one(number_eltype(eti)) for eti ∈ x.parts))
+end
 
-similar(x::ProductRepr) = ProductRepr(map(similar, submanifold_components(x))...)
-function similar(x::ProductRepr, ::Type{T}) where {T}
-    return ProductRepr(map(t -> similar(t, T), submanifold_components(x))...)
+allocate(x::ProductRepr) = ProductRepr(map(allocate, submanifold_components(x))...)
+function allocate(x::ProductRepr, ::Type{T}) where {T}
+    return ProductRepr(map(t -> allocate(t, T), submanifold_components(x))...)
 end
 
 function copyto!(x::ProductRepr, y::ProductRepr)
@@ -327,4 +362,8 @@ function Base.convert(::Type{TPR}, x::ProductRepr) where {TPR<:ProductRepr}
         t -> convert(t...),
         ziptuples(tuple(TPR.parameters[1].parameters...), submanifold_components(x)),
     ))
+end
+
+function show(io::IO, ::MIME"text/plain", x::ProductRepr)
+    _show_product_repr(io, x; name = "ProductRepr")
 end

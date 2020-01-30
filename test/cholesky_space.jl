@@ -2,6 +2,7 @@ include("utils.jl")
 
 @testset "Cholesky Space" begin
     M = Manifolds.CholeskySpace(3)
+    @test repr(M) == "CholeskySpace(3)"
 
     types = [
         Matrix{Float64},

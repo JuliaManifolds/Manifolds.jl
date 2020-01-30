@@ -5,7 +5,39 @@ include("utils.jl")
     Mc = FixedRankMatrices(3,2,2,ℂ)
     x = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
     v = UMVTVector([0. 0.; 0. 0.; 1. 1.], [1. 0.; 0. 1.],zeros(2,2))
-    @test inner(M,x,v,v) == norm(M,x,v)^2   
+    @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ)"
+    @test repr(Mc) == "FixedRankMatrices(3, 2, 2, ℂ)"
+    @test sprint(show, "text/plain", x) == """
+    SVDMPoint{Array{Float64,2},Array{Float64,1},Array{Float64,2}}
+    U factor:
+     3×2 Array{Float64,2}:
+      1.0  0.0
+      0.0  1.0
+      0.0  0.0
+    singular values:
+     2-element Array{Float64,1}:
+      1.0
+      1.0
+    Vt factor:
+     2×2 Array{Float64,2}:
+      1.0  0.0
+      0.0  1.0"""
+    @test sprint(show, "text/plain", v) == """
+    UMVTVector{Array{Float64,2},Array{Float64,2},Array{Float64,2}}
+    U factor:
+     3×2 Array{Float64,2}:
+      0.0  0.0
+      0.0  0.0
+      1.0  1.0
+    M factor:
+     2×2 Array{Float64,2}:
+      1.0  0.0
+      0.0  1.0
+    Vt factor:
+     2×2 Array{Float64,2}:
+      0.0  0.0
+      0.0  0.0"""
+    @test inner(M,x,v,v) == norm(M,x,v)^2
     @test x == SVDMPoint(x.U,x.S,x.Vt)
     @test v == UMVTVector(v.U, v.M, v.Vt)
     @testset "Fixed Rank Matrices – Basics" begin
@@ -94,28 +126,29 @@ include("utils.jl")
                 @test -v == UMVTVector(-v.U, -v.M, -v.Vt)
                 w = UMVTVector(v.U, v.M, v.Vt)
                 @test v == w
-                w = similar(v,eltype(v))
+                w = allocate(v, number_eltype(v))
                 zero_tangent_vector!(M,w,x)
                 oneP = SVDMPoint(one(zeros(3, 3)), ones(2), one(zeros(2, 2)), 2)
                 @test oneP == one(x)
                 oneV = UMVTVector(one(zeros(3,3)),one(zeros(2,2)),one(zeros(2,2)),2)
                 @test oneV == one(v)
             end
-            test_manifold(M,
-                          pts,
-                          test_exp_log = false,
-                          default_inverse_retraction_method = nothing,
-                          test_injectivity_radius = false,
-                          default_retraction_method = PolarRetraction(),
-                          test_is_tangent = false,
-                          test_project_tangent = true,
-                          test_vector_transport = false,
-                          test_forward_diff = false,
-                          test_reverse_diff = false,
-                          test_vector_spaces = false,
-                          test_tangent_vector_broadcasting = false, #broadcast not so easy for 3 matrix type
-                          projection_atol_multiplier = 15,
-                          retraction_methods = [PolarRetraction()]
+            test_manifold(
+                M,
+                pts,
+                test_exp_log = false,
+                default_inverse_retraction_method = nothing,
+                test_injectivity_radius = false,
+                default_retraction_method = PolarRetraction(),
+                test_is_tangent = false,
+                test_project_tangent = true,
+                test_vector_transport = false,
+                test_forward_diff = false,
+                test_reverse_diff = false,
+                test_vector_spaces = false,
+                test_tangent_vector_broadcasting = false, #broadcast not so easy for 3 matrix type
+                projection_atol_multiplier = 15,
+                retraction_methods = [PolarRetraction()]
             )
         end
     end

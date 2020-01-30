@@ -4,6 +4,7 @@ include("utils.jl")
     @testset "Real" begin
         M = Grassmann(3,2)
         @testset "Basics" begin
+            @test repr(M) == "Grassmann(3, 2, ℝ)"
             @test representation_size(M) == (3,2)
             @test manifold_dimension(M) == 2
             @test !is_manifold_point(M,[1., 0., 0., 0.])
@@ -63,6 +64,7 @@ include("utils.jl")
     @testset "Complex" begin
         M = Grassmann(3,2,ℂ)
         @testset "Basics" begin
+            @test repr(M) == "Grassmann(3, 2, ℂ)"
             @test representation_size(M) == (3,2)
             @test manifold_dimension(M) == 4
             @test !is_manifold_point(M,[1., 0., 0., 0.])

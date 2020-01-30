@@ -129,7 +129,7 @@ function get_vector(
     B::ArbitraryOrthonormalBasis,
 ) where {N}
     dim = manifold_dimension(M)
-    vout = similar_result(M, get_vector, x)
+    vout = allocate_result(M, get_vector, x)
     @assert size(v) == (div(N * (N + 1), 2),)
     @assert size(vout) == (N, N)
     k = 1

@@ -4,6 +4,9 @@ include("utils.jl")
     E = Manifolds.Euclidean(3)
     Ec = Manifolds.Euclidean(3;field=ℂ)
     EM = Manifolds.MetricManifold(E,Manifolds.EuclideanMetric())
+    @test repr(E) == "Euclidean(3; field = ℝ)"
+    @test repr(Ec) == "Euclidean(3; field = ℂ)"
+    @test repr(Euclidean(2, 3; field = ℍ)) == "Euclidean(2, 3; field = ℍ)"
     @test is_default_metric(EM) == Val{true}()
     @test is_default_metric(E,Manifolds.EuclideanMetric()) == Val{true}()
     x = zeros(3)
@@ -11,6 +14,10 @@ include("utils.jl")
     @test log_local_metric_density(EM,x) == zero(eltype(x))
     @test project_point!(E,x) == x
     @test manifold_dimension(Ec) == 2*manifold_dimension(E)
+
+    @test E^2 === Euclidean(3, 2)
+    @test E^(2,) === Euclidean(3, 2)
+    @test Ec^(4,5) === Euclidean(3, 4, 5; field = ℂ)
 
     manifolds = [ E, EM, Ec ]
     types = [

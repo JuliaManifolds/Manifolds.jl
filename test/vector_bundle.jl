@@ -1,17 +1,21 @@
 include("utils.jl")
 
+struct TestVectorSpaceType <: VectorSpaceType end
+
 @testset "Tangent bundle" begin
     M = Sphere(2)
 
     @testset "FVector" begin
+        @test sprint(show, TangentSpace) == "TangentSpace"
+        @test sprint(show, CotangentSpace) == "CotangentSpace"
         tvs = ([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
         fv_tvs = map(v -> FVector(TangentSpace, v), tvs)
         fv1 = fv_tvs[1]
-        tv1s = similar(fv_tvs[1])
+        tv1s = allocate(fv_tvs[1])
         @test isa(tv1s, FVector)
         @test tv1s.type == TangentSpace
         @test size(tv1s.data) == size(tvs[1])
-        @test eltype(tv1s) == eltype(tvs[1])
+        @test number_eltype(tv1s) == number_eltype(tvs[1])
         @test isa(fv1 + fv1, FVector)
         @test (fv1 + fv1).type == TangentSpace
         @test isa(fv1 - fv1, FVector)
@@ -41,9 +45,13 @@ include("utils.jl")
     for T in types
         x = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)
+        @test sprint(show, TB) == "TangentBundle(Sphere(2))"
         @test base_manifold(TB) == M
         @test manifold_dimension(TB) == 2*manifold_dimension(M)
         @test representation_size(TB) == (6,)
+        CTB = CotangentBundle(M)
+        @test sprint(show, CTB) == "CotangentBundle(Sphere(2))"
+        @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) == "VectorBundle(TestVectorSpaceType(), Sphere(2))"
         @testset "Type $T" begin
             pts_tb = [ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
                       ProductRepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
@@ -79,6 +87,15 @@ include("utils.jl")
         x = [1.0, 0.0, 0.0]
         t_x = TangentSpaceAtPoint(M, x)
         ct_x = CotangentSpaceAtPoint(M, x)
+        @test sprint(show, "text/plain", t_x) == """
+        VectorSpaceAtPoint{VectorBundleFibers{Manifolds.TangentSpaceType,Sphere{2}},Array{Float64,1}}
+        Fiber:
+         VectorBundleFibers(TangentSpace, Sphere(2))
+        Base point:
+         3-element Array{Float64,1}:
+          1.0
+          0.0
+          0.0"""
         @test base_manifold(t_x) == M
         @test base_manifold(ct_x) == M
         @test t_x.fiber.M == M
@@ -91,9 +108,10 @@ include("utils.jl")
 
     @testset "tensor product" begin
         TT = Manifolds.TensorProductType(TangentSpace, TangentSpace)
+        @test sprint(show, TT) == "TensorProductType(TangentSpace, TangentSpace)"
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(2))) == 4
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(3))) == 9
         @test base_manifold(VectorBundleFibers(TT, Sphere(2))) == M
+        @test sprint(show, VectorBundleFibers(TT, Sphere(2))) == "VectorBundleFibers(TensorProductType(TangentSpace, TangentSpace), Sphere(2))"
     end
-
 end
