@@ -13,7 +13,7 @@ include("group_utils.jl")
     pts = [exp(M, x, hat(M, x, ωi)) for ωi in ω]
     vpts = [hat(M, x, [-1.0, 2.0, 0.5]), hat(M, x, [1.0, 0.0, 0.5])]
 
-    ge = similar(pts[1])
+    ge = allocate(pts[1])
     copyto!(ge, Identity(G))
     @test isapprox(ge, I; atol=1e-10)
 
@@ -65,25 +65,25 @@ include("group_utils.jl")
         @test injectivity_radius(G, pts[1]) == injectivity_radius(M, pts[1])
         @test injectivity_radius(G, pts[1], PolarRetraction()) == injectivity_radius(M, pts[1], PolarRetraction())
 
-        y = similar(pts[1])
+        y = allocate(pts[1])
         exp!(G, y, pts[1], vpts[1])
         @test isapprox(M, y, exp(M, pts[1], vpts[1]))
 
-        y = similar(pts[1])
+        y = allocate(pts[1])
         retract!(G, y, pts[1], vpts[1])
         @test isapprox(M, y, retract(M, pts[1], vpts[1]))
 
-        w = similar(vpts[1])
+        w = allocate(vpts[1])
         inverse_retract!(G, w, pts[1], pts[2])
         @test isapprox(M, pts[1], w, inverse_retract(M, pts[1], pts[2]))
 
-        w = similar(vpts[1])
+        w = allocate(vpts[1])
         inverse_retract!(G, w, pts[1], pts[2], QRInverseRetraction())
         @test isapprox(M, pts[1], w, inverse_retract(M, pts[1], pts[2], QRInverseRetraction()))
 
         z = collect(reshape(1.0:9.0, 3, 3))
         @test isapprox(M, project_point(G, z), project_point(M, z))
-        z2 = similar(pts[1])
+        z2 = allocate(pts[1])
         project_point!(G, z2, z)
         @test isapprox(M, z2, project_point(M, z))
     end

@@ -200,9 +200,9 @@ function test_group(
             @test isapprox(G, Identity(G), g; atol = atol)
 
             test_mutating && @testset "mutating" begin
-                v = similar(ve_pts[1])
+                v = allocate(ve_pts[1])
                 @test group_log!(G, v, identity(G, g_pts[1])) === v
-                g = similar(g_pts[1])
+                g = allocate(g_pts[1])
                 @test group_exp!(G, g, v) === g
                 @test isapprox(G, Identity(G), g; atol = atol)
             end
@@ -218,11 +218,11 @@ function test_group(
 
             test_mutating && @testset "mutating" begin
                 for v in ve_pts
-                    g = similar(g_pts[1])
+                    g = allocate(g_pts[1])
                     @test group_exp!(G, g, v) === g
                     @test is_manifold_point(G, g; atol = atol)
                     @test isapprox(G, g, group_exp(G, v); atol = atol)
-                    v2 = similar(v)
+                    v2 = allocate(v)
                     @test group_log!(G, v2, g) === v2
                     @test isapprox(G, Identity(G), v2, v; atol = atol)
                 end
@@ -257,10 +257,10 @@ function test_group(
 
         test_mutating && @testset "mutating" begin
             for conv in diff_convs
-                y = similar(g_pts[1])
+                y = allocate(g_pts[1])
                 @test retract!(G, y, g_pts[1], v_pts[1], Manifolds.GroupExponentialRetraction(conv...)) === y
                 @test is_manifold_point(G, y; atol = atol)
-                v2 = similar(v_pts[1])
+                v2 = allocate(v_pts[1])
                 @test inverse_retract!(G, v2, g_pts[1], y, Manifolds.GroupLogarithmicInverseRetraction(conv...)) === v2
                 @test isapprox(G, g_pts[1], v2, v_pts[1]; atol = atol)
             end

@@ -91,7 +91,7 @@ include("../utils.jl")
         @test zero(ge) === ge
         @test number_eltype(ge) == Bool
         @test copyto!(ge, ge) === ge
-        y = similar(x)
+        y = allocate(x)
         copyto!(y, ge)
         @test y ≈ zero(x)
         @test ge - x == -x
@@ -110,7 +110,7 @@ include("../utils.jl")
         @test inv(G, ge) === ge
         @test identity(G, x) ≈ zero(x)
         @test identity(G, ge) === ge
-        y = similar(x)
+        y = allocate(x)
         identity!(G, y, x)
         @test y ≈ zero(x)
         @test compose(G, x, x) ≈ x + x
@@ -144,7 +144,7 @@ include("../utils.jl")
         ge = Identity(G)
         @test number_eltype(ge) == Bool
         @test copyto!(ge, ge) === ge
-        y = similar(x)
+        y = allocate(x)
         copyto!(y, ge)
         @test y ≈ one(x)
         @test one(ge) === ge
@@ -162,13 +162,13 @@ include("../utils.jl")
         @test ge \ ge === ge
         @test ge / x ≈ inv(x)
         @test x \ ge ≈ inv(x)
-        y = similar(x)
+        y = allocate(x)
         @test LinearAlgebra.mul!(y, x, ge) === y
         @test y ≈ x
-        y = similar(x)
+        y = allocate(x)
         @test LinearAlgebra.mul!(y, ge, x) === y
         @test y ≈ x
-        y = similar(x)
+        y = allocate(x)
         @test LinearAlgebra.mul!(y, ge, ge) === y
         @test y ≈ one(y)
 
@@ -177,7 +177,7 @@ include("../utils.jl")
         @test inv(G, ge) === ge
         @test identity(G, x) ≈ one(x)
         @test identity(G, ge) === ge
-        y = similar(x)
+        y = allocate(x)
         identity!(G, y, x)
         @test y ≈ one(x)
         @test_throws ErrorException identity!(G, [0.0], ge)

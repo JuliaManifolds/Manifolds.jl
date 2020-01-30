@@ -111,7 +111,7 @@ the $n + 1 × n + 1$ matrix
 ````
 """
 function affine_matrix(G::SpecialEuclidean{n}, x) where {n}
-    y = similar(x, (n + 1, n + 1))
+    y = allocate(x, Size(n + 1, n + 1))
     map(copyto!, submanifold_components(G, y), submanifold_components(G, x))
     @inbounds _padpoint!(G, y)
     return y
@@ -121,7 +121,7 @@ affine_matrix(::SpecialEuclidean{n}, x::AbstractMatrix) where {n} = x
     return SDiagonal{n}(I)
 end
 function affine_matrix(G::SpecialEuclidean{n}, e, v) where {n}
-    w = similar(v, (n + 1, n + 1))
+    w = allocate(v, Size(n + 1, n + 1))
     map(copyto!, submanifold_components(G, w), submanifold_components(G, v))
     @inbounds _padvector!(G, w)
     return w

@@ -215,6 +215,22 @@ isapprox(x, e::Identity; kwargs...) = isapprox(e::Identity, x; kwargs...)
 isapprox(e::Identity, x; kwargs...) = isapprox(e.group, e, x; kwargs...)
 isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
+function allocate_result(M::Manifold, ::typeof(hat), e::Identity, vⁱ)
+    is_decorator_group(M) === Val(true) && return allocate_result(base_group(M), hat, e, vⁱ)
+    error("allocate_result not implemented for manifold $(M), function hat, point $(e), and vector $(vⁱ).")
+end
+function allocate_result(G::GT, ::typeof(hat), ::Identity{GT}, vⁱ) where {GT<:AbstractGroupManifold}
+    B = VectorBundleFibers(TangentSpace, G)
+    return allocate(vⁱ, Size(representation_size(B)))
+end
+function allocate_result(M::Manifold, ::typeof(vee), e::Identity, v)
+    is_decorator_group(M) === Val(true) && return allocate_result(base_group(M), vee, e, v)
+    error("allocate_result not implemented for manifold $(M), function vee, point $(e), and vector $(v).")
+end
+function allocate_result(G::GT, ::typeof(vee), ::Identity{GT}, v) where {GT<:AbstractGroupManifold}
+    return allocate(v, Size(manifold_dimension(G)))
+end
+
 function check_manifold_point(M::Manifold, x::Identity; kwargs...)
     if is_decorator_group(M) === Val(true)
         return check_manifold_point(base_group(M), x; kwargs...)
@@ -601,7 +617,7 @@ function group_exp(M::Manifold, v, ::Val{false})
     return error("group_exp not implemented on $(typeof(M)) for vector $(typeof(v)).")
 end
 function group_exp(G::AbstractGroupManifold, v)
-    y = similar_result(G, group_exp, v)
+    y = allocate_result(G, group_exp, v)
     return group_exp!(G, y, v)
 end
 
@@ -646,7 +662,7 @@ function group_log(M::Manifold, y, ::Val{false})
     return error("group_log not implemented on $(typeof(M)) for element $(typeof(y)).")
 end
 function group_log(G::AbstractGroupManifold, y)
-    v = similar_result(G, group_log, y)
+    v = allocate_result(G, group_log, y)
     return group_log!(G, v, y)
 end
 

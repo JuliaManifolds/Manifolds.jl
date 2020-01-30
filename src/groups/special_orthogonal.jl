@@ -40,35 +40,19 @@ group_exp!(G::SpecialOrthogonal, y, v) = exp!(G, y, Identity(G), v)
 
 group_log!(G::SpecialOrthogonal, v, y) = log!(G, v, Identity(G), y)
 
-function similar_result(
+function allocate_result(
     ::GT,
     ::typeof(exp),
     ::Identity{GT},
     v,
 ) where {n,GT<:SpecialOrthogonal{n}}
-    return similar(v)
+    return allocate(v)
 end
-function similar_result(
+function allocate_result(
     ::GT,
     ::typeof(log),
     ::Identity{GT},
     y,
 ) where {n,GT<:SpecialOrthogonal{n}}
-    return similar(y)
-end
-function similar_result(
-    ::GT,
-    ::typeof(hat),
-    ::Identity{GT},
-    vⁱ,
-) where {n,GT<:SpecialOrthogonal{n}}
-    return similar(vⁱ, (n, n))
-end
-function similar_result(
-    ::GT,
-    ::typeof(vee),
-    ::Identity{GT},
-    v,
-) where {n,GT<:SpecialOrthogonal{n}}
-    return similar(v, n)
+    return allocate(y)
 end

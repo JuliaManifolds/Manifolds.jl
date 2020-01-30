@@ -272,7 +272,7 @@ function group_exp(M::ProductManifold, v::ProductRepr)
     return ProductRepr(map(group_exp, M.manifolds, submanifold_components(M, v))...)
 end
 function group_exp(M::ProductManifold, v)
-    y = similar_result(M, group_exp, v)
+    y = allocate_result(M, group_exp, v)
     return group_exp!(M, y, v)
 end
 
