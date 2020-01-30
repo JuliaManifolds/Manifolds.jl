@@ -12,7 +12,9 @@ as long as that renders still in $\TeX$ within this documentation.
 |:--:|:-------------- |:--:|:--- |
 | $T^*_p \mathcal M$ | The cotangent space at $p$ | | |
 | $\xi$ | A cotangent vector from $T^*_p \mathcal M$ | $\xi_1, \xi_2,\ldots,\eta,\zeta$ | |
-| $F$ | A fiber | |
+| $m$ | dimension (of a manifold) | $n_1,n_2,\ldots,m$| |
+| $F$ | A fiber | | |
+| $k$ | indices | $i,j$ | |
 | $\langle\cdot,\cdot\rangle$ | inner product (in $T_p \mathcal M$) | $\langle\cdot,\cdot\rangle_p, g_p(\cdot,\cdot)$ |
 | $\mathcal M$ | A manifold | $\mathcal M_1, \mathcal M_2,\ldots,\mathcal N$ | |
 | $\mathcal P_{q\gets p}X$ | parallel Transport |
