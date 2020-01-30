@@ -7,8 +7,36 @@ include("utils.jl")
     v = UMVTVector([0. 0.; 0. 0.; 1. 1.], [1. 0.; 0. 1.],zeros(2,2))
     @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ)"
     @test repr(Mc) == "FixedRankMatrices(3, 2, 2, ℂ)"
-    @test startswith(repr("text/plain", x), summary(x))
-    @test startswith(repr("text/plain", v), summary(v))
+    @test sprint(show, "text/plain", x) == """
+    SVDMPoint{Array{Float64,2},Array{Float64,1},Array{Float64,2}}
+    U factor:
+     3×2 Array{Float64,2}:
+      1.0  0.0
+      0.0  1.0
+      0.0  0.0
+    singular values:
+     2-element Array{Float64,1}:
+      1.0
+      1.0
+    Vt factor:
+     2×2 Array{Float64,2}:
+      1.0  0.0
+      0.0  1.0"""
+    @test sprint(show, "text/plain", v) == """
+    UMVTVector{Array{Float64,2},Array{Float64,2},Array{Float64,2}}
+    U factor:
+     3×2 Array{Float64,2}:
+      0.0  0.0
+      0.0  0.0
+      1.0  1.0
+    M factor:
+     2×2 Array{Float64,2}:
+      1.0  0.0
+      0.0  1.0
+    Vt factor:
+     2×2 Array{Float64,2}:
+      0.0  0.0
+      0.0  0.0"""
     @test inner(M,x,v,v) == norm(M,x,v)^2
     @test x == SVDMPoint(x.U,x.S,x.Vt)
     @test v == UMVTVector(v.U, v.M, v.Vt)

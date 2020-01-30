@@ -562,11 +562,16 @@ end
 function show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
     summary(io, vs)
     println(io, "\nFiber:")
-    show(io, mime, vs.fiber)
-    println(io, "\nBase point:")
-    show(io, mime, vs.x)
+    pre = " "
+    sf = sprint(show, "text/plain", vs.fiber; context = io, sizehint = 0)
+    sf = replace(sf, '\n' => "\n$(pre)")
+    println(io, pre, sf)
+    println(io, "Base point:")
+    sp = sprint(show, "text/plain", vs.x; context = io, sizehint = 0)
+    sp = replace(sp, '\n' => "\n$(pre)")
+    print(io, pre, sp)
 end
-show(io::IO, vb::VectorBundle) = print(io, "VectorBundle($(vb.VS), $(vb.M))")
+show(io::IO, vb::VectorBundle) = print(io, "VectorBundle($(vb.type), $(vb.M))")
 show(io::IO, vb::TangentBundle) = print(io, "TangentBundle($(vb.M))")
 show(io::IO, vb::CotangentBundle) = print(io, "CotangentBundle($(vb.M))")
 
