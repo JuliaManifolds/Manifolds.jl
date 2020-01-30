@@ -170,57 +170,57 @@ const PowerManifoldMultidimensional =
 const PowerManifoldNested =
     AbstractPowerManifold{<:Manifold,NestedPowerRepresentation} where {TSize}
 
-function basis(M::AbstractPowerManifold, x, B::AbstractBasis)
+function basis(M::AbstractPowerManifold, p, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
-    vs = [basis(M.manifold, _read(M, rep_size, x, i), B) for i in get_iterator(M)]
+    vs = [basis(M.manifold, _read(M, rep_size, p, i), B) for i in get_iterator(M)]
     return PrecomputedPowerOrthonormalBasis(vs)
 end
 
 ^(M::Manifold, n) = PowerManifold(M, n...)
 
-function basis(M::AbstractPowerManifold, x, B::ArbitraryOrthonormalBasis)
-    return invoke(basis, Tuple{PowerManifold,Any,AbstractBasis}, M, x, B)
+function basis(M::AbstractPowerManifold, p, B::ArbitraryOrthonormalBasis)
+    return invoke(basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
 end
 
-function basis(M::AbstractPowerManifold, x, B::DiagonalizingOrthonormalBasis)
-    return invoke(basis, Tuple{PowerManifold,Any,AbstractBasis}, M, x, B)
+function basis(M::AbstractPowerManifold, p, B::DiagonalizingOrthonormalBasis)
+    return invoke(basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
 end
 
 """
-    check_manifold_point(M::AbstractProductManifold, x; kwargs...)
+    check_manifold_point(M::AbstractProductManifold, p; kwargs...)
 
-Check whether `x` is a valid point on an [`AbstractPowerManifold`](@ref) `M`, i.e.
-each element of `x` has to be a valid point on the base manifold.
+Check whether `p` is a valid point on an [`AbstractPowerManifold`](@ref) `M`,
+i.e. each element of `p` has to be a valid point on the base manifold.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_manifold_point(M::AbstractPowerManifold, x; kwargs...)
+function check_manifold_point(M::AbstractPowerManifold, p; kwargs...)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        imp = check_manifold_point(M.manifold, _read(M, rep_size, x, i); kwargs...)
+        imp = check_manifold_point(M.manifold, _read(M, rep_size, p, i); kwargs...)
         imp === nothing || return imp
     end
     return nothing
 end
 
 """
-    check_tangent_vector(M::AbstractPowerManifold, x, v; kwargs... )
+    check_tangent_vector(M::AbstractPowerManifold, p, X; kwargs... )
 
-Check whether `v` is a tangent vector to `x` an the [`AbstractPowerManifold`](@ref)
-`M`, i.e. atfer [`check_manifold_point`](@ref)`(M, x)`, and all projections to
+Check whether `X` is a tangent vector to `p` an the [`AbstractPowerManifold`](@ref)
+`M`, i.e. atfer [`check_manifold_point`](@ref)`(M, p)`, and all projections to
 base manifolds must be respective tangent vectors.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::AbstractPowerManifold, x, v; kwargs...)
-    mpe = check_manifold_point(M, x)
+function check_tangent_vector(M::AbstractPowerManifold, p, X; kwargs...)
+    mpe = check_manifold_point(M, p)
     mpe === nothing || return mpe
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         imp = check_tangent_vector(
             M.manifold,
-            _read(M, rep_size, x, i),
-            _read(M, rep_size, v, i);
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i);
             kwargs...,
         )
         imp === nothing || return imp
@@ -230,107 +230,107 @@ end
 
 function det_local_metric(
     M::MetricManifold{<:AbstractPowerManifold,PowerMetric},
-    x::AbstractArray,
+    p::AbstractArray,
 )
-    result = one(number_eltype(x))
+    result = one(number_eltype(p))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        result *= det_local_metric(M.manifold, _read(M, rep_size, x, i))
+        result *= det_local_metric(M.manifold, _read(M, rep_size, p, i))
     end
     return result
 end
 
 @doc raw"""
-    distance(M::AbstractPowerManifold, x, y)
+    distance(M::AbstractPowerManifold, p, q)
 
-Compute the distance between `x` and `y` on an [`AbstractPowerManifold`](@ref),
+Compute the distance between `q` and `p` on an [`AbstractPowerManifold`](@ref),
 i.e. from the element wise distances the Forbenius norm is computed.
 """
-function distance(M::AbstractPowerManifold, x, y)
-    sum_squares = zero(number_eltype(x))
+function distance(M::AbstractPowerManifold, p, q)
+    sum_squares = zero(number_eltype(p))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         sum_squares +=
-            distance(M.manifold, _read(M, rep_size, x, i), _read(M, rep_size, y, i))^2
+            distance(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, q, i))^2
     end
     return sqrt(sum_squares)
 end
 
 @doc raw"""
-    exp(M::AbstractPowerManifold, x, v)
+    exp(M::AbstractPowerManifold, p, X)
 
-Compute the exponential map from `x` in direction `v` on the [`AbstractPowerManifold`](@ref) `M`,
+Compute the exponential map from `p` in direction `X` on the [`AbstractPowerManifold`](@ref) `M`,
 which can be computed using the base manifolds exponential map elementwise.
 """
 exp(::AbstractPowerManifold, ::Any...)
 
-function exp!(M::AbstractPowerManifold, y, x, v)
+function exp!(M::AbstractPowerManifold, q, p, X)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         exp!(
             M.manifold,
-            _write(M, rep_size, y, i),
-            _read(M, rep_size, x, i),
-            _read(M, rep_size, v, i),
+            _write(M, rep_size, q, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
         )
     end
-    return y
+    return q
 end
 
 @doc raw"""
-    flat(M::AbstractPowerManifold, x, w::FVector{TangentSpaceType})
+    flat(M::AbstractPowerManifold, p, X::FVector{TangentSpaceType})
 
-use the musical isomorphism to transform the tangent vector `w` from the tangent space at
-`x` on an [`AbstractPowerManifold`](@ref) `M` to a cotangent vector.
-This can be done elementwise, so r every entry of `w` (and `x`) sparately
+use the musical isomorphism to transform the tangent vector `X` from the tangent space at
+`p` on an [`AbstractPowerManifold`](@ref) `M` to a cotangent vector.
+This can be done elementwise, so r every entry of `X` (and `p`) sparately
 """
 flat(::AbstractPowerManifold, ::Any...)
 
-function flat!(M::AbstractPowerManifold, v::CoTFVector, x, w::TFVector)
+function flat!(M::AbstractPowerManifold, ξ::CoTFVector, p, X::TFVector)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         flat!(
             M.manifold,
-            FVector(CotangentSpace, _write(M, rep_size, v.data, i)),
-            _read(M, rep_size, x, i),
-            FVector(TangentSpace, _read(M, rep_size, w.data, i)),
+            FVector(CotangentSpace, _write(M, rep_size, ξ.data, i)),
+            _read(M, rep_size, p, i),
+            FVector(TangentSpace, _read(M, rep_size, X.data, i)),
         )
     end
-    return v
+    return ξ
 end
 
-function get_basis(M::AbstractPowerManifold, x, B::AbstractBasis)
+function get_basis(M::AbstractPowerManifold, p, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
-    vs = [get_basis(M.manifold, _read(M, rep_size, x, i), B) for i in get_iterator(M)]
+    vs = [get_basis(M.manifold, _read(M, rep_size, p, i), B) for i in get_iterator(M)]
     return PrecomputedPowerOrthonormalBasis(vs)
 end
-function get_basis(M::AbstractPowerManifold, x, B::ArbitraryOrthonormalBasis)
-    return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, x, B)
+function get_basis(M::AbstractPowerManifold, p, B::ArbitraryOrthonormalBasis)
+    return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
 end
-function get_basis(M::AbstractPowerManifold, x, B::DiagonalizingOrthonormalBasis)
-    return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, x, B)
+function get_basis(M::AbstractPowerManifold, p, B::DiagonalizingOrthonormalBasis)
+    return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
 end
 
-function get_coordinates(M::AbstractPowerManifold, x, v, B::ArbitraryOrthonormalBasis)
+function get_coordinates(M::AbstractPowerManifold, p, X, B::ArbitraryOrthonormalBasis)
     rep_size = representation_size(M.manifold)
     vs = [
-        get_coordinates(M.manifold, _read(M, rep_size, x, i), _read(M, rep_size, v, i), B)
+        get_coordinates(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), B)
         for i in get_iterator(M)
     ]
     return reduce(vcat, reshape(vs, length(vs)))
 end
 function get_coordinates(
     M::AbstractPowerManifold,
-    x,
-    v,
+    p,
+    X,
     B::PrecomputedPowerOrthonormalBasis,
 )
     rep_size = representation_size(M.manifold)
     vs = [
         get_coordinates(
             M.manifold,
-            _read(M, rep_size, x, i),
-            _read(M, rep_size, v, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
             B.bases[i...],
         )
         for i in get_iterator(M)
@@ -344,19 +344,18 @@ get_iterator(M::PowerManifold{<:Manifold,Tuple{N}}) where {N} = 1:N
     return Base.product(map(Base.OneTo, size_tuple)...)
 end
 
-function get_vector(M::PowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
+function get_vector(M::PowerManifold, p, X, B::PrecomputedPowerOrthonormalBasis)
     dim = manifold_dimension(M.manifold)
-
     rep_size = representation_size(M.manifold)
-    v_out = allocate(x)
+    v_out = allocate(p)
     v_iter = 1
     for i in get_iterator(M)
         copyto!(
             _write(M, rep_size, v_out, i),
             get_vector(
                 M.manifold,
-                _read(M, rep_size, x, i),
-                v[v_iter:v_iter+dim-1],
+                _read(M, rep_size, p, i),
+                X[v_iter:v_iter+dim-1],
                 B.bases[i...],
             ),
         )
@@ -364,16 +363,15 @@ function get_vector(M::PowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
     end
     return v_out
 end
-function get_vector(M::AbstractPowerManifold, x, v, B::ArbitraryOrthonormalBasis)
+function get_vector(M::AbstractPowerManifold, p, X, B::ArbitraryOrthonormalBasis)
     dim = manifold_dimension(M.manifold)
-
     rep_size = representation_size(M.manifold)
-    v_out = allocate(x)
+    v_out = allocate(p)
     v_iter = 1
     for i in get_iterator(M)
         copyto!(
             _write(M, rep_size, v_out, i),
-            get_vector(M.manifold, _read(M, rep_size, x, i), v[v_iter:v_iter+dim-1], B),
+            get_vector(M.manifold, _read(M, rep_size, p, i), X[v_iter:v_iter+dim-1], B),
         )
         v_iter += dim
     end
@@ -381,18 +379,18 @@ function get_vector(M::AbstractPowerManifold, x, v, B::ArbitraryOrthonormalBasis
 end
 
 @doc raw"""
-    injectivity_radius(M::AbstractPowerManifold[, x])
+    injectivity_radius(M::AbstractPowerManifold[, p])
 
 the injectivity radius on an [`AbstractPowerManifold`](@ref) is for the global case
-equal to the one of its base manifold. For a given point `x` it's equal to the
+equal to the one of its base manifold. For a given point `p` it's equal to the
 minimum of all radii in the array entries.
 """
-function injectivity_radius(M::AbstractPowerManifold, x)
+function injectivity_radius(M::AbstractPowerManifold, p)
     radius = 0.0
     initialized = false
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        cur_rad = injectivity_radius(M.manifold, _read(M, rep_size, x, i))
+        cur_rad = injectivity_radius(M.manifold, _read(M, rep_size, p, i))
         if initialized
             radius = min(cur_rad, radius)
         else
@@ -405,47 +403,47 @@ end
 injectivity_radius(M::AbstractPowerManifold) = injectivity_radius(M.manifold)
 
 @doc raw"""
-    inverse_retract(M::AbstractPowerManifold, x, y, m::InversePowerRetraction)
+    inverse_retract(M::AbstractPowerManifold, p, q, m::InversePowerRetraction)
 
-Compute the inverse retraction from `x` with respect to `y` on an [`AbstractPowerManifold`](@ref) `M`
+Compute the inverse retraction from `p` with respect to `q` on an [`AbstractPowerManifold`](@ref) `M`
 using an [`InversePowerRetraction`](@ref), which by default encapsulates a inverse retraction
 of the base manifold. Then this method is performed elementwise, so the encapsulated inverse
 retraction method has to be one that is available on the base [`Manifold`](@ref).
 """
 inverse_retract(::AbstractPowerManifold, ::Any...)
 
-function inverse_retract!(M::AbstractPowerManifold, v, x, y, method::InversePowerRetraction)
+function inverse_retract!(M::AbstractPowerManifold, X, p, q, method::InversePowerRetraction)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         inverse_retract!(
             M.manifold,
-            _write(M, rep_size, v, i),
-            _read(M, rep_size, x, i),
-            _read(M, rep_size, y, i),
+            _write(M, rep_size, X, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, q, i),
             method.inverse_retraction,
         )
     end
-    return v
+    return X
 end
 
 @doc raw"""
-    inner(M::AbstractPowerManifold, x, v, w)
+    inner(M::AbstractPowerManifold, p, X, Y)
 
-Compute the inner product of `v` and `w` from the tangent space at `x` on an
+Compute the inner product of `X` and `Y` from the tangent space at `p` on an
 [`AbstractPowerManifold`](@ref) `M`, i.e. for each arrays entry the tangent
-vector entries from `v` and `w` are in the tangent space of the corresponding
-element from `x`.
+vector entries from `X` and `Y` are in the tangent space of the corresponding
+element from `p`.
 The inner product is then the sum of the elementwise inner products.
 """
-function inner(M::AbstractPowerManifold, x, v, w)
-    result = zero(number_eltype(v))
+function inner(M::AbstractPowerManifold, p, X, Y)
+    result = zero(number_eltype(X))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         result += inner(
             M.manifold,
-            _read(M, rep_size, x, i),
-            _read(M, rep_size, v, i),
-            _read(M, rep_size, w, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, Y, i),
         )
     end
     return result
@@ -453,28 +451,28 @@ end
 
 is_default_metric(::AbstractPowerManifold, ::PowerMetric) = Val(true)
 
-function isapprox(M::AbstractPowerManifold, x, y; kwargs...)
+function isapprox(M::AbstractPowerManifold, p, q; kwargs...)
     result = true
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         result &= isapprox(
             M.manifold,
-            _read(M, rep_size, x, i),
-            _read(M, rep_size, y, i);
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, q, i);
             kwargs...,
         )
     end
     return result
 end
-function isapprox(M::AbstractPowerManifold, x, v, w; kwargs...)
+function isapprox(M::AbstractPowerManifold, p, X, Y; kwargs...)
     result = true
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         result &= isapprox(
             M.manifold,
-            _read(M, rep_size, x, i),
-            _read(M, rep_size, v, i),
-            _read(M, rep_size, w, i);
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, Y, i);
             kwargs...,
         )
     end
@@ -482,24 +480,24 @@ function isapprox(M::AbstractPowerManifold, x, v, w; kwargs...)
 end
 
 @doc raw"""
-    log(M::AbstractPowerManifold, x, y)
+    log(M::AbstractPowerManifold, p, q)
 
-Compute the logarithmic map from `x` to `y` on the [`AbstractPowerManifold`](@ref) `M`,
+Compute the logarithmic map from `p` to `q` on the [`AbstractPowerManifold`](@ref) `M`,
 which can be computed using the base manifolds logarithmic map elementwise.
 """
 log(::AbstractPowerManifold, ::Any...)
 
-function log!(M::AbstractPowerManifold, v, x, y)
+function log!(M::AbstractPowerManifold, X, p, q)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         log!(
             M.manifold,
-            _write(M, rep_size, v, i),
-            _read(M, rep_size, x, i),
-            _read(M, rep_size, y, i),
+            _write(M, rep_size, X, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, q, i),
         )
     end
-    return v
+    return X
 end
 
 
@@ -520,18 +518,18 @@ function manifold_dimension(M::PowerManifold{<:Manifold,TSize}) where {TSize}
 end
 
 @doc raw"""
-    norm(M::AbstractPowerManifold, x, v)
+    norm(M::AbstractPowerManifold, p, X)
 
-Compute the norm of `v` from the tangent space of `x` on an
+Compute the norm of `X` from the tangent space of `p` on an
 [`AbstractPowerManifold`](@ref) `M`, i.e. from the element wise norms the
 Frobenius norm is computed.
 """
-function norm(M::AbstractPowerManifold, x, v)
-    sum_squares = zero(number_eltype(v))
+function norm(M::AbstractPowerManifold, p, X)
+    sum_squares = zero(number_eltype(X))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         sum_squares +=
-            norm(M.manifold, _read(M, rep_size, x, i), _read(M, rep_size, v, i))^2
+            norm(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i))^2
     end
     return sqrt(sum_squares)
 end
@@ -607,18 +605,18 @@ method has to be one that is available on the base [`Manifold`](@ref).
 """
 retract(::AbstractPowerManifold, ::Any...)
 
-function retract!(M::AbstractPowerManifold, y, x, v, method::PowerRetraction)
+function retract!(M::AbstractPowerManifold, q, p, X, method::PowerRetraction)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         retract!(
             M.manifold,
-            _write(M, rep_size, y, i),
-            _read(M, rep_size, x, i),
-            _read(M, rep_size, v, i),
+            _write(M, rep_size, q, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
             method.retraction,
         )
     end
-    return y
+    return q
 end
 
 @doc raw"""
@@ -630,17 +628,17 @@ This can be done elementwise, so for every entry of `w` (and `x`) sparately
 """
 sharp(::AbstractPowerManifold, ::Any...)
 
-function sharp!(M::AbstractPowerManifold, v::TFVector, x, w::CoTFVector)
+function sharp!(M::AbstractPowerManifold, X::TFVector, p, ξ::CoTFVector)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         sharp!(
             M.manifold,
-            FVector(TangentSpace, _write(M, rep_size, v.data, i)),
-            _read(M, rep_size, x, i),
-            FVector(CotangentSpace, _read(M, rep_size, w.data, i)),
+            FVector(TangentSpace, _write(M, rep_size, X.data, i)),
+            _read(M, rep_size, p, i),
+            FVector(CotangentSpace, _read(M, rep_size, ξ.data, i)),
         )
     end
-    return v
+    return X
 end
 
 function show(
