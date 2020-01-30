@@ -3,13 +3,12 @@
 
 The manifold of symmetric positive definite matrices, i.e.
 
-```math
+````math
 𝒫(n) =
 \bigl\{
-x  ∈ ℝ^{n\times n} :
-ξ^\mathrm{T}xξ > 0 \text{ for all } ξ ∈ ℝ^{n}\backslash\{0\}
+p ∈ ℝ^{n\times n} : a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
 \bigr\}
-```
+````
 
 # Constructor
 
@@ -22,64 +21,64 @@ struct SymmetricPositiveDefinite{N} <: Manifold end
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
 
 @doc raw"""
-    check_manifold_point(M::SymmetricPositiveDefinite, x; kwargs...)
+    check_manifold_point(M::SymmetricPositiveDefinite, p; kwargs...)
 
-checks, whether `x` is a valid point on the [`SymmetricPositiveDefinite`](@ref) `M`, i.e. is a matrix
+checks, whether `p` is a valid point on the [`SymmetricPositiveDefinite`](@ref) `M`, i.e. is a matrix
 of size `(N,N)`, symmetric and positive definite.
 The tolerance for the second to last test can be set using the `kwargs...`.
 """
-function check_manifold_point(M::SymmetricPositiveDefinite{N}, x; kwargs...) where {N}
-    if size(x) != representation_size(M)
+function check_manifold_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
+    if size(p) != representation_size(M)
         return DomainError(
-            size(x),
-            "The point $(x) does not lie on $(M), since its size is not $(representation_size(M)).",
+            size(p),
+            "The point $(p) does not lie on $(M), since its size is not $(representation_size(M)).",
         )
     end
-    if !isapprox(norm(x - transpose(x)), 0.0; kwargs...)
+    if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
         return DomainError(
-            norm(x),
-            "The point $(x) does not lie on $(M) since its not a symmetric matrix:",
+            norm(p),
+            "The point $(p) does not lie on $(M) since its not a symmetric matrix:",
         )
     end
-    if !all(eigvals(x) .> 0)
+    if !all(eigvals(p) .> 0)
         return DomainError(
-            norm(x),
-            "The point $x does not lie on $(M) since its not a positive definite matrix.",
+            norm(p),
+            "The point $p does not lie on $(M) since its not a positive definite matrix.",
         )
     end
     return nothing
 end
 
 """
-    check_tangent_vector(M::SymmetricPositiveDefinite, x, v; kwargs... )
+    check_tangent_vector(M::SymmetricPositiveDefinite, p, X; kwargs... )
 
-Check whether `v` is a tangent vector to `x` on the [`SymmetricPositiveDefinite`](@ref) `M`,
-i.e. atfer [`check_manifold_point`](@ref)`(M,x)`, `v` has to be of same dimension as `x`
+Check whether `X` is a tangent vector to `p` on the [`SymmetricPositiveDefinite`](@ref) `M`,
+i.e. atfer [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
 and a symmetric matrix, i.e. this stores tangent vetors as elements of the corresponding
 Lie group. The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::SymmetricPositiveDefinite{N}, x, v; kwargs...) where {N}
-    mpe = check_manifold_point(M, x)
+function check_tangent_vector(M::SymmetricPositiveDefinite{N}, p, X; kwargs...) where {N}
+    mpe = check_manifold_point(M, p)
     mpe === nothing || return mpe
-    if size(v) != representation_size(M)
+    if size(X) != representation_size(M)
         return DomainError(
-            size(v),
-            "The vector $(v) is not a tangent to a point on $(M) since its size does not match $(representation_size(M)).",
+            size(X),
+            "The vector $(X) is not a tangent to a point on $(M) since its size does not match $(representation_size(M)).",
         )
     end
-    if !isapprox(norm(v - transpose(v)), 0.0; kwargs...)
+    if !isapprox(norm(X - transpose(X)), 0.0; kwargs...)
         return DomainError(
-            size(v),
-            "The vector $(v) is not a tangent to a point on $(M) (represented as an element of the Lie algebra) since its not symmetric.",
+            size(X),
+            "The vector $(X) is not a tangent to a point on $(M) (represented as an element of the Lie algebra) since its not symmetric.",
         )
     end
     return nothing
 end
 
 @doc raw"""
-    injectivity_radius(M::SymmetricPositiveDefinite[, x])
-    injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}[, x])
-    injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}[, x])
+    injectivity_radius(M::SymmetricPositiveDefinite[, p])
+    injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}[, p])
+    injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}[, p])
 
 Return the injectivity radius of the [`SymmetricPositiveDefinite`](@ref).
 Since `M` is a Hadamard manifold with respect to the [`LinearAffineMetric`](@ref) and the
@@ -116,12 +115,12 @@ mean(::SymmetricPositiveDefinite, ::Any)
 
 function mean!(
     M::SymmetricPositiveDefinite,
-    y,
+    p,
     x::AbstractVector,
     w::AbstractVector;
     kwargs...,
 )
-    return mean!(M, y, x, w, GeodesicInterpolation(); kwargs...)
+    return mean!(M, p, x, w, GeodesicInterpolation(); kwargs...)
 end
 
 @doc raw"""

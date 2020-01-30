@@ -10,55 +10,55 @@ introduced by [^Lin2019].
 """
 struct LogCholeskyMetric <: RiemannianMetric end
 
-cholesky_to_spd(l, w) = (l * l', w * l' + l * w')
+cholesky_to_spd(x, W) = (x * x', W * x' + x * W')
 
-tangent_cholesky_to_tangent_spd!(l, w) = (w .= w * l' + l * w')
+tangent_cholesky_to_tangent_spd!(x, W) = (w .= W * x' + x * W')
 
-spd_to_cholesky(x, v) = spd_to_cholesky(x, cholesky(x).L, v)
+spd_to_cholesky(p, X) = spd_to_cholesky(p, cholesky(p).L, X)
 
-function spd_to_cholesky(x, l, v)
-    w = inv(l) * v * inv(transpose(l))
+function spd_to_cholesky(p, x, X)
+    w = inv(x) * X * inv(transpose(x))
     # strictly lower triangular plus half diagonal
-    return (l, l * (LowerTriangular(w) - Diagonal(w) / 2))
+    return (x, x * (LowerTriangular(w) - Diagonal(w) / 2))
 end
 
 @doc raw"""
-    distance(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, x, y)
+    distance(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, p, q)
 
 Compute the distance on the manifold of [`SymmetricPositiveDefinite`](@ref)
-nmatrices, i.e. between two symmetric positive definite matrices `x` and `y`
+nmatrices, i.e. between two symmetric positive definite matrices `p` and `q`
 with respect to the [`LogCholeskyMetric`](@ref). The formula reads
 
 ````math
-d_{𝒫(n)}(x,y) = \sqrt{
- \lVert ⌊ l ⌋ - ⌊ k ⌋ \rVert_{\mathrm{F}}^2
- + \lVert \log(\operatorname{diag}(l)) - \log(\operatorname{diag}(k))\rVert_{\mathrm{F}}^2 }\ \ ,
+d_{𝒫(n)}(p,q) = \sqrt{
+ \lVert ⌊ x ⌋ - ⌊ y ⌋ \rVert_{\mathrm{F}}^2
+ + \lVert \log(\operatorname{diag}(x)) - \log(\operatorname{diag}(y))\rVert_{\mathrm{F}}^2 }\ \ ,
 ````
 
-where $l$ and $k$ are the cholesky factors of $x$ and $y$, respectively,
+where $x$ and $y$ are the cholesky factors of $p$ and $q$, respectively,
 $⌊\cdot⌋$ denbotes the strictly lower triangular matrix of its argument,
-and $\lVert\cdot\rVert_{\mathrm{F}}$ denotes the Frobenius norm.
+and $\lVert\cdot\rVert_{\mathrm{F}}$ the Frobenius norm.
 """
 function distance(
     M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
-    x,
-    y,
+    p,
+    q,
 ) where {N}
-    return distance(CholeskySpace{N}(), cholesky(x).L, cholesky(y).L)
+    return distance(CholeskySpace{N}(), cholesky(p).L, cholesky(q).L)
 end
 
 @doc raw"""
-    exp(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, x, v)
+    exp(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, p, X)
 
 Compute the exponential map on the [`SymmetricPositiveDefinite`](@ref) `M` with
-[`LogCholeskyMetric`](@ref) from `x` into direction `v`. The formula reads
+[`LogCholeskyMetric`](@ref) from `p` into direction `X`. The formula reads
 
 ````math
-\exp_x v = (\exp_l w)(\exp_l w)^\mathrm{T}
+\exp_pX = (\exp_y W)(\exp_y W)^\mathrm{T}
 ````
 
-where $\exp_lw$ is the exponential map on [`CholeskySpace`](@ref), $l$ is the cholesky
-decomposition of $x$, $w = l(l^{-1}vl^{-\mathrm{T}})_\frac{1}{2}$,
+where $\exp_xW$ is the exponential map on [`CholeskySpace`](@ref), $y$ is the cholesky
+decomposition of $p$, $W = y(y^{-1}Xy^{-\mathrm{T}})_\frac{1}{2}$,
 and $(\cdot)_\frac{1}{2}$
 denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$.
 """
@@ -66,87 +66,87 @@ exp(::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
 
 function exp!(
     M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
-    y,
-    x,
-    v,
+    q,
+    p,
+    X,
 ) where {N}
-    (l, w) = spd_to_cholesky(x, v)
-    z = exp(CholeskySpace{N}(), l, w)
-    return copyto!(y, z * z')
+    (y, W) = spd_to_cholesky(p, X)
+    z = exp(CholeskySpace{N}(), y, W)
+    return copyto!(q, z * z')
 end
 
 @doc raw"""
-    inner(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, x, v, w)
+    inner(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, p, X, Y)
 
-Compute the inner product of two matrices `v`, `w` in the tangent space of `x`
+Compute the inner product of two matrices `X`, `Y` in the tangent space of `p`
 on the [`SymmetricPositiveDefinite`](@ref) manifold `M`, as
 a [`MetricManifold`](@ref) with [`LogCholeskyMetric`](@ref). The formula reads
 
 ````math
-    (v,w)_x = (p_l(w),p_l(v))_l,
+    g_p(X,Y) = ⟨a_z(X),a_z(Y)⟩_z,
 ````
 
-where the right hand side is the inner product on the [`CholeskySpace`](@ref),
-$l$ is the cholesky factor of $x$,
-$p_l(w) = l (l^{-1}wl^{-\mathrm{T}})_{\frac{1}{2}}$, and $(\cdot)_\frac{1}{2}$
+where $⟨\cdot,\cdot⟩_x$ denotes inner product on the [`CholeskySpace`](@ref),
+$z$ is the cholesky factor of $p$,
+$a_z(W) = z (z^{-1}Wz^{-\mathrm{T}})_{\frac{1}{2}}$, and $(\cdot)_\frac{1}{2}$
 denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$
 """
 function inner(
     M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
-    x,
-    v,
-    w,
+    p,
+    X,
+    Y,
 ) where {N}
-    (l, vl) = spd_to_cholesky(x, v)
-    (l, wl) = spd_to_cholesky(x, l, w)
-    return inner(CholeskySpace{N}(), l, vl, wl)
+    (z, Xz) = spd_to_cholesky(p, X)
+    (z, Yz) = spd_to_cholesky(p, z, Y)
+    return inner(CholeskySpace{N}(), z, Xz, Yz)
 end
 
 @doc raw"""
-    log(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, x, y)
+    log(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, p, q)
 
 Compute the logarithmic map on [`SymmetricPositiveDefinite`](@ref) `M` with
-respect to the [`LogCholeskyMetric`](@ref) eminating from `x` to `y`.
+respect to the [`LogCholeskyMetric`](@ref) eminating from `p` to `q`.
 The formula can be adapted from the [`CholeskySpace`](@ref) as
 ````math
-\log_x y = lw^{\mathrm{T}} + wl^{\mathrm{T}},
+\log_p q = xW^{\mathrm{T}} + Wx^{\mathrm{T}},
 ````
-where $l$ is the colesky factor of $x$ and $w=\log_lk$ for $k$ the cholesky factor
-of $y$ and the just mentioned logarithmic map is the one on [`CholeskySpace`](@ref).
+where $x$ is the colesky factor of $p$ and $W=\log_xy$ for $y$ the cholesky factor
+of $q$ and the just mentioned logarithmic map is the one on [`CholeskySpace`](@ref).
 """
 log(::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
 
 function log!(
     M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
-    v,
-    x,
-    y,
+    X,
+    p,
+    q,
 ) where {N}
-    l = cholesky(x).L
-    k = cholesky(y).L
-    log!(CholeskySpace{N}(), v, l, k)
-    return tangent_cholesky_to_tangent_spd!(l, v)
+    x = cholesky(p).L
+    y = cholesky(q).L
+    log!(CholeskySpace{N}(), X, x, y)
+    return tangent_cholesky_to_tangent_spd!(x, X)
 end
 
 @doc raw"""
     vector_transport_to(
         M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric},
-        x,
-        v,
-        y,
+        p,
+        X,
+        q,
         ::ParallelTransport,
     )
 
-Parallely transport the tangent vector `v` at `x` along the geodesic to `y` with respect to
+Parallel transport the tangent vector `X` at `p` along the geodesic to `q` with respect to
 the [`SymmetricPositiveDefinite`](@ref) manifold `M` and [`LogCholeskyMetric`](@ref).
 The parallel transport is based on the parallel transport on [`CholeskySpace`](@ref):
-Let $l$ and $k$ denote the cholesky factors of `x` and `y`, respectively and
-$w = l(l^{-1}vl^{-\mathrm{T}})_\frac{1}{2}$, where $(\cdot)_\frac{1}{2}$ denotes the lower
-triangular matrix with the diagonal multiplied by $\frac{1}{2}$. With $u$ the parallel
-transport on [`CholeskySpace`](@ref) from $l$ to $k$. The formula hear reads
+Let $x$ and $y$ denote the cholesky factors of `p` and `q`, respectively and
+$W = x(x^{-1}Xx^{-\mathrm{T}})_\frac{1}{2}$, where $(\cdot)_\frac{1}{2}$ denotes the lower
+triangular matrix with the diagonal multiplied by $\frac{1}{2}$. With $V$ the parallel
+transport on [`CholeskySpace`](@ref) from $x$ to $y$. The formula hear reads
 
 ````math
-    𝒫_{y←x}(v) = ku^{\mathrm{T}} + uk^{\mathrm{T}}.
+𝒫_{q←p}X = yV^{\mathrm{T}} + Vy^{\mathrm{T}}.
 ````
 """
 vector_transport_to(
@@ -159,14 +159,14 @@ vector_transport_to(
 
 function vector_transport_to!(
     M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
-    vto,
-    x,
-    v,
-    y,
+    Y,
+    p,
+    X,
+    q,
     ::ParallelTransport,
 ) where {N}
-    k = cholesky(y).L
-    (l, w) = spd_to_cholesky(x, v)
-    vector_transport_to!(CholeskySpace{N}(), vto, l, w, k, ParallelTransport())
-    return tangent_cholesky_to_tangent_spd!(k, vto)
+    y = cholesky(q).L
+    (x, W) = spd_to_cholesky(p, X)
+    vector_transport_to!(CholeskySpace{N}(), V, x, W, y, ParallelTransport())
+    return tangent_cholesky_to_tangent_spd!(y, V)
 end
