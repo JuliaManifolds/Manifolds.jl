@@ -19,6 +19,7 @@ struct ProductManifold{TM<:Tuple} <: Manifold
 end
 
 ProductManifold(manifolds::Manifold...) = ProductManifold{typeof(manifolds)}(manifolds)
+ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
 
 struct ProductMetric <: Metric end
 
@@ -576,6 +577,58 @@ function sharp!(M::ProductManifold, v::TFVector, x, w::CoTFVector)
     wfs = map(u -> FVector(CotangentSpace, u), submanifold_components(w))
     map(sharp!, M.manifolds, vfs, submanifold_components(M, x), wfs)
     return v
+end
+
+function _show_submanifold(io::IO, M::Manifold; pre = "")
+    sx = sprint(show, "text/plain", M, context = io, sizehint = 0)
+    if occursin('\n', sx)
+        sx = sprint(show, M, context = io, sizehint = 0)
+    end
+    sx = replace(sx, '\n' => "\n$(pre)")
+    print(io, pre, sx)
+end
+
+function _show_submanifold_range(io::IO, Ms, range; pre = "")
+    for i in range
+        M = Ms[i]
+        print(io, '\n')
+        _show_submanifold(io, M; pre = pre)
+    end
+end
+
+function _show_product_manifold_no_header(io::IO, M)
+    n = length(M.manifolds)
+    sz = displaysize(io)
+    screen_height, screen_width = sz[1] - 4, sz[2]
+    half_height = div(screen_height, 2)
+    inds = 1:n
+    pre = " "
+    if n > screen_height
+        inds = [1:half_height; (n-div(screen_height - 1, 2)+1):n]
+    end
+    if n ≤ screen_height
+        _show_submanifold_range(io, M.manifolds, 1:n; pre = pre)
+    else
+        _show_submanifold_range(io, M.manifolds, 1:half_height; pre = pre)
+        print(io, "\n$(pre)⋮")
+        _show_submanifold_range(
+            io,
+            M.manifolds,
+            (n-div(screen_height - 1, 2)+1):n;
+            pre = pre,
+        )
+    end
+    return nothing
+end
+
+function show(io::IO, mime::MIME"text/plain", M::ProductManifold)
+    n = length(M.manifolds)
+    print(io, "ProductManifold with $(n) submanifold$(n == 1 ? "" : "s"):")
+    _show_product_manifold_no_header(io, M)
+end
+
+function show(io::IO, M::ProductManifold)
+    print(io, "ProductManifold(", join(M.manifolds, ", "), ")")
 end
 
 """

@@ -9,7 +9,8 @@ include("group_utils.jl")
     G = ProductGroup(M)
     @test G isa ProductGroup
     @test base_manifold(G) === M
-    @test repr(G) == "ProductGroup($(SOn), $(Tn))"
+    @test sprint(show, G) == "ProductGroup($(SOn), $(Tn))"
+    @test sprint(show, "text/plain", G) == "ProductGroup with 2 subgroups:\n $(SOn)\n $(Tn)"
     x = Matrix{Float64}(I, 3, 3)
 
     t = Vector{Float64}.([1:2, 2:3, 3:4])

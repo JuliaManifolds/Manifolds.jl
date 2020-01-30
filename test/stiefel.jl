@@ -4,6 +4,7 @@ include("utils.jl")
     @testset "Real" begin
         M = Stiefel(3,2)
         @testset "Basics" begin
+            @test repr(M) == "Stiefel(3, 2, ℝ)"
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             @test representation_size(M) == (3,2)
             @test manifold_dimension(M) == 3
@@ -65,6 +66,7 @@ include("utils.jl")
     @testset "Complex" begin
         M = Stiefel(3,2,ℂ)
         @testset "Basics" begin
+            @test repr(M) == "Stiefel(3, 2, ℂ)"
             @test representation_size(M) == (3,2)
             @test manifold_dimension(M) == 8
             @test !is_manifold_point(M, [1., 0., 0., 0.])

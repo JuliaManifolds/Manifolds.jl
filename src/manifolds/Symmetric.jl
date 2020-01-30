@@ -315,6 +315,10 @@ sharp(::SymmetricMatrices, ::Any...)
 
 sharp!(M::SymmetricMatrices, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
+function show(io::IO, ::SymmetricMatrices{n,F}) where {n,F}
+    print(io, "SymmetricMatrices($(n), $(F))")
+end
+
 @doc doc"""
     vector_transport_to(M::SymmetricMatrices, x, v, y, ::ParallelTransport)
 

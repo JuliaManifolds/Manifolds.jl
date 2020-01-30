@@ -309,6 +309,8 @@ end
 
 sharp!(M::Sphere, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
 
+show(io::IO, ::Sphere{N}) where {N} = print(io, "Sphere($(N))")
+
 """
     uniform_distribution(S::Sphere, x)
 

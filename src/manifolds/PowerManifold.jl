@@ -5,7 +5,6 @@ An abstract representation type of points and tangent vectors on a power manifol
 """
 abstract type AbstractPowerRepresentation end
 
-
 """
     MultidimentionalArrayPowerRepresentation
 
@@ -36,7 +35,8 @@ An abstract [`Manifold`](@ref) to represent manifolds that are build as powers
 of another [`Manifold`](@ref) `M` with representation type `TPR`, a subtype of
 [`AbstractPowerRepresentation`](@ref).
 """
-abstract type AbstractPowerManifold{M<:Manifold,TPR<:AbstractPowerRepresentation} <: Manifold end
+abstract type AbstractPowerManifold{M<:Manifold,TPR<:AbstractPowerRepresentation} <:
+              Manifold end
 
 @doc doc"""
     PowerManifold{TM<:Manifold, TSize<:Tuple, TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{TM}
@@ -64,16 +64,22 @@ and tangent vectors is used, although a different one, for example
 [`NestedPowerRepresentation`](@ref), can be given as the second argument to the
 constructor.
 """
-struct PowerManifold{
-    TM<:Manifold,
-    TSize,
-    TPR<:AbstractPowerRepresentation
-} <: AbstractPowerManifold{TM,TPR}
+struct PowerManifold{TM<:Manifold,TSize,TPR<:AbstractPowerRepresentation} <:
+       AbstractPowerManifold{TM,TPR}
     manifold::TM
 end
-PowerManifold(M::Manifold, size::Int...) = PowerManifold{typeof(M), Tuple{size...}, MultidimentionalArrayPowerRepresentation}(M)
-function PowerManifold(M::Manifold, ::TPR, size::Int...) where TPR<:AbstractPowerRepresentation
-    PowerManifold{typeof(M), Tuple{size...}, TPR}(M)
+
+function PowerManifold(M::Manifold, size::Int...)
+    return PowerManifold{typeof(M),Tuple{size...},MultidimentionalArrayPowerRepresentation}(
+        M,
+    )
+end
+function PowerManifold(
+    M::Manifold,
+    ::TPR,
+    size::Int...,
+) where {TPR<:AbstractPowerRepresentation}
+    PowerManifold{typeof(M),Tuple{size...},TPR}(M)
 end
 
 @doc doc"""
@@ -159,22 +165,25 @@ function PrecomputedPowerOrthonormalBasis(
     return PrecomputedPowerOrthonormalBasis{typeof(bases),F}(bases)
 end
 
-const PowerManifoldMultidimensional = AbstractPowerManifold{<:Manifold, MultidimentionalArrayPowerRepresentation} where TSize
-const PowerManifoldNested = AbstractPowerManifold{<:Manifold, NestedPowerRepresentation} where TSize
+const PowerManifoldMultidimensional =
+    AbstractPowerManifold{<:Manifold,MultidimentionalArrayPowerRepresentation} where {TSize}
+const PowerManifoldNested =
+    AbstractPowerManifold{<:Manifold,NestedPowerRepresentation} where {TSize}
 
 function basis(M::AbstractPowerManifold, x, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
-    vs = [basis(M.manifold, _read(M, rep_size, x, i), B)
-        for i in get_iterator(M)]
+    vs = [basis(M.manifold, _read(M, rep_size, x, i), B) for i in get_iterator(M)]
     return PrecomputedPowerOrthonormalBasis(vs)
 end
 
+^(M::Manifold, n) = PowerManifold(M, n...)
+
 function basis(M::AbstractPowerManifold, x, B::ArbitraryOrthonormalBasis)
-    return invoke(basis, Tuple{PowerManifold, Any, AbstractBasis}, M, x, B)
+    return invoke(basis, Tuple{PowerManifold,Any,AbstractBasis}, M, x, B)
 end
 
 function basis(M::AbstractPowerManifold, x, B::DiagonalizingOrthonormalBasis)
-    return invoke(basis, Tuple{PowerManifold, Any, AbstractBasis}, M, x, B)
+    return invoke(basis, Tuple{PowerManifold,Any,AbstractBasis}, M, x, B)
 end
 
 """
@@ -241,11 +250,8 @@ function distance(M::AbstractPowerManifold, x, y)
     sum_squares = zero(number_eltype(x))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        sum_squares += distance(
-            M.manifold,
-            _read(M, rep_size, x, i),
-            _read(M, rep_size, y, i),
-        )^2
+        sum_squares +=
+            distance(M.manifold, _read(M, rep_size, x, i), _read(M, rep_size, y, i))^2
     end
     return sqrt(sum_squares)
 end
@@ -313,7 +319,12 @@ function get_coordinates(M::AbstractPowerManifold, x, v, B::ArbitraryOrthonormal
     ]
     return reduce(vcat, reshape(vs, length(vs)))
 end
-function get_coordinates(M::AbstractPowerManifold, x, v, B::PrecomputedPowerOrthonormalBasis)
+function get_coordinates(
+    M::AbstractPowerManifold,
+    x,
+    v,
+    B::PrecomputedPowerOrthonormalBasis,
+)
     rep_size = representation_size(M.manifold)
     vs = [
         get_coordinates(
@@ -519,11 +530,8 @@ function norm(M::AbstractPowerManifold, x, v)
     sum_squares = zero(number_eltype(v))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        sum_squares += norm(
-            M.manifold,
-            _read(M, rep_size, x, i),
-            _read(M, rep_size, v, i)
-        )^2
+        sum_squares +=
+            norm(M.manifold, _read(M, rep_size, x, i), _read(M, rep_size, v, i))^2
     end
     return sqrt(sum_squares)
 end
@@ -560,10 +568,20 @@ end
 @inline function _read(M::AbstractPowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)
     return _read(M, rep_size, x, (i,))
 end
-@inline function _read(::PowerManifoldMultidimensional, rep_size::Tuple, x::AbstractArray, i::Tuple)
+@inline function _read(
+    ::PowerManifoldMultidimensional,
+    rep_size::Tuple,
+    x::AbstractArray,
+    i::Tuple,
+)
     return view(x, rep_size_to_colons(rep_size)..., i...)
 end
-@inline function _read(::PowerManifoldMultidimensional, rep_size::Tuple, x::HybridArray, i::Tuple)
+@inline function _read(
+    ::PowerManifoldMultidimensional,
+    rep_size::Tuple,
+    x::HybridArray,
+    i::Tuple,
+)
     return x[rep_size_to_colons(rep_size)..., i...]
 end
 @inline function _read(::PowerManifoldNested, rep_size::Tuple, x::AbstractArray, i::Tuple)
@@ -623,6 +641,16 @@ function sharp!(M::AbstractPowerManifold, v::TFVector, x, w::CoTFVector)
         )
     end
     return v
+end
+
+function show(
+    io::IO,
+    M::PowerManifold{TM,TSize,MultidimentionalArrayPowerRepresentation},
+) where {TM,TSize}
+    print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
+end
+function show(io::IO, M::PowerManifold{TM,TSize,TPR}) where {TM,TSize,TPR}
+    print(io, "PowerManifold($(M.manifold), $(TPR()), $(join(TSize.parameters, ", ")))")
 end
 
 function allocate_result(M::PowerManifoldNested, f, x...)

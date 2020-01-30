@@ -19,6 +19,13 @@ Random.seed!(42)
     Mr2 = PowerManifold(Mr, 5, 7)
     @test manifold_dimension(Mr2) == 105
 
+    @test repr(Ms1) == "PowerManifold(Sphere(2), 5)"
+    @test repr(Mrn1) == "PowerManifold(Rotations(3), NestedPowerRepresentation(), 5)"
+
+    @test Ms^5 === Ms1
+    @test Ms^(5,) === Ms1
+    @test Mr^(5, 7) === Mr2
+
     @test is_default_metric(Ms1, PowerMetric()) == Val(true)
     types_s1 = [Array{Float64,2},
                 HybridArray{Tuple{3,StaticArrays.Dynamic()}, Float64, 2}]
