@@ -40,6 +40,11 @@ This metric is the default metric for example for the [`Euclidean`](@ref) manifo
 """
 struct EuclideanMetric <: RiemannianMetric end
 
+^(M::Euclidean, n::Int) = ^(M, (n,))
+function ^(::Euclidean{T,F}, n::NTuple{N,Int}) where {T,F,N}
+    return Euclidean{Tuple{T.parameters...,n...},F}()
+end
+
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = one(eltype(x))
 
 """
@@ -305,6 +310,10 @@ of `x` on `M`.
 sharp(::Euclidean, ::Any...)
 
 sharp!(M::Euclidean, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
+
+function show(io::IO, ::Euclidean{N,F}) where {N,F}
+    print(io, "Euclidean($(join(N.parameters, ", ")); field = $(F))")
+end
 
 """
     vector_transport_to(M::Euclidean, x, v, y, ::ParallelTransport)

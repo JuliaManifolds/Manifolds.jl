@@ -133,6 +133,10 @@ symmetric positive definite matrix on $ℳ = 𝒫(n)$.
 """
 @generated representation_size(::SymmetricPositiveDefinite{N}) where {N} = (N, N)
 
+function show(io::IO, ::SymmetricPositiveDefinite{N}) where {N}
+    print(io, "SymmetricPositiveDefinite($(N))")
+end
+
 @doc raw"""
     zero_tangent_vector(M::SymmetricPositiveDefinite,x)
 

@@ -294,8 +294,11 @@ export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
-export AbstractPowerManifold, AbstractPowerRepresentation,
-    MultidimentionalArrayPowerRepresentation, NestedPowerRepresentation, PowerManifold
+export AbstractPowerManifold,
+    AbstractPowerRepresentation,
+    MultidimentionalArrayPowerRepresentation,
+    NestedPowerRepresentation,
+    PowerManifold
 export ProductManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers

@@ -112,6 +112,10 @@ struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
     end
 end
 
+function show(io::IO, method::GeodesicInterpolationWithinRadius)
+    print(io, "GeodesicInterpolationWithinRadius($(method.radius))")
+end
+
 @doc raw"""
     mean(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 

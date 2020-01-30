@@ -62,11 +62,12 @@ struct VectorBundleFibers{TVS<:VectorSpaceType,TM<:Manifold}
     M::TM
 end
 
-const TangentBundleFibers{M} = VectorBundleFibers{TangentSpaceType,M}
+const TangentBundleFibers{M} = VectorBundleFibers{TangentSpaceType,M} where {M<:Manifold}
 
 TangentBundleFibers(M::Manifold) = VectorBundleFibers(TangentSpace, M)
 
-const CotangentBundleFibers{M} = VectorBundleFibers{CotangentSpaceType,M}
+const CotangentBundleFibers{M} =
+    VectorBundleFibers{CotangentSpaceType,M} where {M<:Manifold}
 
 CotangentBundleFibers(M::Manifold) = VectorBundleFibers(CotangentSpace, M)
 
@@ -112,11 +113,11 @@ function VectorBundle(VS::TVS, M::TM) where {TVS<:VectorSpaceType,TM<:Manifold}
     return VectorBundle{TVS,TM}(VS, M, VectorBundleFibers(VS, M))
 end
 
-const TangentBundle{M} = VectorBundle{TangentSpaceType,M}
+const TangentBundle{M} = VectorBundle{TangentSpaceType,M} where {M<:Manifold}
 
 TangentBundle(M::Manifold) = VectorBundle(TangentSpace, M)
 
-const CotangentBundle{M} = VectorBundle{CotangentSpaceType,M}
+const CotangentBundle{M} = VectorBundle{CotangentSpaceType,M} where {M<:Manifold}
 
 CotangentBundle(M::Manifold) = VectorBundle(CotangentSpace, M)
 
@@ -206,7 +207,9 @@ function distance(B::VectorBundle, x, y)
     return sqrt(dist_man^2 + dist_vec^2)
 end
 
-number_eltype(::Type{FVector{TType,TData}}) where {TType<:VectorSpaceType,TData} = number_eltype(TData)
+function number_eltype(::Type{FVector{TType,TData}}) where {TType<:VectorSpaceType,TData}
+    return number_eltype(TData)
+end
 number_eltype(v::FVector) = number_eltype(v.data)
 
 @doc raw"""
@@ -548,6 +551,30 @@ function sharp!(M::Manifold, v::FVector, x, w::FVector)
     )
 end
 
+show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
+show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")
+function show(io::IO, tpt::TensorProductType)
+    print(io, "TensorProductType(", join(tpt.spaces, ", "), ")")
+end
+function show(io::IO, fiber::VectorBundleFibers)
+    print(io, "VectorBundleFibers($(fiber.VS), $(fiber.M))")
+end
+function show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
+    summary(io, vs)
+    println(io, "\nFiber:")
+    pre = " "
+    sf = sprint(show, "text/plain", vs.fiber; context = io, sizehint = 0)
+    sf = replace(sf, '\n' => "\n$(pre)")
+    println(io, pre, sf)
+    println(io, "Base point:")
+    sp = sprint(show, "text/plain", vs.x; context = io, sizehint = 0)
+    sp = replace(sp, '\n' => "\n$(pre)")
+    print(io, pre, sp)
+end
+show(io::IO, vb::VectorBundle) = print(io, "VectorBundle($(vb.type), $(vb.M))")
+show(io::IO, vb::TangentBundle) = print(io, "TangentBundle($(vb.M))")
+show(io::IO, vb::CotangentBundle) = print(io, "CotangentBundle($(vb.M))")
+
 allocate(x::FVector) = FVector(x.type, allocate(x.data))
 allocate(x::FVector, ::Type{T}) where {T} = FVector(x.type, allocate(x.data, T))
 
@@ -577,7 +604,7 @@ Returns type of element of the array that will represent the result of
 function `f` for representing an operation with result in the vector space `VS`
 for manifold `M` on given arguments (passed at a tuple).
 """
-function allocate_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where N
+function allocate_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where {N}
     T = typeof(reduce(+, one(number_eltype(eti)) for eti ∈ args))
     return T
 end

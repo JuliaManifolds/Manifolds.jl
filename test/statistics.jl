@@ -457,6 +457,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
 
             @testset "within radius" begin
                 rng = MersenneTwister(47)
+                @test repr(GeodesicInterpolationWithinRadius(Inf)) == "GeodesicInterpolationWithinRadius(Inf)"
                 S = Sphere(2)
                 x = [[1.0, 0, 0], [0, 1.0, 0]]
                 m = mean(S, x, GeodesicInterpolation())

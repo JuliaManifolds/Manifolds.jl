@@ -81,6 +81,7 @@ end
         E = TestEuclidean{n}()
         g = TestEuclideanMetric()
         M = MetricManifold(E, g)
+        @test repr(M) == "MetricManifold(TestEuclidean{3}(), TestEuclideanMetric())"
         G = Diagonal(1.0:n)
         invG = inv(G)
         @test manifold_dimension(M) == n

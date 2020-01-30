@@ -1,6 +1,7 @@
 include("utils.jl")
 @testset "Symmetric Positive Definite Matrices" begin
     M1 = Manifolds.SymmetricPositiveDefinite(3)
+    @test repr(M1) == "SymmetricPositiveDefinite(3)"
     M2 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LinearAffineMetric())
     M3 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
     M4 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogEuclideanMetric())

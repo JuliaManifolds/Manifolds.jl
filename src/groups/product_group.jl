@@ -27,7 +27,17 @@ function ProductGroup(manifold::ProductManifold)
     return GroupManifold(manifold, op)
 end
 
-show(io::IO, G::ProductGroup) = print(io, "ProductGroup$((G.manifold.manifolds...,))")
+function show(io::IO, ::MIME"text/plain", G::ProductGroup)
+    M = base_manifold(G)
+    n = length(M.manifolds)
+    print(io, "ProductGroup with $(n) subgroup$(n == 1 ? "" : "s"):")
+    _show_product_manifold_no_header(io, M)
+end
+
+function show(io::IO, G::ProductGroup)
+    M = base_manifold(G)
+    print(io, "ProductGroup(", join(M.manifolds, ", "), ")")
+end
 
 function submanifold_component(
     e::Identity{GT},

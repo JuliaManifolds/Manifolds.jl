@@ -648,6 +648,8 @@ function retract!(M::Rotations, y, x, v, method::PolarRetraction)
     return project_point!(M, y, A; check_det = false)
 end
 
+show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
+
 @doc raw"""
     vee(M::Rotations, x, Ω)
 

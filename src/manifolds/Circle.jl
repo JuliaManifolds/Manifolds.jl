@@ -296,6 +296,8 @@ sharp(M::Circle, p::Number, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
 
 sharp!(M::Circle, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
+show(io::IO, ::Circle{F}) where {F} = print(io, "Circle($(F))")
+
 @doc raw"""
     sym_rem(x,[T=π])
 
@@ -305,7 +307,7 @@ Compute symmetric remainder of `x` with respect to the interall 2*`T`, i.e.
 function sym_rem(x::N, T = π) where {N<:Number}
     return (x ≈ T ? convert(N, -T) : rem(x, convert(N, 2 * T), RoundNearest))
 end
-sym_rem(x, T=π) where N = map(sym_rem, x, Ref(T))
+sym_rem(x, T = π) where {N} = map(sym_rem, x, Ref(T))
 
 @doc raw"""
     vector_transport_to(M::Circle, p, X, q, ::ParallelTransport)

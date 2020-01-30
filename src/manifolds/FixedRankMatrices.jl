@@ -312,17 +312,57 @@ function retract!(
     return y
 end
 
-allocate(x::SVDMPoint) = SVDMPoint(allocate(x.U), allocate(x.S), allocate(x.Vt))
-function allocate(x::SVDMPoint, ::Type{T}) where T
-    return SVDMPoint(allocate(x.U,T), allocate(x.S,T), allocate(x.Vt,T))
+function show(io::IO, ::FixedRankMatrices{M,N,K,T}) where {M,N,K,T}
+    print(io, "FixedRankMatrices($(M), $(N), $(K), $(T))")
 end
-allocate(v::UMVTVector) = UMVTVector(allocate(v.U), allocate(v.M), allocate(v.Vt))
-function allocate(v::UMVTVector, ::Type{T}) where T
-    return UMVTVector(allocate(v.U,T), allocate(v.M,T), allocate(v.Vt,T))
+function show(io::IO, mime::MIME"text/plain", x::SVDMPoint)
+    pre = " "
+    summary(io, x)
+    println(io, "\nU factor:")
+    su = sprint(show, "text/plain", x.U; context = io, sizehint = 0)
+    su = replace(su, '\n' => "\n$(pre)")
+    println(io, pre, su)
+    println(io, "singular values:")
+    ss = sprint(show, "text/plain", x.S; context = io, sizehint = 0)
+    ss = replace(ss, '\n' => "\n$(pre)")
+    println(io, pre, ss)
+    println(io, "Vt factor:")
+    sv = sprint(show, "text/plain", x.Vt; context = io, sizehint = 0)
+    sv = replace(sv, '\n' => "\n$(pre)")
+    print(io, pre, sv)
+end
+function show(io::IO, mime::MIME"text/plain", v::UMVTVector)
+    pre = " "
+    summary(io, v)
+    println(io, "\nU factor:")
+    su = sprint(show, "text/plain", v.U; context = io, sizehint = 0)
+    su = replace(su, '\n' => "\n$(pre)")
+    println(io, pre, su)
+    println(io, "M factor:")
+    sm = sprint(show, "text/plain", v.M; context = io, sizehint = 0)
+    sm = replace(sm, '\n' => "\n$(pre)")
+    println(io, pre, sm)
+    println(io, "Vt factor:")
+    sv = sprint(show, "text/plain", v.Vt; context = io, sizehint = 0)
+    sv = replace(sv, '\n' => "\n$(pre)")
+    print(io, pre, sv)
 end
 
-number_eltype(x::SVDMPoint) = typeof(one(eltype(x.U)) + one(eltype(x.S)) + one(eltype(x.Vt)))
-number_eltype(v::UMVTVector) = typeof(one(eltype(v.U)) + one(eltype(v.M)) + one(eltype(v.Vt)))
+allocate(x::SVDMPoint) = SVDMPoint(allocate(x.U), allocate(x.S), allocate(x.Vt))
+function allocate(x::SVDMPoint, ::Type{T}) where {T}
+    return SVDMPoint(allocate(x.U, T), allocate(x.S, T), allocate(x.Vt, T))
+end
+allocate(v::UMVTVector) = UMVTVector(allocate(v.U), allocate(v.M), allocate(v.Vt))
+function allocate(v::UMVTVector, ::Type{T}) where {T}
+    return UMVTVector(allocate(v.U, T), allocate(v.M, T), allocate(v.Vt, T))
+end
+
+function number_eltype(x::SVDMPoint)
+    return typeof(one(eltype(x.U)) + one(eltype(x.S)) + one(eltype(x.Vt)))
+end
+function number_eltype(v::UMVTVector)
+    return typeof(one(eltype(v.U)) + one(eltype(v.M)) + one(eltype(v.Vt)))
+end
 
 one(x::SVDMPoint) = SVDMPoint(
     one(zeros(size(x.U, 1), size(x.U, 1))),
