@@ -1,39 +1,40 @@
 @doc raw"""
     FixedRankMatrices{m,n,k,T} <: Manifold
 
-The manifold of $m \times n$ real-valued (complex-valued) matrices of fixed rank $k$, i.e.
+The manifold of $m \times n$ real-valued or complex-valued matrices of fixed rank $k$, i.e.
 ````math
-ℳ = \{ x  ∈ ℝ^{m \times n} : \operatorname{rank}(x) = k \}.
+\{ p ∈ 𝔽^{m \times n} : \operatorname{rank}(p) = k \},
 ````
+where $𝔽 ∈ \{ℝ,ℂ\}$ and the rank is the number of linearly independent columns of a matrix.
+
 # Representation with 3 matrix factors
 
-A point $x ∈ ℳ$ can be stored using orthonormal matrices
-$U ∈ ℝ^{m \times k}$, $V ∈ ℝ^{n \times k}$ as well as the $k$ singular
-values of $x = USV^\mathrm{T}$. In other words, $U$ and $V$ are from the manifolds
-[`Stiefel`](@ref)`(m,k)` and [`Stiefel`](@ref)`(n,k)`, respectively; see
-[`SVDMPoint`](@ref) for details
+A point $p ∈ ℳ$ can be stored using unitary matrices $U ∈ 𝔽^{m \times k}$, $V ∈ 𝔽^{n \times k}$ as well as the $k$
+singular values of $p = USV^\mathrm{H}$, where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or
+Hermitian. In other words, $U$ and $V$ are from the manifolds [`Stiefel`](@ref)`(m,k,𝔽)` and [`Stiefel`](@ref)`(n,k,𝔽)`,
+respectively; see [`SVDMPoint`](@ref) for details.
 
-The tangent space $T_x ℳ$ at a point $x ∈ ℳ$ with $x=USV^\mathrm{T}$
+The tangent space $T_p ℳ$ at a point $p ∈ ℳ$ with $p=USV^\mathrm{H}$
 is given by
 ````math
-T_xℳ = \bigl\{ UMV^\mathrm{T} + U_xV^\mathrm{T} + UV_x^\mathrm{T} :
-    M  ∈ ℝ^{k \times k},
-    U_x  ∈ ℝ^{m \times k},
-    V_x  ∈ ℝ^{n \times k}
+T_pℳ = \bigl\{ UMV^\mathrm{T} + U_pV^\mathrm{H} + UV_p^\mathrm{H} :
+    M  ∈ 𝔽^{k \times k},
+    U_p  ∈ 𝔽^{m \times k},
+    V_p  ∈ 𝔽^{n \times k}
     \text{ s.t. }
-    U_x^\mathrm{T}U = 0_k,
-    V_x^\mathrm{T}V = 0_k
+    U_p^\mathrm{H}U = 0_k,
+    V_p^\mathrm{H}V = 0_k
 \bigr\},
 ````
 where $0_k$ is the $k \times k$ zero matrix. See [`UMVTVector`](@ref) for details.
 
 The (default) metric of this manifold is obtained by restricting the metric
-on $ℝ^{m \times n}$ to the tangent bundle. This implementation follows[^Vandereycken2013].
+on $ℝ^{m \times n}$ to the tangent bundle[^Vandereycken2013].
 
 # Constructor
     FixedRankMatrics(m,n,k,t=ℝ)
 
-Generate the manifold of `m`-by-`n` real-valued matrices of rank `k`.
+Generate the manifold of `m`-by-`n` (real-valued) matrices of rank `k`.
 
 [^Vandereycken2013]:
     > Bart Vandereycken: "Low-rank matrix completion by Riemannian Optimization,
@@ -50,9 +51,9 @@ end
     SVDMPoint <: MPoint
 
 A point on a certain manifold, where the data is stored in a svd like fashion,
-i.e. in the form $USV^\mathrm{T}$, where this structure stores $U$, $S$ and
-$V^\mathrm{T}$. The storage might also be shortened to just $k$ singular values
-and accordingly shortened $U$ (columns) and $V^\mathrm{T}$ (rows)
+i.e. in the form $USV^\mathrm{H}$, where this structure stores $U$, $S$ and
+$V^\mathrm{H}$. The storage might also be shortened to just $k$ singular values
+and accordingly shortened $U$ (columns) and $V^\mathrm{T}$ (rows).
 
 # Constructors
 * `SVDMPoint(A)` for a matrix `A`, stores its svd factors (i.e. implicitly $k=\min\{m,n\}$)
@@ -80,13 +81,14 @@ SVDMPoint(U, S, Vt, k::Int) = SVDMPoint(U[:, 1:k], S[1:k], Vt[1:k, :])
 @doc raw"""
     UMVTVector <: TVector
 
-A tangent vector that can be described as a product $UMV^\mathrm{T}$, at least
-together with its base point, see for example [`FixedRankMatrices`](@ref)
+A tangent vector that can be described as a product $UMV^\mathrm{H}$, at least
+together with its base point, see for example [`FixedRankMatrices`](@ref). This
+vector structure stores the additionally (to the point) required fields.
 
 # Constructors
 * `UMVTVector(U,M,Vt)` store umv factors to initialize the `UMVTVector`
 * `UMVTVector(U,M,Vt,k)` store the umv factors after shortening them down to
-  inner dimensions $k$, i.e. in $UMV^\mathrm{T}$, $M ∈ ℝ^{k \times k}$
+  inner dimensions $k$, i.e. in $UMV^\mathrm{H}$, where $M$ is a $k\times k$ matrix.
 """
 struct UMVTVector{TU<:AbstractMatrix,TM<:AbstractMatrix,TVt<:AbstractMatrix} <: TVector
     U::TU
@@ -108,12 +110,13 @@ UMVTVector(U, M, Vt, k::Int) = UMVTVector(U[:, 1:k], M[1:k, 1:k], Vt[1:k, :])
 ==(v::UMVTVector, w::UMVTVector) = (v.U == w.U) && (v.M == w.M) && (v.Vt == w.Vt)
 
 @doc raw"""
-    check_manifold_point(M::FixedRankMatrices{m,n,k},x; kwargs...)
+    check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...)
 
 Check whether the matrix or [`SVDMPoint`](@ref) `x` ids a valid point on the
-[`FixedRankMatrices`](@ref)`{m,n,k}` `M`, i.e. is (or represents) an `m`-by`n` matrix of
+[`FixedRankMatrices`](@ref)`{m,n,k,𝔽}` `M`, i.e. is an `m`-by`n` matrix of
 rank `k`. For the [`SVDMPoint`](@ref) the internal representation also has to have the right
-shape, i.e. `x.U` and `x.Vt` have to be unitary.
+shape, i.e. `p.U` and `p.Vt` have to be unitary. The keyword arguments are passed to the
+`rank` function that verifies the rank of `p`.
 """
 function check_manifold_point(M::FixedRankMatrices{m,n,k}, x; kwargs...) where {m,n,k}
     r = rank(x; kwargs...)
