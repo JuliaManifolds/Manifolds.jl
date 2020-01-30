@@ -1,20 +1,20 @@
 @doc raw"""
     Stiefel{n,k,T} <: Manifold
 
-The Stiefel manifold consists of all $n \times k$, $n\geq k$ orthonormal matrices, i.e.
+The Stiefel manifold consists of all $n \times k$, $n\geq k$ unitary matrices, i.e.
 
 ````math
-ℳ = \{ x  ∈ 𝔽^{n \times k} : x^{\mathrm{H}}x = I_k \},
+\{ p ∈ 𝔽^{n \times k} : p^{\mathrm{H}}p = I_k \},
 ````
 
 where $𝔽 ∈ \{ℝ, ℂ\}$,
 $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
 $I_n ∈ ℝ^{n\times n}$ denotes the $k \times k$ identity matrix.
 
-The tangent space at a point $x∈ ℳ$ is given by
+The tangent space at a point $p ∈ ℳ$ is given by
 
 ````math
-T_x ℳ = \{ v ∈ 𝔽^{n\times k} : x^{\mathrm{H}}v + v^{\mathrm{H}}x=0_n\},
+T_p ℳ = \{ X ∈ 𝔽^{n\times k} : p^{\mathrm{H}}X + X^{\mathrm{H}}p=0_n\},
 ````
 
 where $0_n$ is the $k\times k$ zero matrix.
@@ -37,82 +37,81 @@ struct Stiefel{n,k,F} <: Manifold end
 Stiefel(n::Int, k::Int, F::AbstractNumbers = ℝ) = Stiefel{n,k,F}()
 
 @doc raw"""
-    check_manifold_point(M::Stiefel, x; kwargs...)
+    check_manifold_point(M::Stiefel, p; kwargs...)
 
-Check whether `x` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$,
-i.e. that it has the right [`AbstractNumbers`](@ref) type and $x^{\mathrm{H}}x$
-is (approximatly) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
-transpose. The settings for approximately can be set with `kwargs...`.
+Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$, i.e. that it has the right
+[`AbstractNumbers`](@ref) type and $p^{\mathrm{H}}p$ is (approximatly) the identity, where $\cdot^{\mathrm{H}}$ is the
+complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
-function check_manifold_point(M::Stiefel{n,k,T}, x; kwargs...) where {n,k,T}
-    if (T === ℝ) && !(eltype(x) <: Real)
+function check_manifold_point(M::Stiefel{n,k,T}, p; kwargs...) where {n,k,T}
+    if (T === ℝ) && !(eltype(p) <: Real)
         return DomainError(
-            eltype(x),
-            "The matrix $(x) is not a real-valued matrix, so it does noe lie on the Stiefel manifold of dimension ($(n),$(k)).",
+            eltype(p),
+            "The matrix $(p) is not a real-valued matrix, so it does noe lie on the Stiefel manifold of dimension ($(n),$(k)).",
         )
     end
-    if (T === ℂ) && !(eltype(x) <: Real) && !(eltype(x) <: Complex)
+    if (T === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
         return DomainError(
-            eltype(x),
-            "The matrix $(x) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Stiefel manifold of dimension ($(n),$(k)).",
+            eltype(p),
+            "The matrix $(p) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Stiefel manifold of dimension ($(n),$(k)).",
         )
     end
-    if any(size(x) != representation_size(M))
+    if any(size(p) != representation_size(M))
         return DomainError(
-            size(x),
-            "The matrix $(x) is does not lie on the Stiefel manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
+            size(p),
+            "The matrix $(p) is does not lie on the Stiefel manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
         )
     end
-    c = x' * x
+    c = p' * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
             norm(c - one(c)),
-            "The point $(x) does not lie on the Stiefel manifold of dimension ($(n),$(k)), because x'x is not the unit matrix.",
+            "The point $(p) does not lie on the Stiefel manifold of dimension ($(n),$(k)), because x'x is not the unit matrix.",
         )
     end
 end
 
 @doc raw"""
-    check_tangent_vector(M::Stiefel, x, v; kwargs...)
+    check_tangent_vector(M::Stiefel, p, X; kwargs...)
 
-Check whether `v` is a valid tangent vector at `x` on the [`Stiefel`](@ref)
+Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
 `M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](@ref) fits and
-it (approximtly) holds that $x^{\mathrm{H}}v + v^{\mathrm{H}}x = 0$, where
-`kwargs...` is passed to the `isapprox`.
+it (approximtly) holds that $p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0$.
+The settings for approximately can be set with `kwargs...`.
 """
-function check_tangent_vector(M::Stiefel{n,k,T}, x, v; kwargs...) where {n,k,T}
-    mpe = check_manifold_point(M, x)
+function check_tangent_vector(M::Stiefel{n,k,T}, p, X; kwargs...) where {n,k,T}
+    mpe = check_manifold_point(M, p)
     mpe === nothing || return mpe
-    if (T === ℝ) && !(eltype(v) <: Real)
+    if (T === ℝ) && !(eltype(X) <: Real)
         return DomainError(
-            eltype(v),
-            "The matrix $(v) is not a real-valued matrix, so it can not be a tangent vector to the Stiefel manifold of dimension ($(n),$(k)).",
+            eltype(X),
+            "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to the Stiefel manifold of dimension ($(n),$(k)).",
         )
     end
-    if (T === ℂ) && !(eltype(v) <: Real) && !(eltype(v) <: Complex)
+    if (T === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
         return DomainError(
-            eltype(v),
-            "The matrix $(v) is neiter real- nor complex-valued matrix, so it can not bea tangent vectorto the complex Stiefel manifold of dimension ($(n),$(k)).",
+            eltype(X),
+            "The matrix $(X) is neiter real- nor complex-valued matrix, so it can not bea tangent vectorto the complex Stiefel manifold of dimension ($(n),$(k)).",
         )
     end
-    if any(size(v) != representation_size(M))
+    if any(size(X) != representation_size(M))
         return DomainError(
-            size(v),
-            "The matrix $(v) is does not lie in the tangent space of $(x) on the Stiefel manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
+            size(X),
+            "The matrix $(X) is does not lie in the tangent space of $(p) on the Stiefel manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
         )
     end
-    if !isapprox(x' * v + v' * x, zeros(k, k); kwargs...)
+    if !isapprox(p' * X + X' * p, zeros(k, k); kwargs...)
         return DomainError(
-            norm(x' * v + v' * x),
-            "The matrix $(v) is does not lie in the tangent space of $(x) on the Stiefel manifold of dimension ($(n),$(k)), since x'v + v'x is not the zero matrix.",
+            norm(p' * X + X' * p),
+            "The matrix $(X) is does not lie in the tangent space of $(p) on the Stiefel manifold of dimension ($(n),$(k)), since x'v + v'x is not the zero matrix.",
         )
     end
 end
 
 @doc raw"""
-    exp(M, x, v)
+    exp(M, p, X)
 
-Compute the exponential map on the [`Stiefel`](@ref)`{n,k,T}`() manifold `M`
+Computes the exponential map on the [`Stiefel`](@ref)`{n,k,T}`() manifold `M`
 eminating from `x` into tangent direction `v`.
 
 $\operatorname{exp}_{x} v = \begin{pmatrix}

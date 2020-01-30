@@ -45,12 +45,12 @@ function ^(::Euclidean{T,F}, n::NTuple{N,Int}) where {T,F,N}
     return Euclidean{Tuple{T.parameters...,n...},F}()
 end
 
-det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = one(eltype(x))
+det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = one(eltype(p))
 
 """
     distance(M::Euclidean, x, y)
 
-Computes the Euclidean distance between two points on the [`Euclidean`](@ref)
+Compute the Euclidean distance between two points on the [`Euclidean`](@ref)
 manifold `M`, i.e. for vectors it's just the norm of the difference, for matrices
 and higher order arrays, the matrix and ternsor Frobenius norm, respectively.
 """
@@ -59,7 +59,7 @@ distance(::Euclidean, p, q) = norm(p .- q)
 @doc raw"""
     exp(M::Euclidean, p, X)
 
-Computes the exponential map on the [`Euclidean`](@ref) manifold `M` from `x` in direction
+Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `x` in direction
 `X`, which in this case is just
 ````math
 \exp_p X = p + X.
@@ -72,7 +72,7 @@ exp!(M::Euclidean, q, p, X) = (q .= p .+ X)
 """
     flat(M::Euclidean, p, X)
 
-Transforms a tangent vector `X` into a cotangent. Since they can directly be identified in the
+Transform a tangent vector `X` into a cotangent. Since they can directly be identified in the
 [`Euclidean`](@ref) case, this yields just the identity for a tangent vector `w` in the
 tangent space of `p` on `M`.
 """
@@ -124,14 +124,14 @@ hat!(::Euclidean{N,ℝ}, v, p, vⁱ) where {N} = copyto!(v, vⁱ)
 @doc raw"""
     injectivity_radius(M::Euclidean)
 
-Returns the injectivity radius on the [`Euclidean`](@ref) `M`, which is $∞$.
+Return the injectivity radius on the [`Euclidean`](@ref) `M`, which is $∞$.
 """
 injectivity_radius(::Euclidean) = Inf
 
 @doc raw"""
     inner(M::Euclidean, p, X, Y)
 
-Computes the inner product on the [`Euclidean`](@ref) `M`, which is just
+Compute the inner product on the [`Euclidean`](@ref) `M`, which is just
 the inner product on the real-valued or complex valued vector space
 of arrays (or tensors) of size $n_1 \times n_2  \times  …  \times n_i$, i.e.
 
@@ -162,7 +162,7 @@ end
 @doc raw"""
     log(M::Euclidean, p, q)
 
-Computes the logarithmic map on the [`Euclidean`](@ref) `M` from `p` to `q`,
+Compute the logarithmic map on the [`Euclidean`](@ref) `M` from `p` to `q`,
 which in this case is just
 ````math
 \log_p q = q-p.
@@ -240,12 +240,12 @@ end
 @doc raw"""
     norm(M::Euclidean, p, X)
 
-Computes the norm of a tangent vector `X` at `p` on the [`Euclidean`](@ref)
+Compute the norm of a tangent vector `X` at `p` on the [`Euclidean`](@ref)
 `M`, i.e. since every tangent space can be identified with `M` itself
 in this case, just the (Frobenius) norm of `X`.
 """
 norm(::Euclidean, p, X) = norm(X)
-norm(::MetricManifold{<:Manifold,EuclideanMetric}, p, X) = norm(p)
+norm(::MetricManifold{<:Manifold,EuclideanMetric}, p, X) = norm(X)
 
 """
     normal_tvector_distribution(M::Euclidean, p, σ)
@@ -261,7 +261,7 @@ end
 @doc raw"""
     project_point(M::Euclidean, p)
 
-Projects an arbitrary point `p` onto the [`Euclidean`](@ref) `M`, which
+Project an arbitrary point `p` onto the [`Euclidean`](@ref) `M`, which
 is of course just the identity map.
 """
 project_point(::Euclidean, ::Any...)
@@ -271,7 +271,7 @@ project_point!(M::Euclidean, p) = p
 """
     project_tangent(M::Euclidean, p, X)
 
-Projects an arbitrary vector `X` into the tangent space of a point `p` on the
+Project an arbitrary vector `X` into the tangent space of a point `p` on the
 [`Euclidean`](@ref) `M`, which is just the identity, since any tangent
 space of `M` can be identified with all of `M`.
 """
@@ -295,7 +295,7 @@ end
 """
     representation_size(M::Euclidean)
 
-Returns the array dimensions required to represent an element on the
+Return the array dimensions required to represent an element on the
 [`Euclidean`](@ref) `M`, i.e. the vector of all array dimensions.
 """
 @generated representation_size(::Euclidean{N}) where {N} = size_to_tuple(N)
@@ -303,7 +303,7 @@ Returns the array dimensions required to represent an element on the
 """
     sharp(M::Euclidean, p, ξ)
 
-Transforms the cotangent vector `ξ` at `p` on the [`Euclidean`](@ref) `M` to a tangent vector `X`.
+Transform the cotangent vector `ξ` at `p` on the [`Euclidean`](@ref) `M` to a tangent vector `X`.
 Since cotangent and tangent vectors can directly be identified in the [`Euclidean`](@ref)
 case, this yields just the identity.
 """

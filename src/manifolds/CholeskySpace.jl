@@ -52,7 +52,7 @@ end
 """
     check_tangent_vector(M::CholeskySpace, p, X; kwargs... )
 
-Checks whether `v` is a tangent vector to `p` on the [`CholeskySpace`](@ref) `M`, i.e.
+Check whether `v` is a tangent vector to `p` on the [`CholeskySpace`](@ref) `M`, i.e.
 atfer [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same dimension as `x`
 and a symmetric matrix.
 The tolerance for the tests can be set using the `kwargs...`.
@@ -130,7 +130,7 @@ lower triangular matric with positive diagonal `p` and the two tangent vectors
 The formula reads
 
 ````math
-    g_{x}(v,w) = \sum_{i>j} v_{ij}w_{ij} + \sum_{j=1}^m v_{ii}w_{ii}x_{ii}^{-2}
+g_p(X,Y) = \sum_{i>j} X_{ij}Y_{ij} + \sum_{j=1}^m X_{ii}Y_{ii}p_{ii}^{-2}
 ````
 """
 function inner(::CholeskySpace, p, X, Y)
