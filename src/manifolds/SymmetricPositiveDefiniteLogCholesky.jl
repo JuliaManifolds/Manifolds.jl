@@ -12,7 +12,7 @@ struct LogCholeskyMetric <: RiemannianMetric end
 
 cholesky_to_spd(x, W) = (x * x', W * x' + x * W')
 
-tangent_cholesky_to_tangent_spd!(x, W) = (w .= W * x' + x * W')
+tangent_cholesky_to_tangent_spd!(x, W) = (W .= W * x' + x * W')
 
 spd_to_cholesky(p, X) = spd_to_cholesky(p, cholesky(p).L, X)
 
@@ -167,6 +167,6 @@ function vector_transport_to!(
 ) where {N}
     y = cholesky(q).L
     (x, W) = spd_to_cholesky(p, X)
-    vector_transport_to!(CholeskySpace{N}(), V, x, W, y, ParallelTransport())
-    return tangent_cholesky_to_tangent_spd!(y, V)
+    vector_transport_to!(CholeskySpace{N}(), Y, x, W, y, ParallelTransport())
+    return tangent_cholesky_to_tangent_spd!(y, Y)
 end
