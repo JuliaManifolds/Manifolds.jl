@@ -102,8 +102,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test ct_x.fiber.M == M
         @test t_x.fiber.VS == TangentSpace
         @test ct_x.fiber.VS == CotangentSpace
-        @test t_x.x == x
-        @test ct_x.x == x
+        @test t_x.point == x
+        @test ct_x.point == x
     end
 
     @testset "tensor product" begin
