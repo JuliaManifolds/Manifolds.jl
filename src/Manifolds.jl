@@ -218,6 +218,7 @@ include("numbers.jl")
 include("maps.jl")
 include("orthonormal_bases.jl")
 include("differentiation.jl")
+include("riemannian_diff.jl")
 include("SizedAbstractArray.jl")
 
 include("manifolds/VectorBundle.jl")

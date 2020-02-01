@@ -3,16 +3,19 @@ abstract type AbstractDiffBackend end
 
 struct NoneDiffBackend <: AbstractDiffBackend end
 
-function _derivative(f, x, ::NoneDiffBackend)
-    error("NoneDiffBackend does not provide _derivative")
+function _derivative(f, x, backend::AbstractDiffBackend)
+    error("_derivative not implemented for curve $(typeof(f)), point $(typeof(x)) and " *
+          "backend $(typeof(backend))")
 end
 
-function _gradient(f, x, ::NoneDiffBackend)
-    error("NoneDiffBackend does not provide _gradient")
+function _gradient(f, x, backend::AbstractDiffBackend)
+    error("_gradient not implemented for field $(typeof(f)), point $(typeof(x)) and " *
+          "backend $(typeof(backend))")
 end
 
-function _jacobian(f, x, ::NoneDiffBackend)
-    error("NoneDiffBackend does not provide _jacobian")
+function _jacobian(f, x, backend::AbstractDiffBackend)
+    error("_jacobian not implemented for map $(typeof(f)), point $(typeof(x)) and " *
+          "backend $(typeof(backend))")
 end
 
 """
@@ -52,9 +55,9 @@ Get the current differentiation backend.
 diff_backend() = _current_diff_backend.backend
 
 """
-    adbackend!(backend::AbstractDiffBackend)
+    diff_backend!(backend::AbstractDiffBackend)
 
-Set current backend for autodiff to `backend`.
+Set current backend for differentiation to `backend`.
 """
 function diff_backend!(backend::AbstractDiffBackend)
     _current_diff_backend.backend = backend
@@ -68,30 +71,13 @@ Get vector of currently valid differentiation backends.
 """
 diff_backends() = _diff_backends
 
-"""
-    _derivative(f::AbstractCurve, x, backend = diff_backend())
+_derivative(f, x) = _derivative(f, x, diff_backend())
 
-Compute derivative of the curve `f` at point `x` using differentiation backend `backend`.
-"""
-_derivative(f::AbstractCurve, x) = _derivative(f, x, diff_backend())
+_gradient(f, x) = _gradient(f, x, diff_backend())
 
-"""
-    _gradient(f::AbstractRealField, x, backend = diff_backend())
-
-Compute gradient of function `f` at point `x` using differentiation backend `backend`.
-"""
-_gradient(f::AbstractRealField, x) = _gradient(f, x, diff_backend())
-
-"""
-    _jacobian(f::AbstractMap, x::AbstractArray, backend = diff_backend()) -> AbstractArray
-
-Compute Jacobian matrix of function `f` at point `x` using differentiation backend `backend`.
-Inputs and outputs of `f` are vectorized.
-"""
-_jacobian(f::AbstractMap, x) = _jacobian(f::AbstractMap, x, diff_backend())
+_jacobian(f, x) = _jacobian(f, x, diff_backend())
 
 # Finite differences
-
 
 """
     FiniteDifferencesBackend(method::FiniteDifferenceMethod = central_fdm(5, 1))
@@ -110,14 +96,14 @@ push!(_diff_backends, FiniteDifferencesBackend())
 
 diff_backend!(_diff_backends[end])
 
-function _derivative(f::AbstractCurve, x, backend::FiniteDifferencesBackend)
+function _derivative(f, x, backend::FiniteDifferencesBackend)
     return FiniteDifferences.grad(backend.method, f, x)[1]
 end
 
-function _gradient(f::AbstractRealField, x, backend::FiniteDifferencesBackend)
+function _gradient(f, x, backend::FiniteDifferencesBackend)
     return FiniteDifferences.grad(backend.method, f, x)[1]
 end
 
-function _jacobian(f::AbstractMap, x, backend::FiniteDifferencesBackend)
+function _jacobian(f, x, backend::FiniteDifferencesBackend)
     return FiniteDifferences.jacobian(backend.method, f, x)[1]
 end
