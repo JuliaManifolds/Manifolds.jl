@@ -34,7 +34,7 @@ const RotationActionOnVector{N,F,TAD} = RotationAction{
 
 base_group(A::RotationAction) = A.SOn
 
-g_manifold(A::RotationAction) = A.manifold,
+g_manifold(A::RotationAction) = A.manifold
 
 function switch_direction(A::RotationAction{TM,TSO,TAD}) where {TM,TSO,TAD}
     return RotationAction(A.manifold, A.SOn, switch_direction(TAD()))

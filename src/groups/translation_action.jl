@@ -30,7 +30,7 @@ end
 
 base_group(A::TranslationAction) = A.Rn
 
-g_manifold(A::TranslationAction) = A.manifold,
+g_manifold(A::TranslationAction) = A.manifold
 
 function switch_direction(A::TranslationAction{TM,TRN,TAD}) where {TM,TRN,TAD}
     return TranslationAction(A.manifold, A.Rn, switch_direction(TAD()))
