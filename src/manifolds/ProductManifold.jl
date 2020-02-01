@@ -495,13 +495,13 @@ function ProductFVectorDistribution(
 end
 function ProductFVectorDistribution(distributions::FVectorDistribution...)
     M = ProductManifold(map(d -> support(d).space.M, distributions)...)
-    VS = support(distributions[1]).space.VS
-    if !all(d -> support(d).space.VS == VS, distributions)
+    fiber = support(distributions[1]).space.fiber
+    if !all(d -> support(d).space.fiber == fiber, distributions)
         error("Not all distributions have support in vector spaces of the same type, which is currently not supported")
     end
     # Probably worth considering sum spaces in the future?
     x = ProductRepr(map(d -> support(d).x, distributions)...)
-    return ProductFVectorDistribution(VectorBundleFibers(VS, M), x, distributions...)
+    return ProductFVectorDistribution(VectorBundleFibers(fiber, M), x, distributions...)
 end
 
 function ProductPointDistribution(M::ProductManifold, distributions::MPointDistribution...)

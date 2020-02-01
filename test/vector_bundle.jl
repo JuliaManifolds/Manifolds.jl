@@ -98,10 +98,10 @@ struct TestVectorSpaceType <: VectorSpaceType end
           0.0"""
         @test base_manifold(t_x) == M
         @test base_manifold(ct_x) == M
-        @test t_x.fiber.M == M
-        @test ct_x.fiber.M == M
-        @test t_x.fiber.VS == TangentSpace
-        @test ct_x.fiber.VS == CotangentSpace
+        @test t_x.fiber.manifold== M
+        @test ct_x.fiber.manifold== M
+        @test t_x.fiber.fiber == TangentSpace
+        @test ct_x.fiber.fiber == CotangentSpace
         @test t_x.point == x
         @test ct_x.point == x
     end
