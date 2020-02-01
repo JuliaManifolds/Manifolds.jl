@@ -281,7 +281,7 @@ mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation)
 
 function mean!(
     M::Manifold,
-    y,
+    q,
     x::AbstractVector,
     w::AbstractVector,
     ::GeodesicInterpolation;
@@ -298,19 +298,19 @@ function mean!(
     @inbounds begin
         j = order[1]
         s = w[j]
-        copyto!(y, x[j])
+        copyto!(q, x[j])
     end
-    v = zero_tangent_vector(M, y)
-    ytmp = allocate_result(M, mean, y)
+    v = zero_tangent_vector(M, q)
+    ytmp = allocate_result(M, mean, q)
     @inbounds for i = 2:n
         j = order[i]
         s += w[j]
         t = w[j] / s
-        inverse_retract!(M, v, y, x[j], inverse_retraction)
-        retract!(M, ytmp, y, v, t, retraction)
-        copyto!(y, ytmp)
+        inverse_retract!(M, v, q, x[j], inverse_retraction)
+        retract!(M, ytmp, q, v, t, retraction)
+        copyto!(q, ytmp)
     end
-    return y
+    return q
 end
 
 """
@@ -332,26 +332,26 @@ mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolationWith
 
 function mean!(
     M::Manifold,
-    y,
+    q,
     x::AbstractVector,
     w::AbstractVector,
     method::GeodesicInterpolationWithinRadius;
     shuffle_rng = nothing,
     kwargs...,
 )
-    mean!(M, y, x, w, GeodesicInterpolation(); shuffle_rng = shuffle_rng, kwargs...)
+    mean!(M, q, x, w, GeodesicInterpolation(); shuffle_rng = shuffle_rng, kwargs...)
     radius = method.radius
-    injectivity_radius(M, y) ≤ radius && return y
+    injectivity_radius(M, q) ≤ radius && return q
     for i in eachindex(x)
-        @inbounds if distance(M, y, x[i]) ≥ radius
-            return mean!(M, y, x, w, GradientDescentEstimation(); x0 = y, kwargs...)
+        @inbounds if distance(M, q, x[i]) ≥ radius
+            return mean!(M, q, x, w, GradientDescentEstimation(); x0 = q, kwargs...)
         end
     end
-    return y
+    return q
 end
 function mean!(
     M::Manifold,
-    y,
+    q,
     x::AbstractVector,
     w::AbstractVector,
     ::CyclicProximalPointEstimation;
@@ -365,23 +365,23 @@ function mean!(
     if length(w) != n
         throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     end
-    copyto!(y, x0)
-    yold = allocate_result(M, median, y)
+    copyto!(q, x0)
+    yold = allocate_result(M, median, q)
     ytmp = copy(yold)
-    v = zero_tangent_vector(M, y)
+    v = zero_tangent_vector(M, q)
     wv = convert(Vector, w) ./ sum(w)
     for i = 1:stop_iter
         λ = 0.5 / i
-        copyto!(yold, y)
+        copyto!(yold, q)
         for j = 1:n
             @inbounds t = (2 * λ * wv[j]) / (1 + 2 * λ * wv[j])
-            @inbounds inverse_retract!(M, v, y, x[j], inverse_retraction)
-            retract!(M, ytmp, y, v, t, retraction)
-            copyto!(y, ytmp)
+            @inbounds inverse_retract!(M, v, q, x[j], inverse_retraction)
+            retract!(M, ytmp, q, v, t, retraction)
+            copyto!(q, ytmp)
         end
-        isapprox(M, y, yold; kwargs...) && break
+        isapprox(M, q, yold; kwargs...) && break
     end
-    return y
+    return q
 end
 
 @doc raw"""
@@ -476,20 +476,20 @@ computes the [`median`](@ref) in-place in `y`.
 median!(::Manifold, ::Any...)
 function median!(
     M::Manifold,
-    y,
+    q,
     x::AbstractVector,
     method::AbstractEstimationMethod...;
     kwargs...,
 )
     w = _unit_weights(length(x))
-    return median!(M, y, x, w, method...; kwargs...)
+    return median!(M, q, x, w, method...; kwargs...)
 end
 function median!(M::Manifold, y, x::AbstractVector, w::AbstractVector; kwargs...)
     return median!(M, y, x, w, CyclicProximalPointEstimation(); kwargs...)
 end
 function median!(
     M::Manifold,
-    y,
+    q,
     x::AbstractVector,
     w::AbstractVector,
     ::CyclicProximalPointEstimation;
@@ -503,23 +503,23 @@ function median!(
     if length(w) != n
         throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     end
-    copyto!(y, x0)
-    yold = allocate_result(M, median, y)
+    copyto!(q, x0)
+    yold = allocate_result(M, median, q)
     ytmp = copy(yold)
-    v = zero_tangent_vector(M, y)
+    v = zero_tangent_vector(M, q)
     wv = convert(Vector, w) ./ sum(w)
     for i = 1:stop_iter
         λ = 0.5 / i
-        copyto!(yold, y)
+        copyto!(yold, q)
         for j = 1:n
-            @inbounds t = min(λ * wv[j] / distance(M, y, x[j]), 1.0)
-            @inbounds inverse_retract!(M, v, y, x[j], inverse_retraction)
-            retract!(M, ytmp, y, v, t, retraction)
-            copyto!(y, ytmp)
+            @inbounds t = min(λ * wv[j] / distance(M, q, x[j]), 1.0)
+            @inbounds inverse_retract!(M, v, q, x[j], inverse_retraction)
+            retract!(M, ytmp, q, v, t, retraction)
+            copyto!(q, ytmp)
         end
-        isapprox(M, y, yold; kwargs...) && break
+        isapprox(M, q, yold; kwargs...) && break
     end
-    return y
+    return q
 end
 
 @doc raw"""

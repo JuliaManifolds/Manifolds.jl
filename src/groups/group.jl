@@ -1,19 +1,19 @@
 @doc raw"""
     AbstractGroupOperation
 
-Abstract type for smooth binary operations $∘$ on elements of a Lie group $G$:
+Abstract type for smooth binary operations $\circ$ on elements of a Lie group $G$:
 ```math
-∘: G × G → G
+\circ : G × G → G
 ```
 An operation can be either defined for a specific [`AbstractGroupManifold`](@ref)
 or in general, by defining for an operation `Op` the following methods:
 
-    identity!(::AbstractGroupManifold{Op}, y, x)
-    identity(::AbstractGroupManifold{Op}, x)
-    inv!(::AbstractGroupManifold{Op}, y, x)
-    inv(::AbstractGroupManifold{Op}, x)
-    compose(::AbstractGroupManifold{Op}, x, y)
-    compose!(::AbstractGroupManifold{Op}, z, x, y)
+    identity!(::AbstractGroupManifold{Op}, q, q)
+    identity(::AbstractGroupManifold{Op}, p)
+    inv!(::AbstractGroupManifold{Op}, q, p)
+    inv(::AbstractGroupManifold{Op}, p)
+    compose(::AbstractGroupManifold{Op}, p, q)
+    compose!(::AbstractGroupManifold{Op}, x, p, q)
 
 Note that a manifold is connected with an operation by wrapping it with a decorator,
 [`AbstractGroupManifold`](@ref). In typical cases the concrete wrapper
@@ -79,75 +79,75 @@ end
 # GroupManifold forwards
 ########################
 
-function check_tangent_vector(G::GroupManifold, x, v; kwargs...)
-    return check_tangent_vector(G.manifold, x, v; kwargs...)
+function check_tangent_vector(G::GroupManifold, p, X; kwargs...)
+    return check_tangent_vector(G.manifold, p, X; kwargs...)
 end
-distance(G::GroupManifold, x, y) = distance(G.manifold, x, y)
-exp(G::GroupManifold, x, v) = exp(G.manifold, x, v)
-exp!(G::GroupManifold, y, x, v) = exp!(G.manifold, y, x, v)
+distance(G::GroupManifold, p, q) = distance(G.manifold, p, q)
+exp(G::GroupManifold, p, X) = exp(G.manifold, p, X)
+exp!(G::GroupManifold, q, p, X) = exp!(G.manifold, q, p, X)
 injectivity_radius(G::GroupManifold) = injectivity_radius(G.manifold)
-injectivity_radius(G::GroupManifold, x) = injectivity_radius(G.manifold, x)
-function injectivity_radius(G::GroupManifold, x, method::AbstractRetractionMethod)
-    return injectivity_radius(G.manifold, x, method)
+injectivity_radius(G::GroupManifold, p) = injectivity_radius(G.manifold, p)
+function injectivity_radius(G::GroupManifold, p, method::AbstractRetractionMethod)
+    return injectivity_radius(G.manifold, p, method)
 end
-inner(G::GroupManifold, x, v, w) = inner(G.manifold, x, v, w)
-inverse_retract(G::GroupManifold, x, y) = inverse_retract(G.manifold, x, y)
-function inverse_retract(G::GroupManifold, x, y, method::AbstractInverseRetractionMethod)
-    return inverse_retract(G.manifold, x, y, method)
+inner(G::GroupManifold, p, X, Y) = inner(G.manifold, p, X, Y)
+inverse_retract(G::GroupManifold, p, q) = inverse_retract(G.manifold, p, q)
+function inverse_retract(G::GroupManifold, p, q, method::AbstractInverseRetractionMethod)
+    return inverse_retract(G.manifold, p, q, method)
 end
-inverse_retract!(G::GroupManifold, v, x, y) = inverse_retract!(G.manifold, v, x, y)
+inverse_retract!(G::GroupManifold, X, p, q) = inverse_retract!(G.manifold, X, p, q)
 function inverse_retract!(
     G::GroupManifold,
-    v,
-    x,
-    y,
+    X,
+    p,
+    q,
     method::AbstractInverseRetractionMethod,
 )
-    return inverse_retract!(G.manifold, v, x, y, method)
+    return inverse_retract!(G.manifold, X, p, q, method)
 end
-function inverse_retract!(G::GroupManifold, v, x, y, method::LogarithmicInverseRetraction)
-    return inverse_retract!(G.manifold, v, x, y, method)
+function inverse_retract!(G::GroupManifold, X, p, q, method::LogarithmicInverseRetraction)
+    return inverse_retract!(G.manifold, X, p, q, method)
 end
-isapprox(G::GroupManifold, x, y; kwargs...) = isapprox(G.manifold, x, y; kwargs...)
-isapprox(G::GroupManifold, x, v, w; kwargs...) = isapprox(G.manifold, x, v, w; kwargs...)
-log(G::GroupManifold, x, y) = log(G.manifold, x, y)
-log!(G::GroupManifold, v, x, y) = log!(G.manifold, v, x, y)
-norm(G::GroupManifold, x, v) = norm(G.manifold, x, v)
-project_point(G::GroupManifold, x) = project_point(G.manifold, x)
-project_point!(G::GroupManifold, y, x) = project_point!(G.manifold, y, x)
-project_tangent(G::GroupManifold, x, v) = project_tangent(G.manifold, x, v)
-project_tangent!(G::GroupManifold, w, x, v) = project_tangent!(G.manifold, w, x, v)
-retract(G::GroupManifold, x, v) = retract(G.manifold, x, v)
-function retract(G::GroupManifold, x, v, method::AbstractRetractionMethod)
-    return retract(G.manifold, x, v, method)
+isapprox(G::GroupManifold, p, q; kwargs...) = isapprox(G.manifold, p, q; kwargs...)
+isapprox(G::GroupManifold, p, X, w; kwargs...) = isapprox(G.manifold, p, X, w; kwargs...)
+log(G::GroupManifold, p, q) = log(G.manifold, p, q)
+log!(G::GroupManifold, X, p, q) = log!(G.manifold, X, p, q)
+norm(G::GroupManifold, p, X) = norm(G.manifold, p, X)
+project_point(G::GroupManifold, p) = project_point(G.manifold, p)
+project_point!(G::GroupManifold, q, p) = project_point!(G.manifold, q, p)
+project_tangent(G::GroupManifold, p, X) = project_tangent(G.manifold, p, X)
+project_tangent!(G::GroupManifold, Y, p, X) = project_tangent!(G.manifold, Y, p, X)
+retract(G::GroupManifold, p, X) = retract(G.manifold, p, X)
+function retract(G::GroupManifold, p, X, method::AbstractRetractionMethod)
+    return retract(G.manifold, p, X, method)
 end
-retract!(G::GroupManifold, y, x, v) = retract!(G.manifold, y, x, v)
-function retract!(G::GroupManifold, y, x, v, method::AbstractRetractionMethod)
-    return retract!(G.manifold, y, x, v, method)
+retract!(G::GroupManifold, q, p, X) = retract!(G.manifold, q, p, X)
+function retract!(G::GroupManifold, q, p, X, method::AbstractRetractionMethod)
+    return retract!(G.manifold, q, p, X, method)
 end
-function retract!(G::GroupManifold, y, x, v, method::ExponentialRetraction)
-    return retract!(G.manifold, y, x, v, method)
+function retract!(G::GroupManifold, q, p, X, method::ExponentialRetraction)
+    return retract!(G.manifold, q, p, X, method)
 end
-function vector_transport_along!(G::GroupManifold, vto, x, v, c, args...)
-    return vector_transport_along!(G.manifold, vto, x, v, c, args...)
+function vector_transport_along!(G::GroupManifold, Y, p, X, c, args...)
+    return vector_transport_along!(G.manifold, Y, p, X, c, args...)
 end
-function vector_transport_along(G::GroupManifold, x, v, c, args...)
-    return vector_transport_along(G.manifold, x, v, c, args...)
+function vector_transport_along(G::GroupManifold, p, X, c, args...)
+    return vector_transport_along(G.manifold, p, X, c, args...)
 end
-function vector_transport_direction!(G::GroupManifold, vto, x, v, vdir, args...)
-    return vector_transport_direction!(G.manifold, vto, x, v, vdir, args...)
+function vector_transport_direction!(G::GroupManifold, Y, p, X, V, args...)
+    return vector_transport_direction!(G.manifold, Y, p, X, V, args...)
 end
-function vector_transport_direction(G::GroupManifold, x, v, vdir, args...)
-    return vector_transport_direction(G.manifold, x, v, vdir, args...)
+function vector_transport_direction(G::GroupManifold, p, X, V, args...)
+    return vector_transport_direction(G.manifold, p, X, V, args...)
 end
-function vector_transport_to!(G::GroupManifold, vto, x, v, y, args...)
-    return vector_transport_to!(G.manifold, vto, x, v, y, args...)
+function vector_transport_to!(G::GroupManifold, Y, p, X, q, args...)
+    return vector_transport_to!(G.manifold, Y, p, X, q, args...)
 end
-function vector_transport_to(G::GroupManifold, x, v, y, args...)
-    return vector_transport_to(G.manifold, x, v, y, args...)
+function vector_transport_to(G::GroupManifold, p, X, q, args...)
+    return vector_transport_to(G.manifold, p, X, q, args...)
 end
-zero_tangent_vector(G::GroupManifold, x) = zero_tangent_vector(G.manifold, x)
-zero_tangent_vector!(G::GroupManifold, y, x) = zero_tangent_vector!(G.manifold, y, x)
+zero_tangent_vector(G::GroupManifold, p) = zero_tangent_vector(G.manifold, p)
+zero_tangent_vector!(G::GroupManifold, q, p) = zero_tangent_vector!(G.manifold, q, p)
 
 ###################
 # Action directions
@@ -202,31 +202,31 @@ Identity(M::Manifold, ::Val{false}) = error("Identity not implemented for manifo
 
 show(io::IO, e::Identity) = print(io, "Identity($(e.group))")
 
-(e::Identity)(x) = identity(e.group, x)
+(e::Identity)(p) = identity(e.group, p)
 
 # To ensure allocate_result_type works
 number_eltype(e::Identity) = Bool
 
 copyto!(e::TE, ::TE) where {TE<:Identity} = e
-copyto!(x, ::TE) where {TE<:Identity} = identity!(e.group, x, e)
-copyto!(x::AbstractArray, e::TE) where {TE<:Identity} = identity!(e.group, x, e)
+copyto!(p, ::TE) where {TE<:Identity} = identity!(e.group, p, e)
+copyto!(p::AbstractArray, e::TE) where {TE<:Identity} = identity!(e.group, p, e)
 
-isapprox(x, e::Identity; kwargs...) = isapprox(e::Identity, x; kwargs...)
-isapprox(e::Identity, x; kwargs...) = isapprox(e.group, e, x; kwargs...)
+isapprox(p, e::Identity; kwargs...) = isapprox(e::Identity, p; kwargs...)
+isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
 isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
-function check_manifold_point(M::Manifold, x::Identity; kwargs...)
+function check_manifold_point(M::Manifold, p::Identity; kwargs...)
     if is_decorator_group(M) === Val(true)
-        return check_manifold_point(base_group(M), x; kwargs...)
+        return check_manifold_point(base_group(M), p; kwargs...)
     end
-    return DomainError(x, "The identity element $(x) does not belong to $(M).")
+    return DomainError(p, "The identity element $(p) does not belong to $(M).")
 end
-function check_manifold_point(G::GroupManifold, x::Identity; kwargs...)
-    x === Identity(G) && return nothing
-    return DomainError(x, "The identity element $(x) does not belong to $(G).")
+function check_manifold_point(G::GroupManifold, p::Identity; kwargs...)
+    p === Identity(G) && return nothing
+    return DomainError(p, "The identity element $(p) does not belong to $(G).")
 end
-function check_manifold_point(G::GroupManifold, x; kwargs...)
-    return check_manifold_point(G.manifold, x; kwargs...)
+function check_manifold_point(G::GroupManifold, p; kwargs...)
+    return check_manifold_point(G.manifold, p; kwargs...)
 end
 
 ##########################
@@ -236,65 +236,58 @@ end
 @doc raw"""
     inv(G::AbstractGroupManifold, x)
 
-Inverse $x^{-1} ∈ G$ of an element $x ∈ G$, such that
-$x \circ x^{-1} = x^{-1} \circ x = e ∈ G$.
+Inverse $p^{-1} ∈ G$ of an element $p ∈ G$, such that
+$p \circ p^{-1} = p^{-1} \circ p = e ∈ G$.
 """
-inv(M::Manifold, x) = inv(M, x, is_decorator_manifold(M))
-inv(M::Manifold, x, ::Val{true}) = inv(M.manifold, x)
-function inv(M::Manifold, x, ::Val{false})
-    return error("inv not implemented on $(typeof(M)) for points $(typeof(x))")
+inv(M::Manifold, p) = inv(M, p, is_decorator_manifold(M))
+inv(M::Manifold, p, ::Val{true}) = inv(M.manifold, p)
+function inv(M::Manifold, p, ::Val{false})
+    return error("inv not implemented on $(typeof(M)) for points $(typeof(p))")
 end
-function inv(G::AbstractGroupManifold, x)
-    y = allocate_result(G, inv, x)
-    return inv!(G, y, x)
+function inv(G::AbstractGroupManifold, p)
+    q = allocate_result(G, inv, p)
+    return inv!(G, q, p)
+end
+
+inv!(M::Manifold, q, p) = inv!(M, q, p, is_decorator_manifold(M))
+inv!(M::Manifold, q, p, ::Val{true}) = inv!(M.manifold, q, p)
+function inv!(M::Manifold, q, p, ::Val{false})
+    return error("inv! not implemented on $(typeof(M)) for points $(typeof(p))")
 end
 
 @doc raw"""
-    inv!(G::AbstractGroupManifold, y, x)
+    identity(G::AbstractGroupManifold, p)
 
-Inverse $x^{-1} ∈ G$ of an element $x ∈ G$, such that
-$x \circ x^{-1} = x^{-1} \circ x = e ∈ G$.
-The result is saved to `y`.
+Identity element $e ∈ G$, such that for any element $p ∈ G$, $p \circ e = e \circ p = p$.
+The returned element is of a similar type to `p`.
 """
-inv!(M::Manifold, y, x) = inv!(M, y, x, is_decorator_manifold(M))
-inv!(M::Manifold, y, x, ::Val{true}) = inv!(M.manifold, y, x)
-function inv!(M::Manifold, y, x, ::Val{false})
-    return error("inv! not implemented on $(typeof(M)) for points $(typeof(x))")
+identity(M::Manifold, p) = identity(M, p, is_decorator_manifold(M))
+identity(M::Manifold, p, ::Val{true}) = identity(M.manifold, p)
+function identity(M::Manifold, p, ::Val{false})
+    return error("identity not implemented on $(typeof(M)) for points $(typeof(p))")
+end
+function identity(G::AbstractGroupManifold, p)
+    y = allocate_result(G, identity, p)
+    return identity!(G, y, p)
 end
 
-@doc raw"""
-    identity(G::AbstractGroupManifold, x)
-
-Identity element $e ∈ G$, such that for any element $x ∈ G$, $x \circ e = e \circ x = x$.
-The returned element is of a similar type to `x`.
-"""
-identity(M::Manifold, x) = identity(M, x, is_decorator_manifold(M))
-identity(M::Manifold, x, ::Val{true}) = identity(M.manifold, x)
-function identity(M::Manifold, x, ::Val{false})
-    return error("identity not implemented on $(typeof(M)) for points $(typeof(x))")
-end
-function identity(G::AbstractGroupManifold, x)
-    y = allocate_result(G, identity, x)
-    return identity!(G, y, x)
-end
-
-identity!(M::Manifold, y, x) = identity!(M, y, x, is_decorator_manifold(M))
-identity!(M::Manifold, y, x, ::Val{true}) = identity!(M.manifold, y, x)
+identity!(M::Manifold, q, p) = identity!(M, q, p, is_decorator_manifold(M))
+identity!(M::Manifold, q, p, ::Val{true}) = identity!(M.manifold, q, p)
 function identity!(M::Manifold, y, x, ::Val{false})
     return error("identity! not implemented on $(typeof(M)) for points $(typeof(y)) and $(typeof(x))")
 end
 
-isapprox(M::Manifold, x, e::Identity; kwargs...) = isapprox(M, e, x; kwargs...)
-function isapprox(M::Manifold, e::Identity, x; kwargs...)
-    is_decorator_group(M) === Val(true) && return isapprox(base_group(M), e, x; kwargs...)
-    error("isapprox not implemented for manifold $(typeof(M)) and points $(typeof(e)) and $(typeof(x))")
+isapprox(M::Manifold, p, e::Identity; kwargs...) = isapprox(M, e, p; kwargs...)
+function isapprox(M::Manifold, e::Identity, p; kwargs...)
+    is_decorator_group(M) === Val(true) && return isapprox(base_group(M), e, p; kwargs...)
+    error("isapprox not implemented for manifold $(typeof(M)) and points $(typeof(e)) and $(typeof(p))")
 end
 function isapprox(M::Manifold, e::E, ::E; kwargs...) where {E<:Identity}
     is_decorator_group(M) === Val(true) && return isapprox(base_group(M), e, e; kwargs...)
     error("isapprox not implemented for manifold $(typeof(M)) and points $(typeof(e)) and $(typeof(e))")
 end
-function isapprox(G::GT, e::Identity{GT}, x; kwargs...) where {GT<:AbstractGroupManifold}
-    return isapprox(G, identity(G, x), x; kwargs...)
+function isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:AbstractGroupManifold}
+    return isapprox(G, identity(G, p), p; kwargs...)
 end
 function isapprox(
     ::GT,
@@ -304,11 +297,11 @@ function isapprox(
 ) where {GT<:AbstractGroupManifold,E<:Identity{GT}}
     return true
 end
-function isapprox(G::GT, x, e::Identity{GT}; kwargs...) where {GT<:GroupManifold}
-    return isapprox(G, e, x; kwargs...)
+function isapprox(G::GT, p, e::Identity{GT}; kwargs...) where {GT<:GroupManifold}
+    return isapprox(G, e, p; kwargs...)
 end
-function isapprox(G::GT, e::Identity{GT}, x; kwargs...) where {GT<:GroupManifold}
-    return isapprox(G, identity(G, x), x; kwargs...)
+function isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:GroupManifold}
+    return isapprox(G, identity(G, p), p; kwargs...)
 end
 isapprox(::GT, ::E, ::E; kwargs...) where {GT<:GroupManifold,E<:Identity{GT}} = true
 
@@ -317,241 +310,219 @@ isapprox(::GT, ::E, ::E; kwargs...) where {GT<:GroupManifold,E<:Identity{GT}} = 
 
 Compose elements $x,y ∈ G$ using the group operation $x \circ y$.
 """
-compose(M::Manifold, x, y) = compose(M, x, y, is_decorator_manifold(M))
-compose(M::Manifold, x, y, ::Val{true}) = compose(M.manifold, x, y)
-function compose(M::Manifold, x, y, ::Val{false})
-    return error("compose not implemented on $(typeof(M)) for elements $(typeof(x)) and $(typeof(y))")
+compose(M::Manifold, p, q) = compose(M, p, q, is_decorator_manifold(M))
+compose(M::Manifold, p, q, ::Val{true}) = compose(M.manifold, p, q)
+function compose(M::Manifold, p, q, ::Val{false})
+    return error("compose not implemented on $(typeof(M)) for elements $(typeof(p)) and $(typeof(q))")
 end
-function compose(G::AbstractGroupManifold, x, y)
-    z = allocate_result(G, compose, x, y)
-    return compose!(G, z, x, y)
-end
-
-compose!(M::Manifold, z, x, y) = compose!(M, z, x, y, is_decorator_manifold(M))
-compose!(M::Manifold, z, x, y, ::Val{true}) = compose!(M.manifold, z, x, y)
-function compose!(M::Manifold, z, x, y, ::Val{false})
-    return error("compose! not implemented on $(typeof(M)) for elements $(typeof(x)) and $(typeof(y))")
+function compose(G::AbstractGroupManifold, p, q)
+    x = allocate_result(G, compose, p, q)
+    return compose!(G, x, p, q)
 end
 
-_action_order(x, y, conv::LeftAction) = (x, y)
-_action_order(x, y, conv::RightAction) = (y, x)
+compose!(M::Manifold, x, p, q) = compose!(M, x, p, q, is_decorator_manifold(M))
+compose!(M::Manifold, x, p, q, ::Val{true}) = compose!(M.manifold, x, p, q)
+function compose!(M::Manifold, x, p, q, ::Val{false})
+    return error("compose! not implemented on $(typeof(M)) for elements $(typeof(p)) and $(typeof(q))")
+end
+
+_action_order(p, q, conv::LeftAction) = (p, q)
+_action_order(p, q, conv::RightAction) = (q, p)
 
 @doc raw"""
-    translate(G::AbstractGroupManifold, x, y[, conv::ActionDirection=LeftAction()])
+    translate(G::AbstractGroupManifold, p, q)
+    translate(G::AbstractGroupManifold, p, q, conv::ActionDirection=LeftAction()])
 
-For group elements $x,y ∈ G$, translate $y$ by $x$ with the specified convention, either
-left $L_x$ or right $R_x$, defined as
+For group elements $p,q ∈ G$, translate $q$ by $p$ with the specified convention, either
+left $L_p$ or right $R_q$, defined as
 ```math
 \begin{aligned}
-L_x &: y ↦ x \circ y\\
-R_x &: y ↦ y \circ x.
+L_p &: q ↦ p \circ q\\
+R_p &: q ↦ q \circ p.
 \end{aligned}
 ```
 """
-translate(M::Manifold, x, y) = translate(M, x, y, LeftAction())
-function translate(M::Manifold, x, y, conv::ActionDirection)
-    return translate(M, x, y, conv, is_decorator_manifold(M))
+translate(M::Manifold, p, q) = translate(M, p, q, LeftAction())
+function translate(M::Manifold, p, q, conv::ActionDirection)
+    return translate(M, p, q, conv, is_decorator_manifold(M))
 end
-function translate(M::Manifold, x, y, conv::ActionDirection, ::Val{true})
-    return translate(M.manifold, x, y, conv)
+function translate(M::Manifold, p, q, conv::ActionDirection, ::Val{true})
+    return translate(M.manifold, p, q, conv)
 end
-function translate(M::Manifold, x, y, conv::ActionDirection, ::Val{false})
-    return error("translate not implemented on $(typeof(M)) for elements $(typeof(x)) and $(typeof(y)) and direction $(typeof(conv))")
+function translate(M::Manifold, p, q, conv::ActionDirection, ::Val{false})
+    return error("translate not implemented on $(typeof(M)) for elements $(typeof(p)) and $(typeof(q)) and direction $(typeof(conv))")
 end
-function translate(G::AbstractGroupManifold, x, y, conv::ActionDirection)
-    return compose(G, _action_order(x, y, conv)...)
+function translate(G::AbstractGroupManifold, p, q, conv::ActionDirection)
+    return compose(G, _action_order(p, q, conv)...)
+end
+
+translate!(M::Manifold, x, p, q) = translate!(M, x, p, q, LeftAction())
+function translate!(M::Manifold, x, p, q, conv::ActionDirection)
+    return translate!(M, x, p, q, conv, is_decorator_manifold(M))
+end
+function translate!(M::Manifold, x, p, q, conv::ActionDirection, ::Val{true})
+    return translate!(M.manifold, x, p, q, conv)
+end
+function translate!(M::Manifold, x, p, q, conv::ActionDirection, ::Val{false})
+    return error("translate! not implemented on $(typeof(M)) for elements $(typeof(p)) and $(typeof(q)) and direction $(typeof(conv))")
+end
+function translate!(G::AbstractGroupManifold, x, p, q, conv::ActionDirection)
+    return compose!(G, x, _action_order(p, q, conv)...)
 end
 
 @doc raw"""
-    translate!(G::AbstractGroupManifold, z, x, y[, conv::ActionDirection=LeftAction()])
+    inverse_translate(G::AbstractGroupManifold, p, q)
+    inverse_translate(G::AbstractGroupManifold, p, q, conv::ActionDirection=Left())
 
-For group elements $x,y ∈ G$, translate $y$ by $x$ with the specified convention, either
-left $L_x$ or right $R_x$, defined as
+For group elements $p, q ∈ G$, inverse translate $q$ by $p$ with the specified convention,
+either left $L_p^{-1}$ or right $R_p^{-1}$, defined as
 ```math
 \begin{aligned}
-L_x &: y ↦ x \circ y\\
-R_x &: y ↦ y \circ x.
-\end{aligned}
-```
-Result of the operation is saved in `z`.
-"""
-translate!(M::Manifold, z, x, y) = translate!(M, z, x, y, LeftAction())
-function translate!(M::Manifold, z, x, y, conv::ActionDirection)
-    return translate!(M, z, x, y, conv, is_decorator_manifold(M))
-end
-function translate!(M::Manifold, z, x, y, conv::ActionDirection, ::Val{true})
-    return translate!(M.manifold, z, x, y, conv)
-end
-function translate!(M::Manifold, z, x, y, conv::ActionDirection, ::Val{false})
-    return error("translate! not implemented on $(typeof(M)) for elements $(typeof(x)) and $(typeof(y)) and direction $(typeof(conv))")
-end
-function translate!(G::AbstractGroupManifold, z, x, y, conv::ActionDirection)
-    return compose!(G, z, _action_order(x, y, conv)...)
-end
-
-@doc raw"""
-    inverse_translate(G::AbstractGroupManifold, x, y, [conv::ActionDirection=Left()])
-
-For group elements $x,y ∈ G$, inverse translate $y$ by $x$ with the specified convention,
-either left $L_x^{-1}$ or right $R_x^{-1}$, defined as
-```math
-\begin{aligned}
-L_x^{-1} &: y ↦ x^{-1} \circ y\\
-R_x^{-1} &: y ↦ y \circ x^{-1}.
+L_p^{-1} &: q ↦ p^{-1} \circ q\\
+R_p^{-1} &: q ↦ q \circ p^{-1}.
 \end{aligned}
 ```
 """
-inverse_translate(M::Manifold, x, y) = inverse_translate(M, x, y, LeftAction())
-function inverse_translate(M::Manifold, x, y, conv::ActionDirection)
-    return inverse_translate(M, x, y, conv, is_decorator_manifold(M))
+inverse_translate(M::Manifold, p, q) = inverse_translate(M, p, q, LeftAction())
+function inverse_translate(M::Manifold, p, q, conv::ActionDirection)
+    return inverse_translate(M, p, q, conv, is_decorator_manifold(M))
 end
-function inverse_translate(M::Manifold, x, y, conv::ActionDirection, ::Val{true})
-    return inverse_translate(M.manifold, x, y, conv)
+function inverse_translate(M::Manifold, p, q, conv::ActionDirection, ::Val{true})
+    return inverse_translate(M.manifold, p, q, conv)
 end
-function inverse_translate(M::Manifold, x, y, conv::ActionDirection, ::Val{false})
-    return error("inverse_translate not implemented on $(typeof(M)) for elements $(typeof(x)) and $(typeof(y)) and direction $(typeof(conv))")
+function inverse_translate(M::Manifold, p, q, conv::ActionDirection, ::Val{false})
+    return error("inverse_translate not implemented on $(typeof(M)) for elements $(typeof(p)) and $(typeof(q)) and direction $(typeof(conv))")
 end
-function inverse_translate(G::AbstractGroupManifold, x, y, conv::ActionDirection)
-    return translate(G, inv(G, x), y, conv)
+function inverse_translate(G::AbstractGroupManifold, p, q, conv::ActionDirection)
+    return translate(G, inv(G, p), q, conv)
+end
+
+inverse_translate!(M::Manifold, x, p, q) = inverse_translate!(M, x, p, q, LeftAction())
+function inverse_translate!(M::Manifold, x, p, q, conv::ActionDirection)
+    return inverse_translate!(M, x, p, q, conv, is_decorator_manifold(M))
+end
+function inverse_translate!(M::Manifold, x, p, q, conv::ActionDirection, ::Val{true})
+    return inverse_translate!(M.manifold, x, p, q, conv)
+end
+function inverse_translate!(M::Manifold, x, p, q, conv::ActionDirection, ::Val{false})
+    return error("inverse_translate! not implemented on $(typeof(M)) for elements $(typeof(p)) and $(typeof(q)) and direction $(typeof(conv))")
+end
+function inverse_translate!(G::AbstractGroupManifold, x, p, q, conv::ActionDirection)
+    return translate!(G, x, inv(G, p), q, conv)
 end
 
 @doc raw"""
-    inverse_translate!(G::AbstractGroupManifold, z, x, y, [conv::ActionDirection=Left()])
+    translate_diff(G::AbstractGroupManifold, p, q, X)
+    translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection=LeftAction())
 
-For group elements $x,y ∈ G$, inverse translate $y$ by $x$ with the specified convention,
-either left $L_x^{-1}$ or right $R_x^{-1}$, defined as
-```math
-\begin{aligned}
-L_x^{-1} &: y ↦ x^{-1} \circ y\\
-R_x^{-1} &: y ↦ y \circ x^{-1}.
-\end{aligned}
-```
-Result is saved in `z`.
-"""
-inverse_translate!(M::Manifold, z, x, y) = inverse_translate!(M, z, x, y, LeftAction())
-function inverse_translate!(M::Manifold, z, x, y, conv::ActionDirection)
-    return inverse_translate!(M, z, x, y, conv, is_decorator_manifold(M))
-end
-function inverse_translate!(M::Manifold, z, x, y, conv::ActionDirection, ::Val{true})
-    return inverse_translate!(M.manifold, z, x, y, conv)
-end
-function inverse_translate!(M::Manifold, z, x, y, conv::ActionDirection, ::Val{false})
-    return error("inverse_translate! not implemented on $(typeof(M)) for elements $(typeof(x)) and $(typeof(y)) and direction $(typeof(conv))")
-end
-function inverse_translate!(G::AbstractGroupManifold, z, x, y, conv::ActionDirection)
-    return translate!(G, z, inv(G, x), y, conv)
-end
-
-@doc raw"""
-    translate_diff(G::AbstractGroupManifold, x, y, v[, conv::ActionDirection=LeftAction()])
-
-For group elements $x,y ∈ G$ and tangent vector $v ∈ T_y G$, compute the action of the
-differential of the translation by $x$ on $v$, written as $(\mathrm{d}τ_x)_y (v)$, with the
+For group elements $p, q ∈ G$ and tangent vector $X ∈ T_q G$, compute the action of the
+differential of the translation by $p$ on $X$, written as $(\mathrm{d}τ_p)_q (X)$, with the
 specified left or right convention. The differential transports vectors:
 ```math
 \begin{aligned}
-(\mathrm{d}L_x)_y (v) &: T_y G → T_{x \circ y} G\\
-(\mathrm{d}R_x)_y (v) &: T_y G → T_{y \circ x} G\\
+(\mathrm{d}L_p)_q (X) &: T_q G → T_{p \circ q} G\\
+(\mathrm{d}R_p)_q (X) &: T_q G → T_{q \circ p} G\\
 \end{aligned}
 ```
 """
-translate_diff(M::Manifold, x, y, v) = translate_diff(M, x, y, v, LeftAction())
-function translate_diff(M::Manifold, x, y, v, conv::ActionDirection)
-    return translate_diff(M, x, y, v, conv, is_decorator_manifold(M))
+translate_diff(M::Manifold, p, q, X) = translate_diff(M, p, q, X, LeftAction())
+function translate_diff(M::Manifold, p, q, X, conv::ActionDirection)
+    return translate_diff(M, p, q, X, conv, is_decorator_manifold(M))
 end
-function translate_diff(M::Manifold, x, y, v, conv::ActionDirection, ::Val{true})
-    return translate_diff(M.manifold, x, y, v, conv)
+function translate_diff(M::Manifold, p, q, X, conv::ActionDirection, ::Val{true})
+    return translate_diff(M.manifold, p, q, X, conv)
 end
-function translate_diff(M::Manifold, x, y, v, conv::ActionDirection, ::Val{false})
-    return error("translate_diff not implemented on $(typeof(G)) for elements $(typeof(vout)), $(typeof(x)) and $(typeof(y)), vector $(typeof(v)), and direction $(typeof(conv))")
+function translate_diff(M::Manifold, p, q, X, conv::ActionDirection, ::Val{false})
+    return error("translate_diff not implemented on $(typeof(G)) for elements $(typeof(vout)), $(typeof(p)) and $(typeof(q)), vector $(typeof(X)), and direction $(typeof(conv))")
 end
-function translate_diff(G::AbstractGroupManifold, x, y, v, conv::ActionDirection)
-    xy = translate(G, x, y, conv)
-    vout = zero_tangent_vector(G, xy)
-    translate_diff!(G, vout, x, y, v, conv)
-    return vout
+function translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection)
+    pq = translate(G, p, q, conv)
+    Y = zero_tangent_vector(G, pq)
+    translate_diff!(G, Y, p, q, X, conv)
+    return Y
 end
 
-function translate_diff!(M::Manifold, vout, x, y, v)
-    return translate_diff!(M, vout, x, y, v, LeftAction())
+function translate_diff!(M::Manifold, Y, p, q, X)
+    return translate_diff!(M, Y, p, q, X, LeftAction())
 end
-function translate_diff!(M::Manifold, vout, x, y, v, conv::ActionDirection)
-    return translate_diff!(M, vout, x, y, v, conv, is_decorator_manifold(M))
+function translate_diff!(M::Manifold, Y, p, q, X, conv::ActionDirection)
+    return translate_diff!(M, Y, p, q, X, conv, is_decorator_manifold(M))
 end
-function translate_diff!(M::Manifold, vout, x, y, v, conv::ActionDirection, ::Val{true})
-    return translate_diff!(M.manifold, vout, x, y, v, conv)
+function translate_diff!(M::Manifold, Y, p, q, X, conv::ActionDirection, ::Val{true})
+    return translate_diff!(M.manifold, Y, p, q, X, conv)
 end
-function translate_diff!(M::Manifold, vout, x, y, v, conv::ActionDirection, ::Val{false})
-    return error("translate_diff! not implemented on $(typeof(M)) for elements $(typeof(vout)), $(typeof(x)) and $(typeof(y)), vector $(typeof(v)), and direction $(typeof(conv))")
+function translate_diff!(M::Manifold, Y, p, q, X, conv::ActionDirection, ::Val{false})
+    return error("translate_diff! not implemented on $(typeof(M)) for elements $(typeof(Y)), $(typeof(p)) and $(typeof(q)), vector $(typeof(X)), and direction $(typeof(conv))")
 end
 
 @doc raw"""
-    inverse_translate_diff(G::AbstractGroupManifold, x, y, v[, conv::ActionDirection=Left()])
+    inverse_translate_diff(G::AbstractGroupManifold, p, q, X)
+    inverse_translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection=Left())
 
-For group elements $x,y ∈ G$ and tangent vector $v ∈ T_y G$, compute the inverse of the
-action of the differential of the translation by $x$ on $v$, written as
-$((\mathrm{d}τ_x)_y)^{-1} (v) = (\mathrm{d}τ_{x^{-1}})_y (v)$, with the specified left or
-right convention. The differential transports vectors:
+For group elements $p, q ∈ G$ and tangent vector $X ∈ T_q G$, compute the inverse of the
+action of the differential of the translation by $p$ on $X$, written as
+$((\mathrm{d}τ_p)_q)^{-1} (X) = (\mathrm{d}τ_{p^{-1}})_q (X)$, with the specified left or
+right convention. The differential transports vectors is
+
 ```math
 \begin{aligned}
-((\mathrm{d}L_x)_y)^{-1} (v) &: T_y G → T_{x^{-1} \circ y} G\\
-((\mathrm{d}R_x)_y)^{-1} (v) &: T_y G → T_{y \circ x^{-1}} G\\
+((\mathrm{d}L_p)_q)^{-1} (X) &: T_q G → T_{p^{-1} \circ q} G\\
+((\mathrm{d}R_p)_q)^{-1} (X) &: T_q G → T_{q \circ p^{-1}} G\\
 \end{aligned}
 ```
 """
-function inverse_translate_diff(M::Manifold, x, y, v)
-    return inverse_translate_diff(M, x, y, v, LeftAction())
+function inverse_translate_diff(M::Manifold, p, q, X)
+    return inverse_translate_diff(M, p, q, X, LeftAction())
 end
-function inverse_translate_diff(M::Manifold, x, y, v, conv::ActionDirection)
-    return inverse_translate_diff(M, x, y, v, conv, is_decorator_manifold(M))
+function inverse_translate_diff(M::Manifold, p, q, X, conv::ActionDirection)
+    return inverse_translate_diff(M, p, q, X, conv, is_decorator_manifold(M))
 end
-function inverse_translate_diff(M::Manifold, x, y, v, conv::ActionDirection, ::Val{true})
-    return inverse_translate_diff(M.manifold, x, y, v, conv)
+function inverse_translate_diff(M::Manifold, p, q, X, conv::ActionDirection, ::Val{true})
+    return inverse_translate_diff(M.manifold, p, q, X, conv)
 end
-function inverse_translate_diff(M::Manifold, x, y, v, conv::ActionDirection, ::Val{false})
-    return error("inverse_translate_diff not implemented on $(typeof(M)) for elements $(typeof(vout)), $(typeof(x)) and $(typeof(y)), vector $(typeof(v)), and direction $(typeof(conv))")
+function inverse_translate_diff(M::Manifold, p, q, X, conv::ActionDirection, ::Val{false})
+    return error("inverse_translate_diff not implemented on $(typeof(M)) for elements $(typeof(p)) and $(typeof(q)), vector $(typeof(X)), and direction $(typeof(conv))")
 end
-function inverse_translate_diff(G::AbstractGroupManifold, x, y, v, conv::ActionDirection)
-    return translate_diff(G, inv(G, x), y, v, conv)
+function inverse_translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection)
+    return translate_diff(G, inv(G, p), q, X, conv)
 end
 
-function inverse_translate_diff!(M::Manifold, vout, x, y, v)
-    return inverse_translate_diff!(M, vout, x, y, v, LeftAction())
+function inverse_translate_diff!(M::Manifold, Y, p, q, X)
+    return inverse_translate_diff!(M, Y, p, q, X, LeftAction())
 end
-function inverse_translate_diff!(M::Manifold, vout, x, y, v, conv::ActionDirection)
-    return inverse_translate_diff!(M, vout, x, y, v, conv, is_decorator_manifold(M))
+function inverse_translate_diff!(M::Manifold, Y, p, q, X, conv::ActionDirection)
+    return inverse_translate_diff!(M, Y, p, q, X, conv, is_decorator_manifold(M))
 end
-function inverse_translate_diff!(
-    M::Manifold,
-    vout,
-    x,
-    y,
-    v,
+function inverse_translate_diff!(M::Manifold,
+    Y,
+    p,
+    q,
+    X,
     conv::ActionDirection,
     ::Val{true},
 )
-    return inverse_translate_diff!(M.manifold, vout, x, y, v, conv)
+    return inverse_translate_diff!(M.manifold, Y, p, q, X, conv)
 end
 function inverse_translate_diff!(
     M::Manifold,
-    vout,
-    x,
-    y,
-    v,
+    Y,
+    p,
+    q,
+    X,
     conv::ActionDirection,
     ::Val{false},
 )
-    return error("inverse_translate_diff! not implemented on $(typeof(M)) for elements $(typeof(vout)), $(typeof(x)) and $(typeof(y)), vector $(typeof(v)), and direction $(typeof(conv))")
+    return error("inverse_translate_diff! not implemented on $(typeof(M)) for elements $(typeof(Y)), $(typeof(p)) and $(typeof(q)), vector $(typeof(X)), and direction $(typeof(conv))")
 end
 function inverse_translate_diff!(
     G::AbstractGroupManifold,
-    vout,
-    x,
-    y,
-    v,
+    Y,
+    p,
+    q,
+    X,
     conv::ActionDirection,
 )
-    return translate_diff!(G, vout, inv(G, x), y, v, conv)
+    return translate_diff!(G, Y, inv(G, p), q, X, conv)
 end
 
 #################################
@@ -568,46 +539,46 @@ struct AdditionOperation <: AbstractGroupOperation end
 const AdditionGroup = AbstractGroupManifold{AdditionOperation}
 
 +(e::Identity{G}) where {G<:AdditionGroup} = e
-+(::Identity{G}, x) where {G<:AdditionGroup} = x
-+(x, ::Identity{G}) where {G<:AdditionGroup} = x
++(::Identity{G}, p) where {G<:AdditionGroup} = p
++(p, ::Identity{G}) where {G<:AdditionGroup} = p
 +(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
 -(e::Identity{G}) where {G<:AdditionGroup} = e
--(::Identity{G}, x) where {G<:AdditionGroup} = -x
--(x, ::Identity{G}) where {G<:AdditionGroup} = x
+-(::Identity{G}, p) where {G<:AdditionGroup} = -p
+-(p, ::Identity{G}) where {G<:AdditionGroup} = p
 -(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
-*(e::Identity{G}, x) where {G<:AdditionGroup} = e
-*(x, e::Identity{G}) where {G<:AdditionGroup} = e
+*(e::Identity{G}, p) where {G<:AdditionGroup} = e
+*(p, e::Identity{G}) where {G<:AdditionGroup} = e
 *(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
 zero(e::Identity{G}) where {G<:AdditionGroup} = e
 
-identity(::AdditionGroup, x) = zero(x)
+identity(::AdditionGroup, p) = zero(p)
 
-identity!(::AdditionGroup, y, x) = fill!(y, 0)
+identity!(::AdditionGroup, q, p) = fill!(q, 0)
 
-inv(::AdditionGroup, x) = -x
+inv(::AdditionGroup, p) = -p
 
-inv!(::AdditionGroup, y, x) = copyto!(y, -x)
+inv!(::AdditionGroup, q, p) = copyto!(q, -p)
 
-compose(::AdditionGroup, x, y) = x + y
+compose(::AdditionGroup, p, q) = p + q
 
-function compose!(::GT, z, x, y) where {GT<:AdditionGroup}
-    x isa Identity{GT} && return copyto!(z, y)
-    y isa Identity{GT} && return copyto!(z, x)
-    z .= x .+ y
-    return z
+function compose!(::GT, x, p, q) where {GT<:AdditionGroup}
+    p isa Identity{GT} && return copyto!(x, q)
+    q isa Identity{GT} && return copyto!(x, p)
+    x .= p .+ q
+    return x
 end
 
-translate_diff(::AdditionGroup, x, y, v, ::ActionDirection) = v
+translate_diff(::AdditionGroup, p, q, X, ::ActionDirection) = X
 
-translate_diff!(::AdditionGroup, vout, x, y, v, ::ActionDirection) = copyto!(vout, v)
+translate_diff!(::AdditionGroup, Y, p, q, X, ::ActionDirection) = copyto!(Y, X)
 
-inverse_translate_diff(::AdditionGroup, x, y, v, ::ActionDirection) = v
+inverse_translate_diff(::AdditionGroup, p, q, X, ::ActionDirection) = X
 
-function inverse_translate_diff!(::AdditionGroup, vout, x, y, v, ::ActionDirection)
-    return copyto!(vout, v)
+function inverse_translate_diff!(::AdditionGroup, Y, p, q, X, ::ActionDirection)
+    return copyto!(Y, X)
 end
 
 #######################################
@@ -624,16 +595,16 @@ struct MultiplicationOperation <: AbstractGroupOperation end
 const MultiplicationGroup = AbstractGroupManifold{MultiplicationOperation}
 
 *(e::Identity{G}) where {G<:MultiplicationGroup} = e
-*(::Identity{G}, x) where {G<:MultiplicationGroup} = x
-*(x, ::Identity{G}) where {G<:MultiplicationGroup} = x
+*(::Identity{G}, p) where {G<:MultiplicationGroup} = p
+*(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
 *(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
 
-/(x, ::Identity{G}) where {G<:MultiplicationGroup} = x
-/(::Identity{G}, x) where {G<:MultiplicationGroup} = inv(x)
+/(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
+/(::Identity{G}, p) where {G<:MultiplicationGroup} = inv(p)
 /(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
 
-\(x, ::Identity{G}) where {G<:MultiplicationGroup} = inv(x)
-\(::Identity{G}, x) where {G<:MultiplicationGroup} = x
+\(p, ::Identity{G}) where {G<:MultiplicationGroup} = inv(p)
+\(::Identity{G}, p) where {G<:MultiplicationGroup} = p
 \(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
 
 inv(e::Identity{G}) where {G<:MultiplicationGroup} = e
@@ -644,32 +615,32 @@ transpose(e::Identity{G}) where {G<:MultiplicationGroup} = e
 
 LinearAlgebra.det(::Identity{<:MultiplicationGroup}) = 1
 
-LinearAlgebra.mul!(y, e::Identity{G}, x) where {G<:MultiplicationGroup} = copyto!(y, x)
-LinearAlgebra.mul!(y, x, e::Identity{G}) where {G<:MultiplicationGroup} = copyto!(y, x)
-function LinearAlgebra.mul!(y, e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}}
-    return identity!(e.group, y, e)
+LinearAlgebra.mul!(q, e::Identity{G}, p) where {G<:MultiplicationGroup} = copyto!(q, p)
+LinearAlgebra.mul!(q, p, e::Identity{G}) where {G<:MultiplicationGroup} = copyto!(q, p)
+function LinearAlgebra.mul!(q, e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}}
+    return identity!(e.group, q, e)
 end
 
-identity(::MultiplicationGroup, x) = one(x)
+identity(::MultiplicationGroup, p) = one(p)
 
-function identity!(G::GT, y, x) where {GT<:MultiplicationGroup}
-    isa(x, Identity{GT}) || return copyto!(y, one(x))
-    error("identity! not implemented on $(typeof(G)) for points $(typeof(y)) and $(typeof(x))")
+function identity!(G::GT, q, p) where {GT<:MultiplicationGroup}
+    isa(p, Identity{GT}) || return copyto!(q, one(p))
+    error("identity! not implemented on $(typeof(G)) for points $(typeof(q)) and $(typeof(p))")
 end
-identity!(::MultiplicationGroup, y::AbstractMatrix, x) = copyto!(y, I)
+identity!(::MultiplicationGroup, q::AbstractMatrix, p) = copyto!(q, I)
 
-inv(::MultiplicationGroup, x) = inv(x)
+inv(::MultiplicationGroup, p) = inv(p)
 
-inv!(G::MultiplicationGroup, y, x) = copyto!(y, inv(G, x))
+inv!(G::MultiplicationGroup, q, p) = copyto!(q, inv(G, p))
 
-compose(::MultiplicationGroup, x, y) = x * y
+compose(::MultiplicationGroup, p, q) = p * q
 
 # TODO: z might alias with x or y, we might be able to optimize it if it doesn't.
-compose!(::MultiplicationGroup, z, x, y) = copyto!(z, x * y)
+compose!(::MultiplicationGroup, x, p, q) = copyto!(x, p * q)
 
-inverse_translate(::MultiplicationGroup, x, y, ::LeftAction) = x \ y
-inverse_translate(::MultiplicationGroup, x, y, ::RightAction) = y / x
+inverse_translate(::MultiplicationGroup, p, q, ::LeftAction) = p \ q
+inverse_translate(::MultiplicationGroup, p, q, ::RightAction) = q / p
 
-function inverse_translate!(G::MultiplicationGroup, z, x, y, conv::ActionDirection)
-    return copyto!(z, inverse_translate(G, x, y, conv))
+function inverse_translate!(G::MultiplicationGroup, x, p, q, conv::ActionDirection)
+    return copyto!(x, inverse_translate(G, p, q, conv))
 end

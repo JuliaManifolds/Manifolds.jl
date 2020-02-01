@@ -565,11 +565,11 @@ function representation_size(M::ProductManifold)
 end
 
 @doc raw"""
-    sharp(M::ProductManifold, x, w::FVector{CotangentSpaceType})
+    sharp(M::ProductManifold, p, ξ::FVector{CotangentSpaceType})
 
-Use the musical isomorphism to transform the cotangent vector `w` from the tangent space at
-`x` on the [`ProductManifold`](@ref) `M` to a tangent vector.
-This can be done elementwise, so vor every entry of `w` (and `x`) sparately
+Use the musical isomorphism to transform the cotangent vector `ξ` from the tangent space at
+`p` on the [`ProductManifold`](@ref) `M` to a tangent vector.
+This can be done elementwise, so vor every entry of `ξ` (and `p`) sparately
 """
 sharp(::ProductManifold, ::Any...)
 

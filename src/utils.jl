@@ -24,10 +24,10 @@ $x = cos(\theta)$.
     end
 end
 
-allocate(x, s::Size{S}) where {S} = similar(x, S...)
-allocate(x::StaticArray, s::Size{S}) where {S} = similar(x, maybesize(s))
-allocate(x, ::Type{T}, s::Size{S}) where {S,T} = similar(x, T, S...)
-allocate(x::StaticArray, ::Type{T}, s::Size{S}) where {S,T} = similar(x, T, maybesize(s))
+allocate(p, s::Size{S}) where {S} = similar(p, S...)
+allocate(p::StaticArray, s::Size{S}) where {S} = similar(p, maybesize(s))
+allocate(p, ::Type{T}, s::Size{S}) where {S,T} = similar(p, T, S...)
+allocate(p::StaticArray, ::Type{T}, s::Size{S}) where {S,T} = similar(p, T, maybesize(s))
 
 """
     eigen_safe(x)

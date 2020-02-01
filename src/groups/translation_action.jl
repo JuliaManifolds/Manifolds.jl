@@ -36,20 +36,20 @@ function switch_direction(A::TranslationAction{TM,TRN,TAD}) where {TM,TRN,TAD}
     return TranslationAction(A.M, A.Rn, switch_direction(TAD()))
 end
 
-apply(A::TranslationAction, a, x) = x + a
+apply(A::TranslationAction, a, p) = p + a
 
-apply!(A::TranslationAction{M,G}, y, a, x) where {M,G} = (y .= x .+ a)
-apply!(A::TranslationAction{M,G}, y, e::Identity{G}, x) where {M,G} = copyto!(y, x)
+apply!(A::TranslationAction{M,G}, q, a, p) where {M,G} = (q .= p .+ a)
+apply!(A::TranslationAction{M,G}, q, e::Identity{G}, p) where {M,G} = copyto!(q, p)
 
-inverse_apply(A::TranslationAction, a, x) = x - a
+inverse_apply(A::TranslationAction, a, p) = p - a
 
-inverse_apply!(A::TranslationAction{M,G}, y, a, x) where {M,G} = (y .= x .- a)
-inverse_apply!(A::TranslationAction{M,G}, y, e::Identity{G}, x) where {M,G} = copyto!(y, x)
+inverse_apply!(A::TranslationAction{M,G}, q, a, p) where {M,G} = (q .= p .- a)
+inverse_apply!(A::TranslationAction{M,G}, q, e::Identity{G}, p) where {M,G} = copyto!(q, p)
 
-apply_diff(A::TranslationAction, a, x, v) = v
+apply_diff(A::TranslationAction, a, p, X) = X
 
-apply_diff!(A::TranslationAction, vout, a, x, v) = copyto!(vout, v)
+apply_diff!(A::TranslationAction, Y, a, p, X) = copyto!(Y, X)
 
-inverse_apply_diff(A::TranslationAction, a, x, v) = v
+inverse_apply_diff(A::TranslationAction, a, p, X) = X
 
-inverse_apply_diff!(A::TranslationAction, vout, a, x, v) = copyto!(vout, v)
+inverse_apply_diff!(A::TranslationAction, Y, a, p, X) = copyto!(Y, X)

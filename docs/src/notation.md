@@ -14,6 +14,7 @@ as long as that renders still in $\TeX$ within this documentation.
 | $\xi$ | A cotangent vector from $T^*_p \mathcal M$ | $\xi_1, \xi_2,\ldots,\eta,\zeta$ | |
 | $n$ | dimension (of a manifold) | $n_1,n_2,\ldots,m$| |
 | $F$ | A fiber | | |
+| $e$ | identity element of a group | |
 | $k$ | indices | $i,j$ | |
 | $\langle\cdot,\cdot\rangle$ | inner product (in $T_p \mathcal M$) | $\langle\cdot,\cdot\rangle_p, g_p(\cdot,\cdot)$ |
 | $\mathcal M$ | A manifold | $\mathcal M_1, \mathcal M_2,\ldots,\mathcal N$ | |

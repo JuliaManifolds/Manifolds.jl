@@ -54,215 +54,215 @@ function submanifold_components(
     return Identity.(M.manifolds)
 end
 
-inv(G::ProductGroup, x) = inv(G.manifold, x)
+inv(G::ProductGroup, p) = inv(G.manifold, p)
 inv(::GT, e::Identity{GT}) where {GT<:ProductGroup} = e
 function inv(M::ProductManifold, x::ProductRepr)
     return ProductRepr(map(inv, M.manifolds, submanifold_components(M, x))...)
 end
-function inv(M::ProductManifold, x)
-    y = allocate_result(M, inv, x)
-    return inv!(M, y, x)
+function inv(M::ProductManifold, p)
+    q = allocate_result(M, inv, p)
+    return inv!(M, q, p)
 end
 
-inv!(G::ProductGroup, y, x) = inv!(G.manifold, y, x)
-function inv!(M::ProductManifold, y, x)
-    map(inv!, M.manifolds, submanifold_components(M, y), submanifold_components(M, x))
-    return y
+inv!(G::ProductGroup, q, p) = inv!(G.manifold, q, p)
+function inv!(M::ProductManifold, q, p)
+    map(inv!, M.manifolds, submanifold_components(M, q), submanifold_components(M, p))
+    return q
 end
 
-identity(G::ProductGroup, x) = identity(G.manifold, x)
+identity(G::ProductGroup, p) = identity(G.manifold, p)
 identity(::GT, e::Identity{GT}) where {GT<:ProductGroup} = e
-function identity(M::ProductManifold, x::ProductRepr)
-    return ProductRepr(map(identity, M.manifolds, submanifold_components(M, x))...)
+function identity(M::ProductManifold, p::ProductRepr)
+    return ProductRepr(map(identity, M.manifolds, submanifold_components(M, p))...)
 end
-function identity(M::ProductManifold, x)
-    y = allocate_result(M, identity, x)
-    return identity!(M, y, x)
-end
-
-identity!(G::ProductGroup, y, x) = identity!(G.manifold, y, x)
-function identity!(M::ProductManifold, y, x)
-    map(identity!, M.manifolds, submanifold_components(M, y), submanifold_components(M, x))
-    return y
+function identity(M::ProductManifold, p)
+    q = allocate_result(M, identity, p)
+    return identity!(M, q, p)
 end
 
-compose(G::ProductGroup, x, y) = compose(G.manifold, x, y)
-compose(G::GT, ::Identity{GT}, x) where {GT<:ProductGroup} = x
-compose(G::GT, x, ::Identity{GT}) where {GT<:ProductGroup} = x
+identity!(G::ProductGroup, q, p) = identity!(G.manifold, q, p)
+function identity!(M::ProductManifold, q, p)
+    map(identity!, M.manifolds, submanifold_components(M, q), submanifold_components(M, p))
+    return q
+end
+
+compose(G::ProductGroup, p, q) = compose(G.manifold, p, q)
+compose(G::GT, ::Identity{GT}, p) where {GT<:ProductGroup} = p
+compose(G::GT, p, ::Identity{GT}) where {GT<:ProductGroup} = p
 compose(G::GT, e::E, ::E) where {GT<:ProductGroup,E<:Identity{GT}} = e
-function compose(M::ProductManifold, x::ProductRepr, y::ProductRepr)
+function compose(M::ProductManifold, p::ProductRepr, q::ProductRepr)
     return ProductRepr(map(
         compose,
         M.manifolds,
-        submanifold_components(M, x),
-        submanifold_components(M, y),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
     )...)
 end
-function compose(M::ProductManifold, x, y)
-    z = allocate_result(M, compose, x, y)
-    return compose!(M, z, x, y)
+function compose(M::ProductManifold, p, q)
+    z = allocate_result(M, compose, p, q)
+    return compose!(M, z, p, q)
 end
 
-compose!(G::ProductGroup, z, x, y) = compose!(G.manifold, z, x, y)
-function compose!(M::ProductManifold, z, x, y)
+compose!(G::ProductGroup, x, p, q) = compose!(G.manifold, x, p, q)
+function compose!(M::ProductManifold, x, p, q)
     map(
         compose!,
         M.manifolds,
-        submanifold_components(M, z),
         submanifold_components(M, x),
-        submanifold_components(M, y),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
     )
-    return z
+    return x
 end
 
-translate(G::ProductGroup, x, y, conv::ActionDirection) = translate(G.manifold, x, y, conv)
+translate(G::ProductGroup, p, q, conv::ActionDirection) = translate(G.manifold, p, q, conv)
 function translate(
     M::ProductManifold,
-    x::ProductRepr,
-    y::ProductRepr,
+    p::ProductRepr,
+    q::ProductRepr,
     conv::ActionDirection,
 )
     return ProductRepr(map(
         translate,
         M.manifolds,
-        submanifold_components(M, x),
-        submanifold_components(M, y),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
         repeated(conv),
     )...)
 end
-function translate(M::ProductManifold, x, y, conv::ActionDirection)
-    z = allocate_result(M, translate, x, y)
-    return translate!(M, z, x, y, conv)
+function translate(M::ProductManifold, p, q, conv::ActionDirection)
+    x = allocate_result(M, translate, p, q)
+    return translate!(M, x, p, q, conv)
 end
 
-function translate!(G::ProductGroup, z, x, y, conv::ActionDirection)
-    return translate!(G.manifold, z, x, y, conv)
+function translate!(G::ProductGroup, x, p, q, conv::ActionDirection)
+    return translate!(G.manifold, x, p, q, conv)
 end
-function translate!(M::ProductManifold, z, x, y, conv::ActionDirection)
+function translate!(M::ProductManifold, x, p, q, conv::ActionDirection)
     map(
         translate!,
         M.manifolds,
-        submanifold_components(M, z),
         submanifold_components(M, x),
-        submanifold_components(M, y),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
         repeated(conv),
     )
-    return z
+    return x
 end
 
-function inverse_translate(G::ProductGroup, x, y, conv::ActionDirection)
-    return inverse_translate(G.manifold, x, y, conv)
+function inverse_translate(G::ProductGroup, p, q, conv::ActionDirection)
+    return inverse_translate(G.manifold, p, q, conv)
 end
 function inverse_translate(
     M::ProductManifold,
-    x::ProductRepr,
-    y::ProductRepr,
+    p::ProductRepr,
+    q::ProductRepr,
     conv::ActionDirection,
 )
     return ProductRepr(map(
         inverse_translate,
         M.manifolds,
-        submanifold_components(M, x),
-        submanifold_components(M, y),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
         repeated(conv),
     )...)
 end
-function inverse_translate(M::ProductManifold, x, y, conv::ActionDirection)
-    z = allocate_result(M, inverse_translate, x, y)
-    return inverse_translate!(M, z, x, y, conv)
+function inverse_translate(M::ProductManifold, p, q, conv::ActionDirection)
+    x = allocate_result(M, inverse_translate, p, q)
+    return inverse_translate!(M, x, p, q, conv)
 end
 
-function inverse_translate!(G::ProductGroup, z, x, y, conv::ActionDirection)
-    return inverse_translate!(G.manifold, z, x, y, conv)
+function inverse_translate!(G::ProductGroup, x, p, q, conv::ActionDirection)
+    return inverse_translate!(G.manifold, x, p, q, conv)
 end
-function inverse_translate!(M::ProductManifold, z, x, y, conv::ActionDirection)
+function inverse_translate!(M::ProductManifold, x, p, q, conv::ActionDirection)
     map(
         inverse_translate!,
         M.manifolds,
-        submanifold_components(M, z),
         submanifold_components(M, x),
-        submanifold_components(M, y),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
         repeated(conv),
     )
-    return z
+    return x
 end
 
-function translate_diff(G::ProductGroup, x, y, v, conv::ActionDirection)
-    return translate_diff(G.manifold, x, y, v, conv)
+function translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
+    return translate_diff(G.manifold, p, q, X, conv)
 end
 function translate_diff(
     M::ProductManifold,
-    x::ProductRepr,
-    y::ProductRepr,
-    v::ProductRepr,
+    p::ProductRepr,
+    q::ProductRepr,
+    X::ProductRepr,
     conv::ActionDirection,
 )
     return ProductRepr(map(
         translate_diff,
         M.manifolds,
-        submanifold_components(M, x),
-        submanifold_components(M, y),
-        submanifold_components(M, v),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
+        submanifold_components(M, X),
         repeated(conv),
     )...)
 end
-function translate_diff(M::ProductManifold, x, y, v, conv::ActionDirection)
-    vout = allocate_result(M, translate_diff, v, x, y)
-    return translate_diff!(M, vout, x, y, v, conv)
+function translate_diff(M::ProductManifold, p, q, X, conv::ActionDirection)
+    vout = allocate_result(M, translate_diff, X, p, q)
+    return translate_diff!(M, vout, p, q, X, conv)
 end
 
-function translate_diff!(G::ProductGroup, vout, x, y, v, conv::ActionDirection)
-    return translate_diff!(G.manifold, vout, x, y, v, conv)
+function translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirection)
+    return translate_diff!(G.manifold, Y, p, q, X, conv)
 end
-function translate_diff!(M::ProductManifold, vout, x, y, v, conv::ActionDirection)
+function translate_diff!(M::ProductManifold, Y, p, q, X, conv::ActionDirection)
     map(
         translate_diff!,
         M.manifolds,
-        submanifold_components(vout),
-        submanifold_components(M, x),
-        submanifold_components(M, y),
-        submanifold_components(M, v),
+        submanifold_components(Y),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
+        submanifold_components(M, X),
         repeated(conv),
     )
-    return vout
+    return Y
 end
 
-function inverse_translate_diff(G::ProductGroup, x, y, v, conv::ActionDirection)
-    return inverse_translate_diff(G.manifold, x, y, v, conv)
+function inverse_translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
+    return inverse_translate_diff(G.manifold, p, q, X, conv)
 end
 function inverse_translate_diff(
     M::ProductManifold,
-    x::ProductRepr,
-    y::ProductRepr,
-    v::ProductRepr,
+    p::ProductRepr,
+    q::ProductRepr,
+    X::ProductRepr,
     conv::ActionDirection,
 )
     return ProductRepr(map(
         inverse_translate_diff,
         M.manifolds,
-        submanifold_components(M, x),
-        submanifold_components(M, y),
-        submanifold_components(M, v),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
+        submanifold_components(M, X),
         repeated(conv),
     )...)
 end
-function inverse_translate_diff(M::ProductManifold, x, y, v, conv::ActionDirection)
-    vout = allocate_result(M, inverse_translate_diff, v, x, y)
-    return inverse_translate_diff!(M, vout, x, y, v, conv)
+function inverse_translate_diff(M::ProductManifold, p, q, X, conv::ActionDirection)
+    vout = allocate_result(M, inverse_translate_diff, X, p, q)
+    return inverse_translate_diff!(M, vout, p, q, X, conv)
 end
 
-function inverse_translate_diff!(G::ProductGroup, vout, x, y, v, conv::ActionDirection)
-    return inverse_translate_diff!(G.manifold, vout, x, y, v, conv)
+function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirection)
+    return inverse_translate_diff!(G.manifold, Y, p, q, X, conv)
 end
-function inverse_translate_diff!(M::ProductManifold, vout, x, y, v, conv::ActionDirection)
+function inverse_translate_diff!(M::ProductManifold, Y, p, q, X, conv::ActionDirection)
     map(
         inverse_translate_diff!,
         M.manifolds,
-        submanifold_components(vout),
-        submanifold_components(M, x),
-        submanifold_components(M, y),
-        submanifold_components(M, v),
+        submanifold_components(Y),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
+        submanifold_components(M, X),
         repeated(conv),
     )
-    return vout
+    return Y
 end
