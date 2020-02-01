@@ -8,9 +8,8 @@ using LinearAlgebra: Diagonal, dot
     fd51 = Manifolds.FiniteDifferencesBackend()
     @testset "diff_backend" begin
         @test diff_backend() isa Manifolds.FiniteDifferencesBackend
-        @test length(diff_backends()) == 2
+        @test length(diff_backends()) == 1
         @test diff_backends()[1] isa Manifolds.FiniteDifferencesBackend
-        @test diff_backends()[2] isa Manifolds.FiniteDiffBackend
 
         @test fd51.method.p == 5
         @test fd51.method.q == 1
@@ -24,9 +23,9 @@ using LinearAlgebra: Diagonal, dot
     fwd_diff = Manifolds.ForwardDiffBackend()
     @testset "ForwardDiff" begin
         @test diff_backend() isa Manifolds.FiniteDifferencesBackend
-        @test length(diff_backends()) == 3
+        @test length(diff_backends()) == 2
         @test diff_backends()[1] isa Manifolds.FiniteDifferencesBackend
-        @test diff_backends()[3] == fwd_diff
+        @test diff_backends()[2] == fwd_diff
 
         @test diff_backend!(fwd_diff) == fwd_diff
         @test diff_backend() == fwd_diff
@@ -35,6 +34,24 @@ using LinearAlgebra: Diagonal, dot
 
         diff_backend!(fwd_diff)
         @test diff_backend() == fwd_diff
+        diff_backend!(fd51)
+    end
+
+    using FiniteDiff
+
+    finite_diff = Manifolds.FiniteDiffBackend()
+    @testset "FiniteDiff" begin
+        @test diff_backend() isa Manifolds.FiniteDifferencesBackend
+        @test length(diff_backends()) == 3
+        @test diff_backends()[3] == finite_diff
+
+        @test diff_backend!(finite_diff) == finite_diff
+        @test diff_backend() == finite_diff
+        @test diff_backend!(fd51) isa Manifolds.FiniteDifferencesBackend
+        @test diff_backend() isa Manifolds.FiniteDifferencesBackend
+
+        diff_backend!(finite_diff)
+        @test diff_backend() == finite_diff
         diff_backend!(fd51)
     end
 
@@ -51,14 +68,14 @@ using LinearAlgebra: Diagonal, dot
         @testset "Inference" begin
             @test (@inferred _derivative(c1, 0.0, Manifolds.ForwardDiffBackend())) ≈ [1.0, 0.0]
 
-            @test (@inferred _derivative(c1, 0.0, Manifolds.FiniteDiffBackend())) ≈ [1.0, 0.0]
-            @test (@inferred _gradient(f1, [1.0, -1.0], Manifolds.FiniteDiffBackend())) ≈ [1.0, -2.0]
+            @test (@inferred _derivative(c1, 0.0, finite_diff)) ≈ [1.0, 0.0]
+            @test (@inferred _gradient(f1, [1.0, -1.0], finite_diff)) ≈ [1.0, -2.0]
         end
 
         @testset for backend in [
             fd51,
-            Manifolds.ForwardDiffBackend(),
-            Manifolds.FiniteDiffBackend()
+            fwd_diff,
+            finite_diff
         ]
             diff_backend!(backend)
             @test _derivative(c1, 0.0) ≈ [1.0, 0.0]

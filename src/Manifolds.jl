@@ -82,7 +82,6 @@ import StatsBase: kurtosis, mean_and_std, mean_and_var, moment, skewness
 using Base.Iterators: repeated
 using Distributions
 using Einsum: @einsum
-using FiniteDiff
 using FiniteDifferences
 using HybridArrays
 using LinearAlgebra
@@ -267,6 +266,11 @@ include("groups/special_euclidean.jl")
 include("statistics.jl")
 
 function __init__()
+    @require FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41" begin
+        using .FiniteDiff
+        include("finite_diff.jl")
+    end
+
     @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
         using .ForwardDiff
         include("forward_diff.jl")
