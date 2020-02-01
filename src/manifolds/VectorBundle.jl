@@ -57,7 +57,7 @@ as a representation of vector spaces from a vector bundle but without
 storing the point at which a vector space is attached (which is specified
 separately in various functions).
 """
-struct VectorBundleFibers{Tfiber<:VectorSpaceType,TM<:Manifold}
+struct VectorBundleFibers{TVS<:VectorSpaceType,TM<:Manifold}
     fiber::TVS
     manifold::TM
 end
