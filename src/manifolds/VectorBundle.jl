@@ -184,7 +184,7 @@ vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
   * The point $p = (x_p, V_p)$ where $x_p  ∈ ℳ$ and $V_p$ belongs to the
-    fiber $F=\pi^{-1}(\{x_p\})$ of the vector bundle $B$ where $\pi$ is the
+    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
     Similarly, $q = (x_q, V_q)$.
 
@@ -220,7 +220,7 @@ vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
   * The point $p = (x_p, V_p)$ where $x_p ∈ ℳ$ and $V_p$ belongs to the
-    fiber $F=\pi^{-1}(\{x_p\})$ of the vector bundle $B$ where $\pi$ is the
+    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
   * The tangent vector $X = (V_{X,M}, V_{X,F}) ∈ T_pB$ where
     $V_{X,M}$ is a tangent vector from the tangent space $T_{x_p}ℳ$ and
@@ -376,7 +376,7 @@ vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
   * The point $p = (x_p, V_p)$ where $x_p ∈ ℳ$ and $V_p$ belongs to the
-    fiber $F=\pi^{-1}(\{x_p\})$ of the vector bundle $B$ where $\pi$ is the
+    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
   * The tangent vector $v = (V_{X,M}, V_{X,F}) ∈ T_{x}B$ where
     $V_{X,M}$ is a tangent vector from the tangent space $T_{x_p}ℳ$ and
@@ -414,7 +414,7 @@ vector bundle `B` over manifold `B.VS` (denoted $ℳ$).
 
 Notation:
   * The point $p = (x_p, V_p)$ where $x_p ∈ ℳ$ and $V_p$ belongs to the
-    fiber $F=\pi^{-1}(\{x_p\})$ of the vector bundle $B$ where $\pi$ is the
+    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
     Similarly, $q = (x_q, V_q)$.
 
@@ -457,7 +457,7 @@ over manifold `B.VS` (denoted $ℳ$) to the vector bundle.
 Notation:
   * The point $p = (x_p, V_p)$ where $x_p$ belongs to the ambient space of $ℳ$
     and $V_p$ belongs to the ambient space of the
-    fiber $F=\pi^{-1}(\{x_p\})$ of the vector bundle $B$ where $\pi$ is the
+    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
 
 The projection is calculated by projecting the point $x_p$ to the manifold $ℳ$
@@ -480,11 +480,11 @@ to the tangent space $T_p B$.
 
 Notation:
   * The point $p = (x_p, V_p)$ where $x_p ∈ ℳ$ and $V_p$ belongs to the
-    fiber $F=\pi^{-1}(\{x_p\})$ of the vector bundle $B$ where $\pi$ is the
+    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
   * The vector $x = (V_{X,M}, V_{X,F})$ where $x_p$ belongs to the ambient space of $T_{x_p}ℳ$
     and $V_{X,F}$ belongs to the ambient space of the
-    fiber $F=\pi^{-1}(\{x_p\})$ of the vector bundle $B$ where $\pi$ is the
+    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
 
 The projection is calculated by projecting $V_{X,M}$ to tangent space $T_{x_p}ℳ$
@@ -667,7 +667,7 @@ over manifold `B.VS` (denoted $ℳ$). The zero vector belongs to the space $T_{p
 
 Notation:
   * The point $p = (x_p, V_p)$ where $x_p ∈ ℳ$ and $V_p$ belongs to the
-    fiber $F=\pi^{-1}(\{x_p\})$ of the vector bundle $B$ where $\pi$ is the
+    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
 
 The zero vector is calculated as

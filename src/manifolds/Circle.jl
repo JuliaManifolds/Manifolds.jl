@@ -2,7 +2,7 @@
     Circle{F} <: Manifold
 
 The circle $𝕊^1$ as a manifold ere manifold represented by
-real-valued data in $[-\pi,\pi)$ or complex-valued data $z ∈ ℂ$ of absolute value
+real-valued data in $[-π,π)$ or complex-valued data $z ∈ ℂ$ of absolute value
 $\lvert z\rvert = 1$.
 # Constructor
 
@@ -20,7 +20,7 @@ Circle(f::AbstractNumbers = ℝ) = Circle{f}()
     check_manifold_point(M::Circle, p)
 
 Check whether `p` is a point on the [`Circle`](@ref) `M`.
-For the real-valued case, `x` is an angle and hence it checks that $p  ∈ [-\pi,\pi)$.
+For the real-valued case, `x` is an angle and hence it checks that $p  ∈ [-π,π)$.
 for the complex-valued case its a unit number, $p  ∈ ℂ$ with $\lvert p \rvert = 1$.
 """
 check_manifold_point(::Circle, ::Any...)
@@ -97,9 +97,9 @@ distance(::Circle{ℂ}, p, q) = acos(clamp(complex_dot(p, q), -1, 1))
 
 Compute the exponential map on the [`Circle`](@ref).
 ````math
-\exp_pX = (p+X)_{2\pi},
+\exp_pX = (p+X)_{2π},
 ````
-where $(\cdot)_{2\pi}$ is the (symmetric) remainder with respect to division by $2\pi$, i.e. in $[-\pi,\pi)$.
+where $(\cdot)_{2π}$ is the (symmetric) remainder with respect to division by $2π$, i.e. in $[-π,π)$.
 
 For the complex-valued case the formula is the same as for the [`Sphere`](@ref) $𝕊^1$ is applied, to values in the
 complex plane.
@@ -159,7 +159,7 @@ get_vector(M::Circle{ℂ}, p, X, B::ArbitraryOrthonormalBasis) = @SVector [1im *
 @doc raw"""
     injectivity_radius(M::Circle[, p])
 
-Return the injectivity radius on the [`Circle`](@ref) `M`, i.e. $\pi$.
+Return the injectivity radius on the [`Circle`](@ref) `M`, i.e. $π$.
 """
 injectivity_radius(::Circle, args...) = π
 
@@ -199,9 +199,9 @@ end
 
 Compute the logarithmic map on the [`Circle`](@ref) `M`.
 ````math
-\log_p q = (q-p)_{2\pi},
+\log_p q = (q-p)_{2π},
 ````
-where $(\cdot)_{2\pi}$ is the (symmetric) remainder with respect to division by $2\pi$, i.e. in $[-\pi,\pi)$.
+where $(\cdot)_{2π}$ is the (symmetric) remainder with respect to division by $2π$, i.e. in $[-π,π)$.
 
 For the complex-valued case the formula is the same as for the [`Sphere`](@ref) $𝕊^1$ is applied, to values in the
 complex plane.
@@ -261,7 +261,7 @@ mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...) = sym_rem(sum(w .
     project_point(M::Circle, p)
 
 Project a point `p` onto the [`Circle`](@ref) `M`.
-For the real-valued case this is the remainder with respect to modulus $2\pi$.
+For the real-valued case this is the remainder with respect to modulus $2π$.
 For the complex-valued case the result is the projection of `p` onto the unit circle in the
 complex plane.
 """
@@ -302,7 +302,7 @@ show(io::IO, ::Circle{F}) where {F} = print(io, "Circle($(F))")
     sym_rem(x,[T=π])
 
 Compute symmetric remainder of `x` with respect to the interall 2*`T`, i.e.
-`(x+T)%2T`, where the default for `T` is $\pi$
+`(x+T)%2T`, where the default for `T` is $π$
 """
 function sym_rem(x::N, T = π) where {N<:Number}
     return (x ≈ T ? convert(N, -T) : rem(x, convert(N, 2 * T), RoundNearest))

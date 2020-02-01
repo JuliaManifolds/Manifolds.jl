@@ -190,7 +190,7 @@ end
     injectivity_radius(M::Grassmann)
     injectivity_radius(M::Grassmann, p)
 
-Return the injectivity radius on the [`Grassmann`](@ref) `M`, which is $\frac{\pi}{2}$.
+Return the injectivity radius on the [`Grassmann`](@ref) `M`, which is $\frac{π}{2}$.
 """
 injectivity_radius(::Grassmann, ::Any...) = π / 2
 

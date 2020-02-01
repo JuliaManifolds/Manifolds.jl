@@ -116,12 +116,12 @@ flat!(M::Sphere, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 @doc raw"""
     injectivity_radius(M::Sphere[, p])
 
-Return the injectivity radius for the [`Sphere`](@ref) `M`, which is globally $\pi$.
+Return the injectivity radius for the [`Sphere`](@ref) `M`, which is globally $π$.
 
     injectivity_radius(M::Sphere, x, ::ProjectionRetraction)
 
 Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
-[`Sphere`](@ref), which is globally $\frac{\pi}{2}$.
+[`Sphere`](@ref), which is globally $\frac{π}{2}$.
 """
 injectivity_radius(::Sphere, ::Any...) = π
 injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π / 2
@@ -147,7 +147,7 @@ end
 
 Compute the inverse of the projection based retraction on the [`Sphere`](@ref),
 i.e. rearranging $p+X = q\lVert p+X\rVert_2$ yields
-since $⟨p,X⟩ = 0$ and when $d_{𝕊^2}(p,q) \leq \frac{\pi}{2}$ that
+since $⟨p,X⟩ = 0$ and when $d_{𝕊^2}(p,q) \leq \frac{π}{2}$ that
 
 ````math
 \operatorname{retr}_p^{-1}(q) = \frac{q}{⟨p, q⟩} - p.

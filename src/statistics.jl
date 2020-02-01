@@ -47,9 +47,9 @@ points are in an open geodesic ball about the mean with corresponding radius
     + [`Euclidean`](@ref)
     + [`SymmetricPositiveDefinite`](@ref) [^Ho2013]
 * Other manifolds:
-    + [`Sphere`](@ref): $\frac{\pi}{2}$ [^Salehian2015]
-    + [`Grassmann`](@ref): $\frac{\pi}{4}$ [^Chakraborty2015]
-    + [`Stiefel`](@ref)/[`Rotations`](@ref): $\frac{\pi}{2 \sqrt 2}$ [^Chakraborty2019]
+    + [`Sphere`](@ref): $\frac{π}{2}$ [^Salehian2015]
+    + [`Grassmann`](@ref): $\frac{π}{4}$ [^Chakraborty2015]
+    + [`Stiefel`](@ref)/[`Rotations`](@ref): $\frac{π}{2 \sqrt 2}$ [^Chakraborty2019]
 
 For online variance computation, the algorithm additionally uses an analogous
 recursion to the weighted Welford algorithm [^West1979].
