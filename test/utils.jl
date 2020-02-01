@@ -434,7 +434,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             for _ in 1:10
                 randtv = rand(tvd)
                 atol = rand_tvector_atol_multiplier * find_eps(randtv)
-                @test is_tangent_vector(M, supp.x, randtv; atol = atol)
+                @test is_tangent_vector(M, supp.point, randtv; atol = atol)
             end
         end
     end

@@ -119,16 +119,16 @@ struct PowerPointDistribution{TM<:AbstractPowerManifold,TD<:MPointDistribution,T
        MPointDistribution{TM}
     manifold::TM
     distribution::TD
-    x::TX
+    point::TX
 end
 
 """
     PowerFVectorDistribution([type::VectorBundleFibers], [x], distr)
 
-Generates a random vector at point `x` from vector space (a fiber of a tangent
+Generates a random vector at a `point` from vector space (a fiber of a tangent
 bundle) of type `type` using the power distribution of `distr`.
 
-Vector space type and `x` can be automatically inferred from distribution `distr`.
+Vector space type and `point` can be automatically inferred from distribution `distr`.
 """
 struct PowerFVectorDistribution{
     TSpace<:VectorBundleFibers{<:VectorSpaceType,<:AbstractPowerManifold},
@@ -136,7 +136,7 @@ struct PowerFVectorDistribution{
     TX,
 } <: FVectorDistribution{TSpace,TX}
     type::TSpace
-    x::TX
+    point::TX
     distribution::TD
 end
 
@@ -535,12 +535,12 @@ function norm(M::AbstractPowerManifold, p, X)
 end
 
 function rand(rng::AbstractRNG, d::PowerFVectorDistribution)
-    fv = zero_vector(d.type, d.x)
+    fv = zero_vector(d.type, d.point)
     _rand!(rng, d, fv)
     return fv
 end
 function rand(rng::AbstractRNG, d::PowerPointDistribution)
-    x = allocate_result(d.manifold, rand, d.x)
+    x = allocate_result(d.manifold, rand, d.point)
     _rand!(rng, d, x)
     return x
 end
@@ -549,7 +549,7 @@ function _rand!(rng::AbstractRNG, d::PowerFVectorDistribution, v::AbstractArray)
     PM = d.type.manifold
     rep_size = representation_size(PM.manifold)
     for i in get_iterator(d.type.manifold)
-        copyto!(d.distribution.x, _read(PM, rep_size, d.x, i))
+        copyto!(d.distribution.point, _read(PM, rep_size, d.point, i))
         _rand!(rng, d.distribution, _read(PM, rep_size, v, i))
     end
     return v
@@ -663,7 +663,7 @@ function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector
     return FVector(TangentSpace, alloc)
 end
 
-support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.x)
+support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)
 support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 
 @inline function _write(M::AbstractPowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)

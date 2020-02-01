@@ -105,7 +105,7 @@ Vector bundle on manifold `M` of type `type`.
 """
 struct VectorBundle{TVS<:VectorSpaceType,TM<:Manifold} <: Manifold
     type::TVS
-    M::TM
+    manifold::TM
     fiber::VectorBundleFibers{TVS,TM}
 end
 
