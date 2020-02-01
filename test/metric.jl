@@ -297,8 +297,8 @@ end
 
         a = Manifolds.projected_distribution(M, Distributions.MvNormal(zero(zeros(3)), 1.0))
         b = Manifolds.projected_distribution(MM2, Distributions.MvNormal(zero(zeros(3)), 1.0))
-        @test isapprox(Matrix(a.d.Σ), Matrix(b.d.Σ))
-        @test isapprox(a.d.μ, b.d.μ)
+        @test isapprox(Matrix(a.distribution.Σ), Matrix(b.distribution.Σ))
+        @test isapprox(a.distribution.μ, b.distribution.μ)
         @test get_basis(M,x,ArbitraryOrthonormalBasis()) == get_basis(MM2,x,ArbitraryOrthonormalBasis())
         @test_throws ErrorException get_basis(MM,x,ArbitraryOrthonormalBasis())
         cov = flat(M, x, FVector(TangentSpace, v))

@@ -12,7 +12,7 @@ The left and right actions are equivalent.
 """
 struct TranslationAction{TM<:Manifold,TRn<:TranslationGroup,TAD<:ActionDirection} <:
        AbstractGroupAction{TAD}
-    M::TM
+    manifold::TM
     Rn::TRn
 end
 
