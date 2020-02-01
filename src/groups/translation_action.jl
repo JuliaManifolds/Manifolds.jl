@@ -25,15 +25,15 @@ function TranslationAction(
 end
 
 function show(io::IO, A::TranslationAction)
-    print(io, "TranslationAction($(A.M), $(A.Rn), $(direction(A)))")
+    print(io, "TranslationAction($(A.manifold), $(A.Rn), $(direction(A)))")
 end
 
 base_group(A::TranslationAction) = A.Rn
 
-g_manifold(A::TranslationAction) = A.M
+g_manifold(A::TranslationAction) = A.manifold,
 
 function switch_direction(A::TranslationAction{TM,TRN,TAD}) where {TM,TRN,TAD}
-    return TranslationAction(A.M, A.Rn, switch_direction(TAD()))
+    return TranslationAction(A.manifold, A.Rn, switch_direction(TAD()))
 end
 
 apply(A::TranslationAction, a, p) = p + a

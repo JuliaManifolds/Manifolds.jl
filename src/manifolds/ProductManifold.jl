@@ -494,7 +494,7 @@ function ProductFVectorDistribution(
     return ProductFVectorDistribution(type, p, distributions...)
 end
 function ProductFVectorDistribution(distributions::FVectorDistribution...)
-    M = ProductManifold(map(d -> support(d).space.M, distributions)...)
+    M = ProductManifold(map(d -> support(d).space.manifold, distributions)...)
     fiber = support(distributions[1]).space.fiber
     if !all(d -> support(d).space.fiber == fiber, distributions)
         error("Not all distributions have support in vector spaces of the same type, which is currently not supported")
@@ -534,7 +534,7 @@ function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::AbstractArra
     return copyto!(v, rand(rng, d))
 end
 function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, X::ProductRepr)
-    map(t -> _rand!(rng, t[1], t[2]), d.distributions, submanifold_components(d.space.M, X))
+    map(t -> _rand!(rng, t[1], t[2]), d.distributions, submanifold_components(d.space.manifold, X))
     return X
 end
 

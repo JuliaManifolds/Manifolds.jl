@@ -546,9 +546,9 @@ function rand(rng::AbstractRNG, d::PowerPointDistribution)
 end
 
 function _rand!(rng::AbstractRNG, d::PowerFVectorDistribution, v::AbstractArray)
-    PM = d.type.M
+    PM = d.type.manifold
     rep_size = representation_size(PM.manifold)
-    for i in get_iterator(d.type.M)
+    for i in get_iterator(d.type.manifold)
         copyto!(d.distribution.x, _read(PM, rep_size, d.x, i))
         _rand!(rng, d.distribution, _read(PM, rep_size, v, i))
     end

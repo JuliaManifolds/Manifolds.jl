@@ -10,7 +10,7 @@ Euclidean-like manifold `M` of dimension `n`.
 """
 struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal,TAD<:ActionDirection} <:
        AbstractGroupAction{TAD}
-    M::TM
+    manifold::TM
     SOn::TSO
 end
 
@@ -23,7 +23,7 @@ function RotationAction(
 end
 
 function show(io::IO, A::RotationAction)
-    print(io, "RotationAction($(A.M), $(A.SOn), $(direction(A)))")
+    print(io, "RotationAction($(A.manifold), $(A.SOn), $(direction(A)))")
 end
 
 const RotationActionOnVector{N,F,TAD} = RotationAction{
@@ -34,10 +34,10 @@ const RotationActionOnVector{N,F,TAD} = RotationAction{
 
 base_group(A::RotationAction) = A.SOn
 
-g_manifold(A::RotationAction) = A.M
+g_manifold(A::RotationAction) = A.manifold,
 
 function switch_direction(A::RotationAction{TM,TSO,TAD}) where {TM,TSO,TAD}
-    return RotationAction(A.M, A.SOn, switch_direction(TAD()))
+    return RotationAction(A.manifold, A.SOn, switch_direction(TAD()))
 end
 
 apply(A::RotationActionOnVector{N,F,LeftAction}, a, p) where {N,F} = a * p
@@ -70,8 +70,8 @@ end
 inverse_apply_diff(A::RotationActionOnVector{N,F,RightAction}, a, p, X) where {N,F} = a * X
 
 function optimal_alignment(A::RotationActionOnVector{N,T,LeftAction}, p, q) where {N,T}
-    is_manifold_point(A.M, p, true)
-    is_manifold_point(A.M, q, true)
+    is_manifold_point(A.manifold, p, true)
+    is_manifold_point(A.manifold, q, true)
 
     Xmul = p * transpose(q)
     F = svd(Xmul)

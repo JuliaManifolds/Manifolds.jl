@@ -254,10 +254,10 @@ is_default_metric(M::Manifold, G::Metric) = Val(false)
     is_default_metric(MM)
 
 Indicate whether the [`Metric`](@ref) `MM.G` is the default metric for
-the [`Manifold`](@ref) `MM.M` within the [`MetricManifold`](@ref) `MM`.
+the [`Manifold`](@ref) `MM.manifold,` within the [`MetricManifold`](@ref) `MM`.
 This means that any occurence of
-[`MetricManifold`](@ref)`(MM.M,MM.G)` where `typeof(is_default_metric(MM.M,MM.G)) = Val{true}`
-falls back to just be called with `MM.MM` such that the [`Manifold`](@ref) `MM.M`
+[`MetricManifold`](@ref)`(MM.manifold,MM.G)` where `typeof(is_default_metric(MM.manifold,MM.G)) = Val{true}`
+falls back to just be called with `MM.manifold,` such that the [`Manifold`](@ref) `MM.manifold`
 implicitly has the metric `MM.G`, for example if this was the first one
 implemented or is the one most commonly assumed to be used.
 """
@@ -302,7 +302,7 @@ function inner(
     X,
     Y,
 ) where {MMT<:MetricManifold}
-    ginv = inverse_local_metric(B.M, p)
+    ginv = inverse_local_metric(B.manifold, p)
     return dot(X, ginv * Y)
 end
 
