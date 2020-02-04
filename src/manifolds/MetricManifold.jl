@@ -308,11 +308,21 @@ function local_metric_jacobian(M, p; backend = :default)
     return ∂g
 end
 
-log!(M::MMT, w, x, y) where {MMT<:MetricManifold} = log!(M, is_default_metric(M), w, x, y)
-function log!(M::MMT, ::Val{true}, w, x, y) where {MMT<:MetricManifold}
-    return log!(base_manifold(M), w, x, y)
+@doc raw"""
+    log(N::MetricManifold{M,G}, p, X)
+
+Copute the logarithmic map on the [`Manifold`](@ref) `M` equipped with the [`Metric`](@ref) `G`.
+
+If the metric was declared the default metric using [`is_default_metric`](@ref), this method
+falls back to `log(M,p,X)`.
+"""
+log(::MetricManifold, ::Any...)
+
+log!(M::MMT, X, p, q) where {MMT<:MetricManifold} = log!(M, is_default_metric(M), X, p, q)
+function log!(M::MMT, ::Val{true}, X, p, q) where {MMT<:MetricManifold}
+    return log!(base_manifold(M), X, p, q)
 end
-function log!(M::MMT, ::Val{false}, Y, p, q) where {MMT<:MetricManifold}
+function log!(M::MMT, ::Val{false}, X, p, q) where {MMT<:MetricManifold}
     error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(p)) and $(typeof(q)).")
 end
 

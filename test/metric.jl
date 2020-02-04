@@ -282,9 +282,9 @@ end
         @test norm(MM2, x, v) === norm(M, x, v)
         @test distance(MM2, x, y) === distance(M, x, y)
         @test exp!(MM2, y, x, v) === exp!(M, y, x, v)
-        @test exp(MM2, y, x, v) === exp(M, y, x, v)
+        @test exp(MM2, x, v) == exp(M, x, v)
         @test log!(MM2, v, x, y) === log!(M, v, x, y)
-        @test log(MM2, v, x, y) === log(M, v, x, y)
+        @test log(MM2, x, y) == log(M, x, y)
         @test retract!(MM2, y, x, v) === retract!(M, y, x, v)
         @test retract!(MM2, y, x, v, 1) === retract!(M, y, x, v, 1)
 
