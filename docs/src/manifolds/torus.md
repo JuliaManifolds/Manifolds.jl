@@ -1,7 +1,7 @@
 # Torus
-The torus $𝕋^d \equiv [-π,π)^d$ is modeled as an [`AbstractPowerManifold`](@ref) of
+The torus $𝕋^d \cong [-π,π)^d$ is modeled as an [`AbstractPowerManifold`](@ref) of
 the (real-valued) [`Circle`](@ref) and uses [`MultidimentionalArrayPowerRepresentation`](@ref).
-Points on the torus are hence row vectors, $x\inℝ^{d}$.
+Points on the torus are hence row vectors, $x ∈ ℝ^{d}$.
 
 ## Example
 
