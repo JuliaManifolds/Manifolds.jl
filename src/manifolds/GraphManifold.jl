@@ -82,7 +82,7 @@ Check whether `p` is a valid point on the [`GraphManifold`](@ref), and
 `X` it from its tangent space, i.e. its
 length equals the number of vertices (for [`VertexManifold`](@ref)s) or
 the number of edges (for [`EdgeManifold`](@ref)s) and that each element of `X`
-together with its corresponding einty of `p` passes the
+together with its corresponding entry of `p` passes the
 [`check_tangent_vector`](@ref) test for the base manifold `M.manifold`.
 """
 check_tangent_vector(::GraphManifold, ::Any...)

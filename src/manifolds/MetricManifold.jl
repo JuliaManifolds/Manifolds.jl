@@ -62,7 +62,7 @@ The Christoffel symbols are (in Einstein summation convention)
 
 $\Gamma_{ijk} = \frac{1}{2} \Bigl[g_{kj,i} + g_{ik,j} - g_{ij,k}\Bigr],$
 
-where $g_{ij,k}=\frac{\partial}{\partial p^k} g_{ij}$ is the coordinate
+where $g_{ij,k}=\frac{∂}{∂ p^k} g_{ij}$ is the coordinate
 derivative of the local representation of the metric tensor. The dimensions of
 the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
@@ -99,7 +99,7 @@ end
 
 Get partial derivatives of the Christoffel symbols of the second kind
 for manifold `M` at `p` with respect to the coordinates of `p`,
-$\frac{\partial}{\partial p^l} \Gamma^{k}_{ij} = \Gamma^{k}_{ij,l}.$
+$\frac{∂}{∂ p^l} \Gamma^{k}_{ij} = \Gamma^{k}_{ij,l}.$
 The dimensions of the resulting multi-dimensional array are ordered $(i,j,k,l)$.
 """
 function christoffel_symbols_second_jacobian(M::MetricManifold, p; backend = :default)
@@ -322,7 +322,7 @@ end
     local_metric_jacobian(M::MetricManifold, p; backend=:default)
 
 Get partial derivatives of the local metric of `M` at `p` with respect to the
-coordinates of `p`, $\frac{\partial}{\partial p^k} g_{ij} = g_{ij,k}$. The
+coordinates of `p`, $\frac{∂}{∂ p^k} g_{ij} = g_{ij,k}$. The
 dimensions of the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
 function local_metric_jacobian(M, p; backend = :default)
