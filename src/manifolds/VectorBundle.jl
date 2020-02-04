@@ -270,9 +270,9 @@ end
 
 function get_basis(M::VectorBundle, p, B::DiagonalizingOrthonormalBasis)
     xp1 = submanifold_component(p, Val(1))
-    bv1 = DiagonalizingOrthonormalBasis(submanifold_component(B.v, Val(1)))
+    bv1 = DiagonalizingOrthonormalBasis(submanifold_component(B.frame_direction, Val(1)))
     b1 = get_basis(M.manifold, xp1, bv1)
-    bv2 = DiagonalizingOrthonormalBasis(submanifold_component(B.v, Val(2)))
+    bv2 = DiagonalizingOrthonormalBasis(submanifold_component(B.frame_direction, Val(2)))
     b2 = get_basis(M.fiber, xp1, bv2)
     return PrecomputedVectorBundleOrthonormalBasis(b1, b2)
 end

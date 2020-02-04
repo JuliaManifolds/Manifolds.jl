@@ -149,29 +149,6 @@ coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
 """
 exp(::MetricManifold, ::Any...)
-function exp(M::MMT, p, X, T::AbstractVector{T} where {T}) where {MMT<:MetricManifold}
-    return exp(M, is_default_metric(M), p, X, T)
-end
-function exp(
-    M::MMT,
-    ::Val{true},
-    p,
-    X,
-    T::AbstractVector{T} where {T},
-) where {MMT<:MetricManifold}
-    return exp(base_manifold(M), p, X, T)
-end
-function exp(
-    M::MMT,
-    ::Val{false},
-    p,
-    X,
-    T::AbstractVector{T} where {T},
-) where {MMT<:MetricManifold}
-    sol = solve_exp_ode(M, p, X, extrema(T); dense = false, saveat = T)
-    n = length(p)
-    return map(i -> sol.u[i][n+1:end], 1:length(T))
-end
 
 exp!(M::MMT, q, p, X) where {MMT<:MetricManifold} = exp!(M, is_default_metric(M), q, p, X)
 function exp!(M::MMT, ::Val{true}, q, p, X) where {MMT<:MetricManifold}

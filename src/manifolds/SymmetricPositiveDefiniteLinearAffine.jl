@@ -67,7 +67,7 @@ Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`manifold_dimension`](@ref) of `M`) in the tangent space of `p` on the
 [`MetricManifold`](@ref) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
 [`LinearAffineMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
-with eigenvalues `κ` and where the direction `B.v` has curvature `0`.
+with eigenvalues `κ` and where the direction `B.frame_direction` has curvature `0`.
 """
 function get_basis(
     M::SymmetricPositiveDefinite{N},
@@ -75,7 +75,7 @@ function get_basis(
     B::DiagonalizingOrthonormalBasis,
 ) where {N}
     xSqrt = sqrt(p)
-    eigv = eigen(B.v)
+    eigv = eigen(B.frame_direction)
     V = eigv.vectors
     Ξ = [
         (i == j ? 1 / 2 :

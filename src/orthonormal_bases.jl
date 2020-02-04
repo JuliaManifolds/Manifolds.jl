@@ -71,20 +71,20 @@ function ProjectedOrthonormalBasis(method::Symbol, F::AbstractNumbers = ℝ)
 end
 
 @doc raw"""
-    DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ)
+    DiagonalizingOrthonormalBasis(frame_direction, F::AbstractNumbers = ℝ)
 
 An orthonormal basis `Ξ` as a vector of tangent vectors (of length determined by
 [`manifold_dimension`](@ref)) in the tangent space that diagonalizes the curvature
-tensor $R(u,v)w$ and where the direction `v` has curvature `0`.
+tensor $R(u,v)w$ and where the direction `frameDirection` $v$ has curvature `0`.
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
 struct DiagonalizingOrthonormalBasis{TV,F} <: AbstractOrthonormalBasis{F}
-    v::TV
+    frame_direction::TV
 end
 
-function DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ)
-    return DiagonalizingOrthonormalBasis{typeof(v),F}(v)
+function DiagonalizingOrthonormalBasis(X, F::AbstractNumbers = ℝ)
+    return DiagonalizingOrthonormalBasis{typeof(X),F}(X)
 end
 
 const ArbitraryOrDiagonalizingBasis =
@@ -380,7 +380,7 @@ function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis
         io,
         "DiagonalizingOrthonormalBasis with coordinates in $(number_system(onb)) and eigenvalue 0 in direction:",
     )
-    sk = sprint(show, "text/plain", onb.v, context = io, sizehint = 0)
+    sk = sprint(show, "text/plain", onb.frame_direction, context = io, sizehint = 0)
     sk = replace(sk, '\n' => "\n ")
     print(io, sk)
 end

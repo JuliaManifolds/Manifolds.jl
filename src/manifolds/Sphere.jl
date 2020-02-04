@@ -17,12 +17,12 @@ Sphere(n::Int) = Sphere{n}()
 function get_basis(M::Sphere{N}, x, B::DiagonalizingOrthonormalBasis) where {N}
     A = zeros(N + 1, N + 1)
     A[1, :] = transpose(x)
-    A[2, :] = transpose(B.v)
+    A[2, :] = transpose(B.frame_direction)
     V = nullspace(A)
     κ = ones(N)
-    if !iszero(B.v)
+    if !iszero(B.frame_direction)
         # if we have a nonzero direction for the geodesic, add it and it gets curvature zero from the tensor
-        V = cat(B.v / norm(M, x, B.v), V; dims = 2)
+        V = cat(B.frame_direction / norm(M, x, B.frame_direction), V; dims = 2)
         κ[1] = 0 # no curvature along the geodesic direction, if x!=y
     end
     vecs = [V[:, i] for i = 1:N]

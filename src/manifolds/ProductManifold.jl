@@ -254,7 +254,7 @@ function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     vs = map(ziptuples(
         M.manifolds,
         submanifold_components(p),
-        submanifold_components(B.v),
+        submanifold_components(B.frame_direction),
     )) do t
         return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
     end
