@@ -171,7 +171,7 @@ with respect to given set of points `pts`. The [`mean`](@ref) is calculated usin
 The orbit of $p$ with respect to the action of a group $G$ is the set
 ````math
 O = \{ g ⋅ p : g ∈ G \}.
-```
+````
 This function is useful for computing means on quotients of manifolds by a Lie group action.
 """
 function center_of_orbit(
