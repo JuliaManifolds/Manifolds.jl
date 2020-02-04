@@ -1,7 +1,7 @@
 @doc raw"""
     Circle{F} <: Manifold
 
-The circle $𝕊^1$ as a manifold ere manifold represented by
+The circle $𝕊^1$ is a manifold here represented by
 real-valued data in $[-π,π)$ or complex-valued data $z ∈ ℂ$ of absolute value
 $\lvert z\rvert = 1$.
 # Constructor
