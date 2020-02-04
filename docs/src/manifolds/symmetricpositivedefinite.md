@@ -3,7 +3,7 @@
 The symmetric positive definite matrices
 
 ```math
-𝒫(n) = \bigl\{ A ∈ ℝ^{n \times n}\ \big|\ A = A^{\mathrm{T}} \text{ and } x^{\mathrm{T}}Ax > 0 \text{ for } 0 ≠ x ∈ ℝ^n \bigr\}
+𝒫(n) = \bigl\{ A ∈ ℝ^{n × n}\ \big|\ A = A^{\mathrm{T}} \text{ and } x^{\mathrm{T}}Ax > 0 \text{ for } 0 ≠ x ∈ ℝ^n \bigr\}
 ```
 
 ```@docs

@@ -1,23 +1,23 @@
 @doc raw"""
     Stiefel{n,k,T} <: Manifold
 
-The Stiefel manifold consists of all $n \times k$, $n\geq k$ unitary matrices, i.e.
+The Stiefel manifold consists of all $n × k$, $n\geq k$ unitary matrices, i.e.
 
 ````math
-\{ p ∈ 𝔽^{n \times k} : p^{\mathrm{H}}p = I_k \},
+\{ p ∈ 𝔽^{n × k} : p^{\mathrm{H}}p = I_k \},
 ````
 
 where $𝔽 ∈ \{ℝ, ℂ\}$,
 $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
-$I_n ∈ ℝ^{n\times n}$ denotes the $k \times k$ identity matrix.
+$I_n ∈ ℝ^{n× n}$ denotes the $k × k$ identity matrix.
 
 The tangent space at a point $p ∈ ℳ$ is given by
 
 ````math
-T_p ℳ = \{ X ∈ 𝔽^{n\times k} : p^{\mathrm{H}}X + X^{\mathrm{H}}p=0_n\},
+T_p ℳ = \{ X ∈ 𝔽^{n × k} : p^{\mathrm{H}}X + X^{\mathrm{H}}p=0_n\},
 ````
 
-where $0_n$ is the $k\times k$ zero matrix.
+where $0_n$ is the $k × k$ zero matrix.
 
 The metric is either inherited from $ℝ^{n,k}$ for the real-valued case
 or the one inherited from interpreting the complex valued entries in the Gaussian
@@ -30,7 +30,7 @@ The manifold is named after
 # Constructor
     Stiefel(n,k,F=ℝ)
 
-Generate the (real-valued) Stiefel manifold of $n\times k$ dimensional orthonormal matrices.
+Generate the (real-valued) Stiefel manifold of $n × k$ dimensional orthonormal matrices.
 """
 struct Stiefel{n,k,F} <: Manifold end
 
@@ -128,7 +128,7 @@ eminating from `p` into tangent direction `X`.
 
 where $\operatorname{Exp}$ denotes matrix exponential,
 $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and $I_k$ and
-$0_k$ are the identity matrix and the zero matrix of dimension $k \times k$, respectively.
+$0_k$ are the identity matrix and the zero matrix of dimension $k × k$, respectively.
 """
 exp(::Stiefel, ::Any...)
 
@@ -166,7 +166,7 @@ This follows the folloing approach: From the Polar retraction we know that
 \operatorname{retr}_p^{-1}q = qs - t
 ````
 
-if such a symmetric positive definite $k\times k$ matrix exists. Since $qs - t$
+if such a symmetric positive definite $k × k$ matrix exists. Since $qs - t$
 is also a tangent vector at $p$ we obtain
 
 ````math
@@ -279,7 +279,7 @@ Compute the QR-based retraction [`QRRetraction`](@ref) on the
 \operatorname{retr}_p X = QD,
 ````
 
-where D is a $n\times k$ matrix with
+where D is a $n × k$ matrix with
 
 ````math
 D = \operatorname{diag}\bigl(\operatorname{sgn}(R_{ii}+0,5)_{i=1}^k \bigr),

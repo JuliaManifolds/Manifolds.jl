@@ -1,8 +1,8 @@
 # Rotations
 
-The manifold $\mathrm{SO}(n)$ of orthogonal matrices with determinant $+1$ in $ℝ^{n\times n}$, i.e.
+The manifold $\mathrm{SO}(n)$ of orthogonal matrices with determinant $+1$ in $ℝ^{n× n}$, i.e.
 
-$\mathrm{SO}(n) = \bigl\{R ∈ ℝ^{n\times n} \big| RR^{\mathrm{T}} =
+$\mathrm{SO}(n) = \bigl\{R ∈ ℝ^{n × n} \big| RR^{\mathrm{T}} =
 R^{\mathrm{T}}R = \mathrm{I}_n, \det(R) = 1 \bigr\}$
 
 The Lie group $\mathrm{SO}(n)$ is a subgroup of the orthogonal group $\mathrm{O}(n)$ and also known as the special orthogonal group or the set of rotations group.

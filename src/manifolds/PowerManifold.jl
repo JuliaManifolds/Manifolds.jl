@@ -41,7 +41,7 @@ abstract type AbstractPowerManifold{M<:Manifold,TPR<:AbstractPowerRepresentation
 @doc raw"""
     PowerManifold{TM<:Manifold, TSize<:Tuple, TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{TM}
 
-The power manifold $ℳ^{n_1\times n_2 \times … \times n_d}$ with power geometry
+The power manifold $ℳ^{n_1× n_2 × … × n_d}$ with power geometry
  `TSize` statically defines the number of elements along each axis.
 
 For example, a manifold-valued time series would be represented by a power manifold with
@@ -58,7 +58,7 @@ power manifolds might be faster if they are represented as [`ProductManifold`](@
     PowerManifold(M, N_1, N_2, ..., N_n)
     PowerManifold(M, NestedPowerRepresentation(), N_1, N_2, ..., N_n)
 
-Generate the power manifold $M^{N_1 \times N_2 \times … \times N_n}$.
+Generate the power manifold $M^{N_1 × N_2 × … × N_n}$.
 By default, the [`MultidimentionalArrayPowerRepresentation`](@ref) of points
 and tangent vectors is used, although a different one, for example
 [`NestedPowerRepresentation`](@ref), can be given as the second argument to the

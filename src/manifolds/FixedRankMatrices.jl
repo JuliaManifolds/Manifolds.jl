@@ -1,15 +1,15 @@
 @doc raw"""
     FixedRankMatrices{m,n,k,T} <: Manifold
 
-The manifold of $m \times n$ real-valued or complex-valued matrices of fixed rank $k$, i.e.
+The manifold of $m × n$ real-valued or complex-valued matrices of fixed rank $k$, i.e.
 ````math
-\{ p ∈ 𝔽^{m \times n} : \operatorname{rank}(p) = k \},
+\{ p ∈ 𝔽^{m × n} : \operatorname{rank}(p) = k \},
 ````
 where $𝔽 ∈ \{ℝ,ℂ\}$ and the rank is the number of linearly independent columns of a matrix.
 
 # Representation with 3 matrix factors
 
-A point $p ∈ ℳ$ can be stored using unitary matrices $U ∈ 𝔽^{m \times k}$, $V ∈ 𝔽^{n \times k}$ as well as the $k$
+A point $p ∈ ℳ$ can be stored using unitary matrices $U ∈ 𝔽^{m × k}$, $V ∈ 𝔽^{n × k}$ as well as the $k$
 singular values of $p = USV^\mathrm{H}$, where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or
 Hermitian. In other words, $U$ and $V$ are from the manifolds [`Stiefel`](@ref)`(m,k,𝔽)` and [`Stiefel`](@ref)`(n,k,𝔽)`,
 respectively; see [`SVDMPoint`](@ref) for details.
@@ -18,18 +18,18 @@ The tangent space $T_p ℳ$ at a point $p ∈ ℳ$ with $p=USV^\mathrm{H}$
 is given by
 ````math
 T_pℳ = \bigl\{ UMV^\mathrm{T} + U_pV^\mathrm{H} + UV_p^\mathrm{H} :
-    M  ∈ 𝔽^{k \times k},
-    U_p  ∈ 𝔽^{m \times k},
-    V_p  ∈ 𝔽^{n \times k}
+    M  ∈ 𝔽^{k × k},
+    U_p  ∈ 𝔽^{m × k},
+    V_p  ∈ 𝔽^{n × k}
     \text{ s.t. }
     U_p^\mathrm{H}U = 0_k,
     V_p^\mathrm{H}V = 0_k
 \bigr\},
 ````
-where $0_k$ is the $k \times k$ zero matrix. See [`UMVTVector`](@ref) for details.
+where $0_k$ is the $k × k$ zero matrix. See [`UMVTVector`](@ref) for details.
 
 The (default) metric of this manifold is obtained by restricting the metric
-on $ℝ^{m \times n}$ to the tangent bundle[^Vandereycken2013].
+on $ℝ^{m × n}$ to the tangent bundle[^Vandereycken2013].
 
 # Constructor
     FixedRankMatrics(m, n, k[, t=ℝ])
@@ -88,7 +88,7 @@ vector structure stores the additionally (to the point) required fields.
 # Constructors
 * `UMVTVector(U,M,Vt)` store umv factors to initialize the `UMVTVector`
 * `UMVTVector(U,M,Vt,k)` store the umv factors after shortening them down to
-  inner dimensions $k$, i.e. in $UMV^\mathrm{H}$, where $M$ is a $k\times k$ matrix.
+  inner dimensions $k$, i.e. in $UMV^\mathrm{H}$, where $M$ is a $k × k$ matrix.
 """
 struct UMVTVector{TU<:AbstractMatrix,TM<:AbstractMatrix,TVt<:AbstractMatrix} <: TVector
     U::TU
@@ -286,7 +286,7 @@ Compute an SVD-based retraction on the [`FixedRankMatrices`](@ref) `M` by comput
     q = U_kS_kV_k^\mathrm{H},
 ````
 where $U_k S_k V_k^\mathrm{H}$ is the shortened singular value decomposition $USV=p+X$,
-in the sense that $S_k$ is the diagonal matrix of size $k \times k$ with the $k$ largest
+in the sense that $S_k$ is the diagonal matrix of size $k × k$ with the $k$ largest
 singular values and $U$ and $V$ are shortened accordingly.
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)

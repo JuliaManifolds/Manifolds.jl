@@ -2,22 +2,22 @@
     SymmetricMatrices{n,F} <: Manifold
 
 The [`Manifold`](@ref) $ \operatorname{Sym} (n)$ consisting of the real- or complex-valued
-symmetric matrices of size $ n\times n$, i.e. the set
+symmetric matrices of size $ n× n$, i.e. the set
 
 ````math
-\operatorname{Sym}(n) = \bigl\{p  ∈ 𝔽^{n\times n} \big| p^{\mathrm{H}} = p \bigr\},
+\operatorname{Sym}(n) = \bigl\{p  ∈ 𝔽^{n × n} \big| p^{\mathrm{H}} = p \bigr\},
 ````
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed
 and the field $𝔽 ∈ \{ ℝ, ℂ\}$ is set by the
 [`AbstractNumbers`](@ref) `F`.
 
-Though it is slighty redundant, usually the matrices are safed as $n\times n$ arrays.
+Though it is slighty redundant, usually the matrices are safed as $n × n$ arrays.
 
 # Constructor
 
     SymmetricMatrices(n::Int, F::AbstractNumbers=ℝ)
 
-Generate the manifold of $n\times n$ symmetric metrices.
+Generate the manifold of $n × n$ symmetric metrices.
 """
 struct SymmetricMatrices{n,F} <: Manifold end
 
@@ -301,7 +301,7 @@ project_tangent!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2
     representation_size(M::SymmetricMatrices)
 
 Returns the size points on the [`SymmetricMatrices`](@ref) `M` are represented as, i.e.
-for the $n\times n$ it's `(n,n)`.
+for the $n × n$ it's `(n,n)`.
 """
 @generated representation_size(::SymmetricMatrices{N}) where {N} = (N, N)
 

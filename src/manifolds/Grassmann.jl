@@ -9,11 +9,11 @@ of $ℂ^n$ for the second.
 The manifold can be represented as
 
 ````math
-\operatorname{Gr}(n,k) := \bigl\{ \operatorname{span}(p) : p ∈ 𝔽^{n \times k}, p^\mathrm{H}p = I_k\},
+\operatorname{Gr}(n,k) := \bigl\{ \operatorname{span}(p) : p ∈ 𝔽^{n × k}, p^\mathrm{H}p = I_k\},
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and
-$I_k$ is the $k \times k$ identity matrix. This means, that the columns of $x$
+$I_k$ is the $k × k$ identity matrix. This means, that the columns of $x$
 form an unitary basis of the subspace, that is a point on
 $\operatorname{Gr}(n,k)$, and hence the subspace can actually be represented by
 a whole equivalence class of representers.
@@ -24,17 +24,17 @@ Another interpretation is, that
 ````
 
 i.e the Grassmann manifold is the quotient of the [`Stiefel`](@ref) manifold and
-the orthogonal group $\operatorname{O}(k)$ of orthogonal $k \times k$ matrices.
+the orthogonal group $\operatorname{O}(k)$ of orthogonal $k × k$ matrices.
 
 The tangent space at a point (subspace) $x$ is given by
 
 ````math
 T_x\mathrm{Gr}(n,k) = \bigl\{
-X ∈ 𝔽^{n \times k} :
+X ∈ 𝔽^{n × k} :
 X^{\mathrm{H}}p + p^{\mathrm{H}}X = 0_{k} \bigr\},
 ````
 
-where $0_{k}$ denotes the $k \times k$ zero matrix.
+where $0_{k}$ denotes the $k × k$ zero matrix.
 
 Note that a point $p ∈ \operatorname{Gr}(n,k)$ might be represented by
 different matrices (i.e. matrices with unitary column vectors that span
@@ -100,7 +100,7 @@ the [`Grassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and $0_k$
-denotes the $k \times k$ zero natrix.
+denotes the $k × k$ zero natrix.
 """
 function check_tangent_vector(G::Grassmann{n,k,F}, p, X; kwargs...) where {n,k,F}
     t = check_manifold_point(G, p)
@@ -359,7 +359,7 @@ Compute the QR-based retraction [`QRRetraction`](@ref) on the
 ````math
 \operatorname{retr}_p X = QD,
 ````
-where D is a $m \times n$ matrix with
+where D is a $m × n$ matrix with
 ````math
 D = \operatorname{diag}( \operatorname{sgn}(R_{ii}+0,5)_{i=1}^n ).
 ````

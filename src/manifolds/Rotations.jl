@@ -1,7 +1,7 @@
 @doc raw"""
     Rotations{N} <: Manifold
 
-The special orthogonal manifold $\mathrm{SO}(n)$ represented by $n \times n$
+The special orthogonal manifold $\mathrm{SO}(n)$ represented by $n × n$
 real-valued orthogonal matrices with determinant $+1$ is the manifold of `Rotations`,
 since these matrices represent all rotations in $ℝ^n$.
 
@@ -9,7 +9,7 @@ since these matrices represent all rotations in $ℝ^n$.
 
     Rotations(n)
 
-Generate the $\mathrm{SO}(n) \subset ℝ^{n \times n}$
+Generate the $\mathrm{SO}(n) \subset ℝ^{n × n}$
 """
 struct Rotations{N} <: Manifold end
 
@@ -41,7 +41,7 @@ end
 @doc raw"""
     angles_4d_skew_sym_matrix(A)
 
-The Lie algebra of [`Rotations`](@ref) in $ℝ^4$, $\mathrm{SO}(4)$, consists of $4\times 4$
+The Lie algebra of [`Rotations`](@ref) in $ℝ^4$, $\mathrm{SO}(4)$, consists of $4× 4$
 skew-symmetric matrices. The unique imaginary components of their eigenvalues are the
 angles of the two plane rotations. This function computes these more efficiently than
 `eigvals`.

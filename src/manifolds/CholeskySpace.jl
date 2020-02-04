@@ -9,7 +9,7 @@ are for example summarized in Table 1 of [^Lin2019].
 
     CholeskySpace(n)
 
-Generate the manifold of $n\times n$ lower triangular matrices with positive diagonal.
+Generate the manifold of $n× n$ lower triangular matrices with positive diagonal.
 
 [^Lin2019]:
     > Lin, Zenhua: "Riemannian Geometry of Symmetric Positive Definite Matrices via
