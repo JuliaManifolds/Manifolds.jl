@@ -116,7 +116,7 @@ component vector $v^i$, compute the equivalent vector representation
 $v=v^i e_i$, where Einstein summation notation is used:
 
 ````math
-\wedge: v^i ↦ v^i e_i
+∧ : v^i ↦ v^i e_i
 ````
 
 For array manifolds, this converts a vector representation of the tangent
@@ -141,7 +141,7 @@ vector $v$, compute the vector components $v^i$, such that $v = v^i e_i$, where
 Einstein summation notation is used:
 
 ````math
-\vee: v^i e_i ↦ v^i
+⋁ : v^i e_i ↦ v^i
 ````
 
 For array manifolds, this converts an array representation of the tangent
