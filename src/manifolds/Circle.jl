@@ -318,7 +318,7 @@ For the real-valued case this results in the identity.
 For the complex-valud case, the formula is the same as for the [`Sphere`](@ref)`(1)` in the
 complex plane.
 ````math
-𝒫_{q←p}(v) = X - \frac{⟨\log_p q,X⟩_p}{d^2_{ℂ}(p,q)}
+\mathcal P_{q←p} X = X - \frac{⟨\log_p q,X⟩_p}{d^2_{ℂ}(p,q)}
 \bigl(\log_p q + \log_q p \bigr),
 ````
 where [`log`](@ref) denotes the logarithmic map on `M`.

@@ -11,10 +11,10 @@ where $𝔽 ∈ \{ℝ, ℂ\}$,
 $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
 $I_n ∈ ℝ^{n× n}$ denotes the $k × k$ identity matrix.
 
-The tangent space at a point $p ∈ ℳ$ is given by
+The tangent space at a point $p ∈ \mathcal M$ is given by
 
 ````math
-T_p ℳ = \{ X ∈ 𝔽^{n × k} : p^{\mathrm{H}}X + X^{\mathrm{H}}p=0_n\},
+T_p \mathcal M = \{ X ∈ 𝔽^{n × k} : p^{\mathrm{H}}X + X^{\mathrm{H}}p=0_n\},
 ````
 
 where $0_n$ is the $k × k$ zero matrix.
@@ -247,7 +247,7 @@ Project `X` onto the tangent space of `p` to the [`Stiefel`](@ref) manifold `M`.
 The formula reads
 
 ````math
-\operatorname{proj}_{ℳ}(p, X) = X - p \operatorname{Sym}(p^{\mathrm{H}}X),
+\operatorname{proj}_{\mathcal M}(p, X) = X - p \operatorname{Sym}(p^{\mathrm{H}}X),
 ````
 
 where $\operatorname{Sym}(q)$ is the symmetrization of $q$, e.g. by

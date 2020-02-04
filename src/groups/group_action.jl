@@ -33,7 +33,7 @@ direction(::AbstractGroupAction{AD}) where {AD} = AD()
 
 Apply action `a` to the point `p`. The action is specified by `A`.
 Unless otherwise specified, right actions are defined in terms of the left action. For
-point $p ∈ ℳ$ and action element $a$, the right action is
+point $p ∈ \mathcal M$ and action element $a$, the right action is
 
 ````math
 p ⋅ a ≐ a^{-1} ⋅ p.
@@ -82,15 +82,15 @@ end
 @doc raw"""
     apply_diff(A::AbstractGroupAction, a, p, X)
 
-For group point $p ∈ ℳ$ and tangent vector $X ∈ T_p ℳ$, compute the action of the
+For group point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action of the
 differential of the action of $a ∈ G$ on $X$, specified by rule `A`. Written as
 $(\mathrm{d}τ_a)_p (X)$, with the specified left or right convention, the differential
 transports vectors
 
 ````math
 \begin{aligned}
-(\mathrm{d}L_a)_p (X) &: T_p ℳ → T_{a ⋅ p} ℳ\\
-(\mathrm{d}R_a)_p (X) &: T_p ℳ → T_{p ⋅ a} ℳ
+(\mathrm{d}L_a)_p (X) &: T_p \mathcal M → T_{a ⋅ p} \mathcal M\\
+(\mathrm{d}R_a)_p (X) &: T_p \mathcal M → T_{p ⋅ a} \mathcal M
 \end{aligned}
 ````
 """
@@ -105,15 +105,15 @@ end
 @doc raw"""
     inverse_apply_diff(A::AbstractGroupAction, a, p, X)
 
-For group point $p ∈ ℳ$ and tangent vector $X ∈ T_p ℳ$, compute the action of the
+For group point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action of the
 differential of the inverse action of $a ∈ G$ on $X$, specified by rule `A`. Written as
 $(\mathrm{d}τ_a)_p^{-1} (X)$, with the specified left or right convention, the
 differential transports vectors
 
 ````math
 \begin{aligned}
-(\mathrm{d}L_a)_p^{-1} (X) &: T_p ℳ → T_{a^{-1} ⋅ p} ℳ\\
-(\mathrm{d}R_a)_p^{-1} (X) &: T_p ℳ → T_{p ⋅ a^{-1}} ℳ
+(\mathrm{d}L_a)_p^{-1} (X) &: T_p \mathcal M → T_{a^{-1} ⋅ p} \mathcal M\\
+(\mathrm{d}R_a)_p^{-1} (X) &: T_p \mathcal M → T_{p ⋅ a^{-1}} \mathcal M
 \end{aligned}
 ````
 """
@@ -139,7 +139,7 @@ the element closest to `q` in the metric of the G-manifold:
 ```math
 \arg\min_{g ∈ G} d_M(g ⋅ p, q)
 ```
-where $G$ is the group that acts on the G-manifold $ℳ$.
+where $G$ is the group that acts on the G-manifold $\mathcal M$.
 """
 function optimal_alignment(A::AbstractGroupAction, p, q)
     error("optimal_alignment not implemented for $(typeof(A)) and points $(typeof(p)) and $(typeof(q)).")

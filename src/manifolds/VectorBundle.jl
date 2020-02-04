@@ -180,10 +180,10 @@ distance(B::VectorBundleFibers, p, X, Y) = norm(B, p, X - Y)
     distance(B::VectorBundle, p, q)
 
 Distance between points $x$ and $y$ from the
-vector bundle `B` over manifold `B.fiber` (denoted $ℳ$).
+vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
 
 Notation:
-  * The point $p = (x_p, V_p)$ where $x_p  ∈ ℳ$ and $V_p$ belongs to the
+  * The point $p = (x_p, V_p)$ where $x_p  ∈ \mathcal M$ and $V_p$ belongs to the
     fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
     Similarly, $q = (x_q, V_q)$.
@@ -192,7 +192,7 @@ The distance is calculated as
 
 $d_B(x, y) = \sqrt{d_M(x_p, x_q)^2 + d_F(V_p, V_{q←p})^2}$
 
-where $d_ℳ$ is the distance on manifold $ℳ$, $d_F$ is the distance
+where $d_\mathcal M$ is the distance on manifold $\mathcal M$, $d_F$ is the distance
 between two vectors from the fiber $F$ and $V_{q←p}$ is the result
 of parallel transport of vector $V_q$ to point $x_p$. The default
 behavior of [`vector_transport_to`](@ref) is used to compute the vector
@@ -216,14 +216,14 @@ number_eltype(v::FVector) = number_eltype(v.data)
     exp(B::VectorBundle, p, X)
 
 Exponential map of tangent vector $X$ at point $p$ from
-vector bundle `B` over manifold `B.fiber` (denoted $ℳ$).
+vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
 
 Notation:
-  * The point $p = (x_p, V_p)$ where $x_p ∈ ℳ$ and $V_p$ belongs to the
+  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
     fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
   * The tangent vector $X = (V_{X,M}, V_{X,F}) ∈ T_pB$ where
-    $V_{X,M}$ is a tangent vector from the tangent space $T_{x_p}ℳ$ and
+    $V_{X,M}$ is a tangent vector from the tangent space $T_{x_p}\mathcal M$ and
     $V_{X,F}$ is a tangent vector from the tangent space $T_{V_p}F$ (isomorphic to $F$).
 
 The exponential map is calculated as
@@ -253,7 +253,7 @@ from the vector space of type `M` at point `p` from the underlying [`Manifold`](
 
 The function can be used for example to transform vectors
 from the tangent bundle to vectors from the cotangent bundle
-$\flat : Tℳ → T^{*}ℳ$
+$\flat : T\mathcal M → T^{*}\mathcal M$
 """
 function flat(M::Manifold, p, X::FVector)
     ξ = allocate_result(M, flat, X, p)
@@ -372,14 +372,14 @@ end
     inner(B::VectorBundle, p, X, Y)
 
 Inner product of tangent vectors `X` and `Y` at point `p` from the
-vector bundle `B` over manifold `B.fiber` (denoted $ℳ$).
+vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
 
 Notation:
-  * The point $p = (x_p, V_p)$ where $x_p ∈ ℳ$ and $V_p$ belongs to the
+  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
     fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
   * The tangent vector $v = (V_{X,M}, V_{X,F}) ∈ T_{x}B$ where
-    $V_{X,M}$ is a tangent vector from the tangent space $T_{x_p}ℳ$ and
+    $V_{X,M}$ is a tangent vector from the tangent space $T_{x_p}\mathcal M$ and
     $V_{X,F}$ is a tangent vector from the tangent space $T_{V_p}F$ (isomorphic to $F$).
     Similarly for the other tangent vector $w = (V_{Y,M}, V_{Y,F}) ∈ T_{x}B$.
 
@@ -410,10 +410,10 @@ end
     log(B::VectorBundle, p, q)
 
 Logarithmic map of the point `y` at point `p` from
-vector bundle `B` over manifold `B.fiber` (denoted $ℳ$).
+vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
 
 Notation:
-  * The point $p = (x_p, V_p)$ where $x_p ∈ ℳ$ and $V_p$ belongs to the
+  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
     fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
     Similarly, $q = (x_q, V_q)$.
@@ -452,16 +452,16 @@ norm(B::VectorBundleFibers{<:TangentSpaceType}, p, X) = norm(B.manifold, p, X)
     project_point(B::VectorBundle, p)
 
 Project the point `p` from the ambient space of the vector bundle `B`
-over manifold `B.fiber` (denoted $ℳ$) to the vector bundle.
+over manifold `B.fiber` (denoted $\mathcal M$) to the vector bundle.
 
 Notation:
-  * The point $p = (x_p, V_p)$ where $x_p$ belongs to the ambient space of $ℳ$
+  * The point $p = (x_p, V_p)$ where $x_p$ belongs to the ambient space of $\mathcal M$
     and $V_p$ belongs to the ambient space of the
     fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
 
-The projection is calculated by projecting the point $x_p$ to the manifold $ℳ$
-and then projecting the vector $V_p$ to the tangent space $T_{x_p}ℳ$.
+The projection is calculated by projecting the point $x_p$ to the manifold $\mathcal M$
+and then projecting the vector $V_p$ to the tangent space $T_{x_p}\mathcal M$.
 """
 project_point(::VectorBundle, ::Any...)
 
@@ -479,15 +479,15 @@ Project the element `X` of the ambient space of the tangent space $T_p B$
 to the tangent space $T_p B$.
 
 Notation:
-  * The point $p = (x_p, V_p)$ where $x_p ∈ ℳ$ and $V_p$ belongs to the
+  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
     fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
-  * The vector $x = (V_{X,M}, V_{X,F})$ where $x_p$ belongs to the ambient space of $T_{x_p}ℳ$
+  * The vector $x = (V_{X,M}, V_{X,F})$ where $x_p$ belongs to the ambient space of $T_{x_p}\mathcal M$
     and $V_{X,F}$ belongs to the ambient space of the
     fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
 
-The projection is calculated by projecting $V_{X,M}$ to tangent space $T_{x_p}ℳ$
+The projection is calculated by projecting $V_{X,M}$ to tangent space $T_{x_p}\mathcal M$
 and then projecting the vector $V_{X,F}$ to the fiber $F$.
 """
 project_tangent(::VectorBundle, ::Any...)
@@ -535,7 +535,7 @@ from the vector space `M` at point `p` from the underlying [`Manifold`](@ref).
 
 The function can be used for example to transform vectors
 from the cotangent bundle to vectors from the tangent bundle
-$\sharp : T^{*}ℳ → Tℳ$
+$\sharp : T^{*}\mathcal M → T\mathcal M$
 """
 function sharp(M::Manifold, p, ξ::FVector)
     X = allocate_result(M, sharp, ξ, p)
@@ -663,10 +663,10 @@ end
     zero_tangent_vector(B::VectorBundle, p)
 
 Zero tangent vector at point `p` from the vector bundle `B`
-over manifold `B.fiber` (denoted $ℳ$). The zero vector belongs to the space $T_{p}B$
+over manifold `B.fiber` (denoted $\mathcal M$). The zero vector belongs to the space $T_{p}B$
 
 Notation:
-  * The point $p = (x_p, V_p)$ where $x_p ∈ ℳ$ and $V_p$ belongs to the
+  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
     fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
     canonical projection of that vector bundle $B$.
 
@@ -674,7 +674,7 @@ The zero vector is calculated as
 
 $\mathbf{0}_{p} = (\mathbf{0}_{x_p}, \mathbf{0}_F)$
 
-where $\mathbf{0}_{x_p}$ is the zero tangent vector from $T_{x_p}ℳ$ and
+where $\mathbf{0}_{x_p}$ is the zero tangent vector from $T_{x_p}\mathcal M$ and
 $\mathbf{0}_F$ is the zero element of the vector space $F$.
 """
 zero_tangent_vector(::VectorBundle, ::Any...)

@@ -30,7 +30,7 @@ nmatrices, i.e. between two symmetric positive definite matrices `p` and `q`
 with respect to the [`LogCholeskyMetric`](@ref). The formula reads
 
 ````math
-d_{𝒫(n)}(p,q) = \sqrt{
+d_{\mathcal P(n)}(p,q) = \sqrt{
  \lVert ⌊ x ⌋ - ⌊ y ⌋ \rVert_{\mathrm{F}}^2
  + \lVert \log(\operatorname{diag}(x)) - \log(\operatorname{diag}(y))\rVert_{\mathrm{F}}^2 }\ \ ,
 ````
@@ -146,7 +146,7 @@ triangular matrix with the diagonal multiplied by $\frac{1}{2}$. With $V$ the pa
 transport on [`CholeskySpace`](@ref) from $x$ to $y$. The formula hear reads
 
 ````math
-𝒫_{q←p}X = yV^{\mathrm{T}} + Vy^{\mathrm{T}}.
+\mathcal P_{q←p}X = yV^{\mathrm{T}} + Vy^{\mathrm{T}}.
 ````
 """
 vector_transport_to(

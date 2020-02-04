@@ -16,7 +16,7 @@ Compute the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between
 as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
 
 ```math
-d_{𝒫(n)}(p,q)
+d_{\mathcal P(n)}(p,q)
 = \lVert \operatorname{Log}(p^{-\frac{1}{2}}qp^{-\frac{1}{2}})\rVert_{\mathrm{F}}.,
 ```
 where $\operatorname{Log}$ denotes the matrix logarithm and
@@ -207,7 +207,7 @@ tangent space at `q` on the [`SymmetricPositiveDefinite`](@ref) as a
 The formula reads
 
 ```math
-𝒫_{q←p}X = p^{\frac{1}{2}}
+\mathcal P_{q←p}X = p^{\frac{1}{2}}
 \operatorname{Exp}\bigl(
 \frac{1}{2}p^{-\frac{1}{2}}\log_p(q)p^{-\frac{1}{2}}
 \bigr)

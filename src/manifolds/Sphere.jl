@@ -328,7 +328,7 @@ end
 Compute the [`ParallelTransport`](@ref) on the [`Sphere`](@ref) `M`, which is given by
 
 ````math
-𝒫_{q←p}(X) = X - \frac{⟨\log_pq,X⟩_p}{d^2_{𝕊^n}(p,q)}
+\mathcal P_{q←p}(X) = X - \frac{⟨\log_pq,X⟩_p}{d^2_{𝕊^n}(p,q)}
 \bigl(\log_pq + \log_qp \bigr).
 ````
 """

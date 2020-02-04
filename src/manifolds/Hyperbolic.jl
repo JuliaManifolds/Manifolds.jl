@@ -43,8 +43,8 @@ It is also the default metric e.g. for the [`Hyperbolic`](@ref) space.
 
 !!! note
     While the `MinkowskiMetric` itself is not positive definite in the whole embedded space,
-    it is positive definite when restricted to a tangent space $T_xℳ$,
-    $x ∈ ℳ$, of the [`Hyperbolic`](@ref) space $ℳ$.
+    it is positive definite when restricted to a tangent space $T_x\mathcal M$,
+    $x ∈ \mathcal M$, of the [`Hyperbolic`](@ref) space $\mathcal M$.
 """
 struct MinkowskiMetric <: LorentzMetric end
 
@@ -253,7 +253,7 @@ Compute the paralllel transport of the `X` from the tangent space at `p` on the
 connecting `p` and `q`. The formula reads
 
 ````math
-𝒫_{q←p}X = X - \frac{⟨\log_p q,X⟩_x}{d^2_{ℍ^n}(p,q)}
+\mathcal P_{q←p}X = X - \frac{⟨\log_p q,X⟩_x}{d^2_{ℍ^n}(p,q)}
 \bigl(\log_pq + \log_qp \bigr).
 ````
 """

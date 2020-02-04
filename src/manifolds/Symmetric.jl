@@ -330,7 +330,7 @@ of `X` from the tangent space at `p` on the [`SymmetricMatrices`](@ref) `M` to `
 Since the metric is inherited from the embedding space, this is just the identity, i.e.
 
 ````math
-𝒫_{q←p}(X) = X.
+\mathcal P_{q←p}(X) = X.
 ````
 """
 vector_transport_to(::SymmetricMatrices, ::Any...)

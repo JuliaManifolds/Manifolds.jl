@@ -234,7 +234,7 @@ end
 ##########################
 
 @doc raw"""
-    inv(G::AbstractGroupManifold, x)
+    inv(G::AbstractGroupManifold, p)
 
 Inverse $p^{-1} ∈ G$ of an element $p ∈ G$, such that
 $p \circ p^{-1} = p^{-1} \circ p = e ∈ G$.

@@ -249,7 +249,7 @@ isapprox(M::Grassmann, p, q; kwargs...) = isapprox(distance(M, p, q), 0.0; kwarg
 @doc raw"""
     log(M::Grassmann, p, q)
 
-Compute the logarithmic map on the [`Grassmann`](@ref) `M`$ = ℳ=\mathrm{Gr}(n,k)$,
+Compute the logarithmic map on the [`Grassmann`](@ref) `M`$ = \mathcal M=\mathrm{Gr}(n,k)$,
 i.e. the tangent vector `X` whose corresponding [`geodesic`](@ref) starting from `p`
 reaches `q` after time 1 on `M`. The formula reads
 

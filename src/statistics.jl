@@ -33,7 +33,7 @@ t_k &= \frac{w_k}{\sum_{i=1}^k w_i}\\
 where $x_k$ are points, $w_k$ are weights, $\mu_k$ is the $k$th estimate of the
 mean, and $\gamma_x(y; t)$ is the point at time $t$ along the
 [`shortest_geodesic`](@ref shortest_geodesic(::Manifold, ::Any, ::Any, ::Real))
-between points $x,y  ∈ ℳ$. The algorithm
+between points $x,y  ∈ \mathcal M$. The algorithm
 terminates when all $x_k$ have been considered. In the [`Euclidean`](@ref) case,
 this exactly computes the weighted mean.
 
@@ -123,9 +123,9 @@ Compute the (optionally weighted) Riemannian center of mass also known as
 Karcher mean of the vector `x` of points on the [`Manifold`](@ref) `M`, defined
 as the point that satisfies the minimizer
 ````math
-\argmin_{y ∈ ℳ} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{ℳ}^2(y,x_i),
+\argmin_{y ∈ \mathcal M} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
 ````
-where $\mathrm{d}_{ℳ}$ denotes the Riemannian [`distance`](@ref).
+where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 
 In the general case, the [`GradientDescentEstimation`](@ref) is used to compute the mean.
 However, this default may be overloaded for specific manifolds.
@@ -390,9 +390,9 @@ end
 Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
 [`Manifold`](@ref) `M`, defined as the point that satisfies the minimizer
 ````math
-\argmin_{y ∈ ℳ} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{ℳ}(y,x_i),
+\argmin_{y ∈ \mathcal M} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
 ````
-where $\mathrm{d}_{ℳ}$ denotes the Riemannian [`distance`](@ref).
+where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 This function is nonsmooth (i.e nondifferentiable).
 
 In the general case, the [`CyclicProximalPointEstimation`](@ref) is used to compute the
@@ -530,7 +530,7 @@ compute the (optionally weighted) variance of a `Vector` `x` of `n` data points
 on the [`Manifold`](@ref) `M`, i.e.
 
 ````math
-\frac{1}{c} \sum_{i=1}^n w_i d_{ℳ}^2 (x_i,m),
+\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m),
 ````
 where `c` is a correction term, see
 [Statistics.var](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.var).
@@ -565,7 +565,7 @@ compute the optionally weighted standard deviation of a `Vector` `x` of `n` data
 points on the [`Manifold`](@ref) `M`, i.e.
 
 ````math
-\sqrt{\frac{1}{c} \sum_{i=1}^n w_i d_{ℳ}^2 (x_i,m)},
+\sqrt{\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m)},
 ````
 where `c` is a correction term, see
 [Statistics.std](https://juliastats.org/StatsBase.jl/stable/scalarstats/#Statistics.std).

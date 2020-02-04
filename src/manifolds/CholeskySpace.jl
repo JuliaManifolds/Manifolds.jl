@@ -83,7 +83,7 @@ matrices `p`, `q` that are lower triangular with positive diagonal. The formula
 reads
 
 ````math
-d_{ℳ}(p,q) = \sqrt{\sum_{i>j} (p_{ij}-q_{ij})^2 +
+d_{\mathcal M}(p,q) = \sqrt{\sum_{i>j} (p_{ij}-q_{ij})^2 +
 \sum_{j=1}^m (\log p_{jj} - \log q_{jj})^2
 }
 ````
@@ -192,7 +192,7 @@ Parallely transport the tangent vector `X` at `p` along the geodesic to `q`
 on the [`CholeskySpace`](@ref) manifold `M`. The formula reads
 
 ````math
-𝒫_{q←p}(X) = ⌊ X ⌋
+\mathcal P_{q←p}(X) = ⌊ X ⌋
 + \operatorname{diag}(q)\operatorname{diag}(p)^{-1}\operatorname{diag}(X),
 ````
 
