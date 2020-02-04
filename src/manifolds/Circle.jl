@@ -21,7 +21,7 @@ Circle(f::AbstractNumbers = ℝ) = Circle{f}()
 
 Check whether `p` is a point on the [`Circle`](@ref) `M`.
 For the real-valued case, `x` is an angle and hence it checks that $p  ∈ [-π,π)$.
-for the complex-valued case its a unit number, $p  ∈ ℂ$ with $\lvert p \rvert = 1$.
+for the complex-valued case, it is a unit number, $p  ∈ ℂ$ with $\lvert p \rvert = 1$.
 """
 check_manifold_point(::Circle, ::Any...)
 
@@ -49,7 +49,7 @@ end
 
 Check whether `X` is a tangent vector in the tangent space of `p` on the
 [`Circle`](@ref) `M`.
-For the real-valued case represented by angles all `X` are valid, since the tangent space is the whole real line.
+For the real-valued case represented by angles, all `X` are valid, since the tangent space is the whole real line.
 For the complex-valued case `X` has to lie on the line parallel to the tangent line at `p`
 in the complex plane, i.e. their inner product has to be zero.
 """
@@ -97,11 +97,11 @@ distance(::Circle{ℂ}, p, q) = acos(clamp(complex_dot(p, q), -1, 1))
 
 Compute the exponential map on the [`Circle`](@ref).
 ````math
-\exp_pX = (p+X)_{2π},
+\exp_p X = (p+X)_{2π},
 ````
 where $(\cdot)_{2π}$ is the (symmetric) remainder with respect to division by $2π$, i.e. in $[-π,π)$.
 
-For the complex-valued case the formula is the same as for the [`Sphere`](@ref) $𝕊^1$ is applied, to values in the
+For the complex-valued case, the same formula as for the [`Sphere`](@ref) $𝕊^1$ is applied to values in the
 complex plane.
 """
 exp(::Circle, ::Any...)
@@ -203,7 +203,7 @@ Compute the logarithmic map on the [`Circle`](@ref) `M`.
 ````
 where $(\cdot)_{2π}$ is the (symmetric) remainder with respect to division by $2π$, i.e. in $[-π,π)$.
 
-For the complex-valued case the formula is the same as for the [`Sphere`](@ref) $𝕊^1$ is applied, to values in the
+For the complex-valued case, the same formula as for the [`Sphere`](@ref) $𝕊^1$ is applied to values in the
 complex plane.
 """
 log(::Circle, ::Any...)
