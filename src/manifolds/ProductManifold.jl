@@ -129,7 +129,7 @@ end
     check_tangent_vector(M::ProductManifold, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`ProductManifold`](@ref)
-`M`, i.e. atfer [`check_manifold_point`](@ref)`(M, p)`, and all projections to
+`M`, i.e. after [`check_manifold_point`](@ref)`(M, p)`, and all projections to
 base manifolds must be respective tangent vectors.
 
 The tolerance for the last test can be set using the `kwargs...`.
@@ -189,7 +189,7 @@ end
 @doc raw"""
     distance(M::ProductManifold, p, q)
 
-compute the distance two points `p` and `q` on the [`ProductManifold`](@ref) `M`, which is
+Compute the distance between two points `p` and `q` on the [`ProductManifold`](@ref) `M`, which is
 the 2-norm of the elementwise distances on the internal manifolds that build `M`.
 """
 function distance(M::ProductManifold, p, q)
@@ -206,7 +206,7 @@ end
 @doc raw"""
     exp(M::ProductManifold, p, X)
 
-compute the exponential map from `p` towards `X` on the [`ProductManifold`](@ref) `M`,
+compute the exponential map from `p` in the direction of `X` on the [`ProductManifold`](@ref) `M`,
 which is the elementwise exponential map on the internal manifolds that build `M`.
 """
 exp(::ProductManifold, ::Any...)
@@ -235,7 +235,7 @@ end
 
 use the musical isomorphism to transform the tangent vector `w` from the tangent space at
 `x` on the [`ProductManifold`](@ref) `M` to a cotangent vector.
-This can be done elementwise, so for every entry of `w` (and `x`) sparately
+This can be done elementwise for every entry of `w` (and `x`) separately.
 """
 flat(::ProductManifold, ::Any...)
 

@@ -261,7 +261,7 @@ end
 @doc raw"""
     project_point(M::Euclidean, p)
 
-Project an arbitrary point `p` onto the [`Euclidean`](@ref) `M`, which
+Project an arbitrary point `p` onto the [`Euclidean`](@ref) manifold `M`, which
 is of course just the identity map.
 """
 project_point(::Euclidean, ::Any...)

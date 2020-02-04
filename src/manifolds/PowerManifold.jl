@@ -282,7 +282,7 @@ end
 
 use the musical isomorphism to transform the tangent vector `X` from the tangent space at
 `p` on an [`AbstractPowerManifold`](@ref) `M` to a cotangent vector.
-This can be done elementwise, so r every entry of `X` (and `p`) sparately
+This can be done elementwise for each entry of `X` (and `p`).
 """
 flat(::AbstractPowerManifold, ::Any...)
 

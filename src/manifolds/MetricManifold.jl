@@ -192,7 +192,7 @@ Compute the musical isomorphism to transform the tangent vector `X` from the
 computing
 
 ````math
-X^\flat = G_pX,
+X^♭= G_p X,
 ````
 where $G_p$ is the local matrix representation of `G`, see [`local_metric`](@ref)
 """
@@ -285,7 +285,7 @@ metric (see [`is_default_metric`](@ref)) this is done using `inner(M, p, X, Y)`,
 otherwise the [`local_metric`](@ref)`(M, p)` is employed as
 
 ````math
-g_p(X, Y) = ⟨X, G_pY⟩,
+g_p(X, Y) = ⟨X, G_p Y⟩,
 ````
 where $G_p$ is the local matrix representation of the [`Metric`](@ref) `G`.
 """
@@ -342,7 +342,7 @@ end
 @doc raw"""
     log_local_metric_density(M::MetricManifold, p)
 
-Return the natural logarithm of the metric density $\rho$ of `M` at `p`, which
+Return the natural logarithm of the metric density $ρ$ of `M` at `p`, which
 is given by $\rho=\log \sqrt{|\det [g_{ij}]|}$.
 """
 log_local_metric_density(M::MetricManifold, p) = log(abs(det_local_metric(M, p))) / 2
@@ -514,7 +514,7 @@ Compute the musical isomorphism to transform the cotangent vector `ξ` from the
 computing
 
 ````math
-ξ^\sharp = G_p^{-1}ξ,
+ξ^♯ = G_p^{-1} ξ,
 ````
 where $G_p$ is the local matrix representation of `G`, i.e. one employs
 [`inverse_local_metric`](@ref) here to obtain $G_p^{-1}$.

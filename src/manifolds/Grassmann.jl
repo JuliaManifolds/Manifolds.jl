@@ -65,19 +65,19 @@ function check_manifold_point(M::Grassmann{n,k,F}, p; kwargs...) where {n,k,F}
     if (F === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
-            "The matrix $(p) is not a real-valued matrix, so it does noe lie on the Grassmann manifold of dimension ($(n),$(k)).",
+            "The matrix $(p) is not a real-valued matrix, so it does not lie on the Grassmann manifold of dimension ($(n),$(k)).",
         )
     end
     if (F === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
         return DomainError(
             eltype(p),
-            "The matrix $(p) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Grassmann manifold of dimension ($(n),$(k)).",
+            "The matrix $(p) is neither a real- nor complex-valued matrix, so it does not lie on the complex Grassmann manifold of dimension ($(n),$(k)).",
         )
     end
     if size(p) != representation_size(M)
         return DomainError(
             size(p),
-            "The matrix $(p) is does not lie on the Grassmann manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
+            "The matrix $(p) does not lie on the Grassmann manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
         )
     end
     c = p' * p
@@ -114,19 +114,19 @@ function check_tangent_vector(G::Grassmann{n,k,F}, p, X; kwargs...) where {n,k,F
     if (F === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
         return DomainError(
             eltype(X),
-            "The matrix $(X) is neiter real- nor complex-valued matrix, so it can not bea tangent vector to the complex Grassmann manifold of dimension ($(n),$(k)).",
+            "The matrix $(X) is neither a real- nor complex-valued matrix, so it can not be a tangent vector to the complex Grassmann manifold of dimension ($(n),$(k)).",
         )
     end
     if size(X) != representation_size(G)
         return DomainError(
             size(X),
-            "The matrix $(X) is does not lie in the tangent space of $(p) on the Grassmann manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
+            "The matrix $(X) does not lie in the tangent space of $(p) on the Grassmann manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
         )
     end
     if !isapprox(p' * X + X' * p, zeros(k, k); kwargs...)
         return DomainError(
             norm(p' * X + X' * p),
-            "The matrix $(X) is does not lie in the tangent space of $(p) on the Grassmann manifold of dimension ($(n),$(k)), since x'v + v'x is not the zero matrix.",
+            "The matrix $(X) does not lie in the tangent space of $(p) on the Grassmann manifold of dimension ($(n),$(k)), since x'v + v'x is not the zero matrix.",
         )
     end
 end

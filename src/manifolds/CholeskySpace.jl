@@ -53,7 +53,7 @@ end
     check_tangent_vector(M::CholeskySpace, p, X; kwargs... )
 
 Check whether `v` is a tangent vector to `p` on the [`CholeskySpace`](@ref) `M`, i.e.
-atfer [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same dimension as `x`
+after [`check_manifold_point`](@ref)`(M,p)`, `X` has to have the same dimension as `x`
 and a symmetric matrix.
 The tolerance for the tests can be set using the `kwargs...`.
 """
