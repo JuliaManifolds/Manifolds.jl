@@ -55,7 +55,7 @@ end
 """
     check_tangent_vector(M, p, X; kwargs... )
 
-Check whether `X is a tangent vector to `p` on the [`Sphere`](@ref) `M`, i.e.
+Check whether `X` is a tangent vector to `p` on the [`Sphere`](@ref) `M`, i.e.
 after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
 and orthogonal to `p`.
 The tolerance for the last test can be set using the `kwargs...`.

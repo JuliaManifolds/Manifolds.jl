@@ -505,7 +505,7 @@ end
     manifold_dimension(M::PowerManifold)
 
 Returns the manifold-dimension of an [`PowerManifold`](@ref) `M`
-$=𝒩 = (ℳ)^{n_1,…,n_d}, i.e. with $n=(n_1,…,n_d)$ the array
+$=𝒩 = (ℳ)^{n_1,…,n_d}$, i.e. with $n=(n_1,…,n_d)$ the array
 size of the power manifold and $d_{ℳ}$ the dimension of the base manifold
 $ℳ$, the manifold is of dimension
 
