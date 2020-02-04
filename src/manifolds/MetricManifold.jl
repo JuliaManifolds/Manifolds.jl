@@ -309,12 +309,13 @@ function local_metric_jacobian(M, p; backend = :default)
 end
 
 @doc raw"""
-    log(N::MetricManifold{M,G}, p, X)
+    log(N::MetricManifold{M,G}, p, q)
 
 Copute the logarithmic map on the [`Manifold`](@ref) `M` equipped with the [`Metric`](@ref) `G`.
 
 If the metric was declared the default metric using [`is_default_metric`](@ref), this method
-falls back to `log(M,p,X)`.
+falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for the non-default
+[`Metric`](@ref) `G` metric within its [`MetricManifold`](@ref)`{M,G}`.
 """
 log(::MetricManifold, ::Any...)
 
