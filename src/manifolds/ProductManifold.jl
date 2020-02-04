@@ -235,7 +235,7 @@ end
 
 use the musical isomorphism to transform the tangent vector `w` from the tangent space at
 `x` on the [`ProductManifold`](@ref) `M` to a cotangent vector.
-This can be done elementwise, so for every entry of `w` (and `x`) sparately
+This can be done elementwise for every entry of `w` (and `x`) separately.
 """
 flat(::ProductManifold, ::Any...)
 
