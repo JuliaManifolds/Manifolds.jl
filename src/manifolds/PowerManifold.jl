@@ -510,7 +510,7 @@ size of the power manifold and $d_{\mathcal M}$ the dimension of the base manifo
 $\mathcal M$, the manifold is of dimension
 
 ````math
-d_{\mathcal N} = d_{\mathcal M}\prod_{i=1}^d n_i = n_1n_2\cdot…\cdot n_d d_{\mathcal M}.
+\dim(\mathcal N) = \dim(\mathcal M)\prod_{i=1}^d n_i = n_1n_2\cdot…\cdot n_d \dim(\mathcal M).
 ````
 """
 function manifold_dimension(M::PowerManifold{<:Manifold,TSize}) where {TSize}

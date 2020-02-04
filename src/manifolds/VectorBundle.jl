@@ -253,7 +253,7 @@ from the vector space of type `M` at point `p` from the underlying [`Manifold`](
 
 The function can be used for example to transform vectors
 from the tangent bundle to vectors from the cotangent bundle
-$\flat : T\mathcal M → T^{*}\mathcal M$
+$♭ : T\mathcal M → T^{*}\mathcal M$
 """
 function flat(M::Manifold, p, X::FVector)
     ξ = allocate_result(M, flat, X, p)
@@ -535,7 +535,7 @@ from the vector space `M` at point `p` from the underlying [`Manifold`](@ref).
 
 The function can be used for example to transform vectors
 from the cotangent bundle to vectors from the tangent bundle
-$\sharp : T^{*}\mathcal M → T\mathcal M$
+$♯ : T^{*}\mathcal M → T\mathcal M$
 """
 function sharp(M::Manifold, p, ξ::FVector)
     X = allocate_result(M, sharp, ξ, p)
