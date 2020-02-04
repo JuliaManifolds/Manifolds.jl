@@ -129,7 +129,7 @@ end
     check_tangent_vector(M::ProductManifold, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`ProductManifold`](@ref)
-`M`, i.e. atfer [`check_manifold_point`](@ref)`(M, p)`, and all projections to
+`M`, i.e. after [`check_manifold_point`](@ref)`(M, p)`, and all projections to
 base manifolds must be respective tangent vectors.
 
 The tolerance for the last test can be set using the `kwargs...`.
