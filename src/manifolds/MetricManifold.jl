@@ -60,7 +60,7 @@ end
 Compute the Christoffel symbols of the first kind in local coordinates.
 The Christoffel symbols are (in Einstein summation convention)
 
-$\Gamma_{ijk} = \frac{1}{2} \Bigl[g_{kj,i} + g_{ik,j} - g_{ij,k}\Bigr],$
+$Γ_{ijk} = \frac{1}{2} \Bigl[g_{kj,i} + g_{ik,j} - g_{ij,k}\Bigr],$
 
 where $g_{ij,k}=\frac{∂}{∂ p^k} g_{ij}$ is the coordinate
 derivative of the local representation of the metric tensor. The dimensions of
@@ -80,9 +80,9 @@ end
 Compute the Christoffel symbols of the second kind in local coordinates.
 The Christoffel symbols are (in Einstein summation convention)
 
-$\Gamma^{l}_{ij} = g^{kl} \Gamma_{ijk},$
+$Γ^{l}_{ij} = g^{kl} Γ_{ijk},$
 
-where $\Gamma_{ijk}$ are the Christoffel symbols of the first kind, and
+where $Γ_{ijk}$ are the Christoffel symbols of the first kind, and
 $g^{kl}$ is the inverse of the local representation of the metric tensor.
 The dimensions of the resulting multi-dimensional array are ordered $(l,i,j)$.
 """
@@ -99,7 +99,7 @@ end
 
 Get partial derivatives of the Christoffel symbols of the second kind
 for manifold `M` at `p` with respect to the coordinates of `p`,
-$\frac{∂}{∂ p^l} \Gamma^{k}_{ij} = \Gamma^{k}_{ij,l}.$
+$\frac{∂}{∂ p^l} Γ^{k}_{ij} = Γ^{k}_{ij,l}.$
 The dimensions of the resulting multi-dimensional array are ordered $(i,j,k,l)$.
 """
 function christoffel_symbols_second_jacobian(M::MetricManifold, p; backend = :default)
@@ -544,9 +544,9 @@ Approximate the exponential map on the manifold over the provided timespan
 assuming the Levi-Civita connection by solving the ordinary differential
 equation
 
-$\frac{d^2}{dt^2} p^k + \Gamma^k_{ij} \frac{d}{dt} p_i \frac{d}{dt} p_j = 0,$
+$\frac{d^2}{dt^2} p^k + Γ^k_{ij} \frac{d}{dt} p_i \frac{d}{dt} p_j = 0,$
 
-where $\Gamma^k_{ij}$ are the Christoffel symbols of the second kind, and
+where $Γ^k_{ij}$ are the Christoffel symbols of the second kind, and
 the Einstein summation convention is assumed. The arguments `tspan` and
 `solver` follow the `OrdinaryDiffEq` conventions. `kwargs...` specify keyword
 arguments that will be passed to `OrdinaryDiffEq.solve`.
