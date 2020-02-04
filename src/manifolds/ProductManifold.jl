@@ -189,7 +189,7 @@ end
 @doc raw"""
     distance(M::ProductManifold, p, q)
 
-compute the distance two points `p` and `q` on the [`ProductManifold`](@ref) `M`, which is
+Compute the distance between two points `p` and `q` on the [`ProductManifold`](@ref) `M`, which is
 the 2-norm of the elementwise distances on the internal manifolds that build `M`.
 """
 function distance(M::ProductManifold, p, q)
