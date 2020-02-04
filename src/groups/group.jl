@@ -462,7 +462,7 @@ end
 For group elements $p, q ∈ G$ and tangent vector $X ∈ T_q G$, compute the inverse of the
 action of the differential of the translation by $p$ on $X$, written as
 $((\mathrm{d}τ_p)_q)^{-1} (X) = (\mathrm{d}τ_{p^{-1}})_q (X)$, with the specified left or
-right convention. The differential transports vectors is
+right convention. The differential transports vectors as
 
 ```math
 \begin{aligned}
