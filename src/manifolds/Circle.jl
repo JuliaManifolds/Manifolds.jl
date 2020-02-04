@@ -281,6 +281,7 @@ For the real-valued case this is just the identity.
 For the complex valued case `X` is projected onto the line in the complex plane
 that is parallel to the tangent to `p` on the unit circle and contains `0`.
 """
+project_tangent(::Circle, ::Any, ::Any)
 project_tangent(::Circle{ℝ}, p::Real, X::Real) = X
 project_tangent(::Circle{ℂ}, p::Number, X::Number) = X - complex_dot(p, X) * p
 
