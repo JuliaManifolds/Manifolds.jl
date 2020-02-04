@@ -241,7 +241,7 @@ end
     manifold_dimension(M::Circle)
 
 Return the dimension of the [`Circle`](@ref) `M`,
-i.e. $\operatorname{dim}(𝕊^1) = 1$.
+i.e. $\dim(𝕊^1) = 1$.
 """
 manifold_dimension(::Circle) = 1
 

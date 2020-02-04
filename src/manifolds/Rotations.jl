@@ -453,7 +453,7 @@ end
 @doc raw"""
     manifold_dimension(M::Rotations)
 
-Return the dimension of the manifold $\mathrm{SO}(n)$, i.e. $\frac{n(n-1)}{2}$.
+Return the dimension of the manifold $\mathrm{SO}(n)$, i.e. $\dim(\mathrm{SO}(n)) = \frac{n(n-1)}{2}$.
 """
 manifold_dimension(M::Rotations{N}) where {N} = div(N * (N - 1), 2)
 

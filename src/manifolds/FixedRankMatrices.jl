@@ -228,7 +228,7 @@ Return the manifold dimension for the `𝔽`-valued [`FixedRankMatrices`](@ref) 
 of dimension `m`x`n` of rank `k`, namely
 
 ````math
-k(m + n - k) \dim_ℝ 𝔽,
+\dim(\mathcal M) = k(m + n - k) \dim_ℝ 𝔽,
 ````
 
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.

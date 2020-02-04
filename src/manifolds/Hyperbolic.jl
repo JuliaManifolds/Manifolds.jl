@@ -194,7 +194,7 @@ end
 @doc raw"""
     manifold_dimension(H::Hyperbolic)
 
-Return the dimension of the hyperbolic space manifold $ℍ^n$, i.e. $n$.
+Return the dimension of the hyperbolic space manifold $ℍ^n$, i.e. $\dim(ℍ^n) = n$.
 """
 manifold_dimension(::Hyperbolic{N}) where {N} = N
 

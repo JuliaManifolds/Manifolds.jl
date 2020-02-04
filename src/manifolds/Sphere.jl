@@ -197,7 +197,7 @@ end
 @doc raw"""
     manifold_dimension(M::Sphere)
 
-Return the dimension of the [`Sphere`](@ref)`(n) `M`, i.e. $𝕊^n$, which is $n$.
+Return the dimension of the [`Sphere`](@ref)`(n) `M`, i.e. $𝕊^n$, which is $\dim(𝕊^n) = n$.
 """
 manifold_dimension(S::Sphere{N}) where {N} = N
 

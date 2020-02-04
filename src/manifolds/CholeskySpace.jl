@@ -167,7 +167,11 @@ end
 @doc raw"""
     manifold_dimension(M::CholeskySpace)
 
-Return the manifold dimension for the [`CholeskySpace`](@ref) `M`, i.e. $\frac{N(N+1)}{2}$.
+Return the manifold dimension for the [`CholeskySpace`](@ref) `M`, i.e.
+
+````math
+    \dim(\mathcal M) = \frac{N(N+1)}{2}.
+````
 """
 @generated manifold_dimension(::CholeskySpace{N}) where {N} = div(N * (N + 1), 2)
 
