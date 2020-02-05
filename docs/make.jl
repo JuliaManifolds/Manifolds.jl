@@ -4,7 +4,8 @@ makedocs(
     # for development, we disable prettyurls
     format = Documenter.HTML(prettyurls = false),
     modules = [Manifolds, ManifoldsBase],
-    sitename = "Manifolds",
+    authors = "Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
+    sitename = "Manifolds.jl",
     pages = [
         "Home" => "index.md",
         "ManifoldsBase.jl" => "interface.md",
@@ -38,6 +39,7 @@ makedocs(
         "Statistics" => "statistics.md",
         "Distributions" => "distributions.md",
         "Orthonormal bases" => "orthonormal_bases.md",
+        "Notation" => "notation.md",
         "Library" => [
             "Number systems" => "lib/numbers.md",
             "Public" => "lib/public.md",

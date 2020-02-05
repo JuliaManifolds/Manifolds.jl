@@ -26,6 +26,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test (2*fv1).type == TangentSpace
 
         PM = ProductManifold(Sphere(2), Euclidean(2))
+        @test_throws ErrorException flat(PM,ProductRepr([0.0,],[0.0]),FVector(CotangentSpace, ProductRepr([0.0],[0.0])))
+        @test_throws ErrorException sharp(PM,ProductRepr([0.0,],[0.0]),FVector(TangentSpace, ProductRepr([0.0],[0.0])))
+
         fv2 = FVector(TangentSpace, ProductRepr([1.0, 0.0, 0.0], [1.0, 2.0]))
         @test submanifold_component(fv2, 1) == [1, 0, 0]
         @test submanifold_component(fv2, 2) == [1, 2]
@@ -98,12 +101,12 @@ struct TestVectorSpaceType <: VectorSpaceType end
           0.0"""
         @test base_manifold(t_x) == M
         @test base_manifold(ct_x) == M
-        @test t_x.fiber.M == M
-        @test ct_x.fiber.M == M
-        @test t_x.fiber.VS == TangentSpace
-        @test ct_x.fiber.VS == CotangentSpace
-        @test t_x.x == x
-        @test ct_x.x == x
+        @test t_x.fiber.manifold== M
+        @test ct_x.fiber.manifold== M
+        @test t_x.fiber.fiber == TangentSpace
+        @test ct_x.fiber.fiber == CotangentSpace
+        @test t_x.point == x
+        @test ct_x.point == x
     end
 
     @testset "tensor product" begin

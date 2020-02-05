@@ -157,14 +157,14 @@ function ProductArray(
 end
 ProductArray(M::ShapeSpecification, data) = ProductArray(typeof(M), data, M.reshapers)
 
-@doc doc"""
+@doc raw"""
     prod_point(M::ShapeSpecification, pts...)
 
 Construct a product point from product manifold `M` based on point `pts`
 represented by [`ProductArray`](@ref).
 
 # Example
-To construct a point on the product manifold $S^2 \times \mathbb{R}^2$
+To construct a point on the product manifold $S^2 × ℝ^2$
 from points on the sphere and in the euclidean space represented by,
 respectively, `[1.0, 0.0, 0.0]` and `[-3.0, 2.0]` you need to construct shape
 specification first. It describes how linear storage of `ProductArray`
@@ -187,7 +187,7 @@ function prod_point(M::ShapeSpecification, pts...)
     return ProductArray(M, Array(data))
 end
 
-@doc doc"""
+@doc raw"""
     submanifold_component(M::Manifold, x, i::Integer)
     submanifold_component(M::Manifold, x, ::Val(i)) where {i}
     submanifold_component(x, i::Integer)
@@ -201,7 +201,7 @@ submanifold_component(M::Manifold, x, i::Val) = submanifold_component(x, i)
 submanifold_component(x, ::Val{I}) where {I} = x.parts[I]
 submanifold_component(x, i::Integer) = submanifold_component(x, Val(i))
 
-@doc doc"""
+@doc raw"""
     submanifold_components(M::Manifold, x)
     submanifold_components(x)
 

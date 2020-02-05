@@ -4,7 +4,6 @@ include("group_utils.jl")
 @testset "Semidirect product group" begin
     M1 = TranslationGroup(2)
     A = TranslationAction(M1, M1)
-
     G = SemidirectProductGroup(M1, M1, A)
     @test G === GroupManifold(
         TranslationGroup(2) × TranslationGroup(2),
