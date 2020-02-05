@@ -40,7 +40,7 @@ Stiefel(n::Int, k::Int, F::AbstractNumbers = ℝ) = Stiefel{n,k,F}()
     check_manifold_point(M::Stiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$, i.e. that it has the right
-[`AbstractNumbers`](@ref) type and $p^{\mathrm{H}}p$ is (approximatly) the identity, where $\cdot^{\mathrm{H}}$ is the
+[`AbstractNumbers`](@ref) type and $p^{\mathrm{H}}p$ is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_manifold_point(M::Stiefel{n,k,F}, p; kwargs...) where {n,k,F}
@@ -76,7 +76,7 @@ end
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
 `M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](@ref) fits and
-it (approximtly) holds that $p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0$.
+it (approximately) holds that $p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0$.
 The settings for approximately can be set with `kwargs...`.
 """
 function check_tangent_vector(M::Stiefel{n,k,F}, p, X; kwargs...) where {n,k,F}
@@ -111,8 +111,8 @@ end
 @doc raw"""
     exp(M, p, X)
 
-Computes the exponential map on the [`Stiefel`](@ref)`{n,k,F}`() manifold `M`
-emanating from `p` into tangent direction `X`.
+Compute the exponential map on the [`Stiefel`](@ref)`{n,k,T}`() manifold `M`
+emanating from `p` in tangent direction `X`.
 
 ````math
 \exp_p X = \begin{pmatrix}

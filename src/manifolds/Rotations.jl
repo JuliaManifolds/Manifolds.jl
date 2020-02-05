@@ -3,7 +3,7 @@
 
 The special orthogonal manifold $\mathrm{SO}(n)$ represented by $n × n$
 real-valued orthogonal matrices with determinant $+1$ is the manifold of `Rotations`,
-since these matrices represent all rotations in $ℝ^n$.
+since these matrices represent all rotations of points in $ℝ^n$.
 
 # Constructor
 
@@ -41,7 +41,7 @@ end
 @doc raw"""
     angles_4d_skew_sym_matrix(A)
 
-The Lie algebra of [`Rotations`](@ref) in $ℝ^4$, $\mathrm{SO}(4)$, consists of $4× 4$
+The Lie algebra of [`Rotations(4)`](@ref) in $ℝ^{4 × 4}$, $𝔰𝔬(4)$, consists of $4 × 4$
 skew-symmetric matrices. The unique imaginary components of their eigenvalues are the
 angles of the two plane rotations. This function computes these more efficiently than
 `eigvals`.
@@ -232,8 +232,8 @@ function exp!(M::Rotations{4}, q, p, X)
         a₂ = (sincα - (1 - r) / 2 * cosα) * c
         a₃ = (e + (1 - r) * (e - sincα / 2)) * c
     end
-    v² = X * X
-    q .= a₀ .* p .+ p * (a₁ .* X .+ a₂ .* v² .+ a₃ .* (v² * X))
+    X² = X * X
+    q .= a₀ .* p .+ p * (a₁ .* X .+ a₂ .* X² .+ a₃ .* (X² * X))
     return q
 end
 
@@ -486,7 +486,7 @@ Compute the norm of a tangent vector `X` from the tangent space at `p` on the
 ````
 
 i.e. the Frobenius norm of `X`, where tangent vectors are represented by
-elements from the Lie group.
+elements from the Lie algebra.
 """
 norm(M::Rotations, p, X) = norm(X)
 
@@ -533,7 +533,7 @@ end
 
 Project `p` to the nearest point on manifold `M`.
 
-Given the singular value decomposition $p = U \Sigma V^\mathrm{T}$, with the
+Given the singular value decomposition $p = U Σ V^\mathrm{T}$, with the
 singular values sorted in descending order, the projection is
 
 ````math
@@ -636,8 +636,8 @@ retract(::Rotations, ::Any, ::Any, ::PolarRetraction)
 @doc raw"""
     retract(M, p, X, ::QRRetraction)
 
-Compute the SVD-based retraction on the [`Rotations`](@ref) `M` from `p` in direction `X`
-(as an element of the Lie group) and is a first-order approximation of the exponential map.
+Compute the QR-based retraction on the [`Rotations`](@ref) `M` from `p` in direction `X`
+(as an element of the Lie group), which is a first-order approximation of the exponential map.
 
 This is also the default retraction on the [`Rotations`](@ref)
 """

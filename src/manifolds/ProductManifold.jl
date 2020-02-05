@@ -343,8 +343,8 @@ function hat!(M::ProductManifold, X, p, Xⁱ)
     ts = ziptuples(M.manifolds, submanifold_components(M, X), submanifold_components(M, p))
     for t ∈ ts
         dim = manifold_dimension(first(t))
-        tvⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
-        hat!(t..., tvⁱ)
+        tXⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
+        hat!(t..., tXⁱ)
         i += dim
     end
     return X
@@ -570,7 +570,7 @@ end
 
 Use the musical isomorphism to transform the cotangent vector `ξ` from the tangent space at
 `p` on the [`ProductManifold`](@ref) `M` to a tangent vector.
-This can be done elementwise, so vor every entry of `ξ` (and `p`) sparately
+This can be done elementwise for every entry of `ξ` (and `p`) separately
 """
 sharp(::ProductManifold, ::Any...)
 
@@ -669,8 +669,8 @@ function vee!(M::ProductManifold, Xⁱ, p, X)
     for t ∈ ts
         SM = first(t)
         dim = manifold_dimension(SM)
-        tvⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
-        vee!(SM, tvⁱ, Base.tail(t)...)
+        tXⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
+        vee!(SM, tXⁱ, Base.tail(t)...)
         i += dim
     end
     return Xⁱ

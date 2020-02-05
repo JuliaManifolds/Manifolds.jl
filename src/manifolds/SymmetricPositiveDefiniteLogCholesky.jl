@@ -111,7 +111,7 @@ The formula can be adapted from the [`CholeskySpace`](@ref) as
 ````math
 \log_p q = xW^{\mathrm{T}} + Wx^{\mathrm{T}},
 ````
-where $x$ is the colesky factor of $p$ and $W=\log_xy$ for $y$ the cholesky factor
+where $x$ is the cholesky factor of $p$ and $W=\log_x y$ for $y$ the cholesky factor
 of $q$ and the just mentioned logarithmic map is the one on [`CholeskySpace`](@ref).
 """
 log(::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
