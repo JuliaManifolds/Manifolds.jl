@@ -518,7 +518,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             rng = MersenneTwister(47)
             R = Manifolds.Rotations(3)
             p0 = collect(Diagonal(ones(3)))
-            v1 = hat(R, x0, [1.0, 0.0, 0.0])
+            v1 = hat(R, p0, [1.0, 0.0, 0.0])
             v2 = hat(R, p0, [0.0, 1.0, 0.0])
             x = [exp(R, p0, v1, π/2*(1:4)); exp(R, p0, v2, π/2*(1:4))]
             w = pweights([rand(rng) for _ = 1:length(x)])
