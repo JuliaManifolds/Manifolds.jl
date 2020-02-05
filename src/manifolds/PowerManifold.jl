@@ -620,11 +620,11 @@ function retract!(M::AbstractPowerManifold, q, p, X, method::PowerRetraction)
 end
 
 @doc raw"""
-    sharp(M::AbstractPowerManifold, x, w::FVector{CotangentSpaceType})
+    sharp(M::AbstractPowerManifold, p, ξ::FVector{CotangentSpaceType})
 
-Use the musical isomorphism to transform the cotangent vector `w` from the tangent space at
-`x` on an [`AbstractPowerManifold`](@ref) `M` to a tangent vector.
-This can be done elementwise, so for every entry of `w` (and `x`) sparately
+Use the musical isomorphism to transform the cotangent vector `ξ` from the tangent space at
+`p` on an [`AbstractPowerManifold`](@ref) `M` to a tangent vector.
+This can be done elementwise for every entry of `ξ` (and `p`).
 """
 sharp(::AbstractPowerManifold, ::Any...)
 
