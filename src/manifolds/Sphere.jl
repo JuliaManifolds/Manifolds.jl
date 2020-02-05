@@ -14,15 +14,15 @@ struct Sphere{N} <: Manifold end
 
 Sphere(n::Int) = Sphere{n}()
 
-function get_basis(M::Sphere{N}, x, B::DiagonalizingOrthonormalBasis) where {N}
+function get_basis(M::Sphere{N}, p, B::DiagonalizingOrthonormalBasis) where {N}
     A = zeros(N + 1, N + 1)
-    A[1, :] = transpose(x)
+    A[1, :] = transpose(p)
     A[2, :] = transpose(B.frame_direction)
     V = nullspace(A)
     κ = ones(N)
     if !iszero(B.frame_direction)
         # if we have a nonzero direction for the geodesic, add it and it gets curvature zero from the tensor
-        V = cat(B.frame_direction / norm(M, x, B.frame_direction), V; dims = 2)
+        V = cat(B.frame_direction / norm(M, p, B.frame_direction), V; dims = 2)
         κ[1] = 0 # no curvature along the geodesic direction, if x!=y
     end
     vecs = [V[:, i] for i = 1:N]
@@ -86,7 +86,7 @@ The formula is given by the (shorter) great arc length on the (or a) great circl
 both `p` and `q` lie on.
 
 ````math
-d_{𝕊^n}(p,q) = \operatorname{acos}(⟨p,q⟩).
+d_{𝕊^n}(p,q) = \arccos(⟨p,q⟩).
 ````
 """
 distance(::Sphere, x, y) = acos(clamp(dot(x, y), -1, 1))
@@ -138,8 +138,8 @@ metric from the embedding, i.e. $ g_p(X,Y) = X^\mathrm{T}Y$.
 function get_vector(M::Sphere{N}, p, X, B::ArbitraryOrthonormalBasis) where {N}
     p[1] ≈ 1 && return vcat(0, X)
     xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
-    v0 = vcat(0, X)
-    return 2 * xp1 * dot(xp1, v0) / dot(xp1, xp1) - v0
+    X0 = vcat(0, X)
+    return 2 * xp1 * dot(xp1, X0) / dot(xp1, xp1) - X0
 end
 
 @doc raw"""

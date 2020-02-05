@@ -109,62 +109,62 @@ Abstract type for defining statistical estimation methods.
 abstract type AbstractEstimationMethod end
 
 @doc raw"""
-    hat(M::Manifold, x, vⁱ)
+    hat(M::Manifold, p, Xⁱ)
 
-Given a basis $e_i$ on the tangent space at a point $x$ and tangent
-component vector $v^i$, compute the equivalent vector representation
-$v=v^i e_i$, where Einstein summation notation is used:
+Given a basis $e_i$ on the tangent space at a point `p` and tangent
+component vector $X^i$, compute the equivalent vector representation
+$X=X^i e_i$, where Einstein summation notation is used:
 
 ````math
-∧ : v^i ↦ v^i e_i
+∧ : X^i ↦ X^i e_i
 ````
 
 For array manifolds, this converts a vector representation of the tangent
 vector to an array representation. The [`vee`](@ref) map is the `hat` map's
 inverse.
 """
-function hat(M::Manifold, x, vⁱ)
-    v = allocate_result(M, hat, x, vⁱ)
-    return hat!(M, v, x, vⁱ)
+function hat(M::Manifold, p, Xⁱ)
+    X = allocate_result(M, hat, p, Xⁱ)
+    return hat!(M, X, p, Xⁱ)
 end
 
-function hat!(M::Manifold, v, x, vⁱ)
-    is_decorator_manifold(M) === Val(true) && return hat!(base_manifold(M), v, x, vⁱ)
-    error("hat! operator not defined for manifold $(typeof(M)), array $(typeof(v)), point $(typeof(x)), and vector $(typeof(vⁱ))")
+function hat!(M::Manifold, X, p, Xⁱ)
+    is_decorator_manifold(M) === Val(true) && return hat!(base_manifold(M), X, p, Xⁱ)
+    error("hat! operator not defined for manifold $(typeof(M)), array $(typeof(X)), point $(typeof(p)), and vector $(typeof(Xⁱ))")
 end
 
 @doc raw"""
-    vee(M::Manifold, x, v)
+    vee(M::Manifold, p, X)
 
-Given a basis $e_i$ on the tangent space at a point $x$ and tangent
-vector $v$, compute the vector components $v^i$, such that $v = v^i e_i$, where
+Given a basis $e_i$ on the tangent space at a point `p` and tangent
+vector `X`, compute the vector components $X^i$, such that $X = X^i e_i$, where
 Einstein summation notation is used:
 
 ````math
-\vee : v^i e_i ↦ v^i
+\vee : X^i e_i ↦ X^i
 ````
 
 For array manifolds, this converts an array representation of the tangent
 vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
 inverse.
 """
-function vee(M::Manifold, x, v)
-    vⁱ = allocate_result(M, vee, x, v)
-    return vee!(M, vⁱ, x, v)
+function vee(M::Manifold, p, X)
+    Xⁱ = allocate_result(M, vee, p, X)
+    return vee!(M, Xⁱ, p, X)
 end
 
-function vee!(M::Manifold, vⁱ, x, v)
-    is_decorator_manifold(M) === Val(true) && return vee!(base_manifold(M), vⁱ, x, v)
-    error("vee! operator not defined for manifold $(typeof(M)), vector $(typeof(vⁱ)), point $(typeof(x)), and array $(typeof(v))")
+function vee!(M::Manifold, Xⁱ, p, X)
+    is_decorator_manifold(M) === Val(true) && return vee!(base_manifold(M), Xⁱ, p, X)
+    error("vee! operator not defined for manifold $(typeof(M)), vector $(typeof(Xⁱ)), point $(typeof(p)), and array $(typeof(X))")
 end
 
-function allocate_result(M::Manifold, f::typeof(vee), x, v)
-    T = allocate_result_type(M, f, (x, v))
-    return allocate(x, T, manifold_dimension(M))
+function allocate_result(M::Manifold, f::typeof(vee), p, X)
+    T = allocate_result_type(M, f, (p, X))
+    return allocate(p, T, manifold_dimension(M))
 end
-function allocate_result(M::Manifold, f::typeof(vee), x::StaticArray, v)
-    T = allocate_result_type(M, f, (x, v))
-    return allocate(x, T, Size(manifold_dimension(M)))
+function allocate_result(M::Manifold, f::typeof(vee), p::StaticArray, X)
+    T = allocate_result_type(M, f, (p, X))
+    return allocate(p, T, Size(manifold_dimension(M)))
 end
 
 """

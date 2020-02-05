@@ -24,13 +24,13 @@ The algorithm proceeds with the following simple online update:
 
 ```math
 \begin{aligned}
-\mu_1 &= x_1\\
+μ_1 &= x_1\\
 t_k &= \frac{w_k}{\sum_{i=1}^k w_i}\\
-\mu_{k} &= \gamma_{\mu_{k-1}}(x_k; t_k),
+μ_{k} &= \gamma_{μ_{k-1}}(x_k; t_k),
 \end{aligned}
 ```
 
-where $x_k$ are points, $w_k$ are weights, $\mu_k$ is the $k$th estimate of the
+where $x_k$ are points, $w_k$ are weights, $μ_k$ is the $k$th estimate of the
 mean, and $\gamma_x(y; t)$ is the point at time $t$ along the
 [`shortest_geodesic`](@ref shortest_geodesic(::Manifold, ::Any, ::Any, ::Real))
 between points $x,y  ∈ \mathcal M$. The algorithm
@@ -145,7 +145,7 @@ Compute the mean using the specified `method`.
         x::AbstractVector,
         [w::AbstractWeights,]
         method::GradientDescentEstimation;
-        x0=x[1],
+        p0=x[1],
         stop_iter=100,
         retraction::AbstractRetractionMethod = ExponentialRetraction(),
         inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
@@ -154,7 +154,7 @@ Compute the mean using the specified `method`.
 
 Compute the mean using the gradient descent scheme [`GradientDescentEstimation`](@ref).
 
-Optionally, provide `x0`, the starting point (by default set to the first data
+Optionally, provide `p0`, the starting point (by default set to the first data
 point). `stop_iter` denotes the maximal number of iterations to perform and the
 `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal change
 between two iterates is small. For more stopping criteria check the
@@ -226,7 +226,7 @@ function mean!(
     x::AbstractVector,
     w::AbstractVector,
     ::GradientDescentEstimation;
-    x0 = x[1],
+    p0 = x[1],
     stop_iter = 100,
     retraction::AbstractRetractionMethod = ExponentialRetraction(),
     inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
@@ -236,7 +236,7 @@ function mean!(
     if length(w) != n
         throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
     end
-    copyto!(y, x0)
+    copyto!(y, p0)
     yold = allocate_result(M, mean, y)
     v = zero_tangent_vector(M, y)
     vtmp = copy(v)
@@ -344,7 +344,7 @@ function mean!(
     injectivity_radius(M, q) ≤ radius && return q
     for i in eachindex(x)
         @inbounds if distance(M, q, x[i]) ≥ radius
-            return mean!(M, q, x, w, GradientDescentEstimation(); x0 = q, kwargs...)
+            return mean!(M, q, x, w, GradientDescentEstimation(); p0 = q, kwargs...)
         end
     end
     return q
@@ -355,7 +355,7 @@ function mean!(
     x::AbstractVector,
     w::AbstractVector,
     ::CyclicProximalPointEstimation;
-    x0 = x[1],
+    p0 = x[1],
     stop_iter = 1000000,
     retraction::AbstractRetractionMethod = ExponentialRetraction(),
     inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
@@ -365,18 +365,18 @@ function mean!(
     if length(w) != n
         throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     end
-    copyto!(q, x0)
+    copyto!(q, p0)
     yold = allocate_result(M, median, q)
     ytmp = copy(yold)
-    v = zero_tangent_vector(M, q)
+    X = zero_tangent_vector(M, q)
     wv = convert(Vector, w) ./ sum(w)
     for i = 1:stop_iter
         λ = 0.5 / i
         copyto!(yold, q)
         for j = 1:n
             @inbounds t = (2 * λ * wv[j]) / (1 + 2 * λ * wv[j])
-            @inbounds inverse_retract!(M, v, q, x[j], inverse_retraction)
-            retract!(M, ytmp, q, v, t, retraction)
+            @inbounds inverse_retract!(M, X, q, x[j], inverse_retraction)
+            retract!(M, ytmp, q, X, t, retraction)
             copyto!(q, ytmp)
         end
         isapprox(M, q, yold; kwargs...) && break
@@ -413,7 +413,7 @@ Compute the median using the specified `method`.
         x::AbstractVector,
         [w::AbstractWeights,]
         method::CyclicProximalPointEstimation;
-        x0=x[1],
+        p0=x[1],
         stop_iter=1000000,
         retraction::AbstractRetractionMethod = ExponentialRetraction(),
         inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
@@ -422,7 +422,7 @@ Compute the median using the specified `method`.
 
 Compute the median using [`CyclicProximalPointEstimation`](@ref).
 
-Optionally, provide `x0`, the starting point (by default set to the first
+Optionally, provide `p0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform
 and the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal
 change between two iterates is small. For more stopping criteria check the
@@ -493,7 +493,7 @@ function median!(
     x::AbstractVector,
     w::AbstractVector,
     ::CyclicProximalPointEstimation;
-    x0 = x[1],
+    p0 = x[1],
     stop_iter = 1000000,
     retraction::AbstractRetractionMethod = ExponentialRetraction(),
     inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
@@ -503,7 +503,7 @@ function median!(
     if length(w) != n
         throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     end
-    copyto!(q, x0)
+    copyto!(q, p0)
     yold = allocate_result(M, median, q)
     ytmp = copy(yold)
     v = zero_tangent_vector(M, q)
@@ -721,7 +721,7 @@ function mean_and_var(
     injectivity_radius(M, y) ≤ radius && return y, v
     for i in eachindex(x)
         @inbounds if distance(M, y, x[i]) ≥ radius
-            mean!(M, y, x, w, GradientDescentEstimation(); x0 = y, kwargs...)
+            mean!(M, y, x, w, GradientDescentEstimation(); p0 = y, kwargs...)
             v = var(M, x, w, y; corrected = corrected)
             return y, v
         end

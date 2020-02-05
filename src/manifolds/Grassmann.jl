@@ -147,7 +147,7 @@ where
 ````math
 b_{i}=\begin{cases}
 0 & \text{if} \; S_i \geq 1\\
-\operatorname{acos}(S_i) & \, \text{if} \; S_i<1.
+\arccos(S_i) & \, \text{if} \; S_i<1.
 \end{cases}
 ````
 """

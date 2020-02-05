@@ -49,14 +49,14 @@ function exp!(M::SymmetricPositiveDefinite{N}, q, p, X) where {N}
     S = e.values
     Ssqrt = Diagonal(sqrt.(S))
     SsqrtInv = Diagonal(1 ./ sqrt.(S))
-    xSqrt = Symmetric(U * Ssqrt * transpose(U))
-    xSqrtInv = Symmetric(U * SsqrtInv * transpose(U))
-    T = Symmetric(xSqrtInv * X * xSqrtInv)
+    pSqrt = Symmetric(U * Ssqrt * transpose(U))
+    pSqrtInv = Symmetric(U * SsqrtInv * transpose(U))
+    T = Symmetric(pSqrtInv * X * pSqrtInv)
     eig1 = eigen(T) # numerical stabilization
     Se = Diagonal(exp.(eig1.values))
     Ue = eig1.vectors
-    xue = xSqrt * Ue
-    return copyto!(q, xue * Se * transpose(xue))
+    pUe = pSqrt * Ue
+    return copyto!(q, pUe * Se * transpose(pUe))
 end
 
 @doc raw"""
@@ -74,7 +74,7 @@ function get_basis(
     p,
     B::DiagonalizingOrthonormalBasis,
 ) where {N}
-    xSqrt = sqrt(p)
+    pSqrt = sqrt(p)
     eigv = eigen(B.frame_direction)
     V = eigv.vectors
     Ξ = [
@@ -188,13 +188,13 @@ function log!(M::SymmetricPositiveDefinite{N}, X, p, q) where {N}
     S = e.values
     Ssqrt = Diagonal(sqrt.(S))
     SsqrtInv = Diagonal(1 ./ sqrt.(S))
-    xSqrt = Symmetric(U * Ssqrt * transpose(U))
-    xSqrtInv = Symmetric(U * SsqrtInv * transpose(U))
-    T = Symmetric(xSqrtInv * q * xSqrtInv)
+    pSqrt = Symmetric(U * Ssqrt * transpose(U))
+    pSqrtInv = Symmetric(U * SsqrtInv * transpose(U))
+    T = Symmetric(pSqrtInv * q * pSqrtInv)
     e2 = eigen(T)
     Se = Diagonal(log.(max.(e2.values, eps())))
-    xue = xSqrt * e2.vectors
-    return mul!(X, xue, Se * transpose(xue))
+    pUe = pSqrt * e2.vectors
+    return mul!(X, pUe, Se * transpose(pUe))
 end
 
 @doc raw"""
@@ -239,10 +239,10 @@ function vector_transport_to!(
     Ssqrt = sqrt.(S)
     SsqrtInv = Diagonal(1 ./ Ssqrt)
     Ssqrt = Diagonal(Ssqrt)
-    xSqrt = Symmetric(U * Ssqrt * transpose(U))
-    xSqrtInv = Symmetric(U * SsqrtInv * transpose(U))
-    tv = Symmetric(xSqrtInv * X * xSqrtInv)
-    ty = Symmetric(xSqrtInv * q * xSqrtInv)
+    pSqrt = Symmetric(U * Ssqrt * transpose(U))
+    pSqrtInv = Symmetric(U * SsqrtInv * transpose(U))
+    tv = Symmetric(pSqrtInv * X * pSqrtInv)
+    ty = Symmetric(pSqrtInv * q * pSqrtInv)
     e2 = eigen(ty)
     Se = Diagonal(log.(e2.values))
     Ue = e2.vectors
@@ -250,7 +250,7 @@ function vector_transport_to!(
     e3 = eigen(ty2)
     Sf = Diagonal(exp.(e3.values))
     Uf = e3.vectors
-    xue = xSqrt * Uf * Sf * transpose(Uf)
-    vtp = Symmetric(xue * tv * transpose(xue))
+    pUe = pSqrt * Uf * Sf * transpose(Uf)
+    vtp = Symmetric(pUe * tv * transpose(pUe))
     return copyto!(Y, vtp)
 end

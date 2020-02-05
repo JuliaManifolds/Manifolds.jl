@@ -250,49 +250,49 @@ function get_vector(M::Rotations, p, X, B::ArbitraryOrthonormalBasis) where {N}
 end
 
 @doc raw"""
-    hat(M::Rotations, p, ω)
+    hat(M::Rotations, p, Xⁱ)
 
-Convert the unique tangent vector components $\omega$ at point `p` on [`Rotations`](@ref)
+Convert the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
 group $\mathrm{SO}(n)$ to the matrix representation $\Omega$ of the tangent
 vector. See [`vee`](@ref) for the conventions used.
 """
 hat(::Rotations, ::Any...)
 
-function hat!(M::Rotations{2}, Ω, p, θ::Real)
-    @assert length(Ω) == 4
+function hat!(M::Rotations{2}, X, p, Xⁱ::Real)
+    @assert length(X) == 4
     @inbounds begin
-        Ω[1] = 0
-        Ω[3] = -θ
-        Ω[2] = θ
-        Ω[4] = 0
+        X[1] = 0
+        X[3] = -Xⁱ
+        X[2] = Xⁱ
+        X[4] = 0
     end
-    return Ω
+    return X
 end
-hat!(M::Rotations{2}, Ω, p, ω) = hat!(M, Ω, p, ω[1])
-function hat!(M::Rotations{N}, Ω, p, ω) where {N}
-    @assert size(Ω) == (N, N)
-    @assert length(ω) == manifold_dimension(M)
+hat!(M::Rotations{2}, X, p, Xⁱ) = hat!(M, X, p, Xⁱ[1])
+function hat!(M::Rotations{N}, X, p, Xⁱ) where {N}
+    @assert size(X) == (N, N)
+    @assert length(Xⁱ) == manifold_dimension(M)
     @inbounds begin
-        Ω[1, 1] = 0
-        Ω[1, 2] = -ω[3]
-        Ω[1, 3] = ω[2]
-        Ω[2, 1] = ω[3]
-        Ω[2, 2] = 0
-        Ω[2, 3] = -ω[1]
-        Ω[3, 1] = -ω[2]
-        Ω[3, 2] = ω[1]
-        Ω[3, 3] = 0
+        X[1, 1] = 0
+        X[1, 2] = -Xⁱ[3]
+        X[1, 3] = Xⁱ[2]
+        X[2, 1] = Xⁱ[3]
+        X[2, 2] = 0
+        X[2, 3] = -Xⁱ[1]
+        X[3, 1] = -Xⁱ[2]
+        X[3, 2] = Xⁱ[1]
+        X[3, 3] = 0
         k = 4
         for i = 4:N
             for j = 1:i-1
-                Ω[i, j] = ω[k]
-                Ω[j, i] = -ω[k]
+                X[i, j] = Xⁱ[k]
+                X[j, i] = -Xⁱ[k]
                 k += 1
             end
-            Ω[i, i] = 0
+            X[i, i] = 0
         end
     end
-    return Ω
+    return X
 end
 
 @doc raw"""
@@ -659,43 +659,43 @@ end
 show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
 
 @doc raw"""
-    vee(M::Rotations, P, Ω)
+    vee(M::Rotations, p X)
 
-Extract the unique tangent vector components $\omega$ at point $x$ on rotations
-group $\mathrm{SO}(n)$ from the matrix representation $\Omega$ of the tangent
+Extract the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
+$\mathrm{SO}(n)$ from the matrix representation `X` of the tangent
 vector.
 
 The basis on the Lie algebra $\mathfrak{so}(n)$ is chosen such that for
-$\mathrm{SO}(2)$, $\omega=\theta=\Omega_{21}$ is the angle of rotation, and
+$\mathrm{SO}(2)$, $X^i=\theta=X_{21}$ is the angle of rotation, and
 for $\mathrm{SO}(3)$,
-$\omega = (\Omega_{32}, \Omega_{13}, \Omega_{21}) = \theta u$ is the
+$X^i = (X_{32}, X_{13}, X_{21}) = \theta u$ is the
 angular velocity and axis-angle representation, where $u$ is the unit vector
 along the axis of rotation.
 
 For $\mathrm{SO}(n)$ where $n \ge 4$, the additional elements of $\omega$ are
-$\omega_{i (i - 3)/2 + j + 1} = \Omega_{ij}$, for $i  ∈ [4, n], j ∈ [1,i)$.
+$X^i_{j (j - 3)/2 + k + 1} = X_{jk}$, for $j  ∈ [4, n], k ∈ [1,j)$.
 """
 vee(::Rotations, ::Any...)
 
-function vee!(M::Rotations{N}, ω, p, Ω) where {N}
-    @assert size(Ω) == (N, N)
-    @assert length(ω) == manifold_dimension(M)
+function vee!(M::Rotations{N}, Xⁱ, p, X) where {N}
+    @assert size(X) == (N, N)
+    @assert length(Xⁱ) == manifold_dimension(M)
     @inbounds begin
-        ω[1] = Ω[3, 2]
-        ω[2] = Ω[1, 3]
-        ω[3] = Ω[2, 1]
+        Xⁱ[1] = X[3, 2]
+        Xⁱ[2] = X[1, 3]
+        Xⁱ[3] = X[2, 1]
 
         k = 4
         for i = 4:N, j = 1:i-1
-            ω[k] = Ω[i, j]
+            Xⁱ[k] = X[i, j]
             k += 1
         end
     end
-    return ω
+    return Xⁱ
 end
-function vee!(M::Rotations{2}, ω, p, Ω)
-    ω[1] = Ω[2]
-    return ω
+function vee!(M::Rotations{2}, Xⁱ, p, X)
+    Xⁱ[1] = X[2]
+    return Xⁱ
 end
 
 @doc raw"""

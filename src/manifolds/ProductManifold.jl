@@ -231,11 +231,12 @@ function exp!(M::ProductManifold, q, p, X)
 end
 
 @doc raw"""
-    flat(M::ProductManifold, p, w::FVector{TangentSpaceType})
+    flat(M::ProductManifold, p, X::FVector{TangentSpaceType})
 
-use the musical isomorphism to transform the tangent vector `w` from the tangent space at
-`x` on the [`ProductManifold`](@ref) `M` to a cotangent vector.
-This can be done elementwise for every entry of `w` (and `x`) separately.
+use the musical isomorphism to transform the tangent vector `X` from the tangent space at
+`p` on the [`ProductManifold`](@ref) `M` to a cotangent vector.
+This can be done elementwise for every entry of `X` (with respect to the corresponding
+entry in `p`) separately.
 """
 flat(::ProductManifold, ::Any...)
 

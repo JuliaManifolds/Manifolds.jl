@@ -306,12 +306,13 @@ for the $n × n$ it's `(n,n)`.
 @generated representation_size(::SymmetricMatrices{N}) where {N} = (N, N)
 
 @doc raw"""
-    sharp(M::SymmetricMatrices, x, w::FVector{CotangentSpaceType})
+    sharp(M::SymmetricMatrices, p, ξ::FVector{CotangentSpaceType})
 
-Compute the [`sharp`](@ref sharp(M::Manifold, x, w::FVector)) isomorphism of the
-[`SymmetricMatrices`](@ref) `M` on the manifold point `x` and cotangent vector `w`.
+Compute the [`sharp`](@ref sharp(M::Manifold, p, ξ::FVector)) isomorphism of the
+[`SymmetricMatrices`](@ref) `M` on the manifold point `p` and cotangent vector `ξ`.
 
-Since `M` is already a vector space over $ℝ$, this returns just the vector `w`.
+Since `M` is already a vector space over $ℝ$, this returns just the vector `ξ` as a tangent
+vector.
 """
 sharp(::SymmetricMatrices, ::Any...)
 
