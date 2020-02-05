@@ -109,14 +109,14 @@ function translate_diff!(G::SemidirectProductGroup, Y, p, q, X, conv::LeftAction
     M = base_manifold(G)
     N, H = M.manifolds
     A = G.op.action
-    nx, hx = submanifold_components(G, p)
-    ny, hy = submanifold_components(G, q)
-    nv, hv = submanifold_components(G, X)
-    nvout, hvout = submanifold_components(G, Y)
-    translate_diff!(H, hvout, hx, hy, hv, conv)
-    nw = apply_diff(A, hx, ny, nv)
-    nz = apply(A, hx, ny)
-    translate_diff!(N, nvout, nx, nz, nw, conv)
+    np, hp = submanifold_components(G, p)
+    nq, hq = submanifold_components(G, q)
+    nX, hX = submanifold_components(G, X)
+    nY, hY = submanifold_components(G, Y)
+    translate_diff!(H, hY, hp, hq, hX, conv)
+    nZ = apply_diff(A, hp, nq, nX)
+    nr = apply(A, hp, nq)
+    translate_diff!(N, nY, np, nr, nZ, conv)
     @inbounds _padvector!(G, Y)
     return Y
 end

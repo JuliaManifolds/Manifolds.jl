@@ -328,8 +328,8 @@ end
 Compute the [`ParallelTransport`](@ref) on the [`Sphere`](@ref) `M`, which is given by
 
 ````math
-\mathcal P_{q←p}(X) = X - \frac{⟨\log_pq,X⟩_p}{d^2_{𝕊^n}(p,q)}
-\bigl(\log_pq + \log_qp \bigr).
+\mathcal P_{q←p}(X) = X - \frac{⟨\log_p q,X⟩_p}{d^2_{𝕊^n}(p,q)}
+\bigl(\log_p q + \log_qp \bigr).
 ````
 """
 vector_transport_to(::Sphere, ::Any, ::Any, ::Any, ::ParallelTransport)

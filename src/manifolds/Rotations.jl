@@ -144,7 +144,7 @@ Compute the exponential map on the [`Rotations`](@ref) from `p` into direction
 `X`, i.e.
 
 ````math
-\exp_pX = p \operatorname{Exp}(X),
+\exp_p X = p \operatorname{Exp}(X),
 ````
 
 where $\operatorname{Exp}(X)$  denotes the matrix exponential of $X$.

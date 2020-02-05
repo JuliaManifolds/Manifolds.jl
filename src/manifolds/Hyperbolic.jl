@@ -254,7 +254,7 @@ connecting `p` and `q`. The formula reads
 
 ````math
 \mathcal P_{q←p}X = X - \frac{⟨\log_p q,X⟩_x}{d^2_{ℍ^n}(p,q)}
-\bigl(\log_pq + \log_qp \bigr).
+\bigl(\log_p q + \log_qp \bigr).
 ````
 """
 vector_transport_to(::Hyperbolic, ::Any, ::Any, ::Any, ::ParallelTransport)

@@ -420,7 +420,7 @@ Notation:
 
 The logarithmic map is calculated as
 
-$\log_pq = (\log_{x_p}(x_q), V_{\log} - V_p)$
+$\log_p q = (\log_{x_p}(x_q), V_{\log} - V_p)$
 
 where $V_{\log}$ is the result of vector transport of $V_q$ to the point $x_p$.
 The difference $V_{\log} - V_p$ corresponds to the logarithmic map in the vector space $F$.

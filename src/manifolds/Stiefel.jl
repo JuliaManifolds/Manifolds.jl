@@ -148,7 +148,7 @@ Compute the inner product for two tangent vectors `X`, `Y` from the
 tangent space of `p` on the [`Stiefel`](@ref) manifold `M`. The formula reads
 
 ````math
-g_p(X,Y) = \operatorname{trace}(X^{\mathrm{H}}Y),
+g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}Y),
 ````
 i.e. the [`EuclideanMetric`](@ref) from the embedding restricted to the tangent
 space. For the complex-valued case this is the Hermitian metric, to be precise.

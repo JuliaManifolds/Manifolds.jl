@@ -10,7 +10,7 @@ as long as that renders still in $\TeX$ within this documentation.
 
 | Symbol | Description | Also used | Comment |
 |:--:|:--------------- |:--:|:-- |
-| $\times$ | Cartesian product of two manifolds | | see [`ProductManifold](@ref) |
+| $\times$ | Cartesian product of two manifolds | | see [`ProductManifold`](@ref) |
 | $\^$ | (n-ary) Cartesian power | | see [`PowerManifold`](@ref) |
 | $T^*_p \mathcal M$ | the cotangent space at $p$ | | |
 | $\xi$ | a cotangent vector from $T^*_p \mathcal M$ | $\xi_1, \xi_2,\ldots,\eta,\zeta$ | sometimes written with base point $\xi_p$. |
@@ -20,7 +20,9 @@ as long as that renders still in $\TeX$ within this documentation.
 | $\mathbb F$ | a field | | field a manifold is based on, usually $\mathcal F \in \{\mathbb R,\mathbb C\}$ |
 | $\gamma$ | a geodesic | $\gamma_{p;q}$, $\gamma_{p,X}$ | connecting two points $p,q$ or starting in $p$ with velocity $X$. |
 | $\circ$ | a group operation | |
+| $\cdot^\mathrm{H}$ | Hermitian or conjugate transposed (vector or matrix) | |
 | $e$ | identity element of a group | |
+| $I_k$ | identity matrix of size $k\times k$ | |
 | $k$ | indices | $i,j$ | |
 | $\langle\cdot,\cdot\rangle$ | inner product (in $T_p \mathcal M$) | $\langle\cdot,\cdot\rangle_p, g_p(\cdot,\cdot)$ |
 | $\mathfrak g$ | a Lie algebra | |
@@ -30,6 +32,10 @@ as long as that renders still in $\TeX$ within this documentation.
 | $\operatorname{Log}$ | the matrix logarithm | |
 | $\mathcal P_{q\gets p}X$ | parallel transport | | of the vector $X$ from $T_p\mathcal M$ to $T_q\mathcal M$
 | $p$ | a point on $\mathcal M$ | $p_1, p_2, \ldots,q$ | for 3 points one might use $x,y,z$ |
+| $\Xi$ | a set of tangent vectors | $\{X_1,\ldots,X_n\}$ | |
 | $T_p \mathcal M$ | the tangent space at $p$ | | |
 | $X$ | a tangent vector from $T_p \mathcal M$ | $X_1,X_2,\ldots,Y,Z$ | sometimes written with base point $X_p$ |
+| $\operatorname{tr}$ | trace (of a matrix) | |
+| $\cdot^\mathrm{T}$ | transposed (vector or matrix) | |
 | $B$ | a vector bundle | |
+| $0_k$ | the $k\times k$ zero matrix. | |

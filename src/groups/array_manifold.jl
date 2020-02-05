@@ -5,9 +5,9 @@ array_point(e::Identity) = e
 
 function inv(M::ArrayManifold, p; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
-    y = array_point(inv(M.manifold, array_value(p)))
-    is_manifold_point(M, y, true; kwargs...)
-    return y
+    q = array_point(inv(M.manifold, array_value(p)))
+    is_manifold_point(M, q, true; kwargs...)
+    return q
 end
 
 function inv!(M::ArrayManifold, q, p; kwargs...)
@@ -63,10 +63,10 @@ function translate!(M::ArrayManifold, z, x, y, conv::ActionDirection; kwargs...)
     return z
 end
 
-function inverse_translate(M::ArrayManifold, x, y, conv::ActionDirection; kwargs...)
-    is_manifold_point(M, x, true; kwargs...)
-    is_manifold_point(M, y, true; kwargs...)
-    z = array_point(inverse_translate(M.manifold, array_value(x), array_value(y), conv))
+function inverse_translate(M::ArrayManifold, p, q, conv::ActionDirection; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    is_manifold_point(M, q, true; kwargs...)
+    z = array_point(inverse_translate(M.manifold, array_value(p), array_value(q), conv))
     is_manifold_point(M, z, true; kwargs...)
     return z
 end
@@ -79,20 +79,20 @@ function inverse_translate!(M::ArrayManifold, z, x, y, conv::ActionDirection; kw
     return z
 end
 
-function translate_diff(M::ArrayManifold, x, y, v, conv::ActionDirection; kwargs...)
-    is_manifold_point(M, x, true; kwargs...)
-    is_manifold_point(M, y, true; kwargs...)
-    is_tangent_vector(M, y, v, true; kwargs...)
-    vout = ArrayTVector(translate_diff(
+function translate_diff(M::ArrayManifold, p, q, X, conv::ActionDirection; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    is_manifold_point(M, q, true; kwargs...)
+    is_tangent_vector(M, q, X, true; kwargs...)
+    Y = ArrayTVector(translate_diff(
         M.manifold,
-        array_value(x),
-        array_value(y),
-        array_value(v),
+        array_value(p),
+        array_value(q),
+        array_value(X),
         conv,
     ))
-    xy = translate(M, x, y, conv)
-    is_tangent_vector(M, xy, vout, true; kwargs...)
-    return vout
+    pq = translate(M, p, q, conv)
+    is_tangent_vector(M, pq, Y, true; kwargs...)
+    return Y
 end
 
 function translate_diff!(M::ArrayManifold, Y, p, q, X, conv::ActionDirection; kwargs...)
@@ -116,7 +116,7 @@ function inverse_translate_diff(M::ArrayManifold, p, q, X, conv::ActionDirection
     is_manifold_point(M, p, true; kwargs...)
     is_manifold_point(M, q, true; kwargs...)
     is_tangent_vector(M, q, X, true; kwargs...)
-    vout = ArrayTVector(inverse_translate_diff(
+    Y = ArrayTVector(inverse_translate_diff(
         M.manifold,
         array_value(p),
         array_value(q),
@@ -124,8 +124,8 @@ function inverse_translate_diff(M::ArrayManifold, p, q, X, conv::ActionDirection
         conv,
     ))
     xinvy = inverse_translate(M, p, q, conv)
-    is_tangent_vector(M, xinvy, vout, true; kwargs...)
-    return vout
+    is_tangent_vector(M, xinvy, Y, true; kwargs...)
+    return Y
 end
 
 function inverse_translate_diff!(

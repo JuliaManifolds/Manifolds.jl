@@ -201,7 +201,7 @@ Compute the inner product for two tangent vectors `X`, `Y` from the tangent spac
 of `p` on the [`Grassmann`](@ref) manifold `M`. The formula reads
 
 ````math
-g_p(X,Y) = \operatorname{trace}(X^{\mathrm{H}}Y),
+g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}Y),
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.

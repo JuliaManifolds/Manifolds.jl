@@ -114,7 +114,7 @@ Compute the exponential map emanating from `p` in tangent direction `X` on the
 [`SymmetricMatrices`](@ref) `M`, which reads
 
 ````math
-\exp_pX = p + X.
+\exp_p X = p + X.
 ````
 """
 exp(::SymmetricMatrices, ::Any...)
@@ -232,7 +232,7 @@ Compute the logarithmic map from `p` to `q` on the [`SymmetricMatrices`](@ref) `
 reads
 
 ````math
-\log_pq = q-p.
+\log_p q = q-p.
 ````
 """
 log(::SymmetricMatrices, ::Any...)

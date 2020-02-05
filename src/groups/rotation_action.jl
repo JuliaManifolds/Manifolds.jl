@@ -57,11 +57,11 @@ function apply_diff(A::RotationActionOnVector{N,F,RightAction}, a, p, X) where {
     return inv(base_group(A), a) * X
 end
 
-function apply_diff!(A::RotationActionOnVector{N,F,LeftAction}, vout, a, p, X) where {N,F}
-    return mul!(vout, a, X)
+function apply_diff!(A::RotationActionOnVector{N,F,LeftAction}, Y, a, p, X) where {N,F}
+    return mul!(Y, a, X)
 end
-function apply_diff!(A::RotationActionOnVector{N,F,RightAction}, vout, a, p, X) where {N,F}
-    return mul!(vout, inv(base_group(A), a), X)
+function apply_diff!(A::RotationActionOnVector{N,F,RightAction}, Y, a, p, X) where {N,F}
+    return mul!(Y, inv(base_group(A), a), X)
 end
 
 function inverse_apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, p, X) where {N,F}

@@ -54,7 +54,7 @@ Compute the exponential map on the [`SymmetricPositiveDefinite`](@ref) `M` with
 [`LogCholeskyMetric`](@ref) from `p` into direction `X`. The formula reads
 
 ````math
-\exp_pX = (\exp_y W)(\exp_y W)^\mathrm{T}
+\exp_p X = (\exp_y W)(\exp_y W)^\mathrm{T}
 ````
 
 where $\exp_xW$ is the exponential map on [`CholeskySpace`](@ref), $y$ is the cholesky
