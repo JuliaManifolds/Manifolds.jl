@@ -11,7 +11,7 @@ as long as that renders still in $\TeX$ within this documentation.
 | Symbol | Description | Also used | Comment |
 |:--:|:--------------- |:--:|:-- |
 | $\times$ | Cartesian product of two manifolds | | see [`ProductManifold`](@ref) |
-| $\^$ | (n-ary) Cartesian power | | see [`PowerManifold`](@ref) |
+| $^{\wedge}$ | (n-ary) Cartesian power of a manifold | | see [`PowerManifold`](@ref) |
 | $T^*_p \mathcal M$ | the cotangent space at $p$ | | |
 | $\xi$ | a cotangent vector from $T^*_p \mathcal M$ | $\xi_1, \xi_2,\ldots,\eta,\zeta$ | sometimes written with base point $\xi_p$. |
 | $n$ | dimension (of a manifold) | $n_1,n_2,\ldots,m, \operatorname{dim}(\mathcal M)$| for the real dimension sometimes also $\operatorname{dim}_{\mathbb R}(\mathcal M)$|
@@ -20,7 +20,7 @@ as long as that renders still in $\TeX$ within this documentation.
 | $\mathbb F$ | a field | | field a manifold is based on, usually $\mathcal F \in \{\mathbb R,\mathbb C\}$ |
 | $\gamma$ | a geodesic | $\gamma_{p;q}$, $\gamma_{p,X}$ | connecting two points $p,q$ or starting in $p$ with velocity $X$. |
 | $\circ$ | a group operation | |
-| $\cdot^\mathrm{H}$ | Hermitian or conjugate transposed (vector or matrix) | |
+| $\cdot^\mathrm{H}$ | Hermitian or conjugate transposed| |
 | $e$ | identity element of a group | |
 | $I_k$ | identity matrix of size $k\times k$ | |
 | $k$ | indices | $i,j$ | |
@@ -36,6 +36,6 @@ as long as that renders still in $\TeX$ within this documentation.
 | $T_p \mathcal M$ | the tangent space at $p$ | | |
 | $X$ | a tangent vector from $T_p \mathcal M$ | $X_1,X_2,\ldots,Y,Z$ | sometimes written with base point $X_p$ |
 | $\operatorname{tr}$ | trace (of a matrix) | |
-| $\cdot^\mathrm{T}$ | transposed (vector or matrix) | |
+| $\cdot^\mathrm{T}$ | transposed | |
 | $B$ | a vector bundle | |
 | $0_k$ | the $k\times k$ zero matrix. | |

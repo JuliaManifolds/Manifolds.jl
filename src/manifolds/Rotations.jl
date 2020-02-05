@@ -344,7 +344,7 @@ The formula reads
 
 where $s$ is the solution to the Sylvester equation
 
-$p^{\mathrm{T}}qs + s(p^{\mathrm{T}}q)^{\mathrm{T}} + 2\mathrm{I}_n = 0.$
+$p^{\mathrm{T}}qs + s(p^{\mathrm{T}}q)^{\mathrm{T}} + 2I_n = 0.$
 """
 inverse_retract(::Rotations, ::Any, ::Any, ::PolarInverseRetraction)
 
