@@ -95,7 +95,7 @@ distance(::Sphere, x, y) = acos(clamp(dot(x, y), -1, 1))
     exp(M::Sphere, p, X)
 
 Compute the exponential map from `p` into the tangent direction `X` on the [`Sphere`](@ref)
-`M` by following the great arc eminating from `p` in direction `X`.
+`M` by following the great arc emanating from `p` in direction `X`.
 
 ````math
 \exp_p X = \cos(\lVert X \rVert_p)p + \sin(\lVert X \rVert_p)\frac{X}{\lVert X \rVert_p},

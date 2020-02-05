@@ -19,7 +19,7 @@ The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
 [`real_dimension`](@ref) of the field $𝔽$.
 """
-struct Euclidean{N<:Tuple,T} <: Manifold where {N,T<:AbstractNumbers} end
+struct Euclidean{N<:Tuple,F} <: Manifold where {N,F<:AbstractNumbers} end
 
 function Euclidean(n::Vararg{Int,N}; field::AbstractNumbers = ℝ) where {N}
     return Euclidean{Tuple{n...},field}()

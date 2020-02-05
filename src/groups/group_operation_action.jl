@@ -42,8 +42,8 @@ function apply_diff(A::GroupOperationAction, a, p, X)
     return translate_diff(A.group, a, p, X, direction(A))
 end
 
-function apply_diff!(A::GroupOperationAction, vout, a, p, X)
-    return translate_diff!(A.group, vout, a, p, X, direction(A))
+function apply_diff!(A::GroupOperationAction, Y, a, p, X)
+    return translate_diff!(A.group, Y, a, p, X, direction(A))
 end
 
 function inverse_apply_diff(A::GroupOperationAction, a, p, X)

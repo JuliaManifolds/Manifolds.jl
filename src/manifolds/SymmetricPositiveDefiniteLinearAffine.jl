@@ -102,16 +102,16 @@ function get_coordinates(
     B::ArbitraryOrthonormalBasis,
 ) where {N}
     dim = manifold_dimension(M)
-    vout = similar(X, dim)
+    Y = similar(X, dim)
     @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, sqrt(2))
-        @inbounds vout[k] = X[i, j] * scale
+        @inbounds Y[k] = X[i, j] * scale
         k += 1
     end
-    return vout
+    return Y
 end
 function get_coordinates(
     M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
@@ -129,17 +129,17 @@ function get_vector(
     B::ArbitraryOrthonormalBasis,
 ) where {N}
     dim = manifold_dimension(M)
-    vout = allocate_result(M, get_vector, p)
+    Y = allocate_result(M, get_vector, p)
     @assert size(X) == (div(N * (N + 1), 2),)
-    @assert size(vout) == (N, N)
+    @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds vout[i, j] = X[k] * scale
-        @inbounds vout[j, i] = X[k] * scale
+        @inbounds Y[i, j] = X[k] * scale
+        @inbounds Y[j, i] = X[k] * scale
         k += 1
     end
-    return vout
+    return Y
 end
 function get_vector(
     M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},

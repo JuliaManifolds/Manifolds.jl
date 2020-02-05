@@ -1,5 +1,5 @@
 @doc raw"""
-    Stiefel{n,k,T} <: Manifold
+    Stiefel{n,k,F} <: Manifold
 
 The Stiefel manifold consists of all $n × k$, $n\geq k$ unitary matrices, i.e.
 
@@ -7,7 +7,7 @@ The Stiefel manifold consists of all $n × k$, $n\geq k$ unitary matrices, i.e.
 \{ p ∈ 𝔽^{n × k} : p^{\mathrm{H}}p = I_k \},
 ````
 
-where $𝔽 ∈ \{ℝ, ℂ\}$,
+where `F`$=𝔽 ∈ \{ℝ, ℂ\}$,
 $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
 $I_n ∈ ℝ^{n× n}$ denotes the $k × k$ identity matrix.
 
@@ -43,14 +43,14 @@ Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{S
 [`AbstractNumbers`](@ref) type and $p^{\mathrm{H}}p$ is (approximatly) the identity, where $\cdot^{\mathrm{H}}$ is the
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
-function check_manifold_point(M::Stiefel{n,k,T}, p; kwargs...) where {n,k,T}
-    if (T === ℝ) && !(eltype(p) <: Real)
+function check_manifold_point(M::Stiefel{n,k,F}, p; kwargs...) where {n,k,F}
+    if (F === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
             "The matrix $(p) is not a real-valued matrix, so it does noe lie on the Stiefel manifold of dimension ($(n),$(k)).",
         )
     end
-    if (T === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
+    if (F === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
         return DomainError(
             eltype(p),
             "The matrix $(p) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Stiefel manifold of dimension ($(n),$(k)).",
@@ -79,16 +79,16 @@ Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
 it (approximtly) holds that $p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0$.
 The settings for approximately can be set with `kwargs...`.
 """
-function check_tangent_vector(M::Stiefel{n,k,T}, p, X; kwargs...) where {n,k,T}
+function check_tangent_vector(M::Stiefel{n,k,F}, p, X; kwargs...) where {n,k,F}
     mpe = check_manifold_point(M, p)
     mpe === nothing || return mpe
-    if (T === ℝ) && !(eltype(X) <: Real)
+    if (F === ℝ) && !(eltype(X) <: Real)
         return DomainError(
             eltype(X),
             "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to the Stiefel manifold of dimension ($(n),$(k)).",
         )
     end
-    if (T === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
+    if (F === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
         return DomainError(
             eltype(X),
             "The matrix $(X) is neiter real- nor complex-valued matrix, so it can not bea tangent vectorto the complex Stiefel manifold of dimension ($(n),$(k)).",
@@ -111,8 +111,8 @@ end
 @doc raw"""
     exp(M, p, X)
 
-Computes the exponential map on the [`Stiefel`](@ref)`{n,k,T}`() manifold `M`
-eminating from `p` into tangent direction `X`.
+Computes the exponential map on the [`Stiefel`](@ref)`{n,k,F}`() manifold `M`
+emanating from `p` into tangent direction `X`.
 
 ````math
 \exp_p X = \begin{pmatrix}

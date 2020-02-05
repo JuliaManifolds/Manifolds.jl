@@ -98,7 +98,7 @@ end
 @doc raw"""
     exp(M::CholeskySpace, p, X)
 
-Compute the exponential map on the [`CholeskySpace`](@ref) `M` eminating from the lower
+Compute the exponential map on the [`CholeskySpace`](@ref) `M` emanating from the lower
 triangular matrix with positive diagonal `p` towards the lower triangular matrix `X`
 The formula reads
 
@@ -143,7 +143,7 @@ end
 @doc raw"""
     log(M::CholeskySpace, X, p, q)
 
-Compute the logarithmic map on the [`CholeskySpace`](@ref) `M` for the geodesic eminating
+Compute the logarithmic map on the [`CholeskySpace`](@ref) `M` for the geodesic emanating
 from the lower triangular matrix with positive diagonal `p` towards `q`.
 The formula reads
 

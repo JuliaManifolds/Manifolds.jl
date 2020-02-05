@@ -98,8 +98,8 @@ function apply_diff(A::AbstractGroupAction, a, p, X)
     return error("apply_diff not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(p)), and vector $(typeof(X))")
 end
 
-function apply_diff!(A::AbstractGroupAction, vout, a, p, X)
-    return error("apply_diff! not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(p)), vectors $(typeof(vout)) and $(typeof(X))")
+function apply_diff!(A::AbstractGroupAction, Y, a, p, X)
+    return error("apply_diff! not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(p)), vectors $(typeof(Y)) and $(typeof(X))")
 end
 
 @doc raw"""
@@ -121,8 +121,8 @@ function inverse_apply_diff(A::AbstractGroupAction, a, p, X)
     return apply_diff(A, inv(base_group(A), a), p, X)
 end
 
-function inverse_apply_diff!(A::AbstractGroupAction, vout, a, p, X)
-    return apply_diff!(A, vout, inv(base_group(A), a), p, X)
+function inverse_apply_diff!(A::AbstractGroupAction, Y, a, p, X)
+    return apply_diff!(A, Y, inv(base_group(A), a), p, X)
 end
 
 compose(A::AbstractGroupAction{LeftAction}, a, b) = compose(base_group(A), a, b)

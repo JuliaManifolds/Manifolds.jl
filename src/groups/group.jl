@@ -433,7 +433,7 @@ function translate_diff(M::Manifold, p, q, X, conv::ActionDirection, ::Val{true}
     return translate_diff(M.manifold, p, q, X, conv)
 end
 function translate_diff(M::Manifold, p, q, X, conv::ActionDirection, ::Val{false})
-    return error("translate_diff not implemented on $(typeof(G)) for elements $(typeof(vout)), $(typeof(p)) and $(typeof(q)), vector $(typeof(X)), and direction $(typeof(conv))")
+    return error("translate_diff not implemented on $(typeof(G)) for elements $(typeof(p)) and $(typeof(q)), vector $(typeof(X)), and direction $(typeof(conv))")
 end
 function translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection)
     pq = translate(G, p, q, conv)

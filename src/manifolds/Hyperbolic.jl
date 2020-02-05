@@ -112,7 +112,7 @@ distance(M::Hyperbolic, p, q) = acosh(max(-minkowski_dot(p, q), 1.0))
 @doc raw"""
     exp(M::Hyperbolic, p, X)
 
-Compute the exponential map on the [`Hyperbolic`](@ref) space $ℍ^n$ eminating
+Compute the exponential map on the [`Hyperbolic`](@ref) space $ℍ^n$ emanating
 from `p` towards `X`. The formula reads
 
 ````math

@@ -10,6 +10,8 @@ as long as that renders still in $\TeX$ within this documentation.
 
 | Symbol | Description | Also used | Comment |
 |:--:|:--------------- |:--:|:-- |
+| $\times$ | Cartesian product of two manifolds | | see [`ProductManifold](@ref) |
+| $\^$ | (n-ary) Cartesian power | | see [`PowerManifold`](@ref) |
 | $T^*_p \mathcal M$ | the cotangent space at $p$ | | |
 | $\xi$ | a cotangent vector from $T^*_p \mathcal M$ | $\xi_1, \xi_2,\ldots,\eta,\zeta$ | sometimes written with base point $\xi_p$. |
 | $n$ | dimension (of a manifold) | $n_1,n_2,\ldots,m, \operatorname{dim}(\mathcal M)$| for the real dimension sometimes also $\operatorname{dim}_{\mathbb R}(\mathcal M)$|

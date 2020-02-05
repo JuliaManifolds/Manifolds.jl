@@ -106,7 +106,7 @@ end
     log(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, p, q)
 
 Compute the logarithmic map on [`SymmetricPositiveDefinite`](@ref) `M` with
-respect to the [`LogCholeskyMetric`](@ref) eminating from `p` to `q`.
+respect to the [`LogCholeskyMetric`](@ref) emanating from `p` to `q`.
 The formula can be adapted from the [`CholeskySpace`](@ref) as
 ````math
 \log_p q = xW^{\mathrm{T}} + Wx^{\mathrm{T}},

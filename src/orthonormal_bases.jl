@@ -172,25 +172,25 @@ end
 function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
-    #  2) guarantees a reasonable array type `vout`
+    #  2) guarantees a reasonable array type `Y`
     #     (for example scalar * `SizedArray` is an `SArray`)
     bvectors = get_vectors(M, x, B)
     if isa(bvectors[1], ProductRepr)
         vt = v[1] * bvectors[1]
-        vout = allocate(bvectors[1], eltype(vt))
-        copyto!(vout, vt)
+        Y = allocate(bvectors[1], eltype(vt))
+        copyto!(Y, vt)
         for i = 2:length(v)
-            vout += v[i] * bvectors[i]
+            Y += v[i] * bvectors[i]
         end
-        return vout
+        return Y
     else
         vt = v[1] .* bvectors[1]
-        vout = allocate(bvectors[1], eltype(vt))
-        copyto!(vout, vt)
+        Y = allocate(bvectors[1], eltype(vt))
+        copyto!(Y, vt)
         for i = 2:length(v)
-            vout .+= v[i] .* bvectors[i]
+            Y .+= v[i] .* bvectors[i]
         end
-        return vout
+        return Y
     end
 end
 

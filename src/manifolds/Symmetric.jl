@@ -110,7 +110,7 @@ distance(M::SymmetricMatrices, p, q) = norm(p - q)
 @doc raw"""
     exp(M::SymmetricMatrices, p, X)
 
-Compute the exponential map eminating from `p` in tangent direction `X` on the
+Compute the exponential map emanating from `p` in tangent direction `X` on the
 [`SymmetricMatrices`](@ref) `M`, which reads
 
 ````math
@@ -140,16 +140,16 @@ function get_coordinates(
     B::ArbitraryOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    vout = similar(X, dim)
+    Y = similar(X, dim)
     @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, sqrt(2))
-        @inbounds vout[k] = X[i, j] * scale
+        @inbounds Y[k] = X[i, j] * scale
         k += 1
     end
-    return vout
+    return Y
 end
 function get_coordinates(
     M::SymmetricMatrices{N,ℂ},
@@ -158,18 +158,18 @@ function get_coordinates(
     B::ArbitraryOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    vout = similar(X, dim)
+    Y = similar(X, dim)
     @assert size(X) == (N, N)
     @assert dim == N * (N + 1)
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, sqrt(2))
-        @inbounds vout[k] = real(X[i, j]) * scale
+        @inbounds Y[k] = real(X[i, j]) * scale
         k += 1
-        @inbounds vout[k] = imag(X[i, j]) * scale
+        @inbounds Y[k] = imag(X[i, j]) * scale
         k += 1
     end
-    return vout
+    return Y
 end
 
 function get_vector(
@@ -179,17 +179,17 @@ function get_vector(
     B::ArbitraryOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    vout = allocate_result(M, get_vector, p)
+    Y = allocate_result(M, get_vector, p)
     @assert size(X) == (div(N * (N + 1), 2),)
-    @assert size(vout) == (N, N)
+    @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds vout[i, j] = X[k] * scale
-        @inbounds vout[j, i] = X[k] * scale
+        @inbounds Y[i, j] = X[k] * scale
+        @inbounds Y[j, i] = X[k] * scale
         k += 1
     end
-    return vout
+    return Y
 end
 function get_vector(
     M::SymmetricMatrices{N,ℂ},
@@ -198,17 +198,17 @@ function get_vector(
     B::ArbitraryOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    vout = allocate_result(M, get_vector, p, p .* 1im)
+    Y = allocate_result(M, get_vector, p, p .* 1im)
     @assert size(X) == (N * (N + 1),)
-    @assert size(vout) == (N, N)
+    @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds vout[i, j] = Complex(X[k], X[k+1]) * scale
-        @inbounds vout[j, i] = vout[i, j]
+        @inbounds Y[i, j] = Complex(X[k], X[k+1]) * scale
+        @inbounds Y[j, i] = Y[i, j]
         k += 2
     end
-    return vout
+    return Y
 end
 
 @doc raw"""

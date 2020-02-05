@@ -207,8 +207,8 @@ function translate_diff(
     )...)
 end
 function translate_diff(M::ProductManifold, p, q, X, conv::ActionDirection)
-    vout = allocate_result(M, translate_diff, X, p, q)
-    return translate_diff!(M, vout, p, q, X, conv)
+    Y = allocate_result(M, translate_diff, X, p, q)
+    return translate_diff!(M, Y, p, q, X, conv)
 end
 
 function translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirection)
@@ -247,8 +247,8 @@ function inverse_translate_diff(
     )...)
 end
 function inverse_translate_diff(M::ProductManifold, p, q, X, conv::ActionDirection)
-    vout = allocate_result(M, inverse_translate_diff, X, p, q)
-    return inverse_translate_diff!(M, vout, p, q, X, conv)
+    Y = allocate_result(M, inverse_translate_diff, X, p, q)
+    return inverse_translate_diff!(M, Y, p, q, X, conv)
 end
 
 function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirection)
