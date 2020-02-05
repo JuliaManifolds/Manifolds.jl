@@ -36,6 +36,7 @@ Allocation of new points is performed using a custom mechanism that relies on th
   For more complex types, such as nested representations of [`PowerManifold`](@ref) (see [`NestedPowerRepresentation`](@ref)), [`FVector`](@ref) types, checked types like [`ArrayMPoint`](@ref) and more it operates differently.
   While `similar` only concerns itself with the higher level of nested structures, `allocate` maps itself through all levels of nesting until a simple array of numbers is reached and then calls `similar`.
   The difference can be most easily seen in the following example:
+
 ```julia
 julia> x = similar([[1.0], [2.0]])
 2-element Array{Array{Float64,1},1}:
@@ -56,6 +57,8 @@ Stacktrace:
 julia> y[1]
 1-element Array{Float64,1}:
  6.90031725726027e-310
+
 ```
+
 * [`allocate_result`](@ref) allocates a result of a particular function (for example [`exp`], [`flat`], etc.) on a particular manifold with particular arguments.
   It takes into account the possibility that different arguments may have different numeric [`number_eltype`](@ref) types thorough the [`ManifoldsBase.allocate_result_type`](@ref) function.

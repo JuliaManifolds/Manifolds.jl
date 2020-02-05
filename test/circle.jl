@@ -29,6 +29,7 @@ include("utils.jl")
         x .+= 2*π
         project_point!(M,x)
         @test x == MVector(0.0)
+        @test project_tangent(M,0.0,1.) == 1.
     end
     types = [Float64, Float32]
 

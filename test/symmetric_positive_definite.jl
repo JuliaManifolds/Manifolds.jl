@@ -94,5 +94,8 @@ include("utils.jl")
                 @test isapprox(0.0, inner(M2,x,X[i],X[j]))
             end
         end
+        d2onb = get_basis(M2, x, DiagonalizingOrthonormalBasis(v))
+        @test donb.kappas == d2onb.kappas
+        @test donb.vectors==d2onb.vectors
     end
 end

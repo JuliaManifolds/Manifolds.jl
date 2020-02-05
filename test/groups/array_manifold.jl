@@ -7,94 +7,94 @@
 
     eg = Matrix{Float64}(I, 3, 3)
     ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0]]
-    x, y = [exp(M, eg, hat(M, eg, ωi)) for ωi in ω]
-    v = hat(M, eg, [-1.0, 2.0, 0.5])
+    p, q = [exp(M, eg, hat(M, eg, ωi)) for ωi in ω]
+    X = hat(M, eg, [-1.0, 2.0, 0.5])
 
     e = Identity(AG)
     @test e === Identity(G)
-    x2, y2 = ArrayMPoint(x), ArrayMPoint(y)
-    v2 = ArrayTVector(v)
+    p2, q2 = ArrayMPoint(p), ArrayMPoint(q)
+    X2 = ArrayTVector(X)
 
-    @test identity(AG, x2) isa ArrayMPoint
-    @test isapprox(G, identity(AG, x2).value, identity(G, x))
+    @test identity(AG, p2) isa ArrayMPoint
+    @test isapprox(G, identity(AG, p2).value, identity(G, p))
     @test identity(AG, e) === e
     @test_throws DomainError identity(AG, Identity(TranslationGroup(3)))
 
-    eg = allocate(x2)
-    identity!(AG, eg, x2)
-    @test isapprox(G, eg.value, identity(G, x))
-    eg = allocate(x2)
+    eg = allocate(p2)
+    identity!(AG, eg, p2)
+    @test isapprox(G, eg.value, identity(G, p))
+    eg = allocate(p2)
     identity!(AG, eg, e)
-    @test isapprox(G, eg.value, identity(G, x))
+    @test isapprox(G, eg.value, identity(G, p))
 
-    @test inv(AG, x2) isa ArrayMPoint
-    @test isapprox(G, inv(AG, x2).value, inv(G, x))
+    @test inv(AG, p2) isa ArrayMPoint
+    @test isapprox(G, inv(AG, p2).value, inv(G, p))
     @test inv(AG, e) === e
     @test_throws DomainError inv(AG, Identity(TranslationGroup(3)))
 
-    xinv = allocate(x2)
-    inv!(AG, xinv, x2)
-    @test isapprox(G, xinv.value, inv(G, x))
-    eg = allocate(x2)
+    pinvq = allocate(p2)
+    inv!(AG, pinvq, p2)
+    @test isapprox(G, pinvq.value, inv(G, p))
+    eg = allocate(p2)
     inv!(AG, eg, e)
     @test isapprox(G, eg.value, e)
 
-    @test compose(AG, x2, y2) isa ArrayMPoint
-    @test isapprox(G, compose(AG, x2, y2).value, compose(G, x, y))
-    @test compose(AG, x2, e) === x2
-    @test compose(AG, e, x2) === x2
+    @test compose(AG, p2, q2) isa ArrayMPoint
+    @test isapprox(G, compose(AG, p2, q2).value, compose(G, p, q))
+    @test compose(AG, p2, e) === p2
+    @test compose(AG, e, p2) === p2
 
-    xy = allocate(x2)
-    compose!(AG, xy, x2, y2)
-    @test isapprox(G, xy.value, compose(G, x, y))
-    xy = allocate(x2)
-    compose!(AG, xy, e, y2)
-    @test isapprox(G, xy.value, compose(G, e, y))
-    xy = allocate(x2)
-    compose!(AG, xy, x2, e)
-    @test isapprox(G, xy.value, compose(G, x, e))
+    pq = allocate(p2)
+    compose!(AG, pq, p2, q2)
+    @test isapprox(G, pq.value, compose(G, p, q))
+    pq = allocate(p2)
+    compose!(AG, pq, e, q2)
+    @test isapprox(G, pq.value, compose(G, e, q))
+    pq = allocate(p2)
+    compose!(AG, pq, p2, e)
+    @test isapprox(G, pq.value, compose(G, p, e))
 
-    @test group_exp(AG, v2) isa ArrayMPoint
-    @test isapprox(G, group_exp(AG, v2).value, group_exp(G, v))
-    expv = allocate(x2)
-    group_exp!(AG, expv, v2)
-    @test isapprox(G, expv.value, group_exp(G, v))
+    @test group_exp(AG, X2) isa ArrayMPoint
+    @test isapprox(G, group_exp(AG, X2).value, group_exp(G, X))
+    expX = allocate(p2)
+    group_exp!(AG, expX, X2)
+    @test isapprox(G, expX.value, group_exp(G, X))
 
-    @test group_log(AG, x2) isa ArrayTVector
-    @test isapprox(G, e, group_log(AG, x2).value, group_log(G, x))
-    logx = allocate(v2)
-    group_log!(AG, logx, x2)
-    @test isapprox(G, e, logx.value, group_log(G, x))
+    @test group_log(AG, p2) isa ArrayTVector
+    @test isapprox(G, e, group_log(AG, p2).value, group_log(G, p))
+    logp = allocate(X2)
+    group_log!(AG, logp, p2)
+    @test isapprox(G, e, logp.value, group_log(G, p))
 
     for conv in (LeftAction(), RightAction())
-        @test translate(AG, x2, y2, conv) isa ArrayMPoint
-        @test isapprox(G, translate(AG, x2, y2, conv).value, translate(G, x, y, conv))
+        @test translate(AG, p2, q2, conv) isa ArrayMPoint
+        @test isapprox(G, translate(AG, p2, q2, conv).value, translate(G, p, q, conv))
 
-        xy = allocate(x2)
-        translate!(AG, xy, x2, y2, conv)
-        @test isapprox(G, xy.value, translate(G, x, y, conv))
+        pq = allocate(p2)
+        translate!(AG, pq, p2, q2, conv)
+        @test isapprox(G, pq.value, translate(G, p, q, conv))
 
-        @test inverse_translate(AG, x2, y2, conv) isa ArrayMPoint
-        @test isapprox(G, inverse_translate(AG, x2, y2, conv).value, inverse_translate(G, x, y, conv))
+        @test inverse_translate(AG, p2, q2, conv) isa ArrayMPoint
+        @test isapprox(G, inverse_translate(AG, p2, q2, conv).value, inverse_translate(G, p, q, conv))
 
-        xinvy = allocate(x2)
-        inverse_translate!(AG, xinvy, x2, y2, conv)
-        @test isapprox(G, xinvy.value, inverse_translate(G, x, y, conv))
+        pinvq = allocate(p2)
+        inverse_translate!(AG, pinvq, p2, q2, conv)
+        @test isapprox(G, pinvq.value, inverse_translate(G, p, q, conv))
     end
 
     for conv in (LeftAction(), RightAction())
-        @test translate_diff(AG, y2, x2, v2, conv; atol = 1e-10) isa ArrayTVector
-        @test isapprox(G, translate_diff(AG, y2, x2, v2, conv; atol = 1e-10).value, translate_diff(G, y, x, v, conv))
+        @test translate_diff(AG, q2, p2, X2, conv; atol = 1e-10) isa ArrayTVector
+        @test isapprox(G, translate_diff(AG, q2, p2, X2, conv; atol = 1e-10).value, translate_diff(G, q, p, X, conv))
 
-        vout = allocate(v2)
-        translate_diff!(AG, vout, y2, x2, v2, conv; atol = 1e-10)
-        @test isapprox(vout.value, translate_diff(G, y, x, v, conv))
+        Y = allocate(X2)
+        translate_diff!(AG, Y, q2, p2, X2, conv; atol = 1e-10)
+        @test isapprox(Y.value, translate_diff(G, q, p, X, conv))
 
-        @test inverse_translate_diff(AG, y2, x2, v2, conv; atol = 1e-10) isa ArrayTVector
-        @test isapprox(G, inverse_translate_diff(AG, y2, x2, v2, conv; atol = 1e-10).value, inverse_translate_diff(G, y, x, v, conv))
+        @test inverse_translate_diff(AG, q2, p2, X2, conv; atol = 1e-10) isa ArrayTVector
+        @test isapprox(G, inverse_translate_diff(AG, q2, p2, X2, conv; atol = 1e-10).value, inverse_translate_diff(G, q, p, X, conv))
 
-        vout = allocate(v2)
-        inverse_translate_diff!(AG, vout, y2, x2, v2, conv; atol = 1e-10)
-        @test isapprox(vout.value, inverse_translate_diff(G, y, x, v, conv))
+        Y = allocate(X2)
+        inverse_translate_diff!(AG, Y, q2, p2, X2, conv; atol = 1e-10)
+        @test isapprox(Y.value, inverse_translate_diff(G, q, p, X, conv))
     end
 end
