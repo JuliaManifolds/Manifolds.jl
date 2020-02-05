@@ -11,7 +11,7 @@ where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transpo
 and the field $𝔽 ∈ \{ ℝ, ℂ\}$ is set by the
 [`AbstractNumbers`](@ref) `F`.
 
-Though it is slighty redundant, usually the matrices are safed as $n × n$ arrays.
+Though it is slightly redundant, usually the matrices are stored as $n × n$ arrays.
 
 # Constructor
 
@@ -64,7 +64,7 @@ end
     check_tangent_vector(M::SymmetricMatrices{n,F}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
-[`SymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of dimension `(n,n)`
+[`SymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
 and its values have to be from the correct [`AbstractNumbers`](@ref).
 
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.

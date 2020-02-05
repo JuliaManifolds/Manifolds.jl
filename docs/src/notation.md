@@ -15,7 +15,7 @@ as long as that renders still in $\TeX$ within this documentation.
 | $n$ | dimension (of a manifold) | $n_1,n_2,\ldots,m, \operatorname{dim}(\mathcal M)$| for the real dimension sometimes also $\operatorname{dim}_{\mathbb R}(\mathcal M)$|
 | $d(\cdot,\cdot)$ | (Riemannian) distance | $d_{\mathcal M}(\cdot,\cdot)$ | |
 | $F$ | a fiber | | |
-| $\mathbb F$ | a field | | field a manifold is based on, usually $\mathcal F \in \{\mathbb R,\mathbb C\}$ |
+| $\mathbb F$ | a field | | field a manifold is based on, usually $\mathbb F \in \{\mathbb R,\mathbb C\}$ |
 | $\gamma$ | a geodesic | $\gamma_{p;q}$, $\gamma_{p,X}$ | connecting two points $p,q$ or starting in $p$ with velocity $X$. |
 | $\circ$ | a group operation | |
 | $e$ | identity element of a group | |

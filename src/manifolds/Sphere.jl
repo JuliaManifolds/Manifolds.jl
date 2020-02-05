@@ -8,7 +8,7 @@ vectors in $ℝ^{n+1}$ of unit length
 
     Sphere(n)
 
-Generate the $𝕊^{n}\subset ℝ^{n+1}$
+Generate $𝕊^{n} ⊂ ℝ^{n+1}$.
 """
 struct Sphere{N} <: Manifold end
 
@@ -94,7 +94,7 @@ distance(::Sphere, x, y) = acos(clamp(dot(x, y), -1, 1))
 @doc raw"""
     exp(M::Sphere, p, X)
 
-Compute the exponential map from `p` into the tangent direction `X` on the [`Sphere`](@ref)
+Compute the exponential map from `p` in the tangent direction `X` on the [`Sphere`](@ref)
 `M` by following the great arc eminating from `p` in direction `X`.
 
 ````math
