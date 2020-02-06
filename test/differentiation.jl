@@ -98,5 +98,5 @@ end
     c1 = FunctionCurve(s2) do t
         return geodesic(s2, q, p, t)
     end
-    @test isapprox(s2, c1(π/4), r_derivative(c1, π/4), [π/2, 0.0, π/2])
+    @test isapprox(s2, c1(π/4), r_derivative(c1, π/4), [-sqrt(2)/2, 0.0, sqrt(2)/2])
 end
