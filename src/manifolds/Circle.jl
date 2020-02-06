@@ -1,27 +1,27 @@
 @doc raw"""
-    Circle{F} <: Manifold
+    Circle{𝔽} <: Manifold
 
 The circle $𝕊^1$ is a manifold here represented by
 real-valued points in $[-π,π)$ or complex-valued points $z ∈ ℂ$ of absolute value
 $\lvert z\rvert = 1$.
 # Constructor
 
-    Circle(f=ℝ)
+    Circle(ℝ)
 
 Generate the `ℝ`-valued Circle represented by angles, which
-alternatively can be set to use the [`AbstractNumbers`](@ref) `f=ℂ` to obtain the `Circle`
+alternatively can be set to use the [`AbstractNumbers`](@ref) `𝔽=ℂ` to obtain the `Circle`
 represented by `ℂ`-valued `Circle` of unit numbers.
 """
-struct Circle{F} <: Manifold where {F<:AbstractNumbers} end
+struct Circle{𝔽} <: Manifold where {𝔽<:AbstractNumbers} end
 
-Circle(f::AbstractNumbers = ℝ) = Circle{f}()
+Circle(field::AbstractNumbers = ℝ) = Circle{field}()
 
 @doc raw"""
     check_manifold_point(M::Circle, p)
 
 Check whether `p` is a point on the [`Circle`](@ref) `M`.
 For the real-valued case, `x` is an angle and hence it checks that $p  ∈ [-π,π)$.
-for the complex-valued case, it is a unit number, $p  ∈ ℂ$ with $\lvert p \rvert = 1$.
+for the complex-valued case, it is a unit number, $p ∈ ℂ$ with $\lvert p \rvert = 1$.
 """
 check_manifold_point(::Circle, ::Any...)
 
@@ -297,7 +297,7 @@ sharp(M::Circle, p::Number, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
 
 sharp!(M::Circle, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
-show(io::IO, ::Circle{F}) where {F} = print(io, "Circle($(F))")
+show(io::IO, ::Circle{𝔽}) where {𝔽} = print(io, "Circle($(𝔽))")
 
 @doc raw"""
     sym_rem(x,[T=π])

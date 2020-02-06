@@ -1,5 +1,5 @@
 @doc raw"""
-    Euclidean{T<:Tuple} <: Manifold
+    Euclidean{T<:Tuple,𝔽} <: Manifold
 
 Euclidean vector space $ℝ^n$.
 
@@ -19,7 +19,7 @@ The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
 [`real_dimension`](@ref) of the field $𝔽$.
 """
-struct Euclidean{N<:Tuple,F} <: Manifold where {N,F<:AbstractNumbers} end
+struct Euclidean{N<:Tuple,𝔽} <: Manifold where {N,𝔽<:AbstractNumbers} end
 
 function Euclidean(n::Vararg{Int,N}; field::AbstractNumbers = ℝ) where {N}
     return Euclidean{Tuple{n...},field}()
@@ -41,8 +41,8 @@ This metric is the default metric for example for the [`Euclidean`](@ref) manifo
 struct EuclideanMetric <: RiemannianMetric end
 
 ^(M::Euclidean, n::Int) = ^(M, (n,))
-function ^(::Euclidean{T,F}, n::NTuple{N,Int}) where {T,F,N}
-    return Euclidean{Tuple{T.parameters...,n...},F}()
+function ^(::Euclidean{T,𝔽}, n::NTuple{N,Int}) where {T,𝔽,N}
+    return Euclidean{Tuple{T.parameters...,n...},𝔽}()
 end
 
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = one(eltype(p))
@@ -311,8 +311,8 @@ sharp(::Euclidean, ::Any...)
 
 sharp!(M::Euclidean, X::TFVector, x, ξ::CoTFVector) = copyto!(X, ξ)
 
-function show(io::IO, ::Euclidean{N,F}) where {N,F}
-    print(io, "Euclidean($(join(N.parameters, ", ")); field = $(F))")
+function show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
+    print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")
 end
 
 """
