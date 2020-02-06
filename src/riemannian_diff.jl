@@ -8,7 +8,7 @@ abstract type AbstractRiemannianDiffBackend end
 
 
 """
-    r_derivative(f::AbstractCurve, x, backend::AbstractDiffBackend = rdiff_backend()
+    r_derivative(f::AbstractCurve, p, backend::AbstractDiffBackend = rdiff_backend()
 
 Compute the Riemannian derivative of a curve `f` at point `x` using given backend.
 """
@@ -16,7 +16,7 @@ r_derivative(::AbstractCurve, ::Any, ::AbstractRiemannianDiffBackend)
 
 
 """
-    r_gradient(f::AbstractRealField, x, backend::AbstractRiemannianDiffBackend = rdiff_backend())
+    r_gradient(f::AbstractRealField, p, backend::AbstractRiemannianDiffBackend = rdiff_backend())
 
 Compute the Riemannian gradient of a real field `f` at point `x` using given backend.
 """
@@ -24,7 +24,7 @@ r_gradient(::AbstractRealField, ::Any, ::AbstractRiemannianDiffBackend)
 
 
 """
-    r_jacobian(f::AbstractMap, x, backend::AbstractRiemannianDiffBackend = rdiff_backend())
+    r_jacobian(f::AbstractMap, p, backend::AbstractRiemannianDiffBackend = rdiff_backend())
 
 Compute the Riemannian Jacobian of a map `f` at point `x` using given backend.
 """
@@ -41,26 +41,26 @@ struct RiemannianONBDiffBackend{TADBackend<:AbstractDiffBackend} <:
     diff_backend::TADBackend
 end
 
-function r_derivative(f::AbstractCurve, x, backend::AbstractRiemannianDiffBackend)
-    error("r_derivative not implemented for curve $(typeof(f)), point $(typeof(x)) and " *
+function r_derivative(f::AbstractCurve, p, backend::AbstractRiemannianDiffBackend)
+    error("r_derivative not implemented for curve $(typeof(f)), point $(typeof(p)) and " *
           "backend $(typeof(backend))")
 end
 
-function r_gradient(f::AbstractRealField, x, backend::AbstractRiemannianDiffBackend)
-    error("r_gradient not implemented for field $(typeof(f)), point $(typeof(x)) and " *
+function r_gradient(f::AbstractRealField, p, backend::AbstractRiemannianDiffBackend)
+    error("r_gradient not implemented for field $(typeof(f)), point $(typeof(p)) and " *
           "backend $(typeof(backend))")
 end
 
-function r_jacobian(f::AbstractMap, x, backend::AbstractRiemannianDiffBackend)
-    error("r_jacobian not implemented for map $(typeof(f)), point $(typeof(x)) and " *
+function r_jacobian(f::AbstractMap, p, backend::AbstractRiemannianDiffBackend)
+    error("r_jacobian not implemented for map $(typeof(f)), point $(typeof(p)) and " *
           "backend $(typeof(backend))")
 end
 
-r_derivative(f::AbstractCurve, x) = r_derivative(f, x, rdiff_backend())
+r_derivative(f::AbstractCurve, p) = r_derivative(f, p, rdiff_backend())
 
-r_gradient(f::AbstractRealField, x) = r_gradient(f, x, rdiff_backend())
+r_gradient(f::AbstractRealField, p) = r_gradient(f, p, rdiff_backend())
 
-r_jacobian(f::AbstractMap, x) = r_jacobian(f::AbstractMap, x, rdiff_backend())
+r_jacobian(f::AbstractMap, p) = r_jacobian(f::AbstractMap, p, rdiff_backend())
 
 
 """
