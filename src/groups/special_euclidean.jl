@@ -84,10 +84,10 @@ Base.@propagate_inbounds function _padvector!(
 end
 
 @doc doc"""
-    affine_matrix(G::SpecialEuclidean, x) -> AbstractMatrix
+    affine_matrix(G::SpecialEuclidean, p) -> AbstractMatrix
 
-Represent the point $x ∈ \mathrm{SE}(n)$ as an affine matrix.
-For $x = (t, R) ∈ \mathrm{SE}(n)$, where $t ∈ \mathrm{T}(n), R ∈ \mathrm{SO}(n)$, the
+Represent the point $p ∈ \mathrm{SE}(n)$ as an affine matrix.
+For $p = (t, R) ∈ \mathrm{SE}(n)$, where $t ∈ \mathrm{T}(n), R ∈ \mathrm{SO}(n)$, the
 affine representation is the $n + 1 × n + 1$ matrix
 
 ````math
@@ -97,10 +97,10 @@ R & t \\
 \end{pmatrix}.
 ````
 
-    affine_matrix(G::SpecialEuclidean, e, v) -> AbstractMatrix
+    affine_matrix(G::SpecialEuclidean, e, X) -> AbstractMatrix
 
-Represent the Lie algebra element $v ∈ 𝔰𝔢(n) = T_e \mathrm{SE}(n)$ as a (screw) matrix.
-For $v = (b, Ω) ∈ 𝔰𝔢(n)$, where $Ω ∈ 𝔰𝔬(n) = T_e \mathrm{SO}(n)$, the screw representation is
+Represent the Lie algebra element $X ∈ 𝔰𝔢(n) = T_e \mathrm{SE}(n)$ as a (screw) matrix.
+For $X = (b, Ω) ∈ 𝔰𝔢(n)$, where $Ω ∈ 𝔰𝔬(n) = T_e \mathrm{SO}(n)$, the screw representation is
 the $n + 1 × n + 1$ matrix
 
 ````math
@@ -110,23 +110,23 @@ the $n + 1 × n + 1$ matrix
 \end{pmatrix}.
 ````
 """
-function affine_matrix(G::SpecialEuclidean{n}, x) where {n}
-    y = allocate(x, Size(n + 1, n + 1))
-    map(copyto!, submanifold_components(G, y), submanifold_components(G, x))
-    @inbounds _padpoint!(G, y)
-    return y
+function affine_matrix(G::SpecialEuclidean{n}, p) where {n}
+    pmat = allocate(p, Size(n + 1, n + 1))
+    map(copyto!, submanifold_components(G, pmat), submanifold_components(G, p))
+    @inbounds _padpoint!(G, pmat)
+    return pmat
 end
-affine_matrix(::SpecialEuclidean{n}, x::AbstractMatrix) where {n} = x
+affine_matrix(::SpecialEuclidean{n}, p::AbstractMatrix) where {n} = p
 @generated function affine_matrix(::GT, ::Identity{GT}) where {n,GT<:SpecialEuclidean{n}}
     return SDiagonal{n}(I)
 end
-function affine_matrix(G::SpecialEuclidean{n}, e, v) where {n}
-    w = allocate(v, Size(n + 1, n + 1))
-    map(copyto!, submanifold_components(G, w), submanifold_components(G, v))
-    @inbounds _padvector!(G, w)
-    return w
+function affine_matrix(G::SpecialEuclidean{n}, e, X) where {n}
+    Xmat = allocate(X, Size(n + 1, n + 1))
+    map(copyto!, submanifold_components(G, Xmat), submanifold_components(G, X))
+    @inbounds _padvector!(G, Xmat)
+    return Xmat
 end
-affine_matrix(::SpecialEuclidean{n}, e, v::AbstractMatrix) where {n} = v
+affine_matrix(::SpecialEuclidean{n}, e, X::AbstractMatrix) where {n} = X
 
 compose(::SpecialEuclidean, p::AbstractMatrix, q::AbstractMatrix) = p * q
 
@@ -140,17 +140,17 @@ function compose!(
 end
 
 @doc doc"""
-    group_exp(G::SpecialEuclidean, v)
+    group_exp(G::SpecialEuclidean, X)
 
-Compute the group exponential of $v ∈ 𝔰𝔢(n)$. In the [`affine_matrix`](@ref) representation,
+Compute the group exponential of $X ∈ 𝔰𝔢(n)$. In the [`affine_matrix`](@ref) representation,
 the group exponential is the matrix exponential (see [`group_exp`](@ref)).
 
-    group_exp(G::SpecialEuclidean{2}, v)
+    group_exp(G::SpecialEuclidean{2}, X)
 
-The group exponential on $\mathrm{SE}(2)$ for $v = (b, Ω) ∈ 𝔰𝔢(2)$, where $R ∈ 𝔰𝔬(2)$ is
+The group exponential on $\mathrm{SE}(2)$ for $X = (b, Ω) ∈ 𝔰𝔢(2)$, where $R ∈ 𝔰𝔬(2)$ is
 
 ````math
-\exp v = (U(θ) b, \exp Ω) = (t, R),
+\exp X = (U(θ) b, \exp Ω) = (t, R),
 ````
 
 where $R = \exp Ω$ is the group exponential on $\mathrm{SO}(3)$, and $U(θ)$ is
@@ -160,14 +160,14 @@ U(θ) = \frac{\sin θ}{θ} I_2 + \frac{1 - \cos θ}{θ^2} Ω,
 ````
 
 where $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
-(see [`norm`](@ref norm(M::Rotations, x, v))) is the angle of the rotation.
+(see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 
-    group_exp(G::SpecialEuclidean{3}, v)
+    group_exp(G::SpecialEuclidean{3}, X)
 
-The group exponential on $\mathrm{SE}(3)$ for $v = (b, Ω) ∈ 𝔰𝔢(3)$, where $R ∈ 𝔰𝔬(3)$ is
+The group exponential on $\mathrm{SE}(3)$ for $X = (b, Ω) ∈ 𝔰𝔢(3)$, where $R ∈ 𝔰𝔬(3)$ is
 
 ````math
-\exp v = (U(θ) b, \exp Ω) = (t, R),
+\exp X = (U(θ) b, \exp Ω) = (t, R),
 ````
 
 where $R = \exp Ω$ is the group exponential on $\mathrm{SO}(3)$, and $U(θ)$ is
@@ -180,17 +180,17 @@ where $θ$ is the same as above.
 """
 group_exp(::SpecialEuclidean, ::Any)
 
-function group_exp!(G::SpecialEuclidean, y, v)
-    vmat = affine_matrix(G, Identity(G), v)
-    expv = exp(vmat)
-    map(copyto!, submanifold_components(G, y), submanifold_components(G, expv))
-    _padpoint!(G, y)
-    return y
+function group_exp!(G::SpecialEuclidean, q, X)
+    Xmat = affine_matrix(G, Identity(G), X)
+    qmat = exp(Xmat)
+    map(copyto!, submanifold_components(G, q), submanifold_components(G, qmat))
+    _padpoint!(G, q)
+    return q
 end
-function group_exp!(G::SpecialEuclidean{2}, y, v)
+function group_exp!(G::SpecialEuclidean{2}, q, X)
     SO2 = submanifold(G, 2)
-    b, Ω = submanifold_components(G, v)
-    t, R = submanifold_components(G, y)
+    b, Ω = submanifold_components(G, X)
+    t, R = submanifold_components(G, q)
     @assert size(R) == (2, 2)
     @assert size(t) == (2,)
     @assert size(b) == (2,)
@@ -212,14 +212,14 @@ function group_exp!(G::SpecialEuclidean{2}, y, v)
         R[4] = cosθ
         t[1] = α * b[1] - β * b[2]
         t[2] = α * b[2] + β * b[1]
-        _padpoint!(G, y)
+        _padpoint!(G, q)
     end
-    return y
+    return q
 end
-function group_exp!(G::SpecialEuclidean{3}, y, v)
+function group_exp!(G::SpecialEuclidean{3}, q, X)
     SO3 = submanifold(G, 2)
-    b, Ω = submanifold_components(G, v)
-    t, R = submanifold_components(G, y)
+    b, Ω = submanifold_components(G, X)
+    t, R = submanifold_components(G, q)
     @assert size(R) == (3, 3)
     @assert size(t) == (3,)
 
@@ -240,21 +240,21 @@ function group_exp!(G::SpecialEuclidean{3}, y, v)
     Jₗ = I + β .* Ω .+ γ .* Ω²
     R .= I + α .* Ω .+ β .* Ω²
     copyto!(t, Jₗ * b)
-    @inbounds _padpoint!(G, y)
-    return y
+    @inbounds _padpoint!(G, q)
+    return q
 end
 
-function group_log!(G::SpecialEuclidean, v, y)
-    ymat = affine_matrix(G, y)
-    logy = real(log(ymat))
-    map(copyto!, submanifold_components(G, v), submanifold_components(G, logy))
-    _padvector!(G, v)
-    return v
+function group_log!(G::SpecialEuclidean, X, q)
+    qmat = affine_matrix(G, q)
+    Xmat = real(log(qmat))
+    map(copyto!, submanifold_components(G, X), submanifold_components(G, Xmat))
+    _padvector!(G, X)
+    return X
 end
-function group_log!(G::SpecialEuclidean{2}, v, y)
+function group_log!(G::SpecialEuclidean{2}, X, q)
     SO2 = submanifold(G, 2)
-    b, Ω = submanifold_components(G, v)
-    t, R = submanifold_components(G, y)
+    b, Ω = submanifold_components(G, X)
+    t, R = submanifold_components(G, q)
     @assert size(b) == (2,)
 
     group_log!(SO2, Ω, R)
@@ -265,13 +265,13 @@ function group_log!(G::SpecialEuclidean{2}, v, y)
     @inbounds begin
         b[1] = α * t[1] + β * t[2]
         b[2] = α * t[2] - β * t[1]
-        _padvector!(G, v)
+        _padvector!(G, X)
     end
-    return v
+    return X
 end
-function group_log!(G::SpecialEuclidean{3}, v, y)
-    b, Ω = submanifold_components(G, v)
-    t, R = submanifold_components(G, y)
+function group_log!(G::SpecialEuclidean{3}, X, q)
+    b, Ω = submanifold_components(G, X)
+    t, R = submanifold_components(G, q)
     @assert size(Ω) == (3, 3)
     @assert size(b) == (3,)
 
@@ -291,6 +291,6 @@ function group_log!(G::SpecialEuclidean{3}, v, y)
     Ω .= (R .- transpose(R)) .* α
     Jₗ⁻¹ = I - Ω ./ 2 .+ β .* Ω^2
     mul!(b, Jₗ⁻¹, t)
-    @inbounds _padvector!(G, v)
-    return v
+    @inbounds _padvector!(G, X)
+    return X
 end

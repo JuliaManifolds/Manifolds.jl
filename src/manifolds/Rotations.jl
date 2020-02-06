@@ -677,7 +677,7 @@ For $\mathrm{SO}(n)$ where $n \ge 4$, the additional elements of $\omega$ are
 $X^i_{j (j - 3)/2 + k + 1} = X_{jk}$, for $j  ∈ [4, n], k ∈ [1,j)$.
 """
 vee(::Rotations, ::Any...)
-vee(M::Rotations{2}, x, Ω) = [Ω[2]]
+vee(M::Rotations{2}, p, X) = [X[2]]
 
 function vee!(M::Rotations{N}, Xⁱ, p, X) where {N}
     @assert size(X) == (N, N)

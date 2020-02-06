@@ -82,10 +82,10 @@ end
 @doc raw"""
     apply_diff(A::AbstractGroupAction, a, p, X)
 
-For group point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action of the
-differential of the action of $a ∈ G$ on $X$, specified by rule `A`. Written as
-$(\mathrm{d}τ_a)_p (X)$, with the specified left or right convention, the differential
-transports vectors
+For group point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action
+of the differential of the action of $a ∈ \mathcal{G}$ on $X$, specified by rule `A`.
+Written as $(\mathrm{d}τ_a)_p (X)$, with the specified left or right convention, the
+differential transports vectors
 
 ````math
 \begin{aligned}
@@ -105,10 +105,10 @@ end
 @doc raw"""
     inverse_apply_diff(A::AbstractGroupAction, a, p, X)
 
-For group point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action of the
-differential of the inverse action of $a ∈ G$ on $X$, specified by rule `A`. Written as
-$(\mathrm{d}τ_a)_p^{-1} (X)$, with the specified left or right convention, the
-differential transports vectors
+For group point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action
+of the differential of the inverse action of $a ∈ \mathcal{G}$ on $X$, specified by rule
+`A`. Written as $(\mathrm{d}τ_a)_p^{-1} (X)$, with the specified left or right convention,
+the differential transports vectors
 
 ````math
 \begin{aligned}
@@ -137,9 +137,9 @@ compose!(A::AbstractGroupAction{RightAction}, q, a, b) = compose!(base_group(A),
 Calculate an action element of action `A` that acts upon `p` to produce
 the element closest to `q` in the metric of the G-manifold:
 ```math
-\arg\min_{g ∈ G} d_M(g ⋅ p, q)
+\arg\min_{g ∈ \mathcal{G}} d_M(g ⋅ p, q)
 ```
-where $G$ is the group that acts on the G-manifold $\mathcal M$.
+where $\mathcal{G}$ is the group that acts on the G-manifold $\mathcal M$.
 """
 function optimal_alignment(A::AbstractGroupAction, p, q)
     error("optimal_alignment not implemented for $(typeof(A)) and points $(typeof(p)) and $(typeof(q)).")
@@ -161,7 +161,7 @@ end
         A::AbstractGroupAction,
         pts,
         p,
-        mean_method::AbstractEstimationMethod = GradientDescentEstimation()
+        mean_method::AbstractEstimationMethod = GradientDescentEstimation(),
     )
 
 Calculate an action element $g$ of action `A` that is the mean element of the orbit of `p`
@@ -170,7 +170,7 @@ with respect to given set of points `pts`. The [`mean`](@ref) is calculated usin
 
 The orbit of $p$ with respect to the action of a group $G$ is the set
 ````math
-O = \{ g ⋅ p : g ∈ G \}.
+O = \{ g ⋅ p : g ∈ \mathcal{G} \}.
 ````
 This function is useful for computing means on quotients of manifolds by a Lie group action.
 """

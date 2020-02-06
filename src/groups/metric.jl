@@ -1,17 +1,18 @@
 @doc doc"""
     has_invariant_metric(G::AbstractGroupManifold, conv::ActionDirection) -> Val
 
-Return `Val(true)` if the metric on the group $G$ is invariant under translations by the
-specified direction, that is, given a group $G$, a left- or right group translation map $τ$,
-and a metric $g_e$ on the Lie algebra, a $τ$-invariant metric at any point $x ∈ G$ is
-defined as a metric with the inner product
+Return `Val(true)` if the metric on the group $\mathcal{G}$ is invariant under translations
+by the specified direction, that is, given a group $\mathcal{G}$, a left- or right group
+translation map $τ$, and a metric $g_e$ on the Lie algebra, a $τ$-invariant metric at any
+point $p ∈ \mathcal{G}$ is defined as a metric with the inner product
 
 ````math
-g_x(v, w) = g_{τ_y x}((\mathrm{d}τ_y)_x v, (\mathrm{d}τ_y)_x w),
+g_p(X, Y) = g_{τ_q p}((\mathrm{d}τ_q)_p X, (\mathrm{d}τ_q)_p Y),
 ````
 
-for $v,w ∈ T_x G$ and all $y ∈ G$, where $(\mathrm{d}τ_y)_x$ is the action of the
-differential of translation by $y$ evaluated at $x$ (see [`translate_diff`](@ref)).
+for $X,Y ∈ T_q \mathcal{G}$ and all $q ∈ \mathcal{G}$, where $(\mathrm{d}τ_q)_p$ is the
+action of the differential of translation by $q$ evaluated at $p$ (see
+[`translate_diff`](@ref)).
 """
 function has_invariant_metric(M::Manifold, conv::ActionDirection)
     return has_invariant_metric(M, conv, is_decorator_manifold(M))
@@ -39,20 +40,21 @@ end
 @doc doc"""
     check_has_invariant_metric(
         G::AbstractGroupManifold,
-        x,
-        v,
-        w,
-        ys::AbstractVector,
+        p,
+        X,
+        Y,
+        qs::AbstractVector,
         conv::ActionDirection = LeftAction();
         kwargs...,
     ) -> Bool
 
-Check whether the metric on the group $G$ is invariant using a set of predefined points.
-Namely, for $x ∈ G$, $v,w \in T_x G$, a metric $g$, and a translation map $τ_y$ in the
-specified direction, check for each $y ∈ G$ that the following condition holds:
+Check whether the metric on the group $\mathcal{G}$ is invariant using a set of predefined
+points. Namely, for $p ∈ \mathcal{G}$, $X,Y \in T_p \mathcal{G}$, a metric $g$, and a
+translation map $τ_q$ in the specified direction, check for each $q ∈ \mathcal{G}$ that the
+following condition holds:
 
 ````math
-g_x(v, w) ≈ g_{τ_y x}((\mathrm{d}τ_y)_x v, (\mathrm{d}τ_y)_x w).
+g_p(X, Y) ≈ g_{τ_q p}((\mathrm{d}τ_q)_p X, (\mathrm{d}τ_q)_p Y).
 ````
 
 This is necessary but not sufficient for invariance.
@@ -61,19 +63,19 @@ Optionally, `kwargs` passed to `isapprox` may be provided.
 """
 function check_has_invariant_metric(
     M::Manifold,
-    x,
-    v,
-    w,
-    ys,
+    p,
+    X,
+    Y,
+    qs,
     conv::ActionDirection = LeftAction();
     kwargs...,
 )
-    ip = inner(M, x, v, w)
-    for y in ys
-        τx = translate(M, y, x, conv)
-        dτv = translate_diff(M, y, x, v, conv)
-        dτw = translate_diff(M, y, x, w, conv)
-        isapprox(ip, inner(M, τx, dτv, dτw); kwargs...) || return false
+    ip = inner(M, p, X, Y)
+    for q in qs
+        τp = translate(M, q, p, conv)
+        dτX = translate_diff(M, q, p, X, conv)
+        dτY = translate_diff(M, q, p, Y, conv)
+        isapprox(ip, inner(M, τp, dτX, dτY); kwargs...) || return false
     end
     return true
 end
@@ -84,21 +86,22 @@ end
 Extend a metric on the Lie algebra of an [`AbstractGroupManifold`](@ref) to the whole group
 via translation in the specified direction.
 
-Given a group $G$ and a left- or right group translation map $τ$ on the group, a metric $g$
-is $τ$-invariant if it has the inner product
+Given a group $\mathcal{G}$ and a left- or right group translation map $τ$ on the group, a
+metric $g$ is $τ$-invariant if it has the inner product
 
 ````math
-g_x(v, w) = g_{τ_y x}((\mathrm{d}τ_y)_x v, (\mathrm{d}τ_y)_x w),
+g_p(X, Y) = g_{τ_q p}((\mathrm{d}τ_q)_p X, (\mathrm{d}τ_q)_p Y),
 ````
 
-for all $x,y ∈ G$ and $v,w ∈ T_x G$, where $(\mathrm{d}τ_y)_x$ is the action of the
-differential of translation by $y$ evaluated at $x$ (see [`translate_diff`](@ref)).
+for all $p,q ∈ \mathcal{G}$ and $X,Y ∈ T_p \mathcal{G}$, where $(\mathrm{d}τ_q)_p$ is the
+action of the differential of translation by $q$ evaluated at $p$ (see
+[`translate_diff`](@ref)).
 
 `InvariantMetric` constructs an (assumed) $τ$-invariant metric by extending the inner
-product of an metric $h_e$ on the Lie algebra to the whole group:
+product of a metric $h_e$ on the Lie algebra to the whole group:
 
 ````math
-g_x(v, w) = h_e((\mathrm{d}τ_x)_x^{-1} v, (\mathrm{d}τ_x)_x^{-1} w).
+g_p(X, Y) = h_e((\mathrm{d}τ_p)_p^{-1} X, (\mathrm{d}τ_p)_p^{-1} Y).
 ````
 
 !!! warning
@@ -147,32 +150,32 @@ function has_invariant_metric(
     return Val(true)
 end
 
-function exp!(M::MetricManifold{<:AbstractGroupManifold}, ::Val{false}, y, x, v)
+function exp!(M::MetricManifold{<:AbstractGroupManifold}, ::Val{false}, q, p, X)
     if has_biinvariant_metric(M) === Val(true)
-        return retract!(M, y, x, v, GroupExponentialRetraction(LeftAction()))
+        return retract!(M, q, p, X, GroupExponentialRetraction(LeftAction()))
     end
     return invoke(
         exp!,
-        Tuple{MetricManifold,Val{false},typeof(y),typeof(x),typeof(v)},
+        Tuple{MetricManifold,Val{false},typeof(q),typeof(p),typeof(X)},
         M,
         Val(false),
-        y,
-        x,
-        v,
+        q,
+        p,
+        X,
     )
 end
 
-function log!(M::MetricManifold{<:AbstractGroupManifold}, ::Val{false}, v, x, y)
+function log!(M::MetricManifold{<:AbstractGroupManifold}, ::Val{false}, X, p, q)
     if has_biinvariant_metric(M) === Val(true)
-        return inverse_retract!(M, v, x, y, GroupLogarithmicInverseRetraction(LeftAction()))
+        return inverse_retract!(M, X, p, q, GroupLogarithmicInverseRetraction(LeftAction()))
     end
     return invoke(
         log!,
-        Tuple{MetricManifold,Val{false},typeof(v),typeof(x),typeof(y)},
+        Tuple{MetricManifold,Val{false},typeof(X),typeof(p),typeof(q)},
         M,
         Val(false),
-        v,
-        x,
-        y,
+        X,
+        p,
+        q,
     )
 end

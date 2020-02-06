@@ -36,23 +36,23 @@ function inverse_translate_diff!(G::SpecialOrthogonal, Y, p, q, X, conv::ActionD
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
 end
 
-group_exp!(G::SpecialOrthogonal, y, v) = exp!(G, y, Identity(G), v)
+group_exp!(G::SpecialOrthogonal, q, X) = exp!(G, q, Identity(G), X)
 
-group_log!(G::SpecialOrthogonal, v, y) = log!(G, v, Identity(G), y)
+group_log!(G::SpecialOrthogonal, X, q) = log!(G, X, Identity(G), q)
 
 function allocate_result(
     ::GT,
     ::typeof(exp),
     ::Identity{GT},
-    v,
+    X,
 ) where {n,GT<:SpecialOrthogonal{n}}
-    return allocate(v)
+    return allocate(X)
 end
 function allocate_result(
     ::GT,
     ::typeof(log),
     ::Identity{GT},
-    y,
+    q,
 ) where {n,GT<:SpecialOrthogonal{n}}
-    return allocate(y)
+    return allocate(q)
 end

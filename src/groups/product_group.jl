@@ -268,28 +268,28 @@ function inverse_translate_diff!(M::ProductManifold, Y, p, q, X, conv::ActionDir
     return Y
 end
 
-function group_exp(M::ProductManifold, v::ProductRepr)
-    return ProductRepr(map(group_exp, M.manifolds, submanifold_components(M, v))...)
+function group_exp(M::ProductManifold, X::ProductRepr)
+    return ProductRepr(map(group_exp, M.manifolds, submanifold_components(M, X))...)
 end
-function group_exp(M::ProductManifold, v)
-    y = allocate_result(M, group_exp, v)
-    return group_exp!(M, y, v)
-end
-
-function group_exp!(M::ProductManifold, y, v)
-    map(group_exp!, M.manifolds, submanifold_components(M, y), submanifold_components(M, v))
-    return y
+function group_exp(M::ProductManifold, X)
+    q = allocate_result(M, group_exp, X)
+    return group_exp!(M, q, X)
 end
 
-function group_log(M::ProductManifold, y::ProductRepr)
-    return ProductRepr(map(group_log, M.manifolds, submanifold_components(M, y))...)
-end
-function group_log(M::ProductManifold, y)
-    v = zero_tangent_vector(G, y)
-    return group_log!(M, v, y)
+function group_exp!(M::ProductManifold, q, X)
+    map(group_exp!, M.manifolds, submanifold_components(M, q), submanifold_components(M, X))
+    return q
 end
 
-function group_log!(M::ProductManifold, v, y)
-    map(group_log!, M.manifolds, submanifold_components(M, v), submanifold_components(M, y))
-    return v
+function group_log(M::ProductManifold, q::ProductRepr)
+    return ProductRepr(map(group_log, M.manifolds, submanifold_components(M, q))...)
+end
+function group_log(M::ProductManifold, q)
+    X = zero_tangent_vector(G, q)
+    return group_log!(M, X, q)
+end
+
+function group_log!(M::ProductManifold, X, q)
+    map(group_log!, M.manifolds, submanifold_components(M, X), submanifold_components(M, q))
+    return X
 end

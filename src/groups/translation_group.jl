@@ -1,5 +1,5 @@
 @doc raw"""
-    TranslationGroup{T<:Tuple,F} <: GroupManifold{Euclidean{T,F},AdditionOperation}
+    TranslationGroup{T<:Tuple,𝔽} <: GroupManifold{Euclidean{T,𝔽},AdditionOperation}
 
 Translation group $\mathrm{T}(n)$ represented by translation arrays.
 
@@ -9,7 +9,7 @@ Translation group $\mathrm{T}(n)$ represented by translation arrays.
 Generate the translation group on
 $𝔽^{n₁,…,nᵢ}$ = `Euclidean(n₁,...,nᵢ; field = 𝔽)`, which is isomorphic to group itself.
 """
-const TranslationGroup{T<:Tuple,F} = GroupManifold{Euclidean{T,F},AdditionOperation}
+const TranslationGroup{T<:Tuple,𝔽} = GroupManifold{Euclidean{T,𝔽},AdditionOperation}
 
 function TranslationGroup(n::Int...; field::AbstractNumbers = ℝ)
     return TranslationGroup{Tuple{n...},field}(
@@ -18,8 +18,8 @@ function TranslationGroup(n::Int...; field::AbstractNumbers = ℝ)
     )
 end
 
-function show(io::IO, ::TranslationGroup{N,F}) where {N,F}
-    print(io, "TranslationGroup($(join(N.parameters, ", ")); field = $(F))")
+function show(io::IO, ::TranslationGroup{N,𝔽}) where {N,𝔽}
+    print(io, "TranslationGroup($(join(N.parameters, ", ")); field = $(𝔽))")
 end
 
 has_invariant_metric(::TranslationGroup, ::ActionDirection) = Val(true)
