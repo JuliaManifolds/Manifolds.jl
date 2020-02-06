@@ -447,7 +447,7 @@ For group elements $p, q ∈ \mathcal{G}$ and tangent vector $X ∈ T_q \mathcal
 the action of the differential of the translation $τ_p$ by $p$ on $X$, with the specified
 left or right `conv`ention. The differential transports vectors:
 ```math
-(\mathrm{d}τ_p)_q (X) : T_q \mathcal{G} → T_{τ_p q} \mathcal{G}\\
+(\mathrm{d}τ_p)_q : T_q \mathcal{G} → T_{τ_p q} \mathcal{G}\\
 ```
 """
 translate_diff(M::Manifold, p, q, X) = translate_diff(M, p, q, X, LeftAction())
@@ -488,7 +488,7 @@ For group elements $p, q ∈ \mathcal{G}$ and tangent vector $X ∈ T_q \mathcal
 the action on $X$ of the differential of the inverse translation $τ_p$ by $p$, with the
 specified left or right `conv`ention. The differential transports vectors:
 ```math
-((\mathrm{d}τ_p^{-1})_q) (X) : T_q \mathcal{G} → T_{τ_p^{-1} q} \mathcal{G}\\
+(\mathrm{d}τ_p^{-1})_q : T_q \mathcal{G} → T_{τ_p^{-1} q} \mathcal{G}\\
 ```
 """
 function inverse_translate_diff(M::Manifold, p, q, X)
