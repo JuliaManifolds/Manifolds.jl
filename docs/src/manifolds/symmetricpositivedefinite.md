@@ -10,7 +10,7 @@ The symmetric positive definite matrices
 SymmetricPositiveDefinite
 ```
 
-can -- for example -- be illustrated as ellipsoids:  since the eigen values are all positive they can be taken as lengths of the axes of an ellipsoids while the directions are given by the eigenvectors.
+can -- for example -- be illustrated as ellipsoids:  since the eigenvalues are all positive they can be taken as lengths of the axes of an ellipsoids while the directions are given by the eigenvectors.
 
 ![An example set of data](../assets/images/SPDSignal.png)
 

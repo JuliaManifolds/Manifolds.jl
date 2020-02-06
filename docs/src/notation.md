@@ -1,12 +1,11 @@
 # Notation overview
 
 Since manifolds include a reasonable amount of elements and functions, the following list tries to keep an overview of used notation throughout `Manifolds.jl`.
-The order is alphabetically by name.
+The order is alphabetical by name.
 They might be used in a plain form within the code or when referring to that code.
-This is for example the case the calligraphic symbols.
+This is for example the case with the calligraphic symbols.
 
-Within the documented functions the utf8 symbols are used whenever possible,
-as long as that renders still in $\TeX$ within this documentation.
+Within the documented functions, the utf8 symbols are used whenever possible, as long as that renders correctly in $\TeX$ within this documentation.
 
 | Symbol | Description | Also used | Comment |
 |:--:|:--------------- |:--:|:-- |
