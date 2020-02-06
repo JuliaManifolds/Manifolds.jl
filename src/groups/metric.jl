@@ -67,12 +67,12 @@ function check_has_invariant_metric(
     conv::ActionDirection = LeftAction();
     kwargs...,
 )
-    ip = inner(M, p, X, Y)
+    gpXY = inner(M, p, X, Y)
     for q in qs
-        τp = translate(M, q, p, conv)
-        dτX = translate_diff(M, q, p, X, conv)
-        dτY = translate_diff(M, q, p, Y, conv)
-        isapprox(ip, inner(M, τp, dτX, dτY); kwargs...) || return false
+        τq = translate(M, q, p, conv)
+        dτqX = translate_diff(M, q, p, X, conv)
+        dτqY = translate_diff(M, q, p, Y, conv)
+        isapprox(gpXY, inner(M, τq, dτqX, dτqY); kwargs...) || return false
     end
     return true
 end
