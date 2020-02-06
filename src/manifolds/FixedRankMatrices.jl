@@ -261,12 +261,7 @@ function project_tangent!(
     Y.Vt .= (aTu - p.Vt' * uTav')'
     return Y
 end
-function project_tangent!(
-    M::FixedRankMatrices,
-    Y::UMVTVector,
-    p::SVDMPoint,
-    X::UMVTVector,
-)
+function project_tangent!(M::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, X::UMVTVector)
     return project_tangent!(M, Y, p, X.U * X.M * X.Vt)
 end
 

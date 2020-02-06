@@ -219,7 +219,12 @@ function allocate_result(M::Manifold, ::typeof(hat), e::Identity, Xⁱ)
     is_decorator_group(M) === Val(true) && return allocate_result(base_group(M), hat, e, Xⁱ)
     error("allocate_result not implemented for manifold $(M), function hat, point $(e), and vector $(Xⁱ).")
 end
-function allocate_result(G::GT, ::typeof(hat), ::Identity{GT}, Xⁱ) where {GT<:AbstractGroupManifold}
+function allocate_result(
+    G::GT,
+    ::typeof(hat),
+    ::Identity{GT},
+    Xⁱ,
+) where {GT<:AbstractGroupManifold}
     B = VectorBundleFibers(TangentSpace, G)
     return allocate(Xⁱ, Size(representation_size(B)))
 end
@@ -227,7 +232,12 @@ function allocate_result(M::Manifold, ::typeof(vee), e::Identity, X)
     is_decorator_group(M) === Val(true) && return allocate_result(base_group(M), vee, e, X)
     error("allocate_result not implemented for manifold $(M), function vee, point $(e), and vector $(X).")
 end
-function allocate_result(G::GT, ::typeof(vee), ::Identity{GT}, X) where {GT<:AbstractGroupManifold}
+function allocate_result(
+    G::GT,
+    ::typeof(vee),
+    ::Identity{GT},
+    X,
+) where {GT<:AbstractGroupManifold}
     return allocate(X, Size(manifold_dimension(G)))
 end
 
@@ -503,7 +513,8 @@ end
 function inverse_translate_diff!(M::Manifold, Y, p, q, X, conv::ActionDirection)
     return inverse_translate_diff!(M, Y, p, q, X, conv, is_decorator_manifold(M))
 end
-function inverse_translate_diff!(M::Manifold,
+function inverse_translate_diff!(
+    M::Manifold,
     Y,
     p,
     q,

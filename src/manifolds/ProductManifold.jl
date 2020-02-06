@@ -569,7 +569,11 @@ function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::AbstractArra
     return copyto!(v, rand(rng, d))
 end
 function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, X::ProductRepr)
-    map(t -> _rand!(rng, t[1], t[2]), d.distributions, submanifold_components(d.space.manifold, X))
+    map(
+        t -> _rand!(rng, t[1], t[2]),
+        d.distributions,
+        submanifold_components(d.space.manifold, X),
+    )
     return X
 end
 

@@ -403,7 +403,8 @@ function isapprox(B::VectorBundle, p, X, Y; kwargs...)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
-    return isapprox(B.manifold, VXM, VYM; kwargs...) && isapprox(B.manifold, px, VXF, VYF; kwargs...)
+    return isapprox(B.manifold, VXM, VYM; kwargs...) &&
+           isapprox(B.manifold, px, VXF, VYF; kwargs...)
 end
 
 @doc raw"""
@@ -437,7 +438,9 @@ function log!(B::VectorBundle, X, p, q)
     return X
 end
 
-manifold_dimension(B::VectorBundle) = manifold_dimension(B.manifold) + vector_space_dimension(B.fiber)
+function manifold_dimension(B::VectorBundle)
+    return manifold_dimension(B.manifold) + vector_space_dimension(B.fiber)
+end
 
 """
     norm(B::VectorBundleFibers, p, q)
@@ -520,7 +523,9 @@ end
 
 Base.@propagate_inbounds setindex!(x::FVector, val, i) = setindex!(x.data, val, i)
 
-representation_size(B::VectorBundleFibers{<:TCoTSpaceType}) = representation_size(B.manifold)
+function representation_size(B::VectorBundleFibers{<:TCoTSpaceType})
+    return representation_size(B.manifold)
+end
 function representation_size(B::VectorBundle)
     len_manifold = prod(representation_size(B.manifold))
     len_vs = prod(representation_size(B.fiber))
@@ -626,7 +631,9 @@ Dimension of the vector space of type `B`.
 function vector_space_dimension(B::VectorBundleFibers)
     error("vector_space_dimension not implemented for vector space family $(typeof(B)).")
 end
-vector_space_dimension(B::VectorBundleFibers{<:TCoTSpaceType}) = manifold_dimension(B.manifold)
+function vector_space_dimension(B::VectorBundleFibers{<:TCoTSpaceType})
+    return manifold_dimension(B.manifold)
+end
 function vector_space_dimension(B::VectorBundleFibers{<:TensorProductType})
     dim = 1
     for space in B.fiber.spaces

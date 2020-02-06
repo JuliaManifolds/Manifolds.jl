@@ -29,10 +29,8 @@ is both left- and right-invariant (see [`has_invariant_metric`](@ref)).
 """
 function has_biinvariant_metric(M::Manifold)
     return Val(
-        (
-            has_invariant_metric(M, LeftAction()) === Val(true) &&
-            has_invariant_metric(M, RightAction()) === Val(true)
-        ),
+        has_invariant_metric(M, LeftAction()) === Val(true) &&
+        has_invariant_metric(M, RightAction()) === Val(true),
     )
 end
 
