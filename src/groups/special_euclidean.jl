@@ -97,18 +97,7 @@ R & t \\
 \end{pmatrix}.
 ````
 
-    affine_matrix(G::SpecialEuclidean, e, X) -> AbstractMatrix
-
-Represent the Lie algebra element $X ∈ 𝔰𝔢(n) = T_e \mathrm{SE}(n)$ as a (screw) matrix.
-For $X = (b, Ω) ∈ 𝔰𝔢(n)$, where $Ω ∈ 𝔰𝔬(n) = T_e \mathrm{SO}(n)$, the screw representation is
-the $n + 1 × n + 1$ matrix
-
-````math
-\begin{pmatrix}
-Ω & b \\
-0^\mathrm{T} & 0
-\end{pmatrix}.
-````
+See also [`screw_matrix`](@ref) for matrix representations of the Lie algebra.
 """
 function affine_matrix(G::SpecialEuclidean{n}, p) where {n}
     pis = submanifold_components(G, p)
@@ -119,19 +108,41 @@ function affine_matrix(G::SpecialEuclidean{n}, p) where {n}
 end
 affine_matrix(::SpecialEuclidean{n}, p::AbstractMatrix) where {n} = p
 @generated function affine_matrix(::GT, ::Identity{GT}) where {n,GT<:SpecialEuclidean{n}}
-    return SDiagonal{n}(I)
+    s = maybesize(Size(n, n))
+    s isa Size && return SDiagonal{n,Float64}(I)
+    return Diagonal{Float64}(I, n)
 end
-function affine_matrix(G::SpecialEuclidean{n}, e, X) where {n}
+
+@doc doc"""
+    screw_matrix(G::SpecialEuclidean, X) -> AbstractMatrix
+
+Represent the Lie algebra element $X ∈ 𝔰𝔢(n) = T_e \mathrm{SE}(n)$ as a screw matrix.
+For $X = (b, Ω) ∈ 𝔰𝔢(n)$, where $Ω ∈ 𝔰𝔬(n) = T_e \mathrm{SO}(n)$, the screw representation is
+the $n + 1 × n + 1$ matrix
+
+````math
+\begin{pmatrix}
+Ω & b \\
+0^\mathrm{T} & 0
+\end{pmatrix}.
+````
+
+See also [`affine_matrix`](@ref) for matrix representations of the Lie group.
+"""
+function screw_matrix(G::SpecialEuclidean{n}, X) where {n}
     Xis = submanifold_components(G, X)
-    Xmat = allocate_result(G, affine_matrix, Xis...)
+    Xmat = allocate_result(G, screw_matrix, Xis...)
     map(copyto!, submanifold_components(G, Xmat), Xis)
     @inbounds _padvector!(G, Xmat)
     return Xmat
 end
-affine_matrix(::SpecialEuclidean{n}, e, X::AbstractMatrix) where {n} = X
+screw_matrix(::SpecialEuclidean{n}, X::AbstractMatrix) where {n} = X
 
 function allocate_result(G::SpecialEuclidean{n}, f::typeof(affine_matrix), p...) where {n}
     return allocate(p[1], Size(n + 1, n + 1))
+end
+function allocate_result(G::SpecialEuclidean{n}, f::typeof(screw_matrix), X...) where {n}
+    return allocate(X[1], Size(n + 1, n + 1))
 end
 
 compose(::SpecialEuclidean, p::AbstractMatrix, q::AbstractMatrix) = p * q
@@ -156,7 +167,7 @@ Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(n)$, where $b ∈ �
 
 where $t ∈ \mathrm{T}(n)$ and $R = \exp Ω$ is the group exponential on $\mathrm{SO}(n)$.
 
-In the [`affine_matrix`](@ref) representation, the group exponential is the matrix
+In the [`screw_matrix`](@ref) representation, the group exponential is the matrix
 exponential (see [`group_exp`](@ref)).
 
     group_exp(G::SpecialEuclidean{2}, X)
@@ -195,7 +206,7 @@ and $θ$ is the same as above.
 group_exp(::SpecialEuclidean, ::Any)
 
 function group_exp!(G::SpecialEuclidean, q, X)
-    Xmat = affine_matrix(G, Identity(G), X)
+    Xmat = screw_matrix(G, X)
     qmat = exp(Xmat)
     map(copyto!, submanifold_components(G, q), submanifold_components(G, qmat))
     _padpoint!(G, q)

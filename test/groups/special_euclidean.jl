@@ -58,7 +58,7 @@ include("group_utils.jl")
                 w2 = allocate(w)
                 w2.parts[1] .= w.parts[1]
                 w2.parts[2] .= pts[1].parts[2] * w.parts[2]
-                @test affine_matrix(G, pts[1], w2) ≈ affine_matrix(G, pts[1]) * affine_matrix(G, Identity(G), v_pts[1])
+                @test screw_matrix(G, w2) ≈ affine_matrix(G, pts[1]) * screw_matrix(G, v_pts[1])
 
                 test_group(G, pts, v_pts, v_pts; test_diff = true, diff_convs = [(), (LeftAction(),)])
             end
@@ -73,20 +73,26 @@ include("group_utils.jl")
             t2, R2 = g2.parts
             g1g2 = ProductRepr(R1 * t2 + t1, R1 * R2)
             @test isapprox(G, compose(G, g1, g2), g1g2)
-            @test affine_matrix(G, g1g2) ≈ affine_matrix(G, g1) * affine_matrix(G, g2)
+            g1g2mat = affine_matrix(G, g1g2)
+            @test g1g2mat ≈ affine_matrix(G, g1) * affine_matrix(G, g2)
+            @test affine_matrix(G, g1g2mat) === g1g2mat
+            @test affine_matrix(G, Identity(G)) isa SDiagonal{n,Float64}
+            @test affine_matrix(G, Identity(G)) == SDiagonal{n,Float64}(I)
 
             w = translate_diff(G, pts[1], Identity(G), v_pts[1])
             w2 = allocate(w)
             w2.parts[1] .= w.parts[1]
             w2.parts[2] .= pts[1].parts[2] * w.parts[2]
-            @test affine_matrix(G, pts[1], w2) ≈ affine_matrix(G, pts[1]) * affine_matrix(G, Identity(G), v_pts[1])
+            w2mat = screw_matrix(G, w2)
+            @test w2mat ≈ affine_matrix(G, pts[1]) * screw_matrix(G, v_pts[1])
+            @test screw_matrix(G, w2mat) === w2mat
 
             test_group(G, pts, v_pts, v_pts; test_diff = true, diff_convs = [(), (LeftAction(),)])
         end
 
         @testset "affine matrix" begin
             pts = [affine_matrix(G, ProductRepr(tp...)) for tp in tuple_pts]
-            v_pts = [affine_matrix(G, Identity(G), ProductRepr(tuple_v...))]
+            v_pts = [screw_matrix(G, ProductRepr(tuple_v...))]
             test_group(G, pts, v_pts, v_pts; test_diff = true, diff_convs = [(), (LeftAction(),)])
         end
 
@@ -99,9 +105,13 @@ include("group_utils.jl")
             @test v ≈ vexp
             @test hat(G, x, v) ≈ V
 
-            v = vee(G, affine_matrix(G, x), affine_matrix(G, x, V))
+            v = vee(G, affine_matrix(G, x), screw_matrix(G, V))
             @test v ≈ vexp
-            @test hat(G, affine_matrix(G, x), v) ≈ affine_matrix(G, x, V)
+            @test hat(G, affine_matrix(G, x), v) ≈ screw_matrix(G, V)
         end
     end
+
+    G = SpecialEuclidean(11)
+    @test affine_matrix(G, Identity(G)) isa Diagonal{Float64,Vector{Float64}}
+    @test affine_matrix(G, Identity(G)) == Diagonal(ones(11))
 end
