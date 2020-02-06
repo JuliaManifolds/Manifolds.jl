@@ -31,12 +31,11 @@ direction(::AbstractGroupAction{AD}) where {AD} = AD()
 @doc raw"""
     apply(A::AbstractGroupAction, a, p)
 
-Apply action `a` to the point `p`. The action is specified by `A`.
-Unless otherwise specified, right actions are defined in terms of the left action. For
-point $p ∈ \mathcal M$ and action element $a$, the right action is
+Apply action `a` to the point `p` using map $τ_a$, specified by `A`.
+Unless otherwise specified, the right action is defined in terms of the left action:
 
 ````math
-p ⋅ a ≐ a^{-1} ⋅ p.
+\mathrm{R}_a = \mathrm{L}_{a^{-1}}
 ````
 """
 function apply(A::AbstractGroupAction, a, p)
@@ -83,15 +82,12 @@ end
     apply_diff(A::AbstractGroupAction, a, p, X)
 
 For group point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action
-of the differential of the action of $a ∈ \mathcal{G}$ on $X$, specified by rule `A`.
-Written as $(\mathrm{d}τ_a)_p (X)$, with the specified left or right convention, the
+on $X$ of the differential of the action of $a ∈ \mathcal{G}$, specified by rule `A`.
+Written as $(\mathrm{d}τ_a)_p$, with the specified left or right convention, the
 differential transports vectors
 
 ````math
-\begin{aligned}
-(\mathrm{d}L_a)_p (X) &: T_p \mathcal M → T_{a ⋅ p} \mathcal M\\
-(\mathrm{d}R_a)_p (X) &: T_p \mathcal M → T_{p ⋅ a} \mathcal M
-\end{aligned}
+(\mathrm{d}τ_a)_p : T_p \mathcal M → T_{τ_a p} \mathcal M
 ````
 """
 function apply_diff(A::AbstractGroupAction, a, p, X)
@@ -106,15 +102,12 @@ end
     inverse_apply_diff(A::AbstractGroupAction, a, p, X)
 
 For group point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action
-of the differential of the inverse action of $a ∈ \mathcal{G}$ on $X$, specified by rule
-`A`. Written as $(\mathrm{d}τ_a)_p^{-1} (X)$, with the specified left or right convention,
+on $X$ of the differential of the inverse action of $a ∈ \mathcal{G}$, specified by rule
+`A`. Written as $(\mathrm{d}τ_a^{-1})_p$, with the specified left or right convention,
 the differential transports vectors
 
 ````math
-\begin{aligned}
-(\mathrm{d}L_a)_p^{-1} (X) &: T_p \mathcal M → T_{a^{-1} ⋅ p} \mathcal M\\
-(\mathrm{d}R_a)_p^{-1} (X) &: T_p \mathcal M → T_{p ⋅ a^{-1}} \mathcal M
-\end{aligned}
+(\mathrm{d}τ_a^{-1})_p : T_p \mathcal M → T_{τ_a^{-1} p} \mathcal M
 ````
 """
 function inverse_apply_diff(A::AbstractGroupAction, a, p, X)
@@ -134,10 +127,10 @@ compose!(A::AbstractGroupAction{RightAction}, q, a, b) = compose!(base_group(A),
 @doc raw"""
     optimal_alignment(A::AbstractGroupAction, p, q)
 
-Calculate an action element of action `A` that acts upon `p` to produce
+Calculate an action element $a$ of action `A` that acts upon `p` to produce
 the element closest to `q` in the metric of the G-manifold:
 ```math
-\arg\min_{g ∈ \mathcal{G}} d_M(g ⋅ p, q)
+\arg\min_{a ∈ \mathcal{G}} d_{\mathcal M}(τ_a p, q)
 ```
 where $\mathcal{G}$ is the group that acts on the G-manifold $\mathcal M$.
 """
@@ -170,7 +163,7 @@ with respect to given set of points `pts`. The [`mean`](@ref) is calculated usin
 
 The orbit of $p$ with respect to the action of a group $\mathcal{G}$ is the set
 ````math
-O = \{ a ⋅ p : a ∈ \mathcal{G} \}.
+O = \{ τ_a p : a ∈ \mathcal{G} \}.
 ````
 This function is useful for computing means on quotients of manifolds by a Lie group action.
 """

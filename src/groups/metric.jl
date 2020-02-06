@@ -3,16 +3,15 @@
 
 Return `Val(true)` if the metric on the group $\mathcal{G}$ is invariant under translations
 by the specified direction, that is, given a group $\mathcal{G}$, a left- or right group
-translation map $τ$, and a metric $g_e$ on the Lie algebra, a $τ$-invariant metric at any
-point $p ∈ \mathcal{G}$ is defined as a metric with the inner product
+translation map $τ$, and a metric $g_e$ on the Lie algebra, a $τ$-invariant metric at
+any point $p ∈ \mathcal{G}$ is defined as a metric with the inner product
 
 ````math
 g_p(X, Y) = g_{τ_q p}((\mathrm{d}τ_q)_p X, (\mathrm{d}τ_q)_p Y),
 ````
 
 for $X,Y ∈ T_q \mathcal{G}$ and all $q ∈ \mathcal{G}$, where $(\mathrm{d}τ_q)_p$ is the
-action of the differential of translation by $q$ evaluated at $p$ (see
-[`translate_diff`](@ref)).
+differential of translation by $q$ evaluated at $p$ (see [`translate_diff`](@ref)).
 """
 function has_invariant_metric(M::Manifold, conv::ActionDirection)
     return has_invariant_metric(M, conv, is_decorator_manifold(M))
@@ -94,14 +93,13 @@ g_p(X, Y) = g_{τ_q p}((\mathrm{d}τ_q)_p X, (\mathrm{d}τ_q)_p Y),
 ````
 
 for all $p,q ∈ \mathcal{G}$ and $X,Y ∈ T_p \mathcal{G}$, where $(\mathrm{d}τ_q)_p$ is the
-action of the differential of translation by $q$ evaluated at $p$ (see
-[`translate_diff`](@ref)).
+differential of translation by $q$ evaluated at $p$ (see [`translate_diff`](@ref)).
 
 `InvariantMetric` constructs an (assumed) $τ$-invariant metric by extending the inner
 product of a metric $h_e$ on the Lie algebra to the whole group:
 
 ````math
-g_p(X, Y) = h_e((\mathrm{d}τ_p)_p^{-1} X, (\mathrm{d}τ_p)_p^{-1} Y).
+g_p(X, Y) = h_e((\mathrm{d}τ_p^{-1})_p X, (\mathrm{d}τ_p^{-1})_p Y).
 ````
 
 !!! warning

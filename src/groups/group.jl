@@ -351,8 +351,8 @@ _action_order(p, q, conv::RightAction) = (q, p)
     translate(G::AbstractGroupManifold, p, q)
     translate(G::AbstractGroupManifold, p, q, conv::ActionDirection=LeftAction()])
 
-For group elements $p,q ∈ \mathcal{G}$, translate $q$ by $p$ with the specified convention,
-either left $L_p$ or right $R_p$, defined as
+Translate group element $q$ by $p$ with the translation $τ_p$ with the specified
+`conv`ention, either left ($L_p$) or right ($R_p$), defined as
 ```math
 \begin{aligned}
 L_p &: q ↦ p \circ q\\
@@ -392,8 +392,8 @@ end
     inverse_translate(G::AbstractGroupManifold, p, q)
     inverse_translate(G::AbstractGroupManifold, p, q, conv::ActionDirection=LeftAction())
 
-For group elements $p, q ∈ \mathcal{G}$, inverse translate $q$ by $p$ with the specified
-convention, either left $L_p^{-1}$ or right $R_p^{-1}$, defined as
+Inverse translate group element $q$ by $p$ with the inverse translation $τ_p^{-1}$ with the
+specified `conv`ention, either left ($L_p^{-1}$) or right ($R_p^{-1}$), defined as
 ```math
 \begin{aligned}
 L_p^{-1} &: q ↦ p^{-1} \circ q\\
@@ -434,14 +434,10 @@ end
     translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection=LeftAction())
 
 For group elements $p, q ∈ \mathcal{G}$ and tangent vector $X ∈ T_q \mathcal{G}$, compute
-the action of the differential of the translation by $p$ on $X$, written as
-$(\mathrm{d}τ_p)_q (X)$, with the specified left or right convention. The differential
-transports vectors:
+the action of the differential of the translation $τ_p$ by $p$ on $X$, with the specified
+left or right `conv`ention. The differential transports vectors:
 ```math
-\begin{aligned}
-(\mathrm{d}L_p)_q (X) &: T_q \mathcal{G} → T_{p \circ q} \mathcal{G}\\
-(\mathrm{d}R_p)_q (X) &: T_q \mathcal{G} → T_{q \circ p} \mathcal{G}\\
-\end{aligned}
+(\mathrm{d}τ_p)_q (X) : T_q \mathcal{G} → T_{τ_p q} \mathcal{G}\\
 ```
 """
 translate_diff(M::Manifold, p, q, X) = translate_diff(M, p, q, X, LeftAction())
@@ -478,16 +474,11 @@ end
     inverse_translate_diff(G::AbstractGroupManifold, p, q, X)
     inverse_translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection=LeftAction())
 
-For group elements $p, q ∈ \mathcal{G}$ and tangent vector $X ∈ T_q \mathcal{G}$, compute the inverse of the
-action of the differential of the translation by $p$ on $X$, written as
-$((\mathrm{d}τ_p)_q)^{-1} (X) = (\mathrm{d}τ_{p^{-1}})_q (X)$, with the specified left or
-right convention. The differential transports vectors as
-
+For group elements $p, q ∈ \mathcal{G}$ and tangent vector $X ∈ T_q \mathcal{G}$, compute
+the action on $X$ of the differential of the inverse translation $τ_p$ by $p$, with the
+specified left or right `conv`ention. The differential transports vectors:
 ```math
-\begin{aligned}
-((\mathrm{d}L_p)_q)^{-1} (X) &: T_q \mathcal{G} → T_{p^{-1} \circ q} \mathcal{G}\\
-((\mathrm{d}R_p)_q)^{-1} (X) &: T_q \mathcal{G} → T_{q \circ p^{-1}} \mathcal{G}\\
-\end{aligned}
+((\mathrm{d}τ_p^{-1})_q) (X) : T_q \mathcal{G} → T_{τ_p^{-1} q} \mathcal{G}\\
 ```
 """
 function inverse_translate_diff(M::Manifold, p, q, X)
@@ -708,10 +699,10 @@ With a group translation ([`translate`](@ref)) $τ_p$ in a specified direction, 
 retraction is
 
 ````math
-\operatorname{retr}_p = τ_p \circ \exp \circ (\mathrm{d}τ_p)_p^{-1},
+\operatorname{retr}_p = τ_p \circ \exp \circ (\mathrm{d}τ_p^{-1})_p,
 ````
 
-where $\exp$ is the group exponential ([`group_exp`](@ref)), and $(\mathrm{d}τ_p)_p^{-1}$ is
+where $\exp$ is the group exponential ([`group_exp`](@ref)), and $(\mathrm{d}τ_p^{-1})_p$ is
 the action of the differential of inverse translation $τ_p^{-1}$ evaluated at $p$ (see
 [`inverse_translate_diff`](@ref)).
 """
@@ -759,7 +750,7 @@ retraction is
 ````
 
 where $\log$ is the group logarithm ([`group_log`](@ref)), and $(\mathrm{d}τ_p)_e$ is the
-action of the differential of translation $τ_p$ evaluated at the identity element
+action of the differential of translation $τ_p$ evaluated at the identity element $e$
 (see [`translate_diff`](@ref)).
 """
 function inverse_retract(G::GroupManifold, p, q, method::GroupLogarithmicInverseRetraction)
