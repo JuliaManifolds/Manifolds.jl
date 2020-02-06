@@ -1,18 +1,62 @@
 
+"""
+    AbstractDiffBackend
+
+
+An abstract type for diff backends. See [`FiniteDifferencesBackend`](@ref) for
+an example.
+"""
 abstract type AbstractDiffBackend end
 
 struct NoneDiffBackend <: AbstractDiffBackend end
 
+
+"""
+    _derivative(f, p[, backend::AbstractDiffBackend])
+
+Compute the derivative of a callable `f` at point `p` computed using the given `backend`,
+an object of type [`AbstractDiffBackend`](@ref). If the backend is not explicitly
+specified, it is obtained using the function [`diff_backend`](@ref).
+
+!!! note
+
+    Not specifying the backend explicitly will usually result in a type instability
+    and decreased performance.
+"""
 function _derivative(f, p, backend::AbstractDiffBackend)
     error("_derivative not implemented for curve $(typeof(f)), point $(typeof(p)) and " *
           "backend $(typeof(backend))")
 end
 
+"""
+    _gradient(f, p[, backend::AbstractDiffBackend])
+
+Compute the gradient of a callable `f` at point `p` computed using the given `backend`,
+an object of type [`AbstractDiffBackend`](@ref). If the backend is not explicitly
+specified, it is obtained using the function [`diff_backend`](@ref).
+
+!!! note
+
+    Not specifying the backend explicitly will usually result in a type instability
+    and decreased performance.
+"""
 function _gradient(f, p, backend::AbstractDiffBackend)
     error("_gradient not implemented for field $(typeof(f)), point $(typeof(p)) and " *
           "backend $(typeof(backend))")
 end
 
+"""
+    _jacobian(f, p[, backend::AbstractDiffBackend])
+
+Compute the Jacobian of a callable `f` at point `p` computed using the given `backend`,
+an object of type [`AbstractDiffBackend`](@ref). If the backend is not explicitly
+specified, it is obtained using the function [`diff_backend`](@ref).
+
+!!! note
+
+    Not specifying the backend explicitly will usually result in a type instability
+    and decreased performance.
+"""
 function _jacobian(f, p, backend::AbstractDiffBackend)
     error("_jacobian not implemented for map $(typeof(f)), point $(typeof(p)) and " *
           "backend $(typeof(backend))")
@@ -26,7 +70,7 @@ constant [`_current_diff_backend`](@ref).
 
 # See also
 
-[`AbstractDiffBackend`](@ref), [`diff_backend`](@ref), [`diff_backend!`]
+[`AbstractDiffBackend`](@ref), [`diff_backend`](@ref), [`diff_backend!`](@ref)
 """
 mutable struct CurrentDiffBackend
     backend::AbstractDiffBackend

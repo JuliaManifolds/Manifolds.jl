@@ -44,7 +44,7 @@ makedocs(
             "Number systems" => "lib/numbers.md",
             "Public" => "lib/public.md",
             "Internals" => "lib/internals.md",
-            "Automatic differentiation" => "lib/autodiff.md"
+            "Differentiation" => "lib/differentiation.md"
         ]
     ]
 )

@@ -2,7 +2,8 @@
 """
     AbstractRiemannianDiffBackend
 
-An abstract type for diff backends. See [`AbstractDiffBackend`](@ref) for an example.
+An abstract type for diff backends. See [`RiemannianONBDiffBackend`](@ref) for
+an example.
 """
 abstract type AbstractRiemannianDiffBackend end
 
@@ -30,17 +31,6 @@ Compute the Riemannian Jacobian of a map `f` at point `x` using given backend.
 """
 r_jacobian(::AbstractMap, ::Any, ::AbstractRiemannianDiffBackend)
 
-"""
-    RiemannianONBDiffBackend(adbackend::AbstractDiffBackend) <: AbstractRiemannianDiffBackend
-
-Riemannian differentiation based on differentiation in [`ArbitraryOrthonormalBasis`](@ref)
-using backend `diff_backend`.
-"""
-struct RiemannianONBDiffBackend{TADBackend<:AbstractDiffBackend} <:
-       AbstractRiemannianDiffBackend
-    diff_backend::TADBackend
-end
-
 function r_derivative(f::AbstractCurve, p, backend::AbstractRiemannianDiffBackend)
     error("r_derivative not implemented for curve $(typeof(f)), point $(typeof(p)) and " *
           "backend $(typeof(backend))")
@@ -62,6 +52,16 @@ r_gradient(f::AbstractRealField, p) = r_gradient(f, p, rdiff_backend())
 
 r_jacobian(f::AbstractMap, p) = r_jacobian(f::AbstractMap, p, rdiff_backend())
 
+"""
+    RiemannianONBDiffBackend(adbackend::AbstractDiffBackend) <: AbstractRiemannianDiffBackend
+
+Riemannian differentiation based on differentiation in [`ArbitraryOrthonormalBasis`](@ref)
+using backend `diff_backend`.
+"""
+struct RiemannianONBDiffBackend{TADBackend<:AbstractDiffBackend} <:
+       AbstractRiemannianDiffBackend
+    diff_backend::TADBackend
+end
 
 """
     CurrentRiemannianDiffBackend(backend::AbstractRiemannianDiffBackend)
@@ -80,8 +80,8 @@ end
 """
     _current_rdiff_backend
 
-The instance of [`CurrentRiemannianDiffBackend`] that stores the globally default differentiation
-backend.
+The instance of [`CurrentRiemannianDiffBackend`](@ref) that stores the globally default
+differentiation backend.
 """
 const _current_rdiff_backend = CurrentRiemannianDiffBackend(RiemannianONBDiffBackend(diff_backend()))
 

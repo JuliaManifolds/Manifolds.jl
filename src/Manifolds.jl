@@ -488,5 +488,16 @@ export AbstractCurve,
     FunctionCurve,
     FunctionMap,
     FunctionRealField
-export codomain, diff_backend, diff_backend!, diff_backends, domain
+export AbstractDiffBackend,
+    AbstractRiemannianDiffBackend,
+    FiniteDifferencesBackend,
+    RiemannianONBDiffBackend
+export codomain,
+    diff_backend,
+    diff_backend!,
+    diff_backends,
+    domain,
+    r_derivative,
+    r_jacobian,
+    r_gradient
 end # module
