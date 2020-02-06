@@ -85,7 +85,12 @@ function r_derivative(f::AbstractCurve, t::Real, backend::RiemannianONBDiffBacke
 end
 
 function r_gradient(f::AbstractRealField, p, backend::RiemannianONBDiffBackend)
-    error("TODO")
+    M = domain(f)
+    X = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
+    onb_coords = _gradient(X, backend.diff_backend) do Y
+        return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
+    end
+    return get_vector(M, p, onb_coords, backend.basis)
 end
 
 function r_jacobian(f::AbstractMap, p, backend::RiemannianONBDiffBackend)

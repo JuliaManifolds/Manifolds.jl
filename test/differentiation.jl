@@ -100,3 +100,12 @@ end
     end
     @test isapprox(s2, c1(π/4), r_derivative(c1, π/4), [-sqrt(2)/2, 0.0, sqrt(2)/2])
 end
+
+@testset "Riemannian gradients" begin
+    s2 = Sphere(2)
+    f1 = FunctionRealField(s2) do p
+        return p[1]
+    end
+    q = [sqrt(2)/2, 0, sqrt(2)/2]
+    @test isapprox(s2, q, r_gradient(f1, q), [0.5, 0.0, -0.5])
+end
