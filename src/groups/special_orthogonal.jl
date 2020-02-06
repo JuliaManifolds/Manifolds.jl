@@ -18,8 +18,8 @@ show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(
 
 inv(::SpecialOrthogonal, p) = transpose(p)
 
-inverse_translate(G::SpecialOrthogonal, p, q, conv::LeftAction) = inv(G, p) * q
-inverse_translate(G::SpecialOrthogonal, p, q, conv::RightAction) = q * inv(G, p)
+inverse_translate(G::SpecialOrthogonal, p, q, ::LeftAction) = inv(G, p) * q
+inverse_translate(G::SpecialOrthogonal, p, q, ::RightAction) = q * inv(G, p)
 
 translate_diff(::SpecialOrthogonal, p, q, X, ::LeftAction) = X
 translate_diff(G::SpecialOrthogonal, p, q, X, ::RightAction) = inv(G, p) * X * p

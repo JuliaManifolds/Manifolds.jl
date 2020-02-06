@@ -1,9 +1,9 @@
 """
-    ProjectedPointDistribution(m::Manifold, d, proj!, x)
+    ProjectedPointDistribution(M::Manifold, d, proj!, p)
 
-Generates a random point in ambient space of `m` and projects it to `m`
+Generates a random point in ambient space of `M` and projects it to `M`
 using function `proj!`. Generated arrays are of type `TResult`, which can be
-specified by providing the `x` argument.
+specified by providing the `p` argument.
 """
 struct ProjectedPointDistribution{TResult,TM<:Manifold,TD<:Distribution,TProj} <:
        MPointDistribution{TM}
@@ -16,7 +16,7 @@ function ProjectedPointDistribution(
     M::Manifold,
     d::Distribution,
     proj!,
-    x::TResult,
+    ::TResult,
 ) where {TResult}
     return ProjectedPointDistribution{TResult,typeof(M),typeof(d),typeof(proj!)}(
         M,
@@ -26,13 +26,13 @@ function ProjectedPointDistribution(
 end
 
 function rand(rng::AbstractRNG, d::ProjectedPointDistribution{TResult}) where {TResult}
-    x = convert(TResult, rand(rng, d.distribution))
-    return d.proj!(d.manifold, x)
+    p = convert(TResult, rand(rng, d.distribution))
+    return d.proj!(d.manifold, p)
 end
 
-function _rand!(rng::AbstractRNG, d::ProjectedPointDistribution, x::AbstractArray{<:Number})
-    _rand!(rng, d.distribution, x)
-    return d.proj!(d.manifold, x)
+function _rand!(rng::AbstractRNG, d::ProjectedPointDistribution, p::AbstractArray{<:Number})
+    _rand!(rng, d.distribution, p)
+    return d.proj!(d.manifold, p)
 end
 
 support(d::ProjectedPointDistribution) = MPointSupport(d.manifold)
@@ -63,7 +63,7 @@ function ProjectedFVectorDistribution(
     p,
     d::Distribution,
     project_vector!,
-    xt::TResult,
+    ::TResult,
 ) where {TResult}
     return ProjectedFVectorDistribution{
         TResult,
@@ -87,10 +87,10 @@ end
 function _rand!(
     rng::AbstractRNG,
     d::ProjectedFVectorDistribution,
-    v::AbstractArray{<:Number},
+    X::AbstractArray{<:Number},
 )
     # calling _rand!(rng, d.d, v) doesn't work for all arrays types
-    return copyto!(v, rand(rng, d))
+    return copyto!(X, rand(rng, d))
 end
 
 support(tvd::ProjectedFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)

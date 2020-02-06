@@ -7,7 +7,7 @@ Translation group $\mathrm{T}(n)$ represented by translation arrays.
     TranslationGroup(n₁,...,nᵢ; field = 𝔽)
 
 Generate the translation group on
-$𝔽^{n₁,…,nᵢ}$ = `Euclidean(n₁,...,nᵢ; field = 𝔽)`, which is isomorphic to group itself.
+$𝔽^{n₁,…,nᵢ}$ = `Euclidean(n₁,...,nᵢ; field = 𝔽)`, which is isomorphic to the group itself.
 """
 const TranslationGroup{T<:Tuple,𝔽} = GroupManifold{Euclidean{T,𝔽},AdditionOperation}
 

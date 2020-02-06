@@ -109,7 +109,7 @@ function inverse_retract!(G::GroupManifold, X, p, q, method::LogarithmicInverseR
     return inverse_retract!(G.manifold, X, p, q, method)
 end
 isapprox(G::GroupManifold, p, q; kwargs...) = isapprox(G.manifold, p, q; kwargs...)
-isapprox(G::GroupManifold, p, X, w; kwargs...) = isapprox(G.manifold, p, X, w; kwargs...)
+isapprox(G::GroupManifold, p, X, Y; kwargs...) = isapprox(G.manifold, p, X, Y; kwargs...)
 log(G::GroupManifold, p, q) = log(G.manifold, p, q)
 log!(G::GroupManifold, X, p, q) = log!(G.manifold, X, p, q)
 norm(G::GroupManifold, p, X) = norm(G.manifold, p, X)
@@ -231,15 +231,15 @@ function allocate_result(G::GT, ::typeof(vee), ::Identity{GT}, X) where {GT<:Abs
     return allocate(X, Size(manifold_dimension(G)))
 end
 
-function check_manifold_point(M::Manifold, p::Identity; kwargs...)
+function check_manifold_point(M::Manifold, e::Identity; kwargs...)
     if is_decorator_group(M) === Val(true)
-        return check_manifold_point(base_group(M), p; kwargs...)
+        return check_manifold_point(base_group(M), e; kwargs...)
     end
-    return DomainError(p, "The identity element $(p) does not belong to $(M).")
+    return DomainError(e, "The identity element $(e) does not belong to $(M).")
 end
-function check_manifold_point(G::GroupManifold, p::Identity; kwargs...)
-    p === Identity(G) && return nothing
-    return DomainError(p, "The identity element $(p) does not belong to $(G).")
+function check_manifold_point(G::GroupManifold, e::Identity; kwargs...)
+    e === Identity(G) && return nothing
+    return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
 function check_manifold_point(G::GroupManifold, p; kwargs...)
     return check_manifold_point(G.manifold, p; kwargs...)
@@ -253,7 +253,8 @@ end
     inv(G::AbstractGroupManifold, p)
 
 Inverse $p^{-1} ∈ \mathcal{G}$ of an element $p ∈ \mathcal{G}$, such that
-$p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}$.
+$p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}$, where $e$ is the [`identity`](@ref)
+element of $\mathcal{G}$.
 """
 inv(M::Manifold, p) = inv(M, p, is_decorator_manifold(M))
 inv(M::Manifold, p, ::Val{true}) = inv(M.manifold, p)
@@ -290,8 +291,8 @@ end
 
 identity!(M::Manifold, q, p) = identity!(M, q, p, is_decorator_manifold(M))
 identity!(M::Manifold, q, p, ::Val{true}) = identity!(M.manifold, q, p)
-function identity!(M::Manifold, y, x, ::Val{false})
-    return error("identity! not implemented on $(typeof(M)) for points $(typeof(y)) and $(typeof(x))")
+function identity!(M::Manifold, q, p, ::Val{false})
+    return error("identity! not implemented on $(typeof(M)) for points $(typeof(q)) and $(typeof(p))")
 end
 
 isapprox(M::Manifold, p, e::Identity; kwargs...) = isapprox(M, e, p; kwargs...)
@@ -582,7 +583,7 @@ For `Number` and `AbstractMatrix` types of `X`, compute the usual numeric/matrix
 exponential,
 
 ````math
-\exp X = \operatorname{Exp} X = \sum_{n=0}^\infty \frac{1}{n!} X^n.
+\exp X = \operatorname{Exp} X = \sum_{n=0}^∞ \frac{1}{n!} X^n.
 ````
 """
 group_exp(M::Manifold, X) = group_exp(M, X, is_decorator_manifold(M))
@@ -625,7 +626,7 @@ Compute $X = q$.
 For `Number` and `AbstractMatrix` types of `q`, compute the usual numeric/matrix logarithm:
 
 ````math
-\log q = \operatorname{Log} q = \sum_{n=1}^\infty \frac{(-1)^{n+1}}{n} (q - e)^n,
+\log q = \operatorname{Log} q = \sum_{n=1}^∞ \frac{(-1)^{n+1}}{n} (q - e)^n,
 ````
 
 where $e$ here is the [`identity`](@ref) element, that is, $1$ for numeric $q$ or the
@@ -910,7 +911,7 @@ inv!(G::MultiplicationGroup, q, p) = copyto!(q, inv(G, p))
 
 compose(::MultiplicationGroup, p, q) = p * q
 
-# TODO: z might alias with x or y, we might be able to optimize it if it doesn't.
+# TODO: x might alias with p or q, we might be able to optimize it if it doesn't.
 compose!(::MultiplicationGroup, x, p, q) = copyto!(x, p * q)
 
 inverse_translate(::MultiplicationGroup, p, q, ::LeftAction) = p \ q

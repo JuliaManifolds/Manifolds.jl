@@ -93,10 +93,10 @@ $g^{kl}$ is the inverse of the local representation of the metric tensor.
 The dimensions of the resulting multi-dimensional array are ordered $(l,i,j)$.
 """
 function christoffel_symbols_second(M::MetricManifold, p; backend = :default)
-    ginv = inverse_local_metric(M, p)
+    Ginv = inverse_local_metric(M, p)
     Γ₁ = christoffel_symbols_first(M, p; backend = backend)
     Γ₂ = allocate(Γ₁)
-    @einsum Γ₂[l, i, j] = ginv[k, l] * Γ₁[i, j, k]
+    @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
     return Γ₂
 end
 
@@ -135,8 +135,8 @@ Compute the Einstein tensor of the manifold `M` at the point `p`.
 function einstein_tensor(M::MetricManifold, p; backend = :default)
     Ric = ricci_tensor(M, p; backend = backend)
     g = local_metric(M, p)
-    ginv = inverse_local_metric(M, p)
-    S = sum(ginv .* Ric)
+    Ginv = inverse_local_metric(M, p)
+    S = sum(Ginv .* Ric)
     G = Ric - g .* S / 2
     return G
 end
@@ -270,7 +270,7 @@ otherwise the [`local_metric`](@ref)`(M, p)` is employed as
 ````math
 g_p(X, Y) = ⟨X, G_p Y⟩,
 ````
-where $G_p$ is the local matrix representation of the [`Metric`](@ref) `G`.
+where $G_p$ is the loal matrix representation of the [`Metric`](@ref) `G`.
 """
 inner(M::MMT, p, X, Y) where {MMT<:MetricManifold} = inner(M, is_default_metric(M), p, X, Y)
 function inner(M::MMT, ::Val{false}, p, X, Y) where {MMT<:MetricManifold}
@@ -285,8 +285,8 @@ function inner(
     X,
     Y,
 ) where {MMT<:MetricManifold}
-    ginv = inverse_local_metric(B.manifold, p)
-    return dot(X, ginv * Y)
+    Ginv = inverse_local_metric(B.manifold, p)
+    return dot(X, Ginv * Y)
 end
 
 @doc raw"""
@@ -294,7 +294,7 @@ end
 
 Return the local matrix representation at the point `p` of the metric
 tensor $g$ on the [`Manifold`](@ref) `M`, usually written $g_{ij}$.
-The matrix has the property that $g(v, w)=v^T [g_{ij}] w = g_{ij} v^i w^j$,
+The matrix has the property that $g(X, Y)=X^\mathrm{T} [g_{ij}] Y = g_{ij} X^i Y^j$,
 where the latter expression uses Einstein summation convention.
 """
 function local_metric(M::MetricManifold, p)
@@ -337,7 +337,7 @@ end
     log_local_metric_density(M::MetricManifold, p)
 
 Return the natural logarithm of the metric density $ρ$ of `M` at `p`, which
-is given by $\rho=\log \sqrt{|\det [g_{ij}]|}$.
+is given by $ρ = \log \sqrt{|\det [g_{ij}]|}$.
 """
 log_local_metric_density(M::MetricManifold, p) = log(abs(det_local_metric(M, p))) / 2
 
@@ -463,9 +463,9 @@ end
 Compute the Ricci scalar curvature of the manifold `M` at the point `p`.
 """
 function ricci_curvature(M::MetricManifold, p; backend = :default)
-    ginv = inverse_local_metric(M, p)
+    Ginv = inverse_local_metric(M, p)
     Ric = ricci_tensor(M, p; backend = backend)
-    S = sum(ginv .* Ric)
+    S = sum(Ginv .* Ric)
     return S
 end
 
@@ -516,8 +516,8 @@ where $G_p$ is the local matrix representation of `G`, i.e. one employs
 sharp(::MetricManifold, ::Any)
 
 function sharp!(M::N, X::TFVector, p, ξ::CoTFVector) where {N<:MetricManifold}
-    ginv = inverse_local_metric(M, p)
-    copyto!(X.data, ginv * ξ.data)
+    Ginv = inverse_local_metric(M, p)
+    copyto!(X.data, Ginv * ξ.data)
     return X
 end
 

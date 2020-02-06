@@ -61,11 +61,11 @@ function inv!(G::SemidirectProductGroup, q, p)
     M = base_manifold(G)
     N, H = M.manifolds
     A = G.op.action
-    nx, hx = submanifold_components(G, p)
-    ny, hy = submanifold_components(G, q)
-    inv!(H, hy, hx)
-    ninv = inv(N, nx)
-    apply!(A, ny, hy, ninv)
+    np, hp = submanifold_components(G, p)
+    nq, hq = submanifold_components(G, q)
+    inv!(H, hq, hp)
+    npinv = inv(N, np)
+    apply!(A, nq, hq, npinv)
     @inbounds _padpoint!(G, q)
     return q
 end
@@ -76,10 +76,10 @@ identity(G::GT, e::Identity{GT}) where {GT<:SemidirectProductGroup} = e
 function identity!(G::SemidirectProductGroup, q, p)
     M = base_manifold(G)
     N, H = M.manifolds
-    nx, hx = submanifold_components(G, p)
-    ny, hy = submanifold_components(G, q)
-    identity!(N, ny, nx)
-    identity!(H, hy, hx)
+    np, hp = submanifold_components(G, p)
+    nq, hq = submanifold_components(G, q)
+    identity!(N, nq, np)
+    identity!(H, hq, hp)
     @inbounds _padpoint!(G, q)
     return q
 end
@@ -93,12 +93,12 @@ function compose!(G::SemidirectProductGroup, x, p, q)
     M = base_manifold(G)
     N, H = M.manifolds
     A = G.op.action
-    nx, hx = submanifold_components(G, p)
-    ny, hy = submanifold_components(G, q)
-    nz, hz = submanifold_components(G, x)
-    compose!(H, hz, hx, hy)
-    zₙtmp = apply(A, hx, ny)
-    compose!(N, nz, nx, zₙtmp)
+    np, hp = submanifold_components(G, p)
+    nq, hq = submanifold_components(G, q)
+    nx, hx = submanifold_components(G, x)
+    compose!(H, hx, hp, hq)
+    nxtmp = apply(A, hp, nq)
+    compose!(N, nx, np, nxtmp)
     @inbounds _padpoint!(G, x)
     return x
 end
@@ -108,7 +108,7 @@ function compose!(G::GT, x, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Iden
     return identity!(G, x, e)
 end
 
-function translate_diff!(G::SemidirectProductGroup, Y, p, q, X, conv::LeftAction)
+function translate_diff!(G::SemidirectProductGroup, Y, p, q, X, conX::LeftAction)
     M = base_manifold(G)
     N, H = M.manifolds
     A = G.op.action
@@ -116,10 +116,10 @@ function translate_diff!(G::SemidirectProductGroup, Y, p, q, X, conv::LeftAction
     nq, hq = submanifold_components(G, q)
     nX, hX = submanifold_components(G, X)
     nY, hY = submanifold_components(G, Y)
-    translate_diff!(H, hY, hp, hq, hX, conv)
+    translate_diff!(H, hY, hp, hq, hX, conX)
     nZ = apply_diff(A, hp, nq, nX)
     nr = apply(A, hp, nq)
-    translate_diff!(N, nY, np, nr, nZ, conv)
+    translate_diff!(N, nY, np, nr, nZ, conX)
     @inbounds _padvector!(G, Y)
     return Y
 end
@@ -130,10 +130,10 @@ function hat!(G::SemidirectProductGroup, Y, p, X)
     dimN = manifold_dimension(N)
     dimH = manifold_dimension(H)
     @assert length(X) == dimN + dimH
-    nx, hx = submanifold_components(G, p)
-    nV, hV = submanifold_components(G, Y)
-    hat!(N, nV, nx, view(X, 1:dimN))
-    hat!(H, hV, hx, view(X, dimN+1:dimN+dimH))
+    np, hp = submanifold_components(G, p)
+    nY, hY = submanifold_components(G, Y)
+    hat!(N, nY, np, view(X, 1:dimN))
+    hat!(H, hY, hp, view(X, dimN+1:dimN+dimH))
     @inbounds _padvector!(G, Y)
     return Y
 end
@@ -144,10 +144,10 @@ function vee!(G::SemidirectProductGroup, Y, p, X)
     dimN = manifold_dimension(N)
     dimH = manifold_dimension(H)
     @assert length(Y) == dimN + dimH
-    nx, hx = submanifold_components(G, p)
-    nV, hV = submanifold_components(G, X)
-    vee!(N, view(Y, 1:dimN), nx, nV)
-    vee!(H, view(Y, dimN+1:dimN+dimH), hx, hV)
+    np, hp = submanifold_components(G, p)
+    nY, hY = submanifold_components(G, X)
+    vee!(N, view(Y, 1:dimN), np, nY)
+    vee!(H, view(Y, dimN+1:dimN+dimH), hp, hY)
     return Y
 end
 
@@ -160,27 +160,27 @@ end
 function zero_tangent_vector!(G::SemidirectProductGroup, X, p)
     M = base_manifold(G)
     N, H = M.manifolds
-    nx, hx = submanifold_components(G, p)
-    nv, hv = submanifold_components(G, X)
-    zero_tangent_vector!(N, nv, nx)
-    zero_tangent_vector!(H, hv, hx)
+    np, hp = submanifold_components(G, p)
+    nX, hX = submanifold_components(G, X)
+    zero_tangent_vector!(N, nX, np)
+    zero_tangent_vector!(H, hX, hp)
     return X
 end
 
 function isapprox(G::SemidirectProductGroup, p, q; kwargs...)
     M = base_manifold(G)
     N, H = M.manifolds
-    nx, hx = submanifold_components(G, p)
-    ny, hy = submanifold_components(G, q)
-    return isapprox(N, nx, ny; kwargs...) && isapprox(H, hx, hy; kwargs...)
+    np, hp = submanifold_components(G, p)
+    nq, hq = submanifold_components(G, q)
+    return isapprox(N, np, nq; kwargs...) && isapprox(H, hp, hq; kwargs...)
 end
 function isapprox(G::SemidirectProductGroup, p, X, Y; kwargs...)
     M = base_manifold(G)
     N, H = M.manifolds
-    nx, hx = submanifold_components(G, p)
-    nv, hv = submanifold_components(G, X)
-    nw, hw = submanifold_components(G, Y)
-    return isapprox(N, nx, nv, nw; kwargs...) && isapprox(H, hx, hv, hw; kwargs...)
+    np, hp = submanifold_components(G, p)
+    nX, hX = submanifold_components(G, X)
+    nY, hY = submanifold_components(G, Y)
+    return isapprox(N, np, nX, nY; kwargs...) && isapprox(H, hp, hX, hY; kwargs...)
 end
 function isapprox(G::GT, p, e::Identity{GT}; kwargs...) where {GT<:SemidirectProductGroup}
     return isapprox(G, e, p; kwargs...)

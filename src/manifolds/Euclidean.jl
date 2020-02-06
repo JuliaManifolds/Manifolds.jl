@@ -1,7 +1,7 @@
 @doc raw"""
     Euclidean{T<:Tuple,𝔽} <: Manifold
 
-Euclidean vector space $ℝ^n$.
+Euclidean vector space.
 
 # Constructor
 
@@ -11,17 +11,17 @@ Generate the $n$-dimensional vector space $ℝ^n$.
 
     Euclidean(n₁,n₂,...,nᵢ; field=ℝ)
 
-Generate the vector space of $k=n_1n_2\cdot… n_i$ values, i.e. the
-$𝔽^{n_1, n_2,…, n_d}$ whose
-elements are interpreted as $n_1 ×,n_2 × … × n_i$ arrays.
-For $d=2$ we obtain a matrix space.
+Generate the vector space of $k = n_1 \cdot n_2 \cdot … \cdot n_i$ values, i.e. the
+manifold $𝔽^{n_1, n_2, …, n_i}$ whose
+elements are interpreted as $n_1 × n_2 × … × n_i$ arrays.
+For $i=2$ we obtain a matrix space.
 The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
 [`real_dimension`](@ref) of the field $𝔽$.
 """
 struct Euclidean{N<:Tuple,𝔽} <: Manifold where {N,𝔽<:AbstractNumbers} end
 
-function Euclidean(n::Vararg{Int,N}; field::AbstractNumbers = ℝ) where {N}
+function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
     return Euclidean{Tuple{n...},field}()
 end
 
@@ -48,7 +48,7 @@ end
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = one(eltype(p))
 
 """
-    distance(M::Euclidean, x, y)
+    distance(M::Euclidean, p, q)
 
 Compute the Euclidean distance between two points on the [`Euclidean`](@ref)
 manifold `M`, i.e. for vectors it's just the norm of the difference, for matrices
@@ -59,7 +59,7 @@ distance(::Euclidean, p, q) = norm(p .- q)
 @doc raw"""
     exp(M::Euclidean, p, X)
 
-Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `x` in direction
+Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `p` in direction
 `X`, which in this case is just
 ````math
 \exp_p X = p + X.
@@ -115,11 +115,11 @@ function get_vector(M::Euclidean{<:Tuple,ℂ}, p, X, B::ArbitraryOrDiagonalizing
     return reshape(X[1:N] + im * X[N+1:end], S)
 end
 
-function hat(M::Euclidean{N,ℝ}, p, vⁱ) where {N}
-    return reshape(vⁱ, representation_size(TangentBundleFibers(M)))
+function hat(M::Euclidean{N,ℝ}, p, Xⁱ) where {N}
+    return reshape(Xⁱ, representation_size(TangentBundleFibers(M)))
 end
 
-hat!(::Euclidean{N,ℝ}, v, p, vⁱ) where {N} = copyto!(v, vⁱ)
+hat!(::Euclidean{N,ℝ}, X, p, Xⁱ) where {N} = copyto!(X, Xⁱ)
 
 @doc raw"""
     injectivity_radius(M::Euclidean)
@@ -139,11 +139,11 @@ of arrays (or tensors) of size $n_1 × n_2  ×  …  × n_i$, i.e.
 g_p(X,Y) = \sum_{k ∈ I} \overline{X}_{k} Y_{k},
 ````
 where $I$ is the set of vectors $k ∈ ℕ^i$, such that for all
-$1 \leq j \leq i$ it holds $1\leq k_j \leq n_j$.
+$1 ≤ j ≤ i$ it holds $1 ≤ k_j ≤ n_j$.
 
-For the special case of $i\leq 2$, i.e. matrices and vectors, this simplifies to
+For the special case of $i ≤ 2$, i.e. matrices and vectors, this simplifies to
 ````math
-g_p(Y,Y) = X^{\mathrm{H}}Y,
+g_p(X,Y) = X^{\mathrm{H}}Y,
 ````
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
@@ -309,7 +309,7 @@ case, this yields just the identity.
 """
 sharp(::Euclidean, ::Any...)
 
-sharp!(M::Euclidean, X::TFVector, x, ξ::CoTFVector) = copyto!(X, ξ)
+sharp!(M::Euclidean, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 function show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
     print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")

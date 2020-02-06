@@ -140,8 +140,8 @@ Return tangent vector coordinates in the Lie algebra of the circle.
 """
 function get_coordinates(M::Circle{ℂ}, p, X, B::ArbitraryOrthonormalBasis)
     X, p = X[1], p[1]
-    w = imag(X) * real(p) - real(X) * imag(p)
-    return @SVector [w]
+    Xⁱ = imag(X) * real(p) - real(X) * imag(p)
+    return @SVector [Xⁱ]
 end
 
 get_vector(M::Circle{ℝ}, p, X, B::ArbitraryOrthonormalBasis) = X
@@ -176,7 +176,7 @@ g_p(X,Y) = X*Y
 
 for the real case and
 
-    ````math
+````math
 g_p(X,Y) = Y^\mathrm{T}X
 ````
 
@@ -333,10 +333,10 @@ function vector_transport_to(
     q::Number,
     ::ParallelTransport,
 )
-    v_xy = log(M, p, q)
-    vl = norm(M, p, v_xy)
+    X_pq = log(M, p, q)
+    Xnorm = norm(M, p, X_pq)
     Y = X
-    if vl > 0
+    if Xnorm > 0
         factor = 2 * complex_dot(X, q) / (abs(p + q)^2)
         Y -= factor .* (p + q)
     end
@@ -345,10 +345,10 @@ end
 
 vector_transport_to!(::Circle{ℝ}, Y, p, X, q, ::ParallelTransport) = (Y .= X)
 function vector_transport_to!(M::Circle{ℂ}, Y, p, X, q, ::ParallelTransport)
-    v_xy = log(M, p, q)
-    vl = norm(M, p, v_xy)
+    X_pq = log(M, p, q)
+    Xnorm = norm(M, p, X_pq)
     Y .= X
-    if vl > 0
+    if Xnorm > 0
         factor = 2 * complex_dot(X, q) / (sum(abs.(p + q) .^ 2))
         Y .-= factor .* (p + q)
     end
@@ -362,8 +362,8 @@ function vector_transport_direction(
     Y::Number,
     m::AbstractVectorTransportMethod,
 )
-    y = exp(M, p, Y)
-    return vector_transport_to(M, p, X, y, m)
+    q = exp(M, p, Y)
+    return vector_transport_to(M, p, X, q, m)
 end
 
 zero_tangent_vector(::Circle, p::Number) = zero(p)

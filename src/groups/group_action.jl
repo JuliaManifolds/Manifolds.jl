@@ -64,8 +64,8 @@ end
 Apply inverse of action `a` to the point `p`. The action is specified by `A`.
 """
 function inverse_apply(A::AbstractGroupAction, a, p)
-    y = allocate_result(A, inverse_apply, p, a)
-    return inverse_apply!(A, y, a, p)
+    q = allocate_result(A, inverse_apply, p, a)
+    return inverse_apply!(A, q, a, p)
 end
 
 """
@@ -146,7 +146,7 @@ function optimal_alignment(A::AbstractGroupAction, p, q)
 end
 
 """
-    optimal_alignment!(A::AbstractGroupAction, y, p, q)
+    optimal_alignment!(A::AbstractGroupAction, x, p, q)
 
 Calculate an action element of action `A` that acts upon `p` to produce the element closest
 to `q`.
@@ -164,13 +164,13 @@ end
         mean_method::AbstractEstimationMethod = GradientDescentEstimation(),
     )
 
-Calculate an action element $g$ of action `A` that is the mean element of the orbit of `p`
+Calculate an action element $a$ of action `A` that is the mean element of the orbit of `p`
 with respect to given set of points `pts`. The [`mean`](@ref) is calculated using the method
 `mean_method`.
 
-The orbit of $p$ with respect to the action of a group $G$ is the set
+The orbit of $p$ with respect to the action of a group $\mathcal{G}$ is the set
 ````math
-O = \{ g ⋅ p : g ∈ \mathcal{G} \}.
+O = \{ a ⋅ p : a ∈ \mathcal{G} \}.
 ````
 This function is useful for computing means on quotients of manifolds by a Lie group action.
 """

@@ -100,8 +100,8 @@ function compose(M::ProductManifold, p::ProductRepr, q::ProductRepr)
     )...)
 end
 function compose(M::ProductManifold, p, q)
-    z = allocate_result(M, compose, p, q)
-    return compose!(M, z, p, q)
+    x = allocate_result(M, compose, p, q)
+    return compose!(M, x, p, q)
 end
 
 compose!(G::ProductGroup, x, p, q) = compose!(G.manifold, x, p, q)
