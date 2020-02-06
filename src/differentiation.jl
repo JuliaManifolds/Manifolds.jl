@@ -12,9 +12,9 @@ struct NoneDiffBackend <: AbstractDiffBackend end
 
 
 """
-    _derivative(f, p[, backend::AbstractDiffBackend])
+    _derivative(f, t[, backend::AbstractDiffBackend])
 
-Compute the derivative of a callable `f` at point `p` computed using the given `backend`,
+Compute the derivative of a callable `f` at time `t` computed using the given `backend`,
 an object of type [`AbstractDiffBackend`](@ref). If the backend is not explicitly
 specified, it is obtained using the function [`diff_backend`](@ref).
 
@@ -23,8 +23,8 @@ specified, it is obtained using the function [`diff_backend`](@ref).
     Not specifying the backend explicitly will usually result in a type instability
     and decreased performance.
 """
-function _derivative(f, p, backend::AbstractDiffBackend)
-    error("_derivative not implemented for curve $(typeof(f)), point $(typeof(p)) and " *
+function _derivative(f, t, backend::AbstractDiffBackend)
+    error("_derivative not implemented for curve $(typeof(f)), time $(typeof(t)) and " *
           "backend $(typeof(backend))")
 end
 
@@ -115,7 +115,7 @@ Get vector of currently valid differentiation backends.
 """
 diff_backends() = _diff_backends
 
-_derivative(f, p) = _derivative(f, p, diff_backend())
+_derivative(f, t) = _derivative(f, t, diff_backend())
 
 _gradient(f, p) = _gradient(f, p, diff_backend())
 
@@ -140,8 +140,8 @@ push!(_diff_backends, FiniteDifferencesBackend())
 
 diff_backend!(_diff_backends[end])
 
-function _derivative(f, p, backend::FiniteDifferencesBackend)
-    return FiniteDifferences.grad(backend.method, f, p)[1]
+function _derivative(f, t, backend::FiniteDifferencesBackend)
+    return FiniteDifferences.grad(backend.method, f, t)[1]
 end
 
 function _gradient(f, p, backend::FiniteDifferencesBackend)

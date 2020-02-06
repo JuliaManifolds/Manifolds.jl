@@ -9,17 +9,17 @@ abstract type AbstractRiemannianDiffBackend end
 
 
 """
-    r_derivative(f::AbstractCurve, p, backend::AbstractDiffBackend = rdiff_backend()
+    r_derivative(f::AbstractCurve, t::Real, backend::AbstractDiffBackend = rdiff_backend()
 
-Compute the Riemannian derivative of a curve `f` at point `x` using given backend.
+Compute the Riemannian derivative of a curve `f` at time `t` using the given backend.
 """
-r_derivative(::AbstractCurve, ::Any, ::AbstractRiemannianDiffBackend)
+r_derivative(::AbstractCurve, ::Real, ::AbstractRiemannianDiffBackend)
 
 
 """
     r_gradient(f::AbstractRealField, p, backend::AbstractRiemannianDiffBackend = rdiff_backend())
 
-Compute the Riemannian gradient of a real field `f` at point `x` using given backend.
+Compute the Riemannian gradient of a real field `f` at point `p` using the given backend.
 """
 r_gradient(::AbstractRealField, ::Any, ::AbstractRiemannianDiffBackend)
 
@@ -27,12 +27,12 @@ r_gradient(::AbstractRealField, ::Any, ::AbstractRiemannianDiffBackend)
 """
     r_jacobian(f::AbstractMap, p, backend::AbstractRiemannianDiffBackend = rdiff_backend())
 
-Compute the Riemannian Jacobian of a map `f` at point `x` using given backend.
+Compute the Riemannian Jacobian of a map `f` at point `p` using the given backend.
 """
 r_jacobian(::AbstractMap, ::Any, ::AbstractRiemannianDiffBackend)
 
-function r_derivative(f::AbstractCurve, p, backend::AbstractRiemannianDiffBackend)
-    error("r_derivative not implemented for curve $(typeof(f)), point $(typeof(p)) and " *
+function r_derivative(f::AbstractCurve, t, backend::AbstractRiemannianDiffBackend)
+    error("r_derivative not implemented for curve $(typeof(f)), point $(typeof(t)) and " *
           "backend $(typeof(backend))")
 end
 
@@ -58,9 +58,38 @@ r_jacobian(f::AbstractMap, p) = r_jacobian(f::AbstractMap, p, rdiff_backend())
 Riemannian differentiation based on differentiation in [`ArbitraryOrthonormalBasis`](@ref)
 using backend `diff_backend`.
 """
-struct RiemannianONBDiffBackend{TADBackend<:AbstractDiffBackend} <:
-       AbstractRiemannianDiffBackend
+struct RiemannianONBDiffBackend{
+    TADBackend<:AbstractDiffBackend,
+    TRetr<:AbstractRetractionMethod,
+    TInvRetr<:AbstractInverseRetractionMethod,
+    TBasis<:AbstractOrthonormalBasis{ℝ}
+} <: AbstractRiemannianDiffBackend
     diff_backend::TADBackend
+    retraction::TRetr
+    inverse_retraction::TInvRetr
+    basis::TBasis
+end
+
+function r_derivative(f::AbstractCurve, t::Real, backend::RiemannianONBDiffBackend)
+    M = codomain(f)
+    p = f(t)
+    onb_coords = _derivative(zero(number_eltype(p)), backend.diff_backend) do h
+        return get_coordinates(
+            M,
+            p,
+            inverse_retract(M, p, f(t+h), backend.inverse_retraction),
+            backend.basis,
+        )
+    end
+    return get_vector(M, p, onb_coords, backend.basis)
+end
+
+function r_gradient(f::AbstractRealField, p, backend::RiemannianONBDiffBackend)
+    error("TODO")
+end
+
+function r_jacobian(f::AbstractMap, p, backend::RiemannianONBDiffBackend)
+    error("TODO")
 end
 
 """
@@ -83,7 +112,14 @@ end
 The instance of [`CurrentRiemannianDiffBackend`](@ref) that stores the globally default
 differentiation backend.
 """
-const _current_rdiff_backend = CurrentRiemannianDiffBackend(RiemannianONBDiffBackend(diff_backend()))
+const _current_rdiff_backend = CurrentRiemannianDiffBackend(
+    RiemannianONBDiffBackend(
+        diff_backend(),
+        ExponentialRetraction(),
+        LogarithmicInverseRetraction(),
+        ArbitraryOrthonormalBasis(),
+    ),
+)
 
 """
     rdiff_backend() -> AbstractRiemannianDiffBackend

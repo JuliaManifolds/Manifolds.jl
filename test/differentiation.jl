@@ -90,3 +90,13 @@ using LinearAlgebra: Diagonal, dot
         diff_backend!(fd51)
     end
 end
+
+@testset "Riemannian derivatives" begin
+    s2 = Sphere(2)
+    p = [0.0, 0.0, 1.0]
+    q = [1.0, 0.0, 0.0]
+    c1 = FunctionCurve(s2) do t
+        return geodesic(s2, q, p, t)
+    end
+    @test isapprox(s2, c1(π/4), r_derivative(c1, π/4), [π/2, 0.0, π/2])
+end
