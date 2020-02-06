@@ -1,21 +1,6 @@
 include("../utils.jl")
 include("group_utils.jl")
 
-function _to_affine(p, is_vector = false)
-    d = length(p)
-    N = Int((sqrt(4d + 1) - 1) / 2)
-    P = Matrix{eltype(p)}(undef, N + 1, N + 1)
-    setindex!(P, p.parts[1], 1:N, N + 1)
-    setindex!(P, p.parts[2], 1:N, 1:N)
-    fill!(view(P, N + 1, 1:N), 0)
-    if is_vector
-        P[N+1, N+1] = 0
-    else
-        P[N+1, N+1] = 1
-    end
-    return P
-end
-
 @testset "Special Euclidean group" begin
     @testset "SpecialEuclidean($n)" for n in (2, 3, 4)
         G = SpecialEuclidean(n)
@@ -61,22 +46,47 @@ end
                 t2, R2 = g2.parts
                 g1g2 = Manifolds.prod_point(shape_se, R1 * t2 + t1, R1 * R2)
                 @test isapprox(G, compose(G, g1, g2), g1g2)
-                @test _to_affine(g1g2) ≈ _to_affine(g1) * _to_affine(g2)
+                @test affine_matrix(G, g1g2) ≈ affine_matrix(G, g1) * affine_matrix(G, g2)
+                tmp = copy(g1)
+                Manifolds._padpoint!(G, tmp)
+                @test tmp == g1
+                tmp = copy(v_pts[1])
+                Manifolds._padvector!(G, tmp)
+                @test tmp == v_pts[1]
 
                 w = translate_diff(G, pts[1], Identity(G), v_pts[1])
                 w2 = allocate(w)
                 w2.parts[1] .= w.parts[1]
                 w2.parts[2] .= pts[1].parts[2] * w.parts[2]
-                @test _to_affine(w2, true) ≈ _to_affine(pts[1]) * _to_affine(v_pts[1], true)
+                @test affine_matrix(G, pts[1], w2) ≈ affine_matrix(G, pts[1]) * affine_matrix(G, Identity(G), v_pts[1])
 
                 test_group(G, pts, v_pts, v_pts; test_diff = true, diff_convs = [(), (LeftAction(),)])
             end
         end
 
+        @testset "product repr" begin
+            pts = [ProductRepr(tp...) for tp in tuple_pts]
+            v_pts = [ProductRepr(tuple_v...)]
+
+            g1, g2 = pts[1:2]
+            t1, R1 = g1.parts
+            t2, R2 = g2.parts
+            g1g2 = ProductRepr(R1 * t2 + t1, R1 * R2)
+            @test isapprox(G, compose(G, g1, g2), g1g2)
+            @test affine_matrix(G, g1g2) ≈ affine_matrix(G, g1) * affine_matrix(G, g2)
+
+            w = translate_diff(G, pts[1], Identity(G), v_pts[1])
+            w2 = allocate(w)
+            w2.parts[1] .= w.parts[1]
+            w2.parts[2] .= pts[1].parts[2] * w.parts[2]
+            @test affine_matrix(G, pts[1], w2) ≈ affine_matrix(G, pts[1]) * affine_matrix(G, Identity(G), v_pts[1])
+
+            test_group(G, pts, v_pts, v_pts; test_diff = true, diff_convs = [(), (LeftAction(),)])
+        end
+
         @testset "affine matrix" begin
-            shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M.manifolds...)
-            pts = [_to_affine(Manifolds.prod_point(shape_se, tp...)) for tp in tuple_pts]
-            v_pts = [_to_affine(Manifolds.prod_point(shape_se, tuple_v...), true)]
+            pts = [affine_matrix(G, ProductRepr(tp...)) for tp in tuple_pts]
+            v_pts = [affine_matrix(G, Identity(G), ProductRepr(tuple_v...))]
             test_group(G, pts, v_pts, v_pts; test_diff = true, diff_convs = [(), (LeftAction(),)])
         end
 
@@ -89,9 +99,9 @@ end
             @test v ≈ vexp
             @test hat(G, x, v) ≈ V
 
-            v = vee(G, _to_affine(x), _to_affine(V, true))
+            v = vee(G, affine_matrix(G, x), affine_matrix(G, x, V))
             @test v ≈ vexp
-            @test hat(G, _to_affine(x), v) ≈ _to_affine(V, true)
+            @test hat(G, affine_matrix(G, x), v) ≈ affine_matrix(G, x, V)
         end
     end
 end

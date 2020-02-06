@@ -111,8 +111,9 @@ the $n + 1 × n + 1$ matrix
 ````
 """
 function affine_matrix(G::SpecialEuclidean{n}, p) where {n}
-    pmat = allocate(p, Size(n + 1, n + 1))
-    map(copyto!, submanifold_components(G, pmat), submanifold_components(G, p))
+    pis = submanifold_components(G, p)
+    pmat = allocate_result(G, affine_matrix, pis...)
+    map(copyto!, submanifold_components(G, pmat), pis)
     @inbounds _padpoint!(G, pmat)
     return pmat
 end
@@ -121,12 +122,17 @@ affine_matrix(::SpecialEuclidean{n}, p::AbstractMatrix) where {n} = p
     return SDiagonal{n}(I)
 end
 function affine_matrix(G::SpecialEuclidean{n}, e, X) where {n}
-    Xmat = allocate(X, Size(n + 1, n + 1))
-    map(copyto!, submanifold_components(G, Xmat), submanifold_components(G, X))
+    Xis = submanifold_components(G, X)
+    Xmat = allocate_result(G, affine_matrix, Xis...)
+    map(copyto!, submanifold_components(G, Xmat), Xis)
     @inbounds _padvector!(G, Xmat)
     return Xmat
 end
 affine_matrix(::SpecialEuclidean{n}, e, X::AbstractMatrix) where {n} = X
+
+function allocate_result(G::SpecialEuclidean{n}, f::typeof(affine_matrix), p...) where {n}
+    return allocate(p[1], Size(n + 1, n + 1))
+end
 
 compose(::SpecialEuclidean, p::AbstractMatrix, q::AbstractMatrix) = p * q
 
@@ -304,7 +310,7 @@ group_log(::SpecialEuclidean, ::Any)
 
 function group_log!(G::SpecialEuclidean, X, q)
     qmat = affine_matrix(G, q)
-    Xmat = real(log(qmat))
+    Xmat = real(log_safe(qmat))
     map(copyto!, submanifold_components(G, X), submanifold_components(G, Xmat))
     _padvector!(G, X)
     return X
