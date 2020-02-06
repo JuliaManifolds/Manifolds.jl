@@ -140,43 +140,51 @@ function compose!(
 end
 
 @doc doc"""
-    group_exp(G::SpecialEuclidean, X)
+    group_exp(G::SpecialEuclidean{n}, X)
 
-Compute the group exponential of $X ∈ 𝔰𝔢(n)$. In the [`affine_matrix`](@ref) representation,
-the group exponential is the matrix exponential (see [`group_exp`](@ref)).
+Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(n)$, where $b ∈ 𝔱(n)$ and $Ω ∈ 𝔰𝔬(n)$:
+
+````math
+\exp X = (t, R),
+````
+
+where $t ∈ \mathrm{T}(n)$ and $R = \exp Ω$ is the group exponential on $\mathrm{SO}(n)$.
+
+In the [`affine_matrix`](@ref) representation, the group exponential is the matrix
+exponential (see [`group_exp`](@ref)).
 
     group_exp(G::SpecialEuclidean{2}, X)
 
-The group exponential on $\mathrm{SE}(2)$ for $X = (b, Ω) ∈ 𝔰𝔢(2)$, where $R ∈ 𝔰𝔬(2)$ is
+The group exponential on $\mathrm{SE}(2)$ is
 
 ````math
-\exp X = (U(θ) b, \exp Ω) = (t, R),
+\exp X = (t, R) = (U(θ) b, \exp Ω),
 ````
 
-where $R = \exp Ω$ is the group exponential on $\mathrm{SO}(3)$, and $U(θ)$ is
+where $U(θ)$ is
 
 ````math
 U(θ) = \frac{\sin θ}{θ} I_2 + \frac{1 - \cos θ}{θ^2} Ω,
 ````
 
-where $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
+and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 
     group_exp(G::SpecialEuclidean{3}, X)
 
-The group exponential on $\mathrm{SE}(3)$ for $X = (b, Ω) ∈ 𝔰𝔢(3)$, where $R ∈ 𝔰𝔬(3)$ is
+The group exponential on $\mathrm{SE}(3)$ is
 
 ````math
-\exp X = (U(θ) b, \exp Ω) = (t, R),
+\exp X = (t, R) = (U(θ) b, \exp Ω),
 ````
 
-where $R = \exp Ω$ is the group exponential on $\mathrm{SO}(3)$, and $U(θ)$ is
+where $U(θ)$ is
 
 ````math
 U(θ) = I_3 + \frac{1 - \cos θ}{θ^2} Ω + \frac{θ - \sin θ}{θ^3} Ω^2,
 ````
 
-where $θ$ is the same as above.
+and $θ$ is the same as above.
 """
 group_exp(::SpecialEuclidean, ::Any)
 
@@ -243,6 +251,56 @@ function group_exp!(G::SpecialEuclidean{3}, q, X)
     @inbounds _padpoint!(G, q)
     return q
 end
+
+@doc doc"""
+    group_log(G::SpecialEuclidean{n}, p)
+
+Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(n)$, where $t ∈ \mathrm{T}(n)$
+and $R ∈ \mathrm{SO}(n)$:
+
+````math
+\log p = (b, Ω),
+````
+
+where $b ∈ 𝔱(n)$ and $Ω = \log R ∈ 𝔰𝔬(n)$ is the group logarithm on $\mathrm{SO}(n)$.
+
+In the [`affine_matrix`](@ref) representation, the group logarithm is the matrix logarithm
+(see [`group_log`](@ref)):
+
+    group_log(G::SpecialEuclidean{2}, p)
+
+The group logarithm on $\mathrm{SE}(2)$ is
+
+````math
+\log p = (b, Ω) = (U(θ)^{-1} t, \log R),
+````
+
+where $U(θ)$ is
+
+````math
+U(θ) = \frac{\sin θ}{θ} I_2 + \frac{1 - \cos θ}{θ^2} Ω,
+````
+
+and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
+(see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
+
+    group_exp(G::SpecialEuclidean{3}, p)
+
+The group logarithm on $\mathrm{SE}(3)$ is
+
+````math
+\log p = (b, Ω) = (U(θ)^{-1} t, \log R),
+````
+
+where $U(θ)$ is
+
+````math
+U(θ) = I_3 + \frac{1 - \cos θ}{θ^2} Ω + \frac{θ - \sin θ}{θ^3} Ω^2,
+````
+
+and $θ$ is the same as above.
+"""
+group_log(::SpecialEuclidean, ::Any)
 
 function group_log!(G::SpecialEuclidean, X, q)
     qmat = affine_matrix(G, q)
