@@ -255,7 +255,7 @@ end
 
 Convert the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
 group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. See
-[`vee`](@ref) for the conventions used.
+[`vee`](@ref vee(::Rotations, ::Any...)) for the conventions used.
 """
 hat(::Rotations, ::Any...)
 
@@ -483,7 +483,7 @@ Compute the norm of a tangent vector `X` from the tangent space at `p` on the
 [`Rotations`](@ref) `M`. The formula reads
 
 ````math
-\lVert X \rVert_x = \lVert X \rVert,
+\lVert X \rVert_p = \lVert X \rVert,
 ````
 
 i.e. the Frobenius norm of `X`, where tangent vectors are represented by
@@ -667,13 +667,13 @@ $\mathrm{SO}(n)$ from the matrix representation `X` of the tangent
 vector.
 
 The basis on the Lie algebra $𝔰𝔬(n)$ is chosen such that
-for $\mathrm{SO}(2)$, $X^i = θ = X_{21}$ is the angle of rotation, and
-for $\mathrm{SO}(3)$, $X^i = (X_{32}, X_{13}, X_{21}) = θ u$ is the
+for $\mathrm{SO}(2)$, $X^1 = θ = X_{21}$ is the angle of rotation, and
+for $\mathrm{SO}(3)$, $(X^1, X^2, X^3) = (X_{32}, X_{13}, X_{21}) = θ u$ is the
 angular velocity and axis-angle representation, where $u$ is the unit vector
 along the axis of rotation.
 
 For $\mathrm{SO}(n)$ where $n ≥ 4$, the additional elements of $X^i$ are
-$X^i_{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
+$X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
 """
 vee(::Rotations, ::Any...)
 vee(M::Rotations{2}, p, X) = [X[2]]
