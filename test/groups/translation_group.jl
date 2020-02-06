@@ -7,6 +7,11 @@ include("group_utils.jl")
         @test repr(G) == "TranslationGroup(2, 3; field = ℝ)"
         @test repr(TranslationGroup(2, 3; field = ℂ)) == "TranslationGroup(2, 3; field = ℂ)"
 
+        @test has_invariant_metric(G, LeftAction()) === Val(true)
+        @test has_invariant_metric(G, RightAction()) === Val(true)
+        @test has_biinvariant_metric(G) === Val(true)
+        @test is_default_metric(MetricManifold(G, EuclideanMetric())) === Val(true)
+
         types = [Matrix{Float64}]
         @test base_manifold(G) === Euclidean(2, 3)
 

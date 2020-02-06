@@ -8,6 +8,11 @@ include("group_utils.jl")
     @test M === Rotations(3)
     x = Matrix(I, 3, 3)
 
+    @test has_invariant_metric(G, LeftAction()) === Val(true)
+    @test has_invariant_metric(G, RightAction()) === Val(true)
+    @test has_biinvariant_metric(G) === Val(true)
+    @test is_default_metric(MetricManifold(G, EuclideanMetric())) === Val(true)
+
     types = [Matrix{Float64}]
     ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
     pts = [exp(M, x, hat(M, x, ωi)) for ωi in ω]
@@ -86,5 +91,16 @@ include("group_utils.jl")
         z2 = allocate(pts[1])
         project_point!(G, z2, z)
         @test isapprox(M, z2, project_point(M, z))
+    end
+
+    @testset "vee/hat" begin
+        X = vpts[1]
+        pe = identity(G, pts[1])
+
+        Xⁱ = vee(G, Identity(G), X)
+        @test Xⁱ ≈ vee(G, pe, X)
+
+        X2 = hat(G, Identity(G), Xⁱ)
+        @test isapprox(M, pe, X2, hat(G, pe, Xⁱ); atol = 1e-6)
     end
 end

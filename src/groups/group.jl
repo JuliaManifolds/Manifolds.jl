@@ -462,7 +462,7 @@ function translate_diff(M::Manifold, p, q, X, conv::ActionDirection, ::Val{false
 end
 function translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection)
     pq = translate(G, p, q, conv)
-    Y = zero_tangent_vector(G, pq)
+    Y = allocate_result(G, translate_diff, X, p, q)
     translate_diff!(G, Y, p, q, X, conv)
     return Y
 end
@@ -876,6 +876,7 @@ const MultiplicationGroup = AbstractGroupManifold{MultiplicationOperation}
 *(::Identity{G}, p) where {G<:MultiplicationGroup} = p
 *(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
 *(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
+*(::Identity{<:MultiplicationGroup}, e::Identity{<:AdditionGroup}) = e
 
 /(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
 /(::Identity{G}, p) where {G<:MultiplicationGroup} = inv(p)

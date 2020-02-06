@@ -285,7 +285,7 @@ function group_log(M::ProductManifold, q::ProductRepr)
     return ProductRepr(map(group_log, M.manifolds, submanifold_components(M, q))...)
 end
 function group_log(M::ProductManifold, q)
-    X = zero_tangent_vector(G, q)
+    X = zero_tangent_vector(M, q)
     return group_log!(M, X, q)
 end
 

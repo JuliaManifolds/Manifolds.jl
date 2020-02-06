@@ -170,6 +170,9 @@ function test_group(
             g2invg1 = inverse_translate(G, g_pts[2], g_pts[1], conv...)
             @test isapprox(G, g_pts[1], inverse_translate_diff(G, g_pts[2], g2g1, translate_diff(G, g_pts[2], g_pts[1], X, conv...), conv...), X; atol = atol)
             @test isapprox(G, g_pts[1], translate_diff(G, g_pts[2], g2invg1, inverse_translate_diff(G, g_pts[2], g_pts[1], X, conv...), conv...), X; atol = atol)
+            Xe = inverse_translate_diff(G, g_pts[1], g_pts[1], X, conv...)
+            @test isapprox(G, e, Xe, translate_diff(G, e, e, Xe, conv...); atol = atol)
+            @test isapprox(G, e, Xe, inverse_translate_diff(G, e, e, Xe, conv...); atol = atol)
         end
 
         test_mutating && @testset "mutating" begin

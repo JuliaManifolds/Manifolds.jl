@@ -7,6 +7,8 @@ include("group_utils.jl")
         @test repr(G) == "SpecialEuclidean($n)"
         M = base_manifold(G)
         @test M === TranslationGroup(n) × SpecialOrthogonal(n)
+        @test submanifold(G, 1) === TranslationGroup(n)
+        @test submanifold(G, 2) === SpecialOrthogonal(n)
         Rn = Rotations(n)
         x = Matrix(I, n, n)
 

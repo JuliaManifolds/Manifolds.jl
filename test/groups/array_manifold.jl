@@ -12,6 +12,8 @@
 
     e = Identity(AG)
     @test e === Identity(G)
+    @test Manifolds.array_value(e) === e
+    @test Manifolds.array_point(e) === e
     p2, q2 = ArrayMPoint(p), ArrayMPoint(q)
     X2 = ArrayTVector(X)
 
