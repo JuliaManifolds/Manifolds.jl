@@ -1,16 +1,16 @@
 
 struct ForwardDiffBackend <: AbstractDiffBackend end
 
-function Manifolds._derivative(f::AbstractCurve, x, ::ForwardDiffBackend)
-    return ForwardDiff.derivative(f, x)
+function Manifolds._derivative(f::AbstractCurve, p, ::ForwardDiffBackend)
+    return ForwardDiff.derivative(f, p)
 end
 
-function _gradient(f::AbstractRealField, x, ::ForwardDiffBackend)
-    return ForwardDiff.gradient(f, x)
+function _gradient(f::AbstractRealField, p, ::ForwardDiffBackend)
+    return ForwardDiff.gradient(f, p)
 end
 
-function _jacobian(f::AbstractMap, x, ::ForwardDiffBackend)
-    return ForwardDiff.jacobian(f, x)
+function _jacobian(f::AbstractMap, p, ::ForwardDiffBackend)
+    return ForwardDiff.jacobian(f, p)
 end
 
 push!(_diff_backends, ForwardDiffBackend())

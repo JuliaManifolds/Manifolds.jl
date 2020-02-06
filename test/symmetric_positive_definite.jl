@@ -1,6 +1,7 @@
 include("utils.jl")
 @testset "Symmetric Positive Definite Matrices" begin
     M1 = Manifolds.SymmetricPositiveDefinite(3)
+    @test repr(M1) == "SymmetricPositiveDefinite(3)"
     M2 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LinearAffineMetric())
     M3 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
     M4 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogEuclideanMetric())
@@ -93,5 +94,8 @@ include("utils.jl")
                 @test isapprox(0.0, inner(M2,x,X[i],X[j]))
             end
         end
+        d2onb = get_basis(M2, x, DiagonalizingOrthonormalBasis(v))
+        @test donb.kappas == d2onb.kappas
+        @test donb.vectors==d2onb.vectors
     end
 end

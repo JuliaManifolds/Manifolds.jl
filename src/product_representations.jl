@@ -157,14 +157,14 @@ function ProductArray(
 end
 ProductArray(M::ShapeSpecification, data) = ProductArray(typeof(M), data, M.reshapers)
 
-@doc doc"""
+@doc raw"""
     prod_point(M::ShapeSpecification, pts...)
 
 Construct a product point from product manifold `M` based on point `pts`
 represented by [`ProductArray`](@ref).
 
 # Example
-To construct a point on the product manifold $S^2 \times \mathbb{R}^2$
+To construct a point on the product manifold $S^2 × ℝ^2$
 from points on the sphere and in the euclidean space represented by,
 respectively, `[1.0, 0.0, 0.0]` and `[-3.0, 2.0]` you need to construct shape
 specification first. It describes how linear storage of `ProductArray`
@@ -187,7 +187,7 @@ function prod_point(M::ShapeSpecification, pts...)
     return ProductArray(M, Array(data))
 end
 
-@doc doc"""
+@doc raw"""
     submanifold_component(M::Manifold, x, i::Integer)
     submanifold_component(M::Manifold, x, ::Val(i)) where {i}
     submanifold_component(x, i::Integer)
@@ -201,7 +201,7 @@ submanifold_component(M::Manifold, x, i::Val) = submanifold_component(x, i)
 submanifold_component(x, ::Val{I}) where {I} = x.parts[I]
 submanifold_component(x, i::Integer) = submanifold_component(x, Val(i))
 
-@doc doc"""
+@doc raw"""
     submanifold_components(M::Manifold, x)
     submanifold_components(x)
 
@@ -265,15 +265,48 @@ function (*)(a::Number, v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpeci
     return ProductArray(ShapeSpec, a * v.data, v.reshapers)
 end
 
-number_eltype(::Type{ProductArray{TM, TData, TV}}) where {TM, TData, TV} = eltype(TData)
+number_eltype(::Type{ProductArray{TM,TData,TV}}) where {TM,TData,TV} = eltype(TData)
 
-function allocate(x::ProductArray{ShapeSpec}) where ShapeSpec<:ShapeSpecification
+function _show_component(io::IO, v; pre = "", head = "")
+    sx = sprint(show, "text/plain", v, context = io, sizehint = 0)
+    sx = replace(sx, '\n' => "\n$(pre)")
+    print(io, head, pre, sx)
+end
+
+function _show_component_range(io::IO, vs, range; pre = "", sym = "Component ")
+    for i in range
+        _show_component(io, vs[i]; pre = pre, head = "\n$(sym)$(i) =\n")
+    end
+    return nothing
+end
+
+function _show_product_repr(io::IO, x; name = "Product representation", nmax = 4)
+    n = length(x.parts)
+    print(io, "$(name) with $(n) submanifold component$(n == 1 ? "" : "s"):")
+    half_nmax = div(nmax, 2)
+    pre = "  "
+    sym = " Component "
+    if n ≤ nmax
+        _show_component_range(io, x.parts, 1:n; pre = pre, sym = sym)
+    else
+        _show_component_range(io, x.parts, 1:half_nmax; pre = pre, sym = sym)
+        print(io, "\n ⋮")
+        _show_component_range(io, x.parts, (n-half_nmax+1):n; pre = pre, sym = sym)
+    end
+    return nothing
+end
+
+function show(io::IO, ::MIME"text/plain", x::ProductArray)
+    _show_product_repr(io, x; name = "ProductArray")
+end
+
+function allocate(x::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
     return ProductArray(ShapeSpec, allocate(x.data), x.reshapers)
 end
 function allocate(
     x::ProductArray{ShapeSpec},
-    ::Type{T}
-) where {ShapeSpec<:ShapeSpecification, T}
+    ::Type{T},
+) where {ShapeSpec<:ShapeSpecification,T}
     return ProductArray(ShapeSpec, allocate(x.data, T), x.reshapers)
 end
 
@@ -329,4 +362,8 @@ function Base.convert(::Type{TPR}, x::ProductRepr) where {TPR<:ProductRepr}
         t -> convert(t...),
         ziptuples(tuple(TPR.parameters[1].parameters...), submanifold_components(x)),
     ))
+end
+
+function show(io::IO, ::MIME"text/plain", x::ProductRepr)
+    _show_product_repr(io, x; name = "ProductRepr")
 end

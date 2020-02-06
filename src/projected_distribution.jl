@@ -8,7 +8,7 @@ specified by providing the `x` argument.
 struct ProjectedPointDistribution{TResult,TM<:Manifold,TD<:Distribution,TProj} <:
        MPointDistribution{TM}
     manifold::TM
-    d::TD
+    distribution::TD
     proj!::TProj
 end
 
@@ -26,41 +26,41 @@ function ProjectedPointDistribution(
 end
 
 function rand(rng::AbstractRNG, d::ProjectedPointDistribution{TResult}) where {TResult}
-    x = convert(TResult, rand(rng, d.d))
+    x = convert(TResult, rand(rng, d.distribution))
     return d.proj!(d.manifold, x)
 end
 
 function _rand!(rng::AbstractRNG, d::ProjectedPointDistribution, x::AbstractArray{<:Number})
-    _rand!(rng, d.d, x)
+    _rand!(rng, d.distribution, x)
     return d.proj!(d.manifold, x)
 end
 
 support(d::ProjectedPointDistribution) = MPointSupport(d.manifold)
 
 """
-    ProjectedFVectorDistribution(type::VectorBundleFibers, x, d, project_vector!)
+    ProjectedFVectorDistribution(type::VectorBundleFibers, p, d, project_vector!)
 
 Generates a random vector from ambient space of manifold `type.manifold`
-at point `x` and projects it to vector space of type `type` using function
+at point `p` and projects it to vector space of type `type` using function
 `project_vector!`, see [`project_vector`](@ref) for documentation.
 Generated arrays are of type `TResult`.
 """
 struct ProjectedFVectorDistribution{
     TResult,
     TSpace<:VectorBundleFibers,
-    TX,
+    ManifoldPoint,
     TD<:Distribution,
     TProj,
-} <: FVectorDistribution{TSpace,TX}
+} <: FVectorDistribution{TSpace,ManifoldPoint}
     type::TSpace
-    x::TX
-    d::TD
+    point::ManifoldPoint
+    distribution::TD
     project_vector!::TProj
 end
 
 function ProjectedFVectorDistribution(
     type::VectorBundleFibers,
-    x,
+    p,
     d::Distribution,
     project_vector!,
     xt::TResult,
@@ -68,20 +68,20 @@ function ProjectedFVectorDistribution(
     return ProjectedFVectorDistribution{
         TResult,
         typeof(type),
-        typeof(x),
+        typeof(p),
         typeof(d),
         typeof(project_vector!),
     }(
         type,
-        x,
+        p,
         d,
         project_vector!,
     )
 end
 
 function rand(rng::AbstractRNG, d::ProjectedFVectorDistribution{TResult}) where {TResult}
-    v = convert(TResult, reshape(rand(rng, d.d), size(d.x)))
-    return d.project_vector!(d.type, v, d.x, v)
+    X = convert(TResult, reshape(rand(rng, d.distribution), size(d.point)))
+    return d.project_vector!(d.type, X, d.point, X)
 end
 
 function _rand!(
@@ -93,4 +93,4 @@ function _rand!(
     return copyto!(v, rand(rng, d))
 end
 
-support(tvd::ProjectedFVectorDistribution) = FVectorSupport(tvd.type, tvd.x)
+support(tvd::ProjectedFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)

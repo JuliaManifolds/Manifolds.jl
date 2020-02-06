@@ -1,243 +1,245 @@
-@doc doc"""
+@doc raw"""
     SymmetricMatrices{n,F} <: Manifold
 
 The [`Manifold`](@ref) $ \operatorname{Sym} (n)$ consisting of the real- or complex-valued
-symmetric matrices of size $ n\times n$, i.e. the set
+symmetric matrices of size $ n× n$, i.e. the set
 
 ````math
-\operatorname{Sym}(n) = \bigl\{A \in \mathbb F^{n\times n} \big| A^{\mathrm{H}} = A \bigr\},
+\operatorname{Sym}(n) = \bigl\{p  ∈ 𝔽^{n × n} \big| p^{\mathrm{H}} = p \bigr\},
 ````
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed
-and the field $\mathbb F \in \{ \mathbb R, \mathbb C\}$ is set by the
+and the field $𝔽 ∈ \{ ℝ, ℂ\}$ is set by the
 [`AbstractNumbers`](@ref) `F`.
 
-Though it is slighty redundant, usually the matrices are safed as $n\times n$ arrays.
+Though it is slightly redundant, usually the matrices are stored as $n × n$ arrays.
 
 # Constructor
 
     SymmetricMatrices(n::Int, F::AbstractNumbers=ℝ)
 
-Generate the manifold of $n\times n$ symmetric metrices.
+Generate the manifold of $n × n$ symmetric metrices.
 """
 struct SymmetricMatrices{n,F} <: Manifold end
 
 SymmetricMatrices(n::Int, F::AbstractNumbers = ℝ) = SymmetricMatrices{n,F}()
 
-@doc doc"""
-    check_manifold_point(M::SymmetricMatrices{n,F}, x; kwargs...)
+@doc raw"""
+    check_manifold_point(M::SymmetricMatrices{n,F}, p; kwargs...)
 
-Check whether `x` is a valid manifold point on the [`SymmetricMatrices`](@ref) `M`, i.e.
-whether `x` is a symmetric matrix of size `(n,n)` with values from the corresponding
+Check whether `p` is a valid manifold point on the [`SymmetricMatrices`](@ref) `M`, i.e.
+whether `p` is a symmetric matrix of size `(n,n)` with values from the corresponding
 [`AbstractNumbers`](@ref) `F`.
 
-The tolerance for the symmetry of `x` can be set using `kwargs...`.
+The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
-function check_manifold_point(M::SymmetricMatrices{n,F}, x; kwargs...) where {n,F}
-    if (F === ℝ) && !(eltype(x) <: Real)
+function check_manifold_point(M::SymmetricMatrices{n,F}, p; kwargs...) where {n,F}
+    if (F === ℝ) && !(eltype(p) <: Real)
         return DomainError(
-            eltype(x),
-            "The matrix $(x) does not lie on $M, since its values are not real.",
+            eltype(p),
+            "The matrix $(p) does not lie on $M, since its values are not real.",
         )
     end
-    if (F === ℂ) && !(eltype(x) <: Real) && !(eltype(x) <: Complex)
+    if (F === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
         return DomainError(
-            eltype(x),
-            "The matrix $(x) does not lie on $M, since its values are not complex.",
+            eltype(p),
+            "The matrix $(p) does not lie on $M, since its values are not complex.",
         )
     end
-    if size(x) != (n, n)
+    if size(p) != (n, n)
         return DomainError(
-            size(x),
-            "The point $(x) does not lie on $M since its size ($(size(x))) does not match the representation size ($(representation_size(M))).",
+            size(p),
+            "The point $(p) does not lie on $M since its size ($(size(p))) does not match the representation size ($(representation_size(M))).",
         )
     end
-    if !isapprox(norm(x - transpose(x)), 0.0; kwargs...)
+    if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
         return DomainError(
-            norm(x - transpose(x)),
-            "The point $(x) does not lie on $M, since it is not symmetric.",
+            norm(p - transpose(p)),
+            "The point $(p) does not lie on $M, since it is not symmetric.",
         )
     end
     return nothing
 end
 
 """
-    check_tangent_vector(M::SymmetricMatrices{n,F}, x, v; kwargs... )
+    check_tangent_vector(M::SymmetricMatrices{n,F}, p, X; kwargs... )
 
-Check whether `v` is a tangent vector to manifold point `x` on the
-[`SymmetricMatrices`](@ref) `M`, i.e. `v` has to be a symmetric matrix of dimension `(n,n)`
+Check whether `X` is a tangent vector to manifold point `p` on the
+[`SymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
 and its values have to be from the correct [`AbstractNumbers`](@ref).
 
-The tolerance for the symmetry of `x` and `v` can be set using `kwargs...`.
+The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
-function check_tangent_vector(M::SymmetricMatrices{n,F}, x, v; kwargs...) where {n,F}
-    t = check_manifold_point(M, x; kwargs...)
+function check_tangent_vector(M::SymmetricMatrices{n,F}, p, X; kwargs...) where {n,F}
+    t = check_manifold_point(M, p; kwargs...)
     t === nothing || return t
-    if (F === ℝ) && !(eltype(v) <: Real)
+    if (F === ℝ) && !(eltype(X) <: Real)
         return DomainError(
-            eltype(v),
-            "The matrix $(v) is not a tangent to a point on $M, since its values are not real.",
+            eltype(X),
+            "The matrix $(X) is not a tangent to a point on $M, since its values are not real.",
         )
     end
-    if (F === ℂ) && !(eltype(v) <: Real) && !(eltype(v) <: Complex)
+    if (F === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
         return DomainError(
-            eltype(v),
-            "The matrix $(v) is not a tangent to a point on $M, since its values are not complex.",
+            eltype(X),
+            "The matrix $(X) is not a tangent to a point on $M, since its values are not complex.",
         )
     end
-    if size(v) != (n, n)
+    if size(X) != (n, n)
         return DomainError(
-            size(v),
-            "The vector $(v) is not a tangent to a point on $(M) since its size ($(size(v))) does not match the representation size ($(representation_size(M))).",
+            size(X),
+            "The vector $(X) is not a tangent to a point on $(M) since its size ($(size(X))) does not match the representation size ($(representation_size(M))).",
         )
     end
-    if !isapprox(norm(v - transpose(v)), 0.0; kwargs...)
+    if !isapprox(norm(X - transpose(X)), 0.0; kwargs...)
         return DomainError(
-            norm(v - transpose(v)),
-            "The vector $(v) is not a tangent vector to $(x) on $(M), since it is not symmetric.",
+            norm(X - transpose(X)),
+            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not symmetric.",
         )
     end
     return nothing
 end
 
-@doc doc"""
-    distance(M::SymmetricMatrices, x, y)
+@doc raw"""
+    distance(M::SymmetricMatrices, p, q)
 
 Compute distance using the inherited metric, i.e. taking the Frobenius-norm of the
 difference.
 """
-distance(M::SymmetricMatrices, x, y) = norm(x - y)
+distance(M::SymmetricMatrices, p, q) = norm(p - q)
 
-@doc doc"""
-    exp(M::SymmetricMatrices, x, v)
+@doc raw"""
+    exp(M::SymmetricMatrices, p, X)
 
-Compute the exponential map eminating from `x` in tangent direction `v` on the
+Compute the exponential map emanating from `p` in tangent direction `X` on the
 [`SymmetricMatrices`](@ref) `M`, which reads
 
 ````math
-\exp_xv = x + v.
+\exp_p X = p + X.
 ````
 """
 exp(::SymmetricMatrices, ::Any...)
 
-exp!(M::SymmetricMatrices, y, x, v) = (y .= x .+ v)
+exp!(M::SymmetricMatrices, q, p, X) = (q .= p .+ X)
 
-@doc doc"""
-    flat(M::SymmetricMatrices, x, w::FVector{TangentSpaceType})
+@doc raw"""
+    flat(M::SymmetricMatrices, p, X::FVector{TangentSpaceType})
 
-Compute the [`flat`](@ref flat(M::Manifold, x, w::FVector)) isomorphism of the
-[`SymmetricMatrices`](@ref) `M` on the manifold point `x` and tangent vector `w`.
+Compute the [`flat`](@ref flat(M::Manifold, p, X::FVector)) isomorphism of the
+[`SymmetricMatrices`](@ref) `M` on the manifold point `p` and tangent vector `X`.
 
-Since `M` is already a vector space over $\mathbb R$, this returns just the vector `w`.
+Since `M` is already a vector space over $ℝ$, this returns just the vector `X`.
 """
 flat(::SymmetricMatrices, ::Any...)
 
-flat!(M::SymmetricMatrices, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
+flat!(M::SymmetricMatrices, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 function get_coordinates(
     M::SymmetricMatrices{N,ℝ},
-    x,
-    v,
+    p,
+    X,
     B::ArbitraryOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    vout = similar(v, dim)
-    @assert size(v) == (N, N)
+    Y = similar(X, dim)
+    @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, sqrt(2))
-        @inbounds vout[k] = v[i, j] * scale
+        @inbounds Y[k] = X[i, j] * scale
         k += 1
     end
-    return vout
+    return Y
 end
 function get_coordinates(
     M::SymmetricMatrices{N,ℂ},
-    x,
-    v,
+    p,
+    X,
     B::ArbitraryOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    vout = similar(v, dim)
-    @assert size(v) == (N, N)
+    Y = similar(X, dim)
+    @assert size(X) == (N, N)
     @assert dim == N * (N + 1)
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, sqrt(2))
-        @inbounds vout[k] = real(v[i, j]) * scale
+        @inbounds Y[k] = real(X[i, j]) * scale
         k += 1
-        @inbounds vout[k] = imag(v[i, j]) * scale
+        @inbounds Y[k] = imag(X[i, j]) * scale
         k += 1
     end
-    return vout
+    return Y
 end
 
 function get_vector(
     M::SymmetricMatrices{N,ℝ},
-    x,
-    v,
+    p,
+    X,
     B::ArbitraryOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    vout = allocate_result(M, get_vector, x)
-    @assert size(v) == (div(N * (N + 1), 2),)
-    @assert size(vout) == (N, N)
+    Y = allocate_result(M, get_vector, p)
+    @assert size(X) == (div(N * (N + 1), 2),)
+    @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds vout[i, j] = v[k] * scale
-        @inbounds vout[j, i] = v[k] * scale
+        @inbounds Y[i, j] = X[k] * scale
+        @inbounds Y[j, i] = X[k] * scale
         k += 1
     end
-    return vout
+    return Y
 end
 function get_vector(
     M::SymmetricMatrices{N,ℂ},
-    x,
-    v,
+    p,
+    X,
     B::ArbitraryOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    vout = allocate_result(M, get_vector, x, x .* 1im)
-    @assert size(v) == (N * (N + 1),)
-    @assert size(vout) == (N, N)
+    Y = allocate_result(M, get_vector, p, p .* 1im)
+    @assert size(X) == (N * (N + 1),)
+    @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds vout[i, j] = Complex(v[k], v[k+1]) * scale
-        @inbounds vout[j, i] = vout[i, j]
+        @inbounds Y[i, j] = Complex(X[k], X[k+1]) * scale
+        @inbounds Y[j, i] = Y[i, j]
         k += 2
     end
-    return vout
+    return Y
 end
 
-@doc doc"""
-    inner(M::SymmetricMatrices, x, w, v)
+@doc raw"""
+    inner(M::SymmetricMatrices, p, X, Y)
 
-Compute the inner product of the two tangent vectors `w`, `v` from the tangent
-space at `x` on the [`SymmetricMatrices`](@ref) `M` using the restriction of the
+Compute the inner product of the two tangent vectors `X`, `Y` from the tangent
+space at `p` on the [`SymmetricMatrices`](@ref) `M` using the restriction of the
 metric from the embedding, i.e.
+
 ````math
-(v,w)_x = \operatorname{tr}(v^{\mathrm{H}}w),
+g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}Y),
 ````
+
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
-@inline inner(M::SymmetricMatrices, x, w, v) = dot(w, v)
+@inline inner(M::SymmetricMatrices, p, X, Y) = dot(X, Y)
 
-@doc doc"""
-    log(M::SymmetricMatrices, x, y)
-Compute the logarithmic map from `x` to `y` on the [`SymmetricMatrices`](@ref) `M`, which
+@doc raw"""
+    log(M::SymmetricMatrices, p, q)
+Compute the logarithmic map from `p` to `q` on the [`SymmetricMatrices`](@ref) `M`, which
 reads
 
 ````math
-\log_xy = y-x.
+\log_p q = q-p.
 ````
 """
 log(::SymmetricMatrices, ::Any...)
 
-log!(M::SymmetricMatrices, v, x, y) = (v .= y .- x)
+log!(M::SymmetricMatrices, X, p, q) = (X .= q .- p)
 
-@doc doc"""
+@doc raw"""
 manifold_dimension(M::SymmetricMatrices{n,𝔽})
 
 Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the number system
@@ -253,92 +255,97 @@ function manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}
     return div(N * (N + 1), 2) * real_dimension(𝔽)
 end
 
-@doc doc"""
-    norm(M::SymmetricMatrices, x, v)
+@doc raw"""
+    norm(M::SymmetricMatrices, p, X)
 
-Compute the norm of the tangent vector `v` from the tangent space at `x` on the
+Compute the norm of the tangent vector `X` from the tangent space at `p` on the
 [`SymmetricMatrices`](@ref) `M`, which is the norm from the embedding, i.e.
 
 ````math
-\lVert v \rVert_x = \lVert v \rVert_2
+\lVert X \rVert_p = \lVert X \rVert_2
 ````
 """
-norm(M::SymmetricMatrices, x, v) = norm(v)
+norm(M::SymmetricMatrices, p, X) = norm(X)
 
-@doc doc"""
-    project_point(M::SymmetricMatrices,x)
+@doc raw"""
+    project_point(M::SymmetricMatrices, p)
 
-Projects `x` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
+Projects `p` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
 
 ````math
-\operatorname{proj}_{\operatorname{Sym}(n)}(x) = \frac{1}{2} \bigl( x + x^{\mathrm{H}} \bigr),
+\operatorname{proj}_{\operatorname{Sym}(n)}(p) = \frac{1}{2} \bigl( p + p^{\mathrm{H}} \bigr),
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 project_point(::SymmetricMatrices, ::Any...)
 
-project_point!(M::SymmetricMatrices, x) = (x .= (x + transpose(x)) ./ 2)
+project_point!(M::SymmetricMatrices, p) = (p .= (p + p') ./ 2)
 
-@doc doc"""
-    project_tangent(M::SymmetricMatrices, x, v)
+@doc raw"""
+    project_tangent(M::SymmetricMatrices, p, X)
 
-Project the matrix `v` onto the tangent space at `x` on the [`SymmetricMatrices`](@ref) `M`,
+Project the matrix `X` onto the tangent space at `p` on the [`SymmetricMatrices`](@ref) `M`,
 
 ````math
-\operatorname{proj}_x(v) = \frac{1}{2} \bigl( v + v^{\mathrm{H}} \bigr),
+\operatorname{proj}_p(X) = \frac{1}{2} \bigl( X + X^{\mathrm{H}} \bigr),
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 project_tangent(::SymmetricMatrices, ::Any...)
 
-project_tangent!(M::SymmetricMatrices, w, x, v) = (w .= (v .+ transpose(v)) ./ 2)
+project_tangent!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
 
-@doc doc"""
+@doc raw"""
     representation_size(M::SymmetricMatrices)
 
 Returns the size points on the [`SymmetricMatrices`](@ref) `M` are represented as, i.e.
-for the $n\times n$ it's `(n,n)`.
+for the $n × n$ it's `(n,n)`.
 """
 @generated representation_size(::SymmetricMatrices{N}) where {N} = (N, N)
 
-@doc doc"""
-    sharp(M::SymmetricMatrices, x, w::FVector{CotangentSpaceType})
+@doc raw"""
+    sharp(M::SymmetricMatrices, p, ξ::FVector{CotangentSpaceType})
 
-Compute the [`sharp`](@ref sharp(M::Manifold, x, w::FVector)) isomorphism of the
-[`SymmetricMatrices`](@ref) `M` on the manifold point `x` and cotangent vector `w`.
+Compute the [`sharp`](@ref sharp(M::Manifold, p, ξ::FVector)) isomorphism of the
+[`SymmetricMatrices`](@ref) `M` on the manifold point `p` and cotangent vector `ξ`.
 
-Since `M` is already a vector space over $\mathbb R$, this returns just the vector `w`.
+Since `M` is already a vector space over $ℝ$, this returns just the vector `ξ` as a tangent
+vector.
 """
 sharp(::SymmetricMatrices, ::Any...)
 
-sharp!(M::SymmetricMatrices, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
+sharp!(M::SymmetricMatrices, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
-@doc doc"""
-    vector_transport_to(M::SymmetricMatrices, x, v, y, ::ParallelTransport)
+function show(io::IO, ::SymmetricMatrices{n,F}) where {n,F}
+    print(io, "SymmetricMatrices($(n), $(F))")
+end
+
+@doc raw"""
+    vector_transport_to(M::SymmetricMatrices, p, X, q, ::ParallelTransport)
 
 Compute the parallel
-[`vector_transport_to`](@ref vector_transport_to(M::Manifold, x, v, y, ParallelTransport()))
-of `v` from the tangent space at `x` on the [`SymmetricMatrices`](@ref) `M` to `y`.
+[`vector_transport_to`](@ref vector_transport_to(M::Manifold, p, X, y, ParallelTransport()))
+of `X` from the tangent space at `p` on the [`SymmetricMatrices`](@ref) `M` to `q`.
 Since the metric is inherited from the embedding space, this is just the identity, i.e.
 
 ````math
-P_{y\gets x}(v) = v.
+\mathcal P_{q←p}(X) = X.
 ````
 """
 vector_transport_to(::SymmetricMatrices, ::Any...)
 
-function vector_transport_to!(M::SymmetricMatrices, vto, x, v, y, ::ParallelTransport)
-    return copyto!(vto, v)
+function vector_transport_to!(M::SymmetricMatrices, Y, p, X, q, ::ParallelTransport)
+    return copyto!(Y, X)
 end
 
-@doc doc"""
-    zero_tangent_vector(M, x)
+@doc raw"""
+    zero_tangent_vector(M, p)
 
-Return the zero tangent vector for the tangent space at `x` on the
+Return the zero tangent vector for the tangent space at `p` on the
 [`SymmetricMatrices`](@ref) `M`, i.e. the zero matrix.
 """
 zero_tangent_vector(::SymmetricMatrices, ::Any...)
 
-zero_tangent_vector!(M::SymmetricMatrices, v, x) = fill!(v, 0)
+zero_tangent_vector!(M::SymmetricMatrices, X, p) = fill!(X, 0)

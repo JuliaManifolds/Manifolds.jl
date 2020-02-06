@@ -39,7 +39,7 @@ Base.show(io::IO, ::QuaternionNumbers) = print(io, "ℍ")
 
 ^(𝔽::AbstractNumbers, n) = Euclidean(n...; field = 𝔽)
 
-@doc doc"""
+@doc raw"""
     real_dimension(𝔽::AbstractNumbers)
 
 Return the real dimension $\dim_ℝ 𝔽$ of the [`AbstractNumbers`] system `𝔽`.

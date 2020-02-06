@@ -3,6 +3,7 @@ include("utils.jl")
 @testset "Circle" begin
     M = Circle()
     @testset "Real Circle Basics" begin
+        @test repr(M) == "Circle(ℝ)"
         @test representation_size(M) == ()
         @test manifold_dimension(M) == 1
         @test !is_manifold_point(M, 9.)
@@ -28,6 +29,7 @@ include("utils.jl")
         x .+= 2*π
         project_point!(M,x)
         @test x == MVector(0.0)
+        @test project_tangent(M,0.0,1.) == 1.
     end
     types = [Float64, Float32]
 
@@ -66,6 +68,7 @@ include("utils.jl")
     end
     Mc = Circle(ℂ)
     @testset "Complex Circle Basics" begin
+        @test repr(Mc) == "Circle(ℂ)"
         @test representation_size(Mc) == ()
         @test manifold_dimension(Mc) == 1
         @test is_tangent_vector(Mc, 1im, 0.)

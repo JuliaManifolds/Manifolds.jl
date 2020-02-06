@@ -3,18 +3,18 @@ abstract type AbstractDiffBackend end
 
 struct NoneDiffBackend <: AbstractDiffBackend end
 
-function _derivative(f, x, backend::AbstractDiffBackend)
-    error("_derivative not implemented for curve $(typeof(f)), point $(typeof(x)) and " *
+function _derivative(f, p, backend::AbstractDiffBackend)
+    error("_derivative not implemented for curve $(typeof(f)), point $(typeof(p)) and " *
           "backend $(typeof(backend))")
 end
 
-function _gradient(f, x, backend::AbstractDiffBackend)
-    error("_gradient not implemented for field $(typeof(f)), point $(typeof(x)) and " *
+function _gradient(f, p, backend::AbstractDiffBackend)
+    error("_gradient not implemented for field $(typeof(f)), point $(typeof(p)) and " *
           "backend $(typeof(backend))")
 end
 
-function _jacobian(f, x, backend::AbstractDiffBackend)
-    error("_jacobian not implemented for map $(typeof(f)), point $(typeof(x)) and " *
+function _jacobian(f, p, backend::AbstractDiffBackend)
+    error("_jacobian not implemented for map $(typeof(f)), point $(typeof(p)) and " *
           "backend $(typeof(backend))")
 end
 
@@ -71,11 +71,11 @@ Get vector of currently valid differentiation backends.
 """
 diff_backends() = _diff_backends
 
-_derivative(f, x) = _derivative(f, x, diff_backend())
+_derivative(f, p) = _derivative(f, p, diff_backend())
 
-_gradient(f, x) = _gradient(f, x, diff_backend())
+_gradient(f, p) = _gradient(f, p, diff_backend())
 
-_jacobian(f, x) = _jacobian(f, x, diff_backend())
+_jacobian(f, p) = _jacobian(f, p, diff_backend())
 
 # Finite differences
 
@@ -96,14 +96,14 @@ push!(_diff_backends, FiniteDifferencesBackend())
 
 diff_backend!(_diff_backends[end])
 
-function _derivative(f, x, backend::FiniteDifferencesBackend)
-    return FiniteDifferences.grad(backend.method, f, x)[1]
+function _derivative(f, p, backend::FiniteDifferencesBackend)
+    return FiniteDifferences.grad(backend.method, f, p)[1]
 end
 
-function _gradient(f, x, backend::FiniteDifferencesBackend)
-    return FiniteDifferences.grad(backend.method, f, x)[1]
+function _gradient(f, p, backend::FiniteDifferencesBackend)
+    return FiniteDifferences.grad(backend.method, f, p)[1]
 end
 
-function _jacobian(f, x, backend::FiniteDifferencesBackend)
-    return FiniteDifferences.jacobian(backend.method, f, x)[1]
+function _jacobian(f, p, backend::FiniteDifferencesBackend)
+    return FiniteDifferences.jacobian(backend.method, f, p)[1]
 end

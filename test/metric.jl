@@ -81,6 +81,7 @@ end
         E = TestEuclidean{n}()
         g = TestEuclideanMetric()
         M = MetricManifold(E, g)
+        @test repr(M) == "MetricManifold(TestEuclidean{3}(), TestEuclideanMetric())"
         G = Diagonal(1.0:n)
         invG = inv(G)
         @test manifold_dimension(M) == n
@@ -281,7 +282,9 @@ end
         @test norm(MM2, x, v) === norm(M, x, v)
         @test distance(MM2, x, y) === distance(M, x, y)
         @test exp!(MM2, y, x, v) === exp!(M, y, x, v)
+        @test exp(MM2, x, v) == exp(M, x, v)
         @test log!(MM2, v, x, y) === log!(M, v, x, y)
+        @test log(MM2, x, y) == log(M, x, y)
         @test retract!(MM2, y, x, v) === retract!(M, y, x, v)
         @test retract!(MM2, y, x, v, 1) === retract!(M, y, x, v, 1)
 
@@ -296,8 +299,8 @@ end
 
         a = Manifolds.projected_distribution(M, Distributions.MvNormal(zero(zeros(3)), 1.0))
         b = Manifolds.projected_distribution(MM2, Distributions.MvNormal(zero(zeros(3)), 1.0))
-        @test isapprox(Matrix(a.d.Σ), Matrix(b.d.Σ))
-        @test isapprox(a.d.μ, b.d.μ)
+        @test isapprox(Matrix(a.distribution.Σ), Matrix(b.distribution.Σ))
+        @test isapprox(a.distribution.μ, b.distribution.μ)
         @test get_basis(M,x,ArbitraryOrthonormalBasis()) == get_basis(MM2,x,ArbitraryOrthonormalBasis())
         @test_throws ErrorException get_basis(MM,x,ArbitraryOrthonormalBasis())
         cov = flat(M, x, FVector(TangentSpace, v))

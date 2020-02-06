@@ -52,7 +52,7 @@ This can best be achieved by adding a docstring to the method with a general sig
 ````julia
     struct MyManifold <: Manifold end
 
-    @doc doc"""
+    @doc raw"""
         exp(M::MyManifold, x, v)
 
     Describe the function.

@@ -12,14 +12,14 @@ FiniteDiffBackend() = FiniteDiffBackend(Val(:central))
 
 push!(_diff_backends, FiniteDiffBackend())
 
-function _derivative(f::AbstractCurve, x, backend::FiniteDiffBackend{Method}) where Method
-    return FiniteDiff.finite_difference_derivative(f, x, Method)
+function _derivative(f::AbstractCurve, p, backend::FiniteDiffBackend{Method}) where Method
+    return FiniteDiff.finite_difference_derivative(f, p, Method)
 end
 
-function _gradient(f::AbstractRealField, x, backend::FiniteDiffBackend{Method}) where Method
-    return FiniteDiff.finite_difference_gradient(f, x, Method)
+function _gradient(f::AbstractRealField, p, backend::FiniteDiffBackend{Method}) where Method
+    return FiniteDiff.finite_difference_gradient(f, p, Method)
 end
 
-function _jacobian(f::AbstractMap, x, backend::FiniteDiffBackend{Method}) where Method
-    return FiniteDiff.finite_difference_jacobian(f, x, Method)
+function _jacobian(f::AbstractMap, p, backend::FiniteDiffBackend{Method}) where Method
+    return FiniteDiff.finite_difference_jacobian(f, p, Method)
 end

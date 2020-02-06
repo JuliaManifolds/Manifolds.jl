@@ -7,10 +7,12 @@ include("utils.jl")
     A_sym2 = [1 2 3; 2 5 -1; 3 -1 9]
     B_sym = [1 2 3; 2 5 1; 3 1 -1]
     M_complex = SymmetricMatrices(3,ℂ)
+    @test repr(M_complex) == "SymmetricMatrices(3, ℂ)"
     C = [1+im 1 im; 1 2 -im; im -im -1-im]
     D = [1 0; 0 1];
     X = zeros(3,3)
     @testset "Real Symmetric Matrices Basics" begin
+        @test repr(M) == "SymmetricMatrices(3, ℝ)"
         @test representation_size(M) == (3,3)
         @test check_manifold_point(M,B_sym)===nothing
         @test_throws DomainError is_manifold_point(M,A,true)

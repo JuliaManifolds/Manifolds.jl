@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     SpecialEuclidean(n)
 
 Special Euclidean group $\mathrm{SE}(n)$, the group of rigid motions.
@@ -21,7 +21,7 @@ SemidirectProductGroup(Tn, SOn, RotationAction(Tn, SOn))
 ```
 
 Points on $\mathrm{SE}(n)$ may be represented as points on the underlying product manifold
-$\mathrm{T}(n) \times \mathrm{SO}(n)$ or as affine matrices with size `(n + 1, n + 1)`.
+$\mathrm{T}(n) × \mathrm{SO}(n)$ or as affine matrices with size `(n + 1, n + 1)`.
 """
 const SpecialEuclidean{N} = SemidirectProductGroup{
     TranslationGroup{Tuple{N},ℝ},
@@ -40,54 +40,54 @@ show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n)
 
 Base.@propagate_inbounds function submanifold_component(
     ::SpecialEuclidean{n},
-    x::AbstractMatrix,
+    p::AbstractMatrix,
     ::Val{1},
 ) where {n}
-    return view(x, 1:n, n + 1)
+    return view(p, 1:n, n + 1)
 end
 Base.@propagate_inbounds function submanifold_component(
     ::SpecialEuclidean{n},
-    x::AbstractMatrix,
+    p::AbstractMatrix,
     ::Val{2},
 ) where {n}
-    return view(x, 1:n, 1:n)
+    return view(p, 1:n, 1:n)
 end
 
-function submanifold_components(G::SpecialEuclidean{n}, x::AbstractMatrix) where {n}
-    @assert size(x) == (n + 1, n + 1)
-    @inbounds t = submanifold_component(G, x, Val(1))
-    @inbounds R = submanifold_component(G, x, Val(2))
+function submanifold_components(G::SpecialEuclidean{n}, p::AbstractMatrix) where {n}
+    @assert size(p) == (n + 1, n + 1)
+    @inbounds t = submanifold_component(G, p, Val(1))
+    @inbounds R = submanifold_component(G, p, Val(2))
     return (t, R)
 end
 
 Base.@propagate_inbounds function _padpoint!(
     ::SpecialEuclidean{n},
-    y::AbstractMatrix,
+    q::AbstractMatrix,
 ) where {n}
     for i ∈ 1:n
-        y[n+1, i] = 0
+        q[n+1, i] = 0
     end
-    y[n+1, n+1] = 1
-    return y
+    q[n+1, n+1] = 1
+    return q
 end
 
 Base.@propagate_inbounds function _padvector!(
     ::SpecialEuclidean{n},
-    v::AbstractMatrix,
+    X::AbstractMatrix,
 ) where {n}
     for i ∈ 1:n+1
-        v[n+1, i] = 0
+        X[n+1, i] = 0
     end
-    return v
+    return X
 end
 
-compose(::SpecialEuclidean, x::AbstractMatrix, y::AbstractMatrix) = x * y
+compose(::SpecialEuclidean, p::AbstractMatrix, q::AbstractMatrix) = p * q
 
 function compose!(
     ::SpecialEuclidean,
-    z::AbstractMatrix,
     x::AbstractMatrix,
-    y::AbstractMatrix,
+    p::AbstractMatrix,
+    q::AbstractMatrix,
 )
-    return mul!(z, x, y)
+    return mul!(x, p, q)
 end

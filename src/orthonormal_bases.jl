@@ -70,21 +70,21 @@ function ProjectedOrthonormalBasis(method::Symbol, F::AbstractNumbers = ℝ)
     return ProjectedOrthonormalBasis{method,F}()
 end
 
-@doc doc"""
-    DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ)
+@doc raw"""
+    DiagonalizingOrthonormalBasis(frame_direction, F::AbstractNumbers = ℝ)
 
 An orthonormal basis `Ξ` as a vector of tangent vectors (of length determined by
 [`manifold_dimension`](@ref)) in the tangent space that diagonalizes the curvature
-tensor $R(u,v)w$ and where the direction `v` has curvature `0`.
+tensor $R(u,v)w$ and where the direction `frame_direction` $v$ has curvature `0`.
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
 struct DiagonalizingOrthonormalBasis{TV,F} <: AbstractOrthonormalBasis{F}
-    v::TV
+    frame_direction::TV
 end
 
-function DiagonalizingOrthonormalBasis(v, F::AbstractNumbers = ℝ)
-    return DiagonalizingOrthonormalBasis{typeof(v),F}(v)
+function DiagonalizingOrthonormalBasis(X, F::AbstractNumbers = ℝ)
+    return DiagonalizingOrthonormalBasis{typeof(X),F}(X)
 end
 
 const ArbitraryOrDiagonalizingBasis =
@@ -106,12 +106,12 @@ function PrecomputedOrthonormalBasis(vectors::AbstractVector, F::AbstractNumbers
     return PrecomputedOrthonormalBasis{typeof(vectors),F}(vectors)
 end
 
-@doc doc"""
+@doc raw"""
     DiagonalizingOrthonormalBasis(vectors, kappas, F::AbstractNumbers = ℝ)
 
 A precomputed orthonormal basis `Ξ` as a vector of tangent vectors (of length determined
 by [`manifold_dimension`](@ref)) in the tangent space that diagonalizes the curvature
-tensor $R(u,v)w$ with eigenvalues `kappas` and where the direction `v` has curvature `0`.
+tensor $R(u,v)w$ with eigenvalues `kappas` and where the direction `v` has eigenvalue `0`.
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
@@ -172,25 +172,25 @@ end
 function get_vector(M::Manifold, x, v, B::AbstractPrecomputedOrthonormalBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
-    #  2) guarantees a reasonable array type `vout`
+    #  2) guarantees a reasonable array type `Y`
     #     (for example scalar * `SizedArray` is an `SArray`)
     bvectors = get_vectors(M, x, B)
     if isa(bvectors[1], ProductRepr)
         vt = v[1] * bvectors[1]
-        vout = allocate(bvectors[1], eltype(vt))
-        copyto!(vout, vt)
+        Y = allocate(bvectors[1], eltype(vt))
+        copyto!(Y, vt)
         for i = 2:length(v)
-            vout += v[i] * bvectors[i]
+            Y += v[i] * bvectors[i]
         end
-        return vout
+        return Y
     else
         vt = v[1] .* bvectors[1]
-        vout = allocate(bvectors[1], eltype(vt))
-        copyto!(vout, vt)
+        Y = allocate(bvectors[1], eltype(vt))
+        copyto!(Y, vt)
         for i = 2:length(v)
-            vout .+= v[i] .* bvectors[i]
+            Y .+= v[i] .* bvectors[i]
         end
-        return vout
+        return Y
     end
 end
 
@@ -342,4 +342,78 @@ function get_basis(M::Manifold, x, B::ProjectedOrthonormalBasis{:gram_schmidt,�
     end
     @warn "get_basis with bases $(typeof(B)) only found $(K) orthonormal basis vectors, but manifold dimension is $(dim)."
     return PrecomputedOrthonormalBasis(Ξ)
+end
+
+function _show_basis_vector(io::IO, v; pre = "", head = "")
+    sx = sprint(show, "text/plain", v, context = io, sizehint = 0)
+    sx = replace(sx, '\n' => "\n$(pre)")
+    print(io, head, pre, sx)
+end
+
+function _show_basis_vector_range(io::IO, vs, range; pre = "", sym = "E")
+    for i in range
+        _show_basis_vector(io, vs[i]; pre = pre, head = "\n$(sym)$(i) =\n")
+    end
+    return nothing
+end
+
+function _show_basis_vector_range_noheader(io::IO, vs; max_vectors = 4, pre = "", sym = "E")
+    nv = length(vs)
+    if nv ≤ max_vectors
+        _show_basis_vector_range(io, vs, 1:nv; pre = "  ", sym = " E")
+    else
+        halfn = div(max_vectors, 2)
+        _show_basis_vector_range(io, vs, 1:halfn; pre = "  ", sym = " E")
+        print(io, "\n ⋮")
+        _show_basis_vector_range(io, vs, (nv-halfn+1):nv; pre = "  ", sym = " E")
+    end
+end
+
+function show(io::IO, ::ArbitraryOrthonormalBasis{F}) where {F}
+    print(io, "ArbitraryOrthonormalBasis($(F))")
+end
+function show(io::IO, ::ProjectedOrthonormalBasis{method,F}) where {method,F}
+    print(io, "ProjectedOrthonormalBasis($(repr(method)), $(F))")
+end
+function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis)
+    println(
+        io,
+        "DiagonalizingOrthonormalBasis with coordinates in $(number_system(onb)) and eigenvalue 0 in direction:",
+    )
+    sk = sprint(show, "text/plain", onb.frame_direction, context = io, sizehint = 0)
+    sk = replace(sk, '\n' => "\n ")
+    print(io, sk)
+end
+function show(io::IO, mime::MIME"text/plain", onb::PrecomputedOrthonormalBasis)
+    nv = length(onb.vectors)
+    print(
+        io,
+        "PrecomputedOrthonormalBasis with coordinates in $(number_system(onb)) and $(nv) basis vector$(nv == 1 ? "" : "s"):",
+    )
+    _show_basis_vector_range_noheader(
+        io,
+        onb.vectors;
+        max_vectors = 4,
+        pre = "  ",
+        sym = " E",
+    )
+end
+function show(io::IO, mime::MIME"text/plain", onb::PrecomputedDiagonalizingOrthonormalBasis)
+    nv = length(onb.vectors)
+    println(
+        io,
+        "PrecomputedDiagonalizingOrthonormalBasis with coordinates in $(number_system(onb)) and $(nv) basis vector$(nv == 1 ? "" : "s")",
+    )
+    print(io, "Basis vectors:")
+    _show_basis_vector_range_noheader(
+        io,
+        onb.vectors;
+        max_vectors = 4,
+        pre = "  ",
+        sym = " E",
+    )
+    println(io, "\nEigenvalues:")
+    sk = sprint(show, "text/plain", onb.kappas, context = io, sizehint = 0)
+    sk = replace(sk, '\n' => "\n ")
+    print(io, ' ', sk)
 end
