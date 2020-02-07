@@ -83,7 +83,7 @@ Base.@propagate_inbounds function _padvector!(
     return X
 end
 
-@doc doc"""
+@doc raw"""
     affine_matrix(G::SpecialEuclidean, p) -> AbstractMatrix
 
 Represent the point $p ∈ \mathrm{SE}(n)$ as an affine matrix.
@@ -113,7 +113,7 @@ affine_matrix(::SpecialEuclidean{n}, p::AbstractMatrix) where {n} = p
     return Diagonal{Float64}(I, n)
 end
 
-@doc doc"""
+@doc raw"""
     screw_matrix(G::SpecialEuclidean, X) -> AbstractMatrix
 
 Represent the Lie algebra element $X ∈ 𝔰𝔢(n) = T_e \mathrm{SE}(n)$ as a screw matrix.
@@ -156,7 +156,7 @@ function compose!(
     return mul!(x, p, q)
 end
 
-@doc doc"""
+@doc raw"""
     group_exp(G::SpecialEuclidean{n}, X)
 
 Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(n)$, where $b ∈ 𝔱(n)$ and $Ω ∈ 𝔰𝔬(n)$:
@@ -269,7 +269,7 @@ function group_exp!(G::SpecialEuclidean{3}, q, X)
     return q
 end
 
-@doc doc"""
+@doc raw"""
     group_log(G::SpecialEuclidean{n}, p)
 
 Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(n)$, where $t ∈ \mathrm{T}(n)$

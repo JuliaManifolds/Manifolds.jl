@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     InvariantMetric{G<:Metric,D<:ActionDirection} <: Metric
 
 Extend a metric on the Lie algebra of an [`AbstractGroupManifold`](@ref) to the whole group
@@ -58,7 +58,7 @@ Alias for a right-[`InvariantMetric`](@ref).
 """
 RightInvariantMetric(metric) = InvariantMetric{typeof(metric),RightAction}(metric)
 
-@doc doc"""
+@doc raw"""
     check_has_invariant_metric(
         G::AbstractGroupManifold,
         p,
@@ -132,7 +132,7 @@ function has_biinvariant_metric(M::Manifold)
     )
 end
 
-@doc doc"""
+@doc raw"""
     has_invariant_metric(G::AbstractGroupManifold, conv::ActionDirection) -> Val
 
 Return `Val(true)` if the metric on the group $\mathcal{G}$ is invariant under translations

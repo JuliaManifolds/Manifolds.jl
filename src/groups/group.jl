@@ -546,7 +546,7 @@ function inverse_translate_diff!(
     return translate_diff!(G, Y, inv(G, p), q, X, conv)
 end
 
-@doc doc"""
+@doc raw"""
     group_exp(G::AbstractGroupManifold, X)
 
 Compute the group exponential of the Lie algebra element `X`.
@@ -604,7 +604,7 @@ function group_exp!(M::Manifold, q, X, ::Val{false})
     return error("group_exp! not implemented on $(typeof(M)) for vector $(typeof(X)) and element $(typeof(q)).")
 end
 
-@doc doc"""
+@doc raw"""
     group_log(G::AbstractGroupManifold, q)
 
 Compute the group logarithm of the group element `q`.
@@ -696,7 +696,7 @@ end
 direction(::GroupExponentialRetraction{D}) where {D} = D()
 direction(::GroupLogarithmicInverseRetraction{D}) where {D} = D()
 
-@doc doc"""
+@doc raw"""
     retract(
         G::AbstractGroupManifold,
         p,
@@ -743,7 +743,7 @@ function retract!(M::Manifold, q, p, X, method::GroupExponentialRetraction)
     return translate!(M, q, p, pinvq, conv)
 end
 
-@doc doc"""
+@doc raw"""
     inverse_retract(
         G::AbstractGroupManifold,
         p,
