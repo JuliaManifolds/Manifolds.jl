@@ -296,7 +296,7 @@ export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
 export AbstractPowerManifold,
     AbstractPowerRepresentation,
-    MultidimentionalArrayPowerRepresentation,
+    ArrayPowerRepresentation,
     NestedPowerRepresentation,
     PowerManifold
 export ProductManifold
@@ -325,6 +325,13 @@ export AbstractEstimationMethod,
     CyclicProximalPointEstimation,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius
+export
+    DiagonalizingOrthonormalBasis,
+    PrecomputedDiagonalizingOrthonormalBasis,
+    PrecomputedOrthonormalBasis,
+    PrecomputedPowerOrthonormalBasis,
+    PrecomputedProductOrthonormalBasis,
+    ArbitraryOrthonormalBasis
 export allocate,
     allocate_result,
     base_manifold,
