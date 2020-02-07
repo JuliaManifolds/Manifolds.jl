@@ -256,11 +256,6 @@ function test_group(
             @test is_manifold_point(G, y; atol = atol)
             v2 = inverse_retract(G, g_pts[1], y, Manifolds.GroupLogarithmicInverseRetraction(conv...))
             @test isapprox(G, g_pts[1], v2, v_pts[1]; atol = atol)
-
-            if has_biinvariant_metric(G) === Val(true)
-                @test isapprox(G, exp(G, g_pts[1], v_pts[1]), y; atol = atol)
-                @test isapprox(G, g_pts[1], log(G, g_pts[1], y), v2; atol = atol)
-            end
         end
 
         test_mutating && @testset "mutating" begin
