@@ -198,7 +198,7 @@ function log!(M::MetricManifold{<:Manifold,<:InvariantMetric}, ::Val{false}, X, 
     )
 end
 
-function norm(M::MetricManifold{<:Manifold,<:InvariantMetric}, ::Val{false}, p, X)
+function norm(M::MetricManifold{<:Manifold,<:InvariantMetric}, p, X)
     imetric = metric(M)
     conv = direction(imetric)
     N = MetricManifold(M.manifold, imetric.metric)
