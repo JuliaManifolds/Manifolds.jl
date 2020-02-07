@@ -16,6 +16,9 @@ differential of translation by $q$ evaluated at $p$ (see [`translate_diff`](@ref
 function has_invariant_metric(M::Manifold, conv::ActionDirection)
     return has_invariant_metric(M, conv, is_decorator_manifold(M))
 end
+function has_invariant_metric(M::MetricManifold, conv::ActionDirection)
+    return has_invariant_metric(M, conv, is_default_metric(M))
+end
 function has_invariant_metric(M::Manifold, conv::ActionDirection, ::Val{true})
     return has_invariant_metric(M.manifold, conv)
 end
@@ -109,7 +112,7 @@ provided.
 
 # Constructor
 
-    InvariantMetric(metric::Metric, conv::ActionDirection)
+    InvariantMetric(metric::Metric, conv::ActionDirection = LeftAction())
 """
 struct InvariantMetric{G<:Metric,D<:ActionDirection} <: Metric
     metric::G
@@ -119,36 +122,30 @@ function InvariantMetric(metric, conv = LeftAction())
     return InvariantMetric{typeof(metric),typeof(conv)}(metric)
 end
 
-const LeftInvariantMetric{G} = InvariantMetric{G,LeftAction}
+const LeftInvariantMetric{G} = InvariantMetric{G,LeftAction} where {G<:Metric}
 
 """
     LeftInvariantMetric(metric::Metric)
 
 Alias for a left-[`InvariantMetric`](@ref).
 """
-LeftInvariantMetric(metric) = InvariantMetric{LeftAction}(metric)
+LeftInvariantMetric(metric) = InvariantMetric{typeof(metric),LeftAction}(metric)
 
-const RightInvariantMetric{G} = InvariantMetric{G,RightAction}
+const RightInvariantMetric{G} = InvariantMetric{G,RightAction} where {G<:Metric}
 
 """
     RightInvariantMetric(metric::Metric)
 
 Alias for a right-[`InvariantMetric`](@ref).
 """
-RightInvariantMetric(metric) = InvariantMetric{RightAction}(metric)
+RightInvariantMetric(metric) = InvariantMetric{typeof(metric),RightAction}(metric)
 
 direction(::InvariantMetric{G,D}) where {G,D} = D()
 
-function has_invariant_metric(
-    ::MetricManifold{<:Manifold,InvariantMetric{<:Metric,D}},
-    ::D,
-) where {D}
-    return Val(true)
-end
-
-function exp!(M::MetricManifold{<:AbstractGroupManifold}, ::Val{false}, q, p, X)
+function exp!(M::MetricManifold{<:Manifold,<:InvariantMetric}, ::Val{false}, q, p, X)
     if has_biinvariant_metric(M) === Val(true)
-        return retract!(M, q, p, X, GroupExponentialRetraction(LeftAction()))
+        conv = direction(metric(M))
+        return retract!(M, q, p, X, GroupExponentialRetraction(conv))
     end
     return invoke(
         exp!,
@@ -161,9 +158,35 @@ function exp!(M::MetricManifold{<:AbstractGroupManifold}, ::Val{false}, q, p, X)
     )
 end
 
-function log!(M::MetricManifold{<:AbstractGroupManifold}, ::Val{false}, X, p, q)
+function has_invariant_metric(
+    M::MetricManifold{<:Manifold,<:InvariantMetric},
+    conv::ActionDirection,
+)
+    direction(metric(M)) === conv && return Val(true)
+    return invoke(has_invariant_metric, Tuple{MetricManifold,typeof(conv)}, M, conv)
+end
+
+function inner(M::MetricManifold{<:Manifold,<:InvariantMetric}, ::Val{false}, p, X, Y)
+    imetric = metric(M)
+    conv = direction(imetric)
+    N = MetricManifold(M.manifold, imetric.metric)
+    Xₑ = inverse_translate_diff(M, p, p, X, conv)
+    Yₑ = inverse_translate_diff(M, p, p, Y, conv)
+    return inner(N, Identity(N), Xₑ, Yₑ)
+end
+
+function is_default_metric(M::MetricManifold{<:Manifold,<:InvariantMetric})
+    imetric = metric(M)
+    N = MetricManifold(M.manifold, imetric.metric)
+    is_default_metric(N) === Val(true) || return Val(false)
+    return has_invariant_metric(N, direction(imetric))
+end
+
+function log!(M::MetricManifold{<:Manifold,<:InvariantMetric}, ::Val{false}, X, p, q)
     if has_biinvariant_metric(M) === Val(true)
-        return inverse_retract!(M, X, p, q, GroupLogarithmicInverseRetraction(LeftAction()))
+        imetric = metric(M)
+        conv = direction(imetric)
+        return inverse_retract!(M, X, p, q, GroupLogarithmicInverseRetraction(conv))
     end
     return invoke(
         log!,
@@ -174,4 +197,19 @@ function log!(M::MetricManifold{<:AbstractGroupManifold}, ::Val{false}, X, p, q)
         p,
         q,
     )
+end
+
+function norm(M::MetricManifold{<:Manifold,<:InvariantMetric}, ::Val{false}, p, X)
+    imetric = metric(M)
+    conv = direction(imetric)
+    N = MetricManifold(M.manifold, imetric.metric)
+    Xₑ = inverse_translate_diff(M, p, p, X, conv)
+    return norm(N, Identity(N), Xₑ)
+end
+
+function show(io::IO, metric::LeftInvariantMetric)
+    print(io, "LeftInvariantMetric($(metric.metric))")
+end
+function show(io::IO, metric::RightInvariantMetric)
+    print(io, "RightInvariantMetric($(metric.metric))")
 end

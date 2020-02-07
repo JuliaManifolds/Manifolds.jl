@@ -24,4 +24,4 @@ end
 
 has_invariant_metric(::TranslationGroup, ::ActionDirection) = Val(true)
 
-is_default_metric(::MetricManifold{TranslationGroup,EuclideanMetric}) = Val(true)
+is_default_metric(::MetricManifold{<:TranslationGroup,EuclideanMetric}) = Val(true)
