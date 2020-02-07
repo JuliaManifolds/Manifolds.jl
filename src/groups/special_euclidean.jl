@@ -107,7 +107,7 @@ function affine_matrix(G::SpecialEuclidean{n}, p) where {n}
     return pmat
 end
 affine_matrix(::SpecialEuclidean{n}, p::AbstractMatrix) where {n} = p
-@generated function affine_matrix(::GT, ::Identity{GT}) where {n,GT<:SpecialEuclidean{n}}
+function affine_matrix(::GT, ::Identity{GT}) where {n,GT<:SpecialEuclidean{n}}
     s = maybesize(Size(n, n))
     s isa Size && return SDiagonal{n,Float64}(I)
     return Diagonal{Float64}(I, n)
