@@ -10,6 +10,16 @@ include("utils.jl")
         @test_throws DomainError is_manifold_point(M, 9., true)
         @test !is_tangent_vector(M, 9., 0.)
         @test_throws DomainError is_tangent_vector(M, 9., 0., true)
+        @test get_coordinates(M, Ref(0.0), Ref(2.0), ArbitraryOrthonormalBasis())[] ≈ 2.0
+        @test get_coordinates(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ 2.0
+        @test get_coordinates(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ -2.0
+        @test get_coordinates(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈ -2.0
+        @test get_coordinates(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈ 2.0
+        @test get_vector(M, Ref(0.0), Ref(2.0), ArbitraryOrthonormalBasis())[] ≈ 2.0
+        @test get_vector(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ 2.0
+        @test get_vector(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ -2.0
+        @test get_vector(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈ -2.0
+        @test get_vector(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈ 2.0
         @test flat(M,0.0, FVector(TangentSpace,1.0)) == FVector(CotangentSpace,1.0)
         @test sharp(M,0.0, FVector(CotangentSpace,1.0)) == FVector(TangentSpace,1.0)
         @test vector_transport_to(M,0.0,1.0,1.0, ParallelTransport()) == 1.0
@@ -35,8 +45,8 @@ include("utils.jl")
 
     basis_types = (ArbitraryOrthonormalBasis(),)
     basis_types_real = (ArbitraryOrthonormalBasis(),
-        DiagonalizingOrthonormalBasis([-1]),
-        DiagonalizingOrthonormalBasis([1])
+        DiagonalizingOrthonormalBasis(Ref(-1.0)),
+        DiagonalizingOrthonormalBasis(Ref(1.0))
     )
     for T in types
         @testset "Type $T" begin
