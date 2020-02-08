@@ -98,7 +98,7 @@ Compute the exponential map from `p` in the tangent direction `X` on the [`Spher
 `M` by following the great arc eminating from `p` in direction `X`.
 
 ````math
-\exp_p X = \cos(\lVert X \rVert_p)p + \sin(\lVert X \rVert_p)\frac{X}{\lVert X \rVert_p},
+\exp_p X = \cos(\lVert X \rVert_p)p + \sin(\lVert X \rVert_p)\frac{X}{\lVert X \rVert_p}X,
 ````
 where $\lVert X \rVert_p$ is the [`norm`](@ref norm(::Sphere,p,X)) on the
 [`Sphere`](@ref) `M`.
@@ -333,6 +333,17 @@ Compute the [`ParallelTransport`](@ref) on the [`Sphere`](@ref) `M`, which is gi
 ````
 """
 vector_transport_to(::Sphere, ::Any, ::Any, ::Any, ::ParallelTransport)
+
+@doc doc"""
+    vector_transport_to(M, p, X, q, ::ParallelTransport)
+
+Compute the paralllel transport of the tangent vector `X` at `p` to `q`,
+provided, the [`geodesic`](@ref) between `p` and `q` is unique
+
+$P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_{𝕊^n}(p,q)}
+\bigl(\log_xy + \log_yx \bigr).$
+"""
+vector_transport_to(::Sphere, ::Any, ::Any, ::Any, ::Any, ::ParallelTransport)
 
 function vector_transport_to!(M::Sphere, Y, p, X, q, ::ParallelTransport)
     v_xy = log(M, p, q)
