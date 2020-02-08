@@ -170,6 +170,21 @@ const PowerManifoldMultidimensional =
 const PowerManifoldNested =
     AbstractPowerManifold{<:Manifold,NestedPowerRepresentation} where {TSize}
 
+_access_nested(x, i::Int) = x[i]
+_access_nested(x, i::Tuple) = x[i...]
+
+function allocate_result(M::PowerManifoldNested, f, x...)
+    return [allocate_result(M.manifold, f, map(y -> _access_nested(y, i), x)...) for i in get_iterator(M)]
+end
+function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x)
+    alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
+    return FVector(CotangentSpace, alloc)
+end
+function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector, x)
+    alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
+    return FVector(TangentSpace, alloc)
+end
+
 function basis(M::AbstractPowerManifold, p, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     vs = [basis(M.manifold, _read(M, rep_size, p, i), B) for i in get_iterator(M)]
@@ -596,10 +611,10 @@ function representation_size(M::PowerManifold{<:Manifold,TSize}) where {TSize}
 end
 
 @doc raw"""
-    retract(M::AbstractPowerManifold, x, v, m::PowerRetraction)
+    retract(M::AbstractPowerManifold, p, X, method::PowerRetraction)
 
-Compute the retraction from `x` with tangent vector `v` on an [`AbstractPowerManifold`](@ref) `M`
-using an [`PowerRetraction`](@ref), which by default encapsulates a retraction of the
+Compute the retraction from `p` with tangent vector `X` on an [`AbstractPowerManifold`](@ref) `M`
+using a [`PowerRetraction`](@ref), which by default encapsulates a retraction of the
 base manifold. Then this method is performed elementwise, so the encapsulated retraction
 method has to be one that is available on the base [`Manifold`](@ref).
 """
@@ -649,18 +664,6 @@ function show(
 end
 function show(io::IO, M::PowerManifold{TM,TSize,TPR}) where {TM,TSize,TPR}
     print(io, "PowerManifold($(M.manifold), $(TPR()), $(join(TSize.parameters, ", ")))")
-end
-
-function allocate_result(M::PowerManifoldNested, f, x...)
-    return [allocate_result(M.manifold, f, map(y -> y[i], x)...) for i in get_iterator(M)]
-end
-function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x)
-    alloc = [allocate(w.data[i]) for i in get_iterator(M)]
-    return FVector(CotangentSpace, alloc)
-end
-function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector, x)
-    alloc = [allocate(w.data[i]) for i in get_iterator(M)]
-    return FVector(TangentSpace, alloc)
 end
 
 support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)
