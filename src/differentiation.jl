@@ -46,6 +46,22 @@ function _gradient(f, p, backend::AbstractDiffBackend)
 end
 
 """
+    _hessian(f, p[, backend::AbstractDiffBackend])
+
+Compute the Hessian of a callable `f` at point `p` computed using the given `backend`,
+an object of type [`AbstractDiffBackend`](@ref). If the backend is not explicitly
+specified, it is obtained using the function [`diff_backend`](@ref).
+
+!!! note
+
+    Not specifying the backend explicitly will usually result in a type instability
+    and decreased performance.
+"""
+function _hessian(f, p, backend::AbstractDiffBackend)
+    return transpose(_jacobian(q -> _gradient(f, q, backend), p, backend))
+end
+
+"""
     _jacobian(f, p[, backend::AbstractDiffBackend])
 
 Compute the Jacobian of a callable `f` at point `p` computed using the given `backend`,
@@ -118,6 +134,8 @@ diff_backends() = _diff_backends
 _derivative(f, t) = _derivative(f, t, diff_backend())
 
 _gradient(f, p) = _gradient(f, p, diff_backend())
+
+_hessian(f, p) = _hessian(f, p, diff_backend())
 
 _jacobian(f, p) = _jacobian(f, p, diff_backend())
 

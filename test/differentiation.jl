@@ -106,6 +106,18 @@ end
     f1 = FunctionRealField(s2) do p
         return p[1]
     end
+
+    rb_onb = RiemannianONBDiffBackend(
+        diff_backend(),
+        Manifolds.ExponentialRetraction(),
+        Manifolds.LogarithmicInverseRetraction(),
+        ArbitraryOrthonormalBasis(),
+    )
+
+    rb_proj = Manifolds.RiemannianProjectionDiffBackend(diff_backend())
+
     q = [sqrt(2)/2, 0, sqrt(2)/2]
     @test isapprox(s2, q, r_gradient(f1, q), [0.5, 0.0, -0.5])
+    @test isapprox(s2, q, r_gradient(f1, q, rb_onb), [0.5, 0.0, -0.5])
+    @test isapprox(s2, q, r_gradient(f1, q, rb_proj), [0.5, 0.0, -0.5])
 end

@@ -53,10 +53,15 @@ r_gradient(f::AbstractRealField, p) = r_gradient(f, p, rdiff_backend())
 r_jacobian(f::AbstractMap, p) = r_jacobian(f::AbstractMap, p, rdiff_backend())
 
 """
-    RiemannianONBDiffBackend(adbackend::AbstractDiffBackend) <: AbstractRiemannianDiffBackend
+    RiemannianONBDiffBackend(
+        diff_backend::AbstractDiffBackend
+        retraction::AbstractRetractionMethod
+        inverse_retraction::AbstractInverseRetractionMethod
+        basis::AbstractOrthonormalBasis{ℝ}
+    ) <: AbstractRiemannianDiffBackend
 
-Riemannian differentiation based on differentiation in [`ArbitraryOrthonormalBasis`](@ref)
-using backend `diff_backend`.
+Riemannian differentiation based on differentiation in an [`AbstractOrthonormalBasis`](@ref)
+`basis` using specified `retraction`, `inverse_retraction` and using backend `diff_backend`.
 """
 struct RiemannianONBDiffBackend{
     TADBackend<:AbstractDiffBackend,
@@ -141,4 +146,32 @@ Set current backend for differentiation to `backend`.
 function rdiff_backend!(backend::AbstractRiemannianDiffBackend)
     _current_rdiff_backend.backend = backend
     return backend
+end
+
+
+"""
+    RiemannianProjectionDiffBackend(
+        diff_backend::AbstractDiffBackend
+    ) <: AbstractRiemannianDiffBackend
+
+Riemannian differentiation based on differentiation in the ambient space and projection to
+the given manifold. Differentiation in the ambient space is performed using
+the backend `diff_backend`.
+
+Only valid for manifolds that are embedded in a special way in the Euclidean space.
+See [^Absil2008], Section 3.6.1 for details.
+
+[^Absil2008]:
+    > Absil, P. A., et al. Optimization Algorithms on Matrix Manifolds. 2008.
+"""
+struct RiemannianProjectionDiffBackend{
+    TADBackend<:AbstractDiffBackend,
+} <: AbstractRiemannianDiffBackend
+    diff_backend::TADBackend
+end
+
+function r_gradient(f::AbstractRealField, p, backend::RiemannianProjectionDiffBackend)
+    M = domain(f)
+    amb_grad = _gradient(f, p, backend.diff_backend)
+    return project_tangent(M, p, amb_grad)
 end
