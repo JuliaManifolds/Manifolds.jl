@@ -23,6 +23,12 @@ Compute the Riemannian gradient of a real field `f` at point `p` using the given
 """
 r_gradient(::AbstractRealField, ::Any, ::AbstractRiemannianDiffBackend)
 
+"""
+    r_hessian(f::AbstractRealField, p, backend::AbstractRiemannianDiffBackend = rdiff_backend())
+
+Compute the Riemannian Hessian of a real field `f` at point `p` using the given backend.
+"""
+r_hessian(::AbstractRealField, ::Any, ::AbstractRiemannianDiffBackend)
 
 """
     r_jacobian(f::AbstractMap, p, backend::AbstractRiemannianDiffBackend = rdiff_backend())
@@ -41,6 +47,11 @@ function r_gradient(f::AbstractRealField, p, backend::AbstractRiemannianDiffBack
           "backend $(typeof(backend))")
 end
 
+function r_hessian(f::AbstractRealField, p, backend::AbstractRiemannianDiffBackend)
+    error("r_hessian not implemented for field $(typeof(f)), point $(typeof(p)) and " *
+          "backend $(typeof(backend))")
+end
+
 function r_jacobian(f::AbstractMap, p, backend::AbstractRiemannianDiffBackend)
     error("r_jacobian not implemented for map $(typeof(f)), point $(typeof(p)) and " *
           "backend $(typeof(backend))")
@@ -49,6 +60,8 @@ end
 r_derivative(f::AbstractCurve, p) = r_derivative(f, p, rdiff_backend())
 
 r_gradient(f::AbstractRealField, p) = r_gradient(f, p, rdiff_backend())
+
+r_hessian(f::AbstractRealField, p) = r_hessian(f, p, rdiff_backend())
 
 r_jacobian(f::AbstractMap, p) = r_jacobian(f::AbstractMap, p, rdiff_backend())
 
@@ -98,8 +111,39 @@ function r_gradient(f::AbstractRealField, p, backend::RiemannianONBDiffBackend)
     return get_vector(M, p, onb_coords, backend.basis)
 end
 
+"""
+    r_hessian(f::AbstractRealField, p, backend::RiemannianONBDiffBackend)
+
+Compute the Riemannian Hessian using the Euclidean Hessian according to Proposition 5.5.4
+from [^Absil2008] (generalized to arbitrary retractions).
+
+[^Absil2008]:
+    > Absil, P. A., et al. Optimization Algorithms on Matrix Manifolds. 2008.
+"""
+function r_hessian(f::AbstractRealField, p, backend::RiemannianONBDiffBackend)
+    M = domain(f)
+    X = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
+    onb_coords = _hessian(X, backend.diff_backend) do Y
+        return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
+    end
+    return onb_coords
+end
+
 function r_jacobian(f::AbstractMap, p, backend::RiemannianONBDiffBackend)
-    error("TODO")
+    M = domain(f)
+    N = codomain(f)
+    fp = f(p)
+    X = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
+    onb_coords = _jacobian(X, backend.diff_backend) do Y
+        val = f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
+        return get_coordinates(
+            N,
+            fp,
+            inverse_retract(N, fp, val, backend.inverse_retraction),
+            backend.basis,
+        )
+    end
+    return onb_coords
 end
 
 """

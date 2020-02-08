@@ -507,5 +507,6 @@ export codomain,
     domain,
     r_derivative,
     r_jacobian,
+    r_hessian,
     r_gradient
 end # module
