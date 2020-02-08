@@ -1,6 +1,6 @@
 using Test
 using Manifolds
-using Manifolds: _derivative, _gradient, _jacobian
+using Manifolds: _derivative, _gradient, _hessian, _jacobian
 using FiniteDifferences
 using LinearAlgebra: Diagonal, dot
 
@@ -55,7 +55,7 @@ using LinearAlgebra: Diagonal, dot
         diff_backend!(fd51)
     end
 
-    @testset "gradient/jacobian" begin
+    @testset "gradient/jacobian/hessian" begin
         diff_backend!(fd51)
         r2 = Euclidean(2)
 
@@ -63,8 +63,12 @@ using LinearAlgebra: Diagonal, dot
             return [sin(t), cos(t)]
         end
         f1 = FunctionRealField(r2) do x
-            return x[1]+x[2]^2
+            return x[1] + x[2]^2
         end
+        f2 = FunctionRealField(r2) do x
+            return 3*x[1]*x[2] + x[2]^3
+        end
+
         @testset "Inference" begin
             @test (@inferred _derivative(c1, 0.0, Manifolds.ForwardDiffBackend())) ≈ [1.0, 0.0]
 
@@ -80,6 +84,7 @@ using LinearAlgebra: Diagonal, dot
             diff_backend!(backend)
             @test _derivative(c1, 0.0) ≈ [1.0, 0.0]
             @test _gradient(f1, [1.0, -1.0]) ≈ [1.0, -2.0]
+            @test _hessian(f2, [1.0, -1.0]) ≈ [0.0 3.0; 3.0 -6.0] atol = 1e-5
         end
         diff_backend!(Manifolds.NoneDiffBackend())
         @testset for backend in [fd51, Manifolds.ForwardDiffBackend()]
