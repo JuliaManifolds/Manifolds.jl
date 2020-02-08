@@ -39,12 +39,13 @@ function show(io::IO, G::ProductGroup)
     print(io, "ProductGroup(", join(M.manifolds, ", "), ")")
 end
 
+submanifold(G::ProductGroup, i) = submanifold(base_manifold(G), i)
+
 function submanifold_component(
     e::Identity{GT},
     ::Val{I},
 ) where {I,MT<:ProductManifold,GT<:GroupManifold{MT}}
-    M = base_manifold(e.group)
-    return Identity(submanifold(M, I))
+    return Identity(submanifold(e.group, I))
 end
 
 function submanifold_components(
@@ -99,8 +100,8 @@ function compose(M::ProductManifold, p::ProductRepr, q::ProductRepr)
     )...)
 end
 function compose(M::ProductManifold, p, q)
-    z = allocate_result(M, compose, p, q)
-    return compose!(M, z, p, q)
+    x = allocate_result(M, compose, p, q)
+    return compose!(M, x, p, q)
 end
 
 compose!(G::ProductGroup, x, p, q) = compose!(G.manifold, x, p, q)
@@ -218,7 +219,7 @@ function translate_diff!(M::ProductManifold, Y, p, q, X, conv::ActionDirection)
     map(
         translate_diff!,
         M.manifolds,
-        submanifold_components(Y),
+        submanifold_components(M, Y),
         submanifold_components(M, p),
         submanifold_components(M, q),
         submanifold_components(M, X),
@@ -258,11 +259,37 @@ function inverse_translate_diff!(M::ProductManifold, Y, p, q, X, conv::ActionDir
     map(
         inverse_translate_diff!,
         M.manifolds,
-        submanifold_components(Y),
+        submanifold_components(M, Y),
         submanifold_components(M, p),
         submanifold_components(M, q),
         submanifold_components(M, X),
         repeated(conv),
     )
     return Y
+end
+
+function group_exp(M::ProductManifold, X::ProductRepr)
+    return ProductRepr(map(group_exp, M.manifolds, submanifold_components(M, X))...)
+end
+function group_exp(M::ProductManifold, X)
+    q = allocate_result(M, group_exp, X)
+    return group_exp!(M, q, X)
+end
+
+function group_exp!(M::ProductManifold, q, X)
+    map(group_exp!, M.manifolds, submanifold_components(M, q), submanifold_components(M, X))
+    return q
+end
+
+function group_log(M::ProductManifold, q::ProductRepr)
+    return ProductRepr(map(group_log, M.manifolds, submanifold_components(M, q))...)
+end
+function group_log(M::ProductManifold, q)
+    X = allocate_result(M, group_log, q)
+    return group_log!(M, X, q)
+end
+
+function group_log!(M::ProductManifold, X, q)
+    map(group_log!, M.manifolds, submanifold_components(M, X), submanifold_components(M, q))
+    return X
 end

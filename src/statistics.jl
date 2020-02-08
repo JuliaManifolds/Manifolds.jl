@@ -26,14 +26,14 @@ The algorithm proceeds with the following simple online update:
 \begin{aligned}
 μ_1 &= x_1\\
 t_k &= \frac{w_k}{\sum_{i=1}^k w_i}\\
-μ_{k} &= \gamma_{μ_{k-1}}(x_k; t_k),
+μ_{k} &= γ_{μ_{k-1}}(x_k; t_k),
 \end{aligned}
 ```
 
 where $x_k$ are points, $w_k$ are weights, $μ_k$ is the $k$th estimate of the
-mean, and $\gamma_x(y; t)$ is the point at time $t$ along the
+mean, and $γ_x(y; t)$ is the point at time $t$ along the
 [`shortest_geodesic`](@ref shortest_geodesic(::Manifold, ::Any, ::Any, ::Real))
-between points $x,y  ∈ \mathcal M$. The algorithm
+between points $x,y ∈ \mathcal M$. The algorithm
 terminates when all $x_k$ have been considered. In the [`Euclidean`](@ref) case,
 this exactly computes the weighted mean.
 

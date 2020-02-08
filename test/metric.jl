@@ -22,7 +22,7 @@ struct TestSphericalMetric <: Metric end
 Manifolds.manifold_dimension(::TestSphere{N}) where {N} = N
 function Manifolds.local_metric(M::MetricManifold{<:TestSphere,<:TestSphericalMetric}, x)
     r = base_manifold(M).r
-    d = similar(x)
+    d = allocate(x)
     d[1] = r^2
     d[2] = d[1] * sin(x[1])^2
     return Diagonal(d)
@@ -82,6 +82,12 @@ end
         g = TestEuclideanMetric()
         M = MetricManifold(E, g)
         @test repr(M) == "MetricManifold(TestEuclidean{3}(), TestEuclideanMetric())"
+
+        if VERSION ≥ v"1.3"
+            @test E |> TestEuclideanMetric() === M
+            @test E |> TestEuclideanMetric === M
+        end
+
         G = Diagonal(1.0:n)
         invG = inv(G)
         @test manifold_dimension(M) == n
@@ -241,7 +247,7 @@ end
         x = [0.1 0.2 0.4]
         v = [0.5 0.7 0.11]
         w = [0.13 0.17 0.19]
-        y = similar(x)
+        y = allocate(x)
 
         # Test fallbacks
         @test_throws ErrorException vee!(M,w,x,v)

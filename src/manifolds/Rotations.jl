@@ -115,15 +115,15 @@ end
 
 4D rotations can be described by two orthogonal planes that are unchanged by
 the action of the rotation (vectors within a plane rotate only within the
-plane). The cosines of the two angles of rotation about these planes may be
+plane). The cosines of the two angles $α,β$ of rotation about these planes may be
 obtained from the distinct real parts of the eigenvalues of the rotation
 matrix. This function computes these more efficiently by solving the system
 
 ```math
 \begin{aligned}
-\cos\alpha + \cos\beta &= \frac{1}{2} \operatorname{tr}(R)\\
-\cos\alpha + \cos\beta &= \frac{1}{8} \operatorname{tr}(R)^2
-                           - \frac{1}{16} \operatorname{tr}((R - R^T)^2) - 1.
+\cos α + \cos β &= \frac{1}{2} \operatorname{tr}(R)\\
+\cos α + \cos β &= \frac{1}{8} \operatorname{tr}(R)^2
+                 - \frac{1}{16} \operatorname{tr}((R - R^T)^2) - 1.
 \end{aligned}
 ```
 
@@ -173,17 +173,16 @@ exp(::Rotations, ::Any...)
 
 exp!(M::Rotations, q, p, X) = copyto!(q, p * exp(X))
 function exp!(M::Rotations{2}, q, p, X)
-    θ = vee(M, p, X)[1]
     @assert size(q) == (2, 2)
-    @assert size(p) == (2, 2)
+    θ = vee(M, p, X)[1]
+    sinθ, cosθ = sincos(θ)
     @inbounds begin
-        sinθ, cosθ = sincos(θ)
-        q[1] = p[1] * cosθ + p[3] * sinθ
-        q[2] = p[2] * cosθ + p[4] * sinθ
-        q[3] = p[3] * cosθ - p[1] * sinθ
-        q[4] = p[4] * cosθ - p[2] * sinθ
+        q[1] = cosθ
+        q[2] = sinθ
+        q[3] = -sinθ
+        q[4] = cosθ
     end
-    return q
+    return copyto!(q, p * q)
 end
 function exp!(M::Rotations{3}, q, p, X)
     θ = norm(M, p, X) / sqrt(2)
@@ -194,8 +193,8 @@ function exp!(M::Rotations{3}, q, p, X)
         a = sin(θ) / θ
         b = (1 - cos(θ)) / θ^2
     end
-    q .= p .+ p * (a .* X .+ b .* (X^2))
-    return q
+    pinvq = I + a .* X .+ b .* (X^2)
+    return copyto!(q, p * pinvq)
 end
 function exp!(M::Rotations{4}, q, p, X)
     T = eltype(X)
@@ -232,9 +231,11 @@ function exp!(M::Rotations{4}, q, p, X)
         a₂ = (sincα - (1 - r) / 2 * cosα) * c
         a₃ = (e + (1 - r) * (e - sincα / 2)) * c
     end
+
     X² = X * X
-    q .= a₀ .* p .+ p * (a₁ .* X .+ a₂ .* X² .+ a₃ .* (X² * X))
-    return q
+    X³ = X² * X
+    pinvq = a₀ * I + a₁ .* X .+ a₂ .* X² .+ a₃ .* X³
+    return copyto!(q, p * pinvq)
 end
 
 flat!(M::Rotations, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
@@ -253,8 +254,8 @@ end
     hat(M::Rotations, p, Xⁱ)
 
 Convert the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
-group $\mathrm{SO}(n)$ to the matrix representation $\Omega$ of the tangent
-vector. See [`vee`](@ref) for the conventions used.
+group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. See
+[`vee`](@ref vee(::Rotations, ::Any...)) for the conventions used.
 """
 hat(::Rotations, ::Any...)
 
@@ -302,7 +303,7 @@ end
 Return the injectivity radius on the [`Rotations`](@ref) `M`, which is globally
 
 ````math
-    \operatorname{inj}_{\mathrm{SO}(n)}(x) = π\sqrt{2}.
+    \operatorname{inj}_{\mathrm{SO}(n)}(p) = π\sqrt{2}.
 ````
 
     injectivity_radius(M::Rotations, p, ::PolarRetraction)
@@ -321,7 +322,7 @@ plane at `p` on the special orthogonal space `M=`$\mathrm{SO}(n)$ using the
 restriction of the metric from the embedding, i.e.
 
 ````math
-g_p(X, Y) = \operatorname{tr}(v^T w),
+g_p(X, Y) = \operatorname{tr}(X^\mathrm{T} Y),
 ````
 
 Tangent vectors are represented by matrices.
@@ -421,8 +422,8 @@ function log!(M::Rotations{3}, X, p, q)
     if cosθ ≈ -1
         eig = eigen_safe(U)
         ival = findfirst(λ -> isapprox(λ, 1), eig.values)
-        vi = SVector{3}(1:3)
-        ax = eig.vectors[vi, ival]
+        inds = SVector{3}(1:3)
+        ax = eig.vectors[inds, ival]
         return hat!(M, X, p, π * ax)
     end
     X .= ((U .- transpose(U)) ./ (2 * usinc_from_cos(cosθ)))
@@ -482,7 +483,7 @@ Compute the norm of a tangent vector `X` from the tangent space at `p` on the
 [`Rotations`](@ref) `M`. The formula reads
 
 ````math
-\lVert X \rVert_x = \lVert X \rVert,
+\lVert X \rVert_p = \lVert X \rVert,
 ````
 
 i.e. the Frobenius norm of `X`, where tangent vectors are represented by
@@ -659,23 +660,23 @@ end
 show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
 
 @doc raw"""
-    vee(M::Rotations, p X)
+    vee(M::Rotations, p, X)
 
-Extract the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
+Extract the unique tangent vector components $X^i$ at point `p` on [`Rotations`](@ref)
 $\mathrm{SO}(n)$ from the matrix representation `X` of the tangent
 vector.
 
-The basis on the Lie algebra $\mathfrak{so}(n)$ is chosen such that for
-$\mathrm{SO}(2)$, $X^i=\theta=X_{21}$ is the angle of rotation, and
-for $\mathrm{SO}(3)$,
-$X^i = (X_{32}, X_{13}, X_{21}) = \theta u$ is the
+The basis on the Lie algebra $𝔰𝔬(n)$ is chosen such that
+for $\mathrm{SO}(2)$, $X^1 = θ = X_{21}$ is the angle of rotation, and
+for $\mathrm{SO}(3)$, $(X^1, X^2, X^3) = (X_{32}, X_{13}, X_{21}) = θ u$ is the
 angular velocity and axis-angle representation, where $u$ is the unit vector
 along the axis of rotation.
 
-For $\mathrm{SO}(n)$ where $n \ge 4$, the additional elements of $\omega$ are
-$X^i_{j (j - 3)/2 + k + 1} = X_{jk}$, for $j  ∈ [4, n], k ∈ [1,j)$.
+For $\mathrm{SO}(n)$ where $n ≥ 4$, the additional elements of $X^i$ are
+$X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
 """
 vee(::Rotations, ::Any...)
+vee(M::Rotations{2}, p, X) = [X[2]]
 
 function vee!(M::Rotations{N}, Xⁱ, p, X) where {N}
     @assert size(X) == (N, N)

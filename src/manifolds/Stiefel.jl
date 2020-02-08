@@ -1,25 +1,25 @@
 @doc raw"""
-    Stiefel{n,k,F} <: Manifold
+    Stiefel{n,k,𝔽} <: Manifold
 
-The Stiefel manifold consists of all $n × k$, $n\geq k$ unitary matrices, i.e.
+The Stiefel manifold consists of all $n × k$, $n ≥ k$ unitary matrices, i.e.
 
 ````math
 \{ p ∈ 𝔽^{n × k} : p^{\mathrm{H}}p = I_k \},
 ````
 
-where `F`$=𝔽 ∈ \{ℝ, ℂ\}$,
+where $𝔽 ∈ \{ℝ, ℂ\}$,
 $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
-$I_n ∈ ℝ^{n× n}$ denotes the $k × k$ identity matrix.
+$I_n ∈ ℝ^{n × n}$ denotes the $k × k$ identity matrix.
 
 The tangent space at a point $p ∈ \mathcal M$ is given by
 
 ````math
-T_p \mathcal M = \{ X ∈ 𝔽^{n × k} : p^{\mathrm{H}}X + X^{\mathrm{H}}p=0_n\},
+T_p \mathcal M = \{ X ∈ 𝔽^{n × k} : p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0_n\},
 ````
 
 where $0_n$ is the $k × k$ zero matrix.
 
-The metric is either inherited from $ℝ^{n,k}$ for the real-valued case
+The metric is either inherited from $ℝ^{n × k}$ for the real-valued case
 or the one inherited from interpreting the complex valued entries in the Gaussian
 plane $ℝ^2$ and then over all entries as before, i.e. the latter
 may be called an Hermitian metric in the complex-valued matrices.
@@ -28,13 +28,13 @@ The manifold is named after
 [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
 
 # Constructor
-    Stiefel(n,k,F=ℝ)
+    Stiefel(n, k, field = ℝ)
 
 Generate the (real-valued) Stiefel manifold of $n × k$ dimensional orthonormal matrices.
 """
-struct Stiefel{n,k,F} <: Manifold end
+struct Stiefel{n,k,𝔽} <: Manifold end
 
-Stiefel(n::Int, k::Int, F::AbstractNumbers = ℝ) = Stiefel{n,k,F}()
+Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ) = Stiefel{n,k,field}()
 
 @doc raw"""
     check_manifold_point(M::Stiefel, p; kwargs...)
@@ -43,14 +43,14 @@ Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{S
 [`AbstractNumbers`](@ref) type and $p^{\mathrm{H}}p$ is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
-function check_manifold_point(M::Stiefel{n,k,F}, p; kwargs...) where {n,k,F}
-    if (F === ℝ) && !(eltype(p) <: Real)
+function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
+    if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
             "The matrix $(p) is not a real-valued matrix, so it does noe lie on the Stiefel manifold of dimension ($(n),$(k)).",
         )
     end
-    if (F === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
+    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
         return DomainError(
             eltype(p),
             "The matrix $(p) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Stiefel manifold of dimension ($(n),$(k)).",
@@ -79,16 +79,16 @@ Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
 it (approximately) holds that $p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0$.
 The settings for approximately can be set with `kwargs...`.
 """
-function check_tangent_vector(M::Stiefel{n,k,F}, p, X; kwargs...) where {n,k,F}
+function check_tangent_vector(M::Stiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     mpe = check_manifold_point(M, p)
     mpe === nothing || return mpe
-    if (F === ℝ) && !(eltype(X) <: Real)
+    if (𝔽 === ℝ) && !(eltype(X) <: Real)
         return DomainError(
             eltype(X),
             "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to the Stiefel manifold of dimension ($(n),$(k)).",
         )
     end
-    if (F === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
+    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
         return DomainError(
             eltype(X),
             "The matrix $(X) is neiter real- nor complex-valued matrix, so it can not bea tangent vectorto the complex Stiefel manifold of dimension ($(n),$(k)).",
@@ -109,9 +109,9 @@ function check_tangent_vector(M::Stiefel{n,k,F}, p, X; kwargs...) where {n,k,F}
 end
 
 @doc raw"""
-    exp(M, p, X)
+    exp(M::Stiefel, p, X)
 
-Compute the exponential map on the [`Stiefel`](@ref)`{n,k,T}`() manifold `M`
+Compute the exponential map on the [`Stiefel`](@ref)`{n,k,𝔽}`() manifold `M`
 emanating from `p` in tangent direction `X`.
 
 ````math
@@ -185,7 +185,7 @@ This implementation follows the Lyapunov approach.
 inverse_retract(::Stiefel, ::Any, ::Any, ::PolarInverseRetraction)
 
 @doc raw"""
-    inverse_retract(M, p, q, ::QRInverseRetraction)
+    inverse_retract(M::Stiefel, p, q, ::QRInverseRetraction)
 
 Compute the inverse retraction based on a qr decomposition
 for two points `p`, `q` on the [`Stiefel`](@ref) manifold `M` and return
@@ -241,7 +241,7 @@ manifold_dimension(::Stiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
 manifold_dimension(::Stiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
 
 @doc raw"""
-    project_tangent(M, p, X)
+    project_tangent(M::Stiefel, p, X)
 
 Project `X` onto the tangent space of `p` to the [`Stiefel`](@ref) manifold `M`.
 The formula reads
@@ -258,7 +258,7 @@ project_tangent(::Stiefel, ::Any...)
 project_tangent!(::Stiefel, Y, p, X) = copyto!(Y, X - p * Symmetric(p' * X))
 
 @doc raw"""
-    retract(M, p, X, ::PolarRetraction)
+    retract(M::Stiefel, p, X, ::PolarRetraction)
 
 Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 [`Stiefel`](@ref) manifold `M`. With $USV = p + X$ the retraction reads
@@ -270,7 +270,7 @@ Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
 
 @doc raw"""
-    retract(M, p, X, ::QRRetraction )
+    retract(M::Stiefel, p, X, ::QRRetraction )
 
 Compute the QR-based retraction [`QRRetraction`](@ref) on the
 [`Stiefel`](@ref) manifold `M`. With $QR = p + X$ the retraction reads
@@ -279,7 +279,7 @@ Compute the QR-based retraction [`QRRetraction`](@ref) on the
 \operatorname{retr}_p X = QD,
 ````
 
-where D is a $n × k$ matrix with
+where $D$ is a $n × k$ matrix with
 
 ````math
 D = \operatorname{diag}\bigl(\operatorname{sgn}(R_{ii}+0,5)_{i=1}^k \bigr),

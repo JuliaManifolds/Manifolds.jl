@@ -1,5 +1,5 @@
 @doc raw"""
-    Grassmann{n,k,F} <: Manifold
+    Grassmann{n,k,𝔽} <: Manifold
 
 The Grassmann manifold $\operatorname{Gr}(n,k)$ consists of all subspaces spanned by $k$ linear independent
 vectors $𝔽^n$, where $𝔽  ∈ \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
@@ -46,29 +46,29 @@ The manifold is named after
 
 # Constructor
 
-    Grassmann(n,k,F=ℝ)
+    Grassmann(n,k,field=ℝ)
 
 Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
-case $𝔽 = ℝ$ is the default.
+case $field = ℝ$ is the default.
 """
-struct Grassmann{n,k,F} <: Manifold end
+struct Grassmann{n,k,𝔽} <: Manifold end
 
-Grassmann(n::Int, k::Int, F::AbstractNumbers = ℝ) = Grassmann{n,k,F}()
+Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ) = Grassmann{n,k,field}()
 
 @doc raw"""
-    check_manifold_point(M::Grassmann{n,k,F}, p)
+    check_manifold_point(M::Grassmann{n,k,𝔽}, p)
 
 Check whether `p` is representing a point on the [`Grassmann`](@ref) `M`, i.e. its
-a `n`-by-`k` matrix of unitary column vectors and of correct `eltype` with respect to `F`.
+a `n`-by-`k` matrix of unitary column vectors and of correct `eltype` with respect to `𝔽`.
 """
-function check_manifold_point(M::Grassmann{n,k,F}, p; kwargs...) where {n,k,F}
-    if (F === ℝ) && !(eltype(p) <: Real)
+function check_manifold_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
+    if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
             "The matrix $(p) is not a real-valued matrix, so it does not lie on the Grassmann manifold of dimension ($(n),$(k)).",
         )
     end
-    if (F === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
+    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
         return DomainError(
             eltype(p),
             "The matrix $(p) is neither a real- nor complex-valued matrix, so it does not lie on the complex Grassmann manifold of dimension ($(n),$(k)).",
@@ -90,7 +90,7 @@ function check_manifold_point(M::Grassmann{n,k,F}, p; kwargs...) where {n,k,F}
 end
 
 @doc raw"""
-    check_tangent_vector(M::Grassmann{n,k,F}, p, X)
+    check_tangent_vector(M::Grassmann{n,k,𝔽}, p, X)
 
 Check whether `X` is a tangent vector in the tangent space of `p` on
 the [`Grassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
@@ -102,16 +102,16 @@ the [`Grassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and $0_k$
 denotes the $k × k$ zero natrix.
 """
-function check_tangent_vector(G::Grassmann{n,k,F}, p, X; kwargs...) where {n,k,F}
+function check_tangent_vector(G::Grassmann{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     t = check_manifold_point(G, p)
     t === nothing || return t
-    if (F === ℝ) && !(eltype(X) <: Real)
+    if (𝔽 === ℝ) && !(eltype(X) <: Real)
         return DomainError(
             eltype(X),
             "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to the Grassmann manifold of dimension ($(n),$(k)).",
         )
     end
-    if (F === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
+    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
         return DomainError(
             eltype(X),
             "The matrix $(X) is neither a real- nor complex-valued matrix, so it can not be a tangent vector to the complex Grassmann manifold of dimension ($(n),$(k)).",
@@ -146,7 +146,7 @@ where
 
 ````math
 b_{i}=\begin{cases}
-0 & \text{if} \; S_i \geq 1\\
+0 & \text{if} \; S_i ≥ 1\\
 \arccos(S_i) & \, \text{if} \; S_i<1.
 \end{cases}
 ````
@@ -331,7 +331,7 @@ project_tangent(::Grassmann, ::Any...)
 project_tangent!(M::Grassmann, v, x, w) = copyto!(v, w - x * x' * w)
 
 @doc raw"""
-    representation_size(M::Grassmann{n,k,F})
+    representation_size(M::Grassmann{n,k})
 
 Return the represenation size or matrix dimension of a point on the [`Grassmann`](@ref)
 `M`, i.e. $(n,k)$ for both the real-valued and the complex value case.
@@ -379,7 +379,7 @@ function retract!(::Grassmann{N,K}, q, p, X, ::QRRetraction) where {N,K}
     return copyto!(q, Array(qrfac.Q) * D)
 end
 
-show(io::IO, ::Grassmann{n,k,F}) where {n,k,F} = print(io, "Grassmann($(n), $(k), $(F))")
+show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽} = print(io, "Grassmann($(n), $(k), $(𝔽))")
 
 @doc raw"""
     zero_tangent_vector(M::Grassmann, p)
