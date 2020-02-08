@@ -1,7 +1,6 @@
 # `ManifoldsBase.jl` – an interface for manifolds
 
-The interface for a manifold is provided in the lightweight package [`ManifoldsBase.jl](https://github.com/JuliaNLSolvers/ManifoldsBase.jl) separate
-from the collection of manifolds in here.
+The interface for a manifold is provided in the lightweight package [`ManifoldsBase.jl](https://github.com/JuliaNLSolvers/ManifoldsBase.jl) separate from the collection of manifolds in here.
 You can easily implement your algorithms and even your own manifolds just using the interface.
 
 ```@contents

@@ -33,6 +33,7 @@ include("../utils.jl")
         @test_throws ErrorException inv!(G, x, eg)
         @test_throws ErrorException inv(G, x)
 
+        @test_throws ErrorException copyto!(x, eg)
         @test_throws ErrorException identity!(G, x, x)
         @test_throws ErrorException identity(G, x)
 
@@ -70,23 +71,38 @@ include("../utils.jl")
         @test_throws ErrorException inverse_translate_diff!(G, v, x, x, v)
         @test_throws ErrorException inverse_translate_diff!(G, v, x, x, v, LeftAction())
         @test_throws ErrorException inverse_translate_diff!(G, v, x, x, v, RightAction())
+
+        @test_throws ErrorException group_exp(G, v)
+        @test_throws ErrorException group_exp!(G, x, v)
+        @test_throws ErrorException group_log(G, x)
+        @test_throws ErrorException group_log!(G, v, x)
     end
 
     @testset "Action direction" begin
         @test switch_direction(LeftAction()) == RightAction()
         @test switch_direction(RightAction()) == LeftAction()
+
+        @test Manifolds._action_order(1, 2, LeftAction()) === (1, 2)
+        @test Manifolds._action_order(1, 2, RightAction()) === (2, 1)
     end
 
     @testset "Addition operation" begin
         G = GroupManifold(NotImplementedManifold(), Manifolds.AdditionOperation())
-        test_group(G, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        test_group(G, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]], [], [[1.0, 2.0]])
+
+        @test_throws DomainError is_manifold_point(
+            G,
+            Identity(GroupManifold(NotImplementedManifold(), NotImplementedOperation())),
+            true,
+        )
 
         x = [1.0, 2.0]
+        v = [3.0, 4.0]
         ge = Identity(G)
         @test zero(ge) === ge
         @test number_eltype(ge) == Bool
         @test copyto!(ge, ge) === ge
-        y = similar(x)
+        y = allocate(x)
         copyto!(y, ge)
         @test y ≈ zero(x)
         @test ge - x == -x
@@ -105,7 +121,7 @@ include("../utils.jl")
         @test inv(G, ge) === ge
         @test identity(G, x) ≈ zero(x)
         @test identity(G, ge) === ge
-        y = similar(x)
+        y = allocate(x)
         identity!(G, y, x)
         @test y ≈ zero(x)
         @test compose(G, x, x) ≈ x + x
@@ -118,6 +134,8 @@ include("../utils.jl")
         @test y ≈ x
         compose!(G, y, ge, x)
         @test y ≈ x
+        @test group_exp(G, v) === v
+        @test group_log(G, x) === x
 
         y = identity(G, x)
         @test isapprox(y, ge; atol=1e-10)
@@ -127,13 +145,19 @@ include("../utils.jl")
 
     @testset "Multiplication operation" begin
         G = GroupManifold(NotImplementedManifold(), Manifolds.MultiplicationOperation())
-        test_group(G, [[1.0 2.0; 3.0 4.0], [2.0 3.0; 4.0 5.0], [3.0 4.0; 5.0 6.0]])
+        test_group(
+            G,
+            [[1.0 2.0; 3.0 4.0], [2.0 3.0; 4.0 5.0], [3.0 4.0; 5.0 6.0]],
+            [],
+            [[1.0 2.0; 3.0 4.0]];
+            test_group_exp_log = false,
+        )
 
         x = [1.0 2.0; 2.0 3.0]
         ge = Identity(G)
         @test number_eltype(ge) == Bool
         @test copyto!(ge, ge) === ge
-        y = similar(x)
+        y = allocate(x)
         copyto!(y, ge)
         @test y ≈ one(x)
         @test one(ge) === ge
@@ -151,13 +175,13 @@ include("../utils.jl")
         @test ge \ ge === ge
         @test ge / x ≈ inv(x)
         @test x \ ge ≈ inv(x)
-        y = similar(x)
+        y = allocate(x)
         @test LinearAlgebra.mul!(y, x, ge) === y
         @test y ≈ x
-        y = similar(x)
+        y = allocate(x)
         @test LinearAlgebra.mul!(y, ge, x) === y
         @test y ≈ x
-        y = similar(x)
+        y = allocate(x)
         @test LinearAlgebra.mul!(y, ge, ge) === y
         @test y ≈ one(y)
 
@@ -166,7 +190,7 @@ include("../utils.jl")
         @test inv(G, ge) === ge
         @test identity(G, x) ≈ one(x)
         @test identity(G, ge) === ge
-        y = similar(x)
+        y = allocate(x)
         identity!(G, y, x)
         @test y ≈ one(x)
         @test_throws ErrorException identity!(G, [0.0], ge)
@@ -180,6 +204,8 @@ include("../utils.jl")
         @test y ≈ x
         compose!(G, y, ge, x)
         @test y ≈ x
+        @test group_exp!(G, y, x) === y
+        @test y ≈ exp(x)
 
         @testset "identity optimization" begin
             x2 = copy(x)

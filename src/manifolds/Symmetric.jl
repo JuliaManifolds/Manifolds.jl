@@ -1,45 +1,44 @@
 @doc raw"""
-    SymmetricMatrices{n,F} <: Manifold
+    SymmetricMatrices{n,𝔽} <: Manifold
 
-The [`Manifold`](@ref) $ \operatorname{Sym} (n)$ consisting of the real- or complex-valued
-symmetric matrices of size $ n× n$, i.e. the set
+The [`Manifold`](@ref) $ \operatorname{Sym}(n)$ consisting of the real- or complex-valued
+symmetric matrices of size $n × n$, i.e. the set
 
 ````math
 \operatorname{Sym}(n) = \bigl\{p  ∈ 𝔽^{n × n} \big| p^{\mathrm{H}} = p \bigr\},
 ````
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed
-and the field $𝔽 ∈ \{ ℝ, ℂ\}$ is set by the
-[`AbstractNumbers`](@ref) `F`.
+where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transpose,
+and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
 
 Though it is slightly redundant, usually the matrices are stored as $n × n$ arrays.
 
 # Constructor
 
-    SymmetricMatrices(n::Int, F::AbstractNumbers=ℝ)
+    SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
 
-Generate the manifold of $n × n$ symmetric metrices.
+Generate the manifold of $n × n$ symmetric matrices.
 """
-struct SymmetricMatrices{n,F} <: Manifold end
+struct SymmetricMatrices{n,𝔽} <: Manifold end
 
-SymmetricMatrices(n::Int, F::AbstractNumbers = ℝ) = SymmetricMatrices{n,F}()
+SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ) = SymmetricMatrices{n,field}()
 
 @doc raw"""
-    check_manifold_point(M::SymmetricMatrices{n,F}, p; kwargs...)
+    check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...)
 
 Check whether `p` is a valid manifold point on the [`SymmetricMatrices`](@ref) `M`, i.e.
 whether `p` is a symmetric matrix of size `(n,n)` with values from the corresponding
-[`AbstractNumbers`](@ref) `F`.
+[`AbstractNumbers`](@ref) `𝔽`.
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
-function check_manifold_point(M::SymmetricMatrices{n,F}, p; kwargs...) where {n,F}
-    if (F === ℝ) && !(eltype(p) <: Real)
+function check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
+    if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
             "The matrix $(p) does not lie on $M, since its values are not real.",
         )
     end
-    if (F === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
+    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
         return DomainError(
             eltype(p),
             "The matrix $(p) does not lie on $M, since its values are not complex.",
@@ -61,7 +60,7 @@ function check_manifold_point(M::SymmetricMatrices{n,F}, p; kwargs...) where {n,
 end
 
 """
-    check_tangent_vector(M::SymmetricMatrices{n,F}, p, X; kwargs... )
+    check_tangent_vector(M::SymmetricMatrices{n,𝔽}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
@@ -69,16 +68,16 @@ and its values have to be from the correct [`AbstractNumbers`](@ref).
 
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
-function check_tangent_vector(M::SymmetricMatrices{n,F}, p, X; kwargs...) where {n,F}
+function check_tangent_vector(M::SymmetricMatrices{n,𝔽}, p, X; kwargs...) where {n,𝔽}
     t = check_manifold_point(M, p; kwargs...)
     t === nothing || return t
-    if (F === ℝ) && !(eltype(X) <: Real)
+    if (𝔽 === ℝ) && !(eltype(X) <: Real)
         return DomainError(
             eltype(X),
             "The matrix $(X) is not a tangent to a point on $M, since its values are not real.",
         )
     end
-    if (F === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
+    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
         return DomainError(
             eltype(X),
             "The matrix $(X) is not a tangent to a point on $M, since its values are not complex.",
@@ -127,7 +126,7 @@ exp!(M::SymmetricMatrices, q, p, X) = (q .= p .+ X)
 Compute the [`flat`](@ref flat(M::Manifold, p, X::FVector)) isomorphism of the
 [`SymmetricMatrices`](@ref) `M` on the manifold point `p` and tangent vector `X`.
 
-Since `M` is already a vector space over $ℝ$, this returns just the vector `X`.
+Since `M` is already a vector space over $𝔽$, this returns just the vector `X`.
 """
 flat(::SymmetricMatrices, ::Any...)
 
@@ -341,7 +340,7 @@ function vector_transport_to!(M::SymmetricMatrices, Y, p, X, q, ::ParallelTransp
 end
 
 @doc raw"""
-    zero_tangent_vector(M, p)
+    zero_tangent_vector(M::SymmetricMatrices, p)
 
 Return the zero tangent vector for the tangent space at `p` on the
 [`SymmetricMatrices`](@ref) `M`, i.e. the zero matrix.

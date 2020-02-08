@@ -85,11 +85,11 @@ include("utils.jl")
         x = collect(reshape(1.0:6.0, (3, 2)))
         v = collect(reshape(7.0:12.0, (3, 2)))
         @test hat(E, x, vec(v)) ≈ v
-        w = similar(v)
+        w = allocate(v)
         @test hat!(E, w, x, vec(v)) === w
         @test w ≈ v
         @test vee(E, x, v) ≈ vec(v)
-        w = similar(vec(v))
+        w = allocate(vec(v))
         @test vee!(E, w, x, v) === w
         @test w ≈ vec(v)
     end

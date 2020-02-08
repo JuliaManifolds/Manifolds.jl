@@ -7,6 +7,11 @@ include("group_utils.jl")
 
     @test base_manifold(G) === Circle{ℂ}()
 
+    @test has_invariant_metric(G, LeftAction()) === Val(true)
+    @test has_invariant_metric(G, RightAction()) === Val(true)
+    @test has_biinvariant_metric(G) === Val(true)
+    @test is_default_metric(MetricManifold(G, EuclideanMetric())) === Val(true)
+
     @testset "identity overloads" begin
         @test identity(G, Identity(G)) === Identity(G)
         @test inv(G, Identity(G)) === Identity(G)
@@ -23,7 +28,7 @@ include("group_utils.jl")
         vpts = [0.0 + 0.5im]
         @test compose(G, pts[2], pts[1]) ≈ pts[2] * pts[1]
         @test translate_diff(G, pts[2], pts[1], vpts[1]) ≈ pts[2] * vpts[1]
-        test_group(G, pts, vpts; test_diff = true, test_mutating = false)
+        test_group(G, pts, vpts, vpts; test_diff = true, test_mutating = false, test_invariance = true)
     end
 
     @testset "vector points" begin
@@ -31,7 +36,7 @@ include("group_utils.jl")
         vpts = [[0.0 + 0.5im]]
         @test compose(G, pts[2], pts[1]) ≈ pts[2] .* pts[1]
         @test translate_diff(G, pts[2], pts[1], vpts[1]) ≈ pts[2] .* vpts[1]
-        test_group(G, pts, vpts; test_diff = true, test_mutating = true)
+        test_group(G, pts, vpts, vpts; test_diff = true, test_mutating = true, test_invariance = true)
     end
 
     @testset "Group forwards to decorated" begin

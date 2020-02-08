@@ -1,27 +1,27 @@
 @doc raw"""
-    Circle{F} <: Manifold
+    Circle{𝔽} <: Manifold
 
 The circle $𝕊^1$ is a manifold here represented by
 real-valued points in $[-π,π)$ or complex-valued points $z ∈ ℂ$ of absolute value
 $\lvert z\rvert = 1$.
 # Constructor
 
-    Circle(f=ℝ)
+    Circle(ℝ)
 
 Generate the `ℝ`-valued Circle represented by angles, which
-alternatively can be set to use the [`AbstractNumbers`](@ref) `f=ℂ` to obtain the `Circle`
+alternatively can be set to use the [`AbstractNumbers`](@ref) `𝔽=ℂ` to obtain the `Circle`
 represented by `ℂ`-valued `Circle` of unit numbers.
 """
-struct Circle{F} <: Manifold where {F<:AbstractNumbers} end
+struct Circle{𝔽} <: Manifold where {𝔽<:AbstractNumbers} end
 
-Circle(f::AbstractNumbers = ℝ) = Circle{f}()
+Circle(field::AbstractNumbers = ℝ) = Circle{field}()
 
 @doc raw"""
     check_manifold_point(M::Circle, p)
 
 Check whether `p` is a point on the [`Circle`](@ref) `M`.
 For the real-valued case, `x` is an angle and hence it checks that $p  ∈ [-π,π)$.
-for the complex-valued case, it is a unit number, $p  ∈ ℂ$ with $\lvert p \rvert = 1$.
+for the complex-valued case, it is a unit number, $p ∈ ℂ$ with $\lvert p \rvert = 1$.
 """
 check_manifold_point(::Circle, ::Any...)
 
@@ -140,8 +140,8 @@ Return tangent vector coordinates in the Lie algebra of the circle.
 """
 function get_coordinates(M::Circle{ℂ}, p, X, B::ArbitraryOrthonormalBasis)
     X, p = X[1], p[1]
-    w = imag(X) * real(p) - real(X) * imag(p)
-    return @SVector [w]
+    Xⁱ = imag(X) * real(p) - real(X) * imag(p)
+    return @SVector [Xⁱ]
 end
 
 get_vector(M::Circle{ℝ}, p, X, B::ArbitraryOrthonormalBasis) = X
@@ -176,7 +176,7 @@ g_p(X,Y) = X*Y
 
 for the real case and
 
-    ````math
+````math
 g_p(X,Y) = Y^\mathrm{T}X
 ````
 
@@ -297,7 +297,7 @@ sharp(M::Circle, p::Number, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
 
 sharp!(M::Circle, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
-show(io::IO, ::Circle{F}) where {F} = print(io, "Circle($(F))")
+show(io::IO, ::Circle{𝔽}) where {𝔽} = print(io, "Circle($(𝔽))")
 
 @doc raw"""
     sym_rem(x,[T=π])
@@ -333,10 +333,10 @@ function vector_transport_to(
     q::Number,
     ::ParallelTransport,
 )
-    v_xy = log(M, p, q)
-    vl = norm(M, p, v_xy)
+    X_pq = log(M, p, q)
+    Xnorm = norm(M, p, X_pq)
     Y = X
-    if vl > 0
+    if Xnorm > 0
         factor = 2 * complex_dot(X, q) / (abs(p + q)^2)
         Y -= factor .* (p + q)
     end
@@ -345,10 +345,10 @@ end
 
 vector_transport_to!(::Circle{ℝ}, Y, p, X, q, ::ParallelTransport) = (Y .= X)
 function vector_transport_to!(M::Circle{ℂ}, Y, p, X, q, ::ParallelTransport)
-    v_xy = log(M, p, q)
-    vl = norm(M, p, v_xy)
+    X_pq = log(M, p, q)
+    Xnorm = norm(M, p, X_pq)
     Y .= X
-    if vl > 0
+    if Xnorm > 0
         factor = 2 * complex_dot(X, q) / (sum(abs.(p + q) .^ 2))
         Y .-= factor .* (p + q)
     end
@@ -362,8 +362,8 @@ function vector_transport_direction(
     Y::Number,
     m::AbstractVectorTransportMethod,
 )
-    y = exp(M, p, Y)
-    return vector_transport_to(M, p, X, y, m)
+    q = exp(M, p, Y)
+    return vector_transport_to(M, p, X, q, m)
 end
 
 zero_tangent_vector(::Circle, p::Number) = zero(p)

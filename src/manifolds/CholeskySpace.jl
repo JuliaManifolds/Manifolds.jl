@@ -206,10 +206,7 @@ and $\operatorname{diag}$ extracts the diagonal matrix.
 vector_transport_to(::CholeskySpace, ::Any, ::Any, ::Any, ::ParallelTransport)
 
 function vector_transport_to!(::CholeskySpace, Y, p, X, q, ::ParallelTransport)
-    return copyto!(
-        Y,
-        strictlyLowerTriangular(p) + Diagonal(diag(q) .* diag(X) ./ diag(p)),
-    )
+    return copyto!(Y, strictlyLowerTriangular(p) + Diagonal(diag(q) .* diag(X) ./ diag(p)))
 end
 
 @doc raw"""

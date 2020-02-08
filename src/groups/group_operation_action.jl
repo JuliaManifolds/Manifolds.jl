@@ -28,7 +28,7 @@ end
 
 apply(A::GroupOperationAction, a, p) = translate(A.group, a, p, direction(A))
 
-apply!(A::GroupOperationAction, y, a, p) = translate!(A.group, y, a, p, direction(A))
+apply!(A::GroupOperationAction, q, a, p) = translate!(A.group, q, a, p, direction(A))
 
 function inverse_apply(A::GroupOperationAction, a, p)
     return inverse_translate(A.group, a, p, direction(A))
@@ -68,10 +68,10 @@ function center_of_orbit(
     p,
     mean_method::AbstractEstimationMethod,
 )
-    m = mean(A.group, pts, mean_method)
-    return inverse_apply(switch_direction(A), p, m)
+    μ = mean(A.group, pts, mean_method)
+    return inverse_apply(switch_direction(A), p, μ)
 end
 function center_of_orbit(A::GroupOperationAction, pts::AbstractVector, p)
-    m = mean(A.group, pts)
-    return inverse_apply(switch_direction(A), p, m)
+    μ = mean(A.group, pts)
+    return inverse_apply(switch_direction(A), p, μ)
 end

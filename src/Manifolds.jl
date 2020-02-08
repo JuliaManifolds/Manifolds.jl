@@ -26,7 +26,6 @@ import Base:
     one,
     promote_rule,
     setindex!,
-    similar,
     show,
     similar,
     size,
@@ -160,10 +159,6 @@ end
 
 function allocate_result(M::Manifold, f::typeof(vee), p, X)
     T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, manifold_dimension(M))
-end
-function allocate_result(M::Manifold, f::typeof(vee), p::StaticArray, X)
-    T = allocate_result_type(M, f, (p, X))
     return allocate(p, T, Size(manifold_dimension(M)))
 end
 
@@ -249,6 +244,7 @@ include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/Torus.jl")
 
 include("groups/group.jl")
+include("groups/metric.jl")
 include("groups/group_action.jl")
 include("groups/group_operation_action.jl")
 include("groups/array_manifold.jl")
@@ -315,14 +311,14 @@ export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribut
 export Metric,
     RiemannianMetric,
     LorentzMetric,
-    MinkowskiMetric,
     EuclideanMetric,
-    MetricManifold,
     LinearAffineMetric,
-    LogEuclideanMetric,
     LogCholeskyMetric,
+    LogEuclideanMetric,
+    MinkowskiMetric,
     PowerMetric,
-    ProductMetric
+    ProductMetric,
+    MetricManifold
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod, QRRetraction, PolarRetraction, ProjectionRetraction
 export AbstractInverseRetractionMethod,
@@ -426,30 +422,41 @@ export AbstractGroupAction,
     ActionDirection,
     AdditionOperation,
     CircleGroup,
-    MultiplicationOperation,
     GroupManifold,
     GroupOperationAction,
     Identity,
+    InvariantMetric,
     LeftAction,
+    LeftInvariantMetric,
+    MultiplicationOperation,
     ProductGroup,
     ProductOperation,
     RightAction,
+    RightInvariantMetric,
     RotationAction,
     SemidirectProductGroup,
     SpecialEuclidean,
     SpecialOrthogonal,
     TranslationGroup,
     TranslationAction
-export apply,
+export affine_matrix,
+    apply,
     apply!,
     apply_diff,
     apply_diff!,
     base_group,
     center_of_orbit,
+    check_has_invariant_metric,
     compose,
     compose!,
     direction,
     g_manifold,
+    group_exp,
+    group_exp!,
+    group_log,
+    group_log!,
+    has_biinvariant_metric,
+    has_invariant_metric,
     identity,
     identity!,
     inv,
@@ -464,6 +471,7 @@ export apply,
     inverse_translate_diff!,
     optimal_alignment,
     optimal_alignment!,
+    screw_matrix,
     switch_direction,
     translate,
     translate!,

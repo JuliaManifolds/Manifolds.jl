@@ -513,6 +513,40 @@ function ProductPointDistribution(distributions::MPointDistribution...)
     return ProductPointDistribution(M, distributions...)
 end
 
+function project_point(M::ProductManifold, p::ProductRepr)
+    return ProductRepr(map(project_point, M.manifolds, submanifold_components(M, p))...)
+end
+
+function project_point!(M::ProductManifold, q, p)
+    map(
+        project_point!,
+        M.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p),
+    )
+    return q
+end
+
+function project_tangent(M::ProductManifold, p::ProductRepr, X::ProductRepr)
+    return ProductRepr(map(
+        project_tangent,
+        M.manifolds,
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )...)
+end
+
+function project_tangent!(M::ProductManifold, Y, p, X)
+    map(
+        project_tangent!,
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return Y
+end
+
 function rand(rng::AbstractRNG, d::ProductPointDistribution)
     return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
 end
@@ -535,7 +569,11 @@ function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::AbstractArra
     return copyto!(v, rand(rng, d))
 end
 function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, X::ProductRepr)
-    map(t -> _rand!(rng, t[1], t[2]), d.distributions, submanifold_components(d.space.manifold, X))
+    map(
+        t -> _rand!(rng, t[1], t[2]),
+        d.distributions,
+        submanifold_components(d.space.manifold, X),
+    )
     return X
 end
 
