@@ -4,7 +4,7 @@ function solve_exp_ode(
     v,
     tspan;
     solver = AutoVern9(Rodas5()),
-    backend = :default,
+    backend = diff_backend(),
     kwargs...,
 )
     n = length(x)

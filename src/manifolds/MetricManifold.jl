@@ -55,7 +55,11 @@ function check_tangent_vector(M::MetricManifold, p, X; kwargs...)
 end
 
 @doc raw"""
-    christoffel_symbols_first(M::MetricManifold, p; backend=:default)
+    christoffel_symbols_first(
+        M::MetricManifold,
+        p;
+        backend::AbstractDiffBackend = diff_backend(),
+    )
 
 Compute the Christoffel symbols of the first kind in local coordinates.
 The Christoffel symbols are (in Einstein summation convention)
@@ -66,7 +70,11 @@ where $g_{ij,k}=\frac{∂}{∂ p^k} g_{ij}$ is the coordinate
 derivative of the local representation of the metric tensor. The dimensions of
 the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
-function christoffel_symbols_first(M::MetricManifold, p; backend = :default)
+function christoffel_symbols_first(
+    M::MetricManifold,
+    p;
+    backend::AbstractDiffBackend = diff_backend(),
+)
     ∂g = local_metric_jacobian(M, p; backend = backend)
     n = size(∂g, 1)
     Γ = allocate(∂g, Size(n, n, n))
@@ -75,7 +83,11 @@ function christoffel_symbols_first(M::MetricManifold, p; backend = :default)
 end
 
 @doc raw"""
-    christoffel_symbols_second(M::MetricManifold, x; backend=:default)
+    christoffel_symbols_second(
+        M::MetricManifold,
+        x;
+        backend::AbstractDiffBackend = diff_backend(),
+    )
 
 Compute the Christoffel symbols of the second kind in local coordinates.
 The Christoffel symbols are (in Einstein summation convention)
@@ -86,7 +98,11 @@ where $Γ_{ijk}$ are the Christoffel symbols of the first kind, and
 $g^{kl}$ is the inverse of the local representation of the metric tensor.
 The dimensions of the resulting multi-dimensional array are ordered $(l,i,j)$.
 """
-function christoffel_symbols_second(M::MetricManifold, p; backend = :default)
+function christoffel_symbols_second(
+    M::MetricManifold,
+    p;
+    backend::AbstractDiffBackend = diff_backend(),
+)
     ginv = inverse_local_metric(M, p)
     Γ₁ = christoffel_symbols_first(M, p; backend = backend)
     Γ₂ = allocate(Γ₁)
@@ -95,14 +111,22 @@ function christoffel_symbols_second(M::MetricManifold, p; backend = :default)
 end
 
 @doc raw"""
-    christoffel_symbols_second_jacobian(M::MetricManifold, p; backend = :default)
+    christoffel_symbols_second_jacobian(
+        M::MetricManifold,
+        p;
+        backend::AbstractDiffBackend = diff_backend(),
+    )
 
 Get partial derivatives of the Christoffel symbols of the second kind
 for manifold `M` at `p` with respect to the coordinates of `p`,
 $\frac{∂}{∂ p^l} Γ^{k}_{ij} = Γ^{k}_{ij,l}.$
 The dimensions of the resulting multi-dimensional array are ordered $(i,j,k,l)$.
 """
-function christoffel_symbols_second_jacobian(M::MetricManifold, p; backend = :default)
+function christoffel_symbols_second_jacobian(
+    M::MetricManifold,
+    p;
+    backend::AbstractDiffBackend = diff_backend(),
+)
     n = size(p, 1)
     ∂Γ = reshape(
         _jacobian(q -> christoffel_symbols_second(M, q; backend = backend), p, backend),
@@ -122,11 +146,15 @@ Return the determinant of local matrix representation of the metric tensor $g$.
 det_local_metric(M::MetricManifold, p) = det(local_metric(M, p))
 
 """
-    einstein_tensor(M::MetricManifold, p; backend = :default)
+    einstein_tensor(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Einstein tensor of the manifold `M` at the point `p`.
 """
-function einstein_tensor(M::MetricManifold, p; backend = :default)
+function einstein_tensor(
+    M::MetricManifold,
+    p;
+    backend::AbstractDiffBackend = diff_backend(),
+)
     Ric = ricci_tensor(M, p; backend = backend)
     g = local_metric(M, p)
     ginv = inverse_local_metric(M, p)
@@ -182,7 +210,7 @@ function flat!(M::MMT, ξ::CoTFVector, p, X::TFVector) where {MMT<:MetricManifol
 end
 
 """
-    gaussian_curvature(M::MetricManifold, x; backend = :default)
+    gaussian_curvature(M::MetricManifold, x; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Gaussian curvature of the manifold `M` at the point `x`.
 """
@@ -296,13 +324,17 @@ function local_metric(M::MetricManifold, p)
 end
 
 @doc raw"""
-    local_metric_jacobian(M::MetricManifold, p; backend=:default)
+    local_metric_jacobian(
+        M::MetricManifold,
+        p;
+        backend::AbstractDiffBackend = diff_backend(),
+    )
 
 Get partial derivatives of the local metric of `M` at `p` with respect to the
 coordinates of `p`, $\frac{∂}{∂ p^k} g_{ij} = g_{ij,k}$. The
 dimensions of the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
-function local_metric_jacobian(M, p; backend = :default)
+function local_metric_jacobian(M, p; backend::AbstractDiffBackend = diff_backend())
     n = size(p, 1)
     ∂g = reshape(_jacobian(q -> local_metric(M, q), p, backend), n, n, n)
     return ∂g
@@ -452,11 +484,15 @@ function projected_distribution(M::MMT, ::Val{false}, d) where {MMT<:MetricManif
 end
 
 """
-    ricci_curvature(M::MetricManifold, p; backend = :default)
+    ricci_curvature(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Ricci scalar curvature of the manifold `M` at the point `p`.
 """
-function ricci_curvature(M::MetricManifold, p; backend = :default)
+function ricci_curvature(
+    M::MetricManifold,
+    p;
+    backend::AbstractDiffBackend = diff_backend(),
+)
     ginv = inverse_local_metric(M, p)
     Ric = ricci_tensor(M, p; backend = backend)
     S = sum(ginv .* Ric)
@@ -464,7 +500,7 @@ function ricci_curvature(M::MetricManifold, p; backend = :default)
 end
 
 """
-    ricci_tensor(M::MetricManifold, p; backend = :default)
+    ricci_tensor(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Ricci tensor, also known as the Ricci curvature tensor,
 of the manifold `M` at the point `p`.
@@ -478,13 +514,17 @@ function ricci_tensor(M::MetricManifold, p; kwargs...)
 end
 
 @doc raw"""
-    riemann_tensor(M::MetricManifold, p)
+    riemann_tensor(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Riemann tensor $R^l_{ijk}$, also known as the Riemann curvature
 tensor, at the point `p`. The dimensions of the resulting multi-dimensional
 array are ordered $(l,i,j,k)$.
 """
-function riemann_tensor(M::MetricManifold, p; backend = :default)
+function riemann_tensor(
+    M::MetricManifold,
+    p;
+    backend::AbstractDiffBackend = diff_backend(),
+)
     n = size(p, 1)
     Γ = christoffel_symbols_second(M, p; backend = backend)
     ∂Γ = christoffel_symbols_second_jacobian(M, p; backend = backend) ./ n
@@ -523,7 +563,7 @@ show(io::IO, M::MetricManifold) = print(io, "MetricManifold($(M.manifold), $(M.m
         p,
         X,
         tspan;
-        backend = :default,
+        backend::AbstractDiffBackend = diff_backend(),
         solver = AutoVern9(Rodas5()),
         kwargs...,
     )
