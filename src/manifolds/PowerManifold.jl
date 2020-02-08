@@ -534,6 +534,15 @@ function norm(M::AbstractPowerManifold, p, X)
     return sqrt(sum_squares)
 end
 
+@doc raw"""
+    power_dimensions(M::PowerManifold)
+
+return the power of `M`,
+"""
+function power_dimensions(M::PowerManifold{<:Manifold,TSize}) where {TSize}
+    return size_to_tuple(TSize)
+end
+
 function rand(rng::AbstractRNG, d::PowerFVectorDistribution)
     fv = zero_vector(d.type, d.point)
     _rand!(rng, d, fv)

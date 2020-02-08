@@ -383,6 +383,7 @@ export allocate,
     normal_tvector_distribution,
     number_eltype,
     one,
+    power_dimensions,
     project_point,
     project_point!,
     project_tangent,
@@ -418,7 +419,8 @@ export allocate,
     zero_vector!,
     zero_tangent_vector,
     zero_tangent_vector!,
-    ×
+    ×,
+    uniform_distribution
 # Lie group types & functions
 export AbstractGroupAction,
     AbstractGroupOperation,
