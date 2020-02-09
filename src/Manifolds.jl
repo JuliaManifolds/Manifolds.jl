@@ -328,7 +328,8 @@ export
     PrecomputedPowerOrthonormalBasis,
     PrecomputedProductOrthonormalBasis,
     ArbitraryOrthonormalBasis
-export allocate,
+export ×,
+    allocate,
     allocate_result,
     base_manifold,
     bundle_projection,
@@ -401,6 +402,7 @@ export allocate,
     submanifold,
     submanifold_component,
     submanifold_components,
+    uniform_distribution,
     var,
     vector_space_dimension,
     vector_transport_along,
@@ -414,9 +416,7 @@ export allocate,
     zero_vector,
     zero_vector!,
     zero_tangent_vector,
-    zero_tangent_vector!,
-    ×,
-    uniform_distribution
+    zero_tangent_vector!
 # Lie group types & functions
 export AbstractGroupAction,
     AbstractGroupOperation,

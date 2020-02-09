@@ -39,6 +39,12 @@ git-tree-sha1 = "d497bcc45bb98a1fbe19445a774cfafeabc6c6df"
 uuid = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 version = "0.24.5"
 
+[[HybridArrays]]
+deps = ["LinearAlgebra", "StaticArrays"]
+git-tree-sha1 = "cc7c0b0f8e188f28e3353dde575aeb0aff0e41c0"
+uuid = "1baab800-613f-4b0a-84e4-9cd3431bfbb9"
+version = "0.3.1"
+
 [[Inflate]]
 deps = ["Pkg", "Printf", "Random", "Test"]
 git-tree-sha1 = "b7ec91c153cf8bff9aff58b39497925d133ef7fd"
