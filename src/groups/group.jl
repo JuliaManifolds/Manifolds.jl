@@ -1,9 +1,9 @@
 @doc raw"""
     AbstractGroupOperation
 
-Abstract type for smooth binary operations $\circ$ on elements of a Lie group $G$:
+Abstract type for smooth binary operations $∘$ on elements of a Lie group $\mathcal{G}$:
 ```math
-\circ : G × G → G
+∘ : \mathcal{G} × \mathcal{G} → \mathcal{G}
 ```
 An operation can be either defined for a specific [`AbstractGroupManifold`](@ref)
 or in general, by defining for an operation `Op` the following methods:
@@ -60,7 +60,7 @@ is_decorator_group(::Manifold, ::Val{false}) = Val(false)
 """
     base_group(M::Manifold) -> AbstractGroupManifold
 
-Undecorate `M` until an `AbstractGroupManifold` is encountered.
+Un-decorate `M` until an `AbstractGroupManifold` is encountered.
 Return an error if the [`base_manifold`](@ref) is reached without encountering a group.
 """
 function base_group(M::Manifold)
@@ -109,7 +109,7 @@ function inverse_retract!(G::GroupManifold, X, p, q, method::LogarithmicInverseR
     return inverse_retract!(G.manifold, X, p, q, method)
 end
 isapprox(G::GroupManifold, p, q; kwargs...) = isapprox(G.manifold, p, q; kwargs...)
-isapprox(G::GroupManifold, p, X, w; kwargs...) = isapprox(G.manifold, p, X, w; kwargs...)
+isapprox(G::GroupManifold, p, X, Y; kwargs...) = isapprox(G.manifold, p, X, Y; kwargs...)
 log(G::GroupManifold, p, q) = log(G.manifold, p, q)
 log!(G::GroupManifold, X, p, q) = log!(G.manifold, X, p, q)
 norm(G::GroupManifold, p, X) = norm(G.manifold, p, X)
@@ -190,7 +190,7 @@ switch_direction(::RightAction) = LeftAction()
 @doc raw"""
     Identity(G::AbstractGroupManifold)
 
-The group identity element $e ∈ G$.
+The group identity element $e ∈ \mathcal{G}$.
 """
 struct Identity{G<:AbstractGroupManifold}
     group::G
@@ -215,15 +215,41 @@ isapprox(p, e::Identity; kwargs...) = isapprox(e::Identity, p; kwargs...)
 isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
 isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
-function check_manifold_point(M::Manifold, p::Identity; kwargs...)
-    if is_decorator_group(M) === Val(true)
-        return check_manifold_point(base_group(M), p; kwargs...)
-    end
-    return DomainError(p, "The identity element $(p) does not belong to $(M).")
+function allocate_result(M::Manifold, ::typeof(hat), e::Identity, Xⁱ)
+    is_decorator_group(M) === Val(true) && return allocate_result(base_group(M), hat, e, Xⁱ)
+    error("allocate_result not implemented for manifold $(M), function hat, point $(e), and vector $(Xⁱ).")
 end
-function check_manifold_point(G::GroupManifold, p::Identity; kwargs...)
-    p === Identity(G) && return nothing
-    return DomainError(p, "The identity element $(p) does not belong to $(G).")
+function allocate_result(
+    G::GT,
+    ::typeof(hat),
+    ::Identity{GT},
+    Xⁱ,
+) where {GT<:AbstractGroupManifold}
+    B = VectorBundleFibers(TangentSpace, G)
+    return allocate(Xⁱ, Size(representation_size(B)))
+end
+function allocate_result(M::Manifold, ::typeof(vee), e::Identity, X)
+    is_decorator_group(M) === Val(true) && return allocate_result(base_group(M), vee, e, X)
+    error("allocate_result not implemented for manifold $(M), function vee, point $(e), and vector $(X).")
+end
+function allocate_result(
+    G::GT,
+    ::typeof(vee),
+    ::Identity{GT},
+    X,
+) where {GT<:AbstractGroupManifold}
+    return allocate(X, Size(manifold_dimension(G)))
+end
+
+function check_manifold_point(M::Manifold, e::Identity; kwargs...)
+    if is_decorator_group(M) === Val(true)
+        return check_manifold_point(base_group(M), e; kwargs...)
+    end
+    return DomainError(e, "The identity element $(e) does not belong to $(M).")
+end
+function check_manifold_point(G::GroupManifold, e::Identity; kwargs...)
+    e === Identity(G) && return nothing
+    return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
 function check_manifold_point(G::GroupManifold, p; kwargs...)
     return check_manifold_point(G.manifold, p; kwargs...)
@@ -236,8 +262,9 @@ end
 @doc raw"""
     inv(G::AbstractGroupManifold, p)
 
-Inverse $p^{-1} ∈ G$ of an element $p ∈ G$, such that
-$p \circ p^{-1} = p^{-1} \circ p = e ∈ G$.
+Inverse $p^{-1} ∈ \mathcal{G}$ of an element $p ∈ \mathcal{G}$, such that
+$p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}$, where $e$ is the [`identity`](@ref)
+element of $\mathcal{G}$.
 """
 inv(M::Manifold, p) = inv(M, p, is_decorator_manifold(M))
 inv(M::Manifold, p, ::Val{true}) = inv(M.manifold, p)
@@ -258,7 +285,8 @@ end
 @doc raw"""
     identity(G::AbstractGroupManifold, p)
 
-Identity element $e ∈ G$, such that for any element $p ∈ G$, $p \circ e = e \circ p = p$.
+Identity element $e ∈ \mathcal{G}$, such that for any element $p ∈ \mathcal{G}$,
+$p \circ e = e \circ p = p$.
 The returned element is of a similar type to `p`.
 """
 identity(M::Manifold, p) = identity(M, p, is_decorator_manifold(M))
@@ -273,8 +301,8 @@ end
 
 identity!(M::Manifold, q, p) = identity!(M, q, p, is_decorator_manifold(M))
 identity!(M::Manifold, q, p, ::Val{true}) = identity!(M.manifold, q, p)
-function identity!(M::Manifold, y, x, ::Val{false})
-    return error("identity! not implemented on $(typeof(M)) for points $(typeof(y)) and $(typeof(x))")
+function identity!(M::Manifold, q, p, ::Val{false})
+    return error("identity! not implemented on $(typeof(M)) for points $(typeof(q)) and $(typeof(p))")
 end
 
 isapprox(M::Manifold, p, e::Identity; kwargs...) = isapprox(M, e, p; kwargs...)
@@ -306,9 +334,9 @@ end
 isapprox(::GT, ::E, ::E; kwargs...) where {GT<:GroupManifold,E<:Identity{GT}} = true
 
 @doc raw"""
-    compose(G::AbstractGroupManifold, x, y)
+    compose(G::AbstractGroupManifold, p, q)
 
-Compose elements $x,y ∈ G$ using the group operation $x \circ y$.
+Compose elements $p,q ∈ \mathcal{G}$ using the group operation $p \circ q$.
 """
 compose(M::Manifold, p, q) = compose(M, p, q, is_decorator_manifold(M))
 compose(M::Manifold, p, q, ::Val{true}) = compose(M.manifold, p, q)
@@ -333,8 +361,8 @@ _action_order(p, q, conv::RightAction) = (q, p)
     translate(G::AbstractGroupManifold, p, q)
     translate(G::AbstractGroupManifold, p, q, conv::ActionDirection=LeftAction()])
 
-For group elements $p,q ∈ G$, translate $q$ by $p$ with the specified convention, either
-left $L_p$ or right $R_q$, defined as
+Translate group element $q$ by $p$ with the translation $τ_p$ with the specified
+`conv`ention, either left ($L_p$) or right ($R_p$), defined as
 ```math
 \begin{aligned}
 L_p &: q ↦ p \circ q\\
@@ -372,10 +400,10 @@ end
 
 @doc raw"""
     inverse_translate(G::AbstractGroupManifold, p, q)
-    inverse_translate(G::AbstractGroupManifold, p, q, conv::ActionDirection=Left())
+    inverse_translate(G::AbstractGroupManifold, p, q, conv::ActionDirection=LeftAction())
 
-For group elements $p, q ∈ G$, inverse translate $q$ by $p$ with the specified convention,
-either left $L_p^{-1}$ or right $R_p^{-1}$, defined as
+Inverse translate group element $q$ by $p$ with the inverse translation $τ_p^{-1}$ with the
+specified `conv`ention, either left ($L_p^{-1}$) or right ($R_p^{-1}$), defined as
 ```math
 \begin{aligned}
 L_p^{-1} &: q ↦ p^{-1} \circ q\\
@@ -415,14 +443,11 @@ end
     translate_diff(G::AbstractGroupManifold, p, q, X)
     translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection=LeftAction())
 
-For group elements $p, q ∈ G$ and tangent vector $X ∈ T_q G$, compute the action of the
-differential of the translation by $p$ on $X$, written as $(\mathrm{d}τ_p)_q (X)$, with the
-specified left or right convention. The differential transports vectors:
+For group elements $p, q ∈ \mathcal{G}$ and tangent vector $X ∈ T_q \mathcal{G}$, compute
+the action of the differential of the translation $τ_p$ by $p$ on $X$, with the specified
+left or right `conv`ention. The differential transports vectors:
 ```math
-\begin{aligned}
-(\mathrm{d}L_p)_q (X) &: T_q G → T_{p \circ q} G\\
-(\mathrm{d}R_p)_q (X) &: T_q G → T_{q \circ p} G\\
-\end{aligned}
+(\mathrm{d}τ_p)_q : T_q \mathcal{G} → T_{τ_p q} \mathcal{G}\\
 ```
 """
 translate_diff(M::Manifold, p, q, X) = translate_diff(M, p, q, X, LeftAction())
@@ -437,7 +462,7 @@ function translate_diff(M::Manifold, p, q, X, conv::ActionDirection, ::Val{false
 end
 function translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection)
     pq = translate(G, p, q, conv)
-    Y = zero_tangent_vector(G, pq)
+    Y = allocate_result(G, translate_diff, X, p, q)
     translate_diff!(G, Y, p, q, X, conv)
     return Y
 end
@@ -457,18 +482,13 @@ end
 
 @doc raw"""
     inverse_translate_diff(G::AbstractGroupManifold, p, q, X)
-    inverse_translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection=Left())
+    inverse_translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection=LeftAction())
 
-For group elements $p, q ∈ G$ and tangent vector $X ∈ T_q G$, compute the inverse of the
-action of the differential of the translation by $p$ on $X$, written as
-$((\mathrm{d}τ_p)_q)^{-1} (X) = (\mathrm{d}τ_{p^{-1}})_q (X)$, with the specified left or
-right convention. The differential transports vectors as
-
+For group elements $p, q ∈ \mathcal{G}$ and tangent vector $X ∈ T_q \mathcal{G}$, compute
+the action on $X$ of the differential of the inverse translation $τ_p$ by $p$, with the
+specified left or right `conv`ention. The differential transports vectors:
 ```math
-\begin{aligned}
-((\mathrm{d}L_p)_q)^{-1} (X) &: T_q G → T_{p^{-1} \circ q} G\\
-((\mathrm{d}R_p)_q)^{-1} (X) &: T_q G → T_{q \circ p^{-1}} G\\
-\end{aligned}
+(\mathrm{d}τ_p^{-1})_q : T_q \mathcal{G} → T_{τ_p^{-1} q} \mathcal{G}\\
 ```
 """
 function inverse_translate_diff(M::Manifold, p, q, X)
@@ -493,7 +513,8 @@ end
 function inverse_translate_diff!(M::Manifold, Y, p, q, X, conv::ActionDirection)
     return inverse_translate_diff!(M, Y, p, q, X, conv, is_decorator_manifold(M))
 end
-function inverse_translate_diff!(M::Manifold,
+function inverse_translate_diff!(
+    M::Manifold,
     Y,
     p,
     q,
@@ -523,6 +544,255 @@ function inverse_translate_diff!(
     conv::ActionDirection,
 )
     return translate_diff!(G, Y, inv(G, p), q, X, conv)
+end
+
+@doc raw"""
+    group_exp(G::AbstractGroupManifold, X)
+
+Compute the group exponential of the Lie algebra element `X`.
+
+Given an element $X ∈ 𝔤 = T_e \mathcal{G}$, where $e$ is the [`identity`](@ref) element of
+the group $\mathcal{G}$, and $𝔤$ is its Lie algebra, the group exponential is the map
+
+````math
+\exp : 𝔤 → \mathcal{G},
+````
+such that for $t,s ∈ ℝ$, $γ(t) = \exp (t X)$ defines a one-parameter subgroup with the
+following properties:
+
+````math
+\begin{aligned}
+γ(t) &= γ(-t)^{-1}\\
+γ(t + s) &= γ(t) \circ γ(s) = γ(s) \circ γ(t)\\
+γ(0) &= e\\
+\lim_{t → 0} \frac{d}{dt} γ(t) &= X.
+\end{aligned}
+````
+
+!!! note
+    In general, the group exponential map is distinct from the Riemannian exponential map
+    [`exp`](@ref).
+
+```
+group_exp(G::AbstractGroupManifold{AdditionOperation}, X)
+```
+
+Compute $q = X$.
+
+    group_exp(G::AbstractGroupManifold{MultiplicationOperation}, X)
+
+For `Number` and `AbstractMatrix` types of `X`, compute the usual numeric/matrix
+exponential,
+
+````math
+\exp X = \operatorname{Exp} X = \sum_{n=0}^∞ \frac{1}{n!} X^n.
+````
+"""
+group_exp(M::Manifold, X) = group_exp(M, X, is_decorator_manifold(M))
+group_exp(M::Manifold, X, ::Val{true}) = group_exp(M.manifold, X)
+function group_exp(M::Manifold, X, ::Val{false})
+    return error("group_exp not implemented on $(typeof(M)) for vector $(typeof(X)).")
+end
+function group_exp(G::AbstractGroupManifold, X)
+    q = allocate_result(G, group_exp, X)
+    return group_exp!(G, q, X)
+end
+
+group_exp!(M::Manifold, q, X) = group_exp!(M, q, X, is_decorator_manifold(M))
+group_exp!(M::Manifold, q, X, ::Val{true}) = group_exp!(M.manifold, q, X)
+function group_exp!(M::Manifold, q, X, ::Val{false})
+    return error("group_exp! not implemented on $(typeof(M)) for vector $(typeof(X)) and element $(typeof(q)).")
+end
+
+@doc raw"""
+    group_log(G::AbstractGroupManifold, q)
+
+Compute the group logarithm of the group element `q`.
+
+Given an element $q ∈ \mathcal{G}$, compute the right inverse of the group exponential map
+[`group_exp`](@ref), that is, the element $\log q = X ∈ 𝔤 = T_e \mathcal{G}$, such that
+$q = \exp X$
+
+!!! note
+    In general, the group logarithm map is distinct from the Riemannian logarithm map
+    [`log`](@ref).
+
+```
+group_log(G::AbstractGroupManifold{AdditionOperation}, q)
+```
+
+Compute $X = q$.
+
+    group_log(G::AbstractGroupManifold{MultiplicationOperation}, q)
+
+For `Number` and `AbstractMatrix` types of `q`, compute the usual numeric/matrix logarithm:
+
+````math
+\log q = \operatorname{Log} q = \sum_{n=1}^∞ \frac{(-1)^{n+1}}{n} (q - e)^n,
+````
+
+where $e$ here is the [`identity`](@ref) element, that is, $1$ for numeric $q$ or the
+identity matrix $I_m$ for matrix $q ∈ ℝ^{m × m}$.
+"""
+group_log(M::Manifold, q) = group_log(M, q, is_decorator_manifold(M))
+group_log(M::Manifold, q, ::Val{true}) = group_log(M.manifold, q)
+function group_log(M::Manifold, q, ::Val{false})
+    return error("group_log not implemented on $(typeof(M)) for element $(typeof(q)).")
+end
+function group_log(G::AbstractGroupManifold, q)
+    X = allocate_result(G, group_log, q)
+    return group_log!(G, X, q)
+end
+
+group_log!(M::Manifold, X, q) = group_log!(M, X, q, is_decorator_manifold(M))
+group_log!(M::Manifold, X, q, ::Val{true}) = group_log!(M.manifold, X, q)
+function group_log!(M::Manifold, X, q, ::Val{false})
+    return error("group_log! not implemented on $(typeof(M)) for element $(typeof(q)) and vector $(typeof(X)).")
+end
+
+############################
+# Group-specific Retractions
+############################
+
+"""
+    GroupExponentialRetraction{D<:ActionDirection} <: AbstractRetractionMethod
+
+Retraction using the group exponential [`group_exp`](@ref) "translated" to any point on the
+manifold.
+
+For more details, see
+[`retract`](@ref retract(::GroupManifold, p, X, ::GroupExponentialRetraction)).
+
+# Constructor
+
+    GroupExponentialRetraction(conv::ActionDirection = LeftAction())
+"""
+struct GroupExponentialRetraction{D<:ActionDirection} <: AbstractRetractionMethod end
+
+function GroupExponentialRetraction(conv::ActionDirection = LeftAction())
+    return GroupExponentialRetraction{typeof(conv)}()
+end
+
+"""
+    GroupLogarithmicInverseRetraction{D<:ActionDirection} <: AbstractInverseRetractionMethod
+
+Retraction using the group logarithm [`group_log`](@ref) "translated" to any point on the
+manifold.
+
+For more details, see
+[`inverse_retract`](@ref inverse_retract(::GroupManifold, p, q ::GroupLogarithmicInverseRetraction)).
+
+# Constructor
+
+    GroupLogarithmicInverseRetraction(conv::ActionDirection = LeftAction())
+"""
+struct GroupLogarithmicInverseRetraction{D<:ActionDirection} <:
+       AbstractInverseRetractionMethod end
+
+function GroupLogarithmicInverseRetraction(conv::ActionDirection = LeftAction())
+    return GroupLogarithmicInverseRetraction{typeof(conv)}()
+end
+
+direction(::GroupExponentialRetraction{D}) where {D} = D()
+direction(::GroupLogarithmicInverseRetraction{D}) where {D} = D()
+
+@doc raw"""
+    retract(
+        G::AbstractGroupManifold,
+        p,
+        X,
+        method::GroupExponentialRetraction{<:ActionDirection},
+    )
+
+Compute the retraction using the group exponential [`group_exp`](@ref) "translated" to any
+point on the manifold.
+With a group translation ([`translate`](@ref)) $τ_p$ in a specified direction, the
+retraction is
+
+````math
+\operatorname{retr}_p = τ_p \circ \exp \circ (\mathrm{d}τ_p^{-1})_p,
+````
+
+where $\exp$ is the group exponential ([`group_exp`](@ref)), and $(\mathrm{d}τ_p^{-1})_p$ is
+the action of the differential of inverse translation $τ_p^{-1}$ evaluated at $p$ (see
+[`inverse_translate_diff`](@ref)).
+"""
+function retract(G::GroupManifold, p, X, method::GroupExponentialRetraction)
+    conv = direction(method)
+    Xₑ = inverse_translate_diff(G, p, p, X, conv)
+    pinvq = group_exp(G, Xₑ)
+    q = translate(G, p, pinvq, conv)
+    return q
+end
+
+function retract!(G::GroupManifold, q, p, X, method::GroupExponentialRetraction)
+    return invoke(
+        retract!,
+        Tuple{Manifold,typeof(q),typeof(p),typeof(X),typeof(method)},
+        G,
+        q,
+        p,
+        X,
+        method,
+    )
+end
+function retract!(M::Manifold, q, p, X, method::GroupExponentialRetraction)
+    conv = direction(method)
+    Xₑ = inverse_translate_diff(M, p, p, X, conv)
+    pinvq = group_exp(M, Xₑ)
+    return translate!(M, q, p, pinvq, conv)
+end
+
+@doc raw"""
+    inverse_retract(
+        G::AbstractGroupManifold,
+        p,
+        X,
+        method::GroupLogarithmicInverseRetraction{<:ActionDirection},
+    )
+
+Compute the inverse retraction using the group logarithm [`group_log`](@ref) "translated"
+to any point on the manifold.
+With a group translation ([`translate`](@ref)) $τ_p$ in a specified direction, the
+retraction is
+
+````math
+\operatorname{retr}_p^{-1} = (\mathrm{d}τ_p)_e \circ \log \circ τ_p^{-1},
+````
+
+where $\log$ is the group logarithm ([`group_log`](@ref)), and $(\mathrm{d}τ_p)_e$ is the
+action of the differential of translation $τ_p$ evaluated at the identity element $e$
+(see [`translate_diff`](@ref)).
+"""
+function inverse_retract(G::GroupManifold, p, q, method::GroupLogarithmicInverseRetraction)
+    conv = direction(method)
+    pinvq = inverse_translate(G, p, q, conv)
+    Xₑ = group_log(G, pinvq)
+    return translate_diff(G, p, Identity(G), Xₑ, conv)
+end
+
+function inverse_retract!(
+    G::GroupManifold,
+    X,
+    p,
+    q,
+    method::GroupLogarithmicInverseRetraction,
+)
+    return invoke(
+        inverse_retract!,
+        Tuple{Manifold,typeof(X),typeof(p),typeof(q),typeof(method)},
+        G,
+        X,
+        p,
+        q,
+        method,
+    )
+end
+function inverse_retract!(M::Manifold, X, p, q, method::GroupLogarithmicInverseRetraction)
+    conv = direction(method)
+    pinvq = inverse_translate(M, p, q, conv)
+    Xₑ = group_log(M, pinvq)
+    return translate_diff!(M, X, p, Identity(M), Xₑ, conv)
 end
 
 #################################
@@ -581,6 +851,14 @@ function inverse_translate_diff!(::AdditionGroup, Y, p, q, X, ::ActionDirection)
     return copyto!(Y, X)
 end
 
+group_exp(::AdditionGroup, X) = X
+
+group_exp!(::AdditionGroup, q, X) = copyto!(q, X)
+
+group_log(::AdditionGroup, q) = q
+
+group_log!(::AdditionGroup, X, q) = copyto!(X, q)
+
 #######################################
 # Overloads for MultiplicationOperation
 #######################################
@@ -598,6 +876,7 @@ const MultiplicationGroup = AbstractGroupManifold{MultiplicationOperation}
 *(::Identity{G}, p) where {G<:MultiplicationGroup} = p
 *(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
 *(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
+*(::Identity{<:MultiplicationGroup}, e::Identity{<:AdditionGroup}) = e
 
 /(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
 /(::Identity{G}, p) where {G<:MultiplicationGroup} = inv(p)
@@ -635,7 +914,7 @@ inv!(G::MultiplicationGroup, q, p) = copyto!(q, inv(G, p))
 
 compose(::MultiplicationGroup, p, q) = p * q
 
-# TODO: z might alias with x or y, we might be able to optimize it if it doesn't.
+# TODO: x might alias with p or q, we might be able to optimize it if it doesn't.
 compose!(::MultiplicationGroup, x, p, q) = copyto!(x, p * q)
 
 inverse_translate(::MultiplicationGroup, p, q, ::LeftAction) = p \ q
@@ -643,4 +922,9 @@ inverse_translate(::MultiplicationGroup, p, q, ::RightAction) = q / p
 
 function inverse_translate!(G::MultiplicationGroup, x, p, q, conv::ActionDirection)
     return copyto!(x, inverse_translate(G, p, q, conv))
+end
+
+function group_exp!(G::MultiplicationGroup, q, X)
+    X isa Union{Number,AbstractMatrix} && return copyto!(q, exp(X))
+    return error("group_exp! not implemented on $(typeof(G)) for vector $(typeof(X)) and element $(typeof(q)).")
 end

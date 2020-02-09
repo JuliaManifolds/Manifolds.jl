@@ -7,6 +7,11 @@ include("group_utils.jl")
         @test repr(G) == "TranslationGroup(2, 3; field = ℝ)"
         @test repr(TranslationGroup(2, 3; field = ℂ)) == "TranslationGroup(2, 3; field = ℂ)"
 
+        @test has_invariant_metric(G, LeftAction()) === Val(true)
+        @test has_invariant_metric(G, RightAction()) === Val(true)
+        @test has_biinvariant_metric(G) === Val(true)
+        @test is_default_metric(MetricManifold(G, EuclideanMetric())) === Val(true)
+
         types = [Matrix{Float64}]
         @test base_manifold(G) === Euclidean(2, 3)
 
@@ -16,7 +21,7 @@ include("group_utils.jl")
             gpts = convert.(T, pts)
             vgpts = convert.(T, vpts)
             @test compose(G, gpts[1], gpts[2]) ≈ gpts[1] + gpts[2]
-            test_group(G, gpts, vgpts; test_diff = true)
+            test_group(G, gpts, vgpts, vgpts; test_diff = true, test_invariance = true)
         end
     end
 
@@ -34,7 +39,7 @@ include("group_utils.jl")
             vgpts = convert.(T, vpts)
             @test compose(G, gpts[1], gpts[2]) ≈ gpts[1] + gpts[2]
             @test translate_diff(G, gpts[2], gpts[1], vgpts[1]) ≈ vgpts[1]
-            test_group(G, gpts, vgpts; test_diff = true)
+            test_group(G, gpts, vgpts, vgpts; test_diff = true, test_invariance = true)
         end
     end
 end

@@ -1,5 +1,5 @@
 @doc raw"""
-    FixedRankMatrices{m,n,k,F} <: Manifold
+    FixedRankMatrices{m,n,k,𝔽} <: Manifold
 
 The manifold of $m × n$ real-valued or complex-valued matrices of fixed rank $k$, i.e.
 ````math
@@ -32,9 +32,9 @@ The (default) metric of this manifold is obtained by restricting the metric
 on $ℝ^{m × n}$ to the tangent bundle[^Vandereycken2013].
 
 # Constructor
-    FixedRankMatrics(m, n, k[, t=ℝ])
+    FixedRankMatrics(m, n, k[, field=ℝ])
 
-Generate the manifold of `m`-by-`n` (real-valued) matrices of rank `k`.
+Generate the manifold of `m`-by-`n` (`field`-valued) matrices of rank `k`.
 
 [^Vandereycken2013]:
     > Bart Vandereycken: "Low-rank matrix completion by Riemannian Optimization,
@@ -42,9 +42,9 @@ Generate the manifold of `m`-by-`n` (real-valued) matrices of rank `k`.
     > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
-struct FixedRankMatrices{M,N,K,F} <: Manifold end
-function FixedRankMatrices(m::Int, n::Int, k::Int, f::AbstractNumbers = ℝ)
-    return FixedRankMatrices{m,n,k,f}()
+struct FixedRankMatrices{M,N,K,𝔽} <: Manifold end
+function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers = ℝ)
+    return FixedRankMatrices{m,n,k,field}()
 end
 
 @doc raw"""
@@ -261,12 +261,7 @@ function project_tangent!(
     Y.Vt .= (aTu - p.Vt' * uTav')'
     return Y
 end
-function project_tangent!(
-    M::FixedRankMatrices,
-    Y::UMVTVector,
-    p::SVDMPoint,
-    X::UMVTVector,
-)
+function project_tangent!(M::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, X::UMVTVector)
     return project_tangent!(M, Y, p, X.U * X.M * X.Vt)
 end
 
@@ -305,8 +300,8 @@ function retract!(
     return q
 end
 
-function show(io::IO, ::FixedRankMatrices{M,N,K,T}) where {M,N,K,T}
-    print(io, "FixedRankMatrices($(M), $(N), $(K), $(T))")
+function show(io::IO, ::FixedRankMatrices{M,N,K,𝔽}) where {M,N,K,𝔽}
+    print(io, "FixedRankMatrices($(M), $(N), $(K), $(𝔽))")
 end
 function show(io::IO, mime::MIME"text/plain", p::SVDMPoint)
     pre = " "
@@ -384,10 +379,10 @@ function copyto!(X::UMVTVector, Y::UMVTVector)
 end
 
 @doc raw"""
-    zero_tangent_vector(M::FixedRankMatrices, x::SVDMPoint)
+    zero_tangent_vector(M::FixedRankMatrices, p::SVDMPoint)
 
 Return a [`UMVTVector`](@ref) representing the zero tangent vector in the tangent space of
-`x` on the [`FixedRankMatrices`](@ref) `M`, for example all three elements of the resulting
+`p` on the [`FixedRankMatrices`](@ref) `M`, for example all three elements of the resulting
 structure are zero matrices.
 """
 function zero_tangent_vector(::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,n,k}

@@ -147,7 +147,7 @@ end
 
 Compute the inverse of the projection based retraction on the [`Sphere`](@ref),
 i.e. rearranging $p+X = q\lVert p+X\rVert_2$ yields
-since $⟨p,X⟩ = 0$ and when $d_{𝕊^2}(p,q) \leq \frac{π}{2}$ that
+since $⟨p,X⟩ = 0$ and when $d_{𝕊^2}(p,q) ≤ \frac{π}{2}$ that
 
 ````math
 \operatorname{retr}_p^{-1}(q) = \frac{q}{⟨p, q⟩} - p.
@@ -346,10 +346,10 @@ $P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_{𝕊^n}(p,q)}
 vector_transport_to(::Sphere, ::Any, ::Any, ::Any, ::Any, ::ParallelTransport)
 
 function vector_transport_to!(M::Sphere, Y, p, X, q, ::ParallelTransport)
-    v_xy = log(M, p, q)
-    vl = norm(M, p, v_xy)
+    X_pq = log(M, p, q)
+    Xl = norm(M, p, X_pq)
     copyto!(Y, X)
-    if vl > 0
+    if Xl > 0
         factor = 2 * dot(X, q) / (norm(p + q)^2)
         Y .-= factor .* (p .+ q)
     end

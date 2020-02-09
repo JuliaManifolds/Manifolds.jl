@@ -11,9 +11,9 @@ To make a graph manifold over $ℝ^2$ with three vertices and two edges, one can
 using Manifolds
 using LightGraphs
 M = Euclidean(2)
-x = [[1., 4.], [2., 5.], [3., 6.]]
-y = [[4., 5.], [6., 7.], [8., 9.]]
-z = [[6., 5.], [4., 3.], [2., 8.]]
+p = [[1., 4.], [2., 5.], [3., 6.]]
+q = [[4., 5.], [6., 7.], [8., 9.]]
+x = [[6., 5.], [4., 3.], [2., 8.]]
 G = SimpleGraph(3)
 add_edge!(G, 1, 2)
 add_edge!(G, 2, 3)
@@ -26,16 +26,16 @@ It supports all [`AbstractPowerManifold`](@ref) operations (it is based on [`Nes
 using Manifolds
 using LightGraphs
 M = Euclidean(2)
-x = [[1., 4.], [2., 5.], [3., 6.]]
-y = [[4., 5.], [6., 7.], [8., 9.]]
-z = [[6., 5.], [4., 3.], [2., 8.]]
+p = [[1., 4.], [2., 5.], [3., 6.]]
+q = [[4., 5.], [6., 7.], [8., 9.]]
+x = [[6., 5.], [4., 3.], [2., 8.]]
 G = SimpleGraph(3)
 add_edge!(G, 1, 2)
 add_edge!(G, 2, 3)
 N = GraphManifold(G, M, VertexManifold())
 ```
 ```@example graph-1
-incident_log(N, x)
+incident_log(N, p)
 ```
 
 ## Types and functions
