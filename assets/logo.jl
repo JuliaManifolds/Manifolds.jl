@@ -230,7 +230,7 @@ if !plain
     }
     plot_patch!(tp, S, x, basis, π / 5, θs; options = optionsP, tangent = true)
     optionsL = @pgf {
-        color = patch_colors2[2],
+        color = rgb_logo_colors_dark[3],
         line_width = mesh_line_width,
         opacity = 0.5*tangent_space_opacity,
 
