@@ -303,7 +303,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             if isa(btype, ProjectedOrthonormalBasis)
                 # check projection idempotency
                 for i in 1:N
-                    @test project_tangent(M, x, bvectors[i]) ≈ bvectors[i]
+                    @test isapprox(M, x, project_tangent(M, x, bvectors[i]), bvectors[i])
                 end
             end
 
