@@ -12,11 +12,11 @@ There are two ways to store the data: in a multidimensional array or in a nested
 Let's look at both for an example. Let $\mathcal M$ be `Sphere(2)` the 2-sphere. and we want
 to look at vectors of length 4.
 
-For the default, the [`ArrayPowerRepresentation`](@ref), we store the data in da multidimensional array,
+For the default, the [`ArrayPowerRepresentation`](@ref), we store the data in a multidimensional array,
 
 ```@example 1
 using Manifolds #hide
-M = PowerManifold(Sphere(2),4)
+M = PowerManifold(Sphere(2), 4)
 p = cat([1.0, 0.0, 0.0],
         [1/sqrt(2.0), 1/sqrt(2.0), 0.0],
         [1/sqrt(2.0), 0.0, 1/sqrt(2.0)],
@@ -27,11 +27,11 @@ p = cat([1.0, 0.0, 0.0],
 which is a valid point i.e.
 
 ```@example 1
-is_manifold_point(M,p)
+is_manifold_point(M, p)
 ```
 
-An advantage of this representation is, that it is quite efficient.
-A disadvantage might be both looking at the matrix and seeing the points.
+An advantage of this representation is that it is quite efficient, especially when a `HybridArray` (from the `HybridArrays.jl` package) is used to represent a point on the power manifold.
+A disadvantage is not being able to easily identify parts of the multidimensional array that correspond to a single point on the base manifold.
 Another problem is, that accessing a single point is ` p[:,1]` which might be unintuitive.
 
 For the [`NestedPowerRepresentation`](@ref) we can now do
@@ -47,7 +47,7 @@ p = [ [1.0, 0.0, 0.0],
 ```
 
 which is again a valid point so [`is_manifold_point`](@ref)`(M,p)` here also yields true.
-A disadvantage might be that with nested arrays one looses a little bit of performance.
+A disadvantage might be that with nested arrays one loses a little bit of performance.
 The data however is nicely encapsulated. Accessing the first data item is just `p[1]`.
 
 ## Types and Functions
