@@ -52,14 +52,6 @@ inner product $g(X, X) > 0$ whenever $X$ is not the zero vector.
 """
 abstract type RiemannianMetric <: Metric end
 
-function check_manifold_point(M::MetricManifold, p; kwargs...)
-    return check_manifold_point(M.manifold, p; kwargs...)
-end
-
-function check_tangent_vector(M::MetricManifold, p, X; kwargs...)
-    return check_tangent_vector(M.manifold, p, X; kwargs...)
-end
-
 @doc raw"""
     christoffel_symbols_first(M::MetricManifold, p; backend=:default)
 
@@ -156,10 +148,8 @@ in an embedded space.
 """
 exp(::MetricManifold, ::Any...)
 
-exp!(M::MMT, q, p, X) where {MMT<:MetricManifold} = exp!(M, is_default_metric(M), q, p, X)
-function exp!(M::MMT, ::Val{true}, q, p, X) where {MMT<:MetricManifold}
-    return exp!(base_manifold(M), q, p, X)
-end
+is_decorator_transparent(M::MMT, ::typeof(exp!)) where {MMT <: MetricManifold} = false
+
 function exp!(M::MMT, ::Val{false}, q, p, X) where {MMT<:MetricManifold}
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, p, X, tspan; dense = false, saveat = [1.0])
@@ -181,7 +171,9 @@ where $G_p$ is the local matrix representation of `G`, see [`local_metric`](@ref
 """
 flat(::MetricManifold, ::Any...)
 
-function flat!(M::MMT, ξ::CoTFVector, p, X::TFVector) where {MMT<:MetricManifold}
+is_decorator_transparent(M::MMT, ::typeof(flat!)) where {MMT <: MetricManifold} = false
+
+function flat!(M::MMT, ξ::CoTFVector, p, X::TFVector, ::Val{false}) where {MMT<:MetricManifold}
     g = local_metric(M, p)
     copyto!(ξ.data, g * X.data)
     return ξ
@@ -194,18 +186,7 @@ Compute the Gaussian curvature of the manifold `M` at the point `x`.
 """
 gaussian_curvature(M::MetricManifold, p; kwargs...) = ricci_curvature(M, p; kwargs...) / 2
 
-function get_basis(M::MMT, p, B::ArbitraryOrthonormalBasis) where {MMT<:MetricManifold}
-    return invoke(get_basis, Tuple{MMT,Any,AbstractBasis}, M, p, B)
-end
-function get_basis(M::MMT, p, B::AbstractBasis) where {MMT<:MetricManifold}
-    return get_basis(M, is_default_metric(M), p, B)
-end
-function get_basis(M::MMT, ::Val{true}, p, B::AbstractBasis) where {MMT<:MetricManifold}
-    return get_basis(base_manifold(M), p, B)
-end
-function get_basis(M::MMT, ::Val{false}, p, B::AbstractBasis) where {MMT<:MetricManifold}
-    error("tangent_orthogonal_basis not implemented on $(typeof(M)) for point $(typeof(p)) and basis type $(typeof(B)).")
-end
+is_decorator_transparent(M::MMT, ::typeof(get_basis)) where {MMT <: MetricManifold} = false
 
 function injectivity_radius(M::MMT, args...) where {MMT<:MetricManifold}
     return injectivity_radius(base_manifold(M), args...)
@@ -220,7 +201,6 @@ written $g^{ij}$.
 inverse_local_metric(M::MetricManifold, p) = inv(local_metric(M, p))
 
 is_default_decorator(M::MMT) where {MMT <: MetricManifold} = is_default_metric(M)
-is_decorator_manifold(M::MMT) where {MMT<:MetricManifold} = Val(true)
 
 """
     is_default_metric(M,G)
@@ -232,7 +212,7 @@ falls back to just be called with `M` such that the [`Manifold`](@ref) `M`
 implicitly has this metric, for example if this was the first one implemented
 or is the one most commonly assumed to be used.
 """
-is_default_metric(M::Manifold, G::Metric) = Val(false)
+is_default_metric(M::Manifold, G::Metric) = false
 
 """
     is_default_metric(MM)
@@ -273,12 +253,12 @@ g_p(X, Y) = ⟨X, G_p Y⟩,
 ````
 where $G_p$ is the loal matrix representation of the [`Metric`](@ref) `G`.
 """
-inner(M::MMT, p, X, Y) where {MMT<:MetricManifold} = inner(M, is_default_metric(M), p, X, Y)
-function inner(M::MMT, ::Val{false}, p, X, Y) where {MMT<:MetricManifold}
+inner(::MetricManifold, ::Any)
+
+is_decorator_transparent(M::MMT, ::typeof(inner)) where {MMT <: MetricManifold} = false
+
+function inner(M::MMT, p, X, Y, ::Val{false}) where {MMT<:MetricManifold}
     return dot(X, local_metric(M, p) * Y)
-end
-function inner(M::MMT, ::Val{true}, p, X, Y) where {MMT<:MetricManifold}
-    return inner(base_manifold(M), p, X, Y)
 end
 function inner(
     B::VectorBundleFibers{<:CotangentSpaceType,MMT},
@@ -326,13 +306,7 @@ falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for
 """
 log(::MetricManifold, ::Any...)
 
-log!(M::MMT, X, p, q) where {MMT<:MetricManifold} = log!(M, is_default_metric(M), X, p, q)
-function log!(M::MMT, ::Val{true}, X, p, q) where {MMT<:MetricManifold}
-    return log!(base_manifold(M), X, p, q)
-end
-function log!(M::MMT, ::Val{false}, X, p, q) where {MMT<:MetricManifold}
-    error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(p)) and $(typeof(q)).")
-end
+is_decorator_transparent(M::MMT, ::typeof(log!)) where {MMT <: MetricManifold} = false
 
 @doc raw"""
     log_local_metric_density(M::MetricManifold, p)
@@ -342,61 +316,27 @@ is given by $ρ = \log \sqrt{|\det [g_{ij}]|}$.
 """
 log_local_metric_density(M::MetricManifold, p) = log(abs(det_local_metric(M, p))) / 2
 
+is_decorator_transparent(M::MMT, ::typeof(mean!)) where {MMT <: MetricManifold} = false
+
 function mean!(
     M::MMT,
     p,
     x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-) where {MMT<:MetricManifold}
-    return mean!(M, is_default_metric(M), p, x, w; kwargs...)
-end
-function mean!(
-    M::MMT,
-    ::Val{true},
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-) where {MMT<:MetricManifold}
-    return mean!(base_manifold(M), p, x, w; kwargs...)
-end
-function mean!(
-    M::MMT,
-    ::Val{false},
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
+    w::AbstractVector,
+    ::Val{false};
     kwargs...,
 ) where {MMT<:MetricManifold}
     return mean!(M, p, x, w, GradientDescentEstimation(); kwargs...)
 end
 
+is_decorator_transparent(M::MMT, ::typeof(median!)) where {MMT <: MetricManifold} = false
+
 function median!(
     M::MMT,
     p,
     x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-) where {MMT<:MetricManifold}
-    return median!(M, is_default_metric(M), p, x, w; kwargs...)
-end
-function median!(
-    M::MMT,
-    ::Val{true},
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-) where {MMT<:MetricManifold}
-    return median!(base_manifold(M), p, x, w; kwargs...)
-end
-function median!(
-    M::MMT,
-    ::Val{false},
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
+    w::AbstractVector,
+    ::Val{false};
     kwargs...,
 ) where {MMT<:MetricManifold}
     return median!(M, p, x, w, CyclicProximalPointEstimation(); kwargs...)

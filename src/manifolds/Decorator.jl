@@ -44,57 +44,161 @@ _acts_transparent(M::Manifold, f) = is_default(M) || is_decorator_transparent(M
 function check_manifold_point(M::DT, p; kwargs...) where {DT <: AbstractDecoratorManifold}
     return check_manifold_point(
         M,
-        Val(_acts_transparent(M::Manifold, check_manifold_point)),
-        p;
+        p,
+        Val(_acts_transparent(M::Manifold, check_manifold_point));
         kwargs...)
 end
-function check_manifold_point(M::DT, ::Val{true}, p; kwargs...) where {DT <: AbstractDecoratorManifold}
+function check_manifold_point(M::DT, p,::Val{true}; kwargs...) where {DT <: AbstractDecoratorManifold}
     return check_manifold_point(M.manifold, p; kwargs...)
 end
-function check_manifold_point(M::DT, ::Val{false}, p; kwargs...) where {DT <: AbstractDecoratorManifold}
+function check_manifold_point(M::DT, p, ::Val{false}; kwargs...) where {DT <: AbstractDecoratorManifold}
     manifold_function_not_implemented_message(M, check_manifold_point, p)
 end
 
 function check_tangent_vector(M::DT, p, X; kwargs...) where {DT <: AbstractDecoratorManifold}
     return check_manifold_point(
         M,
-        Val(_acts_transparent(M,check_tangent_vector)),
-        p;
+        p,
+        Val(_acts_transparent(M,check_tangent_vector));
         kwargs...)
 end
-function check_tangent_vector(M::DT, ::Val{true}, p, X; kwargs...) where {DT <: AbstractDecoratorManifold}
+function check_tangent_vector(M::DT, p, X, ::Val{true}; kwargs...) where {DT <: AbstractDecoratorManifold}
     return check_tangent_vector(M.manifold, p; kwargs...)
 end
-function check_tangent_vector(M::DT, ::Val{false}, p, X; kwargs...) where {DT <: AbstractDecoratorManifold}
+function check_tangent_vector(M::DT, p, X, ::Val{false}; kwargs...) where {DT <: AbstractDecoratorManifold}
     error(manifold_function_not_implemented_message(M,check_tangent_vector,p,X))
 end
 
 function distance(M::DT, p, q) where {DT <: AbstractDecoratorManifold}
-    return distance(M, Val(_acts_transparent(M)), p,q)
+    return distance(M, p,q, Val(_acts_transparent(M, distance)))
 end
-function distance(M::DT, ::Val{true}, p, q) where {DT <: AbstractDecoratorManifold}
+function distance(M::DT, p, q, ::Val{true}) where {DT <: AbstractDecoratorManifold}
     return distance(M.manifold, p,q)
 end
 function distance(M::DT, p, q, ::Val{false}) where {DT <: AbstractDecoratorManifold}
     error(manifold_function_not_implemented_message(M, distance, p, q))
 end
 
-function hat!(M::DT, X, p, Xⁱ) where {DT <: AbstractDecoratorManifold}
-    return hat!(M, Val(_acts_transparent(M,hat)), X, p, Xⁱ)
+function exp!(M::DT, q, p, X) where {DT <: AbstractDecoratorManifold}
+    return exp!(M, p, X,Val(_acts_transparent(M, exp!)))
 end
-function hat!(M::DT, ::Val{true}, X, p, Xⁱ) where {DT <: AbstractDecoratorManifold}
+function exp!(M::DT, q, p, X, ::Val{true}) where {DT <: AbstractDecoratorManifold}
+    return exp!(M.manifold, p, X)
+end
+function exp!(M::DT, q, p, X, ::Val{false}) where {DT <: AbstractDecoratorManifold}
+    error(manifold_function_not_implemented_message(M, exp, p, X))
+end
+
+function flat!(M::DT, ξ::CoTFVector, p, X::TFVector) where {DT <: AbstractDecoratorManifold}
+    return flat!(M, p, X,Val(_acts_transparent(M,flat!)))
+end
+function flat!(M::DT, ξ::CoTFVector, p, X::TFVector, ::Val{true}) where {DT <: AbstractDecoratorManifold}
+    return flat!(M.manifold, p, X)
+end
+function flat!(M::DT, ξ::CoTFVector, p, X::TFVector, ::Val{false}) where {DT <: AbstractDecoratorManifold}
+    error(manifold_function_not_implemented_message(M, flat, p, X))
+end
+
+function get_basis(M::DT, p, B::BT) where {DT <: AbstractDecoratorManifold, BT <: AbstractBasis}
+    return get_basis(M, p, B, Val(_acts_transparent(M, get_basis)))
+end
+function get_basis(M::DT, p, B::BT, ::Val{true}) where {DT <: AbstractDecoratorManifold, BT <: AbstractBasis}
+    return get_basis(M.manifold, p, B)
+end
+function get_basis(M::DT, p, B::BT, ::Val{false}) where {DT <: AbstractDecoratorManifold, BT <: AbstractBasis}
+    error(manifold_function_not_implemented_message(M, get_basis, p, B))
+end
+
+function hat!(M::DT, X, p, Xⁱ) where {DT <: AbstractDecoratorManifold}
+    return hat!(M, X, p, Xⁱ, Val(_acts_transparent(M, hat!)))
+end
+function hat!(M::DT, X, p, Xⁱ, ::Val{true}) where {DT <: AbstractDecoratorManifold}
     return hat!(M.manifold, X, p, Xⁱ)
 end
-function hat!(M::DT, ::Val{false}, X, p, Xⁱ) where {DT <: AbstractDecoratorManifold}
-    error("hat! operator not defined for manifold $(typeof(M)), array $(typeof(X)), point $(typeof(p)), and vector $(typeof(Xⁱ))")
+function hat!(M::DT, X, p, Xⁱ, ::Val{false}) where {DT <: AbstractDecoratorManifold}
+    error(manifold_function_not_implemented_message(M, hat!, p, X))
+end
+
+function inner(M::DT, p, X, Y) where {DT <: AbstractDecoratorManifold}
+    return inner(M, p, X, Y, Val(_acts_transparent(M, inner)))
+end
+function inner(M::DT, p, X, Y, ::Val{true}) where {DT <: AbstractDecoratorManifold}
+    return inner(M.manifold, p, X, Y)
+end
+function inner(M::DT, p, X, Y, ::Val{false}) where {DT <: AbstractDecoratorManifold}
+    error(manifold_function_not_implemented_message(M, inner, p, X, Y))
+end
+
+function log!(M::DT, X, p, q) where {DT <: AbstractDecoratorManifold}
+    return log!(M, X, p, q, Val(_acts_transparent(M, log!)))
+end
+function log!(M::DT, X, p, q, ::Val{true}) where {DT <: AbstractDecoratorManifold}
+    return log!(M.manifold, X, p, q)
+end
+function log!(M::DT, X, p, q, ::Val{false}) where {DT <: AbstractDecoratorManifold}
+    error(manifold_function_not_implemented_message(M, log!, p, q))
+end
+
+function mean!(
+    M::DT,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...
+) where {DT <: AbstractDecoratorManifold}
+    return mean!(M, x, w, Val(_acts_transparent(M, mean!)); kwargs...)
+end
+function mean!(
+        M::DT,
+        x::AbstractVector,
+        w::AbstractVector,
+        ::Val{true};
+        kwargs...
+) where {DT <: AbstractDecoratorManifold}
+    return mean!(M.manifold, x, w; kawrgs...)
+end
+function mean!(
+        M::DT,
+        x::AbstractVector,
+        w::AbstractVector,
+        ::Val{false};
+        kwargs...
+) where {DT <: AbstractDecoratorManifold}
+    error(manifold_function_not_implemented_message(M, mean!, x, w))
+end
+
+function median!(
+    M::DT,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...
+) where {DT <: AbstractDecoratorManifold}
+    return median!(M, x, w, Val(_acts_transparent(M, median!)); kwargs...)
+end
+function median!(
+        M::DT,
+        x::AbstractVector,
+        w::AbstractVector,
+        ::Val{true};
+        kwargs...
+) where {DT <: AbstractDecoratorManifold}
+    return median!(M.manifold, x, w; kawrgs...)
+end
+function median!(
+        M::DT,
+        x::AbstractVector,
+        w::AbstractVector,
+        ::Val{false};
+        kwargs...
+) where {DT <: AbstractDecoratorManifold}
+    error(manifold_function_not_implemented_message(M, median!, x, w))
 end
 
 function vee!(M::DT, Xⁱ, p, X) where {DT <: AbstractDecoratorManifold}
-    return vee!(M, Val(_acts_transparent(M,vee)), Xⁱ, p, X)
+    return vee!(M, Xⁱ, p, X, Val(_acts_transparent(M,vee)))
 end
-function vee!(M::DT, ::Val{true}, Xⁱ, p, X) where {DT <: AbstractDecoratorManifold}
+function vee!(M::DT, Xⁱ, p, X, ::Val{true}) where {DT <: AbstractDecoratorManifold}
     return vee!(M.manifold, Xⁱ, p, X)
 end
-function vee!(M::DT, ::Val{false}, Xⁱ, p, X) where {DT <: AbstractDecoratorManifold}
-    error("vee! operator not defined for manifold $(typeof(M)), array $(typeof(X)), point $(typeof(p)), and vector $(typeof(Xⁱ))")
+function vee!(M::DT, Xⁱ, p, X, ::Val{false}) where {DT <: AbstractDecoratorManifold}
+    error(manifold_function_not_implemented_message(M, vee!, p, X))
 end

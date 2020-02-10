@@ -33,9 +33,8 @@ function embedd!(M, q, p)
     error("Embedding a point $(typeof(p)) on $(typeof(M)) not yet implemented.")
 end
 
-function inner(M::MT, p, X, Y) where {MT <: AbstractIsometricallyEmbeddedManifold}
-    return inner(M.embedding,p,X,X)
-end
+is_decorator_transparent(::EM, ::typeof(inner)) where {EM <: AbstractEmbeddedManifold} = false
+is_decorator_transparent(::EmbeddedManifold{M,N,IsometricEmbedding}, ::typeof(inner)) where {M,N} = true
 
 function inverse_retract!(M::MT, X, p, q, m::EmbeddedRetraction) where {MT <: EmbeddedManifold}
     x = allocate(q)
@@ -51,21 +50,15 @@ is_default_decorator(M::EM) where {EM <: EmbeddedManifold} = is_default_embeddin
 
 getEmbedding(M::AbstractEmbeddedManifold) = M.embedding
 
-function norm(M::MT, p, X, Y) where {MT <: AbstractIsometricallyEmbeddedManifold}
-    return norm(M.embedding,p,X,X)
-end
 
-function project_point!(M::MT, q, p) where {
-        MT <: AbstractIsometricallyEmbeddedManifold
-    }
-    return project_point!(M.manifold, q, p)
-end
+is_decorator_transparent(::EM, ::typeof(norm)) where {EM <: AbstractEmbeddedManifold} = false
+is_decorator_transparent(::EmbeddedManifold{M,N,IsometricEmbedding}, ::typeof(norm)) where {M,N} = true
 
-function project_tangent!(M::MT, X, p, A) where {
-        MT <: AbstractIsometricallyEmbeddedManifold
-    }
-    return project_tangent!(M.manifold, X, p, A)
-end
+is_decorator_transparent(::EM, ::typeof(project_point!)) where {EM <: AbstractEmbeddedManifold} = false
+is_decorator_transparent(::EmbeddedManifold{M,N,IsometricEmbedding}, ::typeof(project_point!)) where {M,N} = true
+
+is_decorator_transparent(::EM, ::typeof(project_tangent!)) where {EM <: AbstractEmbeddedManifold} = false
+is_decorator_transparent(::EmbeddedManifold{M,N,IsometricEmbedding}, ::typeof(project_tangent!)) where {M,N} = true
 
 function retract!(M::MT, q, p, X, m::EmbeddedRetraction) where {MT <: AbstractEmbeddedManifold}
     x = allocate(q)
