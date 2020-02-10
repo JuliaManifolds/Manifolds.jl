@@ -2,17 +2,20 @@
     AbstractEmbeddedManifold
 
 """
-struct AbstractEmbeddedManifold end
+abstract type AbstractEmbeddedManifold <: AbstractDecoratorManifold end
+
+abstract type AbstractEmbeddingType end
 
 """
-    AbstrectIsometricallyEmbeddedManifold
+    IsometricEmbedding <: AbstractEmbeddingType
 
 """
-struct AbstractIsometricallyEmbeddedManifold end
+struct IsometricEmbedding <: AbstractEmbeddingType end
 
-struct EmbeddedManifold{MT <: Manifold, NT <: Manifold} <: AbstractDecoratorManifold
+struct EmbeddedManifold{MT <: Manifold, NT <: Manifold, ET <: AbstractEmbeddingType} <: AbstractEmbeddedManifold
     manifold::MT
     embedding::NT
+    type::ET
 end
 
 struct EmbeddedRetraction{R <: AbstractRetractionMethod} <: AbstractRetractionMethod
