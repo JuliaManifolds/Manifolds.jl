@@ -153,7 +153,7 @@ inner(::Euclidean, ::Any...)
 
 inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = local_metric(M, p)
 
-is_default_metric(::Euclidean, ::EuclideanMetric) = Val(true)
+is_default_metric(::Euclidean, ::EuclideanMetric) = true
 
 function local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, p)
     return Diagonal(ones(SVector{size(p, 1),eltype(p)}))

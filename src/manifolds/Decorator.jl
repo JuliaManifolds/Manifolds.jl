@@ -90,13 +90,13 @@ function exp!(M::DT, q, p, X, ::Val{false}) where {DT <: AbstractDecoratorManifo
 end
 
 function flat!(M::DT, ξ::CoTFVector, p, X::TFVector) where {DT <: AbstractDecoratorManifold}
-    return flat!(M, p, X,Val(_acts_transparent(M,flat!)))
+    return flat!(M, ξ, p, X,Val(_acts_transparent(M,flat!)))
 end
 function flat!(M::DT, ξ::CoTFVector, p, X::TFVector, ::Val{true}) where {DT <: AbstractDecoratorManifold}
-    return flat!(M.manifold, p, X)
+    return flat!(M.manifold, ξ, p, X)
 end
 function flat!(M::DT, ξ::CoTFVector, p, X::TFVector, ::Val{false}) where {DT <: AbstractDecoratorManifold}
-    error(manifold_function_not_implemented_message(M, flat, p, X))
+    error(manifold_function_not_implemented_message(M, flat, ξ, p, X))
 end
 
 function get_basis(M::DT, p, B::BT) where {DT <: AbstractDecoratorManifold, BT <: AbstractBasis}
@@ -191,6 +191,45 @@ function median!(
         kwargs...
 ) where {DT <: AbstractDecoratorManifold}
     error(manifold_function_not_implemented_message(M, median!, x, w))
+end
+
+function projected_distribution(M::DT, d, p) where {DT<:AbstractDecoratorManifold}
+    return projected_distribution(M, d, p, Val(_acts_transparent(M, projected_distribution)))
+end
+function projected_distribution(M::DT, d, p, ::Val{true}) where {DT<:AbstractDecoratorManifold}
+    return projected_distribution(M.manifold, d, p)
+end
+function projected_distribution(
+    M::DT,
+    d,
+    p,
+    ::Val{false}
+) where {DT<:AbstractDecoratorManifold}
+    error(manifold_function_not_implemented_message(M, projected_distribution, d, p))
+end
+function projected_distribution(M::DT, d) where {DT<:AbstractDecoratorManifold}
+    return projected_distribution(M, d, Val(_acts_transparent(M, projected_distribution)))
+end
+function projected_distribution(M::DT, d, ::Val{true}) where {DT<:AbstractDecoratorManifold}
+    return projected_distribution(M.manifold, d)
+end
+function projected_distribution(
+    M::DT,
+    d,
+    ::Val{false}
+) where {DT<:AbstractDecoratorManifold}
+    error(manifold_function_not_implemented_message(M, projected_distribution, d))
+end
+
+
+function sharp!(M::DT, X::TFVector, p, ξ::CoTFVector) where {DT <: AbstractDecoratorManifold}
+    return sharp!(M, X, p, ξ, Val(_acts_transparent(M,sharp!)))
+end
+function sharp!(M::DT, X::TFVector, p, ξ::CoTFVector, ::Val{true}) where {DT <: AbstractDecoratorManifold}
+    return sharp!(M.manifold, X, p, ξ)
+end
+function sharp!(M::DT, X::TFVector, p, ξ::CoTFVector, ::Val{false}) where {DT <: AbstractDecoratorManifold}
+    error(manifold_function_not_implemented_message(M, sharp!, ξ, p, X))
 end
 
 function vee!(M::DT, Xⁱ, p, X) where {DT <: AbstractDecoratorManifold}

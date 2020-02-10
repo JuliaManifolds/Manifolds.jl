@@ -7,8 +7,8 @@ include("utils.jl")
     @test repr(E) == "Euclidean(3; field = ℝ)"
     @test repr(Ec) == "Euclidean(3; field = ℂ)"
     @test repr(Euclidean(2, 3; field = ℍ)) == "Euclidean(2, 3; field = ℍ)"
-    @test is_default_metric(EM) == Val{true}()
-    @test is_default_metric(E,Manifolds.EuclideanMetric()) == Val{true}()
+    @test is_default_metric(EM)
+    @test is_default_metric(E,Manifolds.EuclideanMetric())
     x = zeros(3)
     @test det_local_metric(EM,x) == one(eltype(x))
     @test log_local_metric_density(EM,x) == zero(eltype(x))

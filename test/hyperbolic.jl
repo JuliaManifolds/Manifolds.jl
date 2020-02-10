@@ -13,7 +13,7 @@ include("utils.jl")
         @test_throws DomainError is_tangent_vector(M,[1.,0.,0.],[1.,0.,0.],true)
         @test !is_tangent_vector(M,[0.,0.,1.],[1.,0.,1.])
         @test_throws DomainError is_tangent_vector(M,[0.,0.,1.],[1.,0.,1.],true)
-        @test is_default_metric(M,MinkowskiMetric()) === Val(true)
+        @test is_default_metric(M,MinkowskiMetric())
         @test manifold_dimension(M) == 2
     end
     types = [

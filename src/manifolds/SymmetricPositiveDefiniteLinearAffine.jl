@@ -6,7 +6,7 @@ matrix logarithms and exponentials, which yields a linear and affine metric.
 """
 struct LinearAffineMetric <: RiemannianMetric end
 
-is_default_metric(::SymmetricPositiveDefinite, ::LinearAffineMetric) = Val(true)
+is_default_metric(::SymmetricPositiveDefinite, ::LinearAffineMetric) = true
 
 @doc raw"""
     distance(M::SymmetricPositiveDefinite, p, q)

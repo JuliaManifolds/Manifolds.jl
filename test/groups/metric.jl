@@ -30,10 +30,10 @@ struct TestDefaultInvariantMetricManifold <: Manifold end
 function is_default_metric(
     ::MetricManifold{TestDefaultInvariantMetricManifold,TestInvariantMetricBase},
 )
-    return Val(true)
+    return true
 end
 
-has_invariant_metric(::TestDefaultInvariantMetricManifold, ::RightAction) = Val(true)
+has_invariant_metric(::TestDefaultInvariantMetricManifold, ::RightAction) = true
 
 @testset "Invariant metrics" begin
     base_metric = TestInvariantMetricBase()
@@ -59,9 +59,9 @@ has_invariant_metric(::TestDefaultInvariantMetricManifold, ::RightAction) = Val(
     @test has_invariant_metric(G, LeftAction()) === Val(false)
 
     G = MetricManifold(TestDefaultInvariantMetricManifold(),LeftInvariantMetric(TestInvariantMetricBase()))
-    @test is_default_metric(G) === Val(false)
+    @test !is_default_metric(G)
     G = MetricManifold(TestDefaultInvariantMetricManifold(),RightInvariantMetric(TestInvariantMetricBase()))
-    @test is_default_metric(G) === Val(true)
+    @test is_default_metric(G)
 
     @testset "inner/norm" begin
         SO3 = SpecialOrthogonal(3)

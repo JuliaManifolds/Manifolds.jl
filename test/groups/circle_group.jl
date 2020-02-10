@@ -7,10 +7,10 @@ include("group_utils.jl")
 
     @test base_manifold(G) === Circle{ℂ}()
 
-    @test has_invariant_metric(G, LeftAction()) === Val(true)
-    @test has_invariant_metric(G, RightAction()) === Val(true)
-    @test has_biinvariant_metric(G) === Val(true)
-    @test is_default_metric(MetricManifold(G, EuclideanMetric())) === Val(true)
+    @test has_invariant_metric(G, LeftAction())
+    @test has_invariant_metric(G, RightAction())
+    @test has_biinvariant_metric(G)
+    @test is_default_metric(MetricManifold(G, EuclideanMetric()))
 
     @testset "identity overloads" begin
         @test identity(G, Identity(G)) === Identity(G)

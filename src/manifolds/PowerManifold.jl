@@ -464,7 +464,7 @@ function inner(M::AbstractPowerManifold, p, X, Y)
     return result
 end
 
-is_default_metric(::AbstractPowerManifold, ::PowerMetric) = Val(true)
+is_default_metric(::AbstractPowerManifold, ::PowerMetric) = true
 
 function isapprox(M::AbstractPowerManifold, p, q; kwargs...)
     result = true

@@ -6,10 +6,10 @@ include("utils.jl")
     M3 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
     M4 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogEuclideanMetric())
 
-    @test is_default_metric(M2) == Val{true}()
-    @test is_default_metric(M1, Manifolds.LinearAffineMetric()) == Val{true}()
-    @test is_default_metric(M1, Manifolds.LogCholeskyMetric()) == Val{false}()
-    @test is_default_metric(M3) == Val{false}()
+    @test is_default_metric(M2)
+    @test is_default_metric(M1, Manifolds.LinearAffineMetric())
+    @test !is_default_metric(M1, Manifolds.LogCholeskyMetric())
+    @test !is_default_metric(M3)
 
     @test injectivity_radius(M1) == Inf
     @test injectivity_radius(M1,one(zeros(3,3))) == Inf

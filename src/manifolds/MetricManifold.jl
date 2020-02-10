@@ -200,6 +200,8 @@ written $g^{ij}$.
 """
 inverse_local_metric(M::MetricManifold, p) = inv(local_metric(M, p))
 
+is_decorator_manifold(M::MMT) where {MMT <: MetricManifold} = Val(true)
+
 is_default_decorator(M::MMT) where {MMT <: MetricManifold} = is_default_metric(M)
 
 """
@@ -207,7 +209,7 @@ is_default_decorator(M::MMT) where {MMT <: MetricManifold} = is_default_metric(M
 
 Indicate whether the [`Metric`](@ref) `G` is the default metric for
 the [`Manifold`](@ref) `M`. This means that any occurence of
-[`MetricManifold`](@ref)(M,G) where `typeof(is_default_metric(M,G)) = Val{true}`
+[`MetricManifold`](@ref)(M,G) where `typeof(is_default_metric(M,G)) = true`
 falls back to just be called with `M` such that the [`Manifold`](@ref) `M`
 implicitly has this metric, for example if this was the first one implemented
 or is the one most commonly assumed to be used.
@@ -220,7 +222,7 @@ is_default_metric(M::Manifold, G::Metric) = false
 Indicate whether the [`Metric`](@ref) `MM.G` is the default metric for
 the [`Manifold`](@ref) `MM.manifold,` within the [`MetricManifold`](@ref) `MM`.
 This means that any occurence of
-[`MetricManifold`](@ref)`(MM.manifold,MM.G)` where `typeof(is_default_metric(MM.manifold,MM.G)) = Val{true}`
+[`MetricManifold`](@ref)`(MM.manifold,MM.G)` where `typeof(is_default_metric(MM.manifold,MM.G)) = true`
 falls back to just be called with `MM.manifold,` such that the [`Manifold`](@ref) `MM.manifold`
 implicitly has the metric `MM.G`, for example if this was the first one
 implemented or is the one most commonly assumed to be used.
@@ -230,7 +232,7 @@ function is_default_metric(M::MMT) where {MMT<:MetricManifold}
 end
 
 function convert(T::Type{MetricManifold{MT,GT}}, M::MT) where {MT,GT}
-    return _convert_with_default(M, GT, is_default_metric(M, GT()))
+    return _convert_with_default(M, GT, Val(is_default_metric(M, GT())))
 end
 
 function _convert_with_default(M::MT, T::Type{<:Metric}, ::Val{true}) where {MT<:Manifold}
@@ -350,53 +352,36 @@ Get the metric $g$ of the manifold `M`.
 metric(M::MetricManifold) = M.metric
 
 function normal_tvector_distribution(M::MMT, p, σ) where {MMT<:MetricManifold}
-    return normal_tvector_distribution(M, is_default_metric(M), p, σ)
+    return normal_tvector_distribution(M, p, σ, Val(is_default_metric(M)))
 end
-function normal_tvector_distribution(M::MMT, ::Val{true}, p, σ) where {MMT<:MetricManifold}
+function normal_tvector_distribution(M::MMT, p, σ, ::Val{true}) where {MMT<:MetricManifold}
     return normal_tvector_distribution(base_manifold(M), p, σ)
 end
-function normal_tvector_distribution(M::MMT, ::Val{false}, p, σ) where {MMT<:MetricManifold}
+function normal_tvector_distribution(M::MMT, p, σ, ::Val{false}) where {MMT<:MetricManifold}
     error("normal_tvector_distribution not implemented for a $(typeof(M)) at point $(typeof(p)) with standard deviation $(typeof(σ)).")
 end
 
 function project_point!(M::MMT, q, p) where {MMT<:MetricManifold}
-    return project_point!(M, is_default_metric(M), q, p)
+    return project_point!(M, q, p, Val(is_default_metric(M)))
 end
-function project_point!(M::MMT, ::Val{true}, q, p) where {MMT<:MetricManifold}
+function project_point!(M::MMT, q, p, ::Val{true}) where {MMT<:MetricManifold}
     return project_point!(base_manifold(M), q, p)
 end
-function project_point!(M::MMT, ::Val{false}, q, p) where {MMT<:MetricManifold}
+function project_point!(M::MMT, q, p, ::Val{false}) where {MMT<:MetricManifold}
     error("project_point! not implemented on $(typeof(M)) for point $(typeof(p))")
 end
 
 function project_tangent!(M::MMT, Y, p, X) where {MMT<:MetricManifold}
-    return project_tangent!(M, is_default_metric(M), Y, p, X)
+    return project_tangent!(M, Y, p, X, Val(is_default_metric(M)))
 end
-function project_tangent!(M::MMT, ::Val{true}, Y, p, X) where {MMT<:MetricManifold}
+function project_tangent!(M::MMT, Y, p, X, ::Val{true}) where {MMT<:MetricManifold}
     return project_tangent!(base_manifold(M), Y, p, X)
 end
-function project_tangent!(M::MMT, ::Val{false}, Y, p, X) where {MMT<:MetricManifold}
+function project_tangent!(M::MMT, Y, p, X, ::Val{false}) where {MMT<:MetricManifold}
     error("project_tangent! not implemented for a $(typeof(M)) and tangent $(typeof(X)) at point $(typeof(p)).")
 end
 
-function projected_distribution(M::MMT, d, p) where {MMT<:MetricManifold}
-    return projected_distribution(M, is_default_metric(M), d, p)
-end
-function projected_distribution(M::MMT, ::Val{true}, d, p) where {MMT<:MetricManifold}
-    return projected_distribution(base_manifold(M), d, p)
-end
-function projected_distribution(M::MMT, ::Val{false}, d, p) where {MMT<:MetricManifold}
-    error("projected_distribution not implemented for a $(typeof(M)) and with $(typeof(d)) at point $(typeof(p)).")
-end
-function projected_distribution(M::MMT, d) where {MMT<:MetricManifold}
-    return projected_distribution(M, is_default_metric(M), d)
-end
-function projected_distribution(M::MMT, ::Val{true}, d) where {MMT<:MetricManifold}
-    return projected_distribution(base_manifold(M), d)
-end
-function projected_distribution(M::MMT, ::Val{false}, d) where {MMT<:MetricManifold}
-    error("projected_distribution not implemented for a $(typeof(M)) with $(typeof(d)).")
-end
+is_decorator_transparent(M::MMT, ::typeof(projected_distribution)) where {MMT <: MetricManifold}= false
 
 """
     ricci_curvature(M::MetricManifold, p; backend = :default)
@@ -456,7 +441,9 @@ where $G_p$ is the local matrix representation of `G`, i.e. one employs
 """
 sharp(::MetricManifold, ::Any)
 
-function sharp!(M::N, X::TFVector, p, ξ::CoTFVector) where {N<:MetricManifold}
+is_decorator_transparent(M::MMT, ::typeof(sharp!)) where {MMT <: MetricManifold} = false
+
+function sharp!(M::N, X::TFVector, p, ξ::CoTFVector, ::Val{false}) where {N<:MetricManifold}
     Ginv = inverse_local_metric(M, p)
     copyto!(X.data, Ginv * ξ.data)
     return X
@@ -509,7 +496,7 @@ function vector_transport_to!(
     q,
     m::AbstractVectorTransportMethod,
 ) where {MMT<:MetricManifold}
-    return vector_transport_to!(M, is_default_metric(M), Y, p, X, q, m)
+    return vector_transport_to!(M, Val(is_default_metric(M)), Y, p, X, q, m)
 end
 function vector_transport_to!(
     M::MMT,

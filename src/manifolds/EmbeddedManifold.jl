@@ -25,11 +25,11 @@ struct EmbeddedInverseRetraction{IR <: AbstractInverseRetractionMethod} <: Abstr
     inverseretracttionMethod::IR
 end
 
-function embedd(M::MT,p) where {MT <: AbstractEmbeddedManifold}
+function embed(M::MT,p) where {MT <: AbstractEmbeddedManifold}
     q = allocate(p)
-    return embedd!(M, q, p)
+    return embed!(M, q, p)
 end
-function embedd!(M, q, p)
+function embed!(M, q, p)
     error("Embedding a point $(typeof(p)) on $(typeof(M)) not yet implemented.")
 end
 
@@ -48,7 +48,7 @@ end
 
 is_default_decorator(M::EM) where {EM <: EmbeddedManifold} = is_default_embedding(M)
 
-getEmbedding(M::AbstractEmbeddedManifold) = M.embedding
+get_embedding(M::AbstractEmbeddedManifold) = M.embedding
 
 
 is_decorator_transparent(::EM, ::typeof(norm)) where {EM <: AbstractEmbeddedManifold} = false

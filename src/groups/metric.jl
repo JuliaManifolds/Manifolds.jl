@@ -126,10 +126,7 @@ Return `Val(true)` if the metric on the manifold is bi-invariant, that is, if th
 is both left- and right-invariant (see [`has_invariant_metric`](@ref)).
 """
 function has_biinvariant_metric(M::Manifold)
-    return Val(
-        has_invariant_metric(M, LeftAction()) === Val(true) &&
-        has_invariant_metric(M, RightAction()) === Val(true),
-    )
+    return has_invariant_metric(M, LeftAction()) && has_invariant_metric(M, RightAction())
 end
 
 @doc raw"""
@@ -156,12 +153,12 @@ end
 function has_invariant_metric(M::Manifold, conv::ActionDirection, ::Val{true})
     return has_invariant_metric(M.manifold, conv)
 end
-has_invariant_metric(::Manifold, ::ActionDirection, ::Val{false}) = Val(false)
+has_invariant_metric(::Manifold, ::ActionDirection, ::Val{false}) = false
 function has_invariant_metric(
     M::MetricManifold{<:Manifold,<:InvariantMetric},
     conv::ActionDirection,
 )
-    direction(metric(M)) === conv && return Val(true)
+    direction(metric(M)) === conv && return true
     return invoke(has_invariant_metric, Tuple{MetricManifold,typeof(conv)}, M, conv)
 end
 
@@ -177,12 +174,12 @@ end
 function is_default_metric(M::MetricManifold{<:Manifold,<:InvariantMetric})
     imetric = metric(M)
     N = MetricManifold(M.manifold, imetric.metric)
-    is_default_metric(N) === Val(true) || return Val(false)
+    !is_default_metric(N) && return false
     return has_invariant_metric(N, direction(imetric))
 end
 
 function log!(M::MetricManifold{<:Manifold,<:InvariantMetric}, ::Val{false}, X, p, q)
-    if has_biinvariant_metric(M) === Val(true)
+    if has_biinvariant_metric(M)
         imetric = metric(M)
         conv = direction(imetric)
         return inverse_retract!(M, X, p, q, GroupLogarithmicInverseRetraction(conv))

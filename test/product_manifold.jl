@@ -10,7 +10,7 @@ include("utils.jl")
     @test Mse == ProductManifold(M1) × ProductManifold(M2)
     @test Mse == M1 × ProductManifold(M2)
     @test injectivity_radius(Mse) ≈ π
-    @test is_default_metric(Mse, ProductMetric()) == Val(true)
+    @test is_default_metric(Mse, ProductMetric())
     types = [
         Vector{Float64},
         MVector{5, Float64},

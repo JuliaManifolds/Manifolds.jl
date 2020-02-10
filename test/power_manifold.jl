@@ -29,7 +29,7 @@ Random.seed!(42)
     @test Ms^(5,) === Ms1
     @test Mr^(5, 7) === Mr2
 
-    @test is_default_metric(Ms1, PowerMetric()) == Val(true)
+    @test is_default_metric(Ms1, PowerMetric())
     types_s1 = [Array{Float64,2},
                 HybridArray{Tuple{3,StaticArrays.Dynamic()}, Float64, 2}]
     types_s2 = [Array{Float64,3},
