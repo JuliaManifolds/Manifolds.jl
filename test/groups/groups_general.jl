@@ -15,10 +15,10 @@ include("../utils.jl")
 
         @test is_decorator_manifold(G) === Val(true)
 
-        @test Manifolds.is_decorator_group(G) === Val(true)
-        @test Manifolds.is_decorator_group(NotImplementedManifold()) === Val(false)
-        @test Manifolds.is_decorator_group(G, Val(true)) === Val(false)
-        @test Manifolds.is_decorator_group(G, Val(false)) === Val(false)
+        @test Manifolds.is_decorator_group(G)
+        @test !Manifolds.is_decorator_group(NotImplementedManifold())
+        @test !Manifolds.is_decorator_group(G, Val(true))
+        @test !Manifolds.is_decorator_group(G, Val(false))
 
         @test base_group(G) === G
 

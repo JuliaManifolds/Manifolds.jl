@@ -20,7 +20,7 @@ one. This type is mostly useful for equipping the direct product of group manifo
     ProductGroup(manifold::ProductManifold)
 """
 function ProductGroup(manifold::ProductManifold)
-    if !all(M -> (is_decorator_group(M) === Val(true)), manifold.manifolds)
+    if !all(M -> is_decorator_group(M), manifold.manifolds)
         error("All submanifolds of product manifold must be or decorate groups.")
     end
     op = ProductOperation()

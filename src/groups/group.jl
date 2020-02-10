@@ -50,10 +50,10 @@ end
 
 show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
-is_decorator_group(M::GM) where {GM <: AbstractGroupManifold} = Val(true)
-# is_decorator_group(M::Manifold) = is_decorator_group(M, is_decorator_manifold(M))
-is_decorator_group(M::Manifold, ::Val{true}) = is_decorator_group(M.manifold)
-is_decorator_group(::Manifold, ::Val{false}) = Val(false)
+is_decorator_group(M::GM) where {GM <: AbstractGroupManifold} = true
+is_decorator_group(M::Manifold) = is_decorator_group(M, is_decorator_manifold(M))
+is_decorator_group(M::Manifold, ::Val{true}) = is_decorator_group(M.manifold) == Val{true}
+is_decorator_group(::Manifold, ::Val{false}) = false
 
 is_default_decorator(M::GM) where {GM <: AbstractGroupManifold} = is_decorator_group(M)
 
@@ -64,7 +64,7 @@ Un-decorate `M` until an `AbstractGroupManifold` is encountered.
 Return an error if the [`base_manifold`](@ref) is reached without encountering a group.
 """
 function base_group(M::Manifold)
-    is_decorator_group(M) === Val(true) && return base_group(M.manifold)
+    is_decorator_group(M) && return base_group(M.manifold)
     error("base_group: manifold $(typeof(M)) with base manifold $(typeof(base_manifold(M))) has no base group.")
 end
 base_group(G::AbstractGroupManifold) = G
@@ -216,7 +216,7 @@ isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
 isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
 function allocate_result(M::Manifold, ::typeof(hat), e::Identity, Xⁱ)
-    is_decorator_group(M) === Val(true) && return allocate_result(base_group(M), hat, e, Xⁱ)
+    is_decorator_group(M) && return allocate_result(base_group(M), hat, e, Xⁱ)
     error("allocate_result not implemented for manifold $(M), function hat, point $(e), and vector $(Xⁱ).")
 end
 function allocate_result(
@@ -229,7 +229,7 @@ function allocate_result(
     return allocate(Xⁱ, Size(representation_size(B)))
 end
 function allocate_result(M::Manifold, ::typeof(vee), e::Identity, X)
-    is_decorator_group(M) === Val(true) && return allocate_result(base_group(M), vee, e, X)
+    is_decorator_group(M) && return allocate_result(base_group(M), vee, e, X)
     error("allocate_result not implemented for manifold $(M), function vee, point $(e), and vector $(X).")
 end
 function allocate_result(
@@ -242,7 +242,7 @@ function allocate_result(
 end
 
 function check_manifold_point(M::Manifold, e::Identity; kwargs...)
-    if is_decorator_group(M) === Val(true)
+    if is_decorator_group(M)
         return check_manifold_point(base_group(M), e; kwargs...)
     end
     return DomainError(e, "The identity element $(e) does not belong to $(M).")
@@ -307,11 +307,11 @@ end
 
 isapprox(M::Manifold, p, e::Identity; kwargs...) = isapprox(M, e, p; kwargs...)
 function isapprox(M::Manifold, e::Identity, p; kwargs...)
-    is_decorator_group(M) === Val(true) && return isapprox(base_group(M), e, p; kwargs...)
+    is_decorator_group(M) && return isapprox(base_group(M), e, p; kwargs...)
     error("isapprox not implemented for manifold $(typeof(M)) and points $(typeof(e)) and $(typeof(p))")
 end
 function isapprox(M::Manifold, e::E, ::E; kwargs...) where {E<:Identity}
-    is_decorator_group(M) === Val(true) && return isapprox(base_group(M), e, e; kwargs...)
+    is_decorator_group(M) && return isapprox(base_group(M), e, e; kwargs...)
     error("isapprox not implemented for manifold $(typeof(M)) and points $(typeof(e)) and $(typeof(e))")
 end
 function isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:AbstractGroupManifold}

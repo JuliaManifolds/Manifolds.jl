@@ -35,7 +35,7 @@ function manifold_function_not_implemented_message(M,f,x...)
     return "$(f) not implemented on $(M) for $(a) $(s)."
 end
 
-_acts_transparent(M::Manifold, f) = is_default(M) || is_decorator_transparent(M,f)
+_acts_transparent(M::Manifold, f) = is_default_decorator(M) || is_decorator_transparent(M,f)
 
 #
 # Functions overwritten with decorators
