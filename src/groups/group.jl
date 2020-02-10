@@ -29,7 +29,7 @@ Abstract type for a Lie group, a group that is also a smooth manifold with an
 implement at least [`inv`](@ref), [`identity`](@ref), [`compose`](@ref), and
 [`translate_diff`](@ref).
 """
-abstract type AbstractGroupManifold{O<:AbstractGroupOperation} <: Manifold end
+abstract type AbstractGroupManifold{O<:AbstractGroupOperation} <: AbstractDecoratorManifold end
 
 """
     GroupManifold{M<:Manifold,O<:AbstractGroupOperation} <: AbstractGroupManifold{O}
@@ -50,12 +50,12 @@ end
 
 show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
-is_decorator_manifold(::GroupManifold) = Val(true)
-
-is_decorator_group(::AbstractGroupManifold) = Val(true)
-is_decorator_group(M::Manifold) = is_decorator_group(M, is_decorator_manifold(M))
+is_decorator_group(M::GM) where {GM <: AbstractGroupManifold} = Val(true)
+# is_decorator_group(M::Manifold) = is_decorator_group(M, is_decorator_manifold(M))
 is_decorator_group(M::Manifold, ::Val{true}) = is_decorator_group(M.manifold)
 is_decorator_group(::Manifold, ::Val{false}) = Val(false)
+
+is_default_decorator(M::GM) where {GM <: AbstractGroupManifold} = is_decorator_group(M)
 
 """
     base_group(M::Manifold) -> AbstractGroupManifold

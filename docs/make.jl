@@ -31,7 +31,9 @@ makedocs(
                 "Vector bundle" => "manifolds/vector_bundle.md"
             ],
             "Manifold decorators" => [
+                "Decorator manifold" => "manifolds/decorator.md",
                 "Array manifold" => "manifolds/array.md",
+                "Embedded manifold" => "manifolds/embedded.md",
                 "Metric manifold" => "manifolds/metric.md",
                 "Group manifold" => "manifolds/group.md"
             ]

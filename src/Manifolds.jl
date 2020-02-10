@@ -128,7 +128,6 @@ function hat(M::Manifold, p, Xⁱ)
 end
 
 function hat!(M::Manifold, X, p, Xⁱ)
-    is_decorator_manifold(M) === Val(true) && return hat!(base_manifold(M), X, p, Xⁱ)
     error("hat! operator not defined for manifold $(typeof(M)), array $(typeof(X)), point $(typeof(p)), and vector $(typeof(Xⁱ))")
 end
 
@@ -153,7 +152,6 @@ function vee(M::Manifold, p, X)
 end
 
 function vee!(M::Manifold, Xⁱ, p, X)
-    is_decorator_manifold(M) === Val(true) && return vee!(base_manifold(M), Xⁱ, p, X)
     error("vee! operator not defined for manifold $(typeof(M)), vector $(typeof(Xⁱ)), point $(typeof(p)), and array $(typeof(X))")
 end
 
@@ -220,6 +218,8 @@ include("distributions.jl")
 include("projected_distribution.jl")
 include("product_representations.jl")
 
+include("manifolds/Decorator.jl")
+include("manifolds/EmbeddedManifold.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/ProductManifold.jl")
 include("manifolds/PowerManifold.jl")

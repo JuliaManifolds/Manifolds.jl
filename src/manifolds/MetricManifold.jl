@@ -13,7 +13,7 @@ if VERSION ≥ v"1.3"
 end
 
 """
-    MetricManifold{M<:Manifold,G<:Metric} <: Manifold
+    MetricManifold{M<:Manifold,G<:Metric} <: DecoratorManifold
 
 Equip a [`Manifold`](@ref) explicitly with a [`Metric`](@ref) `G`.
 
@@ -219,6 +219,7 @@ written $g^{ij}$.
 """
 inverse_local_metric(M::MetricManifold, p) = inv(local_metric(M, p))
 
+is_default_decorator(M::MMT) where {MMT <: MetricManifold} = is_default_metric(M)
 is_decorator_manifold(M::MMT) where {MMT<:MetricManifold} = Val(true)
 
 """
