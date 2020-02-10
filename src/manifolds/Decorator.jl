@@ -80,13 +80,13 @@ function distance(M::DT, p, q, ::Val{false}) where {DT <: AbstractDecoratorManif
 end
 
 function exp!(M::DT, q, p, X) where {DT <: AbstractDecoratorManifold}
-    return exp!(M, p, X,Val(_acts_transparent(M, exp!)))
+    return exp!(M, q, p, X, Val(_acts_transparent(M, exp!)))
 end
 function exp!(M::DT, q, p, X, ::Val{true}) where {DT <: AbstractDecoratorManifold}
-    return exp!(M.manifold, p, X)
+    return exp!(M.manifold, q, p, X)
 end
 function exp!(M::DT, q, p, X, ::Val{false}) where {DT <: AbstractDecoratorManifold}
-    error(manifold_function_not_implemented_message(M, exp, p, X))
+    error(manifold_function_not_implemented_message(M, exp!, q, p, X))
 end
 
 function flat!(M::DT, ξ::CoTFVector, p, X::TFVector) where {DT <: AbstractDecoratorManifold}
