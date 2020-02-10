@@ -36,7 +36,7 @@ using HybridArrays, StaticArrays
 q = HybridArray{Tuple{3,StaticArrays.Dynamic()}, Float64, 2}(p)
 ```
 
-which is still a valid point on `M` and [`Power`](@ref) works with these, too.
+which is still a valid point on `M` and [`PowerManifold`](@ref) works with these, too.
 
 An advantage of this representation is that it is quite efficient, especially when a `HybridArray` (from the [HybridArrays.jl](https://github.com/mateuszbaran/HybridArrays.jl) package) is used to represent a point on the power manifold.
 A disadvantage is not being able to easily identify parts of the multidimensional array that correspond to a single point on the base manifold.
