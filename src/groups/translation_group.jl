@@ -18,9 +18,9 @@ function TranslationGroup(n::Int...; field::AbstractNumbers = ℝ)
     )
 end
 
-has_invariant_metric(::TranslationGroup, ::ActionDirection) = true
+has_invariant_metric(::TranslationGroup, ::ActionDirection) = Val(true)
 
-is_default_metric(::MetricManifold{<:TranslationGroup,EuclideanMetric}) = true
+val_is_default_metric(::MetricManifold{<:TranslationGroup,EuclideanMetric}) = Val(true)
 
 function show(io::IO, ::TranslationGroup{N,𝔽}) where {N,𝔽}
     print(io, "TranslationGroup($(join(N.parameters, ", ")); field = $(𝔽))")

@@ -1,24 +1,28 @@
 #
 # General functions for decorators
 #
-"""
-    AbstractDecoratorManifold<:Manifold
 
 """
-abstract type AbstractDecoratorManifold<:Manifold end
+    AbstractDecoratorManifold <: Manifold
+"""
+abstract type AbstractDecoratorManifold <: Manifold end
+
 """
     is_default_decorator(M)
 
-For any manifold that [`is_decorator_manifold`](@ref) it might be the default
-decorator. This function dispatches onto these checks for specific decorators
+For any manifold that is a subtype of [`AbstractDecoratorManifold`](@ref)
+indicates which function is used to determine the default decorator.
+This default decorator acts transparent even for functions where transparency is disabled.
 """
-is_default_decorator(M::Manifold) = false
+is_default_decorator(M::Manifold) = _is_default_decorator(M,val_is_default_decorator(M))
+_is_default_decorator(M::Manifold, ::Val{T}) where {T} = T
+val_is_default_decorator(M::Manifold) = Val(false)
 
 """
     is_decorator_transparent(M, f)
 
 Given a [`Manifold`](@ref) `M` and a function `f`, indicate, whether a
-[`is_decorator_manifold`](@ref) acts transparent for `f`. This means, it
+[`AbstractDecoratorManifold`](@ref) acts transparent for `f`. This means, it
 just passes through down to the internally stored manifold.
 Only decorator manifolds can be transparent and their default is, to be transparent.
 A function that is affected by the decorator hence has to set this to `Val(false)`
@@ -26,29 +30,34 @@ actively.
 If a decorator manifold is not in general transparent, it might still pass down
 for the case that a decorator is the default decorator, see [`is_default_decorator`](@ref).
 """
-is_decorator_transparent(M::Manifold, f) = is_decorator_transparent(M::Manifold, f, is_decorator_manifold(M))
-is_decorator_transparent(M::Manifold, f, ::Val{true}) = true
-is_decorator_transparent(M::Manifold, f, ::Val{false}) = false
-
+is_decorator_transparent(M::Manifold, f) = _is_decorator_transparent(M::Manifold, f, val_is_decorator_transparent(M,f))
+_is_decorator_transparent(M::Manifold, f, ::Val{T}) where {T} = T
+val_is_decorator_transparent(M::DT, f) where {DT <: Manifold} = Val(true)
 
 function manifold_function_not_implemented_message(M,f,x...)
-    s = join(string.([x...]),", "," and ")
+    s = join(map(string, map(typeof, x)),", "," and ")
     a = length(x) > 1 ? "arguments" : "argument"
     m = length(x) > 0 ? " for $(a) $(s)." : "."
     return "$(f) not implemented on $(M)$(m)"
 end
 
-_acts_transparent(M::Manifold, f) = is_default_decorator(M) || is_decorator_transparent(M,f)
+_acts_transparently(M::Manifold, f) = _val_or(val_is_default_decorator(M), val_is_decorator_transparent(M,f))
+_val_or(::Val{T1},::Val{T2}) where {T1,T2} = Val(T1||T2)
 
 #
 # Functions overwritten with decorators
 #
 
+function base_manifold(M::DT, depth=-1) where {DT<: AbstractDecoratorManifold}
+    return (depth != 0) ? base_manifold(M.manifold, (depth > 0) ? depth-1 : depth) : M
+end
+#base_manifold(M::Manifold, depth=-1) = M
+
 function check_manifold_point(M::DT, p; kwargs...) where {DT<:AbstractDecoratorManifold}
     return check_manifold_point(
         M,
         p,
-        Val(_acts_transparent(M::Manifold, check_manifold_point));
+        _acts_transparently(M::Manifold, check_manifold_point);
         kwargs...)
 end
 function check_manifold_point(M::DT, p,::Val{true}; kwargs...) where {DT<:AbstractDecoratorManifold}
@@ -59,21 +68,22 @@ function check_manifold_point(M::DT, p, ::Val{false}; kwargs...) where {DT<:Abst
 end
 
 function check_tangent_vector(M::DT, p, X; kwargs...) where {DT<:AbstractDecoratorManifold}
-    return check_manifold_point(
+    return check_tangent_vector(
         M,
         p,
-        Val(_acts_transparent(M,check_tangent_vector));
+        X,
+        _acts_transparently(M,check_tangent_vector);
         kwargs...)
 end
 function check_tangent_vector(M::DT, p, X, ::Val{true}; kwargs...) where {DT<:AbstractDecoratorManifold}
-    return check_tangent_vector(M.manifold, p; kwargs...)
+    return check_tangent_vector(M.manifold, p, X; kwargs...)
 end
 function check_tangent_vector(M::DT, p, X, ::Val{false}; kwargs...) where {DT<:AbstractDecoratorManifold}
     error(manifold_function_not_implemented_message(M,check_tangent_vector,p,X))
 end
 
 function distance(M::DT, p, q) where {DT<:AbstractDecoratorManifold}
-    return distance(M, p,q, Val(_acts_transparent(M, distance)))
+    return distance(M, p,q, _acts_transparently(M, distance))
 end
 function distance(M::DT, p, q, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return distance(M.manifold, p,q)
@@ -83,7 +93,7 @@ function distance(M::DT, p, q, ::Val{false}) where {DT<:AbstractDecoratorManifol
 end
 
 function exp!(M::DT, q, p, X) where {DT<:AbstractDecoratorManifold}
-    return exp!(M, q, p, X, Val(_acts_transparent(M, exp!)))
+    return exp!(M, q, p, X, _acts_transparently(M, exp!))
 end
 function exp!(M::DT, q, p, X, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return exp!(M.manifold, q, p, X)
@@ -93,7 +103,7 @@ function exp!(M::DT, q, p, X, ::Val{false}) where {DT<:AbstractDecoratorManifold
 end
 
 function flat!(M::DT, ξ::CoTFVector, p, X::TFVector) where {DT<:AbstractDecoratorManifold}
-    return flat!(M, ξ, p, X,Val(_acts_transparent(M,flat!)))
+    return flat!(M, ξ, p, X,_acts_transparently(M,flat!))
 end
 function flat!(M::DT, ξ::CoTFVector, p, X::TFVector, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return flat!(M.manifold, ξ, p, X)
@@ -102,18 +112,29 @@ function flat!(M::DT, ξ::CoTFVector, p, X::TFVector, ::Val{false}) where {DT<:A
     error(manifold_function_not_implemented_message(M, flat, ξ, p, X))
 end
 
-function get_basis(M::DT, p, B::BT) where {DT<:AbstractDecoratorManifold, BT<:AbstractBasis}
-    return get_basis(M, p, B, Val(_acts_transparent(M, get_basis)))
+function get_basis(M::DT, p, B::AbstractBasis) where {DT<:AbstractDecoratorManifold}
+    return get_basis(M, p, B, _acts_transparently(M, get_basis))
 end
-function get_basis(M::DT, p, B::BT, ::Val{true}) where {DT<:AbstractDecoratorManifold, BT<:AbstractBasis}
+function get_basis(M::DT, p, B::AbstractBasis, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return get_basis(M.manifold, p, B)
 end
-function get_basis(M::DT, p, B::BT, ::Val{false}) where {DT<:AbstractDecoratorManifold, BT<:AbstractBasis}
+function get_basis(M::DT, p, B::AbstractBasis, ::Val{false}) where {DT<:AbstractDecoratorManifold, }
     error(manifold_function_not_implemented_message(M, get_basis, p, B))
 end
 
+function get_basis(M::DT, p, B::ArbitraryOrthonormalBasis) where {DT<:AbstractDecoratorManifold}
+    return get_basis(M, p, B, _acts_transparently(M, get_basis))
+end
+function get_basis(M::DT, p, B::ArbitraryOrthonormalBasis, ::Val{true}) where {DT<:AbstractDecoratorManifold}
+    return get_basis(M.manifold, p, B)
+end
+function get_basis(M::DT, p, B::ArbitraryOrthonormalBasis, ::Val{false}) where {DT<:AbstractDecoratorManifold}
+    error(manifold_function_not_implemented_message(M, get_basis, p, B))
+end
+
+
 function hat!(M::DT, X, p, Xⁱ) where {DT<:AbstractDecoratorManifold}
-    return hat!(M, X, p, Xⁱ, Val(_acts_transparent(M, hat!)))
+    return hat!(M, X, p, Xⁱ, _acts_transparently(M, hat!))
 end
 function hat!(M::DT, X, p, Xⁱ, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return hat!(M.manifold, X, p, Xⁱ)
@@ -123,7 +144,7 @@ function hat!(M::DT, X, p, Xⁱ, ::Val{false}) where {DT<:AbstractDecoratorManif
 end
 
 function injectivity_radius(M::DT) where {DT<:AbstractDecoratorManifold}
-    return injectivity_radius(M, Val(_acts_transparent(M, injectivity_radius)))
+    return injectivity_radius(M, _acts_transparently(M, injectivity_radius))
 end
 function injectivity_radius(M::DT, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return injectivity_radius(M.manifold)
@@ -132,7 +153,7 @@ function injectivity_radius(M::DT, ::Val{false}) where {DT<:AbstractDecoratorMan
     error(manifold_function_not_implemented_message(M, injectivity_radius))
 end
 function injectivity_radius(M::DT, p) where {DT<:AbstractDecoratorManifold}
-    return injectivity_radius(M, p, Val(_acts_transparent(M, injectivity_radius)))
+    return injectivity_radius(M, p, _acts_transparently(M, injectivity_radius))
 end
 function injectivity_radius(M::DT, p, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return injectivity_radius(M.manifold, p)
@@ -142,7 +163,7 @@ function injectivity_radius(M::DT, p, ::Val{false}) where {DT<:AbstractDecorator
 end
 
 function inner(M::DT, p, X, Y) where {DT<:AbstractDecoratorManifold}
-    return inner(M, p, X, Y, Val(_acts_transparent(M, inner)))
+    return inner(M, p, X, Y, _acts_transparently(M, inner))
 end
 function inner(M::DT, p, X, Y, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return inner(M.manifold, p, X, Y)
@@ -158,7 +179,7 @@ function inverse_retract!(
     q,
     m::AbstractInverseRetractionMethod
 ) where {DT<:AbstractDecoratorManifold}
-    return inverse_retract!(M, X, p, q, m, Val(_acts_transparent(M, inverse_retract!)))
+    return inverse_retract!(M, X, p, q, m, _acts_transparently(M, inverse_retract!))
 end
 function inverse_retract!(
     M::DT,
@@ -167,7 +188,7 @@ function inverse_retract!(
     q,
     m::LogarithmicInverseRetraction
 ) where {DT<:AbstractDecoratorManifold}
-    return inverse_retract!(M, X, p, q, m, Val(_acts_transparent(M, inverse_retract!)))
+    return inverse_retract!(M, X, p, q, m, _acts_transparently(M, inverse_retract!))
 end
 function inverse_retract!(
     M::DT,
@@ -191,28 +212,28 @@ function inverse_retract!(
 end
 
 function isapprox(M::DT, p, q) where {DT<:AbstractDecoratorManifold}
-    return isapprox(M, p, q, Val(_acts_transparent(M, isapprox)))
+    return isapprox(M, p, q, _acts_transparently(M, isapprox))
 end
 function isapprox(M::DT, p, q, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return isapprox(M.manifold, p, q)
 end
-function isapprox!(M::DT, p, q, ::Val{false}) where {DT<:AbstractDecoratorManifold}
+function isapprox(M::DT, p, q, ::Val{false}) where {DT<:AbstractDecoratorManifold}
     error(manifold_function_not_implemented_message(M, isapprox, p, q))
 end
 
 function isapprox(M::DT, p, X, Y) where {DT<:AbstractDecoratorManifold}
-    return isapprox(M, p, X, Y, Val(_acts_transparent(M, isapprox)))
+    return isapprox(M, p, X, Y, _acts_transparently(M, isapprox))
 end
 function isapprox(M::DT, p, X, Y, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return isapprox(M.manifold, p, X, Y)
 end
-function isapprox!(M::DT, p, X, Y, ::Val{false}) where {DT<:AbstractDecoratorManifold}
+function isapprox(M::DT, p, X, Y, ::Val{false}) where {DT<:AbstractDecoratorManifold}
     error(manifold_function_not_implemented_message(M, isapprox, p, X, Y))
 end
 
 
 function log!(M::DT, X, p, q) where {DT<:AbstractDecoratorManifold}
-    return log!(M, X, p, q, Val(_acts_transparent(M, log!)))
+    return log!(M, X, p, q, _acts_transparently(M, log!))
 end
 function log!(M::DT, X, p, q, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return log!(M.manifold, X, p, q)
@@ -222,7 +243,7 @@ function log!(M::DT, X, p, q, ::Val{false}) where {DT<:AbstractDecoratorManifold
 end
 
 function manifold_dimension(M::DT) where {DT<:AbstractDecoratorManifold}
-    return manifold_dimension(M, Val(_acts_transparent(M, manifold_dimension)))
+    return manifold_dimension(M, _acts_transparently(M, manifold_dimension))
 end
 function manifold_dimension(M::DT, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return manifold_dimension(M.manifold)
@@ -238,7 +259,7 @@ function mean!(
     w::AbstractVector;
     kwargs...
 ) where {DT<:AbstractDecoratorManifold}
-    return mean!(M, x, w, Val(_acts_transparent(M, mean!)); kwargs...)
+    return mean!(M, x, w, _acts_transparently(M, mean!); kwargs...)
 end
 function mean!(
         M::DT,
@@ -265,7 +286,7 @@ function median!(
     w::AbstractVector;
     kwargs...
 ) where {DT<:AbstractDecoratorManifold}
-    return median!(M, x, w, Val(_acts_transparent(M, median!)); kwargs...)
+    return median!(M, x, w, _acts_transparently(M, median!); kwargs...)
 end
 function median!(
         M::DT,
@@ -291,7 +312,7 @@ function normal_tvector_distribution(M::DT, p, σ) where {DT<:AbstractDecoratorM
         M,
         p,
         σ,
-        Val(_acts_transparent(M, normal_tvector_distribution))
+        _acts_transparently(M, normal_tvector_distribution)
     )
 end
 function normal_tvector_distribution(
@@ -312,7 +333,7 @@ function normal_tvector_distribution(
 end
 
 function project_point!(M::DT, p) where {DT<:AbstractDecoratorManifold}
-    return project_point!(M, p, Val(_acts_transparent(M, project_point!)))
+    return project_point!(M, p, _acts_transparently(M, project_point!))
 end
 function project_point!(M::DT, p, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return project_point!(M.manifold, p)
@@ -322,7 +343,7 @@ function project_point!(M::DT, p, ::Val{false}) where {DT<:AbstractDecoratorMani
 end
 
 function project_tangent!(M::DT, Y, p, X) where {DT<:AbstractDecoratorManifold}
-    return project_tangent!(M, Y, p, X, Val(_acts_transparent(M, project_tangent!)))
+    return project_tangent!(M, Y, p, X, _acts_transparently(M, project_tangent!))
 end
 function project_tangent!(M::DT, Y, p, X, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return project_tangent!(M.manifold, Y, p, X)
@@ -332,7 +353,7 @@ function project_tangent!(M::DT, Y, p, X, ::Val{false}) where {DT<:AbstractDecor
 end
 
 function projected_distribution(M::DT, d, p) where {DT<:AbstractDecoratorManifold}
-    return projected_distribution(M, d, p, Val(_acts_transparent(M, projected_distribution)))
+    return projected_distribution(M, d, p, _acts_transparently(M, projected_distribution))
 end
 function projected_distribution(M::DT, d, p, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return projected_distribution(M.manifold, d, p)
@@ -346,7 +367,7 @@ function projected_distribution(
     error(manifold_function_not_implemented_message(M, projected_distribution, d, p))
 end
 function projected_distribution(M::DT, d) where {DT<:AbstractDecoratorManifold}
-    return projected_distribution(M, d, Val(_acts_transparent(M, projected_distribution)))
+    return projected_distribution(M, d, _acts_transparently(M, projected_distribution))
 end
 function projected_distribution(M::DT, d, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return projected_distribution(M.manifold, d)
@@ -360,7 +381,7 @@ function projected_distribution(
 end
 
 function representation_size(M::DT) where {DT<:AbstractDecoratorManifold}
-    return representation_size(M, Val(_acts_transparent(M, representation_size)))
+    return representation_size(M, _acts_transparently(M, representation_size))
 end
 function representation_size(M::DT, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return representation_size(M.manifold)
@@ -377,7 +398,7 @@ function retract!(
     X,
     m::AbstractRetractionMethod
 ) where {DT<:AbstractDecoratorManifold}
-    return retract!(M, q, p, X, m, Val(_acts_transparent(M, retract!)))
+    return retract!(M, q, p, X, m, _acts_transparently(M, retract!))
 end
 function retract!(
     M::DT,
@@ -386,7 +407,7 @@ function retract!(
     X,
     m::ExponentialRetraction
 ) where {DT<:AbstractDecoratorManifold}
-    return retract!(M, q, p, X, m, Val(_acts_transparent(M, retract!)))
+    return retract!(M, q, p, X, m, _acts_transparently(M, retract!))
 end
 function retract!(
     M::DT,
@@ -411,7 +432,7 @@ end
 
 
 function sharp!(M::DT, X::TFVector, p, ξ::CoTFVector) where {DT<:AbstractDecoratorManifold}
-    return sharp!(M, X, p, ξ, Val(_acts_transparent(M,sharp!)))
+    return sharp!(M, X, p, ξ, _acts_transparently(M,sharp!))
 end
 function sharp!(M::DT, X::TFVector, p, ξ::CoTFVector, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return sharp!(M.manifold, X, p, ξ)
@@ -433,7 +454,7 @@ function vector_transport_along!(
         p,
         X,
         c,
-        Val(_acts_transparent(M,vector_transport_along!))
+        _acts_transparently(M,vector_transport_along!)
     )
 end
 function vector_transport_along!(
@@ -448,14 +469,13 @@ function vector_transport_along!(
 end
 function vector_transport_along!(
     M::DT,
-    ::Val{false},
     Y,
     p,
     X,
     c,
     ::Val{false}
 ) where {DT<:AbstractDecoratorManifold}
-    error(manifold_function_not_implemented_message(M, vector_transport_along!, X, p, X, c))
+    error(manifold_function_not_implemented_message(M, vector_transport_along!, Y, p, X, c))
 end
 
 
@@ -472,7 +492,7 @@ function vector_transport_direction!(
         p,
         X,
         d,
-        Val(_acts_transparent(M,vector_transport_direction!))
+        _acts_transparently(M,vector_transport_direction!)
     )
 end
 function vector_transport_direction!(
@@ -487,14 +507,13 @@ function vector_transport_direction!(
 end
 function vector_transport_direction!(
     M::DT,
-    ::Val{false},
     Y,
     p,
     X,
     d,
     ::Val{false}
 ) where {DT<:AbstractDecoratorManifold}
-    error(manifold_function_not_implemented_message(M, vector_transport_direction!, X, p, X, d))
+    error(manifold_function_not_implemented_message(M, vector_transport_direction!, Y, p, X, d))
 end
 
 function vector_transport_to!(
@@ -512,7 +531,7 @@ function vector_transport_to!(
         X,
         q,
         m,
-        Val(_acts_transparent(M,vector_transport_to!))
+        _acts_transparently(M,vector_transport_to!)
     )
 end
 function vector_transport_to!(
@@ -528,7 +547,6 @@ function vector_transport_to!(
 end
 function vector_transport_to!(
     M::DT,
-    ::Val{false},
     Y,
     p,
     X,
@@ -536,11 +554,11 @@ function vector_transport_to!(
     m,
     ::Val{false}
 ) where {DT<:AbstractDecoratorManifold}
-    error(manifold_function_not_implemented_message(M, vector_transport_to!, X, p, X, q, m))
+    error(manifold_function_not_implemented_message(M, vector_transport_to!, Y, p, X, q, m))
 end
 
 function vee!(M::DT, Xⁱ, p, X) where {DT<:AbstractDecoratorManifold}
-    return vee!(M, Xⁱ, p, X, Val(_acts_transparent(M,vee!)))
+    return vee!(M, Xⁱ, p, X, _acts_transparently(M,vee!))
 end
 function vee!(M::DT, Xⁱ, p, X, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return vee!(M.manifold, Xⁱ, p, X)
@@ -550,7 +568,7 @@ function vee!(M::DT, Xⁱ, p, X, ::Val{false}) where {DT<:AbstractDecoratorManif
 end
 
 function zero_tangent_vector!(M::DT, X, p) where {DT<:AbstractDecoratorManifold}
-    return zero_tangent_vector!(M, X, p, Val(_acts_transparent(M,zero_tangent_vector!)))
+    return zero_tangent_vector!(M, X, p, _acts_transparently(M,zero_tangent_vector!))
 end
 function zero_tangent_vector!(M::DT, X, p, ::Val{true}) where {DT<:AbstractDecoratorManifold}
     return zero_tangent_vector!(M.manifold, X, p)

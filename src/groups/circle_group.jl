@@ -12,7 +12,7 @@ show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
 
 has_invariant_metric(::CircleGroup, ::ActionDirection) = Val(true)
 
-is_default_metric(::MetricManifold{CircleGroup,EuclideanMetric}) = true
+val_is_default_metric(::MetricManifold{CircleGroup,EuclideanMetric}) = Val(true)
 
 function compose(G::CircleGroup, p::AbstractVector, q::AbstractVector)
     return map(compose, repeated(G), p, q)

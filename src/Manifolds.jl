@@ -50,7 +50,6 @@ import ManifoldsBase:
     isapprox,
     is_manifold_point,
     is_tangent_vector,
-    is_decorator_manifold,
     inverse_retract,
     inverse_retract!,
     log,
@@ -287,6 +286,7 @@ export Euclidean,
     Torus
 export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
+export AbstractDecoratorManifold
 export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
@@ -347,7 +347,6 @@ export allocate,
     inverse_retract,
     inverse_retract!,
     isapprox,
-    is_decorator_manifold,
     is_default_metric,
     is_manifold_point,
     is_tangent_vector,

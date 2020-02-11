@@ -126,7 +126,9 @@ Return `Val(true)` if the metric on the manifold is bi-invariant, that is, if th
 is both left- and right-invariant (see [`has_invariant_metric`](@ref)).
 """
 function has_biinvariant_metric(M::Manifold)
-    return has_invariant_metric(M, LeftAction()) && has_invariant_metric(M, RightAction())
+    return Val(
+        has_invariant_metric(M, LeftAction())===Val{true}
+        && has_invariant_metric(M, RightAction()) == Val{true})
 end
 
 @doc raw"""
@@ -144,16 +146,15 @@ g_p(X, Y) = g_{τ_q p}((\mathrm{d}τ_q)_p X, (\mathrm{d}τ_q)_p Y),
 for $X,Y ∈ T_q \mathcal{G}$ and all $q ∈ \mathcal{G}$, where $(\mathrm{d}τ_q)_p$ is the
 differential of translation by $q$ evaluated at $p$ (see [`translate_diff`](@ref)).
 """
-function has_invariant_metric(M::Manifold, conv::ActionDirection)
-    return has_invariant_metric(M, conv, Val(is_decorator_manifold(M)))
+function has_invariant_metric(M::DT, conv::ActionDirection) where {DT<:AbstractDecoratorManifold}
+    return has_invariant_metric(M.manifold, conv)
 end
 function has_invariant_metric(M::MetricManifold, conv::ActionDirection)
-    return has_invariant_metric(M, conv, Val(is_default_metric(M)))
+    return val_is_default_metric(M)
 end
 function has_invariant_metric(M::Manifold, conv::ActionDirection, ::Val{true})
     return has_invariant_metric(M.manifold, conv)
 end
-has_invariant_metric(::Manifold, ::ActionDirection, ::Val{false}) = false
 function has_invariant_metric(
     M::MetricManifold{<:Manifold,<:InvariantMetric},
     conv::ActionDirection,
@@ -171,10 +172,10 @@ function inner(M::MetricManifold{<:Manifold,<:InvariantMetric}, ::Val{false}, p,
     return inner(N, Identity(N), Xₑ, Yₑ)
 end
 
-function is_default_metric(M::MetricManifold{<:Manifold,<:InvariantMetric})
+function val_is_default_metric(M::MetricManifold{<:Manifold,<:InvariantMetric})
     imetric = metric(M)
     N = MetricManifold(M.manifold, imetric.metric)
-    !is_default_metric(N) && return false
+    val_is_default_metric(N) !== Val{true} && return false
     return has_invariant_metric(N, direction(imetric))
 end
 
