@@ -10,8 +10,8 @@ line_offset_brightness = 0.25
 patch_opacity = 0.8
 tangent_space_opacity = 0.8
 line_width = 6
-geo_line_width = 12 * ( (plain) ? 3 : 1)
-mesh_line_width = line_width / 3
+geo_line_width = 20 * ( (plain) ? 2 : 1)
+mesh_line_width = 3
 basis_color = dark_mode ? RGB(0.33, 0.33, 0.33) : RGB(0.67, 0.67, 0.67)
 inner_prod_color = dark_mode ? RGB(0.67, 0.67, 0.67) : RGB(0.33, 0.33, 0.33)
 logo_colors = [(77, 100, 174), (57, 151, 79), (202, 60, 50), (146, 89, 163)] # Julia colors
@@ -101,7 +101,7 @@ function plot_tangent_vector!(ax, M, x, v; n = 100, options = nothing, color = "
             "-stealth",
             roundcaps,
             color = color,
-            line_width = 4,
+            line_width = 8,
         }
     end
     @pgf push!(
@@ -297,7 +297,7 @@ if !plain
         Plot3(
             {
                 only_marks,
-                mark_options = {fill = point_color, draw_opacity = 0},
+                mark_options = {fill = point_color, draw_opacity = 0, scale=2.5},
                 opacity = 0.66,
                 draw = "none",
             },
