@@ -235,9 +235,6 @@ end
         g2 = DefaultBaseManifoldMetric()
         MM2 = MetricManifold(M,g2)
 
-#        @test is_decorator_manifold(MM) == Val{true}()
-#        @test is_decorator_manifold(MM2) == Val{true}()
-#        @test is_decorator_manifold(M) == Val{false}()
         @test is_default_metric(MM) == is_default_metric(base_manifold(MM),metric(MM))
         @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2),metric(MM2))
         @test is_default_metric(MM2)

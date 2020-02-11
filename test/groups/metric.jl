@@ -33,7 +33,7 @@ function is_default_metric(
     return true
 end
 
-has_invariant_metric(::TestDefaultInvariantMetricManifold, ::RightAction) = true
+has_invariant_metric(::TestDefaultInvariantMetricManifold, ::RightAction) = Val(true)
 
 @testset "Invariant metrics" begin
     base_metric = TestInvariantMetricBase()

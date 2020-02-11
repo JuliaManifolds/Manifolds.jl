@@ -10,7 +10,7 @@ include("group_utils.jl")
         @test has_invariant_metric(G, LeftAction()) === Val(true)
         @test has_invariant_metric(G, RightAction()) === Val(true)
         @test has_biinvariant_metric(G) === Val(true)
-        @test is_default_metric(MetricManifold(G, EuclideanMetric())) === Val(true)
+        @test is_default_metric(MetricManifold(G, EuclideanMetric())) === true
 
         types = [Matrix{Float64}]
         @test base_manifold(G) === Euclidean(2, 3)

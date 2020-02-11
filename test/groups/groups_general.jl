@@ -13,8 +13,6 @@ include("../utils.jl")
         @test_throws Exception Identity(G, Val(true))
         @test_throws ErrorException Identity(G, Val(false))
 
-        @test is_decorator_manifold(G) === Val(true)
-
         @test Manifolds.is_decorator_group(G)
         @test !Manifolds.is_decorator_group(NotImplementedManifold())
         @test !Manifolds.is_decorator_group(G, Val(true))

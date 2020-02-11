@@ -1,13 +1,10 @@
-import Manifolds: is_decorator_manifold
-
 struct NotImplementedOperation <: AbstractGroupOperation end
 
 struct NotImplementedManifold <: Manifold end
 
-struct NotImplementedGroupDecorator{M} <: Manifold
+struct NotImplementedGroupDecorator{M} <: AbstractDecoratorManifold
     manifold::M
 end
-is_decorator_manifold(::NotImplementedGroupDecorator) = Val(true)
 
 """
     test_group(
