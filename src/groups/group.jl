@@ -75,80 +75,6 @@ if VERSION ≥ v"1.3"
     (::Type{T})(M::Manifold) where {T<:AbstractGroupOperation} = GroupManifold(M, T())
 end
 
-########################
-# GroupManifold forwards
-########################
-
-function check_tangent_vector(G::GroupManifold, p, X; kwargs...)
-    return check_tangent_vector(G.manifold, p, X; kwargs...)
-end
-distance(G::GroupManifold, p, q) = distance(G.manifold, p, q)
-exp(G::GroupManifold, p, X) = exp(G.manifold, p, X)
-exp!(G::GroupManifold, q, p, X) = exp!(G.manifold, q, p, X)
-injectivity_radius(G::GroupManifold) = injectivity_radius(G.manifold)
-injectivity_radius(G::GroupManifold, p) = injectivity_radius(G.manifold, p)
-function injectivity_radius(G::GroupManifold, p, method::AbstractRetractionMethod)
-    return injectivity_radius(G.manifold, p, method)
-end
-inner(G::GroupManifold, p, X, Y) = inner(G.manifold, p, X, Y)
-inverse_retract(G::GroupManifold, p, q) = inverse_retract(G.manifold, p, q)
-function inverse_retract(G::GroupManifold, p, q, method::AbstractInverseRetractionMethod)
-    return inverse_retract(G.manifold, p, q, method)
-end
-inverse_retract!(G::GroupManifold, X, p, q) = inverse_retract!(G.manifold, X, p, q)
-function inverse_retract!(
-    G::GroupManifold,
-    X,
-    p,
-    q,
-    method::AbstractInverseRetractionMethod,
-)
-    return inverse_retract!(G.manifold, X, p, q, method)
-end
-function inverse_retract!(G::GroupManifold, X, p, q, method::LogarithmicInverseRetraction)
-    return inverse_retract!(G.manifold, X, p, q, method)
-end
-isapprox(G::GroupManifold, p, q; kwargs...) = isapprox(G.manifold, p, q; kwargs...)
-isapprox(G::GroupManifold, p, X, Y; kwargs...) = isapprox(G.manifold, p, X, Y; kwargs...)
-log(G::GroupManifold, p, q) = log(G.manifold, p, q)
-log!(G::GroupManifold, X, p, q) = log!(G.manifold, X, p, q)
-norm(G::GroupManifold, p, X) = norm(G.manifold, p, X)
-project_point(G::GroupManifold, p) = project_point(G.manifold, p)
-project_point!(G::GroupManifold, q, p) = project_point!(G.manifold, q, p)
-project_tangent(G::GroupManifold, p, X) = project_tangent(G.manifold, p, X)
-project_tangent!(G::GroupManifold, Y, p, X) = project_tangent!(G.manifold, Y, p, X)
-retract(G::GroupManifold, p, X) = retract(G.manifold, p, X)
-function retract(G::GroupManifold, p, X, method::AbstractRetractionMethod)
-    return retract(G.manifold, p, X, method)
-end
-retract!(G::GroupManifold, q, p, X) = retract!(G.manifold, q, p, X)
-function retract!(G::GroupManifold, q, p, X, method::AbstractRetractionMethod)
-    return retract!(G.manifold, q, p, X, method)
-end
-function retract!(G::GroupManifold, q, p, X, method::ExponentialRetraction)
-    return retract!(G.manifold, q, p, X, method)
-end
-function vector_transport_along!(G::GroupManifold, Y, p, X, c, args...)
-    return vector_transport_along!(G.manifold, Y, p, X, c, args...)
-end
-function vector_transport_along(G::GroupManifold, p, X, c, args...)
-    return vector_transport_along(G.manifold, p, X, c, args...)
-end
-function vector_transport_direction!(G::GroupManifold, Y, p, X, V, args...)
-    return vector_transport_direction!(G.manifold, Y, p, X, V, args...)
-end
-function vector_transport_direction(G::GroupManifold, p, X, V, args...)
-    return vector_transport_direction(G.manifold, p, X, V, args...)
-end
-function vector_transport_to!(G::GroupManifold, Y, p, X, q, args...)
-    return vector_transport_to!(G.manifold, Y, p, X, q, args...)
-end
-function vector_transport_to(G::GroupManifold, p, X, q, args...)
-    return vector_transport_to(G.manifold, p, X, q, args...)
-end
-zero_tangent_vector(G::GroupManifold, p) = zero_tangent_vector(G.manifold, p)
-zero_tangent_vector!(G::GroupManifold, q, p) = zero_tangent_vector!(G.manifold, q, p)
-
 ###################
 # Action directions
 ###################
@@ -250,9 +176,6 @@ end
 function check_manifold_point(G::GroupManifold, e::Identity; kwargs...)
     e === Identity(G) && return nothing
     return DomainError(e, "The identity element $(e) does not belong to $(G).")
-end
-function check_manifold_point(G::GroupManifold, p; kwargs...)
-    return check_manifold_point(G.manifold, p; kwargs...)
 end
 
 ##########################
@@ -717,13 +640,7 @@ where $\exp$ is the group exponential ([`group_exp`](@ref)), and $(\mathrm{d}τ_
 the action of the differential of inverse translation $τ_p^{-1}$ evaluated at $p$ (see
 [`inverse_translate_diff`](@ref)).
 """
-function retract(G::GroupManifold, p, X, method::GroupExponentialRetraction)
-    conv = direction(method)
-    Xₑ = inverse_translate_diff(G, p, p, X, conv)
-    pinvq = group_exp(G, Xₑ)
-    q = translate(G, p, pinvq, conv)
-    return q
-end
+retract(G::GroupManifold, ::Any, ::Any, ::GroupExponentialRetraction)
 
 function retract!(G::GroupManifold, q, p, X, method::GroupExponentialRetraction)
     return invoke(
@@ -764,12 +681,7 @@ where $\log$ is the group logarithm ([`group_log`](@ref)), and $(\mathrm{d}τ_p)
 action of the differential of translation $τ_p$ evaluated at the identity element $e$
 (see [`translate_diff`](@ref)).
 """
-function inverse_retract(G::GroupManifold, p, q, method::GroupLogarithmicInverseRetraction)
-    conv = direction(method)
-    pinvq = inverse_translate(G, p, q, conv)
-    Xₑ = group_log(G, pinvq)
-    return translate_diff(G, p, Identity(G), Xₑ, conv)
-end
+inverse_retract(G::GroupManifold, ::Any, ::Any, ::GroupLogarithmicInverseRetraction)
 
 function inverse_retract!(
     G::GroupManifold,

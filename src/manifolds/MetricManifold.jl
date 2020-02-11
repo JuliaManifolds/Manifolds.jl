@@ -188,10 +188,6 @@ gaussian_curvature(M::MetricManifold, p; kwargs...) = ricci_curvature(M, p; kwar
 
 is_decorator_transparent(M::MMT, ::typeof(get_basis)) where {MMT <: MetricManifold} = false
 
-function injectivity_radius(M::MMT, args...) where {MMT<:MetricManifold}
-    return injectivity_radius(base_manifold(M), args...)
-end
-
 @doc raw"""
     inverse_local_metric(M::MetricManifold, p)
 
@@ -201,7 +197,6 @@ written $g^{ij}$.
 inverse_local_metric(M::MetricManifold, p) = inv(local_metric(M, p))
 
 is_decorator_manifold(M::MMT) where {MMT <: MetricManifold} = Val(true)
-
 is_default_decorator(M::MMT) where {MMT <: MetricManifold} = is_default_metric(M)
 
 """
@@ -222,7 +217,7 @@ is_default_metric(M::Manifold, G::Metric) = false
 Indicate whether the [`Metric`](@ref) `MM.G` is the default metric for
 the [`Manifold`](@ref) `MM.manifold,` within the [`MetricManifold`](@ref) `MM`.
 This means that any occurence of
-[`MetricManifold`](@ref)`(MM.manifold,MM.G)` where `typeof(is_default_metric(MM.manifold,MM.G)) = true`
+[`MetricManifold`](@ref)`(MM.manifold,MM.G)` where `is_default_metric(MM.manifold,MM.G)) = true`
 falls back to just be called with `MM.manifold,` such that the [`Manifold`](@ref) `MM.manifold`
 implicitly has the metric `MM.G`, for example if this was the first one
 implemented or is the one most commonly assumed to be used.
@@ -361,25 +356,8 @@ function normal_tvector_distribution(M::MMT, p, σ, ::Val{false}) where {MMT<:Me
     error("normal_tvector_distribution not implemented for a $(typeof(M)) at point $(typeof(p)) with standard deviation $(typeof(σ)).")
 end
 
-function project_point!(M::MMT, q, p) where {MMT<:MetricManifold}
-    return project_point!(M, q, p, Val(is_default_metric(M)))
-end
-function project_point!(M::MMT, q, p, ::Val{true}) where {MMT<:MetricManifold}
-    return project_point!(base_manifold(M), q, p)
-end
-function project_point!(M::MMT, q, p, ::Val{false}) where {MMT<:MetricManifold}
-    error("project_point! not implemented on $(typeof(M)) for point $(typeof(p))")
-end
-
-function project_tangent!(M::MMT, Y, p, X) where {MMT<:MetricManifold}
-    return project_tangent!(M, Y, p, X, Val(is_default_metric(M)))
-end
-function project_tangent!(M::MMT, Y, p, X, ::Val{true}) where {MMT<:MetricManifold}
-    return project_tangent!(base_manifold(M), Y, p, X)
-end
-function project_tangent!(M::MMT, Y, p, X, ::Val{false}) where {MMT<:MetricManifold}
-    error("project_tangent! not implemented for a $(typeof(M)) and tangent $(typeof(X)) at point $(typeof(p)).")
-end
+is_decorator_transparent(M::MMT, ::typeof(project_point!)) where {MMT <: MetricManifold} = false
+is_decorator_transparent(M::MMT, ::typeof(project_tangent!)) where {MMT <: MetricManifold} = false
 
 is_decorator_transparent(M::MMT, ::typeof(projected_distribution)) where {MMT <: MetricManifold}= false
 
@@ -486,41 +464,4 @@ in an embedded space.
 """
 function solve_exp_ode(M, p, X, tspan; kwargs...)
     error("solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq` on Julia 1.1 or greater.")
-end
-
-function vector_transport_to!(
-    M::MMT,
-    Y,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod,
-) where {MMT<:MetricManifold}
-    return vector_transport_to!(M, Val(is_default_metric(M)), Y, p, X, q, m)
-end
-function vector_transport_to!(
-    M::MMT,
-    ::Val{true},
-    Y,
-    p,
-    X,
-    q,
-    m,
-) where {MMT<:MetricManifold}
-    return vector_transport_to!(base_manifold(M), Y, p, X, q, m)
-end
-function vector_transport_to!(
-    M::MMT,
-    ::Val{false},
-    Y,
-    p,
-    X,
-    q,
-    m,
-) where {MMT<:MetricManifold}
-    error("vector transport from a point of type $(typeof(p)) to a type $(typeof(q)) on a $(typeof(M)) for a vector of type $(X) and the $(typeof(m)) not yet implemented.")
-end
-
-function zero_tangent_vector!(M::MMT, X, p) where {MMT<:MetricManifold}
-    return zero_tangent_vector!(M.manifold, X, p)
 end

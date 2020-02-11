@@ -145,10 +145,10 @@ for $X,Y ∈ T_q \mathcal{G}$ and all $q ∈ \mathcal{G}$, where $(\mathrm{d}τ_
 differential of translation by $q$ evaluated at $p$ (see [`translate_diff`](@ref)).
 """
 function has_invariant_metric(M::Manifold, conv::ActionDirection)
-    return has_invariant_metric(M, conv, is_decorator_manifold(M))
+    return has_invariant_metric(M, conv, Val(is_decorator_manifold(M)))
 end
 function has_invariant_metric(M::MetricManifold, conv::ActionDirection)
-    return has_invariant_metric(M, conv, is_default_metric(M))
+    return has_invariant_metric(M, conv, Val(is_default_metric(M)))
 end
 function has_invariant_metric(M::Manifold, conv::ActionDirection, ::Val{true})
     return has_invariant_metric(M.manifold, conv)

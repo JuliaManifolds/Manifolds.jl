@@ -39,8 +39,8 @@ is_decorator_transparent(::EmbeddedManifold{M,N,IsometricEmbedding}, ::typeof(in
 function inverse_retract!(M::MT, X, p, q, m::EmbeddedRetraction) where {MT <: EmbeddedManifold}
     x = allocate(q)
     y = allocate(p)
-    embedd!(M, x, p)
-    embedd!(M, y, q)
+    embed!(M, x, p)
+    embed!(M, y, q)
     retract!(M.embedding, X, x, y)
     project_tangent!(M, X, p, X)
     return q
