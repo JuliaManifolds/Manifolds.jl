@@ -1,22 +1,21 @@
+abstract type AbstractEmbeddingType end
+abstract type AbstractIsometricEmbeddingType <: AbstractEmbeddingType end
+
+"""
+    DefaultIsometricEmbedding <: AbstractEmbeddingType
+
+"""
+struct DefaultIsometricEmbedding <: AbstractIsometricEmbeddingType end
+
 """
     AbstractEmbeddedManifold
 
 """
-abstract type AbstractEmbeddedManifold <: AbstractDecoratorManifold end
+abstract type AbstractEmbeddedManifold{T<:AbstractEmbeddingType} <: AbstractDecoratorManifold end
 
-abstract type AbstractEmbeddingType end
-abstract type AbstractIsometricEmbedding <: AbstractEmbeddingType end
-
-"""
-    IsometricEmbedding <: AbstractEmbeddingType
-
-"""
-struct DefaultIsometricEmbedding <: AbstractIsometricEmbedding end
-
-struct EmbeddedManifold{MT <: Manifold, NT <: Manifold, ET <: AbstractEmbeddingType} <: AbstractEmbeddedManifold
+struct EmbeddedManifold{MT <: Manifold, NT <: Manifold, ET} <: AbstractEmbeddedManifold{ET}
     submanifold::MT
     manifold::NT
-    type::ET
 end
 
 """
@@ -42,7 +41,6 @@ end
 val_is_decorator_transparent(::EM, ::typeof(project_point!)) where {EM <: AbstractEmbeddedManifold} = Val(false)
 val_is_decorator_transparent(::EM, ::typeof(project_tangent!)) where {EM <: AbstractEmbeddedManifold} = Val(false)
 
-
 function embed(M::MT,p) where {MT <: AbstractEmbeddedManifold}
     q = allocate(p)
     return embed!(M, q, p)
@@ -50,9 +48,6 @@ end
 function embed!(M, q, p)
     error("Embedding a point $(typeof(p)) on $(typeof(M)) not yet implemented.")
 end
-
-val_is_decorator_transparent(::EM, ::typeof(inner)) where {EM <: AbstractEmbeddedManifold} = Val(false)
-val_is_decorator_transparent(::EmbeddedManifold{M,N,T}, ::typeof(inner)) where {M,N, T<:AbstractIsometricEmbedding} = Val(true)
 
 function inverse_retract!(M::MT, X, p, q, m::EmbeddedRetraction) where {MT <: EmbeddedManifold}
     x = allocate(q)
@@ -64,14 +59,7 @@ function inverse_retract!(M::MT, X, p, q, m::EmbeddedRetraction) where {MT <: Em
     return q
 end
 
-val_is_decorator_transparent(::EM, ::typeof(manifold_dimension)) where {EM <: AbstractEmbeddedManifold} = Val(false)
-
-val_is_default_decorator(M::EM) where {EM <: EmbeddedManifold} = is_default_embedding(M)
-
 get_embedding(M::AbstractEmbeddedManifold) = M.manifold
-
-val_is_decorator_transparent(::EM, ::typeof(norm)) where {EM <: AbstractEmbeddedManifold} = Val(false)
-val_is_decorator_transparent(::EmbeddedManifold{M,N,T}, ::typeof(norm)) where {M,N,T<:AbstractIsometricEmbedding} = Val(true)
 
 function retract!(M::MT, q, p, X, m::EmbeddedRetraction) where {MT <: AbstractEmbeddedManifold}
     x = allocate(q)
@@ -86,3 +74,18 @@ end
 function show(io::IO, ::EmbeddedManifold{M,N}) where {N <: Manifold, M <: Manifold}
     print(io, "EmbeddedManifold($(M),$(N))")
 end
+
+val_is_default_decorator(M::EM) where {EM <: EmbeddedManifold} = is_default_embedding(M)
+val_is_decorator_transparent(::EM, ::typeof(check_manifold_point)) where {EM <: AbstractEmbeddedManifold} = Val(false)
+val_is_decorator_transparent(::EM, ::typeof(check_tangent_vector)) where {EM <: AbstractEmbeddedManifold} = Val(false)
+val_is_decorator_transparent(::EM, ::typeof(inner)) where {EM <: AbstractEmbeddedManifold} = Val(false)
+val_is_decorator_transparent(::EM, ::typeof(get_basis)) where {EM <: AbstractEmbeddedManifold} = Val(false)
+val_is_decorator_transparent(::EM, ::typeof(get_vector)) where {EM <: AbstractEmbeddedManifold} = Val(false)
+val_is_decorator_transparent(::EM, ::typeof(get_coordinates)) where {EM <: AbstractEmbeddedManifold} = Val(false)
+val_is_decorator_transparent(::EM, ::typeof(norm)) where {EM <: AbstractEmbeddedManifold} = Val(false)
+val_is_decorator_transparent(::EM, ::typeof(manifold_dimension)) where {EM <: AbstractEmbeddedManifold} = Val(false)
+
+val_is_decorator_transparent(::EM, ::typeof(exp!)) where {EM <: AbstractEmbeddedManifold{<:AbstractIsometricEmbeddingType}} = Val(true)
+val_is_decorator_transparent(::EM, ::typeof(inner)) where {EM <: AbstractEmbeddedManifold{<:AbstractIsometricEmbeddingType}} = Val(true)
+val_is_decorator_transparent(::EM, ::typeof(log!)) where {EM <: AbstractEmbeddedManifold{<:AbstractIsometricEmbeddingType}} = Val(true)
+val_is_decorator_transparent(::EM, ::typeof(norm)) where {EM <: AbstractEmbeddedManifold{<:AbstractIsometricEmbeddingType}} = Val(true)

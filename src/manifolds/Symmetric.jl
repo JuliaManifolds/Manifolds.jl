@@ -18,18 +18,13 @@ Though it is slightly redundant, usually the matrices are stored as $n × n$ arr
 
 Generate the manifold of $n × n$ symmetric matrices.
 """
-struct SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold
+struct SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbedding}
     manifold::Euclidean{Tuple{n,n},𝔽}
 end
 
 function SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
     SymmetricMatrices{n,field}(Euclidean(n,n; field=field))
 end
-
-val_is_decorator_transparent(::SymmetricMatrices, ::typeof(inner)) = Val(true)
-val_is_decorator_transparent(::SymmetricMatrices, ::typeof(exp!)) = Val(true)
-val_is_decorator_transparent(::SymmetricMatrices, ::typeof(log!)) = Val(true)
-val_is_decorator_transparent(::SymmetricMatrices, ::typeof(norm)) = Val(true)
 
 base_manifold(M::SymmetricMatrices) = M
 
@@ -42,7 +37,7 @@ whether `p` is a symmetric matrix of size `(n,n)` with values from the correspon
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
-function check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
+function check_manifold_point(M::SymmetricMatrices{n,𝔽}, p, ::Val{false}; kwargs...) where {n,𝔽}
     if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
@@ -79,7 +74,7 @@ and its values have to be from the correct [`AbstractNumbers`](@ref).
 
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
-function check_tangent_vector(M::SymmetricMatrices{n,𝔽}, p, X; kwargs...) where {n,𝔽}
+function check_tangent_vector(M::SymmetricMatrices{n,𝔽}, p, X, ::Val{false}; kwargs...) where {n,𝔽}
     t = check_manifold_point(M, p; kwargs...)
     t === nothing || return t
     if (𝔽 === ℝ) && !(eltype(X) <: Real)
@@ -111,6 +106,76 @@ end
 
 embed!(M::SymmetricMatrices,p, q) = (q .= p)
 
+_vec_to_sym(v,n) = Symmetric([ i<=j ? v[div(j*(j-1),2)+i] : 0 for i=1:n, j=1:n ])
+function _basis_vec_sym(k,n,unit=true,𝔽::AbstractNumbers=ℝ)
+        v = _vec_to_sym([ (i==k ? 1.0 : 0.0) + (𝔽==ℂ ? 0.0*im : 0.0) for i=1:div(n*(n+1),2)],n)
+        return (norm(Diagonal(v)) == 0 && unit ? 1/sqrt(2) : 1)*v;
+end
+
+function get_basis(M::SymmetricMatrices{n,ℝ}, p, B::ArbitraryOrthonormalBasis{ℝ}, ::Val{false}) where {n}
+    vecs = [_basis_vec_sym(k,n,true,ℝ) for k=1:manifold_dimension(M)]
+    return PrecomputedOrthonormalBasis(vecs)
+end
+function get_basis(M::SymmetricMatrices{n,ℂ}, p, B::ArbitraryOrthonormalBasis{ℂ}, ::Val{false}) where {n}
+    vecs = [_basis_vec_sym(k,n,true,ℂ) for k=1:manifold_dimension(M)]
+    return PrecomputedOrthonormalBasis([vec; im*vecs])
+end
+function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis, ::Val{false}) where {n}
+    vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors
+    kappas = zeros(real(eltype(p)), manifold_dimension(M))
+    return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
+end
+
+function get_basis(M::SymmetricMatrices{n,T}, p, B::AbstractOrthonormalBasis{T}, ::Val{false}) where {n,T}
+    return PrecomputedProductOrthonormalBasis(
+        [_basis_sym(k,manifold_dimension(M),true,T) for k=1:manifold_dimension(M)]
+    )
+end
+
+function get_coordinates(
+     M::SymmetricMatrices{N,T},
+     p,
+     X,
+     B::ArbitraryOrthonormalBasis{T},
+     ::Val{false}
+) where {N,T}
+    V = get_basis(M,p,B)
+    return [inner(M,p,X,Y) for Y in V.vectors]
+end
+
+function get_coordinates(
+     M::SymmetricMatrices{N,T},
+     p,
+     X,
+     B::AbstractPrecomputedOrthonormalBasis{T},
+     ::Val{false}
+) where {N,T}
+    return [inner(M,p,X,Y) for Y in B.vectors]
+end
+
+function get_vector(
+    M::SymmetricMatrices{N,T},
+    p,
+    X,
+    B::ArbitraryOrthonormalBasis{T},
+    ::Val{false}
+) where {N,T}
+    V = get_basis(M,p,B)
+    dim = manifold_dimension(M)
+    @assert size(X) == (dim,)
+    return sum(X.*V.vectors)
+end
+function get_vector(
+    M::SymmetricMatrices{N,T},
+    p,
+    X,
+    B::AbstractPrecomputedOrthonormalBasis{T},
+    ::Val{false}
+) where {N,T}
+    dim = manifold_dimension(M)
+    @assert size(X) == (dim,)
+    return sum(X.*B.vectors)
+end
 @doc raw"""
 manifold_dimension(M::SymmetricMatrices{n,𝔽})
 
@@ -140,7 +205,7 @@ where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transpo
 """
 project_point(::SymmetricMatrices, ::Any...)
 
-project_point!(M::SymmetricMatrices, p) = (p .= (p + p') ./ 2)
+project_point!(M::SymmetricMatrices, p, ::Val{false}) = (p .= (p + p') ./ 2)
 
 @doc raw"""
     project_tangent(M::SymmetricMatrices, p, X)

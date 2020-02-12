@@ -117,12 +117,24 @@ end
     X,
     B::AbstractBasis,
 )
+@decorator_transparent_function get_coordinates(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractPrecomputedOrthonormalBasis,
+)
 
 @decorator_transparent_function get_vector(
     M::AbstractDecoratorManifold,
     p,
     X,
     B::AbstractBasis,
+)
+@decorator_transparent_function get_vector(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractPrecomputedOrthonormalBasis,
 )
 
 @decorator_transparent_function hat!(M::AbstractDecoratorManifold, X, p, Xⁱ)
@@ -173,7 +185,7 @@ end
     M::AbstractDecoratorManifold, p, σ
 )
 
-@decorator_transparent_function project_point!(M::AbstractDecoratorManifold, q, p)
+@decorator_transparent_function project_point!(M::AbstractDecoratorManifold, p)
 
 @decorator_transparent_function project_tangent!(M::AbstractDecoratorManifold, Y, p, X)
 
