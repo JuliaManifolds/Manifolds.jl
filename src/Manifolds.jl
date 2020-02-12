@@ -92,7 +92,7 @@ using ManifoldsBase:
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
 using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
 using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
-using ManifoldsBase: @decorator_transparent_function
+using ManifoldsBase: @decorator_transparent_function, manifold_function_not_implemented_message
 using Markdown: @doc_str
 using Random: AbstractRNG
 using Requires

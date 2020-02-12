@@ -14,12 +14,12 @@ For any manifold that is a subtype of [`AbstractDecoratorManifold`](@ref)
 indicates which function is used to determine the default decorator.
 This default decorator acts transparent even for functions where transparency is disabled.
 """
-is_default_decorator(M::Manifold) = _is_default_decorator(M,val_is_default_decorator(M))
+is_default_decorator(M::Manifold) = _is_default_decorator(M, val_is_default_decorator(M))
 _is_default_decorator(M::Manifold, ::Val{T}) where {T} = T
 val_is_default_decorator(M::Manifold) = Val(false)
 
 """
-    is_decorator_transparent(M, f)
+    is_decorator_transparent(f, M, args...)
 
 Given a [`Manifold`](@ref) `M` and a function `f`, indicate, whether a
 [`AbstractDecoratorManifold`](@ref) acts transparent for `f`. This means, it
@@ -30,19 +30,17 @@ actively.
 If a decorator manifold is not in general transparent, it might still pass down
 for the case that a decorator is the default decorator, see [`is_default_decorator`](@ref).
 """
-is_decorator_transparent(M::Manifold, f) = _is_decorator_transparent(M::Manifold, f, val_is_decorator_transparent(M,f))
-_is_decorator_transparent(M::Manifold, f, ::Val{T}) where {T} = T
-val_is_decorator_transparent(M::DT, f) where {DT <: Manifold} = Val(true)
+function is_decorator_transparent(f, M::Manifold, args...)
+    return _is_decorator_transparent(val_is_decorator_transparent(f, M, args...))
+end
+_is_decorator_transparent(::Val{T}) where {T} = T
+val_is_decorator_transparent(f, M::Manifold, args...) = Val(true)
 
-function manifold_function_not_implemented_message(M,f,x...)
-    s = join(map(string, map(typeof, x)),", "," and ")
-    a = length(x) > 1 ? "arguments" : "argument"
-    m = length(x) > 0 ? " for $(a) $(s)." : "."
-    return "$(f) not implemented on $(M)$(m)"
+function _acts_transparently(f, M::Manifold, args...)
+    return _val_or(val_is_default_decorator(M), val_is_decorator_transparent(f, M, args...))
 end
 
-_acts_transparently(M::Manifold, f) = _val_or(val_is_default_decorator(M), val_is_decorator_transparent(M,f))
-_val_or(::Val{T1},::Val{T2}) where {T1,T2} = Val(T1||T2)
+_val_or(::Val{T1}, ::Val{T2}) where {T1,T2} = Val(T1 || T2)
 
 #
 # Functions overwritten with decorators

@@ -23,7 +23,7 @@ struct SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmb
 end
 
 function SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
-    SymmetricMatrices{n,field}(Euclidean(n,n; field=field))
+    SymmetricMatrices{n,field}(Euclidean(n, n; field=field))
 end
 
 base_manifold(M::SymmetricMatrices) = M
@@ -104,78 +104,92 @@ function check_tangent_vector(M::SymmetricMatrices{n,𝔽}, p, X, ::Val{false}; 
     return nothing
 end
 
-embed!(M::SymmetricMatrices,p, q) = (q .= p)
+embed!(M::SymmetricMatrices, p, q) = copyto!(q, p)
 
-_vec_to_sym(v,n) = Symmetric([ i<=j ? v[div(j*(j-1),2)+i] : 0 for i=1:n, j=1:n ])
-function _basis_vec_sym(k,n,unit=true,𝔽::AbstractNumbers=ℝ)
-        v = _vec_to_sym([ (i==k ? 1.0 : 0.0) + (𝔽==ℂ ? 0.0*im : 0.0) for i=1:div(n*(n+1),2)],n)
-        return (norm(Diagonal(v)) == 0 && unit ? 1/sqrt(2) : 1)*v;
-end
-
-function get_basis(M::SymmetricMatrices{n,ℝ}, p, B::ArbitraryOrthonormalBasis{ℝ}, ::Val{false}) where {n}
-    vecs = [_basis_vec_sym(k,n,true,ℝ) for k=1:manifold_dimension(M)]
-    return PrecomputedOrthonormalBasis(vecs)
-end
-function get_basis(M::SymmetricMatrices{n,ℂ}, p, B::ArbitraryOrthonormalBasis{ℂ}, ::Val{false}) where {n}
-    vecs = [_basis_vec_sym(k,n,true,ℂ) for k=1:manifold_dimension(M)]
-    return PrecomputedOrthonormalBasis([vec; im*vecs])
-end
-function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis, ::Val{false}) where {n}
+function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis) where {n}
     vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors
     kappas = zeros(real(eltype(p)), manifold_dimension(M))
     return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
 end
 
-function get_basis(M::SymmetricMatrices{n,T}, p, B::AbstractOrthonormalBasis{T}, ::Val{false}) where {n,T}
-    return PrecomputedProductOrthonormalBasis(
-        [_basis_sym(k,manifold_dimension(M),true,T) for k=1:manifold_dimension(M)]
-    )
-end
-
 function get_coordinates(
-     M::SymmetricMatrices{N,T},
-     p,
-     X,
-     B::ArbitraryOrthonormalBasis{T},
-     ::Val{false}
-) where {N,T}
-    V = get_basis(M,p,B)
-    return [inner(M,p,X,Y) for Y in V.vectors]
+    M::SymmetricMatrices{N,ℝ},
+    p,
+    X,
+    B::ArbitraryOrthonormalBasis{ℝ},
+) where {N}
+    dim = manifold_dimension(M)
+    Y = similar(X, dim)
+    @assert size(X) == (N, N)
+    @assert dim == div(N * (N + 1), 2)
+    k = 1
+    for i = 1:N, j = i:N
+        scale = ifelse(i == j, 1, sqrt(2))
+        @inbounds Y[k] = X[i, j] * scale
+        k += 1
+    end
+    return Y
 end
-
 function get_coordinates(
-     M::SymmetricMatrices{N,T},
-     p,
-     X,
-     B::AbstractPrecomputedOrthonormalBasis{T},
-     ::Val{false}
-) where {N,T}
-    return [inner(M,p,X,Y) for Y in B.vectors]
+    M::SymmetricMatrices{N,ℂ},
+    p,
+    X,
+    B::ArbitraryOrthonormalBasis{ℝ},
+) where {N}
+    dim = manifold_dimension(M)
+    Y = similar(X, dim)
+    @assert size(X) == (N, N)
+    @assert dim == N * (N + 1)
+    k = 1
+    for i = 1:N, j = i:N
+        scale = ifelse(i == j, 1, sqrt(2))
+        @inbounds Y[k] = real(X[i, j]) * scale
+        k += 1
+        @inbounds Y[k] = imag(X[i, j]) * scale
+        k += 1
+    end
+    return Y
 end
 
 function get_vector(
-    M::SymmetricMatrices{N,T},
+    M::SymmetricMatrices{N,ℝ},
     p,
     X,
-    B::ArbitraryOrthonormalBasis{T},
-    ::Val{false}
-) where {N,T}
-    V = get_basis(M,p,B)
+    B::ArbitraryOrthonormalBasis{ℝ},
+) where {N}
     dim = manifold_dimension(M)
-    @assert size(X) == (dim,)
-    return sum(X.*V.vectors)
+    Y = allocate_result(M, get_vector, p)
+    @assert size(X) == (div(N * (N + 1), 2),)
+    @assert size(Y) == (N, N)
+    k = 1
+    for i = 1:N, j = i:N
+        scale = ifelse(i == j, 1, 1 / sqrt(2))
+        @inbounds Y[i, j] = X[k] * scale
+        @inbounds Y[j, i] = X[k] * scale
+        k += 1
+    end
+    return Y
 end
 function get_vector(
-    M::SymmetricMatrices{N,T},
+    M::SymmetricMatrices{N,ℂ},
     p,
     X,
-    B::AbstractPrecomputedOrthonormalBasis{T},
-    ::Val{false}
-) where {N,T}
+    B::ArbitraryOrthonormalBasis{ℝ},
+) where {N}
     dim = manifold_dimension(M)
-    @assert size(X) == (dim,)
-    return sum(X.*B.vectors)
+    Y = allocate_result(M, get_vector, p, p .* 1im)
+    @assert size(X) == (N * (N + 1),)
+    @assert size(Y) == (N, N)
+    k = 1
+    for i = 1:N, j = i:N
+        scale = ifelse(i == j, 1, 1 / sqrt(2))
+        @inbounds Y[i, j] = Complex(X[k], X[k+1]) * scale
+        @inbounds Y[j, i] = Y[i, j]
+        k += 2
+    end
+    return Y
 end
+
 @doc raw"""
 manifold_dimension(M::SymmetricMatrices{n,𝔽})
 
@@ -188,7 +202,7 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the numb
 
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
-function manifold_dimension(::SymmetricMatrices{N,𝔽}, ::Val{false}) where {N,𝔽}
+function manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}
     return div(N * (N + 1), 2) * real_dimension(𝔽)
 end
 
@@ -205,7 +219,7 @@ where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transpo
 """
 project_point(::SymmetricMatrices, ::Any...)
 
-project_point!(M::SymmetricMatrices, p, ::Val{false}) = (p .= (p + p') ./ 2)
+project_point!(M::SymmetricMatrices, p) = (p .= (p + p') ./ 2)
 
 @doc raw"""
     project_tangent(M::SymmetricMatrices, p, X)

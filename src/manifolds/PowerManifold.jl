@@ -193,14 +193,6 @@ end
 
 ^(M::Manifold, n) = PowerManifold(M, n...)
 
-function basis(M::AbstractPowerManifold, p, B::ArbitraryOrthonormalBasis)
-    return invoke(basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
-end
-
-function basis(M::AbstractPowerManifold, p, B::DiagonalizingOrthonormalBasis)
-    return invoke(basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
-end
-
 """
     check_manifold_point(M::AbstractProductManifold, p; kwargs...)
 
