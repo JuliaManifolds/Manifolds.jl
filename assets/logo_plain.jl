@@ -6,9 +6,11 @@ using Manifolds, LinearAlgebra, PGFPlotsX, Colors, Distributions, Contour, Rando
 dark_mode = true
 
 line_offset_brightness = 0.25
-patch_opacity = 1.
-geo_line_width = 27
-mesh_line_width = 3
+patch_opacity = 0.8
+geo_opacity = 0.8
+geo_line_width = 40
+mesh_line_width = 5
+mesh_opacity = 0.5
 logo_colors = [(77, 100, 174), (57, 151, 79), (202, 60, 50), (146, 89, 163)] # Julia colors
 
 rgb_logo_colors = map(x -> RGB(x ./ 255...), logo_colors)
@@ -16,7 +18,7 @@ rgb_logo_colors_bright = map(x -> RGB( (1 + line_offset_brightness) .* x ./ 255.
 rgb_logo_colors_dark = map(x -> RGB( (1 - line_offset_brightness) .* x ./ 255...), logo_colors)
 
 out_file_prefix = dark_mode ? "logo-plain-dark" : "logo-plain"
-out_file_ext = ".svg"
+out_file_ext = ".pdf"
 
 #
 # Helping functions
@@ -79,7 +81,7 @@ push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"\usetikzlibrary{arrows.meta}")
 push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"\pgfplotsset{roundcaps/.style={line cap=round}}")
 push!(
     PGFPlotsX.CUSTOM_PREAMBLE,
-    raw"\pgfplotsset{circledotted/.style={dash pattern=on 0pt off 3\pgflinewidth, line cap=round}}",
+    raw"\pgfplotsset{meshlinestyle/.style={dash pattern=on 0pt off 2.5\pgflinewidth, line cap=round}}",
 )
 if dark_mode
     push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"\pagecolor{black}")
@@ -128,17 +130,17 @@ for i in eachindex(base_points)
     optionsP = @pgf {fill = patch_colors[i], draw = "none", opacity = patch_opacity}
     plot_patch!(tp, S, x, basis, π / 5, θs; options = optionsP)
     optionsL = @pgf {
-        circledotted,
-        color = patch_colors_line[i],
+        meshlinestyle,
+        color = dark_mode ? "white" : "black",
         line_width = mesh_line_width,
-        opacity = 1.,
+        opacity = mesh_opacity,
     }
     plot_normal_coord!(tp, S, x, basis, rs, θs; options = optionsL)
 end
 
 #
 # Plot geodesics
-options = @pgf {no_markers, roundcaps, line_width = geo_line_width, color = rgb_logo_colors[1]}
+options = @pgf {opacity=geo_opacity, no_markers, roundcaps, line_width = geo_line_width, color = rgb_logo_colors[1]}
 plot_geodesic!(tp, S, base_points[1], base_points[2]; options = options)
 plot_geodesic!(tp, S, base_points[1], base_points[3]; options = options)
 plot_geodesic!(tp, S, base_points[2], base_points[3]; options = options)
