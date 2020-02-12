@@ -37,7 +37,7 @@ whether `p` is a symmetric matrix of size `(n,n)` with values from the correspon
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
-function check_manifold_point(M::SymmetricMatrices{n,𝔽}, p, ::Val{false}; kwargs...) where {n,𝔽}
+function check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
     if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
@@ -74,7 +74,7 @@ and its values have to be from the correct [`AbstractNumbers`](@ref).
 
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
-function check_tangent_vector(M::SymmetricMatrices{n,𝔽}, p, X, ::Val{false}; kwargs...) where {n,𝔽}
+function check_tangent_vector(M::SymmetricMatrices{n,𝔽}, p, X; kwargs...) where {n,𝔽}
     t = check_manifold_point(M, p; kwargs...)
     t === nothing || return t
     if (𝔽 === ℝ) && !(eltype(X) <: Real)

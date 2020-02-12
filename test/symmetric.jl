@@ -47,7 +47,7 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
-                basis_types_vecs = bases,
+                basis_types_vecs = (DiagonalizingOrthonormalBasis(log(M, pts[1], pts[2])), bases...),
                 basis_types_to_from = bases,
             )
             test_manifold(
