@@ -6,11 +6,11 @@ using Manifolds, LinearAlgebra, PGFPlotsX, Colors, Distributions, Contour, Rando
 dark_mode = true
 
 line_offset_brightness = 0.25
-patch_opacity = 0.8
-geo_opacity = 0.8
+patch_opacity = 1.0
+geo_opacity = 0.66
 geo_line_width = 40
 mesh_line_width = 5
-mesh_opacity = 0.5
+mesh_opacity = dark_mode ? 0.5 : 0.7
 logo_colors = [(77, 100, 174), (57, 151, 79), (202, 60, 50), (146, 89, 163)] # Julia colors
 
 rgb_logo_colors = map(x -> RGB(x ./ 255...), logo_colors)
@@ -140,7 +140,12 @@ end
 
 #
 # Plot geodesics
-options = @pgf {opacity=geo_opacity, no_markers, roundcaps, line_width = geo_line_width, color = rgb_logo_colors[1]}
+options = @pgf {
+    opacity=geo_opacity,
+    no_markers,
+    roundcaps,
+    line_width = geo_line_width,
+    color = dark_mode ? "white" : "black"}
 plot_geodesic!(tp, S, base_points[1], base_points[2]; options = options)
 plot_geodesic!(tp, S, base_points[1], base_points[3]; options = options)
 plot_geodesic!(tp, S, base_points[2], base_points[3]; options = options)
