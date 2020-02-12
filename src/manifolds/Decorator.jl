@@ -132,6 +132,36 @@ function get_basis(M::DT, p, B::ArbitraryOrthonormalBasis, ::Val{false}) where {
     error(manifold_function_not_implemented_message(M, get_basis, p, B))
 end
 
+function get_basis(M::DT, p, B::ProjectedOrthonormalBasis{:svd,ℝ}) where {DT<:AbstractDecoratorManifold}
+    return get_basis(M, p, B, _acts_transparently(M, get_basis))
+end
+function get_basis(M::DT, p, B::ProjectedOrthonormalBasis{:svd,ℝ}, ::Val{true}) where {DT<:AbstractDecoratorManifold}
+    return get_basis(M.manifold, p, B)
+end
+function get_basis(M::DT, p, B::ProjectedOrthonormalBasis{:svd,ℝ}, ::Val{false}) where {DT<:AbstractDecoratorManifold}
+    error(manifold_function_not_implemented_message(M, get_basis, p, B))
+end
+
+function get_coordinates(M::DT, p, X, B::AbstractBasis) where {DT<:AbstractDecoratorManifold}
+    return get_coordinates(M, p, X, B, _acts_transparently(M, get_coordinates))
+end
+function get_coordinates(M::DT, p, X, B::AbstractBasis, ::Val{true}) where {DT<:AbstractDecoratorManifold}
+    return get_coordinates(M.manifold, p, X, B)
+end
+function get_coordinates(M::DT, p, X, B::AbstractBasis, ::Val{false}) where {DT<:AbstractDecoratorManifold, }
+    error(manifold_function_not_implemented_message(M, get_coordinates, p, X, B))
+end
+
+function get_vector(M::DT, p, X, B::AbstractBasis) where {DT<:AbstractDecoratorManifold}
+    return get_vector(M, p, X, B, _acts_transparently(M, get_vector))
+end
+function get_vector(M::DT, p, X, B::AbstractBasis, ::Val{true}) where {DT<:AbstractDecoratorManifold}
+    return get_vector(M.manifold, p, X, B)
+end
+function get_vector(M::DT, p, X, B::AbstractBasis, ::Val{false}) where {DT<:AbstractDecoratorManifold, }
+    error(manifold_function_not_implemented_message(M, get_vector, p, X, B))
+end
+
 
 function hat!(M::DT, X, p, Xⁱ) where {DT<:AbstractDecoratorManifold}
     return hat!(M, X, p, Xⁱ, _acts_transparently(M, hat!))

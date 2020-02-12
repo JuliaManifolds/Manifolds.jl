@@ -18,6 +18,7 @@ import Base:
     eltype,
     exp,
     getindex,
+    getproperty,
     identity,
     inv,
     isapprox,
