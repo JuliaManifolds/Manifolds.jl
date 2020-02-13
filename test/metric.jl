@@ -62,6 +62,9 @@ function Manifolds.sharp!(::BaseManifold, v::FVector{Manifolds.TangentSpaceType}
 end
 
 @testset "Metrics" begin
+    @testset "Metric Basics" begin
+        @test length(methods(is_default_metric)) == 1
+    end
     @testset "solve_exp_ode error message" begin
         E = TestEuclidean{3}()
         g = TestEuclideanMetric()

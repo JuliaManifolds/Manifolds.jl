@@ -268,9 +268,9 @@ function test_group(
     end
 
     test_invariance && @testset "metric invariance" begin
-        if has_invariant_metric(G, LeftAction()) === Val(true)
+        if invariant_metric_dispatch(G, LeftAction()) === Val(true)
             @testset "left-invariant" begin
-                @test check_has_invariant_metric(
+                @test has_approx_invariant_metric(
                     G,
                     g_pts[1],
                     v_pts[1],
@@ -280,9 +280,9 @@ function test_group(
                 )
             end
         end
-        if has_invariant_metric(G, RightAction()) === Val(true)
+        if invariant_metric_dispatch(G, RightAction()) === Val(true)
             @testset "right-invariant" begin
-                @test check_has_invariant_metric(
+                @test has_approx_invariant_metric(
                     G,
                     g_pts[1],
                     v_pts[1],

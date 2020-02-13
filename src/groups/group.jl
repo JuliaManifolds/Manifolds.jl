@@ -62,6 +62,14 @@ function base_group(M::Manifold)
 end
 base_group(G::AbstractGroupManifold) = G
 
+decorator_group_dispatch(M::GM) where {GM <: AbstractGroupManifold} = Val(true)
+function is_group_decorator(M::GM) where {GM <: AbstractGroupManifold}
+    return is_group_decorator(M,decorator_group_dispatch(M))
+end
+_is_group_decorator(M::GM, ::Val{T}) where {T, GM <: AbstractGroupManifold} = T
+
+default_decorator_dispach(M::GM) where {GM <: AbstractGroupManifold} = Val(false)
+
 # piping syntax for decoration
 if VERSION ≥ v"1.3"
     (op::AbstractGroupOperation)(M::Manifold) = GroupManifold(M, op)

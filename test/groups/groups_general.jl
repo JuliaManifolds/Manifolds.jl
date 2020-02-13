@@ -2,6 +2,9 @@
 include("../utils.jl")
 
 @testset "General group tests" begin
+    @test length(methods(has_biinvariant_metric)) == 1
+    @test length(methods(has_invariant_metric)) == 1
+    @test length(methods(has_biinvariant_metric)) == 1
     @testset "Not implemented operation" begin
         G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
         @test repr(G) == "GroupManifold(NotImplementedManifold(), NotImplementedOperation())"
@@ -9,14 +12,12 @@ include("../utils.jl")
         v = [2.0, 3.0]
         eg = Identity(G)
         @test repr(eg) === "Identity($(G))"
-
+        @test length(methods(is_decorator_group)) == 1
         @test_throws Exception Identity(G, Val(true))
         @test_throws ErrorException Identity(G, Val(false))
 
         @test Manifolds.is_decorator_group(G)
         @test !Manifolds.is_decorator_group(NotImplementedManifold())
-        @test !Manifolds.is_decorator_group(G, Val(true))
-        @test !Manifolds.is_decorator_group(G, Val(false))
 
         @test base_group(G) === G
 

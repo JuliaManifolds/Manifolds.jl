@@ -354,7 +354,7 @@ Get the metric $g$ of the manifold `M`.
 metric(M::MetricManifold) = M.metric
 
 function normal_tvector_distribution(M::MMT, p, σ) where {MMT<:MetricManifold}
-    return normal_tvector_distribution(M, p, σ, Val(is_default_metric(M)))
+    return normal_tvector_distribution(M, p, σ, default_metric_dispatch(M))
 end
 function normal_tvector_distribution(M::MMT, p, σ, ::Val{true}) where {MMT<:MetricManifold}
     return normal_tvector_distribution(base_manifold(M), p, σ)

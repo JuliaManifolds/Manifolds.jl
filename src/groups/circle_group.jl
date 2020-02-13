@@ -10,7 +10,7 @@ CircleGroup() = GroupManifold(Circle{ℂ}(), MultiplicationOperation())
 
 show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
 
-has_invariant_metric(::CircleGroup, ::ActionDirection) = Val(true)
+invariant_metric_dispatch(::CircleGroup, ::ActionDirection) = Val(true)
 
 default_metric_dispatch(::MetricManifold{CircleGroup,EuclideanMetric}) = Val(true)
 

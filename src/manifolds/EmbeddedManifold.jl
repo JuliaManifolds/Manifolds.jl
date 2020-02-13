@@ -109,7 +109,7 @@ function show(io::IO, ::EmbeddedManifold{M,N}) where {N <: Manifold, M <: Manifo
     print(io, "EmbeddedManifold($(M),$(N))")
 end
 
-default_decorator_dispatch(M::EM) where {EM <: EmbeddedManifold} = is_default_embedding(M)
+default_decorator_dispatch(M::EM) where {EM <: EmbeddedManifold} = default_embedding:dispatch(M)
 function decorator_transparent_dispatch(
     ::typeof(check_manifold_point),
     ::AbstractEmbeddedManifold,

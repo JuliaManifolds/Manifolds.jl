@@ -12,6 +12,13 @@ different from the internal manifold, two steps are required. Let's assume the f
 1. set `decorator_transparent_dispatch(f,M) = false`
 2. implement `f(DM,arg1,arg2)`
 
-Notw that by setting a `default_decorator_dispatch` function for your type, which is set to `is_default_metric` in our example manifold, you can still set the default matric to fall back to `f(M, arg1, args2)` even if the decorator is set to be nontransparent by step 1.
+Notw that by setting a [`default_decorator_dispatch`](@ref) function for your type,
+which is set to [`default_metric_dispatch`] in our example manifold, you can still set the default matric to fall back to `f(M, arg1, args2)` even if the decorator is set to be nontransparent by step 1.
 This makes it possible to extend a manifold or all manifolds with a feature, where the original implementation already covers one specific case. The [`MetricManifold`](@ref) is the best example, since the default metric indicates, for which metric the manifold was originally implemented, such that those functions are just passed through.
 This can best be seen in the [`SymmetricPositiveDefinite`](@ref) manifold with its [`LinearAffineMetric`](@ref).
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/Decorator.jl"]
+Order = [:type, :function]
+```

@@ -18,7 +18,7 @@ function TranslationGroup(n::Int...; field::AbstractNumbers = ℝ)
     )
 end
 
-has_invariant_metric(::TranslationGroup, ::ActionDirection) = Val(true)
+invariant_metric_dispatch(::TranslationGroup, ::ActionDirection) = Val(true)
 
 default_metric_dispatch(::MetricManifold{<:TranslationGroup,EuclideanMetric}) = Val(true)
 
