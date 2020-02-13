@@ -119,10 +119,14 @@ decorator_transparent_dispatch(M::MMT, ::typeof(inner)) where {MMT <: MetricMani
 decorator_transparent_dispatch(M::MMT, ::typeof(log!)) where {MMT <: MetricManifold} = Val(false)
 decorator_transparent_dispatch(M::MMT, ::typeof(median!)) where {MMT <: MetricManifold} = Val(false)
 decorator_transparent_dispatch(M::MMT, ::typeof(mean!)) where {MMT <: MetricManifold} = Val(false)
+decorator_transparent_dispatch(M::MMT, ::typeof(norm!)) where {MMT <: MetricManifold} = Val(false)
 decorator_transparent_dispatch(M::MMT, ::typeof(project_point!)) where {MMT <: MetricManifold} = Val(false)
 decorator_transparent_dispatch(M::MMT, ::typeof(project_tangent!)) where {MMT <: MetricManifold} = Val(false)
 decorator_transparent_dispatch(M::MMT, ::typeof(projected_distribution)) where {MMT <: MetricManifold}= Val(false)
 decorator_transparent_dispatch(M::MMT, ::typeof(sharp!)) where {MMT <: MetricManifold} = Val(false)
+decorator_transparent_dispatch(M::MMT, ::typeof(vector_transport_along!)) where {MMT <: MetricManifold} = Val(false)
+decorator_transparent_dispatch(M::MMT, ::typeof(vector_transport_direction!)) where {MMT <: MetricManifold} = Val(false)
+decorator_transparent_dispatch(M::MMT, ::typeof(vector_transport_to!)) where {MMT <: MetricManifold} = Val(false)
 
 @doc raw"""
     det_local_metric(M::MetricManifold, p)
