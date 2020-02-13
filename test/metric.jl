@@ -63,7 +63,8 @@ end
 
 @testset "Metrics" begin
     @testset "Metric Basics" begin
-        @test length(methods(is_default_metric)) == 1
+        #one for MetricManifold, one for Manifold & Metric
+        @test length(methods(is_default_metric)) == 2
     end
     @testset "solve_exp_ode error message" begin
         E = TestEuclidean{3}()
