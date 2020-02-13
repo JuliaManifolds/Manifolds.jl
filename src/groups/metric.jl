@@ -150,7 +150,7 @@ function has_invariant_metric(M::DT, conv::ActionDirection) where {DT<:AbstractD
     return has_invariant_metric(M.manifold, conv)
 end
 function has_invariant_metric(M::MetricManifold, conv::ActionDirection)
-    return val_is_default_metric(M)
+    return default_metric_dispatch(M)
 end
 function has_invariant_metric(M::Manifold, conv::ActionDirection, ::Val{true})
     return has_invariant_metric(M.manifold, conv)
@@ -172,10 +172,10 @@ function inner(M::MetricManifold{<:Manifold,<:InvariantMetric}, ::Val{false}, p,
     return inner(N, Identity(N), Xₑ, Yₑ)
 end
 
-function val_is_default_metric(M::MetricManifold{<:Manifold,<:InvariantMetric})
+function default_metric_dispatch(M::MetricManifold{<:Manifold,<:InvariantMetric})
     imetric = metric(M)
     N = MetricManifold(M.manifold, imetric.metric)
-    val_is_default_metric(N) !== Val{true} && return false
+    default_metric_dispatch(N) !== Val{true} && return false
     return has_invariant_metric(N, direction(imetric))
 end
 

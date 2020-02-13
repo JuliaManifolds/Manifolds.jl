@@ -50,10 +50,6 @@ end
 
 show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
-val_is_decorator_group(M::GM) where {GM <: AbstractGroupManifold} = Val(true)
-
-val_is_default_decorator(M::GM) where {GM <: AbstractGroupManifold} = Val(false)
-
 """
     base_group(M::Manifold) -> AbstractGroupManifold
 

@@ -112,6 +112,18 @@ function christoffel_symbols_second_jacobian(M::MetricManifold, p; backend = :de
     return ∂Γ
 end
 
+decorator_transparent_dispatch(M::MMT, ::typeof(exp!)) where {MMT <: MetricManifold} = Val(false)
+decorator_transparent_dispatch(M::MMT, ::typeof(flat!)) where {MMT <: MetricManifold} = Val(false)
+decorator_transparent_dispatch(M::MMT, ::typeof(get_basis)) where {MMT <: MetricManifold} = Val(false)
+decorator_transparent_dispatch(M::MMT, ::typeof(inner)) where {MMT <: MetricManifold} = Val(false)
+decorator_transparent_dispatch(M::MMT, ::typeof(log!)) where {MMT <: MetricManifold} = Val(false)
+decorator_transparent_dispatch(M::MMT, ::typeof(median!)) where {MMT <: MetricManifold} = Val(false)
+decorator_transparent_dispatch(M::MMT, ::typeof(mean!)) where {MMT <: MetricManifold} = Val(false)
+decorator_transparent_dispatch(M::MMT, ::typeof(project_point!)) where {MMT <: MetricManifold} = Val(false)
+decorator_transparent_dispatch(M::MMT, ::typeof(project_tangent!)) where {MMT <: MetricManifold} = Val(false)
+decorator_transparent_dispatch(M::MMT, ::typeof(projected_distribution)) where {MMT <: MetricManifold}= Val(false)
+decorator_transparent_dispatch(M::MMT, ::typeof(sharp!)) where {MMT <: MetricManifold} = Val(false)
+
 @doc raw"""
     det_local_metric(M::MetricManifold, p)
 
@@ -148,8 +160,6 @@ in an embedded space.
 """
 exp(::MetricManifold, ::Any...)
 
-val_is_decorator_transparent(M::MMT, ::typeof(exp!)) where {MMT <: MetricManifold} = Val(false)
-
 function exp!(M::MMT, ::Val{false}, q, p, X) where {MMT<:MetricManifold}
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, p, X, tspan; dense = false, saveat = [1.0])
@@ -171,7 +181,6 @@ where $G_p$ is the local matrix representation of `G`, see [`local_metric`](@ref
 """
 flat(::MetricManifold, ::Any...)
 
-val_is_decorator_transparent(M::MMT, ::typeof(flat!)) where {MMT <: MetricManifold} = Val(false)
 
 function flat!(M::MMT, ξ::CoTFVector, p, X::TFVector, ::Val{false}) where {MMT<:MetricManifold}
     g = local_metric(M, p)
@@ -186,8 +195,6 @@ Compute the Gaussian curvature of the manifold `M` at the point `x`.
 """
 gaussian_curvature(M::MetricManifold, p; kwargs...) = ricci_curvature(M, p; kwargs...) / 2
 
-val_is_decorator_transparent(M::MMT, ::typeof(get_basis)) where {MMT <: MetricManifold} = Val(false)
-
 @doc raw"""
     inverse_local_metric(M::MetricManifold, p)
 
@@ -196,7 +203,7 @@ written $g^{ij}$.
 """
 inverse_local_metric(M::MetricManifold, p) = inv(local_metric(M, p))
 
-val_is_default_decorator(M::MMT) where {MMT <: MetricManifold} = val_is_default_metric(M)
+default_decorator_dispatch(M::MMT) where {MMT <: MetricManifold} = default_metric_dispatch(M)
 
 """
     is_default_metric(M,G)
@@ -209,11 +216,11 @@ implicitly has this metric, for example if this was the first one implemented
 or is the one most commonly assumed to be used.
 """
 function is_default_metric(M::Manifold, G::Metric)
-    return _is_default_metric(M, G, val_is_default_metric(M,G))
+    return _is_default_metric(M, G, default_metric_dispatch(M,G))
 end
 _is_default_metric(::Manifold, ::Metric, ::Val{T}) where {T} = T
 
-val_is_default_metric(::Manifold, ::Metric) = Val(false)
+default_metric_dispatch(::Manifold, ::Metric) = Val(false)
 """
     is_default_metric(MM)
 
@@ -228,12 +235,12 @@ implemented or is the one most commonly assumed to be used.
 function is_default_metric(M::MMT) where {MMT<:MetricManifold}
     return is_default_metric(base_manifold(M), metric(M))
 end
-function val_is_default_metric(M::MMT) where {MMT<:MetricManifold}
-    return val_is_default_metric(base_manifold(M), metric(M))
+function default_metric_dispatch(M::MMT) where {MMT<:MetricManifold}
+    return default_metric_dispatch(base_manifold(M), metric(M))
 end
 
 function convert(T::Type{MetricManifold{MT,GT}}, M::MT) where {MT,GT}
-    return _convert_with_default(M, GT, val_is_default_metric(M, GT()))
+    return _convert_with_default(M, GT, default_metric_dispatch(M, GT()))
 end
 
 function _convert_with_default(M::MT, T::Type{<:Metric}, ::Val{true}) where {MT<:Manifold}
@@ -257,8 +264,6 @@ g_p(X, Y) = ⟨X, G_p Y⟩,
 where $G_p$ is the loal matrix representation of the [`Metric`](@ref) `G`.
 """
 inner(::MetricManifold, ::Any)
-
-val_is_decorator_transparent(M::MMT, ::typeof(inner)) where {MMT <: MetricManifold} = Val(false)
 
 function inner(M::MMT, p, X, Y, ::Val{false}) where {MMT<:MetricManifold}
     return dot(X, local_metric(M, p) * Y)
@@ -309,7 +314,6 @@ falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for
 """
 log(::MetricManifold, ::Any...)
 
-val_is_decorator_transparent(M::MMT, ::typeof(log!)) where {MMT <: MetricManifold} = Val(false)
 
 @doc raw"""
     log_local_metric_density(M::MetricManifold, p)
@@ -319,7 +323,6 @@ is given by $ρ = \log \sqrt{|\det [g_{ij}]|}$.
 """
 log_local_metric_density(M::MetricManifold, p) = log(abs(det_local_metric(M, p))) / 2
 
-val_is_decorator_transparent(M::MMT, ::typeof(mean!)) where {MMT <: MetricManifold} = Val(false)
 
 function mean!(
     M::MMT,
@@ -331,8 +334,6 @@ function mean!(
 ) where {MMT<:MetricManifold}
     return mean!(M, p, x, w, GradientDescentEstimation(); kwargs...)
 end
-
-val_is_decorator_transparent(M::MMT, ::typeof(median!)) where {MMT <: MetricManifold} = Val(false)
 
 function median!(
     M::MMT,
@@ -361,11 +362,6 @@ end
 function normal_tvector_distribution(M::MMT, p, σ, ::Val{false}) where {MMT<:MetricManifold}
     error("normal_tvector_distribution not implemented for a $(typeof(M)) at point $(typeof(p)) with standard deviation $(typeof(σ)).")
 end
-
-val_is_decorator_transparent(M::MMT, ::typeof(project_point!)) where {MMT <: MetricManifold} = Val(false)
-val_is_decorator_transparent(M::MMT, ::typeof(project_tangent!)) where {MMT <: MetricManifold} = Val(false)
-
-val_is_decorator_transparent(M::MMT, ::typeof(projected_distribution)) where {MMT <: MetricManifold}= Val(false)
 
 """
     ricci_curvature(M::MetricManifold, p; backend = :default)
@@ -424,8 +420,6 @@ where $G_p$ is the local matrix representation of `G`, i.e. one employs
 [`inverse_local_metric`](@ref) here to obtain $G_p^{-1}$.
 """
 sharp(::MetricManifold, ::Any)
-
-val_is_decorator_transparent(M::MMT, ::typeof(sharp!)) where {MMT <: MetricManifold} = Val(false)
 
 function sharp!(M::N, X::TFVector, p, ξ::CoTFVector, ::Val{false}) where {N<:MetricManifold}
     Ginv = inverse_local_metric(M, p)

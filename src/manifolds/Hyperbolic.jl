@@ -150,7 +150,7 @@ inner product on $ℝ^{n+1}$.
 """
 @inline inner(M::Hyperbolic, p, X, Y) = minkowski_dot(X, Y)
 
-val_is_default_metric(::Hyperbolic, ::MinkowskiMetric) = Val(true)
+default_metric_dispatch(::Hyperbolic, ::MinkowskiMetric) = Val(true)
 
 @doc raw"""
     log(M::Hyperbolic, p, q)

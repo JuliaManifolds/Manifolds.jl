@@ -4,19 +4,33 @@
 
 """
     AbstractDecoratorManifold <: Manifold
+
+An `AbstractDecoratorManifold` indicates that to some extend a manifold subtype
+decorates another manifold in the sense that
+
+* it extends the functionality of a manifold with further features
+* it defines a new manifold that internally uses functions from another manifold
+
+with the main intend that several or most functions of [`Manifold`](@ref) are transparently
+passed thrugh to the manifold that is decorated.
 """
 abstract type AbstractDecoratorManifold <: Manifold end
 
 """
     is_default_decorator(M)
 
-For any manifold that is a subtype of [`AbstractDecoratorManifold`](@ref)
-indicates which function is used to determine the default decorator.
-This default decorator acts transparent even for functions where transparency is disabled.
+For any manifold that is a subtype of [`AbstractDecoratorManifold`](@ref), this function
+indicates whether a certain manifold `M` acts as a default decorator.
+
+This yields that _all_ functions are passed through to the [`Manifold`](@ref) that is
+decorated independently of [`is_decorator_transparent`](@ref) for single functions.
+
+The idea is that a set of decorators has a default decorator that is already covered
+by the orginial implementation.
 """
-is_default_decorator(M::Manifold) = _is_default_decorator(M, val_is_default_decorator(M))
+is_default_decorator(M::Manifold) = _is_default_decorator(M, default_decorator_dispatch(M))
 _is_default_decorator(M::Manifold, ::Val{T}) where {T} = T
-val_is_default_decorator(M::Manifold) = Val(false)
+default_decorator_dispatch(M::Manifold) = Val(false)
 
 """
     is_decorator_transparent(f, M, args...)
@@ -31,13 +45,13 @@ If a decorator manifold is not in general transparent, it might still pass down
 for the case that a decorator is the default decorator, see [`is_default_decorator`](@ref).
 """
 function is_decorator_transparent(f, M::Manifold, args...)
-    return _is_decorator_transparent(val_is_decorator_transparent(f, M, args...))
+    return _is_decorator_transparent(decorator_transparent_dispatch(f, M, args...))
 end
 _is_decorator_transparent(::Val{T}) where {T} = T
-val_is_decorator_transparent(f, M::Manifold, args...) = Val(true)
+decorator_transparent_dispatch(f, M::Manifold, args...) = Val(true)
 
 function _acts_transparently(f, M::Manifold, args...)
-    return _val_or(val_is_default_decorator(M), val_is_decorator_transparent(f, M, args...))
+    return _val_or(default_decorator_dispatch(M), decorator_transparent_dispatch(f, M, args...))
 end
 
 _val_or(::Val{T1}, ::Val{T2}) where {T1,T2} = Val(T1 || T2)
@@ -120,6 +134,12 @@ end
     p,
     X,
     B::AbstractPrecomputedOrthonormalBasis,
+)
+@decorator_transparent_function get_coordinates(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractPrecomputedOrthonormalBasis{ℝ},
 )
 
 @decorator_transparent_function get_vector(
