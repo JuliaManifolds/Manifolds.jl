@@ -95,7 +95,7 @@ include("utils.jl")
             end
         end
         d2onb = get_basis(M2, x, DiagonalizingOrthonormalBasis(v))
-        @test donb.kappas == d2onb.kappas
-        @test donb.vectors==d2onb.vectors
+        @test donb.data.kappas == d2onb.eigenvalues
+        @test get_vectors(base_manifold(M2), x, donb) == get_vectors(M2, x, d2onb)
     end
 end

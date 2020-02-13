@@ -17,23 +17,23 @@ Manifolds.get_vector(::ProjManifold, x, v, ::ArbitraryOrthonormalBasis) = revers
     @test number_system(pb) == ℝ
     @test get_basis(M, x, pb) == pb
     N = manifold_dimension(M)
-    @test isa(pb, PrecomputedOrthonormalBasis)
-    @test length(pb.vectors) == N
+    @test isa(pb, CachedBasis)
+    @test length(get_vectors(M, x, pb)) == N
     # test orthonormality
     for i in 1:N
-        @test norm(M, x, pb.vectors[i]) ≈ 1
+        @test norm(M, x, get_vectors(M, x, pb)[i]) ≈ 1
         for j in i+1:N
-            @test inner(M, x, pb.vectors[i], pb.vectors[j]) ≈ 0 atol = 1e-15
+            @test inner(M, x, get_vectors(M, x, pb)[i], get_vectors(M, x, pb)[j]) ≈ 0 atol = 1e-15
         end
     end
     # check projection idempotency
     for i in 1:N
-        @test project_tangent(M, x, pb.vectors[i]) ≈ pb.vectors[i]
+        @test project_tangent(M, x, get_vectors(M, x, pb)[i]) ≈ get_vectors(M, x, pb)[i]
     end
 
     aonb = get_basis(M, x, ArbitraryOrthonormalBasis())
-    @test size(aonb.vectors) == (5,)
-    @test aonb.vectors[1] ≈ [0, 0, 0, 0, 1]
+    @test size(get_vectors(M, x, aonb)) == (5,)
+    @test get_vectors(M, x, aonb)[1] ≈ [0, 0, 0, 0, 1]
 end
 
 struct NonManifold <: Manifold end
@@ -63,19 +63,24 @@ struct NonBasis <: Manifolds.AbstractBasis{ℝ} end
         @test isapprox(M, pts[1], v1, vbi)
 
         b = get_basis(M, pts[1], ArbitraryOrthonormalBasis())
-        @test isa(b, PrecomputedOrthonormalBasis)
+        @test isa(b, CachedBasis{ArbitraryOrthonormalBasis{ℝ},Array{Array{Float64,1},1},ℝ})
         N = manifold_dimension(M)
-        @test length(b.vectors) == N
+        @test length(get_vectors(M, pts[1], b)) == N
         # check orthonormality
         for i in 1:N
-            @test norm(M, pts[1], b.vectors[i]) ≈ 1
+            @test norm(M, pts[1], get_vectors(M, pts[1], b)[i]) ≈ 1
             for j in i+1:N
-                @test inner(M, pts[1], b.vectors[i], b.vectors[j]) ≈ 0
+                @test inner(
+                    M,
+                    pts[1],
+                    get_vectors(M, pts[1], b)[i],
+                    get_vectors(M, pts[1], b)[j]
+                ) ≈ 0
             end
         end
         # check that the coefficients correspond to the basis
         for i in 1:N
-            @test inner(M, pts[1], v1, b.vectors[i]) ≈ vb[i]
+            @test inner(M, pts[1], v1, get_vectors(M, pts[1], b)[i]) ≈ vb[i]
         end
 
         @test get_coordinates(M, pts[1], v1, b) ≈ get_coordinates(M, pts[1], v1, ArbitraryOrthonormalBasis())
@@ -89,9 +94,9 @@ struct NonBasis <: Manifolds.AbstractBasis{ℝ} end
         b = get_basis(A, pts[1], aonb)
         @test_throws ErrorException get_vector(A, pts[1], [], aonb)
         @test_throws DimensionMismatch get_coordinates(A, pts[1], [], aonb)
-        @test_throws ArgumentError get_basis(A, pts[1], PrecomputedOrthonormalBasis([pts[1]]))
-        @test_throws ArgumentError get_basis(A, pts[1], PrecomputedOrthonormalBasis([pts[1], pts[1], pts[1]]))
-        @test_throws ArgumentError get_basis(A, pts[1], PrecomputedOrthonormalBasis([2*pts[1], pts[1], pts[1]]))
+        @test_throws ArgumentError get_basis(A, pts[1], CachedBasis(aonb,[pts[1]]))
+        @test_throws ArgumentError get_basis(A, pts[1], CachedBasis(aonb,[pts[1], pts[1], pts[1]]))
+        @test_throws ArgumentError get_basis(A, pts[1], CachedBasis(aonb,[2*pts[1], pts[1], pts[1]]))
     end
 end
 
@@ -112,7 +117,7 @@ end
     x = collect(reshape(1.0:6.0, (2, 3)))
     pb = get_basis(M, x, ArbitraryOrthonormalBasis())
     @test sprint(show, "text/plain", pb) == """
-    PrecomputedOrthonormalBasis with coordinates in ℝ and 6 basis vectors:
+    ArbitraryOrthonormalBasis{ℝ} with coordinates in ℝ and 6 basis vectors:
      E1 =
       2×3 Array{Float64,2}:
        1.0  0.0  0.0
@@ -130,10 +135,10 @@ end
       2×3 Array{Float64,2}:
        0.0  0.0  0.0
        0.0  0.0  1.0"""
-
-    dpb = PrecomputedDiagonalizingOrthonormalBasis(pb.vectors, Float64[1, 2, 3, 4, 5, 6])
+    b = DiagonalizingOrthonormalBasis(get_vectors(M, x, pb)[1])
+    dpb = CachedBasis(b, Float64[1, 2, 3, 4, 5, 6], get_vectors(M, x, pb))
     @test sprint(show, "text/plain", dpb) == """
-    PrecomputedDiagonalizingOrthonormalBasis with coordinates in ℝ and 6 basis vectors
+    DiagonalizingOrthonormalBasis(ℝ) with coordinates in ℝ and 6 basis vectors
     Basis vectors:
      E1 =
       2×3 Array{Float64,2}:
@@ -165,15 +170,15 @@ end
     x = reshape(Float64[1], (1, 1, 1))
     pb = get_basis(M, x, ArbitraryOrthonormalBasis())
     @test sprint(show, "text/plain", pb) == """
-    PrecomputedOrthonormalBasis with coordinates in ℝ and 1 basis vector:
+    ArbitraryOrthonormalBasis(ℝ) with coordinates in ℝ and 1 basis vector:
      E1 =
       1×1×1 Array{Float64,3}:
       [:, :, 1] =
        1.0"""
 
-   dpb = PrecomputedDiagonalizingOrthonormalBasis(pb.vectors, Float64[1])
+   dpb = CachedBasis(DiagonalizingOrthonormalBasis(get_vectors(M, x, pb)), Float64[1], get_vectors(M, x, pb))
    @test sprint(show, "text/plain", dpb) == """
-   PrecomputedDiagonalizingOrthonormalBasis with coordinates in ℝ and 1 basis vector
+   DiagonalizingOrthonormalBasis(ℝ) with coordinates in ℝ and 1 basis vector
    Basis vectors:
     E1 =
      1×1×1 Array{Float64,3}:

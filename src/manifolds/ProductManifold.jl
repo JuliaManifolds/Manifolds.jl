@@ -88,18 +88,8 @@ The tuple `parts` stores bases corresponding to multiplied manifolds.
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct PrecomputedProductOrthonormalBasis{
-    T<:NTuple{N,AbstractPrecomputedOrthonormalBasis} where {N},
-    F,
-} <: AbstractPrecomputedOrthonormalBasis{F}
+struct ProductBasisData{T<:NTuple{N,S} where {N,S}}
     parts::T
-end
-
-function PrecomputedProductOrthonormalBasis(
-    parts::NTuple{N,AbstractPrecomputedOrthonormalBasis},
-    F::AbstractNumbers = ℝ,
-) where {N}
-    return PrecomputedProductOrthonormalBasis{typeof(parts),F}(parts)
 end
 
 """
@@ -249,7 +239,7 @@ end
 
 function get_basis(M::ProductManifold, p, B::AbstractBasis)
     parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
-    return PrecomputedProductOrthonormalBasis(parts)
+    return CachedBasis(ProductBasisData(parts))
 end
 function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     vs = map(ziptuples(
@@ -259,20 +249,20 @@ function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     )) do t
         return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
     end
-    return PrecomputedProductOrthonormalBasis(vs)
+    return CachedBasis(ProductBasisData(vs))
 end
 function get_basis(M::ProductManifold, p, B::ArbitraryOrthonormalBasis)
     parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
-    return PrecomputedProductOrthonormalBasis(parts)
+    return CachedBasis(ProductBasisData(parts))
 end
 
-function get_coordinates(M::ProductManifold, p, X, B::PrecomputedProductOrthonormalBasis)
+function get_coordinates(M::ProductManifold, p, X, B::CachedBasis{ProductBasisData})
     reps = map(
         get_coordinates,
         M.manifolds,
         submanifold_components(p),
         submanifold_components(X),
-        B.parts,
+        B.data.parts,
     )
     return vcat(reps...)
 end
@@ -288,7 +278,7 @@ function get_vector(
     M::ProductManifold{<:NTuple{N,Any}},
     p::ProductRepr,
     X,
-    B::PrecomputedProductOrthonormalBasis,
+    B::CachedBasis{ProductBasisData},
 ) where {N}
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
@@ -297,7 +287,7 @@ function get_vector(
             M.manifolds[i],
             submanifold_component(p, i),
             X[dims_acc[i]:dims_acc[i]+dims[i]-1],
-            B.parts[i],
+            B.data.parts[i],
         )
     end
     return ProductRepr(parts)
@@ -324,7 +314,7 @@ end
 function get_vectors(
     M::ProductManifold{<:NTuple{N,Manifold}},
     p::ProductRepr,
-    B::PrecomputedProductOrthonormalBasis,
+    B::CachedBasis{ProductBasisData},
 ) where {N}
     xparts = submanifold_components(p)
     BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.parts))
@@ -403,7 +393,7 @@ function inverse_retract!(M::ProductManifold, X, p, q, method::InverseProductRet
     return X
 end
 
-is_default_metric(::ProductManifold, ::ProductMetric) = Val(true)
+default_metric_dispatch(::ProductManifold, ::ProductMetric) = Val(true)
 
 function isapprox(M::ProductManifold, p, q; kwargs...)
     return all(

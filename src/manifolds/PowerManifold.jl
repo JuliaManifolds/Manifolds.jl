@@ -151,18 +151,12 @@ The array `bases` stores bases corresponding to particular parts of the manifold
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct PrecomputedPowerOrthonormalBasis{
-    TB<:AbstractArray{<:AbstractPrecomputedOrthonormalBasis},
-    F,
-} <: AbstractPrecomputedOrthonormalBasis{F}
+struct PowerBasisData{TB<:AbstractArray{T} where {T}}
     bases::TB
 end
 
-function PrecomputedPowerOrthonormalBasis(
-    bases::AbstractArray{<:AbstractPrecomputedOrthonormalBasis},
-    F::AbstractNumbers = ℝ,
-) where {N}
-    return PrecomputedPowerOrthonormalBasis{typeof(bases),F}(bases)
+function PrecomputedPowerOrthonormalBasis(bases::AbstractArray{T}) where {T}
+    return PrecomputedPowerOrthonormalBasis{typeof(bases)}(bases)
 end
 
 const PowerManifoldMultidimensional =
@@ -317,7 +311,7 @@ end
 function get_basis(M::AbstractPowerManifold, p, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     vs = [get_basis(M.manifold, _read(M, rep_size, p, i), B) for i in get_iterator(M)]
-    return PrecomputedPowerOrthonormalBasis(vs)
+    return CachedBasis(PowerBasisData(vs))
 end
 function get_basis(M::AbstractPowerManifold, p, B::ArbitraryOrthonormalBasis)
     return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
@@ -338,7 +332,7 @@ function get_coordinates(
     M::AbstractPowerManifold,
     p,
     X,
-    B::PrecomputedPowerOrthonormalBasis,
+    B::CachedBasis{PowerBasisData},
 )
     rep_size = representation_size(M.manifold)
     vs = [
@@ -346,7 +340,7 @@ function get_coordinates(
             M.manifold,
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
-            B.bases[i...],
+            B.data.bases[i...],
         )
         for i in get_iterator(M)
     ]
@@ -359,7 +353,7 @@ get_iterator(M::PowerManifold{<:Manifold,Tuple{N}}) where {N} = 1:N
     return Base.product(map(Base.OneTo, size_tuple)...)
 end
 
-function get_vector(M::PowerManifold, p, X, B::PrecomputedPowerOrthonormalBasis)
+function get_vector(M::PowerManifold, p, X, B::CachedBasis{PowerBasisData})
     dim = manifold_dimension(M.manifold)
     rep_size = representation_size(M.manifold)
     v_out = allocate(p)
@@ -371,7 +365,7 @@ function get_vector(M::PowerManifold, p, X, B::PrecomputedPowerOrthonormalBasis)
                 M.manifold,
                 _read(M, rep_size, p, i),
                 X[v_iter:v_iter+dim-1],
-                B.bases[i...],
+                B.data.bases[i...],
             ),
         )
         v_iter += dim

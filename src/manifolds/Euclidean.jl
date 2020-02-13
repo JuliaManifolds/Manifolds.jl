@@ -82,16 +82,16 @@ flat!(M::Euclidean, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 function get_basis(M::Euclidean{<:Tuple,ℝ}, p, B::ArbitraryOrthonormalBasis)
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
-    return PrecomputedOrthonormalBasis(vecs)
+    return CachedBasis(B,vecs)
 end
 function get_basis(M::Euclidean{<:Tuple,ℂ}, p, B::ArbitraryOrthonormalBasis)
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
-    return PrecomputedOrthonormalBasis([vecs; im * vecs])
+    return CachedBasis(B,[vecs; im * vecs])
 end
 function get_basis(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
     vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors
-    kappas = zeros(real(eltype(p)), manifold_dimension(M))
-    return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
+    eigenvalues = zeros(real(eltype(p)), manifold_dimension(M))
+    return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
 function get_coordinates(M::Euclidean{<:Tuple,ℝ}, p, X, B::ArbitraryOrDiagonalizingBasis)

@@ -321,6 +321,7 @@ export AbstractEstimationMethod,
     CyclicProximalPointEstimation,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius
+
 export allocate,
     allocate_result,
     base_manifold,
@@ -473,12 +474,12 @@ export affine_matrix,
 # Orthonormal bases
 export AbstractBasis,
     AbstractOrthonormalBasis,
-    AbstractPrecomputedOrthonormalBasis,
     ArbitraryOrthonormalBasis,
     DiagonalizingOrthonormalBasis,
-    PrecomputedDiagonalizingOrthonormalBasis,
-    PrecomputedOrthonormalBasis,
-    PrecomputedProductOrthonormalBasis,
-    ProjectedOrthonormalBasis
+    ProjectedOrthonormalBasis,
+    CachedBasis,
+    DiagonalizingBasisData,
+    ProductBasisData,
+    PowerBasisData
 export get_basis, get_coordinates, get_vector, get_vectors, number_system
 end # module

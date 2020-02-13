@@ -24,26 +24,26 @@ The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be use
 abstract type AbstractOrthonormalBasis{𝔽} <: AbstractBasis{𝔽} end
 
 """
-    ArbitraryOrthonormalBasis(field::AbstractNumbers = ℝ)
+    ArbitraryOrthonormalBasis(𝔽::AbstractNumbers = ℝ)
 
 An arbitrary orthonormal basis on a manifold. This will usually
 be the fastest orthonormal basis available for a manifold.
 
-The type parameter `field` denotes the [`AbstractNumbers`](@ref) that will be used as
+The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as
 scalars.
 """
 struct ArbitraryOrthonormalBasis{𝔽} <: AbstractOrthonormalBasis{𝔽} end
 
-ArbitraryOrthonormalBasis(field::AbstractNumbers = ℝ) = ArbitraryOrthonormalBasis{field}()
+ArbitraryOrthonormalBasis(𝔽::AbstractNumbers = ℝ) = ArbitraryOrthonormalBasis{𝔽}()
 
 """
-    ProjectedOrthonormalBasis(method::Symbol, field::AbstractNumbers = ℝ)
+    ProjectedOrthonormalBasis(method::Symbol, 𝔽::AbstractNumbers = ℝ)
 
 An orthonormal basis that comes from orthonormalization of basis vectors
 of the ambient space projected onto the subspace representing the tangent space
 at a given point.
 
-The type parameter `field` denotes the [`AbstractNumbers`](@ref) that will be used as
+The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as
 scalars.
 
 Available methods:
@@ -55,25 +55,25 @@ Available methods:
 """
 struct ProjectedOrthonormalBasis{Method,𝔽} <: AbstractOrthonormalBasis{𝔽} end
 
-function ProjectedOrthonormalBasis(method::Symbol, field::AbstractNumbers = ℝ)
-    return ProjectedOrthonormalBasis{method,field}()
+function ProjectedOrthonormalBasis(method::Symbol, 𝔽::AbstractNumbers = ℝ)
+    return ProjectedOrthonormalBasis{method,𝔽}()
 end
 
 @doc raw"""
-    DiagonalizingOrthonormalBasis(frame_direction, field::AbstractNumbers = ℝ)
+    DiagonalizingOrthonormalBasis(frame_direction, 𝔽::AbstractNumbers = ℝ)
 
 An orthonormal basis `Ξ` as a vector of tangent vectors (of length determined by
 [`manifold_dimension`](@ref)) in the tangent space that diagonalizes the curvature
 tensor $R(u,v)w$ and where the direction `frame_direction` $v$ has curvature `0`.
 
-The type parameter `field` denotes the [`AbstractNumbers`](@ref) that will be used as
+The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as
 scalars.
 """
 struct DiagonalizingOrthonormalBasis{TV,𝔽} <: AbstractOrthonormalBasis{𝔽}
     frame_direction::TV
 end
-function DiagonalizingOrthonormalBasis(X, field::AbstractNumbers = ℝ)
-    return DiagonalizingOrthonormalBasis{typeof(X),field}(X)
+function DiagonalizingOrthonormalBasis(X, 𝔽::AbstractNumbers = ℝ)
+    return DiagonalizingOrthonormalBasis{typeof(X),𝔽}(X)
 end
 struct DiagonalizingBasisData{D,V,ET}
     frame_direction::D
@@ -81,32 +81,27 @@ struct DiagonalizingBasisData{D,V,ET}
     vectors::V
 end
 
-
 const ArbitraryOrDiagonalizingBasis =
     Union{ArbitraryOrthonormalBasis,DiagonalizingOrthonormalBasis}
 
-struct TangentBasis{B,V,𝔽} <: AbstractBasis{𝔽} where {BT<:AbstractBasis, V}
+
+struct CachedBasis{B,V,𝔽} <: AbstractBasis{𝔽} where {BT<:AbstractBasis, V}
     data::V
 end
-function TangentBasis(
-    basis::B,
-    vectors::V,
-    field::AbstractNumbers = ℝ
-) where  {B<:AbstractBasis, V<:AbstractVector}
-    return TangentBasis{B,V,field}(vectors)
+function CachedBasis(basis::B, data::V, 𝔽::AbstractNumbers = ℝ) where  {V,B<:AbstractBasis}
+    return CachedBasis{B,V,𝔽}(data)
 end
-function TangentBasis(basis::TangentBasis) # avoid double encapsulation
+function CachedBasis(basis::CachedBasis) # avoid double encapsulation
     return basis
 end
 function CachedBasis(
     basis::DiagonalizingOrthonormalBasis,
     eigenvalues::ET,
     vectors::T,
-    field::AbstractNumbers = ℝ) where {ET<:AbstractVector, T<:AbstractVector}
-    return CachedBasis{DiagonalizingOrthonormalBasis,DiagonalizingBasisData,field}(
-        basis,
-        DiagonalizingBasisData(basis.frame_direction, eigenvalues,vectors),
-    )
+    𝔽::AbstractNumbers = ℝ,
+) where {ET<:AbstractVector, T<:AbstractVector}
+    data = DiagonalizingBasisData(basis.frame_direction, eigenvalues, vectors)
+    return CachedBasis(basis, data, 𝔽)
 end
 
 """
@@ -124,7 +119,7 @@ See also: [`get_vector`](@ref), [`get_basis`](@ref)
 function get_coordinates(M::Manifold, p, X, B::AbstractBasis)
     error("get_coordinates not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
-function get_coordinates(M::Manifold, p, X, B::CachedBasis{<:AbstractBasis{ℝ}})
+function get_coordinates(M::Manifold, p, X, B::CachedBasis{BT}) where {BT <: AbstractBasis{ℝ}}
     return map(vb -> real(inner(M, p, X, vb)), get_vectors(M, p, B))
 end
 function get_coordinates(M::Manifold, p, X, B::CachedBasis)
@@ -177,7 +172,7 @@ end
 Compute the basis vectors of the tangent space at a point on manifold `M`
 represented by `p`.
 
-Returned object derives from [`AbstractBasis`](@ref) and may have a field `.vectors`
+Returned object derives from [`AbstractBasis`](@ref) and may have a 𝔽 `.vectors`
 that stores tangent vectors or it may store them implicitly, in which case
 the function [`get_vectors`](@ref) needs to be used to retrieve the basis vectors.
 
@@ -199,7 +194,7 @@ function get_basis(M::Manifold, p, B::ArbitraryOrthonormalBasis)
     )
 end
 get_basis(M::Manifold, p, B::CachedBasis) = B
-function get_basis(M::ArrayManifold, p, B::CachedBasis{AbstractOrthonormalBasis{T},T}) where {T}
+function get_basis(M::ArrayManifold, p, B::CachedBasis{<:AbstractOrthonormalBasis{ℝ},T,ℝ}) where {T<:AbstractVector}
     bvectors = get_vectors(M, p, B)
     N = length(bvectors)
     M_dim = manifold_dimension(M)
@@ -271,21 +266,21 @@ function get_vectors(M::Manifold, p, B::AbstractBasis)
     error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
 
-get_vectors(::Manifold, p, B::CachedBasis) = B.data
-get_vectors(::Manifold, p, B::CachedBasis{DiagonalizingOrthonormalBasis}) = B.data.vectors
+get_vectors(::Manifold, ::Any, B::CachedBasis) = B.data
+get_vectors(::Manifold, ::Any, B::CachedBasis{T,DiagonalizingBasisData,𝔽}) where {T,𝔽} = B.data.vectors
+_get_vectors(B::CachedBasis) = B.data
+_get_vectors(B::CachedBasis{T,DiagonalizingBasisData,𝔽}) where {T,𝔽} = B.data.vectors
 # related to DefaultManifold; to be moved to ManifoldsBase.jl in the future
 function get_coordinates(M::DefaultManifold, p, X, B::ArbitraryOrthonormalBasis)
-    return CachedBasis(B, reshape(X, manifold_dimension(M)))
+    return reshape(X, manifold_dimension(M))
 end
 
 function get_vector(M::DefaultManifold, p, X, B::ArbitraryOrthonormalBasis)
-    return CachedBasis(reshape(X, representation_size(M)))
+    return reshape(X, representation_size(M))
 end
 
-function get_basis(M::DefaultManifold, p, ::ArbitraryOrthonormalBasis)
-    return PrecomputedOrthonormalBasis([
-        _euclidean_basis_vector(p, i) for i in eachindex(p)
-    ])
+function get_basis(M::DefaultManifold, p, B::ArbitraryOrthonormalBasis)
+    return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
 end
 
 function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
@@ -362,7 +357,7 @@ function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis
     print(io, sk)
 end
 function show(io::IO, mime::MIME"text/plain", B::CachedBasis{T}) where {T<:AbstractBasis}
-    vectors = get_vectors(B)
+    vectors = _get_vectors(B)
     nv = length(vectors)
     print(
         io, "$(T) with coordinates in $(number_system(B)) and $(nv) basis vector$(nv == 1 ? "" : "s"):",
@@ -376,11 +371,11 @@ function show(io::IO, mime::MIME"text/plain", B::CachedBasis{T}) where {T<:Abstr
     )
 end
 function show(io::IO, mime::MIME"text/plain", B::CachedBasis{DiagonalizingOrthonormalBasis})
-    vectors = get_vectors(B)
+    vectors = _get_vectors(B)
     nv = length(vectors)
     println(
         io,
-        "PrecomputedDiagonalizingOrthonormalBasis with coordinates in $(number_system(B)) and $(nv) basis vector$(nv == 1 ? "" : "s")",
+        "$(B) with coordinates in $(number_system(B)) and $(nv) basis vector$(nv == 1 ? "" : "s")",
     )
     print(io, "Basis vectors:")
     _show_basis_vector_range_noheader(
