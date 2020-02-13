@@ -1,5 +1,5 @@
 @doc raw"""
-    SymmetricMatrices{n,𝔽} <: Manifold
+    SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbedding}
 
 The [`Manifold`](@ref) $ \operatorname{Sym}(n)$ consisting of the real- or complex-valued
 symmetric matrices of size $n × n$, i.e. the set
