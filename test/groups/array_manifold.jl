@@ -4,7 +4,7 @@
     AG = ArrayManifold(G)
     @test base_group(AG) === G
     @test (@inferred Manifolds.decorator_group_dispatch(AG)) === Val(true)
-    @test Manifolds.is_decorator_group(AG)
+    @test Manifolds.is_group_decorator(AG)
 
     eg = Matrix{Float64}(I, 3, 3)
     ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0]]

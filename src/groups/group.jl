@@ -62,13 +62,15 @@ function base_group(M::Manifold)
 end
 base_group(G::AbstractGroupManifold) = G
 
-decorator_group_dispatch(M::GM) where {GM <: AbstractGroupManifold} = Val(true)
-function is_group_decorator(M::GM) where {GM <: AbstractGroupManifold}
-    return is_group_decorator(M,decorator_group_dispatch(M))
-end
-_is_group_decorator(M::GM, ::Val{T}) where {T, GM <: AbstractGroupManifold} = T
+decorator_group_dispatch(M::Manifold) = Val(false)
+decorator_group_dispatch(M::AbstractDecoratorManifold) = decorator_group_dispatch(M.manifold)
+decorator_group_dispatch(M::AbstractGroupManifold) = Val(true)
 
-default_decorator_dispach(M::GM) where {GM <: AbstractGroupManifold} = Val(false)
+function is_group_decorator(M::Manifold)
+    return _extract_val(decorator_group_dispatch(M))
+end
+
+default_decorator_dispach(M::AbstractGroupManifold) = Val(false)
 
 # piping syntax for decoration
 if VERSION ≥ v"1.3"
@@ -142,7 +144,7 @@ isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
 isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
 function allocate_result(M::Manifold, ::typeof(hat), e::Identity, Xⁱ)
-    is_decorator_group(M) && return allocate_result(base_group(M), hat, e, Xⁱ)
+    is_group_decorator(M) && return allocate_result(base_group(M), hat, e, Xⁱ)
     error("allocate_result not implemented for manifold $(M), function hat, point $(e), and vector $(Xⁱ).")
 end
 function allocate_result(
@@ -155,7 +157,7 @@ function allocate_result(
     return allocate(Xⁱ, Size(representation_size(B)))
 end
 function allocate_result(M::Manifold, ::typeof(vee), e::Identity, X)
-    is_decorator_group(M) && return allocate_result(base_group(M), vee, e, X)
+    is_group_decorator(M) && return allocate_result(base_group(M), vee, e, X)
     error("allocate_result not implemented for manifold $(M), function vee, point $(e), and vector $(X).")
 end
 function allocate_result(
@@ -219,7 +221,7 @@ function identity(G::AbstractGroupManifold, p)
     return identity!(G, y, p)
 end
 
-identity!(M::DT, q, p) where {DT<:AbstractDecoratorManifold} = identity!(M, q, p)
+identity!(M::AbstractDecoratorManifold, q, p) = identity!(M.manifold, q, p)
 function identity!(M::Manifold, q, p)
     return error("identity! not implemented on $(typeof(M)) for points $(typeof(q)) and $(typeof(p))")
 end

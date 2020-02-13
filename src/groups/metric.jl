@@ -182,7 +182,7 @@ end
 function default_metric_dispatch(M::MetricManifold{<:Manifold,<:InvariantMetric})
     imetric = metric(M)
     N = MetricManifold(M.manifold, imetric.metric)
-    default_metric_dispatch(N) !== Val{true} && return Val(false)
+    default_metric_dispatch(N) === Val(true) || return Val(false)
     return invariant_metric_dispatch(N, direction(imetric))
 end
 
