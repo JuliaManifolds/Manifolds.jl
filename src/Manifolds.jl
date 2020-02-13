@@ -454,7 +454,7 @@ export affine_matrix,
     group_log,
     group_log!,
     has_biinvariant_metric,
-    has_invariant_metric
+    has_invariant_metric,
     identity,
     identity!,
     inv,
