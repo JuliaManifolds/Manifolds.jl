@@ -239,7 +239,7 @@ end
         g2 = DefaultBaseManifoldMetric()
         MM2 = MetricManifold(M,g2)
 
-        @test (@inferred default_metric_decorator(MM2)) === Val(true)
+        @test (@inferred is_default_metric(MM2))
         @test is_default_metric(MM) == is_default_metric(base_manifold(MM), metric(MM))
         @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2), metric(MM2))
         @test is_default_metric(MM2)

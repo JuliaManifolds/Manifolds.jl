@@ -168,7 +168,7 @@ in an embedded space.
 """
 exp(::MetricManifold, ::Any...)
 
-function exp!(M::MMT, ::Val{false}, q, p, X) where {MMT<:MetricManifold}
+function exp!(M::MMT, q, p, X) where {MMT<:MetricManifold}
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, p, X, tspan; dense = false, saveat = [1.0])
     n = length(p)
@@ -190,7 +190,7 @@ where $G_p$ is the local matrix representation of `G`, see [`local_metric`](@ref
 flat(::MetricManifold, ::Any...)
 
 
-function flat!(M::MMT, ξ::CoTFVector, p, X::TFVector, ::Val{false}) where {MMT<:MetricManifold}
+function flat!(M::MMT, ξ::CoTFVector, p, X::TFVector) where {MMT<:MetricManifold}
     g = local_metric(M, p)
     copyto!(ξ.data, g * X.data)
     return ξ
@@ -273,7 +273,7 @@ where $G_p$ is the loal matrix representation of the [`Metric`](@ref) `G`.
 """
 inner(::MetricManifold, ::Any)
 
-function inner(M::MMT, p, X, Y, ::Val{false}) where {MMT<:MetricManifold}
+function inner(M::MMT, p, X, Y) where {MMT<:MetricManifold}
     return dot(X, local_metric(M, p) * Y)
 end
 function inner(
@@ -336,8 +336,7 @@ function mean!(
     M::MMT,
     p,
     x::AbstractVector,
-    w::AbstractVector,
-    ::Val{false};
+    w::AbstractVector;
     kwargs...,
 ) where {MMT<:MetricManifold}
     return mean!(M, p, x, w, GradientDescentEstimation(); kwargs...)
@@ -347,8 +346,7 @@ function median!(
     M::MMT,
     p,
     x::AbstractVector,
-    w::AbstractVector,
-    ::Val{false};
+    w::AbstractVector;
     kwargs...,
 ) where {MMT<:MetricManifold}
     return median!(M, p, x, w, CyclicProximalPointEstimation(); kwargs...)
@@ -360,16 +358,6 @@ end
 Get the metric $g$ of the manifold `M`.
 """
 metric(M::MetricManifold) = M.metric
-
-function normal_tvector_distribution(M::MMT, p, σ) where {MMT<:MetricManifold}
-    return normal_tvector_distribution(M, p, σ, default_metric_dispatch(M))
-end
-function normal_tvector_distribution(M::MMT, p, σ, ::Val{true}) where {MMT<:MetricManifold}
-    return normal_tvector_distribution(base_manifold(M), p, σ)
-end
-function normal_tvector_distribution(M::MMT, p, σ, ::Val{false}) where {MMT<:MetricManifold}
-    error("normal_tvector_distribution not implemented for a $(typeof(M)) at point $(typeof(p)) with standard deviation $(typeof(σ)).")
-end
 
 """
     ricci_curvature(M::MetricManifold, p; backend = :default)
@@ -429,7 +417,7 @@ where $G_p$ is the local matrix representation of `G`, i.e. one employs
 """
 sharp(::MetricManifold, ::Any)
 
-function sharp!(M::N, X::TFVector, p, ξ::CoTFVector, ::Val{false}) where {N<:MetricManifold}
+function sharp!(M::N, X::TFVector, p, ξ::CoTFVector) where {N<:MetricManifold}
     Ginv = inverse_local_metric(M, p)
     copyto!(X.data, Ginv * ξ.data)
     return X
