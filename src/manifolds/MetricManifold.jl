@@ -216,27 +216,27 @@ implicitly has this metric, for example if this was the first one implemented
 or is the one most commonly assumed to be used.
 """
 function is_default_metric(M::Manifold, G::Metric)
-    return _is_default_metric(M, G, default_metric_dispatch(M,G))
+    return _extract_val(default_metric_dispatch(M, G))
 end
-_is_default_metric(::Manifold, ::Metric, ::Val{T}) where {T} = T
 
 default_metric_dispatch(::Manifold, ::Metric) = Val(false)
+function default_metric_dispatch(M::MetricManifold)
+    return default_metric_dispatch(base_manifold(M), metric(M))
+end
+
 """
-    is_default_metric(MM)
+    is_default_metric(MM::MetricManifold)
 
 Indicate whether the [`Metric`](@ref) `MM.G` is the default metric for
 the [`Manifold`](@ref) `MM.manifold,` within the [`MetricManifold`](@ref) `MM`.
 This means that any occurence of
-[`MetricManifold`](@ref)`(MM.manifold,MM.G)` where `is_default_metric(MM.manifold,MM.G)) = true`
+[`MetricManifold`](@ref)`(MM.manifold, MM.G)` where `is_default_metric(MM.manifold, MM.G)) = true`
 falls back to just be called with `MM.manifold,` such that the [`Manifold`](@ref) `MM.manifold`
 implicitly has the metric `MM.G`, for example if this was the first one
 implemented or is the one most commonly assumed to be used.
 """
-function is_default_metric(M::MMT) where {MMT<:MetricManifold}
-    return is_default_metric(base_manifold(M), metric(M))
-end
-function default_metric_dispatch(M::MMT) where {MMT<:MetricManifold}
-    return default_metric_dispatch(base_manifold(M), metric(M))
+function is_default_metric(M::MetricManifold)
+    return _extract_val(default_metric_dispatch(M))
 end
 
 function convert(T::Type{MetricManifold{MT,GT}}, M::MT) where {MT,GT}

@@ -28,8 +28,8 @@ decorated independently of [`is_decorator_transparent`](@ref) for single functio
 The idea is that a set of decorators has a default decorator that is already covered
 by the orginial implementation.
 """
-is_default_decorator(M::Manifold) = _is_default_decorator(M, default_decorator_dispatch(M))
-_is_default_decorator(M::Manifold, ::Val{T}) where {T} = T
+is_default_decorator(M::Manifold) = _extract_val(default_decorator_dispatch(M))
+
 default_decorator_dispatch(M::Manifold) = Val(false)
 
 """
@@ -45,9 +45,9 @@ If a decorator manifold is not in general transparent, it might still pass down
 for the case that a decorator is the default decorator, see [`is_default_decorator`](@ref).
 """
 function is_decorator_transparent(f, M::Manifold, args...)
-    return _is_decorator_transparent(decorator_transparent_dispatch(f, M, args...))
+    return _extract_val(decorator_transparent_dispatch(f, M, args...))
 end
-_is_decorator_transparent(::Val{T}) where {T} = T
+
 decorator_transparent_dispatch(f, M::Manifold, args...) = Val(true)
 
 function _acts_transparently(f, M::Manifold, args...)

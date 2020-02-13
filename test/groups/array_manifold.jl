@@ -3,6 +3,7 @@
     M = Rotations(3)
     AG = ArrayManifold(G)
     @test base_group(AG) === G
+    @test (@inferred Manifolds.decorator_group_dispatch(AG)) === Val(true)
     @test Manifolds.is_decorator_group(AG)
 
     eg = Matrix{Float64}(I, 3, 3)

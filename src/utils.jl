@@ -40,6 +40,8 @@ converted to a `Matrix` before the decomposition.
     return Eigen(SizedVector{s[1]}(E.values), SizedMatrix{s...}(E.vectors))
 end
 
+@inline _extract_val(::Val{T}) where {T} = T
+
 """
     log_safe(x)
 

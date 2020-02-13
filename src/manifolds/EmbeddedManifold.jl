@@ -109,7 +109,10 @@ function show(io::IO, ::EmbeddedManifold{M,N}) where {N <: Manifold, M <: Manifo
     print(io, "EmbeddedManifold($(M),$(N))")
 end
 
-default_decorator_dispatch(M::EM) where {EM <: EmbeddedManifold} = default_embedding:dispatch(M)
+function default_decorator_dispatch(M::EmbeddedManifold)
+    return default_embedding_dispatch(M)
+end
+
 function decorator_transparent_dispatch(
     ::typeof(check_manifold_point),
     ::AbstractEmbeddedManifold,
@@ -193,4 +196,46 @@ function decorator_transparent_dispatch(
     args...,
 )
     return Val(true)
+end
+function decorator_transparent_dispatch(
+    ::typeof(vector_transport_along),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(false)
+end
+function decorator_transparent_dispatch(
+    ::typeof(vector_transport_along!),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(false)
+end
+function decorator_transparent_dispatch(
+    ::typeof(vector_transport_direction),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(false)
+end
+function decorator_transparent_dispatch(
+    ::typeof(vector_transport_direction!),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(false)
+end
+function decorator_transparent_dispatch(
+    ::typeof(vector_transport_to),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(false)
+end
+function decorator_transparent_dispatch(
+    ::typeof(vector_transport_to!),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(false)
 end

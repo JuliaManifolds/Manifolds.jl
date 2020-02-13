@@ -27,10 +27,10 @@ struct TestInvariantMetricManifold <: Manifold end
 
 struct TestDefaultInvariantMetricManifold <: Manifold end
 
-function is_default_metric(
+function default_metric_dispatch(
     ::MetricManifold{TestDefaultInvariantMetricManifold,TestInvariantMetricBase},
 )
-    return true
+    return Val(true)
 end
 
 invariant_metric_dispatch(::TestDefaultInvariantMetricManifold, ::RightAction) = Val(true)
@@ -51,12 +51,12 @@ invariant_metric_dispatch(::TestDefaultInvariantMetricManifold, ::RightAction) =
     @test direction(rmetric) === RightAction()
 
     G = MetricManifold(TestInvariantMetricManifold(), lmetric)
-    @test invariant_metric_dispatch(G, LeftAction()) === Val(true)
-    @test invariant_metric_dispatch(G, RightAction()) === Val(false)
+    @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(true)
+    @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(false)
 
     G = MetricManifold(TestInvariantMetricManifold(), rmetric)
-    @test invariant_metric_dispatch(G, RightAction()) === Val(true)
-    @test invariant_metric_dispatch(G, LeftAction()) === Val(false)
+    @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(true)
+    @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(false)
 
     G = MetricManifold(TestDefaultInvariantMetricManifold(),LeftInvariantMetric(TestInvariantMetricBase()))
     @test !is_default_metric(G)

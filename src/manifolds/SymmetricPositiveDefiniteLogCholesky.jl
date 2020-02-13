@@ -170,14 +170,3 @@ function vector_transport_to!(
     vector_transport_to!(CholeskySpace{N}(), Y, x, W, y, m)
     return tangent_cholesky_to_tangent_spd!(y, Y)
 end
-
-function vector_transport_direction!(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
-    Y,
-    p,
-    X,
-    d,
-    m::ParallelTransport
-) where {N}
-    return vector_transport_to!(M, Y, p, X, exp(M,p,d), m)
-end

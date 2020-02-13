@@ -8,9 +8,9 @@ include("group_utils.jl")
     @test M === Rotations(3)
     x = Matrix(I, 3, 3)
 
-    @test invariant_metric_dispatch(G, LeftAction()) === Val(true)
-    @test invariant_metric_dispatch(G, RightAction()) === Val(true)
-    @test biinvariant_metric_dispatch(G) === Val(true)
+    @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(true)
+    @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(true)
+    @test (@inferred biinvariant_metric_dispatch(G)) === Val(true)
     @test is_default_metric(MetricManifold(G, EuclideanMetric())) === true
     @test is_default_metric(MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction()))) === true
     @test is_default_metric(MetricManifold(G, InvariantMetric(EuclideanMetric(), RightAction()))) === true

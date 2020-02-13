@@ -132,8 +132,7 @@ function biinvariant_metric_dispatch(M::Manifold)
     )
 end
 
-has_biinvariant_metric(M::Manifold) = _has_biinvariant_metric(M,biinvariant_metric_dispatch(M))
-_has_biinvariant_metric(M::Manifold, ::Val{T}) where {T} = T
+has_biinvariant_metric(M::Manifold) = _extract_val(biinvariant_metric_dispatch(M))
 
 @doc raw"""
     invariant_metric_dispatch(G::AbstractGroupManifold, conv::ActionDirection) -> Val
@@ -167,9 +166,9 @@ function invariant_metric_dispatch(
     return invoke(invariant_metric_dispatch, Tuple{MetricManifold,typeof(conv)}, M, conv)
 end
 
-has_invariant_metric(M::Manifold, conv::ActionDirection) = _has_invariant_metric(M,invariant_metric_dispatch(M))
-_has_invariant_metric(::Manifold, ::Val{T}) where {T} = T
-
+function has_invariant_metric(M::Manifold, conv::ActionDirection)
+    return _extract_val(invariant_metric_dispatch(M, conv))
+end
 
 function inner(M::MetricManifold{<:Manifold,<:InvariantMetric}, ::Val{false}, p, X, Y)
     imetric = metric(M)
@@ -188,7 +187,7 @@ function default_metric_dispatch(M::MetricManifold{<:Manifold,<:InvariantMetric}
 end
 
 function log!(M::MetricManifold{<:Manifold,<:InvariantMetric}, ::Val{false}, X, p, q)
-    if biinvariant_metric_dispatch(M)
+    if biinvariant_metric_dispatch(M) === Val(true)
         imetric = metric(M)
         conv = direction(imetric)
         return inverse_retract!(M, X, p, q, GroupLogarithmicInverseRetraction(conv))
