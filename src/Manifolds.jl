@@ -129,7 +129,7 @@ function hat(M::Manifold, p, Xⁱ)
 end
 
 function hat!(M::Manifold, X, p, Xⁱ)
-    error("hat! operator not defined for manifold $(typeof(M)), array $(typeof(X)), point $(typeof(p)), and vector $(typeof(Xⁱ))")
+    error(manifold_function_not_implemented_message(M, hat!, X, p, Xⁱ))
 end
 
 @doc raw"""
@@ -153,7 +153,7 @@ function vee(M::Manifold, p, X)
 end
 
 function vee!(M::Manifold, Xⁱ, p, X)
-    error("vee! operator not defined for manifold $(typeof(M)), vector $(typeof(Xⁱ)), point $(typeof(p)), and array $(typeof(X))")
+    error(manifold_function_not_implemented_message(M, vee!, Xⁱ, p, X))
 end
 
 function allocate_result(M::Manifold, f::typeof(vee), p, X)

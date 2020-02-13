@@ -127,8 +127,9 @@ is both left- and right-invariant (see [`has_invariant_metric`](@ref)).
 """
 function has_biinvariant_metric(M::Manifold)
     return Val(
-        has_invariant_metric(M, LeftAction())===Val{true}
-        && has_invariant_metric(M, RightAction()) == Val{true})
+        has_invariant_metric(M, LeftAction()) === Val(true) &&
+        has_invariant_metric(M, RightAction()) === Val(true),
+    )
 end
 
 @doc raw"""
@@ -159,7 +160,7 @@ function has_invariant_metric(
     M::MetricManifold{<:Manifold,<:InvariantMetric},
     conv::ActionDirection,
 )
-    direction(metric(M)) === conv && return true
+    direction(metric(M)) === conv && return Val(true)
     return invoke(has_invariant_metric, Tuple{MetricManifold,typeof(conv)}, M, conv)
 end
 
@@ -175,7 +176,7 @@ end
 function default_metric_dispatch(M::MetricManifold{<:Manifold,<:InvariantMetric})
     imetric = metric(M)
     N = MetricManifold(M.manifold, imetric.metric)
-    default_metric_dispatch(N) !== Val{true} && return false
+    default_metric_dispatch(N) !== Val{true} && return Val(false)
     return has_invariant_metric(N, direction(imetric))
 end
 

@@ -13,7 +13,7 @@ if VERSION ≥ v"1.3"
 end
 
 """
-    MetricManifold{M<:Manifold,G<:Metric} <: DecoratorManifold
+    MetricManifold{M<:Manifold,G<:Metric} <: AbstractDecoratorManifold
 
 Equip a [`Manifold`](@ref) explicitly with a [`Metric`](@ref) `G`.
 
