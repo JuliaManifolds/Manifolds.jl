@@ -25,8 +25,8 @@ function get_basis(M::Sphere{N}, p, B::DiagonalizingOrthonormalBasis) where {N}
         V = cat(B.frame_direction / norm(M, p, B.frame_direction), V; dims = 2)
         κ[1] = 0 # no curvature along the geodesic direction, if x!=y
     end
-    vecs = [V[:, i] for i = 1:N]
-    return PrecomputedDiagonalizingOrthonormalBasis(vecs, κ)
+    Ξ = [V[:, i] for i = 1:N]
+    return CachedBasis(B, κ, Ξ)
 end
 
 """

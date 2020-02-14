@@ -85,7 +85,7 @@ function get_basis(
     ]
     λ = eigv.values
     κ = [-1 / 4 * (λ[i] - λ[j])^2 for i = 1:N for j = i:N]
-    return PrecomputedDiagonalizingOrthonormalBasis(Ξ, κ)
+    return CachedBasis(B, κ, Ξ)
 end
 function get_basis(
     M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},

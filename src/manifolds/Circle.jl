@@ -125,7 +125,7 @@ flat!(::Circle, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 function get_basis(M::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
-    return PrecomputedDiagonalizingOrthonormalBasis(vs, @SVector [0])
+    return CachedBasis(B, (@SVector [0]) , vs)
 end
 
 get_coordinates(M::Circle{ℝ}, p, X, B::ArbitraryOrthonormalBasis) = X

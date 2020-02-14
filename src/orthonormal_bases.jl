@@ -106,13 +106,18 @@ end
 
 """
     get_coordinates(M::Manifold, p, X, B::AbstractBasis)
+    get_coordinates(M::Manifold, p, X, B::CachedBasis)
 
 Compute a one-dimensional vector of coefficients of the tangent vector `X`
 at point denoted by `p` on manifold `M` in basis `B`.
 
 Depending on the basis, `p` may not directly represent a point on the manifold.
 For example if a basis transported along a curve is used, `p` may be the coordinate
-along the curve.
+along the curve. If a [`CachedBasis`](@ref) is provided, their stored vectors are used,
+otherwise the user has to provide a method to compute the coordinates.
+
+For the [`CachedBasis`](@ref) keep in mind that the reconstruction with [`get_vector`](@ref)
+requires either a dual basis or the cached basis to be selfdual, for example orthonormal
 
 See also: [`get_vector`](@ref), [`get_basis`](@ref)
 """
@@ -136,12 +141,15 @@ Depending on the basis, `p` may not directly represent a point on the manifold.
 For example if a basis transported along a curve is used, `p` may be the coordinate
 along the curve.
 
+For the [`CachedBasis`](@ref) keep in mind that the reconstruction from [`get_coordinates`](@ref)
+requires either a dual basis or the cached basis to be selfdual, for example orthonormal
+
 See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 """
 function get_vector(M::Manifold, p, X, B::AbstractBasis)
     error("get_vector not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
-function get_vector(M::Manifold, p, X, B::CachedBasis{<:AbstractOrthonormalBasis})
+function get_vector(M::Manifold, p, X, B::CachedBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `Y`
@@ -266,10 +274,9 @@ function get_vectors(M::Manifold, p, B::AbstractBasis)
     error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
 
-get_vectors(::Manifold, ::Any, B::CachedBasis) = B.data
-get_vectors(::Manifold, ::Any, B::CachedBasis{T,DiagonalizingBasisData,𝔽}) where {T,𝔽} = B.data.vectors
+get_vectors(::Manifold, ::Any, B::CachedBasis) = _get_vectors(B)
 _get_vectors(B::CachedBasis) = B.data
-_get_vectors(B::CachedBasis{T,DiagonalizingBasisData,𝔽}) where {T,𝔽} = B.data.vectors
+_get_vectors(B::CachedBasis{BT,D,𝔽}) where {BT<:AbstractBasis, D<:DiagonalizingBasisData, 𝔽} = B.data.vectors
 # related to DefaultManifold; to be moved to ManifoldsBase.jl in the future
 function get_coordinates(M::DefaultManifold, p, X, B::ArbitraryOrthonormalBasis)
     return reshape(X, manifold_dimension(M))
@@ -309,7 +316,7 @@ function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt,�
         end
         push!(Ξ, Ξₙ)
         K += 1
-        K * real_dimension(number_system(B)) == dim && return PrecomputedOrthonormalBasis(Ξ)
+        K * real_dimension(number_system(B)) == dim && return CachedBasis(B, Ξ, ℝ)
         @label skip
     end
     @warn "get_basis with bases $(typeof(B)) only found $(K) orthonormal basis vectors, but manifold dimension is $(dim)."
@@ -356,11 +363,11 @@ function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis
     sk = replace(sk, '\n' => "\n ")
     print(io, sk)
 end
-function show(io::IO, mime::MIME"text/plain", B::CachedBasis{T}) where {T<:AbstractBasis}
+function show(io::IO, mime::MIME"text/plain", B::CachedBasis{T,D,𝔽}) where {T<:AbstractBasis,D,𝔽}
     vectors = _get_vectors(B)
     nv = length(vectors)
     print(
-        io, "$(T) with coordinates in $(number_system(B)) and $(nv) basis vector$(nv == 1 ? "" : "s"):",
+        io, "$(T()) with coordinates in $(number_system(B)) and $(nv) basis vector$(nv == 1 ? "" : "s"):",
     )
     _show_basis_vector_range_noheader(
         io,
@@ -370,12 +377,15 @@ function show(io::IO, mime::MIME"text/plain", B::CachedBasis{T}) where {T<:Abstr
         sym = " E",
     )
 end
-function show(io::IO, mime::MIME"text/plain", B::CachedBasis{DiagonalizingOrthonormalBasis})
+function show(io::IO, mime::MIME"text/plain", B::CachedBasis{T,D,𝔽}) where {T<:DiagonalizingOrthonormalBasis, D<:DiagonalizingBasisData, 𝔽}
     vectors = _get_vectors(B)
     nv = length(vectors)
+    sk = sprint(show, "text/plain", T(B.data.frame_direction), context = io, sizehint = 0)
+    sk = replace(sk, '\n' => "\n ")
+    print(io, sk)
     println(
         io,
-        "$(B) with coordinates in $(number_system(B)) and $(nv) basis vector$(nv == 1 ? "" : "s")",
+        "\nand $(nv) basis vector$(nv == 1 ? "" : "s").",
     )
     print(io, "Basis vectors:")
     _show_basis_vector_range_noheader(

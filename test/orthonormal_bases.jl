@@ -117,7 +117,7 @@ end
     x = collect(reshape(1.0:6.0, (2, 3)))
     pb = get_basis(M, x, ArbitraryOrthonormalBasis())
     @test sprint(show, "text/plain", pb) == """
-    ArbitraryOrthonormalBasis{ℝ} with coordinates in ℝ and 6 basis vectors:
+    ArbitraryOrthonormalBasis(ℝ) with coordinates in ℝ and 6 basis vectors:
      E1 =
       2×3 Array{Float64,2}:
        1.0  0.0  0.0
@@ -138,7 +138,11 @@ end
     b = DiagonalizingOrthonormalBasis(get_vectors(M, x, pb)[1])
     dpb = CachedBasis(b, Float64[1, 2, 3, 4, 5, 6], get_vectors(M, x, pb))
     @test sprint(show, "text/plain", dpb) == """
-    DiagonalizingOrthonormalBasis(ℝ) with coordinates in ℝ and 6 basis vectors
+    DiagonalizingOrthonormalBasis with coordinates in ℝ and eigenvalue 0 in direction:
+     2×3 Array{Float64,2}:
+       1.0  0.0  0.0
+       0.0  0.0  0.0
+    and 6 basis vectors.
     Basis vectors:
      E1 =
       2×3 Array{Float64,2}:
@@ -176,15 +180,18 @@ end
       [:, :, 1] =
        1.0"""
 
-   dpb = CachedBasis(DiagonalizingOrthonormalBasis(get_vectors(M, x, pb)), Float64[1], get_vectors(M, x, pb))
-   @test sprint(show, "text/plain", dpb) == """
-   DiagonalizingOrthonormalBasis(ℝ) with coordinates in ℝ and 1 basis vector
-   Basis vectors:
-    E1 =
-     1×1×1 Array{Float64,3}:
-     [:, :, 1] =
-      1.0
-   Eigenvalues:
-    1-element Array{Float64,1}:
-     1.0"""
+    dpb = CachedBasis(DiagonalizingOrthonormalBasis(get_vectors(M, x, pb)), Float64[1], get_vectors(M, x, pb))
+    @test sprint(show, "text/plain", dpb) == """
+    DiagonalizingOrthonormalBasis with coordinates in ℝ and eigenvalue 0 in direction:
+     1-element Array{Array{Float64,3},1}:
+       [1.0]
+    and 1 basis vector.
+    Basis vectors:
+     E1 =
+      1×1×1 Array{Float64,3}:
+      [:, :, 1] =
+       1.0
+    Eigenvalues:
+     1-element Array{Float64,1}:
+      1.0"""
 end

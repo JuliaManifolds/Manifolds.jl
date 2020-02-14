@@ -286,7 +286,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     for btype ∈ basis_types_vecs
         x = pts[1]
         b = get_basis(M, x, btype)
-        @test isa(b, AbstractPrecomputedOrthonormalBasis)
+        @test isa(b, CachedBasis{<:AbstractOrthonormalBasis})
 
         bvectors = get_vectors(M, x, b)
         N = length(bvectors)

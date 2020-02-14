@@ -88,7 +88,7 @@ The tuple `parts` stores bases corresponding to multiplied manifolds.
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct ProductBasisData{T<:NTuple{N,S} where {N,S}}
+struct ProductBasisData{T<:Tuple}
     parts::T
 end
 
@@ -238,8 +238,8 @@ function flat!(M::ProductManifold, ξ::CoTFVector, p, X::TFVector)
 end
 
 function get_basis(M::ProductManifold, p, B::AbstractBasis)
-    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
-    return CachedBasis(ProductBasisData(parts))
+    parts = map(t -> get_basis(t..., B).parts, ziptuples(M.manifolds, submanifold_components(p)))
+    return CachedBasis(B,ProductBasisData(parts))
 end
 function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     vs = map(ziptuples(
@@ -247,13 +247,13 @@ function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
         submanifold_components(p),
         submanifold_components(B.frame_direction),
     )) do t
-        return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
+        return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3])).data
     end
-    return CachedBasis(ProductBasisData(vs))
+    return CachedBasis(B,ProductBasisData(vs))
 end
 function get_basis(M::ProductManifold, p, B::ArbitraryOrthonormalBasis)
-    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
-    return CachedBasis(ProductBasisData(parts))
+    parts = map(t -> get_basis(t..., B).data, ziptuples(M.manifolds, submanifold_components(p)))
+    return CachedBasis(B,ProductBasisData(parts))
 end
 
 function get_coordinates(M::ProductManifold, p, X, B::CachedBasis{ProductBasisData})
@@ -393,7 +393,7 @@ function inverse_retract!(M::ProductManifold, X, p, q, method::InverseProductRet
     return X
 end
 
-default_metric_dispatch(::ProductManifold, ::ProductMetric) = Val(true)
+is_default_metric(::ProductManifold, ::ProductMetric) = Val(true)
 
 function isapprox(M::ProductManifold, p, q; kwargs...)
     return all(
