@@ -151,7 +151,7 @@ The array `bases` stores bases corresponding to particular parts of the manifold
 
 The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct PowerBasisData{TB<:AbstractArray{T} where {T}}
+struct PowerBasisData{TB<:AbstractArray}
     bases::TB
 end
 
