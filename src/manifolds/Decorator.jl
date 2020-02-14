@@ -54,7 +54,8 @@ function _acts_transparently(f, M::Manifold, args...)
     return _val_or(default_decorator_dispatch(M), decorator_transparent_dispatch(f, M, args...))
 end
 
-_val_or(::Val{T1}, ::Val{T2}) where {T1,T2} = Val(T1 || T2)
+_val_or(::Val{T}, ::Val{true}) where {T} = Val(:transparent)
+_val_or(::Val{T}, ::Val{false}) where {T} = Val(T)
 
 #
 # Functions overwritten with decorators
@@ -102,6 +103,7 @@ end
     p,
     B::AbstractBasis,
 )
+
 @decorator_transparent_function get_basis(
     M::AbstractDecoratorManifold,
     p,

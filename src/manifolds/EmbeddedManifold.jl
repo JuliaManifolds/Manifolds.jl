@@ -44,14 +44,14 @@ function decorator_transparent_dispatch(
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(project_tangent!),
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:intransparent)
 end
 
 function embed(M::MT,p) where {MT <: AbstractEmbeddedManifold}
@@ -60,27 +60,6 @@ function embed(M::MT,p) where {MT <: AbstractEmbeddedManifold}
 end
 function embed!(M, q, p)
     error("Embedding a point $(typeof(p)) on $(typeof(M)) not yet implemented.")
-end
-
-function get_basis(M::AbstractEmbeddedManifold, p, B::ArbitraryOrthonormalBasis)
-    return invoke(get_basis, Tuple{Manifold,Any,ArbitraryOrthonormalBasis}, M, p, B)
-end
-function get_basis(M::AbstractEmbeddedManifold, p, B::AbstractPrecomputedOrthonormalBasis)
-    return invoke(get_basis, Tuple{Manifold,Any,AbstractPrecomputedOrthonormalBasis}, M, p, B)
-end
-function get_basis(M::AbstractEmbeddedManifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
-    return invoke(get_basis, Tuple{Manifold,Any,ProjectedOrthonormalBasis{:svd,ℝ}}, M, p, B)
-end
-
-function get_coordinates(M::AbstractEmbeddedManifold, p, X, B::AbstractPrecomputedOrthonormalBasis{ℝ})
-    return invoke(get_coordinates, Tuple{Manifold,Any,Any,AbstractPrecomputedOrthonormalBasis{ℝ}}, M, p, X, B)
-end
-function get_coordinates(M::AbstractEmbeddedManifold, p, X, B::AbstractPrecomputedOrthonormalBasis)
-    return invoke(get_coordinates, Tuple{Manifold,Any,Any,AbstractPrecomputedOrthonormalBasis}, M, p, X, B)
-end
-
-function get_vector(M::AbstractEmbeddedManifold, p, X, B::AbstractPrecomputedOrthonormalBasis)
-    return invoke(get_vector, Tuple{Manifold,Any,Any,AbstractPrecomputedOrthonormalBasis}, M, p, X, B)
 end
 
 function inverse_retract!(M::MT, X, p, q, m::EmbeddedRetraction) where {MT <: EmbeddedManifold}
@@ -118,21 +97,21 @@ function decorator_transparent_dispatch(
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(check_tangent_vector),
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(exp!),
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(exp!),
@@ -146,28 +125,28 @@ function decorator_transparent_dispatch(
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:parent)
 end
 function decorator_transparent_dispatch(
     ::typeof(get_coordinates),
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:parent)
 end
 function decorator_transparent_dispatch(
     ::typeof(get_vector),
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:parent)
 end
 function decorator_transparent_dispatch(
     ::typeof(inner),
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(inner),
@@ -181,7 +160,7 @@ function decorator_transparent_dispatch(
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(log!),
@@ -195,7 +174,7 @@ function decorator_transparent_dispatch(
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(norm),
@@ -209,14 +188,14 @@ function decorator_transparent_dispatch(
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_along!),
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_along!),
@@ -230,7 +209,7 @@ function decorator_transparent_dispatch(
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_direction!),
@@ -244,7 +223,7 @@ function decorator_transparent_dispatch(
     ::AbstractEmbeddedManifold,
     args...,
 )
-    return Val(false)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_to!),
