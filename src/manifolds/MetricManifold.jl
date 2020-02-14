@@ -71,6 +71,11 @@ function christoffel_symbols_first(M::MetricManifold, p; backend = :default)
     @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
     return Γ
 end
+@decorator_transparent_function christoffel_symbols_first(
+    M::AbstractDecoratorManifold,
+    p;
+    backend = :default
+)
 
 @doc raw"""
     christoffel_symbols_second(M::MetricManifold, x; backend=:default)
@@ -91,6 +96,11 @@ function christoffel_symbols_second(M::MetricManifold, p; backend = :default)
     @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
     return Γ₂
 end
+@decorator_transparent_function christoffel_symbols_second(
+    M::AbstractDecoratorManifold,
+    p;
+    backend = :default
+)
 
 @doc raw"""
     christoffel_symbols_second_jacobian(M::MetricManifold, p; backend = :default)
@@ -111,24 +121,29 @@ function christoffel_symbols_second_jacobian(M::MetricManifold, p; backend = :de
     )
     return ∂Γ
 end
+@decorator_transparent_function christoffel_symbols_second_jacobian(
+    M::AbstractDecoratorManifold,
+    p;
+    backend = :default
+)
 
-decorator_transparent_dispatch(::typeof(exp!), M::MetricManifold) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(exp!), M::MetricManifold, args...) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(exp!), M::MetricManifold, q, p, X, t) = Val(:parent)
-decorator_transparent_dispatch(::typeof(flat!), M::MetricManifold) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(get_basis), M::MetricManifold) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(inner), M::MetricManifold) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(inverse_retract!), M::MetricManifold) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(flat!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(get_basis), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(inner), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(inverse_retract!), M::MetricManifold, args...) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(inverse_retract!), M::MetricManifold, X, p, q, m::LogarithmicInverseRetraction) = Val(:parent)
-decorator_transparent_dispatch(::typeof(log!), M::MetricManifold) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(norm), M::MetricManifold) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(project_point!), M::MetricManifold) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(project_tangent!), M::MetricManifold) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(sharp!), M::MetricManifold) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(retract!), M::MetricManifold) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(log!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(norm), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(project_point!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(project_tangent!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(sharp!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(retract!), M::MetricManifold, args...) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(retract!), M::MetricManifold, q, p, X, m::ExponentialRetraction) = Val(:parent)
-decorator_transparent_dispatch(::typeof(vector_transport_along!), M::MetricManifold) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(vector_transport_direction!), M::MetricManifold) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(vector_transport_to!), M::MetricManifold) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(vector_transport_along!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(vector_transport_direction!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(vector_transport_to!), M::MetricManifold, args...) = Val(:intransparent)
 
 @doc raw"""
     det_local_metric(M::MetricManifold, p)
@@ -136,6 +151,10 @@ decorator_transparent_dispatch(::typeof(vector_transport_to!), M::MetricManifold
 Return the determinant of local matrix representation of the metric tensor $g$.
 """
 det_local_metric(M::MetricManifold, p) = det(local_metric(M, p))
+@decorator_transparent_function det_local_metric(
+    M::AbstractDecoratorManifold,
+    p
+)
 
 """
     einstein_tensor(M::MetricManifold, p; backend = :default)
@@ -150,6 +169,11 @@ function einstein_tensor(M::MetricManifold, p; backend = :default)
     G = Ric - g .* S / 2
     return G
 end
+@decorator_transparent_function einstein_tensor(
+    M::AbstractDecoratorManifold,
+    p;
+    backend = :default
+)
 
 @doc raw"""
     exp(N::MetricManifold{M,G}, p, X)
@@ -166,7 +190,7 @@ in an embedded space.
 """
 exp(::MetricManifold, ::Any...)
 
-function exp!(M::MMT, q, p, X) where {MMT<:MetricManifold}
+function exp!(M::MMT, ::Val{:intransparent}, q, p, X) where {MMT<:MetricManifold}
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, p, X, tspan; dense = false, saveat = [1.0])
     n = length(p)
@@ -188,7 +212,7 @@ where $G_p$ is the local matrix representation of `G`, see [`local_metric`](@ref
 flat(::MetricManifold, ::Any...)
 
 
-function flat!(M::MMT, ξ::CoTFVector, p, X::TFVector) where {MMT<:MetricManifold}
+function flat!(M::MMT, ::Val{:intransparent}, ξ::CoTFVector, p, X::TFVector) where {MMT<:MetricManifold}
     g = local_metric(M, p)
     copyto!(ξ.data, g * X.data)
     return ξ
@@ -200,6 +224,11 @@ end
 Compute the Gaussian curvature of the manifold `M` at the point `x`.
 """
 gaussian_curvature(M::MetricManifold, p; kwargs...) = ricci_curvature(M, p; kwargs...) / 2
+@decorator_transparent_function gaussian_curvature(
+    M::AbstractDecoratorManifold,
+    p;
+    kwargs...
+)
 
 @doc raw"""
     inverse_local_metric(M::MetricManifold, p)
@@ -208,6 +237,7 @@ Return the local matrix representation of the inverse metric (cometric) tensor, 
 written $g^{ij}$.
 """
 inverse_local_metric(M::MetricManifold, p) = inv(local_metric(M, p))
+@decorator_transparent_function inverse_local_metric(M::AbstractDecoratorManifold, p)
 
 default_decorator_dispatch(M::MMT) where {MMT <: MetricManifold} = default_metric_dispatch(M)
 
@@ -295,6 +325,7 @@ where the latter expression uses Einstein summation convention.
 function local_metric(M::MetricManifold, p)
     error("Local metric not implemented on $(typeof(M)) for point $(typeof(p))")
 end
+@decorator_transparent_function local_metric(M::AbstractDecoratorManifold, p)
 
 @doc raw"""
     local_metric_jacobian(M::MetricManifold, p; backend=:default)
@@ -308,6 +339,11 @@ function local_metric_jacobian(M, p; backend = :default)
     ∂g = reshape(_jacobian(q -> local_metric(M, q), p, backend), n, n, n)
     return ∂g
 end
+@decorator_transparent_function local_metric_jacobian(
+    M::AbstractDecoratorManifold,
+    p;
+    backend = :default
+)
 
 @doc raw"""
     log(N::MetricManifold{M,G}, p, q)
@@ -328,7 +364,7 @@ Return the natural logarithm of the metric density $ρ$ of `M` at `p`, which
 is given by $ρ = \log \sqrt{|\det [g_{ij}]|}$.
 """
 log_local_metric_density(M::MetricManifold, p) = log(abs(det_local_metric(M, p))) / 2
-
+@decorator_transparent_function log_local_metric_density(M::AbstractDecoratorManifold, p)
 
 function mean!(
     M::MMT,
@@ -356,6 +392,7 @@ end
 Get the metric $g$ of the manifold `M`.
 """
 metric(M::MetricManifold) = M.metric
+@decorator_transparent_function metric(M::AbstractDecoratorManifold)
 
 """
     ricci_curvature(M::MetricManifold, p; backend = :default)
@@ -368,7 +405,11 @@ function ricci_curvature(M::MetricManifold, p; backend = :default)
     S = sum(Ginv .* Ric)
     return S
 end
-
+@decorator_transparent_function ricci_curvature(
+    M::AbstractDecoratorManifold,
+    p;
+    backend = :defailt
+)
 """
     ricci_tensor(M::MetricManifold, p; backend = :default)
 
@@ -382,7 +423,11 @@ function ricci_tensor(M::MetricManifold, p; kwargs...)
     @einsum Ric[i, j] = R[l, i, l, j]
     return Ric
 end
-
+@decorator_transparent_function ricci_tensor(
+    M::AbstractDecoratorManifold,
+    p;
+    kwargs...
+)
 @doc raw"""
     riemann_tensor(M::MetricManifold, p)
 
@@ -399,7 +444,11 @@ function riemann_tensor(M::MetricManifold, p; backend = :default)
         ∂Γ[l, i, k, j] - ∂Γ[l, i, j, k] + Γ[s, i, k] * Γ[l, s, j] - Γ[s, i, j] * Γ[l, s, k]
     return R
 end
-
+@decorator_transparent_function riemann_tensor(
+    M::AbstractDecoratorManifold,
+    p;
+    backend = :default
+)
 @doc raw"""
     sharp(N::MetricManifold{M,G}, p, ξ::FVector{CotangentSpaceType})
 
