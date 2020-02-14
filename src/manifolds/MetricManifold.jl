@@ -239,7 +239,7 @@ written $g^{ij}$.
 inverse_local_metric(M::MetricManifold, p) = inv(local_metric(M, p))
 @decorator_transparent_function inverse_local_metric(M::AbstractDecoratorManifold, p)
 
-default_decorator_dispatch(M::MMT) where {MMT <: MetricManifold} = default_metric_dispatch(M)
+default_decorator_dispatch(M::MetricManifold) = default_metric_dispatch(M)
 
 """
     is_default_metric(M,G)

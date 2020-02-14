@@ -219,7 +219,7 @@ where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transpo
 """
 project_point(::SymmetricMatrices, ::Any...)
 
-project_point!(M::SymmetricMatrices, p) = (p .= (p + p') ./ 2)
+project_point!(M::SymmetricMatrices, q, p) = copyto!(q, (p + p') ./ 2)
 
 @doc raw"""
     project_tangent(M::SymmetricMatrices, p, X)

@@ -252,7 +252,7 @@ Project the point `p` from the embedding onto the [`Sphere`](@ref) `M`.
 """
 project_point(::Sphere, ::Any...)
 
-project_point!(S::Sphere, p) = (p ./= norm(p))
+project_point!(S::Sphere, q, p) = copyto!(q, p./ norm(p))
 
 @doc raw"""
     project_tangent(M::Sphere, p, X)
@@ -304,7 +304,7 @@ retract(::Sphere, ::Any, ::Any, ::ProjectionRetraction)
 
 function retract!(M::Sphere, q, p, X, ::ProjectionRetraction)
     q .= p .+ X
-    return project_point!(M, q)
+    return project_point!(M, q, q)
 end
 
 sharp!(M::Sphere, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)

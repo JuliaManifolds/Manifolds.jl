@@ -81,7 +81,7 @@ function retract!(M::MT, q, p, X, m::EmbeddedRetraction) where {MT <: AbstractEm
     embed!(M, x, p)
     embed!(M, Z, p, X)
     retract!(get_embedding(M), q, x, Z)
-    project_point!(M, q)
+    project_point!(M, q, q)
     return q
 end
 

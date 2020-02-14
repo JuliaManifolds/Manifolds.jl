@@ -27,12 +27,12 @@ end
 
 function rand(rng::AbstractRNG, d::ProjectedPointDistribution{TResult}) where {TResult}
     p = convert(TResult, rand(rng, d.distribution))
-    return d.proj!(d.manifold, p)
+    return d.proj!(d.manifold, p, p)
 end
 
 function _rand!(rng::AbstractRNG, d::ProjectedPointDistribution, p::AbstractArray{<:Number})
     _rand!(rng, d.distribution, p)
-    return d.proj!(d.manifold, p)
+    return d.proj!(d.manifold, p, p)
 end
 
 support(d::ProjectedPointDistribution) = MPointSupport(d.manifold)

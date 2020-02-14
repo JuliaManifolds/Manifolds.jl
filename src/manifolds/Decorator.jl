@@ -214,7 +214,7 @@ end
     M::AbstractDecoratorManifold, p, σ
 )
 
-@decorator_transparent_function project_point!(M::AbstractDecoratorManifold, p)
+@decorator_transparent_function project_point!(M::AbstractDecoratorManifold, q, p)
 
 @decorator_transparent_function project_tangent!(M::AbstractDecoratorManifold, Y, p, X)
 

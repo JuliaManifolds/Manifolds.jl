@@ -14,12 +14,12 @@ include("utils.jl")
     @testset "Real Symmetric Matrices Basics" begin
         @test repr(M) == "SymmetricMatrices(3, ℝ)"
         @test representation_size(M) == (3,3)
-        @test check_manifold_point(M,B_sym)===nothing
+        @test check_manifold_point(M,B_sym) === nothing
         @test_throws DomainError is_manifold_point(M,A,true)
         @test_throws DomainError is_manifold_point(M,C,true)
         @test_throws DomainError is_manifold_point(M,D,true)
         @test_throws DomainError is_manifold_point(M_complex, [:a :b :c; :b :d :e; :c :e :f],true)
-        @test check_tangent_vector(M,B_sym,B_sym)===nothing
+        @test check_tangent_vector(M,B_sym,B_sym) === nothing
         @test_throws DomainError is_tangent_vector(M,B_sym,A,true)
         @test_throws DomainError is_tangent_vector(M,A,B_sym,true)
         @test_throws DomainError is_tangent_vector(M,B_sym,D,true)
@@ -27,8 +27,8 @@ include("utils.jl")
         @test_throws DomainError is_tangent_vector(M_complex, B_sym, [:a :b :c; :b :d :e; :c :e :f],true)
         @test manifold_dimension(M) == 6
         @test manifold_dimension(M_complex) == 12
-        @test A_sym2 == project_point!(M,A_sym)
-        @test A_sym2 == project_tangent(M,A_sym,A_sym)
+        @test A_sym2 == project_point!(M, A_sym, A_sym)
+        @test A_sym2 == project_tangent(M, A_sym, A_sym, A_sym)
     end
     types = [
         Matrix{Float64},

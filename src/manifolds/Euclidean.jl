@@ -266,7 +266,7 @@ is of course just the identity map.
 """
 project_point(::Euclidean, ::Any...)
 
-project_point!(M::Euclidean, p) = p
+project_point!(M::Euclidean, q, p) = copyto!(q, p)
 
 """
     project_tangent(M::Euclidean, p, X)

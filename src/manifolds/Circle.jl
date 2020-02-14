@@ -269,8 +269,8 @@ project_point(::Circle, ::Any)
 project_point(::Circle{ℝ}, p::Real) = sym_rem(p)
 project_point(::Circle{ℂ}, p::Number) = p / abs(p)
 
-project_point!(::Circle{ℝ}, p) = (p .= sym_rem(p))
-project_point!(::Circle{ℂ}, p) = (p .= p / sum(abs.(p)))
+project_point!(::Circle{ℝ}, q, p) = copyto!(q, sym_rem(p))
+project_point!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
 
 @doc raw"""
     project_tangent(M::Circle, p, X)
