@@ -48,7 +48,7 @@ function is_decorator_transparent(f, M::Manifold, args...)
     return _extract_val(decorator_transparent_dispatch(f, M, args...))
 end
 
-decorator_transparent_dispatch(f, M::Manifold, args...) = Val(true)
+decorator_transparent_dispatch(f, M::Manifold, args...) = Val(:transparent)
 
 function _acts_transparently(f, M::Manifold, args...)
     return _val_or(default_decorator_dispatch(M), decorator_transparent_dispatch(f, M, args...))
