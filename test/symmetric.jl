@@ -28,7 +28,7 @@ include("utils.jl")
         @test manifold_dimension(M) == 6
         @test manifold_dimension(M_complex) == 12
         @test A_sym2 == project_point!(M, A_sym, A_sym)
-        @test A_sym2 == project_tangent(M, A_sym, A_sym, A_sym)
+        @test A_sym2 == project_tangent(M, A_sym, A_sym)
     end
     types = [
         Matrix{Float64},
