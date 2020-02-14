@@ -326,6 +326,7 @@ function local_metric(M::MetricManifold, p)
     error("Local metric not implemented on $(typeof(M)) for point $(typeof(p))")
 end
 @decorator_transparent_function local_metric(M::AbstractDecoratorManifold, p)
+decorator_transparent_dispatch(::typeof(local_metric), M::MetricManifold, args...) = Val(:intransparent)
 
 @doc raw"""
     local_metric_jacobian(M::MetricManifold, p; backend=:default)
@@ -344,6 +345,7 @@ end
     p;
     backend = :default
 )
+decorator_transparent_dispatch(::typeof(local_metric_jacobian), M::AbstractDecoratorManifold, p) = Val(:parent)
 
 @doc raw"""
     log(N::MetricManifold{M,G}, p, q)
@@ -365,6 +367,7 @@ is given by $ρ = \log \sqrt{|\det [g_{ij}]|}$.
 """
 log_local_metric_density(M::MetricManifold, p) = log(abs(det_local_metric(M, p))) / 2
 @decorator_transparent_function log_local_metric_density(M::AbstractDecoratorManifold, p)
+decorator_transparent_dispatch(::typeof(log_local_metric_density), M::AbstractDecoratorManifold, args...) = Val(:parent)
 
 function mean!(
     M::MMT,
@@ -410,6 +413,8 @@ end
     p;
     backend = :defailt
 )
+decorator_transparent_dispatch(::typeof(ricci_curvature), M::AbstractDecoratorManifold, args...) = Val(:parent)
+
 """
     ricci_tensor(M::MetricManifold, p; backend = :default)
 

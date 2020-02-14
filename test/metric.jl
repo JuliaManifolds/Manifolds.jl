@@ -239,9 +239,9 @@ end
         g2 = DefaultBaseManifoldMetric()
         MM2 = MetricManifold(M,g2)
 
-        @test (@inferred default_metric_dispatch(MM)) === (@inferred default_metric_dispatch(base_manifold(MM), metric(MM)))
-        @test (@inferred default_metric_dispatch(MM2)) === (@inferred default_metric_dispatch(base_manifold(MM2), metric(MM2)))
-        @test (@inferred default_metric_dispatch(MM2)) === Val(true)
+        @test (@inferred Manifolds.default_metric_dispatch(MM)) === (@inferred Manifolds.default_metric_dispatch(base_manifold(MM), metric(MM)))
+        @test (@inferred Manifolds.default_metric_dispatch(MM2)) === (@inferred Manifolds.default_metric_dispatch(base_manifold(MM2), metric(MM2)))
+        @test (@inferred Manifolds.default_metric_dispatch(MM2)) === Val(true)
         @test is_default_metric(MM) == is_default_metric(base_manifold(MM), metric(MM))
         @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2), metric(MM2))
         @test is_default_metric(MM2)
