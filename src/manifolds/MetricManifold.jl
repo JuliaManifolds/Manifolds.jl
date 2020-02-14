@@ -301,7 +301,7 @@ where $G_p$ is the loal matrix representation of the [`Metric`](@ref) `G`.
 """
 inner(::MetricManifold, ::Any)
 
-function inner(M::MMT, p, X, Y) where {MMT<:MetricManifold}
+function inner(M::MMT, ::Val{:intransparent}, p, X, Y) where {MMT<:MetricManifold}
     return dot(X, local_metric(M, p) * Y)
 end
 function inner(
