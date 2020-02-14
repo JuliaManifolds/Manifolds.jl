@@ -130,9 +130,6 @@ decorator_transparent_dispatch(::typeof(vector_transport_along!), M::MetricManif
 decorator_transparent_dispatch(::typeof(vector_transport_direction!), M::MetricManifold) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(vector_transport_to!), M::MetricManifold) = Val(:intransparent)
 
-inverse_retract!(M::MetricManifold, X, p, q, ::LogarithmicInverseRetraction) = log!(M,X,p,q)
-retract!(M::MetricManifold, q, p, X, ::ExponentialRetraction) = exp!(M, q, p, X)
-
 @doc raw"""
     det_local_metric(M::MetricManifold, p)
 
