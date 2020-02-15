@@ -99,8 +99,8 @@ end
         @test base_manifold(M) === E
         @test metric(M) === g
 
-        @test_throws MethodError local_metric_jacobian(E, zeros(3))
-        @test_throws MethodError christoffel_symbols_second_jacobian(E, zeros(3))
+        @test_throws ErrorException local_metric_jacobian(E, zeros(3))
+        @test_throws ErrorException christoffel_symbols_second_jacobian(E, zeros(3))
 
         for vtype in (Vector, MVector{n})
             x, v, w = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
@@ -287,6 +287,7 @@ end
         # MM falls back to nondefault error
         @test_throws ErrorException projected_distribution(MM,1,x)
         @test_throws ErrorException projected_distribution(MM,1)
+        # normal_tvector is not implemented
         @test_throws ErrorException normal_tvector_distribution(MM,x,0.2)
 
         @test inner(MM2, x, v, w) === inner(M, x, v, w)

@@ -125,9 +125,11 @@ decorator_transparent_dispatch(::typeof(inverse_retract!), M::MetricManifold, X,
 decorator_transparent_dispatch(::typeof(log!), M::MetricManifold, args...) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(mean!), M::MetricManifold, args...) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(median), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(normal_tvector_distribution), M::MetricManifold, arge...) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(norm), M::MetricManifold, args...) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(project_point!), M::MetricManifold, args...) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(project_tangent!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(projected_distribution), M::MetricManifold, arge...) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(sharp!), M::MetricManifold, args...) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(retract!), M::MetricManifold, args...) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(retract!), M::MetricManifold, q, p, X, m::ExponentialRetraction) = Val(:parent)
@@ -310,7 +312,7 @@ where the latter expression uses Einstein summation convention.
 local_metric(::MetricManifold, ::Any)
 @decorator_transparent_function function local_metric(M::MetricManifold, p)
     error("Local metric not implemented on $(typeof(M)) for point $(typeof(p))")
-end
+end :intransparent
 
 @doc raw"""
     local_metric_jacobian(M::MetricManifold, p; backend=:default)
@@ -324,7 +326,7 @@ local_metric_jacobian(::MetricManifold, ::Any)
     n = size(p, 1)
     ∂g = reshape(_jacobian(q -> local_metric(M, q), p, backend), n, n, n)
     return ∂g
-end :parent
+end :intransparent
 
 @doc raw"""
     log(N::MetricManifold{M,G}, p, q)
@@ -347,26 +349,6 @@ log_local_metric_density(::MetricManifold, ::Any)
 @decorator_transparent_function function log_local_metric_density(M::MetricManifold, p)
     return log(abs(det_local_metric(M, p))) / 2
 end :parent
-
-@decorator_transparent_fallback function mean!(
-    M::MetricManifold,
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-)
-    return mean!(M, p, x, w, GradientDescentEstimation(); kwargs...)
-end
-
-@decorator_transparent_fallback function median!(
-    M::MetricManifold,
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-)
-    return median!(M, p, x, w, CyclicProximalPointEstimation(); kwargs...)
-end
 
 @doc raw"""
     metric(M::MetricManifold)

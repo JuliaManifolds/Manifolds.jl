@@ -211,7 +211,9 @@ end
 )
 
 @decorator_transparent_signature normal_tvector_distribution(
-    M::AbstractDecoratorManifold, p, σ
+    M::AbstractDecoratorManifold,
+    p,
+    σ
 )
 
 @decorator_transparent_signature project_point!(M::AbstractDecoratorManifold, q, p)
