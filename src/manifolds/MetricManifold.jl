@@ -310,9 +310,9 @@ The matrix has the property that $g(X, Y)=X^\mathrm{T} [g_{ij}] Y = g_{ij} X^i Y
 where the latter expression uses Einstein summation convention.
 """
 local_metric(::MetricManifold, ::Any)
-@decorator_transparent_function function local_metric(M::MetricManifold, p)
+@decorator_transparent_function :intransparent function local_metric(M::MetricManifold, p)
     error("Local metric not implemented on $(typeof(M)) for point $(typeof(p))")
-end :intransparent
+end
 
 @doc raw"""
     local_metric_jacobian(M::MetricManifold, p; backend=:default)
@@ -322,11 +322,11 @@ coordinates of `p`, $\frac{∂}{∂ p^k} g_{ij} = g_{ij,k}$. The
 dimensions of the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
 local_metric_jacobian(::MetricManifold, ::Any)
-@decorator_transparent_function function local_metric_jacobian(M::MetricManifold, p; backend = :default)
+@decorator_transparent_function :intransparent function local_metric_jacobian(M::MetricManifold, p; backend = :default)
     n = size(p, 1)
     ∂g = reshape(_jacobian(q -> local_metric(M, q), p, backend), n, n, n)
     return ∂g
-end :intransparent
+end
 
 @doc raw"""
     log(N::MetricManifold{M,G}, p, q)
@@ -346,9 +346,9 @@ Return the natural logarithm of the metric density $ρ$ of `M` at `p`, which
 is given by $ρ = \log \sqrt{|\det [g_{ij}]|}$.
 """
 log_local_metric_density(::MetricManifold, ::Any)
-@decorator_transparent_function function log_local_metric_density(M::MetricManifold, p)
+@decorator_transparent_function :parent function log_local_metric_density(M::MetricManifold, p)
     return log(abs(det_local_metric(M, p))) / 2
-end :parent
+end
 
 @doc raw"""
     metric(M::MetricManifold)
@@ -366,12 +366,12 @@ end
 Compute the Ricci scalar curvature of the manifold `M` at the point `p`.
 """
 ricci_curvature(::MetricManifold, ::Any)
-@decorator_transparent_function function ricci_curvature(M::MetricManifold, p; backend = :default)
+@decorator_transparent_function :parent function ricci_curvature(M::MetricManifold, p; backend = :default)
     Ginv = inverse_local_metric(M, p)
     Ric = ricci_tensor(M, p; backend = backend)
     S = sum(Ginv .* Ric)
     return S
-end :parent
+end
 
 """
     ricci_tensor(M::MetricManifold, p; backend = :default)
