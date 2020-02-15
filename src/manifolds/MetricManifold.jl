@@ -337,7 +337,6 @@ falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for
 """
 log(::MetricManifold, ::Any...)
 
-
 @doc raw"""
     log_local_metric_density(M::MetricManifold, p)
 
@@ -349,23 +348,23 @@ log_local_metric_density(::MetricManifold, ::Any)
     return log(abs(det_local_metric(M, p))) / 2
 end :parent
 
-function mean!(
-    M::MMT,
+@decorator_transparent_fallback function mean!(
+    M::MetricManifold,
     p,
     x::AbstractVector,
     w::AbstractVector;
     kwargs...,
-) where {MMT<:MetricManifold}
+)
     return mean!(M, p, x, w, GradientDescentEstimation(); kwargs...)
 end
 
-function median!(
-    M::MMT,
+@decorator_transparent_fallback function median!(
+    M::MetricManifold,
     p,
     x::AbstractVector,
     w::AbstractVector;
     kwargs...,
-) where {MMT<:MetricManifold}
+)
     return median!(M, p, x, w, CyclicProximalPointEstimation(); kwargs...)
 end
 

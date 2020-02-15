@@ -214,9 +214,9 @@ end
             R = riemann_tensor(M, x)
             for l=1:n, i=1:n, j=1:n, k=1:n
                 if (l,i,j,k) == (2,1,1,2)
-                    @test R[l,i,j,k] ≈ -1 atol=1e-6
+                    @test R[l,i,j,k] ≈ -1 atol=2e-6
                 elseif (l,i,j,k) == (2,1,2,1)
-                    @test R[l,i,j,k] ≈ 1 atol=1e-6
+                    @test R[l,i,j,k] ≈ 1 atol=2e-6
                 elseif (l,i,j,k) == (1,2,1,2)
                     @test R[l,i,j,k] ≈ sin(θ)^2 atol=1e-6
                 elseif (l,i,j,k) == (1,2,2,1)
@@ -226,9 +226,9 @@ end
                 end
             end
 
-            @test ricci_tensor(M, x) ≈ G ./ r^2 atol=1e-6
-            @test ricci_curvature(M, x) ≈ 2 / r^2 atol=1e-6
-            @test gaussian_curvature(M, x) ≈ 1 / r^2 atol=1e-6
+            @test ricci_tensor(M, x) ≈ G ./ r^2 atol=2e-6
+            @test ricci_curvature(M, x) ≈ 2 / r^2 atol=2e-6
+            @test gaussian_curvature(M, x) ≈ 1 / r^2 atol=2e-6
             @test einstein_tensor(M, x) ≈ ricci_tensor(M, x) - gaussian_curvature(M, x)  .* G atol=1e-6
         end
     end
