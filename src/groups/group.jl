@@ -156,7 +156,7 @@ function allocate_result(
     B = VectorBundleFibers(TangentSpace, G)
     return allocate(Xⁱ, Size(representation_size(B)))
 end
-function allocate_result(M::Manifold, ::typeof(vee), e::Identity, X)
+function allocate_result(M::AbstractGroupManifold, ::typeof(vee), e::Identity, X)
     is_group_decorator(M) && return allocate_result(base_group(M), vee, e, X)
     error("allocate_result not implemented for manifold $(M), function vee, point $(e), and vector $(X).")
 end
@@ -253,37 +253,37 @@ R_p &: q ↦ q \circ p.
 """
 translate(::AbstractGroupManifold, ::Any...)
 @decorator_transparent_function :intransparent function translate(
-    M::AbstractGroupManifold,
+    G::AbstractGroupManifold,
     p,
     q
 )
-    return translate(M, p, q, LeftAction())
+    return translate(G, p, q, LeftAction())
 end
 @decorator_transparent_function :intransparent function translate(
-    M::Manifold,
+    G::AbstractGroupManifold,
     p,
     q,
     conv::ActionDirection
 )
-    return compose(M, _action_order(p, q, conv)...)
+    return compose(G, _action_order(p, q, conv)...)
 end
 
 @decorator_transparent_function :intransparent function translate!(
-    M::AbstractGroupManifold,
-    x,
+    G::AbstractGroupManifold,
+    X,
     p,
     q
 )
-    return translate!(M, x, p, q, LeftAction())
+    return translate!(G, X, p, q, LeftAction())
 end
 @decorator_transparent_function :intransparent function translate!(
     G::AbstractGroupManifold,
-    x,
+    X,
     p,
     q,
     conv::ActionDirection
 )
-    return compose!(G, x, _action_order(p, q, conv)...)
+    return compose!(G, X, _action_order(p, q, conv)...)
 end
 
 @doc raw"""
@@ -318,19 +318,21 @@ end
 end
 
 @decorator_transparent_function :intransparent function inverse_translate!(
-    M::AbstractGroupManifold,
+    G::AbstractGroupManifold,
+    X,
     p,
     q
 )
-    return inverse_translate!(M, x, p, q, LeftAction())
+    return inverse_translate!(G, X, p, q, LeftAction())
 end
 @decorator_transparent_function :intransparent function inverse_translate!(
-    M::AbstractGroupManifold,
+    G::AbstractGroupManifold,
+    X,
     p,
     q,
     conv::ActionDirection
 )
-    return translate!(G, x, inv(G, p), q, conv)
+    return translate!(G, X, inv(G, p), q, conv)
 end
 
 @doc raw"""
@@ -599,7 +601,7 @@ function retract!(G::GroupManifold, q, p, X, method::GroupExponentialRetraction)
         method,
     )
 end
-function retract!(M::Manifold, q, p, X, method::GroupExponentialRetraction)
+function retract!(M::AbstractGroupManifold, q, p, X, method::GroupExponentialRetraction)
     conv = direction(method)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
     pinvq = group_exp(M, Xₑ)
@@ -646,7 +648,7 @@ function inverse_retract!(
         method,
     )
 end
-function inverse_retract!(M::Manifold, X, p, q, method::GroupLogarithmicInverseRetraction)
+function inverse_retract!(M::AbstractGroupManifold, X, p, q, method::GroupLogarithmicInverseRetraction)
     conv = direction(method)
     pinvq = inverse_translate(M, p, q, conv)
     Xₑ = group_log(M, pinvq)
