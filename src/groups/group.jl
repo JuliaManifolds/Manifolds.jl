@@ -169,15 +169,9 @@ function allocate_result(
     return allocate(X, Size(manifold_dimension(G)))
 end
 
-function check_manifold_point(M::DT, e::Identity; kwargs...) where {DT<:AbstractDecoratorManifold}
-    check_manifold_point(M.manifold, e; kwargs...)
-end
-function check_manifold_point(M::Manifold, e::Identity; kwargs...)
+function check_manifold_point(M::AbstractGroupManifold, e::Identity; kwargs...) where {DT<:AbstractDecoratorManifold}
+    e === Identity(M) && return nothing
     return DomainError(e, "The identity element $(e) does not belong to $(M).")
-end
-function check_manifold_point(G::GroupManifold, e::Identity; kwargs...)
-    e === Identity(G) && return nothing
-    return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
 
 ##########################
@@ -191,18 +185,14 @@ Inverse $p^{-1} ∈ \mathcal{G}$ of an element $p ∈ \mathcal{G}$, such that
 $p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}$, where $e$ is the [`identity`](@ref)
 element of $\mathcal{G}$.
 """
-inv(M::DT, p) where {DT <: AbstractDecoratorManifold} = inv(M.manifold, p)
-function inv(M::Manifold, p)
-    error("inv not implemented on $(typeof(M)) for points $(typeof(p))")
-end
-function inv(G::AbstractGroupManifold, p)
+inv(M::AbstractGroupManifold, ::Any...)
+@decorator_transparent_function :intransparent function inv(G::AbstractGroupManifold, p)
     q = allocate_result(G, inv, p)
     return inv!(G, q, p)
 end
 
-inv!(M::DT, q, p) where {DT <: AbstractDecoratorManifold} = inv!(M.manifold, q, p)
-function inv!(M::Manifold, q, p)
-    return error("inv! not implemented on $(typeof(M)) for points $(typeof(p))")
+@decorator_transparent_function :intransparent  function inv!(M::AbstractGroupManifold, q, p)
+    inv!(M.manifold, q, p)
 end
 
 @doc raw"""
@@ -212,11 +202,12 @@ Identity element $e ∈ \mathcal{G}$, such that for any element $p ∈ \mathcal{
 $p \circ e = e \circ p = p$.
 The returned element is of a similar type to `p`.
 """
-function identity(G::Manifold, p)
+identity(::AbstractGroupManifold, ::Any)
+
+@decorator_transparent_function :intransparent function identity(G::AbstractGroupManifold, p)
     y = allocate_result(G, identity, p)
     return identity!(G, y, p)
 end
-@decorator_transparent_signature identity!(M::AbstractGroupManifold, q, p)
 
 function isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:AbstractGroupManifold}
     return isapprox(G, identity(G, p), p; kwargs...)
@@ -224,7 +215,7 @@ end
 function isapprox(G::GT, p, e::Identity{GT}; kwargs...) where {GT<:GroupManifold}
     return isapprox(G, e, p; kwargs...)
 end
-function isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:GroupManifold}
+function isapprox(G::GT, e::Identity{GT}, p; kwargs...)where {GT<:GroupManifold}
     return isapprox(G, identity(G, p), p; kwargs...)
 end
 isapprox(::GT, ::E, ::E; kwargs...) where {GT<:AbstractGroupManifold,E<:Identity{GT}} = true
@@ -234,12 +225,18 @@ isapprox(::GT, ::E, ::E; kwargs...) where {GT<:AbstractGroupManifold,E<:Identity
 
 Compose elements $p,q ∈ \mathcal{G}$ using the group operation $p \circ q$.
 """
-function compose(G::Manifold, p, q)
+compose(::AbstractGroupManifold, ::Any...)
+@decorator_transparent_function :intransparent function compose(
+    G::AbstractGroupManifold,
+    p,
+    q
+)
     x = allocate_result(G, compose, p, q)
     return compose!(G, x, p, q)
 end
 
 @decorator_transparent_signature compose!(M::AbstractGroupManifold, x, p, q)
+decorator_transparent_dispatch(::typeof(compose!), M::AbstractGroupManifold, x, p, q) = Val(:intransparent)
 
 _action_order(p, q, conv::LeftAction) = (p, q)
 _action_order(p, q, conv::RightAction) = (q, p)
@@ -257,13 +254,32 @@ R_p &: q ↦ q \circ p.
 \end{aligned}
 ```
 """
-translate(M::Manifold, p, q) = translate(M, p, q, LeftAction())
-function translate(M::Manifold, p, q, conv::ActionDirection)
+translate(::AbstractGroupManifold, ::Any...)
+@decorator_transparent_function :intransparent function translate(
+    M::AbstractGroupManifold,
+    p,
+    q
+)
+    return translate(M, p, q, LeftAction())
+end
+@decorator_transparent_function :intransparent function translate(
+    M::Manifold,
+    p,
+    q,
+    conv::ActionDirection
+)
     return compose(M, _action_order(p, q, conv)...)
 end
 
-translate!(M::Manifold, x, p, q) = translate!(M, x, p, q, LeftAction())
-@decorator_transparent_function function translate!(
+@decorator_transparent_function :intransparent function translate!(
+    M::AbstractGroupManifold,
+    x,
+    p,
+    q
+)
+    return translate!(M, x, p, q, LeftAction())
+end
+@decorator_transparent_function :intransparent function translate!(
     G::AbstractGroupManifold,
     x,
     p,
@@ -286,19 +302,37 @@ R_p^{-1} &: q ↦ q \circ p^{-1}.
 \end{aligned}
 ```
 """
-inverse_translate(M::Manifold, p, q) = inverse_translate(M, p, q, LeftAction())
-function inverse_translate(M::Manifold, p, q, conv::ActionDirection)
+inverse_translate(::AbstractGroupManifold, ::Any...)
+
+@decorator_transparent_function :intransparent function inverse_translate(
+    M::AbstractGroupManifold,
+    p,
+    q
+)
+    return inverse_translate(M, p, q, LeftAction())
+end
+@decorator_transparent_function :intransparent function inverse_translate(
+    M::AbstractGroupManifold,
+    p,
+    q,
+    conv::ActionDirection
+)
     return translate(M, inv(M, p), q, conv)
 end
 
-inverse_translate!(M::Manifold, x, p, q) = inverse_translate!(M, x, p, q, LeftAction())
-function inverse_translate!(M::DT, x, p, q, conv::ActionDirection) where {DT<:AbstractDecoratorManifold}
-    return inverse_translate!(M.manifold, x, p, q, conv)
+@decorator_transparent_function :intransparent function inverse_translate!(
+    M::AbstractGroupManifold,
+    p,
+    q
+)
+    return inverse_translate!(M, x, p, q, LeftAction())
 end
-function inverse_translate!(M::Manifold, x, p, q, conv::ActionDirection)
-    return error("inverse_translate! not implemented on $(typeof(M)) for elements $(typeof(p)) and $(typeof(q)) and direction $(typeof(conv))")
-end
-function inverse_translate!(G::AbstractGroupManifold, x, p, q, conv::ActionDirection)
+@decorator_transparent_function :intransparent function inverse_translate!(
+    M::AbstractGroupManifold,
+    p,
+    q,
+    conv::ActionDirection
+)
     return translate!(G, x, inv(G, p), q, conv)
 end
 
@@ -313,29 +347,35 @@ left or right `conv`ention. The differential transports vectors:
 (\mathrm{d}τ_p)_q : T_q \mathcal{G} → T_{τ_p q} \mathcal{G}\\
 ```
 """
-translate_diff(M::Manifold, p, q, X) = translate_diff(M, p, q, X, LeftAction())
-function translate_diff(M::DT, p, q, X, conv::ActionDirection) where {DT<:AbstractDecoratorManifold}
-    return translate_diff(M.manifold, p, q, X, conv)
+translate_diff(::AbstractGroupManifold, ::Any...)
+@decorator_transparent_function :intransparent function translate_diff(
+    M::AbstractGroupManifold,
+    p,
+    q,
+    X
+)
+    return translate_diff(M, p, q, X, LeftAction())
 end
-function translate_diff(M::Manifold, p, q, X, conv::ActionDirection)
-    return error("translate_diff not implemented on $(typeof(G)) for elements $(typeof(p)) and $(typeof(q)), vector $(typeof(X)), and direction $(typeof(conv))")
-end
-function translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection)
-    pq = translate(G, p, q, conv)
+@decorator_transparent_function :intransparent function translate_diff(
+    M::AbstractGroupManifold,
+    p,
+    q,
+    X,
+    conv::ActionDirection
+)
     Y = allocate_result(G, translate_diff, X, p, q)
     translate_diff!(G, Y, p, q, X, conv)
     return Y
 end
-
-function translate_diff!(M::Manifold, Y, p, q, X)
-    return translate_diff!(M, Y, p, q, X, LeftAction())
-end
-function translate_diff!(M::DT, Y, p, q, X, conv::ActionDirection) where {DT<:AbstractDecoratorManifold}
-    return translate_diff!(M.manifold, Y, p, q, X, conv)
-end
-function translate_diff!(M::Manifold, Y, p, q, X, conv::ActionDirection)
-    return error("translate_diff! not implemented on $(typeof(M)) for elements $(typeof(Y)), $(typeof(p)) and $(typeof(q)), vector $(typeof(X)), and direction $(typeof(conv))")
-end
+@decorator_transparent_signature translate_diff!(
+    M::AbstractGroupManifold,
+    Y,
+    p,
+    q,
+    X,
+    conv::ActionDirection
+)
+decorator_transparent_dispatch(::typeof(translate_diff!), M::AbstractGroupManifold, Y, p, q, X, conv) = Val(:intransparent)
 
 @doc raw"""
     inverse_translate_diff(G::AbstractGroupManifold, p, q, X)
@@ -348,36 +388,33 @@ specified left or right `conv`ention. The differential transports vectors:
 (\mathrm{d}τ_p^{-1})_q : T_q \mathcal{G} → T_{τ_p^{-1} q} \mathcal{G}\\
 ```
 """
-function inverse_translate_diff(M::Manifold, p, q, X)
-    return inverse_translate_diff(M, p, q, X, LeftAction())
+inverse_translate_diff(::AbstractGroupManifold, ::Any...)
+@decorator_transparent_function :intransparent function inverse_translate_diff(
+    G::AbstractGroupManifold,
+    p,
+    q,
+    X)
+    return inverse_translate_diff(G, p, q, X, LeftAction())
 end
-function inverse_translate_diff(M::DT, p, q, X, conv::ActionDirection) where {DT<:AbstractDecoratorManifold}
-    return inverse_translate_diff(M.manifold, p, q, X, conv)
-end
-function inverse_translate_diff(M::Manifold, p, q, X, conv::ActionDirection)
-    return error("inverse_translate_diff not implemented on $(typeof(M)) for elements $(typeof(p)) and $(typeof(q)), vector $(typeof(X)), and direction $(typeof(conv))")
-end
-function inverse_translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection)
-    return translate_diff(G, inv(G, p), q, X, conv)
-end
-
-function inverse_translate_diff!(M::Manifold, Y, p, q, X)
-    return inverse_translate_diff!(M, Y, p, q, X, LeftAction())
-end
-function inverse_translate_diff!(M::DT, Y, p, q, X, conv::ActionDirection) where {DT<:AbstractDecoratorManifold}
-    return inverse_translate_diff!(M.manifold, Y, p, q, X, conv)
-end
-function inverse_translate_diff!(
-    M::Manifold,
-    Y,
+@decorator_transparent_function :intransparent function inverse_translate_diff(
+    G::AbstractGroupManifold,
     p,
     q,
     X,
     conv::ActionDirection
 )
-    return error("inverse_translate_diff! not implemented on $(typeof(M)) for elements $(typeof(Y)), $(typeof(p)) and $(typeof(q)), vector $(typeof(X)), and direction $(typeof(conv))")
+    return translate_diff(G, inv(G, p), q, X, conv)
 end
-function inverse_translate_diff!(
+
+@decorator_transparent_function :intransparent function inverse_translate_diff!(
+    G::AbstractGroupManifold,
+    Y,
+    p,
+    q,
+    X)
+    return inverse_translate_diff!(G, Y, p, q, X, LeftAction())
+end
+@decorator_transparent_function :intransparent function inverse_translate_diff!(
     G::AbstractGroupManifold,
     Y,
     p,
@@ -430,23 +467,17 @@ exponential,
 \exp X = \operatorname{Exp} X = \sum_{n=0}^∞ \frac{1}{n!} X^n.
 ````
 """
-function group_exp(M::DT, X) where {DT<:AbstractDecoratorManifold}
-    return group_exp(M.manifold, X)
-end
-function group_exp(M::Manifold, X)
-    return error("group_exp not implemented on $(typeof(M)) for vector $(typeof(X)).")
-end
-function group_exp(G::AbstractGroupManifold, X)
+group_exp(::AbstractGroupManifold, ::Any...)
+@decorator_transparent_function :intransparent function group_exp(G::AbstractGroupManifold, X)
     q = allocate_result(G, group_exp, X)
     return group_exp!(G, q, X)
 end
-
-function group_exp!(M::DT, q, X) where {DT<:AbstractDecoratorManifold}
-    group_exp!(M.manifold, q, X)
-end
-function group_exp!(M::Manifold, q, X)
-    return error("group_exp! not implemented on $(typeof(M)) for vector $(typeof(X)) and element $(typeof(q)).")
-end
+@decorator_transparent_signature group_exp!(
+    G::AbstractGroupManifold,
+    q,
+    X
+)
+decorator_transparent_dispatch(::typeof(group_exp!), M::AbstractGroupManifold, q, X) = Val(:intransparent)
 
 @doc raw"""
     group_log(G::AbstractGroupManifold, q)
@@ -478,23 +509,18 @@ For `Number` and `AbstractMatrix` types of `q`, compute the usual numeric/matrix
 where $e$ here is the [`identity`](@ref) element, that is, $1$ for numeric $q$ or the
 identity matrix $I_m$ for matrix $q ∈ ℝ^{m × m}$.
 """
-function group_log(M::DT, q) where {DT<:AbstractDecoratorManifold}
-    return group_log(M.manifold, q)
-end
-function group_log(M::Manifold, q)
-    return error("group_log not implemented on $(typeof(M)) for element $(typeof(q)).")
-end
-function group_log(G::AbstractGroupManifold, q)
+group_log(::AbstractGroupManifold, ::Any...)
+@decorator_transparent_function :intransparent function group_log(G::AbstractGroupManifold, q)
     X = allocate_result(G, group_log, q)
     return group_log!(G, X, q)
 end
 
-function group_log!(M::DT, X, q) where {DT<:AbstractDecoratorManifold}
-    group_log!(M.manifold, X, q)
-end
-function group_log!(M::Manifold, X, q)
-    return error("group_log! not implemented on $(typeof(M)) for element $(typeof(q)) and vector $(typeof(X)).")
-end
+@decorator_transparent_signature group_log!(
+    G::AbstractGroupManifold,
+    X,
+    q
+)
+decorator_transparent_dispatch(::typeof(group_log!), M::AbstractGroupManifold, X, q) = Val(:intransparent)
 
 ############################
 # Group-specific Retractions
