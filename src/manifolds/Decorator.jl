@@ -65,26 +65,26 @@ function base_manifold(M::AbstractDecoratorManifold, depth::Val{N} = Val(-1)) wh
     return (N != 0) ? base_manifold(M.manifold, (N > 0) ? Val(N-1) : depth) : M
 end
 
-@decorator_transparent_function check_manifold_point(
+@decorator_transparent_signature check_manifold_point(
     M::AbstractDecoratorManifold,
     p;
     kwargs...,
 )
 
-@decorator_transparent_function check_tangent_vector(
+@decorator_transparent_signature check_tangent_vector(
     M::AbstractDecoratorManifold,
     p,
     X;
     kwargs...,
 )
 
-@decorator_transparent_function distance(
+@decorator_transparent_signature distance(
     M::AbstractDecoratorManifold,
     p,
     q,
 )
 
-@decorator_transparent_function exp!(
+@decorator_transparent_signature exp!(
     M::AbstractDecoratorManifold,
     q,
     p,
@@ -92,7 +92,7 @@ end
 )
 
 
-@decorator_transparent_function exp!(
+@decorator_transparent_signature exp!(
     M::AbstractDecoratorManifold,
     q,
     p,
@@ -100,80 +100,80 @@ end
     T
 )
 
-@decorator_transparent_function flat!(
+@decorator_transparent_signature flat!(
     M::AbstractDecoratorManifold,
     ξ::CoTFVector,
     p,
     X::TFVector,
 )
 
-@decorator_transparent_function get_basis(
+@decorator_transparent_signature get_basis(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis,
 )
 
-@decorator_transparent_function get_basis(
+@decorator_transparent_signature get_basis(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractOrthonormalBasis,
 )
-@decorator_transparent_function get_basis(
+@decorator_transparent_signature get_basis(
     M::AbstractDecoratorManifold,
     p,
     B::ProjectedOrthonormalBasis{:svd,ℝ},
 )
-@decorator_transparent_function get_basis(
+@decorator_transparent_signature get_basis(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractPrecomputedOrthonormalBasis,
 )
-@decorator_transparent_function get_basis(
+@decorator_transparent_signature get_basis(
     M::AbstractDecoratorManifold,
     p,
     B::ArbitraryOrthonormalBasis,
 )
 
-@decorator_transparent_function get_coordinates(
+@decorator_transparent_signature get_coordinates(
     M::AbstractDecoratorManifold,
     p,
     X,
     B::AbstractBasis,
 )
-@decorator_transparent_function get_coordinates(
+@decorator_transparent_signature get_coordinates(
     M::AbstractDecoratorManifold,
     p,
     X,
     B::AbstractPrecomputedOrthonormalBasis,
 )
-@decorator_transparent_function get_coordinates(
+@decorator_transparent_signature get_coordinates(
     M::AbstractDecoratorManifold,
     p,
     X,
     B::AbstractPrecomputedOrthonormalBasis{ℝ},
 )
 
-@decorator_transparent_function get_vector(
+@decorator_transparent_signature get_vector(
     M::AbstractDecoratorManifold,
     p,
     X,
     B::AbstractBasis,
 )
-@decorator_transparent_function get_vector(
+@decorator_transparent_signature get_vector(
     M::AbstractDecoratorManifold,
     p,
     X,
     B::AbstractPrecomputedOrthonormalBasis,
 )
 
-@decorator_transparent_function hat!(M::AbstractDecoratorManifold, X, p, Xⁱ)
+@decorator_transparent_signature hat!(M::AbstractDecoratorManifold, X, p, Xⁱ)
 
-@decorator_transparent_function injectivity_radius(M::AbstractDecoratorManifold)
-@decorator_transparent_function injectivity_radius(M::AbstractDecoratorManifold, p)
+@decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold)
+@decorator_transparent_signature injectivity_radius(M::AbstractDecoratorManifold, p)
 
-@decorator_transparent_function inner(M::AbstractDecoratorManifold, p, X, Y)
+@decorator_transparent_signature inner(M::AbstractDecoratorManifold, p, X, Y)
 
-@decorator_transparent_function inverse_retract!(
+@decorator_transparent_signature inverse_retract!(
     M::AbstractDecoratorManifold,
     X,
     p,
@@ -181,7 +181,7 @@ end
     m::AbstractInverseRetractionMethod,
 )
 
-@decorator_transparent_function inverse_retract!(
+@decorator_transparent_signature inverse_retract!(
     M::AbstractDecoratorManifold,
     X,
     p,
@@ -189,42 +189,42 @@ end
     m::LogarithmicInverseRetraction,
 )
 
-@decorator_transparent_function isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
-@decorator_transparent_function isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
+@decorator_transparent_signature isapprox(M::AbstractDecoratorManifold, p, q; kwargs...)
+@decorator_transparent_signature isapprox(M::AbstractDecoratorManifold, p, X, Y; kwargs...)
 
-@decorator_transparent_function log!(M::AbstractDecoratorManifold, X, p, q)
+@decorator_transparent_signature log!(M::AbstractDecoratorManifold, X, p, q)
 
-@decorator_transparent_function manifold_dimension(M::AbstractDecoratorManifold)
+@decorator_transparent_signature manifold_dimension(M::AbstractDecoratorManifold)
 
-@decorator_transparent_function mean!(
+@decorator_transparent_signature mean!(
     M::AbstractDecoratorManifold,
     x::AbstractVector,
     w::AbstractVector;
     kwargs...,
 )
 
-@decorator_transparent_function median!(
+@decorator_transparent_signature median!(
     M::AbstractDecoratorManifold,
     x::AbstractVector,
     w::AbstractVector;
     kwargs...,
 )
 
-@decorator_transparent_function normal_tvector_distribution(
+@decorator_transparent_signature normal_tvector_distribution(
     M::AbstractDecoratorManifold, p, σ
 )
 
-@decorator_transparent_function project_point!(M::AbstractDecoratorManifold, q, p)
+@decorator_transparent_signature project_point!(M::AbstractDecoratorManifold, q, p)
 
-@decorator_transparent_function project_tangent!(M::AbstractDecoratorManifold, Y, p, X)
+@decorator_transparent_signature project_tangent!(M::AbstractDecoratorManifold, Y, p, X)
 
-@decorator_transparent_function projected_distribution(M::AbstractDecoratorManifold, d, p)
+@decorator_transparent_signature projected_distribution(M::AbstractDecoratorManifold, d, p)
 
-@decorator_transparent_function projected_distribution(M::AbstractDecoratorManifold, d)
+@decorator_transparent_signature projected_distribution(M::AbstractDecoratorManifold, d)
 
-@decorator_transparent_function representation_size(M::AbstractDecoratorManifold)
+@decorator_transparent_signature representation_size(M::AbstractDecoratorManifold)
 
-@decorator_transparent_function retract!(
+@decorator_transparent_signature retract!(
     M::AbstractDecoratorManifold,
     q,
     p,
@@ -232,7 +232,7 @@ end
     m::AbstractRetractionMethod
 )
 
-@decorator_transparent_function retract!(
+@decorator_transparent_signature retract!(
     M::AbstractDecoratorManifold,
     q,
     p,
@@ -240,14 +240,14 @@ end
     m::ExponentialRetraction
 )
 
-@decorator_transparent_function sharp!(
+@decorator_transparent_signature sharp!(
     M::AbstractDecoratorManifold,
     X::TFVector,
     p,
     ξ::CoTFVector,
 )
 
-@decorator_transparent_function vector_transport_along!(
+@decorator_transparent_signature vector_transport_along!(
     M::AbstractDecoratorManifold,
     Y,
     p,
@@ -255,7 +255,7 @@ end
     c,
 )
 
-@decorator_transparent_function vector_transport_direction!(
+@decorator_transparent_signature vector_transport_direction!(
     M::AbstractDecoratorManifold,
     Y,
     p,
@@ -263,7 +263,7 @@ end
     d,
 )
 
-@decorator_transparent_function vector_transport_to!(
+@decorator_transparent_signature vector_transport_to!(
     M::AbstractDecoratorManifold,
     Y,
     p,
@@ -272,6 +272,6 @@ end
     m::AbstractVectorTransportMethod,
 )
 
-@decorator_transparent_function vee!(M::AbstractDecoratorManifold, Xⁱ, p, X)
+@decorator_transparent_signature vee!(M::AbstractDecoratorManifold, Xⁱ, p, X)
 
-@decorator_transparent_function zero_tangent_vector!(M::AbstractDecoratorManifold, X, p)
+@decorator_transparent_signature zero_tangent_vector!(M::AbstractDecoratorManifold, X, p)

@@ -66,6 +66,7 @@ end
         #one for MetricManifold, one for Manifold & Metric
         @test length(methods(is_default_metric)) == 2
     end
+
     @testset "solve_exp_ode error message" begin
         E = TestEuclidean{3}()
         g = TestEuclideanMetric()
@@ -326,6 +327,7 @@ end
 
         xsample = [[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
         w = pweights([0.5, 0.5])
+        # test despatch with results from above
         @test mean(M, xsample, w) ≈ ones(3)
         @test mean(MM2, xsample, w) ≈ ones(3)
         @test mean(MM, xsample, w) ≈ 3 .* ones(3)

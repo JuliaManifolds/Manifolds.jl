@@ -70,7 +70,7 @@ function is_group_decorator(M::Manifold)
     return _extract_val(decorator_group_dispatch(M))
 end
 
-default_decorator_dispach(M::AbstractGroupManifold) = Val(false)
+default_decorator_dispatch(M::AbstractGroupManifold) = Val(false)
 
 # piping syntax for decoration
 if VERSION ≥ v"1.3"

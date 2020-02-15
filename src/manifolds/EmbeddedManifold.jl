@@ -54,14 +54,13 @@ function decorator_transparent_dispatch(
     return Val(:intransparent)
 end
 
-function embed(M::AbstractEmbeddedManifold,p)
+@decorator_transparent_function function embed(M::AbstractEmbeddedManifold,p)
     q = allocate(p)
     return embed!(M, q, p)
 end
-function embed!(M, q, p)
+@decorator_transparent_function function embed!(M::AbstractEmbeddedManifold, q, p)
     error("Embedding a point $(typeof(p)) on $(typeof(M)) not yet implemented.")
 end
-@decorator_transparent_function embed!(M::AbstractDecoratorManifold, p)
 
 function inverse_retract!(M::MT, X, p, q, m::EmbeddedRetraction) where {MT <: EmbeddedManifold}
     x = allocate(q)
@@ -73,7 +72,9 @@ function inverse_retract!(M::MT, X, p, q, m::EmbeddedRetraction) where {MT <: Em
     return q
 end
 
-get_embedding(M::AbstractEmbeddedManifold) = M.manifold
+@decorator_transparent_function function get_embedding(M::AbstractEmbeddedManifold)
+    return M.manifold
+end
 
 function retract!(M::MT, q, p, X, m::EmbeddedRetraction) where {MT <: AbstractEmbeddedManifold}
     x = allocate(q)
