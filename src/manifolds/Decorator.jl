@@ -198,6 +198,7 @@ end
 
 @decorator_transparent_signature mean!(
     M::AbstractDecoratorManifold,
+    y,
     x::AbstractVector,
     w::AbstractVector;
     kwargs...,
@@ -205,6 +206,7 @@ end
 
 @decorator_transparent_signature median!(
     M::AbstractDecoratorManifold,
+    y,
     x::AbstractVector,
     w::AbstractVector;
     kwargs...,
