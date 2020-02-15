@@ -212,13 +212,10 @@ end
 function isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:AbstractGroupManifold}
     return isapprox(G, identity(G, p), p; kwargs...)
 end
-function isapprox(G::GT, p, e::Identity{GT}; kwargs...) where {GT<:GroupManifold}
+function isapprox(G::GT, p, e::Identity{GT}; kwargs...) where {GT<:AbstractGroupManifold}
     return isapprox(G, e, p; kwargs...)
 end
-function isapprox(G::GT, e::Identity{GT}, p; kwargs...)where {GT<:GroupManifold}
-    return isapprox(G, identity(G, p), p; kwargs...)
-end
-isapprox(::GT, ::E, ::E; kwargs...) where {GT<:AbstractGroupManifold,E<:Identity{GT}} = true
+isapprox(::GT, ::E, ::E; kwargs...) where {GT<:AbstractGroupManifold, E<:Identity{GT}} = true
 
 @doc raw"""
     compose(G::AbstractGroupManifold, p, q)
