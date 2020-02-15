@@ -208,6 +208,9 @@ identity(::AbstractGroupManifold, ::Any)
     y = allocate_result(G, identity, p)
     return identity!(G, y, p)
 end
+@decorator_transparent_signature identity!(G::AbstractGroupManifold, q, p)
+decorator_transparent_dispatch(::typeof(identity!), M::AbstractGroupManifold, q, p) = Val(:intransparent)
+
 
 function isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:AbstractGroupManifold}
     return isapprox(G, identity(G, p), p; kwargs...)
@@ -348,15 +351,15 @@ left or right `conv`ention. The differential transports vectors:
 """
 translate_diff(::AbstractGroupManifold, ::Any...)
 @decorator_transparent_function :intransparent function translate_diff(
-    M::AbstractGroupManifold,
+    G::AbstractGroupManifold,
     p,
     q,
     X
 )
-    return translate_diff(M, p, q, X, LeftAction())
+    return translate_diff(G, p, q, X, LeftAction())
 end
 @decorator_transparent_function :intransparent function translate_diff(
-    M::AbstractGroupManifold,
+    G::AbstractGroupManifold,
     p,
     q,
     X,
@@ -366,6 +369,16 @@ end
     translate_diff!(G, Y, p, q, X, conv)
     return Y
 end
+@decorator_transparent_function :intransparent function translate_diff!(
+    M::AbstractGroupManifold,
+    Y,
+    p,
+    q,
+    X
+)
+    return translate_diff!(M, Y, p, q, X, LeftAction())
+end
+
 @decorator_transparent_signature translate_diff!(
     M::AbstractGroupManifold,
     Y,
