@@ -212,44 +212,14 @@ Identity element $e ∈ \mathcal{G}$, such that for any element $p ∈ \mathcal{
 $p \circ e = e \circ p = p$.
 The returned element is of a similar type to `p`.
 """
-identity(M::DT, p) where {DT <: AbstractDecoratorManifold} = identity(M.manifold, p)
-function identity(M::Manifold, p, ::Val{false})
-    return error("identity not implemented on $(typeof(M)) for points $(typeof(p))")
-end
-function identity(G::AbstractGroupManifold, p)
+function identity(G::Manifold, p)
     y = allocate_result(G, identity, p)
     return identity!(G, y, p)
 end
+@decorator_transparent_signature identity!(M::AbstractGroupManifold, q, p)
 
-identity!(M::AbstractDecoratorManifold, q, p) = identity!(M.manifold, q, p)
-function identity!(M::Manifold, q, p)
-    return error("identity! not implemented on $(typeof(M)) for points $(typeof(q)) and $(typeof(p))")
-end
-
-isapprox(M::Manifold, p, e::Identity; kwargs...) = isapprox(M, e, p; kwargs...)
-function isapprox(M::DT, e::Identity, p; kwargs...) where {DT<:AbstractDecoratorManifold}
-    isapprox(M.manifold, e, p; kwargs...)
-    error("isapprox not implemented for manifold $(typeof(M)) and points $(typeof(e)) and $(typeof(p))")
-end
-function isapprox(M::Manifold, e::Identity, p; kwargs...) where {DT<:AbstractDecoratorManifold}
-    error("isapprox not implemented for manifold $(typeof(M)) and points $(typeof(e)) and $(typeof(p))")
-end
-function isapprox(M::DT, e::E, ::E; kwargs...) where {E<:Identity, DT<:AbstractDecoratorManifold}
-  return isapprox(M.manifold, e, e; kwargs...)
-end
-function isapprox(M::Manifold, e::E, ::E; kwargs...) where {E<:Identity}
-    error("isapprox not implemented for manifold $(typeof(M)) and points $(typeof(e)) and $(typeof(e))")
-end
 function isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:AbstractGroupManifold}
     return isapprox(G, identity(G, p), p; kwargs...)
-end
-function isapprox(
-    ::GT,
-    ::E,
-    ::E;
-    kwargs...,
-) where {GT<:AbstractGroupManifold,E<:Identity{GT}}
-    return true
 end
 function isapprox(G::GT, p, e::Identity{GT}; kwargs...) where {GT<:GroupManifold}
     return isapprox(G, e, p; kwargs...)
@@ -257,26 +227,19 @@ end
 function isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:GroupManifold}
     return isapprox(G, identity(G, p), p; kwargs...)
 end
-isapprox(::GT, ::E, ::E; kwargs...) where {GT<:GroupManifold,E<:Identity{GT}} = true
+isapprox(::GT, ::E, ::E; kwargs...) where {GT<:AbstractGroupManifold,E<:Identity{GT}} = true
 
 @doc raw"""
     compose(G::AbstractGroupManifold, p, q)
 
 Compose elements $p,q ∈ \mathcal{G}$ using the group operation $p \circ q$.
 """
-compose(M::DT, p, q) where {DT<:AbstractDecoratorManifold} = compose(M.manifold, p, q)
-function compose(M::Manifold, p, q)
-    return error("compose not implemented on $(typeof(M)) for elements $(typeof(p)) and $(typeof(q))")
-end
-function compose(G::AbstractGroupManifold, p, q)
+function compose(G::Manifold, p, q)
     x = allocate_result(G, compose, p, q)
     return compose!(G, x, p, q)
 end
 
-compose!(M::DT, x, p, q) where {DT<:AbstractDecoratorManifold} = compose!(M.manifold, x, p, q)
-function compose!(M::Manifold, x, p, q)
-    return error("compose! not implemented on $(typeof(M)) for elements $(typeof(p)) and $(typeof(q))")
-end
+@decorator_transparent_signature compose!(M::AbstractGroupManifold, x, p, q)
 
 _action_order(p, q, conv::LeftAction) = (p, q)
 _action_order(p, q, conv::RightAction) = (q, p)
@@ -295,24 +258,18 @@ R_p &: q ↦ q \circ p.
 ```
 """
 translate(M::Manifold, p, q) = translate(M, p, q, LeftAction())
-function translate(M::DT, p, q, conv::ActionDirection) where {DT<:AbstractDecoratorManifold}
-    return translate(M.manifold, p, q, conv)
-end
 function translate(M::Manifold, p, q, conv::ActionDirection)
-    return error("translate not implemented on $(typeof(M)) for elements $(typeof(p)) and $(typeof(q)) and direction $(typeof(conv))")
-end
-function translate(G::AbstractGroupManifold, p, q, conv::ActionDirection)
-    return compose(G, _action_order(p, q, conv)...)
+    return compose(M, _action_order(p, q, conv)...)
 end
 
 translate!(M::Manifold, x, p, q) = translate!(M, x, p, q, LeftAction())
-function translate!(M::DT, x, p, q, conv::ActionDirection) where {DT<:AbstractDecoratorManifold}
-    return translate!(M.manifold, x, p, q, conv)
-end
-function translate!(M::Manifold, x, p, q, conv::ActionDirection)
-    return error("translate! not implemented on $(typeof(M)) for elements $(typeof(p)) and $(typeof(q)) and direction $(typeof(conv))")
-end
-function translate!(G::AbstractGroupManifold, x, p, q, conv::ActionDirection)
+@decorator_transparent_function function translate!(
+    G::AbstractGroupManifold,
+    x,
+    p,
+    q,
+    conv::ActionDirection
+)
     return compose!(G, x, _action_order(p, q, conv)...)
 end
 
@@ -330,14 +287,8 @@ R_p^{-1} &: q ↦ q \circ p^{-1}.
 ```
 """
 inverse_translate(M::Manifold, p, q) = inverse_translate(M, p, q, LeftAction())
-function inverse_translate(M::DT, p, q, conv::ActionDirection) where {DT<:AbstractDecoratorManifold}
-    return inverse_translate(M.manifold, p, q, conv)
-end
 function inverse_translate(M::Manifold, p, q, conv::ActionDirection)
-    return error("inverse_translate not implemented on $(typeof(M)) for elements $(typeof(p)) and $(typeof(q)) and direction $(typeof(conv))")
-end
-function inverse_translate(G::AbstractGroupManifold, p, q, conv::ActionDirection)
-    return translate(G, inv(G, p), q, conv)
+    return translate(M, inv(M, p), q, conv)
 end
 
 inverse_translate!(M::Manifold, x, p, q) = inverse_translate!(M, x, p, q, LeftAction())

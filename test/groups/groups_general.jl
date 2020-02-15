@@ -13,8 +13,6 @@ include("../utils.jl")
         eg = Identity(G)
         @test repr(eg) === "Identity($(G))"
         @test length(methods(is_group_decorator)) == 1
-        @test_throws Exception Identity(G, Val(true))
-        @test_throws ErrorException Identity(G, Val(false))
 
         @test Manifolds.is_group_decorator(G)
         @test !Manifolds.is_group_decorator(NotImplementedManifold())
