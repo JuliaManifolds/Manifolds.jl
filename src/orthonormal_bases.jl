@@ -214,31 +214,6 @@ See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 function get_basis(M::Manifold, p, B::AbstractBasis)
     error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
-@decorator_transparent_signature get_basis(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis,
-)
-@decorator_transparent_signature get_basis(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractOrthonormalBasis,
-)
-@decorator_transparent_signature get_basis(
-    M::AbstractDecoratorManifold,
-    p,
-    B::ProjectedOrthonormalBasis{:svd,ℝ},
-)
-@decorator_transparent_signature get_basis(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractPrecomputedOrthonormalBasis,
-)
-@decorator_transparent_signature get_basis(
-    M::AbstractDecoratorManifold,
-    p,
-    B::ArbitraryOrthonormalBasis,
-)
 """
     get_basis(M::Manifold, p, B::ArbitraryOrthonormalBasis)
 
@@ -272,42 +247,11 @@ function get_basis(M::ArrayManifold, p, B::AbstractPrecomputedOrthonormalBasis{�
     end
     return B
 end
-
 function get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     return get_coordinates(M.manifold, p, X, B)
 end
-@decorator_transparent_signature get_coordinates(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    B::AbstractBasis,
-)
-@decorator_transparent_signature get_coordinates(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    B::AbstractPrecomputedOrthonormalBasis,
-)
-@decorator_transparent_signature get_coordinates(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    B::AbstractPrecomputedOrthonormalBasis{ℝ},
-)
 
-@decorator_transparent_signature get_vector(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    B::AbstractBasis,
-)
-@decorator_transparent_signature get_vector(
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    B::AbstractPrecomputedOrthonormalBasis,
-)
 
 function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
@@ -478,3 +422,63 @@ function show(io::IO, mime::MIME"text/plain", onb::PrecomputedDiagonalizingOrtho
     sk = replace(sk, '\n' => "\n ")
     print(io, ' ', sk)
 end
+
+#
+# Transparency
+#
+@decorator_transparent_signature get_basis(
+    M::AbstractDecoratorManifold,
+    p,
+    B::AbstractBasis,
+)
+@decorator_transparent_signature get_basis(
+    M::AbstractDecoratorManifold,
+    p,
+    B::AbstractOrthonormalBasis,
+)
+@decorator_transparent_signature get_basis(
+    M::AbstractDecoratorManifold,
+    p,
+    B::ProjectedOrthonormalBasis{:svd,ℝ},
+)
+@decorator_transparent_signature get_basis(
+    M::AbstractDecoratorManifold,
+    p,
+    B::AbstractPrecomputedOrthonormalBasis,
+)
+@decorator_transparent_signature get_basis(
+    M::AbstractDecoratorManifold,
+    p,
+    B::ArbitraryOrthonormalBasis,
+)
+@decorator_transparent_signature get_coordinates(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractBasis,
+)
+@decorator_transparent_signature get_coordinates(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractPrecomputedOrthonormalBasis,
+)
+@decorator_transparent_signature get_coordinates(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractPrecomputedOrthonormalBasis{ℝ},
+)
+
+@decorator_transparent_signature get_vector(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractBasis,
+)
+@decorator_transparent_signature get_vector(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractPrecomputedOrthonormalBasis,
+)

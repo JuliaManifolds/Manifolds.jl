@@ -42,6 +42,8 @@ import ManifoldsBase:
     base_manifold,
     check_manifold_point,
     check_tangent_vector,
+    decorator_transparent_dispatch,
+    default_decorator_dispatch,
     distance,
     exp,
     exp!,
@@ -92,7 +94,9 @@ using ManifoldsBase:
     @decorator_transparent_fallback,
     @decorator_transparent_function,
     @decorator_transparent_signature,
-    _acts_transparently
+    _acts_transparently,
+    is_decorator_transparent,
+    is_default_decorator
 using ManifoldsBase:
     ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction

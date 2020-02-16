@@ -62,14 +62,6 @@ end
 end
 
 function decorator_transparent_dispatch(
-    ::typeof(manifold_dimension),
-    ::AbstractEmbeddedManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-
-function decorator_transparent_dispatch(
     ::typeof(project_point!),
     ::AbstractEmbeddedManifold,
     args...,
