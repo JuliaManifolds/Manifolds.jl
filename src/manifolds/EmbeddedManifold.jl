@@ -39,21 +39,6 @@ struct EmbeddedInverseRetraction{IR <: AbstractInverseRetractionMethod} <: Abstr
     inverse_retraction_method::IR
 end
 
-function decorator_transparent_dispatch(
-    ::typeof(project_point!),
-    ::AbstractEmbeddedManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(project_tangent!),
-    ::AbstractEmbeddedManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-
 @decorator_transparent_function function embed(M::AbstractEmbeddedManifold,p)
     q = allocate(p)
     return embed!(M, q, p)
@@ -75,6 +60,30 @@ end
 @decorator_transparent_function function get_embedding(M::AbstractEmbeddedManifold)
     return M.manifold
 end
+
+function decorator_transparent_dispatch(
+    ::typeof(manifold_dimension),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(:intransparent)
+end
+
+function decorator_transparent_dispatch(
+    ::typeof(project_point!),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(project_tangent!),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(:intransparent)
+end
+
 
 function retract!(M::MT, q, p, X, m::EmbeddedRetraction) where {MT <: AbstractEmbeddedManifold}
     x = allocate(q)

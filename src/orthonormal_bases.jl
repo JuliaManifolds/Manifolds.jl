@@ -277,6 +277,37 @@ function get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     return get_coordinates(M.manifold, p, X, B)
 end
+@decorator_transparent_signature get_coordinates(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractBasis,
+)
+@decorator_transparent_signature get_coordinates(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractPrecomputedOrthonormalBasis,
+)
+@decorator_transparent_signature get_coordinates(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractPrecomputedOrthonormalBasis{ℝ},
+)
+
+@decorator_transparent_signature get_vector(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractBasis,
+)
+@decorator_transparent_signature get_vector(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    B::AbstractPrecomputedOrthonormalBasis,
+)
 
 function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
