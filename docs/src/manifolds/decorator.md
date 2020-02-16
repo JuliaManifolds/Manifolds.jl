@@ -9,7 +9,7 @@ that involve metrics, especially [`exp`](@ref) and [`log`](@ref) but not the [`m
 By default all functions are passed down. To implement a function for a decorator
 different from the internal manifold, two steps are required. Let's assume the function is called `f(M,arg1,arg2)`, and our decorator manifold is `DM` that decorates `M`. Then
 
-1. set `decorator_transparent_dispatch(f,M) = false`
+1. set `decorator_transparent_dispatch(f,M) = Val(:intransparent)`
 2. implement `f(DM,arg1,arg2)`
 
 Notw that by setting a [`default_decorator_dispatch`](@ref) function for your type,
@@ -18,7 +18,7 @@ This makes it possible to extend a manifold or all manifolds with a feature, whe
 This can best be seen in the [`SymmetricPositiveDefinite`](@ref) manifold with its [`LinearAffineMetric`](@ref).
 
 ```@autodocs
-Modules = [Manifolds]
-Pages = ["manifolds/Decorator.jl"]
-Order = [:type, :function]
+Modules = [ManifoldsBase]
+Pages = ["DecoratorManifold.jl"]
+Order = [:macro, :type, :function]
 ```

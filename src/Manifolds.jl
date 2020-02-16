@@ -88,6 +88,12 @@ using LightGraphs
 using LightGraphs: AbstractGraph
 using ManifoldsBase: CoTVector, Manifold, MPoint, TVector, DefaultManifold
 using ManifoldsBase:
+    AbstractDecoratorManifold,
+    @decorator_transparent_fallback,
+    @decorator_transparent_function,
+    @decorator_transparent_signature,
+    _acts_transparently
+using ManifoldsBase:
     ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
 using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
@@ -131,10 +137,7 @@ function hat(M::Manifold, p, Xⁱ)
     X = allocate_result(M, hat, p, Xⁱ)
     return hat!(M, X, p, Xⁱ)
 end
-
-function hat!(M::Manifold, X, p, Xⁱ)
-    error(manifold_function_not_implemented_message(M, hat!, X, p, Xⁱ))
-end
+@decorator_transparent_signature hat!(M::AbstractDecoratorManifold, X, p, Xⁱ)
 
 @doc raw"""
     vee(M::Manifold, p, X)
@@ -159,6 +162,7 @@ end
 function vee!(M::Manifold, Xⁱ, p, X)
     error(manifold_function_not_implemented_message(M, vee!, Xⁱ, p, X))
 end
+@decorator_transparent_signature vee!(M::AbstractDecoratorManifold, Xⁱ, p, X)
 
 function allocate_result(M::Manifold, f::typeof(vee), p, X)
     T = allocate_result_type(M, f, (p, X))
@@ -223,7 +227,6 @@ include("distributions.jl")
 include("projected_distribution.jl")
 include("product_representations.jl")
 
-include("manifolds/Decorator.jl")
 include("manifolds/EmbeddedManifold.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/ProductManifold.jl")

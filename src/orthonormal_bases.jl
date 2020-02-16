@@ -214,6 +214,31 @@ See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 function get_basis(M::Manifold, p, B::AbstractBasis)
     error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
+@decorator_transparent_signature get_basis(
+    M::AbstractDecoratorManifold,
+    p,
+    B::AbstractBasis,
+)
+@decorator_transparent_signature get_basis(
+    M::AbstractDecoratorManifold,
+    p,
+    B::AbstractOrthonormalBasis,
+)
+@decorator_transparent_signature get_basis(
+    M::AbstractDecoratorManifold,
+    p,
+    B::ProjectedOrthonormalBasis{:svd,ℝ},
+)
+@decorator_transparent_signature get_basis(
+    M::AbstractDecoratorManifold,
+    p,
+    B::AbstractPrecomputedOrthonormalBasis,
+)
+@decorator_transparent_signature get_basis(
+    M::AbstractDecoratorManifold,
+    p,
+    B::ArbitraryOrthonormalBasis,
+)
 """
     get_basis(M::Manifold, p, B::ArbitraryOrthonormalBasis)
 

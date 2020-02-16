@@ -384,6 +384,14 @@ function mean!(
     return q
 end
 
+@decorator_transparent_signature mean!(
+    M::AbstractDecoratorManifold,
+    y,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+)
+
 @doc raw"""
     median(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
@@ -521,6 +529,14 @@ function median!(
     end
     return q
 end
+
+@decorator_transparent_signature median!(
+    M::AbstractDecoratorManifold,
+    y,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+)
 
 @doc raw"""
     var(M, x, m=mean(M, x); corrected=true, kwargs...)

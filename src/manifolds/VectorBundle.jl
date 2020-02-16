@@ -268,6 +268,13 @@ function flat!(M::Manifold, ξ::FVector, p, X::FVector)
     )
 end
 
+@decorator_transparent_signature flat!(
+    M::AbstractDecoratorManifold,
+    ξ::CoTFVector,
+    p,
+    X::TFVector,
+)
+
 function get_basis(M::VectorBundle, p, B::DiagonalizingOrthonormalBasis)
     xp1 = submanifold_component(p, Val(1))
     bv1 = DiagonalizingOrthonormalBasis(submanifold_component(B.frame_direction, Val(1)))
@@ -555,6 +562,13 @@ function sharp!(M::Manifold, X::FVector, p, ξ::FVector)
         "type $(typeof(p)) and vector of type $(typeof(ξ)).",
     )
 end
+
+@decorator_transparent_signature sharp!(
+    M::AbstractDecoratorManifold,
+    X::TFVector,
+    p,
+    ξ::CoTFVector,
+)
 
 show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
 show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")
