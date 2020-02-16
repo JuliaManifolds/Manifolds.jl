@@ -95,18 +95,15 @@ using ManifoldsBase:
     @decorator_transparent_function,
     @decorator_transparent_signature,
     _acts_transparently,
+    _extract_val,
     is_decorator_transparent,
-    is_default_decorator
+    is_default_decorator,
+    manifold_function_not_implemented_message
 using ManifoldsBase:
     ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
 using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
 using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
-using ManifoldsBase:
-    @decorator_transparent_fallback,
-    @decorator_transparent_function,
-    @decorator_transparent_signature,
-    manifold_function_not_implemented_message
 using Markdown: @doc_str
 using Random: AbstractRNG
 using Requires
