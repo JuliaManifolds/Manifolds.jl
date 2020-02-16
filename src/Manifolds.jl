@@ -141,6 +141,9 @@ function hat(M::Manifold, p, Xⁱ)
     X = allocate_result(M, hat, p, Xⁱ)
     return hat!(M, X, p, Xⁱ)
 end
+function hat!(M::Manifold, X, p, Xⁱ)
+    error(manifold_function_not_implemented_message(M, hat!, X, p, Xⁱ))
+end
 @decorator_transparent_signature hat!(M::AbstractDecoratorManifold, X, p, Xⁱ)
 
 @doc raw"""

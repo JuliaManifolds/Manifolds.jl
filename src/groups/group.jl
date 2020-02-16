@@ -169,11 +169,22 @@ function allocate_result(
     return allocate(X, Size(manifold_dimension(G)))
 end
 
-function check_manifold_point(M::AbstractGroupManifold, e::Identity; kwargs...) where {DT<:AbstractDecoratorManifold}
+@decorator_transparent_fallback :intransparent function check_manifold_point(
+    M::AbstractGroupManifold,
+    e::Identity;
+    kwargs...
+)
     e === Identity(M) && return nothing
     return DomainError(e, "The identity element $(e) does not belong to $(M).")
 end
-
+function decorator_transparent_dispatch(
+    ::typeof(check_manifold_point),
+    M::AbstractGroupManifold,
+    e::Identity;
+    kwargs...
+)
+    return Val(:intransparent)
+end
 ##########################
 # Group-specific functions
 ##########################

@@ -3,6 +3,7 @@ array_value(e::Identity) = e
 array_point(p) = ArrayMPoint(p)
 array_point(e::Identity) = e
 
+
 function inv(M::ArrayManifold, p; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
     q = array_point(inv(M.manifold, array_value(p)))
