@@ -89,12 +89,12 @@ using LinearAlgebra
 using LightGraphs
 using LightGraphs: AbstractGraph
 using ManifoldsBase: CoTVector, Manifold, MPoint, TVector, DefaultManifold
+using ManifoldsBase
 using ManifoldsBase:
     AbstractDecoratorManifold,
     @decorator_transparent_fallback,
     @decorator_transparent_function,
     @decorator_transparent_signature,
-    _acts_transparently,
     _extract_val,
     is_decorator_transparent,
     is_default_decorator,
