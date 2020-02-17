@@ -628,17 +628,6 @@ the action of the differential of inverse translation $τ_p^{-1}$ evaluated at $
 """
 retract(::GroupManifold, ::Any, ::Any, ::GroupExponentialRetraction)
 
-function retract!(G::GroupManifold, q, p, X, method::GroupExponentialRetraction)
-    return invoke(
-        retract!,
-        Tuple{Manifold,typeof(q),typeof(p),typeof(X),typeof(method)},
-        G,
-        q,
-        p,
-        X,
-        method,
-    )
-end
 function retract!(M::AbstractGroupManifold, q, p, X, method::GroupExponentialRetraction)
     conv = direction(method)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
@@ -669,23 +658,6 @@ action of the differential of translation $τ_p$ evaluated at the identity eleme
 """
 inverse_retract(::GroupManifold, ::Any, ::Any, ::GroupLogarithmicInverseRetraction)
 
-function inverse_retract!(
-    G::GroupManifold,
-    X,
-    p,
-    q,
-    method::GroupLogarithmicInverseRetraction,
-)
-    return invoke(
-        inverse_retract!,
-        Tuple{Manifold,typeof(X),typeof(p),typeof(q),typeof(method)},
-        G,
-        X,
-        p,
-        q,
-        method,
-    )
-end
 function inverse_retract!(
     M::AbstractGroupManifold,
     X,
