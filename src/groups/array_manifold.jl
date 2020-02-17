@@ -161,7 +161,7 @@ function group_exp(M::ArrayManifold, X; kwargs...)
 end
 
 function group_exp!(M::ArrayManifold, q, X; kwargs...)
-    is_tangent_vector(M, Identity(M), X, true; kwargs...)
+    is_tangent_vector(M, Identity(M), X, true; check_base_point=false, kwargs...)
     group_exp!(M.manifold, array_value(q), array_value(X))
     is_manifold_point(M, q, true; kwargs...)
     return q

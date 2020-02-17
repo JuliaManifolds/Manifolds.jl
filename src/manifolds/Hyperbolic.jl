@@ -71,16 +71,19 @@ function check_manifold_point(M::Hyperbolic, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::Hyperbolic, p, X; kwargs... )
+    check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`Hyperbolic`](@ref) `M`, i.e.
 after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
 and orthogonal to `p` with respect to [`minkowski_dot`](@ref).
+The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::Hyperbolic, p, X; kwargs...)
-    perr = check_manifold_point(M, p)
-    perr === nothing || return perr
+function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwargs...)
+    if check_tangent_vector
+        perr = check_manifold_point(M, p; kwargs...)
+        perr === nothing || return perr
+    end
     if size(X) != representation_size(M)
         return DomainError(
             size(X),

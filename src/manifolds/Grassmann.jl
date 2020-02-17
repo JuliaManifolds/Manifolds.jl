@@ -90,7 +90,7 @@ function check_manifold_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,�
 end
 
 @doc raw"""
-    check_tangent_vector(M::Grassmann{n,k,𝔽}, p, X)
+    check_tangent_vector(M::Grassmann{n,k,𝔽}, p, X; check_base_point = true, kwargs...)
 
 Check whether `X` is a tangent vector in the tangent space of `p` on
 the [`Grassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
@@ -101,10 +101,13 @@ the [`Grassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and $0_k$
 denotes the $k × k$ zero natrix.
+The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
-function check_tangent_vector(G::Grassmann{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
-    t = check_manifold_point(G, p)
-    t === nothing || return t
+function check_tangent_vector(G::Grassmann{n,k,𝔽}, p, X; check_base_point = true, kwargs...) where {n,k,𝔽}
+    if check_base_point
+        t = check_manifold_point(G, p)
+        t === nothing || return t
+    end
     if (𝔽 === ℝ) && !(eltype(X) <: Real)
         return DomainError(
             eltype(X),
