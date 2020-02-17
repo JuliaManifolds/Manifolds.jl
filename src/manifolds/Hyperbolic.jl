@@ -80,7 +80,7 @@ The optional parameter `check_base_point` indicates, whether to call [`check_man
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwargs...)
-    if check_tangent_vector
+    if check_base_point
         perr = check_manifold_point(M, p; kwargs...)
         perr === nothing || return perr
     end

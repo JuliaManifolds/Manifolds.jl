@@ -142,7 +142,7 @@ function check_tangent_vector(
     kwargs...,
 )
     if check_base_point
-        perr = check_manifold_point(M, p)
+        perr = check_manifold_point(M, p; kwargs...)
         perr === nothing || return perr
     end
     ts = ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, X))
