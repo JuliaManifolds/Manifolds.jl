@@ -1,5 +1,5 @@
 using OrdinaryDiffEq
-import Manifolds: invariant_metric_dispatch, is_default_metric, local_metric
+import Manifolds: invariant_metric_dispatch, default_metric_dispatch, local_metric
 
 struct TestInvariantMetricBase <: Metric end
 

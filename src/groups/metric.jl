@@ -103,16 +103,15 @@ end
 
 direction(::InvariantMetric{G,D}) where {G,D} = D()
 
-function exp!(M::MetricManifold{<:Manifold,<:InvariantMetric}, ::Val{false}, q, p, X)
+function exp!(M::MetricManifold{<:Manifold,<:InvariantMetric}, q, p, X)
     if biinvariant_metric_dispatch(M) === Val(true)
         conv = direction(metric(M))
         return retract!(M, q, p, X, GroupExponentialRetraction(conv))
     end
     return invoke(
         exp!,
-        Tuple{MetricManifold,Val{false},typeof(q),typeof(p),typeof(X)},
+        Tuple{MetricManifold,typeof(q),typeof(p),typeof(X)},
         M,
-        Val(false),
         q,
         p,
         X,
@@ -186,17 +185,16 @@ function default_metric_dispatch(M::MetricManifold{<:Manifold,<:InvariantMetric}
     return invariant_metric_dispatch(N, direction(imetric))
 end
 
-function log!(M::MetricManifold{<:Manifold,<:InvariantMetric}, ::Val{false}, X, p, q)
-    if biinvariant_metric_dispatch(M) === Val(true)
+function log!(M::MetricManifold{<:Manifold,<:InvariantMetric}, X, p, q)
+    if has_biinvariant_metric(M)
         imetric = metric(M)
         conv = direction(imetric)
         return inverse_retract!(M, X, p, q, GroupLogarithmicInverseRetraction(conv))
     end
     return invoke(
         log!,
-        Tuple{MetricManifold,Val{false},typeof(X),typeof(p),typeof(q)},
+        Tuple{MetricManifold,typeof(X),typeof(p),typeof(q)},
         M,
-        Val(false),
         X,
         p,
         q,
