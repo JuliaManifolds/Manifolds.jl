@@ -117,7 +117,6 @@ end
 
             if VERSION ≥ v"1.1"
                 T = 0:.5:10
-                @test exp(M, x, v, T) ≈ [x + t * v for t in T] atol=1e-6
                 @test geodesic(M, x, v, T) ≈ [x + t * v for t in T] atol=1e-6
             end
 
@@ -182,8 +181,6 @@ end
             if VERSION ≥ v"1.1" && (!Sys.iswindows() || Sys.ARCH == :x86_64)
                 @testset "numerically integrated geodesics for $vtype" begin
                     T = 0:.1:1
-                    @test isapprox([sph_to_cart(yi...) for yi in exp(M, x, v, T)],
-                                   exp(S, xcart, vcart, T); atol=1e-3, rtol=1e-3)
                     @test isapprox([sph_to_cart(yi...) for yi in geodesic(M, x, v, T)],
                                    geodesic(S, xcart, vcart, T); atol=1e-3, rtol=1e-3)
                 end
