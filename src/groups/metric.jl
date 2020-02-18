@@ -165,7 +165,7 @@ invariant_metric_dispatch(::MetricManifold, ::ActionDirection)
     conv::ActionDirection
 )
 function invariant_metric_dispatch(M::MetricManifold, conv::ActionDirection)
-    is_default_metric(M) && return invariant_metric_dispatch(M, conv)
+    is_default_metric(M) && return invariant_metric_dispatch(M.manifold, conv)
     return Val(false)
 end
 function invariant_metric_dispatch(
