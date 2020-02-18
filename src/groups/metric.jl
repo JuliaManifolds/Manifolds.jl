@@ -23,7 +23,8 @@ g_p(X, Y) = h_e((\mathrm{d}τ_p^{-1})_p X, (\mathrm{d}τ_p^{-1})_p Y).
 
 !!! warning
     The invariance condition is not checked and must be verified for the entire group.
-    To check the condition for a set of points, use [`has_approx_invariant_metric`](@ref).
+    To verify the condition for a set of points numerically, use
+    [`has_approx_invariant_metric`](@ref).
 
 The convenient aliases [`LeftInvariantMetric`](@ref) and [`RightInvariantMetric`](@ref) are
 provided.
@@ -82,8 +83,16 @@ This is necessary but not sufficient for invariance.
 
 Optionally, `kwargs` passed to `isapprox` may be provided.
 """
-function has_approx_invariant_metric(
-    M::Manifold,
+has_approx_invariant_metric(
+    ::AbstractGroupManifold,
+    ::Any,
+    ::Any,
+    ::Any,
+    ::Any,
+    ::ActionDirection
+)
+@decorator_transparent_function function has_approx_invariant_metric(
+    M::AbstractGroupManifold,
     p,
     X,
     Y,
@@ -103,10 +112,10 @@ end
 
 direction(::InvariantMetric{G,D}) where {G,D} = D()
 
-function exp!(M::MetricManifold{<:Manifold,<:InvariantMetric}, q, p, X)
-    if biinvariant_metric_dispatch(M) === Val(true)
+function exp!(M::MetricManifold{<:AbstractGroupManifold,<:InvariantMetric}, q, p, X)
+    if has_biinvariant_metric(M)
         conv = direction(metric(M))
-        return retract!(M, q, p, X, GroupExponentialRetraction(conv))
+        return retract!(M.manifold, q, p, X, GroupExponentialRetraction(conv))
     end
     return invoke(
         exp!,
@@ -117,6 +126,7 @@ function exp!(M::MetricManifold{<:Manifold,<:InvariantMetric}, q, p, X)
         X,
     )
 end
+
 
 """
     biinvariant_metric_dispatch(G::AbstractGroupManifold) -> Val
@@ -148,14 +158,15 @@ g_p(X, Y) = g_{τ_q p}((\mathrm{d}τ_q)_p X, (\mathrm{d}τ_q)_p Y),
 for $X,Y ∈ T_q \mathcal{G}$ and all $q ∈ \mathcal{G}$, where $(\mathrm{d}τ_q)_p$ is the
 differential of translation by $q$ evaluated at $p$ (see [`translate_diff`](@ref)).
 """
-invariant_metric_dispatch(::AbstractGroupManifold, ::ActionDirection)
+invariant_metric_dispatch(::MetricManifold, ::ActionDirection)
 
 @decorator_transparent_signature invariant_metric_dispatch(
     M::AbstractDecoratorManifold,
     conv::ActionDirection
 )
 function invariant_metric_dispatch(M::MetricManifold, conv::ActionDirection)
-    return default_metric_dispatch(M)
+    is_default_metric(M) && return invariant_metric_dispatch(M, conv)
+    return Val(false)
 end
 function invariant_metric_dispatch(
     M::MetricManifold{<:Manifold,<:InvariantMetric},
@@ -164,12 +175,13 @@ function invariant_metric_dispatch(
     direction(metric(M)) === conv && return Val(true)
     return invoke(invariant_metric_dispatch, Tuple{MetricManifold,typeof(conv)}, M, conv)
 end
+invairant_metric_dispatch(M::Manifold, ::ActionDirection) = Val(false)
 
 function has_invariant_metric(M::Manifold, conv::ActionDirection)
     return _extract_val(invariant_metric_dispatch(M, conv))
 end
 
-function inner(M::MetricManifold{<:Manifold,<:InvariantMetric}, ::Val{false}, p, X, Y)
+function inner(M::MetricManifold{<:Manifold,<:InvariantMetric}, p, X, Y)
     imetric = metric(M)
     conv = direction(imetric)
     N = MetricManifold(M.manifold, imetric.metric)
@@ -185,11 +197,11 @@ function default_metric_dispatch(M::MetricManifold{<:Manifold,<:InvariantMetric}
     return invariant_metric_dispatch(N, direction(imetric))
 end
 
-function log!(M::MetricManifold{<:Manifold,<:InvariantMetric}, X, p, q)
+function log!(M::MetricManifold{<:AbstractGroupManifold,<:InvariantMetric}, X, p, q)
     if has_biinvariant_metric(M)
         imetric = metric(M)
         conv = direction(imetric)
-        return inverse_retract!(M, X, p, q, GroupLogarithmicInverseRetraction(conv))
+        return inverse_retract!(M.manifold, X, p, q, GroupLogarithmicInverseRetraction(conv))
     end
     return invoke(
         log!,

@@ -626,7 +626,7 @@ where $\exp$ is the group exponential ([`group_exp`](@ref)), and $(\mathrm{d}τ_
 the action of the differential of inverse translation $τ_p^{-1}$ evaluated at $p$ (see
 [`inverse_translate_diff`](@ref)).
 """
-retract(::GroupManifold, ::Any, ::Any, ::GroupExponentialRetraction)
+retract(::AbstractGroupManifold, ::Any, ::Any, ::GroupExponentialRetraction)
 
 function retract!(M::AbstractGroupManifold, q, p, X, method::GroupExponentialRetraction)
     conv = direction(method)
@@ -656,7 +656,7 @@ where $\log$ is the group logarithm ([`group_log`](@ref)), and $(\mathrm{d}τ_p)
 action of the differential of translation $τ_p$ evaluated at the identity element $e$
 (see [`translate_diff`](@ref)).
 """
-inverse_retract(::GroupManifold, ::Any, ::Any, ::GroupLogarithmicInverseRetraction)
+inverse_retract(::AbstractGroupManifold, ::Any, ::Any, ::GroupLogarithmicInverseRetraction)
 
 function inverse_retract!(
     M::AbstractGroupManifold,

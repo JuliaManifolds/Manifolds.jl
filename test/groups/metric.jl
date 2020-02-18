@@ -28,7 +28,7 @@ struct TestInvariantMetricManifold <: Manifold end
 struct TestDefaultInvariantMetricManifold <: Manifold end
 
 function default_metric_dispatch(
-    ::MetricManifold{TestDefaultInvariantMetricManifold,TestInvariantMetricBase},
+    ::MetricManifold{TestDefaultInvariantMetricManifold,RightInvariantMetric{TestInvariantMetricBase}},
 )
     return Val(true)
 end
