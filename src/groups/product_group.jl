@@ -27,6 +27,13 @@ function ProductGroup(manifold::ProductManifold)
     return GroupManifold(manifold, op)
 end
 
+function decorator_transparent_dispatch(::typeof(group_exp!), M::ProductGroup, q, X)
+    return Val(:transparent)
+end
+function decorator_transparent_dispatch(::typeof(group_log!), M::ProductGroup, X, q)
+    return Val(:transparent)
+end
+
 function show(io::IO, ::MIME"text/plain", G::ProductGroup)
     M = base_manifold(G)
     n = length(M.manifolds)
