@@ -654,7 +654,6 @@ function retract!(M::Rotations, q::AbstractArray{T}, p, X, method::QRRetraction)
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
     return copyto!(q, qr_decomp.Q * D)
 end
-retract!(M::Rotations, q, p, X) = retract!(M, q, p, X, QRRetraction())
 function retract!(M::Rotations, q, p, X, method::PolarRetraction)
     A = p + p * X
     return project_point!(M, q, A; check_det = false)
