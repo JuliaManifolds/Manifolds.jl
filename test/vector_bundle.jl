@@ -16,6 +16,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test tv1s.type == TangentSpace
         @test size(tv1s.data) == size(tvs[1])
         @test number_eltype(tv1s) == number_eltype(tvs[1])
+        @test number_eltype(tv1s) == number_eltype(typeof(tv1s))
         @test isa(fv1 + fv1, FVector)
         @test (fv1 + fv1).type == TangentSpace
         @test isa(fv1 - fv1, FVector)
