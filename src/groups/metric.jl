@@ -175,7 +175,7 @@ function invariant_metric_dispatch(
     direction(metric(M)) === conv && return Val(true)
     return invoke(invariant_metric_dispatch, Tuple{MetricManifold,typeof(conv)}, M, conv)
 end
-invairant_metric_dispatch(M::Manifold, ::ActionDirection) = Val(false)
+invariant_metric_dispatch(M::Manifold, ::ActionDirection) = Val(false)
 
 function has_invariant_metric(M::Manifold, conv::ActionDirection)
     return _extract_val(invariant_metric_dispatch(M, conv))

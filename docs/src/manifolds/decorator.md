@@ -1,9 +1,10 @@
 # Decorator manifold
 
-A decorator manifold extends the functionality of a [`Manifold`](@ref) is a transparent way.
+A decorator manifold extends the functionality of a [`Manifold`](@ref) in a transparent way.
 It internally stores the [`Manifold`](@ref) it extends and for all usual functions
 defined in the [`ManifoldsBase`](interface.md), acts by default transparent in the sense that it passes all functions through to the base despite those that it actually affects.
-For example the [`ArrayManifold`](@ref) directly overwrites nearly all functions, since it affects nearly all functions, despite a few like [`manifold_dimension`](@ref). On the other hand, the [`MetricManifold`](@ref) only affects functions
+For example, because the [`ArrayManifold`](@ref) affects nearly all functions, it overwrites nearly all functions, except a few like [`manifold_dimension`](@ref).
+On the other hand, the [`MetricManifold`](@ref) only affects functions
 that involve metrics, especially [`exp`](@ref) and [`log`](@ref) but not the [`manifold_dimension`](@ref).
 
 By default all functions are passed down. To implement a function for a decorator
