@@ -12,7 +12,7 @@ Method for estimation using the cyclic proximal point technique.
 """
 struct CyclicProximalPointEstimation <: AbstractEstimationMethod end
 
-_unit_weights(n::Int) = ProbabilityWeights(ones(n), n)
+_unit_weights(n::Int) = UnitWeights{Float64}(n)
 
 @doc raw"""
     GeodesicInterpolation <: AbstractEstimationMethod

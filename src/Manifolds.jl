@@ -109,7 +109,7 @@ using Random: AbstractRNG
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
-using StatsBase: AbstractWeights, ProbabilityWeights, values, varcorrection
+using StatsBase: AbstractWeights, UnitWeights, values, varcorrection
 using UnsafeArrays
 
 """
@@ -305,7 +305,7 @@ export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
 export AbstractPowerManifold,
     AbstractPowerRepresentation,
-    MultidimentionalArrayPowerRepresentation,
+    ArrayPowerRepresentation,
     NestedPowerRepresentation,
     PowerManifold
 export ProductManifold
@@ -334,7 +334,15 @@ export AbstractEstimationMethod,
     CyclicProximalPointEstimation,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius
-export allocate,
+export
+    DiagonalizingOrthonormalBasis,
+    PrecomputedDiagonalizingOrthonormalBasis,
+    PrecomputedOrthonormalBasis,
+    PrecomputedPowerOrthonormalBasis,
+    PrecomputedProductOrthonormalBasis,
+    ArbitraryOrthonormalBasis
+export ×,
+    allocate,
     allocate_result,
     base_manifold,
     bundle_projection,
@@ -387,6 +395,7 @@ export allocate,
     normal_tvector_distribution,
     number_eltype,
     one,
+    power_dimensions,
     project_point,
     project_point!,
     project_tangent,
@@ -408,6 +417,7 @@ export allocate,
     submanifold,
     submanifold_component,
     submanifold_components,
+    uniform_distribution,
     var,
     vector_space_dimension,
     vector_transport_along,
@@ -421,8 +431,7 @@ export allocate,
     zero_vector,
     zero_vector!,
     zero_tangent_vector,
-    zero_tangent_vector!,
-    ×
+    zero_tangent_vector!
 # Lie group types & functions
 export AbstractGroupAction,
     AbstractGroupOperation,
