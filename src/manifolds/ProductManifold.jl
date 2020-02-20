@@ -81,15 +81,6 @@ function InverseProductRetraction(inverse_retractions::AbstractInverseRetraction
 end
 
 """
-    ProductBasisData
-
-A typed tuple to store tuples of data of stored/precomputed bases.
-"""
-struct ProductBasisData{T<:Tuple}
-    parts::T
-end
-
-"""
     check_manifold_point(M::ProductManifold, p; kwargs...)
 
 Check whether `p` is a valid point on the [`ProductManifold`](@ref) `M`.

@@ -81,6 +81,16 @@ struct DiagonalizingBasisData{D,V,ET}
     vectors::V
 end
 
+"""
+    ProductBasisData
+
+A typed tuple to store tuples of data of stored/precomputed bases.
+"""
+struct ProductBasisData{T<:Tuple}
+    parts::T
+end
+
+
 const ArbitraryOrDiagonalizingBasis =
     Union{ArbitraryOrthonormalBasis,DiagonalizingOrthonormalBasis}
 
@@ -277,6 +287,7 @@ end
 get_vectors(::Manifold, ::Any, B::CachedBasis) = _get_vectors(B)
 _get_vectors(B::CachedBasis) = B.data
 _get_vectors(B::CachedBasis{BT,D,𝔽}) where {BT<:AbstractBasis, D<:DiagonalizingBasisData, 𝔽} = B.data.vectors
+_get_vectors(B::CachedBasis{BT,D,𝔽}) where {BT<:AbstractBasis, D<:ProductBasisData, 𝔽} = B.data.parts
 # related to DefaultManifold; to be moved to ManifoldsBase.jl in the future
 function get_coordinates(M::DefaultManifold, p, X, B::ArbitraryOrthonormalBasis)
     return reshape(X, manifold_dimension(M))
