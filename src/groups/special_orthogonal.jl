@@ -8,11 +8,6 @@ Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
 """
 const SpecialOrthogonal{n} = GroupManifold{Rotations{n},MultiplicationOperation}
 
-decorator_transparent_dispatch(::typeof(retract!), M::SpecialOrthogonal, q, p, X) = Val(true)
-decorator_transparent_dispatch(::typeof(retract), M::SpecialOrthogonal, p, X) = Val(true)
-decorator_transparent_dispatch(::typeof(inverse_retract!), M::SpecialOrthogonal, X, p, q) = Val(true)
-decorator_transparent_dispatch(::typeof(inverse_retract), M::SpecialOrthogonal, p, q) = Val(true)
-
 invariant_metric_dispatch(::SpecialOrthogonal, ::ActionDirection) = Val(true)
 
 default_metric_dispatch(::MetricManifold{<:SpecialOrthogonal,EuclideanMetric}) = Val(true)
