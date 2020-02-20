@@ -115,7 +115,7 @@ direction(::InvariantMetric{G,D}) where {G,D} = D()
 function exp!(M::MetricManifold{<:AbstractGroupManifold,<:InvariantMetric}, q, p, X)
     if has_biinvariant_metric(M)
         conv = direction(metric(M))
-        return retract!(M, q, p, X, GroupExponentialRetraction(conv))
+        return retract!(group_manifold(M), q, p, X, GroupExponentialRetraction(conv))
     end
     return invoke(
         exp!,
@@ -201,7 +201,7 @@ function log!(M::MetricManifold{<:AbstractGroupManifold,<:InvariantMetric}, X, p
     if has_biinvariant_metric(M)
         imetric = metric(M)
         conv = direction(imetric)
-        return inverse_retract!(M, X, p, q, GroupLogarithmicInverseRetraction(conv))
+        return inverse_retract!(group_manifold(M), X, p, q, GroupLogarithmicInverseRetraction(conv))
     end
     return invoke(
         log!,
