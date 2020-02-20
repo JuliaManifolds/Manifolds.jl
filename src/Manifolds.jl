@@ -97,7 +97,7 @@ using Random: AbstractRNG
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
-using StatsBase: AbstractWeights, ProbabilityWeights, values, varcorrection
+using StatsBase: AbstractWeights, UnitWeights, values, varcorrection
 using UnsafeArrays
 
 """
