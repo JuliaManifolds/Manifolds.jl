@@ -240,7 +240,7 @@ function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B,ProductBasisData(vs))
 end
 function get_basis(M::ProductManifold, p, B::ArbitraryOrthonormalBasis)
-    parts = map(t -> get_basis(t..., B).data, ziptuples(M.manifolds, submanifold_components(p)))
+    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
     return CachedBasis(B,ProductBasisData(parts))
 end
 
@@ -302,12 +302,13 @@ end
 function get_vectors(
     M::ProductManifold{<:NTuple{N,Manifold}},
     p::ProductRepr,
-    B::CachedBasis{ProductBasisData},
+    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
 ) where {N}
     xparts = submanifold_components(p)
-    BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.parts))
+    BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.data.parts))
     zero_tvs = map(t -> zero_tangent_vector(t...), ziptuples(M.manifolds, xparts))
     vs = typeof(ProductRepr(zero_tvs...))[]
+    print(N)
     for i = 1:N, k = 1:length(BVs[i])
         push!(vs, ProductRepr(zero_tvs[1:i-1]..., BVs[i][k], zero_tvs[i+1:end]...))
     end
