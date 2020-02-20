@@ -141,22 +141,12 @@ struct PowerFVectorDistribution{
 end
 
 """
-    PrecomputedPowerOrthonormalBasis(
-        bases::AbstractArray{AbstractPrecomputedOrthonormalBasis},
-        F::AbstractNumbers = ℝ,
-    )
+    PowerBasisData{TB<:AbstractArray}
 
-A precomputed orthonormal basis of a tangent space of a power manifold.
-The array `bases` stores bases corresponding to particular parts of the manifold.
-
-The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
+Data storage for an array of [`BasisData`](@ref)
 """
 struct PowerBasisData{TB<:AbstractArray}
     bases::TB
-end
-
-function PrecomputedPowerOrthonormalBasis(bases::AbstractArray{T}) where {T}
-    return PrecomputedPowerOrthonormalBasis{typeof(bases)}(bases)
 end
 
 const PowerManifoldMultidimensional =
@@ -182,7 +172,7 @@ end
 function basis(M::AbstractPowerManifold, p, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     vs = [basis(M.manifold, _read(M, rep_size, p, i), B) for i in get_iterator(M)]
-    return PrecomputedPowerOrthonormalBasis(vs)
+    return CachedBasis(vs)
 end
 
 ^(M::Manifold, n) = PowerManifold(M, n...)
@@ -311,7 +301,7 @@ end
 function get_basis(M::AbstractPowerManifold, p, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     vs = [get_basis(M.manifold, _read(M, rep_size, p, i), B) for i in get_iterator(M)]
-    return CachedBasis(PowerBasisData(vs))
+    return CachedBasis(B,PowerBasisData(vs))
 end
 function get_basis(M::AbstractPowerManifold, p, B::ArbitraryOrthonormalBasis)
     return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
