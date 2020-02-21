@@ -6,7 +6,7 @@ An abstract representation type of points and tangent vectors on a power manifol
 abstract type AbstractPowerRepresentation end
 
 """
-    MultidimentionalArrayPowerRepresentation
+    ArrayPowerRepresentation
 
 Representation of points and tangent vectors on a power manifold using multidimensional
 arrays where first dimensions are equal to [`representation_size`](@ref) of the
@@ -15,7 +15,7 @@ direction.
 
 [`Torus`](@ref) uses this representation.
 """
-struct MultidimentionalArrayPowerRepresentation <: AbstractPowerRepresentation end
+struct ArrayPowerRepresentation <: AbstractPowerRepresentation end
 
 """
     NestedPowerRepresentation
@@ -59,7 +59,7 @@ power manifolds might be faster if they are represented as [`ProductManifold`](@
     PowerManifold(M, NestedPowerRepresentation(), N_1, N_2, ..., N_n)
 
 Generate the power manifold $M^{N_1 × N_2 × … × N_n}$.
-By default, the [`MultidimentionalArrayPowerRepresentation`](@ref) of points
+By default, the [`ArrayPowerRepresentation`](@ref) of points
 and tangent vectors is used, although a different one, for example
 [`NestedPowerRepresentation`](@ref), can be given as the second argument to the
 constructor.
@@ -70,7 +70,7 @@ struct PowerManifold{TM<:Manifold,TSize,TPR<:AbstractPowerRepresentation} <:
 end
 
 function PowerManifold(M::Manifold, size::Int...)
-    return PowerManifold{typeof(M),Tuple{size...},MultidimentionalArrayPowerRepresentation}(
+    return PowerManifold{typeof(M),Tuple{size...},ArrayPowerRepresentation}(
         M,
     )
 end
@@ -150,7 +150,7 @@ struct PowerBasisData{TB<:AbstractArray}
 end
 
 const PowerManifoldMultidimensional =
-    AbstractPowerManifold{<:Manifold,MultidimentionalArrayPowerRepresentation} where {TSize}
+    AbstractPowerManifold{<:Manifold,ArrayPowerRepresentation} where {TSize}
 const PowerManifoldNested =
     AbstractPowerManifold{<:Manifold,NestedPowerRepresentation} where {TSize}
 
@@ -550,6 +550,15 @@ function norm(M::AbstractPowerManifold, p, X)
     return sqrt(sum_squares)
 end
 
+@doc raw"""
+    power_dimensions(M::PowerManifold)
+
+return the power of `M`,
+"""
+function power_dimensions(M::PowerManifold{<:Manifold,TSize}) where {TSize}
+    return size_to_tuple(TSize)
+end
+
 function rand(rng::AbstractRNG, d::PowerFVectorDistribution)
     fv = zero_vector(d.type, d.point)
     _rand!(rng, d, fv)
@@ -659,7 +668,7 @@ end
 
 function show(
     io::IO,
-    M::PowerManifold{TM,TSize,MultidimentionalArrayPowerRepresentation},
+    M::PowerManifold{TM,TSize,ArrayPowerRepresentation},
 ) where {TM,TSize}
     print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
 end

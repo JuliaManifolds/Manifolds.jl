@@ -11,6 +11,7 @@ include("utils.jl")
         @test !is_manifold_point(M, [2.,0.,0.])
         @test !is_tangent_vector(M,[1.,0.,0.],[1.,0.,0.])
         @test_throws DomainError is_tangent_vector(M,[1.,0.,0.],[1.,0.,0.],true)
+        @test injectivity_radius(M, [1.0, 0.0, 0.0], ProjectionRetraction()) == π/2
     end
     types = [
         Vector{Float64},

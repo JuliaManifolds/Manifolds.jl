@@ -33,6 +33,7 @@ ManifoldsBase = "0.4"
 Requires = "0.5, 1"
 SpecialFunctions = "=0.8"
 StaticArrays = "0.12"
+StatsBase = "0.32.1"
 julia = "1.0"
 
 [extras]
