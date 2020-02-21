@@ -235,7 +235,7 @@ function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
         submanifold_components(p),
         submanifold_components(B.frame_direction),
     )) do t
-        return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3])).data
+        return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
     end
     return CachedBasis(B,ProductBasisData(vs))
 end
@@ -308,13 +308,11 @@ function get_vectors(
     BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.data.parts))
     zero_tvs = map(t -> zero_tangent_vector(t...), ziptuples(M.manifolds, xparts))
     vs = typeof(ProductRepr(zero_tvs...))[]
-    print(N)
     for i = 1:N, k = 1:length(BVs[i])
         push!(vs, ProductRepr(zero_tvs[1:i-1]..., BVs[i][k], zero_tvs[i+1:end]...))
     end
     return vs
 end
-
 function hat!(M::ProductManifold, X, p, Xⁱ)
     dim = manifold_dimension(M)
     @assert length(Xⁱ) == dim
