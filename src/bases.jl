@@ -8,11 +8,26 @@ The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be use
 abstract type AbstractBasis{𝔽} end
 
 """
-    number_system(::AbstractBasis)
+    ArbitraryBasis{𝔽}
 
-The number system used as scalars in the given basis.
+An arbitrary basis on a manifold. This will usually
+be the fastest basis available for a manifold.
+
+The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-number_system(::AbstractBasis{𝔽}) where {𝔽} = 𝔽
+struct ArbitraryBasis{𝔽} <: AbstractBasis{𝔽} end
+ArbitraryBasis(𝔽::AbstractNumbers = ℝ) = ArbitraryBasis{𝔽}()
+
+"""
+    ArbitraryOrthogonalBasis{𝔽}
+
+An arbitrary orthogonal basis on a manifold. This will usually
+be the fastest orthogonal basis available for a manifold.
+
+The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
+"""
+struct ArbitraryOrthogonalBasis{𝔽} <: AbstractBasis{𝔽} end
+ArbitraryOrthogonalBasis(𝔽::AbstractNumbers = ℝ) = ArbitraryOrthogonalBasis{𝔽}()
 
 """
     AbstractOrthonormalBasis{𝔽}
@@ -114,6 +129,16 @@ function CachedBasis(
     return CachedBasis(basis, data, 𝔽)
 end
 
+function _euclidean_basis_vector(p, i)
+    X = zero(p)
+    X[i] = 1
+    return X
+end
+
+_get_vectors(B::CachedBasis) = B.data
+_get_vectors(B::CachedBasis{BT,D,𝔽}) where {BT<:AbstractBasis, D<:DiagonalizingBasisData, 𝔽} = B.data.vectors
+_get_vectors(B::CachedBasis{BT,D,𝔽}) where {BT<:AbstractBasis, D<:ProductBasisData, 𝔽} = B.data.parts
+
 """
     get_coordinates(M::Manifold, p, X, B::AbstractBasis)
     get_coordinates(M::Manifold, p, X, B::CachedBasis)
@@ -134,11 +159,24 @@ See also: [`get_vector`](@ref), [`get_basis`](@ref)
 function get_coordinates(M::Manifold, p, X, B::AbstractBasis)
     error("get_coordinates not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
+function get_coordinates(M::Manifold, x, v, B::ArbitraryBasis)
+    return get_coordinates(M, x, v, ArbitraryOrthogonalBasis(number_system(B)))
+end
+function get_coordinates(M::Manifold, x, v, B::ArbitraryOrthogonalBasis)
+    return get_coordinates(M, x, v, ArbitraryOrthonormalBasis(number_system(B)))
+end
 function get_coordinates(M::Manifold, p, X, B::CachedBasis{BT}) where {BT <: AbstractBasis{ℝ}}
     return map(vb -> real(inner(M, p, X, vb)), get_vectors(M, p, B))
 end
 function get_coordinates(M::Manifold, p, X, B::CachedBasis)
     return map(vb -> inner(M, p, X, vb), get_vectors(M, p, B))
+end
+function get_coordinates(M::DefaultManifold, p, X, B::ArbitraryOrthonormalBasis)
+    return reshape(X, manifold_dimension(M))
+end
+function get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
+    is_tangent_vector(M, p, X, true; kwargs...)
+    return get_coordinates(M.manifold, p, X, B)
 end
 
 """
@@ -158,6 +196,12 @@ See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 """
 function get_vector(M::Manifold, p, X, B::AbstractBasis)
     error("get_vector not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
+end
+function get_vector(M::Manifold, x, v, B::ArbitraryBasis)
+    return get_vector(M, x, v, ArbitraryOrthogonalBasis(number_system(B)))
+end
+function get_vector(M::Manifold, x, v, B::ArbitraryOrthogonalBasis)
+    return get_vector(M, x, v, ArbitraryOrthonormalBasis(number_system(B)))
 end
 function get_vector(M::Manifold, p, X, B::CachedBasis)
     # quite convoluted but:
@@ -233,22 +277,8 @@ function get_basis(M::ArrayManifold, p, B::CachedBasis{<:AbstractOrthonormalBasi
     end
     return B
 end
-
-function get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
-    is_tangent_vector(M, p, X, true; kwargs...)
-    return get_coordinates(M.manifold, p, X, B)
-end
-
-function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
-    size(X) == (manifold_dimension(M),) || error("Incorrect size of vector X")
-    return get_vector(M.manifold, p, X, B)
-end
-
-function _euclidean_basis_vector(p, i)
-    X = zero(p)
-    X[i] = 1
-    return X
+function get_basis(M::DefaultManifold, p, B::ArbitraryOrthonormalBasis)
+    return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
 end
 
 function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
@@ -274,33 +304,6 @@ function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
     end
     return CachedBasis(B,vecs)
 end
-
-"""
-    get_vectors(M::Manifold, p, B::AbstractBasis)
-
-Get the basis vectors of basis `B` of the tangent space at point `p`.
-"""
-function get_vectors(M::Manifold, p, B::AbstractBasis)
-    error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
-end
-
-get_vectors(::Manifold, ::Any, B::CachedBasis) = _get_vectors(B)
-_get_vectors(B::CachedBasis) = B.data
-_get_vectors(B::CachedBasis{BT,D,𝔽}) where {BT<:AbstractBasis, D<:DiagonalizingBasisData, 𝔽} = B.data.vectors
-_get_vectors(B::CachedBasis{BT,D,𝔽}) where {BT<:AbstractBasis, D<:ProductBasisData, 𝔽} = B.data.parts
-# related to DefaultManifold; to be moved to ManifoldsBase.jl in the future
-function get_coordinates(M::DefaultManifold, p, X, B::ArbitraryOrthonormalBasis)
-    return reshape(X, manifold_dimension(M))
-end
-
-function get_vector(M::DefaultManifold, p, X, B::ArbitraryOrthonormalBasis)
-    return reshape(X, representation_size(M))
-end
-
-function get_basis(M::DefaultManifold, p, B::ArbitraryOrthonormalBasis)
-    return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
-end
-
 function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
     E = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     N = length(E)
@@ -334,19 +337,44 @@ function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt,�
     return CachedBasis(B, Ξ)
 end
 
+"""
+    get_vectors(M::Manifold, p, B::AbstractBasis)
+
+Get the basis vectors of basis `B` of the tangent space at point `p`.
+"""
+function get_vectors(M::Manifold, p, B::AbstractBasis)
+    error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
+end
+get_vectors(::Manifold, ::Any, B::CachedBasis) = _get_vectors(B)
+function get_vector(M::DefaultManifold, p, X, B::ArbitraryOrthonormalBasis)
+    return reshape(X, representation_size(M))
+end
+function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    size(X) == (manifold_dimension(M),) || error("Incorrect size of vector X")
+    return get_vector(M.manifold, p, X, B)
+end
+
+hat(M::Manifold, x, v) = get_vector(M, x, v, ArbitraryBasis())
+
+"""
+    number_system(::AbstractBasis)
+
+The number system used as scalars in the given basis.
+"""
+number_system(::AbstractBasis{𝔽}) where {𝔽} = 𝔽
+
 function _show_basis_vector(io::IO, X; pre = "", head = "")
     sX = sprint(show, "text/plain", X, context = io, sizehint = 0)
     sX = replace(sX, '\n' => "\n$(pre)")
     print(io, head, pre, sX)
 end
-
 function _show_basis_vector_range(io::IO, Ξ, range; pre = "", sym = "E")
     for i in range
         _show_basis_vector(io, Ξ[i]; pre = pre, head = "\n$(sym)$(i) =\n")
     end
     return nothing
 end
-
 function _show_basis_vector_range_noheader(io::IO, Ξ; max_vectors = 4, pre = "", sym = "E")
     nv = length(Ξ)
     if nv ≤ max_vectors
@@ -411,3 +439,5 @@ function show(io::IO, mime::MIME"text/plain", B::CachedBasis{T,D,𝔽}) where {T
     sk = replace(sk, '\n' => "\n ")
     print(io, ' ', sk)
 end
+
+vee(M::Manifold, x, v) = get_coordinates(M, x, v, ArbitraryBasis())

@@ -210,7 +210,7 @@ struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
 include("utils.jl")
 include("numbers.jl")
-include("orthonormal_bases.jl")
+include("bases.jl")
 include("autodiff.jl")
 include("SizedAbstractArray.jl")
 
