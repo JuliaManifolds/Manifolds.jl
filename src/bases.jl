@@ -234,7 +234,7 @@ end
 Compute the basis vectors of the tangent space at a point on manifold `M`
 represented by `p`.
 
-Returned object derives from [`AbstractBasis`](@ref) and may have a 𝔽 `.vectors`
+Returned object derives from [`AbstractBasis`](@ref) and may have a field `.vectors`
 that stores tangent vectors or it may store them implicitly, in which case
 the function [`get_vectors`](@ref) needs to be used to retrieve the basis vectors.
 
