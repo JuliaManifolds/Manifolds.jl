@@ -68,7 +68,7 @@ Random.seed!(42)
 
     trim(s::String) = s[1:min(length(s), 20)]
 
-    basis_types = (OrthonormalBasis(),
+    basis_types = (ArbitraryOrthonormalBasis(),
         ProjectedOrthonormalBasis(:svd)
     )
     for T in types_s1
@@ -76,7 +76,7 @@ Random.seed!(42)
             pts1 = [convert(T, rand(power_s1_pt_dist)) for _ in 1:3]
             @test injectivity_radius(Ms1,pts1[1]) == π
             basis_diag = DiagonalizingOrthonormalBasis(log(Ms1, pts1[1], pts1[2]))
-            basis_arb = get_basis(Ms1, pts1[1], OrthonormalBasis())
+            basis_arb = get_basis(Ms1, pts1[1], ArbitraryOrthonormalBasis())
             test_manifold(Ms1,
                 pts1;
                 test_reverse_diff = true,

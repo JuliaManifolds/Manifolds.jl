@@ -23,7 +23,7 @@ include("utils.jl")
         basis_types = if M == M3
             ()
         else
-            (OrthonormalBasis(),)
+            (ArbitraryOrthonormalBasis(),)
         end
         @testset "$(typeof(M))" begin
             @test representation_size(M) == (3,3)

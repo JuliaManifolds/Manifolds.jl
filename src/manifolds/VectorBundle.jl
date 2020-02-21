@@ -276,7 +276,7 @@ function get_basis(M::TangentBundleFibers, p, B::DiagonalizingOrthonormalBasis)
     return get_basis(M.manifold, p, B)
 end
 
-function get_coordinates(M::VectorBundle, p, X, B::OrthonormalBasis) where {N}
+function get_coordinates(M::VectorBundle, p, X, B::ArbitraryOrthonormalBasis) where {N}
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     coord1 = get_coordinates(M.manifold, px, VXM, B)
@@ -287,7 +287,7 @@ function get_coordinates(M::TangentBundleFibers, p, X, B::AbstractBasis) where {
     return get_coordinates(M.manifold, p, X, B)
 end
 
-function get_vector(M::VectorBundle, p, X, B::OrthonormalBasis) where {N}
+function get_vector(M::VectorBundle, p, X, B::ArbitraryOrthonormalBasis) where {N}
     n = manifold_dimension(M.manifold)
     xp1 = submanifold_component(p, Val(1))
     v1 = get_vector(M.manifold, xp1, X[1:n], B)

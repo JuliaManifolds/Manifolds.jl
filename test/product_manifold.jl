@@ -260,7 +260,7 @@ include("utils.jl")
 
     @testset "ProductRepr" begin
         basis_types = (
-            OrthonormalBasis(),
+            ArbitraryOrthonormalBasis(),
             ProjectedOrthonormalBasis(:svd),
             DiagonalizingOrthonormalBasis(ProductRepr([0.0, 1.0, 0.0], [1.0, 0.0]))
         )

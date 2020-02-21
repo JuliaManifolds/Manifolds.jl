@@ -19,7 +19,7 @@ include("utils.jl")
     inverse_retraction_methods = [Manifolds.PolarInverseRetraction(),
                                   Manifolds.QRInverseRetraction()]
 
-    basis_types = (OrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
+    basis_types = (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
 
     @testset "vee/hat" begin
         M = Manifolds.Rotations(2)

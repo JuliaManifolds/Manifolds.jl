@@ -135,7 +135,7 @@ metric from the embedding, i.e. $ g_p(X,Y) = X^\mathrm{T}Y$.
 """
 @inline inner(S::Sphere, p, X, Y) = dot(X, Y)
 
-function get_vector(M::Sphere{N}, p, X, B::OrthonormalBasis) where {N}
+function get_vector(M::Sphere{N}, p, X, B::ArbitraryOrthonormalBasis) where {N}
     p[1] ≈ 1 && return vcat(0, X)
     xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
     X0 = vcat(0, X)
@@ -268,13 +268,13 @@ project_tangent(::Sphere, ::Any...)
 project_tangent!(S::Sphere, Y, p, X) = (Y .= X .- dot(p, X) .* p)
 
 @doc raw"""
-    get_coordinates(M::Sphere, p, X, B::OrthonormalBasis)
+    get_coordinates(M::Sphere, p, X, B::ArbitraryOrthonormalBasis)
 
 Represent the tangent vector `X` at point `p` from the [`Sphere`](@ref) `M` in
 an orthonormal basis by rotating the vector `X` using the rotation matrix
 $2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
 """
-function get_coordinates(M::Sphere{N}, p, X, B::OrthonormalBasis) where {N}
+function get_coordinates(M::Sphere{N}, p, X, B::ArbitraryOrthonormalBasis) where {N}
     if isapprox(p[1], 1)
         return X[2:end]
     else

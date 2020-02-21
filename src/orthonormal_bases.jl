@@ -24,7 +24,7 @@ The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be use
 abstract type AbstractOrthonormalBasis{𝔽} <: AbstractBasis{𝔽} end
 
 """
-    OrthonormalBasis(𝔽::AbstractNumbers = ℝ)
+    ArbitraryOrthonormalBasis(𝔽::AbstractNumbers = ℝ)
 
 An arbitrary orthonormal basis on a manifold. This will usually
 be the fastest orthonormal basis available for a manifold.
@@ -32,9 +32,9 @@ be the fastest orthonormal basis available for a manifold.
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as
 scalars.
 """
-struct OrthonormalBasis{𝔽} <: AbstractOrthonormalBasis{𝔽} end
+struct ArbitraryOrthonormalBasis{𝔽} <: AbstractOrthonormalBasis{𝔽} end
 
-OrthonormalBasis(𝔽::AbstractNumbers = ℝ) = OrthonormalBasis{𝔽}()
+ArbitraryOrthonormalBasis(𝔽::AbstractNumbers = ℝ) = ArbitraryOrthonormalBasis{𝔽}()
 
 """
     ProjectedOrthonormalBasis(method::Symbol, 𝔽::AbstractNumbers = ℝ)
@@ -92,7 +92,7 @@ end
 
 
 const ArbitraryOrDiagonalizingBasis =
-    Union{OrthonormalBasis,DiagonalizingOrthonormalBasis}
+    Union{ArbitraryOrthonormalBasis,DiagonalizingOrthonormalBasis}
 
 
 struct CachedBasis{B,V,𝔽} <: AbstractBasis{𝔽} where {BT<:AbstractBasis, V}
@@ -200,11 +200,11 @@ function get_basis(M::Manifold, p, B::AbstractBasis)
     error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
 """
-    get_basis(M::Manifold, p, B::OrthonormalBasis)
+    get_basis(M::Manifold, p, B::ArbitraryOrthonormalBasis)
 
-Compute the basis vectors of an [`OrthonormalBasis`](@ref).
+Compute the basis vectors of an [`ArbitraryOrthonormalBasis`](@ref).
 """
-function get_basis(M::Manifold, p, B::OrthonormalBasis)
+function get_basis(M::Manifold, p, B::ArbitraryOrthonormalBasis)
     dim = manifold_dimension(M)
     return CachedBasis(
         B,
@@ -289,15 +289,15 @@ _get_vectors(B::CachedBasis) = B.data
 _get_vectors(B::CachedBasis{BT,D,𝔽}) where {BT<:AbstractBasis, D<:DiagonalizingBasisData, 𝔽} = B.data.vectors
 _get_vectors(B::CachedBasis{BT,D,𝔽}) where {BT<:AbstractBasis, D<:ProductBasisData, 𝔽} = B.data.parts
 # related to DefaultManifold; to be moved to ManifoldsBase.jl in the future
-function get_coordinates(M::DefaultManifold, p, X, B::OrthonormalBasis)
+function get_coordinates(M::DefaultManifold, p, X, B::ArbitraryOrthonormalBasis)
     return reshape(X, manifold_dimension(M))
 end
 
-function get_vector(M::DefaultManifold, p, X, B::OrthonormalBasis)
+function get_vector(M::DefaultManifold, p, X, B::ArbitraryOrthonormalBasis)
     return reshape(X, representation_size(M))
 end
 
-function get_basis(M::DefaultManifold, p, B::OrthonormalBasis)
+function get_basis(M::DefaultManifold, p, B::ArbitraryOrthonormalBasis)
     return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
 end
 
@@ -359,8 +359,8 @@ function _show_basis_vector_range_noheader(io::IO, Ξ; max_vectors = 4, pre = ""
     end
 end
 
-function show(io::IO, ::OrthonormalBasis{𝔽}) where {𝔽}
-    print(io, "OrthonormalBasis($(𝔽))")
+function show(io::IO, ::ArbitraryOrthonormalBasis{𝔽}) where {𝔽}
+    print(io, "ArbitraryOrthonormalBasis($(𝔽))")
 end
 function show(io::IO, ::ProjectedOrthonormalBasis{method,𝔽}) where {method,𝔽}
     print(io, "ProjectedOrthonormalBasis($(repr(method)), $(𝔽))")
