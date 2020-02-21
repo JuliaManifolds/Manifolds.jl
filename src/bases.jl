@@ -355,8 +355,6 @@ function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
     return get_vector(M.manifold, p, X, B)
 end
 
-hat(M::Manifold, x, v) = get_vector(M, x, v, ArbitraryBasis())
-
 """
     number_system(::AbstractBasis)
 
@@ -439,5 +437,3 @@ function show(io::IO, mime::MIME"text/plain", B::CachedBasis{T,D,𝔽}) where {T
     sk = replace(sk, '\n' => "\n ")
     print(io, ' ', sk)
 end
-
-vee(M::Manifold, x, v) = get_coordinates(M, x, v, ArbitraryBasis())
