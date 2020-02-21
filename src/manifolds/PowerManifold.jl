@@ -322,8 +322,8 @@ function get_coordinates(
     M::AbstractPowerManifold,
     p,
     X,
-    B::CachedBasis{PowerBasisData},
-)
+    B::CachedBasis{<:AbstractBasis{ℝ},<:PowerBasisData,ℝ}
+) where {𝔽}
     rep_size = representation_size(M.manifold)
     vs = [
         get_coordinates(
@@ -336,14 +336,31 @@ function get_coordinates(
     ]
     return reduce(vcat, reshape(vs, length(vs)))
 end
-
+function get_coordinates(
+    M::AbstractPowerManifold,
+    p,
+    X,
+    B::CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽}
+) where {𝔽}
+    rep_size = representation_size(M.manifold)
+    vs = [
+        get_coordinates(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            B.data.bases[i...],
+        )
+        for i in get_iterator(M)
+    ]
+    return reduce(vcat, reshape(vs, length(vs)))
+end
 get_iterator(M::PowerManifold{<:Manifold,Tuple{N}}) where {N} = 1:N
 @generated function get_iterator(M::PowerManifold{<:Manifold,SizeTuple}) where {SizeTuple}
     size_tuple = size_to_tuple(SizeTuple)
     return Base.product(map(Base.OneTo, size_tuple)...)
 end
 
-function get_vector(M::PowerManifold, p, X, B::CachedBasis{PowerBasisData})
+function get_vector(M::PowerManifold, p, X, B::CachedBasis{<:AbstractBasis,<:PowerBasisData})
     dim = manifold_dimension(M.manifold)
     rep_size = representation_size(M.manifold)
     v_out = allocate(p)

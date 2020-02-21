@@ -135,9 +135,9 @@ end
 const TFVector = FVector{TangentSpaceType}
 const CoTFVector = FVector{CotangentSpaceType}
 
-struct VectorBundleBasisData{F, TBase<:AbstractVector, TVec<:AbstractVector}
-    base_basis::TBase
-    vec_basis::TVec
+struct VectorBundleBasisData{BBasis<:CachedBasis, TBasis<:CachedBasis}
+    base_basis::BBasis
+    vec_basis::TBasis
 end
 
 (+)(X::FVector, Y::FVector) = FVector(X.type, X.data + Y.data)
@@ -309,7 +309,10 @@ end
 function get_vector(M::TangentBundleFibers, p, X, B::AbstractBasis) where {N}
     return get_vector(M.manifold, p, X, B)
 end
-function get_vectors(M::VectorBundle, p, B::CachedBasis{VectorBundleBasisData})
+function get_vectors(
+    M::VectorBundle,
+    p,
+    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData})
     xp1 = submanifold_component(p, Val(1))
     zero_m = zero_tangent_vector(M.manifold, xp1)
     zero_f = zero_vector(M.fiber, xp1)
@@ -322,7 +325,9 @@ function get_vectors(M::VectorBundle, p, B::CachedBasis{VectorBundleBasisData})
     end
     return vs
 end
-
+function get_vectors(M::VectorBundleFibers, p, B::CachedBasis)
+    return get_vectors(M.manifold, p, B)
+end
 Base.@propagate_inbounds getindex(x::FVector, i) = getindex(x.data, i)
 
 """
