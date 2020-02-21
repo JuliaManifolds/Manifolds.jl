@@ -18,7 +18,7 @@ include("utils.jl")
         MVector{3, Float64},
         Vector{Float32},
     ]
-    basis_types = (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
+    basis_types = (OrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types
         @testset "Type $T" begin
             pts = [convert(T, [1.0, 0.0, 0.0]),

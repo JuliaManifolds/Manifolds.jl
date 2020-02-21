@@ -65,8 +65,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 @test bundle_projection(TB, pt) ≈ pt.parts[1]
             end
             basis_types = (
-                ArbitraryOrthonormalBasis(),
-                get_basis(TB, pts_tb[1], ArbitraryOrthonormalBasis()),
+                OrthonormalBasis(),
+                get_basis(TB, pts_tb[1], OrthonormalBasis()),
                 DiagonalizingOrthonormalBasis(log(TB, pts_tb[1], pts_tb[2])),
             )
             test_manifold(

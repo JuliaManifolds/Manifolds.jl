@@ -328,7 +328,7 @@ export
     PrecomputedOrthonormalBasis,
     PrecomputedPowerOrthonormalBasis,
     PrecomputedProductOrthonormalBasis,
-    ArbitraryOrthonormalBasis
+    OrthonormalBasis
 export ×,
     allocate,
     allocate_result,
@@ -483,7 +483,7 @@ export affine_matrix,
 # Orthonormal bases
 export AbstractBasis,
     AbstractOrthonormalBasis,
-    ArbitraryOrthonormalBasis,
+    OrthonormalBasis,
     DiagonalizingOrthonormalBasis,
     ProjectedOrthonormalBasis,
     CachedBasis,

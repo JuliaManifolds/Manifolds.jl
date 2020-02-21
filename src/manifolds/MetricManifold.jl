@@ -194,7 +194,7 @@ Compute the Gaussian curvature of the manifold `M` at the point `x`.
 """
 gaussian_curvature(M::MetricManifold, p; kwargs...) = ricci_curvature(M, p; kwargs...) / 2
 
-function get_basis(M::MMT, p, B::ArbitraryOrthonormalBasis) where {MMT<:MetricManifold}
+function get_basis(M::MMT, p, B::OrthonormalBasis) where {MMT<:MetricManifold}
     return invoke(get_basis, Tuple{MMT,Any,AbstractBasis}, M, p, B)
 end
 function get_basis(M::MMT, p, B::AbstractBasis) where {MMT<:MetricManifold}

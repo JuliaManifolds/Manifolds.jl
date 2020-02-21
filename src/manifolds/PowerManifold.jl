@@ -177,7 +177,7 @@ end
 
 ^(M::Manifold, n) = PowerManifold(M, n...)
 
-function basis(M::AbstractPowerManifold, p, B::ArbitraryOrthonormalBasis)
+function basis(M::AbstractPowerManifold, p, B::OrthonormalBasis)
     return invoke(basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
 end
 
@@ -303,14 +303,14 @@ function get_basis(M::AbstractPowerManifold, p, B::AbstractBasis)
     vs = [get_basis(M.manifold, _read(M, rep_size, p, i), B) for i in get_iterator(M)]
     return CachedBasis(B,PowerBasisData(vs))
 end
-function get_basis(M::AbstractPowerManifold, p, B::ArbitraryOrthonormalBasis)
+function get_basis(M::AbstractPowerManifold, p, B::OrthonormalBasis)
     return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
 end
 function get_basis(M::AbstractPowerManifold, p, B::DiagonalizingOrthonormalBasis)
     return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
 end
 
-function get_coordinates(M::AbstractPowerManifold, p, X, B::ArbitraryOrthonormalBasis)
+function get_coordinates(M::AbstractPowerManifold, p, X, B::OrthonormalBasis)
     rep_size = representation_size(M.manifold)
     vs = [
         get_coordinates(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), B)
@@ -379,7 +379,7 @@ function get_vector(M::PowerManifold, p, X, B::CachedBasis{<:AbstractBasis,<:Pow
     end
     return v_out
 end
-function get_vector(M::AbstractPowerManifold, p, X, B::ArbitraryOrthonormalBasis)
+function get_vector(M::AbstractPowerManifold, p, X, B::OrthonormalBasis)
     dim = manifold_dimension(M.manifold)
     rep_size = representation_size(M.manifold)
     v_out = allocate(p)

@@ -5,7 +5,7 @@ An orthonormal basis of the tangent space $T_p \mathcal M$ of (real) dimension $
 A vector $X$ from the tangent space $T_p \mathcal M$ can be expressed in Einstein notation as a sum $X = X^i e_i$, where (real) coefficients $X^i$ are calculated as $X^i = \mathrm{Re}(g_p(X, e_i))$.
 
 The main types are:
-* [`ArbitraryOrthonormalBasis`](@ref), which is designed to work when no special properties of the tangent space basis are required.
+* [`OrthonormalBasis`](@ref), which is designed to work when no special properties of the tangent space basis are required.
    It is designed to make [`get_coordinates`](@ref) and [`get_vector`](@ref) fast.
 * [`DiagonalizingOrthonormalBasis`](@ref), which diagonalizes the curvature tensor and makes the curvature in the selected direction equal to 0.
 * [`ProjectedOrthonormalBasis`](@ref), which projects a basis of the ambient space and orthonormalizes projections to obtain a basis in a generic way.

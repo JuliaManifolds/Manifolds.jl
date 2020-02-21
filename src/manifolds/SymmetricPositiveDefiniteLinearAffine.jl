@@ -99,7 +99,7 @@ function get_coordinates(
     M::SymmetricPositiveDefinite{N},
     p,
     X,
-    B::ArbitraryOrthonormalBasis,
+    B::OrthonormalBasis,
 ) where {N}
     dim = manifold_dimension(M)
     Y = similar(X, dim)
@@ -117,7 +117,7 @@ function get_coordinates(
     M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
     p,
     X,
-    B::ArbitraryOrthonormalBasis,
+    B::OrthonormalBasis,
 ) where {N}
     return get_coordinates(base_manifold(M), p, X, B)
 end
@@ -126,7 +126,7 @@ function get_vector(
     M::SymmetricPositiveDefinite{N},
     p,
     X,
-    B::ArbitraryOrthonormalBasis,
+    B::OrthonormalBasis,
 ) where {N}
     dim = manifold_dimension(M)
     Y = allocate_result(M, get_vector, p)
@@ -145,7 +145,7 @@ function get_vector(
     M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
     p,
     X,
-    B::ArbitraryOrthonormalBasis,
+    B::OrthonormalBasis,
 ) where {N}
     return get_vector(base_manifold(M), p, X, B)
 end

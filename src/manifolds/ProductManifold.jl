@@ -239,7 +239,7 @@ function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     end
     return CachedBasis(B,ProductBasisData(vs))
 end
-function get_basis(M::ProductManifold, p, B::ArbitraryOrthonormalBasis)
+function get_basis(M::ProductManifold, p, B::OrthonormalBasis)
     parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
     return CachedBasis(B,ProductBasisData(parts))
 end
@@ -254,7 +254,7 @@ function get_coordinates(M::ProductManifold, p, X, B::CachedBasis{ProductBasisDa
     )
     return vcat(reps...)
 end
-function get_coordinates(M::ProductManifold, p, X, B::ArbitraryOrthonormalBasis)
+function get_coordinates(M::ProductManifold, p, X, B::OrthonormalBasis)
     reps = map(
         t -> get_coordinates(t..., B),
         ziptuples(M.manifolds, submanifold_components(p), submanifold_components(X)),
@@ -284,7 +284,7 @@ function get_vector(
     M::ProductManifold{<:NTuple{N,Any}},
     p::ProductRepr,
     X,
-    B::ArbitraryOrthonormalBasis,
+    B::OrthonormalBasis,
 ) where {N}
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])

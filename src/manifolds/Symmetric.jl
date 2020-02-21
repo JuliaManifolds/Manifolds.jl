@@ -136,7 +136,7 @@ function get_coordinates(
     M::SymmetricMatrices{N,ℝ},
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::OrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
     Y = similar(X, dim)
@@ -154,7 +154,7 @@ function get_coordinates(
     M::SymmetricMatrices{N,ℂ},
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::OrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
     Y = similar(X, dim)
@@ -175,7 +175,7 @@ function get_vector(
     M::SymmetricMatrices{N,ℝ},
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::OrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
     Y = allocate_result(M, get_vector, p)
@@ -194,7 +194,7 @@ function get_vector(
     M::SymmetricMatrices{N,ℂ},
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::OrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
     Y = allocate_result(M, get_vector, p, p .* 1im)

@@ -240,12 +240,12 @@ end
 
 flat!(M::Rotations, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_coordinates(M::Rotations, p, X, B::ArbitraryOrthonormalBasis) where {N}
+function get_coordinates(M::Rotations, p, X, B::OrthonormalBasis) where {N}
     T = Base.promote_eltype(p, X)
     return vee(M, p, X) .* sqrt(T(2))
 end
 
-function get_vector(M::Rotations, p, X, B::ArbitraryOrthonormalBasis) where {N}
+function get_vector(M::Rotations, p, X, B::OrthonormalBasis) where {N}
     T = Base.promote_eltype(p, X)
     return hat(M, p, X) ./ sqrt(T(2))
 end
