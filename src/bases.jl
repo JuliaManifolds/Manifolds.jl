@@ -110,10 +110,10 @@ const ArbitraryOrDiagonalizingBasis =
     Union{ArbitraryOrthonormalBasis,DiagonalizingOrthonormalBasis}
 
 
-struct CachedBasis{B,V,𝔽} <: AbstractBasis{𝔽} where {BT<:AbstractBasis, V}
+struct CachedBasis{B,V,𝔽} <: AbstractBasis{𝔽} where {BT<:AbstractBasis,V}
     data::V
 end
-function CachedBasis(basis::B, data::V, 𝔽::AbstractNumbers = ℝ) where  {V,B<:AbstractBasis}
+function CachedBasis(basis::B, data::V, 𝔽::AbstractNumbers = ℝ) where {V,B<:AbstractBasis}
     return CachedBasis{B,V,𝔽}(data)
 end
 function CachedBasis(basis::CachedBasis) # avoid double encapsulation
@@ -124,7 +124,7 @@ function CachedBasis(
     eigenvalues::ET,
     vectors::T,
     𝔽::AbstractNumbers = ℝ,
-) where {ET<:AbstractVector, T<:AbstractVector}
+) where {ET<:AbstractVector,T<:AbstractVector}
     data = DiagonalizingBasisData(basis.frame_direction, eigenvalues, vectors)
     return CachedBasis(basis, data, 𝔽)
 end
@@ -136,8 +136,12 @@ function _euclidean_basis_vector(p, i)
 end
 
 _get_vectors(B::CachedBasis) = B.data
-_get_vectors(B::CachedBasis{BT,D,𝔽}) where {BT<:AbstractBasis, D<:DiagonalizingBasisData, 𝔽} = B.data.vectors
-_get_vectors(B::CachedBasis{BT,D,𝔽}) where {BT<:AbstractBasis, D<:ProductBasisData, 𝔽} = B.data.parts
+function _get_vectors(B::CachedBasis{<:AbstractBasis,<:DiagonalizingBasisData})
+    return B.data.vectors
+end
+function _get_vectors(B::CachedBasis{<:AbstractBasis,<:ProductBasisData})
+    return B.data.parts
+end
 
 """
     get_coordinates(M::Manifold, p, X, B::AbstractBasis)
@@ -165,7 +169,7 @@ end
 function get_coordinates(M::Manifold, x, v, B::ArbitraryOrthogonalBasis)
     return get_coordinates(M, x, v, ArbitraryOrthonormalBasis(number_system(B)))
 end
-function get_coordinates(M::Manifold, p, X, B::CachedBasis{BT}) where {BT <: AbstractBasis{ℝ}}
+function get_coordinates(M::Manifold, p, X, B::CachedBasis{BT}) where {BT<:AbstractBasis{ℝ}}
     return map(vb -> real(inner(M, p, X, vb)), get_vectors(M, p, B))
 end
 function get_coordinates(M::Manifold, p, X, B::CachedBasis)
@@ -256,7 +260,11 @@ function get_basis(M::Manifold, p, B::ArbitraryOrthonormalBasis)
     )
 end
 get_basis(M::Manifold, p, B::CachedBasis) = B
-function get_basis(M::ArrayManifold, p, B::CachedBasis{<:AbstractOrthonormalBasis{ℝ},T,ℝ}) where {T<:AbstractVector}
+function get_basis(
+    M::ArrayManifold,
+    p,
+    B::CachedBasis{<:AbstractOrthonormalBasis{ℝ},T,ℝ},
+) where {T<:AbstractVector}
     bvectors = get_vectors(M, p, B)
     N = length(bvectors)
     M_dim = manifold_dimension(M)
@@ -302,7 +310,7 @@ function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
         i_norm = norm(M, p, vecs[i])
         vecs[i] /= i_norm
     end
-    return CachedBasis(B,vecs)
+    return CachedBasis(B, vecs)
 end
 function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
     E = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
@@ -400,38 +408,32 @@ function show(io::IO, mime::MIME"text/plain", onb::DiagonalizingOrthonormalBasis
     sk = replace(sk, '\n' => "\n ")
     print(io, sk)
 end
-function show(io::IO, mime::MIME"text/plain", B::CachedBasis{T,D,𝔽}) where {T<:AbstractBasis,D,𝔽}
+function show(
+    io::IO,
+    mime::MIME"text/plain",
+    B::CachedBasis{T,D,𝔽},
+) where {T<:AbstractBasis,D,𝔽}
     vectors = _get_vectors(B)
     nv = length(vectors)
     print(
-        io, "$(T()) with coordinates in $(number_system(B)) and $(nv) basis vector$(nv == 1 ? "" : "s"):",
-    )
-    _show_basis_vector_range_noheader(
         io,
-        vectors;
-        max_vectors = 4,
-        pre = "  ",
-        sym = " E",
+        "$(T()) with coordinates in $(number_system(B)) and $(nv) basis vector$(nv == 1 ? "" : "s"):",
     )
+    _show_basis_vector_range_noheader(io, vectors; max_vectors = 4, pre = "  ", sym = " E")
 end
-function show(io::IO, mime::MIME"text/plain", B::CachedBasis{T,D,𝔽}) where {T<:DiagonalizingOrthonormalBasis, D<:DiagonalizingBasisData, 𝔽}
+function show(
+    io::IO,
+    mime::MIME"text/plain",
+    B::CachedBasis{T,D,𝔽},
+) where {T<:DiagonalizingOrthonormalBasis,D<:DiagonalizingBasisData,𝔽}
     vectors = _get_vectors(B)
     nv = length(vectors)
     sk = sprint(show, "text/plain", T(B.data.frame_direction), context = io, sizehint = 0)
     sk = replace(sk, '\n' => "\n ")
     print(io, sk)
-    println(
-        io,
-        "\nand $(nv) basis vector$(nv == 1 ? "" : "s").",
-    )
+    println(io, "\nand $(nv) basis vector$(nv == 1 ? "" : "s").")
     print(io, "Basis vectors:")
-    _show_basis_vector_range_noheader(
-        io,
-        vectors;
-        max_vectors = 4,
-        pre = "  ",
-        sym = " E",
-    )
+    _show_basis_vector_range_noheader(io, vectors; max_vectors = 4, pre = "  ", sym = " E")
     println(io, "\nEigenvalues:")
     sk = sprint(show, "text/plain", B.data.eigenvalues, context = io, sizehint = 0)
     sk = replace(sk, '\n' => "\n ")

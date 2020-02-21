@@ -226,7 +226,7 @@ function flat!(M::ProductManifold, ξ::CoTFVector, p, X::TFVector)
 end
 
 function get_basis(M::ProductManifold, p, B::AbstractBasis)
-    parts = map(t -> get_basis(t..., B).parts, ziptuples(M.manifolds, submanifold_components(p)))
+    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
     return CachedBasis(B,ProductBasisData(parts))
 end
 function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
