@@ -174,7 +174,7 @@ exp(::Rotations, ::Any...)
 exp!(M::Rotations, q, p, X) = copyto!(q, p * exp(X))
 function exp!(M::Rotations{2}, q, p, X)
     @assert size(q) == (2, 2)
-    θ = vee(M, p, X)[1]
+    θ = get_coordinates(M, p, X)[1]
     sinθ, cosθ = sincos(θ)
     @inbounds begin
         q[1] = cosθ
@@ -240,37 +240,36 @@ end
 
 flat!(M::Rotations, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_coordinates(M::Rotations, p, X, B::ArbitraryOrthonormalBasis) where {N}
-    T = Base.promote_eltype(p, X)
-    return vee(M, p, X) .* sqrt(T(2))
-end
-
-function get_vector(M::Rotations, p, X, B::ArbitraryOrthonormalBasis) where {N}
-    T = Base.promote_eltype(p, X)
-    return hat(M, p, X) ./ sqrt(T(2))
-end
-
 @doc raw"""
-    hat(M::Rotations, p, Xⁱ)
+    get_vector(M::Rotations, p, Xⁱ)
 
 Convert the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
 group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. See
-[`vee`](@ref vee(::Rotations, ::Any...)) for the conventions used.
+[`get_coordinates`](@ref get_coordinates(::Rotations, ::Any...)) for the conventions used.
 """
-hat(::Rotations, ::Any...)
+get_vector(::Rotations, ::Any...)
+function get_vector(M::Rotations{2}, p, Xⁱ::Real, B::DefaultBasis)
+    X = zeros(2,2)
+    return get_vector!(M, X, p, Xⁱ, B)
+end
+get_vector(M::Rotations{2}, p, Xⁱ, B::DefaultBasis) = get_vector(M, p, Xⁱ[1], B)
+function get_vector(M::Rotations{N}, p, Xⁱ, B::DefaultBasis) where {N}
+    X = zeros(N,N)
+    return get_vector!(M, X, p, Xⁱ, B)
+end
 
-function hat!(M::Rotations{2}, X, p, Xⁱ::Real)
-    @assert length(X) == 4
+get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultBasis) = get_vector!(M, X, p, Xⁱ[1], B)
+function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultBasis)
+    @assert size(X) == (2,2)
     @inbounds begin
-        X[1] = 0
-        X[3] = -Xⁱ
-        X[2] = Xⁱ
-        X[4] = 0
+        X[1, 1] = 0
+        X[1, 2] = Xⁱ
+        X[2, 1] = -Xⁱ
+        X[2, 2] = 0
     end
     return X
 end
-hat!(M::Rotations{2}, X, p, Xⁱ) = hat!(M, X, p, Xⁱ[1])
-function hat!(M::Rotations{N}, X, p, Xⁱ) where {N}
+function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultBasis) where {N}
     @assert size(X) == (N, N)
     @assert length(Xⁱ) == manifold_dimension(M)
     @inbounds begin
@@ -414,7 +413,7 @@ function log!(M::Rotations{2}, X, p, q)
     U = transpose(p) * q
     @assert size(U) == (2, 2)
     @inbounds θ = atan(U[2], U[1])
-    return hat!(M, X, p, θ)
+    return get_vector!(M, X, p, θ, DefaultBasis())
 end
 function log!(M::Rotations{3}, X, p, q)
     U = transpose(p) * q
@@ -424,7 +423,7 @@ function log!(M::Rotations{3}, X, p, q)
         ival = findfirst(λ -> isapprox(λ, 1), eig.values)
         inds = SVector{3}(1:3)
         ax = eig.vectors[inds, ival]
-        return hat!(M, X, p, π * ax)
+        return get_vector!(M, X, p, π * ax)
     end
     X .= ((U .- transpose(U)) ./ (2 * usinc_from_cos(cosθ)))
     return X
@@ -660,7 +659,7 @@ end
 show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
 
 @doc raw"""
-    vee(M::Rotations, p, X)
+    get_coordinates(M::Rotations, p, X)
 
 Extract the unique tangent vector components $X^i$ at point `p` on [`Rotations`](@ref)
 $\mathrm{SO}(n)$ from the matrix representation `X` of the tangent
@@ -675,12 +674,12 @@ along the axis of rotation.
 For $\mathrm{SO}(n)$ where $n ≥ 4$, the additional elements of $X^i$ are
 $X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
 """
-vee(::Rotations, ::Any...)
-vee(M::Rotations{2}, p, X) = [X[2]]
+get_coordinates(::Rotations, ::Any...)
+get_coordinates(M::Rotations{2}, p, X, ::DefaultBasis) = [X[2]]
 
-function vee!(M::Rotations{N}, Xⁱ, p, X) where {N}
+function get_coordinates(M::Rotations{N}, p, X) where {N}
     @assert size(X) == (N, N)
-    @assert length(Xⁱ) == manifold_dimension(M)
+    Xⁱ = zeros(manifold_dimension(M))
     @inbounds begin
         Xⁱ[1] = X[3, 2]
         Xⁱ[2] = X[1, 3]
@@ -692,10 +691,6 @@ function vee!(M::Rotations{N}, Xⁱ, p, X) where {N}
             k += 1
         end
     end
-    return Xⁱ
-end
-function vee!(M::Rotations{2}, Xⁱ, p, X)
-    Xⁱ[1] = X[2]
     return Xⁱ
 end
 

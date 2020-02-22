@@ -8,26 +8,26 @@ The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be use
 abstract type AbstractBasis{𝔽} end
 
 """
-    ArbitraryBasis{𝔽}
+    DefaultBasis{𝔽}
 
 An arbitrary basis on a manifold. This will usually
 be the fastest basis available for a manifold.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct ArbitraryBasis{𝔽} <: AbstractBasis{𝔽} end
-ArbitraryBasis(𝔽::AbstractNumbers = ℝ) = ArbitraryBasis{𝔽}()
+struct DefaultBasis{𝔽} <: AbstractBasis{𝔽} end
+DefaultBasis(𝔽::AbstractNumbers = ℝ) = DefaultBasis{𝔽}()
 
 """
-    ArbitraryOrthogonalBasis{𝔽}
+    DefaultOrthogonalBasis{𝔽}
 
 An arbitrary orthogonal basis on a manifold. This will usually
 be the fastest orthogonal basis available for a manifold.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct ArbitraryOrthogonalBasis{𝔽} <: AbstractBasis{𝔽} end
-ArbitraryOrthogonalBasis(𝔽::AbstractNumbers = ℝ) = ArbitraryOrthogonalBasis{𝔽}()
+struct DefaultOrthogonalBasis{𝔽} <: AbstractBasis{𝔽} end
+DefaultOrthogonalBasis(𝔽::AbstractNumbers = ℝ) = DefaultOrthogonalBasis{𝔽}()
 
 """
     AbstractOrthonormalBasis{𝔽}
@@ -39,7 +39,7 @@ The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be use
 abstract type AbstractOrthonormalBasis{𝔽} <: AbstractBasis{𝔽} end
 
 """
-    ArbitraryOrthonormalBasis(𝔽::AbstractNumbers = ℝ)
+    DefaultOrthonormalBasis(𝔽::AbstractNumbers = ℝ)
 
 An arbitrary orthonormal basis on a manifold. This will usually
 be the fastest orthonormal basis available for a manifold.
@@ -47,9 +47,9 @@ be the fastest orthonormal basis available for a manifold.
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as
 scalars.
 """
-struct ArbitraryOrthonormalBasis{𝔽} <: AbstractOrthonormalBasis{𝔽} end
+struct DefaultOrthonormalBasis{𝔽} <: AbstractOrthonormalBasis{𝔽} end
 
-ArbitraryOrthonormalBasis(𝔽::AbstractNumbers = ℝ) = ArbitraryOrthonormalBasis{𝔽}()
+DefaultOrthonormalBasis(𝔽::AbstractNumbers = ℝ) = DefaultOrthonormalBasis{𝔽}()
 
 """
     ProjectedOrthonormalBasis(method::Symbol, 𝔽::AbstractNumbers = ℝ)
@@ -106,8 +106,8 @@ struct ProductBasisData{T<:Tuple}
 end
 
 
-const ArbitraryOrDiagonalizingBasis =
-    Union{ArbitraryOrthonormalBasis,DiagonalizingOrthonormalBasis}
+const DefaultOrDiagonalizingBasis =
+    Union{DefaultOrthonormalBasis,DiagonalizingOrthonormalBasis}
 
 
 struct CachedBasis{B,V,𝔽} <: AbstractBasis{𝔽} where {BT<:AbstractBasis,V}
@@ -135,14 +135,6 @@ function _euclidean_basis_vector(p, i)
     return X
 end
 
-_get_vectors(B::CachedBasis) = B.data
-function _get_vectors(B::CachedBasis{<:AbstractBasis,<:DiagonalizingBasisData})
-    return B.data.vectors
-end
-function _get_vectors(B::CachedBasis{<:AbstractBasis,<:ProductBasisData})
-    return B.data.parts
-end
-
 """
     get_coordinates(M::Manifold, p, X, B::AbstractBasis)
     get_coordinates(M::Manifold, p, X, B::CachedBasis)
@@ -163,11 +155,11 @@ See also: [`get_vector`](@ref), [`get_basis`](@ref)
 function get_coordinates(M::Manifold, p, X, B::AbstractBasis)
     error("get_coordinates not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
-function get_coordinates(M::Manifold, x, v, B::ArbitraryBasis)
-    return get_coordinates(M, x, v, ArbitraryOrthogonalBasis(number_system(B)))
+function get_coordinates(M::Manifold, x, v, B::DefaultBasis)
+    return get_coordinates(M, x, v, DefaultOrthogonalBasis(number_system(B)))
 end
-function get_coordinates(M::Manifold, x, v, B::ArbitraryOrthogonalBasis)
-    return get_coordinates(M, x, v, ArbitraryOrthonormalBasis(number_system(B)))
+function get_coordinates(M::Manifold, x, v, B::DefaultOrthogonalBasis)
+    return get_coordinates(M, x, v, DefaultOrthonormalBasis(number_system(B)))
 end
 function get_coordinates(M::Manifold, p, X, B::CachedBasis{BT}) where {BT<:AbstractBasis{ℝ}}
     return map(vb -> real(inner(M, p, X, vb)), get_vectors(M, p, B))
@@ -175,7 +167,7 @@ end
 function get_coordinates(M::Manifold, p, X, B::CachedBasis)
     return map(vb -> inner(M, p, X, vb), get_vectors(M, p, B))
 end
-function get_coordinates(M::DefaultManifold, p, X, B::ArbitraryOrthonormalBasis)
+function get_coordinates(M::DefaultManifold, p, X, B::DefaultOrthonormalBasis)
     return reshape(X, manifold_dimension(M))
 end
 function get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
@@ -201,11 +193,19 @@ See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 function get_vector(M::Manifold, p, X, B::AbstractBasis)
     error("get_vector not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
-function get_vector(M::Manifold, x, v, B::ArbitraryBasis)
-    return get_vector(M, x, v, ArbitraryOrthogonalBasis(number_system(B)))
+function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    size(X) == (manifold_dimension(M),) || error("Incorrect size of vector X")
+    return get_vector(M.manifold, p, X, B)
 end
-function get_vector(M::Manifold, x, v, B::ArbitraryOrthogonalBasis)
-    return get_vector(M, x, v, ArbitraryOrthonormalBasis(number_system(B)))
+function get_vector(M::DefaultManifold, p, X, B::DefaultOrthonormalBasis)
+    return reshape(X, representation_size(M))
+end
+function get_vector(M::Manifold, x, v, B::DefaultBasis)
+    return get_vector(M, x, v, DefaultOrthogonalBasis(number_system(B)))
+end
+function get_vector(M::Manifold, x, v, B::DefaultOrthogonalBasis)
+    return get_vector(M, x, v, DefaultOrthonormalBasis(number_system(B)))
 end
 function get_vector(M::Manifold, p, X, B::CachedBasis)
     # quite convoluted but:
@@ -233,7 +233,7 @@ function get_vector(M::Manifold, p, X, B::CachedBasis)
 end
 
 """
-    get_basis(M::Manifold, p, B::AbstractBasis) -> AbstractBasis
+    get_basis(M::Manifold, p, B::AbstractBasis) -> CachedBasis
 
 Compute the basis vectors of the tangent space at a point on manifold `M`
 represented by `p`.
@@ -248,11 +248,11 @@ function get_basis(M::Manifold, p, B::AbstractBasis)
     error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
 """
-    get_basis(M::Manifold, p, B::ArbitraryOrthonormalBasis)
+    get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
 
-Compute the basis vectors of an [`ArbitraryOrthonormalBasis`](@ref).
+Compute the basis vectors of an [`DefaultOrthonormalBasis`](@ref).
 """
-function get_basis(M::Manifold, p, B::ArbitraryOrthonormalBasis)
+function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
     dim = manifold_dimension(M)
     return CachedBasis(
         B,
@@ -285,7 +285,7 @@ function get_basis(
     end
     return B
 end
-function get_basis(M::DefaultManifold, p, B::ArbitraryOrthonormalBasis)
+function get_basis(M::DefaultManifold, p, B::DefaultOrthonormalBasis)
     return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
 end
 
@@ -353,14 +353,33 @@ Get the basis vectors of basis `B` of the tangent space at point `p`.
 function get_vectors(M::Manifold, p, B::AbstractBasis)
     error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
-get_vectors(::Manifold, ::Any, B::CachedBasis) = _get_vectors(B)
-function get_vector(M::DefaultManifold, p, X, B::ArbitraryOrthonormalBasis)
-    return reshape(X, representation_size(M))
-end
-function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
-    size(X) == (manifold_dimension(M),) || error("Incorrect size of vector X")
-    return get_vector(M.manifold, p, X, B)
+get_vectors(M::Manifold, p, B::CachedBasis{<:AbstractBasis,<:AbstractArray}) = B.data
+get_vectors(M::Manifold, p, B::CachedBasis{<:AbstractBasis,<:DiagonalizingBasisData}) = B.data.vectors
+
+#internal for directly cached basis i.e. those that are just arrays – used in show
+_get_vectors(B::CachedBasis{<:AbstractBasis,<:AbstractArray}) = B.data
+_get_vectors(B::CachedBasis{<:AbstractBasis,<:DiagonalizingBasisData}) = B.data.vectors
+
+@doc raw"""
+    hat(M::Manifold, p, Xⁱ)
+
+Given a basis $e_i$ on the tangent space at a point `p` and tangent
+component vector $X^i$, compute the equivalent vector representation
+$X=X^i e_i$, where Einstein summation notation is used:
+
+````math
+∧ : X^i ↦ X^i e_i
+````
+
+For array manifolds, this converts a vector representation of the tangent
+vector to an array representation. The [`vee`](@ref) map is the `hat` map's
+inverse.
+"""
+hat(M::Manifold, x, v) = get_vector(M, x, v, DefaultBasis())
+
+function hat!(M::Manifold, X, p, Xⁱ)
+    is_decorator_manifold(M) === Val(true) && return hat!(base_manifold(M), X, p, Xⁱ)
+    error("hat! operator not defined for manifold $(typeof(M)), array $(typeof(X)), point $(typeof(p)), and vector $(typeof(Xⁱ))")
 end
 
 """
@@ -393,8 +412,8 @@ function _show_basis_vector_range_noheader(io::IO, Ξ; max_vectors = 4, pre = ""
     end
 end
 
-function show(io::IO, ::ArbitraryOrthonormalBasis{𝔽}) where {𝔽}
-    print(io, "ArbitraryOrthonormalBasis($(𝔽))")
+function show(io::IO, ::DefaultOrthonormalBasis{𝔽}) where {𝔽}
+    print(io, "DefaultOrthonormalBasis($(𝔽))")
 end
 function show(io::IO, ::ProjectedOrthonormalBasis{method,𝔽}) where {method,𝔽}
     print(io, "ProjectedOrthonormalBasis($(repr(method)), $(𝔽))")
@@ -438,4 +457,30 @@ function show(
     sk = sprint(show, "text/plain", B.data.eigenvalues, context = io, sizehint = 0)
     sk = replace(sk, '\n' => "\n ")
     print(io, ' ', sk)
+end
+
+@doc raw"""
+    vee(M::Manifold, p, X)
+
+Given a basis $e_i$ on the tangent space at a point `p` and tangent
+vector `X`, compute the vector components $X^i$, such that $X = X^i e_i$, where
+Einstein summation notation is used:
+
+````math
+\vee : X^i e_i ↦ X^i
+````
+
+For array manifolds, this converts an array representation of the tangent
+vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
+inverse.
+"""
+vee(M::Manifold, x, v) = get_coordinates(M, x, v, DefaultBasis())
+
+function vee!(M::Manifold, Xⁱ, p, X)
+    is_decorator_manifold(M) === Val(true) && return vee!(base_manifold(M), Xⁱ, p, X)
+    error("vee! operator not defined for manifold $(typeof(M)), vector $(typeof(Xⁱ)), point $(typeof(p)), and array $(typeof(X))")
+end
+function allocate_result(M::Manifold, f::typeof(vee), p, X)
+    T = allocate_result_type(M, f, (p, X))
+    return allocate(p, T, Size(manifold_dimension(M)))
 end

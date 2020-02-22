@@ -36,9 +36,9 @@ include("utils.jl")
 
     for M in manifolds
         basis_types = if M == E
-            (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd), DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]))
+            (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd), DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]))
         elseif M == Ec
-            (ArbitraryOrthonormalBasis(), DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]))
+            (DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]))
         else
             ()
         end

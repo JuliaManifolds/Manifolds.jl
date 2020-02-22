@@ -6,7 +6,7 @@ ManifoldsBase.inner(::ProjManifold, x, w, v) = dot(w, v)
 ManifoldsBase.project_tangent!(S::ProjManifold, w, x, v) = (w .= v .- dot(x, v) .* x)
 ManifoldsBase.representation_size(::ProjManifold) = (2,3)
 ManifoldsBase.manifold_dimension(::ProjManifold) = 5
-Manifolds.get_vector(::ProjManifold, x, v, ::ArbitraryOrthonormalBasis) = reverse(v)
+Manifolds.get_vector(::ProjManifold, x, v, ::DefaultOrthonormalBasis) = reverse(v)
 
 @testset "Projected and arbitrary orthonormal basis" begin
     M = ProjManifold()
@@ -31,7 +31,7 @@ Manifolds.get_vector(::ProjManifold, x, v, ::ArbitraryOrthonormalBasis) = revers
         @test project_tangent(M, x, get_vectors(M, x, pb)[i]) ≈ get_vectors(M, x, pb)[i]
     end
 
-    aonb = get_basis(M, x, ArbitraryOrthonormalBasis())
+    aonb = get_basis(M, x, DefaultOrthonormalBasis())
     @test size(get_vectors(M, x, aonb)) == (5,)
     @test get_vectors(M, x, aonb)[1] ≈ [0, 0, 0, 0, 1]
 end
@@ -43,7 +43,7 @@ struct NonBasis <: Manifolds.AbstractBasis{ℝ} end
 
     @testset "Errors" begin
         m = NonManifold()
-        onb = ArbitraryOrthonormalBasis()
+        onb = DefaultOrthonormalBasis()
 
         @test_throws ErrorException get_basis(m, [0], onb)
         @test_throws ErrorException get_basis(m, [0], NonBasis())
@@ -57,13 +57,13 @@ struct NonBasis <: Manifolds.AbstractBasis{ℝ} end
     @testset "basis representation" begin
         v1 = log(M, pts[1], pts[2])
 
-        vb = get_coordinates(M, pts[1], v1, ArbitraryOrthonormalBasis())
+        vb = get_coordinates(M, pts[1], v1, DefaultOrthonormalBasis())
         @test isa(vb, AbstractVector)
-        vbi = get_vector(M, pts[1], vb, ArbitraryOrthonormalBasis())
+        vbi = get_vector(M, pts[1], vb, DefaultOrthonormalBasis())
         @test isapprox(M, pts[1], v1, vbi)
 
-        b = get_basis(M, pts[1], ArbitraryOrthonormalBasis())
-        @test isa(b, CachedBasis{ArbitraryOrthonormalBasis{ℝ},Array{Array{Float64,1},1},ℝ})
+        b = get_basis(M, pts[1], DefaultOrthonormalBasis())
+        @test isa(b, CachedBasis{DefaultOrthonormalBasis{ℝ},Array{Array{Float64,1},1},ℝ})
         N = manifold_dimension(M)
         @test length(get_vectors(M, pts[1], b)) == N
         # check orthonormality
@@ -83,14 +83,14 @@ struct NonBasis <: Manifolds.AbstractBasis{ℝ} end
             @test inner(M, pts[1], v1, get_vectors(M, pts[1], b)[i]) ≈ vb[i]
         end
 
-        @test get_coordinates(M, pts[1], v1, b) ≈ get_coordinates(M, pts[1], v1, ArbitraryOrthonormalBasis())
-        @test get_vector(M, pts[1], vb, b) ≈ get_vector(M, pts[1], vb, ArbitraryOrthonormalBasis())
+        @test get_coordinates(M, pts[1], v1, b) ≈ get_coordinates(M, pts[1], v1, DefaultOrthonormalBasis())
+        @test get_vector(M, pts[1], vb, b) ≈ get_vector(M, pts[1], vb, DefaultOrthonormalBasis())
 
     end
 
     @testset "ArrayManifold basis" begin
         A = ArrayManifold(M)
-        aonb = ArbitraryOrthonormalBasis()
+        aonb = DefaultOrthonormalBasis()
         b = get_basis(A, pts[1], aonb)
         @test_throws ErrorException get_vector(A, pts[1], [], aonb)
         @test_throws DimensionMismatch get_coordinates(A, pts[1], [], aonb)
@@ -101,8 +101,8 @@ struct NonBasis <: Manifolds.AbstractBasis{ℝ} end
 end
 
 @testset "Basis show methods" begin
-    @test sprint(show, ArbitraryOrthonormalBasis()) == "ArbitraryOrthonormalBasis(ℝ)"
-    @test sprint(show, ArbitraryOrthonormalBasis(ℂ)) == "ArbitraryOrthonormalBasis(ℂ)"
+    @test sprint(show, DefaultOrthonormalBasis()) == "DefaultOrthonormalBasis(ℝ)"
+    @test sprint(show, DefaultOrthonormalBasis(ℂ)) == "DefaultOrthonormalBasis(ℂ)"
     @test sprint(show, ProjectedOrthonormalBasis(:svd)) == "ProjectedOrthonormalBasis(:svd, ℝ)"
     @test sprint(show, ProjectedOrthonormalBasis(:gram_schmidt, ℂ)) == "ProjectedOrthonormalBasis(:gram_schmidt, ℂ)"
 
@@ -115,9 +115,9 @@ end
 
     M = Euclidean(2, 3)
     x = collect(reshape(1.0:6.0, (2, 3)))
-    pb = get_basis(M, x, ArbitraryOrthonormalBasis())
+    pb = get_basis(M, x, DefaultOrthonormalBasis())
     @test sprint(show, "text/plain", pb) == """
-    ArbitraryOrthonormalBasis(ℝ) with coordinates in ℝ and 6 basis vectors:
+    DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 6 basis vectors:
      E1 =
       2×3 Array{Float64,2}:
        1.0  0.0  0.0
@@ -172,9 +172,9 @@ end
 
     M = Euclidean(1, 1, 1)
     x = reshape(Float64[1], (1, 1, 1))
-    pb = get_basis(M, x, ArbitraryOrthonormalBasis())
+    pb = get_basis(M, x, DefaultOrthonormalBasis())
     @test sprint(show, "text/plain", pb) == """
-    ArbitraryOrthonormalBasis(ℝ) with coordinates in ℝ and 1 basis vector:
+    DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 1 basis vector:
      E1 =
       1×1×1 Array{Float64,3}:
       [:, :, 1] =

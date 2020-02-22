@@ -10,12 +10,12 @@ include("utils.jl")
         @test_throws DomainError is_manifold_point(M, 9., true)
         @test !is_tangent_vector(M, 9., 0.)
         @test_throws DomainError is_tangent_vector(M, 9., 0., true)
-        @test get_coordinates(M, Ref(0.0), Ref(2.0), ArbitraryOrthonormalBasis())[] ≈ 2.0
+        @test get_coordinates(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ 2.0
         @test get_coordinates(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ -2.0
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈ -2.0
         @test get_coordinates(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈ 2.0
-        @test get_vector(M, Ref(0.0), Ref(2.0), ArbitraryOrthonormalBasis())[] ≈ 2.0
+        @test get_vector(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_vector(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ 2.0
         @test get_vector(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ -2.0
         @test get_vector(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈ -2.0
@@ -43,8 +43,8 @@ include("utils.jl")
     end
     types = [Float64, Float32]
 
-    basis_types = (ArbitraryOrthonormalBasis(),)
-    basis_types_real = (ArbitraryOrthonormalBasis(),
+    basis_types = (DefaultOrthonormalBasis(),)
+    basis_types_real = (DefaultOrthonormalBasis(),
         DiagonalizingOrthonormalBasis(Ref(-1.0)),
         DiagonalizingOrthonormalBasis(Ref(1.0))
     )
