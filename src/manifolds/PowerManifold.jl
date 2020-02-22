@@ -169,12 +169,6 @@ function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector
     return FVector(TangentSpace, alloc)
 end
 
-function basis(M::AbstractPowerManifold, p, B::AbstractBasis)
-    rep_size = representation_size(M.manifold)
-    vs = [basis(M.manifold, _read(M, rep_size, p, i), B) for i in get_iterator(M)]
-    return CachedBasis(vs)
-end
-
 ^(M::Manifold, n) = PowerManifold(M, n...)
 
 """
@@ -293,13 +287,13 @@ end
 function get_basis(M::AbstractPowerManifold, p, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     vs = [get_basis(M.manifold, _read(M, rep_size, p, i), B) for i in get_iterator(M)]
-    return CachedBasis(B,PowerBasisData(vs))
+    return CachedBasis(B, PowerBasisData(vs))
 end
 function get_basis(M::AbstractPowerManifold, p, B::DefaultOrthonormalBasis)
-    return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
+    return invoke(get_basis, Tuple{AbstractPowerManifold,Any,AbstractBasis}, M, p, B)
 end
 function get_basis(M::AbstractPowerManifold, p, B::DiagonalizingOrthonormalBasis)
-    return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
+    return invoke(get_basis, Tuple{AbstractPowerManifold,Any,AbstractBasis}, M, p, B)
 end
 
 function get_coordinates(M::AbstractPowerManifold, p, X, B::DefaultOrthonormalBasis)
@@ -322,7 +316,7 @@ function get_coordinates(
             M.manifold,
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
-            B.data.bases[i...],
+            _access_nested(B.data.bases, i),
         )
         for i in get_iterator(M)
     ]
@@ -340,7 +334,7 @@ function get_coordinates(
             M.manifold,
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
-            B.data.bases[i...],
+            _access_nested(B.data.bases, i),
         )
         for i in get_iterator(M)
     ]
@@ -364,7 +358,7 @@ function get_vector(M::PowerManifold, p, X, B::CachedBasis{<:AbstractBasis,<:Pow
                 M.manifold,
                 _read(M, rep_size, p, i),
                 X[v_iter:v_iter+dim-1],
-                B.data.bases[i...],
+                _access_nested(B.data.bases, i),
             ),
         )
         v_iter += dim
@@ -658,6 +652,21 @@ function sharp!(M::AbstractPowerManifold, X::TFVector, p, ξ::CoTFVector)
     return X
 end
 
+function show(
+    io::IO,
+    mime::MIME"text/plain",
+    B::CachedBasis{T,D,𝔽},
+) where {T<:AbstractBasis,D<:PowerBasisData,𝔽}
+    println(
+        io,
+        "$(T()) for a power manifold with coordinates in $(number_system(B))",
+    )
+    for i in Base.product(map(Base.OneTo, size(B.data.bases))...)
+        println(io, "Basis for component $i:")
+        show(io, mime, _access_nested(B.data.bases, i))
+        println(io)
+    end
+end
 function show(
     io::IO,
     M::PowerManifold{TM,TSize,ArrayPowerRepresentation},
