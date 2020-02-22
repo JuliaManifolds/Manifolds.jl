@@ -15,8 +15,8 @@ abstract type AbstractEmbeddedManifold{T<:AbstractEmbeddingType} <: AbstractDeco
 struct DefaultIsometricEmbedding <: AbstractIsometricEmbeddingType end
 
 struct EmbeddedManifold{MT <: Manifold, NT <: Manifold, ET} <: AbstractEmbeddedManifold{ET}
-    submanifold::MT
-    manifold::NT
+    manifold::MT
+    embedding::NT
 end
 
 """
@@ -57,8 +57,10 @@ function inverse_retract!(M::MT, X, p, q, m::EmbeddedRetraction) where {MT <: Em
     return q
 end
 
+decorated_manifold(M::AbstractEmbeddedManifold) = M.embedding
+
 @decorator_transparent_function function get_embedding(M::AbstractEmbeddedManifold)
-    return M.manifold
+    return M.embedding
 end
 
 function decorator_transparent_dispatch(
@@ -82,7 +84,7 @@ function retract!(M::MT, q, p, X, m::EmbeddedRetraction) where {MT <: AbstractEm
     Z = allocate(X)
     embed!(M, x, p)
     embed!(M, Z, p, X)
-    retract!(get_embedding(M), q, x, Z)
+    retract!(M.embedding, q, x, Z)
     project_point!(M, q, q)
     return q
 end

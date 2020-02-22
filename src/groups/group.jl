@@ -22,7 +22,7 @@ Note that a manifold is connected with an operation by wrapping it with a decora
 abstract type AbstractGroupOperation end
 
 @doc raw"""
-    AbstractGroupManifold{<:AbstractGroupOperation} <: Manifold
+    AbstractGroupManifold{<:AbstractGroupOperation} <: AbstractDecoratorManifold
 
 Abstract type for a Lie group, a group that is also a smooth manifold with an
 [`AbstractGroupOperation`](@ref), a smooth binary operation. `AbstractGroupManifold`s must
@@ -127,7 +127,7 @@ struct Identity{G<:AbstractGroupManifold}
     group::G
 end
 
-Identity(M::AbstractDecoratorManifold) = Identity(M.manifold)
+Identity(M::AbstractDecoratorManifold) = Identity(decorated_manifold(M))
 Identity(M::Manifold) = error("Identity not implemented for manifold $(M)")
 
 show(io::IO, e::Identity) = print(io, "Identity($(e.group))")
@@ -197,7 +197,7 @@ inv(::AbstractGroupManifold, ::Any...)
 end
 
 @decorator_transparent_function :intransparent function inv!(G::AbstractGroupManifold, q, p)
-    inv!(G.manifold, q, p)
+    inv!(decorated_manifold(G), q, p)
 end
 
 @doc raw"""
