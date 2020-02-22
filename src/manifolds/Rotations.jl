@@ -257,6 +257,10 @@ function get_vector(M::Rotations{N}, p, Xⁱ, B::DefaultBasis) where {N}
     X = zeros(N,N)
     return get_vector!(M, X, p, Xⁱ, B)
 end
+function get_vector(M::Rotations, p, X, B::DefaultOrthonormalBasis) where {N}
+    T = Base.promote_eltype(p, X)
+    return get_vector(M, p, X, DefaultBasis()) ./ sqrt(T(2))
+end
 
 get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultBasis) = get_vector!(M, X, p, Xⁱ[1], B)
 function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultBasis)
@@ -293,10 +297,6 @@ function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultBasis) where {N}
         end
     end
     return X
-end
-function get_vector(M::Rotations, p, X, B::DefaultOrthonormalBasis) where {N}
-    T = Base.promote_eltype(p, X)
-    return get_vector(M, p, X, DefaultBasis()) ./ sqrt(T(2))
 end
 
 @doc raw"""
