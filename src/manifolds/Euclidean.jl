@@ -80,36 +80,36 @@ flat(::Euclidean, ::Any...)
 
 flat!(M::Euclidean, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_basis(M::Euclidean{<:Tuple,ℝ}, p, B::ArbitraryOrthonormalBasis)
+function get_basis(M::Euclidean{<:Tuple,ℝ}, p, B::DefaultOrthonormalBasis)
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     return CachedBasis(B,vecs)
 end
-function get_basis(M::Euclidean{<:Tuple,ℂ}, p, B::ArbitraryOrthonormalBasis)
+function get_basis(M::Euclidean{<:Tuple,ℂ}, p, B::DefaultOrthonormalBasis)
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     return CachedBasis(B,[vecs; im * vecs])
 end
 function get_basis(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
-    vecs = get_vectors(M, p, get_basis(M, p, ArbitraryOrthonormalBasis()))
+    vecs = get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
     eigenvalues = zeros(real(eltype(p)), manifold_dimension(M))
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates(M::Euclidean{<:Tuple,ℝ}, p, X, B::ArbitraryOrDiagonalizingBasis)
+function get_coordinates(M::Euclidean{<:Tuple,ℝ}, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
     PS = prod(S)
     return reshape(X, PS)
 end
-function get_coordinates(M::Euclidean{<:Tuple,ℂ}, p, X, B::ArbitraryOrDiagonalizingBasis)
+function get_coordinates(M::Euclidean{<:Tuple,ℂ}, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
     PS = prod(S)
     return [reshape(real(X), PS); reshape(imag(X), PS)]
 end
 
-function get_vector(M::Euclidean{<:Tuple,ℝ}, p, X, B::ArbitraryOrDiagonalizingBasis)
+function get_vector(M::Euclidean{<:Tuple,ℝ}, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
     return reshape(X, S)
 end
-function get_vector(M::Euclidean{<:Tuple,ℂ}, p, X, B::ArbitraryOrDiagonalizingBasis)
+function get_vector(M::Euclidean{<:Tuple,ℂ}, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
     N = div(length(X), 2)
     return reshape(X[1:N] + im * X[N+1:end], S)
