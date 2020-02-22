@@ -174,7 +174,7 @@ exp(::Rotations, ::Any...)
 exp!(M::Rotations, q, p, X) = copyto!(q, p * exp(X))
 function exp!(M::Rotations{2}, q, p, X)
     @assert size(q) == (2, 2)
-    θ = get_coordinates(M, p, X)[1]
+    θ = get_coordinates(M, p, X, DefaultBasis())[1]
     sinθ, cosθ = sincos(θ)
     @inbounds begin
         q[1] = cosθ
@@ -260,12 +260,12 @@ end
 
 get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultBasis) = get_vector!(M, X, p, Xⁱ[1], B)
 function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultBasis)
-    @assert size(X) == (2,2)
+    @assert length(X) == 4
     @inbounds begin
-        X[1, 1] = 0
-        X[1, 2] = Xⁱ
-        X[2, 1] = -Xⁱ
-        X[2, 2] = 0
+        X[1] = 0
+        X[2] = Xⁱ
+        X[3] = -Xⁱ
+        X[4] = 0
     end
     return X
 end
@@ -293,6 +293,10 @@ function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultBasis) where {N}
         end
     end
     return X
+end
+function get_vector(M::Rotations, p, X, B::DefaultOrthonormalBasis) where {N}
+    T = Base.promote_eltype(p, X)
+    return get_vector(M, p, X, DefaultBasis()) ./ sqrt(T(2))
 end
 
 @doc raw"""
@@ -692,6 +696,10 @@ function get_coordinates(M::Rotations{N}, p, X) where {N}
         end
     end
     return Xⁱ
+end
+function get_coordinates(M::Rotations, p, X, B::DefaultOrthonormalBasis) where {N}
+    T = Base.promote_eltype(p, X)
+    return get_coordinates(M, p, X, DefaultBasis()) .* sqrt(T(2))
 end
 
 @doc raw"""
