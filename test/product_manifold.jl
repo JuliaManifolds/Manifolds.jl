@@ -309,4 +309,35 @@ include("utils.jl")
         v2 = vee(M, x, V)
         @test isapprox(v, v2)
     end
+
+    @testset "Basis printing" begin
+        p = ProductRepr([1.0, 0.0, 0.0], [1.0, 0.0])
+        B = DefaultOrthonormalBasis()
+        Bc = get_basis(Mse, p, B)
+        @test sprint(show, "text/plain", Bc) == """
+        DefaultOrthonormalBasis(ℝ) for a product manifold with coordinates in ℝ
+        Basis for component 1:
+        DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 2 basis vectors:
+         E1 =
+          3-element Array{Int64,1}:
+           0
+           1
+           0
+         E2 =
+          3-element Array{Int64,1}:
+           0
+           0
+           1
+        Basis for component 2:
+        DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 2 basis vectors:
+         E1 =
+          2-element Array{Float64,1}:
+           1.0
+           0.0
+         E2 =
+          2-element Array{Float64,1}:
+           0.0
+           1.0
+        """
+    end
 end

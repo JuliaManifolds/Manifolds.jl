@@ -458,6 +458,21 @@ function show(
     sk = replace(sk, '\n' => "\n ")
     print(io, ' ', sk)
 end
+function show(
+    io::IO,
+    mime::MIME"text/plain",
+    B::CachedBasis{T,D,𝔽},
+) where {T<:AbstractBasis,D<:ProductBasisData,𝔽}
+    println(
+        io,
+        "$(T()) for a product manifold with coordinates in $(number_system(B))",
+    )
+    for (i, cb) = enumerate(B.data.parts)
+        println(io, "Basis for component $i:")
+        show(io, mime, cb)
+        println(io)
+    end
+end
 
 @doc raw"""
     vee(M::Manifold, p, X)
