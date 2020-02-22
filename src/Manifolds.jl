@@ -42,6 +42,7 @@ import ManifoldsBase:
     base_manifold,
     check_manifold_point,
     check_tangent_vector,
+    decorated_manifold,
     decorator_transparent_dispatch,
     default_decorator_dispatch,
     distance,

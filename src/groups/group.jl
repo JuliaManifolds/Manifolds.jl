@@ -56,7 +56,7 @@ show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op)
 Un-decorate `M` until an `AbstractGroupManifold` is encountered.
 Return an error if the [`base_manifold`](@ref) is reached without encountering a group.
 """
-base_group(M::AbstractDecoratorManifold) = base_group(M.manifold)
+base_group(M::AbstractDecoratorManifold) = base_group(decorated_manifold(M))
 function base_group(M::Manifold)
     error("base_group: no base group found.")
 end
@@ -64,7 +64,7 @@ base_group(G::AbstractGroupManifold) = G
 
 decorator_group_dispatch(M::Manifold) = Val(false)
 function decorator_group_dispatch(M::AbstractDecoratorManifold)
-    return decorator_group_dispatch(M.manifold)
+    return decorator_group_dispatch(decorated_manifold(M))
 end
 decorator_group_dispatch(M::AbstractGroupManifold) = Val(true)
 
