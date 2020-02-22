@@ -127,7 +127,7 @@ struct Identity{G<:AbstractGroupManifold}
     group::G
 end
 
-Identity(M::AbstractDecoratorManifold) = Identity(decorated_manifold(M))
+Identity(M::AbstractDecoratorManifold) = Identity(M.manifold)
 Identity(M::Manifold) = error("Identity not implemented for manifold $(M)")
 
 show(io::IO, e::Identity) = print(io, "Identity($(e.group))")
@@ -197,7 +197,7 @@ inv(::AbstractGroupManifold, ::Any...)
 end
 
 @decorator_transparent_function :intransparent function inv!(G::AbstractGroupManifold, q, p)
-    inv!(decorated_manifold(G), q, p)
+    inv!(G.manifold, q, p)
 end
 
 @doc raw"""

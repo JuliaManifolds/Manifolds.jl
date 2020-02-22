@@ -18,15 +18,14 @@ Though it is slightly redundant, usually the matrices are stored as $n × n$ arr
 
 Generate the manifold of $n × n$ symmetric matrices.
 """
-struct SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbedding}
-    manifold::Euclidean{Tuple{n,n},𝔽}
-end
+struct SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbedding} end
 
 function SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
-    SymmetricMatrices{n,field}(Euclidean(n, n; field=field))
+    SymmetricMatrices{n,field}()
 end
 
 base_manifold(M::SymmetricMatrices) = M
+decorated_manifold(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N,N; field=𝔽)
 
 @doc raw"""
     check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...)
