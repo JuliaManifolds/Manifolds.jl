@@ -427,7 +427,7 @@ function log!(M::Rotations{3}, X, p, q)
         ival = findfirst(λ -> isapprox(λ, 1), eig.values)
         inds = SVector{3}(1:3)
         ax = eig.vectors[inds, ival]
-        return get_vector!(M, X, p, π * ax)
+        return get_vector!(M, X, p, π * ax, DefaultBasis())
     end
     X .= ((U .- transpose(U)) ./ (2 * usinc_from_cos(cosθ)))
     return X
@@ -681,7 +681,7 @@ $X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
 get_coordinates(::Rotations, ::Any...)
 get_coordinates(M::Rotations{2}, p, X, ::DefaultBasis) = [X[2]]
 
-function get_coordinates(M::Rotations{N}, p, X) where {N}
+function get_coordinates(M::Rotations{N}, p, X, B::DefaultBasis) where {N}
     @assert size(X) == (N, N)
     Xⁱ = zeros(manifold_dimension(M))
     @inbounds begin
