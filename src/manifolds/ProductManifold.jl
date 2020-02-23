@@ -266,7 +266,7 @@ function get_vector(
     M::ProductManifold{<:NTuple{N,Any}},
     p::ProductRepr,
     X,
-    B::CachedBasis{ProductBasisData},
+    B::CachedBasis,
 ) where {N}
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
@@ -284,7 +284,7 @@ function get_vector(
     M::ProductManifold{<:NTuple{N,Any}},
     p::ProductRepr,
     X,
-    B::DefaultOrthonormalBasis,
+    B::AbstractBasis,
 ) where {N}
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
