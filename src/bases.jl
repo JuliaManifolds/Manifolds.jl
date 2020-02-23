@@ -288,7 +288,6 @@ end
 function get_basis(M::DefaultManifold, p, B::DefaultOrthonormalBasis)
     return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
 end
-
 function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
     S = representation_size(M)
     PS = prod(S)
