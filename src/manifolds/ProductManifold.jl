@@ -237,14 +237,19 @@ function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     )) do t
         return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
     end
-    return CachedBasis(B,ProductBasisData(vs))
+    return CachedBasis(B, ProductBasisData(vs))
 end
 function get_basis(M::ProductManifold, p, B::DefaultOrthonormalBasis)
     parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
-    return CachedBasis(B,ProductBasisData(parts))
+    return CachedBasis(B, ProductBasisData(parts))
 end
 
-function get_coordinates(M::ProductManifold, p, X, B::CachedBasis{ProductBasisData})
+function get_coordinates(
+    M::ProductManifold,
+    p,
+    X,
+    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
+)
     reps = map(
         get_coordinates,
         M.manifolds,
@@ -253,6 +258,20 @@ function get_coordinates(M::ProductManifold, p, X, B::CachedBasis{ProductBasisDa
         B.data.parts,
     )
     return vcat(reps...)
+end
+function get_coordinates(
+    M::ProductManifold,
+    p,
+    X,
+    B::CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
+)
+    argtype = Tuple{
+        ProductManifold,
+        Any,
+        Any,
+        CachedBasis{<:AbstractBasis,<:ProductBasisData},
+    }
+    return invoke(get_coordinates, argtype, M, p, X, B)
 end
 function get_coordinates(M::ProductManifold, p, X, B::DefaultOrthonormalBasis)
     reps = map(
@@ -266,7 +285,7 @@ function get_vector(
     M::ProductManifold{<:NTuple{N,Any}},
     p::ProductRepr,
     X,
-    B::CachedBasis,
+    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
 ) where {N}
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
@@ -279,6 +298,20 @@ function get_vector(
         )
     end
     return ProductRepr(parts)
+end
+function get_vector(
+    M::ProductManifold{<:NTuple{N,Any}},
+    p::ProductRepr,
+    X,
+    B::CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
+) where {N}
+    argtype = Tuple{
+        ProductManifold{<:NTuple{N,Any}},
+        ProductRepr,
+        Any,
+        CachedBasis{<:AbstractBasis,<:ProductBasisData},
+    }
+    return invoke(get_vector, argtype, M, p, X, B)
 end
 function get_vector(
     M::ProductManifold{<:NTuple{N,Any}},
@@ -313,6 +346,7 @@ function get_vectors(
     end
     return vs
 end
+
 function hat!(M::ProductManifold, X, p, Xⁱ)
     dim = manifold_dimension(M)
     @assert length(Xⁱ) == dim
