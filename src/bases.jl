@@ -191,23 +191,39 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 """
 function get_vector(M::Manifold, p, X, B::AbstractBasis)
-    error("get_vector not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
+    Y = allocate_result(M, get_vector, p, X, B)
+    return get_vector!(M, Y, p, X, B)
+end
+function allocate_result(M::Manifold, f::typeof(get_vector), p, X, B)
+    T = allocate_result_type(M, f, (p, X))
+    return allocate(p, T, Size(manifold_dimension(M)))
 end
 function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
-    size(X) == (manifold_dimension(M),) || error("Incorrect size of vector X")
-    return get_vector(M.manifold, p, X, B)
+    size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
+    Y = get_vector(M.manifold, p, X, B)
+    size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
+    return Y
 end
-function get_vector(M::DefaultManifold, p, X, B::DefaultOrthonormalBasis)
-    return reshape(X, representation_size(M))
+
+function get_vector!(M::ArrayManifold, Y, p, X, B::AbstractBasis; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
+    get_vector!(M.manifold, Y, p, X, B)
+    size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
+    return Y
 end
-function get_vector(M::Manifold, x, v, B::DefaultBasis)
-    return get_vector(M, x, v, DefaultOrthogonalBasis(number_system(B)))
+function get_vector!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
+    Y .= reshape(X, representation_size(M))
+    return Y
 end
-function get_vector(M::Manifold, x, v, B::DefaultOrthogonalBasis)
-    return get_vector(M, x, v, DefaultOrthonormalBasis(number_system(B)))
+function get_vector!(M::Manifold, Y, p, X, B::DefaultBasis)
+    return get_vector!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
 end
-function get_vector(M::Manifold, p, X, B::CachedBasis)
+function get_vector!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
+    return get_vector!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
+end
+function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `Y`
@@ -215,7 +231,6 @@ function get_vector(M::Manifold, p, X, B::CachedBasis)
     bvectors = get_vectors(M, p, B)
     if isa(bvectors[1], ProductRepr)
         Xt = X[1] * bvectors[1]
-        Y = allocate(bvectors[1], eltype(Xt))
         copyto!(Y, Xt)
         for i = 2:length(X)
             Y += X[i] * bvectors[i]
@@ -223,7 +238,6 @@ function get_vector(M::Manifold, p, X, B::CachedBasis)
         return Y
     else
         Xt = X[1] .* bvectors[1]
-        Y = allocate(bvectors[1], eltype(Xt))
         copyto!(Y, Xt)
         for i = 2:length(X)
             Y .+= X[i] .* bvectors[i]
@@ -247,11 +261,7 @@ See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 function get_basis(M::Manifold, p, B::AbstractBasis)
     error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
-"""
-    get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
 
-Compute the basis vectors of an [`DefaultOrthonormalBasis`](@ref).
-"""
 function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
     dim = manifold_dimension(M)
     return CachedBasis(
