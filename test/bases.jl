@@ -93,7 +93,6 @@ struct NonBasis <: Manifolds.AbstractBasis{ℝ} end
         aonb = DefaultOrthonormalBasis()
         b = get_basis(A, pts[1], aonb)
         @test_throws ErrorException get_vector(A, pts[1], [], aonb)
-        @test_throws DimensionMismatch get_coordinates(A, pts[1], [], aonb)
         @test_throws ArgumentError get_basis(A, pts[1], CachedBasis(aonb,[pts[1]]))
         @test_throws ArgumentError get_basis(A, pts[1], CachedBasis(aonb,[pts[1], pts[1], pts[1]]))
         @test_throws ArgumentError get_basis(A, pts[1], CachedBasis(aonb,[2*pts[1], pts[1], pts[1]]))

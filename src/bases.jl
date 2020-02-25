@@ -153,26 +153,40 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 See also: [`get_vector`](@ref), [`get_basis`](@ref)
 """
 function get_coordinates(M::Manifold, p, X, B::AbstractBasis)
-    error("get_coordinates not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
+    Y = allocate_result(M, get_coordinates, p, X, B)
+    return get_coordinates!(M, Y, p, X, B)
 end
-function get_coordinates(M::Manifold, x, v, B::DefaultBasis)
-    return get_coordinates(M, x, v, DefaultOrthogonalBasis(number_system(B)))
-end
-function get_coordinates(M::Manifold, x, v, B::DefaultOrthogonalBasis)
-    return get_coordinates(M, x, v, DefaultOrthonormalBasis(number_system(B)))
-end
-function get_coordinates(M::Manifold, p, X, B::CachedBasis{BT}) where {BT<:AbstractBasis{ℝ}}
-    return map(vb -> real(inner(M, p, X, vb)), get_vectors(M, p, B))
-end
-function get_coordinates(M::Manifold, p, X, B::CachedBasis)
-    return map(vb -> inner(M, p, X, vb), get_vectors(M, p, B))
-end
-function get_coordinates(M::DefaultManifold, p, X, B::DefaultOrthonormalBasis)
-    return reshape(X, manifold_dimension(M))
+function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B)
+    T = allocate_result_type(M, f, (p, X))
+    return allocate(p, T, Size(manifold_dimension(M)))
 end
 function get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     return get_coordinates(M.manifold, p, X, B)
+end
+
+function get_coordinates!(M::Manifold, Y, p, X, B::DefaultBasis)
+    return get_coordinates!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
+end
+function get_coordinates!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
+    return get_coordinates!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
+end
+function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis{BT}) where {BT<:AbstractBasis{ℝ}}
+    Y .= map(vb -> real(inner(M, p, X, vb)), get_vectors(M, p, B))
+    return Y
+end
+function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis)
+    Y .= map(vb -> inner(M, p, X, vb), get_vectors(M, p, B))
+    return Y
+end
+function get_coordinates!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
+    Y .= reshape(X, manifold_dimension(M))
+    return Y
+end
+function get_coordinates!(M::ArrayManifold, Y, p, X, B::AbstractBasis; kwargs...)
+    is_tangent_vector(M, p, X, true; kwargs...)
+    get_coordinates!(M, Y, p, X, B)
+    return Y
 end
 
 """
@@ -386,10 +400,7 @@ inverse.
 """
 hat(M::Manifold, p, Xⁱ) = get_vector(M, p, Xⁱ, DefaultBasis())
 
-function hat!(M::Manifold, X, p, Xⁱ)
-    is_decorator_manifold(M) === Val(true) && return hat!(base_manifold(M), X, p, Xⁱ)
-    error("hat! operator not defined for manifold $(typeof(M)), array $(typeof(X)), point $(typeof(p)), and vector $(typeof(Xⁱ))")
-end
+hat!(M::Manifold, X, p, Xⁱ) = get_vector!(M, X, p, Xⁱ)
 
 """
     number_system(::AbstractBasis)
@@ -500,11 +511,4 @@ inverse.
 """
 vee(M::Manifold, p, X) = get_coordinates(M, p, X, DefaultBasis())
 
-function vee!(M::Manifold, Xⁱ, p, X)
-    is_decorator_manifold(M) === Val(true) && return vee!(base_manifold(M), Xⁱ, p, X)
-    error("vee! operator not defined for manifold $(typeof(M)), vector $(typeof(Xⁱ)), point $(typeof(p)), and array $(typeof(X))")
-end
-function allocate_result(M::Manifold, f::typeof(vee), p, X)
-    T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, Size(manifold_dimension(M)))
-end
+vee!(M::Manifold, Xⁱ, p, X) = get_coordinates!(M, Xⁱ, p, X)
