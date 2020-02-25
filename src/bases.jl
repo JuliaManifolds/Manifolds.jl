@@ -374,7 +374,7 @@ For array manifolds, this converts a vector representation of the tangent
 vector to an array representation. The [`vee`](@ref) map is the `hat` map's
 inverse.
 """
-hat(M::Manifold, x, v) = get_vector(M, x, v, DefaultBasis())
+hat(M::Manifold, p, Xⁱ) = get_vector(M, p, Xⁱ, DefaultBasis())
 
 function hat!(M::Manifold, X, p, Xⁱ)
     is_decorator_manifold(M) === Val(true) && return hat!(base_manifold(M), X, p, Xⁱ)
@@ -488,7 +488,7 @@ For array manifolds, this converts an array representation of the tangent
 vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
 inverse.
 """
-vee(M::Manifold, x, v) = get_coordinates(M, x, v, DefaultBasis())
+vee(M::Manifold, p, X) = get_coordinates(M, p, X, DefaultBasis())
 
 function vee!(M::Manifold, Xⁱ, p, X)
     is_decorator_manifold(M) === Val(true) && return vee!(base_manifold(M), Xⁱ, p, X)

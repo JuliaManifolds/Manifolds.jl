@@ -174,7 +174,7 @@ exp(::Rotations, ::Any...)
 exp!(M::Rotations, q, p, X) = copyto!(q, p * exp(X))
 function exp!(M::Rotations{2}, q, p, X)
     @assert size(q) == (2, 2)
-    θ = get_coordinates(M, p, X, DefaultBasis())[1]
+    θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
     sinθ, cosθ = sincos(θ)
     @inbounds begin
         q[1] = cosθ
@@ -241,7 +241,7 @@ end
 flat!(M::Rotations, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 @doc raw"""
-    get_vector(M::Rotations, p, Xⁱ)
+    get_vector(M::Rotations, p, Xⁱ, B:: DefaultOrthogonalBasis)
 
 Convert the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
 group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. See

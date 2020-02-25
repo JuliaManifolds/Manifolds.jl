@@ -9,7 +9,7 @@ The main types are:
    It is designed to make [`get_coordinates`](@ref) and [`get_vector`](@ref) fast.
 * [`DiagonalizingOrthonormalBasis`](@ref), which diagonalizes the curvature tensor and makes the curvature in the selected direction equal to 0.
 * [`ProjectedOrthonormalBasis`](@ref), which projects a basis of the ambient space and orthonormalizes projections to obtain a basis in a generic way.
-* [`CachedBasis`](@ref), which by stores (explicitly or implicitly) a precomputed basis at a certain point.
+* [`CachedBasis`](@ref), which stores (explicitly or implicitly) a precomputed basis at a certain point.
 
 The main functions are:
 * [`get_basis`](@ref) precomputes a basis at a certain point.
