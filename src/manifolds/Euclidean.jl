@@ -103,12 +103,8 @@ end
 function get_coordinates!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
     PS = prod(S)
-    Y .= [reshape(real(X), PS); reshape(imag(X), PS)]
+    Y .= [reshape(real(X), PS)..., reshape(imag(X), PS)...]
     return Y
-end
-function allocate_result(M::Euclidean{<:Tuple,ℂ}, f::typeof(get_coordinates), p, X, B)
-    T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, Size(2*manifold_dimension(M)))
 end
 
 function get_vector!(M::Euclidean{<:Tuple,ℝ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
@@ -116,7 +112,7 @@ function get_vector!(M::Euclidean{<:Tuple,ℝ}, Y, p, X, B::DefaultOrDiagonalizi
     Y .= reshape(X, S)
     return Y
 end
-function get_vector(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
+function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
     N = div(length(X), 2)
     Y .= reshape(X[1:N] + im * X[N+1:end], S)
