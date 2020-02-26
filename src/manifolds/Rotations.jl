@@ -257,13 +257,13 @@ For $\mathrm{SO}(n)$ where $n ≥ 4$, the additional elements of $X^i$ are
 $X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
 """
 get_coordinates(::Rotations, ::Any...)
-get_coordinates(::Rotations{2}, p, X, ::DefaultBasis) = [X[2]]
+get_coordinates(::Rotations{2}, p, X, ::DefaultOrthogonalBasis) = [X[2]]
 
-function get_coordinates!(::Rotations{2}, Xⁱ, p, X, ::DefaultBasis)
+function get_coordinates!(::Rotations{2}, Xⁱ, p, X, ::DefaultOrthogonalBasis)
     Xⁱ .= [X[2]]
     return Xⁱ
 end
-function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultBasis) where {N}
+function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthogonalBasis) where {N}
     @inbounds begin
         Xⁱ[1] = X[3, 2]
         Xⁱ[2] = X[1, 3]
@@ -293,8 +293,8 @@ group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. S
 """
 get_vector(::Rotations, ::Any...)
 
-get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultBasis) = get_vector!(M, X, p, Xⁱ[1], B)
-function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultBasis)
+get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultOrthogonalBasis) = get_vector!(M, X, p, Xⁱ[1], B)
+function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultOrthogonalBasis)
     @assert length(X) == 4
     @inbounds begin
         X[1] = 0
@@ -304,7 +304,7 @@ function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultBasis)
     end
     return X
 end
-function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultBasis) where {N}
+function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultOrthogonalBasis) where {N}
     @assert size(X) == (N, N)
     @assert length(Xⁱ) == manifold_dimension(M)
     @inbounds begin
@@ -454,7 +454,7 @@ function log!(M::Rotations{2}, X, p, q)
     U = transpose(p) * q
     @assert size(U) == (2, 2)
     @inbounds θ = atan(U[2], U[1])
-    return get_vector!(M, X, p, θ, DefaultBasis())
+    return get_vector!(M, X, p, θ, DefaultOrthogonalBasis())
 end
 function log!(M::Rotations{3}, X, p, q)
     U = transpose(p) * q
@@ -464,7 +464,7 @@ function log!(M::Rotations{3}, X, p, q)
         ival = findfirst(λ -> isapprox(λ, 1), eig.values)
         inds = SVector{3}(1:3)
         ax = eig.vectors[inds, ival]
-        return get_vector!(M, X, p, π * ax, DefaultBasis())
+        return get_vector!(M, X, p, π * ax, DefaultOrthogonalBasis())
     end
     X .= ((U .- transpose(U)) ./ (2 * usinc_from_cos(cosθ)))
     return X
