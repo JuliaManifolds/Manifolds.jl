@@ -260,7 +260,7 @@ get_coordinates(::Rotations, ::Any...)
 get_coordinates(::Rotations{2}, p, X, ::DefaultOrthogonalBasis) = [X[2]]
 
 function get_coordinates!(::Rotations{2}, Xⁱ, p, X, ::DefaultOrthogonalBasis)
-    Xⁱ .= [X[2]]
+    Xⁱ[1] = X[2]
     return Xⁱ
 end
 function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthogonalBasis) where {N}
@@ -279,7 +279,7 @@ function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthogonalBasis
 end
 function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthonormalBasis) where {N}
     T = Base.promote_eltype(p, X)
-    get_coordinates!(M, Xⁱ, p, X, DefaultBasis())
+    get_coordinates!(M, Xⁱ, p, X, DefaultOrthogonalBasis())
     Xⁱ .*= sqrt(T(2))
     return Xⁱ
 end
@@ -331,7 +331,7 @@ function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultOrthogonalBasis) wher
 end
 function get_vector!(M::Rotations, X, p, Xⁱ, B::DefaultOrthonormalBasis)
     T = Base.promote_eltype(p, X)
-    get_vector!(M, X, p, Xⁱ, DefaultBasis())
+    get_vector!(M, X, p, Xⁱ, DefaultOrthogonalBasis())
     X ./= sqrt(T(2))
     return X
 end
