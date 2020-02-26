@@ -48,7 +48,9 @@ struct NonBasis <: Manifolds.AbstractBasis{ℝ} end
         @test_throws ErrorException get_basis(m, [0], onb)
         @test_throws ErrorException get_basis(m, [0], NonBasis())
         @test_throws ErrorException get_coordinates(m, [0], [0], onb)
+        @test_throws ErrorException get_coordinates!(m, [0], [0], [0], onb)
         @test_throws ErrorException get_vector(m, [0], [0], onb)
+        @test_throws ErrorException get_vector!(m, [0], [0], [0], onb)
         @test_throws ErrorException get_vectors(m, [0], NonBasis())
     end
 
@@ -86,6 +88,13 @@ struct NonBasis <: Manifolds.AbstractBasis{ℝ} end
         @test get_coordinates(M, pts[1], v1, b) ≈ get_coordinates(M, pts[1], v1, DefaultOrthonormalBasis())
         @test get_vector(M, pts[1], vb, b) ≈ get_vector(M, pts[1], vb, DefaultOrthonormalBasis())
 
+        v1c = allocate(v1)
+        get_coordinates!(M, v1c, pts[1], v1, b)
+        @test v1c ≈ get_coordinates(M, pts[1], v1, b)
+
+        v1cv = allocate(v1)
+        get_vector!(M, v1cv, pts[1], v1c, b)
+        @test isapprox(M, pts[1], v1, v1cv)
     end
 
     @testset "ArrayManifold basis" begin

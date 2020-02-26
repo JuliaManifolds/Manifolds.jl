@@ -274,6 +274,9 @@ function get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
     return get_coordinates(M.manifold, p, X, B)
 end
 
+function get_coordinates!(M::Manifold, Y, p, X, B::AbstractBasis)
+    error("get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
+end
 function get_coordinates!(M::Manifold, Y, p, X, B::DefaultBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
 end
@@ -329,6 +332,9 @@ function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
     return Y
 end
 
+function get_vector!(M::Manifold, Y, p, X, B::AbstractBasis)
+    error("get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).")
+end
 function get_vector!(M::ArrayManifold, Y, p, X, B::AbstractBasis; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
     size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")

@@ -435,5 +435,11 @@ export AbstractBasis,
     DiagonalizingBasisData,
     ProductBasisData,
     PowerBasisData
-export get_basis, get_coordinates, get_vector, get_vectors, number_system
+export get_basis,
+    get_coordinates,
+    get_coordinates!,
+    get_vector,
+    get_vector!,
+    get_vectors,
+    number_system
 end # module
