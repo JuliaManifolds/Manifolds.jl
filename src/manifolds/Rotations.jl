@@ -241,6 +241,49 @@ end
 flat!(M::Rotations, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 @doc raw"""
+    get_coordinates(M::Rotations, p, X)
+
+Extract the unique tangent vector components $X^i$ at point `p` on [`Rotations`](@ref)
+$\mathrm{SO}(n)$ from the matrix representation `X` of the tangent
+vector.
+
+The basis on the Lie algebra $𝔰𝔬(n)$ is chosen such that
+for $\mathrm{SO}(2)$, $X^1 = θ = X_{21}$ is the angle of rotation, and
+for $\mathrm{SO}(3)$, $(X^1, X^2, X^3) = (X_{32}, X_{13}, X_{21}) = θ u$ is the
+angular velocity and axis-angle representation, where $u$ is the unit vector
+along the axis of rotation.
+
+For $\mathrm{SO}(n)$ where $n ≥ 4$, the additional elements of $X^i$ are
+$X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
+"""
+get_coordinates(::Rotations, ::Any...)
+get_coordinates(::Rotations{2}, p, X, ::DefaultBasis) = [X[2]]
+
+function get_coordinates!(::Rotations{2}, Xⁱ, p, X, ::DefaultBasis)
+    Xⁱ .= [X[2]]
+    return Xⁱ
+end
+function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultBasis) where {N}
+    @inbounds begin
+        Xⁱ[1] = X[3, 2]
+        Xⁱ[2] = X[1, 3]
+        Xⁱ[3] = X[2, 1]
+
+        k = 4
+        for i = 4:N, j = 1:i-1
+            Xⁱ[k] = X[i, j]
+            k += 1
+        end
+    end
+    return Xⁱ
+end
+function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthonormalBasis) where {N}
+    T = Base.promote_eltype(p, X)
+    get_coordinates!(M, Xⁱ, p, X, DefaultBasis()) .* sqrt(T(2))
+    return Xⁱ
+end
+
+@doc raw"""
     get_vector(M::Rotations, p, Xⁱ, B:: DefaultOrthogonalBasis)
 
 Convert the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
@@ -248,19 +291,6 @@ group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. S
 [`get_coordinates`](@ref get_coordinates(::Rotations, ::Any...)) for the conventions used.
 """
 get_vector(::Rotations, ::Any...)
-function get_vector(M::Rotations{2}, p, Xⁱ::Real, B::DefaultBasis)
-    X = zeros(2,2)
-    return get_vector!(M, X, p, Xⁱ, B)
-end
-get_vector(M::Rotations{2}, p, Xⁱ, B::DefaultBasis) = get_vector(M, p, Xⁱ[1], B)
-function get_vector(M::Rotations{N}, p, Xⁱ, B::DefaultBasis) where {N}
-    X = zeros(N,N)
-    return get_vector!(M, X, p, Xⁱ, B)
-end
-function get_vector(M::Rotations, p, X, B::DefaultOrthonormalBasis) where {N}
-    T = Base.promote_eltype(p, X)
-    return get_vector(M, p, X, DefaultBasis()) ./ sqrt(T(2))
-end
 
 get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultBasis) = get_vector!(M, X, p, Xⁱ[1], B)
 function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultBasis)
@@ -296,6 +326,12 @@ function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultBasis) where {N}
             X[i, i] = 0
         end
     end
+    return X
+end
+function get_vector!(M::Rotations, X, p, Xⁱ, B::DefaultOrthonormalBasis)
+    T = Base.promote_eltype(p, X)
+    get_vector!(M, X, p, Xⁱ, DefaultBasis())
+    X ./= sqrt(T(2))
     return X
 end
 
@@ -661,46 +697,6 @@ function retract!(M::Rotations, q, p, X, method::PolarRetraction)
 end
 
 show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
-
-@doc raw"""
-    get_coordinates(M::Rotations, p, X)
-
-Extract the unique tangent vector components $X^i$ at point `p` on [`Rotations`](@ref)
-$\mathrm{SO}(n)$ from the matrix representation `X` of the tangent
-vector.
-
-The basis on the Lie algebra $𝔰𝔬(n)$ is chosen such that
-for $\mathrm{SO}(2)$, $X^1 = θ = X_{21}$ is the angle of rotation, and
-for $\mathrm{SO}(3)$, $(X^1, X^2, X^3) = (X_{32}, X_{13}, X_{21}) = θ u$ is the
-angular velocity and axis-angle representation, where $u$ is the unit vector
-along the axis of rotation.
-
-For $\mathrm{SO}(n)$ where $n ≥ 4$, the additional elements of $X^i$ are
-$X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
-"""
-get_coordinates(::Rotations, ::Any...)
-get_coordinates(M::Rotations{2}, p, X, ::DefaultBasis) = [X[2]]
-
-function get_coordinates(M::Rotations{N}, p, X, B::DefaultBasis) where {N}
-    @assert size(X) == (N, N)
-    Xⁱ = zeros(manifold_dimension(M))
-    @inbounds begin
-        Xⁱ[1] = X[3, 2]
-        Xⁱ[2] = X[1, 3]
-        Xⁱ[3] = X[2, 1]
-
-        k = 4
-        for i = 4:N, j = 1:i-1
-            Xⁱ[k] = X[i, j]
-            k += 1
-        end
-    end
-    return Xⁱ
-end
-function get_coordinates(M::Rotations, p, X, B::DefaultOrthonormalBasis) where {N}
-    T = Base.promote_eltype(p, X)
-    return get_coordinates(M, p, X, DefaultBasis()) .* sqrt(T(2))
-end
 
 @doc raw"""
     zero_tangent_vector(M::Rotations, p)

@@ -136,6 +136,115 @@ function _euclidean_basis_vector(p, i)
 end
 
 """
+    get_basis(M::Manifold, p, B::AbstractBasis) -> CachedBasis
+
+Compute the basis vectors of the tangent space at a point on manifold `M`
+represented by `p`.
+
+Returned object derives from [`AbstractBasis`](@ref) and may have a field `.vectors`
+that stores tangent vectors or it may store them implicitly, in which case
+the function [`get_vectors`](@ref) needs to be used to retrieve the basis vectors.
+
+See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
+"""
+function get_basis(M::Manifold, p, B::AbstractBasis)
+    error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
+end
+
+function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
+    dim = manifold_dimension(M)
+    return CachedBasis(
+        B,
+        [get_vector(M, p, [ifelse(i == j, 1, 0) for j = 1:dim], B) for i = 1:dim],
+    )
+end
+get_basis(M::Manifold, p, B::CachedBasis) = B
+function get_basis(
+    M::ArrayManifold,
+    p,
+    B::CachedBasis{<:AbstractOrthonormalBasis{ℝ},T,ℝ},
+) where {T<:AbstractVector}
+    bvectors = get_vectors(M, p, B)
+    N = length(bvectors)
+    M_dim = manifold_dimension(M)
+    if N != M_dim
+
+        throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
+    end
+    for i = 1:N
+        Xi_norm = norm(M, p, bvectors[i])
+        if !isapprox(Xi_norm, 1)
+            throw(ArgumentError("vector number $i is not normalized (norm = $Xi_norm)"))
+        end
+        for j = i+1:N
+            dot_val = real(inner(M, p, bvectors[i], bvectors[j]))
+            if !isapprox(dot_val, 0; atol = eps(eltype(p)))
+                throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
+            end
+        end
+    end
+    return B
+end
+function get_basis(M::DefaultManifold, p, B::DefaultOrthonormalBasis)
+    return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
+end
+function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
+    S = representation_size(M)
+    PS = prod(S)
+    dim = manifold_dimension(M)
+    # projection
+    # TODO: find a better way to obtain a basis of the ambient space
+    Xs = [
+        convert(Vector, reshape(project_tangent(M, p, _euclidean_basis_vector(p, i)), PS))
+        for i in eachindex(p)
+    ]
+    O = reduce(hcat, Xs)
+    # orthogonalization
+    # TODO: try using rank-revealing QR here
+    decomp = svd(O)
+    rotated = Diagonal(decomp.S) * decomp.Vt
+    vecs = [collect(reshape(rotated[i, :], S)) for i = 1:dim]
+    # normalization
+    for i = 1:dim
+        i_norm = norm(M, p, vecs[i])
+        vecs[i] /= i_norm
+    end
+    return CachedBasis(B, vecs)
+end
+function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
+    E = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
+    N = length(E)
+    Ξ = empty(E)
+    dim = manifold_dimension(M)
+    N < dim && @warn "Input only has $(N) vectors, but manifold dimension is $(dim)."
+    K = 0
+    @inbounds for n = 1:N
+        Ξₙ = project_tangent(M, p, E[n])
+        for k = 1:K
+            Ξₙ .-= real(inner(M, p, Ξ[k], Ξₙ)) .* Ξ[k]
+        end
+        nrmΞₙ = norm(M, p, Ξₙ)
+        if nrmΞₙ == 0
+            @warn "Input vector $(n) has length 0."
+            @goto skip
+        end
+        Ξₙ ./= nrmΞₙ
+        for k = 1:K
+            if !isapprox(real(inner(M, p, Ξ[k], Ξₙ)), 0; kwargs...)
+                @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
+                @goto skip
+            end
+        end
+        push!(Ξ, Ξₙ)
+        K += 1
+        K * real_dimension(number_system(B)) == dim && return CachedBasis(B, Ξ, ℝ)
+        @label skip
+    end
+    @warn "get_basis with bases $(typeof(B)) only found $(K) orthonormal basis vectors, but manifold dimension is $(dim)."
+    return CachedBasis(B, Ξ)
+end
+
+"""
     get_coordinates(M::Manifold, p, X, B::AbstractBasis)
     get_coordinates(M::Manifold, p, X, B::CachedBasis)
 
@@ -210,7 +319,7 @@ function get_vector(M::Manifold, p, X, B::AbstractBasis)
 end
 function allocate_result(M::Manifold, f::typeof(get_vector), p, X, B)
     T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, Size(manifold_dimension(M)))
+    return allocate(p, T, representation_size(M))
 end
 function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
@@ -258,114 +367,6 @@ function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
         end
         return Y
     end
-end
-
-"""
-    get_basis(M::Manifold, p, B::AbstractBasis) -> CachedBasis
-
-Compute the basis vectors of the tangent space at a point on manifold `M`
-represented by `p`.
-
-Returned object derives from [`AbstractBasis`](@ref) and may have a field `.vectors`
-that stores tangent vectors or it may store them implicitly, in which case
-the function [`get_vectors`](@ref) needs to be used to retrieve the basis vectors.
-
-See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
-"""
-function get_basis(M::Manifold, p, B::AbstractBasis)
-    error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
-end
-
-function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
-    dim = manifold_dimension(M)
-    return CachedBasis(
-        B,
-        [get_vector(M, p, [ifelse(i == j, 1, 0) for j = 1:dim], B) for i = 1:dim],
-    )
-end
-get_basis(M::Manifold, p, B::CachedBasis) = B
-function get_basis(
-    M::ArrayManifold,
-    p,
-    B::CachedBasis{<:AbstractOrthonormalBasis{ℝ},T,ℝ},
-) where {T<:AbstractVector}
-    bvectors = get_vectors(M, p, B)
-    N = length(bvectors)
-    M_dim = manifold_dimension(M)
-    if N != M_dim
-        throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
-    end
-    for i = 1:N
-        Xi_norm = norm(M, p, bvectors[i])
-        if !isapprox(Xi_norm, 1)
-            throw(ArgumentError("vector number $i is not normalized (norm = $Xi_norm)"))
-        end
-        for j = i+1:N
-            dot_val = real(inner(M, p, bvectors[i], bvectors[j]))
-            if !isapprox(dot_val, 0; atol = eps(eltype(p)))
-                throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
-            end
-        end
-    end
-    return B
-end
-function get_basis(M::DefaultManifold, p, B::DefaultOrthonormalBasis)
-    return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
-end
-function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
-    S = representation_size(M)
-    PS = prod(S)
-    dim = manifold_dimension(M)
-    # projection
-    # TODO: find a better way to obtain a basis of the ambient space
-    Xs = [
-        convert(Vector, reshape(project_tangent(M, p, _euclidean_basis_vector(p, i)), PS))
-        for i in eachindex(p)
-    ]
-    O = reduce(hcat, Xs)
-    # orthogonalization
-    # TODO: try using rank-revealing QR here
-    decomp = svd(O)
-    rotated = Diagonal(decomp.S) * decomp.Vt
-    vecs = [collect(reshape(rotated[i, :], S)) for i = 1:dim]
-    # normalization
-    for i = 1:dim
-        i_norm = norm(M, p, vecs[i])
-        vecs[i] /= i_norm
-    end
-    return CachedBasis(B, vecs)
-end
-function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
-    E = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
-    N = length(E)
-    Ξ = empty(E)
-    dim = manifold_dimension(M)
-    N < dim && @warn "Input only has $(N) vectors, but manifold dimension is $(dim)."
-    K = 0
-    @inbounds for n = 1:N
-        Ξₙ = project_tangent(M, p, E[n])
-        for k = 1:K
-            Ξₙ .-= real(inner(M, p, Ξ[k], Ξₙ)) .* Ξ[k]
-        end
-        nrmΞₙ = norm(M, p, Ξₙ)
-        if nrmΞₙ == 0
-            @warn "Input vector $(n) has length 0."
-            @goto skip
-        end
-        Ξₙ ./= nrmΞₙ
-        for k = 1:K
-            if !isapprox(real(inner(M, p, Ξ[k], Ξₙ)), 0; kwargs...)
-                @warn "Input vector $(n) is not linearly independent of output basis vector $(k)."
-                @goto skip
-            end
-        end
-        push!(Ξ, Ξₙ)
-        K += 1
-        K * real_dimension(number_system(B)) == dim && return CachedBasis(B, Ξ, ℝ)
-        @label skip
-    end
-    @warn "get_basis with bases $(typeof(B)) only found $(K) orthonormal basis vectors, but manifold dimension is $(dim)."
-    return CachedBasis(B, Ξ)
 end
 
 """

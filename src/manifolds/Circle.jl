@@ -144,6 +144,7 @@ function get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
     return @SVector [Xⁱ]
 end
 
+get_vector(M::Circle{ℝ}, p, X, B::AbstractBasis) = X
 get_vector(M::Circle{ℝ}, p, X, B::DefaultOrthonormalBasis) = X
 function get_vector(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
@@ -154,7 +155,7 @@ end
 
 Return tangent vector from the coordinates in the Lie algebra of the circle.
 """
-get_vector(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis) = @SVector [1im * X[1] * p[1]]
+get_vector(M::Circle{ℂ}, p, X, B::AbstractBasis) = @SVector [1im * X[1] * p[1]]
 
 @doc raw"""
     injectivity_radius(M::Circle[, p])
