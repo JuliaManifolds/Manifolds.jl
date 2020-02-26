@@ -279,7 +279,8 @@ function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultBasis) where {N
 end
 function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthonormalBasis) where {N}
     T = Base.promote_eltype(p, X)
-    get_coordinates!(M, Xⁱ, p, X, DefaultBasis()) .* sqrt(T(2))
+    get_coordinates!(M, Xⁱ, p, X, DefaultBasis())
+    Xⁱ .*= sqrt(T(2))
     return Xⁱ
 end
 
