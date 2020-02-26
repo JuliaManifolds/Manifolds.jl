@@ -134,7 +134,7 @@ function get_coordinates(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     return X .* (sbv == 0 ? 1 : sbv)
 end
 """
-    get_coordinates(M::Circle{ℂ}, x, v, B::DefaultOrthonormalBasis)
+    get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
 Return tangent vector coordinates in the Lie algebra of the circle.
 """
