@@ -317,7 +317,7 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 """
 function get_vector(M::Manifold, p, X, B::AbstractBasis)
-    Y = allocate_result(M, get_vector, p, X, B)
+    Y = allocate_result(M, get_vector, p, X)
     return get_vector!(M, Y, p, X, B)
 end
 function allocate_result(M::Manifold, f::typeof(get_vector), p, X, B)

@@ -98,7 +98,7 @@ function get_coordinates!(M::Euclidean{<:Tuple,ℝ}, Y, p, X, B::DefaultOrDiagon
     S = representation_size(M)
     PS = prod(S)
     Y .= reshape(X, PS)
-    return
+    return Y
 end
 function get_coordinates!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
