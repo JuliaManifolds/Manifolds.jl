@@ -129,6 +129,16 @@ function CachedBasis(
     return CachedBasis(basis, data, 𝔽)
 end
 
+function combine_allocation_promotion_functions(f::typeof(T), ::typeof(T)) where T
+    return f
+end
+function combine_allocation_promotion_functions(::typeof(complex), ::typeof(identity))
+    return complex
+end
+function combine_allocation_promotion_functions(::typeof(identity), ::typeof(complex))
+    return complex
+end
+
 function _euclidean_basis_vector(p, i)
     X = zero(p)
     X[i] = 1
@@ -374,6 +384,28 @@ function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
         return Y
     end
 end
+
+"""
+    allocation_promotion_function(M::Manifold, ::typeof(get_vector), args...)
+
+Determine the function that must be used to ensure that the allocated representation is of
+the right type. This is needed for `get_vector` when a point on a complex manifold
+is represented by a real-valued vectors with a real-coefficient basis, so that
+a complex-valued vector representation is allocated.
+"""
+allocation_promotion_function(M::Manifold, ::typeof(get_vector), args...) = identity
+
+@inline function allocate_result_type(M::Manifold, f::typeof(get_vector), args::Tuple)
+    apf = allocation_promotion_function(M, f, p, X)
+    return apf(invoke(
+        allocate_result_type,
+        Tuple{Manifold, Any, typeof(args)},
+        M,
+        f,
+        args,
+    ))
+end
+
 
 """
     get_vectors(M::Manifold, p, B::AbstractBasis)

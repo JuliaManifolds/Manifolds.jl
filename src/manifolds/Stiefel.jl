@@ -36,6 +36,14 @@ struct Stiefel{n,k,𝔽} <: Manifold end
 
 Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ) = Stiefel{n,k,field}()
 
+function allocation_promotion_function(
+    M::Stiefel{n,k,ℂ},
+    ::typeof(get_vector),
+    args...,
+) where {n,k}
+    return complex
+end
+
 @doc raw"""
     check_manifold_point(M::Stiefel, p; kwargs...)
 

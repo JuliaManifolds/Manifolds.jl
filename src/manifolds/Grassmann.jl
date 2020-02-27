@@ -55,6 +55,14 @@ struct Grassmann{n,k,𝔽} <: Manifold end
 
 Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ) = Grassmann{n,k,field}()
 
+function allocation_promotion_function(
+    M::Grassmann{n,k,ℂ},
+    ::typeof(get_vector),
+    args...,
+) where {n,k}
+    return complex
+end
+
 @doc raw"""
     check_manifold_point(M::Grassmann{n,k,𝔽}, p)
 

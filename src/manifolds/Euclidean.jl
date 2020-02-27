@@ -45,6 +45,14 @@ function ^(::Euclidean{T,𝔽}, n::NTuple{N,Int}) where {T,𝔽,N}
     return Euclidean{Tuple{T.parameters...,n...},𝔽}()
 end
 
+function allocation_promotion_function(
+    M::Euclidean{<:Tuple,ℂ},
+    ::typeof(get_vector),
+    args...,
+)
+    return complex
+end
+
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = one(eltype(p))
 
 """
