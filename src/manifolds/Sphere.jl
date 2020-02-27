@@ -10,9 +10,12 @@ vectors in $ℝ^{n+1}$ of unit length
 
 Generate $𝕊^{n} ⊂ ℝ^{n+1}$.
 """
-struct Sphere{N} <: Manifold end
+struct Sphere{N} <: AbstractEmbeddedManifold{DefaultIsometricEmbedding} end
 
 Sphere(n::Int) = Sphere{n}()
+
+base_manifold(M::Sphere) = M
+decorated_manifold(M::Sphere{N}) where {N} = Euclidean(N; field=ℝ)
 
 function get_basis(M::Sphere{N}, p, B::DiagonalizingOrthonormalBasis) where {N}
     A = zeros(N + 1, N + 1)
@@ -113,14 +116,14 @@ where $\lVert X \rVert_p$ is the [`norm`](@ref norm(::Sphere,p,X)) on the
 [`Sphere`](@ref) `M`.
 """
 exp(::Sphere, ::Any...)
+decorator_transparent_dispatch(::typeof(exp), ::Sphere, args...) = Val(:parent)
 
+decorator_transparent_dispatch(::typeof(exp!), ::Sphere, args...) = Val(:intransparent)
 function exp!(M::Sphere, q, p, X)
     θ = norm(M, p, X)
     q .= cos(θ) .* p .+ usinc(θ) .* X
     return q
 end
-
-flat!(M::Sphere, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 @doc raw"""
     injectivity_radius(M::Sphere[, p])
@@ -183,7 +186,9 @@ and a deterministic choice from the set of tangent vectors is returned if $x=-y$
 opposite points.
 """
 log(::Sphere, ::Any...)
+decorator_transparent_dispatch(::typeof(log), ::Sphere, args...) = Val(:parent)
 
+decorator_transparent_dispatch(::typeof(log!), ::Sphere, args...) = Val(:intransparent)
 function log!(S::Sphere, X, p, q)
     cosθ = dot(p, q)
     if cosθ ≈ -1 # appr. opposing points, return deterministic choice from set-valued log
@@ -227,17 +232,6 @@ mean(::Sphere, ::Any...)
 function mean!(S::Sphere, p, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(S, p, x, w, GeodesicInterpolationWithinRadius(π / 2); kwargs...)
 end
-
-@doc raw"""
-    norm(M::Sphere, p, X)
-
-Compute the length of the tangent vector `v` from the tangent space at `p` on the
-[`Sphere`](@ref) `M`, which is the norm in the embedding, i.e.
-````math
-\lVert X \rVert_p = \lVert X \rVert_2.
-````
-"""
-norm(M::Sphere, p, X) = norm(X)
 
 """
     normal_tvector_distribution(S::Sphere, p, σ)
@@ -310,6 +304,9 @@ Compute the retraction that is based on projection, i.e.
 ````
 """
 retract(::Sphere, ::Any, ::Any, ::ProjectionRetraction)
+
+decorator_transparent_dispatch(::typeof(retract), ::Sphere, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(retract!), ::Sphere, args...) = Val(:parent)
 
 function retract!(M::Sphere, q, p, X, ::ProjectionRetraction)
     q .= p .+ X
