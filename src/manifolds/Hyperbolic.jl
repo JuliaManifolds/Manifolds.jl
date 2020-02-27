@@ -32,6 +32,7 @@ Hyperbolic(n::Int) = Hyperbolic{n}()
 
 base_manifold(M::Hyperbolic) = M
 decorated_manifold(M::Hyperbolic{N}) where {N} = Lorentz(N+1)
+default_metric_dispatch(::Hyperbolic, ::MinkowskiMetric) = Val(true)
 
 """
     check_manifold_point(M::Hyperbolic, p; kwargs...)
@@ -119,8 +120,6 @@ function exp!(M::Hyperbolic, q, p, X)
     vn < eps(eltype(p)) && return copyto!(q, p)
     return copyto!(q, cosh(vn) * p + sinh(vn) / vn * X)
 end
-
-flat!(M::Hyperbolic, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 @doc raw"""
     injectivity_radius(M::Hyperbolic)
