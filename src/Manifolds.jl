@@ -238,9 +238,11 @@ include("manifolds/ProductManifold.jl")
 include("manifolds/PowerManifold.jl")
 include("manifolds/GraphManifold.jl")
 
+include("manifolds/Euclidean.jl")
+include("manifolds/Lorentz.jl")
+
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
-include("manifolds/Euclidean.jl")
 include("manifolds/FixedRankMatrices.jl")
 include("manifolds/Grassmann.jl")
 include("manifolds/Hyperbolic.jl")

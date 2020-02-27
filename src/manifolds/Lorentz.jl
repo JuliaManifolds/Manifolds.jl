@@ -24,6 +24,8 @@ struct MinkowskiMetric <: LorentzMetric end
 
 The Lorenzt manifold (or Lorentzian) is a pseudo-Riemannian manifold
 """
-Lorentz{N} = MetricManifold{Euclidean{N},LorentzMetric}
+const Lorentz = MetricManifold{Euclidean{Tuple{N,},ℝ},LorentzMetric} where N
 
-local_metric(Lorentz{N}, p) = Diagonal([ones(N-1)...,-1])
+Lorentz(n,metric=MinkowskiMetric()) = Lorentz{n}(Euclidean(n),metric)
+
+local_metric(::Lorentz{N}, p) where {N} = Diagonal([ones(N-1)...,-1])

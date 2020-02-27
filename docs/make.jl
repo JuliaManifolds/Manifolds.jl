@@ -17,6 +17,7 @@ makedocs(
                 "Fixed-rank matrices" => "manifolds/fixedrankmatrices.md",
                 "Grassmannian" => "manifolds/grassmann.md",
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
+                "Hyperbolic space" => "manifolds/lorentz.md",
                 "Rotations" => "manifolds/rotations.md",
                 "Sphere" => "manifolds/sphere.md",
                 "Stiefel" => "manifolds/stiefel.md",

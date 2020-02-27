@@ -361,13 +361,3 @@ function vector_transport_to!(M::Sphere, Y, p, X, q, ::ParallelTransport)
     end
     return Y
 end
-
-@doc raw"""
-    zero_tangent_vector(M::Sphere, p)
-
-Return the zero tangent vector from the tangent space at `p` on the [`Sphere`](@ref) `M`,
-which is the zero vector in the embedding.
-"""
-zero_tangent_vector(::Sphere, ::Any...)
-
-zero_tangent_vector!(::Sphere, X, p) = fill!(X, 0)
