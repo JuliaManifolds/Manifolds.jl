@@ -29,3 +29,5 @@ const Lorentz = MetricManifold{Euclidean{Tuple{N,},ℝ},LorentzMetric} where N
 Lorentz(n,metric=MinkowskiMetric()) = Lorentz{n}(Euclidean(n),metric)
 
 local_metric(::Lorentz{N}, p) where {N} = Diagonal([ones(N-1)...,-1])
+
+inner(::Lorentz, p, X, Y) = -X[end] * Y[end] + sum(X[1:end-1] .* Y[1:end-1])
