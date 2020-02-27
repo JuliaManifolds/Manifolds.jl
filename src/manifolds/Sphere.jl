@@ -10,7 +10,7 @@ vectors in $ℝ^{n+1}$ of unit length
 
 Generate $𝕊^{n} ⊂ ℝ^{n+1}$.
 """
-struct Sphere{N} <: AbstractEmbeddedManifold{DefaultIsometricEmbedding} end
+struct Sphere{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType} end
 
 Sphere(n::Int) = Sphere{n}()
 

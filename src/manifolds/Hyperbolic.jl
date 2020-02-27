@@ -26,27 +26,9 @@ a Riemannian metric on the tangent bundle $T ℍ^n$.
 
 Generate the $ℍ^{n} ⊂ ℝ^{n+1}$
 """
-struct Hyperbolic{N} <: Manifold end
+struct Hyperbolic{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType} end
 
 Hyperbolic(n::Int) = Hyperbolic{n}()
-
-@doc raw"""
-    MinkowskiMetric <: LorentzMetric
-
-The Minkowski metric is a [`LorentzMetric`](@ref) with, i.e.
-
-````math
-⟨a,b⟩_{\mathrm{M}} = -a_{n+1}b_{n+1} +
-\displaystyle\sum_{k=1}^n a_kb_k.
-````
-It is also the default metric e.g. for the [`Hyperbolic`](@ref) space.
-
-!!! note
-    While the `MinkowskiMetric` itself is not positive definite in the whole embedded space,
-    it is positive definite when restricted to a tangent space $T_x\mathcal M$,
-    $x ∈ \mathcal M$, of the [`Hyperbolic`](@ref) space $\mathcal M$.
-"""
-struct MinkowskiMetric <: LorentzMetric end
 
 """
     check_manifold_point(M::Hyperbolic, x; kwargs...)

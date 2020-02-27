@@ -35,15 +35,6 @@ struct MetricManifold{M<:Manifold,G<:Metric} <: AbstractDecoratorManifold
 end
 
 @doc raw"""
-    LorentzMetric <: Metric
-
-Abstract type for Lorentz metrics, which have a single time dimension. These
-metrics assume the spacelike convention with the time dimension being last,
-giving the signature $(++...+-)$.
-"""
-abstract type LorentzMetric <: Metric end
-
-@doc raw"""
     RiemannianMetric <: Metric
 
 Abstract type for Riemannian metrics, a family of positive definite inner
