@@ -48,7 +48,7 @@ end
 function allocation_promotion_function(
     M::Euclidean{<:Tuple,ℂ},
     ::typeof(get_vector),
-    args...,
+    args::Tuple,
 )
     return complex
 end

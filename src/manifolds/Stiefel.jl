@@ -39,7 +39,7 @@ Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ) = Stiefel{n,k,field}()
 function allocation_promotion_function(
     M::Stiefel{n,k,ℂ},
     ::typeof(get_vector),
-    args...,
+    args::Tuple,
 ) where {n,k}
     return complex
 end

@@ -80,8 +80,8 @@ function InverseProductRetraction(inverse_retractions::AbstractInverseRetraction
     return InverseProductRetraction{typeof(inverse_retractions)}(inverse_retractions)
 end
 
-function allocation_promotion_function(M::ProductManifold, f::typeof(get_vector), args...)
-    apfs = map(MM -> allocation_promotion_function(MM, f, args...), M.manifolds)
+function allocation_promotion_function(M::ProductManifold, f::typeof(get_vector), args::Tuple)
+    apfs = map(MM -> allocation_promotion_function(MM, f, args), M.manifolds)
     return reduce(combine_allocation_promotion_functions, apfs)
 end
 

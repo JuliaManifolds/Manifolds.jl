@@ -169,8 +169,8 @@ function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector
     return FVector(TangentSpace, alloc)
 end
 
-function allocation_promotion_function(M::AbstractPowerManifold, f::typeof(get_vector), args...)
-    return allocation_promotion_function(M.manifold, f, args...)
+function allocation_promotion_function(M::AbstractPowerManifold, f::typeof(get_vector), args::Tuple)
+    return allocation_promotion_function(M.manifold, f, args)
 end
 
 ^(M::Manifold, n) = PowerManifold(M, n...)
