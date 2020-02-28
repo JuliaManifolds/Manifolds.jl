@@ -21,8 +21,8 @@ struct Sphere{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType} end
 Sphere(n::Int) = Sphere{n}()
 
 base_manifold(M::Sphere) = M
-decorated_manifold(M::Sphere{N}) where {N} = Euclidean(N; field=ℝ)
-get_embedding(M::Sphere{N}) where {N} = Euclidean(N; field=ℝ)
+decorated_manifold(M::Sphere{N}) where {N} = Euclidean(N+1; field=ℝ)
+get_embedding(M::Sphere{N}) where {N} = Euclidean(N+1; field=ℝ)
 
 function get_basis(M::Sphere{N}, p, B::DiagonalizingOrthonormalBasis) where {N}
     A = zeros(N + 1, N + 1)
@@ -123,9 +123,7 @@ where $\lVert X \rVert_p$ is the [`norm`](@ref norm(::Sphere,p,X)) on the
 [`Sphere`](@ref) `M`.
 """
 exp(::Sphere, ::Any...)
-decorator_transparent_dispatch(::typeof(exp), ::Sphere, args...) = Val(:parent)
 
-decorator_transparent_dispatch(::typeof(exp!), ::Sphere, args...) = Val(:intransparent)
 function exp!(M::Sphere, q, p, X)
     θ = norm(M, p, X)
     q .= cos(θ) .* p .+ usinc(θ) .* X
@@ -144,15 +142,6 @@ Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
 """
 injectivity_radius(::Sphere, ::Any...) = π
 injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π / 2
-
-@doc raw"""
-    inner(M::Sphere, p, X, Y)
-
-Compute the inner product of the two tangent vectors `X`, `Y` from the tangent
-space at `p` on the [`Sphere`](@ref) `M` using the restriction of the
-metric from the embedding, i.e. $ g_p(X,Y) = X^\mathrm{T}Y$.
-"""
-@inline inner(S::Sphere, p, X, Y) = dot(X, Y)
 
 function get_vector(M::Sphere{N}, p, X, B::ArbitraryOrthonormalBasis) where {N}
     p[1] ≈ 1 && return vcat(0, X)
@@ -193,9 +182,7 @@ and a deterministic choice from the set of tangent vectors is returned if $x=-y$
 opposite points.
 """
 log(::Sphere, ::Any...)
-decorator_transparent_dispatch(::typeof(log), ::Sphere, args...) = Val(:parent)
 
-decorator_transparent_dispatch(::typeof(log!), ::Sphere, args...) = Val(:intransparent)
 function log!(S::Sphere, X, p, q)
     cosθ = dot(p, q)
     if cosθ ≈ -1 # appr. opposing points, return deterministic choice from set-valued log
@@ -312,15 +299,12 @@ Compute the retraction that is based on projection, i.e.
 """
 retract(::Sphere, ::Any, ::Any, ::ProjectionRetraction)
 
-decorator_transparent_dispatch(::typeof(retract), ::Sphere, args...) = Val(:parent)
-decorator_transparent_dispatch(::typeof(retract!), ::Sphere, args...) = Val(:parent)
+# decorator_transparent_dispatch(::typeof(retract!), ::Sphere, args...) = Val(:parent)
 
 function retract!(M::Sphere, q, p, X, ::ProjectionRetraction)
     q .= p .+ X
     return project_point!(M, q, q)
 end
-
-sharp!(M::Sphere, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 show(io::IO, ::Sphere{N}) where {N} = print(io, "Sphere($(N))")
 
@@ -335,26 +319,16 @@ function uniform_distribution(M::Sphere, p)
     return ProjectedPointDistribution(M, d, project_point!, p)
 end
 
-@doc raw"""
-    vector_transport_to(M::Sphere, p, X, q, ::ParallelTransport)
-
-Compute the [`ParallelTransport`](@ref) on the [`Sphere`](@ref) `M`, which is given by
-
-````math
-\mathcal P_{q←p}(X) = X - \frac{⟨\log_p q,X⟩_p}{d^2_{𝕊^n}(p,q)}
-\bigl(\log_p q + \log_qp \bigr).
-````
-"""
-vector_transport_to(::Sphere, ::Any, ::Any, ::Any, ::ParallelTransport)
-
 @doc doc"""
     vector_transport_to(M, p, X, q, ::ParallelTransport)
 
 Compute the paralllel transport of the tangent vector `X` at `p` to `q`,
 provided, the [`geodesic`](@ref) between `p` and `q` is unique
 
-$P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_{𝕊^n}(p,q)}
-\bigl(\log_xy + \log_yx \bigr).$
+````math
+P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_{𝕊^n}(p,q)}
+\bigl(\log_xy + \log_yx \bigr).
+````
 """
 vector_transport_to(::Sphere, ::Any, ::Any, ::Any, ::Any, ::ParallelTransport)
 
