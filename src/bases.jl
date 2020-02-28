@@ -129,7 +129,33 @@ function CachedBasis(
     return CachedBasis(basis, data, 𝔽)
 end
 
-function combine_allocation_promotion_functions(f::T, ::T) where T
+# forward declarations
+function get_coordinates end
+function vee end
+
+const vee_or_get_coordinates = Union{typeof(get_coordinates),typeof(vee)}
+
+function allocate_result(M::Manifold, f::vee_or_get_coordinates, p, X)
+    T = allocate_result_type(M, f, (p, X))
+    return allocate(p, T, Size(manifold_dimension(M)))
+end
+
+@inline function allocate_result_type(M::Manifold, f::vee_or_get_coordinates, args::Tuple)
+    apf = allocation_promotion_function(M, f, args)
+    return apf(invoke(allocate_result_type, Tuple{Manifold,Any,typeof(args)}, M, f, args))
+end
+
+"""
+    allocation_promotion_function(M::Manifold, ::vee_or_get_coordinates, args::Tuple)
+
+Determine the function that must be used to ensure that the allocated representation is of
+the right type. This is needed for `get_vector` when a point on a complex manifold
+is represented by a real-valued vectors with a real-coefficient basis, so that
+a complex-valued vector representation is allocated.
+"""
+allocation_promotion_function(M::Manifold, ::vee_or_get_coordinates, args::Tuple) = identity
+
+function combine_allocation_promotion_functions(f::T, ::T) where {T}
     return f
 end
 function combine_allocation_promotion_functions(::typeof(complex), ::typeof(identity))
@@ -272,12 +298,8 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 See also: [`get_vector`](@ref), [`get_basis`](@ref)
 """
 function get_coordinates(M::Manifold, p, X, B::AbstractBasis)
-    Y = allocate_result(M, get_coordinates, p, X, B)
+    Y = allocate_result(M, get_coordinates, p, X)
     return get_coordinates!(M, Y, p, X, B)
-end
-function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X, B)
-    T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, Size(manifold_dimension(M)))
 end
 function get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
@@ -293,12 +315,18 @@ end
 function get_coordinates!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
 end
-function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis{BT}) where {BT<:AbstractBasis{ℝ}}
-    Y .= map(vb -> real(inner(M, p, X, vb)), get_vectors(M, p, B))
+function get_coordinates!(
+    M::Manifold,
+    Y,
+    p,
+    X,
+    B::CachedBasis{BT},
+) where {BT<:AbstractBasis{ℝ}}
+    map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     return Y
 end
 function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis)
-    Y .= map(vb -> inner(M, p, X, vb), get_vectors(M, p, B))
+    map!(vb -> inner(M, p, X, vb), Y, get_vectors(M, p, B))
     return Y
 end
 function get_coordinates!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
@@ -329,10 +357,6 @@ See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 function get_vector(M::Manifold, p, X, B::AbstractBasis)
     Y = allocate_result(M, get_vector, p, X)
     return get_vector!(M, Y, p, X, B)
-end
-function allocate_result(M::Manifold, f::typeof(get_vector), p, X, B)
-    T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, representation_size(M))
 end
 function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
@@ -386,28 +410,6 @@ function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
 end
 
 """
-    allocation_promotion_function(M::Manifold, ::typeof(get_vector), args::Tuple)
-
-Determine the function that must be used to ensure that the allocated representation is of
-the right type. This is needed for `get_vector` when a point on a complex manifold
-is represented by a real-valued vectors with a real-coefficient basis, so that
-a complex-valued vector representation is allocated.
-"""
-allocation_promotion_function(M::Manifold, ::typeof(get_vector), args::Tuple) = identity
-
-@inline function allocate_result_type(M::Manifold, f::typeof(get_vector), args::Tuple)
-    apf = allocation_promotion_function(M, f, args)
-    return apf(invoke(
-        allocate_result_type,
-        Tuple{Manifold, Any, typeof(args)},
-        M,
-        f,
-        args,
-    ))
-end
-
-
-"""
     get_vectors(M::Manifold, p, B::AbstractBasis)
 
 Get the basis vectors of basis `B` of the tangent space at point `p`.
@@ -416,7 +418,13 @@ function get_vectors(M::Manifold, p, B::AbstractBasis)
     error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
 get_vectors(M::Manifold, p, B::CachedBasis{<:AbstractBasis,<:AbstractArray}) = B.data
-get_vectors(M::Manifold, p, B::CachedBasis{<:AbstractBasis,<:DiagonalizingBasisData}) = B.data.vectors
+function get_vectors(
+    M::Manifold,
+    p,
+    B::CachedBasis{<:AbstractBasis,<:DiagonalizingBasisData},
+)
+    return B.data.vectors
+end
 
 #internal for directly cached basis i.e. those that are just arrays – used in show
 _get_vectors(B::CachedBasis{<:AbstractBasis,<:AbstractArray}) = B.data
@@ -439,7 +447,7 @@ inverse.
 """
 hat(M::Manifold, p, Xⁱ) = get_vector(M, p, Xⁱ, DefaultBasis())
 
-hat!(M::Manifold, X, p, Xⁱ) = get_vector!(M, X, p, Xⁱ)
+hat!(M::Manifold, X, p, Xⁱ) = get_vector!(M, X, p, Xⁱ, DefaultBasis())
 
 """
     number_system(::AbstractBasis)
@@ -522,10 +530,7 @@ function show(
     mime::MIME"text/plain",
     B::CachedBasis{T,D,𝔽},
 ) where {T<:AbstractBasis,D<:ProductBasisData,𝔽}
-    println(
-        io,
-        "$(T()) for a product manifold with coordinates in $(number_system(B))",
-    )
+    println(io, "$(T()) for a product manifold with coordinates in $(number_system(B))")
     for (i, cb) = enumerate(B.data.parts)
         println(io, "Basis for component $i:")
         show(io, mime, cb)
@@ -550,4 +555,4 @@ inverse.
 """
 vee(M::Manifold, p, X) = get_coordinates(M, p, X, DefaultBasis())
 
-vee!(M::Manifold, Xⁱ, p, X) = get_coordinates!(M, Xⁱ, p, X)
+vee!(M::Manifold, Xⁱ, p, X) = get_coordinates!(M, Xⁱ, p, X, DefaultBasis())

@@ -353,6 +353,23 @@ function get_vectors(
     return vs
 end
 
+function hat(M::ProductManifold, p::ProductRepr, Xⁱ)
+    dim = manifold_dimension(M)
+    @assert length(Xⁱ) == dim
+    i = one(dim)
+    ts = ziptuples(M.manifolds, submanifold_components(M, p))
+    mapped = map(ts) do t
+        dim = manifold_dimension(first(t))
+        tXⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
+        i += dim
+        return hat(t..., tXⁱ)
+    end
+    return ProductRepr(mapped...)
+end
+function hat(M::ProductManifold, p, Xⁱ)
+    X = allocate_result(M, hat, p, Xⁱ)
+    return hat!(M, X, p, Xⁱ)
+end
 function hat!(M::ProductManifold, X, p, Xⁱ)
     dim = manifold_dimension(M)
     @assert length(Xⁱ) == dim
@@ -714,6 +731,20 @@ function support(tvd::ProductFVectorDistribution)
         tvd.type,
         ProductRepr(map(d -> support(d).point, tvd.distributions)...),
     )
+end
+
+function vee(M::ProductManifold, p::ProductRepr, X)
+    reps = map(
+        vee,
+        M.manifolds,
+        submanifold_components(p),
+        submanifold_components(X)
+    )
+    return vcat(reps...)
+end
+function vee(M::ProductManifold, p, X)
+    Xⁱ = allocate_result(M, vee, p, X)
+    return vee!(M, Xⁱ, p, X)
 end
 
 function vee!(M::ProductManifold, Xⁱ, p, X)
