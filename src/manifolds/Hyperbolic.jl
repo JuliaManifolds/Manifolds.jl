@@ -1,15 +1,15 @@
 @doc raw"""
-    Hyperbolic{N} <: Manifold
+    Hyperbolic{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType}
 
-The hyperbolic space $ℍ^n$ represented by $n+1$-Tuples, i.e. in by
-vectors in $ℝ^{n+1}$ using the Minkowsi metric, i.e.
+The hyperbolic space $ℍ^n$ represented by $n+1$-Tuples, i.e. embedded in the
+[`Lorentz`](@ref)ian manifold equipped with the [`MinkowskiMetric`](@ref)
+$⟨\cdot,\cdot⟩_{\mathrm{M}}$. The space is defined as
 
 ```math
 ℍ^n = \Bigl\{p ∈ ℝ^{n+1} : ⟨p,p⟩_{\mathrm{M}}= -p_{n+1}^2
-  + \displaystyle\sum_{k=1}^n p_k^2 = -1, p_{n+1} > 0\Bigr\},
+  + \displaystyle\sum_{k=1}^n p_k^2 = -1, p_{n+1} > 0\Bigr\},.
 ```
 
-where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the Minkowski inner product.
 The tangent space $T_p ℍ^n$ is given by
 
 ````math
@@ -17,8 +17,9 @@ T_p ℍ^n := \bigl\{
 X ∈ ℝ^{n+1} : ⟨p,X⟩_{\mathrm{M}} = 0
 \bigr\}.
 ````
-The Minkowski inner product inntroduces the [`MinkowskiMetric`](@ref), which is
-a Riemannian metric on the tangent bundle $T ℍ^n$.
+Note that while the [`MinkowskiMetric`](@ref) renders the [`Lorentz`](@ref) manifold (only)
+pseudo-Riemannian, on the tangent bundle of the Hyperbolic space it induces a Riemannian
+metric. The corresponding sectional curvature is $-1$.
 
 # Constructor
 
@@ -96,7 +97,8 @@ Compute the distance on the [`Hyperbolic`](@ref) `M`, which reads
 d_{ℍ^n}(p,q) = \operatorname{acosh}( - ⟨p, q⟩_{\mathrm{M}}),
 ````
 
-where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ is the inner product.
+where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
+the [`Lorentz`](@ref)ian manifold.
 """
 distance(M::Hyperbolic, p, q) = acosh(max(-inner(M, p, p, q), 1.0))
 
@@ -111,7 +113,8 @@ from `p` towards `X`. The formula reads
 + \sinh(\sqrt{⟨X,X⟩_{\mathrm{M}}})\frac{X}{\sqrt{⟨X,X⟩_{\mathrm{M}}}},
 ````
 
-where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ is the inner product.
+where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
+the [`Lorentz`](@ref)ian manifold.
 """
 exp(::Hyperbolic, ::Any...)
 
@@ -189,8 +192,8 @@ The formula reads
 ````math
 Y = X + ⟨p,X⟩_{\mathrm{M}} p,
 ````
-where $⟨\cdot, \cdot⟩_{\mathrm{M}}$ denotes the Minkowski inner
-product in the embedding, see [`Lorentz`](@ref) manifold.
+where $⟨\cdot, \cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
+the [`Lorentz`](@ref)ian manifold.
 """
 project_tangent(::Hyperbolic, ::Any...)
 

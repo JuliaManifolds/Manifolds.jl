@@ -1,8 +1,14 @@
 @doc raw"""
-    Sphere{N} <: Manifold
+    Sphere{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType}
 
 The unit sphere manifold $𝕊^n$ represented by $n+1$-Tuples, i.e. in by
-vectors in $ℝ^{n+1}$ of unit length
+vectors in $ℝ^{n+1}$ of unit length, i.e. we obtain an embedded manifold,
+where the inner product on the tangent spaces
+
+````math
+T_p𝕊^n := \bigl\{ X ∈ ℝ^{n+1} : ⟨p,X⟩ = 0 \bigr \},
+````
+where $⟨\cdot,\cdot⟩$ denotes the inner product in the embedding $\mathbb R^{n+1}$.
 
 # Constructor
 
