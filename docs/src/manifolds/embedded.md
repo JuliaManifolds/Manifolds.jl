@@ -1,19 +1,43 @@
 # Embedded manifold
 
-The A lot of manifolds can easily be defined in their embedding. For example the
-[`Sphere`](@ref)`(n)` is embedded in [`Euclidean`](@ref). Similar to the metric and
-[`MetricManifold`](@ref), an embedding is often implicitly assumed.
+Some manifolds can easily be defined by using a certain embedding. For example the [`Sphere`](@ref)`(n)` is embedded in [`Euclidean`](@ref)`(n+1)`.
+Similar to the metric and [`MetricManifold`](@ref), an embedding is often implicitly assumed.
+We introduce the embedded manifolds hence as an [`AbstractDecoratorManifold`](@ref).
 
-This decorator enables to use such an embedding in an transparent way. A manifold can be defined using the embedding, see [`SymmetricMatrices`](@ref), where just the functions that are different from the embedding have to be implemented.
+This decorator enables to use such an embedding in an transparent way. Different types of
+embeddings can be distinguished using the [`AbstractEmbeddingType`](@ref).
 
-This also covers representation of tangent vectors. For these transforms [`embed`](@ref) and [`project_point`](@ref) and [`project_tangent`](@ref) can be used. The last two might often already be implemented. [`embed`](@ref) might be useful, when for example a Lie group tangent vector is represented within the Lie algebra and in the embedding this has to be parallel transported from the [`Identity`](@ref) to the point the tangent space is attached to.
+The embedding also covers representation of tangent vectors.
+For both points and tangent vectors the function [`embed`](@ref) returns their representation in the embedding.
+For any point or vector in the embedding the functions [`project_point`](@ref) and [`project_tangent`](@ref) can be used to obtain the closest point on the manifold and tangent vector in the tangent space, respectively.
+A specific example where [`embed`](@ref) might be useful, is for example a Lie group, where tangent vectors are often represented in the Lie algebra.
+Then their representation is different from the representation in the embedding.
 
-Further, different embeddings can be modeled, especially to change representation of points between a manifold and its embedding.
-For example an [`IsometricEmbedding`](@ref)
-can use the functions from the embedding restricted to the domain.
+## Isometric Embeddings
+
+For isometric embeddings the type [`AbstractIsometricEmbeddingType`](@ref) can be used to
+avoid reimplementing the metric. See [`Sphere`](@ref) or [`Hyperbolic`](@ref) for example.
+Here, the exponential map, the logarithmic map, the retraction and its inverse
+are set to `:intransparent`, i.e. they have to be implemented.
+
+Further more the [`DefaultIsometricEmbedding`](@ref) type even states, that the exponential
+and logarithmic map as well as retractions and vector transports of the embedding can be
+used for the embedded manifold as well. See [`SymmetricMatrices`](@ref) for an example.
+
+In both cases of course [`check_manifold_point`](@ref) and [`check_tangent_vector`](@ref) have to be implemented
+
+## Types
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["manifolds/Embedded.jl"]
-Order = [:type, :function]
+Pages = ["manifolds/EmbeddedManifold.jl"]
+Order = [:type]
+```
+
+## Functions
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/EmbeddedManifold.jl"]
+Order = [:function]
 ```

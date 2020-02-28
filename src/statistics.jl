@@ -1,4 +1,11 @@
 """
+    AbstractEstimationMethod
+
+Abstract type for defining statistical estimation methods.
+"""
+abstract type AbstractEstimationMethod end
+
+"""
     GradientDescentEstimation <: AbstractEstimationMethod
 
 Method for estimation using gradient descent.

@@ -70,7 +70,8 @@ end
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
 and its values have to be from the correct [`AbstractNumbers`](@ref).
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
+The optional parameter `check_base_point` indicates, whether to call
+ [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
 function check_tangent_vector(

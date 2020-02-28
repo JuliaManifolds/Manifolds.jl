@@ -90,7 +90,6 @@ using LinearAlgebra
 using LightGraphs
 using LightGraphs: AbstractGraph
 using ManifoldsBase: CoTVector, Manifold, MPoint, TVector, DefaultManifold
-using ManifoldsBase
 using ManifoldsBase:
     AbstractDecoratorManifold,
     @decorator_transparent_fallback,
@@ -112,13 +111,6 @@ using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
 using StatsBase: AbstractWeights, UnitWeights, values, varcorrection
 using UnsafeArrays
-
-"""
-    AbstractEstimationMethod
-
-Abstract type for defining statistical estimation methods.
-"""
-abstract type AbstractEstimationMethod end
 
 @doc raw"""
     hat(M::Manifold, p, Xⁱ)
@@ -226,11 +218,14 @@ include("orthonormal_bases.jl")
 include("autodiff.jl")
 include("SizedAbstractArray.jl")
 
+include("statistics.jl")
+
 include("manifolds/VectorBundle.jl")
 
 include("distributions.jl")
 include("projected_distribution.jl")
 include("product_representations.jl")
+
 
 include("manifolds/EmbeddedManifold.jl")
 include("manifolds/MetricManifold.jl")
@@ -272,8 +267,6 @@ include("groups/translation_action.jl")
 include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
-
-include("statistics.jl")
 
 function __init__()
     @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
@@ -317,9 +310,11 @@ export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibe
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
 export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribution
+export AbstractEmbeddedManifold
 export Metric,
     RiemannianMetric,
     LorentzMetric,
+    EmbeddedManifold,
     EuclideanMetric,
     LinearAffineMetric,
     LogCholeskyMetric,
@@ -328,10 +323,18 @@ export Metric,
     PowerMetric,
     ProductMetric,
     MetricManifold
+export AbstractEmbeddingType, AbstractIsometricEmbeddingType, DefaultIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
-export AbstractRetractionMethod, QRRetraction, PolarRetraction, ProjectionRetraction
+export AbstractRetractionMethod,
+    ExponentialRetraction,
+    QRRetraction,
+    PolarRetraction,
+    ProjectionRetraction
 export AbstractInverseRetractionMethod,
-    QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
+    LogarithmicInverseRetraction,
+    QRInverseRetraction,
+    PolarInverseRetraction,
+    ProjectionInverseRetraction
 export AbstractEstimationMethod,
     GradientDescentEstimation,
     CyclicProximalPointEstimation,
@@ -356,6 +359,7 @@ export ×,
     det_local_metric,
     distance,
     einstein_tensor,
+    embed,
     exp,
     exp!,
     flat,
