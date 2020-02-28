@@ -131,6 +131,8 @@ end
 
 # forward declarations
 function get_coordinates end
+function get_vector end
+function hat end
 function vee end
 
 const vee_or_get_coordinates = Union{typeof(get_coordinates),typeof(vee)}
@@ -140,20 +142,24 @@ function allocate_result(M::Manifold, f::vee_or_get_coordinates, p, X)
     return allocate(p, T, Size(manifold_dimension(M)))
 end
 
-@inline function allocate_result_type(M::Manifold, f::vee_or_get_coordinates, args::Tuple)
+@inline function allocate_result_type(
+    M::Manifold,
+    f::Union{vee_or_get_coordinates, typeof(hat), typeof(get_vector)},
+    args::Tuple,
+)
     apf = allocation_promotion_function(M, f, args)
     return apf(invoke(allocate_result_type, Tuple{Manifold,Any,typeof(args)}, M, f, args))
 end
 
 """
-    allocation_promotion_function(M::Manifold, ::vee_or_get_coordinates, args::Tuple)
+    allocation_promotion_function(M::Manifold, f, args::Tuple)
 
 Determine the function that must be used to ensure that the allocated representation is of
-the right type. This is needed for `get_vector` when a point on a complex manifold
+the right type. This is needed for [`get_vector`](@ref) when a point on a complex manifold
 is represented by a real-valued vectors with a real-coefficient basis, so that
 a complex-valued vector representation is allocated.
 """
-allocation_promotion_function(M::Manifold, ::vee_or_get_coordinates, args::Tuple) = identity
+allocation_promotion_function(M::Manifold, f, args::Tuple) = identity
 
 function combine_allocation_promotion_functions(f::T, ::T) where {T}
     return f
