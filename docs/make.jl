@@ -19,6 +19,7 @@ makedocs(
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
                 "Lorentzian manifold" => "manifolds/lorentz.md",
                 "Rotations" => "manifolds/rotations.md",
+                "Skew-symmetric matrices" => "manifolds/skewsymmetric.md",
                 "Sphere" => "manifolds/sphere.md",
                 "Stiefel" => "manifolds/stiefel.md",
                 "Symmetric matrices" => "manifolds/symmetric.md",

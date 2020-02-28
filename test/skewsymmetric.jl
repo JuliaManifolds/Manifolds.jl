@@ -1,41 +1,41 @@
 include("utils.jl")
 
-@testset "SymmetricMatrices" begin
-    M=SymmetricMatrices(3,ℝ)
+@testset "SkewSymmetricMatrices" begin
+    M=SkewSymmetricMatrices(3,ℝ)
     A = [1 2 3; 4 5 6; 7 8 9]
-    A_sym = [1 2 3; 2 5 -1; 3 -1 9]
-    A_sym2 = [1 2 3; 2 5 -1; 3 -1 9]
-    B_sym = [1 2 3; 2 5 1; 3 1 -1]
-    M_complex = SymmetricMatrices(3,ℂ)
-    @test repr(M_complex) == "SymmetricMatrices(3, ℂ)"
-    C = [1 1 -im; 1 2 -im; im im -1]
+    A_skewsym = [0 -2 -3; 2 0 1; 3 -1 0]
+    A_skewsym2 = [0 -2 -3; 2 0 1; 3 -1 0]
+    B_skewsym = [0 -2 -3; 2 0 -1; 3 1 0]
+    M_complex = SkewSymmetricMatrices(3,ℂ)
+    @test repr(M_complex) == "SkewSymmetricMatrices(3, ℂ)"
+    C = [0 -1 im; 1 0 -im; im -im 0]
     D = [1 0; 0 1];
     X = zeros(3,3)
-    @testset "Real Symmetric Matrices Basics" begin
-        @test repr(M) == "SymmetricMatrices(3, ℝ)"
+    @testset "Real Skew-Symmetric Matrices Basics" begin
+        @test repr(M) == "SkewSymmetricMatrices(3, ℝ)"
         @test representation_size(M) == (3,3)
         @test base_manifold(M) === M
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3,3},ℝ}
-        @test check_manifold_point(M,B_sym) === nothing
+        @test check_manifold_point(M,B_skewsym) === nothing
         @test_throws DomainError is_manifold_point(M,A,true)
         @test_throws DomainError is_manifold_point(M,C,true)
         @test_throws DomainError is_manifold_point(M,D,true)
         @test_throws DomainError is_manifold_point(M_complex, [:a :b :c; :b :d :e; :c :e :f],true)
-        @test check_tangent_vector(M,B_sym,B_sym) === nothing
-        @test_throws DomainError is_tangent_vector(M,B_sym,A,true)
-        @test_throws DomainError is_tangent_vector(M,A,B_sym,true)
-        @test_throws DomainError is_tangent_vector(M,B_sym,D,true)
-        @test_throws DomainError is_tangent_vector(M,B_sym, 1*im * zero_tangent_vector(M,B_sym),true)
-        @test_throws DomainError is_tangent_vector(M_complex, B_sym, [:a :b :c; :b :d :e; :c :e :f],true)
-        @test manifold_dimension(M) == 6
+        @test check_tangent_vector(M,B_skewsym,B_skewsym) === nothing
+        @test_throws DomainError is_tangent_vector(M,B_skewsym,A,true)
+        @test_throws DomainError is_tangent_vector(M,A,B_skewsym,true)
+        @test_throws DomainError is_tangent_vector(M,B_skewsym,D,true)
+        @test_throws DomainError is_tangent_vector(M,B_skewsym, 1*im * zero_tangent_vector(M,B_skewsym),true)
+        @test_throws DomainError is_tangent_vector(M_complex, B_skewsym, [:a :b :c; :b :d :e; :c :e :f],true)
+        @test manifold_dimension(M) == 3
         @test manifold_dimension(M_complex) == 9
-        @test A_sym2 == project_point!(M, A_sym, A_sym)
-        @test A_sym2 == project_tangent(M, A_sym, A_sym)
-        A_sym3 = similar(A_sym)
-        embed!(M,A_sym3, A_sym)
-        A_sym4 = embed(M,A_sym)
-        @test A_sym3 == A_sym
-        @test A_sym4 == A_sym
+        @test A_skewsym2 == project_point!(M, A_skewsym, A_skewsym)
+        @test A_skewsym2 == project_tangent(M, A_skewsym, A_skewsym)
+        A_sym3 = similar(A_skewsym)
+        embed!(M,A_sym3, A_skewsym)
+        A_sym4 = embed(M,A_skewsym)
+        @test A_sym3 == A_skewsym
+        @test A_sym4 == A_skewsym
     end
     types = [
         Matrix{Float64},
@@ -44,7 +44,7 @@ include("utils.jl")
     ]
     bases = (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types
-        pts = [convert(T,A_sym),convert(T,B_sym),convert(T,X)]
+        pts = [convert(T,A_skewsym),convert(T,B_skewsym),convert(T,X)]
         @testset "Type $T" begin
             test_manifold(
                 M,

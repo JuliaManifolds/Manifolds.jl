@@ -243,6 +243,7 @@ include("manifolds/FixedRankMatrices.jl")
 include("manifolds/Grassmann.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/Rotations.jl")
+include("manifolds/SkewSymmetric.jl")
 include("manifolds/Stiefel.jl")
 include("manifolds/Sphere.jl")
 include("manifolds/Symmetric.jl")
@@ -290,6 +291,7 @@ export Euclidean,
     Hyperbolic,
     Lorentz,
     Rotations,
+    SkewSymmetricMatrices,
     Sphere,
     Stiefel,
     SymmetricMatrices,

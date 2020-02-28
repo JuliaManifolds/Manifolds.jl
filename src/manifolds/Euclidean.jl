@@ -145,7 +145,7 @@ For the special case of $i ≤ 2$, i.e. matrices and vectors, this simplifies to
 ````math
 g_p(X,Y) = X^{\mathrm{H}}Y,
 ````
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
 inner(::Euclidean, ::Any...)
 @inline inner(::Euclidean, p, X, Y) = dot(X, Y)

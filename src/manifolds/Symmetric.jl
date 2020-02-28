@@ -7,10 +7,13 @@ symmetric matrices of size $n × n$, i.e. the set
 ````math
 \operatorname{Sym}(n) = \bigl\{p  ∈ 𝔽^{n × n} \big| p^{\mathrm{H}} = p \bigr\},
 ````
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transpose,
+where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
 and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
 
 Though it is slightly redundant, usually the matrices are stored as $n × n$ arrays.
+
+Note that in this representation, the complex valued case has to have a real-valued diagonal,
+which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}).
 
 # Constructor
 
@@ -25,8 +28,11 @@ function SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
 end
 
 base_manifold(M::SymmetricMatrices) = M
+
 decorated_manifold(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N,N; field=𝔽)
+
 get_embedding(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N,N; field=𝔽)
+
 @doc raw"""
     check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...)
 
@@ -55,9 +61,9 @@ function check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where 
             "The point $(p) does not lie on $M since its size ($(size(p))) does not match the representation size ($(representation_size(M))).",
         )
     end
-    if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
+    if !isapprox(norm(p - p'), 0.0; kwargs...)
         return DomainError(
-            norm(p - transpose(p)),
+            norm(p - p'),
             "The point $(p) does not lie on $M, since it is not symmetric.",
         )
     end
@@ -103,9 +109,9 @@ function check_tangent_vector(
             "The vector $(X) is not a tangent to a point on $(M) since its size ($(size(X))) does not match the representation size ($(representation_size(M))).",
         )
     end
-    if !isapprox(norm(X - transpose(X)), 0.0; kwargs...)
+    if !isapprox(norm(X - X'), 0.0; kwargs...)
         return DomainError(
-            norm(X - transpose(X)),
+            norm(X - X'),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not symmetric.",
         )
     end
@@ -114,7 +120,7 @@ end
 
 embed!(M::SymmetricMatrices, q, p) = copyto!(q, p)
 
-function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis) where {n}
+function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
     vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors
     kappas = zeros(real(eltype(p)), manifold_dimension(M))
     return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
@@ -147,14 +153,16 @@ function get_coordinates(
     dim = manifold_dimension(M)
     Y = similar(X, dim)
     @assert size(X) == (N, N)
-    @assert dim == N * (N + 1)
+    @assert dim == N * N
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, sqrt(2))
         @inbounds Y[k] = real(X[i, j]) * scale
         k += 1
-        @inbounds Y[k] = imag(X[i, j]) * scale
-        k += 1
+        if i != j # imag zero on the diagonal
+            @inbounds Y[k] = imag(X[i, j]) * scale
+            k += 1
+        end
     end
     return Y
 end
@@ -186,17 +194,18 @@ function get_vector(
 ) where {N}
     dim = manifold_dimension(M)
     Y = allocate_result(M, get_vector, p, p .* 1im)
-    @assert size(X) == (N * (N + 1),)
+    @assert size(X) == (N^2,)
     @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds Y[i, j] = Complex(X[k], X[k+1]) * scale
+        @inbounds Y[i, j] = Complex(X[k], i==j ? 0 : X[k+1]) * scale
         @inbounds Y[j, i] = Y[i, j]
-        k += 2
+        k += (i==j ? 1 : 2)
     end
     return Y
 end
+## unify within bases later.
 
 @doc raw"""
 manifold_dimension(M::SymmetricMatrices{n,𝔽})
@@ -205,13 +214,19 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the numb
 `𝔽`, i.e.
 
 ````math
-\dim \operatorname{Sym}(n,𝔽) = \frac{n(n+1)}{2} \dim_ℝ 𝔽,
+\dim \operatorname{Sym}(n,ℝ) = \frac{n(n+1)}{2},
 ````
 
-where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
+and
+
+````math
+\dim \operatorname{Sym}(n,ℂ) = 2\frac{n(n+1)}{2} - n = n^2,
+````
+
+where the last $-n$ is due to the zero imaginary part for Hermitian matrices
 """
 function manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}
-    return div(N * (N + 1), 2) * real_dimension(𝔽)
+    return div(N * (N + 1), 2) * real_dimension(𝔽) - (𝔽===ℂ ? N : 0)
 end
 
 @doc raw"""
@@ -223,7 +238,7 @@ Projects `p` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
 \operatorname{proj}_{\operatorname{Sym}(n)}(p) = \frac{1}{2} \bigl( p + p^{\mathrm{H}} \bigr),
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project_point(::SymmetricMatrices, ::Any...)
 
@@ -238,7 +253,7 @@ Project the matrix `X` onto the tangent space at `p` on the [`SymmetricMatrices`
 \operatorname{proj}_p(X) = \frac{1}{2} \bigl( X + X^{\mathrm{H}} \bigr),
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project_tangent(::SymmetricMatrices, ::Any...)
 
