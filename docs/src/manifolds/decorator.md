@@ -1,7 +1,7 @@
 # Decorator manifold
 
 A decorator manifold extends the functionality of a [`Manifold`](@ref) in a transparent way.
-It internally stores the [`Manifold`](@ref) it extends and for all usual functions defined in the [`ManifoldsBase`](interface.md), acts by default transparent in the sense that it passes all functions through to the base despite those that it actually affects.
+It internally stores the [`Manifold`](@ref) it extends and for all usual functions defined in the [`ManifoldsBase`](../interface.md), acts by default transparent in the sense that it passes all functions through to the base despite those that it actually affects.
 For example, because the [`ArrayManifold`](@ref) affects nearly all functions, it overwrites nearly all functions, except a few like [`manifold_dimension`](@ref).
 On the other hand, the [`MetricManifold`](@ref) only affects functions that involve metrics, especially [`exp`](@ref) and [`log`](@ref) but not the [`manifold_dimension`](@ref).
 
@@ -18,13 +18,4 @@ This can best be seen in the [`SymmetricPositiveDefinite`](@ref) manifold with i
 Modules = [ManifoldsBase]
 Pages = ["DecoratorManifold.jl"]
 Order = [:macro, :type, :function]
-```
-
-## Internal Functions
-
-The following functions are internally used within [ManifoldsBase.jl](https://github.com/JuliaNLSolvers/ManifoldsBase.jl) to determine whether a certain decorator is the default decorator, i.e. if the [`default_decorator_dispatch`] is set to `Val{trie}`, i.e. [`is_default_decorator`](@ref) returns `true`, the corresponding decorator acts completely transparent. It passes all called functions defined in the interface down to the inner manifold it decorators. This way for example the default implementation already provided can be made the implementation of a specificly given [`Metric`](@ref).
-
-```@docs
-ManifoldsBase.default_decorator_dispatch
-ManifoldsBase.is_default_decorator
 ```
