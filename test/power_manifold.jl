@@ -8,9 +8,11 @@ Random.seed!(42)
 
     Ms = Sphere(2)
     Ms1 = PowerManifold(Ms, 5)
+    @test power_dimensions(Ms1) == (5,)
     @test manifold_dimension(Ms1) == 10
     @test injectivity_radius(Ms1) == π
     Ms2 = PowerManifold(Ms, 5, 7)
+    @test power_dimensions(Ms2) == (5,7)
     @test manifold_dimension(Ms2) == 70
     Mr = Manifolds.Rotations(3)
     Mr1 = PowerManifold(Mr, 5)
