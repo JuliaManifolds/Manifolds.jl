@@ -14,6 +14,8 @@ include("utils.jl")
     @testset "Real Symmetric Matrices Basics" begin
         @test repr(M) == "SymmetricMatrices(3, ℝ)"
         @test representation_size(M) == (3,3)
+        @test base_manifold(M) === M
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{3,3},ℝ}
         @test check_manifold_point(M,B_sym) === nothing
         @test_throws DomainError is_manifold_point(M,A,true)
         @test_throws DomainError is_manifold_point(M,C,true)
@@ -29,6 +31,11 @@ include("utils.jl")
         @test manifold_dimension(M_complex) == 12
         @test A_sym2 == project_point!(M, A_sym, A_sym)
         @test A_sym2 == project_tangent(M, A_sym, A_sym)
+        A_sym3 = similar(A_sym)
+        embed!(M,A_sym3, A_sym)
+        A_sym4 = embed(M,A_sym)
+        @test A_sym3 == A_sym
+        @test A_sym4 == A_sym
     end
     types = [
         Matrix{Float64},

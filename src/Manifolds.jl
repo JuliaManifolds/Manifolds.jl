@@ -90,6 +90,7 @@ using LinearAlgebra
 using LightGraphs
 using LightGraphs: AbstractGraph
 using ManifoldsBase: CoTVector, Manifold, MPoint, TVector, DefaultManifold
+using ManifoldsBase
 using ManifoldsBase:
     AbstractDecoratorManifold,
     @decorator_transparent_fallback,
@@ -287,6 +288,7 @@ export Euclidean,
     FixedRankMatrices,
     Grassmann,
     Hyperbolic,
+    Lorentz,
     Rotations,
     Sphere,
     Stiefel,
@@ -360,12 +362,14 @@ export ×,
     distance,
     einstein_tensor,
     embed,
+    embed!,
     exp,
     exp!,
     flat,
     flat!,
     gaussian_curvature,
     geodesic,
+    get_embedding,
     hat,
     hat!,
     incident_log,

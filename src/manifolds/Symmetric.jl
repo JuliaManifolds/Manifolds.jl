@@ -26,7 +26,7 @@ end
 
 base_manifold(M::SymmetricMatrices) = M
 decorated_manifold(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N,N; field=𝔽)
-
+get_embedding(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N,N; field=𝔽)
 @doc raw"""
     check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...)
 
@@ -112,7 +112,7 @@ function check_tangent_vector(
     return nothing
 end
 
-embed!(M::SymmetricMatrices, p, q) = copyto!(q, p)
+embed!(M::SymmetricMatrices, q, p) = copyto!(q, p)
 
 function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis) where {n}
     vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors

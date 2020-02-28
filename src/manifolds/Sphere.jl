@@ -22,6 +22,7 @@ Sphere(n::Int) = Sphere{n}()
 
 base_manifold(M::Sphere) = M
 decorated_manifold(M::Sphere{N}) where {N} = Euclidean(N; field=ℝ)
+get_embedding(M::Sphere{N}) where {N} = Euclidean(N; field=ℝ)
 
 function get_basis(M::Sphere{N}, p, B::DiagonalizingOrthonormalBasis) where {N}
     A = zeros(N + 1, N + 1)
