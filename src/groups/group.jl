@@ -215,26 +215,36 @@ isapprox(p, e::Identity; kwargs...) = isapprox(e::Identity, p; kwargs...)
 isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
 isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
-function allocate_result(M::Manifold, ::typeof(hat), e::Identity, Xⁱ)
-    is_decorator_group(M) === Val(true) && return allocate_result(base_group(M), hat, e, Xⁱ)
-    error("allocate_result not implemented for manifold $(M), function hat, point $(e), and vector $(Xⁱ).")
+function allocate_result(
+    M::Manifold,
+    f::Union{typeof(hat),typeof(get_vector)},
+    e::Identity,
+    Xⁱ,
+)
+    is_decorator_group(M) === Val(true) && return allocate_result(base_group(M), f, e, Xⁱ)
+    error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(Xⁱ).")
 end
 function allocate_result(
     G::GT,
-    ::typeof(hat),
+    ::Union{typeof(hat),typeof(get_vector)},
     ::Identity{GT},
     Xⁱ,
 ) where {GT<:AbstractGroupManifold}
     B = VectorBundleFibers(TangentSpace, G)
     return allocate(Xⁱ, Size(representation_size(B)))
 end
-function allocate_result(M::Manifold, ::typeof(vee), e::Identity, X)
-    is_decorator_group(M) === Val(true) && return allocate_result(base_group(M), vee, e, X)
-    error("allocate_result not implemented for manifold $(M), function vee, point $(e), and vector $(X).")
+function allocate_result(
+    M::Manifold,
+    f::Union{typeof(vee),typeof(get_coordinates)},
+    e::Identity,
+    X,
+)
+    is_decorator_group(M) === Val(true) && return allocate_result(base_group(M), f, e, X)
+    error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(X).")
 end
 function allocate_result(
     G::GT,
-    ::typeof(vee),
+    ::Union{typeof(vee),typeof(get_coordinates)},
     ::Identity{GT},
     X,
 ) where {GT<:AbstractGroupManifold}

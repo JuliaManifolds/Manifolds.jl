@@ -235,6 +235,9 @@ function get_basis(M::ProductManifold, p, B::AbstractBasis)
     parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
     return CachedBasis(B, ProductBasisData(parts))
 end
+function get_basis(M::ProductManifold, p, B::CachedBasis)
+    return invoke(get_basis, Tuple{Manifold,Any,CachedBasis}, M, p, B)
+end
 function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     vs = map(ziptuples(
         M.manifolds,
@@ -246,8 +249,7 @@ function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, ProductBasisData(vs))
 end
 function get_basis(M::ProductManifold, p, B::DefaultOrthonormalBasis)
-    parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
-    return CachedBasis(B, ProductBasisData(parts))
+    return invoke(get_basis, Tuple{ProductManifold,Any,AbstractBasis}, M, p, B)
 end
 
 function get_coordinates(

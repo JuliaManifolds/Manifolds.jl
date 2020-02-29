@@ -259,11 +259,6 @@ include("utils.jl")
     end
 
     @testset "ProductRepr" begin
-        basis_types = (
-            DefaultOrthonormalBasis(),
-            ProjectedOrthonormalBasis(:svd),
-            DiagonalizingOrthonormalBasis(ProductRepr([0.0, 1.0, 0.0], [1.0, 0.0]))
-        )
 
         Ts = SizedVector{3, Float64}
         Tr2 = SizedVector{2, Float64}
@@ -275,6 +270,13 @@ include("utils.jl")
                   convert(Tr2, [0.0, 0.1])]
 
         pts = [ProductRepr(p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
+        basis_types = (
+            DefaultOrthonormalBasis(),
+            ProjectedOrthonormalBasis(:svd),
+            get_basis(Mse, pts[1], DefaultOrthonormalBasis()),
+            DiagonalizingOrthonormalBasis(ProductRepr([0.0, 1.0, 0.0], [1.0, 0.0]))
+        )
+
         test_manifold(
             Mse,
             pts,
@@ -283,7 +285,7 @@ include("utils.jl")
             test_tangent_vector_broadcasting = false,
             test_forward_diff = false,
             test_reverse_diff = false,
-            basis_types_vecs = (basis_types[1], basis_types[3],),
+            basis_types_vecs = (basis_types[1], basis_types[3], basis_types[4]),
             basis_types_to_from = basis_types,
         )
         @test number_eltype(pts[1]) === Float64

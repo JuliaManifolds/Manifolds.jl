@@ -264,15 +264,27 @@ function flat!(M::Manifold, ξ::FVector, p, X::FVector)
     )
 end
 
+function get_basis(M::VectorBundle, p, B::AbstractBasis)
+    xp1 = submanifold_component(p, Val(1))
+    base_basis = get_basis(M.manifold, xp1, B)
+    vec_basis = get_basis(M.fiber, xp1, B)
+    return CachedBasis(B, VectorBundleBasisData(base_basis, vec_basis))
+end
+function get_basis(M::VectorBundle, p, B::CachedBasis)
+    return invoke(get_basis, Tuple{Manifold, Any, CachedBasis}, M, p, B)
+end
 function get_basis(M::VectorBundle, p, B::DiagonalizingOrthonormalBasis)
     xp1 = submanifold_component(p, Val(1))
     bv1 = DiagonalizingOrthonormalBasis(submanifold_component(B.frame_direction, Val(1)))
     b1 = get_basis(M.manifold, xp1, bv1)
     bv2 = DiagonalizingOrthonormalBasis(submanifold_component(B.frame_direction, Val(2)))
     b2 = get_basis(M.fiber, xp1, bv2)
-    return CachedBasis(B,VectorBundleBasisData(b1, b2))
+    return CachedBasis(B, VectorBundleBasisData(b1, b2))
 end
-function get_basis(M::TangentBundleFibers, p, B::DiagonalizingOrthonormalBasis)
+function get_basis(M::VectorBundle, p, B::DefaultOrthonormalBasis)
+    return invoke(get_basis, Tuple{VectorBundle,Any,AbstractBasis}, M, p, B)
+end
+function get_basis(M::TangentBundleFibers, p, B::AbstractBasis)
     return get_basis(M.manifold, p, B)
 end
 
@@ -287,12 +299,12 @@ function get_coordinates(
     M::VectorBundle,
     p,
     X,
-    B::CachedBasis{VectorBundleBasisData},
+    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData},
 ) where {N}
      px, Vx = submanifold_components(M.manifold, p)
      VXM, VXF = submanifold_components(M.manifold, X)
-     coord1 = get_coordinates(M.manifold, px, VXM, B.base_basis)
-     coord2 = get_coordinates(M.fiber, px, VXF, B.vec_basis)
+     coord1 = get_coordinates(M.manifold, px, VXM, B.data.base_basis)
+     coord2 = get_coordinates(M.fiber, px, VXF, B.data.vec_basis)
      return vcat(coord1, coord2)
  end
 function get_coordinates(M::TangentBundleFibers, p, X, B::AbstractBasis) where {N}
