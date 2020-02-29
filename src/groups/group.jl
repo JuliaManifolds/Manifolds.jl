@@ -164,7 +164,7 @@ function allocate_result(
     e::Identity{GT},
     X,
 ) where {GT<:AbstractGroupManifold}
-    error("allocate_result not implemented for group manifold $(G), function vee, $(e), and vector $(X).")
+    error("allocate_result not implemented for group manifold $(G), function hat, $(e), and vector $(X).")
 end
 function allocate_result(M::Manifold, ::typeof(vee), e::Identity, X)
     is_group_decorator(M) && return allocate_result(base_group(M), vee, e, X)
