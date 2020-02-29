@@ -27,6 +27,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{AbstractEmbed
     @testset "EmbeddedManifold basic tests" begin
         M = EmbeddedManifold(Euclidean(2), Euclidean(3))
         @test repr(M) == "EmbeddedManifold(Euclidean(2; field = ℝ), Euclidean(3; field = ℝ), DefaultIsometricEmbedding())"
+        @test decorated_manifold(M) == Euclidean(3)
     end
     @testset "PlaneManifold" begin
         M = PlaneManifold()
@@ -99,6 +100,8 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{AbstractEmbed
             @test_throws ErrorException inner(M3,[1,2],[2,3],[2,3])
             @test_throws ErrorException manifold_dimension(M3)
             @test_throws ErrorException norm(M3,[1,2],[2,3])
+            @test_throws ErrorException embed(M3,[1,2],[2,3])
+            @test_throws ErrorException embed(M3,[1,2])
         end
     end
 end

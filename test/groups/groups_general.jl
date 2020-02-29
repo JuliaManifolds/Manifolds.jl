@@ -23,6 +23,12 @@ include("../utils.jl")
             @test NotImplementedOperation(NotImplementedManifold()) === G
             @test (NotImplementedOperation())(NotImplementedManifold()) === G
         end
+        @test_throws ErrorException base_group(MetricManifold(Euclidean(3),EuclideanMetric()))
+        @test_throws ErrorException hat(Rotations(3), Identity(G), [1,2,3])
+        @test_throws ErrorException hat(GroupManifold(Rotations(3), NotImplementedOperation()), Identity(G), [1,2,3])
+        @test_throws ErrorException vee(Rotations(3), Identity(G), [1,2,3])
+        @test_throws ErrorException vee(GroupManifold(Rotations(3), NotImplementedOperation()), Identity(G), [1,2,3])
+        @test_throws ErrorException Identity(Euclidean(3))
 
         @test_throws ErrorException copyto!(x, eg)
 
