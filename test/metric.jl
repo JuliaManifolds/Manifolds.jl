@@ -32,6 +32,7 @@ sph_to_cart(θ, ϕ) = [cos(ϕ)*sin(θ), sin(ϕ)*sin(θ), cos(θ)]
 struct BaseManifold{N} <: Manifold end
 struct BaseManifoldMetric{M} <: Metric end
 struct DefaultBaseManifoldMetric <: Metric end
+struct NotImplementedMetric <: Metric end
 
 Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
 Manifolds.inner(::BaseManifold, x, v, w) = 2 * dot(v,w)
@@ -80,7 +81,10 @@ end
             exp(M, x, v)
         end
     end
-
+    @testset "Local Metric Error message" begin
+        M = MetricManifold(BaseManifold{2}(),NotImplementedMetric())
+        @test_throws ErrorException local_metric(M, [3,4])
+    end
     @testset "scaled Euclidean metric" begin
         n = 3
         E = TestEuclidean{n}()

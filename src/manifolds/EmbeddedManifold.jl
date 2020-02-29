@@ -46,14 +46,29 @@ Based on the [`AbstractEmbeddingType`](@ref) `ET`, this introduces functions for
 passing through to embedding `N`.
 
 # Fields
+
 * `manifold` the manifold that is an embedded manifold
 * `embedding` a second manifold, the first one is embedded into
+
+# Constructor
+
+    EmbeddedManifold(M,N,e=DefaultIsometricEmbedding)
+
+Generate the `EmbeddedManifold` of the [`Manifold`](@ref) `M` into the
+[`Manifold`](@ref) `N` with [`AbstractEmbeddingType`](@ref) `e` that by default is the most
+transparent [`DefaultIsometricEmbedding`](@ref)
 """
 struct EmbeddedManifold{MT <: Manifold, NT <: Manifold, ET} <: AbstractEmbeddedManifold{ET}
     manifold::MT
     embedding::NT
 end
-
+function EmbeddedManifold(
+    M::MT,
+    N::NT,
+    e::ET=DefaultIsometricEmbedding()
+) where {MT <: Manifold, NT <: Manifold, ET <: AbstractEmbeddingType}
+    return EmbeddedManifold{MT,NT,ET}(M,N)
+end
 """
     EmbeddedRetraction{R <: AbstractRetractionMethod} <: AbstractRetractionMethod
 
@@ -144,10 +159,10 @@ decorated_manifold(M::AbstractEmbeddedManifold) = M.embedding
 
 Return the [`Manifold`](@ref) `N` an [`AbstractEmbeddedManifold`](@ref) is embedded into.
 """
-get_embedding(M::AbstractEmbeddedManifold)
+get_embedding(::AbstractEmbeddedManifold)
 
 @decorator_transparent_function function get_embedding(M::AbstractEmbeddedManifold)
-    return M.embedding
+    return decorated_manifold(M)
 end
 
 """
@@ -169,8 +184,11 @@ function retract!(M::AbstractEmbeddedManifold, q, p, X, m::EmbeddedRetraction)
     return q
 end
 
-function show(io::IO, ::EmbeddedManifold{M,N}) where {N <: Manifold, M <: Manifold}
-    print(io, "EmbeddedManifold($(M),$(N))")
+function show(
+    io::IO,
+    M::EmbeddedManifold{MT,NT,ET}
+) where {MT <: Manifold, NT <: Manifold, ET<:AbstractEmbeddingType}
+    print(io, "EmbeddedManifold($(M.manifold), $(M.embedding), $(ET()))")
 end
 
 function default_decorator_dispatch(M::EmbeddedManifold)
@@ -344,14 +362,14 @@ function decorator_transparent_dispatch(
     ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
     args...,
 )
-    return Val(:transparent)
+    return Val(:parent)
 end
 function decorator_transparent_dispatch(
     ::typeof(project_point!),
     ::AbstractEmbeddedManifold{<:AbstractIsometricEmbeddingType},
     args...,
 )
-    return Val(:parent)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(project_point!),
@@ -379,7 +397,7 @@ function decorator_transparent_dispatch(
     ::AbstractEmbeddedManifold{<:AbstractIsometricEmbeddingType},
     args...,
 )
-    return Val(:parent)
+    return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(project_tangent!),

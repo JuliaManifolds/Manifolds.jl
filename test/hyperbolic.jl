@@ -4,6 +4,7 @@ include("utils.jl")
     M = Hyperbolic(2)
     @testset "Hyperbolic Basics" begin
         @test repr(M) == "Hyperbolic(2)"
+        @test base_manifold(M) == M
         @test typeof(get_embedding(M)) == MetricManifold{Euclidean{Tuple{3},ℝ},MinkowskiMetric}
         @test representation_size(M) == (3,)
         @test !is_manifold_point(M, [1., 0., 0., 0.])

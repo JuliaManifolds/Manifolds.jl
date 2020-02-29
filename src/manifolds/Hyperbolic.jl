@@ -34,7 +34,6 @@ Hyperbolic(n::Int) = Hyperbolic{n}()
 base_manifold(M::Hyperbolic) = M
 decorated_manifold(M::Hyperbolic{N}) where {N} = Lorentz(N+1, MinkowskiMetric())
 default_metric_dispatch(::Hyperbolic, ::MinkowskiMetric) = Val(true)
-get_embedding(M::Hyperbolic{N}) where {N} = Lorentz(N+1, MinkowskiMetric())
 
 """
     check_manifold_point(M::Hyperbolic, p; kwargs...)

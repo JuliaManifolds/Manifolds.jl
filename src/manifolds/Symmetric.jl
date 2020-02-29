@@ -31,8 +31,6 @@ base_manifold(M::SymmetricMatrices) = M
 
 decorated_manifold(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N,N; field=𝔽)
 
-get_embedding(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N,N; field=𝔽)
-
 @doc raw"""
     check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...)
 
