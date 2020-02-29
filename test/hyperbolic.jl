@@ -39,6 +39,18 @@ include("utils.jl")
             )
         end
     end
+     @testset "Embedding test" begin
+        p = [0.0, 0.0, 1.0]
+        X = [1.0, 1.0, 0.0]
+        @test embed(M,p) == p
+        q = similar(p)
+        embed!(M,q,p)
+        @test q==p
+        @test embed(M,p,X) == X
+        Y = similar(X)
+        embed!(M,Y,p,X)
+        @test Y == X
+    end
     @testset "Hyperbolic mean test" begin
         pts =[
             [0., 0., 1.],
