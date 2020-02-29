@@ -102,6 +102,10 @@ the [`Lorentz`](@ref)ian manifold.
 """
 distance(M::Hyperbolic, p, q) = acosh(max(-inner(M, p, p, q), 1.0))
 
+embed!(::Hyperbolic, q, p) = (q .= p)
+
+embed!(::Hyperbolic, Y, p, X) = (Y .= X)
+
 @doc raw"""
     exp(M::Hyperbolic, p, X)
 

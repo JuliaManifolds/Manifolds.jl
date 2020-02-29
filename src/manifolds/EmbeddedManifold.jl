@@ -69,40 +69,6 @@ function EmbeddedManifold(
 ) where {MT <: Manifold, NT <: Manifold, ET <: AbstractEmbeddingType}
     return EmbeddedManifold{MT,NT,ET}(M,N)
 end
-"""
-    EmbeddedRetraction{R <: AbstractRetractionMethod} <: AbstractRetractionMethod
-
-A retraction on an [`EmbeddedManifold`](@ref) by using the retraction `R` in the
-embedding and projecting the result back to the manifold.
-
-# Constructor
-
-    EmbeddedInverseRetraction(m::AbstractRetractionMethod=ExponentialRetraction)
-
-Generate the retraction that uses the [`AbstractRetractionMethod`](@ref) `m` in the
-embedding, which defaults to the [`ExponentialRetraction`](@ref)
-"""
-struct EmbeddedRetraction{R <: AbstractRetractionMethod} <: AbstractRetractionMethod
-    retraction_method::R
-end
-EmbeddedRetraction() = EmbeddedRetraction(ExponentialRetraction())
-"""
-    EmbeddedInverseRetraction{R <: AbstractInverseRetractionMethod} <: AbstractInverseRetractionMethod
-
-An inverse retraction on an [`EmbeddedManifold`](@ref) by using the inverse retraction `R`
-in the embedding and projecting the result back to the corresponding tangent space.
-
-# Constructor
-
-    EmbeddedInverseRetraction(m::AbstractInverseRetractionMethod=LogarithmicInverseRetraction)
-
-Generate the inverse retraction that uses the [`AbstractInverseRetractionMethod`](@ref) `m`
-in the embedding, which defaults to the [`LogarithmicInverseRetraction`](@ref).
-"""
-struct EmbeddedInverseRetraction{IR <: AbstractInverseRetractionMethod} <: AbstractInverseRetractionMethod
-    inverse_retraction_method::IR
-end
-EmbeddedInverseRetraction() = EmbeddedInverseRetraction(LogarithmicInverseRetraction())
 
 """
     embed(M::AbstractEmbeddedManifold,p)
@@ -119,37 +85,20 @@ embed(::AbstractEmbeddedManifold, ::Any...)
 
 @decorator_transparent_function function embed(M::AbstractEmbeddedManifold,p)
     q = allocate(p)
-    return embed!(M, q, p)
+    embed!(M, q, p)
+    return q
 end
 @decorator_transparent_function function embed!(M::AbstractEmbeddedManifold, q, p)
     error("Embedding a point $(typeof(p)) on $(typeof(M)) not yet implemented.")
 end
 
 @decorator_transparent_function function embed(M::AbstractEmbeddedManifold,p, X)
-    q = allocate(p)
-    return embed!(M, q, p)
+    Y = allocate(X)
+    embed!(M, Y, p, X)
+    return Y
 end
 @decorator_transparent_function function embed!(M::AbstractEmbeddedManifold, Y, p, X)
-    error("Embedding a tangent $(X) at point $(typeof(p)) on $(typeof(M)) not yet implemented.")
-end
-
-"""
-    inverse_retract(M::EmbeddedManifold, p, q, m::EmbeddedInverseRetraction)
-
-Compute the inverse retraction on the [`AbstractEmbeddingType`](@ref) `M` by
-using an [`AbstractInverseRetractionMethod`](@ref) in the embedding and projecting the
-result back into the tangent space at `p`.
-"""
-inverse_retract(::AbstractEmbeddedManifold, ::Any, ::Any, ::EmbeddedInverseRetraction)
-
-function inverse_retract!(M::AbstractEmbeddedManifold, X, p, q, m::EmbeddedInverseRetraction)
-    x = allocate(q)
-    y = allocate(p)
-    embed!(M, x, p)
-    embed!(M, y, q)
-    retract!(M.embedding, X, x, y, m.inverse_retraction_method)
-    project_tangent!(M, X, p, X)
-    return X
+    error("Embedding a tangent $(typeof(X)) at point $(typeof(p)) on $(typeof(M)) not yet implemented.")
 end
 
 decorated_manifold(M::AbstractEmbeddedManifold) = M.embedding
@@ -163,25 +112,6 @@ get_embedding(::AbstractEmbeddedManifold)
 
 @decorator_transparent_function function get_embedding(M::AbstractEmbeddedManifold)
     return decorated_manifold(M)
-end
-
-"""
-    inverse_retract(M::EmbeddedManifold, p, q, m::EmbeddedInverseRetraction)
-
-Compute the retraction on the [`AbstractEmbeddingType`](@ref) `M` by
-using an [`AbstractRetractionMethod`](@ref) in the embedding and projecting the
-result back onto the manifold `M`.
-"""
-retract(::AbstractEmbeddedManifold, ::Any, ::Any, ::EmbeddedRetraction)
-
-function retract!(M::AbstractEmbeddedManifold, q, p, X, m::EmbeddedRetraction)
-    x = allocate(q)
-    Z = allocate(X)
-    embed!(M, x, p)
-    embed!(M, Z, p, X)
-    retract!(M.embedding, q, x, Z, m.retraction_method)
-    project_point!(M, q, q)
-    return q
 end
 
 function show(

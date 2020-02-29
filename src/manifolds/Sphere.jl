@@ -109,6 +109,10 @@ d_{𝕊^n}(p,q) = \arccos(⟨p,q⟩).
 """
 distance(::Sphere, x, y) = acos(clamp(dot(x, y), -1, 1))
 
+embed!(::Sphere, q, p) = (q .= p)
+
+embed!(::Sphere, Y, p, X) = (Y .= X)
+
 @doc raw"""
     exp(M::Sphere, p, X)
 
@@ -297,8 +301,6 @@ Compute the retraction that is based on projection, i.e.
 ````
 """
 retract(::Sphere, ::Any, ::Any, ::ProjectionRetraction)
-
-# decorator_transparent_dispatch(::typeof(retract!), ::Sphere, args...) = Val(:parent)
 
 function retract!(M::Sphere, q, p, X, ::ProjectionRetraction)
     q .= p .+ X
