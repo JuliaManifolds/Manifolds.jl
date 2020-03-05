@@ -48,13 +48,13 @@ function check_tangent_vector(
     if check_base_point && length(p) != N
         return DomainError(
             length(p),
-            "The number of elements in `x` ($(length(p))) does not match the dimension of the torus ($(N)).",
+            "The number of elements in `p` ($(length(p))) does not match the dimension of the torus ($(N)).",
         )
     end
     if length(X) != N
         return DomainError(
             length(X),
-            "The number of elements in `v` ($(length(X))) does not match the dimension of the torus ($(N)).",
+            "The number of elements in `X` ($(length(X))) does not match the dimension of the torus ($(N)).",
         )
     end
     return check_tangent_vector(

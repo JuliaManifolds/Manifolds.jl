@@ -27,7 +27,7 @@ Random.seed!(42)
     @test repr(Ms1) == "PowerManifold(Sphere(2), 5)"
     @test repr(Mrn1) == "PowerManifold(Rotations(3), NestedPowerRepresentation(), 5)"
 
-    @test Ms^5 === Ms1
+    @test Ms^5 === Oblique(3,5)
     @test Ms^(5,) === Ms1
     @test Mr^(5, 7) === Mr2
 

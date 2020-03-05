@@ -251,7 +251,9 @@ include("manifolds/SymmetricPositiveDefinite.jl")
 include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
+
 include("manifolds/Torus.jl")
+include("manifolds/Oblique.jl")
 
 include("groups/group.jl")
 include("groups/metric.jl")
@@ -290,6 +292,7 @@ export Euclidean,
     Grassmann,
     Hyperbolic,
     Lorentz,
+    Oblique,
     Rotations,
     SkewSymmetricMatrices,
     Sphere,

@@ -18,6 +18,9 @@ include("sphere.jl")
 include("stiefel.jl")
 include("symmetric.jl")
 include("symmetric_positive_definite.jl")
+
+include("oblique.jl")
+
 include("torus.jl")
 
 #meta manifolds

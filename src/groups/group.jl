@@ -159,11 +159,11 @@ function allocate_result(
     return allocate(Xⁱ, Size(representation_size(B)))
 end
 function allocate_result(
-    G::Manifold,
+    G::GT,
     ::typeof(hat),
-    e::Identity{GT},
+    e::Identity{GT2},
     X,
-) where {GT<:AbstractGroupManifold}
+) where {GT<:AbstractGroupManifold, GT2 <: GroupManifold}
     error("allocate_result not implemented for group manifold $(G), function hat, $(e), and vector $(X).")
 end
 function allocate_result(M::Manifold, ::typeof(vee), e::Identity, X)
@@ -171,11 +171,11 @@ function allocate_result(M::Manifold, ::typeof(vee), e::Identity, X)
     error("allocate_result not implemented for manifold $(M), function vee, $(e), and vector $(X).")
 end
 function allocate_result(
-    G::Manifold,
+    G::GT,
     ::typeof(vee),
-    e::Identity{GT},
+    e::Identity{GT2},
     X,
-) where {GT<:AbstractGroupManifold}
+) where {GT<:AbstractGroupManifold, GT2 <: AbstractGroupManifold}
     error("allocate_result not implemented for group manifold $(G), function vee, $(e), and vector $(X).")
 end
 function allocate_result(
