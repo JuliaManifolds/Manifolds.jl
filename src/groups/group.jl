@@ -149,6 +149,9 @@ function allocate_result(M::Manifold, ::typeof(hat), e::Identity, Xⁱ)
     is_group_decorator(M) && return allocate_result(base_group(M), hat, e, Xⁱ)
     error("allocate_result not implemented for manifold $(M), function hat, point $(e), and vector $(Xⁱ).")
 end
+function allocate_result(M::AbstractGroupManifold, ::typeof(hat), e::Identity, Xⁱ)
+    error("allocate_result not implemented for group manifold $(M), function vee, $(e), and vector $(Xⁱ).")
+end
 function allocate_result(
     G::GT,
     ::typeof(hat),
@@ -158,25 +161,12 @@ function allocate_result(
     B = VectorBundleFibers(TangentSpace, G)
     return allocate(Xⁱ, Size(representation_size(B)))
 end
-function allocate_result(
-    G::GT,
-    ::typeof(hat),
-    e::Identity{GT2},
-    X,
-) where {GT<:AbstractGroupManifold, GT2 <: GroupManifold}
-    error("allocate_result not implemented for group manifold $(G), function hat, $(e), and vector $(X).")
-end
 function allocate_result(M::Manifold, ::typeof(vee), e::Identity, X)
     is_group_decorator(M) && return allocate_result(base_group(M), vee, e, X)
     error("allocate_result not implemented for manifold $(M), function vee, $(e), and vector $(X).")
 end
-function allocate_result(
-    G::GT,
-    ::typeof(vee),
-    e::Identity{GT2},
-    X,
-) where {GT<:AbstractGroupManifold, GT2 <: AbstractGroupManifold}
-    error("allocate_result not implemented for group manifold $(G), function vee, $(e), and vector $(X).")
+function allocate_result(M::AbstractGroupManifold, ::typeof(vee), e::Identity, X)
+    error("allocate_result not implemented for group manifold $(M), function vee, $(e), and vector $(X).")
 end
 function allocate_result(
     G::GT,
