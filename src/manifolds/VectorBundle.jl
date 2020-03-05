@@ -288,7 +288,7 @@ function get_basis(M::TangentBundleFibers, p, B::AbstractBasis)
     return get_basis(M.manifold, p, B)
 end
 
-function get_coordinates(M::VectorBundle, p, X, B::DefaultOrthonormalBasis) where {N}
+function get_coordinates(M::VectorBundle, p, X, B::AbstractBasis) where {N}
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     coord1 = get_coordinates(M.manifold, px, VXM, B)
@@ -336,7 +336,8 @@ end
 function get_vectors(
     M::VectorBundle,
     p,
-    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData})
+    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData},
+)
     xp1 = submanifold_component(p, Val(1))
     zero_m = zero_tangent_vector(M.manifold, xp1)
     zero_f = zero_vector(M.fiber, xp1)

@@ -1,10 +1,10 @@
 include("utils.jl")
 @testset "Symmetric Positive Definite Matrices" begin
-    M1 = Manifolds.SymmetricPositiveDefinite(3)
+    M1 = SymmetricPositiveDefinite(3)
     @test repr(M1) == "SymmetricPositiveDefinite(3)"
-    M2 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LinearAffineMetric())
-    M3 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
-    M4 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogEuclideanMetric())
+    M2 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LinearAffineMetric())
+    M3 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
+    M4 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LogEuclideanMetric())
 
     @test is_default_metric(M2) == Val{true}()
     @test is_default_metric(M1, Manifolds.LinearAffineMetric()) == Val{true}()
@@ -48,9 +48,10 @@ include("utils.jl")
                     test_vector_transport = true,
                     test_forward_diff = false,
                     test_reverse_diff = false,
+                    test_vee_hat = M === M2,
                     exp_log_atol_multiplier = exp_log_atol_multiplier,
                     basis_types_vecs = basis_types,
-                    basis_types_to_from = basis_types
+                    basis_types_to_from = basis_types,
                 )
             end
             @testset "Test Error cases in is_manifold_point and is_tangent_vector" begin

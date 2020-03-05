@@ -34,6 +34,7 @@ include("utils.jl")
                 test_vector_transport = true,
                 is_tangent_atol_multiplier = 10.0,
                 exp_log_atol_multiplier = 10.0,
+                test_vee_hat = false,
             )
         end
     end

@@ -1,14 +1,14 @@
 include("utils.jl")
 
 @testset "Euclidean" begin
-    E = Manifolds.Euclidean(3)
-    Ec = Manifolds.Euclidean(3;field=ℂ)
-    EM = Manifolds.MetricManifold(E,Manifolds.EuclideanMetric())
+    E = Euclidean(3)
+    Ec = Euclidean(3; field=ℂ)
+    EM = Manifolds.MetricManifold(E, Manifolds.EuclideanMetric())
     @test repr(E) == "Euclidean(3; field = ℝ)"
     @test repr(Ec) == "Euclidean(3; field = ℂ)"
     @test repr(Euclidean(2, 3; field = ℍ)) == "Euclidean(2, 3; field = ℍ)"
     @test is_default_metric(EM) == Val{true}()
-    @test is_default_metric(E,Manifolds.EuclideanMetric()) == Val{true}()
+    @test is_default_metric(E, Manifolds.EuclideanMetric()) == Val{true}()
     x = zeros(3)
     @test det_local_metric(EM,x) == one(eltype(x))
     @test log_local_metric_density(EM,x) == zero(eltype(x))
@@ -59,7 +59,8 @@ include("utils.jl")
                     tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
                     basis_types_vecs = basis_types,
                     basis_types_to_from = basis_types,
-                    basis_has_specialized_diagonalizing_get = true
+                    basis_has_specialized_diagonalizing_get = true,
+                    test_vee_hat = isa(M, Euclidean),
                 )
             end
         end
@@ -75,7 +76,8 @@ include("utils.jl")
                 test_reverse_diff = isa(T, Vector),
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
-                test_vector_transport = true
+                test_vector_transport = true,
+                test_vee_hat = false,
             )
         end
     end

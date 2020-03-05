@@ -144,6 +144,21 @@ function get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
     return @SVector [Xⁱ]
 end
 
+function get_coordinates!(M::Circle, Y::AbstractArray, p, X, B::DefaultOrthonormalBasis)
+    Y[] = get_coordinates(M, p, X, B)[]
+    return Y
+end
+function get_coordinates!(
+    M::Circle,
+    Y::AbstractArray,
+    p,
+    X,
+    B::DiagonalizingOrthonormalBasis,
+)
+    Y[] = get_coordinates(M, p, X, B)[]
+    return Y
+end
+
 get_vector(M::Circle{ℝ}, p, X, B::AbstractBasis) = X
 get_vector(M::Circle{ℝ}, p, X, B::DefaultOrthonormalBasis) = X
 function get_vector(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
@@ -156,6 +171,27 @@ end
 Return tangent vector from the coordinates in the Lie algebra of the circle.
 """
 get_vector(M::Circle{ℂ}, p, X, B::AbstractBasis) = @SVector [1im * X[1] * p[1]]
+
+function get_vector!(M::Circle, Y::AbstractArray, p, X, B::AbstractBasis)
+    Y[] = get_vector(M, p, X, B)[]
+    return Y
+end
+function get_vector!(M::Circle, Y::AbstractArray, p, X, B::DefaultOrthonormalBasis)
+    Y[] = get_vector(M, p, X, B)[]
+    return Y
+end
+function get_vector!(M::Circle, Y::AbstractArray, p, X, B::DiagonalizingOrthonormalBasis)
+    Y[] = get_vector(M, p, X, B)[]
+    return Y
+end
+function get_vector!(M::Circle, Y::AbstractArray, p, X, B::DefaultBasis)
+    Y[] = get_vector(M, p, X, B)[]
+    return Y
+end
+function get_vector!(M::Circle, Y::AbstractArray, p, X, B::DefaultOrthogonalBasis)
+    Y[] = get_vector(M, p, X, B)[]
+    return Y
+end
 
 @doc raw"""
     injectivity_radius(M::Circle[, p])

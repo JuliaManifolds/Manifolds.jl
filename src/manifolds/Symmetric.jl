@@ -22,6 +22,14 @@ struct SymmetricMatrices{n,𝔽} <: Manifold end
 
 SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ) = SymmetricMatrices{n,field}()
 
+function allocation_promotion_function(
+    M::SymmetricMatrices{<:Any,ℂ},
+    ::typeof(get_vector),
+    args::Tuple,
+)
+    return complex
+end
+
 @doc raw"""
     check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...)
 
@@ -132,14 +140,15 @@ flat(::SymmetricMatrices, ::Any...)
 
 flat!(M::SymmetricMatrices, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_coordinates(
+function get_coordinates!(
     M::SymmetricMatrices{N,ℝ},
+    Y,
     p,
     X,
     B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, dim)
+    @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
     k = 1
@@ -150,14 +159,15 @@ function get_coordinates(
     end
     return Y
 end
-function get_coordinates(
+function get_coordinates!(
     M::SymmetricMatrices{N,ℂ},
+    Y,
     p,
     X,
     B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, dim)
+    @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == N * (N + 1)
     k = 1
@@ -171,14 +181,14 @@ function get_coordinates(
     return Y
 end
 
-function get_vector(
+function get_vector!(
     M::SymmetricMatrices{N,ℝ},
+    Y,
     p,
     X,
     B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = allocate_result(M, get_vector, p)
     @assert size(X) == (div(N * (N + 1), 2),)
     @assert size(Y) == (N, N)
     k = 1
@@ -190,14 +200,14 @@ function get_vector(
     end
     return Y
 end
-function get_vector(
+function get_vector!(
     M::SymmetricMatrices{N,ℂ},
+    Y,
     p,
     X,
     B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = allocate_result(M, get_vector, p, p .* 1im)
     @assert size(X) == (N * (N + 1),)
     @assert size(Y) == (N, N)
     k = 1

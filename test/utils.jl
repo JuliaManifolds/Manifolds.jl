@@ -64,6 +64,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_vector_transport = false,
     test_mutating_rand = false,
     test_vector_spaces = true,
+    test_vee_hat = false,
     is_mutating = true,
     default_inverse_retraction_method = ManifoldsBase.LogarithmicInverseRetraction(),
     default_retraction_method = ManifoldsBase.ExponentialRetraction(),
@@ -348,6 +349,23 @@ function test_manifold(M::Manifold, pts::AbstractVector;
                 end
             end
         end
+    end
+
+    test_vee_hat && @testset "vee and hat" begin
+        p = pts[1]
+        q = pts[2]
+        X = inverse_retract(M, p, q, default_inverse_retraction_method)
+        Y = vee(M, p, X)
+        @test length(Y) == manifold_dimension(M)
+        @test isapprox(M, p, X, hat(M, p, Y))
+        Y2 = allocate(Y)
+        vee_ret = vee!(M, Y2, p, X)
+        @test vee_ret === Y2
+        @test isapprox(Y, Y2)
+        X2 = allocate(X)
+        hat_ret = hat!(M, X2, p, Y)
+        @test hat_ret === X2
+        @test isapprox(M, p, X2, X)
     end
 
     test_forward_diff && @testset "ForwardDiff support" begin

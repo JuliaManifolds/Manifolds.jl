@@ -36,6 +36,7 @@ include("utils.jl")
                 tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
                 basis_types_vecs = (DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),),
                 basis_types_to_from = basis_types,
+                test_vee_hat = true,
                 retraction_methods = [ProjectionRetraction()],
                 inverse_retraction_methods = [ProjectionInverseRetraction()]
             )

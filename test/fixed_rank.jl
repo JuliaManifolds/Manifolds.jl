@@ -146,6 +146,7 @@ include("utils.jl")
                 test_forward_diff = false,
                 test_reverse_diff = false,
                 test_vector_spaces = false,
+                test_vee_hat = false,
                 test_tangent_vector_broadcasting = false, #broadcast not so easy for 3 matrix type
                 projection_atol_multiplier = 15,
                 retraction_methods = [PolarRetraction()]

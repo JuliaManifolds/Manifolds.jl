@@ -344,44 +344,96 @@ function get_coordinates(
     ]
     return reduce(vcat, reshape(vs, length(vs)))
 end
+
+function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBasis)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        get_coordinates!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            B,
+        )
+    end
+    return Y
+end
+function get_coordinates!(
+    M::AbstractPowerManifold,
+    Y,
+    p,
+    X,
+    B::CachedBasis{<:AbstractBasis{ℝ},<:PowerBasisData,ℝ}
+)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        get_coordinates(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _access_nested(B.data.bases, i),
+        )
+    end
+    return Y
+end
+function get_coordinates!(
+    M::AbstractPowerManifold,
+    Y,
+    p,
+    X,
+    B::CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽}
+) where {𝔽}
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        get_coordinates(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _access_nested(B.data.bases, i),
+        )
+    end
+    return Y
+end
+
 get_iterator(M::PowerManifold{<:Manifold,Tuple{N}}) where {N} = 1:N
 @generated function get_iterator(M::PowerManifold{<:Manifold,SizeTuple}) where {SizeTuple}
     size_tuple = size_to_tuple(SizeTuple)
     return Base.product(map(Base.OneTo, size_tuple)...)
 end
 
-function get_vector(M::PowerManifold, p, X, B::CachedBasis{<:AbstractBasis,<:PowerBasisData})
+function get_vector!(M::PowerManifold, Y, p, X, B::CachedBasis{<:AbstractBasis,<:PowerBasisData})
     dim = manifold_dimension(M.manifold)
     rep_size = representation_size(M.manifold)
-    v_out = allocate(p)
     v_iter = 1
     for i in get_iterator(M)
-        copyto!(
-            _write(M, rep_size, v_out, i),
-            get_vector(
-                M.manifold,
-                _read(M, rep_size, p, i),
-                X[v_iter:v_iter+dim-1],
-                _access_nested(B.data.bases, i),
-            ),
+        get_vector!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            X[v_iter:v_iter+dim-1],
+            _access_nested(B.data.bases, i),
         )
         v_iter += dim
     end
-    return v_out
+    return Y
 end
-function get_vector(M::AbstractPowerManifold, p, X, B::DefaultOrthonormalBasis)
+function get_vector!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBasis)
     dim = manifold_dimension(M.manifold)
     rep_size = representation_size(M.manifold)
-    v_out = allocate(p)
     v_iter = 1
     for i in get_iterator(M)
-        copyto!(
-            _write(M, rep_size, v_out, i),
-            get_vector(M.manifold, _read(M, rep_size, p, i), X[v_iter:v_iter+dim-1], B),
+        get_vector!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            X[v_iter:v_iter+dim-1],
+            B,
         )
         v_iter += dim
     end
-    return v_out
+    return Y
 end
 
 @doc raw"""

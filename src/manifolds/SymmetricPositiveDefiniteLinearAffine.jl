@@ -95,14 +95,15 @@ function get_basis(
     return get_basis(base_manifold(M), p, B)
 end
 
-function get_coordinates(
+function get_coordinates!(
     M::SymmetricPositiveDefinite{N},
+    Y,
     p,
     X,
     B::DefaultOrthonormalBasis,
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, dim)
+    @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
     k = 1
@@ -113,23 +114,24 @@ function get_coordinates(
     end
     return Y
 end
-function get_coordinates(
+function get_coordinates!(
     M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
+    Y,
     p,
     X,
     B::DefaultOrthonormalBasis,
 ) where {N}
-    return get_coordinates(base_manifold(M), p, X, B)
+    return get_coordinates!(base_manifold(M), Y, p, X, B)
 end
 
-function get_vector(
+function get_vector!(
     M::SymmetricPositiveDefinite{N},
+    Y,
     p,
     X,
     B::DefaultOrthonormalBasis,
 ) where {N}
     dim = manifold_dimension(M)
-    Y = allocate_result(M, get_vector, p)
     @assert size(X) == (div(N * (N + 1), 2),)
     @assert size(Y) == (N, N)
     k = 1
@@ -141,13 +143,14 @@ function get_vector(
     end
     return Y
 end
-function get_vector(
+function get_vector!(
     M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
+    Y,
     p,
     X,
     B::DefaultOrthonormalBasis,
 ) where {N}
-    return get_vector(base_manifold(M), p, X, B)
+    return get_vector!(base_manifold(M), Y, p, X, B)
 end
 
 @doc raw"""

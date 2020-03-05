@@ -60,6 +60,7 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                test_vee_hat = false,
                 is_mutating = false
             )
             ptsS = SVector.(pts)
@@ -71,6 +72,7 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                test_vee_hat = true,
                 basis_types_vecs = basis_types_real,
                 basis_types_to_from = basis_types_real
             )
@@ -122,7 +124,8 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
-                is_mutating=false,
+                is_mutating = false,
+                test_vee_hat = false,
                 exp_log_atol_multiplier = 2.0,
                 is_tangent_atol_multiplier = 2.0
             )
@@ -135,6 +138,7 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                test_vee_hat = true,
                 exp_log_atol_multiplier = 2.0,
                 is_tangent_atol_multiplier = 2.0,
                 basis_types_vecs = basis_types,

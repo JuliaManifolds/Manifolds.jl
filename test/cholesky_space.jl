@@ -22,6 +22,7 @@ include("utils.jl")
             test_vector_transport = true,
             test_forward_diff = false,
             test_reverse_diff = false,
+            test_vee_hat = false,
             exp_log_atol_multiplier = 8.0,
         )
     end
