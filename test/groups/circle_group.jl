@@ -11,7 +11,7 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
 
     @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(true)
     @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(true)
-    @test (@inferred biinvariant_metric_dispatch(G)) === Val(true)
+    @test (@inferred Manifolds.biinvariant_metric_dispatch(G)) === Val(true)
     @test (@inferred default_metric_dispatch(MetricManifold(G, EuclideanMetric()))) === Val(true)
     @test has_invariant_metric(G, LeftAction())
     @test has_invariant_metric(G, RightAction())

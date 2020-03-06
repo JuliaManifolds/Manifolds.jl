@@ -7,6 +7,8 @@ include("utils.jl")
     A_skewsym2 = [0 -2 -3; 2 0 1; 3 -1 0]
     B_skewsym = [0 -2 -3; 2 0 -1; 3 1 0]
     M_complex = SkewSymmetricMatrices(3,ℂ)
+    A_skewsym_complex = [1.0im -2.0 -3.0; 2.0 0.0 1.0; 3.0 -1.0 0.0]
+    B_skewsym_complex = [2.0im -2.0-2.0im -3.0; 2.0-2.0im 0.0 -1.0; 3.0 1.0 0.0]
     @test repr(M_complex) == "SkewSymmetricMatrices(3, ℂ)"
     C = [0 -1 im; 1 0 -im; im -im 0]
     D = [1 0; 0 1];
@@ -57,9 +59,23 @@ include("utils.jl")
                 basis_types_vecs = (DiagonalizingOrthonormalBasis(log(M, pts[1], pts[2])), bases...),
                 basis_types_to_from = bases,
             )
+        end
+    end
+    complex_types = [
+        Matrix{ComplexF64},
+        MMatrix{3,3,ComplexF64},
+        Matrix{ComplexF32},
+    ]
+    for T in complex_types
+        pts_complex = [
+            convert(T,A_skewsym_complex),
+            convert(T,B_skewsym_complex),
+            convert(T,X)
+        ]
+        @testset "Type $T" begin
             test_manifold(
                 M_complex,
-                pts,
+                pts_complex,
                 test_injectivity_radius = false,
                 test_reverse_diff = isa(T, Vector),
                 test_project_tangent = true,
