@@ -311,6 +311,43 @@ function get_coordinates(M::TangentBundleFibers, p, X, B::AbstractBasis) where {
     return get_coordinates(M.manifold, p, X, B)
 end
 
+function get_coordinates!(M::VectorBundle, Y, p, X, B::AbstractBasis) where {N}
+    px, Vx = submanifold_components(M.manifold, p)
+    VXM, VXF = submanifold_components(M.manifold, X)
+    n = manifold_dimension(M.manifold)
+    get_coordinates!(M.manifold, view(Y, 1:n), px, VXM, B)
+    get_coordinates!(M.fiber, view(Y, n+1:length(Y)), px, VXF, B)
+    return Y
+end
+function get_coordinates!(
+    M::VectorBundle,
+    Y,
+    p,
+    X,
+    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData},
+) where {N}
+     px, Vx = submanifold_components(M.manifold, p)
+     VXM, VXF = submanifold_components(M.manifold, X)
+     n = manifold_dimension(M.manifold)
+     get_coordinates!(M.manifold, view(Y, 1:n), px, VXM, B.data.base_basis)
+     get_coordinates!(M.fiber, view(Y, n+1:length(Y)), px, VXF, B.data.vec_basis)
+     return Y
+ end
+function get_coordinates!(M::TangentBundleFibers, Y, p, X, B::AbstractBasis) where {N}
+    return get_coordinates!(M.manifold, Y, p, X, B)
+end
+function get_coordinates!(M::VectorBundle, Y, p, X, B::DefaultBasis) where {N}
+    return invoke(
+        get_coordinates!,
+        Tuple{VectorBundle,Any,Any,Any,AbstractBasis},
+        M,
+        Y,
+        p,
+        X,
+        B,
+    )
+end
+
 function get_vector(M::VectorBundle, p, X, B::DefaultOrthonormalBasis) where {N}
     n = manifold_dimension(M.manifold)
     xp1 = submanifold_component(p, Val(1))
@@ -333,6 +370,43 @@ end
 function get_vector(M::TangentBundleFibers, p, X, B::AbstractBasis) where {N}
     return get_vector(M.manifold, p, X, B)
 end
+
+function get_vector!(M::VectorBundle, Y, p, X, B::DefaultOrthonormalBasis) where {N}
+    n = manifold_dimension(M.manifold)
+    xp1 = submanifold_component(p, Val(1))
+    get_vector!(M.manifold, submanifold_component(Y, Val(1)), xp1, X[1:n], B)
+    get_vector!(M.fiber, submanifold_component(Y, Val(2)), xp1, X[n+1:end], B)
+    return Y
+end
+function get_vector!(
+    M::VectorBundle,
+    Y,
+    p,
+    X,
+    B::CachedBasis{VectorBundleBasisData},
+) where {N}
+    n = manifold_dimension(M.manifold)
+    xp1 = submanifold_component(p, Val(1))
+    get_vector!(
+        M.manifold,
+        submanifold_component(Y, Val(1)),
+        xp1,
+        X[1:n],
+        B.data.base_basis,
+    )
+    get_vector!(
+        M.fiber,
+        submanifold_component(Y, Val(2)),
+        xp1,
+        X[n+1:end],
+        B.data.vec_basis,
+    )
+    return Y
+end
+function get_vector!(M::TangentBundleFibers, Y, p, X, B::AbstractBasis) where {N}
+    return get_vector!(M.manifold, Y, p, X, B)
+end
+
 function get_vectors(
     M::VectorBundle,
     p,
@@ -350,6 +424,7 @@ function get_vectors(
     end
     return vs
 end
+
 function get_vectors(M::VectorBundleFibers, p, B::CachedBasis)
     return get_vectors(M.manifold, p, B)
 end

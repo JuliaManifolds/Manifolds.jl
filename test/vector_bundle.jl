@@ -76,6 +76,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_reverse_diff = isa(T, Vector),
                 test_forward_diff = isa(T, Vector),
                 test_tangent_vector_broadcasting = false,
+                test_vee_hat = true,
                 test_project_tangent = true,
                 basis_types_vecs = basis_types,
                 projection_atol_multiplier = 4

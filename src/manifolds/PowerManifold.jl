@@ -164,9 +164,27 @@ function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
     return FVector(CotangentSpace, alloc)
 end
+function allocate_result(
+    M::PowerManifoldNested,
+    f::Union{typeof(get_vector),typeof(hat)},
+    p,
+    X,
+)
+    return [allocate_result(M.manifold, f, _access_nested(p, i)) for i in get_iterator(M)]
+end
 function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector, x)
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
     return FVector(TangentSpace, alloc)
+end
+function allocate_result(M::PowerManifoldNested, f::vee_or_get_coordinates, p, X)
+    return invoke(
+        allocate_result,
+        Tuple{Manifold, vee_or_get_coordinates, Any, Any},
+        M,
+        f,
+        p,
+        X,
+    )
 end
 
 function allocation_promotion_function(M::AbstractPowerManifold, f, args::Tuple)
@@ -347,14 +365,18 @@ end
 
 function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBasis)
     rep_size = representation_size(M.manifold)
+    dim = manifold_dimension(M.manifold)
+    v_iter = 1
     for i in get_iterator(M)
+        # TODO: this view is really suboptimal when `dim` can be statically determined
         get_coordinates!(
             M.manifold,
-            _write(M, rep_size, Y, i),
+            view(Y, v_iter:v_iter+dim-1),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             B,
         )
+        v_iter += dim
     end
     return Y
 end
@@ -365,17 +387,14 @@ function get_coordinates!(
     X,
     B::CachedBasis{<:AbstractBasis{ℝ},<:PowerBasisData,ℝ}
 )
-    rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        get_coordinates(
-            M.manifold,
-            _write(M, rep_size, Y, i),
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i),
-            _access_nested(B.data.bases, i),
-        )
-    end
-    return Y
+    TypeTuple = Tuple{
+        AbstractPowerManifold,
+        Any,
+        Any,
+        Any,
+        CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽},
+    }
+    return invoke(get_coordinates!, TypeTuple, M, Y, p, X, B)
 end
 function get_coordinates!(
     M::AbstractPowerManifold,
@@ -385,14 +404,17 @@ function get_coordinates!(
     B::CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽}
 ) where {𝔽}
     rep_size = representation_size(M.manifold)
+    dim = manifold_dimension(M.manifold)
+    v_iter = 1
     for i in get_iterator(M)
         get_coordinates(
             M.manifold,
-            _write(M, rep_size, Y, i),
+            view(Y, v_iter:v_iter+dim-1),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _access_nested(B.data.bases, i),
         )
+        v_iter += dim
     end
     return Y
 end

@@ -82,6 +82,7 @@ Random.seed!(42)
                 test_reverse_diff = true,
                 test_musical_isomorphisms = true,
                 test_injectivity_radius = false,
+                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_s1_pt_dist],
@@ -102,6 +103,7 @@ Random.seed!(42)
                 test_reverse_diff = true,
                 test_musical_isomorphisms = true,
                 test_injectivity_radius = false,
+                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_s2_pt_dist],
@@ -122,6 +124,7 @@ Random.seed!(42)
                 test_reverse_diff = false,
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
+                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_r1_pt_dist],
@@ -143,6 +146,7 @@ Random.seed!(42)
                 test_reverse_diff = false,
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
+                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_rn1_pt_dist],
@@ -163,6 +167,7 @@ Random.seed!(42)
                 test_reverse_diff = false,
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
+                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_r2_pt_dist],
@@ -182,6 +187,7 @@ Random.seed!(42)
                 test_reverse_diff = false,
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
+                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_rn2_pt_dist],
@@ -204,6 +210,7 @@ Random.seed!(42)
             test_forward_diff = false,
             test_injectivity_radius = false,
             test_musical_isomorphisms = true,
+            test_vee_hat = true,
             retraction_methods = retraction_methods,
             inverse_retraction_methods = inverse_retraction_methods,
             rand_tvector_atol_multiplier = 5.0,
@@ -211,7 +218,7 @@ Random.seed!(42)
             is_tangent_atol_multiplier = 12.0,
         )
     end
-    
+
     @testset "Basis printing" begin
         p = hcat([[1.0, 0.0, 0.0] for i in 1:5]...)
         Bc = get_basis(Ms1, p, DefaultOrthonormalBasis())
