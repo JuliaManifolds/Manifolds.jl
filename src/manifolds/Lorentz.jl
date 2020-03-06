@@ -10,12 +10,8 @@ abstract type LorentzMetric <: Metric end
 @doc raw"""
     MinkowskiMetric <: LorentzMetric
 
-As a special metric of signature  $(++...+-)$, i.e. a [`LorentzMetric`](@ref)
-the minkowski metric on $\mathbb R^n$ is given by
-````math
-⟨a,b⟩_{\mathrm{M}} = -a_{n}b_{n} +
-\displaystyle\sum_{k=1}^{n-1} a_kb_k.
-````
+As a special metric of signature  $(++...+-)$, i.e. a [`LorentzMetric`](@ref),
+see [`minkowski_metric`](@ref) for the formula.
 """
 struct MinkowskiMetric <: LorentzMetric end
 
@@ -42,5 +38,15 @@ function local_metric(::MetricManifold{Euclidean{Tuple{N,},ℝ},MinkowskiMetric}
 end
 
 function inner(::MetricManifold{Euclidean{Tuple{N,},ℝ},MinkowskiMetric}, p, X, Y) where {N}
-    return -X[end] * Y[end] + sum(X[1:end-1] .* Y[1:end-1])
+    return minkowski_metric(X,Y)
 end
+@doc raw"""
+    minkowski_metric(a,b)
+
+Compute the minkowski metric on $\mathbb R^n$ is given by
+````math
+⟨a,b⟩_{\mathrm{M}} = -a_{n}b_{n} +
+\displaystyle\sum_{k=1}^{n-1} a_kb_k.
+````
+"""
+minkowski_metric(a,b) = -a[end] * b[end] + sum(a[1:end-1] .* b[1:end-1])

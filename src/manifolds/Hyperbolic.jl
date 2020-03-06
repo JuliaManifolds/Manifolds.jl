@@ -49,9 +49,9 @@ function check_manifold_point(M::Hyperbolic, p; kwargs...)
             "The point $(p) does not lie on $(M), since its size is not $(representation_size(M)).",
         )
     end
-    if !isapprox(inner(M,p,p,p), -1.0; kwargs...)
+    if !isapprox(minkowski_metric(p, p), -1.0; kwargs...)
         return DomainError(
-            inner(M,p,p,p),
+            minkowski_metric(p, p),
             "The point $(p) does not lie on $(M) since its Minkowski inner product is not -1.",
         )
     end
@@ -64,7 +64,7 @@ end
 Check whether `X` is a tangent vector to `p` on the [`Hyperbolic`](@ref) `M`, i.e.
 after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of the same dimension as `p`
 and orthogonal to `p` with respect to the inner product from the embedding, see
-[`MinkowskiMetric`](@ref). The optional parameter `check_base_point` indicates, whether to
+[`MinkowskiMetric`](@ref). The optional parameter `check_base_point` indicates whether to
 call [`check_manifold_point`](@ref)  for `p`. The tolerance for the last test can be set
 using the `kwargs...`.
 """
@@ -79,9 +79,9 @@ function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwar
             "The vector $(X) is not a tangent to a point on $M since its size does not match $(representation_size(M)).",
         )
     end
-    if !isapprox(inner(M, p, p, X), 0.0; kwargs...)
+    if !isapprox(minkowski_metric(p, X), 0.0; kwargs...)
         return DomainError(
-            abs(inner(M, p, p, X)),
+            abs(minkowski_metric(p, X)),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal (with respect to the Minkowski inner product) in the embedding.",
         )
     end
@@ -100,7 +100,7 @@ d_{ℍ^n}(p,q) = \operatorname{acosh}( - ⟨p, q⟩_{\mathrm{M}}),
 where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
 the [`Lorentz`](@ref)ian manifold.
 """
-distance(M::Hyperbolic, p, q) = acosh(max(-inner(M, p, p, q), 1.0))
+distance(M::Hyperbolic, p, q) = acosh(max(-minkowski_metric(p, q), 1.0))
 
 embed!(::Hyperbolic, q, p) = (q .= p)
 
@@ -153,7 +153,7 @@ and is zero otherwise.
 log(::Hyperbolic, ::Any...)
 
 function log!(M::Hyperbolic, X, p, q)
-    scp = inner(M, p, p, q)
+    scp = minkowski_metric(p, q)
     w = q + scp * p
     wn = sqrt(max(scp .^ 2 - 1, 0.0))
     wn < eps(eltype(p)) && return zero_tangent_vector!(M, X, p)
@@ -201,7 +201,7 @@ the [`Lorentz`](@ref)ian manifold.
 """
 project_tangent(::Hyperbolic, ::Any...)
 
-project_tangent!(M::Hyperbolic, Y, p, X) = (Y .= X .+ inner(M, p, p, X) .* p)
+project_tangent!(M::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)
 
 show(io::IO, ::Hyperbolic{N}) where {N} = print(io, "Hyperbolic($(N))")
 

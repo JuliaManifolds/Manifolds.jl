@@ -658,6 +658,7 @@ function retract!(M::Rotations, q, p, X, method::PolarRetraction)
     A = p + p * X
     return project_point!(M, q, A; check_det = false)
 end
+retract!(M::Rotations, q, p, X) = retract!(M, q, p, X, QRRetraction())
 
 show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
 
