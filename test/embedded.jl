@@ -1,6 +1,6 @@
 include("utils.jl")
 
-struct PlaneManifold <: AbstractEmbeddedManifold{DefaultIsometricEmbedding} end
+struct PlaneManifold <: AbstractEmbeddedManifold{TransparentIsometricEmbedding} end
 
 Manifolds.decorated_manifold(::PlaneManifold) = Euclidean(3)
 Manifolds.base_manifold(::PlaneManifold) = Euclidean(2)
@@ -15,7 +15,7 @@ Manifolds.embed!(::PlaneManifold, Y, p, X) = copyto!(Y,X)
 Manifolds.project_point!(::PlaneManifold, q, p) = (q .= [p[1] p[2] 0.])
 Manifolds.project_tangent!(::PlaneManifold, Y, p, X) = (Y .= [X[1] X[2] 0.])
 
-struct NotImplementedEmbeddedManifold <: AbstractEmbeddedManifold{DefaultIsometricEmbedding} end
+struct NotImplementedEmbeddedManifold <: AbstractEmbeddedManifold{TransparentIsometricEmbedding} end
 Manifolds.decorated_manifold(::NotImplementedEmbeddedManifold) = Euclidean(2)
 Manifolds.base_manifold(::NotImplementedEmbeddedManifold) = Euclidean(2)
 
@@ -26,7 +26,7 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{AbstractEmbed
 @testset "Embedded Manifolds" begin
     @testset "EmbeddedManifold basic tests" begin
         M = EmbeddedManifold(Euclidean(2), Euclidean(3))
-        @test repr(M) == "EmbeddedManifold(Euclidean(2; field = ℝ), Euclidean(3; field = ℝ), DefaultIsometricEmbedding())"
+        @test repr(M) == "EmbeddedManifold(Euclidean(2; field = ℝ), Euclidean(3; field = ℝ), TransparentIsometricEmbedding())"
         @test decorated_manifold(M) == Euclidean(3)
     end
     @testset "PlaneManifold" begin

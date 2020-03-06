@@ -26,7 +26,7 @@ is passed from the embedded manifold to the embedding.
 abstract type AbstractIsometricEmbeddingType <: AbstractEmbeddingType end
 
 """
-    DefaultIsometricEmbedding <: AbstractIsometricEmbeddingType
+    TransparentIsometricEmbedding <: AbstractIsometricEmbeddingType
 
 Specify that an embedding is the default isometric embedding. This even inherits
 logarithmic and exponential map as well as retraction and inverse retractions from the
@@ -35,7 +35,7 @@ embedding.
 For an example, see [`SymmetricMatrices`](@ref) which are isometrically embedded in
 the Euclidean space of matrices but also inherit exponential and logarithmic maps.
 """
-struct DefaultIsometricEmbedding <: AbstractIsometricEmbeddingType end
+struct TransparentIsometricEmbedding <: AbstractIsometricEmbeddingType end
 
 """
     EmbeddedManifold{MT <: Manifold, NT <: Manifold, ET} <: AbstractEmbeddedManifold{ET}
@@ -52,11 +52,11 @@ passing them through to embedding `N`.
 
 # Constructor
 
-    EmbeddedManifold(M, N, e=DefaultIsometricEmbedding())
+    EmbeddedManifold(M, N, e=TransparentIsometricEmbedding())
 
 Generate the `EmbeddedManifold` of the [`Manifold`](@ref) `M` into the
 [`Manifold`](@ref) `N` with [`AbstractEmbeddingType`](@ref) `e` that by default is the most
-transparent [`DefaultIsometricEmbedding`](@ref)
+transparent [`TransparentIsometricEmbedding`](@ref)
 """
 struct EmbeddedManifold{MT <: Manifold, NT <: Manifold, ET} <: AbstractEmbeddedManifold{ET}
     manifold::MT
@@ -65,7 +65,7 @@ end
 function EmbeddedManifold(
     M::MT,
     N::NT,
-    e::ET=DefaultIsometricEmbedding()
+    e::ET=TransparentIsometricEmbedding()
 ) where {MT <: Manifold, NT <: Manifold, ET <: AbstractEmbeddingType}
     return EmbeddedManifold{MT,NT,ET}(M,N)
 end
@@ -148,7 +148,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(exp),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -162,7 +162,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(exp!),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -211,7 +211,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(inverse_retract),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -225,7 +225,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(inverse_retract!),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -240,7 +240,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(log),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -254,7 +254,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(log!),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -289,7 +289,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(project_point),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:parent)
@@ -303,7 +303,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(project_point!),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -317,7 +317,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(project_tangent),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -331,7 +331,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(project_tangent!),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -345,7 +345,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(retract),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -359,7 +359,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(retract!),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -373,7 +373,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_along),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -387,7 +387,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_along!),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -401,7 +401,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_direction),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -415,7 +415,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_direction!),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -429,7 +429,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_to),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
@@ -443,7 +443,7 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_to!),
-    ::AbstractEmbeddedManifold{<:DefaultIsometricEmbedding},
+    ::AbstractEmbeddedManifold{<:TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)

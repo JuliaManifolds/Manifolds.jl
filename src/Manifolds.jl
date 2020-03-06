@@ -237,7 +237,7 @@ export Metric,
     PowerMetric,
     ProductMetric,
     MetricManifold
-export AbstractEmbeddingType, AbstractIsometricEmbeddingType, DefaultIsometricEmbedding
+export AbstractEmbeddingType, AbstractIsometricEmbeddingType, TransparentIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod,
     ExponentialRetraction,

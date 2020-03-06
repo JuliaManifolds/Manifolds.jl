@@ -21,7 +21,7 @@ See [`Sphere`](@ref) or [`Hyperbolic`](@ref) for example.
 Here, the exponential map, the logarithmic map, the retraction and its inverse
 are set to `:intransparent`, i.e. they have to be implemented.
 
-Furthermore, the [`DefaultIsometricEmbedding`](@ref) type even states that the exponential
+Furthermore, the [`TransparentIsometricEmbedding`](@ref) type even states that the exponential
 and logarithmic maps as well as retractions and vector transports of the embedding can be
 used for the embedded manifold as well.
 See [`SymmetricMatrices`](@ref) for an example.
