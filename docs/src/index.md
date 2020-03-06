@@ -12,7 +12,7 @@ based on that interface can be used within your code.
 To install the package just type
 
 ```julia
-] add Manifolds
+] add https://github.com/JuliaNLSolvers/Manifolds.jl.git
 ```
 
 Then you can directly start, for example to stop half way from the north pole on the [`Sphere`](@ref) to a point on the the equator, you can generate the [`shortest_geodesic`](@ref).
@@ -23,22 +23,4 @@ using Manifolds
 M = Sphere(2)
 γ = shortest_geodesic(M, [0., 0., 1.], [0., 1., 0.])
 γ(0.5)
-```
-
-## Specific Retractions
-
-```@docs
-PolarInverseRetraction
-PolarRetraction
-ProjectionInverseRetraction
-ProjectionRetraction
-QRInverseRetraction
-QRRetraction
-```
-
-## Additional functions
-
-```@docs
-hat(::Manifold, ::Any, ::Any)
-vee(::Manifold, ::Any, ::Any)
 ```
