@@ -20,7 +20,7 @@ struct Oblique{N,M} <: AbstractPowerManifold{Sphere{N},ArrayPowerRepresentation}
     manifold::Sphere{N}
 end
 
-Oblique(n::Int,m::Int) = Oblique{n-1,m}(Sphere(n-1))
+Oblique(n::Int, m::Int) = Oblique{n - 1,m}(Sphere(n - 1))
 
 ^(M::Sphere{N}, m::Int) where {N} = Oblique{N,m}(M)
 
@@ -32,8 +32,8 @@ of `m` unit columns from $\mathbb R^{n+1}$, i.e. each column is a point from
 [`Sphere`](@ref)`(n)`.
 """
 check_manifold_point(::Oblique, ::Any)
-function check_manifold_point(M::Oblique{Ns,Ms}, p; kwargs...) where {Ns, Ms}
-    if size(p) != (Ns+1,Ms)
+function check_manifold_point(M::Oblique{Ns,Ms}, p; kwargs...) where {Ns,Ms}
+    if size(p) != (Ns + 1, Ms)
         return DomainError(
             length(p),
             "The matrix in `p` ($(size(p))) does not match the dimension of Oblique $((Ns,Ms)).",
@@ -54,15 +54,15 @@ function check_tangent_vector(
     p,
     X;
     check_base_point = true,
-    kwargs...
+    kwargs...,
 ) where {Ns,Ms}
-    if check_base_point && size(p) != (Ns+1,Ms)
+    if check_base_point && size(p) != (Ns + 1, Ms)
         return DomainError(
             length(p),
             "The matrix `p` ($(size(p))) does not match the dimension of Oblique $((Ns,Ms)).",
         )
     end
-    if size(X) != (Ns+1,Ms)
+    if size(X) != (Ns + 1, Ms)
         return DomainError(
             length(X),
             "The matrix `X` ($(size(X))) does not match the dimension of Oblique $((Ns,Ms)).",
@@ -73,14 +73,14 @@ function check_tangent_vector(
         p,
         X;
         check_base_point = check_base_point,
-        kwargs...
+        kwargs...,
     )
 end
 
 get_iterator(M::Oblique{Ns,Ms}) where {Ns,Ms} = 1:Ms
 
-@generated manifold_dimension(::Oblique{N,M}) where {N,M} = (N)*M
+@generated manifold_dimension(::Oblique{N,M}) where {N,M} = (N) * M
 
-@generated representation_size(::Oblique{N,M}) where {N,M} = (N+1,M)
+@generated representation_size(::Oblique{N,M}) where {N,M} = (N + 1, M)
 
 show(io::IO, ::Oblique{N,M}) where {N,M} = print(io, "Oblique($(N+1),$(M))")

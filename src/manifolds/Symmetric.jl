@@ -29,7 +29,7 @@ end
 
 base_manifold(M::SymmetricMatrices) = M
 
-decorated_manifold(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N,N; field=𝔽)
+decorated_manifold(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field = 𝔽)
 
 @doc raw"""
     check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...)
@@ -83,7 +83,7 @@ function check_tangent_vector(
     p,
     X;
     check_base_point = true,
-    kwargs...
+    kwargs...,
 ) where {n,𝔽}
     if check_base_point
         t = check_manifold_point(M, p; kwargs...)
@@ -197,9 +197,9 @@ function get_vector(
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds Y[i, j] = Complex(X[k], i==j ? 0 : X[k+1]) * scale
+        @inbounds Y[i, j] = Complex(X[k], i == j ? 0 : X[k+1]) * scale
         @inbounds Y[j, i] = Y[i, j]
-        k += (i==j ? 1 : 2)
+        k += (i == j ? 1 : 2)
     end
     return Y
 end
@@ -224,7 +224,7 @@ and
 where the last $-n$ is due to the zero imaginary part for Hermitian matrices
 """
 function manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}
-    return div(N * (N + 1), 2) * real_dimension(𝔽) - (𝔽===ℂ ? N : 0)
+    return div(N * (N + 1), 2) * real_dimension(𝔽) - (𝔽 === ℂ ? N : 0)
 end
 
 @doc raw"""

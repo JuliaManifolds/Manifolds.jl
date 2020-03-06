@@ -28,9 +28,9 @@ function SkewSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
 end
 
 base_manifold(M::SkewSymmetricMatrices) = M
-decorated_manifold(M::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
+decorated_manifold(M::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field = 𝔽)
 
-get_embedding(M::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
+get_embedding(M::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field = 𝔽)
 
 @doc raw"""
     check_manifold_point(M::SkewSymmetricMatrices{n,𝔽}, p; kwargs...)
@@ -84,7 +84,7 @@ function check_tangent_vector(
     p,
     X;
     check_base_point = true,
-    kwargs...
+    kwargs...,
 ) where {n,𝔽}
     if check_base_point
         t = check_manifold_point(M, p; kwargs...)
@@ -154,7 +154,7 @@ function get_coordinates(
     @assert dim == N^2
     k = 1
     for i = 1:N, j = i:N
-        if i==j # real-part zero on the diagonal -> just one basis vector per diag entry
+        if i == j # real-part zero on the diagonal -> just one basis vector per diag entry
             @inbounds Y[k] = imag(X[i, j])
             k += 1
         else
@@ -177,8 +177,8 @@ function get_vector(
     @assert size(X) == (div(N * (N - 1), 2),)
     @assert size(Y) == (N, N)
     k = 1
-    for i= 1:N
-        Y[i,i] = convert(eltype(p),0.)
+    for i = 1:N
+        Y[i, i] = convert(eltype(p), 0.0)
     end
     for i = 1:N, j = (i+1):N
         @inbounds Y[i, j] = X[k] / sqrt(2)
@@ -199,7 +199,7 @@ function get_vector(
     @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
-        if i==j # real zero on the diag
+        if i == j # real zero on the diag
             @inbounds Y[i, j] = Complex(convert(eltype(X), 0), X[k])
             k += 1
         else
@@ -228,7 +228,7 @@ Return the dimension of the [`SkewSymmetricMatrices`](@ref) matrix `M` over the 
 where the last $n$ is due to an imaginary diagonal that is allowed $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
 function manifold_dimension(::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽}
-    return div(N * (N - 1), 2) * real_dimension(𝔽) + (𝔽===ℂ ? N : 0)
+    return div(N * (N - 1), 2) * real_dimension(𝔽) + (𝔽 === ℂ ? N : 0)
 end
 
 @doc raw"""

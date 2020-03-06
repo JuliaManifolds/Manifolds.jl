@@ -16,7 +16,8 @@ This means, that technically an embedded manifold is a decorator for the embeddi
 functions of this type get, in the semi-transparent way of the
 [`AbstractDecoratorManifold`](@ref), passed on to the embedding.
 """
-abstract type AbstractEmbeddedManifold{T<:AbstractEmbeddingType} <: AbstractDecoratorManifold end
+abstract type AbstractEmbeddedManifold{T<:AbstractEmbeddingType} <:
+              AbstractDecoratorManifold end
 
 """
     AbstractIsometricEmbeddingType <: AbstractEmbeddingType
@@ -59,16 +60,16 @@ Generate the `EmbeddedManifold` of the [`Manifold`](@ref) `M` into the
 [`Manifold`](@ref) `N` with [`AbstractEmbeddingType`](@ref) `e` that by default is the most
 transparent [`TransparentIsometricEmbedding`](@ref)
 """
-struct EmbeddedManifold{MT <: Manifold, NT <: Manifold, ET} <: AbstractEmbeddedManifold{ET}
+struct EmbeddedManifold{MT<:Manifold,NT<:Manifold,ET} <: AbstractEmbeddedManifold{ET}
     manifold::MT
     embedding::NT
 end
 function EmbeddedManifold(
     M::MT,
     N::NT,
-    e::ET=TransparentIsometricEmbedding()
-) where {MT <: Manifold, NT <: Manifold, ET <: AbstractEmbeddingType}
-    return EmbeddedManifold{MT,NT,ET}(M,N)
+    e::ET = TransparentIsometricEmbedding(),
+) where {MT<:Manifold,NT<:Manifold,ET<:AbstractEmbeddingType}
+    return EmbeddedManifold{MT,NT,ET}(M, N)
 end
 
 """
@@ -117,8 +118,8 @@ end
 
 function show(
     io::IO,
-    M::EmbeddedManifold{MT,NT,ET}
-) where {MT <: Manifold, NT <: Manifold, ET<:AbstractEmbeddingType}
+    M::EmbeddedManifold{MT,NT,ET},
+) where {MT<:Manifold,NT<:Manifold,ET<:AbstractEmbeddingType}
     print(io, "EmbeddedManifold($(M.manifold), $(M.embedding), $(ET()))")
 end
 
@@ -260,11 +261,7 @@ function decorator_transparent_dispatch(
 )
     return Val(:transparent)
 end
-function decorator_transparent_dispatch(
-    ::typeof(norm),
-    ::AbstractEmbeddedManifold,
-    args...,
-)
+function decorator_transparent_dispatch(::typeof(norm), ::AbstractEmbeddedManifold, args...)
     return Val(:intransparent)
 end
 function decorator_transparent_dispatch(
