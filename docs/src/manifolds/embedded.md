@@ -28,6 +28,15 @@ See [`SymmetricMatrices`](@ref) for an example.
 
 In both cases of course [`check_manifold_point`](@ref) and [`check_tangent_vector`](@ref) have to be implemented.
 
+## Technical Details
+
+Ssemantically we use the idea of the embedding to efficiently implement a manifold by not having to implement those functions that are already given by its embedding. Hence we decorate in some sence the manifold we implement.
+Still, technicall [`base_manifold`](@ref) is the embedding as long as [`EmbeddedManifold`](@ref) is used.
+For the abstract case, [`AbstractEmbeddedManifold`](@ref) the base manfiold might differ.
+Note that internally [`base_manifold](@ref) uses [`decorated_manifold`](@ref) for one step of removing multiple decorators.
+
+Clearly [`get_embedding`](@ref) always returns the embedding.
+
 ## Types
 
 ```@autodocs
