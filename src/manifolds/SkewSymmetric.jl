@@ -149,14 +149,14 @@ function get_coordinates(
     B::ArbitraryOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, dim)
+    Y = similar(real(X), dim)
     @assert size(X) == (N, N)
     @assert dim == N^2
     k = 1
     for i = 1:N, j = i:N
         @inbounds Y[k] = real(X[i, j]) * sqrt(2)
         k += 1
-        if i != j # real zero on the diagonal
+        if i != j # real zero on the diagonal -> just one basis vector per diag entry
             @inbounds Y[k] = imag(X[i, j]) * sqrt(2)
             k += 1
         end
@@ -198,13 +198,13 @@ function get_vector(
     k = 1
     for i = 1:N, j = i:N
         if i==j # real zero on the diag
-            @inbounds Y[i, j] = Complex(0, X[k])
+            @inbounds Y[i, j] = Complex(convert(eltype(X), 0), X[k])
             k += 1
         else
             @inbounds Y[i, j] = Complex(X[k], X[k+1]) / sqrt(2)
             k += 2
-        end
             @inbounds Y[j, i] = -Y[i, j]
+        end
     end
     return Y
 end
