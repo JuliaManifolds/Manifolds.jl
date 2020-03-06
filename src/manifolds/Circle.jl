@@ -53,7 +53,6 @@ For the real-valued case represented by angles, all `X` are valid, since the tan
 For the complex-valued case `X` has to lie on the line parallel to the tangent line at `p`
 in the complex plane, i.e. their inner product has to be zero.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
 check_tangent_vector(::Circle{ℝ}, ::Any...; ::Any...)
 

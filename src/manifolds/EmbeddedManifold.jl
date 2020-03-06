@@ -12,8 +12,9 @@ An abstract type for embedded manifolds, which acts as an [`AbstractDecoratorMan
 The functions of the manifold that is embedded can hence be just passed on to the embedding.
 The embedding is further specified by an [`AbstractEmbeddingType`](@ref).
 
-This means, that formally an embedded manifold is a decorator for the manifold it is embedded
-into.
+This means, that technically an embedded manifold is a decorator for the embedding, i.e.
+functions of this type get, in the semi-transparent way of the
+[`AbstractDecoratorManifold`](@ref), passed on to the embedding.
 """
 abstract type AbstractEmbeddedManifold{T<:AbstractEmbeddingType} <: AbstractDecoratorManifold end
 
