@@ -84,7 +84,7 @@ include("utils.jl")
                 basis_types_vecs = (ArbitraryOrthonormalBasis(),),
                 basis_types_to_from = (ArbitraryOrthonormalBasis(),)
             )
-            @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
+            @test isapprox(-pts_complex[1], exp(M, pts_complex[1], log(M, pts_complex[1], -pts_complex[1])))
         end # testset type $T
     end # for
 end # test SymmetricMatrices
