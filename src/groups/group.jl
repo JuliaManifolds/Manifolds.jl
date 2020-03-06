@@ -145,6 +145,13 @@ isapprox(p, e::Identity; kwargs...) = isapprox(e::Identity, p; kwargs...)
 isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
 isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
+function decorator_transparent_dispatch(
+    ::typeof(hat),
+    ::AbstractGroupManifold,
+    args...,
+)
+    return Val(:parent)
+end
 function allocate_result(M::Manifold, ::typeof(hat), e::Identity, Xⁱ)
     is_group_decorator(M) && return allocate_result(base_group(M), hat, e, Xⁱ)
     error("allocate_result not implemented for manifold $(M), function hat, point $(e), and vector $(Xⁱ).")
@@ -160,6 +167,14 @@ function allocate_result(
 ) where {GT<:AbstractGroupManifold}
     B = VectorBundleFibers(TangentSpace, G)
     return allocate(Xⁱ, Size(representation_size(B)))
+end
+
+function decorator_transparent_dispatch(
+    ::typeof(vee),
+    ::AbstractGroupManifold,
+    args...,
+)
+    return Val(:parent)
 end
 function allocate_result(M::Manifold, ::typeof(vee), e::Identity, X)
     is_group_decorator(M) && return allocate_result(base_group(M), vee, e, X)
