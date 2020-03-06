@@ -49,6 +49,8 @@ import ManifoldsBase:
     exp,
     exp!,
     geodesic,
+    hat,
+    hat!,
     injectivity_radius,
     inner,
     isapprox,
@@ -75,6 +77,8 @@ import ManifoldsBase:
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
+    vee,
+    vee!,
     zero_tangent_vector,
     zero_tangent_vector!
 import Random: rand
@@ -103,8 +107,11 @@ using ManifoldsBase:
 using ManifoldsBase:
     ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
+using ManifoldsBase: QRRetraction, PolarRetraction, ProjectionRetraction
 using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
+using ManifoldsBase: QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
 using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
+
 using Markdown: @doc_str
 using Random: AbstractRNG
 using Requires
@@ -112,106 +119,6 @@ using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
 using StatsBase: AbstractWeights, UnitWeights, values, varcorrection
 using UnsafeArrays
-
-@doc raw"""
-    hat(M::Manifold, p, Xⁱ)
-
-Given a basis $e_i$ on the tangent space at a point `p` and tangent
-component vector $X^i$, compute the equivalent vector representation
-$X=X^i e_i$, where Einstein summation notation is used:
-
-````math
-∧ : X^i ↦ X^i e_i
-````
-
-For array manifolds, this converts a vector representation of the tangent
-vector to an array representation. The [`vee`](@ref) map is the `hat` map's
-inverse.
-"""
-function hat(M::Manifold, p, Xⁱ)
-    X = allocate_result(M, hat, p, Xⁱ)
-    return hat!(M, X, p, Xⁱ)
-end
-function hat!(M::Manifold, X, p, Xⁱ)
-    error(manifold_function_not_implemented_message(M, hat!, X, p, Xⁱ))
-end
-@decorator_transparent_signature hat!(M::AbstractDecoratorManifold, X, p, Xⁱ)
-
-@doc raw"""
-    vee(M::Manifold, p, X)
-
-Given a basis $e_i$ on the tangent space at a point `p` and tangent
-vector `X`, compute the vector components $X^i$, such that $X = X^i e_i$, where
-Einstein summation notation is used:
-
-````math
-\vee : X^i e_i ↦ X^i
-````
-
-For array manifolds, this converts an array representation of the tangent
-vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
-inverse.
-"""
-function vee(M::Manifold, p, X)
-    Xⁱ = allocate_result(M, vee, p, X)
-    return vee!(M, Xⁱ, p, X)
-end
-
-function vee!(M::Manifold, Xⁱ, p, X)
-    error(manifold_function_not_implemented_message(M, vee!, Xⁱ, p, X))
-end
-@decorator_transparent_signature vee!(M::AbstractDecoratorManifold, Xⁱ, p, X)
-
-function allocate_result(M::Manifold, f::typeof(vee), p, X)
-    T = allocate_result_type(M, f, (p, X))
-    return allocate(p, T, Size(manifold_dimension(M)))
-end
-
-"""
-    PolarRetraction <: AbstractRetractionMethod
-
-Retractions that are based on singular value decompositions of the matrix / matrices
-for point and tangent vector on a [`Manifold`](@ref)
-"""
-struct PolarRetraction <: AbstractRetractionMethod end
-
-"""
-    ProjectionRetraction <: AbstractRetractionMethod
-
-Retractions that are based on projection and usually addition in the embedding.
-"""
-struct ProjectionRetraction <: AbstractRetractionMethod end
-
-"""
-    QRRetraction <: AbstractRetractionMethod
-
-Retractions that are based on a QR decomposition of the
-matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
-"""
-struct QRRetraction <: AbstractRetractionMethod end
-
-"""
-    PolarInverseRetraction <: AbstractInverseRetractionMethod
-
-Inverse retractions that are based on a singular value decomposition of the
-matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
-"""
-struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
-
-"""
-    ProjectionInverseRetraction <: AbstractInverseRetractionMethod
-
-Inverse retractions that are based on a projection (or its inversion).
-"""
-struct ProjectionInverseRetraction <: AbstractInverseRetractionMethod end
-
-"""
-    QRInverseRetraction <: AbstractInverseRetractionMethod
-
-Inverse retractions that are based on a QR decomposition of the
-matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
-"""
-struct QRInverseRetraction <: AbstractInverseRetractionMethod end
 
 include("utils.jl")
 include("numbers.jl")
