@@ -154,11 +154,13 @@ function get_coordinates(
     @assert dim == N^2
     k = 1
     for i = 1:N, j = i:N
-        @inbounds Y[k] = real(X[i, j]) * sqrt(2)
-        k += 1
-        if i != j # real zero on the diagonal -> just one basis vector per diag entry
-            @inbounds Y[k] = imag(X[i, j]) * sqrt(2)
+        if i==j
+            @inbounds Y[k] = real(X[i, j])
             k += 1
+        else  # real-part zero on the diagonal -> just one basis vector per diag entry
+            @inbounds Y[k] = real(X[i, j])
+            @inbounds Y[k+1] = imag(X[i, j]) * sqrt(2)
+            k += 2
         end
     end
     return Y
