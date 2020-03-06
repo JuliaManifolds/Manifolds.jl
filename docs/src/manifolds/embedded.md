@@ -1,11 +1,12 @@
 # Embedded manifold
 
-Some manifolds can easily be defined by using a certain embedding. For example the [`Sphere`](@ref)`(n)` is embedded in [`Euclidean`](@ref)`(n+1)`.
+Some manifolds can easily be defined by using a certain embedding.
+For example the [`Sphere`](@ref)`(n)` is embedded in [`Euclidean`](@ref)`(n+1)`.
 Similar to the metric and [`MetricManifold`](@ref), an embedding is often implicitly assumed.
 We introduce the embedded manifolds hence as an [`AbstractDecoratorManifold`](@ref).
 
-This decorator enables to use such an embedding in an transparent way. Different types of
-embeddings can be distinguished using the [`AbstractEmbeddingType`](@ref).
+This decorator enables to use such an embedding in an transparent way.
+Different types of embeddings can be distinguished using the [`AbstractEmbeddingType`](@ref).
 
 The embedding also covers representation of tangent vectors.
 For both points and tangent vectors the function [`embed`](@ref) returns their representation in the embedding.
@@ -15,16 +16,17 @@ Then their representation is different from the representation in the embedding.
 
 ## Isometric Embeddings
 
-For isometric embeddings the type [`AbstractIsometricEmbeddingType`](@ref) can be used to
-avoid reimplementing the metric. See [`Sphere`](@ref) or [`Hyperbolic`](@ref) for example.
+For isometric embeddings the type [`AbstractIsometricEmbeddingType`](@ref) can be used to avoid reimplementing the metric.
+See [`Sphere`](@ref) or [`Hyperbolic`](@ref) for example.
 Here, the exponential map, the logarithmic map, the retraction and its inverse
 are set to `:intransparent`, i.e. they have to be implemented.
 
-Further more the [`DefaultIsometricEmbedding`](@ref) type even states, that the exponential
-and logarithmic map as well as retractions and vector transports of the embedding can be
-used for the embedded manifold as well. See [`SymmetricMatrices`](@ref) for an example.
+Furthermore, the [`DefaultIsometricEmbedding`](@ref) type even states that the exponential
+and logarithmic maps as well as retractions and vector transports of the embedding can be
+used for the embedded manifold as well.
+See [`SymmetricMatrices`](@ref) for an example.
 
-In both cases of course [`check_manifold_point`](@ref) and [`check_tangent_vector`](@ref) have to be implemented
+In both cases of course [`check_manifold_point`](@ref) and [`check_tangent_vector`](@ref) have to be implemented.
 
 ## Types
 

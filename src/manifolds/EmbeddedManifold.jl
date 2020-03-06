@@ -1,14 +1,14 @@
 """
     AbstractEmbeddingType
 
-A type to provide properties of the embedding an [`AbstractEmbeddedManifold`](@ref) has.
+A type used to specify properties of an [`AbstractEmbeddedManifold`](@ref).
 """
 abstract type AbstractEmbeddingType end
 
 """
     AbstractEmbeddedManifold{T<:AbstractEmbeddingType} <: AbstractDecoratorManifold
 
-An abstract type for an EmbeddedManifold, which acts as an [`AbstractDecoratorManifold`](@ref).
+An abstract type for embedded manifolds, which acts as an [`AbstractDecoratorManifold`](@ref).
 The functions of the manifold that is embedded can hence be just passed on to the embedding.
 The embedding is further specified by an [`AbstractEmbeddingType`](@ref).
 
@@ -20,7 +20,7 @@ abstract type AbstractEmbeddedManifold{T<:AbstractEmbeddingType} <: AbstractDeco
 """
     AbstractIsometricEmbeddingType <: AbstractEmbeddingType
 
-Characterizes an that an embedding is isometric. For this case the [`inner`](@ref) product
+Characterizes an embedding as isometric. For this case the [`inner`](@ref) product
 is passed from the embedded manifold to the embedding.
 """
 abstract type AbstractIsometricEmbeddingType <: AbstractEmbeddingType end
@@ -42,8 +42,8 @@ struct DefaultIsometricEmbedding <: AbstractIsometricEmbeddingType end
 
 A type to represent that a [`Manifold`](@ref) `M` of type `MT` is indeed an emebedded
 manifold and embedded into the manifold `N` of type `NT`.
-Based on the [`AbstractEmbeddingType`](@ref) `ET`, this introduces functions for `M` by
-passing through to embedding `N`.
+Based on the [`AbstractEmbeddingType`](@ref) `ET`, this introduces methods for `M` by
+passing them through to embedding `N`.
 
 # Fields
 
@@ -52,7 +52,7 @@ passing through to embedding `N`.
 
 # Constructor
 
-    EmbeddedManifold(M,N,e=DefaultIsometricEmbedding)
+    EmbeddedManifold(M, N, e=DefaultIsometricEmbedding())
 
 Generate the `EmbeddedManifold` of the [`Manifold`](@ref) `M` into the
 [`Manifold`](@ref) `N` with [`AbstractEmbeddingType`](@ref) `e` that by default is the most
@@ -71,19 +71,19 @@ function EmbeddedManifold(
 end
 
 """
-    embed(M::AbstractEmbeddedManifold,p)
+    embed(M::AbstractEmbeddedManifold, p)
 
 return the embedded representation of a point `p` on the [`AbstractEmbeddedManifold`](@ref)
 `M`.
 
-    embed(M::AbstractEmbeddedManifold,p,X)
+    embed(M::AbstractEmbeddedManifold, p, X)
 
 return the embedded representation of a tangent vector `X` at point `p` on the
 [`AbstractEmbeddedManifold`](@ref) `M`.
 """
 embed(::AbstractEmbeddedManifold, ::Any...)
 
-@decorator_transparent_function function embed(M::AbstractEmbeddedManifold,p)
+@decorator_transparent_function function embed(M::AbstractEmbeddedManifold, p)
     q = allocate(p)
     embed!(M, q, p)
     return q
@@ -92,7 +92,7 @@ end
     error("Embedding a point $(typeof(p)) on $(typeof(M)) not yet implemented.")
 end
 
-@decorator_transparent_function function embed(M::AbstractEmbeddedManifold,p, X)
+@decorator_transparent_function function embed(M::AbstractEmbeddedManifold, p, X)
     Y = allocate(X)
     embed!(M, Y, p, X)
     return Y

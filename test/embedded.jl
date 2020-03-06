@@ -5,7 +5,7 @@ struct PlaneManifold <: AbstractEmbeddedManifold{DefaultIsometricEmbedding} end
 Manifolds.decorated_manifold(::PlaneManifold) = Euclidean(3)
 Manifolds.base_manifold(::PlaneManifold) = Euclidean(2)
 
-function Manifolds.check_manifold_point(M,p;kwargs...)
+function Manifolds.check_manifold_point(M, p; kwargs...)
     length(p)!= 3 && return "Wrong size"
     isapprox(p[3],0.;kwargs...) != 0 && return "Third component not zero"
     return nothing

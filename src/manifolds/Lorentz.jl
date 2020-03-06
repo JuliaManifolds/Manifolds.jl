@@ -22,7 +22,7 @@ struct MinkowskiMetric <: LorentzMetric end
 @doc doc"""
     Lorentz{N} = MetricManifold{Euclidean{N},LorentzMetric}
 
-The Lorentz manifold (or Lorentzian) is a pseudo-Riemannian manifold
+The Lorentz manifold (or Lorentzian) is a pseudo-Riemannian manifold.
 
 # Constructor
 
@@ -33,7 +33,7 @@ which is by default set to the [`MinkowskiMetric`](@ref).
 """
 const Lorentz = MetricManifold{Euclidean{Tuple{N,},ℝ},<:LorentzMetric} where N
 
-function Lorentz(n, m::MT where {MT <: LorentzMetric}=MinkowskiMetric() )
+function Lorentz(n, m::MT = MinkowskiMetric()) where {MT<:LorentzMetric}
     return Lorentz{n,typeof(m)}(Euclidean(n),m)
 end
 

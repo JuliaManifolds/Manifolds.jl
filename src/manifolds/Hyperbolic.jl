@@ -62,7 +62,7 @@ end
     check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`Hyperbolic`](@ref) `M`, i.e.
-after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
+after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of the same dimension as `p`
 and orthogonal to `p` with respect to the inner product from the embedding, see
 [`MinkowskiMetric`](@ref). The optional parameter `check_base_point` indicates, whether to
 call [`check_manifold_point`](@ref)  for `p`. The tolerance for the last test can be set
