@@ -149,15 +149,17 @@ function get_coordinates(
     B::ArbitraryOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, dim)
+    Y = similar(X, real(eltype(X)), dim)
     @assert size(X) == (N, N)
     @assert dim == N^2
     k = 1
     for i = 1:N, j = i:N
-        @inbounds Y[k] = real(X[i, j]) * sqrt(2)
-        k += 1
         if i != j # real zero on the diagonal
-            @inbounds Y[k] = imag(X[i, j]) * sqrt(2)
+            @inbounds Y[k] = real(X[i, j]) * sqrt(2)
+            @inbounds Y[k+1] = imag(X[i, j]) * sqrt(2)
+            k += 2
+        else
+            @inbounds Y[k] = imag(X[i, j])
             k += 1
         end
     end
@@ -203,14 +205,14 @@ function get_vector(
         else
             @inbounds Y[i, j] = Complex(X[k], X[k+1]) / sqrt(2)
             k += 2
+            @inbounds Y[j, i] = -conj(Y[i, j])
         end
-            @inbounds Y[j, i] = -Y[i, j]
     end
     return Y
 end
 
 @doc raw"""
-manifold_dimension(M::SkewSymmetricMatrices{n,𝔽})
+    manifold_dimension(M::SkewSymmetricMatrices{n,𝔽})
 
 Return the dimension of the [`SkewSymmetricMatrices`](@ref) matrix `M` over the number system
 `𝔽`, i.e.

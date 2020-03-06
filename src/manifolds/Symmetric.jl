@@ -206,7 +206,7 @@ end
 ## unify within bases later.
 
 @doc raw"""
-manifold_dimension(M::SymmetricMatrices{n,𝔽})
+    manifold_dimension(M::SymmetricMatrices{n,𝔽})
 
 Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the number system
 `𝔽`, i.e.
