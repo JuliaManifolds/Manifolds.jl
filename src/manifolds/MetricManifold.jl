@@ -60,7 +60,7 @@ derivative of the local representation of the metric tensor. The dimensions of
 the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
 christoffel_symbols_first(::MetricManifold, ::Any)
-@decorator_transparent_function function function christoffel_symbols_first(
+@decorator_transparent_function function christoffel_symbols_first(
     M::MetricManifold,
     p;
     backend::AbstractDiffBackend = diff_backend(),
