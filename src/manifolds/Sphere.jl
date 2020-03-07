@@ -183,13 +183,6 @@ Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
 injectivity_radius(::Sphere, ::Any...) = π
 injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π / 2
 
-function get_vector(M::Sphere{N}, p, X, B::ArbitraryOrthonormalBasis) where {N}
-    p[1] ≈ 1 && return vcat(0, X)
-    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
-    X0 = vcat(0, X)
-    return 2 * xp1 * dot(xp1, X0) / dot(xp1, xp1) - X0
-end
-
 @doc raw"""
     inverse_retract(M::Sphere, p, q, ::ProjectionInverseRetraction)
 

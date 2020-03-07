@@ -127,9 +127,9 @@ end
 embed!(M::SymmetricMatrices, q, p) = copyto!(q, p)
 
 function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
-    vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors
-    kappas = zeros(real(eltype(p)), manifold_dimension(M))
-    return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
+    Ξ = get_basis(M, p, DefaultOrthonormalBasis()).data
+    κ = zeros(real(eltype(p)), manifold_dimension(M))
+    return CachedBasis(B, κ, Ξ)
 end
 
 function get_coordinates!(

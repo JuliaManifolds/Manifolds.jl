@@ -120,16 +120,16 @@ end
 embed!(M::SkewSymmetricMatrices, q, p) = copyto!(q, p)
 
 function get_basis(M::SkewSymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
-    vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors
-    kappas = zeros(real(eltype(p)), manifold_dimension(M))
-    return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
+    Ξ = get_basis(M, p, DefaultOrthonormalBasis()).data
+    κ = zeros(real(eltype(p)), manifold_dimension(M))
+    return CachedBasis(B, κ, Ξ)
 end
 
 function get_coordinates(
     M::SkewSymmetricMatrices{N,ℝ},
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
     Y = similar(X, dim)
@@ -146,7 +146,7 @@ function get_coordinates(
     M::SkewSymmetricMatrices{N,ℂ},
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
     Y = similar(X, real(eltype(X)), dim)
@@ -170,7 +170,7 @@ function get_vector(
     M::SkewSymmetricMatrices{N,ℝ},
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
     Y = allocate_result(M, get_vector, p)
@@ -191,7 +191,7 @@ function get_vector(
     M::SkewSymmetricMatrices{N,ℂ},
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
     Y = allocate_result(M, get_vector, p, p .* 1im)
