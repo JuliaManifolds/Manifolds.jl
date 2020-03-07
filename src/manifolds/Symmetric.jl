@@ -183,7 +183,7 @@ function get_vector!(
     B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    @assert size(X) == (div(N * (N + 1), 2),)
+    @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
@@ -202,7 +202,7 @@ function get_vector!(
     B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    @assert size(X) == (N * (N + 1),)
+    @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
