@@ -50,16 +50,19 @@ function check_manifold_point(M::CholeskySpace, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::CholeskySpace, p, X; kwargs... )
+    check_tangent_vector(M::CholeskySpace, p, X; check_base_point = true, kwargs... )
 
 Check whether `v` is a tangent vector to `p` on the [`CholeskySpace`](@ref) `M`, i.e.
 after [`check_manifold_point`](@ref)`(M,p)`, `X` has to have the same dimension as `x`
 and a symmetric matrix.
+The optional parameter `check_base_point` indicates whether to call [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the tests can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::CholeskySpace, p, X; kwargs...)
-    mpe = check_manifold_point(M, p)
-    mpe !== nothing && return mpe
+function check_tangent_vector(M::CholeskySpace, p, X; check_base_point = true, kwargs...)
+    if check_base_point
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe !== nothing && return mpe
+    end
     if size(X) != representation_size(M)
         return DomainError(
             size(X),

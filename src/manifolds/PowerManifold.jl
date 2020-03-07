@@ -193,14 +193,6 @@ end
 
 ^(M::Manifold, n) = PowerManifold(M, n...)
 
-function basis(M::AbstractPowerManifold, p, B::ArbitraryOrthonormalBasis)
-    return invoke(basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
-end
-
-function basis(M::AbstractPowerManifold, p, B::DiagonalizingOrthonormalBasis)
-    return invoke(basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
-end
-
 """
     check_manifold_point(M::AbstractProductManifold, p; kwargs...)
 
@@ -219,17 +211,19 @@ function check_manifold_point(M::AbstractPowerManifold, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::AbstractPowerManifold, p, X; kwargs... )
+    check_tangent_vector(M::AbstractPowerManifold, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` an the [`AbstractPowerManifold`](@ref)
 `M`, i.e. atfer [`check_manifold_point`](@ref)`(M, p)`, and all projections to
 base manifolds must be respective tangent vectors.
-
+The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::AbstractPowerManifold, p, X; kwargs...)
-    mpe = check_manifold_point(M, p)
-    mpe === nothing || return mpe
+function check_tangent_vector(M::AbstractPowerManifold, p, X; check_base_point = true, kwargs...)
+    if check_base_point
+        mpe = check_manifold_point(M, p)
+        mpe === nothing || return mpe
+    end
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         imp = check_tangent_vector(
@@ -464,7 +458,7 @@ function inner(M::AbstractPowerManifold, p, X, Y)
     return result
 end
 
-is_default_metric(::AbstractPowerManifold, ::PowerMetric) = Val(true)
+default_metric_dispatch(::AbstractPowerManifold, ::PowerMetric) = Val(true)
 
 function isapprox(M::AbstractPowerManifold, p, q; kwargs...)
     result = true

@@ -20,11 +20,18 @@ one. This type is mostly useful for equipping the direct product of group manifo
     ProductGroup(manifold::ProductManifold)
 """
 function ProductGroup(manifold::ProductManifold)
-    if !all(M -> (is_decorator_group(M) === Val(true)), manifold.manifolds)
+    if !all(is_group_decorator, manifold.manifolds)
         error("All submanifolds of product manifold must be or decorate groups.")
     end
     op = ProductOperation()
     return GroupManifold(manifold, op)
+end
+
+function decorator_transparent_dispatch(::typeof(group_exp!), M::ProductGroup, q, X)
+    return Val(:transparent)
+end
+function decorator_transparent_dispatch(::typeof(group_log!), M::ProductGroup, X, q)
+    return Val(:transparent)
 end
 
 function show(io::IO, ::MIME"text/plain", G::ProductGroup)

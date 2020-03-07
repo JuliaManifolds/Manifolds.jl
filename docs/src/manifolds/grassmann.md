@@ -1,4 +1,4 @@
-# Grassmann manifold
+# Grassmannian manifold
 
 ```@autodocs
 Modules = [Manifolds]

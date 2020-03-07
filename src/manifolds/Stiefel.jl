@@ -72,16 +72,25 @@ function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,�
 end
 
 @doc raw"""
-    check_tangent_vector(M::Stiefel, p, X; kwargs...)
+    check_tangent_vector(M::Stiefel, p, X; check_base_point = true, kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
 `M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](@ref) fits and
 it (approximately) holds that $p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0$.
+The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The settings for approximately can be set with `kwargs...`.
 """
-function check_tangent_vector(M::Stiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
-    mpe = check_manifold_point(M, p)
-    mpe === nothing || return mpe
+function check_tangent_vector(
+    M::Stiefel{n,k,𝔽},
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+) where {n,k,𝔽}
+    if check_base_point
+        mpe = check_manifold_point(M, p)
+        mpe === nothing || return mpe
+    end
     if (𝔽 === ℝ) && !(eltype(X) <: Real)
         return DomainError(
             eltype(X),

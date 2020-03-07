@@ -2,6 +2,9 @@
 include("../utils.jl")
 
 @testset "General group tests" begin
+    @test length(methods(has_biinvariant_metric)) == 1
+    @test length(methods(has_invariant_metric)) == 1
+    @test length(methods(has_biinvariant_metric)) == 1
     @testset "Not implemented operation" begin
         G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
         @test repr(G) == "GroupManifold(NotImplementedManifold(), NotImplementedOperation())"
@@ -9,16 +12,10 @@ include("../utils.jl")
         v = [2.0, 3.0]
         eg = Identity(G)
         @test repr(eg) === "Identity($(G))"
+        @test length(methods(is_group_decorator)) == 1
 
-        @test_throws Exception Identity(G, Val(true))
-        @test_throws ErrorException Identity(G, Val(false))
-
-        @test is_decorator_manifold(G) === Val(true)
-
-        @test Manifolds.is_decorator_group(G) === Val(true)
-        @test Manifolds.is_decorator_group(NotImplementedManifold()) === Val(false)
-        @test Manifolds.is_decorator_group(G, Val(true)) === Val(false)
-        @test Manifolds.is_decorator_group(G, Val(false)) === Val(false)
+        @test Manifolds.is_group_decorator(G)
+        @test !Manifolds.is_group_decorator(NotImplementedManifold())
 
         @test base_group(G) === G
 
@@ -26,6 +23,12 @@ include("../utils.jl")
             @test NotImplementedOperation(NotImplementedManifold()) === G
             @test (NotImplementedOperation())(NotImplementedManifold()) === G
         end
+        @test_throws ErrorException base_group(MetricManifold(Euclidean(3),EuclideanMetric()))
+        @test_throws ErrorException hat(Rotations(3), Identity(G), [1,2,3])
+        @test_throws ErrorException hat(GroupManifold(Rotations(3), NotImplementedOperation()), Identity(G), [1,2,3])
+        @test_throws ErrorException vee(Rotations(3), Identity(G), [1,2,3])
+        @test_throws ErrorException vee(GroupManifold(Rotations(3), NotImplementedOperation()), Identity(G), [1,2,3])
+        @test_throws ErrorException Identity(Euclidean(3))
 
         @test_throws ErrorException copyto!(x, eg)
 

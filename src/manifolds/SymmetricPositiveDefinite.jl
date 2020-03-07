@@ -50,16 +50,26 @@ function check_manifold_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) whe
 end
 
 """
-    check_tangent_vector(M::SymmetricPositiveDefinite, p, X; kwargs... )
+    check_tangent_vector(M::SymmetricPositiveDefinite, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`SymmetricPositiveDefinite`](@ref) `M`,
 i.e. atfer [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
 and a symmetric matrix, i.e. this stores tangent vetors as elements of the corresponding
-Lie group. The tolerance for the last test can be set using the `kwargs...`.
+Lie group.
+The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
+The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::SymmetricPositiveDefinite{N}, p, X; kwargs...) where {N}
-    mpe = check_manifold_point(M, p)
-    mpe === nothing || return mpe
+function check_tangent_vector(
+    M::SymmetricPositiveDefinite{N},
+    p,
+    X;
+    check_base_point = true,
+    kwargs...
+) where {N}
+    if check_base_point
+        mpe = check_manifold_point(M, p)
+        mpe === nothing || return mpe
+    end
     if size(X) != representation_size(M)
         return DomainError(
             size(X),
