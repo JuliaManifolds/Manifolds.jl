@@ -6,7 +6,7 @@ An abstract representation type of points and tangent vectors on a power manifol
 abstract type AbstractPowerRepresentation end
 
 """
-    MultidimentionalArrayPowerRepresentation
+    ArrayPowerRepresentation
 
 Representation of points and tangent vectors on a power manifold using multidimensional
 arrays where first dimensions are equal to [`representation_size`](@ref) of the
@@ -15,7 +15,7 @@ direction.
 
 [`Torus`](@ref) uses this representation.
 """
-struct MultidimentionalArrayPowerRepresentation <: AbstractPowerRepresentation end
+struct ArrayPowerRepresentation <: AbstractPowerRepresentation end
 
 """
     NestedPowerRepresentation
@@ -59,7 +59,7 @@ power manifolds might be faster if they are represented as [`ProductManifold`](@
     PowerManifold(M, NestedPowerRepresentation(), N_1, N_2, ..., N_n)
 
 Generate the power manifold $M^{N_1 × N_2 × … × N_n}$.
-By default, the [`MultidimentionalArrayPowerRepresentation`](@ref) of points
+By default, the [`ArrayPowerRepresentation`](@ref) of points
 and tangent vectors is used, although a different one, for example
 [`NestedPowerRepresentation`](@ref), can be given as the second argument to the
 constructor.
@@ -70,7 +70,7 @@ struct PowerManifold{TM<:Manifold,TSize,TPR<:AbstractPowerRepresentation} <:
 end
 
 function PowerManifold(M::Manifold, size::Int...)
-    return PowerManifold{typeof(M),Tuple{size...},MultidimentionalArrayPowerRepresentation}(
+    return PowerManifold{typeof(M),Tuple{size...},ArrayPowerRepresentation}(
         M,
     )
 end
@@ -166,9 +166,24 @@ function PrecomputedPowerOrthonormalBasis(
 end
 
 const PowerManifoldMultidimensional =
-    AbstractPowerManifold{<:Manifold,MultidimentionalArrayPowerRepresentation} where {TSize}
+    AbstractPowerManifold{<:Manifold,ArrayPowerRepresentation} where {TSize}
 const PowerManifoldNested =
     AbstractPowerManifold{<:Manifold,NestedPowerRepresentation} where {TSize}
+
+_access_nested(x, i::Int) = x[i]
+_access_nested(x, i::Tuple) = x[i...]
+
+function allocate_result(M::PowerManifoldNested, f, x...)
+    return [allocate_result(M.manifold, f, map(y -> _access_nested(y, i), x)...) for i in get_iterator(M)]
+end
+function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x)
+    alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
+    return FVector(CotangentSpace, alloc)
+end
+function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector, x)
+    alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
+    return FVector(TangentSpace, alloc)
+end
 
 function basis(M::AbstractPowerManifold, p, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
@@ -177,14 +192,6 @@ function basis(M::AbstractPowerManifold, p, B::AbstractBasis)
 end
 
 ^(M::Manifold, n) = PowerManifold(M, n...)
-
-function basis(M::AbstractPowerManifold, p, B::ArbitraryOrthonormalBasis)
-    return invoke(basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
-end
-
-function basis(M::AbstractPowerManifold, p, B::DiagonalizingOrthonormalBasis)
-    return invoke(basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
-end
 
 """
     check_manifold_point(M::AbstractProductManifold, p; kwargs...)
@@ -204,17 +211,19 @@ function check_manifold_point(M::AbstractPowerManifold, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::AbstractPowerManifold, p, X; kwargs... )
+    check_tangent_vector(M::AbstractPowerManifold, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` an the [`AbstractPowerManifold`](@ref)
 `M`, i.e. atfer [`check_manifold_point`](@ref)`(M, p)`, and all projections to
 base manifolds must be respective tangent vectors.
-
+The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::AbstractPowerManifold, p, X; kwargs...)
-    mpe = check_manifold_point(M, p)
-    mpe === nothing || return mpe
+function check_tangent_vector(M::AbstractPowerManifold, p, X; check_base_point = true, kwargs...)
+    if check_base_point
+        mpe = check_manifold_point(M, p)
+        mpe === nothing || return mpe
+    end
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         imp = check_tangent_vector(
@@ -449,7 +458,7 @@ function inner(M::AbstractPowerManifold, p, X, Y)
     return result
 end
 
-is_default_metric(::AbstractPowerManifold, ::PowerMetric) = Val(true)
+default_metric_dispatch(::AbstractPowerManifold, ::PowerMetric) = Val(true)
 
 function isapprox(M::AbstractPowerManifold, p, q; kwargs...)
     result = true
@@ -534,6 +543,15 @@ function norm(M::AbstractPowerManifold, p, X)
     return sqrt(sum_squares)
 end
 
+@doc raw"""
+    power_dimensions(M::PowerManifold)
+
+return the power of `M`,
+"""
+function power_dimensions(M::PowerManifold{<:Manifold,TSize}) where {TSize}
+    return size_to_tuple(TSize)
+end
+
 function rand(rng::AbstractRNG, d::PowerFVectorDistribution)
     fv = zero_vector(d.type, d.point)
     _rand!(rng, d, fv)
@@ -596,10 +614,10 @@ function representation_size(M::PowerManifold{<:Manifold,TSize}) where {TSize}
 end
 
 @doc raw"""
-    retract(M::AbstractPowerManifold, x, v, m::PowerRetraction)
+    retract(M::AbstractPowerManifold, p, X, method::PowerRetraction)
 
-Compute the retraction from `x` with tangent vector `v` on an [`AbstractPowerManifold`](@ref) `M`
-using an [`PowerRetraction`](@ref), which by default encapsulates a retraction of the
+Compute the retraction from `p` with tangent vector `X` on an [`AbstractPowerManifold`](@ref) `M`
+using a [`PowerRetraction`](@ref), which by default encapsulates a retraction of the
 base manifold. Then this method is performed elementwise, so the encapsulated retraction
 method has to be one that is available on the base [`Manifold`](@ref).
 """
@@ -643,24 +661,12 @@ end
 
 function show(
     io::IO,
-    M::PowerManifold{TM,TSize,MultidimentionalArrayPowerRepresentation},
+    M::PowerManifold{TM,TSize,ArrayPowerRepresentation},
 ) where {TM,TSize}
     print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
 end
 function show(io::IO, M::PowerManifold{TM,TSize,TPR}) where {TM,TSize,TPR}
     print(io, "PowerManifold($(M.manifold), $(TPR()), $(join(TSize.parameters, ", ")))")
-end
-
-function allocate_result(M::PowerManifoldNested, f, x...)
-    return [allocate_result(M.manifold, f, map(y -> y[i], x)...) for i in get_iterator(M)]
-end
-function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x)
-    alloc = [allocate(w.data[i]) for i in get_iterator(M)]
-    return FVector(CotangentSpace, alloc)
-end
-function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector, x)
-    alloc = [allocate(w.data[i]) for i in get_iterator(M)]
-    return FVector(TangentSpace, alloc)
 end
 
 support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)

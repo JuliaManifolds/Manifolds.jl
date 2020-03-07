@@ -1,4 +1,11 @@
 """
+    AbstractEstimationMethod
+
+Abstract type for defining statistical estimation methods.
+"""
+abstract type AbstractEstimationMethod end
+
+"""
     GradientDescentEstimation <: AbstractEstimationMethod
 
 Method for estimation using gradient descent.
@@ -12,7 +19,7 @@ Method for estimation using the cyclic proximal point technique.
 """
 struct CyclicProximalPointEstimation <: AbstractEstimationMethod end
 
-_unit_weights(n::Int) = ProbabilityWeights(ones(n), n)
+_unit_weights(n::Int) = UnitWeights{Float64}(n)
 
 @doc raw"""
     GeodesicInterpolation <: AbstractEstimationMethod
@@ -384,6 +391,14 @@ function mean!(
     return q
 end
 
+@decorator_transparent_signature mean!(
+    M::AbstractDecoratorManifold,
+    y,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+)
+
 @doc raw"""
     median(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
@@ -521,6 +536,14 @@ function median!(
     end
     return q
 end
+
+@decorator_transparent_signature median!(
+    M::AbstractDecoratorManifold,
+    y,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+)
 
 @doc raw"""
     var(M, x, m=mean(M, x); corrected=true, kwargs...)

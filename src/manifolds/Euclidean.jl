@@ -19,7 +19,7 @@ The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
 [`real_dimension`](@ref) of the field $𝔽$.
 """
-struct Euclidean{N<:Tuple,𝔽} <: Manifold where {N,𝔽<:AbstractNumbers} end
+struct Euclidean{N,𝔽} <: Manifold where {N<:Tuple, 𝔽<:AbstractNumbers} end
 
 function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
     return Euclidean{Tuple{n...},field}()
@@ -145,7 +145,7 @@ For the special case of $i ≤ 2$, i.e. matrices and vectors, this simplifies to
 ````math
 g_p(X,Y) = X^{\mathrm{H}}Y,
 ````
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
 inner(::Euclidean, ::Any...)
 @inline inner(::Euclidean, p, X, Y) = dot(X, Y)
@@ -153,7 +153,7 @@ inner(::Euclidean, ::Any...)
 
 inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = local_metric(M, p)
 
-is_default_metric(::Euclidean, ::EuclideanMetric) = Val(true)
+default_metric_dispatch(::Euclidean, ::EuclideanMetric) = Val(true)
 
 function local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, p)
     return Diagonal(ones(SVector{size(p, 1),eltype(p)}))
@@ -266,7 +266,7 @@ is of course just the identity map.
 """
 project_point(::Euclidean, ::Any...)
 
-project_point!(M::Euclidean, p) = p
+project_point!(M::Euclidean, q, p) = copyto!(q, p)
 
 """
     project_tangent(M::Euclidean, p, X)

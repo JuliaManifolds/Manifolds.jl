@@ -1,5 +1,5 @@
 using OrdinaryDiffEq
-import Manifolds: has_invariant_metric, is_default_metric, local_metric
+import Manifolds: invariant_metric_dispatch, default_metric_dispatch, local_metric
 
 struct TestInvariantMetricBase <: Metric end
 
@@ -12,7 +12,7 @@ end
 
 struct TestBiInvariantMetricBase <: Metric end
 
-function has_invariant_metric(
+function invariant_metric_dispatch(
     ::MetricManifold{<:Manifold,<:InvariantMetric{TestBiInvariantMetricBase}},
     ::ActionDirection,
 )
@@ -27,13 +27,13 @@ struct TestInvariantMetricManifold <: Manifold end
 
 struct TestDefaultInvariantMetricManifold <: Manifold end
 
-function is_default_metric(
-    ::MetricManifold{TestDefaultInvariantMetricManifold,TestInvariantMetricBase},
+function default_metric_dispatch(
+    ::MetricManifold{TestDefaultInvariantMetricManifold,RightInvariantMetric{TestInvariantMetricBase}},
 )
     return Val(true)
 end
 
-has_invariant_metric(::TestDefaultInvariantMetricManifold, ::RightAction) = Val(true)
+invariant_metric_dispatch(::TestDefaultInvariantMetricManifold, ::RightAction) = Val(true)
 
 @testset "Invariant metrics" begin
     base_metric = TestInvariantMetricBase()
@@ -51,17 +51,17 @@ has_invariant_metric(::TestDefaultInvariantMetricManifold, ::RightAction) = Val(
     @test direction(rmetric) === RightAction()
 
     G = MetricManifold(TestInvariantMetricManifold(), lmetric)
-    @test has_invariant_metric(G, LeftAction()) === Val(true)
-    @test has_invariant_metric(G, RightAction()) === Val(false)
+    @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(true)
+    @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(false)
 
     G = MetricManifold(TestInvariantMetricManifold(), rmetric)
-    @test has_invariant_metric(G, RightAction()) === Val(true)
-    @test has_invariant_metric(G, LeftAction()) === Val(false)
+    @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(true)
+    @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(false)
 
     G = MetricManifold(TestDefaultInvariantMetricManifold(),LeftInvariantMetric(TestInvariantMetricBase()))
-    @test is_default_metric(G) === Val(false)
+    @test !is_default_metric(G)
     G = MetricManifold(TestDefaultInvariantMetricManifold(),RightInvariantMetric(TestInvariantMetricBase()))
-    @test is_default_metric(G) === Val(true)
+    @test is_default_metric(G)
 
     @testset "inner/norm" begin
         SO3 = SpecialOrthogonal(3)

@@ -45,23 +45,30 @@ function check_manifold_point(M::Circle{ℂ}, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::Circle, p, X)
+    check_tangent_vector(M::Circle, p, X; check_base_point, kwargs...)
 
 Check whether `X` is a tangent vector in the tangent space of `p` on the
 [`Circle`](@ref) `M`.
 For the real-valued case represented by angles, all `X` are valid, since the tangent space is the whole real line.
 For the complex-valued case `X` has to lie on the line parallel to the tangent line at `p`
 in the complex plane, i.e. their inner product has to be zero.
+The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
 check_tangent_vector(::Circle{ℝ}, ::Any...; ::Any...)
 
-function check_tangent_vector(M::Circle{ℝ}, p, X; kwargs...)
-    perr = check_manifold_point(M, p)
-    return perr # if x is valid all v that are real numbers are valid
+function check_tangent_vector(M::Circle{ℝ}, p, X; check_base_point = true, kwargs...)
+    if check_base_point
+        perr = check_manifold_point(M, p; kwargs...)
+        return perr # if x is valid all v that are real numbers are valid
+    else
+        return nothing
+    end
 end
-function check_tangent_vector(M::Circle{ℂ}, p, X; kwargs...)
-    perr = check_manifold_point(M, p)
-    perr === nothing || return perr
+function check_tangent_vector(M::Circle{ℂ}, p, X; check_base_point = true, kwargs...)
+    if check_base_point
+        perr = check_manifold_point(M, p)
+        perr === nothing || return perr
+    end
     if !isapprox(abs(complex_dot(p, X)), 0.0; kwargs...)
         return DomainError(
             abs(complex_dot(p, X)),
@@ -123,14 +130,14 @@ flat(M::Circle, p::Number, X::TFVector) = FVector(CotangentSpace, X.data)
 flat!(::Circle, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 function get_basis(M::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
-    sbv = sign(B.frame_direction[1])
+    sbv = sign(B.frame_direction[])
     vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
     return PrecomputedDiagonalizingOrthonormalBasis(vs, @SVector [0])
 end
 
 get_coordinates(M::Circle{ℝ}, p, X, B::ArbitraryOrthonormalBasis) = X
 function get_coordinates(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
-    sbv = sign(B.frame_direction[1])
+    sbv = sign(B.frame_direction[])
     return X .* (sbv == 0 ? 1 : sbv)
 end
 """
@@ -146,7 +153,7 @@ end
 
 get_vector(M::Circle{ℝ}, p, X, B::ArbitraryOrthonormalBasis) = X
 function get_vector(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
-    sbv = sign(B.frame_direction[1])
+    sbv = sign(B.frame_direction[])
     return X .* (sbv == 0 ? 1 : sbv)
 end
 """
@@ -269,8 +276,8 @@ project_point(::Circle, ::Any)
 project_point(::Circle{ℝ}, p::Real) = sym_rem(p)
 project_point(::Circle{ℂ}, p::Number) = p / abs(p)
 
-project_point!(::Circle{ℝ}, p) = (p .= sym_rem(p))
-project_point!(::Circle{ℂ}, p) = (p .= p / sum(abs.(p)))
+project_point!(::Circle{ℝ}, q, p) = copyto!(q, sym_rem(p))
+project_point!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
 
 @doc raw"""
     project_tangent(M::Circle, p, X)

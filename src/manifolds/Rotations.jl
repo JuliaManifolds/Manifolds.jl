@@ -85,16 +85,19 @@ function check_manifold_point(M::Rotations{N}, p; kwargs...) where {N}
 end
 
 """
-    check_tangent_vector(M, p, X; kwargs... )
+    check_tangent_vector(M, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`Rotations`](@ref)
 space `M`, i.e. after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same
 dimension and orthogonal to `p`.
+The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::Rotations{N}, p, X; kwargs...) where {N}
-    perr = check_manifold_point(M, p)
-    perr === nothing || return perr
+function check_tangent_vector(M::Rotations{N}, p, X; check_base_point = true, kwargs...) where {N}
+    if check_base_point
+        perr = check_manifold_point(M, p)
+        perr === nothing || return perr
+    end
     if size(X) != (N, N)
         return DomainError(
             size(X),
@@ -651,7 +654,6 @@ function retract!(M::Rotations, q::AbstractArray{T}, p, X, method::QRRetraction)
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
     return copyto!(q, qr_decomp.Q * D)
 end
-retract!(M::Rotations, q, p, X) = retract!(M, q, p, X, QRRetraction())
 function retract!(M::Rotations, q, p, X, method::PolarRetraction)
     A = p + p * X
     return project_point!(M, q, A; check_det = false)

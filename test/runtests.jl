@@ -14,13 +14,18 @@ include("fixed_rank.jl")
 include("grassmann.jl")
 include("hyperbolic.jl")
 include("rotations.jl")
+include("skewsymmetric.jl")
 include("sphere.jl")
 include("stiefel.jl")
 include("symmetric.jl")
 include("symmetric_positive_definite.jl")
+
+include("oblique.jl")
+
 include("torus.jl")
 
 #meta manifolds
+include("embedded.jl")
 include("product_manifold.jl")
 include("power_manifold.jl")
 include("vector_bundle.jl")

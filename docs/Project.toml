@@ -1,8 +1,12 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+HybridArrays = "1baab800-613f-4b0a-84e4-9cd3431bfbb9"
 LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
 ManifoldsBase = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 Documenter = "0.24"
-ManifoldsBase = "0.4"
+HybridArrays = ">= 0.3"
+ManifoldsBase = "0.5.1"
+StaticArrays = "0.12"

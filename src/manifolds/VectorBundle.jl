@@ -276,6 +276,13 @@ function flat!(M::Manifold, ξ::FVector, p, X::FVector)
     )
 end
 
+@decorator_transparent_signature flat!(
+    M::AbstractDecoratorManifold,
+    ξ::CoTFVector,
+    p,
+    X::TFVector,
+)
+
 function get_basis(M::VectorBundle, p, B::DiagonalizingOrthonormalBasis)
     xp1 = submanifold_component(p, Val(1))
     bv1 = DiagonalizingOrthonormalBasis(submanifold_component(B.frame_direction, Val(1)))
@@ -476,11 +483,12 @@ and then projecting the vector $V_p$ to the tangent space $T_{x_p}\mathcal M$.
 """
 project_point(::VectorBundle, ::Any...)
 
-function project_point!(B::VectorBundle, p)
-    px, Vx = submanifold_components(B.manifold, p)
-    project_point!(B.manifold, px)
-    project_tangent!(B.manifold, Vx, px, Vx)
-    return p
+function project_point!(B::VectorBundle, q, p)
+    px, pVx = submanifold_components(B.manifold, p)
+    qx, qVx = submanifold_components(B.manifold, q)
+    project_point!(B.manifold, qx, px)
+    project_tangent!(B.manifold, qVx, qx, pVx)
+    return q
 end
 
 @doc raw"""
@@ -562,6 +570,13 @@ function sharp!(M::Manifold, X::FVector, p, ξ::FVector)
         "type $(typeof(p)) and vector of type $(typeof(ξ)).",
     )
 end
+
+@decorator_transparent_signature sharp!(
+    M::AbstractDecoratorManifold,
+    X::TFVector,
+    p,
+    ξ::CoTFVector,
+)
 
 show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
 show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")

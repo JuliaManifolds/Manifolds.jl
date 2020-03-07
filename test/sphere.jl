@@ -4,6 +4,7 @@ include("utils.jl")
     M = Sphere(2)
     @testset "Sphere Basics" begin
         @test repr(M) == "Sphere(2)"
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{3},ℝ}
         @test representation_size(M) == (3,)
         @test !is_manifold_point(M, [1., 0., 0., 0.])
         @test !is_tangent_vector(M, [1.,0.,0.], [0., 0., 1., 0.])
@@ -11,6 +12,7 @@ include("utils.jl")
         @test !is_manifold_point(M, [2.,0.,0.])
         @test !is_tangent_vector(M,[1.,0.,0.],[1.,0.,0.])
         @test_throws DomainError is_tangent_vector(M,[1.,0.,0.],[1.,0.,0.],true)
+        @test injectivity_radius(M, [1.0, 0.0, 0.0], ProjectionRetraction()) == π/2
     end
     types = [
         Vector{Float64},
@@ -35,8 +37,8 @@ include("utils.jl")
                 tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
                 basis_types_vecs = (DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),),
                 basis_types_to_from = basis_types,
-                retraction_methods = [ProjectionRetraction()],
-                inverse_retraction_methods = [ProjectionInverseRetraction()]
+                retraction_methods = [ProjectionRetraction(),],
+                inverse_retraction_methods = [ProjectionInverseRetraction(),]
             )
 
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
@@ -49,6 +51,19 @@ include("utils.jl")
 
         gtsd_mvector = Manifolds.normal_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
         @test isa(rand(gtsd_mvector), MVector)
+    end
+
+    @testset "Embedding test" begin
+        p = [1.0, 0.0, 0.0]
+        X = [0.0, 1.0, 1.0]
+        @test embed(M,p) == p
+        q = similar(p)
+        embed!(M,q,p)
+        @test q==p
+        @test embed(M,p,X) == X
+        Y = similar(X)
+        embed!(M,Y,p,X)
+        @test Y == X
     end
 
     @testset "log edge case" begin

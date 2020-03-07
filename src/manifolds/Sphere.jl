@@ -1,8 +1,16 @@
 @doc raw"""
-    Sphere{N} <: Manifold
+    Sphere{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType}
 
 The unit sphere manifold $𝕊^n$ represented by $n+1$-Tuples, i.e. in by
-vectors in $ℝ^{n+1}$ of unit length
+vectors in $ℝ^{n+1}$ of unit length. A sphere is an embedded manifold
+and inherits the inner product of its embedding $\mathbb R^{n+1}$.
+The tangent space at point p is given by
+
+````math
+T_p𝕊^n := \bigl\{ X ∈ ℝ^{n+1} : ⟨p,X⟩ = 0 \bigr \},
+````
+
+where $⟨\cdot,\cdot⟩$ denotes the inner product in the embedding $\mathbb R^{n+1}$.
 
 # Constructor
 
@@ -10,9 +18,12 @@ vectors in $ℝ^{n+1}$ of unit length
 
 Generate $𝕊^{n} ⊂ ℝ^{n+1}$.
 """
-struct Sphere{N} <: Manifold end
+struct Sphere{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType} end
 
 Sphere(n::Int) = Sphere{n}()
+
+base_manifold(M::Sphere) = M
+decorated_manifold(M::Sphere{N}) where {N} = Euclidean(N+1; field=ℝ)
 
 function get_basis(M::Sphere{N}, p, B::DiagonalizingOrthonormalBasis) where {N}
     A = zeros(N + 1, N + 1)
@@ -53,16 +64,25 @@ function check_manifold_point(M::Sphere{N}, p; kwargs...) where {N}
 end
 
 """
-    check_tangent_vector(M, p, X; kwargs... )
+    check_tangent_vector(M, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`Sphere`](@ref) `M`, i.e.
 after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
 and orthogonal to `p`.
+The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::Sphere{N}, p, X; kwargs...) where {N}
-    perr = check_manifold_point(M, p)
-    perr === nothing || return perr
+function check_tangent_vector(
+    M::Sphere{N},
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+) where {N}
+    if check_base_point
+        perr = check_manifold_point(M, p)
+        perr === nothing || return perr
+    end
     if size(X) != representation_size(M)
         return DomainError(
             size(X),
@@ -91,6 +111,10 @@ d_{𝕊^n}(p,q) = \arccos(⟨p,q⟩).
 """
 distance(::Sphere, x, y) = acos(clamp(dot(x, y), -1, 1))
 
+embed!(::Sphere, q, p) = (q .= p)
+
+embed!(::Sphere, Y, p, X) = (Y .= X)
+
 @doc raw"""
     exp(M::Sphere, p, X)
 
@@ -98,7 +122,7 @@ Compute the exponential map from `p` in the tangent direction `X` on the [`Spher
 `M` by following the great arc eminating from `p` in direction `X`.
 
 ````math
-\exp_p X = \cos(\lVert X \rVert_p)p + \sin(\lVert X \rVert_p)\frac{X}{\lVert X \rVert_p},
+\exp_p X = \cos(\lVert X \rVert_p)p + \sin(\lVert X \rVert_p)\frac{X}{\lVert X \rVert_p}X,
 ````
 where $\lVert X \rVert_p$ is the [`norm`](@ref norm(::Sphere,p,X)) on the
 [`Sphere`](@ref) `M`.
@@ -110,8 +134,6 @@ function exp!(M::Sphere, q, p, X)
     q .= cos(θ) .* p .+ usinc(θ) .* X
     return q
 end
-
-flat!(M::Sphere, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 @doc raw"""
     injectivity_radius(M::Sphere[, p])
@@ -125,15 +147,6 @@ Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
 """
 injectivity_radius(::Sphere, ::Any...) = π
 injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π / 2
-
-@doc raw"""
-    inner(M::Sphere, p, X, Y)
-
-Compute the inner product of the two tangent vectors `X`, `Y` from the tangent
-space at `p` on the [`Sphere`](@ref) `M` using the restriction of the
-metric from the embedding, i.e. $ g_p(X,Y) = X^\mathrm{T}Y$.
-"""
-@inline inner(S::Sphere, p, X, Y) = dot(X, Y)
 
 function get_vector(M::Sphere{N}, p, X, B::ArbitraryOrthonormalBasis) where {N}
     p[1] ≈ 1 && return vcat(0, X)
@@ -219,17 +232,6 @@ function mean!(S::Sphere, p, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(S, p, x, w, GeodesicInterpolationWithinRadius(π / 2); kwargs...)
 end
 
-@doc raw"""
-    norm(M::Sphere, p, X)
-
-Compute the length of the tangent vector `v` from the tangent space at `p` on the
-[`Sphere`](@ref) `M`, which is the norm in the embedding, i.e.
-````math
-\lVert X \rVert_p = \lVert X \rVert_2.
-````
-"""
-norm(M::Sphere, p, X) = norm(X)
-
 """
     normal_tvector_distribution(S::Sphere, p, σ)
 
@@ -252,7 +254,7 @@ Project the point `p` from the embedding onto the [`Sphere`](@ref) `M`.
 """
 project_point(::Sphere, ::Any...)
 
-project_point!(S::Sphere, p) = (p ./= norm(p))
+project_point!(S::Sphere, q, p) = copyto!(q, p./ norm(p))
 
 @doc raw"""
     project_tangent(M::Sphere, p, X)
@@ -304,10 +306,8 @@ retract(::Sphere, ::Any, ::Any, ::ProjectionRetraction)
 
 function retract!(M::Sphere, q, p, X, ::ProjectionRetraction)
     q .= p .+ X
-    return project_point!(M, q)
+    return project_point!(M, q, q)
 end
-
-sharp!(M::Sphere, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 show(io::IO, ::Sphere{N}) where {N} = print(io, "Sphere($(N))")
 
@@ -322,17 +322,18 @@ function uniform_distribution(M::Sphere, p)
     return ProjectedPointDistribution(M, d, project_point!, p)
 end
 
-@doc raw"""
-    vector_transport_to(M::Sphere, p, X, q, ::ParallelTransport)
+@doc doc"""
+    vector_transport_to(M, p, X, q, ::ParallelTransport)
 
-Compute the [`ParallelTransport`](@ref) on the [`Sphere`](@ref) `M`, which is given by
+Compute the paralllel transport of the tangent vector `X` at `p` to `q`,
+provided, the [`geodesic`](@ref) between `p` and `q` is unique
 
 ````math
-\mathcal P_{q←p}(X) = X - \frac{⟨\log_p q,X⟩_p}{d^2_{𝕊^n}(p,q)}
-\bigl(\log_p q + \log_qp \bigr).
+P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_{𝕊^n}(p,q)}
+\bigl(\log_xy + \log_yx \bigr).
 ````
 """
-vector_transport_to(::Sphere, ::Any, ::Any, ::Any, ::ParallelTransport)
+vector_transport_to(::Sphere, ::Any, ::Any, ::Any, ::Any, ::ParallelTransport)
 
 function vector_transport_to!(M::Sphere, Y, p, X, q, ::ParallelTransport)
     X_pq = log(M, p, q)
@@ -344,13 +345,3 @@ function vector_transport_to!(M::Sphere, Y, p, X, q, ::ParallelTransport)
     end
     return Y
 end
-
-@doc raw"""
-    zero_tangent_vector(M::Sphere, p)
-
-Return the zero tangent vector from the tangent space at `p` on the [`Sphere`](@ref) `M`,
-which is the zero vector in the embedding.
-"""
-zero_tangent_vector(::Sphere, ::Any...)
-
-zero_tangent_vector!(::Sphere, X, p) = fill!(X, 0)

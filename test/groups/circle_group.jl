@@ -1,16 +1,22 @@
 include("../utils.jl")
 include("group_utils.jl")
 
+using Manifolds: invariant_metric_dispatch, default_metric_dispatch
+
 @testset "Circle group" begin
     G = CircleGroup()
     @test repr(G) == "CircleGroup()"
 
     @test base_manifold(G) === Circle{ℂ}()
 
-    @test has_invariant_metric(G, LeftAction()) === Val(true)
-    @test has_invariant_metric(G, RightAction()) === Val(true)
-    @test has_biinvariant_metric(G) === Val(true)
-    @test is_default_metric(MetricManifold(G, EuclideanMetric())) === Val(true)
+    @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(true)
+    @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(true)
+    @test (@inferred Manifolds.biinvariant_metric_dispatch(G)) === Val(true)
+    @test (@inferred default_metric_dispatch(MetricManifold(G, EuclideanMetric()))) === Val(true)
+    @test has_invariant_metric(G, LeftAction())
+    @test has_invariant_metric(G, RightAction())
+    @test has_biinvariant_metric(G)
+    @test is_default_metric(MetricManifold(G, EuclideanMetric()))
 
     @testset "identity overloads" begin
         @test identity(G, Identity(G)) === Identity(G)
