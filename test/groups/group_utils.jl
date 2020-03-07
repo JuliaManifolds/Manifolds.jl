@@ -1,13 +1,10 @@
-import Manifolds: is_decorator_manifold
-
 struct NotImplementedOperation <: AbstractGroupOperation end
 
 struct NotImplementedManifold <: Manifold end
 
-struct NotImplementedGroupDecorator{M} <: Manifold
+struct NotImplementedGroupDecorator{M} <: AbstractDecoratorManifold
     manifold::M
 end
-is_decorator_manifold(::NotImplementedGroupDecorator) = Val(true)
 
 """
     test_group(
@@ -271,9 +268,9 @@ function test_group(
     end
 
     test_invariance && @testset "metric invariance" begin
-        if has_invariant_metric(G, LeftAction()) === Val(true)
+        if has_invariant_metric(G, LeftAction())
             @testset "left-invariant" begin
-                @test check_has_invariant_metric(
+                @test has_approx_invariant_metric(
                     G,
                     g_pts[1],
                     v_pts[1],
@@ -283,9 +280,9 @@ function test_group(
                 )
             end
         end
-        if has_invariant_metric(G, RightAction()) === Val(true)
+        if invariant_metric_dispatch(G, RightAction()) === Val(true)
             @testset "right-invariant" begin
-                @test check_has_invariant_metric(
+                @test has_approx_invariant_metric(
                     G,
                     g_pts[1],
                     v_pts[1],

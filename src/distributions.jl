@@ -62,3 +62,12 @@ Get the object of type `FVectorSupport` for the distribution `d`.
 function Distributions.support(::T) where {T<:FVectorDistribution}
     error("support not implemented for type $T")
 end
+
+@decorator_transparent_signature normal_tvector_distribution(
+    M::AbstractDecoratorManifold,
+    p,
+    σ
+)
+
+@decorator_transparent_signature projected_distribution(M::AbstractDecoratorManifold, d, p)
+@decorator_transparent_signature projected_distribution(M::AbstractDecoratorManifold, d)

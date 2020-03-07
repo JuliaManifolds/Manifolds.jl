@@ -163,10 +163,10 @@ function vector_transport_to!(
     p,
     X,
     q,
-    ::ParallelTransport,
+    m::ParallelTransport
 ) where {N}
     y = cholesky(q).L
     (x, W) = spd_to_cholesky(p, X)
-    vector_transport_to!(CholeskySpace{N}(), Y, x, W, y, ParallelTransport())
+    vector_transport_to!(CholeskySpace{N}(), Y, x, W, y, m)
     return tangent_cholesky_to_tangent_spd!(y, Y)
 end

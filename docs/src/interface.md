@@ -1,12 +1,14 @@
 # `ManifoldsBase.jl` – an interface for manifolds
 
-The interface for a manifold is provided in the lightweight package [`ManifoldsBase.jl](https://github.com/JuliaNLSolvers/ManifoldsBase.jl) separate from the collection of manifolds in here.
+The interface for a manifold is provided in the lightweight package [ManifoldsBase.jl](https://github.com/JuliaNLSolvers/ManifoldsBase.jl) separate from the collection of manifolds in here.
 You can easily implement your algorithms and even your own manifolds just using the interface.
 
 ```@contents
 Pages = ["interface.md"]
 Depth = 2
 ```
+
+Additionally the [`AbstractDecoratorManifold`](@ref) is provided as well as the [`ArrayManifold`](@ref) as a specific example of such a decorator.
 
 ## Types and functions
 
@@ -18,6 +20,7 @@ Modules = [Manifolds, ManifoldsBase]
 Pages = ["ManifoldsBase.jl"]
 Order = [:type, :function]
 ```
+
 ## `DefaultManifold`
 
 `DefaultManifold` is a simplified version of [`Euclidean`](@ref) and demonstrates a basic interface implementation.
@@ -30,6 +33,7 @@ ManifoldsBase.DefaultManifold
 
 Non-mutating functions in `Manifolds.jl` are typically implemented using mutating variants.
 Allocation of new points is performed using a custom mechanism that relies on the following functions:
+
 * [`allocate`](@ref) that allocates a new point or vector similar to the given one.
   This function behaves like `similar` for simple representations of points and vectors (for example `Array{Float64}`).
   For more complex types, such as nested representations of [`PowerManifold`](@ref) (see [`NestedPowerRepresentation`](@ref)), [`FVector`](@ref) types, checked types like [`ArrayMPoint`](@ref) and more it operates differently.
@@ -56,7 +60,6 @@ Stacktrace:
 julia> y[1]
 1-element Array{Float64,1}:
  6.90031725726027e-310
-
 ```
 
 * [`allocate_result`](@ref) allocates a result of a particular function (for example [`exp`], [`flat`], etc.) on a particular manifold with particular arguments.

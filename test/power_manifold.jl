@@ -8,9 +8,11 @@ Random.seed!(42)
 
     Ms = Sphere(2)
     Ms1 = PowerManifold(Ms, 5)
+    @test power_dimensions(Ms1) == (5,)
     @test manifold_dimension(Ms1) == 10
     @test injectivity_radius(Ms1) == π
     Ms2 = PowerManifold(Ms, 5, 7)
+    @test power_dimensions(Ms2) == (5,7)
     @test manifold_dimension(Ms2) == 70
     Mr = Manifolds.Rotations(3)
     Mr1 = PowerManifold(Mr, 5)
@@ -25,11 +27,11 @@ Random.seed!(42)
     @test repr(Ms1) == "PowerManifold(Sphere(2), 5)"
     @test repr(Mrn1) == "PowerManifold(Rotations(3), NestedPowerRepresentation(), 5)"
 
-    @test Ms^5 === Ms1
+    @test Ms^5 === Oblique(3,5)
     @test Ms^(5,) === Ms1
     @test Mr^(5, 7) === Mr2
 
-    @test is_default_metric(Ms1, PowerMetric()) == Val(true)
+    @test is_default_metric(Ms1, PowerMetric())
     types_s1 = [Array{Float64,2},
                 HybridArray{Tuple{3,StaticArrays.Dynamic()}, Float64, 2}]
     types_s2 = [Array{Float64,3},

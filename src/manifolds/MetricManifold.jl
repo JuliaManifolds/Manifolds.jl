@@ -13,7 +13,7 @@ if VERSION ≥ v"1.3"
 end
 
 """
-    MetricManifold{M<:Manifold,G<:Metric} <: Manifold
+    MetricManifold{M<:Manifold,G<:Metric} <: AbstractDecoratorManifold
 
 Equip a [`Manifold`](@ref) explicitly with a [`Metric`](@ref) `G`.
 
@@ -29,19 +29,10 @@ you can of course still implement that directly.
 
 Generate the [`Manifold`](@ref) `M` as a manifold with the [`Metric`](@ref) `G`.
 """
-struct MetricManifold{M<:Manifold,G<:Metric} <: Manifold
+struct MetricManifold{M<:Manifold,G<:Metric} <: AbstractDecoratorManifold
     manifold::M
     metric::G
 end
-
-@doc raw"""
-    LorentzMetric <: Metric
-
-Abstract type for Lorentz metrics, which have a single time dimension. These
-metrics assume the spacelike convention with the time dimension being last,
-giving the signature $(++...+-)$.
-"""
-abstract type LorentzMetric <: Metric end
 
 @doc raw"""
     RiemannianMetric <: Metric
@@ -51,14 +42,6 @@ products. The positive definite property means that for $X  ∈ T_p \mathcal M$,
 inner product $g(X, X) > 0$ whenever $X$ is not the zero vector.
 """
 abstract type RiemannianMetric <: Metric end
-
-function check_manifold_point(M::MetricManifold, p; kwargs...)
-    return check_manifold_point(M.manifold, p; kwargs...)
-end
-
-function check_tangent_vector(M::MetricManifold, p, X; kwargs...)
-    return check_tangent_vector(M.manifold, p, X; kwargs...)
-end
 
 @doc raw"""
     christoffel_symbols_first(M::MetricManifold, p; backend=:default)
@@ -72,7 +55,8 @@ where $g_{ij,k}=\frac{∂}{∂ p^k} g_{ij}$ is the coordinate
 derivative of the local representation of the metric tensor. The dimensions of
 the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
-function christoffel_symbols_first(M::MetricManifold, p; backend = :default)
+christoffel_symbols_first(::MetricManifold, ::Any)
+@decorator_transparent_function function christoffel_symbols_first(M::MetricManifold, p; backend = :default)
     ∂g = local_metric_jacobian(M, p; backend = backend)
     n = size(∂g, 1)
     Γ = allocate(∂g, Size(n, n, n))
@@ -92,7 +76,8 @@ where $Γ_{ijk}$ are the Christoffel symbols of the first kind, and
 $g^{kl}$ is the inverse of the local representation of the metric tensor.
 The dimensions of the resulting multi-dimensional array are ordered $(l,i,j)$.
 """
-function christoffel_symbols_second(M::MetricManifold, p; backend = :default)
+christoffel_symbols_second(::MetricManifold, ::Any)
+@decorator_transparent_function function christoffel_symbols_second(M::MetricManifold, p; backend = :default)
     Ginv = inverse_local_metric(M, p)
     Γ₁ = christoffel_symbols_first(M, p; backend = backend)
     Γ₂ = allocate(Γ₁)
@@ -108,7 +93,8 @@ for manifold `M` at `p` with respect to the coordinates of `p`,
 $\frac{∂}{∂ p^l} Γ^{k}_{ij} = Γ^{k}_{ij,l}.$
 The dimensions of the resulting multi-dimensional array are ordered $(i,j,k,l)$.
 """
-function christoffel_symbols_second_jacobian(M::MetricManifold, p; backend = :default)
+christoffel_symbols_second_jacobian(::MetricManifold, ::Any)
+@decorator_transparent_function function christoffel_symbols_second_jacobian(M::MetricManifold, p; backend = :default)
     n = size(p, 1)
     ∂Γ = reshape(
         _jacobian(q -> christoffel_symbols_second(M, q; backend = backend), p, backend),
@@ -120,19 +106,58 @@ function christoffel_symbols_second_jacobian(M::MetricManifold, p; backend = :de
     return ∂Γ
 end
 
+decorator_transparent_dispatch(::typeof(exp), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(exp!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(exp!), M::MetricManifold, q, p, X, t) = Val(:parent)
+decorator_transparent_dispatch(::typeof(flat), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(flat!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(get_basis), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(inner), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(inverse_retract), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(inverse_retract!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(inverse_retract!), M::MetricManifold, X, p, q, m::LogarithmicInverseRetraction) = Val(:parent)
+decorator_transparent_dispatch(::typeof(log), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(log!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(mean), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(mean!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(median), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(median!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(normal_tvector_distribution), M::MetricManifold, arge...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(norm), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(project_point), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(project_point!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(project_tangent), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(project_tangent!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(projected_distribution), M::MetricManifold, arge...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(sharp), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(sharp!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(retract), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(retract!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(retract!), M::MetricManifold, q, p, X, m::ExponentialRetraction) = Val(:parent)
+decorator_transparent_dispatch(::typeof(vector_transport_along), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(vector_transport_along!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(vector_transport_direction), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(vector_transport_direction!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(vector_transport_to), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(vector_transport_to!), M::MetricManifold, args...) = Val(:intransparent)
+
 @doc raw"""
     det_local_metric(M::MetricManifold, p)
 
 Return the determinant of local matrix representation of the metric tensor $g$.
 """
-det_local_metric(M::MetricManifold, p) = det(local_metric(M, p))
+det_local_metric(::MetricManifold, ::Any)
+@decorator_transparent_function function det_local_metric(M::MetricManifold, p)
+    return det(local_metric(M, p))
+end
 
 """
     einstein_tensor(M::MetricManifold, p; backend = :default)
 
 Compute the Einstein tensor of the manifold `M` at the point `p`.
 """
-function einstein_tensor(M::MetricManifold, p; backend = :default)
+einstein_tensor(::MetricManifold, ::Any)
+@decorator_transparent_function function einstein_tensor(M::MetricManifold, p; backend = :default)
     Ric = ricci_tensor(M, p; backend = backend)
     g = local_metric(M, p)
     Ginv = inverse_local_metric(M, p)
@@ -156,11 +181,7 @@ in an embedded space.
 """
 exp(::MetricManifold, ::Any...)
 
-exp!(M::MMT, q, p, X) where {MMT<:MetricManifold} = exp!(M, is_default_metric(M), q, p, X)
-function exp!(M::MMT, ::Val{true}, q, p, X) where {MMT<:MetricManifold}
-    return exp!(base_manifold(M), q, p, X)
-end
-function exp!(M::MMT, ::Val{false}, q, p, X) where {MMT<:MetricManifold}
+@decorator_transparent_fallback function exp!(M::MetricManifold, q, p, X)
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, p, X, tspan; dense = false, saveat = [1.0])
     n = length(p)
@@ -181,7 +202,8 @@ where $G_p$ is the local matrix representation of `G`, see [`local_metric`](@ref
 """
 flat(::MetricManifold, ::Any...)
 
-function flat!(M::MMT, ξ::CoTFVector, p, X::TFVector) where {MMT<:MetricManifold}
+
+@decorator_transparent_fallback function flat!(M::MetricManifold, ξ::CoTFVector, p, X::TFVector)
     g = local_metric(M, p)
     copyto!(ξ.data, g * X.data)
     return ξ
@@ -192,7 +214,10 @@ end
 
 Compute the Gaussian curvature of the manifold `M` at the point `x`.
 """
-gaussian_curvature(M::MetricManifold, p; kwargs...) = ricci_curvature(M, p; kwargs...) / 2
+gaussian_curvature(::MetricManifold, ::Any)
+@decorator_transparent_function function gaussian_curvature(M::MetricManifold, p; kwargs...)
+    return ricci_curvature(M, p; kwargs...) / 2
+end
 
 function get_basis(M::MMT, p, B::DefaultOrthonormalBasis) where {MMT<:MetricManifold}
     return invoke(get_basis, Tuple{MMT,Any,AbstractBasis}, M, p, B)
@@ -217,39 +242,49 @@ end
 Return the local matrix representation of the inverse metric (cometric) tensor, usually
 written $g^{ij}$.
 """
-inverse_local_metric(M::MetricManifold, p) = inv(local_metric(M, p))
+inverse_local_metric(::MetricManifold, ::Any)
+@decorator_transparent_function function inverse_local_metric(M::MetricManifold, p)
+    return inv(local_metric(M, p))
+end
 
-is_decorator_manifold(M::MMT) where {MMT<:MetricManifold} = Val(true)
+default_decorator_dispatch(M::MetricManifold) = default_metric_dispatch(M)
 
 """
     is_default_metric(M,G)
 
 Indicate whether the [`Metric`](@ref) `G` is the default metric for
 the [`Manifold`](@ref) `M`. This means that any occurence of
-[`MetricManifold`](@ref)(M,G) where `typeof(is_default_metric(M,G)) = Val{true}`
+[`MetricManifold`](@ref)(M,G) where `typeof(is_default_metric(M,G)) = true`
 falls back to just be called with `M` such that the [`Manifold`](@ref) `M`
 implicitly has this metric, for example if this was the first one implemented
 or is the one most commonly assumed to be used.
 """
-is_default_metric(M::Manifold, G::Metric) = Val(false)
+function is_default_metric(M::Manifold, G::Metric)
+    return _extract_val(default_metric_dispatch(M, G))
+end
+
+default_metric_dispatch(::Manifold, ::Metric) = Val(false)
+function default_metric_dispatch(M::MetricManifold)
+    return default_metric_dispatch(base_manifold(M), metric(M))
+end
 
 """
-    is_default_metric(MM)
+    is_default_metric(MM::MetricManifold)
 
 Indicate whether the [`Metric`](@ref) `MM.G` is the default metric for
 the [`Manifold`](@ref) `MM.manifold,` within the [`MetricManifold`](@ref) `MM`.
 This means that any occurence of
-[`MetricManifold`](@ref)`(MM.manifold,MM.G)` where `typeof(is_default_metric(MM.manifold,MM.G)) = Val{true}`
+[`MetricManifold`](@ref)`(MM.manifold, MM.G)` where `is_default_metric(MM.manifold, MM.G)) = true`
 falls back to just be called with `MM.manifold,` such that the [`Manifold`](@ref) `MM.manifold`
 implicitly has the metric `MM.G`, for example if this was the first one
 implemented or is the one most commonly assumed to be used.
 """
-function is_default_metric(M::MMT) where {MMT<:MetricManifold}
-    return is_default_metric(base_manifold(M), metric(M))
+function is_default_metric(M::MetricManifold)
+    return _extract_val(default_metric_dispatch(M))
 end
 
 function convert(T::Type{MetricManifold{MT,GT}}, M::MT) where {MT,GT}
-    return _convert_with_default(M, GT, is_default_metric(M, GT()))
+    return _convert_with_default(M, GT, default_metric_dispatch(M, GT()))
 end
 
 function _convert_with_default(M::MT, T::Type{<:Metric}, ::Val{true}) where {MT<:Manifold}
@@ -272,12 +307,10 @@ g_p(X, Y) = ⟨X, G_p Y⟩,
 ````
 where $G_p$ is the loal matrix representation of the [`Metric`](@ref) `G`.
 """
-inner(M::MMT, p, X, Y) where {MMT<:MetricManifold} = inner(M, is_default_metric(M), p, X, Y)
-function inner(M::MMT, ::Val{false}, p, X, Y) where {MMT<:MetricManifold}
+inner(::MetricManifold, ::Any)
+
+function inner(M::MMT, ::Val{:intransparent}, p, X, Y) where {MMT<:MetricManifold}
     return dot(X, local_metric(M, p) * Y)
-end
-function inner(M::MMT, ::Val{true}, p, X, Y) where {MMT<:MetricManifold}
-    return inner(base_manifold(M), p, X, Y)
 end
 function inner(
     B::VectorBundleFibers{<:CotangentSpaceType,MMT},
@@ -297,7 +330,8 @@ tensor $g$ on the [`Manifold`](@ref) `M`, usually written $g_{ij}$.
 The matrix has the property that $g(X, Y)=X^\mathrm{T} [g_{ij}] Y = g_{ij} X^i Y^j$,
 where the latter expression uses Einstein summation convention.
 """
-function local_metric(M::MetricManifold, p)
+local_metric(::MetricManifold, ::Any)
+@decorator_transparent_function :intransparent function local_metric(M::MetricManifold, p)
     error("Local metric not implemented on $(typeof(M)) for point $(typeof(p))")
 end
 
@@ -308,7 +342,8 @@ Get partial derivatives of the local metric of `M` at `p` with respect to the
 coordinates of `p`, $\frac{∂}{∂ p^k} g_{ij} = g_{ij,k}$. The
 dimensions of the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
-function local_metric_jacobian(M, p; backend = :default)
+local_metric_jacobian(::MetricManifold, ::Any)
+@decorator_transparent_function :intransparent function local_metric_jacobian(M::MetricManifold, p; backend = :default)
     n = size(p, 1)
     ∂g = reshape(_jacobian(q -> local_metric(M, q), p, backend), n, n, n)
     return ∂g
@@ -325,80 +360,15 @@ falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for
 """
 log(::MetricManifold, ::Any...)
 
-log!(M::MMT, X, p, q) where {MMT<:MetricManifold} = log!(M, is_default_metric(M), X, p, q)
-function log!(M::MMT, ::Val{true}, X, p, q) where {MMT<:MetricManifold}
-    return log!(base_manifold(M), X, p, q)
-end
-function log!(M::MMT, ::Val{false}, X, p, q) where {MMT<:MetricManifold}
-    error("Logarithmic map not implemented on $(typeof(M)) for points $(typeof(p)) and $(typeof(q)).")
-end
-
 @doc raw"""
     log_local_metric_density(M::MetricManifold, p)
 
 Return the natural logarithm of the metric density $ρ$ of `M` at `p`, which
 is given by $ρ = \log \sqrt{|\det [g_{ij}]|}$.
 """
-log_local_metric_density(M::MetricManifold, p) = log(abs(det_local_metric(M, p))) / 2
-
-function mean!(
-    M::MMT,
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-) where {MMT<:MetricManifold}
-    return mean!(M, is_default_metric(M), p, x, w; kwargs...)
-end
-function mean!(
-    M::MMT,
-    ::Val{true},
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-) where {MMT<:MetricManifold}
-    return mean!(base_manifold(M), p, x, w; kwargs...)
-end
-function mean!(
-    M::MMT,
-    ::Val{false},
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-) where {MMT<:MetricManifold}
-    return mean!(M, p, x, w, GradientDescentEstimation(); kwargs...)
-end
-
-function median!(
-    M::MMT,
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-) where {MMT<:MetricManifold}
-    return median!(M, is_default_metric(M), p, x, w; kwargs...)
-end
-function median!(
-    M::MMT,
-    ::Val{true},
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-) where {MMT<:MetricManifold}
-    return median!(base_manifold(M), p, x, w; kwargs...)
-end
-function median!(
-    M::MMT,
-    ::Val{false},
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-) where {MMT<:MetricManifold}
-    return median!(M, p, x, w, CyclicProximalPointEstimation(); kwargs...)
+log_local_metric_density(::MetricManifold, ::Any)
+@decorator_transparent_function :parent function log_local_metric_density(M::MetricManifold, p)
+    return log(abs(det_local_metric(M, p))) / 2
 end
 
 @doc raw"""
@@ -406,63 +376,18 @@ end
 
 Get the metric $g$ of the manifold `M`.
 """
-metric(M::MetricManifold) = M.metric
+metric(::MetricManifold)
 
-function normal_tvector_distribution(M::MMT, p, σ) where {MMT<:MetricManifold}
-    return normal_tvector_distribution(M, is_default_metric(M), p, σ)
+function metric(M::MetricManifold)
+    return M.metric
 end
-function normal_tvector_distribution(M::MMT, ::Val{true}, p, σ) where {MMT<:MetricManifold}
-    return normal_tvector_distribution(base_manifold(M), p, σ)
-end
-function normal_tvector_distribution(M::MMT, ::Val{false}, p, σ) where {MMT<:MetricManifold}
-    error("normal_tvector_distribution not implemented for a $(typeof(M)) at point $(typeof(p)) with standard deviation $(typeof(σ)).")
-end
-
-function project_point!(M::MMT, q, p) where {MMT<:MetricManifold}
-    return project_point!(M, is_default_metric(M), q, p)
-end
-function project_point!(M::MMT, ::Val{true}, q, p) where {MMT<:MetricManifold}
-    return project_point!(base_manifold(M), q, p)
-end
-function project_point!(M::MMT, ::Val{false}, q, p) where {MMT<:MetricManifold}
-    error("project_point! not implemented on $(typeof(M)) for point $(typeof(p))")
-end
-
-function project_tangent!(M::MMT, Y, p, X) where {MMT<:MetricManifold}
-    return project_tangent!(M, is_default_metric(M), Y, p, X)
-end
-function project_tangent!(M::MMT, ::Val{true}, Y, p, X) where {MMT<:MetricManifold}
-    return project_tangent!(base_manifold(M), Y, p, X)
-end
-function project_tangent!(M::MMT, ::Val{false}, Y, p, X) where {MMT<:MetricManifold}
-    error("project_tangent! not implemented for a $(typeof(M)) and tangent $(typeof(X)) at point $(typeof(p)).")
-end
-
-function projected_distribution(M::MMT, d, p) where {MMT<:MetricManifold}
-    return projected_distribution(M, is_default_metric(M), d, p)
-end
-function projected_distribution(M::MMT, ::Val{true}, d, p) where {MMT<:MetricManifold}
-    return projected_distribution(base_manifold(M), d, p)
-end
-function projected_distribution(M::MMT, ::Val{false}, d, p) where {MMT<:MetricManifold}
-    error("projected_distribution not implemented for a $(typeof(M)) and with $(typeof(d)) at point $(typeof(p)).")
-end
-function projected_distribution(M::MMT, d) where {MMT<:MetricManifold}
-    return projected_distribution(M, is_default_metric(M), d)
-end
-function projected_distribution(M::MMT, ::Val{true}, d) where {MMT<:MetricManifold}
-    return projected_distribution(base_manifold(M), d)
-end
-function projected_distribution(M::MMT, ::Val{false}, d) where {MMT<:MetricManifold}
-    error("projected_distribution not implemented for a $(typeof(M)) with $(typeof(d)).")
-end
-
 """
     ricci_curvature(M::MetricManifold, p; backend = :default)
 
 Compute the Ricci scalar curvature of the manifold `M` at the point `p`.
 """
-function ricci_curvature(M::MetricManifold, p; backend = :default)
+ricci_curvature(::MetricManifold, ::Any)
+@decorator_transparent_function :parent function ricci_curvature(M::MetricManifold, p; backend = :default)
     Ginv = inverse_local_metric(M, p)
     Ric = ricci_tensor(M, p; backend = backend)
     S = sum(Ginv .* Ric)
@@ -475,7 +400,8 @@ end
 Compute the Ricci tensor, also known as the Ricci curvature tensor,
 of the manifold `M` at the point `p`.
 """
-function ricci_tensor(M::MetricManifold, p; kwargs...)
+ricci_tensor(::MetricManifold, ::Any)
+@decorator_transparent_function function ricci_tensor(M::MetricManifold, p; kwargs...)
     R = riemann_tensor(M, p; kwargs...)
     n = size(R, 1)
     Ric = allocate(R, Size(n, n))
@@ -490,7 +416,8 @@ Compute the Riemann tensor $R^l_{ijk}$, also known as the Riemann curvature
 tensor, at the point `p`. The dimensions of the resulting multi-dimensional
 array are ordered $(l,i,j,k)$.
 """
-function riemann_tensor(M::MetricManifold, p; backend = :default)
+riemann_tensor(::MetricManifold, ::Any)
+@decorator_transparent_function function riemann_tensor(M::MetricManifold, p; backend = :default)
     n = size(p, 1)
     Γ = christoffel_symbols_second(M, p; backend = backend)
     ∂Γ = christoffel_symbols_second_jacobian(M, p; backend = backend) ./ n
@@ -558,41 +485,4 @@ in an embedded space.
 """
 function solve_exp_ode(M, p, X, tspan; kwargs...)
     error("solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq` on Julia 1.1 or greater.")
-end
-
-function vector_transport_to!(
-    M::MMT,
-    Y,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod,
-) where {MMT<:MetricManifold}
-    return vector_transport_to!(M, is_default_metric(M), Y, p, X, q, m)
-end
-function vector_transport_to!(
-    M::MMT,
-    ::Val{true},
-    Y,
-    p,
-    X,
-    q,
-    m,
-) where {MMT<:MetricManifold}
-    return vector_transport_to!(base_manifold(M), Y, p, X, q, m)
-end
-function vector_transport_to!(
-    M::MMT,
-    ::Val{false},
-    Y,
-    p,
-    X,
-    q,
-    m,
-) where {MMT<:MetricManifold}
-    error("vector transport from a point of type $(typeof(p)) to a type $(typeof(q)) on a $(typeof(M)) for a vector of type $(X) and the $(typeof(m)) not yet implemented.")
-end
-
-function zero_tangent_vector!(M::MMT, X, p) where {MMT<:MetricManifold}
-    return zero_tangent_vector!(M.manifold, X, p)
 end

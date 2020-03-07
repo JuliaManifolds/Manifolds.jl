@@ -15,9 +15,12 @@ makedocs(
                 "Circle" => "manifolds/circle.md",
                 "Euclidean" => "manifolds/euclidean.md",
                 "Fixed-rank matrices" => "manifolds/fixedrankmatrices.md",
-                "Grassmannian" => "manifolds/grassmann.md",
+                "Grassmannian manifold" => "manifolds/grassmann.md",
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
+                "Lorentzian manifold" => "manifolds/lorentz.md",
+                "Oblique manifold" => "manifolds/oblique.md",
                 "Rotations" => "manifolds/rotations.md",
+                "Skew-symmetric matrices" => "manifolds/skewsymmetric.md",
                 "Sphere" => "manifolds/sphere.md",
                 "Stiefel" => "manifolds/stiefel.md",
                 "Symmetric matrices" => "manifolds/symmetric.md",
@@ -31,7 +34,9 @@ makedocs(
                 "Vector bundle" => "manifolds/vector_bundle.md"
             ],
             "Manifold decorators" => [
+                "Decorator manifold" => "manifolds/decorator.md",
                 "Array manifold" => "manifolds/array.md",
+                "Embedded manifold" => "manifolds/embedded.md",
                 "Metric manifold" => "manifolds/metric.md",
                 "Group manifold" => "manifolds/group.md"
             ]

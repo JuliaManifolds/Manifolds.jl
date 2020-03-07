@@ -154,14 +154,27 @@ function inverse_translate_diff!(
 end
 
 function group_exp(M::ArrayManifold, X; kwargs...)
-    is_tangent_vector(M, Identity(M), X, true; kwargs...)
+    is_tangent_vector(
+        M,
+        Identity(M),
+        array_value(X),
+        true;
+        check_base_point = false,
+        kwargs...)
     q = array_point(group_exp(M.manifold, array_value(X)))
     is_manifold_point(M, q, true; kwargs...)
     return q
 end
 
 function group_exp!(M::ArrayManifold, q, X; kwargs...)
-    is_tangent_vector(M, Identity(M), X, true; kwargs...)
+    is_tangent_vector(
+        M,
+        Identity(M),
+        array_value(X),
+        true;
+        check_base_point=false,
+        kwargs...
+    )
     group_exp!(M.manifold, array_value(q), array_value(X))
     is_manifold_point(M, q, true; kwargs...)
     return q
@@ -170,13 +183,27 @@ end
 function group_log(M::ArrayManifold, q; kwargs...)
     is_manifold_point(M, q, true; kwargs...)
     X = ArrayTVector(group_log(M.manifold, array_value(q)))
-    is_tangent_vector(M, Identity(M), X, true; kwargs...)
+    is_tangent_vector(
+        M,
+        Identity(M),
+        array_value(X),
+        true;
+        check_base_point = false,
+        kwargs...,
+    )
     return X
 end
 
 function group_log!(M::ArrayManifold, X, q; kwargs...)
     is_manifold_point(M, q, true; kwargs...)
     group_log!(M.manifold, array_value(X), array_value(q))
-    is_tangent_vector(M, Identity(M), X, true; kwargs...)
+    is_tangent_vector(
+        M,
+        Identity(M),
+        array_value(X),
+        true;
+        check_base_point = false,
+        kwargs...,
+    )
     return X
 end

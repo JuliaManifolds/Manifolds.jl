@@ -110,7 +110,7 @@ function check_manifold_point(M::ProductManifold, p::ProductArray; kwargs...)
 end
 
 """
-    check_tangent_vector(M::ProductManifold, p, X; kwargs... )
+    check_tangent_vector(M::ProductManifold, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`ProductManifold`](@ref)
 `M`, i.e. after [`check_manifold_point`](@ref)`(M, p)`, and all projections to
@@ -118,9 +118,17 @@ base manifolds must be respective tangent vectors.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::ProductManifold, p::ProductRepr, X::ProductRepr; kwargs...)
-    perr = check_manifold_point(M, p)
-    perr === nothing || return perr
+function check_tangent_vector(
+    M::ProductManifold,
+    p::ProductRepr,
+    X::ProductRepr;
+    check_base_point = true,
+    kwargs...,
+)
+    if check_base_point
+        perr = check_manifold_point(M, p; kwargs...)
+        perr === nothing || return perr
+    end
     ts = ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, X))
     for t ∈ ts
         err = check_tangent_vector(t...; kwargs...)
@@ -439,7 +447,7 @@ function inverse_retract!(M::ProductManifold, X, p, q, method::InverseProductRet
     return X
 end
 
-is_default_metric(::ProductManifold, ::ProductMetric) = Val(true)
+default_metric_dispatch(::ProductManifold, ::ProductMetric) = Val(true)
 
 function isapprox(M::ProductManifold, p, q; kwargs...)
     return all(

@@ -1,14 +1,26 @@
 # Manifolds
 
-The package __Manifolds__ aims to provide both a unified interface to define and use manifolds as well as a library of manifolds to use for your projects.
+The package __Manifolds__ aims to provide a library of manifolds to be used within your project.
+The implemented manifolds are accompanied by their mathematical formulae.
 
-```@autodocs
-Modules = [Manifolds, ManifoldsBase]
-Pages = ["Manifolds.jl"]
-Order = [:type, :function]
+The manifolds are implemented using the interface for manifolds given in [`ManifoldsBase.jl`](interface.md).
+You can use that interface to implement your own software on manifolds, such that all manifolds
+based on that interface can be used within your code.
+
+## Getting started
+
+To install the package just type
+
+```julia
+] add https://github.com/JuliaNLSolvers/Manifolds.jl.git
 ```
 
-## Decorators
+Then you can directly start, for example to stop half way from the north pole on the [`Sphere`](@ref) to a point on the the equator, you can generate the [`shortest_geodesic`](@ref).
+It internally employs [`log`](@ref log(::Sphere,::Any,::Any)) and [`exp`](@ref exp(::Sphere,::Any,::Any)).
 
-* [Array manifold](@ref)
-* [Metric manifold](@ref)
+```@example
+using Manifolds
+M = Sphere(2)
+γ = shortest_geodesic(M, [0., 0., 1.], [0., 1., 0.])
+γ(0.5)
+```

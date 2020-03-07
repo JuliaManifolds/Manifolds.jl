@@ -41,16 +41,20 @@ import ManifoldsBase:
     base_manifold,
     check_manifold_point,
     check_tangent_vector,
+    decorated_manifold,
+    decorator_transparent_dispatch,
+    default_decorator_dispatch,
     distance,
     exp,
     exp!,
     geodesic,
+    hat,
+    hat!,
     injectivity_radius,
     inner,
     isapprox,
     is_manifold_point,
     is_tangent_vector,
-    is_decorator_manifold,
     inverse_retract,
     inverse_retract!,
     log,
@@ -72,6 +76,8 @@ import ManifoldsBase:
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
+    vee,
+    vee!,
     zero_tangent_vector,
     zero_tangent_vector!
 import Random: rand
@@ -87,11 +93,24 @@ using LinearAlgebra
 using LightGraphs
 using LightGraphs: AbstractGraph
 using ManifoldsBase: CoTVector, Manifold, MPoint, TVector, DefaultManifold
+using ManifoldsBase
+using ManifoldsBase:
+    AbstractDecoratorManifold,
+    @decorator_transparent_fallback,
+    @decorator_transparent_function,
+    @decorator_transparent_signature,
+    _extract_val,
+    is_decorator_transparent,
+    is_default_decorator,
+    manifold_function_not_implemented_message
 using ManifoldsBase:
     ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
+using ManifoldsBase: QRRetraction, PolarRetraction, ProjectionRetraction
 using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
+using ManifoldsBase: QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
 using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
+
 using Markdown: @doc_str
 using Random: AbstractRNG
 using Requires
@@ -100,64 +119,13 @@ using StaticArrays
 using StatsBase: AbstractWeights, UnitWeights, values, varcorrection
 using UnsafeArrays
 
-"""
-    AbstractEstimationMethod
-
-Abstract type for defining statistical estimation methods.
-"""
-abstract type AbstractEstimationMethod end
-
-"""
-    PolarRetraction <: AbstractRetractionMethod
-
-Retractions that are based on singular value decompositions of the matrix / matrices
-for point and tangent vector on a [`Manifold`](@ref)
-"""
-struct PolarRetraction <: AbstractRetractionMethod end
-
-"""
-    ProjectionRetraction <: AbstractRetractionMethod
-
-Retractions that are based on projection and usually addition in the embedding.
-"""
-struct ProjectionRetraction <: AbstractRetractionMethod end
-
-"""
-    QRRetraction <: AbstractRetractionMethod
-
-Retractions that are based on a QR decomposition of the
-matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
-"""
-struct QRRetraction <: AbstractRetractionMethod end
-
-"""
-    PolarInverseRetraction <: AbstractInverseRetractionMethod
-
-Inverse retractions that are based on a singular value decomposition of the
-matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
-"""
-struct PolarInverseRetraction <: AbstractInverseRetractionMethod end
-
-"""
-    ProjectionInverseRetraction <: AbstractInverseRetractionMethod
-
-Inverse retractions that are based on a projection (or its inversion).
-"""
-struct ProjectionInverseRetraction <: AbstractInverseRetractionMethod end
-
-"""
-    QRInverseRetraction <: AbstractInverseRetractionMethod
-
-Inverse retractions that are based on a QR decomposition of the
-matrix / matrices for point and tangent vector on a [`Manifold`](@ref)
-"""
-struct QRInverseRetraction <: AbstractInverseRetractionMethod end
-
 include("utils.jl")
 include("numbers.jl")
 include("bases.jl")
 include("autodiff.jl")
 include("SizedAbstractArray.jl")
+
+include("statistics.jl")
 
 include("manifolds/VectorBundle.jl")
 
@@ -165,18 +133,23 @@ include("distributions.jl")
 include("projected_distribution.jl")
 include("product_representations.jl")
 
+
+include("manifolds/EmbeddedManifold.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/ProductManifold.jl")
 include("manifolds/PowerManifold.jl")
 include("manifolds/GraphManifold.jl")
 
+include("manifolds/Euclidean.jl")
+include("manifolds/Lorentz.jl")
+
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
-include("manifolds/Euclidean.jl")
 include("manifolds/FixedRankMatrices.jl")
 include("manifolds/Grassmann.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/Rotations.jl")
+include("manifolds/SkewSymmetric.jl")
 include("manifolds/Stiefel.jl")
 include("manifolds/Sphere.jl")
 include("manifolds/Symmetric.jl")
@@ -184,7 +157,9 @@ include("manifolds/SymmetricPositiveDefinite.jl")
 include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
+
 include("manifolds/Torus.jl")
+include("manifolds/Oblique.jl")
 
 include("groups/group.jl")
 include("groups/metric.jl")
@@ -202,8 +177,6 @@ include("groups/translation_action.jl")
 include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
-
-include("statistics.jl")
 
 function __init__()
     @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
@@ -224,7 +197,10 @@ export Euclidean,
     FixedRankMatrices,
     Grassmann,
     Hyperbolic,
+    Lorentz,
+    Oblique,
     Rotations,
+    SkewSymmetricMatrices,
     Sphere,
     Stiefel,
     SymmetricMatrices,
@@ -232,6 +208,7 @@ export Euclidean,
     Torus
 export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
+export AbstractDecoratorManifold
 export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
@@ -246,9 +223,11 @@ export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibe
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
 export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribution
+export AbstractEmbeddedManifold
 export Metric,
     RiemannianMetric,
     LorentzMetric,
+    EmbeddedManifold,
     EuclideanMetric,
     LinearAffineMetric,
     LogCholeskyMetric,
@@ -257,10 +236,18 @@ export Metric,
     PowerMetric,
     ProductMetric,
     MetricManifold
+export AbstractEmbeddingType, AbstractIsometricEmbeddingType, TransparentIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
-export AbstractRetractionMethod, QRRetraction, PolarRetraction, ProjectionRetraction
+export AbstractRetractionMethod,
+    ExponentialRetraction,
+    QRRetraction,
+    PolarRetraction,
+    ProjectionRetraction
 export AbstractInverseRetractionMethod,
-    QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
+    LogarithmicInverseRetraction,
+    QRInverseRetraction,
+    PolarInverseRetraction,
+    ProjectionInverseRetraction
 export AbstractEstimationMethod,
     GradientDescentEstimation,
     CyclicProximalPointEstimation,
@@ -279,19 +266,25 @@ export ×,
     allocate_result,
     base_manifold,
     bundle_projection,
+    check_manifold_point,
+    check_tangent_vector,
     christoffel_symbols_first,
     christoffel_symbols_second,
     christoffel_symbols_second_jacobian,
     complex_dot,
+    decorated_manifold,
     det_local_metric,
     distance,
     einstein_tensor,
+    embed,
+    embed!,
     exp,
     exp!,
     flat,
     flat!,
     gaussian_curvature,
     geodesic,
+    get_embedding,
     hat,
     hat!,
     incident_log,
@@ -301,8 +294,10 @@ export ×,
     inverse_retract,
     inverse_retract!,
     isapprox,
-    is_decorator_manifold,
+    is_group_decorator,
+    is_decorator_transparent,
     is_default_metric,
+    is_default_decorator,
     is_manifold_point,
     is_tangent_vector,
     isapprox,
@@ -321,6 +316,7 @@ export ×,
     mean_and_std,
     median,
     median!,
+    minkowski_metric,
     moment,
     norm,
     normal_tvector_distribution,
@@ -394,7 +390,7 @@ export affine_matrix,
     apply_diff!,
     base_group,
     center_of_orbit,
-    check_has_invariant_metric,
+    has_approx_invariant_metric,
     compose,
     compose!,
     direction,
@@ -409,6 +405,7 @@ export affine_matrix,
     identity!,
     inv,
     inv!,
+    invariant_metric_dispatch,
     inverse_apply,
     inverse_apply!,
     inverse_apply_diff,
