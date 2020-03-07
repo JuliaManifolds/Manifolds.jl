@@ -21,6 +21,20 @@ end
 ProductManifold(manifolds::Manifold...) = ProductManifold{typeof(manifolds)}(manifolds)
 ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
 
+"""
+    ProductBasisData
+
+A typed tuple to store tuples of data of stored/precomputed bases for a [`ProductManifold`](@ref).
+"""
+struct ProductBasisData{T<:Tuple}
+    parts::T
+end
+
+"""
+    ProductMetric <: Metric
+
+A type to represent the product of metrics for a [`ProductManifold`](@ref).
+"""
 struct ProductMetric <: Metric end
 
 """
@@ -713,6 +727,19 @@ end
 
 function show(io::IO, M::ProductManifold)
     print(io, "ProductManifold(", join(M.manifolds, ", "), ")")
+end
+
+function show(
+    io::IO,
+    mime::MIME"text/plain",
+    B::CachedBasis{T,D,𝔽},
+) where {T<:AbstractBasis,D<:ProductBasisData,𝔽}
+    println(io, "$(T()) for a product manifold with coordinates in $(number_system(B))")
+    for (i, cb) = enumerate(B.data.parts)
+        println(io, "Basis for component $i:")
+        show(io, mime, cb)
+        println(io)
+    end
 end
 
 """

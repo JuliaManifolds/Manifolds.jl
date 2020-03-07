@@ -219,19 +219,6 @@ gaussian_curvature(::MetricManifold, ::Any)
     return ricci_curvature(M, p; kwargs...) / 2
 end
 
-function get_basis(M::MMT, p, B::DefaultOrthonormalBasis) where {MMT<:MetricManifold}
-    return invoke(get_basis, Tuple{MMT,Any,AbstractBasis}, M, p, B)
-end
-function get_basis(M::MMT, p, B::AbstractBasis) where {MMT<:MetricManifold}
-    return get_basis(M, is_default_metric(M), p, B)
-end
-function get_basis(M::MMT, ::Val{true}, p, B::AbstractBasis) where {MMT<:MetricManifold}
-    return get_basis(base_manifold(M), p, B)
-end
-function get_basis(M::MMT, ::Val{false}, p, B::AbstractBasis) where {MMT<:MetricManifold}
-    error("tangent_orthogonal_basis not implemented on $(typeof(M)) for point $(typeof(p)) and basis type $(typeof(B)).")
-end
-
 function injectivity_radius(M::MMT, args...) where {MMT<:MetricManifold}
     return injectivity_radius(base_manifold(M), args...)
 end

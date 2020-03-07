@@ -96,16 +96,6 @@ struct DiagonalizingBasisData{D,V,ET}
     vectors::V
 end
 
-"""
-    ProductBasisData
-
-A typed tuple to store tuples of data of stored/precomputed bases.
-"""
-struct ProductBasisData{T<:Tuple}
-    parts::T
-end
-
-
 const DefaultOrDiagonalizingBasis =
     Union{DefaultOrthonormalBasis,DiagonalizingOrthonormalBasis}
 
@@ -530,18 +520,6 @@ function show(
     sk = sprint(show, "text/plain", B.data.eigenvalues, context = io, sizehint = 0)
     sk = replace(sk, '\n' => "\n ")
     print(io, ' ', sk)
-end
-function show(
-    io::IO,
-    mime::MIME"text/plain",
-    B::CachedBasis{T,D,𝔽},
-) where {T<:AbstractBasis,D<:ProductBasisData,𝔽}
-    println(io, "$(T()) for a product manifold with coordinates in $(number_system(B))")
-    for (i, cb) = enumerate(B.data.parts)
-        println(io, "Basis for component $i:")
-        show(io, mime, cb)
-        println(io)
-    end
 end
 
 @doc raw"""
