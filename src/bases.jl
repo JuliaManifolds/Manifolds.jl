@@ -573,79 +573,42 @@ function decorator_transparent_dispatch(
     ::typeof(get_basis),
     ::Manifold,
     ::Any,
-    ::DefaultBasis,
+    ::Union{DefaultBasis, DefaultOrthogonalBasis},
     args...
 )
     return Val(:parent)
 end
-function decorator_transparent_dispatch(
-    ::typeof(get_basis),
-    ::Manifold,
-    ::Any,
-    ::DefaultOrthogonalBasis,
-    args...,
-)
-    return Val(:parent)
-end
 
+@decorator_transparent_signature get_coordinates(M::Manifold,p,X,B::DefaultOrthonormalBasis)
 function decorator_transparent_dispatch(
     ::typeof(get_coordinates),
     M::Manifold,
     ::Any,
     ::Any,
-    ::DefaultBasis,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(get_coordinates),
-    ::Manifold,
-    ::Any,
-    ::Any,
-    ::DefaultOrthogonalBasis,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(get_coordinates!),
-    ::Manifold,
-    ::Any,
-    ::Any,
-    ::DefaultBasis,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(get_coordinates!),
-    ::Manifold,
-    ::Any,
-    ::Any,
-    ::DefaultOrthogonalBasis,
+    ::Union{DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis},
     args...,
 )
     return Val(:parent)
 end
 
 function decorator_transparent_dispatch(
-    ::typeof(get_vector),
+    ::typeof(get_coordinates!),
     ::Manifold,
     ::Any,
     ::Any,
-    ::DefaultBasis,
+    ::Union{DefaultBasis, DefaultOrthogonalBasis},
     args...,
 )
     return Val(:parent)
 end
+
 @decorator_transparent_signature get_vector(M::Manifold,p,X,B::DefaultOrthonormalBasis)
 function decorator_transparent_dispatch(
     ::typeof(get_vector),
     ::Manifold,
     ::Any,
     ::Any,
-    ::DefaultOrthogonalBasis,
+    ::Union{DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis},
     args...,
 )
     return Val(:parent)
