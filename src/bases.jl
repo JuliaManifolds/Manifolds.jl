@@ -559,13 +559,13 @@ function get_basis(
     return B
 end
 # the following is not nice, can we do better when using decorators and a specific last part?
-get__coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...) = _get__coordinates(M,p,X,B, kwargs...)
-get__coordinates(M::ArrayManifold, p, X, B::CachedBasis; kwargs...) = _get__coordinates(M,p,X,B, kwargs...)
-get__coordinates(M::ArrayManifold, p, X, B::DefaultBasis; kwargs...) = _get__coordinates(M,p,X,B, kwargs...)
-get__coordinates(M::ArrayManifold, p, X, B::DefaultOrthogonalBasis; kwargs...) = _get__coordinates(M,p,X,B, kwargs...)
-get__coordinates(M::ArrayManifold, p, X, B::DefaultOrthonormalBasis; kwargs...) = _get__coordinates(M,p,X,B, kwargs...)
+get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...) = _get_coordinates(M,p,X,B, kwargs...)
+get_coordinates(M::ArrayManifold, p, X, B::CachedBasis; kwargs...) = _get_coordinates(M,p,X,B, kwargs...)
+get_coordinates(M::ArrayManifold, p, X, B::DefaultBasis; kwargs...) = _get_coordinates(M,p,X,B, kwargs...)
+get_coordinates(M::ArrayManifold, p, X, B::DefaultOrthogonalBasis; kwargs...) = _get_coordinates(M,p,X,B, kwargs...)
+get_coordinates(M::ArrayManifold, p, X, B::DefaultOrthonormalBasis; kwargs...) = _get_coordinates(M,p,X,B, kwargs...)
 
-function _get__coordinates(M::ArrayManifold, p, X, B::AbstractBasis;  kwargs...)
+function _get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis;  kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     return get_coordinates(M.manifold, p, X, B)
 end
