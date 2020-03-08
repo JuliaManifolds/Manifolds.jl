@@ -375,24 +375,8 @@ end
 _get_vectors(B::CachedBasis{<:AbstractBasis,<:AbstractArray}) = B.data
 _get_vectors(B::CachedBasis{<:AbstractBasis,<:DiagonalizingBasisData}) = B.data.vectors
 
-# @doc raw"""
-#     hat(M::Manifold, p, Xⁱ)
-
-# Given a basis $e_i$ on the tangent space at a point `p` and tangent
-# component vector $X^i$, compute the equivalent vector representation
-# $X=X^i e_i$, where Einstein summation notation is used:
-
-# ````math
-# ∧ : X^i ↦ X^i e_i
-# ````
-
-# For array manifolds, this converts a vector representation of the tangent
-# vector to an array representation. The [`vee`](@ref) map is the `hat` map's
-# inverse.
-# """
-# hat(M::Manifold, p, Xⁱ) = get_vector(M, p, Xⁱ, DefaultBasis())
-
-# hat!(M::Manifold, X, p, Xⁱ) = get_vector!(M, X, p, Xⁱ, DefaultBasis())
+hat(M::Manifold, p, Xⁱ) = get_vector(M, p, Xⁱ, DefaultBasis())
+hat!(M::Manifold, X, p, Xⁱ) = get_vector!(M, X, p, Xⁱ, DefaultBasis())
 
 """
     number_system(::AbstractBasis)
@@ -471,24 +455,9 @@ function show(
     print(io, ' ', sk)
 end
 
-# @doc raw"""
-#     vee(M::Manifold, p, X)
+vee(M::Manifold, p, X) = get_coordinates(M, p, X, DefaultBasis())
 
-# Given a basis $e_i$ on the tangent space at a point `p` and tangent
-# vector `X`, compute the vector components $X^i$, such that $X = X^i e_i$, where
-# Einstein summation notation is used:
-
-# ````math
-# \vee : X^i e_i ↦ X^i
-# ````
-
-# For array manifolds, this converts an array representation of the tangent
-# vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
-# inverse.
-# """
-# vee(M::Manifold, p, X) = get_coordinates(M, p, X, DefaultBasis())
-
-# vee!(M::Manifold, Xⁱ, p, X) = get_coordinates!(M, Xⁱ, p, X, DefaultBasis())
+vee!(M::Manifold, Xⁱ, p, X) = get_coordinates!(M, Xⁱ, p, X, DefaultBasis())
 
 
 #
