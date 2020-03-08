@@ -495,60 +495,37 @@ vee!(M::Manifold, Xⁱ, p, X) = get_coordinates!(M, Xⁱ, p, X, DefaultBasis())
 # Transparency
 #
 @decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::AbstractBasis)
+@decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::CachedBasis)
 @decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::DefaultBasis)
 @decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::DefaultOrthogonalBasis)
 @decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::DefaultOrthonormalBasis)
-function decorator_transparent_dispatch(
-    ::typeof(get_coordinates),
-    M::Manifold,
-    ::Any,
-    ::Any,
-    ::Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis},
-    args...,
-)
+function decorator_transparent_dispatch(::typeof(get_coordinates), args...)
     return Val(:parent)
 end
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::AbstractBasis)
+@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::CachedBasis)
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultBasis)
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthogonalBasis)
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthonormalBasis)
-function decorator_transparent_dispatch(
-    ::typeof(get_coordinates!),
-    ::Manifold,
-    ::Any,
-    ::Any,
-    ::Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis},
-    args...,
-)
+function decorator_transparent_dispatch(::typeof(get_coordinates!), args...)
     return Val(:parent)
 end
 
 @decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, p, X, B::AbstractBasis)
+@decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, p, X, B::CachedBasis)
 @decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, p, X, B::DefaultBasis)
 @decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, p, X, B::DefaultOrthogonalBasis)
 @decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, p, X, B::DefaultOrthonormalBasis)
-function decorator_transparent_dispatch(
-    ::typeof(get_vector),
-    ::Manifold,
-    ::Any,
-    ::Any,
-    ::Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis},
-    args...,
-)
+function decorator_transparent_dispatch(::typeof(get_vector), args...)
     return Val(:parent)
 end
+
 @decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::AbstractBasis)
+@decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::CachedBasis)
 @decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultBasis)
 @decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthogonalBasis)
 @decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthonormalBasis)
-function decorator_transparent_dispatch(
-    ::typeof(get_vector!),
-    ::Manifold,
-    ::Any,
-    ::Any,
-    ::Union{DefaultBasis, DefaultOrthogonalBasis},
-    args...,
-)
+function decorator_transparent_dispatch(::typeof(get_vector!), args...)
     return Val(:parent)
 end
 
@@ -582,13 +559,13 @@ function get_basis(
     return B
 end
 # the following is not nice, can we do better when using decorators and a specific last part?
-function get_coordinates(
-    M::ArrayManifold,
-    p,
-    X,
-    B::Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis};
-    kwargs...
-)
+get__coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...) = _get__coordinates(M,p,X,B, kwargs...)
+get__coordinates(M::ArrayManifold, p, X, B::CachedBasis; kwargs...) = _get__coordinates(M,p,X,B, kwargs...)
+get__coordinates(M::ArrayManifold, p, X, B::DefaultBasis; kwargs...) = _get__coordinates(M,p,X,B, kwargs...)
+get__coordinates(M::ArrayManifold, p, X, B::DefaultOrthogonalBasis; kwargs...) = _get__coordinates(M,p,X,B, kwargs...)
+get__coordinates(M::ArrayManifold, p, X, B::DefaultOrthonormalBasis; kwargs...) = _get__coordinates(M,p,X,B, kwargs...)
+
+function _get__coordinates(M::ArrayManifold, p, X, B::AbstractBasis;  kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     return get_coordinates(M.manifold, p, X, B)
 end
@@ -604,13 +581,13 @@ function get_coordinates!(
     get_coordinates!(M, Y, p, X, B)
     return Y
 end
-function get_vector(
-    M::ArrayManifold,
-    p,
-    X,
-    B::Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis};
-    kwargs...
-)
+get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...) = _get_vector(M,p,X,B, kwargs...)
+get_vector(M::ArrayManifold, p, X, B::CachedBasis; kwargs...) = _get_vector(M,p,X,B, kwargs...)
+get_vector(M::ArrayManifold, p, X, B::DefaultBasis; kwargs...) = _get_vector(M,p,X,B, kwargs...)
+get_vector(M::ArrayManifold, p, X, B::DefaultOrthogonalBasis; kwargs...) = _get_vector(M,p,X,B, kwargs...)
+get_vector(M::ArrayManifold, p, X, B::DefaultOrthonormalBasis; kwargs...) = _get_vector(M,p,X,B, kwargs...)
+
+function _get_vector(M::ArrayManifold, p, X, B::AbstractBasis;  kwargs...)
     is_manifold_point(M, p, true; kwargs...)
     size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
     Y = get_vector(M.manifold, p, X, B)
