@@ -257,10 +257,6 @@ end
         w = [0.13 0.17 0.19]
         y = allocate(x)
 
-        # Test fallbacks
-        @test_throws ErrorException vee!(M,w,x,v)
-        @test_throws ErrorException hat!(M,w,x,v)
-
         @test inner(M, x, v, w) == 2 * dot(v,w)
         @test inner(MM, x, v, w) === inner(M, x, v, w)
         @test norm(MM, x, v) === norm(M, x, v)
