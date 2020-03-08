@@ -499,15 +499,15 @@ vee!(M::Manifold, Xⁱ, p, X) = get_coordinates!(M, Xⁱ, p, X, DefaultBasis())
 @decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::DefaultBasis)
 @decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::DefaultOrthogonalBasis)
 @decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::DefaultOrthonormalBasis)
-function decorator_transparent_dispatch(::typeof(get_coordinates), args...)
+function decorator_transparent_dispatch(::typeof(get_coordinates), ::Manifold, args...)
     return Val(:parent)
 end
-@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::AbstractBasis)
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::CachedBasis)
+@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::CachedBasis{BT,V,𝔽}) where {BT<:AbstractBasis{ℝ},𝔽, V}
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultBasis)
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthogonalBasis)
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthonormalBasis)
-function decorator_transparent_dispatch(::typeof(get_coordinates!), args...)
+function decorator_transparent_dispatch(::typeof(get_coordinates!), ::Manifold, args...)
     return Val(:parent)
 end
 
@@ -516,7 +516,7 @@ end
 @decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, p, X, B::DefaultBasis)
 @decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, p, X, B::DefaultOrthogonalBasis)
 @decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, p, X, B::DefaultOrthonormalBasis)
-function decorator_transparent_dispatch(::typeof(get_vector), args...)
+function decorator_transparent_dispatch(::typeof(get_vector), ::Manifold, args...)
     return Val(:parent)
 end
 
@@ -525,7 +525,7 @@ end
 @decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultBasis)
 @decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthogonalBasis)
 @decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthonormalBasis)
-function decorator_transparent_dispatch(::typeof(get_vector!), args...)
+function decorator_transparent_dispatch(::typeof(get_vector!), ::Manifold, args...)
     return Val(:parent)
 end
 
