@@ -179,22 +179,21 @@ the function [`get_vectors`](@ref) needs to be used to retrieve the basis vector
 
 See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
-get_basis(::Manifold, ::Any, ::AbstractBasis)
-@decorator_transparent_function function get_basis(M::Manifold, p, B::AbstractBasis)
+function get_basis(M::Manifold, p, B::AbstractBasis)
     error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
 
-@decorator_transparent_function function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
+function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
     dim = manifold_dimension(M)
     return CachedBasis(
         B,
         [get_vector(M, p, [ifelse(i == j, 1, 0) for j = 1:dim], B) for i = 1:dim],
     )
 end
-@decorator_transparent_function function get_basis(M::Manifold, p, B::CachedBasis)
+function get_basis(M::Manifold, p, B::CachedBasis)
     return B
 end
-@decorator_transparent_function function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
+function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
     S = representation_size(M)
     PS = prod(S)
     dim = manifold_dimension(M)
@@ -217,7 +216,7 @@ end
     end
     return CachedBasis(B, vecs)
 end
-@decorator_transparent_function function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
+function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
     E = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     N = length(E)
     Ξ = empty(E)
@@ -368,7 +367,7 @@ end
 )
     return B.data
 end
-function get_vectors(
+@decorator_transparent_function function get_vectors(
     M::Manifold,
     p,
     B::CachedBasis{<:AbstractBasis,<:DiagonalizingBasisData},
@@ -569,17 +568,7 @@ end
 # Transparency
 #
 
-function decorator_transparent_dispatch(
-    ::typeof(get_basis),
-    ::Manifold,
-    ::Any,
-    ::Union{DefaultBasis, DefaultOrthogonalBasis},
-    args...
-)
-    return Val(:parent)
-end
-
-@decorator_transparent_signature get_coordinates(M::Manifold,p,X,B::DefaultOrthonormalBasis)
+@decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::DefaultOrthonormalBasis)
 function decorator_transparent_dispatch(
     ::typeof(get_coordinates),
     M::Manifold,
@@ -602,7 +591,7 @@ function decorator_transparent_dispatch(
     return Val(:parent)
 end
 
-@decorator_transparent_signature get_vector(M::Manifold,p,X,B::DefaultOrthonormalBasis)
+@decorator_transparent_signature get_vector(M::AbstractDecoratorManifold,p,X,B::DefaultOrthonormalBasis)
 function decorator_transparent_dispatch(
     ::typeof(get_vector),
     ::Manifold,
