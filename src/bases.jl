@@ -503,7 +503,7 @@ function decorator_transparent_dispatch(::typeof(get_coordinates), ::Manifold, a
     return Val(:parent)
 end
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::CachedBasis)
-@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::CachedBasis{BT,V,𝔽}) where {BT<:AbstractBasis{ℝ},𝔽, V}
+@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::CachedBasis{BT,V,𝔽}) where {BT<:AbstractBasis{ℝ}, 𝔽, V}
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultBasis)
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthogonalBasis)
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthonormalBasis)

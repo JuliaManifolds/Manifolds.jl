@@ -45,6 +45,8 @@ Manifolds.local_metric(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}},x
 Manifolds.exp!(M::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x, v) where N = exp!(base_manifold(M), y, x, v)
 Manifolds.vector_transport_to!(::BaseManifold, vto, x, v, y, ::ParallelTransport) = (vto .= v)
 Manifolds.get_basis(::BaseManifold{N},x,::DefaultOrthonormalBasis) where {N} = ( [(Matrix(I, N, N)[:,i]) for i in 1:N], zeros(N))
+Manifolds.get_coordinates!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
+Manifolds.get_vector!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
 Manifolds.default_metric_dispatch(::BaseManifold, ::DefaultBaseManifoldMetric) = Val(true)
 Manifolds.projected_distribution(M::BaseManifold, d) = ProjectedPointDistribution(M, d, project_point!, rand(d))
 Manifolds.projected_distribution(M::BaseManifold, d, x) = ProjectedPointDistribution(M, d, project_point!, x)
