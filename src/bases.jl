@@ -266,22 +266,21 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 
 See also: [`get_vector`](@ref), [`get_basis`](@ref)
 """
-get_coordinates(::Manifold, ::Any, ::Any, ::AbstractBasis)
-@decorator_transparent_function function get_coordinates(M::Manifold, p, X, B::AbstractBasis)
+function get_coordinates(M::Manifold, p, X, B::AbstractBasis)
     Y = allocate_result(M, get_coordinates, p, X)
     return get_coordinates!(M, Y, p, X, B)
 end
 
-@decorator_transparent_function function get_coordinates!(M::Manifold, Y, p, X, B::AbstractBasis)
+function get_coordinates!(M::Manifold, Y, p, X, B::AbstractBasis)
     error("get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
-@decorator_transparent_function function get_coordinates!(M::Manifold, Y, p, X, B::DefaultBasis)
+function get_coordinates!(M::Manifold, Y, p, X, B::DefaultBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
 end
-@decorator_transparent_function function get_coordinates!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
+function get_coordinates!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
 end
-@decorator_transparent_function function get_coordinates!(
+function get_coordinates!(
     M::Manifold,
     Y,
     p,
@@ -291,7 +290,7 @@ end
     map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     return Y
 end
-@decorator_transparent_function function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis)
+function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis)
     map!(vb -> inner(M, p, X, vb), Y, get_vectors(M, p, B))
     return Y
 end
@@ -312,22 +311,21 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 
 See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 """
-get_vector(::Manifold, ::Any, ::Any, ::AbstractBasis)
-@decorator_transparent_function function get_vector(M::Manifold, p, X, B::AbstractBasis)
+function get_vector(M::Manifold, p, X, B::AbstractBasis)
     Y = allocate_result(M, get_vector, p, X)
     return get_vector!(M, Y, p, X, B)
 end
 
-@decorator_transparent_function function get_vector!(M::Manifold, Y, p, X, B::AbstractBasis)
+function get_vector!(M::Manifold, Y, p, X, B::AbstractBasis)
     error("get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
-@decorator_transparent_function function get_vector!(M::Manifold, Y, p, X, B::DefaultBasis)
+function get_vector!(M::Manifold, Y, p, X, B::DefaultBasis)
     return get_vector!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
 end
-@decorator_transparent_function function get_vector!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
+function get_vector!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
     return get_vector!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
 end
-@decorator_transparent_function function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
+function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `Y`
@@ -355,19 +353,17 @@ end
 
 Get the basis vectors of basis `B` of the tangent space at point `p`.
 """
-get_vectors(::Manifold, ::Any, ::AbstractBasis)
-
-@decorator_transparent_function function get_vectors(M::Manifold, p, B::AbstractBasis)
+function get_vectors(M::Manifold, p, B::AbstractBasis)
     error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
-@decorator_transparent_function function get_vectors(
+function get_vectors(
     M::Manifold,
     p,
     B::CachedBasis{<:AbstractBasis,<:AbstractArray},
 )
     return B.data
 end
-@decorator_transparent_function function get_vectors(
+function get_vectors(
     M::Manifold,
     p,
     B::CachedBasis{<:AbstractBasis,<:DiagonalizingBasisData},
@@ -568,57 +564,59 @@ end
 # Transparency
 #
 
+@decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::AbstractBasis)
+@decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::DefaultBasis)
+@decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::DefaultOrthogonalBasis)
 @decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::DefaultOrthonormalBasis)
 function decorator_transparent_dispatch(
     ::typeof(get_coordinates),
     M::Manifold,
     ::Any,
     ::Any,
-    ::Union{DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis},
+    ::Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis},
     args...,
 )
     return Val(:parent)
 end
-
+@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::AbstractBasis)
+@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultBasis)
+@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthogonalBasis)
+@decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthonormalBasis)
 function decorator_transparent_dispatch(
     ::typeof(get_coordinates!),
     ::Manifold,
     ::Any,
     ::Any,
-    ::Union{DefaultBasis, DefaultOrthogonalBasis},
+    ::Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis},
     args...,
 )
     return Val(:parent)
 end
 
-@decorator_transparent_signature get_vector(M::AbstractDecoratorManifold,p,X,B::DefaultOrthonormalBasis)
+@decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, p, X, B::AbstractBasis)
+@decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, p, X, B::DefaultBasis)
+@decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, p, X, B::DefaultOrthogonalBasis)
+@decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, p, X, B::DefaultOrthonormalBasis)
 function decorator_transparent_dispatch(
     ::typeof(get_vector),
     ::Manifold,
     ::Any,
     ::Any,
-    ::Union{DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis},
+    ::Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis},
     args...,
 )
     return Val(:parent)
 end
-
+@decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::AbstractBasis)
+@decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultBasis)
+@decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthogonalBasis)
+@decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, p, X, B::DefaultOrthonormalBasis)
 function decorator_transparent_dispatch(
     ::typeof(get_vector!),
     ::Manifold,
     ::Any,
     ::Any,
-    ::DefaultBasis,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(get_vector!),
-    ::Manifold,
-    ::Any,
-    ::Any,
-    ::DefaultOrthogonalBasis,
+    ::Union{DefaultBasis, DefaultOrthogonalBasis},
     args...,
 )
     return Val(:parent)
