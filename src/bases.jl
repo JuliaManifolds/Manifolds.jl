@@ -490,80 +490,10 @@ vee(M::Manifold, p, X) = get_coordinates(M, p, X, DefaultBasis())
 
 vee!(M::Manifold, Xⁱ, p, X) = get_coordinates!(M, Xⁱ, p, X, DefaultBasis())
 
-#
-# Array Manifold
-#
-function get_basis(
-    M::ArrayManifold,
-    p,
-    B::CachedBasis{<:AbstractOrthonormalBasis{ℝ},T,ℝ},
-) where {T<:AbstractVector}
-    bvectors = get_vectors(M, p, B)
-    N = length(bvectors)
-    M_dim = manifold_dimension(M)
-    if N != M_dim
-
-        throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
-    end
-    for i = 1:N
-        Xi_norm = norm(M, p, bvectors[i])
-        if !isapprox(Xi_norm, 1)
-            throw(ArgumentError("vector number $i is not normalized (norm = $Xi_norm)"))
-        end
-        for j = i+1:N
-            dot_val = real(inner(M, p, bvectors[i], bvectors[j]))
-            if !isapprox(dot_val, 0; atol = eps(eltype(p)))
-                throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
-            end
-        end
-    end
-    return B
-end
-function get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
-    is_tangent_vector(M, p, X, true; kwargs...)
-    return get_coordinates(M.manifold, p, X, B)
-end
-function get_coordinates!(M::ArrayManifold, Y, p, X, B::AbstractBasis; kwargs...)
-    is_tangent_vector(M, p, X, true; kwargs...)
-    get_coordinates!(M, Y, p, X, B)
-    return Y
-end
-function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
-    size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
-    Y = get_vector(M.manifold, p, X, B)
-    size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
-    return Y
-end
-function get_vector!(M::ArrayManifold, Y, p, X, B::AbstractBasis; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
-    size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
-    get_vector!(M.manifold, Y, p, X, B)
-    size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
-    return Y
-end
-
-
-#
-# DefaultManifold
-#
-function get_basis(M::DefaultManifold, p, B::DefaultOrthonormalBasis)
-    return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
-end
-function get_coordinates!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
-    Y .= reshape(X, manifold_dimension(M))
-    return Y
-end
-
-function get_vector!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
-    Y .= reshape(X, representation_size(M))
-    return Y
-end
 
 #
 # Transparency
 #
-
 @decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::AbstractBasis)
 @decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::DefaultBasis)
 @decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, p, X, B::DefaultOrthogonalBasis)
@@ -620,4 +550,100 @@ function decorator_transparent_dispatch(
     args...,
 )
     return Val(:parent)
+end
+
+#
+# Array Manifold
+#
+function get_basis(
+    M::ArrayManifold,
+    p,
+    B::CachedBasis{<:AbstractOrthonormalBasis{ℝ},T,ℝ},
+) where {T<:AbstractVector}
+    bvectors = get_vectors(M, p, B)
+    N = length(bvectors)
+    M_dim = manifold_dimension(M)
+    if N != M_dim
+
+        throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
+    end
+    for i = 1:N
+        Xi_norm = norm(M, p, bvectors[i])
+        if !isapprox(Xi_norm, 1)
+            throw(ArgumentError("vector number $i is not normalized (norm = $Xi_norm)"))
+        end
+        for j = i+1:N
+            dot_val = real(inner(M, p, bvectors[i], bvectors[j]))
+            if !isapprox(dot_val, 0; atol = eps(eltype(p)))
+                throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
+            end
+        end
+    end
+    return B
+end
+# the following is not nice, can we do better when using decorators and a specific last part?
+function get_coordinates(
+    M::ArrayManifold,
+    p,
+    X,
+    B::Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis};
+    kwargs...
+)
+    is_tangent_vector(M, p, X, true; kwargs...)
+    return get_coordinates(M.manifold, p, X, B)
+end
+function get_coordinates!(
+    M::ArrayManifold,
+    Y,
+    p,
+    X,
+    B::Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis};
+    kwargs...
+)
+    is_tangent_vector(M, p, X, true; kwargs...)
+    get_coordinates!(M, Y, p, X, B)
+    return Y
+end
+function get_vector(
+    M::ArrayManifold,
+    p,
+    X,
+    B::Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis};
+    kwargs...
+)
+    is_manifold_point(M, p, true; kwargs...)
+    size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
+    Y = get_vector(M.manifold, p, X, B)
+    size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
+    return Y
+end
+function get_vector!(
+    M::ArrayManifold,
+    Y,
+    p,
+    X,
+    B::Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis};
+    kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
+    get_vector!(M.manifold, Y, p, X, B)
+    size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
+    return Y
+end
+
+
+#
+# DefaultManifold
+#
+function get_basis(M::DefaultManifold, p, B::DefaultOrthonormalBasis)
+    return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
+end
+function get_coordinates!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
+    Y .= reshape(X, manifold_dimension(M))
+    return Y
+end
+
+function get_vector!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
+    Y .= reshape(X, representation_size(M))
+    return Y
 end
