@@ -146,7 +146,7 @@ isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
 isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
 function decorator_transparent_dispatch(
-    ::typeof(hat),
+    ::Union{typeof(hat),typeof(get_vector)},
     ::AbstractGroupManifold,
     args...,
 )
@@ -158,11 +158,16 @@ function allocate_result(
     e::Identity,
     Xⁱ,
 )
-    is_decorator_group(M) === Val(true) && return allocate_result(base_group(M), f, e, Xⁱ)
+    is_group_decorator(M) && return allocate_result(base_group(M), f, e, Xⁱ)
     error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(Xⁱ).")
 end
-function allocate_result(M::AbstractGroupManifold, ::typeof(hat), e::Identity, Xⁱ)
-    error("allocate_result not implemented for group manifold $(M), function vee, $(e), and vector $(Xⁱ).")
+function allocate_result(
+    M::AbstractGroupManifold,
+    f::Union{typeof(hat),typeof(get_vector)},
+    e::Identity,
+    Xⁱ,
+    )
+    error("allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(Xⁱ).")
 end
 function allocate_result(
     G::GT,
@@ -175,19 +180,19 @@ function allocate_result(
 end
 
 function decorator_transparent_dispatch(
-    ::typeof(vee),
+    ::Union{typeof(vee),typeof(get_coordinates)},
     ::AbstractGroupManifold,
     args...,
 )
     return Val(:parent)
 end
 function allocate_result(
-    M::Manifold,
+    M::AbstractDecoratorManifold,
     f::Union{typeof(vee),typeof(get_coordinates)},
     e::Identity,
     X,
 )
-    is_decorator_group(M) === Val(true) && return allocate_result(base_group(M), f, e, X)
+    is_decorator_group(M) && return allocate_result(base_group(M), f, e, X)
     error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(X).")
 end
 function allocate_result(
@@ -196,7 +201,7 @@ function allocate_result(
     e::Identity,
     X,
     )
-    error("allocate_result not implemented for group manifold $(M), function vee, $(e), and vector $(X).")
+    error("allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(X).")
 end
 function allocate_result(
     G::GT,
