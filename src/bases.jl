@@ -179,48 +179,22 @@ the function [`get_vectors`](@ref) needs to be used to retrieve the basis vector
 
 See also: [`get_coordinates`](@ref), [`get_vector`](@ref)
 """
-function get_basis(M::Manifold, p, B::AbstractBasis)
+get_basis(::Manifold, ::Any, ::AbstractBasis)
+@decorator_transparent_function function get_basis(M::Manifold, p, B::AbstractBasis)
     error("get_basis not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
 
-function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
+@decorator_transparent_function function get_basis(M::Manifold, p, B::DefaultOrthonormalBasis)
     dim = manifold_dimension(M)
     return CachedBasis(
         B,
         [get_vector(M, p, [ifelse(i == j, 1, 0) for j = 1:dim], B) for i = 1:dim],
     )
 end
-get_basis(M::Manifold, p, B::CachedBasis) = B
-function get_basis(
-    M::ArrayManifold,
-    p,
-    B::CachedBasis{<:AbstractOrthonormalBasis{ℝ},T,ℝ},
-) where {T<:AbstractVector}
-    bvectors = get_vectors(M, p, B)
-    N = length(bvectors)
-    M_dim = manifold_dimension(M)
-    if N != M_dim
-
-        throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
-    end
-    for i = 1:N
-        Xi_norm = norm(M, p, bvectors[i])
-        if !isapprox(Xi_norm, 1)
-            throw(ArgumentError("vector number $i is not normalized (norm = $Xi_norm)"))
-        end
-        for j = i+1:N
-            dot_val = real(inner(M, p, bvectors[i], bvectors[j]))
-            if !isapprox(dot_val, 0; atol = eps(eltype(p)))
-                throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
-            end
-        end
-    end
+@decorator_transparent_function function get_basis(M::Manifold, p, B::CachedBasis)
     return B
 end
-function get_basis(M::DefaultManifold, p, B::DefaultOrthonormalBasis)
-    return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
-end
-function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
+@decorator_transparent_function function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
     S = representation_size(M)
     PS = prod(S)
     dim = manifold_dimension(M)
@@ -243,7 +217,7 @@ function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:svd,ℝ})
     end
     return CachedBasis(B, vecs)
 end
-function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
+@decorator_transparent_function function get_basis(M::Manifold, p, B::ProjectedOrthonormalBasis{:gram_schmidt,ℝ}; kwargs...)
     E = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     N = length(E)
     Ξ = empty(E)
@@ -293,25 +267,22 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 
 See also: [`get_vector`](@ref), [`get_basis`](@ref)
 """
-function get_coordinates(M::Manifold, p, X, B::AbstractBasis)
+get_coordinates(::Manifold, ::Any, ::Any, ::AbstractBasis)
+@decorator_transparent_function function get_coordinates(M::Manifold, p, X, B::AbstractBasis)
     Y = allocate_result(M, get_coordinates, p, X)
     return get_coordinates!(M, Y, p, X, B)
 end
-function get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
-    is_tangent_vector(M, p, X, true; kwargs...)
-    return get_coordinates(M.manifold, p, X, B)
-end
 
-function get_coordinates!(M::Manifold, Y, p, X, B::AbstractBasis)
+@decorator_transparent_function function get_coordinates!(M::Manifold, Y, p, X, B::AbstractBasis)
     error("get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
-function get_coordinates!(M::Manifold, Y, p, X, B::DefaultBasis)
+@decorator_transparent_function function get_coordinates!(M::Manifold, Y, p, X, B::DefaultBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
 end
-function get_coordinates!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
+@decorator_transparent_function function get_coordinates!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
 end
-function get_coordinates!(
+@decorator_transparent_function function get_coordinates!(
     M::Manifold,
     Y,
     p,
@@ -321,19 +292,11 @@ function get_coordinates!(
     map!(vb -> real(inner(M, p, X, vb)), Y, get_vectors(M, p, B))
     return Y
 end
-function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis)
+@decorator_transparent_function function get_coordinates!(M::Manifold, Y, p, X, B::CachedBasis)
     map!(vb -> inner(M, p, X, vb), Y, get_vectors(M, p, B))
     return Y
 end
-function get_coordinates!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
-    Y .= reshape(X, manifold_dimension(M))
-    return Y
-end
-function get_coordinates!(M::ArrayManifold, Y, p, X, B::AbstractBasis; kwargs...)
-    is_tangent_vector(M, p, X, true; kwargs...)
-    get_coordinates!(M, Y, p, X, B)
-    return Y
-end
+
 
 """
     get_vector(M::Manifold, p, X, B::AbstractBasis)
@@ -350,39 +313,22 @@ requires either a dual basis or the cached basis to be selfdual, for example ort
 
 See also: [`get_coordinates`](@ref), [`get_basis`](@ref)
 """
-function get_vector(M::Manifold, p, X, B::AbstractBasis)
+get_vector(::Manifold, ::Any, ::Any, ::AbstractBasis)
+@decorator_transparent_function function get_vector(M::Manifold, p, X, B::AbstractBasis)
     Y = allocate_result(M, get_vector, p, X)
     return get_vector!(M, Y, p, X, B)
 end
-function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
-    size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
-    Y = get_vector(M.manifold, p, X, B)
-    size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
-    return Y
-end
 
-function get_vector!(M::Manifold, Y, p, X, B::AbstractBasis)
+@decorator_transparent_function function get_vector!(M::Manifold, Y, p, X, B::AbstractBasis)
     error("get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
-function get_vector!(M::ArrayManifold, Y, p, X, B::AbstractBasis; kwargs...)
-    is_manifold_point(M, p, true; kwargs...)
-    size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
-    get_vector!(M.manifold, Y, p, X, B)
-    size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
-    return Y
-end
-function get_vector!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
-    Y .= reshape(X, representation_size(M))
-    return Y
-end
-function get_vector!(M::Manifold, Y, p, X, B::DefaultBasis)
+@decorator_transparent_function function get_vector!(M::Manifold, Y, p, X, B::DefaultBasis)
     return get_vector!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
 end
-function get_vector!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
+@decorator_transparent_function function get_vector!(M::Manifold, Y, p, X, B::DefaultOrthogonalBasis)
     return get_vector!(M, Y, p, X, DefaultOrthonormalBasis(number_system(B)))
 end
-function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
+@decorator_transparent_function function get_vector!(M::Manifold, Y, p, X, B::CachedBasis)
     # quite convoluted but:
     #  1) preserves the correct `eltype`
     #  2) guarantees a reasonable array type `Y`
@@ -410,10 +356,18 @@ end
 
 Get the basis vectors of basis `B` of the tangent space at point `p`.
 """
-function get_vectors(M::Manifold, p, B::AbstractBasis)
+get_vectors(::Manifold, ::Any, ::AbstractBasis)
+
+@decorator_transparent_function function get_vectors(M::Manifold, p, B::AbstractBasis)
     error("get_vectors not implemented for manifold of type $(typeof(M)) a point of type $(typeof(p)) and basis of type $(typeof(B)).")
 end
-get_vectors(M::Manifold, p, B::CachedBasis{<:AbstractBasis,<:AbstractArray}) = B.data
+@decorator_transparent_function function get_vectors(
+    M::Manifold,
+    p,
+    B::CachedBasis{<:AbstractBasis,<:AbstractArray},
+)
+    return B.data
+end
 function get_vectors(
     M::Manifold,
     p,
@@ -540,3 +494,180 @@ inverse.
 vee(M::Manifold, p, X) = get_coordinates(M, p, X, DefaultBasis())
 
 vee!(M::Manifold, Xⁱ, p, X) = get_coordinates!(M, Xⁱ, p, X, DefaultBasis())
+
+#
+# Array Manifold
+#
+function get_basis(
+    M::ArrayManifold,
+    p,
+    B::CachedBasis{<:AbstractOrthonormalBasis{ℝ},T,ℝ},
+) where {T<:AbstractVector}
+    bvectors = get_vectors(M, p, B)
+    N = length(bvectors)
+    M_dim = manifold_dimension(M)
+    if N != M_dim
+
+        throw(ArgumentError("Incorrect number of basis vectors; expected: $M_dim, given: $N"))
+    end
+    for i = 1:N
+        Xi_norm = norm(M, p, bvectors[i])
+        if !isapprox(Xi_norm, 1)
+            throw(ArgumentError("vector number $i is not normalized (norm = $Xi_norm)"))
+        end
+        for j = i+1:N
+            dot_val = real(inner(M, p, bvectors[i], bvectors[j]))
+            if !isapprox(dot_val, 0; atol = eps(eltype(p)))
+                throw(ArgumentError("vectors number $i and $j are not orthonormal (inner product = $dot_val)"))
+            end
+        end
+    end
+    return B
+end
+function get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
+    is_tangent_vector(M, p, X, true; kwargs...)
+    return get_coordinates(M.manifold, p, X, B)
+end
+function get_coordinates!(M::ArrayManifold, Y, p, X, B::AbstractBasis; kwargs...)
+    is_tangent_vector(M, p, X, true; kwargs...)
+    get_coordinates!(M, Y, p, X, B)
+    return Y
+end
+function get_vector(M::ArrayManifold, p, X, B::AbstractBasis; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
+    Y = get_vector(M.manifold, p, X, B)
+    size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
+    return Y
+end
+function get_vector!(M::ArrayManifold, Y, p, X, B::AbstractBasis; kwargs...)
+    is_manifold_point(M, p, true; kwargs...)
+    size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
+    get_vector!(M.manifold, Y, p, X, B)
+    size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
+    return Y
+end
+
+
+#
+# DefaultManifold
+#
+function get_basis(M::DefaultManifold, p, B::DefaultOrthonormalBasis)
+    return CachedBasis(B, [_euclidean_basis_vector(p, i) for i in eachindex(p)])
+end
+function get_coordinates!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
+    Y .= reshape(X, manifold_dimension(M))
+    return Y
+end
+
+function get_vector!(M::DefaultManifold, Y, p, X, B::DefaultOrthonormalBasis)
+    Y .= reshape(X, representation_size(M))
+    return Y
+end
+
+#
+# Transparency
+#
+
+function decorator_transparent_dispatch(
+    ::typeof(get_basis),
+    ::Manifold,
+    ::Any,
+    ::DefaultBasis,
+    args...
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(get_basis),
+    ::Manifold,
+    ::Any,
+    ::DefaultOrthogonalBasis,
+    args...,
+)
+    return Val(:parent)
+end
+
+function decorator_transparent_dispatch(
+    ::typeof(get_coordinates),
+    M::Manifold,
+    ::Any,
+    ::Any,
+    ::DefaultBasis,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(get_coordinates),
+    ::Manifold,
+    ::Any,
+    ::Any,
+    ::DefaultOrthogonalBasis,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(get_coordinates!),
+    ::Manifold,
+    ::Any,
+    ::Any,
+    ::DefaultBasis,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(get_coordinates!),
+    ::Manifold,
+    ::Any,
+    ::Any,
+    ::DefaultOrthogonalBasis,
+    args...,
+)
+    return Val(:parent)
+end
+
+function decorator_transparent_dispatch(
+    ::typeof(get_vector),
+    ::Manifold,
+    ::Any,
+    ::Any,
+    ::DefaultBasis,
+    args...,
+)
+    return Val(:parent)
+end
+@decorator_transparent_signature get_vector(M::Manifold,p,X,B::DefaultOrthonormalBasis)
+function decorator_transparent_dispatch(
+    ::typeof(get_vector),
+    ::Manifold,
+    ::Any,
+    ::Any,
+    ::DefaultOrthogonalBasis,
+    args...,
+)
+    return Val(:parent)
+end
+
+function decorator_transparent_dispatch(
+    ::typeof(get_vector!),
+    ::Manifold,
+    ::Any,
+    ::Any,
+    ::DefaultBasis,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(get_vector!),
+    ::Manifold,
+    ::Any,
+    ::Any,
+    ::DefaultOrthogonalBasis,
+    args...,
+)
+    return Val(:parent)
+end
