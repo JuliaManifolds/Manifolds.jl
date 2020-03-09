@@ -211,44 +211,44 @@ function allocate_result(
 ) where {GT<:AbstractGroupManifold}
     return allocate(X, Size(manifold_dimension(G)))
 end
-function get_vector(M::MT, e::Identity{GroupManifold{NT,GT}}, X, B::VeeOrthogonalBasis) where {MT<:Manifold,NT<:Manifold,GT}
-    error("get_vector not applicable for manifold $(MT), and identity $(e), $(X), since the identity does not match.")
+function get_vector(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
+    error("get_vector not applicable for manifold $(M), and identity $(e), $(X), since the identity does not match.")
 end
-function get_vector!(M::MT, Y, e::Identity{GroupManifold{NT,GT}}, X, B::VeeOrthogonalBasis) where {MT<:Manifold,NT<:Manifold,GT}
-    error("get_vector! not applicable for manifold $(MT), $(Y), and identity $(e), $(X), since the identity does not match.")
+function get_vector!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
+    error("get_vector! not applicable for manifold $(M), $(Y), and identity $(e), $(X), since the identity does not match.")
 end
-function get_vector(M::GM, e::Identity{GroupManifold{NT,GT}}, X, B::VeeOrthogonalBasis) where {GM<:AbstractGroupManifold,NT<:Manifold,GT}
+function get_vector(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBasis)
     error("get_vector not applicable for group manifold $(M), and identity $(e), $(X), since the identity does not match.")
 end
-function get_vector!(M::GM, Y, e::Identity{GroupManifold{NT,GT}}, X, B::VeeOrthogonalBasis) where {GM<:AbstractGroupManifold, NT<:Manifold,GT}
+function get_vector!(M::AbstractGroupManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
     error("get_vector not applicable for group manifold $(M), $(Y), and identity $(e), $(X), since the identity does not match.")
 end
-function get_vector(M::GT, e::Identity{GT}, X) where {GT <: AbstractGroupManifold}
-    return get_vector(decorated_manifold(M), e, X)
+function get_vector(M::GT, e::Identity{GT}, X, B::VeeOrthogonalBasis) where {GT <: AbstractGroupManifold}
+    return get_vector(decorated_manifold(M), e, X, B)
 end
-function get_vector!(M::GT, Y, e::Identity{GT}, X) where {GT <: AbstractGroupManifold}
-    return hat!(decorated_manifold(M), Y, e, X)
+function get_vector!(M::GT, Y, e::Identity{GT}, X, B::VeeOrthogonalBasis) where {GT <: AbstractGroupManifold}
+    return get_vector!(decorated_manifold(M), Y, e, X, B)
 end
 @decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, e::Identity, X, B::VeeOrthogonalBasis)
 @decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
 
-function get_coordinates(M::MT, e::Identity{GroupManifold{NT,GT}}, X, ::VeeOrthogonalBasis) where {MT<:Manifold,NT<:Manifold,GT}
-    error("get_coordinates not applicable for manifold $(MT), and identity $(e), $(X), since the identity does not match.")
+function get_coordinates(M::Manifold, e::Identity, X, ::VeeOrthogonalBasis)
+    error("get_coordinates not applicable for manifold $(M), and identity $(e), $(X), since the identity does not match.")
 end
-function get_coordinates!(M::MT, Y, e::Identity{GroupManifold{NT,GT}}, X, ::VeeOrthogonalBasis) where {NT<:Manifold,MT<:Manifold,GT}
-    error("get_coordinates! not applicable for manifold $(MT), $(Y), and identity $(e), $(X), since the identity does not match.")
+function get_coordinates!(M::Manifold, Y, e::Identity, X, ::VeeOrthogonalBasis)
+    error("get_coordinates! not applicable for manifold $(M), $(Y), and identity $(e), $(X), since the identity does not match.")
 end
-function get_coordinates(M::GM, e::Identity{GroupManifold{NT,GT}}, X, ::VeeOrthogonalBasis) where {GM<:AbstractGroupManifold, NT<:Manifold,GT}
+function get_coordinates(M::AbstractGroupManifold, e::Identity, X, ::VeeOrthogonalBasis)
     error("get_coordinates not applicable for group manifold $(M), and identity $(e), $(X), since the identity does not match.")
 end
-function get_coordinates!(M::GM, Y, e::Identity{GroupManifold{NT,GT}}, X, ::VeeOrthogonalBasis) where {GM<:AbstractGroupManifold, NT<:Manifold,GT}
+function get_coordinates!(M::AbstractGroupManifold, Y, e::Identity, X, ::VeeOrthogonalBasis)
     error("get_coordinates! not applicable for group manifold $(M), $(Y), and identity $(e), $(X), since the identity does not match.")
 end
 function get_coordinates(M::GT, e::Identity{GT}, X, B::VeeOrthogonalBasis) where {GT <: AbstractGroupManifold}
-    return get_coordinates(decorated_manifold(M), e, X)
+    return get_coordinates(decorated_manifold(M), e, X, B)
 end
 function get_coordinates!(M::GT, Y, e::Identity{GT}, X, B::VeeOrthogonalBasis) where {GT <: AbstractGroupManifold}
-    return get_coordinates!(decorated_manifold(M), Y, e, X)
+    return get_coordinates!(decorated_manifold(M), Y, e, X, B)
 end
 @decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, e::Identity, X, B::VeeOrthogonalBasis)
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
