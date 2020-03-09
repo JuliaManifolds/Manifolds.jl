@@ -127,7 +127,7 @@ struct Identity{G<:AbstractGroupManifold}
     group::G
 end
 
-Identity(M::AbstractDecoratorManifold) = Identity(M.manifold)
+Identity(M::AbstractDecoratorManifold) = Identity(decorated_manifold(M))
 Identity(M::Manifold) = error("Identity not implemented for manifold $(M)")
 
 show(io::IO, e::Identity) = print(io, "Identity($(e.group))")
@@ -184,7 +184,7 @@ function decorator_transparent_dispatch(
     ::AbstractGroupManifold,
     args...,
 )
-    return Val(:intransparent)
+    return Val(:parent)
 end
 function allocate_result(
     M::AbstractDecoratorManifold,
@@ -223,6 +223,12 @@ end
 function hat!(M::AbstractGroupManifold, Y, e::Identity, X)
     error("hat not applicable for group manifold $(M), $(Y), and identity $(e), $(X), since the identity does not match.")
 end
+function hat(M::GT, e::Identity{GT}, X) where {GT <: AbstractGroupManifold}
+    return hat(decorated_manifold(M), e, X)
+end
+function hat!(M::GT, Y, e::Identity{GT}, X) where {GT <: AbstractGroupManifold}
+    return hat!(decorated_manifold(M), Y, e, X)
+end
 @decorator_transparent_signature hat(M::AbstractDecoratorManifold, e::Identity, X::Any)
 @decorator_transparent_signature hat!(M::AbstractDecoratorManifold, Y::Any, e::Identity, X::Any)
 
@@ -232,6 +238,19 @@ end
 function vee!(M::Manifold, Y, e::Identity, X)
     error("vee not applicable for manifold $(M), $(Y), $(e), $(X), since the manifold is not a group manifold")
 end
+function vee(M::AbstractGroupManifold, e::Identity, X)
+    error("vee not applicable for group manifold $(M), and identity $(e), $(X), since the identity does not match.")
+end
+function vee!(M::AbstractGroupManifold, Y, e::Identity, X)
+    error("vee not applicable for group manifold $(M), $(Y), and identity $(e), $(X), since the identity does not match.")
+end
+function vee(M::GT, e::Identity{GT}, X) where {GT <: AbstractGroupManifold}
+    return vee(decorated_manifold(M), e, X)
+end
+function vee!(M::GT, Y, e::Identity{GT}, X) where {GT <: AbstractGroupManifold}
+    return vee!(decorated_manifold(M), Y, e, X)
+end
+
 @decorator_transparent_signature vee(M::AbstractDecoratorManifold, e::Identity, X::Any)
 @decorator_transparent_signature vee!(M::AbstractDecoratorManifold, Y::Any, e::Identity, X::Any)
 
