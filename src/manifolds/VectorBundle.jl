@@ -315,11 +315,11 @@ function get_coordinates(
      coord2 = get_coordinates(M.fiber, px, VXF, B.data.vec_basis)
      return vcat(coord1, coord2)
  end
-function get_coordinates(M::TangentBundleFibers, p, X, B::AbstractBasis) where {N}
+function get_coordinates(M::TangentBundleFibers, p, X, B::all_uncached_bases) where {N}
     return get_coordinates(M.manifold, p, X, B)
 end
 
-function get_coordinates!(M::VectorBundle, Y, p, X, B::AbstractBasis) where {N}
+function get_coordinates!(M::VectorBundle, Y, p, X, B::all_uncached_bases) where {N}
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     n = manifold_dimension(M.manifold)
@@ -341,7 +341,7 @@ function get_coordinates!(
      get_coordinates!(M.fiber, view(Y, n+1:length(Y)), px, VXF, B.data.vec_basis)
      return Y
  end
-function get_coordinates!(M::TangentBundleFibers, Y, p, X, B::AbstractBasis) where {N}
+function get_coordinates!(M::TangentBundleFibers, Y, p, X, B::all_uncached_bases) where {N}
     return get_coordinates!(M.manifold, Y, p, X, B)
 end
 function get_coordinates!(M::VectorBundle, Y, p, X, B::DefaultBasis) where {N}
@@ -375,7 +375,7 @@ function get_vector(
     v2 = get_vector(M.fiber, xp1, X[n+1:end], B.data.vec_basis)
     return ProductRepr(v1, v2)
 end
-function get_vector(M::TangentBundleFibers, p, X, B::AbstractBasis) where {N}
+function get_vector(M::TangentBundleFibers, p, X, B::all_uncached_bases) where {N}
     return get_vector(M.manifold, p, X, B)
 end
 
@@ -411,7 +411,7 @@ function get_vector!(
     )
     return Y
 end
-function get_vector!(M::TangentBundleFibers, Y, p, X, B::AbstractBasis) where {N}
+function get_vector!(M::TangentBundleFibers, Y, p, X, B::all_uncached_bases) where {N}
     return get_vector!(M.manifold, Y, p, X, B)
 end
 

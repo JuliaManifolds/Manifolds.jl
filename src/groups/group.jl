@@ -217,8 +217,6 @@ end
 function hat!(M::Manifold, Y, e::Identity, X)
     error("hat not applicable for manifold $(M), $(Y), $(e), $(X), since the manifold is not a group manifold")
 end
-@decorator_transparent_signature hat(M::AbstractDecoratorManifold, e::Identity, Xⁱ)
-@decorator_transparent_signature hat!(M::AbstractDecoratorManifold, X, e::Identity, Xⁱ)
 
 function vee(M::Manifold, e::Identity, X)
     error("vee not applicable for manifold $(M), $(e), $(X), since the manifold is not a group manifold")
@@ -226,8 +224,6 @@ end
 function vee!(M::Manifold, Y, e::Identity, X)
     error("vee not applicable for manifold $(M), $(Y), $(e), $(X), since the manifold is not a group manifold")
 end
-@decorator_transparent_signature vee(M::AbstractDecoratorManifold, e::Identity, X)
-@decorator_transparent_signature vee!(M::AbstractDecoratorManifold, Xⁱ, e::Identity, X)
 
 @decorator_transparent_fallback :transparent function check_manifold_point(
     G::AbstractGroupManifold,
