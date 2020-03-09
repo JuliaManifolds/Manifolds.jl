@@ -119,34 +119,35 @@ switch_direction(::RightAction) = LeftAction()
 ##################################
 
 @doc raw"""
-    Identity(G::AbstractGroupManifold)
+    Identity(G::AbstractGroupManifold, p)
 
-The group identity element $e ∈ \mathcal{G}$.
+The group identity element $e ∈ \mathcal{G}$ represented by point `p`.
 """
-struct Identity{G<:AbstractGroupManifold}
+struct Identity{G<:AbstractGroupManifold,PT}
     group::G
+    p::PT
 end
 
-Identity(M::AbstractDecoratorManifold) = Identity(decorated_manifold(M))
-Identity(M::Manifold) = error("Identity not implemented for manifold $(M)")
+Identity(M::AbstractDecoratorManifold, p) = Identity(decorated_manifold(M), p)
+Identity(M::Manifold, p) = error("Identity not implemented for manifold $(M) and point $(p).")
 
-show(io::IO, e::Identity) = print(io, "Identity($(e.group))")
+make_identity(M::Manifold, p) = Identity(M, identity(M, p))
 
-(e::Identity)(p) = identity(e.group, p)
+show(io::IO, e::Identity) = print(io, "Identity($(e.group), $(e.p))")
 
 # To ensure allocate_result_type works
 number_eltype(e::Identity) = Bool
 
 copyto!(e::TE, ::TE) where {TE<:Identity} = e
-copyto!(p, ::TE) where {TE<:Identity} = identity!(e.group, p, e)
-copyto!(p::AbstractArray, e::TE) where {TE<:Identity} = identity!(e.group, p, e)
+copyto!(p, ::TE) where {TE<:Identity} = copyto!(p, e.p)
+copyto!(p::AbstractArray, e::TE) where {TE<:Identity} = copyto!(p, e.p)
 
 isapprox(p, e::Identity; kwargs...) = isapprox(e::Identity, p; kwargs...)
 isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
 isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
 function decorator_transparent_dispatch(
-    ::Union{typeof(hat),typeof(get_vector)},
+    ::Union{typeof(get_vector)},
     ::AbstractGroupManifold,
     args...,
 )
@@ -154,7 +155,7 @@ function decorator_transparent_dispatch(
 end
 function allocate_result(
     M::Manifold,
-    f::Union{typeof(hat),typeof(get_vector)},
+    f::typeof(get_vector),
     e::Identity,
     Xⁱ,
 )
@@ -163,7 +164,7 @@ function allocate_result(
 end
 function allocate_result(
     M::AbstractGroupManifold,
-    f::Union{typeof(hat),typeof(get_vector)},
+    f::typeof(get_vector),
     e::Identity,
     Xⁱ,
     )
@@ -171,7 +172,7 @@ function allocate_result(
 end
 function allocate_result(
     G::GT,
-    ::Union{typeof(hat),typeof(get_vector)},
+    ::typeof(get_vector),
     ::Identity{GT},
     Xⁱ,
 ) where {GT<:AbstractGroupManifold}
@@ -224,10 +225,10 @@ function get_vector!(M::AbstractGroupManifold, Y, e::Identity, X, B::VeeOrthogon
     error("get_vector not applicable for group manifold $(M), $(Y), and identity $(e), $(X), since the identity does not match.")
 end
 function get_vector(M::GT, e::Identity{GT}, X, B::VeeOrthogonalBasis) where {GT <: AbstractGroupManifold}
-    return get_vector(decorated_manifold(M), e, X, B)
+    return get_vector(decorated_manifold(M), e.p, X, B)
 end
 function get_vector!(M::GT, Y, e::Identity{GT}, X, B::VeeOrthogonalBasis) where {GT <: AbstractGroupManifold}
-    return get_vector!(decorated_manifold(M), Y, e, X, B)
+    return get_vector!(decorated_manifold(M), Y, e.p, X, B)
 end
 @decorator_transparent_signature get_vector(M::AbstractDecoratorManifold, e::Identity, X, B::VeeOrthogonalBasis)
 @decorator_transparent_signature get_vector!(M::AbstractDecoratorManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
@@ -245,10 +246,10 @@ function get_coordinates!(M::AbstractGroupManifold, Y, e::Identity, X, ::VeeOrth
     error("get_coordinates! not applicable for group manifold $(M), $(Y), and identity $(e), $(X), since the identity does not match.")
 end
 function get_coordinates(M::GT, e::Identity{GT}, X, B::VeeOrthogonalBasis) where {GT <: AbstractGroupManifold}
-    return get_coordinates(decorated_manifold(M), e, X, B)
+    return get_coordinates(decorated_manifold(M), e.p, X, B)
 end
 function get_coordinates!(M::GT, Y, e::Identity{GT}, X, B::VeeOrthogonalBasis) where {GT <: AbstractGroupManifold}
-    return get_coordinates!(decorated_manifold(M), Y, e, X, B)
+    return get_coordinates!(decorated_manifold(M), Y, e.p, X, B)
 end
 @decorator_transparent_signature get_coordinates(M::AbstractDecoratorManifold, e::Identity, X, B::VeeOrthogonalBasis)
 @decorator_transparent_signature get_coordinates!(M::AbstractDecoratorManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
@@ -258,8 +259,14 @@ end
     e::Identity;
     kwargs...,
 )
-    e === Identity(G) && return nothing
     return DomainError(e, "The identity element $(e) does not belong to $(G).")
+end
+@decorator_transparent_fallback :transparent function check_manifold_point(
+    G::GT,
+    e::Identity{GT};
+    kwargs...,
+) where {GT<:AbstractGroupManifold}
+    return nothing
 end
 ##########################
 # Group-specific functions
@@ -307,7 +314,7 @@ function decorator_transparent_dispatch(
 end
 
 function isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:AbstractGroupManifold}
-    return isapprox(G, identity(G, p), p; kwargs...)
+    return isapprox(G, e.p, p; kwargs...)
 end
 function isapprox(G::GT, p, e::Identity{GT}; kwargs...) where {GT<:AbstractGroupManifold}
     return isapprox(G, e, p; kwargs...)
@@ -770,7 +777,7 @@ function inverse_retract(
     conv = direction(method)
     pinvq = inverse_translate(G, p, q, conv)
     Xₑ = group_log(G, pinvq)
-    return translate_diff(G, p, Identity(G), Xₑ, conv)
+    return translate_diff(G, p, Identity(G, p), Xₑ, conv)
 end
 
 function inverse_retract!(
@@ -783,7 +790,7 @@ function inverse_retract!(
     conv = direction(method)
     pinvq = inverse_translate(G, p, q, conv)
     Xₑ = group_log(G, pinvq)
-    return translate_diff!(G, X, p, Identity(G), Xₑ, conv)
+    return translate_diff!(G, X, p, Identity(G, p), Xₑ, conv)
 end
 
 #################################

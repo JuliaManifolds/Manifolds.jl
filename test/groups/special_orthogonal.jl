@@ -21,7 +21,7 @@ include("group_utils.jl")
     vpts = [hat(M, x, [-1.0, 2.0, 0.5]), hat(M, x, [1.0, 0.0, 0.5])]
 
     ge = allocate(pts[1])
-    copyto!(ge, Identity(G))
+    copyto!(ge, make_identity(G, pts[1]))
     @test isapprox(ge, I; atol=1e-10)
 
     for T in types
@@ -38,8 +38,7 @@ include("group_utils.jl")
         @test (@inferred Manifolds.decorator_group_dispatch(DM)) === Val(true)
         @test Manifolds.is_group_decorator(DM)
         @test base_group(DM) === G
-        @test Identity(DM) === Identity(G)
-        @test_throws DomainError is_manifold_point(DM, Identity(TranslationGroup(3)), true)
+        @test_throws DomainError is_manifold_point(DM, make_identity(TranslationGroup(3), [1, 2, 3]), true)
         test_group(DM, pts, vpts, vpts; test_diff = true)
     end
 
@@ -101,10 +100,10 @@ include("group_utils.jl")
         X = vpts[1]
         pe = identity(G, pts[1])
 
-        Xⁱ = vee(G, Identity(G), X)
+        Xⁱ = vee(G, make_identity(G, pts[1]), X)
         @test Xⁱ ≈ vee(G, pe, X)
 
-        X2 = hat(G, Identity(G), Xⁱ)
+        X2 = hat(G, make_identity(G, pts[1]), Xⁱ)
         @test isapprox(M, pe, X2, hat(G, pe, Xⁱ); atol = 1e-6)
     end
 end

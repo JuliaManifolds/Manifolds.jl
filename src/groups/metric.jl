@@ -187,7 +187,7 @@ function inner(M::MetricManifold{<:Manifold,<:InvariantMetric}, p, X, Y)
     N = MetricManifold(M.manifold, imetric.metric)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
     Yₑ = inverse_translate_diff(M, p, p, Y, conv)
-    return inner(N, Identity(N), Xₑ, Yₑ)
+    return inner(N, Identity(N, p), Xₑ, Yₑ)
 end
 
 function default_metric_dispatch(M::MetricManifold{<:Manifold,<:InvariantMetric})
@@ -218,7 +218,7 @@ function norm(M::MetricManifold{<:Manifold,<:InvariantMetric}, p, X)
     conv = direction(imetric)
     N = MetricManifold(M.manifold, imetric.metric)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
-    return norm(N, Identity(N), Xₑ)
+    return norm(N, Identity(N, p), Xₑ)
 end
 
 function show(io::IO, metric::LeftInvariantMetric)

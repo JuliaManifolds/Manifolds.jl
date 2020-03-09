@@ -166,7 +166,7 @@ function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x
 end
 function allocate_result(
     M::PowerManifoldNested,
-    f::Union{typeof(get_vector),typeof(hat)},
+    f::typeof(get_vector),
     p,
     X,
 )

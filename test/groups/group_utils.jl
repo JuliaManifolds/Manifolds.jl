@@ -38,7 +38,7 @@ function test_group(
     test_invariance = false,
     diff_convs = [(), (LeftAction(),), (RightAction(),)],
 )
-    e = Identity(G)
+    e = make_identity(G, g_pts[1])
 
     @testset "Basic group properties" begin
         @testset "Closed" begin
@@ -197,14 +197,14 @@ function test_group(
         @testset "e = exp(0)" begin
             v = group_log(G, identity(G, g_pts[1]))
             g = group_exp(G, v)
-            @test isapprox(G, Identity(G), g; atol = atol)
+            @test isapprox(G, make_identity(G, g_pts[1]), g; atol = atol)
 
             test_mutating && @testset "mutating" begin
                 v = allocate(ve_pts[1])
                 @test group_log!(G, v, identity(G, g_pts[1])) === v
                 g = allocate(g_pts[1])
                 @test group_exp!(G, g, v) === g
-                @test isapprox(G, Identity(G), g; atol = atol)
+                @test isapprox(G, make_identity(G, g_pts[1]), g; atol = atol)
             end
         end
 
@@ -213,7 +213,7 @@ function test_group(
                 g = group_exp(G, v)
                 @test is_manifold_point(G, g; atol = atol)
                 v2 = group_log(G, g)
-                @test isapprox(G, Identity(G), v2, v; atol = atol)
+                @test isapprox(G, make_identity(G, g_pts[1]), v2, v; atol = atol)
             end
 
             test_mutating && @testset "mutating" begin
@@ -224,7 +224,7 @@ function test_group(
                     @test isapprox(G, g, group_exp(G, v); atol = atol)
                     v2 = allocate(v)
                     @test group_log!(G, v2, g) === v2
-                    @test isapprox(G, Identity(G), v2, v; atol = atol)
+                    @test isapprox(G, make_identity(G, g_pts[1]), v2, v; atol = atol)
                 end
             end
         end
@@ -323,7 +323,7 @@ function test_action(
 
     G = base_group(A)
     M = g_manifold(A)
-    e = Identity(G)
+    e = make_identity(G, g_pts[1])
 
     @testset "Basic action properties" begin
         @testset "Direction" begin
