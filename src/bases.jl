@@ -122,19 +122,17 @@ end
 # forward declarations
 function get_coordinates end
 function get_vector end
-function hat end
-function vee end
 
-const vee_or_get_coordinates = Union{typeof(get_coordinates),typeof(vee)}
+const all_uncached_bases = Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis}
 
-function allocate_result(M::Manifold, f::vee_or_get_coordinates, p, X)
+function allocate_result(M::Manifold, f::typeof(get_coordinates), p, X)
     T = allocate_result_type(M, f, (p, X))
     return allocate(p, T, Size(manifold_dimension(M)))
 end
 
 @inline function allocate_result_type(
     M::Manifold,
-    f::Union{vee_or_get_coordinates, typeof(hat), typeof(get_vector)},
+    f::Union{typeof(get_coordinates), typeof(get_vector)},
     args::Tuple,
 )
     apf = allocation_promotion_function(M, f, args)
@@ -375,8 +373,8 @@ end
 _get_vectors(B::CachedBasis{<:AbstractBasis,<:AbstractArray}) = B.data
 _get_vectors(B::CachedBasis{<:AbstractBasis,<:DiagonalizingBasisData}) = B.data.vectors
 
-hat(M::Manifold, p, Xⁱ) = get_vector(M, p, Xⁱ, DefaultBasis())
-hat!(M::Manifold, X, p, Xⁱ) = get_vector!(M, X, p, Xⁱ, DefaultBasis())
+hat(M::Manifold, p, Xⁱ) = get_vector(M, p, Xⁱ, DefaultOrthogonalBasis())
+hat!(M::Manifold, X, p, Xⁱ) = get_vector!(M, X, p, Xⁱ, DefaultOrthogonalBasis())
 
 """
     number_system(::AbstractBasis)
@@ -455,9 +453,9 @@ function show(
     print(io, ' ', sk)
 end
 
-vee(M::Manifold, p, X) = get_coordinates(M, p, X, DefaultBasis())
+vee(M::Manifold, p, X) = get_coordinates(M, p, X, DefaultOrthogonalBasis())
 
-vee!(M::Manifold, Xⁱ, p, X) = get_coordinates!(M, Xⁱ, p, X, DefaultBasis())
+vee!(M::Manifold, Xⁱ, p, X) = get_coordinates!(M, Xⁱ, p, X, DefaultOrthogonalBasis())
 
 
 #
@@ -538,14 +536,7 @@ function _get_coordinates(M::ArrayManifold, p, X, B::AbstractBasis;  kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     return get_coordinates(M.manifold, p, X, B)
 end
-function get_coordinates!(
-    M::ArrayManifold,
-    Y,
-    p,
-    X,
-    B::Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis};
-    kwargs...
-)
+function get_coordinates!(M::ArrayManifold, Y, p, X, B::all_uncached_bases; kwargs...)
     is_tangent_vector(M, p, X, true; kwargs...)
     get_coordinates!(M, Y, p, X, B)
     return Y
@@ -563,13 +554,7 @@ function _get_vector(M::ArrayManifold, p, X, B::AbstractBasis;  kwargs...)
     size(Y) == representation_size(M) || error("Incorrect size of tangent vector Y")
     return Y
 end
-function get_vector!(
-    M::ArrayManifold,
-    Y,
-    p,
-    X,
-    B::Union{AbstractBasis, DefaultBasis, DefaultOrthogonalBasis, DefaultOrthonormalBasis};
-    kwargs...)
+function get_vector!(M::ArrayManifold, Y, p, X, B::all_uncached_bases; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
     size(X) == (manifold_dimension(M),) || error("Incorrect size of coefficient vector X")
     get_vector!(M.manifold, Y, p, X, B)

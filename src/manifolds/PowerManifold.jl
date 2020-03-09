@@ -176,10 +176,10 @@ function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
     return FVector(TangentSpace, alloc)
 end
-function allocate_result(M::PowerManifoldNested, f::vee_or_get_coordinates, p, X)
+function allocate_result(M::PowerManifoldNested, f::typeof(get_coordinates), p, X)
     return invoke(
         allocate_result,
-        Tuple{Manifold, vee_or_get_coordinates, Any, Any},
+        Tuple{Manifold, typeof(get_coordinates), Any, Any},
         M,
         f,
         p,

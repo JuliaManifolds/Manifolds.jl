@@ -342,10 +342,6 @@ function var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T}
     return sum(var(x; mean = m, kwargs...))
 end
 
-vee(::Euclidean{N,ℝ}, p, X) where {N} = vec(X)
-
-vee!(::Euclidean{N,ℝ}, Xⁱ, p, X) where {N} = copyto!(Xⁱ, X)
-
 """
     zero_tangent_vector(M::Euclidean, x)
 

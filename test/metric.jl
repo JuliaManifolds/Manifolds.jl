@@ -44,7 +44,7 @@ Manifolds.injectivity_radius(::BaseManifold) = Inf
 Manifolds.local_metric(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}},x) where N = 2*one(x*x')
 Manifolds.exp!(M::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x, v) where N = exp!(base_manifold(M), y, x, v)
 Manifolds.vector_transport_to!(::BaseManifold, vto, x, v, y, ::ParallelTransport) = (vto .= v)
-Manifolds.get_basis(::BaseManifold{N},x,::DefaultOrthonormalBasis) where {N} = ( [(Matrix(I, N, N)[:,i]) for i in 1:N], zeros(N))
+Manifolds.get_basis(::BaseManifold{N},x,B::DefaultOrthonormalBasis) where {N} = CachedBasis(B, [(Matrix{eltype(x)}(I, N, N)[:,i]) for i in 1:N])
 Manifolds.get_coordinates!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
 Manifolds.get_vector!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
 Manifolds.default_metric_dispatch(::BaseManifold, ::DefaultBaseManifoldMetric) = Val(true)
@@ -252,9 +252,9 @@ end
 
         @test convert(typeof(MM2), M) == MM2
         @test_throws ErrorException convert(typeof(MM), M)
-        x = [0.1 0.2 0.4]
-        v = [0.5 0.7 0.11]
-        w = [0.13 0.17 0.19]
+        x = [0.1, 0.2, 0.4]
+        v = [0.5, 0.7, 0.11]
+        w = [0.13, 0.17, 0.19]
         y = allocate(x)
 
         @test inner(M, x, v, w) == 2 * dot(v,w)
@@ -312,7 +312,7 @@ end
         b = Manifolds.projected_distribution(MM2, Distributions.MvNormal(zero(zeros(3)), 1.0))
         @test isapprox(Matrix(a.distribution.Σ), Matrix(b.distribution.Σ))
         @test isapprox(a.distribution.μ, b.distribution.μ)
-        @test get_basis(M,x,DefaultOrthonormalBasis()) == get_basis(MM2,x,DefaultOrthonormalBasis())
+        @test get_basis(M,x,DefaultOrthonormalBasis()).data == get_basis(MM2,x,DefaultOrthonormalBasis()).data
         @test_throws ErrorException get_basis(MM,x,DefaultOrthonormalBasis())
         cov = flat(M, x, FVector(TangentSpace, v))
         cow = flat(M, x, FVector(TangentSpace, w))

@@ -23,7 +23,7 @@ include("utils.jl")
 
     @testset "vee/hat" begin
         M = Manifolds.Rotations(2)
-        v = randn(1)
+        v = [1.23,]
         x = Matrix{Float64}(I, 2, 2)
         V = Manifolds.hat(M, x, v)
         @test isa(V, AbstractMatrix)
@@ -108,7 +108,7 @@ include("utils.jl")
                 V = project_tangent(SOn, x, randn(n, n))
                 v = Manifolds.vee(SOn, x, V)
                 @test isa(v, AbstractVector)
-                @test Manifolds.hat(SOn, x, v) == V
+                @test Manifolds.hat(SOn, x, v) ≈ V
             end
 
             if n == 4
