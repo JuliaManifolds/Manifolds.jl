@@ -116,6 +116,27 @@ function check_tangent_vector(M::GeneralizedStiefel{n,k,T}, x, v; kwargs...) whe
 end
 
 @doc doc"""
+    project_point(M::GeneralizedStiefel,x)
+
+Projects `x` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
+
+````math
+\operatorname{proj}_{\operatorname{Sym}(n)}(x) = \frac{1}{2} \bigl( x + x^{\mathrm{H}} \bigr),
+````
+
+where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+"""
+project_point(::GeneralizedStiefel, ::Any...)
+
+function project_point!(M::GeneralizedStiefel, x)
+    s = svd(x)
+    e=eigen(s.U' * M.B * s.U)
+    qsinv = e.vectors * Diagonal(1 ./ sqrt.(e.values))
+    x = s.U * qsinv * e.vectors' * s.V'
+    return x
+end
+
+@doc doc"""
     project_tangent(M, x, v)
 
 Project `v` onto the tangent space of `x` to the [`GeneralizedStiefel`](@ref) manifold `M`.
@@ -165,3 +186,37 @@ i.e. the metric induced by the scalar product `B` from the embedding, restricted
 space.
 """
 inner(M::GeneralizedStiefel, x, v, w) = dot(v, M.B * w)
+
+
+@doc doc"""
+    retract(M, x, v, ::PolarRetraction)
+
+Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
+[`GeneralizedStiefel`](@ref) manifold `M`. With $USV = x + v$ the retraction reads
+````math
+\operatorname{retr}_x(v) = U\bar{V}^\mathrm{H}.
+````
+
+    retract(M, x, v, ::QRRetraction )
+
+Compute the QR-based retraction [`QRRetraction`](@ref) on the
+[`Stiefel`](@ref) manifold `M`. With $QR = x + v$ the retraction reads
+````math
+\operatorname{retr}_x(v) = QD,
+````
+where D is a $n\times k$ matrix with
+````math
+D = \operatorname{diag}\bigl(\operatorname{sgn}(R_{ii}+0,5)_{i=1}^k \bigr),
+````
+where $\operatorname{sgn}(x) = \begin{cases}
+1 & \text{ for } x > 0,\\
+0 & \text{ for } x = 0,\\
+-1& \text{ for } x < 0.
+\end{cases}$
+"""
+retract(::GeneralizedStiefel, ::Any...)
+
+function retract!(M::GeneralizedStiefel, y, x, v, ::PolarRetraction)
+    project_point!(M,y,x+v)
+    return y
+end
