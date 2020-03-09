@@ -377,7 +377,7 @@ function get_vectors(
     return vs
 end
 
-function hat(M::ProductManifold, p::ProductRepr, Xⁱ)
+function get_vector(M::ProductManifold, p::ProductRepr, Xⁱ, B::VeeOrthogonalBasis)
     dim = manifold_dimension(M)
     @assert length(Xⁱ) == dim
     i = one(dim)
@@ -386,15 +386,15 @@ function hat(M::ProductManifold, p::ProductRepr, Xⁱ)
         dim = manifold_dimension(first(t))
         tXⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
         i += dim
-        return hat(t..., tXⁱ)
+        return get_vector(t..., tXⁱ, B)
     end
     return ProductRepr(mapped...)
 end
-function hat(M::ProductManifold, p, Xⁱ)
+function get_vector(M::ProductManifold, p, Xⁱ, B::VeeOrthogonalBasis)
     X = allocate_result(M, hat, p, Xⁱ)
-    return hat!(M, X, p, Xⁱ)
+    return get_vector!(M, X, p, Xⁱ, B)
 end
-function hat!(M::ProductManifold, X, p, Xⁱ)
+function get_vector!(M::ProductManifold, X, p, Xⁱ, B::VeeOrthogonalBasis)
     dim = manifold_dimension(M)
     @assert length(Xⁱ) == dim
     i = one(dim)
@@ -402,7 +402,7 @@ function hat!(M::ProductManifold, X, p, Xⁱ)
     for t ∈ ts
         dim = manifold_dimension(first(t))
         tXⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
-        hat!(t..., tXⁱ)
+        get_vector!(t..., tXⁱ, B)
         i += dim
     end
     return X
@@ -770,21 +770,22 @@ function support(tvd::ProductFVectorDistribution)
     )
 end
 
-function vee(M::ProductManifold, p::ProductRepr, X)
+function get_coordinates(M::ProductManifold, p::ProductRepr, X, B::VeeOrthogonalBasis)
     reps = map(
-        vee,
+        get_coordinates,
         M.manifolds,
         submanifold_components(p),
-        submanifold_components(X)
+        submanifold_components(X),
+        B,
     )
     return vcat(reps...)
 end
-function vee(M::ProductManifold, p, X)
-    Xⁱ = allocate_result(M, vee, p, X)
-    return vee!(M, Xⁱ, p, X)
+function get_coordinates(M::ProductManifold, p, X, B::VeeOrthogonalBasis)
+    Xⁱ = allocate_result(M, get_coordinates, p, X)
+    return get_coordinates!(M, Xⁱ, p, X, B)
 end
 
-function vee!(M::ProductManifold, Xⁱ, p, X)
+function get_coordinates!(M::ProductManifold, Xⁱ, p, X, B::VeeOrthogonalBasis)
     dim = manifold_dimension(M)
     @assert length(Xⁱ) == dim
     i = one(dim)
@@ -793,7 +794,7 @@ function vee!(M::ProductManifold, Xⁱ, p, X)
         SM = first(t)
         dim = manifold_dimension(SM)
         tXⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
-        vee!(SM, tXⁱ, Base.tail(t)...)
+        get_coordinates!(SM, tXⁱ, Base.tail(t)...,B)
         i += dim
     end
     return Xⁱ

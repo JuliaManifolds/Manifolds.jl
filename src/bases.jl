@@ -19,6 +19,15 @@ struct DefaultBasis{𝔽} <: AbstractBasis{𝔽} end
 DefaultBasis(𝔽::AbstractNumbers = ℝ) = DefaultBasis{𝔽}()
 
 """
+    AbstractOrthogonalBasis{𝔽}
+
+Abstract type that represents an orthonormal basis on a manifold or a subset of it.
+
+The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
+"""
+abstract type AbstractOrthogonalBasis{𝔽} <: AbstractBasis{𝔽} end
+
+"""
     DefaultOrthogonalBasis{𝔽}
 
 An arbitrary orthogonal basis on a manifold. This will usually
@@ -26,8 +35,12 @@ be the fastest orthogonal basis available for a manifold.
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-struct DefaultOrthogonalBasis{𝔽} <: AbstractBasis{𝔽} end
+struct DefaultOrthogonalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽} end
 DefaultOrthogonalBasis(𝔽::AbstractNumbers = ℝ) = DefaultOrthogonalBasis{𝔽}()
+
+
+struct VeeOrthogonalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽} end
+VeeOrthogonalBasis(𝔽::AbstractNumbers = ℝ) = VeeOrthogonalBasis{𝔽}()
 
 """
     AbstractOrthonormalBasis{𝔽}
@@ -36,7 +49,7 @@ Abstract type that represents an orthonormal basis on a manifold or a subset of 
 
 The type parameter `𝔽` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
 """
-abstract type AbstractOrthonormalBasis{𝔽} <: AbstractBasis{𝔽} end
+abstract type AbstractOrthonormalBasis{𝔽} <: AbstractOrthogonalBasis{𝔽} end
 
 """
     DefaultOrthonormalBasis(𝔽::AbstractNumbers = ℝ)
@@ -272,6 +285,9 @@ end
 function get_coordinates!(M::Manifold, Y, p, X, B::AbstractBasis)
     error("get_coordinates! not implemented for manifold of type $(typeof(M)) coordinates of type $(typeof(Y)), a point of type $(typeof(p)), tangent vector of type $(typeof(X)) and basis of type $(typeof(B)).")
 end
+function get_coordinates!(M::Manifold, Y, p, X, B::VeeOrthogonalBasis)
+    return get_coordinates!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
+end
 function get_coordinates!(M::Manifold, Y, p, X, B::DefaultBasis)
     return get_coordinates!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
 end
@@ -316,6 +332,9 @@ end
 
 function get_vector!(M::Manifold, Y, p, X, B::AbstractBasis)
     error("get_vector! not implemented for manifold of type $(typeof(M)) vector of type $(typeof(Y)), a point of type $(typeof(p)), coordinates of type $(typeof(X)) and basis of type $(typeof(B)).")
+end
+function get_vector!(M::Manifold, Y, p, X, B::VeeOrthogonalBasis)
+    return get_vector!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
 end
 function get_vector!(M::Manifold, Y, p, X, B::DefaultBasis)
     return get_vector!(M, Y, p, X, DefaultOrthogonalBasis(number_system(B)))
@@ -373,8 +392,8 @@ end
 _get_vectors(B::CachedBasis{<:AbstractBasis,<:AbstractArray}) = B.data
 _get_vectors(B::CachedBasis{<:AbstractBasis,<:DiagonalizingBasisData}) = B.data.vectors
 
-hat(M::Manifold, p, Xⁱ) = get_vector(M, p, Xⁱ, DefaultOrthogonalBasis())
-hat!(M::Manifold, X, p, Xⁱ) = get_vector!(M, X, p, Xⁱ, DefaultOrthogonalBasis())
+hat(M::Manifold, p, X) = get_vector(M, p, X, VeeOrthogonalBasis())
+hat!(M::Manifold, Y, p, X) = get_vector!(M, Y, p, X, VeeOrthogonalBasis())
 
 """
     number_system(::AbstractBasis)
@@ -453,10 +472,8 @@ function show(
     print(io, ' ', sk)
 end
 
-vee(M::Manifold, p, X) = get_coordinates(M, p, X, DefaultOrthogonalBasis())
-
-vee!(M::Manifold, Xⁱ, p, X) = get_coordinates!(M, Xⁱ, p, X, DefaultOrthogonalBasis())
-
+vee(M::Manifold, p, X) = get_coordinates(M, p, X, VeeOrthogonalBasis())
+vee!(M::Manifold, Y, p, X) = get_coordinates!(M, Y, p, X, VeeOrthogonalBasis())
 
 #
 # Transparency

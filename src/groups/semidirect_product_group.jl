@@ -138,7 +138,7 @@ function hat!(G::SemidirectProductGroup, Y, p, X)
     return Y
 end
 
-function vee!(G::SemidirectProductGroup, Y, p, X)
+function get_coordinates!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
     M = base_manifold(G)
     N, H = M.manifolds
     dimN = manifold_dimension(N)
@@ -146,8 +146,8 @@ function vee!(G::SemidirectProductGroup, Y, p, X)
     @assert length(Y) == dimN + dimH
     np, hp = submanifold_components(G, p)
     nY, hY = submanifold_components(G, X)
-    vee!(N, view(Y, 1:dimN), np, nY)
-    vee!(H, view(Y, dimN+1:dimN+dimH), hp, hY)
+    get_coordinates!(N, view(Y, 1:dimN), np, nY, B)
+    get_coordinates!(H, view(Y, dimN+1:dimN+dimH), hp, hY, B)
     return Y
 end
 

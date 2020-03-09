@@ -127,12 +127,6 @@ function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizi
     return Y
 end
 
-function hat(M::Euclidean{N,ℝ}, p, Xⁱ) where {N}
-    return reshape(Xⁱ, representation_size(TangentBundleFibers(M)))
-end
-
-hat!(::Euclidean{N,ℝ}, X, p, Xⁱ) where {N} = copyto!(X, Xⁱ)
-
 @doc raw"""
     injectivity_radius(M::Euclidean)
 
