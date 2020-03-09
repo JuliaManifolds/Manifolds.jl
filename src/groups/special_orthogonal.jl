@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     SpecialOrthogonal{n} <: GroupManifold{Rotations{n},MultiplicationOperation}
 
 Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
@@ -8,26 +8,51 @@ Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
 """
 const SpecialOrthogonal{n} = GroupManifold{Rotations{n},MultiplicationOperation}
 
+invariant_metric_dispatch(::SpecialOrthogonal, ::ActionDirection) = Val(true)
+
+default_metric_dispatch(::MetricManifold{<:SpecialOrthogonal,EuclideanMetric}) = Val(true)
+
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
 
 show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
 
-inv(::SpecialOrthogonal, x) = transpose(x)
+inv(::SpecialOrthogonal, p) = transpose(p)
 
-inverse_translate(G::SpecialOrthogonal, x, y, conv::LeftAction) = inv(G, x) * y
-inverse_translate(G::SpecialOrthogonal, x, y, conv::RightAction) = y * inv(G, x)
+inverse_translate(G::SpecialOrthogonal, p, q, ::LeftAction) = inv(G, p) * q
+inverse_translate(G::SpecialOrthogonal, p, q, ::RightAction) = q * inv(G, p)
 
-translate_diff(::SpecialOrthogonal, x, y, v, ::LeftAction) = v
-translate_diff(G::SpecialOrthogonal, x, y, v, ::RightAction) = inv(G, x) * v * x
+translate_diff(::SpecialOrthogonal, p, q, X, ::LeftAction) = X
+translate_diff(G::SpecialOrthogonal, p, q, X, ::RightAction) = inv(G, p) * X * p
 
-function translate_diff!(G::SpecialOrthogonal, vout, x, y, v, conv::ActionDirection)
-    return copyto!(vout, translate_diff(G, x, y, v, conv))
+function translate_diff!(G::SpecialOrthogonal, Y, p, q, X, conv::ActionDirection)
+    return copyto!(Y, translate_diff(G, p, q, X, conv))
 end
 
-function inverse_translate_diff(G::SpecialOrthogonal, x, y, v, conv::ActionDirection)
-    return translate_diff(G, inv(G, x), y, v, conv)
+function inverse_translate_diff(G::SpecialOrthogonal, p, q, X, conv::ActionDirection)
+    return translate_diff(G, inv(G, p), q, X, conv)
 end
 
-function inverse_translate_diff!(G::SpecialOrthogonal, vout, x, y, v, conv::ActionDirection)
-    return copyto!(vout, inverse_translate_diff(G, x, y, v, conv))
+function inverse_translate_diff!(G::SpecialOrthogonal, Y, p, q, X, conv::ActionDirection)
+    return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
+end
+
+group_exp!(G::SpecialOrthogonal, q, X) = exp!(G, q, Identity(G), X)
+
+group_log!(G::SpecialOrthogonal, X, q) = log!(G, X, Identity(G), q)
+
+function allocate_result(
+    ::GT,
+    ::typeof(exp),
+    ::Identity{GT},
+    X,
+) where {n,GT<:SpecialOrthogonal{n}}
+    return allocate(X)
+end
+function allocate_result(
+    ::GT,
+    ::typeof(log),
+    ::Identity{GT},
+    q,
+) where {n,GT<:SpecialOrthogonal{n}}
+    return allocate(q)
 end

@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     GroupOperationAction(group::AbstractGroupManifold, AD::ActionDirection = LeftAction())
 
 Action of a group upon itself via left or right translation.
@@ -26,52 +26,52 @@ function switch_direction(A::GroupOperationAction)
     return GroupOperationAction(A.group, switch_direction(direction(A)))
 end
 
-apply(A::GroupOperationAction, a, x) = translate(A.group, a, x, direction(A))
+apply(A::GroupOperationAction, a, p) = translate(A.group, a, p, direction(A))
 
-apply!(A::GroupOperationAction, y, a, x) = translate!(A.group, y, a, x, direction(A))
+apply!(A::GroupOperationAction, q, a, p) = translate!(A.group, q, a, p, direction(A))
 
-function inverse_apply(A::GroupOperationAction, a, x)
-    return inverse_translate(A.group, a, x, direction(A))
+function inverse_apply(A::GroupOperationAction, a, p)
+    return inverse_translate(A.group, a, p, direction(A))
 end
 
-function inverse_apply!(A::GroupOperationAction, y, a, x)
-    return inverse_translate!(A.group, y, a, x, direction(A))
+function inverse_apply!(A::GroupOperationAction, q, a, p)
+    return inverse_translate!(A.group, q, a, p, direction(A))
 end
 
-function apply_diff(A::GroupOperationAction, a, x, v)
-    return translate_diff(A.group, a, x, v, direction(A))
+function apply_diff(A::GroupOperationAction, a, p, X)
+    return translate_diff(A.group, a, p, X, direction(A))
 end
 
-function apply_diff!(A::GroupOperationAction, vout, a, x, v)
-    return translate_diff!(A.group, vout, a, x, v, direction(A))
+function apply_diff!(A::GroupOperationAction, Y, a, p, X)
+    return translate_diff!(A.group, Y, a, p, X, direction(A))
 end
 
-function inverse_apply_diff(A::GroupOperationAction, a, x, v)
-    return inverse_translate_diff(A.group, a, x, v, direction(A))
+function inverse_apply_diff(A::GroupOperationAction, a, p, X)
+    return inverse_translate_diff(A.group, a, p, X, direction(A))
 end
 
-function inverse_apply_diff!(A::GroupOperationAction, vout, a, x, v)
-    return inverse_translate_diff!(A.group, vout, a, x, v, direction(A))
+function inverse_apply_diff!(A::GroupOperationAction, Y, a, p, X)
+    return inverse_translate_diff!(A.group, Y, a, p, X, direction(A))
 end
 
-function optimal_alignment(A::GroupOperationAction, x1, x2)
-    return inverse_apply(switch_direction(A), x1, x2)
+function optimal_alignment(A::GroupOperationAction, p, q)
+    return inverse_apply(switch_direction(A), p, q)
 end
 
-function optimal_alignment!(A::GroupOperationAction, y, x1, x2)
-    return inverse_apply!(switch_direction(A), y, x1, x2)
+function optimal_alignment!(A::GroupOperationAction, x, p, q)
+    return inverse_apply!(switch_direction(A), x, p, q)
 end
 
 function center_of_orbit(
     A::GroupOperationAction,
     pts::AbstractVector,
-    q,
+    p,
     mean_method::AbstractEstimationMethod,
 )
-    m = mean(A.group, pts, mean_method)
-    return inverse_apply(switch_direction(A), q, m)
+    μ = mean(A.group, pts, mean_method)
+    return inverse_apply(switch_direction(A), p, μ)
 end
-function center_of_orbit(A::GroupOperationAction, pts::AbstractVector, q)
-    m = mean(A.group, pts)
-    return inverse_apply(switch_direction(A), q, m)
+function center_of_orbit(A::GroupOperationAction, pts::AbstractVector, p)
+    μ = mean(A.group, pts)
+    return inverse_apply(switch_direction(A), p, μ)
 end

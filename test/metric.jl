@@ -22,7 +22,7 @@ struct TestSphericalMetric <: Metric end
 Manifolds.manifold_dimension(::TestSphere{N}) where {N} = N
 function Manifolds.local_metric(M::MetricManifold{<:TestSphere,<:TestSphericalMetric}, x)
     r = base_manifold(M).r
-    d = similar(x)
+    d = allocate(x)
     d[1] = r^2
     d[2] = d[1] * sin(x[1])^2
     return Diagonal(d)
@@ -32,6 +32,7 @@ sph_to_cart(θ, ϕ) = [cos(ϕ)*sin(θ), sin(ϕ)*sin(θ), cos(θ)]
 struct BaseManifold{N} <: Manifold end
 struct BaseManifoldMetric{M} <: Metric end
 struct DefaultBaseManifoldMetric <: Metric end
+struct NotImplementedMetric <: Metric end
 
 Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
 Manifolds.inner(::BaseManifold, x, v, w) = 2 * dot(v,w)
@@ -43,7 +44,7 @@ Manifolds.injectivity_radius(::BaseManifold) = Inf
 Manifolds.local_metric(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}},x) where N = 2*one(x*x')
 Manifolds.exp!(M::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x, v) where N = exp!(base_manifold(M), y, x, v)
 Manifolds.vector_transport_to!(::BaseManifold, vto, x, v, y, ::ParallelTransport) = (vto .= v)
-Manifolds.is_default_metric(::BaseManifold,::DefaultBaseManifoldMetric) = Val(true)
+Manifolds.default_metric_dispatch(::BaseManifold, ::DefaultBaseManifoldMetric) = Val(true)
 Manifolds.get_basis(::BaseManifold{N},x,::ArbitraryOrthonormalBasis) where {N} = ( [(Matrix(I, N, N)[:,i]) for i in 1:N], zeros(N))
 Manifolds.projected_distribution(M::BaseManifold, d) = ProjectedPointDistribution(M, d, project_point!, rand(d))
 Manifolds.projected_distribution(M::BaseManifold, d, x) = ProjectedPointDistribution(M, d, project_point!, x)
@@ -62,6 +63,11 @@ function Manifolds.sharp!(::BaseManifold, v::FVector{Manifolds.TangentSpaceType}
 end
 
 @testset "Metrics" begin
+    @testset "Metric Basics" begin
+        #one for MetricManifold, one for Manifold & Metric
+        @test length(methods(is_default_metric)) == 2
+    end
+
     @testset "solve_exp_ode error message" begin
         E = TestEuclidean{3}()
         g = TestEuclideanMetric()
@@ -75,20 +81,30 @@ end
             exp(M, x, v)
         end
     end
-
+    @testset "Local Metric Error message" begin
+        M = MetricManifold(BaseManifold{2}(),NotImplementedMetric())
+        @test_throws ErrorException local_metric(M, [3,4])
+    end
     @testset "scaled Euclidean metric" begin
         n = 3
         E = TestEuclidean{n}()
         g = TestEuclideanMetric()
         M = MetricManifold(E, g)
+        @test repr(M) == "MetricManifold(TestEuclidean{3}(), TestEuclideanMetric())"
+
+        if VERSION ≥ v"1.3"
+            @test E |> TestEuclideanMetric() === M
+            @test E |> TestEuclideanMetric === M
+        end
+
         G = Diagonal(1.0:n)
         invG = inv(G)
         @test manifold_dimension(M) == n
         @test base_manifold(M) === E
         @test metric(M) === g
 
-        @test_throws MethodError local_metric_jacobian(E, zeros(3))
-        @test_throws MethodError christoffel_symbols_second_jacobian(E, zeros(3))
+        @test_throws ErrorException local_metric_jacobian(E, zeros(3))
+        @test_throws ErrorException christoffel_symbols_second_jacobian(E, zeros(3))
 
         for vtype in (Vector, MVector{n})
             x, v, w = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
@@ -105,7 +121,6 @@ end
 
             if VERSION ≥ v"1.1"
                 T = 0:.5:10
-                @test exp(M, x, v, T) ≈ [x + t * v for t in T] atol=1e-6
                 @test geodesic(M, x, v, T) ≈ [x + t * v for t in T] atol=1e-6
             end
 
@@ -170,8 +185,6 @@ end
             if VERSION ≥ v"1.1" && (!Sys.iswindows() || Sys.ARCH == :x86_64)
                 @testset "numerically integrated geodesics for $vtype" begin
                     T = 0:.1:1
-                    @test isapprox([sph_to_cart(yi...) for yi in exp(M, x, v, T)],
-                                   exp(S, xcart, vcart, T); atol=1e-3, rtol=1e-3)
                     @test isapprox([sph_to_cart(yi...) for yi in geodesic(M, x, v, T)],
                                    geodesic(S, xcart, vcart, T); atol=1e-3, rtol=1e-3)
                 end
@@ -202,9 +215,9 @@ end
             R = riemann_tensor(M, x)
             for l=1:n, i=1:n, j=1:n, k=1:n
                 if (l,i,j,k) == (2,1,1,2)
-                    @test R[l,i,j,k] ≈ -1 atol=1e-6
+                    @test R[l,i,j,k] ≈ -1 atol=2e-6
                 elseif (l,i,j,k) == (2,1,2,1)
-                    @test R[l,i,j,k] ≈ 1 atol=1e-6
+                    @test R[l,i,j,k] ≈ 1 atol=2e-6
                 elseif (l,i,j,k) == (1,2,1,2)
                     @test R[l,i,j,k] ≈ sin(θ)^2 atol=1e-6
                 elseif (l,i,j,k) == (1,2,2,1)
@@ -214,9 +227,9 @@ end
                 end
             end
 
-            @test ricci_tensor(M, x) ≈ G ./ r^2 atol=1e-6
-            @test ricci_curvature(M, x) ≈ 2 / r^2 atol=1e-6
-            @test gaussian_curvature(M, x) ≈ 1 / r^2 atol=1e-6
+            @test ricci_tensor(M, x) ≈ G ./ r^2 atol=2e-6
+            @test ricci_curvature(M, x) ≈ 2 / r^2 atol=2e-6
+            @test gaussian_curvature(M, x) ≈ 1 / r^2 atol=2e-6
             @test einstein_tensor(M, x) ≈ ricci_tensor(M, x) - gaussian_curvature(M, x)  .* G atol=1e-6
         end
     end
@@ -228,19 +241,19 @@ end
         g2 = DefaultBaseManifoldMetric()
         MM2 = MetricManifold(M,g2)
 
-        @test is_decorator_manifold(MM) == Val{true}()
-        @test is_decorator_manifold(MM2) == Val{true}()
-        @test is_decorator_manifold(M) == Val{false}()
-        @test is_default_metric(MM) == is_default_metric(base_manifold(MM),metric(MM))
-        @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2),metric(MM2))
-        @test is_default_metric(MM2) == Val{true}()
+        @test (@inferred Manifolds.default_metric_dispatch(MM)) === (@inferred Manifolds.default_metric_dispatch(base_manifold(MM), metric(MM)))
+        @test (@inferred Manifolds.default_metric_dispatch(MM2)) === (@inferred Manifolds.default_metric_dispatch(base_manifold(MM2), metric(MM2)))
+        @test (@inferred Manifolds.default_metric_dispatch(MM2)) === Val(true)
+        @test is_default_metric(MM) == is_default_metric(base_manifold(MM), metric(MM))
+        @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2), metric(MM2))
+        @test is_default_metric(MM2)
 
-        @test convert(typeof(MM2),M) == MM2
-        @test_throws ErrorException convert(typeof(MM),M)
+        @test convert(typeof(MM2), M) == MM2
+        @test_throws ErrorException convert(typeof(MM), M)
         x = [0.1 0.2 0.4]
         v = [0.5 0.7 0.11]
         w = [0.13 0.17 0.19]
-        y = similar(x)
+        y = allocate(x)
 
         # Test fallbacks
         @test_throws ErrorException vee!(M,w,x,v)
@@ -275,13 +288,16 @@ end
         # MM falls back to nondefault error
         @test_throws ErrorException projected_distribution(MM,1,x)
         @test_throws ErrorException projected_distribution(MM,1)
+        # normal_tvector is not implemented
         @test_throws ErrorException normal_tvector_distribution(MM,x,0.2)
 
         @test inner(MM2, x, v, w) === inner(M, x, v, w)
         @test norm(MM2, x, v) === norm(M, x, v)
         @test distance(MM2, x, y) === distance(M, x, y)
         @test exp!(MM2, y, x, v) === exp!(M, y, x, v)
+        @test exp(MM2, x, v) == exp(M, x, v)
         @test log!(MM2, v, x, y) === log!(M, v, x, y)
+        @test log(MM2, x, y) == log(M, x, y)
         @test retract!(MM2, y, x, v) === retract!(M, y, x, v)
         @test retract!(MM2, y, x, v, 1) === retract!(M, y, x, v, 1)
 
@@ -296,8 +312,8 @@ end
 
         a = Manifolds.projected_distribution(M, Distributions.MvNormal(zero(zeros(3)), 1.0))
         b = Manifolds.projected_distribution(MM2, Distributions.MvNormal(zero(zeros(3)), 1.0))
-        @test isapprox(Matrix(a.d.Σ), Matrix(b.d.Σ))
-        @test isapprox(a.d.μ, b.d.μ)
+        @test isapprox(Matrix(a.distribution.Σ), Matrix(b.distribution.Σ))
+        @test isapprox(a.distribution.μ, b.distribution.μ)
         @test get_basis(M,x,ArbitraryOrthonormalBasis()) == get_basis(MM2,x,ArbitraryOrthonormalBasis())
         @test_throws ErrorException get_basis(MM,x,ArbitraryOrthonormalBasis())
         cov = flat(M, x, FVector(TangentSpace, v))
@@ -313,6 +329,7 @@ end
 
         xsample = [[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
         w = pweights([0.5, 0.5])
+        # test despatch with results from above
         @test mean(M, xsample, w) ≈ ones(3)
         @test mean(MM2, xsample, w) ≈ ones(3)
         @test mean(MM, xsample, w) ≈ 3 .* ones(3)

@@ -1,14 +1,22 @@
 include("utils.jl")
-@testset "Symmetric Positive Definite Matrices" begin
-    M1 = Manifolds.SymmetricPositiveDefinite(3)
-    M2 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LinearAffineMetric())
-    M3 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
-    M4 = MetricManifold(Manifolds.SymmetricPositiveDefinite(3), Manifolds.LogEuclideanMetric())
 
-    @test is_default_metric(M2) == Val{true}()
-    @test is_default_metric(M1, Manifolds.LinearAffineMetric()) == Val{true}()
-    @test is_default_metric(M1, Manifolds.LogCholeskyMetric()) == Val{false}()
-    @test is_default_metric(M3) == Val{false}()
+using Manifolds: default_metric_dispatch
+
+@testset "Symmetric Positive Definite Matrices" begin
+    M1 = SymmetricPositiveDefinite(3)
+    @test repr(M1) == "SymmetricPositiveDefinite(3)"
+    M2 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LinearAffineMetric())
+    M3 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
+    M4 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LogEuclideanMetric())
+
+    @test (@inferred default_metric_dispatch(M2)) === Val(true)
+    @test (@inferred default_metric_dispatch(M1, Manifolds.LinearAffineMetric())) === Val(true)
+    @test (@inferred default_metric_dispatch(M1, Manifolds.LogCholeskyMetric())) === Val(false)
+    @test (@inferred default_metric_dispatch(M3)) === Val(false)
+    @test is_default_metric(M2)
+    @test is_default_metric(M1, Manifolds.LinearAffineMetric())
+    @test !is_default_metric(M1, Manifolds.LogCholeskyMetric())
+    @test !is_default_metric(M3)
 
     @test injectivity_radius(M1) == Inf
     @test injectivity_radius(M1,one(zeros(3,3))) == Inf
@@ -93,5 +101,8 @@ include("utils.jl")
                 @test isapprox(0.0, inner(M2,x,X[i],X[j]))
             end
         end
+        d2onb = get_basis(M2, x, DiagonalizingOrthonormalBasis(v))
+        @test donb.kappas == d2onb.kappas
+        @test donb.vectors==d2onb.vectors
     end
 end

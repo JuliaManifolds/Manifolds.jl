@@ -4,13 +4,20 @@ include("utils.jl")
     E = Manifolds.Euclidean(3)
     Ec = Manifolds.Euclidean(3;field=ℂ)
     EM = Manifolds.MetricManifold(E,Manifolds.EuclideanMetric())
-    @test is_default_metric(EM) == Val{true}()
-    @test is_default_metric(E,Manifolds.EuclideanMetric()) == Val{true}()
-    x = zeros(3)
-    @test det_local_metric(EM,x) == one(eltype(x))
-    @test log_local_metric_density(EM,x) == zero(eltype(x))
-    @test project_point!(E,x) == x
+    @test repr(E) == "Euclidean(3; field = ℝ)"
+    @test repr(Ec) == "Euclidean(3; field = ℂ)"
+    @test repr(Euclidean(2, 3; field = ℍ)) == "Euclidean(2, 3; field = ℍ)"
+    @test is_default_metric(EM)
+    @test is_default_metric(E, Manifolds.EuclideanMetric())
+    p = zeros(3)
+    @test det_local_metric(EM, p) == one(eltype(p))
+    @test log_local_metric_density(EM, p) == zero(eltype(p))
+    @test project_point!(E, p, p) == p
     @test manifold_dimension(Ec) == 2*manifold_dimension(E)
+
+    @test E^2 === Euclidean(3, 2)
+    @test E^(2,) === Euclidean(3, 2)
+    @test Ec^(4,5) === Euclidean(3, 4, 5; field = ℂ)
 
     manifolds = [ E, EM, Ec ]
     types = [
@@ -75,15 +82,15 @@ include("utils.jl")
 
     @testset "hat/vee" begin
         E = Euclidean(3, 2)
-        x = collect(reshape(1.0:6.0, (3, 2)))
-        v = collect(reshape(7.0:12.0, (3, 2)))
-        @test hat(E, x, vec(v)) ≈ v
-        w = similar(v)
-        @test hat!(E, w, x, vec(v)) === w
-        @test w ≈ v
-        @test vee(E, x, v) ≈ vec(v)
-        w = similar(vec(v))
-        @test vee!(E, w, x, v) === w
-        @test w ≈ vec(v)
+        p = collect(reshape(1.0:6.0, (3, 2)))
+        X = collect(reshape(7.0:12.0, (3, 2)))
+        @test hat(E, p, vec(X)) ≈ X
+        Y = allocate(X)
+        @test hat!(E, Y, p, vec(X)) === Y
+        @test Y ≈ X
+        @test vee(E, p, X) ≈ vec(X)
+        Y = allocate(vec(X))
+        @test vee!(E, Y, p, X) === Y
+        @test Y ≈ vec(X)
     end
 end

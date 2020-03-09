@@ -1,4 +1,6 @@
-# Manifolds
+<div align="center">
+    <img src="https://github.com/JuliaNLSolvers/Manifolds.jl/blob/master/docs/src/assets/logo-text-readme.png" alt="Manifolds.jl" width="526">
+</div>
 
 [![Build Status](https://travis-ci.org/JuliaNLSolvers/Manifolds.jl.svg?branch=master)](https://travis-ci.org/JuliaNLSolvers/Manifolds.jl/) [![codecov.io](http://codecov.io/github/JuliaNLSolvers/Manifolds.jl/coverage.svg?branch=master)](https://codecov.io/gh/JuliaNLSolvers/Manifolds.jl/)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://julianlsolvers.github.io/Manifolds.jl/latest/)

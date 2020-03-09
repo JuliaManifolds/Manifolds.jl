@@ -6,10 +6,10 @@ However, often there is an implicitly assumed (default) metric, like the usual i
 This decorator takes this into account.
 It is not necessary to use this decorator if you implement just one (or the first) metric.
 If you later introduce a second, the old (first) metric can be used with the (non [`MetricManifold`](@ref)) [`Manifold`](@ref), i.e. without an explicitly stated metric.
-The decorator acts transparent in that sense; see [`is_decorator_manifold`](@ref) for details.
 
 This manifold decorator serves two purposes:
-1. to implement different metrics (e.g. in closed form) for one [`Manifold`](@ref) 2. to provide a way to compute geodesics on manifolds, where this [`Metric`](@ref) does not yield closed formula.
+1. to implement different metrics (e.g. in closed form) for one [`Manifold`](@ref)
+2. to provide a way to compute geodesics on manifolds, where this [`Metric`](@ref) does not yield closed formula.
 
 Let's first look at the provided types.
 

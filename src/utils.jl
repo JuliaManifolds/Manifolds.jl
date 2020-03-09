@@ -1,18 +1,16 @@
-@doc doc"""
+@doc raw"""
     usinc(θ::Real)
 
-Unnormalized version of `sinc` function, i.e.
-$\operatorname{usinc}(\theta) = \frac{\sin(\theta)}{\theta}$. This is
-equivalent to `sinc(θ/π)`.
+Unnormalized version of `sinc` function, i.e. $\operatorname{usinc}(θ) = \frac{\sin(θ)}{θ}$.
+This is equivalent to `sinc(θ/π)`.
 """
 @inline usinc(θ::Real) = θ == 0 ? one(θ) : isinf(θ) ? zero(θ) : sin(θ) / θ
 
-@doc doc"""
+@doc raw"""
     usinc_from_cos(x::Real)
 
-Unnormalized version of `sinc` function, i.e.
-$\operatorname{usinc}(\theta) = \frac{\sin(\theta)}{\theta}$, computed from
-$x = cos(\theta)$.
+Unnormalized version of `sinc` function, i.e. $\operatorname{usinc}(θ) = \frac{\sin(θ)}{θ}$,
+computed from $x = cos(θ)$.
 """
 @inline function usinc_from_cos(x::Real)
     if x >= 1
@@ -24,10 +22,10 @@ $x = cos(\theta)$.
     end
 end
 
-allocate(x, s::Size{S}) where {S} = similar(x, S...)
-allocate(x::StaticArray, s::Size{S}) where {S} = similar(x, maybesize(s))
-allocate(x, ::Type{T}, s::Size{S}) where {S,T} = similar(x, T, S...)
-allocate(x::StaticArray, ::Type{T}, s::Size{S}) where {S,T} = similar(x, T, maybesize(s))
+allocate(p, s::Size{S}) where {S} = similar(p, S...)
+allocate(p::StaticArray, s::Size{S}) where {S} = similar(p, maybesize(s))
+allocate(p, ::Type{T}, s::Size{S}) where {S,T} = similar(p, T, S...)
+allocate(p::StaticArray, ::Type{T}, s::Size{S}) where {S,T} = similar(p, T, maybesize(s))
 
 """
     eigen_safe(x)

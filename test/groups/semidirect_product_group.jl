@@ -4,7 +4,6 @@ include("group_utils.jl")
 @testset "Semidirect product group" begin
     M1 = TranslationGroup(2)
     A = TranslationAction(M1, M1)
-
     G = SemidirectProductGroup(M1, M1, A)
     @test G === GroupManifold(
         TranslationGroup(2) × TranslationGroup(2),
@@ -23,6 +22,14 @@ include("group_utils.jl")
     shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M.manifolds...)
     pts = [Manifolds.prod_point(shape_se, tp...) for tp in tuple_pts]
     v_pts = [Manifolds.prod_point(shape_se, tuple_v...)]
+
+    X = log(G,pts[1],pts[1])
+    Y = zero_tangent_vector(G,pts[1])
+    Z = Manifolds.allocate_result(G, zero_tangent_vector, pts[1])
+    Z = zero_tangent_vector!(M,Z,pts[1])
+    @test norm(G,pts[1],X) ≈ 0
+    @test norm(G,pts[1],Y) ≈ 0
+    @test norm(G,pts[1],Z) ≈ 0
 
     e = Identity(G)
     @test inv(G, e) === e

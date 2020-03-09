@@ -29,6 +29,12 @@ include("utils.jl")
             test_representation_size = false,
             test_reverse_diff = VERSION > v"1.2",
         )
+        @test sprint(show, "text/plain", N) == """
+        GraphManifold
+        Graph:
+         {3, 2} undirected simple Int64 graph
+        Manifold on vertices:
+         Euclidean(2; field = ℝ)"""
 
         NE = GraphManifold(G,M,EdgeManifold())
         @test is_manifold_point(NE, x[1:2])
@@ -46,6 +52,12 @@ include("utils.jl")
             test_representation_size = false,
             test_reverse_diff = VERSION > v"1.2",
         )
+        @test sprint(show, "text/plain", NE) == """
+        GraphManifold
+        Graph:
+         {3, 2} undirected simple Int64 graph
+        Manifold on edges:
+         Euclidean(2; field = ℝ)"""
 
         G2 = SimpleDiGraph(3)
         add_edge!(G2, 1, 2)

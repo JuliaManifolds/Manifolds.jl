@@ -110,8 +110,8 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         end
 
         test_repr(Manifolds.representation_size(M))
-        for VS ∈ (Manifolds.TangentSpace, Manifolds.CotangentSpace)
-            test_repr(Manifolds.representation_size(Manifolds.VectorBundleFibers(VS, M)))
+        for fiber ∈ (Manifolds.TangentSpace, Manifolds.CotangentSpace)
+            test_repr(Manifolds.representation_size(Manifolds.VectorBundleFibers(fiber, M)))
         end
     end
 
@@ -284,36 +284,38 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     end
 
     for btype ∈ basis_types_vecs
-        x = pts[1]
-        b = get_basis(M, x, btype)
-        @test isa(b, AbstractPrecomputedOrthonormalBasis)
+        @testset "Basis support for $(btype)" begin
+            x = pts[1]
+            b = get_basis(M, x, btype)
+            @test isa(b, AbstractPrecomputedOrthonormalBasis)
 
-        bvectors = get_vectors(M, x, b)
-        N = length(bvectors)
-        @test real_dimension(number_system(btype)) * N == manifold_dimension(M)
+            bvectors = get_vectors(M, x, b)
+            N = length(bvectors)
+            @test real_dimension(number_system(btype)) * N == manifold_dimension(M)
 
-        # test orthonormality
-        for i in 1:N
-            @test norm(M, x, bvectors[i]) ≈ 1
-            for j in i+1:N
-                @test real(inner(M, x, bvectors[i], bvectors[j])) ≈ 0 atol = sqrt(find_eps(x))
-            end
-        end
-        if isa(btype, ProjectedOrthonormalBasis)
-            # check projection idempotency
+            # test orthonormality
             for i in 1:N
-                @test project_tangent(M, x, bvectors[i]) ≈ bvectors[i]
+                @test norm(M, x, bvectors[i]) ≈ 1
+                for j in i+1:N
+                    @test real(inner(M, x, bvectors[i], bvectors[j])) ≈ 0 atol = sqrt(find_eps(x))
+                end
             end
-        end
+            if isa(btype, ProjectedOrthonormalBasis)
+                # check projection idempotency
+                for i in 1:N
+                    @test isapprox(M, x, project_tangent(M, x, bvectors[i]), bvectors[i])
+                end
+            end
 
-        if !isa(btype, ProjectedOrthonormalBasis) &&
-            (basis_has_specialized_diagonalizing_get || !isa(btype, DiagonalizingOrthonormalBasis))
+            if !isa(btype, ProjectedOrthonormalBasis) &&
+                (basis_has_specialized_diagonalizing_get || !isa(btype, DiagonalizingOrthonormalBasis))
 
-            v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
-            vb = get_coordinates(M, x, v1, btype)
+                v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
+                vb = get_coordinates(M, x, v1, btype)
 
-            @test get_coordinates(M, x, v1, b) ≈ vb
-            @test isapprox(M, x, get_vector(M, x, vb, b), get_vector(M, x, vb, btype))
+                @test get_coordinates(M, x, v1, b) ≈ vb
+                @test isapprox(M, x, get_vector(M, x, vb, b), get_vector(M, x, vb, btype))
+            end
         end
     end
 
@@ -434,7 +436,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             for _ in 1:10
                 randtv = rand(tvd)
                 atol = rand_tvector_atol_multiplier * find_eps(randtv)
-                @test is_tangent_vector(M, supp.x, randtv; atol = atol)
+                @test is_tangent_vector(M, supp.point, randtv; atol = atol)
             end
         end
     end

@@ -1,27 +1,27 @@
-@doc doc"""
-    Euclidean{T<:Tuple} <: Manifold
+@doc raw"""
+    Euclidean{T<:Tuple,𝔽} <: Manifold
 
-Euclidean vector space $\mathbb R^n$.
+Euclidean vector space.
 
 # Constructor
 
     Euclidean(n)
 
-Generate the $n$-dimensional vector space $\mathbb R^n$.
+Generate the $n$-dimensional vector space $ℝ^n$.
 
     Euclidean(n₁,n₂,...,nᵢ; field=ℝ)
 
-Generate the vector space of $k=n_1n_2\cdot\ldots n_i$ values, i.e. the
-$\mathbb F^{n_1, n_2, \ldots, n_d}$ whose
-elements are interpreted as $n_1 \times,n_2\times\cdots\times n_i$ arrays.
-For $d=2$ we obtain a matrix space.
+Generate the vector space of $k = n_1 \cdot n_2 \cdot … \cdot n_i$ values, i.e. the
+manifold $𝔽^{n_1, n_2, …, n_i}$ whose
+elements are interpreted as $n_1 × n_2 × … × n_i$ arrays.
+For $i=2$ we obtain a matrix space.
 The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
 [`real_dimension`](@ref) of the field $𝔽$.
 """
-struct Euclidean{N<:Tuple,T} <: Manifold where {N,T<:AbstractNumbers} end
+struct Euclidean{N,𝔽} <: Manifold where {N<:Tuple, 𝔽<:AbstractNumbers} end
 
-function Euclidean(n::Vararg{Int,N}; field::AbstractNumbers = ℝ) where {N}
+function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
     return Euclidean{Tuple{n...},field}()
 end
 
@@ -40,134 +40,139 @@ This metric is the default metric for example for the [`Euclidean`](@ref) manifo
 """
 struct EuclideanMetric <: RiemannianMetric end
 
-det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = one(eltype(x))
+^(M::Euclidean, n::Int) = ^(M, (n,))
+function ^(::Euclidean{T,𝔽}, n::NTuple{N,Int}) where {T,𝔽,N}
+    return Euclidean{Tuple{T.parameters...,n...},𝔽}()
+end
+
+det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = one(eltype(p))
 
 """
-    distance(M::Euclidean, x, y)
+    distance(M::Euclidean, p, q)
 
 Compute the Euclidean distance between two points on the [`Euclidean`](@ref)
 manifold `M`, i.e. for vectors it's just the norm of the difference, for matrices
 and higher order arrays, the matrix and ternsor Frobenius norm, respectively.
 """
-distance(::Euclidean, x, y) = norm(x .- y)
+distance(::Euclidean, p, q) = norm(p .- q)
 
-@doc doc"""
-    exp(M::Euclidean, x, v)
+@doc raw"""
+    exp(M::Euclidean, p, X)
 
-Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `x` in direction
-`v`, which in this case is just
+Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `p` in direction
+`X`, which in this case is just
 ````math
-\exp_x v = x + v.
+\exp_p X = p + X.
 ````
 """
 exp(::Euclidean, ::Any...)
 
-exp!(M::Euclidean, y, x, v) = (y .= x .+ v)
+exp!(M::Euclidean, q, p, X) = (q .= p .+ X)
 
 """
-    flat(M::Euclidean, x, w)
+    flat(M::Euclidean, p, X)
 
-Transform a tangent vector into a cotangent. Since they can directly be identified in the
+Transform a tangent vector `X` into a cotangent. Since they can directly be identified in the
 [`Euclidean`](@ref) case, this yields just the identity for a tangent vector `w` in the
-tangent space of `x` on `M`. The result is returned also in place in `v`.
+tangent space of `p` on `M`.
 """
 flat(::Euclidean, ::Any...)
 
-flat!(M::Euclidean, v::CoTFVector, x, w::TFVector) = copyto!(v, w)
+flat!(M::Euclidean, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_basis(M::Euclidean{<:Tuple,ℝ}, x, B::ArbitraryOrthonormalBasis)
-    vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
+function get_basis(M::Euclidean{<:Tuple,ℝ}, p, B::ArbitraryOrthonormalBasis)
+    vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     return PrecomputedOrthonormalBasis(vecs)
 end
-function get_basis(M::Euclidean{<:Tuple,ℂ}, x, B::ArbitraryOrthonormalBasis)
-    vecs = [_euclidean_basis_vector(x, i) for i in eachindex(x)]
+function get_basis(M::Euclidean{<:Tuple,ℂ}, p, B::ArbitraryOrthonormalBasis)
+    vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     return PrecomputedOrthonormalBasis([vecs; im * vecs])
 end
-function get_basis(M::Euclidean, x, B::DiagonalizingOrthonormalBasis)
-    vecs = get_basis(M, x, ArbitraryOrthonormalBasis()).vectors
-    kappas = zeros(real(eltype(x)), manifold_dimension(M))
+function get_basis(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
+    vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors
+    kappas = zeros(real(eltype(p)), manifold_dimension(M))
     return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
 end
 
-function get_coordinates(M::Euclidean{<:Tuple,ℝ}, x, v, B::ArbitraryOrDiagonalizingBasis)
+function get_coordinates(M::Euclidean{<:Tuple,ℝ}, p, X, B::ArbitraryOrDiagonalizingBasis)
     S = representation_size(M)
     PS = prod(S)
-    return reshape(v, PS)
+    return reshape(X, PS)
 end
-function get_coordinates(M::Euclidean{<:Tuple,ℂ}, x, v, B::ArbitraryOrDiagonalizingBasis)
+function get_coordinates(M::Euclidean{<:Tuple,ℂ}, p, X, B::ArbitraryOrDiagonalizingBasis)
     S = representation_size(M)
     PS = prod(S)
-    return [reshape(real(v), PS); reshape(imag(v), PS)]
+    return [reshape(real(X), PS); reshape(imag(X), PS)]
 end
 
-function get_vector(M::Euclidean{<:Tuple,ℝ}, x, v, B::ArbitraryOrDiagonalizingBasis)
+function get_vector(M::Euclidean{<:Tuple,ℝ}, p, X, B::ArbitraryOrDiagonalizingBasis)
     S = representation_size(M)
-    return reshape(v, S)
+    return reshape(X, S)
 end
-function get_vector(M::Euclidean{<:Tuple,ℂ}, x, v, B::ArbitraryOrDiagonalizingBasis)
+function get_vector(M::Euclidean{<:Tuple,ℂ}, p, X, B::ArbitraryOrDiagonalizingBasis)
     S = representation_size(M)
-    N = div(length(v), 2)
-    return reshape(v[1:N] + im * v[N+1:end], S)
+    N = div(length(X), 2)
+    return reshape(X[1:N] + im * X[N+1:end], S)
 end
 
-function hat(M::Euclidean{N,ℝ}, x, vⁱ) where {N}
-    return reshape(vⁱ, representation_size(TangentBundleFibers(M)))
+function hat(M::Euclidean{N,ℝ}, p, Xⁱ) where {N}
+    return reshape(Xⁱ, representation_size(TangentBundleFibers(M)))
 end
 
-hat!(::Euclidean{N,ℝ}, v, x, vⁱ) where {N} = copyto!(v, vⁱ)
+hat!(::Euclidean{N,ℝ}, X, p, Xⁱ) where {N} = copyto!(X, Xⁱ)
 
-@doc doc"""
+@doc raw"""
     injectivity_radius(M::Euclidean)
 
-Return the injectivity radius on the [`Euclidean`](@ref) `M`, which is $\infty$.
+Return the injectivity radius on the [`Euclidean`](@ref) `M`, which is $∞$.
 """
 injectivity_radius(::Euclidean) = Inf
 
-@doc doc"""
-    inner(M::Euclidean, x, v, w)
+@doc raw"""
+    inner(M::Euclidean, p, X, Y)
 
 Compute the inner product on the [`Euclidean`](@ref) `M`, which is just
 the inner product on the real-valued or complex valued vector space
-of arrays (or tensors) of size $n_1\times n_2 \times \cdots \times n_i$, i.e.
+of arrays (or tensors) of size $n_1 × n_2  ×  …  × n_i$, i.e.
 
 ````math
-g_x(v,w) = \sum_{k\in I} \overline{v}_{k} w_{k},
+g_p(X,Y) = \sum_{k ∈ I} \overline{X}_{k} Y_{k},
 ````
-where $I$ is the set of integer vectors $k\in\mathbb N^i$, such that for all
-$1 \leq j \leq i$ it holds $1\leq k_j \leq n_j$.
+where $I$ is the set of vectors $k ∈ ℕ^i$, such that for all
+$1 ≤ j ≤ i$ it holds $1 ≤ k_j ≤ n_j$.
 
-For the special case of $i\leq 2$, i.e. matrices and vectors, this simplifies to
+For the special case of $i ≤ 2$, i.e. matrices and vectors, this simplifies to
 ````math
-g_x(v,w) = w^{\mathrm{H}}v,
+g_p(X,Y) = X^{\mathrm{H}}Y,
 ````
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
 inner(::Euclidean, ::Any...)
-@inline inner(::Euclidean, x, v, w) = dot(v, w)
-@inline inner(::MetricManifold{<:Manifold,EuclideanMetric}, x, v, w) = dot(v, w)
+@inline inner(::Euclidean, p, X, Y) = dot(X, Y)
+@inline inner(::MetricManifold{<:Manifold,EuclideanMetric}, p, X, Y) = dot(X, Y)
 
-inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = local_metric(M, x)
+inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = local_metric(M, p)
 
-is_default_metric(::Euclidean, ::EuclideanMetric) = Val(true)
+default_metric_dispatch(::Euclidean, ::EuclideanMetric) = Val(true)
 
-function local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, x)
-    return Diagonal(ones(SVector{size(x, 1),eltype(x)}))
+function local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, p)
+    return Diagonal(ones(SVector{size(p, 1),eltype(p)}))
 end
 
-@doc doc"""
-    log(M::Euclidean, x, y)
+@doc raw"""
+    log(M::Euclidean, p, q)
 
-Compute the logarithmic map on the [`Euclidean`](@ref) `M` from `x` to `y`,
+Compute the logarithmic map on the [`Euclidean`](@ref) `M` from `p` to `q`,
 which in this case is just
 ````math
-\log_x y = y - x.
+\log_p q = q-p.
 ````
 """
 log(::Euclidean, ::Any...)
 
-log!(M::Euclidean, v, x, y) = (v .= y .- x)
+log!(M::Euclidean, X, p, q) = (X .= q .- p)
 
-log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, x) = zero(eltype(x))
+log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = zero(eltype(p))
 
 @generated _product_of_dimensions(::Euclidean{N}) where {N} = prod(N.parameters)
 
@@ -193,8 +198,8 @@ function mean(
 end
 mean(::Euclidean, x::AbstractVector; kwargs...) = mean(x)
 
-function mean!(M::Euclidean, y, x::AbstractVector, w::AbstractVector; kwargs...)
-    return mean!(M, y, x, w, GeodesicInterpolation(); kwargs...)
+function mean!(M::Euclidean, p, x::AbstractVector, w::AbstractVector; kwargs...)
+    return mean!(M, p, x, w, GeodesicInterpolation(); kwargs...)
 end
 
 function mean_and_var(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...)
@@ -225,63 +230,63 @@ function median(
     return median(x, w)
 end
 
-function median!(::Euclidean{Tuple{1}}, y, x::AbstractVector; kwargs...)
-    return copyto!(y, [median(vcat(x...))])
+function median!(::Euclidean{Tuple{1}}, p, x::AbstractVector; kwargs...)
+    return copyto!(p, [median(vcat(x...))])
 end
-function median!(::Euclidean{Tuple{1}}, y, x::AbstractVector, w::AbstractWeights; kwargs...)
-    return copyto!(y, [median(vcat(x...), w)])
+function median!(::Euclidean{Tuple{1}}, p, x::AbstractVector, w::AbstractWeights; kwargs...)
+    return copyto!(p, [median(vcat(x...), w)])
 end
 
-@doc doc"""
-    norm(M::Euclidean, x, v)
+@doc raw"""
+    norm(M::Euclidean, p, X)
 
-Compute the norm of a tangent vector `v` at `x` on the [`Euclidean`](@ref)
+Compute the norm of a tangent vector `X` at `p` on the [`Euclidean`](@ref)
 `M`, i.e. since every tangent space can be identified with `M` itself
-in this case, just the (Frobenius) norm of `v`.
+in this case, just the (Frobenius) norm of `X`.
 """
-norm(::Euclidean, x, v) = norm(v)
-norm(::MetricManifold{<:Manifold,EuclideanMetric}, x, v) = norm(v)
+norm(::Euclidean, p, X) = norm(X)
+norm(::MetricManifold{<:Manifold,EuclideanMetric}, p, X) = norm(X)
 
 """
-    normal_tvector_distribution(M::Euclidean, x, σ)
+    normal_tvector_distribution(M::Euclidean, p, σ)
 
 Normal distribution in ambient space with standard deviation `σ`
-projected to tangent space at `x`.
+projected to tangent space at `p`.
 """
-function normal_tvector_distribution(M::Euclidean{Tuple{N}}, x, σ) where {N}
-    d = Distributions.MvNormal(zero(x), σ)
-    return ProjectedFVectorDistribution(TangentBundleFibers(M), x, d, project_vector!, x)
+function normal_tvector_distribution(M::Euclidean{Tuple{N}}, p, σ) where {N}
+    d = Distributions.MvNormal(zero(p), σ)
+    return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project_vector!, p)
 end
 
-@doc doc"""
-    project_point(M::Euclidean, x)
+@doc raw"""
+    project_point(M::Euclidean, p)
 
-Project an arbitrary point `x` onto the [`Euclidean`](@ref) `M`, which
+Project an arbitrary point `p` onto the [`Euclidean`](@ref) manifold `M`, which
 is of course just the identity map.
 """
 project_point(::Euclidean, ::Any...)
 
-project_point!(M::Euclidean, x) = x
+project_point!(M::Euclidean, q, p) = copyto!(q, p)
 
 """
-    project_tangent(M::Euclidean, x, v)
+    project_tangent(M::Euclidean, p, X)
 
-Project an arbitrary vector `v` into the tangent space of a point `x` on the
+Project an arbitrary vector `X` into the tangent space of a point `p` on the
 [`Euclidean`](@ref) `M`, which is just the identity, since any tangent
 space of `M` can be identified with all of `M`.
 """
 project_tangent(::Euclidean, ::Any...)
 
-project_tangent!(M::Euclidean, w, x, v) = copyto!(w, v)
+project_tangent!(M::Euclidean, Y, p, X) = copyto!(Y, X)
 
 """
-    projected_distribution(M::Euclidean, d, [x])
+    projected_distribution(M::Euclidean, d, [p])
 
 Wrap the standard distribution `d` into a manifold-valued distribution. Generated
-points will be of similar type to `x`. By default, the type is not changed.
+points will be of similar type to `p`. By default, the type is not changed.
 """
-function projected_distribution(M::Euclidean, d, x)
-    return ProjectedPointDistribution(M, d, project_point!, x)
+function projected_distribution(M::Euclidean, d, p)
+    return ProjectedPointDistribution(M, d, project_point!, p)
 end
 function projected_distribution(M::Euclidean, d)
     return ProjectedPointDistribution(M, d, project_point!, rand(d))
@@ -296,34 +301,38 @@ Return the array dimensions required to represent an element on the
 @generated representation_size(::Euclidean{N}) where {N} = size_to_tuple(N)
 
 """
-    sharp(M::Euclidean, x, w)
+    sharp(M::Euclidean, p, ξ)
 
-since cotangent and tangent vectors can directly be identified in the [`Euclidean`](@ref)
-case, this yields just the identity for a cotangent vector `w` in the tangent space
-of `x` on `M`.
+Transform the cotangent vector `ξ` at `p` on the [`Euclidean`](@ref) `M` to a tangent vector `X`.
+Since cotangent and tangent vectors can directly be identified in the [`Euclidean`](@ref)
+case, this yields just the identity.
 """
 sharp(::Euclidean, ::Any...)
 
-sharp!(M::Euclidean, v::TFVector, x, w::CoTFVector) = copyto!(v, w)
+sharp!(M::Euclidean, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
+
+function show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
+    print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")
+end
 
 """
-    vector_transport_to(M::Euclidean, x, v, y, ::ParallelTransport)
+    vector_transport_to(M::Euclidean, p, X, q, ::ParallelTransport)
 
-Parallely transport the vector `v` from the tangent space at `x` to the tangent space at `y`
+Parallely transport the vector `X` from the tangent space at `p` to the tangent space at `q`
 on the [`Euclidean`](@ref) `M`, which simplifies to the identity.
 """
 vector_transport_to(::Euclidean, ::Any, ::Any, ::Any, ::ParallelTransport)
 
-vector_transport_to!(M::Euclidean, vto, x, v, y, ::ParallelTransport) = copyto!(vto, v)
+vector_transport_to!(M::Euclidean, Y, p, X, q, ::ParallelTransport) = copyto!(Y, X)
 
 var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
 function var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T}
     return sum(var(x; mean = m, kwargs...))
 end
 
-vee(::Euclidean{N,ℝ}, x, v) where {N} = vec(v)
+vee(::Euclidean{N,ℝ}, p, X) where {N} = vec(X)
 
-vee!(::Euclidean{N,ℝ}, vⁱ, x, v) where {N} = copyto!(vⁱ, v)
+vee!(::Euclidean{N,ℝ}, Xⁱ, p, X) where {N} = copyto!(Xⁱ, X)
 
 """
     zero_tangent_vector(M::Euclidean, x)

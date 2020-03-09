@@ -1,13 +1,10 @@
-import Manifolds: is_decorator_manifold
-
 struct NotImplementedOperation <: AbstractGroupOperation end
 
 struct NotImplementedManifold <: Manifold end
 
-struct NotImplementedGroupDecorator{M} <: Manifold
+struct NotImplementedGroupDecorator{M} <: AbstractDecoratorManifold
     manifold::M
 end
-is_decorator_manifold(::NotImplementedGroupDecorator) = Val(true)
 
 """
     test_group(
@@ -17,6 +14,7 @@ is_decorator_manifold(::NotImplementedGroupDecorator) = Val(true)
         atol = 1e-10,
         test_mutating = true,
         test_diff = false,
+        test_invariance = false,
         diff_convs = [(), (LeftAction(),), (RightAction(),)],
     )
 
@@ -25,14 +23,19 @@ elements of it (contained in `g_pts`).
 Optionally, specify `test_diff` to test differentials of translation, using `v_pts`, which
 must contain at least one tangent vector at `g_pts[1]`, and the direction conventions
 specified in `diff_convs`.
+If the group is equipped with an invariant metric, `test_invariance` indicates that the
+invariance should be checked for the provided points.
 """
 function test_group(
     G,
     g_pts::AbstractVector,
-    v_pts::AbstractVector = [];
+    v_pts::AbstractVector = [],
+    ve_pts::AbstractVector = [];
     atol = 1e-10,
     test_mutating = true,
+    test_group_exp_log = true,
     test_diff = false,
+    test_invariance = false,
     diff_convs = [(), (LeftAction(),), (RightAction(),)],
 )
     e = Identity(G)
@@ -152,37 +155,141 @@ function test_group(
     end
 
     test_diff && @testset "translation differential" begin
-        v = v_pts[1]
+        X = v_pts[1]
         g21 = compose(G, g_pts[2], g_pts[1])
         g12 = compose(G, g_pts[1], g_pts[2])
-        @test isapprox(G, g12, translate_diff(G, g_pts[2], g_pts[1], v), translate_diff(G, g_pts[2], g_pts[1], v, LeftAction()); atol = atol)
-        @test is_tangent_vector(G, g12, translate_diff(G, g_pts[2], g_pts[1], v, LeftAction()), true; atol = atol)
-        RightAction() in diff_convs && @test is_tangent_vector(G, g21, translate_diff(G, g_pts[2], g_pts[1], v, RightAction()), true; atol = atol)
+        @test isapprox(G, g12, translate_diff(G, g_pts[2], g_pts[1], X), translate_diff(G, g_pts[2], g_pts[1], X, LeftAction()); atol = atol)
+        @test is_tangent_vector(G, g12, translate_diff(G, g_pts[2], g_pts[1], X, LeftAction()), true; atol = atol)
+        RightAction() in diff_convs && @test is_tangent_vector(G, g21, translate_diff(G, g_pts[2], g_pts[1], X, RightAction()), true; atol = atol)
 
         for conv in diff_convs
             g2g1 = translate(G, g_pts[2], g_pts[1], conv...)
             g2invg1 = inverse_translate(G, g_pts[2], g_pts[1], conv...)
-            @test isapprox(G, g_pts[1], inverse_translate_diff(G, g_pts[2], g2g1, translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...), v; atol = atol)
-            @test isapprox(G, g_pts[1], translate_diff(G, g_pts[2], g2invg1, inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...), conv...), v; atol = atol)
+            @test isapprox(G, g_pts[1], inverse_translate_diff(G, g_pts[2], g2g1, translate_diff(G, g_pts[2], g_pts[1], X, conv...), conv...), X; atol = atol)
+            @test isapprox(G, g_pts[1], translate_diff(G, g_pts[2], g2invg1, inverse_translate_diff(G, g_pts[2], g_pts[1], X, conv...), conv...), X; atol = atol)
+            Xe = inverse_translate_diff(G, g_pts[1], g_pts[1], X, conv...)
+            @test isapprox(G, e, Xe, translate_diff(G, e, e, Xe, conv...); atol = atol)
+            @test isapprox(G, e, Xe, inverse_translate_diff(G, e, e, Xe, conv...); atol = atol)
         end
 
         test_mutating && @testset "mutating" begin
             for conv in diff_convs
                 g2g1 = translate(G, g_pts[2], g_pts[1], conv...)
                 g2invg1 = inverse_translate(G, g_pts[2], g_pts[1], conv...)
-                vout = allocate(v)
-                @test translate_diff!(G, vout, g_pts[2], g_pts[1], v, conv...) === vout
-                @test isapprox(G, g2g1, vout, translate_diff(G, g_pts[2], g_pts[1], v, conv...); atol = atol)
+                Y = allocate(X)
+                @test translate_diff!(G, Y, g_pts[2], g_pts[1], X, conv...) === Y
+                @test isapprox(G, g2g1, Y, translate_diff(G, g_pts[2], g_pts[1], X, conv...); atol = atol)
 
-                vout = translate_diff(G, g_pts[2], g_pts[1], v, conv...)
-                vout2 = allocate(vout)
-                @test inverse_translate_diff!(G, vout2, g_pts[2], g2g1, vout, conv...) === vout2
-                @test isapprox(G, g_pts[1], vout2, v; atol = atol)
+                Y = translate_diff(G, g_pts[2], g_pts[1], X, conv...)
+                Z = allocate(Y)
+                @test inverse_translate_diff!(G, Z, g_pts[2], g2g1, Y, conv...) === Z
+                @test isapprox(G, g_pts[1], Z, X; atol = atol)
 
-                vout = inverse_translate_diff(G, g_pts[2], g_pts[1], v, conv...)
-                vout2 = allocate(vout)
-                @test translate_diff!(G, vout2, g_pts[2], g2invg1, vout, conv...) === vout2
-                @test isapprox(G, g_pts[1], vout2, v; atol = atol)
+                Y = inverse_translate_diff(G, g_pts[2], g_pts[1], X, conv...)
+                Z = allocate(Y)
+                @test translate_diff!(G, Z, g_pts[2], g2invg1, Y, conv...) === Z
+                @test isapprox(G, g_pts[1], Z, X; atol = atol)
+            end
+        end
+    end
+
+    test_group_exp_log && @testset "group exp/log properties" begin
+        @testset "e = exp(0)" begin
+            v = group_log(G, identity(G, g_pts[1]))
+            g = group_exp(G, v)
+            @test isapprox(G, Identity(G), g; atol = atol)
+
+            test_mutating && @testset "mutating" begin
+                v = allocate(ve_pts[1])
+                @test group_log!(G, v, identity(G, g_pts[1])) === v
+                g = allocate(g_pts[1])
+                @test group_exp!(G, g, v) === g
+                @test isapprox(G, Identity(G), g; atol = atol)
+            end
+        end
+
+        @testset "v = log(exp(v))" begin
+            for v in ve_pts
+                g = group_exp(G, v)
+                @test is_manifold_point(G, g; atol = atol)
+                v2 = group_log(G, g)
+                @test isapprox(G, Identity(G), v2, v; atol = atol)
+            end
+
+            test_mutating && @testset "mutating" begin
+                for v in ve_pts
+                    g = allocate(g_pts[1])
+                    @test group_exp!(G, g, v) === g
+                    @test is_manifold_point(G, g; atol = atol)
+                    @test isapprox(G, g, group_exp(G, v); atol = atol)
+                    v2 = allocate(v)
+                    @test group_log!(G, v2, g) === v2
+                    @test isapprox(G, Identity(G), v2, v; atol = atol)
+                end
+            end
+        end
+
+        @testset "inv(g) = exp(-log(g))" begin
+            g = g_pts[1]
+            v = group_log(G, g)
+            ginv = group_exp(G, -v)
+            @test isapprox(G, ginv, inv(G, g); atol = atol)
+        end
+
+        @testset "exp(sv)∘exp(tv) = exp((s+t)v)" begin
+            g1 = group_exp(G, 0.2 * ve_pts[1])
+            g2 = group_exp(G, 0.3 * ve_pts[1])
+            g12 = group_exp(G, 0.5 * ve_pts[1])
+            g1_g2 = compose(G, g1, g2)
+            g2_g1 = compose(G, g2, g1)
+            isapprox(G, g1_g2, g12; atol = atol)
+            isapprox(G, g2_g1, g12; atol = atol)
+        end
+    end
+
+    test_group_exp_log && test_diff && @testset "exp/log retract/inverse_retract" begin
+        for conv in diff_convs
+            y = retract(G, g_pts[1], v_pts[1], Manifolds.GroupExponentialRetraction(conv...))
+            @test is_manifold_point(G, y; atol = atol)
+            v2 = inverse_retract(G, g_pts[1], y, Manifolds.GroupLogarithmicInverseRetraction(conv...))
+            @test isapprox(G, g_pts[1], v2, v_pts[1]; atol = atol)
+        end
+
+        test_mutating && @testset "mutating" begin
+            for conv in diff_convs
+                y = allocate(g_pts[1])
+                @test retract!(G, y, g_pts[1], v_pts[1], Manifolds.GroupExponentialRetraction(conv...)) === y
+                @test is_manifold_point(G, y; atol = atol)
+                v2 = allocate(v_pts[1])
+                @test inverse_retract!(G, v2, g_pts[1], y, Manifolds.GroupLogarithmicInverseRetraction(conv...)) === v2
+                @test isapprox(G, g_pts[1], v2, v_pts[1]; atol = atol)
+            end
+        end
+    end
+
+    test_invariance && @testset "metric invariance" begin
+        if has_invariant_metric(G, LeftAction())
+            @testset "left-invariant" begin
+                @test has_approx_invariant_metric(
+                    G,
+                    g_pts[1],
+                    v_pts[1],
+                    v_pts[end],
+                    g_pts,
+                    LeftAction(),
+                )
+            end
+        end
+        if invariant_metric_dispatch(G, RightAction()) === Val(true)
+            @testset "right-invariant" begin
+                @test has_approx_invariant_metric(
+                    G,
+                    g_pts[1],
+                    v_pts[1],
+                    v_pts[end],
+                    g_pts,
+                    RightAction(),
+                )
             end
         end
     end

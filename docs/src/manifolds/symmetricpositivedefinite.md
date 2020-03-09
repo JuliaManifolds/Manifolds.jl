@@ -3,14 +3,14 @@
 The symmetric positive definite matrices
 
 ```math
-\mathcal P(n) = \bigl\{ A \in \mathbb R^{n\times n}\ \big|\ A = A^{\mathrm{T}} \text{ and } x^{\mathrm{T}}Ax > 0 \text{ for } 0\neq x \in\mathbb R^n \bigr\}
+\mathcal P(n) = \bigl\{ A ∈ ℝ^{n × n}\ \big|\ A = A^{\mathrm{T}} \text{ and } x^{\mathrm{T}}Ax > 0 \text{ for } 0 ≠ x ∈ ℝ^n \bigr\}
 ```
 
 ```@docs
 SymmetricPositiveDefinite
 ```
 
-can -- for example -- be illustrated as ellipsoids:  since the eigen values are all positive they can be taken as lengths of the axes of an ellipsoids while the directions are given by the eigenvectors.
+can -- for example -- be illustrated as ellipsoids:  since the eigenvalues are all positive they can be taken as lengths of the axes of an ellipsoids while the directions are given by the eigenvectors.
 
 ![An example set of data](../assets/images/SPDSignal.png)
 

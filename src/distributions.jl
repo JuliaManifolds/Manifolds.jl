@@ -10,12 +10,12 @@ struct FVectorvariate <: VariateForm end
     FVectorSupport(space::Manifold, VectorBundleFibers)
 
 Value support for vector bundle fiber-valued distributions (values from a fiber of a vector
-bundle at point `x` from the given manifold).
+bundle at a `point` from the given manifold).
 For example used for tangent vector-valued distributions.
 """
 struct FVectorSupport{TSpace<:VectorBundleFibers,T} <: ValueSupport
     space::TSpace
-    x::T
+    point::T
 end
 
 """
@@ -62,3 +62,12 @@ Get the object of type `FVectorSupport` for the distribution `d`.
 function Distributions.support(::T) where {T<:FVectorDistribution}
     error("support not implemented for type $T")
 end
+
+@decorator_transparent_signature normal_tvector_distribution(
+    M::AbstractDecoratorManifold,
+    p,
+    σ
+)
+
+@decorator_transparent_signature projected_distribution(M::AbstractDecoratorManifold, d, p)
+@decorator_transparent_signature projected_distribution(M::AbstractDecoratorManifold, d)

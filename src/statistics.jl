@@ -1,4 +1,11 @@
 """
+    AbstractEstimationMethod
+
+Abstract type for defining statistical estimation methods.
+"""
+abstract type AbstractEstimationMethod end
+
+"""
     GradientDescentEstimation <: AbstractEstimationMethod
 
 Method for estimation using gradient descent.
@@ -12,9 +19,9 @@ Method for estimation using the cyclic proximal point technique.
 """
 struct CyclicProximalPointEstimation <: AbstractEstimationMethod end
 
-_unit_weights(n::Int) = ProbabilityWeights(ones(n), n)
+_unit_weights(n::Int) = UnitWeights{Float64}(n)
 
-@doc doc"""
+@doc raw"""
     GeodesicInterpolation <: AbstractEstimationMethod
 
 Repeated weighted geodesic interpolation method for estimating the Riemannian
@@ -24,16 +31,16 @@ The algorithm proceeds with the following simple online update:
 
 ```math
 \begin{aligned}
-\mu_1 &= x_1\\
+μ_1 &= x_1\\
 t_k &= \frac{w_k}{\sum_{i=1}^k w_i}\\
-\mu_{k} &= \gamma_{\mu_{k-1}}(x_k; t_k),
+μ_{k} &= γ_{μ_{k-1}}(x_k; t_k),
 \end{aligned}
 ```
 
-where $x_k$ are points, $w_k$ are weights, $\mu_k$ is the $k$th estimate of the
-mean, and $\gamma_x(y; t)$ is the point at time $t$ along the
+where $x_k$ are points, $w_k$ are weights, $μ_k$ is the $k$th estimate of the
+mean, and $γ_x(y; t)$ is the point at time $t$ along the
 [`shortest_geodesic`](@ref shortest_geodesic(::Manifold, ::Any, ::Any, ::Real))
-between points $x,y \in \mathcal M$. The algorithm
+between points $x,y ∈ \mathcal M$. The algorithm
 terminates when all $x_k$ have been considered. In the [`Euclidean`](@ref) case,
 this exactly computes the weighted mean.
 
@@ -43,13 +50,13 @@ points are in an open geodesic ball about the mean with corresponding radius
 (see [`GeodesicInterpolationWithinRadius`](@ref)):
 
 * All simply connected complete Riemannian manifolds with non-positive sectional
-  curvature at radius $\infty$ [^Cheng2016], in particular:
+  curvature at radius $∞$ [^Cheng2016], in particular:
     + [`Euclidean`](@ref)
     + [`SymmetricPositiveDefinite`](@ref) [^Ho2013]
 * Other manifolds:
-    + [`Sphere`](@ref): $\frac{\pi}{2}$ [^Salehian2015]
-    + [`Grassmann`](@ref): $\frac{\pi}{4}$ [^Chakraborty2015]
-    + [`Stiefel`](@ref)/[`Rotations`](@ref): $\frac{\pi}{2 \sqrt 2}$ [^Chakraborty2019]
+    + [`Sphere`](@ref): $\frac{π}{2}$ [^Salehian2015]
+    + [`Grassmann`](@ref): $\frac{π}{4}$ [^Chakraborty2015]
+    + [`Stiefel`](@ref)/[`Rotations`](@ref): $\frac{π}{2 \sqrt 2}$ [^Chakraborty2019]
 
 For online variance computation, the algorithm additionally uses an analogous
 recursion to the weighted Welford algorithm [^West1979].
@@ -112,14 +119,18 @@ struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
     end
 end
 
-@doc doc"""
+function show(io::IO, method::GeodesicInterpolationWithinRadius)
+    print(io, "GeodesicInterpolationWithinRadius($(method.radius))")
+end
+
+@doc raw"""
     mean(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
 Compute the (optionally weighted) Riemannian center of mass also known as
 Karcher mean of the vector `x` of points on the [`Manifold`](@ref) `M`, defined
 as the point that satisfies the minimizer
 ````math
-\argmin_{y\in\mathcal M} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
+\argmin_{y ∈ \mathcal M} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
 ````
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 
@@ -141,7 +152,7 @@ Compute the mean using the specified `method`.
         x::AbstractVector,
         [w::AbstractWeights,]
         method::GradientDescentEstimation;
-        x0=x[1],
+        p0=x[1],
         stop_iter=100,
         retraction::AbstractRetractionMethod = ExponentialRetraction(),
         inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
@@ -150,7 +161,7 @@ Compute the mean using the specified `method`.
 
 Compute the mean using the gradient descent scheme [`GradientDescentEstimation`](@ref).
 
-Optionally, provide `x0`, the starting point (by default set to the first data
+Optionally, provide `p0`, the starting point (by default set to the first data
 point). `stop_iter` denotes the maximal number of iterations to perform and the
 `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal change
 between two iterates is small. For more stopping criteria check the
@@ -189,7 +200,7 @@ function mean(
     return mean!(M, y, x, w, method...; kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     mean!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights]; kwargs...)
     mean!(
         M::Manifold,
@@ -222,7 +233,7 @@ function mean!(
     x::AbstractVector,
     w::AbstractVector,
     ::GradientDescentEstimation;
-    x0 = x[1],
+    p0 = x[1],
     stop_iter = 100,
     retraction::AbstractRetractionMethod = ExponentialRetraction(),
     inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
@@ -232,7 +243,7 @@ function mean!(
     if length(w) != n
         throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
     end
-    copyto!(y, x0)
+    copyto!(y, p0)
     yold = allocate_result(M, mean, y)
     v = zero_tangent_vector(M, y)
     vtmp = copy(v)
@@ -277,7 +288,7 @@ mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation)
 
 function mean!(
     M::Manifold,
-    y,
+    q,
     x::AbstractVector,
     w::AbstractVector,
     ::GeodesicInterpolation;
@@ -294,19 +305,19 @@ function mean!(
     @inbounds begin
         j = order[1]
         s = w[j]
-        copyto!(y, x[j])
+        copyto!(q, x[j])
     end
-    v = zero_tangent_vector(M, y)
-    ytmp = allocate_result(M, mean, y)
+    v = zero_tangent_vector(M, q)
+    ytmp = allocate_result(M, mean, q)
     @inbounds for i = 2:n
         j = order[i]
         s += w[j]
         t = w[j] / s
-        inverse_retract!(M, v, y, x[j], inverse_retraction)
-        retract!(M, ytmp, y, v, t, retraction)
-        copyto!(y, ytmp)
+        inverse_retract!(M, v, q, x[j], inverse_retraction)
+        retract!(M, ytmp, q, v, t, retraction)
+        copyto!(q, ytmp)
     end
-    return y
+    return q
 end
 
 """
@@ -328,30 +339,30 @@ mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolationWith
 
 function mean!(
     M::Manifold,
-    y,
+    q,
     x::AbstractVector,
     w::AbstractVector,
     method::GeodesicInterpolationWithinRadius;
     shuffle_rng = nothing,
     kwargs...,
 )
-    mean!(M, y, x, w, GeodesicInterpolation(); shuffle_rng = shuffle_rng, kwargs...)
+    mean!(M, q, x, w, GeodesicInterpolation(); shuffle_rng = shuffle_rng, kwargs...)
     radius = method.radius
-    injectivity_radius(M, y) ≤ radius && return y
+    injectivity_radius(M, q) ≤ radius && return q
     for i in eachindex(x)
-        @inbounds if distance(M, y, x[i]) ≥ radius
-            return mean!(M, y, x, w, GradientDescentEstimation(); x0 = y, kwargs...)
+        @inbounds if distance(M, q, x[i]) ≥ radius
+            return mean!(M, q, x, w, GradientDescentEstimation(); p0 = q, kwargs...)
         end
     end
-    return y
+    return q
 end
 function mean!(
     M::Manifold,
-    y,
+    q,
     x::AbstractVector,
     w::AbstractVector,
     ::CyclicProximalPointEstimation;
-    x0 = x[1],
+    p0 = x[1],
     stop_iter = 1000000,
     retraction::AbstractRetractionMethod = ExponentialRetraction(),
     inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
@@ -361,32 +372,40 @@ function mean!(
     if length(w) != n
         throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     end
-    copyto!(y, x0)
-    yold = allocate_result(M, median, y)
+    copyto!(q, p0)
+    yold = allocate_result(M, median, q)
     ytmp = copy(yold)
-    v = zero_tangent_vector(M, y)
+    X = zero_tangent_vector(M, q)
     wv = convert(Vector, w) ./ sum(w)
     for i = 1:stop_iter
         λ = 0.5 / i
-        copyto!(yold, y)
+        copyto!(yold, q)
         for j = 1:n
             @inbounds t = (2 * λ * wv[j]) / (1 + 2 * λ * wv[j])
-            @inbounds inverse_retract!(M, v, y, x[j], inverse_retraction)
-            retract!(M, ytmp, y, v, t, retraction)
-            copyto!(y, ytmp)
+            @inbounds inverse_retract!(M, X, q, x[j], inverse_retraction)
+            retract!(M, ytmp, q, X, t, retraction)
+            copyto!(q, ytmp)
         end
-        isapprox(M, y, yold; kwargs...) && break
+        isapprox(M, q, yold; kwargs...) && break
     end
-    return y
+    return q
 end
 
-@doc doc"""
+@decorator_transparent_signature mean!(
+    M::AbstractDecoratorManifold,
+    y,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+)
+
+@doc raw"""
     median(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
 Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
 [`Manifold`](@ref) `M`, defined as the point that satisfies the minimizer
 ````math
-\argmin_{y\in\mathcal M} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
+\argmin_{y ∈ \mathcal M} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
 ````
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 This function is nonsmooth (i.e nondifferentiable).
@@ -409,7 +428,7 @@ Compute the median using the specified `method`.
         x::AbstractVector,
         [w::AbstractWeights,]
         method::CyclicProximalPointEstimation;
-        x0=x[1],
+        p0=x[1],
         stop_iter=1000000,
         retraction::AbstractRetractionMethod = ExponentialRetraction(),
         inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
@@ -418,7 +437,7 @@ Compute the median using the specified `method`.
 
 Compute the median using [`CyclicProximalPointEstimation`](@ref).
 
-Optionally, provide `x0`, the starting point (by default set to the first
+Optionally, provide `p0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform
 and the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal
 change between two iterates is small. For more stopping criteria check the
@@ -456,7 +475,7 @@ function median(
     return median!(M, y, x, w, method...; kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     median!(M::Manifold, y, x::AbstractVector[, w::AbstractWeights]; kwargs...)
     median!(
         M::Manifold,
@@ -472,24 +491,24 @@ computes the [`median`](@ref) in-place in `y`.
 median!(::Manifold, ::Any...)
 function median!(
     M::Manifold,
-    y,
+    q,
     x::AbstractVector,
     method::AbstractEstimationMethod...;
     kwargs...,
 )
     w = _unit_weights(length(x))
-    return median!(M, y, x, w, method...; kwargs...)
+    return median!(M, q, x, w, method...; kwargs...)
 end
 function median!(M::Manifold, y, x::AbstractVector, w::AbstractVector; kwargs...)
     return median!(M, y, x, w, CyclicProximalPointEstimation(); kwargs...)
 end
 function median!(
     M::Manifold,
-    y,
+    q,
     x::AbstractVector,
     w::AbstractVector,
     ::CyclicProximalPointEstimation;
-    x0 = x[1],
+    p0 = x[1],
     stop_iter = 1000000,
     retraction::AbstractRetractionMethod = ExponentialRetraction(),
     inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
@@ -499,26 +518,34 @@ function median!(
     if length(w) != n
         throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     end
-    copyto!(y, x0)
-    yold = allocate_result(M, median, y)
+    copyto!(q, p0)
+    yold = allocate_result(M, median, q)
     ytmp = copy(yold)
-    v = zero_tangent_vector(M, y)
+    v = zero_tangent_vector(M, q)
     wv = convert(Vector, w) ./ sum(w)
     for i = 1:stop_iter
         λ = 0.5 / i
-        copyto!(yold, y)
+        copyto!(yold, q)
         for j = 1:n
-            @inbounds t = min(λ * wv[j] / distance(M, y, x[j]), 1.0)
-            @inbounds inverse_retract!(M, v, y, x[j], inverse_retraction)
-            retract!(M, ytmp, y, v, t, retraction)
-            copyto!(y, ytmp)
+            @inbounds t = min(λ * wv[j] / distance(M, q, x[j]), 1.0)
+            @inbounds inverse_retract!(M, v, q, x[j], inverse_retraction)
+            retract!(M, ytmp, q, v, t, retraction)
+            copyto!(q, ytmp)
         end
-        isapprox(M, y, yold; kwargs...) && break
+        isapprox(M, q, yold; kwargs...) && break
     end
-    return y
+    return q
 end
 
-@doc doc"""
+@decorator_transparent_signature median!(
+    M::AbstractDecoratorManifold,
+    y,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+)
+
+@doc raw"""
     var(M, x, m=mean(M, x); corrected=true, kwargs...)
     var(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false, kwargs...)
 
@@ -553,7 +580,7 @@ function var(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
 end
 var(M::Manifold, x::AbstractVector; kwargs...) = mean_and_var(M, x; kwargs...)[2]
 
-@doc doc"""
+@doc raw"""
     std(M, x, m=mean(M, x); corrected=true, kwargs...)
     std(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false, kwargs...)
 
@@ -570,7 +597,7 @@ can be activated by setting `corrected=true`.
 """
 std(M::Manifold, args...; kwargs...) = sqrt(var(M, args...; kwargs...))
 
-@doc doc"""
+@doc raw"""
     mean_and_var(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...) -> (mean, var)
 
 Compute the [`mean`](@ref mean(::Manifold, args...)) and the [`var`](@ref)iance
@@ -613,7 +640,7 @@ function mean_and_var(
     return mean_and_var(M, x, w, method...; corrected = corrected, kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     mean_and_var(
         M::Manifold,
         x::AbstractVector
@@ -717,7 +744,7 @@ function mean_and_var(
     injectivity_radius(M, y) ≤ radius && return y, v
     for i in eachindex(x)
         @inbounds if distance(M, y, x[i]) ≥ radius
-            mean!(M, y, x, w, GradientDescentEstimation(); x0 = y, kwargs...)
+            mean!(M, y, x, w, GradientDescentEstimation(); p0 = y, kwargs...)
             v = var(M, x, w, y; corrected = corrected)
             return y, v
         end
@@ -725,7 +752,7 @@ function mean_and_var(
     return y, v
 end
 
-@doc doc"""
+@doc raw"""
     mean_and_std(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...) -> (mean, std)
 
 Compute the [`mean`](@ref mean(::Manifold, args...)) and the standard deviation

@@ -7,9 +7,13 @@ include("group_utils.jl")
     Rn = Rotations(3)
     M = ProductManifold(SOn, Tn)
     G = ProductGroup(M)
+    @test_throws ErrorException ProductGroup(ProductManifold(Rotations(3), Stiefel(3,2)))
     @test G isa ProductGroup
+    @test submanifold(G, 1) === SOn
+    @test submanifold(G, 2) === Tn
     @test base_manifold(G) === M
-    @test repr(G) == "ProductGroup($(SOn), $(Tn))"
+    @test sprint(show, G) == "ProductGroup($(SOn), $(Tn))"
+    @test sprint(show, "text/plain", G) == "ProductGroup with 2 subgroups:\n $(SOn)\n $(Tn)"
     x = Matrix{Float64}(I, 3, 3)
 
     t = Vector{Float64}.([1:2, 2:3, 3:4])
@@ -34,7 +38,27 @@ include("group_utils.jl")
             v_pts = [Manifolds.prod_point(shape_se, tuple_v...)]
             @test compose(G, pts[1], Identity(G)) == pts[1]
             @test compose(G, Identity(G), pts[1]) == pts[1]
-            test_group(G, pts, v_pts; test_diff = true)
+            test_group(G, pts, v_pts, v_pts; test_diff = true)
+            @test isapprox(
+                M,
+                identity(M, pts[1]),
+                group_exp(M, v_pts[1]),
+                Manifolds.prod_point(
+                    shape_se,
+                    group_exp(SOn, v_pts[1].parts[1]),
+                    group_exp(Tn, v_pts[1].parts[2]),
+                ),
+            )
+            @test isapprox(
+                M,
+                identity(M, pts[1]),
+                group_log(M, pts[1]),
+                Manifolds.prod_point(
+                    shape_se,
+                    group_log(SOn, pts[1].parts[1]),
+                    group_log(Tn, pts[1].parts[2]),
+                ),
+            )
         end
     end
 
@@ -43,6 +67,19 @@ include("group_utils.jl")
         v_pts = [ProductRepr(tuple_v...)]
         @test compose(G, pts[1], Identity(G)) == pts[1]
         @test compose(G, Identity(G), pts[1]) == pts[1]
-        test_group(G, pts, v_pts; test_diff = true, test_mutating = false)
+        test_group(G, pts, v_pts, v_pts; test_diff = true, test_mutating = false)
+        @test isapprox(
+            M,
+            group_exp(M, v_pts[1]),
+            ProductRepr(
+                group_exp(SOn, v_pts[1].parts[1]),
+                group_exp(Tn, v_pts[1].parts[2]),
+            ),
+        )
+        @test isapprox(
+            M,
+            group_log(M, pts[1]),
+            ProductRepr(group_log(SOn, pts[1].parts[1]), group_log(Tn, pts[1].parts[2])),
+        )
     end
 end

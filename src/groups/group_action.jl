@@ -19,7 +19,7 @@ The manifold the action `A` acts upon.
 """
 g_manifold(A::AbstractGroupAction) = error("g_manifold not implemented for $(typeof(A)).")
 
-allocate_result(A::AbstractGroupAction, f, x...) = allocate_result(g_manifold(A), f, x...)
+allocate_result(A::AbstractGroupAction, f, p...) = allocate_result(g_manifold(A), f, p...)
 
 """
     direction(::AbstractGroupAction{AD}) -> AD
@@ -28,150 +28,143 @@ Get the direction of the action
 """
 direction(::AbstractGroupAction{AD}) where {AD} = AD()
 
-@doc doc"""
-    apply(A::AbstractGroupAction, a, x)
+@doc raw"""
+    apply(A::AbstractGroupAction, a, p)
 
-Apply action `a` to the point `x`. The action is specified by `A`.
-Unless otherwise specified, right actions are defined in terms of the left action. For
-point $x ∈ M$ and action element $a$, the right action is
+Apply action `a` to the point `p` using map $τ_a$, specified by `A`.
+Unless otherwise specified, the right action is defined in terms of the left action:
 
 ````math
-x ⋅ a ≐ a^{-1} ⋅ x.
+\mathrm{R}_a = \mathrm{L}_{a^{-1}}
 ````
 """
-function apply(A::AbstractGroupAction, a, x)
-    y = allocate_result(A, apply, x, a)
-    return apply!(A, y, a, x)
+function apply(A::AbstractGroupAction, a, p)
+    y = allocate_result(A, apply, p, a)
+    return apply!(A, y, a, p)
 end
 
 """
-    apply!(A::AbstractGroupAction, y, a, x)
+    apply!(A::AbstractGroupAction, q, a, p)
 
-Apply action `a` to the point `x` with the rule specified by `A`.
-The result is saved in `y`.
+Apply action `a` to the point `p` with the rule specified by `A`.
+The result is saved in `q`.
 """
-function apply!(A::AbstractGroupAction{LeftAction}, y, a, x)
-    error("apply! not implemented for action $(typeof(A)) and points $(typeof(y)), $(typeof(x)) and $(typeof(a)).")
+function apply!(A::AbstractGroupAction{LeftAction}, q, a, p)
+    error("apply! not implemented for action $(typeof(A)) and points $(typeof(q)), $(typeof(p)) and $(typeof(a)).")
 end
-function apply!(A::AbstractGroupAction{RightAction}, y, a, x)
+function apply!(A::AbstractGroupAction{RightAction}, q, a, p)
     ainv = inv(base_group(A), a)
-    return apply!(switch_direction(A), y, ainv, x)
+    return apply!(switch_direction(A), q, ainv, p)
 end
 
 """
-    inverse_apply(A::AbstractGroupAction, a, x)
+    inverse_apply(A::AbstractGroupAction, a, p)
 
-Apply inverse of action `a` to the point `x`. The action is specified by `A`.
+Apply inverse of action `a` to the point `p`. The action is specified by `A`.
 """
-function inverse_apply(A::AbstractGroupAction, a, x)
-    y = allocate_result(A, inverse_apply, x, a)
-    return inverse_apply!(A, y, a, x)
+function inverse_apply(A::AbstractGroupAction, a, p)
+    q = allocate_result(A, inverse_apply, p, a)
+    return inverse_apply!(A, q, a, p)
 end
 
 """
-    inverse_apply!(A::AbstractGroupAction, y, a, x)
+    inverse_apply!(A::AbstractGroupAction, q, a, p)
 
-Apply inverse of action `a` to the point `x` with the rule specified by `A`.
-The result is saved in `y`.
+Apply inverse of action `a` to the point `p` with the rule specified by `A`.
+The result is saved in `q`.
 """
-function inverse_apply!(A::AbstractGroupAction, y, a, x)
+function inverse_apply!(A::AbstractGroupAction, q, a, p)
     inva = inv(base_group(A), a)
-    return apply!(A, y, inva, x)
+    return apply!(A, q, inva, p)
 end
 
-@doc doc"""
-    apply_diff(A::AbstractGroupAction, a, x, v)
+@doc raw"""
+    apply_diff(A::AbstractGroupAction, a, p, X)
 
-For group point $x ∈ M$ and tangent vector $v ∈ T_x M$, compute the action of the
-differential of the action of $a ∈ G$ on $v$, specified by rule `A`. Written as
-$(\mathrm{d}τ_a)_x (v)$, with the specified left or right convention, the differential
-transports vectors
-
-````math
-\begin{aligned}
-(\mathrm{d}L_a)_x (v) &: T_x M → T_{a ⋅ x} M\\
-(\mathrm{d}R_a)_x (v) &: T_x M → T_{x ⋅ a} M
-\end{aligned}
-````
-"""
-function apply_diff(A::AbstractGroupAction, a, x, v)
-    return error("apply_diff not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(x)), and vector $(typeof(v))")
-end
-
-function apply_diff!(A::AbstractGroupAction, vout, a, x, v)
-    return error("apply_diff! not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(x)), vectors $(typeof(vout)) and $(typeof(v))")
-end
-
-@doc doc"""
-    inverse_apply_diff(A::AbstractGroupAction, a, x, v)
-
-For group point $x ∈ M$ and tangent vector $v ∈ T_x M$, compute the action of the
-differential of the inverse action of $a ∈ G$ on $v$, specified by rule `A`. Written as
-$(\mathrm{d}τ_a)_x^{-1} (v)$, with the specified left or right convention, the
+For group point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action
+on $X$ of the differential of the action of $a ∈ \mathcal{G}$, specified by rule `A`.
+Written as $(\mathrm{d}τ_a)_p$, with the specified left or right convention, the
 differential transports vectors
 
 ````math
-\begin{aligned}
-(\mathrm{d}L_a)_x^{-1} (v) &: T_x M → T_{a^{-1} ⋅ x} M\\
-(\mathrm{d}R_a)_x^{-1} (v) &: T_x M → T_{x ⋅ a^{-1}} M
-\end{aligned}
+(\mathrm{d}τ_a)_p : T_p \mathcal M → T_{τ_a p} \mathcal M
 ````
 """
-function inverse_apply_diff(A::AbstractGroupAction, a, x, v)
-    return apply_diff(A, inv(base_group(A), a), x, v)
+function apply_diff(A::AbstractGroupAction, a, p, X)
+    return error("apply_diff not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(p)), and vector $(typeof(X))")
 end
 
-function inverse_apply_diff!(A::AbstractGroupAction, vout, a, x, v)
-    return apply_diff!(A, vout, inv(base_group(A), a), x, v)
+function apply_diff!(A::AbstractGroupAction, Y, a, p, X)
+    return error("apply_diff! not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(p)), vectors $(typeof(Y)) and $(typeof(X))")
+end
+
+@doc raw"""
+    inverse_apply_diff(A::AbstractGroupAction, a, p, X)
+
+For group point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action
+on $X$ of the differential of the inverse action of $a ∈ \mathcal{G}$, specified by rule
+`A`. Written as $(\mathrm{d}τ_a^{-1})_p$, with the specified left or right convention,
+the differential transports vectors
+
+````math
+(\mathrm{d}τ_a^{-1})_p : T_p \mathcal M → T_{τ_a^{-1} p} \mathcal M
+````
+"""
+function inverse_apply_diff(A::AbstractGroupAction, a, p, X)
+    return apply_diff(A, inv(base_group(A), a), p, X)
+end
+
+function inverse_apply_diff!(A::AbstractGroupAction, Y, a, p, X)
+    return apply_diff!(A, Y, inv(base_group(A), a), p, X)
 end
 
 compose(A::AbstractGroupAction{LeftAction}, a, b) = compose(base_group(A), a, b)
 compose(A::AbstractGroupAction{RightAction}, a, b) = compose(base_group(A), b, a)
 
-compose!(A::AbstractGroupAction{LeftAction}, y, a, b) = compose!(base_group(A), y, a, b)
-compose!(A::AbstractGroupAction{RightAction}, y, a, b) = compose!(base_group(A), y, b, a)
+compose!(A::AbstractGroupAction{LeftAction}, q, a, b) = compose!(base_group(A), q, a, b)
+compose!(A::AbstractGroupAction{RightAction}, q, a, b) = compose!(base_group(A), q, b, a)
 
-@doc doc"""
-    optimal_alignment(A::AbstractGroupAction, x1, x2)
+@doc raw"""
+    optimal_alignment(A::AbstractGroupAction, p, q)
 
-Calculate an action element of action `A` that acts upon `x1` to produce
-the element closest to `x2` in the metric of the G-manifold:
+Calculate an action element $a$ of action `A` that acts upon `p` to produce
+the element closest to `q` in the metric of the G-manifold:
 ```math
-\arg\min_{g ∈ G} d_M(g ⋅ x_1, x_2)
+\arg\min_{a ∈ \mathcal{G}} d_{\mathcal M}(τ_a p, q)
 ```
-where $G$ is the group that acts on the G-manifold $M$.
+where $\mathcal{G}$ is the group that acts on the G-manifold $\mathcal M$.
 """
-function optimal_alignment(A::AbstractGroupAction, x1, x2)
-    error("optimal_alignment not implemented for $(typeof(A)) and points $(typeof(x1)) and $(typeof(x2)).")
+function optimal_alignment(A::AbstractGroupAction, p, q)
+    error("optimal_alignment not implemented for $(typeof(A)) and points $(typeof(p)) and $(typeof(q)).")
 end
 
 """
-    optimal_alignment!(A::AbstractGroupAction, y, x1, x2)
+    optimal_alignment!(A::AbstractGroupAction, x, p, q)
 
-Calculate an action element of action `A` that acts upon `x1` to produce the element closest
-to `x2`.
-The result is written to `y`.
+Calculate an action element of action `A` that acts upon `p` to produce the element closest
+to `q`.
+The result is written to `x`.
 """
-function optimal_alignment!(A::AbstractGroupAction, y, x1, x2)
-    return copyto!(y, optimal_alignment(A, x1, x2))
+function optimal_alignment!(A::AbstractGroupAction, x, p, q)
+    return copyto!(x, optimal_alignment(A, p, q))
 end
 
-@doc doc"""
+@doc raw"""
     center_of_orbit(
         A::AbstractGroupAction,
         pts,
-        q,
-        mean_method::AbstractEstimationMethod = GradientDescentEstimation()
+        p,
+        mean_method::AbstractEstimationMethod = GradientDescentEstimation(),
     )
 
-Calculate an action element $g$ of action `A` that is the mean element of the orbit of `q`
+Calculate an action element $a$ of action `A` that is the mean element of the orbit of `p`
 with respect to given set of points `pts`. The [`mean`](@ref) is calculated using the method
 `mean_method`.
 
-The orbit of $q$ with respect to the action of a group $G$ is the set
+The orbit of $p$ with respect to the action of a group $\mathcal{G}$ is the set
 ````math
-O = \{ g ⋅ q : g ∈ G \}.
-```
+O = \{ τ_a p : a ∈ \mathcal{G} \}.
+````
 This function is useful for computing means on quotients of manifolds by a Lie group action.
 """
 function center_of_orbit(
@@ -180,7 +173,6 @@ function center_of_orbit(
     q,
     mean_method::AbstractEstimationMethod = GradientDescentEstimation(),
 )
-
     alignments = map(p -> optimal_alignment(A, q, p), pts)
     return mean(g_manifold(A), alignments, mean_method)
 end
