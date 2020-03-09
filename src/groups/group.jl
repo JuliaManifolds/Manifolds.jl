@@ -180,7 +180,14 @@ function allocate_result(
 end
 
 function decorator_transparent_dispatch(
-    ::Union{typeof(vee),typeof(get_coordinates)},
+    ::typeof(vee),
+    ::AbstractGroupManifold,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(get_coordinates),
     ::AbstractGroupManifold,
     args...,
 )
@@ -211,12 +218,6 @@ function allocate_result(
 ) where {GT<:AbstractGroupManifold}
     return allocate(X, Size(manifold_dimension(G)))
 end
-function hat(M::Manifold, e::Identity, X)
-    error("hat not applicable for manifold $(M), $(e), $(X), since the manifold is not a group manifold")
-end
-function hat!(M::Manifold, Y, e::Identity, X)
-    error("hat not applicable for manifold $(M), $(Y), $(e), $(X), since the manifold is not a group manifold")
-end
 function hat(M::AbstractGroupManifold, e::Identity, X)
     error("hat not applicable for group manifold $(M), and identity $(e), $(X), since the identity does not match.")
 end
@@ -232,12 +233,6 @@ end
 @decorator_transparent_signature hat(M::AbstractDecoratorManifold, e::Identity, X::Any)
 @decorator_transparent_signature hat!(M::AbstractDecoratorManifold, Y::Any, e::Identity, X::Any)
 
-function vee(M::Manifold, e::Identity, X)
-    error("vee not applicable for manifold $(M), $(e), $(X), since the manifold is not a group manifold")
-end
-function vee!(M::Manifold, Y, e::Identity, X)
-    error("vee not applicable for manifold $(M), $(Y), $(e), $(X), since the manifold is not a group manifold")
-end
 function vee(M::AbstractGroupManifold, e::Identity, X)
     error("vee not applicable for group manifold $(M), and identity $(e), $(X), since the identity does not match.")
 end
