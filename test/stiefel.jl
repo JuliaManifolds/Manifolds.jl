@@ -13,6 +13,21 @@ include("utils.jl")
             @test !is_tangent_vector(M, x, [0., 0., 1., 0.])
             @test_throws DomainError is_tangent_vector(M, x, 1 * im * zero_tangent_vector(M,x), true)
         end
+        @testset "Embedding and Projection"
+            x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            y = similar(x)
+            z = embed(M,x)
+            @test z==x
+            embed!(M,y,x)
+            @test y==z
+            a = [1.0 0.0; 0.0 2.0; 0.0 0.0]
+            @test !is_manifold_point(M,a)
+            b = similar(a)
+            c = project_point(M,a)
+            @test c==x
+            project_point!(M,b,a)
+            @test b==x
+        end
 
         types = [
             Matrix{Float64},
