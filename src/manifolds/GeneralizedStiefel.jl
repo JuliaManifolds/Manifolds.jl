@@ -1,5 +1,5 @@
 @doc doc"""
-    GeneralizedStiefel{n,k,T} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType}
+    GeneralizedStiefel{n,k,T} <: AbstractEmbeddedManifold{AbstractEmbeddingType}
 
 The Generalized Stiefel manifold consists of all $n\times k$, $n\geq k$ orthonormal
 matrices w.r.t. an arbitrary scalar product with symmetric positive definite matrix
