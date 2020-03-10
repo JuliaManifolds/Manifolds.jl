@@ -273,7 +273,11 @@ $\operatorname{Sym}(q) = \frac{q^{\mathrm{H}}+q}{2}$.
 """
 project_tangent(::Stiefel, ::Any...)
 
-project_tangent!(::Stiefel, Y, p, X) = copyto!(Y, X - p * Symmetric(p' * X))
+function project_tangent!(::Stiefel, Y, p, X)
+    A = p'*X
+    copyto!(Y, X - p*Hermitian(0.5*(A+A')))
+    return Y
+end
 
 @doc raw"""
     retract(M::Stiefel, p, X, ::PolarRetraction)

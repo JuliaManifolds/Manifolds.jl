@@ -59,7 +59,7 @@ function check_manifold_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) whe
             "The matrix $(p) is not a real-valued matrix, so it does not lie on the Generalized Stiefel manifold of dimension ($(n),$(k)).",
         )
     end
-    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(x) <: Complex)
+    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
         return DomainError(
             eltype(p),
             "The matrix $(p) is neiter real- nor complex-valued matrix, so it does not lie on the complex Generalized Stiefel manifold of dimension ($(n),$(k)).",
@@ -168,7 +168,7 @@ manifold_dimension(::GeneralizedStiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * 
 @doc doc"""
     project_point(M::GeneralizedStiefel,p)
 
-Projects `p` from the embedding onto the [`GeneralizedStiefel`](@ref) `M`, i.e. compute `q`
+Project `p` from the embedding onto the [`GeneralizedStiefel`](@ref) `M`, i.e. compute `q`
 as the polar decomposition of $p$ such that $q^{\mathrm{H}}Bq$ is the identity,
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
@@ -197,8 +197,11 @@ $\operatorname{Sym}(y) = \frac{y^{\mathrm{H}}+y}{2}$.
 """
 project_tangent(::GeneralizedStiefel, ::Any...)
 
-project_tangent!(M::GeneralizedStiefel, Y, p, X) = copyto!(Y, X - p*Symmetric(p'*M.B'*X))
-
+function  project_tangent!(M::GeneralizedStiefel, Y, p, X)
+    A = p'*M.B'*X
+    copyto!(Y, X - p*Hermitian(0.5*(A+A')))
+    return Y
+end
 @doc doc"""
     retract(M, p, X)
     retract(M, p, X, ::PolarRetraction)
@@ -212,9 +215,9 @@ and projecting the result back to the manifold.
 The default retraction for this manifold is the [`ProjectionRetraction`](@ref).
 """
 retract(::GeneralizedStiefel, ::Any...)
-retract(M::GeneralizedStiefel, p, X) = retract(M::GeneralizedStiefel, p, X, ProjectionRetraction())
+retract(M::GeneralizedStiefel, p, X) = retract(M, p, X, ProjectionRetraction())
 
-retract!(M::GeneralizedStiefel, Y, p, X) = retract(M::GeneralizedStiefel, Y, p, X, ProjectionRetraction())
+retract!(M::GeneralizedStiefel, q, p, X) = retract!(M, q, p, X, ProjectionRetraction())
 function retract!(M::GeneralizedStiefel, q, p, X, ::PolarRetraction)
     project_point!(M, q, p+X)
     return q
@@ -234,9 +237,9 @@ Compute the vector transport of the tangent vector `X` at `p` to `q`,
 using the [`project_tangent`](@ref project_tangent(::GeneralizedStiefel, ::Any...))
 of `X` to `q`.
 """
-vector_transport_to(::GeneralizedStiefel, ::Any, ::Any, ::Any, ::Any, ::ProjectionTransport)
+vector_transport_to(::GeneralizedStiefel, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
 function vector_transport_to!(M::GeneralizedStiefel, Y, p, X, q, ::ProjectionTransport)
-    project_tangent!(Y,q,X)
+    project_tangent!(M, Y, q, X)
     return Y
 end
