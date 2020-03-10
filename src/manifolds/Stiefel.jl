@@ -90,7 +90,7 @@ function check_tangent_vector(
     kwargs...,
 ) where {n,k,𝔽}
     if check_base_point
-        mpe = check_manifold_point(M, p)
+        mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     if (𝔽 === ℝ) && !(eltype(X) <: Real)

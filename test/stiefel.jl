@@ -13,7 +13,7 @@ include("utils.jl")
             @test !is_tangent_vector(M, x, [0., 0., 1., 0.])
             @test_throws DomainError is_tangent_vector(M, x, 1 * im * zero_tangent_vector(M,x), true)
         end
-        @testset "Embedding and Projection"
+        @testset "Embedding and Projection" begin
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             y = similar(x)
             z = embed(M,x)

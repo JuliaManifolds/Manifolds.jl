@@ -1,7 +1,9 @@
 @doc doc"""
     GeneralizedStiefel{n,k,T} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType}
 
-The Generalized Stiefel manifold consists of all $n\times k$, $n\geq k$ orthonormal matrices w.r.t. an arbitrary scalar product `B`, i.e.
+The Generalized Stiefel manifold consists of all $n\times k$, $n\geq k$ orthonormal
+matrices w.r.t. an arbitrary scalar product with symmetric positive definite matrix
+$B\in R^{n × n}$, i.e.
 
 ````math
 \operatorname{St}(n,k,B) = \{ p \in \mathbb F^{n × k} : p^{\mathrm{H}} B p = I_k \},
@@ -33,7 +35,7 @@ The manifold is named after
 Generate the (real-valued) Generalized Stiefel manifold of $n\times k$ dimensional
 orthonormal matrices with scalar product `B`.
 """
-struct GeneralizedStiefel{n,k,F,TB<:AbstractMatrix} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType}
+struct GeneralizedStiefel{n,k,F,TB<:AbstractMatrix} <: AbstractEmbeddedManifold{AbstractEmbeddingType}
     B::TB
 end
 
@@ -50,14 +52,14 @@ i.e. that it has the right [`AbstractNumbers`](@ref) type and $x^{\mathrm{H}}Bx$
 is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
-function check_manifold_point(M::GeneralizedStiefel{n,k,T}, p; kwargs...) where {n,k,T}
-    if (T === ℝ) && !(eltype(p) <: Real)
+function check_manifold_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
+    if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
             "The matrix $(p) is not a real-valued matrix, so it does not lie on the Generalized Stiefel manifold of dimension ($(n),$(k)).",
         )
     end
-    if (T === ℂ) && !(eltype(p) <: Real) && !(eltype(x) <: Complex)
+    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(x) <: Complex)
         return DomainError(
             eltype(p),
             "The matrix $(p) is neiter real- nor complex-valued matrix, so it does not lie on the complex Generalized Stiefel manifold of dimension ($(n),$(k)).",
@@ -88,16 +90,25 @@ Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`]
 it (approximately) holds that $p^{\mathrm{H}}BX + X^{\mathrm{H}}Bp = 0$, where
 `kwargs...` is passed to the `isapprox`.
 """
-function check_tangent_vector(M::GeneralizedStiefel{n,k,T}, p, X; kwargs...) where {n,k,T}
-    mpe = check_manifold_point(M, p, kwargs)
+function check_tangent_vector(
+    M::GeneralizedStiefel{n,k,𝔽},
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+) where {n,k,𝔽}
+    if check_base_point
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
+    end
     mpe === nothing || return mpe
-    if (T === ℝ) && !(eltype(X) <: Real)
+    if (𝔽 === ℝ) && !(eltype(X) <: Real)
         return DomainError(
             eltype(X),
             "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to the Generalized Stiefel manifold of dimension ($(n),$(k)).",
         )
     end
-    if (T === ℂ) && !(eltype(X) <: Real) && !(eltype(v) <: Complex)
+    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
         return DomainError(
             eltype(X),
             "The matrix $(X) is a neither real- nor complex-valued matrix, so it can not be a tangent vector to the complex Generalized Stiefel manifold of dimension ($(n),$(k)).",
@@ -186,9 +197,10 @@ $\operatorname{Sym}(y) = \frac{y^{\mathrm{H}}+y}{2}$.
 """
 project_tangent(::GeneralizedStiefel, ::Any...)
 
-project_tangent!(::GeneralizedStiefel, Y, p, X) = copyto!(Y, X - p * Symmetric(B*p'*X))
+project_tangent!(M::GeneralizedStiefel, Y, p, X) = copyto!(Y, X - p*Symmetric(p'*M.B'*X))
 
 @doc doc"""
+    retract(M, p, X)
     retract(M, p, X, ::PolarRetraction)
     retract(M, p, X, ::ProjectionRetraction)
 
@@ -196,17 +208,24 @@ Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 [`GeneralizedStiefel`](@ref) manifold `M`, which in this case is the same as
 the projection based retraction employing the exponential map in the embedding
 and projecting the result back to the manifold.
+
+The default retraction for this manifold is the [`ProjectionRetraction`](@ref).
 """
 retract(::GeneralizedStiefel, ::Any...)
+retract(M::GeneralizedStiefel, p, X) = retract(M::GeneralizedStiefel, p, X, ProjectionRetraction())
 
+retract!(M::GeneralizedStiefel, Y, p, X) = retract(M::GeneralizedStiefel, Y, p, X, ProjectionRetraction())
 function retract!(M::GeneralizedStiefel, q, p, X, ::PolarRetraction)
     project_point!(M, q, p+X)
     return q
 end
-function retract!(M::GeneralizedStiefel, y, x, v, ::ProjectionRetraction)
+function retract!(M::GeneralizedStiefel, q, p, X, ::ProjectionRetraction)
     project_point!(M, q, p+X)
-    return y
+    return q
 end
+
+show(io::IO, M::GeneralizedStiefel{n,k,F}) where {n,k,F} = print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(F))")
+
 
 @doc doc"""
     vector_transport_to(M, p, X, q, ::ProjectionTransport)
