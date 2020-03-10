@@ -339,6 +339,18 @@ function get_vector!(M::Rotations, X, p, Xⁱ, B::DefaultOrthonormalBasis)
     return X
 end
 
+for BT in DISAMBIGUATION_BASIS_TYPES
+    (BT == DefaultOrthogonalBasis || BT == DefaultOrthonormalBasis) && continue
+    if BT == VeeOrthogonalBasis
+        argid = 1
+    else
+        argid = 5
+    end
+    eval(quote
+        @superinvoke_maker $argid get_vector!(M::Rotations, Y, p, X, B::$BT)
+    end)
+end
+
 @doc raw"""
     injectivity_radius(M::Rotations)
     injectivity_radius(M::Rotations, p)

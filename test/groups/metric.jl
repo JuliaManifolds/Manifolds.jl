@@ -1,3 +1,6 @@
+include("../utils.jl")
+include("group_utils.jl")
+
 using OrdinaryDiffEq
 import Manifolds: invariant_metric_dispatch, default_metric_dispatch, local_metric
 
