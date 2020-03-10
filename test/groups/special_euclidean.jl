@@ -4,6 +4,7 @@ include("group_utils.jl")
 @testset "Special Euclidean group" begin
     @testset "SpecialEuclidean($n)" for n in (2, 3, 4)
         G = SpecialEuclidean(n)
+        @test isa(G, SpecialEuclidean{n})
         @test repr(G) == "SpecialEuclidean($n)"
         M = base_manifold(G)
         @test M === TranslationGroup(n) × SpecialOrthogonal(n)

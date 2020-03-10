@@ -59,7 +59,7 @@ function submanifold_components(
     e::Identity{GT},
 ) where {MT<:ProductManifold,GT<:GroupManifold{MT}}
     M = base_manifold(e.group)
-    return map(Identity, M.manifolds, submanifold_components(M, e.p))
+    return map(Identity, M.manifolds, submanifold_components(e.group, e.p))
 end
 
 inv(G::ProductGroup, p) = inv(G.manifold, p)
