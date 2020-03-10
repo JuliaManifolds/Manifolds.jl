@@ -322,6 +322,9 @@ end
 function get_coordinates!(M::VectorBundle, Y, p, X, B::DefaultBasis)
     invoke(get_coordinates!, Tuple{VectorBundle,Any,Any,Any,AbstractBasis}, M, Y, p, X, B)
 end
+function get_coordinates!(M::VectorBundle, Y, p, X, B::VeeOrthogonalBasis)
+    invoke(get_coordinates!, Tuple{VectorBundle,Any,Any,Any,AbstractBasis}, M, Y, p, X, B)
+end
 function get_coordinates!(M::VectorBundle, Y, p, X, B::DefaultOrthogonalBasis)
     invoke(get_coordinates!, Tuple{VectorBundle,Any,Any,Any,AbstractBasis}, M, Y, p, X, B)
 end
