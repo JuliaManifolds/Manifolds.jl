@@ -1,3 +1,5 @@
+include("../utils.jl")
+
 @testset "Group wrapped in ArrayManifold" begin
     G = SpecialOrthogonal(3)
     M = Rotations(3)
@@ -11,15 +13,15 @@
     p, q = [exp(M, eg, hat(M, eg, ωi)) for ωi in ω]
     X = hat(M, eg, [-1.0, 2.0, 0.5])
 
-    e = Identity(AG, p)
-    @test Manifolds.array_value(e) === e
-    @test Manifolds.array_point(e) === e
+    e = make_identity(AG, p)
+    @test Manifolds.array_value(e).p == Manifolds.array_value(e.p)
+    @test_broken Manifolds.array_point(e).p == Manifolds.array_point(e.p)
     p2, q2 = ArrayMPoint(p), ArrayMPoint(q)
     X2 = ArrayTVector(X)
 
     @test identity(AG, p2) isa ArrayMPoint
     @test isapprox(G, identity(AG, p2).value, identity(G, p))
-    @test identity(AG, e) === e
+    @test identity(AG, e) isa Identity
     @test_throws DomainError identity(AG, Identity(TranslationGroup(3), ω[1]))
 
     eg = allocate(p2)
@@ -31,15 +33,15 @@
 
     @test inv(AG, p2) isa ArrayMPoint
     @test isapprox(G, inv(AG, p2).value, inv(G, p))
-    @test inv(AG, e) === e
-    @test_throws DomainError inv(AG, Identity(TranslationGroup(3)))
+    @test inv(AG, e) isa Identity
+    @test_throws DomainError inv(AG, Identity(TranslationGroup(3), ω[1]))
 
     pinvq = allocate(p2)
     inv!(AG, pinvq, p2)
     @test isapprox(G, pinvq.value, inv(G, p))
     eg = allocate(p2)
     inv!(AG, eg, e)
-    @test isapprox(G, eg.value, e)
+    @test isapprox(G, eg.value, Manifolds.array_value(e))
 
     @test compose(AG, p2, q2) isa ArrayMPoint
     @test isapprox(G, compose(AG, p2, q2).value, compose(G, p, q))

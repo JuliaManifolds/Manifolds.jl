@@ -1,4 +1,4 @@
-array_value(e::Identity) = e
+array_value(e::Identity) = Identity(e.group, array_value(e.p))
 
 array_point(p) = ArrayMPoint(p)
 array_point(e::Identity) = e
@@ -156,7 +156,7 @@ end
 function group_exp(M::ArrayManifold, X; kwargs...)
     is_tangent_vector(
         M,
-        make_identity(M, array_value(X)),
+        make_identity(M.manifold, array_value(X)),
         array_value(X),
         true;
         check_base_point = false,
@@ -169,7 +169,7 @@ end
 function group_exp!(M::ArrayManifold, q, X; kwargs...)
     is_tangent_vector(
         M,
-        make_identity(M, array_value(X)),
+        make_identity(M.manifold, array_value(X)),
         array_value(X),
         true;
         check_base_point=false,
@@ -185,7 +185,7 @@ function group_log(M::ArrayManifold, q; kwargs...)
     X = ArrayTVector(group_log(M.manifold, array_value(q)))
     is_tangent_vector(
         M,
-        make_identity(M, array_value(X)),
+        make_identity(M.manifold, array_value(X)),
         array_value(X),
         true;
         check_base_point = false,
@@ -199,7 +199,7 @@ function group_log!(M::ArrayManifold, X, q; kwargs...)
     group_log!(M.manifold, array_value(X), array_value(q))
     is_tangent_vector(
         M,
-        make_identity(M, array_value(X)),
+        make_identity(M.manifold, array_value(X)),
         array_value(X),
         true;
         check_base_point = false,
