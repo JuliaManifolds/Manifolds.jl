@@ -131,6 +131,10 @@ end
 Identity(M::AbstractDecoratorManifold, p) = Identity(decorated_manifold(M), p)
 Identity(M::Manifold, p) = error("Identity not implemented for manifold $(M) and point $(p).")
 
+function ==(e1::Identity,e2::Identity)
+    return e1.p == e2.p && e1.group == e2.group
+end
+
 make_identity(M::Manifold, p) = Identity(M, identity(M, p))
 
 show(io::IO, e::Identity) = print(io, "Identity($(e.group), $(e.p))")
