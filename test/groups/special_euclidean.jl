@@ -115,6 +115,6 @@ include("group_utils.jl")
     end
 
     G = SpecialEuclidean(11)
-    @test affine_matrix(G, make_identity(G, [])) isa Diagonal{Float64,Vector{Float64}}
-    @test affine_matrix(G, make_identity(G, [])) == Diagonal(ones(11))
+    @test affine_matrix(G, make_identity(G, ones(12, 12))) isa Diagonal{Float64,Vector{Float64}}
+    @test affine_matrix(G, make_identity(G, ones(12, 12))) == Diagonal(ones(11))
 end
