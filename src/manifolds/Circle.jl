@@ -165,6 +165,23 @@ function get_coordinates!(
     Y[] = get_coordinates(M, p, X, B)[]
     return Y
 end
+function get_coordinates!(
+    M::Circle,
+    Y::AbstractArray,
+    p,
+    X,
+    B::VeeOrthogonalBasis,
+)
+    return invoke(
+        get_coordinates!,
+        Tuple{Manifold,Any,Any,Any,VeeOrthogonalBasis},
+        M,
+        Y,
+        p,
+        X,
+        B,
+    )
+end
 
 get_vector(M::Circle{ℝ}, p, X, B::AbstractBasis) = X
 get_vector(M::Circle{ℝ}, p, X, B::DefaultOrthonormalBasis) = X
@@ -198,6 +215,27 @@ end
 function get_vector!(M::Circle, Y::AbstractArray, p, X, B::DefaultOrthogonalBasis)
     Y[] = get_vector(M, p, X, B)[]
     return Y
+end
+function get_vector!(M::Circle, Y::AbstractArray, p, X, B::VeeOrthogonalBasis)
+    Y[] = get_vector(M, p, X, B)[]
+    return Y
+end
+function get_vector!(
+    M::Circle,
+    Y::AbstractArray,
+    p,
+    X,
+    B::VeeOrthogonalBasis,
+)
+    return invoke(
+        get_vector!,
+        Tuple{Manifold,Any,Any,Any,VeeOrthogonalBasis},
+        M,
+        Y,
+        p,
+        X,
+        B,
+    )
 end
 
 @doc raw"""
