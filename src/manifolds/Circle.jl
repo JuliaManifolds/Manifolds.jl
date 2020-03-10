@@ -220,23 +220,6 @@ function get_vector!(M::Circle, Y::AbstractArray, p, X, B::VeeOrthogonalBasis)
     Y[] = get_vector(M, p, X, B)[]
     return Y
 end
-function get_vector!(
-    M::Circle,
-    Y::AbstractArray,
-    p,
-    X,
-    B::VeeOrthogonalBasis,
-)
-    return invoke(
-        get_vector!,
-        Tuple{Manifold,Any,Any,Any,VeeOrthogonalBasis},
-        M,
-        Y,
-        p,
-        X,
-        B,
-    )
-end
 
 @doc raw"""
     injectivity_radius(M::Circle[, p])
