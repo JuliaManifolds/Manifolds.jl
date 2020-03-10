@@ -49,26 +49,26 @@ function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,�
     if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
-            "The matrix $(p) is not a real-valued matrix, so it does noe lie on the Stiefel manifold of dimension ($(n),$(k)).",
+            "The matrix $(p) is not a real-valued matrix, so it does not lie on the $(M).",
         )
     end
     if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
         return DomainError(
             eltype(p),
-            "The matrix $(p) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Stiefel manifold of dimension ($(n),$(k)).",
+            "The matrix $(p) is neiter real- nor complex-valued matrix, so it does not lie on $(M).",
         )
     end
     if any(size(p) != representation_size(M))
         return DomainError(
             size(p),
-            "The matrix $(p) is does not lie on the Stiefel manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
+            "The matrix $(p) is does not lie on the $(M), since its dimensions are wrong.",
         )
     end
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
             norm(c - one(c)),
-            "The point $(p) does not lie on the Stiefel manifold of dimension ($(n),$(k)), because x'x is not the unit matrix.",
+            "The point $(p) does not lie on $(M), because x'x is not the unit matrix.",
         )
     end
 end

@@ -56,26 +56,26 @@ function check_manifold_point(M::GeneralizedStiefel{n,k,B,𝔽}, p; kwargs...) w
     if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
-            "The matrix $(p) is not a real-valued matrix, so it does not lie on the Generalized Stiefel manifold of dimension ($(n),$(k)).",
+            "The matrix $(p) is not a real-valued matrix, so it does not lie on $(M).",
         )
     end
     if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
         return DomainError(
             eltype(p),
-            "The matrix $(p) is neiter real- nor complex-valued matrix, so it does not lie on the complex Generalized Stiefel manifold of dimension ($(n),$(k)).",
+            "The matrix $(p) is neiter real- nor complex-valued matrix, so it does not lie on $(M).",
         )
     end
     if any(size(p) != representation_size(M))
         return DomainError(
             size(p),
-            "The matrix $(p) is does not lie on the Generalized Stiefel manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
+            "The matrix $(p) is does not lie on $(M), since its dimensions are wrong.",
         )
     end
     c = p' * M.B * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
             norm(c - one(c)),
-            "The point $(p) does not lie on the Generalized Stiefel manifold of dimension ($(n),$(k)), because x'Bx is not the unit matrix.",
+            "The point $(p) does not lie on $(M), because x'Bx is not the unit matrix.",
         )
     end
 end

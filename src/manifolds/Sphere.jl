@@ -55,7 +55,7 @@ function check_manifold_point(M::Sphere{N}, p; kwargs...) where {N}
     if size(p) != representation_size(M)
         return DomainError(
             size(p),
-            "The point $(p) does not lie on $M, since its size is not $(N+1).",
+            "The point $(p) does not lie on $(M), since its size is not $(N+1).",
         )
     end
     if !isapprox(norm(p), 1.0; kwargs...)

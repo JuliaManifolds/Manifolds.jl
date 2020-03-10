@@ -94,7 +94,7 @@ include("utils.jl")
             @test manifold_dimension(M) == 8
             @test !is_manifold_point(M, [1., 0., 0., 0.])
             @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0., 0., 1., 0.])
-            x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            x = [1.0 0.0; 0.0 0.5; 0.0 0.0]
             @test_throws DomainError is_manifold_point(M, [:a :b; :c :d; :e :f],true)
             @test_throws DomainError is_tangent_vector(M, x, [:a :b; :c :d; :e :f], true)
 
