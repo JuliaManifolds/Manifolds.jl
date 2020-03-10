@@ -127,6 +127,16 @@ function default_decorator_dispatch(M::EmbeddedManifold)
     return default_embedding_dispatch(M)
 end
 
+@doc doc"""
+    default_embedding_dispatch(M)
+
+A function to indicate that an [`AbstractEmbeddedManifold`](ref) is the default
+and hence acts completely transparent and passes all functions transparently onwards.
+This is used by the [`DecoratorManifold`](@ref) within [`default_decorator_dispatch`](@ref).
+By default this is set to `Val(false)`.
+"""
+default_embedding_dispatch(M::AbstractEmbeddedManifold) = Val(false)
+
 function decorator_transparent_dispatch(
     ::typeof(check_manifold_point),
     ::AbstractEmbeddedManifold,

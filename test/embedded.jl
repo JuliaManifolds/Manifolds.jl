@@ -31,10 +31,13 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{AbstractEmbed
         @test repr(M) ==
               "EmbeddedManifold(Euclidean(2; field = ℝ), Euclidean(3; field = ℝ), TransparentIsometricEmbedding())"
         @test decorated_manifold(M) == Euclidean(3)
+        @test Manifolds.default_embedding_dispatch(M) === Val{false}()
+        @test ManifoldsBase.default_decorator_dispatch(M) === Manifolds.default_embedding_dispatch(M)
     end
     @testset "PlaneManifold" begin
         M = PlaneManifold()
         @test repr(M) == "PlaneManifold()"
+        @test ManifoldsBase.default_decorator_dispatch(M) === Val{false}()
         p = [1.0 1.0 0.0]
         q = [1.0 0.0 0.0]
         X = q - p
