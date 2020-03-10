@@ -200,26 +200,11 @@ function get_vector!(M::Circle, Y::AbstractArray, p, X, B::AbstractBasis)
     Y[] = get_vector(M, p, X, B)[]
     return Y
 end
-function get_vector!(M::Circle, Y::AbstractArray, p, X, B::DefaultOrthonormalBasis)
-    Y[] = get_vector(M, p, X, B)[]
-    return Y
-end
-function get_vector!(M::Circle, Y::AbstractArray, p, X, B::DiagonalizingOrthonormalBasis)
-    Y[] = get_vector(M, p, X, B)[]
-    return Y
-end
-function get_vector!(M::Circle, Y::AbstractArray, p, X, B::DefaultBasis)
-    Y[] = get_vector(M, p, X, B)[]
-    return Y
-end
-function get_vector!(M::Circle, Y::AbstractArray, p, X, B::DefaultOrthogonalBasis)
-    Y[] = get_vector(M, p, X, B)[]
-    return Y
-end
-function get_vector!(M::Circle, Y::AbstractArray, p, X, B::VeeOrthogonalBasis)
-    Y[] = get_vector(M, p, X, B)[]
-    return Y
-end
+@superinvoke_maker 5 get_vector!(M::Circle, Y::AbstractArray, p, X, B::DefaultOrthonormalBasis)
+@superinvoke_maker 5 get_vector!(M::Circle, Y::AbstractArray, p, X, B::DiagonalizingOrthonormalBasis)
+@superinvoke_maker 5 get_vector!(M::Circle, Y::AbstractArray, p, X, B::DefaultBasis)
+@superinvoke_maker 5 get_vector!(M::Circle, Y::AbstractArray, p, X, B::DefaultOrthogonalBasis)
+@superinvoke_maker 5 get_vector!(M::Circle, Y::AbstractArray, p, X, B::VeeOrthogonalBasis)
 
 @doc raw"""
     injectivity_radius(M::Circle[, p])
