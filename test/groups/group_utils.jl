@@ -323,7 +323,7 @@ function test_action(
 
     G = base_group(A)
     M = g_manifold(A)
-    e = make_identity(G, g_pts[1])
+    e = make_identity(G, a_pts[1])
 
     @testset "Basic action properties" begin
         @testset "Direction" begin
