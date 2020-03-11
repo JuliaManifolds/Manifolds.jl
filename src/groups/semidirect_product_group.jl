@@ -124,7 +124,7 @@ function translate_diff!(G::SemidirectProductGroup, Y, p, q, X, conX::LeftAction
     return Y
 end
 
-function hat!(G::SemidirectProductGroup, Y, p, X)
+function get_vector!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
     M = base_manifold(G)
     N, H = M.manifolds
     dimN = manifold_dimension(N)
@@ -132,8 +132,8 @@ function hat!(G::SemidirectProductGroup, Y, p, X)
     @assert length(X) == dimN + dimH
     np, hp = submanifold_components(G, p)
     nY, hY = submanifold_components(G, Y)
-    hat!(N, nY, np, view(X, 1:dimN))
-    hat!(H, hY, hp, view(X, dimN+1:dimN+dimH))
+    get_vector!(N, nY, np, view(X, 1:dimN), B)
+    get_vector!(H, hY, hp, view(X, dimN+1:dimN+dimH), B)
     @inbounds _padvector!(G, Y)
     return Y
 end
