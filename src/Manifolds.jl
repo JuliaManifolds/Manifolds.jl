@@ -96,6 +96,7 @@ using ManifoldsBase: CoTVector, Manifold, MPoint, TVector, DefaultManifold
 using ManifoldsBase
 using ManifoldsBase:
     AbstractDecoratorManifold,
+    AbstractNumbers,
     @decorator_transparent_fallback,
     @decorator_transparent_function,
     @decorator_transparent_signature,
@@ -110,6 +111,7 @@ using ManifoldsBase: QRRetraction, PolarRetraction, ProjectionRetraction
 using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
 using ManifoldsBase: QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
 using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
+using ManifoldsBase: ℝ, ℂ, ℍ
 
 using Markdown: @doc_str
 using Random: AbstractRNG
@@ -120,7 +122,6 @@ using StatsBase: AbstractWeights, UnitWeights, values, varcorrection
 using UnsafeArrays
 
 include("utils.jl")
-include("numbers.jl")
 include("bases.jl")
 include("autodiff.jl")
 include("SizedAbstractArray.jl")

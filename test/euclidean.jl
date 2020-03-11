@@ -95,4 +95,15 @@ include("utils.jl")
         @test vee!(E, Y, p, X) === Y
         @test Y ≈ vec(X)
     end
+
+    @testset "Number systems power" begin
+        @test ℝ^2 === Euclidean(2)
+        @test ℝ^(2,3) === Euclidean(2, 3)
+
+        @test ℂ^2 === Euclidean(2; field = ℂ)
+        @test ℂ^(2,3) === Euclidean(2, 3; field = ℂ)
+
+        @test ℍ^2 === Euclidean(2; field = ℍ)
+        @test ℍ^(2,3) === Euclidean(2, 3; field = ℍ)
+    end
 end

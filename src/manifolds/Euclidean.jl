@@ -25,6 +25,8 @@ function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
     return Euclidean{Tuple{n...},field}()
 end
 
+^(𝔽::AbstractNumbers, n) = Euclidean(n...; field = 𝔽)
+
 """
     EuclideanMetric <: RiemannianMetric
 
