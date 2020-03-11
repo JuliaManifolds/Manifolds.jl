@@ -37,19 +37,25 @@ import ManifoldsBase:
     allocate,
     allocate_result,
     allocate_result_type,
+    allocation_promotion_function,
     array_value,
     base_manifold,
     check_manifold_point,
     check_tangent_vector,
+    combine_allocation_promotion_functions,
     decorated_manifold,
     decorator_transparent_dispatch,
     default_decorator_dispatch,
     distance,
     exp,
     exp!,
+    get_basis,
+    get_coordinates,
+    get_coordinates!,
+    get_vector,
+    get_vector!,
+    get_vectors,
     geodesic,
-    hat,
-    hat!,
     injectivity_radius,
     inner,
     isapprox,
@@ -76,8 +82,6 @@ import ManifoldsBase:
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
-    vee,
-    vee!,
     zero_tangent_vector,
     zero_tangent_vector!
 import Random: rand
@@ -100,10 +104,16 @@ using ManifoldsBase:
     @decorator_transparent_fallback,
     @decorator_transparent_function,
     @decorator_transparent_signature,
+    _euclidean_basis_vector,
     _extract_val,
     is_decorator_transparent,
     is_default_decorator,
     manifold_function_not_implemented_message
+using ManifoldsBase:
+    AbstractBasis,
+    DefaultOrDiagonalizingBasis,
+    DiagonalizingBasisData,
+    VeeOrthogonalBasis
 using ManifoldsBase:
     ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
@@ -122,7 +132,6 @@ using StatsBase: AbstractWeights, UnitWeights, values, varcorrection
 using UnsafeArrays
 
 include("utils.jl")
-include("bases.jl")
 include("autodiff.jl")
 include("SizedAbstractArray.jl")
 

@@ -310,6 +310,7 @@ function allocate(
     return ProductArray(ShapeSpec, allocate(x.data, T), x.reshapers)
 end
 allocate(p::ProductArray, ::Type{T}, s::Size{S}) where {S,T} = Vector{T}(undef, S)
+allocate(p::ProductArray, ::Type{T}, s::Integer) where {T} = Vector{T}(undef, s)
 
 """
     ProductRepr(parts)
@@ -369,3 +370,5 @@ end
 function show(io::IO, ::MIME"text/plain", x::ProductRepr)
     _show_product_repr(io, x; name = "ProductRepr")
 end
+
+ManifoldsBase._get_vector_cache_broadcast(::ProductRepr) = Val(false)

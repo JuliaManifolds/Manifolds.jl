@@ -353,7 +353,7 @@ function get_coordinates!(
      get_coordinates!(M.fiber, view(Y, n+1:length(Y)), px, VXF, B.data.vec_basis)
      return Y
  end
-function get_coordinates!(M::TangentBundleFibers, Y, p, X, B::all_uncached_bases) where {N}
+function get_coordinates!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncached_bases) where {N}
     return get_coordinates!(M.manifold, Y, p, X, B)
 end
 
@@ -389,7 +389,7 @@ function get_vector!(
     )
     return Y
 end
-function get_vector!(M::TangentBundleFibers, Y, p, X, B::all_uncached_bases) where {N}
+function get_vector!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncached_bases) where {N}
     return get_vector!(M.manifold, Y, p, X, B)
 end
 

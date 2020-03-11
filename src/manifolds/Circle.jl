@@ -200,7 +200,7 @@ function get_vector!(M::Circle, Y::AbstractArray, p, X, B::AbstractBasis)
     Y[] = get_vector(M, p, X, B)[]
     return Y
 end
-for BT in DISAMBIGUATION_BASIS_TYPES
+for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES
     eval(quote
         @superinvoke_maker 5 get_vector!(M::Circle, Y::AbstractArray, p, X, B::$BT)
     end)
