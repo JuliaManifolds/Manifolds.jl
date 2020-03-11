@@ -35,7 +35,7 @@ struct DefaultBaseManifoldMetric <: Metric end
 struct NotImplementedMetric <: Metric end
 
 Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
-Manifolds.inner(::BaseManifold, x, v, w) = 2 * dot(v,w)
+Manifolds.inner(::BaseManifold, x, v, w) = 2 * dot(v, w)
 Manifolds.exp!(::BaseManifold, y, x, v) = y .= x + 2 * v
 Manifolds.log!(::BaseManifold, v, x, y) = v .= (y - x) / 2
 Manifolds.project_tangent!(::BaseManifold, w, x, v) = w .= 2 .* v
@@ -59,7 +59,12 @@ function Manifolds.flat!(::BaseManifold, v::FVector{Manifolds.CotangentSpaceType
     v.data .= 2 .* w.data
     return v
 end
-function Manifolds.sharp!(::BaseManifold, v::FVector{Manifolds.TangentSpaceType}, x, w::FVector{Manifolds.CotangentSpaceType})
+function Manifolds.sharp!(
+    ::BaseManifold,
+    v::FVector{Manifolds.TangentSpaceType},
+    x,
+    w::FVector{Manifolds.CotangentSpaceType},
+)
     v.data .= w.data ./ 2
     return v
 end
@@ -84,8 +89,8 @@ end
         end
     end
     @testset "Local Metric Error message" begin
-        M = MetricManifold(BaseManifold{2}(),NotImplementedMetric())
-        @test_throws ErrorException local_metric(M, [3,4])
+        M = MetricManifold(BaseManifold{2}(), NotImplementedMetric())
+        @test_throws ErrorException local_metric(M, [3, 4])
     end
     @testset "scaled Euclidean metric" begin
         n = 3
@@ -111,28 +116,28 @@ end
         for vtype in (Vector, MVector{n})
             x, v, w = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
 
-            @test check_manifold_point(M,x) == check_manifold_point(E,x)
-            @test check_tangent_vector(M,x,v) == check_tangent_vector(E,x,v)
+            @test check_manifold_point(M, x) == check_manifold_point(E, x)
+            @test check_tangent_vector(M, x, v) == check_tangent_vector(E, x, v)
 
             @test local_metric(M, x) ≈ G
             @test inverse_local_metric(M, x) ≈ invG
             @test det_local_metric(M, x) ≈ *(1.0:n...)
             @test log_local_metric_density(M, x) ≈ sum(log.(1.0:n)) / 2
-            @test inner(M, x, v, w) ≈ dot(v, G * w) atol=1e-6
-            @test norm(M, x, v) ≈ sqrt(dot(v, G * v)) atol=1e-6
+            @test inner(M, x, v, w) ≈ dot(v, G * w) atol = 1e-6
+            @test norm(M, x, v) ≈ sqrt(dot(v, G * v)) atol = 1e-6
 
             if VERSION ≥ v"1.1"
-                T = 0:.5:10
-                @test geodesic(M, x, v, T) ≈ [x + t * v for t in T] atol=1e-6
+                T = 0:0.5:10
+                @test geodesic(M, x, v, T) ≈ [x + t * v for t in T] atol = 1e-6
             end
 
-            @test christoffel_symbols_first(M, x) ≈ zeros(n, n, n) atol=1e-6
-            @test christoffel_symbols_second(M, x) ≈ zeros(n, n, n) atol=1e-6
-            @test riemann_tensor(M, x) ≈ zeros(n, n, n, n) atol=1e-6
-            @test ricci_tensor(M, x) ≈ zeros(n, n) atol=1e-6
-            @test ricci_curvature(M, x) ≈ 0 atol=1e-6
-            @test gaussian_curvature(M, x) ≈ 0 atol=1e-6
-            @test einstein_tensor(M, x) ≈ zeros(n, n) atol=1e-6
+            @test christoffel_symbols_first(M, x) ≈ zeros(n, n, n) atol = 1e-6
+            @test christoffel_symbols_second(M, x) ≈ zeros(n, n, n) atol = 1e-6
+            @test riemann_tensor(M, x) ≈ zeros(n, n, n, n) atol = 1e-6
+            @test ricci_tensor(M, x) ≈ zeros(n, n) atol = 1e-6
+            @test ricci_curvature(M, x) ≈ 0 atol = 1e-6
+            @test gaussian_curvature(M, x) ≈ 0 atol = 1e-6
+            @test einstein_tensor(M, x) ≈ zeros(n, n) atol = 1e-6
 
             fdm = forward_fdm(2, 1)
             @test christoffel_symbols_first(M, x; backend=fdm) ≈ zeros(n, n, n) atol=1e-6
@@ -172,67 +177,75 @@ end
             invG = Diagonal(vtype([1, 1 / sin(θ)^2])) ./ r^2
             v, w = normalize(randn(n)), normalize(randn(n))
 
-            @test local_metric(M, x) ≈ G atol=1e-6
-            @test inverse_local_metric(M, x) ≈ invG atol=1e-6
-            @test det_local_metric(M, x) ≈ r^4 * sin(θ)^2 atol=1e-6
-            @test log_local_metric_density(M, x) ≈ 2log(r) + log(sin(θ)) atol=1e-6
-            @test inner(M, x, v, w) ≈ dot(v, G * w) atol=1e-6
-            @test norm(M, x, v) ≈ sqrt(dot(v, G * v)) atol=1e-6
+            @test local_metric(M, x) ≈ G atol = 1e-6
+            @test inverse_local_metric(M, x) ≈ invG atol = 1e-6
+            @test det_local_metric(M, x) ≈ r^4 * sin(θ)^2 atol = 1e-6
+            @test log_local_metric_density(M, x) ≈ 2 * log(r) + log(sin(θ)) atol = 1e-6
+            @test inner(M, x, v, w) ≈ dot(v, G * w) atol = 1e-6
+            @test norm(M, x, v) ≈ sqrt(dot(v, G * v)) atol = 1e-6
 
             xcart = sph_to_cart(θ, ϕ)
-            vcart = [cos(ϕ)*cos(θ) -sin(ϕ)*sin(θ);
-                     sin(ϕ)*cos(θ)  cos(ϕ)*sin(θ);
-                     -sin(θ) 0] * v
+            vcart =
+                [
+                    cos(ϕ) * cos(θ) -sin(ϕ) * sin(θ)
+                    sin(ϕ) * cos(θ) cos(ϕ) * sin(θ)
+                    -sin(θ) 0
+                ] * v
 
             if VERSION ≥ v"1.1" && (!Sys.iswindows() || Sys.ARCH == :x86_64)
                 @testset "numerically integrated geodesics for $vtype" begin
-                    T = 0:.1:1
-                    @test isapprox([sph_to_cart(yi...) for yi in geodesic(M, x, v, T)],
-                                   geodesic(S, xcart, vcart, T); atol=1e-3, rtol=1e-3)
+                    T = 0:0.1:1
+                    @test isapprox(
+                        [sph_to_cart(yi...) for yi in geodesic(M, x, v, T)],
+                        geodesic(S, xcart, vcart, T);
+                        atol = 1e-3,
+                        rtol = 1e-3,
+                    )
                 end
             end
 
             Γ₁ = christoffel_symbols_first(M, x)
-            for i=1:n, j=1:n, k=1:n
-                if (i,j,k) == (1,2,2) || (i,j,k) == (2,1,2)
-                    @test Γ₁[i,j,k] ≈ r^2*cos(θ)*sin(θ) atol=1e-6
-                elseif (i,j,k) == (2,2,1)
-                    @test Γ₁[i,j,k] ≈ -r^2*cos(θ)*sin(θ) atol=1e-6
+            for i = 1:n, j = 1:n, k = 1:n
+                if (i, j, k) == (1, 2, 2) || (i, j, k) == (2, 1, 2)
+                    @test Γ₁[i, j, k] ≈ r^2 * cos(θ) * sin(θ) atol = 1e-6
+                elseif (i, j, k) == (2, 2, 1)
+                    @test Γ₁[i, j, k] ≈ -r^2 * cos(θ) * sin(θ) atol = 1e-6
                 else
-                    @test Γ₁[i,j,k] ≈ 0 atol=1e-6
+                    @test Γ₁[i, j, k] ≈ 0 atol = 1e-6
                 end
             end
 
             Γ₂ = christoffel_symbols_second(M, x)
-            for l=1:n, i=1:n, j=1:n
-                if (l,i,j) == (1,2,2)
-                    @test Γ₂[l,i,j] ≈ -cos(θ)*sin(θ) atol=1e-6
-                elseif (l,i,j) == (2,1,2) || (l,i,j) == (2,2,1)
-                    @test Γ₂[l,i,j] ≈ cot(θ) atol=1e-6
+            for l = 1:n, i = 1:n, j = 1:n
+                if (l, i, j) == (1, 2, 2)
+                    @test Γ₂[l, i, j] ≈ -cos(θ) * sin(θ) atol = 1e-6
+                elseif (l, i, j) == (2, 1, 2) || (l, i, j) == (2, 2, 1)
+                    @test Γ₂[l, i, j] ≈ cot(θ) atol = 1e-6
                 else
-                    @test Γ₂[l,i,j] ≈ 0 atol=1e-6
+                    @test Γ₂[l, i, j] ≈ 0 atol = 1e-6
                 end
             end
 
             R = riemann_tensor(M, x)
-            for l=1:n, i=1:n, j=1:n, k=1:n
-                if (l,i,j,k) == (2,1,1,2)
-                    @test R[l,i,j,k] ≈ -1 atol=2e-6
-                elseif (l,i,j,k) == (2,1,2,1)
-                    @test R[l,i,j,k] ≈ 1 atol=2e-6
-                elseif (l,i,j,k) == (1,2,1,2)
-                    @test R[l,i,j,k] ≈ sin(θ)^2 atol=1e-6
-                elseif (l,i,j,k) == (1,2,2,1)
-                    @test R[l,i,j,k] ≈ -sin(θ)^2 atol=1e-6
+            for l = 1:n, i = 1:n, j = 1:n, k = 1:n
+                if (l, i, j, k) == (2, 1, 1, 2)
+                    @test R[l, i, j, k] ≈ -1 atol = 2e-6
+                elseif (l, i, j, k) == (2, 1, 2, 1)
+                    @test R[l, i, j, k] ≈ 1 atol = 2e-6
+                elseif (l, i, j, k) == (1, 2, 1, 2)
+                    @test R[l, i, j, k] ≈ sin(θ)^2 atol = 1e-6
+                elseif (l, i, j, k) == (1, 2, 2, 1)
+                    @test R[l, i, j, k] ≈ -sin(θ)^2 atol = 1e-6
                 else
-                    @test R[l,i,j,k] ≈ 0 atol=1e-6
+                    @test R[l, i, j, k] ≈ 0 atol = 1e-6
                 end
             end
 
-            @test ricci_tensor(M, x) ≈ G ./ r^2 atol=2e-6
-            @test ricci_curvature(M, x) ≈ 2 / r^2 atol=2e-6
-            @test gaussian_curvature(M, x) ≈ 1 / r^2 atol=2e-6
-            @test einstein_tensor(M, x) ≈ ricci_tensor(M, x) - gaussian_curvature(M, x)  .* G atol=1e-6
+            @test ricci_tensor(M, x) ≈ G ./ r^2 atol = 2e-6
+            @test ricci_curvature(M, x) ≈ 2 / r^2 atol = 2e-6
+            @test gaussian_curvature(M, x) ≈ 1 / r^2 atol = 2e-6
+            @test einstein_tensor(M, x) ≈ ricci_tensor(M, x) - gaussian_curvature(M, x) .* G atol =
+                1e-6
         end
     end
 
@@ -241,10 +254,12 @@ end
         g = BaseManifoldMetric{3}()
         MM = MetricManifold(M, g)
         g2 = DefaultBaseManifoldMetric()
-        MM2 = MetricManifold(M,g2)
+        MM2 = MetricManifold(M, g2)
 
-        @test (@inferred Manifolds.default_metric_dispatch(MM)) === (@inferred Manifolds.default_metric_dispatch(base_manifold(MM), metric(MM)))
-        @test (@inferred Manifolds.default_metric_dispatch(MM2)) === (@inferred Manifolds.default_metric_dispatch(base_manifold(MM2), metric(MM2)))
+        @test (@inferred Manifolds.default_metric_dispatch(MM)) ===
+              (@inferred Manifolds.default_metric_dispatch(base_manifold(MM), metric(MM)))
+        @test (@inferred Manifolds.default_metric_dispatch(MM2)) ===
+              (@inferred Manifolds.default_metric_dispatch(base_manifold(MM2), metric(MM2)))
         @test (@inferred Manifolds.default_metric_dispatch(MM2)) === Val(true)
         @test is_default_metric(MM) == is_default_metric(base_manifold(MM), metric(MM))
         @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2), metric(MM2))
@@ -257,7 +272,7 @@ end
         w = [0.13, 0.17, 0.19]
         y = allocate(x)
 
-        @test inner(M, x, v, w) == 2 * dot(v,w)
+        @test inner(M, x, v, w) == 2 * dot(v, w)
         @test inner(MM, x, v, w) === inner(M, x, v, w)
         @test norm(MM, x, v) === norm(M, x, v)
         @test exp(M, x, v) == x + 2 * v
@@ -267,9 +282,11 @@ end
         @test retract!(MM, y, x, v, 1) === retract!(M, y, x, v, 1)
         # without a definition for the metric from the embedding, no projection possible
         @test_throws ErrorException log!(MM, w, x, y) === project_tangent!(M, w, x, y)
-        @test_throws ErrorException project_tangent!(MM, w, x, v) === project_tangent!(M, w, x, v)
+        @test_throws ErrorException project_tangent!(MM, w, x, v) ===
+                                    project_tangent!(M, w, x, v)
         @test_throws ErrorException project_point!(MM, y, x) === project_point!(M, y, x)
-        @test_throws ErrorException vector_transport_to!(MM, w, x, v, y) === vector_transport_to!(M, w, x, v, y)
+        @test_throws ErrorException vector_transport_to!(MM, w, x, v, y) ===
+                                    vector_transport_to!(M, w, x, v, y)
         # without DiffEq, these error
         # @test_throws ErrorException exp(MM,x, v, 1:3)
         # @test_throws ErrorException exp!(MM, y, x, v)
@@ -280,14 +297,14 @@ end
         @test is_manifold_point(MM, x) === is_manifold_point(M, x)
         @test is_tangent_vector(MM, x, v) === is_tangent_vector(M, x, v)
 
-        @test_throws ErrorException local_metric(MM2,x)
-        @test_throws ErrorException local_metric_jacobian(MM2,x)
-        @test_throws ErrorException christoffel_symbols_second_jacobian(MM2,x)
+        @test_throws ErrorException local_metric(MM2, x)
+        @test_throws ErrorException local_metric_jacobian(MM2, x)
+        @test_throws ErrorException christoffel_symbols_second_jacobian(MM2, x)
         # MM falls back to nondefault error
-        @test_throws ErrorException projected_distribution(MM,1,x)
-        @test_throws ErrorException projected_distribution(MM,1)
+        @test_throws ErrorException projected_distribution(MM, 1, x)
+        @test_throws ErrorException projected_distribution(MM, 1)
         # normal_tvector is not implemented
-        @test_throws ErrorException normal_tvector_distribution(MM,x,0.2)
+        @test_throws ErrorException normal_tvector_distribution(MM, x, 0.2)
 
         @test inner(MM2, x, v, w) === inner(M, x, v, w)
         @test norm(MM2, x, v) === norm(M, x, v)
@@ -309,11 +326,15 @@ end
         @test is_tangent_vector(MM2, x, v) === is_tangent_vector(M, x, v)
 
         a = Manifolds.projected_distribution(M, Distributions.MvNormal(zero(zeros(3)), 1.0))
-        b = Manifolds.projected_distribution(MM2, Distributions.MvNormal(zero(zeros(3)), 1.0))
+        b = Manifolds.projected_distribution(
+            MM2,
+            Distributions.MvNormal(zero(zeros(3)), 1.0),
+        )
         @test isapprox(Matrix(a.distribution.Σ), Matrix(b.distribution.Σ))
         @test isapprox(a.distribution.μ, b.distribution.μ)
-        @test get_basis(M,x,DefaultOrthonormalBasis()).data == get_basis(MM2,x,DefaultOrthonormalBasis()).data
-        @test_throws ErrorException get_basis(MM,x,DefaultOrthonormalBasis())
+        @test get_basis(M, x, DefaultOrthonormalBasis()).data ==
+              get_basis(MM2, x, DefaultOrthonormalBasis()).data
+        @test_throws ErrorException get_basis(MM, x, DefaultOrthonormalBasis())
         cov = flat(M, x, FVector(TangentSpace, v))
         cow = flat(M, x, FVector(TangentSpace, w))
         @test cov.data ≈ flat(MM, x, FVector(TangentSpace, v)).data
