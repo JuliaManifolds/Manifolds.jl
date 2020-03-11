@@ -227,7 +227,7 @@ function get_vector(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBa
     return get_vector(decorated_manifold(M), e.p, X, B)
 end
 function get_vector(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group && error("On $(M) the identity $(e) does not match to perform get_vector.")
+    M != e.group.manifold && error("On $(M) the identity $(e) does not match to perform get_vector.")
     return get_vector(M, e.p, X, B)
 end
 function get_vector!(M::AbstractGroupManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
