@@ -200,12 +200,14 @@ function get_vector!(M::Circle, Y::AbstractArray, p, X, B::AbstractBasis)
     Y[] = get_vector(M, p, X, B)[]
     return Y
 end
-
 for BT in DISAMBIGUATION_BASIS_TYPES
     eval(quote
         @superinvoke_maker 5 get_vector!(M::Circle, Y::AbstractArray, p, X, B::$BT)
     end)
 end
+
+
+decorator_transparent_dispatch(::typeof(get_vector!),::Circle,::AbstractArray, p, X, B) = Val{:parent}()
 
 @doc raw"""
     injectivity_radius(M::Circle[, p])
