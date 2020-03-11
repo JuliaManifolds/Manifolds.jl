@@ -309,6 +309,7 @@ function allocate(
 ) where {ShapeSpec<:ShapeSpecification,T}
     return ProductArray(ShapeSpec, allocate(x.data, T), x.reshapers)
 end
+allocate(p::ProductArray, ::Type{T}, s::Size{S}) where {S,T} = Vector{T}(undef, S)
 
 """
     ProductRepr(parts)
@@ -340,6 +341,7 @@ allocate(x::ProductRepr) = ProductRepr(map(allocate, submanifold_components(x)).
 function allocate(x::ProductRepr, ::Type{T}) where {T}
     return ProductRepr(map(t -> allocate(t, T), submanifold_components(x))...)
 end
+allocate(p::ProductRepr, ::Type{T}, s::Size{S}) where {S,T} = Vector{T}(undef, S)
 
 function copyto!(x::ProductRepr, y::ProductRepr)
     map(copyto!, submanifold_components(x), submanifold_components(y))

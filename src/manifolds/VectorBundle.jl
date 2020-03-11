@@ -308,6 +308,29 @@ end
 function get_coordinates!(M::VectorBundle, Y, p, X, B::DefaultOrthonormalBasis)
     invoke(get_coordinates!, Tuple{VectorBundle,Any,Any,Any,AbstractBasis}, M, Y, p, X, B)
 end
+function get_coordinates!(M::VectorBundle, Y, p, X, B::CachedBasis)
+    invoke(get_coordinates!, Tuple{Manifold,Any,Any,Any,AbstractBasis}, M, Y, p, X, B)
+end
+function get_coordinates!(M::VectorBundle, Y, p, X, B::CachedBasis{<:AbstractBasis{ℝ}})
+    invoke(get_coordinates!, Tuple{Manifold,Any,Any,Any,typeof(B)}, M, Y, p, X, B)
+end
+function get_coordinates!(
+    M::VectorBundle,
+    Y,
+    p,
+    X,
+    B::CachedBasis{<:AbstractBasis{ℝ},<:VectorBundleBasisData},
+)
+    invoke(
+        get_coordinates!,
+        Tuple{VectorBundle,Any,Any,Any,CachedBasis{<:AbstractBasis,<:VectorBundleBasisData}},
+        M,
+        Y,
+        p,
+        X,
+        B,
+    )
+end
 function get_coordinates!(M::VectorBundle, Y, p, X, B::AbstractBasis)
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
