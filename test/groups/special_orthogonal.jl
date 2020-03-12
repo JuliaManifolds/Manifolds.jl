@@ -14,7 +14,8 @@ include("group_utils.jl")
     @test is_default_metric(MetricManifold(G, EuclideanMetric())) === true
     @test is_default_metric(MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction()))) === true
     @test is_default_metric(MetricManifold(G, InvariantMetric(EuclideanMetric(), RightAction()))) === true
-    @test Manifold.default_metric_dispatch(G, EuclideanMetric())) === Val{true}()
+    @test Manifolds.default_metric_dispatch(G, EuclideanMetric()) === Val{true}()
+    @test Manifolds.default_metric_dispatch(MetricManifold(G, EuclideanMetric())) === Val{true}()
 
     types = [Matrix{Float64}]
     ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]

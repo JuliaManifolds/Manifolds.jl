@@ -58,8 +58,8 @@ invariant_metric_dispatch(::TestDefaultInvariantMetricManifold, ::RightAction) =
     @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(true)
     @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(false)
 
-    @test Manifolds.invariant_metric_dispatch(TestInvariantMetricManifold, RightAction()) === Val{false}()
-    @test Manifolds.invariant_metric_dispatch(TestInvariantMetricManifold, LeftAction()) === Val{false}()
+    @test Manifolds.invariant_metric_dispatch(TestInvariantMetricManifold(), RightAction()) === Val{false}()
+    @test Manifolds.invariant_metric_dispatch(TestInvariantMetricManifold(), LeftAction()) === Val{false}()
 
     G = MetricManifold(TestDefaultInvariantMetricManifold(),LeftInvariantMetric(TestInvariantMetricBase()))
     @test !is_default_metric(G)
