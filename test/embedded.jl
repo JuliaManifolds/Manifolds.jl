@@ -121,4 +121,47 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{AbstractEmbed
             @test_throws ErrorException embed(M3, [1, 2])
         end
     end
+    @testset "EmbeddedManifold decorator dispatch" begin
+        TM = NotImplementedEmbeddedManifold() # transparently iso
+        IM = NotImplementedEmbeddedManifold2() # iso
+        AM = NotImplementedEmbeddedManifold3() # general
+        for f in [exp, get_basis, get_coordinates, get_vector, inverse_retract, log]
+            @test decorator_transparent_dispatch(f,AM) === Val{:parent}()
+        end
+        for f in [project_point, project_tangent, retract]
+            @test decorator_transparent_dispatch(f,AM) === Val{:parent}()
+        end
+        for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
+            @test decorator_transparent_dispatch(f,AM) === Val{:parent}()
+        end
+        for f in [check_manifold_point, check_tangent_vector, exp!, inner, inverse_retract!]
+            @test decorator_transparent_dispatch(f,AM) === Val{:intransparent}()
+        end
+        for f in [log!, norm, manifold_dimension, project_point!, retract!]
+            @test decorator_transparent_dispatch(f,AM) === Val{:intransparent}()
+        end
+        for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
+            @test decorator_transparent_dispatch(f,AM) === Val{:intransparent}()
+        end
+
+        for f in [inner]
+            @test decorator_transparent_dispatch(f,IM) === Val{:transparent}()
+        end
+        for f in [inverse_retract!, retract!]
+            @test decorator_transparent_dispatch(f,IM) === Val{:parent}()
+        end
+
+        for f in [exp, inverse_retract!, log]
+            @test decorator_transparent_dispatch(f,TM) === Val{:parent}()
+        end
+        for f in [exp!, inverse_retract!, log!, project_point!, project_tangent!, retract!]
+            @test decorator_transparent_dispatch(f,TM) === Val{:transparent}()
+        end
+        for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
+            @test decorator_transparent_dispatch(f,AM) === Val{:transparent}()
+        end
+        for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
+            @test decorator_transparent_dispatch(f,TM) === Val{:transparent}()
+        end
+    end
 end

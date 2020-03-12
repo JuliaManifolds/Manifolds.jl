@@ -250,6 +250,8 @@ end
         @test is_default_metric(MM) == is_default_metric(base_manifold(MM), metric(MM))
         @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2), metric(MM2))
         @test is_default_metric(MM2)
+        @test Manifolds.default_decorator_dispatch(MM) === default_metric_dispatch(MM)
+        @test Manifolds.default_decorator_dispatch(MM2) === default_metric_dispatch(MM2)
 
         @test convert(typeof(MM2), M) == MM2
         @test_throws ErrorException convert(typeof(MM), M)
@@ -348,18 +350,33 @@ end
         MM = MetricManifold(M, g)
         x = [1,2,3]
         # nonmutating always go to parent for allocation
-        @test Manifolds.decorator_transparent_dispatch(exp,MM) === Val{:parent}()
-        @test Manifolds.decorator_transparent_dispatch(flat, MM) === Val{:parent}()
-        @test Manifolds.decorator_transparent_dispatch(get_basis,MM) === Val{:intransparent}()
-        @test Manifolds.decorator_transparent_dispatch(inner,MM) === Val{:intransparent}()
-        @test Manifolds.decorator_transparent_dispatch(inverse_retract, MM) === Val{:parent}()
+        for f in [exp, flat, inverse_retract, log, mean, median, project_point]
+            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:parent}()
+        end
+        for f in [project_tangent, sharp, retract]
+            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:parent}()
+        end
+        for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
+            @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:parent}()
+        end
+        for f in [get_basis, inner, normal_tvector_distribution, projected_distribution]
+            @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
+        end
 
         # miraring ones are mostly intransparent despite for a few cases - e.g. dispatch/default last variables
-        @test Manifolds.decorator_transparent_dispatch(exp!,MM) === Val{:intransparent}()
+        for f in [exp!, flat!, inverse_retract!, log!, mean!, median!]
+            @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
+        end
+        for f in [norm, project_point!, project_tangent!, sharp!, retract!]
+            @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
+        end
+        for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
+            @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
+        end
+
         @test Manifolds.decorator_transparent_dispatch(exp,MM,x,x,x,x) === Val{:parent}()
-        @test Manifolds.decorator_transparent_dispatch(flat!,MM) === Val{:intransparent}()
-        @test Manifolds.decorator_transparent_dispatch(inverse_retract!, MM) === Val{:intransparent}()
         @test Manifolds.decorator_transparent_dispatch(inverse_retract!, MM, x, x, x, LogarithmicInverseRetraction()) === Val{:parent}()
+        @test Manifolds.decorator_transparent_dispatch(retract!, MM, x, x, x, ExponentialRetraction()) === Val{:parent}()
 
     end
 end

@@ -13,6 +13,7 @@ struct NotImplementedReshaper <: AbstractReshaper end
     @test Mse == M1 × ProductManifold(M2)
     @test injectivity_radius(Mse) ≈ π
     @test is_default_metric(Mse, ProductMetric())
+    @test default_metric_dispatch(Mse, ProductMetric()) === Val{true}()
     struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
     @test_throws ErrorException Manifolds.make_reshape(NotImplementedReshaper(), Int64, zeros(2,3))
     types = [
