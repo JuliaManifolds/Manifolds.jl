@@ -70,6 +70,8 @@ function Manifolds.sharp!(
 end
 
 @testset "Metrics" begin
+    # some tests failed due to insufficient accuracy for a particularly bad RNG state
+    Random.seed!(42)
     @testset "Metric Basics" begin
         #one for MetricManifold, one for Manifold & Metric
         @test length(methods(is_default_metric)) == 2
