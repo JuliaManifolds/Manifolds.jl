@@ -238,6 +238,9 @@ end
         M = BaseManifold{3}()
         g = BaseManifoldMetric{3}()
         MM = MetricManifold(M, g)
+        if VERSION ≥ v"1.3"
+            @test DefaultBaseManifoldMetric(BaseManifold{3}()) === MetricManifold(BaseManifold{3}(),DefaultBaseManifoldMetric())
+        end
         g2 = DefaultBaseManifoldMetric()
         MM2 = MetricManifold(M,g2)
 
@@ -337,5 +340,26 @@ end
         @test median(M, xsample, w) ≈ 2 .* ones(3)
         @test median(MM2, xsample, w) ≈ 2 * ones(3)
         @test median(MM, xsample, w) ≈ 4 .* ones(3)
+    end
+
+    @testset "Metric decorator dispatches" begin
+        M = BaseManifold{3}()
+        g = BaseManifoldMetric{3}()
+        MM = MetricManifold(M, g)
+        x = [1,2,3]
+        # nonmutating always go to parent for allocation
+        @test Manifolds.decorator_transparent_dispatch(exp,MM) === Val{:parent}()
+        @test Manifolds.decorator_transparent_dispatch(flat, MM) === Val{:parent}()
+        @test Manifolds.decorator_transparent_dispatch(get_basis,MM) === Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(inner,MM) === Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(inverse_retract, MM) === Val{:parent}()
+
+        # miraring ones are mostly intransparent despite for a few cases - e.g. dispatch/default last variables
+        @test Manifolds.decorator_transparent_dispatch(exp!,MM) === Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(exp,MM,x,x,x,x) === Val{:parent}()
+        @test Manifolds.decorator_transparent_dispatch(flat!,MM) === Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(inverse_retract!, MM) === Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(inverse_retract!, MM, x, x, x, LogarithmicInverseRetraction()) === Val{:parent}()
+
     end
 end
