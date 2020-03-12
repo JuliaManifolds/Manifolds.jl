@@ -1,6 +1,6 @@
 include("utils.jl")
 
-struct NotImplementedReshaper <: AbstractReshaper end
+struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
 
 @testset "Product manifold" begin
     @test_throws MethodError ProductManifold()
