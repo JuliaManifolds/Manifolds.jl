@@ -15,7 +15,10 @@ include("../utils.jl")
         @test length(methods(is_group_decorator)) == 1
 
         @test Manifolds.is_group_decorator(G)
+        @test Manifolds.decorator_group_dispatch(G) === Val{true}()
+        @test Manifolds.default_decorator_dispatch(G) === Val{false}()
         @test !Manifolds.is_group_decorator(NotImplementedManifold())
+        @test Manifolds.decorator_group_dispatch(NotImplementedManifold()) === Val{false}()
 
         @test base_group(G) === G
 
@@ -79,6 +82,16 @@ include("../utils.jl")
         @test_throws ErrorException group_exp!(G, x, v)
         @test_throws ErrorException group_log(G, x)
         @test_throws ErrorException group_log!(G, v, x)
+
+        for f in [translate, translate!, compose, compose!, translate_diff!, translate_diff]
+            @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:intransparent}()
+        end
+        for f in [inverse_translate_diff!, inverse_translate_diff]
+            @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:intransparent}()
+        end
+        for f in [group_exp!, group_exp, group_log, group_log!]
+            @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:intransparent}()
+        end
     end
 
     @testset "Action direction" begin

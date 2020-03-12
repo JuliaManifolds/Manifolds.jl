@@ -293,6 +293,15 @@ function compose(
     x = allocate_result(G, compose, p, q)
     return compose!(G, x, p, q)
 end
+function decorator_transparent_dispatch(
+    ::typeof(compose),
+    M::AbstractGroupManifold,
+    x,
+    p,
+    q
+)
+    return Val(:intransparent)
+end
 
 @decorator_transparent_signature compose!(M::AbstractDecoratorManifold, x, p, q)
 function decorator_transparent_dispatch(
@@ -538,6 +547,14 @@ end
 @decorator_transparent_signature group_exp!(G::AbstractDecoratorManifold, q, X)
 
 function decorator_transparent_dispatch(
+    ::typeof(group_exp),
+    ::AbstractGroupManifold,
+    q,
+    X,
+)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(
     ::typeof(group_exp!),
     ::AbstractGroupManifold,
     q,
@@ -581,6 +598,14 @@ group_log(::AbstractGroupManifold, ::Any...)
 function group_log(G::AbstractGroupManifold, q)
     X = allocate_result(G, group_log, q)
     return group_log!(G, X, q)
+end
+function decorator_transparent_dispatch(
+    ::typeof(group_log),
+    ::AbstractGroupManifold,
+    X,
+    q,
+)
+    return Val(:intransparent)
 end
 
 @decorator_transparent_signature group_log!(M::AbstractDecoratorManifold, X, q)

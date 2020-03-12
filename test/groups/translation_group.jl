@@ -11,7 +11,7 @@ include("group_utils.jl")
         @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(true)
         @test (@inferred Manifolds.biinvariant_metric_dispatch(G)) === Val(true)
         @test is_default_metric(MetricManifold(G, EuclideanMetric())) === true
-
+        @test Manifolds.default_metric_dispatch(MetricManifold(G, EuclideanMetric())) === Val{true}()
         types = [Matrix{Float64}]
         @test base_manifold(G) === Euclidean(2, 3)
 
