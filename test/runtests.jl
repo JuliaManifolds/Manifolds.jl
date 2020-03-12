@@ -1,5 +1,12 @@
 include("autodiff.jl")
 include("utils.jl")
+
+@testset "Ambiguities" begin
+    # TODO: reduce the number of ambiguities
+    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 206
+    @test length(Test.detect_ambiguities(Manifolds)) == 0
+end
+
 include("groups/group_utils.jl")
 include("sized_abstract_array.jl")
 
