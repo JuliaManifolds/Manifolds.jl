@@ -256,6 +256,7 @@ function get_coordinates!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
     return get_coordinates!(M, Y, e.p, X, B)
 end
 
+import ManifoldsBase.check_manifold_point__transparent
 @decorator_transparent_fallback :transparent function check_manifold_point(
     G::AbstractGroupManifold,
     e::Identity;

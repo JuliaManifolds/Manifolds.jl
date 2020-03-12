@@ -185,6 +185,7 @@ in an embedded space.
 """
 exp(::MetricManifold, ::Any...)
 
+import ManifoldsBase.exp!__intransparent
 @decorator_transparent_fallback function exp!(M::MetricManifold, q, p, X)
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, p, X, tspan; dense = false, saveat = [1.0])
@@ -206,7 +207,8 @@ where $G_p$ is the local matrix representation of `G`, see [`local_metric`](@ref
 """
 flat(::MetricManifold, ::Any...)
 
-
+# TODO: uncomment the import if `flat!` goes to ManifoldsBase
+# import ManifoldsBase.flat!__intransparent
 @decorator_transparent_fallback function flat!(M::MetricManifold, ξ::CoTFVector, p, X::TFVector)
     g = local_metric(M, p)
     copyto!(ξ.data, g * X.data)
@@ -300,7 +302,8 @@ where $G_p$ is the loal matrix representation of the [`Metric`](@ref) `G`.
 """
 inner(::MetricManifold, ::Any)
 
-function inner(M::MMT, ::Val{:intransparent}, p, X, Y) where {MMT<:MetricManifold}
+import ManifoldsBase.inner__intransparent
+function inner__intransparent(M::MMT, p, X, Y) where {MMT<:MetricManifold}
     return dot(X, local_metric(M, p) * Y)
 end
 function inner(
