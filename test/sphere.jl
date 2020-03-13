@@ -38,7 +38,7 @@ include("utils.jl")
                 basis_types_vecs = (DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),),
                 basis_types_to_from = basis_types,
                 test_vee_hat = false,
-                retraction_methods = [ProjectionRetraction(),],
+                retraction_methods = [ProjectionRetraction(), ExponentialRetraction()],
                 inverse_retraction_methods = [ProjectionInverseRetraction(),]
             )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))

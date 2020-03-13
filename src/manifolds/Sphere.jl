@@ -180,7 +180,11 @@ Return the injectivity radius for the [`Sphere`](@ref) `M`, which is globally $�
 Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
 [`Sphere`](@ref), which is globally $\frac{π}{2}$.
 """
-injectivity_radius(::Sphere, ::Any...) = π
+injectivity_radius(::Sphere) = π
+injectivity_radius(::Sphere, ::ExponentialRetraction) = π
+injectivity_radius(::Sphere, ::ProjectionRetraction) = π / 2
+injectivity_radius(::Sphere, ::Any) = π
+injectivity_radius(::Sphere, ::Any, ::ExponentialRetraction) = π
 injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π / 2
 
 @doc raw"""
