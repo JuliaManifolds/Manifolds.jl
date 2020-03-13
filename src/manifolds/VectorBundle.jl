@@ -289,8 +289,15 @@ function get_basis(M::VectorBundle, p, B::DiagonalizingOrthonormalBasis)
     b2 = get_basis(M.fiber, xp1, bv2)
     return CachedBasis(B, VectorBundleBasisData(b1, b2))
 end
-function get_basis(M::VectorBundle, p, B::DefaultOrthonormalBasis)
-    return invoke(get_basis, Tuple{VectorBundle,Any,AbstractBasis}, M, p, B)
+
+for BT in (
+    DefaultOrthonormalBasis,
+    ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
+    ProjectedOrthonormalBasis{:svd,ℝ},
+)
+    eval(quote
+        @invoke_maker 3 AbstractBasis get_basis(M::VectorBundle, p, B::$BT)
+    end)
 end
 function get_basis(M::TangentBundleFibers, p, B::AbstractBasis)
     return get_basis(M.manifold, p, B)
