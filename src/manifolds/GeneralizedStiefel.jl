@@ -199,7 +199,7 @@ project_tangent(::GeneralizedStiefel, ::Any...)
 
 function  project_tangent!(M::GeneralizedStiefel, Y, p, X)
     A = p'*M.B'*X
-    copyto!(Y, X - p*Hermitian(0.5*(A+A')))
+    copyto!(Y, X - p*Hermitian((A+A')/2))
     return Y
 end
 @doc doc"""
