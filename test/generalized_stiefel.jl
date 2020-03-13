@@ -58,13 +58,14 @@ include("utils.jl")
         e = similar(a)
         retract!(M, e, x, X)
         @test e == a
-        @test vector_transport_to(M,x,X,y, ProjectionTransport()) == project_tangent(M,y,X)
+        @test vector_transport_to(M, x, X, y, ProjectionTransport()) ==
+              project_tangent(M, y, X)
         @testset "Type $T" for T in types
-            pts = convert.(T, [x,y,z])
-            @test !is_manifold_point(M,2*x)
-            @test_throws DomainError !is_manifold_point(M,2*x,true)
-            @test !is_tangent_vector(M,x,y)
-            @test_throws DomainError is_tangent_vector(M,x,y,true)
+            pts = convert.(T, [x, y, z])
+            @test !is_manifold_point(M, 2 * x)
+            @test_throws DomainError !is_manifold_point(M, 2 * x, true)
+            @test !is_tangent_vector(M, x, y)
+            @test_throws DomainError is_tangent_vector(M, x, y, true)
             test_manifold(
                 M,
                 pts,
@@ -79,7 +80,7 @@ include("utils.jl")
                 test_reverse_diff = false,
                 projection_atol_multiplier = 15.0,
                 retraction_atol_multiplier = 10.0,
-                is_tangent_atol_multiplier = 4*10.0^2,
+                is_tangent_atol_multiplier = 4 * 10.0^2,
                 retraction_methods = [PolarRetraction(), ProjectionRetraction()],
             )
         end
@@ -90,17 +91,17 @@ include("utils.jl")
         M = GeneralizedStiefel(3, 2, B, ℂ)
         @testset "Basics" begin
             @test repr(M) == "GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℂ)"
-            @test representation_size(M) == (3,2)
+            @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 8
-            @test !is_manifold_point(M, [1., 0., 0., 0.])
-            @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0., 0., 1., 0.])
+            @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
+            @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             x = [1.0 0.0; 0.0 0.5; 0.0 0.0]
-            @test_throws DomainError is_manifold_point(M, [:a :b; :c :d; :e :f],true)
+            @test_throws DomainError is_manifold_point(M, [:a :b; :c :d; :e :f], true)
             @test_throws DomainError is_tangent_vector(M, x, [:a :b; :c :d; :e :f], true)
 
             x = [1im 0.0; 0.0 0.5im; 0.0 0.0]
-            @test is_manifold_point(M,x)
-            @test !is_manifold_point(M,2*x)
+            @test is_manifold_point(M, x)
+            @test !is_manifold_point(M, 2 * x)
         end
     end
 
@@ -109,7 +110,7 @@ include("utils.jl")
         M = GeneralizedStiefel(3, 2, B, ℍ)
         @test repr(M) == "GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℍ)"
         @testset "Basics" begin
-            @test representation_size(M) == (3,2)
+            @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 18
         end
     end

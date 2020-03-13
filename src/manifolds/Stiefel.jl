@@ -36,7 +36,7 @@ struct Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingTy
 Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ) = Stiefel{n,k,field}()
 
 base_manifold(M::Stiefel) = M
-decorated_manifold(M::Stiefel{N,K}) where {N,K} = Euclidean(N,K; field=ℝ)
+decorated_manifold(M::Stiefel{N,K}) where {N,K} = Euclidean(N, K; field = ℝ)
 
 @doc raw"""
     check_manifold_point(M::Stiefel, p; kwargs...)
@@ -274,8 +274,8 @@ $\operatorname{Sym}(q) = \frac{q^{\mathrm{H}}+q}{2}$.
 project_tangent(::Stiefel, ::Any...)
 
 function project_tangent!(::Stiefel, Y, p, X)
-    A = p'*X
-    copyto!(Y, X - p*Hermitian(0.5*(A+A')))
+    A = p' * X
+    copyto!(Y, X - p * Hermitian((A + A') / 2))
     return Y
 end
 
