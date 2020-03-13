@@ -21,9 +21,9 @@ Manifolds.decorated_manifold(::NotImplementedEmbeddedManifold) = Euclidean(2)
 Manifolds.base_manifold(::NotImplementedEmbeddedManifold) = Euclidean(2)
 
 struct NotImplementedEmbeddedManifold2 <:
-       AbstractEmbeddedManifold{AbstractIsometricEmbeddingType} end
+       AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
 
-struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{AbstractEmbeddingType} end
+struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{DefaultEmbeddingType} end
 
 @testset "Embedded Manifolds" begin
     @testset "EmbeddedManifold basic tests" begin
@@ -31,10 +31,13 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{AbstractEmbed
         @test repr(M) ==
               "EmbeddedManifold(Euclidean(2; field = ℝ), Euclidean(3; field = ℝ), TransparentIsometricEmbedding())"
         @test decorated_manifold(M) == Euclidean(3)
+        @test Manifolds.default_embedding_dispatch(M) === Val{false}()
+        @test ManifoldsBase.default_decorator_dispatch(M) === Manifolds.default_embedding_dispatch(M)
     end
     @testset "PlaneManifold" begin
         M = PlaneManifold()
         @test repr(M) == "PlaneManifold()"
+        @test ManifoldsBase.default_decorator_dispatch(M) === Val{false}()
         p = [1.0 1.0 0.0]
         q = [1.0 0.0 0.0]
         X = q - p
@@ -116,6 +119,49 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{AbstractEmbed
             @test_throws ErrorException norm(M3, [1, 2], [2, 3])
             @test_throws ErrorException embed(M3, [1, 2], [2, 3])
             @test_throws ErrorException embed(M3, [1, 2])
+        end
+    end
+    @testset "EmbeddedManifold decorator dispatch" begin
+        TM = NotImplementedEmbeddedManifold() # transparently iso
+        IM = NotImplementedEmbeddedManifold2() # iso
+        AM = NotImplementedEmbeddedManifold3() # general
+        for f in [exp, get_basis, get_coordinates, get_vector, inverse_retract, log]
+            @test Manifolds.decorator_transparent_dispatch(f,AM) === Val{:parent}()
+        end
+        for f in [project_point, project_tangent, retract]
+            @test Manifolds.decorator_transparent_dispatch(f,AM) === Val{:parent}()
+        end
+        for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
+            @test Manifolds.decorator_transparent_dispatch(f,AM) === Val{:parent}()
+        end
+        for f in [check_manifold_point, check_tangent_vector, exp!, inner, inverse_retract!]
+            @test Manifolds.decorator_transparent_dispatch(f,AM) === Val{:intransparent}()
+        end
+        for f in [log!, norm, manifold_dimension, project_point!, project_tangent!, retract!]
+            @test Manifolds.decorator_transparent_dispatch(f,AM) === Val{:intransparent}()
+        end
+        for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
+            @test Manifolds.decorator_transparent_dispatch(f,AM) === Val{:intransparent}()
+        end
+
+        for f in [inner, norm]
+            @test Manifolds.decorator_transparent_dispatch(f,IM) === Val{:transparent}()
+        end
+        for f in [inverse_retract!, retract!]
+            @test Manifolds.decorator_transparent_dispatch(f,IM) === Val{:parent}()
+        end
+
+        for f in [exp, inverse_retract, log, project_tangent, retract]
+            @test Manifolds.decorator_transparent_dispatch(f,TM) === Val{:transparent}()
+        end
+        for f in [exp!, inverse_retract!, log!, project_point!, project_tangent!, retract!]
+            @test Manifolds.decorator_transparent_dispatch(f,TM) === Val{:transparent}()
+        end
+        for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
+            @test Manifolds.decorator_transparent_dispatch(f,TM) === Val{:transparent}()
+        end
+        for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
+            @test Manifolds.decorator_transparent_dispatch(f,TM) === Val{:transparent}()
         end
     end
 end

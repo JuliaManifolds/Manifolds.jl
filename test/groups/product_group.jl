@@ -15,7 +15,9 @@ include("group_utils.jl")
     @test sprint(show, G) == "ProductGroup($(SOn), $(Tn))"
     @test sprint(show, "text/plain", G) == "ProductGroup with 2 subgroups:\n $(SOn)\n $(Tn)"
     x = Matrix{Float64}(I, 3, 3)
-
+    for f in [group_exp!, group_log!]
+        @test Manifolds.decorator_transparent_dispatch(f,G,x,x) === Val{:transparent}()
+    end
     t = Vector{Float64}.([1:2, 2:3, 3:4])
     ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
     tuple_pts = [(exp(Rn, x, hat(Rn, x, ωi)), ti) for (ωi, ti) in zip(ω, t)]

@@ -6,6 +6,7 @@ include("utils.jl")
         @test repr(M) == "Sphere(2)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3},ℝ}
         @test representation_size(M) == (3,)
+        @test base_manifold(M) === M
         @test !is_manifold_point(M, [1., 0., 0., 0.])
         @test !is_tangent_vector(M, [1.,0.,0.], [0., 0., 1., 0.])
         @test_throws DomainError is_manifold_point(M, [2.,0.,0.],true)

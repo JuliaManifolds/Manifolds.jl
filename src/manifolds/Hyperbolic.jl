@@ -1,5 +1,5 @@
 @doc raw"""
-    Hyperbolic{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType}
+    Hyperbolic{N} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
 
 The hyperbolic space $ℍ^n$ represented by $n+1$-Tuples, i.e. embedded in the
 [`Lorentz`](@ref)ian manifold equipped with the [`MinkowskiMetric`](@ref)
@@ -27,7 +27,7 @@ metric. The corresponding sectional curvature is $-1$.
 
 Generate the $ℍ^{n} ⊂ ℝ^{n+1}$
 """
-struct Hyperbolic{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType} end
+struct Hyperbolic{N} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
 
 Hyperbolic(n::Int) = Hyperbolic{n}()
 

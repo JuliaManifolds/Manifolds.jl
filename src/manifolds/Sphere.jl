@@ -1,5 +1,5 @@
 @doc raw"""
-    Sphere{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType}
+    Sphere{N} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
 
 The unit sphere manifold $𝕊^n$ represented by $n+1$-Tuples, i.e. in by
 vectors in $ℝ^{n+1}$ of unit length. A sphere is an embedded manifold
@@ -12,13 +12,17 @@ T_p𝕊^n := \bigl\{ X ∈ ℝ^{n+1} : ⟨p,X⟩ = 0 \bigr \},
 
 where $⟨\cdot,\cdot⟩$ denotes the inner product in the embedding $\mathbb R^{n+1}$.
 
+This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
+several functions like the [`inner`](@ref) product and the [`zero_tangent_vector`](@ref)
+are inherited from the embedding.
+
 # Constructor
 
     Sphere(n)
 
 Generate $𝕊^{n} ⊂ ℝ^{n+1}$.
 """
-struct Sphere{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType} end
+struct Sphere{N} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
 
 Sphere(n::Int) = Sphere{n}()
 
@@ -51,7 +55,7 @@ function check_manifold_point(M::Sphere{N}, p; kwargs...) where {N}
     if size(p) != representation_size(M)
         return DomainError(
             size(p),
-            "The point $(p) does not lie on $M, since its size is not $(N+1).",
+            "The point $(p) does not lie on $(M), since its size is not $(N+1).",
         )
     end
     if !isapprox(norm(p), 1.0; kwargs...)

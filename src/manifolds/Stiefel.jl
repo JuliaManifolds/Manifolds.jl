@@ -4,25 +4,24 @@
 The Stiefel manifold consists of all $n × k$, $n ≥ k$ unitary matrices, i.e.
 
 ````math
-\{ p ∈ 𝔽^{n × k} : p^{\mathrm{H}}p = I_k \},
+\operatorname{St}(n,k)\{ p ∈ 𝔽^{n × k} : p^{\mathrm{H}}p = I_k \},
 ````
 
 where $𝔽 ∈ \{ℝ, ℂ\}$,
 $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
-$I_n ∈ ℝ^{n × n}$ denotes the $k × k$ identity matrix.
+$I_k ∈ ℝ^{k × k}$ denotes the $k × k$ identity matrix.
 
 The tangent space at a point $p ∈ \mathcal M$ is given by
 
 ````math
-T_p \mathcal M = \{ X ∈ 𝔽^{n × k} : p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0_n\},
+T_p \mathcal M = \{ X ∈ 𝔽^{n × k} : p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0_k\},
 ````
 
-where $0_n$ is the $k × k$ zero matrix.
+where $0_k$ is the $k × k$ zero matrix.
 
-The metric is either inherited from $ℝ^{n × k}$ for the real-valued case
-or the one inherited from interpreting the complex valued entries in the Gaussian
-plane $ℝ^2$ and then over all entries as before, i.e. the latter
-may be called an Hermitian metric in the complex-valued matrices.
+This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
+several functions like the [`inner`](@ref) product and the [`zero_tangent_vector`](@ref)
+are inherited from the embedding.
 
 The manifold is named after
 [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
@@ -32,9 +31,12 @@ The manifold is named after
 
 Generate the (real-valued) Stiefel manifold of $n × k$ dimensional orthonormal matrices.
 """
-struct Stiefel{n,k,𝔽} <: Manifold end
+struct Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
 
 Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ) = Stiefel{n,k,field}()
+
+base_manifold(M::Stiefel) = M
+decorated_manifold(M::Stiefel{N,K}) where {N,K} = Euclidean(N, K; field = ℝ)
 
 @doc raw"""
     check_manifold_point(M::Stiefel, p; kwargs...)
@@ -47,26 +49,26 @@ function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,�
     if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
-            "The matrix $(p) is not a real-valued matrix, so it does noe lie on the Stiefel manifold of dimension ($(n),$(k)).",
+            "The matrix $(p) is not a real-valued matrix, so it does not lie on the $(M).",
         )
     end
     if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
         return DomainError(
             eltype(p),
-            "The matrix $(p) is neiter real- nor complex-valued matrix, so it does noe lie on the complex Stiefel manifold of dimension ($(n),$(k)).",
+            "The matrix $(p) is neiter real- nor complex-valued matrix, so it does not lie on $(M).",
         )
     end
     if any(size(p) != representation_size(M))
         return DomainError(
             size(p),
-            "The matrix $(p) is does not lie on the Stiefel manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
+            "The matrix $(p) is does not lie on the $(M), since its dimensions are wrong.",
         )
     end
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
             norm(c - one(c)),
-            "The point $(p) does not lie on the Stiefel manifold of dimension ($(n),$(k)), because x'x is not the unit matrix.",
+            "The point $(p) does not lie on $(M), because x'x is not the unit matrix.",
         )
     end
 end
@@ -88,7 +90,7 @@ function check_tangent_vector(
     kwargs...,
 ) where {n,k,𝔽}
     if check_base_point
-        mpe = check_manifold_point(M, p)
+        mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     if (𝔽 === ℝ) && !(eltype(X) <: Real)
@@ -116,6 +118,10 @@ function check_tangent_vector(
         )
     end
 end
+
+embed!(::Stiefel, q, p) = (q .= p)
+
+embed!(::Stiefel, Y, p, X) = (Y .= X)
 
 @doc raw"""
     exp(M::Stiefel, p, X)
@@ -149,20 +155,6 @@ function exp!(M::Stiefel{n,k}, q, p, X) where {n,k}
         [exp(-p'X); zeros(eltype(p), k, k)],
     )
 end
-
-@doc raw"""
-    inner(M::Stiefel, p, X, Y)
-
-Compute the inner product for two tangent vectors `X`, `Y` from the
-tangent space of `p` on the [`Stiefel`](@ref) manifold `M`. The formula reads
-
-````math
-g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}Y),
-````
-i.e. the [`EuclideanMetric`](@ref) from the embedding restricted to the tangent
-space. For the complex-valued case this is the Hermitian metric, to be precise.
-"""
-inner(::Stiefel, p, X, Y) = dot(X, Y)
 
 @doc raw"""
     inverse_retract(M::Stiefel, p, q, ::PolarInverseRetraction)
@@ -249,6 +241,23 @@ manifold_dimension(::Stiefel{n,k,ℝ}) where {n,k} = n * k - div(k * (k + 1), 2)
 manifold_dimension(::Stiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
 manifold_dimension(::Stiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
 
+@doc doc"""
+    project_point(M::Stiefel,p)
+
+Projects `p` from the embedding onto the [`Stiefel`](@ref) `M`, i.e. compute `q`
+as the polar decomposition of $p$ such that $q^{\mathrm{H}q$ is the identity,
+where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+"""
+project_point(::Stiefel, ::Any...)
+
+function project_point!(M::Stiefel, q, p)
+    s = svd(p)
+    e = eigen(s.U' * s.U)
+    qsinv = e.vectors * Diagonal(1 ./ sqrt.(e.values))
+    q .= s.U * qsinv * e.vectors' * s.V'
+    return q
+end
+
 @doc raw"""
     project_tangent(M::Stiefel, p, X)
 
@@ -264,7 +273,11 @@ $\operatorname{Sym}(q) = \frac{q^{\mathrm{H}}+q}{2}$.
 """
 project_tangent(::Stiefel, ::Any...)
 
-project_tangent!(::Stiefel, Y, p, X) = copyto!(Y, X - p * Symmetric(p' * X))
+function project_tangent!(::Stiefel, Y, p, X)
+    A = p' * X
+    copyto!(Y, X - p * Hermitian((A + A') / 2))
+    return Y
+end
 
 @doc raw"""
     retract(M::Stiefel, p, X, ::PolarRetraction)
@@ -322,14 +335,3 @@ i.e. `(n,k)`, which is the matrix dimensions.
 @generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
 
 show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")
-
-@doc raw"""
-    zero_tangent_vector(M::Stiefel, p)
-
-Returns the zero tangent vector from the tangent space at `p`
-on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$,
-i.e. an `(n,k)` zero matrix.
-"""
-zero_tangent_vector(::Stiefel, ::Any...)
-
-zero_tangent_vector!(::Stiefel, X, p) = fill!(X, 0)
