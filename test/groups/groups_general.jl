@@ -20,6 +20,11 @@ include("../utils.jl")
         @test !Manifolds.is_group_decorator(NotImplementedManifold())
         @test Manifolds.decorator_group_dispatch(NotImplementedManifold()) === Val{false}()
 
+        @test Manifolds.decorator_transparent_dispatch(compose, G, x, x, x) === Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(compose!, G, x, x, x) === Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(group_exp, G, x, x) === Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(group_log, G, x, x) === Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(translate_diff!, G, x, x, x, x, x) === Val{:intransparent}()
         @test base_group(G) === G
 
         if VERSION ≥ v"1.3"
