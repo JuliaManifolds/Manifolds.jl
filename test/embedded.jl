@@ -21,7 +21,7 @@ Manifolds.decorated_manifold(::NotImplementedEmbeddedManifold) = Euclidean(2)
 Manifolds.base_manifold(::NotImplementedEmbeddedManifold) = Euclidean(2)
 
 struct NotImplementedEmbeddedManifold2 <:
-       AbstractEmbeddedManifold{DefaultEmbeddingType} end
+       AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
 
 struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{DefaultEmbeddingType} end
 
