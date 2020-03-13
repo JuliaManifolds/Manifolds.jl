@@ -240,6 +240,8 @@ end
         MM = MetricManifold(M, g)
         if VERSION ≥ v"1.3"
             @test DefaultBaseManifoldMetric(BaseManifold{3}()) === MetricManifold(BaseManifold{3}(),DefaultBaseManifoldMetric())
+            MT = DefaultBaseManifoldMetric()
+            @test MT(BaseManifold{3}()) === MetricManifold(BaseManifold{3}(),DefaultBaseManifoldMetric())
         end
         g2 = DefaultBaseManifoldMetric()
         MM2 = MetricManifold(M,g2)
@@ -374,7 +376,7 @@ end
             @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
         end
 
-        @test Manifolds.decorator_transparent_dispatch(exp,MM,x,x,x,x) === Val{:parent}()
+        @test Manifolds.decorator_transparent_dispatch(exp!,MM,x,x,x,x) === Val{:parent}()
         @test Manifolds.decorator_transparent_dispatch(inverse_retract!, MM, x, x, x, LogarithmicInverseRetraction()) === Val{:parent}()
         @test Manifolds.decorator_transparent_dispatch(retract!, MM, x, x, x, ExponentialRetraction()) === Val{:parent}()
 
