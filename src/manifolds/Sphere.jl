@@ -22,7 +22,7 @@ are inherited from the embedding.
 
 Generate $𝕊^{n} ⊂ ℝ^{n+1}$.
 """
-struct Sphere{N} <: AbstractEmbeddedManifold{DefaultEmbeddingType} end
+struct Sphere{N} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
 
 Sphere(n::Int) = Sphere{n}()
 

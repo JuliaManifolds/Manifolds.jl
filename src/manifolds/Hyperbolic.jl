@@ -27,7 +27,7 @@ metric. The corresponding sectional curvature is $-1$.
 
 Generate the $ℍ^{n} ⊂ ℝ^{n+1}$
 """
-struct Hyperbolic{N} <: AbstractEmbeddedManifold{DefaultEmbeddingType} end
+struct Hyperbolic{N} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
 
 Hyperbolic(n::Int) = Hyperbolic{n}()
 
