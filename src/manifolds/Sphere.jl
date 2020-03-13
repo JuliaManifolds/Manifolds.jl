@@ -1,5 +1,5 @@
 @doc raw"""
-    Sphere{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType}
+    Sphere{N} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
 
 The unit sphere manifold $𝕊^n$ represented by $n+1$-Tuples, i.e. in by
 vectors in $ℝ^{n+1}$ of unit length. A sphere is an embedded manifold
@@ -22,7 +22,7 @@ are inherited from the embedding.
 
 Generate $𝕊^{n} ⊂ ℝ^{n+1}$.
 """
-struct Sphere{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType} end
+struct Sphere{N} <: AbstractEmbeddedManifold{DefaultEmbeddingType} end
 
 Sphere(n::Int) = Sphere{n}()
 

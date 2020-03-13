@@ -20,12 +20,28 @@ abstract type AbstractEmbeddedManifold{T<:AbstractEmbeddingType} <:
               AbstractDecoratorManifold end
 
 """
+DefaultEmbeddingType <: AbstractEmbeddingType
+
+A type of default embedding that does not have any special properties.
+"""
+struct DefaultEmbeddingType <: AbstractEmbeddingType end
+
+"""
     AbstractIsometricEmbeddingType <: AbstractEmbeddingType
 
 Characterizes an embedding as isometric. For this case the [`inner`](@ref) product
 is passed from the embedded manifold to the embedding.
 """
 abstract type AbstractIsometricEmbeddingType <: AbstractEmbeddingType end
+
+
+"""
+    DefaultIsometricEmbeddingType <: AbstractIsometricEmbeddingType
+
+An isometric embedding type that acts as a default, i.e. it has no specifig properties
+beyond its isometric property.
+"""
+struct DefaultIsometricEmbeddingType <: AbstractIsometricEmbeddingType end
 
 """
     TransparentIsometricEmbedding <: AbstractIsometricEmbeddingType

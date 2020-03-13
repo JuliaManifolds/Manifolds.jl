@@ -21,9 +21,9 @@ Manifolds.decorated_manifold(::NotImplementedEmbeddedManifold) = Euclidean(2)
 Manifolds.base_manifold(::NotImplementedEmbeddedManifold) = Euclidean(2)
 
 struct NotImplementedEmbeddedManifold2 <:
-       AbstractEmbeddedManifold{AbstractIsometricEmbeddingType} end
+       AbstractEmbeddedManifold{DefaultEmbeddingType} end
 
-struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{AbstractEmbeddingType} end
+struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{DefaultEmbeddingType} end
 
 @testset "Embedded Manifolds" begin
     @testset "EmbeddedManifold basic tests" begin

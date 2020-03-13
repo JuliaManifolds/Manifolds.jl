@@ -1,5 +1,5 @@
 @doc doc"""
-    GeneralizedStiefel{n,k,B,T} <: AbstractEmbeddedManifold{AbstractEmbeddingType}
+    GeneralizedStiefel{n,k,B,T} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
 
 The Generalized Stiefel manifold consists of all $n\times k$, $n\geq k$ orthonormal
 matrices w.r.t. an arbitrary scalar product with symmetric positive definite matrix
@@ -35,7 +35,7 @@ The manifold is named after
 Generate the (real-valued) Generalized Stiefel manifold of $n\times k$ dimensional
 orthonormal matrices with scalar product `B`.
 """
-struct GeneralizedStiefel{n,k,TB<:AbstractMatrix,F} <: AbstractEmbeddedManifold{AbstractEmbeddingType}
+struct GeneralizedStiefel{n,k,TB<:AbstractMatrix,F} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
     B::TB
 end
 

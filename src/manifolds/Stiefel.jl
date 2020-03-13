@@ -31,7 +31,7 @@ The manifold is named after
 
 Generate the (real-valued) Stiefel manifold of $n × k$ dimensional orthonormal matrices.
 """
-struct Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType} end
+struct Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{DefaultEmbeddingType} end
 
 Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ) = Stiefel{n,k,field}()
 
