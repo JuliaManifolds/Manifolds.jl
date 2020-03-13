@@ -270,8 +270,14 @@ function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     end
     return CachedBasis(B, ProductBasisData(vs))
 end
-function get_basis(M::ProductManifold, p, B::DefaultOrthonormalBasis)
-    return invoke(get_basis, Tuple{ProductManifold,Any,AbstractBasis}, M, p, B)
+for BT in (
+    DefaultOrthonormalBasis,
+    ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
+    ProjectedOrthonormalBasis{:svd,ℝ},
+)
+    eval(quote
+        @invoke_maker 3 AbstractBasis get_basis(M::ProductManifold, p, B::$BT)
+    end)
 end
 
 function get_coordinates(
