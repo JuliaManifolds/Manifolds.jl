@@ -202,7 +202,7 @@ function get_vector!(M::Circle, Y::AbstractArray, p, X, B::AbstractBasis)
 end
 for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES
     eval(quote
-        @superinvoke_maker 5 get_vector!(M::Circle, Y::AbstractArray, p, X, B::$BT)
+        @invoke_maker 5 $(supertype(BT)) get_vector!(M::Circle, Y::AbstractArray, p, X, B::$BT)
     end)
 end
 

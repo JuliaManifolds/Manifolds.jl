@@ -225,8 +225,20 @@ gaussian_curvature(::MetricManifold, ::Any)
     return ricci_curvature(M, p; kwargs...) / 2
 end
 
-function injectivity_radius(M::MMT, args...) where {MMT<:MetricManifold}
-    return injectivity_radius(base_manifold(M), args...)
+function injectivity_radius(M::MetricManifold, p)
+    return injectivity_radius(base_manifold(M), p)
+end
+function injectivity_radius(M::MetricManifold, m::AbstractRetractionMethod)
+    return injectivity_radius(base_manifold(M), m)
+end
+function injectivity_radius(M::MetricManifold, m::ExponentialRetraction)
+    return injectivity_radius(base_manifold(M), m)
+end
+function injectivity_radius(M::MetricManifold, p, m::AbstractRetractionMethod)
+    return injectivity_radius(base_manifold(M), p, m)
+end
+function injectivity_radius(M::MetricManifold, p, m::ExponentialRetraction)
+    return injectivity_radius(base_manifold(M), p, m)
 end
 
 @doc raw"""

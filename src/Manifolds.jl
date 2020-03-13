@@ -106,6 +106,7 @@ using ManifoldsBase:
     @decorator_transparent_signature,
     _euclidean_basis_vector,
     _extract_val,
+    @invoke_maker,
     is_decorator_transparent,
     is_default_decorator,
     manifold_function_not_implemented_message

@@ -129,28 +129,3 @@ end
 function LinearAlgebra.eigvals(A::StaticArray, B::StaticArray; kwargs...)
     return eigvals(Array(A), Array(B); kwargs...)
 end
-
-macro superinvoke_maker(argnum, sig)
-    parts = ManifoldsBase._split_signature(sig)
-    kwargs_list = parts[:kwargs_list]
-    callargs = parts[:callargs]
-    fname = parts[:fname]
-    where_exprs = parts[:where_exprs]
-    argnames = parts[:argnames]
-    argtypes = parts[:argtypes]
-    kwargs_call = parts[:kwargs_call]
-
-    return esc(quote
-        function ($fname)(
-            $(callargs...);
-            $(kwargs_list...),
-        ) where {$(where_exprs...)}
-            return invoke(
-                $fname,
-                Tuple{$(argtypes[1:argnum-1]...),supertype($(argtypes[argnum])),$(argtypes[argnum+1:end]...)},
-                $(argnames...);
-                $(kwargs_call...),
-            )
-        end
-    end)
-end
