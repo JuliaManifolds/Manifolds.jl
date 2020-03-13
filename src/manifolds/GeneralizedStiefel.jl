@@ -35,14 +35,22 @@ The manifold is named after
 Generate the (real-valued) Generalized Stiefel manifold of $n\times k$ dimensional
 orthonormal matrices with scalar product `B`.
 """
-struct GeneralizedStiefel{n,k,TB<:AbstractMatrix,F} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
+struct GeneralizedStiefel{n,k,TB<:AbstractMatrix,F} <:
+       AbstractEmbeddedManifold{DefaultEmbeddingType}
     B::TB
 end
 
-GeneralizedStiefel(n::Int, k::Int, B::AbstractMatrix = Matrix{Float64}(I,n,n), F::AbstractNumbers = ℝ) = GeneralizedStiefel{n,k,typeof(B),F}(B)
+function GeneralizedStiefel(
+    n::Int,
+    k::Int,
+    B::AbstractMatrix = Matrix{Float64}(I, n, n),
+    F::AbstractNumbers = ℝ,
+)
+    return GeneralizedStiefel{n,k,typeof(B),F}(B)
+end
 
 base_manifold(M::GeneralizedStiefel) = M
-decorated_manifold(M::GeneralizedStiefel{N,K}) where {N,K} = Euclidean(N,K; field=ℝ)
+decorated_manifold(M::GeneralizedStiefel{N,K}) where {N,K} = Euclidean(N, K; field = ℝ)
 
 @doc doc"""
     check_manifold_point(M::GeneralizedStiefel, p; kwargs...)
@@ -161,7 +169,9 @@ The dimension is given by
 \end{aligned}
 ````
 """
-manifold_dimension(::GeneralizedStiefel{n,k,B,ℝ}) where {n,k,B} = n * k - div(k * (k + 1), 2)
+function manifold_dimension(::GeneralizedStiefel{n,k,B,ℝ}) where {n,k,B}
+    return n * k - div(k * (k + 1), 2)
+end
 manifold_dimension(::GeneralizedStiefel{n,k,B,ℂ}) where {n,k,B} = 2 * n * k - k * k
 manifold_dimension(::GeneralizedStiefel{n,k,B,ℍ}) where {n,k,B} = 4 * n * k - k * (2k - 1)
 
@@ -176,7 +186,7 @@ project_point(::GeneralizedStiefel, ::Any...)
 
 function project_point!(M::GeneralizedStiefel, q, p)
     s = svd(p)
-    e=eigen(s.U' * M.B * s.U)
+    e = eigen(s.U' * M.B * s.U)
     qsinv = e.vectors * Diagonal(1 ./ sqrt.(e.values))
     q .= s.U * qsinv * e.vectors' * s.V'
     return q
@@ -197,9 +207,9 @@ $\operatorname{Sym}(y) = \frac{y^{\mathrm{H}}+y}{2}$.
 """
 project_tangent(::GeneralizedStiefel, ::Any...)
 
-function  project_tangent!(M::GeneralizedStiefel, Y, p, X)
-    A = p'*M.B'*X
-    copyto!(Y, X - p*Hermitian((A+A')/2))
+function project_tangent!(M::GeneralizedStiefel, Y, p, X)
+    A = p' * M.B' * X
+    copyto!(Y, X - p * Hermitian((A + A') / 2))
     return Y
 end
 @doc doc"""
@@ -219,15 +229,17 @@ retract(M::GeneralizedStiefel, p, X) = retract(M, p, X, ProjectionRetraction())
 
 retract!(M::GeneralizedStiefel, q, p, X) = retract!(M, q, p, X, ProjectionRetraction())
 function retract!(M::GeneralizedStiefel, q, p, X, ::PolarRetraction)
-    project_point!(M, q, p+X)
+    project_point!(M, q, p + X)
     return q
 end
 function retract!(M::GeneralizedStiefel, q, p, X, ::ProjectionRetraction)
-    project_point!(M, q, p+X)
+    project_point!(M, q, p + X)
     return q
 end
 
-show(io::IO, M::GeneralizedStiefel{n,k,B,F}) where {n,k,B,F} = print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(F))")
+function show(io::IO, M::GeneralizedStiefel{n,k,B,F}) where {n,k,B,F}
+    print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(F))")
+end
 
 
 @doc doc"""
