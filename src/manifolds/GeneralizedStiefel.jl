@@ -30,7 +30,7 @@ The manifold is named after
 [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
 
 # Constructor
-    GeneralizedStiefel(n, k, B=I_k, F=ℝ)
+    GeneralizedStiefel(n, k, B=I_n, F=ℝ)
 
 Generate the (real-valued) Generalized Stiefel manifold of $n\times k$ dimensional
 orthonormal matrices with scalar product `B`.
@@ -50,7 +50,6 @@ function GeneralizedStiefel(
 end
 
 base_manifold(M::GeneralizedStiefel) = M
-decorated_manifold(M::GeneralizedStiefel{N,K}) where {N,K} = Euclidean(N, K; field = ℝ)
 
 @doc doc"""
     check_manifold_point(M::GeneralizedStiefel, p; kwargs...)
@@ -61,24 +60,8 @@ is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the complex conju
 transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_manifold_point(M::GeneralizedStiefel{n,k,B,𝔽}, p; kwargs...) where {n,k,B,𝔽}
-    if (𝔽 === ℝ) && !(eltype(p) <: Real)
-        return DomainError(
-            eltype(p),
-            "The matrix $(p) is not a real-valued matrix, so it does not lie on $(M).",
-        )
-    end
-    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
-        return DomainError(
-            eltype(p),
-            "The matrix $(p) is neiter real- nor complex-valued matrix, so it does not lie on $(M).",
-        )
-    end
-    if any(size(p) != representation_size(M))
-        return DomainError(
-            size(p),
-            "The matrix $(p) is does not lie on $(M), since its dimensions are wrong.",
-        )
-    end
+    mpv = invoke(check_manifold_point, Tuple{typeof(get_embedding(M)), typeof(p)}, get_embedding(M), p; kwargs...)
+    mpv === nothing || return mpv
     c = p' * M.B * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
@@ -109,32 +92,24 @@ function check_tangent_vector(
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
-    mpe === nothing || return mpe
-    if (𝔽 === ℝ) && !(eltype(X) <: Real)
-        return DomainError(
-            eltype(X),
-            "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to the Generalized Stiefel manifold of dimension ($(n),$(k)).",
-        )
-    end
-    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
-        return DomainError(
-            eltype(X),
-            "The matrix $(X) is a neither real- nor complex-valued matrix, so it can not be a tangent vector to the complex Generalized Stiefel manifold of dimension ($(n),$(k)).",
-        )
-    end
-    if any(size(X) != representation_size(M))
-        return DomainError(
-            size(X),
-            "The matrix $(X) does not lie in the tangent space of $(p) on the Generalized Stiefel manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
-        )
-    end
+    mpv = invoke(
+        check_tangent_vector,
+        Tuple{typeof(get_embedding(M)), typeof(p), typeof(X)},
+        get_embedding(M),
+        p,
+        X;
+        check_base_point = check_base_point,
+        kwargs...
+    )
     if !isapprox(p' * M.B * X + X' * M.B * p, zeros(k, k); kwargs...)
         return DomainError(
             norm(p' * M.B * X + X' * M.B * p),
-            "The matrix $(X) does not lie in the tangent space of $(p) on the Generalized Stiefel manifold of dimension ($(n),$(k)), since x'Bv + v'Bx is not the zero matrix.",
+            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since x'Bv + v'Bx is not the zero matrix.",
         )
     end
 end
+
+decorated_manifold(M::GeneralizedStiefel{N,K,B,𝔽}) where {N,K,B,𝔽} = Euclidean(N, K; field = 𝔽)
 
 embed!(::GeneralizedStiefel, q, p) = (q .= p)
 

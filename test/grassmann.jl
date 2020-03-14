@@ -42,7 +42,7 @@ include("utils.jl")
                 test_reverse_diff = false,
                 retraction_methods = [PolarRetraction(), QRRetraction()],
                 inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()],
-                basis_types_vecs = basis_types,
+                #basis_types_vecs = basis_types,
                 exp_log_atol_multiplier = 10.0,
                 is_tangent_atol_multiplier = 10.0,
             )

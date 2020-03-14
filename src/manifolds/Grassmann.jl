@@ -13,7 +13,7 @@ The manifold can be represented as
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and
-$I_k$ is the $k × k$ identity matrix. This means, that the columns of $x$
+$I_k$ is the $k × k$ identity matrix. This means, that the columns of $p$
 form an unitary basis of the subspace, that is a point on
 $\operatorname{Gr}(n,k)$, and hence the subspace can actually be represented by
 a whole equivalence class of representers.
@@ -51,9 +51,11 @@ The manifold is named after
 Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
 case $field = ℝ$ is the default.
 """
-struct Grassmann{n,k,𝔽} <: Manifold end
+struct Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
 
 Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ) = Grassmann{n,k,field}()
+
+base_manifold(M::Grassmann) = M
 
 @doc raw"""
     check_manifold_point(M::Grassmann{n,k,𝔽}, p)
@@ -62,24 +64,8 @@ Check whether `p` is representing a point on the [`Grassmann`](@ref) `M`, i.e. i
 a `n`-by-`k` matrix of unitary column vectors and of correct `eltype` with respect to `𝔽`.
 """
 function check_manifold_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    if (𝔽 === ℝ) && !(eltype(p) <: Real)
-        return DomainError(
-            eltype(p),
-            "The matrix $(p) is not a real-valued matrix, so it does not lie on $(M).",
-        )
-    end
-    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
-        return DomainError(
-            eltype(p),
-            "The matrix $(p) is neither a real- nor complex-valued matrix, so it does not lie on $(M).",
-        )
-    end
-    if size(p) != representation_size(M)
-        return DomainError(
-            size(p),
-            "The matrix $(p) does not lie on $(M), since its dimensions are wrong.",
-        )
-    end
+    mpv = invoke(check_manifold_point, Tuple{typeof(get_embedding(M)), typeof(p)}, get_embedding(M), p; kwargs...)
+    mpv === nothing || return mpv
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
@@ -105,27 +91,19 @@ The optional parameter `check_base_point` indicates, whether to call [`check_man
 """
 function check_tangent_vector(M::Grassmann{n,k,𝔽}, p, X; check_base_point = true, kwargs...) where {n,k,𝔽}
     if check_base_point
-        t = check_manifold_point(M, p)
-        t === nothing || return t
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
     end
-    if (𝔽 === ℝ) && !(eltype(X) <: Real)
-        return DomainError(
-            eltype(X),
-            "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to $(p) on $(M).",
-        )
-    end
-    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
-        return DomainError(
-            eltype(X),
-            "The matrix $(X) is neither a real- nor complex-valued matrix, so it can not be a tangent vector to $(p) on $(M).",
-        )
-    end
-    if size(X) != representation_size(M)
-        return DomainError(
-            size(X),
-            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since its dimensions are wrong.",
-        )
-    end
+    mpv = invoke(
+        check_tangent_vector,
+        Tuple{typeof(get_embedding(M)), typeof(p), typeof(X)},
+        get_embedding(M),
+        p,
+        X;
+        check_base_point = check_base_point,
+        kwargs...
+    )
+    mpv === nothing || return mpv
     if !isapprox(p' * X + X' * p, zeros(k, k); kwargs...)
         return DomainError(
             norm(p' * X + X' * p),
@@ -133,6 +111,8 @@ function check_tangent_vector(M::Grassmann{n,k,𝔽}, p, X; check_base_point = t
         )
     end
 end
+
+decorated_manifold(M::Grassmann{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
 
 @doc raw"""
     distance(M::Grassmann, p, q)
@@ -161,6 +141,10 @@ function distance(M::Grassmann, p, q)
     return sqrt(sum((acos.(a)) .^ 2))
 end
 
+embed!(::Grassmann, q, p) = (q .= p)
+
+embed!(::Grassmann, Y, p, X) = (Y .= X)
+
 @doc raw"""
     exp(M::Grassmann, p, X)
 
@@ -185,7 +169,7 @@ exp(::Grassmann, ::Any...)
 function exp!(M::Grassmann, q, p, X)
     norm(M, p, X) ≈ 0 && return copyto!(q, p)
     d = svd(X)
-    z = p * d.V * Diagonal(cos.(d.S)) * d.Vt + d.U * Diagonal(sin.(d.S)) * d.Vt
+    z = p * d.U * Diagonal(cos.(d.S)) * d.Vt + d.U * Diagonal(sin.(d.S)) * d.Vt
     return copyto!(q, Array(qr(z).Q))
 end
 
@@ -305,10 +289,10 @@ manifold_dimension(::Grassmann{n,k,𝔽}) where {n,k,𝔽} = k * (n - k) * real_
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
-mean(::Grassmann{n,k,ℝ} where {n,k}, ::Any...)
+mean(::Grassmann{n,k} where {n,k}, ::Any...)
 
 function mean!(
-    M::Grassmann{n,k,ℝ},
+    M::Grassmann{n,k},
     p,
     x::AbstractVector,
     w::AbstractVector;

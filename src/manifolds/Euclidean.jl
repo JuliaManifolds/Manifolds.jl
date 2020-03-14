@@ -45,6 +45,51 @@ function ^(::Euclidean{T,𝔽}, n::NTuple{N,Int}) where {T,𝔽,N}
     return Euclidean{Tuple{T.parameters...,n...},𝔽}()
 end
 
+function check_manifold_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
+    if (𝔽 === ℝ) && !(eltype(p) <: Real)
+        return DomainError(
+            eltype(p),
+            "The matrix $(p) is not a real-valued matrix, so it does not lie on $(M).",
+        )
+    end
+    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
+        return DomainError(
+            eltype(p),
+            "The matrix $(p) is neither a real- nor complex-valued matrix, so it does not lie on $(M).",
+        )
+    end
+    if size(p) != representation_size(M)
+        return DomainError(
+            size(p),
+            "The matrix $(p) does not lie on $(M), since its dimensions are wrong.",
+        )
+    end
+end
+
+function check_tangent_vector(M::Euclidean{N,𝔽}, p, X; check_base_point = true, kwargs...) where {N,𝔽}
+    if check_base_point
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
+    end
+    if (𝔽 === ℝ) && !(eltype(X) <: Real)
+        return DomainError(
+            eltype(X),
+            "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to $(p) on $(M).",
+        )
+    end
+    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
+        return DomainError(
+            eltype(X),
+            "The matrix $(X) is neither a real- nor complex-valued matrix, so it can not be a tangent vector to $(p) on $(M).",
+        )
+    end
+    if size(X) != representation_size(M)
+        return DomainError(
+            size(X),
+            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since its dimensions are wrong.",
+        )
+    end
+end
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = one(eltype(p))
 
 """
