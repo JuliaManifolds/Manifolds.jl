@@ -157,6 +157,7 @@ include("manifolds/Lorentz.jl")
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
 include("manifolds/FixedRankMatrices.jl")
+include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Grassmann.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/Rotations.jl")
@@ -206,6 +207,7 @@ export Euclidean,
     CholeskySpace,
     Circle,
     FixedRankMatrices,
+    GeneralizedStiefel,
     Grassmann,
     Hyperbolic,
     Lorentz,
@@ -247,7 +249,8 @@ export Metric,
     PowerMetric,
     ProductMetric,
     MetricManifold
-export AbstractEmbeddingType, AbstractIsometricEmbeddingType, TransparentIsometricEmbedding
+export AbstractEmbeddingType, AbstractIsometricEmbeddingType
+export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod,
     ExponentialRetraction,

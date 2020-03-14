@@ -32,6 +32,7 @@ Random.seed!(42)
     @test Mr^(5, 7) === Mr2
 
     @test is_default_metric(Ms1, PowerMetric())
+    @test default_metric_dispatch(Ms1, PowerMetric()) === Val{true}()
     types_s1 = [Array{Float64,2},
                 HybridArray{Tuple{3,StaticArrays.Dynamic()}, Float64, 2}]
     types_s2 = [Array{Float64,3},
@@ -288,4 +289,24 @@ Random.seed!(42)
            1
         """
     end
+
+    @testset "Power manifold of Circle" begin
+        pts_t = [[0.0, 1.0, 2.0], [1.0, 1.0, 2.4], [0.0, 2.0, 1.0]]
+        MT = PowerManifold(Circle(), 3)
+        @test representation_size(MT) == (3,)
+        test_manifold(
+            MT,
+            pts_t;
+            test_reverse_diff = false,
+            test_forward_diff = false,
+            test_injectivity_radius = false,
+            test_musical_isomorphisms = true,
+            retraction_methods = retraction_methods,
+            inverse_retraction_methods = inverse_retraction_methods,
+            rand_tvector_atol_multiplier = 5.0,
+            retraction_atol_multiplier = 12,
+            is_tangent_atol_multiplier = 12.0,
+        )
+    end
+
 end

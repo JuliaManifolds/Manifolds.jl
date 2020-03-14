@@ -27,6 +27,7 @@ include("utils.jl")
             true,
         )
         @test is_default_metric(M, MinkowskiMetric())
+        @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
         @test manifold_dimension(M) == 2
     end
     types = [Vector{Float64}, SizedVector{3,Float64}, Vector{Float32}]

@@ -9,6 +9,7 @@ include("utils.jl")
     @test repr(Euclidean(2, 3; field = ℍ)) == "Euclidean(2, 3; field = ℍ)"
     @test is_default_metric(EM)
     @test is_default_metric(E, Manifolds.EuclideanMetric())
+    @test Manifolds.default_metric_dispatch(E,Manifolds.EuclideanMetric()) === Val{true}()
     p = zeros(3)
     @test det_local_metric(EM, p) == one(eltype(p))
     @test log_local_metric_density(EM, p) == zero(eltype(p))
@@ -16,6 +17,7 @@ include("utils.jl")
     @test manifold_dimension(Ec) == 2*manifold_dimension(E)
 
     @test E^2 === Euclidean(3, 2)
+    @test ^(E,2) === Euclidean(3, 2)
     @test E^(2,) === Euclidean(3, 2)
     @test Ec^(4,5) === Euclidean(3, 4, 5; field = ℂ)
 

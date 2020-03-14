@@ -73,26 +73,26 @@ function check_manifold_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,�
     if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
-            "The matrix $(p) is not a real-valued matrix, so it does not lie on the Grassmann manifold of dimension ($(n),$(k)).",
+            "The matrix $(p) is not a real-valued matrix, so it does not lie on $(M).",
         )
     end
     if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
         return DomainError(
             eltype(p),
-            "The matrix $(p) is neither a real- nor complex-valued matrix, so it does not lie on the complex Grassmann manifold of dimension ($(n),$(k)).",
+            "The matrix $(p) is neither a real- nor complex-valued matrix, so it does not lie on $(M).",
         )
     end
     if size(p) != representation_size(M)
         return DomainError(
             size(p),
-            "The matrix $(p) does not lie on the Grassmann manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
+            "The matrix $(p) does not lie on $(M), since its dimensions are wrong.",
         )
     end
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
             norm(c - one(c)),
-            "The point $(p) does not lie on the Grassmann manifold of dimension ($(n),$(k)), because x'x is not the unit matrix.",
+            "The point $(p) does not lie on $(M), because x'x is not the unit matrix.",
         )
     end
 end
@@ -111,33 +111,33 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian 
 denotes the $k × k$ zero natrix.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
-function check_tangent_vector(G::Grassmann{n,k,𝔽}, p, X; check_base_point = true, kwargs...) where {n,k,𝔽}
+function check_tangent_vector(M::Grassmann{n,k,𝔽}, p, X; check_base_point = true, kwargs...) where {n,k,𝔽}
     if check_base_point
-        t = check_manifold_point(G, p)
+        t = check_manifold_point(M, p)
         t === nothing || return t
     end
     if (𝔽 === ℝ) && !(eltype(X) <: Real)
         return DomainError(
             eltype(X),
-            "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to the Grassmann manifold of dimension ($(n),$(k)).",
+            "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to $(p) on $(M).",
         )
     end
     if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
         return DomainError(
             eltype(X),
-            "The matrix $(X) is neither a real- nor complex-valued matrix, so it can not be a tangent vector to the complex Grassmann manifold of dimension ($(n),$(k)).",
+            "The matrix $(X) is neither a real- nor complex-valued matrix, so it can not be a tangent vector to $(p) on $(M).",
         )
     end
-    if size(X) != representation_size(G)
+    if size(X) != representation_size(M)
         return DomainError(
             size(X),
-            "The matrix $(X) does not lie in the tangent space of $(p) on the Grassmann manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
+            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since its dimensions are wrong.",
         )
     end
     if !isapprox(p' * X + X' * p, zeros(k, k); kwargs...)
         return DomainError(
             norm(p' * X + X' * p),
-            "The matrix $(X) does not lie in the tangent space of $(p) on the Grassmann manifold of dimension ($(n),$(k)), since x'v + v'x is not the zero matrix.",
+            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since p'X + X'p is not the zero matrix.",
         )
     end
 end
