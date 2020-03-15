@@ -55,7 +55,7 @@ struct Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbedding
 
 Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ) = Grassmann{n,k,field}()
 
-base_manifold(M::Grassmann) = M
+base_manifold(M::Grassmann, d::Val{N}=Val(-1)) where {N} = M
 
 @doc raw"""
     check_manifold_point(M::Grassmann{n,k,𝔽}, p)
@@ -64,7 +64,7 @@ Check whether `p` is representing a point on the [`Grassmann`](@ref) `M`, i.e. i
 a `n`-by-`k` matrix of unitary column vectors and of correct `eltype` with respect to `𝔽`.
 """
 function check_manifold_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv = invoke(check_manifold_point, Tuple{typeof(get_embedding(M)), typeof(p)}, get_embedding(M), p; kwargs...)
+    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
@@ -96,11 +96,11 @@ function check_tangent_vector(M::Grassmann{n,k,𝔽}, p, X; check_base_point = t
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{typeof(get_embedding(M)), typeof(p), typeof(X)},
-        get_embedding(M),
+        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        M,
         p,
         X;
-        check_base_point = check_base_point,
+        check_base_point = false, # already checked above
         kwargs...
     )
     mpv === nothing || return mpv
@@ -169,7 +169,7 @@ exp(::Grassmann, ::Any...)
 function exp!(M::Grassmann, q, p, X)
     norm(M, p, X) ≈ 0 && return copyto!(q, p)
     d = svd(X)
-    z = p * d.U * Diagonal(cos.(d.S)) * d.Vt + d.U * Diagonal(sin.(d.S)) * d.Vt
+    z = p * d.V * Diagonal(cos.(d.S)) * d.Vt + d.U * Diagonal(sin.(d.S)) * d.Vt
     return copyto!(q, Array(qr(z).Q))
 end
 

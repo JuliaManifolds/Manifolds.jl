@@ -49,8 +49,6 @@ function GeneralizedStiefel(
     return GeneralizedStiefel{n,k,typeof(B),F}(B)
 end
 
-base_manifold(M::GeneralizedStiefel) = M
-
 @doc doc"""
     check_manifold_point(M::GeneralizedStiefel, p; kwargs...)
 
@@ -60,7 +58,7 @@ is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the complex conju
 transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_manifold_point(M::GeneralizedStiefel{n,k,B,𝔽}, p; kwargs...) where {n,k,B,𝔽}
-    mpv = invoke(check_manifold_point, Tuple{typeof(get_embedding(M)), typeof(p)}, get_embedding(M), p; kwargs...)
+    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     c = p' * M.B * p
     if !isapprox(c, one(c); kwargs...)
@@ -94,13 +92,14 @@ function check_tangent_vector(
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{typeof(get_embedding(M)), typeof(p), typeof(X)},
-        get_embedding(M),
+        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        M,
         p,
         X;
-        check_base_point = check_base_point,
+        check_base_point = false, # already checked above
         kwargs...
     )
+    mpv === nothing || return mpv
     if !isapprox(p' * M.B * X + X' * M.B * p, zeros(k, k); kwargs...)
         return DomainError(
             norm(p' * M.B * X + X' * M.B * p),

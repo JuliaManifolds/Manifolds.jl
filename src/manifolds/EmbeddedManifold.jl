@@ -89,6 +89,58 @@ function EmbeddedManifold(
 end
 
 """
+    base_manifold(M::AbstractEmbeddedManifold, d::Val{N} = Val(-1))
+
+Return the base manifold of `M`. While functions like `inner` might be overwritten to
+use the (decorated) manifold representing the embedding, the base_manifold is the manifold
+itself in the sense that detemining e.g. the [`is_default_metric`](@ref) does not check with
+the embedding but with the manifold itself.
+"""
+base_manifold(M::AbstractEmbeddedManifold, d::Val{N}=Val(-1)) where {N} = M
+base_manifold(M::EmbeddedManifold, d::Val{N}=Val(-1)) where {N} = M.M
+
+
+"""
+    check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs)
+
+check whether a point `p` is a valid point on the [`AbstractEmbeddedManifold`](@ref),
+i.e. that `embed(M, p)` is a valid point on the embedded manifold.
+"""
+function check_manifold_point(M::AbstractEmbeddedManifold, p; kwargs...)
+    q = embed(M,p)
+    return invoke(
+        check_manifold_point,
+        Tuple{typeof(get_embedding(M)), typeof(q)},
+        get_embedding(M),
+        q;
+        kwargs...
+    )
+end
+
+"""
+    check_tangent_vector(M::AbstractEmbeddedManifold, p, X; check_base_point = true, kwargs...)
+
+check that `embed(M,p,X)` is a valid tangent to `embed(p,X)`, where `check_base_point`
+determines whether the validity of `p` is checked, too.
+"""
+function check_tangent_vector(M::AbstractEmbeddedManifold, p, X; check_base_point = true, kwargs...)
+    if check_base_point
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
+    end
+    q = embed(M,p)
+    Y = embed(M,p,X)
+    return invoke(
+        check_tangent_vector,
+        Tuple{typeof(get_embedding(M)), typeof(q), typeof(Y)},
+        get_embedding(M),
+        q,
+        Y;
+        check_base_point = check_base_point,
+        kwargs...
+    )
+end
+"""
     embed(M::AbstractEmbeddedManifold, p)
 
 return the embedded representation of a point `p` on the [`AbstractEmbeddedManifold`](@ref)

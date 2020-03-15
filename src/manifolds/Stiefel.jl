@@ -35,9 +35,6 @@ struct Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingTy
 
 Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ) = Stiefel{n,k,field}()
 
-base_manifold(M::Stiefel) = M
-decorated_manifold(M::Stiefel{N,K}) where {N,K} = Euclidean(N, K; field = ℝ)
-
 @doc raw"""
     check_manifold_point(M::Stiefel, p; kwargs...)
 
@@ -46,7 +43,7 @@ Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{S
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv = invoke(check_manifold_point, Tuple{typeof(get_embedding(M)), typeof(p)}, get_embedding(M), p; kwargs...)
+    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
@@ -79,13 +76,14 @@ function check_tangent_vector(
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{typeof(get_embedding(M)), typeof(p), typeof(X)},
-        get_embedding(M),
+        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        M,
         p,
         X;
-        check_base_point = check_base_point,
+        check_base_point = false, # already checked above
         kwargs...
     )
+    mpv === nothing || return mpv
     if !isapprox(p' * X + X' * p, zeros(k, k); kwargs...)
         return DomainError(
             norm(p' * X + X' * p),
@@ -93,6 +91,8 @@ function check_tangent_vector(
         )
     end
 end
+
+decorated_manifold(M::Stiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
 
 embed!(::Stiefel, q, p) = (q .= p)
 
