@@ -306,6 +306,17 @@ function decorator_transparent_dispatch(
 end
 function decorator_transparent_dispatch(
     ::typeof(inverse_retract!),
+    ::AbstractEmbeddedManifold,
+    ::Any,
+    ::Any,
+    ::Any,
+    ::LogarithmicInverseRetraction,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(inverse_retract!),
     ::AbstractEmbeddedManifold{<:AbstractIsometricEmbeddingType},
     args...,
 )
@@ -433,6 +444,17 @@ function decorator_transparent_dispatch(
     args...,
 )
     return Val(:intransparent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(retract!),
+    ::AbstractEmbeddedManifold,
+    ::Any,
+    ::Any,
+    ::Any,
+    ::ExponentialRetraction,
+    args...,
+)
+    return Val(:parent)
 end
 function decorator_transparent_dispatch(
     ::typeof(retract!),
