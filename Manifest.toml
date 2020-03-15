@@ -214,7 +214,7 @@ version = "1.0.1"
 deps = ["Random", "Rmath_jll"]
 git-tree-sha1 = "86c5647b565873641538d8f812c04e4c9dbeb370"
 uuid = "79098fc4-a85e-5d69-aa6a-4863f24498fa"
-version = "0.6.1"
+version = "0.6.0"
 
 [[Rmath_jll]]
 deps = ["Libdl", "Pkg"]
