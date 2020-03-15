@@ -3,7 +3,7 @@ include("utils.jl")
 
 @testset "Ambiguities" begin
     # TODO: reduce the number of ambiguities
-    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 54
+    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 59
     @test length(Test.detect_ambiguities(Manifolds)) == 0
 end
 

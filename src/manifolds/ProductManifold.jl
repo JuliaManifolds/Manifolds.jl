@@ -806,7 +806,7 @@ function get_coordinates(M::ProductManifold, p::ProductRepr, X, B::VeeOrthogonal
     return vcat(reps...)
 end
 function get_coordinates(M::ProductManifold, p, X, B::VeeOrthogonalBasis)
-    Xⁱ = allocate_result(M, get_coordinates, p, X)
+    Xⁱ = allocate_result(M, get_coordinates, p, X, B)
     return get_coordinates!(M, Xⁱ, p, X, B)
 end
 
