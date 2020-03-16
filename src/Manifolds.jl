@@ -130,7 +130,6 @@ using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
 using StatsBase: AbstractWeights, UnitWeights, values, varcorrection
-using UnsafeArrays
 
 include("utils.jl")
 include("autodiff.jl")
