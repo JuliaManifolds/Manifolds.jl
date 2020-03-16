@@ -82,9 +82,9 @@ version = "0.9.2"
 
 [[HybridArrays]]
 deps = ["LinearAlgebra", "StaticArrays"]
-git-tree-sha1 = "cc7c0b0f8e188f28e3353dde575aeb0aff0e41c0"
+git-tree-sha1 = "f25e413e54ff8e3c7753c7858f479ab07a8a01e1"
 uuid = "1baab800-613f-4b0a-84e4-9cd3431bfbb9"
-version = "0.3.1"
+version = "0.3.2"
 
 [[Inflate]]
 deps = ["Pkg", "Printf", "Random", "Test"]
