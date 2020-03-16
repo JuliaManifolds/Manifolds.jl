@@ -16,7 +16,8 @@ makedocs(
                 "Euclidean" => "manifolds/euclidean.md",
                 "Fixed-rank matrices" => "manifolds/fixedrankmatrices.md",
                 "Generalized Stiefel" => "manifolds/generalizedstiefel.md",
-                "Grassmannian manifold" => "manifolds/grassmann.md",
+                "Generalized Grassmann" => "manifolds/generalizedstiefel.md",
+                "Grassmann" => "manifolds/grassmann.md",
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
                 "Lorentzian manifold" => "manifolds/lorentz.md",
                 "Oblique manifold" => "manifolds/oblique.md",
@@ -35,8 +36,6 @@ makedocs(
                 "Vector bundle" => "manifolds/vector_bundle.md"
             ],
             "Manifold decorators" => [
-                "Decorator manifold" => "manifolds/decorator.md",
-                "Array manifold" => "manifolds/array.md",
                 "Embedded manifold" => "manifolds/embedded.md",
                 "Metric manifold" => "manifolds/metric.md",
                 "Group manifold" => "manifolds/group.md"

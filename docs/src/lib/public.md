@@ -3,7 +3,6 @@
 Documentation for `Manifolds.jl`'s public interface.
 
 ```@docs
-allocate
 Manifolds.ShapeSpecification
 submanifold_component
 submanifold_components

@@ -1,7 +1,8 @@
 # `ManifoldsBase.jl` – an interface for manifolds
 
-The interface for a manifold is provided in the lightweight package [ManifoldsBase.jl](https://github.com/JuliaNLSolvers/ManifoldsBase.jl) separate from the collection of manifolds in here.
+The interface for a manifold is provided in the lightweight package [ManifoldsBase.jl](https://github.com/JuliaNLSolvers/ManifoldsBase.jl).
 You can easily implement your algorithms and even your own manifolds just using the interface.
+All manifolds from the package here are also based on this interface, so any project based 
 
 ```@contents
 Pages = ["interface.md"]
@@ -19,14 +20,6 @@ If a manifold that you implement for your own package fits this interface, we ha
 Modules = [Manifolds, ManifoldsBase]
 Pages = ["ManifoldsBase.jl"]
 Order = [:type, :function]
-```
-
-## `DefaultManifold`
-
-`DefaultManifold` is a simplified version of [`Euclidean`](@ref) and demonstrates a basic interface implementation.
-
-```@docs
-ManifoldsBase.DefaultManifold
 ```
 
 ## Allocation
@@ -64,3 +57,49 @@ julia> y[1]
 
 * [`allocate_result`](@ref) allocates a result of a particular function (for example [`exp`], [`flat`], etc.) on a particular manifold with particular arguments.
   It takes into account the possibility that different arguments may have different numeric [`number_eltype`](@ref) types thorough the [`ManifoldsBase.allocate_result_type`](@ref) function.
+
+## A Decorator for manifolds
+
+ decorator manifold extends the functionality of a [`Manifold`](@ref) in a semi-transparent way.
+It internally stores the [`Manifold`](@ref) it extends and by default for functions defined in the [`ManifoldsBase`](interface.md) it acts transparently in the sense that it passes all functions through to the base except those that it actually affects.
+For example, because the [`ArrayManifold`](@ref) affects nearly all functions, it overwrites nearly all functions, except a few like [`manifold_dimension`](@ref).
+On the other hand, the [`MetricManifold`](@ref) only affects functions that involve metrics, especially [`exp`](@ref) and [`log`](@ref) but not the [`manifold_dimension`](@ref).
+
+By default all functions are passed down.
+To implement a method for a decorator that behaves differently from the method of the same function for the internal manifold, two steps are required.
+Let's assume the function is called `f(M, arg1, arg2)`, and our decorator manifold `DM` of type `OurDecoratorManifold` decorates `M`.
+Then
+
+1. set `decorator_transparent_dispatch(f, M::OurDecoratorManifold, args...) = Val(:intransparent)`
+2. implement `f(DM::OurDecoratorManifold, arg1, arg2)`
+
+This makes it possible to extend a manifold or all manifolds with a feature or replace a feature of the original manifold.
+The [`MetricManifold`](@ref) is the best example of the second case, since the default metric indicates for which metric the manifold was originally implemented, such that those functions are just passed through.
+This can best be seen in the [`SymmetricPositiveDefinite`](@ref) manifold with its [`LinearAffineMetric`](@ref).
+
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["DecoratorManifold.jl"]
+Order = [:macro, :type, :function]
+```
+
+## ArrayManifold
+
+A simple decorator is the [`ArrayManifold`](@ref) that “decorates” a manifold with tests that all involved arrays are correct. For example involved input and output paratemers are checked before and after running a function, repectively.
+This is done by calling [`is_manifold_point`](@ref) or [`is_tangent_vector`](@ref) whenever applicable.
+
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["ArrayManifold.jl"]
+Order = [:macro, :type, :function]
+```
+
+## DefaultManifold
+
+[`DefaultManifold`](@ref ManifoldsBase.DefaultManifold) is a simplified version of [`Euclidean`](@ref) and demonstrates a basic interface implementation.
+It can be used to perform simple tests.
+Since when using `Manifolds.jl` the [`Euclidean`](@ref) is available, the default manifold itself is npt exported.
+
+```@docs
+ManifoldsBase.DefaultManifold
+```
