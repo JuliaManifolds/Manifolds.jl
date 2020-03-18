@@ -15,6 +15,8 @@ include("utils.jl")
             @test !is_tangent_vector(M, x, [0., 0., 1., 0.])
             @test_throws DomainError is_tangent_vector(M, x, [0., 0., 1., 0.], true)
             @test_throws DomainError is_tangent_vector(M, x, 1 * im * zero_tangent_vector(M,x), true)
+            @test injectivity_radius(M) == π/2
+            @test mean(M,[x,x,x]) == x
         end
         @testset "Embedding and Projection" begin
             y = similar(x)
@@ -70,8 +72,8 @@ include("utils.jl")
                 M,
                 pts,
                 test_exp_log = false,
-                default_inverse_retraction_method = nothing,
-                default_retraction_method = ProjectionRetraction(),
+                default_inverse_retraction_method = LogarithmicInverseRetraction(),
+                default_retraction_method = ExponentialRetraction(),
                 test_injectivity_radius = false,
                 test_is_tangent = true,
                 test_project_tangent = true,

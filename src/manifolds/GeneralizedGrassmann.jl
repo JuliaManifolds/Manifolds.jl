@@ -195,24 +195,6 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 inner(M::GeneralizedGrassmann{n,k,B}, p, X, Y) where {n,k,B} = dot(X, M.B * Y)
 
-@doc raw"""
-    inverse_retract(M::Grassmann, p, q, ::PolarInverseRetraction)
-
-Compute the inverse retraction for the [`PolarRetraction`](@ref), on the
-[`Grassmann`](@ref) manifold `M`, i.e.,
-
-````math
-\operatorname{retr}_p^{-1}q = q*(p^\mathrm{H}q)^{-1} - p,
-````
-
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
-"""
-inverse_retract(::GeneralizedGrassmann, ::Any, ::Any, ::PolarInverseRetraction)
-
-function inverse_retract!(::GeneralizedGrassmann, X, p, q, ::PolarInverseRetraction)
-    return copyto!(X, q / (p' * q) - p)
-end
-
 function isapprox(M::GeneralizedGrassmann, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
 end
