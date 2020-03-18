@@ -16,7 +16,7 @@ makedocs(
                 "Euclidean" => "manifolds/euclidean.md",
                 "Fixed-rank matrices" => "manifolds/fixedrankmatrices.md",
                 "Generalized Stiefel" => "manifolds/generalizedstiefel.md",
-                "Generalized Grassmann" => "manifolds/generalizedstiefel.md",
+                "Generalized Grassmann" => "manifolds/generalizedgrassmann.md",
                 "Grassmann" => "manifolds/grassmann.md",
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
                 "Lorentzian manifold" => "manifolds/lorentz.md",

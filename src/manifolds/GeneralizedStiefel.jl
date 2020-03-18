@@ -167,7 +167,7 @@ function project_point!(M::GeneralizedStiefel, q, p)
 end
 
 @doc doc"""
-    project_tangent(M, p, X)
+    project_tangent(M:GeneralizedStiefel, p, X)
 
 Project `X` onto the tangent space of `p` to the [`GeneralizedStiefel`](@ref) manifold `M`.
 The formula reads
@@ -187,9 +187,9 @@ function project_tangent!(M::GeneralizedStiefel, Y, p, X)
     return Y
 end
 @doc doc"""
-    retract(M, p, X)
-    retract(M, p, X, ::PolarRetraction)
-    retract(M, p, X, ::ProjectionRetraction)
+    retract(M::GeneralizedStiefel, p, X)
+    retract(M::GeneralizedStiefel, p, X, ::PolarRetraction)
+    retract(M::GeneralizedStiefel, p, X, ::ProjectionRetraction)
 
 Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 [`GeneralizedStiefel`](@ref) manifold `M`, which in this case is the same as
@@ -217,7 +217,7 @@ end
 
 
 @doc doc"""
-    vector_transport_to(M, p, X, q, ::ProjectionTransport)
+    vector_transport_to(M::GeneralizedStiefel, p, X, q, ::ProjectionTransport)
 
 Compute the vector transport of the tangent vector `X` at `p` to `q`,
 using the [`project_tangent`](@ref project_tangent(::GeneralizedStiefel, ::Any...))

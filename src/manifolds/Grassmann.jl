@@ -123,7 +123,7 @@ Let $USV = p^\mathrm{H}q$ denote the SVD decomposition of
 $p^\mathrm{H}q$, where $\cdot^{\mathrm{H}}$ denotes the complex
 conjugate transposed or Hermitian. Then the distance is given by
 ````math
-d_{\mathrm{GR}(n,k)}(p,q) = \operatorname{norm}(\operatorname{Re}(b)).
+d_{\mathrm{Gr}(n,k)}(p,q) = \operatorname{norm}(\operatorname{Re}(b)).
 ````
 where
 

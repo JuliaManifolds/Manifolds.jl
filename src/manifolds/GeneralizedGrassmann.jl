@@ -21,7 +21,7 @@ a whole equivalence class of representers. For $B=I_n$ this simplifies to the [`
 The tangent space at a point (subspace) $x$ is given by
 
 ````math
-T_x\mathrm{Gr}(n,k) = \bigl\{
+T_x\mathrm{Gr}(n,k,B) = \bigl\{
 X ∈ 𝔽^{n × k} :
 X^{\mathrm{H}}Bp + p^{\mathrm{H}}BX = 0_{k} \bigr\},
 ````
@@ -31,17 +31,17 @@ where $0_{k}$ denotes the $k × k$ zero matrix.
 Note that a point $p ∈ \operatorname{Gr}(n,k,B)$ might be represented by
 different matrices (i.e. matrices with $B$-unitary column vectors that span
 the same subspace). Different representations of $p$ also lead to different
-representation matrices for the tangent space $T_p\mathrm{Gr}(n,k)$
+representation matrices for the tangent space $T_p\mathrm{Gr}(n,k,B)$
 
 The manifold is named after
 [Hermann G. Graßmann](https://en.wikipedia.org/wiki/Hermann_Grassmann) (1809-1877).
 
 # Constructor
 
-   GeneralizedGrassmann(n,k,B=Matrixfield=ℝ)
+    GeneralizedGrassmann(n, k, B=I_n, field=ℝ)
 
-Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
-case $field = ℝ$ is the default.
+Generate the (real-valued) Generalized Grassmann manifold of $n\times k$ dimensional
+orthonormal matrices with scalar product `B`.
 """
 struct GeneralizedGrassmann{n,k,TB<:AbstractMatrix,𝔽} <:
        AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}
@@ -83,7 +83,7 @@ Check whether `X` is a tangent vector in the tangent space of `p` on
 the [`GeneralizedGrassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
 
 ````math
-    p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0_k,
+    p^{\mathrm{H}}BX + X^{\mathrm{H}}Bp = 0_k,
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and $0_k$
@@ -104,6 +104,7 @@ function check_tangent_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; check_bas
         check_base_point = check_base_point,
         kwargs...
     )
+    mpv === nothing || return mpv
     if !isapprox(p' * M.B * X + X' * M.B * p, zeros(k, k); kwargs...)
         return DomainError(
             norm(p' * M.B * X + X' * M.B * p),
@@ -112,16 +113,19 @@ function check_tangent_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; check_bas
     end
 end
 
+decorated_manifold(M::GeneralizedGrassmann{N,K,B,𝔽}) where {N,K,B,𝔽} = Euclidean(N, K; field = 𝔽)
+
 @doc raw"""
     distance(M::GeneralizedGrassmann, p, q)
 
-Compute the Riemannian distance on [`GeneralizedGrassmann`](@ref) manifold `M`$= \mathrm{Gr}(n,k)$.
+Compute the Riemannian distance on [`GeneralizedGrassmann`](@ref)
+manifold `M`$= \mathrm{Gr}(n,k,B)$.
 
 Let $USV = p^\mathrm{H}Bq$ denote the SVD decomposition of
 $p^\mathrm{H}Bq$, where $\cdot^{\mathrm{H}}$ denotes the complex
 conjugate transposed or Hermitian. Then the distance is given by
 ````math
-d_{\mathrm{GR}(n,k,B)}(p,q) = \operatorname{norm}(\operatorname{Re}(b)).
+d_{\mathrm{Gr}(n,k,B)}(p,q) = \operatorname{norm}(\operatorname{Re}(b)).
 ````
 where
 
@@ -139,24 +143,22 @@ function distance(M::GeneralizedGrassmann, p, q)
     return sqrt(sum((acos.(a)) .^ 2))
 end
 
+embed!(::GeneralizedGrassmann, q, p) = (q .= p)
+embed!(::GeneralizedGrassmann, Y, p, X) = (Y .= X)
+
 @doc raw"""
     exp(M::GeneralizedGrassmann, p, X)
 
-Compute the exponential map on the [`Grassmann`](@ref) `M`$= \mathrm{Gr}(n,k)$ starting in
-`p` with tangent vector (direction) `X`. Let $X = USV$ denote the SVD decomposition of $X$.
-Then the exponential map is written using
+Compute the exponential map on the [`GeneralizedGrassmann`](@ref) `M`$= \mathrm{Gr}(n,k,B)$
+starting in `p` with tangent vector (direction) `X`. Let $X^{\mathrm{H}}BX = USV$ denote the
+SVD decomposition of $X^{\mathrm{H}}BX$. Then the exponential map is written using
 
 ````math
 z = p V\cos(S)V^\mathrm{H} + U\sin(S)V^\mathrm{H},
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian and the
-cosine and sine are applied element wise to the diagonal entries of $S$. A final QR
-decomposition $z=QR$ is performed for numerical stability reasons, yielding the result as
-
-````math
-\exp_p X = Q.
-````
+cosine and sine are applied element wise to the diagonal entries of $S$.
 """
 exp(::GeneralizedGrassmann, ::Any...)
 
@@ -164,17 +166,18 @@ function exp!(M::GeneralizedGrassmann, q, p, X)
     norm(M, p, X) ≈ 0 && return copyto!(q, p)
     d = svd(X'*M.B*X)
     V = d.Vt
-    S = abs(sqrt(d.S))
+    S = abs.(sqrt.(d.S))
     U = X*(V/Diagonal(S))
     z = p * V * Diagonal(cos.(S)) * V + U * Diagonal(sin.(S)) * V
-    return copyto!(q, Array(qr(z).Q))
+    return copyto!(q, project_point(M,z))
 end
 
 @doc raw"""
     injectivity_radius(M::GeneralizedGrassmann)
     injectivity_radius(M::GeneraizedGrassmann, p)
 
-Return the injectivity radius on the [`GeneralizedGrassmann`](@ref) `M`, which is $\frac{π}{2}$.
+Return the injectivity radius on the [`GeneralizedGrassmann`](@ref) `M`,
+which is $\frac{π}{2}$.
 """
 injectivity_radius(::GeneralizedGrassmann, ::Any...) = π / 2
 
@@ -190,7 +193,7 @@ g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}BY),
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-inner(::GeneralizedGrassmann{n,k,B}, p, X, Y) where {n,k,B} = dot(X, M.B * Y)
+inner(M::GeneralizedGrassmann{n,k,B}, p, X, Y) where {n,k,B} = dot(X, M.B * Y)
 
 @doc raw"""
     inverse_retract(M::Grassmann, p, q, ::PolarInverseRetraction)
@@ -209,21 +212,6 @@ inverse_retract(::GeneralizedGrassmann, ::Any, ::Any, ::PolarInverseRetraction)
 function inverse_retract!(::GeneralizedGrassmann, X, p, q, ::PolarInverseRetraction)
     return copyto!(X, q / (p' * q) - p)
 end
-
-@doc raw"""
-    inverse_retract(M, p, q, ::QRInverseRetraction)
-
-Compute the inverse retraction for the [`QRRetraction`](@ref), on the
-[`Grassmann`](@ref) manifold `M`, i.e.,
-
-````math
-\operatorname{retr}_p^{-1}q = q*(p^\mathrm{H}q)^{-1} - p,
-````
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
-"""
-inverse_retract(::GeneralizedGrassmann, ::Any, ::Any, ::QRInverseRetraction)
-
-inverse_retract!(::GeneralizedGrassmann, X, p, q, ::QRInverseRetraction) = copyto!(X, q / (p' * q) - p)
 
 function isapprox(M::GeneralizedGrassmann, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
@@ -264,10 +252,10 @@ end
 @doc raw"""
     manifold_dimension(M::GeneralizedGrassmann)
 
-Return the dimension of the [`Grassmann(n,k,𝔽)`](@ref) manifold `M`, i.e.
+Return the dimension of the [`GeneralizedGrassmann(n,k,𝔽)`](@ref) manifold `M`, i.e.
 
 ````math
-\dim \operatorname{Gr}(n,k) = k(n-k) \dim_ℝ 𝔽,
+\dim \operatorname{Gr}(n,k,B) = k(n-k) \dim_ℝ 𝔽,
 ````
 
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
@@ -318,14 +306,15 @@ end
 @doc raw"""
     project_tangent(M::GeneralizedGrassmann, p, X)
 
-Project the `n`-by-`k` `X` onto the tangent space of `p` on the [`Grassmann`](@ref) `M`,
-which is computed by
+Project the `n`-by-`k` `X` onto the tangent space of `p` on the
+[`GeneralizedGrassmann`](@ref) `M`, which is computed by
 
 ````math
-\operatorname{proj_p}(X) = X - pp^{\mathrm{H}}X,
+\operatorname{proj_p}(X) = X - pp^{\mathrm{H}}B^\mathrm{T}X,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
+and $\cdot^{\mathrm{T}}$ the transpose.
 """
 project_tangent(::GeneralizedGrassmann, ::Any...)
 
@@ -347,31 +336,41 @@ Return the represenation size or matrix dimension of a point on the [`Generalize
     retract(M::GeneralizedGrassmann, p, X, ::PolarRetraction)
 
 Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
-[`Grassmann`](@ref) `M`. With $USV = p + X$ the retraction reads
-````math
-\operatorname{retr}_p X = UV^\mathrm{H},
-````
-
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+[`GeneralizedGrassmann`](@ref) `M`, by
+[`project`](@ref project_point(M::GeneralizedGrassmann, p))ing $p + X$ onto `M`.
 """
 retract(::GeneralizedGrassmann, ::Any, ::Any, ::PolarRetraction)
 
 function retract!(M::GeneralizedGrassmann, q, p, X, ::PolarRetraction)
-    project_point!(M,q, p + X)
+    project_point!(M, q, p+X)
     return q
 end
 function retract!(M::GeneralizedGrassmann, q, p, X, ::ProjectionRetraction)
-    project_point!(M,q, p + X)
+    project_point!(M, q, p+X)
     return q
 end
 
-show(io::IO, ::GeneralizedGrassmann{n,k,B,𝔽}) where {n,k,B,𝔽} = print(io, "GeneralizedGrassmann($(n), $(k), $(B), $(𝔽))")
+show(io::IO, M::GeneralizedGrassmann{n,k,B,𝔽}) where {n,k,B,𝔽} = print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
+
+@doc doc"""
+    vector_transport_to(M::GeneralizedGrassmann, p, X, q, ::ProjectionTransport)
+
+Compute the vector transport of the tangent vector `X` at `p` to `q`,
+using the [`project_point`](@ref project_point(::GeneralizedGrassmann, ::Any...))
+of `X` to `q`.
+"""
+vector_transport_to(::GeneralizedGrassmann, ::Any, ::Any, ::Any, ::ProjectionTransport)
+
+function vector_transport_to!(M::GeneralizedGrassmann, Y, p, X, q, ::ProjectionTransport)
+    project_tangent!(M, Y, q, X)
+    return Y
+end
 
 @doc raw"""
-    zero_tangent_vector(M::Grassmann, p)
+    zero_tangent_vector(M::GeneralizedGrassmann, p)
 
-Return the zero tangent vector from the tangent space at `p` on the [`Grassmann`](@ref) `M`,
-which is given by a zero matrix the same size as `p`.
+Return the zero tangent vector from the tangent space at `p` on the
+[`GeneralizedGrassmann`](@ref) `M`, which is given by a zero matrix the same size as `p`.
 """
 zero_tangent_vector(::GeneralizedGrassmann, ::Any...)
 
