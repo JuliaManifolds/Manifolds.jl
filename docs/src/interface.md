@@ -89,7 +89,7 @@ Order = [:macro, :type, :function]
 
 ## ArrayManifold
 
-A simple decorator is the [`ArrayManifold`](@ref) that “decorates” a manifold with tests that all involved arrays are correct. For example involved input and output paratemers are checked before and after running a function, repectively.
+[`ArrayManifold`](@ref) is a simple decorator that “decorates” a manifold with tests that all involved arrays are correct. For example involved input and output paratemers are checked before and after running a function, repectively.
 This is done by calling [`is_manifold_point`](@ref) or [`is_tangent_vector`](@ref) whenever applicable.
 
 ```@autodocs
@@ -102,7 +102,7 @@ Order = [:macro, :type, :function]
 
 [`DefaultManifold`](@ref ManifoldsBase.DefaultManifold) is a simplified version of [`Euclidean`](@ref) and demonstrates a basic interface implementation.
 It can be used to perform simple tests.
-Since when using `Manifolds.jl` the [`Euclidean`](@ref) is available, the default manifold itself is npt exported.
+Since when using `Manifolds.jl` the [`Euclidean`](@ref) is available, the `DefaultManifold` itself is not exported.
 
 ```@docs
 ManifoldsBase.DefaultManifold

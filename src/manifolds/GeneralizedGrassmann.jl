@@ -12,13 +12,13 @@ The manifold can be represented as
 \operatorname{Gr}(n, k, B) := \bigl\{ \operatorname{span}(p) : p ∈ 𝔽^{n × k}, p^\mathrm{H}Bp = I_k\},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate (or Hermitian) transpose and
 $I_k$ is the $k × k$ identity matrix. This means, that the columns of $p$
-form an unitary basis of the subspace  with respect to the scaled inner product, that is a
+form an unitary basis of the subspace with respect to the scaled inner product, that is a
 point on $\operatorname{Gr}(n,k,B)$, and hence the subspace can actually be represented by
 a whole equivalence class of representers. For $B=I_n$ this simplifies to the [`Grassmann`](@ref) manifold.
 
-The tangent space at a point (subspace) $x$ is given by
+The tangent space at a point (subspace) $p$ is given by
 
 ````math
 T_x\mathrm{Gr}(n,k,B) = \bigl\{
@@ -273,7 +273,7 @@ end
 
 Project `p` from the embedding onto the [`GeneralizedGrassmann`](@ref) `M`, i.e. compute `q`
 as the polar decomposition of $p$ such that $q^{\mathrm{H}}Bq$ is the identity,
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose.
 """
 project_point(::GeneralizedGrassmann, ::Any...)
 
