@@ -60,9 +60,10 @@ include("utils.jl")
         @test is_tangent_vector(M,x,v)
     end
     types = [
-                [ Matrix{Float64}, Vector{Float64}, Matrix{Float64} ],
-                [ Matrix{Float32}, Vector{Float32}, Matrix{Float32} ]
-            ]
+       [ Matrix{Float64}, Vector{Float64}, Matrix{Float64} ],
+    ]
+    TEST_FLOAT32 && push!(types, [ Matrix{Float32}, Vector{Float32}, Matrix{Float32} ] )
+
     for T in types
         @testset "Type $T" begin
             y = retract(M, x, v, PolarRetraction())

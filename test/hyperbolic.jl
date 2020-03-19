@@ -31,7 +31,12 @@ include("utils.jl")
         @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
         @test manifold_dimension(M) == 2
     end
-    types = [Vector{Float64}, SizedVector{3,Float64}, Vector{Float32}]
+    types = [
+        Vector{Float64},
+        SizedVector{3,Float64},
+    ]
+    TEST_FLOAT32 && push!(types, Vector{Float32})
+
     for T in types
         @testset "Type $T" begin
             pts = [

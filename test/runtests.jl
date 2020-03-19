@@ -1,3 +1,10 @@
+const TEST_FLOAT32 = false
+const TEST_DOUBLE64 = false
+
+@info "Manifolds.jl Test settings:\n\n"*
+    "Testing Float32: $(TEST_FLOAT32)\n"*
+    "Testing Double64: $(TEST_DOUBLE64)"
+
 include("autodiff.jl")
 include("utils.jl")
 include("numbers.jl")

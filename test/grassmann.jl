@@ -21,8 +21,8 @@ include("utils.jl")
         types = [
             Matrix{Float64},
             MMatrix{3, 2, Float64},
-            Matrix{Float32},
         ]
+        TEST_FLOAT32 && push!(types, Matrix{Float32})
         basis_types = (ProjectedOrthonormalBasis(:gram_schmidt),)
         @testset "Type $T" for T in types
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]

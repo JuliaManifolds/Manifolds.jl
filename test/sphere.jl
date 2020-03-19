@@ -18,7 +18,7 @@ include("utils.jl")
     types = [
         Vector{Float64},
         MVector{3, Float64},
-        Vector{Float32},
+#        Vector{Float32},
     ]
     basis_types = (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types

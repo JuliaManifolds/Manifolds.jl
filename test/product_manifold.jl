@@ -18,8 +18,8 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
     types = [
         Vector{Float64},
         MVector{5, Float64},
-        Vector{Float32},
     ]
+    TEST_FLOAT32 && push!(types, Vector{Float32})
 
     retraction_methods = [Manifolds.ProductRetraction(ManifoldsBase.ExponentialRetraction(), ManifoldsBase.ExponentialRetraction())]
     inverse_retraction_methods = [Manifolds.InverseProductRetraction(ManifoldsBase.LogarithmicInverseRetraction(), ManifoldsBase.LogarithmicInverseRetraction())]
