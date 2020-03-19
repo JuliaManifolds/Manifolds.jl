@@ -272,7 +272,6 @@ export
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
     DiagonalizingOrthonormalBasis,
-    DefaultOrthonormalBasis
     ProjectedOrthonormalBasis
 export ×,
     allocate,
