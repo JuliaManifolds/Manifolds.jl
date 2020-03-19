@@ -55,8 +55,6 @@ struct Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbedding
 
 Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ) = Grassmann{n,k,field}()
 
-base_manifold(M::Grassmann, d::Val{N}=Val(-1)) where {N} = M
-
 @doc raw"""
     check_manifold_point(M::Grassmann{n,k,𝔽}, p)
 
