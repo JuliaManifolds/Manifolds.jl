@@ -66,7 +66,7 @@ For example, because the [`ArrayManifold`](@ref) affects nearly all functions, i
 On the other hand, the [`MetricManifold`](@ref) only affects functions that involve metrics, especially [`exp`](@ref) and [`log`](@ref) but not the [`manifold_dimension`](@ref).
 Contrary to the previous decorator, the [`MetricManifold`](@ref) does not overwrite functions.
 The decorator sets functions like [`exp`](@ref) and [`log`](@ref) to be implemented anew but required to be implemented when specifying a new metric.
-An exception is then the when a new metric [`is_default_metric`](@ref), which again makes the function transparent.
+An exception is not issued if a metric is additionally set to be the default metric (see [`is_default_metric`](@ref), since this makes all functions act transparently.
 this last case assumes that the newly specified metric type is actually the one already implemented on a manifold initially.
 
 By default, i.e. for a plain new decorator, all functions are passed down.
