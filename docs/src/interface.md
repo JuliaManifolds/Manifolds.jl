@@ -2,7 +2,7 @@
 
 The interface for a manifold is provided in the lightweight package [ManifoldsBase.jl](https://github.com/JuliaNLSolvers/ManifoldsBase.jl).
 You can easily implement your algorithms and even your own manifolds just using the interface.
-All manifolds from the package here are also based on this interface, so any project based 
+All manifolds from the package here are also based on this interface, so any project based on the interface can benefit from all manifolds, as long as the functions used in such a project are implemented.
 
 ```@contents
 Pages = ["interface.md"]
@@ -60,12 +60,16 @@ julia> y[1]
 
 ## A Decorator for manifolds
 
- decorator manifold extends the functionality of a [`Manifold`](@ref) in a semi-transparent way.
+A decorator manifold extends the functionality of a [`Manifold`](@ref) in a semi-transparent way.
 It internally stores the [`Manifold`](@ref) it extends and by default for functions defined in the [`ManifoldsBase`](interface.md) it acts transparently in the sense that it passes all functions through to the base except those that it actually affects.
 For example, because the [`ArrayManifold`](@ref) affects nearly all functions, it overwrites nearly all functions, except a few like [`manifold_dimension`](@ref).
 On the other hand, the [`MetricManifold`](@ref) only affects functions that involve metrics, especially [`exp`](@ref) and [`log`](@ref) but not the [`manifold_dimension`](@ref).
+Contrary to the previous decorator, the [`MetricManifold`](@ref) does not overwrite functions.
+The decorator sets functions like [`exp`](@ref) and [`log`](@ref) to be implemented anew but required to be implemented when specifying a new metric.
+An exception is then the when a new metric [`is_default_metric`](@ref), which again makes the function transparent.
+this last case assumes that the newly specified metric type is actually the one already implemented on a manifold initially.
 
-By default all functions are passed down.
+By default, i.e. for a plain new decorator, all functions are passed down.
 To implement a method for a decorator that behaves differently from the method of the same function for the internal manifold, two steps are required.
 Let's assume the function is called `f(M, arg1, arg2)`, and our decorator manifold `DM` of type `OurDecoratorManifold` decorates `M`.
 Then
