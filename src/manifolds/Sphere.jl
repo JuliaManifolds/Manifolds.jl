@@ -101,8 +101,6 @@ d_{𝕊^n}(p,q) = \arccos(⟨p,q⟩).
 """
 distance(::Sphere, x, y) = acos(clamp(dot(x, y), -1, 1))
 
-decorated_manifold(M::Sphere{N}) where {N} = Euclidean(N+1; field=ℝ)
-
 embed!(::Sphere, q, p) = (q .= p)
 
 embed!(::Sphere, Y, p, X) = (Y .= X)
