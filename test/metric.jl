@@ -306,8 +306,13 @@ end
         # @test_throws ErrorException exp!(MM, y, x, v)
         # these always fall back anyways.
         @test zero_tangent_vector!(MM, v, x) === zero_tangent_vector!(M, v, x)
+
         @test injectivity_radius(MM, x) === injectivity_radius(M, x)
         @test injectivity_radius(MM) === injectivity_radius(M)
+        @test injectivity_radius(MM, ProjectionRetraction()) === injectivity_radius(M, ProjectionRetraction())
+        @test injectivity_radius(MM, ExponentialRetraction()) === injectivity_radius(M, ExponentialRetraction())
+        @test injectivity_radius(MM) === injectivity_radius(M)
+
         @test is_manifold_point(MM, x) === is_manifold_point(M, x)
         @test is_tangent_vector(MM, x, v) === is_tangent_vector(M, x, v)
 

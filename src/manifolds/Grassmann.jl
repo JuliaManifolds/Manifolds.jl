@@ -57,7 +57,7 @@ Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ) = Grassmann{n,k,field}()
 
 function allocation_promotion_function(
     M::Grassmann{n,k,ℂ},
-    ::typeof(get_vector),
+    f,
     args::Tuple,
 ) where {n,k}
     return complex

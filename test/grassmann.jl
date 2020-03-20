@@ -70,6 +70,7 @@ include("utils.jl")
             @test manifold_dimension(M) == 4
             @test !is_manifold_point(M,[1., 0., 0., 0.])
             @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0., 0., 1., 0.])
+            @test Manifolds.allocation_promotion_function(M,exp!,(1,)) == complex
             @test_throws DomainError is_manifold_point(M, [2. 0.; 0. 1.; 0. 0.],true)
             @test_throws DomainError is_tangent_vector(M, [2. 0.; 0. 1.; 0. 0.],zeros(3,2),true)
             @test_throws DomainError is_tangent_vector(M, [1. 0.; 0. 1.; 0. 0.],ones(3,2),true)
