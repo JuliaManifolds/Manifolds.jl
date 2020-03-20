@@ -40,8 +40,9 @@ include("utils.jl")
     types = [
         Matrix{Float64},
         MMatrix{3,3,Float64},
-        Matrix{Float32},
     ]
+    TEST_FLOAT32 && push!(types, Matrix{Float32})
+
     bases = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types
         pts = [convert(T,A_sym),convert(T,B_sym),convert(T,X)]

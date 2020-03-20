@@ -35,15 +35,15 @@ version = "0.8.1"
 
 [[Documenter]]
 deps = ["Base64", "Dates", "DocStringExtensions", "InteractiveUtils", "JSON", "LibGit2", "Logging", "Markdown", "REPL", "Test", "Unicode"]
-git-tree-sha1 = "d497bcc45bb98a1fbe19445a774cfafeabc6c6df"
+git-tree-sha1 = "3bacd94d853a6bccaee1d0104d8b06d29a7506ac"
 uuid = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-version = "0.24.5"
+version = "0.24.6"
 
 [[HybridArrays]]
 deps = ["LinearAlgebra", "StaticArrays"]
-git-tree-sha1 = "cc7c0b0f8e188f28e3353dde575aeb0aff0e41c0"
+git-tree-sha1 = "f25e413e54ff8e3c7753c7858f479ab07a8a01e1"
 uuid = "1baab800-613f-4b0a-84e4-9cd3431bfbb9"
-version = "0.3.1"
+version = "0.3.2"
 
 [[Inflate]]
 deps = ["Pkg", "Printf", "Random", "Test"]
@@ -88,9 +88,9 @@ version = "0.5.4"
 
 [[ManifoldsBase]]
 deps = ["LinearAlgebra", "Markdown"]
-git-tree-sha1 = "8d61b42fe77636ace85083e2420abd89babb9b3e"
+git-tree-sha1 = "dc0a73af0ed9014d12c88cf7a8da42f0334a8e58"
 uuid = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
-version = "0.5.1"
+version = "0.5.2"
 
 [[Markdown]]
 deps = ["Base64"]

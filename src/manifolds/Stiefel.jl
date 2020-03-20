@@ -42,8 +42,8 @@ function allocation_promotion_function(
 ) where {n,k}
     return complex
 end
+
 base_manifold(M::Stiefel) = M
-decorated_manifold(M::Stiefel{N,K}) where {N,K} = Euclidean(N, K; field = ℝ)
 
 @doc raw"""
     check_manifold_point(M::Stiefel, p; kwargs...)
@@ -53,24 +53,8 @@ Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{S
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    if (𝔽 === ℝ) && !(eltype(p) <: Real)
-        return DomainError(
-            eltype(p),
-            "The matrix $(p) is not a real-valued matrix, so it does not lie on the $(M).",
-        )
-    end
-    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
-        return DomainError(
-            eltype(p),
-            "The matrix $(p) is neiter real- nor complex-valued matrix, so it does not lie on $(M).",
-        )
-    end
-    if any(size(p) != representation_size(M))
-        return DomainError(
-            size(p),
-            "The matrix $(p) is does not lie on the $(M), since its dimensions are wrong.",
-        )
-    end
+    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv === nothing || return mpv
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
@@ -100,24 +84,16 @@ function check_tangent_vector(
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
-    if (𝔽 === ℝ) && !(eltype(X) <: Real)
-        return DomainError(
-            eltype(X),
-            "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to the Stiefel manifold of dimension ($(n),$(k)).",
-        )
-    end
-    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
-        return DomainError(
-            eltype(X),
-            "The matrix $(X) is neiter real- nor complex-valued matrix, so it can not bea tangent vectorto the complex Stiefel manifold of dimension ($(n),$(k)).",
-        )
-    end
-    if any(size(X) != representation_size(M))
-        return DomainError(
-            size(X),
-            "The matrix $(X) is does not lie in the tangent space of $(p) on the Stiefel manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
-        )
-    end
+    mpv = invoke(
+        check_tangent_vector,
+        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        M,
+        p,
+        X;
+        check_base_point = false, # already checked above
+        kwargs...
+    )
+    mpv === nothing || return mpv
     if !isapprox(p' * X + X' * p, zeros(k, k); kwargs...)
         return DomainError(
             norm(p' * X + X' * p),
@@ -125,6 +101,8 @@ function check_tangent_vector(
         )
     end
 end
+
+decorated_manifold(M::Stiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
 
 embed!(::Stiefel, q, p) = (q .= p)
 

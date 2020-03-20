@@ -7,8 +7,9 @@ include("utils.jl")
     types = [
         Matrix{Float64},
         MMatrix{3, 3, Float64},
-        Matrix{Float32},
     ]
+    TEST_FLOAT32 && push!(types, Matrix{Float32})
+
     for T in types
         A(α) = [1. 0. 0.; 0. cos(α) sin(α); 0. -sin(α) cos(α)]
         ptsF = [#

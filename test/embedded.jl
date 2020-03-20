@@ -128,16 +128,16 @@ struct NotImplementedEmbeddedManifold3 <: AbstractEmbeddedManifold{DefaultEmbedd
         for f in [exp, get_basis, get_coordinates, get_vector, inverse_retract, log]
             @test Manifolds.decorator_transparent_dispatch(f,AM) === Val{:parent}()
         end
-        for f in [project_point, project_tangent, retract]
+        for f in [project_point, project_tangent, retract, inverse_retract!, retract!]
             @test Manifolds.decorator_transparent_dispatch(f,AM) === Val{:parent}()
         end
         for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
             @test Manifolds.decorator_transparent_dispatch(f,AM) === Val{:parent}()
         end
-        for f in [check_manifold_point, check_tangent_vector, exp!, inner, inverse_retract!]
+        for f in [check_manifold_point, check_tangent_vector, exp!, inner]
             @test Manifolds.decorator_transparent_dispatch(f,AM) === Val{:intransparent}()
         end
-        for f in [log!, norm, manifold_dimension, project_point!, project_tangent!, retract!]
+        for f in [log!, norm, manifold_dimension, project_point!, project_tangent!]
             @test Manifolds.decorator_transparent_dispatch(f,AM) === Val{:intransparent}()
         end
         for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]

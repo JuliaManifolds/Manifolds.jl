@@ -36,12 +36,8 @@ of length [`manifold_dimension`](@ref)`(M)+1` (approximately) of unit length.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_manifold_point(M::Sphere{N}, p; kwargs...) where {N}
-    if size(p) != representation_size(M)
-        return DomainError(
-            size(p),
-            "The point $(p) does not lie on $(M), since its size is not $(N+1).",
-        )
-    end
+    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv === nothing || return mpv
     if !isapprox(norm(p), 1.0; kwargs...)
         return DomainError(
             norm(p),
@@ -68,15 +64,19 @@ function check_tangent_vector(
     kwargs...,
 ) where {N}
     if check_base_point
-        perr = check_manifold_point(M, p)
-        perr === nothing || return perr
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
     end
-    if size(X) != representation_size(M)
-        return DomainError(
-            size(X),
-            "The vector $(X) is not a tangent to a point on $M since its size does not match $(N+1).",
-        )
-    end
+    mpv = invoke(
+        check_tangent_vector,
+        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        M,
+        p,
+        X;
+        check_base_point = false, # already checked above
+        kwargs...
+    )
+    mpv === nothing || return mpv
     if !isapprox(abs(dot(p, X)), 0.0; kwargs...)
         return DomainError(
             abs(dot(p, X)),
@@ -85,6 +85,8 @@ function check_tangent_vector(
     end
     return nothing
 end
+
+decorated_manifold(M::Sphere) = Euclidean(representation_size(M)...; field=ℝ)
 
 @doc raw"""
     distance(M::Sphere, p, q)
@@ -172,7 +174,6 @@ end
 function get_vector!(M::Sphere, Y::AbstractVector, p, X, B::DefaultOrthonormalBasis)
     return copyto!(Y, get_vector(M, p, X, B))
 end
-
 
 @doc raw"""
     injectivity_radius(M::Sphere[, p])

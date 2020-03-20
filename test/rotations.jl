@@ -10,9 +10,8 @@ include("utils.jl")
     types = [
         Matrix{Float64},
         MMatrix{2, 2, Float64},
-        Matrix{Float32},
     ]
-
+    TEST_FLOAT32 && push!(types, Matrix{Float32})
     retraction_methods = [Manifolds.PolarRetraction(),
                           Manifolds.QRRetraction()]
 

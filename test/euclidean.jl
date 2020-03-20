@@ -25,9 +25,9 @@ include("utils.jl")
     types = [
         Vector{Float64},
         MVector{3, Float64},
-        Vector{Float32},
-        Vector{Double64},
     ]
+    TEST_FLOAT32 && push!(types, Vector{Float32})
+    TEST_DOUBLE64 && push!(types, Vector{Double64})
 
     types_complex = [
         Vector{ComplexF64},
@@ -35,6 +35,8 @@ include("utils.jl")
         Vector{ComplexF32},
         Vector{ComplexDF64},
     ]
+    TEST_FLOAT32 && push!(types_complex, Vector{ComplexF32})
+    TEST_DOUBLE64 && push!(types_complex, Vector{ComplexDF64})
 
     for M in manifolds
         basis_types = if M == E
