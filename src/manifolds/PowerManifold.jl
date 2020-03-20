@@ -394,7 +394,7 @@ function get_coordinates!(
         Any,
         Any,
         Any,
-        CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽},
+        CachedBasis{<:AbstractBasis,<:PowerBasisData,ℝ},
     }
     return invoke(get_coordinates!, TypeTuple, M, Y, p, X, B)
 end
@@ -409,7 +409,7 @@ function get_coordinates!(
     dim = manifold_dimension(M.manifold)
     v_iter = 1
     for i in get_iterator(M)
-        get_coordinates(
+        get_coordinates!(
             M.manifold,
             view(Y, v_iter:v_iter+dim-1),
             _read(M, rep_size, p, i),

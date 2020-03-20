@@ -348,6 +348,16 @@ function test_manifold(M::Manifold, pts::AbstractVector;
                     @test real(inner(M, x, vs_invs[i], vs_invs[j])) ≈ 0 atol = sqrt(find_eps(x))
                 end
             end
+
+            if is_mutating
+                vb_s = allocate(vb)
+                @test get_coordinates!(M, vb_s, x, v1, btype) === vb_s
+                @test isapprox(vb_s, vb; atol = find_eps(x))
+
+                vbi_s = allocate(vbi)
+                @test get_vector!(M, vbi_s, x, vb, btype) === vbi_s
+                @test isapprox(M, x, v1, vbi_s)
+            end
         end
     end
 

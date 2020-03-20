@@ -1,6 +1,7 @@
 include("utils.jl")
 
 using HybridArrays, Random
+using Manifolds: default_metric_dispatch
 
 Random.seed!(42)
 
