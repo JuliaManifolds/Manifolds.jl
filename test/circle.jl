@@ -42,7 +42,10 @@ include("utils.jl")
         @test x == MVector(0.0)
         @test project_tangent(M, 0.0, 1.) == 1.
     end
-    types = [Float64, Float32]
+    types = [
+        Float64,
+    ]
+    TEST_FLOAT32 && push!(types, Float32)
 
     basis_types = (ArbitraryOrthonormalBasis(),)
     basis_types_real = (ArbitraryOrthonormalBasis(),
@@ -109,7 +112,9 @@ include("utils.jl")
         @test x == MVector(1.0+0.0im)
 
     end
-    types = [Complex{Float64}, Complex{Float32}]
+    types = [Complex{Float64}, ]
+    TEST_FLOAT32 && push!(types, Complex{Float32})
+
     for T in types
         @testset "Type $T" begin
             a = 1/sqrt(2.0)

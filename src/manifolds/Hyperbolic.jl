@@ -31,10 +31,6 @@ struct Hyperbolic{N} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} 
 
 Hyperbolic(n::Int) = Hyperbolic{n}()
 
-base_manifold(M::Hyperbolic) = M
-decorated_manifold(M::Hyperbolic{N}) where {N} = Lorentz(N+1, MinkowskiMetric())
-default_metric_dispatch(::Hyperbolic, ::MinkowskiMetric) = Val(true)
-
 """
     check_manifold_point(M::Hyperbolic, p; kwargs...)
 
@@ -43,12 +39,8 @@ inner product in the embedding of -1, see [`MinkowskiMetric`](@ref).
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_manifold_point(M::Hyperbolic, p; kwargs...)
-    if size(p) != representation_size(M)
-        return DomainError(
-            size(p),
-            "The point $(p) does not lie on $(M), since its size is not $(representation_size(M)).",
-        )
-    end
+    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv === nothing || return mpv
     if !isapprox(minkowski_metric(p, p), -1.0; kwargs...)
         return DomainError(
             minkowski_metric(p, p),
@@ -70,15 +62,19 @@ using the `kwargs...`.
 """
 function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwargs...)
     if check_base_point
-        perr = check_manifold_point(M, p; kwargs...)
-        perr === nothing || return perr
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
     end
-    if size(X) != representation_size(M)
-        return DomainError(
-            size(X),
-            "The vector $(X) is not a tangent to a point on $M since its size does not match $(representation_size(M)).",
-        )
-    end
+    mpv = invoke(
+        check_tangent_vector,
+        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        M,
+        p,
+        X;
+        check_base_point = false, # already checked above
+        kwargs...
+    )
+    mpv === nothing || return mpv
     if !isapprox(minkowski_metric(p, X), 0.0; kwargs...)
         return DomainError(
             abs(minkowski_metric(p, X)),
@@ -87,6 +83,10 @@ function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwar
     end
     return nothing
 end
+
+decorated_manifold(M::Hyperbolic{N}) where {N} = Lorentz(N+1, MinkowskiMetric())
+
+default_metric_dispatch(::Hyperbolic, ::MinkowskiMetric) = Val(true)
 
 @doc raw"""
     distance(M::Hyperbolic, p, q)

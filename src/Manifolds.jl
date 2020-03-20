@@ -146,6 +146,7 @@ include("manifolds/Lorentz.jl")
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
 include("manifolds/FixedRankMatrices.jl")
+include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Grassmann.jl")
 include("manifolds/Hyperbolic.jl")
@@ -196,6 +197,7 @@ export Euclidean,
     CholeskySpace,
     Circle,
     FixedRankMatrices,
+    GeneralizedGrassmann,
     GeneralizedStiefel,
     Grassmann,
     Hyperbolic,

@@ -27,10 +27,6 @@ function SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
     SymmetricMatrices{n,field}()
 end
 
-base_manifold(M::SymmetricMatrices) = M
-
-decorated_manifold(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field = 𝔽)
-
 @doc raw"""
     check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...)
 
@@ -41,24 +37,8 @@ whether `p` is a symmetric matrix of size `(n,n)` with values from the correspon
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
 function check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    if (𝔽 === ℝ) && !(eltype(p) <: Real)
-        return DomainError(
-            eltype(p),
-            "The matrix $(p) does not lie on $M, since its values are not real.",
-        )
-    end
-    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
-        return DomainError(
-            eltype(p),
-            "The matrix $(p) does not lie on $M, since its values are not complex.",
-        )
-    end
-    if size(p) != (n, n)
-        return DomainError(
-            size(p),
-            "The point $(p) does not lie on $M since its size ($(size(p))) does not match the representation size ($(representation_size(M))).",
-        )
-    end
+    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv === nothing || return mpv
     if !isapprox(norm(p - p'), 0.0; kwargs...)
         return DomainError(
             norm(p - p'),
@@ -86,27 +66,19 @@ function check_tangent_vector(
     kwargs...,
 ) where {n,𝔽}
     if check_base_point
-        t = check_manifold_point(M, p; kwargs...)
-        t === nothing || return t
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
     end
-    if (𝔽 === ℝ) && !(eltype(X) <: Real)
-        return DomainError(
-            eltype(X),
-            "The matrix $(X) is not a tangent to a point on $M, since its values are not real.",
-        )
-    end
-    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
-        return DomainError(
-            eltype(X),
-            "The matrix $(X) is not a tangent to a point on $M, since its values are not complex.",
-        )
-    end
-    if size(X) != (n, n)
-        return DomainError(
-            size(X),
-            "The vector $(X) is not a tangent to a point on $(M) since its size ($(size(X))) does not match the representation size ($(representation_size(M))).",
-        )
-    end
+    mpv = invoke(
+        check_tangent_vector,
+        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        M,
+        p,
+        X;
+        check_base_point = false, # already checked above
+        kwargs...
+    )
+    mpv === nothing || return mpv
     if !isapprox(norm(X - X'), 0.0; kwargs...)
         return DomainError(
             norm(X - X'),
@@ -116,7 +88,10 @@ function check_tangent_vector(
     return nothing
 end
 
+decorated_manifold(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field = 𝔽)
+
 embed!(M::SymmetricMatrices, q, p) = copyto!(q, p)
+embed!(M::SymmetricMatrices, Y, p, X) = copyto!(Y, X)
 
 function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
     vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors

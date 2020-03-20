@@ -1,3 +1,10 @@
+const TEST_FLOAT32 = false
+const TEST_DOUBLE64 = false
+
+@info "Manifolds.jl Test settings:\n\n"*
+    "Testing Float32: $(TEST_FLOAT32)\n"*
+    "Testing Double64: $(TEST_DOUBLE64)"
+
 include("autodiff.jl")
 include("utils.jl")
 include("numbers.jl")
@@ -11,6 +18,7 @@ include("cholesky_space.jl")
 include("euclidean.jl")
 include("fixed_rank.jl")
 include("generalized_stiefel.jl")
+include("generalized_grassmann.jl")
 include("grassmann.jl")
 include("hyperbolic.jl")
 include("rotations.jl")

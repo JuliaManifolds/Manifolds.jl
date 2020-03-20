@@ -8,6 +8,7 @@ include("utils.jl")
         @test typeof(get_embedding(M)) ==
               MetricManifold{Euclidean{Tuple{3},ℝ},MinkowskiMetric}
         @test representation_size(M) == (3,)
+        @test isinf(injectivity_radius(M))
         @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
         @test !is_tangent_vector(M, [0.0, 0.0, 1.0], [0.0, 0.0, 1.0, 0.0])
         @test_throws DomainError is_manifold_point(M, [2.0, 0.0, 0.0], true)
@@ -30,7 +31,12 @@ include("utils.jl")
         @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
         @test manifold_dimension(M) == 2
     end
-    types = [Vector{Float64}, SizedVector{3,Float64}, Vector{Float32}]
+    types = [
+        Vector{Float64},
+        SizedVector{3,Float64},
+    ]
+    TEST_FLOAT32 && push!(types, Vector{Float32})
+
     for T in types
         @testset "Type $T" begin
             pts = [

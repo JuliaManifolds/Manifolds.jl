@@ -53,7 +53,12 @@ include("utils.jl")
         @test A_sym3 == A_skewsym
         @test A_sym4 == A_skewsym
     end
-    types = [Matrix{Float64}, MMatrix{3,3,Float64}, Matrix{Float32}]
+    types = [
+        Matrix{Float64},
+        MMatrix{3,3,Float64},
+    ]
+    TEST_FLOAT32 && push!(types, Matrix{Float32})
+
     bases = (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types
         pts = [convert(T, A_skewsym), convert(T, B_skewsym), convert(T, X)]
