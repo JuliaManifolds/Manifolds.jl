@@ -390,7 +390,7 @@ end
         for f in [exp, flat, inverse_retract, log, mean, median, project_point]
             @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:parent}()
         end
-        for f in [project_tangent, sharp, retract]
+        for f in [project_tangent, sharp, retract, get_vector, get_coordinates]
             @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:parent}()
         end
         for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
@@ -399,8 +399,11 @@ end
         for f in [get_basis, inner, normal_tvector_distribution, projected_distribution]
             @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
         end
+        for f in [get_coordinates!, get_vector!]
+            @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
+        end
 
-        # miraring ones are mostly intransparent despite for a few cases - e.g. dispatch/default last variables
+        # mirroring ones are mostly intransparent despite for a few cases - e.g. dispatch/default last variables
         for f in [exp!, flat!, inverse_retract!, log!, mean!, median!]
             @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
         end
