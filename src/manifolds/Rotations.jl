@@ -354,7 +354,7 @@ Return the injectivity radius on the [`Rotations`](@ref) `M`, which is globally
 Return the radius of injectivity for the [`PolarRetraction`](@ref) on the
 [`Rotations`](@ref) `M` which is $\frac{π}{\sqrt{2}}$.
 """
-injectivity_radius(::Rotations) = π * sqrt(2.0)
+injectivity_radius(::Rotations, ::Any...) = π * sqrt(2.0)
 injectivity_radius(::Rotations, p, ::PolarRetraction) = π / sqrt(2.0)
 
 @doc raw"""

@@ -13,7 +13,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
     @test Mse == M1 × ProductManifold(M2)
     @test injectivity_radius(Mse) ≈ π
     @test is_default_metric(Mse, ProductMetric())
-    @test default_metric_dispatch(Mse, ProductMetric()) === Val{true}()
+    @test Manifolds.default_metric_dispatch(Mse, ProductMetric()) === Val{true}()
     @test_throws ErrorException Manifolds.make_reshape(NotImplementedReshaper(), Int64, zeros(2,3))
     types = [
         Vector{Float64},
@@ -169,6 +169,8 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             distr_tv_M1 = Manifolds.normal_tvector_distribution(M1, pts_base[1][1:3], 1.0)
             distr_tv_M2 = Manifolds.normal_tvector_distribution(M2, pts_base[1][4:5], 1.0)
             @test injectivity_radius(Mse, pts[1]) ≈ π
+            @test injectivity_radius(Mse) ≈ π
+            @test injectivity_radius(Mse, pts[1], ExponentialRetraction()) ≈ π
             test_manifold(
                 Mse,
                 pts;

@@ -41,6 +41,11 @@ Manifolds.log!(::BaseManifold, v, x, y) = v .= (y - x) / 2
 Manifolds.project_tangent!(::BaseManifold, w, x, v) = w .= 2 .* v
 Manifolds.project_point!(::BaseManifold, y, x) = (y .= x)
 Manifolds.injectivity_radius(::BaseManifold) = Inf
+Manifolds.injectivity_radius(::BaseManifold, ::Any) = Inf
+Manifolds.injectivity_radius(::BaseManifold, ::AbstractRetractionMethod) = Inf
+Manifolds.injectivity_radius(::BaseManifold, ::ExponentialRetraction) = Inf
+Manifolds.injectivity_radius(::BaseManifold, ::Any, ::AbstractRetractionMethod) = Inf
+Manifolds.injectivity_radius(::BaseManifold, ::Any, ::ExponentialRetraction) = Inf
 Manifolds.local_metric(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}},x) where N = 2*one(x*x')
 Manifolds.exp!(M::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x, v) where N = exp!(base_manifold(M), y, x, v)
 Manifolds.vector_transport_to!(::BaseManifold, vto, x, v, y, ::ParallelTransport) = (vto .= v)
@@ -271,8 +276,8 @@ end
         @test is_default_metric(MM) == is_default_metric(base_manifold(MM), metric(MM))
         @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2), metric(MM2))
         @test is_default_metric(MM2)
-        @test Manifolds.default_decorator_dispatch(MM) === default_metric_dispatch(MM)
-        @test Manifolds.default_decorator_dispatch(MM2) === default_metric_dispatch(MM2)
+        @test Manifolds.default_decorator_dispatch(MM) === Manifolds.default_metric_dispatch(MM)
+        @test Manifolds.default_decorator_dispatch(MM2) === Manifolds.default_metric_dispatch(MM2)
 
         @test convert(typeof(MM2), M) == MM2
         @test_throws ErrorException convert(typeof(MM), M)
@@ -331,6 +336,10 @@ end
         @test zero_tangent_vector!(MM2, v, x) === zero_tangent_vector!(M, v, x)
         @test injectivity_radius(MM2, x) === injectivity_radius(M, x)
         @test injectivity_radius(MM2) === injectivity_radius(M)
+        @test injectivity_radius(MM2, x, ExponentialRetraction()) === injectivity_radius(M, x, ExponentialRetraction())
+        @test injectivity_radius(MM2, ExponentialRetraction()) === injectivity_radius(M, ExponentialRetraction())
+        @test injectivity_radius(MM2, x, ProjectionRetraction()) === injectivity_radius(M, x, ProjectionRetraction())
+        @test injectivity_radius(MM2, ProjectionRetraction()) === injectivity_radius(M, ProjectionRetraction())
         @test is_manifold_point(MM2, x) === is_manifold_point(M, x)
         @test is_tangent_vector(MM2, x, v) === is_tangent_vector(M, x, v)
 

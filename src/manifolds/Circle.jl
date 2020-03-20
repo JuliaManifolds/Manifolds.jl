@@ -206,9 +206,6 @@ for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES
     end)
 end
 
-
-decorator_transparent_dispatch(::typeof(get_vector!),::Circle,::AbstractArray, p, X, B) = Val{:parent}()
-
 @doc raw"""
     injectivity_radius(M::Circle[, p])
 

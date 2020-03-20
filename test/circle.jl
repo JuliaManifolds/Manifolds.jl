@@ -47,7 +47,7 @@ include("utils.jl")
     ]
     TEST_FLOAT32 && push!(types, Float32)
 
-    basis_types = (DefaultOrthonormalBasis(),)
+    basis_types = (DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis(Ref(1.0)))
     basis_types_real = (DefaultOrthonormalBasis(),
         DiagonalizingOrthonormalBasis(Ref(-1.0)),
         DiagonalizingOrthonormalBasis(Ref(1.0))

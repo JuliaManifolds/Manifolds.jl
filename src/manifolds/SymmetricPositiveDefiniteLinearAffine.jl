@@ -114,15 +114,6 @@ function get_coordinates!(
     end
     return Y
 end
-function get_coordinates!(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
-    Y,
-    p,
-    X,
-    B::DefaultOrthonormalBasis,
-) where {N}
-    return get_coordinates!(base_manifold(M), Y, p, X, B)
-end
 
 function get_vector!(
     M::SymmetricPositiveDefinite{N},
@@ -142,15 +133,6 @@ function get_vector!(
         k += 1
     end
     return Y
-end
-function get_vector!(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
-    Y,
-    p,
-    X,
-    B::DefaultOrthonormalBasis,
-) where {N}
-    return get_vector!(base_manifold(M), Y, p, X, B)
 end
 
 @doc raw"""
