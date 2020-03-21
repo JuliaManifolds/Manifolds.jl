@@ -1,8 +1,8 @@
 <div align="center">
-    <img src="https://github.com/JuliaNLSolvers/Manifolds.jl/blob/master/docs/src/assets/logo-text-readme.png" alt="Manifolds.jl" width="526">
+    <img src="https://github.com/JuliaManifolds/Manifolds.jl/blob/master/docs/src/assets/logo-text-readme.png" alt="Manifolds.jl" width="526">
 </div>
 
-[![Build Status](https://travis-ci.org/JuliaNLSolvers/Manifolds.jl.svg?branch=master)](https://travis-ci.org/JuliaNLSolvers/Manifolds.jl/) [![codecov.io](http://codecov.io/github/JuliaNLSolvers/Manifolds.jl/coverage.svg?branch=master)](https://codecov.io/gh/JuliaNLSolvers/Manifolds.jl/)
+[![Build Status](https://travis-ci.org/JuliaManifolds/Manifolds.jl.svg?branch=master)](https://travis-ci.org/JuliaManifolds/Manifolds.jl/) [![codecov.io](http://codecov.io/github/JuliaManifolds/Manifolds.jl/coverage.svg?branch=master)](https://codecov.io/gh/JuliaManifolds/Manifolds.jl/)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://julianlsolvers.github.io/Manifolds.jl/latest/)
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 
