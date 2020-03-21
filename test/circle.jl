@@ -15,6 +15,9 @@ include("utils.jl")
         @test get_coordinates(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ -2.0
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈ -2.0
         @test get_coordinates(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈ 2.0
+        y = [0.0]
+        get_coordinates!(M, y, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))
+        @test y ≈ [2.0]
         @test get_vector(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_vector(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ 2.0
         @test get_vector(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ -2.0
@@ -25,8 +28,15 @@ include("utils.jl")
         @test vector_transport_to(M,0.0,1.0,1.0, ParallelTransport()) == 1.0
         @test retract(M,0.0,1.0) == exp(M,0.0,1.0)
         @test injectivity_radius(M) ≈ π
+        @test injectivity_radius(M, Ref(-2.0)) ≈ π
+        @test injectivity_radius(M, ExponentialRetraction) ≈ π
         @test mean(M, [-π/2,0.,π]) ≈ π/2
         @test mean(M, [-π/2,0.,π], [1., 1., 1.]) == π/2
+        z = project_point(M, 1.5*π)
+        z2 = [0.0]
+        project_point!(M,z2,1.5*π)
+        @test z2[1]==z
+        @test project_point(M,z) == z
     end
     TEST_STATIC_SIZED && @testset "Real Circle and static sized arrays" begin
         v = MVector(0.0)

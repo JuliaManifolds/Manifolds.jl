@@ -17,6 +17,9 @@ include("utils.jl")
             @test is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], zero_tangent_vector(M,[1.0 0.0; 0.0 1.0; 0.0 0.0]), true)
             @test_throws DomainError is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], 1im*zero_tangent_vector(M,[1.0 0.0; 0.0 1.0; 0.0 0.0]), true)
             @test injectivity_radius(M) == π/2
+            @test injectivity_radius(M, ExponentialRetraction()) == π/2
+            @test injectivity_radius(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]) == π/2
+            @test injectivity_radius(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], ExponentialRetraction()) == π/2
         end
         types = [Matrix{Float64}, ]
         TEST_STATIC_SIZED && push!(types, MMatrix{3, 2, Float64})

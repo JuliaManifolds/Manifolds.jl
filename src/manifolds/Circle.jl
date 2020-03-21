@@ -134,7 +134,6 @@ function get_basis(M::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
     vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
     return CachedBasis(B, (@SVector [0]) , vs)
 end
-
 get_coordinates(M::Circle{ℝ}, p, X, B::DefaultOrthonormalBasis) = X
 function get_coordinates(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])

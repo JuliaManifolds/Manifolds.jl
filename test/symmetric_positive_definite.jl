@@ -20,6 +20,8 @@ using Manifolds: default_metric_dispatch
 
     @test injectivity_radius(M1) == Inf
     @test injectivity_radius(M1,one(zeros(3,3))) == Inf
+    @test injectivity_radius(M1, ExponentialRetraction()) == Inf
+    @test injectivity_radius(M1,one(zeros(3,3)), ExponentialRetraction()) == Inf
     metrics = [M1, M2, M3]
     types = [Matrix{Float64}, ]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
