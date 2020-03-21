@@ -149,6 +149,13 @@ struct PowerBasisData{TB<:AbstractArray}
     bases::TB
 end
 
+const POWER_BASIS_LIST_CACHED = [
+    CachedBasis{<:AbstractBasis{ℝ},<:PowerBasisData},
+    CachedBasis{<:ManifoldsBase.AbstractOrthogonalBasis{ℝ},<:PowerBasisData},
+    CachedBasis{<:ManifoldsBase.AbstractOrthonormalBasis{ℝ},<:PowerBasisData},
+    CachedBasis{<:AbstractBasis{ℂ},<:PowerBasisData},
+]
+
 const PowerManifoldMultidimensional =
     AbstractPowerManifold{<:Manifold,ArrayPowerRepresentation} where {TSize}
 const PowerManifoldNested =
@@ -332,24 +339,6 @@ function get_coordinates(
     M::AbstractPowerManifold,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis{ℝ},<:PowerBasisData,ℝ}
-)
-    rep_size = representation_size(M.manifold)
-    vs = [
-        get_coordinates(
-            M.manifold,
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i),
-            _access_nested(B.data.bases, i),
-        )
-        for i in get_iterator(M)
-    ]
-    return reduce(vcat, reshape(vs, length(vs)))
-end
-function get_coordinates(
-    M::AbstractPowerManifold,
-    p,
-    X,
     B::CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽}
 ) where {𝔽}
     rep_size = representation_size(M.manifold)
@@ -363,6 +352,16 @@ function get_coordinates(
         for i in get_iterator(M)
     ]
     return reduce(vcat, reshape(vs, length(vs)))
+end
+for BT in POWER_BASIS_LIST_CACHED
+    eval(quote
+        @invoke_maker 4 CachedBasis{<:AbstractBasis,<:PowerBasisData} get_coordinates(
+                M::AbstractPowerManifold,
+                p,
+                X,
+                B::$BT,
+            )
+    end)
 end
 
 function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBasis)
@@ -483,6 +482,18 @@ function injectivity_radius(M::AbstractPowerManifold, p)
     return radius
 end
 injectivity_radius(M::AbstractPowerManifold) = injectivity_radius(M.manifold)
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(
+        M::AbstractPowerManifold,
+        rm::AbstractRetractionMethod,
+    )
+end)
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(
+        M::AbstractPowerManifold,
+        rm::ExponentialRetraction,
+    )
+end)
 
 @doc raw"""
     inverse_retract(M::AbstractPowerManifold, p, q, m::InversePowerRetraction)
