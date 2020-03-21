@@ -361,6 +361,15 @@ function get_coordinates!(
     return Xⁱ
 end
 
+eval(quote
+    @invoke_maker 5 CachedBasis{<:AbstractBasis,<:ProductBasisData} get_coordinates!(
+        M::ProductManifold,
+        Xⁱ,
+        p,
+        X,
+        B::CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
+    )
+end)
 for BT in (
     VeeOrthogonalBasis,
     DefaultOrthogonalBasis,
@@ -372,11 +381,12 @@ for BT in (
 end
 
 function get_vector(
-    M::ProductManifold{<:NTuple{N,Any}},
+    M::ProductManifold,
     p::ProductRepr,
     X,
     B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
-) where {N}
+)
+    N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
     parts = ntuple(N) do i
@@ -389,26 +399,21 @@ function get_vector(
     end
     return ProductRepr(parts)
 end
+eval(quote
+    @invoke_maker 4 CachedBasis{<:AbstractBasis,<:ProductBasisData} get_vector(
+        M::ProductManifold,
+        p::ProductRepr,
+        X,
+        B::CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
+    )
+end)
 function get_vector(
-    M::ProductManifold{<:NTuple{N,Any}},
-    p::ProductRepr,
-    X,
-    B::CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
-) where {N}
-    argtype = Tuple{
-        ProductManifold{<:NTuple{N,Any}},
-        ProductRepr,
-        Any,
-        CachedBasis{<:AbstractBasis,<:ProductBasisData},
-    }
-    return invoke(get_vector, argtype, M, p, X, B)
-end
-function get_vector(
-    M::ProductManifold{<:NTuple{N,Any}},
+    M::ProductManifold,
     p::ProductRepr,
     X,
     B::AbstractBasis,
-) where {N}
+)
+    N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
     parts = ntuple(N) do i
@@ -421,22 +426,6 @@ function get_vector(
     end
     return ProductRepr(parts)
 end
-
-function get_vectors(
-    M::ProductManifold{<:NTuple{N,Manifold}},
-    p::ProductRepr,
-    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
-) where {N}
-    xparts = submanifold_components(p)
-    BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.data.parts))
-    zero_tvs = map(t -> zero_tangent_vector(t...), ziptuples(M.manifolds, xparts))
-    vs = typeof(ProductRepr(zero_tvs...))[]
-    for i = 1:N, k = 1:length(BVs[i])
-        push!(vs, ProductRepr(zero_tvs[1:i-1]..., BVs[i][k], zero_tvs[i+1:end]...))
-    end
-    return vs
-end
-
 function get_vector(M::ProductManifold, p::ProductRepr, Xⁱ, B::VeeOrthogonalBasis)
     dim = manifold_dimension(M)
     @assert length(Xⁱ) == dim
@@ -454,18 +443,80 @@ function get_vector(M::ProductManifold, p, Xⁱ, B::VeeOrthogonalBasis)
     X = allocate_result(M, hat, p, Xⁱ)
     return get_vector!(M, X, p, Xⁱ, B)
 end
-function get_vector!(M::ProductManifold, X, p, Xⁱ, B::VeeOrthogonalBasis)
-    dim = manifold_dimension(M)
-    @assert length(Xⁱ) == dim
-    i = one(dim)
-    ts = ziptuples(M.manifolds, submanifold_components(M, X), submanifold_components(M, p))
-    for t ∈ ts
-        dim = manifold_dimension(first(t))
-        tXⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
-        get_vector!(t..., tXⁱ, B)
-        i += dim
+
+function get_vector!(
+    M::ProductManifold,
+    Xⁱ,
+    p,
+    X,
+    B::AbstractBasis,
+)
+    N = number_of_components(M)
+    dims = map(manifold_dimension, M.manifolds)
+    dims_acc = accumulate(+, [1, dims...])
+    for i in 1:N
+        get_vector!(
+            M.manifolds[i],
+            submanifold_component(Xⁱ, i),
+            submanifold_component(p, i),
+            X[dims_acc[i]:dims_acc[i]+dims[i]-1],
+            B,
+        )
+    end
+    return Xⁱ
+end
+function get_vector!(
+    M::ProductManifold,
+    X,
+    p,
+    Xⁱ,
+    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
+)
+    N = number_of_components(M)
+    dims = map(manifold_dimension, M.manifolds)
+    dims_acc = accumulate(+, [1, dims...])
+    for i in 1:N
+        get_vector!(
+            M.manifolds[i],
+            submanifold_component(X, i),
+            submanifold_component(p, i),
+            Xⁱ[dims_acc[i]:dims_acc[i]+dims[i]-1],
+            B.data.parts[i],
+        )
     end
     return X
+end
+
+for BT in (
+    VeeOrthogonalBasis,
+    DefaultOrthogonalBasis,
+    DefaultOrthonormalBasis,
+)
+    eval(quote
+        @invoke_maker 5 AbstractBasis get_vector!(
+            M::ProductManifold,
+            X,
+            p,
+            Xⁱ,
+            B::$BT,
+        )
+    end)
+end
+
+function get_vectors(
+    M::ProductManifold,
+    p::ProductRepr,
+    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
+)
+    N = number_of_components(M)
+    xparts = submanifold_components(p)
+    BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.data.parts))
+    zero_tvs = map(t -> zero_tangent_vector(t...), ziptuples(M.manifolds, xparts))
+    vs = typeof(ProductRepr(zero_tvs...))[]
+    for i = 1:N, k = 1:length(BVs[i])
+        push!(vs, ProductRepr(zero_tvs[1:i-1]..., BVs[i][k], zero_tvs[i+1:end]...))
+    end
+    return vs
 end
 
 @doc raw"""
@@ -612,6 +663,13 @@ function norm(M::ProductManifold, p, X)
     )
     return sqrt(sum(norms_squared))
 end
+
+"""
+    number_of_components(M::ProductManifold{<:NTuple{N,Any}}) where {N}
+
+Calculate the number of manifolds multiplied in the given [`ProductManifold`](@ref) `M`.
+"""
+number_of_components(M::ProductManifold{<:NTuple{N,Any}}) where {N} = N
 
 function ProductFVectorDistribution(
     type::VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
