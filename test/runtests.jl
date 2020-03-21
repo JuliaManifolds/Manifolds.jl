@@ -1,12 +1,3 @@
-const TEST_FLOAT32 = false
-const TEST_DOUBLE64 = false
-const TEST_STATIC_SIZED = false
-
-@info "Manifolds.jl Test settings:\n\n"*
-    "Testing Float32: $(TEST_FLOAT32)\n"*
-    "Testing Double64: $(TEST_DOUBLE64)\n"*
-    "Testing Static: $(TEST_STATIC_SIZED)\n"
-
 include("autodiff.jl")
 include("utils.jl")
 

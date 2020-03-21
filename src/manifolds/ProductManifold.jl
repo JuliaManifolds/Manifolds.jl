@@ -271,6 +271,7 @@ function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, ProductBasisData(vs))
 end
 for BT in (
+    DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
     ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
     ProjectedOrthonormalBasis{:svd,ℝ},
@@ -295,26 +296,79 @@ function get_coordinates(
     )
     return vcat(reps...)
 end
-function get_coordinates(
-    M::ProductManifold,
-    p,
-    X,
-    B::CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
-)
-    argtype = Tuple{
-        ProductManifold,
-        Any,
-        Any,
-        CachedBasis{<:AbstractBasis,<:ProductBasisData},
-    }
-    return invoke(get_coordinates, argtype, M, p, X, B)
-end
-function get_coordinates(M::ProductManifold, p, X, B::DefaultOrthonormalBasis)
+eval(quote
+    @invoke_maker 4 CachedBasis{<:AbstractBasis,<:ProductBasisData} get_coordinates(
+        M::ProductManifold,
+        p,
+        X,
+        B::CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
+    )
+end)
+function get_coordinates(M::ProductManifold, p, X, B::AbstractBasis)
     reps = map(
         t -> get_coordinates(t..., B),
         ziptuples(M.manifolds, submanifold_components(p), submanifold_components(X)),
     )
     return vcat(reps...)
+end
+for BT in (
+    VeeOrthogonalBasis,
+    DefaultOrthogonalBasis,
+    DefaultOrthonormalBasis,
+)
+    eval(quote
+        @invoke_maker 4 AbstractBasis get_coordinates(M::ProductManifold, p, X, B::$BT)
+    end)
+end
+
+function get_coordinates!(M::ProductManifold, Xⁱ, p, X, B::AbstractBasis)
+    dim = manifold_dimension(M)
+    @assert length(Xⁱ) == dim
+    i = one(dim)
+    ts = ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, X))
+    for t ∈ ts
+        SM = first(t)
+        dim = manifold_dimension(SM)
+        tXⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
+        get_coordinates!(SM, tXⁱ, Base.tail(t)..., B)
+        i += dim
+    end
+    return Xⁱ
+end
+function get_coordinates!(
+    M::ProductManifold,
+    Xⁱ,
+    p,
+    X,
+    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
+)
+    dim = manifold_dimension(M)
+    @assert length(Xⁱ) == dim
+    i = one(dim)
+    ts = ziptuples(
+        M.manifolds,
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        B.data.parts,
+    )
+    for t ∈ ts
+        SM = first(t)
+        dim = manifold_dimension(SM)
+        tXⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
+        get_coordinates!(SM, tXⁱ, Base.tail(t)...)
+        i += dim
+    end
+    return Xⁱ
+end
+
+for BT in (
+    VeeOrthogonalBasis,
+    DefaultOrthogonalBasis,
+    DefaultOrthonormalBasis,
+)
+    eval(quote
+        @invoke_maker 5 AbstractBasis get_coordinates!(M::ProductManifold, Xⁱ, p, X, B::$BT)
+    end)
 end
 
 function get_vector(
@@ -793,36 +847,6 @@ function support(tvd::ProductFVectorDistribution)
         tvd.type,
         ProductRepr(map(d -> support(d).point, tvd.distributions)...),
     )
-end
-
-function get_coordinates(M::ProductManifold, p::ProductRepr, X, B::VeeOrthogonalBasis)
-    reps = map(
-        get_coordinates,
-        M.manifolds,
-        submanifold_components(p),
-        submanifold_components(X),
-        B,
-    )
-    return vcat(reps...)
-end
-function get_coordinates(M::ProductManifold, p, X, B::VeeOrthogonalBasis)
-    Xⁱ = allocate_result(M, get_coordinates, p, X, B)
-    return get_coordinates!(M, Xⁱ, p, X, B)
-end
-
-function get_coordinates!(M::ProductManifold, Xⁱ, p, X, B::VeeOrthogonalBasis)
-    dim = manifold_dimension(M)
-    @assert length(Xⁱ) == dim
-    i = one(dim)
-    ts = ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, X))
-    for t ∈ ts
-        SM = first(t)
-        dim = manifold_dimension(SM)
-        tXⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
-        get_coordinates!(SM, tXⁱ, Base.tail(t)...,B)
-        i += dim
-    end
-    return Xⁱ
 end
 
 function zero_tangent_vector!(M::ProductManifold, X, p)
