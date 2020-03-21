@@ -2,6 +2,7 @@ include("utils.jl")
 
 struct TestVectorSpaceType <: VectorSpaceType end
 
+
 @testset "Tangent bundle" begin
     M = Sphere(2)
 
@@ -117,5 +118,12 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(3))) == 9
         @test base_manifold(VectorBundleFibers(TT, Sphere(2))) == M
         @test sprint(show, VectorBundleFibers(TT, Sphere(2))) == "VectorBundleFibers(TensorProductType(TangentSpace, TangentSpace), Sphere(2))"
+    end
+
+    @testset "Error messages" begin
+        vbf = VectorBundleFibers(TestVectorSpaceType(), Euclidean(3))
+        @test_throws ErrorException inner(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
+        @test_throws ErrorException Manifolds.project_vector!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
+        @test_throws ErrorException vector_space_dimension(vbf)
     end
 end
