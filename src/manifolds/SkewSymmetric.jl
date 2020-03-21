@@ -27,6 +27,17 @@ function SkewSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
     SkewSymmetricMatrices{n,field}()
 end
 
+function allocation_promotion_function(
+    M::SkewSymmetricMatrices{<:Any,ℂ},
+    ::typeof(get_vector),
+    args::Tuple,
+)
+    return complex
+end
+
+base_manifold(M::SkewSymmetricMatrices) = M
+
+
 @doc raw"""
     check_manifold_point(M::SkewSymmetricMatrices{n,𝔽}, p; kwargs...)
 
