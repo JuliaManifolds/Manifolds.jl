@@ -14,6 +14,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         fv1 = fv_tvs[1]
         tv1s = allocate(fv_tvs[1])
         @test isa(tv1s, FVector)
+        @test size(tv1s) == (3,)
         @test tv1s.type == TangentSpace
         @test size(tv1s.data) == size(tvs[1])
         @test number_eltype(tv1s) == number_eltype(tvs[1])
@@ -31,15 +32,16 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test_throws ErrorException flat(PM,ProductRepr([0.0,],[0.0]),FVector(CotangentSpace, ProductRepr([0.0],[0.0])))
         @test_throws ErrorException sharp(PM,ProductRepr([0.0,],[0.0]),FVector(TangentSpace, ProductRepr([0.0],[0.0])))
 
-        fv2 = FVector(TangentSpace, ProductRepr([1.0, 0.0, 0.0], [1.0, 2.0]))
+        fv2 = FVector(TangentSpace, ProductRepr([1, 0, 0], [1 2]))
         @test submanifold_component(fv2, 1) == [1, 0, 0]
-        @test submanifold_component(fv2, 2) == [1, 2]
-        @test submanifold_component(fv2, Val(1)) == [1, 0, 0]
-        @test submanifold_component(fv2, Val(2)) == [1, 2]
+        @test submanifold_component(fv2, 2) == [1 2]
+        @test (@inferred submanifold_component(fv2, Val(1))) == [1, 0, 0]
+        @test (@inferred submanifold_component(fv2, Val(2))) == [1 2]
         @test submanifold_component(PM, fv2, 1) == [1, 0, 0]
-        @test submanifold_component(PM, fv2, 2) == [1, 2]
-        @test submanifold_component(PM, fv2, Val(1)) == [1, 0, 0]
-        @test submanifold_component(PM, fv2, Val(2)) == [1, 2]
+        @test submanifold_component(PM, fv2, 2) == [1 2]
+        @test (@inferred submanifold_component(PM, fv2, Val(1))) == [1, 0, 0]
+        @test (@inferred submanifold_component(PM, fv2, Val(2))) == [1 2]
+        @test submanifold_components(PM, fv2) == ([1.0, 0.0, 0.0], [1.0 2.0])
     end
 
     types = [ Vector{Float64}, ]
@@ -124,6 +126,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         vbf = VectorBundleFibers(TestVectorSpaceType(), Euclidean(3))
         @test_throws ErrorException inner(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws ErrorException Manifolds.project_vector!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
+        @test_throws ErrorException zero_vector!(vbf, [1, 2, 3], [1, 2, 3])
         @test_throws ErrorException vector_space_dimension(vbf)
     end
 end
