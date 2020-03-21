@@ -37,11 +37,9 @@ include("utils.jl")
         @test A_sym3 == A_sym
         @test A_sym4 == A_sym
     end
-    types = [
-        Matrix{Float64},
-        MMatrix{3,3,Float64},
-    ]
+    types = [ Matrix{Float64}, ]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
+    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64})
 
     bases = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types

@@ -15,11 +15,9 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
     @test is_default_metric(Mse, ProductMetric())
     @test Manifolds.default_metric_dispatch(Mse, ProductMetric()) === Val{true}()
     @test_throws ErrorException Manifolds.make_reshape(NotImplementedReshaper(), Int64, zeros(2,3))
-    types = [
-        Vector{Float64},
-        MVector{5, Float64},
-    ]
+    types = [Vector{Float64}, ]
     TEST_FLOAT32 && push!(types, Vector{Float32})
+    TEST_STATIC_SIZED && push!(types, MVector{5, Float64})
 
     retraction_methods = [Manifolds.ProductRetraction(ManifoldsBase.ExponentialRetraction(), ManifoldsBase.ExponentialRetraction())]
     inverse_retraction_methods = [Manifolds.InverseProductRetraction(ManifoldsBase.LogarithmicInverseRetraction(), ManifoldsBase.LogarithmicInverseRetraction())]

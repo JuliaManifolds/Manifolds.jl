@@ -215,8 +215,8 @@ function add_manifold_benchmarks()
                 test_tangent_vector_broadcasting = true)
         end
 
-        types_spd = (Matrix{Float64},
-            MMatrix{3,3,Float64})
+        types_spd = [Matrix{Float64},]
+        TEST_STATIC_SIZED && push!(types_spd, MMatrix{3,3,Float64})
 
         A(α) = [1. 0. 0.; 0. cos(α) sin(α); 0. -sin(α) cos(α)]
         pts_spd = [#

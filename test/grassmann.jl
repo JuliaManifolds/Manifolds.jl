@@ -18,10 +18,9 @@ include("utils.jl")
             @test_throws DomainError is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], 1im*zero_tangent_vector(M,[1.0 0.0; 0.0 1.0; 0.0 0.0]), true)
             @test injectivity_radius(M) == π/2
         end
-        types = [
-            Matrix{Float64},
-            MMatrix{3, 2, Float64},
-        ]
+        types = [Matrix{Float64}, ]
+        TEST_STATIC_SIZED && push!(types, MMatrix{3, 2, Float64})
+
         TEST_FLOAT32 && push!(types, Matrix{Float32})
         basis_types = (ProjectedOrthonormalBasis(:gram_schmidt),)
         @testset "Type $T" for T in types

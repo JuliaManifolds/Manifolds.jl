@@ -44,8 +44,9 @@ Random.seed!(42)
     types_r1 = [Array{Float64,3},
                 HybridArray{Tuple{3,3,StaticArrays.Dynamic()}, Float64, 3}]
 
-    types_rn1 = [Vector{Matrix{Float64}},
-                 Vector{MMatrix{3,3,Float64}}]
+    types_rn1 = [Vector{Matrix{Float64}}, ]
+    TEST_STATIC_SIZED && push!(types_rn1, Vector{MMatrix{3,3,Float64}})
+
     types_r2 = [Array{Float64,4},
                 HybridArray{Tuple{3,3,StaticArrays.Dynamic(),StaticArrays.Dynamic()}, Float64, 4}]
     types_rn2 = [Matrix{Matrix{Float64}}]

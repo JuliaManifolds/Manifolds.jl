@@ -21,11 +21,9 @@ using Manifolds: default_metric_dispatch
     @test injectivity_radius(M1) == Inf
     @test injectivity_radius(M1,one(zeros(3,3))) == Inf
     metrics = [M1, M2, M3]
-    types = [
-        Matrix{Float64},
-        MMatrix{3,3,Float64},
-    ]
+    types = [Matrix{Float64}, ]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
+    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64})
 
     for M in metrics
         basis_types = if M == M3

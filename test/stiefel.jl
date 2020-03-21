@@ -45,11 +45,9 @@ include("utils.jl")
             @test Z == X
         end
 
-        types = [
-            Matrix{Float64},
-            MMatrix{3,2,Float64},
-        ]
+        types = [Matrix{Float64}, ]
         TEST_FLOAT32 && push!(types, Matrix{Float32})
+        TEST_STATIC_SIZED && push!(types, MMatrix{3, 2, Float64})
 
         @testset "Type $T" for T in types
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]

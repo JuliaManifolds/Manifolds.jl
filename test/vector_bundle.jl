@@ -41,11 +41,10 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test submanifold_component(PM, fv2, Val(2)) == [1, 2]
     end
 
-    types = [
-        Vector{Float64},
-        MVector{3, Float64},
-        Vector{Float32},
-    ]
+    types = [ Vector{Float64}, ]
+    TEST_FLOAT32 && push!(types, Vector{Float32})
+    TEST_STATIC_SIZED && push!(types, MVector{3, Float64})
+
     for T in types
         x = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)

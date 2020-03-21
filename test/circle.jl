@@ -27,6 +27,8 @@ include("utils.jl")
         @test injectivity_radius(M) ≈ π
         @test mean(M, [-π/2,0.,π]) ≈ π/2
         @test mean(M, [-π/2,0.,π], [1., 1., 1.]) == π/2
+    end
+    TEST_STATIC_SIZED && @testset "Real Circle and static sized arrays" begin
         v = MVector(0.0)
         x = SVector(0.0)
         log!(M, v, x, SVector(π/4))

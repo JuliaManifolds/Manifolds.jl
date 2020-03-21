@@ -22,21 +22,15 @@ include("utils.jl")
     @test Ec^(4,5) === Euclidean(3, 4, 5; field = ℂ)
 
     manifolds = [ E, EM, Ec ]
-    types = [
-        Vector{Float64},
-        MVector{3, Float64},
-    ]
+    types = [ Vector{Float64}, ]
     TEST_FLOAT32 && push!(types, Vector{Float32})
     TEST_DOUBLE64 && push!(types, Vector{Double64})
+    TEST_STATIC_SIZED && push!(types, MVector{3, Float64})
 
-    types_complex = [
-        Vector{ComplexF64},
-        MVector{3, ComplexF64},
-        Vector{ComplexF32},
-        Vector{ComplexDF64},
-    ]
+    types_complex = [ Vector{ComplexF64}, ]
     TEST_FLOAT32 && push!(types_complex, Vector{ComplexF32})
     TEST_DOUBLE64 && push!(types_complex, Vector{ComplexDF64})
+    TEST_STATIC_SIZED && push!(types_complex, MVector{3, ComplexF64})
 
     for M in manifolds
         basis_types = if M == E
