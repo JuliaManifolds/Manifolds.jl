@@ -1,9 +1,15 @@
 include("autodiff.jl")
 include("utils.jl")
 
+@info "Manifolds.jl Test settings:\n\n"*
+    "Testing Float32:  $(TEST_FLOAT32)\n"*
+    "Testing Double64: $(TEST_DOUBLE64)\n"*
+    "Testing Static:   $(TEST_STATIC_SIZED)\n"
+
+
 @testset "Ambiguities" begin
     # TODO: reduce the number of ambiguities
-    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 83
+    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 57
     @test length(Test.detect_ambiguities(Manifolds)) == 0
 end
 

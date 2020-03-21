@@ -174,12 +174,15 @@ end
 
 @doc raw"""
     injectivity_radius(M::GeneralizedGrassmann)
-    injectivity_radius(M::GeneraizedGrassmann, p)
+    injectivity_radius(M::GeneralizedGrassmann, p)
 
 Return the injectivity radius on the [`GeneralizedGrassmann`](@ref) `M`,
 which is $\frac{π}{2}$.
 """
-injectivity_radius(::GeneralizedGrassmann, ::Any...) = π / 2
+injectivity_radius(::GeneralizedGrassmann) = π / 2
+injectivity_radius(::GeneralizedGrassmann, ::ExponentialRetraction) = π / 2
+injectivity_radius(::GeneralizedGrassmann, ::Any) = π / 2
+injectivity_radius(::GeneralizedGrassmann, ::Any, ::ExponentialRetraction) = π / 2
 
 @doc raw"""
     inner(M::GeneralizedGrassmann, p, X, Y)

@@ -151,6 +151,15 @@ function get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
     return @SVector [Xⁱ]
 end
 
+eval(quote
+    @invoke_maker 1 Manifold get_coordinates(
+        M::Circle,
+        e::Identity,
+        X,
+        B::VeeOrthogonalBasis,
+    )
+end)
+
 function get_coordinates!(M::Circle, Y::AbstractArray, p, X, B::DefaultOrthonormalBasis)
     Y[] = get_coordinates(M, p, X, B)[]
     return Y
@@ -165,23 +174,17 @@ function get_coordinates!(
     Y[] = get_coordinates(M, p, X, B)[]
     return Y
 end
-function get_coordinates!(
-    M::Circle,
-    Y::AbstractArray,
-    p,
-    X,
-    B::VeeOrthogonalBasis,
-)
-    return invoke(
-        get_coordinates!,
-        Tuple{Manifold,Any,Any,Any,VeeOrthogonalBasis},
-        M,
-        Y,
+
+eval(quote
+    @invoke_maker 1 Manifold get_coordinates!(
+        M::Circle,
+        Y::AbstractArray,
         p,
         X,
-        B,
+        B::VeeOrthogonalBasis,
     )
-end
+end)
+
 
 get_vector(M::Circle{ℝ}, p, X, B::AbstractBasis) = X
 get_vector(M::Circle{ℝ}, p, X, B::DefaultOrthonormalBasis) = X
@@ -211,7 +214,10 @@ end
 
 Return the injectivity radius on the [`Circle`](@ref) `M`, i.e. $π$.
 """
-injectivity_radius(::Circle, args...) = π
+injectivity_radius(::Circle) = π
+injectivity_radius(::Circle, ::ExponentialRetraction) = π
+injectivity_radius(::Circle, ::Any) = π
+injectivity_radius(::Circle, ::Any, ::ExponentialRetraction) = π
 
 @doc raw"""
     inner(M::Circle, p, X, Y)

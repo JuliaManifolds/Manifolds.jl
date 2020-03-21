@@ -134,8 +134,9 @@ end
 
 Return the injectivity radius on the [`Hyperbolic`](@ref), which is $∞$.
 """
-injectivity_radius(H::Hyperbolic, ::Any...) = Inf
+injectivity_radius(H::Hyperbolic) = Inf
 injectivity_radius(H::Hyperbolic, ::ExponentialRetraction) = Inf
+injectivity_radius(H::Hyperbolic, ::Any) = Inf
 injectivity_radius(H::Hyperbolic, ::Any, ::ExponentialRetraction) = Inf
 
 @doc raw"""

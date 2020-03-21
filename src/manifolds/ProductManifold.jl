@@ -21,6 +21,15 @@ end
 ProductManifold(manifolds::Manifold...) = ProductManifold{typeof(manifolds)}(manifolds)
 ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
 
+const PRODUCT_BASIS_LIST = [
+    VeeOrthogonalBasis,
+    DefaultBasis,
+    DefaultOrthogonalBasis,
+    DefaultOrthonormalBasis,
+    ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
+    ProjectedOrthonormalBasis{:svd,ℝ},
+]
+
 """
     ProductBasisData
 
@@ -29,6 +38,13 @@ A typed tuple to store tuples of data of stored/precomputed bases for a [`Produc
 struct ProductBasisData{T<:Tuple}
     parts::T
 end
+
+const PRODUCT_BASIS_LIST_CACHED = [
+    CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
+    CachedBasis{<:ManifoldsBase.AbstractOrthogonalBasis{ℝ},<:ProductBasisData},
+    CachedBasis{<:ManifoldsBase.AbstractOrthonormalBasis{ℝ},<:ProductBasisData},
+    CachedBasis{<:AbstractBasis{ℂ},<:ProductBasisData},
+]
 
 """
     ProductMetric <: Metric
@@ -270,12 +286,7 @@ function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     end
     return CachedBasis(B, ProductBasisData(vs))
 end
-for BT in (
-    DefaultOrthogonalBasis,
-    DefaultOrthonormalBasis,
-    ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
-    ProjectedOrthonormalBasis{:svd,ℝ},
-)
+for BT in PRODUCT_BASIS_LIST
     eval(quote
         @invoke_maker 3 AbstractBasis get_basis(M::ProductManifold, p, B::$BT)
     end)
@@ -296,14 +307,18 @@ function get_coordinates(
     )
     return vcat(reps...)
 end
-eval(quote
-    @invoke_maker 4 CachedBasis{<:AbstractBasis,<:ProductBasisData} get_coordinates(
-        M::ProductManifold,
-        p,
-        X,
-        B::CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
-    )
-end)
+
+for BT in PRODUCT_BASIS_LIST_CACHED
+    eval(quote
+        @invoke_maker 4 CachedBasis{<:AbstractBasis,<:ProductBasisData} get_coordinates(
+                M::ProductManifold,
+                p,
+                X,
+                B::$BT,
+            )
+    end)
+end
+
 function get_coordinates(M::ProductManifold, p, X, B::AbstractBasis)
     reps = map(
         t -> get_coordinates(t..., B),
@@ -311,11 +326,7 @@ function get_coordinates(M::ProductManifold, p, X, B::AbstractBasis)
     )
     return vcat(reps...)
 end
-for BT in (
-    VeeOrthogonalBasis,
-    DefaultOrthogonalBasis,
-    DefaultOrthonormalBasis,
-)
+for BT in PRODUCT_BASIS_LIST
     eval(quote
         @invoke_maker 4 AbstractBasis get_coordinates(M::ProductManifold, p, X, B::$BT)
     end)
@@ -361,20 +372,18 @@ function get_coordinates!(
     return Xⁱ
 end
 
-eval(quote
-    @invoke_maker 5 CachedBasis{<:AbstractBasis,<:ProductBasisData} get_coordinates!(
-        M::ProductManifold,
-        Xⁱ,
-        p,
-        X,
-        B::CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
-    )
-end)
-for BT in (
-    VeeOrthogonalBasis,
-    DefaultOrthogonalBasis,
-    DefaultOrthonormalBasis,
-)
+for BT in PRODUCT_BASIS_LIST_CACHED
+    eval(quote
+        @invoke_maker 5 CachedBasis{<:AbstractBasis,<:ProductBasisData} get_coordinates!(
+                M::ProductManifold,
+                Xⁱ,
+                p,
+                X,
+                B::$BT,
+            )
+    end)
+end
+for BT in PRODUCT_BASIS_LIST
     eval(quote
         @invoke_maker 5 AbstractBasis get_coordinates!(M::ProductManifold, Xⁱ, p, X, B::$BT)
     end)
@@ -487,11 +496,17 @@ function get_vector!(
     return X
 end
 
-for BT in (
-    VeeOrthogonalBasis,
-    DefaultOrthogonalBasis,
-    DefaultOrthonormalBasis,
-)
+eval(quote
+    @invoke_maker 1 Manifold get_vector!(
+        M::ProductManifold,
+        Xⁱ,
+        e::Identity,
+        X,
+        B::VeeOrthogonalBasis,
+    )
+end)
+
+for BT in PRODUCT_BASIS_LIST
     eval(quote
         @invoke_maker 5 AbstractBasis get_vector!(
             M::ProductManifold,

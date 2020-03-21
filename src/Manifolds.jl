@@ -143,6 +143,8 @@ include("distributions.jl")
 include("projected_distribution.jl")
 include("product_representations.jl")
 
+# It's included early to ensure visibility of `Identity`
+include("groups/group.jl")
 
 include("manifolds/EmbeddedManifold.jl")
 include("manifolds/MetricManifold.jl")
@@ -173,7 +175,6 @@ include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/Torus.jl")
 include("manifolds/Oblique.jl")
 
-include("groups/group.jl")
 include("groups/metric.jl")
 include("groups/group_action.jl")
 include("groups/group_operation_action.jl")
