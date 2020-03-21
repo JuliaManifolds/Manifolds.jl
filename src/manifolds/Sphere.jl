@@ -189,6 +189,9 @@ injectivity_radius(::Sphere, ::ProjectionRetraction) = π / 2
 injectivity_radius(::Sphere, ::Any) = π
 injectivity_radius(::Sphere, ::Any, ::ExponentialRetraction) = π
 injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π / 2
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(M::Sphere, rm::AbstractRetractionMethod)
+end)
 
 @doc raw"""
     inverse_retract(M::Sphere, p, q, ::ProjectionInverseRetraction)

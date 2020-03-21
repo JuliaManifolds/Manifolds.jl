@@ -183,6 +183,12 @@ injectivity_radius(::GeneralizedGrassmann) = π / 2
 injectivity_radius(::GeneralizedGrassmann, ::ExponentialRetraction) = π / 2
 injectivity_radius(::GeneralizedGrassmann, ::Any) = π / 2
 injectivity_radius(::GeneralizedGrassmann, ::Any, ::ExponentialRetraction) = π / 2
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(
+        M::GeneralizedGrassmann,
+        rm::AbstractRetractionMethod,
+    )
+end)
 
 @doc raw"""
     inner(M::GeneralizedGrassmann, p, X, Y)
