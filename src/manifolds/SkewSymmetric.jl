@@ -187,10 +187,10 @@ function get_vector!(
     k = 1
     for i = 1:N, j = i:N
         if i == j # real zero on the diag
-            @inbounds Y[i, j] = Complex(convert(eltype(X), 0), X[k])
+            @inbounds Y[i, j] = X[k]*1im
             k += 1
         else
-            @inbounds Y[i, j] = Complex(X[k], X[k+1]) / sqrt(2)
+            @inbounds Y[i, j] = (X[k] + X[k+1]*1im) / sqrt(2)
             k += 2
             @inbounds Y[j, i] = -conj(Y[i, j])
         end

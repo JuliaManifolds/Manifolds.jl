@@ -184,7 +184,7 @@ function get_vector!(
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds Y[i, j] = Complex(X[k], i == j ? 0 : X[k+1]) * scale
+        @inbounds Y[i, j] = X[k] + (i == j ? 0 : X[k+1]*1im) * scale
         @inbounds Y[j, i] = Y[i, j]
         k += (i == j ? 1 : 2)
     end

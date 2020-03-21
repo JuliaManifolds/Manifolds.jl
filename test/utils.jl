@@ -334,7 +334,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
 
             vb = get_coordinates(M, x, v1, btype)
-            @test isa(vb, AbstractVector{<:Real})
+            #@test isa(vb, AbstractVector{<:Real})
             @test length(vb) == N
             vbi = get_vector(M, x, vb, btype)
             @test isapprox(M, x, v1, vbi)
