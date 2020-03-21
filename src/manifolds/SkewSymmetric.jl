@@ -99,14 +99,15 @@ function get_basis(M::SkewSymmetricMatrices, p, B::DiagonalizingOrthonormalBasis
     return CachedBasis(B, κ, Ξ)
 end
 
-function get_coordinates(
+function get_coordinates!(
     M::SkewSymmetricMatrices{N,ℝ},
+    Y,
     p,
     X,
     B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, dim)
+    @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == div(N * (N - 1), 2)
     k = 1
@@ -116,14 +117,15 @@ function get_coordinates(
     end
     return Y
 end
-function get_coordinates(
+function get_coordinates!(
     M::SkewSymmetricMatrices{N,ℂ},
+    Y,
     p,
     X,
     B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, real(eltype(X)), dim)
+    @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == N^2
     k = 1
@@ -140,15 +142,15 @@ function get_coordinates(
     return Y
 end
 
-function get_vector(
+function get_vector!(
     M::SkewSymmetricMatrices{N,ℝ},
+    Y,
     p,
     X,
     B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = allocate_result(M, get_vector, p)
-    @assert size(X) == (div(N * (N - 1), 2),)
+    @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
     for i = 1:N
@@ -161,15 +163,15 @@ function get_vector(
     end
     return Y
 end
-function get_vector(
+function get_vector!(
     M::SkewSymmetricMatrices{N,ℂ},
+    Y,
     p,
     X,
     B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = allocate_result(M, get_vector, p, p .* 1im)
-    @assert size(X) == (N^2,)
+    @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N

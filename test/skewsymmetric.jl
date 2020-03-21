@@ -79,7 +79,11 @@ include("utils.jl")
             )
         end
     end
-    complex_types = [Matrix{ComplexF64}, MMatrix{3,3,ComplexF64}, Matrix{ComplexF32}]
+    complex_types = [
+        Matrix{ComplexF64},
+        MMatrix{3,3,ComplexF64},
+    ]
+    TEST_FLOAT32 && push!(complex_types, Matrix{ComplexF32})
     for T in complex_types
         pts_complex =
             [convert(T, A_skewsym_complex), convert(T, B_skewsym_complex), convert(T, X)]
