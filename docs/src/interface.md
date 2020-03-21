@@ -1,6 +1,6 @@
 # `ManifoldsBase.jl` – an interface for manifolds
 
-The interface for a manifold is provided in the lightweight package [ManifoldsBase.jl](https://github.com/JuliaNLSolvers/ManifoldsBase.jl).
+The interface for a manifold is provided in the lightweight package [ManifoldsBase.jl](https://github.com/JuliaManifolds/ManifoldsBase.jl).
 You can easily implement your algorithms and even your own manifolds just using the interface.
 All manifolds from the package here are also based on this interface, so any project based on the interface can benefit from all manifolds, as long as the functions used in such a project are implemented.
 
@@ -14,7 +14,7 @@ Additionally the [`AbstractDecoratorManifold`](@ref) is provided as well as the 
 ## Types and functions
 
 The following functions are currently available from the interface.
-If a manifold that you implement for your own package fits this interface, we happily look forward to a [Pull Request](https://github.com/JuliaNLSolvers/Manifolds.jl/compare) to add it here.
+If a manifold that you implement for your own package fits this interface, we happily look forward to a [Pull Request](https://github.com/JuliaManifolds/Manifolds.jl/compare) to add it here.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]

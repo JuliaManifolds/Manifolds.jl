@@ -12,7 +12,7 @@ based on that interface can be used within your code.
 To install the package just type
 
 ```julia
-] add https://github.com/JuliaNLSolvers/Manifolds.jl.git
+] add https://github.com/JuliaManifolds/Manifolds.jl.git
 ```
 
 Then you can directly start, for example to stop half way from the north pole on the [`Sphere`](@ref) to a point on the the equator, you can generate the [`shortest_geodesic`](@ref).
