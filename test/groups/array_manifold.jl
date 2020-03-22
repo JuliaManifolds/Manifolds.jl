@@ -15,7 +15,7 @@ include("../utils.jl")
 
     e = make_identity(AG, p)
     @test Manifolds.array_value(e).p == Manifolds.array_value(e.p)
-    @test_broken Manifolds.array_point(e).p == Manifolds.array_point(e.p)
+    @test Manifolds.array_point(e).p == e.p
     p2, q2 = ArrayMPoint(p), ArrayMPoint(q)
     X2 = ArrayTVector(X)
 

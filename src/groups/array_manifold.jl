@@ -1,7 +1,7 @@
 array_value(e::Identity) = Identity(e.group, array_value(e.p))
 
 array_point(p) = ArrayMPoint(p)
-array_point(e::Identity) = e
+array_point(e::Identity) = Identity(e.group, array_point(e.p))
 
 function inv(M::ArrayManifold, p; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
