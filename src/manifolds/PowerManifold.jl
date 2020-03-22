@@ -70,9 +70,7 @@ struct PowerManifold{TM<:Manifold,TSize,TPR<:AbstractPowerRepresentation} <:
 end
 
 function PowerManifold(M::Manifold, size::Int...)
-    return PowerManifold{typeof(M),Tuple{size...},ArrayPowerRepresentation}(
-        M,
-    )
+    return PowerManifold{typeof(M),Tuple{size...},ArrayPowerRepresentation}(M)
 end
 function PowerManifold(
     M::Manifold,
@@ -171,12 +169,7 @@ function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
     return FVector(CotangentSpace, alloc)
 end
-function allocate_result(
-    M::PowerManifoldNested,
-    f::typeof(get_vector),
-    p,
-    X,
-)
+function allocate_result(M::PowerManifoldNested, f::typeof(get_vector), p, X)
     return [allocate_result(M.manifold, f, _access_nested(p, i)) for i in get_iterator(M)]
 end
 function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector, x)
@@ -186,7 +179,7 @@ end
 function allocate_result(M::PowerManifoldNested, f::typeof(get_coordinates), p, X, B)
     return invoke(
         allocate_result,
-        Tuple{Manifold, typeof(get_coordinates), Any, Any, typeof(B)},
+        Tuple{Manifold,typeof(get_coordinates),Any,Any,typeof(B)},
         M,
         f,
         p,
@@ -227,7 +220,13 @@ base manifolds must be respective tangent vectors.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::AbstractPowerManifold, p, X; check_base_point = true, kwargs...)
+function check_tangent_vector(
+    M::AbstractPowerManifold,
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+)
     if check_base_point
         mpe = check_manifold_point(M, p)
         mpe === nothing || return mpe
@@ -323,11 +322,13 @@ function get_basis(M::AbstractPowerManifold, p, B::AbstractBasis)
 end
 function get_basis(M::AbstractPowerManifold, p, B::DiagonalizingOrthonormalBasis)
     rep_size = representation_size(M.manifold)
-    vs = [get_basis(
-        M.manifold,
-        _read(M, rep_size, p, i),
-        DiagonalizingOrthonormalBasis(_read(M, rep_size, B.frame_direction, i)),
-    ) for i in get_iterator(M)]
+    vs = [
+        get_basis(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            DiagonalizingOrthonormalBasis(_read(M, rep_size, B.frame_direction, i)),
+        ) for i in get_iterator(M)
+    ]
     return CachedBasis(B, PowerBasisData(vs))
 end
 for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES
@@ -342,8 +343,12 @@ end
 function get_coordinates(M::AbstractPowerManifold, p, X, B::DefaultOrthonormalBasis)
     rep_size = representation_size(M.manifold)
     vs = [
-        get_coordinates(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), B)
-        for i in get_iterator(M)
+        get_coordinates(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            B,
+        ) for i in get_iterator(M)
     ]
     return reduce(vcat, reshape(vs, length(vs)))
 end
@@ -351,7 +356,7 @@ function get_coordinates(
     M::AbstractPowerManifold,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽}
+    B::CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽},
 ) where {𝔽}
     rep_size = representation_size(M.manifold)
     vs = [
@@ -360,19 +365,18 @@ function get_coordinates(
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _access_nested(B.data.bases, i),
-        )
-        for i in get_iterator(M)
+        ) for i in get_iterator(M)
     ]
     return reduce(vcat, reshape(vs, length(vs)))
 end
 for BT in POWER_BASIS_LIST_CACHED
     eval(quote
         @invoke_maker 4 CachedBasis{<:AbstractBasis,<:PowerBasisData} get_coordinates(
-                M::AbstractPowerManifold,
-                p,
-                X,
-                B::$BT,
-            )
+            M::AbstractPowerManifold,
+            p,
+            X,
+            B::$BT,
+        )
     end)
 end
 
@@ -398,7 +402,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis{ℝ},<:PowerBasisData,ℝ}
+    B::CachedBasis{<:AbstractBasis{ℝ},<:PowerBasisData,ℝ},
 )
     TypeTuple = Tuple{
         AbstractPowerManifold,
@@ -414,7 +418,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽}
+    B::CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽},
 ) where {𝔽}
     rep_size = representation_size(M.manifold)
     dim = manifold_dimension(M.manifold)
@@ -438,7 +442,13 @@ get_iterator(M::PowerManifold{<:Manifold,Tuple{N}}) where {N} = 1:N
     return Base.product(map(Base.OneTo, size_tuple)...)
 end
 
-function get_vector!(M::PowerManifold, Y, p, X, B::CachedBasis{<:AbstractBasis,<:PowerBasisData})
+function get_vector!(
+    M::PowerManifold,
+    Y,
+    p,
+    X,
+    B::CachedBasis{<:AbstractBasis,<:PowerBasisData},
+)
     dim = manifold_dimension(M.manifold)
     rep_size = representation_size(M.manifold)
     v_iter = 1
@@ -760,20 +770,14 @@ function show(
     mime::MIME"text/plain",
     B::CachedBasis{T,D,𝔽},
 ) where {T<:AbstractBasis,D<:PowerBasisData,𝔽}
-    println(
-        io,
-        "$(T()) for a power manifold with coordinates in $(number_system(B))",
-    )
+    println(io, "$(T()) for a power manifold with coordinates in $(number_system(B))")
     for i in Base.product(map(Base.OneTo, size(B.data.bases))...)
         println(io, "Basis for component $i:")
         show(io, mime, _access_nested(B.data.bases, i))
         println(io)
     end
 end
-function show(
-    io::IO,
-    M::PowerManifold{TM,TSize,ArrayPowerRepresentation},
-) where {TM,TSize}
+function show(io::IO, M::PowerManifold{TM,TSize,ArrayPowerRepresentation}) where {TM,TSize}
     print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
 end
 function show(io::IO, M::PowerManifold{TM,TSize,TPR}) where {TM,TSize,TPR}
