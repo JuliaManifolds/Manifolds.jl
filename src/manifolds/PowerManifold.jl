@@ -321,7 +321,19 @@ function get_basis(M::AbstractPowerManifold, p, B::AbstractBasis)
     vs = [get_basis(M.manifold, _read(M, rep_size, p, i), B) for i in get_iterator(M)]
     return CachedBasis(B, PowerBasisData(vs))
 end
+function get_basis(M::AbstractPowerManifold, p, B::DiagonalizingOrthonormalBasis)
+    rep_size = representation_size(M.manifold)
+    vs = [get_basis(
+        M.manifold,
+        _read(M, rep_size, p, i),
+        DiagonalizingOrthonormalBasis(_read(M, rep_size, B.frame_direction, i)),
+    ) for i in get_iterator(M)]
+    return CachedBasis(B, PowerBasisData(vs))
+end
 for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES
+    if BT == DiagonalizingOrthonormalBasis
+        continue
+    end
     eval(quote
         @invoke_maker 3 AbstractBasis get_basis(M::AbstractPowerManifold, p, B::$BT)
     end)

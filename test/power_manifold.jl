@@ -2,6 +2,7 @@ include("utils.jl")
 
 using HybridArrays, Random
 using Manifolds: default_metric_dispatch
+using StaticArrays: Dynamic
 
 Random.seed!(42)
 
@@ -37,18 +38,18 @@ Random.seed!(42)
     @test is_default_metric(Ms1, PowerMetric())
     @test default_metric_dispatch(Ms1, PowerMetric()) === Val{true}()
     types_s1 = [Array{Float64,2},
-                HybridArray{Tuple{3,StaticArrays.Dynamic()}, Float64, 2}]
+                HybridArray{Tuple{3,Dynamic()}, Float64, 2}]
     types_s2 = [Array{Float64,3},
-                HybridArray{Tuple{3,StaticArrays.Dynamic(),StaticArrays.Dynamic()}, Float64, 3}]
+                HybridArray{Tuple{3,Dynamic(),Dynamic()}, Float64, 3}]
 
     types_r1 = [Array{Float64,3},
-                HybridArray{Tuple{3,3,StaticArrays.Dynamic()}, Float64, 3}]
+                HybridArray{Tuple{3,3,Dynamic()}, Float64, 3}]
 
     types_rn1 = [Vector{Matrix{Float64}}, ]
     TEST_STATIC_SIZED && push!(types_rn1, Vector{MMatrix{3,3,Float64}})
 
     types_r2 = [Array{Float64,4},
-                HybridArray{Tuple{3,3,StaticArrays.Dynamic(),StaticArrays.Dynamic()}, Float64, 4}]
+                HybridArray{Tuple{3,3,Dynamic(),Dynamic()}, Float64, 4}]
     types_rn2 = [Matrix{Matrix{Float64}}]
 
     retraction_methods = [Manifolds.PowerRetraction(ManifoldsBase.ExponentialRetraction())]
@@ -81,10 +82,15 @@ Random.seed!(42)
     for T in types_s1
         @testset "Type $(trim(string(T)))..." begin
             pts1 = [convert(T, rand(power_s1_pt_dist)) for _ in 1:3]
-            @test injectivity_radius(Ms1,pts1[1]) == π
-            basis_diag = DiagonalizingOrthonormalBasis(log(Ms1, pts1[1], pts1[2]))
+            @test injectivity_radius(Ms1, pts1[1]) == π
+            basis_diag = get_basis(
+                Ms1,
+                pts1[1],
+                DiagonalizingOrthonormalBasis(log(Ms1, pts1[1], pts1[2])),
+            )
             basis_arb = get_basis(Ms1, pts1[1], DefaultOrthonormalBasis())
-            test_manifold(Ms1,
+            test_manifold(
+                Ms1,
                 pts1;
                 test_reverse_diff = true,
                 test_musical_isomorphisms = true,
