@@ -26,8 +26,6 @@ struct Sphere{N} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
 
 Sphere(n::Int) = Sphere{n}()
 
-base_manifold(M::Sphere) = M
-
 """
     check_manifold_point(M, p; kwargs...)
 

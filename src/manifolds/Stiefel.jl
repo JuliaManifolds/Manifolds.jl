@@ -43,8 +43,6 @@ function allocation_promotion_function(
     return complex
 end
 
-base_manifold(M::Stiefel) = M
-
 @doc raw"""
     check_manifold_point(M::Stiefel, p; kwargs...)
 

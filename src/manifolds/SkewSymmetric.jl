@@ -35,9 +35,6 @@ function allocation_promotion_function(
     return complex
 end
 
-base_manifold(M::SkewSymmetricMatrices) = M
-
-
 @doc raw"""
     check_manifold_point(M::SkewSymmetricMatrices{n,𝔽}, p; kwargs...)
 
