@@ -120,7 +120,7 @@ include("group_utils.jl")
         gT = allocate_result(G, get_coordinates, e, pts[1])
         @test size(gT) == (manifold_dimension(M),)
         @test eltype(gT) == eltype(e.p)
-        @test_thorws ErrorException allocate_result(M, get_vector, e, pts[1])
+        @test_throws ErrorException allocate_result(M, get_vector, e, pts[1])
         gT = allocate_result(G, get_vector, e, pts[1])
         @test size(gT) == size(e.p)
         @test eltype(gT) == eltype(e.p)
@@ -129,10 +129,23 @@ include("group_utils.jl")
         @test eT == e.p
 
         eF = Identity(SpecialEuclidean(3), 1)
+        c = [1.0, 0.0, 0.0]
         Y = zeros(representation_size(G))
-        get_vector!(G, Y, e, [1.0, 0.0, 0.0], Manifolds.VeeOrthogonalBasis())
-        @test Y ≈ get_vector(decorated_manifold(G), e.p, [1.0, 0.0, 0.0], Manifolds.VeeOrthogonalBasis())
-        @test_throws ErrorException get_vector!(G, Y, eF, [1.0, 0.0, 0.0], Manifolds.VeeOrthogonalBasis())
-    end
+        get_vector!(G, Y, e, c, Manifolds.VeeOrthogonalBasis())
+        @test Y ≈ get_vector(decorated_manifold(G), e.p, c, Manifolds.VeeOrthogonalBasis())
+        @test_throws ErrorException get_vector!(G, Y, eF, c, Manifolds.VeeOrthogonalBasis())
+        get_vector!(M, Y, e, c, Manifolds.VeeOrthogonalBasis())
+        @test Y ≈ get_vector(decorated_manifold(G), e.p, c, Manifolds.VeeOrthogonalBasis())
+        @test_throws ErrorException get_vector!(M, Y, eF, c, Manifolds.VeeOrthogonalBasis())
 
+        @test get_coordinates(decorated_manifold(G), e, Y, Manifolds.VeeOrthogonalBasis()) == c
+        @test_throws ErrorException get_coordinates(M, eF, c, Manifolds.VeeOrthogonalBasis())
+        c2 = similar(c)
+        get_coordinates!(G, c2, e, Y, Manifolds.VeeOrthogonalBasis())
+        @test c==c2
+        @test_throws ErrorException get_coordinates!(G, c2, eF, Y, Manifolds.VeeOrthogonalBasis())
+        get_coordinates!(M, c2, e, Y, Manifolds.VeeOrthogonalBasis())
+        @test c==c2
+        @test_throws ErrorException get_coordinates!(M, c2, eF, Y, Manifolds.VeeOrthogonalBasis())
+    end
 end
