@@ -56,8 +56,6 @@ import ManifoldsBase:
     get_vector!,
     get_vectors,
     geodesic,
-    hat,
-    hat!,
     injectivity_radius,
     inner,
     isapprox,
@@ -84,8 +82,6 @@ import ManifoldsBase:
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
-    vee,
-    vee!,
     zero_tangent_vector,
     zero_tangent_vector!
 import Random: rand
@@ -110,10 +106,14 @@ using ManifoldsBase:
     @decorator_transparent_signature,
     _euclidean_basis_vector,
     _extract_val,
+    hat,
+    hat!,
     @invoke_maker,
     is_decorator_transparent,
     is_default_decorator,
-    manifold_function_not_implemented_message
+    manifold_function_not_implemented_message,
+    vee,
+    vee!
 using ManifoldsBase:
     AbstractBasis,
     DefaultOrDiagonalizingBasis,
