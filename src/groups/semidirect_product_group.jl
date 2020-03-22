@@ -137,6 +137,15 @@ function get_vector!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
     @inbounds _padvector!(G, Y)
     return Y
 end
+eval(quote
+    @invoke_maker 1 Manifold get_vector!(
+        M::SemidirectProductGroup,
+        Xⁱ,
+        e::Identity,
+        X,
+        B::VeeOrthogonalBasis,
+    )
+end)
 
 function get_coordinates!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
     M = base_manifold(G)
@@ -150,6 +159,15 @@ function get_coordinates!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBa
     get_coordinates!(H, view(Y, dimN+1:dimN+dimH), hp, hY, B)
     return Y
 end
+eval(quote
+    @invoke_maker 1 Manifold get_coordinates!(
+        M::SemidirectProductGroup,
+        Y,
+        e::Identity,
+        X,
+        B::VeeOrthogonalBasis,
+    )
+end)
 
 function zero_tangent_vector(G::SemidirectProductGroup, p)
     X = allocate_result(G, zero_tangent_vector, p)

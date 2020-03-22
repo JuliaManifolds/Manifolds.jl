@@ -50,6 +50,12 @@ end
 
 show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
+const GROUP_MANIFOLD_BASIS_DISAMBIGUATION = [
+    AbstractDecoratorManifold,
+    ArrayManifold,
+    VectorBundle,
+]
+
 """
     base_group(M::Manifold) -> AbstractGroupManifold
 
@@ -222,6 +228,16 @@ function get_vector(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group.manifold && error("On $(M) the identity $(e) does not match to perform get_vector.")
     return get_vector(M, e.p, X, B)
 end
+for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
+    eval(quote
+        @invoke_maker 1 Manifold get_vector(
+            M::$MT,
+            e::Identity,
+            X,
+            B::VeeOrthogonalBasis,
+        )
+    end)
+end
 function get_vector!(M::AbstractGroupManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group && error("On $(M) the identity $(e) does not match to perform get_vector!")
     return get_vector!(decorated_manifold(M), Y, e.p, X, B)
@@ -230,16 +246,37 @@ function get_vector!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group.manifold && error("On $(M) the identity $(e) does not match to perform get_vector!")
     return get_vector!(M, Y, e.p, X, B)
 end
+for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
+    eval(quote
+        @invoke_maker 1 Manifold get_vector!(
+            M::$MT,
+            Y,
+            e::Identity,
+            X,
+            B::VeeOrthogonalBasis,
+        )
+    end)
+end
 
 function get_coordinates(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group && error("On $(M) the identity $(e) does not match to perform get_coordinates")
     return get_coordinates(decorated_manifold(M), e.p, X, B)
 end
 function get_coordinates(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold &&
-    error("On $(M) the identity $(e) does not match to perform get_coordinates")
+    M != e.group.manifold && error("On $(M) the identity $(e) does not match to perform get_coordinates")
     return get_coordinates(M, e.p, X, B)
 end
+for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
+    eval(quote
+        @invoke_maker 1 Manifold get_coordinates(
+            M::$MT,
+            e::Identity,
+            X,
+            B::VeeOrthogonalBasis,
+        )
+    end)
+end
+
 function get_coordinates!(
     M::AbstractGroupManifold,
     Y,
@@ -253,6 +290,17 @@ end
 function get_coordinates!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group.manifold && error("On $(M) the identity $(e) does not match to perform get_coordinates!")
     return get_coordinates!(M, Y, e.p, X, B)
+end
+for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
+    eval(quote
+        @invoke_maker 1 Manifold get_coordinates!(
+            M::$MT,
+            Y,
+            e::Identity,
+            X,
+            B::VeeOrthogonalBasis,
+        )
+    end)
 end
 
 import ManifoldsBase.check_manifold_point__transparent

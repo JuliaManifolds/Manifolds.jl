@@ -318,6 +318,14 @@ for BT in PRODUCT_BASIS_LIST_CACHED
             )
     end)
 end
+eval(quote
+    @invoke_maker 1 Manifold get_coordinates(
+        M::ProductManifold,
+        e::Identity,
+        X,
+        B::VeeOrthogonalBasis,
+    )
+end)
 
 function get_coordinates(M::ProductManifold, p, X, B::AbstractBasis)
     reps = map(
@@ -388,6 +396,15 @@ for BT in PRODUCT_BASIS_LIST
         @invoke_maker 5 AbstractBasis get_coordinates!(M::ProductManifold, Xⁱ, p, X, B::$BT)
     end)
 end
+eval(quote
+    @invoke_maker 1 Manifold get_coordinates!(
+        M::ProductManifold,
+        Y,
+        e::Identity,
+        X,
+        B::VeeOrthogonalBasis,
+    )
+end)
 
 function get_vector(
     M::ProductManifold,
@@ -414,6 +431,14 @@ eval(quote
         p::ProductRepr,
         X,
         B::CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
+    )
+end)
+eval(quote
+    @invoke_maker 1 Manifold get_vector(
+        M::ProductManifold,
+        e::Identity,
+        X,
+        B::VeeOrthogonalBasis,
     )
 end)
 function get_vector(
@@ -495,7 +520,6 @@ function get_vector!(
     end
     return X
 end
-
 eval(quote
     @invoke_maker 1 Manifold get_vector!(
         M::ProductManifold,

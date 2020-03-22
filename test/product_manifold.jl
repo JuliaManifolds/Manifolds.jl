@@ -314,6 +314,12 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         V = hat(M, x, v)
         v2 = vee(M, x, V)
         @test isapprox(v, v2)
+
+        xr = ProductRepr(exp(M1, e, hat(M1, e, [1.0, 2.0, 3.0])), [1.0, 2.0, 3.0])
+
+        Vr = hat(M, xr, v)
+        v2r = vee(M, xr, V)
+        @test isapprox(v, v2r)
     end
 
     @testset "Basis printing" begin
