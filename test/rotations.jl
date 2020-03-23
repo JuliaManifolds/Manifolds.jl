@@ -6,23 +6,24 @@ include("utils.jl")
     @test representation_size(M) == (2,2)
     @test injectivity_radius(M) == π*sqrt(2.0)
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0]) == π*sqrt(2.0)
+    @test injectivity_radius(M, ExponentialRetraction()) == π*sqrt(2.0)
+    @test injectivity_radius(M, [1.0 0.0; 0.0 1.0], ExponentialRetraction()) == π*sqrt(2.0)
+    @test injectivity_radius(M, PolarRetraction()) ≈ π/sqrt(2)
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0], PolarRetraction()) ≈ π/sqrt(2)
-    types = [
-        Matrix{Float64},
-        MMatrix{2, 2, Float64},
-    ]
+    types = [ Matrix{Float64}, ]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
+    TEST_STATIC_SIZED && push!(types, MMatrix{2, 2, Float64})
     retraction_methods = [Manifolds.PolarRetraction(),
                           Manifolds.QRRetraction()]
 
     inverse_retraction_methods = [Manifolds.PolarInverseRetraction(),
                                   Manifolds.QRInverseRetraction()]
 
-    basis_types = (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
+    basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
 
     @testset "vee/hat" begin
         M = Manifolds.Rotations(2)
-        v = randn(1)
+        v = [1.23,]
         x = Matrix{Float64}(I, 2, 2)
         V = Manifolds.hat(M, x, v)
         @test isa(V, AbstractMatrix)
@@ -107,7 +108,7 @@ include("utils.jl")
                 V = project_tangent(SOn, x, randn(n, n))
                 v = Manifolds.vee(SOn, x, V)
                 @test isa(v, AbstractVector)
-                @test Manifolds.hat(SOn, x, v) == V
+                @test Manifolds.hat(SOn, x, v) ≈ V
             end
 
             if n == 4

@@ -1,5 +1,6 @@
 
 include("../utils.jl")
+include("group_utils.jl")
 
 @testset "General group tests" begin
     @test length(methods(has_biinvariant_metric)) == 1
@@ -10,8 +11,8 @@ include("../utils.jl")
         @test repr(G) == "GroupManifold(NotImplementedManifold(), NotImplementedOperation())"
         x = [1.0, 2.0]
         v = [2.0, 3.0]
-        eg = Identity(G)
-        @test repr(eg) === "Identity($(G))"
+        eg = Identity(G, [0.0, 0.0])
+        @test repr(eg) === "Identity($(G), $([0.0, 0.0]))"
         @test length(methods(is_group_decorator)) == 1
 
         @test Manifolds.is_group_decorator(G)
@@ -31,20 +32,23 @@ include("../utils.jl")
             @test NotImplementedOperation(NotImplementedManifold()) === G
             @test (NotImplementedOperation())(NotImplementedManifold()) === G
         end
-        @test_throws ErrorException base_group(MetricManifold(Euclidean(3),EuclideanMetric()))
-        @test_throws ErrorException hat(Rotations(3), Identity(G), [1,2,3])
-        @test_throws ErrorException hat(GroupManifold(Rotations(3), NotImplementedOperation()), Identity(G), [1,2,3])
-        @test_throws ErrorException vee(Rotations(3), Identity(G), [1,2,3])
-        @test_throws ErrorException vee(GroupManifold(Rotations(3), NotImplementedOperation()), Identity(G), [1,2,3])
-        @test_throws ErrorException Identity(Euclidean(3))
 
-        @test_throws ErrorException copyto!(x, eg)
+        @test_throws ErrorException allocate_result(G, get_vector, Identity(SpecialOrthogonal(3),x), v)
+        @test_throws ErrorException allocate_result(G, get_coordinates, Identity(SpecialOrthogonal(3),x), v)
+        @test_throws ErrorException allocate_result(ArrayManifold(NotImplementedManifold()), get_coordinates, Identity(SpecialOrthogonal(3),x), v)
+        @test_throws ErrorException base_group(MetricManifold(Euclidean(3), EuclideanMetric()))
+        @test_throws ErrorException hat(Rotations(3), eg, [1, 2, 3])
+        @test_throws ErrorException hat(GroupManifold(Rotations(3), NotImplementedOperation()), eg, [1, 2, 3])
+        @test_throws ErrorException vee(Rotations(3), eg, [1, 2, 3])
+        @test_throws ErrorException vee(GroupManifold(Rotations(3), NotImplementedOperation()), eg, [1, 2, 3])
+        @test_throws ErrorException Identity(Euclidean(3), [0, 0, 0])
 
         @test_throws ErrorException inv!(G, x, x)
         @test_throws ErrorException inv!(G, x, eg)
         @test_throws ErrorException inv(G, x)
 
-        @test_throws ErrorException copyto!(x, eg)
+        @test copyto!(x, eg) === x
+        @test isapprox(G, x, eg)
         @test_throws ErrorException identity!(G, x, x)
         @test_throws ErrorException identity(G, x)
 
@@ -116,13 +120,13 @@ include("../utils.jl")
 
         @test_throws DomainError is_manifold_point(
             G,
-            Identity(GroupManifold(NotImplementedManifold(), NotImplementedOperation())),
+            Identity(GroupManifold(NotImplementedManifold(), NotImplementedOperation()), [0.0, 0.0]),
             true,
         )
 
         x = [1.0, 2.0]
         v = [3.0, 4.0]
-        ge = Identity(G)
+        ge = Identity(G, [0.0, 0.0])
         @test zero(ge) === ge
         @test number_eltype(ge) == Bool
         @test copyto!(ge, ge) === ge
@@ -140,7 +144,7 @@ include("../utils.jl")
         @test ge * 1 === ge
         @test 1 * ge === ge
         @test ge * ge === ge
-        @test ge(x) ≈ zero(x)
+        @test ge.p ≈ zero(x)
         @test inv(G, x) ≈ -x
         @test inv(G, ge) === ge
         @test identity(G, x) ≈ zero(x)
@@ -178,7 +182,7 @@ include("../utils.jl")
         )
 
         x = [1.0 2.0; 2.0 3.0]
-        ge = Identity(G)
+        ge = Identity(G, [1.0 0.0; 0.0 1.0])
         @test number_eltype(ge) == Bool
         @test copyto!(ge, ge) === ge
         y = allocate(x)
@@ -209,7 +213,7 @@ include("../utils.jl")
         @test LinearAlgebra.mul!(y, ge, ge) === y
         @test y ≈ one(y)
 
-        @test ge(x) ≈ one(x)
+        @test ge.p ≈ one(x)
         @test inv(G, x) ≈ inv(x)
         @test inv(G, ge) === ge
         @test identity(G, x) ≈ one(x)

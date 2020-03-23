@@ -99,7 +99,16 @@ Return the injectivity radius of the [`SymmetricPositiveDefinite`](@ref).
 Since `M` is a Hadamard manifold with respect to the [`LinearAffineMetric`](@ref) and the
 [`LogCholeskyMetric`](@ref), the injectivity radius is globally $∞$.
 """
-injectivity_radius(M::SymmetricPositiveDefinite{N}, args...) where {N} = Inf
+injectivity_radius(::SymmetricPositiveDefinite) = Inf
+injectivity_radius(::SymmetricPositiveDefinite, ::ExponentialRetraction) = Inf
+injectivity_radius(::SymmetricPositiveDefinite, ::Any) = Inf
+injectivity_radius(::SymmetricPositiveDefinite, ::Any, ::ExponentialRetraction) = Inf
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(
+        M::SymmetricPositiveDefinite,
+        rm::AbstractRetractionMethod,
+    )
+end)
 
 @doc raw"""
     manifold_dimension(M::SymmetricPositiveDefinite)

@@ -10,12 +10,16 @@ include("utils.jl")
         @test_throws DomainError is_manifold_point(M, 9., true)
         @test !is_tangent_vector(M, 9., 0.)
         @test_throws DomainError is_tangent_vector(M, 9., 0., true)
-        @test get_coordinates(M, Ref(0.0), Ref(2.0), ArbitraryOrthonormalBasis())[] ≈ 2.0
+        @test is_tangent_vector(M, 0., 0.; check_base_point=false)
+        @test get_coordinates(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ 2.0
         @test get_coordinates(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ -2.0
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈ -2.0
         @test get_coordinates(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈ 2.0
-        @test get_vector(M, Ref(0.0), Ref(2.0), ArbitraryOrthonormalBasis())[] ≈ 2.0
+        y = [0.0]
+        get_coordinates!(M, y, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))
+        @test y ≈ [2.0]
+        @test get_vector(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_vector(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ 2.0
         @test get_vector(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ -2.0
         @test get_vector(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈ -2.0
@@ -25,8 +29,18 @@ include("utils.jl")
         @test vector_transport_to(M,0.0,1.0,1.0, ParallelTransport()) == 1.0
         @test retract(M,0.0,1.0) == exp(M,0.0,1.0)
         @test injectivity_radius(M) ≈ π
+        @test injectivity_radius(M, Ref(-2.0)) ≈ π
+        @test injectivity_radius(M, Ref(-2.0), ExponentialRetraction()) ≈ π
+        @test injectivity_radius(M, ExponentialRetraction()) ≈ π
         @test mean(M, [-π/2,0.,π]) ≈ π/2
         @test mean(M, [-π/2,0.,π], [1., 1., 1.]) == π/2
+        z = project_point(M, 1.5*π)
+        z2 = [0.0]
+        project_point!(M,z2,1.5*π)
+        @test z2[1]==z
+        @test project_point(M,z) == z
+    end
+    TEST_STATIC_SIZED && @testset "Real Circle and static sized arrays" begin
         v = MVector(0.0)
         x = SVector(0.0)
         log!(M, v, x, SVector(π/4))
@@ -47,8 +61,8 @@ include("utils.jl")
     ]
     TEST_FLOAT32 && push!(types, Float32)
 
-    basis_types = (ArbitraryOrthonormalBasis(),)
-    basis_types_real = (ArbitraryOrthonormalBasis(),
+    basis_types = (DefaultOrthonormalBasis(),)
+    basis_types_real = (DefaultOrthonormalBasis(),
         DiagonalizingOrthonormalBasis(Ref(-1.0)),
         DiagonalizingOrthonormalBasis(Ref(1.0))
     )
@@ -64,6 +78,7 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                test_vee_hat = false,
                 is_mutating = false
             )
             ptsS = SVector.(pts)
@@ -75,6 +90,7 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                test_vee_hat = true,
                 basis_types_vecs = basis_types_real,
                 basis_types_to_from = basis_types_real
             )
@@ -128,7 +144,8 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
-                is_mutating=false,
+                is_mutating = false,
+                test_vee_hat = false,
                 exp_log_atol_multiplier = 2.0,
                 is_tangent_atol_multiplier = 2.0
             )
@@ -141,6 +158,7 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                test_vee_hat = true,
                 exp_log_atol_multiplier = 2.0,
                 is_tangent_atol_multiplier = 2.0,
                 basis_types_vecs = basis_types,

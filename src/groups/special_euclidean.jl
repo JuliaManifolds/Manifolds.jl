@@ -227,7 +227,7 @@ function group_exp!(G::SpecialEuclidean{2}, q, X)
     @assert size(t) == (2,)
     @assert size(b) == (2,)
 
-    θ = vee(SO2, Identity(SO2), Ω)[1]
+    θ = vee(SO2, Identity(SO2, Ω), Ω)[1]
     sinθ, cosθ = sincos(θ)
     if θ ≈ 0
         α = 1 - θ^2 / 6
@@ -255,7 +255,7 @@ function group_exp!(G::SpecialEuclidean{3}, q, X)
     @assert size(R) == (3, 3)
     @assert size(t) == (3,)
 
-    θ = norm(SO3, Identity(SO3), Ω) / sqrt(2)
+    θ = norm(SO3, Identity(SO3, Ω), Ω) / sqrt(2)
     θ² = θ^2
     if θ ≈ 0
         α = 1 - θ² / 6

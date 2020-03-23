@@ -1,3 +1,7 @@
+const TEST_FLOAT32 = false
+const TEST_DOUBLE64 = false
+const TEST_STATIC_SIZED = false
+
 using Manifolds
 using ManifoldsBase
 
@@ -64,6 +68,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_vector_transport = false,
     test_mutating_rand = false,
     test_vector_spaces = true,
+    test_vee_hat = false,
     is_mutating = true,
     default_inverse_retraction_method = ManifoldsBase.LogarithmicInverseRetraction(),
     default_retraction_method = ManifoldsBase.ExponentialRetraction(),
@@ -287,8 +292,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         @testset "Basis support for $(btype)" begin
             x = pts[1]
             b = get_basis(M, x, btype)
-            @test isa(b, AbstractPrecomputedOrthonormalBasis)
-
+            @test isa(b, CachedBasis)
             bvectors = get_vectors(M, x, b)
             N = length(bvectors)
             @test real_dimension(number_system(btype)) * N == manifold_dimension(M)
@@ -303,10 +307,16 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             if isa(btype, ProjectedOrthonormalBasis)
                 # check projection idempotency
                 for i in 1:N
+                    @test norm(M, x, bvectors[i]) ≈ 1
+                    for j in i+1:N
+                        @test real(inner(M, x, bvectors[i], bvectors[j])) ≈ 0 atol = sqrt(find_eps(x))
+                    end
+                end
+                # check projection idempotency
+                for i in 1:N
                     @test isapprox(M, x, project_tangent(M, x, bvectors[i]), bvectors[i])
                 end
             end
-
             if !isa(btype, ProjectedOrthonormalBasis) &&
                 (basis_has_specialized_diagonalizing_get || !isa(btype, DiagonalizingOrthonormalBasis))
 
@@ -328,7 +338,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             v1 = inverse_retract(M, x, pts[2], default_inverse_retraction_method)
 
             vb = get_coordinates(M, x, v1, btype)
-            @test isa(vb, AbstractVector{<:Real})
+            #@test isa(vb, AbstractVector{<:Real})
             @test length(vb) == N
             vbi = get_vector(M, x, vb, btype)
             @test isapprox(M, x, v1, vbi)
@@ -337,12 +347,39 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             vs_invs = [get_vector(M, x, vu, btype) for vu in vs]
             # check orthonormality of inverse representation
             for i in 1:N
-                @test norm(M, x, vs_invs[i]) ≈ 1
+                @test norm(M, x, vs_invs[i]) ≈ 1 atol = find_eps(x)
                 for j in i+1:N
                     @test real(inner(M, x, vs_invs[i], vs_invs[j])) ≈ 0 atol = sqrt(find_eps(x))
                 end
             end
+
+            if is_mutating
+                vb_s = allocate(vb)
+                @test get_coordinates!(M, vb_s, x, v1, btype) === vb_s
+                @test isapprox(vb_s, vb; atol = find_eps(x))
+
+                vbi_s = allocate(vbi)
+                @test get_vector!(M, vbi_s, x, vb, btype) === vbi_s
+                @test isapprox(M, x, v1, vbi_s)
+            end
         end
+    end
+
+    test_vee_hat && @testset "vee and hat" begin
+        p = pts[1]
+        q = pts[2]
+        X = inverse_retract(M, p, q, default_inverse_retraction_method)
+        Y = vee(M, p, X)
+        @test length(Y) == manifold_dimension(M)
+        @test isapprox(M, p, X, hat(M, p, Y))
+        Y2 = allocate(Y)
+        vee_ret = vee!(M, Y2, p, X)
+        @test vee_ret === Y2
+        @test isapprox(Y, Y2)
+        X2 = allocate(X)
+        hat_ret = hat!(M, X2, p, Y)
+        @test hat_ret === X2
+        @test isapprox(M, p, X2, X)
     end
 
     test_forward_diff && @testset "ForwardDiff support" begin

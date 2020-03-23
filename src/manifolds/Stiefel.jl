@@ -35,6 +35,14 @@ struct Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingTy
 
 Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ) = Stiefel{n,k,field}()
 
+function allocation_promotion_function(
+    M::Stiefel{n,k,ℂ},
+    f,
+    args::Tuple,
+) where {n,k}
+    return complex
+end
+
 @doc raw"""
     check_manifold_point(M::Stiefel, p; kwargs...)
 

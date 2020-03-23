@@ -111,6 +111,10 @@ decorator_transparent_dispatch(::typeof(exp!), M::MetricManifold, args...) = Val
 decorator_transparent_dispatch(::typeof(exp!), M::MetricManifold, q, p, X, t) = Val(:parent)
 decorator_transparent_dispatch(::typeof(flat), M::MetricManifold, args...) = Val(:parent)
 decorator_transparent_dispatch(::typeof(flat!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(get_coordinates), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(get_coordinates!), M::MetricManifold, args...) = Val(:intransparent)
+decorator_transparent_dispatch(::typeof(get_vector), M::MetricManifold, args...) = Val(:parent)
+decorator_transparent_dispatch(::typeof(get_vector!), M::MetricManifold, args...) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(get_basis), M::MetricManifold, args...) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(inner), M::MetricManifold, args...) = Val(:intransparent)
 decorator_transparent_dispatch(::typeof(inverse_retract), M::MetricManifold, args...) = Val(:parent)
@@ -181,6 +185,7 @@ in an embedded space.
 """
 exp(::MetricManifold, ::Any...)
 
+import ManifoldsBase.exp!__intransparent
 @decorator_transparent_fallback function exp!(M::MetricManifold, q, p, X)
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, p, X, tspan; dense = false, saveat = [1.0])
@@ -202,7 +207,8 @@ where $G_p$ is the local matrix representation of `G`, see [`local_metric`](@ref
 """
 flat(::MetricManifold, ::Any...)
 
-
+# TODO: uncomment the import if `flat!` goes to ManifoldsBase
+# import ManifoldsBase.flat!__intransparent
 @decorator_transparent_fallback function flat!(M::MetricManifold, ξ::CoTFVector, p, X::TFVector)
     g = local_metric(M, p)
     copyto!(ξ.data, g * X.data)
@@ -217,6 +223,22 @@ Compute the Gaussian curvature of the manifold `M` at the point `x`.
 gaussian_curvature(::MetricManifold, ::Any)
 @decorator_transparent_function function gaussian_curvature(M::MetricManifold, p; kwargs...)
     return ricci_curvature(M, p; kwargs...) / 2
+end
+
+function injectivity_radius(M::MetricManifold, p)
+    return injectivity_radius(base_manifold(M), p)
+end
+function injectivity_radius(M::MetricManifold, m::AbstractRetractionMethod)
+    return injectivity_radius(base_manifold(M), m)
+end
+function injectivity_radius(M::MetricManifold, m::ExponentialRetraction)
+    return injectivity_radius(base_manifold(M), m)
+end
+function injectivity_radius(M::MetricManifold, p, m::AbstractRetractionMethod)
+    return injectivity_radius(base_manifold(M), p, m)
+end
+function injectivity_radius(M::MetricManifold, p, m::ExponentialRetraction)
+    return injectivity_radius(base_manifold(M), p, m)
 end
 
 @doc raw"""
@@ -292,7 +314,8 @@ where $G_p$ is the loal matrix representation of the [`Metric`](@ref) `G`.
 """
 inner(::MetricManifold, ::Any)
 
-function inner(M::MMT, ::Val{:intransparent}, p, X, Y) where {MMT<:MetricManifold}
+import ManifoldsBase.inner__intransparent
+function inner__intransparent(M::MMT, p, X, Y) where {MMT<:MetricManifold}
     return dot(X, local_metric(M, p) * Y)
 end
 function inner(

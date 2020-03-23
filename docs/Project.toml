@@ -8,5 +8,5 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 [compat]
 Documenter = "0.24"
 HybridArrays = ">= 0.3"
-ManifoldsBase = "0.5.2"
+ManifoldsBase = "0.6"
 StaticArrays = "0.12"

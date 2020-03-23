@@ -177,7 +177,7 @@ exp(::Rotations, ::Any...)
 exp!(M::Rotations, q, p, X) = copyto!(q, p * exp(X))
 function exp!(M::Rotations{2}, q, p, X)
     @assert size(q) == (2, 2)
-    θ = vee(M, p, X)[1]
+    θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
     sinθ, cosθ = sincos(θ)
     @inbounds begin
         q[1] = cosθ
@@ -243,37 +243,71 @@ end
 
 flat!(M::Rotations, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_coordinates(M::Rotations, p, X, B::ArbitraryOrthonormalBasis) where {N}
-    T = Base.promote_eltype(p, X)
-    return vee(M, p, X) .* sqrt(T(2))
-end
+@doc raw"""
+    get_coordinates(M::Rotations, p, X)
 
-function get_vector(M::Rotations, p, X, B::ArbitraryOrthonormalBasis) where {N}
+Extract the unique tangent vector components $X^i$ at point `p` on [`Rotations`](@ref)
+$\mathrm{SO}(n)$ from the matrix representation `X` of the tangent
+vector.
+
+The basis on the Lie algebra $𝔰𝔬(n)$ is chosen such that
+for $\mathrm{SO}(2)$, $X^1 = θ = X_{21}$ is the angle of rotation, and
+for $\mathrm{SO}(3)$, $(X^1, X^2, X^3) = (X_{32}, X_{13}, X_{21}) = θ u$ is the
+angular velocity and axis-angle representation, where $u$ is the unit vector
+along the axis of rotation.
+
+For $\mathrm{SO}(n)$ where $n ≥ 4$, the additional elements of $X^i$ are
+$X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
+"""
+get_coordinates(::Rotations, ::Any...)
+get_coordinates(::Rotations{2}, p, X, ::DefaultOrthogonalBasis) = [X[2]]
+
+function get_coordinates!(::Rotations{2}, Xⁱ, p, X, ::DefaultOrthogonalBasis)
+    Xⁱ[1] = X[2]
+    return Xⁱ
+end
+function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthogonalBasis) where {N}
+    @inbounds begin
+        Xⁱ[1] = X[3, 2]
+        Xⁱ[2] = X[1, 3]
+        Xⁱ[3] = X[2, 1]
+
+        k = 4
+        for i = 4:N, j = 1:i-1
+            Xⁱ[k] = X[i, j]
+            k += 1
+        end
+    end
+    return Xⁱ
+end
+function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthonormalBasis) where {N}
     T = Base.promote_eltype(p, X)
-    return hat(M, p, X) ./ sqrt(T(2))
+    get_coordinates!(M, Xⁱ, p, X, DefaultOrthogonalBasis())
+    Xⁱ .*= sqrt(T(2))
+    return Xⁱ
 end
 
 @doc raw"""
-    hat(M::Rotations, p, Xⁱ)
+    get_vector(M::Rotations, p, Xⁱ, B:: DefaultOrthogonalBasis)
 
 Convert the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
 group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. See
-[`vee`](@ref vee(::Rotations, ::Any...)) for the conventions used.
+[`get_coordinates`](@ref get_coordinates(::Rotations, ::Any...)) for the conventions used.
 """
-hat(::Rotations, ::Any...)
+get_vector(::Rotations, ::Any...)
 
-function hat!(M::Rotations{2}, X, p, Xⁱ::Real)
+get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultOrthogonalBasis) = get_vector!(M, X, p, Xⁱ[1], B)
+function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultOrthogonalBasis)
     @assert length(X) == 4
     @inbounds begin
         X[1] = 0
-        X[3] = -Xⁱ
         X[2] = Xⁱ
+        X[3] = -Xⁱ
         X[4] = 0
     end
     return X
 end
-hat!(M::Rotations{2}, X, p, Xⁱ) = hat!(M, X, p, Xⁱ[1])
-function hat!(M::Rotations{N}, X, p, Xⁱ) where {N}
+function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultOrthogonalBasis) where {N}
     @assert size(X) == (N, N)
     @assert length(Xⁱ) == manifold_dimension(M)
     @inbounds begin
@@ -298,6 +332,12 @@ function hat!(M::Rotations{N}, X, p, Xⁱ) where {N}
     end
     return X
 end
+function get_vector!(M::Rotations, X, p, Xⁱ, B::DefaultOrthonormalBasis)
+    T = Base.promote_eltype(p, X)
+    get_vector!(M, X, p, Xⁱ, DefaultOrthogonalBasis())
+    X ./= sqrt(T(2))
+    return X
+end
 
 @doc raw"""
     injectivity_radius(M::Rotations)
@@ -315,6 +355,13 @@ Return the radius of injectivity for the [`PolarRetraction`](@ref) on the
 [`Rotations`](@ref) `M` which is $\frac{π}{\sqrt{2}}$.
 """
 injectivity_radius(::Rotations) = π * sqrt(2.0)
+injectivity_radius(::Rotations, ::ExponentialRetraction) = π * sqrt(2.0)
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(M::Rotations, rm::AbstractRetractionMethod)
+end)
+injectivity_radius(::Rotations, ::Any) = π * sqrt(2.0)
+injectivity_radius(::Rotations, ::Any, ::ExponentialRetraction) = π * sqrt(2.0)
+injectivity_radius(::Rotations, ::PolarRetraction) = π / sqrt(2.0)
 injectivity_radius(::Rotations, p, ::PolarRetraction) = π / sqrt(2.0)
 
 @doc raw"""
@@ -417,7 +464,7 @@ function log!(M::Rotations{2}, X, p, q)
     U = transpose(p) * q
     @assert size(U) == (2, 2)
     @inbounds θ = atan(U[2], U[1])
-    return hat!(M, X, p, θ)
+    return get_vector!(M, X, p, θ, DefaultOrthogonalBasis())
 end
 function log!(M::Rotations{3}, X, p, q)
     U = transpose(p) * q
@@ -427,7 +474,7 @@ function log!(M::Rotations{3}, X, p, q)
         ival = findfirst(λ -> isapprox(λ, 1), eig.values)
         inds = SVector{3}(1:3)
         ax = eig.vectors[inds, ival]
-        return hat!(M, X, p, π * ax)
+        return get_vector!(M, X, p, π * ax, DefaultOrthogonalBasis())
     end
     X .= ((U .- transpose(U)) ./ (2 * usinc_from_cos(cosθ)))
     return X
@@ -660,46 +707,6 @@ function retract!(M::Rotations, q, p, X, method::PolarRetraction)
 end
 
 show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
-
-@doc raw"""
-    vee(M::Rotations, p, X)
-
-Extract the unique tangent vector components $X^i$ at point `p` on [`Rotations`](@ref)
-$\mathrm{SO}(n)$ from the matrix representation `X` of the tangent
-vector.
-
-The basis on the Lie algebra $𝔰𝔬(n)$ is chosen such that
-for $\mathrm{SO}(2)$, $X^1 = θ = X_{21}$ is the angle of rotation, and
-for $\mathrm{SO}(3)$, $(X^1, X^2, X^3) = (X_{32}, X_{13}, X_{21}) = θ u$ is the
-angular velocity and axis-angle representation, where $u$ is the unit vector
-along the axis of rotation.
-
-For $\mathrm{SO}(n)$ where $n ≥ 4$, the additional elements of $X^i$ are
-$X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
-"""
-vee(::Rotations, ::Any...)
-vee(M::Rotations{2}, p, X) = [X[2]]
-
-function vee!(M::Rotations{N}, Xⁱ, p, X) where {N}
-    @assert size(X) == (N, N)
-    @assert length(Xⁱ) == manifold_dimension(M)
-    @inbounds begin
-        Xⁱ[1] = X[3, 2]
-        Xⁱ[2] = X[1, 3]
-        Xⁱ[3] = X[2, 1]
-
-        k = 4
-        for i = 4:N, j = 1:i-1
-            Xⁱ[k] = X[i, j]
-            k += 1
-        end
-    end
-    return Xⁱ
-end
-function vee!(M::Rotations{2}, Xⁱ, p, X)
-    Xⁱ[1] = X[2]
-    return Xⁱ
-end
 
 @doc raw"""
     zero_tangent_vector(M::Rotations, p)

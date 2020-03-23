@@ -17,11 +17,13 @@ include("utils.jl")
             @test is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], zero_tangent_vector(M,[1.0 0.0; 0.0 1.0; 0.0 0.0]), true)
             @test_throws DomainError is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], 1im*zero_tangent_vector(M,[1.0 0.0; 0.0 1.0; 0.0 0.0]), true)
             @test injectivity_radius(M) == π/2
+            @test injectivity_radius(M, ExponentialRetraction()) == π/2
+            @test injectivity_radius(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]) == π/2
+            @test injectivity_radius(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], ExponentialRetraction()) == π/2
         end
-        types = [
-            Matrix{Float64},
-            MMatrix{3, 2, Float64},
-        ]
+        types = [Matrix{Float64}, ]
+        TEST_STATIC_SIZED && push!(types, MMatrix{3, 2, Float64})
+
         TEST_FLOAT32 && push!(types, Matrix{Float32})
         basis_types = (ProjectedOrthonormalBasis(:gram_schmidt),)
         @testset "Type $T" for T in types
@@ -40,6 +42,7 @@ include("utils.jl")
                 test_vector_transport = false,
                 test_forward_diff = false,
                 test_reverse_diff = false,
+                test_vee_hat = false,
                 retraction_methods = [PolarRetraction(), QRRetraction()],
                 inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()],
                 #basis_types_vecs = basis_types,
@@ -69,6 +72,7 @@ include("utils.jl")
             @test manifold_dimension(M) == 4
             @test !is_manifold_point(M,[1., 0., 0., 0.])
             @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0., 0., 1., 0.])
+            @test Manifolds.allocation_promotion_function(M,exp!,(1,)) == complex
             @test_throws DomainError is_manifold_point(M, [2. 0.; 0. 1.; 0. 0.],true)
             @test_throws DomainError is_tangent_vector(M, [2. 0.; 0. 1.; 0. 0.],zeros(3,2),true)
             @test_throws DomainError is_tangent_vector(M, [1. 0.; 0. 1.; 0. 0.],ones(3,2),true)
@@ -97,6 +101,7 @@ include("utils.jl")
                 test_vector_transport = false,
                 test_forward_diff = false,
                 test_reverse_diff = false,
+                test_vee_hat = false,
                 retraction_methods = [PolarRetraction(), QRRetraction()],
                 inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()],
                 exp_log_atol_multiplier = 10.0,

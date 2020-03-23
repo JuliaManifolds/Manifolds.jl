@@ -123,6 +123,8 @@ function exp!(M::Sphere, q, p, X)
     return q
 end
 
+flat!(M::Sphere, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
+
 function get_basis(M::Sphere{N}, p, B::DiagonalizingOrthonormalBasis) where {N}
     A = zeros(N + 1, N + 1)
     A[1, :] = transpose(p)
@@ -134,8 +136,39 @@ function get_basis(M::Sphere{N}, p, B::DiagonalizingOrthonormalBasis) where {N}
         V = cat(B.frame_direction / norm(M, p, B.frame_direction), V; dims = 2)
         κ[1] = 0 # no curvature along the geodesic direction, if x!=y
     end
-    vecs = [V[:, i] for i = 1:N]
-    return PrecomputedDiagonalizingOrthonormalBasis(vecs, κ)
+    Ξ = [V[:, i] for i = 1:N]
+    return CachedBasis(B, κ, Ξ)
+end
+
+@doc raw"""
+    get_coordinates(M::Sphere, p, X, B::DefaultOrthonormalBasis)
+
+Represent the tangent vector `X` at point `p` from the [`Sphere`](@ref) `M` in
+an orthonormal basis by rotating the vector `X` using the rotation matrix
+$2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
+"""
+function get_coordinates(M::Sphere{N}, p, X, B::DefaultOrthonormalBasis) where {N}
+    if isapprox(p[1], 1)
+        return X[2:end]
+    else
+        xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
+        return (2*xp1*dot(xp1, X)/dot(xp1, xp1)-X)[2:end]
+    end
+end
+
+function get_coordinates!(M::Sphere, Y, p, X, B::DefaultOrthonormalBasis)
+    return copyto!(Y, get_coordinates(M, p, X, B))
+end
+
+function get_vector(M::Sphere{N}, p, X, B::DefaultOrthonormalBasis) where {N}
+    p[1] ≈ 1 && return vcat(0, X)
+    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
+    X0 = vcat(0, X)
+    return 2 * xp1 * dot(xp1, X0) / dot(xp1, xp1) - X0
+end
+
+function get_vector!(M::Sphere, Y::AbstractVector, p, X, B::DefaultOrthonormalBasis)
+    return copyto!(Y, get_vector(M, p, X, B))
 end
 
 @doc raw"""
@@ -148,15 +181,15 @@ Return the injectivity radius for the [`Sphere`](@ref) `M`, which is globally $�
 Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
 [`Sphere`](@ref), which is globally $\frac{π}{2}$.
 """
-injectivity_radius(::Sphere, ::Any...) = π
+injectivity_radius(::Sphere) = π
+injectivity_radius(::Sphere, ::ExponentialRetraction) = π
+injectivity_radius(::Sphere, ::ProjectionRetraction) = π / 2
+injectivity_radius(::Sphere, ::Any) = π
+injectivity_radius(::Sphere, ::Any, ::ExponentialRetraction) = π
 injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π / 2
-
-function get_vector(M::Sphere{N}, p, X, B::ArbitraryOrthonormalBasis) where {N}
-    p[1] ≈ 1 && return vcat(0, X)
-    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
-    X0 = vcat(0, X)
-    return 2 * xp1 * dot(xp1, X0) / dot(xp1, xp1) - X0
-end
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(M::Sphere, rm::AbstractRetractionMethod)
+end)
 
 @doc raw"""
     inverse_retract(M::Sphere, p, q, ::ProjectionInverseRetraction)
@@ -271,22 +304,6 @@ Project the point `X` onto the tangent space at `p` on the [`Sphere`](@ref) `M`.
 project_tangent(::Sphere, ::Any...)
 
 project_tangent!(S::Sphere, Y, p, X) = (Y .= X .- dot(p, X) .* p)
-
-@doc raw"""
-    get_coordinates(M::Sphere, p, X, B::ArbitraryOrthonormalBasis)
-
-Represent the tangent vector `X` at point `p` from the [`Sphere`](@ref) `M` in
-an orthonormal basis by rotating the vector `X` using the rotation matrix
-$2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
-"""
-function get_coordinates(M::Sphere{N}, p, X, B::ArbitraryOrthonormalBasis) where {N}
-    if isapprox(p[1], 1)
-        return X[2:end]
-    else
-        xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
-        return (2*xp1*dot(xp1, X)/dot(xp1, xp1)-X)[2:end]
-    end
-end
 
 @doc raw"""
     representation_size(M::Sphere)

@@ -37,19 +37,25 @@ import ManifoldsBase:
     allocate,
     allocate_result,
     allocate_result_type,
+    allocation_promotion_function,
     array_value,
     base_manifold,
     check_manifold_point,
     check_tangent_vector,
+    combine_allocation_promotion_functions,
     decorated_manifold,
     decorator_transparent_dispatch,
     default_decorator_dispatch,
     distance,
     exp,
     exp!,
+    get_basis,
+    get_coordinates,
+    get_coordinates!,
+    get_vector,
+    get_vector!,
+    get_vectors,
     geodesic,
-    hat,
-    hat!,
     injectivity_radius,
     inner,
     isapprox,
@@ -76,8 +82,6 @@ import ManifoldsBase:
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
-    vee,
-    vee!,
     zero_tangent_vector,
     zero_tangent_vector!
 import Random: rand
@@ -96,13 +100,25 @@ using ManifoldsBase: CoTVector, Manifold, MPoint, TVector, DefaultManifold
 using ManifoldsBase
 using ManifoldsBase:
     AbstractDecoratorManifold,
+    AbstractNumbers,
     @decorator_transparent_fallback,
     @decorator_transparent_function,
     @decorator_transparent_signature,
+    _euclidean_basis_vector,
     _extract_val,
+    hat,
+    hat!,
+    @invoke_maker,
     is_decorator_transparent,
     is_default_decorator,
-    manifold_function_not_implemented_message
+    manifold_function_not_implemented_message,
+    vee,
+    vee!
+using ManifoldsBase:
+    AbstractBasis,
+    DefaultOrDiagonalizingBasis,
+    DiagonalizingBasisData,
+    VeeOrthogonalBasis
 using ManifoldsBase:
     ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
@@ -110,6 +126,7 @@ using ManifoldsBase: QRRetraction, PolarRetraction, ProjectionRetraction
 using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
 using ManifoldsBase: QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
 using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
+using ManifoldsBase: ℝ, ℂ, ℍ
 
 using Markdown: @doc_str
 using Random: AbstractRNG
@@ -117,11 +134,8 @@ using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
 using StatsBase: AbstractWeights, UnitWeights, values, varcorrection
-using UnsafeArrays
 
 include("utils.jl")
-include("numbers.jl")
-include("orthonormal_bases.jl")
 include("autodiff.jl")
 include("SizedAbstractArray.jl")
 
@@ -133,6 +147,8 @@ include("distributions.jl")
 include("projected_distribution.jl")
 include("product_representations.jl")
 
+# It's included early to ensure visibility of `Identity`
+include("groups/group.jl")
 
 include("manifolds/EmbeddedManifold.jl")
 include("manifolds/MetricManifold.jl")
@@ -163,7 +179,6 @@ include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/Torus.jl")
 include("manifolds/Oblique.jl")
 
-include("groups/group.jl")
 include("groups/metric.jl")
 include("groups/group_action.jl")
 include("groups/group_operation_action.jl")
@@ -259,12 +274,12 @@ export AbstractEstimationMethod,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius
 export
+    CachedBasis,
+    DefaultBasis,
+    DefaultOrthogonalBasis,
+    DefaultOrthonormalBasis,
     DiagonalizingOrthonormalBasis,
-    PrecomputedDiagonalizingOrthonormalBasis,
-    PrecomputedOrthonormalBasis,
-    PrecomputedPowerOrthonormalBasis,
-    PrecomputedProductOrthonormalBasis,
-    ArbitraryOrthonormalBasis
+    ProjectedOrthonormalBasis
 export ×,
     allocate,
     allocate_result,
@@ -418,6 +433,7 @@ export affine_matrix,
     inverse_translate!,
     inverse_translate_diff,
     inverse_translate_diff!,
+    make_identity,
     optimal_alignment,
     optimal_alignment!,
     screw_matrix,
@@ -429,12 +445,18 @@ export affine_matrix,
 # Orthonormal bases
 export AbstractBasis,
     AbstractOrthonormalBasis,
-    AbstractPrecomputedOrthonormalBasis,
-    ArbitraryOrthonormalBasis,
+    DefaultOrthonormalBasis,
     DiagonalizingOrthonormalBasis,
-    PrecomputedDiagonalizingOrthonormalBasis,
-    PrecomputedOrthonormalBasis,
-    PrecomputedProductOrthonormalBasis,
-    ProjectedOrthonormalBasis
-export get_basis, get_coordinates, get_vector, get_vectors, number_system
+    ProjectedOrthonormalBasis,
+    CachedBasis,
+    DiagonalizingBasisData,
+    ProductBasisData,
+    PowerBasisData
+export get_basis,
+    get_coordinates,
+    get_coordinates!,
+    get_vector,
+    get_vector!,
+    get_vectors,
+    number_system
 end # module

@@ -27,6 +27,14 @@ function SkewSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
     SkewSymmetricMatrices{n,field}()
 end
 
+function allocation_promotion_function(
+    M::SkewSymmetricMatrices{<:Any,ℂ},
+    ::typeof(get_vector),
+    args::Tuple,
+)
+    return complex
+end
+
 @doc raw"""
     check_manifold_point(M::SkewSymmetricMatrices{n,𝔽}, p; kwargs...)
 
@@ -94,19 +102,20 @@ embed!(M::SkewSymmetricMatrices, q, p) = copyto!(q, p)
 embed!(M::SkewSymmetricMatrices, Y, p, X) = copyto!(Y, X)
 
 function get_basis(M::SkewSymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
-    vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors
-    kappas = zeros(real(eltype(p)), manifold_dimension(M))
-    return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
+    Ξ = get_basis(M, p, DefaultOrthonormalBasis()).data
+    κ = zeros(real(eltype(p)), manifold_dimension(M))
+    return CachedBasis(B, κ, Ξ)
 end
 
-function get_coordinates(
+function get_coordinates!(
     M::SkewSymmetricMatrices{N,ℝ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, dim)
+    @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == div(N * (N - 1), 2)
     k = 1
@@ -116,14 +125,15 @@ function get_coordinates(
     end
     return Y
 end
-function get_coordinates(
+function get_coordinates!(
     M::SkewSymmetricMatrices{N,ℂ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, real(eltype(X)), dim)
+    @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == N^2
     k = 1
@@ -140,15 +150,15 @@ function get_coordinates(
     return Y
 end
 
-function get_vector(
+function get_vector!(
     M::SkewSymmetricMatrices{N,ℝ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = allocate_result(M, get_vector, p)
-    @assert size(X) == (div(N * (N - 1), 2),)
+    @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
     for i = 1:N
@@ -161,23 +171,23 @@ function get_vector(
     end
     return Y
 end
-function get_vector(
+function get_vector!(
     M::SkewSymmetricMatrices{N,ℂ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = allocate_result(M, get_vector, p, p .* 1im)
-    @assert size(X) == (N^2,)
+    @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
         if i == j # real zero on the diag
-            @inbounds Y[i, j] = Complex(convert(eltype(X), 0), X[k])
+            @inbounds Y[i, j] = X[k]*1im
             k += 1
         else
-            @inbounds Y[i, j] = Complex(X[k], X[k+1]) / sqrt(2)
+            @inbounds Y[i, j] = (X[k] + X[k+1]*1im) / sqrt(2)
             k += 2
             @inbounds Y[j, i] = -conj(Y[i, j])
         end

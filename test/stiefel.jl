@@ -45,11 +45,9 @@ include("utils.jl")
             @test Z == X
         end
 
-        types = [
-            Matrix{Float64},
-            MMatrix{3,2,Float64},
-        ]
+        types = [Matrix{Float64}, ]
         TEST_FLOAT32 && push!(types, Matrix{Float32})
+        TEST_STATIC_SIZED && push!(types, MMatrix{3, 2, Float64})
 
         @testset "Type $T" for T in types
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
@@ -74,6 +72,7 @@ include("utils.jl")
                 test_vector_transport = false,
                 test_forward_diff = false,
                 test_reverse_diff = false,
+                test_vee_hat = false,
                 projection_atol_multiplier = 15.0,
                 retraction_atol_multiplier = 10.0,
                 is_tangent_atol_multiplier = 4 * 10.0^2,
@@ -104,6 +103,7 @@ include("utils.jl")
             @test repr(M) == "Stiefel(3, 2, ℂ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 8
+            @test Manifolds.allocation_promotion_function(M,exp!,(1,)) == complex
             @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
@@ -134,6 +134,7 @@ include("utils.jl")
                 test_vector_transport = false,
                 test_forward_diff = false,
                 test_reverse_diff = false,
+                test_vee_hat = false,
                 projection_atol_multiplier = 15.0,
                 retraction_atol_multiplier = 10.0,
                 is_tangent_atol_multiplier = 4 * 10.0^2,

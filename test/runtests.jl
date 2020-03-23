@@ -1,16 +1,20 @@
-const TEST_FLOAT32 = false
-const TEST_DOUBLE64 = false
-
-@info "Manifolds.jl Test settings:\n\n"*
-    "Testing Float32: $(TEST_FLOAT32)\n"*
-    "Testing Double64: $(TEST_DOUBLE64)"
-
 include("autodiff.jl")
 include("utils.jl")
-include("numbers.jl")
+
+@info "Manifolds.jl Test settings:\n\n"*
+    "Testing Float32:  $(TEST_FLOAT32)\n"*
+    "Testing Double64: $(TEST_DOUBLE64)\n"*
+    "Testing Static:   $(TEST_STATIC_SIZED)\n"
+
+
+@testset "Ambiguities" begin
+    # TODO: reduce the number of ambiguities
+    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 18
+    @test length(Test.detect_ambiguities(Manifolds)) == 0
+end
+
 include("groups/group_utils.jl")
 include("sized_abstract_array.jl")
-include("orthonormal_bases.jl")
 
 # starting with tests of simple manifolds
 include("circle.jl")

@@ -263,7 +263,21 @@ function decorator_transparent_dispatch(
     return Val(:parent)
 end
 function decorator_transparent_dispatch(
+    ::typeof(get_coordinates!),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
     ::typeof(get_vector),
+    ::AbstractEmbeddedManifold,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(get_vector!),
     ::AbstractEmbeddedManifold,
     args...,
 )

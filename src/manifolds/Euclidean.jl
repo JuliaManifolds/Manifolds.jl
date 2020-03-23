@@ -25,6 +25,8 @@ function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
     return Euclidean{Tuple{n...},field}()
 end
 
+^(𝔽::AbstractNumbers, n) = Euclidean(n...; field = 𝔽)
+
 """
     EuclideanMetric <: RiemannianMetric
 
@@ -43,6 +45,14 @@ struct EuclideanMetric <: RiemannianMetric end
 ^(M::Euclidean, n::Int) = ^(M, (n,))
 function ^(::Euclidean{T,𝔽}, n::NTuple{N,Int}) where {T,𝔽,N}
     return Euclidean{Tuple{T.parameters...,n...},𝔽}()
+end
+
+function allocation_promotion_function(
+    M::Euclidean{<:Tuple,ℂ},
+    ::typeof(get_vector),
+    args::Tuple,
+)
+    return complex
 end
 
 function check_manifold_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
@@ -90,6 +100,7 @@ function check_tangent_vector(M::Euclidean{N,𝔽}, p, X; check_base_point = tru
         )
     end
 end
+
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = one(eltype(p))
 
 """
@@ -125,46 +136,44 @@ flat(::Euclidean, ::Any...)
 
 flat!(M::Euclidean, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_basis(M::Euclidean{<:Tuple,ℝ}, p, B::ArbitraryOrthonormalBasis)
+function get_basis(M::Euclidean{<:Tuple,ℝ}, p, B::DefaultOrthonormalBasis)
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
-    return PrecomputedOrthonormalBasis(vecs)
+    return CachedBasis(B,vecs)
 end
-function get_basis(M::Euclidean{<:Tuple,ℂ}, p, B::ArbitraryOrthonormalBasis)
+function get_basis(M::Euclidean{<:Tuple,ℂ}, p, B::DefaultOrthonormalBasis)
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
-    return PrecomputedOrthonormalBasis([vecs; im * vecs])
+    return CachedBasis(B,[vecs; im * vecs])
 end
 function get_basis(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
-    vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors
-    kappas = zeros(real(eltype(p)), manifold_dimension(M))
-    return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
+    vecs = get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
+    eigenvalues = zeros(real(eltype(p)), manifold_dimension(M))
+    return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates(M::Euclidean{<:Tuple,ℝ}, p, X, B::ArbitraryOrDiagonalizingBasis)
+function get_coordinates!(M::Euclidean{<:Tuple,ℝ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
     PS = prod(S)
-    return reshape(X, PS)
+    copyto!(Y, reshape(X, PS))
+    return Y
 end
-function get_coordinates(M::Euclidean{<:Tuple,ℂ}, p, X, B::ArbitraryOrDiagonalizingBasis)
+function get_coordinates!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
     PS = prod(S)
-    return [reshape(real(X), PS); reshape(imag(X), PS)]
+    Y .= [reshape(real(X), PS)..., reshape(imag(X), PS)...]
+    return Y
 end
 
-function get_vector(M::Euclidean{<:Tuple,ℝ}, p, X, B::ArbitraryOrDiagonalizingBasis)
+function get_vector!(M::Euclidean{<:Tuple,ℝ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
-    return reshape(X, S)
+    Y .= reshape(X, S)
+    return Y
 end
-function get_vector(M::Euclidean{<:Tuple,ℂ}, p, X, B::ArbitraryOrDiagonalizingBasis)
+function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
     N = div(length(X), 2)
-    return reshape(X[1:N] + im * X[N+1:end], S)
+    Y .= reshape(X[1:N] + im * X[N+1:end], S)
+    return Y
 end
-
-function hat(M::Euclidean{N,ℝ}, p, Xⁱ) where {N}
-    return reshape(Xⁱ, representation_size(TangentBundleFibers(M)))
-end
-
-hat!(::Euclidean{N,ℝ}, X, p, Xⁱ) where {N} = copyto!(X, Xⁱ)
 
 @doc raw"""
     injectivity_radius(M::Euclidean)
@@ -374,10 +383,6 @@ var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
 function var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T}
     return sum(var(x; mean = m, kwargs...))
 end
-
-vee(::Euclidean{N,ℝ}, p, X) where {N} = vec(X)
-
-vee!(::Euclidean{N,ℝ}, Xⁱ, p, X) where {N} = copyto!(Xⁱ, X)
 
 """
     zero_tangent_vector(M::Euclidean, x)

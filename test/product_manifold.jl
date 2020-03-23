@@ -13,13 +13,11 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
     @test Mse == M1 × ProductManifold(M2)
     @test injectivity_radius(Mse) ≈ π
     @test is_default_metric(Mse, ProductMetric())
-    @test default_metric_dispatch(Mse, ProductMetric()) === Val{true}()
+    @test Manifolds.default_metric_dispatch(Mse, ProductMetric()) === Val{true}()
     @test_throws ErrorException Manifolds.make_reshape(NotImplementedReshaper(), Int64, zeros(2,3))
-    types = [
-        Vector{Float64},
-        MVector{5, Float64},
-    ]
+    types = [Vector{Float64}, ]
     TEST_FLOAT32 && push!(types, Vector{Float32})
+    TEST_STATIC_SIZED && push!(types, MVector{5, Float64})
 
     retraction_methods = [Manifolds.ProductRetraction(ManifoldsBase.ExponentialRetraction(), ManifoldsBase.ExponentialRetraction())]
     inverse_retraction_methods = [Manifolds.InverseProductRetraction(ManifoldsBase.LogarithmicInverseRetraction(), ManifoldsBase.LogarithmicInverseRetraction())]
@@ -169,6 +167,9 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             distr_tv_M1 = Manifolds.normal_tvector_distribution(M1, pts_base[1][1:3], 1.0)
             distr_tv_M2 = Manifolds.normal_tvector_distribution(M2, pts_base[1][4:5], 1.0)
             @test injectivity_radius(Mse, pts[1]) ≈ π
+            @test injectivity_radius(Mse) ≈ π
+            @test injectivity_radius(Mse, pts[1], ExponentialRetraction()) ≈ π
+            @test injectivity_radius(Mse, ExponentialRetraction()) ≈ π
             test_manifold(
                 Mse,
                 pts;
@@ -263,11 +264,6 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
     end
 
     @testset "ProductRepr" begin
-        basis_types = (
-            ArbitraryOrthonormalBasis(),
-            ProjectedOrthonormalBasis(:svd),
-            DiagonalizingOrthonormalBasis(ProductRepr([0.0, 1.0, 0.0], [1.0, 0.0]))
-        )
 
         Ts = SizedVector{3, Float64}
         Tr2 = SizedVector{2, Float64}
@@ -279,6 +275,13 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
                   convert(Tr2, [0.0, 0.1])]
 
         pts = [ProductRepr(p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
+        basis_types = (
+            DefaultOrthonormalBasis(),
+            ProjectedOrthonormalBasis(:svd),
+            get_basis(Mse, pts[1], DefaultOrthonormalBasis()),
+            DiagonalizingOrthonormalBasis(ProductRepr([0.0, 1.0, 0.0], [1.0, 0.0]))
+        )
+
         test_manifold(
             Mse,
             pts,
@@ -287,8 +290,8 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             test_tangent_vector_broadcasting = false,
             test_forward_diff = false,
             test_reverse_diff = false,
-            basis_types_vecs = (basis_types[1], basis_types[3],),
-            basis_types_to_from = basis_types
+            basis_types_vecs = (basis_types[1], basis_types[3], basis_types[4]),
+            basis_types_to_from = basis_types,
         )
         @test number_eltype(pts[1]) === Float64
         @test submanifold_component(Mse, pts[1], 1) === pts[1].parts[1]
@@ -312,5 +315,42 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         V = hat(M, x, v)
         v2 = vee(M, x, V)
         @test isapprox(v, v2)
+
+        xr = ProductRepr(exp(M1, e, hat(M1, e, [1.0, 2.0, 3.0])), [1.0, 2.0, 3.0])
+
+        Vr = hat(M, xr, v)
+        v2r = vee(M, xr, V)
+        @test isapprox(v, v2r)
+    end
+
+    @testset "Basis printing" begin
+        p = ProductRepr([1.0, 0.0, 0.0], [1.0, 0.0])
+        B = DefaultOrthonormalBasis()
+        Bc = get_basis(Mse, p, B)
+        @test sprint(show, "text/plain", Bc) == """
+        DefaultOrthonormalBasis(ℝ) for a product manifold with coordinates in ℝ
+        Basis for component 1:
+        DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 2 basis vectors:
+         E1 =
+          3-element Array{Int64,1}:
+           0
+           1
+           0
+         E2 =
+          3-element Array{Int64,1}:
+           0
+           0
+           1
+        Basis for component 2:
+        DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 2 basis vectors:
+         E1 =
+          2-element Array{Float64,1}:
+           1.0
+           0.0
+         E2 =
+          2-element Array{Float64,1}:
+           0.0
+           1.0
+        """
     end
 end

@@ -53,13 +53,10 @@ include("utils.jl")
         @test A_sym3 == A_skewsym
         @test A_sym4 == A_skewsym
     end
-    types = [
-        Matrix{Float64},
-        MMatrix{3,3,Float64},
-    ]
+    types = [Matrix{Float64}, ]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
-
-    bases = (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
+    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64})
+    bases = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types
         pts = [convert(T, A_skewsym), convert(T, B_skewsym), convert(T, X)]
         @testset "Type $T" begin
@@ -79,7 +76,9 @@ include("utils.jl")
             )
         end
     end
-    complex_types = [Matrix{ComplexF64}, MMatrix{3,3,ComplexF64}, Matrix{ComplexF32}]
+    complex_types = [ Matrix{ComplexF64}, ]
+    TEST_FLOAT32 && push!(complex_types, Matrix{ComplexF32})
+    TEST_STATIC_SIZED && push!(compley_types, MMatrix{3, 3, ComplexF64})
     for T in complex_types
         pts_complex =
             [convert(T, A_skewsym_complex), convert(T, B_skewsym_complex), convert(T, X)]
@@ -92,8 +91,8 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
-                basis_types_vecs = (ArbitraryOrthonormalBasis(),),
-                basis_types_to_from = (ArbitraryOrthonormalBasis(),),
+                basis_types_vecs = (DefaultOrthonormalBasis(),),
+                basis_types_to_from = (DefaultOrthonormalBasis(),),
             )
             @test isapprox(
                 -pts_complex[1],

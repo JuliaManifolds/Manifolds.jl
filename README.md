@@ -16,6 +16,5 @@ For more details and options, see the documentation
 - [LATEST][docs-latest-url] — in-development version of the documentation.
 
 
-
 [docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
 [docs-latest-url]: https://julianlsolvers.github.io/Manifolds.jl/latest

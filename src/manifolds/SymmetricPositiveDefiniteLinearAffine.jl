@@ -85,7 +85,7 @@ function get_basis(
     ]
     λ = eigv.values
     κ = [-1 / 4 * (λ[i] - λ[j])^2 for i = 1:N for j = i:N]
-    return PrecomputedDiagonalizingOrthonormalBasis(Ξ, κ)
+    return CachedBasis(B, κ, Ξ)
 end
 function get_basis(
     M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
@@ -95,14 +95,15 @@ function get_basis(
     return get_basis(base_manifold(M), p, B)
 end
 
-function get_coordinates(
+function get_coordinates!(
     M::SymmetricPositiveDefinite{N},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis,
+    B::DefaultOrthonormalBasis,
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, dim)
+    @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
     k = 1
@@ -113,23 +114,15 @@ function get_coordinates(
     end
     return Y
 end
-function get_coordinates(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
-    p,
-    X,
-    B::ArbitraryOrthonormalBasis,
-) where {N}
-    return get_coordinates(base_manifold(M), p, X, B)
-end
 
-function get_vector(
+function get_vector!(
     M::SymmetricPositiveDefinite{N},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis,
+    B::DefaultOrthonormalBasis,
 ) where {N}
     dim = manifold_dimension(M)
-    Y = allocate_result(M, get_vector, p)
     @assert size(X) == (div(N * (N + 1), 2),)
     @assert size(Y) == (N, N)
     k = 1
@@ -140,14 +133,6 @@ function get_vector(
         k += 1
     end
     return Y
-end
-function get_vector(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
-    p,
-    X,
-    B::ArbitraryOrthonormalBasis,
-) where {N}
-    return get_vector(base_manifold(M), p, X, B)
 end
 
 @doc raw"""

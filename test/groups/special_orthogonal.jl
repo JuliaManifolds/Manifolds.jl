@@ -23,8 +23,16 @@ include("group_utils.jl")
     vpts = [hat(M, x, [-1.0, 2.0, 0.5]), hat(M, x, [1.0, 0.0, 0.5])]
 
     ge = allocate(pts[1])
-    copyto!(ge, Identity(G))
+    copyto!(ge, make_identity(G, pts[1]))
     @test isapprox(ge, I; atol=1e-10)
+
+    gI = Identity(G,ge)
+    gT = allocate_result(G,exp,gI,log(G,pts[1],pts[2]))
+    @test size(gT) == size(ge)
+    @test eltype(gT) == eltype(ge)
+    gT = allocate_result(G, log, gI, pts[1])
+    @test size(gT) == size(ge)
+    @test eltype(gT) == eltype(ge)
 
     for T in types
         gpts = convert.(T, pts)
@@ -40,8 +48,7 @@ include("group_utils.jl")
         @test (@inferred Manifolds.decorator_group_dispatch(DM)) === Val(true)
         @test Manifolds.is_group_decorator(DM)
         @test base_group(DM) === G
-        @test Identity(DM) === Identity(G)
-        @test_throws DomainError is_manifold_point(DM, Identity(TranslationGroup(3)), true)
+        @test_throws DomainError is_manifold_point(DM, make_identity(TranslationGroup(3), [1, 2, 3]), true)
         test_group(DM, pts, vpts, vpts; test_diff = true)
     end
 
@@ -102,10 +109,43 @@ include("group_utils.jl")
         X = vpts[1]
         pe = identity(G, pts[1])
 
-        Xⁱ = vee(G, Identity(G), X)
+        Xⁱ = vee(G, make_identity(G, pts[1]), X)
         @test Xⁱ ≈ vee(G, pe, X)
 
-        X2 = hat(G, Identity(G), Xⁱ)
+        X2 = hat(G, make_identity(G, pts[1]), Xⁱ)
         @test isapprox(M, pe, X2, hat(G, pe, Xⁱ); atol = 1e-6)
+    end
+    @testset "Identity and get_vector/get_coordinates" begin
+        e = Identity(G, Matrix{Float64}(I,3,3))
+        gT = allocate_result(G, get_coordinates, e, pts[1])
+        @test size(gT) == (manifold_dimension(M),)
+        @test eltype(gT) == eltype(e.p)
+        @test_throws ErrorException allocate_result(M, get_vector, e, pts[1])
+        gT = allocate_result(G, get_vector, e, pts[1])
+        @test size(gT) == size(e.p)
+        @test eltype(gT) == eltype(e.p)
+        eT = similar(e.p)
+        copyto!(eT, e)
+        @test eT == e.p
+
+        eF = Identity(SpecialEuclidean(3), 1)
+        c = [1.0, 0.0, 0.0]
+        Y = zeros(representation_size(G))
+        get_vector!(G, Y, e, c, Manifolds.VeeOrthogonalBasis())
+        @test Y ≈ get_vector(decorated_manifold(G), e.p, c, Manifolds.VeeOrthogonalBasis())
+        @test_throws ErrorException get_vector!(G, Y, eF, c, Manifolds.VeeOrthogonalBasis())
+        get_vector!(M, Y, e, c, Manifolds.VeeOrthogonalBasis())
+        @test Y ≈ get_vector(decorated_manifold(G), e.p, c, Manifolds.VeeOrthogonalBasis())
+        @test_throws ErrorException get_vector!(M, Y, eF, c, Manifolds.VeeOrthogonalBasis())
+
+        @test get_coordinates(decorated_manifold(G), e, Y, Manifolds.VeeOrthogonalBasis()) == c
+        @test_throws ErrorException get_coordinates(M, eF, c, Manifolds.VeeOrthogonalBasis())
+        c2 = similar(c)
+        get_coordinates!(G, c2, e, Y, Manifolds.VeeOrthogonalBasis())
+        @test c==c2
+        @test_throws ErrorException get_coordinates!(G, c2, eF, Y, Manifolds.VeeOrthogonalBasis())
+        get_coordinates!(M, c2, e, Y, Manifolds.VeeOrthogonalBasis())
+        @test c==c2
+        @test_throws ErrorException get_coordinates!(M, c2, eF, Y, Manifolds.VeeOrthogonalBasis())
     end
 end

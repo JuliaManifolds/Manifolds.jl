@@ -132,43 +132,94 @@ flat!(::Circle, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 function get_basis(M::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
-    return PrecomputedDiagonalizingOrthonormalBasis(vs, @SVector [0])
+    return CachedBasis(B, (@SVector [0]) , vs)
 end
-
-get_coordinates(M::Circle{ℝ}, p, X, B::ArbitraryOrthonormalBasis) = X
+get_coordinates(M::Circle{ℝ}, p, X, B::DefaultOrthonormalBasis) = X
 function get_coordinates(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     return X .* (sbv == 0 ? 1 : sbv)
 end
 """
-    get_coordinates(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
+    get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
 Return tangent vector coordinates in the Lie algebra of the circle.
 """
-function get_coordinates(M::Circle{ℂ}, p, X, B::ArbitraryOrthonormalBasis)
+function get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
     X, p = X[1], p[1]
     Xⁱ = imag(X) * real(p) - real(X) * imag(p)
     return @SVector [Xⁱ]
 end
 
-get_vector(M::Circle{ℝ}, p, X, B::ArbitraryOrthonormalBasis) = X
+eval(quote
+    @invoke_maker 1 Manifold get_coordinates(
+        M::Circle,
+        e::Identity,
+        X,
+        B::VeeOrthogonalBasis,
+    )
+end)
+
+function get_coordinates!(M::Circle, Y::AbstractArray, p, X, B::DefaultOrthonormalBasis)
+    Y[] = get_coordinates(M, p, X, B)[]
+    return Y
+end
+function get_coordinates!(
+    M::Circle,
+    Y::AbstractArray,
+    p,
+    X,
+    B::DiagonalizingOrthonormalBasis,
+)
+    Y[] = get_coordinates(M, p, X, B)[]
+    return Y
+end
+
+eval(quote
+    @invoke_maker 1 Manifold get_coordinates!(
+        M::Circle,
+        Y::AbstractArray,
+        p,
+        X,
+        B::VeeOrthogonalBasis,
+    )
+end)
+
+
+get_vector(M::Circle{ℝ}, p, X, B::AbstractBasis) = X
+get_vector(M::Circle{ℝ}, p, X, B::DefaultOrthonormalBasis) = X
 function get_vector(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     return X .* (sbv == 0 ? 1 : sbv)
 end
 """
-    get_vector(M::Circle{ℂ}, p, X, B::ArbitraryOrthonormalBasis)
+    get_vector(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
 Return tangent vector from the coordinates in the Lie algebra of the circle.
 """
-get_vector(M::Circle{ℂ}, p, X, B::ArbitraryOrthonormalBasis) = @SVector [1im * X[1] * p[1]]
+get_vector(M::Circle{ℂ}, p, X, B::AbstractBasis) = @SVector [1im * X[1] * p[1]]
+
+function get_vector!(M::Circle, Y::AbstractArray, p, X, B::AbstractBasis)
+    Y[] = get_vector(M, p, X, B)[]
+    return Y
+end
+for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES
+    eval(quote
+        @invoke_maker 5 $(supertype(BT)) get_vector!(M::Circle, Y::AbstractArray, p, X, B::$BT)
+    end)
+end
 
 @doc raw"""
     injectivity_radius(M::Circle[, p])
 
 Return the injectivity radius on the [`Circle`](@ref) `M`, i.e. $π$.
 """
-injectivity_radius(::Circle, args...) = π
+injectivity_radius(::Circle) = π
+injectivity_radius(::Circle, ::ExponentialRetraction) = π
+injectivity_radius(::Circle, ::Any) = π
+injectivity_radius(::Circle, ::Any, ::ExponentialRetraction) = π
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(M::Circle, rm::AbstractRetractionMethod)
+end)
 
 @doc raw"""
     inner(M::Circle, p, X, Y)

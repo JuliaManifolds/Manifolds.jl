@@ -27,6 +27,14 @@ function SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
     SymmetricMatrices{n,field}()
 end
 
+function allocation_promotion_function(
+    M::SymmetricMatrices{<:Any,ℂ},
+    ::typeof(get_vector),
+    args::Tuple,
+)
+    return complex
+end
+
 @doc raw"""
     check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...)
 
@@ -94,19 +102,20 @@ embed!(M::SymmetricMatrices, q, p) = copyto!(q, p)
 embed!(M::SymmetricMatrices, Y, p, X) = copyto!(Y, X)
 
 function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
-    vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors
-    kappas = zeros(real(eltype(p)), manifold_dimension(M))
-    return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
+    Ξ = get_basis(M, p, DefaultOrthonormalBasis()).data
+    κ = zeros(real(eltype(p)), manifold_dimension(M))
+    return CachedBasis(B, κ, Ξ)
 end
 
-function get_coordinates(
+function get_coordinates!(
     M::SymmetricMatrices{N,ℝ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, dim)
+    @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
     k = 1
@@ -117,14 +126,15 @@ function get_coordinates(
     end
     return Y
 end
-function get_coordinates(
+function get_coordinates!(
     M::SymmetricMatrices{N,ℂ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, dim)
+    @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == N * N
     k = 1
@@ -140,15 +150,15 @@ function get_coordinates(
     return Y
 end
 
-function get_vector(
+function get_vector!(
     M::SymmetricMatrices{N,ℝ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = allocate_result(M, get_vector, p)
-    @assert size(X) == (div(N * (N + 1), 2),)
+    @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
@@ -159,20 +169,20 @@ function get_vector(
     end
     return Y
 end
-function get_vector(
+function get_vector!(
     M::SymmetricMatrices{N,ℂ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = allocate_result(M, get_vector, p, p .* 1im)
-    @assert size(X) == (N^2,)
+    @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds Y[i, j] = Complex(X[k], i == j ? 0 : X[k+1]) * scale
+        @inbounds Y[i, j] = ( X[k] + (i == j ? 0 : X[k+1]*1im) ) * scale
         @inbounds Y[j, i] = Y[i, j]
         k += (i == j ? 1 : 2)
     end

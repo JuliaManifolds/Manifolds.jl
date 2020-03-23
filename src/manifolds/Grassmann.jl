@@ -55,6 +55,14 @@ struct Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbedding
 
 Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ) = Grassmann{n,k,field}()
 
+function allocation_promotion_function(
+    M::Grassmann{n,k,ℂ},
+    f,
+    args::Tuple,
+) where {n,k}
+    return complex
+end
+
 @doc raw"""
     check_manifold_point(M::Grassmann{n,k,𝔽}, p)
 
@@ -177,7 +185,13 @@ end
 
 Return the injectivity radius on the [`Grassmann`](@ref) `M`, which is $\frac{π}{2}$.
 """
-injectivity_radius(::Grassmann, ::Any...) = π / 2
+injectivity_radius(::Grassmann) = π / 2
+injectivity_radius(::Grassmann, ::ExponentialRetraction) = π / 2
+injectivity_radius(::Grassmann, ::Any) = π / 2
+injectivity_radius(::Grassmann, ::Any, ::ExponentialRetraction) = π / 2
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(M::Grassmann, rm::AbstractRetractionMethod)
+end)
 
 @doc raw"""
     inner(M::Grassmann, p, X, Y)

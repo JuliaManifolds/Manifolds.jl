@@ -16,6 +16,9 @@ include("utils.jl")
             @test_throws DomainError is_tangent_vector(M, x, [0., 0., 1., 0.], true)
             @test_throws DomainError is_tangent_vector(M, x, 1 * im * zero_tangent_vector(M,x), true)
             @test injectivity_radius(M) == π/2
+            @test injectivity_radius(M, ExponentialRetraction()) == π/2
+            @test injectivity_radius(M, x) == π/2
+            @test injectivity_radius(M, x, ExponentialRetraction()) == π/2
             @test mean(M,[x,x,x]) == x
         end
         @testset "Embedding and Projection" begin
@@ -39,10 +42,8 @@ include("utils.jl")
             @test Z == X
         end
 
-        types = [
-            Matrix{Float64},
-            MMatrix{3, 2, Float64},
-        ]
+        types = [Matrix{Float64}, ]
+        TEST_STATIC_SIZED && push!(types, MMatrix{3, 2, Float64})
         X = [0.0 0.0; 1.0 0.0; 0.0 2.0]
         Y = [ 0.0 0.0; -1.0 0.0; 0.0 2.0]
         @test inner(M,x,X,Y) == 0

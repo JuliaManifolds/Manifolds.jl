@@ -14,6 +14,9 @@ branches:
   only:
     - master
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/ # build tagged releases
+script:
+    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+    - julia --optimize=0 --project -e 'using Pkg; Pkg.build(); Pkg.test(; coverage=true)';
 jobs:
   allow_failures:
     - julia: nightly

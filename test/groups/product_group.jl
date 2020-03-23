@@ -22,14 +22,17 @@ include("group_utils.jl")
     ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
     tuple_pts = [(exp(Rn, x, hat(Rn, x, ωi)), ti) for (ωi, ti) in zip(ω, t)]
     tuple_v = (hat(Rn, x, [1.0, 0.5, -0.5]), [-1.0, 2.0])
+    eA = [x, zeros(2)]
+    shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M.manifolds...)
+    e = Manifolds.prod_point(shape_se, eA...)
 
     @testset "identity specializations" begin
-        @test inv(G, Identity(G)) === Identity(G)
-        @test identity(G, Identity(G)) === Identity(G)
-        @test submanifold_component(G, Identity(G), Val(1)) === Identity(SOn)
-        @test submanifold_component(G, Identity(G), Val(2)) === Identity(Tn)
-        @test submanifold_components(G, Identity(G)) == (Identity(SOn), Identity(Tn))
-        @test compose(G, Identity(G), Identity(G)) === Identity(G)
+        @test inv(G, Identity(G,e)) === Identity(G,e)
+        @test identity(G, Identity(G,e)) === Identity(G,e)
+        @test submanifold_component(G, Identity(G,e), Val(1)) == Identity(SOn,x)
+        @test submanifold_component(G, Identity(G,e), Val(2)) == Identity(Tn, zeros(2))
+        @test submanifold_components(G, Identity(G,e)) == (Identity(SOn,x), Identity(Tn,zeros(2)))
+        @test compose(G, Identity(G,e), Identity(G,e)) === Identity(G,e)
     end
 
     @testset "product point" begin
@@ -38,8 +41,8 @@ include("group_utils.jl")
             shape_se = Manifolds.ShapeSpecification(reshaper, M.manifolds...)
             pts = [Manifolds.prod_point(shape_se, tp...) for tp in tuple_pts]
             v_pts = [Manifolds.prod_point(shape_se, tuple_v...)]
-            @test compose(G, pts[1], Identity(G)) == pts[1]
-            @test compose(G, Identity(G), pts[1]) == pts[1]
+            @test compose(G, pts[1], Identity(G,e)) == pts[1]
+            @test compose(G, Identity(G,e), pts[1]) == pts[1]
             test_group(G, pts, v_pts, v_pts; test_diff = true)
             @test isapprox(
                 M,
@@ -67,8 +70,8 @@ include("group_utils.jl")
     @testset "product repr" begin
         pts = [ProductRepr(tp...) for tp in tuple_pts]
         v_pts = [ProductRepr(tuple_v...)]
-        @test compose(G, pts[1], Identity(G)) == pts[1]
-        @test compose(G, Identity(G), pts[1]) == pts[1]
+        @test compose(G, pts[1], Identity(G,e)) == pts[1]
+        @test compose(G, Identity(G,e), pts[1]) == pts[1]
         test_group(G, pts, v_pts, v_pts; test_diff = true, test_mutating = false)
         @test isapprox(
             M,
