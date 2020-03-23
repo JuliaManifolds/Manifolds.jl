@@ -68,10 +68,8 @@ import ManifoldsBase:
     manifold_dimension,
     norm,
     number_eltype,
-    project_point,
-    project_point!,
-    project_tangent,
-    project_tangent!,
+    project,
+    project!,
     representation_size,
     retract,
     retract!,
@@ -150,7 +148,6 @@ include("product_representations.jl")
 # It's included early to ensure visibility of `Identity`
 include("groups/group.jl")
 
-include("manifolds/EmbeddedManifold.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/ProductManifold.jl")
 include("manifolds/PowerManifold.jl")
@@ -342,8 +339,8 @@ export ×,
     number_eltype,
     one,
     power_dimensions,
-    project_point,
-    project_point!,
+    project,
+    project!,
     project_tangent,
     project_tangent!,
     projected_distribution,

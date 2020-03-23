@@ -529,7 +529,7 @@ norm(B::VectorBundleFibers, p, X) = sqrt(inner(B, p, X, X))
 norm(B::VectorBundleFibers{<:TangentSpaceType}, p, X) = norm(B.manifold, p, X)
 
 @doc raw"""
-    project_point(B::VectorBundle, p)
+    project(B::VectorBundle, p)
 
 Project the point `p` from the ambient space of the vector bundle `B`
 over manifold `B.fiber` (denoted $\mathcal M$) to the vector bundle.
@@ -543,18 +543,18 @@ Notation:
 The projection is calculated by projecting the point $x_p$ to the manifold $\mathcal M$
 and then projecting the vector $V_p$ to the tangent space $T_{x_p}\mathcal M$.
 """
-project_point(::VectorBundle, ::Any...)
+project(::VectorBundle, ::Any...)
 
-function project_point!(B::VectorBundle, q, p)
+function project!(B::VectorBundle, q, p)
     px, pVx = submanifold_components(B.manifold, p)
     qx, qVx = submanifold_components(B.manifold, q)
-    project_point!(B.manifold, qx, px)
-    project_tangent!(B.manifold, qVx, qx, pVx)
+    project!(B.manifold, qx, px)
+    project!(B.manifold, qVx, qx, pVx)
     return q
 end
 
 @doc raw"""
-    project_tangent(B::VectorBundle, p, X)
+    project(B::VectorBundle, p, X)
 
 Project the element `X` of the ambient space of the tangent space $T_p B$
 to the tangent space $T_p B$.
@@ -571,14 +571,14 @@ Notation:
 The projection is calculated by projecting $V_{X,M}$ to tangent space $T_{x_p}\mathcal M$
 and then projecting the vector $V_{X,F}$ to the fiber $F$.
 """
-project_tangent(::VectorBundle, ::Any...)
+project(::VectorBundle, ::Any...)
 
-function project_tangent!(B::VectorBundle, Y, p, X)
+function project!(B::VectorBundle, Y, p, X)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
-    project_tangent!(B.manifold, VYM, px, VXM)
-    project_tangent!(B.manifold, VYF, px, VXF)
+    project!(B.manifold, VYM, px, VXM)
+    project!(B.manifold, VYF, px, VXF)
     return Y
 end
 
@@ -593,7 +593,7 @@ function project_vector(B::VectorBundleFibers, p, X)
 end
 
 function project_vector!(B::VectorBundleFibers{<:TangentSpaceType}, Y, p, X)
-    return project_tangent!(B.manifold, Y, p, X)
+    return project!(B.manifold, Y, p, X)
 end
 function project_vector!(B::VectorBundleFibers, Y, p, X)
     error("project_vector! not implemented for vector space family of type $(typeof(B)), output vector of type $(typeof(Y)) and input vector at point $(typeof(p)) with type of w $(typeof(X)).")

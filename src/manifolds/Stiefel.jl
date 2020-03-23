@@ -225,15 +225,15 @@ manifold_dimension(::Stiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
 manifold_dimension(::Stiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
 
 @doc doc"""
-    project_point(M::Stiefel,p)
+    project(M::Stiefel,p)
 
 Projects `p` from the embedding onto the [`Stiefel`](@ref) `M`, i.e. compute `q`
 as the polar decomposition of $p$ such that $q^{\mathrm{H}q$ is the identity,
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
-project_point(::Stiefel, ::Any...)
+project(::Stiefel, ::Any, ::Any)
 
-function project_point!(M::Stiefel, q, p)
+function project!(M::Stiefel, q, p)
     s = svd(p)
     e = eigen(s.U' * s.U)
     qsinv = e.vectors * Diagonal(1 ./ sqrt.(e.values))
@@ -242,7 +242,7 @@ function project_point!(M::Stiefel, q, p)
 end
 
 @doc raw"""
-    project_tangent(M::Stiefel, p, X)
+    project(M::Stiefel, p, X)
 
 Project `X` onto the tangent space of `p` to the [`Stiefel`](@ref) manifold `M`.
 The formula reads
@@ -254,9 +254,9 @@ The formula reads
 where $\operatorname{Sym}(q)$ is the symmetrization of $q$, e.g. by
 $\operatorname{Sym}(q) = \frac{q^{\mathrm{H}}+q}{2}$.
 """
-project_tangent(::Stiefel, ::Any...)
+project(::Stiefel, ::Any...)
 
-function project_tangent!(::Stiefel, Y, p, X)
+function project!(::Stiefel, Y, p, X)
     A = p' * X
     copyto!(Y, X - p * Hermitian((A + A') / 2))
     return Y

@@ -49,7 +49,7 @@ that lie on it (contained in `pts`).
   ReverseDiff is tested.
 - `test_musical_isomorphisms = false` : test musical isomorphisms
 - `test_mutating_rand = false` : test the mutating random function for points on manifolds
-- `test_project_tangent = false` : test projections on tangent spaces
+- `test_project = false` : test projections on tangent spaces
 - `test_representation_size = true` : test repersentation size of points/tvectprs
 - `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace
 - `test_vector_transport = false` : test vector transport
@@ -62,7 +62,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
     test_forward_diff = true,
     test_reverse_diff = true,
     test_tangent_vector_broadcasting = true,
-    test_project_tangent = false,
+    test_project = false,
     test_representation_size = true,
     test_musical_isomorphisms = false,
     test_vector_transport = false,
@@ -262,15 +262,15 @@ function test_manifold(M::Manifold, pts::AbstractVector;
         end
     end
 
-    test_project_tangent && @testset "project_tangent test" begin
+    test_project && @testset "project test" begin
         for (x,v) in zip(pts,tv)
             atol = find_eps(x) * projection_atol_multiplier
-            @test isapprox(M, x, v, project_tangent(M, x, v); atol = atol)
+            @test isapprox(M, x, v, project(M, x, v); atol = atol)
             if is_mutating
                 v2 = allocate(v)
-                project_tangent!(M, v2, x, v)
+                project!(M, v2, x, v)
             else
-                v2 = project_tangent(M, x, v)
+                v2 = project(M, x, v)
             end
             @test isapprox(M, x, v2, v; atol = atol)
         end
@@ -314,7 +314,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
                 end
                 # check projection idempotency
                 for i in 1:N
-                    @test isapprox(M, x, project_tangent(M, x, bvectors[i]), bvectors[i])
+                    @test isapprox(M, x, project(M, x, bvectors[i]), bvectors[i])
                 end
             end
             if !isa(btype, ProjectedOrthonormalBasis) &&

@@ -242,16 +242,16 @@ function manifold_dimension(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽}
 end
 
 @doc raw"""
-    project_tangent(M, p, A)
-    project_tangent(M, p, X)
+    project(M, p, A)
+    project(M, p, X)
 
 Project the matrix $A ∈ ℝ^{m,n}$ or a [`UMVTVector`](@ref) `X` from the embedding or
 another tangent space onto the tangent space at $p$ on the [`FixedRankMatrices`](@ref) `M`,
 further decomposing the result into $X=UMV$, i.e. a [`UMVTVector`](@ref).
 """
-project_tangent(::FixedRankMatrices, ::Any...)
+project(::FixedRankMatrices, ::Any, ::Any)
 
-function project_tangent!(
+function project!(
     ::FixedRankMatrices,
     Y::UMVTVector,
     p::SVDMPoint,
@@ -265,8 +265,8 @@ function project_tangent!(
     Y.Vt .= (aTu - p.Vt' * uTav')'
     return Y
 end
-function project_tangent!(M::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, X::UMVTVector)
-    return project_tangent!(M, Y, p, X.U * X.M * X.Vt)
+function project!(M::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, X::UMVTVector)
+    return project!(M, Y, p, X.U * X.M * X.Vt)
 end
 
 @doc raw"""

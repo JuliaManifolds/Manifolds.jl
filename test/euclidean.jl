@@ -13,12 +13,12 @@ include("utils.jl")
     p = zeros(3)
     @test det_local_metric(EM, p) == one(eltype(p))
     @test log_local_metric_density(EM, p) == zero(eltype(p))
-    @test project_point!(E, p, p) == p
+    @test project!(E, p, p) == p
     @test manifold_dimension(Ec) == 2*manifold_dimension(E)
     X = zeros(3)
     X[1] = 1.0
     Y = similar(X)
-    project_tangent!(E, Y, p, X)
+    project!(E, Y, p, X)
     @test Y==X
 
     @test E^2 === Euclidean(3, 2)
@@ -54,7 +54,7 @@ include("utils.jl")
                     M,
                     pts,
                     test_reverse_diff = isa(T, Vector),
-                    test_project_tangent = true,
+                    test_project = true,
                     test_musical_isomorphisms = true,
                     test_vector_transport = true,
                     test_mutating_rand = isa(T, Vector),
@@ -77,7 +77,7 @@ include("utils.jl")
                 Ec,
                 pts,
                 test_reverse_diff = isa(T, Vector),
-                test_project_tangent = true,
+                test_project = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 test_vee_hat = false,

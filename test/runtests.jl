@@ -37,7 +37,6 @@ include("oblique.jl")
 include("torus.jl")
 
 #meta manifolds
-include("embedded.jl")
 include("product_manifold.jl")
 include("power_manifold.jl")
 include("vector_bundle.jl")

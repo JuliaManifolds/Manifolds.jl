@@ -32,7 +32,7 @@ include("utils.jl")
                 M,
                 pts,
                 test_reverse_diff = isa(T, Vector),
-                test_project_tangent = true,
+                test_project = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 test_mutating_rand = isa(T, Vector),
@@ -75,14 +75,14 @@ include("utils.jl")
         v = log(M, x, -x)
         @test norm(v) ≈ π
         @test isapprox(dot(x, v), 0; atol=1e-12)
-        vexp = normalize(project_tangent(M, x, [1, zeros(n)...]))
+        vexp = normalize(project(M, x, [1, zeros(n)...]))
         @test v ≈ π * vexp
 
         x = [1, zeros(n)...]
         v = log(M, x, -x)
         @test norm(v) ≈ π
         @test isapprox(dot(x, v), 0; atol=1e-12)
-        vexp = normalize(project_tangent(M, x, [0, 1, zeros(n - 1)...]))
+        vexp = normalize(project(M, x, [0, 1, zeros(n - 1)...]))
         @test v ≈ π * vexp
     end
 end

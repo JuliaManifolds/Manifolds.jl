@@ -70,7 +70,7 @@ include("group_utils.jl")
         test_manifold(G, pts;
             test_reverse_diff = false,
             test_injectivity_radius = false,
-            test_project_tangent = true,
+            test_project = true,
             test_musical_isomorphisms = false,
             retraction_methods = retraction_methods,
             inverse_retraction_methods = inverse_retraction_methods,
@@ -99,10 +99,10 @@ include("group_utils.jl")
         @test isapprox(M, pts[1], w, inverse_retract(M, pts[1], pts[2], QRInverseRetraction()))
 
         z = collect(reshape(1.0:9.0, 3, 3))
-        @test isapprox(M, project_point(G, z), project_point(M, z))
+        @test isapprox(M, project(G, z), project(M, z))
         z2 = allocate(pts[1])
-        project_point!(G, z2, z)
-        @test isapprox(M, z2, project_point(M, z))
+        project!(G, z2, z)
+        @test isapprox(M, z2, project(M, z))
     end
 
     @testset "vee/hat" begin

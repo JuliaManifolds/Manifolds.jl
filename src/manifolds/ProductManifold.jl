@@ -747,13 +747,13 @@ function ProductPointDistribution(distributions::MPointDistribution...)
     return ProductPointDistribution(M, distributions...)
 end
 
-function project_point(M::ProductManifold, p::ProductRepr)
-    return ProductRepr(map(project_point, M.manifolds, submanifold_components(M, p))...)
+function project(M::ProductManifold, p::ProductRepr)
+    return ProductRepr(map(project, M.manifolds, submanifold_components(M, p))...)
 end
 
-function project_point!(M::ProductManifold, q, p)
+function project!(M::ProductManifold, q, p)
     map(
-        project_point!,
+        project!,
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),
@@ -761,18 +761,18 @@ function project_point!(M::ProductManifold, q, p)
     return q
 end
 
-function project_tangent(M::ProductManifold, p::ProductRepr, X::ProductRepr)
+function project(M::ProductManifold, p::ProductRepr, X::ProductRepr)
     return ProductRepr(map(
-        project_tangent,
+        project,
         M.manifolds,
         submanifold_components(M, p),
         submanifold_components(M, X),
     )...)
 end
 
-function project_tangent!(M::ProductManifold, Y, p, X)
+function project!(M::ProductManifold, Y, p, X)
     map(
-        project_tangent!,
+        project!,
         M.manifolds,
         submanifold_components(M, Y),
         submanifold_components(M, p),

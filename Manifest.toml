@@ -1,3 +1,5 @@
+# This file is machine-generated - editing it directly is not advised
+
 [[AbstractTrees]]
 deps = ["Markdown"]
 git-tree-sha1 = "86d092c2599f1f7bb01668bf8eb3412f98d61e47"
@@ -184,9 +186,9 @@ version = "0.5.4"
 
 [[ManifoldsBase]]
 deps = ["LinearAlgebra", "Markdown"]
-git-tree-sha1 = "28b3838e699ce07789b252226944a52f0ca3757e"
+git-tree-sha1 = "2b36a95906e73de5b1fecf23ce4e77bd01428ef9"
 uuid = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
-version = "0.6.0"
+version = "0.7.1"
 
 [[Markdown]]
 deps = ["Base64"]
@@ -225,7 +227,7 @@ uuid = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 version = "0.12.0"
 
 [[Pkg]]
-deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Test", "UUIDs"]
+deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[Printf]]
@@ -357,7 +359,7 @@ uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 version = "0.9.4"
 
 [[SuiteSparse]]
-deps = ["Libdl", "LinearAlgebra", "SparseArrays"]
+deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
 uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 
 [[TableTraits]]

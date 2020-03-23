@@ -314,7 +314,7 @@ function mean!(
 end
 
 @doc raw"""
-    project_tangent(M::Grassmann, p, X)
+    project(M::Grassmann, p, X)
 
 Project the `n`-by-`k` `X` onto the tangent space of `p` on the [`Grassmann`](@ref) `M`,
 which is computed by
@@ -325,9 +325,9 @@ which is computed by
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-project_tangent(::Grassmann, ::Any...)
+project(::Grassmann, ::Any...)
 
-project_tangent!(M::Grassmann, v, x, w) = copyto!(v, w - x * x' * w)
+project!(M::Grassmann, v, x, w) = copyto!(v, w - x * x' * w)
 
 @doc raw"""
     representation_size(M::Grassmann{n,k})

@@ -216,7 +216,7 @@ function manifold_dimension(::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽}
 end
 
 @doc raw"""
-    project_point(M::SkewSymmetricMatrices, p)
+    project(M::SkewSymmetricMatrices, p)
 
 Projects `p` from the embedding onto the [`SkewSymmetricMatrices`](@ref) `M`, i.e.
 
@@ -226,12 +226,12 @@ Projects `p` from the embedding onto the [`SkewSymmetricMatrices`](@ref) `M`, i.
 
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
-project_point(::SkewSymmetricMatrices, ::Any...)
+project(::SkewSymmetricMatrices, ::Any)
 
-project_point!(M::SkewSymmetricMatrices, q, p) = copyto!(q, (p - p') ./ 2)
+project!(M::SkewSymmetricMatrices, q, p) = copyto!(q, (p - p') ./ 2)
 
 @doc raw"""
-    project_tangent(M::SkewSymmetricMatrices, p, X)
+    project(M::SkewSymmetricMatrices, p, X)
 
 Project the matrix `X` onto the tangent space at `p` on the [`SkewSymmetricMatrices`](@ref) `M`,
 
@@ -241,9 +241,9 @@ Project the matrix `X` onto the tangent space at `p` on the [`SkewSymmetricMatri
 
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
-project_tangent(::SkewSymmetricMatrices, ::Any...)
+project(::SkewSymmetricMatrices, ::Any, ::Any)
 
-project_tangent!(M::SkewSymmetricMatrices, Y, p, X) = (Y .= (X .- X') ./ 2)
+project!(M::SkewSymmetricMatrices, Y, p, X) = (Y .= (X .- X') ./ 2)
 
 function show(io::IO, ::SkewSymmetricMatrices{n,F}) where {n,F}
     print(io, "SkewSymmetricMatrices($(n), $(F))")

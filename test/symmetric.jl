@@ -29,8 +29,8 @@ include("utils.jl")
         @test_throws DomainError is_tangent_vector(M_complex, B_sym, [:a :b :c; :b :d :e; :c :e :f],true)
         @test manifold_dimension(M) == 6
         @test manifold_dimension(M_complex) == 9
-        @test A_sym2 == project_point!(M, A_sym, A_sym)
-        @test A_sym2 == project_tangent(M, A_sym, A_sym)
+        @test A_sym2 == project!(M, A_sym, A_sym)
+        @test A_sym2 == project(M, A_sym, A_sym)
         A_sym3 = similar(A_sym)
         embed!(M,A_sym3, A_sym)
         A_sym4 = embed(M,A_sym)
@@ -50,7 +50,7 @@ include("utils.jl")
                 pts,
                 test_injectivity_radius = false,
                 test_reverse_diff = isa(T, Vector),
-                test_project_tangent = true,
+                test_project = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 basis_types_vecs = (DiagonalizingOrthonormalBasis(log(M, pts[1], pts[2])), bases...),
@@ -61,7 +61,7 @@ include("utils.jl")
                 pts,
                 test_injectivity_radius = false,
                 test_reverse_diff = isa(T, Vector),
-                test_project_tangent = true,
+                test_project = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 basis_types_vecs = (DefaultOrthonormalBasis(),),

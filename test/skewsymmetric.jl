@@ -45,8 +45,8 @@ include("utils.jl")
         )
         @test manifold_dimension(M) == 3
         @test manifold_dimension(M_complex) == 9
-        @test A_skewsym2 == project_point!(M, A_skewsym, A_skewsym)
-        @test A_skewsym2 == project_tangent(M, A_skewsym, A_skewsym)
+        @test A_skewsym2 == project!(M, A_skewsym, A_skewsym)
+        @test A_skewsym2 == project(M, A_skewsym, A_skewsym)
         A_sym3 = similar(A_skewsym)
         embed!(M, A_sym3, A_skewsym)
         A_sym4 = embed(M, A_skewsym)
@@ -65,7 +65,7 @@ include("utils.jl")
                 pts,
                 test_injectivity_radius = false,
                 test_reverse_diff = isa(T, Vector),
-                test_project_tangent = true,
+                test_project = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 basis_types_vecs = (
@@ -88,7 +88,7 @@ include("utils.jl")
                 pts_complex,
                 test_injectivity_radius = false,
                 test_reverse_diff = isa(T, Vector),
-                test_project_tangent = true,
+                test_project = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 basis_types_vecs = (DefaultOrthonormalBasis(),),

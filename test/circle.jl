@@ -34,11 +34,11 @@ include("utils.jl")
         @test injectivity_radius(M, ExponentialRetraction()) ≈ π
         @test mean(M, [-π/2,0.,π]) ≈ π/2
         @test mean(M, [-π/2,0.,π], [1., 1., 1.]) == π/2
-        z = project_point(M, 1.5*π)
+        z = project(M, 1.5*π)
         z2 = [0.0]
-        project_point!(M,z2,1.5*π)
+        project!(M,z2,1.5*π)
         @test z2[1]==z
-        @test project_point(M,z) == z
+        @test project(M,z) == z
     end
     TEST_STATIC_SIZED && @testset "Real Circle and static sized arrays" begin
         v = MVector(0.0)
@@ -47,14 +47,14 @@ include("utils.jl")
         @test norm(M, x, v) ≈ π/4
         @test is_tangent_vector(M, x, v)
         @test is_tangent_vector(M, [], v; check_base_point = false)
-        @test project_point(M, 1.0) == 1.0
+        @test project(M, 1.0) == 1.0
         x = MVector(0.0)
-        project_point!(M, x, x)
+        project!(M, x, x)
         @test x == MVector(0.0)
         x .+= 2*π
-        project_point!(M, x, x)
+        project!(M, x, x)
         @test x == MVector(0.0)
-        @test project_tangent(M, 0.0, 1.) == 1.
+        @test project(M, 0.0, 1.) == 1.
     end
     types = [
         Float64,
@@ -75,7 +75,7 @@ include("utils.jl")
                 test_forward_diff = false,
                 test_reverse_diff = false,
                 test_vector_spaces = false,
-                test_project_tangent = true,
+                test_project = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 test_vee_hat = false,
@@ -87,7 +87,7 @@ include("utils.jl")
                 ptsS,
                 test_forward_diff = false,
                 test_reverse_diff = false,
-                test_project_tangent = true,
+                test_project = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 test_vee_hat = true,
@@ -118,13 +118,13 @@ include("utils.jl")
         log!(Mc, v, x, SVector(-1.0+0.0im))
         @test norm(Mc, SVector(1.0), v) ≈ π
         @test is_tangent_vector(Mc, x, v)
-        @test project_point(Mc, 1.0) == 1.0
-        project_point(Mc, 1/sqrt(2.0) + 1/sqrt(2.0) * im) == 1/sqrt(2.0) + 1/sqrt(2.0) * im
+        @test project(Mc, 1.0) == 1.0
+        project(Mc, 1/sqrt(2.0) + 1/sqrt(2.0) * im) == 1/sqrt(2.0) + 1/sqrt(2.0) * im
         x = MVector(1.0+0.0im)
-        project_point!(Mc, x, x)
+        project!(Mc, x, x)
         @test x == MVector(1.0+0.0im)
         x .*= 2
-        project_point!(Mc, x, x)
+        project!(Mc, x, x)
         @test x == MVector(1.0+0.0im)
 
     end
@@ -141,7 +141,7 @@ include("utils.jl")
                 test_forward_diff = false,
                 test_reverse_diff = false,
                 test_vector_spaces = false,
-                test_project_tangent = true,
+                test_project = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 is_mutating = false,
@@ -155,7 +155,7 @@ include("utils.jl")
                 ptsS,
                 test_forward_diff = false,
                 test_reverse_diff = false,
-                test_project_tangent = true,
+                test_project = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 test_vee_hat = true,

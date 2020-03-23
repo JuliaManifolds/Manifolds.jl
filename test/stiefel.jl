@@ -33,9 +33,9 @@ include("utils.jl")
             a = [1.0 0.0; 0.0 2.0; 0.0 0.0]
             @test !is_manifold_point(M, a)
             b = similar(a)
-            c = project_point(M, a)
+            c = project(M, a)
             @test c == x
-            project_point!(M, b, a)
+            project!(M, b, a)
             @test b == x
             X = [0.0 0.0; 0.0 0.0; -1.0 1.0]
             Y = similar(X)
@@ -68,7 +68,7 @@ include("utils.jl")
                 default_inverse_retraction_method = PolarInverseRetraction(),
                 test_injectivity_radius = false,
                 test_is_tangent = true,
-                test_project_tangent = true,
+                test_project = true,
                 test_vector_transport = false,
                 test_forward_diff = false,
                 test_reverse_diff = false,
@@ -130,7 +130,7 @@ include("utils.jl")
                 default_inverse_retraction_method = PolarInverseRetraction(),
                 test_injectivity_radius = false,
                 test_is_tangent = true,
-                test_project_tangent = true,
+                test_project = true,
                 test_vector_transport = false,
                 test_forward_diff = false,
                 test_reverse_diff = false,

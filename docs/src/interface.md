@@ -58,6 +58,31 @@ julia> y[1]
 * [`allocate_result`](@ref) allocates a result of a particular function (for example [`exp`], [`flat`], etc.) on a particular manifold with particular arguments.
   It takes into account the possibility that different arguments may have different numeric [`number_eltype`](@ref) types thorough the [`ManifoldsBase.allocate_result_type`](@ref) function.
 
+## Bases
+
+The following functions and types provide support for bases of the tangent space of different manifolds.
+An orthonormal basis of the tangent space $T_p \mathcal M$ of (real) dimension $n$ has a real-coefficient basis $e_1, e_2, …, e_n$ if $\mathrm{Re}(g_p(e_i, e_j)) = δ_{ij}$ for each $i,j ∈ \{1, 2, …, n\}$ where $g_p$ is the Riemannian metric at point $p$.
+A vector $X$ from the tangent space $T_p \mathcal M$ can be expressed in Einstein notation as a sum $X = X^i e_i$, where (real) coefficients $X^i$ are calculated as $X^i = \mathrm{Re}(g_p(X, e_i))$.
+
+The main types are:
+* [`DefaultOrthonormalBasis`](@ref), which is designed to work when no special properties of the tangent space basis are required.
+   It is designed to make [`get_coordinates`](@ref) and [`get_vector`](@ref) fast.
+* [`DiagonalizingOrthonormalBasis`](@ref), which diagonalizes the curvature tensor and makes the curvature in the selected direction equal to 0.
+* [`ProjectedOrthonormalBasis`](@ref), which projects a basis of the ambient space and orthonormalizes projections to obtain a basis in a generic way.
+* [`CachedBasis`](@ref), which stores (explicitly or implicitly) a precomputed basis at a certain point.
+
+The main functions are:
+* [`get_basis`](@ref) precomputes a basis at a certain point.
+* [`get_coordinates`](@ref) returns coordinates of a tangent vector.
+* [`get_vector`](@ref) returns a vector for the specified coordinates.
+* [`get_vectors`](@ref) returns a vector of basis vectors (calling it should be avoided for high-dimensional manifolds).
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["orthonormal_bases.jl"]
+Order = [:type, :function]
+```
+
 ## A Decorator for manifolds
 
 A decorator manifold extends the functionality of a [`Manifold`](@ref) in a semi-transparent way.
@@ -96,6 +121,61 @@ This is done by calling [`is_manifold_point`](@ref) or [`is_tangent_vector`](@re
 Modules = [Manifolds, ManifoldsBase]
 Pages = ["ArrayManifold.jl"]
 Order = [:macro, :type, :function]
+```
+
+## Embedded manifold
+
+Some manifolds can easily be defined by using a certain embedding.
+For example the [`Sphere`](@ref)`(n)` is embedded in [`Euclidean`](@ref)`(n+1)`.
+Similar to the metric and [`MetricManifold`](@ref), an embedding is often implicitly assumed.
+We introduce the embedded manifolds hence as an [`AbstractDecoratorManifold`](@ref).
+
+This decorator enables to use such an embedding in an transparent way.
+Different types of embeddings can be distinguished using the [`AbstractEmbeddingType`](@ref).
+
+The embedding also covers representation of tangent vectors.
+For both points and tangent vectors the function [`embed`](@ref) returns their representation in the embedding.
+For any point or vector in the embedding the functions [`project`](@ref) and [`project`](@ref) can be used to obtain the closest point on the manifold and tangent vector in the tangent space, respectively.
+A specific example where [`embed`](@ref) might be useful, is for example a Lie group, where tangent vectors are often represented in the Lie algebra.
+Then their representation is different from the representation in the embedding.
+
+### Isometric Embeddings
+
+For isometric embeddings the type [`AbstractIsometricEmbeddingType`](@ref) can be used to avoid reimplementing the metric.
+See [`Sphere`](@ref) or [`Hyperbolic`](@ref) for example.
+Here, the exponential map, the logarithmic map, the retraction and its inverse
+are set to `:intransparent`, i.e. they have to be implemented.
+
+Furthermore, the [`TransparentIsometricEmbedding`](@ref) type even states that the exponential
+and logarithmic maps as well as retractions and vector transports of the embedding can be
+used for the embedded manifold as well.
+See [`SymmetricMatrices`](@ref) for an example.
+
+In both cases of course [`check_manifold_point`](@ref) and [`check_tangent_vector`](@ref) have to be implemented.
+
+### Technical Details
+
+Semantically we use the idea of the embedding to efficiently implement a manifold by not having to implement those functions that are already given by its embedding. Hence we decorate in some sense the manifold we implement.
+Still, technically [`base_manifold`](@ref) returns the embedding as long as [`EmbeddedManifold`](@ref) is used.
+For the abstract case, [`AbstractEmbeddedManifold`](@ref) the base manfiold might differ.
+Note that internally [`base_manifold`](@ref) uses [`decorated_manifold`](@ref) for one step of removing multiple decorators.
+
+Clearly [`get_embedding`](@ref) always returns the embedding.
+
+### Types
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["EmbeddedManifold.jl"]
+Order = [:type]
+```
+
+### Functions
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["EmbeddedManifold.jl"]
+Order = [:function]
 ```
 
 ## DefaultManifold

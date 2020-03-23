@@ -169,7 +169,7 @@ function exp!(M::GeneralizedGrassmann, q, p, X)
     S = abs.(sqrt.(d.S))
     U = X*(V/Diagonal(S))
     z = p * V * Diagonal(cos.(S)) * V + U * Diagonal(sin.(S)) * V
-    return copyto!(q, project_point(M,z))
+    return copyto!(q, project(M,z))
 end
 
 @doc raw"""
@@ -278,15 +278,15 @@ function mean!(
 end
 
 @doc doc"""
-    project_point(M::GeneralizedGrassmann, p)
+    project(M::GeneralizedGrassmann, p)
 
 Project `p` from the embedding onto the [`GeneralizedGrassmann`](@ref) `M`, i.e. compute `q`
 as the polar decomposition of $p$ such that $q^{\mathrm{H}}Bq$ is the identity,
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose.
 """
-project_point(::GeneralizedGrassmann, ::Any...)
+project(::GeneralizedGrassmann, ::Any)
 
-function project_point!(M::GeneralizedGrassmann, q, p)
+function project!(M::GeneralizedGrassmann, q, p)
     s = svd(p)
     e = eigen(s.U' * M.B * s.U)
     qsinv = e.vectors * Diagonal(1 ./ sqrt.(e.values))
@@ -295,7 +295,7 @@ function project_point!(M::GeneralizedGrassmann, q, p)
 end
 
 @doc raw"""
-    project_tangent(M::GeneralizedGrassmann, p, X)
+    project(M::GeneralizedGrassmann, p, X)
 
 Project the `n`-by-`k` `X` onto the tangent space of `p` on the
 [`GeneralizedGrassmann`](@ref) `M`, which is computed by
@@ -307,9 +307,9 @@ Project the `n`-by-`k` `X` onto the tangent space of `p` on the
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 and $\cdot^{\mathrm{T}}$ the transpose.
 """
-project_tangent(::GeneralizedGrassmann, ::Any...)
+project(::GeneralizedGrassmann, ::Any, ::Any)
 
-function project_tangent!(M::GeneralizedGrassmann, Y, p, X)
+function project!(M::GeneralizedGrassmann, Y, p, X)
     A = p' * M.B' * X
     copyto!(Y, X - p * Hermitian((A + A') / 2))
     return Y
@@ -328,16 +328,16 @@ Return the represenation size or matrix dimension of a point on the [`Generalize
 
 Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 [`GeneralizedGrassmann`](@ref) `M`, by
-[`project`](@ref project_point(M::GeneralizedGrassmann, p))ing $p + X$ onto `M`.
+[`project`](@ref project(M::GeneralizedGrassmann, p))ing $p + X$ onto `M`.
 """
 retract(::GeneralizedGrassmann, ::Any, ::Any, ::PolarRetraction)
 
 function retract!(M::GeneralizedGrassmann, q, p, X, ::PolarRetraction)
-    project_point!(M, q, p+X)
+    project!(M, q, p+X)
     return q
 end
 function retract!(M::GeneralizedGrassmann, q, p, X, ::ProjectionRetraction)
-    project_point!(M, q, p+X)
+    project!(M, q, p+X)
     return q
 end
 
@@ -347,13 +347,13 @@ show(io::IO, M::GeneralizedGrassmann{n,k,B,𝔽}) where {n,k,B,𝔽} = print(io,
     vector_transport_to(M::GeneralizedGrassmann, p, X, q, ::ProjectionTransport)
 
 Compute the vector transport of the tangent vector `X` at `p` to `q`,
-using the [`project_point`](@ref project_point(::GeneralizedGrassmann, ::Any...))
+using the [`project`](@ref project(::GeneralizedGrassmann, ::Any...))
 of `X` to `q`.
 """
 vector_transport_to(::GeneralizedGrassmann, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
 function vector_transport_to!(M::GeneralizedGrassmann, Y, p, X, q, ::ProjectionTransport)
-    project_tangent!(M, Y, q, X)
+    project!(M, Y, q, X)
     return Y
 end
 

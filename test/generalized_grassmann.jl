@@ -30,9 +30,9 @@ include("utils.jl")
             a = [1.0 0.0; 0.0 2.0; 0.0 0.0]
             @test !is_manifold_point(M,a)
             b = similar(a)
-            c = project_point(M,a)
+            c = project(M,a)
             @test c==x
-            project_point!(M,b,a)
+            project!(M,b,a)
             @test b==x
             X = [ 0.0 0.0; 0.0 0.0; -1.0 1.0]
             Y = similar(X)
@@ -53,7 +53,7 @@ include("utils.jl")
         @test is_manifold_point(M,z)
         @test retract(M, x, X) == exp(M, x, X)
 
-        a = project_point(M, x+X)
+        a = project(M, x+X)
         c = retract(M, x, X, ProjectionRetraction())
         d = retract(M, x, X, PolarRetraction())
         @test a == c
@@ -62,7 +62,7 @@ include("utils.jl")
         retract!(M, e, x, X)
         @test e == exp(M, x, X)
         @test vector_transport_to(M, x, X, y, ProjectionTransport()) ==
-              project_tangent(M, y, X)
+              project(M, y, X)
         @testset "Type $T" for T in types
             pts = convert.(T, [x, y, z])
             @test !is_manifold_point(M, 2 * x)
@@ -77,7 +77,7 @@ include("utils.jl")
                 default_retraction_method = ExponentialRetraction(),
                 test_injectivity_radius = false,
                 test_is_tangent = true,
-                test_project_tangent = true,
+                test_project = true,
                 test_vector_transport = false,
                 test_forward_diff = false,
                 test_reverse_diff = false,

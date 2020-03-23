@@ -240,7 +240,7 @@ function log!(S::Sphere, X, p, q)
         θ = acos(cosθ)
         X .= (q .- cosθ .* p) ./ usinc(θ)
     end
-    return project_tangent!(S, X, p, X)
+    return project!(S, X, p, X)
 end
 
 @doc raw"""
@@ -280,7 +280,7 @@ function normal_tvector_distribution(S::Sphere, p, σ)
 end
 
 @doc raw"""
-    project_point(M::Sphere, p)
+    project(M::Sphere, p)
 
 Project the point `p` from the embedding onto the [`Sphere`](@ref) `M`.
 
@@ -288,12 +288,12 @@ Project the point `p` from the embedding onto the [`Sphere`](@ref) `M`.
 \operatorname{proj}_{𝕊^n}(p) = \frac{p}{\lVert p \rVert_2}.
 ````
 """
-project_point(::Sphere, ::Any...)
+project(::Sphere, ::Any)
 
-project_point!(S::Sphere, q, p) = copyto!(q, p./ norm(p))
+project!(S::Sphere, q, p) = copyto!(q, p./ norm(p))
 
 @doc raw"""
-    project_tangent(M::Sphere, p, X)
+    project(M::Sphere, p, X)
 
 Project the point `X` onto the tangent space at `p` on the [`Sphere`](@ref) `M`.
 
@@ -301,9 +301,9 @@ Project the point `X` onto the tangent space at `p` on the [`Sphere`](@ref) `M`.
 \operatorname{proj}_{p}(X) = X - ⟨p, X⟩p
 ````
 """
-project_tangent(::Sphere, ::Any...)
+project(::Sphere, ::Any, ::Any)
 
-project_tangent!(S::Sphere, Y, p, X) = (Y .= X .- dot(p, X) .* p)
+project!(S::Sphere, Y, p, X) = (Y .= X .- dot(p, X) .* p)
 
 @doc raw"""
     representation_size(M::Sphere)
@@ -326,7 +326,7 @@ retract(::Sphere, ::Any, ::Any, ::ProjectionRetraction)
 
 function retract!(M::Sphere, q, p, X, ::ProjectionRetraction)
     q .= p .+ X
-    return project_point!(M, q, q)
+    return project!(M, q, q)
 end
 
 show(io::IO, ::Sphere{N}) where {N} = print(io, "Sphere($(N))")
@@ -339,7 +339,7 @@ similar type as `p`.
 """
 function uniform_distribution(M::Sphere, p)
     d = Distributions.MvNormal(zero(p), 1.0)
-    return ProjectedPointDistribution(M, d, project_point!, p)
+    return ProjectedPointDistribution(M, d, project!, p)
 end
 
 @doc doc"""
