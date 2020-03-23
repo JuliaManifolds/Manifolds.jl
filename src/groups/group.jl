@@ -200,7 +200,7 @@ function allocate_result(
     e::Identity,
     X,
 )
-    is_decorator_group(M) && return allocate_result(base_group(M), f, e, X)
+    is_group_decorator(M) && return allocate_result(base_group(M), f, e, X)
     error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(X).")
 end
 function allocate_result(

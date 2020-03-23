@@ -15,6 +15,11 @@ include("utils.jl")
     @test log_local_metric_density(EM, p) == zero(eltype(p))
     @test project_point!(E, p, p) == p
     @test manifold_dimension(Ec) == 2*manifold_dimension(E)
+    X = zeros(3)
+    X[1] = 1.0
+    Y = similar(X)
+    project_tangent!(E, Y, p, X)
+    @test Y==X
 
     @test E^2 === Euclidean(3, 2)
     @test ^(E,2) === Euclidean(3, 2)

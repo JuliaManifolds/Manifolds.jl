@@ -10,6 +10,7 @@ include("utils.jl")
         @test_throws DomainError is_manifold_point(M, 9., true)
         @test !is_tangent_vector(M, 9., 0.)
         @test_throws DomainError is_tangent_vector(M, 9., 0., true)
+        @test is_tangent_vector(M, 0., 0.; check_base_point=false)
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ 2.0
         @test get_coordinates(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈ -2.0
@@ -29,7 +30,8 @@ include("utils.jl")
         @test retract(M,0.0,1.0) == exp(M,0.0,1.0)
         @test injectivity_radius(M) ≈ π
         @test injectivity_radius(M, Ref(-2.0)) ≈ π
-        @test injectivity_radius(M, ExponentialRetraction) ≈ π
+        @test injectivity_radius(M, Ref(-2.0), ExponentialRetraction()) ≈ π
+        @test injectivity_radius(M, ExponentialRetraction()) ≈ π
         @test mean(M, [-π/2,0.,π]) ≈ π/2
         @test mean(M, [-π/2,0.,π], [1., 1., 1.]) == π/2
         z = project_point(M, 1.5*π)

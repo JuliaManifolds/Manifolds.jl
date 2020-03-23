@@ -169,6 +169,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             @test injectivity_radius(Mse, pts[1]) ≈ π
             @test injectivity_radius(Mse) ≈ π
             @test injectivity_radius(Mse, pts[1], ExponentialRetraction()) ≈ π
+            @test injectivity_radius(Mse, ExponentialRetraction()) ≈ π
             test_manifold(
                 Mse,
                 pts;

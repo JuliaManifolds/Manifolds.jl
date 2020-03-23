@@ -35,6 +35,7 @@ include("group_utils.jl")
 
         @test_throws ErrorException allocate_result(G, get_vector, Identity(SpecialOrthogonal(3),x), v)
         @test_throws ErrorException allocate_result(G, get_coordinates, Identity(SpecialOrthogonal(3),x), v)
+        @test_throws ErrorException allocate_result(ArrayManifold(NotImplementedManifold()), get_coordinates, Identity(SpecialOrthogonal(3),x), v)
         @test_throws ErrorException base_group(MetricManifold(Euclidean(3), EuclideanMetric()))
         @test_throws ErrorException hat(Rotations(3), eg, [1, 2, 3])
         @test_throws ErrorException hat(GroupManifold(Rotations(3), NotImplementedOperation()), eg, [1, 2, 3])
