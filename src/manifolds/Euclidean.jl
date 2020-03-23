@@ -49,7 +49,7 @@ end
 
 function allocation_promotion_function(
     M::Euclidean{<:Tuple,ℂ},
-    ::typeof(get_vector),
+    ::Union{typeof(get_vector),typeof(get_coordinates)},
     args::Tuple,
 )
     return complex
