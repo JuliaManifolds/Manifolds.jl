@@ -52,6 +52,7 @@ import ManifoldsBase:
     get_basis,
     get_coordinates,
     get_coordinates!,
+    get_embedding,
     get_vector,
     get_vector!,
     get_vectors,
@@ -114,9 +115,12 @@ using ManifoldsBase:
     vee!
 using ManifoldsBase:
     AbstractBasis,
+    AbstractOrthogonalBasis,
     DefaultOrDiagonalizingBasis,
     DiagonalizingBasisData,
-    VeeOrthogonalBasis
+    VeeOrthogonalBasis,
+    AbstractOrthonormalBasis,
+    DefaultOrthonormalBasis
 using ManifoldsBase:
     ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
@@ -125,6 +129,15 @@ using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetracti
 using ManifoldsBase: QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
 using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 using ManifoldsBase: ℝ, ℂ, ℍ
+using ManifoldsBase: AbstractEmbeddingType,
+    TransparentIsometricEmbedding,
+    DefaultIsometricEmbeddingType,
+    DefaultEmbeddingType
+using ManifoldsBase:
+    AbstractEmbeddedManifold,
+    EmbeddedManifold,
+    TransparentIsometricEmbedding
+
 
 using Markdown: @doc_str
 using Random: AbstractRNG
@@ -341,8 +354,6 @@ export ×,
     power_dimensions,
     project,
     project!,
-    project_tangent,
-    project_tangent!,
     projected_distribution,
     real_dimension,
     ricci_curvature,
