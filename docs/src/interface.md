@@ -135,9 +135,15 @@ Different types of embeddings can be distinguished using the [`AbstractEmbedding
 
 The embedding also covers representation of tangent vectors.
 For both points and tangent vectors the function [`embed`](@ref) returns their representation in the embedding.
-For any point or vector in the embedding the functions [`project`](@ref) and [`project`](@ref) can be used to obtain the closest point on the manifold and tangent vector in the tangent space, respectively.
-A specific example where [`embed`](@ref) might be useful, is for example a Lie group, where tangent vectors are often represented in the Lie algebra.
-Then their representation is different from the representation in the embedding.
+For any point or vector in the embedding the functions [`project`](@ref) can be used to obtain the closest point on the manifold and tangent vector in the tangent space.
+Note that both [`embed`](@ref) and [`project`](@ref) may also be implemented on a [`Manifold`](@ref) already, assuming that the default implementation of that manifold has an (implicitly assumed) embedding.
+If there exists more than one embedding or to foster using functions from the embedding, like [`inner`](@ref),
+this decorator can be employed. The different embeddings might also refer to different representations or parametrisations of an embedding.
+A specific example where [`embed`](@ref) and [`project`](@ref) actually do change the representation are Lie groups.
+Here, tangent vectors are often represented in the Lie algebra, i.e. in the tangent space of the identity element.
+Then, projection first projects onto a tangent space but also takes care to return the correct representation, i.e. the element from the Lie algebra corresponding to the projected tangent vector.
+Similarly, before embedding a tangent vector that is represented by an element from the Lie algebra,
+the group opration is applied.
 
 ### Isometric Embeddings
 
