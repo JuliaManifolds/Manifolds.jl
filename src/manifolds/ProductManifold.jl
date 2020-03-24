@@ -910,7 +910,7 @@ function show(
     mime::MIME"text/plain",
     B::CachedBasis{T,D,𝔽},
 ) where {T<:AbstractBasis,D<:ProductBasisData,𝔽}
-    println(io, "$(T()) for a product manifold with coordinates in $(number_system(B))")
+    println(io, "$(T()) for a product manifold")
     for (i, cb) = enumerate(B.data.parts)
         println(io, "Basis for component $i:")
         show(io, mime, cb)

@@ -107,8 +107,6 @@ include("utils.jl")
             @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            @test_throws DomainError is_manifold_point(M, [:a :b; :c :d; :e :f], true)
-            @test_throws DomainError is_tangent_vector(M, x, [:a :b; :c :d; :e :f], true)
         end
         types = [Matrix{ComplexF64}]
         @testset "Type $T" for T in types

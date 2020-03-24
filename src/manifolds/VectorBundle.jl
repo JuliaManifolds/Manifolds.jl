@@ -543,7 +543,7 @@ Notation:
 The projection is calculated by projecting the point $x_p$ to the manifold $\mathcal M$
 and then projecting the vector $V_p$ to the tangent space $T_{x_p}\mathcal M$.
 """
-project(::VectorBundle, ::Any...)
+project(::VectorBundle, ::Any)
 
 function project!(B::VectorBundle, q, p)
     px, pVx = submanifold_components(B.manifold, p)
@@ -571,7 +571,7 @@ Notation:
 The projection is calculated by projecting $V_{X,M}$ to tangent space $T_{x_p}\mathcal M$
 and then projecting the vector $V_{X,F}$ to the fiber $F$.
 """
-project(::VectorBundle, ::Any...)
+project(::VectorBundle, ::Any, ::Any)
 
 function project!(B::VectorBundle, Y, p, X)
     px, Vx = submanifold_components(B.manifold, p)

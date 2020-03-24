@@ -770,7 +770,7 @@ function show(
     mime::MIME"text/plain",
     B::CachedBasis{T,D,𝔽},
 ) where {T<:AbstractBasis,D<:PowerBasisData,𝔽}
-    println(io, "$(T()) for a power manifold with coordinates in $(number_system(B))")
+    println(io, "$(T()) for a power manifold")
     for i in Base.product(map(Base.OneTo, size(B.data.bases))...)
         println(io, "Basis for component $i:")
         show(io, mime, _access_nested(B.data.bases, i))

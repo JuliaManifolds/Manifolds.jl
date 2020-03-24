@@ -22,11 +22,6 @@ include("utils.jl")
         @test_throws DomainError is_manifold_point(M, A, true)
         @test_throws DomainError is_manifold_point(M, C, true)
         @test_throws DomainError is_manifold_point(M, D, true)
-        @test_throws DomainError is_manifold_point(
-            M_complex,
-            [:a :b :c; :b :d :e; :c :e :f],
-            true,
-        )
         @test check_tangent_vector(M, B_skewsym, B_skewsym) === nothing
         @test_throws DomainError is_tangent_vector(M, B_skewsym, A, true)
         @test_throws DomainError is_tangent_vector(M, A, B_skewsym, true)
@@ -35,12 +30,6 @@ include("utils.jl")
             M,
             B_skewsym,
             1 * im * zero_tangent_vector(M, B_skewsym),
-            true,
-        )
-        @test_throws DomainError is_tangent_vector(
-            M_complex,
-            B_skewsym,
-            [:a :b :c; :b :d :e; :c :e :f],
             true,
         )
         @test manifold_dimension(M) == 3

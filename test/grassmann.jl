@@ -76,8 +76,6 @@ include("utils.jl")
             @test_throws DomainError is_manifold_point(M, [2. 0.; 0. 1.; 0. 0.],true)
             @test_throws DomainError is_tangent_vector(M, [2. 0.; 0. 1.; 0. 0.],zeros(3,2),true)
             @test_throws DomainError is_tangent_vector(M, [1. 0.; 0. 1.; 0. 0.],ones(3,2),true)
-            @test_throws DomainError is_tangent_vector(M, [1. 0.; 0. 1.; 0. 0.], [:a :a; :a :a; :a :a],true)
-            @test_throws DomainError is_manifold_point(M, [:c :a; :a :a; :b :b], true)
             @test is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], 1im*zero_tangent_vector(M,[1.0 0.0; 0.0 1.0; 0.0 0.0]))
             @test is_manifold_point(M, [1.0 0.0; 0.0 1.0; 0.0 0.0])
             @test injectivity_radius(M) == π/2

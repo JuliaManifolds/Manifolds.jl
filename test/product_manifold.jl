@@ -328,9 +328,9 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         B = DefaultOrthonormalBasis()
         Bc = get_basis(Mse, p, B)
         @test sprint(show, "text/plain", Bc) == """
-        DefaultOrthonormalBasis(ℝ) for a product manifold with coordinates in ℝ
+        DefaultOrthonormalBasis(ℝ) for a product manifold
         Basis for component 1:
-        DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 2 basis vectors:
+        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
          E1 =
           3-element Array{Int64,1}:
            0
@@ -342,7 +342,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
            0
            1
         Basis for component 2:
-        DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 2 basis vectors:
+        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
          E1 =
           2-element Array{Float64,1}:
            1.0
