@@ -131,14 +131,15 @@ using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetracti
 using ManifoldsBase: QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
 using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 using ManifoldsBase: ℝ, ℂ, ℍ
-using ManifoldsBase: AbstractEmbeddingType,
+using ManifoldsBase:
+    AbstractEmbeddingType,
+    AbstractIsometricEmbeddingType,
     TransparentIsometricEmbedding,
     DefaultIsometricEmbeddingType,
     DefaultEmbeddingType
 using ManifoldsBase:
     AbstractEmbeddedManifold,
-    EmbeddedManifold,
-    TransparentIsometricEmbedding
+    EmbeddedManifold
 
 
 using Markdown: @doc_str
