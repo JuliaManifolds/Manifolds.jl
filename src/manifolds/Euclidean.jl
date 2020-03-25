@@ -71,7 +71,7 @@ function check_manifold_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
     if size(p) != representation_size(M)
         return DomainError(
             size(p),
-            "The matrix $(p) does not lie on $(M), since its dimensions are wrong.",
+            "The matrix $(p) does not lie on $(M), since its dimensions ($(size(p))) are wrong (expected: $(representation_size(M))).",
         )
     end
 end
@@ -96,7 +96,7 @@ function check_tangent_vector(M::Euclidean{N,𝔽}, p, X; check_base_point = tru
     if size(X) != representation_size(M)
         return DomainError(
             size(X),
-            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since its dimensions are wrong.",
+            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since its dimensions $(size(X)) are wrong  (expected: $(representation_size(M))).",
         )
     end
 end
