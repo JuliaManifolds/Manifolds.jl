@@ -17,4 +17,4 @@ For more details and options, see the documentation
 
 
 [docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
-[docs-latest-url]: https://julianlsolvers.github.io/Manifolds.jl/latest
+[docs-latest-url]: https://juliamanifolds.github.io/Manifolds.jl/latest
