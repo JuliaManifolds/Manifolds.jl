@@ -1,5 +1,5 @@
 @doc raw"""
-    GeneralizedGrassmann{n,k,𝔽} <: Manifold
+    GeneralizedGrassmann{n,k,𝔽} <: AbstractEmbeddedManifold
 
 The generalized Grassmann manifold $\operatorname{Gr}(n,k,B)$ consists of all subspaces
 spanned by $k$ linear independent vectors $𝔽^n$, where $𝔽  ∈ \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
@@ -44,7 +44,7 @@ Generate the (real-valued) Generalized Grassmann manifold of $n\times k$ dimensi
 orthonormal matrices with scalar product `B`.
 """
 struct GeneralizedGrassmann{n,k,TB<:AbstractMatrix,𝔽} <:
-       AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}
+       AbstractEmbeddedManifold{DefaultEmbeddingType}
        B::TB
 end
 
@@ -65,7 +65,7 @@ a `n`-by-`k` matrix of unitary column vectors with respect to the B inner prudct
 of correct `eltype` with respect to `𝔽`.
 """
 function check_manifold_point(M::GeneralizedGrassmann{n,k,B,𝔽}, p; kwargs...) where {n,k,B,𝔽}
-    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv = invoke(check_manifold_point, Tuple{typeof(get_embedding(M)), typeof(p)}, get_embedding(M), p; kwargs...)
     mpv === nothing || return mpv
     c = p' * M.B * p
     if !isapprox(c, one(c); kwargs...)

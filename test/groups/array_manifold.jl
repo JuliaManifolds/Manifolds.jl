@@ -17,6 +17,7 @@ include("../utils.jl")
     @test Manifolds.array_value(e).p == Manifolds.array_value(e.p)
     @test Manifolds.array_point(e).p == e.p
     p2, q2 = ArrayMPoint(p), ArrayMPoint(q)
+    @test q2 === Manifolds.array_point(q2) # test that double wraps are avoided.
     X2 = ArrayTVector(X)
 
     @test identity(AG, p2) isa ArrayMPoint
