@@ -6,6 +6,23 @@ using StaticArrays: Dynamic
 
 Random.seed!(42)
 
+struct TestManifoldPowerMetric <: Manifold end
+struct TestManifoldPowerMetricMetric <: Metric end
+
+function Manifolds.det_local_metric(
+    ::MetricManifold{TestManifoldPowerMetric,TestManifoldPowerMetricMetric},
+    p,
+)
+    return sum(p)
+end
+
+@inline function Manifolds.default_metric_dispatch(
+    M::TestManifoldPowerMetric,
+    PM::TestManifoldPowerMetricMetric,
+)
+    return Val(true)
+end
+
 @testset "Power manifold" begin
 
     Ms = Sphere(2)
@@ -35,8 +52,6 @@ Random.seed!(42)
     @test Ms^(5,) === Ms1
     @test Mr^(5, 7) === Mr2
 
-    @test is_default_metric(Ms1, PowerMetric())
-    @test default_metric_dispatch(Ms1, PowerMetric()) === Val{true}()
     types_s1 = [Array{Float64,2},
                 HybridArray{Tuple{3,Dynamic()}, Float64, 2}]
     types_s2 = [Array{Float64,3},
@@ -319,4 +334,15 @@ Random.seed!(42)
         )
     end
 
+    @testset "Power manifold with metric" begin
+        M1 = TestManifoldPowerMetric()
+        M2 = MetricManifold(M1, TestManifoldPowerMetricMetric())
+        M13 = PowerManifold(M1, 3)
+        PM = PowerMetric(TestManifoldPowerMetricMetric())
+        @test is_default_metric(M13, PM)
+        @test (@inferred default_metric_dispatch(M13, PM)) === Val(true)
+        MPM = MetricManifold(M13, PM)
+        p = [1 2 3; 4 5 6]
+        @test det_local_metric(MPM, p) == 4*10*18
+    end
 end

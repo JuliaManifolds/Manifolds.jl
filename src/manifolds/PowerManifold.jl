@@ -81,13 +81,17 @@ function PowerManifold(
 end
 
 @doc raw"""
-    PowerMetric <: Metric
+    PowerMetric(metric::metric)
 
 Represent the [`Metric`](@ref) on an [`AbstractPowerManifold`](@ref), i.e. the inner
 product on the tangent space is the sum of the inner product of each elements
 tangent space of the power manifold.
+
+It is constructed based on the given `metric` on the powered space.
 """
-struct PowerMetric <: Metric end
+struct PowerMetric{TM<:Metric} <: Metric
+    metric::TM
+end
 
 """
     PowerRetraction(retraction::AbstractRetractionMethod)
@@ -246,7 +250,20 @@ end
 
 function det_local_metric(
     M::MetricManifold{<:AbstractPowerManifold,PowerMetric},
-    p::AbstractArray,
+    p,
+)
+    MM = MetricManifold(M.manifold.manifold, M.metric.metric)
+    result = one(number_eltype(p))
+    rep_size = representation_size(MM)
+    for i in get_iterator(M)
+        result *= det_local_metric(MM, _read(M, rep_size, p, i))
+    end
+    return result
+end
+
+function det_local_metric(
+    M::AbstractPowerManifold{<:MetricManifold},
+    p,
 )
     result = one(number_eltype(p))
     rep_size = representation_size(M.manifold)
@@ -564,7 +581,9 @@ function inner(M::AbstractPowerManifold, p, X, Y)
     return result
 end
 
-default_metric_dispatch(::AbstractPowerManifold, ::PowerMetric) = Val(true)
+@inline function default_metric_dispatch(M::AbstractPowerManifold, PM::PowerMetric)
+    return default_metric_dispatch(M.manifold, PM.metric)
+end
 
 function isapprox(M::AbstractPowerManifold, p, q; kwargs...)
     result = true
