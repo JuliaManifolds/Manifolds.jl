@@ -39,6 +39,7 @@ include("utils.jl")
         project!(M,z2,1.5*π)
         @test z2[1]==z
         @test project(M,z) == z
+        @test project(M, 1.0, 2.0) == 2.0
     end
     TEST_STATIC_SIZED && @testset "Real Circle and static sized arrays" begin
         v = MVector(0.0)
