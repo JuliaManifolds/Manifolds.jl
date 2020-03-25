@@ -20,9 +20,9 @@ version = "0.3.2"
 
 [[ArrayInterface]]
 deps = ["LinearAlgebra", "Requires", "SparseArrays"]
-git-tree-sha1 = "7b26f0015d9459082a16ebe3fe934c4abb8f1327"
+git-tree-sha1 = "8683deff18ed6cd123e2b4d4147d2dc21f19391b"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "2.2.0"
+version = "2.6.1"
 
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -128,10 +128,9 @@ uuid = "1baab800-613f-4b0a-84e4-9cd3431bfbb9"
 version = "0.3.2"
 
 [[Inflate]]
-deps = ["Pkg", "Printf", "Random", "Test"]
-git-tree-sha1 = "b7ec91c153cf8bff9aff58b39497925d133ef7fd"
+git-tree-sha1 = "f5fc07d4e706b84f72d54eedcc1c13d92fb0871c"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
-version = "0.1.1"
+version = "0.1.2"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
@@ -179,16 +178,16 @@ uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
 version = "0.4.0"
 
 [[MacroTools]]
-deps = ["DataStructures", "Markdown", "Random"]
-git-tree-sha1 = "07ee65e03e28ca88bc9a338a3726ae0c3efaa94b"
+deps = ["Markdown", "Random"]
+git-tree-sha1 = "f7d2e3f654af75f01ec49be82c231c382214223a"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.4"
+version = "0.5.5"
 
 [[ManifoldsBase]]
 deps = ["LinearAlgebra", "Markdown"]
-git-tree-sha1 = "2b36a95906e73de5b1fecf23ce4e77bd01428ef9"
+git-tree-sha1 = "2367dc382a834154b658ac6297e570c4f65a635c"
 uuid = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
-version = "0.7.1"
+version = "0.7.2"
 
 [[Markdown]]
 deps = ["Base64"]
@@ -291,9 +290,9 @@ version = "0.6.0"
 
 [[Roots]]
 deps = ["Printf"]
-git-tree-sha1 = "869a9990ec6347862d59040d00416ecd0683b965"
+git-tree-sha1 = "955ce06c1f424ca7043c7827f5cb14d8eb397065"
 uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
-version = "1.0.0"
+version = "1.0.1"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
