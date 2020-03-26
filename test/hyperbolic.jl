@@ -50,7 +50,7 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_project = true,
+                test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 is_tangent_atol_multiplier = 10.0,

@@ -42,7 +42,7 @@ include("utils.jl")
         test_manifold(M, pts;
             test_reverse_diff = false,
             test_injectivity_radius = false,
-            test_project = true,
+            test_project_tangent = true,
             test_musical_isomorphisms = true,
             retraction_methods = retraction_methods,
             inverse_retraction_methods = inverse_retraction_methods,

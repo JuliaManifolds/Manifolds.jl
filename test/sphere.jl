@@ -32,7 +32,7 @@ include("utils.jl")
                 M,
                 pts,
                 test_reverse_diff = isa(T, Vector),
-                test_project = true,
+                test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 test_mutating_rand = isa(T, Vector),

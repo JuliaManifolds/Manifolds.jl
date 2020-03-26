@@ -54,7 +54,7 @@ include("utils.jl")
                 pts,
                 test_injectivity_radius = false,
                 test_reverse_diff = isa(T, Vector),
-                test_project = true,
+                test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 basis_types_vecs = (
@@ -77,7 +77,7 @@ include("utils.jl")
                 pts_complex,
                 test_injectivity_radius = false,
                 test_reverse_diff = isa(T, Vector),
-                test_project = true,
+                test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 basis_types_vecs = (DefaultOrthonormalBasis(),),

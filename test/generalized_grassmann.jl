@@ -77,7 +77,7 @@ include("utils.jl")
                 default_retraction_method = ExponentialRetraction(),
                 test_injectivity_radius = false,
                 test_is_tangent = true,
-                test_project = true,
+                test_project_tangent = true,
                 test_vector_transport = false,
                 test_forward_diff = false,
                 test_reverse_diff = false,

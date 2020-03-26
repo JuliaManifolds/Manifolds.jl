@@ -54,7 +54,7 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
             test_forward_diff = false,
             test_reverse_diff = false,
             test_vector_spaces = false,
-            test_project = true,
+            test_project_tangent = true,
             test_musical_isomorphisms = false,
             test_vector_transport = true,
             is_mutating = true,
