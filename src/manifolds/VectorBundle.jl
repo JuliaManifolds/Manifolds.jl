@@ -290,11 +290,11 @@ function get_basis(M::VectorBundle, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, VectorBundleBasisData(b1, b2))
 end
 
-for BT in (
+for BT in [
     DefaultOrthonormalBasis,
     ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
     ProjectedOrthonormalBasis{:svd,ℝ},
-)
+]
     eval(quote
         @invoke_maker 3 AbstractBasis get_basis(M::VectorBundle, p, B::$BT)
     end)
@@ -303,41 +303,6 @@ function get_basis(M::TangentBundleFibers, p, B::AbstractBasis)
     return get_basis(M.manifold, p, B)
 end
 
-function get_coordinates!(M::VectorBundle, Y, p, X, B::DefaultBasis)
-    invoke(get_coordinates!, Tuple{VectorBundle,Any,Any,Any,AbstractBasis}, M, Y, p, X, B)
-end
-function get_coordinates!(M::VectorBundle, Y, p, X, B::VeeOrthogonalBasis)
-    invoke(get_coordinates!, Tuple{VectorBundle,Any,Any,Any,AbstractBasis}, M, Y, p, X, B)
-end
-function get_coordinates!(M::VectorBundle, Y, p, X, B::DefaultOrthogonalBasis)
-    invoke(get_coordinates!, Tuple{VectorBundle,Any,Any,Any,AbstractBasis}, M, Y, p, X, B)
-end
-function get_coordinates!(M::VectorBundle, Y, p, X, B::DefaultOrthonormalBasis)
-    invoke(get_coordinates!, Tuple{VectorBundle,Any,Any,Any,AbstractBasis}, M, Y, p, X, B)
-end
-function get_coordinates!(M::VectorBundle, Y, p, X, B::CachedBasis)
-    invoke(get_coordinates!, Tuple{Manifold,Any,Any,Any,AbstractBasis}, M, Y, p, X, B)
-end
-function get_coordinates!(M::VectorBundle, Y, p, X, B::CachedBasis{<:AbstractBasis{ℝ}})
-    invoke(get_coordinates!, Tuple{Manifold,Any,Any,Any,typeof(B)}, M, Y, p, X, B)
-end
-function get_coordinates!(
-    M::VectorBundle,
-    Y,
-    p,
-    X,
-    B::CachedBasis{<:AbstractBasis{ℝ},<:VectorBundleBasisData},
-)
-    invoke(
-        get_coordinates!,
-        Tuple{VectorBundle,Any,Any,Any,CachedBasis{<:AbstractBasis,<:VectorBundleBasisData}},
-        M,
-        Y,
-        p,
-        X,
-        B,
-    )
-end
 function get_coordinates!(M::VectorBundle, Y, p, X, B::AbstractBasis)
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
@@ -359,7 +324,36 @@ function get_coordinates!(
      get_coordinates!(M.manifold, view(Y, 1:n), px, VXM, B.data.base_basis)
      get_coordinates!(M.fiber, view(Y, n+1:length(Y)), px, VXF, B.data.vec_basis)
      return Y
- end
+end
+for BT in [
+    DefaultBasis,
+    DefaultOrthogonalBasis,
+    DefaultOrthonormalBasis,
+    ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
+    ProjectedOrthonormalBasis{:svd,ℝ},
+    VeeOrthogonalBasis,
+]
+    eval(quote
+        @invoke_maker 5 AbstractBasis get_coordinates!(M::VectorBundle, Y, p, X, B::$BT)
+    end)
+end
+for BT in [
+    CachedBasis{<:AbstractBasis{ℝ},<:VectorBundleBasisData},
+    CachedBasis{<:ManifoldsBase.AbstractOrthogonalBasis{ℝ},<:VectorBundleBasisData},
+    CachedBasis{<:ManifoldsBase.AbstractOrthonormalBasis{ℝ},<:VectorBundleBasisData},
+    CachedBasis{<:AbstractBasis{ℂ},<:VectorBundleBasisData},
+]
+    eval(quote
+        @invoke_maker 5 CachedBasis{<:AbstractBasis,<:VectorBundleBasisData} get_coordinates!(
+                M::VectorBundle,
+                Y,
+                p,
+                X,
+                B::$BT,
+            )
+    end)
+end
+
 function get_coordinates!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncached_bases) where {N}
     return get_coordinates!(M.manifold, Y, p, X, B)
 end
@@ -376,7 +370,7 @@ function get_vector!(
     Y,
     p,
     X,
-    B::CachedBasis{VectorBundleBasisData},
+    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData},
 ) where {N}
     n = manifold_dimension(M.manifold)
     xp1 = submanifold_component(p, Val(1))

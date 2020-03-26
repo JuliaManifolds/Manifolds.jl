@@ -572,6 +572,14 @@ end
 function injectivity_radius(M::ProductManifold, p, m::AbstractRetractionMethod)
     return min(map((lM, lp) -> injectivity_radius(lM, lp, m), M.manifolds, submanifold_components(M, p))...)
 end
+function injectivity_radius(M::ProductManifold, p, m::ProductRetraction)
+    return min(map(
+        (lM, lp, lm) -> injectivity_radius(lM, lp, lm),
+        M.manifolds,
+        submanifold_components(M, p),
+        m.retractions
+    )...)
+end
 eval(quote
     @invoke_maker 3 AbstractRetractionMethod injectivity_radius(
         M::ProductManifold,
@@ -582,6 +590,13 @@ end)
 injectivity_radius(M::ProductManifold) = min(map(injectivity_radius, M.manifolds)...)
 function injectivity_radius(M::ProductManifold, m::AbstractRetractionMethod)
     return min(map(manif -> injectivity_radius(manif, m), M.manifolds)...)
+end
+function injectivity_radius(M::ProductManifold, m::ProductRetraction)
+    return min(map(
+        (lM, lm) -> injectivity_radius(lM, lm),
+        M.manifolds,
+        m.retractions
+    )...)
 end
 eval(quote
     @invoke_maker 2 AbstractRetractionMethod injectivity_radius(

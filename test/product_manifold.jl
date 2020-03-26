@@ -15,6 +15,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
     @test is_default_metric(Mse, ProductMetric())
     @test Manifolds.default_metric_dispatch(Mse, ProductMetric()) === Val{true}()
     @test_throws ErrorException Manifolds.make_reshape(NotImplementedReshaper(), Int64, zeros(2,3))
+    @test Manifolds.number_of_components(Mse) == 2
     types = [Vector{Float64}, ]
     TEST_FLOAT32 && push!(types, Vector{Float32})
     TEST_STATIC_SIZED && push!(types, MVector{5, Float64})
@@ -175,7 +176,8 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
                 pts;
                 test_reverse_diff = isa(T, Vector),
                 test_musical_isomorphisms = true,
-                test_injectivity_radius = false,
+                test_injectivity_radius = true,
+                test_project = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 test_mutating_rand = isa(T, Vector),
