@@ -102,8 +102,15 @@ include("group_utils.jl")
             @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:transparent}()
         end
         for f in [group_exp!, group_exp, group_log, group_log!]
-            @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:transparent}()
+            @test Manifolds.decorator_transparent_dispatch(f, G, x, x) === Val{:intransparent}()
         end
+        for f in [get_vector, get_coordinates]
+            @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:parent}()
+        end
+        @test Manifolds.decorator_transparent_dispatch(identity!, G, x, x) === Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(isapprox, G, eg, x) === Val{:transparent}()
+        @test Manifolds.decorator_transparent_dispatch(isapprox, G, x, eg) === Val{:transparent}()
+        @test Manifolds.decorator_transparent_dispatch(isapprox, G, eg, eg) === Val{:transparent}()
     end
 
     @testset "Action direction" begin

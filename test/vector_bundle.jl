@@ -66,10 +66,12 @@ struct TestVectorSpaceType <: VectorSpaceType end
             for pt ∈ pts_tb
                 @test bundle_projection(TB, pt) ≈ pt.parts[1]
             end
+            diag_basis = DiagonalizingOrthonormalBasis(log(TB, pts_tb[1], pts_tb[2]))
             basis_types = (
                 DefaultOrthonormalBasis(),
                 get_basis(TB, pts_tb[1], DefaultOrthonormalBasis()),
-                DiagonalizingOrthonormalBasis(log(TB, pts_tb[1], pts_tb[2])),
+                diag_basis,
+                get_basis(TB, pts_tb[1], diag_basis),
             )
             test_manifold(
                 TB,
@@ -80,6 +82,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_tangent_vector_broadcasting = false,
                 test_vee_hat = true,
                 test_project_tangent = true,
+                test_project_point = true,
                 basis_types_vecs = basis_types,
                 projection_atol_multiplier = 4
             )

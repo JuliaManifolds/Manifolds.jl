@@ -22,11 +22,6 @@ include("utils.jl")
         @test_throws DomainError is_manifold_point(M, A, true)
         @test_throws DomainError is_manifold_point(M, C, true)
         @test_throws DomainError is_manifold_point(M, D, true)
-        @test_throws DomainError is_manifold_point(
-            M_complex,
-            [:a :b :c; :b :d :e; :c :e :f],
-            true,
-        )
         @test check_tangent_vector(M, B_skewsym, B_skewsym) === nothing
         @test_throws DomainError is_tangent_vector(M, B_skewsym, A, true)
         @test_throws DomainError is_tangent_vector(M, A, B_skewsym, true)
@@ -37,16 +32,10 @@ include("utils.jl")
             1 * im * zero_tangent_vector(M, B_skewsym),
             true,
         )
-        @test_throws DomainError is_tangent_vector(
-            M_complex,
-            B_skewsym,
-            [:a :b :c; :b :d :e; :c :e :f],
-            true,
-        )
         @test manifold_dimension(M) == 3
         @test manifold_dimension(M_complex) == 9
-        @test A_skewsym2 == project_point!(M, A_skewsym, A_skewsym)
-        @test A_skewsym2 == project_tangent(M, A_skewsym, A_skewsym)
+        @test A_skewsym2 == project!(M, A_skewsym, A_skewsym)
+        @test A_skewsym2 == project(M, A_skewsym, A_skewsym)
         A_sym3 = similar(A_skewsym)
         embed!(M, A_sym3, A_skewsym)
         A_sym4 = embed(M, A_skewsym)

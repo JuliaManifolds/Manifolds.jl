@@ -88,9 +88,9 @@ version = "0.5.4"
 
 [[ManifoldsBase]]
 deps = ["LinearAlgebra", "Markdown"]
-git-tree-sha1 = "28b3838e699ce07789b252226944a52f0ca3757e"
+git-tree-sha1 = "2367dc382a834154b658ac6297e570c4f65a635c"
 uuid = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
-version = "0.6.0"
+version = "0.7.2"
 
 [[Markdown]]
 deps = ["Base64"]

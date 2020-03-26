@@ -572,6 +572,14 @@ end
 function injectivity_radius(M::ProductManifold, p, m::AbstractRetractionMethod)
     return min(map((lM, lp) -> injectivity_radius(lM, lp, m), M.manifolds, submanifold_components(M, p))...)
 end
+function injectivity_radius(M::ProductManifold, p, m::ProductRetraction)
+    return min(map(
+        (lM, lp, lm) -> injectivity_radius(lM, lp, lm),
+        M.manifolds,
+        submanifold_components(M, p),
+        m.retractions
+    )...)
+end
 eval(quote
     @invoke_maker 3 AbstractRetractionMethod injectivity_radius(
         M::ProductManifold,
@@ -582,6 +590,13 @@ end)
 injectivity_radius(M::ProductManifold) = min(map(injectivity_radius, M.manifolds)...)
 function injectivity_radius(M::ProductManifold, m::AbstractRetractionMethod)
     return min(map(manif -> injectivity_radius(manif, m), M.manifolds)...)
+end
+function injectivity_radius(M::ProductManifold, m::ProductRetraction)
+    return min(map(
+        (lM, lm) -> injectivity_radius(lM, lm),
+        M.manifolds,
+        m.retractions
+    )...)
 end
 eval(quote
     @invoke_maker 2 AbstractRetractionMethod injectivity_radius(
@@ -747,13 +762,13 @@ function ProductPointDistribution(distributions::MPointDistribution...)
     return ProductPointDistribution(M, distributions...)
 end
 
-function project_point(M::ProductManifold, p::ProductRepr)
-    return ProductRepr(map(project_point, M.manifolds, submanifold_components(M, p))...)
+function project(M::ProductManifold, p::ProductRepr)
+    return ProductRepr(map(project, M.manifolds, submanifold_components(M, p))...)
 end
 
-function project_point!(M::ProductManifold, q, p)
+function project!(M::ProductManifold, q, p)
     map(
-        project_point!,
+        project!,
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),
@@ -761,18 +776,18 @@ function project_point!(M::ProductManifold, q, p)
     return q
 end
 
-function project_tangent(M::ProductManifold, p::ProductRepr, X::ProductRepr)
+function project(M::ProductManifold, p::ProductRepr, X::ProductRepr)
     return ProductRepr(map(
-        project_tangent,
+        project,
         M.manifolds,
         submanifold_components(M, p),
         submanifold_components(M, X),
     )...)
 end
 
-function project_tangent!(M::ProductManifold, Y, p, X)
+function project!(M::ProductManifold, Y, p, X)
     map(
-        project_tangent!,
+        project!,
         M.manifolds,
         submanifold_components(M, Y),
         submanifold_components(M, p),
@@ -910,7 +925,7 @@ function show(
     mime::MIME"text/plain",
     B::CachedBasis{T,D,𝔽},
 ) where {T<:AbstractBasis,D<:ProductBasisData,𝔽}
-    println(io, "$(T()) for a product manifold with coordinates in $(number_system(B))")
+    println(io, "$(T()) for a product manifold")
     for (i, cb) = enumerate(B.data.parts)
         println(io, "Basis for component $i:")
         show(io, mime, cb)

@@ -458,7 +458,7 @@ log(::Rotations, ::Any...)
 function log!(M::Rotations, X, p, q)
     U = transpose(p) * q
     X .= real(log_safe(U))
-    return project_tangent!(M, X, p, X)
+    return project!(M, X, p, X)
 end
 function log!(M::Rotations{2}, X, p, q)
     U = transpose(p) * q
@@ -498,7 +498,7 @@ function log!(M::Rotations{4}, X, p, q)
     else
         copyto!(X, real(log_safe(U)))
     end
-    return project_tangent!(M, X, p, X)
+    return project!(M, X, p, X)
 end
 
 @doc raw"""
@@ -580,7 +580,7 @@ function normal_tvector_distribution(M::Rotations, p, σ)
 end
 
 @doc raw"""
-    project_point(M::Rotations, p; check_det = true)
+    project(M::Rotations, p; check_det = true)
 
 Project `p` to the nearest point on manifold `M`.
 
@@ -596,9 +596,9 @@ The diagonal matrix ensures that the determinant of the result is $+1$.
 If `p` is expected to be almost special orthogonal, then you may avoid this
 check with `check_det = false`.
 """
-project_point(::Rotations, ::Any...)
+project(::Rotations, ::Any)
 
-function project_point!(M::Rotations{N}, q, p; check_det = true) where {N}
+function project!(M::Rotations{N}, q, p; check_det = true) where {N}
     F = svd(p)
     copyto!(q, F.U * F.Vt)
     if check_det && det(q) < 0
@@ -611,7 +611,7 @@ function project_point!(M::Rotations{N}, q, p; check_det = true) where {N}
 end
 
 @doc raw"""
-    project_tangent(M::Rotations, p, X)
+    project(M::Rotations, p, X)
 
 Project the matrix `X` onto the tangent space by making `X` skew symmetric,
 
@@ -621,9 +621,9 @@ Project the matrix `X` onto the tangent space by making `X` skew symmetric,
 
 where tangent vectors are represented by elements from the Lie group
 """
-project_tangent(::Rotations, ::Any...)
+project(::Rotations, ::Any, ::Any)
 
-project_tangent!(M::Rotations, Y, p, X) = (Y .= (X .- transpose(X)) ./ 2)
+project!(M::Rotations, Y, p, X) = (Y .= (X .- transpose(X)) ./ 2)
 
 @doc raw"""
     representation_size(M::Rotations)
@@ -703,7 +703,7 @@ function retract!(M::Rotations, q::AbstractArray{T}, p, X, method::QRRetraction)
 end
 function retract!(M::Rotations, q, p, X, method::PolarRetraction)
     A = p + p * X
-    return project_point!(M, q, A; check_det = false)
+    return project!(M, q, A; check_det = false)
 end
 
 show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")

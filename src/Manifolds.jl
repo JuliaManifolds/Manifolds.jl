@@ -47,11 +47,14 @@ import ManifoldsBase:
     decorator_transparent_dispatch,
     default_decorator_dispatch,
     distance,
+    embed,
+    embed!,
     exp,
     exp!,
     get_basis,
     get_coordinates,
     get_coordinates!,
+    get_embedding,
     get_vector,
     get_vector!,
     get_vectors,
@@ -68,10 +71,8 @@ import ManifoldsBase:
     manifold_dimension,
     norm,
     number_eltype,
-    project_point,
-    project_point!,
-    project_tangent,
-    project_tangent!,
+    project,
+    project!,
     representation_size,
     retract,
     retract!,
@@ -116,9 +117,12 @@ using ManifoldsBase:
     vee!
 using ManifoldsBase:
     AbstractBasis,
+    AbstractOrthogonalBasis,
     DefaultOrDiagonalizingBasis,
     DiagonalizingBasisData,
-    VeeOrthogonalBasis
+    VeeOrthogonalBasis,
+    AbstractOrthonormalBasis,
+    DefaultOrthonormalBasis
 using ManifoldsBase:
     ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
@@ -127,6 +131,16 @@ using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetracti
 using ManifoldsBase: QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
 using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 using ManifoldsBase: ℝ, ℂ, ℍ
+using ManifoldsBase:
+    AbstractEmbeddingType,
+    AbstractIsometricEmbeddingType,
+    TransparentIsometricEmbedding,
+    DefaultIsometricEmbeddingType,
+    DefaultEmbeddingType
+using ManifoldsBase:
+    AbstractEmbeddedManifold,
+    EmbeddedManifold
+
 
 using Markdown: @doc_str
 using Random: AbstractRNG
@@ -150,7 +164,6 @@ include("product_representations.jl")
 # It's included early to ensure visibility of `Identity`
 include("groups/group.jl")
 
-include("manifolds/EmbeddedManifold.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/ProductManifold.jl")
 include("manifolds/PowerManifold.jl")
@@ -342,10 +355,8 @@ export ×,
     number_eltype,
     one,
     power_dimensions,
-    project_point,
-    project_point!,
-    project_tangent,
-    project_tangent!,
+    project,
+    project!,
     projected_distribution,
     real_dimension,
     ricci_curvature,

@@ -277,7 +277,7 @@ function log(M::Circle{ℂ}, p::Number, q::Number)
         θ = acos(cosθ)
         X = (q - cosθ * p) / usinc(θ)
     end
-    return project_tangent(M, p, X)
+    return project(M, p, X)
 end
 
 log!(::Circle{ℝ}, X, p, q) = (X .= sym_rem(q - p))
@@ -292,7 +292,7 @@ function log!(M::Circle{ℂ}, X, p, q)
         θ = acos(cosθ)
         X .= (q - cosθ * p) / usinc(θ)
     end
-    return project_tangent!(M, X, p, X)
+    return project!(M, X, p, X)
 end
 
 @doc raw"""
@@ -316,22 +316,22 @@ mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...) = sym_rem(sum(w .
 @inline norm(::Circle, p, X) = sum(abs, X)
 
 @doc raw"""
-    project_point(M::Circle, p)
+    project(M::Circle, p)
 
 Project a point `p` onto the [`Circle`](@ref) `M`.
 For the real-valued case this is the remainder with respect to modulus $2π$.
 For the complex-valued case the result is the projection of `p` onto the unit circle in the
 complex plane.
 """
-project_point(::Circle, ::Any)
-project_point(::Circle{ℝ}, p::Real) = sym_rem(p)
-project_point(::Circle{ℂ}, p::Number) = p / abs(p)
+project(::Circle, ::Any)
+project(::Circle{ℝ}, p::Real) = sym_rem(p)
+project(::Circle{ℂ}, p::Number) = p / abs(p)
 
-project_point!(::Circle{ℝ}, q, p) = copyto!(q, sym_rem(p))
-project_point!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
+project!(::Circle{ℝ}, q, p) = copyto!(q, sym_rem(p))
+project!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
 
 @doc raw"""
-    project_tangent(M::Circle, p, X)
+    project(M::Circle, p, X)
 
 Project a value `X` onto the tangent space of the point `p` on the [`Circle`](@ref) `M`.
 
@@ -339,12 +339,12 @@ For the real-valued case this is just the identity.
 For the complex valued case `X` is projected onto the line in the complex plane
 that is parallel to the tangent to `p` on the unit circle and contains `0`.
 """
-project_tangent(::Circle, ::Any, ::Any)
-project_tangent(::Circle{ℝ}, p::Real, X::Real) = X
-project_tangent(::Circle{ℂ}, p::Number, X::Number) = X - complex_dot(p, X) * p
+project(::Circle, ::Any, ::Any)
+project(::Circle{ℝ}, p::Real, X::Real) = X
+project(::Circle{ℂ}, p::Number, X::Number) = X - complex_dot(p, X) * p
 
-project_tangent!(::Circle{ℝ}, Y, p, X) = (Y .= X)
-project_tangent!(::Circle{ℂ}, Y, p, X) = (Y .= X - complex_dot(p, X) * p)
+project!(::Circle{ℝ}, Y, p, X) = (Y .= X)
+project!(::Circle{ℂ}, Y, p, X) = (Y .= X - complex_dot(p, X) * p)
 
 retract(M::Circle, p, q) = retract(M, p, q, ExponentialRetraction())
 retract(M::Circle, p, q, m::ExponentialRetraction) = exp(M, p, q)

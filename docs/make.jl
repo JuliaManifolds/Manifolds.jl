@@ -36,12 +36,10 @@ makedocs(
                 "Vector bundle" => "manifolds/vector_bundle.md"
             ],
             "Manifold decorators" => [
-                "Embedded manifold" => "manifolds/embedded.md",
                 "Metric manifold" => "manifolds/metric.md",
                 "Group manifold" => "manifolds/group.md"
             ]
         ],
-        "Bases" => "bases.md",
         "Statistics" => "statistics.md",
         "Distributions" => "distributions.md",
         "Notation" => "notation.md",

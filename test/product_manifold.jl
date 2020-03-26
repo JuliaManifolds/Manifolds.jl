@@ -15,6 +15,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
     @test is_default_metric(Mse, ProductMetric())
     @test Manifolds.default_metric_dispatch(Mse, ProductMetric()) === Val{true}()
     @test_throws ErrorException Manifolds.make_reshape(NotImplementedReshaper(), Int64, zeros(2,3))
+    @test Manifolds.number_of_components(Mse) == 2
     types = [Vector{Float64}, ]
     TEST_FLOAT32 && push!(types, Vector{Float32})
     TEST_STATIC_SIZED && push!(types, MVector{5, Float64})
@@ -175,7 +176,9 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
                 pts;
                 test_reverse_diff = isa(T, Vector),
                 test_musical_isomorphisms = true,
-                test_injectivity_radius = false,
+                test_injectivity_radius = true,
+                test_project_point = true,
+                test_project_tangent = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 test_mutating_rand = isa(T, Vector),
@@ -290,6 +293,8 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             test_tangent_vector_broadcasting = false,
             test_forward_diff = false,
             test_reverse_diff = false,
+            test_project_tangent = true,
+            test_project_point = true,
             basis_types_vecs = (basis_types[1], basis_types[3], basis_types[4]),
             basis_types_to_from = basis_types,
         )
@@ -300,6 +305,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         @test submanifold_component(pts[1], Val(1)) === pts[1].parts[1]
         @test submanifold_components(Mse, pts[1]) === pts[1].parts
         @test submanifold_components(pts[1]) === pts[1].parts
+        @test (@inferred ManifoldsBase._get_vector_cache_broadcast(pts[1])) === Val(false)
     end
 
     @testset "vee/hat" begin
@@ -328,9 +334,9 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         B = DefaultOrthonormalBasis()
         Bc = get_basis(Mse, p, B)
         @test sprint(show, "text/plain", Bc) == """
-        DefaultOrthonormalBasis(ℝ) for a product manifold with coordinates in ℝ
+        DefaultOrthonormalBasis(ℝ) for a product manifold
         Basis for component 1:
-        DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 2 basis vectors:
+        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
          E1 =
           3-element Array{Int64,1}:
            0
@@ -342,7 +348,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
            0
            1
         Basis for component 2:
-        DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 2 basis vectors:
+        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
          E1 =
           2-element Array{Float64,1}:
            1.0

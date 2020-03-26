@@ -213,7 +213,7 @@ function manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}
 end
 
 @doc raw"""
-    project_point(M::SymmetricMatrices, p)
+    project(M::SymmetricMatrices, p)
 
 Projects `p` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
 
@@ -223,12 +223,12 @@ Projects `p` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
 
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
-project_point(::SymmetricMatrices, ::Any...)
+project(::SymmetricMatrices, ::Any)
 
-project_point!(M::SymmetricMatrices, q, p) = copyto!(q, (p + p') ./ 2)
+project!(M::SymmetricMatrices, q, p) = copyto!(q, (p + p') ./ 2)
 
 @doc raw"""
-    project_tangent(M::SymmetricMatrices, p, X)
+    project(M::SymmetricMatrices, p, X)
 
 Project the matrix `X` onto the tangent space at `p` on the [`SymmetricMatrices`](@ref) `M`,
 
@@ -238,9 +238,9 @@ Project the matrix `X` onto the tangent space at `p` on the [`SymmetricMatrices`
 
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
-project_tangent(::SymmetricMatrices, ::Any...)
+project(::SymmetricMatrices, ::Any, ::Any)
 
-project_tangent!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
+project!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
 
 function show(io::IO, ::SymmetricMatrices{n,F}) where {n,F}
     print(io, "SymmetricMatrices($(n), $(F))")

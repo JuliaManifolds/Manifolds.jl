@@ -38,8 +38,8 @@ Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
 Manifolds.inner(::BaseManifold, x, v, w) = 2 * dot(v, w)
 Manifolds.exp!(::BaseManifold, y, x, v) = y .= x + 2 * v
 Manifolds.log!(::BaseManifold, v, x, y) = v .= (y - x) / 2
-Manifolds.project_tangent!(::BaseManifold, w, x, v) = w .= 2 .* v
-Manifolds.project_point!(::BaseManifold, y, x) = (y .= x)
+Manifolds.project!(::BaseManifold, w, x, v) = w .= 2 .* v
+Manifolds.project!(::BaseManifold, y, x) = (y .= x)
 Manifolds.injectivity_radius(::BaseManifold) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::Any) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::AbstractRetractionMethod) = Inf
@@ -53,8 +53,8 @@ Manifolds.get_basis(::BaseManifold{N},x,B::DefaultOrthonormalBasis) where {N} = 
 Manifolds.get_coordinates!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
 Manifolds.get_vector!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
 Manifolds.default_metric_dispatch(::BaseManifold, ::DefaultBaseManifoldMetric) = Val(true)
-Manifolds.projected_distribution(M::BaseManifold, d) = ProjectedPointDistribution(M, d, project_point!, rand(d))
-Manifolds.projected_distribution(M::BaseManifold, d, x) = ProjectedPointDistribution(M, d, project_point!, x)
+Manifolds.projected_distribution(M::BaseManifold, d) = ProjectedPointDistribution(M, d, project!, rand(d))
+Manifolds.projected_distribution(M::BaseManifold, d, x) = ProjectedPointDistribution(M, d, project!, x)
 Manifolds.mean!(::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...) = fill!(y, 1)
 Manifolds.median!(::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...) = fill!(y, 2)
 Manifolds.mean!(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N} = fill!(y, 3)
@@ -295,10 +295,10 @@ end
         @test retract!(MM, y, x, v) === retract!(M, y, x, v)
         @test retract!(MM, y, x, v, 1) === retract!(M, y, x, v, 1)
         # without a definition for the metric from the embedding, no projection possible
-        @test_throws ErrorException log!(MM, w, x, y) === project_tangent!(M, w, x, y)
-        @test_throws ErrorException project_tangent!(MM, w, x, v) ===
-                                    project_tangent!(M, w, x, v)
-        @test_throws ErrorException project_point!(MM, y, x) === project_point!(M, y, x)
+        @test_throws ErrorException log!(MM, w, x, y) === project!(M, w, x, y)
+        @test_throws ErrorException project!(MM, w, x, v) ===
+                                    project!(M, w, x, v)
+        @test_throws ErrorException project!(MM, y, x) === project!(M, y, x)
         @test_throws ErrorException vector_transport_to!(MM, w, x, v, y) ===
                                     vector_transport_to!(M, w, x, v, y)
         # without DiffEq, these error
@@ -335,8 +335,8 @@ end
         @test retract!(MM2, y, x, v) === retract!(M, y, x, v)
         @test retract!(MM2, y, x, v, 1) === retract!(M, y, x, v, 1)
 
-        @test project_point!(MM2, y, x) === project_point!(M, y, x)
-        @test project_tangent!(MM2, w, x, v) === project_tangent!(M, w, x, v)
+        @test project!(MM2, y, x) === project!(M, y, x)
+        @test project!(MM2, w, x, v) === project!(M, w, x, v)
         @test vector_transport_to!(MM2, w, x, v, y) == vector_transport_to!(M, w, x, v, y)
         @test zero_tangent_vector!(MM2, v, x) === zero_tangent_vector!(M, v, x)
         @test injectivity_radius(MM2, x) === injectivity_radius(M, x)
@@ -387,10 +387,10 @@ end
         MM = MetricManifold(M, g)
         x = [1,2,3]
         # nonmutating always go to parent for allocation
-        for f in [exp, flat, inverse_retract, log, mean, median, project_point]
+        for f in [exp, flat, inverse_retract, log, mean, median, project]
             @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:parent}()
         end
-        for f in [project_tangent, sharp, retract, get_vector, get_coordinates]
+        for f in [sharp, retract, get_vector, get_coordinates]
             @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:parent}()
         end
         for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
@@ -407,7 +407,7 @@ end
         for f in [exp!, flat!, inverse_retract!, log!, mean!, median!]
             @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
         end
-        for f in [norm, project_point!, project_tangent!, sharp!, retract!]
+        for f in [norm, project!, sharp!, retract!]
             @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
         end
         for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]

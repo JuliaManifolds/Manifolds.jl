@@ -150,15 +150,15 @@ manifold_dimension(::GeneralizedStiefel{n,k,B,ℂ}) where {n,k,B} = 2 * n * k - 
 manifold_dimension(::GeneralizedStiefel{n,k,B,ℍ}) where {n,k,B} = 4 * n * k - k * (2k - 1)
 
 @doc doc"""
-    project_point(M::GeneralizedStiefel,p)
+    project(M::GeneralizedStiefel,p)
 
 Project `p` from the embedding onto the [`GeneralizedStiefel`](@ref) `M`, i.e. compute `q`
 as the polar decomposition of $p$ such that $q^{\mathrm{H}}Bq$ is the identity,
 where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
-project_point(::GeneralizedStiefel, ::Any...)
+project(::GeneralizedStiefel, ::Any)
 
-function project_point!(M::GeneralizedStiefel, q, p)
+function project!(M::GeneralizedStiefel, q, p)
     s = svd(p)
     e = eigen(s.U' * M.B * s.U)
     qsinv = e.vectors * Diagonal(1 ./ sqrt.(e.values))
@@ -167,7 +167,7 @@ function project_point!(M::GeneralizedStiefel, q, p)
 end
 
 @doc doc"""
-    project_tangent(M:GeneralizedStiefel, p, X)
+    project(M:GeneralizedStiefel, p, X)
 
 Project `X` onto the tangent space of `p` to the [`GeneralizedStiefel`](@ref) manifold `M`.
 The formula reads
@@ -179,9 +179,9 @@ The formula reads
 where $\operatorname{Sym}(y)$ is the symmetrization of $y$, e.g. by
 $\operatorname{Sym}(y) = \frac{y^{\mathrm{H}}+y}{2}$.
 """
-project_tangent(::GeneralizedStiefel, ::Any...)
+project(::GeneralizedStiefel, ::Any, ::Any)
 
-function project_tangent!(M::GeneralizedStiefel, Y, p, X)
+function project!(M::GeneralizedStiefel, Y, p, X)
     A = p' * M.B' * X
     copyto!(Y, X - p * Hermitian((A + A') / 2))
     return Y
@@ -203,11 +203,11 @@ retract(M::GeneralizedStiefel, p, X) = retract(M, p, X, ProjectionRetraction())
 
 retract!(M::GeneralizedStiefel, q, p, X) = retract!(M, q, p, X, ProjectionRetraction())
 function retract!(M::GeneralizedStiefel, q, p, X, ::PolarRetraction)
-    project_point!(M, q, p + X)
+    project!(M, q, p + X)
     return q
 end
 function retract!(M::GeneralizedStiefel, q, p, X, ::ProjectionRetraction)
-    project_point!(M, q, p + X)
+    project!(M, q, p + X)
     return q
 end
 
@@ -220,12 +220,12 @@ end
     vector_transport_to(M::GeneralizedStiefel, p, X, q, ::ProjectionTransport)
 
 Compute the vector transport of the tangent vector `X` at `p` to `q`,
-using the [`project_tangent`](@ref project_tangent(::GeneralizedStiefel, ::Any...))
+using the [`project`](@ref project(::GeneralizedStiefel, ::Any...))
 of `X` to `q`.
 """
 vector_transport_to(::GeneralizedStiefel, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
 function vector_transport_to!(M::GeneralizedStiefel, Y, p, X, q, ::ProjectionTransport)
-    project_tangent!(M, Y, q, X)
+    project!(M, Y, q, X)
     return Y
 end

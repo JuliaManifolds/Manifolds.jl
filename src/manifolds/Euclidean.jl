@@ -49,7 +49,7 @@ end
 
 function allocation_promotion_function(
     M::Euclidean{<:Tuple,ℂ},
-    ::typeof(get_vector),
+    ::Union{typeof(get_vector),typeof(get_coordinates)},
     args::Tuple,
 )
     return complex
@@ -71,7 +71,7 @@ function check_manifold_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
     if size(p) != representation_size(M)
         return DomainError(
             size(p),
-            "The matrix $(p) does not lie on $(M), since its dimensions are wrong.",
+            "The matrix $(p) does not lie on $(M), since its dimensions ($(size(p))) are wrong (expected: $(representation_size(M))).",
         )
     end
 end
@@ -96,7 +96,7 @@ function check_tangent_vector(M::Euclidean{N,𝔽}, p, X; check_base_point = tru
     if size(X) != representation_size(M)
         return DomainError(
             size(X),
-            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since its dimensions are wrong.",
+            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since its dimensions $(size(X)) are wrong  (expected: $(representation_size(M))).",
         )
     end
 end
@@ -313,25 +313,25 @@ function normal_tvector_distribution(M::Euclidean{Tuple{N}}, p, σ) where {N}
 end
 
 @doc raw"""
-    project_point(M::Euclidean, p)
+    project(M::Euclidean, p)
 
 Project an arbitrary point `p` onto the [`Euclidean`](@ref) manifold `M`, which
 is of course just the identity map.
 """
-project_point(::Euclidean, ::Any...)
+project(::Euclidean, ::Any)
 
-project_point!(M::Euclidean, q, p) = copyto!(q, p)
+project!(M::Euclidean, q, p) = copyto!(q, p)
 
 """
-    project_tangent(M::Euclidean, p, X)
+    project(M::Euclidean, p, X)
 
 Project an arbitrary vector `X` into the tangent space of a point `p` on the
 [`Euclidean`](@ref) `M`, which is just the identity, since any tangent
 space of `M` can be identified with all of `M`.
 """
-project_tangent(::Euclidean, ::Any...)
+project(::Euclidean, ::Any, ::Any)
 
-project_tangent!(M::Euclidean, Y, p, X) = copyto!(Y, X)
+project!(M::Euclidean, Y, p, X) = copyto!(Y, X)
 
 """
     projected_distribution(M::Euclidean, d, [p])
@@ -340,10 +340,10 @@ Wrap the standard distribution `d` into a manifold-valued distribution. Generate
 points will be of similar type to `p`. By default, the type is not changed.
 """
 function projected_distribution(M::Euclidean, d, p)
-    return ProjectedPointDistribution(M, d, project_point!, p)
+    return ProjectedPointDistribution(M, d, project!, p)
 end
 function projected_distribution(M::Euclidean, d)
-    return ProjectedPointDistribution(M, d, project_point!, rand(d))
+    return ProjectedPointDistribution(M, d, project!, rand(d))
 end
 
 """

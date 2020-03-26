@@ -193,7 +193,7 @@ function mean!(M::Hyperbolic, p, x::AbstractVector, w::AbstractVector; kwargs...
 end
 
 @doc raw"""
-    project_tangent(M::Hyperbolic, p, X)
+    project(M::Hyperbolic, p, X)
 
 Perform an orthogonal projection with respect to the Minkowski inner product of `X` onto
 the tangent space at `p` of the [`Hyperbolic`](@ref) space `M`.
@@ -205,9 +205,9 @@ Y = X + ⟨p,X⟩_{\mathrm{M}} p,
 where $⟨\cdot, \cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
 the [`Lorentz`](@ref)ian manifold.
 """
-project_tangent(::Hyperbolic, ::Any...)
+project(::Hyperbolic, ::Any, ::Any)
 
-project_tangent!(M::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)
+project!(M::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)
 
 show(io::IO, ::Hyperbolic{N}) where {N} = print(io, "Hyperbolic($(N))")
 
