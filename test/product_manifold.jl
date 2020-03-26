@@ -293,6 +293,8 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             test_tangent_vector_broadcasting = false,
             test_forward_diff = false,
             test_reverse_diff = false,
+            test_project_tangent = true,
+            test_project_point = true,
             basis_types_vecs = (basis_types[1], basis_types[3], basis_types[4]),
             basis_types_to_from = basis_types,
         )
@@ -303,6 +305,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         @test submanifold_component(pts[1], Val(1)) === pts[1].parts[1]
         @test submanifold_components(Mse, pts[1]) === pts[1].parts
         @test submanifold_components(pts[1]) === pts[1].parts
+        @test (@inferred ManifoldsBase._get_vector_cache_broadcast(pts[1])) === Val(false)
     end
 
     @testset "vee/hat" begin
