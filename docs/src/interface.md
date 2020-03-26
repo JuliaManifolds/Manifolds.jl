@@ -22,6 +22,14 @@ Pages = ["ManifoldsBase.jl"]
 Order = [:type, :function]
 ```
 
+## Number systems
+
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["numbers.jl"]
+Order = [:type, :function]
+```
+
 ## Allocation
 
 Non-mutating functions in `Manifolds.jl` are typically implemented using mutating variants.
@@ -78,8 +86,8 @@ The main functions are:
 * [`get_vectors`](@ref) returns a vector of basis vectors (calling it should be avoided for high-dimensional manifolds).
 
 ```@autodocs
-Modules = [Manifolds]
-Pages = ["orthonormal_bases.jl"]
+Modules = [ManifoldsBase,Manifolds]
+Pages = ["bases.jl"]
 Order = [:type, :function]
 ```
 
@@ -171,7 +179,7 @@ Clearly [`get_embedding`](@ref) always returns the embedding.
 ### Types
 
 ```@autodocs
-Modules = [ManifoldsBase]
+Modules = [ManifoldsBase, Manifolds]
 Pages = ["EmbeddedManifold.jl"]
 Order = [:type]
 ```
@@ -179,7 +187,7 @@ Order = [:type]
 ### Functions
 
 ```@autodocs
-Modules = [ManifoldsBase]
+Modules = [ManifoldsBase, Manifolds]
 Pages = ["EmbeddedManifold.jl"]
 Order = [:function]
 ```

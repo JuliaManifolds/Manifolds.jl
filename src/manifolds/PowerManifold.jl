@@ -141,7 +141,7 @@ end
 """
     PowerBasisData{TB<:AbstractArray}
 
-Data storage for an array of [`BasisData`](@ref)
+Data storage for an array of basis data.
 """
 struct PowerBasisData{TB<:AbstractArray}
     bases::TB
