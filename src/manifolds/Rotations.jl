@@ -446,7 +446,7 @@ Compute the logarithmic map on the [`Rotations`](@ref) manifold
 ```math
 \log_p q =
   \frac{1}{2} \bigl(\operatorname{Log}(p^{\mathrm{T}}q)
-  - (\operatorname{Log} p^{\mathrm{T}}q)^{\mathrm{T}}),
+  - (\operatorname{Log}(p^{\mathrm{T}}q)^{\mathrm{T}}),
 ```
 where $\operatorname{Log}$ denotes the matrix logarithm.
 

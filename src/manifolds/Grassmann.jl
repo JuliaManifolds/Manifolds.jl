@@ -232,7 +232,7 @@ Compute the inverse retraction for the [`QRRetraction`](@ref), on the
 [`Grassmann`](@ref) manifold `M`, i.e.,
 
 ````math
-\operatorname{retr}_p^{-1}q = q*(p^\mathrm{H}q)^{-1} - p,
+\operatorname{retr}_p^{-1}q = q(p^\mathrm{H}q)^{-1} - p,
 ````
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """

@@ -147,14 +147,15 @@ end)
 
 Compute the logarithmic map on the [`Hyperbolic`](@ref) space $ℍ^n$, the tangent
 vector representing the [`geodesic`](@ref) starting from `p`
-reaches `q` after time 1. The formula reads for $x ≠ y$
+reaches `q` after time 1. The formula reads for $p ≠ q$
 
 ```math
 \log_p q = d_{ℍ^n}(p,q)
-\frac{q-⟨p,q⟩_{\mathrm{M}} p}{\lVert q-⟨p,q⟩_{\mathrm{M}} p \rVert_2}
+\frac{q-⟨p,q⟩_{\mathrm{M}} p}{\lVert q-⟨p,q⟩_{\mathrm{M}} p \rVert_2},
 ```
 
-and is zero otherwise.
+where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
+the [`Lorentz`](@ref)ian manifold. For $p=q$ the logarihmic map is equal to the zero vector.
 """
 log(::Hyperbolic, ::Any...)
 
@@ -219,9 +220,10 @@ Compute the paralllel transport of the `X` from the tangent space at `p` on the
 connecting `p` and `q`. The formula reads
 
 ````math
-\mathcal P_{q←p}X = X - \frac{⟨\log_p q,X⟩_x}{d^2_{ℍ^n}(p,q)}
-\bigl(\log_p q + \log_qp \bigr).
+\mathcal P_{q←p}X = X - \frac{⟨\log_p q,X⟩_p}{d^2_{ℍ^n}(p,q)}
+\bigl(\log_p q + \log_qp \bigr),
 ````
+where $⟨\cdot,\cdot⟩_p$ denotes the inner product in the tangent space at `p`.
 """
 vector_transport_to(::Hyperbolic, ::Any, ::Any, ::Any, ::ParallelTransport)
 
