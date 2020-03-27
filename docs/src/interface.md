@@ -2,7 +2,7 @@
 
 The interface for a manifold is provided in the lightweight package [ManifoldsBase.jl](https://github.com/JuliaManifolds/ManifoldsBase.jl).
 You can easily implement your algorithms and even your own manifolds just using the interface.
-All manifolds from the package here are also based on this interface, so any project based on the interface can benefit from all manifolds, as long as the functions used in such a project are implemented.
+All manifolds from the package here are also based on this interface, so any project based on the interface can benefit from all manifolds, as soon as a certain manifold provides implementations of the functions a project requires.
 
 ```@contents
 Pages = ["interface.md"]
@@ -77,7 +77,7 @@ The main types are:
    It is designed to make [`get_coordinates`](@ref) and [`get_vector`](@ref) fast.
 * [`DiagonalizingOrthonormalBasis`](@ref), which diagonalizes the curvature tensor and makes the curvature in the selected direction equal to 0.
 * [`ProjectedOrthonormalBasis`](@ref), which projects a basis of the ambient space and orthonormalizes projections to obtain a basis in a generic way.
-* [`CachedBasis`](@ref), which stores (explicitly or implicitly) a precomputed basis at a certain point.
+* `CachedBasis`, which stores (explicitly or implicitly) a precomputed basis at a certain point.
 
 The main functions are:
 * [`get_basis`](@ref) precomputes a basis at a certain point.
@@ -131,7 +131,7 @@ Pages = ["ArrayManifold.jl"]
 Order = [:macro, :type, :function]
 ```
 
-## Embedded manifold
+## EmbeddedManifold
 
 Some manifolds can easily be defined by using a certain embedding.
 For example the [`Sphere`](@ref)`(n)` is embedded in [`Euclidean`](@ref)`(n+1)`.

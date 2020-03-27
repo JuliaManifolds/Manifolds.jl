@@ -1,6 +1,6 @@
 # Internal documentation
 
-Documentation for `Manifolds.jl`'s internal methods and types.
+This page documents the internal types and methods of `Manifolds.jl`'s that might be of use for writing your own manifold.
 
 ## Types
 
