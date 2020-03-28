@@ -23,7 +23,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
 Arpack = "=0.3.2"
-Distributions = "0.22"
+Distributions = "0.22, 0.23"
 Einsum = "0.4"
 FiniteDifferences = "0.9"
 HybridArrays = "0.3"
