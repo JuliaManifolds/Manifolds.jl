@@ -171,7 +171,7 @@ function get_coordinates(M::Sphere{n,1,ℝ}, p, X, B::DefaultOrthonormalBasis) w
     if isapprox(abs(p[1]), 1)
         return X[2:end]
     else
-        xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n + 1)
+        xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n)
         return (2*xp1*real(dot(xp1, X))/real(dot(xp1, xp1))-X)[2:end]
     end
 end
@@ -182,7 +182,7 @@ end
 
 function get_vector(M::Sphere{n,1,ℝ}, p, X, B::DefaultOrthonormalBasis) where {n}
     p[1] ≈ 1 && return vcat(0, X)
-    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n + 1)
+    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n)
     X0 = vcat(0, X)
     return 2 * xp1 * real(dot(xp1, X0)) / real(dot(xp1, xp1)) - X0
 end

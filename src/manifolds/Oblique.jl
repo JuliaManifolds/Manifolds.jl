@@ -79,7 +79,7 @@ end
 
 get_iterator(M::Oblique{n,m}) where {n,m} = 1:m
 
-@generated manifold_dimension(::Oblique{n,m}) where {n,m} = (n) * m
+@generated manifold_dimension(::Oblique{n,m}) where {n,m} = (n-1) * m
 
 @generated representation_size(::Oblique{n,m}) where {n,m} = (n, m)
 
