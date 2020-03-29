@@ -13,8 +13,8 @@ T_p𝕊^n := \bigl\{ X ∈ ℝ^{n+1} : ⟨p,X⟩ = 0 \bigr \},
 where $⟨\cdot,\cdot⟩$ denotes the inner product in the embedding $\mathbb R^{n+1}$.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
-several functions like the [`inner`](@ref) product and the [`zero_tangent_vector`](@ref)
-are inherited from the embedding.
+several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
+[`zero_tangent_vector`](@ref zero_tangent_vector(::Euclidean, ::Any...)) are inherited from the embedding.
 
 # Constructor
 

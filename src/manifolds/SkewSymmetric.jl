@@ -202,11 +202,10 @@ Return the dimension of the [`SkewSymmetricMatrices`](@ref) matrix `M` over the 
 `𝔽`, i.e.
 
 ````math
-\dim \operatorname{SkewSym}(n,𝔽) = \frac{n(n-1)}{2},
-````
-
-````math
-\dim \operatorname{SkewSym}(n,ℂ) = 2*\frac{n(n-1)}{2} + n = n^2
+\begin{aligned}
+\dim \mathrm{SkewSym}(n,ℝ) &= \frac{n(n-1)}{2},\\
+\dim \mathrm{SkewSym}(n,ℂ) &= 2*\frac{n(n-1)}{2} + n = n^2,
+\end{aligned}
 ````
 
 where the last $n$ is due to an imaginary diagonal that is allowed $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.

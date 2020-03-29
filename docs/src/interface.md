@@ -2,7 +2,7 @@
 
 The interface for a manifold is provided in the lightweight package [ManifoldsBase.jl](https://github.com/JuliaManifolds/ManifoldsBase.jl).
 You can easily implement your algorithms and even your own manifolds just using the interface.
-All manifolds from the package here are also based on this interface, so any project based on the interface can benefit from all manifolds, as long as the functions used in such a project are implemented.
+All manifolds from the package here are also based on this interface, so any project based on the interface can benefit from all manifolds, as soon as a certain manifold provides implementations of the functions a project requires.
 
 ```@contents
 Pages = ["interface.md"]
@@ -19,6 +19,14 @@ If a manifold that you implement for your own package fits this interface, we ha
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
 Pages = ["ManifoldsBase.jl"]
+Order = [:type, :function]
+```
+
+## Number systems
+
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["numbers.jl"]
 Order = [:type, :function]
 ```
 
@@ -78,8 +86,8 @@ The main functions are:
 * [`get_vectors`](@ref) returns a vector of basis vectors (calling it should be avoided for high-dimensional manifolds).
 
 ```@autodocs
-Modules = [Manifolds]
-Pages = ["orthonormal_bases.jl"]
+Modules = [ManifoldsBase,Manifolds]
+Pages = ["bases.jl"]
 Order = [:type, :function]
 ```
 
@@ -123,7 +131,7 @@ Pages = ["ArrayManifold.jl"]
 Order = [:macro, :type, :function]
 ```
 
-## Embedded manifold
+## EmbeddedManifold
 
 Some manifolds can easily be defined by using a certain embedding.
 For example the [`Sphere`](@ref)`(n)` is embedded in [`Euclidean`](@ref)`(n+1)`.
@@ -171,7 +179,7 @@ Clearly [`get_embedding`](@ref) always returns the embedding.
 ### Types
 
 ```@autodocs
-Modules = [ManifoldsBase]
+Modules = [ManifoldsBase, Manifolds]
 Pages = ["EmbeddedManifold.jl"]
 Order = [:type]
 ```
@@ -179,7 +187,7 @@ Order = [:type]
 ### Functions
 
 ```@autodocs
-Modules = [ManifoldsBase]
+Modules = [ManifoldsBase, Manifolds]
 Pages = ["EmbeddedManifold.jl"]
 Order = [:function]
 ```

@@ -1,7 +1,7 @@
 name = "Manifolds"
 uuid = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Antoine Levitt <antoine.levitt@gmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
@@ -28,7 +28,7 @@ Einsum = "0.4"
 FiniteDifferences = "0.9"
 HybridArrays = "0.3"
 LightGraphs = "1"
-ManifoldsBase = "0.7.2"
+ManifoldsBase = "0.7.3"
 Requires = "0.5, 1"
 SimpleWeightedGraphs = "1"
 SpecialFunctions = "=0.8"
