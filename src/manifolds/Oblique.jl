@@ -20,7 +20,7 @@ struct Oblique{N,M} <: AbstractPowerManifold{Sphere{N},ArrayPowerRepresentation}
     manifold::Sphere{N}
 end
 
-Oblique(n::Int, m::Int) = Oblique{n - 1,m}(Sphere(n - 1))
+Oblique(n::Int, m::Int) = Oblique{n,m}(Sphere(n - 1))
 
 ^(M::Sphere{N}, m::Int) where {N} = Oblique{N,m}(M)
 
@@ -32,14 +32,14 @@ of `m` unit columns from $\mathbb R^{n+1}$, i.e. each column is a point from
 [`Sphere`](@ref)`(n)`.
 """
 check_manifold_point(::Oblique, ::Any)
-function check_manifold_point(M::Oblique{Ns,Ms}, p; kwargs...) where {Ns,Ms}
-    if size(p) != (Ns + 1, Ms)
+function check_manifold_point(M::Oblique{n,m}, p; kwargs...) where {n,m}
+    if size(p) != (n, m)
         return DomainError(
             length(p),
-            "The matrix in `p` ($(size(p))) does not match the dimension of Oblique $((Ns,Ms)).",
+            "The matrix in `p` ($(size(p))) does not match the dimension of Oblique $((n,m)).",
         )
     end
-    return check_manifold_point(PowerManifold(M.manifold, Ms), p; kwargs...)
+    return check_manifold_point(PowerManifold(M.manifold, m), p; kwargs...)
 end
 @doc raw"""
     check_tangent_vector(M::Oblique p, X; check_base_point = true, kwargs...)
@@ -50,26 +50,26 @@ a tangent vector to the columns of `p` on the [`Sphere`](@ref).
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
 function check_tangent_vector(
-    M::Oblique{Ns,Ms},
+    M::Oblique{n,m},
     p,
     X;
     check_base_point = true,
     kwargs...,
-) where {Ns,Ms}
-    if check_base_point && size(p) != (Ns + 1, Ms)
+) where {n,m}
+    if check_base_point && size(p) != (n, m)
         return DomainError(
             length(p),
-            "The matrix `p` ($(size(p))) does not match the dimension of Oblique $((Ns,Ms)).",
+            "The matrix `p` ($(size(p))) does not match the dimension of Oblique $((n,m)).",
         )
     end
-    if size(X) != (Ns + 1, Ms)
+    if size(X) != (n, m)
         return DomainError(
             length(X),
-            "The matrix `X` ($(size(X))) does not match the dimension of Oblique $((Ns,Ms)).",
+            "The matrix `X` ($(size(X))) does not match the dimension of Oblique $((n,m)).",
         )
     end
     return check_tangent_vector(
-        PowerManifold(M.manifold, Ms),
+        PowerManifold(M.manifold, m),
         p,
         X;
         check_base_point = check_base_point,
@@ -77,10 +77,10 @@ function check_tangent_vector(
     )
 end
 
-get_iterator(M::Oblique{Ns,Ms}) where {Ns,Ms} = 1:Ms
+get_iterator(M::Oblique{n,m}) where {n,m} = 1:m
 
-@generated manifold_dimension(::Oblique{N,M}) where {N,M} = (N) * M
+@generated manifold_dimension(::Oblique{n,m}) where {n,m} = (n) * m
 
-@generated representation_size(::Oblique{N,M}) where {N,M} = (N + 1, M)
+@generated representation_size(::Oblique{n,m}) where {n,m} = (n, m)
 
-show(io::IO, ::Oblique{N,M}) where {N,M} = print(io, "Oblique($(N+1),$(M))")
+show(io::IO, ::Oblique{n,m}) where {n,m} = print(io, "Oblique($(n),$(m))")

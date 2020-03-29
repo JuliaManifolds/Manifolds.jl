@@ -1,16 +1,24 @@
 @doc raw"""
-    Sphere{N} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
+    Sphere{N,M,𝔽} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
 
-The unit sphere manifold $𝕊^n$ represented by $n+1$-Tuples, i.e. in by
-vectors in $ℝ^{n+1}$ of unit length. A sphere is an embedded manifold
-and inherits the inner product of its embedding $\mathbb R^{n+1}$.
+The (unit) sphere manifold $𝕊^{m,n}$ is the set of all unit norm elements. The sphere is
+represented in the embedding, and currently supports both vectors and matrices, i.e.
+
+````math
+𝕊^{n,m} := \bigl\{ p \in 𝔽^{m,n}\ \big|\ \lVert p \rVert = 1 \bigr\}
+````
+
+where $𝔽\in\{ℝ,ℂ\}. For $m=1$ and $𝔽=ℝ$ this  simplifies to unit vectors in $ℝ^n$ and the
+more common notation is $𝕊^{n,m} ≜ 𝕊^{n-1}$.
+
 The tangent space at point p is given by
 
 ````math
-T_p𝕊^n := \bigl\{ X ∈ ℝ^{n+1} : ⟨p,X⟩ = 0 \bigr \},
+T_p𝕊^{n,m} := \bigl\{ X ∈ 𝔽^{n,m} : ⟨p,X⟩ = 0 \bigr \},
 ````
 
-where $⟨\cdot,\cdot⟩$ denotes the inner product in the embedding $\mathbb R^{n+1}$.
+where $𝔽\in\{ℝ,ℂ\} and $⟨\cdot,\cdot⟩$ denotes the inner product in the
+embedding $\mathbb 𝔽^{n+1}$.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref) product and the [`zero_tangent_vector`](@ref)
@@ -18,13 +26,18 @@ are inherited from the embedding.
 
 # Constructor
 
-    Sphere(n)
+    Sphere(n[, field=ℝ])
 
-Generate $𝕊^{n} ⊂ ℝ^{n+1}$.
+Generate $𝕊^{n+1,1} ⊂ ℝ^{n+1}$.
+
+    Sphere(n,m[, field=ℝ])
+
+Generate $𝕊^{n,m} ⊂ ℝ^{n,m}$.
 """
-struct Sphere{N} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
+struct Sphere{n,m,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
 
-Sphere(n::Int) = Sphere{n}()
+Sphere(n::Int, field::AbstractNumbers=ℝ) = Sphere{n+1,1,field}()
+Sphere(n::Int, m::Int, field::AbstractNumbers=ℝ) = Sphere{n,m,field}()
 
 """
     check_manifold_point(M, p; kwargs...)
@@ -33,8 +46,14 @@ Check whether `p` is a valid point on the [`Sphere`](@ref) `M`, i.e. is a vector
 of length [`manifold_dimension`](@ref)`(M)+1` (approximately) of unit length.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_manifold_point(M::Sphere{N}, p; kwargs...) where {N}
-    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+function check_manifold_point(M::Sphere, p; kwargs...)
+    mpv = invoke(
+        check_manifold_point,
+        Tuple{(typeof(get_embedding(M))), typeof(p)},
+        get_embedding(M),
+        p;
+        kwargs...
+    )
     mpv === nothing || return mpv
     if !isapprox(norm(p), 1.0; kwargs...)
         return DomainError(
@@ -55,27 +74,27 @@ The optional parameter `check_base_point` indicates, whether to call [`check_man
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(
-    M::Sphere{N},
+    M::Sphere,
     p,
     X;
     check_base_point = true,
     kwargs...,
-) where {N}
+)
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
-        M,
+        Tuple{typeof(get_embedding(M)), typeof(p), typeof(X)},
+        get_embedding(M),
         p,
         X;
         check_base_point = false, # already checked above
         kwargs...
     )
     mpv === nothing || return mpv
-    if !isapprox(abs(dot(p, X)), 0.0; kwargs...)
+    if !isapprox(abs(real(dot(p, X))), 0.0; kwargs...)
         return DomainError(
             abs(dot(p, X)),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding.",
@@ -84,7 +103,8 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(M::Sphere) = Euclidean(representation_size(M)...; field=ℝ)
+decorated_manifold(M::Sphere{n,m,𝔽}) where {n,m,𝔽}= Euclidean(n,m; field=𝔽)
+decorated_manifold(M::Sphere{n,1,𝔽}) where {n,𝔽}= Euclidean(n; field=𝔽)
 
 @doc raw"""
     distance(M::Sphere, p, q)
@@ -97,7 +117,7 @@ both `p` and `q` lie on.
 d_{𝕊^n}(p,q) = \arccos(⟨p,q⟩).
 ````
 """
-distance(::Sphere, x, y) = acos(clamp(dot(x, y), -1, 1))
+distance(::Sphere, p, q) = acos(clamp(real(dot(p, q)), -1, 1))
 
 embed!(::Sphere, q, p) = (q .= p)
 
@@ -125,18 +145,18 @@ end
 
 flat!(M::Sphere, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_basis(M::Sphere{N}, p, B::DiagonalizingOrthonormalBasis) where {N}
-    A = zeros(N + 1, N + 1)
+function get_basis(M::Sphere{n,1,ℝ}, p, B::DiagonalizingOrthonormalBasis{T,ℝ}) where {T,n}
+    A = zeros(n, n)
     A[1, :] = transpose(p)
     A[2, :] = transpose(B.frame_direction)
     V = nullspace(A)
-    κ = ones(N)
+    κ = ones(n)
     if !iszero(B.frame_direction)
         # if we have a nonzero direction for the geodesic, add it and it gets curvature zero from the tensor
         V = cat(B.frame_direction / norm(M, p, B.frame_direction), V; dims = 2)
         κ[1] = 0 # no curvature along the geodesic direction, if x!=y
     end
-    Ξ = [V[:, i] for i = 1:N]
+    Ξ = [V[:, i] for i = 1:manifold_dimension(M)]
     return CachedBasis(B, κ, Ξ)
 end
 
@@ -147,12 +167,12 @@ Represent the tangent vector `X` at point `p` from the [`Sphere`](@ref) `M` in
 an orthonormal basis by rotating the vector `X` using the rotation matrix
 $2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
 """
-function get_coordinates(M::Sphere{N}, p, X, B::DefaultOrthonormalBasis) where {N}
-    if isapprox(p[1], 1)
+function get_coordinates(M::Sphere{n,1,ℝ}, p, X, B::DefaultOrthonormalBasis) where {n}
+    if isapprox(abs(p[1]), 1)
         return X[2:end]
     else
-        xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
-        return (2*xp1*dot(xp1, X)/dot(xp1, xp1)-X)[2:end]
+        xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n + 1)
+        return (2*xp1*real(dot(xp1, X))/real(dot(xp1, xp1))-X)[2:end]
     end
 end
 
@@ -160,11 +180,11 @@ function get_coordinates!(M::Sphere, Y, p, X, B::DefaultOrthonormalBasis)
     return copyto!(Y, get_coordinates(M, p, X, B))
 end
 
-function get_vector(M::Sphere{N}, p, X, B::DefaultOrthonormalBasis) where {N}
+function get_vector(M::Sphere{n,1,ℝ}, p, X, B::DefaultOrthonormalBasis) where {n}
     p[1] ≈ 1 && return vcat(0, X)
-    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
+    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n + 1)
     X0 = vcat(0, X)
-    return 2 * xp1 * dot(xp1, X0) / dot(xp1, xp1) - X0
+    return 2 * xp1 * real(dot(xp1, X0)) / real(dot(xp1, xp1)) - X0
 end
 
 function get_vector!(M::Sphere, Y::AbstractVector, p, X, B::DefaultOrthonormalBasis)
@@ -205,7 +225,7 @@ since $⟨p,X⟩ = 0$ and when $d_{𝕊^2}(p,q) ≤ \frac{π}{2}$ that
 inverse_retract(::Sphere, ::Any, ::Any, ::ProjectionInverseRetraction)
 
 function inverse_retract!(::Sphere, X, p, q, ::ProjectionInverseRetraction)
-    return (X .= q ./ dot(p, q) .- p)
+    return (X .= q ./ real(dot(p, q)) .- p)
 end
 
 @doc raw"""
@@ -225,7 +245,7 @@ opposite points.
 log(::Sphere, ::Any...)
 
 function log!(S::Sphere, X, p, q)
-    cosθ = dot(p, q)
+    cosθ = real(dot(p, q))
     if cosθ ≈ -1 # appr. opposing points, return deterministic choice from set-valued log
         fill!(X, 0)
         if p[1] ≈ 1
@@ -233,7 +253,7 @@ function log!(S::Sphere, X, p, q)
         else
             X[1] = 1
         end
-        copyto!(X, X .- dot(p, X) .* p)
+        copyto!(X, X .- real(dot(p, X)) .* p)
         X .*= π / norm(X)
     else
         cosθ = cosθ > 1 ? one(cosθ) : cosθ
@@ -248,7 +268,8 @@ end
 
 Return the dimension of the [`Sphere`](@ref)`(n) `M`, i.e. $𝕊^n$, which is $\dim(𝕊^n) = n$.
 """
-manifold_dimension(S::Sphere{N}) where {N} = N
+manifold_dimension(S::Sphere{n,m,ℝ}) where {n,m} = n*m-1
+manifold_dimension(S::Sphere{n,m,ℂ}) where {n,m} = 2*n*m-1
 
 """
     mean(
@@ -285,8 +306,10 @@ end
 Project the point `p` from the embedding onto the [`Sphere`](@ref) `M`.
 
 ````math
-\operatorname{proj}_{𝕊^n}(p) = \frac{p}{\lVert p \rVert_2}.
+    \operatorname{proj}_{𝕊^{n,m}}(p) = \frac{p}{\lVert p \rVert},
 ````
+where $\lVert\cdot\rVert$ denotes the usual 2-norm for vectors if $m=1$ and the Frobenius
+norm for the case $m>1$.
 """
 project(::Sphere, ::Any)
 
@@ -303,15 +326,17 @@ Project the point `X` onto the tangent space at `p` on the [`Sphere`](@ref) `M`.
 """
 project(::Sphere, ::Any, ::Any)
 
-project!(S::Sphere, Y, p, X) = (Y .= X .- dot(p, X) .* p)
+project!(S::Sphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
 
 @doc raw"""
     representation_size(M::Sphere)
 
 Return the size points on the [`Sphere`](@ref) `M` are represented as, i.e.
-for the `n`-dimensional [`Sphere`](@ref) it is vectors of size `(n+1,)`.
+for the `n`-dimensional [`Sphere`](@ref) it is vectors of size `(n+1,)` and
+for (Forbenius-)unit-norm matrixes (n,m).
 """
-@generated representation_size(::Sphere{N}) where {N} = (N + 1,)
+@generated representation_size(::Sphere{n,1}) where {n} = (n,)
+@generated representation_size(::Sphere{n,m}) where {n,m} = (n,m,)
 
 @doc raw"""
     retract(M::Sphere, p, X, ::ProjectionRetraction)
@@ -329,7 +354,10 @@ function retract!(M::Sphere, q, p, X, ::ProjectionRetraction)
     return project!(M, q, q)
 end
 
-show(io::IO, ::Sphere{N}) where {N} = print(io, "Sphere($(N))")
+show(io::IO, ::Sphere{n,1,ℝ}) where {n} = print(io, "Sphere($(n-1))")
+show(io::IO, ::Sphere{n,m,ℝ}) where {n,m} = print(io, "Sphere($(n),$(m))")
+show(io::IO, ::Sphere{n,1,ℂ}) where {n} = print(io, "Sphere($(n-1); field = ℂ)")
+show(io::IO, ::Sphere{n,m,ℂ}) where {n,m} = print(io, "Sphere($(n),$(m); field = ℂ)")
 
 """
     uniform_distribution(M::Sphere, p)
@@ -343,13 +371,13 @@ function uniform_distribution(M::Sphere, p)
 end
 
 @doc doc"""
-    vector_transport_to(M, p, X, q, ::ParallelTransport)
+    vector_transport_to(M::Sphere, p, X, q, ::ParallelTransport)
 
-Compute the paralllel transport of the tangent vector `X` at `p` to `q`,
-provided, the [`geodesic`](@ref) between `p` and `q` is unique
+Compute the paralllel transport on the [`Sphere`](@ref) of the tangent vector `X` at `p`
+to `q`, provided, the [`geodesic`](@ref) between `p` and `q` is unique. The formula reads
 
 ````math
-P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_{𝕊^n}(p,q)}
+P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_{𝕊^{n,m}}(p,q)}
 \bigl(\log_xy + \log_yx \bigr).
 ````
 """
@@ -360,7 +388,7 @@ function vector_transport_to!(M::Sphere, Y, p, X, q, ::ParallelTransport)
     Xl = norm(M, p, X_pq)
     copyto!(Y, X)
     if Xl > 0
-        factor = 2 * dot(X, q) / (norm(p + q)^2)
+        factor = 2 * real(dot(X, q)) / (norm(p + q)^2)
         Y .-= factor .* (p .+ q)
     end
     return Y
