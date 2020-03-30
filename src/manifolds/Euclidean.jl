@@ -369,9 +369,6 @@ sharp!(M::Euclidean, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 function show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
     print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")
 end
-function show(io::IO, ::Euclidean{N,ℝ}) where {N}
-    print(io, "Euclidean($(join(N.parameters, ", ")))")
-end
 
 """
     vector_transport_to(M::Euclidean, p, X, q, ::ParallelTransport)

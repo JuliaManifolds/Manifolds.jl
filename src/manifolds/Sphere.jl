@@ -387,10 +387,8 @@ function retract!(M::GeneralizedSphere, q, p, X, ::ProjectionRetraction)
     return project!(M, q, q)
 end
 
-show(io::IO, ::Sphere{n,ℝ}) where {n} = print(io, "Sphere($(n-1))")
-show(io::IO, ::GeneralizedSphere{N,ℝ}) where {N} = print(io, "GeneralizedSphere($(join(N.parameters, ", ")))")
-show(io::IO, ::Sphere{n,ℂ}) where {n} = print(io, "Sphere($(n-1); field = ℂ)")
-show(io::IO, ::GeneralizedSphere{N,ℂ}) where {N} = print(io, "GeneralizedSphere($(join(N.parameters, ", ")); field = ℂ)")
+show(io::IO, ::Sphere{n,𝔽}) where {n,𝔽} = print(io, "Sphere($(n-1); field = $(𝔽))")
+show(io::IO, ::GeneralizedSphere{N,𝔽}) where {N,𝔽} = print(io, "GeneralizedSphere($(join(N.parameters, ", ")); field = $(𝔽))")
 
 """
     uniform_distribution(M::Sphere, p)

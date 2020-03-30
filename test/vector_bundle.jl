@@ -51,13 +51,13 @@ struct TestVectorSpaceType <: VectorSpaceType end
     for T in types
         x = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)
-        @test sprint(show, TB) == "TangentBundle(Sphere(2))"
+        @test sprint(show, TB) == "TangentBundle(Sphere(2; field = ℝ))"
         @test base_manifold(TB) == M
         @test manifold_dimension(TB) == 2*manifold_dimension(M)
         @test representation_size(TB) == (6,)
         CTB = CotangentBundle(M)
-        @test sprint(show, CTB) == "CotangentBundle(Sphere(2))"
-        @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) == "VectorBundle(TestVectorSpaceType(), Sphere(2))"
+        @test sprint(show, CTB) == "CotangentBundle(Sphere(2; field = ℝ))"
+        @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) == "VectorBundle(TestVectorSpaceType(), Sphere(2; field = ℝ))"
         @testset "Type $T" begin
             pts_tb = [ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
                       ProductRepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
@@ -100,7 +100,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test sprint(show, "text/plain", t_x) == """
         VectorSpaceAtPoint{VectorBundleFibers{Manifolds.TangentSpaceType,GeneralizedSphere{Tuple{3},ℝ}},Array{Float64,1}}
         Fiber:
-         VectorBundleFibers(TangentSpace, Sphere(2))
+         VectorBundleFibers(TangentSpace, Sphere(2; field = ℝ))
         Base point:
          3-element Array{Float64,1}:
           1.0
@@ -122,7 +122,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(2))) == 4
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(3))) == 9
         @test base_manifold(VectorBundleFibers(TT, Sphere(2))) == M
-        @test sprint(show, VectorBundleFibers(TT, Sphere(2))) == "VectorBundleFibers(TensorProductType(TangentSpace, TangentSpace), Sphere(2))"
+        @test sprint(show, VectorBundleFibers(TT, Sphere(2))) == "VectorBundleFibers(TensorProductType(TangentSpace, TangentSpace), Sphere(2; field = ℝ))"
     end
 
     @testset "Error messages" begin

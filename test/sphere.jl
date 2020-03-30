@@ -3,7 +3,7 @@ include("utils.jl")
 @testset "Sphere" begin
     M = Sphere(2)
     @testset "Sphere Basics" begin
-        @test repr(M) == "Sphere(2)"
+        @test repr(M) == "Sphere(2; field = ℝ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3},ℝ}
         @test representation_size(M) == (3,)
         @test injectivity_radius(M) == π
