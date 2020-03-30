@@ -21,8 +21,8 @@ where $𝔽\in\{ℝ,ℂ\} and $⟨\cdot,\cdot⟩$ denotes the inner product in t
 embedding $\mathbb 𝔽^{n+1}$.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
-several functions like the [`inner`](@ref) product and the [`zero_tangent_vector`](@ref)
-are inherited from the embedding.
+several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
+[`zero_tangent_vector`](@ref zero_tangent_vector(::Euclidean, ::Any...)) are inherited from the embedding.
 
 # Constructor
 

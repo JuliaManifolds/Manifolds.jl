@@ -116,7 +116,7 @@ end)
 returns the dimension of
 [`SymmetricPositiveDefinite`](@ref) `M`$=\mathcal P(n), n ∈ ℕ$, i.e.
 ````math
-\dim \mathcal P(n) = \frac{n(n+1)}{2}
+\dim \mathcal P(n) = \frac{n(n+1)}{2}.
 ````
 """
 @generated function manifold_dimension(M::SymmetricPositiveDefinite{N}) where {N}

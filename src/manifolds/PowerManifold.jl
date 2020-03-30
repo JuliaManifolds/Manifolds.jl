@@ -57,6 +57,7 @@ power manifolds might be faster if they are represented as [`ProductManifold`](@
 
     PowerManifold(M, N_1, N_2, ..., N_n)
     PowerManifold(M, NestedPowerRepresentation(), N_1, N_2, ..., N_n)
+    M^(N_1,N_2, ..., N_n)
 
 Generate the power manifold $M^{N_1 × N_2 × … × N_n}$.
 By default, the [`ArrayPowerRepresentation`](@ref) of points
@@ -141,7 +142,7 @@ end
 """
     PowerBasisData{TB<:AbstractArray}
 
-Data storage for an array of [`BasisData`](@ref)
+Data storage for an array of basis data.
 """
 struct PowerBasisData{TB<:AbstractArray}
     bases::TB

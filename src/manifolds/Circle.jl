@@ -6,7 +6,7 @@ real-valued points in $[-π,π)$ or complex-valued points $z ∈ ℂ$ of absolut
 $\lvert z\rvert = 1$.
 # Constructor
 
-    Circle(ℝ)
+    Circle(𝔽=ℝ)
 
 Generate the `ℝ`-valued Circle represented by angles, which
 alternatively can be set to use the [`AbstractNumbers`](@ref) `𝔽=ℂ` to obtain the `Circle`
@@ -14,7 +14,7 @@ represented by `ℂ`-valued `Circle` of unit numbers.
 """
 struct Circle{𝔽} <: Manifold where {𝔽<:AbstractNumbers} end
 
-Circle(field::AbstractNumbers = ℝ) = Circle{field}()
+Circle(𝔽::AbstractNumbers = ℝ) = Circle{𝔽}()
 
 @doc raw"""
     check_manifold_point(M::Circle, p)

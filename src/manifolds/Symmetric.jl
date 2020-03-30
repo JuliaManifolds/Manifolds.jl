@@ -197,13 +197,10 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the numb
 `𝔽`, i.e.
 
 ````math
-\dim \operatorname{Sym}(n,ℝ) = \frac{n(n+1)}{2},
-````
-
-and
-
-````math
-\dim \operatorname{Sym}(n,ℂ) = 2\frac{n(n+1)}{2} - n = n^2,
+\begin{aligned}
+\dim \mathrm{Sym}(n,ℝ) &= \frac{n(n+1)}{2},\\
+\dim \mathrm{Sym}(n,ℂ) &= 2\frac{n(n+1)}{2} - n = n^2,
+\end{aligned}
 ````
 
 where the last $-n$ is due to the zero imaginary part for Hermitian matrices

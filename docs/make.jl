@@ -44,7 +44,6 @@ makedocs(
         "Distributions" => "distributions.md",
         "Notation" => "notation.md",
         "Library" => [
-            "Number systems" => "lib/numbers.md",
             "Public" => "lib/public.md",
             "Internals" => "lib/internals.md",
             "Automatic differentiation" => "lib/autodiff.md"
