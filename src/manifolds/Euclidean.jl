@@ -13,7 +13,7 @@ Generate the $n$-dimensional vector space $ℝ^n$.
     𝔽^(n₁,n₂,...,nᵢ) = Euclidean(n₁,n₂,...,nᵢ; field=𝔽)
 
 Generate the vector space of $k = n_1 \cdot n_2 \cdot … \cdot n_i$ values, i.e. the
-manifold $𝔽^{n_1, n_2, …, n_i}$ whose
+manifold $𝔽^{n_1, n_2, …, n_i}$, $𝔽\in\{ℝ,ℂ\}$, whose
 elements are interpreted as $n_1 × n_2 × … × n_i$ arrays.
 For $i=2$ we obtain a matrix space.
 The default `field=ℝ` can also be set to `field=ℂ`.
@@ -368,6 +368,9 @@ sharp!(M::Euclidean, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 function show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
     print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")
+end
+function show(io::IO, ::Euclidean{N,ℝ}) where {N}
+    print(io, "Euclidean($(join(N.parameters, ", ")))")
 end
 
 """

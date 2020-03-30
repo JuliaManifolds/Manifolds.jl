@@ -1,24 +1,27 @@
 @doc raw"""
-    Sphere{N,M,𝔽} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
+    GeneralizedSphere{T<:Tuple,𝔽} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
 
-The (unit) sphere manifold $𝕊^{m,n}$ is the set of all unit norm elements. The sphere is
-represented in the embedding, and currently supports both vectors and matrices, i.e.
+The (unit) sphere manifold $𝕊^{n₁,n₂,...,nᵢ}$ is the set of all unit norm elements of
+$𝔽^{n₁,n₂,...,nᵢ}$, where $𝔽\in\{ℝ,ℂ\}. The generalized sphere is
+represented in the embedding, and supports arbitrary sized arrays or in other words arbitrary
+tensors of unit norm. The set formally reads
 
 ````math
-𝕊^{n,m} := \bigl\{ p \in 𝔽^{m,n}\ \big|\ \lVert p \rVert = 1 \bigr\}
+𝕊^{n_1, n_2, …, n_i} := \bigl\{ p \in 𝔽^{n_1, n_2, …, n_i}\ \big|\ \lVert p \rVert = 1 \bigr\}
 ````
 
-where $𝔽\in\{ℝ,ℂ\}. For $m=1$ and $𝔽=ℝ$ this  simplifies to unit vectors in $ℝ^n$ and the
-more common notation is $𝕊^{n,m} ≜ 𝕊^{n-1}$.
+where $𝔽\in\{ℝ,ℂ\}$. For example $i=1$ $𝔽=ℝ$ this  simplifies to unit vectors in $ℝ^n$, see
+[`Sphere`](@ref) for this special case. Note that compared to the classical (nongeneral) case,
+the argument for the generalized case is given by the dimension of the embedding.
 
 The tangent space at point p is given by
 
 ````math
-T_p𝕊^{n,m} := \bigl\{ X ∈ 𝔽^{n,m} : ⟨p,X⟩ = 0 \bigr \},
+T_p𝕊^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i} : ⟨p,X⟩ = 0 \bigr \},
 ````
 
 where $𝔽\in\{ℝ,ℂ\} and $⟨\cdot,\cdot⟩$ denotes the inner product in the
-embedding $\mathbb 𝔽^{n+1}$.
+embedding $\mathbb 𝔽^{n_1, n_2, …, n_i}$.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
@@ -26,27 +29,57 @@ several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product 
 
 # Constructor
 
+    GeneralizedSphere(n₁,n₂,...,nᵢ; field=ℝ))
+
+Generate sphere in $𝔽^{n_1, n_2, …, n_i}$, where 𝔽 defaults to the real-valued case ℝ.
+"""
+struct GeneralizedSphere{N,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} where {N<:Tuple, 𝔽<:AbstractNumbers} end
+
+@doc raw"""
+    Sphere{n,𝔽} <: GeneralizedSphere{Tuple{n},𝔽}
+
+The (unit) sphere manifold $𝕊^{n}$ is the set of all unit norm vectors in $𝔽^{N}$, $𝔽 elements. The sphere is
+represented in the embedding, and currently supports both vectors and matrices, i.e.
+
+````math
+𝕊^{n} := \bigl\{ p \in 𝔽^{n+1}\ \big|\ \lVert p \rVert = 1 \bigr\}
+````
+
+where $𝔽\in\{ℝ,ℂ\}. Note that compared to the [`GeneralizedSphere`](@ref), here the
+argument of the manifold is the dimension of the manifold, i.e. $𝕊^{n} ⊂ 𝔽^{n+1}$, $n\in ℕ$.
+
+The tangent space at point p is given by
+
+````math
+T_p𝕊^{n} := \bigl\{ X ∈ 𝔽^{n+1} : ⟨p,X⟩ = 0 \bigr \},
+````
+
+where $𝔽\in\{ℝ,ℂ\} and $⟨\cdot,\cdot⟩$ denotes the inner product in the
+embedding $\mathbb 𝔽^{n+1}$.
+
+This manifold is modeled as a special case of the more general case, i.e. as an embedded
+manifold to the [`Euclidean`](@ref), and several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product
+and the [`zero_tangent_vector`](@ref zero_tangent_vector(::Euclidean, ::Any...)) are inherited from the embedding.
+
+# Constructor
+
     Sphere(n[, field=ℝ])
 
-Generate $𝕊^{n+1,1} ⊂ ℝ^{n+1}$.
-
-    Sphere(n,m[, field=ℝ])
-
-Generate $𝕊^{n,m} ⊂ ℝ^{n,m}$.
+Generate the (real-valued) sphere $𝕊^{n} ⊂ ℝ^{n+1}$, where `field` can also be used to
+generate the complex-valued sphere.
 """
-struct Sphere{n,m,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
+struct Sphere{n,𝔽} <: GeneralizedSphere{Tuple{n},𝔽} where {𝔽,n} end
 
-Sphere(n::Int, field::AbstractNumbers=ℝ) = Sphere{n+1,1,field}()
-Sphere(n::Int, m::Int, field::AbstractNumbers=ℝ) = Sphere{n,m,field}()
+Sphere(n::Int, field::AbstractNumbers=ℝ) = Sphere{n+1,field}()
 
 """
-    check_manifold_point(M, p; kwargs...)
+    check_manifold_point(M::GeneralizedSphere, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Sphere`](@ref) `M`, i.e. is a vector
 of length [`manifold_dimension`](@ref)`(M)+1` (approximately) of unit length.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_manifold_point(M::Sphere, p; kwargs...)
+function check_manifold_point(M::GeneralizedSphere, p; kwargs...)
     mpv = invoke(
         check_manifold_point,
         Tuple{(typeof(get_embedding(M))), typeof(p)},
@@ -74,7 +107,7 @@ The optional parameter `check_base_point` indicates, whether to call [`check_man
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(
-    M::Sphere,
+    M::GeneralizedSphere,
     p,
     X;
     check_base_point = true,
@@ -103,8 +136,8 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(M::Sphere{n,m,𝔽}) where {n,m,𝔽}= Euclidean(n,m; field=𝔽)
-decorated_manifold(M::Sphere{n,1,𝔽}) where {n,𝔽}= Euclidean(n; field=𝔽)
+decorated_manifold(M::GeneralizedSphere{N,𝔽}) where {N,𝔽}= Euclidean(size_to_tuple(N)...; field=𝔽)
+decorated_manifold(M::Sphere{N,𝔽}) where {N,𝔽}= Euclidean(N; field=𝔽)
 
 @doc raw"""
     distance(M::Sphere, p, q)
@@ -117,11 +150,11 @@ both `p` and `q` lie on.
 d_{𝕊^n}(p,q) = \arccos(⟨p,q⟩).
 ````
 """
-distance(::Sphere, p, q) = acos(clamp(real(dot(p, q)), -1, 1))
+distance(::GeneralizedSphere, p, q) = acos(clamp(real(dot(p, q)), -1, 1))
 
-embed!(::Sphere, q, p) = (q .= p)
+embed!(::GeneralizedSphere, q, p) = (q .= p)
 
-embed!(::Sphere, Y, p, X) = (Y .= X)
+embed!(::GeneralizedSphere, Y, p, X) = (Y .= X)
 
 @doc raw"""
     exp(M::Sphere, p, X)
@@ -135,17 +168,17 @@ Compute the exponential map from `p` in the tangent direction `X` on the [`Spher
 where $\lVert X \rVert_p$ is the [`norm`](@ref norm(::Sphere,p,X)) on the
 [`Sphere`](@ref) `M`.
 """
-exp(::Sphere, ::Any...)
+exp(::GeneralizedSphere, ::Any...)
 
-function exp!(M::Sphere, q, p, X)
+function exp!(M::GeneralizedSphere, q, p, X)
     θ = norm(M, p, X)
     q .= cos(θ) .* p .+ usinc(θ) .* X
     return q
 end
 
-flat!(M::Sphere, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
+flat!(M::GeneralizedSphere, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_basis(M::Sphere{n,1,ℝ}, p, B::DiagonalizingOrthonormalBasis{T,ℝ}) where {T,n}
+function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{T,ℝ}) where {T,n}
     A = zeros(n, n)
     A[1, :] = transpose(p)
     A[2, :] = transpose(B.frame_direction)
@@ -167,7 +200,7 @@ Represent the tangent vector `X` at point `p` from the [`Sphere`](@ref) `M` in
 an orthonormal basis by rotating the vector `X` using the rotation matrix
 $2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
 """
-function get_coordinates(M::Sphere{n,1,ℝ}, p, X, B::DefaultOrthonormalBasis) where {n}
+function get_coordinates(M::Sphere{n,ℝ}, p, X, B::DefaultOrthonormalBasis) where {n}
     if isapprox(abs(p[1]), 1)
         return X[2:end]
     else
@@ -180,7 +213,7 @@ function get_coordinates!(M::Sphere, Y, p, X, B::DefaultOrthonormalBasis)
     return copyto!(Y, get_coordinates(M, p, X, B))
 end
 
-function get_vector(M::Sphere{n,1,ℝ}, p, X, B::DefaultOrthonormalBasis) where {n}
+function get_vector(M::Sphere{n,ℝ}, p, X, B::DefaultOrthonormalBasis) where {n}
     p[1] ≈ 1 && return vcat(0, X)
     xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n)
     X0 = vcat(0, X)
@@ -201,12 +234,12 @@ Return the injectivity radius for the [`Sphere`](@ref) `M`, which is globally $�
 Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
 [`Sphere`](@ref), which is globally $\frac{π}{2}$.
 """
-injectivity_radius(::Sphere) = π
-injectivity_radius(::Sphere, ::ExponentialRetraction) = π
-injectivity_radius(::Sphere, ::ProjectionRetraction) = π / 2
-injectivity_radius(::Sphere, ::Any) = π
-injectivity_radius(::Sphere, ::Any, ::ExponentialRetraction) = π
-injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π / 2
+injectivity_radius(::GeneralizedSphere) = π
+injectivity_radius(::GeneralizedSphere, ::ExponentialRetraction) = π
+injectivity_radius(::GeneralizedSphere, ::ProjectionRetraction) = π / 2
+injectivity_radius(::GeneralizedSphere, ::Any) = π
+injectivity_radius(::GeneralizedSphere, ::Any, ::ExponentialRetraction) = π
+injectivity_radius(::GeneralizedSphere, ::Any, ::ProjectionRetraction) = π / 2
 eval(quote
     @invoke_maker 1 Manifold injectivity_radius(M::Sphere, rm::AbstractRetractionMethod)
 end)
@@ -222,29 +255,29 @@ since $⟨p,X⟩ = 0$ and when $d_{𝕊^2}(p,q) ≤ \frac{π}{2}$ that
 \operatorname{retr}_p^{-1}(q) = \frac{q}{⟨p, q⟩} - p.
 ````
 """
-inverse_retract(::Sphere, ::Any, ::Any, ::ProjectionInverseRetraction)
+inverse_retract(::GeneralizedSphere, ::Any, ::Any, ::ProjectionInverseRetraction)
 
-function inverse_retract!(::Sphere, X, p, q, ::ProjectionInverseRetraction)
+function inverse_retract!(::GeneralizedSphere, X, p, q, ::ProjectionInverseRetraction)
     return (X .= q ./ real(dot(p, q)) .- p)
 end
 
 @doc raw"""
-    log(M::Sphere, p, q)
+    log(M::GeneralizedSphere, p, q)
 
-Compute the logarithmic map on the [`Sphere`](@ref) `M`, i.e. the tangent vector,
+Compute the logarithmic map on the [`GeneralizedSphere`](@ref) `M`, i.e. the tangent vector,
 whose geodesic starting from `p` reaches `q` after time 1.
 The formula reads for $x ≠ -y$
 
 ````math
-\log_p q = d_{𝕊^n}(p,q) \frac{q-⟨p,q⟩ p}{\lVert q-⟨p,q⟩ p \rVert_2},
+\log_p q = d_{𝕊}(p,q) \frac{q-⟨p,q⟩ p}{\lVert q-⟨p,q⟩ p \rVert_2},
 ````
 
 and a deterministic choice from the set of tangent vectors is returned if $x=-y$, i.e. for
 opposite points.
 """
-log(::Sphere, ::Any...)
+log(::GeneralizedSphere, ::Any...)
 
-function log!(S::Sphere, X, p, q)
+function log!(M::GeneralizedSphere, X, p, q)
     cosθ = real(dot(p, q))
     if cosθ ≈ -1 # appr. opposing points, return deterministic choice from set-valued log
         fill!(X, 0)
@@ -260,20 +293,21 @@ function log!(S::Sphere, X, p, q)
         θ = acos(cosθ)
         X .= (q .- cosθ .* p) ./ usinc(θ)
     end
-    return project!(S, X, p, X)
+    return project!(M, X, p, X)
 end
 
 @doc raw"""
     manifold_dimension(M::Sphere)
+    manifold_dimension(M::GeneralizedSphere)
 
-Return the dimension of the [`Sphere`](@ref)`(n) `M`, i.e. $𝕊^n$, which is $\dim(𝕊^n) = n$.
+Return the dimension of the [`Sphere`](@ref)`(n) `M` or the [`GeneralizedSphere`](@ref), respectively i.e.
+ $𝕊^n$, which is $\dim(𝕊^n) = n$.
 """
-manifold_dimension(S::Sphere{n,m,ℝ}) where {n,m} = n*m-1
-manifold_dimension(S::Sphere{n,m,ℂ}) where {n,m} = 2*n*m-1
+manifold_dimension(M::GeneralizedSphere) = manifold_dimension(get_embedding(M))-1
 
 """
     mean(
-        S::Sphere,
+        S::GeneralizedSphere,
         x::AbstractVector,
         [w::AbstractWeights,]
         method = GeodesicInterpolationWithinRadius(π/2);
@@ -283,9 +317,9 @@ manifold_dimension(S::Sphere{n,m,ℂ}) where {n,m} = 2*n*m-1
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
-mean(::Sphere, ::Any...)
+mean(::GeneralizedSphere, ::Any...)
 
-function mean!(S::Sphere, p, x::AbstractVector, w::AbstractVector; kwargs...)
+function mean!(S::GeneralizedSphere, p, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(S, p, x, w, GeodesicInterpolationWithinRadius(π / 2); kwargs...)
 end
 
@@ -295,13 +329,13 @@ end
 Normal distribution in ambient space with standard deviation `σ`
 projected to tangent space at `p`.
 """
-function normal_tvector_distribution(S::Sphere, p, σ)
+function normal_tvector_distribution(S::GeneralizedSphere, p, σ)
     d = Distributions.MvNormal(zero(p), σ)
     return ProjectedFVectorDistribution(TangentBundleFibers(S), p, d, project_vector!, p)
 end
 
 @doc raw"""
-    project(M::Sphere, p)
+    project(M::GeneralizedSphere, p)
 
 Project the point `p` from the embedding onto the [`Sphere`](@ref) `M`.
 
@@ -311,7 +345,7 @@ Project the point `p` from the embedding onto the [`Sphere`](@ref) `M`.
 where $\lVert\cdot\rVert$ denotes the usual 2-norm for vectors if $m=1$ and the Frobenius
 norm for the case $m>1$.
 """
-project(::Sphere, ::Any)
+project(::GeneralizedSphere, ::Any)
 
 project!(S::Sphere, q, p) = copyto!(q, p./ norm(p))
 
@@ -324,9 +358,9 @@ Project the point `X` onto the tangent space at `p` on the [`Sphere`](@ref) `M`.
 \operatorname{proj}_{p}(X) = X - ⟨p, X⟩p
 ````
 """
-project(::Sphere, ::Any, ::Any)
+project(::GeneralizedSphere, ::Any, ::Any)
 
-project!(S::Sphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
+project!(S::GeneralizedSphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
 
 @doc raw"""
     representation_size(M::Sphere)
@@ -335,8 +369,7 @@ Return the size points on the [`Sphere`](@ref) `M` are represented as, i.e.
 for the `n`-dimensional [`Sphere`](@ref) it is vectors of size `(n+1,)` and
 for (Forbenius-)unit-norm matrixes (n,m).
 """
-@generated representation_size(::Sphere{n,1}) where {n} = (n,)
-@generated representation_size(::Sphere{n,m}) where {n,m} = (n,m,)
+@generated representation_size(::GeneralizedSphere{N}) = size_to_tuple(N)
 
 @doc raw"""
     retract(M::Sphere, p, X, ::ProjectionRetraction)
@@ -347,17 +380,17 @@ Compute the retraction that is based on projection, i.e.
 \operatorname{retr}_p(X) = \frac{p+X}{\lVert p+X \rVert_2}
 ````
 """
-retract(::Sphere, ::Any, ::Any, ::ProjectionRetraction)
+retract(::GeneralizedSphere, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract!(M::Sphere, q, p, X, ::ProjectionRetraction)
+function retract!(M::GeneralizedSphere, q, p, X, ::ProjectionRetraction)
     q .= p .+ X
     return project!(M, q, q)
 end
 
-show(io::IO, ::Sphere{n,1,ℝ}) where {n} = print(io, "Sphere($(n-1))")
-show(io::IO, ::Sphere{n,m,ℝ}) where {n,m} = print(io, "Sphere($(n),$(m))")
-show(io::IO, ::Sphere{n,1,ℂ}) where {n} = print(io, "Sphere($(n-1); field = ℂ)")
-show(io::IO, ::Sphere{n,m,ℂ}) where {n,m} = print(io, "Sphere($(n),$(m); field = ℂ)")
+show(io::IO, ::Sphere{n,ℝ}) where {n} = print(io, "Sphere($(n-1))")
+show(io::IO, ::GeneralizedSphere{N,ℝ}) where {N} = print(io, "GeneralizedSphere($(join(N.parameters, ", ")))")
+show(io::IO, ::Sphere{n,ℂ}) where {n} = print(io, "Sphere($(n-1); field = ℂ)")
+show(io::IO, ::GeneralizedSphere{N,ℂ}) where {N} = print(io, "GeneralizedSphere($(join(N.parameters, ", ")); field = ℂ)")
 
 """
     uniform_distribution(M::Sphere, p)
@@ -365,7 +398,7 @@ show(io::IO, ::Sphere{n,m,ℂ}) where {n,m} = print(io, "Sphere($(n),$(m); field
 Uniform distribution on given [`Sphere`](@ref) `M`. Generated points will be of
 similar type as `p`.
 """
-function uniform_distribution(M::Sphere, p)
+function uniform_distribution(M::GeneralizedSphere, p)
     d = Distributions.MvNormal(zero(p), 1.0)
     return ProjectedPointDistribution(M, d, project!, p)
 end
@@ -381,9 +414,9 @@ P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_{𝕊^{n,m}}(p,q)}
 \bigl(\log_xy + \log_yx \bigr).
 ````
 """
-vector_transport_to(::Sphere, ::Any, ::Any, ::Any, ::Any, ::ParallelTransport)
+vector_transport_to(::GeneralizedSphere, ::Any, ::Any, ::Any, ::Any, ::ParallelTransport)
 
-function vector_transport_to!(M::Sphere, Y, p, X, q, ::ParallelTransport)
+function vector_transport_to!(M::GeneralizedSphere, Y, p, X, q, ::ParallelTransport)
     X_pq = log(M, p, q)
     Xl = norm(M, p, X_pq)
     copyto!(Y, X)
