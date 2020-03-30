@@ -98,7 +98,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         t_x = TangentSpaceAtPoint(M, x)
         ct_x = CotangentSpaceAtPoint(M, x)
         @test sprint(show, "text/plain", t_x) == """
-        VectorSpaceAtPoint{VectorBundleFibers{Manifolds.TangentSpaceType,Sphere{3,1,ℝ}},Array{Float64,1}}
+        VectorSpaceAtPoint{VectorBundleFibers{Manifolds.TangentSpaceType,GeneralizedSphere{Tuple{3},ℝ}},Array{Float64,1}}
         Fiber:
          VectorBundleFibers(TangentSpace, Sphere(2))
         Base point:

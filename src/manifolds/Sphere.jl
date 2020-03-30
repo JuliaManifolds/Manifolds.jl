@@ -36,7 +36,7 @@ Generate sphere in $𝔽^{n_1, n_2, …, n_i}$, where 𝔽 defaults to the real-
 struct GeneralizedSphere{N,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} where {N<:Tuple, 𝔽<:AbstractNumbers} end
 
 @doc raw"""
-    Sphere{n,𝔽} <: GeneralizedSphere{Tuple{n},𝔽}
+    Sphere{n+1,𝔽} = GeneralizedSphere{Tuple{n+1},𝔽}
 
 The (unit) sphere manifold $𝕊^{n}$ is the set of all unit norm vectors in $𝔽^{N}$, $𝔽 elements. The sphere is
 represented in the embedding, and currently supports both vectors and matrices, i.e.
@@ -68,7 +68,7 @@ and the [`zero_tangent_vector`](@ref zero_tangent_vector(::Euclidean, ::Any...))
 Generate the (real-valued) sphere $𝕊^{n} ⊂ ℝ^{n+1}$, where `field` can also be used to
 generate the complex-valued sphere.
 """
-struct Sphere{n,𝔽} <: GeneralizedSphere{Tuple{n},𝔽} where {𝔽,n} end
+const Sphere{n,𝔽} = GeneralizedSphere{Tuple{n},𝔽}
 
 Sphere(n::Int, field::AbstractNumbers=ℝ) = Sphere{n+1,field}()
 
@@ -241,7 +241,7 @@ injectivity_radius(::GeneralizedSphere, ::Any) = π
 injectivity_radius(::GeneralizedSphere, ::Any, ::ExponentialRetraction) = π
 injectivity_radius(::GeneralizedSphere, ::Any, ::ProjectionRetraction) = π / 2
 eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(M::Sphere, rm::AbstractRetractionMethod)
+    @invoke_maker 1 Manifold injectivity_radius(M::GeneralizedSphere, rm::AbstractRetractionMethod)
 end)
 
 @doc raw"""
@@ -369,7 +369,7 @@ Return the size points on the [`Sphere`](@ref) `M` are represented as, i.e.
 for the `n`-dimensional [`Sphere`](@ref) it is vectors of size `(n+1,)` and
 for (Forbenius-)unit-norm matrixes (n,m).
 """
-@generated representation_size(::GeneralizedSphere{N}) = size_to_tuple(N)
+@generated representation_size(::GeneralizedSphere{N}) where {N} = size_to_tuple(N)
 
 @doc raw"""
     retract(M::Sphere, p, X, ::ProjectionRetraction)
