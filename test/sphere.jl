@@ -85,4 +85,26 @@ include("utils.jl")
         vexp = normalize(project(M, x, [0, 1, zeros(n - 1)...]))
         @test v ≈ π * vexp
     end
+
+    @testset "Complex Sphere" begin
+        M = Sphere(2,ℂ)
+        @test repr(M) == "Sphere(2; field = ℂ)"
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{3},ℂ}
+        @test representation_size(M) == (3,)
+        p = [1.0, 1.0im, 1.0]
+        q = project(M,p)
+        @test is_manifold_point(M,q)
+    end
+
+    @testset "Tensor Sphere" begin
+        M = TensorSphere(2,2; field = ℝ)
+        @test repr(M) == "TensorSphere(2, 2; field = ℝ)"
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℝ}
+        @test representation_size(M) == (2,2)
+
+        M = TensorSphere(2,2; field = ℂ)
+        @test repr(M) == "TensorSphere(2, 2; field = ℂ)"
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℂ}
+        @test representation_size(M) == (2,2)
+    end
 end
