@@ -238,6 +238,7 @@ export Euclidean,
     Stiefel,
     SymmetricMatrices,
     SymmetricPositiveDefinite,
+    TensorSphere,
     Torus
 export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds

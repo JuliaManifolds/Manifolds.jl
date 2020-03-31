@@ -16,13 +16,13 @@ The [`Sphere`](@ref) is stored internally within `M.manifold`, such that all fun
 Generate the manifold of matrices $\mathbb R^{n × m}$ such that the $m$ columns are unit
 vectors, i.e. from the [`Sphere`](@ref)`(n-1)`.
 """
-struct Oblique{N,M} <: AbstractPowerManifold{Sphere{N},ArrayPowerRepresentation}
-    manifold::Sphere{N}
+struct Oblique{N,M,𝔽,S} <: AbstractPowerManifold{Sphere{S,𝔽},ArrayPowerRepresentation} where {N,M}
+    manifold::Sphere{S,𝔽}
 end
 
-Oblique(n::Int, m::Int) = Oblique{n,m}(Sphere(n - 1))
+Oblique(n::Int, m::Int, field::AbstractNumbers = ℝ) = Oblique{n,m,field,n-1}(Sphere(n - 1,field))
 
-^(M::Sphere{N}, m::Int) where {N} = Oblique{N,m}(M)
+^(M::Sphere{N,𝔽}, m::Int) where {N,𝔽} = Oblique{manifold_dimension(M)+1,m,𝔽,N}(M)
 
 @doc raw"""
     check_manifold_point(M::Oblique{n,m},p)
