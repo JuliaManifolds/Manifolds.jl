@@ -318,3 +318,26 @@ i.e. `(n,k)`, which is the matrix dimensions.
 @generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
 
 show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")
+
+"""
+    uniform_distribution(M::Stiefel, p)
+
+Uniform distribution on given [`Stiefel`](@ref) `M`. Generated points will be of
+similar type as `p`.
+"""
+function uniform_distribution(M::Stiefel, p)
+    d = RandnMatrix(size(p)...)
+    return ProjectedPointDistribution(M, d, project!, p)
+end
+
+struct RandnMatrix <: ContinuousMatrixDistribution
+    n::Integer
+    m::Integer
+end
+Base.size(d::RandnMatrix) = (d.n,d.m)
+Base.size(d::RandnMatrix, i) = i::Integer <= 2 ? size(d)[i] : 1
+Distributions._rand!(rng::AbstractRNG, d::RandnMatrix, A::AbstractMatrix) = randn!(rng,A)
+Distributions._logpdf(d::RandnMatrix, x::AbstractArray) = sum(x) do xij
+    dij = Distributions.Normal(zero(xij),one(xij))
+    return Distributions.logpdf(dij,xij)
+end
