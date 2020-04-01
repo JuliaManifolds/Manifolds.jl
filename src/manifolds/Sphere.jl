@@ -7,7 +7,7 @@ abstract type AbstractSphere{𝔽} <:
     AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} where {𝔽<:AbstractNumbers} end
 
 @doc raw"""
-    Sphere{n,𝔽} = AbstractSphere{𝔽}
+    Sphere{n,𝔽} <: AbstractSphere{𝔽}
 
 The (unit) sphere manifold $𝕊^{n}$ is the set of all unit norm vectors in $𝔽^{N}$, $𝔽 elements. The sphere is
 represented in the embedding, and currently supports both vectors and matrices, i.e.
@@ -418,7 +418,7 @@ end
 @doc doc"""
     vector_transport_to(M::AbstractSphere, p, X, q, ::ParallelTransport)
 
-Compute the paralllel transport on the [`Sphere`](@ref) of the tangent vector `X` at `p`
+Compute the parallel transport on the [`Sphere`](@ref) of the tangent vector `X` at `p`
 to `q`, provided, the [`geodesic`](@ref) between `p` and `q` is unique. The formula reads
 
 ````math
