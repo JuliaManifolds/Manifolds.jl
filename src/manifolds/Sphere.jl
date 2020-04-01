@@ -1,5 +1,5 @@
 """
-    AbstractSphere{𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType
+    AbstractSphere{𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}
 
 An abstract type to represent a unit sphere that is represented isometrically in the embedding.
 """
@@ -16,13 +16,13 @@ represented in the embedding, and currently supports both vectors and matrices, 
 𝕊^{n} := \bigl\{ p \in 𝔽^{n+1}\ \big|\ \lVert p \rVert = 1 \bigr\}
 ````
 
-where $𝔽\in\{ℝ,ℂ\}. Note that compared to the [`TensorSphere`](@ref), here the
+where $𝔽\in\{ℝ,ℂ\}$. Note that compared to the [`ArraySphere`](@ref), here the
 argument of the manifold is the dimension of the manifold, i.e. $𝕊^{n} ⊂ 𝔽^{n+1}$, $n\in ℕ$.
 
 The tangent space at point p is given by
 
 ````math
-T_p𝕊^{n} := \bigl\{ X ∈ 𝔽^{n+1} : ⟨p,X⟩ = 0 \bigr \},
+T_p𝕊^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ |\ ⟨p,X⟩ = 0 \bigr \},
 ````
 
 where $𝔽\in\{ℝ,ℂ\} and $⟨\cdot,\cdot⟩$ denotes the inner product in the
@@ -44,7 +44,7 @@ Sphere(n::Int, field::AbstractNumbers=ℝ) = Sphere{n,field}()
 
 
 @doc raw"""
-    TensorSphere{T<:Tuple,𝔽} <: AbstractSphere{𝔽}
+    ArraySphere{T<:Tuple,𝔽} <: AbstractSphere{𝔽}
 
 The (unit) sphere manifold $𝕊^{n₁,n₂,...,nᵢ}$ is the set of all unit norm elements of
 $𝔽^{n₁,n₂,...,nᵢ}$, where $𝔽\in\{ℝ,ℂ\}. The generalized sphere is
@@ -55,17 +55,18 @@ tensors of unit norm. The set formally reads
 𝕊^{n_1, n_2, …, n_i} := \bigl\{ p \in 𝔽^{n_1, n_2, …, n_i}\ \big|\ \lVert p \rVert = 1 \bigr\}
 ````
 
-where $𝔽\in\{ℝ,ℂ\}$. For example $i=1$ $𝔽=ℝ$ this  simplifies to unit vectors in $ℝ^n$, see
-[`Sphere`](@ref) for this special case. Note that compared to the classical (nongeneral) case,
-the argument for the generalized case is given by the dimension of the embedding.
+where $𝔽\in\{ℝ,ℂ\}$. Setting $i=1$ and $𝔽=ℝ$  this  simplifies to unit vectors in $ℝ^n$, see
+[`Sphere`](@ref) for this special case. Note that compared to this classical case,
+the argument for the generalized case here is given by the dimension of the embedding.
+This means that `Sphere(2)` and `ArraySphere(3)` are the same manifold.
 
 The tangent space at point p is given by
 
 ````math
-T_p𝕊^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i} : ⟨p,X⟩ = 0 \bigr \},
+T_p𝕊^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i}\ |\ ⟨p,X⟩ = 0 \bigr \},
 ````
 
-where $𝔽\in\{ℝ,ℂ\} and $⟨\cdot,\cdot⟩$ denotes the inner product in the
+where $𝔽\in\{ℝ,ℂ\}$ and $⟨\cdot,\cdot⟩$ denotes the inner product in the
 embedding $\mathbb 𝔽^{n_1, n_2, …, n_i}$.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
@@ -74,20 +75,20 @@ several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product 
 
 # Constructor
 
-    TensorSphere(n₁,n₂,...,nᵢ; field=ℝ))
+    ArraySphere(n₁,n₂,...,nᵢ; field=ℝ))
 
 Generate sphere in $𝔽^{n_1, n_2, …, n_i}$, where 𝔽 defaults to the real-valued case ℝ.
 """
-struct TensorSphere{N,𝔽} <: AbstractSphere{𝔽} where {N<:Tuple} end
-function TensorSphere(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
-    return TensorSphere{Tuple{n...},field}()
+struct ArraySphere{N,𝔽} <: AbstractSphere{𝔽} where {N<:Tuple} end
+function ArraySphere(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
+    return ArraySphere{Tuple{n...},field}()
 end
 
 """
     check_manifold_point(M::AbstractSphere, p; kwargs...)
 
-Check whether `p` is a valid point on the [`Sphere`](@ref) `M`, i.e. is a vector
-of length [`manifold_dimension`](@ref)`(M)+1` (approximately) of unit length.
+Check whether `p` is a valid point on the [`Sphere`](@ref) `M`, i.e. is a point in
+the embedding of unit length.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_manifold_point(M::AbstractSphere, p; kwargs...)
@@ -155,12 +156,12 @@ get_embedding(M::AbstractSphere{𝔽}) where {𝔽} = decorated_manifold(M)
 @doc raw"""
     distance(M::AbstractSphere, p, q)
 
-Compute the geodesic distance betweeen `p` and `q` on the [`Sphere`](@ref) `M`.
+Compute the geodesic distance betweeen `p` and `q` on the [`AbstractSphere`](@ref) `M`.
 The formula is given by the (shorter) great arc length on the (or a) great circle
 both `p` and `q` lie on.
 
 ````math
-d_{𝕊^n}(p,q) = \arccos(⟨p,q⟩).
+d_{𝕊}(p,q) = \arccos(⟨p,q⟩).
 ````
 """
 distance(::AbstractSphere, p, q) = acos(clamp(real(dot(p, q)), -1, 1))
@@ -172,14 +173,14 @@ embed!(::AbstractSphere, Y, p, X) = (Y .= X)
 @doc raw"""
     exp(M::AbstractSphere, p, X)
 
-Compute the exponential map from `p` in the tangent direction `X` on the [`Sphere`](@ref)
+Compute the exponential map from `p` in the tangent direction `X` on the [`AbstractSphere`](@ref)
 `M` by following the great arc eminating from `p` in direction `X`.
 
 ````math
 \exp_p X = \cos(\lVert X \rVert_p)p + \sin(\lVert X \rVert_p)\frac{X}{\lVert X \rVert_p}X,
 ````
-where $\lVert X \rVert_p$ is the [`norm`](@ref norm(::Sphere,p,X)) on the
-[`Sphere`](@ref) `M`.
+where $\lVert X \rVert_p$ is the [`norm`](@ref norm(::AbstractSphere,p,X)) on the
+tangent space at `p` of the [`AbstractSphere`](@ref) `M`.
 """
 exp(::AbstractSphere, ::Any...)
 
@@ -238,14 +239,14 @@ function get_vector!(M::Sphere, Y::AbstractVector, p, X, B::DefaultOrthonormalBa
 end
 
 @doc raw"""
-    injectivity_radius(M::Sphere[, p])
+    injectivity_radius(M::AbstractSphere[, p])
 
-Return the injectivity radius for the [`Sphere`](@ref) `M`, which is globally $π$.
+Return the injectivity radius for the [`AbstractSphere`](@ref) `M`, which is globally $π$.
 
     injectivity_radius(M::Sphere, x, ::ProjectionRetraction)
 
 Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
-[`Sphere`](@ref), which is globally $\frac{π}{2}$.
+[`AbstractSphere`](@ref), which is globally $\frac{π}{2}$.
 """
 injectivity_radius(::AbstractSphere) = π
 injectivity_radius(::AbstractSphere, ::ExponentialRetraction) = π
@@ -258,9 +259,9 @@ eval(quote
 end)
 
 @doc raw"""
-    inverse_retract(M::Sphere, p, q, ::ProjectionInverseRetraction)
+    inverse_retract(M::AbstractSphere, p, q, ::ProjectionInverseRetraction)
 
-Compute the inverse of the projection based retraction on the [`Sphere`](@ref),
+Compute the inverse of the projection based retraction on the [`AbstractSphere`](@ref) `M`,
 i.e. rearranging $p+X = q\lVert p+X\rVert_2$ yields
 since $⟨p,X⟩ = 0$ and when $d_{𝕊^2}(p,q) ≤ \frac{π}{2}$ that
 
@@ -312,7 +313,7 @@ end
 @doc raw"""
     manifold_dimension(M::AbstractSphere)
 
-Return the dimension of the [`AbstractSphere`](@ref)`(n) `M`, respectively i.e. the
+Return the dimension of the [`AbstractSphere`](@ref) `M`, respectively i.e. the
 dimension of the embedding -1.
 """
 manifold_dimension(M::AbstractSphere) = manifold_dimension(get_embedding(M)) - 1
@@ -352,7 +353,7 @@ end
 Project the point `p` from the embedding onto the [`Sphere`](@ref) `M`.
 
 ````math
-    \operatorname{proj}_{𝕊^{n,m}}(p) = \frac{p}{\lVert p \rVert},
+    \operatorname{proj}(p) = \frac{p}{\lVert p \rVert},
 ````
 where $\lVert\cdot\rVert$ denotes the usual 2-norm for vectors if $m=1$ and the Frobenius
 norm for the case $m>1$.
@@ -380,7 +381,7 @@ project!(S::AbstractSphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
 Return the size points on the [`AbstractSphere`](@ref) `M` are represented as, i.e., the
 representation size of the embedding.
 """
-@generated representation_size(M::TensorSphere{N}) where {N} = size_to_tuple(N)
+@generated representation_size(M::ArraySphere{N}) where {N} = size_to_tuple(N)
 @generated representation_size(M::Sphere{N}) where {N} = (N+1,)
 
 
@@ -401,7 +402,7 @@ function retract!(M::AbstractSphere, q, p, X, ::ProjectionRetraction)
 end
 
 show(io::IO, ::Sphere{n,𝔽}) where {n,𝔽} = print(io, "Sphere($(n); field = $(𝔽))")
-show(io::IO, ::TensorSphere{N,𝔽}) where {N,𝔽} = print(io, "TensorSphere($(join(N.parameters, ", ")); field = $(𝔽))")
+show(io::IO, ::ArraySphere{N,𝔽}) where {N,𝔽} = print(io, "ArraySphere($(join(N.parameters, ", ")); field = $(𝔽))")
 
 """
     uniform_distribution(M::AbstractSphere, p)
@@ -421,7 +422,7 @@ Compute the paralllel transport on the [`Sphere`](@ref) of the tangent vector `X
 to `q`, provided, the [`geodesic`](@ref) between `p` and `q` is unique. The formula reads
 
 ````math
-P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_{𝕊^{n,m}}(p,q)}
+P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_𝕊}(p,q)}
 \bigl(\log_xy + \log_yx \bigr).
 ````
 """

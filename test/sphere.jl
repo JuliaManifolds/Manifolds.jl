@@ -97,13 +97,13 @@ include("utils.jl")
     end
 
     @testset "Tensor Sphere" begin
-        M = TensorSphere(2,2; field = ℝ)
-        @test repr(M) == "TensorSphere(2, 2; field = ℝ)"
+        M = ArraySphere(2,2; field = ℝ)
+        @test repr(M) == "ArraySphere(2, 2; field = ℝ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℝ}
         @test representation_size(M) == (2,2)
 
-        M = TensorSphere(2,2; field = ℂ)
-        @test repr(M) == "TensorSphere(2, 2; field = ℂ)"
+        M = ArraySphere(2,2; field = ℂ)
+        @test repr(M) == "ArraySphere(2, 2; field = ℂ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℂ}
         @test representation_size(M) == (2,2)
     end

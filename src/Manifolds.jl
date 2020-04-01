@@ -221,12 +221,13 @@ function __init__()
 end
 #
 export CoTVector, Manifold, MPoint, TVector, Manifold
+export AbstractSphere
 export Euclidean,
+    ArraySphere,
     CholeskySpace,
     Circle,
     FixedRankMatrices,
     GeneralizedGrassmann,
-    GeneralizedSphere,
     GeneralizedStiefel,
     Grassmann,
     Hyperbolic,
@@ -238,7 +239,6 @@ export Euclidean,
     Stiefel,
     SymmetricMatrices,
     SymmetricPositiveDefinite,
-    TensorSphere,
     Torus
 export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
