@@ -17,9 +17,9 @@ represented in the embedding, and currently supports both vectors and matrices, 
 ````
 
 where $𝔽\in\{ℝ,ℂ\}$. Note that compared to the [`ArraySphere`](@ref), here the
-argument of the manifold is the dimension of the manifold, i.e. $𝕊^{n} ⊂ 𝔽^{n+1}$, $n\in ℕ$.
+argument `n` of the manifold is the dimension of the manifold, i.e. $𝕊^{n} ⊂ 𝔽^{n+1}$, $n\in ℕ$.
 
-The tangent space at point p is given by
+The tangent space at point $p$ is given by
 
 ````math
 T_p𝕊^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ |\ ⟨p,X⟩ = 0 \bigr \},
@@ -46,7 +46,7 @@ Sphere(n::Int, field::AbstractNumbers=ℝ) = Sphere{n,field}()
 @doc raw"""
     ArraySphere{T<:Tuple,𝔽} <: AbstractSphere{𝔽}
 
-The (unit) sphere manifold $𝕊^{n₁,n₂,...,nᵢ}$ is the set of all unit norm elements of
+The (unit) sphere manifold $𝕊^{n₁,n₂,...,nᵢ}$ is the set of all unit (Frobenius) norm elements of
 $𝔽^{n₁,n₂,...,nᵢ}$, where $𝔽\in\{ℝ,ℂ\}. The generalized sphere is
 represented in the embedding, and supports arbitrary sized arrays or in other words arbitrary
 tensors of unit norm. The set formally reads
@@ -203,7 +203,7 @@ function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{T,ℝ})
         V = cat(B.frame_direction / norm(M, p, B.frame_direction), V; dims = 2)
         κ[1] = 0 # no curvature along the geodesic direction, if x!=y
     end
-    Ξ = [V[:, i] for i = 1:manifold_dimension(M)]
+    Ξ = [V[:, i] for i = 1:n]
     return CachedBasis(B, κ, Ξ)
 end
 
@@ -219,7 +219,7 @@ function get_coordinates(M::Sphere{n,ℝ}, p, X, B::DefaultOrthonormalBasis) whe
         return X[2:end]
     else
         xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n+1)
-        return (2*xp1*real(dot(xp1, X))/real(dot(xp1, xp1))-X)[2:end]
+        return (2*xp1*dot(xp1, X)/dot(xp1, xp1)-X)[2:end]
     end
 end
 
