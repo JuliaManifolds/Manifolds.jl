@@ -157,8 +157,18 @@ include("statistics.jl")
 
 include("manifolds/VectorBundle.jl")
 
-include("distributions.jl")
-include("projected_distribution.jl")
+include("distributions/Distributions.jl")
+using .ManifoldDistributions:
+    FVectorDistribution,
+    FVectorSupport,
+    MPointDistribution,
+    ProjectedFVectorDistribution,
+    ProjectedPointDistribution
+import .ManifoldDistributions:
+    normal_tvector_distribution,
+    projected_distribution,
+    uniform_distribution
+
 include("product_representations.jl")
 
 # It's included early to ensure visibility of `Identity`
@@ -251,10 +261,10 @@ export AbstractPowerManifold,
     PowerManifold
 export ProductManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
-export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers
+export ProductRepr, TangentBundle, TangentBundleFibers
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
-export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribution
+export AbstractVectorTransportMethod, ParallelTransport
 export AbstractEmbeddedManifold
 export Metric,
     RiemannianMetric,
@@ -351,13 +361,11 @@ export ×,
     minkowski_metric,
     moment,
     norm,
-    normal_tvector_distribution,
     number_eltype,
     one,
     power_dimensions,
     project,
     project!,
-    projected_distribution,
     real_dimension,
     ricci_curvature,
     ricci_tensor,
@@ -374,7 +382,6 @@ export ×,
     submanifold,
     submanifold_component,
     submanifold_components,
-    uniform_distribution,
     var,
     vector_space_dimension,
     vector_transport_along,

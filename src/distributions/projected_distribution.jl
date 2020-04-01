@@ -1,3 +1,6 @@
+@decorator_transparent_signature projected_distribution(M::AbstractDecoratorManifold, d, p)
+@decorator_transparent_signature projected_distribution(M::AbstractDecoratorManifold, d)
+
 """
     ProjectedPointDistribution(M::Manifold, d, proj!, p)
 
@@ -25,17 +28,17 @@ function ProjectedPointDistribution(
     )
 end
 
-function rand(rng::AbstractRNG, d::ProjectedPointDistribution{TResult}) where {TResult}
-    p = convert(TResult, rand(rng, d.distribution))
+function Random.rand(rng::AbstractRNG, d::ProjectedPointDistribution{TResult}) where {TResult}
+    p = convert(TResult, Random.rand(rng, d.distribution))
     return d.proj!(d.manifold, p, p)
 end
 
-function _rand!(rng::AbstractRNG, d::ProjectedPointDistribution, p::AbstractArray{<:Number})
-    _rand!(rng, d.distribution, p)
+function Distributions._rand!(rng::AbstractRNG, d::ProjectedPointDistribution, p::AbstractArray{<:Number})
+    Distributions._rand!(rng, d.distribution, p)
     return d.proj!(d.manifold, p, p)
 end
 
-support(d::ProjectedPointDistribution) = MPointSupport(d.manifold)
+Distributions.support(d::ProjectedPointDistribution) = MPointSupport(d.manifold)
 
 """
     ProjectedFVectorDistribution(type::VectorBundleFibers, p, d, project_vector!)
@@ -79,18 +82,18 @@ function ProjectedFVectorDistribution(
     )
 end
 
-function rand(rng::AbstractRNG, d::ProjectedFVectorDistribution{TResult}) where {TResult}
-    X = convert(TResult, reshape(rand(rng, d.distribution), size(d.point)))
+function Random.rand(rng::AbstractRNG, d::ProjectedFVectorDistribution{TResult}) where {TResult}
+    X = convert(TResult, reshape(Random.rand(rng, d.distribution), size(d.point)))
     return d.project_vector!(d.type, X, d.point, X)
 end
 
-function _rand!(
+function Distributions._rand!(
     rng::AbstractRNG,
     d::ProjectedFVectorDistribution,
     X::AbstractArray{<:Number},
 )
     # calling _rand!(rng, d.d, v) doesn't work for all arrays types
-    return copyto!(X, rand(rng, d))
+    return copyto!(X, Random.rand(rng, d))
 end
 
-support(tvd::ProjectedFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)
+Distributions.support(tvd::ProjectedFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)
