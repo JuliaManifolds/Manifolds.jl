@@ -143,7 +143,7 @@ using ManifoldsBase:
 
 
 using Markdown: @doc_str
-using Random: AbstractRNG, randn!
+using Random: AbstractRNG
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
