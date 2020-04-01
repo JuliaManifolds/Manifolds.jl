@@ -55,7 +55,7 @@ Random.seed!(42)
     retraction_methods = [Manifolds.PowerRetraction(ManifoldsBase.ExponentialRetraction())]
     inverse_retraction_methods = [Manifolds.InversePowerRetraction(ManifoldsBase.LogarithmicInverseRetraction())]
 
-    sphere_dist = Manifolds.uniform_distribution(Ms, @SVector [1.0, 0.0, 0.0])
+    sphere_dist = uniform_distribution(Ms, @SVector [1.0, 0.0, 0.0])
     power_s1_pt_dist = Manifolds.PowerPointDistribution(Ms1, sphere_dist, randn(Float64, 3, 5))
     power_s2_pt_dist = Manifolds.PowerPointDistribution(Ms2, sphere_dist, randn(Float64, 3, 5, 7))
     sphere_tv_dist = Manifolds.normal_tvector_distribution(Ms, (@MVector [1.0, 0.0, 0.0]), 1.0)

@@ -36,8 +36,8 @@ include("utils.jl")
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
                 test_mutating_rand = isa(T, Vector),
-                point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
-                tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
+                point_distributions = [uniform_distribution(M, pts[1])],
+                tvector_distributions = [normal_tvector_distribution(M, pts[1], 1.0)],
                 basis_types_vecs = (DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),),
                 basis_types_to_from = basis_types,
                 test_vee_hat = false,
@@ -49,10 +49,10 @@ include("utils.jl")
     end
 
     @testset "Distribution tests" begin
-        usd_mvector = Manifolds.uniform_distribution(M, @MVector [1.0, 0.0, 0.0])
+        usd_mvector = uniform_distribution(M, @MVector [1.0, 0.0, 0.0])
         @test isa(rand(usd_mvector), MVector)
 
-        gtsd_mvector = Manifolds.normal_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
+        gtsd_mvector = normal_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
         @test isa(rand(gtsd_mvector), MVector)
     end
 

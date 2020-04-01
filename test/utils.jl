@@ -4,6 +4,7 @@ const TEST_STATIC_SIZED = false
 
 using Manifolds
 using ManifoldsBase
+using Manifolds.ManifoldDistributions
 
 using LinearAlgebra
 using Distributions

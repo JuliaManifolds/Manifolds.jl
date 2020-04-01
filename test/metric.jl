@@ -53,8 +53,8 @@ Manifolds.get_basis(::BaseManifold{N},x,B::DefaultOrthonormalBasis) where {N} = 
 Manifolds.get_coordinates!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
 Manifolds.get_vector!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
 Manifolds.default_metric_dispatch(::BaseManifold, ::DefaultBaseManifoldMetric) = Val(true)
-Manifolds.projected_distribution(M::BaseManifold, d) = ProjectedPointDistribution(M, d, project!, rand(d))
-Manifolds.projected_distribution(M::BaseManifold, d, x) = ProjectedPointDistribution(M, d, project!, x)
+ManifoldDistributions.projected_distribution(M::BaseManifold, d) = ProjectedPointDistribution(M, d, project!, rand(d))
+ManifoldDistributions.projected_distribution(M::BaseManifold, d, x) = ProjectedPointDistribution(M, d, project!, x)
 Manifolds.mean!(::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...) = fill!(y, 1)
 Manifolds.median!(::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...) = fill!(y, 2)
 Manifolds.mean!(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N} = fill!(y, 3)
@@ -348,8 +348,8 @@ end
         @test is_manifold_point(MM2, x) === is_manifold_point(M, x)
         @test is_tangent_vector(MM2, x, v) === is_tangent_vector(M, x, v)
 
-        a = Manifolds.projected_distribution(M, Distributions.MvNormal(zero(zeros(3)), 1.0))
-        b = Manifolds.projected_distribution(
+        a = projected_distribution(M, Distributions.MvNormal(zero(zeros(3)), 1.0))
+        b = projected_distribution(
             MM2,
             Distributions.MvNormal(zero(zeros(3)), 1.0),
         )
