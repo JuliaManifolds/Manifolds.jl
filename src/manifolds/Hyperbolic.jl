@@ -1,5 +1,5 @@
 @doc raw"""
-    Hyperbolic{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType}
+    Hyperbolic{N} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
 
 The hyperbolic space $ℍ^n$ represented by $n+1$-Tuples, i.e. embedded in the
 [`Lorentz`](@ref)ian manifold equipped with the [`MinkowskiMetric`](@ref)
@@ -27,13 +27,9 @@ metric. The corresponding sectional curvature is $-1$.
 
 Generate the $ℍ^{n} ⊂ ℝ^{n+1}$
 """
-struct Hyperbolic{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType} end
+struct Hyperbolic{N} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
 
 Hyperbolic(n::Int) = Hyperbolic{n}()
-
-base_manifold(M::Hyperbolic) = M
-decorated_manifold(M::Hyperbolic{N}) where {N} = Lorentz(N+1, MinkowskiMetric())
-default_metric_dispatch(::Hyperbolic, ::MinkowskiMetric) = Val(true)
 
 """
     check_manifold_point(M::Hyperbolic, p; kwargs...)
@@ -43,12 +39,8 @@ inner product in the embedding of -1, see [`MinkowskiMetric`](@ref).
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_manifold_point(M::Hyperbolic, p; kwargs...)
-    if size(p) != representation_size(M)
-        return DomainError(
-            size(p),
-            "The point $(p) does not lie on $(M), since its size is not $(representation_size(M)).",
-        )
-    end
+    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv === nothing || return mpv
     if !isapprox(minkowski_metric(p, p), -1.0; kwargs...)
         return DomainError(
             minkowski_metric(p, p),
@@ -70,15 +62,19 @@ using the `kwargs...`.
 """
 function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwargs...)
     if check_base_point
-        perr = check_manifold_point(M, p; kwargs...)
-        perr === nothing || return perr
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
     end
-    if size(X) != representation_size(M)
-        return DomainError(
-            size(X),
-            "The vector $(X) is not a tangent to a point on $M since its size does not match $(representation_size(M)).",
-        )
-    end
+    mpv = invoke(
+        check_tangent_vector,
+        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        M,
+        p,
+        X;
+        check_base_point = false, # already checked above
+        kwargs...
+    )
+    mpv === nothing || return mpv
     if !isapprox(minkowski_metric(p, X), 0.0; kwargs...)
         return DomainError(
             abs(minkowski_metric(p, X)),
@@ -87,6 +83,10 @@ function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwar
     end
     return nothing
 end
+
+decorated_manifold(M::Hyperbolic{N}) where {N} = Lorentz(N+1, MinkowskiMetric())
+
+default_metric_dispatch(::Hyperbolic, ::MinkowskiMetric) = Val(true)
 
 @doc raw"""
     distance(M::Hyperbolic, p, q)
@@ -134,21 +134,28 @@ end
 
 Return the injectivity radius on the [`Hyperbolic`](@ref), which is $∞$.
 """
-injectivity_radius(H::Hyperbolic, ::Any...) = Inf
+injectivity_radius(H::Hyperbolic) = Inf
+injectivity_radius(H::Hyperbolic, ::ExponentialRetraction) = Inf
+injectivity_radius(H::Hyperbolic, ::Any) = Inf
+injectivity_radius(H::Hyperbolic, ::Any, ::ExponentialRetraction) = Inf
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(M::Hyperbolic, rm::AbstractRetractionMethod)
+end)
 
 @doc raw"""
     log(M::Hyperbolic, p, q)
 
 Compute the logarithmic map on the [`Hyperbolic`](@ref) space $ℍ^n$, the tangent
 vector representing the [`geodesic`](@ref) starting from `p`
-reaches `q` after time 1. The formula reads for $x ≠ y$
+reaches `q` after time 1. The formula reads for $p ≠ q$
 
 ```math
 \log_p q = d_{ℍ^n}(p,q)
-\frac{q-⟨p,q⟩_{\mathrm{M}} p}{\lVert q-⟨p,q⟩_{\mathrm{M}} p \rVert_2}
+\frac{q-⟨p,q⟩_{\mathrm{M}} p}{\lVert q-⟨p,q⟩_{\mathrm{M}} p \rVert_2},
 ```
 
-and is zero otherwise.
+where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
+the [`Lorentz`](@ref)ian manifold. For $p=q$ the logarihmic map is equal to the zero vector.
 """
 log(::Hyperbolic, ::Any...)
 
@@ -187,7 +194,7 @@ function mean!(M::Hyperbolic, p, x::AbstractVector, w::AbstractVector; kwargs...
 end
 
 @doc raw"""
-    project_tangent(M::Hyperbolic, p, X)
+    project(M::Hyperbolic, p, X)
 
 Perform an orthogonal projection with respect to the Minkowski inner product of `X` onto
 the tangent space at `p` of the [`Hyperbolic`](@ref) space `M`.
@@ -199,9 +206,9 @@ Y = X + ⟨p,X⟩_{\mathrm{M}} p,
 where $⟨\cdot, \cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
 the [`Lorentz`](@ref)ian manifold.
 """
-project_tangent(::Hyperbolic, ::Any...)
+project(::Hyperbolic, ::Any, ::Any)
 
-project_tangent!(M::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)
+project!(M::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)
 
 show(io::IO, ::Hyperbolic{N}) where {N} = print(io, "Hyperbolic($(N))")
 
@@ -213,9 +220,10 @@ Compute the paralllel transport of the `X` from the tangent space at `p` on the
 connecting `p` and `q`. The formula reads
 
 ````math
-\mathcal P_{q←p}X = X - \frac{⟨\log_p q,X⟩_x}{d^2_{ℍ^n}(p,q)}
-\bigl(\log_p q + \log_qp \bigr).
+\mathcal P_{q←p}X = X - \frac{⟨\log_p q,X⟩_p}{d^2_{ℍ^n}(p,q)}
+\bigl(\log_p q + \log_qp \bigr),
 ````
+where $⟨\cdot,\cdot⟩_p$ denotes the inner product in the tangent space at `p`.
 """
 vector_transport_to(::Hyperbolic, ::Any, ::Any, ::Any, ::ParallelTransport)
 

@@ -27,9 +27,13 @@ function SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
     SymmetricMatrices{n,field}()
 end
 
-base_manifold(M::SymmetricMatrices) = M
-
-decorated_manifold(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field = 𝔽)
+function allocation_promotion_function(
+    M::SymmetricMatrices{<:Any,ℂ},
+    ::typeof(get_vector),
+    args::Tuple,
+)
+    return complex
+end
 
 @doc raw"""
     check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...)
@@ -41,24 +45,8 @@ whether `p` is a symmetric matrix of size `(n,n)` with values from the correspon
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
 function check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    if (𝔽 === ℝ) && !(eltype(p) <: Real)
-        return DomainError(
-            eltype(p),
-            "The matrix $(p) does not lie on $M, since its values are not real.",
-        )
-    end
-    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
-        return DomainError(
-            eltype(p),
-            "The matrix $(p) does not lie on $M, since its values are not complex.",
-        )
-    end
-    if size(p) != (n, n)
-        return DomainError(
-            size(p),
-            "The point $(p) does not lie on $M since its size ($(size(p))) does not match the representation size ($(representation_size(M))).",
-        )
-    end
+    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv === nothing || return mpv
     if !isapprox(norm(p - p'), 0.0; kwargs...)
         return DomainError(
             norm(p - p'),
@@ -86,27 +74,19 @@ function check_tangent_vector(
     kwargs...,
 ) where {n,𝔽}
     if check_base_point
-        t = check_manifold_point(M, p; kwargs...)
-        t === nothing || return t
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
     end
-    if (𝔽 === ℝ) && !(eltype(X) <: Real)
-        return DomainError(
-            eltype(X),
-            "The matrix $(X) is not a tangent to a point on $M, since its values are not real.",
-        )
-    end
-    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
-        return DomainError(
-            eltype(X),
-            "The matrix $(X) is not a tangent to a point on $M, since its values are not complex.",
-        )
-    end
-    if size(X) != (n, n)
-        return DomainError(
-            size(X),
-            "The vector $(X) is not a tangent to a point on $(M) since its size ($(size(X))) does not match the representation size ($(representation_size(M))).",
-        )
-    end
+    mpv = invoke(
+        check_tangent_vector,
+        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        M,
+        p,
+        X;
+        check_base_point = false, # already checked above
+        kwargs...
+    )
+    mpv === nothing || return mpv
     if !isapprox(norm(X - X'), 0.0; kwargs...)
         return DomainError(
             norm(X - X'),
@@ -116,22 +96,26 @@ function check_tangent_vector(
     return nothing
 end
 
+decorated_manifold(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field = 𝔽)
+
 embed!(M::SymmetricMatrices, q, p) = copyto!(q, p)
+embed!(M::SymmetricMatrices, Y, p, X) = copyto!(Y, X)
 
 function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
-    vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors
-    kappas = zeros(real(eltype(p)), manifold_dimension(M))
-    return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
+    Ξ = get_basis(M, p, DefaultOrthonormalBasis()).data
+    κ = zeros(real(eltype(p)), manifold_dimension(M))
+    return CachedBasis(B, κ, Ξ)
 end
 
-function get_coordinates(
+function get_coordinates!(
     M::SymmetricMatrices{N,ℝ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, dim)
+    @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
     k = 1
@@ -142,14 +126,15 @@ function get_coordinates(
     end
     return Y
 end
-function get_coordinates(
+function get_coordinates!(
     M::SymmetricMatrices{N,ℂ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, dim)
+    @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == N * N
     k = 1
@@ -165,15 +150,15 @@ function get_coordinates(
     return Y
 end
 
-function get_vector(
+function get_vector!(
     M::SymmetricMatrices{N,ℝ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = allocate_result(M, get_vector, p)
-    @assert size(X) == (div(N * (N + 1), 2),)
+    @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
@@ -184,20 +169,20 @@ function get_vector(
     end
     return Y
 end
-function get_vector(
+function get_vector!(
     M::SymmetricMatrices{N,ℂ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = allocate_result(M, get_vector, p, p .* 1im)
-    @assert size(X) == (N^2,)
+    @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds Y[i, j] = Complex(X[k], i == j ? 0 : X[k+1]) * scale
+        @inbounds Y[i, j] = ( X[k] + (i == j ? 0 : X[k+1]*1im) ) * scale
         @inbounds Y[j, i] = Y[i, j]
         k += (i == j ? 1 : 2)
     end
@@ -212,13 +197,10 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the numb
 `𝔽`, i.e.
 
 ````math
-\dim \operatorname{Sym}(n,ℝ) = \frac{n(n+1)}{2},
-````
-
-and
-
-````math
-\dim \operatorname{Sym}(n,ℂ) = 2\frac{n(n+1)}{2} - n = n^2,
+\begin{aligned}
+\dim \mathrm{Sym}(n,ℝ) &= \frac{n(n+1)}{2},\\
+\dim \mathrm{Sym}(n,ℂ) &= 2\frac{n(n+1)}{2} - n = n^2,
+\end{aligned}
 ````
 
 where the last $-n$ is due to the zero imaginary part for Hermitian matrices
@@ -228,7 +210,7 @@ function manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}
 end
 
 @doc raw"""
-    project_point(M::SymmetricMatrices, p)
+    project(M::SymmetricMatrices, p)
 
 Projects `p` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
 
@@ -238,12 +220,12 @@ Projects `p` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
 
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
-project_point(::SymmetricMatrices, ::Any...)
+project(::SymmetricMatrices, ::Any)
 
-project_point!(M::SymmetricMatrices, q, p) = copyto!(q, (p + p') ./ 2)
+project!(M::SymmetricMatrices, q, p) = copyto!(q, (p + p') ./ 2)
 
 @doc raw"""
-    project_tangent(M::SymmetricMatrices, p, X)
+    project(M::SymmetricMatrices, p, X)
 
 Project the matrix `X` onto the tangent space at `p` on the [`SymmetricMatrices`](@ref) `M`,
 
@@ -253,9 +235,9 @@ Project the matrix `X` onto the tangent space at `p` on the [`SymmetricMatrices`
 
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
-project_tangent(::SymmetricMatrices, ::Any...)
+project(::SymmetricMatrices, ::Any, ::Any)
 
-project_tangent!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
+project!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
 
 function show(io::IO, ::SymmetricMatrices{n,F}) where {n,F}
     print(io, "SymmetricMatrices($(n), $(F))")

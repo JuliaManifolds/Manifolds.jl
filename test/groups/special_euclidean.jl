@@ -4,6 +4,7 @@ include("group_utils.jl")
 @testset "Special Euclidean group" begin
     @testset "SpecialEuclidean($n)" for n in (2, 3, 4)
         G = SpecialEuclidean(n)
+        @test isa(G, SpecialEuclidean{n})
         @test repr(G) == "SpecialEuclidean($n)"
         M = base_manifold(G)
         @test M === TranslationGroup(n) × SpecialOrthogonal(n)
@@ -56,7 +57,7 @@ include("group_utils.jl")
                 Manifolds._padvector!(G, tmp)
                 @test tmp == v_pts[1]
 
-                w = translate_diff(G, pts[1], Identity(G), v_pts[1])
+                w = translate_diff(G, pts[1], make_identity(G, pts[1]), v_pts[1])
                 w2 = allocate(w)
                 w2.parts[1] .= w.parts[1]
                 w2.parts[2] .= pts[1].parts[2] * w.parts[2]
@@ -78,10 +79,10 @@ include("group_utils.jl")
             g1g2mat = affine_matrix(G, g1g2)
             @test g1g2mat ≈ affine_matrix(G, g1) * affine_matrix(G, g2)
             @test affine_matrix(G, g1g2mat) === g1g2mat
-            @test affine_matrix(G, Identity(G)) isa SDiagonal{n,Float64}
-            @test affine_matrix(G, Identity(G)) == SDiagonal{n,Float64}(I)
+            @test affine_matrix(G, make_identity(G, pts[1])) isa SDiagonal{n,Float64}
+            @test affine_matrix(G, make_identity(G, pts[1])) == SDiagonal{n,Float64}(I)
 
-            w = translate_diff(G, pts[1], Identity(G), v_pts[1])
+            w = translate_diff(G, pts[1], make_identity(G, pts[1]), v_pts[1])
             w2 = allocate(w)
             w2.parts[1] .= w.parts[1]
             w2.parts[2] .= pts[1].parts[2] * w.parts[2]
@@ -114,6 +115,6 @@ include("group_utils.jl")
     end
 
     G = SpecialEuclidean(11)
-    @test affine_matrix(G, Identity(G)) isa Diagonal{Float64,Vector{Float64}}
-    @test affine_matrix(G, Identity(G)) == Diagonal(ones(11))
+    @test affine_matrix(G, make_identity(G, ones(12, 12))) isa Diagonal{Float64,Vector{Float64}}
+    @test affine_matrix(G, make_identity(G, ones(12, 12))) == Diagonal(ones(11))
 end

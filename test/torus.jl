@@ -22,7 +22,7 @@ include("utils.jl")
         x = [1.0, 2.0]
         y = [-1.0, 2.0]
         z = [0., 0.]
-        basis_types = (ArbitraryOrthonormalBasis(),)
+        basis_types = (DefaultOrthonormalBasis(),)
         test_manifold(M,
             [x, y, z],
             test_forward_diff = false,

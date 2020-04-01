@@ -3,7 +3,7 @@
 First, thanks for taking the time to contribute.
 Any contribution is appreciated and welcome.
 
-The following is a set of guidelines to [`Manifolds.jl`](https://julianlsolvers.github.io/Manifolds.jl/).
+The following is a set of guidelines to [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/).
 
 #### Table of Contents
 
@@ -25,7 +25,7 @@ If you found a bug or want to propose a feature, we track our issues within the 
 
 ### Add a missing method
 
-Not all methods from our interface [`ManifoldsBase.jl`](https://julianlsolvers.github.io/Manifolds.jl/latest/interface.html) have been implemented for every manifold.
+Not all methods from our interface [`ManifoldsBase.jl`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html) have been implemented for every manifold.
 If you notice a method missing and can contribute an implementation, please do so!
 Even providing a single new method is a good contribution.
 
@@ -33,18 +33,18 @@ Even providing a single new method is a good contribution.
 
 A main contribution you can provide is another manifold that is not yet included in the
 package.
-A manifold is a concrete type of [`Manifold`](https://julianlsolvers.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.Manifold) from [`ManifoldsBase.jl`](https://julianlsolvers.github.io/Manifolds.jl/latest/interface.html).
+A manifold is a concrete type of [`Manifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.Manifold) from [`ManifoldsBase.jl`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html).
 This package also provides the main set of functions a manifold can/should implement.
 Don't worry if you can only implement some of the functions.
 If the application you have in mind only requires a subset of these functions, implement those.
-The [`ManifoldsBase.jl`](https://julianlsolvers.github.io/Manifolds.jl/latest/interface.html) interface provides concrete error messages for the remaining unimplemented functions.
+The [`ManifoldsBase.jl`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html) interface provides concrete error messages for the remaining unimplemented functions.
 
 One important detail is that the interface usually provides a mutating as well as a non-mutating variant
-See for example [exp!](https://julianlsolvers.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.exp!-Tuple{Manifold,Any,Any,Any}) and [exp](https://julianlsolvers.github.io/Manifolds.jl/latest/interface.html#Base.exp-Tuple{Manifold,Any,Any}).
+See for example [exp!](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.exp!-Tuple{Manifold,Any,Any,Any}) and [exp](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#Base.exp-Tuple{Manifold,Any,Any}).
 The non-mutating one (e.g. `exp`) always falls back to use the mutating one, so in most cases it should
 suffice to implement the mutating one (e.g. `exp!`).
 
-Note that since the first argument is _always_ the [`Manifold`](https://julianlsolvers.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.Manifold), the mutated argument is always the second one in the signature.
+Note that since the first argument is _always_ the [`Manifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.Manifold), the mutated argument is always the second one in the signature.
 In the example we have `exp(M, x, v)` for the exponential map and `exp!(M, y, v, x)` for the mutating one, that stores the result in `y`.
 
 On the other hand, the user will most likely look for the documentation of the non-mutating version, so we recommend adding the docstring for the non-mutating one, where all different signatures should be collected in one string when reasonable.

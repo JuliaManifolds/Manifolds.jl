@@ -120,7 +120,7 @@ shape, i.e. `p.U` and `p.Vt` have to be unitary. The keyword arguments are passe
 """
 function check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {m,n,k}
     r = rank(p; kwargs...)
-    s = "The point $(p) does not lie on the manifold of fixed rank matrices of size ($(m),$(n)) witk rank $(k), "
+    s = "The point $(p) does not lie on $(M), "
     if size(p) != (m, n)
         return DomainError(size(p), string(s, "since its size is wrong."))
     end
@@ -130,11 +130,11 @@ function check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {
     return nothing
 end
 function check_manifold_point(
-    F::FixedRankMatrices{m,n,k},
+    M::FixedRankMatrices{m,n,k},
     x::SVDMPoint;
     kwargs...,
 ) where {m,n,k}
-    s = "The point $(x) does not lie on the manifold of fixed rank matrices of size ($(m),$(n)) witk rank $(k), "
+    s = "The point $(x) does not lie on $(M), "
     if (size(x.U) != (m, k)) || (length(x.S) != k) || (size(x.Vt) != (k, n))
         return DomainError(
             [size(x.U)..., length(x.S), size(x.Vt)...],
@@ -181,19 +181,19 @@ function check_tangent_vector(
     if (size(X.U) != (m, k)) || (size(X.Vt) != (k, n)) || (size(X.M) != (k, k))
         return DomainError(
             cat(size(X.U), size(X.M), size(X.Vt), dims = 1),
-            "The tangent vector $(X) is not a tangent vector to $(p) on the fixed rank matrices since the matrix dimensions to not fit (expected $(m)x$(k), $(k)x$(k), $(k)x$(n)).",
+            "The tangent vector $(X) is not a tangent vector to $(p) on $(M), since matrix dimensions do not agree (expected $(m)x$(k), $(k)x$(k), $(k)x$(n)).",
         )
     end
     if !isapprox(X.U' * p.U, zeros(k, k); kwargs...)
         return DomainError(
             norm(X.U' * p.U - zeros(k, k)),
-            "The tangent vector $(X) is not a tangent vector to $(p) on the fixed rank matrices since v.U'x.U is not zero. ",
+            "The tangent vector $(X) is not a tangent vector to $(p) on $(M) since v.U'x.U is not zero. ",
         )
     end
     if !isapprox(X.Vt * p.Vt', zeros(k, k); kwargs...)
         return DomainError(
             norm(X.Vt * p.Vt - zeros(k, k)),
-            "The tangent vector $(X) is not a tangent vector to $(p) on the fixed rank matrices since v.V'x.V is not zero.",
+            "The tangent vector $(X) is not a tangent vector to $(p) on $(M) since v.V'x.V is not zero.",
         )
     end
 end
@@ -242,16 +242,16 @@ function manifold_dimension(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽}
 end
 
 @doc raw"""
-    project_tangent(M, p, A)
-    project_tangent(M, p, X)
+    project(M, p, A)
+    project(M, p, X)
 
 Project the matrix $A ∈ ℝ^{m,n}$ or a [`UMVTVector`](@ref) `X` from the embedding or
 another tangent space onto the tangent space at $p$ on the [`FixedRankMatrices`](@ref) `M`,
 further decomposing the result into $X=UMV$, i.e. a [`UMVTVector`](@ref).
 """
-project_tangent(::FixedRankMatrices, ::Any...)
+project(::FixedRankMatrices, ::Any, ::Any)
 
-function project_tangent!(
+function project!(
     ::FixedRankMatrices,
     Y::UMVTVector,
     p::SVDMPoint,
@@ -265,8 +265,8 @@ function project_tangent!(
     Y.Vt .= (aTu - p.Vt' * uTav')'
     return Y
 end
-function project_tangent!(M::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, X::UMVTVector)
-    return project_tangent!(M, Y, p, X.U * X.M * X.Vt)
+function project!(M::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, X::UMVTVector)
+    return project!(M, Y, p, X.U * X.M * X.Vt)
 end
 
 @doc raw"""

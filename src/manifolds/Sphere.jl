@@ -1,5 +1,5 @@
 @doc raw"""
-    Sphere{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType}
+    Sphere{N} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
 
 The unit sphere manifold $𝕊^n$ represented by $n+1$-Tuples, i.e. in by
 vectors in $ℝ^{n+1}$ of unit length. A sphere is an embedded manifold
@@ -12,33 +12,19 @@ T_p𝕊^n := \bigl\{ X ∈ ℝ^{n+1} : ⟨p,X⟩ = 0 \bigr \},
 
 where $⟨\cdot,\cdot⟩$ denotes the inner product in the embedding $\mathbb R^{n+1}$.
 
+This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
+several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
+[`zero_tangent_vector`](@ref zero_tangent_vector(::Euclidean, ::Any...)) are inherited from the embedding.
+
 # Constructor
 
     Sphere(n)
 
 Generate $𝕊^{n} ⊂ ℝ^{n+1}$.
 """
-struct Sphere{N} <: AbstractEmbeddedManifold{AbstractIsometricEmbeddingType} end
+struct Sphere{N} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
 
 Sphere(n::Int) = Sphere{n}()
-
-base_manifold(M::Sphere) = M
-decorated_manifold(M::Sphere{N}) where {N} = Euclidean(N+1; field=ℝ)
-
-function get_basis(M::Sphere{N}, p, B::DiagonalizingOrthonormalBasis) where {N}
-    A = zeros(N + 1, N + 1)
-    A[1, :] = transpose(p)
-    A[2, :] = transpose(B.frame_direction)
-    V = nullspace(A)
-    κ = ones(N)
-    if !iszero(B.frame_direction)
-        # if we have a nonzero direction for the geodesic, add it and it gets curvature zero from the tensor
-        V = cat(B.frame_direction / norm(M, p, B.frame_direction), V; dims = 2)
-        κ[1] = 0 # no curvature along the geodesic direction, if x!=y
-    end
-    vecs = [V[:, i] for i = 1:N]
-    return PrecomputedDiagonalizingOrthonormalBasis(vecs, κ)
-end
 
 """
     check_manifold_point(M, p; kwargs...)
@@ -48,12 +34,8 @@ of length [`manifold_dimension`](@ref)`(M)+1` (approximately) of unit length.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_manifold_point(M::Sphere{N}, p; kwargs...) where {N}
-    if size(p) != representation_size(M)
-        return DomainError(
-            size(p),
-            "The point $(p) does not lie on $M, since its size is not $(N+1).",
-        )
-    end
+    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv === nothing || return mpv
     if !isapprox(norm(p), 1.0; kwargs...)
         return DomainError(
             norm(p),
@@ -80,15 +62,19 @@ function check_tangent_vector(
     kwargs...,
 ) where {N}
     if check_base_point
-        perr = check_manifold_point(M, p)
-        perr === nothing || return perr
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
     end
-    if size(X) != representation_size(M)
-        return DomainError(
-            size(X),
-            "The vector $(X) is not a tangent to a point on $M since its size does not match $(N+1).",
-        )
-    end
+    mpv = invoke(
+        check_tangent_vector,
+        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        M,
+        p,
+        X;
+        check_base_point = false, # already checked above
+        kwargs...
+    )
+    mpv === nothing || return mpv
     if !isapprox(abs(dot(p, X)), 0.0; kwargs...)
         return DomainError(
             abs(dot(p, X)),
@@ -97,6 +83,8 @@ function check_tangent_vector(
     end
     return nothing
 end
+
+decorated_manifold(M::Sphere) = Euclidean(representation_size(M)...; field=ℝ)
 
 @doc raw"""
     distance(M::Sphere, p, q)
@@ -135,6 +123,54 @@ function exp!(M::Sphere, q, p, X)
     return q
 end
 
+flat!(M::Sphere, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
+
+function get_basis(M::Sphere{N}, p, B::DiagonalizingOrthonormalBasis) where {N}
+    A = zeros(N + 1, N + 1)
+    A[1, :] = transpose(p)
+    A[2, :] = transpose(B.frame_direction)
+    V = nullspace(A)
+    κ = ones(N)
+    if !iszero(B.frame_direction)
+        # if we have a nonzero direction for the geodesic, add it and it gets curvature zero from the tensor
+        V = cat(B.frame_direction / norm(M, p, B.frame_direction), V; dims = 2)
+        κ[1] = 0 # no curvature along the geodesic direction, if x!=y
+    end
+    Ξ = [V[:, i] for i = 1:N]
+    return CachedBasis(B, κ, Ξ)
+end
+
+@doc raw"""
+    get_coordinates(M::Sphere, p, X, B::DefaultOrthonormalBasis)
+
+Represent the tangent vector `X` at point `p` from the [`Sphere`](@ref) `M` in
+an orthonormal basis by rotating the vector `X` using the rotation matrix
+$2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
+"""
+function get_coordinates(M::Sphere{N}, p, X, B::DefaultOrthonormalBasis) where {N}
+    if isapprox(p[1], 1)
+        return X[2:end]
+    else
+        xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
+        return (2*xp1*dot(xp1, X)/dot(xp1, xp1)-X)[2:end]
+    end
+end
+
+function get_coordinates!(M::Sphere, Y, p, X, B::DefaultOrthonormalBasis)
+    return copyto!(Y, get_coordinates(M, p, X, B))
+end
+
+function get_vector(M::Sphere{N}, p, X, B::DefaultOrthonormalBasis) where {N}
+    p[1] ≈ 1 && return vcat(0, X)
+    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
+    X0 = vcat(0, X)
+    return 2 * xp1 * dot(xp1, X0) / dot(xp1, xp1) - X0
+end
+
+function get_vector!(M::Sphere, Y::AbstractVector, p, X, B::DefaultOrthonormalBasis)
+    return copyto!(Y, get_vector(M, p, X, B))
+end
+
 @doc raw"""
     injectivity_radius(M::Sphere[, p])
 
@@ -145,15 +181,15 @@ Return the injectivity radius for the [`Sphere`](@ref) `M`, which is globally $�
 Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
 [`Sphere`](@ref), which is globally $\frac{π}{2}$.
 """
-injectivity_radius(::Sphere, ::Any...) = π
+injectivity_radius(::Sphere) = π
+injectivity_radius(::Sphere, ::ExponentialRetraction) = π
+injectivity_radius(::Sphere, ::ProjectionRetraction) = π / 2
+injectivity_radius(::Sphere, ::Any) = π
+injectivity_radius(::Sphere, ::Any, ::ExponentialRetraction) = π
 injectivity_radius(::Sphere, ::Any, ::ProjectionRetraction) = π / 2
-
-function get_vector(M::Sphere{N}, p, X, B::ArbitraryOrthonormalBasis) where {N}
-    p[1] ≈ 1 && return vcat(0, X)
-    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
-    X0 = vcat(0, X)
-    return 2 * xp1 * dot(xp1, X0) / dot(xp1, xp1) - X0
-end
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(M::Sphere, rm::AbstractRetractionMethod)
+end)
 
 @doc raw"""
     inverse_retract(M::Sphere, p, q, ::ProjectionInverseRetraction)
@@ -204,7 +240,7 @@ function log!(S::Sphere, X, p, q)
         θ = acos(cosθ)
         X .= (q .- cosθ .* p) ./ usinc(θ)
     end
-    return project_tangent!(S, X, p, X)
+    return project!(S, X, p, X)
 end
 
 @doc raw"""
@@ -244,7 +280,7 @@ function normal_tvector_distribution(S::Sphere, p, σ)
 end
 
 @doc raw"""
-    project_point(M::Sphere, p)
+    project(M::Sphere, p)
 
 Project the point `p` from the embedding onto the [`Sphere`](@ref) `M`.
 
@@ -252,12 +288,12 @@ Project the point `p` from the embedding onto the [`Sphere`](@ref) `M`.
 \operatorname{proj}_{𝕊^n}(p) = \frac{p}{\lVert p \rVert_2}.
 ````
 """
-project_point(::Sphere, ::Any...)
+project(::Sphere, ::Any)
 
-project_point!(S::Sphere, q, p) = copyto!(q, p./ norm(p))
+project!(S::Sphere, q, p) = copyto!(q, p./ norm(p))
 
 @doc raw"""
-    project_tangent(M::Sphere, p, X)
+    project(M::Sphere, p, X)
 
 Project the point `X` onto the tangent space at `p` on the [`Sphere`](@ref) `M`.
 
@@ -265,25 +301,9 @@ Project the point `X` onto the tangent space at `p` on the [`Sphere`](@ref) `M`.
 \operatorname{proj}_{p}(X) = X - ⟨p, X⟩p
 ````
 """
-project_tangent(::Sphere, ::Any...)
+project(::Sphere, ::Any, ::Any)
 
-project_tangent!(S::Sphere, Y, p, X) = (Y .= X .- dot(p, X) .* p)
-
-@doc raw"""
-    get_coordinates(M::Sphere, p, X, B::ArbitraryOrthonormalBasis)
-
-Represent the tangent vector `X` at point `p` from the [`Sphere`](@ref) `M` in
-an orthonormal basis by rotating the vector `X` using the rotation matrix
-$2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
-"""
-function get_coordinates(M::Sphere{N}, p, X, B::ArbitraryOrthonormalBasis) where {N}
-    if isapprox(p[1], 1)
-        return X[2:end]
-    else
-        xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), N + 1)
-        return (2*xp1*dot(xp1, X)/dot(xp1, xp1)-X)[2:end]
-    end
-end
+project!(S::Sphere, Y, p, X) = (Y .= X .- dot(p, X) .* p)
 
 @doc raw"""
     representation_size(M::Sphere)
@@ -306,7 +326,7 @@ retract(::Sphere, ::Any, ::Any, ::ProjectionRetraction)
 
 function retract!(M::Sphere, q, p, X, ::ProjectionRetraction)
     q .= p .+ X
-    return project_point!(M, q, q)
+    return project!(M, q, q)
 end
 
 show(io::IO, ::Sphere{N}) where {N} = print(io, "Sphere($(N))")
@@ -319,7 +339,7 @@ similar type as `p`.
 """
 function uniform_distribution(M::Sphere, p)
     d = Distributions.MvNormal(zero(p), 1.0)
-    return ProjectedPointDistribution(M, d, project_point!, p)
+    return ProjectedPointDistribution(M, d, project!, p)
 end
 
 @doc doc"""

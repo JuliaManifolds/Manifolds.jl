@@ -10,6 +10,7 @@ Euclidean vector space.
 Generate the $n$-dimensional vector space $ℝ^n$.
 
     Euclidean(n₁,n₂,...,nᵢ; field=ℝ)
+    𝔽^(n₁,n₂,...,nᵢ) = Euclidean(n₁,n₂,...,nᵢ; field=𝔽)
 
 Generate the vector space of $k = n_1 \cdot n_2 \cdot … \cdot n_i$ values, i.e. the
 manifold $𝔽^{n_1, n_2, …, n_i}$ whose
@@ -24,6 +25,8 @@ struct Euclidean{N,𝔽} <: Manifold where {N<:Tuple, 𝔽<:AbstractNumbers} end
 function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
     return Euclidean{Tuple{n...},field}()
 end
+
+^(𝔽::AbstractNumbers, n) = Euclidean(n...; field = 𝔽)
 
 """
     EuclideanMetric <: RiemannianMetric
@@ -43,6 +46,60 @@ struct EuclideanMetric <: RiemannianMetric end
 ^(M::Euclidean, n::Int) = ^(M, (n,))
 function ^(::Euclidean{T,𝔽}, n::NTuple{N,Int}) where {T,𝔽,N}
     return Euclidean{Tuple{T.parameters...,n...},𝔽}()
+end
+
+function allocation_promotion_function(
+    M::Euclidean{<:Tuple,ℂ},
+    ::Union{typeof(get_vector),typeof(get_coordinates)},
+    args::Tuple,
+)
+    return complex
+end
+
+function check_manifold_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
+    if (𝔽 === ℝ) && !(eltype(p) <: Real)
+        return DomainError(
+            eltype(p),
+            "The matrix $(p) is not a real-valued matrix, so it does not lie on $(M).",
+        )
+    end
+    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
+        return DomainError(
+            eltype(p),
+            "The matrix $(p) is neither a real- nor complex-valued matrix, so it does not lie on $(M).",
+        )
+    end
+    if size(p) != representation_size(M)
+        return DomainError(
+            size(p),
+            "The matrix $(p) does not lie on $(M), since its dimensions ($(size(p))) are wrong (expected: $(representation_size(M))).",
+        )
+    end
+end
+
+function check_tangent_vector(M::Euclidean{N,𝔽}, p, X; check_base_point = true, kwargs...) where {N,𝔽}
+    if check_base_point
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
+    end
+    if (𝔽 === ℝ) && !(eltype(X) <: Real)
+        return DomainError(
+            eltype(X),
+            "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to $(p) on $(M).",
+        )
+    end
+    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
+        return DomainError(
+            eltype(X),
+            "The matrix $(X) is neither a real- nor complex-valued matrix, so it can not be a tangent vector to $(p) on $(M).",
+        )
+    end
+    if size(X) != representation_size(M)
+        return DomainError(
+            size(X),
+            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since its dimensions $(size(X)) are wrong  (expected: $(representation_size(M))).",
+        )
+    end
 end
 
 det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = one(eltype(p))
@@ -80,46 +137,44 @@ flat(::Euclidean, ::Any...)
 
 flat!(M::Euclidean, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_basis(M::Euclidean{<:Tuple,ℝ}, p, B::ArbitraryOrthonormalBasis)
+function get_basis(M::Euclidean{<:Tuple,ℝ}, p, B::DefaultOrthonormalBasis)
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
-    return PrecomputedOrthonormalBasis(vecs)
+    return CachedBasis(B,vecs)
 end
-function get_basis(M::Euclidean{<:Tuple,ℂ}, p, B::ArbitraryOrthonormalBasis)
+function get_basis(M::Euclidean{<:Tuple,ℂ}, p, B::DefaultOrthonormalBasis)
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
-    return PrecomputedOrthonormalBasis([vecs; im * vecs])
+    return CachedBasis(B,[vecs; im * vecs])
 end
 function get_basis(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
-    vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors
-    kappas = zeros(real(eltype(p)), manifold_dimension(M))
-    return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
+    vecs = get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
+    eigenvalues = zeros(real(eltype(p)), manifold_dimension(M))
+    return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates(M::Euclidean{<:Tuple,ℝ}, p, X, B::ArbitraryOrDiagonalizingBasis)
+function get_coordinates!(M::Euclidean{<:Tuple,ℝ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
     PS = prod(S)
-    return reshape(X, PS)
+    copyto!(Y, reshape(X, PS))
+    return Y
 end
-function get_coordinates(M::Euclidean{<:Tuple,ℂ}, p, X, B::ArbitraryOrDiagonalizingBasis)
+function get_coordinates!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
     PS = prod(S)
-    return [reshape(real(X), PS); reshape(imag(X), PS)]
+    Y .= [reshape(real(X), PS)..., reshape(imag(X), PS)...]
+    return Y
 end
 
-function get_vector(M::Euclidean{<:Tuple,ℝ}, p, X, B::ArbitraryOrDiagonalizingBasis)
+function get_vector!(M::Euclidean{<:Tuple,ℝ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
-    return reshape(X, S)
+    Y .= reshape(X, S)
+    return Y
 end
-function get_vector(M::Euclidean{<:Tuple,ℂ}, p, X, B::ArbitraryOrDiagonalizingBasis)
+function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
     N = div(length(X), 2)
-    return reshape(X[1:N] + im * X[N+1:end], S)
+    Y .= reshape(X[1:N] + im * X[N+1:end], S)
+    return Y
 end
-
-function hat(M::Euclidean{N,ℝ}, p, Xⁱ) where {N}
-    return reshape(Xⁱ, representation_size(TangentBundleFibers(M)))
-end
-
-hat!(::Euclidean{N,ℝ}, X, p, Xⁱ) where {N} = copyto!(X, Xⁱ)
 
 @doc raw"""
     injectivity_radius(M::Euclidean)
@@ -259,25 +314,25 @@ function normal_tvector_distribution(M::Euclidean{Tuple{N}}, p, σ) where {N}
 end
 
 @doc raw"""
-    project_point(M::Euclidean, p)
+    project(M::Euclidean, p)
 
 Project an arbitrary point `p` onto the [`Euclidean`](@ref) manifold `M`, which
 is of course just the identity map.
 """
-project_point(::Euclidean, ::Any...)
+project(::Euclidean, ::Any)
 
-project_point!(M::Euclidean, q, p) = copyto!(q, p)
+project!(M::Euclidean, q, p) = copyto!(q, p)
 
 """
-    project_tangent(M::Euclidean, p, X)
+    project(M::Euclidean, p, X)
 
 Project an arbitrary vector `X` into the tangent space of a point `p` on the
 [`Euclidean`](@ref) `M`, which is just the identity, since any tangent
 space of `M` can be identified with all of `M`.
 """
-project_tangent(::Euclidean, ::Any...)
+project(::Euclidean, ::Any, ::Any)
 
-project_tangent!(M::Euclidean, Y, p, X) = copyto!(Y, X)
+project!(M::Euclidean, Y, p, X) = copyto!(Y, X)
 
 """
     projected_distribution(M::Euclidean, d, [p])
@@ -286,10 +341,10 @@ Wrap the standard distribution `d` into a manifold-valued distribution. Generate
 points will be of similar type to `p`. By default, the type is not changed.
 """
 function projected_distribution(M::Euclidean, d, p)
-    return ProjectedPointDistribution(M, d, project_point!, p)
+    return ProjectedPointDistribution(M, d, project!, p)
 end
 function projected_distribution(M::Euclidean, d)
-    return ProjectedPointDistribution(M, d, project_point!, rand(d))
+    return ProjectedPointDistribution(M, d, project!, rand(d))
 end
 
 """
@@ -329,10 +384,6 @@ var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
 function var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T}
     return sum(var(x; mean = m, kwargs...))
 end
-
-vee(::Euclidean{N,ℝ}, p, X) where {N} = vec(X)
-
-vee!(::Euclidean{N,ℝ}, Xⁱ, p, X) where {N} = copyto!(Xⁱ, X)
 
 """
     zero_tangent_vector(M::Euclidean, x)

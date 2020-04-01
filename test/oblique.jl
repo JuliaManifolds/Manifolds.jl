@@ -24,7 +24,7 @@ include("utils.jl")
         x = [1.0 0.0 0.0; 1.0 0.0 0.0]'
         y = [1.0 0.0 0.0; 1/sqrt(2) 1/sqrt(2) 0.0]'
         z = [1/sqrt(2) 1/sqrt(2) 0.0; 1.0 0.0 0.0]'
-        basis_types = (ArbitraryOrthonormalBasis(),)
+        basis_types = (DefaultOrthonormalBasis(),)
         test_manifold(
             M,
             [x, y, z],

@@ -35,10 +35,10 @@ function decorator_transparent_dispatch(::typeof(group_log!), M::ProductGroup, X
 end
 
 function show(io::IO, ::MIME"text/plain", G::ProductGroup)
-    M = base_manifold(G)
-    n = length(M.manifolds)
-    print(io, "ProductGroup with $(n) subgroup$(n == 1 ? "" : "s"):")
-    _show_product_manifold_no_header(io, M)
+    print(io,
+        "ProductGroup with $(length(base_manifold(G).manifolds)) subgroup$(length(base_manifold(G).manifolds) == 1 ? "" : "s"):"
+    )
+    _show_product_manifold_no_header(io, base_manifold(G))
 end
 
 function show(io::IO, G::ProductGroup)
@@ -52,14 +52,14 @@ function submanifold_component(
     e::Identity{GT},
     ::Val{I},
 ) where {I,MT<:ProductManifold,GT<:GroupManifold{MT}}
-    return Identity(submanifold(e.group, I))
+    return Identity(submanifold(e.group, I), submanifold_component(e.p, I))
 end
 
 function submanifold_components(
     e::Identity{GT},
 ) where {MT<:ProductManifold,GT<:GroupManifold{MT}}
     M = base_manifold(e.group)
-    return Identity.(M.manifolds)
+    return map(Identity, M.manifolds, submanifold_components(e.group, e.p))
 end
 
 inv(G::ProductGroup, p) = inv(G.manifold, p)

@@ -27,10 +27,13 @@ function SkewSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
     SkewSymmetricMatrices{n,field}()
 end
 
-base_manifold(M::SkewSymmetricMatrices) = M
-decorated_manifold(M::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field = 𝔽)
-
-get_embedding(M::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field = 𝔽)
+function allocation_promotion_function(
+    M::SkewSymmetricMatrices{<:Any,ℂ},
+    ::typeof(get_vector),
+    args::Tuple,
+)
+    return complex
+end
 
 @doc raw"""
     check_manifold_point(M::SkewSymmetricMatrices{n,𝔽}, p; kwargs...)
@@ -42,24 +45,8 @@ whether `p` is a skew-symmetric matrix of size `(n,n)` with values from the corr
 The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
 """
 function check_manifold_point(M::SkewSymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    if (𝔽 === ℝ) && !(eltype(p) <: Real)
-        return DomainError(
-            eltype(p),
-            "The matrix $(p) does not lie on $M, since its values are not real.",
-        )
-    end
-    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
-        return DomainError(
-            eltype(p),
-            "The matrix $(p) does not lie on $M, since its values are not complex.",
-        )
-    end
-    if size(p) != (n, n)
-        return DomainError(
-            size(p),
-            "The point $(p) does not lie on $M since its size ($(size(p))) does not match the representation size ($(representation_size(M))).",
-        )
-    end
+    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv === nothing || return mpv
     if !isapprox(norm(p + p'), 0.0; kwargs...)
         return DomainError(
             norm(p + p'),
@@ -87,27 +74,19 @@ function check_tangent_vector(
     kwargs...,
 ) where {n,𝔽}
     if check_base_point
-        t = check_manifold_point(M, p; kwargs...)
-        t === nothing || return t
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
     end
-    if (𝔽 === ℝ) && !(eltype(X) <: Real)
-        return DomainError(
-            eltype(X),
-            "The matrix $(X) is not a tangent to a point on $M, since its values are not real.",
-        )
-    end
-    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
-        return DomainError(
-            eltype(X),
-            "The matrix $(X) is not a tangent to a point on $M, since its values are not complex.",
-        )
-    end
-    if size(X) != (n, n)
-        return DomainError(
-            size(X),
-            "The vector $(X) is not a tangent to a point on $(M) since its size ($(size(X))) does not match the representation size ($(representation_size(M))).",
-        )
-    end
+    mpv = invoke(
+        check_tangent_vector,
+        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        M,
+        p,
+        X;
+        check_base_point = false, # already checked above
+        kwargs...
+    )
+    mpv === nothing || return mpv
     if !isapprox(norm(X + adjoint(X)), 0.0; kwargs...)
         return DomainError(
             norm(X + adjoint(X)),
@@ -117,22 +96,26 @@ function check_tangent_vector(
     return nothing
 end
 
+decorated_manifold(M::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field = 𝔽)
+
 embed!(M::SkewSymmetricMatrices, q, p) = copyto!(q, p)
+embed!(M::SkewSymmetricMatrices, Y, p, X) = copyto!(Y, X)
 
 function get_basis(M::SkewSymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
-    vecs = get_basis(M, p, ArbitraryOrthonormalBasis()).vectors
-    kappas = zeros(real(eltype(p)), manifold_dimension(M))
-    return PrecomputedDiagonalizingOrthonormalBasis(vecs, kappas)
+    Ξ = get_basis(M, p, DefaultOrthonormalBasis()).data
+    κ = zeros(real(eltype(p)), manifold_dimension(M))
+    return CachedBasis(B, κ, Ξ)
 end
 
-function get_coordinates(
+function get_coordinates!(
     M::SkewSymmetricMatrices{N,ℝ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, dim)
+    @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == div(N * (N - 1), 2)
     k = 1
@@ -142,14 +125,15 @@ function get_coordinates(
     end
     return Y
 end
-function get_coordinates(
+function get_coordinates!(
     M::SkewSymmetricMatrices{N,ℂ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = similar(X, real(eltype(X)), dim)
+    @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == N^2
     k = 1
@@ -166,15 +150,15 @@ function get_coordinates(
     return Y
 end
 
-function get_vector(
+function get_vector!(
     M::SkewSymmetricMatrices{N,ℝ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = allocate_result(M, get_vector, p)
-    @assert size(X) == (div(N * (N - 1), 2),)
+    @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
     for i = 1:N
@@ -187,23 +171,23 @@ function get_vector(
     end
     return Y
 end
-function get_vector(
+function get_vector!(
     M::SkewSymmetricMatrices{N,ℂ},
+    Y,
     p,
     X,
-    B::ArbitraryOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ},
 ) where {N}
     dim = manifold_dimension(M)
-    Y = allocate_result(M, get_vector, p, p .* 1im)
-    @assert size(X) == (N^2,)
+    @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
     for i = 1:N, j = i:N
         if i == j # real zero on the diag
-            @inbounds Y[i, j] = Complex(convert(eltype(X), 0), X[k])
+            @inbounds Y[i, j] = X[k]*1im
             k += 1
         else
-            @inbounds Y[i, j] = Complex(X[k], X[k+1]) / sqrt(2)
+            @inbounds Y[i, j] = (X[k] + X[k+1]*1im) / sqrt(2)
             k += 2
             @inbounds Y[j, i] = -conj(Y[i, j])
         end
@@ -218,11 +202,10 @@ Return the dimension of the [`SkewSymmetricMatrices`](@ref) matrix `M` over the 
 `𝔽`, i.e.
 
 ````math
-\dim \operatorname{SkewSym}(n,𝔽) = \frac{n(n-1)}{2},
-````
-
-````math
-\dim \operatorname{SkewSym}(n,ℂ) = 2*\frac{n(n-1)}{2} + n = n^2
+\begin{aligned}
+\dim \mathrm{SkewSym}(n,ℝ) &= \frac{n(n-1)}{2},\\
+\dim \mathrm{SkewSym}(n,ℂ) &= 2*\frac{n(n-1)}{2} + n = n^2,
+\end{aligned}
 ````
 
 where the last $n$ is due to an imaginary diagonal that is allowed $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
@@ -232,7 +215,7 @@ function manifold_dimension(::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽}
 end
 
 @doc raw"""
-    project_point(M::SkewSymmetricMatrices, p)
+    project(M::SkewSymmetricMatrices, p)
 
 Projects `p` from the embedding onto the [`SkewSymmetricMatrices`](@ref) `M`, i.e.
 
@@ -242,12 +225,12 @@ Projects `p` from the embedding onto the [`SkewSymmetricMatrices`](@ref) `M`, i.
 
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
-project_point(::SkewSymmetricMatrices, ::Any...)
+project(::SkewSymmetricMatrices, ::Any)
 
-project_point!(M::SkewSymmetricMatrices, q, p) = copyto!(q, (p - p') ./ 2)
+project!(M::SkewSymmetricMatrices, q, p) = copyto!(q, (p - p') ./ 2)
 
 @doc raw"""
-    project_tangent(M::SkewSymmetricMatrices, p, X)
+    project(M::SkewSymmetricMatrices, p, X)
 
 Project the matrix `X` onto the tangent space at `p` on the [`SkewSymmetricMatrices`](@ref) `M`,
 
@@ -257,9 +240,9 @@ Project the matrix `X` onto the tangent space at `p` on the [`SkewSymmetricMatri
 
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
-project_tangent(::SkewSymmetricMatrices, ::Any...)
+project(::SkewSymmetricMatrices, ::Any, ::Any)
 
-project_tangent!(M::SkewSymmetricMatrices, Y, p, X) = (Y .= (X .- X') ./ 2)
+project!(M::SkewSymmetricMatrices, Y, p, X) = (Y .= (X .- X') ./ 2)
 
 function show(io::IO, ::SkewSymmetricMatrices{n,F}) where {n,F}
     print(io, "SkewSymmetricMatrices($(n), $(F))")

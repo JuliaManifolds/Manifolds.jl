@@ -11,6 +11,7 @@ const SpecialOrthogonal{n} = GroupManifold{Rotations{n},MultiplicationOperation}
 invariant_metric_dispatch(::SpecialOrthogonal, ::ActionDirection) = Val(true)
 
 default_metric_dispatch(::MetricManifold{<:SpecialOrthogonal,EuclideanMetric}) = Val(true)
+default_metric_dispatch(::SpecialOrthogonal,::EuclideanMetric) = Val(true)
 
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
 
@@ -36,9 +37,9 @@ function inverse_translate_diff!(G::SpecialOrthogonal, Y, p, q, X, conv::ActionD
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
 end
 
-group_exp!(G::SpecialOrthogonal, q, X) = exp!(G, q, Identity(G), X)
+group_exp!(G::SpecialOrthogonal, q, X) = exp!(G, q, make_identity(G, q).p, X)
 
-group_log!(G::SpecialOrthogonal, X, q) = log!(G, X, Identity(G), q)
+group_log!(G::SpecialOrthogonal, X, q) = log!(G, X, make_identity(G, q).p, q)
 
 function allocate_result(
     ::GT,

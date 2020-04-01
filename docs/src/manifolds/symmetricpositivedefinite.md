@@ -16,7 +16,7 @@ can -- for example -- be illustrated as ellipsoids:  since the eigenvalues are a
 
 The manifold can be equipped with different metrics
 
-## Common and Metric Independent functions
+## Common and metric independent functions
 
 ```@autodocs
 Modules = [Manifolds]
@@ -25,7 +25,7 @@ Order = [:function]
  Filter = t -> t !== mean
 ```
 
-## Default Metric: Linear Affine Metric
+## Default metric: the linear affine metric
 
 ```@autodocs
 Modules = [Manifolds]
@@ -41,7 +41,7 @@ Pages = ["manifolds/SymmetricPositiveDefiniteLinearAffine.jl"]
 Order = [:function]
 ```
 
-## Log Euclidean Metric
+## The log Euclidean metric
 
 ```@autodocs
 Modules = [Manifolds]
@@ -49,7 +49,7 @@ Pages = ["manifolds/SymmetricPositiveDefiniteLogEuclidean.jl"]
 Order = [:type, :function]
 ```
 
-## Log Cholesky Metric
+## log Cholesky metric
 
 ```@autodocs
 Modules = [Manifolds]

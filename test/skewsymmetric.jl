@@ -22,11 +22,6 @@ include("utils.jl")
         @test_throws DomainError is_manifold_point(M, A, true)
         @test_throws DomainError is_manifold_point(M, C, true)
         @test_throws DomainError is_manifold_point(M, D, true)
-        @test_throws DomainError is_manifold_point(
-            M_complex,
-            [:a :b :c; :b :d :e; :c :e :f],
-            true,
-        )
         @test check_tangent_vector(M, B_skewsym, B_skewsym) === nothing
         @test_throws DomainError is_tangent_vector(M, B_skewsym, A, true)
         @test_throws DomainError is_tangent_vector(M, A, B_skewsym, true)
@@ -37,24 +32,20 @@ include("utils.jl")
             1 * im * zero_tangent_vector(M, B_skewsym),
             true,
         )
-        @test_throws DomainError is_tangent_vector(
-            M_complex,
-            B_skewsym,
-            [:a :b :c; :b :d :e; :c :e :f],
-            true,
-        )
         @test manifold_dimension(M) == 3
         @test manifold_dimension(M_complex) == 9
-        @test A_skewsym2 == project_point!(M, A_skewsym, A_skewsym)
-        @test A_skewsym2 == project_tangent(M, A_skewsym, A_skewsym)
+        @test A_skewsym2 == project!(M, A_skewsym, A_skewsym)
+        @test A_skewsym2 == project(M, A_skewsym, A_skewsym)
         A_sym3 = similar(A_skewsym)
         embed!(M, A_sym3, A_skewsym)
         A_sym4 = embed(M, A_skewsym)
         @test A_sym3 == A_skewsym
         @test A_sym4 == A_skewsym
     end
-    types = [Matrix{Float64}, MMatrix{3,3,Float64}, Matrix{Float32}]
-    bases = (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
+    types = [Matrix{Float64}, ]
+    TEST_FLOAT32 && push!(types, Matrix{Float32})
+    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64})
+    bases = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types
         pts = [convert(T, A_skewsym), convert(T, B_skewsym), convert(T, X)]
         @testset "Type $T" begin
@@ -74,7 +65,9 @@ include("utils.jl")
             )
         end
     end
-    complex_types = [Matrix{ComplexF64}, MMatrix{3,3,ComplexF64}, Matrix{ComplexF32}]
+    complex_types = [ Matrix{ComplexF64}, ]
+    TEST_FLOAT32 && push!(complex_types, Matrix{ComplexF32})
+    TEST_STATIC_SIZED && push!(compley_types, MMatrix{3, 3, ComplexF64})
     for T in complex_types
         pts_complex =
             [convert(T, A_skewsym_complex), convert(T, B_skewsym_complex), convert(T, X)]
@@ -87,8 +80,8 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
-                basis_types_vecs = (ArbitraryOrthonormalBasis(),),
-                basis_types_to_from = (ArbitraryOrthonormalBasis(),),
+                basis_types_vecs = (DefaultOrthonormalBasis(),),
+                basis_types_to_from = (DefaultOrthonormalBasis(),),
             )
             @test isapprox(
                 -pts_complex[1],

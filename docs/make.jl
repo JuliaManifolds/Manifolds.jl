@@ -15,7 +15,9 @@ makedocs(
                 "Circle" => "manifolds/circle.md",
                 "Euclidean" => "manifolds/euclidean.md",
                 "Fixed-rank matrices" => "manifolds/fixedrankmatrices.md",
-                "Grassmannian manifold" => "manifolds/grassmann.md",
+                "Generalized Stiefel" => "manifolds/generalizedstiefel.md",
+                "Generalized Grassmann" => "manifolds/generalizedgrassmann.md",
+                "Grassmann" => "manifolds/grassmann.md",
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
                 "Lorentzian manifold" => "manifolds/lorentz.md",
                 "Oblique manifold" => "manifolds/oblique.md",
@@ -34,19 +36,14 @@ makedocs(
                 "Vector bundle" => "manifolds/vector_bundle.md"
             ],
             "Manifold decorators" => [
-                "Decorator manifold" => "manifolds/decorator.md",
-                "Array manifold" => "manifolds/array.md",
-                "Embedded manifold" => "manifolds/embedded.md",
                 "Metric manifold" => "manifolds/metric.md",
                 "Group manifold" => "manifolds/group.md"
             ]
         ],
         "Statistics" => "statistics.md",
         "Distributions" => "distributions.md",
-        "Orthonormal bases" => "orthonormal_bases.md",
         "Notation" => "notation.md",
         "Library" => [
-            "Number systems" => "lib/numbers.md",
             "Public" => "lib/public.md",
             "Internals" => "lib/internals.md",
             "Differentiation" => "lib/differentiation.md"
@@ -55,6 +52,6 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/JuliaNLSolvers/Manifolds.jl.git",
+    repo = "github.com/JuliaManifolds/Manifolds.jl.git",
     push_preview = true,
 )

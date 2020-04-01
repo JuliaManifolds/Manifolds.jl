@@ -177,7 +177,7 @@ exp(::Rotations, ::Any...)
 exp!(M::Rotations, q, p, X) = copyto!(q, p * exp(X))
 function exp!(M::Rotations{2}, q, p, X)
     @assert size(q) == (2, 2)
-    θ = vee(M, p, X)[1]
+    θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
     sinθ, cosθ = sincos(θ)
     @inbounds begin
         q[1] = cosθ
@@ -243,37 +243,71 @@ end
 
 flat!(M::Rotations, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_coordinates(M::Rotations, p, X, B::ArbitraryOrthonormalBasis) where {N}
-    T = Base.promote_eltype(p, X)
-    return vee(M, p, X) .* sqrt(T(2))
-end
+@doc raw"""
+    get_coordinates(M::Rotations, p, X)
 
-function get_vector(M::Rotations, p, X, B::ArbitraryOrthonormalBasis) where {N}
+Extract the unique tangent vector components $X^i$ at point `p` on [`Rotations`](@ref)
+$\mathrm{SO}(n)$ from the matrix representation `X` of the tangent
+vector.
+
+The basis on the Lie algebra $𝔰𝔬(n)$ is chosen such that
+for $\mathrm{SO}(2)$, $X^1 = θ = X_{21}$ is the angle of rotation, and
+for $\mathrm{SO}(3)$, $(X^1, X^2, X^3) = (X_{32}, X_{13}, X_{21}) = θ u$ is the
+angular velocity and axis-angle representation, where $u$ is the unit vector
+along the axis of rotation.
+
+For $\mathrm{SO}(n)$ where $n ≥ 4$, the additional elements of $X^i$ are
+$X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
+"""
+get_coordinates(::Rotations, ::Any...)
+get_coordinates(::Rotations{2}, p, X, ::DefaultOrthogonalBasis) = [X[2]]
+
+function get_coordinates!(::Rotations{2}, Xⁱ, p, X, ::DefaultOrthogonalBasis)
+    Xⁱ[1] = X[2]
+    return Xⁱ
+end
+function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthogonalBasis) where {N}
+    @inbounds begin
+        Xⁱ[1] = X[3, 2]
+        Xⁱ[2] = X[1, 3]
+        Xⁱ[3] = X[2, 1]
+
+        k = 4
+        for i = 4:N, j = 1:i-1
+            Xⁱ[k] = X[i, j]
+            k += 1
+        end
+    end
+    return Xⁱ
+end
+function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthonormalBasis) where {N}
     T = Base.promote_eltype(p, X)
-    return hat(M, p, X) ./ sqrt(T(2))
+    get_coordinates!(M, Xⁱ, p, X, DefaultOrthogonalBasis())
+    Xⁱ .*= sqrt(T(2))
+    return Xⁱ
 end
 
 @doc raw"""
-    hat(M::Rotations, p, Xⁱ)
+    get_vector(M::Rotations, p, Xⁱ, B:: DefaultOrthogonalBasis)
 
 Convert the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
 group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. See
-[`vee`](@ref vee(::Rotations, ::Any...)) for the conventions used.
+[`get_coordinates`](@ref get_coordinates(::Rotations, ::Any...)) for the conventions used.
 """
-hat(::Rotations, ::Any...)
+get_vector(::Rotations, ::Any...)
 
-function hat!(M::Rotations{2}, X, p, Xⁱ::Real)
+get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultOrthogonalBasis) = get_vector!(M, X, p, Xⁱ[1], B)
+function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultOrthogonalBasis)
     @assert length(X) == 4
     @inbounds begin
         X[1] = 0
-        X[3] = -Xⁱ
         X[2] = Xⁱ
+        X[3] = -Xⁱ
         X[4] = 0
     end
     return X
 end
-hat!(M::Rotations{2}, X, p, Xⁱ) = hat!(M, X, p, Xⁱ[1])
-function hat!(M::Rotations{N}, X, p, Xⁱ) where {N}
+function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultOrthogonalBasis) where {N}
     @assert size(X) == (N, N)
     @assert length(Xⁱ) == manifold_dimension(M)
     @inbounds begin
@@ -298,6 +332,12 @@ function hat!(M::Rotations{N}, X, p, Xⁱ) where {N}
     end
     return X
 end
+function get_vector!(M::Rotations, X, p, Xⁱ, B::DefaultOrthonormalBasis)
+    T = Base.promote_eltype(p, X)
+    get_vector!(M, X, p, Xⁱ, DefaultOrthogonalBasis())
+    X ./= sqrt(T(2))
+    return X
+end
 
 @doc raw"""
     injectivity_radius(M::Rotations)
@@ -315,6 +355,13 @@ Return the radius of injectivity for the [`PolarRetraction`](@ref) on the
 [`Rotations`](@ref) `M` which is $\frac{π}{\sqrt{2}}$.
 """
 injectivity_radius(::Rotations) = π * sqrt(2.0)
+injectivity_radius(::Rotations, ::ExponentialRetraction) = π * sqrt(2.0)
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(M::Rotations, rm::AbstractRetractionMethod)
+end)
+injectivity_radius(::Rotations, ::Any) = π * sqrt(2.0)
+injectivity_radius(::Rotations, ::Any, ::ExponentialRetraction) = π * sqrt(2.0)
+injectivity_radius(::Rotations, ::PolarRetraction) = π / sqrt(2.0)
 injectivity_radius(::Rotations, p, ::PolarRetraction) = π / sqrt(2.0)
 
 @doc raw"""
@@ -399,7 +446,7 @@ Compute the logarithmic map on the [`Rotations`](@ref) manifold
 ```math
 \log_p q =
   \frac{1}{2} \bigl(\operatorname{Log}(p^{\mathrm{T}}q)
-  - (\operatorname{Log} p^{\mathrm{T}}q)^{\mathrm{T}}),
+  - (\operatorname{Log}(p^{\mathrm{T}}q)^{\mathrm{T}}),
 ```
 where $\operatorname{Log}$ denotes the matrix logarithm.
 
@@ -411,13 +458,13 @@ log(::Rotations, ::Any...)
 function log!(M::Rotations, X, p, q)
     U = transpose(p) * q
     X .= real(log_safe(U))
-    return project_tangent!(M, X, p, X)
+    return project!(M, X, p, X)
 end
 function log!(M::Rotations{2}, X, p, q)
     U = transpose(p) * q
     @assert size(U) == (2, 2)
     @inbounds θ = atan(U[2], U[1])
-    return hat!(M, X, p, θ)
+    return get_vector!(M, X, p, θ, DefaultOrthogonalBasis())
 end
 function log!(M::Rotations{3}, X, p, q)
     U = transpose(p) * q
@@ -427,7 +474,7 @@ function log!(M::Rotations{3}, X, p, q)
         ival = findfirst(λ -> isapprox(λ, 1), eig.values)
         inds = SVector{3}(1:3)
         ax = eig.vectors[inds, ival]
-        return hat!(M, X, p, π * ax)
+        return get_vector!(M, X, p, π * ax, DefaultOrthogonalBasis())
     end
     X .= ((U .- transpose(U)) ./ (2 * usinc_from_cos(cosθ)))
     return X
@@ -451,7 +498,7 @@ function log!(M::Rotations{4}, X, p, q)
     else
         copyto!(X, real(log_safe(U)))
     end
-    return project_tangent!(M, X, p, X)
+    return project!(M, X, p, X)
 end
 
 @doc raw"""
@@ -533,7 +580,7 @@ function normal_tvector_distribution(M::Rotations, p, σ)
 end
 
 @doc raw"""
-    project_point(M::Rotations, p; check_det = true)
+    project(M::Rotations, p; check_det = true)
 
 Project `p` to the nearest point on manifold `M`.
 
@@ -549,9 +596,9 @@ The diagonal matrix ensures that the determinant of the result is $+1$.
 If `p` is expected to be almost special orthogonal, then you may avoid this
 check with `check_det = false`.
 """
-project_point(::Rotations, ::Any...)
+project(::Rotations, ::Any)
 
-function project_point!(M::Rotations{N}, q, p; check_det = true) where {N}
+function project!(M::Rotations{N}, q, p; check_det = true) where {N}
     F = svd(p)
     copyto!(q, F.U * F.Vt)
     if check_det && det(q) < 0
@@ -564,7 +611,7 @@ function project_point!(M::Rotations{N}, q, p; check_det = true) where {N}
 end
 
 @doc raw"""
-    project_tangent(M::Rotations, p, X)
+    project(M::Rotations, p, X)
 
 Project the matrix `X` onto the tangent space by making `X` skew symmetric,
 
@@ -574,9 +621,9 @@ Project the matrix `X` onto the tangent space by making `X` skew symmetric,
 
 where tangent vectors are represented by elements from the Lie group
 """
-project_tangent(::Rotations, ::Any...)
+project(::Rotations, ::Any, ::Any)
 
-project_tangent!(M::Rotations, Y, p, X) = (Y .= (X .- transpose(X)) ./ 2)
+project!(M::Rotations, Y, p, X) = (Y .= (X .- transpose(X)) ./ 2)
 
 @doc raw"""
     representation_size(M::Rotations)
@@ -656,50 +703,10 @@ function retract!(M::Rotations, q::AbstractArray{T}, p, X, method::QRRetraction)
 end
 function retract!(M::Rotations, q, p, X, method::PolarRetraction)
     A = p + p * X
-    return project_point!(M, q, A; check_det = false)
+    return project!(M, q, A; check_det = false)
 end
 
 show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
-
-@doc raw"""
-    vee(M::Rotations, p, X)
-
-Extract the unique tangent vector components $X^i$ at point `p` on [`Rotations`](@ref)
-$\mathrm{SO}(n)$ from the matrix representation `X` of the tangent
-vector.
-
-The basis on the Lie algebra $𝔰𝔬(n)$ is chosen such that
-for $\mathrm{SO}(2)$, $X^1 = θ = X_{21}$ is the angle of rotation, and
-for $\mathrm{SO}(3)$, $(X^1, X^2, X^3) = (X_{32}, X_{13}, X_{21}) = θ u$ is the
-angular velocity and axis-angle representation, where $u$ is the unit vector
-along the axis of rotation.
-
-For $\mathrm{SO}(n)$ where $n ≥ 4$, the additional elements of $X^i$ are
-$X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
-"""
-vee(::Rotations, ::Any...)
-vee(M::Rotations{2}, p, X) = [X[2]]
-
-function vee!(M::Rotations{N}, Xⁱ, p, X) where {N}
-    @assert size(X) == (N, N)
-    @assert length(Xⁱ) == manifold_dimension(M)
-    @inbounds begin
-        Xⁱ[1] = X[3, 2]
-        Xⁱ[2] = X[1, 3]
-        Xⁱ[3] = X[2, 1]
-
-        k = 4
-        for i = 4:N, j = 1:i-1
-            Xⁱ[k] = X[i, j]
-            k += 1
-        end
-    end
-    return Xⁱ
-end
-function vee!(M::Rotations{2}, Xⁱ, p, X)
-    Xⁱ[1] = X[2]
-    return Xⁱ
-end
 
 @doc raw"""
     zero_tangent_vector(M::Rotations, p)

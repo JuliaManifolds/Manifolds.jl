@@ -13,7 +13,7 @@ The manifold can be represented as
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and
-$I_k$ is the $k × k$ identity matrix. This means, that the columns of $x$
+$I_k$ is the $k × k$ identity matrix. This means, that the columns of $p$
 form an unitary basis of the subspace, that is a point on
 $\operatorname{Gr}(n,k)$, and hence the subspace can actually be represented by
 a whole equivalence class of representers.
@@ -51,9 +51,17 @@ The manifold is named after
 Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
 case $field = ℝ$ is the default.
 """
-struct Grassmann{n,k,𝔽} <: Manifold end
+struct Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
 
 Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ) = Grassmann{n,k,field}()
+
+function allocation_promotion_function(
+    M::Grassmann{n,k,ℂ},
+    f,
+    args::Tuple,
+) where {n,k}
+    return complex
+end
 
 @doc raw"""
     check_manifold_point(M::Grassmann{n,k,𝔽}, p)
@@ -62,29 +70,13 @@ Check whether `p` is representing a point on the [`Grassmann`](@ref) `M`, i.e. i
 a `n`-by-`k` matrix of unitary column vectors and of correct `eltype` with respect to `𝔽`.
 """
 function check_manifold_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    if (𝔽 === ℝ) && !(eltype(p) <: Real)
-        return DomainError(
-            eltype(p),
-            "The matrix $(p) is not a real-valued matrix, so it does not lie on the Grassmann manifold of dimension ($(n),$(k)).",
-        )
-    end
-    if (𝔽 === ℂ) && !(eltype(p) <: Real) && !(eltype(p) <: Complex)
-        return DomainError(
-            eltype(p),
-            "The matrix $(p) is neither a real- nor complex-valued matrix, so it does not lie on the complex Grassmann manifold of dimension ($(n),$(k)).",
-        )
-    end
-    if size(p) != representation_size(M)
-        return DomainError(
-            size(p),
-            "The matrix $(p) does not lie on the Grassmann manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
-        )
-    end
+    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv === nothing || return mpv
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
             norm(c - one(c)),
-            "The point $(p) does not lie on the Grassmann manifold of dimension ($(n),$(k)), because x'x is not the unit matrix.",
+            "The point $(p) does not lie on $(M), because x'x is not the unit matrix.",
         )
     end
 end
@@ -103,36 +95,30 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian 
 denotes the $k × k$ zero natrix.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
-function check_tangent_vector(G::Grassmann{n,k,𝔽}, p, X; check_base_point = true, kwargs...) where {n,k,𝔽}
+function check_tangent_vector(M::Grassmann{n,k,𝔽}, p, X; check_base_point = true, kwargs...) where {n,k,𝔽}
     if check_base_point
-        t = check_manifold_point(G, p)
-        t === nothing || return t
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
     end
-    if (𝔽 === ℝ) && !(eltype(X) <: Real)
-        return DomainError(
-            eltype(X),
-            "The matrix $(X) is not a real-valued matrix, so it can not be a tangent vector to the Grassmann manifold of dimension ($(n),$(k)).",
-        )
-    end
-    if (𝔽 === ℂ) && !(eltype(X) <: Real) && !(eltype(X) <: Complex)
-        return DomainError(
-            eltype(X),
-            "The matrix $(X) is neither a real- nor complex-valued matrix, so it can not be a tangent vector to the complex Grassmann manifold of dimension ($(n),$(k)).",
-        )
-    end
-    if size(X) != representation_size(G)
-        return DomainError(
-            size(X),
-            "The matrix $(X) does not lie in the tangent space of $(p) on the Grassmann manifold of dimension ($(n),$(k)), since its dimensions are wrong.",
-        )
-    end
+    mpv = invoke(
+        check_tangent_vector,
+        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        M,
+        p,
+        X;
+        check_base_point = false, # already checked above
+        kwargs...
+    )
+    mpv === nothing || return mpv
     if !isapprox(p' * X + X' * p, zeros(k, k); kwargs...)
         return DomainError(
             norm(p' * X + X' * p),
-            "The matrix $(X) does not lie in the tangent space of $(p) on the Grassmann manifold of dimension ($(n),$(k)), since x'v + v'x is not the zero matrix.",
+            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since p'X + X'p is not the zero matrix.",
         )
     end
 end
+
+decorated_manifold(M::Grassmann{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
 
 @doc raw"""
     distance(M::Grassmann, p, q)
@@ -143,7 +129,7 @@ Let $USV = p^\mathrm{H}q$ denote the SVD decomposition of
 $p^\mathrm{H}q$, where $\cdot^{\mathrm{H}}$ denotes the complex
 conjugate transposed or Hermitian. Then the distance is given by
 ````math
-d_{\mathrm{GR}(n,k)}(p,q) = \operatorname{norm}(\operatorname{Re}(b)).
+d_{\mathrm{Gr}(n,k)}(p,q) = \operatorname{norm}(\operatorname{Re}(b)).
 ````
 where
 
@@ -160,6 +146,10 @@ function distance(M::Grassmann, p, q)
     a[a.>1] .= 1
     return sqrt(sum((acos.(a)) .^ 2))
 end
+
+embed!(::Grassmann, q, p) = (q .= p)
+
+embed!(::Grassmann, Y, p, X) = (Y .= X)
 
 @doc raw"""
     exp(M::Grassmann, p, X)
@@ -195,7 +185,13 @@ end
 
 Return the injectivity radius on the [`Grassmann`](@ref) `M`, which is $\frac{π}{2}$.
 """
-injectivity_radius(::Grassmann, ::Any...) = π / 2
+injectivity_radius(::Grassmann) = π / 2
+injectivity_radius(::Grassmann, ::ExponentialRetraction) = π / 2
+injectivity_radius(::Grassmann, ::Any) = π / 2
+injectivity_radius(::Grassmann, ::Any, ::ExponentialRetraction) = π / 2
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(M::Grassmann, rm::AbstractRetractionMethod)
+end)
 
 @doc raw"""
     inner(M::Grassmann, p, X, Y)
@@ -236,7 +232,7 @@ Compute the inverse retraction for the [`QRRetraction`](@ref), on the
 [`Grassmann`](@ref) manifold `M`, i.e.,
 
 ````math
-\operatorname{retr}_p^{-1}q = q*(p^\mathrm{H}q)^{-1} - p,
+\operatorname{retr}_p^{-1}q = q(p^\mathrm{H}q)^{-1} - p,
 ````
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
@@ -305,10 +301,10 @@ manifold_dimension(::Grassmann{n,k,𝔽}) where {n,k,𝔽} = k * (n - k) * real_
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
-mean(::Grassmann{n,k,ℝ} where {n,k}, ::Any...)
+mean(::Grassmann{n,k} where {n,k}, ::Any...)
 
 function mean!(
-    M::Grassmann{n,k,ℝ},
+    M::Grassmann{n,k},
     p,
     x::AbstractVector,
     w::AbstractVector;
@@ -318,7 +314,7 @@ function mean!(
 end
 
 @doc raw"""
-    project_tangent(M::Grassmann, p, X)
+    project(M::Grassmann, p, X)
 
 Project the `n`-by-`k` `X` onto the tangent space of `p` on the [`Grassmann`](@ref) `M`,
 which is computed by
@@ -329,9 +325,9 @@ which is computed by
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-project_tangent(::Grassmann, ::Any...)
+project(::Grassmann, ::Any...)
 
-project_tangent!(M::Grassmann, v, x, w) = copyto!(v, w - x * x' * w)
+project!(M::Grassmann, v, x, w) = copyto!(v, w - x * x' * w)
 
 @doc raw"""
     representation_size(M::Grassmann{n,k})

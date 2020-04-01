@@ -57,6 +57,7 @@ power manifolds might be faster if they are represented as [`ProductManifold`](@
 
     PowerManifold(M, N_1, N_2, ..., N_n)
     PowerManifold(M, NestedPowerRepresentation(), N_1, N_2, ..., N_n)
+    M^(N_1,N_2, ..., N_n)
 
 Generate the power manifold $M^{N_1 × N_2 × … × N_n}$.
 By default, the [`ArrayPowerRepresentation`](@ref) of points
@@ -70,9 +71,7 @@ struct PowerManifold{TM<:Manifold,TSize,TPR<:AbstractPowerRepresentation} <:
 end
 
 function PowerManifold(M::Manifold, size::Int...)
-    return PowerManifold{typeof(M),Tuple{size...},ArrayPowerRepresentation}(
-        M,
-    )
+    return PowerManifold{typeof(M),Tuple{size...},ArrayPowerRepresentation}(M)
 end
 function PowerManifold(
     M::Manifold,
@@ -141,29 +140,20 @@ struct PowerFVectorDistribution{
 end
 
 """
-    PrecomputedPowerOrthonormalBasis(
-        bases::AbstractArray{AbstractPrecomputedOrthonormalBasis},
-        F::AbstractNumbers = ℝ,
-    )
+    PowerBasisData{TB<:AbstractArray}
 
-A precomputed orthonormal basis of a tangent space of a power manifold.
-The array `bases` stores bases corresponding to particular parts of the manifold.
-
-The type parameter `F` denotes the [`AbstractNumbers`](@ref) that will be used as scalars.
+Data storage for an array of basis data.
 """
-struct PrecomputedPowerOrthonormalBasis{
-    TB<:AbstractArray{<:AbstractPrecomputedOrthonormalBasis},
-    F,
-} <: AbstractPrecomputedOrthonormalBasis{F}
+struct PowerBasisData{TB<:AbstractArray}
     bases::TB
 end
 
-function PrecomputedPowerOrthonormalBasis(
-    bases::AbstractArray{<:AbstractPrecomputedOrthonormalBasis},
-    F::AbstractNumbers = ℝ,
-) where {N}
-    return PrecomputedPowerOrthonormalBasis{typeof(bases),F}(bases)
-end
+const POWER_BASIS_LIST_CACHED = [
+    CachedBasis{<:AbstractBasis{ℝ},<:PowerBasisData},
+    CachedBasis{<:ManifoldsBase.AbstractOrthogonalBasis{ℝ},<:PowerBasisData},
+    CachedBasis{<:ManifoldsBase.AbstractOrthonormalBasis{ℝ},<:PowerBasisData},
+    CachedBasis{<:AbstractBasis{ℂ},<:PowerBasisData},
+]
 
 const PowerManifoldMultidimensional =
     AbstractPowerManifold{<:Manifold,ArrayPowerRepresentation} where {TSize}
@@ -180,15 +170,27 @@ function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
     return FVector(CotangentSpace, alloc)
 end
+function allocate_result(M::PowerManifoldNested, f::typeof(get_vector), p, X)
+    return [allocate_result(M.manifold, f, _access_nested(p, i)) for i in get_iterator(M)]
+end
 function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector, x)
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
     return FVector(TangentSpace, alloc)
 end
+function allocate_result(M::PowerManifoldNested, f::typeof(get_coordinates), p, X, B)
+    return invoke(
+        allocate_result,
+        Tuple{Manifold,typeof(get_coordinates),Any,Any,typeof(B)},
+        M,
+        f,
+        p,
+        X,
+        B,
+    )
+end
 
-function basis(M::AbstractPowerManifold, p, B::AbstractBasis)
-    rep_size = representation_size(M.manifold)
-    vs = [basis(M.manifold, _read(M, rep_size, p, i), B) for i in get_iterator(M)]
-    return PrecomputedPowerOrthonormalBasis(vs)
+function allocation_promotion_function(M::AbstractPowerManifold, f, args::Tuple)
+    return allocation_promotion_function(M.manifold, f, args)
 end
 
 ^(M::Manifold, n) = PowerManifold(M, n...)
@@ -219,7 +221,13 @@ base manifolds must be respective tangent vectors.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::AbstractPowerManifold, p, X; check_base_point = true, kwargs...)
+function check_tangent_vector(
+    M::AbstractPowerManifold,
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+)
     if check_base_point
         mpe = check_manifold_point(M, p)
         mpe === nothing || return mpe
@@ -311,20 +319,37 @@ end
 function get_basis(M::AbstractPowerManifold, p, B::AbstractBasis)
     rep_size = representation_size(M.manifold)
     vs = [get_basis(M.manifold, _read(M, rep_size, p, i), B) for i in get_iterator(M)]
-    return PrecomputedPowerOrthonormalBasis(vs)
-end
-function get_basis(M::AbstractPowerManifold, p, B::ArbitraryOrthonormalBasis)
-    return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
+    return CachedBasis(B, PowerBasisData(vs))
 end
 function get_basis(M::AbstractPowerManifold, p, B::DiagonalizingOrthonormalBasis)
-    return invoke(get_basis, Tuple{PowerManifold,Any,AbstractBasis}, M, p, B)
-end
-
-function get_coordinates(M::AbstractPowerManifold, p, X, B::ArbitraryOrthonormalBasis)
     rep_size = representation_size(M.manifold)
     vs = [
-        get_coordinates(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), B)
-        for i in get_iterator(M)
+        get_basis(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            DiagonalizingOrthonormalBasis(_read(M, rep_size, B.frame_direction, i)),
+        ) for i in get_iterator(M)
+    ]
+    return CachedBasis(B, PowerBasisData(vs))
+end
+for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES
+    if BT == DiagonalizingOrthonormalBasis
+        continue
+    end
+    eval(quote
+        @invoke_maker 3 AbstractBasis get_basis(M::AbstractPowerManifold, p, B::$BT)
+    end)
+end
+
+function get_coordinates(M::AbstractPowerManifold, p, X, B::DefaultOrthonormalBasis)
+    rep_size = representation_size(M.manifold)
+    vs = [
+        get_coordinates(
+            M.manifold,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            B,
+        ) for i in get_iterator(M)
     ]
     return reduce(vcat, reshape(vs, length(vs)))
 end
@@ -332,19 +357,84 @@ function get_coordinates(
     M::AbstractPowerManifold,
     p,
     X,
-    B::PrecomputedPowerOrthonormalBasis,
-)
+    B::CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽},
+) where {𝔽}
     rep_size = representation_size(M.manifold)
     vs = [
         get_coordinates(
             M.manifold,
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
-            B.bases[i...],
-        )
-        for i in get_iterator(M)
+            _access_nested(B.data.bases, i),
+        ) for i in get_iterator(M)
     ]
     return reduce(vcat, reshape(vs, length(vs)))
+end
+for BT in POWER_BASIS_LIST_CACHED
+    eval(quote
+        @invoke_maker 4 CachedBasis{<:AbstractBasis,<:PowerBasisData} get_coordinates(
+            M::AbstractPowerManifold,
+            p,
+            X,
+            B::$BT,
+        )
+    end)
+end
+
+function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBasis)
+    rep_size = representation_size(M.manifold)
+    dim = manifold_dimension(M.manifold)
+    v_iter = 1
+    for i in get_iterator(M)
+        # TODO: this view is really suboptimal when `dim` can be statically determined
+        get_coordinates!(
+            M.manifold,
+            view(Y, v_iter:v_iter+dim-1),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            B,
+        )
+        v_iter += dim
+    end
+    return Y
+end
+function get_coordinates!(
+    M::AbstractPowerManifold,
+    Y,
+    p,
+    X,
+    B::CachedBasis{<:AbstractBasis{ℝ},<:PowerBasisData,ℝ},
+)
+    TypeTuple = Tuple{
+        AbstractPowerManifold,
+        Any,
+        Any,
+        Any,
+        CachedBasis{<:AbstractBasis,<:PowerBasisData,ℝ},
+    }
+    return invoke(get_coordinates!, TypeTuple, M, Y, p, X, B)
+end
+function get_coordinates!(
+    M::AbstractPowerManifold,
+    Y,
+    p,
+    X,
+    B::CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽},
+) where {𝔽}
+    rep_size = representation_size(M.manifold)
+    dim = manifold_dimension(M.manifold)
+    v_iter = 1
+    for i in get_iterator(M)
+        get_coordinates!(
+            M.manifold,
+            view(Y, v_iter:v_iter+dim-1),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _access_nested(B.data.bases, i),
+        )
+        v_iter += dim
+    end
+    return Y
 end
 
 get_iterator(M::PowerManifold{<:Manifold,Tuple{N}}) where {N} = 1:N
@@ -353,38 +443,43 @@ get_iterator(M::PowerManifold{<:Manifold,Tuple{N}}) where {N} = 1:N
     return Base.product(map(Base.OneTo, size_tuple)...)
 end
 
-function get_vector(M::PowerManifold, p, X, B::PrecomputedPowerOrthonormalBasis)
+function get_vector!(
+    M::PowerManifold,
+    Y,
+    p,
+    X,
+    B::CachedBasis{<:AbstractBasis,<:PowerBasisData},
+)
     dim = manifold_dimension(M.manifold)
     rep_size = representation_size(M.manifold)
-    v_out = allocate(p)
     v_iter = 1
     for i in get_iterator(M)
-        copyto!(
-            _write(M, rep_size, v_out, i),
-            get_vector(
-                M.manifold,
-                _read(M, rep_size, p, i),
-                X[v_iter:v_iter+dim-1],
-                B.bases[i...],
-            ),
+        get_vector!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            X[v_iter:v_iter+dim-1],
+            _access_nested(B.data.bases, i),
         )
         v_iter += dim
     end
-    return v_out
+    return Y
 end
-function get_vector(M::AbstractPowerManifold, p, X, B::ArbitraryOrthonormalBasis)
+function get_vector!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBasis)
     dim = manifold_dimension(M.manifold)
     rep_size = representation_size(M.manifold)
-    v_out = allocate(p)
     v_iter = 1
     for i in get_iterator(M)
-        copyto!(
-            _write(M, rep_size, v_out, i),
-            get_vector(M.manifold, _read(M, rep_size, p, i), X[v_iter:v_iter+dim-1], B),
+        get_vector!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            X[v_iter:v_iter+dim-1],
+            B,
         )
         v_iter += dim
     end
-    return v_out
+    return Y
 end
 
 @doc raw"""
@@ -410,6 +505,18 @@ function injectivity_radius(M::AbstractPowerManifold, p)
     return radius
 end
 injectivity_radius(M::AbstractPowerManifold) = injectivity_radius(M.manifold)
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(
+        M::AbstractPowerManifold,
+        rm::AbstractRetractionMethod,
+    )
+end)
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(
+        M::AbstractPowerManifold,
+        rm::ExponentialRetraction,
+    )
+end)
 
 @doc raw"""
     inverse_retract(M::AbstractPowerManifold, p, q, m::InversePowerRetraction)
@@ -661,8 +768,17 @@ end
 
 function show(
     io::IO,
-    M::PowerManifold{TM,TSize,ArrayPowerRepresentation},
-) where {TM,TSize}
+    mime::MIME"text/plain",
+    B::CachedBasis{T,D,𝔽},
+) where {T<:AbstractBasis,D<:PowerBasisData,𝔽}
+    println(io, "$(T()) for a power manifold")
+    for i in Base.product(map(Base.OneTo, size(B.data.bases))...)
+        println(io, "Basis for component $i:")
+        show(io, mime, _access_nested(B.data.bases, i))
+        println(io)
+    end
+end
+function show(io::IO, M::PowerManifold{TM,TSize,ArrayPowerRepresentation}) where {TM,TSize}
     print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
 end
 function show(io::IO, M::PowerManifold{TM,TSize,TPR}) where {TM,TSize,TPR}

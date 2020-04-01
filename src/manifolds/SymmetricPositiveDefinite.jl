@@ -16,7 +16,7 @@ p ∈ ℝ^{n × n} : a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash
 
 generates the manifold $\mathcal P(n) \subset ℝ^{n × n}$
 """
-struct SymmetricPositiveDefinite{N} <: Manifold end
+struct SymmetricPositiveDefinite{N} <: AbstractEmbeddedManifold{DefaultEmbeddingType} end
 
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
 
@@ -28,12 +28,8 @@ of size `(N,N)`, symmetric and positive definite.
 The tolerance for the second to last test can be set using the `kwargs...`.
 """
 function check_manifold_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
-    if size(p) != representation_size(M)
-        return DomainError(
-            size(p),
-            "The point $(p) does not lie on $(M), since its size is not $(representation_size(M)).",
-        )
-    end
+    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv === nothing || return mpv
     if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
         return DomainError(
             norm(p),
@@ -67,15 +63,19 @@ function check_tangent_vector(
     kwargs...
 ) where {N}
     if check_base_point
-        mpe = check_manifold_point(M, p)
+        mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
-    if size(X) != representation_size(M)
-        return DomainError(
-            size(X),
-            "The vector $(X) is not a tangent to a point on $(M) since its size does not match $(representation_size(M)).",
-        )
-    end
+    mpv = invoke(
+        check_tangent_vector,
+        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        M,
+        p,
+        X;
+        check_base_point = false, # already checked above
+        kwargs...
+    )
+    mpv === nothing || return mpv
     if !isapprox(norm(X - transpose(X)), 0.0; kwargs...)
         return DomainError(
             size(X),
@@ -84,6 +84,11 @@ function check_tangent_vector(
     end
     return nothing
 end
+
+decorated_manifold(M::SymmetricPositiveDefinite) = Euclidean(representation_size(M)...; field = ℝ)
+
+embed!(M::SymmetricPositiveDefinite, q, p) = (q .= p)
+embed!(M::SymmetricPositiveDefinite, Y, p, X) = (Y .= X)
 
 @doc raw"""
     injectivity_radius(M::SymmetricPositiveDefinite[, p])
@@ -94,7 +99,16 @@ Return the injectivity radius of the [`SymmetricPositiveDefinite`](@ref).
 Since `M` is a Hadamard manifold with respect to the [`LinearAffineMetric`](@ref) and the
 [`LogCholeskyMetric`](@ref), the injectivity radius is globally $∞$.
 """
-injectivity_radius(M::SymmetricPositiveDefinite{N}, args...) where {N} = Inf
+injectivity_radius(::SymmetricPositiveDefinite) = Inf
+injectivity_radius(::SymmetricPositiveDefinite, ::ExponentialRetraction) = Inf
+injectivity_radius(::SymmetricPositiveDefinite, ::Any) = Inf
+injectivity_radius(::SymmetricPositiveDefinite, ::Any, ::ExponentialRetraction) = Inf
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(
+        M::SymmetricPositiveDefinite,
+        rm::AbstractRetractionMethod,
+    )
+end)
 
 @doc raw"""
     manifold_dimension(M::SymmetricPositiveDefinite)
@@ -102,7 +116,7 @@ injectivity_radius(M::SymmetricPositiveDefinite{N}, args...) where {N} = Inf
 returns the dimension of
 [`SymmetricPositiveDefinite`](@ref) `M`$=\mathcal P(n), n ∈ ℕ$, i.e.
 ````math
-\dim \mathcal P(n) = \frac{n(n+1)}{2}
+\dim \mathcal P(n) = \frac{n(n+1)}{2}.
 ````
 """
 @generated function manifold_dimension(M::SymmetricPositiveDefinite{N}) where {N}

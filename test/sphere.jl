@@ -6,6 +6,10 @@ include("utils.jl")
         @test repr(M) == "Sphere(2)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3},ℝ}
         @test representation_size(M) == (3,)
+        @test injectivity_radius(M) == π
+        @test injectivity_radius(M, ExponentialRetraction()) == π
+        @test injectivity_radius(M, ProjectionRetraction()) == π / 2
+        @test base_manifold(M) === M
         @test !is_manifold_point(M, [1., 0., 0., 0.])
         @test !is_tangent_vector(M, [1.,0.,0.], [0., 0., 1., 0.])
         @test_throws DomainError is_manifold_point(M, [2.,0.,0.],true)
@@ -14,12 +18,11 @@ include("utils.jl")
         @test_throws DomainError is_tangent_vector(M,[1.,0.,0.],[1.,0.,0.],true)
         @test injectivity_radius(M, [1.0, 0.0, 0.0], ProjectionRetraction()) == π/2
     end
-    types = [
-        Vector{Float64},
-        MVector{3, Float64},
-        Vector{Float32},
-    ]
-    basis_types = (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
+    types = [ Vector{Float64}, ]
+    TEST_FLOAT32 && push!(types, Vector{Float32})
+    TEST_STATIC_SIZED && push!(types, MVector{3, Float64})
+
+    basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types
         @testset "Type $T" begin
             pts = [convert(T, [1.0, 0.0, 0.0]),
@@ -37,10 +40,10 @@ include("utils.jl")
                 tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
                 basis_types_vecs = (DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),),
                 basis_types_to_from = basis_types,
-                retraction_methods = [ProjectionRetraction(),],
+                test_vee_hat = false,
+                retraction_methods = [ProjectionRetraction(), ExponentialRetraction()],
                 inverse_retraction_methods = [ProjectionInverseRetraction(),]
             )
-
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end
     end
@@ -72,14 +75,14 @@ include("utils.jl")
         v = log(M, x, -x)
         @test norm(v) ≈ π
         @test isapprox(dot(x, v), 0; atol=1e-12)
-        vexp = normalize(project_tangent(M, x, [1, zeros(n)...]))
+        vexp = normalize(project(M, x, [1, zeros(n)...]))
         @test v ≈ π * vexp
 
         x = [1, zeros(n)...]
         v = log(M, x, -x)
         @test norm(v) ≈ π
         @test isapprox(dot(x, v), 0; atol=1e-12)
-        vexp = normalize(project_tangent(M, x, [0, 1, zeros(n - 1)...]))
+        vexp = normalize(project(M, x, [0, 1, zeros(n - 1)...]))
         @test v ≈ π * vexp
     end
 end

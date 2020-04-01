@@ -37,19 +37,28 @@ import ManifoldsBase:
     allocate,
     allocate_result,
     allocate_result_type,
+    allocation_promotion_function,
     array_value,
     base_manifold,
     check_manifold_point,
     check_tangent_vector,
+    combine_allocation_promotion_functions,
     decorated_manifold,
     decorator_transparent_dispatch,
     default_decorator_dispatch,
     distance,
+    embed,
+    embed!,
     exp,
     exp!,
+    get_basis,
+    get_coordinates,
+    get_coordinates!,
+    get_embedding,
+    get_vector,
+    get_vector!,
+    get_vectors,
     geodesic,
-    hat,
-    hat!,
     injectivity_radius,
     inner,
     isapprox,
@@ -62,10 +71,8 @@ import ManifoldsBase:
     manifold_dimension,
     norm,
     number_eltype,
-    project_point,
-    project_point!,
-    project_tangent,
-    project_tangent!,
+    project,
+    project!,
     representation_size,
     retract,
     retract!,
@@ -76,8 +83,6 @@ import ManifoldsBase:
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
-    vee,
-    vee!,
     zero_tangent_vector,
     zero_tangent_vector!
 import Random: rand
@@ -96,13 +101,28 @@ using ManifoldsBase: CoTVector, Manifold, MPoint, TVector, DefaultManifold
 using ManifoldsBase
 using ManifoldsBase:
     AbstractDecoratorManifold,
+    AbstractNumbers,
     @decorator_transparent_fallback,
     @decorator_transparent_function,
     @decorator_transparent_signature,
+    _euclidean_basis_vector,
     _extract_val,
+    hat,
+    hat!,
+    @invoke_maker,
     is_decorator_transparent,
     is_default_decorator,
-    manifold_function_not_implemented_message
+    manifold_function_not_implemented_message,
+    vee,
+    vee!
+using ManifoldsBase:
+    AbstractBasis,
+    AbstractOrthogonalBasis,
+    DefaultOrDiagonalizingBasis,
+    DiagonalizingBasisData,
+    VeeOrthogonalBasis,
+    AbstractOrthonormalBasis,
+    DefaultOrthonormalBasis
 using ManifoldsBase:
     ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
@@ -110,6 +130,17 @@ using ManifoldsBase: QRRetraction, PolarRetraction, ProjectionRetraction
 using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
 using ManifoldsBase: QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
 using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
+using ManifoldsBase: ℝ, ℂ, ℍ
+using ManifoldsBase:
+    AbstractEmbeddingType,
+    AbstractIsometricEmbeddingType,
+    TransparentIsometricEmbedding,
+    DefaultIsometricEmbeddingType,
+    DefaultEmbeddingType
+using ManifoldsBase:
+    AbstractEmbeddedManifold,
+    EmbeddedManifold
+
 
 using Markdown: @doc_str
 using Random: AbstractRNG
@@ -117,12 +148,9 @@ using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
 using StatsBase: AbstractWeights, UnitWeights, values, varcorrection
-using UnsafeArrays
 
 include("utils.jl")
-include("numbers.jl")
 include("maps.jl")
-include("orthonormal_bases.jl")
 include("differentiation.jl")
 include("riemannian_diff.jl")
 include("SizedAbstractArray.jl")
@@ -135,8 +163,9 @@ include("distributions.jl")
 include("projected_distribution.jl")
 include("product_representations.jl")
 
+# It's included early to ensure visibility of `Identity`
+include("groups/group.jl")
 
-include("manifolds/EmbeddedManifold.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/ProductManifold.jl")
 include("manifolds/PowerManifold.jl")
@@ -148,6 +177,8 @@ include("manifolds/Lorentz.jl")
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
 include("manifolds/FixedRankMatrices.jl")
+include("manifolds/GeneralizedGrassmann.jl")
+include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Grassmann.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/Rotations.jl")
@@ -163,7 +194,6 @@ include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/Torus.jl")
 include("manifolds/Oblique.jl")
 
-include("groups/group.jl")
 include("groups/metric.jl")
 include("groups/group_action.jl")
 include("groups/group_operation_action.jl")
@@ -202,6 +232,8 @@ export Euclidean,
     CholeskySpace,
     Circle,
     FixedRankMatrices,
+    GeneralizedGrassmann,
+    GeneralizedStiefel,
     Grassmann,
     Hyperbolic,
     Lorentz,
@@ -243,7 +275,8 @@ export Metric,
     PowerMetric,
     ProductMetric,
     MetricManifold
-export AbstractEmbeddingType, AbstractIsometricEmbeddingType, TransparentIsometricEmbedding
+export AbstractEmbeddingType, AbstractIsometricEmbeddingType
+export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod,
     ExponentialRetraction,
@@ -261,12 +294,12 @@ export AbstractEstimationMethod,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius
 export
+    CachedBasis,
+    DefaultBasis,
+    DefaultOrthogonalBasis,
+    DefaultOrthonormalBasis,
     DiagonalizingOrthonormalBasis,
-    PrecomputedDiagonalizingOrthonormalBasis,
-    PrecomputedOrthonormalBasis,
-    PrecomputedPowerOrthonormalBasis,
-    PrecomputedProductOrthonormalBasis,
-    ArbitraryOrthonormalBasis
+    ProjectedOrthonormalBasis
 export ×,
     allocate,
     allocate_result,
@@ -329,10 +362,8 @@ export ×,
     number_eltype,
     one,
     power_dimensions,
-    project_point,
-    project_point!,
-    project_tangent,
-    project_tangent!,
+    project,
+    project!,
     projected_distribution,
     real_dimension,
     ricci_curvature,
@@ -420,6 +451,7 @@ export affine_matrix,
     inverse_translate!,
     inverse_translate_diff,
     inverse_translate_diff!,
+    make_identity,
     optimal_alignment,
     optimal_alignment!,
     screw_matrix,
@@ -431,14 +463,21 @@ export affine_matrix,
 # Orthonormal bases
 export AbstractBasis,
     AbstractOrthonormalBasis,
-    AbstractPrecomputedOrthonormalBasis,
-    ArbitraryOrthonormalBasis,
+    DefaultOrthonormalBasis,
     DiagonalizingOrthonormalBasis,
-    PrecomputedDiagonalizingOrthonormalBasis,
-    PrecomputedOrthonormalBasis,
-    PrecomputedProductOrthonormalBasis,
-    ProjectedOrthonormalBasis
-export get_basis, get_coordinates, get_vector, get_vectors, number_system
+    ProjectedOrthonormalBasis,
+    CachedBasis,
+    DiagonalizingBasisData,
+    ProductBasisData,
+    PowerBasisData
+export get_basis,
+    get_coordinates,
+    get_coordinates!,
+    get_vector,
+    get_vector!,
+    get_vectors,
+    number_system
+
 # maps and differentiation
 export AbstractCurve,
     AbstractMap,

@@ -20,29 +20,26 @@ include("utils.jl")
         @test_throws DomainError is_manifold_point(M,A,true)
         @test_throws DomainError is_manifold_point(M,C,true)
         @test_throws DomainError is_manifold_point(M,D,true)
-        @test_throws DomainError is_manifold_point(M_complex, [:a :b :c; :b :d :e; :c :e :f],true)
         @test check_tangent_vector(M,B_sym,B_sym) === nothing
         @test_throws DomainError is_tangent_vector(M,B_sym,A,true)
         @test_throws DomainError is_tangent_vector(M,A,B_sym,true)
         @test_throws DomainError is_tangent_vector(M,B_sym,D,true)
         @test_throws DomainError is_tangent_vector(M,B_sym, 1*im * zero_tangent_vector(M,B_sym),true)
-        @test_throws DomainError is_tangent_vector(M_complex, B_sym, [:a :b :c; :b :d :e; :c :e :f],true)
         @test manifold_dimension(M) == 6
         @test manifold_dimension(M_complex) == 9
-        @test A_sym2 == project_point!(M, A_sym, A_sym)
-        @test A_sym2 == project_tangent(M, A_sym, A_sym)
+        @test A_sym2 == project!(M, A_sym, A_sym)
+        @test A_sym2 == project(M, A_sym, A_sym)
         A_sym3 = similar(A_sym)
         embed!(M,A_sym3, A_sym)
         A_sym4 = embed(M,A_sym)
         @test A_sym3 == A_sym
         @test A_sym4 == A_sym
     end
-    types = [
-        Matrix{Float64},
-        MMatrix{3,3,Float64},
-        Matrix{Float32},
-    ]
-    bases = (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
+    types = [ Matrix{Float64}, ]
+    TEST_FLOAT32 && push!(types, Matrix{Float32})
+    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64})
+
+    bases = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types
         pts = [convert(T,A_sym),convert(T,B_sym),convert(T,X)]
         @testset "Type $T" begin
@@ -65,8 +62,8 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
-                basis_types_vecs = (ArbitraryOrthonormalBasis(),),
-                basis_types_to_from = (ArbitraryOrthonormalBasis(),)
+                basis_types_vecs = (DefaultOrthonormalBasis(),),
+                basis_types_to_from = (DefaultOrthonormalBasis(),)
             )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end # testset type $T

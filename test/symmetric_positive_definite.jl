@@ -20,17 +20,18 @@ using Manifolds: default_metric_dispatch
 
     @test injectivity_radius(M1) == Inf
     @test injectivity_radius(M1,one(zeros(3,3))) == Inf
+    @test injectivity_radius(M1, ExponentialRetraction()) == Inf
+    @test injectivity_radius(M1,one(zeros(3,3)), ExponentialRetraction()) == Inf
     metrics = [M1, M2, M3]
-    types = [
-        Matrix{Float64},
-        MMatrix{3,3,Float64},
-        Matrix{Float32},
-    ]
+    types = [Matrix{Float64}, ]
+    TEST_FLOAT32 && push!(types, Matrix{Float32})
+    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64})
+
     for M in metrics
         basis_types = if M == M3
             ()
         else
-            (ArbitraryOrthonormalBasis(),)
+            (DefaultOrthonormalBasis(),)
         end
         @testset "$(typeof(M))" begin
             @test representation_size(M) == (3,3)
@@ -55,9 +56,10 @@ using Manifolds: default_metric_dispatch
                     test_vector_transport = true,
                     test_forward_diff = false,
                     test_reverse_diff = false,
+                    test_vee_hat = M === M2,
                     exp_log_atol_multiplier = exp_log_atol_multiplier,
                     basis_types_vecs = basis_types,
-                    basis_types_to_from = basis_types
+                    basis_types_to_from = basis_types,
                 )
             end
             @testset "Test Error cases in is_manifold_point and is_tangent_vector" begin
@@ -92,8 +94,8 @@ using Manifolds: default_metric_dispatch
     @testset "Test for tangent ONB on LinearAffineMetric" begin
         v = log(M2,x,y)
         donb = get_basis(base_manifold(M2), x, DiagonalizingOrthonormalBasis(v))
-        X = donb.vectors
-        k = donb.kappas
+        X = get_vectors(base_manifold(M2), x, donb)
+        k = donb.data.eigenvalues
         @test isapprox(0.0,first(k))
         for i = 1:length(X)
             @test isapprox(1.0, norm(M2,x,X[i]))
@@ -102,7 +104,7 @@ using Manifolds: default_metric_dispatch
             end
         end
         d2onb = get_basis(M2, x, DiagonalizingOrthonormalBasis(v))
-        @test donb.kappas == d2onb.kappas
-        @test donb.vectors==d2onb.vectors
+        @test donb.data.eigenvalues == d2onb.data.eigenvalues
+        @test get_vectors(base_manifold(M2), x, donb) == get_vectors(M2, x, d2onb)
     end
 end

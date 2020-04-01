@@ -458,6 +458,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             @testset "within radius" begin
                 rng = MersenneTwister(47)
                 @test repr(GeodesicInterpolationWithinRadius(Inf)) == "GeodesicInterpolationWithinRadius(Inf)"
+                @test_throws DomainError GeodesicInterpolationWithinRadius(-0.1)
                 S = Sphere(2)
                 x = [[1.0, 0, 0], [0, 1.0, 0]]
                 m = mean(S, x, GeodesicInterpolation())
@@ -528,7 +529,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             @test m != mg
             @test m == mf
 
-            μ = project_point(R, randn(3, 3))
+            μ = project(R, randn(3, 3))
             d = normal_tvector_distribution(R, μ, 0.1)
             x = [exp(R, μ, rand(rng, d)) for _ = 1:10]
             w = pweights([rand(rng) for _ = 1:length(x)])
@@ -541,7 +542,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             rng = MersenneTwister(47)
             G = Manifolds.Grassmann(3, 2)
             p0 = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            x = [exp(G, p0, project_tangent(G, p0, randn(rng, 3, 2) * 10)) for _= 1:10]
+            x = [exp(G, p0, project(G, p0, randn(rng, 3, 2) * 10)) for _= 1:10]
             w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(G, x, w)
             mg = mean(G, x, w, GeodesicInterpolation())
@@ -549,7 +550,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             @test m != mg
             @test m == mf
 
-            x = [exp(G, p0, project_tangent(G, p0, randn(rng, 3, 2) * 0.01)) for _= 1:10]
+            x = [exp(G, p0, project(G, p0, randn(rng, 3, 2) * 0.01)) for _= 1:10]
             w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(G, x, w)
             mg = mean(G, x, w, GeodesicInterpolation())

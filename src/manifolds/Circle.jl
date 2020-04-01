@@ -6,7 +6,7 @@ real-valued points in $[-π,π)$ or complex-valued points $z ∈ ℂ$ of absolut
 $\lvert z\rvert = 1$.
 # Constructor
 
-    Circle(ℝ)
+    Circle(𝔽=ℝ)
 
 Generate the `ℝ`-valued Circle represented by angles, which
 alternatively can be set to use the [`AbstractNumbers`](@ref) `𝔽=ℂ` to obtain the `Circle`
@@ -14,7 +14,7 @@ represented by `ℂ`-valued `Circle` of unit numbers.
 """
 struct Circle{𝔽} <: Manifold where {𝔽<:AbstractNumbers} end
 
-Circle(field::AbstractNumbers = ℝ) = Circle{field}()
+Circle(𝔽::AbstractNumbers = ℝ) = Circle{𝔽}()
 
 @doc raw"""
     check_manifold_point(M::Circle, p)
@@ -132,43 +132,94 @@ flat!(::Circle, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 function get_basis(M::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
-    return PrecomputedDiagonalizingOrthonormalBasis(vs, @SVector [0])
+    return CachedBasis(B, (@SVector [0]) , vs)
 end
-
-get_coordinates(M::Circle{ℝ}, p, X, B::ArbitraryOrthonormalBasis) = X
+get_coordinates(M::Circle{ℝ}, p, X, B::DefaultOrthonormalBasis) = X
 function get_coordinates(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     return X .* (sbv == 0 ? 1 : sbv)
 end
 """
-    get_coordinates(M::Circle{ℂ}, x, v, B::ArbitraryOrthonormalBasis)
+    get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
 Return tangent vector coordinates in the Lie algebra of the circle.
 """
-function get_coordinates(M::Circle{ℂ}, p, X, B::ArbitraryOrthonormalBasis)
+function get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
     X, p = X[1], p[1]
     Xⁱ = imag(X) * real(p) - real(X) * imag(p)
     return @SVector [Xⁱ]
 end
 
-get_vector(M::Circle{ℝ}, p, X, B::ArbitraryOrthonormalBasis) = X
+eval(quote
+    @invoke_maker 1 Manifold get_coordinates(
+        M::Circle,
+        e::Identity,
+        X,
+        B::VeeOrthogonalBasis,
+    )
+end)
+
+function get_coordinates!(M::Circle, Y::AbstractArray, p, X, B::DefaultOrthonormalBasis)
+    Y[] = get_coordinates(M, p, X, B)[]
+    return Y
+end
+function get_coordinates!(
+    M::Circle,
+    Y::AbstractArray,
+    p,
+    X,
+    B::DiagonalizingOrthonormalBasis,
+)
+    Y[] = get_coordinates(M, p, X, B)[]
+    return Y
+end
+
+eval(quote
+    @invoke_maker 1 Manifold get_coordinates!(
+        M::Circle,
+        Y::AbstractArray,
+        p,
+        X,
+        B::VeeOrthogonalBasis,
+    )
+end)
+
+
+get_vector(M::Circle{ℝ}, p, X, B::AbstractBasis) = X
+get_vector(M::Circle{ℝ}, p, X, B::DefaultOrthonormalBasis) = X
 function get_vector(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     return X .* (sbv == 0 ? 1 : sbv)
 end
 """
-    get_vector(M::Circle{ℂ}, p, X, B::ArbitraryOrthonormalBasis)
+    get_vector(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
 Return tangent vector from the coordinates in the Lie algebra of the circle.
 """
-get_vector(M::Circle{ℂ}, p, X, B::ArbitraryOrthonormalBasis) = @SVector [1im * X[1] * p[1]]
+get_vector(M::Circle{ℂ}, p, X, B::AbstractBasis) = @SVector [1im * X[1] * p[1]]
+
+function get_vector!(M::Circle, Y::AbstractArray, p, X, B::AbstractBasis)
+    Y[] = get_vector(M, p, X, B)[]
+    return Y
+end
+for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES
+    eval(quote
+        @invoke_maker 5 $(supertype(BT)) get_vector!(M::Circle, Y::AbstractArray, p, X, B::$BT)
+    end)
+end
 
 @doc raw"""
     injectivity_radius(M::Circle[, p])
 
 Return the injectivity radius on the [`Circle`](@ref) `M`, i.e. $π$.
 """
-injectivity_radius(::Circle, args...) = π
+injectivity_radius(::Circle) = π
+injectivity_radius(::Circle, ::ExponentialRetraction) = π
+injectivity_radius(::Circle, ::Any) = π
+injectivity_radius(::Circle, ::Any, ::ExponentialRetraction) = π
+eval(quote
+    @invoke_maker 1 Manifold injectivity_radius(M::Circle, rm::AbstractRetractionMethod)
+end)
 
 @doc raw"""
     inner(M::Circle, p, X, Y)
@@ -226,7 +277,7 @@ function log(M::Circle{ℂ}, p::Number, q::Number)
         θ = acos(cosθ)
         X = (q - cosθ * p) / usinc(θ)
     end
-    return project_tangent(M, p, X)
+    return project(M, p, X)
 end
 
 log!(::Circle{ℝ}, X, p, q) = (X .= sym_rem(q - p))
@@ -241,7 +292,7 @@ function log!(M::Circle{ℂ}, X, p, q)
         θ = acos(cosθ)
         X .= (q - cosθ * p) / usinc(θ)
     end
-    return project_tangent!(M, X, p, X)
+    return project!(M, X, p, X)
 end
 
 @doc raw"""
@@ -265,22 +316,22 @@ mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...) = sym_rem(sum(w .
 @inline norm(::Circle, p, X) = sum(abs, X)
 
 @doc raw"""
-    project_point(M::Circle, p)
+    project(M::Circle, p)
 
 Project a point `p` onto the [`Circle`](@ref) `M`.
 For the real-valued case this is the remainder with respect to modulus $2π$.
 For the complex-valued case the result is the projection of `p` onto the unit circle in the
 complex plane.
 """
-project_point(::Circle, ::Any)
-project_point(::Circle{ℝ}, p::Real) = sym_rem(p)
-project_point(::Circle{ℂ}, p::Number) = p / abs(p)
+project(::Circle, ::Any)
+project(::Circle{ℝ}, p::Real) = sym_rem(p)
+project(::Circle{ℂ}, p::Number) = p / abs(p)
 
-project_point!(::Circle{ℝ}, q, p) = copyto!(q, sym_rem(p))
-project_point!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
+project!(::Circle{ℝ}, q, p) = copyto!(q, sym_rem(p))
+project!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
 
 @doc raw"""
-    project_tangent(M::Circle, p, X)
+    project(M::Circle, p, X)
 
 Project a value `X` onto the tangent space of the point `p` on the [`Circle`](@ref) `M`.
 
@@ -288,12 +339,12 @@ For the real-valued case this is just the identity.
 For the complex valued case `X` is projected onto the line in the complex plane
 that is parallel to the tangent to `p` on the unit circle and contains `0`.
 """
-project_tangent(::Circle, ::Any, ::Any)
-project_tangent(::Circle{ℝ}, p::Real, X::Real) = X
-project_tangent(::Circle{ℂ}, p::Number, X::Number) = X - complex_dot(p, X) * p
+project(::Circle, ::Any, ::Any)
+project(::Circle{ℝ}, p::Real, X::Real) = X
+project(::Circle{ℂ}, p::Number, X::Number) = X - complex_dot(p, X) * p
 
-project_tangent!(::Circle{ℝ}, Y, p, X) = (Y .= X)
-project_tangent!(::Circle{ℂ}, Y, p, X) = (Y .= X - complex_dot(p, X) * p)
+project!(::Circle{ℝ}, Y, p, X) = (Y .= X)
+project!(::Circle{ℂ}, Y, p, X) = (Y .= X - complex_dot(p, X) * p)
 
 retract(M::Circle, p, q) = retract(M, p, q, ExponentialRetraction())
 retract(M::Circle, p, q, m::ExponentialRetraction) = exp(M, p, q)

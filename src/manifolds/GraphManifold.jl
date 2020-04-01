@@ -188,8 +188,9 @@ end
 returns the manifold dimension of the [`GraphManifold`](@ref) `N` on the vertices of
 a graph $G=(V,E)$, i.e.
 ````math
-\dim(\mathcal N) = \lvert V \rVert \dim(\mathcal M).
+\dim(\mathcal N) = \lvert V \rvert \dim(\mathcal M),
 ````
+where $\mathcal M$ is the manifold of the data on the nodes.
 """
 function manifold_dimension(M::VertexGraphManifold)
     return manifold_dimension(M.manifold) * nv(M.graph)
@@ -200,8 +201,9 @@ end
 returns the manifold dimension of the [`GraphManifold`](@ref) `N` on the edges of
 a graph $G=(V,E)$, i.e.
 ````math
-\dim(\mathcal N) = \lvert E \rVert \dim(\mathcal M).
+\dim(\mathcal N) = \lvert E \rvert \dim(\mathcal M),
 ````
+where $\mathcal M$ is the manifold of the data on the edges.
 """
 function manifold_dimension(M::EdgeGraphManifold)
     return manifold_dimension(M.manifold) * ne(M.graph)

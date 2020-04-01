@@ -124,7 +124,7 @@ function translate_diff!(G::SemidirectProductGroup, Y, p, q, X, conX::LeftAction
     return Y
 end
 
-function hat!(G::SemidirectProductGroup, Y, p, X)
+function get_vector!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
     M = base_manifold(G)
     N, H = M.manifolds
     dimN = manifold_dimension(N)
@@ -132,13 +132,22 @@ function hat!(G::SemidirectProductGroup, Y, p, X)
     @assert length(X) == dimN + dimH
     np, hp = submanifold_components(G, p)
     nY, hY = submanifold_components(G, Y)
-    hat!(N, nY, np, view(X, 1:dimN))
-    hat!(H, hY, hp, view(X, dimN+1:dimN+dimH))
+    get_vector!(N, nY, np, view(X, 1:dimN), B)
+    get_vector!(H, hY, hp, view(X, dimN+1:dimN+dimH), B)
     @inbounds _padvector!(G, Y)
     return Y
 end
+eval(quote
+    @invoke_maker 1 Manifold get_vector!(
+        M::SemidirectProductGroup,
+        Xⁱ,
+        e::Identity,
+        X,
+        B::VeeOrthogonalBasis,
+    )
+end)
 
-function vee!(G::SemidirectProductGroup, Y, p, X)
+function get_coordinates!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
     M = base_manifold(G)
     N, H = M.manifolds
     dimN = manifold_dimension(N)
@@ -146,10 +155,19 @@ function vee!(G::SemidirectProductGroup, Y, p, X)
     @assert length(Y) == dimN + dimH
     np, hp = submanifold_components(G, p)
     nY, hY = submanifold_components(G, X)
-    vee!(N, view(Y, 1:dimN), np, nY)
-    vee!(H, view(Y, dimN+1:dimN+dimH), hp, hY)
+    get_coordinates!(N, view(Y, 1:dimN), np, nY, B)
+    get_coordinates!(H, view(Y, dimN+1:dimN+dimH), hp, hY, B)
     return Y
 end
+eval(quote
+    @invoke_maker 1 Manifold get_coordinates!(
+        M::SemidirectProductGroup,
+        Y,
+        e::Identity,
+        X,
+        B::VeeOrthogonalBasis,
+    )
+end)
 
 function zero_tangent_vector(G::SemidirectProductGroup, p)
     X = allocate_result(G, zero_tangent_vector, p)

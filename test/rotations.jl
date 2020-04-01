@@ -6,31 +6,31 @@ include("utils.jl")
     @test representation_size(M) == (2,2)
     @test injectivity_radius(M) == π*sqrt(2.0)
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0]) == π*sqrt(2.0)
+    @test injectivity_radius(M, ExponentialRetraction()) == π*sqrt(2.0)
+    @test injectivity_radius(M, [1.0 0.0; 0.0 1.0], ExponentialRetraction()) == π*sqrt(2.0)
+    @test injectivity_radius(M, PolarRetraction()) ≈ π/sqrt(2)
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0], PolarRetraction()) ≈ π/sqrt(2)
-    types = [
-        Matrix{Float64},
-        MMatrix{2, 2, Float64},
-        Matrix{Float32},
-    ]
-
+    types = [ Matrix{Float64}, ]
+    TEST_FLOAT32 && push!(types, Matrix{Float32})
+    TEST_STATIC_SIZED && push!(types, MMatrix{2, 2, Float64})
     retraction_methods = [Manifolds.PolarRetraction(),
                           Manifolds.QRRetraction()]
 
     inverse_retraction_methods = [Manifolds.PolarInverseRetraction(),
                                   Manifolds.QRInverseRetraction()]
 
-    basis_types = (ArbitraryOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
+    basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
 
     @testset "vee/hat" begin
         M = Manifolds.Rotations(2)
-        v = randn(1)
+        v = [1.23,]
         x = Matrix{Float64}(I, 2, 2)
         V = Manifolds.hat(M, x, v)
         @test isa(V, AbstractMatrix)
         @test norm(M, x, V) / sqrt(2) ≈ norm(v)
         @test Manifolds.vee(M, x, V) == v
 
-        V = project_tangent(M, x, randn(2, 2))
+        V = project(M, x, randn(2, 2))
         v = Manifolds.vee(M, x, V)
         @test isa(v, AbstractVector)
         @test Manifolds.hat(M, x, v) == V
@@ -105,10 +105,10 @@ include("utils.jl")
                 @test norm(SOn, x, V) / sqrt(2) ≈ norm(v)
                 @test Manifolds.vee(SOn, x, V) == v
 
-                V = project_tangent(SOn, x, randn(n, n))
+                V = project(SOn, x, randn(n, n))
                 v = Manifolds.vee(SOn, x, V)
                 @test isa(v, AbstractVector)
-                @test Manifolds.hat(SOn, x, v) == V
+                @test Manifolds.hat(SOn, x, v) ≈ V
             end
 
             if n == 4
@@ -164,16 +164,16 @@ include("utils.jl")
     @testset "Project point" begin
         M = Manifolds.Rotations(2)
         x = Matrix{Float64}(I, 2, 2)
-        x1 = project_point(M, x)
+        x1 = project(M, x)
         @test is_manifold_point(M, x1, true)
 
         M = Manifolds.Rotations(3)
         x = collect(reshape(1.0:9.0, (3, 3)))
-        x2 = project_point(M, x)
+        x2 = project(M, x)
         @test is_manifold_point(M, x2, true)
 
         rng = MersenneTwister(44);
-        x3 = project_point(M, randn(rng, 3,3))
+        x3 = project(M, randn(rng, 3,3))
         @test is_manifold_point(M, x3, true)
     end
 end

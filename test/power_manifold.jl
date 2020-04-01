@@ -1,6 +1,8 @@
 include("utils.jl")
 
 using HybridArrays, Random
+using Manifolds: default_metric_dispatch
+using StaticArrays: Dynamic
 
 Random.seed!(42)
 
@@ -27,23 +29,27 @@ Random.seed!(42)
     @test repr(Ms1) == "PowerManifold(Sphere(2), 5)"
     @test repr(Mrn1) == "PowerManifold(Rotations(3), NestedPowerRepresentation(), 5)"
 
+    @test Manifolds.allocation_promotion_function(Ms, exp, ([1],)) == Manifolds.allocation_promotion_function(Ms1, exp, (1,))
+
     @test Ms^5 === Oblique(3,5)
     @test Ms^(5,) === Ms1
     @test Mr^(5, 7) === Mr2
 
     @test is_default_metric(Ms1, PowerMetric())
+    @test default_metric_dispatch(Ms1, PowerMetric()) === Val{true}()
     types_s1 = [Array{Float64,2},
-                HybridArray{Tuple{3,StaticArrays.Dynamic()}, Float64, 2}]
+                HybridArray{Tuple{3,Dynamic()}, Float64, 2}]
     types_s2 = [Array{Float64,3},
-                HybridArray{Tuple{3,StaticArrays.Dynamic(),StaticArrays.Dynamic()}, Float64, 3}]
+                HybridArray{Tuple{3,Dynamic(),Dynamic()}, Float64, 3}]
 
     types_r1 = [Array{Float64,3},
-                HybridArray{Tuple{3,3,StaticArrays.Dynamic()}, Float64, 3}]
+                HybridArray{Tuple{3,3,Dynamic()}, Float64, 3}]
 
-    types_rn1 = [Vector{Matrix{Float64}},
-                 Vector{MMatrix{3,3,Float64}}]
+    types_rn1 = [Vector{Matrix{Float64}}, ]
+    TEST_STATIC_SIZED && push!(types_rn1, Vector{MMatrix{3,3,Float64}})
+
     types_r2 = [Array{Float64,4},
-                HybridArray{Tuple{3,3,StaticArrays.Dynamic(),StaticArrays.Dynamic()}, Float64, 4}]
+                HybridArray{Tuple{3,3,Dynamic(),Dynamic()}, Float64, 4}]
     types_rn2 = [Matrix{Matrix{Float64}}]
 
     retraction_methods = [Manifolds.PowerRetraction(ManifoldsBase.ExponentialRetraction())]
@@ -70,20 +76,26 @@ Random.seed!(42)
 
     trim(s::String) = s[1:min(length(s), 20)]
 
-    basis_types = (ArbitraryOrthonormalBasis(),
+    basis_types = (DefaultOrthonormalBasis(),
         ProjectedOrthonormalBasis(:svd)
     )
     for T in types_s1
         @testset "Type $(trim(string(T)))..." begin
             pts1 = [convert(T, rand(power_s1_pt_dist)) for _ in 1:3]
-            @test injectivity_radius(Ms1,pts1[1]) == π
-            basis_diag = DiagonalizingOrthonormalBasis(log(Ms1, pts1[1], pts1[2]))
-            basis_arb = get_basis(Ms1, pts1[1], ArbitraryOrthonormalBasis())
-            test_manifold(Ms1,
+            @test injectivity_radius(Ms1, pts1[1]) == π
+            basis_diag = get_basis(
+                Ms1,
+                pts1[1],
+                DiagonalizingOrthonormalBasis(log(Ms1, pts1[1], pts1[2])),
+            )
+            basis_arb = get_basis(Ms1, pts1[1], DefaultOrthonormalBasis())
+            test_manifold(
+                Ms1,
                 pts1;
                 test_reverse_diff = true,
                 test_musical_isomorphisms = true,
                 test_injectivity_radius = false,
+                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_s1_pt_dist],
@@ -104,6 +116,7 @@ Random.seed!(42)
                 test_reverse_diff = true,
                 test_musical_isomorphisms = true,
                 test_injectivity_radius = false,
+                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_s2_pt_dist],
@@ -124,6 +137,7 @@ Random.seed!(42)
                 test_reverse_diff = false,
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
+                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_r1_pt_dist],
@@ -145,6 +159,7 @@ Random.seed!(42)
                 test_reverse_diff = false,
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
+                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_rn1_pt_dist],
@@ -165,6 +180,7 @@ Random.seed!(42)
                 test_reverse_diff = false,
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
+                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_r2_pt_dist],
@@ -184,6 +200,7 @@ Random.seed!(42)
                 test_reverse_diff = false,
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
+                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = [power_rn2_pt_dist],
@@ -193,6 +210,94 @@ Random.seed!(42)
                 is_tangent_atol_multiplier = 12.0,
             )
         end
+    end
+
+    @testset "Power manifold of Circle" begin
+        pts_t = [[0.0, 1.0, 2.0], [1.0, 1.0, 2.4], [0.0, 2.0, 1.0]]
+        MT = PowerManifold(Circle(), 3)
+        @test representation_size(MT) == (3,)
+        test_manifold(
+            MT,
+            pts_t;
+            test_reverse_diff = false,
+            test_forward_diff = false,
+            test_injectivity_radius = false,
+            test_musical_isomorphisms = true,
+            test_vee_hat = true,
+            retraction_methods = retraction_methods,
+            inverse_retraction_methods = inverse_retraction_methods,
+            rand_tvector_atol_multiplier = 5.0,
+            retraction_atol_multiplier = 12,
+            is_tangent_atol_multiplier = 12.0,
+        )
+    end
+
+    @testset "Basis printing" begin
+        p = hcat([[1.0, 0.0, 0.0] for i in 1:5]...)
+        Bc = get_basis(Ms1, p, DefaultOrthonormalBasis())
+        @test sprint(show, "text/plain", Bc) == """
+        DefaultOrthonormalBasis(ℝ) for a power manifold
+        Basis for component (1,):
+        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+         E1 =
+          3-element Array{Int64,1}:
+           0
+           1
+           0
+         E2 =
+          3-element Array{Int64,1}:
+           0
+           0
+           1
+        Basis for component (2,):
+        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+         E1 =
+          3-element Array{Int64,1}:
+           0
+           1
+           0
+         E2 =
+          3-element Array{Int64,1}:
+           0
+           0
+           1
+        Basis for component (3,):
+        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+         E1 =
+          3-element Array{Int64,1}:
+           0
+           1
+           0
+         E2 =
+          3-element Array{Int64,1}:
+           0
+           0
+           1
+        Basis for component (4,):
+        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+         E1 =
+          3-element Array{Int64,1}:
+           0
+           1
+           0
+         E2 =
+          3-element Array{Int64,1}:
+           0
+           0
+           1
+        Basis for component (5,):
+        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+         E1 =
+          3-element Array{Int64,1}:
+           0
+           1
+           0
+         E2 =
+          3-element Array{Int64,1}:
+           0
+           0
+           1
+        """
     end
 
     @testset "Power manifold of Circle" begin
