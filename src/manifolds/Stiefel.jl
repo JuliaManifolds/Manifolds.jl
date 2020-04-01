@@ -330,10 +330,7 @@ function uniform_distribution(M::Stiefel{n,k,ℝ}, p) where {n,k}
     return ProjectedPointDistribution(M, d, project!, p)
 end
 
-struct RandnMatrix <: ContinuousMatrixDistribution
-    n::Integer
-    m::Integer
-end
+struct MatrixStandardNormal{N,M} <: ContinuousMatrixDistribution end
 Base.size(d::RandnMatrix) = (d.n,d.m)
 Base.size(d::RandnMatrix, i) = i::Integer <= 2 ? size(d)[i] : 1
 Distributions._rand!(rng::AbstractRNG, d::RandnMatrix, A::AbstractMatrix) = randn!(rng,A)
