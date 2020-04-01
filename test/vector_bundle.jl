@@ -128,7 +128,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
     @testset "Error messages" begin
         vbf = VectorBundleFibers(TestVectorSpaceType(), Euclidean(3))
         @test_throws ErrorException inner(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
-        @test_throws ErrorException Manifolds.project_vector!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
+        @test_throws ErrorException Manifolds.project!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws ErrorException zero_vector!(vbf, [1, 2, 3], [1, 2, 3])
         @test_throws ErrorException vector_space_dimension(vbf)
     end
