@@ -9,8 +9,8 @@ abstract type AbstractSphere{𝔽} <:
 @doc raw"""
     Sphere{n,𝔽} <: AbstractSphere{𝔽}
 
-The (unit) sphere manifold $𝕊^{n}$ is the set of all unit norm vectors in $𝔽^{N}$, $𝔽 elements. The sphere is
-represented in the embedding, and currently supports both vectors and matrices, i.e.
+The (unit) sphere manifold $𝕊^{n}$ is the set of all unit norm vectors in $𝔽^{N}$, $𝔽 elements.
+The sphere is represented in the embedding, i.e.
 
 ````math
 𝕊^{n} := \bigl\{ p \in 𝔽^{n+1}\ \big|\ \lVert p \rVert = 1 \bigr\}
@@ -215,7 +215,7 @@ an orthonormal basis by rotating the vector `X` using the rotation matrix
 $2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
 """
 function get_coordinates(M::Sphere{n,ℝ}, p, X, B::DefaultOrthonormalBasis) where {n}
-    if isapprox(abs(p[1]), 1)
+    if isapprox(p[1], 1)
         return X[2:end]
     else
         xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n+1)
