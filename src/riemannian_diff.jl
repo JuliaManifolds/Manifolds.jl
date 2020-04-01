@@ -70,7 +70,7 @@ r_jacobian(f::AbstractMap, p) = r_jacobian(f::AbstractMap, p, rdiff_backend())
         diff_backend::AbstractDiffBackend
         retraction::AbstractRetractionMethod
         inverse_retraction::AbstractInverseRetractionMethod
-        basis::AbstractOrthonormalBasis{ℝ}
+        basis::Union{AbstractOrthonormalBasis,CachedBasis{<:AbstractOrthonormalBasis}},
     ) <: AbstractRiemannianDiffBackend
 
 Riemannian differentiation based on differentiation in an [`AbstractOrthonormalBasis`](@ref)
@@ -80,7 +80,7 @@ struct RiemannianONBDiffBackend{
     TADBackend<:AbstractDiffBackend,
     TRetr<:AbstractRetractionMethod,
     TInvRetr<:AbstractInverseRetractionMethod,
-    TBasis<:AbstractOrthonormalBasis{ℝ}
+    TBasis<:Union{AbstractOrthonormalBasis,CachedBasis{<:AbstractOrthonormalBasis}},
 } <: AbstractRiemannianDiffBackend
     diff_backend::TADBackend
     retraction::TRetr
@@ -171,7 +171,7 @@ const _current_rdiff_backend = CurrentRiemannianDiffBackend(
         diff_backend(),
         ExponentialRetraction(),
         LogarithmicInverseRetraction(),
-        ArbitraryOrthonormalBasis(),
+        DefaultOrthonormalBasis(),
     ),
 )
 
@@ -217,5 +217,5 @@ end
 function r_gradient(f::AbstractRealField, p, backend::RiemannianProjectionDiffBackend)
     M = domain(f)
     amb_grad = _gradient(f, p, backend.diff_backend)
-    return project_tangent(M, p, amb_grad)
+    return project(M, p, amb_grad)
 end

@@ -116,7 +116,7 @@ end
         diff_backend(),
         Manifolds.ExponentialRetraction(),
         Manifolds.LogarithmicInverseRetraction(),
-        ArbitraryOrthonormalBasis(),
+        DefaultOrthonormalBasis(),
     )
 
     rb_proj = Manifolds.RiemannianProjectionDiffBackend(diff_backend())
@@ -130,7 +130,10 @@ end
         diff_backend(),
         Manifolds.ExponentialRetraction(),
         Manifolds.LogarithmicInverseRetraction(),
-        PrecomputedOrthonormalBasis([[0.0, -1.0, 0.0], [sqrt(2)/2, 0.0, -sqrt(2)/2]]),
+        CachedBasis(
+            DefaultOrthonormalBasis(),
+            [[0.0, -1.0, 0.0], [sqrt(2)/2, 0.0, -sqrt(2)/2]],
+        ),
     )
 
     @test r_hessian(f1, q, rb_onb2) ≈ [-sqrt(2)/2 0.0; 0.0 -sqrt(2)/2] atol = 1e-6

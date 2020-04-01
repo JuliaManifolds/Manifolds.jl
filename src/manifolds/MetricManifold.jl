@@ -379,7 +379,8 @@ coordinates of `p`, $\frac{∂}{∂ p^k} g_{ij} = g_{ij,k}$. The
 dimensions of the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
 local_metric_jacobian(::MetricManifold, ::Any)
-@decorator_transparent_function :intransparent function local_metric_jacobian(M,
+@decorator_transparent_function :intransparent function local_metric_jacobian(
+    M::MetricManifold,
     p;
     backend::AbstractDiffBackend = diff_backend(),
 )
@@ -406,7 +407,10 @@ Return the natural logarithm of the metric density $ρ$ of `M` at `p`, which
 is given by $ρ = \log \sqrt{|\det [g_{ij}]|}$.
 """
 log_local_metric_density(::MetricManifold, ::Any)
-@decorator_transparent_function :parent function log_local_metric_density(M::MetricManifold, p)
+@decorator_transparent_function :parent function log_local_metric_density(
+    M::MetricManifold,
+    p,
+)
     return log(abs(det_local_metric(M, p))) / 2
 end
 

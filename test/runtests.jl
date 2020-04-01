@@ -1,8 +1,6 @@
 include("differentiation.jl")
 include("utils.jl")
 
-include("maps.jl")
-
 @info "Manifolds.jl Test settings:\n\n"*
     "Testing Float32:  $(TEST_FLOAT32)\n"*
     "Testing Double64: $(TEST_DOUBLE64)\n"*
@@ -14,6 +12,9 @@ include("maps.jl")
     @test length(Test.detect_ambiguities(ManifoldsBase)) <= 13
     @test length(Test.detect_ambiguities(Manifolds)) == 0
 end
+
+include("maps.jl")
+
 
 include("groups/group_utils.jl")
 include("sized_abstract_array.jl")
