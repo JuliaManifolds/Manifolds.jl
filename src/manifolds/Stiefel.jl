@@ -324,6 +324,12 @@ show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(
 
 Uniform distribution on given (real-valued) [`Stiefel`](@ref) `M`.
 Generated points will be of similar type as `p`.
+
+The implementation is based on Section 2.5.1 in [^Chikuse2003].
+
+[^Chikuse2003]:
+    > Y. Chikuse: "Statistics on Special Manifolds", Springer New York, 2003,
+    > doi: [10.1007/978-0-387-21540-2](https://doi.org/10.1007/978-0-387-21540-2).
 """
 function uniform_distribution(M::Stiefel{n,k,ℝ}, p) where {n,k}
     μ = Distributions.Zeros(p)
