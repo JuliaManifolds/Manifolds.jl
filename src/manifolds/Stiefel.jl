@@ -334,7 +334,9 @@ struct MatrixStandardNormal{N,M} <: ContinuousMatrixDistribution end
 Base.size(d::RandnMatrix) = (d.n,d.m)
 Base.size(d::RandnMatrix, i) = i::Integer <= 2 ? size(d)[i] : 1
 Distributions._rand!(rng::AbstractRNG, d::RandnMatrix, A::AbstractMatrix) = randn!(rng,A)
-Distributions._logpdf(d::RandnMatrix, x::AbstractArray) = sum(x) do xij
-    dij = Distributions.Normal(zero(xij),one(xij))
-    return Distributions.logpdf(dij,xij)
+function Distributions._logpdf(d::RandnMatrix, x::AbstractArray)
+    dim = prod(size(d))
+    σ = one(eltype(x))
+    dvec = MvNormal(dim, σ)
+    return Distributions._logpdf(dvec, vec(x))
 end
