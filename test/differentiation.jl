@@ -1,6 +1,6 @@
 using Test
 using Manifolds
-using Manifolds: _derivative, _gradient, _hessian, _jacobian
+using Manifolds: _derivative, _derivative!, _gradient, _gradient!, _hessian, _jacobian
 using FiniteDifferences
 using LinearAlgebra: Diagonal, dot
 
@@ -70,7 +70,10 @@ using LinearAlgebra: Diagonal, dot
         end
 
         @testset "Inference" begin
+            v = [-1.0, -1.0]
             @test (@inferred _derivative(c1, 0.0, Manifolds.ForwardDiffBackend())) ≈ [1.0, 0.0]
+            @test (@inferred _derivative!(c1, v, 0.0, Manifolds.ForwardDiffBackend())) === v
+            @test v ≈ [1.0, 0.0]
 
             @test (@inferred _derivative(c1, 0.0, finite_diff)) ≈ [1.0, 0.0]
             @test (@inferred _gradient(f1, [1.0, -1.0], finite_diff)) ≈ [1.0, -2.0]
@@ -83,7 +86,12 @@ using LinearAlgebra: Diagonal, dot
         ]
             diff_backend!(backend)
             @test _derivative(c1, 0.0) ≈ [1.0, 0.0]
+            v = [-1.0, -1.0]
+            @test _derivative!(c1, v, 0.0) === v
+            @test isapprox(v, [1.0, 0.0])
             @test _gradient(f1, [1.0, -1.0]) ≈ [1.0, -2.0]
+            @test _gradient!(f1, v, [1.0, -1.0]) === v
+            @test v ≈ [1.0, -2.0]
             @test _hessian(f2, [1.0, -1.0]) ≈ [0.0 3.0; 3.0 -6.0] atol = 1e-5
         end
         diff_backend!(Manifolds.NoneDiffBackend())

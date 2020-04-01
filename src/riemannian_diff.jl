@@ -42,9 +42,17 @@ function r_derivative(f::AbstractCurve, t, backend::AbstractRiemannianDiffBacken
           "backend $(typeof(backend))")
 end
 
+function r_derivative!(f::AbstractCurve, X, t, backend::AbstractRiemannianDiffBackend)
+    copyto!(X, r_derivative(f, t, backend))
+end
+
 function r_gradient(f::AbstractRealField, p, backend::AbstractRiemannianDiffBackend)
     error("r_gradient not implemented for field $(typeof(f)), point $(typeof(p)) and " *
           "backend $(typeof(backend))")
+end
+
+function r_gradient!(f::AbstractRealField, X, p, backend::AbstractRiemannianDiffBackend)
+    copyto!(X, r_gradient(f, p, backend))
 end
 
 function r_hessian(f::AbstractRealField, p, backend::AbstractRiemannianDiffBackend)
@@ -59,7 +67,11 @@ end
 
 r_derivative(f::AbstractCurve, p) = r_derivative(f, p, rdiff_backend())
 
+r_derivative!(f::AbstractCurve, X, p) = r_derivative!(f, X, p, rdiff_backend())
+
 r_gradient(f::AbstractRealField, p) = r_gradient(f, p, rdiff_backend())
+
+r_gradient!(f::AbstractRealField, X, p) = r_gradient!(f, X, p, rdiff_backend())
 
 r_hessian(f::AbstractRealField, p) = r_hessian(f, p, rdiff_backend())
 
@@ -218,4 +230,11 @@ function r_gradient(f::AbstractRealField, p, backend::RiemannianProjectionDiffBa
     M = domain(f)
     amb_grad = _gradient(f, p, backend.diff_backend)
     return project(M, p, amb_grad)
+end
+
+function r_gradient!(f::AbstractRealField, X, p, backend::RiemannianProjectionDiffBackend)
+    M = domain(f)
+    amb_grad = embed(M, p, X)
+    _gradient!(f, amb_grad, p, backend.diff_backend)
+    return project!(M, X, p, amb_grad)
 end

@@ -28,6 +28,10 @@ function _derivative(f, t, backend::AbstractDiffBackend)
           "backend $(typeof(backend))")
 end
 
+function _derivative!(f, X, t, backend::AbstractDiffBackend)
+    return copyto!(X, _derivative(f, t, backend))
+end
+
 """
     _gradient(f, p[, backend::AbstractDiffBackend])
 
@@ -43,6 +47,10 @@ specified, it is obtained using the function [`diff_backend`](@ref).
 function _gradient(f, p, backend::AbstractDiffBackend)
     error("_gradient not implemented for field $(typeof(f)), point $(typeof(p)) and " *
           "backend $(typeof(backend))")
+end
+
+function _gradient!(f, X, p, backend::AbstractDiffBackend)
+    return copyto!(X, _gradient(f, p, backend))
 end
 
 """
@@ -62,6 +70,26 @@ function _hessian(f, p, backend::AbstractDiffBackend)
 end
 
 """
+    _hessian_vector_product(f, p, X[, backend::AbstractDiffBackend])
+
+Compute product of the Hessian of a callable `f` at point `p` computed using the given
+`backend`, an object of type [`AbstractDiffBackend`](@ref), and the vector X. If the backend
+is not explicitly specified, it is obtained using the function [`diff_backend`](@ref).
+
+!!! note
+
+    Not specifying the backend explicitly will usually result in a type instability
+    and decreased performance.
+"""
+function _hessian_vector_product(f, p, X, backend::AbstractDiffBackend)
+    return _jacobian_transpose_vector_product(
+        q -> _gradient(f, q, backend),
+        p,
+        X,
+        backend)
+end
+
+"""
     _jacobian(f, p[, backend::AbstractDiffBackend])
 
 Compute the Jacobian of a callable `f` at point `p` computed using the given `backend`,
@@ -77,6 +105,15 @@ function _jacobian(f, p, backend::AbstractDiffBackend)
     error("_jacobian not implemented for map $(typeof(f)), point $(typeof(p)) and " *
           "backend $(typeof(backend))")
 end
+
+function _jacobian_vector_product(f, p, X, backend::AbstractDiffBackend)
+    return _jacobian(f, p, backend) * X
+end
+
+function _jacobian_transpose_vector_product(f, p, X, backend::AbstractDiffBackend)
+    return transpose(_jacobian(f, p, backend)) * X
+end
+
 
 """
     CurrentDiffBackend(backend::AbstractDiffBackend)
@@ -133,9 +170,15 @@ diff_backends() = _diff_backends
 
 _derivative(f, t) = _derivative(f, t, diff_backend())
 
+_derivative!(f, X, t) = _derivative!(f, X, t, diff_backend())
+
 _gradient(f, p) = _gradient(f, p, diff_backend())
 
+_gradient!(f, X, p) = _gradient!(f, X, p, diff_backend())
+
 _hessian(f, p) = _hessian(f, p, diff_backend())
+
+_hessian_vector_product(f, p, X) = _hessian_vector_product(f, p, X, diff_backend())
 
 _jacobian(f, p) = _jacobian(f, p, diff_backend())
 
