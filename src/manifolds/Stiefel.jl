@@ -320,12 +320,12 @@ i.e. `(n,k)`, which is the matrix dimensions.
 show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")
 
 """
-    uniform_distribution(M::Stiefel, p)
+    uniform_distribution(M::Stiefel{n,k,ℝ}, p)
 
-Uniform distribution on given [`Stiefel`](@ref) `M`. Generated points will be of
-similar type as `p`.
+Uniform distribution on given (real-valued) [`Stiefel`](@ref) `M`.
+Generated points will be of similar type as `p`.
 """
-function uniform_distribution(M::Stiefel, p)
+function uniform_distribution(M::Stiefel{n,k,ℝ}, p) where {n,k}
     d = RandnMatrix(size(p)...)
     return ProjectedPointDistribution(M, d, project!, p)
 end
