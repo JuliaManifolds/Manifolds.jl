@@ -335,7 +335,7 @@ Base.size(d::MatrixStandardNormal{N,M}) where {N,M} = (N,M)
 Base.size(d::MatrixStandardNormal, i) = i::Integer <= 2 ? size(d)[i] : 1
 Distributions._rand!(rng::AbstractRNG, d::MatrixStandardNormal, A::AbstractMatrix) = randn!(rng,A)
 function Distributions._logpdf(d::MatrixStandardNormal, x::AbstractArray)
-    dim = prod(size(d))
+    dim = length(d)
     σ = one(eltype(x))
     dvec = MvNormal(dim, σ)
     return Distributions._logpdf(dvec, vec(x))
