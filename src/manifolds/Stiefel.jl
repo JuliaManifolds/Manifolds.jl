@@ -326,15 +326,15 @@ Uniform distribution on given (real-valued) [`Stiefel`](@ref) `M`.
 Generated points will be of similar type as `p`.
 """
 function uniform_distribution(M::Stiefel{n,k,ℝ}, p) where {n,k}
-    d = RandnMatrix(size(p)...)
+    d = MatrixStandardNormal{size(p)...}()
     return ProjectedPointDistribution(M, d, project!, p)
 end
 
 struct MatrixStandardNormal{N,M} <: ContinuousMatrixDistribution end
-Base.size(d::RandnMatrix) = (d.n,d.m)
-Base.size(d::RandnMatrix, i) = i::Integer <= 2 ? size(d)[i] : 1
-Distributions._rand!(rng::AbstractRNG, d::RandnMatrix, A::AbstractMatrix) = randn!(rng,A)
-function Distributions._logpdf(d::RandnMatrix, x::AbstractArray)
+Base.size(d::MatrixStandardNormal{N,M}) where {N,M} = (N,M)
+Base.size(d::MatrixStandardNormal, i) = i::Integer <= 2 ? size(d)[i] : 1
+Distributions._rand!(rng::AbstractRNG, d::MatrixStandardNormal, A::AbstractMatrix) = randn!(rng,A)
+function Distributions._logpdf(d::MatrixStandardNormal, x::AbstractArray)
     dim = prod(size(d))
     σ = one(eltype(x))
     dvec = MvNormal(dim, σ)
