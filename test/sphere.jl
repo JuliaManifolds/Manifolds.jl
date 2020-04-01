@@ -94,6 +94,9 @@ include("utils.jl")
         p = [1.0, 1.0im, 1.0]
         q = project(M,p)
         @test is_manifold_point(M,q)
+        Y = [2.0, 1.0im, 20.0]
+        X = project(M,q,Y)
+        @test is_tangent_vector(M,q,X,true; atol=10^(-14))
     end
 
     @testset "Tensor Sphere" begin
@@ -101,8 +104,14 @@ include("utils.jl")
         @test repr(M) == "ArraySphere(2, 2; field = ℝ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℝ}
         @test representation_size(M) == (2,2)
-
+        p = ones(2,2)
+        q = project(M,p)
+        @test is_manifold_point(M,q)
+        Y = [1.0 0.0; 0.0 1.1]
+        X = project(M,q,Y)
+        @test is_tangent_vector(M,q,X)
         M = ArraySphere(2,2; field = ℂ)
+
         @test repr(M) == "ArraySphere(2, 2; field = ℂ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℂ}
         @test representation_size(M) == (2,2)
