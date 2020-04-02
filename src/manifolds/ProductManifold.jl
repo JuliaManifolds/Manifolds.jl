@@ -1,10 +1,7 @@
 @doc raw"""
-    ProductManifold{TM<:Tuple, TRanges<:Tuple, TSizes<:Tuple} <: Manifold
+    ProductManifold{𝔽,TM<:Tuple} <: Manifold{𝔽}
 
-Product manifold $M_1 × M_2 × …  × M_n$ with product geometry.
-`TRanges` and `TSizes` statically define the relationship between representation
-of the product manifold and representations of point, tangent vectors
-and cotangent vectors of respective manifolds.
+Product manifold $M_1 × M_2 × …  × M_n$ with product geometry..
 
 # Constructor
 
@@ -45,10 +42,10 @@ struct ProductBasisData{T<:Tuple}
 end
 
 const PRODUCT_BASIS_LIST_CACHED = [
-    CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
-    CachedBasis{<:ManifoldsBase.AbstractOrthogonalBasis{ℝ},<:ProductBasisData},
-    CachedBasis{<:ManifoldsBase.AbstractOrthonormalBasis{ℝ},<:ProductBasisData},
-    CachedBasis{<:AbstractBasis{ℂ},<:ProductBasisData},
+    CachedBasis{ℝ,<:AbstractBasis{ℝ},<:ProductBasisData},
+    CachedBasis{ℂ,<:AbstractBasis{ℂ},<:ProductBasisData},
+    CachedBasis{ℝ,<:AbstractOrthogonalBasis{ℝ},<:ProductBasisData},
+    CachedBasis{ℝ,<:AbstractOrthonormalBasis{ℝ},<:ProductBasisData},
 ]
 
 """
@@ -304,8 +301,8 @@ function get_coordinates(
     M::ProductManifold,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+) where {𝔽}
     reps = map(
         get_coordinates,
         M.manifolds,
@@ -318,7 +315,7 @@ end
 
 for BT in PRODUCT_BASIS_LIST_CACHED
     eval(quote
-        @invoke_maker 4 CachedBasis{<:AbstractBasis,<:ProductBasisData} get_coordinates(
+        @invoke_maker 4 CachedBasis{<:Any,<:AbstractBasis,<:ProductBasisData} get_coordinates(
                 M::ProductManifold,
                 p,
                 X,
@@ -367,8 +364,8 @@ function get_coordinates!(
     Xⁱ,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+) where {𝔽}
     dim = manifold_dimension(M)
     @assert length(Xⁱ) == dim
     i = one(dim)
@@ -390,7 +387,7 @@ end
 
 for BT in PRODUCT_BASIS_LIST_CACHED
     eval(quote
-        @invoke_maker 5 CachedBasis{<:AbstractBasis,<:ProductBasisData} get_coordinates!(
+        @invoke_maker 5 CachedBasis{<:Any,<:AbstractBasis,<:ProductBasisData} get_coordinates!(
                 M::ProductManifold,
                 Xⁱ,
                 p,
@@ -418,8 +415,8 @@ function get_vector(
     M::ProductManifold,
     p::ProductRepr,
     X,
-    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+) where {𝔽}
     N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
@@ -434,11 +431,11 @@ function get_vector(
     return ProductRepr(parts)
 end
 eval(quote
-    @invoke_maker 4 CachedBasis{<:AbstractBasis,<:ProductBasisData} get_vector(
+    @invoke_maker 4 CachedBasis{<:Any,<:AbstractBasis,<:ProductBasisData} get_vector(
         M::ProductManifold,
         p::ProductRepr,
         X,
-        B::CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
+        B::CachedBasis{ℝ,<:AbstractBasis{ℝ},<:ProductBasisData},
     )
 end)
 eval(quote
@@ -512,8 +509,8 @@ function get_vector!(
     X,
     p,
     Xⁱ,
-    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+) where {𝔽}
     N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
@@ -553,8 +550,8 @@ end
 function get_vectors(
     M::ProductManifold,
     p::ProductRepr,
-    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+) where {𝔽}
     N = number_of_components(M)
     xparts = submanifold_components(p)
     BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.data.parts))

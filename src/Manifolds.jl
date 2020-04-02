@@ -72,6 +72,7 @@ import ManifoldsBase:
     manifold_dimension,
     norm,
     number_eltype,
+    number_of_coordinates,
     project,
     project!,
     representation_size,

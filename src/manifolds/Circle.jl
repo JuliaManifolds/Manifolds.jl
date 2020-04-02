@@ -315,6 +315,8 @@ mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...) = sym_rem(sum(w .
 
 @inline norm(::Circle, p, X) = sum(abs, X)
 
+number_of_coordinates(::Circle, ::AbstractBasis) = 1
+
 @doc raw"""
     project(M::Circle, p)
 

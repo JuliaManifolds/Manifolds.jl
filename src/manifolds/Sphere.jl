@@ -192,7 +192,7 @@ end
 
 flat!(M::AbstractSphere, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{T,ℝ}) where {T,n}
+function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) where {n}
     A = zeros(n+1, n+1)
     A[1, :] = transpose(p)
     A[2, :] = transpose(B.frame_direction)

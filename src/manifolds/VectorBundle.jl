@@ -320,8 +320,8 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData},
-) where {N}
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData},
+) where {𝔽}
      px, Vx = submanifold_components(M.manifold, p)
      VXM, VXF = submanifold_components(M.manifold, X)
      n = manifold_dimension(M.manifold)
@@ -342,13 +342,13 @@ for BT in [
     end)
 end
 for BT in [
-    CachedBasis{<:AbstractBasis{ℝ},<:VectorBundleBasisData},
-    CachedBasis{<:ManifoldsBase.AbstractOrthogonalBasis{ℝ},<:VectorBundleBasisData},
-    CachedBasis{<:ManifoldsBase.AbstractOrthonormalBasis{ℝ},<:VectorBundleBasisData},
-    CachedBasis{<:AbstractBasis{ℂ},<:VectorBundleBasisData},
+    CachedBasis{ℝ,<:AbstractBasis{ℝ},<:VectorBundleBasisData},
+    CachedBasis{ℝ,<:ManifoldsBase.AbstractOrthogonalBasis{ℝ},<:VectorBundleBasisData},
+    CachedBasis{ℝ,<:ManifoldsBase.AbstractOrthonormalBasis{ℝ},<:VectorBundleBasisData},
+    CachedBasis{ℂ,<:AbstractBasis{ℂ},<:VectorBundleBasisData},
 ]
     eval(quote
-        @invoke_maker 5 CachedBasis{<:AbstractBasis,<:VectorBundleBasisData} get_coordinates!(
+        @invoke_maker 5 CachedBasis{<:Any,<:AbstractBasis,<:VectorBundleBasisData} get_coordinates!(
                 M::VectorBundle,
                 Y,
                 p,
@@ -374,8 +374,8 @@ function get_vector!(
     Y,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData},
-) where {N}
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData},
+) where {𝔽}
     n = manifold_dimension(M.manifold)
     xp1 = submanifold_component(p, Val(1))
     get_vector!(
@@ -401,8 +401,8 @@ end
 function get_vectors(
     M::VectorBundle,
     p,
-    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData},
+) where {𝔽}
     xp1 = submanifold_component(p, Val(1))
     zero_m = zero_tangent_vector(M.manifold, xp1)
     zero_f = zero_vector(M.fiber, xp1)

@@ -149,16 +149,16 @@ struct PowerBasisData{TB<:AbstractArray}
 end
 
 const POWER_BASIS_LIST_CACHED = [
-    CachedBasis{<:AbstractBasis{ℝ},<:PowerBasisData},
-    CachedBasis{<:ManifoldsBase.AbstractOrthogonalBasis{ℝ},<:PowerBasisData},
-    CachedBasis{<:ManifoldsBase.AbstractOrthonormalBasis{ℝ},<:PowerBasisData},
-    CachedBasis{<:AbstractBasis{ℂ},<:PowerBasisData},
+    CachedBasis{ℝ,<:AbstractBasis{ℝ},<:PowerBasisData},
+    CachedBasis{ℂ,<:AbstractBasis{ℂ},<:PowerBasisData},
+    CachedBasis{ℝ,<:AbstractOrthogonalBasis{ℝ},<:PowerBasisData},
+    CachedBasis{ℝ,<:AbstractOrthonormalBasis{ℝ},<:PowerBasisData},
 ]
 
 const PowerManifoldMultidimensional =
-    AbstractPowerManifold{<:Manifold,ArrayPowerRepresentation} where {TSize}
+    AbstractPowerManifold{𝔽,<:Manifold{𝔽},ArrayPowerRepresentation} where {𝔽}
 const PowerManifoldNested =
-    AbstractPowerManifold{<:Manifold,NestedPowerRepresentation} where {TSize}
+    AbstractPowerManifold{𝔽,<:Manifold{𝔽},NestedPowerRepresentation} where {𝔽}
 
 _access_nested(x, i::Int) = x[i]
 _access_nested(x, i::Tuple) = x[i...]
@@ -177,7 +177,13 @@ function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
     return FVector(TangentSpace, alloc)
 end
-function allocate_result(M::PowerManifoldNested, f::typeof(get_coordinates), p, X, B)
+function allocate_result(
+    M::PowerManifoldNested,
+    f::typeof(get_coordinates),
+    p,
+    X,
+    B::AbstractBasis,
+)
     return invoke(
         allocate_result,
         Tuple{Manifold,typeof(get_coordinates),Any,Any,typeof(B)},
@@ -357,7 +363,7 @@ function get_coordinates(
     M::AbstractPowerManifold,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽},
+    B::CachedBasis{𝔽,<:AbstractBasis,<:PowerBasisData},
 ) where {𝔽}
     rep_size = representation_size(M.manifold)
     vs = [
@@ -372,7 +378,7 @@ function get_coordinates(
 end
 for BT in POWER_BASIS_LIST_CACHED
     eval(quote
-        @invoke_maker 4 CachedBasis{<:AbstractBasis,<:PowerBasisData} get_coordinates(
+        @invoke_maker 4 CachedBasis{<:Any,<:AbstractBasis,<:PowerBasisData} get_coordinates(
             M::AbstractPowerManifold,
             p,
             X,
@@ -403,14 +409,14 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis{ℝ},<:PowerBasisData,ℝ},
+    B::CachedBasis{ℝ,<:AbstractBasis{ℝ},<:PowerBasisData},
 )
     TypeTuple = Tuple{
         AbstractPowerManifold,
         Any,
         Any,
         Any,
-        CachedBasis{<:AbstractBasis,<:PowerBasisData,ℝ},
+        CachedBasis{ℝ,<:AbstractBasis,<:PowerBasisData},
     }
     return invoke(get_coordinates!, TypeTuple, M, Y, p, X, B)
 end
@@ -419,7 +425,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽},
+    B::CachedBasis{𝔽,<:AbstractBasis,<:PowerBasisData},
 ) where {𝔽}
     rep_size = representation_size(M.manifold)
     dim = manifold_dimension(M.manifold)
@@ -437,8 +443,10 @@ function get_coordinates!(
     return Y
 end
 
-get_iterator(M::PowerManifold{<:Manifold,Tuple{N}}) where {N} = 1:N
-@generated function get_iterator(M::PowerManifold{<:Manifold,SizeTuple}) where {SizeTuple}
+get_iterator(M::PowerManifold{𝔽,<:Manifold{𝔽},Tuple{N}}) where {𝔽,N} = 1:N
+@generated function get_iterator(
+    M::PowerManifold{𝔽,<:Manifold{𝔽},SizeTuple},
+) where {𝔽,SizeTuple}
     size_tuple = size_to_tuple(SizeTuple)
     return Base.product(map(Base.OneTo, size_tuple)...)
 end
@@ -448,8 +456,8 @@ function get_vector!(
     Y,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:PowerBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData},
+) where {𝔽}
     dim = manifold_dimension(M.manifold)
     rep_size = representation_size(M.manifold)
     v_iter = 1
