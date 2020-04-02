@@ -1,11 +1,9 @@
 name: Manifolds-CI
 on:
   push:
-    branches:
-      - master
+    branches: [master]
+    tags: ["v*"]
   pull_request:
-  release:
-    types: [published, created, edited]
 
 jobs:
   test:
