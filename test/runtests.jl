@@ -1,4 +1,4 @@
-testing_group("groupmisc") && include("autodiff.jl")
+include("autodiff.jl")
 include("utils.jl")
 
 @info "Manifolds.jl Test settings:\n\n"*
