@@ -311,7 +311,6 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             @test isa(b, CachedBasis)
             bvectors = get_vectors(M, p, b)
             N = length(bvectors)
-            @test real_dimension(number_system(btype)) * N == manifold_dimension(M)
 
             # test orthonormality
             for i in 1:N
