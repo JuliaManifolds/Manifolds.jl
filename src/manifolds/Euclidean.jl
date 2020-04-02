@@ -102,7 +102,7 @@ function check_tangent_vector(M::Euclidean{N,𝔽}, p, X; check_base_point = tru
     end
 end
 
-det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = one(eltype(p))
+det_local_metric(M::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}= one(eltype(p))
 
 """
     distance(M::Euclidean, p, q)
@@ -160,7 +160,7 @@ end
 function get_coordinates!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
     PS = prod(S)
-    Y .= [reshape(real(X), PS)..., reshape(imag(X), PS)...]
+    Y .= [reshape(X, PS)..., reshape(X, PS)...]
     return Y
 end
 
@@ -204,13 +204,15 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpo
 """
 inner(::Euclidean, ::Any...)
 @inline inner(::Euclidean, p, X, Y) = dot(X, Y)
-@inline inner(::MetricManifold{<:Manifold,EuclideanMetric}, p, X, Y) = dot(X, Y)
+@inline inner(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p, X, Y) where {𝔽} = dot(X, Y)
 
-inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = local_metric(M, p)
+function inverse_local_metric(M::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
+    return local_metric(M, p)
+end
 
 default_metric_dispatch(::Euclidean, ::EuclideanMetric) = Val(true)
 
-function local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, p)
+function local_metric(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
     return Diagonal(ones(SVector{size(p, 1),eltype(p)}))
 end
 
@@ -227,7 +229,7 @@ log(::Euclidean, ::Any...)
 
 log!(M::Euclidean, X, p, q) = (X .= q .- p)
 
-log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = zero(eltype(p))
+log_local_metric_density(M::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽} = zero(eltype(p))
 
 @generated _product_of_dimensions(::Euclidean{N}) where {N} = prod(N.parameters)
 
