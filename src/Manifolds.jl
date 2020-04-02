@@ -33,6 +33,7 @@ import Base:
     zero
 import Distributions: _rand!, support
 import LinearAlgebra: cross, det, Diagonal, dot, mul!, norm, I, UniformScaling
+import ManifoldsBase: OutOfInjectivityRadiusError
 import ManifoldsBase:
     allocate,
     allocate_result,
@@ -221,7 +222,9 @@ function __init__()
 end
 #
 export CoTVector, Manifold, MPoint, TVector, Manifold
+export AbstractSphere
 export Euclidean,
+    ArraySphere,
     CholeskySpace,
     Circle,
     FixedRankMatrices,
@@ -463,6 +466,7 @@ export AbstractBasis,
     DiagonalizingBasisData,
     ProductBasisData,
     PowerBasisData
+export OutOfInjectivityRadiusError
 export get_basis,
     get_coordinates,
     get_coordinates!,
