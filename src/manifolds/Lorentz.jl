@@ -27,17 +27,17 @@ The Lorentz manifold (or Lorentzian) is a pseudo-Riemannian manifold.
 Generate the Lorentz manifold of dimension `n` with the [`LorentzMetric`](@ref) `m`,
 which is by default set to the [`MinkowskiMetric`](@ref).
 """
-const Lorentz = MetricManifold{Euclidean{Tuple{N},ℝ},<:LorentzMetric} where {N}
+const Lorentz = MetricManifold{ℝ,Euclidean{Tuple{N},ℝ},<:LorentzMetric} where {N}
 
 function Lorentz(n, m::MT = MinkowskiMetric()) where {MT<:LorentzMetric}
     return Lorentz{n,typeof(m)}(Euclidean(n), m)
 end
 
-function local_metric(::MetricManifold{Euclidean{Tuple{N},ℝ},MinkowskiMetric}, p) where {N}
+function local_metric(::MetricManifold{ℝ,Euclidean{Tuple{N},ℝ},MinkowskiMetric}, p) where {N}
     return Diagonal([ones(N - 1)..., -1])
 end
 
-function inner(::MetricManifold{Euclidean{Tuple{N},ℝ},MinkowskiMetric}, p, X, Y) where {N}
+function inner(::MetricManifold{ℝ,Euclidean{Tuple{N},ℝ},MinkowskiMetric}, p, X, Y) where {N}
     return minkowski_metric(X, Y)
 end
 @doc raw"""

@@ -1,5 +1,5 @@
 @doc raw"""
-    SymmetricPositiveDefinite{N} <: Manifold
+    SymmetricPositiveDefinite{N} <: Manifold{ℝ}
 
 The manifold of symmetric positive definite matrices, i.e.
 
@@ -16,7 +16,7 @@ p ∈ ℝ^{n × n} : a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash
 
 generates the manifold $\mathcal P(n) \subset ℝ^{n × n}$
 """
-struct SymmetricPositiveDefinite{N} <: AbstractEmbeddedManifold{DefaultEmbeddingType} end
+struct SymmetricPositiveDefinite{N} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType} end
 
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
 

@@ -1,5 +1,5 @@
 @doc raw"""
-    SkewSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{TransparentIsometricEmbedding}
+    SkewSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
 
 The [`Manifold`](@ref) $ \operatorname{SkewSym}(n)$ consisting of the real- or
 complex-valued skew-symmetric matrices of size $n × n$, i.e. the set
@@ -21,7 +21,7 @@ which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::
 
 Generate the manifold of $n × n$ symmetric matrices.
 """
-struct SkewSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{TransparentIsometricEmbedding} end
+struct SkewSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
 
 function SkewSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
     SkewSymmetricMatrices{n,field}()

@@ -4,7 +4,7 @@
 The circle group is the complex circle ([`Circle(ℂ)`](@ref)) equipped with
 the group operation of complex multiplication ([`MultiplicationOperation`](@ref)).
 """
-const CircleGroup = GroupManifold{Circle{ℂ},MultiplicationOperation}
+const CircleGroup = GroupManifold{ℂ,Circle{ℂ},MultiplicationOperation}
 
 CircleGroup() = GroupManifold(Circle{ℂ}(), MultiplicationOperation())
 
@@ -12,7 +12,7 @@ show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
 
 invariant_metric_dispatch(::CircleGroup, ::ActionDirection) = Val(true)
 
-default_metric_dispatch(::MetricManifold{CircleGroup,EuclideanMetric}) = Val(true)
+default_metric_dispatch(::MetricManifold{ℂ,CircleGroup,EuclideanMetric}) = Val(true)
 
 function compose(G::CircleGroup, p::AbstractVector, q::AbstractVector)
     return map(compose, repeated(G), p, q)

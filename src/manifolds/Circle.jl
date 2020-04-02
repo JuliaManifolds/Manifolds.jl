@@ -1,5 +1,5 @@
 @doc raw"""
-    Circle{𝔽} <: Manifold
+    Circle{𝔽} <: Manifold{𝔽}
 
 The circle $𝕊^1$ is a manifold here represented by
 real-valued points in $[-π,π)$ or complex-valued points $z ∈ ℂ$ of absolute value
@@ -12,7 +12,7 @@ Generate the `ℝ`-valued Circle represented by angles, which
 alternatively can be set to use the [`AbstractNumbers`](@ref) `𝔽=ℂ` to obtain the `Circle`
 represented by `ℂ`-valued `Circle` of unit numbers.
 """
-struct Circle{𝔽} <: Manifold where {𝔽<:AbstractNumbers} end
+struct Circle{𝔽} <: Manifold{𝔽} end
 
 Circle(𝔽::AbstractNumbers = ℝ) = Circle{𝔽}()
 

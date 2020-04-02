@@ -1,5 +1,5 @@
 @doc raw"""
-    Euclidean{T<:Tuple,𝔽} <: Manifold
+    Euclidean{T<:Tuple,𝔽} <: Manifold{𝔽}
 
 Euclidean vector space.
 
@@ -20,7 +20,7 @@ The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
 [`real_dimension`](@ref) of the field $𝔽$.
 """
-struct Euclidean{N,𝔽} <: Manifold where {N<:Tuple, 𝔽<:AbstractNumbers} end
+struct Euclidean{N,𝔽} <: Manifold{𝔽} where {N<:Tuple} end
 
 function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
     return Euclidean{Tuple{n...},field}()

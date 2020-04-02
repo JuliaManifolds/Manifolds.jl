@@ -1,10 +1,10 @@
 """
-    AbstractSphere{𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}
+    AbstractSphere{𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
 
 An abstract type to represent a unit sphere that is represented isometrically in the embedding.
 """
 abstract type AbstractSphere{𝔽} <:
-    AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} where {𝔽<:AbstractNumbers} end
+    AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
 @doc raw"""
     Sphere{n,𝔽} <: AbstractSphere{𝔽}

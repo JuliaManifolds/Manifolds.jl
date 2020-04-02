@@ -30,8 +30,8 @@ of a graph `G` depending on the [`GraphManifoldType`](@ref) `T`.
 * `G` is an `AbstractSimpleGraph`
 * `M` is a [`Manifold`](@ref)
 """
-struct GraphManifold{G<:AbstractGraph,TM,T<:GraphManifoldType} <:
-       AbstractPowerManifold{TM,NestedPowerRepresentation}
+struct GraphManifold{G<:AbstractGraph,𝔽,TM,T<:GraphManifoldType} <:
+       AbstractPowerManifold{𝔽,TM,NestedPowerRepresentation}
     graph::G
     manifold::TM
 end
@@ -156,10 +156,10 @@ function incident_log!(M::VertexGraphManifold, X, p)
     return X
 end
 function incident_log!(
-    M::GraphManifold{<:AbstractSimpleWeightedGraph,<:Manifold,VertexManifold},
+    M::GraphManifold{<:AbstractSimpleWeightedGraph,𝔽,<:Manifold{𝔽},VertexManifold},
     X,
     p,
-)
+) where {𝔽}
     rep_size = representation_size(M.manifold)
     for e in edges(M.graph)
         X[src(e)] += (

@@ -1,5 +1,5 @@
 @doc raw"""
-    Stiefel{n,k,𝔽} <: Manifold
+    Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
 
 The Stiefel manifold consists of all $n × k$, $n ≥ k$ unitary matrices, i.e.
 
@@ -31,7 +31,7 @@ The manifold is named after
 
 Generate the (real-valued) Stiefel manifold of $n × k$ dimensional orthonormal matrices.
 """
-struct Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
+struct Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
 Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ) = Stiefel{n,k,field}()
 

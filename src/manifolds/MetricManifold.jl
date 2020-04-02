@@ -29,7 +29,7 @@ you can of course still implement that directly.
 
 Generate the [`Manifold`](@ref) `M` as a manifold with the [`Metric`](@ref) `G`.
 """
-struct MetricManifold{M<:Manifold,G<:Metric} <: AbstractDecoratorManifold
+struct MetricManifold{𝔽,M<:Manifold{𝔽},G<:Metric} <: AbstractDecoratorManifold{𝔽}
     manifold::M
     metric::G
 end

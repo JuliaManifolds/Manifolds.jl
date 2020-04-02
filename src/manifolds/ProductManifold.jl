@@ -14,11 +14,16 @@ generates the product manifold $M_1 × M_2 × … × M_n$.
 Alternatively, the same manifold can be contructed using the `×` operator:
 `M_1 × M_2 × M_3`.
 """
-struct ProductManifold{TM<:Tuple} <: Manifold
+struct ProductManifold{𝔽,TM<:Tuple} <: Manifold{𝔽}
     manifolds::TM
 end
 
-ProductManifold(manifolds::Manifold...) = ProductManifold{typeof(manifolds)}(manifolds)
+function ProductManifold(manifolds::Manifold{𝔽}...) where {𝔽}
+    return ProductManifold{𝔽,typeof(manifolds)}(manifolds)
+end
+function ProductManifold(manifolds::Manifold...)
+    throw(MethodError("Currently only manifold of same number field can be build into a product manifold."))
+end
 ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
 
 const PRODUCT_BASIS_LIST = [
@@ -203,7 +208,10 @@ function cross(M1::ProductManifold, M2::ProductManifold)
     return ProductManifold(M1.manifolds..., M2.manifolds...)
 end
 
-function det_local_metric(M::MetricManifold{ProductManifold,ProductMetric}, p::ProductArray)
+function det_local_metric(
+    M::MetricManifold{ProductMetric,𝔽,ProductManifold{𝔽}},
+    p::ProductArray
+) where {𝔽}
     dets = map(det_local_metric, M.manifolds, submanifold_components(M, p))
     return prod(dets)
 end
@@ -723,7 +731,7 @@ end
 
 Calculate the number of manifolds multiplied in the given [`ProductManifold`](@ref) `M`.
 """
-number_of_components(M::ProductManifold{<:NTuple{N,Any}}) where {N} = N
+number_of_components(M::ProductManifold{𝔽,<:NTuple{N,Any}}) where {𝔽,N} = N
 
 function ProductFVectorDistribution(
     type::VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},

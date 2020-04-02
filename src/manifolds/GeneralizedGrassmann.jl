@@ -1,5 +1,5 @@
 @doc raw"""
-    GeneralizedGrassmann{n,k,𝔽} <: AbstractEmbeddedManifold
+    GeneralizedGrassmann{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
 
 The generalized Grassmann manifold $\operatorname{Gr}(n,k,B)$ consists of all subspaces
 spanned by $k$ linear independent vectors $𝔽^n$, where $𝔽  ∈ \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
@@ -44,7 +44,7 @@ Generate the (real-valued) Generalized Grassmann manifold of $n\times k$ dimensi
 orthonormal matrices with scalar product `B`.
 """
 struct GeneralizedGrassmann{n,k,TB<:AbstractMatrix,𝔽} <:
-       AbstractEmbeddedManifold{DefaultEmbeddingType}
+       AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
        B::TB
 end
 
@@ -90,7 +90,13 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian 
 denotes the $k × k$ zero natrix.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
-function check_tangent_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; check_base_point = true, kwargs...) where {n,k,𝔽}
+function check_tangent_vector(
+    M::GeneralizedGrassmann{n,k,B,𝔽},
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+) where {n,k,B,𝔽}
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe

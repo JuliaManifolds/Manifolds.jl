@@ -29,7 +29,7 @@ Abstract type for a Lie group, a group that is also a smooth manifold with an
 implement at least [`inv`](@ref), [`identity`](@ref), [`compose`](@ref), and
 [`translate_diff`](@ref).
 """
-abstract type AbstractGroupManifold{O<:AbstractGroupOperation} <: AbstractDecoratorManifold end
+abstract type AbstractGroupManifold{O<:AbstractGroupOperation,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 """
     GroupManifold{M<:Manifold,O<:AbstractGroupOperation} <: AbstractGroupManifold{O}
@@ -43,7 +43,7 @@ Group manifolds by default forward metric-related operations to the wrapped mani
 
     GroupManifold(manifold, op)
 """
-struct GroupManifold{M<:Manifold,O<:AbstractGroupOperation} <: AbstractGroupManifold{O}
+struct GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <: AbstractGroupManifold{O,𝔽}
     manifold::M
     op::O
 end

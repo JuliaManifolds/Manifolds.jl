@@ -6,7 +6,7 @@ Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
 # Constructor
     SpecialOrthogonal(n)
 """
-const SpecialOrthogonal{n} = GroupManifold{Rotations{n},MultiplicationOperation}
+const SpecialOrthogonal{n} = GroupManifold{ℝ,Rotations{n},MultiplicationOperation}
 
 invariant_metric_dispatch(::SpecialOrthogonal, ::ActionDirection) = Val(true)
 
