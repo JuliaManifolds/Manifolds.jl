@@ -1,6 +1,12 @@
 name: Manifolds-CI
 on:
-  - pull_request
+  push:
+    branches:
+      - master
+  pull_request:
+  release:
+    types: [published, created, edited]
+
 jobs:
   test:
     name: Julia ${{ matrix.julia-version }} - ${{ matrix.os }} - ${{ matrix.arch }}
