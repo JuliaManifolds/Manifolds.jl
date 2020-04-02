@@ -176,4 +176,12 @@ include("utils.jl")
         x3 = project(M, randn(rng, 3,3))
         @test is_manifold_point(M, x3, true)
     end
+    @testset "Edge cases of Rotations" begin
+        @test_throws OutOfInjectivityRadiusError inverse_retract(
+            Rotations(2),
+            [1.0 0.0; 0.0 1.0],
+            [1.0 0.0; 0.0 -1.0],
+            PolarInverseRetraction()
+        )
+    end
 end

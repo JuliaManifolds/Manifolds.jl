@@ -576,7 +576,7 @@ projected to tangent space at `p`.
 """
 function normal_tvector_distribution(M::Rotations, p, σ)
     d = Distributions.MvNormal(reshape(zero(p), :), σ)
-    return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project_vector!, p)
+    return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project!, p)
 end
 
 @doc raw"""
