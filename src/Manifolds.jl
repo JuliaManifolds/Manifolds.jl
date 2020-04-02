@@ -125,7 +125,7 @@ using ManifoldsBase:
     AbstractOrthonormalBasis,
     DefaultOrthonormalBasis
 using ManifoldsBase:
-    ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
+    ValidationCoTVector, ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
 using ManifoldsBase: QRRetraction, PolarRetraction, ProjectionRetraction
 using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
@@ -244,7 +244,7 @@ export Euclidean,
 export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
 export AbstractDecoratorManifold
-export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
+export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
 export AbstractPowerManifold,

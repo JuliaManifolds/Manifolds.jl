@@ -52,7 +52,7 @@ show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op)
 
 const GROUP_MANIFOLD_BASIS_DISAMBIGUATION = [
     AbstractDecoratorManifold,
-    ArrayManifold,
+    ValidationManifold,
     VectorBundle,
 ]
 
