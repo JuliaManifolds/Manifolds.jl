@@ -62,8 +62,8 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
-                basis_types_vecs = (DefaultOrthonormalBasis(),),
-                basis_types_to_from = (DefaultOrthonormalBasis(),)
+                basis_types_vecs = (DefaultOrthonormalBasis(ℂ),),
+                basis_types_to_from = (DefaultOrthonormalBasis(ℂ),)
             )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end # testset type $T

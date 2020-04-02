@@ -80,8 +80,8 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
-                basis_types_vecs = (DefaultOrthonormalBasis(),),
-                basis_types_to_from = (DefaultOrthonormalBasis(),),
+                basis_types_vecs = (DefaultOrthonormalBasis(ℂ),),
+                basis_types_to_from = (DefaultOrthonormalBasis(ℂ),),
             )
             @test isapprox(
                 -pts_complex[1],
