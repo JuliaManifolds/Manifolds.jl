@@ -354,7 +354,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
             Xb = get_coordinates(M, p, X1, btype)
             #@test isa(Xb, AbstractVector{<:Real})
-            @test length(Xb) == N
+            @test length(Xb) == max(div(N,real_dimension(number_system(M))),1)*real_dimension(number_system(btype))
             Xbi = get_vector(M, p, Xb, btype)
             @test isapprox(M, p, X1, Xbi)
 

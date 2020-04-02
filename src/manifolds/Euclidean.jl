@@ -164,12 +164,12 @@ function get_coordinates!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagon
     return Y
 end
 
-function get_vector!(M::Euclidean, Y, p, X, B::DefaultOrDiagonalizingBasis{ℝ})
+function get_vector!(M::Euclidean, Y, p, X, B::DefaultOrDiagonalizingBasis)
     S = representation_size(M)
     Y .= reshape(X, S)
     return Y
 end
-function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis{ℂ})
+function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis{ℝ})
     S = representation_size(M)
     N = div(length(X), 2)
     Y .= reshape(X[1:N] + im * X[N+1:end], S)
