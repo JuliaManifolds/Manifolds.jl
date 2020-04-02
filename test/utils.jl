@@ -20,6 +20,8 @@ find_eps(x::Type{TN}) where TN<:Number = eps(real(TN))
 find_eps(x) = find_eps(number_eltype(x))
 find_eps(x...) = find_eps(Base.promote_type(map(number_eltype, x)...))
 
+testing_group(str::String) = "TESTGROUP" ∉ keys(ENV) || ENV["TESTGROUP"] == str
+
 """
     test_manifold(m::Manifold, pts::AbstractVector;
     args
