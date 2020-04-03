@@ -13,7 +13,7 @@ function Manifolds.local_metric(M::MetricManifold{ℝ,<:TestEuclidean,<:TestEucl
     return Diagonal(1.0:manifold_dimension(M))
 end
 
-struct TestSphere{N,T} <: Manifold
+struct TestSphere{N,T} <: Manifold{ℝ}
     r::T
 end
 
