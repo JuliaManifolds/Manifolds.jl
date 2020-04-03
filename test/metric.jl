@@ -5,11 +5,11 @@ import Manifolds: mean!, median!
 
 include("utils.jl")
 
-struct TestEuclidean{N} <: Manifold end
+struct TestEuclidean{N} <: Manifold{ℝ} end
 struct TestEuclideanMetric <: Metric end
 
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
-function Manifolds.local_metric(M::MetricManifold{<:TestEuclidean,<:TestEuclideanMetric}, x)
+function Manifolds.local_metric(M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric}, x)
     return Diagonal(1.0:manifold_dimension(M))
 end
 
@@ -20,7 +20,7 @@ end
 struct TestSphericalMetric <: Metric end
 
 Manifolds.manifold_dimension(::TestSphere{N}) where {N} = N
-function Manifolds.local_metric(M::MetricManifold{<:TestSphere,<:TestSphericalMetric}, x)
+function Manifolds.local_metric(M::MetricManifold{ℝ,<:TestSphere,<:TestSphericalMetric}, x)
     r = base_manifold(M).r
     d = allocate(x)
     d[1] = r^2

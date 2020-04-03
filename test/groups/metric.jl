@@ -6,23 +6,32 @@ import Manifolds: invariant_metric_dispatch, default_metric_dispatch, local_metr
 
 struct TestInvariantMetricBase <: Metric end
 
-function local_metric(::MetricManifold{<:Manifold,TestInvariantMetricBase}, ::Identity)
+function local_metric(
+    ::MetricManifold{𝔽,<:Manifold,TestInvariantMetricBase},
+    ::Identity,
+) where {𝔽}
     return Diagonal([1.0, 2.0, 3.0])
 end
-function local_metric(::MetricManifold{<:Manifold,<:InvariantMetric{TestInvariantMetricBase}}, p)
+function local_metric(
+    ::MetricManifold{𝔽,<:Manifold,<:InvariantMetric{TestInvariantMetricBase}},
+    p,
+) where {𝔽}
     return Diagonal([1.0, 2.0, 3.0])
 end
 
 struct TestBiInvariantMetricBase <: Metric end
 
 function invariant_metric_dispatch(
-    ::MetricManifold{<:Manifold,<:InvariantMetric{TestBiInvariantMetricBase}},
+    ::MetricManifold{𝔽,<:Manifold,<:InvariantMetric{TestBiInvariantMetricBase}},
     ::ActionDirection,
-)
+) where {𝔽}
     return Val(true)
 end
 
-function local_metric(::MetricManifold{<:Manifold,<:TestBiInvariantMetricBase}, ::Identity)
+function local_metric(
+    ::MetricManifold{𝔽,<:Manifold,<:TestBiInvariantMetricBase},
+    ::Identity,
+) where {𝔽}
     return Diagonal(0.4I, 3)
 end
 

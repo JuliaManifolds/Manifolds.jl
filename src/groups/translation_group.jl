@@ -20,7 +20,11 @@ end
 
 invariant_metric_dispatch(::TranslationGroup, ::ActionDirection) = Val(true)
 
-default_metric_dispatch(::MetricManifold{<:TranslationGroup,EuclideanMetric}) = Val(true)
+function default_metric_dispatch(
+    ::MetricManifold{𝔽,<:TranslationGroup,EuclideanMetric}
+) where {𝔽}
+    return Val(true)
+end
 
 function show(io::IO, ::TranslationGroup{N,𝔽}) where {N,𝔽}
     print(io, "TranslationGroup($(join(N.parameters, ", ")); field = $(𝔽))")

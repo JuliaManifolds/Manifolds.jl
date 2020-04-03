@@ -1,5 +1,5 @@
 @doc raw"""
-    SpecialOrthogonal{n} <: GroupManifold{Rotations{n},MultiplicationOperation}
+    SpecialOrthogonal{n} <: GroupManifold{ℝ,Rotations{n},MultiplicationOperation}
 
 Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
 
@@ -10,7 +10,7 @@ const SpecialOrthogonal{n} = GroupManifold{ℝ,Rotations{n},MultiplicationOperat
 
 invariant_metric_dispatch(::SpecialOrthogonal, ::ActionDirection) = Val(true)
 
-default_metric_dispatch(::MetricManifold{<:SpecialOrthogonal,EuclideanMetric}) = Val(true)
+default_metric_dispatch(::MetricManifold{𝔽,<:SpecialOrthogonal,EuclideanMetric}) where {𝔽}= Val(true)
 default_metric_dispatch(::SpecialOrthogonal,::EuclideanMetric) = Val(true)
 
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())

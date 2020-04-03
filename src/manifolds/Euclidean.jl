@@ -302,7 +302,7 @@ Compute the norm of a tangent vector `X` at `p` on the [`Euclidean`](@ref)
 in this case, just the (Frobenius) norm of `X`.
 """
 norm(::Euclidean, p, X) = norm(X)
-norm(::MetricManifold{<:Manifold,EuclideanMetric}, p, X) = norm(X)
+norm(::MetricManifold{ℝ,<:Manifold,EuclideanMetric}, p, X) = norm(X)
 
 """
     normal_tvector_distribution(M::Euclidean, p, σ)

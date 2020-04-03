@@ -112,7 +112,12 @@ end
 
 direction(::InvariantMetric{G,D}) where {G,D} = D()
 
-function exp!(M::MetricManifold{<:AbstractGroupManifold,<:InvariantMetric}, q, p, X)
+function exp!(
+    M::MetricManifold{𝔽,<:AbstractGroupManifold,<:InvariantMetric},
+    q,
+    p,
+    X
+) where {𝔽}
     if has_biinvariant_metric(M)
         conv = direction(metric(M))
         return retract!(base_group(M), q, p, X, GroupExponentialRetraction(conv))
@@ -169,9 +174,9 @@ function invariant_metric_dispatch(M::MetricManifold, conv::ActionDirection)
     return Val(false)
 end
 function invariant_metric_dispatch(
-    M::MetricManifold{<:Manifold,<:InvariantMetric},
+    M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric},
     conv::ActionDirection,
-)
+) where {𝔽}
     direction(metric(M)) === conv && return Val(true)
     return invoke(invariant_metric_dispatch, Tuple{MetricManifold,typeof(conv)}, M, conv)
 end
@@ -181,7 +186,7 @@ function has_invariant_metric(M::Manifold, conv::ActionDirection)
     return _extract_val(invariant_metric_dispatch(M, conv))
 end
 
-function inner(M::MetricManifold{<:Manifold,<:InvariantMetric}, p, X, Y)
+function inner(M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric}, p, X, Y) where {𝔽}
     imetric = metric(M)
     conv = direction(imetric)
     N = MetricManifold(M.manifold, imetric.metric)
@@ -190,14 +195,21 @@ function inner(M::MetricManifold{<:Manifold,<:InvariantMetric}, p, X, Y)
     return inner(N, Identity(N, p), Xₑ, Yₑ)
 end
 
-function default_metric_dispatch(M::MetricManifold{<:Manifold,<:InvariantMetric})
+function default_metric_dispatch(
+    M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric}
+) where {𝔽}
     imetric = metric(M)
     N = MetricManifold(M.manifold, imetric.metric)
     default_metric_dispatch(N) === Val(true) || return Val(false)
     return invariant_metric_dispatch(N, direction(imetric))
 end
 
-function log!(M::MetricManifold{<:AbstractGroupManifold,<:InvariantMetric}, X, p, q)
+function log!(
+    M::MetricManifold{𝔽,<:AbstractGroupManifold,<:InvariantMetric},
+    X,
+    p,
+    q
+) where {𝔽}
     if has_biinvariant_metric(M)
         imetric = metric(M)
         conv = direction(imetric)
@@ -213,7 +225,7 @@ function log!(M::MetricManifold{<:AbstractGroupManifold,<:InvariantMetric}, X, p
     )
 end
 
-function norm(M::MetricManifold{<:Manifold,<:InvariantMetric}, p, X)
+function norm(M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric}, p, X) where {𝔽}
     imetric = metric(M)
     conv = direction(imetric)
     N = MetricManifold(M.manifold, imetric.metric)
