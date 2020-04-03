@@ -14,6 +14,10 @@ jobs:
         julia-version: [1.0, 1.4, nightly]
         os: [ubuntu-latest, macOS-latest, windows-latest]
         arch: [x64]
+        env:
+          - TESTGROUP: basic
+          - TESTGROUP: combined
+          - TESTGROUP: groupmisc
         include:
           - julia-version: nightly
             allow_failures: true
