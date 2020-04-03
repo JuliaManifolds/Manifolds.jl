@@ -203,7 +203,7 @@ include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
 
-include("distributions/Distributions.jl")
+include("distributions/ManifoldDistributions.jl")
 
 function __init__()
     @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
