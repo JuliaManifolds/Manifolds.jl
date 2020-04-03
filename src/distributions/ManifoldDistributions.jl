@@ -18,7 +18,6 @@ using ..Manifolds:
     Sphere,
     allocate_result,
     get_iterator,
-    project_vector!,
     project!,
     representation_size,
     submanifold_components,
