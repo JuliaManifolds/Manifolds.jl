@@ -777,7 +777,7 @@ end
 function show(
     io::IO,
     mime::MIME"text/plain",
-    B::CachedBasis{T,D,𝔽},
+    B::CachedBasis{𝔽,T,D},
 ) where {T<:AbstractBasis,D<:PowerBasisData,𝔽}
     println(io, "$(T()) for a power manifold")
     for i in Base.product(map(Base.OneTo, size(B.data.bases))...)
