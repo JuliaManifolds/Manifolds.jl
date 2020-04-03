@@ -10,6 +10,8 @@ using ..Manifolds:
     VectorBundleFibers,
     VectorSpaceType,
     ProductRepr,
+    ℝ,
+    AbstractSphere,
     AbstractPowerManifold,
     Euclidean,
     MetricManifold,
