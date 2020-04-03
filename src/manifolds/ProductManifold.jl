@@ -41,6 +41,7 @@ struct ProductBasisData{T<:Tuple}
 end
 
 const PRODUCT_BASIS_LIST_CACHED = [
+    CachedBasis,
     CachedBasis{ℝ,<:AbstractBasis{ℝ},<:ProductBasisData},
     CachedBasis{ℂ,<:AbstractBasis{ℂ},<:ProductBasisData},
     CachedBasis{ℝ,<:AbstractOrthogonalBasis{ℝ},<:ProductBasisData},
@@ -430,7 +431,7 @@ function get_vector(
     return ProductRepr(parts)
 end
 eval(quote
-    @invoke_maker 4 CachedBasis{<:Any,<:AbstractBasis,<:ProductBasisData} get_vector(
+    @invoke_maker 4 (CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData} where 𝔽) get_vector(
         M::ProductManifold,
         p::ProductRepr,
         X,

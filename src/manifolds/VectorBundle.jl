@@ -342,13 +342,14 @@ for BT in [
     end)
 end
 for BT in [
+    CachedBasis,
     CachedBasis{ℝ,<:AbstractBasis{ℝ},<:VectorBundleBasisData},
     CachedBasis{ℝ,<:ManifoldsBase.AbstractOrthogonalBasis{ℝ},<:VectorBundleBasisData},
     CachedBasis{ℝ,<:ManifoldsBase.AbstractOrthonormalBasis{ℝ},<:VectorBundleBasisData},
     CachedBasis{ℂ,<:AbstractBasis{ℂ},<:VectorBundleBasisData},
 ]
     eval(quote
-        @invoke_maker 5 CachedBasis{<:Any,<:AbstractBasis,<:VectorBundleBasisData} get_coordinates!(
+        @invoke_maker 5 (CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData} where 𝔽) get_coordinates!(
                 M::VectorBundle,
                 Y,
                 p,
