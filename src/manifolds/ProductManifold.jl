@@ -16,20 +16,9 @@ struct ProductManifold{𝔽,TM<:Tuple} <: Manifold{𝔽}
 end
 
 function ProductManifold(manifolds::Manifold...)
-    𝔽 = _unify_field((number_system.(manifolds))...)
+    𝔽 = ManifoldsBase._unify_number_systems((number_system.(manifolds))...)
     return ProductManifold{𝔽,typeof(manifolds)}(manifolds)
 end
-
-function _unify_field(fields::AbstractNumbers...)
-    (a,rest) = Iterators.peel(fields)
-    return _unify_field(a,_unify_field(rest...))
-end
-function _unify_field(𝔽::AbstractNumbers, 𝔾::AbstractNumbers)
-    for 𝔼 ∈ [ℍ, ℂ, ℝ]
-        (𝔽 === 𝔼 || 𝔾 === 𝔼) && return 𝔼
-    end
-end
-_unify_field(𝔽::AbstractNumbers) = 𝔽
 
 ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
 
@@ -325,7 +314,7 @@ end
 
 for BT in PRODUCT_BASIS_LIST_CACHED
     eval(quote
-        @invoke_maker 4 CachedBasis{<:Any,<:AbstractBasis,<:ProductBasisData} get_coordinates(
+        @invoke_maker 4 (CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData} where 𝔽) get_coordinates(
                 M::ProductManifold,
                 p,
                 X,
@@ -938,8 +927,8 @@ end
 function show(
     io::IO,
     mime::MIME"text/plain",
-    B::CachedBasis{T,D,𝔽},
-) where {T<:AbstractBasis,D<:ProductBasisData,𝔽}
+    B::CachedBasis{𝔽,T,D},
+) where {𝔽,T<:AbstractBasis{𝔽},D<:ProductBasisData}
     println(io, "$(T()) for a product manifold")
     for (i, cb) = enumerate(B.data.parts)
         println(io, "Basis for component $i:")

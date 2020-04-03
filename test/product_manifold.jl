@@ -6,6 +6,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
     @test_throws MethodError ProductManifold()
     M1 = Sphere(2)
     M2 = Euclidean(2)
+    @test (@inferred ProductManifold(M1, M2)) isa ProductManifold
     Mse = ProductManifold(M1, M2)
     @test Mse == M1 × M2
     @test Mse == ProductManifold(M1) × M2
