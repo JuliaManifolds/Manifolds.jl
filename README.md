@@ -5,7 +5,9 @@
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliamanifolds.github.io/Manifolds.jl/stable/)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliamanifolds.github.io/Manifolds.jl/latest/)
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
-[![Build Status](https://travis-ci.org/JuliaManifolds/Manifolds.jl.svg?branch=master)](https://travis-ci.org/JuliaManifolds/Manifolds.jl/) [![codecov.io](http://codecov.io/github/JuliaManifolds/Manifolds.jl/coverage.svg?branch=master)](https://codecov.io/gh/JuliaManifolds/Manifolds.jl/)
+[![Build Status](https://travis-ci.org/JuliaManifolds/Manifolds.jl.svg?branch=master)](https://travis-ci.org/JuliaManifolds/Manifolds.jl/)
+[![CI](https://github.com/JuliaManifolds/Manifolds.jl/workflows/CI/badge.svg)](https://github.com/JuliaManifolds/Manifolds.jl/actions)
+[![codecov.io](http://codecov.io/github/JuliaManifolds/Manifolds.jl/coverage.svg?branch=master)](https://codecov.io/gh/JuliaManifolds/Manifolds.jl/)
 
 Package __Manifolds.jl__ aims to provide both a unified interface to define and
 use manifolds as well as a library of manifolds to use for your projects.
