@@ -6,7 +6,7 @@ projected to tangent space at `p`.
 """
 function normal_tvector_distribution(M::Euclidean{Tuple{N}}, p, σ) where {N}
     d = Distributions.MvNormal(zero(p), σ)
-    return ProjectedFVector(TangentBundleFibers(M), p, d, project_vector!, p)
+    return ProjectedFVector(TangentBundleFibers(M), p, d, project!, p)
 end
 
 """
@@ -260,7 +260,7 @@ projected to tangent space at `p`.
 """
 function normal_tvector_distribution(M::Rotations, p, σ)
     d = Distributions.MvNormal(reshape(zero(p), :), σ)
-    return ProjectedFVector(TangentBundleFibers(M), p, d, project_vector!, p)
+    return ProjectedFVector(TangentBundleFibers(M), p, d, project!, p)
 end
 
 function Random.rand(
@@ -294,23 +294,24 @@ function _fix_random_rotation(A::AbstractMatrix)
 end
 
 """
-    normal_tvector_distribution(S::Sphere, p, σ)
+    normal_tvector_distribution(S::Sphere{n,ℝ}, p, σ)
 
-Normal distribution in ambient space with standard deviation `σ`
-projected to tangent space at `p`.
+Generate a distribution in the tangent space at `p` by generating a
+normal distribution in ambient space with standard deviation `σ`
+projected to the tangent space at `p`.
 """
-function normal_tvector_distribution(S::Sphere, p, σ)
+function normal_tvector_distribution(S::Sphere{n,ℝ}, p, σ) where {n}
     d = Distributions.MvNormal(zero(p), σ)
-    return ProjectedFVector(TangentBundleFibers(S), p, d, project_vector!, p)
+    return ProjectedFVector(TangentBundleFibers(S), p, d, project!, p)
 end
 
 """
-    uniform_distribution(M::Sphere, p)
+    uniform_distribution(M::AbstractSphere, p)
 
-Uniform distribution on given [`Sphere`](@ref) `M`. Generated points will be of
+Uniform distribution on given [`AbstractSphere`](@ref) `M`. Generated points will be of
 similar type as `p`.
 """
-function uniform_distribution(M::Sphere, p)
+function uniform_distribution(M::AbstractSphere, p)
     d = Distributions.MvNormal(zero(p), 1.0)
     return ProjectedPoint(M, d, project!, p)
 end

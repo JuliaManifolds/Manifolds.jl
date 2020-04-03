@@ -19,7 +19,7 @@ Optionally:
   bundles),
 * [`flat`](@ref) and [`sharp`](@ref),
 * `norm` (by default uses `inner`),
-* [`project_vector`](@ref) (for embedded vector spaces),
+* [`project`](@ref) (for embedded vector spaces),
 * [`representation_size`](@ref) (if support for [`ProductArray`](@ref) is desired),
 * broadcasting for basic operations.
 """
@@ -577,20 +577,20 @@ function project!(B::VectorBundle, Y, p, X)
 end
 
 """
-    project_vector(B::VectorBundleFibers, p, X)
+    project(B::VectorBundleFibers, p, X)
 
 Project vector `X` from the vector space of type `B.fiber` at point `p`.
 """
-function project_vector(B::VectorBundleFibers, p, X)
-    Y = allocate_result(B, project_vector, p, X)
-    return project_vector!(B, Y, p, X)
+function project(B::VectorBundleFibers, p, X)
+    Y = allocate_result(B, project, p, X)
+    return project!(B, Y, p, X)
 end
 
-function project_vector!(B::VectorBundleFibers{<:TangentSpaceType}, Y, p, X)
+function project!(B::VectorBundleFibers{<:TangentSpaceType}, Y, p, X)
     return project!(B.manifold, Y, p, X)
 end
-function project_vector!(B::VectorBundleFibers, Y, p, X)
-    error("project_vector! not implemented for vector space family of type $(typeof(B)), output vector of type $(typeof(Y)) and input vector at point $(typeof(p)) with type of w $(typeof(X)).")
+function project!(B::VectorBundleFibers, Y, p, X)
+    error("project! not implemented for vector space family of type $(typeof(B)), output vector of type $(typeof(Y)) and input vector at point $(typeof(p)) with type of w $(typeof(X)).")
 end
 
 Base.@propagate_inbounds setindex!(x::FVector, val, i) = setindex!(x.data, val, i)
