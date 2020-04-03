@@ -6,7 +6,7 @@ projected to tangent space at `p`.
 """
 function normal_tvector_distribution(M::Euclidean{Tuple{N}}, p, σ) where {N}
     d = Distributions.MvNormal(zero(p), σ)
-    return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project_vector!, p)
+    return ProjectedFVector(TangentBundleFibers(M), p, d, project_vector!, p)
 end
 
 """
@@ -16,10 +16,10 @@ Wrap the standard distribution `d` into a manifold-valued distribution. Generate
 points will be of similar type to `p`. By default, the type is not changed.
 """
 function projected_distribution(M::Euclidean, d, p)
-    return ProjectedPointDistribution(M, d, project!, p)
+    return ProjectedPoint(M, d, project!, p)
 end
 function projected_distribution(M::Euclidean, d)
-    return ProjectedPointDistribution(M, d, project!, rand(d))
+    return ProjectedPoint(M, d, project!, rand(d))
 end
 
 function ManifoldsBase.decorator_transparent_dispatch(
@@ -38,11 +38,11 @@ function ManifoldsBase.decorator_transparent_dispatch(
 end
 
 """
-    PowerPointDistribution(M::AbstractPowerManifold, distribution)
+    PowerPoint(M::AbstractPowerManifold, distribution)
 
 Power distribution on manifold `M`, based on `distribution`.
 """
-struct PowerPointDistribution{TM<:AbstractPowerManifold,TD<:MPointDistribution,TX} <:
+struct PowerPoint{TM<:AbstractPowerManifold,TD<:MPointDistribution,TX} <:
        MPointDistribution{TM}
     manifold::TM
     distribution::TD
@@ -50,14 +50,14 @@ struct PowerPointDistribution{TM<:AbstractPowerManifold,TD<:MPointDistribution,T
 end
 
 """
-    PowerFVectorDistribution([type::VectorBundleFibers], [x], distr)
+    PowerFVector([type::VectorBundleFibers], [x], distr)
 
 Generates a random vector at a `point` from vector space (a fiber of a tangent
 bundle) of type `type` using the power distribution of `distr`.
 
 Vector space type and `point` can be automatically inferred from distribution `distr`.
 """
-struct PowerFVectorDistribution{
+struct PowerFVector{
     TSpace<:VectorBundleFibers{<:VectorSpaceType,<:AbstractPowerManifold},
     TD<:FVectorDistribution,
     TX,
@@ -67,22 +67,18 @@ struct PowerFVectorDistribution{
     distribution::TD
 end
 
-function Random.rand(rng::AbstractRNG, d::PowerFVectorDistribution)
+function Random.rand(rng::AbstractRNG, d::PowerFVector)
     fv = zero_vector(d.type, d.point)
     Distributions._rand!(rng, d, fv)
     return fv
 end
-function Random.rand(rng::AbstractRNG, d::PowerPointDistribution)
+function Random.rand(rng::AbstractRNG, d::PowerPoint)
     x = allocate_result(d.manifold, rand, d.point)
     Distributions._rand!(rng, d, x)
     return x
 end
 
-function Distributions._rand!(
-    rng::AbstractRNG,
-    d::PowerFVectorDistribution,
-    v::AbstractArray,
-)
+function Distributions._rand!(rng::AbstractRNG, d::PowerFVector, v::AbstractArray)
     PM = d.type.manifold
     rep_size = representation_size(PM.manifold)
     for i in get_iterator(d.type.manifold)
@@ -91,7 +87,7 @@ function Distributions._rand!(
     end
     return v
 end
-function Distributions._rand!(rng::AbstractRNG, d::PowerPointDistribution, x::AbstractArray)
+function Distributions._rand!(rng::AbstractRNG, d::PowerPoint, x::AbstractArray)
     M = d.manifold
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -100,18 +96,18 @@ function Distributions._rand!(rng::AbstractRNG, d::PowerPointDistribution, x::Ab
     return x
 end
 
-Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)
-Distributions.support(d::PowerPointDistribution) = MPointSupport(d.manifold)
+Distributions.support(tvd::PowerFVector) = FVectorSupport(tvd.type, tvd.point)
+Distributions.support(d::PowerPoint) = MPointSupport(d.manifold)
 
 """
-    ProductFVectorDistribution([type::VectorBundleFibers], [x], distrs...)
+    ProductFVector([type::VectorBundleFibers], [x], distrs...)
 
 Generates a random vector at point `x` from vector space (a fiber of a tangent
 bundle) of type `type` using the product distribution of given distributions.
 
 Vector space type and `x` can be automatically inferred from distributions `distrs`.
 """
-struct ProductFVectorDistribution{
+struct ProductFVector{
     TSpace<:VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
     TD<:(NTuple{N,Distribution} where {N}),
     TX,
@@ -122,37 +118,35 @@ struct ProductFVectorDistribution{
 end
 
 """
-    ProductPointDistribution(M::ProductManifold, distributions)
+    ProductPoint(M::ProductManifold, distributions)
 
 Product distribution on manifold `M`, combined from `distributions`.
 """
-struct ProductPointDistribution{
-    TM<:ProductManifold,
-    TD<:(NTuple{N,Distribution} where {N}),
-} <: MPointDistribution{TM}
+struct ProductPoint{TM<:ProductManifold,TD<:(NTuple{N,Distribution} where {N})} <:
+       MPointDistribution{TM}
     manifold::TM
     distributions::TD
 end
 
-function ProductFVectorDistribution(
+function ProductFVector(
     type::VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
     p::Union{AbstractArray,MPoint,ProductRepr},
     distributions::FVectorDistribution...,
 )
-    return ProductFVectorDistribution{typeof(type),typeof(distributions),typeof(p)}(
+    return ProductFVector{typeof(type),typeof(distributions),typeof(p)}(
         type,
         p,
         distributions,
     )
 end
-function ProductFVectorDistribution(
+function ProductFVector(
     type::VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
     distributions::FVectorDistribution...,
 )
     p = ProductRepr(map(d -> support(d).point, distributions))
-    return ProductFVectorDistribution(type, p, distributions...)
+    return ProductFVector(type, p, distributions...)
 end
-function ProductFVectorDistribution(distributions::FVectorDistribution...)
+function ProductFVector(distributions::FVectorDistribution...)
     M = ProductManifold(map(d -> support(d).space.manifold, distributions)...)
     fiber = support(distributions[1]).space.fiber
     if !all(d -> support(d).space.fiber == fiber, distributions)
@@ -160,32 +154,28 @@ function ProductFVectorDistribution(distributions::FVectorDistribution...)
     end
     # Probably worth considering sum spaces in the future?
     x = ProductRepr(map(d -> support(d).point, distributions)...)
-    return ProductFVectorDistribution(VectorBundleFibers(fiber, M), x, distributions...)
+    return ProductFVector(VectorBundleFibers(fiber, M), x, distributions...)
 end
 
-function ProductPointDistribution(M::ProductManifold, distributions::MPointDistribution...)
-    return ProductPointDistribution{typeof(M),typeof(distributions)}(M, distributions)
+function ProductPoint(M::ProductManifold, distributions::MPointDistribution...)
+    return ProductPoint{typeof(M),typeof(distributions)}(M, distributions)
 end
-function ProductPointDistribution(distributions::MPointDistribution...)
+function ProductPoint(distributions::MPointDistribution...)
     M = ProductManifold(map(d -> support(d).manifold, distributions)...)
-    return ProductPointDistribution(M, distributions...)
+    return ProductPoint(M, distributions...)
 end
 
-function Random.rand(rng::AbstractRNG, d::ProductPointDistribution)
+function Random.rand(rng::AbstractRNG, d::ProductPoint)
     return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
 end
-function Random.rand(rng::AbstractRNG, d::ProductFVectorDistribution)
+function Random.rand(rng::AbstractRNG, d::ProductFVector)
     return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
 end
 
-function Distributions._rand!(
-    rng::AbstractRNG,
-    d::ProductPointDistribution,
-    x::AbstractArray{<:Number},
-)
+function Distributions._rand!(rng::AbstractRNG, d::ProductPoint, x::AbstractArray{<:Number})
     return copyto!(x, rand(rng, d))
 end
-function Distributions._rand!(rng::AbstractRNG, d::ProductPointDistribution, p::ProductRepr)
+function Distributions._rand!(rng::AbstractRNG, d::ProductPoint, p::ProductRepr)
     map(
         t -> Distributions._rand!(rng, t[1], t[2]),
         d.distributions,
@@ -195,16 +185,12 @@ function Distributions._rand!(rng::AbstractRNG, d::ProductPointDistribution, p::
 end
 function Distributions._rand!(
     rng::AbstractRNG,
-    d::ProductFVectorDistribution,
+    d::ProductFVector,
     v::AbstractArray{<:Number},
 )
     return copyto!(v, rand(rng, d))
 end
-function Distributions._rand!(
-    rng::AbstractRNG,
-    d::ProductFVectorDistribution,
-    X::ProductRepr,
-)
+function Distributions._rand!(rng::AbstractRNG, d::ProductFVector, X::ProductRepr)
     map(
         t -> Distributions._rand!(rng, t[1], t[2]),
         d.distributions,
@@ -213,8 +199,8 @@ function Distributions._rand!(
     return X
 end
 
-Distributions.support(d::ProductPointDistribution) = MPointSupport(d.manifold)
-function Distributions.support(tvd::ProductFVectorDistribution)
+Distributions.support(d::ProductPoint) = MPointSupport(d.manifold)
+function Distributions.support(tvd::ProductFVector)
     return FVectorSupport(
         tvd.type,
         ProductRepr(map(d -> support(d).point, tvd.distributions)...),
@@ -222,7 +208,7 @@ function Distributions.support(tvd::ProductFVectorDistribution)
 end
 
 """
-    NormalRotationDistribution(M::Rotations, d::Distribution, x::TResult)
+    NormalRotation(M::Rotations, d::Distribution, x::TResult)
 
 Distribution that returns a random point on the manifold [`Rotations`](@ref)
 `M`. Random point is generated using base distribution `d` and the type
@@ -230,18 +216,13 @@ of the result is adjusted to `TResult`.
 
 See [`normal_rotation_distribution`](@ref) for details.
 """
-struct NormalRotationDistribution{TResult,TM<:Rotations,TD<:Distribution} <:
-       MPointDistribution{TM}
+struct NormalRotation{TResult,TM<:Rotations,TD<:Distribution} <: MPointDistribution{TM}
     manifold::TM
     distr::TD
 end
 
-function NormalRotationDistribution(
-    M::Rotations,
-    d::Distribution,
-    x::TResult,
-) where {TResult}
-    return NormalRotationDistribution{TResult,typeof(M),typeof(d)}(M, d)
+function NormalRotation(M::Rotations, d::Distribution, x::TResult) where {TResult}
+    return NormalRotation{TResult,typeof(M),typeof(d)}(M, d)
 end
 
 @doc raw"""
@@ -268,7 +249,7 @@ The argument `p` is used to determine the type of returned points.
 """
 function normal_rotation_distribution(M::Rotations{N}, p, σ::Real) where {N}
     d = Distributions.MvNormal(zeros(N * N), σ)
-    return NormalRotationDistribution(M, d, p)
+    return NormalRotation(M, d, p)
 end
 
 """
@@ -279,12 +260,12 @@ projected to tangent space at `p`.
 """
 function normal_tvector_distribution(M::Rotations, p, σ)
     d = Distributions.MvNormal(reshape(zero(p), :), σ)
-    return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project_vector!, p)
+    return ProjectedFVector(TangentBundleFibers(M), p, d, project_vector!, p)
 end
 
 function Random.rand(
     rng::AbstractRNG,
-    d::NormalRotationDistribution{TResult,Rotations{N}},
+    d::NormalRotation{TResult,Rotations{N}},
 ) where {TResult,N}
     if N == 1
         return convert(TResult, ones(1, 1))
@@ -296,7 +277,7 @@ end
 
 function Distributions._rand!(
     rng::AbstractRNG,
-    d::NormalRotationDistribution{TResult,Rotations{N}},
+    d::NormalRotation{TResult,Rotations{N}},
     x::AbstractArray{<:Real},
 ) where {TResult,N}
     return copyto!(x, rand(rng, d))
@@ -320,7 +301,7 @@ projected to tangent space at `p`.
 """
 function normal_tvector_distribution(S::Sphere, p, σ)
     d = Distributions.MvNormal(zero(p), σ)
-    return ProjectedFVectorDistribution(TangentBundleFibers(S), p, d, project_vector!, p)
+    return ProjectedFVector(TangentBundleFibers(S), p, d, project_vector!, p)
 end
 
 """
@@ -331,5 +312,5 @@ similar type as `p`.
 """
 function uniform_distribution(M::Sphere, p)
     d = Distributions.MvNormal(zero(p), 1.0)
-    return ProjectedPointDistribution(M, d, project!, p)
+    return ProjectedPoint(M, d, project!, p)
 end

@@ -104,7 +104,6 @@ include("projected_distribution.jl")
 include("manifold_distribution.jl")
 
 export normal_tvector_distribution, projected_distribution, uniform_distribution
-export FVectorDistribution,
-    MPointDistribution, ProjectedFVectorDistribution, ProjectedPointDistribution
+export FVectorDistribution, MPointDistribution, ProjectedFVector, ProjectedPoint
 
 end # module
