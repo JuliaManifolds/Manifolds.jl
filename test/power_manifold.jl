@@ -56,23 +56,23 @@ Random.seed!(42)
     inverse_retraction_methods = [Manifolds.InversePowerRetraction(ManifoldsBase.LogarithmicInverseRetraction())]
 
     sphere_dist = uniform_distribution(Ms, @SVector [1.0, 0.0, 0.0])
-    power_s1_pt_dist = ManifoldDistributions.PowerPointDistribution(Ms1, sphere_dist, randn(Float64, 3, 5))
-    power_s2_pt_dist = ManifoldDistributions.PowerPointDistribution(Ms2, sphere_dist, randn(Float64, 3, 5, 7))
+    power_s1_pt_dist = ManifoldDistributions.PowerPoint(Ms1, sphere_dist, randn(Float64, 3, 5))
+    power_s2_pt_dist = ManifoldDistributions.PowerPoint(Ms2, sphere_dist, randn(Float64, 3, 5, 7))
     sphere_tv_dist = ManifoldDistributions.normal_tvector_distribution(Ms, (@MVector [1.0, 0.0, 0.0]), 1.0)
-    power_s1_tv_dist = ManifoldDistributions.PowerFVectorDistribution(TangentBundleFibers(Ms1), rand(power_s1_pt_dist), sphere_tv_dist)
-    power_s2_tv_dist = ManifoldDistributions.PowerFVectorDistribution(TangentBundleFibers(Ms2), rand(power_s2_pt_dist), sphere_tv_dist)
+    power_s1_tv_dist = ManifoldDistributions.PowerFVector(TangentBundleFibers(Ms1), rand(power_s1_pt_dist), sphere_tv_dist)
+    power_s2_tv_dist = ManifoldDistributions.PowerFVector(TangentBundleFibers(Ms2), rand(power_s2_pt_dist), sphere_tv_dist)
 
     id_rot = @SMatrix [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
     rotations_dist = ManifoldDistributions.normal_rotation_distribution(Mr, id_rot, 1.0)
-    power_r1_pt_dist = ManifoldDistributions.PowerPointDistribution(Mr1, rotations_dist, randn(Float64, 3, 3, 5))
-    power_rn1_pt_dist = ManifoldDistributions.PowerPointDistribution(Mrn1, rotations_dist, [randn(Float64, 3, 3) for i in 1:5])
-    power_r2_pt_dist = ManifoldDistributions.PowerPointDistribution(Mr2, rotations_dist, randn(Float64, 3, 3, 5, 7))
-    power_rn2_pt_dist = ManifoldDistributions.PowerPointDistribution(Mrn2, rotations_dist, [randn(Float64, 3, 3) for i in 1:5, j in 1:7])
+    power_r1_pt_dist = ManifoldDistributions.PowerPoint(Mr1, rotations_dist, randn(Float64, 3, 3, 5))
+    power_rn1_pt_dist = ManifoldDistributions.PowerPoint(Mrn1, rotations_dist, [randn(Float64, 3, 3) for i in 1:5])
+    power_r2_pt_dist = ManifoldDistributions.PowerPoint(Mr2, rotations_dist, randn(Float64, 3, 3, 5, 7))
+    power_rn2_pt_dist = ManifoldDistributions.PowerPoint(Mrn2, rotations_dist, [randn(Float64, 3, 3) for i in 1:5, j in 1:7])
     rotations_tv_dist = ManifoldDistributions.normal_tvector_distribution(Mr, MMatrix(id_rot), 1.0)
-    power_r1_tv_dist = ManifoldDistributions.PowerFVectorDistribution(TangentBundleFibers(Mr1), rand(power_r1_pt_dist), rotations_tv_dist)
-    power_rn1_tv_dist = ManifoldDistributions.PowerFVectorDistribution(TangentBundleFibers(Mrn1), rand(power_rn1_pt_dist), rotations_tv_dist)
-    power_r2_tv_dist = ManifoldDistributions.PowerFVectorDistribution(TangentBundleFibers(Mr2), rand(power_r2_pt_dist), rotations_tv_dist)
-    power_rn2_tv_dist = ManifoldDistributions.PowerFVectorDistribution(TangentBundleFibers(Mrn2), rand(power_rn2_pt_dist), rotations_tv_dist)
+    power_r1_tv_dist = ManifoldDistributions.PowerFVector(TangentBundleFibers(Mr1), rand(power_r1_pt_dist), rotations_tv_dist)
+    power_rn1_tv_dist = ManifoldDistributions.PowerFVector(TangentBundleFibers(Mrn1), rand(power_rn1_pt_dist), rotations_tv_dist)
+    power_r2_tv_dist = ManifoldDistributions.PowerFVector(TangentBundleFibers(Mr2), rand(power_r2_pt_dist), rotations_tv_dist)
+    power_rn2_tv_dist = ManifoldDistributions.PowerFVector(TangentBundleFibers(Mrn2), rand(power_rn2_pt_dist), rotations_tv_dist)
 
     trim(s::String) = s[1:min(length(s), 20)]
 
