@@ -5,10 +5,10 @@ Direct product group operation.
 """
 struct ProductOperation <: AbstractGroupOperation end
 
-const ProductGroup{T} = GroupManifold{ProductManifold{T},ProductOperation}
+const ProductGroup{𝔽,T} = GroupManifold{𝔽,ProductManifold{𝔽,T},ProductOperation}
 
 """
-    ProductGroup{T} <: GroupManifold{ProductManifold{T},ProductOperation}
+    ProductGroup{𝔽,T} <: GroupManifold{𝔽,ProductManifold{T},ProductOperation}
 
 Decorate a product manifold with a [`ProductOperation`](@ref).
 
@@ -19,7 +19,7 @@ one. This type is mostly useful for equipping the direct product of group manifo
 # Constructor
     ProductGroup(manifold::ProductManifold)
 """
-function ProductGroup(manifold::ProductManifold)
+function ProductGroup(manifold::ProductManifold{𝔽}) where {𝔽}
     if !all(is_group_decorator, manifold.manifolds)
         error("All submanifolds of product manifold must be or decorate groups.")
     end
@@ -51,13 +51,13 @@ submanifold(G::ProductGroup, i) = submanifold(base_manifold(G), i)
 function submanifold_component(
     e::Identity{GT},
     ::Val{I},
-) where {I,MT<:ProductManifold,GT<:GroupManifold{MT}}
+) where {I,MT<:ProductManifold,𝔽,GT<:GroupManifold{𝔽,MT}}
     return Identity(submanifold(e.group, I), submanifold_component(e.p, I))
 end
 
 function submanifold_components(
     e::Identity{GT},
-) where {MT<:ProductManifold,GT<:GroupManifold{MT}}
+) where {MT<:ProductManifold,𝔽,GT<:GroupManifold{𝔽,MT}}
     M = base_manifold(e.group)
     return map(Identity, M.manifolds, submanifold_components(e.group, e.p))
 end
