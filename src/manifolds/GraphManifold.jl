@@ -36,15 +36,15 @@ struct GraphManifold{G<:AbstractGraph,𝔽,TM,T<:GraphManifoldType} <:
     manifold::TM
 end
 
-function GraphManifold(g::G, M::TM, ::VertexManifold) where {G<:AbstractGraph,TM<:Manifold}
-    return GraphManifold{G,TM,VertexManifold}(g, M)
+function GraphManifold(g::G, M::TM, ::VertexManifold) where {G<:AbstractGraph,𝔽,TM<:Manifold{<:𝔽}}
+    return GraphManifold{G,𝔽,TM,VertexManifold}(g, M)
 end
-function GraphManifold(g::G, M::TM, ::EdgeManifold) where {G<:AbstractGraph,TM<:Manifold}
-    return GraphManifold{G,TM,EdgeManifold}(g, M)
+function GraphManifold(g::G, M::TM, ::EdgeManifold) where {G<:AbstractGraph,𝔽,TM<:Manifold{<:𝔽}}
+    return GraphManifold{G,𝔽,TM,EdgeManifold}(g, M)
 end
 
-const EdgeGraphManifold = GraphManifold{<:AbstractGraph,<:Manifold,EdgeManifold}
-const VertexGraphManifold = GraphManifold{<:AbstractGraph,<:Manifold,VertexManifold}
+const EdgeGraphManifold{𝔽} = GraphManifold{<:AbstractGraph,𝔽,<:Manifold{𝔽},EdgeManifold}
+const VertexGraphManifold{𝔽} = GraphManifold{<:AbstractGraph,𝔽,<:Manifold{𝔽},VertexManifold}
 
 @doc raw"""
     check_manifold_point(M::GraphManifold, p)
