@@ -15,29 +15,6 @@ struct Rotations{N} <: Manifold end
 
 Rotations(n::Int) = Rotations{n}()
 
-"""
-    NormalRotationDistribution(M::Rotations, d::Distribution, x::TResult)
-
-Distribution that returns a random point on the manifold [`Rotations`](@ref)
-`M`. Random point is generated using base distribution `d` and the type
-of the result is adjusted to `TResult`.
-
-See [`normal_rotation_distribution`](@ref) for details.
-"""
-struct NormalRotationDistribution{TResult,TM<:Rotations,TD<:Distribution} <:
-       MPointDistribution{TM}
-    manifold::TM
-    distr::TD
-end
-
-function NormalRotationDistribution(
-    M::Rotations,
-    d::Distribution,
-    x::TResult,
-) where {TResult}
-    return NormalRotationDistribution{TResult,typeof(M),typeof(d)}(M, d)
-end
-
 @doc raw"""
     angles_4d_skew_sym_matrix(A)
 
@@ -542,44 +519,6 @@ elements from the Lie algebra.
 norm(M::Rotations, p, X) = norm(X)
 
 @doc raw"""
-    normal_rotation_distribution(M::Rotations, p, σ::Real)
-
-Return a random point on the manifold [`Rotations`](@ref) `M`
-by generating a (Gaussian) random orthogonal matrix with determinant $+1$. Let
-
-$QR = A$
-
-be the QR decomposition of a random matrix $A$, then the formula reads
-
-$p = QD$
-
-where $D$ is a diagonal matrix with the signs of the diagonal entries of $R$,
-i.e.
-
-$D_{ij}=\begin{cases} \operatorname{sgn}(R_{ij}) & \text{if} \; i=j \\ 0 & \, \text{otherwise} \end{cases}.$
-
-It can happen that the matrix gets -1 as a determinant. In this case, the first
-and second columns are swapped.
-
-The argument `p` is used to determine the type of returned points.
-"""
-function normal_rotation_distribution(M::Rotations{N}, p, σ::Real) where {N}
-    d = Distributions.MvNormal(zeros(N * N), σ)
-    return NormalRotationDistribution(M, d, p)
-end
-
-"""
-    normal_tvector_distribution(M::Rotations, p, σ)
-
-Normal distribution in ambient space with standard deviation `σ`
-projected to tangent space at `p`.
-"""
-function normal_tvector_distribution(M::Rotations, p, σ)
-    d = Distributions.MvNormal(reshape(zero(p), :), σ)
-    return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project_vector!, p)
-end
-
-@doc raw"""
     project(M::Rotations, p; check_det = true)
 
 Project `p` to the nearest point on manifold `M`.
@@ -634,36 +573,6 @@ $\mathrm{SO}(n)$ it's `(n,n)`.
 @generated representation_size(::Rotations{N}) where {N} = (N, N)
 
 sharp!(M::Rotations, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
-
-function rand(
-    rng::AbstractRNG,
-    d::NormalRotationDistribution{TResult,Rotations{N}},
-) where {TResult,N}
-    if N == 1
-        return convert(TResult, ones(1, 1))
-    else
-        A = reshape(rand(rng, d.distr), (N, N))
-        return convert(TResult, _fix_random_rotation(A))
-    end
-end
-
-function _rand!(
-    rng::AbstractRNG,
-    d::NormalRotationDistribution{TResult,Rotations{N}},
-    x::AbstractArray{<:Real},
-) where {TResult,N}
-    return copyto!(x, rand(rng, d))
-end
-
-function _fix_random_rotation(A::AbstractMatrix)
-    s = diag(sign.(qr(A).R))
-    D = Diagonal(s)
-    C = qr(A).Q * D
-    if det(C) < 0
-        C[:, [1, 2]] = C[:, [2, 1]]
-    end
-    return C
-end
 
 @doc raw"""
     retract(M::Rotations, p, X, ::PolarRetraction)

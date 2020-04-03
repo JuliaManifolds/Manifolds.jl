@@ -110,36 +110,6 @@ struct InversePowerRetraction{TR<:AbstractInverseRetractionMethod} <:
 end
 
 """
-    PowerPointDistribution(M::AbstractPowerManifold, distribution)
-
-Power distribution on manifold `M`, based on `distribution`.
-"""
-struct PowerPointDistribution{TM<:AbstractPowerManifold,TD<:MPointDistribution,TX} <:
-       MPointDistribution{TM}
-    manifold::TM
-    distribution::TD
-    point::TX
-end
-
-"""
-    PowerFVectorDistribution([type::VectorBundleFibers], [x], distr)
-
-Generates a random vector at a `point` from vector space (a fiber of a tangent
-bundle) of type `type` using the power distribution of `distr`.
-
-Vector space type and `point` can be automatically inferred from distribution `distr`.
-"""
-struct PowerFVectorDistribution{
-    TSpace<:VectorBundleFibers{<:VectorSpaceType,<:AbstractPowerManifold},
-    TD<:FVectorDistribution,
-    TX,
-} <: FVectorDistribution{TSpace,TX}
-    type::TSpace
-    point::TX
-    distribution::TD
-end
-
-"""
     PowerBasisData{TB<:AbstractArray}
 
 Data storage for an array of basis data.
@@ -659,35 +629,6 @@ function power_dimensions(M::PowerManifold{<:Manifold,TSize}) where {TSize}
     return size_to_tuple(TSize)
 end
 
-function rand(rng::AbstractRNG, d::PowerFVectorDistribution)
-    fv = zero_vector(d.type, d.point)
-    _rand!(rng, d, fv)
-    return fv
-end
-function rand(rng::AbstractRNG, d::PowerPointDistribution)
-    x = allocate_result(d.manifold, rand, d.point)
-    _rand!(rng, d, x)
-    return x
-end
-
-function _rand!(rng::AbstractRNG, d::PowerFVectorDistribution, v::AbstractArray)
-    PM = d.type.manifold
-    rep_size = representation_size(PM.manifold)
-    for i in get_iterator(d.type.manifold)
-        copyto!(d.distribution.point, _read(PM, rep_size, d.point, i))
-        _rand!(rng, d.distribution, _read(PM, rep_size, v, i))
-    end
-    return v
-end
-function _rand!(rng::AbstractRNG, d::PowerPointDistribution, x::AbstractArray)
-    M = d.manifold
-    rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        _rand!(rng, d.distribution, _write(M, rep_size, x, i))
-    end
-    return x
-end
-
 @inline function _read(M::AbstractPowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)
     return _read(M, rep_size, x, (i,))
 end
@@ -784,9 +725,6 @@ end
 function show(io::IO, M::PowerManifold{TM,TSize,TPR}) where {TM,TSize,TPR}
     print(io, "PowerManifold($(M.manifold), $(TPR()), $(join(TSize.parameters, ", ")))")
 end
-
-support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)
-support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 
 @inline function _write(M::AbstractPowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)
     return _write(M, rep_size, x, (i,))

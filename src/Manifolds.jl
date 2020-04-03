@@ -31,7 +31,6 @@ import Base:
     size,
     transpose,
     zero
-import Distributions: _rand!, support
 import LinearAlgebra: cross, det, Diagonal, dot, mul!, norm, I, UniformScaling
 import ManifoldsBase:
     allocate,
@@ -85,12 +84,10 @@ import ManifoldsBase:
     vector_transport_to!,
     zero_tangent_vector,
     zero_tangent_vector!
-import Random: rand
 import Statistics: mean, mean!, median, median!, std, var
 import StatsBase: kurtosis, mean_and_std, mean_and_var, moment, skewness
 
 using Base.Iterators: repeated
-using Distributions
 using Einsum: @einsum
 using FiniteDifferences
 using HybridArrays
@@ -158,17 +155,6 @@ include("statistics.jl")
 include("manifolds/VectorBundle.jl")
 
 include("distributions/Distributions.jl")
-using .ManifoldDistributions:
-    FVectorDistribution,
-    FVectorSupport,
-    MPointDistribution,
-    ProjectedFVectorDistribution,
-    ProjectedPointDistribution
-import .ManifoldDistributions:
-    normal_tvector_distribution,
-    projected_distribution,
-    uniform_distribution
-
 include("product_representations.jl")
 
 # It's included early to ensure visibility of `Identity`
@@ -229,7 +215,7 @@ function __init__()
         include("ode.jl")
     end
 end
-#
+
 export CoTVector, Manifold, MPoint, TVector, Manifold
 export Euclidean,
     CholeskySpace,

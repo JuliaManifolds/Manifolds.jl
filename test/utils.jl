@@ -486,7 +486,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
     @testset "tangent vector distributions" begin
         for tvd ∈ tvector_distributions
-            supp = Manifolds.support(tvd)
+            supp = Distributions.support(tvd)
             for _ in 1:10
                 randtv = rand(tvd)
                 atol = rand_tvector_atol_multiplier * find_eps(randtv)

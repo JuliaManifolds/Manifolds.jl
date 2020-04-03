@@ -182,8 +182,8 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 test_mutating_rand = isa(T, Vector),
-                point_distributions = [Manifolds.ProductPointDistribution(distr_M1, distr_M2)],
-                tvector_distributions = [Manifolds.ProductFVectorDistribution(distr_tv_M1, distr_tv_M2)])
+                point_distributions = [ManifoldDistributions.ProductPointDistribution(distr_M1, distr_M2)],
+                tvector_distributions = [ManifoldDistributions.ProductFVectorDistribution(distr_tv_M1, distr_tv_M2)])
         end
     end
 

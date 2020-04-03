@@ -268,17 +268,6 @@ function mean!(S::Sphere, p, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(S, p, x, w, GeodesicInterpolationWithinRadius(π / 2); kwargs...)
 end
 
-"""
-    normal_tvector_distribution(S::Sphere, p, σ)
-
-Normal distribution in ambient space with standard deviation `σ`
-projected to tangent space at `p`.
-"""
-function normal_tvector_distribution(S::Sphere, p, σ)
-    d = Distributions.MvNormal(zero(p), σ)
-    return ProjectedFVectorDistribution(TangentBundleFibers(S), p, d, project_vector!, p)
-end
-
 @doc raw"""
     project(M::Sphere, p)
 
@@ -330,17 +319,6 @@ function retract!(M::Sphere, q, p, X, ::ProjectionRetraction)
 end
 
 show(io::IO, ::Sphere{N}) where {N} = print(io, "Sphere($(N))")
-
-"""
-    uniform_distribution(M::Sphere, p)
-
-Uniform distribution on given [`Sphere`](@ref) `M`. Generated points will be of
-similar type as `p`.
-"""
-function uniform_distribution(M::Sphere, p)
-    d = Distributions.MvNormal(zero(p), 1.0)
-    return ProjectedPointDistribution(M, d, project!, p)
-end
 
 @doc doc"""
     vector_transport_to(M, p, X, q, ::ParallelTransport)
