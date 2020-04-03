@@ -7,9 +7,9 @@ julia:
     - 1.4
     - nightly
 env:
-    - TESTGROUP="basic"
-    - TESTGROUP="combined"
-    - TESTGROUP="groupmisc"
+    - TEST_GROUP="basic"
+    - TEST_GROUP="combined"
+    - TEST_GROUP="groupmisc"
 notifications:
     email: false
 sudo: false

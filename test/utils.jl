@@ -16,11 +16,11 @@ const TEST_FLOAT32 = "TEST_FLOAT32" ∈ keys(ENV) && ENV["TEST_FLOAT32"] == "tru
 const TEST_DOUBLE64 = "TEST_DOUBLE64" ∈ keys(ENV) && ENV["TEST_DOUBLE64"] == "true"
 const TEST_STATIC_SIZED = "TEST_STATIC_SIZED" ∈ keys(ENV) && ENV["TEST_STATIC_SIZED"] == "true"
 
+testing_group(str::String) = "TEST_GROUP" ∉ keys(ENV) || ENV["TEST_GROUP"] == str
+
 find_eps(x::Type{TN}) where TN<:Number = eps(real(TN))
 find_eps(x) = find_eps(number_eltype(x))
 find_eps(x...) = find_eps(Base.promote_type(map(number_eltype, x)...))
-
-testing_group(str::String) = "TESTGROUP" ∉ keys(ENV) || ENV["TESTGROUP"] == str
 
 """
     test_manifold(m::Manifold, pts::AbstractVector;
