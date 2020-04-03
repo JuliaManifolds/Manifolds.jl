@@ -1,5 +1,5 @@
 @doc raw"""
-    SymmetricPositiveDefinite{N} <: Manifold{ℝ}
+    SymmetricPositiveDefinite{N} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType}
 
 The manifold of symmetric positive definite matrices, i.e.
 
