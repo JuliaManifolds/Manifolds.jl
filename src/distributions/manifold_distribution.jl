@@ -22,10 +22,18 @@ function projected_distribution(M::Euclidean, d)
     return ProjectedPointDistribution(M, d, project!, rand(d))
 end
 
-function ManifoldsBase.decorator_transparent_dispatch(::typeof(normal_tvector_distribution), M::MetricManifold, arge...)
+function ManifoldsBase.decorator_transparent_dispatch(
+    ::typeof(normal_tvector_distribution),
+    M::MetricManifold,
+    arge...,
+)
     return Val(:intransparent)
 end
-function ManifoldsBase.decorator_transparent_dispatch(::typeof(projected_distribution), M::MetricManifold, arge...)
+function ManifoldsBase.decorator_transparent_dispatch(
+    ::typeof(projected_distribution),
+    M::MetricManifold,
+    arge...,
+)
     return Val(:intransparent)
 end
 
@@ -70,7 +78,11 @@ function Random.rand(rng::AbstractRNG, d::PowerPointDistribution)
     return x
 end
 
-function Distributions._rand!(rng::AbstractRNG, d::PowerFVectorDistribution, v::AbstractArray)
+function Distributions._rand!(
+    rng::AbstractRNG,
+    d::PowerFVectorDistribution,
+    v::AbstractArray,
+)
     PM = d.type.manifold
     rep_size = representation_size(PM.manifold)
     for i in get_iterator(d.type.manifold)
@@ -166,7 +178,11 @@ function Random.rand(rng::AbstractRNG, d::ProductFVectorDistribution)
     return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
 end
 
-function Distributions._rand!(rng::AbstractRNG, d::ProductPointDistribution, x::AbstractArray{<:Number})
+function Distributions._rand!(
+    rng::AbstractRNG,
+    d::ProductPointDistribution,
+    x::AbstractArray{<:Number},
+)
     return copyto!(x, rand(rng, d))
 end
 function Distributions._rand!(rng::AbstractRNG, d::ProductPointDistribution, p::ProductRepr)
@@ -177,10 +193,18 @@ function Distributions._rand!(rng::AbstractRNG, d::ProductPointDistribution, p::
     )
     return p
 end
-function Distributions._rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::AbstractArray{<:Number})
+function Distributions._rand!(
+    rng::AbstractRNG,
+    d::ProductFVectorDistribution,
+    v::AbstractArray{<:Number},
+)
     return copyto!(v, rand(rng, d))
 end
-function Distributions._rand!(rng::AbstractRNG, d::ProductFVectorDistribution, X::ProductRepr)
+function Distributions._rand!(
+    rng::AbstractRNG,
+    d::ProductFVectorDistribution,
+    X::ProductRepr,
+)
     map(
         t -> Distributions._rand!(rng, t[1], t[2]),
         d.distributions,

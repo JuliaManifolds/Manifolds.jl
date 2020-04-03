@@ -3,10 +3,7 @@ module ManifoldDistributions
 using Distributions
 using LinearAlgebra
 using ManifoldsBase
-using ManifoldsBase:
-    AbstractDecoratorManifold,
-    Manifold,
-    @decorator_transparent_signature
+using ManifoldsBase: AbstractDecoratorManifold, Manifold, @decorator_transparent_signature
 using ..Manifolds
 using ..Manifolds:
     TangentBundleFibers,
@@ -98,18 +95,16 @@ end
 @decorator_transparent_signature normal_tvector_distribution(
     M::AbstractDecoratorManifold,
     p,
-    σ
+    σ,
 )
 
-@decorator_transparent_signature uniform_distribution(
-    M::AbstractDecoratorManifold,
-    p,
-)
+@decorator_transparent_signature uniform_distribution(M::AbstractDecoratorManifold, p)
 
 include("projected_distribution.jl")
 include("manifold_distribution.jl")
 
 export normal_tvector_distribution, projected_distribution, uniform_distribution
-export FVectorDistribution, MPointDistribution, ProjectedFVectorDistribution, ProjectedPointDistribution
+export FVectorDistribution,
+    MPointDistribution, ProjectedFVectorDistribution, ProjectedPointDistribution
 
 end # module
