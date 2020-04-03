@@ -7,17 +7,14 @@ on:
 
 jobs:
   test:
-    name: Julia ${{ matrix.julia-version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ TESTGROUP }}
+    name: Julia ${{ matrix.julia-version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ matrix.testgroup }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         julia-version: [1.0, 1.4, nightly]
         os: [ubuntu-latest, macOS-latest, windows-latest]
         arch: [x64]
-        env:
-          - TESTGROUP: basic
-          - TESTGROUP: combined
-          - TESTGROUP: groupmisc
+        testgroup: [basic, combined, groupmisc]
         include:
           - julia-version: nightly
             allow_failures: true
@@ -29,6 +26,8 @@ jobs:
           arch: ${{ matrix.arch }}
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
+        env:
+          TESTGROUP: ${{ matrix.testgroup }}
         continue-on-error: ${{ matrix.allow_failures }}
       - uses: julia-actions/julia-uploadcodecov@latest
         env:
