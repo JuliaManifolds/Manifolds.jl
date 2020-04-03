@@ -44,7 +44,7 @@ include("utils.jl")
     end
     types = [Matrix{Float64}, ]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
-    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64})
+    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64, 9})
     bases = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types
         pts = [convert(T, A_skewsym), convert(T, B_skewsym), convert(T, X)]

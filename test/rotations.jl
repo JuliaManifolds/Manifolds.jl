@@ -12,7 +12,7 @@ include("utils.jl")
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0], PolarRetraction()) ≈ π/sqrt(2)
     types = [ Matrix{Float64}, ]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
-    TEST_STATIC_SIZED && push!(types, MMatrix{2, 2, Float64})
+    TEST_STATIC_SIZED && push!(types, MMatrix{2, 2, Float64, 4})
     retraction_methods = [Manifolds.PolarRetraction(),
                           Manifolds.QRRetraction()]
 
