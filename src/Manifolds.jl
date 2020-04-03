@@ -154,7 +154,6 @@ include("statistics.jl")
 
 include("manifolds/VectorBundle.jl")
 
-include("distributions/Distributions.jl")
 include("product_representations.jl")
 
 # It's included early to ensure visibility of `Identity`
@@ -203,6 +202,8 @@ include("groups/translation_action.jl")
 include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
+
+include("distributions/Distributions.jl")
 
 function __init__()
     @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
