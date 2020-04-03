@@ -15,12 +15,22 @@ struct ProductManifold{𝔽,TM<:Tuple} <: Manifold{𝔽}
     manifolds::TM
 end
 
-function ProductManifold(manifolds::Manifold{𝔽}...) where {𝔽}
+function ProductManifold(manifolds::Manifold...)
+    𝔽 = _unify_field((number_system.(manifolds))...)
     return ProductManifold{𝔽,typeof(manifolds)}(manifolds)
 end
-function ProductManifold(manifolds::Manifold...)
-    throw(MethodError("Currently only manifold of same number field can be build into a product manifold."))
+
+function _unify_field(fields::AbstractNumbers...)
+    (a,rest) = Iterators.peel(fields)
+    return _unify_field(a,_unify_field(rest...))
 end
+function _unify_field(𝔽::AbstractNumbers, 𝔾::AbstractNumbers)
+    for 𝔼 ∈ [ℍ, ℂ, ℝ]
+        (𝔽 === 𝔼 || 𝔾 === 𝔼) && return 𝔼
+    end
+end
+_unify_field(𝔽::AbstractNumbers) = 𝔽
+
 ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
 
 const PRODUCT_BASIS_LIST = [
@@ -955,7 +965,7 @@ from the first and the third factor is returned.
 
 The version with `AbstractVector` is not type-stable, for better preformance use `Val`.
 """
-submanifold(M::ProductManifold, i::Val) = ProductManifold(select_from_tuple(M.manifolds, i))
+submanifold(M::ProductManifold, i::Val) = ProductManifold(select_from_tuple(M.manifolds, i)...)
 submanifold(M::ProductManifold, i::AbstractVector) = submanifold(M, Val(tuple(i...)))
 
 support(d::ProductPointDistribution) = MPointSupport(d.manifold)

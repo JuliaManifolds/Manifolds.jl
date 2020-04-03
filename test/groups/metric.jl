@@ -26,12 +26,12 @@ function local_metric(::MetricManifold{<:Manifold,<:TestBiInvariantMetricBase}, 
     return Diagonal(0.4I, 3)
 end
 
-struct TestInvariantMetricManifold <: Manifold end
+struct TestInvariantMetricManifold <: Manifold{ℝ} end
 
-struct TestDefaultInvariantMetricManifold <: Manifold end
+struct TestDefaultInvariantMetricManifold <: Manifold{ℝ} end
 
 function default_metric_dispatch(
-    ::MetricManifold{TestDefaultInvariantMetricManifold,RightInvariantMetric{TestInvariantMetricBase}},
+    ::MetricManifold{ℝ,TestDefaultInvariantMetricManifold,RightInvariantMetric{TestInvariantMetricBase}},
 )
     return Val(true)
 end
