@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    name: Julia ${{ matrix.julia-version }} - ${{ matrix.os }} - ${{ matrix.arch }} - $TESTGROUP
+    name: Julia ${{ matrix.julia-version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ TESTGROUP }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
