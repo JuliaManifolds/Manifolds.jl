@@ -101,7 +101,7 @@ CotangentSpaceAtPoint(M::Manifold, p) = VectorSpaceAtPoint(CotangentBundleFibers
 """
     VectorBundle{TVS<:VectorSpaceType,TM<:Manifold,𝔽} <: Manifold{𝔽}
 
-Vector bundle on a [`Manifold'](@ref) `M` of type [`VectorSpaceType`](@ref).
+Vector bundle on a [`Manifold`](@ref) `M` of type [`VectorSpaceType`](@ref).
 
 # Constructor
 
