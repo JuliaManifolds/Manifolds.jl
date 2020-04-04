@@ -370,10 +370,10 @@ function mean!(
 )
     n = length(x)
     if length(w) != n
-        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
+        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
     end
     copyto!(q, p0)
-    yold = allocate_result(M, median, q)
+    yold = allocate_result(M, mean, q)
     ytmp = copy(yold)
     X = zero_tangent_vector(M, q)
     wv = convert(Vector, w) ./ sum(w)

@@ -25,7 +25,7 @@ using Manifolds: default_metric_dispatch
     metrics = [M1, M2, M3]
     types = [Matrix{Float64}, ]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
-    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64})
+    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64, 9})
 
     for M in metrics
         basis_types = if M == M3

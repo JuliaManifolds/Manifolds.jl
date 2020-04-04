@@ -1,7 +1,3 @@
-const TEST_FLOAT32 = false
-const TEST_DOUBLE64 = false
-const TEST_STATIC_SIZED = false
-
 using Manifolds
 using ManifoldsBase
 
@@ -15,6 +11,12 @@ using StaticArrays
 using Test
 using LightGraphs
 using SimpleWeightedGraphs
+
+const TEST_FLOAT32 = "TEST_FLOAT32" ∈ keys(ENV) && ENV["TEST_FLOAT32"] == "true"
+const TEST_DOUBLE64 = "TEST_DOUBLE64" ∈ keys(ENV) && ENV["TEST_DOUBLE64"] == "true"
+const TEST_STATIC_SIZED = "TEST_STATIC_SIZED" ∈ keys(ENV) && ENV["TEST_STATIC_SIZED"] == "true"
+
+testing_group(str::String) = "TEST_GROUP" ∉ keys(ENV) || ENV["TEST_GROUP"] == str
 
 find_eps(x::Type{TN}) where TN<:Number = eps(real(TN))
 find_eps(x) = find_eps(number_eltype(x))
