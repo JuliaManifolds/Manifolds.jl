@@ -148,13 +148,6 @@ struct PowerBasisData{TB<:AbstractArray}
     bases::TB
 end
 
-const POWER_BASIS_LIST_CACHED = [
-    CachedBasis{ℝ,<:AbstractBasis{ℝ},<:PowerBasisData},
-    CachedBasis{ℂ,<:AbstractBasis{ℂ},<:PowerBasisData},
-    CachedBasis{ℝ,<:AbstractOrthogonalBasis{ℝ},<:PowerBasisData},
-    CachedBasis{ℝ,<:AbstractOrthonormalBasis{ℝ},<:PowerBasisData},
-]
-
 const PowerManifoldMultidimensional =
     AbstractPowerManifold{𝔽,<:Manifold{𝔽},ArrayPowerRepresentation} where {𝔽}
 const PowerManifoldNested =
@@ -376,16 +369,6 @@ function get_coordinates(
     ]
     return reduce(vcat, reshape(vs, length(vs)))
 end
-for BT in POWER_BASIS_LIST_CACHED
-    eval(quote
-        @invoke_maker 4 CachedBasis{<:Any,<:AbstractBasis,<:PowerBasisData} get_coordinates(
-            M::AbstractPowerManifold,
-            p,
-            X,
-            B::$BT,
-        )
-    end)
-end
 
 function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBasis)
     rep_size = representation_size(M.manifold)
@@ -403,22 +386,6 @@ function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonorm
         v_iter += dim
     end
     return Y
-end
-function get_coordinates!(
-    M::AbstractPowerManifold,
-    Y,
-    p,
-    X,
-    B::CachedBasis{ℝ,<:AbstractBasis{ℝ},<:PowerBasisData},
-)
-    TypeTuple = Tuple{
-        AbstractPowerManifold,
-        Any,
-        Any,
-        Any,
-        CachedBasis{ℝ,<:AbstractBasis,<:PowerBasisData},
-    }
-    return invoke(get_coordinates!, TypeTuple, M, Y, p, X, B)
 end
 function get_coordinates!(
     M::AbstractPowerManifold,

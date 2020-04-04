@@ -42,10 +42,6 @@ end
 
 const PRODUCT_BASIS_LIST_CACHED = [
     CachedBasis,
-    CachedBasis{ℝ,<:AbstractBasis{ℝ},<:ProductBasisData},
-    CachedBasis{ℂ,<:AbstractBasis{ℂ},<:ProductBasisData},
-    CachedBasis{ℝ,<:AbstractOrthogonalBasis{ℝ},<:ProductBasisData},
-    CachedBasis{ℝ,<:AbstractOrthonormalBasis{ℝ},<:ProductBasisData},
 ]
 
 """
@@ -545,6 +541,15 @@ for BT in PRODUCT_BASIS_LIST
             B::$BT,
         )
     end)
+end
+function get_vector!(
+    M::ProductManifold,
+    Y,
+    p,
+    X,
+    B::CachedBasis,
+)
+    error("get_vector! called on $M with an incorrect CachedBasis. Expected a CachedBasis with ProductBasisData, given $B")
 end
 
 function get_vectors(

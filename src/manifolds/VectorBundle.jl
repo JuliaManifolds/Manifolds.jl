@@ -341,22 +341,14 @@ for BT in [
         @invoke_maker 5 AbstractBasis get_coordinates!(M::VectorBundle, Y, p, X, B::$BT)
     end)
 end
-for BT in [
-    CachedBasis,
-    CachedBasis{ℝ,<:AbstractBasis{ℝ},<:VectorBundleBasisData},
-    CachedBasis{ℝ,<:ManifoldsBase.AbstractOrthogonalBasis{ℝ},<:VectorBundleBasisData},
-    CachedBasis{ℝ,<:ManifoldsBase.AbstractOrthonormalBasis{ℝ},<:VectorBundleBasisData},
-    CachedBasis{ℂ,<:AbstractBasis{ℂ},<:VectorBundleBasisData},
-]
-    eval(quote
-        @invoke_maker 5 (CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData} where 𝔽) get_coordinates!(
-                M::VectorBundle,
-                Y,
-                p,
-                X,
-                B::$BT,
-            )
-    end)
+function get_coordinates!(
+    M::VectorBundle,
+    Y,
+    p,
+    X,
+    B::CachedBasis,
+)
+    error("get_coordinates! called on $M with an incorrect CachedBasis. Expected a CachedBasis with VectorBundleBasisData, given $B")
 end
 
 function get_coordinates!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncached_bases) where {N}
