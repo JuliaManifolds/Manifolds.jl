@@ -387,7 +387,7 @@ end
 
 for BT in PRODUCT_BASIS_LIST_CACHED
     eval(quote
-        @invoke_maker 5 CachedBasis{<:Any,<:AbstractBasis,<:ProductBasisData} get_coordinates!(
+        @invoke_maker 5 (CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData} where 𝔽) get_coordinates!(
                 M::ProductManifold,
                 Xⁱ,
                 p,
