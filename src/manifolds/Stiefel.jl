@@ -4,7 +4,7 @@
 The Stiefel manifold consists of all $n × k$, $n ≥ k$ unitary matrices, i.e.
 
 ````math
-\operatorname{St}(n,k)\{ p ∈ 𝔽^{n × k} : p^{\mathrm{H}}p = I_k \},
+\operatorname{St}(n,k) = \bigl\{ p ∈ 𝔽^{n × k}\ \big|\ p^{\mathrm{H}}p = I_k \bigr\},
 ````
 
 where $𝔽 ∈ \{ℝ, ℂ\}$,

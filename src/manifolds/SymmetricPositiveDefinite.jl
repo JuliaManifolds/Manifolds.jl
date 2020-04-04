@@ -6,7 +6,7 @@ The manifold of symmetric positive definite matrices, i.e.
 ````math
 \mathcal P(n) =
 \bigl\{
-p ∈ ℝ^{n × n} : a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
+p ∈ ℝ^{n × n}\ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
 \bigr\}
 ````
 

@@ -22,7 +22,7 @@ Note that a manifold is connected with an operation by wrapping it with a decora
 abstract type AbstractGroupOperation end
 
 @doc raw"""
-    AbstractGroupManifold{<:AbstractGroupOperation} <: AbstractDecoratorManifold
+    AbstractGroupManifold{O<:AbstractGroupOperation,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 Abstract type for a Lie group, a group that is also a smooth manifold with an
 [`AbstractGroupOperation`](@ref), a smooth binary operation. `AbstractGroupManifold`s must
@@ -32,7 +32,7 @@ implement at least [`inv`](@ref), [`identity`](@ref), [`compose`](@ref), and
 abstract type AbstractGroupManifold{O<:AbstractGroupOperation,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 """
-    GroupManifold{M<:Manifold,O<:AbstractGroupOperation} <: AbstractGroupManifold{O}
+    GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <: AbstractGroupManifold{O,𝔽}
 
 Decorator for a smooth manifold that equips the manifold with a group operation, thus making
 it a Lie group. See [`AbstractGroupManifold`](@ref) for more details.

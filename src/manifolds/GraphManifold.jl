@@ -21,10 +21,10 @@ A type for a [`GraphManifold`](@ref) where the data is given on the vertices.
 struct VertexManifold <: GraphManifoldType end
 
 @doc raw"""
-    GraphManifold{G, M, T} <: AbstractPowerManifold{M,NestedPowerRepresentation}
+    GraphManifold{G,𝔽,M,T} <: AbstractPowerManifold{𝔽,M,NestedPowerRepresentation}
 
-Build a manifold, that is a [`PowerManifold`](@ref) of the [`Manifold`](@ref) `M` either on the edges or vertices
-of a graph `G` depending on the [`GraphManifoldType`](@ref) `T`.
+Build a manifold, that is a [`PowerManifold`](@ref) of the [`Manifold`](@ref) `M` either on
+the edges or vertices of a graph `G` depending on the [`GraphManifoldType`](@ref) `T`.
 
 # Fields
 * `G` is an `AbstractSimpleGraph`
@@ -183,7 +183,7 @@ function incident_log!(
 end
 
 @doc raw"""
-    manifold_dimension(N::GraphManifold{G,M,VertexManifold})
+    manifold_dimension(N::GraphManifold{G,𝔽,M,VertexManifold})
 
 returns the manifold dimension of the [`GraphManifold`](@ref) `N` on the vertices of
 a graph $G=(V,E)$, i.e.
@@ -196,7 +196,7 @@ function manifold_dimension(M::VertexGraphManifold)
     return manifold_dimension(M.manifold) * nv(M.graph)
 end
 @doc raw"""
-    manifold_dimension(N::GraphManifold{G,M,EdgeManifold})
+    manifold_dimension(N::GraphManifold{G,𝔽,M,EdgeManifold})
 
 returns the manifold dimension of the [`GraphManifold`](@ref) `N` on the edges of
 a graph $G=(V,E)$, i.e.

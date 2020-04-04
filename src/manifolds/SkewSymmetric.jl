@@ -5,7 +5,7 @@ The [`Manifold`](@ref) $ \operatorname{SkewSym}(n)$ consisting of the real- or
 complex-valued skew-symmetric matrices of size $n × n$, i.e. the set
 
 ````math
-\operatorname{SkewSym}(n) = \bigl\{p  ∈ 𝔽^{n × n} \big| p^{\mathrm{H}} = -p \bigr\},
+\operatorname{SkewSym}(n) = \bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = -p \bigr\},
 ````
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
 and the field $𝔽 ∈ \{ ℝ, ℂ\}$.

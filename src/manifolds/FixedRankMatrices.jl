@@ -3,7 +3,7 @@
 
 The manifold of $m × n$ real-valued or complex-valued matrices of fixed rank $k$, i.e.
 ````math
-\{ p ∈ 𝔽^{m × n} : \operatorname{rank}(p) = k \},
+\bigl\{ p ∈ 𝔽^{m × n}\ \big|\ \operatorname{rank}(p) = k \bigr\},
 ````
 where $𝔽 ∈ \{ℝ,ℂ\}$ and the rank is the number of linearly independent columns of a matrix.
 

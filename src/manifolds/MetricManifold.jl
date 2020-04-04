@@ -13,7 +13,7 @@ if VERSION ≥ v"1.3"
 end
 
 """
-    MetricManifold{M<:Manifold,G<:Metric} <: AbstractDecoratorManifold
+    MetricManifold{𝔽,M<:Manifold{𝔽},G<:Metric} <: AbstractDecoratorManifold{𝔽}
 
 Equip a [`Manifold`](@ref) explicitly with a [`Metric`](@ref) `G`.
 
@@ -25,6 +25,7 @@ the exponential map and this is implemented directly (without solving the ode),
 you can of course still implement that directly.
 
 # Constructor
+
     MetricManifold(M, G)
 
 Generate the [`Manifold`](@ref) `M` as a manifold with the [`Metric`](@ref) `G`.

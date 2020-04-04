@@ -6,7 +6,7 @@ matrices w.r.t. an arbitrary scalar product with symmetric positive definite mat
 $B\in R^{n × n}$, i.e.
 
 ````math
-\operatorname{St}(n,k,B) = \{ p \in \mathbb F^{n × k} : p^{\mathrm{H}} B p = I_k \},
+\operatorname{St}(n,k,B) = \bigl\{ p \in \mathbb F^{n × k}\ \big|\ p^{\mathrm{H}} B p = I_k \bigr\},
 ````
 
 where $𝔽 ∈ \{ℝ, ℂ\}$,

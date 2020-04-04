@@ -1,12 +1,12 @@
 @doc raw"""
-    Hyperbolic{N} <: AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
+    Hyperbolic{N} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType}
 
 The hyperbolic space $ℍ^n$ represented by $n+1$-Tuples, i.e. embedded in the
 [`Lorentz`](@ref)ian manifold equipped with the [`MinkowskiMetric`](@ref)
 $⟨\cdot,\cdot⟩_{\mathrm{M}}$. The space is defined as
 
 ```math
-ℍ^n = \Bigl\{p ∈ ℝ^{n+1} : ⟨p,p⟩_{\mathrm{M}}= -p_{n+1}^2
+ℍ^n = \Bigl\{p ∈ ℝ^{n+1}\ \Big|\ ⟨p,p⟩_{\mathrm{M}}= -p_{n+1}^2
   + \displaystyle\sum_{k=1}^n p_k^2 = -1, p_{n+1} > 0\Bigr\},.
 ```
 

@@ -160,7 +160,7 @@ starting in `p` with tangent vector (direction) `X`. Let $X^{\mathrm{H}}BX = USV
 SVD decomposition of $X^{\mathrm{H}}BX$. Then the exponential map is written using
 
 ````math
-z = p V\cos(S)V^\mathrm{H} + U\sin(S)V^\mathrm{H},
+\exp_p X = p V\cos(S)V^\mathrm{H} + U\sin(S)V^\mathrm{H},
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian and the

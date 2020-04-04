@@ -49,7 +49,7 @@ The manifold is named after
     Grassmann(n,k,field=ℝ)
 
 Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
-case $field = ℝ$ is the default.
+case `field = ℝ` is the default.
 """
 struct Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 

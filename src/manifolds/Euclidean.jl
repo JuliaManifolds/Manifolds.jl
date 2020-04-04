@@ -194,7 +194,7 @@ of arrays (or tensors) of size $n_1 × n_2  ×  …  × n_i$, i.e.
 g_p(X,Y) = \sum_{k ∈ I} \overline{X}_{k} Y_{k},
 ````
 where $I$ is the set of vectors $k ∈ ℕ^i$, such that for all
-$1 ≤ j ≤ i$ it holds $1 ≤ k_j ≤ n_j$.
+$1 ≤ j ≤ i$ it holds $1 ≤ k_j ≤ n_j$ and $\overline{\cdot}$ denotes the complex conjugate.
 
 For the special case of $i ≤ 2$, i.e. matrices and vectors, this simplifies to
 ````math

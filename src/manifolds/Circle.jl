@@ -9,8 +9,8 @@ $\lvert z\rvert = 1$.
     Circle(𝔽=ℝ)
 
 Generate the `ℝ`-valued Circle represented by angles, which
-alternatively can be set to use the [`AbstractNumbers`](@ref) `𝔽=ℂ` to obtain the `Circle`
-represented by `ℂ`-valued `Circle` of unit numbers.
+alternatively can be set to use the [`AbstractNumbers`](@ref) `𝔽=ℂ` to obtain the circle
+represented by `ℂ`-valued circle of unit numbers.
 """
 struct Circle{𝔽} <: Manifold{𝔽} end
 
@@ -142,7 +142,7 @@ end
 """
     get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
-Return tangent vector coordinates in the Lie algebra of the circle.
+Return tangent vector coordinates in the Lie algebra of the [`Circle`](@ref).
 """
 function get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
     X, p = X[1], p[1]
@@ -194,7 +194,7 @@ end
 """
     get_vector(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
-Return tangent vector from the coordinates in the Lie algebra of the circle.
+Return tangent vector from the coordinates in the Lie algebra of the [`Circle`](@ref).
 """
 get_vector(M::Circle{ℂ}, p, X, B::AbstractBasis) = @SVector [1im * X[1] * p[1]]
 
