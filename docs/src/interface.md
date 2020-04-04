@@ -32,7 +32,7 @@ Order = [:type, :function]
 
 ## Allocation
 
-Non-mutating functions in `Manifolds.jl` are typically implemented using mutating variants.
+Non-mutating functions in `ManifoldsBase.jl` are typically implemented using mutating variants.
 Allocation of new points is performed using a custom mechanism that relies on the following functions:
 
 * [`allocate`](@ref) that allocates a new point or vector similar to the given one.
@@ -80,10 +80,11 @@ The main types are:
 * [`CachedBasis`](@ref), which stores (explicitly or implicitly) a precomputed basis at a certain point.
 
 The main functions are:
+
 * [`get_basis`](@ref) precomputes a basis at a certain point.
 * [`get_coordinates`](@ref) returns coordinates of a tangent vector.
 * [`get_vector`](@ref) returns a vector for the specified coordinates.
-* [`get_vectors`](@ref) returns a vector of basis vectors (calling it should be avoided for high-dimensional manifolds).
+* [`get_vectors`](@ref) returns a vector of basis vectors. Calling it should be avoided for high-dimensional manifolds.
 
 ```@autodocs
 Modules = [ManifoldsBase,Manifolds]
