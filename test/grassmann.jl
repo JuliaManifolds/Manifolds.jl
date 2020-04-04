@@ -22,7 +22,7 @@ include("utils.jl")
             @test injectivity_radius(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], ExponentialRetraction()) == π/2
         end
         types = [Matrix{Float64}, ]
-        TEST_STATIC_SIZED && push!(types, MMatrix{3, 2, Float64, 6})
+        TEST_STATIC_SIZED && push!(types, MMatrix{3, 2, Float64})
 
         TEST_FLOAT32 && push!(types, Matrix{Float32})
         basis_types = (ProjectedOrthonormalBasis(:gram_schmidt),)

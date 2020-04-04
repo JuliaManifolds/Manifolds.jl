@@ -56,7 +56,7 @@ function test_median(M, x, yexp = nothing; kwargs...)
         y = median(M, x; kwargs...)
         @test is_manifold_point(M, y; atol=10^-9)
         if yexp !== nothing
-            @test isapprox(M, y, yexp; atol=10^-4)
+            @test isapprox(M, y, yexp; atol=10^-5)
         end
     end
 
@@ -279,7 +279,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             n=3
             x = [ exp(M,p,π/6*[cos(α), sin(α), 0.]) for α = range(0,2*π - 2*π/n, length=n) ]
             test_mean(M, x)
-            test_median(M, x; atol = 10^-5)
+            test_median(M, x; atol = 10^-12)
             test_var(M, x)
             test_std(M, x)
             test_moments(M, x)
@@ -288,7 +288,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
         @testset "zero variance" begin
             x = fill([0.,0.,1.], 5)
             test_mean(M, x, [0.,0.,1.])
-            test_median(M, x, [0.,0.,1.]; atol = 10^-5)
+            test_median(M, x, [0.,0.,1.]; atol = 10^-12)
             test_var(M, x, 0.0)
             test_std(M, x, 0.0)
         end
@@ -298,7 +298,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             θ = π / 4
             @test isapprox(M, mean(M, x), geodesic(M, x[1], x[3], θ))
             test_mean(M, x, [1.0, 1.0, 0.0] / √2)
-            test_median(M, x, [1.0, 1.0, 0.0] / √2; atol = 10^-8)
+            test_median(M, x, [1.0, 1.0, 0.0] / √2; atol = 10^-12)
             test_var(M, x, θ^2)
             test_std(M, x, θ)
             test_moments(M, x)
@@ -314,7 +314,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             vx = vcat(x...)
 
             test_mean(M, x, mean(x))
-            test_median(M, x; atol = 10^-5)
+            test_median(M, x; atol = 10^-12)
             test_var(M, x, var(vx))
             test_std(M, x, std(vx))
             test_moments(M, x)
@@ -351,15 +351,15 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
                 w = pweights(  ones(length(x)) / length(x)  )
                 @test mean(M,x) ≈ mean(x)
                 @test mean(M,x,w) ≈ mean(x,w)
-                @test median(M,x; rng = MersenneTwister(1212), atol = 10^-5) ≈ median(x)
-                @test median(M,x,w; rng = MersenneTwister(1212), atol = 10^-5) ≈ median(x,w)
+                @test median(M,x; rng = MersenneTwister(1212), atol = 10^-12) ≈ median(x)
+                @test median(M,x,w; rng = MersenneTwister(1212), atol = 10^-12) ≈ median(x,w)
                 @test var(M,x) ≈ var(x)
                 @test var(M,x,w) ≈ var(x,w)
                 @test std(M,x) ≈ std(x)
                 @test std(M,x,w) ≈ std(x,w)
 
                 test_mean(M, x)
-                test_median(M, x; atol = 10^-5)
+                test_median(M, x; atol = 10^-12)
                 test_var(M, x)
                 test_std(M, x)
                 test_moments(M, x)
@@ -377,7 +377,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
                 @test std(M,x,w) ≈ std(vx,w)
 
                 test_mean(M, x)
-                test_median(M, x; atol = 10^-5)
+                test_median(M, x; atol = 10^-12)
                 test_var(M, x)
                 test_std(M, x)
                 test_moments(M, x)
