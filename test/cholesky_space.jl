@@ -6,7 +6,7 @@ include("utils.jl")
 
     types = [Matrix{Float64}, ]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
-    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64, 9})
+    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64})
 
     for T in types
         A(α) = [1. 0. 0.; 0. cos(α) sin(α); 0. -sin(α) cos(α)]
