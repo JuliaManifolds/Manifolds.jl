@@ -158,7 +158,7 @@ isapprox(p, e::Identity; kwargs...) = isapprox(e::Identity, p; kwargs...)
 isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
 isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
-function allocate_result(M::Manifold, f::typeof(get_coordinates), e::Identity, X)
+function allocate_result(M::Manifold, f::typeof(get_coordinates), e::Identity, X, ::AbstractBasis)
     T = allocate_result_type(M, f, (e.p, X))
     return allocate(e.p, T, Size(manifold_dimension(M)))
 end

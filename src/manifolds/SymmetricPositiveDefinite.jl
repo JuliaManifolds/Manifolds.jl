@@ -166,12 +166,6 @@ end
 returns the zero tangent vector in the tangent space of the symmetric positive
 definite matrix `x` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
 """
-zero_tangent_vector(M::SymmetricPositiveDefinite, x) = zero(x)
-function zero_tangent_vector(
-    M::MetricManifold{SymmetricPositiveDefinite{N},T},
-    x,
-) where {N,T<:Metric}
-    return zero(x)
-end
+zero_tangent_vector(::SymmetricPositiveDefinite, ::Any)
 
 zero_tangent_vector!(M::SymmetricPositiveDefinite{N}, v, x) where {N} = fill!(v, 0)

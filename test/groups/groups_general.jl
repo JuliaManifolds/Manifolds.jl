@@ -27,7 +27,9 @@ include("group_utils.jl")
         @test Manifolds.decorator_transparent_dispatch(group_log, G, x, x) === Val{:intransparent}()
         @test Manifolds.decorator_transparent_dispatch(translate_diff!, G, x, x, x, x, x) === Val{:intransparent}()
         @test base_group(G) === G
-
+        z = similar(x)
+        copyto!(z,eg)
+        @test z==eg.p
         if VERSION ≥ v"1.3"
             @test NotImplementedOperation(NotImplementedManifold()) === G
             @test (NotImplementedOperation())(NotImplementedManifold()) === G

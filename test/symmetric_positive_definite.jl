@@ -23,6 +23,7 @@ using Manifolds: default_metric_dispatch
     @test injectivity_radius(M1, ExponentialRetraction()) == Inf
     @test injectivity_radius(M1,one(zeros(3,3)), ExponentialRetraction()) == Inf
     @test zero_tangent_vector(M1,one(zeros(3,3))) == zero_tangent_vector(M2,one(zeros(3,3)))
+    @test zero_tangent_vector(M1,one(zeros(3,3))) == zero_tangent_vector(M3,one(zeros(3,3)))
     metrics = [M1, M2, M3]
     types = [Matrix{Float64}, ]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
