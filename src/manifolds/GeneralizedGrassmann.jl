@@ -9,7 +9,7 @@ of $ℂ^n$ for the second.
 The manifold can be represented as
 
 ````math
-\operatorname{Gr}(n, k, B) := \bigl\{ \operatorname{span}(p) : p ∈ 𝔽^{n × k}, p^\mathrm{H}Bp = I_k\},
+\operatorname{Gr}(n, k, B) := \bigl\{ \operatorname{span}(p)\ \big|\ p ∈ 𝔽^{n × k}, p^\mathrm{H}Bp = I_k\},
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate (or Hermitian) transpose and

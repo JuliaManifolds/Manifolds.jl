@@ -52,7 +52,7 @@ include("utils.jl")
         basis_types = if M == E
             (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd), DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]))
         elseif M == Ec
-            (DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]))
+            (DefaultOrthonormalBasis(), DefaultOrthonormalBasis(ℂ), DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]))
         else
             ()
         end
