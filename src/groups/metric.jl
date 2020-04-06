@@ -116,7 +116,7 @@ function exp!(
     M::MetricManifold{𝔽,<:AbstractGroupManifold,<:InvariantMetric},
     q,
     p,
-    X
+    X,
 ) where {𝔽}
     if has_biinvariant_metric(M)
         conv = direction(metric(M))

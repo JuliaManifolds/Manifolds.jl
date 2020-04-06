@@ -1,7 +1,7 @@
 @doc raw"""
     ProductManifold{𝔽,TM<:Tuple} <: Manifold{𝔽}
 
-Product manifold $M_1 × M_2 × …  × M_n$ with product geometry..
+Product manifold $M_1 × M_2 × …  × M_n$ with product geometry.
 
 # Constructor
 
