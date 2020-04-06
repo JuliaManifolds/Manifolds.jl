@@ -131,5 +131,12 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test_throws ErrorException Manifolds.project!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws ErrorException zero_vector!(vbf, [1, 2, 3], [1, 2, 3])
         @test_throws ErrorException vector_space_dimension(vbf)
+        a = fill(0.0, 6)
+        @test_throws ErrorException get_coordinates!(
+            TangentBundle(M),
+            a,
+            ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0, 0.0]),
+            ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0, 1.0]),
+            CachedBasis(DefaultOrthonormalBasis(), []))
     end
 end
