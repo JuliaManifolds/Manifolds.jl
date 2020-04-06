@@ -1,7 +1,7 @@
 @doc raw"""
     Oblique{N,M,𝔽} <: AbstractPowerManifold{𝔽}
 
-The oblique manifold $\mathcal{OB}(n,m)$ is the set of real-valued matrices with unit norm
+The oblique manifold $\mathcal{OB}(n,m)$ is the set of 𝔽-valued matrices with unit norm
 column endowed with the metric from the embedding. This yields exactly the same metric as
 considering the product metric of the unit norm vectors, i.e. [`PowerManifold`](@ref) of the
 $(n-1)$-dimensional [`Sphere`](@ref).
