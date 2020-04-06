@@ -43,7 +43,7 @@ The manifold is named after
 Generate the (real-valued) Generalized Grassmann manifold of $n\times k$ dimensional
 orthonormal matrices with scalar product `B`.
 """
-struct GeneralizedGrassmann{n,k,TB<:AbstractMatrix,𝔽} <:
+struct GeneralizedGrassmann{n,k,𝔽,TB<:AbstractMatrix} <:
        AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
        B::TB
 end
@@ -54,17 +54,17 @@ function GeneralizedGrassmann(
     B::AbstractMatrix = Matrix{Float64}(I, n, n),
     field::AbstractNumbers = ℝ,
 )
-    return GeneralizedGrassmann{n,k,typeof(B),field}(B)
+    return GeneralizedGrassmann{n,k,field,typeof(B)}(B)
 end
 
 @doc raw"""
-    check_manifold_point(M::GeneralizedGrassmann{n,k,B,𝔽}, p)
+    check_manifold_point(M::GeneralizedGrassmann{n,k,𝔽}, p)
 
 Check whether `p` is representing a point on the [`GeneralizedGrassmann`](@ref) `M`, i.e. its
 a `n`-by-`k` matrix of unitary column vectors with respect to the B inner prudct and
 of correct `eltype` with respect to `𝔽`.
 """
-function check_manifold_point(M::GeneralizedGrassmann{n,k,B,𝔽}, p; kwargs...) where {n,k,B,𝔽}
+function check_manifold_point(M::GeneralizedGrassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
     mpv = invoke(check_manifold_point, Tuple{typeof(get_embedding(M)), typeof(p)}, get_embedding(M), p; kwargs...)
     mpv === nothing || return mpv
     c = p' * M.B * p
@@ -77,7 +77,7 @@ function check_manifold_point(M::GeneralizedGrassmann{n,k,B,𝔽}, p; kwargs...)
 end
 
 @doc raw"""
-    check_tangent_vector(M::GeneralizedGrassmann{n,k,B,𝔽}, p, X; check_base_point = true, kwargs...)
+    check_tangent_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; check_base_point = true, kwargs...)
 
 Check whether `X` is a tangent vector in the tangent space of `p` on
 the [`GeneralizedGrassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
@@ -91,12 +91,12 @@ denotes the $k × k$ zero natrix.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
 function check_tangent_vector(
-    M::GeneralizedGrassmann{n,k,B,𝔽},
+    M::GeneralizedGrassmann{n,k,𝔽},
     p,
     X;
     check_base_point = true,
     kwargs...,
-) where {n,k,B,𝔽}
+) where {n,k,𝔽}
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
@@ -119,7 +119,9 @@ function check_tangent_vector(
     end
 end
 
-decorated_manifold(M::GeneralizedGrassmann{N,K,B,𝔽}) where {N,K,B,𝔽} = Euclidean(N, K; field = 𝔽)
+function decorated_manifold(M::GeneralizedGrassmann{N,K,𝔽}) where {N,K,𝔽}
+    return Euclidean(N, K; field = 𝔽)
+end
 
 @doc raw"""
     distance(M::GeneralizedGrassmann, p, q)
@@ -208,7 +210,7 @@ g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}BY),
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-inner(M::GeneralizedGrassmann{n,k,B}, p, X, Y) where {n,k,B} = dot(X, M.B * Y)
+inner(M::GeneralizedGrassmann{n,k}, p, X, Y) where {n,k} = dot(X, M.B * Y)
 
 function isapprox(M::GeneralizedGrassmann, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
@@ -257,7 +259,9 @@ Return the dimension of the [`GeneralizedGrassmann(n,k,𝔽)`](@ref) manifold `M
 
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
-manifold_dimension(::GeneralizedGrassmann{n,k,B,𝔽}) where {n,k,B,𝔽} = k * (n - k) * real_dimension(𝔽)
+function manifold_dimension(::GeneralizedGrassmann{n,k,𝔽}) where {n,k,𝔽}
+    return k * (n - k) * real_dimension(𝔽)
+end
 
 """
     mean(
@@ -347,7 +351,9 @@ function retract!(M::GeneralizedGrassmann, q, p, X, ::ProjectionRetraction)
     return q
 end
 
-show(io::IO, M::GeneralizedGrassmann{n,k,B,𝔽}) where {n,k,B,𝔽} = print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
+function show(io::IO, M::GeneralizedGrassmann{n,k,𝔽}) where {n,k,𝔽}
+    print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
+end
 
 @doc doc"""
     vector_transport_to(M::GeneralizedGrassmann, p, X, q, ::ProjectionTransport)

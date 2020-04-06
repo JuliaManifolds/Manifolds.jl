@@ -248,7 +248,13 @@ include("group_utils.jl")
             x2 = copy(x)
             identity!(G, x2, x)
             x3 = copy(x)
-            invoke(identity!, Tuple{AbstractGroupManifold{Manifolds.MultiplicationOperation}, Any, AbstractMatrix}, G, x3, x)
+            invoke(
+                identity!,
+                Tuple{AbstractGroupManifold{ℝ,Manifolds.MultiplicationOperation}, Any, AbstractMatrix},
+                G,
+                x3,
+                x,
+            )
             @test isapprox(G, x2, x3)
         end
     end
