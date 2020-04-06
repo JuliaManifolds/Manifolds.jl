@@ -99,7 +99,7 @@ space at `p`.
 CotangentSpaceAtPoint(M::Manifold, p) = VectorSpaceAtPoint(CotangentBundleFibers(M), p)
 
 """
-    VectorBundle{TVS<:VectorSpaceType,TM<:Manifold,𝔽} <: Manifold{𝔽}
+    VectorBundle{𝔽,TVS<:VectorSpaceType,TM<:Manifold{𝔽}} <: Manifold{𝔽}
 
 Vector bundle on a [`Manifold`](@ref) `M` of type [`VectorSpaceType`](@ref).
 
@@ -107,21 +107,21 @@ Vector bundle on a [`Manifold`](@ref) `M` of type [`VectorSpaceType`](@ref).
 
     VectorBundle(M::Manifold, type::VectorSpaceType)
 """
-struct VectorBundle{TVS<:VectorSpaceType,TM<:Manifold,𝔽} <: Manifold{𝔽}
+struct VectorBundle{𝔽,TVS<:VectorSpaceType,TM<:Manifold{𝔽}} <: Manifold{𝔽}
     type::TVS
     manifold::TM
     fiber::VectorBundleFibers{TVS,TM}
 end
 
 function VectorBundle(fiber::TVS, M::TM) where {TVS<:VectorSpaceType,TM<:Manifold{𝔽}} where 𝔽
-    return VectorBundle{TVS,TM,𝔽}(fiber, M, VectorBundleFibers(fiber, M))
+    return VectorBundle{𝔽,TVS,TM}(fiber, M, VectorBundleFibers(fiber, M))
 end
 
-const TangentBundle{M} = VectorBundle{TangentSpaceType,M} where {M<:Manifold}
+const TangentBundle{𝔽,M} = VectorBundle{𝔽,TangentSpaceType,M} where {𝔽,M<:Manifold{𝔽}}
 
 TangentBundle(M::Manifold) = VectorBundle(TangentSpace, M)
 
-const CotangentBundle{M} = VectorBundle{CotangentSpaceType,M} where {M<:Manifold}
+const CotangentBundle{𝔽,M} = VectorBundle{𝔽,CotangentSpaceType,M} where {𝔽,M<:Manifold{𝔽}}
 
 CotangentBundle(M::Manifold) = VectorBundle(CotangentSpace, M)
 

@@ -89,8 +89,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
         end
     end
 
-    @test TangentBundle{Sphere{2}} == VectorBundle{Manifolds.TangentSpaceType, Sphere{2}}
-    @test CotangentBundle{Sphere{2}} == VectorBundle{Manifolds.CotangentSpaceType, Sphere{2}}
+    @test TangentBundle{ℝ,Sphere{2,ℝ}} == VectorBundle{ℝ,Manifolds.TangentSpaceType,Sphere{2,ℝ}}
+    @test CotangentBundle{ℝ,Sphere{2,ℝ}} == VectorBundle{ℝ,Manifolds.CotangentSpaceType,Sphere{2,ℝ}}
 
     @test base_manifold(TangentBundle(M)) == M
     @testset "spaces at point" begin
