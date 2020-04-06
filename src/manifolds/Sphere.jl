@@ -416,7 +416,7 @@ function uniform_distribution(M::AbstractSphere, p)
     return ProjectedPointDistribution(M, d, project!, p)
 end
 
-@doc doc"""
+@doc raw"""
     vector_transport_to(M::AbstractSphere, p, X, q, ::ParallelTransport)
 
 Compute the parallel transport on the [`Sphere`](@ref) of the tangent vector `X` at `p`

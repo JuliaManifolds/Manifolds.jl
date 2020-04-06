@@ -3,14 +3,14 @@
 
 The (relative interior of) the probability simplex is the set
 ````math
-𝒮^{n} := \bigl\{ p \in ℝ^{n+1}\ \big|\ p_i > 0 \text{for all} i=1,…,n+1
-\text{ and } ⟨𝟙,p⟩ = \sum_{i=1}^{n+1} p_i = 1\bigr\},
+𝒮^{n} := \biggl\{ p \in ℝ^{n+1}\ \big|\ p_i > 0 \text{ for all } i=1,…,n+1,
+\text{ and } ⟨\mathbb{1},p⟩ = \sum_{i=1}^{n+1} p_i = 1\biggr\},
 ````
-where $𝟙=(1,…,1)^\mathrm{T}\in ℝ^{n+1}$ denotes the vector containing only ones.
+where $\mathbb{1}=(1,…,1)^{\mathrm{T}}\in ℝ^{n+1}$ denotes the vector containing only ones.
 
 The tangent space is given by
 ````math
-T_p𝒮 = \bigl\{ X \in ℝ^{n+1}\ \big|\ ⟨𝟙,X⟩ = \sum_{i=1}^{n+1} X_i = 0 \bigr\}
+T_p𝒮 = \biggl\{ X \in ℝ^{n+1}\ \big|\ ⟨\mathbb{1},X⟩ = \sum_{i=1}^{n+1} X_i = 0 \biggr\}
 ````
 
 This implementation follows the notation in [^ÅströmPetraSchmitzerSchnörr2017]
@@ -104,7 +104,7 @@ decorated_manifold(M::ProbabilitySimplex) = Euclidean(representation_size(M)...;
 Compute the sistance of two points on the [`ProbabilitySimplex`](@ref) `M`.
 The formula reads
 ````math
-d_{𝒮}(p,q) = 2\arccos\Bigl( \sum_{i=1}^{n+1} \sqrt{p_iq_i})
+d_{𝒮}(p,q) = 2\arccos \biggl( \sum_{i=1}^{n+1} \sqrt{p_i q_i} \biggr)
 ````
 """
 distance(::ProbabilitySimplex,p,q) = 2*arccos(sum(sqrt.(p.*q)))
@@ -118,13 +118,16 @@ embed!(M::ProbabilitySimplex, Y, p, X) = (Y .= X)
 Compute the exponential map on the probability simplex.
 
 ````math
-\exp_pX = \frac{1}{2}\bigl(p+\frac{1}{\lVert X_p \rVert^2}X_p^2\bigr)
-+ \frac{1}{2}\bigl(p - \frac{1}{\lVert X_p \rVert^2}X_p^2)\cos(\lVertX_p\rVert^2)
+\exp_pX = \frac{1}{2}\Bigl(p+\frac{1}{\lVert X_p \rVert^2}X_p^2\Bigr)
++ \frac{1}{2}\Bigl(p - \frac{1}{\lVert X_p \rVert^2}X_p^2\Bigr)\cos(\lVert X_p\rVert)
 + \frac{1}{\lVert Xp \rVert}\sqrt{p}\sin(\lVert X_p\rVert),
 ````
+
 where $X_p = \frac{X}{\sqrt{p}}$, with its division meant elementwise, as well as for the
 operations $X_p^2$ and $\sqrt{p}$.
 """
+exp(::ProbabilitySimplex, ::Any...)
+
 function exp!(::ProbabilitySimplex, q, p, X)
     Xp = X./sqrt.(p)
     Xp_n = Xp./norm(Xp)
@@ -149,19 +152,51 @@ inner(::ProbabilitySimplex, p, X, Y) =
 Compute the logarithmic map of `p` and `q` on the [`ProbabilitySimplex`](@ref) `M`.
 
 ````math
-\log_pq = \frac{d_{𝒮}(p,q)}
+\log_pq = \frac{d_{𝒮}(p,q)}{\sqrt{1-⟨\sqrt{p},\sqrt{q}⟩}}(\sqrt{pq} - ⟨\sqrt{p},\sqrt{q}⟩p),
 ````
+
+where $\sqrt{p}$ is meant elementwise.
 """
+log(::ProbabilitySimplex, ::Any...)
+
 function log!(M::ProbabilitySimplex, X, p, q)
     s = dot(sqrt.(p),sqrt.(q))
     X .= distance(M,p,q)./(1-s^2)*(sqrt.(p.*q) - s*p )
     return X
 end
 
+@doc raw"""
+    manifold_dimension(M::ProbabilitySimplex{n})
+
+Returns the manifodl dimension of the probability siomplex in $ℝ^{n+1}$, i.e.
+````math
+    \dim_{𝒮} = n.
+````
+"""
 manifold_dimension(::ProbabilitySimplex{n}) where {n} = n
+
+@doc raw"""
+    project(M::ProbabilitySimplex, p, Y)
+
+project `Y` from the embedding onto the tangent space at `p` on
+the [`ProbabilitySimplex`](@ref) `M`. The formula reads
+
+````math
+\operatorname{proj}_{𝒮}(p,Y) = p\bigl(Y - ⟨p,Y⟩\mathbb{1}),
+````
+
+where multiplication is meant elementwise and $\mathbb{1}$ is the vector of ones.
+"""
+project(::ProbabilitySimplex, ::Any, ::Any)
 
 project!(::ProbabilitySimplex, X, p, Y) = X .= (p.*( Y .- dot(p,Y)))
 
+@doc raw"""
+    representation_size(::ProbabilitySimplex{n})
+
+return the representation size of points in the $n$-dimensional probability simplex,
+i.e. an array size of `(n+1,)`.
+"""
 representation_size(::ProbabilitySimplex{n}) where {n} = (n+1,)
 
 @doc raw"""
