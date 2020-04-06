@@ -181,6 +181,7 @@ include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Grassmann.jl")
 include("manifolds/Hyperbolic.jl")
+include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/SkewSymmetric.jl")
 include("manifolds/Stiefel.jl")
@@ -235,6 +236,7 @@ export Euclidean,
     Hyperbolic,
     Lorentz,
     Oblique,
+    ProbabilitySimplex,
     Rotations,
     SkewSymmetricMatrices,
     Sphere,

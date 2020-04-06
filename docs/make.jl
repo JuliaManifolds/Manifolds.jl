@@ -21,6 +21,7 @@ makedocs(
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
                 "Lorentzian manifold" => "manifolds/lorentz.md",
                 "Oblique manifold" => "manifolds/oblique.md",
+                "Probability simplex" => "manifolds/probabilitysimplex.md",
                 "Rotations" => "manifolds/rotations.md",
                 "Skew-symmetric matrices" => "manifolds/skewsymmetric.md",
                 "Sphere" => "manifolds/sphere.md",

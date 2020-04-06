@@ -3,8 +3,8 @@
 
 The (relative interior of) the probability simplex is the set
 ````math
-𝒮^{n} := \bigl\{ p \in ℝ^{n+1}\ \big| p_i > 0 \text{for all} i=1,…,n+1
-\text{ and } ⟨𝟙,p⟩ = \sum_{i=1}^{n+1} p_i = 1},
+𝒮^{n} := \bigl\{ p \in ℝ^{n+1}\ \big|\ p_i > 0 \text{for all} i=1,…,n+1
+\text{ and } ⟨𝟙,p⟩ = \sum_{i=1}^{n+1} p_i = 1\bigr\},
 ````
 where $𝟙=(1,…,1)^\mathrm{T}\in ℝ^{n+1}$ denotes the vector containing only ones.
 
@@ -15,7 +15,7 @@ T_p𝒮 = \bigl\{ X \in ℝ^{n+1}\ \big|\ ⟨𝟙,X⟩ = \sum_{i=1}^{n+1} X_i = 
 
 This implementation follows the notation in [^ÅströmPetraSchmitzerSchnörr2017]
 
-[^ÅströmPetraSchmitzerSchnörr2017]
+[^ÅströmPetraSchmitzerSchnörr2017]:
     > F. Åström, S. Petra, B. Schmitzer, C. Schnörr: “Image Labeling by Assignment”,
     > Journal of Mathematical Imaging and Vision, 58(2), pp. 221–238, 2017.
     > doi: [10.1007/s10851-016-0702-4](https://doi.org/10.1007/s10851-016-0702-4)
@@ -32,7 +32,7 @@ Check whether `p` is a valid point on the [`ProbabilitySimplex`](@ref) `M`, i.e.
 the embedding with positive entries that sum to one
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_manifold_point(M::AbstractSphere, p; kwargs...)
+function check_manifold_point(M::ProbabilitySimplex, p; kwargs...)
     mpv = invoke(
         check_manifold_point,
         Tuple{(typeof(get_embedding(M))), typeof(p)},
@@ -67,7 +67,7 @@ The optional parameter `check_base_point` indicates, whether to call
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(
-    M::AbstractSphere,
+    M::ProbabilitySimplex,
     p,
     X;
     check_base_point = true,
@@ -138,7 +138,7 @@ end
 Compute the inner product of two tangent vectors `X`, `Y` from the tangent space $T_p𝒮$ at
 `p`. The formula reads
 ````math
-g_p(X,Y) = \sum_{i=1}^{n+1} frac{X_iY_i}{p}
+g_p(X,Y) = \sum_{i=1}^{n+1}\frac{X_iY_i}{p}
 ````
 """
 inner(::ProbabilitySimplex, p, X, Y) =
@@ -169,7 +169,7 @@ representation_size(::ProbabilitySimplex{n}) where {n} = (n+1,)
 
 Compute a first order approximation by projection. The formula reads
 ````math
-\operatorname{retr}_p X = \frac{p\e^X}{⟨p,\e^X⟩},
+\operatorname{retr}_p X = \frac{p\mathrm{e}^X}{⟨p,\mathrm{e}^X⟩},
 ````
 where multiplication, exponentiation and division are meant elementwise.
 """
