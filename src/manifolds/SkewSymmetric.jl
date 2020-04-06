@@ -1,11 +1,11 @@
 @doc raw"""
-    SkewSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{TransparentIsometricEmbedding}
+    SkewSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
 
 The [`Manifold`](@ref) $ \operatorname{SkewSym}(n)$ consisting of the real- or
 complex-valued skew-symmetric matrices of size $n × n$, i.e. the set
 
 ````math
-\operatorname{SkewSym}(n) = \bigl\{p  ∈ 𝔽^{n × n} \big| p^{\mathrm{H}} = -p \bigr\},
+\operatorname{SkewSym}(n) = \bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = -p \bigr\},
 ````
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
 and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
@@ -21,7 +21,7 @@ which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::
 
 Generate the manifold of $n × n$ symmetric matrices.
 """
-struct SkewSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{TransparentIsometricEmbedding} end
+struct SkewSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
 
 function SkewSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
     SkewSymmetricMatrices{n,field}()
@@ -130,7 +130,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℂ},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -176,7 +176,7 @@ function get_vector!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℂ},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)

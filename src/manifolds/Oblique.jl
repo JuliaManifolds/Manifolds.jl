@@ -1,7 +1,7 @@
 @doc raw"""
-    Oblique{N,M} <: AbstractPowerManifold
+    Oblique{N,M,𝔽} <: AbstractPowerManifold{𝔽}
 
-The oblique manifold $\mathcal{OB}(n,m)$ is the set of real-valued matrices with unit norm
+The oblique manifold $\mathcal{OB}(n,m)$ is the set of 𝔽-valued matrices with unit norm
 column endowed with the metric from the embedding. This yields exactly the same metric as
 considering the product metric of the unit norm vectors, i.e. [`PowerManifold`](@ref) of the
 $(n-1)$-dimensional [`Sphere`](@ref).
@@ -16,7 +16,7 @@ The [`Sphere`](@ref) is stored internally within `M.manifold`, such that all fun
 Generate the manifold of matrices $\mathbb R^{n × m}$ such that the $m$ columns are unit
 vectors, i.e. from the [`Sphere`](@ref)`(n-1)`.
 """
-struct Oblique{N,M,𝔽,S} <: AbstractPowerManifold{Sphere{S,𝔽},ArrayPowerRepresentation} where {N,M}
+struct Oblique{N,M,𝔽,S} <: AbstractPowerManifold{𝔽,Sphere{S,𝔽},ArrayPowerRepresentation} where {N,M}
     manifold::Sphere{S,𝔽}
 end
 
@@ -79,7 +79,7 @@ end
 
 get_iterator(M::Oblique{n,m}) where {n,m} = 1:m
 
-@generated manifold_dimension(::Oblique{n,m}) where {n,m} = (n-1) * m
+@generated manifold_dimension(::Oblique{n,m,𝔽}) where {n,m,𝔽} = (n* real_dimension(𝔽) - 1) * m
 
 @generated representation_size(::Oblique{n,m}) where {n,m} = (n, m)
 

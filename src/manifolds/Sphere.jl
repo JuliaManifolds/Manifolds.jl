@@ -1,10 +1,10 @@
 """
-    AbstractSphere{𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}
+    AbstractSphere{𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
 
 An abstract type to represent a unit sphere that is represented isometrically in the embedding.
 """
 abstract type AbstractSphere{𝔽} <:
-    AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} where {𝔽<:AbstractNumbers} end
+    AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
 @doc raw"""
     Sphere{n,𝔽} <: AbstractSphere{𝔽}
@@ -192,7 +192,7 @@ end
 
 flat!(M::AbstractSphere, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{T,ℝ}) where {T,n}
+function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) where {n}
     A = zeros(n+1, n+1)
     A[1, :] = transpose(p)
     A[2, :] = transpose(B.frame_direction)

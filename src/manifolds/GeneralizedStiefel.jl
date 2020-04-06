@@ -1,12 +1,12 @@
 @doc doc"""
-    GeneralizedStiefel{n,k,B,T} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
+    GeneralizedStiefel{n,k,𝔽,B} <: AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
 
 The Generalized Stiefel manifold consists of all $n\times k$, $n\geq k$ orthonormal
 matrices w.r.t. an arbitrary scalar product with symmetric positive definite matrix
 $B\in R^{n × n}$, i.e.
 
 ````math
-\operatorname{St}(n,k,B) = \{ p \in \mathbb F^{n × k} : p^{\mathrm{H}} B p = I_k \},
+\operatorname{St}(n,k,B) = \bigl\{ p \in \mathbb F^{n × k}\ \big|\ p^{\mathrm{H}} B p = I_k \bigr\},
 ````
 
 where $𝔽 ∈ \{ℝ, ℂ\}$,
@@ -35,8 +35,8 @@ The manifold is named after
 Generate the (real-valued) Generalized Stiefel manifold of $n\times k$ dimensional
 orthonormal matrices with scalar product `B`.
 """
-struct GeneralizedStiefel{n,k,TB<:AbstractMatrix,F} <:
-       AbstractEmbeddedManifold{DefaultEmbeddingType}
+struct GeneralizedStiefel{n,k,𝔽,TB<:AbstractMatrix} <:
+       AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
     B::TB
 end
 
@@ -44,9 +44,9 @@ function GeneralizedStiefel(
     n::Int,
     k::Int,
     B::AbstractMatrix = Matrix{Float64}(I, n, n),
-    F::AbstractNumbers = ℝ,
+    𝔽::AbstractNumbers = ℝ,
 )
-    return GeneralizedStiefel{n,k,typeof(B),F}(B)
+    return GeneralizedStiefel{n,k,𝔽,typeof(B)}(B)
 end
 
 @doc doc"""
@@ -57,7 +57,7 @@ i.e. that it has the right [`AbstractNumbers`](@ref) type and $x^{\mathrm{H}}Bx$
 is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
-function check_manifold_point(M::GeneralizedStiefel{n,k,B,𝔽}, p; kwargs...) where {n,k,B,𝔽}
+function check_manifold_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
     mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     c = p' * M.B * p
@@ -80,7 +80,7 @@ it (approximately) holds that $p^{\mathrm{H}}BX + X^{\mathrm{H}}Bp = 0$, where
 `kwargs...` is passed to the `isapprox`.
 """
 function check_tangent_vector(
-    M::GeneralizedStiefel{n,k,B,𝔽},
+    M::GeneralizedStiefel{n,k,𝔽},
     p,
     X;
     check_base_point = true,
@@ -108,7 +108,7 @@ function check_tangent_vector(
     end
 end
 
-decorated_manifold(M::GeneralizedStiefel{N,K,B,𝔽}) where {N,K,B,𝔽} = Euclidean(N, K; field = 𝔽)
+decorated_manifold(M::GeneralizedStiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
 
 embed!(::GeneralizedStiefel, q, p) = (q .= p)
 
@@ -143,11 +143,11 @@ The dimension is given by
 \end{aligned}
 ````
 """
-function manifold_dimension(::GeneralizedStiefel{n,k,B,ℝ}) where {n,k,B}
+function manifold_dimension(::GeneralizedStiefel{n,k,ℝ}) where {n,k}
     return n * k - div(k * (k + 1), 2)
 end
-manifold_dimension(::GeneralizedStiefel{n,k,B,ℂ}) where {n,k,B} = 2 * n * k - k * k
-manifold_dimension(::GeneralizedStiefel{n,k,B,ℍ}) where {n,k,B} = 4 * n * k - k * (2k - 1)
+manifold_dimension(::GeneralizedStiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
+manifold_dimension(::GeneralizedStiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
 
 @doc doc"""
     project(M::GeneralizedStiefel,p)
@@ -211,8 +211,8 @@ function retract!(M::GeneralizedStiefel, q, p, X, ::ProjectionRetraction)
     return q
 end
 
-function show(io::IO, M::GeneralizedStiefel{n,k,B,F}) where {n,k,B,F}
-    print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(F))")
+function show(io::IO, M::GeneralizedStiefel{n,k,𝔽}) where {n,k,𝔽}
+    print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽))")
 end
 
 

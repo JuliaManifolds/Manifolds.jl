@@ -26,6 +26,7 @@ represented as affine matrices with size `(n + 1, n + 1)` (see [`affine_matrix`]
 which the group operation is [`MultiplicationOperation`](@ref).
 """
 const SpecialEuclidean{N} = SemidirectProductGroup{
+    ℝ,
     TranslationGroup{Tuple{N},ℝ},
     SpecialOrthogonal{N},
     RotationAction{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N},LeftAction},

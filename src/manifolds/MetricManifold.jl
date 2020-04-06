@@ -13,7 +13,7 @@ if VERSION ≥ v"1.3"
 end
 
 """
-    MetricManifold{M<:Manifold,G<:Metric} <: AbstractDecoratorManifold
+    MetricManifold{𝔽,M<:Manifold{𝔽},G<:Metric} <: AbstractDecoratorManifold{𝔽}
 
 Equip a [`Manifold`](@ref) explicitly with a [`Metric`](@ref) `G`.
 
@@ -25,11 +25,12 @@ the exponential map and this is implemented directly (without solving the ode),
 you can of course still implement that directly.
 
 # Constructor
+
     MetricManifold(M, G)
 
 Generate the [`Manifold`](@ref) `M` as a manifold with the [`Metric`](@ref) `G`.
 """
-struct MetricManifold{M<:Manifold,G<:Metric} <: AbstractDecoratorManifold
+struct MetricManifold{𝔽,M<:Manifold{𝔽},G<:Metric} <: AbstractDecoratorManifold{𝔽}
     manifold::M
     metric::G
 end
@@ -286,7 +287,7 @@ function is_default_metric(M::MetricManifold)
     return _extract_val(default_metric_dispatch(M))
 end
 
-function convert(T::Type{MetricManifold{MT,GT}}, M::MT) where {MT,GT}
+function convert(T::Type{MetricManifold{𝔽,MT,GT}}, M::MT) where {𝔽,MT,GT}
     return _convert_with_default(M, GT, default_metric_dispatch(M, GT()))
 end
 

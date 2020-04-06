@@ -1,10 +1,7 @@
 @doc raw"""
-    ProductManifold{TM<:Tuple, TRanges<:Tuple, TSizes<:Tuple} <: Manifold
+    ProductManifold{𝔽,TM<:Tuple} <: Manifold{𝔽}
 
 Product manifold $M_1 × M_2 × …  × M_n$ with product geometry.
-`TRanges` and `TSizes` statically define the relationship between representation
-of the product manifold and representations of point, tangent vectors
-and cotangent vectors of respective manifolds.
 
 # Constructor
 
@@ -14,11 +11,15 @@ generates the product manifold $M_1 × M_2 × … × M_n$.
 Alternatively, the same manifold can be contructed using the `×` operator:
 `M_1 × M_2 × M_3`.
 """
-struct ProductManifold{TM<:Tuple} <: Manifold
+struct ProductManifold{𝔽,TM<:Tuple} <: Manifold{𝔽}
     manifolds::TM
 end
 
-ProductManifold(manifolds::Manifold...) = ProductManifold{typeof(manifolds)}(manifolds)
+function ProductManifold(manifolds::Manifold...)
+    𝔽 = ManifoldsBase._unify_number_systems((number_system.(manifolds))...)
+    return ProductManifold{𝔽,typeof(manifolds)}(manifolds)
+end
+
 ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
 
 const PRODUCT_BASIS_LIST = [
@@ -40,10 +41,7 @@ struct ProductBasisData{T<:Tuple}
 end
 
 const PRODUCT_BASIS_LIST_CACHED = [
-    CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
-    CachedBasis{<:ManifoldsBase.AbstractOrthogonalBasis{ℝ},<:ProductBasisData},
-    CachedBasis{<:ManifoldsBase.AbstractOrthonormalBasis{ℝ},<:ProductBasisData},
-    CachedBasis{<:AbstractBasis{ℂ},<:ProductBasisData},
+    CachedBasis,
 ]
 
 """
@@ -203,7 +201,10 @@ function cross(M1::ProductManifold, M2::ProductManifold)
     return ProductManifold(M1.manifolds..., M2.manifolds...)
 end
 
-function det_local_metric(M::MetricManifold{ProductManifold,ProductMetric}, p::ProductArray)
+function det_local_metric(
+    M::MetricManifold{ProductMetric,𝔽,ProductManifold{𝔽}},
+    p::ProductArray
+) where {𝔽}
     dets = map(det_local_metric, M.manifolds, submanifold_components(M, p))
     return prod(dets)
 end
@@ -296,8 +297,8 @@ function get_coordinates(
     M::ProductManifold,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+) where {𝔽}
     reps = map(
         get_coordinates,
         M.manifolds,
@@ -310,7 +311,7 @@ end
 
 for BT in PRODUCT_BASIS_LIST_CACHED
     eval(quote
-        @invoke_maker 4 CachedBasis{<:AbstractBasis,<:ProductBasisData} get_coordinates(
+        @invoke_maker 4 (CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData} where 𝔽) get_coordinates(
                 M::ProductManifold,
                 p,
                 X,
@@ -359,8 +360,8 @@ function get_coordinates!(
     Xⁱ,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+) where {𝔽}
     dim = manifold_dimension(M)
     @assert length(Xⁱ) == dim
     i = one(dim)
@@ -382,7 +383,7 @@ end
 
 for BT in PRODUCT_BASIS_LIST_CACHED
     eval(quote
-        @invoke_maker 5 CachedBasis{<:AbstractBasis,<:ProductBasisData} get_coordinates!(
+        @invoke_maker 5 (CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData} where 𝔽) get_coordinates!(
                 M::ProductManifold,
                 Xⁱ,
                 p,
@@ -410,8 +411,8 @@ function get_vector(
     M::ProductManifold,
     p::ProductRepr,
     X,
-    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+) where {𝔽}
     N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
@@ -426,11 +427,11 @@ function get_vector(
     return ProductRepr(parts)
 end
 eval(quote
-    @invoke_maker 4 CachedBasis{<:AbstractBasis,<:ProductBasisData} get_vector(
+    @invoke_maker 4 (CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData} where 𝔽) get_vector(
         M::ProductManifold,
         p::ProductRepr,
         X,
-        B::CachedBasis{<:AbstractBasis{ℝ},<:ProductBasisData},
+        B::CachedBasis{ℝ,<:AbstractBasis{ℝ},<:ProductBasisData},
     )
 end)
 eval(quote
@@ -504,8 +505,8 @@ function get_vector!(
     X,
     p,
     Xⁱ,
-    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+) where {𝔽}
     N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
@@ -541,12 +542,21 @@ for BT in PRODUCT_BASIS_LIST
         )
     end)
 end
+function get_vector!(
+    M::ProductManifold,
+    Y,
+    p,
+    X,
+    B::CachedBasis,
+)
+    error("get_vector! called on $M with an incorrect CachedBasis. Expected a CachedBasis with ProductBasisData, given $B")
+end
 
 function get_vectors(
     M::ProductManifold,
     p::ProductRepr,
-    B::CachedBasis{<:AbstractBasis,<:ProductBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+) where {𝔽}
     N = number_of_components(M)
     xparts = submanifold_components(p)
     BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.data.parts))
@@ -723,7 +733,7 @@ end
 
 Calculate the number of manifolds multiplied in the given [`ProductManifold`](@ref) `M`.
 """
-number_of_components(M::ProductManifold{<:NTuple{N,Any}}) where {N} = N
+number_of_components(M::ProductManifold{𝔽,<:NTuple{N,Any}}) where {𝔽,N} = N
 
 function ProductFVectorDistribution(
     type::VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
@@ -923,8 +933,8 @@ end
 function show(
     io::IO,
     mime::MIME"text/plain",
-    B::CachedBasis{T,D,𝔽},
-) where {T<:AbstractBasis,D<:ProductBasisData,𝔽}
+    B::CachedBasis{𝔽,T,D},
+) where {𝔽,T<:AbstractBasis{𝔽},D<:ProductBasisData}
     println(io, "$(T()) for a product manifold")
     for (i, cb) = enumerate(B.data.parts)
         println(io, "Basis for component $i:")
@@ -950,7 +960,7 @@ from the first and the third factor is returned.
 
 The version with `AbstractVector` is not type-stable, for better preformance use `Val`.
 """
-submanifold(M::ProductManifold, i::Val) = ProductManifold(select_from_tuple(M.manifolds, i))
+submanifold(M::ProductManifold, i::Val) = ProductManifold(select_from_tuple(M.manifolds, i)...)
 submanifold(M::ProductManifold, i::AbstractVector) = submanifold(M, Val(tuple(i...)))
 
 support(d::ProductPointDistribution) = MPointSupport(d.manifold)

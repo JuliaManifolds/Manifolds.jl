@@ -5,22 +5,22 @@ import Manifolds: mean!, median!
 
 include("utils.jl")
 
-struct TestEuclidean{N} <: Manifold end
+struct TestEuclidean{N} <: Manifold{ℝ} end
 struct TestEuclideanMetric <: Metric end
 
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
-function Manifolds.local_metric(M::MetricManifold{<:TestEuclidean,<:TestEuclideanMetric}, x)
+function Manifolds.local_metric(M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric}, x)
     return Diagonal(1.0:manifold_dimension(M))
 end
 
-struct TestSphere{N,T} <: Manifold
+struct TestSphere{N,T} <: Manifold{ℝ}
     r::T
 end
 
 struct TestSphericalMetric <: Metric end
 
 Manifolds.manifold_dimension(::TestSphere{N}) where {N} = N
-function Manifolds.local_metric(M::MetricManifold{<:TestSphere,<:TestSphericalMetric}, x)
+function Manifolds.local_metric(M::MetricManifold{ℝ,<:TestSphere,<:TestSphericalMetric}, x)
     r = base_manifold(M).r
     d = allocate(x)
     d[1] = r^2
@@ -29,7 +29,7 @@ function Manifolds.local_metric(M::MetricManifold{<:TestSphere,<:TestSphericalMe
 end
 sph_to_cart(θ, ϕ) = [cos(ϕ)*sin(θ), sin(ϕ)*sin(θ), cos(θ)]
 
-struct BaseManifold{N} <: Manifold end
+struct BaseManifold{N} <: Manifold{ℝ} end
 struct BaseManifoldMetric{M} <: Metric end
 struct DefaultBaseManifoldMetric <: Metric end
 struct NotImplementedMetric <: Metric end
@@ -46,8 +46,8 @@ Manifolds.injectivity_radius(::BaseManifold, ::AbstractRetractionMethod) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::ExponentialRetraction) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::Any, ::AbstractRetractionMethod) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::Any, ::ExponentialRetraction) = Inf
-Manifolds.local_metric(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}},x) where N = 2*one(x*x')
-Manifolds.exp!(M::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x, v) where N = exp!(base_manifold(M), y, x, v)
+Manifolds.local_metric(::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},x) where N = 2*one(x*x')
+Manifolds.exp!(M::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}}, y, x, v) where N = exp!(base_manifold(M), y, x, v)
 Manifolds.vector_transport_to!(::BaseManifold, vto, x, v, y, ::ParallelTransport) = (vto .= v)
 Manifolds.get_basis(::BaseManifold{N},x,B::DefaultOrthonormalBasis) where {N} = CachedBasis(B, [(Matrix{eltype(x)}(I, N, N)[:,i]) for i in 1:N])
 Manifolds.get_coordinates!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
@@ -57,8 +57,8 @@ Manifolds.projected_distribution(M::BaseManifold, d) = ProjectedPointDistributio
 Manifolds.projected_distribution(M::BaseManifold, d, x) = ProjectedPointDistribution(M, d, project!, x)
 Manifolds.mean!(::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...) = fill!(y, 1)
 Manifolds.median!(::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...) = fill!(y, 2)
-Manifolds.mean!(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N} = fill!(y, 3)
-Manifolds.median!(::MetricManifold{BaseManifold{N},BaseManifoldMetric{N}}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N} = fill!(y, 4)
+Manifolds.mean!(::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N} = fill!(y, 3)
+Manifolds.median!(::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N} = fill!(y, 4)
 
 function Manifolds.flat!(::BaseManifold, v::FVector{Manifolds.CotangentSpaceType}, x, w::FVector{Manifolds.TangentSpaceType})
     v.data .= 2 .* w.data

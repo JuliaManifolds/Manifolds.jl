@@ -65,7 +65,7 @@ function add_manifold_benchmarks()
     SUITE["manifolds"] = BenchmarkGroup()
 
     s2 = Manifolds.Sphere(2)
-    array_s2 = ArrayManifold(s2)
+    array_s2 = ValidationManifold(s2)
     r2 = Manifolds.Euclidean(2)
 
     pts_r2 = [Size(2)([1.0, 1.0]),
@@ -99,7 +99,7 @@ function add_manifold_benchmarks()
                  [Size(3)([1.0, 0.0, 0.0]),
                   Size(3)([0.0, 1.0, 0.0]),
                   Size(3)([0.0, 0.0, 1.0])],
-                 "ArrayManifold{Sphere{2}} -- SizedArray";
+                 "ValidationManifold{Sphere{2}} -- SizedArray";
                  test_tangent_vector_broadcasting = false)
 
     retraction_methods_rot = [Manifolds.PolarRetraction(),

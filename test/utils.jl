@@ -4,6 +4,7 @@ const TEST_STATIC_SIZED = false
 
 using Manifolds
 using ManifoldsBase
+using ManifoldsBase: number_of_coordinates
 
 using LinearAlgebra
 using Distributions
@@ -311,7 +312,6 @@ function test_manifold(M::Manifold, pts::AbstractVector;
             @test isa(b, CachedBasis)
             bvectors = get_vectors(M, p, b)
             N = length(bvectors)
-            @test real_dimension(number_system(btype)) * N == manifold_dimension(M)
 
             # test orthonormality
             for i in 1:N
@@ -347,7 +347,7 @@ function test_manifold(M::Manifold, pts::AbstractVector;
 
     for btype ∈ (basis_types_to_from..., basis_types_vecs...)
         p = pts[1]
-        N = manifold_dimension(M)
+        N = number_of_coordinates(M, btype)
         if !isa(btype, ProjectedOrthonormalBasis) &&
             (basis_has_specialized_diagonalizing_get || !isa(btype, DiagonalizingOrthonormalBasis))
 
@@ -378,15 +378,15 @@ function test_manifold(M::Manifold, pts::AbstractVector;
                 @test get_vector!(M, Xbi_s, p, Xb, btype) === Xbi_s
                 @test isapprox(M, p, X1, Xbi_s)
             end
-        end
     end
+end
 
     test_vee_hat && @testset "vee and hat" begin
         p = pts[1]
         q = pts[2]
         X = inverse_retract(M, p, q, default_inverse_retraction_method)
         Y = vee(M, p, X)
-        @test length(Y) == manifold_dimension(M)
+        @test length(Y) == number_of_coordinates(M, ManifoldsBase.VeeOrthogonalBasis())
         @test isapprox(M, p, X, hat(M, p, Y))
         Y2 = allocate(Y)
         vee_ret = vee!(M, Y2, p, X)

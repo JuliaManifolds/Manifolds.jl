@@ -6,6 +6,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
     @test_throws MethodError ProductManifold()
     M1 = Sphere(2)
     M2 = Euclidean(2)
+    @test (@inferred ProductManifold(M1, M2)) isa ProductManifold
     Mse = ProductManifold(M1, M2)
     @test Mse == M1 × M2
     @test Mse == ProductManifold(M1) × M2
@@ -358,5 +359,15 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
            0.0
            1.0
         """
+    end
+
+    @testset "Basis-related errors" begin
+        a = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
+        @test_throws ErrorException get_vector!(
+            Mse,
+            a,
+            ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0]),
+            [1.0, 2.0, 3.0, 4.0, 5.0],
+            CachedBasis(DefaultOrthonormalBasis(), []))
     end
 end

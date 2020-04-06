@@ -9,7 +9,7 @@ Pages = ["interface.md"]
 Depth = 2
 ```
 
-Additionally the [`AbstractDecoratorManifold`](@ref) is provided as well as the [`ArrayManifold`](@ref) as a specific example of such a decorator.
+Additionally the [`AbstractDecoratorManifold`](@ref) is provided as well as the [`ValidationManifold`](@ref) as a specific example of such a decorator.
 
 ## Types and functions
 
@@ -32,12 +32,12 @@ Order = [:type, :function]
 
 ## Allocation
 
-Non-mutating functions in `Manifolds.jl` are typically implemented using mutating variants.
+Non-mutating functions in `ManifoldsBase.jl` are typically implemented using mutating variants.
 Allocation of new points is performed using a custom mechanism that relies on the following functions:
 
 * [`allocate`](@ref) that allocates a new point or vector similar to the given one.
   This function behaves like `similar` for simple representations of points and vectors (for example `Array{Float64}`).
-  For more complex types, such as nested representations of [`PowerManifold`](@ref) (see [`NestedPowerRepresentation`](@ref)), [`FVector`](@ref) types, checked types like [`ArrayMPoint`](@ref) and more it operates differently.
+  For more complex types, such as nested representations of [`PowerManifold`](@ref) (see [`NestedPowerRepresentation`](@ref)), [`FVector`](@ref) types, checked types like [`ValidationMPoint`](@ref) and more it operates differently.
   While `similar` only concerns itself with the higher level of nested structures, `allocate` maps itself through all levels of nesting until a simple array of numbers is reached and then calls `similar`.
   The difference can be most easily seen in the following example:
 
@@ -80,10 +80,11 @@ The main types are:
 * [`CachedBasis`](@ref), which stores (explicitly or implicitly) a precomputed basis at a certain point.
 
 The main functions are:
+
 * [`get_basis`](@ref) precomputes a basis at a certain point.
 * [`get_coordinates`](@ref) returns coordinates of a tangent vector.
 * [`get_vector`](@ref) returns a vector for the specified coordinates.
-* [`get_vectors`](@ref) returns a vector of basis vectors (calling it should be avoided for high-dimensional manifolds).
+* [`get_vectors`](@ref) returns a vector of basis vectors. Calling it should be avoided for high-dimensional manifolds.
 
 ```@autodocs
 Modules = [ManifoldsBase,Manifolds]
@@ -95,7 +96,7 @@ Order = [:type, :function]
 
 A decorator manifold extends the functionality of a [`Manifold`](@ref) in a semi-transparent way.
 It internally stores the [`Manifold`](@ref) it extends and by default for functions defined in the [`ManifoldsBase`](interface.md) it acts transparently in the sense that it passes all functions through to the base except those that it actually affects.
-For example, because the [`ArrayManifold`](@ref) affects nearly all functions, it overwrites nearly all functions, except a few like [`manifold_dimension`](@ref).
+For example, because the [`ValidationManifold`](@ref) affects nearly all functions, it overwrites nearly all functions, except a few like [`manifold_dimension`](@ref).
 On the other hand, the [`MetricManifold`](@ref) only affects functions that involve metrics, especially [`exp`](@ref) and [`log`](@ref) but not the [`manifold_dimension`](@ref).
 Contrary to the previous decorator, the [`MetricManifold`](@ref) does not overwrite functions.
 The decorator sets functions like [`exp`](@ref) and [`log`](@ref) to be implemented anew but required to be implemented when specifying a new metric.
@@ -120,14 +121,14 @@ Pages = ["DecoratorManifold.jl"]
 Order = [:macro, :type, :function]
 ```
 
-## ArrayManifold
+## ValidationManifold
 
-[`ArrayManifold`](@ref) is a simple decorator that “decorates” a manifold with tests that all involved arrays are correct. For example involved input and output paratemers are checked before and after running a function, repectively.
+[`ValidationManifold`](@ref) is a simple decorator that “decorates” a manifold with tests that all involved arrays are correct. For example involved input and output paratemers are checked before and after running a function, repectively.
 This is done by calling [`is_manifold_point`](@ref) or [`is_tangent_vector`](@ref) whenever applicable.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
-Pages = ["ArrayManifold.jl"]
+Pages = ["ValidationManifold.jl"]
 Order = [:macro, :type, :function]
 ```
 

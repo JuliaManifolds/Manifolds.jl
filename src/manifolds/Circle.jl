@@ -1,5 +1,5 @@
 @doc raw"""
-    Circle{𝔽} <: Manifold
+    Circle{𝔽} <: Manifold{𝔽}
 
 The circle $𝕊^1$ is a manifold here represented by
 real-valued points in $[-π,π)$ or complex-valued points $z ∈ ℂ$ of absolute value
@@ -9,10 +9,10 @@ $\lvert z\rvert = 1$.
     Circle(𝔽=ℝ)
 
 Generate the `ℝ`-valued Circle represented by angles, which
-alternatively can be set to use the [`AbstractNumbers`](@ref) `𝔽=ℂ` to obtain the `Circle`
-represented by `ℂ`-valued `Circle` of unit numbers.
+alternatively can be set to use the [`AbstractNumbers`](@ref) `𝔽=ℂ` to obtain the circle
+represented by `ℂ`-valued circle of unit numbers.
 """
-struct Circle{𝔽} <: Manifold where {𝔽<:AbstractNumbers} end
+struct Circle{𝔽} <: Manifold{𝔽} end
 
 Circle(𝔽::AbstractNumbers = ℝ) = Circle{𝔽}()
 
@@ -142,7 +142,7 @@ end
 """
     get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
-Return tangent vector coordinates in the Lie algebra of the circle.
+Return tangent vector coordinates in the Lie algebra of the [`Circle`](@ref).
 """
 function get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
     X, p = X[1], p[1]
@@ -194,7 +194,7 @@ end
 """
     get_vector(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
-Return tangent vector from the coordinates in the Lie algebra of the circle.
+Return tangent vector from the coordinates in the Lie algebra of the [`Circle`](@ref).
 """
 get_vector(M::Circle{ℂ}, p, X, B::AbstractBasis) = @SVector [1im * X[1] * p[1]]
 
@@ -314,6 +314,8 @@ mean(::Circle, x::Array{<:Real}; kwargs...) = sym_rem(sum(x))
 mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...) = sym_rem(sum(w .* x))
 
 @inline norm(::Circle, p, X) = sum(abs, X)
+
+number_of_coordinates(::Circle, ::AbstractBasis) = 1
 
 @doc raw"""
     project(M::Circle, p)

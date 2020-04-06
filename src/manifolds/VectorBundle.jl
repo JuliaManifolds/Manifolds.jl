@@ -99,25 +99,29 @@ space at `p`.
 CotangentSpaceAtPoint(M::Manifold, p) = VectorSpaceAtPoint(CotangentBundleFibers(M), p)
 
 """
-    VectorBundle(M::Manifold, type::VectorSpaceType)
+    VectorBundle{𝔽,TVS<:VectorSpaceType,TM<:Manifold{𝔽}} <: Manifold{𝔽}
 
-Vector bundle on manifold `M` of type `type`.
+Vector bundle on a [`Manifold`](@ref) `M` of type [`VectorSpaceType`](@ref).
+
+# Constructor
+
+    VectorBundle(M::Manifold, type::VectorSpaceType)
 """
-struct VectorBundle{TVS<:VectorSpaceType,TM<:Manifold} <: Manifold
+struct VectorBundle{𝔽,TVS<:VectorSpaceType,TM<:Manifold{𝔽}} <: Manifold{𝔽}
     type::TVS
     manifold::TM
     fiber::VectorBundleFibers{TVS,TM}
 end
 
-function VectorBundle(fiber::TVS, M::TM) where {TVS<:VectorSpaceType,TM<:Manifold}
-    return VectorBundle{TVS,TM}(fiber, M, VectorBundleFibers(fiber, M))
+function VectorBundle(fiber::TVS, M::TM) where {TVS<:VectorSpaceType,TM<:Manifold{𝔽}} where 𝔽
+    return VectorBundle{𝔽,TVS,TM}(fiber, M, VectorBundleFibers(fiber, M))
 end
 
-const TangentBundle{M} = VectorBundle{TangentSpaceType,M} where {M<:Manifold}
+const TangentBundle{𝔽,M} = VectorBundle{𝔽,TangentSpaceType,M} where {𝔽,M<:Manifold{𝔽}}
 
 TangentBundle(M::Manifold) = VectorBundle(TangentSpace, M)
 
-const CotangentBundle{M} = VectorBundle{CotangentSpaceType,M} where {M<:Manifold}
+const CotangentBundle{𝔽,M} = VectorBundle{𝔽,CotangentSpaceType,M} where {𝔽,M<:Manifold{𝔽}}
 
 CotangentBundle(M::Manifold) = VectorBundle(CotangentSpace, M)
 
@@ -316,8 +320,8 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData},
-) where {N}
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData},
+) where {𝔽}
      px, Vx = submanifold_components(M.manifold, p)
      VXM, VXF = submanifold_components(M.manifold, X)
      n = manifold_dimension(M.manifold)
@@ -337,21 +341,14 @@ for BT in [
         @invoke_maker 5 AbstractBasis get_coordinates!(M::VectorBundle, Y, p, X, B::$BT)
     end)
 end
-for BT in [
-    CachedBasis{<:AbstractBasis{ℝ},<:VectorBundleBasisData},
-    CachedBasis{<:ManifoldsBase.AbstractOrthogonalBasis{ℝ},<:VectorBundleBasisData},
-    CachedBasis{<:ManifoldsBase.AbstractOrthonormalBasis{ℝ},<:VectorBundleBasisData},
-    CachedBasis{<:AbstractBasis{ℂ},<:VectorBundleBasisData},
-]
-    eval(quote
-        @invoke_maker 5 CachedBasis{<:AbstractBasis,<:VectorBundleBasisData} get_coordinates!(
-                M::VectorBundle,
-                Y,
-                p,
-                X,
-                B::$BT,
-            )
-    end)
+function get_coordinates!(
+    M::VectorBundle,
+    Y,
+    p,
+    X,
+    B::CachedBasis,
+)
+    error("get_coordinates! called on $M with an incorrect CachedBasis. Expected a CachedBasis with VectorBundleBasisData, given $B")
 end
 
 function get_coordinates!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncached_bases) where {N}
@@ -370,8 +367,8 @@ function get_vector!(
     Y,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData},
-) where {N}
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData},
+) where {𝔽}
     n = manifold_dimension(M.manifold)
     xp1 = submanifold_component(p, Val(1))
     get_vector!(
@@ -397,8 +394,8 @@ end
 function get_vectors(
     M::VectorBundle,
     p,
-    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData},
+) where {𝔽}
     xp1 = submanifold_component(p, Val(1))
     zero_m = zero_tangent_vector(M.manifold, xp1)
     zero_f = zero_vector(M.fiber, xp1)

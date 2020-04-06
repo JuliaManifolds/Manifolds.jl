@@ -1,9 +1,9 @@
 @doc raw"""
-    FixedRankMatrices{m,n,k,𝔽} <: Manifold
+    FixedRankMatrices{m,n,k,𝔽} <: Manifold{𝔽}
 
 The manifold of $m × n$ real-valued or complex-valued matrices of fixed rank $k$, i.e.
 ````math
-\{ p ∈ 𝔽^{m × n} : \operatorname{rank}(p) = k \},
+\bigl\{ p ∈ 𝔽^{m × n}\ \big|\ \operatorname{rank}(p) = k \bigr\},
 ````
 where $𝔽 ∈ \{ℝ,ℂ\}$ and the rank is the number of linearly independent columns of a matrix.
 
@@ -42,7 +42,7 @@ Generate the manifold of `m`-by-`n` (`field`-valued) matrices of rank `k`.
     > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
-struct FixedRankMatrices{M,N,K,𝔽} <: Manifold end
+struct FixedRankMatrices{M,N,K,𝔽} <: Manifold{𝔽} end
 function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers = ℝ)
     return FixedRankMatrices{m,n,k,field}()
 end

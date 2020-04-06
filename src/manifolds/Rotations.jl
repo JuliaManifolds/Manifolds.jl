@@ -1,5 +1,5 @@
 @doc raw"""
-    Rotations{N} <: Manifold
+    Rotations{N} <: Manifold{ℝ}
 
 The special orthogonal manifold $\mathrm{SO}(n)$ represented by $n × n$
 real-valued orthogonal matrices with determinant $+1$ is the manifold of `Rotations`,
@@ -11,7 +11,7 @@ since these matrices represent all rotations of points in $ℝ^n$.
 
 Generate the $\mathrm{SO}(n) \subset ℝ^{n × n}$
 """
-struct Rotations{N} <: Manifold end
+struct Rotations{N} <: Manifold{ℝ} end
 
 Rotations(n::Int) = Rotations{n}()
 
@@ -504,7 +504,10 @@ end
 @doc raw"""
     manifold_dimension(M::Rotations)
 
-Return the dimension of the manifold $\mathrm{SO}(n)$, i.e. $\dim(\mathrm{SO}(n)) = \frac{n(n-1)}{2}$.
+Return the dimension of the manifold $\mathrm{SO}(n)$, i.e.
+```math
+\dim_{\mathrm{SO}(n)} = \frac{n(n-1)}{2}.
+```
 """
 manifold_dimension(M::Rotations{N}) where {N} = div(N * (N - 1), 2)
 

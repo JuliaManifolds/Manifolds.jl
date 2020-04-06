@@ -27,7 +27,9 @@ include("group_utils.jl")
         @test Manifolds.decorator_transparent_dispatch(group_log, G, x, x) === Val{:intransparent}()
         @test Manifolds.decorator_transparent_dispatch(translate_diff!, G, x, x, x, x, x) === Val{:intransparent}()
         @test base_group(G) === G
-
+        z = similar(x)
+        copyto!(z,eg)
+        @test z==eg.p
         if VERSION ≥ v"1.3"
             @test NotImplementedOperation(NotImplementedManifold()) === G
             @test (NotImplementedOperation())(NotImplementedManifold()) === G
@@ -35,7 +37,7 @@ include("group_utils.jl")
 
         @test_throws ErrorException allocate_result(G, get_vector, Identity(SpecialOrthogonal(3),x), v)
         @test_throws ErrorException allocate_result(G, get_coordinates, Identity(SpecialOrthogonal(3),x), v)
-        @test_throws ErrorException allocate_result(ArrayManifold(NotImplementedManifold()), get_coordinates, Identity(SpecialOrthogonal(3),x), v)
+        @test_throws ErrorException allocate_result(ValidationManifold(NotImplementedManifold()), get_coordinates, Identity(SpecialOrthogonal(3),x), v)
         @test_throws ErrorException base_group(MetricManifold(Euclidean(3), EuclideanMetric()))
         @test_throws ErrorException hat(Rotations(3), eg, [1, 2, 3])
         @test_throws ErrorException hat(GroupManifold(Rotations(3), NotImplementedOperation()), eg, [1, 2, 3])
@@ -246,7 +248,13 @@ include("group_utils.jl")
             x2 = copy(x)
             identity!(G, x2, x)
             x3 = copy(x)
-            invoke(identity!, Tuple{AbstractGroupManifold{Manifolds.MultiplicationOperation}, Any, AbstractMatrix}, G, x3, x)
+            invoke(
+                identity!,
+                Tuple{AbstractGroupManifold{ℝ,Manifolds.MultiplicationOperation}, Any, AbstractMatrix},
+                G,
+                x3,
+                x,
+            )
             @test isapprox(G, x2, x3)
         end
     end

@@ -1,5 +1,5 @@
 @doc raw"""
-    Euclidean{T<:Tuple,𝔽} <: Manifold
+    Euclidean{T<:Tuple,𝔽} <: Manifold{𝔽}
 
 Euclidean vector space.
 
@@ -20,7 +20,7 @@ The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
 [`real_dimension`](@ref) of the field $𝔽$.
 """
-struct Euclidean{N,𝔽} <: Manifold where {N<:Tuple, 𝔽<:AbstractNumbers} end
+struct Euclidean{N,𝔽} <: Manifold{𝔽} where {N<:Tuple} end
 
 function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
     return Euclidean{Tuple{n...},field}()
@@ -102,7 +102,7 @@ function check_tangent_vector(M::Euclidean{N,𝔽}, p, X; check_base_point = tru
     end
 end
 
-det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = one(eltype(p))
+det_local_metric(M::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}= one(eltype(p))
 
 """
     distance(M::Euclidean, p, q)
@@ -137,11 +137,11 @@ flat(::Euclidean, ::Any...)
 
 flat!(M::Euclidean, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_basis(M::Euclidean{<:Tuple,ℝ}, p, B::DefaultOrthonormalBasis)
+function get_basis(M::Euclidean, p, B::DefaultOrthonormalBasis{ℝ})
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     return CachedBasis(B,vecs)
 end
-function get_basis(M::Euclidean{<:Tuple,ℂ}, p, B::DefaultOrthonormalBasis)
+function get_basis(M::Euclidean{<:Tuple,ℂ}, p, B::DefaultOrthonormalBasis{ℂ})
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     return CachedBasis(B,[vecs; im * vecs])
 end
@@ -151,25 +151,25 @@ function get_basis(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates!(M::Euclidean{<:Tuple,ℝ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
+function get_coordinates!(M::Euclidean, Y, p, X, B::DefaultOrDiagonalizingBasis{ℝ})
     S = representation_size(M)
     PS = prod(S)
     copyto!(Y, reshape(X, PS))
     return Y
 end
-function get_coordinates!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
+function get_coordinates!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis{ℂ})
     S = representation_size(M)
     PS = prod(S)
-    Y .= [reshape(real(X), PS)..., reshape(imag(X), PS)...]
+    Y .= [reshape(real.(X), PS)..., reshape(imag(X), PS)...]
     return Y
 end
 
-function get_vector!(M::Euclidean{<:Tuple,ℝ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
+function get_vector!(M::Euclidean, Y, p, X, B::DefaultOrDiagonalizingBasis{ℝ})
     S = representation_size(M)
     Y .= reshape(X, S)
     return Y
 end
-function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
+function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis{ℂ})
     S = representation_size(M)
     N = div(length(X), 2)
     Y .= reshape(X[1:N] + im * X[N+1:end], S)
@@ -194,7 +194,7 @@ of arrays (or tensors) of size $n_1 × n_2  ×  …  × n_i$, i.e.
 g_p(X,Y) = \sum_{k ∈ I} \overline{X}_{k} Y_{k},
 ````
 where $I$ is the set of vectors $k ∈ ℕ^i$, such that for all
-$1 ≤ j ≤ i$ it holds $1 ≤ k_j ≤ n_j$.
+$1 ≤ j ≤ i$ it holds $1 ≤ k_j ≤ n_j$ and $\overline{\cdot}$ denotes the complex conjugate.
 
 For the special case of $i ≤ 2$, i.e. matrices and vectors, this simplifies to
 ````math
@@ -204,13 +204,15 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpo
 """
 inner(::Euclidean, ::Any...)
 @inline inner(::Euclidean, p, X, Y) = dot(X, Y)
-@inline inner(::MetricManifold{<:Manifold,EuclideanMetric}, p, X, Y) = dot(X, Y)
+@inline inner(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p, X, Y) where {𝔽} = dot(X, Y)
 
-inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = local_metric(M, p)
+function inverse_local_metric(M::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
+    return local_metric(M, p)
+end
 
 default_metric_dispatch(::Euclidean, ::EuclideanMetric) = Val(true)
 
-function local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, p)
+function local_metric(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
     return Diagonal(ones(SVector{size(p, 1),eltype(p)}))
 end
 
@@ -227,7 +229,7 @@ log(::Euclidean, ::Any...)
 
 log!(M::Euclidean, X, p, q) = (X .= q .- p)
 
-log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = zero(eltype(p))
+log_local_metric_density(M::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽} = zero(eltype(p))
 
 @generated _product_of_dimensions(::Euclidean{N}) where {N} = prod(N.parameters)
 
@@ -300,7 +302,7 @@ Compute the norm of a tangent vector `X` at `p` on the [`Euclidean`](@ref)
 in this case, just the (Frobenius) norm of `X`.
 """
 norm(::Euclidean, p, X) = norm(X)
-norm(::MetricManifold{<:Manifold,EuclideanMetric}, p, X) = norm(X)
+norm(::MetricManifold{ℝ,<:Manifold,EuclideanMetric}, p, X) = norm(X)
 
 """
     normal_tvector_distribution(M::Euclidean, p, σ)

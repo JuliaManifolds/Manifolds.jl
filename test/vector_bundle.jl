@@ -89,8 +89,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
         end
     end
 
-    @test TangentBundle{Sphere{2}} == VectorBundle{Manifolds.TangentSpaceType, Sphere{2}}
-    @test CotangentBundle{Sphere{2}} == VectorBundle{Manifolds.CotangentSpaceType, Sphere{2}}
+    @test TangentBundle{ℝ,Sphere{2,ℝ}} == VectorBundle{ℝ,Manifolds.TangentSpaceType,Sphere{2,ℝ}}
+    @test CotangentBundle{ℝ,Sphere{2,ℝ}} == VectorBundle{ℝ,Manifolds.CotangentSpaceType,Sphere{2,ℝ}}
 
     @test base_manifold(TangentBundle(M)) == M
     @testset "spaces at point" begin
@@ -131,5 +131,12 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test_throws ErrorException Manifolds.project!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws ErrorException zero_vector!(vbf, [1, 2, 3], [1, 2, 3])
         @test_throws ErrorException vector_space_dimension(vbf)
+        a = fill(0.0, 6)
+        @test_throws ErrorException get_coordinates!(
+            TangentBundle(M),
+            a,
+            ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0, 0.0]),
+            ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0, 1.0]),
+            CachedBasis(DefaultOrthonormalBasis(), []))
     end
 end
