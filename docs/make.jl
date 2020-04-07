@@ -2,7 +2,10 @@ using Manifolds, ManifoldsBase, Documenter
 
 makedocs(
     # for development, we disable prettyurls
-    format = Documenter.HTML(prettyurls = false),
+    format = Documenter.HTML(
+        prettyurls = false,
+        assets = ["assets/favicon.ico"]
+    ),
     modules = [Manifolds, ManifoldsBase],
     authors = "Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
     sitename = "Manifolds.jl",
