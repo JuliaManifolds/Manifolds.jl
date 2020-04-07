@@ -281,12 +281,14 @@ export AbstractRetractionMethod,
     ExponentialRetraction,
     QRRetraction,
     PolarRetraction,
-    ProjectionRetraction
+    ProjectionRetraction,
+    SoftmaxRetraction
 export AbstractInverseRetractionMethod,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,
-    ProjectionInverseRetraction
+    ProjectionInverseRetraction,
+    SoftmaxInverseRetraction
 export AbstractEstimationMethod,
     GradientDescentEstimation,
     CyclicProximalPointEstimation,

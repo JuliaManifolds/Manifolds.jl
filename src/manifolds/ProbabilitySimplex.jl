@@ -26,6 +26,20 @@ struct ProbabilitySimplex{n} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingTyp
 ProbabilitySimplex(n::Int) = ProbabilitySimplex{n}()
 
 """
+    SoftmaxRetraction <: AbstractRetractionMethod
+
+Descrives a retraction that is based on the Softmax function.
+"""
+struct SoftmaxRetraction <: AbstractRetractionMethod end
+
+"""
+    SoftmaxInverseRetraction <: AbstractInverseRetractionMethod
+
+Descrives an inverse  retraction that is based on the Softmax function.
+"""
+struct SoftmaxInverseRetraction <: AbstractInverseRetractionMethod end
+
+"""
     check_manifold_point(M::ProbabilitySimplex, p; kwargs...)
 
 Check whether `p` is a valid point on the [`ProbabilitySimplex`](@ref) `M`, i.e. is a point in
@@ -107,7 +121,7 @@ The formula reads
 d_{𝒮}(p,q) = 2\arccos \biggl( \sum_{i=1}^{n+1} \sqrt{p_i q_i} \biggr)
 ````
 """
-distance(::ProbabilitySimplex,p,q) = 2*arccos(sum(sqrt.(p.*q)))
+distance(::ProbabilitySimplex,p,q) = 2*acos(sum(sqrt.(p.*q)))
 
 embed!(M::ProbabilitySimplex, q, p) = (q .= p)
 embed!(M::ProbabilitySimplex, Y, p, X) = (Y .= X)
@@ -144,7 +158,24 @@ Compute the inner product of two tangent vectors `X`, `Y` from the tangent space
 g_p(X,Y) = \sum_{i=1}^{n+1}\frac{X_iY_i}{p}
 ````
 """
-inner(::ProbabilitySimplex, p, X, Y) =
+inner(::ProbabilitySimplex, p, X, Y) = sum( (X.*Y)./p )
+
+@doc raw"""
+    inverse_retract(M::ProbabilitySimplex, p, q, ::SoftmaxInverseRetraction)
+
+Compute a first order approximation by projection. The formula reads
+````math
+\operatorname{retr}^{-1}_p q = \bigl( I - \frac{1}{n}\mathbb{1}\mathbb{1}^\mathrm{T}\bigr)(\log(q)-\log(p))
+````
+where $\mathbb{1}$ is the column vector containing ones and $\log$ is applied elementwise.
+"""
+inverse_retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxInverseRetraction)
+
+function inverse_retract!(::ProbabilitySimplex{n}, X, p, q, ::SoftmaxInverseRetraction) where {n}
+    X .= (one(zeros(n+1,n+1)) - 1/n.*ones(n+1,n+1) ) * (log.(q) - log.(p))
+    return X
+end
+
 
 @doc raw"""
     log(M::ProbabilitySimplex, p, q)
@@ -155,13 +186,13 @@ Compute the logarithmic map of `p` and `q` on the [`ProbabilitySimplex`](@ref) `
 \log_pq = \frac{d_{𝒮}(p,q)}{\sqrt{1-⟨\sqrt{p},\sqrt{q}⟩}}(\sqrt{pq} - ⟨\sqrt{p},\sqrt{q}⟩p),
 ````
 
-where $\sqrt{p}$ is meant elementwise.
+where $pq$ and $\sqrt{p}$ is meant elementwise.
 """
 log(::ProbabilitySimplex, ::Any...)
 
 function log!(M::ProbabilitySimplex, X, p, q)
     s = dot(sqrt.(p),sqrt.(q))
-    X .= distance(M,p,q)./(1-s^2)*(sqrt.(p.*q) - s*p )
+    X .= (distance(M,p,q)/(1-s^2)) .* ( sqrt.(p.*q) .- s.*p )
     return X
 end
 
@@ -200,17 +231,19 @@ i.e. an array size of `(n+1,)`.
 representation_size(::ProbabilitySimplex{n}) where {n} = (n+1,)
 
 @doc raw"""
-    retract(M::ProbabilitySimplex, p, X, ::ProjectionRetracion)
+    retract(M::ProbabilitySimplex, p, X, ::SoftmaxRetraction)
 
-Compute a first order approximation by projection. The formula reads
+Compute a first order approximation by applying the softmax function. The formula reads
+
 ````math
 \operatorname{retr}_p X = \frac{p\mathrm{e}^X}{⟨p,\mathrm{e}^X⟩},
 ````
+
 where multiplication, exponentiation and division are meant elementwise.
 """
-retract(::ProbabilitySimplex, ::Any, ::Any, ::ProjectionRetraction) =
+retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxRetraction)
 
-function retract!(::ProbabilitySimplex, q, p, X, ::ProjectionRetraction)
+function retract!(::ProbabilitySimplex, q, p, X, ::SoftmaxRetraction)
     q .= p.*exp.(X)./(dot(p,exp.(X)))
     return q
 end
