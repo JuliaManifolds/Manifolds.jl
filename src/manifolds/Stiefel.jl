@@ -323,6 +323,7 @@ show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(
     uniform_distribution(M::Stiefel{n,k,ℝ}, p)
 
 Uniform distribution on given (real-valued) [`Stiefel`](@ref) `M`.
+Specifically, this is the normalized Haar and Hausdorff measure on `M`.
 Generated points will be of similar type as `p`.
 
 The implementation is based on Section 2.5.1 in [^Chikuse2003].
