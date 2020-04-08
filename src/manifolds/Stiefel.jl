@@ -332,7 +332,7 @@ The implementation is based on Section 2.5.1 in [^Chikuse2003].
     > doi: [10.1007/978-0-387-21540-2](https://doi.org/10.1007/978-0-387-21540-2).
 """
 function uniform_distribution(M::Stiefel{n,k,ℝ}, p) where {n,k}
-    μ = Distributions.Zeros(p)
+    μ = Distributions.Zeros(n,k)
     σ = one(eltype(p))
     Σ1 = Distributions.PDMats.ScalMat(n,σ)
     Σ2 = Distributions.PDMats.ScalMat(k,σ)
