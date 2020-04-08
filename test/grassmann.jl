@@ -65,7 +65,11 @@ include("utils.jl")
         end
 
         @testset "Distribution tests" begin
-            ugd_mmatrix = Manifolds.uniform_distribution(M, @MMatrix [1.0 0.0; 0.0 1.0; 0.0 0.0])
+            ugd_mmatrix = Manifolds.uniform_distribution(M, @MMatrix [
+                1.0 0.0
+                0.0 1.0
+                0.0 0.0
+            ])
             @test isa(rand(ugd_mmatrix), MMatrix)
         end
     end
