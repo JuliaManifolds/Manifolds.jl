@@ -235,7 +235,7 @@ project(::Stiefel, ::Any, ::Any)
 
 function project!(M::Stiefel, q, p)
     s = svd(p)
-    q .= s.U * s.V'
+    mul!(q, s.U, s.Vt)
     return q
 end
 
