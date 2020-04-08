@@ -54,5 +54,10 @@ include("utils.jl")
         X2 = X .+ 10
         Y = project(M, p, X2)
         @test isapprox(M, p, X, Y)
+
+        X = log(M, q, p)
+        X2 = X + [1, 2, 3]
+        Y = project(M, q, X2)
+        @test is_tangent_vector(M, q, Y; atol = 1e-15)
     end
 end
