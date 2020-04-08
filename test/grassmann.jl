@@ -40,6 +40,7 @@ include("utils.jl")
                 test_injectivity_radius = false,
                 test_project_tangent = true,
                 test_vector_transport = false,
+                point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
                 test_forward_diff = false,
                 test_reverse_diff = false,
                 test_vee_hat = false,
@@ -61,6 +62,11 @@ include("utils.jl")
                 @test norm(M, pts[1], v1) isa Real
                 @test norm(M, pts[1], v1) ≈ sqrt(inner(M, pts[1], v1, v1))
             end
+        end
+
+        @testset "Distribution tests" begin
+            ugd_mmatrix = Manifolds.uniform_distribution(M, @MMatrix [1.0 0.0; 0.0 1.0; 0.0 0.0])
+            @test isa(rand(ugd_mmatrix), MMatrix)
         end
     end
 
