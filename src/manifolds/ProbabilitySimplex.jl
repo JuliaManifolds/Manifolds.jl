@@ -139,7 +139,13 @@ The formula reads
 d_{Δ^n}(p,q) = 2\arccos \biggl( \sum_{i=1}^{n+1} \sqrt{p_i q_i} \biggr)
 ````
 """
-distance(::ProbabilitySimplex,p,q) = 2*acos(sum(sqrt.(p.*q)))
+function distance(::ProbabilitySimplex, p, q)
+    sumsqrt = zero(Base.promote_eltype(p, q))
+    @inbounds for i in eachindex(p, q)
+        sumsqrt += sqrt(p[i] * q[i])
+    end
+    return 2acos(sumsqrt)
+end
 
 embed!(::ProbabilitySimplex, q, p) = copyto!(q, p)
 embed!(::ProbabilitySimplex, Y, p, X) = copyto!(Y, X)
