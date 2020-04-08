@@ -1,6 +1,5 @@
 # Multinomial matrices
 
-
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["manifolds/Multinomial.jl"]
@@ -13,6 +12,6 @@ Most functions are directly implemented for an [`AbstractPowerManifold`](@ref) w
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["manifolds/ObliqueMultinomial.jl"]
+Pages = ["manifolds/Multinomial.jl"]
 Order = [:function]
 ```

@@ -88,7 +88,7 @@ end
 
 get_iterator(M::MultinomialMatrices{n,m}) where {n,m} = 1:m
 
-@generated manifold_dimension(::MultinomialMatrices{n,m,𝔽}) where {n,m} = (n-1) * m
+@generated manifold_dimension(::MultinomialMatrices{n,m}) where {n,m} = (n-1) * m
 
 @generated representation_size(::MultinomialMatrices{n,m}) where {n,m} = (n, m)
 

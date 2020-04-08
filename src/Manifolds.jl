@@ -193,6 +193,7 @@ include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 
 include("manifolds/Torus.jl")
+include("manifolds/Multinomial.jl")
 include("manifolds/Oblique.jl")
 
 include("groups/metric.jl")
