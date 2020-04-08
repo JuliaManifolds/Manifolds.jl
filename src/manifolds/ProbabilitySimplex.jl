@@ -307,12 +307,20 @@ project `Y` from the embedding onto the tangent space at `p` on
 the [`ProbabilitySimplex`](@ref) `M`. The formula reads
 
 ````math
-\operatorname{proj}_{Δ^n}(p,Y) = pY -⟨p,Y⟩p.
+\operatorname{proj}_{Δ^n}(p,Y) = Y - ⟨p,Y⟩p.
 ````
 """
 project(::ProbabilitySimplex, ::Any, ::Any)
 
-function project!(::ProbabilitySimplex{n}, X, p, Y) where {n}
+function project!(::ProbabilitySimplex, q, p)
+    if any(x -> x <= 0, p)
+        throw(DomainError(p, "All coordinates of the projected point must be positive"))
+    end
+    q .= p ./ sum(p)
+    return q
+end
+
+function project!(::ProbabilitySimplex, X, p, Y)
     X .= Y .- sum(Y) .* p
     return X
 end
