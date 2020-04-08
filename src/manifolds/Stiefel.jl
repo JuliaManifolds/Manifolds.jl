@@ -35,7 +35,11 @@ struct Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingTy
 
 Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ) = Stiefel{n,k,field}()
 
-function allocation_promotion_function(M::Stiefel{n,k,ℂ}, f, args::Tuple) where {n,k}
+function allocation_promotion_function(
+    M::Stiefel{n,k,ℂ},
+    f,
+    args::Tuple,
+) where {n,k}
     return complex
 end
 
@@ -47,8 +51,7 @@ Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{S
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
@@ -81,12 +84,12 @@ function check_tangent_vector(
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
+        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
         M,
         p,
         X;
         check_base_point = false, # already checked above
-        kwargs...,
+        kwargs...
     )
     mpv === nothing || return mpv
     if !isapprox(p' * X + X' * p, zeros(k, k); kwargs...)
@@ -331,11 +334,11 @@ see also Theorem 2.2.1(iii) in [^Chikuse2003].
     > doi: [10.1007/978-0-387-21540-2](https://doi.org/10.1007/978-0-387-21540-2).
 """
 function uniform_distribution(M::Stiefel{n,k,ℝ}, p) where {n,k}
-    μ = Distributions.Zeros(n, k)
+    μ = Distributions.Zeros(n,k)
     σ = one(eltype(p))
-    Σ1 = Distributions.PDMats.ScalMat(n, σ)
-    Σ2 = Distributions.PDMats.ScalMat(k, σ)
-    d = MatrixNormal(μ, Σ1, Σ2)
+    Σ1 = Distributions.PDMats.ScalMat(n,σ)
+    Σ2 = Distributions.PDMats.ScalMat(k,σ)
+    d = MatrixNormal(μ,Σ1,Σ2)
 
     return ProjectedPointDistribution(M, d, project!, p)
 end
