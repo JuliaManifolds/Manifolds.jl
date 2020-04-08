@@ -54,5 +54,13 @@ include("utils.jl")
         X2 = X .+ 10
         Y = project(M, p, X2)
         @test isapprox(M, p, X, Y)
+
+        X = log(M, q, p)
+        X2 = X + [1, 2, 3]
+        Y = project(M, q, X2)
+        @test is_tangent_vector(M, q, Y; atol = 1e-15)
+
+        @test_throws DomainError project(M, [1, -1, 2])
+        @test isapprox(M, [0.6, 0.2, 0.2], project(M, [0.3, 0.1, 0.1]))
     end
 end
