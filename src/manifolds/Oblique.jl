@@ -77,7 +77,7 @@ function check_tangent_vector(
     )
 end
 
-get_iterator(M::Oblique{n,m}) where {n,m} = 1:m
+get_iterator(M::Oblique{n,m}) where {n,m} = Base.OneTo(m)
 
 @generated manifold_dimension(::Oblique{n,m,𝔽}) where {n,m,𝔽} = (n* real_dimension(𝔽) - 1) * m
 

@@ -18,10 +18,10 @@ T_pΔ^n = \biggl\{ X ∈ ℝ^{n+1}\ \big|\ ⟨\mathbb{1},X⟩ = \sum_{i=1}^{n+1}
 The manifold is implemented assuming the Fisher-Rao metric for the multinomial distribution,
 which is equivalent to the induced metric from isometrically embedding the probability
 simplex in the $n$-sphere of radius 2.
-The corresponding diffoemorphism $\varphi\colon \mathbb Δ^n \to \mathcal N$,
-where $\mathcal N \subset 2𝕊^n$ is given by %\varphi(p) = 2\sqrt{p}$.
+The corresponding diffeomorphism $\varphi: \mathbb Δ^n → \mathcal N$,
+where $\mathcal N \subset 2𝕊^n$ is given by $\varphi(p) = 2\sqrt{p}$.
 
-This implementation follows the notation in [^ÅströmPetraSchmitzerSchnörr2017]
+This implementation follows the notation in [^ÅströmPetraSchmitzerSchnörr2017].
 
 [^ÅströmPetraSchmitzerSchnörr2017]:
     > F. Åström, S. Petra, B. Schmitzer, C. Schnörr: “Image Labeling by Assignment”,
@@ -36,14 +36,14 @@ ProbabilitySimplex(n::Int) = ProbabilitySimplex{n}()
 """
     SoftmaxRetraction <: AbstractRetractionMethod
 
-Describes a retraction that is based on the Softmax function.
+Describes a retraction that is based on the softmax function.
 """
 struct SoftmaxRetraction <: AbstractRetractionMethod end
 
 """
     SoftmaxInverseRetraction <: AbstractInverseRetractionMethod
 
-Describes an inverse retraction that is based on the Softmax function.
+Describes an inverse retraction that is based on the softmax function.
 """
 struct SoftmaxInverseRetraction <: AbstractInverseRetractionMethod end
 

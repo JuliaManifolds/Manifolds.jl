@@ -84,7 +84,7 @@ function check_tangent_vector(
     )
 end
 
-get_iterator(M::MultinomialMatrices{n,m}) where {n,m} = 1:m
+get_iterator(M::MultinomialMatrices{n,m}) where {n,m} = Base.OneTo(m)
 
 @generated manifold_dimension(::MultinomialMatrices{n,m}) where {n,m} = (n-1) * m
 
