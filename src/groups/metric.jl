@@ -89,7 +89,7 @@ has_approx_invariant_metric(
     ::Any,
     ::Any,
     ::Any,
-    ::ActionDirection
+    ::ActionDirection,
 )
 @decorator_transparent_function function has_approx_invariant_metric(
     M::AbstractGroupManifold,
@@ -122,14 +122,7 @@ function exp!(
         conv = direction(metric(M))
         return retract!(base_group(M), q, p, X, GroupExponentialRetraction(conv))
     end
-    return invoke(
-        exp!,
-        Tuple{MetricManifold,typeof(q),typeof(p),typeof(X)},
-        M,
-        q,
-        p,
-        X,
-    )
+    return invoke(exp!, Tuple{MetricManifold,typeof(q),typeof(p),typeof(X)}, M, q, p, X)
 end
 
 
@@ -167,7 +160,7 @@ invariant_metric_dispatch(::MetricManifold, ::ActionDirection)
 
 @decorator_transparent_signature invariant_metric_dispatch(
     M::AbstractDecoratorManifold,
-    conv::ActionDirection
+    conv::ActionDirection,
 )
 function invariant_metric_dispatch(M::MetricManifold, conv::ActionDirection)
     is_default_metric(M) && return invariant_metric_dispatch(M.manifold, conv)
@@ -196,7 +189,7 @@ function inner(M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric}, p, X, Y) wh
 end
 
 function default_metric_dispatch(
-    M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric}
+    M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric},
 ) where {𝔽}
     imetric = metric(M)
     N = MetricManifold(M.manifold, imetric.metric)
@@ -208,21 +201,20 @@ function log!(
     M::MetricManifold{𝔽,<:AbstractGroupManifold,<:InvariantMetric},
     X,
     p,
-    q
+    q,
 ) where {𝔽}
     if has_biinvariant_metric(M)
         imetric = metric(M)
         conv = direction(imetric)
-        return inverse_retract!(base_group(M), X, p, q, GroupLogarithmicInverseRetraction(conv))
+        return inverse_retract!(
+            base_group(M),
+            X,
+            p,
+            q,
+            GroupLogarithmicInverseRetraction(conv),
+        )
     end
-    return invoke(
-        log!,
-        Tuple{MetricManifold,typeof(X),typeof(p),typeof(q)},
-        M,
-        X,
-        p,
-        q,
-    )
+    return invoke(log!, Tuple{MetricManifold,typeof(X),typeof(p),typeof(q)}, M, X, p, q)
 end
 
 function norm(M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric}, p, X) where {𝔽}

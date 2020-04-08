@@ -29,7 +29,8 @@ Abstract type for a Lie group, a group that is also a smooth manifold with an
 implement at least [`inv`](@ref), [`identity`](@ref), [`compose`](@ref), and
 [`translate_diff`](@ref).
 """
-abstract type AbstractGroupManifold{𝔽,O<:AbstractGroupOperation} <: AbstractDecoratorManifold{𝔽} end
+abstract type AbstractGroupManifold{𝔽,O<:AbstractGroupOperation} <:
+              AbstractDecoratorManifold{𝔽} end
 
 """
     GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <: AbstractGroupManifold{𝔽,O}
@@ -43,18 +44,16 @@ Group manifolds by default forward metric-related operations to the wrapped mani
 
     GroupManifold(manifold, op)
 """
-struct GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <: AbstractGroupManifold{𝔽,O}
+struct GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <:
+       AbstractGroupManifold{𝔽,O}
     manifold::M
     op::O
 end
 
 show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
-const GROUP_MANIFOLD_BASIS_DISAMBIGUATION = [
-    AbstractDecoratorManifold,
-    ValidationManifold,
-    VectorBundle,
-]
+const GROUP_MANIFOLD_BASIS_DISAMBIGUATION =
+    [AbstractDecoratorManifold, ValidationManifold, VectorBundle]
 
 """
     base_group(M::Manifold) -> AbstractGroupManifold
@@ -158,7 +157,13 @@ isapprox(p, e::Identity; kwargs...) = isapprox(e::Identity, p; kwargs...)
 isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
 isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
-function allocate_result(M::Manifold, f::typeof(get_coordinates), e::Identity, X, B::AbstractBasis)
+function allocate_result(
+    M::Manifold,
+    f::typeof(get_coordinates),
+    e::Identity,
+    X,
+    B::AbstractBasis,
+)
     T = allocate_result_type(M, f, (e.p, X))
     return allocate(e.p, T, Size(number_of_coordinates(M, B)))
 end
@@ -225,25 +230,29 @@ function get_vector(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBa
     return get_vector(decorated_manifold(M), e.p, X, B)
 end
 function get_vector(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold && error("On $(M) the identity $(e) does not match to perform get_vector.")
+    M != e.group.manifold &&
+    error("On $(M) the identity $(e) does not match to perform get_vector.")
     return get_vector(M, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(quote
-        @invoke_maker 1 Manifold get_vector(
-            M::$MT,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end)
+    eval(
+        quote
+            @invoke_maker 1 Manifold get_vector(
+                M::$MT,
+                e::Identity,
+                X,
+                B::VeeOrthogonalBasis,
+            )
+        end,
+    )
 end
 function get_vector!(M::AbstractGroupManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group && error("On $(M) the identity $(e) does not match to perform get_vector!")
     return get_vector!(decorated_manifold(M), Y, e.p, X, B)
 end
 function get_vector!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold && error("On $(M) the identity $(e) does not match to perform get_vector!")
+    M != e.group.manifold &&
+    error("On $(M) the identity $(e) does not match to perform get_vector!")
     return get_vector!(M, Y, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
@@ -259,11 +268,13 @@ for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
 end
 
 function get_coordinates(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group && error("On $(M) the identity $(e) does not match to perform get_coordinates")
+    M != e.group &&
+    error("On $(M) the identity $(e) does not match to perform get_coordinates")
     return get_coordinates(decorated_manifold(M), e.p, X, B)
 end
 function get_coordinates(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold && error("On $(M) the identity $(e) does not match to perform get_coordinates")
+    M != e.group.manifold &&
+    error("On $(M) the identity $(e) does not match to perform get_coordinates")
     return get_coordinates(M, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
@@ -284,11 +295,13 @@ function get_coordinates!(
     X,
     B::VeeOrthogonalBasis,
 )
-    M != e.group && error("On $(M) the identity $(e) does not match to perform get_coordinates!")
+    M != e.group &&
+    error("On $(M) the identity $(e) does not match to perform get_coordinates!")
     return get_coordinates!(decorated_manifold(M), Y, e.p, X, B)
 end
 function get_coordinates!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold && error("On $(M) the identity $(e) does not match to perform get_coordinates!")
+    M != e.group.manifold &&
+    error("On $(M) the identity $(e) does not match to perform get_coordinates!")
     return get_coordinates!(M, Y, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
@@ -407,7 +420,7 @@ function decorator_transparent_dispatch(
     M::AbstractGroupManifold,
     x,
     p,
-    q
+    q,
 )
     return Val(:intransparent)
 end
@@ -730,12 +743,7 @@ function group_log(G::AbstractGroupManifold, q)
     X = allocate_result(G, group_log, q)
     return group_log!(G, X, q)
 end
-function decorator_transparent_dispatch(
-    ::typeof(group_log),
-    ::AbstractGroupManifold,
-    X,
-    q,
-)
+function decorator_transparent_dispatch(::typeof(group_log), ::AbstractGroupManifold, X, q)
     return Val(:intransparent)
 end
 

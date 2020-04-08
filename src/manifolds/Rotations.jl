@@ -93,7 +93,13 @@ dimension and orthogonal to `p`.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::Rotations{N}, p, X; check_base_point = true, kwargs...) where {N}
+function check_tangent_vector(
+    M::Rotations{N},
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+) where {N}
     if check_base_point
         perr = check_manifold_point(M, p)
         perr === nothing || return perr
@@ -296,7 +302,9 @@ group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. S
 """
 get_vector(::Rotations, ::Any...)
 
-get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultOrthogonalBasis) = get_vector!(M, X, p, Xⁱ[1], B)
+function get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultOrthogonalBasis)
+    return get_vector!(M, X, p, Xⁱ[1], B)
+end
 function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultOrthogonalBasis)
     @assert length(X) == 4
     @inbounds begin

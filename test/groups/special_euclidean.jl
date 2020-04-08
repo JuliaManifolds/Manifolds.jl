@@ -31,10 +31,7 @@ include("group_utils.jl")
                 [1.0, 3.0, 2.0, 1.0, 2.0, 3.0],
             ]
             tuple_pts = [(ti, exp(Rn, x, hat(Rn, x, ωi))) for (ti, ωi) in zip(t, ω)]
-            tuple_v = (
-                [-1.0, 2.0, 1.0, 3.0],
-                hat(Rn, x, [1.0, 0.5, -0.5, 0.0, 2.0, 1.0]),
-            )
+            tuple_v = ([-1.0, 2.0, 1.0, 3.0], hat(Rn, x, [1.0, 0.5, -0.5, 0.0, 2.0, 1.0]))
         end
 
         @testset "product point" begin
@@ -61,9 +58,17 @@ include("group_utils.jl")
                 w2 = allocate(w)
                 w2.parts[1] .= w.parts[1]
                 w2.parts[2] .= pts[1].parts[2] * w.parts[2]
-                @test screw_matrix(G, w2) ≈ affine_matrix(G, pts[1]) * screw_matrix(G, v_pts[1])
+                @test screw_matrix(G, w2) ≈
+                      affine_matrix(G, pts[1]) * screw_matrix(G, v_pts[1])
 
-                test_group(G, pts, v_pts, v_pts; test_diff = true, diff_convs = [(), (LeftAction(),)])
+                test_group(
+                    G,
+                    pts,
+                    v_pts,
+                    v_pts;
+                    test_diff = true,
+                    diff_convs = [(), (LeftAction(),)],
+                )
             end
         end
 
@@ -90,17 +95,32 @@ include("group_utils.jl")
             @test w2mat ≈ affine_matrix(G, pts[1]) * screw_matrix(G, v_pts[1])
             @test screw_matrix(G, w2mat) === w2mat
 
-            test_group(G, pts, v_pts, v_pts; test_diff = true, diff_convs = [(), (LeftAction(),)])
+            test_group(
+                G,
+                pts,
+                v_pts,
+                v_pts;
+                test_diff = true,
+                diff_convs = [(), (LeftAction(),)],
+            )
         end
 
         @testset "affine matrix" begin
             pts = [affine_matrix(G, ProductRepr(tp...)) for tp in tuple_pts]
             v_pts = [screw_matrix(G, ProductRepr(tuple_v...))]
-            test_group(G, pts, v_pts, v_pts; test_diff = true, diff_convs = [(), (LeftAction(),)])
+            test_group(
+                G,
+                pts,
+                v_pts,
+                v_pts;
+                test_diff = true,
+                diff_convs = [(), (LeftAction(),)],
+            )
         end
 
         @testset "hat/vee" begin
-            shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M.manifolds...)
+            shape_se =
+                Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M.manifolds...)
             x = Manifolds.prod_point(shape_se, tuple_pts[1]...)
             V = Manifolds.prod_point(shape_se, tuple_v...)
             vexp = [V.parts[1]; vee(Rn, x.parts[2], V.parts[2])]
@@ -115,6 +135,7 @@ include("group_utils.jl")
     end
 
     G = SpecialEuclidean(11)
-    @test affine_matrix(G, make_identity(G, ones(12, 12))) isa Diagonal{Float64,Vector{Float64}}
+    @test affine_matrix(G, make_identity(G, ones(12, 12))) isa
+          Diagonal{Float64,Vector{Float64}}
     @test affine_matrix(G, make_identity(G, ones(12, 12))) == Diagonal(ones(11))
 end

@@ -3,8 +3,7 @@
 
 An abstract type to represent a unit sphere that is represented isometrically in the embedding.
 """
-abstract type AbstractSphere{𝔽} <:
-    AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
+abstract type AbstractSphere{𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
 @doc raw"""
     Sphere{n,𝔽} <: AbstractSphere{𝔽}
@@ -40,7 +39,7 @@ Generate the (real-valued) sphere $𝕊^{n} ⊂ ℝ^{n+1}$, where `field` can al
 generate the complex-valued sphere.
 """
 struct Sphere{N,𝔽} <: AbstractSphere{𝔽} end
-Sphere(n::Int, field::AbstractNumbers=ℝ) = Sphere{n,field}()
+Sphere(n::Int, field::AbstractNumbers = ℝ) = Sphere{n,field}()
 
 
 @doc raw"""
@@ -94,10 +93,10 @@ The tolerance for the last test can be set using the `kwargs...`.
 function check_manifold_point(M::AbstractSphere, p; kwargs...)
     mpv = invoke(
         check_manifold_point,
-        Tuple{(typeof(get_embedding(M))), typeof(p)},
+        Tuple{(typeof(get_embedding(M))),typeof(p)},
         get_embedding(M),
         p;
-        kwargs...
+        kwargs...,
     )
     mpv === nothing || return mpv
     if !isapprox(norm(p), 1.0; kwargs...)
@@ -119,25 +118,19 @@ The optional parameter `check_base_point` indicates, whether to call
 [`check_manifold_point`](@ref)  for `p` or not.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(
-    M::AbstractSphere,
-    p,
-    X;
-    check_base_point = true,
-    kwargs...,
-)
+function check_tangent_vector(M::AbstractSphere, p, X; check_base_point = true, kwargs...)
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{typeof(get_embedding(M)), typeof(p), typeof(X)},
+        Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
         get_embedding(M),
         p,
         X;
         check_base_point = false, # already checked above
-        kwargs...
+        kwargs...,
     )
     mpv === nothing || return mpv
     if !isapprox(abs(real(dot(p, X))), 0.0; kwargs...)
@@ -149,7 +142,9 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(M::AbstractSphere{𝔽}) where {𝔽} = Euclidean(representation_size(M)...; field=𝔽)
+function decorated_manifold(M::AbstractSphere{𝔽}) where {𝔽}
+    return Euclidean(representation_size(M)...; field = 𝔽)
+end
 get_embedding(M::AbstractSphere{𝔽}) where {𝔽} = decorated_manifold(M)
 
 
@@ -193,7 +188,7 @@ end
 flat!(M::AbstractSphere, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) where {n}
-    A = zeros(n+1, n+1)
+    A = zeros(n + 1, n + 1)
     A[1, :] = transpose(p)
     A[2, :] = transpose(B.frame_direction)
     V = nullspace(A)
@@ -218,7 +213,7 @@ function get_coordinates(M::Sphere{n,ℝ}, p, X, B::DefaultOrthonormalBasis) whe
     if isapprox(p[1], 1)
         return X[2:end]
     else
-        xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n+1)
+        xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n + 1)
         return (2*xp1*dot(xp1, X)/dot(xp1, xp1)-X)[2:end]
     end
 end
@@ -229,7 +224,7 @@ end
 
 function get_vector(M::Sphere{n,ℝ}, p, X, B::DefaultOrthonormalBasis) where {n}
     p[1] ≈ 1 && return vcat(0, X)
-    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n+1)
+    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n + 1)
     X0 = vcat(0, X)
     return 2 * xp1 * real(dot(xp1, X0)) / real(dot(xp1, xp1)) - X0
 end
@@ -255,7 +250,10 @@ injectivity_radius(::AbstractSphere, ::Any) = π
 injectivity_radius(::AbstractSphere, ::Any, ::ExponentialRetraction) = π
 injectivity_radius(::AbstractSphere, ::Any, ::ProjectionRetraction) = π / 2
 eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(M::AbstractSphere, rm::AbstractRetractionMethod)
+    @invoke_maker 1 Manifold injectivity_radius(
+        M::AbstractSphere,
+        rm::AbstractRetractionMethod,
+    )
 end)
 
 @doc raw"""
@@ -361,7 +359,7 @@ norm for the case $m>1$.
 """
 project(::AbstractSphere, ::Any)
 
-project!(S::AbstractSphere, q, p) = copyto!(q, p./ norm(p))
+project!(S::AbstractSphere, q, p) = copyto!(q, p ./ norm(p))
 
 @doc raw"""
     project(M::AbstractSphere, p, X)
@@ -383,7 +381,7 @@ Return the size points on the [`AbstractSphere`](@ref) `M` are represented as, i
 representation size of the embedding.
 """
 @generated representation_size(M::ArraySphere{N}) where {N} = size_to_tuple(N)
-@generated representation_size(M::Sphere{N}) where {N} = (N+1,)
+@generated representation_size(M::Sphere{N}) where {N} = (N + 1,)
 
 
 @doc raw"""
@@ -403,7 +401,9 @@ function retract!(M::AbstractSphere, q, p, X, ::ProjectionRetraction)
 end
 
 show(io::IO, ::Sphere{n,𝔽}) where {n,𝔽} = print(io, "Sphere($(n); field = $(𝔽))")
-show(io::IO, ::ArraySphere{N,𝔽}) where {N,𝔽} = print(io, "ArraySphere($(join(N.parameters, ", ")); field = $(𝔽))")
+function show(io::IO, ::ArraySphere{N,𝔽}) where {N,𝔽}
+    print(io, "ArraySphere($(join(N.parameters, ", ")); field = $(𝔽))")
+end
 
 """
     uniform_distribution(M::AbstractSphere, p)

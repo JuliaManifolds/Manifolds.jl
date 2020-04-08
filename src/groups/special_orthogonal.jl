@@ -10,8 +10,9 @@ const SpecialOrthogonal{n} = GroupManifold{ℝ,Rotations{n},MultiplicationOperat
 
 invariant_metric_dispatch(::SpecialOrthogonal, ::ActionDirection) = Val(true)
 
-default_metric_dispatch(::MetricManifold{𝔽,<:SpecialOrthogonal,EuclideanMetric}) where {𝔽}= Val(true)
-default_metric_dispatch(::SpecialOrthogonal,::EuclideanMetric) = Val(true)
+default_metric_dispatch(::MetricManifold{𝔽,<:SpecialOrthogonal,EuclideanMetric}) where {𝔽} =
+    Val(true)
+default_metric_dispatch(::SpecialOrthogonal, ::EuclideanMetric) = Val(true)
 
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
 

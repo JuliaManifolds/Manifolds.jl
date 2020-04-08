@@ -3,57 +3,67 @@ include("utils.jl")
 @testset "Generalized Grassmann" begin
     @testset "Real" begin
         B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
-        M = GeneralizedGrassmann(3,2,B)
+        M = GeneralizedGrassmann(3, 2, B)
         x = [1.0 0.0; 0.0 0.5; 0.0 0.0]
         @testset "Basics" begin
-            @test repr(M) == "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ)"
-            @test representation_size(M) == (3,2)
+            @test repr(M) ==
+                  "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ)"
+            @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 2
             @test base_manifold(M) === M
-            @test_throws DomainError is_manifold_point(M, [1., 0., 0., 0.],true)
-            @test_throws DomainError is_manifold_point(M, 1im*[1.0 0.0; 0.0 1.0; 0.0 0.0],true)
-            @test !is_tangent_vector(M, x, [0., 0., 1., 0.])
-            @test_throws DomainError is_tangent_vector(M, x, [0., 0., 1., 0.], true)
-            @test_throws DomainError is_tangent_vector(M, x, 1 * im * zero_tangent_vector(M,x), true)
-            @test injectivity_radius(M) == π/2
-            @test injectivity_radius(M, ExponentialRetraction()) == π/2
-            @test injectivity_radius(M, x) == π/2
-            @test injectivity_radius(M, x, ExponentialRetraction()) == π/2
-            @test mean(M,[x,x,x]) == x
+            @test_throws DomainError is_manifold_point(M, [1.0, 0.0, 0.0, 0.0], true)
+            @test_throws DomainError is_manifold_point(
+                M,
+                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0],
+                true,
+            )
+            @test !is_tangent_vector(M, x, [0.0, 0.0, 1.0, 0.0])
+            @test_throws DomainError is_tangent_vector(M, x, [0.0, 0.0, 1.0, 0.0], true)
+            @test_throws DomainError is_tangent_vector(
+                M,
+                x,
+                1 * im * zero_tangent_vector(M, x),
+                true,
+            )
+            @test injectivity_radius(M) == π / 2
+            @test injectivity_radius(M, ExponentialRetraction()) == π / 2
+            @test injectivity_radius(M, x) == π / 2
+            @test injectivity_radius(M, x, ExponentialRetraction()) == π / 2
+            @test mean(M, [x, x, x]) == x
         end
         @testset "Embedding and Projection" begin
             y = similar(x)
-            z = embed(M,x)
-            @test z==x
-            embed!(M,y,x)
-            @test y==z
+            z = embed(M, x)
+            @test z == x
+            embed!(M, y, x)
+            @test y == z
             a = [1.0 0.0; 0.0 2.0; 0.0 0.0]
-            @test !is_manifold_point(M,a)
+            @test !is_manifold_point(M, a)
             b = similar(a)
-            c = project(M,a)
-            @test c==x
-            project!(M,b,a)
-            @test b==x
-            X = [ 0.0 0.0; 0.0 0.0; -1.0 1.0]
+            c = project(M, a)
+            @test c == x
+            project!(M, b, a)
+            @test b == x
+            X = [0.0 0.0; 0.0 0.0; -1.0 1.0]
             Y = similar(X)
-            Z = embed(M,x,X)
-            embed!(M,Y,x,X)
+            Z = embed(M, x, X)
+            embed!(M, Y, x, X)
             @test Y == X
             @test Z == X
         end
 
-        types = [Matrix{Float64}, ]
-        TEST_STATIC_SIZED && push!(types, MMatrix{3, 2, Float64})
+        types = [Matrix{Float64}]
+        TEST_STATIC_SIZED && push!(types, MMatrix{3,2,Float64})
         X = [0.0 0.0; 1.0 0.0; 0.0 2.0]
-        Y = [ 0.0 0.0; -1.0 0.0; 0.0 2.0]
-        @test inner(M,x,X,Y) == 0
+        Y = [0.0 0.0; -1.0 0.0; 0.0 2.0]
+        @test inner(M, x, X, Y) == 0
         y = retract(M, x, X)
         z = retract(M, x, Y)
-        @test is_manifold_point(M,y)
-        @test is_manifold_point(M,z)
+        @test is_manifold_point(M, y)
+        @test is_manifold_point(M, z)
         @test retract(M, x, X) == exp(M, x, X)
 
-        a = project(M, x+X)
+        a = project(M, x + X)
         c = retract(M, x, X, ProjectionRetraction())
         d = retract(M, x, X, PolarRetraction())
         @test a == c
@@ -61,8 +71,7 @@ include("utils.jl")
         e = similar(a)
         retract!(M, e, x, X)
         @test e == exp(M, x, X)
-        @test vector_transport_to(M, x, X, y, ProjectionTransport()) ==
-              project(M, y, X)
+        @test vector_transport_to(M, x, X, y, ProjectionTransport()) == project(M, y, X)
         @testset "Type $T" for T in types
             pts = convert.(T, [x, y, z])
             @test !is_manifold_point(M, 2 * x)
@@ -93,7 +102,8 @@ include("utils.jl")
         B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
         M = GeneralizedGrassmann(3, 2, B, ℂ)
         @testset "Basics" begin
-            @test repr(M) == "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℂ)"
+            @test repr(M) ==
+                  "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℂ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 4
             @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
@@ -109,7 +119,8 @@ include("utils.jl")
     @testset "Quaternion" begin
         B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
         M = GeneralizedGrassmann(3, 2, B, ℍ)
-        @test repr(M) == "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℍ)"
+        @test repr(M) ==
+              "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℍ)"
         @testset "Basics" begin
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 8

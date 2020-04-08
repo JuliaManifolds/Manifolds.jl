@@ -80,7 +80,11 @@ include("../utils.jl")
         @test isapprox(G, pq.value, translate(G, p, q, conv))
 
         @test inverse_translate(AG, p2, q2, conv) isa ValidationMPoint
-        @test isapprox(G, inverse_translate(AG, p2, q2, conv).value, inverse_translate(G, p, q, conv))
+        @test isapprox(
+            G,
+            inverse_translate(AG, p2, q2, conv).value,
+            inverse_translate(G, p, q, conv),
+        )
 
         pinvq = allocate(p2)
         inverse_translate!(AG, pinvq, p2, q2, conv)
@@ -89,14 +93,23 @@ include("../utils.jl")
 
     for conv in (LeftAction(), RightAction())
         @test translate_diff(AG, q2, p2, X2, conv; atol = 1e-10) isa ValidationTVector
-        @test isapprox(G, translate_diff(AG, q2, p2, X2, conv; atol = 1e-10).value, translate_diff(G, q, p, X, conv))
+        @test isapprox(
+            G,
+            translate_diff(AG, q2, p2, X2, conv; atol = 1e-10).value,
+            translate_diff(G, q, p, X, conv),
+        )
 
         Y = allocate(X2)
         translate_diff!(AG, Y, q2, p2, X2, conv; atol = 1e-10)
         @test isapprox(Y.value, translate_diff(G, q, p, X, conv))
 
-        @test inverse_translate_diff(AG, q2, p2, X2, conv; atol = 1e-10) isa ValidationTVector
-        @test isapprox(G, inverse_translate_diff(AG, q2, p2, X2, conv; atol = 1e-10).value, inverse_translate_diff(G, q, p, X, conv))
+        @test inverse_translate_diff(AG, q2, p2, X2, conv; atol = 1e-10) isa
+              ValidationTVector
+        @test isapprox(
+            G,
+            inverse_translate_diff(AG, q2, p2, X2, conv; atol = 1e-10).value,
+            inverse_translate_diff(G, q, p, X, conv),
+        )
 
         Y = allocate(X2)
         inverse_translate_diff!(AG, Y, q2, p2, X2, conv; atol = 1e-10)

@@ -45,7 +45,7 @@ orthonormal matrices with scalar product `B`.
 """
 struct GeneralizedGrassmann{n,k,𝔽,TB<:AbstractMatrix} <:
        AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
-       B::TB
+    B::TB
 end
 
 function GeneralizedGrassmann(
@@ -65,7 +65,13 @@ a `n`-by-`k` matrix of unitary column vectors with respect to the B inner prudct
 of correct `eltype` with respect to `𝔽`.
 """
 function check_manifold_point(M::GeneralizedGrassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv = invoke(check_manifold_point, Tuple{typeof(get_embedding(M)), typeof(p)}, get_embedding(M), p; kwargs...)
+    mpv = invoke(
+        check_manifold_point,
+        Tuple{typeof(get_embedding(M)),typeof(p)},
+        get_embedding(M),
+        p;
+        kwargs...,
+    )
     mpv === nothing || return mpv
     c = p' * M.B * p
     if !isapprox(c, one(c); kwargs...)
@@ -103,12 +109,12 @@ function check_tangent_vector(
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{typeof(get_embedding(M)), typeof(p), typeof(X)},
+        Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
         get_embedding(M),
         p,
         X;
         check_base_point = check_base_point,
-        kwargs...
+        kwargs...,
     )
     mpv === nothing || return mpv
     if !isapprox(p' * M.B * X + X' * M.B * p, zeros(k, k); kwargs...)
@@ -172,12 +178,12 @@ exp(::GeneralizedGrassmann, ::Any...)
 
 function exp!(M::GeneralizedGrassmann, q, p, X)
     norm(M, p, X) ≈ 0 && return copyto!(q, p)
-    d = svd(X'*M.B*X)
+    d = svd(X' * M.B * X)
     V = d.Vt
     S = abs.(sqrt.(d.S))
-    U = X*(V/Diagonal(S))
+    U = X * (V / Diagonal(S))
     z = p * V * Diagonal(cos.(S)) * V + U * Diagonal(sin.(S)) * V
-    return copyto!(q, project(M,z))
+    return copyto!(q, project(M, z))
 end
 
 @doc raw"""
@@ -215,7 +221,9 @@ inner(M::GeneralizedGrassmann{n,k}, p, X, Y) where {n,k} = dot(X, M.B * Y)
 function isapprox(M::GeneralizedGrassmann, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
 end
-isapprox(M::GeneralizedGrassmann, p, q; kwargs...) = isapprox(distance(M, p, q), 0.0; kwargs...)
+function isapprox(M::GeneralizedGrassmann, p, q; kwargs...)
+    return isapprox(distance(M, p, q), 0.0; kwargs...)
+end
 
 @doc raw"""
     log(M::GeneralizedGrassmann, p, q)
@@ -343,11 +351,11 @@ Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 retract(::GeneralizedGrassmann, ::Any, ::Any, ::PolarRetraction)
 
 function retract!(M::GeneralizedGrassmann, q, p, X, ::PolarRetraction)
-    project!(M, q, p+X)
+    project!(M, q, p + X)
     return q
 end
 function retract!(M::GeneralizedGrassmann, q, p, X, ::ProjectionRetraction)
-    project!(M, q, p+X)
+    project!(M, q, p + X)
     return q
 end
 
