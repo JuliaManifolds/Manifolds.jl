@@ -16,6 +16,11 @@ include("utils.jl")
     @test_throws DomainError is_tangent_vector(M,p,zeros(4), true)
     @test_throws DomainError is_tangent_vector(M,p,Y.+1, true)
 
+    @test injectivity_radius(M,p) == injectivity_radius(M,p,ExponentialRetraction())
+    @test injectivity_radius(M,p,SoftmaxRetraction()) == injectivity_radius(M,p)
+    @test_throws ErrorException injectivity_radius(M, ExponentialRetraction())
+    @test_throws ErrorException injectivity_radius(M)
+
     types = [ Vector{Float64}, ]
     TEST_FLOAT32 && push!(types, Vector{Float32})
     TEST_STATIC_SIZED && push!(types, MVector{3, Float64})
