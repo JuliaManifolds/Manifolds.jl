@@ -235,9 +235,7 @@ project(::Stiefel, ::Any, ::Any)
 
 function project!(M::Stiefel, q, p)
     s = svd(p)
-    e = eigen(s.U' * s.U)
-    qsinv = e.vectors * Diagonal(1 ./ sqrt.(e.values))
-    q .= s.U * qsinv * e.vectors' * s.V'
+    q .= s.U * s.V'
     return q
 end
 
