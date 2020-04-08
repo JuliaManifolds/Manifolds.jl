@@ -17,6 +17,8 @@ T_pΔ^n = \biggl\{ X ∈ ℝ^{n+1}\ \big|\ ⟨\mathbb{1},X⟩ = \sum_{i=1}^{n+1}
 
 We employ this set and its tangent spaces with the [`FisherRaoMetric`](@ref) exploiting
 the isometry to the $n$-sphere of radius 2, i.e. a scaled version of the [`Sphere`](@ref).
+The corresponding diffoemorphism $\varphi\colon \mathbb Δ^n \to \mathcal N$,
+where $\mathcal N \subset 2𝕊^n$ is given by %\varphi(p) = 2\sqrt{p}$.
 
 This implementation follows the notation in [^ÅströmPetraSchmitzerSchnörr2017]
 
