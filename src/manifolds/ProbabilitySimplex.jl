@@ -183,12 +183,10 @@ compute the injectivity radius on the [`ProbabilitySimplex`](@ref) `M` at the po
 i.e. the distanceradius to a point near/on the boundary, that could be reached by following the
 geodesic.
 """
-function injectivity_radius(M::ProbabilitySimplex, p)
+function injectivity_radius(::ProbabilitySimplex{n}, p) where {n}
     i = argmin(p)
-    q = copy(p)
-    q[i] = 0
-    q ./= sum(q)
-    return distance(M, p, q)
+    s = sum(p) - p[i]
+    return 2 * acos(sqrt(s))
 end
 function injectivity_radius(M::ProbabilitySimplex, p, ::ExponentialRetraction)
     return injectivity_radius(M, p)
