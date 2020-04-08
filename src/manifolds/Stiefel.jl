@@ -323,7 +323,8 @@ Uniform distribution on given (real-valued) [`Stiefel`](@ref) `M`.
 Specifically, this is the normalized Haar and Hausdorff measure on `M`.
 Generated points will be of similar type as `p`.
 
-The implementation is based on Section 2.5.1 in [^Chikuse2003].
+The implementation is based on Section 2.5.1 in [^Chikuse2003];
+see also Theorem 2.2.1(iii) in [^Chikuse2003].
 
 [^Chikuse2003]:
     > Y. Chikuse: "Statistics on Special Manifolds", Springer New York, 2003,
