@@ -226,9 +226,13 @@ where $pq$ and $\sqrt{p}$ is meant elementwise.
 log(::ProbabilitySimplex, ::Any...)
 
 function log!(M::ProbabilitySimplex, X, p, q)
-    z = sqrt.(p .* q)
-    s = sum(z)
-    X .= 2acos(s) / sqrt(1 - s^2) .* (z .- s .* p)
+    if p ≈ q
+        fill!(X,0)
+    else
+        z = sqrt.(p .* q)
+        s = sum(z)
+        X .= 2acos(s) / sqrt(1 - s^2) .* (z .- s .* p)
+    end
     return X
 end
 
