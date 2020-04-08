@@ -177,6 +177,21 @@ function exp!(::ProbabilitySimplex, q, p, X)
 end
 
 @doc raw"""
+    injectivity_radius(M,p)
+
+compute the injectivity radius on the [`ProbabilitySimplex`](@ref) `M` at the point `p`,
+i.e. the distanceradius to a point near/on the boundary, that could be reached by following the
+geodesic.
+"""
+function injectivity_radius(M::ProbabilitySimplex, p)
+    i = argmin(p)
+    q = copy(p)
+    q[i] = 0
+    q ./= sum(q)
+    return distance(M, p, q)
+end
+
+@doc raw"""
     inner(M::ProbabilitySimplex,p,X,Y)
 
 Compute the inner product of two tangent vectors `X`, `Y` from the tangent space $T_pΔ^n$ at
@@ -245,6 +260,26 @@ Returns the manifold dimension of the probability simplex in $ℝ^{n+1}$, i.e.
 ````
 """
 manifold_dimension(::ProbabilitySimplex{n}) where {n} = n
+
+"""
+    mean(
+        S::ProbabilitySimplex,
+        x::AbstractVector,
+        [w::AbstractWeights,]
+        method = GeodesicInterpolationWithinRadius(a);
+        kwargs...,
+    )
+
+Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+[`GeodesicInterpolationWithinRadius`](@ref), where the minimum of the injectivity radii
+of the points in `x` is used as the value `a`.
+"""
+mean(::ProbabilitySimplex, ::Any...)
+
+function mean!(M::ProbabilitySimplex, p, x::AbstractVector, w::AbstractVector; kwargs...)
+    a = a = min(injectivity_radius.(Ref(M),x)...)
+    return mean!(M, p, x, w, GeodesicInterpolationWithinRadius(a); kwargs...)
+end
 
 @doc raw"""
     project(M::ProbabilitySimplex, p, Y)
