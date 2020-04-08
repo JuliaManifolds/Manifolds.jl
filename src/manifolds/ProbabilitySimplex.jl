@@ -204,8 +204,10 @@ where $\mathbb{1}$ is the column vector containing ones and $\log$ is applied el
 """
 inverse_retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxInverseRetraction)
 
-function inverse_retract!(M::ProbabilitySimplex{n}, X, p, q, ::SoftmaxInverseRetraction) where {n}
-    project!(M, X, (log.(q) - log.(p))
+function inverse_retract!(::ProbabilitySimplex{n}, X, p, q, ::SoftmaxInverseRetraction) where {n}
+    X .= log.(q) .- log.(p)
+    meanlogdiff = mean(X)
+    X .-= meanlogdiff
     return X
 end
 
@@ -224,15 +226,16 @@ where $pq$ and $\sqrt{p}$ is meant elementwise.
 log(::ProbabilitySimplex, ::Any...)
 
 function log!(M::ProbabilitySimplex, X, p, q)
-    s = dot(sqrt.(p),sqrt.(q))
-    X .= (distance(M,p,q)/(1-s^2)) .* ( sqrt.(p.*q) .- s.*p )
+    z = sqrt.(p .* q)
+    s = sum(z)
+    X .= 2acos(s) / sqrt(1 - s^2) .* (z .- s .* p)
     return X
 end
 
 @doc raw"""
     manifold_dimension(M::ProbabilitySimplex{n})
 
-Returns the manifodl dimension of the probability siomplex in $ℝ^{n+1}$, i.e.
+Returns the manifold dimension of the probability simplex in $ℝ^{n+1}$, i.e.
 ````math
     \dim_{Δ^n} = n.
 ````
@@ -253,7 +256,15 @@ where multiplication is meant elementwise and $\mathbb{1}$ is the vector of ones
 """
 project(::ProbabilitySimplex, ::Any, ::Any)
 
-project!(::ProbabilitySimplex{n}, X, p, Y) where {n} = X .= (Y .- (1/(n+1)*sum(Y)))
+function project!(::ProbabilitySimplex, X, p, Y)
+    s = zero(eltype(X))
+    @inbounds for i in eachindex(X, p, Y)
+        X[i] = p[i] * Y[i]
+        s += X[i]
+    end
+    X .-= s .* p
+    return X
+end
 
 @doc raw"""
     representation_size(::ProbabilitySimplex{n})
@@ -277,7 +288,12 @@ where multiplication, exponentiation and division are meant elementwise.
 retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxRetraction)
 
 function retract!(::ProbabilitySimplex, q, p, X, ::SoftmaxRetraction)
-    q .= p.*exp.(X)./(dot(p,exp.(X)))
+    s = zero(eltype(q))
+    @inbounds for i in eachindex(q, p, X)
+        q[i] = p[i] * exp(X[i])
+        s += q[i]
+    end
+    q ./= s
     return q
 end
 
