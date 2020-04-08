@@ -23,7 +23,7 @@ include("utils.jl")
     basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types
         @testset "Type $T" begin
-            pts = [convert(T, [0.5,0.3, 0.2]),
+            pts = [convert(T, [0.5, 0.3, 0.2]),
                    convert(T, [0.4, 0.4, 0.2]),
                    convert(T, [0.3, 0.5, 0.2])]
             test_manifold(
@@ -40,5 +40,14 @@ include("utils.jl")
                 retraction_methods = [SoftmaxRetraction()]
             )
         end
+    end
+
+    @testset "Projection testing" begin
+        p = [1/3, 1/3, 1/3]
+        q = [0.2, 0.3, 0.5]
+        X = log(M, p, q)
+        X2 = X .+ 10
+        Y = project(M, p, X2)
+        @test isapprox(M, p, X, Y)
     end
 end
