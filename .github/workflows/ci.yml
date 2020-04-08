@@ -16,8 +16,6 @@ jobs:
         arch: [x64]
         include:
           - julia-version: nightly
-            os: [ubuntu-latest, macOS-latest, windows-latest]
-            arch: [x64]
             allow_failures: true
     steps:
       - uses: actions/checkout@v2
