@@ -190,6 +190,10 @@ function injectivity_radius(M::ProbabilitySimplex, p)
     q ./= sum(q)
     return distance(M, p, q)
 end
+function injectivity_radius(M::ProbabilitySimplex, ::AbstractRetractionMethod)
+    error("The injectivity radius on $(M) depends on the point and has no closed form globally")
+end
+injectivity_radius(M::ProbabilitySimplex, p, ::ExponentialRetraction) = injectivity_radius(M,p)
 
 @doc raw"""
     inner(M::ProbabilitySimplex,p,X,Y)
