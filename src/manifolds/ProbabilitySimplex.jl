@@ -15,8 +15,9 @@ The tangent space is given by
 T_pΔ^n = \biggl\{ X ∈ ℝ^{n+1}\ \big|\ ⟨\mathbb{1},X⟩ = \sum_{i=1}^{n+1} X_i = 0 \biggr\}
 ````
 
-We employ this set and its tangent spaces with the [`FisherRaoMetric`](@ref) exploiting
-the isometry to the $n$-sphere of radius 2, i.e. a scaled version of the [`Sphere`](@ref).
+The manifold is implemented assuming the Fisher-Rao metric for the multinomial distribution,
+which is equivalent to the induced metric from isometrically embedding the probability
+simplex in the $n$-sphere of radius 2.
 The corresponding diffoemorphism $\varphi\colon \mathbb Δ^n \to \mathcal N$,
 where $\mathcal N \subset 2𝕊^n$ is given by %\varphi(p) = 2\sqrt{p}$.
 
@@ -53,7 +54,7 @@ The Fisher-Rao metric or Fisher information metric is a particular Riemannian me
 can be defined on a smooth statistical manifold, i.e., a smooth manifold whose points are
 probability measures defined on a common probability space.
 
-It is currently used in the discrete case for the [`ProbabilitySimplex`](@ref).
+See for example the [`ProbabilitySimplex`](@ref).
 """
 struct FisherRaoMetric <: Metric end
 
