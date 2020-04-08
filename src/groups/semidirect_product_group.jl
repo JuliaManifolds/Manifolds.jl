@@ -34,7 +34,11 @@ and the inverse
 g^{-1} = (n, h)^{-1} = (θ_{h^{-1}}(n^{-1}), h^{-1}).
 ````
 """
-function SemidirectProductGroup(N::GroupManifold{𝔽}, H::GroupManifold{𝔽}, A::AbstractGroupAction) where {𝔽}
+function SemidirectProductGroup(
+    N::GroupManifold{𝔽},
+    H::GroupManifold{𝔽},
+    A::AbstractGroupAction,
+) where {𝔽}
     N === g_manifold(A) || error("Subgroup $(N) must be the G-manifold of action $(A)")
     H === base_group(A) || error("Subgroup $(H) must be the base group of action $(A)")
     op = SemidirectProductOperation(A)
@@ -159,15 +163,17 @@ function get_coordinates!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBa
     get_coordinates!(H, view(Y, dimN+1:dimN+dimH), hp, hY, B)
     return Y
 end
-eval(quote
-    @invoke_maker 1 Manifold get_coordinates!(
-        M::SemidirectProductGroup,
-        Y,
-        e::Identity,
-        X,
-        B::VeeOrthogonalBasis,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold get_coordinates!(
+            M::SemidirectProductGroup,
+            Y,
+            e::Identity,
+            X,
+            B::VeeOrthogonalBasis,
+        )
+    end,
+)
 
 function zero_tangent_vector(G::SemidirectProductGroup, p)
     X = allocate_result(G, zero_tangent_vector, p)

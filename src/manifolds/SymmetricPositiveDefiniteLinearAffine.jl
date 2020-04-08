@@ -78,9 +78,8 @@ function get_basis(
     eigv = eigen(B.frame_direction)
     V = eigv.vectors
     Ξ = [
-        (i == j ? 1 / 2 :
-             1 / sqrt(2)) * (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i]))
-        for i = 1:N
+        (i == j ? 1 / 2 : 1 / sqrt(2)) *
+        (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) for i = 1:N
         for j = i:N
     ]
     λ = eigv.values

@@ -9,7 +9,10 @@ struct TestEuclidean{N} <: Manifold{ℝ} end
 struct TestEuclideanMetric <: Metric end
 
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
-function Manifolds.local_metric(M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric}, x)
+function Manifolds.local_metric(
+    M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
+    x,
+)
     return Diagonal(1.0:manifold_dimension(M))
 end
 
@@ -27,7 +30,7 @@ function Manifolds.local_metric(M::MetricManifold{ℝ,<:TestSphere,<:TestSpheric
     d[2] = d[1] * sin(x[1])^2
     return Diagonal(d)
 end
-sph_to_cart(θ, ϕ) = [cos(ϕ)*sin(θ), sin(ϕ)*sin(θ), cos(θ)]
+sph_to_cart(θ, ϕ) = [cos(ϕ) * sin(θ), sin(ϕ) * sin(θ), cos(θ)]
 
 struct BaseManifold{N} <: Manifold{ℝ} end
 struct BaseManifoldMetric{M} <: Metric end
@@ -46,21 +49,52 @@ Manifolds.injectivity_radius(::BaseManifold, ::AbstractRetractionMethod) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::ExponentialRetraction) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::Any, ::AbstractRetractionMethod) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::Any, ::ExponentialRetraction) = Inf
-Manifolds.local_metric(::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},x) where N = 2*one(x*x')
-Manifolds.exp!(M::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}}, y, x, v) where N = exp!(base_manifold(M), y, x, v)
-Manifolds.vector_transport_to!(::BaseManifold, vto, x, v, y, ::ParallelTransport) = (vto .= v)
-Manifolds.get_basis(::BaseManifold{N},x,B::DefaultOrthonormalBasis) where {N} = CachedBasis(B, [(Matrix{eltype(x)}(I, N, N)[:,i]) for i in 1:N])
+Manifolds.local_metric(
+    ::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},
+    x,
+) where {N} = 2 * one(x * x')
+Manifolds.exp!(
+    M::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},
+    y,
+    x,
+    v,
+) where {N} = exp!(base_manifold(M), y, x, v)
+Manifolds.vector_transport_to!(::BaseManifold, vto, x, v, y, ::ParallelTransport) =
+    (vto .= v)
+Manifolds.get_basis(::BaseManifold{N}, x, B::DefaultOrthonormalBasis) where {N} =
+    CachedBasis(B, [(Matrix{eltype(x)}(I, N, N)[:, i]) for i = 1:N])
 Manifolds.get_coordinates!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
 Manifolds.get_vector!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
 Manifolds.default_metric_dispatch(::BaseManifold, ::DefaultBaseManifoldMetric) = Val(true)
-Manifolds.projected_distribution(M::BaseManifold, d) = ProjectedPointDistribution(M, d, project!, rand(d))
-Manifolds.projected_distribution(M::BaseManifold, d, x) = ProjectedPointDistribution(M, d, project!, x)
-Manifolds.mean!(::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...) = fill!(y, 1)
-Manifolds.median!(::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...) = fill!(y, 2)
-Manifolds.mean!(::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N} = fill!(y, 3)
-Manifolds.median!(::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}}, y, x::AbstractVector, w::AbstractVector; kwargs...) where {N} = fill!(y, 4)
+Manifolds.projected_distribution(M::BaseManifold, d) =
+    ProjectedPointDistribution(M, d, project!, rand(d))
+Manifolds.projected_distribution(M::BaseManifold, d, x) =
+    ProjectedPointDistribution(M, d, project!, x)
+Manifolds.mean!(::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...) =
+    fill!(y, 1)
+Manifolds.median!(::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...) =
+    fill!(y, 2)
+Manifolds.mean!(
+    ::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},
+    y,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+) where {N} = fill!(y, 3)
+Manifolds.median!(
+    ::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},
+    y,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+) where {N} = fill!(y, 4)
 
-function Manifolds.flat!(::BaseManifold, v::FVector{Manifolds.CotangentSpaceType}, x, w::FVector{Manifolds.TangentSpaceType})
+function Manifolds.flat!(
+    ::BaseManifold,
+    v::FVector{Manifolds.CotangentSpaceType},
+    x,
+    w::FVector{Manifolds.TangentSpaceType},
+)
     v.data .= 2 .* w.data
     return v
 end
@@ -147,21 +181,26 @@ end
             @test einstein_tensor(M, x) ≈ zeros(n, n) atol = 1e-6
 
             fdm = forward_fdm(2, 1)
-            @test christoffel_symbols_first(M, x; backend=fdm) ≈ zeros(n, n, n) atol=1e-6
-            @test christoffel_symbols_second(M, x; backend=fdm) ≈ zeros(n, n, n) atol=1e-6
-            @test riemann_tensor(M, x; backend=fdm) ≈ zeros(n, n, n, n) atol=1e-6
-            @test ricci_tensor(M, x; backend=fdm) ≈ zeros(n, n) atol=1e-6
-            @test ricci_curvature(M, x; backend=fdm) ≈ 0 atol=1e-6
-            @test gaussian_curvature(M, x; backend=fdm) ≈ 0 atol=1e-6
-            @test einstein_tensor(M, x; backend=fdm) ≈ zeros(n, n) atol=1e-6
+            @test christoffel_symbols_first(M, x; backend = fdm) ≈ zeros(n, n, n) atol =
+                1e-6
+            @test christoffel_symbols_second(M, x; backend = fdm) ≈ zeros(n, n, n) atol =
+                1e-6
+            @test riemann_tensor(M, x; backend = fdm) ≈ zeros(n, n, n, n) atol = 1e-6
+            @test ricci_tensor(M, x; backend = fdm) ≈ zeros(n, n) atol = 1e-6
+            @test ricci_curvature(M, x; backend = fdm) ≈ 0 atol = 1e-6
+            @test gaussian_curvature(M, x; backend = fdm) ≈ 0 atol = 1e-6
+            @test einstein_tensor(M, x; backend = fdm) ≈ zeros(n, n) atol = 1e-6
 
-            @test christoffel_symbols_first(M, x; backend=:forwarddiff) ≈ zeros(n, n, n) atol=1e-6
-            @test christoffel_symbols_second(M, x; backend=:forwarddiff) ≈ zeros(n, n, n) atol=1e-6
-            @test riemann_tensor(M, x; backend=:forwarddiff) ≈ zeros(n, n, n, n) atol=1e-6
-            @test ricci_tensor(M, x; backend=:forwarddiff) ≈ zeros(n, n) atol=1e-6
-            @test ricci_curvature(M, x; backend=:forwarddiff) ≈ 0 atol=1e-6
-            @test gaussian_curvature(M, x; backend=:forwarddiff) ≈ 0 atol=1e-6
-            @test einstein_tensor(M, x; backend=:forwarddiff) ≈ zeros(n, n) atol=1e-6
+            @test christoffel_symbols_first(M, x; backend = :forwarddiff) ≈ zeros(n, n, n) atol =
+                1e-6
+            @test christoffel_symbols_second(M, x; backend = :forwarddiff) ≈ zeros(n, n, n) atol =
+                1e-6
+            @test riemann_tensor(M, x; backend = :forwarddiff) ≈ zeros(n, n, n, n) atol =
+                1e-6
+            @test ricci_tensor(M, x; backend = :forwarddiff) ≈ zeros(n, n) atol = 1e-6
+            @test ricci_curvature(M, x; backend = :forwarddiff) ≈ 0 atol = 1e-6
+            @test gaussian_curvature(M, x; backend = :forwarddiff) ≈ 0 atol = 1e-6
+            @test einstein_tensor(M, x; backend = :forwarddiff) ≈ zeros(n, n) atol = 1e-6
         end
     end
 
@@ -261,9 +300,11 @@ end
         g = BaseManifoldMetric{3}()
         MM = MetricManifold(M, g)
         if VERSION ≥ v"1.3"
-            @test DefaultBaseManifoldMetric(BaseManifold{3}()) === MetricManifold(BaseManifold{3}(),DefaultBaseManifoldMetric())
+            @test DefaultBaseManifoldMetric(BaseManifold{3}()) ===
+                  MetricManifold(BaseManifold{3}(), DefaultBaseManifoldMetric())
             MT = DefaultBaseManifoldMetric()
-            @test MT(BaseManifold{3}()) === MetricManifold(BaseManifold{3}(),DefaultBaseManifoldMetric())
+            @test MT(BaseManifold{3}()) ===
+                  MetricManifold(BaseManifold{3}(), DefaultBaseManifoldMetric())
         end
         g2 = DefaultBaseManifoldMetric()
         MM2 = MetricManifold(M, g2)
@@ -276,8 +317,10 @@ end
         @test is_default_metric(MM) == is_default_metric(base_manifold(MM), metric(MM))
         @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2), metric(MM2))
         @test is_default_metric(MM2)
-        @test Manifolds.default_decorator_dispatch(MM) === Manifolds.default_metric_dispatch(MM)
-        @test Manifolds.default_decorator_dispatch(MM2) === Manifolds.default_metric_dispatch(MM2)
+        @test Manifolds.default_decorator_dispatch(MM) ===
+              Manifolds.default_metric_dispatch(MM)
+        @test Manifolds.default_decorator_dispatch(MM2) ===
+              Manifolds.default_metric_dispatch(MM2)
 
         @test convert(typeof(MM2), M) == MM2
         @test_throws ErrorException convert(typeof(MM), M)
@@ -296,8 +339,7 @@ end
         @test retract!(MM, y, x, v, 1) === retract!(M, y, x, v, 1)
         # without a definition for the metric from the embedding, no projection possible
         @test_throws ErrorException log!(MM, w, x, y) === project!(M, w, x, y)
-        @test_throws ErrorException project!(MM, w, x, v) ===
-                                    project!(M, w, x, v)
+        @test_throws ErrorException project!(MM, w, x, v) === project!(M, w, x, v)
         @test_throws ErrorException project!(MM, y, x) === project!(M, y, x)
         @test_throws ErrorException vector_transport_to!(MM, w, x, v, y) ===
                                     vector_transport_to!(M, w, x, v, y)
@@ -309,8 +351,10 @@ end
 
         @test injectivity_radius(MM, x) === injectivity_radius(M, x)
         @test injectivity_radius(MM) === injectivity_radius(M)
-        @test injectivity_radius(MM, ProjectionRetraction()) === injectivity_radius(M, ProjectionRetraction())
-        @test injectivity_radius(MM, ExponentialRetraction()) === injectivity_radius(M, ExponentialRetraction())
+        @test injectivity_radius(MM, ProjectionRetraction()) ===
+              injectivity_radius(M, ProjectionRetraction())
+        @test injectivity_radius(MM, ExponentialRetraction()) ===
+              injectivity_radius(M, ExponentialRetraction())
         @test injectivity_radius(MM) === injectivity_radius(M)
 
         @test is_manifold_point(MM, x) === is_manifold_point(M, x)
@@ -341,10 +385,14 @@ end
         @test zero_tangent_vector!(MM2, v, x) === zero_tangent_vector!(M, v, x)
         @test injectivity_radius(MM2, x) === injectivity_radius(M, x)
         @test injectivity_radius(MM2) === injectivity_radius(M)
-        @test injectivity_radius(MM2, x, ExponentialRetraction()) === injectivity_radius(M, x, ExponentialRetraction())
-        @test injectivity_radius(MM2, ExponentialRetraction()) === injectivity_radius(M, ExponentialRetraction())
-        @test injectivity_radius(MM2, x, ProjectionRetraction()) === injectivity_radius(M, x, ProjectionRetraction())
-        @test injectivity_radius(MM2, ProjectionRetraction()) === injectivity_radius(M, ProjectionRetraction())
+        @test injectivity_radius(MM2, x, ExponentialRetraction()) ===
+              injectivity_radius(M, x, ExponentialRetraction())
+        @test injectivity_radius(MM2, ExponentialRetraction()) ===
+              injectivity_radius(M, ExponentialRetraction())
+        @test injectivity_radius(MM2, x, ProjectionRetraction()) ===
+              injectivity_radius(M, x, ProjectionRetraction())
+        @test injectivity_radius(MM2, ProjectionRetraction()) ===
+              injectivity_radius(M, ProjectionRetraction())
         @test is_manifold_point(MM2, x) === is_manifold_point(M, x)
         @test is_tangent_vector(MM2, x, v) === is_tangent_vector(M, x, v)
 
@@ -385,7 +433,7 @@ end
         M = BaseManifold{3}()
         g = BaseManifoldMetric{3}()
         MM = MetricManifold(M, g)
-        x = [1,2,3]
+        x = [1, 2, 3]
         # nonmutating always go to parent for allocation
         for f in [exp, flat, inverse_retract, log, mean, median, project]
             @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:parent}()
@@ -394,29 +442,45 @@ end
             @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:parent}()
         end
         for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
-            @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:parent}()
+            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:parent}()
         end
         for f in [get_basis, inner, normal_tvector_distribution, projected_distribution]
-            @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
+            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:intransparent}()
         end
         for f in [get_coordinates!, get_vector!]
-            @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
+            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:intransparent}()
         end
 
         # mirroring ones are mostly intransparent despite for a few cases - e.g. dispatch/default last variables
         for f in [exp!, flat!, inverse_retract!, log!, mean!, median!]
-            @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
+            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:intransparent}()
         end
         for f in [norm, project!, sharp!, retract!]
-            @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
+            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:intransparent}()
         end
-        for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
-            @test Manifolds.decorator_transparent_dispatch(f,MM) === Val{:intransparent}()
+        for f in
+            [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
+            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:intransparent}()
         end
 
-        @test Manifolds.decorator_transparent_dispatch(exp!,MM,x,x,x,x) === Val{:parent}()
-        @test Manifolds.decorator_transparent_dispatch(inverse_retract!, MM, x, x, x, LogarithmicInverseRetraction()) === Val{:parent}()
-        @test Manifolds.decorator_transparent_dispatch(retract!, MM, x, x, x, ExponentialRetraction()) === Val{:parent}()
+        @test Manifolds.decorator_transparent_dispatch(exp!, MM, x, x, x, x) ===
+              Val{:parent}()
+        @test Manifolds.decorator_transparent_dispatch(
+            inverse_retract!,
+            MM,
+            x,
+            x,
+            x,
+            LogarithmicInverseRetraction(),
+        ) === Val{:parent}()
+        @test Manifolds.decorator_transparent_dispatch(
+            retract!,
+            MM,
+            x,
+            x,
+            x,
+            ExponentialRetraction(),
+        ) === Val{:parent}()
 
     end
 end

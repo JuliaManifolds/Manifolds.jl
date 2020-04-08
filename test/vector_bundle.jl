@@ -25,12 +25,20 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test (fv1 - fv1).type == TangentSpace
         @test isa(-fv1, FVector)
         @test (-fv1).type == TangentSpace
-        @test isa(2*fv1, FVector)
-        @test (2*fv1).type == TangentSpace
+        @test isa(2 * fv1, FVector)
+        @test (2 * fv1).type == TangentSpace
 
         PM = ProductManifold(Sphere(2), Euclidean(2))
-        @test_throws ErrorException flat(PM,ProductRepr([0.0,],[0.0]),FVector(CotangentSpace, ProductRepr([0.0],[0.0])))
-        @test_throws ErrorException sharp(PM,ProductRepr([0.0,],[0.0]),FVector(TangentSpace, ProductRepr([0.0],[0.0])))
+        @test_throws ErrorException flat(
+            PM,
+            ProductRepr([0.0], [0.0]),
+            FVector(CotangentSpace, ProductRepr([0.0], [0.0])),
+        )
+        @test_throws ErrorException sharp(
+            PM,
+            ProductRepr([0.0], [0.0]),
+            FVector(TangentSpace, ProductRepr([0.0], [0.0])),
+        )
 
         fv2 = FVector(TangentSpace, ProductRepr([1, 0, 0], [1 2]))
         @test submanifold_component(fv2, 1) == [1, 0, 0]
@@ -44,25 +52,31 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test submanifold_components(PM, fv2) == ([1.0, 0.0, 0.0], [1.0 2.0])
     end
 
-    types = [ Vector{Float64}, ]
+    types = [Vector{Float64}]
     TEST_FLOAT32 && push!(types, Vector{Float32})
-    TEST_STATIC_SIZED && push!(types, MVector{3, Float64})
+    TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
 
     for T in types
         x = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)
         @test sprint(show, TB) == "TangentBundle(Sphere(2; field = ℝ))"
         @test base_manifold(TB) == M
-        @test manifold_dimension(TB) == 2*manifold_dimension(M)
+        @test manifold_dimension(TB) == 2 * manifold_dimension(M)
         @test representation_size(TB) == (6,)
         CTB = CotangentBundle(M)
         @test sprint(show, CTB) == "CotangentBundle(Sphere(2; field = ℝ))"
-        @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) == "VectorBundle(TestVectorSpaceType(), Sphere(2; field = ℝ))"
+        @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
+              "VectorBundle(TestVectorSpaceType(), Sphere(2; field = ℝ))"
         @testset "Type $T" begin
-            pts_tb = [ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
-                      ProductRepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
-                      ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, 2.0, -1.0]))]
-            @inferred ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0]))
+            pts_tb = [
+                ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
+                ProductRepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
+                ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, 2.0, -1.0])),
+            ]
+            @inferred ProductRepr(
+                convert(T, [1.0, 0.0, 0.0]),
+                convert(T, [0.0, -1.0, -1.0]),
+            )
             for pt ∈ pts_tb
                 @test bundle_projection(TB, pt) ≈ pt.parts[1]
             end
@@ -84,13 +98,15 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_project_tangent = true,
                 test_project_point = true,
                 basis_types_vecs = basis_types,
-                projection_atol_multiplier = 4
+                projection_atol_multiplier = 4,
             )
         end
     end
 
-    @test TangentBundle{ℝ,Sphere{2,ℝ}} == VectorBundle{ℝ,Manifolds.TangentSpaceType,Sphere{2,ℝ}}
-    @test CotangentBundle{ℝ,Sphere{2,ℝ}} == VectorBundle{ℝ,Manifolds.CotangentSpaceType,Sphere{2,ℝ}}
+    @test TangentBundle{ℝ,Sphere{2,ℝ}} ==
+          VectorBundle{ℝ,Manifolds.TangentSpaceType,Sphere{2,ℝ}}
+    @test CotangentBundle{ℝ,Sphere{2,ℝ}} ==
+          VectorBundle{ℝ,Manifolds.CotangentSpaceType,Sphere{2,ℝ}}
 
     @test base_manifold(TangentBundle(M)) == M
     @testset "spaces at point" begin
@@ -108,8 +124,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
           0.0"""
         @test base_manifold(t_x) == M
         @test base_manifold(ct_x) == M
-        @test t_x.fiber.manifold== M
-        @test ct_x.fiber.manifold== M
+        @test t_x.fiber.manifold == M
+        @test ct_x.fiber.manifold == M
         @test t_x.fiber.fiber == TangentSpace
         @test ct_x.fiber.fiber == CotangentSpace
         @test t_x.point == x
@@ -122,7 +138,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(2))) == 4
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(3))) == 9
         @test base_manifold(VectorBundleFibers(TT, Sphere(2))) == M
-        @test sprint(show, VectorBundleFibers(TT, Sphere(2))) == "VectorBundleFibers(TensorProductType(TangentSpace, TangentSpace), Sphere(2; field = ℝ))"
+        @test sprint(show, VectorBundleFibers(TT, Sphere(2))) ==
+              "VectorBundleFibers(TensorProductType(TangentSpace, TangentSpace), Sphere(2; field = ℝ))"
     end
 
     @testset "Error messages" begin
@@ -137,6 +154,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
             a,
             ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0, 0.0]),
             ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0, 1.0]),
-            CachedBasis(DefaultOrthonormalBasis(), []))
+            CachedBasis(DefaultOrthonormalBasis(), []),
+        )
     end
 end

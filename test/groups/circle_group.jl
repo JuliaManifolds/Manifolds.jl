@@ -12,7 +12,8 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
     @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(true)
     @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(true)
     @test (@inferred Manifolds.biinvariant_metric_dispatch(G)) === Val(true)
-    @test (@inferred default_metric_dispatch(MetricManifold(G, EuclideanMetric()))) === Val(true)
+    @test (@inferred default_metric_dispatch(MetricManifold(G, EuclideanMetric()))) ===
+          Val(true)
     @test has_invariant_metric(G, LeftAction())
     @test has_invariant_metric(G, RightAction())
     @test has_biinvariant_metric(G)
@@ -22,7 +23,8 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
         ig = Identity(G, [Complex(1.0)])
         @test identity(G, ig) === ig
         @test inv(G, ig) === ig
-        @test allocate_result(G, get_coordinates, ig, Complex(1.0), DefaultBasis()) isa Array{Complex{Float64},1}
+        @test allocate_result(G, get_coordinates, ig, Complex(1.0), DefaultBasis()) isa
+              Array{Complex{Float64},1}
         y = [Complex(0.0)]
         @test identity!(G, y, [Complex(1.0)]) === y
         @test y == [Complex(1.0)]
@@ -36,7 +38,15 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
         vpts = [0.0 + 0.5im]
         @test compose(G, pts[2], pts[1]) ≈ pts[2] * pts[1]
         @test translate_diff(G, pts[2], pts[1], vpts[1]) ≈ pts[2] * vpts[1]
-        test_group(G, pts, vpts, vpts; test_diff = true, test_mutating = false, test_invariance = true)
+        test_group(
+            G,
+            pts,
+            vpts,
+            vpts;
+            test_diff = true,
+            test_mutating = false,
+            test_invariance = true,
+        )
     end
 
     @testset "vector points" begin
@@ -44,7 +54,15 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
         vpts = [[0.0 + 0.5im]]
         @test compose(G, pts[2], pts[1]) ≈ pts[2] .* pts[1]
         @test translate_diff(G, pts[2], pts[1], vpts[1]) ≈ pts[2] .* vpts[1]
-        test_group(G, pts, vpts, vpts; test_diff = true, test_mutating = true, test_invariance = true)
+        test_group(
+            G,
+            pts,
+            vpts,
+            vpts;
+            test_diff = true,
+            test_mutating = true,
+            test_invariance = true,
+        )
     end
 
     @testset "Group forwards to decorated" begin

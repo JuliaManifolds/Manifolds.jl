@@ -23,13 +23,13 @@ include("group_utils.jl")
     pts = [Manifolds.prod_point(shape_se, tp...) for tp in tuple_pts]
     v_pts = [Manifolds.prod_point(shape_se, tuple_v...)]
 
-    X = log(G,pts[1],pts[1])
-    Y = zero_tangent_vector(G,pts[1])
+    X = log(G, pts[1], pts[1])
+    Y = zero_tangent_vector(G, pts[1])
     Z = Manifolds.allocate_result(G, zero_tangent_vector, pts[1])
-    Z = zero_tangent_vector!(M,Z,pts[1])
-    @test norm(G,pts[1],X) ≈ 0
-    @test norm(G,pts[1],Y) ≈ 0
-    @test norm(G,pts[1],Z) ≈ 0
+    Z = zero_tangent_vector!(M, Z, pts[1])
+    @test norm(G, pts[1], X) ≈ 0
+    @test norm(G, pts[1], Y) ≈ 0
+    @test norm(G, pts[1], Z) ≈ 0
 
     e = Identity(G, (zeros(2), zeros(2)))
     @test inv(G, e) === e

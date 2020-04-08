@@ -22,8 +22,8 @@ include("utils.jl")
         @test_throws DomainError is_tangent_vector(M, p, [0.0, 0.0, 0.0], true)
         @test injectivity_radius(M) ≈ π
         x = [1.0 0.0 0.0; 1.0 0.0 0.0]'
-        y = [1.0 0.0 0.0; 1/sqrt(2) 1/sqrt(2) 0.0]'
-        z = [1/sqrt(2) 1/sqrt(2) 0.0; 1.0 0.0 0.0]'
+        y = [1.0 0.0 0.0; 1 / sqrt(2) 1 / sqrt(2) 0.0]'
+        z = [1 / sqrt(2) 1 / sqrt(2) 0.0; 1.0 0.0 0.0]'
         basis_types = (DefaultOrthonormalBasis(),)
         test_manifold(
             M,

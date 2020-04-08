@@ -33,7 +33,10 @@ function Lorentz(n, m::MT = MinkowskiMetric()) where {MT<:LorentzMetric}
     return Lorentz{n,typeof(m)}(Euclidean(n), m)
 end
 
-function local_metric(::MetricManifold{ℝ,Euclidean{Tuple{N},ℝ},MinkowskiMetric}, p) where {N}
+function local_metric(
+    ::MetricManifold{ℝ,Euclidean{Tuple{N},ℝ},MinkowskiMetric},
+    p,
+) where {N}
     return Diagonal([ones(N - 1)..., -1])
 end
 
