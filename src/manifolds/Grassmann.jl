@@ -380,16 +380,6 @@ end
 
 show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽} = print(io, "Grassmann($(n), $(k), $(𝔽))")
 
-@doc raw"""
-    zero_tangent_vector(M::Grassmann, p)
-
-Return the zero tangent vector from the tangent space at `p` on the [`Grassmann`](@ref) `M`,
-which is given by a zero matrix the same size as `p`.
-"""
-zero_tangent_vector(::Grassmann, ::Any...)
-
-zero_tangent_vector!(::Grassmann, X, p) = fill!(X, 0)
-
 """
     uniform_distribution(M::Grassmann{n,k,ℝ}, p)
 
@@ -403,5 +393,16 @@ see also Theorem 2.2.2(iii) in [^Chikuse2003].
     > Y. Chikuse: "Statistics on Special Manifolds", Springer New York, 2003,
     > doi: [10.1007/978-0-387-21540-2](https://doi.org/10.1007/978-0-387-21540-2).
 """
-uniform_distribution(M::Grassmann{n,k,ℝ}, p) where {n,k} =
-    uniform_distribution(Stiefel(n, k, ℝ), p)
+function uniform_distribution(M::Grassmann{n,k,ℝ}, p) where {n,k}
+    return uniform_distribution(Stiefel(n, k, ℝ), p)
+end
+
+@doc raw"""
+    zero_tangent_vector(M::Grassmann, p)
+
+Return the zero tangent vector from the tangent space at `p` on the [`Grassmann`](@ref) `M`,
+which is given by a zero matrix the same size as `p`.
+"""
+zero_tangent_vector(::Grassmann, ::Any...)
+
+zero_tangent_vector!(::Grassmann, X, p) = fill!(X, 0)
