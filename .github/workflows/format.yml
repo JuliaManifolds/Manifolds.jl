@@ -7,6 +7,7 @@ on:
 
 jobs:
   format:
+    name: "Format Check"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -17,7 +18,7 @@ jobs:
         run: |
           julia  -e 'using Pkg; Pkg.add(PackageSpec(name="JuliaFormatter"))'
           julia  -e 'using JuliaFormatter; format(".", verbose=true)'
-      - name: Format check
+      - name: Check format
         run: |
           julia -e '
           out = Cmd(`git diff --name-only`) |> read |> String
