@@ -5,7 +5,7 @@ include("utils.jl")
     p = [0.1, 0.7, 0.2]
     q = [0.3, 0.6, 0.1]
     X = zeros(3)
-    Y = [-0.2, 0.1, 0.1]
+    Y = [-0.1, 0.08, 0.08]
     @test is_manifold_point(M,p)
     @test_throws DomainError is_manifold_point(M,p.+1, true)
     @test_throws DomainError is_manifold_point(M, [0], true)
@@ -35,6 +35,7 @@ include("utils.jl")
                 test_vee_hat = false,
                 test_forward_diff = false,
                 test_reverse_diff = false,
+                is_tangent_atol_multiplier = 5.0,
                 retraction_methods = [ProjectionRetraction(),]
             )
         end
