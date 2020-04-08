@@ -253,10 +253,8 @@ project `Y` from the embedding onto the tangent space at `p` on
 the [`ProbabilitySimplex`](@ref) `M`. The formula reads
 
 ````math
-\operatorname{proj}_{Δ^n}(p,Y) = Y - \frac{1}{n+1}⟨\mathbb{1},Y\rangle\mathbb{1},
+\operatorname{proj}_{Δ^n}(p,Y) = pY -⟨p,Y⟩p.
 ````
-
-where multiplication is meant elementwise and $\mathbb{1}$ is the vector of ones.
 """
 project(::ProbabilitySimplex, ::Any, ::Any)
 
