@@ -278,24 +278,22 @@ Returns the manifold dimension of the probability simplex in $ℝ^{n+1}$, i.e.
 """
 manifold_dimension(::ProbabilitySimplex{n}) where {n} = n
 
-"""
+@doc raw"""
     mean(
         S::ProbabilitySimplex,
         x::AbstractVector,
         [w::AbstractWeights,]
-        method = GeodesicInterpolationWithinRadius(a);
+        method = GeodesicInterpolationWithinRadius();
         kwargs...,
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
-[`GeodesicInterpolationWithinRadius`](@ref), where the minimum of the injectivity radii
-of the points in `x` is used as the value `a`.
+[`GeodesicInterpolationWithinRadius`](@ref), with its default radius, $\frac{π}{2}$.
 """
 mean(::ProbabilitySimplex, ::Any...)
 
 function mean!(M::ProbabilitySimplex, p, x::AbstractVector, w::AbstractVector; kwargs...)
-    a = minimum(injectivity_radius.(Ref(M), x))
-    return mean!(M, p, x, w, GeodesicInterpolationWithinRadius(a); kwargs...)
+    return mean!(M, p, x, w, GeodesicInterpolationWithinRadius(); kwargs...)
 end
 
 @doc raw"""
