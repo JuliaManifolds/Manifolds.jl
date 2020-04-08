@@ -302,9 +302,7 @@ the [`ProbabilitySimplex`](@ref) `M`. The formula reads
 project(::ProbabilitySimplex, ::Any, ::Any)
 
 function project!(::ProbabilitySimplex{n}, X, p, Y) where {n}
-    copyto!(X, Y)
-    s = sum(Y) / 4
-    X .-= s .* sqrt.(p)
+    X .= Y .- sum(Y) .* p
     return X
 end
 
