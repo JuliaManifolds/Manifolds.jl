@@ -28,14 +28,14 @@ ProbabilitySimplex(n::Int) = ProbabilitySimplex{n}()
 """
     SoftmaxRetraction <: AbstractRetractionMethod
 
-Descrives a retraction that is based on the Softmax function.
+Describes a retraction that is based on the Softmax function.
 """
 struct SoftmaxRetraction <: AbstractRetractionMethod end
 
 """
     SoftmaxInverseRetraction <: AbstractInverseRetractionMethod
 
-Descrives an inverse  retraction that is based on the Softmax function.
+Describes an inverse retraction that is based on the Softmax function.
 """
 struct SoftmaxInverseRetraction <: AbstractInverseRetractionMethod end
 
@@ -115,7 +115,7 @@ decorated_manifold(M::ProbabilitySimplex) = Euclidean(representation_size(M)...;
 @doc raw"""
     distance(M,p,q)
 
-Compute the sistance of two points on the [`ProbabilitySimplex`](@ref) `M`.
+Compute the distance between two points on the [`ProbabilitySimplex`](@ref) `M`.
 The formula reads
 ````math
 d_{𝒮}(p,q) = 2\arccos \biggl( \sum_{i=1}^{n+1} \sqrt{p_i q_i} \biggr)
@@ -123,8 +123,8 @@ d_{𝒮}(p,q) = 2\arccos \biggl( \sum_{i=1}^{n+1} \sqrt{p_i q_i} \biggr)
 """
 distance(::ProbabilitySimplex,p,q) = 2*acos(sum(sqrt.(p.*q)))
 
-embed!(M::ProbabilitySimplex, q, p) = (q .= p)
-embed!(M::ProbabilitySimplex, Y, p, X) = (Y .= X)
+embed!(::ProbabilitySimplex, q, p) = copyto!(q, p)
+embed!(::ProbabilitySimplex, Y, p, X) = copyto!(Y, X)
 
 @doc raw"""
     exp(M::ProbabilitySimplex,p,X)
@@ -143,9 +143,10 @@ operations $X_p^2$ and $\sqrt{p}$.
 exp(::ProbabilitySimplex, ::Any...)
 
 function exp!(::ProbabilitySimplex, q, p, X)
-    Xp = X./sqrt.(p)
-    Xp_n = Xp./norm(Xp)
-    q .= 0.5*(p+Xp_n.^2) + 0.5*(p-Xp_n.^2).*cos(norm(Xp)) + Xp_n.*sqrt.(p).*sin(norm(Xp))
+    s = sqrt.(p)
+    Xs = X ./ s ./ 2
+    θ = norm(Xs)
+    q .= (cos(θ) .* s .+ usinc(θ) .* Xs).^2
     return q
 end
 
