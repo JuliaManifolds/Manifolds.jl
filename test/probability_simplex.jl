@@ -18,8 +18,8 @@ include("utils.jl")
 
     @test injectivity_radius(M,p) == injectivity_radius(M,p,ExponentialRetraction())
     @test injectivity_radius(M,p,SoftmaxRetraction()) == injectivity_radius(M,p)
-    @test_throws ErrorException injectivity_radius(M, ExponentialRetraction())
-    @test_throws ErrorException injectivity_radius(M)
+    @test injectivity_radius(M, ExponentialRetraction()) == 0
+    @test injectivity_radius(M) == 0
 
     types = [ Vector{Float64}, ]
     TEST_FLOAT32 && push!(types, Vector{Float32})
