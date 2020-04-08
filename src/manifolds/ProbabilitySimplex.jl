@@ -132,9 +132,9 @@ embed!(M::ProbabilitySimplex, Y, p, X) = (Y .= X)
 Compute the exponential map on the probability simplex.
 
 ````math
-\exp_pX = \frac{1}{2}\Bigl(p+\frac{1}{\lVert X_p \rVert^2}X_p^2\Bigr)
-+ \frac{1}{2}\Bigl(p - \frac{1}{\lVert X_p \rVert^2}X_p^2\Bigr)\cos(\lVert X_p\rVert)
-+ \frac{1}{\lVert Xp \rVert}\sqrt{p}\sin(\lVert X_p\rVert),
+\exp_pX = \frac{1}{2}\Bigl(p+\frac{X_p^2}{\lVert X_p \rVert^2}\Bigr)
++ \frac{1}{2}\Bigl(p - \frac{X_p^2}{\lVert X_p \rVert^2}\Bigr)\cos(\lVert X_p\rVert)
++ \frac{1}{\lVert X_p \rVert}\sqrt{p}\sin(\lVert X_p\rVert),
 ````
 
 where $X_p = \frac{X}{\sqrt{p}}$, with its division meant elementwise, as well as for the
