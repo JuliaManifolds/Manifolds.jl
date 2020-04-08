@@ -144,7 +144,7 @@ function distance(::ProbabilitySimplex, p, q)
     @inbounds for i in eachindex(p, q)
         sumsqrt += sqrt(p[i] * q[i])
     end
-    return 2acos(sumsqrt)
+    return 2*acos(sumsqrt)
 end
 
 embed!(::ProbabilitySimplex, q, p) = copyto!(q, p)
