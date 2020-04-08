@@ -3,15 +3,20 @@
 
 The (relative interior of) the probability simplex is the set
 ````math
-𝒮^{n} := \biggl\{ p \in ℝ^{n+1}\ \big|\ p_i > 0 \text{ for all } i=1,…,n+1,
+Δ^n := \biggl\{ p ∈ ℝ^{n+1}\ \big|\ p_i > 0 \text{ for all } i=1,…,n+1,
 \text{ and } ⟨\mathbb{1},p⟩ = \sum_{i=1}^{n+1} p_i = 1\biggr\},
 ````
-where $\mathbb{1}=(1,…,1)^{\mathrm{T}}\in ℝ^{n+1}$ denotes the vector containing only ones.
+where $\mathbb{1}=(1,…,1)^{\mathrm{T}}∈ ℝ^{n+1}$ denotes the vector containing only ones.
+
+This set is also called the unit simplex or standard simplex.
 
 The tangent space is given by
 ````math
-T_p𝒮 = \biggl\{ X \in ℝ^{n+1}\ \big|\ ⟨\mathbb{1},X⟩ = \sum_{i=1}^{n+1} X_i = 0 \biggr\}
+T_pΔ^n = \biggl\{ X ∈ ℝ^{n+1}\ \big|\ ⟨\mathbb{1},X⟩ = \sum_{i=1}^{n+1} X_i = 0 \biggr\}
 ````
+
+We employ this set and its tangent spaces with the [`FisherRaoMetric`](@ref) exploiting
+the isometry to the $n$-sphere of radius 2, i.e. a scaled version of the [`Sphere`](@ref).
 
 This implementation follows the notation in [^ÅströmPetraSchmitzerSchnörr2017]
 
@@ -38,6 +43,17 @@ struct SoftmaxRetraction <: AbstractRetractionMethod end
 Describes an inverse retraction that is based on the Softmax function.
 """
 struct SoftmaxInverseRetraction <: AbstractInverseRetractionMethod end
+
+"""
+    FisherRaoMetric <: Metric
+
+The Fisher-Rao metric or Fisher information metric is a particular Riemannian metric which
+can be defined on a smooth statistical manifold, i.e., a smooth manifold whose points are
+probability measures defined on a common probability space.
+
+It is currently used in the discrete case for the [`ProbabilitySimplex`](@ref).
+"""
+struct FisherRaoMetric <: Metric end
 
 """
     check_manifold_point(M::ProbabilitySimplex, p; kwargs...)
@@ -112,13 +128,15 @@ end
 
 decorated_manifold(M::ProbabilitySimplex) = Euclidean(representation_size(M)...; field = ℝ)
 
+default_metric_dispatch(::ProbabilitySimplex, ::FisherRaoMetric) = Val(true)
+
 @doc raw"""
     distance(M,p,q)
 
 Compute the distance between two points on the [`ProbabilitySimplex`](@ref) `M`.
 The formula reads
 ````math
-d_{𝒮}(p,q) = 2\arccos \biggl( \sum_{i=1}^{n+1} \sqrt{p_i q_i} \biggr)
+d_{Δ^n}(p,q) = 2\arccos \biggl( \sum_{i=1}^{n+1} \sqrt{p_i q_i} \biggr)
 ````
 """
 distance(::ProbabilitySimplex,p,q) = 2*acos(sum(sqrt.(p.*q)))
@@ -153,13 +171,19 @@ end
 @doc raw"""
     inner(M::ProbabilitySimplex,p,X,Y)
 
-Compute the inner product of two tangent vectors `X`, `Y` from the tangent space $T_p𝒮$ at
+Compute the inner product of two tangent vectors `X`, `Y` from the tangent space $T_pΔ^n$ at
 `p`. The formula reads
 ````math
 g_p(X,Y) = \sum_{i=1}^{n+1}\frac{X_iY_i}{p}
 ````
 """
-inner(::ProbabilitySimplex, p, X, Y) = sum( (X.*Y)./p )
+function inner(::ProbabilitySimplex, p, X, Y)
+    d = zero(Base.promote_eltype(p,X,Y))
+    @inbounds for i in eachindex(p,X,Y)
+        d += X[i]*Y[i]/p[i]
+    end
+    return d
+end
 
 @doc raw"""
     inverse_retract(M::ProbabilitySimplex, p, q, ::SoftmaxInverseRetraction)
@@ -184,7 +208,7 @@ end
 Compute the logarithmic map of `p` and `q` on the [`ProbabilitySimplex`](@ref) `M`.
 
 ````math
-\log_pq = \frac{d_{𝒮}(p,q)}{\sqrt{1-⟨\sqrt{p},\sqrt{q}⟩}}(\sqrt{pq} - ⟨\sqrt{p},\sqrt{q}⟩p),
+\log_pq = \frac{d_{Δ^n}(p,q)}{\sqrt{1-⟨\sqrt{p},\sqrt{q}⟩}}(\sqrt{pq} - ⟨\sqrt{p},\sqrt{q}⟩p),
 ````
 
 where $pq$ and $\sqrt{p}$ is meant elementwise.
@@ -202,7 +226,7 @@ end
 
 Returns the manifodl dimension of the probability siomplex in $ℝ^{n+1}$, i.e.
 ````math
-    \dim_{𝒮} = n.
+    \dim_{Δ^n} = n.
 ````
 """
 manifold_dimension(::ProbabilitySimplex{n}) where {n} = n
@@ -214,7 +238,7 @@ project `Y` from the embedding onto the tangent space at `p` on
 the [`ProbabilitySimplex`](@ref) `M`. The formula reads
 
 ````math
-\operatorname{proj}_{𝒮}(p,Y) = p\bigl(Y - ⟨p,Y⟩\mathbb{1}),
+\operatorname{proj}_{Δ^n}(p,Y) = p\bigl(Y - ⟨p,Y⟩\mathbb{1}),
 ````
 
 where multiplication is meant elementwise and $\mathbb{1}$ is the vector of ones.
