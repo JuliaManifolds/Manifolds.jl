@@ -340,17 +340,9 @@ for BT in [
     ProjectedOrthonormalBasis{:svd,ℝ},
     VeeOrthogonalBasis,
 ]
-    eval(
-        quote
-            @invoke_maker 5 AbstractBasis get_coordinates!(
-                M::VectorBundle,
-                Y,
-                p,
-                X,
-                B::$BT,
-            )
-        end,
-    )
+    eval(quote
+        @invoke_maker 5 AbstractBasis get_coordinates!(M::VectorBundle, Y, p, X, B::$BT)
+    end)
 end
 function get_coordinates!(M::VectorBundle, Y, p, X, B::CachedBasis)
     error("get_coordinates! called on $M with an incorrect CachedBasis. Expected a CachedBasis with VectorBundleBasisData, given $B")

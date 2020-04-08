@@ -235,9 +235,16 @@ function get_vector(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
     return get_vector(M, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(quote
-        @invoke_maker 1 Manifold get_vector(M::$MT, e::Identity, X, B::VeeOrthogonalBasis)
-    end)
+    eval(
+        quote
+            @invoke_maker 1 Manifold get_vector(
+                M::$MT,
+                e::Identity,
+                X,
+                B::VeeOrthogonalBasis,
+            )
+        end,
+    )
 end
 function get_vector!(M::AbstractGroupManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group && error("On $(M) the identity $(e) does not match to perform get_vector!")
