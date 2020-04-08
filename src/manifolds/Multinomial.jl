@@ -5,9 +5,7 @@ The multinomial manifold consists of `m` column vectors, where each column is of
 `n` and unit norm, i.e.
 
 ````math
-\mathcal{MN}(n,m) \coloneqq \bigl\{ p ∈ ℝ^{n×m}\ \big|\
-p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m
-\text{ and } p^\mathrm{T}\mathbb{1}_m = \mathbb{1}_m\bigr\},
+\mathcal{MN}(n,m) \coloneqq \bigl\{ p ∈ ℝ^{n×m}\ \big|\ p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m \text{ and } p^{\mathrm{T}}\mathbb{1}_m = \mathbb{1}_n\bigr\},
 ````
 where $\mathbb{1}_k$ is the vector of length $k$ containing ones.
 
