@@ -67,10 +67,10 @@ The tolerance for the last test can be set using the `kwargs...`.
 function check_manifold_point(M::ProbabilitySimplex, p; kwargs...)
     mpv = invoke(
         check_manifold_point,
-        Tuple{(typeof(get_embedding(M))), typeof(p)},
+        Tuple{(typeof(get_embedding(M))),typeof(p)},
         get_embedding(M),
         p;
-        kwargs...
+        kwargs...,
     )
     mpv === nothing || return mpv
     if any(p .<= 0)
@@ -111,12 +111,12 @@ function check_tangent_vector(
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{typeof(get_embedding(M)), typeof(p), typeof(X)},
+        Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
         get_embedding(M),
         p,
         X;
         check_base_point = false, # already checked above
-        kwargs...
+        kwargs...,
     )
     mpv === nothing || return mpv
     if !isapprox(sum(X), 0.0; kwargs...)
@@ -146,7 +146,7 @@ function distance(::ProbabilitySimplex, p, q)
     @inbounds for i in eachindex(p, q)
         sumsqrt += sqrt(p[i] * q[i])
     end
-    return 2*acos(sumsqrt)
+    return 2 * acos(sumsqrt)
 end
 
 embed!(::ProbabilitySimplex, q, p) = copyto!(q, p)
@@ -172,7 +172,7 @@ function exp!(::ProbabilitySimplex, q, p, X)
     s = sqrt.(p)
     Xs = X ./ s ./ 2
     θ = norm(Xs)
-    q .= (cos(θ) .* s .+ usinc(θ) .* Xs).^2
+    q .= (cos(θ) .* s .+ usinc(θ) .* Xs) .^ 2
     return q
 end
 
@@ -190,13 +190,18 @@ function injectivity_radius(M::ProbabilitySimplex, p)
     q ./= sum(q)
     return distance(M, p, q)
 end
-injectivity_radius(M::ProbabilitySimplex, p, ::ExponentialRetraction) = injectivity_radius(M,p)
-injectivity_radius(M::ProbabilitySimplex, p, ::SoftmaxRetraction) = injectivity_radius(M,p)
+function injectivity_radius(M::ProbabilitySimplex, p, ::ExponentialRetraction)
+    return injectivity_radius(M, p)
+end
+injectivity_radius(M::ProbabilitySimplex, p, ::SoftmaxRetraction) = injectivity_radius(M, p)
 injectivity_radius(M::ProbabilitySimplex) = 0
 injectivity_radius(M::ProbabilitySimplex, ::SoftmaxRetraction) = 0
 injectivity_radius(M::ProbabilitySimplex, ::ExponentialRetraction) = 0
 eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(M::ProbabilitySimplex, rm::AbstractRetractionMethod)
+    @invoke_maker 1 Manifold injectivity_radius(
+        M::ProbabilitySimplex,
+        rm::AbstractRetractionMethod,
+    )
 end)
 
 @doc raw"""
@@ -209,9 +214,9 @@ g_p(X,Y) = \sum_{i=1}^{n+1}\frac{X_iY_i}{p}
 ````
 """
 function inner(::ProbabilitySimplex, p, X, Y)
-    d = zero(Base.promote_eltype(p,X,Y))
-    @inbounds for i in eachindex(p,X,Y)
-        d += X[i]*Y[i]/p[i]
+    d = zero(Base.promote_eltype(p, X, Y))
+    @inbounds for i in eachindex(p, X, Y)
+        d += X[i] * Y[i] / p[i]
     end
     return d
 end
@@ -227,7 +232,13 @@ where $\mathbb{1}$ is the column vector containing ones and $\log$ is applied el
 """
 inverse_retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxInverseRetraction)
 
-function inverse_retract!(::ProbabilitySimplex{n}, X, p, q, ::SoftmaxInverseRetraction) where {n}
+function inverse_retract!(
+    ::ProbabilitySimplex{n},
+    X,
+    p,
+    q,
+    ::SoftmaxInverseRetraction,
+) where {n}
     X .= log.(q) .- log.(p)
     meanlogdiff = mean(X)
     X .-= meanlogdiff
@@ -250,11 +261,11 @@ log(::ProbabilitySimplex, ::Any...)
 
 function log!(M::ProbabilitySimplex, X, p, q)
     if p ≈ q
-        fill!(X,0)
+        fill!(X, 0)
     else
         z = sqrt.(p .* q)
         s = sum(z)
-        X .= 2acos(s) / sqrt(1 - s^2) .* (z .- s .* p)
+        X .= 2 * acos(s) / sqrt(1 - s^2) .* (z .- s .* p)
     end
     return X
 end
@@ -285,7 +296,7 @@ of the points in `x` is used as the value `a`.
 mean(::ProbabilitySimplex, ::Any...)
 
 function mean!(M::ProbabilitySimplex, p, x::AbstractVector, w::AbstractVector; kwargs...)
-    a = a = min(injectivity_radius.(Ref(M),x)...)
+    a = minimum(injectivity_radius.(Ref(M), x))
     return mean!(M, p, x, w, GeodesicInterpolationWithinRadius(a); kwargs...)
 end
 
@@ -312,7 +323,7 @@ end
 return the representation size of points in the $n$-dimensional probability simplex,
 i.e. an array size of `(n+1,)`.
 """
-representation_size(::ProbabilitySimplex{n}) where {n} = (n+1,)
+representation_size(::ProbabilitySimplex{n}) where {n} = (n + 1,)
 
 @doc raw"""
     retract(M::ProbabilitySimplex, p, X, ::SoftmaxRetraction)
