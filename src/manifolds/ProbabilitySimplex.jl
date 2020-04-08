@@ -204,8 +204,8 @@ where $\mathbb{1}$ is the column vector containing ones and $\log$ is applied el
 """
 inverse_retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxInverseRetraction)
 
-function inverse_retract!(::ProbabilitySimplex{n}, X, p, q, ::SoftmaxInverseRetraction) where {n}
-    X .= (one(zeros(n+1,n+1)) - 1/n.*ones(n+1,n+1) ) * (log.(q) - log.(p))
+function inverse_retract!(M::ProbabilitySimplex{n}, X, p, q, ::SoftmaxInverseRetraction) where {n}
+    project!(M, X, (log.(q) - log.(p))
     return X
 end
 
@@ -246,14 +246,14 @@ project `Y` from the embedding onto the tangent space at `p` on
 the [`ProbabilitySimplex`](@ref) `M`. The formula reads
 
 ````math
-\operatorname{proj}_{Δ^n}(p,Y) = p\bigl(Y - ⟨p,Y⟩\mathbb{1}),
+\operatorname{proj}_{Δ^n}(p,Y) = Y - \frac{1}{n+1}⟨\mathbb{1},Y\rangle\mathbb{1},
 ````
 
 where multiplication is meant elementwise and $\mathbb{1}$ is the vector of ones.
 """
 project(::ProbabilitySimplex, ::Any, ::Any)
 
-project!(::ProbabilitySimplex, X, p, Y) = X .= (p.*( Y .- dot(p,Y)))
+project!(::ProbabilitySimplex{n}, X, p, Y) where {n} = X .= (Y .- (1/(n+1)*sum(Y)))
 
 @doc raw"""
     representation_size(::ProbabilitySimplex{n})
