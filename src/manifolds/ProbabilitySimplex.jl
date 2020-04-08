@@ -261,12 +261,9 @@ where multiplication is meant elementwise and $\mathbb{1}$ is the vector of ones
 project(::ProbabilitySimplex, ::Any, ::Any)
 
 function project!(::ProbabilitySimplex{n}, X, p, Y) where {n}
-    s = zero(eltype(X))
-    @inbounds for i in eachindex(X, p, Y)
-        X[i] = Y[i]
-        s += Y[i]
-    end
-    X .-= (s/(n+1)) .* p / 4
+    copyto!(X, Y)
+    s = sum(Y) / 4
+    X .-= s .* sqrt.(p)
     return X
 end
 
