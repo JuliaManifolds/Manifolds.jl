@@ -334,8 +334,8 @@ The implementation is based on Section 2.5.1 in [^Chikuse2003].
 function uniform_distribution(M::Stiefel{n,k,ℝ}, p) where {n,k}
     μ = Distributions.Zeros(p)
     σ = one(eltype(p))
-    Σ1 = Distributions.PDMats.ScalMat(size(p,1),σ)
-    Σ2 = Distributions.PDMats.ScalMat(size(p,2),σ)
+    Σ1 = Distributions.PDMats.ScalMat(n,σ)
+    Σ2 = Distributions.PDMats.ScalMat(k,σ)
     d = MatrixNormal(μ,Σ1,Σ2)
 
     return ProjectedPointDistribution(M, d, project!, p)
