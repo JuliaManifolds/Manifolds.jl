@@ -13,6 +13,6 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: 1.4
-      - uses: julia-actions/julia-format@v1
+      - uses: julia-actions/julia-format@master
         with:
           args: -v .
