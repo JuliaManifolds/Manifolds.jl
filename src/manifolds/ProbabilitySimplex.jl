@@ -263,10 +263,10 @@ project(::ProbabilitySimplex, ::Any, ::Any)
 function project!(::ProbabilitySimplex{n}, X, p, Y) where {n}
     s = zero(eltype(X))
     @inbounds for i in eachindex(X, p, Y)
-        X[i] = p[i] * Y[i]
+        X[i] = Y[i]
         s += Y[i]
     end
-    X .-= (s/(n+1)) .* p
+    X .-= (s/(n+1)) .* p / 4
     return X
 end
 
