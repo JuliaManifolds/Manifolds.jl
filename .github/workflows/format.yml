@@ -1,5 +1,4 @@
 name: Format
-
 on:
   push:
     branches: [master]
@@ -7,13 +6,13 @@ on:
   pull_request:
 
 jobs:
-  build:
+  format:
     runs-on: ubuntu-latest
     steps:
-      - uses: julia-actions/setup-julia@latest
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@v1
         with:
           version: 1.4
-      - uses: actions/checkout@v1
-    - uses: julia-actions/julia-format@latest
-      with:
-        args: -v .
+      - uses: julia-actions/julia-format@latest
+        with:
+          args: -v .
