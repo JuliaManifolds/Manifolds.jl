@@ -74,9 +74,9 @@ function check_manifold_point(M::ProbabilitySimplex, p; kwargs...)
         kwargs...,
     )
     mpv === nothing || return mpv
-    if any(p .<= 0)
+    if minimum(p) <= 0
         return DomainError(
-            norm(p),
+            minimum(p),
             "The point $(p) does not lie on the $(M) since it has nonpositive entries.",
         )
     end
@@ -296,7 +296,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 mean(::ProbabilitySimplex, ::Any...)
 
 function mean!(M::ProbabilitySimplex, p, x::AbstractVector, w::AbstractVector; kwargs...)
-    return mean!(M, p, x, w, GeodesicInterpolationWithinRadius(); kwargs...)
+    return mean!(M, p, x, w, GeodesicInterpolationWithinRadius(π/2); kwargs...)
 end
 
 @doc raw"""

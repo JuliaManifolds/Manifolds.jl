@@ -23,13 +23,11 @@ The [`ProbabilitySimplex`](@ref) is stored internally within `M.manifold`, such 
 Generate the manifold of matrices $\mathbb R^{n×m}$ such that the $m$ columns are
 discrete probability distributions, i.e. sum up to one.
 """
-struct MultinomialMatrices{N,M,S} <:
-       AbstractPowerManifold{ℝ,ProbabilitySimplex{S},ArrayPowerRepresentation} where {N,M}
+struct MultinomialMatrices{N,M,S} <: AbstractPowerManifold{ℝ,ProbabilitySimplex{S},ArrayPowerRepresentation} where {N,M}
     manifold::ProbabilitySimplex{S}
 end
 
-MultinomialMatrices(n::Int, m::Int) =
-    MultinomialMatrices{n,m,n - 1}(ProbabilitySimplex(n - 1))
+MultinomialMatrices(n::Int, m::Int) = MultinomialMatrices{n,m,n - 1}(ProbabilitySimplex(n - 1))
 
 ^(M::ProbabilitySimplex{N}, m::Int) where {N} =
     MultinomialMatrices{manifold_dimension(M) + 1,m,N}(M)

@@ -33,8 +33,8 @@ include("stiefel.jl")
 include("symmetric.jl")
 include("symmetric_positive_definite.jl")
 
+include("multinomial_matrices.jl")
 include("oblique.jl")
-
 include("torus.jl")
 
 #meta manifolds
