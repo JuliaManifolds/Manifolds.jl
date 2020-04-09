@@ -77,7 +77,13 @@ function check_manifold_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
     end
 end
 
-function check_tangent_vector(M::Euclidean{N,𝔽}, p, X; check_base_point = true, kwargs...) where {N,𝔽}
+function check_tangent_vector(
+    M::Euclidean{N,𝔽},
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+) where {N,𝔽}
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
@@ -102,7 +108,9 @@ function check_tangent_vector(M::Euclidean{N,𝔽}, p, X; check_base_point = tru
     end
 end
 
-det_local_metric(M::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}= one(eltype(p))
+function det_local_metric(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
+    return one(eltype(p))
+end
 
 """
     distance(M::Euclidean, p, q)
@@ -139,11 +147,11 @@ flat!(M::Euclidean, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 function get_basis(M::Euclidean, p, B::DefaultOrthonormalBasis{ℝ})
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
-    return CachedBasis(B,vecs)
+    return CachedBasis(B, vecs)
 end
 function get_basis(M::Euclidean{<:Tuple,ℂ}, p, B::DefaultOrthonormalBasis{ℂ})
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
-    return CachedBasis(B,[vecs; im * vecs])
+    return CachedBasis(B, [vecs; im * vecs])
 end
 function get_basis(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
     vecs = get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
@@ -157,7 +165,13 @@ function get_coordinates!(M::Euclidean, Y, p, X, B::DefaultOrDiagonalizingBasis{
     copyto!(Y, reshape(X, PS))
     return Y
 end
-function get_coordinates!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis{ℂ})
+function get_coordinates!(
+    M::Euclidean{<:Tuple,ℂ},
+    Y,
+    p,
+    X,
+    B::DefaultOrDiagonalizingBasis{ℂ},
+)
     S = representation_size(M)
     PS = prod(S)
     Y .= [reshape(real.(X), PS)..., reshape(imag(X), PS)...]
@@ -229,7 +243,12 @@ log(::Euclidean, ::Any...)
 
 log!(M::Euclidean, X, p, q) = (X .= q .- p)
 
-log_local_metric_density(M::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽} = zero(eltype(p))
+function log_local_metric_density(
+    ::MetricManifold{𝔽,<:Manifold,EuclideanMetric},
+    p,
+) where {𝔽}
+    return zero(eltype(p))
+end
 
 @generated _product_of_dimensions(::Euclidean{N}) where {N} = prod(N.parameters)
 

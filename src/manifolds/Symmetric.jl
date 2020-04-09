@@ -45,7 +45,8 @@ whether `p` is a symmetric matrix of size `(n,n)` with values from the correspon
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
 function check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv =
+        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(norm(p - p'), 0.0; kwargs...)
         return DomainError(
@@ -79,12 +80,12 @@ function check_tangent_vector(
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
         check_base_point = false, # already checked above
-        kwargs...
+        kwargs...,
     )
     mpv === nothing || return mpv
     if !isapprox(norm(X - X'), 0.0; kwargs...)
@@ -182,7 +183,7 @@ function get_vector!(
     k = 1
     for i = 1:N, j = i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds Y[i, j] = ( X[k] + (i == j ? 0 : X[k+1]*1im) ) * scale
+        @inbounds Y[i, j] = (X[k] + (i == j ? 0 : X[k+1] * 1im)) * scale
         @inbounds Y[j, i] = Y[i, j]
         k += (i == j ? 1 : 2)
     end

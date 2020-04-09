@@ -28,7 +28,8 @@ of size `(N,N)`, symmetric and positive definite.
 The tolerance for the second to last test can be set using the `kwargs...`.
 """
 function check_manifold_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
-    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv =
+        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
         return DomainError(
@@ -60,7 +61,7 @@ function check_tangent_vector(
     p,
     X;
     check_base_point = true,
-    kwargs...
+    kwargs...,
 ) where {N}
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
@@ -68,12 +69,12 @@ function check_tangent_vector(
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
         check_base_point = false, # already checked above
-        kwargs...
+        kwargs...,
     )
     mpv === nothing || return mpv
     if !isapprox(norm(X - transpose(X)), 0.0; kwargs...)
@@ -85,7 +86,9 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(M::SymmetricPositiveDefinite) = Euclidean(representation_size(M)...; field = ℝ)
+function decorated_manifold(M::SymmetricPositiveDefinite)
+    return Euclidean(representation_size(M)...; field = ℝ)
+end
 
 embed!(M::SymmetricPositiveDefinite, q, p) = (q .= p)
 embed!(M::SymmetricPositiveDefinite, Y, p, X) = (Y .= X)
@@ -103,12 +106,14 @@ injectivity_radius(::SymmetricPositiveDefinite) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, ::ExponentialRetraction) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, ::Any) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, ::Any, ::ExponentialRetraction) = Inf
-eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(
-        M::SymmetricPositiveDefinite,
-        rm::AbstractRetractionMethod,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold injectivity_radius(
+            M::SymmetricPositiveDefinite,
+            rm::AbstractRetractionMethod,
+        )
+    end,
+)
 
 @doc raw"""
     manifold_dimension(M::SymmetricPositiveDefinite)

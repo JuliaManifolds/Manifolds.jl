@@ -66,7 +66,7 @@ end
 @decorator_transparent_signature normal_tvector_distribution(
     M::AbstractDecoratorManifold,
     p,
-    σ
+    σ,
 )
 
 @decorator_transparent_signature projected_distribution(M::AbstractDecoratorManifold, d, p)

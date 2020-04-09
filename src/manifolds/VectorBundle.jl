@@ -113,7 +113,10 @@ struct VectorBundle{𝔽,TVS<:VectorSpaceType,TM<:Manifold{𝔽}} <: Manifold{�
     fiber::VectorBundleFibers{TVS,TM}
 end
 
-function VectorBundle(fiber::TVS, M::TM) where {TVS<:VectorSpaceType,TM<:Manifold{𝔽}} where 𝔽
+function VectorBundle(
+    fiber::TVS,
+    M::TM,
+) where {TVS<:VectorSpaceType,TM<:Manifold{𝔽}} where {𝔽}
     return VectorBundle{𝔽,TVS,TM}(fiber, M, VectorBundleFibers(fiber, M))
 end
 
@@ -139,7 +142,7 @@ end
 const TFVector = FVector{TangentSpaceType}
 const CoTFVector = FVector{CotangentSpaceType}
 
-struct VectorBundleBasisData{BBasis<:CachedBasis, TBasis<:CachedBasis}
+struct VectorBundleBasisData{BBasis<:CachedBasis,TBasis<:CachedBasis}
     base_basis::BBasis
     vec_basis::TBasis
 end
@@ -282,7 +285,7 @@ function get_basis(M::VectorBundle, p, B::AbstractBasis)
     return CachedBasis(B, VectorBundleBasisData(base_basis, vec_basis))
 end
 function get_basis(M::VectorBundle, p, B::CachedBasis)
-    return invoke(get_basis, Tuple{Manifold, Any, CachedBasis}, M, p, B)
+    return invoke(get_basis, Tuple{Manifold,Any,CachedBasis}, M, p, B)
 end
 
 function get_basis(M::VectorBundle, p, B::DiagonalizingOrthonormalBasis)
@@ -322,12 +325,12 @@ function get_coordinates!(
     X,
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData},
 ) where {𝔽}
-     px, Vx = submanifold_components(M.manifold, p)
-     VXM, VXF = submanifold_components(M.manifold, X)
-     n = manifold_dimension(M.manifold)
-     get_coordinates!(M.manifold, view(Y, 1:n), px, VXM, B.data.base_basis)
-     get_coordinates!(M.fiber, view(Y, n+1:length(Y)), px, VXF, B.data.vec_basis)
-     return Y
+    px, Vx = submanifold_components(M.manifold, p)
+    VXM, VXF = submanifold_components(M.manifold, X)
+    n = manifold_dimension(M.manifold)
+    get_coordinates!(M.manifold, view(Y, 1:n), px, VXM, B.data.base_basis)
+    get_coordinates!(M.fiber, view(Y, n+1:length(Y)), px, VXF, B.data.vec_basis)
+    return Y
 end
 for BT in [
     DefaultBasis,
@@ -337,21 +340,29 @@ for BT in [
     ProjectedOrthonormalBasis{:svd,ℝ},
     VeeOrthogonalBasis,
 ]
-    eval(quote
-        @invoke_maker 5 AbstractBasis get_coordinates!(M::VectorBundle, Y, p, X, B::$BT)
-    end)
+    eval(
+        quote
+            @invoke_maker 5 AbstractBasis get_coordinates!(
+                M::VectorBundle,
+                Y,
+                p,
+                X,
+                B::$BT,
+            )
+        end,
+    )
 end
-function get_coordinates!(
-    M::VectorBundle,
-    Y,
-    p,
-    X,
-    B::CachedBasis,
-)
+function get_coordinates!(M::VectorBundle, Y, p, X, B::CachedBasis)
     error("get_coordinates! called on $M with an incorrect CachedBasis. Expected a CachedBasis with VectorBundleBasisData, given $B")
 end
 
-function get_coordinates!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncached_bases) where {N}
+function get_coordinates!(
+    M::TangentBundleFibers,
+    Y,
+    p,
+    X,
+    B::ManifoldsBase.all_uncached_bases,
+) where {N}
     return get_coordinates!(M.manifold, Y, p, X, B)
 end
 
@@ -387,7 +398,13 @@ function get_vector!(
     )
     return Y
 end
-function get_vector!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncached_bases) where {N}
+function get_vector!(
+    M::TangentBundleFibers,
+    Y,
+    p,
+    X,
+    B::ManifoldsBase.all_uncached_bases,
+) where {N}
     return get_vector!(M.manifold, Y, p, X, B)
 end
 
