@@ -219,7 +219,10 @@ decorator_transparent_dispatch(::typeof(vector_transport_to!), M::MetricManifold
 Return the determinant of local matrix representation of the metric tensor $g$.
 """
 det_local_metric(::MetricManifold, ::Any)
-@decorator_transparent_function :intransparent function det_local_metric(M::MetricManifold, p)
+@decorator_transparent_function :intransparent function det_local_metric(
+    M::MetricManifold,
+    p,
+)
     return det(local_metric(M, p))
 end
 

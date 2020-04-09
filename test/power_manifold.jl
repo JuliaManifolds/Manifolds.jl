@@ -57,8 +57,8 @@ end
     @test Ms^(5,) === Ms1
     @test Mr^(5, 7) === Mr2
 
-    types_s1 = [Array{Float64,2}, HybridArray{Tuple{3,Dynamic()}, Float64, 2}]
-    types_s2 = [Array{Float64,3}, HybridArray{Tuple{3,Dynamic(),Dynamic()}, Float64, 3}]
+    types_s1 = [Array{Float64,2}, HybridArray{Tuple{3,Dynamic()},Float64,2}]
+    types_s2 = [Array{Float64,3}, HybridArray{Tuple{3,Dynamic(),Dynamic()},Float64,3}]
 
     types_r1 = [Array{Float64,3}, HybridArray{Tuple{3,3,Dynamic()},Float64,3}]
 
@@ -380,6 +380,6 @@ end
         @test (@inferred default_metric_dispatch(M13, PM)) === Val(true)
         MPM = MetricManifold(M13, PM)
         p = [1 2 3; 4 5 6]
-        @test det_local_metric(MPM, p) == 5*7*9
+        @test det_local_metric(MPM, p) == 5 * 7 * 9
     end
 end

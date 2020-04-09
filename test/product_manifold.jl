@@ -454,6 +454,6 @@ end
         @test (@inferred default_metric_dispatch(M11, PM)) === Val(true)
         MPM = MetricManifold(M11, PM)
         p = ProductRepr([1, 2, 3], [2, 3, 3])
-        @test det_local_metric(MPM, p) == 6*8
+        @test det_local_metric(MPM, p) == 6 * 8
     end
 end
