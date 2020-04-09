@@ -16,13 +16,16 @@ The [`Sphere`](@ref) is stored internally within `M.manifold`, such that all fun
 Generate the manifold of matrices $\mathbb R^{n × m}$ such that the $m$ columns are unit
 vectors, i.e. from the [`Sphere`](@ref)`(n-1)`.
 """
-struct Oblique{N,M,𝔽,S} <: AbstractPowerManifold{𝔽,Sphere{S,𝔽},ArrayPowerRepresentation} where {N,M}
+struct Oblique{N,M,𝔽,S} <:
+       AbstractPowerManifold{𝔽,Sphere{S,𝔽},ArrayPowerRepresentation} where {N,M}
     manifold::Sphere{S,𝔽}
 end
 
-Oblique(n::Int, m::Int, field::AbstractNumbers = ℝ) = Oblique{n,m,field,n-1}(Sphere(n - 1,field))
+function Oblique(n::Int, m::Int, field::AbstractNumbers = ℝ)
+    return Oblique{n,m,field,n - 1}(Sphere(n - 1, field))
+end
 
-^(M::Sphere{N,𝔽}, m::Int) where {N,𝔽} = Oblique{manifold_dimension(M)+1,m,𝔽,N}(M)
+^(M::Sphere{N,𝔽}, m::Int) where {N,𝔽} = Oblique{manifold_dimension(M) + 1,m,𝔽,N}(M)
 
 @doc raw"""
     check_manifold_point(M::Oblique{n,m},p)
@@ -79,7 +82,9 @@ end
 
 get_iterator(M::Oblique{n,m}) where {n,m} = 1:m
 
-@generated manifold_dimension(::Oblique{n,m,𝔽}) where {n,m,𝔽} = (n* real_dimension(𝔽) - 1) * m
+@generated function manifold_dimension(::Oblique{n,m,𝔽}) where {n,m,𝔽}
+    return (n * real_dimension(𝔽) - 1) * m
+end
 
 @generated representation_size(::Oblique{n,m}) where {n,m} = (n, m)
 

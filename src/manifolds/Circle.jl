@@ -132,7 +132,7 @@ flat!(::Circle, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 function get_basis(M::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
-    return CachedBasis(B, (@SVector [0]) , vs)
+    return CachedBasis(B, (@SVector [0]), vs)
 end
 get_coordinates(M::Circle{ℝ}, p, X, B::DefaultOrthonormalBasis) = X
 function get_coordinates(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
@@ -150,14 +150,16 @@ function get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
     return @SVector [Xⁱ]
 end
 
-eval(quote
-    @invoke_maker 1 Manifold get_coordinates(
-        M::Circle,
-        e::Identity,
-        X,
-        B::VeeOrthogonalBasis,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold get_coordinates(
+            M::Circle,
+            e::Identity,
+            X,
+            B::VeeOrthogonalBasis,
+        )
+    end,
+)
 
 function get_coordinates!(M::Circle, Y::AbstractArray, p, X, B::DefaultOrthonormalBasis)
     Y[] = get_coordinates(M, p, X, B)[]
@@ -174,15 +176,17 @@ function get_coordinates!(
     return Y
 end
 
-eval(quote
-    @invoke_maker 1 Manifold get_coordinates!(
-        M::Circle,
-        Y::AbstractArray,
-        p,
-        X,
-        B::VeeOrthogonalBasis,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold get_coordinates!(
+            M::Circle,
+            Y::AbstractArray,
+            p,
+            X,
+            B::VeeOrthogonalBasis,
+        )
+    end,
+)
 
 
 get_vector(M::Circle{ℝ}, p, X, B::AbstractBasis) = X
@@ -203,9 +207,17 @@ function get_vector!(M::Circle, Y::AbstractArray, p, X, B::AbstractBasis)
     return Y
 end
 for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES
-    eval(quote
-        @invoke_maker 5 $(supertype(BT)) get_vector!(M::Circle, Y::AbstractArray, p, X, B::$BT)
-    end)
+    eval(
+        quote
+            @invoke_maker 5 $(supertype(BT)) get_vector!(
+                M::Circle,
+                Y::AbstractArray,
+                p,
+                X,
+                B::$BT,
+            )
+        end,
+    )
 end
 
 @doc raw"""
@@ -217,9 +229,14 @@ injectivity_radius(::Circle) = π
 injectivity_radius(::Circle, ::ExponentialRetraction) = π
 injectivity_radius(::Circle, ::Any) = π
 injectivity_radius(::Circle, ::Any, ::ExponentialRetraction) = π
-eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(M::Circle, rm::AbstractRetractionMethod)
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold injectivity_radius(
+            M::Circle,
+            rm::AbstractRetractionMethod,
+        )
+    end,
+)
 
 @doc raw"""
     inner(M::Circle, p, X, Y)

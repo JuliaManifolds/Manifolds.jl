@@ -43,7 +43,7 @@ function check_tangent_vector(
     p,
     X;
     check_base_point = true,
-    kwargs...
+    kwargs...,
 ) where {N}
     if check_base_point && length(p) != N
         return DomainError(
@@ -62,7 +62,7 @@ function check_tangent_vector(
         p,
         X;
         check_base_point = check_base_point,
-        kwargs...
+        kwargs...,
     )
 end
 

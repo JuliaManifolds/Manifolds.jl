@@ -21,7 +21,7 @@ end
 invariant_metric_dispatch(::TranslationGroup, ::ActionDirection) = Val(true)
 
 function default_metric_dispatch(
-    ::MetricManifold{𝔽,<:TranslationGroup,EuclideanMetric}
+    ::MetricManifold{𝔽,<:TranslationGroup,EuclideanMetric},
 ) where {𝔽}
     return Val(true)
 end

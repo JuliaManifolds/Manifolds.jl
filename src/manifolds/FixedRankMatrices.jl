@@ -251,12 +251,7 @@ further decomposing the result into $X=UMV$, i.e. a [`UMVTVector`](@ref).
 """
 project(::FixedRankMatrices, ::Any, ::Any)
 
-function project!(
-    ::FixedRankMatrices,
-    Y::UMVTVector,
-    p::SVDMPoint,
-    A::AbstractMatrix,
-)
+function project!(::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, A::AbstractMatrix)
     av = A * (p.Vt')
     uTav = p.U' * av
     aTu = A' * p.U

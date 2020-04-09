@@ -72,7 +72,14 @@ function inverse_translate(M::ValidationManifold, p, q, conv::ActionDirection; k
     return x
 end
 
-function inverse_translate!(M::ValidationManifold, x, p, q, conv::ActionDirection; kwargs...)
+function inverse_translate!(
+    M::ValidationManifold,
+    x,
+    p,
+    q,
+    conv::ActionDirection;
+    kwargs...,
+)
     is_manifold_point(M, p, true; kwargs...)
     is_manifold_point(M, q, true; kwargs...)
     inverse_translate!(M.manifold, array_value(x), array_value(p), array_value(q), conv)
@@ -96,7 +103,15 @@ function translate_diff(M::ValidationManifold, p, q, X, conv::ActionDirection; k
     return Y
 end
 
-function translate_diff!(M::ValidationManifold, Y, p, q, X, conv::ActionDirection; kwargs...)
+function translate_diff!(
+    M::ValidationManifold,
+    Y,
+    p,
+    q,
+    X,
+    conv::ActionDirection;
+    kwargs...,
+)
     is_manifold_point(M, p, true; kwargs...)
     is_manifold_point(M, q, true; kwargs...)
     is_tangent_vector(M, q, X, true; kwargs...)
@@ -113,7 +128,14 @@ function translate_diff!(M::ValidationManifold, Y, p, q, X, conv::ActionDirectio
     return Y
 end
 
-function inverse_translate_diff(M::ValidationManifold, p, q, X, conv::ActionDirection; kwargs...)
+function inverse_translate_diff(
+    M::ValidationManifold,
+    p,
+    q,
+    X,
+    conv::ActionDirection;
+    kwargs...,
+)
     is_manifold_point(M, p, true; kwargs...)
     is_manifold_point(M, q, true; kwargs...)
     is_tangent_vector(M, q, X, true; kwargs...)
@@ -161,7 +183,8 @@ function group_exp(M::ValidationManifold, X; kwargs...)
         array_value(X),
         true;
         check_base_point = false,
-        kwargs...)
+        kwargs...,
+    )
     q = array_point(group_exp(M.manifold, array_value(X)))
     is_manifold_point(M, q, true; kwargs...)
     return q
@@ -173,8 +196,8 @@ function group_exp!(M::ValidationManifold, q, X; kwargs...)
         make_identity(M.manifold, array_value(X)),
         array_value(X),
         true;
-        check_base_point=false,
-        kwargs...
+        check_base_point = false,
+        kwargs...,
     )
     group_exp!(M.manifold, array_value(q), array_value(X))
     is_manifold_point(M, q, true; kwargs...)

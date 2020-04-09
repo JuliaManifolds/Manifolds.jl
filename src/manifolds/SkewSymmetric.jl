@@ -21,7 +21,8 @@ which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::
 
 Generate the manifold of $n × n$ symmetric matrices.
 """
-struct SkewSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
+struct SkewSymmetricMatrices{n,𝔽} <:
+       AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
 
 function SkewSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
     SkewSymmetricMatrices{n,field}()
@@ -45,7 +46,8 @@ whether `p` is a skew-symmetric matrix of size `(n,n)` with values from the corr
 The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
 """
 function check_manifold_point(M::SkewSymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv =
+        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(norm(p + p'), 0.0; kwargs...)
         return DomainError(
@@ -79,12 +81,12 @@ function check_tangent_vector(
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
         check_base_point = false, # already checked above
-        kwargs...
+        kwargs...,
     )
     mpv === nothing || return mpv
     if !isapprox(norm(X + adjoint(X)), 0.0; kwargs...)
@@ -184,10 +186,10 @@ function get_vector!(
     k = 1
     for i = 1:N, j = i:N
         if i == j # real zero on the diag
-            @inbounds Y[i, j] = X[k]*1im
+            @inbounds Y[i, j] = X[k] * 1im
             k += 1
         else
-            @inbounds Y[i, j] = (X[k] + X[k+1]*1im) / sqrt(2)
+            @inbounds Y[i, j] = (X[k] + X[k+1] * 1im) / sqrt(2)
             k += 2
             @inbounds Y[j, i] = -conj(Y[i, j])
         end
