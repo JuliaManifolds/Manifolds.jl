@@ -57,7 +57,7 @@ end
     if L != StaticArrays.tuple_prod(S)
         error("Dimension mismatch")
     end
-    exprs = [:(a[$i] = x[$i]) for i = 1:L]
+    exprs = [:(a[$i] = x[$i]) for i in 1:L]
     return quote
         $(Expr(:meta, :inline))
         a = SizedAbstractArray{S,T,N,M}(undef)

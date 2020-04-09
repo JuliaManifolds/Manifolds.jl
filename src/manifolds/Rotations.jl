@@ -279,7 +279,7 @@ function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthogonalBasis
         Xⁱ[3] = X[2, 1]
 
         k = 4
-        for i = 4:N, j = 1:i-1
+        for i in 4:N, j in 1:(i - 1)
             Xⁱ[k] = X[i, j]
             k += 1
         end
@@ -329,8 +329,8 @@ function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultOrthogonalBasis) wher
         X[3, 2] = Xⁱ[1]
         X[3, 3] = 0
         k = 4
-        for i = 4:N
-            for j = 1:i-1
+        for i in 4:N
+            for j in 1:(i - 1)
                 X[i, j] = Xⁱ[k]
                 X[j, i] = -Xⁱ[k]
                 k += 1
@@ -440,10 +440,10 @@ end
 function inverse_retract!(M::Rotations{N}, X, p, q, ::QRInverseRetraction) where {N}
     A = transpose(p) * q
     R = zero(X)
-    for i = 1:N
+    for i in 1:N
         b = zeros(i)
         b[end] = 1
-        b[1:(end-1)] = -transpose(R[1:(i-1), 1:(i-1)]) * A[i, 1:(i-1)]
+        b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
         R[1:i, i] = A[1:i, 1:i] \ b
     end
     C = A * R
@@ -619,7 +619,7 @@ function project!(M::Rotations{N}, q, p; check_det = true) where {N}
     copyto!(q, F.U * F.Vt)
     if check_det && det(q) < 0
         d = similar(F.S)
-        @inbounds fill!(view(d, 1:N-1), 1)
+        @inbounds fill!(view(d, 1:(N - 1)), 1)
         @inbounds d[N] = -1
         copyto!(q, F.U * Diagonal(d) * F.Vt)
     end

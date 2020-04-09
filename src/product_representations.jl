@@ -82,8 +82,8 @@ function ShapeSpecification(reshapers, manifolds::Manifold...)
     lengths = map(prod, sizes)
     ranges = UnitRange{Int64}[]
     k = 1
-    for len ∈ lengths
-        push!(ranges, k:(k+len-1))
+    for len in lengths
+        push!(ranges, k:(k + len - 1))
         k += len
     end
     TRanges = tuple(ranges...)
@@ -291,7 +291,7 @@ function _show_product_repr(io::IO, x; name = "Product representation", nmax = 4
     else
         _show_component_range(io, x.parts, 1:half_nmax; pre = pre, sym = sym)
         print(io, "\n ⋮")
-        _show_component_range(io, x.parts, (n-half_nmax+1):n; pre = pre, sym = sym)
+        _show_component_range(io, x.parts, (n - half_nmax + 1):n; pre = pre, sym = sym)
     end
     return nothing
 end
@@ -335,7 +335,7 @@ end
 ProductRepr(points...) = ProductRepr{typeof(points)}(points)
 
 function number_eltype(x::ProductRepr)
-    return typeof(reduce(+, one(number_eltype(eti)) for eti ∈ x.parts))
+    return typeof(reduce(+, one(number_eltype(eti)) for eti in x.parts))
 end
 
 allocate(x::ProductRepr) = ProductRepr(map(allocate, submanifold_components(x))...)

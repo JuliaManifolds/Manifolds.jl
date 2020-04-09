@@ -120,98 +120,157 @@ christoffel_symbols_second_jacobian(::MetricManifold, ::Any)
 end
 
 decorator_transparent_dispatch(::typeof(exp), M::MetricManifold, args...) = Val(:parent)
-decorator_transparent_dispatch(::typeof(exp!), M::MetricManifold, args...) =
-    Val(:intransparent)
+function decorator_transparent_dispatch(::typeof(exp!), M::MetricManifold, args...)
+    return Val(:intransparent)
+end
 decorator_transparent_dispatch(::typeof(exp!), M::MetricManifold, q, p, X, t) = Val(:parent)
 decorator_transparent_dispatch(::typeof(flat), M::MetricManifold, args...) = Val(:parent)
-decorator_transparent_dispatch(::typeof(flat!), M::MetricManifold, args...) =
-    Val(:intransparent)
-decorator_transparent_dispatch(::typeof(get_coordinates), M::MetricManifold, args...) =
-    Val(:parent)
-decorator_transparent_dispatch(::typeof(get_coordinates!), M::MetricManifold, args...) =
-    Val(:intransparent)
-decorator_transparent_dispatch(::typeof(get_vector), M::MetricManifold, args...) =
-    Val(:parent)
-decorator_transparent_dispatch(::typeof(get_vector!), M::MetricManifold, args...) =
-    Val(:intransparent)
-decorator_transparent_dispatch(::typeof(get_basis), M::MetricManifold, args...) =
-    Val(:intransparent)
-decorator_transparent_dispatch(::typeof(inner), M::MetricManifold, args...) =
-    Val(:intransparent)
-decorator_transparent_dispatch(::typeof(inverse_retract), M::MetricManifold, args...) =
-    Val(:parent)
-decorator_transparent_dispatch(::typeof(inverse_retract!), M::MetricManifold, args...) =
-    Val(:intransparent)
-decorator_transparent_dispatch(
+function decorator_transparent_dispatch(::typeof(flat!), M::MetricManifold, args...)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(get_coordinates),
+    M::MetricManifold,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(get_coordinates!),
+    M::MetricManifold,
+    args...,
+)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(::typeof(get_vector), M::MetricManifold, args...)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(::typeof(get_vector!), M::MetricManifold, args...)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(::typeof(get_basis), M::MetricManifold, args...)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(::typeof(inner), M::MetricManifold, args...)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(inverse_retract),
+    M::MetricManifold,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(inverse_retract!),
+    M::MetricManifold,
+    args...,
+)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(
     ::typeof(inverse_retract!),
     M::MetricManifold,
     X,
     p,
     q,
     m::LogarithmicInverseRetraction,
-) = Val(:parent)
+)
+    return Val(:parent)
+end
 decorator_transparent_dispatch(::typeof(log), M::MetricManifold, args...) = Val(:parent)
-decorator_transparent_dispatch(::typeof(log!), M::MetricManifold, args...) =
-    Val(:intransparent)
+function decorator_transparent_dispatch(::typeof(log!), M::MetricManifold, args...)
+    return Val(:intransparent)
+end
 decorator_transparent_dispatch(::typeof(mean), M::MetricManifold, args...) = Val(:parent)
-decorator_transparent_dispatch(::typeof(mean!), M::MetricManifold, args...) =
-    Val(:intransparent)
+function decorator_transparent_dispatch(::typeof(mean!), M::MetricManifold, args...)
+    return Val(:intransparent)
+end
 decorator_transparent_dispatch(::typeof(median), M::MetricManifold, args...) = Val(:parent)
-decorator_transparent_dispatch(::typeof(median!), M::MetricManifold, args...) =
-    Val(:intransparent)
-decorator_transparent_dispatch(
+function decorator_transparent_dispatch(::typeof(median!), M::MetricManifold, args...)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(
     ::typeof(normal_tvector_distribution),
     M::MetricManifold,
     arge...,
-) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(norm), M::MetricManifold, args...) =
-    Val(:intransparent)
+)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(::typeof(norm), M::MetricManifold, args...)
+    return Val(:intransparent)
+end
 decorator_transparent_dispatch(::typeof(project), M::MetricManifold, args...) = Val(:parent)
-decorator_transparent_dispatch(::typeof(project!), M::MetricManifold, args...) =
-    Val(:intransparent)
-decorator_transparent_dispatch(
+function decorator_transparent_dispatch(::typeof(project!), M::MetricManifold, args...)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(
     ::typeof(projected_distribution),
     M::MetricManifold,
     arge...,
-) = Val(:intransparent)
+)
+    return Val(:intransparent)
+end
 decorator_transparent_dispatch(::typeof(sharp), M::MetricManifold, args...) = Val(:parent)
-decorator_transparent_dispatch(::typeof(sharp!), M::MetricManifold, args...) =
-    Val(:intransparent)
+function decorator_transparent_dispatch(::typeof(sharp!), M::MetricManifold, args...)
+    return Val(:intransparent)
+end
 decorator_transparent_dispatch(::typeof(retract), M::MetricManifold, args...) = Val(:parent)
-decorator_transparent_dispatch(::typeof(retract!), M::MetricManifold, args...) =
-    Val(:intransparent)
-decorator_transparent_dispatch(
+function decorator_transparent_dispatch(::typeof(retract!), M::MetricManifold, args...)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(
     ::typeof(retract!),
     M::MetricManifold,
     q,
     p,
     X,
     m::ExponentialRetraction,
-) = Val(:parent)
-decorator_transparent_dispatch(
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
     ::typeof(vector_transport_along),
     M::MetricManifold,
     args...,
-) = Val(:parent)
-decorator_transparent_dispatch(
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
     ::typeof(vector_transport_along!),
     M::MetricManifold,
     args...,
-) = Val(:intransparent)
-decorator_transparent_dispatch(
+)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(
     ::typeof(vector_transport_direction),
     M::MetricManifold,
     args...,
-) = Val(:parent)
-decorator_transparent_dispatch(
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
     ::typeof(vector_transport_direction!),
     M::MetricManifold,
     args...,
-) = Val(:intransparent)
-decorator_transparent_dispatch(::typeof(vector_transport_to), M::MetricManifold, args...) =
-    Val(:parent)
-decorator_transparent_dispatch(::typeof(vector_transport_to!), M::MetricManifold, args...) =
-    Val(:intransparent)
+)
+    return Val(:intransparent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(vector_transport_to),
+    M::MetricManifold,
+    args...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(vector_transport_to!),
+    M::MetricManifold,
+    args...,
+)
+    return Val(:intransparent)
+end
 
 @doc raw"""
     det_local_metric(M::MetricManifold, p)
@@ -262,7 +321,7 @@ import ManifoldsBase.exp!__intransparent
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, p, X, tspan; dense = false, saveat = [1.0])
     n = length(p)
-    return copyto!(q, sol.u[1][n+1:end])
+    return copyto!(q, sol.u[1][(n + 1):end])
 end
 
 @doc raw"""

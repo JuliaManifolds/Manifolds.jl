@@ -120,7 +120,7 @@ Check whether `p` is a valid point on the [`ProductManifold`](@ref) `M`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_manifold_point(M::ProductManifold, p::ProductRepr; kwargs...)
-    for t ∈ ziptuples(M.manifolds, submanifold_components(M, p))
+    for t in ziptuples(M.manifolds, submanifold_components(M, p))
         err = check_manifold_point(t...; kwargs...)
         err === nothing || return err
     end
@@ -128,7 +128,7 @@ function check_manifold_point(M::ProductManifold, p::ProductRepr; kwargs...)
 end
 
 function check_manifold_point(M::ProductManifold, p::ProductArray; kwargs...)
-    for t ∈ ziptuples(M.manifolds, submanifold_components(M, p))
+    for t in ziptuples(M.manifolds, submanifold_components(M, p))
         err = check_manifold_point(t...; kwargs...)
         err === nothing || return err
     end
@@ -156,7 +156,7 @@ function check_tangent_vector(
         perr === nothing || return perr
     end
     ts = ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, X))
-    for t ∈ ts
+    for t in ts
         err = check_tangent_vector(t...; kwargs...)
         err === nothing || return err
     end
@@ -171,7 +171,7 @@ function check_tangent_vector(
     perr = check_manifold_point(M, p)
     perr === nothing || return perr
     ts = ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, X))
-    for t ∈ ts
+    for t in ts
         err = check_tangent_vector(t...; kwargs...)
         err === nothing || return err
     end
@@ -347,10 +347,10 @@ function get_coordinates!(M::ProductManifold, Xⁱ, p, X, B::AbstractBasis)
     @assert length(Xⁱ) == dim
     i = one(dim)
     ts = ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, X))
-    for t ∈ ts
+    for t in ts
         SM = first(t)
         dim = manifold_dimension(SM)
-        tXⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
+        tXⁱ = @inbounds view(Xⁱ, i:(i + dim - 1))
         get_coordinates!(SM, tXⁱ, Base.tail(t)..., B)
         i += dim
     end
@@ -372,10 +372,10 @@ function get_coordinates!(
         submanifold_components(M, X),
         B.data.parts,
     )
-    for t ∈ ts
+    for t in ts
         SM = first(t)
         dim = manifold_dimension(SM)
-        tXⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
+        tXⁱ = @inbounds view(Xⁱ, i:(i + dim - 1))
         get_coordinates!(SM, tXⁱ, Base.tail(t)...)
         i += dim
     end
@@ -429,7 +429,7 @@ function get_vector(
         get_vector(
             M.manifolds[i],
             submanifold_component(p, i),
-            X[dims_acc[i]:dims_acc[i]+dims[i]-1],
+            X[dims_acc[i]:(dims_acc[i] + dims[i] - 1)],
             B.data.parts[i],
         )
     end
@@ -463,7 +463,7 @@ function get_vector(M::ProductManifold, p::ProductRepr, X, B::AbstractBasis)
         get_vector(
             M.manifolds[i],
             submanifold_component(p, i),
-            X[dims_acc[i]:dims_acc[i]+dims[i]-1],
+            X[dims_acc[i]:(dims_acc[i] + dims[i] - 1)],
             B,
         )
     end
@@ -476,7 +476,7 @@ function get_vector(M::ProductManifold, p::ProductRepr, Xⁱ, B::VeeOrthogonalBa
     ts = ziptuples(M.manifolds, submanifold_components(M, p))
     mapped = map(ts) do t
         dim = manifold_dimension(first(t))
-        tXⁱ = @inbounds view(Xⁱ, i:(i+dim-1))
+        tXⁱ = @inbounds view(Xⁱ, i:(i + dim - 1))
         i += dim
         return get_vector(t..., tXⁱ, B)
     end
@@ -491,12 +491,12 @@ function get_vector!(M::ProductManifold, Xⁱ, p, X, B::AbstractBasis)
     N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
-    for i = 1:N
+    for i in 1:N
         get_vector!(
             M.manifolds[i],
             submanifold_component(Xⁱ, i),
             submanifold_component(p, i),
-            X[dims_acc[i]:dims_acc[i]+dims[i]-1],
+            X[dims_acc[i]:(dims_acc[i] + dims[i] - 1)],
             B,
         )
     end
@@ -512,12 +512,12 @@ function get_vector!(
     N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
-    for i = 1:N
+    for i in 1:N
         get_vector!(
             M.manifolds[i],
             submanifold_component(X, i),
             submanifold_component(p, i),
-            Xⁱ[dims_acc[i]:dims_acc[i]+dims[i]-1],
+            Xⁱ[dims_acc[i]:(dims_acc[i] + dims[i] - 1)],
             B.data.parts[i],
         )
     end
@@ -556,8 +556,8 @@ function get_vectors(
     BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.data.parts))
     zero_tvs = map(t -> zero_tangent_vector(t...), ziptuples(M.manifolds, xparts))
     vs = typeof(ProductRepr(zero_tvs...))[]
-    for i = 1:N, k = 1:length(BVs[i])
-        push!(vs, ProductRepr(zero_tvs[1:i-1]..., BVs[i][k], zero_tvs[i+1:end]...))
+    for i in 1:N, k in 1:length(BVs[i])
+        push!(vs, ProductRepr(zero_tvs[1:(i - 1)]..., BVs[i][k], zero_tvs[(i + 1):end]...))
     end
     return vs
 end
@@ -896,7 +896,7 @@ function _show_product_manifold_no_header(io::IO, M)
     inds = 1:n
     pre = " "
     if n > screen_height
-        inds = [1:half_height; (n-div(screen_height - 1, 2)+1):n]
+        inds = [1:half_height; (n - div(screen_height - 1, 2) + 1):n]
     end
     if n ≤ screen_height
         _show_submanifold_range(io, M.manifolds, 1:n; pre = pre)
@@ -906,7 +906,7 @@ function _show_product_manifold_no_header(io::IO, M)
         _show_submanifold_range(
             io,
             M.manifolds,
-            (n-div(screen_height - 1, 2)+1):n;
+            (n - div(screen_height - 1, 2) + 1):n;
             pre = pre,
         )
     end

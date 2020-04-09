@@ -67,10 +67,10 @@ Base.@propagate_inbounds function _padpoint!(
     ::SpecialEuclidean{n},
     q::AbstractMatrix,
 ) where {n}
-    for i ∈ 1:n
-        q[n+1, i] = 0
+    for i in 1:n
+        q[n + 1, i] = 0
     end
-    q[n+1, n+1] = 1
+    q[n + 1, n + 1] = 1
     return q
 end
 
@@ -78,8 +78,8 @@ Base.@propagate_inbounds function _padvector!(
     ::SpecialEuclidean{n},
     X::AbstractMatrix,
 ) where {n}
-    for i ∈ 1:n+1
-        X[n+1, i] = 0
+    for i in 1:(n + 1)
+        X[n + 1, i] = 0
     end
     return X
 end

@@ -121,7 +121,7 @@ function get_coordinates!(
     @assert size(X) == (N, N)
     @assert dim == div(N * (N - 1), 2)
     k = 1
-    for i = 1:N, j = (i+1):N
+    for i in 1:N, j in (i + 1):N
         @inbounds Y[k] = X[i, j] * sqrt(2)
         k += 1
     end
@@ -139,13 +139,13 @@ function get_coordinates!(
     @assert size(X) == (N, N)
     @assert dim == N^2
     k = 1
-    for i = 1:N, j = i:N
+    for i in 1:N, j in i:N
         if i == j # real-part zero on the diagonal -> just one basis vector per diag entry
             @inbounds Y[k] = imag(X[i, j])
             k += 1
         else
             @inbounds Y[k] = real(X[i, j]) * sqrt(2)
-            @inbounds Y[k+1] = imag(X[i, j]) * sqrt(2)
+            @inbounds Y[k + 1] = imag(X[i, j]) * sqrt(2)
             k += 2
         end
     end
@@ -163,10 +163,10 @@ function get_vector!(
     @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
-    for i = 1:N
+    for i in 1:N
         Y[i, i] = convert(eltype(p), 0.0)
     end
-    for i = 1:N, j = (i+1):N
+    for i in 1:N, j in (i + 1):N
         @inbounds Y[i, j] = X[k] / sqrt(2)
         @inbounds Y[j, i] = -X[k] / sqrt(2)
         k += 1
@@ -184,12 +184,12 @@ function get_vector!(
     @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
-    for i = 1:N, j = i:N
+    for i in 1:N, j in i:N
         if i == j # real zero on the diag
             @inbounds Y[i, j] = X[k] * 1im
             k += 1
         else
-            @inbounds Y[i, j] = (X[k] + X[k+1] * 1im) / sqrt(2)
+            @inbounds Y[i, j] = (X[k] + X[k + 1] * 1im) / sqrt(2)
             k += 2
             @inbounds Y[j, i] = -conj(Y[i, j])
         end

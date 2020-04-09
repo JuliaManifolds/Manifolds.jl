@@ -351,18 +351,22 @@ function number_eltype(X::UMVTVector)
     return typeof(one(eltype(X.U)) + one(eltype(X.M)) + one(eltype(X.Vt)))
 end
 
-one(p::SVDMPoint) = SVDMPoint(
-    one(zeros(size(p.U, 1), size(p.U, 1))),
-    ones(length(p.S)),
-    one(zeros(size(p.Vt, 2), size(p.Vt, 2))),
-    length(p.S),
-)
-one(X::UMVTVector) = UMVTVector(
-    one(zeros(size(X.U, 1), size(X.U, 1))),
-    one(zeros(size(X.M))),
-    one(zeros(size(X.Vt, 2), size(X.Vt, 2))),
-    size(X.M, 1),
-)
+function one(p::SVDMPoint)
+    return SVDMPoint(
+        one(zeros(size(p.U, 1), size(p.U, 1))),
+        ones(length(p.S)),
+        one(zeros(size(p.Vt, 2), size(p.Vt, 2))),
+        length(p.S),
+    )
+end
+function one(X::UMVTVector)
+    return UMVTVector(
+        one(zeros(size(X.U, 1), size(X.U, 1))),
+        one(zeros(size(X.M))),
+        one(zeros(size(X.Vt, 2), size(X.Vt, 2))),
+        size(X.M, 1),
+    )
+end
 
 function copyto!(p::SVDMPoint, q::SVDMPoint)
     copyto!(p.U, q.U)

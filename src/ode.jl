@@ -9,7 +9,7 @@ function solve_exp_ode(
 )
     n = length(x)
     iv = SVector{n}(1:n)
-    ix = SVector{n}(n+1:2n)
+    ix = SVector{n}((n + 1):(2n))
     u0 = allocate(x, 2n)
     u0[iv] .= v
     u0[ix] .= x

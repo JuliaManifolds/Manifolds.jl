@@ -146,7 +146,7 @@ b_{i}=\begin{cases}
 function distance(M::Grassmann, p, q)
     p ≈ q && return zero(real(eltype(p)))
     a = svd(p' * q).S
-    a[a.>1] .= 1
+    a[a .> 1] .= 1
     return sqrt(sum((acos.(a)) .^ 2))
 end
 

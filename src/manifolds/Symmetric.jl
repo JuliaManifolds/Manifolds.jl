@@ -120,7 +120,7 @@ function get_coordinates!(
     @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
     k = 1
-    for i = 1:N, j = i:N
+    for i in 1:N, j in i:N
         scale = ifelse(i == j, 1, sqrt(2))
         @inbounds Y[k] = X[i, j] * scale
         k += 1
@@ -139,7 +139,7 @@ function get_coordinates!(
     @assert size(X) == (N, N)
     @assert dim == N * N
     k = 1
-    for i = 1:N, j = i:N
+    for i in 1:N, j in i:N
         scale = ifelse(i == j, 1, sqrt(2))
         @inbounds Y[k] = real(X[i, j]) * scale
         k += 1
@@ -162,7 +162,7 @@ function get_vector!(
     @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
-    for i = 1:N, j = i:N
+    for i in 1:N, j in i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
         @inbounds Y[i, j] = X[k] * scale
         @inbounds Y[j, i] = X[k] * scale
@@ -181,9 +181,9 @@ function get_vector!(
     @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
-    for i = 1:N, j = i:N
+    for i in 1:N, j in i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds Y[i, j] = (X[k] + (i == j ? 0 : X[k+1] * 1im)) * scale
+        @inbounds Y[i, j] = (X[k] + (i == j ? 0 : X[k + 1] * 1im)) * scale
         @inbounds Y[j, i] = Y[i, j]
         k += (i == j ? 1 : 2)
     end
