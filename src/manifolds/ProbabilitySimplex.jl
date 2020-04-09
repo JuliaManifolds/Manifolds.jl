@@ -93,10 +93,10 @@ end
     check_tangent_vector(M::ProbabilitySimplex, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`ProbabilitySimplex`](@ref) `M`, i.e.
-after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
-and its elements have to sum to one.
+after [`check_manifold_point`](@ref check_manifold_point(::ProbabilitySimplex, ::Any))`(M,p)`,
+`X` has to be of same dimension as `p` and its elements have to sum to one.
 The optional parameter `check_base_point` indicates, whether to call
-[`check_manifold_point`](@ref)  for `p` or not.
+`check_manifold_point`  for `p` or not.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(
@@ -211,7 +211,7 @@ eval(
 Compute the inner product of two tangent vectors `X`, `Y` from the tangent space $T_pΔ^n$ at
 `p`. The formula reads
 ````math
-g_p(X,Y) = \sum_{i=1}^{n+1}\frac{X_iY_i}{p}
+g_p(X,Y) = \sum_{i=1}^{n+1}\frac{X_iY_i}{p_i}
 ````
 """
 function inner(::ProbabilitySimplex, p, X, Y)
@@ -227,9 +227,9 @@ end
 
 Compute a first order approximation by projection. The formula reads
 ````math
-\operatorname{retr}^{-1}_p q = \bigl( I - \frac{1}{n}\mathbb{1}\mathbb{1}^\mathrm{T}\bigr)(\log(q)-\log(p))
+\operatorname{retr}^{-1}_p q = \bigl( I_{n+1} - \frac{1}{n}\mathbb{1}^{n+1,n+1} \bigr)(\log(q)-\log(p))
 ````
-where $\mathbb{1}$ is the column vector containing ones and $\log$ is applied elementwise.
+where $\mathbb{1}^{m,n}$ is the size `(m,n)` matrix containing ones, and $\log$ is applied elementwise.
 """
 inverse_retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxInverseRetraction)
 
@@ -283,7 +283,7 @@ manifold_dimension(::ProbabilitySimplex{n}) where {n} = n
 
 @doc raw"""
     mean(
-        S::ProbabilitySimplex,
+        M::ProbabilitySimplex,
         x::AbstractVector,
         [w::AbstractWeights,]
         method = GeodesicInterpolationWithinRadius();

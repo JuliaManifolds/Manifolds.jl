@@ -37,7 +37,7 @@ MultinomialMatrices(n::Int, m::Int) =
 @doc raw"""
     check_manifold_point(M::MultinomialMatrices, p)
 
-Checks whether `p` is a valid point on the [`MultinomialMatrices`](@ref)`{m,n}` `M`, i.e. is a matrix
+Checks whether `p` is a valid point on the [`MultinomialMatrices`](@ref)`(m,n)` `M`, i.e. is a matrix
 of `m` discrete probability distributions as columns from $\mathbb R^{n}$, i.e. each column is a point from
 [`ProbabilitySimplex`](@ref)`(n-1)`.
 """
@@ -57,7 +57,8 @@ end
 Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialMatrices`](@ref) `M`.
 This means, that `p` is valid, that `X` is of correct dimension and columnswise
 a tangent vector to the columns of `p` on the [`ProbabilitySimplex`](@ref).
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
+The optional parameter `check_base_point` indicates, whether to call
+[`check_manifold_point`](@ref check_manifold_point(::MultinomialMatrices, ::Any))  for `p`.
 """
 function check_tangent_vector(
     M::MultinomialMatrices{n,m},
@@ -93,5 +94,6 @@ get_iterator(M::MultinomialMatrices{n,m}) where {n,m} = Base.OneTo(m)
 
 @generated representation_size(::MultinomialMatrices{n,m}) where {n,m} = (n, m)
 
-show(io::IO, ::MultinomialMatrices{n,m}) where {n,m} =
+function show(io::IO, ::MultinomialMatrices{n,m}) where {n,m}
     print(io, "MultinomialMatrices($(n),$(m))")
+end
