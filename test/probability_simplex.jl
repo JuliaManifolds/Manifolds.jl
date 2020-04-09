@@ -9,7 +9,7 @@ include("utils.jl")
     @test is_manifold_point(M, p)
     @test_throws DomainError is_manifold_point(M, p .+ 1, true)
     @test_throws DomainError is_manifold_point(M, [0], true)
-    @test_throws DomainError is_manifold_point(M,-ones(3),true)
+    @test_throws DomainError is_manifold_point(M, -ones(3), true)
     @test manifold_dimension(M) == 2
     @test is_tangent_vector(M, p, X)
     @test is_tangent_vector(M, p, Y)
@@ -26,13 +26,13 @@ include("utils.jl")
     @test injectivity_radius(M, SoftmaxRetraction()) == 0
 
     pE = similar(p)
-    embed!(M,pE,p)
-    @test pE==p
+    embed!(M, pE, p)
+    @test pE == p
     XE = similar(X)
-    embed!(M,XE,p,X)
-    @test XE==X
+    embed!(M, XE, p, X)
+    @test XE == X
 
-    @test mean(M,[p,q]) == shortest_geodesic(M,p,q)(0.5)
+    @test mean(M, [p, q]) == shortest_geodesic(M, p, q)(0.5)
 
     types = [Vector{Float64}]
     TEST_FLOAT32 && push!(types, Vector{Float32})
