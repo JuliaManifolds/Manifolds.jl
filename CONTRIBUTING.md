@@ -49,6 +49,7 @@ In the example we have `exp(M, x, v)` for the exponential map and `exp!(M, y, v,
 
 On the other hand, the user will most likely look for the documentation of the non-mutating version, so we recommend adding the docstring for the non-mutating one, where all different signatures should be collected in one string when reasonable.
 This can best be achieved by adding a docstring to the method with a general signature with the first argument being your manifold:
+
 ````julia
 struct MyManifold <: Manifold end
 
@@ -64,6 +65,7 @@ exp(::MyManifold, ::Any...)
 
 We try to follow the [documentation guidelines](https://docs.julialang.org/en/v1/manual/documentation/) from the Julia documentation as well as [Blue Style](https://github.com/invenia/BlueStyle).
 We run [`JuliaFormatter.jl`](https://github.com/domluna/JuliaFormatter.jl) on the repo in the following way, which enforces a number of conventions consistent with Blue Style:
+
 ```julia
 using JuliaFormatter
 
@@ -77,6 +79,7 @@ format(
 ```
 
 We also follow a few internal conventions:
+
 - It is preferred that the `Manifold`'s struct contain a reference to the general theory.
 - Any implemented function should be accompanied by its mathematical formulae if a closed form exists.
 - Within the source code of one manifold, the type of the manifold should be the first element of the file, and an alphabetical order of the functions is preferable.
