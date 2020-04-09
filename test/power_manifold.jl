@@ -6,13 +6,13 @@ using StaticArrays: Dynamic
 
 Random.seed!(42)
 
-struct TestManifoldPowerMetric <: Manifold end
+struct TestManifoldPowerMetric <: Manifold{ℝ} end
 struct TestManifoldPowerMetricMetric <: Metric end
 
 function Manifolds.det_local_metric(
-    ::MetricManifold{TestManifoldPowerMetric,TestManifoldPowerMetricMetric},
+    ::MetricManifold{𝔽,TestManifoldPowerMetric,TestManifoldPowerMetricMetric},
     p,
-)
+) where {𝔽}
     return sum(p)
 end
 
@@ -21,6 +21,10 @@ end
     PM::TestManifoldPowerMetricMetric,
 )
     return Val(true)
+end
+
+function Manifolds.representation_size(M::TestManifoldPowerMetric)
+    return (2,)
 end
 
 @testset "Power manifold" begin
@@ -333,7 +337,7 @@ end
             is_tangent_atol_multiplier = 12.0,
         )
     end
-
+    
     @testset "Power manifold with metric" begin
         M1 = TestManifoldPowerMetric()
         M2 = MetricManifold(M1, TestManifoldPowerMetricMetric())
@@ -343,6 +347,6 @@ end
         @test (@inferred default_metric_dispatch(M13, PM)) === Val(true)
         MPM = MetricManifold(M13, PM)
         p = [1 2 3; 4 5 6]
-        @test det_local_metric(MPM, p) == 4*10*18
+        @test det_local_metric(MPM, p) == 5*7*9
     end
 end

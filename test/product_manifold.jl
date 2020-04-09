@@ -1,6 +1,26 @@
 include("utils.jl")
 
+using Manifolds: default_metric_dispatch
+
 struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
+
+struct TestManifoldProductMetric <: Manifold{ℝ} end
+struct TestManifoldProductMetricMetric <: Metric end
+
+function Manifolds.det_local_metric(
+    ::MetricManifold{𝔽,TestManifoldProductMetric,TestManifoldProductMetricMetric},
+    p,
+) where {𝔽}
+    return sum(p)
+end
+
+@inline function Manifolds.default_metric_dispatch(
+    M::TestManifoldProductMetricMetric,
+    PM::TestManifoldProductMetricMetric,
+)
+    return Val(true)
+end
+
 
 @testset "Product manifold" begin
     @test_throws MethodError ProductManifold()
@@ -369,5 +389,20 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0]),
             [1.0, 2.0, 3.0, 4.0, 5.0],
             CachedBasis(DefaultOrthonormalBasis(), []))
+    end
+
+    @testset "Product manifold with metric" begin
+        M1 = TestManifoldProductMetric()
+        M2 = MetricManifold(M1, TestManifoldProductMetricMetric())
+        M11 = ProductManifold(M1, M1)
+        PM = ProductMetric(
+            TestManifoldProductMetricMetric(),
+            TestManifoldProductMetricMetric(),
+        )
+        @test is_default_metric(M11, PM)
+        @test (@inferred default_metric_dispatch(M11, PM)) === Val(true)
+        MPM = MetricManifold(M11, PM)
+        p = ProductRepr([1, 2, 3], [2, 3, 3])
+        @test det_local_metric(MPM, p) == 6*8
     end
 end

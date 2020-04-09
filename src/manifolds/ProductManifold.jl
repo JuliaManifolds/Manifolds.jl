@@ -44,12 +44,22 @@ const PRODUCT_BASIS_LIST_CACHED = [
     CachedBasis,
 ]
 
-"""
+@doc raw"""
     ProductMetric <: Metric
 
-A type to represent the product of metrics for a [`ProductManifold`](@ref).
+A type to represent the product of `metrics` for a [`ProductManifold`](@ref).
+
+# Constructor
+
+    ProductMetric(M_1, M_2, ..., M_n)
+
+generates the product metric $M_1 × M_2 × … × M_n$.
 """
-struct ProductMetric <: Metric end
+struct ProductMetric{TM<:(NTuple{N,Metric} where {N})} <: Metric
+    metrics::TM
+end
+
+ProductMetric(metrics...) = ProductMetric{typeof(metrics)}(metrics)
 
 """
     ProductFVectorDistribution([type::VectorBundleFibers], [x], distrs...)
@@ -202,10 +212,13 @@ function cross(M1::ProductManifold, M2::ProductManifold)
 end
 
 function det_local_metric(
-    M::MetricManifold{ProductMetric,𝔽,ProductManifold{𝔽}},
-    p::ProductArray
+    M::MetricManifold{𝔽,<:ProductManifold{𝔽},<:ProductMetric},
+    p,
 ) where {𝔽}
-    dets = map(det_local_metric, M.manifolds, submanifold_components(M, p))
+    mms = map(M.manifold.manifolds, M.metric.metrics) do mfld, mtr
+        return MetricManifold(mfld, mtr)
+    end
+    dets = map(det_local_metric, mms, submanifold_components(M, p))
     return prod(dets)
 end
 

@@ -249,7 +249,7 @@ function check_tangent_vector(
 end
 
 function det_local_metric(
-    M::MetricManifold{<:AbstractPowerManifold,𝔽,PowerMetric},
+    M::MetricManifold{𝔽,<:AbstractPowerManifold,<:PowerMetric},
     p,
 ) where {𝔽}
     MM = MetricManifold(M.manifold.manifold, M.metric.metric)
@@ -427,13 +427,15 @@ function get_coordinates!(
     return Y
 end
 
-get_iterator(M::PowerManifold{𝔽,<:Manifold{𝔽},Tuple{N}}) where {𝔽,N} = 1:N
+get_iterator(M::PowerManifold{𝔽,<:Manifold{𝔽},Tuple{N}}) where {𝔽,N} = Base.OneTo(N)
 @generated function get_iterator(
     M::PowerManifold{𝔽,<:Manifold{𝔽},SizeTuple},
 ) where {𝔽,SizeTuple}
     size_tuple = size_to_tuple(SizeTuple)
     return Base.product(map(Base.OneTo, size_tuple)...)
 end
+
+@decorator_transparent_signature get_iterator(M::AbstractDecoratorManifold)
 
 function get_vector!(
     M::PowerManifold,
@@ -705,6 +707,8 @@ end
     return view(x[i...], rep_size_to_colons(rep_size)...)
 end
 
+@decorator_transparent_signature _read(M::AbstractDecoratorManifold, rep_size::Tuple, x, i)
+
 @generated function rep_size_to_colons(rep_size::Tuple)
     N = length(rep_size.parameters)
     return ntuple(i -> Colon(), N)
@@ -796,3 +800,5 @@ end
 @inline function _write(M::PowerManifoldNested, rep_size::Tuple, x::AbstractArray, i::Tuple)
     return view(x[i...], rep_size_to_colons(rep_size)...)
 end
+
+@decorator_transparent_signature _write(M::AbstractDecoratorManifold, rep_size::Tuple, x, i)
