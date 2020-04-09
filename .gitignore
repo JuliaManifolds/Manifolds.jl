@@ -1,3 +1,6 @@
+Manifest.toml
+docs/Manifest.toml
 docs/build
+docs/src/generated
 benchmark/tune.json
 benchmark/results*
