@@ -96,7 +96,7 @@ Check whether `X` is a tangent vector to `p` on the [`ProbabilitySimplex`](@ref)
 after [`check_manifold_point`](@ref check_manifold_point(::ProbabilitySimplex, ::Any))`(M,p)`,
 `X` has to be of same dimension as `p` and its elements have to sum to one.
 The optional parameter `check_base_point` indicates, whether to call
-`check_manifold_point`  for `p` or not.
+[`check_manifold_point`](@ref check_manifold_point(::ProbabilitySimplex, ::Any))  for `p` or not.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(
