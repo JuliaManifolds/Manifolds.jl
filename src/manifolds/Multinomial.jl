@@ -18,7 +18,7 @@ The [`ProbabilitySimplex`](@ref) is stored internally within `M.manifold`, such 
 
 # Constructor
 
-    MultinomialMatrices(n,m)
+    MultinomialMatrices(n, m)
 
 Generate the manifold of matrices $\mathbb R^{n×m}$ such that the $m$ columns are
 discrete probability distributions, i.e. sum up to one.
@@ -35,7 +35,7 @@ MultinomialMatrices(n::Int, m::Int) =
     MultinomialMatrices{manifold_dimension(M) + 1,m,N}(M)
 
 @doc raw"""
-    check_manifold_point(M::MultinomialMatrices,p)
+    check_manifold_point(M::MultinomialMatrices, p)
 
 Checks whether `p` is a valid point on the [`MultinomialMatrices`](@ref)`{m,n}` `M`, i.e. is a matrix
 of `m` discrete probability distributions as columns from $\mathbb R^{n}$, i.e. each column is a point from
