@@ -88,7 +88,11 @@ Represent the [`Metric`](@ref) on an [`AbstractPowerManifold`](@ref), i.e. the i
 product on the tangent space is the sum of the inner product of each elements
 tangent space of the power manifold.
 
-It is constructed based on the given `metric` on the powered space.
+# Constructor
+
+    PowerMetric(metric)
+
+Generate the power metric of a power manifold based on `metric`.
 """
 struct PowerMetric{TM<:Metric} <: Metric
     metric::TM
