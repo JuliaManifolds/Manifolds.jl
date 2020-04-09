@@ -5,7 +5,7 @@ import ManifoldsBase: manifold_dimension, exp!, log!, inner, zero_tangent_vector
 using Manifolds: AbstractEstimationMethod, GradientDescentEstimation, CyclicProximalPointEstimation, GeodesicInterpolation, GeodesicInterpolationWithinRadius
 import Manifolds: mean!, median!, var, mean_and_var
 
-struct TestStatsSphere{N} <: Manifold end
+struct TestStatsSphere{N} <: Manifold{ℝ} end
 TestStatsSphere(N) = TestStatsSphere{N}()
 manifold_dimension(M::TestStatsSphere{N}) where {N} = manifold_dimension(Sphere(N))
 exp!(M::TestStatsSphere{N}, w, x, y; kwargs...) where {N} = exp!(Sphere(N), w, x, y; kwargs...)
@@ -13,7 +13,7 @@ log!(M::TestStatsSphere{N}, y, x, v; kwargs...) where {N} = log!(Sphere(N), y, x
 inner(M::TestStatsSphere{N}, x, v, w; kwargs...) where {N} = inner(Sphere(N), x, v, w; kwargs...)
 zero_tangent_vector!(M::TestStatsSphere{N},  v, x; kwargs...) where {N} = zero_tangent_vector!(Sphere(N),  v, x; kwargs...)
 
-struct TestStatsEuclidean{N} <: Manifold end
+struct TestStatsEuclidean{N} <: Manifold{ℝ} end
 TestStatsEuclidean(N) = TestStatsEuclidean{N}()
 manifold_dimension(M::TestStatsEuclidean{N}) where {N} = manifold_dimension(Euclidean(N))
 exp!(M::TestStatsEuclidean{N}, y, x, v; kwargs...) where {N} = exp!(Euclidean(N), y, x, v; kwargs...)
@@ -194,9 +194,9 @@ function test_moments(M, x)
     end
 end
 
-struct TestStatsOverload1 <: Manifold end
-struct TestStatsOverload2 <: Manifold end
-struct TestStatsOverload3 <: Manifold end
+struct TestStatsOverload1 <: Manifold{ℝ} end
+struct TestStatsOverload2 <: Manifold{ℝ} end
+struct TestStatsOverload3 <: Manifold{ℝ} end
 struct TestStatsMethod1 <: AbstractEstimationMethod end
 
 mean!(M::TestStatsOverload1, y, x::AbstractVector, w::AbstractWeights, method::GradientDescentEstimation) = fill!(y, 3)
@@ -529,7 +529,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             @test m != mg
             @test m == mf
 
-            μ = project_point(R, randn(3, 3))
+            μ = project(R, randn(3, 3))
             d = normal_tvector_distribution(R, μ, 0.1)
             x = [exp(R, μ, rand(rng, d)) for _ = 1:10]
             w = pweights([rand(rng) for _ = 1:length(x)])
@@ -542,7 +542,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             rng = MersenneTwister(47)
             G = Manifolds.Grassmann(3, 2)
             p0 = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            x = [exp(G, p0, project_tangent(G, p0, randn(rng, 3, 2) * 10)) for _= 1:10]
+            x = [exp(G, p0, project(G, p0, randn(rng, 3, 2) * 10)) for _= 1:10]
             w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(G, x, w)
             mg = mean(G, x, w, GeodesicInterpolation())
@@ -550,7 +550,7 @@ mean_and_var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, ::Tes
             @test m != mg
             @test m == mf
 
-            x = [exp(G, p0, project_tangent(G, p0, randn(rng, 3, 2) * 0.01)) for _= 1:10]
+            x = [exp(G, p0, project(G, p0, randn(rng, 3, 2) * 0.01)) for _= 1:10]
             w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(G, x, w)
             mg = mean(G, x, w, GeodesicInterpolation())

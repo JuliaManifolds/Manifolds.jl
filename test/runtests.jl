@@ -9,7 +9,7 @@ include("utils.jl")
 
 @testset "Ambiguities" begin
     # TODO: reduce the number of ambiguities
-    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 18
+    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 12
     @test length(Test.detect_ambiguities(Manifolds)) == 0
 end
 
@@ -21,8 +21,8 @@ include("circle.jl")
 include("cholesky_space.jl")
 include("euclidean.jl")
 include("fixed_rank.jl")
-include("generalized_stiefel.jl")
 include("generalized_grassmann.jl")
+include("generalized_stiefel.jl")
 include("grassmann.jl")
 include("hyperbolic.jl")
 include("rotations.jl")
@@ -37,7 +37,6 @@ include("oblique.jl")
 include("torus.jl")
 
 #meta manifolds
-include("embedded.jl")
 include("product_manifold.jl")
 include("power_manifold.jl")
 include("vector_bundle.jl")

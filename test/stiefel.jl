@@ -33,9 +33,9 @@ include("utils.jl")
             a = [1.0 0.0; 0.0 2.0; 0.0 0.0]
             @test !is_manifold_point(M, a)
             b = similar(a)
-            c = project_point(M, a)
+            c = project(M, a)
             @test c == x
-            project_point!(M, b, a)
+            project!(M, b, a)
             @test b == x
             X = [0.0 0.0; 0.0 0.0; -1.0 1.0]
             Y = similar(X)
@@ -107,8 +107,6 @@ include("utils.jl")
             @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            @test_throws DomainError is_manifold_point(M, [:a :b; :c :d; :e :f], true)
-            @test_throws DomainError is_tangent_vector(M, x, [:a :b; :c :d; :e :f], true)
         end
         types = [Matrix{ComplexF64}]
         @testset "Type $T" for T in types

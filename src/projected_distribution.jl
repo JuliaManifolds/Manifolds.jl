@@ -38,11 +38,11 @@ end
 support(d::ProjectedPointDistribution) = MPointSupport(d.manifold)
 
 """
-    ProjectedFVectorDistribution(type::VectorBundleFibers, p, d, project_vector!)
+    ProjectedFVectorDistribution(type::VectorBundleFibers, p, d, project!)
 
 Generates a random vector from ambient space of manifold `type.manifold`
 at point `p` and projects it to vector space of type `type` using function
-`project_vector!`, see [`project_vector`](@ref) for documentation.
+`project!`, see [`project`](@ref) for documentation.
 Generated arrays are of type `TResult`.
 """
 struct ProjectedFVectorDistribution{
@@ -55,14 +55,14 @@ struct ProjectedFVectorDistribution{
     type::TSpace
     point::ManifoldPoint
     distribution::TD
-    project_vector!::TProj
+    project!::TProj
 end
 
 function ProjectedFVectorDistribution(
     type::VectorBundleFibers,
     p,
     d::Distribution,
-    project_vector!,
+    project!,
     ::TResult,
 ) where {TResult}
     return ProjectedFVectorDistribution{
@@ -70,18 +70,18 @@ function ProjectedFVectorDistribution(
         typeof(type),
         typeof(p),
         typeof(d),
-        typeof(project_vector!),
+        typeof(project!),
     }(
         type,
         p,
         d,
-        project_vector!,
+        project!,
     )
 end
 
 function rand(rng::AbstractRNG, d::ProjectedFVectorDistribution{TResult}) where {TResult}
     X = convert(TResult, reshape(rand(rng, d.distribution), size(d.point)))
-    return d.project_vector!(d.type, X, d.point, X)
+    return d.project!(d.type, X, d.point, X)
 end
 
 function _rand!(

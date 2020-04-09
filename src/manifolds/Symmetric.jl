@@ -1,11 +1,11 @@
 @doc raw"""
-    SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{TransparentIsometricEmbedding}
+    SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
 
 The [`Manifold`](@ref) $ \operatorname{Sym}(n)$ consisting of the real- or complex-valued
 symmetric matrices of size $n × n$, i.e. the set
 
 ````math
-\operatorname{Sym}(n) = \bigl\{p  ∈ 𝔽^{n × n} \big| p^{\mathrm{H}} = p \bigr\},
+\operatorname{Sym}(n) = \bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = p \bigr\},
 ````
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
 and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
@@ -21,7 +21,7 @@ which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::
 
 Generate the manifold of $n × n$ symmetric matrices.
 """
-struct SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{TransparentIsometricEmbedding} end
+struct SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
 
 function SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
     SymmetricMatrices{n,field}()
@@ -131,7 +131,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℂ},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -174,7 +174,7 @@ function get_vector!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℂ},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
@@ -197,13 +197,10 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the numb
 `𝔽`, i.e.
 
 ````math
-\dim \operatorname{Sym}(n,ℝ) = \frac{n(n+1)}{2},
-````
-
-and
-
-````math
-\dim \operatorname{Sym}(n,ℂ) = 2\frac{n(n+1)}{2} - n = n^2,
+\begin{aligned}
+\dim \mathrm{Sym}(n,ℝ) &= \frac{n(n+1)}{2},\\
+\dim \mathrm{Sym}(n,ℂ) &= 2\frac{n(n+1)}{2} - n = n^2,
+\end{aligned}
 ````
 
 where the last $-n$ is due to the zero imaginary part for Hermitian matrices
@@ -213,7 +210,7 @@ function manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}
 end
 
 @doc raw"""
-    project_point(M::SymmetricMatrices, p)
+    project(M::SymmetricMatrices, p)
 
 Projects `p` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
 
@@ -223,12 +220,12 @@ Projects `p` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
 
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
-project_point(::SymmetricMatrices, ::Any...)
+project(::SymmetricMatrices, ::Any)
 
-project_point!(M::SymmetricMatrices, q, p) = copyto!(q, (p + p') ./ 2)
+project!(M::SymmetricMatrices, q, p) = copyto!(q, (p + p') ./ 2)
 
 @doc raw"""
-    project_tangent(M::SymmetricMatrices, p, X)
+    project(M::SymmetricMatrices, p, X)
 
 Project the matrix `X` onto the tangent space at `p` on the [`SymmetricMatrices`](@ref) `M`,
 
@@ -238,9 +235,9 @@ Project the matrix `X` onto the tangent space at `p` on the [`SymmetricMatrices`
 
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
-project_tangent(::SymmetricMatrices, ::Any...)
+project(::SymmetricMatrices, ::Any, ::Any)
 
-project_tangent!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
+project!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
 
 function show(io::IO, ::SymmetricMatrices{n,F}) where {n,F}
     print(io, "SymmetricMatrices($(n), $(F))")

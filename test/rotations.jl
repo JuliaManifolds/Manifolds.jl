@@ -30,7 +30,7 @@ include("utils.jl")
         @test norm(M, x, V) / sqrt(2) ≈ norm(v)
         @test Manifolds.vee(M, x, V) == v
 
-        V = project_tangent(M, x, randn(2, 2))
+        V = project(M, x, randn(2, 2))
         v = Manifolds.vee(M, x, V)
         @test isa(v, AbstractVector)
         @test Manifolds.hat(M, x, v) == V
@@ -105,7 +105,7 @@ include("utils.jl")
                 @test norm(SOn, x, V) / sqrt(2) ≈ norm(v)
                 @test Manifolds.vee(SOn, x, V) == v
 
-                V = project_tangent(SOn, x, randn(n, n))
+                V = project(SOn, x, randn(n, n))
                 v = Manifolds.vee(SOn, x, V)
                 @test isa(v, AbstractVector)
                 @test Manifolds.hat(SOn, x, v) ≈ V
@@ -164,16 +164,24 @@ include("utils.jl")
     @testset "Project point" begin
         M = Manifolds.Rotations(2)
         x = Matrix{Float64}(I, 2, 2)
-        x1 = project_point(M, x)
+        x1 = project(M, x)
         @test is_manifold_point(M, x1, true)
 
         M = Manifolds.Rotations(3)
         x = collect(reshape(1.0:9.0, (3, 3)))
-        x2 = project_point(M, x)
+        x2 = project(M, x)
         @test is_manifold_point(M, x2, true)
 
         rng = MersenneTwister(44);
-        x3 = project_point(M, randn(rng, 3,3))
+        x3 = project(M, randn(rng, 3,3))
         @test is_manifold_point(M, x3, true)
+    end
+    @testset "Edge cases of Rotations" begin
+        @test_throws OutOfInjectivityRadiusError inverse_retract(
+            Rotations(2),
+            [1.0 0.0; 0.0 1.0],
+            [1.0 0.0; 0.0 -1.0],
+            PolarInverseRetraction()
+        )
     end
 end

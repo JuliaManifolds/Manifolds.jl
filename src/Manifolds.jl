@@ -33,6 +33,7 @@ import Base:
     zero
 import Distributions: _rand!, support
 import LinearAlgebra: cross, det, Diagonal, dot, mul!, norm, I, UniformScaling
+import ManifoldsBase: OutOfInjectivityRadiusError
 import ManifoldsBase:
     allocate,
     allocate_result,
@@ -47,11 +48,14 @@ import ManifoldsBase:
     decorator_transparent_dispatch,
     default_decorator_dispatch,
     distance,
+    embed,
+    embed!,
     exp,
     exp!,
     get_basis,
     get_coordinates,
     get_coordinates!,
+    get_embedding,
     get_vector,
     get_vector!,
     get_vectors,
@@ -68,10 +72,9 @@ import ManifoldsBase:
     manifold_dimension,
     norm,
     number_eltype,
-    project_point,
-    project_point!,
-    project_tangent,
-    project_tangent!,
+    number_of_coordinates,
+    project,
+    project!,
     representation_size,
     retract,
     retract!,
@@ -116,17 +119,30 @@ using ManifoldsBase:
     vee!
 using ManifoldsBase:
     AbstractBasis,
+    AbstractOrthogonalBasis,
     DefaultOrDiagonalizingBasis,
     DiagonalizingBasisData,
-    VeeOrthogonalBasis
+    VeeOrthogonalBasis,
+    AbstractOrthonormalBasis,
+    DefaultOrthonormalBasis
 using ManifoldsBase:
-    ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
+    ValidationCoTVector, ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
 using ManifoldsBase: QRRetraction, PolarRetraction, ProjectionRetraction
 using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
 using ManifoldsBase: QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
 using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 using ManifoldsBase: ℝ, ℂ, ℍ
+using ManifoldsBase:
+    AbstractEmbeddingType,
+    AbstractIsometricEmbeddingType,
+    TransparentIsometricEmbedding,
+    DefaultIsometricEmbeddingType,
+    DefaultEmbeddingType
+using ManifoldsBase:
+    AbstractEmbeddedManifold,
+    EmbeddedManifold
+
 
 using Markdown: @doc_str
 using Random: AbstractRNG
@@ -150,7 +166,6 @@ include("product_representations.jl")
 # It's included early to ensure visibility of `Identity`
 include("groups/group.jl")
 
-include("manifolds/EmbeddedManifold.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/ProductManifold.jl")
 include("manifolds/PowerManifold.jl")
@@ -208,7 +223,9 @@ function __init__()
 end
 #
 export CoTVector, Manifold, MPoint, TVector, Manifold
+export AbstractSphere
 export Euclidean,
+    ArraySphere,
     CholeskySpace,
     Circle,
     FixedRankMatrices,
@@ -228,7 +245,7 @@ export Euclidean,
 export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
 export AbstractDecoratorManifold
-export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
+export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
 export AbstractPowerManifold,
@@ -342,10 +359,8 @@ export ×,
     number_eltype,
     one,
     power_dimensions,
-    project_point,
-    project_point!,
-    project_tangent,
-    project_tangent!,
+    project,
+    project!,
     projected_distribution,
     real_dimension,
     ricci_curvature,
@@ -452,6 +467,7 @@ export AbstractBasis,
     DiagonalizingBasisData,
     ProductBasisData,
     PowerBasisData
+export OutOfInjectivityRadiusError
 export get_basis,
     get_coordinates,
     get_coordinates!,

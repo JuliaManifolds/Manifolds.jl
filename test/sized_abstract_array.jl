@@ -7,6 +7,7 @@ using Test
     @testset "Inner Constructors" begin
         @test SizedAbstractArray{Tuple{2}, Int, 1, 1, Vector{Int}}((3, 4)).data == [3, 4]
         @test SizedAbstractArray{Tuple{2}, Int, 1}([3, 4]).data == [3, 4]
+        @test SizedAbstractArray{Tuple{2}, Int}([3, 4]).data == [3, 4]
         @test SizedAbstractArray{Tuple{2, 2}, Int, 2}(collect(3:6)).data == collect(3:6)
         @test size(SizedAbstractArray{Tuple{4, 5}, Int, 2}(undef).data) == (4, 5)
         @test size(SizedAbstractArray{Tuple{4, 5}, Int}(undef).data) == (4, 5)
@@ -70,6 +71,8 @@ using Test
         a2 = copy(a1)
         sa1 = SizedAbstractVector{4}(a1)
         sa2 = SizedAbstractVector{4}(a2)
+        @test copy(sa1) == sa1
+        @test copy(sa1) !== sa1
         @test Base.mightalias(a1, sa1)
         @test Base.mightalias(sa1, SizedAbstractVector{4}(a1))
         @test !Base.mightalias(a2, sa1)
@@ -77,6 +80,7 @@ using Test
         @test Base.mightalias(sa1, view(sa1, 1:2))
         @test Base.mightalias(a1, view(sa1, 1:2))
         @test Base.mightalias(sa1, view(a1, 1:2))
+        @test Base.dataids(a1) == Base.dataids(sa1)
     end
 
     @testset "back to Array" begin
@@ -88,6 +92,8 @@ using Test
         @test Matrix(SMatrix{2,2}((1,2,3,4))) == [1 3; 2 4]
         @test convert(Matrix, SMatrix{2,2}((1,2,3,4))) == [1 3; 2 4]
         @test convert(Array, SizedAbstractArray{Tuple{2,2,2,2}, Int}(ones(2,2,2,2))) == ones(2,2,2,2)
+        @test convert(Array{Float64}, SizedAbstractArray{Tuple{2,2,2,2}, Int}(ones(2,2,2,2))) isa Array{Float64,4}
+        @test convert(Array{Float64,4}, SizedAbstractArray{Tuple{2,2,2,2}, Int}(ones(2,2,2,2))) isa Array{Float64,4}
         # Conversion after reshaping
         @test Array(SizedAbstractMatrix{2,2,Int,1,Vector{Int}}([1,2,3,4])) == [1 3; 2 4]
     end
@@ -96,5 +102,11 @@ using Test
         @test @inferred(promote_type(SizedAbstractVector{1,Float64,1,Vector{Float64}}, SizedAbstractVector{1,BigFloat,1,Vector{BigFloat}})) == SizedAbstractVector{1,BigFloat,1,Vector{BigFloat}}
         @test @inferred(promote_type(SizedAbstractVector{2,Int,1,Vector{Int}}, SizedAbstractVector{2,Float64,1,Vector{Float64}})) === SizedAbstractVector{2,Float64,1,Vector{Float64}}
         @test @inferred(promote_type(SizedAbstractMatrix{2,3,Float32,2,Matrix{Float32}}, SizedAbstractMatrix{2,3,Complex{Float64},2,Matrix{Complex{Float64}}})) === SizedAbstractMatrix{2,3,Complex{Float64},2,Matrix{Complex{Float64}}}
+    end
+
+    @testset "similar" begin
+        a = SizedAbstractArray{Tuple{2}, Int, 1}([3, 4])
+        @test similar(typeof(a), Float64) isa SizedAbstractVector{2, Float64}
+        @test similar(typeof(a), Float64, Size(3,4)) isa SizedAbstractMatrix{3, 4, Float64}
     end
 end

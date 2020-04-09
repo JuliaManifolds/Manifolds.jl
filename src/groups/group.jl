@@ -5,15 +5,15 @@ Abstract type for smooth binary operations $∘$ on elements of a Lie group $\ma
 ```math
 ∘ : \mathcal{G} × \mathcal{G} → \mathcal{G}
 ```
-An operation can be either defined for a specific [`AbstractGroupManifold`](@ref)
-or in general, by defining for an operation `Op` the following methods:
+An operation can be either defined for a specific [`AbstractGroupManifold`](@ref) over
+number system `𝔽` or in general, by defining for an operation `Op` the following methods:
 
-    identity!(::AbstractGroupManifold{Op}, q, q)
-    identity(::AbstractGroupManifold{Op}, p)
-    inv!(::AbstractGroupManifold{Op}, q, p)
-    inv(::AbstractGroupManifold{Op}, p)
-    compose(::AbstractGroupManifold{Op}, p, q)
-    compose!(::AbstractGroupManifold{Op}, x, p, q)
+    identity!(::AbstractGroupManifold{𝔽,Op}, q, q)
+    identity(::AbstractGroupManifold{𝔽,Op}, p)
+    inv!(::AbstractGroupManifold{𝔽,Op}, q, p)
+    inv(::AbstractGroupManifold{𝔽,Op}, p)
+    compose(::AbstractGroupManifold{𝔽,Op}, p, q)
+    compose!(::AbstractGroupManifold{𝔽,Op}, x, p, q)
 
 Note that a manifold is connected with an operation by wrapping it with a decorator,
 [`AbstractGroupManifold`](@ref). In typical cases the concrete wrapper
@@ -22,17 +22,17 @@ Note that a manifold is connected with an operation by wrapping it with a decora
 abstract type AbstractGroupOperation end
 
 @doc raw"""
-    AbstractGroupManifold{<:AbstractGroupOperation} <: AbstractDecoratorManifold
+    AbstractGroupManifold{𝔽,O<:AbstractGroupOperation} <: AbstractDecoratorManifold{𝔽}
 
 Abstract type for a Lie group, a group that is also a smooth manifold with an
 [`AbstractGroupOperation`](@ref), a smooth binary operation. `AbstractGroupManifold`s must
 implement at least [`inv`](@ref), [`identity`](@ref), [`compose`](@ref), and
 [`translate_diff`](@ref).
 """
-abstract type AbstractGroupManifold{O<:AbstractGroupOperation} <: AbstractDecoratorManifold end
+abstract type AbstractGroupManifold{𝔽,O<:AbstractGroupOperation} <: AbstractDecoratorManifold{𝔽} end
 
 """
-    GroupManifold{M<:Manifold,O<:AbstractGroupOperation} <: AbstractGroupManifold{O}
+    GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <: AbstractGroupManifold{𝔽,O}
 
 Decorator for a smooth manifold that equips the manifold with a group operation, thus making
 it a Lie group. See [`AbstractGroupManifold`](@ref) for more details.
@@ -43,7 +43,7 @@ Group manifolds by default forward metric-related operations to the wrapped mani
 
     GroupManifold(manifold, op)
 """
-struct GroupManifold{M<:Manifold,O<:AbstractGroupOperation} <: AbstractGroupManifold{O}
+struct GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <: AbstractGroupManifold{𝔽,O}
     manifold::M
     op::O
 end
@@ -52,7 +52,7 @@ show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op)
 
 const GROUP_MANIFOLD_BASIS_DISAMBIGUATION = [
     AbstractDecoratorManifold,
-    ArrayManifold,
+    ValidationManifold,
     VectorBundle,
 ]
 
@@ -158,9 +158,9 @@ isapprox(p, e::Identity; kwargs...) = isapprox(e::Identity, p; kwargs...)
 isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
 isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
-function allocate_result(M::Manifold, f::typeof(get_coordinates), e::Identity, X)
+function allocate_result(M::Manifold, f::typeof(get_coordinates), e::Identity, X, B::AbstractBasis)
     T = allocate_result_type(M, f, (e.p, X))
-    return allocate(e.p, T, Size(manifold_dimension(M)))
+    return allocate(e.p, T, Size(number_of_coordinates(M, B)))
 end
 
 function decorator_transparent_dispatch(
@@ -664,12 +664,12 @@ following properties:
     [`exp`](@ref).
 
 ```
-group_exp(G::AbstractGroupManifold{AdditionOperation}, X)
+group_exp(G::AbstractGroupManifold{𝔽,AdditionOperation}, X) where {𝔽}
 ```
 
 Compute $q = X$.
 
-    group_exp(G::AbstractGroupManifold{MultiplicationOperation}, X)
+    group_exp(G::AbstractGroupManifold{𝔽,MultiplicationOperation}, X) where {𝔽}
 
 For `Number` and `AbstractMatrix` types of `X`, compute the usual numeric/matrix
 exponential,
@@ -708,12 +708,12 @@ $q = \exp X$
     [`log`](@ref).
 
 ```
-group_log(G::AbstractGroupManifold{AdditionOperation}, q)
+group_log(G::AbstractGroupManifold{𝔽,AdditionOperation}, q) where {𝔽}
 ```
 
 Compute $X = q$.
 
-    group_log(G::AbstractGroupManifold{MultiplicationOperation}, q)
+    group_log(G::AbstractGroupManifold{𝔽,MultiplicationOperation}, q) where {𝔽}
 
 For `Number` and `AbstractMatrix` types of `q`, compute the usual numeric/matrix logarithm:
 
@@ -877,7 +877,7 @@ Group operation that consists of simple addition.
 """
 struct AdditionOperation <: AbstractGroupOperation end
 
-const AdditionGroup = AbstractGroupManifold{AdditionOperation}
+const AdditionGroup = AbstractGroupManifold{𝔽,AdditionOperation} where {𝔽}
 
 +(e::Identity{G}) where {G<:AdditionGroup} = e
 +(::Identity{G}, p) where {G<:AdditionGroup} = p
@@ -941,7 +941,7 @@ Group operation that consists of multiplication.
 """
 struct MultiplicationOperation <: AbstractGroupOperation end
 
-const MultiplicationGroup = AbstractGroupManifold{MultiplicationOperation}
+const MultiplicationGroup = AbstractGroupManifold{𝔽,MultiplicationOperation} where {𝔽}
 
 *(e::Identity{G}) where {G<:MultiplicationGroup} = e
 *(::Identity{G}, p) where {G<:MultiplicationGroup} = p

@@ -87,4 +87,8 @@ include("group_utils.jl")
             ProductRepr(group_log(SOn, pts[1].parts[1]), group_log(Tn, pts[1].parts[2])),
         )
     end
+    @test sprint(show, "text/plain", G) === """
+    ProductGroup with 2 subgroups:
+     SpecialOrthogonal(3)
+     TranslationGroup(2; field = ℝ)"""
 end

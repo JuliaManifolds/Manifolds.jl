@@ -1,8 +1,8 @@
 struct NotImplementedOperation <: AbstractGroupOperation end
 
-struct NotImplementedManifold <: Manifold end
+struct NotImplementedManifold <: Manifold{ℝ} end
 
-struct NotImplementedGroupDecorator{M} <: AbstractDecoratorManifold
+struct NotImplementedGroupDecorator{M} <: AbstractDecoratorManifold{ℝ}
     manifold::M
 end
 

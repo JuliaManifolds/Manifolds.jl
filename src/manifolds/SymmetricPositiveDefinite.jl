@@ -1,12 +1,12 @@
 @doc raw"""
-    SymmetricPositiveDefinite{N} <: Manifold
+    SymmetricPositiveDefinite{N} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType}
 
 The manifold of symmetric positive definite matrices, i.e.
 
 ````math
 \mathcal P(n) =
 \bigl\{
-p ∈ ℝ^{n × n} : a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
+p ∈ ℝ^{n × n}\ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
 \bigr\}
 ````
 
@@ -16,7 +16,7 @@ p ∈ ℝ^{n × n} : a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash
 
 generates the manifold $\mathcal P(n) \subset ℝ^{n × n}$
 """
-struct SymmetricPositiveDefinite{N} <: AbstractEmbeddedManifold{DefaultEmbeddingType} end
+struct SymmetricPositiveDefinite{N} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType} end
 
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
 
@@ -116,7 +116,7 @@ end)
 returns the dimension of
 [`SymmetricPositiveDefinite`](@ref) `M`$=\mathcal P(n), n ∈ ℕ$, i.e.
 ````math
-\dim \mathcal P(n) = \frac{n(n+1)}{2}
+\dim \mathcal P(n) = \frac{n(n+1)}{2}.
 ````
 """
 @generated function manifold_dimension(M::SymmetricPositiveDefinite{N}) where {N}
@@ -166,12 +166,6 @@ end
 returns the zero tangent vector in the tangent space of the symmetric positive
 definite matrix `x` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
 """
-zero_tangent_vector(M::SymmetricPositiveDefinite, x) = zero(x)
-function zero_tangent_vector(
-    M::MetricManifold{SymmetricPositiveDefinite{N},T},
-    x,
-) where {N,T<:Metric}
-    return zero(x)
-end
+zero_tangent_vector(::SymmetricPositiveDefinite, ::Any)
 
 zero_tangent_vector!(M::SymmetricPositiveDefinite{N}, v, x) where {N} = fill!(v, 0)

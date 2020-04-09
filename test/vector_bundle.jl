@@ -51,13 +51,13 @@ struct TestVectorSpaceType <: VectorSpaceType end
     for T in types
         x = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)
-        @test sprint(show, TB) == "TangentBundle(Sphere(2))"
+        @test sprint(show, TB) == "TangentBundle(Sphere(2; field = ℝ))"
         @test base_manifold(TB) == M
         @test manifold_dimension(TB) == 2*manifold_dimension(M)
         @test representation_size(TB) == (6,)
         CTB = CotangentBundle(M)
-        @test sprint(show, CTB) == "CotangentBundle(Sphere(2))"
-        @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) == "VectorBundle(TestVectorSpaceType(), Sphere(2))"
+        @test sprint(show, CTB) == "CotangentBundle(Sphere(2; field = ℝ))"
+        @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) == "VectorBundle(TestVectorSpaceType(), Sphere(2; field = ℝ))"
         @testset "Type $T" begin
             pts_tb = [ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
                       ProductRepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
@@ -66,10 +66,12 @@ struct TestVectorSpaceType <: VectorSpaceType end
             for pt ∈ pts_tb
                 @test bundle_projection(TB, pt) ≈ pt.parts[1]
             end
+            diag_basis = DiagonalizingOrthonormalBasis(log(TB, pts_tb[1], pts_tb[2]))
             basis_types = (
                 DefaultOrthonormalBasis(),
                 get_basis(TB, pts_tb[1], DefaultOrthonormalBasis()),
-                DiagonalizingOrthonormalBasis(log(TB, pts_tb[1], pts_tb[2])),
+                diag_basis,
+                get_basis(TB, pts_tb[1], diag_basis),
             )
             test_manifold(
                 TB,
@@ -80,14 +82,15 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_tangent_vector_broadcasting = false,
                 test_vee_hat = true,
                 test_project_tangent = true,
+                test_project_point = true,
                 basis_types_vecs = basis_types,
                 projection_atol_multiplier = 4
             )
         end
     end
 
-    @test TangentBundle{Sphere{2}} == VectorBundle{Manifolds.TangentSpaceType, Sphere{2}}
-    @test CotangentBundle{Sphere{2}} == VectorBundle{Manifolds.CotangentSpaceType, Sphere{2}}
+    @test TangentBundle{ℝ,Sphere{2,ℝ}} == VectorBundle{ℝ,Manifolds.TangentSpaceType,Sphere{2,ℝ}}
+    @test CotangentBundle{ℝ,Sphere{2,ℝ}} == VectorBundle{ℝ,Manifolds.CotangentSpaceType,Sphere{2,ℝ}}
 
     @test base_manifold(TangentBundle(M)) == M
     @testset "spaces at point" begin
@@ -95,9 +98,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
         t_x = TangentSpaceAtPoint(M, x)
         ct_x = CotangentSpaceAtPoint(M, x)
         @test sprint(show, "text/plain", t_x) == """
-        VectorSpaceAtPoint{VectorBundleFibers{Manifolds.TangentSpaceType,Sphere{2}},Array{Float64,1}}
+        VectorSpaceAtPoint{VectorBundleFibers{Manifolds.TangentSpaceType,Sphere{2,ℝ}},Array{Float64,1}}
         Fiber:
-         VectorBundleFibers(TangentSpace, Sphere(2))
+         VectorBundleFibers(TangentSpace, Sphere(2; field = ℝ))
         Base point:
          3-element Array{Float64,1}:
           1.0
@@ -119,14 +122,21 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(2))) == 4
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(3))) == 9
         @test base_manifold(VectorBundleFibers(TT, Sphere(2))) == M
-        @test sprint(show, VectorBundleFibers(TT, Sphere(2))) == "VectorBundleFibers(TensorProductType(TangentSpace, TangentSpace), Sphere(2))"
+        @test sprint(show, VectorBundleFibers(TT, Sphere(2))) == "VectorBundleFibers(TensorProductType(TangentSpace, TangentSpace), Sphere(2; field = ℝ))"
     end
 
     @testset "Error messages" begin
         vbf = VectorBundleFibers(TestVectorSpaceType(), Euclidean(3))
         @test_throws ErrorException inner(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
-        @test_throws ErrorException Manifolds.project_vector!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
+        @test_throws ErrorException Manifolds.project!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws ErrorException zero_vector!(vbf, [1, 2, 3], [1, 2, 3])
         @test_throws ErrorException vector_space_dimension(vbf)
+        a = fill(0.0, 6)
+        @test_throws ErrorException get_coordinates!(
+            TangentBundle(M),
+            a,
+            ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0, 0.0]),
+            ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0, 1.0]),
+            CachedBasis(DefaultOrthonormalBasis(), []))
     end
 end

@@ -1,5 +1,5 @@
 @doc raw"""
-    Grassmann{n,k,𝔽} <: Manifold
+    Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
 
 The Grassmann manifold $\operatorname{Gr}(n,k)$ consists of all subspaces spanned by $k$ linear independent
 vectors $𝔽^n$, where $𝔽  ∈ \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
@@ -49,9 +49,9 @@ The manifold is named after
     Grassmann(n,k,field=ℝ)
 
 Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
-case $field = ℝ$ is the default.
+case `field = ℝ` is the default.
 """
-struct Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
+struct Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
 Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ) = Grassmann{n,k,field}()
 
@@ -232,7 +232,7 @@ Compute the inverse retraction for the [`QRRetraction`](@ref), on the
 [`Grassmann`](@ref) manifold `M`, i.e.,
 
 ````math
-\operatorname{retr}_p^{-1}q = q*(p^\mathrm{H}q)^{-1} - p,
+\operatorname{retr}_p^{-1}q = q(p^\mathrm{H}q)^{-1} - p,
 ````
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
@@ -314,7 +314,7 @@ function mean!(
 end
 
 @doc raw"""
-    project_tangent(M::Grassmann, p, X)
+    project(M::Grassmann, p, X)
 
 Project the `n`-by-`k` `X` onto the tangent space of `p` on the [`Grassmann`](@ref) `M`,
 which is computed by
@@ -325,9 +325,9 @@ which is computed by
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-project_tangent(::Grassmann, ::Any...)
+project(::Grassmann, ::Any...)
 
-project_tangent!(M::Grassmann, v, x, w) = copyto!(v, w - x * x' * w)
+project!(M::Grassmann, v, x, w) = copyto!(v, w - x * x' * w)
 
 @doc raw"""
     representation_size(M::Grassmann{n,k})

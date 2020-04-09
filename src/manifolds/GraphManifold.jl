@@ -21,30 +21,30 @@ A type for a [`GraphManifold`](@ref) where the data is given on the vertices.
 struct VertexManifold <: GraphManifoldType end
 
 @doc raw"""
-    GraphManifold{G, M, T} <: AbstractPowerManifold{M,NestedPowerRepresentation}
+    GraphManifold{G,𝔽,M,T} <: AbstractPowerManifold{𝔽,M,NestedPowerRepresentation}
 
-Build a manifold, that is a [`PowerManifold`](@ref) of the [`Manifold`](@ref) `M` either on the edges or vertices
-of a graph `G` depending on the [`GraphManifoldType`](@ref) `T`.
+Build a manifold, that is a [`PowerManifold`](@ref) of the [`Manifold`](@ref) `M` either on
+the edges or vertices of a graph `G` depending on the [`GraphManifoldType`](@ref) `T`.
 
 # Fields
 * `G` is an `AbstractSimpleGraph`
 * `M` is a [`Manifold`](@ref)
 """
-struct GraphManifold{G<:AbstractGraph,TM,T<:GraphManifoldType} <:
-       AbstractPowerManifold{TM,NestedPowerRepresentation}
+struct GraphManifold{G<:AbstractGraph,𝔽,TM,T<:GraphManifoldType} <:
+       AbstractPowerManifold{𝔽,TM,NestedPowerRepresentation}
     graph::G
     manifold::TM
 end
 
-function GraphManifold(g::G, M::TM, ::VertexManifold) where {G<:AbstractGraph,TM<:Manifold}
-    return GraphManifold{G,TM,VertexManifold}(g, M)
+function GraphManifold(g::G, M::TM, ::VertexManifold) where {G<:AbstractGraph,𝔽,TM<:Manifold{<:𝔽}}
+    return GraphManifold{G,𝔽,TM,VertexManifold}(g, M)
 end
-function GraphManifold(g::G, M::TM, ::EdgeManifold) where {G<:AbstractGraph,TM<:Manifold}
-    return GraphManifold{G,TM,EdgeManifold}(g, M)
+function GraphManifold(g::G, M::TM, ::EdgeManifold) where {G<:AbstractGraph,𝔽,TM<:Manifold{<:𝔽}}
+    return GraphManifold{G,𝔽,TM,EdgeManifold}(g, M)
 end
 
-const EdgeGraphManifold = GraphManifold{<:AbstractGraph,<:Manifold,EdgeManifold}
-const VertexGraphManifold = GraphManifold{<:AbstractGraph,<:Manifold,VertexManifold}
+const EdgeGraphManifold{𝔽} = GraphManifold{<:AbstractGraph,𝔽,<:Manifold{𝔽},EdgeManifold}
+const VertexGraphManifold{𝔽} = GraphManifold{<:AbstractGraph,𝔽,<:Manifold{𝔽},VertexManifold}
 
 @doc raw"""
     check_manifold_point(M::GraphManifold, p)
@@ -156,10 +156,10 @@ function incident_log!(M::VertexGraphManifold, X, p)
     return X
 end
 function incident_log!(
-    M::GraphManifold{<:AbstractSimpleWeightedGraph,<:Manifold,VertexManifold},
+    M::GraphManifold{<:AbstractSimpleWeightedGraph,𝔽,<:Manifold{𝔽},VertexManifold},
     X,
     p,
-)
+) where {𝔽}
     rep_size = representation_size(M.manifold)
     for e in edges(M.graph)
         X[src(e)] += (
@@ -183,25 +183,27 @@ function incident_log!(
 end
 
 @doc raw"""
-    manifold_dimension(N::GraphManifold{G,M,VertexManifold})
+    manifold_dimension(N::GraphManifold{G,𝔽,M,VertexManifold})
 
 returns the manifold dimension of the [`GraphManifold`](@ref) `N` on the vertices of
 a graph $G=(V,E)$, i.e.
 ````math
-\dim(\mathcal N) = \lvert V \rVert \dim(\mathcal M).
+\dim(\mathcal N) = \lvert V \rvert \dim(\mathcal M),
 ````
+where $\mathcal M$ is the manifold of the data on the nodes.
 """
 function manifold_dimension(M::VertexGraphManifold)
     return manifold_dimension(M.manifold) * nv(M.graph)
 end
 @doc raw"""
-    manifold_dimension(N::GraphManifold{G,M,EdgeManifold})
+    manifold_dimension(N::GraphManifold{G,𝔽,M,EdgeManifold})
 
 returns the manifold dimension of the [`GraphManifold`](@ref) `N` on the edges of
 a graph $G=(V,E)$, i.e.
 ````math
-\dim(\mathcal N) = \lvert E \rVert \dim(\mathcal M).
+\dim(\mathcal N) = \lvert E \rvert \dim(\mathcal M),
 ````
+where $\mathcal M$ is the manifold of the data on the edges.
 """
 function manifold_dimension(M::EdgeGraphManifold)
     return manifold_dimension(M.manifold) * ne(M.graph)

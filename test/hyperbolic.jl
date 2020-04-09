@@ -6,10 +6,11 @@ include("utils.jl")
         @test repr(M) == "Hyperbolic(2)"
         @test base_manifold(M) == M
         @test typeof(get_embedding(M)) ==
-              MetricManifold{Euclidean{Tuple{3},ℝ},MinkowskiMetric}
+              MetricManifold{ℝ,Euclidean{Tuple{3},ℝ},MinkowskiMetric}
         @test representation_size(M) == (3,)
         @test isinf(injectivity_radius(M))
         @test isinf(injectivity_radius(M, ExponentialRetraction()))
+        @test isinf(injectivity_radius(M, [0.0, 0.0, 1.0]))
         @test isinf(injectivity_radius(M, [0.0, 0.0, 1.0], ExponentialRetraction()))
         @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
         @test !is_tangent_vector(M, [0.0, 0.0, 1.0], [0.0, 0.0, 1.0, 0.0])

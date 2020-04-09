@@ -87,13 +87,6 @@ function get_basis(
     κ = [-1 / 4 * (λ[i] - λ[j])^2 for i = 1:N for j = i:N]
     return CachedBasis(B, κ, Ξ)
 end
-function get_basis(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
-    p,
-    B::DiagonalizingOrthonormalBasis,
-) where {N}
-    return get_basis(base_manifold(M), p, B)
-end
 
 function get_coordinates!(
     M::SymmetricPositiveDefinite{N},

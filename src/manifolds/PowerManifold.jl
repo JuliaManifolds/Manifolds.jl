@@ -29,17 +29,17 @@ Each element of such array stores a single point or tangent vector.
 struct NestedPowerRepresentation <: AbstractPowerRepresentation end
 
 @doc raw"""
-    AbstractPowerManifold{M,TPR} <: Manifold
+    AbstractPowerManifold{𝔽,M,TPR} <: Manifold{𝔽}
 
 An abstract [`Manifold`](@ref) to represent manifolds that are build as powers
 of another [`Manifold`](@ref) `M` with representation type `TPR`, a subtype of
 [`AbstractPowerRepresentation`](@ref).
 """
-abstract type AbstractPowerManifold{M<:Manifold,TPR<:AbstractPowerRepresentation} <:
-              Manifold end
+abstract type AbstractPowerManifold{𝔽,M<:Manifold{𝔽},TPR<:AbstractPowerRepresentation} <:
+              Manifold{𝔽} end
 
 @doc raw"""
-    PowerManifold{TM<:Manifold, TSize<:Tuple, TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{TM}
+    PowerManifold{𝔽,TM<:Manifold, TSize<:Tuple, TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{𝔽,TM}
 
 The power manifold $\mathcal M^{n_1× n_2 × … × n_d}$ with power geometry
  `TSize` statically defines the number of elements along each axis.
@@ -57,6 +57,7 @@ power manifolds might be faster if they are represented as [`ProductManifold`](@
 
     PowerManifold(M, N_1, N_2, ..., N_n)
     PowerManifold(M, NestedPowerRepresentation(), N_1, N_2, ..., N_n)
+    M^(N_1,N_2, ..., N_n)
 
 Generate the power manifold $M^{N_1 × N_2 × … × N_n}$.
 By default, the [`ArrayPowerRepresentation`](@ref) of points
@@ -64,20 +65,20 @@ and tangent vectors is used, although a different one, for example
 [`NestedPowerRepresentation`](@ref), can be given as the second argument to the
 constructor.
 """
-struct PowerManifold{TM<:Manifold,TSize,TPR<:AbstractPowerRepresentation} <:
-       AbstractPowerManifold{TM,TPR}
+struct PowerManifold{𝔽,TM<:Manifold{𝔽},TSize,TPR<:AbstractPowerRepresentation} <:
+       AbstractPowerManifold{𝔽,TM,TPR}
     manifold::TM
 end
 
-function PowerManifold(M::Manifold, size::Int...)
-    return PowerManifold{typeof(M),Tuple{size...},ArrayPowerRepresentation}(M)
+function PowerManifold(M::Manifold{𝔽}, size::Int...) where {𝔽}
+    return PowerManifold{𝔽,typeof(M),Tuple{size...},ArrayPowerRepresentation}(M)
 end
 function PowerManifold(
-    M::Manifold,
+    M::Manifold{𝔽},
     ::TPR,
     size::Int...,
-) where {TPR<:AbstractPowerRepresentation}
-    PowerManifold{typeof(M),Tuple{size...},TPR}(M)
+) where {𝔽,TPR<:AbstractPowerRepresentation}
+    PowerManifold{𝔽,typeof(M),Tuple{size...},TPR}(M)
 end
 
 @doc raw"""
@@ -145,23 +146,16 @@ end
 """
     PowerBasisData{TB<:AbstractArray}
 
-Data storage for an array of [`BasisData`](@ref)
+Data storage for an array of basis data.
 """
 struct PowerBasisData{TB<:AbstractArray}
     bases::TB
 end
 
-const POWER_BASIS_LIST_CACHED = [
-    CachedBasis{<:AbstractBasis{ℝ},<:PowerBasisData},
-    CachedBasis{<:ManifoldsBase.AbstractOrthogonalBasis{ℝ},<:PowerBasisData},
-    CachedBasis{<:ManifoldsBase.AbstractOrthonormalBasis{ℝ},<:PowerBasisData},
-    CachedBasis{<:AbstractBasis{ℂ},<:PowerBasisData},
-]
-
 const PowerManifoldMultidimensional =
-    AbstractPowerManifold{<:Manifold,ArrayPowerRepresentation} where {TSize}
+    AbstractPowerManifold{𝔽,<:Manifold{𝔽},ArrayPowerRepresentation} where {𝔽}
 const PowerManifoldNested =
-    AbstractPowerManifold{<:Manifold,NestedPowerRepresentation} where {TSize}
+    AbstractPowerManifold{𝔽,<:Manifold{𝔽},NestedPowerRepresentation} where {𝔽}
 
 _access_nested(x, i::Int) = x[i]
 _access_nested(x, i::Tuple) = x[i...]
@@ -180,7 +174,13 @@ function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
     return FVector(TangentSpace, alloc)
 end
-function allocate_result(M::PowerManifoldNested, f::typeof(get_coordinates), p, X, B)
+function allocate_result(
+    M::PowerManifoldNested,
+    f::typeof(get_coordinates),
+    p,
+    X,
+    B::AbstractBasis,
+)
     return invoke(
         allocate_result,
         Tuple{Manifold,typeof(get_coordinates),Any,Any,typeof(B)},
@@ -249,9 +249,9 @@ function check_tangent_vector(
 end
 
 function det_local_metric(
-    M::MetricManifold{<:AbstractPowerManifold,PowerMetric},
+    M::MetricManifold{<:AbstractPowerManifold,𝔽,PowerMetric},
     p,
-)
+) where {𝔽}
     MM = MetricManifold(M.manifold.manifold, M.metric.metric)
     result = one(number_eltype(p))
     rep_size = representation_size(MM)
@@ -373,7 +373,7 @@ function get_coordinates(
     M::AbstractPowerManifold,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽},
+    B::CachedBasis{𝔽,<:AbstractBasis,<:PowerBasisData},
 ) where {𝔽}
     rep_size = representation_size(M.manifold)
     vs = [
@@ -385,16 +385,6 @@ function get_coordinates(
         ) for i in get_iterator(M)
     ]
     return reduce(vcat, reshape(vs, length(vs)))
-end
-for BT in POWER_BASIS_LIST_CACHED
-    eval(quote
-        @invoke_maker 4 CachedBasis{<:AbstractBasis,<:PowerBasisData} get_coordinates(
-            M::AbstractPowerManifold,
-            p,
-            X,
-            B::$BT,
-        )
-    end)
 end
 
 function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBasis)
@@ -419,23 +409,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis{ℝ},<:PowerBasisData,ℝ},
-)
-    TypeTuple = Tuple{
-        AbstractPowerManifold,
-        Any,
-        Any,
-        Any,
-        CachedBasis{<:AbstractBasis,<:PowerBasisData,ℝ},
-    }
-    return invoke(get_coordinates!, TypeTuple, M, Y, p, X, B)
-end
-function get_coordinates!(
-    M::AbstractPowerManifold,
-    Y,
-    p,
-    X,
-    B::CachedBasis{<:AbstractBasis,<:PowerBasisData,𝔽},
+    B::CachedBasis{𝔽,<:AbstractBasis,<:PowerBasisData},
 ) where {𝔽}
     rep_size = representation_size(M.manifold)
     dim = manifold_dimension(M.manifold)
@@ -453,8 +427,10 @@ function get_coordinates!(
     return Y
 end
 
-get_iterator(M::PowerManifold{<:Manifold,Tuple{N}}) where {N} = 1:N
-@generated function get_iterator(M::PowerManifold{<:Manifold,SizeTuple}) where {SizeTuple}
+get_iterator(M::PowerManifold{𝔽,<:Manifold{𝔽},Tuple{N}}) where {𝔽,N} = 1:N
+@generated function get_iterator(
+    M::PowerManifold{𝔽,<:Manifold{𝔽},SizeTuple},
+) where {𝔽,SizeTuple}
     size_tuple = size_to_tuple(SizeTuple)
     return Base.product(map(Base.OneTo, size_tuple)...)
 end
@@ -464,8 +440,8 @@ function get_vector!(
     Y,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:PowerBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:PowerBasisData},
+) where {𝔽}
     dim = manifold_dimension(M.manifold)
     rep_size = representation_size(M.manifold)
     v_iter = 1
@@ -647,7 +623,7 @@ $\mathcal M$, the manifold is of dimension
 \dim(\mathcal N) = \dim(\mathcal M)\prod_{i=1}^d n_i = n_1n_2\cdot…\cdot n_d \dim(\mathcal M).
 ````
 """
-function manifold_dimension(M::PowerManifold{<:Manifold,TSize}) where {TSize}
+function manifold_dimension(M::PowerManifold{𝔽,<:Manifold,TSize}) where {𝔽,TSize}
     return manifold_dimension(M.manifold) * prod(size_to_tuple(TSize))
 end
 
@@ -673,7 +649,7 @@ end
 
 return the power of `M`,
 """
-function power_dimensions(M::PowerManifold{<:Manifold,TSize}) where {TSize}
+function power_dimensions(M::PowerManifold{𝔽,<:Manifold,TSize}) where {𝔽,TSize}
     return size_to_tuple(TSize)
 end
 
@@ -734,7 +710,7 @@ end
     return ntuple(i -> Colon(), N)
 end
 
-function representation_size(M::PowerManifold{<:Manifold,TSize}) where {TSize}
+function representation_size(M::PowerManifold{𝔽,<:Manifold,TSize}) where {𝔽,TSize}
     return (representation_size(M.manifold)..., size_to_tuple(TSize)...)
 end
 
@@ -787,19 +763,19 @@ end
 function show(
     io::IO,
     mime::MIME"text/plain",
-    B::CachedBasis{T,D,𝔽},
+    B::CachedBasis{𝔽,T,D},
 ) where {T<:AbstractBasis,D<:PowerBasisData,𝔽}
-    println(io, "$(T()) for a power manifold with coordinates in $(number_system(B))")
+    println(io, "$(T()) for a power manifold")
     for i in Base.product(map(Base.OneTo, size(B.data.bases))...)
         println(io, "Basis for component $i:")
         show(io, mime, _access_nested(B.data.bases, i))
         println(io)
     end
 end
-function show(io::IO, M::PowerManifold{TM,TSize,ArrayPowerRepresentation}) where {TM,TSize}
+function show(io::IO, M::PowerManifold{𝔽,TM,TSize,ArrayPowerRepresentation}) where {𝔽,TM,TSize}
     print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
 end
-function show(io::IO, M::PowerManifold{TM,TSize,TPR}) where {TM,TSize,TPR}
+function show(io::IO, M::PowerManifold{𝔽,TM,TSize,TPR}) where {𝔽,TM,TSize,TPR}
     print(io, "PowerManifold($(M.manifold), $(TPR()), $(join(TSize.parameters, ", ")))")
 end
 

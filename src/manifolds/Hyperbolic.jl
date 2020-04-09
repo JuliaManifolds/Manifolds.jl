@@ -1,12 +1,12 @@
 @doc raw"""
-    Hyperbolic{N} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
+    Hyperbolic{N} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType}
 
 The hyperbolic space $ℍ^n$ represented by $n+1$-Tuples, i.e. embedded in the
 [`Lorentz`](@ref)ian manifold equipped with the [`MinkowskiMetric`](@ref)
 $⟨\cdot,\cdot⟩_{\mathrm{M}}$. The space is defined as
 
 ```math
-ℍ^n = \Bigl\{p ∈ ℝ^{n+1} : ⟨p,p⟩_{\mathrm{M}}= -p_{n+1}^2
+ℍ^n = \Bigl\{p ∈ ℝ^{n+1}\ \Big|\ ⟨p,p⟩_{\mathrm{M}}= -p_{n+1}^2
   + \displaystyle\sum_{k=1}^n p_k^2 = -1, p_{n+1} > 0\Bigr\},.
 ```
 
@@ -27,7 +27,7 @@ metric. The corresponding sectional curvature is $-1$.
 
 Generate the $ℍ^{n} ⊂ ℝ^{n+1}$
 """
-struct Hyperbolic{N} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
+struct Hyperbolic{N} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
 
 Hyperbolic(n::Int) = Hyperbolic{n}()
 
@@ -147,14 +147,15 @@ end)
 
 Compute the logarithmic map on the [`Hyperbolic`](@ref) space $ℍ^n$, the tangent
 vector representing the [`geodesic`](@ref) starting from `p`
-reaches `q` after time 1. The formula reads for $x ≠ y$
+reaches `q` after time 1. The formula reads for $p ≠ q$
 
 ```math
 \log_p q = d_{ℍ^n}(p,q)
-\frac{q-⟨p,q⟩_{\mathrm{M}} p}{\lVert q-⟨p,q⟩_{\mathrm{M}} p \rVert_2}
+\frac{q-⟨p,q⟩_{\mathrm{M}} p}{\lVert q-⟨p,q⟩_{\mathrm{M}} p \rVert_2},
 ```
 
-and is zero otherwise.
+where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
+the [`Lorentz`](@ref)ian manifold. For $p=q$ the logarihmic map is equal to the zero vector.
 """
 log(::Hyperbolic, ::Any...)
 
@@ -193,7 +194,7 @@ function mean!(M::Hyperbolic, p, x::AbstractVector, w::AbstractVector; kwargs...
 end
 
 @doc raw"""
-    project_tangent(M::Hyperbolic, p, X)
+    project(M::Hyperbolic, p, X)
 
 Perform an orthogonal projection with respect to the Minkowski inner product of `X` onto
 the tangent space at `p` of the [`Hyperbolic`](@ref) space `M`.
@@ -205,9 +206,9 @@ Y = X + ⟨p,X⟩_{\mathrm{M}} p,
 where $⟨\cdot, \cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
 the [`Lorentz`](@ref)ian manifold.
 """
-project_tangent(::Hyperbolic, ::Any...)
+project(::Hyperbolic, ::Any, ::Any)
 
-project_tangent!(M::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)
+project!(M::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)
 
 show(io::IO, ::Hyperbolic{N}) where {N} = print(io, "Hyperbolic($(N))")
 
@@ -219,9 +220,10 @@ Compute the paralllel transport of the `X` from the tangent space at `p` on the
 connecting `p` and `q`. The formula reads
 
 ````math
-\mathcal P_{q←p}X = X - \frac{⟨\log_p q,X⟩_x}{d^2_{ℍ^n}(p,q)}
-\bigl(\log_p q + \log_qp \bigr).
+\mathcal P_{q←p}X = X - \frac{⟨\log_p q,X⟩_p}{d^2_{ℍ^n}(p,q)}
+\bigl(\log_p q + \log_qp \bigr),
 ````
+where $⟨\cdot,\cdot⟩_p$ denotes the inner product in the tangent space at `p`.
 """
 vector_transport_to(::Hyperbolic, ::Any, ::Any, ::Any, ::ParallelTransport)
 

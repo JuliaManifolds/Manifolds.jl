@@ -9,17 +9,28 @@ include("utils.jl")
     @test repr(Euclidean(2, 3; field = ℍ)) == "Euclidean(2, 3; field = ℍ)"
     @test is_default_metric(EM)
     @test is_default_metric(E, Manifolds.EuclideanMetric())
-    @test Manifolds.default_metric_dispatch(E,Manifolds.EuclideanMetric()) === Val{true}()
+    @test Manifolds.default_metric_dispatch(E, Manifolds.EuclideanMetric()) === Val{true}()
     p = zeros(3)
     @test det_local_metric(EM, p) == one(eltype(p))
     @test log_local_metric_density(EM, p) == zero(eltype(p))
-    @test project_point!(E, p, p) == p
+    @test project!(E, p, p) == p
     @test manifold_dimension(Ec) == 2*manifold_dimension(E)
     X = zeros(3)
     X[1] = 1.0
     Y = similar(X)
-    project_tangent!(E, Y, p, X)
+    project!(E, Y, p, X)
     @test Y==X
+
+    # real manifold does not allow complex values
+    @test_throws DomainError is_manifold_point(Ec, [:a,:b,:b], true)
+    @test_throws DomainError is_manifold_point(E, [1.0, 1.0im, 0.0], true)
+    @test_throws DomainError is_manifold_point(E, [1], true)
+    @test_throws DomainError is_tangent_vector(Ec, [:a,:b,:b], [1.0, 1.0, 0.0], true)
+    @test_throws DomainError is_tangent_vector(E, [1.0, 1.0im, 0.0], [1.0, 1.0, 0.0], true) # real manifold does not allow complex values
+    @test_throws DomainError is_tangent_vector(E, [1], [1.0, 1.0, 0.0], true)
+    @test_throws DomainError is_tangent_vector(E, [0.0, 0.0, 0.0], [1.0], true)
+    @test_throws DomainError is_tangent_vector(E, [0.0, 0.0, 0.0], [1.0, 0.0, 1.0im], true)
+    @test_throws DomainError is_tangent_vector(Ec, [0.0, 0.0, 0.0], [:a, :b, :c], true)
 
     @test E^2 === Euclidean(3, 2)
     @test ^(E,2) === Euclidean(3, 2)
@@ -41,7 +52,7 @@ include("utils.jl")
         basis_types = if M == E
             (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd), DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]))
         elseif M == Ec
-            (DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]))
+            (DefaultOrthonormalBasis(), DefaultOrthonormalBasis(ℂ), DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]))
         else
             ()
         end
@@ -54,6 +65,7 @@ include("utils.jl")
                     M,
                     pts,
                     test_reverse_diff = isa(T, Vector),
+                    test_project_point = true,
                     test_project_tangent = true,
                     test_musical_isomorphisms = true,
                     test_vector_transport = true,

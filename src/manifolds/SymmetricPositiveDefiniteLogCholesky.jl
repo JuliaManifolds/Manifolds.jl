@@ -40,7 +40,7 @@ $⌊\cdot⌋$ denbotes the strictly lower triangular matrix of its argument,
 and $\lVert\cdot\rVert_{\mathrm{F}}$ the Frobenius norm.
 """
 function distance(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
+    M::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
     p,
     q,
 ) where {N}
@@ -62,10 +62,10 @@ decomposition of $p$, $W = y(y^{-1}Xy^{-\mathrm{T}})_\frac{1}{2}$,
 and $(\cdot)_\frac{1}{2}$
 denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$.
 """
-exp(::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
+exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
 
 function exp!(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
+    M::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
     q,
     p,
     X,
@@ -76,7 +76,7 @@ function exp!(
 end
 
 @doc raw"""
-    inner(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, p, X, Y)
+    inner(M::MetricManifold{LogCholeskyMetric,ℝ,SymmetricPositiveDefinite}, p, X, Y)
 
 Compute the inner product of two matrices `X`, `Y` in the tangent space of `p`
 on the [`SymmetricPositiveDefinite`](@ref) manifold `M`, as
@@ -92,7 +92,7 @@ $a_z(W) = z (z^{-1}Wz^{-\mathrm{T}})_{\frac{1}{2}}$, and $(\cdot)_\frac{1}{2}$
 denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$
 """
 function inner(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
+    M::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
     p,
     X,
     Y,
@@ -114,10 +114,10 @@ The formula can be adapted from the [`CholeskySpace`](@ref) as
 where $x$ is the cholesky factor of $p$ and $W=\log_x y$ for $y$ the cholesky factor
 of $q$ and the just mentioned logarithmic map is the one on [`CholeskySpace`](@ref).
 """
-log(::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
+log(::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
 
 function log!(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
+    M::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
     X,
     p,
     q,
@@ -150,7 +150,7 @@ transport on [`CholeskySpace`](@ref) from $x$ to $y$. The formula hear reads
 ````
 """
 vector_transport_to(
-    ::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric},
+    ::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric},
     ::Any,
     ::Any,
     ::Any,
@@ -158,7 +158,7 @@ vector_transport_to(
 )
 
 function vector_transport_to!(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LogCholeskyMetric},
+    M::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
     Y,
     p,
     X,

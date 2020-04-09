@@ -1,9 +1,9 @@
 @doc raw"""
-    FixedRankMatrices{m,n,k,𝔽} <: Manifold
+    FixedRankMatrices{m,n,k,𝔽} <: Manifold{𝔽}
 
 The manifold of $m × n$ real-valued or complex-valued matrices of fixed rank $k$, i.e.
 ````math
-\{ p ∈ 𝔽^{m × n} : \operatorname{rank}(p) = k \},
+\bigl\{ p ∈ 𝔽^{m × n}\ \big|\ \operatorname{rank}(p) = k \bigr\},
 ````
 where $𝔽 ∈ \{ℝ,ℂ\}$ and the rank is the number of linearly independent columns of a matrix.
 
@@ -42,7 +42,7 @@ Generate the manifold of `m`-by-`n` (`field`-valued) matrices of rank `k`.
     > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
-struct FixedRankMatrices{M,N,K,𝔽} <: Manifold end
+struct FixedRankMatrices{M,N,K,𝔽} <: Manifold{𝔽} end
 function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers = ℝ)
     return FixedRankMatrices{m,n,k,field}()
 end
@@ -242,16 +242,16 @@ function manifold_dimension(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽}
 end
 
 @doc raw"""
-    project_tangent(M, p, A)
-    project_tangent(M, p, X)
+    project(M, p, A)
+    project(M, p, X)
 
 Project the matrix $A ∈ ℝ^{m,n}$ or a [`UMVTVector`](@ref) `X` from the embedding or
 another tangent space onto the tangent space at $p$ on the [`FixedRankMatrices`](@ref) `M`,
 further decomposing the result into $X=UMV$, i.e. a [`UMVTVector`](@ref).
 """
-project_tangent(::FixedRankMatrices, ::Any...)
+project(::FixedRankMatrices, ::Any, ::Any)
 
-function project_tangent!(
+function project!(
     ::FixedRankMatrices,
     Y::UMVTVector,
     p::SVDMPoint,
@@ -265,8 +265,8 @@ function project_tangent!(
     Y.Vt .= (aTu - p.Vt' * uTav')'
     return Y
 end
-function project_tangent!(M::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, X::UMVTVector)
-    return project_tangent!(M, Y, p, X.U * X.M * X.Vt)
+function project!(M::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, X::UMVTVector)
+    return project!(M, Y, p, X.U * X.M * X.Vt)
 end
 
 @doc raw"""

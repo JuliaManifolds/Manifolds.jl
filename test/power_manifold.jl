@@ -43,7 +43,7 @@ end
     @test manifold_dimension(Mr2) == 105
     @test manifold_dimension(Mrn2) == 105
 
-    @test repr(Ms1) == "PowerManifold(Sphere(2), 5)"
+    @test repr(Ms1) == "PowerManifold(Sphere(2; field = ℝ), 5)"
     @test repr(Mrn1) == "PowerManifold(Rotations(3), NestedPowerRepresentation(), 5)"
 
     @test Manifolds.allocation_promotion_function(Ms, exp, ([1],)) == Manifolds.allocation_promotion_function(Ms1, exp, (1,))
@@ -251,9 +251,9 @@ end
         p = hcat([[1.0, 0.0, 0.0] for i in 1:5]...)
         Bc = get_basis(Ms1, p, DefaultOrthonormalBasis())
         @test sprint(show, "text/plain", Bc) == """
-        DefaultOrthonormalBasis(ℝ) for a power manifold with coordinates in ℝ
+        DefaultOrthonormalBasis(ℝ) for a power manifold
         Basis for component (1,):
-        DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 2 basis vectors:
+        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
          E1 =
           3-element Array{Int64,1}:
            0
@@ -265,7 +265,7 @@ end
            0
            1
         Basis for component (2,):
-        DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 2 basis vectors:
+        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
          E1 =
           3-element Array{Int64,1}:
            0
@@ -277,7 +277,7 @@ end
            0
            1
         Basis for component (3,):
-        DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 2 basis vectors:
+        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
          E1 =
           3-element Array{Int64,1}:
            0
@@ -289,7 +289,7 @@ end
            0
            1
         Basis for component (4,):
-        DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 2 basis vectors:
+        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
          E1 =
           3-element Array{Int64,1}:
            0
@@ -301,7 +301,7 @@ end
            0
            1
         Basis for component (5,):
-        DefaultOrthonormalBasis(ℝ) with coordinates in ℝ and 2 basis vectors:
+        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
          E1 =
           3-element Array{Int64,1}:
            0
