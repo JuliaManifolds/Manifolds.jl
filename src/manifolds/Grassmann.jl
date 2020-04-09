@@ -384,6 +384,7 @@ show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽} = print(io, "Grassmann($(n)
     uniform_distribution(M::Grassmann{n,k,ℝ}, p)
 
 Uniform distribution on given (real-valued) [`Grassmann`](@ref) `M`.
+Specifically, this is the normalized Haar measure on `M`.
 Generated points will be of similar type as `p`.
 
 The implementation is based on Section 2.5.1 in [^Chikuse2003];
