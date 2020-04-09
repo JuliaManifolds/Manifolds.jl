@@ -82,7 +82,7 @@ function PowerManifold(
 end
 
 @doc raw"""
-    PowerMetric(metric::metric)
+    PowerMetric{<:Metric} <: Metric
 
 Represent the [`Metric`](@ref) on an [`AbstractPowerManifold`](@ref), i.e. the inner
 product on the tangent space is the sum of the inner product of each elements
