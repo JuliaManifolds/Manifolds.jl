@@ -51,13 +51,14 @@ makedocs(
         ],
         "Statistics" => "statistics.md",
         "Distributions" => "distributions.md",
+        "About" => "about.md",
+        "Contributing" => "generated/contributing.md",
         "Notation" => "notation.md",
         "Library" => [
             "Public" => "lib/public.md",
             "Internals" => "lib/internals.md",
             "Automatic differentiation" => "lib/autodiff.md",
         ],
-        "Contributing" => "generated/contributing.md",
     ],
 )
 

@@ -7,6 +7,8 @@ The manifolds are implemented using the interface for manifolds given in [`Manif
 You can use that interface to implement your own software on manifolds, such that all manifolds
 based on that interface can be used within your code.
 
+For more information, see the [About](about.md) section.
+
 ## Getting started
 
 To install the package just type
