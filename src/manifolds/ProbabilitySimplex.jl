@@ -286,17 +286,17 @@ manifold_dimension(::ProbabilitySimplex{n}) where {n} = n
         S::ProbabilitySimplex,
         x::AbstractVector,
         [w::AbstractWeights,]
-        method = GeodesicInterpolationWithinRadius();
+        method = GeodesicInterpolation();
         kwargs...,
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
-[`GeodesicInterpolationWithinRadius`](@ref), with its default radius, $\frac{π}{2}$.
+[`GeodesicInterpolation`](@ref).
 """
 mean(::ProbabilitySimplex, ::Any...)
 
 function mean!(M::ProbabilitySimplex, p, x::AbstractVector, w::AbstractVector; kwargs...)
-    return mean!(M, p, x, w, GeodesicInterpolationWithinRadius(π / 2); kwargs...)
+    return mean!(M, p, x, w, GeodesicInterpolation(); kwargs...)
 end
 
 @doc raw"""
