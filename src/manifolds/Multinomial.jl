@@ -23,13 +23,16 @@ The [`ProbabilitySimplex`](@ref) is stored internally within `M.manifold`, such 
 Generate the manifold of matrices $\mathbb R^{n×m}$ such that the $m$ columns are
 discrete probability distributions, i.e. sum up to one.
 """
-struct MultinomialMatrices{N,M,S} <: AbstractPowerManifold{ℝ,ProbabilitySimplex{S},ArrayPowerRepresentation} where {N,M}
+struct MultinomialMatrices{N,M,S} <:
+       AbstractPowerManifold{ℝ,ProbabilitySimplex{S},ArrayPowerRepresentation} where {N,M}
     manifold::ProbabilitySimplex{S}
 end
 
-MultinomialMatrices(n::Int, m::Int) =  MultinomialMatrices{n,m,n-1}(ProbabilitySimplex(n - 1))
+MultinomialMatrices(n::Int, m::Int) =
+    MultinomialMatrices{n,m,n - 1}(ProbabilitySimplex(n - 1))
 
-^(M::ProbabilitySimplex{N}, m::Int) where {N} = MultinomialMatrices{manifold_dimension(M)+1,m,N}(M)
+^(M::ProbabilitySimplex{N}, m::Int) where {N} =
+    MultinomialMatrices{manifold_dimension(M) + 1,m,N}(M)
 
 @doc raw"""
     check_manifold_point(M::MultinomialMatrices,p)
@@ -86,8 +89,9 @@ end
 
 get_iterator(M::MultinomialMatrices{n,m}) where {n,m} = Base.OneTo(m)
 
-@generated manifold_dimension(::MultinomialMatrices{n,m}) where {n,m} = (n-1) * m
+@generated manifold_dimension(::MultinomialMatrices{n,m}) where {n,m} = (n - 1) * m
 
 @generated representation_size(::MultinomialMatrices{n,m}) where {n,m} = (n, m)
 
-show(io::IO, ::MultinomialMatrices{n,m}) where {n,m} = print(io, "MultinomialMatrices($(n),$(m))")
+show(io::IO, ::MultinomialMatrices{n,m}) where {n,m} =
+    print(io, "MultinomialMatrices($(n),$(m))")

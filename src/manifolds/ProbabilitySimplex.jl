@@ -196,12 +196,14 @@ injectivity_radius(M::ProbabilitySimplex, p, ::SoftmaxRetraction) = injectivity_
 injectivity_radius(M::ProbabilitySimplex) = 0
 injectivity_radius(M::ProbabilitySimplex, ::SoftmaxRetraction) = 0
 injectivity_radius(M::ProbabilitySimplex, ::ExponentialRetraction) = 0
-eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(
-        M::ProbabilitySimplex,
-        rm::AbstractRetractionMethod,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold injectivity_radius(
+            M::ProbabilitySimplex,
+            rm::AbstractRetractionMethod,
+        )
+    end,
+)
 
 @doc raw"""
     inner(M::ProbabilitySimplex,p,X,Y)
@@ -311,7 +313,10 @@ project(::ProbabilitySimplex, ::Any, ::Any)
 
 function project!(::ProbabilitySimplex, q, p)
     if any(x -> x <= 0, p)
-        throw(DomainError(p, "All coordinates of point from the embedding, that should be projected, must be positive, otherwise the projection is not well defined."))
+        throw(DomainError(
+            p,
+            "All coordinates of point from the embedding, that should be projected, must be positive, otherwise the projection is not well defined.",
+        ))
     end
     q .= p ./ sum(p)
     return q
