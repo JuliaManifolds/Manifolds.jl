@@ -478,18 +478,22 @@ function injectivity_radius(M::AbstractPowerManifold, p)
     return radius
 end
 injectivity_radius(M::AbstractPowerManifold) = injectivity_radius(M.manifold)
-eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(
-        M::AbstractPowerManifold,
-        rm::AbstractRetractionMethod,
-    )
-end)
-eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(
-        M::AbstractPowerManifold,
-        rm::ExponentialRetraction,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold injectivity_radius(
+            M::AbstractPowerManifold,
+            rm::AbstractRetractionMethod,
+        )
+    end,
+)
+eval(
+    quote
+        @invoke_maker 1 Manifold injectivity_radius(
+            M::AbstractPowerManifold,
+            rm::ExponentialRetraction,
+        )
+    end,
+)
 
 @doc raw"""
     inverse_retract(M::AbstractPowerManifold, p, q, m::InversePowerRetraction)

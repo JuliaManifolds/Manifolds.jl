@@ -106,12 +106,14 @@ injectivity_radius(::SymmetricPositiveDefinite) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, ::ExponentialRetraction) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, ::Any) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, ::Any, ::ExponentialRetraction) = Inf
-eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(
-        M::SymmetricPositiveDefinite,
-        rm::AbstractRetractionMethod,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold injectivity_radius(
+            M::SymmetricPositiveDefinite,
+            rm::AbstractRetractionMethod,
+        )
+    end,
+)
 
 @doc raw"""
     manifold_dimension(M::SymmetricPositiveDefinite)

@@ -364,9 +364,14 @@ Return the radius of injectivity for the [`PolarRetraction`](@ref) on the
 """
 injectivity_radius(::Rotations) = π * sqrt(2.0)
 injectivity_radius(::Rotations, ::ExponentialRetraction) = π * sqrt(2.0)
-eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(M::Rotations, rm::AbstractRetractionMethod)
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold injectivity_radius(
+            M::Rotations,
+            rm::AbstractRetractionMethod,
+        )
+    end,
+)
 injectivity_radius(::Rotations, ::Any) = π * sqrt(2.0)
 injectivity_radius(::Rotations, ::Any, ::ExponentialRetraction) = π * sqrt(2.0)
 injectivity_radius(::Rotations, ::PolarRetraction) = π / sqrt(2.0)
