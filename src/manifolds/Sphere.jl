@@ -249,12 +249,14 @@ injectivity_radius(::AbstractSphere, ::ProjectionRetraction) = π / 2
 injectivity_radius(::AbstractSphere, ::Any) = π
 injectivity_radius(::AbstractSphere, ::Any, ::ExponentialRetraction) = π
 injectivity_radius(::AbstractSphere, ::Any, ::ProjectionRetraction) = π / 2
-eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(
-        M::AbstractSphere,
-        rm::AbstractRetractionMethod,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold injectivity_radius(
+            M::AbstractSphere,
+            rm::AbstractRetractionMethod,
+        )
+    end,
+)
 
 @doc raw"""
     inverse_retract(M::AbstractSphere, p, q, ::ProjectionInverseRetraction)

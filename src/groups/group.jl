@@ -256,15 +256,17 @@ function get_vector!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
     return get_vector!(M, Y, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(quote
-        @invoke_maker 1 Manifold get_vector!(
-            M::$MT,
-            Y,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end)
+    eval(
+        quote
+            @invoke_maker 1 Manifold get_vector!(
+                M::$MT,
+                Y,
+                e::Identity,
+                X,
+                B::VeeOrthogonalBasis,
+            )
+        end,
+    )
 end
 
 function get_coordinates(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBasis)
@@ -278,14 +280,16 @@ function get_coordinates(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
     return get_coordinates(M, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(quote
-        @invoke_maker 1 Manifold get_coordinates(
-            M::$MT,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end)
+    eval(
+        quote
+            @invoke_maker 1 Manifold get_coordinates(
+                M::$MT,
+                e::Identity,
+                X,
+                B::VeeOrthogonalBasis,
+            )
+        end,
+    )
 end
 
 function get_coordinates!(
@@ -305,15 +309,17 @@ function get_coordinates!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
     return get_coordinates!(M, Y, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(quote
-        @invoke_maker 1 Manifold get_coordinates!(
-            M::$MT,
-            Y,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end)
+    eval(
+        quote
+            @invoke_maker 1 Manifold get_coordinates!(
+                M::$MT,
+                Y,
+                e::Identity,
+                X,
+                B::VeeOrthogonalBasis,
+            )
+        end,
+    )
 end
 
 import ManifoldsBase.check_manifold_point__transparent

@@ -316,14 +316,16 @@ for BT in PRODUCT_BASIS_LIST_CACHED
         end,
     )
 end
-eval(quote
-    @invoke_maker 1 Manifold get_coordinates(
-        M::ProductManifold,
-        e::Identity,
-        X,
-        B::VeeOrthogonalBasis,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold get_coordinates(
+            M::ProductManifold,
+            e::Identity,
+            X,
+            B::VeeOrthogonalBasis,
+        )
+    end,
+)
 
 function get_coordinates(M::ProductManifold, p, X, B::AbstractBasis)
     reps = map(
@@ -390,25 +392,29 @@ for BT in PRODUCT_BASIS_LIST_CACHED
     )
 end
 for BT in PRODUCT_BASIS_LIST
-    eval(quote
-        @invoke_maker 5 AbstractBasis get_coordinates!(
-            M::ProductManifold,
-            Xⁱ,
-            p,
-            X,
-            B::$BT,
-        )
-    end)
-end
-eval(quote
-    @invoke_maker 1 Manifold get_coordinates!(
-        M::ProductManifold,
-        Y,
-        e::Identity,
-        X,
-        B::VeeOrthogonalBasis,
+    eval(
+        quote
+            @invoke_maker 5 AbstractBasis get_coordinates!(
+                M::ProductManifold,
+                Xⁱ,
+                p,
+                X,
+                B::$BT,
+            )
+        end,
     )
-end)
+end
+eval(
+    quote
+        @invoke_maker 1 Manifold get_coordinates!(
+            M::ProductManifold,
+            Y,
+            e::Identity,
+            X,
+            B::VeeOrthogonalBasis,
+        )
+    end,
+)
 
 function get_vector(
     M::ProductManifold,
@@ -439,14 +445,16 @@ eval(
         )
     end,
 )
-eval(quote
-    @invoke_maker 1 Manifold get_vector(
-        M::ProductManifold,
-        e::Identity,
-        X,
-        B::VeeOrthogonalBasis,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold get_vector(
+            M::ProductManifold,
+            e::Identity,
+            X,
+            B::VeeOrthogonalBasis,
+        )
+    end,
+)
 function get_vector(M::ProductManifold, p::ProductRepr, X, B::AbstractBasis)
     N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
@@ -515,15 +523,17 @@ function get_vector!(
     end
     return X
 end
-eval(quote
-    @invoke_maker 1 Manifold get_vector!(
-        M::ProductManifold,
-        Xⁱ,
-        e::Identity,
-        X,
-        B::VeeOrthogonalBasis,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold get_vector!(
+            M::ProductManifold,
+            Xⁱ,
+            e::Identity,
+            X,
+            B::VeeOrthogonalBasis,
+        )
+    end,
+)
 
 for BT in PRODUCT_BASIS_LIST
     eval(
@@ -578,13 +588,15 @@ function injectivity_radius(M::ProductManifold, p, m::ProductRetraction)
         m.retractions,
     )...)
 end
-eval(quote
-    @invoke_maker 3 AbstractRetractionMethod injectivity_radius(
-        M::ProductManifold,
-        p,
-        B::ExponentialRetraction,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 3 AbstractRetractionMethod injectivity_radius(
+            M::ProductManifold,
+            p,
+            B::ExponentialRetraction,
+        )
+    end,
+)
 injectivity_radius(M::ProductManifold) = min(map(injectivity_radius, M.manifolds)...)
 function injectivity_radius(M::ProductManifold, m::AbstractRetractionMethod)
     return min(map(manif -> injectivity_radius(manif, m), M.manifolds)...)
@@ -592,12 +604,14 @@ end
 function injectivity_radius(M::ProductManifold, m::ProductRetraction)
     return min(map((lM, lm) -> injectivity_radius(lM, lm), M.manifolds, m.retractions)...)
 end
-eval(quote
-    @invoke_maker 2 AbstractRetractionMethod injectivity_radius(
-        M::ProductManifold,
-        B::ExponentialRetraction,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 2 AbstractRetractionMethod injectivity_radius(
+            M::ProductManifold,
+            B::ExponentialRetraction,
+        )
+    end,
+)
 
 @doc raw"""
     inner(M::ProductManifold, p, X, Y)
