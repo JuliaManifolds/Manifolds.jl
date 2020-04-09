@@ -50,14 +50,14 @@ In the example we have `exp(M, x, v)` for the exponential map and `exp!(M, y, v,
 On the other hand, the user will most likely look for the documentation of the non-mutating version, so we recommend adding the docstring for the non-mutating one, where all different signatures should be collected in one string when reasonable.
 This can best be achieved by adding a docstring to the method with a general signature with the first argument being your manifold:
 ````julia
-    struct MyManifold <: Manifold end
+struct MyManifold <: Manifold end
 
-    @doc raw"""
-        exp(M::MyManifold, x, v)
+@doc raw"""
+    exp(M::MyManifold, x, v)
 
-    Describe the function.
-    """
-    exp(::MyManifold, ::Any...)
+Describe the function.
+"""
+exp(::MyManifold, ::Any...)
 ````
 
 ### Code style
@@ -66,6 +66,7 @@ We try to follow the [documentation guidelines](https://docs.julialang.org/en/v1
 We run [`JuliaFormatter.jl`](https://github.com/domluna/JuliaFormatter.jl) on the repo in the following way, which enforces a number of conventions consistent with Blue Style:
 ```julia
 using JuliaFormatter
+
 format(
     ".",
     short_to_long_function_def = true,
@@ -81,7 +82,7 @@ We also follow a few internal conventions:
 - Within the source code of one manifold, the type of the manifold should be the first element of the file, and an alphabetical order of the functions is preferable.
 - The above implies that the mutating variant of a function follows the non-mutating variant.
 - There should be no dangling `=` signs.
-- Always add a newline between things of different types (struct/method/const)
-- Always add a newline between methods for different functions (including mutating/nonmutating variants)
+- Always add a newline between things of different types (struct/method/const).
+- Always add a newline between methods for different functions (including mutating/nonmutating variants).
 - Prefer to have no newline between methods for the same function; when reasonable, merge the docstrings.
 - All `import`/`using`/`include` should be in the main module file.
