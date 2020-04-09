@@ -395,7 +395,13 @@ see also Theorem 2.2.2(iii) in [^Chikuse2003].
     > doi: [10.1007/978-0-387-21540-2](https://doi.org/10.1007/978-0-387-21540-2).
 """
 function uniform_distribution(M::Grassmann{n,k,ℝ}, p) where {n,k}
-    return uniform_distribution(Stiefel(n, k, ℝ), p)
+    μ = Distributions.Zeros(n, k)
+    σ = one(eltype(p))
+    Σ1 = Distributions.PDMats.ScalMat(n, σ)
+    Σ2 = Distributions.PDMats.ScalMat(k, σ)
+    d = MatrixNormal(μ, Σ1, Σ2)
+
+    return ProjectedPointDistribution(M, d, (M, q, p) -> (q .= svd(p).U), p)
 end
 
 @doc raw"""
