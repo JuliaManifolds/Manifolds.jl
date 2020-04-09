@@ -126,11 +126,16 @@ using ManifoldsBase:
     AbstractOrthonormalBasis,
     DefaultOrthonormalBasis
 using ManifoldsBase:
-    ValidationCoTVector, ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
+    ValidationCoTVector,
+    ValidationManifold,
+    ValidationMPoint,
+    ValidationTVector,
+    ValidationCoTVector
 using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
 using ManifoldsBase: QRRetraction, PolarRetraction, ProjectionRetraction
 using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
-using ManifoldsBase: QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
+using ManifoldsBase:
+    QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
 using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 using ManifoldsBase: ℝ, ℂ, ℍ
 using ManifoldsBase:
@@ -139,9 +144,7 @@ using ManifoldsBase:
     TransparentIsometricEmbedding,
     DefaultIsometricEmbeddingType,
     DefaultEmbeddingType
-using ManifoldsBase:
-    AbstractEmbeddedManifold,
-    EmbeddedManifold
+using ManifoldsBase: AbstractEmbeddedManifold, EmbeddedManifold
 
 
 using Markdown: @doc_str
@@ -296,8 +299,7 @@ export AbstractEstimationMethod,
     CyclicProximalPointEstimation,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius
-export
-    CachedBasis,
+export CachedBasis,
     DefaultBasis,
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
@@ -475,10 +477,5 @@ export AbstractBasis,
     PowerBasisData
 export OutOfInjectivityRadiusError
 export get_basis,
-    get_coordinates,
-    get_coordinates!,
-    get_vector,
-    get_vector!,
-    get_vectors,
-    number_system
+    get_coordinates, get_coordinates!, get_vector, get_vector!, get_vectors, number_system
 end # module

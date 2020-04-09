@@ -36,10 +36,18 @@ struct GraphManifold{G<:AbstractGraph,𝔽,TM,T<:GraphManifoldType} <:
     manifold::TM
 end
 
-function GraphManifold(g::G, M::TM, ::VertexManifold) where {G<:AbstractGraph,𝔽,TM<:Manifold{<:𝔽}}
+function GraphManifold(
+    g::G,
+    M::TM,
+    ::VertexManifold,
+) where {G<:AbstractGraph,𝔽,TM<:Manifold{<:𝔽}}
     return GraphManifold{G,𝔽,TM,VertexManifold}(g, M)
 end
-function GraphManifold(g::G, M::TM, ::EdgeManifold) where {G<:AbstractGraph,𝔽,TM<:Manifold{<:𝔽}}
+function GraphManifold(
+    g::G,
+    M::TM,
+    ::EdgeManifold,
+) where {G<:AbstractGraph,𝔽,TM<:Manifold{<:𝔽}}
     return GraphManifold{G,𝔽,TM,EdgeManifold}(g, M)
 end
 
@@ -87,7 +95,13 @@ together with its corresponding entry of `p` passes the
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
 check_tangent_vector(::GraphManifold, ::Any...)
-function check_tangent_vector(M::VertexGraphManifold, p, X; check_base_point = true, kwargs...)
+function check_tangent_vector(
+    M::VertexGraphManifold,
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+)
     if check_base_point && size(p) != (nv(M.graph),)
         return DomainError(
             length(p),
@@ -103,7 +117,13 @@ function check_tangent_vector(M::VertexGraphManifold, p, X; check_base_point = t
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), nv(M.graph))
     return check_tangent_vector(PM, p, X; check_base_point = check_base_point, kwargs...)
 end
-function check_tangent_vector(M::EdgeGraphManifold, p, X; check_base_point = true, kwargs...)
+function check_tangent_vector(
+    M::EdgeGraphManifold,
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+)
     if check_base_point && size(p) != (ne(M.graph),)
         return DomainError(
             length(p),

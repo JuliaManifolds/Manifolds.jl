@@ -8,7 +8,8 @@ include("group_utils.jl")
     @test length(methods(has_biinvariant_metric)) == 1
     @testset "Not implemented operation" begin
         G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
-        @test repr(G) == "GroupManifold(NotImplementedManifold(), NotImplementedOperation())"
+        @test repr(G) ==
+              "GroupManifold(NotImplementedManifold(), NotImplementedOperation())"
         x = [1.0, 2.0]
         v = [2.0, 3.0]
         eg = Identity(G, [0.0, 0.0])
@@ -21,28 +22,66 @@ include("group_utils.jl")
         @test !Manifolds.is_group_decorator(NotImplementedManifold())
         @test Manifolds.decorator_group_dispatch(NotImplementedManifold()) === Val{false}()
 
-        @test Manifolds.decorator_transparent_dispatch(compose, G, x, x, x) === Val{:intransparent}()
-        @test Manifolds.decorator_transparent_dispatch(compose!, G, x, x, x) === Val{:intransparent}()
-        @test Manifolds.decorator_transparent_dispatch(group_exp, G, x, x) === Val{:intransparent}()
-        @test Manifolds.decorator_transparent_dispatch(group_log, G, x, x) === Val{:intransparent}()
-        @test Manifolds.decorator_transparent_dispatch(translate_diff!, G, x, x, x, x, x) === Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(compose, G, x, x, x) ===
+              Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(compose!, G, x, x, x) ===
+              Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(group_exp, G, x, x) ===
+              Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(group_log, G, x, x) ===
+              Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(
+            translate_diff!,
+            G,
+            x,
+            x,
+            x,
+            x,
+            x,
+        ) === Val{:intransparent}()
         @test base_group(G) === G
         z = similar(x)
-        copyto!(z,eg)
-        @test z==eg.p
+        copyto!(z, eg)
+        @test z == eg.p
         if VERSION ≥ v"1.3"
             @test NotImplementedOperation(NotImplementedManifold()) === G
             @test (NotImplementedOperation())(NotImplementedManifold()) === G
         end
 
-        @test_throws ErrorException allocate_result(G, get_vector, Identity(SpecialOrthogonal(3),x), v)
-        @test_throws ErrorException allocate_result(G, get_coordinates, Identity(SpecialOrthogonal(3),x), v)
-        @test_throws ErrorException allocate_result(ValidationManifold(NotImplementedManifold()), get_coordinates, Identity(SpecialOrthogonal(3),x), v)
-        @test_throws ErrorException base_group(MetricManifold(Euclidean(3), EuclideanMetric()))
+        @test_throws ErrorException allocate_result(
+            G,
+            get_vector,
+            Identity(SpecialOrthogonal(3), x),
+            v,
+        )
+        @test_throws ErrorException allocate_result(
+            G,
+            get_coordinates,
+            Identity(SpecialOrthogonal(3), x),
+            v,
+        )
+        @test_throws ErrorException allocate_result(
+            ValidationManifold(NotImplementedManifold()),
+            get_coordinates,
+            Identity(SpecialOrthogonal(3), x),
+            v,
+        )
+        @test_throws ErrorException base_group(MetricManifold(
+            Euclidean(3),
+            EuclideanMetric(),
+        ))
         @test_throws ErrorException hat(Rotations(3), eg, [1, 2, 3])
-        @test_throws ErrorException hat(GroupManifold(Rotations(3), NotImplementedOperation()), eg, [1, 2, 3])
+        @test_throws ErrorException hat(
+            GroupManifold(Rotations(3), NotImplementedOperation()),
+            eg,
+            [1, 2, 3],
+        )
         @test_throws ErrorException vee(Rotations(3), eg, [1, 2, 3])
-        @test_throws ErrorException vee(GroupManifold(Rotations(3), NotImplementedOperation()), eg, [1, 2, 3])
+        @test_throws ErrorException vee(
+            GroupManifold(Rotations(3), NotImplementedOperation()),
+            eg,
+            [1, 2, 3],
+        )
         @test_throws ErrorException Identity(Euclidean(3), [0, 0, 0])
 
         @test_throws ErrorException inv!(G, x, x)
@@ -104,15 +143,20 @@ include("group_utils.jl")
             @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:transparent}()
         end
         for f in [group_exp!, group_exp, group_log, group_log!]
-            @test Manifolds.decorator_transparent_dispatch(f, G, x, x) === Val{:intransparent}()
+            @test Manifolds.decorator_transparent_dispatch(f, G, x, x) ===
+                  Val{:intransparent}()
         end
         for f in [get_vector, get_coordinates]
             @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:parent}()
         end
-        @test Manifolds.decorator_transparent_dispatch(identity!, G, x, x) === Val{:intransparent}()
-        @test Manifolds.decorator_transparent_dispatch(isapprox, G, eg, x) === Val{:transparent}()
-        @test Manifolds.decorator_transparent_dispatch(isapprox, G, x, eg) === Val{:transparent}()
-        @test Manifolds.decorator_transparent_dispatch(isapprox, G, eg, eg) === Val{:transparent}()
+        @test Manifolds.decorator_transparent_dispatch(identity!, G, x, x) ===
+              Val{:intransparent}()
+        @test Manifolds.decorator_transparent_dispatch(isapprox, G, eg, x) ===
+              Val{:transparent}()
+        @test Manifolds.decorator_transparent_dispatch(isapprox, G, x, eg) ===
+              Val{:transparent}()
+        @test Manifolds.decorator_transparent_dispatch(isapprox, G, eg, eg) ===
+              Val{:transparent}()
     end
 
     @testset "Action direction" begin
@@ -129,7 +173,10 @@ include("group_utils.jl")
 
         @test_throws DomainError is_manifold_point(
             G,
-            Identity(GroupManifold(NotImplementedManifold(), NotImplementedOperation()), [0.0, 0.0]),
+            Identity(
+                GroupManifold(NotImplementedManifold(), NotImplementedOperation()),
+                [0.0, 0.0],
+            ),
             true,
         )
 
@@ -175,8 +222,8 @@ include("group_utils.jl")
         @test group_log(G, x) === x
 
         y = identity(G, x)
-        @test isapprox(y, ge; atol=1e-10)
-        @test isapprox(ge, y; atol=1e-10)
+        @test isapprox(y, ge; atol = 1e-10)
+        @test isapprox(ge, y; atol = 1e-10)
         @test isapprox(ge, ge)
     end
 
@@ -250,7 +297,11 @@ include("group_utils.jl")
             x3 = copy(x)
             invoke(
                 identity!,
-                Tuple{AbstractGroupManifold{ℝ,Manifolds.MultiplicationOperation}, Any, AbstractMatrix},
+                Tuple{
+                    AbstractGroupManifold{ℝ,Manifolds.MultiplicationOperation},
+                    Any,
+                    AbstractMatrix,
+                },
                 G,
                 x3,
                 x,
@@ -260,8 +311,7 @@ include("group_utils.jl")
     end
 end
 
-struct NotImplementedAction <: AbstractGroupAction{LeftAction}
-end
+struct NotImplementedAction <: AbstractGroupAction{LeftAction} end
 
 @testset "General group action tests" begin
     @testset "Not implemented operations" begin

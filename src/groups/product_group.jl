@@ -35,8 +35,9 @@ function decorator_transparent_dispatch(::typeof(group_log!), M::ProductGroup, X
 end
 
 function show(io::IO, ::MIME"text/plain", G::ProductGroup)
-    print(io,
-        "ProductGroup with $(length(base_manifold(G).manifolds)) subgroup$(length(base_manifold(G).manifolds) == 1 ? "" : "s"):"
+    print(
+        io,
+        "ProductGroup with $(length(base_manifold(G).manifolds)) subgroup$(length(base_manifold(G).manifolds) == 1 ? "" : "s"):",
     )
     _show_product_manifold_no_header(io, base_manifold(G))
 end

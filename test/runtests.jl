@@ -1,10 +1,10 @@
 include("autodiff.jl")
 include("utils.jl")
 
-@info "Manifolds.jl Test settings:\n\n"*
-    "Testing Float32:  $(TEST_FLOAT32)\n"*
-    "Testing Double64: $(TEST_DOUBLE64)\n"*
-    "Testing Static:   $(TEST_STATIC_SIZED)\n"
+@info "Manifolds.jl Test settings:\n\n" *
+      "Testing Float32:  $(TEST_FLOAT32)\n" *
+      "Testing Double64: $(TEST_DOUBLE64)\n" *
+      "Testing Static:   $(TEST_STATIC_SIZED)\n"
 
 
 @testset "Ambiguities" begin

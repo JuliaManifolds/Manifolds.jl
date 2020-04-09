@@ -31,19 +31,20 @@ makedocs(
                 "Sphere" => "manifolds/sphere.md",
                 "Stiefel" => "manifolds/stiefel.md",
                 "Symmetric matrices" => "manifolds/symmetric.md",
-                "Symmetric positive definite" => "manifolds/symmetricpositivedefinite.md",
-                "Torus" => "manifolds/torus.md"
+                "Symmetric positive definite" =>
+                    "manifolds/symmetricpositivedefinite.md",
+                "Torus" => "manifolds/torus.md",
             ],
             "Combined manifolds" => [
                 "Graph manifold" => "manifolds/graph.md",
                 "Power manifold" => "manifolds/power.md",
                 "Product manifold" => "manifolds/product.md",
-                "Vector bundle" => "manifolds/vector_bundle.md"
+                "Vector bundle" => "manifolds/vector_bundle.md",
             ],
             "Manifold decorators" => [
                 "Metric manifold" => "manifolds/metric.md",
-                "Group manifold" => "manifolds/group.md"
-            ]
+                "Group manifold" => "manifolds/group.md",
+            ],
         ],
         "Statistics" => "statistics.md",
         "Distributions" => "distributions.md",
@@ -51,12 +52,9 @@ makedocs(
         "Library" => [
             "Public" => "lib/public.md",
             "Internals" => "lib/internals.md",
-            "Automatic differentiation" => "lib/autodiff.md"
-        ]
-    ]
+            "Automatic differentiation" => "lib/autodiff.md",
+        ],
+    ],
 )
 
-deploydocs(
-    repo = "github.com/JuliaManifolds/Manifolds.jl.git",
-    push_preview = true,
-)
+deploydocs(repo = "github.com/JuliaManifolds/Manifolds.jl.git", push_preview = true)

@@ -163,7 +163,7 @@ function vector_transport_to!(
     p,
     X,
     q,
-    m::ParallelTransport
+    m::ParallelTransport,
 ) where {N}
     y = cholesky(q).L
     (x, W) = spd_to_cholesky(p, X)

@@ -157,7 +157,10 @@ _access_nested(x, i::Int) = x[i]
 _access_nested(x, i::Tuple) = x[i...]
 
 function allocate_result(M::PowerManifoldNested, f, x...)
-    return [allocate_result(M.manifold, f, map(y -> _access_nested(y, i), x)...) for i in get_iterator(M)]
+    return [
+        allocate_result(M.manifold, f, map(y -> _access_nested(y, i), x)...)
+        for i in get_iterator(M)
+    ]
 end
 function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x)
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
@@ -343,12 +346,7 @@ end
 function get_coordinates(M::AbstractPowerManifold, p, X, B::DefaultOrthonormalBasis)
     rep_size = representation_size(M.manifold)
     vs = [
-        get_coordinates(
-            M.manifold,
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i),
-            B,
-        ) for i in get_iterator(M)
+        get_coordinates(M.manifold, _read(M, rep_size, p, i), _read(M, rep_size, X, i), B) for i in get_iterator(M)
     ]
     return reduce(vcat, reshape(vs, length(vs)))
 end
@@ -480,18 +478,22 @@ function injectivity_radius(M::AbstractPowerManifold, p)
     return radius
 end
 injectivity_radius(M::AbstractPowerManifold) = injectivity_radius(M.manifold)
-eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(
-        M::AbstractPowerManifold,
-        rm::AbstractRetractionMethod,
-    )
-end)
-eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(
-        M::AbstractPowerManifold,
-        rm::ExponentialRetraction,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold injectivity_radius(
+            M::AbstractPowerManifold,
+            rm::AbstractRetractionMethod,
+        )
+    end,
+)
+eval(
+    quote
+        @invoke_maker 1 Manifold injectivity_radius(
+            M::AbstractPowerManifold,
+            rm::ExponentialRetraction,
+        )
+    end,
+)
 
 @doc raw"""
     inverse_retract(M::AbstractPowerManifold, p, q, m::InversePowerRetraction)
@@ -753,7 +755,10 @@ function show(
         println(io)
     end
 end
-function show(io::IO, M::PowerManifold{𝔽,TM,TSize,ArrayPowerRepresentation}) where {𝔽,TM,TSize}
+function show(
+    io::IO,
+    M::PowerManifold{𝔽,TM,TSize,ArrayPowerRepresentation},
+) where {𝔽,TM,TSize}
     print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
 end
 function show(io::IO, M::PowerManifold{𝔽,TM,TSize,TPR}) where {𝔽,TM,TSize,TPR}
