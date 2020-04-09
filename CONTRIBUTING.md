@@ -63,14 +63,24 @@ This can best be achieved by adding a docstring to the method with a general sig
 ### Code style
 
 We try to follow the [documentation guidelines](https://docs.julialang.org/en/v1/manual/documentation/) from the Julia documentation as well as [Blue Style](https://github.com/invenia/BlueStyle).
-We also run [`JuliaFormatter.jl`](https://github.com/domluna/JuliaFormatter.jl) on the source code, which enforces a number of conventions consistent with Blue Style.
+We run [`JuliaFormatter.jl`](https://github.com/domluna/JuliaFormatter.jl) on the repo in the following way, which enforces a number of conventions consistent with Blue Style:
+```julia
+using JuliaFormatter
+format(
+    ".",
+    short_to_long_function_def = true,
+    always_for_in = true,
+    whitespace_ops_in_indices = true,
+    pipe_to_function_call = true,
+)
+```
+
 We also follow a few internal conventions:
 - It is preferred that the `Manifold`'s struct contain a reference to the general theory.
 - Any implemented function should be accompanied by its mathematical formulae if a closed form exists.
 - Within the source code of one manifold, the type of the manifold should be the first element of the file, and an alphabetical order of the functions is preferable.
 - The above implies that the mutating variant of a function follows the non-mutating variant.
 - There should be no dangling `=` signs.
-  If a "one-line" function is too long to fit in a line, then make it multiline.
 - Always add a newline between things of different types (struct/method/const)
 - Always add a newline between methods for different functions (including mutating/nonmutating variants)
 - Prefer to have no newline between methods for the same function; when reasonable, merge the docstrings.
