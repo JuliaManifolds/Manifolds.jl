@@ -208,10 +208,20 @@ function Base.isapprox(G::SemidirectProductGroup, p, X, Y; kwargs...)
     nY, hY = submanifold_components(G, Y)
     return isapprox(N, np, nX, nY; kwargs...) && isapprox(H, hp, hX, hY; kwargs...)
 end
-function Base.isapprox(G::GT, p, e::Identity{GT}; kwargs...) where {GT<:SemidirectProductGroup}
+function Base.isapprox(
+    G::GT,
+    p,
+    e::Identity{GT};
+    kwargs...,
+) where {GT<:SemidirectProductGroup}
     return isapprox(G, e, p; kwargs...)
 end
-function Base.isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:SemidirectProductGroup}
+function Base.isapprox(
+    G::GT,
+    e::Identity{GT},
+    p;
+    kwargs...,
+) where {GT<:SemidirectProductGroup}
     return isapprox(G, identity(G, p), p; kwargs...)
 end
 function Base.isapprox(

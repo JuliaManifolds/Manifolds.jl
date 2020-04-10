@@ -605,7 +605,9 @@ function sharp!(M::N, X::TFVector, p, ξ::CoTFVector) where {N<:MetricManifold}
     return X
 end
 
-Base.show(io::IO, M::MetricManifold) = print(io, "MetricManifold($(M.manifold), $(M.metric))")
+function Base.show(io::IO, M::MetricManifold)
+    print(io, "MetricManifold($(M.manifold), $(M.metric))")
+end
 
 @doc raw"""
     solve_exp_ode(

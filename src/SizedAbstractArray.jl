@@ -76,7 +76,10 @@ end
 end
 
 # Overide some problematic default behaviour
-@inline function Base.convert(::Type{SA}, sa::SizedAbstractArray) where {SA<:SizedAbstractArray}
+@inline function Base.convert(
+    ::Type{SA},
+    sa::SizedAbstractArray,
+) where {SA<:SizedAbstractArray}
     return SA(sa.data)
 end
 @inline Base.convert(::Type{SA}, sa::SA) where {SA<:SizedAbstractArray} = sa
@@ -98,7 +101,10 @@ end
 @inline function Base.convert(::Type{Array{T}}, sa::SizedAbstractArray{S,T}) where {T,S}
     return Array(reshape(sa.data, size_to_tuple(S)))
 end
-@inline function Base.convert(::Type{Array{T,N}}, sa::SizedAbstractArray{S,T,N}) where {T,S,N}
+@inline function Base.convert(
+    ::Type{Array{T,N}},
+    sa::SizedAbstractArray{S,T,N},
+) where {T,S,N}
     return Array(reshape(sa.data, size_to_tuple(S)))
 end
 

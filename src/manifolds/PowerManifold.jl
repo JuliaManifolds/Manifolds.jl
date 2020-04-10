@@ -647,7 +647,11 @@ function Random.rand(rng::AbstractRNG, d::PowerPointDistribution)
     return x
 end
 
-function Distributions._rand!(rng::AbstractRNG, d::PowerFVectorDistribution, v::AbstractArray)
+function Distributions._rand!(
+    rng::AbstractRNG,
+    d::PowerFVectorDistribution,
+    v::AbstractArray,
+)
     PM = d.type.manifold
     rep_size = representation_size(PM.manifold)
     for i in get_iterator(d.type.manifold)

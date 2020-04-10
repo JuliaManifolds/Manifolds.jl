@@ -193,8 +193,12 @@ same approach as above
 """
 cross(::Manifold...)
 LinearAlgebra.cross(M1::Manifold, M2::Manifold) = ProductManifold(M1, M2)
-LinearAlgebra.cross(M1::ProductManifold, M2::Manifold) = ProductManifold(M1.manifolds..., M2)
-LinearAlgebra.cross(M1::Manifold, M2::ProductManifold) = ProductManifold(M1, M2.manifolds...)
+function LinearAlgebra.cross(M1::ProductManifold, M2::Manifold)
+    return ProductManifold(M1.manifolds..., M2)
+end
+function LinearAlgebra.cross(M1::Manifold, M2::ProductManifold)
+    return ProductManifold(M1, M2.manifolds...)
+end
 function LinearAlgebra.cross(M1::ProductManifold, M2::ProductManifold)
     return ProductManifold(M1.manifolds..., M2.manifolds...)
 end
@@ -806,7 +810,11 @@ function Random.rand(rng::AbstractRNG, d::ProductFVectorDistribution)
     return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
 end
 
-function Distributions._rand!(rng::AbstractRNG, d::ProductPointDistribution, x::AbstractArray{<:Number})
+function Distributions._rand!(
+    rng::AbstractRNG,
+    d::ProductPointDistribution,
+    x::AbstractArray{<:Number},
+)
     return copyto!(x, rand(rng, d))
 end
 function Distributions._rand!(rng::AbstractRNG, d::ProductPointDistribution, p::ProductRepr)
@@ -817,10 +825,18 @@ function Distributions._rand!(rng::AbstractRNG, d::ProductPointDistribution, p::
     )
     return p
 end
-function Distributions._rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::AbstractArray{<:Number})
+function Distributions._rand!(
+    rng::AbstractRNG,
+    d::ProductFVectorDistribution,
+    v::AbstractArray{<:Number},
+)
     return copyto!(v, rand(rng, d))
 end
-function Distributions._rand!(rng::AbstractRNG, d::ProductFVectorDistribution, X::ProductRepr)
+function Distributions._rand!(
+    rng::AbstractRNG,
+    d::ProductFVectorDistribution,
+    X::ProductRepr,
+)
     map(
         t -> Distributions._rand!(rng, t[1], t[2]),
         d.distributions,

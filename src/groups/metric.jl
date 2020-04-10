@@ -217,7 +217,11 @@ function log!(
     return invoke(log!, Tuple{MetricManifold,typeof(X),typeof(p),typeof(q)}, M, X, p, q)
 end
 
-function LinearAlgebra.norm(M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric}, p, X) where {𝔽}
+function LinearAlgebra.norm(
+    M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric},
+    p,
+    X,
+) where {𝔽}
     imetric = metric(M)
     conv = direction(imetric)
     N = MetricManifold(M.manifold, imetric.metric)

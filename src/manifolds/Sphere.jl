@@ -329,7 +329,13 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 """
 mean(::AbstractSphere, ::Any...)
 
-function Statistics.mean!(S::AbstractSphere, p, x::AbstractVector, w::AbstractVector; kwargs...)
+function Statistics.mean!(
+    S::AbstractSphere,
+    p,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+)
     return mean!(S, p, x, w, GeodesicInterpolationWithinRadius(π / 2); kwargs...)
 end
 

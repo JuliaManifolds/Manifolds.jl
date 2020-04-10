@@ -349,7 +349,10 @@ $p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}$, where $e$ is the [`identi
 element of $\mathcal{G}$.
 """
 inv(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function :intransparent function Base.inv(G::AbstractGroupManifold, p)
+@decorator_transparent_function :intransparent function Base.inv(
+    G::AbstractGroupManifold,
+    p,
+)
     q = allocate_result(G, inv, p)
     return inv!(G, q, p)
 end
@@ -377,13 +380,30 @@ function decorator_transparent_dispatch(::typeof(identity!), ::AbstractGroupMani
     return Val(:intransparent)
 end
 
-function Base.isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:AbstractGroupManifold}
+function Base.isapprox(
+    G::GT,
+    e::Identity{GT},
+    p;
+    kwargs...,
+) where {GT<:AbstractGroupManifold}
     return isapprox(G, e.p, p; kwargs...)
 end
-function Base.isapprox(G::GT, p, e::Identity{GT}; kwargs...) where {GT<:AbstractGroupManifold}
+function Base.isapprox(
+    G::GT,
+    p,
+    e::Identity{GT};
+    kwargs...,
+) where {GT<:AbstractGroupManifold}
     return isapprox(G, e, p; kwargs...)
 end
-Base.isapprox(::GT, ::E, ::E; kwargs...) where {GT<:AbstractGroupManifold,E<:Identity{GT}} = true
+function Base.isapprox(
+    ::GT,
+    ::E,
+    ::E;
+    kwargs...,
+) where {GT<:AbstractGroupManifold,E<:Identity{GT}}
+    return true
+end
 
 function decorator_transparent_dispatch(
     ::typeof(isapprox),

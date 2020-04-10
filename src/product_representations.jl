@@ -261,7 +261,10 @@ function Base.:-(v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecificatio
     return ProductArray(ShapeSpec, -v.data, v.reshapers)
 end
 
-function Base.:*(a::Number, v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
+function Base.:*(
+    a::Number,
+    v::ProductArray{ShapeSpec},
+) where {ShapeSpec<:ShapeSpecification}
     return ProductArray(ShapeSpec, a * v.data, v.reshapers)
 end
 

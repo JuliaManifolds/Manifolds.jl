@@ -328,7 +328,9 @@ which is computed with wrapped mean, i.e. the remainder of the mean modulo 2π.
 """
 mean(::Circle, ::Any)
 Statistics.mean(::Circle, x::Array{<:Real}; kwargs...) = sym_rem(sum(x))
-Statistics.mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...) = sym_rem(sum(w .* x))
+function Statistics.mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...)
+    return sym_rem(sum(w .* x))
+end
 
 @inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)
 

@@ -562,7 +562,13 @@ can be activated by setting `corrected=true`. All further `kwargs...` are passed
 to the computation of the mean (if that is not provided).
 """
 var(M::Manifold, ::Any)
-function Statistics.var(M::Manifold, x::AbstractVector, w::AbstractWeights, m; corrected::Bool = false)
+function Statistics.var(
+    M::Manifold,
+    x::AbstractVector,
+    w::AbstractWeights,
+    m;
+    corrected::Bool = false,
+)
     wv = convert(Vector, w)
     s = sum(eachindex(x, w)) do i
         return @inbounds w[i] * distance(M, m, x[i])^2
