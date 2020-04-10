@@ -64,54 +64,60 @@ using HybridArrays
 using LinearAlgebra
 using LightGraphs
 using LightGraphs: AbstractGraph
-using ManifoldsBase: CoTVector, Manifold, MPoint, TVector, DefaultManifold
 using ManifoldsBase
+using ManifoldsBase: ℝ, ℂ, ℍ
 using ManifoldsBase:
     AbstractDecoratorManifold,
     AbstractNumbers,
+    CoTVector,
+    DefaultManifold,
+    Manifold,
+    MPoint,
+    TVector
+using ManifoldsBase:
+    AbstractBasis,
+    AbstractOrthogonalBasis,
+    AbstractOrthonormalBasis,
+    DefaultOrDiagonalizingBasis,
+    DefaultOrthonormalBasis,
+    DiagonalizingBasisData,
+    VeeOrthogonalBasis
+using ManifoldsBase:
+    ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
+using ManifoldsBase:
+    AbstractRetractionMethod,
+    ExponentialRetraction,
+    PolarRetraction,
+    ProjectionRetraction,
+    QRRetraction
+using ManifoldsBase:
+    AbstractInverseRetractionMethod,
+    LogarithmicInverseRetraction,
+    PolarInverseRetraction,
+    ProjectionInverseRetraction,
+    QRInverseRetraction
+using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
+using ManifoldsBase:
+    AbstractEmbeddingType,
+    AbstractIsometricEmbeddingType,
+    DefaultIsometricEmbeddingType,
+    DefaultEmbeddingType,
+    TransparentIsometricEmbedding
+using ManifoldsBase: AbstractEmbeddedManifold, EmbeddedManifold
+using ManifoldsBase:
     @decorator_transparent_fallback,
     @decorator_transparent_function,
     @decorator_transparent_signature,
+    @invoke_maker,
     _euclidean_basis_vector,
     _extract_val,
     hat,
     hat!,
-    @invoke_maker,
     is_decorator_transparent,
     is_default_decorator,
     manifold_function_not_implemented_message,
     vee,
     vee!
-using ManifoldsBase:
-    AbstractBasis,
-    AbstractOrthogonalBasis,
-    DefaultOrDiagonalizingBasis,
-    DiagonalizingBasisData,
-    VeeOrthogonalBasis,
-    AbstractOrthonormalBasis,
-    DefaultOrthonormalBasis
-using ManifoldsBase:
-    ValidationCoTVector,
-    ValidationManifold,
-    ValidationMPoint,
-    ValidationTVector,
-    ValidationCoTVector
-using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
-using ManifoldsBase: QRRetraction, PolarRetraction, ProjectionRetraction
-using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
-using ManifoldsBase:
-    QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
-using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
-using ManifoldsBase: ℝ, ℂ, ℍ
-using ManifoldsBase:
-    AbstractEmbeddingType,
-    AbstractIsometricEmbeddingType,
-    TransparentIsometricEmbedding,
-    DefaultIsometricEmbeddingType,
-    DefaultEmbeddingType
-using ManifoldsBase: AbstractEmbeddedManifold, EmbeddedManifold
-
-
 using Markdown: @doc_str
 using Random
 using Requires
@@ -119,7 +125,7 @@ using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
 using Statistics
 using StatsBase
-using StatsBase: AbstractWeights, UnitWeights, values, varcorrection
+using StatsBase: AbstractWeights
 
 include("utils.jl")
 include("autodiff.jl")

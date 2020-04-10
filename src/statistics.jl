@@ -19,7 +19,7 @@ Method for estimation using the cyclic proximal point technique.
 """
 struct CyclicProximalPointEstimation <: AbstractEstimationMethod end
 
-_unit_weights(n::Int) = UnitWeights{Float64}(n)
+_unit_weights(n::Int) = StatsBase.UnitWeights{Float64}(n)
 
 @doc raw"""
     GeodesicInterpolation <: AbstractEstimationMethod
@@ -573,7 +573,7 @@ function Statistics.var(
     s = sum(eachindex(x, w)) do i
         return @inbounds w[i] * distance(M, m, x[i])^2
     end
-    c = varcorrection(w, corrected)
+    c = StatsBase.varcorrection(w, corrected)
     return c * s
 end
 function Statistics.var(M::Manifold, x::AbstractVector, m; corrected::Bool = true)
@@ -707,7 +707,7 @@ function StatsBase.mean_and_var(
         M₂ += t * s * d^2
         s = snew
     end
-    c = varcorrection(w, corrected)
+    c = StatsBase.varcorrection(w, corrected)
     σ² = c * M₂
     return y, σ²
 end
