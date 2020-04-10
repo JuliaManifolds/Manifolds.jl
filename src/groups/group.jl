@@ -322,7 +322,6 @@ for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
     )
 end
 
-import ManifoldsBase.check_manifold_point__transparent
 @decorator_transparent_fallback :transparent function check_manifold_point(
     G::AbstractGroupManifold,
     e::Identity;
