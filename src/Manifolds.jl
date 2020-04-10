@@ -184,6 +184,7 @@ include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Grassmann.jl")
 include("manifolds/Hyperbolic.jl")
+include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/SkewSymmetric.jl")
 include("manifolds/Stiefel.jl")
@@ -195,6 +196,7 @@ include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 
 include("manifolds/Torus.jl")
+include("manifolds/Multinomial.jl")
 include("manifolds/Oblique.jl")
 
 include("groups/metric.jl")
@@ -237,7 +239,9 @@ export Euclidean,
     Grassmann,
     Hyperbolic,
     Lorentz,
+    MultinomialMatrices,
     Oblique,
+    ProbabilitySimplex,
     Rotations,
     SkewSymmetricMatrices,
     Sphere,
@@ -279,12 +283,17 @@ export AbstractEmbeddingType, AbstractIsometricEmbeddingType
 export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod,
-    ExponentialRetraction, QRRetraction, PolarRetraction, ProjectionRetraction
+    ExponentialRetraction,
+    QRRetraction,
+    PolarRetraction,
+    ProjectionRetraction,
+    SoftmaxRetraction
 export AbstractInverseRetractionMethod,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,
-    ProjectionInverseRetraction
+    ProjectionInverseRetraction,
+    SoftmaxInverseRetraction
 export AbstractEstimationMethod,
     GradientDescentEstimation,
     CyclicProximalPointEstimation,

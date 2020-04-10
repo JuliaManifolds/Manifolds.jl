@@ -31,15 +31,15 @@ end
     check_manifold_point(M::Oblique{n,m},p)
 
 Checks whether `p` is a valid point on the [`Oblique`](@ref)`{m,n}` `M`, i.e. is a matrix
-of `m` unit columns from $\mathbb R^{n+1}$, i.e. each column is a point from
-[`Sphere`](@ref)`(n)`.
+of `m` unit columns from $\mathbb R^{n}$, i.e. each column is a point from
+[`Sphere`](@ref)`(n-1)`.
 """
 check_manifold_point(::Oblique, ::Any)
 function check_manifold_point(M::Oblique{n,m}, p; kwargs...) where {n,m}
     if size(p) != (n, m)
         return DomainError(
             length(p),
-            "The matrix in `p` ($(size(p))) does not match the dimension of Oblique $((n,m)).",
+            "The matrix in `p` ($(size(p))) does not match the dimension of $(M).",
         )
     end
     return check_manifold_point(PowerManifold(M.manifold, m), p; kwargs...)
@@ -62,13 +62,13 @@ function check_tangent_vector(
     if check_base_point && size(p) != (n, m)
         return DomainError(
             length(p),
-            "The matrix `p` ($(size(p))) does not match the dimension of Oblique $((n,m)).",
+            "The matrix `p` ($(size(p))) does not match the dimension of $(M).",
         )
     end
     if size(X) != (n, m)
         return DomainError(
             length(X),
-            "The matrix `X` ($(size(X))) does not match the dimension of Oblique $((n,m)).",
+            "The matrix `X` ($(size(X))) does not match the dimension of $(M).",
         )
     end
     return check_tangent_vector(
@@ -80,7 +80,7 @@ function check_tangent_vector(
     )
 end
 
-get_iterator(M::Oblique{n,m}) where {n,m} = 1:m
+get_iterator(M::Oblique{n,m}) where {n,m} = Base.OneTo(m)
 
 @generated function manifold_dimension(::Oblique{n,m,𝔽}) where {n,m,𝔽}
     return (n * real_dimension(𝔽) - 1) * m
@@ -88,4 +88,4 @@ end
 
 @generated representation_size(::Oblique{n,m}) where {n,m} = (n, m)
 
-show(io::IO, ::Oblique{n,m}) where {n,m} = print(io, "Oblique($(n),$(m))")
+show(io::IO, ::Oblique{n,m,𝔽}) where {n,m,𝔽} = print(io, "Oblique($(n),$(m); field = $(𝔽))")

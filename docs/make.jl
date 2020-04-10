@@ -2,7 +2,7 @@ using Manifolds, ManifoldsBase, Documenter
 
 makedocs(
     # for development, we disable prettyurls
-    format = Documenter.HTML(prettyurls = false),
+    format = Documenter.HTML(prettyurls = false, assets = ["assets/favicon.ico"]),
     modules = [Manifolds, ManifoldsBase],
     authors = "Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
     sitename = "Manifolds.jl",
@@ -20,7 +20,9 @@ makedocs(
                 "Grassmann" => "manifolds/grassmann.md",
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
                 "Lorentzian manifold" => "manifolds/lorentz.md",
+                "Multinomial matrices" => "manifolds/multinomial.md",
                 "Oblique manifold" => "manifolds/oblique.md",
+                "Probability simplex" => "manifolds/probabilitysimplex.md",
                 "Rotations" => "manifolds/rotations.md",
                 "Skew-symmetric matrices" => "manifolds/skewsymmetric.md",
                 "Sphere" => "manifolds/sphere.md",
