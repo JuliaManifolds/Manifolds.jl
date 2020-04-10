@@ -424,7 +424,7 @@ function is_default_metric(M::MetricManifold)
     return _extract_val(default_metric_dispatch(M))
 end
 
-function convert(T::Type{MetricManifold{𝔽,MT,GT}}, M::MT) where {𝔽,MT,GT}
+function Base.convert(T::Type{MetricManifold{𝔽,MT,GT}}, M::MT) where {𝔽,MT,GT}
     return _convert_with_default(M, GT, default_metric_dispatch(M, GT()))
 end
 
@@ -605,7 +605,7 @@ function sharp!(M::N, X::TFVector, p, ξ::CoTFVector) where {N<:MetricManifold}
     return X
 end
 
-show(io::IO, M::MetricManifold) = print(io, "MetricManifold($(M.manifold), $(M.metric))")
+Base.show(io::IO, M::MetricManifold) = print(io, "MetricManifold($(M.manifold), $(M.metric))")
 
 @doc raw"""
     solve_exp_ode(

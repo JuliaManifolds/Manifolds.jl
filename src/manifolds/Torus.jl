@@ -12,7 +12,7 @@ end
 
 Torus(n::Int) = Torus{n}(Circle())
 
-^(M::Circle, n::Int) = Torus{n}(M)
+Base.:^(M::Circle, n::Int) = Torus{n}(M)
 
 @doc raw"""
     check_manifold_point(M::Torus{n},p)
@@ -72,4 +72,4 @@ get_iterator(M::Torus{N}) where {N} = 1:N
 
 @generated representation_size(::Torus{N}) where {N} = (N,)
 
-show(io::IO, ::Torus{N}) where {N} = print(io, "Torus($(N))")
+Base.show(io::IO, ::Torus{N}) where {N} = print(io, "Torus($(N))")

@@ -26,7 +26,7 @@ function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
     return Euclidean{Tuple{n...},field}()
 end
 
-^(𝔽::AbstractNumbers, n) = Euclidean(n...; field = 𝔽)
+Base.:^(𝔽::AbstractNumbers, n) = Euclidean(n...; field = 𝔽)
 
 """
     EuclideanMetric <: RiemannianMetric
@@ -43,8 +43,8 @@ This metric is the default metric for example for the [`Euclidean`](@ref) manifo
 """
 struct EuclideanMetric <: RiemannianMetric end
 
-^(M::Euclidean, n::Int) = ^(M, (n,))
-function ^(::Euclidean{T,𝔽}, n::NTuple{N,Int}) where {T,𝔽,N}
+Base.:^(M::Euclidean, n::Int) = ^(M, (n,))
+function Base.:^(::Euclidean{T,𝔽}, n::NTuple{N,Int}) where {T,𝔽,N}
     return Euclidean{Tuple{T.parameters...,n...},𝔽}()
 end
 
@@ -263,8 +263,8 @@ function manifold_dimension(M::Euclidean{N,𝔽}) where {N,𝔽}
     return _product_of_dimensions(M) * real_dimension(𝔽)
 end
 
-mean(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
-function mean(
+Statistics.mean(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
+function Statistics.mean(
     ::Euclidean{Tuple{1}},
     x::AbstractVector{<:Number},
     w::AbstractWeights;
@@ -272,17 +272,17 @@ function mean(
 )
     return mean(x, w)
 end
-mean(::Euclidean, x::AbstractVector; kwargs...) = mean(x)
+Statistics.mean(::Euclidean, x::AbstractVector; kwargs...) = mean(x)
 
-function mean!(M::Euclidean, p, x::AbstractVector, w::AbstractVector; kwargs...)
+function Statistics.mean!(M::Euclidean, p, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(M, p, x, w, GeodesicInterpolation(); kwargs...)
 end
 
-function mean_and_var(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...)
+function StatsBase.mean_and_var(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...)
     m, v = mean_and_var(x; kwargs...)
     return m, sum(v)
 end
-function mean_and_var(
+function StatsBase.mean_and_var(
     ::Euclidean{Tuple{1}},
     x::AbstractVector{<:Number},
     w::AbstractWeights;
@@ -292,12 +292,12 @@ function mean_and_var(
     m, v = mean_and_var(x, w; corrected = corrected, kwargs...)
     return m, sum(v)
 end
-function mean_and_var(M::Euclidean, x::AbstractVector, w::AbstractWeights; kwargs...)
+function StatsBase.mean_and_var(M::Euclidean, x::AbstractVector, w::AbstractWeights; kwargs...)
     return mean_and_var(M, x, w, GeodesicInterpolation(); kwargs...)
 end
 
-median(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = median(x)
-function median(
+Statistics.median(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = median(x)
+function Statistics.median(
     ::Euclidean{Tuple{1}},
     x::AbstractVector{<:Number},
     w::AbstractWeights;
@@ -306,10 +306,10 @@ function median(
     return median(x, w)
 end
 
-function median!(::Euclidean{Tuple{1}}, p, x::AbstractVector; kwargs...)
+function Statistics.median!(::Euclidean{Tuple{1}}, p, x::AbstractVector; kwargs...)
     return copyto!(p, [median(vcat(x...))])
 end
-function median!(::Euclidean{Tuple{1}}, p, x::AbstractVector, w::AbstractWeights; kwargs...)
+function Statistics.median!(::Euclidean{Tuple{1}}, p, x::AbstractVector, w::AbstractWeights; kwargs...)
     return copyto!(p, [median(vcat(x...), w)])
 end
 
@@ -320,8 +320,8 @@ Compute the norm of a tangent vector `X` at `p` on the [`Euclidean`](@ref)
 `M`, i.e. since every tangent space can be identified with `M` itself
 in this case, just the (Frobenius) norm of `X`.
 """
-norm(::Euclidean, p, X) = norm(X)
-norm(::MetricManifold{ℝ,<:Manifold,EuclideanMetric}, p, X) = norm(X)
+LinearAlgebra.norm(::Euclidean, p, X) = norm(X)
+LinearAlgebra.norm(::MetricManifold{ℝ,<:Manifold,EuclideanMetric}, p, X) = norm(X)
 
 """
     normal_tvector_distribution(M::Euclidean, p, σ)
@@ -387,7 +387,7 @@ sharp(::Euclidean, ::Any...)
 
 sharp!(M::Euclidean, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
-function show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
+function Base.show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
     print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")
 end
 
@@ -401,8 +401,8 @@ vector_transport_to(::Euclidean, ::Any, ::Any, ::Any, ::ParallelTransport)
 
 vector_transport_to!(M::Euclidean, Y, p, X, q, ::ParallelTransport) = copyto!(Y, X)
 
-var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
-function var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T}
+Statistics.var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
+function Statistics.var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T}
     return sum(var(x; mean = m, kwargs...))
 end
 

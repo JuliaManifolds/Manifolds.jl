@@ -147,14 +147,14 @@ struct VectorBundleBasisData{BBasis<:CachedBasis,TBasis<:CachedBasis}
     vec_basis::TBasis
 end
 
-(+)(X::FVector, Y::FVector) = FVector(X.type, X.data + Y.data)
+Base.:+(X::FVector, Y::FVector) = FVector(X.type, X.data + Y.data)
 
-(-)(X::FVector, Y::FVector) = FVector(X.type, X.data - Y.data)
-(-)(X::FVector) = FVector(X.type, -X.data)
+Base.:-(X::FVector, Y::FVector) = FVector(X.type, X.data - Y.data)
+Base.:-(X::FVector) = FVector(X.type, -X.data)
 
-(*)(a::Number, X::FVector) = FVector(X.type, a * X.data)
+Base.:*(a::Number, X::FVector) = FVector(X.type, a * X.data)
 
-function copyto!(X::FVector, Y::FVector)
+function Base.copyto!(X::FVector, Y::FVector)
     copyto!(X.data, Y.data)
     return X
 end
@@ -429,7 +429,7 @@ end
 function get_vectors(M::VectorBundleFibers, p, B::CachedBasis)
     return get_vectors(M.manifold, p, B)
 end
-Base.@propagate_inbounds getindex(x::FVector, i) = getindex(x.data, i)
+Base.@propagate_inbounds Base.getindex(x::FVector, i) = getindex(x.data, i)
 
 """
     inner(B::VectorBundleFibers, p, X, Y)
@@ -479,12 +479,12 @@ function inner(B::VectorBundle, p, X, Y)
     return inner(B.manifold, px, VXM, VYM) + inner(B.fiber, Vx, VXF, VYF)
 end
 
-function isapprox(B::VectorBundle, p, q; kwargs...)
+function Base.isapprox(B::VectorBundle, p, q; kwargs...)
     xp, Vp = submanifold_components(B.manifold, p)
     xq, Vq = submanifold_components(B.manifold, q)
     return isapprox(B.manifold, xp, xq; kwargs...) && isapprox(Vp, Vq; kwargs...)
 end
-function isapprox(B::VectorBundle, p, X, Y; kwargs...)
+function Base.isapprox(B::VectorBundle, p, X, Y; kwargs...)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
@@ -533,8 +533,8 @@ end
 Norm of the vector `X` from the vector space of type `B.fiber`
 at point `p` from manifold `B.manifold`.
 """
-norm(B::VectorBundleFibers, p, X) = sqrt(inner(B, p, X, X))
-norm(B::VectorBundleFibers{<:TangentSpaceType}, p, X) = norm(B.manifold, p, X)
+LinearAlgebra.norm(B::VectorBundleFibers, p, X) = sqrt(inner(B, p, X, X))
+LinearAlgebra.norm(B::VectorBundleFibers{<:TangentSpaceType}, p, X) = norm(B.manifold, p, X)
 
 @doc raw"""
     project(B::VectorBundle, p)
@@ -607,7 +607,7 @@ function project!(B::VectorBundleFibers, Y, p, X)
     error("project! not implemented for vector space family of type $(typeof(B)), output vector of type $(typeof(Y)) and input vector at point $(typeof(p)) with type of w $(typeof(X)).")
 end
 
-Base.@propagate_inbounds setindex!(x::FVector, val, i) = setindex!(x.data, val, i)
+Base.@propagate_inbounds Base.setindex!(x::FVector, val, i) = setindex!(x.data, val, i)
 
 function representation_size(B::VectorBundleFibers{<:TCoTSpaceType})
     return representation_size(B.manifold)
@@ -648,15 +648,15 @@ end
     ξ::CoTFVector,
 )
 
-show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
-show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")
-function show(io::IO, tpt::TensorProductType)
+Base.show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
+Base.show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")
+function Base.show(io::IO, tpt::TensorProductType)
     print(io, "TensorProductType(", join(tpt.spaces, ", "), ")")
 end
-function show(io::IO, fiber::VectorBundleFibers)
+function Base.show(io::IO, fiber::VectorBundleFibers)
     print(io, "VectorBundleFibers($(fiber.fiber), $(fiber.manifold))")
 end
-function show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
+function Base.show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
     summary(io, vs)
     println(io, "\nFiber:")
     pre = " "
@@ -668,9 +668,9 @@ function show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
     sp = replace(sp, '\n' => "\n$(pre)")
     print(io, pre, sp)
 end
-show(io::IO, vb::VectorBundle) = print(io, "VectorBundle($(vb.type), $(vb.manifold))")
-show(io::IO, vb::TangentBundle) = print(io, "TangentBundle($(vb.manifold))")
-show(io::IO, vb::CotangentBundle) = print(io, "CotangentBundle($(vb.manifold))")
+Base.show(io::IO, vb::VectorBundle) = print(io, "VectorBundle($(vb.type), $(vb.manifold))")
+Base.show(io::IO, vb::TangentBundle) = print(io, "TangentBundle($(vb.manifold))")
+Base.show(io::IO, vb::CotangentBundle) = print(io, "CotangentBundle($(vb.manifold))")
 
 allocate(x::FVector) = FVector(x.type, allocate(x.data))
 allocate(x::FVector, ::Type{T}) where {T} = FVector(x.type, allocate(x.data, T))
@@ -706,7 +706,7 @@ function allocate_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) whe
     return T
 end
 
-size(x::FVector) = size(x.data)
+Base.size(x::FVector) = size(x.data)
 
 function submanifold_component(M::Manifold, x::FVector, i::Val)
     return submanifold_component(M, x.data, i)

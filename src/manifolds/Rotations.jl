@@ -538,7 +538,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 """
 mean(::Rotations, ::Any)
 
-function mean!(M::Rotations, q, x::AbstractVector, w::AbstractVector; kwargs...)
+function Statistics.mean!(M::Rotations, q, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(M, q, x, w, GeodesicInterpolationWithinRadius(π / 2 / √2); kwargs...)
 end
 
@@ -555,7 +555,7 @@ Compute the norm of a tangent vector `X` from the tangent space at `p` on the
 i.e. the Frobenius norm of `X`, where tangent vectors are represented by
 elements from the Lie algebra.
 """
-norm(M::Rotations, p, X) = norm(X)
+LinearAlgebra.norm(M::Rotations, p, X) = norm(X)
 
 @doc raw"""
     normal_rotation_distribution(M::Rotations, p, σ::Real)
@@ -651,19 +651,19 @@ $\mathrm{SO}(n)$ it's `(n,n)`.
 
 sharp!(M::Rotations, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
-function rand(
+function Random.rand(
     rng::AbstractRNG,
     d::NormalRotationDistribution{TResult,Rotations{N}},
 ) where {TResult,N}
-    if N == 1
-        return convert(TResult, ones(1, 1))
+    return if N == 1
+        convert(TResult, ones(1, 1))
     else
         A = reshape(rand(rng, d.distr), (N, N))
-        return convert(TResult, _fix_random_rotation(A))
+        convert(TResult, _fix_random_rotation(A))
     end
 end
 
-function _rand!(
+function Distributions._rand!(
     rng::AbstractRNG,
     d::NormalRotationDistribution{TResult,Rotations{N}},
     x::AbstractArray{<:Real},
@@ -722,7 +722,7 @@ function retract!(M::Rotations, q, p, X, method::PolarRetraction)
     return project!(M, q, A; check_det = false)
 end
 
-show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
+Base.show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
 
 @doc raw"""
     zero_tangent_vector(M::Rotations, p)

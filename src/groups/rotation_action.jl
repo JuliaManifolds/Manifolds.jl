@@ -22,7 +22,7 @@ function RotationAction(
     return RotationAction{typeof(M),typeof(SOn),TAD}(M, SOn)
 end
 
-function show(io::IO, A::RotationAction)
+function Base.show(io::IO, A::RotationAction)
     print(io, "RotationAction($(A.manifold), $(A.SOn), $(direction(A)))")
 end
 

@@ -192,10 +192,10 @@ For the case that more than one is a product manifold of these is build with the
 same approach as above
 """
 cross(::Manifold...)
-cross(M1::Manifold, M2::Manifold) = ProductManifold(M1, M2)
-cross(M1::ProductManifold, M2::Manifold) = ProductManifold(M1.manifolds..., M2)
-cross(M1::Manifold, M2::ProductManifold) = ProductManifold(M1, M2.manifolds...)
-function cross(M1::ProductManifold, M2::ProductManifold)
+LinearAlgebra.cross(M1::Manifold, M2::Manifold) = ProductManifold(M1, M2)
+LinearAlgebra.cross(M1::ProductManifold, M2::Manifold) = ProductManifold(M1.manifolds..., M2)
+LinearAlgebra.cross(M1::Manifold, M2::ProductManifold) = ProductManifold(M1, M2.manifolds...)
+function LinearAlgebra.cross(M1::ProductManifold, M2::ProductManifold)
     return ProductManifold(M1.manifolds..., M2.manifolds...)
 end
 
@@ -231,7 +231,7 @@ compute the exponential map from `p` in the direction of `X` on the [`ProductMan
 which is the elementwise exponential map on the internal manifolds that build `M`.
 """
 exp(::ProductManifold, ::Any...)
-function exp(M::ProductManifold, p::ProductRepr, X::ProductRepr)
+function Base.exp(M::ProductManifold, p::ProductRepr, X::ProductRepr)
     return ProductRepr(map(
         exp,
         M.manifolds,
@@ -426,7 +426,7 @@ function get_vector(
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
     parts = ntuple(N) do i
-        get_vector(
+        return get_vector(
             M.manifolds[i],
             submanifold_component(p, i),
             X[dims_acc[i]:(dims_acc[i] + dims[i] - 1)],
@@ -460,7 +460,7 @@ function get_vector(M::ProductManifold, p::ProductRepr, X, B::AbstractBasis)
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
     parts = ntuple(N) do i
-        get_vector(
+        return get_vector(
             M.manifolds[i],
             submanifold_component(p, i),
             X[dims_acc[i]:(dims_acc[i] + dims[i] - 1)],
@@ -655,13 +655,13 @@ end
 
 default_metric_dispatch(::ProductManifold, ::ProductMetric) = Val(true)
 
-function isapprox(M::ProductManifold, p, q; kwargs...)
+function Base.isapprox(M::ProductManifold, p, q; kwargs...)
     return all(
         t -> isapprox(t...; kwargs...),
         ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, q)),
     )
 end
-function isapprox(M::ProductManifold, p, X, Y; kwargs...)
+function Base.isapprox(M::ProductManifold, p, X, Y; kwargs...)
     return all(
         t -> isapprox(t...; kwargs...),
         ziptuples(
@@ -680,7 +680,7 @@ Compute the logarithmic map from `p` to `q` on the [`ProductManifold`](@ref) `M`
 which can be computed using the logarithmic maps of the manifolds elementwise.
 """
 log(::ProductManifold, ::Any...)
-function log(M::ProductManifold, p::ProductRepr, q::ProductRepr)
+function Base.log(M::ProductManifold, p::ProductRepr, q::ProductRepr)
     return ProductRepr(map(
         log,
         M.manifolds,
@@ -714,7 +714,7 @@ manifold_dimension(M::ProductManifold) = mapreduce(manifold_dimension, +, M.mani
 Compute the norm of `X` from the tangent space of `p` on the [`ProductManifold`](@ref),
 i.e. from the element wise norms the 2-norm is computed.
 """
-function norm(M::ProductManifold, p, X)
+function LinearAlgebra.norm(M::ProductManifold, p, X)
     norms_squared = (
         map(
             norm,
@@ -799,30 +799,30 @@ function project!(M::ProductManifold, Y, p, X)
     return Y
 end
 
-function rand(rng::AbstractRNG, d::ProductPointDistribution)
+function Random.rand(rng::AbstractRNG, d::ProductPointDistribution)
     return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
 end
-function rand(rng::AbstractRNG, d::ProductFVectorDistribution)
+function Random.rand(rng::AbstractRNG, d::ProductFVectorDistribution)
     return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
 end
 
-function _rand!(rng::AbstractRNG, d::ProductPointDistribution, x::AbstractArray{<:Number})
+function Distributions._rand!(rng::AbstractRNG, d::ProductPointDistribution, x::AbstractArray{<:Number})
     return copyto!(x, rand(rng, d))
 end
-function _rand!(rng::AbstractRNG, d::ProductPointDistribution, p::ProductRepr)
+function Distributions._rand!(rng::AbstractRNG, d::ProductPointDistribution, p::ProductRepr)
     map(
-        t -> _rand!(rng, t[1], t[2]),
+        t -> Distributions._rand!(rng, t[1], t[2]),
         d.distributions,
         submanifold_components(d.manifold, p),
     )
     return p
 end
-function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::AbstractArray{<:Number})
+function Distributions._rand!(rng::AbstractRNG, d::ProductFVectorDistribution, v::AbstractArray{<:Number})
     return copyto!(v, rand(rng, d))
 end
-function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, X::ProductRepr)
+function Distributions._rand!(rng::AbstractRNG, d::ProductFVectorDistribution, X::ProductRepr)
     map(
-        t -> _rand!(rng, t[1], t[2]),
+        t -> Distributions._rand!(rng, t[1], t[2]),
         d.distributions,
         submanifold_components(d.space.manifold, X),
     )
@@ -878,6 +878,7 @@ function _show_submanifold(io::IO, M::Manifold; pre = "")
     end
     sx = replace(sx, '\n' => "\n$(pre)")
     print(io, pre, sx)
+    return nothing
 end
 
 function _show_submanifold_range(io::IO, Ms, range; pre = "")
@@ -886,6 +887,7 @@ function _show_submanifold_range(io::IO, Ms, range; pre = "")
         print(io, '\n')
         _show_submanifold(io, M; pre = pre)
     end
+    return nothing
 end
 
 function _show_product_manifold_no_header(io::IO, M)
@@ -913,17 +915,17 @@ function _show_product_manifold_no_header(io::IO, M)
     return nothing
 end
 
-function show(io::IO, mime::MIME"text/plain", M::ProductManifold)
+function Base.show(io::IO, mime::MIME"text/plain", M::ProductManifold)
     n = length(M.manifolds)
     print(io, "ProductManifold with $(n) submanifold$(n == 1 ? "" : "s"):")
     _show_product_manifold_no_header(io, M)
 end
 
-function show(io::IO, M::ProductManifold)
+function Base.show(io::IO, M::ProductManifold)
     print(io, "ProductManifold(", join(M.manifolds, ", "), ")")
 end
 
-function show(
+function Base.show(
     io::IO,
     mime::MIME"text/plain",
     B::CachedBasis{𝔽,T,D},
@@ -934,6 +936,7 @@ function show(
         show(io, mime, cb)
         println(io)
     end
+    return nothing
 end
 
 """
@@ -958,8 +961,8 @@ function submanifold(M::ProductManifold, i::Val)
 end
 submanifold(M::ProductManifold, i::AbstractVector) = submanifold(M, Val(tuple(i...)))
 
-support(d::ProductPointDistribution) = MPointSupport(d.manifold)
-function support(tvd::ProductFVectorDistribution)
+Distributions.support(d::ProductPointDistribution) = MPointSupport(d.manifold)
+function Distributions.support(tvd::ProductFVectorDistribution)
     return FVectorSupport(
         tvd.type,
         ProductRepr(map(d -> support(d).point, tvd.distributions)...),

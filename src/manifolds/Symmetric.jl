@@ -240,6 +240,6 @@ project(::SymmetricMatrices, ::Any, ::Any)
 
 project!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
 
-function show(io::IO, ::SymmetricMatrices{n,F}) where {n,F}
+function Base.show(io::IO, ::SymmetricMatrices{n,F}) where {n,F}
     print(io, "SymmetricMatrices($(n), $(F))")
 end

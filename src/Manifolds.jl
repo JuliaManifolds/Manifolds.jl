@@ -1,38 +1,5 @@
 module Manifolds
 
-import Base:
-    Array,
-    +,
-    -,
-    *,
-    \,
-    /,
-    ^,
-    ==,
-    angle,
-    axes,
-    convert,
-    copy,
-    copyto!,
-    dataids,
-    eltype,
-    exp,
-    getindex,
-    identity,
-    inv,
-    isapprox,
-    length,
-    log,
-    one,
-    promote_rule,
-    setindex!,
-    show,
-    similar,
-    size,
-    transpose,
-    zero
-import Distributions: _rand!, support
-import LinearAlgebra: cross, det, Diagonal, dot, mul!, norm, I, UniformScaling
 import ManifoldsBase: OutOfInjectivityRadiusError
 import ManifoldsBase:
     allocate,
@@ -87,9 +54,6 @@ import ManifoldsBase:
     vector_transport_to!,
     zero_tangent_vector,
     zero_tangent_vector!
-import Random: rand
-import Statistics: mean, mean!, median, median!, std, var
-import StatsBase: kurtosis, mean_and_std, mean_and_var, moment, skewness
 
 using Base.Iterators: repeated
 using Distributions
@@ -148,10 +112,12 @@ using ManifoldsBase: AbstractEmbeddedManifold, EmbeddedManifold
 
 
 using Markdown: @doc_str
-using Random: AbstractRNG
+using Random
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
+using Statistics
+using StatsBase
 using StatsBase: AbstractWeights, UnitWeights, values, varcorrection
 
 include("utils.jl")

@@ -248,10 +248,10 @@ inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 
 inverse_retract!(::Grassmann, X, p, q, ::QRInverseRetraction) = copyto!(X, q / (p' * q) - p)
 
-function isapprox(M::Grassmann, p, X, Y; kwargs...)
+function Base.isapprox(M::Grassmann, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
 end
-isapprox(M::Grassmann, p, q; kwargs...) = isapprox(distance(M, p, q), 0.0; kwargs...)
+Base.isapprox(M::Grassmann, p, q; kwargs...) = isapprox(distance(M, p, q), 0.0; kwargs...)
 
 @doc raw"""
     log(M::Grassmann, p, q)
@@ -311,7 +311,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 """
 mean(::Grassmann{n,k} where {n,k}, ::Any...)
 
-function mean!(
+function Statistics.mean!(
     M::Grassmann{n,k},
     p,
     x::AbstractVector,
@@ -386,7 +386,7 @@ function retract!(::Grassmann{N,K}, q, p, X, ::QRRetraction) where {N,K}
     return copyto!(q, Array(qrfac.Q) * D)
 end
 
-show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽} = print(io, "Grassmann($(n), $(k), $(𝔽))")
+Base.show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽} = print(io, "Grassmann($(n), $(k), $(𝔽))")
 
 @doc raw"""
     zero_tangent_vector(M::Grassmann, p)

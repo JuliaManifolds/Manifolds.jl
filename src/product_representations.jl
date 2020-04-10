@@ -238,30 +238,30 @@ Base.dataids(x::ProductArray) = Base.dataids(x.data)
 @inline find_pv(a::ProductArray, rest) = a
 @inline find_pv(::Any, rest) = find_pv(rest)
 
-size(x::ProductArray) = size(x.data)
+Base.size(x::ProductArray) = size(x.data)
 
-Base.@propagate_inbounds getindex(x::ProductArray, i) = getindex(x.data, i)
+Base.@propagate_inbounds Base.getindex(x::ProductArray, i) = getindex(x.data, i)
 
-Base.@propagate_inbounds setindex!(x::ProductArray, val, i) = setindex!(x.data, val, i)
+Base.@propagate_inbounds Base.setindex!(x::ProductArray, val, i) = setindex!(x.data, val, i)
 
-function (+)(
+function Base.:+(
     v1::ProductArray{ShapeSpec},
     v2::ProductArray{ShapeSpec},
 ) where {ShapeSpec<:ShapeSpecification}
     return ProductArray(ShapeSpec, v1.data + v2.data, v1.reshapers)
 end
 
-function (-)(
+function Base.:-(
     v1::ProductArray{ShapeSpec},
     v2::ProductArray{ShapeSpec},
 ) where {ShapeSpec<:ShapeSpecification}
     return ProductArray(ShapeSpec, v1.data - v2.data, v1.reshapers)
 end
-function (-)(v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
+function Base.:-(v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
     return ProductArray(ShapeSpec, -v.data, v.reshapers)
 end
 
-function (*)(a::Number, v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
+function Base.:*(a::Number, v::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
     return ProductArray(ShapeSpec, a * v.data, v.reshapers)
 end
 
@@ -296,7 +296,7 @@ function _show_product_repr(io::IO, x; name = "Product representation", nmax = 4
     return nothing
 end
 
-function show(io::IO, ::MIME"text/plain", x::ProductArray)
+function Base.show(io::IO, ::MIME"text/plain", x::ProductArray)
     _show_product_repr(io, x; name = "ProductArray")
 end
 
@@ -345,21 +345,21 @@ end
 allocate(p::ProductRepr, ::Type{T}, s::Size{S}) where {S,T} = Vector{T}(undef, S)
 allocate(p::ProductRepr, ::Type{T}, s::Integer) where {S,T} = Vector{T}(undef, s)
 
-function copyto!(x::ProductRepr, y::ProductRepr)
+function Base.copyto!(x::ProductRepr, y::ProductRepr)
     map(copyto!, submanifold_components(x), submanifold_components(y))
     return x
 end
 
-function (+)(v1::ProductRepr, v2::ProductRepr)
+function Base.:+(v1::ProductRepr, v2::ProductRepr)
     return ProductRepr(map(+, submanifold_components(v1), submanifold_components(v2))...)
 end
 
-function (-)(v1::ProductRepr, v2::ProductRepr)
+function Base.:-(v1::ProductRepr, v2::ProductRepr)
     return ProductRepr(map(-, submanifold_components(v1), submanifold_components(v2))...)
 end
-(-)(v::ProductRepr) = ProductRepr(map(-, submanifold_components(v)))
+Base.:-(v::ProductRepr) = ProductRepr(map(-, submanifold_components(v)))
 
-(*)(a::Number, v::ProductRepr) = ProductRepr(map(t -> a * t, submanifold_components(v)))
+Base.:*(a::Number, v::ProductRepr) = ProductRepr(map(t -> a * t, submanifold_components(v)))
 
 function Base.convert(::Type{TPR}, x::ProductRepr) where {TPR<:ProductRepr}
     return ProductRepr(map(
@@ -368,7 +368,7 @@ function Base.convert(::Type{TPR}, x::ProductRepr) where {TPR<:ProductRepr}
     ))
 end
 
-function show(io::IO, ::MIME"text/plain", x::ProductRepr)
+function Base.show(io::IO, ::MIME"text/plain", x::ProductRepr)
     _show_product_repr(io, x; name = "ProductRepr")
 end
 

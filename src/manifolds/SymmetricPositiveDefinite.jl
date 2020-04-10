@@ -142,7 +142,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 """
 mean(::SymmetricPositiveDefinite, ::Any)
 
-function mean!(
+function Statistics.mean!(
     M::SymmetricPositiveDefinite,
     p,
     x::AbstractVector,
@@ -161,7 +161,7 @@ symmetric positive definite matrix on $\mathcal M = \mathcal P(n)$.
 """
 @generated representation_size(::SymmetricPositiveDefinite{N}) where {N} = (N, N)
 
-function show(io::IO, ::SymmetricPositiveDefinite{N}) where {N}
+function Base.show(io::IO, ::SymmetricPositiveDefinite{N}) where {N}
     print(io, "SymmetricPositiveDefinite($(N))")
 end
 

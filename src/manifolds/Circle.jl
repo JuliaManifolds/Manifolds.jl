@@ -112,8 +112,8 @@ For the complex-valued case, the same formula as for the [`Sphere`](@ref) $𝕊^
 complex plane.
 """
 exp(::Circle, ::Any...)
-exp(::Circle{ℝ}, p::Real, X::Real) = sym_rem(p + X)
-function exp(M::Circle{ℂ}, x::Number, v::Number)
+Base.exp(::Circle{ℝ}, p::Real, X::Real) = sym_rem(p + X)
+function Base.exp(M::Circle{ℂ}, x::Number, v::Number)
     θ = norm(M, x, v)
     return cos(θ) * x + usinc(θ) * v
 end
@@ -282,8 +282,8 @@ For the complex-valued case, the same formula as for the [`Sphere`](@ref) $𝕊^
 complex plane.
 """
 log(::Circle, ::Any...)
-log(::Circle{ℝ}, p::Real, q::Real) = sym_rem(q - p)
-function log(M::Circle{ℂ}, p::Number, q::Number)
+Base.log(::Circle{ℝ}, p::Real, q::Real) = sym_rem(q - p)
+function Base.log(M::Circle{ℂ}, p::Number, q::Number)
     cosθ = complex_dot(p, q)
     if cosθ ≈ -1  # appr. opposing points, return deterministic choice from set-valued log
         X = real(p) ≈ 1 ? 1im : 1 + 0im
@@ -327,10 +327,10 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` of point
 which is computed with wrapped mean, i.e. the remainder of the mean modulo 2π.
 """
 mean(::Circle, ::Any)
-mean(::Circle, x::Array{<:Real}; kwargs...) = sym_rem(sum(x))
-mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...) = sym_rem(sum(w .* x))
+Statistics.mean(::Circle, x::Array{<:Real}; kwargs...) = sym_rem(sum(x))
+Statistics.mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...) = sym_rem(sum(w .* x))
 
-@inline norm(::Circle, p, X) = sum(abs, X)
+@inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)
 
 number_of_coordinates(::Circle, ::AbstractBasis) = 1
 
@@ -374,7 +374,7 @@ sharp(M::Circle, p::Number, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
 
 sharp!(M::Circle, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
-show(io::IO, ::Circle{𝔽}) where {𝔽} = print(io, "Circle($(𝔽))")
+Base.show(io::IO, ::Circle{𝔽}) where {𝔽} = print(io, "Circle($(𝔽))")
 
 @doc raw"""
     sym_rem(x,[T=π])

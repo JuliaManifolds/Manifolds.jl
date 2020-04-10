@@ -24,7 +24,7 @@ function TranslationAction(
     return TranslationAction{typeof(M),typeof(Rn),TAD}(M, Rn)
 end
 
-function show(io::IO, A::TranslationAction)
+function Base.show(io::IO, A::TranslationAction)
     print(io, "TranslationAction($(A.manifold), $(A.Rn), $(direction(A)))")
 end
 

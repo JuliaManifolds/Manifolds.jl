@@ -19,9 +19,9 @@ default_metric_dispatch(::SpecialOrthogonal, ::EuclideanMetric) = Val(true)
 
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
 
-show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
+Base.show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
 
-inv(::SpecialOrthogonal, p) = transpose(p)
+Base.inv(::SpecialOrthogonal, p) = transpose(p)
 
 inverse_translate(G::SpecialOrthogonal, p, q, ::LeftAction) = inv(G, p) * q
 inverse_translate(G::SpecialOrthogonal, p, q, ::RightAction) = q * inv(G, p)

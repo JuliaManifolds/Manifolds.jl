@@ -39,7 +39,7 @@ function SpecialEuclidean(n)
     return SemidirectProductGroup(Tn, SOn, A)
 end
 
-show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
+Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
 
 Base.@propagate_inbounds function submanifold_component(
     ::SpecialEuclidean{n},

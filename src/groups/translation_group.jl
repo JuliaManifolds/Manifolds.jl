@@ -26,6 +26,6 @@ function default_metric_dispatch(
     return Val(true)
 end
 
-function show(io::IO, ::TranslationGroup{N,𝔽}) where {N,𝔽}
+function Base.show(io::IO, ::TranslationGroup{N,𝔽}) where {N,𝔽}
     print(io, "TranslationGroup($(join(N.parameters, ", ")); field = $(𝔽))")
 end

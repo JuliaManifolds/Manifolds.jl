@@ -14,7 +14,7 @@ function GroupOperationAction(
     return GroupOperationAction{typeof(G),TAD}(G)
 end
 
-function show(io::IO, A::GroupOperationAction)
+function Base.show(io::IO, A::GroupOperationAction)
     print(io, "GroupOperationAction($(A.group), $(direction(A)))")
 end
 

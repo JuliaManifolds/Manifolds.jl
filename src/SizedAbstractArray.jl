@@ -76,35 +76,35 @@ end
 end
 
 # Overide some problematic default behaviour
-@inline function convert(::Type{SA}, sa::SizedAbstractArray) where {SA<:SizedAbstractArray}
+@inline function Base.convert(::Type{SA}, sa::SizedAbstractArray) where {SA<:SizedAbstractArray}
     return SA(sa.data)
 end
-@inline convert(::Type{SA}, sa::SA) where {SA<:SizedAbstractArray} = sa
+@inline Base.convert(::Type{SA}, sa::SA) where {SA<:SizedAbstractArray} = sa
 
 # Back to Array (unfortunately need both convert and construct to overide other methods)
-@inline function Array(sa::SizedAbstractArray{S}) where {S}
+@inline function Base.Array(sa::SizedAbstractArray{S}) where {S}
     return Array(reshape(sa.data, size_to_tuple(S)))
 end
-@inline function Array{T}(sa::SizedAbstractArray{S,T}) where {T,S}
+@inline function Base.Array{T}(sa::SizedAbstractArray{S,T}) where {T,S}
     return Array(reshape(sa.data, size_to_tuple(S)))
 end
-@inline function Array{T,N}(sa::SizedAbstractArray{S,T,N}) where {T,S,N}
-    return Array(reshape(sa.data, size_to_tuple(S)))
-end
-
-@inline function convert(::Type{Array}, sa::SizedAbstractArray{S}) where {S}
-    return Array(reshape(sa.data, size_to_tuple(S)))
-end
-@inline function convert(::Type{Array{T}}, sa::SizedAbstractArray{S,T}) where {T,S}
-    return Array(reshape(sa.data, size_to_tuple(S)))
-end
-@inline function convert(::Type{Array{T,N}}, sa::SizedAbstractArray{S,T,N}) where {T,S,N}
+@inline function Base.Array{T,N}(sa::SizedAbstractArray{S,T,N}) where {T,S,N}
     return Array(reshape(sa.data, size_to_tuple(S)))
 end
 
-Base.@propagate_inbounds getindex(a::SizedAbstractArray, i::Int) = getindex(a.data, i)
+@inline function Base.convert(::Type{Array}, sa::SizedAbstractArray{S}) where {S}
+    return Array(reshape(sa.data, size_to_tuple(S)))
+end
+@inline function Base.convert(::Type{Array{T}}, sa::SizedAbstractArray{S,T}) where {T,S}
+    return Array(reshape(sa.data, size_to_tuple(S)))
+end
+@inline function Base.convert(::Type{Array{T,N}}, sa::SizedAbstractArray{S,T,N}) where {T,S,N}
+    return Array(reshape(sa.data, size_to_tuple(S)))
+end
 
-Base.@propagate_inbounds function setindex!(a::SizedAbstractArray, v, i::Int)
+Base.@propagate_inbounds Base.getindex(a::SizedAbstractArray, i::Int) = getindex(a.data, i)
+
+Base.@propagate_inbounds function Base.setindex!(a::SizedAbstractArray, v, i::Int)
     return setindex!(a.data, v, i)
 end
 
@@ -130,7 +130,7 @@ end
 
 Base.dataids(sa::SizedAbstractArray) = Base.dataids(sa.data)
 
-function promote_rule(
+function Base.promote_rule(
     ::Type{<:SizedAbstractArray{S,T,N,M,TDataA}},
     ::Type{<:SizedAbstractArray{S,U,N,M,TDataB}},
 ) where {S,T,U,N,M,TDataA,TDataB}
@@ -138,12 +138,12 @@ function promote_rule(
     SizedAbstractArray{S,TU,N,M,promote_type(TDataA, TDataB)::Type{<:AbstractArray{TU}}}
 end
 
-@inline copy(a::SizedAbstractArray) = typeof(a)(copy(a.data))
+@inline Base.copy(a::SizedAbstractArray) = typeof(a)(copy(a.data))
 
-function similar(::Type{<:SizedAbstractArray{S,T,N,M}}, ::Type{T2}) where {S,T,N,M,T2}
+function Base.similar(::Type{<:SizedAbstractArray{S,T,N,M}}, ::Type{T2}) where {S,T,N,M,T2}
     return SizedAbstractArray{S,T2,N,M}(undef)
 end
-function similar(::Type{SA}, ::Type{T}, s::Size{S}) where {SA<:SizedAbstractArray,T,S}
+function Base.similar(::Type{SA}, ::Type{T}, s::Size{S}) where {SA<:SizedAbstractArray,T,S}
     return sizedabstractarray_similar_type(T, s, StaticArrays.length_val(s))(undef)
 end
 

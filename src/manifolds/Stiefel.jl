@@ -198,10 +198,10 @@ function inverse_retract!(::Stiefel{n,k}, X, p, q, ::QRInverseRetraction) where 
     return copyto!(X, q * R - p)
 end
 
-function isapprox(M::Stiefel, p, X, Y; kwargs...)
+function Base.isapprox(M::Stiefel, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
 end
-isapprox(M::Stiefel, p, q; kwargs...) = isapprox(norm(p - q), 0; kwargs...)
+Base.isapprox(M::Stiefel, p, q; kwargs...) = isapprox(norm(p - q), 0; kwargs...)
 
 @doc raw"""
     manifold_dimension(M::Stiefel)
@@ -312,4 +312,4 @@ i.e. `(n,k)`, which is the matrix dimensions.
 """
 @generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
 
-show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")
+Base.show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")

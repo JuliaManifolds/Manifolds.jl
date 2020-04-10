@@ -8,7 +8,7 @@ const CircleGroup = GroupManifold{ℂ,Circle{ℂ},MultiplicationOperation}
 
 CircleGroup() = GroupManifold(Circle{ℂ}(), MultiplicationOperation())
 
-show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
+Base.show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
 
 invariant_metric_dispatch(::CircleGroup, ::ActionDirection) = Val(true)
 
@@ -20,14 +20,14 @@ end
 
 compose!(G::CircleGroup, x, p, q) = copyto!(x, compose(G, p, q))
 
-identity(::CircleGroup, p::AbstractVector) = map(one, p)
-identity(G::GT, e::Identity{GT}) where {GT<:CircleGroup} = e
+Base.identity(::CircleGroup, p::AbstractVector) = map(one, p)
+Base.identity(G::GT, e::Identity{GT}) where {GT<:CircleGroup} = e
 
 identity!(::CircleGroup, q::AbstractVector, p) = copyto!(q, 1)
 identity!(::GT, q::AbstractVector, ::Identity{GT}) where {GT<:CircleGroup} = copyto!(q, 1)
 
-inv(G::CircleGroup, p::AbstractVector) = map(inv, repeated(G), p)
-inv(G::GT, e::Identity{GT}) where {GT<:CircleGroup} = e
+Base.inv(G::CircleGroup, p::AbstractVector) = map(inv, repeated(G), p)
+Base.inv(G::GT, e::Identity{GT}) where {GT<:CircleGroup} = e
 
 function inverse_translate(
     ::CircleGroup,

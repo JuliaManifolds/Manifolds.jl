@@ -246,6 +246,6 @@ project(::SkewSymmetricMatrices, ::Any, ::Any)
 
 project!(M::SkewSymmetricMatrices, Y, p, X) = (Y .= (X .- X') ./ 2)
 
-function show(io::IO, ::SkewSymmetricMatrices{n,F}) where {n,F}
+function Base.show(io::IO, ::SkewSymmetricMatrices{n,F}) where {n,F}
     print(io, "SkewSymmetricMatrices($(n), $(F))")
 end

@@ -195,7 +195,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` on the
 """
 mean(::Hyperbolic, ::Any...)
 
-function mean!(M::Hyperbolic, p, x::AbstractVector, w::AbstractVector; kwargs...)
+function Statistics.mean!(M::Hyperbolic, p, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(M, p, x, w, CyclicProximalPointEstimation(); kwargs...)
 end
 
@@ -216,7 +216,7 @@ project(::Hyperbolic, ::Any, ::Any)
 
 project!(M::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)
 
-show(io::IO, ::Hyperbolic{N}) where {N} = print(io, "Hyperbolic($(N))")
+Base.show(io::IO, ::Hyperbolic{N}) where {N} = print(io, "Hyperbolic($(N))")
 
 @doc raw"""
     vector_transport_to(M::Hyperbolic, p, X, q, ::ParallelTransport)

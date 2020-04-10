@@ -4,7 +4,7 @@ array_point(p) = ValidationMPoint(p)
 array_point(p::ValidationMPoint) = p
 array_point(e::Identity) = Identity(e.group, array_point(e.p))
 
-function inv(M::ValidationManifold, p; kwargs...)
+function Base.inv(M::ValidationManifold, p; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
     q = array_point(inv(M.manifold, array_value(p)))
     is_manifold_point(M, q, true; kwargs...)
@@ -18,7 +18,7 @@ function inv!(M::ValidationManifold, q, p; kwargs...)
     return q
 end
 
-function identity(M::ValidationManifold, p; kwargs...)
+function Base.identity(M::ValidationManifold, p; kwargs...)
     is_manifold_point(M, p, true; kwargs...)
     q = array_point(identity(M.manifold, array_value(p)))
     is_manifold_point(M, q, true; kwargs...)

@@ -220,10 +220,10 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 inner(M::GeneralizedGrassmann{n,k}, p, X, Y) where {n,k} = dot(X, M.B * Y)
 
-function isapprox(M::GeneralizedGrassmann, p, X, Y; kwargs...)
+function Base.isapprox(M::GeneralizedGrassmann, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
 end
-function isapprox(M::GeneralizedGrassmann, p, q; kwargs...)
+function Base.isapprox(M::GeneralizedGrassmann, p, q; kwargs...)
     return isapprox(distance(M, p, q), 0.0; kwargs...)
 end
 
@@ -287,7 +287,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 """
 mean(::GeneralizedGrassmann{n,k} where {n,k}, ::Any...)
 
-function mean!(
+function Statistics.mean!(
     M::GeneralizedGrassmann{n,k},
     p,
     x::AbstractVector,
@@ -361,7 +361,7 @@ function retract!(M::GeneralizedGrassmann, q, p, X, ::ProjectionRetraction)
     return q
 end
 
-function show(io::IO, M::GeneralizedGrassmann{n,k,𝔽}) where {n,k,𝔽}
+function Base.show(io::IO, M::GeneralizedGrassmann{n,k,𝔽}) where {n,k,𝔽}
     print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
 end
 

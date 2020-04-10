@@ -212,7 +212,7 @@ function retract!(M::GeneralizedStiefel, q, p, X, ::ProjectionRetraction)
     return q
 end
 
-function show(io::IO, M::GeneralizedStiefel{n,k,𝔽}) where {n,k,𝔽}
+function Base.show(io::IO, M::GeneralizedStiefel{n,k,𝔽}) where {n,k,𝔽}
     print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽))")
 end
 

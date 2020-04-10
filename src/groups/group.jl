@@ -50,7 +50,7 @@ struct GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <:
     op::O
 end
 
-show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
+Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
 const GROUP_MANIFOLD_BASIS_DISAMBIGUATION =
     [AbstractDecoratorManifold, ValidationManifold, VectorBundle]
@@ -138,24 +138,24 @@ function Identity(M::Manifold, p)
     error("Identity not implemented for manifold $(M) and point $(p).")
 end
 
-function ==(e1::Identity, e2::Identity)
+function Base.:(==)(e1::Identity, e2::Identity)
     return e1.p == e2.p && e1.group == e2.group
 end
 
 make_identity(M::Manifold, p) = Identity(M, identity(M, p))
 
-show(io::IO, e::Identity) = print(io, "Identity($(e.group), $(e.p))")
+Base.show(io::IO, e::Identity) = print(io, "Identity($(e.group), $(e.p))")
 
 # To ensure allocate_result_type works
 number_eltype(e::Identity) = Bool
 
-copyto!(e::TE, ::TE) where {TE<:Identity} = e
-copyto!(p, ::TE) where {TE<:Identity} = copyto!(p, e.p)
-copyto!(p::AbstractArray, e::TE) where {TE<:Identity} = copyto!(p, e.p)
+Base.copyto!(e::TE, ::TE) where {TE<:Identity} = e
+Base.copyto!(p, ::TE) where {TE<:Identity} = copyto!(p, e.p)
+Base.copyto!(p::AbstractArray, e::TE) where {TE<:Identity} = copyto!(p, e.p)
 
-isapprox(p, e::Identity; kwargs...) = isapprox(e::Identity, p; kwargs...)
-isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
-isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
+Base.isapprox(p, e::Identity; kwargs...) = isapprox(e::Identity, p; kwargs...)
+Base.isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
+Base.isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
 function allocate_result(
     M::Manifold,
@@ -349,7 +349,7 @@ $p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}$, where $e$ is the [`identi
 element of $\mathcal{G}$.
 """
 inv(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function :intransparent function inv(G::AbstractGroupManifold, p)
+@decorator_transparent_function :intransparent function Base.inv(G::AbstractGroupManifold, p)
     q = allocate_result(G, inv, p)
     return inv!(G, q, p)
 end
@@ -366,8 +366,8 @@ $p \circ e = e \circ p = p$.
 The returned element is of a similar type to `p`.
 """
 identity(::AbstractGroupManifold, ::Any)
-@decorator_transparent_signature identity(G::AbstractDecoratorManifold, p)
-function identity(G::AbstractGroupManifold, p)
+@decorator_transparent_signature Base.identity(G::AbstractDecoratorManifold, p)
+function Base.identity(G::AbstractGroupManifold, p)
     y = allocate_result(G, identity, p)
     return identity!(G, y, p)
 end
@@ -377,13 +377,13 @@ function decorator_transparent_dispatch(::typeof(identity!), ::AbstractGroupMani
     return Val(:intransparent)
 end
 
-function isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:AbstractGroupManifold}
+function Base.isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:AbstractGroupManifold}
     return isapprox(G, e.p, p; kwargs...)
 end
-function isapprox(G::GT, p, e::Identity{GT}; kwargs...) where {GT<:AbstractGroupManifold}
+function Base.isapprox(G::GT, p, e::Identity{GT}; kwargs...) where {GT<:AbstractGroupManifold}
     return isapprox(G, e, p; kwargs...)
 end
-isapprox(::GT, ::E, ::E; kwargs...) where {GT<:AbstractGroupManifold,E<:Identity{GT}} = true
+Base.isapprox(::GT, ::E, ::E; kwargs...) where {GT<:AbstractGroupManifold,E<:Identity{GT}} = true
 
 function decorator_transparent_dispatch(
     ::typeof(isapprox),
@@ -893,27 +893,27 @@ struct AdditionOperation <: AbstractGroupOperation end
 
 const AdditionGroup = AbstractGroupManifold{𝔽,AdditionOperation} where {𝔽}
 
-+(e::Identity{G}) where {G<:AdditionGroup} = e
-+(::Identity{G}, p) where {G<:AdditionGroup} = p
-+(p, ::Identity{G}) where {G<:AdditionGroup} = p
-+(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
+Base.:+(e::Identity{G}) where {G<:AdditionGroup} = e
+Base.:+(::Identity{G}, p) where {G<:AdditionGroup} = p
+Base.:+(p, ::Identity{G}) where {G<:AdditionGroup} = p
+Base.:+(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
--(e::Identity{G}) where {G<:AdditionGroup} = e
--(::Identity{G}, p) where {G<:AdditionGroup} = -p
--(p, ::Identity{G}) where {G<:AdditionGroup} = p
--(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
+Base.:-(e::Identity{G}) where {G<:AdditionGroup} = e
+Base.:-(::Identity{G}, p) where {G<:AdditionGroup} = -p
+Base.:-(p, ::Identity{G}) where {G<:AdditionGroup} = p
+Base.:-(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
-*(e::Identity{G}, p) where {G<:AdditionGroup} = e
-*(p, e::Identity{G}) where {G<:AdditionGroup} = e
-*(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
+Base.:*(e::Identity{G}, p) where {G<:AdditionGroup} = e
+Base.:*(p, e::Identity{G}) where {G<:AdditionGroup} = e
+Base.:*(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
-zero(e::Identity{G}) where {G<:AdditionGroup} = e
+Base.zero(e::Identity{G}) where {G<:AdditionGroup} = e
 
-identity(::AdditionGroup, p) = zero(p)
+Base.identity(::AdditionGroup, p) = zero(p)
 
 identity!(::AdditionGroup, q, p) = fill!(q, 0)
 
-inv(::AdditionGroup, p) = -p
+Base.inv(::AdditionGroup, p) = -p
 
 inv!(::AdditionGroup, q, p) = copyto!(q, -p)
 
@@ -957,25 +957,25 @@ struct MultiplicationOperation <: AbstractGroupOperation end
 
 const MultiplicationGroup = AbstractGroupManifold{𝔽,MultiplicationOperation} where {𝔽}
 
-*(e::Identity{G}) where {G<:MultiplicationGroup} = e
-*(::Identity{G}, p) where {G<:MultiplicationGroup} = p
-*(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
-*(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
-*(::Identity{<:MultiplicationGroup}, e::Identity{<:AdditionGroup}) = e
+Base.:*(e::Identity{G}) where {G<:MultiplicationGroup} = e
+Base.:*(::Identity{G}, p) where {G<:MultiplicationGroup} = p
+Base.:*(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
+Base.:*(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
+Base.:*(::Identity{<:MultiplicationGroup}, e::Identity{<:AdditionGroup}) = e
 
-/(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
-/(::Identity{G}, p) where {G<:MultiplicationGroup} = inv(p)
-/(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
+Base.:/(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
+Base.:/(::Identity{G}, p) where {G<:MultiplicationGroup} = inv(p)
+Base.:/(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
 
-\(p, ::Identity{G}) where {G<:MultiplicationGroup} = inv(p)
-\(::Identity{G}, p) where {G<:MultiplicationGroup} = p
-\(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
+Base.:\(p, ::Identity{G}) where {G<:MultiplicationGroup} = inv(p)
+Base.:\(::Identity{G}, p) where {G<:MultiplicationGroup} = p
+Base.:\(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
 
-inv(e::Identity{G}) where {G<:MultiplicationGroup} = e
+Base.inv(e::Identity{G}) where {G<:MultiplicationGroup} = e
 
-one(e::Identity{G}) where {G<:MultiplicationGroup} = e
+Base.one(e::Identity{G}) where {G<:MultiplicationGroup} = e
 
-transpose(e::Identity{G}) where {G<:MultiplicationGroup} = e
+Base.transpose(e::Identity{G}) where {G<:MultiplicationGroup} = e
 
 LinearAlgebra.det(::Identity{<:MultiplicationGroup}) = 1
 
@@ -985,7 +985,7 @@ function LinearAlgebra.mul!(q, e::E, ::E) where {G<:MultiplicationGroup,E<:Ident
     return identity!(e.group, q, e)
 end
 
-identity(::MultiplicationGroup, p) = one(p)
+Base.identity(::MultiplicationGroup, p) = one(p)
 
 function identity!(G::GT, q, p) where {GT<:MultiplicationGroup}
     isa(p, Identity{GT}) || return copyto!(q, one(p))
@@ -993,7 +993,7 @@ function identity!(G::GT, q, p) where {GT<:MultiplicationGroup}
 end
 identity!(::MultiplicationGroup, q::AbstractMatrix, p) = copyto!(q, I)
 
-inv(::MultiplicationGroup, p) = inv(p)
+Base.inv(::MultiplicationGroup, p) = inv(p)
 
 inv!(G::MultiplicationGroup, q, p) = copyto!(q, inv(G, p))
 
