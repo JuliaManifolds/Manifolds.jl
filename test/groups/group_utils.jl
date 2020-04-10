@@ -406,6 +406,7 @@ function test_group(
             end
         end
     end
+    return nothing
 end
 
 """
@@ -636,4 +637,5 @@ function test_action(
             @test isapprox(G, act_opt, act_opt2; atol = atol)
         end
     end
+    return nothing
 end

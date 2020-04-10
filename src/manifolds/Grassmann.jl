@@ -76,6 +76,7 @@ function check_manifold_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,�
             "The point $(p) does not lie on $(M), because x'x is not the unit matrix.",
         )
     end
+    return nothing
 end
 
 @doc raw"""
@@ -119,6 +120,7 @@ function check_tangent_vector(
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since p'X + X'p is not the zero matrix.",
         )
     end
+    return nothing
 end
 
 decorated_manifold(M::Grassmann{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
@@ -387,7 +389,7 @@ function retract!(::Grassmann{N,K}, q, p, X, ::QRRetraction) where {N,K}
 end
 
 function Base.show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽}
-    print(io, "Grassmann($(n), $(k), $(𝔽))")
+    return print(io, "Grassmann($(n), $(k), $(𝔽))")
 end
 
 @doc raw"""

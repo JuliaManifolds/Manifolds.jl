@@ -75,6 +75,7 @@ function check_manifold_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
             "The matrix $(p) does not lie on $(M), since its dimensions ($(size(p))) are wrong (expected: $(representation_size(M))).",
         )
     end
+    return nothing
 end
 
 function check_tangent_vector(
@@ -106,6 +107,7 @@ function check_tangent_vector(
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since its dimensions $(size(X)) are wrong  (expected: $(representation_size(M))).",
         )
     end
+    return nothing
 end
 
 function det_local_metric(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
@@ -403,7 +405,7 @@ sharp(::Euclidean, ::Any...)
 sharp!(M::Euclidean, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 function Base.show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
-    print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")
+    return print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")
 end
 
 """

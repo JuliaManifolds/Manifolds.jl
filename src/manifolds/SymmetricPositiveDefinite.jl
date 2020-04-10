@@ -162,7 +162,7 @@ symmetric positive definite matrix on $\mathcal M = \mathcal P(n)$.
 @generated representation_size(::SymmetricPositiveDefinite{N}) where {N} = (N, N)
 
 function Base.show(io::IO, ::SymmetricPositiveDefinite{N}) where {N}
-    print(io, "SymmetricPositiveDefinite($(N))")
+    return print(io, "SymmetricPositiveDefinite($(N))")
 end
 
 @doc raw"""

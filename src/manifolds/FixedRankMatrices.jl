@@ -196,6 +196,7 @@ function check_tangent_vector(
             "The tangent vector $(X) is not a tangent vector to $(p) on $(M) since v.V'x.V is not zero.",
         )
     end
+    return nothing
 end
 
 @doc raw"""
@@ -300,7 +301,7 @@ function retract!(
 end
 
 function Base.show(io::IO, ::FixedRankMatrices{M,N,K,𝔽}) where {M,N,K,𝔽}
-    print(io, "FixedRankMatrices($(M), $(N), $(K), $(𝔽))")
+    return print(io, "FixedRankMatrices($(M), $(N), $(K), $(𝔽))")
 end
 function Base.show(io::IO, mime::MIME"text/plain", p::SVDMPoint)
     pre = " "
@@ -316,7 +317,7 @@ function Base.show(io::IO, mime::MIME"text/plain", p::SVDMPoint)
     println(io, "Vt factor:")
     sv = sprint(show, "text/plain", p.Vt; context = io, sizehint = 0)
     sv = replace(sv, '\n' => "\n$(pre)")
-    print(io, pre, sv)
+    return print(io, pre, sv)
 end
 function Base.show(io::IO, mime::MIME"text/plain", X::UMVTVector)
     pre = " "
@@ -332,7 +333,7 @@ function Base.show(io::IO, mime::MIME"text/plain", X::UMVTVector)
     println(io, "Vt factor:")
     sv = sprint(show, "text/plain", X.Vt; context = io, sizehint = 0)
     sv = replace(sv, '\n' => "\n$(pre)")
-    print(io, pre, sv)
+    return print(io, pre, sv)
 end
 
 allocate(p::SVDMPoint) = SVDMPoint(allocate(p.U), allocate(p.S), allocate(p.Vt))

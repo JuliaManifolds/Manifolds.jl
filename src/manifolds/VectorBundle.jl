@@ -264,7 +264,7 @@ function flat(M::Manifold, p, X::FVector)
 end
 
 function flat!(M::Manifold, ξ::FVector, p, X::FVector)
-    error(
+    return error(
         "flat! not implemented for vector bundle fibers space " *
         "of type $(typeof(M)), vector of type $(typeof(ξ)), point of " *
         "type $(typeof(p)) and vector of type $(typeof(X)).",
@@ -353,7 +353,7 @@ for BT in [
     )
 end
 function get_coordinates!(M::VectorBundle, Y, p, X, B::CachedBasis)
-    error("get_coordinates! called on $M with an incorrect CachedBasis. Expected a CachedBasis with VectorBundleBasisData, given $B")
+    return error("get_coordinates! called on $M with an incorrect CachedBasis. Expected a CachedBasis with VectorBundleBasisData, given $B")
 end
 
 function get_coordinates!(
@@ -438,7 +438,7 @@ Inner product of vectors `X` and `Y` from the vector space of type `B.fiber`
 at point `p` from manifold `B.manifold`.
 """
 function inner(B::VectorBundleFibers, p, X, Y)
-    error(
+    return error(
         "inner not defined for vector space family of type $(typeof(B)), " *
         "point of type $(typeof(p)) and " *
         "vectors of types $(typeof(X)) and $(typeof(Y)).",
@@ -604,7 +604,7 @@ function project!(B::VectorBundleFibers{<:TangentSpaceType}, Y, p, X)
     return project!(B.manifold, Y, p, X)
 end
 function project!(B::VectorBundleFibers, Y, p, X)
-    error("project! not implemented for vector space family of type $(typeof(B)), output vector of type $(typeof(Y)) and input vector at point $(typeof(p)) with type of w $(typeof(X)).")
+    return error("project! not implemented for vector space family of type $(typeof(B)), output vector of type $(typeof(Y)) and input vector at point $(typeof(p)) with type of w $(typeof(X)).")
 end
 
 Base.@propagate_inbounds Base.setindex!(x::FVector, val, i) = setindex!(x.data, val, i)
@@ -634,7 +634,7 @@ function sharp(M::Manifold, p, ξ::FVector)
 end
 
 function sharp!(M::Manifold, X::FVector, p, ξ::FVector)
-    error(
+    return error(
         "sharp! not implemented for vector bundle fibers space " *
         "of type $(typeof(M)), vector of type $(typeof(X)), point of " *
         "type $(typeof(p)) and vector of type $(typeof(ξ)).",
@@ -651,10 +651,10 @@ end
 Base.show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
 Base.show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")
 function Base.show(io::IO, tpt::TensorProductType)
-    print(io, "TensorProductType(", join(tpt.spaces, ", "), ")")
+    return print(io, "TensorProductType(", join(tpt.spaces, ", "), ")")
 end
 function Base.show(io::IO, fiber::VectorBundleFibers)
-    print(io, "VectorBundleFibers($(fiber.fiber), $(fiber.manifold))")
+    return print(io, "VectorBundleFibers($(fiber.fiber), $(fiber.manifold))")
 end
 function Base.show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
     summary(io, vs)
@@ -666,7 +666,7 @@ function Base.show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
     println(io, "Base point:")
     sp = sprint(show, "text/plain", vs.point; context = io, sizehint = 0)
     sp = replace(sp, '\n' => "\n$(pre)")
-    print(io, pre, sp)
+    return print(io, pre, sp)
 end
 Base.show(io::IO, vb::VectorBundle) = print(io, "VectorBundle($(vb.type), $(vb.manifold))")
 Base.show(io::IO, vb::TangentBundle) = print(io, "TangentBundle($(vb.manifold))")
@@ -722,7 +722,7 @@ submanifold_components(x::FVector) = submanifold_components(x.data)
 Dimension of the vector space of type `B`.
 """
 function vector_space_dimension(B::VectorBundleFibers)
-    error("vector_space_dimension not implemented for vector space family $(typeof(B)).")
+    return error("vector_space_dimension not implemented for vector space family $(typeof(B)).")
 end
 function vector_space_dimension(B::VectorBundleFibers{<:TCoTSpaceType})
     return manifold_dimension(B.manifold)
@@ -753,7 +753,7 @@ Save the zero vector from the vector space of type `B.fiber` at point `p`
 from manifold `B.manifold` to `X`.
 """
 function zero_vector!(B::VectorBundleFibers, X, p)
-    error("zero_vector! not implemented for vector space family of type $(typeof(B)).")
+    return error("zero_vector! not implemented for vector space family of type $(typeof(B)).")
 end
 function zero_vector!(B::VectorBundleFibers{<:TangentSpaceType}, X, p)
     return zero_tangent_vector!(B.manifold, X, p)

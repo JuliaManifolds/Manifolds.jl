@@ -10,7 +10,7 @@ struct SemidirectProductOperation{A<:AbstractGroupAction} <: AbstractGroupOperat
 end
 
 function Base.show(io::IO, op::SemidirectProductOperation)
-    print(io, "SemidirectProductOperation($(op.action))")
+    return print(io, "SemidirectProductOperation($(op.action))")
 end
 
 const SemidirectProductGroup{𝔽,N,H,A} =
@@ -50,7 +50,7 @@ function Base.show(io::IO, G::SemidirectProductGroup)
     M = base_manifold(G)
     N, H = M.manifolds
     A = G.op.action
-    print(io, "SemidirectProductGroup($(N), $(H), $(A))")
+    return print(io, "SemidirectProductGroup($(N), $(H), $(A))")
 end
 
 submanifold(G::SemidirectProductGroup, i) = submanifold(base_manifold(G), i)

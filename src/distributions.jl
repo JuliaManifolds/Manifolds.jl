@@ -60,7 +60,7 @@ abstract type MPointDistribution{TM<:Manifold} <:
 Get the object of type `FVectorSupport` for the distribution `d`.
 """
 function Distributions.support(::T) where {T<:FVectorDistribution}
-    error("support not implemented for type $T")
+    return error("support not implemented for type $T")
 end
 
 @decorator_transparent_signature normal_tvector_distribution(

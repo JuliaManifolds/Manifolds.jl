@@ -78,7 +78,7 @@ function PowerManifold(
     ::TPR,
     size::Int...,
 ) where {𝔽,TPR<:AbstractPowerRepresentation}
-    PowerManifold{𝔽,typeof(M),Tuple{size...},TPR}(M)
+    return PowerManifold{𝔽,typeof(M),Tuple{size...},TPR}(M)
 end
 
 @doc raw"""
@@ -758,15 +758,19 @@ function Base.show(
         show(io, mime, _access_nested(B.data.bases, i))
         println(io)
     end
+    return nothing
 end
 function Base.show(
     io::IO,
     M::PowerManifold{𝔽,TM,TSize,ArrayPowerRepresentation},
 ) where {𝔽,TM,TSize}
-    print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
+    return print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
 end
 function Base.show(io::IO, M::PowerManifold{𝔽,TM,TSize,TPR}) where {𝔽,TM,TSize,TPR}
-    print(io, "PowerManifold($(M.manifold), $(TPR()), $(join(TSize.parameters, ", ")))")
+    return print(
+        io,
+        "PowerManifold($(M.manifold), $(TPR()), $(join(TSize.parameters, ", ")))",
+    )
 end
 
 Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)

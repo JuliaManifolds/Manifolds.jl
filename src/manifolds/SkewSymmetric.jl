@@ -25,7 +25,7 @@ struct SkewSymmetricMatrices{n,𝔽} <:
        AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
 
 function SkewSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
-    SkewSymmetricMatrices{n,field}()
+    return SkewSymmetricMatrices{n,field}()
 end
 
 function allocation_promotion_function(
@@ -247,5 +247,5 @@ project(::SkewSymmetricMatrices, ::Any, ::Any)
 project!(M::SkewSymmetricMatrices, Y, p, X) = (Y .= (X .- X') ./ 2)
 
 function Base.show(io::IO, ::SkewSymmetricMatrices{n,F}) where {n,F}
-    print(io, "SkewSymmetricMatrices($(n), $(F))")
+    return print(io, "SkewSymmetricMatrices($(n), $(F))")
 end

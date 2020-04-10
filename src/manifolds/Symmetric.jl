@@ -24,7 +24,7 @@ Generate the manifold of $n × n$ symmetric matrices.
 struct SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
 
 function SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
-    SymmetricMatrices{n,field}()
+    return SymmetricMatrices{n,field}()
 end
 
 function allocation_promotion_function(
@@ -241,5 +241,5 @@ project(::SymmetricMatrices, ::Any, ::Any)
 project!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
 
 function Base.show(io::IO, ::SymmetricMatrices{n,F}) where {n,F}
-    print(io, "SymmetricMatrices($(n), $(F))")
+    return print(io, "SymmetricMatrices($(n), $(F))")
 end

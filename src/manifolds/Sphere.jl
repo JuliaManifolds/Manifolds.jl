@@ -407,7 +407,7 @@ end
 
 Base.show(io::IO, ::Sphere{n,𝔽}) where {n,𝔽} = print(io, "Sphere($(n); field = $(𝔽))")
 function Base.show(io::IO, ::ArraySphere{N,𝔽}) where {N,𝔽}
-    print(io, "ArraySphere($(join(N.parameters, ", ")); field = $(𝔽))")
+    return print(io, "ArraySphere($(join(N.parameters, ", ")); field = $(𝔽))")
 end
 
 """

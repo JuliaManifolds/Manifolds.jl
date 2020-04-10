@@ -60,9 +60,8 @@ function check_tangent_vector(M::Circle{ℝ}, p, X; check_base_point = true, kwa
     if check_base_point
         perr = check_manifold_point(M, p; kwargs...)
         return perr # if x is valid all v that are real numbers are valid
-    else
-        return nothing
     end
+    return nothing
 end
 function check_tangent_vector(M::Circle{ℂ}, p, X; check_base_point = true, kwargs...)
     if check_base_point

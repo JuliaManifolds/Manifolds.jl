@@ -39,12 +39,12 @@ function Base.show(io::IO, ::MIME"text/plain", G::ProductGroup)
         io,
         "ProductGroup with $(length(base_manifold(G).manifolds)) subgroup$(length(base_manifold(G).manifolds) == 1 ? "" : "s"):",
     )
-    _show_product_manifold_no_header(io, base_manifold(G))
+    return _show_product_manifold_no_header(io, base_manifold(G))
 end
 
 function Base.show(io::IO, G::ProductGroup)
     M = base_manifold(G)
-    print(io, "ProductGroup(", join(M.manifolds, ", "), ")")
+    return print(io, "ProductGroup(", join(M.manifolds, ", "), ")")
 end
 
 submanifold(G::ProductGroup, i) = submanifold(base_manifold(G), i)

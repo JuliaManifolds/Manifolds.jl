@@ -190,6 +190,7 @@ function __init__()
         using .OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
         include("ode.jl")
     end
+    return nothing
 end
 #
 export CoTVector, Manifold, MPoint, TVector, Manifold

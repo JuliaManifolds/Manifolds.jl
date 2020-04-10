@@ -68,6 +68,7 @@ function check_manifold_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) whe
             "The point $(p) does not lie on $(M), because x'Bx is not the unit matrix.",
         )
     end
+    return nothing
 end
 
 
@@ -107,6 +108,7 @@ function check_tangent_vector(
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since x'Bv + v'Bx is not the zero matrix.",
         )
     end
+    return nothing
 end
 
 decorated_manifold(M::GeneralizedStiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
@@ -213,7 +215,7 @@ function retract!(M::GeneralizedStiefel, q, p, X, ::ProjectionRetraction)
 end
 
 function Base.show(io::IO, M::GeneralizedStiefel{n,k,𝔽}) where {n,k,𝔽}
-    print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽))")
+    return print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽))")
 end
 
 

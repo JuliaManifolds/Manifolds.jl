@@ -23,7 +23,7 @@ function RotationAction(
 end
 
 function Base.show(io::IO, A::RotationAction)
-    print(io, "RotationAction($(A.manifold), $(A.SOn), $(direction(A)))")
+    return print(io, "RotationAction($(A.manifold), $(A.SOn), $(direction(A)))")
 end
 
 const RotationActionOnVector{N,F,TAD} = RotationAction{

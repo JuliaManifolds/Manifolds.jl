@@ -25,7 +25,7 @@ function TranslationAction(
 end
 
 function Base.show(io::IO, A::TranslationAction)
-    print(io, "TranslationAction($(A.manifold), $(A.Rn), $(direction(A)))")
+    return print(io, "TranslationAction($(A.manifold), $(A.Rn), $(direction(A)))")
 end
 
 base_group(A::TranslationAction) = A.Rn

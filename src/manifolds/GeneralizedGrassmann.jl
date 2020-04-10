@@ -80,6 +80,7 @@ function check_manifold_point(M::GeneralizedGrassmann{n,k,𝔽}, p; kwargs...) w
             "The point $(p) does not lie on $(M), because x'Bx is not the unit matrix.",
         )
     end
+    return nothing
 end
 
 @doc raw"""
@@ -123,6 +124,7 @@ function check_tangent_vector(
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since x'Bv + v'Bx is not the zero matrix.",
         )
     end
+    return nothing
 end
 
 function decorated_manifold(M::GeneralizedGrassmann{N,K,𝔽}) where {N,K,𝔽}
@@ -362,7 +364,7 @@ function retract!(M::GeneralizedGrassmann, q, p, X, ::ProjectionRetraction)
 end
 
 function Base.show(io::IO, M::GeneralizedGrassmann{n,k,𝔽}) where {n,k,𝔽}
-    print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
+    return print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
 end
 
 @doc doc"""

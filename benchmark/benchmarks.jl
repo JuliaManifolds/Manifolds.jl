@@ -72,6 +72,7 @@ function add_manifold(
         SUITE["manifolds"][name]["tangent vector distribution " * distr_name] =
             @benchmarkable rand($tvd)
     end
+    return nothing
 end
 
 # General manifold benchmarks
@@ -321,7 +322,7 @@ function add_manifold_benchmarks()
         end
 
     end
-
+    return nothing
 end
 
 add_manifold_benchmarks()

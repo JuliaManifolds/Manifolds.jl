@@ -547,7 +547,7 @@ for BT in PRODUCT_BASIS_LIST
     )
 end
 function get_vector!(M::ProductManifold, Y, p, X, B::CachedBasis)
-    error("get_vector! called on $M with an incorrect CachedBasis. Expected a CachedBasis with ProductBasisData, given $B")
+    return error("get_vector! called on $M with an incorrect CachedBasis. Expected a CachedBasis with ProductBasisData, given $B")
 end
 
 function get_vectors(
@@ -934,11 +934,11 @@ end
 function Base.show(io::IO, mime::MIME"text/plain", M::ProductManifold)
     n = length(M.manifolds)
     print(io, "ProductManifold with $(n) submanifold$(n == 1 ? "" : "s"):")
-    _show_product_manifold_no_header(io, M)
+    return _show_product_manifold_no_header(io, M)
 end
 
 function Base.show(io::IO, M::ProductManifold)
-    print(io, "ProductManifold(", join(M.manifolds, ", "), ")")
+    return print(io, "ProductManifold(", join(M.manifolds, ", "), ")")
 end
 
 function Base.show(

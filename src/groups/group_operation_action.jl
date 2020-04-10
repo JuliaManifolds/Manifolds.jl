@@ -15,7 +15,7 @@ function GroupOperationAction(
 end
 
 function Base.show(io::IO, A::GroupOperationAction)
-    print(io, "GroupOperationAction($(A.group), $(direction(A)))")
+    return print(io, "GroupOperationAction($(A.group), $(direction(A)))")
 end
 
 base_group(A::GroupOperationAction) = A.group

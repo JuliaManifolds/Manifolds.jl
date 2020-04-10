@@ -141,7 +141,13 @@ function Base.promote_rule(
     ::Type{<:SizedAbstractArray{S,U,N,M,TDataB}},
 ) where {S,T,U,N,M,TDataA,TDataB}
     TU = promote_type(T, U)
-    SizedAbstractArray{S,TU,N,M,promote_type(TDataA, TDataB)::Type{<:AbstractArray{TU}}}
+    return SizedAbstractArray{
+        S,
+        TU,
+        N,
+        M,
+        promote_type(TDataA, TDataB)::Type{<:AbstractArray{TU}},
+    }
 end
 
 @inline Base.copy(a::SizedAbstractArray) = typeof(a)(copy(a.data))

@@ -13,7 +13,7 @@ struct StaticReshaper <: AbstractReshaper end
 Reshape array `data` to size `Size` using method provided by `reshaper`.
 """
 function make_reshape(reshaper::AbstractReshaper, ::Type{Size}, data) where {Size}
-    error("make_reshape is not defined for reshaper of type $(typeof(reshaper)), size $(Size) and data of type $(typeof(data)).")
+    return error("make_reshape is not defined for reshaper of type $(typeof(reshaper)), size $(Size) and data of type $(typeof(data)).")
 end
 function make_reshape(::StaticReshaper, ::Type{Size}, data) where {Size}
     return SizedAbstractArray{Size}(data)
@@ -91,9 +91,8 @@ function ShapeSpecification(reshapers, manifolds::Manifold...)
     if isa(reshapers, AbstractReshaper)
         rtuple = map(m -> reshapers, manifolds)
         return ShapeSpecification{TRanges,TSizes,typeof(rtuple)}(rtuple)
-    else
-        return ShapeSpecification{TRanges,TSizes,typeof(reshapers)}(reshapers)
     end
+    return ShapeSpecification{TRanges,TSizes,typeof(reshapers)}(reshapers)
 end
 
 """
@@ -180,7 +179,7 @@ Next, the desired point on the product manifold can be obtained by calling
 """
 function prod_point(M::ShapeSpecification, pts...)
     data = mapreduce(vcat, pts) do pt
-        reshape(pt, :)
+        return reshape(pt, :)
     end
     # Array(data) is used to ensure that the data is mutable
     # `mapreduce` can return `SArray` for some arguments
@@ -273,7 +272,7 @@ number_eltype(::Type{ProductArray{TM,TData,TV}}) where {TM,TData,TV} = eltype(TD
 function _show_component(io::IO, v; pre = "", head = "")
     sx = sprint(show, "text/plain", v, context = io, sizehint = 0)
     sx = replace(sx, '\n' => "\n$(pre)")
-    print(io, head, pre, sx)
+    return print(io, head, pre, sx)
 end
 
 function _show_component_range(io::IO, vs, range; pre = "", sym = "Component ")
@@ -300,7 +299,7 @@ function _show_product_repr(io::IO, x; name = "Product representation", nmax = 4
 end
 
 function Base.show(io::IO, ::MIME"text/plain", x::ProductArray)
-    _show_product_repr(io, x; name = "ProductArray")
+    return _show_product_repr(io, x; name = "ProductArray")
 end
 
 function allocate(x::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
@@ -372,7 +371,7 @@ function Base.convert(::Type{TPR}, x::ProductRepr) where {TPR<:ProductRepr}
 end
 
 function Base.show(io::IO, ::MIME"text/plain", x::ProductRepr)
-    _show_product_repr(io, x; name = "ProductRepr")
+    return _show_product_repr(io, x; name = "ProductRepr")
 end
 
 ManifoldsBase._get_vector_cache_broadcast(::ProductRepr) = Val(false)

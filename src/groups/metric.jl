@@ -230,8 +230,8 @@ function LinearAlgebra.norm(
 end
 
 function Base.show(io::IO, metric::LeftInvariantMetric)
-    print(io, "LeftInvariantMetric($(metric.metric))")
+    return print(io, "LeftInvariantMetric($(metric.metric))")
 end
 function Base.show(io::IO, metric::RightInvariantMetric)
-    print(io, "RightInvariantMetric($(metric.metric))")
+    return print(io, "RightInvariantMetric($(metric.metric))")
 end

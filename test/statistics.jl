@@ -70,6 +70,7 @@ function test_mean(M, x, yexp = nothing, method...; kwargs...)
         end
         @test_throws DimensionMismatch mean(M, x, pweights(ones(n + 1)); kwargs...)
     end
+    return nothing
 end
 
 function test_median(M, x, yexp = nothing; kwargs...)
@@ -93,6 +94,7 @@ function test_median(M, x, yexp = nothing; kwargs...)
         end
         @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
     end
+    return nothing
 end
 
 function test_var(M, x, vexp = nothing; kwargs...)
@@ -136,6 +138,7 @@ function test_var(M, x, vexp = nothing; kwargs...)
         end
         @test_throws DimensionMismatch var(M, x, pweights(ones(n + 1)); kwargs...)
     end
+    return nothing
 end
 
 function test_std(M, x, sexp = nothing; kwargs...)
@@ -181,6 +184,7 @@ function test_std(M, x, sexp = nothing; kwargs...)
         end
         @test_throws DimensionMismatch std(M, x, pweights(ones(n + 1)); kwargs...)
     end
+    return nothing
 end
 
 function test_moments(M, x)
@@ -224,6 +228,7 @@ function test_moments(M, x)
         @test_throws DimensionMismatch skewness(M, x, pweights(ones(n + 1)))
         @test_throws DimensionMismatch kurtosis(M, x, pweights(ones(n + 1)))
     end
+    return nothing
 end
 
 struct TestStatsOverload1 <: Manifold{ℝ} end

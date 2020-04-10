@@ -13,12 +13,12 @@ Unnormalized version of `sinc` function, i.e. $\operatorname{usinc}(θ) = \frac{
 computed from $x = cos(θ)$.
 """
 @inline function usinc_from_cos(x::Real)
-    if x >= 1
-        return one(x)
+    return if x >= 1
+        one(x)
     elseif x <= -1
-        return zero(x)
+        zero(x)
     else
-        return sqrt(1 - x^2) / acos(x)
+        sqrt(1 - x^2) / acos(x)
     end
 end
 

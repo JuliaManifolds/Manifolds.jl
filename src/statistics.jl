@@ -115,12 +115,12 @@ struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
 
     function GeodesicInterpolationWithinRadius(radius::T) where {T}
         radius > 0 && return new{T}(radius)
-        throw(DomainError("The radius must be strictly postive, received $(radius)."))
+        return throw(DomainError("The radius must be strictly postive, received $(radius)."))
     end
 end
 
 function Base.show(io::IO, method::GeodesicInterpolationWithinRadius)
-    print(io, "GeodesicInterpolationWithinRadius($(method.radius))")
+    return print(io, "GeodesicInterpolationWithinRadius($(method.radius))")
 end
 
 @doc raw"""

@@ -57,6 +57,7 @@ function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,�
             "The point $(p) does not lie on $(M), because x'x is not the unit matrix.",
         )
     end
+    return nothing
 end
 
 @doc raw"""
@@ -95,6 +96,7 @@ function check_tangent_vector(
             "The matrix $(X) is does not lie in the tangent space of $(p) on the Stiefel manifold of dimension ($(n),$(k)), since x'v + v'x is not the zero matrix.",
         )
     end
+    return nothing
 end
 
 decorated_manifold(M::Stiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)

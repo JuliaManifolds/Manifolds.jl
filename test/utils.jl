@@ -129,6 +129,7 @@ function test_manifold(
             for rs in repr
                 @test rs > 0
             end
+            return nothing
         end
 
         test_repr(Manifolds.representation_size(M))
@@ -543,4 +544,5 @@ function test_manifold(
             end
         end
     end
+    return nothing
 end

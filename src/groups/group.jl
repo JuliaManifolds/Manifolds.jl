@@ -63,7 +63,7 @@ Return an error if the [`base_manifold`](@ref) is reached without encountering a
 """
 base_group(M::AbstractDecoratorManifold) = base_group(decorated_manifold(M))
 function base_group(M::Manifold)
-    error("base_group: no base group found.")
+    return error("base_group: no base group found.")
 end
 base_group(G::AbstractGroupManifold) = G
 
@@ -135,7 +135,7 @@ end
 
 Identity(M::AbstractDecoratorManifold, p) = Identity(decorated_manifold(M), p)
 function Identity(M::Manifold, p)
-    error("Identity not implemented for manifold $(M) and point $(p).")
+    return error("Identity not implemented for manifold $(M) and point $(p).")
 end
 
 function Base.:(==)(e1::Identity, e2::Identity)
@@ -177,10 +177,10 @@ function decorator_transparent_dispatch(
 end
 function allocate_result(M::Manifold, f::typeof(get_vector), e::Identity, Xⁱ)
     is_group_decorator(M) && return allocate_result(base_group(M), f, e, Xⁱ)
-    error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(Xⁱ).")
+    return error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(Xⁱ).")
 end
 function allocate_result(M::AbstractGroupManifold, f::typeof(get_vector), e::Identity, Xⁱ)
-    error("allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(Xⁱ).")
+    return error("allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(Xⁱ).")
 end
 function allocate_result(
     G::GT,
@@ -206,7 +206,7 @@ function allocate_result(
     X,
 )
     is_group_decorator(M) && return allocate_result(base_group(M), f, e, X)
-    error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(X).")
+    return error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(X).")
 end
 function allocate_result(
     M::AbstractGroupManifold,
@@ -214,7 +214,7 @@ function allocate_result(
     e::Identity,
     X,
 )
-    error("allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(X).")
+    return error("allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(X).")
 end
 function allocate_result(
     G::GT,
@@ -357,7 +357,7 @@ inv(::AbstractGroupManifold, ::Any...)
 end
 
 @decorator_transparent_function :intransparent function inv!(G::AbstractGroupManifold, q, p)
-    inv!(G.manifold, q, p)
+    return inv!(G.manifold, q, p)
 end
 
 @doc raw"""
@@ -1008,7 +1008,7 @@ Base.identity(::MultiplicationGroup, p) = one(p)
 
 function identity!(G::GT, q, p) where {GT<:MultiplicationGroup}
     isa(p, Identity{GT}) || return copyto!(q, one(p))
-    error("identity! not implemented on $(typeof(G)) for points $(typeof(q)) and $(typeof(p))")
+    return error("identity! not implemented on $(typeof(G)) for points $(typeof(q)) and $(typeof(p))")
 end
 identity!(::MultiplicationGroup, q::AbstractMatrix, p) = copyto!(q, I)
 
