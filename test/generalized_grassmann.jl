@@ -53,7 +53,7 @@ include("utils.jl")
         end
 
         types = [Matrix{Float64}]
-        TEST_STATIC_SIZED && push!(types, MMatrix{3,2,Float64})
+        TEST_STATIC_SIZED && push!(types, MMatrix{3,2,Float64,6})
         X = [0.0 0.0; 1.0 0.0; 0.0 2.0]
         Y = [0.0 0.0; -1.0 0.0; 0.0 2.0]
         @test inner(M, x, X, Y) == 0

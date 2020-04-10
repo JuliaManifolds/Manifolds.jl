@@ -290,7 +290,7 @@ function add_manifold_benchmarks()
         end
 
         types_spd = [Matrix{Float64}]
-        TEST_STATIC_SIZED && push!(types_spd, MMatrix{3,3,Float64})
+        TEST_STATIC_SIZED && push!(types_spd, MMatrix{3,3,Float64,9})
 
         A(α) = [1.0 0.0 0.0; 0.0 cos(α) sin(α); 0.0 -sin(α) cos(α)]
         pts_spd = [#
