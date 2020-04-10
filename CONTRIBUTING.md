@@ -75,6 +75,8 @@ format(
     always_for_in = true,
     whitespace_ops_in_indices = true,
     pipe_to_function_call = true,
+    import_to_using = true,
+    always_use_return = true,
 )
 ```
 
