@@ -57,47 +57,20 @@ using HybridArrays
 using LinearAlgebra
 using LightGraphs
 using ManifoldsBase
-using ManifoldsBase: ℝ, ℂ, ℍ
 using ManifoldsBase:
-    AbstractDecoratorManifold,
-    AbstractNumbers,
-    CoTVector,
-    DefaultManifold,
-    Manifold,
-    MPoint,
-    TVector
-using ManifoldsBase: OutOfInjectivityRadiusError
-using ManifoldsBase:
+    ℝ,
+    ℂ,
+    ℍ,
     AbstractBasis,
+    AbstractIsometricEmbeddingType,
+    AbstractNumbers,
     AbstractOrthogonalBasis,
     AbstractOrthonormalBasis,
+    AbstractVectorTransportMethod,
+    DefaultManifold,
     DefaultOrDiagonalizingBasis,
-    DefaultOrthonormalBasis,
     DiagonalizingBasisData,
-    VeeOrthogonalBasis
-using ManifoldsBase:
-    ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
-using ManifoldsBase:
-    AbstractRetractionMethod,
-    ExponentialRetraction,
-    PolarRetraction,
-    ProjectionRetraction,
-    QRRetraction
-using ManifoldsBase:
-    AbstractInverseRetractionMethod,
-    LogarithmicInverseRetraction,
-    PolarInverseRetraction,
-    ProjectionInverseRetraction,
-    QRInverseRetraction
-using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
-using ManifoldsBase:
-    AbstractEmbeddingType,
-    AbstractIsometricEmbeddingType,
-    DefaultIsometricEmbeddingType,
-    DefaultEmbeddingType,
-    TransparentIsometricEmbedding
-using ManifoldsBase: AbstractEmbeddedManifold, EmbeddedManifold
-using ManifoldsBase:
+    VeeOrthogonalBasis,
     @decorator_transparent_fallback,
     @decorator_transparent_function,
     @decorator_transparent_signature,
@@ -105,18 +78,9 @@ using ManifoldsBase:
     _euclidean_basis_vector,
     _extract_val,
     combine_allocation_promotion_functions,
-    geodesic,
-    hat,
-    hat!,
     is_decorator_transparent,
     is_default_decorator,
-    manifold_function_not_implemented_message,
-    shortest_geodesic,
-    vector_transport_along,
-    vector_transport_along!,
-    vector_transport_direction!,
-    vee,
-    vee!
+    manifold_function_not_implemented_message
 using Markdown: @doc_str
 using Random
 using Requires
