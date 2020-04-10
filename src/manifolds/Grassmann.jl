@@ -392,6 +392,30 @@ function Base.show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽}
     return print(io, "Grassmann($(n), $(k), $(𝔽))")
 end
 
+"""
+    uniform_distribution(M::Grassmann{n,k,ℝ}, p)
+
+Uniform distribution on given (real-valued) [`Grassmann`](@ref) `M`.
+Specifically, this is the normalized Haar measure on `M`.
+Generated points will be of similar type as `p`.
+
+The implementation is based on Section 2.5.1 in [^Chikuse2003];
+see also Theorem 2.2.2(iii) in [^Chikuse2003].
+
+[^Chikuse2003]:
+    > Y. Chikuse: "Statistics on Special Manifolds", Springer New York, 2003,
+    > doi: [10.1007/978-0-387-21540-2](https://doi.org/10.1007/978-0-387-21540-2).
+"""
+function uniform_distribution(M::Grassmann{n,k,ℝ}, p) where {n,k}
+    μ = Distributions.Zeros(n, k)
+    σ = one(eltype(p))
+    Σ1 = Distributions.PDMats.ScalMat(n, σ)
+    Σ2 = Distributions.PDMats.ScalMat(k, σ)
+    d = MatrixNormal(μ, Σ1, Σ2)
+
+    return ProjectedPointDistribution(M, d, (M, q, p) -> (q .= svd(p).U), p)
+end
+
 @doc raw"""
     zero_tangent_vector(M::Grassmann, p)
 

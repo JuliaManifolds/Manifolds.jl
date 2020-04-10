@@ -315,3 +315,27 @@ i.e. `(n,k)`, which is the matrix dimensions.
 @generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
 
 Base.show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")
+
+"""
+    uniform_distribution(M::Stiefel{n,k,ℝ}, p)
+
+Uniform distribution on given (real-valued) [`Stiefel`](@ref) `M`.
+Specifically, this is the normalized Haar and Hausdorff measure on `M`.
+Generated points will be of similar type as `p`.
+
+The implementation is based on Section 2.5.1 in [^Chikuse2003];
+see also Theorem 2.2.1(iii) in [^Chikuse2003].
+
+[^Chikuse2003]:
+    > Y. Chikuse: "Statistics on Special Manifolds", Springer New York, 2003,
+    > doi: [10.1007/978-0-387-21540-2](https://doi.org/10.1007/978-0-387-21540-2).
+"""
+function uniform_distribution(M::Stiefel{n,k,ℝ}, p) where {n,k}
+    μ = Distributions.Zeros(n, k)
+    σ = one(eltype(p))
+    Σ1 = Distributions.PDMats.ScalMat(n, σ)
+    Σ2 = Distributions.PDMats.ScalMat(k, σ)
+    d = MatrixNormal(μ, Σ1, Σ2)
+
+    return ProjectedPointDistribution(M, d, project!, p)
+end
