@@ -28,11 +28,13 @@ struct MultinomialMatrices{N,M,S} <:
     manifold::ProbabilitySimplex{S}
 end
 
-MultinomialMatrices(n::Int, m::Int) =
-    MultinomialMatrices{n,m,n - 1}(ProbabilitySimplex(n - 1))
+function MultinomialMatrices(n::Int, m::Int)
+    return MultinomialMatrices{n,m,n - 1}(ProbabilitySimplex(n - 1))
+end
 
-^(M::ProbabilitySimplex{N}, m::Int) where {N} =
-    MultinomialMatrices{manifold_dimension(M) + 1,m,N}(M)
+function Base.:^(M::ProbabilitySimplex{N}, m::Int) where {N}
+    return MultinomialMatrices{manifold_dimension(M) + 1,m,N}(M)
+end
 
 @doc raw"""
     check_manifold_point(M::MultinomialMatrices, p)
@@ -94,6 +96,6 @@ get_iterator(M::MultinomialMatrices{n,m}) where {n,m} = Base.OneTo(m)
 
 @generated representation_size(::MultinomialMatrices{n,m}) where {n,m} = (n, m)
 
-function show(io::IO, ::MultinomialMatrices{n,m}) where {n,m}
-    print(io, "MultinomialMatrices($(n),$(m))")
+function Base.show(io::IO, ::MultinomialMatrices{n,m}) where {n,m}
+    return print(io, "MultinomialMatrices($(n),$(m))")
 end

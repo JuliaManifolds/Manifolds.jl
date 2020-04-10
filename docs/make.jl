@@ -1,5 +1,13 @@
 using Manifolds, ManifoldsBase, Documenter
 
+generated_path = joinpath(@__DIR__, "src", "generated")
+isdir(generated_path) || mkdir(generated_path)
+cp(
+    joinpath(dirname(@__DIR__), "CONTRIBUTING.md"),
+    joinpath(generated_path, "contributing.md");
+    force = true,
+)
+
 makedocs(
     # for development, we disable prettyurls
     format = Documenter.HTML(prettyurls = false, assets = ["assets/favicon.ico"]),
@@ -45,6 +53,8 @@ makedocs(
         ],
         "Statistics" => "statistics.md",
         "Distributions" => "distributions.md",
+        "About" => "about.md",
+        "Contributing" => "generated/contributing.md",
         "Notation" => "notation.md",
         "Library" => [
             "Public" => "lib/public.md",

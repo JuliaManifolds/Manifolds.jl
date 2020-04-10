@@ -198,7 +198,7 @@ function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) w
         V = cat(B.frame_direction / norm(M, p, B.frame_direction), V; dims = 2)
         κ[1] = 0 # no curvature along the geodesic direction, if x!=y
     end
-    Ξ = [V[:, i] for i = 1:n]
+    Ξ = [V[:, i] for i in 1:n]
     return CachedBasis(B, κ, Ξ)
 end
 
@@ -210,12 +210,9 @@ an orthonormal basis by rotating the vector `X` using the rotation matrix
 $2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
 """
 function get_coordinates(M::Sphere{n,ℝ}, p, X, B::DefaultOrthonormalBasis) where {n}
-    if isapprox(p[1], 1)
-        return X[2:end]
-    else
-        xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n + 1)
-        return (2*xp1*dot(xp1, X)/dot(xp1, xp1)-X)[2:end]
-    end
+    isapprox(p[1], 1) && return X[2:end]
+    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n + 1)
+    return (2 * xp1 * dot(xp1, X) / dot(xp1, xp1) - X)[2:end]
 end
 
 function get_coordinates!(M::Sphere, Y, p, X, B::DefaultOrthonormalBasis)
@@ -332,7 +329,13 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 """
 mean(::AbstractSphere, ::Any...)
 
-function mean!(S::AbstractSphere, p, x::AbstractVector, w::AbstractVector; kwargs...)
+function Statistics.mean!(
+    S::AbstractSphere,
+    p,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+)
     return mean!(S, p, x, w, GeodesicInterpolationWithinRadius(π / 2); kwargs...)
 end
 
@@ -402,9 +405,9 @@ function retract!(M::AbstractSphere, q, p, X, ::ProjectionRetraction)
     return project!(M, q, q)
 end
 
-show(io::IO, ::Sphere{n,𝔽}) where {n,𝔽} = print(io, "Sphere($(n); field = $(𝔽))")
-function show(io::IO, ::ArraySphere{N,𝔽}) where {N,𝔽}
-    print(io, "ArraySphere($(join(N.parameters, ", ")); field = $(𝔽))")
+Base.show(io::IO, ::Sphere{n,𝔽}) where {n,𝔽} = print(io, "Sphere($(n); field = $(𝔽))")
+function Base.show(io::IO, ::ArraySphere{N,𝔽}) where {N,𝔽}
+    return print(io, "ArraySphere($(join(N.parameters, ", ")); field = $(𝔽))")
 end
 
 """

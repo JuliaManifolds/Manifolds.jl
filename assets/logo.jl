@@ -34,7 +34,7 @@ normal_coord_to_vector(M, x, rθ, B) = get_vector(M, x, collect(polar_to_cart(r�
 normal_coord_to_point(M, x, rθ, B) = exp(M, x, normal_coord_to_vector(M, x, rθ, B))
 
 function plot_normal_coord!(ax, M, x, B, rs, θs; ncirc = 9, options = Dict(), kwargs...)
-    for r in rs[2:end-1]
+    for r in rs[2:(end - 1)]
         push!(
             ax,
             Plot3(

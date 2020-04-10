@@ -10,15 +10,18 @@ const SpecialOrthogonal{n} = GroupManifold{ℝ,Rotations{n},MultiplicationOperat
 
 invariant_metric_dispatch(::SpecialOrthogonal, ::ActionDirection) = Val(true)
 
-default_metric_dispatch(::MetricManifold{𝔽,<:SpecialOrthogonal,EuclideanMetric}) where {𝔽} =
-    Val(true)
+function default_metric_dispatch(
+    ::MetricManifold{𝔽,<:SpecialOrthogonal,EuclideanMetric},
+) where {𝔽}
+    return Val(true)
+end
 default_metric_dispatch(::SpecialOrthogonal, ::EuclideanMetric) = Val(true)
 
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
 
-show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
+Base.show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
 
-inv(::SpecialOrthogonal, p) = transpose(p)
+Base.inv(::SpecialOrthogonal, p) = transpose(p)
 
 inverse_translate(G::SpecialOrthogonal, p, q, ::LeftAction) = inv(G, p) * q
 inverse_translate(G::SpecialOrthogonal, p, q, ::RightAction) = q * inv(G, p)

@@ -44,10 +44,12 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
                   "ProductManifold with 1 submanifold:\n $(M1)"
             @test sprint(show, "text/plain", Mse2) ==
                   "ProductManifold with 4 submanifolds:\n $(M1)\n $(M1)\n $(M2)\n $(M2)"
+            return nothing
         end
         withenv("LINES" => 7, "COLUMNS" => 100) do
             @test sprint(show, "text/plain", Mse2) ==
                   "ProductManifold with 4 submanifolds:\n $(M1)\n ⋮\n $(M2)"
+            return nothing
         end
 
         @test sprint(show, "text/plain", ProductManifold(Mse, Mse)) == """

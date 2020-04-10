@@ -25,7 +25,7 @@ function Oblique(n::Int, m::Int, field::AbstractNumbers = ℝ)
     return Oblique{n,m,field,n - 1}(Sphere(n - 1, field))
 end
 
-^(M::Sphere{N,𝔽}, m::Int) where {N,𝔽} = Oblique{manifold_dimension(M) + 1,m,𝔽,N}(M)
+Base.:^(M::Sphere{N,𝔽}, m::Int) where {N,𝔽} = Oblique{manifold_dimension(M) + 1,m,𝔽,N}(M)
 
 @doc raw"""
     check_manifold_point(M::Oblique{n,m},p)
@@ -88,4 +88,6 @@ end
 
 @generated representation_size(::Oblique{n,m}) where {n,m} = (n, m)
 
-show(io::IO, ::Oblique{n,m,𝔽}) where {n,m,𝔽} = print(io, "Oblique($(n),$(m); field = $(𝔽))")
+function Base.show(io::IO, ::Oblique{n,m,𝔽}) where {n,m,𝔽}
+    return print(io, "Oblique($(n),$(m); field = $(𝔽))")
+end

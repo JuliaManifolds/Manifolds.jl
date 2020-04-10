@@ -241,9 +241,9 @@ function _show_graph_manifold(io::IO, M; man_desc = "", pre = "")
     return nothing
 end
 
-function show(io::IO, mime::MIME"text/plain", M::EdgeGraphManifold)
-    _show_graph_manifold(io, M; man_desc = " on edges", pre = " ")
+function Base.show(io::IO, mime::MIME"text/plain", M::EdgeGraphManifold)
+    return _show_graph_manifold(io, M; man_desc = " on edges", pre = " ")
 end
-function show(io::IO, mime::MIME"text/plain", M::VertexGraphManifold)
-    _show_graph_manifold(io, M; man_desc = " on vertices", pre = " ")
+function Base.show(io::IO, mime::MIME"text/plain", M::VertexGraphManifold)
+    return _show_graph_manifold(io, M; man_desc = " on vertices", pre = " ")
 end

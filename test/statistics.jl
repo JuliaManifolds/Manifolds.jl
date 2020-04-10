@@ -13,26 +13,34 @@ import Manifolds: mean!, median!, var, mean_and_var
 struct TestStatsSphere{N} <: Manifold{ℝ} end
 TestStatsSphere(N) = TestStatsSphere{N}()
 manifold_dimension(M::TestStatsSphere{N}) where {N} = manifold_dimension(Sphere(N))
-exp!(M::TestStatsSphere{N}, w, x, y; kwargs...) where {N} =
-    exp!(Sphere(N), w, x, y; kwargs...)
-log!(M::TestStatsSphere{N}, y, x, v; kwargs...) where {N} =
-    log!(Sphere(N), y, x, v; kwargs...)
-inner(M::TestStatsSphere{N}, x, v, w; kwargs...) where {N} =
-    inner(Sphere(N), x, v, w; kwargs...)
-zero_tangent_vector!(M::TestStatsSphere{N}, v, x; kwargs...) where {N} =
-    zero_tangent_vector!(Sphere(N), v, x; kwargs...)
+function exp!(M::TestStatsSphere{N}, w, x, y; kwargs...) where {N}
+    return exp!(Sphere(N), w, x, y; kwargs...)
+end
+function log!(M::TestStatsSphere{N}, y, x, v; kwargs...) where {N}
+    return log!(Sphere(N), y, x, v; kwargs...)
+end
+function inner(M::TestStatsSphere{N}, x, v, w; kwargs...) where {N}
+    return inner(Sphere(N), x, v, w; kwargs...)
+end
+function zero_tangent_vector!(M::TestStatsSphere{N}, v, x; kwargs...) where {N}
+    return zero_tangent_vector!(Sphere(N), v, x; kwargs...)
+end
 
 struct TestStatsEuclidean{N} <: Manifold{ℝ} end
 TestStatsEuclidean(N) = TestStatsEuclidean{N}()
 manifold_dimension(M::TestStatsEuclidean{N}) where {N} = manifold_dimension(Euclidean(N))
-exp!(M::TestStatsEuclidean{N}, y, x, v; kwargs...) where {N} =
-    exp!(Euclidean(N), y, x, v; kwargs...)
-log!(M::TestStatsEuclidean{N}, w, x, y; kwargs...) where {N} =
-    log!(Euclidean(N), w, x, y; kwargs...)
-inner(M::TestStatsEuclidean{N}, x, v, w; kwargs...) where {N} =
-    inner(Euclidean(N), x, v, w; kwargs...)
-zero_tangent_vector!(M::TestStatsEuclidean{N}, v, x; kwargs...) where {N} =
-    zero_tangent_vector!(Euclidean(N), v, x; kwargs...)
+function exp!(M::TestStatsEuclidean{N}, y, x, v; kwargs...) where {N}
+    return exp!(Euclidean(N), y, x, v; kwargs...)
+end
+function log!(M::TestStatsEuclidean{N}, w, x, y; kwargs...) where {N}
+    return log!(Euclidean(N), w, x, y; kwargs...)
+end
+function inner(M::TestStatsEuclidean{N}, x, v, w; kwargs...) where {N}
+    return inner(Euclidean(N), x, v, w; kwargs...)
+end
+function zero_tangent_vector!(M::TestStatsEuclidean{N}, v, x; kwargs...) where {N}
+    return zero_tangent_vector!(Euclidean(N), v, x; kwargs...)
+end
 
 function test_mean(M, x, yexp = nothing, method...; kwargs...)
     @testset "mean unweighted" begin
@@ -62,6 +70,7 @@ function test_mean(M, x, yexp = nothing, method...; kwargs...)
         end
         @test_throws DimensionMismatch mean(M, x, pweights(ones(n + 1)); kwargs...)
     end
+    return nothing
 end
 
 function test_median(M, x, yexp = nothing; kwargs...)
@@ -85,6 +94,7 @@ function test_median(M, x, yexp = nothing; kwargs...)
         end
         @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
     end
+    return nothing
 end
 
 function test_var(M, x, vexp = nothing; kwargs...)
@@ -128,6 +138,7 @@ function test_var(M, x, vexp = nothing; kwargs...)
         end
         @test_throws DimensionMismatch var(M, x, pweights(ones(n + 1)); kwargs...)
     end
+    return nothing
 end
 
 function test_std(M, x, sexp = nothing; kwargs...)
@@ -173,13 +184,14 @@ function test_std(M, x, sexp = nothing; kwargs...)
         end
         @test_throws DimensionMismatch std(M, x, pweights(ones(n + 1)); kwargs...)
     end
+    return nothing
 end
 
 function test_moments(M, x)
     n = length(x)
     @testset "moments unweighted" begin
         m = mean(M, x)
-        for i = 1:5
+        for i in 1:5
             @test moment(M, x, i) ≈ mean(distance.(Ref(M), Ref(m), x) .^ i)
             @test moment(M, x, i, m) ≈ moment(M, x, i)
         end
@@ -200,7 +212,7 @@ function test_moments(M, x)
 
         for w in (w1, w2, w3)
             m = mean(M, x, w)
-            for i = 1:5
+            for i in 1:5
                 @test moment(M, x, i, w) ≈ mean(distance.(Ref(M), Ref(m), x) .^ i, w)
                 @test moment(M, x, i, w, m) ≈ moment(M, x, i, w)
             end
@@ -216,6 +228,7 @@ function test_moments(M, x)
         @test_throws DimensionMismatch skewness(M, x, pweights(ones(n + 1)))
         @test_throws DimensionMismatch kurtosis(M, x, pweights(ones(n + 1)))
     end
+    return nothing
 end
 
 struct TestStatsOverload1 <: Manifold{ℝ} end
@@ -223,69 +236,92 @@ struct TestStatsOverload2 <: Manifold{ℝ} end
 struct TestStatsOverload3 <: Manifold{ℝ} end
 struct TestStatsMethod1 <: AbstractEstimationMethod end
 
-mean!(
+function mean!(
     M::TestStatsOverload1,
     y,
     x::AbstractVector,
     w::AbstractWeights,
     method::GradientDescentEstimation,
-) = fill!(y, 3)
+)
+    return fill!(y, 3)
+end
 mean!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights) = fill!(y, 4)
-mean!(
+function mean!(
     M::TestStatsOverload2,
     y,
     x::AbstractVector,
     w::AbstractWeights,
     method::GradientDescentEstimation,
-) = fill!(y, 3)
-mean!(
+)
+    return fill!(y, 3)
+end
+function mean!(
     M::TestStatsOverload3,
     y,
     x::AbstractVector,
     w::AbstractWeights,
     method::TestStatsMethod1 = TestStatsMethod1(),
-) = fill!(y, 5)
+)
+    return fill!(y, 5)
+end
 
-median!(
+function median!(
     M::TestStatsOverload1,
     y,
     x::AbstractVector,
     w::AbstractWeights,
     method::CyclicProximalPointEstimation,
-) = fill!(y, 3)
+)
+    return fill!(y, 3)
+end
 median!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights) = fill!(y, 4)
-median!(
+function median!(
     M::TestStatsOverload2,
     y,
     x::AbstractVector,
     w::AbstractWeights,
     method::CyclicProximalPointEstimation,
-) = fill!(y, 3)
-median!(
+)
+    return fill!(y, 3)
+end
+function median!(
     M::TestStatsOverload3,
     y,
     x::AbstractVector,
     w::AbstractWeights,
     method::TestStatsMethod1 = TestStatsMethod1(),
-) = fill!(y, 5)
+)
+    return fill!(y, 5)
+end
 
-var(M::TestStatsOverload1, x::AbstractVector, w::AbstractWeights, m; corrected = false) =
-    4 + 5 * corrected
-mean_and_var(
+function var(
+    M::TestStatsOverload1,
+    x::AbstractVector,
+    w::AbstractWeights,
+    m;
+    corrected = false,
+)
+    return 4 + 5 * corrected
+end
+function mean_and_var(
     M::TestStatsOverload1,
     x::AbstractVector,
     w::AbstractWeights;
     corrected = false,
     kwargs...,
-) = [4.0], 4 + 5 * corrected
-mean_and_var(
+)
+    return [4.0], 4 + 5 * corrected
+end
+function mean_and_var(
     M::TestStatsOverload1,
     x::AbstractVector,
     w::AbstractWeights,
     ::TestStatsMethod1;
     corrected = false,
     kwargs...,
-) = [5.0], 9 + 7 * corrected
+)
+    return [5.0], 9 + 7 * corrected
+end
 
 @testset "Statistics" begin
     @testset "defaults and overloads" begin
@@ -387,7 +423,7 @@ mean_and_var(
             M = TestStatsEuclidean(1)
 
             rng = MersenneTwister(42)
-            x = [randn(rng, 1) for _ = 1:10]
+            x = [randn(rng, 1) for _ in 1:10]
             vx = vcat(x...)
 
             test_mean(M, x, mean(x))
@@ -406,7 +442,7 @@ mean_and_var(
             M = TestStatsEuclidean(5)
 
             rng = MersenneTwister(42)
-            x = [randn(rng, 5) for _ = 1:10]
+            x = [randn(rng, 5) for _ in 1:10]
             test_mean(M, x, mean(x))
             test_var(M, x, sum(var(x)))
             test_std(M, x, sqrt(sum(std(x) .^ 2)))
@@ -468,8 +504,8 @@ mean_and_var(
             rng = MersenneTwister(1212)
             @testset "exact for Euclidean" begin
                 M = Euclidean(2, 2)
-                x = [randn(rng, 2, 2) for _ = 1:10]
-                w = pweights([rand(rng) for _ = 1:10])
+                x = [randn(rng, 2, 2) for _ in 1:10]
+                w = pweights([rand(rng) for _ in 1:10])
                 @test mean(M, x, GeodesicInterpolation()) ≈ mean(x)
                 @test mean(M, x, w, GeodesicInterpolation()) ≈
                       mean(M, x, w, GradientDescentEstimation())
@@ -495,8 +531,8 @@ mean_and_var(
 
             @testset "resumable" begin
                 S = Sphere(2)
-                x = [normalize(randn(rng, 3)) for _ = 1:10]
-                w = pweights([rand(rng) for _ = 1:10])
+                x = [normalize(randn(rng, 3)) for _ in 1:10]
+                w = pweights([rand(rng) for _ in 1:10])
                 ypart = mean(S, x[1:5], pweights(w[1:5]), GeodesicInterpolation())
                 yfull = mean(S, x, w, GeodesicInterpolation())
                 x2 = [[ypart]; x[6:end]]
@@ -510,8 +546,8 @@ mean_and_var(
 
             @testset "exact for Euclidean" begin
                 M = TestStatsEuclidean(4)
-                x = [randn(rng, 4) for _ = 1:10]
-                w = pweights([rand(rng) for _ = 1:10])
+                x = [randn(rng, 4) for _ in 1:10]
+                w = pweights([rand(rng) for _ in 1:10])
                 m1, v1 = mean_and_var(M, x, GeodesicInterpolation())
                 @test m1 ≈ mean(x)
                 @test v1 ≈ sum(var(x))
@@ -576,8 +612,8 @@ mean_and_var(
             P2 = MetricManifold(P1, LinearAffineMetric())
             @testset "$P" for P in [P1, P2]
                 p0 = collect(exp(Symmetric(randn(rng, 3, 3) * 0.1)))
-                x = [exp(P, p0, Symmetric(randn(rng, 3, 3) * 0.1)) for _ = 1:10]
-                w = pweights([rand(rng) for _ = 1:length(x)])
+                x = [exp(P, p0, Symmetric(randn(rng, 3, 3) * 0.1)) for _ in 1:10]
+                w = pweights([rand(rng) for _ in 1:length(x)])
                 m = mean(P, x, w)
                 mg = mean(P, x, w, GeodesicInterpolation())
                 mf = mean(P, x, w, GradientDescentEstimation())
@@ -590,9 +626,9 @@ mean_and_var(
             rng = MersenneTwister(47)
             S = Sphere(2)
             p0 = [1.0, 0, 0]
-            x = [normalize(randn(rng, 3)) for _ = 1:10]
+            x = [normalize(randn(rng, 3)) for _ in 1:10]
             x = [x; -x]
-            w = pweights([rand(rng) for _ = 1:length(x)])
+            w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(S, x, w)
             mg = mean(S, x, w, GeodesicInterpolation())
             mf = mean(S, x, w, GradientDescentEstimation(); p0 = mg)
@@ -600,8 +636,8 @@ mean_and_var(
             @test m == mf
 
             μ = randn(rng, 3) .* 10
-            x = [normalize(randn(rng, 3) .+ μ) for _ = 1:10]
-            w = pweights([rand(rng) for _ = 1:length(x)])
+            x = [normalize(randn(rng, 3) .+ μ) for _ in 1:10]
+            w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(S, x, w)
             mg = mean(S, x, w, GeodesicInterpolation())
             @test m == mg
@@ -614,7 +650,7 @@ mean_and_var(
             v1 = hat(R, p0, [1.0, 0.0, 0.0])
             v2 = hat(R, p0, [0.0, 1.0, 0.0])
             x = [geodesic(R, p0, v1, π / 2 * (1:4)); geodesic(R, p0, v2, π / 2 * (1:4))]
-            w = pweights([rand(rng) for _ = 1:length(x)])
+            w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(R, x, w)
             mg = mean(R, x, w, GeodesicInterpolation())
             mf = mean(R, x, w, GradientDescentEstimation(); p0 = mg)
@@ -623,8 +659,8 @@ mean_and_var(
 
             μ = project(R, randn(3, 3))
             d = normal_tvector_distribution(R, μ, 0.1)
-            x = [exp(R, μ, rand(rng, d)) for _ = 1:10]
-            w = pweights([rand(rng) for _ = 1:length(x)])
+            x = [exp(R, μ, rand(rng, d)) for _ in 1:10]
+            w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(R, x, w)
             mg = mean(R, x, w, GeodesicInterpolation())
             @test m == mg
@@ -634,16 +670,16 @@ mean_and_var(
             rng = MersenneTwister(47)
             G = Manifolds.Grassmann(3, 2)
             p0 = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            x = [exp(G, p0, project(G, p0, randn(rng, 3, 2) * 10)) for _ = 1:10]
-            w = pweights([rand(rng) for _ = 1:length(x)])
+            x = [exp(G, p0, project(G, p0, randn(rng, 3, 2) * 10)) for _ in 1:10]
+            w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(G, x, w)
             mg = mean(G, x, w, GeodesicInterpolation())
             mf = mean(G, x, w, GradientDescentEstimation(); p0 = mg)
             @test m != mg
             @test m == mf
 
-            x = [exp(G, p0, project(G, p0, randn(rng, 3, 2) * 0.01)) for _ = 1:10]
-            w = pweights([rand(rng) for _ = 1:length(x)])
+            x = [exp(G, p0, project(G, p0, randn(rng, 3, 2) * 0.01)) for _ in 1:10]
+            w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(G, x, w)
             mg = mean(G, x, w, GeodesicInterpolation())
             @test m == mg

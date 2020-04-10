@@ -76,7 +76,7 @@ SVDMPoint(S::SVD) = SVDMPoint(S.U, S.S, S.Vt)
 SVDMPoint(A::Matrix, k::Int) = SVDMPoint(svd(A), k)
 SVDMPoint(S::SVD, k::Int) = SVDMPoint(S.U, S.S, S.Vt, k)
 SVDMPoint(U, S, Vt, k::Int) = SVDMPoint(U[:, 1:k], S[1:k], Vt[1:k, :])
-==(x::SVDMPoint, y::SVDMPoint) = (x.U == y.U) && (x.S == y.S) && (x.Vt == y.Vt)
+Base.:(==)(x::SVDMPoint, y::SVDMPoint) = (x.U == y.U) && (x.S == y.S) && (x.Vt == y.Vt)
 
 @doc raw"""
     UMVTVector <: TVector
@@ -99,15 +99,15 @@ end
 UMVTVector(U, M, Vt, k::Int) = UMVTVector(U[:, 1:k], M[1:k, 1:k], Vt[1:k, :])
 
 # here the division in M corrects for the first factor in UMV + x.U*Vt + U*x.Vt, where x is the base point to v.
-*(v::UMVTVector, s::Number) = UMVTVector(v.U * s, v.M * s, v.Vt * s)
-*(s::Number, v::UMVTVector) = UMVTVector(s * v.U, s * v.M, s * v.Vt)
-/(v::UMVTVector, s::Number) = UMVTVector(v.U / s, v.M / s, v.Vt / s)
-\(s::Number, v::UMVTVector) = UMVTVector(s \ v.U, s \ v.M, s \ v.Vt)
-+(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U + w.U, v.M + w.M, v.Vt + w.Vt)
--(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U - w.U, v.M - w.M, v.Vt - w.Vt)
--(v::UMVTVector) = UMVTVector(-v.U, -v.M, -v.Vt)
-+(v::UMVTVector) = UMVTVector(v.U, v.M, v.Vt)
-==(v::UMVTVector, w::UMVTVector) = (v.U == w.U) && (v.M == w.M) && (v.Vt == w.Vt)
+Base.:*(v::UMVTVector, s::Number) = UMVTVector(v.U * s, v.M * s, v.Vt * s)
+Base.:*(s::Number, v::UMVTVector) = UMVTVector(s * v.U, s * v.M, s * v.Vt)
+Base.:/(v::UMVTVector, s::Number) = UMVTVector(v.U / s, v.M / s, v.Vt / s)
+Base.:\(s::Number, v::UMVTVector) = UMVTVector(s \ v.U, s \ v.M, s \ v.Vt)
+Base.:+(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U + w.U, v.M + w.M, v.Vt + w.Vt)
+Base.:-(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U - w.U, v.M - w.M, v.Vt - w.Vt)
+Base.:-(v::UMVTVector) = UMVTVector(-v.U, -v.M, -v.Vt)
+Base.:+(v::UMVTVector) = UMVTVector(v.U, v.M, v.Vt)
+Base.:(==)(v::UMVTVector, w::UMVTVector) = (v.U == w.U) && (v.M == w.M) && (v.Vt == w.Vt)
 
 @doc raw"""
     check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...)
@@ -196,6 +196,7 @@ function check_tangent_vector(
             "The tangent vector $(X) is not a tangent vector to $(p) on $(M) since v.V'x.V is not zero.",
         )
     end
+    return nothing
 end
 
 @doc raw"""
@@ -208,10 +209,10 @@ function inner(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector)
     return dot(v.U, w.U) + dot(v.M, w.M) + dot(v.Vt, w.Vt)
 end
 
-function isapprox(::FixedRankMatrices, p::SVDMPoint, q::SVDMPoint; kwargs...)
+function Base.isapprox(::FixedRankMatrices, p::SVDMPoint, q::SVDMPoint; kwargs...)
     return isapprox(p.U * Diagonal(p.S) * p.Vt, q.U * Diagonal(q.S) * q.Vt; kwargs...)
 end
-function isapprox(
+function Base.isapprox(
     ::FixedRankMatrices,
     p::SVDMPoint,
     X::UMVTVector,
@@ -299,10 +300,10 @@ function retract!(
     return q
 end
 
-function show(io::IO, ::FixedRankMatrices{M,N,K,𝔽}) where {M,N,K,𝔽}
-    print(io, "FixedRankMatrices($(M), $(N), $(K), $(𝔽))")
+function Base.show(io::IO, ::FixedRankMatrices{M,N,K,𝔽}) where {M,N,K,𝔽}
+    return print(io, "FixedRankMatrices($(M), $(N), $(K), $(𝔽))")
 end
-function show(io::IO, mime::MIME"text/plain", p::SVDMPoint)
+function Base.show(io::IO, mime::MIME"text/plain", p::SVDMPoint)
     pre = " "
     summary(io, p)
     println(io, "\nU factor:")
@@ -316,9 +317,9 @@ function show(io::IO, mime::MIME"text/plain", p::SVDMPoint)
     println(io, "Vt factor:")
     sv = sprint(show, "text/plain", p.Vt; context = io, sizehint = 0)
     sv = replace(sv, '\n' => "\n$(pre)")
-    print(io, pre, sv)
+    return print(io, pre, sv)
 end
-function show(io::IO, mime::MIME"text/plain", X::UMVTVector)
+function Base.show(io::IO, mime::MIME"text/plain", X::UMVTVector)
     pre = " "
     summary(io, X)
     println(io, "\nU factor:")
@@ -332,7 +333,7 @@ function show(io::IO, mime::MIME"text/plain", X::UMVTVector)
     println(io, "Vt factor:")
     sv = sprint(show, "text/plain", X.Vt; context = io, sizehint = 0)
     sv = replace(sv, '\n' => "\n$(pre)")
-    print(io, pre, sv)
+    return print(io, pre, sv)
 end
 
 allocate(p::SVDMPoint) = SVDMPoint(allocate(p.U), allocate(p.S), allocate(p.Vt))
@@ -351,26 +352,30 @@ function number_eltype(X::UMVTVector)
     return typeof(one(eltype(X.U)) + one(eltype(X.M)) + one(eltype(X.Vt)))
 end
 
-one(p::SVDMPoint) = SVDMPoint(
-    one(zeros(size(p.U, 1), size(p.U, 1))),
-    ones(length(p.S)),
-    one(zeros(size(p.Vt, 2), size(p.Vt, 2))),
-    length(p.S),
-)
-one(X::UMVTVector) = UMVTVector(
-    one(zeros(size(X.U, 1), size(X.U, 1))),
-    one(zeros(size(X.M))),
-    one(zeros(size(X.Vt, 2), size(X.Vt, 2))),
-    size(X.M, 1),
-)
+function Base.one(p::SVDMPoint)
+    return SVDMPoint(
+        one(zeros(size(p.U, 1), size(p.U, 1))),
+        ones(length(p.S)),
+        one(zeros(size(p.Vt, 2), size(p.Vt, 2))),
+        length(p.S),
+    )
+end
+function Base.one(X::UMVTVector)
+    return UMVTVector(
+        one(zeros(size(X.U, 1), size(X.U, 1))),
+        one(zeros(size(X.M))),
+        one(zeros(size(X.Vt, 2), size(X.Vt, 2))),
+        size(X.M, 1),
+    )
+end
 
-function copyto!(p::SVDMPoint, q::SVDMPoint)
+function Base.copyto!(p::SVDMPoint, q::SVDMPoint)
     copyto!(p.U, q.U)
     copyto!(p.S, q.S)
     copyto!(p.Vt, q.Vt)
     return p
 end
-function copyto!(X::UMVTVector, Y::UMVTVector)
+function Base.copyto!(X::UMVTVector, Y::UMVTVector)
     copyto!(X.U, Y.U)
     copyto!(X.M, Y.M)
     copyto!(X.Vt, Y.Vt)

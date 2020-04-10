@@ -77,7 +77,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 convert(T, [1.0, 0.0, 0.0]),
                 convert(T, [0.0, -1.0, -1.0]),
             )
-            for pt ∈ pts_tb
+            for pt in pts_tb
                 @test bundle_projection(TB, pt) ≈ pt.parts[1]
             end
             diag_basis = DiagonalizingOrthonormalBasis(log(TB, pts_tb[1], pts_tb[2]))

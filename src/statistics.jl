@@ -19,7 +19,7 @@ Method for estimation using the cyclic proximal point technique.
 """
 struct CyclicProximalPointEstimation <: AbstractEstimationMethod end
 
-_unit_weights(n::Int) = UnitWeights{Float64}(n)
+_unit_weights(n::Int) = StatsBase.UnitWeights{Float64}(n)
 
 @doc raw"""
     GeodesicInterpolation <: AbstractEstimationMethod
@@ -115,12 +115,12 @@ struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
 
     function GeodesicInterpolationWithinRadius(radius::T) where {T}
         radius > 0 && return new{T}(radius)
-        throw(DomainError("The radius must be strictly postive, received $(radius)."))
+        return throw(DomainError("The radius must be strictly postive, received $(radius)."))
     end
 end
 
-function show(io::IO, method::GeodesicInterpolationWithinRadius)
-    print(io, "GeodesicInterpolationWithinRadius($(method.radius))")
+function Base.show(io::IO, method::GeodesicInterpolationWithinRadius)
+    return print(io, "GeodesicInterpolationWithinRadius($(method.radius))")
 end
 
 @doc raw"""
@@ -180,7 +180,7 @@ The algorithm is further described in [^Afsari2013].
     > arxiv: [1201.0925](https://arxiv.org/abs/1201.0925)
 """
 mean(::Manifold, ::Any...)
-function mean(
+function Statistics.mean(
     M::Manifold,
     x::AbstractVector,
     method::AbstractEstimationMethod...;
@@ -189,7 +189,7 @@ function mean(
     y = allocate_result(M, mean, x[1])
     return mean!(M, y, x, method...; kwargs...)
 end
-function mean(
+function Statistics.mean(
     M::Manifold,
     x::AbstractVector,
     w::AbstractVector,
@@ -214,7 +214,7 @@ end
 Compute the [`mean`](@ref mean(::Manifold, args...)) in-place in `y`.
 """
 mean!(::Manifold, ::Any...)
-function mean!(
+function Statistics.mean!(
     M::Manifold,
     y,
     x::AbstractVector,
@@ -224,10 +224,10 @@ function mean!(
     w = _unit_weights(length(x))
     return mean!(M, y, x, w, method...; kwargs...)
 end
-function mean!(M::Manifold, y, x::AbstractVector, w::AbstractVector; kwargs...)
+function Statistics.mean!(M::Manifold, y, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(M, y, x, w, GradientDescentEstimation(); kwargs...)
 end
-function mean!(
+function Statistics.mean!(
     M::Manifold,
     y,
     x::AbstractVector,
@@ -248,11 +248,11 @@ function mean!(
     v = zero_tangent_vector(M, y)
     vtmp = copy(v)
     α = w ./ cumsum(w)
-    for i = 1:stop_iter
+    for i in 1:stop_iter
         copyto!(yold, y)
         # Online weighted mean
         @inbounds inverse_retract!(M, v, yold, x[1], inverse_retraction)
-        @inbounds for j = 2:n
+        @inbounds for j in 2:n
             inverse_retract!(M, vtmp, yold, x[j], inverse_retraction)
             v .+= α[j] .* (vtmp .- v)
         end
@@ -286,7 +286,7 @@ the (inverse) retraction.
 """
 mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation)
 
-function mean!(
+function Statistics.mean!(
     M::Manifold,
     q,
     x::AbstractVector,
@@ -309,7 +309,7 @@ function mean!(
     end
     v = zero_tangent_vector(M, q)
     ytmp = allocate_result(M, mean, q)
-    @inbounds for i = 2:n
+    @inbounds for i in 2:n
         j = order[i]
         s += w[j]
         t = w[j] / s
@@ -337,7 +337,7 @@ for a description of `kwargs`.
 """
 mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolationWithinRadius)
 
-function mean!(
+function Statistics.mean!(
     M::Manifold,
     q,
     x::AbstractVector,
@@ -356,7 +356,7 @@ function mean!(
     end
     return q
 end
-function mean!(
+function Statistics.mean!(
     M::Manifold,
     q,
     x::AbstractVector,
@@ -377,10 +377,10 @@ function mean!(
     ytmp = copy(yold)
     X = zero_tangent_vector(M, q)
     wv = convert(Vector, w) ./ sum(w)
-    for i = 1:stop_iter
+    for i in 1:stop_iter
         λ = 0.5 / i
         copyto!(yold, q)
-        for j = 1:n
+        for j in 1:n
             @inbounds t = (2 * λ * wv[j]) / (1 + 2 * λ * wv[j])
             @inbounds inverse_retract!(M, X, q, x[j], inverse_retraction)
             retract!(M, ytmp, q, X, t, retraction)
@@ -391,7 +391,7 @@ function mean!(
     return q
 end
 
-@decorator_transparent_signature mean!(
+@decorator_transparent_signature Statistics.mean!(
     M::AbstractDecoratorManifold,
     y,
     x::AbstractVector,
@@ -455,7 +455,7 @@ The algorithm is further described in [^Bačák2014].
     > arxiv: [1210.2145](https://arxiv.org/abs/1210.2145)
 """
 median(::Manifold, ::Any...)
-function median(
+function Statistics.median(
     M::Manifold,
     x::AbstractVector,
     method::AbstractEstimationMethod...;
@@ -464,7 +464,7 @@ function median(
     y = allocate_result(M, median, x[1])
     return median!(M, y, x, method...; kwargs...)
 end
-function median(
+function Statistics.median(
     M::Manifold,
     x::AbstractVector,
     w::AbstractVector,
@@ -489,7 +489,7 @@ end
 computes the [`median`](@ref) in-place in `y`.
 """
 median!(::Manifold, ::Any...)
-function median!(
+function Statistics.median!(
     M::Manifold,
     q,
     x::AbstractVector,
@@ -499,10 +499,10 @@ function median!(
     w = _unit_weights(length(x))
     return median!(M, q, x, w, method...; kwargs...)
 end
-function median!(M::Manifold, y, x::AbstractVector, w::AbstractVector; kwargs...)
+function Statistics.median!(M::Manifold, y, x::AbstractVector, w::AbstractVector; kwargs...)
     return median!(M, y, x, w, CyclicProximalPointEstimation(); kwargs...)
 end
-function median!(
+function Statistics.median!(
     M::Manifold,
     q,
     x::AbstractVector,
@@ -523,10 +523,10 @@ function median!(
     ytmp = copy(yold)
     v = zero_tangent_vector(M, q)
     wv = convert(Vector, w) ./ sum(w)
-    for i = 1:stop_iter
+    for i in 1:stop_iter
         λ = 0.5 / i
         copyto!(yold, q)
-        for j = 1:n
+        for j in 1:n
             @inbounds t = min(λ * wv[j] / distance(M, q, x[j]), 1.0)
             @inbounds inverse_retract!(M, v, q, x[j], inverse_retraction)
             retract!(M, ytmp, q, v, t, retraction)
@@ -537,7 +537,7 @@ function median!(
     return q
 end
 
-@decorator_transparent_signature median!(
+@decorator_transparent_signature Statistics.median!(
     M::AbstractDecoratorManifold,
     y,
     x::AbstractVector,
@@ -562,23 +562,29 @@ can be activated by setting `corrected=true`. All further `kwargs...` are passed
 to the computation of the mean (if that is not provided).
 """
 var(M::Manifold, ::Any)
-function var(M::Manifold, x::AbstractVector, w::AbstractWeights, m; corrected::Bool = false)
+function Statistics.var(
+    M::Manifold,
+    x::AbstractVector,
+    w::AbstractWeights,
+    m;
+    corrected::Bool = false,
+)
     wv = convert(Vector, w)
     s = sum(eachindex(x, w)) do i
         return @inbounds w[i] * distance(M, m, x[i])^2
     end
-    c = varcorrection(w, corrected)
+    c = StatsBase.varcorrection(w, corrected)
     return c * s
 end
-function var(M::Manifold, x::AbstractVector, m; corrected::Bool = true)
+function Statistics.var(M::Manifold, x::AbstractVector, m; corrected::Bool = true)
     n = length(x)
     w = _unit_weights(n)
     return var(M, x, w, m; corrected = corrected)
 end
-function var(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
+function Statistics.var(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
     return mean_and_var(M, x, w; kwargs...)[2]
 end
-var(M::Manifold, x::AbstractVector; kwargs...) = mean_and_var(M, x; kwargs...)[2]
+Statistics.var(M::Manifold, x::AbstractVector; kwargs...) = mean_and_var(M, x; kwargs...)[2]
 
 @doc raw"""
     std(M, x, m=mean(M, x); corrected=true, kwargs...)
@@ -595,7 +601,7 @@ where `c` is a correction term, see
 The mean of `x` can be specified as `m`, and the corrected variance
 can be activated by setting `corrected=true`.
 """
-std(M::Manifold, args...; kwargs...) = sqrt(var(M, args...; kwargs...))
+Statistics.std(M::Manifold, args...; kwargs...) = sqrt(var(M, args...; kwargs...))
 
 @doc raw"""
     mean_and_var(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...) -> (mean, var)
@@ -616,7 +622,7 @@ a mean-specific method, call [`mean`](@ref mean(::Manifold, args...)) and then
 [`var`](@ref).
 """
 mean_and_var(M::Manifold, ::Any...)
-function mean_and_var(
+function StatsBase.mean_and_var(
     M::Manifold,
     x::AbstractVector,
     w::AbstractWeights,
@@ -628,7 +634,7 @@ function mean_and_var(
     v = var(M, x, w, m; corrected = corrected)
     return m, v
 end
-function mean_and_var(
+function StatsBase.mean_and_var(
     M::Manifold,
     x::AbstractVector,
     method::AbstractEstimationMethod...;
@@ -666,7 +672,7 @@ interpolation method.
     The Welford algorithm for the variance is experimental and is not guaranteed
     to give accurate results except on [`Euclidean`](@ref).
 """
-function mean_and_var(
+function StatsBase.mean_and_var(
     M::Manifold,
     x::AbstractVector,
     w::AbstractWeights,
@@ -690,7 +696,7 @@ function mean_and_var(
     v = zero_tangent_vector(M, y)
     M₂ = zero(number_eltype(v))
     ytmp = allocate_result(M, mean, y)
-    @inbounds for i = 2:n
+    @inbounds for i in 2:n
         j = order[i]
         snew = s + w[j]
         t = w[j] / snew
@@ -701,7 +707,7 @@ function mean_and_var(
         M₂ += t * s * d^2
         s = snew
     end
-    c = varcorrection(w, corrected)
+    c = StatsBase.varcorrection(w, corrected)
     σ² = c * M₂
     return y, σ²
 end
@@ -722,7 +728,7 @@ See [`GeodesicInterpolationWithinRadius`](@ref) and
 [`mean_and_var`](@ref mean_and_var(::Manifold, ::AbstractVector, ::AbstractWeights, ::GeodesicInterpolation))
 for more information.
 """
-function mean_and_var(
+function StatsBase.mean_and_var(
     M::Manifold,
     x::AbstractVector,
     w::AbstractWeights,
@@ -770,7 +776,7 @@ Use the `method` for simultaneously computing the mean and standard deviation.
 To use a mean-specific method, call [`mean`](@ref mean(::Manifold, args...)) and
 then [`std`](@ref).
 """
-function mean_and_std(M::Manifold, args...; kwargs...)
+function StatsBase.mean_and_std(M::Manifold, args...; kwargs...)
     m, v = mean_and_var(M, args...; kwargs...)
     return m, sqrt(v)
 end
@@ -782,7 +788,7 @@ Compute the `k`th central moment of points in `x` on manifold `M`. Optionally
 provide weights `w` and/or a precomputed
 [`mean`](@ref mean(::Manifold, args...)).
 """
-function moment(
+function StatsBase.moment(
     M::Manifold,
     x::AbstractVector,
     k::Int,
@@ -794,7 +800,7 @@ function moment(
     end
     return s / sum(w)
 end
-function moment(M::Manifold, x::AbstractVector, k::Int, m = mean(M, x))
+function StatsBase.moment(M::Manifold, x::AbstractVector, k::Int, m = mean(M, x))
     w = _unit_weights(length(x))
     return moment(M, x, k, w, m)
 end
@@ -806,14 +812,14 @@ Compute the standardized skewness of points in `x` on manifold `M`. Optionally
 provide weights `w` and/or a precomputed
 [`mean`](@ref mean(::Manifold, args...)) `m`.
 """
-function skewness(M::Manifold, x::AbstractVector, w::AbstractWeights)
+function StatsBase.skewness(M::Manifold, x::AbstractVector, w::AbstractWeights)
     m, s = mean_and_std(M, x, w; corrected = false)
     return moment(M, x, 3, w, m) / s^3
 end
-function skewness(M::Manifold, x::AbstractVector, w::AbstractWeights, m)
+function StatsBase.skewness(M::Manifold, x::AbstractVector, w::AbstractWeights, m)
     return moment(M, x, 3, w, m) / std(M, x, w, m; corrected = false)^3
 end
-function skewness(M::Manifold, x::AbstractVector, args...)
+function StatsBase.skewness(M::Manifold, x::AbstractVector, args...)
     w = _unit_weights(length(x))
     return skewness(M, x, w, args...)
 end
@@ -825,14 +831,14 @@ Compute the excess kurtosis of points in `x` on manifold `M`. Optionally
 provide weights `w` and/or a precomputed
 [`mean`](@ref mean(::Manifold, args...)) `m`.
 """
-function kurtosis(M::Manifold, x::AbstractVector, w::AbstractWeights)
+function StatsBase.kurtosis(M::Manifold, x::AbstractVector, w::AbstractWeights)
     m, v = mean_and_var(M, x, w; corrected = false)
     return moment(M, x, 4, w, m) / v^2 - 3
 end
-function kurtosis(M::Manifold, x::AbstractVector, w::AbstractWeights, m)
+function StatsBase.kurtosis(M::Manifold, x::AbstractVector, w::AbstractWeights, m)
     return moment(M, x, 4, w, m) / var(M, x, w, m; corrected = false)^2 - 3
 end
-function kurtosis(M::Manifold, x::AbstractVector, args...)
+function StatsBase.kurtosis(M::Manifold, x::AbstractVector, args...)
     w = _unit_weights(length(x))
     return kurtosis(M, x, w, args...)
 end

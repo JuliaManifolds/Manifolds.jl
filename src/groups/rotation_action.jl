@@ -22,8 +22,8 @@ function RotationAction(
     return RotationAction{typeof(M),typeof(SOn),TAD}(M, SOn)
 end
 
-function show(io::IO, A::RotationAction)
-    print(io, "RotationAction($(A.manifold), $(A.SOn), $(direction(A)))")
+function Base.show(io::IO, A::RotationAction)
+    return print(io, "RotationAction($(A.manifold), $(A.SOn), $(direction(A)))")
 end
 
 const RotationActionOnVector{N,F,TAD} = RotationAction{
@@ -77,7 +77,7 @@ function optimal_alignment(A::RotationActionOnVector{N,T,LeftAction}, p, q) wher
     F = svd(Xmul)
     L = size(Xmul)[2]
     UVt = F.U * F.Vt
-    Ostar = det(UVt) ≥ 0 ? UVt : F.U * Diagonal([i < L ? 1 : -1 for i = 1:L]) * F.Vt
+    Ostar = det(UVt) ≥ 0 ? UVt : F.U * Diagonal([i < L ? 1 : -1 for i in 1:L]) * F.Vt
     return convert(typeof(Xmul), Ostar)
 end
 function optimal_alignment(A::RotationActionOnVector{N,T,RightAction}, p, q) where {N,T}

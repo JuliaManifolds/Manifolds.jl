@@ -76,6 +76,7 @@ function check_manifold_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,�
             "The point $(p) does not lie on $(M), because x'x is not the unit matrix.",
         )
     end
+    return nothing
 end
 
 @doc raw"""
@@ -119,6 +120,7 @@ function check_tangent_vector(
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since p'X + X'p is not the zero matrix.",
         )
     end
+    return nothing
 end
 
 decorated_manifold(M::Grassmann{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
@@ -146,7 +148,7 @@ b_{i}=\begin{cases}
 function distance(M::Grassmann, p, q)
     p ≈ q && return zero(real(eltype(p)))
     a = svd(p' * q).S
-    a[a.>1] .= 1
+    a[a .> 1] .= 1
     return sqrt(sum((acos.(a)) .^ 2))
 end
 
@@ -248,10 +250,10 @@ inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 
 inverse_retract!(::Grassmann, X, p, q, ::QRInverseRetraction) = copyto!(X, q / (p' * q) - p)
 
-function isapprox(M::Grassmann, p, X, Y; kwargs...)
+function Base.isapprox(M::Grassmann, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
 end
-isapprox(M::Grassmann, p, q; kwargs...) = isapprox(distance(M, p, q), 0.0; kwargs...)
+Base.isapprox(M::Grassmann, p, q; kwargs...) = isapprox(distance(M, p, q), 0.0; kwargs...)
 
 @doc raw"""
     log(M::Grassmann, p, q)
@@ -311,7 +313,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 """
 mean(::Grassmann{n,k} where {n,k}, ::Any...)
 
-function mean!(
+function Statistics.mean!(
     M::Grassmann{n,k},
     p,
     x::AbstractVector,
@@ -386,7 +388,9 @@ function retract!(::Grassmann{N,K}, q, p, X, ::QRRetraction) where {N,K}
     return copyto!(q, Array(qrfac.Q) * D)
 end
 
-show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽} = print(io, "Grassmann($(n), $(k), $(𝔽))")
+function Base.show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽}
+    return print(io, "Grassmann($(n), $(k), $(𝔽))")
+end
 
 """
     uniform_distribution(M::Grassmann{n,k,ℝ}, p)

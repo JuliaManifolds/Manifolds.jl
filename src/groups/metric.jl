@@ -217,7 +217,11 @@ function log!(
     return invoke(log!, Tuple{MetricManifold,typeof(X),typeof(p),typeof(q)}, M, X, p, q)
 end
 
-function norm(M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric}, p, X) where {𝔽}
+function LinearAlgebra.norm(
+    M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric},
+    p,
+    X,
+) where {𝔽}
     imetric = metric(M)
     conv = direction(imetric)
     N = MetricManifold(M.manifold, imetric.metric)
@@ -225,9 +229,9 @@ function norm(M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric}, p, X) where 
     return norm(N, Identity(N, p), Xₑ)
 end
 
-function show(io::IO, metric::LeftInvariantMetric)
-    print(io, "LeftInvariantMetric($(metric.metric))")
+function Base.show(io::IO, metric::LeftInvariantMetric)
+    return print(io, "LeftInvariantMetric($(metric.metric))")
 end
-function show(io::IO, metric::RightInvariantMetric)
-    print(io, "RightInvariantMetric($(metric.metric))")
+function Base.show(io::IO, metric::RightInvariantMetric)
+    return print(io, "RightInvariantMetric($(metric.metric))")
 end

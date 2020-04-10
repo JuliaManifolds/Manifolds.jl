@@ -57,6 +57,7 @@ function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,�
             "The point $(p) does not lie on $(M), because x'x is not the unit matrix.",
         )
     end
+    return nothing
 end
 
 @doc raw"""
@@ -95,6 +96,7 @@ function check_tangent_vector(
             "The matrix $(X) is does not lie in the tangent space of $(p) on the Stiefel manifold of dimension ($(n),$(k)), since x'v + v'x is not the zero matrix.",
         )
     end
+    return nothing
 end
 
 decorated_manifold(M::Stiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
@@ -189,19 +191,19 @@ end
 function inverse_retract!(::Stiefel{n,k}, X, p, q, ::QRInverseRetraction) where {n,k}
     A = p' * q
     R = zeros(typeof(one(eltype(p)) * one(eltype(q))), k, k)
-    for i = 1:k
+    for i in 1:k
         b = zeros(i)
         b[i] = 1
-        b[1:(end-1)] = -transpose(R[1:(i-1), 1:(i-1)]) * A[i, 1:(i-1)]
+        b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
         R[1:i, i] = A[1:i, 1:i] \ b
     end
     return copyto!(X, q * R - p)
 end
 
-function isapprox(M::Stiefel, p, X, Y; kwargs...)
+function Base.isapprox(M::Stiefel, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
 end
-isapprox(M::Stiefel, p, q; kwargs...) = isapprox(norm(p - q), 0; kwargs...)
+Base.isapprox(M::Stiefel, p, q; kwargs...) = isapprox(norm(p - q), 0; kwargs...)
 
 @doc raw"""
     manifold_dimension(M::Stiefel)
@@ -221,7 +223,7 @@ manifold_dimension(::Stiefel{n,k,ℝ}) where {n,k} = n * k - div(k * (k + 1), 2)
 manifold_dimension(::Stiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
 manifold_dimension(::Stiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
 
-@doc doc"""
+@doc raw"""
     project(M::Stiefel,p)
 
 Projects `p` from the embedding onto the [`Stiefel`](@ref) `M`, i.e. compute `q`
@@ -312,7 +314,7 @@ i.e. `(n,k)`, which is the matrix dimensions.
 """
 @generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
 
-show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")
+Base.show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")
 
 """
     uniform_distribution(M::Stiefel{n,k,ℝ}, p)

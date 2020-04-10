@@ -78,14 +78,14 @@ Random.seed!(42)
     power_rn1_pt_dist = Manifolds.PowerPointDistribution(
         Mrn1,
         rotations_dist,
-        [randn(Float64, 3, 3) for i = 1:5],
+        [randn(Float64, 3, 3) for i in 1:5],
     )
     power_r2_pt_dist =
         Manifolds.PowerPointDistribution(Mr2, rotations_dist, randn(Float64, 3, 3, 5, 7))
     power_rn2_pt_dist = Manifolds.PowerPointDistribution(
         Mrn2,
         rotations_dist,
-        [randn(Float64, 3, 3) for i = 1:5, j = 1:7],
+        [randn(Float64, 3, 3) for i in 1:5, j in 1:7],
     )
     rotations_tv_dist = Manifolds.normal_tvector_distribution(Mr, MMatrix(id_rot), 1.0)
     power_r1_tv_dist = Manifolds.PowerFVectorDistribution(
@@ -114,7 +114,7 @@ Random.seed!(42)
     basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types_s1
         @testset "Type $(trim(string(T)))..." begin
-            pts1 = [convert(T, rand(power_s1_pt_dist)) for _ = 1:3]
+            pts1 = [convert(T, rand(power_s1_pt_dist)) for _ in 1:3]
             @test injectivity_radius(Ms1, pts1[1]) == π
             basis_diag = get_basis(
                 Ms1,
@@ -142,7 +142,7 @@ Random.seed!(42)
     end
     for T in types_s2
         @testset "Type $(trim(string(T)))..." begin
-            pts2 = [convert(T, rand(power_s2_pt_dist)) for _ = 1:3]
+            pts2 = [convert(T, rand(power_s2_pt_dist)) for _ in 1:3]
             test_manifold(
                 Ms2,
                 pts2;
@@ -163,7 +163,7 @@ Random.seed!(42)
 
     for T in types_r1
         @testset "Type $(trim(string(T)))..." begin
-            pts1 = [convert(T, rand(power_r1_pt_dist)) for _ = 1:3]
+            pts1 = [convert(T, rand(power_r1_pt_dist)) for _ in 1:3]
             test_manifold(
                 Mr1,
                 pts1;
@@ -185,7 +185,7 @@ Random.seed!(42)
 
     for T in types_rn1
         @testset "Type $(trim(string(T)))..." begin
-            pts1 = [convert(T, rand(power_rn1_pt_dist)) for _ = 1:3]
+            pts1 = [convert(T, rand(power_rn1_pt_dist)) for _ in 1:3]
             test_manifold(
                 Mrn1,
                 pts1;
@@ -206,7 +206,7 @@ Random.seed!(42)
     end
     for T in types_r2
         @testset "Type $(trim(string(T)))..." begin
-            pts2 = [convert(T, rand(power_r2_pt_dist)) for _ = 1:3]
+            pts2 = [convert(T, rand(power_r2_pt_dist)) for _ in 1:3]
             test_manifold(
                 Mr2,
                 pts2;
@@ -226,7 +226,7 @@ Random.seed!(42)
     end
     for T in types_rn2
         @testset "Type $(trim(string(T)))..." begin
-            pts2 = [convert(T, rand(power_rn2_pt_dist)) for _ = 1:3]
+            pts2 = [convert(T, rand(power_rn2_pt_dist)) for _ in 1:3]
             test_manifold(
                 Mrn2,
                 pts2;
@@ -266,7 +266,7 @@ Random.seed!(42)
     end
 
     @testset "Basis printing" begin
-        p = hcat([[1.0, 0.0, 0.0] for i = 1:5]...)
+        p = hcat([[1.0, 0.0, 0.0] for i in 1:5]...)
         Bc = get_basis(Ms1, p, DefaultOrthonormalBasis())
         @test sprint(show, "text/plain", Bc) == """
         DefaultOrthonormalBasis(ℝ) for a power manifold

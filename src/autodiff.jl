@@ -18,7 +18,7 @@ adbackend(backend::Val{:default}) = adbackend()
 
 function adbackend(backend::Val{T}) where {T}
     T in _adbackends && return T
-    throw(ArgumentError("Invalid AD backend $(T). Valid options are $(adbackends())."))
+    return throw(ArgumentError("Invalid AD backend $(T). Valid options are $(adbackends())."))
 end
 
 """

@@ -80,6 +80,7 @@ function check_manifold_point(M::GeneralizedGrassmann{n,k,𝔽}, p; kwargs...) w
             "The point $(p) does not lie on $(M), because x'Bx is not the unit matrix.",
         )
     end
+    return nothing
 end
 
 @doc raw"""
@@ -123,6 +124,7 @@ function check_tangent_vector(
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since x'Bv + v'Bx is not the zero matrix.",
         )
     end
+    return nothing
 end
 
 function decorated_manifold(M::GeneralizedGrassmann{N,K,𝔽}) where {N,K,𝔽}
@@ -153,7 +155,7 @@ b_{i}=\begin{cases}
 function distance(M::GeneralizedGrassmann, p, q)
     p ≈ q && return zero(real(eltype(p)))
     a = svd(p' * M.B * q).S
-    a[a.>1] .= 1
+    a[a .> 1] .= 1
     return sqrt(sum((acos.(a)) .^ 2))
 end
 
@@ -220,10 +222,10 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 inner(M::GeneralizedGrassmann{n,k}, p, X, Y) where {n,k} = dot(X, M.B * Y)
 
-function isapprox(M::GeneralizedGrassmann, p, X, Y; kwargs...)
+function Base.isapprox(M::GeneralizedGrassmann, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
 end
-function isapprox(M::GeneralizedGrassmann, p, q; kwargs...)
+function Base.isapprox(M::GeneralizedGrassmann, p, q; kwargs...)
     return isapprox(distance(M, p, q), 0.0; kwargs...)
 end
 
@@ -287,7 +289,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 """
 mean(::GeneralizedGrassmann{n,k} where {n,k}, ::Any...)
 
-function mean!(
+function Statistics.mean!(
     M::GeneralizedGrassmann{n,k},
     p,
     x::AbstractVector,
@@ -297,7 +299,7 @@ function mean!(
     return mean!(M, p, x, w, GeodesicInterpolationWithinRadius(π / 4); kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     project(M::GeneralizedGrassmann, p)
 
 Project `p` from the embedding onto the [`GeneralizedGrassmann`](@ref) `M`, i.e. compute `q`
@@ -361,11 +363,11 @@ function retract!(M::GeneralizedGrassmann, q, p, X, ::ProjectionRetraction)
     return q
 end
 
-function show(io::IO, M::GeneralizedGrassmann{n,k,𝔽}) where {n,k,𝔽}
-    print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
+function Base.show(io::IO, M::GeneralizedGrassmann{n,k,𝔽}) where {n,k,𝔽}
+    return print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
 end
 
-@doc doc"""
+@doc raw"""
     vector_transport_to(M::GeneralizedGrassmann, p, X, q, ::ProjectionTransport)
 
 Compute the vector transport of the tangent vector `X` at `p` to `q`,

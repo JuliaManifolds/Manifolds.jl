@@ -15,7 +15,7 @@ see [`minkowski_metric`](@ref) for the formula.
 """
 struct MinkowskiMetric <: LorentzMetric end
 
-@doc doc"""
+@doc raw"""
     Lorentz{N} = MetricManifold{Euclidean{N,ℝ},LorentzMetric}
 
 The Lorentz manifold (or Lorentzian) is a pseudo-Riemannian manifold.
@@ -52,4 +52,4 @@ Compute the minkowski metric on $\mathbb R^n$ is given by
 \displaystyle\sum_{k=1}^{n-1} a_kb_k.
 ````
 """
-minkowski_metric(a, b) = -a[end] * b[end] + sum(a[1:end-1] .* b[1:end-1])
+minkowski_metric(a, b) = -a[end] * b[end] + sum(a[1:(end - 1)] .* b[1:(end - 1)])

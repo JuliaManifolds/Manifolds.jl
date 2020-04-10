@@ -78,7 +78,7 @@ function PowerManifold(
     ::TPR,
     size::Int...,
 ) where {𝔽,TPR<:AbstractPowerRepresentation}
-    PowerManifold{𝔽,typeof(M),Tuple{size...},TPR}(M)
+    return PowerManifold{𝔽,typeof(M),Tuple{size...},TPR}(M)
 end
 
 @doc raw"""
@@ -195,7 +195,7 @@ function allocation_promotion_function(M::AbstractPowerManifold, f, args::Tuple)
     return allocation_promotion_function(M.manifold, f, args)
 end
 
-^(M::Manifold, n) = PowerManifold(M, n...)
+Base.:^(M::Manifold, n) = PowerManifold(M, n...)
 
 """
     check_manifold_point(M::AbstractProductManifold, p; kwargs...)
@@ -376,7 +376,7 @@ function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonorm
         # TODO: this view is really suboptimal when `dim` can be statically determined
         get_coordinates!(
             M.manifold,
-            view(Y, v_iter:v_iter+dim-1),
+            view(Y, v_iter:(v_iter + dim - 1)),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             B,
@@ -398,7 +398,7 @@ function get_coordinates!(
     for i in get_iterator(M)
         get_coordinates!(
             M.manifold,
-            view(Y, v_iter:v_iter+dim-1),
+            view(Y, v_iter:(v_iter + dim - 1)),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _access_nested(B.data.bases, i),
@@ -431,7 +431,7 @@ function get_vector!(
             M.manifold,
             _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i),
-            X[v_iter:v_iter+dim-1],
+            X[v_iter:(v_iter + dim - 1)],
             _access_nested(B.data.bases, i),
         )
         v_iter += dim
@@ -447,7 +447,7 @@ function get_vector!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBas
             M.manifold,
             _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i),
-            X[v_iter:v_iter+dim-1],
+            X[v_iter:(v_iter + dim - 1)],
             B,
         )
         v_iter += dim
@@ -544,7 +544,7 @@ end
 
 default_metric_dispatch(::AbstractPowerManifold, ::PowerMetric) = Val(true)
 
-function isapprox(M::AbstractPowerManifold, p, q; kwargs...)
+function Base.isapprox(M::AbstractPowerManifold, p, q; kwargs...)
     result = true
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -557,7 +557,7 @@ function isapprox(M::AbstractPowerManifold, p, q; kwargs...)
     end
     return result
 end
-function isapprox(M::AbstractPowerManifold, p, X, Y; kwargs...)
+function Base.isapprox(M::AbstractPowerManifold, p, X, Y; kwargs...)
     result = true
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -617,7 +617,7 @@ Compute the norm of `X` from the tangent space of `p` on an
 [`AbstractPowerManifold`](@ref) `M`, i.e. from the element wise norms the
 Frobenius norm is computed.
 """
-function norm(M::AbstractPowerManifold, p, X)
+function LinearAlgebra.norm(M::AbstractPowerManifold, p, X)
     sum_squares = zero(number_eltype(X))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -636,31 +636,35 @@ function power_dimensions(M::PowerManifold{𝔽,<:Manifold,TSize}) where {𝔽,T
     return size_to_tuple(TSize)
 end
 
-function rand(rng::AbstractRNG, d::PowerFVectorDistribution)
+function Random.rand(rng::AbstractRNG, d::PowerFVectorDistribution)
     fv = zero_vector(d.type, d.point)
-    _rand!(rng, d, fv)
+    Distributions._rand!(rng, d, fv)
     return fv
 end
-function rand(rng::AbstractRNG, d::PowerPointDistribution)
+function Random.rand(rng::AbstractRNG, d::PowerPointDistribution)
     x = allocate_result(d.manifold, rand, d.point)
-    _rand!(rng, d, x)
+    Distributions._rand!(rng, d, x)
     return x
 end
 
-function _rand!(rng::AbstractRNG, d::PowerFVectorDistribution, v::AbstractArray)
+function Distributions._rand!(
+    rng::AbstractRNG,
+    d::PowerFVectorDistribution,
+    v::AbstractArray,
+)
     PM = d.type.manifold
     rep_size = representation_size(PM.manifold)
     for i in get_iterator(d.type.manifold)
         copyto!(d.distribution.point, _read(PM, rep_size, d.point, i))
-        _rand!(rng, d.distribution, _read(PM, rep_size, v, i))
+        Distributions._rand!(rng, d.distribution, _read(PM, rep_size, v, i))
     end
     return v
 end
-function _rand!(rng::AbstractRNG, d::PowerPointDistribution, x::AbstractArray)
+function Distributions._rand!(rng::AbstractRNG, d::PowerPointDistribution, x::AbstractArray)
     M = d.manifold
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        _rand!(rng, d.distribution, _write(M, rep_size, x, i))
+        Distributions._rand!(rng, d.distribution, _write(M, rep_size, x, i))
     end
     return x
 end
@@ -743,7 +747,7 @@ function sharp!(M::AbstractPowerManifold, X::TFVector, p, ξ::CoTFVector)
     return X
 end
 
-function show(
+function Base.show(
     io::IO,
     mime::MIME"text/plain",
     B::CachedBasis{𝔽,T,D},
@@ -754,19 +758,23 @@ function show(
         show(io, mime, _access_nested(B.data.bases, i))
         println(io)
     end
+    return nothing
 end
-function show(
+function Base.show(
     io::IO,
     M::PowerManifold{𝔽,TM,TSize,ArrayPowerRepresentation},
 ) where {𝔽,TM,TSize}
-    print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
+    return print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
 end
-function show(io::IO, M::PowerManifold{𝔽,TM,TSize,TPR}) where {𝔽,TM,TSize,TPR}
-    print(io, "PowerManifold($(M.manifold), $(TPR()), $(join(TSize.parameters, ", ")))")
+function Base.show(io::IO, M::PowerManifold{𝔽,TM,TSize,TPR}) where {𝔽,TM,TSize,TPR}
+    return print(
+        io,
+        "PowerManifold($(M.manifold), $(TPR()), $(join(TSize.parameters, ", ")))",
+    )
 end
 
-support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)
-support(d::PowerPointDistribution) = MPointSupport(d.manifold)
+Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)
+Distributions.support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 
 @inline function _write(M::AbstractPowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)
     return _write(M, rep_size, x, (i,))
