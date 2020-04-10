@@ -86,7 +86,7 @@ end
 """
     check_manifold_point(M::AbstractSphere, p; kwargs...)
 
-Check whether `p` is a valid point on the [`Sphere`](@ref) `M`, i.e. is a point in
+Check whether `p` is a valid point on the [`AbstractSphere`](@ref) `M`, i.e. is a point in
 the embedding of unit length.
 The tolerance for the last test can be set using the `kwargs...`.
 """
@@ -111,7 +111,7 @@ end
 """
     check_tangent_vector(M::AbstractSphere, p, X; check_base_point = true, kwargs... )
 
-Check whether `X` is a tangent vector to `p` on the [`Sphere`](@ref) `M`, i.e.
+Check whether `X` is a tangent vector to `p` on the [`AbstractSphere`](@ref) `M`, i.e.
 after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
 and orthogonal to `p`.
 The optional parameter `check_base_point` indicates, whether to call
@@ -421,14 +421,14 @@ function uniform_distribution(M::AbstractSphere, p)
     return ProjectedPointDistribution(M, d, project!, p)
 end
 
-@doc doc"""
+@doc raw"""
     vector_transport_to(M::AbstractSphere, p, X, q, ::ParallelTransport)
 
 Compute the parallel transport on the [`Sphere`](@ref) of the tangent vector `X` at `p`
 to `q`, provided, the [`geodesic`](@ref) between `p` and `q` is unique. The formula reads
 
 ````math
-P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_𝕊}(p,q)}
+P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_𝕊(p,q)}
 \bigl(\log_xy + \log_yx \bigr).
 ````
 """

@@ -25,6 +25,7 @@ include("generalized_grassmann.jl")
 include("generalized_stiefel.jl")
 include("grassmann.jl")
 include("hyperbolic.jl")
+include("probability_simplex.jl")
 include("rotations.jl")
 include("skewsymmetric.jl")
 include("sphere.jl")
@@ -32,8 +33,8 @@ include("stiefel.jl")
 include("symmetric.jl")
 include("symmetric_positive_definite.jl")
 
+include("multinomial_matrices.jl")
 include("oblique.jl")
-
 include("torus.jl")
 
 #meta manifolds
