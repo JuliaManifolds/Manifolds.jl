@@ -295,7 +295,13 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 """
 mean(::ProbabilitySimplex, ::Any...)
 
-function Statistics.mean!(M::ProbabilitySimplex, p, x::AbstractVector, w::AbstractVector; kwargs...)
+function Statistics.mean!(
+    M::ProbabilitySimplex,
+    p,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+)
     return mean!(M, p, x, w, GeodesicInterpolation(); kwargs...)
 end
 
