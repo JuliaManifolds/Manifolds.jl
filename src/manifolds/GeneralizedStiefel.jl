@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     GeneralizedStiefel{n,k,𝔽,B} <: AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
 
 The Generalized Stiefel manifold consists of all $n\times k$, $n\geq k$ orthonormal
@@ -49,7 +49,7 @@ function GeneralizedStiefel(
     return GeneralizedStiefel{n,k,𝔽,typeof(B)}(B)
 end
 
-@doc doc"""
+@doc raw"""
     check_manifold_point(M::GeneralizedStiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`GeneralizedStiefel`](@ref) `M`=$\operatorname{St}(n,k,B)$,
@@ -72,7 +72,7 @@ function check_manifold_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) whe
 end
 
 
-@doc doc"""
+@doc raw"""
     check_tangent_vector(M::GeneralizedStiefel, p, X; kwargs...)
 
 Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`](@ref)
@@ -117,7 +117,7 @@ embed!(::GeneralizedStiefel, q, p) = (q .= p)
 
 embed!(::GeneralizedStiefel, Y, p, X) = (Y .= X)
 
-@doc doc"""
+@doc raw"""
     inner(M::GeneralizedStiefel, p, X, Y)
 
 Compute the inner product for two tangent vectors `X`, `Y` from the tangent space of `p`
@@ -132,7 +132,7 @@ tangent space.
 inner(M::GeneralizedStiefel, p, X, Y) = dot(X, M.B * Y)
 
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(M::GeneralizedStiefel)
 
 Return the dimension of the [`GeneralizedStiefel`](@ref) manifold `M`=$\operatorname{St}(n,k,B,𝔽)$.
@@ -152,7 +152,7 @@ end
 manifold_dimension(::GeneralizedStiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
 manifold_dimension(::GeneralizedStiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
 
-@doc doc"""
+@doc raw"""
     project(M::GeneralizedStiefel,p)
 
 Project `p` from the embedding onto the [`GeneralizedStiefel`](@ref) `M`, i.e. compute `q`
@@ -169,7 +169,7 @@ function project!(M::GeneralizedStiefel, q, p)
     return q
 end
 
-@doc doc"""
+@doc raw"""
     project(M:GeneralizedStiefel, p, X)
 
 Project `X` onto the tangent space of `p` to the [`GeneralizedStiefel`](@ref) manifold `M`.
@@ -189,7 +189,7 @@ function project!(M::GeneralizedStiefel, Y, p, X)
     copyto!(Y, X - p * Hermitian((A + A') / 2))
     return Y
 end
-@doc doc"""
+@doc raw"""
     retract(M::GeneralizedStiefel, p, X)
     retract(M::GeneralizedStiefel, p, X, ::PolarRetraction)
     retract(M::GeneralizedStiefel, p, X, ::ProjectionRetraction)
@@ -219,7 +219,7 @@ function Base.show(io::IO, M::GeneralizedStiefel{n,k,𝔽}) where {n,k,𝔽}
 end
 
 
-@doc doc"""
+@doc raw"""
     vector_transport_to(M::GeneralizedStiefel, p, X, q, ::ProjectionTransport)
 
 Compute the vector transport of the tangent vector `X` at `p` to `q`,

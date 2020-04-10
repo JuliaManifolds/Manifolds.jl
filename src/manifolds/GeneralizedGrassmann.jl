@@ -299,7 +299,7 @@ function Statistics.mean!(
     return mean!(M, p, x, w, GeodesicInterpolationWithinRadius(π / 4); kwargs...)
 end
 
-@doc doc"""
+@doc raw"""
     project(M::GeneralizedGrassmann, p)
 
 Project `p` from the embedding onto the [`GeneralizedGrassmann`](@ref) `M`, i.e. compute `q`
@@ -367,7 +367,7 @@ function Base.show(io::IO, M::GeneralizedGrassmann{n,k,𝔽}) where {n,k,𝔽}
     return print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
 end
 
-@doc doc"""
+@doc raw"""
     vector_transport_to(M::GeneralizedGrassmann, p, X, q, ::ProjectionTransport)
 
 Compute the vector transport of the tangent vector `X` at `p` to `q`,

@@ -223,7 +223,7 @@ manifold_dimension(::Stiefel{n,k,ℝ}) where {n,k} = n * k - div(k * (k + 1), 2)
 manifold_dimension(::Stiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
 manifold_dimension(::Stiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
 
-@doc doc"""
+@doc raw"""
     project(M::Stiefel,p)
 
 Projects `p` from the embedding onto the [`Stiefel`](@ref) `M`, i.e. compute `q`
