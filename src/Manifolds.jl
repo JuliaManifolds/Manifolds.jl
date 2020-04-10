@@ -1,6 +1,5 @@
 module Manifolds
 
-import ManifoldsBase: OutOfInjectivityRadiusError
 import ManifoldsBase:
     allocate,
     allocate_result,
@@ -11,7 +10,6 @@ import ManifoldsBase:
     check_manifold_point,
     check_manifold_point__transparent,
     check_tangent_vector,
-    combine_allocation_promotion_functions,
     decorated_manifold,
     decorator_transparent_dispatch,
     default_decorator_dispatch,
@@ -29,7 +27,6 @@ import ManifoldsBase:
     get_vector,
     get_vector!,
     get_vectors,
-    geodesic,
     injectivity_radius,
     inner,
     inner__intransparent,
@@ -46,11 +43,7 @@ import ManifoldsBase:
     representation_size,
     retract,
     retract!,
-    shortest_geodesic,
-    vector_transport_along,
-    vector_transport_along!,
     vector_transport_direction,
-    vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
     zero_tangent_vector,
@@ -63,7 +56,6 @@ using FiniteDifferences
 using HybridArrays
 using LinearAlgebra
 using LightGraphs
-using LightGraphs: AbstractGraph
 using ManifoldsBase
 using ManifoldsBase: ℝ, ℂ, ℍ
 using ManifoldsBase:
@@ -74,6 +66,7 @@ using ManifoldsBase:
     Manifold,
     MPoint,
     TVector
+using ManifoldsBase: OutOfInjectivityRadiusError
 using ManifoldsBase:
     AbstractBasis,
     AbstractOrthogonalBasis,
@@ -111,11 +104,17 @@ using ManifoldsBase:
     @invoke_maker,
     _euclidean_basis_vector,
     _extract_val,
+    combine_allocation_promotion_functions,
+    geodesic,
     hat,
     hat!,
     is_decorator_transparent,
     is_default_decorator,
     manifold_function_not_implemented_message,
+    shortest_geodesic,
+    vector_transport_along,
+    vector_transport_along!,
+    vector_transport_direction!,
     vee,
     vee!
 using Markdown: @doc_str
