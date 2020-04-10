@@ -359,7 +359,7 @@ function retract!(::ProbabilitySimplex, q, p, X, ::SoftmaxRetraction)
 end
 
 function show(io::IO, ::ProbabilitySimplex{n}) where {n}
-    print(io, "ProbabilitySimplex($(n))")
+    return print(io, "ProbabilitySimplex($(n))")
 end
 
 @doc raw"""
