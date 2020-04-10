@@ -54,8 +54,8 @@ using Distributions
 using Einsum: @einsum
 using FiniteDifferences
 using HybridArrays
-using LinearAlgebra
 using LightGraphs
+using LinearAlgebra
 using ManifoldsBase
 using ManifoldsBase:
     ℝ,
