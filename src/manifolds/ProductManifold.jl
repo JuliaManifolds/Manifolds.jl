@@ -43,9 +43,9 @@ end
 const PRODUCT_BASIS_LIST_CACHED = [CachedBasis]
 
 @doc raw"""
-    ProductMetric{<:(Tuple{N,Metric} where N)} <: Metric
+    ProductMetric{<:Tuple{N,Metric} where N} <: Metric
 
-A type to represent the product of `metrics` for a [`ProductManifold`](@ref).
+A type to represent the product of [`Metric`](@ref)s for a [`ProductManifold`](@ref).
 
 # Constructor
 
