@@ -18,10 +18,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
-      - uses: mshick/add-pr-comment@v1
-        if: github.event_name == 'pull_request' && success()
-        with:
-          message: |
-            Documentation preview: https://juliamanifolds.github.io/Manifolds.jl/previews/PR${{ github.event.number }}/
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          allow-repeats: false
