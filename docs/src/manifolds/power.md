@@ -33,14 +33,14 @@ This can also be used in combination with [HybridArrays.jl](https://github.com/m
 
 ```@example 1
 using HybridArrays, StaticArrays
-q = HybridArray{Tuple{3,StaticArrays.Dynamic()}, Float64, 2}(p)
+q = HybridArray{Tuple{3,StaticArrays.Dynamic()},Float64,2}(p)
 ```
 
 which is still a valid point on `M` and [`PowerManifold`](@ref) works with these, too.
 
 An advantage of this representation is that it is quite efficient, especially when a `HybridArray` (from the [HybridArrays.jl](https://github.com/mateuszbaran/HybridArrays.jl) package) is used to represent a point on the power manifold.
 A disadvantage is not being able to easily identify parts of the multidimensional array that correspond to a single point on the base manifold.
-Another problem is, that accessing a single point is ` p[:,1]` which might be unintuitive.
+Another problem is, that accessing a single point is ` p[:, 1]` which might be unintuitive.
 
 For the [`NestedPowerRepresentation`](@ref) we can now do
 
@@ -50,13 +50,28 @@ M = PowerManifold(Sphere(2), NestedPowerRepresentation(), 4)
 p = [ [1.0, 0.0, 0.0],
       [1/sqrt(2.0), 1/sqrt(2.0), 0.0],
       [1/sqrt(2.0), 0.0, 1/sqrt(2.0)],
-      [0.0, 1.0, 0.0]
+      [0.0, 1.0, 0.0],
     ]
 ```
 
-which is again a valid point so [`is_manifold_point`](@ref)`(M,p)` here also yields true.
+which is again a valid point so [`is_manifold_point`](@ref)`(M, p)` here also yields true.
 A disadvantage might be that with nested arrays one loses a little bit of performance.
 The data however is nicely encapsulated. Accessing the first data item is just `p[1]`.
+
+For accessing points on power manifolds in both representations you can use [`get_component`](@ref) and [`set_component!`](@ref) functions.
+They work work both point representations.
+
+```@example 3
+using Manifolds
+M = PowerManifold(Sphere(2), NestedPowerRepresentation(), 4)
+p = [ [1.0, 0.0, 0.0],
+      [1/sqrt(2.0), 1/sqrt(2.0), 0.0],
+      [1/sqrt(2.0), 0.0, 1/sqrt(2.0)],
+      [0.0, 1.0, 0.0],
+    ]
+set_component!(M, p, [0.0, 0.0, 1.0], 4)
+get_component(M, p, 4)
+```
 
 ## Types and Functions
 ```@autodocs
