@@ -9,15 +9,8 @@ include("utils.jl")
 
 function our_base_ambiguities()
     ambigs = Test.detect_ambiguities(Base)
-    modules_we_care_about = [
-        Base,
-        LinearAlgebra,
-        Manifolds,
-        ManifoldsBase,
-        StaticArrays,
-        Statistics,
-        StatsBase,
-    ]
+    modules_we_care_about =
+        [Base, LinearAlgebra, Manifolds, ManifoldsBase, StaticArrays, Statistics, StatsBase]
     our_ambigs = filter(ambigs) do (m1, m2)
         we_care = m1.module in modules_we_care_about && m2.module in modules_we_care_about
         return we_care && (m1.module === Manifolds || m2.module === Manifolds)
