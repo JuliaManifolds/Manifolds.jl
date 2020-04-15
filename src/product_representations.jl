@@ -204,7 +204,8 @@ submanifold_component(p, i::Integer) = submanifold_component(p, Val(i))
     submanifold_components(M::Manifold, p)
     submanifold_components(p)
 
-Get the projected components of `p` on the submanifolds of `M`.
+Get the projected components of `p` on the submanifolds of `M`. The components are returned
+as a tuple.
 """
 submanifold_components(::Any...)
 submanifold_components(M::Manifold, p) = submanifold_components(p)

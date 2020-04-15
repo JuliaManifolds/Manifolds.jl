@@ -985,6 +985,28 @@ function Distributions.support(tvd::ProductFVectorDistribution)
     )
 end
 
+@doc raw"""
+    vector_transport_to(M::ProductManifold, p, X, q, m::AbstractVectorTransportMethod)
+
+Compute the vector transport the tangent vector `X`at `p` to `q` on the
+[`ProductManifold`](@ref) `M` using an [`AbstractVectorTransportMethod`](@ref) `m`.
+This method is performed elementwise, i.e. the method `m` has to be implemented on the
+base manifold.
+"""
+vector_transport_to(::ProductManifold, ::Any, ::Any, ::Any, ::AbstractVectorTransportMethod...)
+
+function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::AbstractVectorTransportMethod)
+    map(
+        (Nl,Yl,pl,Xl,ql) -> vector_transport_to!(Nl,Yl,pl,Xl,ql,m),
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, q),
+        submanifold_components(M, X),
+        submanifold_components(M, p),
+    )
+    return Y
+end
+
 function zero_tangent_vector!(M::ProductManifold, X, p)
     map(
         zero_tangent_vector!,
