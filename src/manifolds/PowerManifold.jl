@@ -140,6 +140,15 @@ struct PowerFVectorDistribution{
 end
 
 """
+    PowerVectorTransport(method::AbstractVectorTransportMethod)
+
+Power vector transport method based on `method`. Works on [`AbstractPowerManifold`](@ref)s.
+"""
+struct PowerVectorTransport{TR<:AbstractVectorTransportMethod} <: AbstractVectorTransportMethod
+    method::TR
+end
+
+"""
     PowerBasisData{TB<:AbstractArray}
 
 Data storage for an array of basis data.
@@ -777,16 +786,16 @@ Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, 
 Distributions.support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 
 @doc raw"""
-    vector_transport_to(M::AbstractPowerManifold, p, X, q, method::AbstractVectorTransportMethod)
+    vector_transport_to(M::AbstractPowerManifold, p, X, q, method::PowerVectorTransport)
 
 Compute the vector transport the tangent vector `X`at `p` to `q` on the
-[`PowerManifold`](@ref) `M` using an [`AbstractVectorTransportMethod`](@ref) `m`.
+[`PowerManifold`](@ref) `M` using an [`PowerVectorTransport`](@ref) `m`.
 This method is performed elementwise, i.e. the method `m` has to be implemented on the
 base manifold.
 """
-vector_transport_to(::AbstractPowerManifold, ::Any, ::Any, ::Any, ::AbstractVectorTransportMethod)
+vector_transport_to(::AbstractPowerManifold, ::Any, ::Any, ::Any, ::PowerVectorTransport)
 
-function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q, m::AbstractVectorTransportMethod)
+function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q, m::PowerVectorTransport)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         vector_transport_to!(
@@ -795,7 +804,7 @@ function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q, m::AbstractV
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _read(M, rep_size, q, i),
-            m,
+            m.method,
         )
     end
     return Y

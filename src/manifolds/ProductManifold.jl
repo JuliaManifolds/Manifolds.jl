@@ -111,6 +111,19 @@ function allocation_promotion_function(M::ProductManifold, f, args::Tuple)
     return reduce(combine_allocation_promotion_functions, apfs)
 end
 
+"""
+    ProductVectorTransport(methods::AbstractVectorTransportMethod...)
+
+Product vector transport type of `methods`. Works on [`ProductManifold`](@ref).
+"""
+struct ProductVectorTransport{TR<:Tuple} <: AbstractVectorTransportMethod
+    methods::TR
+end
+
+function ProductVectorTransport(methods::AbstractVectorTransportMethod...)
+    return ProductVectorTransport{typeof(methods)}(methods)
+end
+
 
 """
     check_manifold_point(M::ProductManifold, p; kwargs...)
@@ -986,23 +999,24 @@ function Distributions.support(tvd::ProductFVectorDistribution)
 end
 
 @doc raw"""
-    vector_transport_to(M::ProductManifold, p, X, q, m::AbstractVectorTransportMethod)
+    vector_transport_to(M::ProductManifold, p, X, q, m::ProductVectorTransport)
 
 Compute the vector transport the tangent vector `X`at `p` to `q` on the
 [`ProductManifold`](@ref) `M` using an [`AbstractVectorTransportMethod`](@ref) `m`.
 This method is performed elementwise, i.e. the method `m` has to be implemented on the
 base manifold.
 """
-vector_transport_to(::ProductManifold, ::Any, ::Any, ::Any, ::AbstractVectorTransportMethod...)
+vector_transport_to(::ProductManifold, ::Any, ::Any, ::Any, ::ProductVectorTransport)
 
-function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::AbstractVectorTransportMethod)
+function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTransport)
     map(
-        (Nl,Yl,pl,Xl,ql) -> vector_transport_to!(Nl,Yl,pl,Xl,ql,m),
+        vector_transport_to!,
         M.manifolds,
         submanifold_components(M, Y),
         submanifold_components(M, q),
         submanifold_components(M, X),
         submanifold_components(M, p),
+        m.methods
     )
     return Y
 end
