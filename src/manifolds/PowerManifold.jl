@@ -749,7 +749,7 @@ end
     set_component!(M::AbstractPowerManifold, q, p, idx...)
 
 Set the component of a point `q` on an [`AbstractPowerManifold`](@ref) `M` at index `idx`
-to `p`.
+to `p`, which itself is a point on the [`Manifold`](@ref) the power manifold is build on.
 """
 function set_component!(M::AbstractPowerManifold, q, p, idx...)
     rep_size = representation_size(M.manifold)

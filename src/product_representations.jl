@@ -206,7 +206,7 @@ end
     submanifold_components(M::Manifold, p)
     submanifold_components(p)
 
-Get the projected components of `p` on the submanifolds of `M`.
+Get the projected components of `p` on the submanifolds of `M`. The components are returned in a Tuple.
 """
 submanifold_components(::Any...)
 @inline submanifold_components(M::Manifold, p) = submanifold_components(p)

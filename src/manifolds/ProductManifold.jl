@@ -883,7 +883,7 @@ end
 """
     set_component!(M::ProductManifold, q, p, i)
 
-Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`.
+Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`, where `p` is a point on the [`Manifold`](@ref) this factor of the product manifold consists of.
 """
 function set_component!(M::ProductManifold, q, p, i)
     return copyto!(submanifold_component(M, q, i), p)
