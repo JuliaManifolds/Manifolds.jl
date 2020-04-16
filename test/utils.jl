@@ -13,6 +13,8 @@ using ForwardDiff
 using Random
 using ReverseDiff
 using StaticArrays
+using Statistics
+using StatsBase
 using Test
 using LightGraphs
 using SimpleWeightedGraphs
