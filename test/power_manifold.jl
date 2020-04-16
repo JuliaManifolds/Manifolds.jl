@@ -109,6 +109,20 @@ Random.seed!(42)
         rotations_tv_dist,
     )
 
+    @testset "get_component and set_component!" begin
+        p1 = randn(3, 5)
+        @test get_component(Ms1, p1, 1) == p1[:, 1]
+        p2 = [10.0, 11.0, 12.0]
+        set_component!(Ms1, p1, p2, 2)
+        @test get_component(Ms1, p1, 2) == p2
+
+        Msn1 = PowerManifold(Ms, Manifolds.NestedPowerRepresentation(), 5)
+        pn1 = [randn(3) for _ in 1:5]
+        @test get_component(Msn1, pn1, 1) == pn1[1]
+        set_component!(Msn1, pn1, p2, 2)
+        @test get_component(Msn1, pn1, 2) == p2
+    end
+
     trim(s::String) = s[1:min(length(s), 20)]
 
     basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))

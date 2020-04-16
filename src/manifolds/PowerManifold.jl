@@ -39,7 +39,7 @@ abstract type AbstractPowerManifold{𝔽,M<:Manifold{𝔽},TPR<:AbstractPowerRep
               Manifold{𝔽} end
 
 @doc raw"""
-    PowerManifold{𝔽,TM<:Manifold, TSize<:Tuple, TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{𝔽,TM}
+    PowerManifold{𝔽,TM<:Manifold,TSize<:Tuple,TPR<:AbstractPowerRepresentation} <: AbstractPowerManifold{𝔽,TM}
 
 The power manifold $\mathcal M^{n_1× n_2 × … × n_d}$ with power geometry
  `TSize` statically defines the number of elements along each axis.
@@ -55,11 +55,11 @@ power manifolds might be faster if they are represented as [`ProductManifold`](@
 
 # Constructor
 
-    PowerManifold(M, N_1, N_2, ..., N_n)
-    PowerManifold(M, NestedPowerRepresentation(), N_1, N_2, ..., N_n)
-    M^(N_1,N_2, ..., N_n)
+    PowerManifold(M, N_1, N_2, ..., N_d)
+    PowerManifold(M, NestedPowerRepresentation(), N_1, N_2, ..., N_d)
+    M^(N_1, N_2, ..., N_d)
 
-Generate the power manifold $M^{N_1 × N_2 × … × N_n}$.
+Generate the power manifold $M^{N_1 × N_2 × … × N_d}$.
 By default, the [`ArrayPowerRepresentation`](@ref) of points
 and tangent vectors is used, although a different one, for example
 [`NestedPowerRepresentation`](@ref), can be given as the second argument to the
@@ -343,6 +343,16 @@ for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES
     end)
 end
 
+"""
+    get_component(M::AbstractPowerManifold, p, idx...)
+
+Get the component of a point `p` on an [`AbstractPowerManifold`](@ref) `M` at index `idx`.
+"""
+function get_component(M::AbstractPowerManifold, p, idx...)
+    rep_size = representation_size(M.manifold)
+    return _read(M, rep_size, p, idx)
+end
+
 function get_coordinates(M::AbstractPowerManifold, p, X, B::DefaultOrthonormalBasis)
     rep_size = representation_size(M.manifold)
     vs = [
@@ -408,7 +418,7 @@ function get_coordinates!(
     return Y
 end
 
-get_iterator(M::PowerManifold{𝔽,<:Manifold{𝔽},Tuple{N}}) where {𝔽,N} = 1:N
+get_iterator(M::PowerManifold{𝔽,<:Manifold{𝔽},Tuple{N}}) where {𝔽,N} = Base.OneTo(N)
 @generated function get_iterator(
     M::PowerManifold{𝔽,<:Manifold{𝔽},SizeTuple},
 ) where {𝔽,SizeTuple}
@@ -669,10 +679,15 @@ function Distributions._rand!(rng::AbstractRNG, d::PowerPointDistribution, x::Ab
     return x
 end
 
-@inline function _read(M::AbstractPowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)
+Base.@propagate_inbounds @inline function _read(
+    M::AbstractPowerManifold,
+    rep_size::Tuple,
+    x::AbstractArray,
+    i::Int,
+)
     return _read(M, rep_size, x, (i,))
 end
-@inline function _read(
+Base.@propagate_inbounds @inline function _read(
     ::PowerManifoldMultidimensional,
     rep_size::Tuple,
     x::AbstractArray,
@@ -680,7 +695,7 @@ end
 )
     return view(x, rep_size_to_colons(rep_size)..., i...)
 end
-@inline function _read(
+Base.@propagate_inbounds @inline function _read(
     ::PowerManifoldMultidimensional,
     rep_size::Tuple,
     x::HybridArray,
@@ -688,7 +703,12 @@ end
 )
     return x[rep_size_to_colons(rep_size)..., i...]
 end
-@inline function _read(::PowerManifoldNested, rep_size::Tuple, x::AbstractArray, i::Tuple)
+Base.@propagate_inbounds @inline function _read(
+    ::PowerManifoldNested,
+    rep_size::Tuple,
+    x::AbstractArray,
+    i::Tuple,
+)
     return view(x[i...], rep_size_to_colons(rep_size)...)
 end
 
@@ -723,6 +743,17 @@ function retract!(M::AbstractPowerManifold, q, p, X, method::PowerRetraction)
         )
     end
     return q
+end
+
+"""
+    set_component!(M::AbstractPowerManifold, q, p, idx...)
+
+Set the component of a point `q` on an [`AbstractPowerManifold`](@ref) `M` at index `idx`
+to `p`, which itself is a point on the [`Manifold`](@ref) the power manifold is build on.
+"""
+function set_component!(M::AbstractPowerManifold, q, p, idx...)
+    rep_size = representation_size(M.manifold)
+    return copyto!(_write(M, rep_size, q, idx), p)
 end
 
 @doc raw"""
