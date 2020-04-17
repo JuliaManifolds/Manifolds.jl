@@ -203,6 +203,7 @@ export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibe
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
 export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribution
+export PowerVectorTransport, ProductVectorTransport
 export AbstractEmbeddedManifold
 export Metric,
     RiemannianMetric,
@@ -224,7 +225,9 @@ export AbstractRetractionMethod,
     QRRetraction,
     PolarRetraction,
     ProjectionRetraction,
-    SoftmaxRetraction
+    SoftmaxRetraction,
+    ProductRetraction,
+    PowerRetraction
 export AbstractInverseRetractionMethod,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
