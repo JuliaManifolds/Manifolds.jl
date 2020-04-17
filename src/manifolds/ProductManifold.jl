@@ -1031,9 +1031,9 @@ function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTr
         vector_transport_to!,
         M.manifolds,
         submanifold_components(M, Y),
-        submanifold_components(M, q),
-        submanifold_components(M, X),
         submanifold_components(M, p),
+        submanifold_components(M, X),
+        submanifold_components(M, q),
         m.methods
     )
     return Y

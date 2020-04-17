@@ -3,7 +3,7 @@ include("utils.jl")
 @testset "Sphere" begin
     M = Sphere(2)
     @testset "Sphere Basics" begin
-        @test repr(M) == "Sphere(2; field = ℝ)"
+        @test repr(M) == "Sphere(2, ℝ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3},ℝ}
         @test representation_size(M) == (3,)
         @test injectivity_radius(M) == π
@@ -100,7 +100,7 @@ include("utils.jl")
 
     @testset "Complex Sphere" begin
         M = Sphere(2, ℂ)
-        @test repr(M) == "Sphere(2; field = ℂ)"
+        @test repr(M) == "Sphere(2, ℂ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3},ℂ}
         @test representation_size(M) == (3,)
         p = [1.0, 1.0im, 1.0]

@@ -103,6 +103,14 @@ include("utils.jl")
             ])
             @test isa(rand(ugd_mmatrix), MMatrix)
         end
+
+        @testset "vector transport" begin
+            x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            v = [0.0 0.0; 0.0 0.0; 0.0 1.0]
+            y = exp(M, x, v)
+            @test vector_transport_to(M,x,v,y,ProjectionTransport()) == project(M,y,v)
+            @test is_tangent_vector(M,y,vector_transport_to(M,x,v,y,ProjectionTransport()),true; atol=10^-15)
+        end
     end
 
     @testset "Complex" begin
