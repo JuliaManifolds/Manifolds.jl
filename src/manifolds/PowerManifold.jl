@@ -144,7 +144,8 @@ end
 
 Power vector transport method based on `method`. Works on [`AbstractPowerManifold`](@ref)s.
 """
-struct PowerVectorTransport{TR<:AbstractVectorTransportMethod} <: AbstractVectorTransportMethod
+struct PowerVectorTransport{TR<:AbstractVectorTransportMethod} <:
+       AbstractVectorTransportMethod
     method::TR
 end
 

@@ -310,13 +310,13 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
     )
 
     @testset "product vector transport" begin
-            p = ProductRepr([1.0,0.0,0.0], [0.0,0.0])
-            q = ProductRepr([0.0,1.0,0.0], [2.0,0.0])
-            X = log(Mse,p,q)
-            m = ProductVectorTransport(ParallelTransport(),ParallelTransport())
-            Y = vector_transport_to(Mse,p,X,q,m)
-            Z = -log(Mse,q,p)
-            @test isapprox(Mse,q,Y,Z)
+        p = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
+        q = ProductRepr([0.0, 1.0, 0.0], [2.0, 0.0])
+        X = log(Mse, p, q)
+        m = ProductVectorTransport(ParallelTransport(), ParallelTransport())
+        Y = vector_transport_to(Mse, p, X, q, m)
+        Z = -log(Mse, q, p)
+        @test isapprox(Mse, q, Y, Z)
     end
 
     @testset "prod_point" begin

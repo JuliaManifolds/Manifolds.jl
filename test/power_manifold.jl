@@ -124,12 +124,12 @@ Random.seed!(42)
 
     @testset "power vector transport" begin
         m = PowerVectorTransport(ParallelTransport())
-        p = repeat([1.0,0.0,0.0],1,5)
-        q = repeat([0.0,1.0,0.0],1,5)
-        X = log(Ms1,p,q)
-        Y = vector_transport_to(Ms1,p,X,q,m)
-        Z = -log(Ms1,q,p)
-        @test isapprox(Ms1,q,Y,Z)
+        p = repeat([1.0, 0.0, 0.0], 1, 5)
+        q = repeat([0.0, 1.0, 0.0], 1, 5)
+        X = log(Ms1, p, q)
+        Y = vector_transport_to(Ms1, p, X, q, m)
+        Z = -log(Ms1, q, p)
+        @test isapprox(Ms1, q, Y, Z)
     end
     trim(s::String) = s[1:min(length(s), 20)]
 
