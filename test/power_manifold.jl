@@ -18,6 +18,12 @@ Random.seed!(42)
     Mr = Manifolds.Rotations(3)
     Mr1 = PowerManifold(Mr, 5)
     Mrn1 = PowerManifold(Mr, Manifolds.NestedPowerRepresentation(), 5)
+    @test PowerManifold(PowerManifold(Mr, 2), 3) == PowerManifold(Mr, 2, 3)
+    @test PowerManifold(Torus(2), 3) isa PowerManifold{ℝ,Torus{2}}
+    @test PowerManifold(Mrn1, 3) ==
+          PowerManifold(Mr, Manifolds.NestedPowerRepresentation(), 5, 3)
+    @test PowerManifold(Mrn1, Manifolds.ArrayPowerRepresentation(), 3) ==
+          PowerManifold(Mr, Manifolds.ArrayPowerRepresentation(), 5, 3)
     @test manifold_dimension(Mr1) == 15
     @test manifold_dimension(Mrn1) == 15
     Mr2 = PowerManifold(Mr, 5, 7)

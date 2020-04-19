@@ -64,21 +64,39 @@ By default, the [`ArrayPowerRepresentation`](@ref) of points
 and tangent vectors is used, although a different one, for example
 [`NestedPowerRepresentation`](@ref), can be given as the second argument to the
 constructor.
+When `M` is a `PowerManifold` (not any [`AbstractPowerManifold`](@ref)) itself, given
+dimensions will be appended to the dimensions already present, for example
+`PowerManifold(PowerManifold(Sphere(2), 2), 3)` is equivalent to
+`PowerManifold(Sphere(2), 2, 3)`. This feature preserves the representation of the inner
+power manifold (unless it's explicitly overridden).
 """
 struct PowerManifold{𝔽,TM<:Manifold{𝔽},TSize,TPR<:AbstractPowerRepresentation} <:
        AbstractPowerManifold{𝔽,TM,TPR}
     manifold::TM
 end
 
-function PowerManifold(M::Manifold{𝔽}, size::Int...) where {𝔽}
+function PowerManifold(M::Manifold{𝔽}, size::Integer...) where {𝔽}
     return PowerManifold{𝔽,typeof(M),Tuple{size...},ArrayPowerRepresentation}(M)
 end
 function PowerManifold(
     M::Manifold{𝔽},
     ::TPR,
-    size::Int...,
+    size::Integer...,
 ) where {𝔽,TPR<:AbstractPowerRepresentation}
     return PowerManifold{𝔽,typeof(M),Tuple{size...},TPR}(M)
+end
+function PowerManifold(
+    M::PowerManifold{𝔽,TM,TSize,TPR},
+    size::Integer...,
+) where {𝔽,TM<:Manifold{𝔽},TSize,TPR<:AbstractPowerRepresentation}
+    return PowerManifold{𝔽,TM,Tuple{TSize.parameters...,size...},TPR}(M.manifold)
+end
+function PowerManifold(
+    M::PowerManifold{𝔽,TM,TSize},
+    ::TPR,
+    size::Integer...,
+) where {𝔽,TM<:Manifold{𝔽},TSize,TPR<:AbstractPowerRepresentation}
+    return PowerManifold{𝔽,TM,Tuple{TSize.parameters...,size...},TPR}(M.manifold)
 end
 
 @doc raw"""
