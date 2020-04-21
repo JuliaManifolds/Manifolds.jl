@@ -19,6 +19,7 @@ makedocs(
         "ManifoldsBase.jl" => "interface.md",
         "Manifolds" => [
             "Basic manifolds" => [
+                "Centered matrices" => "manifolds/centeredmatrices.md",
                 "Cholesky space" => "manifolds/choleskyspace.md",
                 "Circle" => "manifolds/circle.md",
                 "Euclidean" => "manifolds/euclidean.md",
