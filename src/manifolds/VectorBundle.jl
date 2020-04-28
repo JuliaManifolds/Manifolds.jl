@@ -790,24 +790,11 @@ function vector_space_dimension(B::VectorBundleFibers{<:TensorProductType})
 end
 
 function vector_transport_direction(M::VectorBundle, p, X, d)
-    return vector_transport_direction(
-        M,
-        p,
-        X,
-        d,
-        M.vector_transport,
-    )
+    return vector_transport_direction(M, p, X, d, M.vector_transport)
 end
 
 function vector_transport_direction!(M::VectorBundle, Y, p, X, d)
-    return vector_transport_direction!(
-        M,
-        Y,
-        p,
-        X,
-        d,
-        M.vector_transport,
-    )
+    return vector_transport_direction!(M, Y, p, X, d, M.vector_transport)
 end
 
 @doc raw"""
@@ -818,24 +805,11 @@ Compute the vector transport the tangent vector `X`at `p` to `q` on the
 """
 vector_transport_to(::VectorBundle, ::Any, ::Any, ::Any, ::VectorBundleVectorTransport)
 function vector_transport_to(M::VectorBundle, p, X, q)
-    return vector_transport_to(
-        M,
-        p,
-        X,
-        q,
-        M.vector_transport,
-    )
+    return vector_transport_to(M, p, X, q, M.vector_transport)
 end
 
 function vector_transport_to!(M::VectorBundle, Y, p, X, q)
-    return vector_transport_to!(
-        M,
-        Y,
-        p,
-        X,
-        q,
-        M.vector_transport,
-    )
+    return vector_transport_to!(M, Y, p, X, q, M.vector_transport)
 end
 function vector_transport_to!(M::VectorBundle, Y, p, X, q, m::VectorBundleVectorTransport)
     px, pVx = submanifold_components(M.manifold, p)
