@@ -105,53 +105,6 @@ space at `p`.
 CotangentSpaceAtPoint(M::Manifold, p) = VectorSpaceAtPoint(CotangentBundleFibers(M), p)
 
 """
-    VectorBundle{𝔽,TVS<:VectorSpaceType,TM<:Manifold{𝔽}} <: Manifold{𝔽}
-
-Vector bundle on a [`Manifold`](@ref) `M` of type [`VectorSpaceType`](@ref).
-
-# Constructor
-
-    VectorBundle(M::Manifold, type::VectorSpaceType)
-"""
-struct VectorBundle{
-    𝔽,
-    TVS<:VectorSpaceType,
-    TM<:Manifold{𝔽},
-    TVT<:AbstractVectorTransportMethod,
-} <: Manifold{𝔽}
-    type::TVS
-    manifold::TM
-    fiber::VectorBundleFibers{TVS,TM}
-    vector_transport::TVT
-end
-
-function VectorBundle(
-    fiber::TVS,
-    M::TM,
-    vtm::AbstractVectorTransportMethod,
-) where {TVS<:VectorSpaceType,TM<:Manifold{𝔽}} where {𝔽}
-    return VectorBundle{𝔽,TVS,TM,typeof(vtm)}(fiber, M, VectorBundleFibers(fiber, M), vtm)
-end
-function VectorBundle(fiber::VectorSpaceType, M::Manifold)
-    vtm = vector_bundle_transport(fiber, M)
-    return VectorBundle(fiber, M, vtm)
-end
-
-const TangentBundle{𝔽,M} = VectorBundle{𝔽,TangentSpaceType,M} where {𝔽,M<:Manifold{𝔽}}
-
-TangentBundle(M::Manifold) = VectorBundle(TangentSpace, M)
-function TangentBundle(M::Manifold, vtm::AbstractVectorTransportMethod)
-    return VectorBundle(TangentSpace, M, vtm)
-end
-
-const CotangentBundle{𝔽,M} = VectorBundle{𝔽,CotangentSpaceType,M} where {𝔽,M<:Manifold{𝔽}}
-
-CotangentBundle(M::Manifold) = VectorBundle(CotangentSpace, M)
-function CotangentBundle(M::Manifold, vtm::AbstractVectorTransportMethod)
-    return VectorBundle(CotangentSpace, M, vtm)
-end
-
-"""
     VectorBundleVectorTransport(
         method_point::AbstractVectorTransportMethod,
         method_vector::AbstractVectorTransportMethod,
@@ -166,6 +119,54 @@ struct VectorBundleVectorTransport{
 } <: AbstractVectorTransportMethod
     method_point::TMP
     method_vector::TMV
+end
+
+"""
+    VectorBundle{𝔽,TVS<:VectorSpaceType,TM<:Manifold{𝔽}} <: Manifold{𝔽}
+
+Vector bundle on a [`Manifold`](@ref) `M` of type [`VectorSpaceType`](@ref).
+
+# Constructor
+
+    VectorBundle(M::Manifold, type::VectorSpaceType)
+"""
+struct VectorBundle{
+    𝔽,
+    TVS<:VectorSpaceType,
+    TM<:Manifold{𝔽},
+    TVT<:VectorBundleVectorTransport,
+} <: Manifold{𝔽}
+    type::TVS
+    manifold::TM
+    fiber::VectorBundleFibers{TVS,TM}
+    vector_transport::TVT
+end
+
+function VectorBundle(
+    fiber::TVS,
+    M::TM,
+    vtm::VectorBundleVectorTransport,
+) where {TVS<:VectorSpaceType,TM<:Manifold{𝔽}} where {𝔽}
+    return VectorBundle{𝔽,TVS,TM,typeof(vtm)}(fiber, M, VectorBundleFibers(fiber, M), vtm)
+end
+function VectorBundle(fiber::VectorSpaceType, M::Manifold)
+    vtmm = vector_bundle_transport(fiber, M)
+    vtbm = VectorBundleVectorTransport(vtmm, vtmm)
+    return VectorBundle(fiber, M, vtbm)
+end
+
+const TangentBundle{𝔽,M} = VectorBundle{𝔽,TangentSpaceType,M} where {𝔽,M<:Manifold{𝔽}}
+
+TangentBundle(M::Manifold) = VectorBundle(TangentSpace, M)
+function TangentBundle(M::Manifold, vtm::VectorBundleVectorTransport)
+    return VectorBundle(TangentSpace, M, vtm)
+end
+
+const CotangentBundle{𝔽,M} = VectorBundle{𝔽,CotangentSpaceType,M} where {𝔽,M<:Manifold{𝔽}}
+
+CotangentBundle(M::Manifold) = VectorBundle(CotangentSpace, M)
+function CotangentBundle(M::Manifold, vtm::VectorBundleVectorTransport)
+    return VectorBundle(CotangentSpace, M, vtm)
 end
 
 """
@@ -245,7 +246,7 @@ function distance(B::VectorBundle, p, q)
     xp, Vp = submanifold_components(B.manifold, p)
     xq, Vq = submanifold_components(B.manifold, q)
     dist_man = distance(B.manifold, xp, xq)
-    vy_x = vector_transport_to(B.manifold, xq, Vq, xp, B.vector_transport)
+    vy_x = vector_transport_to(B.manifold, xq, Vq, xp, B.vector_transport.method_point)
     dist_vec = distance(B.fiber, xp, Vp, vy_x)
     return sqrt(dist_man^2 + dist_vec^2)
 end
@@ -284,7 +285,7 @@ function exp!(B::VectorBundle, q, p, X)
     xq, Xq = submanifold_components(B.manifold, q)
     VXM, VXF = submanifold_components(B.manifold, X)
     exp!(B.manifold, xq, xp, VXM)
-    vector_transport_to!(B.manifold, Xq, xp, Xp + VXF, xq, B.vector_transport)
+    vector_transport_to!(B.manifold, Xq, xp, Xp + VXF, xq, B.vector_transport.method_point)
     return q
 end
 
@@ -562,7 +563,7 @@ function log!(B::VectorBundle, X, p, q)
     py, Vy = submanifold_components(B.manifold, q)
     VXM, VXF = submanifold_components(B.manifold, X)
     log!(B.manifold, VXM, px, py)
-    vector_transport_to!(B.manifold, VXF, py, Vy, px, B.vector_transport)
+    vector_transport_to!(B.manifold, VXF, py, Vy, px, B.vector_transport.method_vector)
     copyto!(VXF, VXF - Vx)
     return X
 end
@@ -794,7 +795,7 @@ function vector_transport_direction(M::VectorBundle, p, X, d)
         p,
         X,
         d,
-        VectorBundleVectorTransport(ParallelTransport(), ParallelTransport()),
+        M.vector_transport,
     )
 end
 
@@ -805,7 +806,7 @@ function vector_transport_direction!(M::VectorBundle, Y, p, X, d)
         p,
         X,
         d,
-        VectorBundleVectorTransport(ParallelTransport(), ParallelTransport()),
+        M.vector_transport,
     )
 end
 
@@ -822,7 +823,7 @@ function vector_transport_to(M::VectorBundle, p, X, q)
         p,
         X,
         q,
-        VectorBundleVectorTransport(ParallelTransport(), ParallelTransport()),
+        M.vector_transport,
     )
 end
 
@@ -833,7 +834,7 @@ function vector_transport_to!(M::VectorBundle, Y, p, X, q)
         p,
         X,
         q,
-        VectorBundleVectorTransport(ParallelTransport(), ParallelTransport()),
+        M.vector_transport,
     )
 end
 function vector_transport_to!(M::VectorBundle, Y, p, X, q, m::VectorBundleVectorTransport)

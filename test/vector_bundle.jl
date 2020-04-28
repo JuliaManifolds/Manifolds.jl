@@ -164,7 +164,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
         N = TangentBundle(M)
         p1 = ProductRepr([0.0, 0.0], [0.0, 0.0])
         p2 = ProductRepr([-1.047, -1.047], [0.0, 0.0])
-        @test isapprox(N, p2, exp(N, p1, log(N, p1, p2)))
+        X1 = log(N, p1, p2)
+        @test isapprox(N, p2, exp(N, p1, X1))
+        @test is_tangent_vector(N, p2, vector_transport_to(N, p1, X1, p2))
 
         M2 = ProductManifold(Circle(ℝ), Euclidean(2))
         N2 = TangentBundle(M2)
@@ -176,8 +178,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test isapprox(N2, p2_2, exp(N2, p1_2, log(N2, p1_2, p2_2)))
 
         ppt = PowerVectorTransport(ParallelTransport())
-        @test TangentBundle(M, ppt).vector_transport === ppt
-        @test CotangentBundle(M, ppt).vector_transport === ppt
-        @test VectorBundle(TangentSpace, M, ppt).vector_transport === ppt
+        tbvt = Manifolds.VectorBundleVectorTransport(ppt, ppt)
+        @test TangentBundle(M, tbvt).vector_transport === tbvt
+        @test CotangentBundle(M, tbvt).vector_transport === tbvt
+        @test VectorBundle(TangentSpace, M, tbvt).vector_transport === tbvt
     end
 end
