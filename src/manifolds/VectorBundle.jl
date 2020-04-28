@@ -152,6 +152,23 @@ function CotangentBundle(M::Manifold, vtm::AbstractVectorTransportMethod)
 end
 
 """
+    VectorBundleVectorTransport(
+        method_point::AbstractVectorTransportMethod,
+        method_vector::AbstractVectorTransportMethod,
+    )
+
+Vector transport type on [`VectorBundle`](@ref). `method_point` is used for vector transport
+of the point part and `method_vector` is used for transport of the vector part
+"""
+struct VectorBundleVectorTransport{
+    TMP<:AbstractVectorTransportMethod,
+    TMV<:AbstractVectorTransportMethod,
+} <: AbstractVectorTransportMethod
+    method_point::TMP
+    method_vector::TMV
+end
+
+"""
     FVector(type::VectorSpaceType, data)
 
 Decorator indicating that the vector `data` is from a fiber of a vector bundle
@@ -769,6 +786,64 @@ function vector_space_dimension(B::VectorBundleFibers{<:TensorProductType})
         dim *= vector_space_dimension(VectorBundleFibers(space, B.manifold))
     end
     return dim
+end
+
+function vector_transport_direction(M::VectorBundle, p, X, d)
+    return vector_transport_direction(
+        M,
+        p,
+        X,
+        d,
+        VectorBundleVectorTransport(ParallelTransport(), ParallelTransport()),
+    )
+end
+
+function vector_transport_direction!(M::VectorBundle, Y, p, X, d)
+    return vector_transport_direction!(
+        M,
+        Y,
+        p,
+        X,
+        d,
+        VectorBundleVectorTransport(ParallelTransport(), ParallelTransport()),
+    )
+end
+
+@doc raw"""
+    vector_transport_to(M::VectorBundle, p, X, q, m::VectorBundleVectorTransport)
+
+Compute the vector transport the tangent vector `X`at `p` to `q` on the
+[`VectorBundle`](@ref) `M` using the [`VectorBundleVectorTransport`](@ref) `m`.
+"""
+vector_transport_to(::VectorBundle, ::Any, ::Any, ::Any, ::VectorBundleVectorTransport)
+function vector_transport_to(M::VectorBundle, p, X, q)
+    return vector_transport_to(
+        M,
+        p,
+        X,
+        q,
+        VectorBundleVectorTransport(ParallelTransport(), ParallelTransport()),
+    )
+end
+
+function vector_transport_to!(M::VectorBundle, Y, p, X, q)
+    return vector_transport_to!(
+        M,
+        Y,
+        p,
+        X,
+        q,
+        VectorBundleVectorTransport(ParallelTransport(), ParallelTransport()),
+    )
+end
+function vector_transport_to!(M::VectorBundle, Y, p, X, q, m::VectorBundleVectorTransport)
+    px, pVx = submanifold_components(M.manifold, p)
+    VXM, VXF = submanifold_components(M.manifold, X)
+    VYM, VYF = submanifold_components(M.manifold, Y)
+    qx, qVx = submanifold_components(M.manifold, q)
+    vector_transport_to!(M.manifold, VYM, px, VXM, qx, m.method_point)
+    vector_transport_to!(M.manifold, VYF, px, VXF, qx, m.method_vector)
+    return Y
 end
 
 """
