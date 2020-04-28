@@ -157,4 +157,26 @@ struct TestVectorSpaceType <: VectorSpaceType end
             CachedBasis(DefaultOrthonormalBasis(), []),
         )
     end
+
+    @testset "log and exp on tangent bundle for power and product manifolds" begin
+        M = PowerManifold(Circle(ℝ), 2)
+        N = TangentBundle(M)
+        p1 = ProductRepr([0.0, 0.0], [0.0, 0.0])
+        p2 = ProductRepr([-1.047, -1.047], [0.0, 0.0])
+        @test isapprox(N, p2, exp(N, p1, log(N, p1, p2)))
+
+        M2 = ProductManifold(Circle(ℝ), Euclidean(2))
+        N2 = TangentBundle(M2)
+        p1_2 = ProductRepr(ProductRepr([0.0], [0.0, 0.0]), ProductRepr([0.0], [0.0, 0.0]))
+        p2_2 = ProductRepr(
+            ProductRepr([-1.047], [1.0, 0.0]),
+            ProductRepr([-1.047], [0.0, 1.0]),
+        )
+        @test isapprox(N2, p2_2, exp(N2, p1_2, log(N2, p1_2, p2_2)))
+
+        ppt = PowerVectorTransport(ParallelTransport())
+        @test TangentBundle(M, ppt).vector_transport === ppt
+        @test CotangentBundle(M, ppt).vector_transport === ppt
+        @test VectorBundle(TangentSpace, M, ppt).vector_transport === ppt
+    end
 end

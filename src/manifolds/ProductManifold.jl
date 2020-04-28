@@ -1016,6 +1016,10 @@ function Distributions.support(tvd::ProductFVectorDistribution)
     )
 end
 
+function vector_bundle_transport(fiber::VectorSpaceType, M::ProductManifold)
+    return ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds))
+end
+
 @doc raw"""
     vector_transport_to(M::ProductManifold, p, X, q, m::ProductVectorTransport)
 
