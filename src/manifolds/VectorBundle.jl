@@ -506,7 +506,7 @@ function Base.isapprox(B::VectorBundle, p, q; kwargs...)
     xp, Vp = submanifold_components(B.manifold, p)
     xq, Vq = submanifold_components(B.manifold, q)
     return isapprox(B.manifold, xp, xq; kwargs...) &&
-        isapprox(VectorSpaceAtPoint(B.fiber, xp), Vp, Vq; kwargs...)
+           isapprox(VectorSpaceAtPoint(B.fiber, xp), Vp, Vq; kwargs...)
 end
 function Base.isapprox(B::VectorBundle, p, X, Y; kwargs...)
     px, Vx = submanifold_components(B.manifold, p)
