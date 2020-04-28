@@ -839,6 +839,21 @@ function vector_bundle_transport(fiber::VectorSpaceType, M::PowerManifold)
     return PowerVectorTransport(ParallelTransport())
 end
 
+function vector_transport_direction(M::AbstractPowerManifold, p, X, d)
+    return vector_transport_direction(M, p, X, d, PowerVectorTransport(ParallelTransport()))
+end
+
+function vector_transport_direction!(M::AbstractPowerManifold, Y, p, X, d)
+    return vector_transport_direction!(
+        M,
+        Y,
+        p,
+        X,
+        d,
+        PowerVectorTransport(ParallelTransport()),
+    )
+end
+
 @doc raw"""
     vector_transport_to(M::AbstractPowerManifold, p, X, q, method::PowerVectorTransport)
 
@@ -848,7 +863,13 @@ This method is performed elementwise, i.e. the method `m` has to be implemented 
 base manifold.
 """
 vector_transport_to(::AbstractPowerManifold, ::Any, ::Any, ::Any, ::PowerVectorTransport)
+function vector_transport_to(M::AbstractPowerManifold, p, X, q)
+    return vector_transport_to(M, p, X, q, PowerVectorTransport(ParallelTransport()))
+end
 
+function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q)
+    return vector_transport_to!(M, Y, p, X, q, PowerVectorTransport(ParallelTransport()))
+end
 function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q, m::PowerVectorTransport)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)

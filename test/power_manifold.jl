@@ -156,6 +156,7 @@ Random.seed!(42)
                 test_reverse_diff = true,
                 test_musical_isomorphisms = true,
                 test_injectivity_radius = false,
+                test_vector_transport = true,
                 test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
