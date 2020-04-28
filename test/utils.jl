@@ -344,6 +344,15 @@ function test_manifold(
             @test is_tangent_vector(M, pts[3], v1t2; atol = tvatol)
             @test isapprox(M, pts[3], v1t1, v1t2)
             @test isapprox(M, pts[1], vector_transport_to(M, pts[1], X1, pts[1]), X1)
+
+            is_mutating && @testset "mutating variants" begin
+                v1t1_m = allocate(v1t1)
+                v1t2_m = allocate(v1t2)
+                vector_transport_to!(M, v1t1_m, pts[1], X1, pts[3])
+                vector_transport_direction!(M, v1t2_m, pts[1], X1, X2)
+                @test isapprox(M, pts[3], v1t1, v1t1_m)
+                @test isapprox(M, pts[3], v1t2, v1t2_m)
+            end
         end
 
     for btype in basis_types_vecs

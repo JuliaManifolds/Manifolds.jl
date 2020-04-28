@@ -255,7 +255,7 @@ function decorator_transparent_dispatch(
     M::MetricManifold,
     args...,
 )
-    return Val(:intransparent)
+    return Val(:parent)
 end
 function decorator_transparent_dispatch(
     ::typeof(vector_transport_to),
