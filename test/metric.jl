@@ -478,10 +478,11 @@ end
         for f in [norm, project!, sharp!, retract!]
             @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:intransparent}()
         end
-        for f in
-            [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
+        for f in [vector_transport_along!, vector_transport_to!]
             @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:intransparent}()
         end
+        @test Manifolds.decorator_transparent_dispatch(vector_transport_direction!, MM) ===
+              Val{:parent}()
 
         @test Manifolds.decorator_transparent_dispatch(exp!, MM, x, x, x, x) ===
               Val{:parent}()
