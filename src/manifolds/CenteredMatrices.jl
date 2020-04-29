@@ -90,12 +90,12 @@ Return the manifold dimension of the [`CenteredMatrices`](@ref) `m`-by-`n` matri
 `𝔽`, i.e.
 
 ````math
-\dim(\mathcal M) = (m*n - m) \dim_ℝ 𝔽,
+\dim(\mathcal M) = (m*n - n) \dim_ℝ 𝔽,
 ````
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
 function manifold_dimension(::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽}
-    return (m*n - m) * real_dimension(𝔽) 
+    return (m*n - n) * real_dimension(𝔽) 
 end
 
 @doc raw"""
