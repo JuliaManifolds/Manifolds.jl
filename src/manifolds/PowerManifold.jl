@@ -493,6 +493,18 @@ function get_vector!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBas
     return Y
 end
 
+"""
+    getindex(p,M::AbstractPowerManifold,i...)
+    p[M::AbstractPowerManifold,i...]
+
+acces the element `[i..]` of a point `p` on an [`AbstractPowerManifold`](@ref) by linear or
+multidimensional indexing.
+See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
+"""
+function getindex(p,M::AbstractPowerManifold, I::Vararg{Any,N} where N)
+    get_component(M,p,I...)
+end
+
 @doc raw"""
     injectivity_radius(M::AbstractPowerManifold[, p])
 
@@ -772,7 +784,6 @@ function retract!(M::AbstractPowerManifold, q, p, X, method::PowerRetraction)
     end
     return q
 end
-
 """
     set_component!(M::AbstractPowerManifold, q, p, idx...)
 
@@ -782,6 +793,17 @@ to `p`, which itself is a point on the [`Manifold`](@ref) the power manifold is 
 function set_component!(M::AbstractPowerManifold, q, p, idx...)
     rep_size = representation_size(M.manifold)
     return copyto!(_write(M, rep_size, q, idx), p)
+end
+"""
+    getindex!(q,p,M::AbstractPowerManifold,i...)
+    q[M::AbstractPowerManifold,i...] = p
+
+set the element `[i..]` of a point `q` on an [`AbstractPowerManifold`](@ref) by linear or
+multidimensional indexing to `q`.
+See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
+"""
+function setindex!(q, p, M::AbstractPowerManifold, I::Vararg{Any,N} where N)
+    return set_component!(M,q,p,I...)
 end
 
 @doc raw"""
