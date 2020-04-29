@@ -22,7 +22,7 @@ end
     # TODO: reduce the number of ambiguities
     @test length(Test.detect_ambiguities(ManifoldsBase)) <= 12
     @test length(Test.detect_ambiguities(Manifolds)) == 0
-    @test length(our_base_ambiguities()) <= 15
+    @test length(our_base_ambiguities()) <= 19
 end
 
 include("groups/group_utils.jl")

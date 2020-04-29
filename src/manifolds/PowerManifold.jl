@@ -494,15 +494,19 @@ function get_vector!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBas
 end
 
 """
-    getindex(p,M::AbstractPowerManifold,i...)
-    p[M::AbstractPowerManifold,i...]
+    getindex(p, M::AbstractPowerManifold, i::Union{Integer,Colon,AbstractVector}...)
+    p[M::AbstractPowerManifold, i...]
 
-acces the element `[i..]` of a point `p` on an [`AbstractPowerManifold`](@ref) by linear or
-multidimensional indexing.
+Acces the element `[i..]` of a point `p` on an [`AbstractPowerManifold`](@ref) `M` by linear
+or multidimensional indexing.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
-function getindex(p,M::AbstractPowerManifold, I::Vararg{Any,N} where N)
-    get_component(M,p,I...)
+function Base.getindex(
+    p::AbstractArray,
+    M::AbstractPowerManifold,
+    I::Union{Integer,Colon,AbstractVector}...,
+)
+    return get_component(M, p, I...)
 end
 
 @doc raw"""
@@ -795,15 +799,20 @@ function set_component!(M::AbstractPowerManifold, q, p, idx...)
     return copyto!(_write(M, rep_size, q, idx), p)
 end
 """
-    getindex!(q,p,M::AbstractPowerManifold,i...)
-    q[M::AbstractPowerManifold,i...] = p
+    setindex!(q, p, M::AbstractPowerManifold, i::Union{Integer,Colon,AbstractVector}...)
+    q[M::AbstractPowerManifold, i...] = p
 
-set the element `[i..]` of a point `q` on an [`AbstractPowerManifold`](@ref) by linear or
-multidimensional indexing to `q`.
+Set the element `[i...]` of a point `q` on an [`AbstractPowerManifold`](@ref) `M` by linear
+or multidimensional indexing to `q`.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
-function setindex!(q, p, M::AbstractPowerManifold, I::Vararg{Any,N} where N)
-    return set_component!(M,q,p,I...)
+function Base.setindex!(
+    q::AbstractArray,
+    p,
+    M::AbstractPowerManifold,
+    I::Union{Integer,Colon,AbstractVector}...,
+)
+    return set_component!(M, q, p, I...)
 end
 
 @doc raw"""

@@ -589,14 +589,19 @@ function get_vectors(
 end
 
 """
-    getindex(p,M::ProductManifold,i)
-    p[M::ProductManifold,i]
+    getindex(p, M::ProductManifold, i::Union{Integer,Colon,AbstractVector})
+    p[M::ProductManifold, i]
 
-acces the element `[i..]` of a point `p` on an [`Power`](@ref) by linear indexing.
+acces the element `[i]` of a point `p` on an [`ProductManifold`](@ref) `M` by linear
+indexing.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
-function getindex(p,M::ProductManifold,i)
-    get_component(M,p,i)
+function Base.getindex(
+    p::Union{ProductArray,ProductRepr},
+    M::ProductManifold,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return get_component(M, p, i)
 end
 
 @doc raw"""
@@ -914,14 +919,19 @@ function set_component!(M::ProductManifold, q, p, i)
 end
 
 """
-    setindex!(q,p,M::ProductManifold,i...)
+    setindex!(q, p, M::ProductManifold, i::Union{Integer,Colon,AbstractVector})
     q[M::ProductManifold,i...] = p
 
 set the element `[i..]` of a point `q` on an [`ProductManifold`](@ref) by linear indexing to `q`.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
-function setindex!(q, p, M::ProductManifold, i)
-    return set_component!(M,q,p,i)
+function Base.setindex!(
+    q::Union{ProductArray,ProductRepr},
+    p,
+    M::ProductManifold,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return set_component!(M, q, p, i)
 end
 
 @doc raw"""

@@ -1,6 +1,5 @@
 module Manifolds
 
-import Base: getindex, setindex!
 import ManifoldsBase:
     allocate,
     allocate_result,
