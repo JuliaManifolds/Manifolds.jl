@@ -596,7 +596,7 @@ acces the element `[i]` of a point `p` on an [`ProductManifold`](@ref) `M` by li
 indexing.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
-function Base.getindex(
+Base.@propagate_inbounds function Base.getindex(
     p::Union{ProductArray,ProductRepr},
     M::ProductManifold,
     i::Union{Integer,Colon,AbstractVector,Val},
@@ -925,7 +925,7 @@ end
 set the element `[i..]` of a point `q` on an [`ProductManifold`](@ref) by linear indexing to `q`.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
-function Base.setindex!(
+Base.@propagate_inbounds function Base.setindex!(
     q::Union{ProductArray,ProductRepr},
     p,
     M::ProductManifold,

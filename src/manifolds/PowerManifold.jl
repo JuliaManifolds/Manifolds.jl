@@ -501,7 +501,7 @@ Acces the element `[i..]` of a point `p` on an [`AbstractPowerManifold`](@ref) `
 or multidimensional indexing.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
-function Base.getindex(
+Base.@propagate_inbounds function Base.getindex(
     p::AbstractArray,
     M::AbstractPowerManifold,
     I::Union{Integer,Colon,AbstractVector}...,
@@ -806,7 +806,7 @@ Set the element `[i...]` of a point `q` on an [`AbstractPowerManifold`](@ref) `M
 or multidimensional indexing to `q`.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
-function Base.setindex!(
+Base.@propagate_inbounds function Base.setindex!(
     q::AbstractArray,
     p,
     M::AbstractPowerManifold,
