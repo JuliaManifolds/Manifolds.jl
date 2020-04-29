@@ -132,6 +132,8 @@ project(::CenteredMatrices, ::Any, ::Any)
 
 project!(M::CenteredMatrices, Y, p, X) = (Y .= X .- mean(X,dims=1))
 
-function Base.show(io::IO, ::CenteredMatrices{m,n,F}) where {m,n,F}
-    return print(io, "CenteredMatrices($(m), $(n), $(F))")
+@generated representation_size(::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽} = (m, n)
+
+function Base.show(io::IO, ::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽}
+    return print(io, "CenteredMatrices($(m), $(n), $(𝔽))")
 end
