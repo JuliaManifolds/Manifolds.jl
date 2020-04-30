@@ -588,6 +588,29 @@ function get_vectors(
     return vs
 end
 
+"""
+    getindex(p, M::ProductManifold, i::Union{Integer,Colon,AbstractVector})
+    p[M::ProductManifold, i]
+
+Access the element(s) at index `i` of a point `p` on a [`ProductManifold`](@ref) `M` by
+linear indexing.
+See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
+"""
+Base.@propagate_inbounds function Base.getindex(
+    p::ProductRepr,
+    M::ProductManifold,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return get_component(M, p, i)
+end
+Base.@propagate_inbounds function Base.getindex(
+    p::ProductArray,
+    M::ProductManifold,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return collect(get_component(M, p, i))
+end
+
 @doc raw"""
     injectivity_radius(M::ProductManifold)
     injectivity_radius(M::ProductManifold, x)
@@ -900,6 +923,22 @@ Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`
 """
 function set_component!(M::ProductManifold, q, p, i)
     return copyto!(submanifold_component(M, q, i), p)
+end
+
+"""
+    setindex!(q, p, M::ProductManifold, i::Union{Integer,Colon,AbstractVector})
+    q[M::ProductManifold,i...] = p
+
+set the element `[i...]` of a point `q` on a [`ProductManifold`](@ref) by linear indexing to `q`.
+See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
+"""
+Base.@propagate_inbounds function Base.setindex!(
+    q::Union{ProductArray,ProductRepr},
+    p,
+    M::ProductManifold,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return set_component!(M, q, p, i)
 end
 
 @doc raw"""
