@@ -497,8 +497,8 @@ end
     getindex(p, M::AbstractPowerManifold, i::Union{Integer,Colon,AbstractVector}...)
     p[M::AbstractPowerManifold, i...]
 
-Acces the element `[i..]` of a point `p` on an [`AbstractPowerManifold`](@ref) `M` by linear
-or multidimensional indexing.
+Access the element(s) at index `[i...]` of a point `p` on an [`AbstractPowerManifold`](@ref)
+`M` by linear or multidimensional indexing.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
 Base.@propagate_inbounds function Base.getindex(
@@ -810,8 +810,8 @@ end
     setindex!(q, p, M::AbstractPowerManifold, i::Union{Integer,Colon,AbstractVector}...)
     q[M::AbstractPowerManifold, i...] = p
 
-Set the element `[i...]` of a point `q` on an [`AbstractPowerManifold`](@ref) `M` by linear
-or multidimensional indexing to `q`.
+Set the element(s) at index `[i...]` of a point `q` on an [`AbstractPowerManifold`](@ref)
+`M` by linear or multidimensional indexing to `q`.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
 Base.@propagate_inbounds function Base.setindex!(
