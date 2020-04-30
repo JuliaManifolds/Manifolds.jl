@@ -118,6 +118,7 @@ Random.seed!(42)
         p1 = randn(3, 5)
         @test get_component(Ms1, p1, 1) == p1[:, 1]
         @test p1[Ms1, 1] == p1[:, 1]
+        @test p1[Ms1, 1] isa Vector
         p2 = [10.0, 11.0, 12.0]
         set_component!(Ms1, p1, p2, 2)
         @test get_component(Ms1, p1, 2) == p2
@@ -128,6 +129,7 @@ Random.seed!(42)
         pn1 = [randn(3) for _ in 1:5]
         @test get_component(Msn1, pn1, 1) == pn1[1]
         @test pn1[Msn1, 1] == pn1[1]
+        @test pn1[Msn1, 1] isa Vector
         set_component!(Msn1, pn1, p2, 2)
         @test get_component(Msn1, pn1, 2) == p2
         pn1[Msn1, 2] = 2 * p2

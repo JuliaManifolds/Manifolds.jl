@@ -508,6 +508,13 @@ Base.@propagate_inbounds function Base.getindex(
 )
     return get_component(M, p, I...)
 end
+Base.@propagate_inbounds function Base.getindex(
+    p::AbstractArray,
+    M::AbstractPowerManifold,
+    I::Integer...,
+)
+    return collect(get_component(M, p, I...))
+end
 
 @doc raw"""
     injectivity_radius(M::AbstractPowerManifold[, p])
@@ -788,6 +795,7 @@ function retract!(M::AbstractPowerManifold, q, p, X, method::PowerRetraction)
     end
     return q
 end
+
 """
     set_component!(M::AbstractPowerManifold, q, p, idx...)
 

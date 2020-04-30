@@ -597,11 +597,18 @@ indexing.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
 Base.@propagate_inbounds function Base.getindex(
-    p::Union{ProductArray,ProductRepr},
+    p::ProductRepr,
     M::ProductManifold,
     i::Union{Integer,Colon,AbstractVector,Val},
 )
     return get_component(M, p, i)
+end
+Base.@propagate_inbounds function Base.getindex(
+    p::ProductArray,
+    M::ProductManifold,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return collect(get_component(M, p, i))
 end
 
 @doc raw"""

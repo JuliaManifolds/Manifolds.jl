@@ -42,6 +42,8 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         @test get_component(Mse, p1, Val(1)) == p1.parts[1]
         @test p1[Mse, 1] == p1.parts[1]
         @test p1[Mse, Val(1)] == p1.parts[1]
+        @test p1[Mse, 1] isa Vector
+        @test p1[Mse, Val(1)] isa Vector
         p2 = [10.0, 12.0]
         set_component!(Mse, p1, p2, 2)
         @test get_component(Mse, p1, 2) == p2
@@ -59,6 +61,8 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         @test get_component(Mse, pra1, Val(1)) == p1.parts[1]
         @test pra1[Mse, 1] == pra1.parts[1]
         @test pra1[Mse, Val(1)] == pra1.parts[1]
+        @test pra1[Mse, 1] isa Vector
+        @test pra1[Mse, Val(1)] isa Vector
         set_component!(Mse, pra1, p2, 2)
         @test get_component(Mse, pra1, 2) == p2
         pra1[Mse, 2] = 2 * p2
@@ -74,6 +78,8 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         @test get_component(Mse, prs1, Val(1)) == p1.parts[1]
         @test prs1[Mse, 1] == prs1.parts[1]
         @test prs1[Mse, Val(1)] == prs1.parts[1]
+        @test prs1[Mse, 1] isa Vector
+        @test prs1[Mse, Val(1)] isa Vector
         set_component!(Mse, prs1, p2, 2)
         @test get_component(Mse, prs1, 2) == p2
         prs1[Mse, 2] = 2 * p2
