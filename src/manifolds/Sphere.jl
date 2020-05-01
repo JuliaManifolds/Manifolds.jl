@@ -24,7 +24,7 @@ The tangent space at point $p$ is given by
 T_p𝕊^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ |\ ⟨p,X⟩ = 0 \bigr \},
 ````
 
-where $𝔽\in\{ℝ,ℂ\} and $⟨\cdot,\cdot⟩$ denotes the inner product in the
+where $𝔽\in\{ℝ,ℂ\}$ and $⟨\cdot,\cdot⟩$ denotes the inner product in the
 embedding $\mathbb 𝔽^{n+1}$.
 
 This manifold is modeled as a special case of the more general case, i.e. as an embedded
