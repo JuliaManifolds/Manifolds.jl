@@ -924,6 +924,21 @@ function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q, m::PowerVect
     return Y
 end
 
+"""
+    view(p, M::AbstractPowerManifold, i::Union{Integer,Colon,AbstractVector}...)
+
+Get the view of the element(s) at index `[i...]` of a point `p` on an
+[`AbstractPowerManifold`](@ref) `M` by linear or multidimensional indexing.
+"""
+function Base.view(
+    p::AbstractArray,
+    M::AbstractPowerManifold,
+    I::Union{Integer,Colon,AbstractVector}...,
+)
+    rep_size = representation_size(M.manifold)
+    return _write(M, rep_size, p, I...)
+end
+
 @inline function _write(M::AbstractPowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)
     return _write(M, rep_size, x, (i,))
 end
