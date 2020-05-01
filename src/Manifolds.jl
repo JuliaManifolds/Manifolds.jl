@@ -239,7 +239,8 @@ export AbstractEstimationMethod,
     GradientDescentEstimation,
     CyclicProximalPointEstimation,
     GeodesicInterpolation,
-    GeodesicInterpolationWithinRadius
+    GeodesicInterpolationWithinRadius,
+    ExtrinsicEstimation
 export CachedBasis,
     DefaultBasis,
     DefaultOrthogonalBasis,

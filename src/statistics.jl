@@ -19,6 +19,16 @@ Method for estimation using the cyclic proximal point technique.
 """
 struct CyclicProximalPointEstimation <: AbstractEstimationMethod end
 
+"""
+    ExtrinsicEstimation <: AbstractEstimationMethod
+
+Method for estimation in the ambient space and projecting to the manifold.
+
+For [`mean`](@ref) estimation, [`GeodesicInterpolation`](@ref) is used for mean estimation
+in the ambient space.
+"""
+struct ExtrinsicEstimation <: AbstractEstimationMethod end
+
 _unit_weights(n::Int) = StatsBase.UnitWeights{Float64}(n)
 
 @doc raw"""
@@ -383,7 +393,7 @@ function Statistics.mean!(
         throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
     end
     copyto!(q, p0)
-    yold = allocate_result(M, median, q)
+    yold = allocate_result(M, mean, q)
     ytmp = copy(yold)
     X = zero_tangent_vector(M, q)
     wv = convert(Vector, w) ./ sum(w)
@@ -408,6 +418,21 @@ end
     w::AbstractVector;
     kwargs...,
 )
+
+function Statistics.mean!(
+    M::Manifold,
+    y,
+    x::AbstractVector,
+    w::AbstractVector,
+    ::ExtrinsicEstimation;
+    p0 = x[1],
+    kwargs...,
+)
+    embedded_x = map(p -> embed(M, p), x)
+    embedded_y = mean(get_embedding(M), embedded_x, w, GeodesicInterpolation(); kwargs...)
+    project!(M, y, embedded_y)
+    return y
+end
 
 @doc raw"""
     median(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
