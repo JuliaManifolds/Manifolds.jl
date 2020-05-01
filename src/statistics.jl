@@ -390,7 +390,7 @@ function Statistics.mean!(
 )
     n = length(x)
     if length(w) != n
-        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
+        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
     end
     copyto!(q, p0)
     yold = allocate_result(M, mean, q)
