@@ -689,7 +689,6 @@ end
     @testset "Extrinsic mean" begin
         rng = MersenneTwister(47)
         S = Sphere(2)
-        p0 = [1.0, 0, 0]
         x = [normalize(randn(rng, 3)) for _ in 1:10]
         w = pweights([rand(rng) for _ in 1:length(x)])
         m = normalize(mean(reduce(hcat, x), w; dims = 2)[:, 1])

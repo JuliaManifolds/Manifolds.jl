@@ -425,7 +425,6 @@ function Statistics.mean!(
     x::AbstractVector,
     w::AbstractVector,
     ::ExtrinsicEstimation;
-    p0 = x[1],
     kwargs...,
 )
     embedded_x = map(p -> embed(M, p), x)
