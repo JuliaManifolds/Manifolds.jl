@@ -128,6 +128,8 @@ Random.seed!(42)
         @test p1[Ms1, 2] ≈ 3 * p2
         p1[Ms1, 2] .+= p2
         @test p1[Ms1, 2] ≈ 4 * p2
+        @test view(p1, Ms1, 1) == p1[Ms1, 1]
+        @test view(p1, Ms1, 1) isa SubArray
 
         Msn1 = PowerManifold(Ms, Manifolds.NestedPowerRepresentation(), 5)
         pn1 = [randn(3) for _ in 1:5]
@@ -142,6 +144,8 @@ Random.seed!(42)
         @test pn1[Msn1, 2] ≈ 3 * p2
         pn1[Msn1, 2] .+= p2
         @test pn1[Msn1, 2] ≈ 4 * p2
+        @test view(pn1, Msn1, 1) == pn1[Msn1, 1]
+        @test view(pn1, Msn1, 1) isa SubArray
     end
 
     @testset "power vector transport" begin
