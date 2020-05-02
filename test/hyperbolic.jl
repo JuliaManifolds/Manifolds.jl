@@ -80,6 +80,6 @@ include("utils.jl")
         ws = UnitWeights{Float64}(length(pts))
         @test isapprox(M, mean(M, pts), pts[1]; atol = 10^-4)
         @test isapprox(M, mean(M, pts, ws), pts[1]; atol = 10^-4)
-        @test_throws DimensionMismatch mean(M, pts, UnitWeights{Float64}(length(pts)+1))
+        @test_throws DimensionMismatch mean(M, pts, UnitWeights{Float64}(length(pts) + 1))
     end
 end
