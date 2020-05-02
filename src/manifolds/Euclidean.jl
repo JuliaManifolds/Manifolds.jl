@@ -318,7 +318,7 @@ function Statistics.median(
 end
 
 function Statistics.median!(::Euclidean{Tuple{1}}, p, x::AbstractVector; kwargs...)
-    return copyto!(p, [median(vcat(x...))])
+    return copyto!(p, [median(reduce(vcat, x))])
 end
 function Statistics.median!(
     ::Euclidean{Tuple{1}},
@@ -327,7 +327,7 @@ function Statistics.median!(
     w::AbstractWeights;
     kwargs...,
 )
-    return copyto!(p, [median(vcat(x...), w)])
+    return copyto!(p, [median(reduce(vcat, x), w)])
 end
 
 @doc raw"""
