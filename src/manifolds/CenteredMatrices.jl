@@ -3,7 +3,7 @@
 
 The manifold of $m × n$ real-valued or complex-valued matrices whose columns sum to zero, i.e.
 ````math
-\bigl\{ p ∈ 𝔽^{m × n}\ \big|\ [1 … 1] p = [0 … 0] \bigr\},
+\bigl\{ p ∈ 𝔽^{m × n}\ \big|\ [1 … 1] * p = [0 … 0] \bigr\},
 ````
 where $𝔽 ∈ \{ℝ,ℂ\}$.
 
@@ -104,12 +104,13 @@ end
 Projects `p` from the embedding onto the [`CenteredMatrices`](@ref) `M`, i.e.
 
 ````math
-\operatorname{proj}_{\mathcal M}(p) = p - \begin{pmatrix} 
-\frac{1}{m}\sum_{i=1}^m p_{i,1} & ⋯ & \frac{1}{m}\sum_{i=1}^m p_{i,n}\\
-⋮ & & ⋮ \\
-\frac{1}{m}\sum_{i=1}^m p_{i,1} & ⋯ & \frac{1}{m}\sum_{i=1}^m p_{i,n}
-\end{pmatrix}.
+\operatorname{proj}_{\mathcal M}(p) = p - \begin{bmatrix} 
+1\\
+⋮\\
+1
+\end{bmatrix} * [c_1 \dots c_n],
 ````
+where $c_i = \frac{1}{m}\sum_{j=1}^m p_{j,i}$ for $i = 1, \dots, n$.
 """
 project(::CenteredMatrices, ::Any)
 
@@ -121,12 +122,13 @@ project!(M::CenteredMatrices, q, p) = copyto!(q, p .- mean(p,dims=1))
 Project the matrix `X` onto the tangent space at `p` on the [`CenteredMatrices`](@ref) `M`, i.e.
 
 ````math
-\operatorname{proj}_p(X) = X - \begin{pmatrix} 
-\frac{1}{m}\sum_{i=1}^m x_{i,1} & ⋯ & \frac{1}{m}\sum_{i=1}^m x_{i,n}\\
-⋮ & & ⋮ \\
-\frac{1}{m}\sum_{i=1}^m x_{i,1} & ⋯ & \frac{1}{m}\sum_{i=1}^m x_{i,n}
-\end{pmatrix}.
+\operatorname{proj}_p(X) = X - \begin{bmatrix} 
+1\\
+⋮\\
+1
+\end{bmatrix} * [c_1 \dots c_n],
 ````
+where $c_i = \frac{1}{m}\sum_{j=1}^m x_{j,i}$  for $i = 1, \dots, n$.
 """
 project(::CenteredMatrices, ::Any, ::Any)
 
