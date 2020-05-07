@@ -7,7 +7,6 @@ using StaticArrays: Dynamic
 Random.seed!(42)
 
 @testset "Power manifold" begin
-
     Ms = Sphere(2)
     Ms1 = PowerManifold(Ms, 5)
     @test power_dimensions(Ms1) == (5,)
@@ -19,6 +18,12 @@ Random.seed!(42)
     Mr = Manifolds.Rotations(3)
     Mr1 = PowerManifold(Mr, 5)
     Mrn1 = PowerManifold(Mr, Manifolds.NestedPowerRepresentation(), 5)
+    @test PowerManifold(PowerManifold(Mr, 2), 3) == PowerManifold(Mr, 2, 3)
+    @test PowerManifold(Torus(2), 3) isa PowerManifold{ℝ,Torus{2}}
+    @test PowerManifold(Mrn1, 3) ==
+          PowerManifold(Mr, Manifolds.NestedPowerRepresentation(), 5, 3)
+    @test PowerManifold(Mrn1, Manifolds.ArrayPowerRepresentation(), 3) ==
+          PowerManifold(Mr, Manifolds.ArrayPowerRepresentation(), 5, 3)
     @test manifold_dimension(Mr1) == 15
     @test manifold_dimension(Mrn1) == 15
     Mr2 = PowerManifold(Mr, 5, 7)
@@ -26,7 +31,7 @@ Random.seed!(42)
     @test manifold_dimension(Mr2) == 105
     @test manifold_dimension(Mrn2) == 105
 
-    @test repr(Ms1) == "PowerManifold(Sphere(2; field = ℝ), 5)"
+    @test repr(Ms1) == "PowerManifold(Sphere(2, ℝ), 5)"
     @test repr(Mrn1) == "PowerManifold(Rotations(3), NestedPowerRepresentation(), 5)"
 
     @test Manifolds.allocation_promotion_function(Ms, exp, ([1],)) ==
@@ -109,6 +114,29 @@ Random.seed!(42)
         rotations_tv_dist,
     )
 
+    @testset "get_component and set_component!" begin
+        p1 = randn(3, 5)
+        @test get_component(Ms1, p1, 1) == p1[:, 1]
+        p2 = [10.0, 11.0, 12.0]
+        set_component!(Ms1, p1, p2, 2)
+        @test get_component(Ms1, p1, 2) == p2
+
+        Msn1 = PowerManifold(Ms, Manifolds.NestedPowerRepresentation(), 5)
+        pn1 = [randn(3) for _ in 1:5]
+        @test get_component(Msn1, pn1, 1) == pn1[1]
+        set_component!(Msn1, pn1, p2, 2)
+        @test get_component(Msn1, pn1, 2) == p2
+    end
+
+    @testset "power vector transport" begin
+        m = PowerVectorTransport(ParallelTransport())
+        p = repeat([1.0, 0.0, 0.0], 1, 5)
+        q = repeat([0.0, 1.0, 0.0], 1, 5)
+        X = log(Ms1, p, q)
+        Y = vector_transport_to(Ms1, p, X, q, m)
+        Z = -log(Ms1, q, p)
+        @test isapprox(Ms1, q, Y, Z)
+    end
     trim(s::String) = s[1:min(length(s), 20)]
 
     basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))

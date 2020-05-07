@@ -1,7 +1,7 @@
 name = "Manifolds"
 uuid = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Antoine Levitt <antoine.levitt@gmail.com>"]
-version = "0.1.6"
+version = "0.2.0"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -21,7 +21,7 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
-Distributions = "0.22, 0.23"
+Distributions = "0.22.6, 0.23"
 Einsum = "0.4"
 FiniteDifferences = "0.9"
 HybridArrays = "0.3"

@@ -7,10 +7,22 @@ include("utils.jl")
       "Testing Static:   $(TEST_STATIC_SIZED)\n"
 
 
+function our_base_ambiguities()
+    ambigs = Test.detect_ambiguities(Base)
+    modules_we_care_about =
+        [Base, LinearAlgebra, Manifolds, ManifoldsBase, StaticArrays, Statistics, StatsBase]
+    our_ambigs = filter(ambigs) do (m1, m2)
+        we_care = m1.module in modules_we_care_about && m2.module in modules_we_care_about
+        return we_care && (m1.module === Manifolds || m2.module === Manifolds)
+    end
+    return our_ambigs
+end
+
 @testset "Ambiguities" begin
     # TODO: reduce the number of ambiguities
     @test length(Test.detect_ambiguities(ManifoldsBase)) <= 12
     @test length(Test.detect_ambiguities(Manifolds)) == 0
+    @test length(our_base_ambiguities()) <= 15
 end
 
 include("groups/group_utils.jl")

@@ -205,6 +205,7 @@ export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibe
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
 export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribution
+export PowerVectorTransport, ProductVectorTransport
 export AbstractEmbeddedManifold
 export Metric,
     RiemannianMetric,
@@ -226,7 +227,9 @@ export AbstractRetractionMethod,
     QRRetraction,
     PolarRetraction,
     ProjectionRetraction,
-    SoftmaxRetraction
+    SoftmaxRetraction,
+    ProductRetraction,
+    PowerRetraction
 export AbstractInverseRetractionMethod,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
@@ -267,6 +270,7 @@ export ×,
     flat!,
     gaussian_curvature,
     geodesic,
+    get_component,
     get_embedding,
     hat,
     hat!,
@@ -316,6 +320,7 @@ export ×,
     retract,
     retract!,
     riemann_tensor,
+    set_component!,
     sharp,
     sharp!,
     shortest_geodesic,

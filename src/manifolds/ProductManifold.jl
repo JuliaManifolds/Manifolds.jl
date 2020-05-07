@@ -111,6 +111,19 @@ function allocation_promotion_function(M::ProductManifold, f, args::Tuple)
     return reduce(combine_allocation_promotion_functions, apfs)
 end
 
+"""
+    ProductVectorTransport(methods::AbstractVectorTransportMethod...)
+
+Product vector transport type of `methods`. Works on [`ProductManifold`](@ref).
+"""
+struct ProductVectorTransport{TR<:Tuple} <: AbstractVectorTransportMethod
+    methods::TR
+end
+
+function ProductVectorTransport(methods::AbstractVectorTransportMethod...)
+    return ProductVectorTransport{typeof(methods)}(methods)
+end
+
 
 """
     check_manifold_point(M::ProductManifold, p; kwargs...)
@@ -293,6 +306,15 @@ for BT in PRODUCT_BASIS_LIST
     eval(quote
         @invoke_maker 3 AbstractBasis get_basis(M::ProductManifold, p, B::$BT)
     end)
+end
+
+"""
+    get_component(M::ProductManifold, p, i)
+
+Get the `i`th component of a point `p` on a [`ProductManifold`](@ref) `M`.
+"""
+function get_component(M::ProductManifold, p, i)
+    return submanifold_component(M, p, i)
 end
 
 function get_coordinates(
@@ -871,6 +893,15 @@ function representation_size(M::ProductManifold)
     return (mapreduce(m -> prod(representation_size(m)), +, M.manifolds),)
 end
 
+"""
+    set_component!(M::ProductManifold, q, p, i)
+
+Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`, where `p` is a point on the [`Manifold`](@ref) this factor of the product manifold consists of.
+"""
+function set_component!(M::ProductManifold, q, p, i)
+    return copyto!(submanifold_component(M, q, i), p)
+end
+
 @doc raw"""
     sharp(M::ProductManifold, p, ξ::FVector{CotangentSpaceType})
 
@@ -983,6 +1014,29 @@ function Distributions.support(tvd::ProductFVectorDistribution)
         tvd.type,
         ProductRepr(map(d -> support(d).point, tvd.distributions)...),
     )
+end
+
+@doc raw"""
+    vector_transport_to(M::ProductManifold, p, X, q, m::ProductVectorTransport)
+
+Compute the vector transport the tangent vector `X`at `p` to `q` on the
+[`ProductManifold`](@ref) `M` using an [`AbstractVectorTransportMethod`](@ref) `m`.
+This method is performed elementwise, i.e. the method `m` has to be implemented on the
+base manifold.
+"""
+vector_transport_to(::ProductManifold, ::Any, ::Any, ::Any, ::ProductVectorTransport)
+
+function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTransport)
+    map(
+        vector_transport_to!,
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        submanifold_components(M, q),
+        m.methods,
+    )
+    return Y
 end
 
 function zero_tangent_vector!(M::ProductManifold, X, p)
