@@ -35,12 +35,12 @@ include("utils.jl")
     E = [0 0; 1 -1; -1 1]
     F = [0.5 1; -1 -0.7; 0.5 -0.3]
     test_manifold(
-                M,
-                [A, E, F],
-                test_injectivity_radius = false,
-                test_reverse_diff = false,
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_vector_transport = true,
-            )
-end 
+        M,
+        [A, E, F],
+        test_injectivity_radius = false,
+        test_reverse_diff = false,
+        test_project_tangent = true,
+        test_musical_isomorphisms = true,
+        test_vector_transport = true,
+    )
+end
