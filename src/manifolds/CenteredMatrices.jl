@@ -27,7 +27,7 @@ zero.
 
 The tolerance for the column sums of `p` can be set using `kwargs...`.
 """
-function check_manifold_point(M::CenteredMatrices{m,n}, p; kwargs...) where {m,n}
+function check_manifold_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...) where {m,n,𝔽}
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv

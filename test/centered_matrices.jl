@@ -5,7 +5,7 @@ include("utils.jl")
     M_complex = CenteredMatrices(3, 2, ℂ)
     @test repr(M_complex) == "CenteredMatrices(3, 2, ℂ)"
     @test manifold_dimension(M_complex) == 8
-    A =[1 2; 4 5; -5 -7]
+    A = [1 2; 4 5; -5 -7]
     B = [1 2 3; 4 5 6; -5 -7 -9]    #wrong dimensions
     C = [-3 -im; 2 im; 1 0]         #complex
     D = [1 2; 3 4; 5 6]             #not centered 
@@ -31,4 +31,16 @@ include("utils.jl")
         @test A2 == A
         @test A3 == A
     end
+    types = [Matrix{Float64}]
+    E = [0 0; 1 -1; -1 1]
+    F = [0.5 1; -1 -0.7; 0.5 -0.3]
+    test_manifold(
+                M,
+                [A, E, F],
+                test_injectivity_radius = false,
+                test_reverse_diff = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_vector_transport = true,
+            )
 end 
