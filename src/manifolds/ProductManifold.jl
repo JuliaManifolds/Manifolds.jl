@@ -111,6 +111,19 @@ function allocation_promotion_function(M::ProductManifold, f, args::Tuple)
     return reduce(combine_allocation_promotion_functions, apfs)
 end
 
+"""
+    ProductVectorTransport(methods::AbstractVectorTransportMethod...)
+
+Product vector transport type of `methods`. Works on [`ProductManifold`](@ref).
+"""
+struct ProductVectorTransport{TR<:Tuple} <: AbstractVectorTransportMethod
+    methods::TR
+end
+
+function ProductVectorTransport(methods::AbstractVectorTransportMethod...)
+    return ProductVectorTransport{typeof(methods)}(methods)
+end
+
 
 """
     check_manifold_point(M::ProductManifold, p; kwargs...)
@@ -293,6 +306,15 @@ for BT in PRODUCT_BASIS_LIST
     eval(quote
         @invoke_maker 3 AbstractBasis get_basis(M::ProductManifold, p, B::$BT)
     end)
+end
+
+"""
+    get_component(M::ProductManifold, p, i)
+
+Get the `i`th component of a point `p` on a [`ProductManifold`](@ref) `M`.
+"""
+function get_component(M::ProductManifold, p, i)
+    return submanifold_component(M, p, i)
 end
 
 function get_coordinates(
@@ -566,6 +588,29 @@ function get_vectors(
     return vs
 end
 
+"""
+    getindex(p, M::ProductManifold, i::Union{Integer,Colon,AbstractVector})
+    p[M::ProductManifold, i]
+
+Access the element(s) at index `i` of a point `p` on a [`ProductManifold`](@ref) `M` by
+linear indexing.
+See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
+"""
+Base.@propagate_inbounds function Base.getindex(
+    p::ProductRepr,
+    M::ProductManifold,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return get_component(M, p, i)
+end
+Base.@propagate_inbounds function Base.getindex(
+    p::ProductArray,
+    M::ProductManifold,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return collect(get_component(M, p, i))
+end
+
 @doc raw"""
     injectivity_radius(M::ProductManifold)
     injectivity_radius(M::ProductManifold, x)
@@ -713,7 +758,7 @@ manifold dimensions the product is made of.
 manifold_dimension(M::ProductManifold) = mapreduce(manifold_dimension, +, M.manifolds)
 
 @doc raw"""
-    norm(M::PowerManifold, p, X)
+    norm(M::ProductManifold, p, X)
 
 Compute the norm of `X` from the tangent space of `p` on the [`ProductManifold`](@ref),
 i.e. from the element wise norms the 2-norm is computed.
@@ -871,6 +916,31 @@ function representation_size(M::ProductManifold)
     return (mapreduce(m -> prod(representation_size(m)), +, M.manifolds),)
 end
 
+"""
+    set_component!(M::ProductManifold, q, p, i)
+
+Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`, where `p` is a point on the [`Manifold`](@ref) this factor of the product manifold consists of.
+"""
+function set_component!(M::ProductManifold, q, p, i)
+    return copyto!(submanifold_component(M, q, i), p)
+end
+
+"""
+    setindex!(q, p, M::ProductManifold, i::Union{Integer,Colon,AbstractVector})
+    q[M::ProductManifold,i...] = p
+
+set the element `[i...]` of a point `q` on a [`ProductManifold`](@ref) by linear indexing to `q`.
+See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
+"""
+Base.@propagate_inbounds function Base.setindex!(
+    q::Union{ProductArray,ProductRepr},
+    p,
+    M::ProductManifold,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return set_component!(M, q, p, i)
+end
+
 @doc raw"""
     sharp(M::ProductManifold, p, ξ::FVector{CotangentSpaceType})
 
@@ -983,6 +1053,73 @@ function Distributions.support(tvd::ProductFVectorDistribution)
         tvd.type,
         ProductRepr(map(d -> support(d).point, tvd.distributions)...),
     )
+end
+
+function vector_bundle_transport(fiber::VectorSpaceType, M::ProductManifold)
+    return ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds))
+end
+
+function vector_transport_direction(M::ProductManifold, p, X, d)
+    return vector_transport_direction(
+        M,
+        p,
+        X,
+        d,
+        ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds)),
+    )
+end
+
+function vector_transport_direction!(M::ProductManifold, Y, p, X, d)
+    return vector_transport_direction!(
+        M,
+        Y,
+        p,
+        X,
+        d,
+        ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds)),
+    )
+end
+
+@doc raw"""
+    vector_transport_to(M::ProductManifold, p, X, q, m::ProductVectorTransport)
+
+Compute the vector transport the tangent vector `X`at `p` to `q` on the
+[`ProductManifold`](@ref) `M` using an [`ProductVectorTransport`](@ref) `m`.
+This method is performed elementwise, i.e. the method `m` has to be implemented on the
+base manifold.
+"""
+vector_transport_to(::ProductManifold, ::Any, ::Any, ::Any, ::ProductVectorTransport)
+function vector_transport_to(M::ProductManifold, p, X, q)
+    return vector_transport_to(
+        M,
+        p,
+        X,
+        q,
+        ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds)),
+    )
+end
+
+function vector_transport_to!(M::ProductManifold, Y, p, X, q)
+    return vector_transport_to!(
+        M,
+        Y,
+        p,
+        X,
+        q,
+        ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds)),
+    )
+end
+function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTransport)
+    map(
+        vector_transport_to!,
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        submanifold_components(M, q),
+        m.methods,
+    )
+    return Y
 end
 
 function zero_tangent_vector!(M::ProductManifold, X, p)

@@ -36,6 +36,60 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
 
     reshapers = (Manifolds.StaticReshaper(), Manifolds.ArrayReshaper())
 
+    @testset "get_component, set_component!, getindex and setindex!" begin
+        p1 = ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0])
+        @test get_component(Mse, p1, 1) == p1.parts[1]
+        @test get_component(Mse, p1, Val(1)) == p1.parts[1]
+        @test p1[Mse, 1] == p1.parts[1]
+        @test p1[Mse, Val(1)] == p1.parts[1]
+        @test p1[Mse, 1] isa Vector
+        @test p1[Mse, Val(1)] isa Vector
+        p2 = [10.0, 12.0]
+        set_component!(Mse, p1, p2, 2)
+        @test get_component(Mse, p1, 2) == p2
+        p1[Mse, 2] = 2 * p2
+        @test p1[Mse, 2] == 2 * p2
+        p3 = [11.0, 15.0]
+        set_component!(Mse, p1, p3, Val(2))
+        @test get_component(Mse, p1, Val(2)) == p3
+        p1[Mse, Val(2)] = 2 * p3
+        @test p1[Mse, Val(2)] == 2 * p3
+
+        shape_a_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M1, M2)
+        pra1 = Manifolds.ProductArray(shape_a_se, [0.0, 1.0, 0.0, 0.0, 0.0])
+        @test get_component(Mse, pra1, 1) == p1.parts[1]
+        @test get_component(Mse, pra1, Val(1)) == p1.parts[1]
+        @test pra1[Mse, 1] == pra1.parts[1]
+        @test pra1[Mse, Val(1)] == pra1.parts[1]
+        @test pra1[Mse, 1] isa Vector
+        @test pra1[Mse, Val(1)] isa Vector
+        set_component!(Mse, pra1, p2, 2)
+        @test get_component(Mse, pra1, 2) == p2
+        pra1[Mse, 2] = 2 * p2
+        @test pra1[Mse, 2] == 2 * p2
+        set_component!(Mse, pra1, p3, Val(2))
+        @test get_component(Mse, pra1, Val(2)) == p3
+        pra1[Mse, Val(2)] = 2 * p3
+        @test pra1[Mse, Val(2)] == 2 * p3
+
+        shape_s_se = Manifolds.ShapeSpecification(Manifolds.StaticReshaper(), M1, M2)
+        prs1 = Manifolds.ProductArray(shape_s_se, [0.0, 1.0, 0.0, 0.0, 0.0])
+        @test get_component(Mse, prs1, 1) == p1.parts[1]
+        @test get_component(Mse, prs1, Val(1)) == p1.parts[1]
+        @test prs1[Mse, 1] == prs1.parts[1]
+        @test prs1[Mse, Val(1)] == prs1.parts[1]
+        @test prs1[Mse, 1] isa Vector
+        @test prs1[Mse, Val(1)] isa Vector
+        set_component!(Mse, prs1, p2, 2)
+        @test get_component(Mse, prs1, 2) == p2
+        prs1[Mse, 2] = 2 * p2
+        @test prs1[Mse, 2] == 2 * p2
+        set_component!(Mse, prs1, p3, Val(2))
+        @test get_component(Mse, prs1, Val(2)) == p3
+        prs1[Mse, Val(2)] = 2 * p3
+        @test prs1[Mse, Val(2)] == 2 * p3
+    end
+
     @testset "Show methods" begin
         Mse2 = ProductManifold(M1, M1, M2, M2)
         @test sprint(show, Mse2) == "ProductManifold($(M1), $(M1), $(M2), $(M2))"
@@ -54,8 +108,8 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
 
         @test sprint(show, "text/plain", ProductManifold(Mse, Mse)) == """
         ProductManifold with 2 submanifolds:
-         ProductManifold(Sphere(2; field = ℝ), Euclidean(2; field = ℝ))
-         ProductManifold(Sphere(2; field = ℝ), Euclidean(2; field = ℝ))"""
+         ProductManifold(Sphere(2, ℝ), Euclidean(2; field = ℝ))
+         ProductManifold(Sphere(2, ℝ), Euclidean(2; field = ℝ))"""
 
         shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M1)
         p = Manifolds.ProductArray(shape_se, Float64[1, 0, 0])
@@ -279,6 +333,16 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         test_reverse_diff = false,
     )
 
+    @testset "product vector transport" begin
+        p = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
+        q = ProductRepr([0.0, 1.0, 0.0], [2.0, 0.0])
+        X = log(Mse, p, q)
+        m = ProductVectorTransport(ParallelTransport(), ParallelTransport())
+        Y = vector_transport_to(Mse, p, X, q, m)
+        Z = -log(Mse, q, p)
+        @test isapprox(Mse, q, Y, Z)
+    end
+
     @testset "prod_point" begin
         shape_se = Manifolds.ShapeSpecification(reshapers[1], M1, M2)
         Ts = SizedVector{3,Float64}
@@ -344,6 +408,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             test_reverse_diff = false,
             test_project_tangent = true,
             test_project_point = true,
+            test_vector_transport = true,
             basis_types_vecs = (basis_types[1], basis_types[3], basis_types[4]),
             basis_types_to_from = basis_types,
         )

@@ -59,14 +59,14 @@ struct TestVectorSpaceType <: VectorSpaceType end
     for T in types
         x = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)
-        @test sprint(show, TB) == "TangentBundle(Sphere(2; field = ℝ))"
+        @test sprint(show, TB) == "TangentBundle(Sphere(2, ℝ))"
         @test base_manifold(TB) == M
         @test manifold_dimension(TB) == 2 * manifold_dimension(M)
         @test representation_size(TB) == (6,)
         CTB = CotangentBundle(M)
-        @test sprint(show, CTB) == "CotangentBundle(Sphere(2; field = ℝ))"
+        @test sprint(show, CTB) == "CotangentBundle(Sphere(2, ℝ))"
         @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
-              "VectorBundle(TestVectorSpaceType(), Sphere(2; field = ℝ))"
+              "VectorBundle(TestVectorSpaceType(), Sphere(2, ℝ))"
         @testset "Type $T" begin
             pts_tb = [
                 ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
@@ -97,6 +97,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_vee_hat = true,
                 test_project_tangent = true,
                 test_project_point = true,
+                test_vector_transport = true,
                 basis_types_vecs = basis_types,
                 projection_atol_multiplier = 4,
             )
@@ -116,7 +117,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test sprint(show, "text/plain", t_x) == """
         VectorSpaceAtPoint{VectorBundleFibers{Manifolds.TangentSpaceType,Sphere{2,ℝ}},Array{Float64,1}}
         Fiber:
-         VectorBundleFibers(TangentSpace, Sphere(2; field = ℝ))
+         VectorBundleFibers(TangentSpace, Sphere(2, ℝ))
         Base point:
          3-element Array{Float64,1}:
           1.0
@@ -139,7 +140,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(3))) == 9
         @test base_manifold(VectorBundleFibers(TT, Sphere(2))) == M
         @test sprint(show, VectorBundleFibers(TT, Sphere(2))) ==
-              "VectorBundleFibers(TensorProductType(TangentSpace, TangentSpace), Sphere(2; field = ℝ))"
+              "VectorBundleFibers(TensorProductType(TangentSpace, TangentSpace), Sphere(2, ℝ))"
     end
 
     @testset "Error messages" begin
@@ -156,5 +157,30 @@ struct TestVectorSpaceType <: VectorSpaceType end
             ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0, 1.0]),
             CachedBasis(DefaultOrthonormalBasis(), []),
         )
+    end
+
+    @testset "log and exp on tangent bundle for power and product manifolds" begin
+        M = PowerManifold(Circle(ℝ), 2)
+        N = TangentBundle(M)
+        p1 = ProductRepr([0.0, 0.0], [0.0, 0.0])
+        p2 = ProductRepr([-1.047, -1.047], [0.0, 0.0])
+        X1 = log(N, p1, p2)
+        @test isapprox(N, p2, exp(N, p1, X1))
+        @test is_tangent_vector(N, p2, vector_transport_to(N, p1, X1, p2))
+
+        M2 = ProductManifold(Circle(ℝ), Euclidean(2))
+        N2 = TangentBundle(M2)
+        p1_2 = ProductRepr(ProductRepr([0.0], [0.0, 0.0]), ProductRepr([0.0], [0.0, 0.0]))
+        p2_2 = ProductRepr(
+            ProductRepr([-1.047], [1.0, 0.0]),
+            ProductRepr([-1.047], [0.0, 1.0]),
+        )
+        @test isapprox(N2, p2_2, exp(N2, p1_2, log(N2, p1_2, p2_2)))
+
+        ppt = PowerVectorTransport(ParallelTransport())
+        tbvt = Manifolds.VectorBundleVectorTransport(ppt, ppt)
+        @test TangentBundle(M, tbvt).vector_transport === tbvt
+        @test CotangentBundle(M, tbvt).vector_transport === tbvt
+        @test VectorBundle(TangentSpace, M, tbvt).vector_transport === tbvt
     end
 end

@@ -417,6 +417,20 @@ function uniform_distribution(M::Grassmann{n,k,ℝ}, p) where {n,k}
 end
 
 @doc raw"""
+    vector_transport_to(M::Grassmann,p,X,q,::ProjectionTransport)
+
+compute the projection based transport on the [`Grassmann`](@ref) `M` by
+interpreting `X` from the tangent space at `p` as a point in the embedding and
+projecting it onto the tangent space at q.
+"""
+vector_transport_to(::Grassmann, ::Any, ::Any, ::Any, ::ProjectionTransport)
+
+function vector_transport_to!(M::Grassmann, Y, p, X, q, ::ProjectionTransport)
+    project!(M, Y, q, X)
+    return Y
+end
+
+@doc raw"""
     zero_tangent_vector(M::Grassmann, p)
 
 Return the zero tangent vector from the tangent space at `p` on the [`Grassmann`](@ref) `M`,

@@ -13,6 +13,8 @@ using ForwardDiff
 using Random
 using ReverseDiff
 using StaticArrays
+using Statistics
+using StatsBase
 using Test
 using LightGraphs
 using SimpleWeightedGraphs
@@ -190,7 +192,7 @@ function test_manifold(
                 log(M, p, p);
                 atol = epsx * exp_log_atol_multiplier,
                 rtol = exp_log_atol_multiplier == 0.0 ?
-                       sqrt(epsx) * exp_log_rtol_multiplier : 0,
+                           sqrt(epsx) * exp_log_rtol_multiplier : 0,
             )
             @test isapprox(
                 M,
@@ -199,7 +201,7 @@ function test_manifold(
                 inverse_retract(M, p, p);
                 atol = epsx * exp_log_atol_multiplier,
                 rtol = exp_log_atol_multiplier == 0.0 ?
-                       sqrt(epsx) * exp_log_rtol_multiplier : 0.0,
+                           sqrt(epsx) * exp_log_rtol_multiplier : 0.0,
             )
         end
         atolp1 = exp_log_atol_multiplier * find_eps(pts[1])
@@ -288,20 +290,20 @@ function test_manifold(
     end
 
     test_tangent_vector_broadcasting &&
-    @testset "broadcasted linear algebra in tangent space" begin
-        for (p, X) in zip(pts, tv)
-            @test isapprox(M, p, 3 * X, 2 .* X .+ X)
-            @test isapprox(M, p, -X, X .- 2 .* X)
-            @test isapprox(M, p, -X, .-X)
-            if (isa(X, AbstractArray))
-                Y = allocate(X)
-                Y .= 2 .* X .+ X
-            else
-                Y = 2 * X + X
+        @testset "broadcasted linear algebra in tangent space" begin
+            for (p, X) in zip(pts, tv)
+                @test isapprox(M, p, 3 * X, 2 .* X .+ X)
+                @test isapprox(M, p, -X, X .- 2 .* X)
+                @test isapprox(M, p, -X, .-X)
+                if (isa(X, AbstractArray))
+                    Y = allocate(X)
+                    Y .= 2 .* X .+ X
+                else
+                    Y = 2 * X + X
+                end
+                @test isapprox(M, p, Y, 3 * X)
             end
-            @test isapprox(M, p, Y, 3 * X)
         end
-    end
 
     test_project_tangent && @testset "project tangent test" begin
         for (p, X) in zip(pts, tv)
@@ -332,18 +334,27 @@ function test_manifold(
     end
 
     test_vector_transport &&
-    !(default_inverse_retraction_method === nothing) &&
-    @testset "vector transport" begin
-        tvatol = is_tangent_atol_multiplier * find_eps(pts[1])
-        X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
-        X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
-        v1t1 = vector_transport_to(M, pts[1], X1, pts[3])
-        v1t2 = vector_transport_direction(M, pts[1], X1, X2)
-        @test is_tangent_vector(M, pts[3], v1t1; atol = tvatol)
-        @test is_tangent_vector(M, pts[3], v1t2; atol = tvatol)
-        @test isapprox(M, pts[3], v1t1, v1t2)
-        @test isapprox(M, pts[1], vector_transport_to(M, pts[1], X1, pts[1]), X1)
-    end
+        !(default_inverse_retraction_method === nothing) &&
+        @testset "vector transport" begin
+            tvatol = is_tangent_atol_multiplier * find_eps(pts[1])
+            X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
+            X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
+            v1t1 = vector_transport_to(M, pts[1], X1, pts[3])
+            v1t2 = vector_transport_direction(M, pts[1], X1, X2)
+            @test is_tangent_vector(M, pts[3], v1t1; atol = tvatol)
+            @test is_tangent_vector(M, pts[3], v1t2; atol = tvatol)
+            @test isapprox(M, pts[3], v1t1, v1t2)
+            @test isapprox(M, pts[1], vector_transport_to(M, pts[1], X1, pts[1]), X1)
+
+            is_mutating && @testset "mutating variants" begin
+                v1t1_m = allocate(v1t1)
+                v1t2_m = allocate(v1t2)
+                vector_transport_to!(M, v1t1_m, pts[1], X1, pts[3])
+                vector_transport_direction!(M, v1t2_m, pts[1], X1, X2)
+                @test isapprox(M, pts[3], v1t1, v1t1_m)
+                @test isapprox(M, pts[3], v1t2, v1t2_m)
+            end
+        end
 
     for btype in basis_types_vecs
         @testset "Basis support for $(btype)" begin

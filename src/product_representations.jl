@@ -195,20 +195,22 @@ end
 Project the product array `p` on `M` to its `i`th component. A new array is returned.
 """
 submanifold_component(::Any...)
-submanifold_component(M::Manifold, p, i::Integer) = submanifold_component(M, p, Val(i))
-submanifold_component(M::Manifold, p, i::Val) = submanifold_component(p, i)
-submanifold_component(p, ::Val{I}) where {I} = p.parts[I]
-submanifold_component(p, i::Integer) = submanifold_component(p, Val(i))
+@inline function submanifold_component(M::Manifold, p, i::Integer)
+    return submanifold_component(M, p, Val(i))
+end
+@inline submanifold_component(M::Manifold, p, i::Val) = submanifold_component(p, i)
+@inline submanifold_component(p, ::Val{I}) where {I} = p.parts[I]
+@inline submanifold_component(p, i::Integer) = submanifold_component(p, Val(i))
 
 @doc raw"""
     submanifold_components(M::Manifold, p)
     submanifold_components(p)
 
-Get the projected components of `p` on the submanifolds of `M`.
+Get the projected components of `p` on the submanifolds of `M`. The components are returned in a Tuple.
 """
 submanifold_components(::Any...)
-submanifold_components(M::Manifold, p) = submanifold_components(p)
-submanifold_components(p) = p.parts
+@inline submanifold_components(M::Manifold, p) = submanifold_components(p)
+@inline submanifold_components(p) = p.parts
 
 function Base.BroadcastStyle(
     ::Type{<:ProductArray{ShapeSpec}},
