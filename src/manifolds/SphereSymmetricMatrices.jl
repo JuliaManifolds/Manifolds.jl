@@ -87,10 +87,10 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(M::SphereSymmetricMatrices{n, ℝ}) where {n, ℝ} = ArraySphere{n, n; field=ℝ}
+decorated_manifold(M::SphereSymmetricMatrices{n, ℝ}) where {n, ℝ} = ArraySphere{Tuple([n, n]), ℝ}
 
-embed!(M::CenteredMatrices, q, p) = copyto!(q, p)
-embed!(M::CenteredMatrices, Y, p, X) = copyto!(Y, X)
+embed!(M::SphereSymmetricMatrices, q, p) = copyto!(q, p)
+embed!(M::SphereSymmetricMatrices, Y, p, X) = copyto!(Y, X)
 
 @doc raw"""
     manifold_dimension(M::SphereSymmetricMatrices{n,ℝ})

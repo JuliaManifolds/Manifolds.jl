@@ -40,6 +40,7 @@ makedocs(
                 "Symmetric positive definite" =>
                     "manifolds/symmetricpositivedefinite.md",
                 "Torus" => "manifolds/torus.md",
+                "Unit-norm symmetric matrices" => "manifolds/spheresymmetricmatrices.md",
             ],
             "Combined manifolds" => [
                 "Graph manifold" => "manifolds/graph.md",

@@ -126,6 +126,7 @@ include("manifolds/Rotations.jl")
 include("manifolds/SkewSymmetric.jl")
 include("manifolds/Stiefel.jl")
 include("manifolds/Sphere.jl")
+include("manifolds/SphereSymmetricMatrices.jl")
 include("manifolds/Symmetric.jl")
 include("manifolds/SymmetricPositiveDefinite.jl")
 include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
@@ -184,6 +185,7 @@ export Euclidean,
     Rotations,
     SkewSymmetricMatrices,
     Sphere,
+    SphereSymmetricMatrices,
     Stiefel,
     SymmetricMatrices,
     SymmetricPositiveDefinite,
