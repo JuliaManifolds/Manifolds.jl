@@ -35,10 +35,6 @@ function check_manifold_point(M::SphereSymmetricMatrices{n,ℝ}, p; kwargs...) w
         return DomainError(norm(p - p'), "The point $(p) does not lie on $M, since it is not symmetric.",
         )
     end
-    #if !isapprox(norm(p), 1.0; kwargs...)
-    #    return DomainError(norm(p), "The point $(p) does not lie on $M, since it is not of unit Frobenius norm.",
-    #    )
-    #end
     return nothing
 end
 
@@ -80,10 +76,6 @@ function check_tangent_vector(
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not symmetric.",
         )
     end
-    #if !isapprox(norm(X), 1.0; kwargs...)
-    #    return DomainError(norm(X), "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not of unit Frobenius norm.",
-    #    )
-    #end
     return nothing
 end
 
@@ -116,7 +108,7 @@ Projects `p` from the embedding onto the [`SphereSymmetricMatrices`](@ref) `M`, 
 """
 project(::SphereSymmetricMatrices, ::Any)
 
-project!(M::SphereSymmetricMatrices, q, p) = copyto!(q, (p+transpose(p))/2 - q * (reshape(q,1,:)*reshape((p+transpose(p))/2,:,1)))
+project!(M::SphereSymmetricMatrices, q, p) = project!(get_embedding(M), q, (p+transpose(p))/2)
 
 @doc raw"""
     project(M::SphereSymmetricMatrices, p, X)
@@ -129,7 +121,7 @@ Project the matrix `X` onto the tangent space at `p` on the [`SphereSymmetricMat
 """
 project(::SphereSymmetricMatrices, ::Any, ::Any)
 
-project!(M::SphereSymmetricMatrices, Y, p, X) = (Y .= (p+transpose(p))/2 - X * (reshape(X,1,:)*reshape((p+transpose(p))/2,:,1)))
+project!(M::SphereSymmetricMatrices, Y, p, X) = project!(get_embedding(M), Y, p, (X+transpose(X))/2) 
 
 @generated representation_size(::SphereSymmetricMatrices{n,ℝ}) where {n,ℝ} = (n, n)
 
