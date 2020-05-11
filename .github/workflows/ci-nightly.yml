@@ -9,7 +9,9 @@ jobs:
   test:
     name: Julia nightly - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
+      fail-fst: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
