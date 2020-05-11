@@ -25,7 +25,7 @@ Check whether the matrix is a valid point on the
 [`SphereSymmetricMatrices`](@ref) `M`, i.e. is an `n`-by-`n` symmetric matrix of unit 
 Frobenius norm.
 
-The tolerance for the symmetry and the Frobenius norm of `p` can be set using `kwargs...`.
+The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
 function check_manifold_point(M::SphereSymmetricMatrices{n,ℝ}, p; kwargs...) where {n,ℝ}
     mpv =
@@ -47,7 +47,8 @@ Check whether `X` is a tangent vector to manifold point `p` on the
 of unit Frobenius norm.
 The optional parameter `check_base_point` indicates, whether to call
  [`check_manifold_point`](@ref)  for `p`.
-The tolerance for the symmetry and the Frobenius norm of `p` and `X` can be set using `kwargs...`.
+
+The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
 function check_tangent_vector(
     M::SphereSymmetricMatrices{n,𝔽},
@@ -104,7 +105,8 @@ end
 Projects `p` from the embedding onto the [`SphereSymmetricMatrices`](@ref) `M`, i.e.
 
 ````math
-\operatorname{proj}_{\mathcal M}(p) = .
+\operatorname{proj}_{\mathcal M}(p) = \frac{p}{\lVert p \rVert}.
+````
 """
 project(::SphereSymmetricMatrices, ::Any)
 
@@ -116,7 +118,7 @@ project!(M::SphereSymmetricMatrices, q, p) = project!(get_embedding(M), q, (p+tr
 Project the matrix `X` onto the tangent space at `p` on the [`SphereSymmetricMatrices`](@ref) `M`, i.e.
 
 ````math
-\operatorname{proj}_p(X) = 
+\operatorname{proj}_p(X) = \frac{X + X^T}{2} - ⟨p, \frac{X + X^T}{2}⟩p.
 ````
 """
 project(::SphereSymmetricMatrices, ::Any, ::Any)
