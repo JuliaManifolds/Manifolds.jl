@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental }}
     strategy:
-      fail-fst: false
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
