@@ -330,6 +330,13 @@ function Statistics.median!(
     return copyto!(p, [median(reduce(vcat, x), w)])
 end
 
+mid_point(::Euclidean, p1, p2) = (p1 .+ p2) ./ 2
+
+function mid_point!(::Euclidean, q, p1, p2)
+    q .= (p1 .+ p2) ./ 2
+    return q
+end
+
 @doc raw"""
     norm(M::Euclidean, p, X)
 

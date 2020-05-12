@@ -331,6 +331,8 @@ function Statistics.mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs..
     return sym_rem(sum(w .* x))
 end
 
+mid_point(::Circle{ℝ}, p1, p2) = sym_rem((p1 + p2) / 2)
+
 @inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)
 
 number_of_coordinates(::Circle, ::AbstractBasis) = 1
