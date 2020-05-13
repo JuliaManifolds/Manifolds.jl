@@ -330,9 +330,11 @@ the [`Circle`](@ref) $𝕊^1$, i.e. the angular mean
 which is computed with wrapped mean, i.e. the remainder of the mean modulo 2π.
 """
 mean(::Circle, ::Any)
-Statistics.mean(::Circle, x::Array{<:Real}; kwargs...) = atan( 1/length(x)*sum(sin.(x)), 1/length(x)*sum( cos.(x)) )
+function Statistics.mean(::Circle, x::Array{<:Real}; kwargs...)
+    return atan(1 / length(x) * sum(sin.(x)), 1 / length(x) * sum(cos.(x)))
+end
 function Statistics.mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...)
-    return atan( sum(w.*sin.(x)), sum( w.*cos.(x)) )
+    return atan(sum(w .* sin.(x)), sum(w .* cos.(x)))
 end
 
 @inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)
