@@ -327,7 +327,6 @@ the [`Circle`](@ref) $𝕊^1$, i.e. the angular mean
 ````math
 \operatorname{atan}\Bigl( \sum_{i=1}^n w_i\sin(x_i),  \sum_{i=1}^n w_i\sin(x_i) \Bigr).
 ````
-which is computed with wrapped mean, i.e. the remainder of the mean modulo 2π.
 """
 mean(::Circle, ::Any)
 function Statistics.mean(::Circle, x::Array{<:Real}; kwargs...)
