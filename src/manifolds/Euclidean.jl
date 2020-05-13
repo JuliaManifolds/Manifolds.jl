@@ -416,14 +416,31 @@ function Base.show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
 end
 
 """
-    vector_transport_to(M::Euclidean, p, X, q, ::ParallelTransport)
+    vector_transport_to(M::Euclidean, p, X, q, ::AbstractVectorTransportMethod)
 
-Parallely transport the vector `X` from the tangent space at `p` to the tangent space at `q`
+Transport the vector `X` from the tangent space at `p` to the tangent space at `q`
 on the [`Euclidean`](@ref) `M`, which simplifies to the identity.
 """
-vector_transport_to(::Euclidean, ::Any, ::Any, ::Any, ::ParallelTransport)
+vector_transport_to(::Euclidean, ::Any, ::Any, ::Any, ::AbstractVectorTransportMethod)
 
-vector_transport_to!(M::Euclidean, Y, p, X, q, ::ParallelTransport) = copyto!(Y, X)
+function vector_transport_to!(M::Euclidean, Y, p, X, q, ::AbstractVectorTransportMethod)
+    return copyto!(Y, X)
+end
+
+for VT in ManifoldsBase.VECTOR_TRANSPORT_DISAMBIGUATION
+    eval(
+        quote
+            @invoke_maker 6 AbstractVectorTransportMethod vector_transport_to!(
+                M::Euclidean,
+                Y,
+                p,
+                X,
+                q,
+                B::$VT,
+            )
+        end,
+    )
+end
 
 Statistics.var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
 function Statistics.var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T}

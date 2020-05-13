@@ -332,6 +332,8 @@ function Statistics.mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs..
 end
 
 mid_point(::Circle{ℝ}, p1, p2) = sym_rem((p1 + p2) / 2)
+mid_point(::Circle{ℂ}, p1::Complex, p2::Complex) = exp(im * (angle(p1) + angle(p2)) / 2)
+mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = SA[mid_point(M, p1[], p2[])]
 
 @inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)
 
