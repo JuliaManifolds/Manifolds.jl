@@ -342,7 +342,7 @@ function Statistics.mean(
 end
 function Statistics.mean(::Circle{ℂ}, x::AbstractVector{<:Complex}; kwargs...)
     s = sum(x)
-    return s/abs(s)
+    return s / abs(s)
 end
 function Statistics.mean(
     ::Circle{ℂ},
