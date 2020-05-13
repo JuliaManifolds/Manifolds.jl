@@ -60,8 +60,8 @@ include("utils.jl")
         @test injectivity_radius(M, Ref(-2.0)) ≈ π
         @test injectivity_radius(M, Ref(-2.0), ExponentialRetraction()) ≈ π
         @test injectivity_radius(M, ExponentialRetraction()) ≈ π
-        @test mean(M, [-π / 2, 0.0, π]) ≈ π / 2
-        @test mean(M, [-π / 2, 0.0, π], [1.0, 1.0, 1.0]) == π / 2
+        @test mean(M, [-π / 2, 0.0, π]) ≈ -π / 2
+        @test mean(M, [-π / 2, 0.0, π], [1.0, 1.0, 1.0]) == -π / 2
         z = project(M, 1.5 * π)
         z2 = [0.0]
         project!(M, z2, 1.5 * π)

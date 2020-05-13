@@ -322,13 +322,17 @@ manifold_dimension(::Circle) = 1
 @doc raw"""
     mean(M::Circle, x::AbstractVector[, w::AbstractWeights])
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` of points on the [`Circle`](@ref) $𝕊^1$,
+Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` of points on
+the [`Circle`](@ref) $𝕊^1$, i.e. the angular mean
+````math
+\operatorname{atan}\Bigl( \sum_{i=1}^n w_i\sin(x_i),  \sum_{i=1}^n w_i\sin(x_i) \Bigr).
+````
 which is computed with wrapped mean, i.e. the remainder of the mean modulo 2π.
 """
 mean(::Circle, ::Any)
-Statistics.mean(::Circle, x::Array{<:Real}; kwargs...) = sym_rem(sum(x))
+Statistics.mean(::Circle, x::Array{<:Real}; kwargs...) = atan( 1/length(x)*sum(sin.(x)), 1/length(x)*sum( cos.(x)) )
 function Statistics.mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...)
-    return sym_rem(sum(w .* x))
+    return atan( sum(w.*sin.(x)), sum( w.*cos.(x)) )
 end
 
 @inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)
