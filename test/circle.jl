@@ -158,6 +158,9 @@ include("utils.jl")
         project!(Mc, x, x)
         @test x == MVector(1.0 + 0.0im)
 
+        angles = map(x -> exp(x * im), [-π / 2, 0.0, π])
+        @test mean(Mc, angles) ≈ exp(-π * im / 2)
+        @test mean(Mc, angles, [1.0, 1.0, 1.0]) ≈ exp(-π * im / 2)
     end
     types = [Complex{Float64}]
     TEST_FLOAT32 && push!(types, Complex{Float32})

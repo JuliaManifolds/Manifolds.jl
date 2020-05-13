@@ -329,11 +329,29 @@ the [`Circle`](@ref) $𝕊^1$, i.e. the angular mean
 ````
 """
 mean(::Circle, ::Any)
-function Statistics.mean(::Circle, x::Array{<:Real}; kwargs...)
-    return atan(1 / length(x) * sum(sin.(x)), 1 / length(x) * sum(cos.(x)))
+function Statistics.mean(::Circle{ℝ}, x::AbstractVector{<:Real}; kwargs...)
+    return atan(1 / length(x) * sum(sin, x), 1 / length(x) * sum(cos, x))
 end
-function Statistics.mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...)
+function Statistics.mean(
+    ::Circle{ℝ},
+    x::AbstractVector{<:Real},
+    w::AbstractVector;
+    kwargs...,
+)
     return atan(sum(w .* sin.(x)), sum(w .* cos.(x)))
+end
+function Statistics.mean(::Circle{ℂ}, x::AbstractVector{<:Complex}; kwargs...)
+    s = sum(x)
+    return s/abs(s)
+end
+function Statistics.mean(
+    ::Circle{ℂ},
+    x::AbstractVector{<:Complex},
+    w::AbstractVector;
+    kwargs...,
+)
+    s = sum(w .* x)
+    return s /= abs(s)
 end
 
 @inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)
