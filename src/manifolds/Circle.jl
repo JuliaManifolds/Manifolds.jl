@@ -430,46 +430,6 @@ end
 sym_rem(x, T = π) where {N} = map(sym_rem, x, Ref(T))
 
 @doc raw"""
-    var(M::Circle{ℝ}, x, m=mean(M, x); kwargs...)
-    var(M::Circle{ℝ}, x, w::AbstractWeights, m=mean(M, x, w); kwargs...)
-
-compute the (optionally weighted) circular variance of a `Vector` `x` of `n` data points
-on the [`Circle`](@ref) `M`, represented by angles, i.e. with
-````
-    s = \sum_{j=1}^n w_j\mathrm{e}^{\mathrm{i} x_j}
-````
-the variance reads as $(1 - \frac{\lvert s \rvert}{\sum_{i=1}^n w_i}).
-"""
-var(::Circle{ℝ}, ::Any)
-function Statistics.var(
-    M::Circle{ℝ},
-    x::AbstractVector,
-    w::AbstractWeights,
-    m=mean(M,x,w);
-    kwargs...
-)
-    var(Circle(ℂ), exp.(1im.*x), w)
-end
-@doc raw"""
-    var(M::Circle{ℂ}, x, w::AbstractWeights; kwargs...)
-
-compute the (optionally weighted) circular variance of a `Vector` `x` of `n` data points
-on the [`Circle`](@ref) `M`, represented by complex numbers of unit norm, i.e. with
-````
-    s = \sum_{j=1}^n w_jx_j
-````
-the variance reads as $(1 - \frac{\lvert s \rvert}{\sum_{i=1}^n w_i})
-"""
-var(::Circle{ℂ}, ::Any)
-function Statistics.var(
-    M::Circle{ℂ},
-    x::AbstractVector,
-    w::AbstractWeights,
-)
-    return 1 - abs(sum(w.*x))/sum(w)
-end
-
-@doc raw"""
     vector_transport_to(M::Circle, p, X, q, ::ParallelTransport)
 
 Compute the parallel transport of `X` from the tangent space at `p` to the tangent space at

@@ -161,6 +161,8 @@ include("utils.jl")
         angles = map(x -> exp(x * im), [-π / 2, 0.0, π])
         @test mean(Mc, angles) ≈ exp(-π * im / 2)
         @test mean(Mc, angles, [1.0, 1.0, 1.0]) ≈ exp(-π * im / 2)
+        @test_throws ErrorException mean(Mc, [-1.0 + 0im, 1.0 + 0im])
+        @test_throws ErrorException mean(Mc, [-1.0 + 0im, 1.0 + 0im], [1.0,1.0])
     end
     types = [Complex{Float64}]
     TEST_FLOAT32 && push!(types, Complex{Float32})
