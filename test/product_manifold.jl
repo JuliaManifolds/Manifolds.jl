@@ -90,6 +90,19 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         @test prs1[Mse, Val(2)] == 2 * p3
     end
 
+    @testset "arithmetic" begin
+        Mee = ProductManifold(Euclidean(3), Euclidean(2))
+        p1 = ProductRepr([0.0, 1.0, 0.0], [0.0, 1.0])
+        p2 = ProductRepr([1.0, 2.0, 0.0], [2.0, 3.0])
+
+        @test isapprox(Mee, p1 + p2, ProductRepr([1.0, 3.0, 0.0], [2.0, 4.0]))
+        @test isapprox(Mee, p1 - p2, ProductRepr([-1.0, -1.0, 0.0], [-2.0, -2.0]))
+        @test isapprox(Mee, -p1, ProductRepr([0.0, -1.0, 0.0], [0.0, -1.0]))
+        @test isapprox(Mee, p1 * 2, ProductRepr([0.0, 2.0, 0.0], [0.0, 2.0]))
+        @test isapprox(Mee, 2 * p1, ProductRepr([0.0, 2.0, 0.0], [0.0, 2.0]))
+        @test isapprox(Mee, p1 / 2, ProductRepr([0.0, 0.5, 0.0], [0.0, 0.5]))
+    end
+
     @testset "Show methods" begin
         Mse2 = ProductManifold(M1, M1, M2, M2)
         @test sprint(show, Mse2) == "ProductManifold($(M1), $(M1), $(M2), $(M2))"

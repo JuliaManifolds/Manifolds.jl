@@ -342,7 +342,7 @@ end
 function mid_point!(::Sphere, q, p1, p2)
     q = p1 + p2
     q ./= norm(q)
-    return s
+    return q
 end
 
 """
