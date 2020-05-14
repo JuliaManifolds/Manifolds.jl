@@ -82,6 +82,7 @@ include("utils.jl")
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
+                mid_point12 = nothing,
             )
 
             @testset "inner/norm" begin
