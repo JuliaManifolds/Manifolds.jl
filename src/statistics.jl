@@ -580,8 +580,8 @@ end
 )
 
 @doc raw"""
-    var(M, x, m=mean(M, x); corrected=true, kwargs...)
-    var(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false, kwargs...)
+    var(M, x, m=mean(M, x); corrected=true)
+    var(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false)
 
 compute the (optionally weighted) variance of a `Vector` `x` of `n` data points
 on the [`Manifold`](@ref) `M`, i.e.
@@ -595,7 +595,7 @@ The mean of `x` can be specified as `m`, and the corrected variance
 can be activated by setting `corrected=true`. All further `kwargs...` are passed
 to the computation of the mean (if that is not provided).
 """
-var(M::Manifold, ::Any)
+var(::Manifold, ::Any)
 function Statistics.var(
     M::Manifold,
     x::AbstractVector,
