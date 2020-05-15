@@ -20,7 +20,13 @@ end
 
 @testset "Ambiguities" begin
     # TODO: reduce the number of ambiguities
-    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 12
+    base_ambigs = Test.detect_ambiguities(ManifoldsBase)
+    if length(base_ambigs) > 12
+        for a in base_ambigs
+            print(a)
+        end
+    end
+    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 13
     @test length(Test.detect_ambiguities(Manifolds)) == 0
     @test length(our_base_ambiguities()) <= 21
 end
