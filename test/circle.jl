@@ -60,8 +60,8 @@ include("utils.jl")
         @test injectivity_radius(M, Ref(-2.0)) ≈ π
         @test injectivity_radius(M, Ref(-2.0), ExponentialRetraction()) ≈ π
         @test injectivity_radius(M, ExponentialRetraction()) ≈ π
-        @test mean(M, [-π / 2, 0.0, π]) ≈ π / 2
-        @test mean(M, [-π / 2, 0.0, π], [1.0, 1.0, 1.0]) == π / 2
+        @test mean(M, [-π / 2, 0.0, π]) ≈ -π / 2
+        @test mean(M, [-π / 2, 0.0, π], [1.0, 1.0, 1.0]) == -π / 2
         z = project(M, 1.5 * π)
         z2 = [0.0]
         project!(M, z2, 1.5 * π)
@@ -158,6 +158,11 @@ include("utils.jl")
         project!(Mc, x, x)
         @test x == MVector(1.0 + 0.0im)
 
+        angles = map(x -> exp(x * im), [-π / 2, 0.0, π])
+        @test mean(Mc, angles) ≈ exp(-π * im / 2)
+        @test mean(Mc, angles, [1.0, 1.0, 1.0]) ≈ exp(-π * im / 2)
+        @test_throws ErrorException mean(Mc, [-1.0 + 0im, 1.0 + 0im])
+        @test_throws ErrorException mean(Mc, [-1.0 + 0im, 1.0 + 0im], [1.0, 1.0])
     end
     types = [Complex{Float64}]
     TEST_FLOAT32 && push!(types, Complex{Float32})

@@ -24,3 +24,4 @@ jobs:
       - uses: julia-actions/julia-uploadcodecov@latest
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        if: ${{ matrix.julia-version == '1.4' && matrix.os =='ubuntu-latest' }}
