@@ -121,10 +121,21 @@ using Manifolds: default_metric_dispatch
         p1 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
         p2 = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
         p3 = A(π / 6) * [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1] * transpose(A(π / 6))
-        X = log(M,p1, p3)
-        Y1 = vector_transport_to(M, p1, X, p2)
-        Y2 = vector_transport_to(M, p1, X, p2, PoleLadderTransport())
-        Y3 = vector_transport_to(M, p1, X, p2, SchildsLadderTransport())
+        X1 = log(M,p1, p3)
+        Y1 = vector_transport_to(M, p1, X1, p2)
+        @test is_tangent_vector(M,p2,Y1)
+        Y2 = vector_transport_to(M, p1, X1, p2, PoleLadderTransport())
+        @test is_tangent_vector(M,p2,Y2,atol=10^-16)
+        Y3 = vector_transport_to(M, p1, X1, p2, SchildsLadderTransport())
+        @test is_tangent_vector(M,p2,Y3)
+        @test isapprox(M,p2,Y1,Y2) # pole is exact on SPDs, i.e. identical to parallel transport
+        @test norm(M,p1,X1) ≈ norm(M,p2,Y1) # parallel transport is length preserving
+        # test isometry
+        X2 = log(M, p1, p2)
+        Y4 = vector_transport_to(M, p1, X2, p2)
+        @test is_tangent_vector(M,p2,Y4)
+        Y5 = vector_transport_to(M, p1, X2, p2, PoleLadderTransport())
+        @test inner(M,p1,X1,X2) ≈ inner(M,p2,Y1,Y4) # parallel transport isometric
+        @test inner(M,p1,X1,X2) ≈ inner(M,p2,Y2,Y5) # pole ladder transport isometric
     end
-
 end
