@@ -206,6 +206,7 @@ export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibe
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
 export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribution
+export PoleLadderTransport, SchildLadderTransport
 export PowerVectorTransport, ProductVectorTransport
 export AbstractEmbeddedManifold
 export Metric,
