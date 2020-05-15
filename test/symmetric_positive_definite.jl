@@ -115,4 +115,16 @@ using Manifolds: default_metric_dispatch
         @test donb.data.eigenvalues == d2onb.data.eigenvalues
         @test get_vectors(base_manifold(M2), x, donb) == get_vectors(M2, x, d2onb)
     end
+    @testset "Vector transport and transport along with Schild and Pole ladder" begin
+        A(α) = [1.0 0.0 0.0; 0.0 cos(α) sin(α); 0.0 -sin(α) cos(α)]
+        M = SymmetricPositiveDefinite(3)
+        p1 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
+        p2 = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
+        p3 = A(π / 6) * [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1] * transpose(A(π / 6))
+        X = log(M,p1, p3)
+        Y1 = vector_transport_to(M, p1, X, p2)
+        Y2 = vector_transport_to(M, p1, X, p2, PoleLadderTransport())
+        Y3 = vector_transport_to(M, p1, X, p2, SchildsLadderTransport())
+    end
+
 end
