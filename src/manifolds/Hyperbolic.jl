@@ -186,7 +186,7 @@ manifold_dimension(::Hyperbolic{N}) where {N} = N
         M::Hyperbolic,
         x::AbstractVector,
         [w::AbstractWeights,]
-        method = CyclicProximalPointEstimationMethod();
+        method = CyclicProximalPointEstimation();
         kwargs...,
     )
 

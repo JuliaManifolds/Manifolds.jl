@@ -97,6 +97,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_vee_hat = true,
                 test_project_tangent = true,
                 test_project_point = true,
+                test_vector_transport = true,
                 basis_types_vecs = basis_types,
                 projection_atol_multiplier = 4,
             )
@@ -156,5 +157,30 @@ struct TestVectorSpaceType <: VectorSpaceType end
             ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0, 1.0]),
             CachedBasis(DefaultOrthonormalBasis(), []),
         )
+    end
+
+    @testset "log and exp on tangent bundle for power and product manifolds" begin
+        M = PowerManifold(Circle(ℝ), 2)
+        N = TangentBundle(M)
+        p1 = ProductRepr([0.0, 0.0], [0.0, 0.0])
+        p2 = ProductRepr([-1.047, -1.047], [0.0, 0.0])
+        X1 = log(N, p1, p2)
+        @test isapprox(N, p2, exp(N, p1, X1))
+        @test is_tangent_vector(N, p2, vector_transport_to(N, p1, X1, p2))
+
+        M2 = ProductManifold(Circle(ℝ), Euclidean(2))
+        N2 = TangentBundle(M2)
+        p1_2 = ProductRepr(ProductRepr([0.0], [0.0, 0.0]), ProductRepr([0.0], [0.0, 0.0]))
+        p2_2 = ProductRepr(
+            ProductRepr([-1.047], [1.0, 0.0]),
+            ProductRepr([-1.047], [0.0, 1.0]),
+        )
+        @test isapprox(N2, p2_2, exp(N2, p1_2, log(N2, p1_2, p2_2)))
+
+        ppt = PowerVectorTransport(ParallelTransport())
+        tbvt = Manifolds.VectorBundleVectorTransport(ppt, ppt)
+        @test TangentBundle(M, tbvt).vector_transport === tbvt
+        @test CotangentBundle(M, tbvt).vector_transport === tbvt
+        @test VectorBundle(TangentSpace, M, tbvt).vector_transport === tbvt
     end
 end

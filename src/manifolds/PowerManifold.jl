@@ -493,6 +493,29 @@ function get_vector!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBas
     return Y
 end
 
+"""
+    getindex(p, M::AbstractPowerManifold, i::Union{Integer,Colon,AbstractVector}...)
+    p[M::AbstractPowerManifold, i...]
+
+Access the element(s) at index `[i...]` of a point `p` on an [`AbstractPowerManifold`](@ref)
+`M` by linear or multidimensional indexing.
+See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
+"""
+Base.@propagate_inbounds function Base.getindex(
+    p::AbstractArray,
+    M::AbstractPowerManifold,
+    I::Union{Integer,Colon,AbstractVector}...,
+)
+    return get_component(M, p, I...)
+end
+Base.@propagate_inbounds function Base.getindex(
+    p::AbstractArray,
+    M::AbstractPowerManifold,
+    I::Integer...,
+)
+    return collect(get_component(M, p, I...))
+end
+
 @doc raw"""
     injectivity_radius(M::AbstractPowerManifold[, p])
 
@@ -783,6 +806,22 @@ function set_component!(M::AbstractPowerManifold, q, p, idx...)
     rep_size = representation_size(M.manifold)
     return copyto!(_write(M, rep_size, q, idx), p)
 end
+"""
+    setindex!(q, p, M::AbstractPowerManifold, i::Union{Integer,Colon,AbstractVector}...)
+    q[M::AbstractPowerManifold, i...] = p
+
+Set the element(s) at index `[i...]` of a point `q` on an [`AbstractPowerManifold`](@ref)
+`M` by linear or multidimensional indexing to `q`.
+See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
+"""
+Base.@propagate_inbounds function Base.setindex!(
+    q::AbstractArray,
+    p,
+    M::AbstractPowerManifold,
+    I::Union{Integer,Colon,AbstractVector}...,
+)
+    return set_component!(M, q, p, I...)
+end
 
 @doc raw"""
     sharp(M::AbstractPowerManifold, p, ξ::FVector{CotangentSpaceType})
@@ -835,6 +874,25 @@ end
 Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)
 Distributions.support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 
+function vector_bundle_transport(fiber::VectorSpaceType, M::PowerManifold)
+    return PowerVectorTransport(ParallelTransport())
+end
+
+function vector_transport_direction(M::AbstractPowerManifold, p, X, d)
+    return vector_transport_direction(M, p, X, d, PowerVectorTransport(ParallelTransport()))
+end
+
+function vector_transport_direction!(M::AbstractPowerManifold, Y, p, X, d)
+    return vector_transport_direction!(
+        M,
+        Y,
+        p,
+        X,
+        d,
+        PowerVectorTransport(ParallelTransport()),
+    )
+end
+
 @doc raw"""
     vector_transport_to(M::AbstractPowerManifold, p, X, q, method::PowerVectorTransport)
 
@@ -844,7 +902,13 @@ This method is performed elementwise, i.e. the method `m` has to be implemented 
 base manifold.
 """
 vector_transport_to(::AbstractPowerManifold, ::Any, ::Any, ::Any, ::PowerVectorTransport)
+function vector_transport_to(M::AbstractPowerManifold, p, X, q)
+    return vector_transport_to(M, p, X, q, PowerVectorTransport(ParallelTransport()))
+end
 
+function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q)
+    return vector_transport_to!(M, Y, p, X, q, PowerVectorTransport(ParallelTransport()))
+end
 function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q, m::PowerVectorTransport)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -858,6 +922,21 @@ function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q, m::PowerVect
         )
     end
     return Y
+end
+
+"""
+    view(p, M::AbstractPowerManifold, i::Union{Integer,Colon,AbstractVector}...)
+
+Get the view of the element(s) at index `[i...]` of a point `p` on an
+[`AbstractPowerManifold`](@ref) `M` by linear or multidimensional indexing.
+"""
+function Base.view(
+    p::AbstractArray,
+    M::AbstractPowerManifold,
+    I::Union{Integer,Colon,AbstractVector}...,
+)
+    rep_size = representation_size(M.manifold)
+    return _write(M, rep_size, p, I...)
 end
 
 @inline function _write(M::AbstractPowerManifold, rep_size::Tuple, x::AbstractArray, i::Int)

@@ -320,15 +320,58 @@ i.e. $\dim(𝕊^1) = 1$.
 manifold_dimension(::Circle) = 1
 
 @doc raw"""
-    mean(M::Circle, x::AbstractVector[, w::AbstractWeights])
+    mean(M::Circle{ℝ}, x::AbstractVector[, w::AbstractWeights])
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` of points on the [`Circle`](@ref) $𝕊^1$,
-which is computed with wrapped mean, i.e. the remainder of the mean modulo 2π.
+Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` of points on
+the [`Circle`](@ref) $𝕊^1$, reprsented by real numbers, i.e. the angular mean
+````math
+\operatorname{atan}\Bigl( \sum_{i=1}^n w_i\sin(x_i),  \sum_{i=1}^n w_i\sin(x_i) \Bigr).
+````
 """
-mean(::Circle, ::Any)
-Statistics.mean(::Circle, x::Array{<:Real}; kwargs...) = sym_rem(sum(x))
-function Statistics.mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...)
-    return sym_rem(sum(w .* x))
+mean(::Circle{ℝ}, ::Any)
+function Statistics.mean(::Circle{ℝ}, x::AbstractVector{<:Real}; kwargs...)
+    return atan(1 / length(x) * sum(sin, x), 1 / length(x) * sum(cos, x))
+end
+function Statistics.mean(
+    ::Circle{ℝ},
+    x::AbstractVector{<:Real},
+    w::AbstractVector;
+    kwargs...,
+)
+    return atan(sum(w .* sin.(x)), sum(w .* cos.(x)))
+end
+@doc raw"""
+    mean(M::Circle{ℂ}, x::AbstractVector[, w::AbstractWeights])
+
+Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` of points on
+the [`Circle`](@ref) $𝕊^1$, reprsented by complex numbers, i.e. embedded in the complex plade.
+Comuting the sum
+````math
+s = \sum_{i=1}^n x_i
+````
+the mean is the angle of the complex number $s$, so represented in the complex plane as
+$\frac{s}{\lvert s \rvert}$, whenever $s \neq 0$.
+
+If the sum $s=0$, the mean is not unique. For example for opposite points or equally spaced
+angles.
+"""
+mean(::Circle{ℂ}, ::Any)
+function Statistics.mean(M::Circle{ℂ}, x::AbstractVector{<:Complex}; kwargs...)
+    s = sum(x)
+    abs(s) == 0 &&
+        return error("The mean for $(x) on $(M) is not defined/unique, since the sum of the complex numbers is zero")
+    return s / abs(s)
+end
+function Statistics.mean(
+    M::Circle{ℂ},
+    x::AbstractVector{<:Complex},
+    w::AbstractVector;
+    kwargs...,
+)
+    s = sum(w .* x)
+    abs(s) == 0 &&
+        error("The mean for $(x) on $(M) is not defined/unique, since the sum of the complex numbers is zero")
+    return s /= abs(s)
 end
 
 @inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)

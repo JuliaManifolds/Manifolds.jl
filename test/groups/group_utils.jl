@@ -337,48 +337,48 @@ function test_group(
     end
 
     test_group_exp_log &&
-    test_diff &&
-    @testset "exp/log retract/inverse_retract" begin
-        for conv in diff_convs
-            y = retract(
-                G,
-                g_pts[1],
-                v_pts[1],
-                Manifolds.GroupExponentialRetraction(conv...),
-            )
-            @test is_manifold_point(G, y; atol = atol)
-            v2 = inverse_retract(
-                G,
-                g_pts[1],
-                y,
-                Manifolds.GroupLogarithmicInverseRetraction(conv...),
-            )
-            @test isapprox(G, g_pts[1], v2, v_pts[1]; atol = atol)
-        end
-
-        test_mutating && @testset "mutating" begin
+        test_diff &&
+        @testset "exp/log retract/inverse_retract" begin
             for conv in diff_convs
-                y = allocate(g_pts[1])
-                @test retract!(
+                y = retract(
                     G,
-                    y,
                     g_pts[1],
                     v_pts[1],
                     Manifolds.GroupExponentialRetraction(conv...),
-                ) === y
+                )
                 @test is_manifold_point(G, y; atol = atol)
-                v2 = allocate(v_pts[1])
-                @test inverse_retract!(
+                v2 = inverse_retract(
                     G,
-                    v2,
                     g_pts[1],
                     y,
                     Manifolds.GroupLogarithmicInverseRetraction(conv...),
-                ) === v2
+                )
                 @test isapprox(G, g_pts[1], v2, v_pts[1]; atol = atol)
             end
+
+            test_mutating && @testset "mutating" begin
+                for conv in diff_convs
+                    y = allocate(g_pts[1])
+                    @test retract!(
+                        G,
+                        y,
+                        g_pts[1],
+                        v_pts[1],
+                        Manifolds.GroupExponentialRetraction(conv...),
+                    ) === y
+                    @test is_manifold_point(G, y; atol = atol)
+                    v2 = allocate(v_pts[1])
+                    @test inverse_retract!(
+                        G,
+                        v2,
+                        g_pts[1],
+                        y,
+                        Manifolds.GroupLogarithmicInverseRetraction(conv...),
+                    ) === v2
+                    @test isapprox(G, g_pts[1], v2, v_pts[1]; atol = atol)
+                end
+            end
         end
-    end
 
     test_invariance && @testset "metric invariance" begin
         if has_invariant_metric(G, LeftAction())

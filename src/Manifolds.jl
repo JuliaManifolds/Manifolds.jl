@@ -44,6 +44,7 @@ import ManifoldsBase:
     retract,
     retract!,
     vector_transport_direction,
+    vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
     zero_tangent_vector,
@@ -242,7 +243,8 @@ export AbstractEstimationMethod,
     GradientDescentEstimation,
     CyclicProximalPointEstimation,
     GeodesicInterpolation,
-    GeodesicInterpolationWithinRadius
+    GeodesicInterpolationWithinRadius,
+    ExtrinsicEstimation
 export CachedBasis,
     DefaultBasis,
     DefaultOrthogonalBasis,

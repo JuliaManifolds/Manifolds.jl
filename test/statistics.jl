@@ -685,4 +685,14 @@ end
             @test m == mg
         end
     end
+
+    @testset "Extrinsic mean" begin
+        rng = MersenneTwister(47)
+        S = Sphere(2)
+        x = [normalize(randn(rng, 3)) for _ in 1:10]
+        w = pweights([rand(rng) for _ in 1:length(x)])
+        m = normalize(mean(reduce(hcat, x), w; dims = 2)[:, 1])
+        mg = mean(S, x, w, ExtrinsicEstimation())
+        @test isapprox(S, m, mg)
+    end
 end
