@@ -124,7 +124,7 @@ version = "0.5.5"
 [[ManifoldsBase]]
 deps = ["LinearAlgebra", "Markdown"]
 git-tree-sha1 = "632571bcb9e00553c4e50d86923e92b55b874bde"
-repo-rev = "schild-and-pole"
+repo-rev = "180ccfdd8396d29c8f5f401e98a35ccc76ca98f0"
 repo-url = "https://github.com/JuliaManifolds/ManifoldsBase.jl.git"
 uuid = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
 version = "0.9.0"
