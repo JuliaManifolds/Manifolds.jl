@@ -64,8 +64,6 @@ using Manifolds: default_metric_dispatch
                     test_vector_transport = true,
                     vector_transport_methods = [
                         ParallelTransport(),
-                        SchildsLadderTransport(),
-                        PoleLadderTransport(),
                     ],
                     test_forward_diff = false,
                     test_reverse_diff = false,
