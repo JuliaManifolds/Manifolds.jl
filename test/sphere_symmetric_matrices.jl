@@ -11,22 +11,22 @@ include("utils.jl")
         @test repr(M) == "SphereSymmetricMatrices(3, ℝ)"
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
-        @test typeof(get_embedding(M)) === ArraySphere{(3, 3),ℝ}
+        @test typeof(get_embedding(M)) === ArraySphere{Tuple{3,3},ℝ}
         @test check_manifold_point(M, A) === nothing
         @test_throws DomainError is_manifold_point(M, B, true)
         @test_throws DomainError is_manifold_point(M, C, true)
         @test_throws DomainError is_manifold_point(M, D, true)
         @test_throws DomainError is_manifold_point(M, E, true)
-        @test check_tangent_vector(M, A, A) === nothing
+        @test check_tangent_vector(M, A, zeros(3, 3)) === nothing
         @test_throws DomainError is_tangent_vector(M, A, B, true)
         @test_throws DomainError is_tangent_vector(M, A, C, true)
         @test_throws DomainError is_tangent_vector(M, A, D, true)
         @test_throws DomainError is_tangent_vector(M, D, A, true)
         @test_throws DomainError is_tangent_vector(M, A, E, true)
         @test manifold_dimension(M) == 5
-        @test A == project!(M, A, A)
-        @test A == project(M, A, A)
         A2 = similar(A)
+        @test A == project!(M, A2, A)
+        @test A == project(M, A)
         embed!(M, A2, A)
         A3 = embed(M, A)
         @test A2 == A
@@ -45,6 +45,6 @@ include("utils.jl")
         test_musical_isomorphisms = true,
         test_vector_transport = true,
         is_tangent_atol_multiplier = 1,
-        is_point_atol_multilplier = 1,
+        #is_point_atol_multilplier = 1,
     )
 end

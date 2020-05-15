@@ -1,5 +1,5 @@
 @doc raw"""
-    SphereSymmetricMatrices{n,ℝ} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType}
+    SphereSymmetricMatrices{n,ℝ} <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding}
 
 The [`Manifold`](@ref) consisting of the $n × n$ real symmetric matrices 
 of unit Frobenius norm, i.e. 
@@ -13,7 +13,7 @@ of unit Frobenius norm, i.e.
 Generate the manifold of `n`-by-`n` real-valued symmetric matrices of unit Frobenius norm.
 """
 struct SphereSymmetricMatrices{N,ℝ} <:
-       AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+       AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
 
 function SphereSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
     return SphereSymmetricMatrices{n,field}()
@@ -84,7 +84,7 @@ function check_tangent_vector(
 end
 
 function decorated_manifold(M::SphereSymmetricMatrices{n,ℝ}) where {n,ℝ}
-    return ArraySphere{Tuple([n, n]),ℝ}
+    return ArraySphere(n, n; field = ℝ)
 end
 
 embed!(M::SphereSymmetricMatrices, q, p) = copyto!(q, p)
@@ -101,7 +101,7 @@ Frobenius norm, i.e.
 ````
 """
 function manifold_dimension(::SphereSymmetricMatrices{n,ℝ}) where {n,ℝ}
-    return n * (n + 1) / 2 - 1
+    return div(n * (n + 1), 2) - 1
 end
 
 @doc raw"""

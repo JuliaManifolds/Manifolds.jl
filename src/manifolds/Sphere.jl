@@ -74,7 +74,7 @@ several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product 
 
 # Constructor
 
-    ArraySphere(n₁,n₂,...,nᵢ; field=ℝ))
+    ArraySphere(n₁,n₂,...,nᵢ; field=ℝ)
 
 Generate sphere in $𝔽^{n_1, n_2, …, n_i}$, where 𝔽 defaults to the real-valued case ℝ.
 """
