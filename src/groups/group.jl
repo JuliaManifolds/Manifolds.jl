@@ -231,7 +231,7 @@ function get_vector(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBa
 end
 function get_vector(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group.manifold &&
-    error("On $(M) the identity $(e) does not match to perform get_vector.")
+        error("On $(M) the identity $(e) does not match to perform get_vector.")
     return get_vector(M, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
@@ -252,7 +252,7 @@ function get_vector!(M::AbstractGroupManifold, Y, e::Identity, X, B::VeeOrthogon
 end
 function get_vector!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group.manifold &&
-    error("On $(M) the identity $(e) does not match to perform get_vector!")
+        error("On $(M) the identity $(e) does not match to perform get_vector!")
     return get_vector!(M, Y, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
@@ -271,12 +271,12 @@ end
 
 function get_coordinates(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group &&
-    error("On $(M) the identity $(e) does not match to perform get_coordinates")
+        error("On $(M) the identity $(e) does not match to perform get_coordinates")
     return get_coordinates(decorated_manifold(M), e.p, X, B)
 end
 function get_coordinates(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group.manifold &&
-    error("On $(M) the identity $(e) does not match to perform get_coordinates")
+        error("On $(M) the identity $(e) does not match to perform get_coordinates")
     return get_coordinates(M, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
@@ -300,12 +300,12 @@ function get_coordinates!(
     B::VeeOrthogonalBasis,
 )
     M != e.group &&
-    error("On $(M) the identity $(e) does not match to perform get_coordinates!")
+        error("On $(M) the identity $(e) does not match to perform get_coordinates!")
     return get_coordinates!(decorated_manifold(M), Y, e.p, X, B)
 end
 function get_coordinates!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group.manifold &&
-    error("On $(M) the identity $(e) does not match to perform get_coordinates!")
+        error("On $(M) the identity $(e) does not match to perform get_coordinates!")
     return get_coordinates!(M, Y, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION

@@ -12,7 +12,8 @@ of unit Frobenius norm, i.e.
 
 Generate the manifold of `n`-by-`n` real-valued symmetric matrices of unit Frobenius norm.
 """
-struct SphereSymmetricMatrices{N,ℝ} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+struct SphereSymmetricMatrices{N,ℝ} <:
+       AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
 
 function SphereSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
     return SphereSymmetricMatrices{n,field}()
@@ -32,7 +33,9 @@ function check_manifold_point(M::SphereSymmetricMatrices{n,ℝ}, p; kwargs...) w
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(norm(p - p'), 0.0; kwargs...)
-        return DomainError(norm(p - p'), "The point $(p) does not lie on $M, since it is not symmetric.",
+        return DomainError(
+            norm(p - p'),
+            "The point $(p) does not lie on $M, since it is not symmetric.",
         )
     end
     return nothing
@@ -80,7 +83,9 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(M::SphereSymmetricMatrices{n, ℝ}) where {n, ℝ} = ArraySphere{Tuple([n, n]), ℝ}
+function decorated_manifold(M::SphereSymmetricMatrices{n,ℝ}) where {n,ℝ}
+    return ArraySphere{Tuple([n, n]),ℝ}
+end
 
 embed!(M::SphereSymmetricMatrices, q, p) = copyto!(q, p)
 embed!(M::SphereSymmetricMatrices, Y, p, X) = copyto!(Y, X)
@@ -95,8 +100,8 @@ Frobenius norm, i.e.
 \dim(\mathcal M) = \frac{n*(n + 1)}{2} - 1.
 ````
 """
-function manifold_dimension(::SphereSymmetricMatrices{n, ℝ}) where {n,ℝ}
-    return n*(n+1)/2 - 1 
+function manifold_dimension(::SphereSymmetricMatrices{n,ℝ}) where {n,ℝ}
+    return n * (n + 1) / 2 - 1
 end
 
 @doc raw"""
@@ -110,7 +115,9 @@ Projects `p` from the embedding onto the [`SphereSymmetricMatrices`](@ref) `M`, 
 """
 project(::SphereSymmetricMatrices, ::Any)
 
-project!(M::SphereSymmetricMatrices, q, p) = project!(get_embedding(M), q, (p+transpose(p))/2)
+function project!(M::SphereSymmetricMatrices, q, p)
+    return project!(get_embedding(M), q, (p + transpose(p)) / 2)
+end
 
 @doc raw"""
     project(M::SphereSymmetricMatrices, p, X)
@@ -123,7 +130,9 @@ Project the matrix `X` onto the tangent space at `p` on the [`SphereSymmetricMat
 """
 project(::SphereSymmetricMatrices, ::Any, ::Any)
 
-project!(M::SphereSymmetricMatrices, Y, p, X) = project!(get_embedding(M), Y, p, (X+transpose(X))/2) 
+function project!(M::SphereSymmetricMatrices, Y, p, X)
+    return project!(get_embedding(M), Y, p, (X + transpose(X)) / 2)
+end
 
 @generated representation_size(::SphereSymmetricMatrices{n,ℝ}) where {n,ℝ} = (n, n)
 

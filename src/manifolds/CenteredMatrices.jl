@@ -31,8 +31,11 @@ function check_manifold_point(M::CenteredMatrices{m,n}, p; kwargs...) where {m,n
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
-    if !isapprox(sum(p, dims=1), zeros(1,n); kwargs...)
-        return DomainError(p, string("The point $(p) does not lie on $(M), since its columns do not sum to zero."))
+    if !isapprox(sum(p, dims = 1), zeros(1, n); kwargs...)
+        return DomainError(
+            p,
+            string("The point $(p) does not lie on $(M), since its columns do not sum to zero."),
+        )
     end
     return nothing
 end
@@ -65,11 +68,11 @@ function check_tangent_vector(
         M,
         p,
         X;
-        check_base_point = false, 
+        check_base_point = false,
         kwargs...,
     )
     mpv === nothing || return mpv
-    if !isapprox(sum(X, dims=1), zeros(1,n); kwargs...)
+    if !isapprox(sum(X, dims = 1), zeros(1, n); kwargs...)
         return DomainError(
             X,
             "The vector $(X) is not a tangent vector to $(p) on $(M), since its columns do not sum to zero.",
@@ -95,7 +98,7 @@ Return the manifold dimension of the [`CenteredMatrices`](@ref) `m`-by-`n` matri
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
 function manifold_dimension(::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽}
-    return (m*n - n) * real_dimension(𝔽) 
+    return (m * n - n) * real_dimension(𝔽)
 end
 
 @doc raw"""
@@ -114,7 +117,7 @@ where $c_i = \frac{1}{m}\sum_{j=1}^m p_{j,i}$ for $i = 1, \dots, n$.
 """
 project(::CenteredMatrices, ::Any)
 
-project!(M::CenteredMatrices, q, p) = copyto!(q, p .- mean(p,dims=1))
+project!(M::CenteredMatrices, q, p) = copyto!(q, p .- mean(p, dims = 1))
 
 @doc raw"""
     project(M::CenteredMatrices, p, X)
@@ -132,7 +135,7 @@ where $c_i = \frac{1}{m}\sum_{j=1}^m x_{j,i}$  for $i = 1, \dots, n$.
 """
 project(::CenteredMatrices, ::Any, ::Any)
 
-project!(M::CenteredMatrices, Y, p, X) = (Y .= X .- mean(X,dims=1))
+project!(M::CenteredMatrices, Y, p, X) = (Y .= X .- mean(X, dims = 1))
 
 @generated representation_size(::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽} = (m, n)
 
