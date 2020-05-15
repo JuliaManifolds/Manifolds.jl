@@ -177,6 +177,11 @@ Random.seed!(42)
                 test_musical_isomorphisms = true,
                 test_injectivity_radius = false,
                 test_vector_transport = true,
+                vector_transport_methods = [
+                    PowerVectorTransport(ParallelTransport()),
+                    PowerVectorTransport(SchildsLadderTransport()),
+                    PowerVectorTransport(PoleLadderTransport()),
+                ],
                 test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,

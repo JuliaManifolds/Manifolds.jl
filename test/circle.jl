@@ -118,6 +118,11 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                vector_transport_methods = [
+                    ParallelTransport(),
+                    SchildsLadderTransport(),
+                    PoleLadderTransport(),
+                ],
                 test_vee_hat = true,
                 basis_types_vecs = basis_types_real,
                 basis_types_to_from = basis_types_real,
