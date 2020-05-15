@@ -422,6 +422,11 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             test_project_tangent = true,
             test_project_point = true,
             test_vector_transport = true,
+            vector_transport_methods = [
+                ProductVectorTransport(ParallelTransport(), ParallelTransport()),
+                ProductVectorTransport(SchildsLadderTransport(), SchildsLadderTransport()),
+                ProductVectorTransport(PoleLadderTransport(), PoleLadderTransport()),
+            ],
             basis_types_vecs = (basis_types[1], basis_types[3], basis_types[4]),
             basis_types_to_from = basis_types,
         )

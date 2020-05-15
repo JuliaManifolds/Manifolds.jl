@@ -79,6 +79,11 @@ include("utils.jl")
                     test_project_tangent = true,
                     test_musical_isomorphisms = true,
                     test_vector_transport = true,
+                    vector_transport_methods = [
+                        ParallelTransport(),
+                        SchildsLadderTransport(),
+                        PoleLadderTransport(),
+                    ],
                     test_mutating_rand = isa(T, Vector),
                     point_distributions = [Manifolds.projected_distribution(
                         M,

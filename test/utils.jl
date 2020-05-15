@@ -87,6 +87,7 @@ function test_manifold(
     tvector_distributions = [],
     basis_types_vecs = (),
     basis_types_to_from = (),
+    vector_transport_methods = [],
     basis_has_specialized_diagonalizing_get = false,
     exp_log_atol_multiplier = 0,
     exp_log_rtol_multiplier = 1,
@@ -355,6 +356,29 @@ function test_manifold(
                 vector_transport_direction!(M, v1t2_m, pts[1], X1, X2)
                 @test isapprox(M, pts[3], v1t1, v1t1_m)
                 @test isapprox(M, pts[3], v1t2, v1t2_m)
+            end
+
+            for vtm in vector_transport_methods
+                v1t1 = vector_transport_to(M, pts[1], X1, pts[3], vtm)
+                v1t2 = vector_transport_direction(M, pts[1], X1, X2, vtm)
+                @test is_tangent_vector(M, pts[3], v1t1; atol = tvatol)
+                @test is_tangent_vector(M, pts[3], v1t2; atol = tvatol)
+                @test isapprox(M, pts[3], v1t1, v1t2)
+                @test isapprox(
+                    M,
+                    pts[1],
+                    vector_transport_to(M, pts[1], X1, pts[1], vtm),
+                    X1,
+                )
+
+                is_mutating && @testset "mutating variants" begin
+                    v1t1_m = allocate(v1t1)
+                    v1t2_m = allocate(v1t2)
+                    vector_transport_to!(M, v1t1_m, pts[1], X1, pts[3], vtm)
+                    vector_transport_direction!(M, v1t2_m, pts[1], X1, X2, vtm)
+                    @test isapprox(M, pts[3], v1t1, v1t1_m)
+                    @test isapprox(M, pts[3], v1t2, v1t2_m)
+                end
             end
         end
 

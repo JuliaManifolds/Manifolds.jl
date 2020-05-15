@@ -70,6 +70,11 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                vector_transport_methods = [
+                    ParallelTransport(),
+                    SchildsLadderTransport(),
+                    PoleLadderTransport(),
+                ],
                 basis_types_vecs = (DefaultOrthonormalBasis(ℂ),),
                 basis_types_to_from = (DefaultOrthonormalBasis(ℂ),),
             )
