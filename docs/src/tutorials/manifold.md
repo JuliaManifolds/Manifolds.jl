@@ -68,7 +68,7 @@ Since the latter might be something we want to [dispatch](https://en.wikipedia.o
 
 ```@example manifold-tutorial
 """
-    MySphere{N} <: Manifold{ℝ}
+    MySphere{N} <: Manifold{ManifoldsBase.ℝ}
 
 Define an `n`-sphere of radius `r`. Construct by `MySphere(radius,n)
 """
