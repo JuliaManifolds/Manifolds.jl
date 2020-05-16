@@ -71,11 +71,11 @@ Since the latter might be something we want to [dispatch](https://en.wikipedia.o
 
 ```@example manifold-tutorial
 """
-    MySphere{N} <: Manifold{ManifoldsBase.ℝ}
+    MySphere{N} <: Manifold{ℝ}
 
 Define an `n`-sphere of radius `r`. Construct by `MySphere(radius,n)
 """
-struct MySphere{N} <: Manifold{ℝ} where {N}
+struct MySphere{N} <: Manifold{ManifoldsBase.ℝ} where {N}
     radius::Float64
 end
 MySphere(radius, n) = MySphere{n}(radius)
