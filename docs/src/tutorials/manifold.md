@@ -75,7 +75,7 @@ Define an `n`-sphere of radius `r`. Construct by `MySphere(radius,n)
 struct MySphere{N} <: Manifold{ℝ} where {N}
     radius::Float64
 end
-MySphere(radius,n) = MySphere{n}(radius)
+MySphere(radius, n) = MySphere{n}(radius)
 Base.show(io::IO, M::MySphere{n}) where {n} = print(io, "MySphere($(M.radius),$n)")
 nothing #hide
 ```
