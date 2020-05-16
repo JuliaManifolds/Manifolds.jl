@@ -50,7 +50,7 @@ calls `exp!`, which modifies its input `q` and returns the resulting point in th
 Actually these two lines are the default implementation for [`exp`](@ref exp(M::Manifold, p, X)).
 Note that for a unified interface, the manifold `M` is _always_ the first parameter, and the variable the result will be stored to in the mutating variants is _always_ the second parameter.
 
-Long story short: if possible, implement the mutating vresion [`exp!`](@ref exp!(M::Manifold, q, p, X)), you get the [`exp`](@ref exp(M::Manifold, p, X)) for free.
+Long story short: if possible, implement the mutating version [`exp!`](@ref exp!(M::Manifold, q, p, X)), you get the [`exp`](@ref exp(M::Manifold, p, X)) for free.
 Many functions that build upon basic functions employ the mutating variant, too, to avoid reallocations.
 
 ## [Startup](@id manifold-tutorial-startup)
@@ -191,7 +191,7 @@ but with just `exp!` you for example already have
 
 For the [`shortest_geodesic`](@ref shortest_geodesic(M::Manifold, p, q)) the implementation of a logarithm [`log`](@ref ManifoldsBase.log(M::Manifold, p, q)), again better a [`log!`](@ref log!(M::Manifold, X, p, q)) is necessary.
 
-Sometimes a default implementation is provided; for example if you implemented [`inner`](@ref inner(M::Manifold, p, X, Y)), the [`norm`](@ref norm(M, p, X)) is defined. You should ovrwrite it, if you can provide a more efficient version, gut for a start, the default should suffice.
+Sometimes a default implementation is provided; for example if you implemented [`inner`](@ref inner(M::Manifold, p, X, Y)), the [`norm`](@ref norm(M, p, X)) is defined. You should overwrite it, if you can provide a more efficient version, gut for a start, the default should suffice.
 With [`log!`](@ref log!(M::Manifold, X, p, q)) and [`inner`](@ref inner(M::Manifold, p, X, Y)) you get the [`distance`](@ref distance(M::Manifold, p, q)), and so.
 
-In summary with just these few functions you can already explore the first things on your own manifold. Whenever a fucntion from `Manifolds.jl` requires another function to be specificly implemented, you get a reasonable error message.
+In summary with just these few functions you can already explore the first things on your own manifold. Whenever a function from `Manifolds.jl` requires another function to be specifically implemented, you get a reasonable error message.
