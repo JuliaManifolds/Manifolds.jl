@@ -138,6 +138,7 @@ using Manifolds: default_metric_dispatch
         # test isometry
         X2 = log(M, p1, p2)
         Y4 = vector_transport_to(M, p1, X2, p2)
+        @test norm(M,p1,X2) ≈ norm(M,p2,Y4)
         @test is_tangent_vector(M,p2,Y4)
         Y5 = vector_transport_to(M, p1, X2, p2, PoleLadderTransport())
         @test inner(M,p1,X1,X2) ≈ inner(M,p2,Y1,Y4) # parallel transport isometric

@@ -212,8 +212,8 @@ function vector_transport_to!(
     distance(M, p, q) < 2 * eps(eltype(p)) && copyto!(Y, X)
     e = eigen(Symmetric(p))
     U = e.vectors
-    S = e.values.^2
-    Ssqrt = e.values
+    S = e.values
+    Ssqrt = sqrt.(e.values)
     SsqrtInv = Diagonal(1 ./ Ssqrt)
     Ssqrt = Diagonal(Ssqrt)
     pSqrt = Symmetric(U * Ssqrt * transpose(U)) # p^1/2
