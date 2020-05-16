@@ -52,6 +52,8 @@ include("utils.jl")
             Ref(-2.0),
             DiagonalizingOrthonormalBasis(Ref(-1.0)),
         )[] ≈ 2.0
+        @test number_of_coordinates(M, DiagonalizingOrthonormalBasis(Ref(-1.0))) == 1
+        @test number_of_coordinates(M, DefaultOrthonormalBasis()) == 1
         @test flat(M, 0.0, FVector(TangentSpace, 1.0)) == FVector(CotangentSpace, 1.0)
         @test sharp(M, 0.0, FVector(CotangentSpace, 1.0)) == FVector(TangentSpace, 1.0)
         @test vector_transport_to(M, 0.0, 1.0, 1.0, ParallelTransport()) == 1.0

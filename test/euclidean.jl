@@ -7,6 +7,7 @@ include("utils.jl")
     @test repr(E) == "Euclidean(3; field = ℝ)"
     @test repr(Ec) == "Euclidean(3; field = ℂ)"
     @test repr(Euclidean(2, 3; field = ℍ)) == "Euclidean(2, 3; field = ℍ)"
+    @test Manifolds.allocation_promotion_function(Ec, get_vector, ()) === complex
     @test is_default_metric(EM)
     @test is_default_metric(E, Manifolds.EuclideanMetric())
     @test Manifolds.default_metric_dispatch(E, Manifolds.EuclideanMetric()) === Val{true}()
