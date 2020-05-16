@@ -225,7 +225,7 @@ function vector_transport_to!(
     Ue = e2.vectors
     logty = Symmetric(Ue * Se * transpose(Ue)) # nearly log_pq without the outer p^1/2
     e3 = eigen(logty) # since they cancel with the pInvSqrt in the next line
-    Sf = Diagonal(exp.(0.5*e3.values)) # Uf * Sf * Uf' is the Exp
+    Sf = Diagonal(exp.(e3.values / 2)) # Uf * Sf * Uf' is the Exp
     Uf = e3.vectors
     pUe = pSqrt * Uf * Sf * transpose(Uf) # factors left of tv (and transposed right)
     vtp = Symmetric(pUe * tv * transpose(pUe)) # so this is the documented formula
