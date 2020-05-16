@@ -62,7 +62,8 @@ using Manifolds: default_metric_dispatch
                     M,
                     pts;
                     test_vector_transport = true,
-                    vector_transport_methods = typeof(M) == SymmetricPositiveDefinite{3} ? [ParallelTransport()] : [],
+                    vector_transport_methods = typeof(M) == SymmetricPositiveDefinite{3} ?
+                                               [ParallelTransport()] : [],
                     test_forward_diff = false,
                     test_reverse_diff = false,
                     test_vee_hat = M === M2,
