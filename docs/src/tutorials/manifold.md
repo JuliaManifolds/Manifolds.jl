@@ -24,6 +24,7 @@ After that, we will
 * [implement](@ref manifold-tutorial-fn) two functions, the exponential map and the manifold dimension.
 
 ## [Technical Preliminaries](@id manifold-tutorial-prel)
+
 There is only two small  technical things we require.
 First of all our [`Manifold`](@ref)`{𝔽}` has a parameter `𝔽`.
 This parameter indicates the [`number_system`](@ref) the manifold is based on, e.g. real-valued (`ℝ`) or complex-valued (`ℂ`) data.
@@ -53,6 +54,7 @@ Long story short: if possible, implement the mutating vresion [`exp!`](@ref exp!
 Many functions that build upon basic functions employ the mutating variant, too, to avoid reallocations.
 
 ## [Startup](@id manifold-tutorial-startup)
+
 As a start, let's load `ManifoldsBase.jl` and import the functions we consider throughout this tutorial.
 For implementing a manifold, loading the interface should suffice for quite some time.
 
@@ -62,6 +64,7 @@ import ManifoldsBase: check_manifold_point, check_tangent_vector, manifold_dimen
 ```
 
 ## [Goal](@id manifold-tutorial-task)
+
 As an example, let's implement the sphere, but with a radius $r$. Since this radius is a property inherent to the manifold.
 The second information, we want to store is the dimension of the sphere, for example whether it's the 1-sphere, i.e. the circle, represented by vectors $p\in\mathbb R^2$ or the 2-sphere in $\mathbb R^3$.
 Since the latter might be something we want to [dispatch](https://en.wikipedia.org/wiki/Multiple_dispatch) on, we model it as a parameter of the type. Hence we define
