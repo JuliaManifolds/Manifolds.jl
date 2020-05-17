@@ -23,6 +23,11 @@ include("utils.jl")
             pts;
             test_injectivity_radius = false,
             test_vector_transport = true,
+            vector_transport_methods = [
+                ParallelTransport(),
+                SchildsLadderTransport(),
+                PoleLadderTransport(),
+            ],
             test_forward_diff = false,
             test_reverse_diff = false,
             test_vee_hat = false,

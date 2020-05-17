@@ -339,6 +339,12 @@ function Statistics.mean!(
     return mean!(S, p, x, w, GeodesicInterpolationWithinRadius(π / 2); kwargs...)
 end
 
+function mid_point!(::Sphere, q, p1, p2)
+    q .= p1 .+ p2
+    q ./= norm(q)
+    return q
+end
+
 """
     normal_tvector_distribution(S::Sphere{n,ℝ}, p, σ)
 

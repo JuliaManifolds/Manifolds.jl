@@ -7,6 +7,7 @@ include("utils.jl")
     @test repr(E) == "Euclidean(3; field = ℝ)"
     @test repr(Ec) == "Euclidean(3; field = ℂ)"
     @test repr(Euclidean(2, 3; field = ℍ)) == "Euclidean(2, 3; field = ℍ)"
+    @test Manifolds.allocation_promotion_function(Ec, get_vector, ()) === complex
     @test is_default_metric(EM)
     @test is_default_metric(E, Manifolds.EuclideanMetric())
     @test Manifolds.default_metric_dispatch(E, Manifolds.EuclideanMetric()) === Val{true}()
@@ -79,6 +80,11 @@ include("utils.jl")
                     test_project_tangent = true,
                     test_musical_isomorphisms = true,
                     test_vector_transport = true,
+                    vector_transport_methods = [
+                        ParallelTransport(),
+                        SchildsLadderTransport(),
+                        PoleLadderTransport(),
+                    ],
                     test_mutating_rand = isa(T, Vector),
                     point_distributions = [Manifolds.projected_distribution(
                         M,

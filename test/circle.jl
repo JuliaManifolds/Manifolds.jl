@@ -52,6 +52,8 @@ include("utils.jl")
             Ref(-2.0),
             DiagonalizingOrthonormalBasis(Ref(-1.0)),
         )[] ≈ 2.0
+        @test number_of_coordinates(M, DiagonalizingOrthonormalBasis(Ref(-1.0))) == 1
+        @test number_of_coordinates(M, DefaultOrthonormalBasis()) == 1
         @test flat(M, 0.0, FVector(TangentSpace, 1.0)) == FVector(CotangentSpace, 1.0)
         @test sharp(M, 0.0, FVector(CotangentSpace, 1.0)) == FVector(TangentSpace, 1.0)
         @test vector_transport_to(M, 0.0, 1.0, 1.0, ParallelTransport()) == 1.0
@@ -118,6 +120,11 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                vector_transport_methods = [
+                    ParallelTransport(),
+                    SchildsLadderTransport(),
+                    PoleLadderTransport(),
+                ],
                 test_vee_hat = true,
                 basis_types_vecs = basis_types_real,
                 basis_types_to_from = basis_types_real,
