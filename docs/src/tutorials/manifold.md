@@ -23,7 +23,7 @@ After that, we will
 * [implement](@ref manifold-tutorial-checks) two tests, so that points and tangent vectors can be checked for validity, for example also within [`ValidationManifold`](@ref),
 * [implement](@ref manifold-tutorial-fn) two functions, the exponential map and the manifold dimension.
 
-## [Technical Preliminaries](@id manifold-tutorial-prel)
+## [Technical preliminaries](@id manifold-tutorial-prel)
 
 There is only two small  technical things we require.
 First of all our [`Manifold`](@ref)`{𝔽}` has a parameter `𝔽`.
@@ -46,7 +46,7 @@ q = similar(p)
 exp!(M, q, p, X)
 ```
 
-calls `exp!`, which modifies its input `q` and returns the resulting point in there.
+calls [`exp!`](@ref exp!(M::Manifold, q, p, X)), which modifies its input `q` and returns the resulting point in there.
 Actually these two lines are the default implementation for [`exp`](@ref exp(M::Manifold, p, X)).
 Note that for a unified interface, the manifold `M` is _always_ the first parameter, and the variable the result will be stored to in the mutating variants is _always_ the second parameter.
 
@@ -104,23 +104,24 @@ If something has to only hold up to precision, we can pass that down, too using 
 
 ```@example manifold-tutorial
 function check_manifold_point(M::MySphere{N}, p; kwargs...) where {N}
-    (size(p)) != (N+1,) && return DomainError(size(p),"The size of $p is not $((N+1,)).")
-    !isapprox(norm(p), M.radius; kwargs...) && return DomainError(norm(p), "The norm of $p is not $(M.radius).")
+    (size(p)) == (N+1,) || return DomainError(size(p),"The size of $p is not $((N+1,)).")
+    if !isapprox(norm(p), M.radius; kwargs...)
+        return DomainError(norm(p), "The norm of $p is not $(M.radius).")
+    end
     return nothing
 end
 nothing #hide
 ```
 
-Similarly, we can verify, whether a tangent vector `X` is valid. It has to fulfill the same size requirements.
-It has to be orthogonal to `p`. We can again use the `kwargs`, but also provide a way to check `p`, too.
+Similarly, we can verify, whether a tangent vector `X` is valid. It has to fulfill the same size requirements and it has to be orthogonal to `p`. We can again use the `kwargs`, but also provide a way to check `p`, too.
 
 ```@example manifold-tutorial
-function check_tangent_vector(M::MySphere{N}, p, X, check_base_point = true, kwargs...) where {N}
+function check_tangent_vector(M::MySphere, p, X, check_base_point = true, kwargs...)
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
-    (size(X)) != (N+1,) && return DomainError(size(X), "The size of $X is not $((N+1,)).")
+    size(X) != size(p) && return DomainError(size(X), "The size of $X is not $(size(p)).")
     if !isapprox(dot(p,X), 0.0; kwargs...)
         return DomainError(dot(p,X), "The tangent $X is not orthogonal to $p.")
     end
@@ -184,7 +185,7 @@ q = exp(S,p, [0.0,1.5π,0.0])
 ## [Conclusion](@id manifold-tutorial-outlook)
 
 You can now just continue implementing further functions from the [interface](../interface.md),
-but with just `exp!` you for example already have
+but with just [`exp!`](@ref exp!(M::Manifold, q, p, X)) you for example already have
 
 * [`geodesic`](@ref geodesic(M::Manifold, p, X)) the (not necessarily shortest) geodesic emanating from `p` in direction `X`.
 * the [`ExponentialRetraction`](@ref), that the [`retract`](@ref retract(M::Manifold, p, X))ion uses by default.
