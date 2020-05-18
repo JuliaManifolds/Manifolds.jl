@@ -13,7 +13,8 @@ This tutorial demonstrates how to easily set your own manifold up within `Manifo
 
 If you looked around a little and saw the [interface](../interface.md), the amount of functions and possibilities, it might seem that a manifold might take some time to implement.
 This tutorial demonstrates that you can get your first own manifold quite fast and you only have to implement the functions you actually need. For this tutorial it would be helpful if you take a look at our [notation](../notation.md).
-For this tutorial it is helpful, if you heard of the exponential map, tangent vectors and the dimension of a manifold.
+This tutorial assumes that you heard of the exponential map, tangent vectors and the dimension of a manifold. If not, please read for example [[do Carmo, 1992](#doCarmo1992)],
+Chapter 3, first.
 
 We start with two technical preliminaries. If you want to start directly, you can [skip](@ref manifold-tutorial-task) this paragraph and revisit it for two of the implementation details.
 
@@ -65,9 +66,15 @@ import ManifoldsBase: check_manifold_point, check_tangent_vector, manifold_dimen
 
 ## [Goal](@id manifold-tutorial-task)
 
-As an example, let's implement the sphere, but with a radius $r$. Since this radius is a property inherent to the manifold.
+As an example, let's implement the sphere, but with a radius $r$.
+Since this radius is a property inherent to the manifold, it will become a field of the manifold.
 The second information, we want to store is the dimension of the sphere, for example whether it's the 1-sphere, i.e. the circle, represented by vectors $p\in\mathbb R^2$ or the 2-sphere in $\mathbb R^3$.
-Since the latter might be something we want to [dispatch](https://en.wikipedia.org/wiki/Multiple_dispatch) on, we model it as a parameter of the type. Hence we define
+Since the latter might be something we want to [dispatch](https://en.wikipedia.org/wiki/Multiple_dispatch) on, we model it as a parameter of the type.
+
+In general the `struct` of a manifold should provide information about the manifold, which are inherent to the manifold or has to be available without a specific point or tangent vector present.
+This is -- most prominently -- a way to determine the manifold dimension.
+
+For our example we define
 
 ```@example manifold-tutorial
 """
@@ -84,7 +91,6 @@ nothing #hide
 ```
 
 Here, the last line just provides a nicer print of a variable of that type
-The manifold should only contain information that it might require independently of its points or tangents.
 Now we can already initialize our manifold that we will use later, the $2$-sphere of radius $1.5$.
 
 ```@example manifold-tutorial
@@ -196,3 +202,17 @@ Sometimes a default implementation is provided; for example if you implemented [
 With [`log!`](@ref log!(M::Manifold, X, p, q)) and [`inner`](@ref inner(M::Manifold, p, X, Y)) you get the [`distance`](@ref distance(M::Manifold, p, q)), and so.
 
 In summary with just these few functions you can already explore the first things on your own manifold. Whenever a function from `Manifolds.jl` requires another function to be specifically implemented, you get a reasonable error message.
+
+## Literature
+
+```@raw html
+<ul>
+<li id="doCarmo1992">
+    [<a>doCarmo, 1992</a>]
+    M. P. do Carmo,
+    <emph>Riemannian Geometry</emph>,
+    Birkhäuser Boston, 1992,
+    ISBN: 0-8176-3490-8.
+</li>
+</ul>
+```
