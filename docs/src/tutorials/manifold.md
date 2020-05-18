@@ -1,4 +1,4 @@
-# [How to Implement your own manifold](@id manifold-tutorial)
+# [How to implement your own manifold](@id manifold-tutorial)
 
 ```@meta
 CurrentModule = ManifoldsBase
@@ -7,12 +7,12 @@ DocTestSetup  = quote
 end
 ```
 
-This tutorial demonstrates, how to easily set up your own manifold within `Manifolds.jl`.
+This tutorial demonstrates how to easily set your own manifold up within `Manifolds.jl`.
 
 ## Introduction
 
 If you looked around a little and saw the [interface](../interface.md), the amount of functions and possibilities, it might seem that a manifold might take some time to implement.
-This tutorial demonstrated, that you can get your first own manifold quite fast and you only have to implement the functions you actually need. For this tutorial it would be helpful, if you take a look at our [notation](../notation.md).
+This tutorial demonstrates that you can get your first own manifold quite fast and you only have to implement the functions you actually need. For this tutorial it would be helpful if you take a look at our [notation](../notation.md).
 For this tutorial it is helpful, if you heard of the exponential map, tangent vectors and the dimension of a manifold.
 
 We start with two technical preliminaries. If you want to start directly, you can [skip](@ref manifold-tutorial-task) this paragraph and revisit it for two of the implementation details.
@@ -25,21 +25,21 @@ After that, we will
 
 ## [Technical preliminaries](@id manifold-tutorial-prel)
 
-There is only two small  technical things we require.
+There are only two small technical things we need to explain at this point.
 First of all our [`Manifold`](@ref)`{𝔽}` has a parameter `𝔽`.
 This parameter indicates the [`number_system`](@ref) the manifold is based on, e.g. real-valued (`ℝ`) or complex-valued (`ℂ`) data.
 This can be used to simultaneously implement both a real-valued and a complex-valued type of a manifold.
 
-Second, a main design decision of `Manifold.jl` is, that most functions are implemented by mutation functions, i.e. as in-place-computations. There usually exists a non-mutating version that falls back to allocating memory and calling the mutating one. This means you only have to implement the mutating version, _unless_ there is a good reason to provide a special case for the non-mutating one, i.e. because in that case you know a far better performing implementation.
+Second, a main design decision of `Manifold.jl` is that most functions are implemented as mutating functions, i.e. as in-place-computations. There usually exists a non-mutating version that falls back to allocating memory and calling the mutating one. This means you only have to implement the mutating version, _unless_ there is a good reason to provide a special case for the non-mutating one, i.e. because in that case you know a far better performing implementation.
 
-Let's look at this for an example. The exponential map $\exp_p\colon T_p\mathcal M \to \mathcal M$ that maps a tangent vector $X\in T_p\mathcal M$ from the tangent space at $p\in \mathcal M$ to the manifold.
-The function [`exp`](@ref exp(M::Manifold, p, X)) has to know the manifold `M`, the point `p` and the tangent vector `X` as input, so to compute the resulting point `q` would be calling
+Let's look at an example. The exponential map $\exp_p\colon T_p\mathcal M \to \mathcal M$ that maps a tangent vector $X\in T_p\mathcal M$ from the tangent space at $p\in \mathcal M$ to the manifold.
+The function [`exp`](@ref exp(M::Manifold, p, X)) has to know the manifold `M`, the point `p` and the tangent vector `X` as input, so to compute the resulting point `q` you need to call
 
 ```julia
 q = exp(M, p, X)
 ```
 
-If you already have allocated memory to the variable that should store the result, it is better to perform the computations directly in that memory and avoid reallocations. For example
+If you already have allocated memory for the variable that should store the result, it is better to perform the computations directly in that memory and avoid reallocations. For example
 
 ```julia
 q = similar(p)
@@ -47,7 +47,7 @@ exp!(M, q, p, X)
 ```
 
 calls [`exp!`](@ref exp!(M::Manifold, q, p, X)), which modifies its input `q` and returns the resulting point in there.
-Actually these two lines are the default implementation for [`exp`](@ref exp(M::Manifold, p, X)).
+Actually these two lines are (almost) the default implementation for [`exp`](@ref exp(M::Manifold, p, X)). [`allocate_result`](@ref) that is actually used there just calls `similar` for simple `Array`s.
 Note that for a unified interface, the manifold `M` is _always_ the first parameter, and the variable the result will be stored to in the mutating variants is _always_ the second parameter.
 
 Long story short: if possible, implement the mutating version [`exp!`](@ref exp!(M::Manifold, q, p, X)), you get the [`exp`](@ref exp(M::Manifold, p, X)) for free.
@@ -85,10 +85,10 @@ nothing #hide
 
 Here, the last line just provides a nicer print of a variable of that type
 The manifold should only contain information that it might require independently of its points or tangents.
-Now we can already initialize our Manifold, we use later, the $2$-sphere of radius $1.5$.
+Now we can already initialize our manifold that we will use later, the $2$-sphere of radius $1.5$.
 
 ```@example manifold-tutorial
-S = MySphere(1.5,2)
+S = MySphere(1.5, 2)
 ```
 
 ## [Checking points and tangents](@id manifold-tutorial-checks)
@@ -96,10 +96,10 @@ S = MySphere(1.5,2)
 If we have now a point, represented as an array, we would first like to check, that it is a valid point on the manifold.
 For this one can use the easy interface [`is_manifold_point`](@ref is_manifold_point(M::Manifold, p; kwargs...)). This internally uses [`check_manifold_point`](@ref check_manifold_point(M, p; kwargs...)).
 This is what we want to implement.
-We have to return the error, if `p` is not on `M` and `nothing` otherwise.
+We have to return the error if `p` is not on `M` and `nothing` otherwise.
 
 We have to check two things: that a point `p` is a vector with `N+1` entries and it's norm is the desired radius.
-To spare a few lines, we can use [lazy evaluation](https://en.wikipedia.org/wiki/Lazy_evaluation) instead of `if` statements.
+To spare a few lines, we can use [short-circuit evaluation](https://docs.julialang.org/en/v1/manual/control-flow/#Short-Circuit-Evaluation-1) instead of `if` statements.
 If something has to only hold up to precision, we can pass that down, too using the `kwargs...`.
 
 ```@example manifold-tutorial
@@ -168,7 +168,7 @@ function exp!(M::MySphere{N}, q, p, X) where {N}
     if nX == 0
         q .= p
     else
-        q.= cos(nX/M.radius)*p + M.radius*sin(nX/M.radius) .* (X./nX)
+        q .= cos(nX/M.radius)*p + M.radius*sin(nX/M.radius) .* (X./nX)
     end
     return q
 end
