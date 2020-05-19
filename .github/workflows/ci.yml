@@ -21,5 +21,5 @@ jobs:
           arch: x64
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
-      - uses: julia-actions/julia-uploadcodecov@latest
+      - uses: codecov/codecov-action@v1
         if: ${{ matrix.julia-version == '1.4' && matrix.os =='ubuntu-latest' }}
