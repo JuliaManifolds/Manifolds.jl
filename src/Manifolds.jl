@@ -444,9 +444,7 @@ export AbstractCurve,
     FunctionMap,
     FunctionRealField
 export AbstractDiffBackend,
-    AbstractRiemannianDiffBackend,
-    FiniteDifferencesBackend,
-    RiemannianONBDiffBackend
+    AbstractRiemannianDiffBackend, FiniteDifferencesBackend, RiemannianONBDiffBackend
 export codomain,
     diff_backend,
     diff_backend!,

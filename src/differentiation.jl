@@ -24,8 +24,10 @@ specified, it is obtained using the function [`diff_backend`](@ref).
     and decreased performance.
 """
 function _derivative(f, t, backend::AbstractDiffBackend)
-    error("_derivative not implemented for curve $(typeof(f)), time $(typeof(t)) and " *
-          "backend $(typeof(backend))")
+    return error(
+        "_derivative not implemented for curve $(typeof(f)), time $(typeof(t)) and " *
+        "backend $(typeof(backend))",
+    )
 end
 
 function _derivative!(f, X, t, backend::AbstractDiffBackend)
@@ -45,8 +47,10 @@ specified, it is obtained using the function [`diff_backend`](@ref).
     and decreased performance.
 """
 function _gradient(f, p, backend::AbstractDiffBackend)
-    error("_gradient not implemented for field $(typeof(f)), point $(typeof(p)) and " *
-          "backend $(typeof(backend))")
+    return error(
+        "_gradient not implemented for field $(typeof(f)), point $(typeof(p)) and " *
+        "backend $(typeof(backend))",
+    )
 end
 
 function _gradient!(f, X, p, backend::AbstractDiffBackend)
@@ -82,11 +86,7 @@ is not explicitly specified, it is obtained using the function [`diff_backend`](
     and decreased performance.
 """
 function _hessian_vector_product(f, p, X, backend::AbstractDiffBackend)
-    return _jacobian_transpose_vector_product(
-        q -> _gradient(f, q, backend),
-        p,
-        X,
-        backend)
+    return _jacobian_transpose_vector_product(q -> _gradient(f, q, backend), p, X, backend)
 end
 
 """
@@ -102,8 +102,10 @@ specified, it is obtained using the function [`diff_backend`](@ref).
     and decreased performance.
 """
 function _jacobian(f, p, backend::AbstractDiffBackend)
-    error("_jacobian not implemented for map $(typeof(f)), point $(typeof(p)) and " *
-          "backend $(typeof(backend))")
+    return error(
+        "_jacobian not implemented for map $(typeof(f)), point $(typeof(p)) and " *
+        "backend $(typeof(backend))",
+    )
 end
 
 function _jacobian_vector_product(f, p, X, backend::AbstractDiffBackend)

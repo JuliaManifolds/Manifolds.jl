@@ -59,7 +59,7 @@ makedocs(
         "Library" => [
             "Public" => "lib/public.md",
             "Internals" => "lib/internals.md",
-            "Differentiation" => "lib/differentiation.md"
+            "Differentiation" => "lib/differentiation.md",
         ],
     ],
 )

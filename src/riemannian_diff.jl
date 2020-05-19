@@ -38,31 +38,39 @@ Compute the Riemannian Jacobian of a map `f` at point `p` using the given backen
 r_jacobian(::AbstractMap, ::Any, ::AbstractRiemannianDiffBackend)
 
 function r_derivative(f::AbstractCurve, t, backend::AbstractRiemannianDiffBackend)
-    error("r_derivative not implemented for curve $(typeof(f)), point $(typeof(t)) and " *
-          "backend $(typeof(backend))")
+    return error(
+        "r_derivative not implemented for curve $(typeof(f)), point $(typeof(t)) and " *
+        "backend $(typeof(backend))",
+    )
 end
 
 function r_derivative!(f::AbstractCurve, X, t, backend::AbstractRiemannianDiffBackend)
-    copyto!(X, r_derivative(f, t, backend))
+    return copyto!(X, r_derivative(f, t, backend))
 end
 
 function r_gradient(f::AbstractRealField, p, backend::AbstractRiemannianDiffBackend)
-    error("r_gradient not implemented for field $(typeof(f)), point $(typeof(p)) and " *
-          "backend $(typeof(backend))")
+    return error(
+        "r_gradient not implemented for field $(typeof(f)), point $(typeof(p)) and " *
+        "backend $(typeof(backend))",
+    )
 end
 
 function r_gradient!(f::AbstractRealField, X, p, backend::AbstractRiemannianDiffBackend)
-    copyto!(X, r_gradient(f, p, backend))
+    return copyto!(X, r_gradient(f, p, backend))
 end
 
 function r_hessian(f::AbstractRealField, p, backend::AbstractRiemannianDiffBackend)
-    error("r_hessian not implemented for field $(typeof(f)), point $(typeof(p)) and " *
-          "backend $(typeof(backend))")
+    return error(
+        "r_hessian not implemented for field $(typeof(f)), point $(typeof(p)) and " *
+        "backend $(typeof(backend))",
+    )
 end
 
 function r_jacobian(f::AbstractMap, p, backend::AbstractRiemannianDiffBackend)
-    error("r_jacobian not implemented for map $(typeof(f)), point $(typeof(p)) and " *
-          "backend $(typeof(backend))")
+    return error(
+        "r_jacobian not implemented for map $(typeof(f)), point $(typeof(p)) and " *
+        "backend $(typeof(backend))",
+    )
 end
 
 r_derivative(f::AbstractCurve, p) = r_derivative(f, p, rdiff_backend())
@@ -181,14 +189,12 @@ end
 The instance of [`CurrentRiemannianDiffBackend`](@ref) that stores the globally default
 differentiation backend.
 """
-const _current_rdiff_backend = CurrentRiemannianDiffBackend(
-    RiemannianONBDiffBackend(
-        diff_backend(),
-        ExponentialRetraction(),
-        LogarithmicInverseRetraction(),
-        DefaultOrthonormalBasis(),
-    ),
-)
+const _current_rdiff_backend = CurrentRiemannianDiffBackend(RiemannianONBDiffBackend(
+    diff_backend(),
+    ExponentialRetraction(),
+    LogarithmicInverseRetraction(),
+    DefaultOrthonormalBasis(),
+),)
 
 """
     rdiff_backend() -> AbstractRiemannianDiffBackend
