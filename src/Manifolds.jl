@@ -1,38 +1,5 @@
 module Manifolds
 
-import Base:
-    Array,
-    +,
-    -,
-    *,
-    \,
-    /,
-    ^,
-    ==,
-    angle,
-    axes,
-    convert,
-    copy,
-    copyto!,
-    dataids,
-    eltype,
-    exp,
-    getindex,
-    identity,
-    inv,
-    isapprox,
-    length,
-    log,
-    one,
-    promote_rule,
-    setindex!,
-    show,
-    similar,
-    size,
-    transpose,
-    zero
-import Distributions: _rand!, support
-import LinearAlgebra: cross, det, Diagonal, dot, mul!, norm, I, UniformScaling
 import ManifoldsBase:
     allocate,
     allocate_result,
@@ -41,16 +8,18 @@ import ManifoldsBase:
     array_value,
     base_manifold,
     check_manifold_point,
+    check_manifold_point__transparent,
     check_tangent_vector,
-    combine_allocation_promotion_functions,
     decorated_manifold,
     decorator_transparent_dispatch,
     default_decorator_dispatch,
     distance,
     embed,
     embed!,
-    exp,
     exp!,
+    exp!__intransparent,
+    # TODO: uncomment the import if `flat!` goes to ManifoldsBase
+    # flat!__intransparent,
     get_basis,
     get_coordinates,
     get_coordinates!,
@@ -58,96 +27,71 @@ import ManifoldsBase:
     get_vector,
     get_vector!,
     get_vectors,
-    geodesic,
     injectivity_radius,
     inner,
-    isapprox,
+    inner__intransparent,
     is_manifold_point,
     is_tangent_vector,
     inverse_retract,
     inverse_retract!,
-    log,
     log!,
     manifold_dimension,
-    norm,
+    mid_point,
+    mid_point!,
     number_eltype,
+    number_of_coordinates,
     project,
     project!,
     representation_size,
     retract,
     retract!,
-    shortest_geodesic,
-    vector_transport_along,
-    vector_transport_along!,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
     zero_tangent_vector,
     zero_tangent_vector!
-import Random: rand
-import Statistics: mean, mean!, median, median!, std, var
-import StatsBase: kurtosis, mean_and_std, mean_and_var, moment, skewness
 
 using Base.Iterators: repeated
 using Distributions
 using Einsum: @einsum
 using FiniteDifferences
 using HybridArrays
-using LinearAlgebra
 using LightGraphs
-using LightGraphs: AbstractGraph
-using ManifoldsBase: CoTVector, Manifold, MPoint, TVector, DefaultManifold
+using LinearAlgebra
 using ManifoldsBase
 using ManifoldsBase:
-    AbstractDecoratorManifold,
-    AbstractNumbers,
-    @decorator_transparent_fallback,
-    @decorator_transparent_function,
-    @decorator_transparent_signature,
-    _euclidean_basis_vector,
-    _extract_val,
-    hat,
-    hat!,
-    @invoke_maker,
-    is_decorator_transparent,
-    is_default_decorator,
-    manifold_function_not_implemented_message,
-    vee,
-    vee!
-using ManifoldsBase:
+    ℝ,
+    ℂ,
+    ℍ,
     AbstractBasis,
+    AbstractIsometricEmbeddingType,
+    AbstractNumbers,
     AbstractOrthogonalBasis,
+    AbstractOrthonormalBasis,
+    AbstractVectorTransportMethod,
+    DefaultManifold,
     DefaultOrDiagonalizingBasis,
     DiagonalizingBasisData,
     VeeOrthogonalBasis,
-    AbstractOrthonormalBasis,
-    DefaultOrthonormalBasis
-using ManifoldsBase:
-    ArrayCoTVector, ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
-using ManifoldsBase: AbstractRetractionMethod, ExponentialRetraction
-using ManifoldsBase: QRRetraction, PolarRetraction, ProjectionRetraction
-using ManifoldsBase: AbstractInverseRetractionMethod, LogarithmicInverseRetraction
-using ManifoldsBase: QRInverseRetraction, PolarInverseRetraction, ProjectionInverseRetraction
-using ManifoldsBase: AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
-using ManifoldsBase: ℝ, ℂ, ℍ
-using ManifoldsBase:
-    AbstractEmbeddingType,
-    AbstractIsometricEmbeddingType,
-    TransparentIsometricEmbedding,
-    DefaultIsometricEmbeddingType,
-    DefaultEmbeddingType
-using ManifoldsBase:
-    AbstractEmbeddedManifold,
-    EmbeddedManifold
-
-
+    @decorator_transparent_fallback,
+    @decorator_transparent_function,
+    @decorator_transparent_signature,
+    @invoke_maker,
+    _euclidean_basis_vector,
+    _extract_val,
+    combine_allocation_promotion_functions,
+    is_decorator_transparent,
+    is_default_decorator,
+    manifold_function_not_implemented_message
 using Markdown: @doc_str
-using Random: AbstractRNG
+using Random
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
-using StatsBase: AbstractWeights, UnitWeights, values, varcorrection
+using Statistics
+using StatsBase
+using StatsBase: AbstractWeights
 
 include("utils.jl")
 include("maps.jl")
@@ -181,6 +125,7 @@ include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Grassmann.jl")
 include("manifolds/Hyperbolic.jl")
+include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/SkewSymmetric.jl")
 include("manifolds/Stiefel.jl")
@@ -192,6 +137,7 @@ include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 
 include("manifolds/Torus.jl")
+include("manifolds/Multinomial.jl")
 include("manifolds/Oblique.jl")
 
 include("groups/metric.jl")
@@ -225,10 +171,13 @@ function __init__()
         using .OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
         include("ode.jl")
     end
+    return nothing
 end
 #
 export CoTVector, Manifold, MPoint, TVector, Manifold
+export AbstractSphere
 export Euclidean,
+    ArraySphere,
     CholeskySpace,
     Circle,
     FixedRankMatrices,
@@ -237,7 +186,9 @@ export Euclidean,
     Grassmann,
     Hyperbolic,
     Lorentz,
+    MultinomialMatrices,
     Oblique,
+    ProbabilitySimplex,
     Rotations,
     SkewSymmetricMatrices,
     Sphere,
@@ -248,7 +199,7 @@ export Euclidean,
 export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
 export AbstractDecoratorManifold
-export ArrayManifold, ArrayMPoint, ArrayTVector, ArrayCoTVector
+export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
 export AbstractPowerManifold,
@@ -262,6 +213,8 @@ export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibe
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
 export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribution
+export PoleLadderTransport, SchildsLadderTransport
+export PowerVectorTransport, ProductVectorTransport
 export AbstractEmbeddedManifold
 export Metric,
     RiemannianMetric,
@@ -282,19 +235,23 @@ export AbstractRetractionMethod,
     ExponentialRetraction,
     QRRetraction,
     PolarRetraction,
-    ProjectionRetraction
+    ProjectionRetraction,
+    SoftmaxRetraction,
+    ProductRetraction,
+    PowerRetraction
 export AbstractInverseRetractionMethod,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,
-    ProjectionInverseRetraction
+    ProjectionInverseRetraction,
+    SoftmaxInverseRetraction
 export AbstractEstimationMethod,
     GradientDescentEstimation,
     CyclicProximalPointEstimation,
     GeodesicInterpolation,
-    GeodesicInterpolationWithinRadius
-export
-    CachedBasis,
+    GeodesicInterpolationWithinRadius,
+    ExtrinsicEstimation
+export CachedBasis,
     DefaultBasis,
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
@@ -323,6 +280,7 @@ export ×,
     flat!,
     gaussian_curvature,
     geodesic,
+    get_component,
     get_embedding,
     hat,
     hat!,
@@ -355,6 +313,8 @@ export ×,
     mean_and_std,
     median,
     median!,
+    mid_point,
+    mid_point!,
     minkowski_metric,
     moment,
     norm,
@@ -372,6 +332,7 @@ export ×,
     retract,
     retract!,
     riemann_tensor,
+    set_component!,
     sharp,
     sharp!,
     shortest_geodesic,
@@ -470,13 +431,9 @@ export AbstractBasis,
     DiagonalizingBasisData,
     ProductBasisData,
     PowerBasisData
+export OutOfInjectivityRadiusError
 export get_basis,
-    get_coordinates,
-    get_coordinates!,
-    get_vector,
-    get_vector!,
-    get_vectors,
-    number_system
+    get_coordinates, get_coordinates!, get_vector, get_vector!, get_vectors, number_system
 
 # maps and differentiation
 export AbstractCurve,

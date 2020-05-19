@@ -5,10 +5,10 @@ Direct product group operation.
 """
 struct ProductOperation <: AbstractGroupOperation end
 
-const ProductGroup{T} = GroupManifold{ProductManifold{T},ProductOperation}
+const ProductGroup{𝔽,T} = GroupManifold{𝔽,ProductManifold{𝔽,T},ProductOperation}
 
 """
-    ProductGroup{T} <: GroupManifold{ProductManifold{T},ProductOperation}
+    ProductGroup{𝔽,T} <: GroupManifold{𝔽,ProductManifold{T},ProductOperation}
 
 Decorate a product manifold with a [`ProductOperation`](@ref).
 
@@ -19,7 +19,7 @@ one. This type is mostly useful for equipping the direct product of group manifo
 # Constructor
     ProductGroup(manifold::ProductManifold)
 """
-function ProductGroup(manifold::ProductManifold)
+function ProductGroup(manifold::ProductManifold{𝔽}) where {𝔽}
     if !all(is_group_decorator, manifold.manifolds)
         error("All submanifolds of product manifold must be or decorate groups.")
     end
@@ -34,16 +34,17 @@ function decorator_transparent_dispatch(::typeof(group_log!), M::ProductGroup, X
     return Val(:transparent)
 end
 
-function show(io::IO, ::MIME"text/plain", G::ProductGroup)
-    print(io,
-        "ProductGroup with $(length(base_manifold(G).manifolds)) subgroup$(length(base_manifold(G).manifolds) == 1 ? "" : "s"):"
+function Base.show(io::IO, ::MIME"text/plain", G::ProductGroup)
+    print(
+        io,
+        "ProductGroup with $(length(base_manifold(G).manifolds)) subgroup$(length(base_manifold(G).manifolds) == 1 ? "" : "s"):",
     )
-    _show_product_manifold_no_header(io, base_manifold(G))
+    return _show_product_manifold_no_header(io, base_manifold(G))
 end
 
-function show(io::IO, G::ProductGroup)
+function Base.show(io::IO, G::ProductGroup)
     M = base_manifold(G)
-    print(io, "ProductGroup(", join(M.manifolds, ", "), ")")
+    return print(io, "ProductGroup(", join(M.manifolds, ", "), ")")
 end
 
 submanifold(G::ProductGroup, i) = submanifold(base_manifold(G), i)
@@ -51,23 +52,23 @@ submanifold(G::ProductGroup, i) = submanifold(base_manifold(G), i)
 function submanifold_component(
     e::Identity{GT},
     ::Val{I},
-) where {I,MT<:ProductManifold,GT<:GroupManifold{MT}}
+) where {I,MT<:ProductManifold,𝔽,GT<:GroupManifold{𝔽,MT}}
     return Identity(submanifold(e.group, I), submanifold_component(e.p, I))
 end
 
 function submanifold_components(
     e::Identity{GT},
-) where {MT<:ProductManifold,GT<:GroupManifold{MT}}
+) where {MT<:ProductManifold,𝔽,GT<:GroupManifold{𝔽,MT}}
     M = base_manifold(e.group)
     return map(Identity, M.manifolds, submanifold_components(e.group, e.p))
 end
 
-inv(G::ProductGroup, p) = inv(G.manifold, p)
-inv(::GT, e::Identity{GT}) where {GT<:ProductGroup} = e
-function inv(M::ProductManifold, x::ProductRepr)
+Base.inv(G::ProductGroup, p) = inv(G.manifold, p)
+Base.inv(::GT, e::Identity{GT}) where {GT<:ProductGroup} = e
+function Base.inv(M::ProductManifold, x::ProductRepr)
     return ProductRepr(map(inv, M.manifolds, submanifold_components(M, x))...)
 end
-function inv(M::ProductManifold, p)
+function Base.inv(M::ProductManifold, p)
     q = allocate_result(M, inv, p)
     return inv!(M, q, p)
 end
@@ -78,12 +79,12 @@ function inv!(M::ProductManifold, q, p)
     return q
 end
 
-identity(G::ProductGroup, p) = identity(G.manifold, p)
-identity(::GT, e::Identity{GT}) where {GT<:ProductGroup} = e
-function identity(M::ProductManifold, p::ProductRepr)
+Base.identity(G::ProductGroup, p) = identity(G.manifold, p)
+Base.identity(::GT, e::Identity{GT}) where {GT<:ProductGroup} = e
+function Base.identity(M::ProductManifold, p::ProductRepr)
     return ProductRepr(map(identity, M.manifolds, submanifold_components(M, p))...)
 end
-function identity(M::ProductManifold, p)
+function Base.identity(M::ProductManifold, p)
     q = allocate_result(M, identity, p)
     return identity!(M, q, p)
 end

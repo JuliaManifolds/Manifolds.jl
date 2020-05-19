@@ -13,12 +13,12 @@ Unnormalized version of `sinc` function, i.e. $\operatorname{usinc}(θ) = \frac{
 computed from $x = cos(θ)$.
 """
 @inline function usinc_from_cos(x::Real)
-    if x >= 1
-        return one(x)
+    return if x >= 1
+        one(x)
     elseif x <= -1
-        return zero(x)
+        zero(x)
     else
-        return sqrt(1 - x^2) / acos(x)
+        sqrt(1 - x^2) / acos(x)
     end
 end
 
@@ -83,7 +83,7 @@ lengths, the result is trimmed to the length of the shorter tuple.
 """
 @generated function ziptuples(a::NTuple{N,Any}, b::NTuple{M,Any}) where {N,M}
     ex = Expr(:tuple)
-    for i = 1:min(N, M)
+    for i in 1:min(N, M)
         push!(ex.args, :((a[$i], b[$i])))
     end
     return ex
@@ -94,7 +94,7 @@ end
     c::NTuple{L,Any},
 ) where {N,M,L}
     ex = Expr(:tuple)
-    for i = 1:min(N, M, L)
+    for i in 1:min(N, M, L)
         push!(ex.args, :((a[$i], b[$i], c[$i])))
     end
     return ex
@@ -106,7 +106,7 @@ end
     d::NTuple{K,Any},
 ) where {N,M,L,K}
     ex = Expr(:tuple)
-    for i = 1:min(N, M, L, K)
+    for i in 1:min(N, M, L, K)
         push!(ex.args, :((a[$i], b[$i], c[$i], d[$i])))
     end
     return ex
@@ -119,7 +119,7 @@ end
     e::NTuple{J,Any},
 ) where {N,M,L,K,J}
     ex = Expr(:tuple)
-    for i = 1:min(N, M, L, K, J)
+    for i in 1:min(N, M, L, K, J)
         push!(ex.args, :((a[$i], b[$i], c[$i], d[$i], e[$i])))
     end
     return ex

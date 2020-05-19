@@ -78,21 +78,13 @@ function get_basis(
     eigv = eigen(B.frame_direction)
     V = eigv.vectors
     Ξ = [
-        (i == j ? 1 / 2 :
-             1 / sqrt(2)) * (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i]))
-        for i = 1:N
-        for j = i:N
+        (i == j ? 1 / 2 : 1 / sqrt(2)) *
+        (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) for i in 1:N
+        for j in i:N
     ]
     λ = eigv.values
-    κ = [-1 / 4 * (λ[i] - λ[j])^2 for i = 1:N for j = i:N]
+    κ = [-1 / 4 * (λ[i] - λ[j])^2 for i in 1:N for j in i:N]
     return CachedBasis(B, κ, Ξ)
-end
-function get_basis(
-    M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric},
-    p,
-    B::DiagonalizingOrthonormalBasis,
-) where {N}
-    return get_basis(base_manifold(M), p, B)
 end
 
 function get_coordinates!(
@@ -107,7 +99,7 @@ function get_coordinates!(
     @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
     k = 1
-    for i = 1:N, j = i:N
+    for i in 1:N, j in i:N
         scale = ifelse(i == j, 1, sqrt(2))
         @inbounds Y[k] = X[i, j] * scale
         k += 1
@@ -126,7 +118,7 @@ function get_vector!(
     @assert size(X) == (div(N * (N + 1), 2),)
     @assert size(Y) == (N, N)
     k = 1
-    for i = 1:N, j = i:N
+    for i in 1:N, j in i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
         @inbounds Y[i, j] = X[k] * scale
         @inbounds Y[j, i] = X[k] * scale
@@ -221,21 +213,21 @@ function vector_transport_to!(
     e = eigen(Symmetric(p))
     U = e.vectors
     S = e.values
-    Ssqrt = sqrt.(S)
+    Ssqrt = sqrt.(e.values)
     SsqrtInv = Diagonal(1 ./ Ssqrt)
     Ssqrt = Diagonal(Ssqrt)
-    pSqrt = Symmetric(U * Ssqrt * transpose(U))
-    pSqrtInv = Symmetric(U * SsqrtInv * transpose(U))
-    tv = Symmetric(pSqrtInv * X * pSqrtInv)
-    ty = Symmetric(pSqrtInv * q * pSqrtInv)
+    pSqrt = Symmetric(U * Ssqrt * transpose(U)) # p^1/2
+    pSqrtInv = Symmetric(U * SsqrtInv * transpose(U)) # p^(-1/2)
+    tv = Symmetric(pSqrtInv * X * pSqrtInv) # p^(-1/2)Xp^{-1/2}
+    ty = Symmetric(pSqrtInv * q * pSqrtInv) # p^(-1/2)qp^(-1/2)
     e2 = eigen(ty)
     Se = Diagonal(log.(e2.values))
     Ue = e2.vectors
-    ty2 = Symmetric(Ue * Se * transpose(Ue))
-    e3 = eigen(ty2)
-    Sf = Diagonal(exp.(e3.values))
+    logty = Symmetric(Ue * Se * transpose(Ue)) # nearly log_pq without the outer p^1/2
+    e3 = eigen(logty) # since they cancel with the pInvSqrt in the next line
+    Sf = Diagonal(exp.(e3.values / 2)) # Uf * Sf * Uf' is the Exp
     Uf = e3.vectors
-    pUe = pSqrt * Uf * Sf * transpose(Uf)
-    vtp = Symmetric(pUe * tv * transpose(pUe))
+    pUe = pSqrt * Uf * Sf * transpose(Uf) # factors left of tv (and transposed right)
+    vtp = Symmetric(pUe * tv * transpose(pUe)) # so this is the documented formula
     return copyto!(Y, vtp)
 end

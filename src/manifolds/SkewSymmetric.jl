@@ -1,11 +1,11 @@
 @doc raw"""
-    SkewSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{TransparentIsometricEmbedding}
+    SkewSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
 
 The [`Manifold`](@ref) $ \operatorname{SkewSym}(n)$ consisting of the real- or
 complex-valued skew-symmetric matrices of size $n × n$, i.e. the set
 
 ````math
-\operatorname{SkewSym}(n) = \bigl\{p  ∈ 𝔽^{n × n} \big| p^{\mathrm{H}} = -p \bigr\},
+\operatorname{SkewSym}(n) = \bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = -p \bigr\},
 ````
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
 and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
@@ -21,10 +21,11 @@ which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::
 
 Generate the manifold of $n × n$ symmetric matrices.
 """
-struct SkewSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{TransparentIsometricEmbedding} end
+struct SkewSymmetricMatrices{n,𝔽} <:
+       AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
 
 function SkewSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
-    SkewSymmetricMatrices{n,field}()
+    return SkewSymmetricMatrices{n,field}()
 end
 
 function allocation_promotion_function(
@@ -45,7 +46,8 @@ whether `p` is a skew-symmetric matrix of size `(n,n)` with values from the corr
 The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
 """
 function check_manifold_point(M::SkewSymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv =
+        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(norm(p + p'), 0.0; kwargs...)
         return DomainError(
@@ -79,12 +81,12 @@ function check_tangent_vector(
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
         check_base_point = false, # already checked above
-        kwargs...
+        kwargs...,
     )
     mpv === nothing || return mpv
     if !isapprox(norm(X + adjoint(X)), 0.0; kwargs...)
@@ -119,7 +121,7 @@ function get_coordinates!(
     @assert size(X) == (N, N)
     @assert dim == div(N * (N - 1), 2)
     k = 1
-    for i = 1:N, j = (i+1):N
+    for i in 1:N, j in (i + 1):N
         @inbounds Y[k] = X[i, j] * sqrt(2)
         k += 1
     end
@@ -130,20 +132,20 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℂ},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == N^2
     k = 1
-    for i = 1:N, j = i:N
+    for i in 1:N, j in i:N
         if i == j # real-part zero on the diagonal -> just one basis vector per diag entry
             @inbounds Y[k] = imag(X[i, j])
             k += 1
         else
             @inbounds Y[k] = real(X[i, j]) * sqrt(2)
-            @inbounds Y[k+1] = imag(X[i, j]) * sqrt(2)
+            @inbounds Y[k + 1] = imag(X[i, j]) * sqrt(2)
             k += 2
         end
     end
@@ -161,10 +163,10 @@ function get_vector!(
     @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
-    for i = 1:N
+    for i in 1:N
         Y[i, i] = convert(eltype(p), 0.0)
     end
-    for i = 1:N, j = (i+1):N
+    for i in 1:N, j in (i + 1):N
         @inbounds Y[i, j] = X[k] / sqrt(2)
         @inbounds Y[j, i] = -X[k] / sqrt(2)
         k += 1
@@ -176,18 +178,18 @@ function get_vector!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℂ},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
-    for i = 1:N, j = i:N
+    for i in 1:N, j in i:N
         if i == j # real zero on the diag
-            @inbounds Y[i, j] = X[k]*1im
+            @inbounds Y[i, j] = X[k] * 1im
             k += 1
         else
-            @inbounds Y[i, j] = (X[k] + X[k+1]*1im) / sqrt(2)
+            @inbounds Y[i, j] = (X[k] + X[k + 1] * 1im) / sqrt(2)
             k += 2
             @inbounds Y[j, i] = -conj(Y[i, j])
         end
@@ -244,6 +246,6 @@ project(::SkewSymmetricMatrices, ::Any, ::Any)
 
 project!(M::SkewSymmetricMatrices, Y, p, X) = (Y .= (X .- X') ./ 2)
 
-function show(io::IO, ::SkewSymmetricMatrices{n,F}) where {n,F}
-    print(io, "SkewSymmetricMatrices($(n), $(F))")
+function Base.show(io::IO, ::SkewSymmetricMatrices{n,F}) where {n,F}
+    return print(io, "SkewSymmetricMatrices($(n), $(F))")
 end

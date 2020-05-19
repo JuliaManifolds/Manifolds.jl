@@ -6,13 +6,13 @@ The n-dimensional torus is the $n$-dimensional product of the [`Circle`](@ref).
 The [`Circle`](@ref) is stored internally within `M.manifold`, such that all functions of
 [`AbstractPowerManifold`](@ref) can be used directly.
 """
-struct Torus{N} <: AbstractPowerManifold{Circle{ℝ},ArrayPowerRepresentation}
+struct Torus{N} <: AbstractPowerManifold{ℝ,Circle{ℝ},ArrayPowerRepresentation}
     manifold::Circle{ℝ}
 end
 
 Torus(n::Int) = Torus{n}(Circle())
 
-^(M::Circle, n::Int) = Torus{n}(M)
+Base.:^(M::Circle, n::Int) = Torus{n}(M)
 
 @doc raw"""
     check_manifold_point(M::Torus{n},p)
@@ -43,7 +43,7 @@ function check_tangent_vector(
     p,
     X;
     check_base_point = true,
-    kwargs...
+    kwargs...,
 ) where {N}
     if check_base_point && length(p) != N
         return DomainError(
@@ -62,7 +62,7 @@ function check_tangent_vector(
         p,
         X;
         check_base_point = check_base_point,
-        kwargs...
+        kwargs...,
     )
 end
 
@@ -72,4 +72,4 @@ get_iterator(M::Torus{N}) where {N} = 1:N
 
 @generated representation_size(::Torus{N}) where {N} = (N,)
 
-show(io::IO, ::Torus{N}) where {N} = print(io, "Torus($(N))")
+Base.show(io::IO, ::Torus{N}) where {N} = print(io, "Torus($(N))")

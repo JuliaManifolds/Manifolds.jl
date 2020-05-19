@@ -45,9 +45,9 @@ include("utils.jl")
             @test Z == X
         end
 
-        types = [Matrix{Float64}, ]
+        types = [Matrix{Float64}]
         TEST_FLOAT32 && push!(types, Matrix{Float32})
-        TEST_STATIC_SIZED && push!(types, MMatrix{3, 2, Float64})
+        TEST_STATIC_SIZED && push!(types, MMatrix{3,2,Float64,6})
 
         @testset "Type $T" for T in types
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
@@ -70,6 +70,7 @@ include("utils.jl")
                 test_is_tangent = true,
                 test_project_tangent = true,
                 test_vector_transport = false,
+                point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
                 test_forward_diff = false,
                 test_reverse_diff = false,
                 test_vee_hat = false,
@@ -81,6 +82,7 @@ include("utils.jl")
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
+                mid_point12 = nothing,
             )
 
             @testset "inner/norm" begin
@@ -95,6 +97,15 @@ include("utils.jl")
                 @test norm(M, pts[1], v1) ≈ sqrt(inner(M, pts[1], v1, v1))
             end
         end
+
+        @testset "Distribution tests" begin
+            usd_mmatrix = Manifolds.uniform_distribution(M, @MMatrix [
+                1.0 0.0
+                0.0 1.0
+                0.0 0.0
+            ])
+            @test isa(rand(usd_mmatrix), MMatrix)
+        end
     end
 
     @testset "Complex" begin
@@ -103,7 +114,7 @@ include("utils.jl")
             @test repr(M) == "Stiefel(3, 2, ℂ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 8
-            @test Manifolds.allocation_promotion_function(M,exp!,(1,)) == complex
+            @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
             @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
@@ -141,6 +152,7 @@ include("utils.jl")
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
+                mid_point12 = nothing,
             )
 
             @testset "inner/norm" begin

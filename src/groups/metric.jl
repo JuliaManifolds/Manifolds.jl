@@ -89,7 +89,7 @@ has_approx_invariant_metric(
     ::Any,
     ::Any,
     ::Any,
-    ::ActionDirection
+    ::ActionDirection,
 )
 @decorator_transparent_function function has_approx_invariant_metric(
     M::AbstractGroupManifold,
@@ -112,19 +112,17 @@ end
 
 direction(::InvariantMetric{G,D}) where {G,D} = D()
 
-function exp!(M::MetricManifold{<:AbstractGroupManifold,<:InvariantMetric}, q, p, X)
+function exp!(
+    M::MetricManifold{𝔽,<:AbstractGroupManifold,<:InvariantMetric},
+    q,
+    p,
+    X,
+) where {𝔽}
     if has_biinvariant_metric(M)
         conv = direction(metric(M))
         return retract!(base_group(M), q, p, X, GroupExponentialRetraction(conv))
     end
-    return invoke(
-        exp!,
-        Tuple{MetricManifold,typeof(q),typeof(p),typeof(X)},
-        M,
-        q,
-        p,
-        X,
-    )
+    return invoke(exp!, Tuple{MetricManifold,typeof(q),typeof(p),typeof(X)}, M, q, p, X)
 end
 
 
@@ -162,16 +160,16 @@ invariant_metric_dispatch(::MetricManifold, ::ActionDirection)
 
 @decorator_transparent_signature invariant_metric_dispatch(
     M::AbstractDecoratorManifold,
-    conv::ActionDirection
+    conv::ActionDirection,
 )
 function invariant_metric_dispatch(M::MetricManifold, conv::ActionDirection)
     is_default_metric(M) && return invariant_metric_dispatch(M.manifold, conv)
     return Val(false)
 end
 function invariant_metric_dispatch(
-    M::MetricManifold{<:Manifold,<:InvariantMetric},
+    M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric},
     conv::ActionDirection,
-)
+) where {𝔽}
     direction(metric(M)) === conv && return Val(true)
     return invoke(invariant_metric_dispatch, Tuple{MetricManifold,typeof(conv)}, M, conv)
 end
@@ -181,7 +179,7 @@ function has_invariant_metric(M::Manifold, conv::ActionDirection)
     return _extract_val(invariant_metric_dispatch(M, conv))
 end
 
-function inner(M::MetricManifold{<:Manifold,<:InvariantMetric}, p, X, Y)
+function inner(M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric}, p, X, Y) where {𝔽}
     imetric = metric(M)
     conv = direction(imetric)
     N = MetricManifold(M.manifold, imetric.metric)
@@ -190,30 +188,40 @@ function inner(M::MetricManifold{<:Manifold,<:InvariantMetric}, p, X, Y)
     return inner(N, Identity(N, p), Xₑ, Yₑ)
 end
 
-function default_metric_dispatch(M::MetricManifold{<:Manifold,<:InvariantMetric})
+function default_metric_dispatch(
+    M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric},
+) where {𝔽}
     imetric = metric(M)
     N = MetricManifold(M.manifold, imetric.metric)
     default_metric_dispatch(N) === Val(true) || return Val(false)
     return invariant_metric_dispatch(N, direction(imetric))
 end
 
-function log!(M::MetricManifold{<:AbstractGroupManifold,<:InvariantMetric}, X, p, q)
+function log!(
+    M::MetricManifold{𝔽,<:AbstractGroupManifold,<:InvariantMetric},
+    X,
+    p,
+    q,
+) where {𝔽}
     if has_biinvariant_metric(M)
         imetric = metric(M)
         conv = direction(imetric)
-        return inverse_retract!(base_group(M), X, p, q, GroupLogarithmicInverseRetraction(conv))
+        return inverse_retract!(
+            base_group(M),
+            X,
+            p,
+            q,
+            GroupLogarithmicInverseRetraction(conv),
+        )
     end
-    return invoke(
-        log!,
-        Tuple{MetricManifold,typeof(X),typeof(p),typeof(q)},
-        M,
-        X,
-        p,
-        q,
-    )
+    return invoke(log!, Tuple{MetricManifold,typeof(X),typeof(p),typeof(q)}, M, X, p, q)
 end
 
-function norm(M::MetricManifold{<:Manifold,<:InvariantMetric}, p, X)
+function LinearAlgebra.norm(
+    M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric},
+    p,
+    X,
+) where {𝔽}
     imetric = metric(M)
     conv = direction(imetric)
     N = MetricManifold(M.manifold, imetric.metric)
@@ -221,9 +229,9 @@ function norm(M::MetricManifold{<:Manifold,<:InvariantMetric}, p, X)
     return norm(N, Identity(N, p), Xₑ)
 end
 
-function show(io::IO, metric::LeftInvariantMetric)
-    print(io, "LeftInvariantMetric($(metric.metric))")
+function Base.show(io::IO, metric::LeftInvariantMetric)
+    return print(io, "LeftInvariantMetric($(metric.metric))")
 end
-function show(io::IO, metric::RightInvariantMetric)
-    print(io, "RightInvariantMetric($(metric.metric))")
+function Base.show(io::IO, metric::RightInvariantMetric)
+    return print(io, "RightInvariantMetric($(metric.metric))")
 end

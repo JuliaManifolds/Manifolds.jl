@@ -92,7 +92,10 @@ struct RiemannianONBDiffBackend{
     TADBackend<:AbstractDiffBackend,
     TRetr<:AbstractRetractionMethod,
     TInvRetr<:AbstractInverseRetractionMethod,
-    TBasis<:Union{AbstractOrthonormalBasis,CachedBasis{<:AbstractOrthonormalBasis}},
+    TBasis<:Union{
+        AbstractOrthonormalBasis,
+        CachedBasis{𝔽,<:AbstractOrthonormalBasis{𝔽}} where {𝔽},
+    },
 } <: AbstractRiemannianDiffBackend
     diff_backend::TADBackend
     retraction::TRetr
@@ -107,7 +110,7 @@ function r_derivative(f::AbstractCurve, t::Real, backend::RiemannianONBDiffBacke
         return get_coordinates(
             M,
             p,
-            inverse_retract(M, p, f(t+h), backend.inverse_retraction),
+            inverse_retract(M, p, f(t + h), backend.inverse_retraction),
             backend.basis,
         )
     end
@@ -220,9 +223,8 @@ See [^Absil2008], Section 3.6.1 for details.
 [^Absil2008]:
     > Absil, P. A., et al. Optimization Algorithms on Matrix Manifolds. 2008.
 """
-struct RiemannianProjectionDiffBackend{
-    TADBackend<:AbstractDiffBackend,
-} <: AbstractRiemannianDiffBackend
+struct RiemannianProjectionDiffBackend{TADBackend<:AbstractDiffBackend} <:
+       AbstractRiemannianDiffBackend
     diff_backend::TADBackend
 end
 

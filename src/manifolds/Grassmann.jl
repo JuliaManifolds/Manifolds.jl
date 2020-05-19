@@ -1,5 +1,5 @@
 @doc raw"""
-    Grassmann{n,k,𝔽} <: Manifold
+    Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
 
 The Grassmann manifold $\operatorname{Gr}(n,k)$ consists of all subspaces spanned by $k$ linear independent
 vectors $𝔽^n$, where $𝔽  ∈ \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
@@ -49,17 +49,13 @@ The manifold is named after
     Grassmann(n,k,field=ℝ)
 
 Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
-case $field = ℝ$ is the default.
+case `field = ℝ` is the default.
 """
-struct Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
+struct Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
 Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ) = Grassmann{n,k,field}()
 
-function allocation_promotion_function(
-    M::Grassmann{n,k,ℂ},
-    f,
-    args::Tuple,
-) where {n,k}
+function allocation_promotion_function(M::Grassmann{n,k,ℂ}, f, args::Tuple) where {n,k}
     return complex
 end
 
@@ -70,7 +66,8 @@ Check whether `p` is representing a point on the [`Grassmann`](@ref) `M`, i.e. i
 a `n`-by-`k` matrix of unitary column vectors and of correct `eltype` with respect to `𝔽`.
 """
 function check_manifold_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv =
+        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
@@ -79,6 +76,7 @@ function check_manifold_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,�
             "The point $(p) does not lie on $(M), because x'x is not the unit matrix.",
         )
     end
+    return nothing
 end
 
 @doc raw"""
@@ -95,19 +93,25 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian 
 denotes the $k × k$ zero natrix.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
-function check_tangent_vector(M::Grassmann{n,k,𝔽}, p, X; check_base_point = true, kwargs...) where {n,k,𝔽}
+function check_tangent_vector(
+    M::Grassmann{n,k,𝔽},
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+) where {n,k,𝔽}
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
         check_base_point = false, # already checked above
-        kwargs...
+        kwargs...,
     )
     mpv === nothing || return mpv
     if !isapprox(p' * X + X' * p, zeros(k, k); kwargs...)
@@ -116,6 +120,7 @@ function check_tangent_vector(M::Grassmann{n,k,𝔽}, p, X; check_base_point = t
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since p'X + X'p is not the zero matrix.",
         )
     end
+    return nothing
 end
 
 decorated_manifold(M::Grassmann{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
@@ -143,7 +148,7 @@ b_{i}=\begin{cases}
 function distance(M::Grassmann, p, q)
     p ≈ q && return zero(real(eltype(p)))
     a = svd(p' * q).S
-    a[a.>1] .= 1
+    a[a .> 1] .= 1
     return sqrt(sum((acos.(a)) .^ 2))
 end
 
@@ -189,9 +194,14 @@ injectivity_radius(::Grassmann) = π / 2
 injectivity_radius(::Grassmann, ::ExponentialRetraction) = π / 2
 injectivity_radius(::Grassmann, ::Any) = π / 2
 injectivity_radius(::Grassmann, ::Any, ::ExponentialRetraction) = π / 2
-eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(M::Grassmann, rm::AbstractRetractionMethod)
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold injectivity_radius(
+            M::Grassmann,
+            rm::AbstractRetractionMethod,
+        )
+    end,
+)
 
 @doc raw"""
     inner(M::Grassmann, p, X, Y)
@@ -240,10 +250,10 @@ inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 
 inverse_retract!(::Grassmann, X, p, q, ::QRInverseRetraction) = copyto!(X, q / (p' * q) - p)
 
-function isapprox(M::Grassmann, p, X, Y; kwargs...)
+function Base.isapprox(M::Grassmann, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
 end
-isapprox(M::Grassmann, p, q; kwargs...) = isapprox(distance(M, p, q), 0.0; kwargs...)
+Base.isapprox(M::Grassmann, p, q; kwargs...) = isapprox(distance(M, p, q), 0.0; kwargs...)
 
 @doc raw"""
     log(M::Grassmann, p, q)
@@ -303,7 +313,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 """
 mean(::Grassmann{n,k} where {n,k}, ::Any...)
 
-function mean!(
+function Statistics.mean!(
     M::Grassmann{n,k},
     p,
     x::AbstractVector,
@@ -378,7 +388,47 @@ function retract!(::Grassmann{N,K}, q, p, X, ::QRRetraction) where {N,K}
     return copyto!(q, Array(qrfac.Q) * D)
 end
 
-show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽} = print(io, "Grassmann($(n), $(k), $(𝔽))")
+function Base.show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽}
+    return print(io, "Grassmann($(n), $(k), $(𝔽))")
+end
+
+"""
+    uniform_distribution(M::Grassmann{n,k,ℝ}, p)
+
+Uniform distribution on given (real-valued) [`Grassmann`](@ref) `M`.
+Specifically, this is the normalized Haar measure on `M`.
+Generated points will be of similar type as `p`.
+
+The implementation is based on Section 2.5.1 in [^Chikuse2003];
+see also Theorem 2.2.2(iii) in [^Chikuse2003].
+
+[^Chikuse2003]:
+    > Y. Chikuse: "Statistics on Special Manifolds", Springer New York, 2003,
+    > doi: [10.1007/978-0-387-21540-2](https://doi.org/10.1007/978-0-387-21540-2).
+"""
+function uniform_distribution(M::Grassmann{n,k,ℝ}, p) where {n,k}
+    μ = Distributions.Zeros(n, k)
+    σ = one(eltype(p))
+    Σ1 = Distributions.PDMats.ScalMat(n, σ)
+    Σ2 = Distributions.PDMats.ScalMat(k, σ)
+    d = MatrixNormal(μ, Σ1, Σ2)
+
+    return ProjectedPointDistribution(M, d, (M, q, p) -> (q .= svd(p).U), p)
+end
+
+@doc raw"""
+    vector_transport_to(M::Grassmann,p,X,q,::ProjectionTransport)
+
+compute the projection based transport on the [`Grassmann`](@ref) `M` by
+interpreting `X` from the tangent space at `p` as a point in the embedding and
+projecting it onto the tangent space at q.
+"""
+vector_transport_to(::Grassmann, ::Any, ::Any, ::Any, ::ProjectionTransport)
+
+function vector_transport_to!(M::Grassmann, Y, p, X, q, ::ProjectionTransport)
+    project!(M, Y, q, X)
+    return Y
+end
 
 @doc raw"""
     zero_tangent_vector(M::Grassmann, p)

@@ -1,7 +1,7 @@
 @doc raw"""
-    Oblique{N,M} <: AbstractPowerManifold
+    Oblique{N,M,𝔽} <: AbstractPowerManifold{𝔽}
 
-The oblique manifold $\mathcal{OB}(n,m)$ is the set of real-valued matrices with unit norm
+The oblique manifold $\mathcal{OB}(n,m)$ is the set of 𝔽-valued matrices with unit norm
 column endowed with the metric from the embedding. This yields exactly the same metric as
 considering the product metric of the unit norm vectors, i.e. [`PowerManifold`](@ref) of the
 $(n-1)$-dimensional [`Sphere`](@ref).
@@ -16,30 +16,33 @@ The [`Sphere`](@ref) is stored internally within `M.manifold`, such that all fun
 Generate the manifold of matrices $\mathbb R^{n × m}$ such that the $m$ columns are unit
 vectors, i.e. from the [`Sphere`](@ref)`(n-1)`.
 """
-struct Oblique{N,M} <: AbstractPowerManifold{Sphere{N},ArrayPowerRepresentation}
-    manifold::Sphere{N}
+struct Oblique{N,M,𝔽,S} <:
+       AbstractPowerManifold{𝔽,Sphere{S,𝔽},ArrayPowerRepresentation} where {N,M}
+    manifold::Sphere{S,𝔽}
 end
 
-Oblique(n::Int, m::Int) = Oblique{n - 1,m}(Sphere(n - 1))
+function Oblique(n::Int, m::Int, field::AbstractNumbers = ℝ)
+    return Oblique{n,m,field,n - 1}(Sphere(n - 1, field))
+end
 
-^(M::Sphere{N}, m::Int) where {N} = Oblique{N,m}(M)
+Base.:^(M::Sphere{N,𝔽}, m::Int) where {N,𝔽} = Oblique{manifold_dimension(M) + 1,m,𝔽,N}(M)
 
 @doc raw"""
     check_manifold_point(M::Oblique{n,m},p)
 
 Checks whether `p` is a valid point on the [`Oblique`](@ref)`{m,n}` `M`, i.e. is a matrix
-of `m` unit columns from $\mathbb R^{n+1}$, i.e. each column is a point from
-[`Sphere`](@ref)`(n)`.
+of `m` unit columns from $\mathbb R^{n}$, i.e. each column is a point from
+[`Sphere`](@ref)`(n-1)`.
 """
 check_manifold_point(::Oblique, ::Any)
-function check_manifold_point(M::Oblique{Ns,Ms}, p; kwargs...) where {Ns,Ms}
-    if size(p) != (Ns + 1, Ms)
+function check_manifold_point(M::Oblique{n,m}, p; kwargs...) where {n,m}
+    if size(p) != (n, m)
         return DomainError(
             length(p),
-            "The matrix in `p` ($(size(p))) does not match the dimension of Oblique $((Ns,Ms)).",
+            "The matrix in `p` ($(size(p))) does not match the dimension of $(M).",
         )
     end
-    return check_manifold_point(PowerManifold(M.manifold, Ms), p; kwargs...)
+    return check_manifold_point(PowerManifold(M.manifold, m), p; kwargs...)
 end
 @doc raw"""
     check_tangent_vector(M::Oblique p, X; check_base_point = true, kwargs...)
@@ -50,26 +53,26 @@ a tangent vector to the columns of `p` on the [`Sphere`](@ref).
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
 function check_tangent_vector(
-    M::Oblique{Ns,Ms},
+    M::Oblique{n,m},
     p,
     X;
     check_base_point = true,
     kwargs...,
-) where {Ns,Ms}
-    if check_base_point && size(p) != (Ns + 1, Ms)
+) where {n,m}
+    if check_base_point && size(p) != (n, m)
         return DomainError(
             length(p),
-            "The matrix `p` ($(size(p))) does not match the dimension of Oblique $((Ns,Ms)).",
+            "The matrix `p` ($(size(p))) does not match the dimension of $(M).",
         )
     end
-    if size(X) != (Ns + 1, Ms)
+    if size(X) != (n, m)
         return DomainError(
             length(X),
-            "The matrix `X` ($(size(X))) does not match the dimension of Oblique $((Ns,Ms)).",
+            "The matrix `X` ($(size(X))) does not match the dimension of $(M).",
         )
     end
     return check_tangent_vector(
-        PowerManifold(M.manifold, Ms),
+        PowerManifold(M.manifold, m),
         p,
         X;
         check_base_point = check_base_point,
@@ -77,10 +80,14 @@ function check_tangent_vector(
     )
 end
 
-get_iterator(M::Oblique{Ns,Ms}) where {Ns,Ms} = 1:Ms
+get_iterator(M::Oblique{n,m}) where {n,m} = Base.OneTo(m)
 
-@generated manifold_dimension(::Oblique{N,M}) where {N,M} = (N) * M
+@generated function manifold_dimension(::Oblique{n,m,𝔽}) where {n,m,𝔽}
+    return (n * real_dimension(𝔽) - 1) * m
+end
 
-@generated representation_size(::Oblique{N,M}) where {N,M} = (N + 1, M)
+@generated representation_size(::Oblique{n,m}) where {n,m} = (n, m)
 
-show(io::IO, ::Oblique{N,M}) where {N,M} = print(io, "Oblique($(N+1),$(M))")
+function Base.show(io::IO, ::Oblique{n,m,𝔽}) where {n,m,𝔽}
+    return print(io, "Oblique($(n),$(m); field = $(𝔽))")
+end

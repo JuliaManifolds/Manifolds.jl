@@ -15,8 +15,8 @@ include("group_utils.jl")
     @test repr(A_right) == "GroupOperationAction($(repr(G)), RightAction())"
 
     for type in types
-        a_pts = convert.(type, [reshape(i:i+3, 2, 2) for i = 1:3])
-        m_pts = convert.(type, [reshape(i+2:i+5, 2, 2) for i = 1:3])
+        a_pts = convert.(type, [reshape(i:(i + 3), 2, 2) for i in 1:3])
+        m_pts = convert.(type, [reshape((i + 2):(i + 5), 2, 2) for i in 1:3])
 
         atol = eltype(m_pts[1]) == Float32 ? 1e-5 : 1e-10
 

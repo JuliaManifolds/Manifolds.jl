@@ -10,20 +10,21 @@ include("utils.jl")
         @test repr(M) == "Torus(2)"
         @test representation_size(M) == (2,)
         @test manifold_dimension(M) == 2
-        @test !is_manifold_point(M, 9.)
-        @test_throws DomainError is_manifold_point(M, 9., true)
-        @test !is_manifold_point(M, [9.;9.])
-        @test_throws DomainError is_manifold_point(M, [9. 9.], true)
-        @test !is_tangent_vector(M, [9.;9.], 0.)
-        @test_throws DomainError is_tangent_vector(M, 9., 0., true)
-        @test !is_tangent_vector(M, [9.;9.], [0.;0.])
-        @test_throws DomainError is_tangent_vector(M, 9., 0., true)
+        @test !is_manifold_point(M, 9.0)
+        @test_throws DomainError is_manifold_point(M, 9.0, true)
+        @test !is_manifold_point(M, [9.0; 9.0])
+        @test_throws DomainError is_manifold_point(M, [9.0 9.0], true)
+        @test !is_tangent_vector(M, [9.0; 9.0], 0.0)
+        @test_throws DomainError is_tangent_vector(M, 9.0, 0.0, true)
+        @test !is_tangent_vector(M, [9.0; 9.0], [0.0; 0.0])
+        @test_throws DomainError is_tangent_vector(M, 9.0, 0.0, true)
         @test injectivity_radius(M) ≈ π
         x = [1.0, 2.0]
         y = [-1.0, 2.0]
-        z = [0., 0.]
+        z = [0.0, 0.0]
         basis_types = (DefaultOrthonormalBasis(),)
-        test_manifold(M,
+        test_manifold(
+            M,
             [x, y, z],
             test_forward_diff = false,
             test_reverse_diff = false,

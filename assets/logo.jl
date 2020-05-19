@@ -14,8 +14,10 @@ mesh_opacity = dark_mode ? 0.5 : 0.7
 logo_colors = [(77, 100, 174), (57, 151, 79), (202, 60, 50), (146, 89, 163)] # Julia colors
 
 rgb_logo_colors = map(x -> RGB(x ./ 255...), logo_colors)
-rgb_logo_colors_bright = map(x -> RGB( (1 + line_offset_brightness) .* x ./ 255...), logo_colors)
-rgb_logo_colors_dark = map(x -> RGB( (1 - line_offset_brightness) .* x ./ 255...), logo_colors)
+rgb_logo_colors_bright =
+    map(x -> RGB((1 + line_offset_brightness) .* x ./ 255...), logo_colors)
+rgb_logo_colors_dark =
+    map(x -> RGB((1 - line_offset_brightness) .* x ./ 255...), logo_colors)
 
 out_file_prefix = dark_mode ? "logo-dark" : "logo"
 out_file_ext = ".svg"
@@ -31,37 +33,36 @@ normal_coord_to_vector(M, x, rθ, B) = get_vector(M, x, collect(polar_to_cart(r�
 
 normal_coord_to_point(M, x, rθ, B) = exp(M, x, normal_coord_to_vector(M, x, rθ, B))
 
-function plot_normal_coord!(
-    ax,
-    M,
-    x,
-    B,
-    rs,
-    θs;
-    ncirc = 9,
-    options = Dict(),
-    kwargs...,
-)
-    for r in rs[2:end-1]
-        push!(ax, Plot3(
-            options,
-            Coordinates(map(θ -> Tuple(normal_coord_to_point(M, x, [r, θ], B)), θs))
-        ))
+function plot_normal_coord!(ax, M, x, B, rs, θs; ncirc = 9, options = Dict(), kwargs...)
+    for r in rs[2:(end - 1)]
+        push!(
+            ax,
+            Plot3(
+                options,
+                Coordinates(map(θ -> Tuple(normal_coord_to_point(M, x, [r, θ], B)), θs)),
+            ),
+        )
     end
     for θ in range(0, 2π; length = ncirc)
-        push!(ax, Plot3(
-            options,
-            Coordinates(map(r -> Tuple(normal_coord_to_point(M, x, [r, θ], B)), rs))
-        ))
+        push!(
+            ax,
+            Plot3(
+                options,
+                Coordinates(map(r -> Tuple(normal_coord_to_point(M, x, [r, θ], B)), rs)),
+            ),
+        )
     end
     return ax
 end
 
 function plot_patch!(ax, M, x, B, r, θs; options = Dict())
-    push!(ax, Plot3(
-        options,
-        Coordinates(map(θ -> Tuple(normal_coord_to_point(M, x, [r, θ], B)), θs))
-    ))
+    push!(
+        ax,
+        Plot3(
+            options,
+            Coordinates(map(θ -> Tuple(normal_coord_to_point(M, x, [r, θ], B)), θs)),
+        ),
+    )
     return ax
 end
 
@@ -104,14 +105,24 @@ if dark_mode
         axis_lines = "none",
         axis_equal,
         view = "{135}{35}",
-        zmin = -0.05, zmax = 1.0, xmin = 0.0, xmax = 1.0, ymin = 0.0, ymax = 1.0
+        zmin = -0.05,
+        zmax = 1.0,
+        xmin = 0.0,
+        xmax = 1.0,
+        ymin = 0.0,
+        ymax = 1.0,
     })
 else
     tp = @pgf Axis({
         axis_lines = "none",
         axis_equal,
         view = "{135}{35}",
-        zmin = -0.05, zmax = 1.0, xmin = 0.0, xmax = 1.0, ymin = 0.0, ymax = 1.0
+        zmin = -0.05,
+        zmax = 1.0,
+        xmin = 0.0,
+        xmax = 1.0,
+        ymin = 0.0,
+        ymax = 1.0,
     })
 end
 rs = range(0, π / 5; length = 6)
@@ -141,11 +152,12 @@ end
 #
 # Plot geodesics
 options = @pgf {
-    opacity=geo_opacity,
+    opacity = geo_opacity,
     no_markers,
     roundcaps,
     line_width = geo_line_width,
-    color = dark_mode ? "white" : "black"}
+    color = dark_mode ? "white" : "black",
+}
 plot_geodesic!(tp, S, base_points[1], base_points[2]; options = options)
 plot_geodesic!(tp, S, base_points[1], base_points[3]; options = options)
 plot_geodesic!(tp, S, base_points[2], base_points[3]; options = options)

@@ -6,8 +6,8 @@ include("utils.jl")
         @test Sphere(2)^3 === Oblique(3, 3)
         @test Sphere(2)^(3,) === PowerManifold(Sphere(2), 3)
         @test ^(Sphere(2), 2) === Oblique(3, 2)
-        @test typeof(^(Sphere(2), 2)) == Oblique{2,2}
-        @test repr(M) == "Oblique(3,2)"
+        @test typeof(^(Sphere(2), 2)) == Oblique{3,2,ℝ,2}
+        @test repr(M) == "Oblique(3,2; field = ℝ)"
         @test representation_size(M) == (3, 2)
         @test manifold_dimension(M) == 4
         p = [2, 0, 0]
@@ -22,8 +22,8 @@ include("utils.jl")
         @test_throws DomainError is_tangent_vector(M, p, [0.0, 0.0, 0.0], true)
         @test injectivity_radius(M) ≈ π
         x = [1.0 0.0 0.0; 1.0 0.0 0.0]'
-        y = [1.0 0.0 0.0; 1/sqrt(2) 1/sqrt(2) 0.0]'
-        z = [1/sqrt(2) 1/sqrt(2) 0.0; 1.0 0.0 0.0]'
+        y = [1.0 0.0 0.0; 1 / sqrt(2) 1 / sqrt(2) 0.0]'
+        z = [1 / sqrt(2) 1 / sqrt(2) 0.0; 1.0 0.0 0.0]'
         basis_types = (DefaultOrthonormalBasis(),)
         test_manifold(
             M,

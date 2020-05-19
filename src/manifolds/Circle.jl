@@ -1,5 +1,5 @@
 @doc raw"""
-    Circle{𝔽} <: Manifold
+    Circle{𝔽} <: Manifold{𝔽}
 
 The circle $𝕊^1$ is a manifold here represented by
 real-valued points in $[-π,π)$ or complex-valued points $z ∈ ℂ$ of absolute value
@@ -9,10 +9,10 @@ $\lvert z\rvert = 1$.
     Circle(𝔽=ℝ)
 
 Generate the `ℝ`-valued Circle represented by angles, which
-alternatively can be set to use the [`AbstractNumbers`](@ref) `𝔽=ℂ` to obtain the `Circle`
-represented by `ℂ`-valued `Circle` of unit numbers.
+alternatively can be set to use the [`AbstractNumbers`](@ref) `𝔽=ℂ` to obtain the circle
+represented by `ℂ`-valued circle of unit numbers.
 """
-struct Circle{𝔽} <: Manifold where {𝔽<:AbstractNumbers} end
+struct Circle{𝔽} <: Manifold{𝔽} end
 
 Circle(𝔽::AbstractNumbers = ℝ) = Circle{𝔽}()
 
@@ -60,9 +60,8 @@ function check_tangent_vector(M::Circle{ℝ}, p, X; check_base_point = true, kwa
     if check_base_point
         perr = check_manifold_point(M, p; kwargs...)
         return perr # if x is valid all v that are real numbers are valid
-    else
-        return nothing
     end
+    return nothing
 end
 function check_tangent_vector(M::Circle{ℂ}, p, X; check_base_point = true, kwargs...)
     if check_base_point
@@ -112,8 +111,8 @@ For the complex-valued case, the same formula as for the [`Sphere`](@ref) $𝕊^
 complex plane.
 """
 exp(::Circle, ::Any...)
-exp(::Circle{ℝ}, p::Real, X::Real) = sym_rem(p + X)
-function exp(M::Circle{ℂ}, x::Number, v::Number)
+Base.exp(::Circle{ℝ}, p::Real, X::Real) = sym_rem(p + X)
+function Base.exp(M::Circle{ℂ}, x::Number, v::Number)
     θ = norm(M, x, v)
     return cos(θ) * x + usinc(θ) * v
 end
@@ -132,7 +131,7 @@ flat!(::Circle, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 function get_basis(M::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
-    return CachedBasis(B, (@SVector [0]) , vs)
+    return CachedBasis(B, (@SVector [0]), vs)
 end
 get_coordinates(M::Circle{ℝ}, p, X, B::DefaultOrthonormalBasis) = X
 function get_coordinates(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
@@ -142,7 +141,7 @@ end
 """
     get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
-Return tangent vector coordinates in the Lie algebra of the circle.
+Return tangent vector coordinates in the Lie algebra of the [`Circle`](@ref).
 """
 function get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
     X, p = X[1], p[1]
@@ -150,14 +149,16 @@ function get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
     return @SVector [Xⁱ]
 end
 
-eval(quote
-    @invoke_maker 1 Manifold get_coordinates(
-        M::Circle,
-        e::Identity,
-        X,
-        B::VeeOrthogonalBasis,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold get_coordinates(
+            M::Circle,
+            e::Identity,
+            X,
+            B::VeeOrthogonalBasis,
+        )
+    end,
+)
 
 function get_coordinates!(M::Circle, Y::AbstractArray, p, X, B::DefaultOrthonormalBasis)
     Y[] = get_coordinates(M, p, X, B)[]
@@ -174,15 +175,17 @@ function get_coordinates!(
     return Y
 end
 
-eval(quote
-    @invoke_maker 1 Manifold get_coordinates!(
-        M::Circle,
-        Y::AbstractArray,
-        p,
-        X,
-        B::VeeOrthogonalBasis,
-    )
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold get_coordinates!(
+            M::Circle,
+            Y::AbstractArray,
+            p,
+            X,
+            B::VeeOrthogonalBasis,
+        )
+    end,
+)
 
 
 get_vector(M::Circle{ℝ}, p, X, B::AbstractBasis) = X
@@ -194,7 +197,7 @@ end
 """
     get_vector(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
-Return tangent vector from the coordinates in the Lie algebra of the circle.
+Return tangent vector from the coordinates in the Lie algebra of the [`Circle`](@ref).
 """
 get_vector(M::Circle{ℂ}, p, X, B::AbstractBasis) = @SVector [1im * X[1] * p[1]]
 
@@ -203,9 +206,17 @@ function get_vector!(M::Circle, Y::AbstractArray, p, X, B::AbstractBasis)
     return Y
 end
 for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES
-    eval(quote
-        @invoke_maker 5 $(supertype(BT)) get_vector!(M::Circle, Y::AbstractArray, p, X, B::$BT)
-    end)
+    eval(
+        quote
+            @invoke_maker 5 $(supertype(BT)) get_vector!(
+                M::Circle,
+                Y::AbstractArray,
+                p,
+                X,
+                B::$BT,
+            )
+        end,
+    )
 end
 
 @doc raw"""
@@ -217,9 +228,14 @@ injectivity_radius(::Circle) = π
 injectivity_radius(::Circle, ::ExponentialRetraction) = π
 injectivity_radius(::Circle, ::Any) = π
 injectivity_radius(::Circle, ::Any, ::ExponentialRetraction) = π
-eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(M::Circle, rm::AbstractRetractionMethod)
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold injectivity_radius(
+            M::Circle,
+            rm::AbstractRetractionMethod,
+        )
+    end,
+)
 
 @doc raw"""
     inner(M::Circle, p, X, Y)
@@ -265,8 +281,8 @@ For the complex-valued case, the same formula as for the [`Sphere`](@ref) $𝕊^
 complex plane.
 """
 log(::Circle, ::Any...)
-log(::Circle{ℝ}, p::Real, q::Real) = sym_rem(q - p)
-function log(M::Circle{ℂ}, p::Number, q::Number)
+Base.log(::Circle{ℝ}, p::Real, q::Real) = sym_rem(q - p)
+function Base.log(M::Circle{ℂ}, p::Number, q::Number)
     cosθ = complex_dot(p, q)
     if cosθ ≈ -1  # appr. opposing points, return deterministic choice from set-valued log
         X = real(p) ≈ 1 ? 1im : 1 + 0im
@@ -304,16 +320,67 @@ i.e. $\dim(𝕊^1) = 1$.
 manifold_dimension(::Circle) = 1
 
 @doc raw"""
-    mean(M::Circle, x::AbstractVector[, w::AbstractWeights])
+    mean(M::Circle{ℝ}, x::AbstractVector[, w::AbstractWeights])
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` of points on the [`Circle`](@ref) $𝕊^1$,
-which is computed with wrapped mean, i.e. the remainder of the mean modulo 2π.
+Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` of points on
+the [`Circle`](@ref) $𝕊^1$, reprsented by real numbers, i.e. the angular mean
+````math
+\operatorname{atan}\Bigl( \sum_{i=1}^n w_i\sin(x_i),  \sum_{i=1}^n w_i\sin(x_i) \Bigr).
+````
 """
-mean(::Circle, ::Any)
-mean(::Circle, x::Array{<:Real}; kwargs...) = sym_rem(sum(x))
-mean(::Circle, x::Array{<:Real}, w::AbstractVector; kwargs...) = sym_rem(sum(w .* x))
+mean(::Circle{ℝ}, ::Any)
+function Statistics.mean(::Circle{ℝ}, x::AbstractVector{<:Real}; kwargs...)
+    return atan(1 / length(x) * sum(sin, x), 1 / length(x) * sum(cos, x))
+end
+function Statistics.mean(
+    ::Circle{ℝ},
+    x::AbstractVector{<:Real},
+    w::AbstractVector;
+    kwargs...,
+)
+    return atan(sum(w .* sin.(x)), sum(w .* cos.(x)))
+end
+@doc raw"""
+    mean(M::Circle{ℂ}, x::AbstractVector[, w::AbstractWeights])
 
-@inline norm(::Circle, p, X) = sum(abs, X)
+Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` of points on
+the [`Circle`](@ref) $𝕊^1$, reprsented by complex numbers, i.e. embedded in the complex plade.
+Comuting the sum
+````math
+s = \sum_{i=1}^n x_i
+````
+the mean is the angle of the complex number $s$, so represented in the complex plane as
+$\frac{s}{\lvert s \rvert}$, whenever $s \neq 0$.
+
+If the sum $s=0$, the mean is not unique. For example for opposite points or equally spaced
+angles.
+"""
+mean(::Circle{ℂ}, ::Any)
+function Statistics.mean(M::Circle{ℂ}, x::AbstractVector{<:Complex}; kwargs...)
+    s = sum(x)
+    abs(s) == 0 &&
+        return error("The mean for $(x) on $(M) is not defined/unique, since the sum of the complex numbers is zero")
+    return s / abs(s)
+end
+function Statistics.mean(
+    M::Circle{ℂ},
+    x::AbstractVector{<:Complex},
+    w::AbstractVector;
+    kwargs...,
+)
+    s = sum(w .* x)
+    abs(s) == 0 &&
+        error("The mean for $(x) on $(M) is not defined/unique, since the sum of the complex numbers is zero")
+    return s /= abs(s)
+end
+
+mid_point(::Circle{ℝ}, p1, p2) = sym_rem((p1 + p2) / 2)
+mid_point(::Circle{ℂ}, p1::Complex, p2::Complex) = exp(im * (angle(p1) + angle(p2)) / 2)
+mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = SA[mid_point(M, p1[], p2[])]
+
+@inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)
+
+number_of_coordinates(::Circle, ::AbstractBasis) = 1
 
 @doc raw"""
     project(M::Circle, p)
@@ -355,7 +422,7 @@ sharp(M::Circle, p::Number, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
 
 sharp!(M::Circle, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
-show(io::IO, ::Circle{𝔽}) where {𝔽} = print(io, "Circle($(𝔽))")
+Base.show(io::IO, ::Circle{𝔽}) where {𝔽} = print(io, "Circle($(𝔽))")
 
 @doc raw"""
     sym_rem(x,[T=π])

@@ -5,15 +5,15 @@ Abstract type for smooth binary operations $∘$ on elements of a Lie group $\ma
 ```math
 ∘ : \mathcal{G} × \mathcal{G} → \mathcal{G}
 ```
-An operation can be either defined for a specific [`AbstractGroupManifold`](@ref)
-or in general, by defining for an operation `Op` the following methods:
+An operation can be either defined for a specific [`AbstractGroupManifold`](@ref) over
+number system `𝔽` or in general, by defining for an operation `Op` the following methods:
 
-    identity!(::AbstractGroupManifold{Op}, q, q)
-    identity(::AbstractGroupManifold{Op}, p)
-    inv!(::AbstractGroupManifold{Op}, q, p)
-    inv(::AbstractGroupManifold{Op}, p)
-    compose(::AbstractGroupManifold{Op}, p, q)
-    compose!(::AbstractGroupManifold{Op}, x, p, q)
+    identity!(::AbstractGroupManifold{𝔽,Op}, q, q)
+    identity(::AbstractGroupManifold{𝔽,Op}, p)
+    inv!(::AbstractGroupManifold{𝔽,Op}, q, p)
+    inv(::AbstractGroupManifold{𝔽,Op}, p)
+    compose(::AbstractGroupManifold{𝔽,Op}, p, q)
+    compose!(::AbstractGroupManifold{𝔽,Op}, x, p, q)
 
 Note that a manifold is connected with an operation by wrapping it with a decorator,
 [`AbstractGroupManifold`](@ref). In typical cases the concrete wrapper
@@ -22,17 +22,18 @@ Note that a manifold is connected with an operation by wrapping it with a decora
 abstract type AbstractGroupOperation end
 
 @doc raw"""
-    AbstractGroupManifold{<:AbstractGroupOperation} <: AbstractDecoratorManifold
+    AbstractGroupManifold{𝔽,O<:AbstractGroupOperation} <: AbstractDecoratorManifold{𝔽}
 
 Abstract type for a Lie group, a group that is also a smooth manifold with an
 [`AbstractGroupOperation`](@ref), a smooth binary operation. `AbstractGroupManifold`s must
 implement at least [`inv`](@ref), [`identity`](@ref), [`compose`](@ref), and
 [`translate_diff`](@ref).
 """
-abstract type AbstractGroupManifold{O<:AbstractGroupOperation} <: AbstractDecoratorManifold end
+abstract type AbstractGroupManifold{𝔽,O<:AbstractGroupOperation} <:
+              AbstractDecoratorManifold{𝔽} end
 
 """
-    GroupManifold{M<:Manifold,O<:AbstractGroupOperation} <: AbstractGroupManifold{O}
+    GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <: AbstractGroupManifold{𝔽,O}
 
 Decorator for a smooth manifold that equips the manifold with a group operation, thus making
 it a Lie group. See [`AbstractGroupManifold`](@ref) for more details.
@@ -43,18 +44,16 @@ Group manifolds by default forward metric-related operations to the wrapped mani
 
     GroupManifold(manifold, op)
 """
-struct GroupManifold{M<:Manifold,O<:AbstractGroupOperation} <: AbstractGroupManifold{O}
+struct GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <:
+       AbstractGroupManifold{𝔽,O}
     manifold::M
     op::O
 end
 
-show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
+Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
-const GROUP_MANIFOLD_BASIS_DISAMBIGUATION = [
-    AbstractDecoratorManifold,
-    ArrayManifold,
-    VectorBundle,
-]
+const GROUP_MANIFOLD_BASIS_DISAMBIGUATION =
+    [AbstractDecoratorManifold, ValidationManifold, VectorBundle]
 
 """
     base_group(M::Manifold) -> AbstractGroupManifold
@@ -64,7 +63,7 @@ Return an error if the [`base_manifold`](@ref) is reached without encountering a
 """
 base_group(M::AbstractDecoratorManifold) = base_group(decorated_manifold(M))
 function base_group(M::Manifold)
-    error("base_group: no base group found.")
+    return error("base_group: no base group found.")
 end
 base_group(G::AbstractGroupManifold) = G
 
@@ -136,31 +135,37 @@ end
 
 Identity(M::AbstractDecoratorManifold, p) = Identity(decorated_manifold(M), p)
 function Identity(M::Manifold, p)
-    error("Identity not implemented for manifold $(M) and point $(p).")
+    return error("Identity not implemented for manifold $(M) and point $(p).")
 end
 
-function ==(e1::Identity, e2::Identity)
+function Base.:(==)(e1::Identity, e2::Identity)
     return e1.p == e2.p && e1.group == e2.group
 end
 
 make_identity(M::Manifold, p) = Identity(M, identity(M, p))
 
-show(io::IO, e::Identity) = print(io, "Identity($(e.group), $(e.p))")
+Base.show(io::IO, e::Identity) = print(io, "Identity($(e.group), $(e.p))")
 
 # To ensure allocate_result_type works
 number_eltype(e::Identity) = Bool
 
-copyto!(e::TE, ::TE) where {TE<:Identity} = e
-copyto!(p, ::TE) where {TE<:Identity} = copyto!(p, e.p)
-copyto!(p::AbstractArray, e::TE) where {TE<:Identity} = copyto!(p, e.p)
+Base.copyto!(e::TE, ::TE) where {TE<:Identity} = e
+Base.copyto!(p, ::TE) where {TE<:Identity} = copyto!(p, e.p)
+Base.copyto!(p::AbstractArray, e::TE) where {TE<:Identity} = copyto!(p, e.p)
 
-isapprox(p, e::Identity; kwargs...) = isapprox(e::Identity, p; kwargs...)
-isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
-isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
+Base.isapprox(p, e::Identity; kwargs...) = isapprox(e::Identity, p; kwargs...)
+Base.isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
+Base.isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
-function allocate_result(M::Manifold, f::typeof(get_coordinates), e::Identity, X)
+function allocate_result(
+    M::Manifold,
+    f::typeof(get_coordinates),
+    e::Identity,
+    X,
+    B::AbstractBasis,
+)
     T = allocate_result_type(M, f, (e.p, X))
-    return allocate(e.p, T, Size(manifold_dimension(M)))
+    return allocate(e.p, T, Size(number_of_coordinates(M, B)))
 end
 
 function decorator_transparent_dispatch(
@@ -172,10 +177,10 @@ function decorator_transparent_dispatch(
 end
 function allocate_result(M::Manifold, f::typeof(get_vector), e::Identity, Xⁱ)
     is_group_decorator(M) && return allocate_result(base_group(M), f, e, Xⁱ)
-    error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(Xⁱ).")
+    return error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(Xⁱ).")
 end
 function allocate_result(M::AbstractGroupManifold, f::typeof(get_vector), e::Identity, Xⁱ)
-    error("allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(Xⁱ).")
+    return error("allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(Xⁱ).")
 end
 function allocate_result(
     G::GT,
@@ -201,7 +206,7 @@ function allocate_result(
     X,
 )
     is_group_decorator(M) && return allocate_result(base_group(M), f, e, X)
-    error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(X).")
+    return error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(X).")
 end
 function allocate_result(
     M::AbstractGroupManifold,
@@ -209,7 +214,7 @@ function allocate_result(
     e::Identity,
     X,
 )
-    error("allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(X).")
+    return error("allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(X).")
 end
 function allocate_result(
     G::GT,
@@ -225,56 +230,66 @@ function get_vector(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBa
     return get_vector(decorated_manifold(M), e.p, X, B)
 end
 function get_vector(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold && error("On $(M) the identity $(e) does not match to perform get_vector.")
+    M != e.group.manifold &&
+        error("On $(M) the identity $(e) does not match to perform get_vector.")
     return get_vector(M, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(quote
-        @invoke_maker 1 Manifold get_vector(
-            M::$MT,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end)
+    eval(
+        quote
+            @invoke_maker 1 Manifold get_vector(
+                M::$MT,
+                e::Identity,
+                X,
+                B::VeeOrthogonalBasis,
+            )
+        end,
+    )
 end
 function get_vector!(M::AbstractGroupManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group && error("On $(M) the identity $(e) does not match to perform get_vector!")
     return get_vector!(decorated_manifold(M), Y, e.p, X, B)
 end
 function get_vector!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold && error("On $(M) the identity $(e) does not match to perform get_vector!")
+    M != e.group.manifold &&
+        error("On $(M) the identity $(e) does not match to perform get_vector!")
     return get_vector!(M, Y, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(quote
-        @invoke_maker 1 Manifold get_vector!(
-            M::$MT,
-            Y,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end)
+    eval(
+        quote
+            @invoke_maker 1 Manifold get_vector!(
+                M::$MT,
+                Y,
+                e::Identity,
+                X,
+                B::VeeOrthogonalBasis,
+            )
+        end,
+    )
 end
 
 function get_coordinates(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group && error("On $(M) the identity $(e) does not match to perform get_coordinates")
+    M != e.group &&
+        error("On $(M) the identity $(e) does not match to perform get_coordinates")
     return get_coordinates(decorated_manifold(M), e.p, X, B)
 end
 function get_coordinates(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold && error("On $(M) the identity $(e) does not match to perform get_coordinates")
+    M != e.group.manifold &&
+        error("On $(M) the identity $(e) does not match to perform get_coordinates")
     return get_coordinates(M, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(quote
-        @invoke_maker 1 Manifold get_coordinates(
-            M::$MT,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end)
+    eval(
+        quote
+            @invoke_maker 1 Manifold get_coordinates(
+                M::$MT,
+                e::Identity,
+                X,
+                B::VeeOrthogonalBasis,
+            )
+        end,
+    )
 end
 
 function get_coordinates!(
@@ -284,26 +299,29 @@ function get_coordinates!(
     X,
     B::VeeOrthogonalBasis,
 )
-    M != e.group && error("On $(M) the identity $(e) does not match to perform get_coordinates!")
+    M != e.group &&
+        error("On $(M) the identity $(e) does not match to perform get_coordinates!")
     return get_coordinates!(decorated_manifold(M), Y, e.p, X, B)
 end
 function get_coordinates!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold && error("On $(M) the identity $(e) does not match to perform get_coordinates!")
+    M != e.group.manifold &&
+        error("On $(M) the identity $(e) does not match to perform get_coordinates!")
     return get_coordinates!(M, Y, e.p, X, B)
 end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(quote
-        @invoke_maker 1 Manifold get_coordinates!(
-            M::$MT,
-            Y,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end)
+    eval(
+        quote
+            @invoke_maker 1 Manifold get_coordinates!(
+                M::$MT,
+                Y,
+                e::Identity,
+                X,
+                B::VeeOrthogonalBasis,
+            )
+        end,
+    )
 end
 
-import ManifoldsBase.check_manifold_point__transparent
 @decorator_transparent_fallback :transparent function check_manifold_point(
     G::AbstractGroupManifold,
     e::Identity;
@@ -330,13 +348,16 @@ $p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}$, where $e$ is the [`identi
 element of $\mathcal{G}$.
 """
 inv(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function :intransparent function inv(G::AbstractGroupManifold, p)
+@decorator_transparent_function :intransparent function Base.inv(
+    G::AbstractGroupManifold,
+    p,
+)
     q = allocate_result(G, inv, p)
     return inv!(G, q, p)
 end
 
 @decorator_transparent_function :intransparent function inv!(G::AbstractGroupManifold, q, p)
-    inv!(G.manifold, q, p)
+    return inv!(G.manifold, q, p)
 end
 
 @doc raw"""
@@ -347,8 +368,8 @@ $p \circ e = e \circ p = p$.
 The returned element is of a similar type to `p`.
 """
 identity(::AbstractGroupManifold, ::Any)
-@decorator_transparent_signature identity(G::AbstractDecoratorManifold, p)
-function identity(G::AbstractGroupManifold, p)
+@decorator_transparent_signature Base.identity(G::AbstractDecoratorManifold, p)
+function Base.identity(G::AbstractGroupManifold, p)
     y = allocate_result(G, identity, p)
     return identity!(G, y, p)
 end
@@ -358,13 +379,30 @@ function decorator_transparent_dispatch(::typeof(identity!), ::AbstractGroupMani
     return Val(:intransparent)
 end
 
-function isapprox(G::GT, e::Identity{GT}, p; kwargs...) where {GT<:AbstractGroupManifold}
+function Base.isapprox(
+    G::GT,
+    e::Identity{GT},
+    p;
+    kwargs...,
+) where {GT<:AbstractGroupManifold}
     return isapprox(G, e.p, p; kwargs...)
 end
-function isapprox(G::GT, p, e::Identity{GT}; kwargs...) where {GT<:AbstractGroupManifold}
+function Base.isapprox(
+    G::GT,
+    p,
+    e::Identity{GT};
+    kwargs...,
+) where {GT<:AbstractGroupManifold}
     return isapprox(G, e, p; kwargs...)
 end
-isapprox(::GT, ::E, ::E; kwargs...) where {GT<:AbstractGroupManifold,E<:Identity{GT}} = true
+function Base.isapprox(
+    ::GT,
+    ::E,
+    ::E;
+    kwargs...,
+) where {GT<:AbstractGroupManifold,E<:Identity{GT}}
+    return true
+end
 
 function decorator_transparent_dispatch(
     ::typeof(isapprox),
@@ -407,7 +445,7 @@ function decorator_transparent_dispatch(
     M::AbstractGroupManifold,
     x,
     p,
-    q
+    q,
 )
     return Val(:intransparent)
 end
@@ -664,12 +702,12 @@ following properties:
     [`exp`](@ref).
 
 ```
-group_exp(G::AbstractGroupManifold{AdditionOperation}, X)
+group_exp(G::AbstractGroupManifold{𝔽,AdditionOperation}, X) where {𝔽}
 ```
 
 Compute $q = X$.
 
-    group_exp(G::AbstractGroupManifold{MultiplicationOperation}, X)
+    group_exp(G::AbstractGroupManifold{𝔽,MultiplicationOperation}, X) where {𝔽}
 
 For `Number` and `AbstractMatrix` types of `X`, compute the usual numeric/matrix
 exponential,
@@ -708,12 +746,12 @@ $q = \exp X$
     [`log`](@ref).
 
 ```
-group_log(G::AbstractGroupManifold{AdditionOperation}, q)
+group_log(G::AbstractGroupManifold{𝔽,AdditionOperation}, q) where {𝔽}
 ```
 
 Compute $X = q$.
 
-    group_log(G::AbstractGroupManifold{MultiplicationOperation}, q)
+    group_log(G::AbstractGroupManifold{𝔽,MultiplicationOperation}, q) where {𝔽}
 
 For `Number` and `AbstractMatrix` types of `q`, compute the usual numeric/matrix logarithm:
 
@@ -730,12 +768,7 @@ function group_log(G::AbstractGroupManifold, q)
     X = allocate_result(G, group_log, q)
     return group_log!(G, X, q)
 end
-function decorator_transparent_dispatch(
-    ::typeof(group_log),
-    ::AbstractGroupManifold,
-    X,
-    q,
-)
+function decorator_transparent_dispatch(::typeof(group_log), ::AbstractGroupManifold, X, q)
     return Val(:intransparent)
 end
 
@@ -877,29 +910,29 @@ Group operation that consists of simple addition.
 """
 struct AdditionOperation <: AbstractGroupOperation end
 
-const AdditionGroup = AbstractGroupManifold{AdditionOperation}
+const AdditionGroup = AbstractGroupManifold{𝔽,AdditionOperation} where {𝔽}
 
-+(e::Identity{G}) where {G<:AdditionGroup} = e
-+(::Identity{G}, p) where {G<:AdditionGroup} = p
-+(p, ::Identity{G}) where {G<:AdditionGroup} = p
-+(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
+Base.:+(e::Identity{G}) where {G<:AdditionGroup} = e
+Base.:+(::Identity{G}, p) where {G<:AdditionGroup} = p
+Base.:+(p, ::Identity{G}) where {G<:AdditionGroup} = p
+Base.:+(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
--(e::Identity{G}) where {G<:AdditionGroup} = e
--(::Identity{G}, p) where {G<:AdditionGroup} = -p
--(p, ::Identity{G}) where {G<:AdditionGroup} = p
--(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
+Base.:-(e::Identity{G}) where {G<:AdditionGroup} = e
+Base.:-(::Identity{G}, p) where {G<:AdditionGroup} = -p
+Base.:-(p, ::Identity{G}) where {G<:AdditionGroup} = p
+Base.:-(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
-*(e::Identity{G}, p) where {G<:AdditionGroup} = e
-*(p, e::Identity{G}) where {G<:AdditionGroup} = e
-*(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
+Base.:*(e::Identity{G}, p) where {G<:AdditionGroup} = e
+Base.:*(p, e::Identity{G}) where {G<:AdditionGroup} = e
+Base.:*(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
-zero(e::Identity{G}) where {G<:AdditionGroup} = e
+Base.zero(e::Identity{G}) where {G<:AdditionGroup} = e
 
-identity(::AdditionGroup, p) = zero(p)
+Base.identity(::AdditionGroup, p) = zero(p)
 
 identity!(::AdditionGroup, q, p) = fill!(q, 0)
 
-inv(::AdditionGroup, p) = -p
+Base.inv(::AdditionGroup, p) = -p
 
 inv!(::AdditionGroup, q, p) = copyto!(q, -p)
 
@@ -941,27 +974,27 @@ Group operation that consists of multiplication.
 """
 struct MultiplicationOperation <: AbstractGroupOperation end
 
-const MultiplicationGroup = AbstractGroupManifold{MultiplicationOperation}
+const MultiplicationGroup = AbstractGroupManifold{𝔽,MultiplicationOperation} where {𝔽}
 
-*(e::Identity{G}) where {G<:MultiplicationGroup} = e
-*(::Identity{G}, p) where {G<:MultiplicationGroup} = p
-*(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
-*(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
-*(::Identity{<:MultiplicationGroup}, e::Identity{<:AdditionGroup}) = e
+Base.:*(e::Identity{G}) where {G<:MultiplicationGroup} = e
+Base.:*(::Identity{G}, p) where {G<:MultiplicationGroup} = p
+Base.:*(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
+Base.:*(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
+Base.:*(::Identity{<:MultiplicationGroup}, e::Identity{<:AdditionGroup}) = e
 
-/(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
-/(::Identity{G}, p) where {G<:MultiplicationGroup} = inv(p)
-/(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
+Base.:/(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
+Base.:/(::Identity{G}, p) where {G<:MultiplicationGroup} = inv(p)
+Base.:/(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
 
-\(p, ::Identity{G}) where {G<:MultiplicationGroup} = inv(p)
-\(::Identity{G}, p) where {G<:MultiplicationGroup} = p
-\(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
+Base.:\(p, ::Identity{G}) where {G<:MultiplicationGroup} = inv(p)
+Base.:\(::Identity{G}, p) where {G<:MultiplicationGroup} = p
+Base.:\(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
 
-inv(e::Identity{G}) where {G<:MultiplicationGroup} = e
+Base.inv(e::Identity{G}) where {G<:MultiplicationGroup} = e
 
-one(e::Identity{G}) where {G<:MultiplicationGroup} = e
+Base.one(e::Identity{G}) where {G<:MultiplicationGroup} = e
 
-transpose(e::Identity{G}) where {G<:MultiplicationGroup} = e
+Base.transpose(e::Identity{G}) where {G<:MultiplicationGroup} = e
 
 LinearAlgebra.det(::Identity{<:MultiplicationGroup}) = 1
 
@@ -971,15 +1004,15 @@ function LinearAlgebra.mul!(q, e::E, ::E) where {G<:MultiplicationGroup,E<:Ident
     return identity!(e.group, q, e)
 end
 
-identity(::MultiplicationGroup, p) = one(p)
+Base.identity(::MultiplicationGroup, p) = one(p)
 
 function identity!(G::GT, q, p) where {GT<:MultiplicationGroup}
     isa(p, Identity{GT}) || return copyto!(q, one(p))
-    error("identity! not implemented on $(typeof(G)) for points $(typeof(q)) and $(typeof(p))")
+    return error("identity! not implemented on $(typeof(G)) for points $(typeof(q)) and $(typeof(p))")
 end
 identity!(::MultiplicationGroup, q::AbstractMatrix, p) = copyto!(q, I)
 
-inv(::MultiplicationGroup, p) = inv(p)
+Base.inv(::MultiplicationGroup, p) = inv(p)
 
 inv!(G::MultiplicationGroup, q, p) = copyto!(q, inv(G, p))
 

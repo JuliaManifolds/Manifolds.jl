@@ -1,16 +1,28 @@
 include("differentiation.jl")
 include("utils.jl")
 
-@info "Manifolds.jl Test settings:\n\n"*
-    "Testing Float32:  $(TEST_FLOAT32)\n"*
-    "Testing Double64: $(TEST_DOUBLE64)\n"*
-    "Testing Static:   $(TEST_STATIC_SIZED)\n"
+@info "Manifolds.jl Test settings:\n\n" *
+      "Testing Float32:  $(TEST_FLOAT32)\n" *
+      "Testing Double64: $(TEST_DOUBLE64)\n" *
+      "Testing Static:   $(TEST_STATIC_SIZED)\n"
 
+
+function our_base_ambiguities()
+    ambigs = Test.detect_ambiguities(Base)
+    modules_we_care_about =
+        [Base, LinearAlgebra, Manifolds, ManifoldsBase, StaticArrays, Statistics, StatsBase]
+    our_ambigs = filter(ambigs) do (m1, m2)
+        we_care = m1.module in modules_we_care_about && m2.module in modules_we_care_about
+        return we_care && (m1.module === Manifolds || m2.module === Manifolds)
+    end
+    return our_ambigs
+end
 
 @testset "Ambiguities" begin
     # TODO: reduce the number of ambiguities
-    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 13
+    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 12
     @test length(Test.detect_ambiguities(Manifolds)) == 0
+    @test length(our_base_ambiguities()) <= 21
 end
 
 include("maps.jl")
@@ -28,6 +40,7 @@ include("generalized_grassmann.jl")
 include("generalized_stiefel.jl")
 include("grassmann.jl")
 include("hyperbolic.jl")
+include("probability_simplex.jl")
 include("rotations.jl")
 include("skewsymmetric.jl")
 include("sphere.jl")
@@ -35,8 +48,8 @@ include("stiefel.jl")
 include("symmetric.jl")
 include("symmetric_positive_definite.jl")
 
+include("multinomial_matrices.jl")
 include("oblique.jl")
-
 include("torus.jl")
 
 #meta manifolds

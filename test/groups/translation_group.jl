@@ -11,11 +11,12 @@ include("group_utils.jl")
         @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(true)
         @test (@inferred Manifolds.biinvariant_metric_dispatch(G)) === Val(true)
         @test is_default_metric(MetricManifold(G, EuclideanMetric())) === true
-        @test Manifolds.default_metric_dispatch(MetricManifold(G, EuclideanMetric())) === Val{true}()
+        @test Manifolds.default_metric_dispatch(MetricManifold(G, EuclideanMetric())) ===
+              Val{true}()
         types = [Matrix{Float64}]
         @test base_manifold(G) === Euclidean(2, 3)
 
-        pts = [reshape(i:i+5, (2, 3)) for i in 1:3]
+        pts = [reshape(i:(i + 5), (2, 3)) for i in 1:3]
         vpts = [reshape(-2:3, (2, 3))]
         for T in types
             gpts = convert.(T, pts)
@@ -32,7 +33,7 @@ include("group_utils.jl")
         types = [Matrix{ComplexF64}]
         @test base_manifold(G) === Euclidean(2, 3; field = ℂ)
 
-        pts = [reshape(complex.(i:i+5, i+1:i+6), (2, 3)) for i in 1:3]
+        pts = [reshape(complex.(i:(i + 5), (i + 1):(i + 6)), (2, 3)) for i in 1:3]
         vpts = [reshape(complex.(-2:3, -1:4), (2, 3))]
         for T in types
             gpts = convert.(T, pts)

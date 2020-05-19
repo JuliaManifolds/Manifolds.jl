@@ -26,6 +26,7 @@ represented as affine matrices with size `(n + 1, n + 1)` (see [`affine_matrix`]
 which the group operation is [`MultiplicationOperation`](@ref).
 """
 const SpecialEuclidean{N} = SemidirectProductGroup{
+    ℝ,
     TranslationGroup{Tuple{N},ℝ},
     SpecialOrthogonal{N},
     RotationAction{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N},LeftAction},
@@ -38,7 +39,7 @@ function SpecialEuclidean(n)
     return SemidirectProductGroup(Tn, SOn, A)
 end
 
-show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
+Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
 
 Base.@propagate_inbounds function submanifold_component(
     ::SpecialEuclidean{n},
@@ -66,10 +67,10 @@ Base.@propagate_inbounds function _padpoint!(
     ::SpecialEuclidean{n},
     q::AbstractMatrix,
 ) where {n}
-    for i ∈ 1:n
-        q[n+1, i] = 0
+    for i in 1:n
+        q[n + 1, i] = 0
     end
-    q[n+1, n+1] = 1
+    q[n + 1, n + 1] = 1
     return q
 end
 
@@ -77,8 +78,8 @@ Base.@propagate_inbounds function _padvector!(
     ::SpecialEuclidean{n},
     X::AbstractMatrix,
 ) where {n}
-    for i ∈ 1:n+1
-        X[n+1, i] = 0
+    for i in 1:(n + 1)
+        X[n + 1, i] = 0
     end
     return X
 end

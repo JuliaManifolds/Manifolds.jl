@@ -6,32 +6,45 @@ import Manifolds: invariant_metric_dispatch, default_metric_dispatch, local_metr
 
 struct TestInvariantMetricBase <: Metric end
 
-function local_metric(::MetricManifold{<:Manifold,TestInvariantMetricBase}, ::Identity)
+function local_metric(
+    ::MetricManifold{𝔽,<:Manifold,TestInvariantMetricBase},
+    ::Identity,
+) where {𝔽}
     return Diagonal([1.0, 2.0, 3.0])
 end
-function local_metric(::MetricManifold{<:Manifold,<:InvariantMetric{TestInvariantMetricBase}}, p)
+function local_metric(
+    ::MetricManifold{𝔽,<:Manifold,<:InvariantMetric{TestInvariantMetricBase}},
+    p,
+) where {𝔽}
     return Diagonal([1.0, 2.0, 3.0])
 end
 
 struct TestBiInvariantMetricBase <: Metric end
 
 function invariant_metric_dispatch(
-    ::MetricManifold{<:Manifold,<:InvariantMetric{TestBiInvariantMetricBase}},
+    ::MetricManifold{𝔽,<:Manifold,<:InvariantMetric{TestBiInvariantMetricBase}},
     ::ActionDirection,
-)
+) where {𝔽}
     return Val(true)
 end
 
-function local_metric(::MetricManifold{<:Manifold,<:TestBiInvariantMetricBase}, ::Identity)
+function local_metric(
+    ::MetricManifold{𝔽,<:Manifold,<:TestBiInvariantMetricBase},
+    ::Identity,
+) where {𝔽}
     return Diagonal(0.4I, 3)
 end
 
-struct TestInvariantMetricManifold <: Manifold end
+struct TestInvariantMetricManifold <: Manifold{ℝ} end
 
-struct TestDefaultInvariantMetricManifold <: Manifold end
+struct TestDefaultInvariantMetricManifold <: Manifold{ℝ} end
 
 function default_metric_dispatch(
-    ::MetricManifold{TestDefaultInvariantMetricManifold,RightInvariantMetric{TestInvariantMetricBase}},
+    ::MetricManifold{
+        ℝ,
+        TestDefaultInvariantMetricManifold,
+        RightInvariantMetric{TestInvariantMetricBase},
+    },
 )
     return Val(true)
 end
@@ -61,20 +74,32 @@ invariant_metric_dispatch(::TestDefaultInvariantMetricManifold, ::RightAction) =
     @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(true)
     @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(false)
 
-    @test Manifolds.invariant_metric_dispatch(TestInvariantMetricManifold(), RightAction()) === Val{false}()
-    @test Manifolds.invariant_metric_dispatch(TestInvariantMetricManifold(), LeftAction()) === Val{false}()
+    @test Manifolds.invariant_metric_dispatch(
+        TestInvariantMetricManifold(),
+        RightAction(),
+    ) === Val{false}()
+    @test Manifolds.invariant_metric_dispatch(
+        TestInvariantMetricManifold(),
+        LeftAction(),
+    ) === Val{false}()
 
-    G = MetricManifold(TestDefaultInvariantMetricManifold(),LeftInvariantMetric(TestInvariantMetricBase()))
+    G = MetricManifold(
+        TestDefaultInvariantMetricManifold(),
+        LeftInvariantMetric(TestInvariantMetricBase()),
+    )
     @test !is_default_metric(G)
-    G = MetricManifold(TestDefaultInvariantMetricManifold(),RightInvariantMetric(TestInvariantMetricBase()))
+    G = MetricManifold(
+        TestDefaultInvariantMetricManifold(),
+        RightInvariantMetric(TestInvariantMetricBase()),
+    )
     @test is_default_metric(G)
 
-    e = Matrix{Float64}(I,3,3)
+    e = Matrix{Float64}(I, 3, 3)
     @testset "inner/norm" begin
         SO3 = SpecialOrthogonal(3)
-        p = exp(hat(SO3, Identity(SO3,e), [1.0, 2.0, 3.0]))
-        X = hat(SO3, Identity(SO3,e), [2.0, 3.0, 4.0])
-        Y = hat(SO3, Identity(SO3,e), [3.0, 4.0, 1.0])
+        p = exp(hat(SO3, Identity(SO3, e), [1.0, 2.0, 3.0]))
+        X = hat(SO3, Identity(SO3, e), [2.0, 3.0, 4.0])
+        Y = hat(SO3, Identity(SO3, e), [3.0, 4.0, 1.0])
 
         G = MetricManifold(SO3, lmetric)
         @test inner(G, p, X, Y) ≈ dot(X, Diagonal([1.0, 2.0, 3.0]) * Y)
@@ -87,9 +112,9 @@ invariant_metric_dispatch(::TestDefaultInvariantMetricManifold, ::RightAction) =
 
     @testset "log/exp bi-invariant" begin
         SO3 = SpecialOrthogonal(3)
-        p = exp(hat(SO3, Identity(SO3,e), [1.0, 2.0, 3.0]))
-        q = exp(hat(SO3, Identity(SO3,e), [3.0, 4.0, 1.0]))
-        X = hat(SO3, Identity(SO3,e), [2.0, 3.0, 4.0])
+        p = exp(hat(SO3, Identity(SO3, e), [1.0, 2.0, 3.0]))
+        q = exp(hat(SO3, Identity(SO3, e), [3.0, 4.0, 1.0]))
+        X = hat(SO3, Identity(SO3, e), [2.0, 3.0, 4.0])
 
         G = MetricManifold(SO3, InvariantMetric(TestBiInvariantMetricBase(), LeftAction()))
         @test isapprox(SO3, exp(G, p, X), exp(SO3, p, X))

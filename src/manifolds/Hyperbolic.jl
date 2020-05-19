@@ -1,12 +1,12 @@
 @doc raw"""
-    Hyperbolic{N} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
+    Hyperbolic{N} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType}
 
 The hyperbolic space $ℍ^n$ represented by $n+1$-Tuples, i.e. embedded in the
 [`Lorentz`](@ref)ian manifold equipped with the [`MinkowskiMetric`](@ref)
 $⟨\cdot,\cdot⟩_{\mathrm{M}}$. The space is defined as
 
 ```math
-ℍ^n = \Bigl\{p ∈ ℝ^{n+1} : ⟨p,p⟩_{\mathrm{M}}= -p_{n+1}^2
+ℍ^n = \Bigl\{p ∈ ℝ^{n+1}\ \Big|\ ⟨p,p⟩_{\mathrm{M}}= -p_{n+1}^2
   + \displaystyle\sum_{k=1}^n p_k^2 = -1, p_{n+1} > 0\Bigr\},.
 ```
 
@@ -27,7 +27,7 @@ metric. The corresponding sectional curvature is $-1$.
 
 Generate the $ℍ^{n} ⊂ ℝ^{n+1}$
 """
-struct Hyperbolic{N} <: AbstractEmbeddedManifold{DefaultIsometricEmbeddingType} end
+struct Hyperbolic{N} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
 
 Hyperbolic(n::Int) = Hyperbolic{n}()
 
@@ -39,7 +39,8 @@ inner product in the embedding of -1, see [`MinkowskiMetric`](@ref).
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_manifold_point(M::Hyperbolic, p; kwargs...)
-    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv =
+        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(minkowski_metric(p, p), -1.0; kwargs...)
         return DomainError(
@@ -67,12 +68,12 @@ function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwar
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
         check_base_point = false, # already checked above
-        kwargs...
+        kwargs...,
     )
     mpv === nothing || return mpv
     if !isapprox(minkowski_metric(p, X), 0.0; kwargs...)
@@ -84,7 +85,7 @@ function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwar
     return nothing
 end
 
-decorated_manifold(M::Hyperbolic{N}) where {N} = Lorentz(N+1, MinkowskiMetric())
+decorated_manifold(M::Hyperbolic{N}) where {N} = Lorentz(N + 1, MinkowskiMetric())
 
 default_metric_dispatch(::Hyperbolic, ::MinkowskiMetric) = Val(true)
 
@@ -138,9 +139,14 @@ injectivity_radius(H::Hyperbolic) = Inf
 injectivity_radius(H::Hyperbolic, ::ExponentialRetraction) = Inf
 injectivity_radius(H::Hyperbolic, ::Any) = Inf
 injectivity_radius(H::Hyperbolic, ::Any, ::ExponentialRetraction) = Inf
-eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(M::Hyperbolic, rm::AbstractRetractionMethod)
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold injectivity_radius(
+            M::Hyperbolic,
+            rm::AbstractRetractionMethod,
+        )
+    end,
+)
 
 @doc raw"""
     log(M::Hyperbolic, p, q)
@@ -180,7 +186,7 @@ manifold_dimension(::Hyperbolic{N}) where {N} = N
         M::Hyperbolic,
         x::AbstractVector,
         [w::AbstractWeights,]
-        method = CyclicProximalPointEstimationMethod();
+        method = CyclicProximalPointEstimation();
         kwargs...,
     )
 
@@ -189,7 +195,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` on the
 """
 mean(::Hyperbolic, ::Any...)
 
-function mean!(M::Hyperbolic, p, x::AbstractVector, w::AbstractVector; kwargs...)
+function Statistics.mean!(M::Hyperbolic, p, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(M, p, x, w, CyclicProximalPointEstimation(); kwargs...)
 end
 
@@ -210,7 +216,7 @@ project(::Hyperbolic, ::Any, ::Any)
 
 project!(M::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)
 
-show(io::IO, ::Hyperbolic{N}) where {N} = print(io, "Hyperbolic($(N))")
+Base.show(io::IO, ::Hyperbolic{N}) where {N} = print(io, "Hyperbolic($(N))")
 
 @doc raw"""
     vector_transport_to(M::Hyperbolic, p, X, q, ::ParallelTransport)

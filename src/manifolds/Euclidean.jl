@@ -1,5 +1,5 @@
 @doc raw"""
-    Euclidean{T<:Tuple,𝔽} <: Manifold
+    Euclidean{T<:Tuple,𝔽} <: Manifold{𝔽}
 
 Euclidean vector space.
 
@@ -13,20 +13,20 @@ Generate the $n$-dimensional vector space $ℝ^n$.
     𝔽^(n₁,n₂,...,nᵢ) = Euclidean(n₁,n₂,...,nᵢ; field=𝔽)
 
 Generate the vector space of $k = n_1 \cdot n_2 \cdot … \cdot n_i$ values, i.e. the
-manifold $𝔽^{n_1, n_2, …, n_i}$ whose
+manifold $𝔽^{n_1, n_2, …, n_i}$, $𝔽\in\{ℝ,ℂ\}$, whose
 elements are interpreted as $n_1 × n_2 × … × n_i$ arrays.
 For $i=2$ we obtain a matrix space.
 The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
 [`real_dimension`](@ref) of the field $𝔽$.
 """
-struct Euclidean{N,𝔽} <: Manifold where {N<:Tuple, 𝔽<:AbstractNumbers} end
+struct Euclidean{N,𝔽} <: Manifold{𝔽} where {N<:Tuple} end
 
 function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
     return Euclidean{Tuple{n...},field}()
 end
 
-^(𝔽::AbstractNumbers, n) = Euclidean(n...; field = 𝔽)
+Base.:^(𝔽::AbstractNumbers, n) = Euclidean(n...; field = 𝔽)
 
 """
     EuclideanMetric <: RiemannianMetric
@@ -43,8 +43,8 @@ This metric is the default metric for example for the [`Euclidean`](@ref) manifo
 """
 struct EuclideanMetric <: RiemannianMetric end
 
-^(M::Euclidean, n::Int) = ^(M, (n,))
-function ^(::Euclidean{T,𝔽}, n::NTuple{N,Int}) where {T,𝔽,N}
+Base.:^(M::Euclidean, n::Int) = ^(M, (n,))
+function Base.:^(::Euclidean{T,𝔽}, n::NTuple{N,Int}) where {T,𝔽,N}
     return Euclidean{Tuple{T.parameters...,n...},𝔽}()
 end
 
@@ -75,9 +75,16 @@ function check_manifold_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
             "The matrix $(p) does not lie on $(M), since its dimensions ($(size(p))) are wrong (expected: $(representation_size(M))).",
         )
     end
+    return nothing
 end
 
-function check_tangent_vector(M::Euclidean{N,𝔽}, p, X; check_base_point = true, kwargs...) where {N,𝔽}
+function check_tangent_vector(
+    M::Euclidean{N,𝔽},
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+) where {N,𝔽}
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
@@ -100,9 +107,12 @@ function check_tangent_vector(M::Euclidean{N,𝔽}, p, X; check_base_point = tru
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since its dimensions $(size(X)) are wrong  (expected: $(representation_size(M))).",
         )
     end
+    return nothing
 end
 
-det_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = one(eltype(p))
+function det_local_metric(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
+    return one(eltype(p))
+end
 
 """
     distance(M::Euclidean, p, q)
@@ -137,13 +147,13 @@ flat(::Euclidean, ::Any...)
 
 flat!(M::Euclidean, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-function get_basis(M::Euclidean{<:Tuple,ℝ}, p, B::DefaultOrthonormalBasis)
+function get_basis(M::Euclidean, p, B::DefaultOrthonormalBasis{ℝ})
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
-    return CachedBasis(B,vecs)
+    return CachedBasis(B, vecs)
 end
-function get_basis(M::Euclidean{<:Tuple,ℂ}, p, B::DefaultOrthonormalBasis)
+function get_basis(M::Euclidean{<:Tuple,ℂ}, p, B::DefaultOrthonormalBasis{ℂ})
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
-    return CachedBasis(B,[vecs; im * vecs])
+    return CachedBasis(B, [vecs; im * vecs])
 end
 function get_basis(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
     vecs = get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
@@ -151,28 +161,34 @@ function get_basis(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates!(M::Euclidean{<:Tuple,ℝ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
+function get_coordinates!(M::Euclidean, Y, p, X, B::DefaultOrDiagonalizingBasis{ℝ})
     S = representation_size(M)
     PS = prod(S)
     copyto!(Y, reshape(X, PS))
     return Y
 end
-function get_coordinates!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
+function get_coordinates!(
+    M::Euclidean{<:Tuple,ℂ},
+    Y,
+    p,
+    X,
+    B::DefaultOrDiagonalizingBasis{ℂ},
+)
     S = representation_size(M)
     PS = prod(S)
-    Y .= [reshape(real(X), PS)..., reshape(imag(X), PS)...]
+    Y .= [reshape(real.(X), PS)..., reshape(imag(X), PS)...]
     return Y
 end
 
-function get_vector!(M::Euclidean{<:Tuple,ℝ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
+function get_vector!(M::Euclidean, Y, p, X, B::DefaultOrDiagonalizingBasis{ℝ})
     S = representation_size(M)
     Y .= reshape(X, S)
     return Y
 end
-function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis)
+function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis{ℂ})
     S = representation_size(M)
     N = div(length(X), 2)
-    Y .= reshape(X[1:N] + im * X[N+1:end], S)
+    Y .= reshape(X[1:N] + im * X[(N + 1):end], S)
     return Y
 end
 
@@ -194,7 +210,7 @@ of arrays (or tensors) of size $n_1 × n_2  ×  …  × n_i$, i.e.
 g_p(X,Y) = \sum_{k ∈ I} \overline{X}_{k} Y_{k},
 ````
 where $I$ is the set of vectors $k ∈ ℕ^i$, such that for all
-$1 ≤ j ≤ i$ it holds $1 ≤ k_j ≤ n_j$.
+$1 ≤ j ≤ i$ it holds $1 ≤ k_j ≤ n_j$ and $\overline{\cdot}$ denotes the complex conjugate.
 
 For the special case of $i ≤ 2$, i.e. matrices and vectors, this simplifies to
 ````math
@@ -204,13 +220,15 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpo
 """
 inner(::Euclidean, ::Any...)
 @inline inner(::Euclidean, p, X, Y) = dot(X, Y)
-@inline inner(::MetricManifold{<:Manifold,EuclideanMetric}, p, X, Y) = dot(X, Y)
+@inline inner(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p, X, Y) where {𝔽} = dot(X, Y)
 
-inverse_local_metric(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = local_metric(M, p)
+function inverse_local_metric(M::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
+    return local_metric(M, p)
+end
 
 default_metric_dispatch(::Euclidean, ::EuclideanMetric) = Val(true)
 
-function local_metric(::MetricManifold{<:Manifold,EuclideanMetric}, p)
+function local_metric(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
     return Diagonal(ones(SVector{size(p, 1),eltype(p)}))
 end
 
@@ -227,7 +245,12 @@ log(::Euclidean, ::Any...)
 
 log!(M::Euclidean, X, p, q) = (X .= q .- p)
 
-log_local_metric_density(M::MetricManifold{<:Manifold,EuclideanMetric}, p) = zero(eltype(p))
+function log_local_metric_density(
+    ::MetricManifold{𝔽,<:Manifold,EuclideanMetric},
+    p,
+) where {𝔽}
+    return zero(eltype(p))
+end
 
 @generated _product_of_dimensions(::Euclidean{N}) where {N} = prod(N.parameters)
 
@@ -242,8 +265,8 @@ function manifold_dimension(M::Euclidean{N,𝔽}) where {N,𝔽}
     return _product_of_dimensions(M) * real_dimension(𝔽)
 end
 
-mean(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
-function mean(
+Statistics.mean(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
+function Statistics.mean(
     ::Euclidean{Tuple{1}},
     x::AbstractVector{<:Number},
     w::AbstractWeights;
@@ -251,17 +274,21 @@ function mean(
 )
     return mean(x, w)
 end
-mean(::Euclidean, x::AbstractVector; kwargs...) = mean(x)
+Statistics.mean(::Euclidean, x::AbstractVector; kwargs...) = mean(x)
 
-function mean!(M::Euclidean, p, x::AbstractVector, w::AbstractVector; kwargs...)
+function Statistics.mean!(M::Euclidean, p, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(M, p, x, w, GeodesicInterpolation(); kwargs...)
 end
 
-function mean_and_var(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...)
+function StatsBase.mean_and_var(
+    ::Euclidean{Tuple{1}},
+    x::AbstractVector{<:Number};
+    kwargs...,
+)
     m, v = mean_and_var(x; kwargs...)
     return m, sum(v)
 end
-function mean_and_var(
+function StatsBase.mean_and_var(
     ::Euclidean{Tuple{1}},
     x::AbstractVector{<:Number},
     w::AbstractWeights;
@@ -271,12 +298,17 @@ function mean_and_var(
     m, v = mean_and_var(x, w; corrected = corrected, kwargs...)
     return m, sum(v)
 end
-function mean_and_var(M::Euclidean, x::AbstractVector, w::AbstractWeights; kwargs...)
+function StatsBase.mean_and_var(
+    M::Euclidean,
+    x::AbstractVector,
+    w::AbstractWeights;
+    kwargs...,
+)
     return mean_and_var(M, x, w, GeodesicInterpolation(); kwargs...)
 end
 
-median(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = median(x)
-function median(
+Statistics.median(::Euclidean{Tuple{1}}, x::AbstractVector{<:Number}; kwargs...) = median(x)
+function Statistics.median(
     ::Euclidean{Tuple{1}},
     x::AbstractVector{<:Number},
     w::AbstractWeights;
@@ -285,11 +317,24 @@ function median(
     return median(x, w)
 end
 
-function median!(::Euclidean{Tuple{1}}, p, x::AbstractVector; kwargs...)
-    return copyto!(p, [median(vcat(x...))])
+function Statistics.median!(::Euclidean{Tuple{1}}, p, x::AbstractVector; kwargs...)
+    return copyto!(p, [median(reduce(vcat, x))])
 end
-function median!(::Euclidean{Tuple{1}}, p, x::AbstractVector, w::AbstractWeights; kwargs...)
-    return copyto!(p, [median(vcat(x...), w)])
+function Statistics.median!(
+    ::Euclidean{Tuple{1}},
+    p,
+    x::AbstractVector,
+    w::AbstractWeights;
+    kwargs...,
+)
+    return copyto!(p, [median(reduce(vcat, x), w)])
+end
+
+mid_point(::Euclidean, p1, p2) = (p1 .+ p2) ./ 2
+
+function mid_point!(::Euclidean, q, p1, p2)
+    q .= (p1 .+ p2) ./ 2
+    return q
 end
 
 @doc raw"""
@@ -299,8 +344,8 @@ Compute the norm of a tangent vector `X` at `p` on the [`Euclidean`](@ref)
 `M`, i.e. since every tangent space can be identified with `M` itself
 in this case, just the (Frobenius) norm of `X`.
 """
-norm(::Euclidean, p, X) = norm(X)
-norm(::MetricManifold{<:Manifold,EuclideanMetric}, p, X) = norm(X)
+LinearAlgebra.norm(::Euclidean, p, X) = norm(X)
+LinearAlgebra.norm(::MetricManifold{ℝ,<:Manifold,EuclideanMetric}, p, X) = norm(X)
 
 """
     normal_tvector_distribution(M::Euclidean, p, σ)
@@ -310,7 +355,7 @@ projected to tangent space at `p`.
 """
 function normal_tvector_distribution(M::Euclidean{Tuple{N}}, p, σ) where {N}
     d = Distributions.MvNormal(zero(p), σ)
-    return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project_vector!, p)
+    return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project!, p)
 end
 
 @doc raw"""
@@ -366,22 +411,39 @@ sharp(::Euclidean, ::Any...)
 
 sharp!(M::Euclidean, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
-function show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
-    print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")
+function Base.show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
+    return print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")
 end
 
 """
-    vector_transport_to(M::Euclidean, p, X, q, ::ParallelTransport)
+    vector_transport_to(M::Euclidean, p, X, q, ::AbstractVectorTransportMethod)
 
-Parallely transport the vector `X` from the tangent space at `p` to the tangent space at `q`
+Transport the vector `X` from the tangent space at `p` to the tangent space at `q`
 on the [`Euclidean`](@ref) `M`, which simplifies to the identity.
 """
-vector_transport_to(::Euclidean, ::Any, ::Any, ::Any, ::ParallelTransport)
+vector_transport_to(::Euclidean, ::Any, ::Any, ::Any, ::AbstractVectorTransportMethod)
 
-vector_transport_to!(M::Euclidean, Y, p, X, q, ::ParallelTransport) = copyto!(Y, X)
+function vector_transport_to!(M::Euclidean, Y, p, X, q, ::AbstractVectorTransportMethod)
+    return copyto!(Y, X)
+end
 
-var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
-function var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T}
+for VT in ManifoldsBase.VECTOR_TRANSPORT_DISAMBIGUATION
+    eval(
+        quote
+            @invoke_maker 6 AbstractVectorTransportMethod vector_transport_to!(
+                M::Euclidean,
+                Y,
+                p,
+                X,
+                q,
+                B::$VT,
+            )
+        end,
+    )
+end
+
+Statistics.var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
+function Statistics.var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T}
     return sum(var(x; mean = m, kwargs...))
 end
 

@@ -1,5 +1,5 @@
 @doc raw"""
-    CholeskySpace{N} <: Manifold
+    CholeskySpace{N} <: Manifold{ℝ}
 
 The manifold of lower triangular matrices with positive diagonal and
 a metric based on the cholesky decomposition. The formulae for this manifold
@@ -15,7 +15,7 @@ Generate the manifold of $n× n$ lower triangular matrices with positive diagona
     > Lin, Zenhua: "Riemannian Geometry of Symmetric Positive Definite Matrices via
     > Cholesky Decomposition", arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
 """
-struct CholeskySpace{N} <: Manifold end
+struct CholeskySpace{N} <: Manifold{ℝ} end
 
 CholeskySpace(n::Int) = CholeskySpace{n}()
 
@@ -185,7 +185,7 @@ Return the representation size for the [`CholeskySpace`](@ref)`{N}` `M`, i.e. `(
 """
 @generated representation_size(::CholeskySpace{N}) where {N} = (N, N)
 
-show(io::IO, ::CholeskySpace{N}) where {N} = print(io, "CholeskySpace($(N))")
+Base.show(io::IO, ::CholeskySpace{N}) where {N} = print(io, "CholeskySpace($(N))")
 
 # two small helpers for strictly lower and upper triangulars
 strictlyLowerTriangular(p) = LowerTriangular(p) - Diagonal(diag(p))

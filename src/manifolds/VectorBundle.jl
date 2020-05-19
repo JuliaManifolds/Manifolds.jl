@@ -19,7 +19,7 @@ Optionally:
   bundles),
 * [`flat`](@ref) and [`sharp`](@ref),
 * `norm` (by default uses `inner`),
-* [`project_vector`](@ref) (for embedded vector spaces),
+* [`project`](@ref) (for embedded vector spaces),
 * [`representation_size`](@ref) (if support for [`ProductArray`](@ref) is desired),
 * broadcasting for basic operations.
 """
@@ -90,6 +90,9 @@ struct VectorSpaceAtPoint{TFiber<:VectorBundleFibers,TX}
     point::TX
 end
 
+const TangentSpaceAtPoint{M} =
+    VectorSpaceAtPoint{TangentBundleFibers{M}} where {M<:Manifold}
+
 """
     TangentSpaceAtPoint(M::Manifold, p)
 
@@ -97,6 +100,9 @@ Return an object of type [`VectorSpaceAtPoint`](@ref) representing tangent
 space at `p`.
 """
 TangentSpaceAtPoint(M::Manifold, p) = VectorSpaceAtPoint(TangentBundleFibers(M), p)
+
+const CotangentSpaceAtPoint{M} =
+    VectorSpaceAtPoint{CotangentBundleFibers{M}} where {M<:Manifold}
 
 """
     CotangentSpaceAtPoint(M::Manifold, p)
@@ -107,27 +113,69 @@ space at `p`.
 CotangentSpaceAtPoint(M::Manifold, p) = VectorSpaceAtPoint(CotangentBundleFibers(M), p)
 
 """
-    VectorBundle(M::Manifold, type::VectorSpaceType)
+    VectorBundleVectorTransport(
+        method_point::AbstractVectorTransportMethod,
+        method_vector::AbstractVectorTransportMethod,
+    )
 
-Vector bundle on manifold `M` of type `type`.
+Vector transport type on [`VectorBundle`](@ref). `method_point` is used for vector transport
+of the point part and `method_vector` is used for transport of the vector part
 """
-struct VectorBundle{TVS<:VectorSpaceType,TM<:Manifold} <: Manifold
+struct VectorBundleVectorTransport{
+    TMP<:AbstractVectorTransportMethod,
+    TMV<:AbstractVectorTransportMethod,
+} <: AbstractVectorTransportMethod
+    method_point::TMP
+    method_vector::TMV
+end
+
+"""
+    VectorBundle{𝔽,TVS<:VectorSpaceType,TM<:Manifold{𝔽}} <: Manifold{𝔽}
+
+Vector bundle on a [`Manifold`](@ref) `M` of type [`VectorSpaceType`](@ref).
+
+# Constructor
+
+    VectorBundle(M::Manifold, type::VectorSpaceType)
+"""
+struct VectorBundle{
+    𝔽,
+    TVS<:VectorSpaceType,
+    TM<:Manifold{𝔽},
+    TVT<:VectorBundleVectorTransport,
+} <: Manifold{𝔽}
     type::TVS
     manifold::TM
     fiber::VectorBundleFibers{TVS,TM}
+    vector_transport::TVT
 end
 
-function VectorBundle(fiber::TVS, M::TM) where {TVS<:VectorSpaceType,TM<:Manifold}
-    return VectorBundle{TVS,TM}(fiber, M, VectorBundleFibers(fiber, M))
+function VectorBundle(
+    fiber::TVS,
+    M::TM,
+    vtm::VectorBundleVectorTransport,
+) where {TVS<:VectorSpaceType,TM<:Manifold{𝔽}} where {𝔽}
+    return VectorBundle{𝔽,TVS,TM,typeof(vtm)}(fiber, M, VectorBundleFibers(fiber, M), vtm)
+end
+function VectorBundle(fiber::VectorSpaceType, M::Manifold)
+    vtmm = vector_bundle_transport(fiber, M)
+    vtbm = VectorBundleVectorTransport(vtmm, vtmm)
+    return VectorBundle(fiber, M, vtbm)
 end
 
-const TangentBundle{M} = VectorBundle{TangentSpaceType,M} where {M<:Manifold}
+const TangentBundle{𝔽,M} = VectorBundle{𝔽,TangentSpaceType,M} where {𝔽,M<:Manifold{𝔽}}
 
 TangentBundle(M::Manifold) = VectorBundle(TangentSpace, M)
+function TangentBundle(M::Manifold, vtm::VectorBundleVectorTransport)
+    return VectorBundle(TangentSpace, M, vtm)
+end
 
-const CotangentBundle{M} = VectorBundle{CotangentSpaceType,M} where {M<:Manifold}
+const CotangentBundle{𝔽,M} = VectorBundle{𝔽,CotangentSpaceType,M} where {𝔽,M<:Manifold{𝔽}}
 
 CotangentBundle(M::Manifold) = VectorBundle(CotangentSpace, M)
+function CotangentBundle(M::Manifold, vtm::VectorBundleVectorTransport)
+    return VectorBundle(CotangentSpace, M, vtm)
+end
 
 """
     FVector(type::VectorSpaceType, data)
@@ -143,19 +191,19 @@ end
 const TFVector = FVector{TangentSpaceType}
 const CoTFVector = FVector{CotangentSpaceType}
 
-struct VectorBundleBasisData{BBasis<:CachedBasis, TBasis<:CachedBasis}
+struct VectorBundleBasisData{BBasis<:CachedBasis,TBasis<:CachedBasis}
     base_basis::BBasis
     vec_basis::TBasis
 end
 
-(+)(X::FVector, Y::FVector) = FVector(X.type, X.data + Y.data)
+Base.:+(X::FVector, Y::FVector) = FVector(X.type, X.data + Y.data)
 
-(-)(X::FVector, Y::FVector) = FVector(X.type, X.data - Y.data)
-(-)(X::FVector) = FVector(X.type, -X.data)
+Base.:-(X::FVector, Y::FVector) = FVector(X.type, X.data - Y.data)
+Base.:-(X::FVector) = FVector(X.type, -X.data)
 
-(*)(a::Number, X::FVector) = FVector(X.type, a * X.data)
+Base.:*(a::Number, X::FVector) = FVector(X.type, a * X.data)
 
-function copyto!(X::FVector, Y::FVector)
+function Base.copyto!(X::FVector, Y::FVector)
     copyto!(X.data, Y.data)
     return X
 end
@@ -206,7 +254,7 @@ function distance(B::VectorBundle, p, q)
     xp, Vp = submanifold_components(B.manifold, p)
     xq, Vq = submanifold_components(B.manifold, q)
     dist_man = distance(B.manifold, xp, xq)
-    vy_x = vector_transport_to(B.manifold, xq, Vq, xp)
+    vy_x = vector_transport_to(B.manifold, xq, Vq, xp, B.vector_transport.method_point)
     dist_vec = distance(B.fiber, xp, Vp, vy_x)
     return sqrt(dist_man^2 + dist_vec^2)
 end
@@ -245,7 +293,7 @@ function exp!(B::VectorBundle, q, p, X)
     xq, Xq = submanifold_components(B.manifold, q)
     VXM, VXF = submanifold_components(B.manifold, X)
     exp!(B.manifold, xq, xp, VXM)
-    vector_transport_to!(B.manifold, Xq, xp, Xp + VXF, xq)
+    vector_transport_to!(B.manifold, Xq, xp, Xp + VXF, xq, B.vector_transport.method_point)
     return q
 end
 
@@ -265,7 +313,7 @@ function flat(M::Manifold, p, X::FVector)
 end
 
 function flat!(M::Manifold, ξ::FVector, p, X::FVector)
-    error(
+    return error(
         "flat! not implemented for vector bundle fibers space " *
         "of type $(typeof(M)), vector of type $(typeof(ξ)), point of " *
         "type $(typeof(p)) and vector of type $(typeof(X)).",
@@ -286,7 +334,7 @@ function get_basis(M::VectorBundle, p, B::AbstractBasis)
     return CachedBasis(B, VectorBundleBasisData(base_basis, vec_basis))
 end
 function get_basis(M::VectorBundle, p, B::CachedBasis)
-    return invoke(get_basis, Tuple{Manifold, Any, CachedBasis}, M, p, B)
+    return invoke(get_basis, Tuple{Manifold,Any,CachedBasis}, M, p, B)
 end
 
 function get_basis(M::VectorBundle, p, B::DiagonalizingOrthonormalBasis)
@@ -316,7 +364,7 @@ function get_coordinates!(M::VectorBundle, Y, p, X, B::AbstractBasis)
     VXM, VXF = submanifold_components(M.manifold, X)
     n = manifold_dimension(M.manifold)
     get_coordinates!(M.manifold, view(Y, 1:n), px, VXM, B)
-    get_coordinates!(M.fiber, view(Y, n+1:length(Y)), px, VXF, B)
+    get_coordinates!(M.fiber, view(Y, (n + 1):length(Y)), px, VXF, B)
     return Y
 end
 function get_coordinates!(
@@ -324,14 +372,14 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData},
-) where {N}
-     px, Vx = submanifold_components(M.manifold, p)
-     VXM, VXF = submanifold_components(M.manifold, X)
-     n = manifold_dimension(M.manifold)
-     get_coordinates!(M.manifold, view(Y, 1:n), px, VXM, B.data.base_basis)
-     get_coordinates!(M.fiber, view(Y, n+1:length(Y)), px, VXF, B.data.vec_basis)
-     return Y
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData},
+) where {𝔽}
+    px, Vx = submanifold_components(M.manifold, p)
+    VXM, VXF = submanifold_components(M.manifold, X)
+    n = manifold_dimension(M.manifold)
+    get_coordinates!(M.manifold, view(Y, 1:n), px, VXM, B.data.base_basis)
+    get_coordinates!(M.fiber, view(Y, (n + 1):length(Y)), px, VXF, B.data.vec_basis)
+    return Y
 end
 for BT in [
     DefaultBasis,
@@ -341,28 +389,29 @@ for BT in [
     ProjectedOrthonormalBasis{:svd,ℝ},
     VeeOrthogonalBasis,
 ]
-    eval(quote
-        @invoke_maker 5 AbstractBasis get_coordinates!(M::VectorBundle, Y, p, X, B::$BT)
-    end)
-end
-for BT in [
-    CachedBasis{<:AbstractBasis{ℝ},<:VectorBundleBasisData},
-    CachedBasis{<:ManifoldsBase.AbstractOrthogonalBasis{ℝ},<:VectorBundleBasisData},
-    CachedBasis{<:ManifoldsBase.AbstractOrthonormalBasis{ℝ},<:VectorBundleBasisData},
-    CachedBasis{<:AbstractBasis{ℂ},<:VectorBundleBasisData},
-]
-    eval(quote
-        @invoke_maker 5 CachedBasis{<:AbstractBasis,<:VectorBundleBasisData} get_coordinates!(
+    eval(
+        quote
+            @invoke_maker 5 AbstractBasis get_coordinates!(
                 M::VectorBundle,
                 Y,
                 p,
                 X,
                 B::$BT,
             )
-    end)
+        end,
+    )
+end
+function get_coordinates!(M::VectorBundle, Y, p, X, B::CachedBasis)
+    return error("get_coordinates! called on $M with an incorrect CachedBasis. Expected a CachedBasis with VectorBundleBasisData, given $B")
 end
 
-function get_coordinates!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncached_bases) where {N}
+function get_coordinates!(
+    M::TangentBundleFibers,
+    Y,
+    p,
+    X,
+    B::ManifoldsBase.all_uncached_bases,
+) where {N}
     return get_coordinates!(M.manifold, Y, p, X, B)
 end
 
@@ -370,7 +419,7 @@ function get_vector!(M::VectorBundle, Y, p, X, B::DefaultOrthonormalBasis)
     n = manifold_dimension(M.manifold)
     xp1 = submanifold_component(p, Val(1))
     get_vector!(M.manifold, submanifold_component(Y, Val(1)), xp1, X[1:n], B)
-    get_vector!(M.fiber, submanifold_component(Y, Val(2)), xp1, X[n+1:end], B)
+    get_vector!(M.fiber, submanifold_component(Y, Val(2)), xp1, X[(n + 1):end], B)
     return Y
 end
 function get_vector!(
@@ -378,8 +427,8 @@ function get_vector!(
     Y,
     p,
     X,
-    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData},
-) where {N}
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData},
+) where {𝔽}
     n = manifold_dimension(M.manifold)
     xp1 = submanifold_component(p, Val(1))
     get_vector!(
@@ -393,20 +442,26 @@ function get_vector!(
         M.fiber,
         submanifold_component(Y, Val(2)),
         xp1,
-        X[n+1:end],
+        X[(n + 1):end],
         B.data.vec_basis,
     )
     return Y
 end
-function get_vector!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncached_bases) where {N}
+function get_vector!(
+    M::TangentBundleFibers,
+    Y,
+    p,
+    X,
+    B::ManifoldsBase.all_uncached_bases,
+) where {N}
     return get_vector!(M.manifold, Y, p, X, B)
 end
 
 function get_vectors(
     M::VectorBundle,
     p,
-    B::CachedBasis{<:AbstractBasis,<:VectorBundleBasisData},
-)
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData},
+) where {𝔽}
     xp1 = submanifold_component(p, Val(1))
     zero_m = zero_tangent_vector(M.manifold, xp1)
     zero_f = zero_vector(M.fiber, xp1)
@@ -423,7 +478,7 @@ end
 function get_vectors(M::VectorBundleFibers, p, B::CachedBasis)
     return get_vectors(M.manifold, p, B)
 end
-Base.@propagate_inbounds getindex(x::FVector, i) = getindex(x.data, i)
+Base.@propagate_inbounds Base.getindex(x::FVector, i) = getindex(x.data, i)
 
 """
     inner(B::VectorBundleFibers, p, X, Y)
@@ -432,7 +487,7 @@ Inner product of vectors `X` and `Y` from the vector space of type `B.fiber`
 at point `p` from manifold `B.manifold`.
 """
 function inner(B::VectorBundleFibers, p, X, Y)
-    error(
+    return error(
         "inner not defined for vector space family of type $(typeof(B)), " *
         "point of type $(typeof(p)) and " *
         "vectors of types $(typeof(X)) and $(typeof(Y)).",
@@ -473,17 +528,21 @@ function inner(B::VectorBundle, p, X, Y)
     return inner(B.manifold, px, VXM, VYM) + inner(B.fiber, Vx, VXF, VYF)
 end
 
-function isapprox(B::VectorBundle, p, q; kwargs...)
+function Base.isapprox(B::VectorBundle, p, q; kwargs...)
     xp, Vp = submanifold_components(B.manifold, p)
     xq, Vq = submanifold_components(B.manifold, q)
-    return isapprox(B.manifold, xp, xq; kwargs...) && isapprox(Vp, Vq; kwargs...)
+    return isapprox(B.manifold, xp, xq; kwargs...) &&
+           isapprox(VectorSpaceAtPoint(B.fiber, xp), Vp, Vq; kwargs...)
 end
-function isapprox(B::VectorBundle, p, X, Y; kwargs...)
+function Base.isapprox(B::VectorBundle, p, X, Y; kwargs...)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
     return isapprox(B.manifold, VXM, VYM; kwargs...) &&
-           isapprox(B.manifold, px, VXF, VYF; kwargs...)
+           isapprox(VectorSpaceAtPoint(B.fiber, px), VXF, VYF; kwargs...)
+end
+function Base.isapprox(B::TangentSpaceAtPoint, X, Y; kwargs...)
+    return isapprox(B.fiber.manifold, B.point, X, Y; kwargs...)
 end
 
 @doc raw"""
@@ -512,7 +571,7 @@ function log!(B::VectorBundle, X, p, q)
     py, Vy = submanifold_components(B.manifold, q)
     VXM, VXF = submanifold_components(B.manifold, X)
     log!(B.manifold, VXM, px, py)
-    vector_transport_to!(B.manifold, VXF, py, Vy, px)
+    vector_transport_to!(B.manifold, VXF, py, Vy, px, B.vector_transport.method_vector)
     copyto!(VXF, VXF - Vx)
     return X
 end
@@ -527,8 +586,8 @@ end
 Norm of the vector `X` from the vector space of type `B.fiber`
 at point `p` from manifold `B.manifold`.
 """
-norm(B::VectorBundleFibers, p, X) = sqrt(inner(B, p, X, X))
-norm(B::VectorBundleFibers{<:TangentSpaceType}, p, X) = norm(B.manifold, p, X)
+LinearAlgebra.norm(B::VectorBundleFibers, p, X) = sqrt(inner(B, p, X, X))
+LinearAlgebra.norm(B::VectorBundleFibers{<:TangentSpaceType}, p, X) = norm(B.manifold, p, X)
 
 @doc raw"""
     project(B::VectorBundle, p)
@@ -585,23 +644,23 @@ function project!(B::VectorBundle, Y, p, X)
 end
 
 """
-    project_vector(B::VectorBundleFibers, p, X)
+    project(B::VectorBundleFibers, p, X)
 
 Project vector `X` from the vector space of type `B.fiber` at point `p`.
 """
-function project_vector(B::VectorBundleFibers, p, X)
-    Y = allocate_result(B, project_vector, p, X)
-    return project_vector!(B, Y, p, X)
+function project(B::VectorBundleFibers, p, X)
+    Y = allocate_result(B, project, p, X)
+    return project!(B, Y, p, X)
 end
 
-function project_vector!(B::VectorBundleFibers{<:TangentSpaceType}, Y, p, X)
+function project!(B::VectorBundleFibers{<:TangentSpaceType}, Y, p, X)
     return project!(B.manifold, Y, p, X)
 end
-function project_vector!(B::VectorBundleFibers, Y, p, X)
-    error("project_vector! not implemented for vector space family of type $(typeof(B)), output vector of type $(typeof(Y)) and input vector at point $(typeof(p)) with type of w $(typeof(X)).")
+function project!(B::VectorBundleFibers, Y, p, X)
+    return error("project! not implemented for vector space family of type $(typeof(B)), output vector of type $(typeof(Y)) and input vector at point $(typeof(p)) with type of w $(typeof(X)).")
 end
 
-Base.@propagate_inbounds setindex!(x::FVector, val, i) = setindex!(x.data, val, i)
+Base.@propagate_inbounds Base.setindex!(x::FVector, val, i) = setindex!(x.data, val, i)
 
 function representation_size(B::VectorBundleFibers{<:TCoTSpaceType})
     return representation_size(B.manifold)
@@ -628,7 +687,7 @@ function sharp(M::Manifold, p, ξ::FVector)
 end
 
 function sharp!(M::Manifold, X::FVector, p, ξ::FVector)
-    error(
+    return error(
         "sharp! not implemented for vector bundle fibers space " *
         "of type $(typeof(M)), vector of type $(typeof(X)), point of " *
         "type $(typeof(p)) and vector of type $(typeof(ξ)).",
@@ -642,15 +701,15 @@ end
     ξ::CoTFVector,
 )
 
-show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
-show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")
-function show(io::IO, tpt::TensorProductType)
-    print(io, "TensorProductType(", join(tpt.spaces, ", "), ")")
+Base.show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
+Base.show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")
+function Base.show(io::IO, tpt::TensorProductType)
+    return print(io, "TensorProductType(", join(tpt.spaces, ", "), ")")
 end
-function show(io::IO, fiber::VectorBundleFibers)
-    print(io, "VectorBundleFibers($(fiber.fiber), $(fiber.manifold))")
+function Base.show(io::IO, fiber::VectorBundleFibers)
+    return print(io, "VectorBundleFibers($(fiber.fiber), $(fiber.manifold))")
 end
-function show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
+function Base.show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
     summary(io, vs)
     println(io, "\nFiber:")
     pre = " "
@@ -660,11 +719,11 @@ function show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
     println(io, "Base point:")
     sp = sprint(show, "text/plain", vs.point; context = io, sizehint = 0)
     sp = replace(sp, '\n' => "\n$(pre)")
-    print(io, pre, sp)
+    return print(io, pre, sp)
 end
-show(io::IO, vb::VectorBundle) = print(io, "VectorBundle($(vb.type), $(vb.manifold))")
-show(io::IO, vb::TangentBundle) = print(io, "TangentBundle($(vb.manifold))")
-show(io::IO, vb::CotangentBundle) = print(io, "CotangentBundle($(vb.manifold))")
+Base.show(io::IO, vb::VectorBundle) = print(io, "VectorBundle($(vb.type), $(vb.manifold))")
+Base.show(io::IO, vb::TangentBundle) = print(io, "TangentBundle($(vb.manifold))")
+Base.show(io::IO, vb::CotangentBundle) = print(io, "CotangentBundle($(vb.manifold))")
 
 allocate(x::FVector) = FVector(x.type, allocate(x.data))
 allocate(x::FVector, ::Type{T}) where {T} = FVector(x.type, allocate(x.data, T))
@@ -696,11 +755,11 @@ function `f` for representing an operation with result in the vector space `fibe
 for manifold `M` on given arguments (passed at a tuple).
 """
 function allocate_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where {N}
-    T = typeof(reduce(+, one(number_eltype(eti)) for eti ∈ args))
+    T = typeof(reduce(+, one(number_eltype(eti)) for eti in args))
     return T
 end
 
-size(x::FVector) = size(x.data)
+Base.size(x::FVector) = size(x.data)
 
 function submanifold_component(M::Manifold, x::FVector, i::Val)
     return submanifold_component(M, x.data, i)
@@ -711,12 +770,21 @@ submanifold_components(M::Manifold, x::FVector) = submanifold_components(M, x.da
 submanifold_components(x::FVector) = submanifold_components(x.data)
 
 """
+    vector_bundle_transport(fiber::VectorSpaceType, M::Manifold)
+
+Determine the vector tranport used for [`exp`](@ref exp(::VectorBundle, ::Any...)) and
+[`log`](@ref log(::VectorBundle, ::Any...)) maps on a vector bundle with vector space type
+`fiber` and manifold `M`.
+"""
+vector_bundle_transport(fiber::VectorSpaceType, M::Manifold) = ParallelTransport()
+
+"""
     vector_space_dimension(B::VectorBundleFibers)
 
 Dimension of the vector space of type `B`.
 """
 function vector_space_dimension(B::VectorBundleFibers)
-    error("vector_space_dimension not implemented for vector space family $(typeof(B)).")
+    return error("vector_space_dimension not implemented for vector space family $(typeof(B)).")
 end
 function vector_space_dimension(B::VectorBundleFibers{<:TCoTSpaceType})
     return manifold_dimension(B.manifold)
@@ -727,6 +795,38 @@ function vector_space_dimension(B::VectorBundleFibers{<:TensorProductType})
         dim *= vector_space_dimension(VectorBundleFibers(space, B.manifold))
     end
     return dim
+end
+
+function vector_transport_direction(M::VectorBundle, p, X, d)
+    return vector_transport_direction(M, p, X, d, M.vector_transport)
+end
+
+function vector_transport_direction!(M::VectorBundle, Y, p, X, d)
+    return vector_transport_direction!(M, Y, p, X, d, M.vector_transport)
+end
+
+@doc raw"""
+    vector_transport_to(M::VectorBundle, p, X, q, m::VectorBundleVectorTransport)
+
+Compute the vector transport the tangent vector `X`at `p` to `q` on the
+[`VectorBundle`](@ref) `M` using the [`VectorBundleVectorTransport`](@ref) `m`.
+"""
+vector_transport_to(::VectorBundle, ::Any, ::Any, ::Any, ::VectorBundleVectorTransport)
+function vector_transport_to(M::VectorBundle, p, X, q)
+    return vector_transport_to(M, p, X, q, M.vector_transport)
+end
+
+function vector_transport_to!(M::VectorBundle, Y, p, X, q)
+    return vector_transport_to!(M, Y, p, X, q, M.vector_transport)
+end
+function vector_transport_to!(M::VectorBundle, Y, p, X, q, m::VectorBundleVectorTransport)
+    px, pVx = submanifold_components(M.manifold, p)
+    VXM, VXF = submanifold_components(M.manifold, X)
+    VYM, VYF = submanifold_components(M.manifold, Y)
+    qx, qVx = submanifold_components(M.manifold, q)
+    vector_transport_to!(M.manifold, VYM, px, VXM, qx, m.method_point)
+    vector_transport_to!(M.manifold, VYF, px, VXF, qx, m.method_vector)
+    return Y
 end
 
 """
@@ -747,7 +847,7 @@ Save the zero vector from the vector space of type `B.fiber` at point `p`
 from manifold `B.manifold` to `X`.
 """
 function zero_vector!(B::VectorBundleFibers, X, p)
-    error("zero_vector! not implemented for vector space family of type $(typeof(B)).")
+    return error("zero_vector! not implemented for vector space family of type $(typeof(B)).")
 end
 function zero_vector!(B::VectorBundleFibers{<:TangentSpaceType}, X, p)
     return zero_tangent_vector!(B.manifold, X, p)

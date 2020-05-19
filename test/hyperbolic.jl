@@ -6,7 +6,7 @@ include("utils.jl")
         @test repr(M) == "Hyperbolic(2)"
         @test base_manifold(M) == M
         @test typeof(get_embedding(M)) ==
-              MetricManifold{Euclidean{Tuple{3},ℝ},MinkowskiMetric}
+              MetricManifold{ℝ,Euclidean{Tuple{3},ℝ},MinkowskiMetric}
         @test representation_size(M) == (3,)
         @test isinf(injectivity_radius(M))
         @test isinf(injectivity_radius(M, ExponentialRetraction()))
@@ -34,10 +34,7 @@ include("utils.jl")
         @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
         @test manifold_dimension(M) == 2
     end
-    types = [
-        Vector{Float64},
-        SizedVector{3,Float64},
-    ]
+    types = [Vector{Float64}, SizedVector{3,Float64}]
     TEST_FLOAT32 && push!(types, Vector{Float32})
 
     for T in types
@@ -53,6 +50,11 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                vector_transport_methods = [
+                    ParallelTransport(),
+                    SchildsLadderTransport(),
+                    PoleLadderTransport(),
+                ],
                 is_tangent_atol_multiplier = 10.0,
                 exp_log_atol_multiplier = 10.0,
                 retraction_methods = (ExponentialRetraction(),),
@@ -80,6 +82,9 @@ include("utils.jl")
             [0.0, 1.0, sqrt(2.0)],
             [0.0, -1.0, sqrt(2.0)],
         ]
+        ws = UnitWeights{Float64}(length(pts))
         @test isapprox(M, mean(M, pts), pts[1]; atol = 10^-4)
+        @test isapprox(M, mean(M, pts, ws), pts[1]; atol = 10^-4)
+        @test_throws DimensionMismatch mean(M, pts, UnitWeights{Float64}(length(pts) + 1))
     end
 end

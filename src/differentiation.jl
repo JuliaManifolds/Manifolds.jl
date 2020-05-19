@@ -202,7 +202,7 @@ push!(_diff_backends, FiniteDifferencesBackend())
 diff_backend!(_diff_backends[end])
 
 function _derivative(f, t, backend::FiniteDifferencesBackend)
-    return FiniteDifferences.grad(backend.method, f, t)[1]
+    return backend.method(f, t)
 end
 
 function _gradient(f, p, backend::FiniteDifferencesBackend)

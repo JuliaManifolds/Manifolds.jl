@@ -1,5 +1,5 @@
 @doc raw"""
-    Rotations{N} <: Manifold
+    Rotations{N} <: Manifold{ℝ}
 
 The special orthogonal manifold $\mathrm{SO}(n)$ represented by $n × n$
 real-valued orthogonal matrices with determinant $+1$ is the manifold of `Rotations`,
@@ -11,7 +11,7 @@ since these matrices represent all rotations of points in $ℝ^n$.
 
 Generate the $\mathrm{SO}(n) \subset ℝ^{n × n}$
 """
-struct Rotations{N} <: Manifold end
+struct Rotations{N} <: Manifold{ℝ} end
 
 Rotations(n::Int) = Rotations{n}()
 
@@ -93,7 +93,13 @@ dimension and orthogonal to `p`.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::Rotations{N}, p, X; check_base_point = true, kwargs...) where {N}
+function check_tangent_vector(
+    M::Rotations{N},
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+) where {N}
     if check_base_point
         perr = check_manifold_point(M, p)
         perr === nothing || return perr
@@ -273,7 +279,7 @@ function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthogonalBasis
         Xⁱ[3] = X[2, 1]
 
         k = 4
-        for i = 4:N, j = 1:i-1
+        for i in 4:N, j in 1:(i - 1)
             Xⁱ[k] = X[i, j]
             k += 1
         end
@@ -296,7 +302,9 @@ group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. S
 """
 get_vector(::Rotations, ::Any...)
 
-get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultOrthogonalBasis) = get_vector!(M, X, p, Xⁱ[1], B)
+function get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultOrthogonalBasis)
+    return get_vector!(M, X, p, Xⁱ[1], B)
+end
 function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultOrthogonalBasis)
     @assert length(X) == 4
     @inbounds begin
@@ -321,8 +329,8 @@ function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultOrthogonalBasis) wher
         X[3, 2] = Xⁱ[1]
         X[3, 3] = 0
         k = 4
-        for i = 4:N
-            for j = 1:i-1
+        for i in 4:N
+            for j in 1:(i - 1)
                 X[i, j] = Xⁱ[k]
                 X[j, i] = -Xⁱ[k]
                 k += 1
@@ -356,9 +364,14 @@ Return the radius of injectivity for the [`PolarRetraction`](@ref) on the
 """
 injectivity_radius(::Rotations) = π * sqrt(2.0)
 injectivity_radius(::Rotations, ::ExponentialRetraction) = π * sqrt(2.0)
-eval(quote
-    @invoke_maker 1 Manifold injectivity_radius(M::Rotations, rm::AbstractRetractionMethod)
-end)
+eval(
+    quote
+        @invoke_maker 1 Manifold injectivity_radius(
+            M::Rotations,
+            rm::AbstractRetractionMethod,
+        )
+    end,
+)
 injectivity_radius(::Rotations, ::Any) = π * sqrt(2.0)
 injectivity_radius(::Rotations, ::Any, ::ExponentialRetraction) = π * sqrt(2.0)
 injectivity_radius(::Rotations, ::PolarRetraction) = π / sqrt(2.0)
@@ -427,10 +440,10 @@ end
 function inverse_retract!(M::Rotations{N}, X, p, q, ::QRInverseRetraction) where {N}
     A = transpose(p) * q
     R = zero(X)
-    for i = 1:N
+    for i in 1:N
         b = zeros(i)
         b[end] = 1
-        b[1:(end-1)] = -transpose(R[1:(i-1), 1:(i-1)]) * A[i, 1:(i-1)]
+        b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
         R[1:i, i] = A[1:i, 1:i] \ b
     end
     C = A * R
@@ -504,7 +517,10 @@ end
 @doc raw"""
     manifold_dimension(M::Rotations)
 
-Return the dimension of the manifold $\mathrm{SO}(n)$, i.e. $\dim(\mathrm{SO}(n)) = \frac{n(n-1)}{2}$.
+Return the dimension of the manifold $\mathrm{SO}(n)$, i.e.
+```math
+\dim_{\mathrm{SO}(n)} = \frac{n(n-1)}{2}.
+```
 """
 manifold_dimension(M::Rotations{N}) where {N} = div(N * (N - 1), 2)
 
@@ -522,7 +538,7 @@ Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 """
 mean(::Rotations, ::Any)
 
-function mean!(M::Rotations, q, x::AbstractVector, w::AbstractVector; kwargs...)
+function Statistics.mean!(M::Rotations, q, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(M, q, x, w, GeodesicInterpolationWithinRadius(π / 2 / √2); kwargs...)
 end
 
@@ -539,7 +555,7 @@ Compute the norm of a tangent vector `X` from the tangent space at `p` on the
 i.e. the Frobenius norm of `X`, where tangent vectors are represented by
 elements from the Lie algebra.
 """
-norm(M::Rotations, p, X) = norm(X)
+LinearAlgebra.norm(M::Rotations, p, X) = norm(X)
 
 @doc raw"""
     normal_rotation_distribution(M::Rotations, p, σ::Real)
@@ -576,7 +592,7 @@ projected to tangent space at `p`.
 """
 function normal_tvector_distribution(M::Rotations, p, σ)
     d = Distributions.MvNormal(reshape(zero(p), :), σ)
-    return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project_vector!, p)
+    return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project!, p)
 end
 
 @doc raw"""
@@ -603,7 +619,7 @@ function project!(M::Rotations{N}, q, p; check_det = true) where {N}
     copyto!(q, F.U * F.Vt)
     if check_det && det(q) < 0
         d = similar(F.S)
-        @inbounds fill!(view(d, 1:N-1), 1)
+        @inbounds fill!(view(d, 1:(N - 1)), 1)
         @inbounds d[N] = -1
         copyto!(q, F.U * Diagonal(d) * F.Vt)
     end
@@ -635,19 +651,19 @@ $\mathrm{SO}(n)$ it's `(n,n)`.
 
 sharp!(M::Rotations, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
-function rand(
+function Random.rand(
     rng::AbstractRNG,
     d::NormalRotationDistribution{TResult,Rotations{N}},
 ) where {TResult,N}
-    if N == 1
-        return convert(TResult, ones(1, 1))
+    return if N == 1
+        convert(TResult, ones(1, 1))
     else
         A = reshape(rand(rng, d.distr), (N, N))
-        return convert(TResult, _fix_random_rotation(A))
+        convert(TResult, _fix_random_rotation(A))
     end
 end
 
-function _rand!(
+function Distributions._rand!(
     rng::AbstractRNG,
     d::NormalRotationDistribution{TResult,Rotations{N}},
     x::AbstractArray{<:Real},
@@ -706,7 +722,7 @@ function retract!(M::Rotations, q, p, X, method::PolarRetraction)
     return project!(M, q, A; check_det = false)
 end
 
-show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
+Base.show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
 
 @doc raw"""
     zero_tangent_vector(M::Rotations, p)

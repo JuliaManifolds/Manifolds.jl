@@ -1,11 +1,11 @@
 @doc raw"""
-    SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{TransparentIsometricEmbedding}
+    SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
 
 The [`Manifold`](@ref) $ \operatorname{Sym}(n)$ consisting of the real- or complex-valued
 symmetric matrices of size $n × n$, i.e. the set
 
 ````math
-\operatorname{Sym}(n) = \bigl\{p  ∈ 𝔽^{n × n} \big| p^{\mathrm{H}} = p \bigr\},
+\operatorname{Sym}(n) = \bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = p \bigr\},
 ````
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
 and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
@@ -21,10 +21,10 @@ which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::
 
 Generate the manifold of $n × n$ symmetric matrices.
 """
-struct SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{TransparentIsometricEmbedding} end
+struct SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
 
 function SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
-    SymmetricMatrices{n,field}()
+    return SymmetricMatrices{n,field}()
 end
 
 function allocation_promotion_function(
@@ -45,7 +45,8 @@ whether `p` is a symmetric matrix of size `(n,n)` with values from the correspon
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
 function check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+    mpv =
+        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(norm(p - p'), 0.0; kwargs...)
         return DomainError(
@@ -79,12 +80,12 @@ function check_tangent_vector(
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
         check_base_point = false, # already checked above
-        kwargs...
+        kwargs...,
     )
     mpv === nothing || return mpv
     if !isapprox(norm(X - X'), 0.0; kwargs...)
@@ -119,7 +120,7 @@ function get_coordinates!(
     @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
     k = 1
-    for i = 1:N, j = i:N
+    for i in 1:N, j in i:N
         scale = ifelse(i == j, 1, sqrt(2))
         @inbounds Y[k] = X[i, j] * scale
         k += 1
@@ -131,14 +132,14 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℂ},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == N * N
     k = 1
-    for i = 1:N, j = i:N
+    for i in 1:N, j in i:N
         scale = ifelse(i == j, 1, sqrt(2))
         @inbounds Y[k] = real(X[i, j]) * scale
         k += 1
@@ -161,7 +162,7 @@ function get_vector!(
     @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
-    for i = 1:N, j = i:N
+    for i in 1:N, j in i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
         @inbounds Y[i, j] = X[k] * scale
         @inbounds Y[j, i] = X[k] * scale
@@ -174,15 +175,15 @@ function get_vector!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℂ},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
     k = 1
-    for i = 1:N, j = i:N
+    for i in 1:N, j in i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds Y[i, j] = ( X[k] + (i == j ? 0 : X[k+1]*1im) ) * scale
+        @inbounds Y[i, j] = (X[k] + (i == j ? 0 : X[k + 1] * 1im)) * scale
         @inbounds Y[j, i] = Y[i, j]
         k += (i == j ? 1 : 2)
     end
@@ -239,6 +240,6 @@ project(::SymmetricMatrices, ::Any, ::Any)
 
 project!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
 
-function show(io::IO, ::SymmetricMatrices{n,F}) where {n,F}
-    print(io, "SymmetricMatrices($(n), $(F))")
+function Base.show(io::IO, ::SymmetricMatrices{n,F}) where {n,F}
+    return print(io, "SymmetricMatrices($(n), $(F))")
 end

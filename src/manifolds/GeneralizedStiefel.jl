@@ -1,12 +1,12 @@
-@doc doc"""
-    GeneralizedStiefel{n,k,B,T} <: AbstractEmbeddedManifold{DefaultEmbeddingType}
+@doc raw"""
+    GeneralizedStiefel{n,k,𝔽,B} <: AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
 
 The Generalized Stiefel manifold consists of all $n\times k$, $n\geq k$ orthonormal
 matrices w.r.t. an arbitrary scalar product with symmetric positive definite matrix
 $B\in R^{n × n}$, i.e.
 
 ````math
-\operatorname{St}(n,k,B) = \{ p \in \mathbb F^{n × k} : p^{\mathrm{H}} B p = I_k \},
+\operatorname{St}(n,k,B) = \bigl\{ p \in \mathbb F^{n × k}\ \big|\ p^{\mathrm{H}} B p = I_k \bigr\},
 ````
 
 where $𝔽 ∈ \{ℝ, ℂ\}$,
@@ -35,8 +35,8 @@ The manifold is named after
 Generate the (real-valued) Generalized Stiefel manifold of $n\times k$ dimensional
 orthonormal matrices with scalar product `B`.
 """
-struct GeneralizedStiefel{n,k,TB<:AbstractMatrix,F} <:
-       AbstractEmbeddedManifold{DefaultEmbeddingType}
+struct GeneralizedStiefel{n,k,𝔽,TB<:AbstractMatrix} <:
+       AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
     B::TB
 end
 
@@ -44,12 +44,12 @@ function GeneralizedStiefel(
     n::Int,
     k::Int,
     B::AbstractMatrix = Matrix{Float64}(I, n, n),
-    F::AbstractNumbers = ℝ,
+    𝔽::AbstractNumbers = ℝ,
 )
-    return GeneralizedStiefel{n,k,typeof(B),F}(B)
+    return GeneralizedStiefel{n,k,𝔽,typeof(B)}(B)
 end
 
-@doc doc"""
+@doc raw"""
     check_manifold_point(M::GeneralizedStiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`GeneralizedStiefel`](@ref) `M`=$\operatorname{St}(n,k,B)$,
@@ -57,8 +57,9 @@ i.e. that it has the right [`AbstractNumbers`](@ref) type and $x^{\mathrm{H}}Bx$
 is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
-function check_manifold_point(M::GeneralizedStiefel{n,k,B,𝔽}, p; kwargs...) where {n,k,B,𝔽}
-    mpv = invoke(check_manifold_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
+function check_manifold_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
+    mpv =
+        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     c = p' * M.B * p
     if !isapprox(c, one(c); kwargs...)
@@ -67,10 +68,11 @@ function check_manifold_point(M::GeneralizedStiefel{n,k,B,𝔽}, p; kwargs...) w
             "The point $(p) does not lie on $(M), because x'Bx is not the unit matrix.",
         )
     end
+    return nothing
 end
 
 
-@doc doc"""
+@doc raw"""
     check_tangent_vector(M::GeneralizedStiefel, p, X; kwargs...)
 
 Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`](@ref)
@@ -80,7 +82,7 @@ it (approximately) holds that $p^{\mathrm{H}}BX + X^{\mathrm{H}}Bp = 0$, where
 `kwargs...` is passed to the `isapprox`.
 """
 function check_tangent_vector(
-    M::GeneralizedStiefel{n,k,B,𝔽},
+    M::GeneralizedStiefel{n,k,𝔽},
     p,
     X;
     check_base_point = true,
@@ -92,12 +94,12 @@ function check_tangent_vector(
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{supertype(typeof(M)), typeof(p), typeof(X)},
+        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
         check_base_point = false, # already checked above
-        kwargs...
+        kwargs...,
     )
     mpv === nothing || return mpv
     if !isapprox(p' * M.B * X + X' * M.B * p, zeros(k, k); kwargs...)
@@ -106,15 +108,16 @@ function check_tangent_vector(
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since x'Bv + v'Bx is not the zero matrix.",
         )
     end
+    return nothing
 end
 
-decorated_manifold(M::GeneralizedStiefel{N,K,B,𝔽}) where {N,K,B,𝔽} = Euclidean(N, K; field = 𝔽)
+decorated_manifold(M::GeneralizedStiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
 
 embed!(::GeneralizedStiefel, q, p) = (q .= p)
 
 embed!(::GeneralizedStiefel, Y, p, X) = (Y .= X)
 
-@doc doc"""
+@doc raw"""
     inner(M::GeneralizedStiefel, p, X, Y)
 
 Compute the inner product for two tangent vectors `X`, `Y` from the tangent space of `p`
@@ -129,7 +132,7 @@ tangent space.
 inner(M::GeneralizedStiefel, p, X, Y) = dot(X, M.B * Y)
 
 
-@doc doc"""
+@doc raw"""
     manifold_dimension(M::GeneralizedStiefel)
 
 Return the dimension of the [`GeneralizedStiefel`](@ref) manifold `M`=$\operatorname{St}(n,k,B,𝔽)$.
@@ -143,13 +146,13 @@ The dimension is given by
 \end{aligned}
 ````
 """
-function manifold_dimension(::GeneralizedStiefel{n,k,B,ℝ}) where {n,k,B}
+function manifold_dimension(::GeneralizedStiefel{n,k,ℝ}) where {n,k}
     return n * k - div(k * (k + 1), 2)
 end
-manifold_dimension(::GeneralizedStiefel{n,k,B,ℂ}) where {n,k,B} = 2 * n * k - k * k
-manifold_dimension(::GeneralizedStiefel{n,k,B,ℍ}) where {n,k,B} = 4 * n * k - k * (2k - 1)
+manifold_dimension(::GeneralizedStiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
+manifold_dimension(::GeneralizedStiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
 
-@doc doc"""
+@doc raw"""
     project(M::GeneralizedStiefel,p)
 
 Project `p` from the embedding onto the [`GeneralizedStiefel`](@ref) `M`, i.e. compute `q`
@@ -166,7 +169,7 @@ function project!(M::GeneralizedStiefel, q, p)
     return q
 end
 
-@doc doc"""
+@doc raw"""
     project(M:GeneralizedStiefel, p, X)
 
 Project `X` onto the tangent space of `p` to the [`GeneralizedStiefel`](@ref) manifold `M`.
@@ -186,7 +189,7 @@ function project!(M::GeneralizedStiefel, Y, p, X)
     copyto!(Y, X - p * Hermitian((A + A') / 2))
     return Y
 end
-@doc doc"""
+@doc raw"""
     retract(M::GeneralizedStiefel, p, X)
     retract(M::GeneralizedStiefel, p, X, ::PolarRetraction)
     retract(M::GeneralizedStiefel, p, X, ::ProjectionRetraction)
@@ -211,12 +214,12 @@ function retract!(M::GeneralizedStiefel, q, p, X, ::ProjectionRetraction)
     return q
 end
 
-function show(io::IO, M::GeneralizedStiefel{n,k,B,F}) where {n,k,B,F}
-    print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(F))")
+function Base.show(io::IO, M::GeneralizedStiefel{n,k,𝔽}) where {n,k,𝔽}
+    return print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽))")
 end
 
 
-@doc doc"""
+@doc raw"""
     vector_transport_to(M::GeneralizedStiefel, p, X, q, ::ProjectionTransport)
 
 Compute the vector transport of the tangent vector `X` at `p` to `q`,
