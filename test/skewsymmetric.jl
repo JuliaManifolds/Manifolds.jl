@@ -62,6 +62,7 @@ include("utils.jl")
                     bases...,
                 ),
                 basis_types_to_from = bases,
+                is_tangent_atol_multiplier = 1,
             )
         end
     end
@@ -82,6 +83,7 @@ include("utils.jl")
                 test_vector_transport = true,
                 basis_types_vecs = (DefaultOrthonormalBasis(ℂ),),
                 basis_types_to_from = (DefaultOrthonormalBasis(ℂ),),
+                is_tangent_atol_multiplier = 1,
             )
             @test isapprox(
                 -pts_complex[1],
