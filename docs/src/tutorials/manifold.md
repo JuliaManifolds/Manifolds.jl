@@ -80,7 +80,7 @@ For our example we define
 """
     MySphere{N} <: Manifold{ℝ}
 
-Define an `n`-sphere of radius `r`. Construct by `MySphere(radius,n)
+Define an `n`-sphere of radius `r`. Construct by `MySphere(radius,n)`
 """
 struct MySphere{N} <: Manifold{ManifoldsBase.ℝ} where {N}
     radius::Float64
@@ -194,11 +194,11 @@ You can now just continue implementing further functions from the [interface](..
 but with just [`exp!`](@ref exp!(M::Manifold, q, p, X)) you for example already have
 
 * [`geodesic`](@ref geodesic(M::Manifold, p, X)) the (not necessarily shortest) geodesic emanating from `p` in direction `X`.
-* the [`ExponentialRetraction`](@ref), that the [`retract`](@ref retract(M::Manifold, p, X))ion uses by default.
+* the [`ExponentialRetraction`](@ref), that the [`retract`](@ref retract(M::Manifold, p, X)) function uses by default.
 
 For the [`shortest_geodesic`](@ref shortest_geodesic(M::Manifold, p, q)) the implementation of a logarithm [`log`](@ref ManifoldsBase.log(M::Manifold, p, q)), again better a [`log!`](@ref log!(M::Manifold, X, p, q)) is necessary.
 
-Sometimes a default implementation is provided; for example if you implemented [`inner`](@ref inner(M::Manifold, p, X, Y)), the [`norm`](@ref norm(M, p, X)) is defined. You should overwrite it, if you can provide a more efficient version, gut for a start, the default should suffice.
+Sometimes a default implementation is provided; for example if you implemented [`inner`](@ref inner(M::Manifold, p, X, Y)), the [`norm`](@ref norm(M, p, X)) is defined. You should overwrite it, if you can provide a more efficient version. For a start the default should suffice.
 With [`log!`](@ref log!(M::Manifold, X, p, q)) and [`inner`](@ref inner(M::Manifold, p, X, Y)) you get the [`distance`](@ref distance(M::Manifold, p, q)), and so.
 
 In summary with just these few functions you can already explore the first things on your own manifold. Whenever a function from `Manifolds.jl` requires another function to be specifically implemented, you get a reasonable error message.
