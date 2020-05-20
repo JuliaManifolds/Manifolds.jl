@@ -16,6 +16,9 @@ This tutorial demonstrates that you can get your first own manifold quite fast a
 This tutorial assumes that you heard of the exponential map, tangent vectors and the dimension of a manifold. If not, please read for example [[do Carmo, 1992](#doCarmo1992)],
 Chapter 3, first.
 
+In general you need just a datatype (`struct`) that inherits from [`Manifold`](@ref) to define a manifold. No function is _per se_ required to be implemented.
+However, it is a good idea to provide functions that might be useful to others, for example [`check_manifold_point`](@ref) and [`check_tangent_vector`](@ref), as we do in this tutorial.
+
 We start with two technical preliminaries. If you want to start directly, you can [skip](@ref manifold-tutorial-task) this paragraph and revisit it for two of the implementation details.
 
 After that, we will
