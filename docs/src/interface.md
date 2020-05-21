@@ -92,6 +92,25 @@ Pages = ["bases.jl"]
 Order = [:type, :function]
 ```
 
+## Vector transport
+
+There are three main functions for vector transport:
+* [`vector_transport_along`](@ref)
+* [`vector_transport_direction`](@ref)
+* [`vector_transport_to`](@ref)
+
+Different types of vector transport are implemented using subtypes of [`AbstractVectorTransportMethod`](@ref):
+* [`ParallelTransport`](@ref)
+* [`PoleLadderTransport`](@ref)
+* [`ProjectionTransport`](@ref)
+* [`SchildsLadderTransport`](@ref)
+
+```@autodocs
+Modules = [ManifoldsBase,Manifolds]
+Pages = ["vector_transport.jl"]
+Order = [:type, :function]
+```
+
 ## A Decorator for manifolds
 
 A decorator manifold extends the functionality of a [`Manifold`](@ref) in a semi-transparent way.

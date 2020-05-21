@@ -364,6 +364,9 @@ end
 Base.:-(v::ProductRepr) = ProductRepr(map(-, submanifold_components(v)))
 
 Base.:*(a::Number, v::ProductRepr) = ProductRepr(map(t -> a * t, submanifold_components(v)))
+Base.:*(v::ProductRepr, a::Number) = ProductRepr(map(t -> t * a, submanifold_components(v)))
+
+Base.:/(v::ProductRepr, a::Number) = ProductRepr(map(t -> t / a, submanifold_components(v)))
 
 function Base.convert(::Type{TPR}, x::ProductRepr) where {TPR<:ProductRepr}
     return ProductRepr(map(

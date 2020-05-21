@@ -8,6 +8,7 @@ include("utils.jl")
     B_sym = [1 2 3; 2 5 1; 3 1 -1]
     M_complex = SymmetricMatrices(3, ℂ)
     @test repr(M_complex) == "SymmetricMatrices(3, ℂ)"
+    @test Manifolds.allocation_promotion_function(M_complex, get_vector, ()) === complex
     C = [1 1 -im; 1 2 -im; im im -1]
     D = [1 0; 0 1]
     X = zeros(3, 3)
@@ -70,6 +71,11 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                vector_transport_methods = [
+                    ParallelTransport(),
+                    SchildsLadderTransport(),
+                    PoleLadderTransport(),
+                ],
                 basis_types_vecs = (DefaultOrthonormalBasis(ℂ),),
                 basis_types_to_from = (DefaultOrthonormalBasis(ℂ),),
             )

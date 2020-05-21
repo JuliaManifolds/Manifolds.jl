@@ -50,6 +50,11 @@ include("utils.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_vector_transport = true,
+                vector_transport_methods = [
+                    ParallelTransport(),
+                    SchildsLadderTransport(),
+                    PoleLadderTransport(),
+                ],
                 is_tangent_atol_multiplier = 10.0,
                 exp_log_atol_multiplier = 10.0,
                 retraction_methods = (ExponentialRetraction(),),

@@ -671,6 +671,19 @@ function manifold_dimension(M::PowerManifold{𝔽,<:Manifold,TSize}) where {𝔽
     return manifold_dimension(M.manifold) * prod(size_to_tuple(TSize))
 end
 
+function mid_point!(M::AbstractPowerManifold, q, p1, p2)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        mid_point!(
+            M.manifold,
+            _write(M, rep_size, q, i),
+            _read(M, rep_size, p1, i),
+            _read(M, rep_size, p2, i),
+        )
+    end
+    return q
+end
+
 @doc raw"""
     norm(M::AbstractPowerManifold, p, X)
 

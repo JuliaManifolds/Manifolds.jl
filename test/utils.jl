@@ -39,6 +39,7 @@ that lie on it (contained in `pts`).
 - `retraction_atol_multiplier = 0`, change absolute tolerance of (inverse) retraction tests (0 use default, i.e. deactivate atol and use rtol)
 - `retraction_rtol_multiplier = 1`, change the relative tolerance of (inverse) retraction tests (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
 - `inverse_retraction_methods = []`: inverse retraction methods that will be tested.
+- `mid_point12 = shortest_geodesic(M, pts[1], pts[2], 0.5)`, if not `nothing`, then check that `mid_point(M, pts[1], pts[2])` is approximately equal to `mid_point12`.
 - `point_distributions = []` : point distributions to test
 - `projection_tvector_atol_multiplier = 0` : chage absolute tolerance in testing projections (0 use default, i.e. deactivate atol and use rtol)
 -  tvector_distributions = []` : tangent vector distributions to test
@@ -57,6 +58,7 @@ that lie on it (contained in `pts`).
 - `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace
 - `test_vector_transport = false` : test vector transport
 - `test_vector_spaces = true` : test Vector bundle of this manifold
+
 """
 function test_manifold(
     M::Manifold,
@@ -80,10 +82,12 @@ function test_manifold(
     default_retraction_method = ManifoldsBase.ExponentialRetraction(),
     retraction_methods = [],
     inverse_retraction_methods = [],
+    mid_point12 = shortest_geodesic(M, pts[1], pts[2], 0.5),
     point_distributions = [],
     tvector_distributions = [],
     basis_types_vecs = (),
     basis_types_to_from = (),
+    vector_transport_methods = [],
     basis_has_specialized_diagonalizing_get = false,
     exp_log_atol_multiplier = 0,
     exp_log_rtol_multiplier = 1,
@@ -353,6 +357,29 @@ function test_manifold(
                 @test isapprox(M, pts[3], v1t1, v1t1_m)
                 @test isapprox(M, pts[3], v1t2, v1t2_m)
             end
+
+            for vtm in vector_transport_methods
+                v1t1 = vector_transport_to(M, pts[1], X1, pts[3], vtm)
+                v1t2 = vector_transport_direction(M, pts[1], X1, X2, vtm)
+                @test is_tangent_vector(M, pts[3], v1t1; atol = tvatol)
+                @test is_tangent_vector(M, pts[3], v1t2; atol = tvatol)
+                @test isapprox(M, pts[3], v1t1, v1t2)
+                @test isapprox(
+                    M,
+                    pts[1],
+                    vector_transport_to(M, pts[1], X1, pts[1], vtm),
+                    X1,
+                )
+
+                is_mutating && @testset "mutating variants" begin
+                    v1t1_m = allocate(v1t1)
+                    v1t2_m = allocate(v1t2)
+                    vector_transport_to!(M, v1t1_m, pts[1], X1, pts[3], vtm)
+                    vector_transport_direction!(M, v1t2_m, pts[1], X1, X2, vtm)
+                    @test isapprox(M, pts[3], v1t1, v1t1_m)
+                    @test isapprox(M, pts[3], v1t2, v1t2_m)
+                end
+            end
         end
 
     for btype in basis_types_vecs
@@ -453,6 +480,16 @@ function test_manifold(
         hat_ret = hat!(M, X2, p, Y)
         @test hat_ret === X2
         @test isapprox(M, p, X2, X)
+    end
+
+    mid_point12 !== nothing && @testset "midpoint" begin
+        mp = mid_point(M, pts[1], pts[2])
+        @test isapprox(M, mp, mid_point12)
+        if is_mutating
+            mpm = allocate(mp)
+            mid_point!(M, mpm, pts[1], pts[2])
+            @test isapprox(M, mpm, mid_point12)
+        end
     end
 
     test_forward_diff && @testset "ForwardDiff support" begin
