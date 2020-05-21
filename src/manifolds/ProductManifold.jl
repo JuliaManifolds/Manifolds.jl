@@ -757,6 +757,17 @@ manifold dimensions the product is made of.
 """
 manifold_dimension(M::ProductManifold) = mapreduce(manifold_dimension, +, M.manifolds)
 
+function mid_point!(M::ProductManifold, q, p1, p2)
+    map(
+        mid_point!,
+        M.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p1),
+        submanifold_components(M, p2),
+    )
+    return q
+end
+
 @doc raw"""
     norm(M::ProductManifold, p, X)
 

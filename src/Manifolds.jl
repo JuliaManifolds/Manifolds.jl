@@ -36,6 +36,8 @@ import ManifoldsBase:
     inverse_retract!,
     log!,
     manifold_dimension,
+    mid_point,
+    mid_point!,
     number_eltype,
     number_of_coordinates,
     project,
@@ -206,6 +208,7 @@ export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibe
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
 export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribution
+export PoleLadderTransport, SchildsLadderTransport
 export PowerVectorTransport, ProductVectorTransport
 export AbstractEmbeddedManifold
 export Metric,
@@ -305,6 +308,8 @@ export ×,
     mean_and_std,
     median,
     median!,
+    mid_point,
+    mid_point!,
     minkowski_metric,
     moment,
     norm,

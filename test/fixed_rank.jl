@@ -180,6 +180,7 @@ include("utils.jl")
                 test_tangent_vector_broadcasting = false, #broadcast not so easy for 3 matrix type
                 projection_atol_multiplier = 15,
                 retraction_methods = [PolarRetraction()],
+                mid_point12 = nothing,
             )
         end
     end

@@ -213,21 +213,21 @@ function vector_transport_to!(
     e = eigen(Symmetric(p))
     U = e.vectors
     S = e.values
-    Ssqrt = sqrt.(S)
+    Ssqrt = sqrt.(e.values)
     SsqrtInv = Diagonal(1 ./ Ssqrt)
     Ssqrt = Diagonal(Ssqrt)
-    pSqrt = Symmetric(U * Ssqrt * transpose(U))
-    pSqrtInv = Symmetric(U * SsqrtInv * transpose(U))
-    tv = Symmetric(pSqrtInv * X * pSqrtInv)
-    ty = Symmetric(pSqrtInv * q * pSqrtInv)
+    pSqrt = Symmetric(U * Ssqrt * transpose(U)) # p^1/2
+    pSqrtInv = Symmetric(U * SsqrtInv * transpose(U)) # p^(-1/2)
+    tv = Symmetric(pSqrtInv * X * pSqrtInv) # p^(-1/2)Xp^{-1/2}
+    ty = Symmetric(pSqrtInv * q * pSqrtInv) # p^(-1/2)qp^(-1/2)
     e2 = eigen(ty)
     Se = Diagonal(log.(e2.values))
     Ue = e2.vectors
-    ty2 = Symmetric(Ue * Se * transpose(Ue))
-    e3 = eigen(ty2)
-    Sf = Diagonal(exp.(e3.values))
+    logty = Symmetric(Ue * Se * transpose(Ue)) # nearly log_pq without the outer p^1/2
+    e3 = eigen(logty) # since they cancel with the pInvSqrt in the next line
+    Sf = Diagonal(exp.(e3.values / 2)) # Uf * Sf * Uf' is the Exp
     Uf = e3.vectors
-    pUe = pSqrt * Uf * Sf * transpose(Uf)
-    vtp = Symmetric(pUe * tv * transpose(pUe))
+    pUe = pSqrt * Uf * Sf * transpose(Uf) # factors left of tv (and transposed right)
+    vtp = Symmetric(pUe * tv * transpose(pUe)) # so this is the documented formula
     return copyto!(Y, vtp)
 end
