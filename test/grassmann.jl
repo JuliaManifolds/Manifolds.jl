@@ -79,7 +79,7 @@ include("utils.jl")
                 ],
                 #basis_types_vecs = basis_types,
                 exp_log_atol_multiplier = 10.0,
-                is_tangent_atol_multiplier = 10.0,
+                is_tangent_atol_multiplier = 20.0,
             )
 
             @testset "inner/norm" begin
