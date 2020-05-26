@@ -45,4 +45,17 @@ include("utils.jl")
         is_tangent_atol_multiplier = 1,
         is_point_atol_multiplier = 1,
     )
+    G = [1 im; -im 0; -1+im -im]
+    H = [im 0; -2*im im; im -im]
+    test_manifold(
+        M_complex,
+        [C, G, H],
+        test_injectivity_radius = false,
+        test_reverse_diff = false,
+        test_project_tangent = true,
+        test_musical_isomorphisms = true,
+        test_vector_transport = true,
+        is_tangent_atol_multiplier = 1,
+        is_point_atol_multiplier = 1,
+    )
 end
