@@ -290,8 +290,9 @@ log(::AbstractSphere, ::Any...)
 
 function log!(M::AbstractSphere, X, p, q)
     cosθ = real(dot(p, q))
+    cosθ = abs(cosθ) > 1 ? sign(cosθ)*one(cosθ) : cosθ
     if cosθ ≈ -1 # appr. opposing points, return deterministic choice from set-valued log
-        fill!(X, 0)
+        fill!(X, 0.0)
         if p[1] ≈ 1
             X[2] = 1
         else
@@ -300,7 +301,6 @@ function log!(M::AbstractSphere, X, p, q)
         copyto!(X, X .- real(dot(p, X)) .* p)
         X .*= π / norm(X)
     else
-        cosθ = cosθ > 1 ? one(cosθ) : cosθ
         θ = acos(cosθ)
         X .= (q .- cosθ .* p) ./ usinc(θ)
     end
