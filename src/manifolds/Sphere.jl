@@ -289,8 +289,7 @@ opposite points.
 log(::AbstractSphere, ::Any...)
 
 function log!(M::AbstractSphere, X, p, q)
-    cosθ = real(dot(p, q))
-    cosθ = abs(cosθ) > 1 ? sign(cosθ) * one(cosθ) : cosθ
+    cosθ = clamp(real(dot(p, q)), -1, 1)
     if cosθ ≈ -1 # appr. opposing points, return deterministic choice from set-valued log
         fill!(X, 0.0)
         if p[1] ≈ 1
