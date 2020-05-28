@@ -374,7 +374,7 @@ function Statistics.mean(
     return s /= abs(s)
 end
 
-mid_point(M::Circle{ℝ}, p1, p2) = exp(M, p1, 0.5*log(M, p1, p2))
+mid_point(M::Circle{ℝ}, p1, p2) = exp(M, p1, 0.5 * log(M, p1, p2))
 mid_point(::Circle{ℂ}, p1::Complex, p2::Complex) = exp(im * (angle(p1) + angle(p2)) / 2)
 mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = SA[mid_point(M, p1[], p2[])]
 
