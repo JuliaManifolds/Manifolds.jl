@@ -4,7 +4,7 @@
 The [`Manifold`](@ref) consisting of the $n × n$ real symmetric matrices 
 of unit Frobenius norm, i.e. 
 ````math
-\bigl\{p  ∈ ℝ^{n × n}\ \big|\ p^T = p, \lVert p \rVert = 1 \bigr\}.
+\mathcal{S}_{\text{sym}} :=\bigl\{p  ∈ ℝ^{n × n}\ \big|\ p^T = p, \lVert p \rVert = 1 \bigr\}.
 ````
 
 # Constructor
