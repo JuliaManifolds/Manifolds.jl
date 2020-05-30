@@ -102,6 +102,34 @@ using LinearAlgebra: Diagonal, dot
     end
 end
 
+rb_onb_default = RiemannianONBDiffBackend(
+    diff_backend(),
+    Manifolds.ExponentialRetraction(),
+    Manifolds.LogarithmicInverseRetraction(),
+    DefaultOrthonormalBasis(),
+)
+
+rb_onb_fd51 = RiemannianONBDiffBackend(
+    Manifolds.FiniteDifferencesBackend(),
+    Manifolds.ExponentialRetraction(),
+    Manifolds.LogarithmicInverseRetraction(),
+    DefaultOrthonormalBasis(),
+)
+
+rb_onb_fwd_diff = RiemannianONBDiffBackend(
+    Manifolds.ForwardDiffBackend(),
+    Manifolds.ExponentialRetraction(),
+    Manifolds.LogarithmicInverseRetraction(),
+    DefaultOrthonormalBasis(),
+)
+
+rb_onb_finite_diff = RiemannianONBDiffBackend(
+    Manifolds.FiniteDiffBackend(),
+    Manifolds.ExponentialRetraction(),
+    Manifolds.LogarithmicInverseRetraction(),
+    DefaultOrthonormalBasis(),
+)
+
 @testset "Riemannian derivatives" begin
     s2 = Sphere(2)
     p = [0.0, 0.0, 1.0]
@@ -109,11 +137,20 @@ end
     c1 = FunctionCurve(s2) do t
         return geodesic(s2, q, p, t)
     end
+    @test domain(c1) === ℝ
+
     Xval = [-sqrt(2) / 2, 0.0, sqrt(2) / 2]
     @test isapprox(s2, c1(π / 4), r_derivative(c1, π / 4), Xval)
     X = similar(p)
     r_derivative!(c1, X, π / 4)
     @test isapprox(s2, c1(π / 4), X, Xval)
+
+    @testset for backend in [rb_onb_fd51, rb_onb_fwd_diff, rb_onb_finite_diff]
+        @test isapprox(s2, c1(π / 4), r_derivative(c1, π / 4, backend), Xval)
+        X = similar(p)
+        r_derivative!(c1, X, π / 4, backend)
+        @test isapprox(s2, c1(π / 4), X, Xval)
+    end
 end
 
 @testset "Riemannian gradients and hessians" begin
@@ -121,6 +158,7 @@ end
     f1 = FunctionRealField(s2) do p
         return p[1]
     end
+    @test codomain(f1) === ℝ
 
     rb_onb = RiemannianONBDiffBackend(
         diff_backend(),
@@ -153,5 +191,6 @@ end
         ),
     )
 
+    @test r_hessian(f1, q) ≈ [-sqrt(2) / 2 0.0; 0.0 -sqrt(2) / 2] atol = 1e-6
     @test r_hessian(f1, q, rb_onb2) ≈ [-sqrt(2) / 2 0.0; 0.0 -sqrt(2) / 2] atol = 1e-6
 end
