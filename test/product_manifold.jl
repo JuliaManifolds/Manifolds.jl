@@ -290,6 +290,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
                     distr_tv_M1,
                     distr_tv_M2,
                 )],
+                is_tangent_atol_multiplier = 1,
             )
         end
     end
@@ -344,6 +345,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         test_injectivity_radius = false,
         test_forward_diff = false,
         test_reverse_diff = false,
+        is_tangent_atol_multiplier = 1,
     )
 
     @testset "product vector transport" begin
@@ -429,6 +431,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             ],
             basis_types_vecs = (basis_types[1], basis_types[3], basis_types[4]),
             basis_types_to_from = basis_types,
+            is_tangent_atol_multiplier = 1,
         )
         @test number_eltype(pts[1]) === Float64
         @test submanifold_component(Mse, pts[1], 1) === pts[1].parts[1]

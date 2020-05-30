@@ -29,6 +29,7 @@ include("groups/group_utils.jl")
 include("sized_abstract_array.jl")
 
 # starting with tests of simple manifolds
+include("centered_matrices.jl")
 include("circle.jl")
 include("cholesky_space.jl")
 include("euclidean.jl")

@@ -116,6 +116,7 @@ include("manifolds/GraphManifold.jl")
 include("manifolds/Euclidean.jl")
 include("manifolds/Lorentz.jl")
 
+include("manifolds/CenteredMatrices.jl")
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
 include("manifolds/FixedRankMatrices.jl")
@@ -171,6 +172,7 @@ export CoTVector, Manifold, MPoint, TVector, Manifold
 export AbstractSphere
 export Euclidean,
     ArraySphere,
+    CenteredMatrices,
     CholeskySpace,
     Circle,
     FixedRankMatrices,

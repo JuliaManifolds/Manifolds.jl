@@ -59,6 +59,7 @@ include("utils.jl")
                 test_vee_hat = false,
                 retraction_methods = [ProjectionRetraction(), ExponentialRetraction()],
                 inverse_retraction_methods = [ProjectionInverseRetraction()],
+                is_tangent_atol_multiplier = 1,
             )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end

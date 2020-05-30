@@ -90,6 +90,7 @@ include("group_utils.jl")
             inverse_retraction_methods = inverse_retraction_methods,
             exp_log_atol_multiplier = 20,
             retraction_atol_multiplier = 12,
+            is_tangent_atol_multiplier = 1,
         )
 
         @test injectivity_radius(G) == injectivity_radius(M)
