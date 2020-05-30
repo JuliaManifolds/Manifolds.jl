@@ -1,6 +1,7 @@
 using Test
 using Manifolds
 using Manifolds: _derivative, _derivative!, _gradient, _gradient!, _hessian, _jacobian
+using Manifolds: r_derivative!, r_gradient!
 using FiniteDifferences
 using LinearAlgebra: Diagonal, dot
 
@@ -108,7 +109,11 @@ end
     c1 = FunctionCurve(s2) do t
         return geodesic(s2, q, p, t)
     end
-    @test isapprox(s2, c1(π / 4), r_derivative(c1, π / 4), [-sqrt(2) / 2, 0.0, sqrt(2) / 2])
+    Xval = [-sqrt(2) / 2, 0.0, sqrt(2) / 2]
+    @test isapprox(s2, c1(π / 4), r_derivative(c1, π / 4), Xval)
+    X = similar(p)
+    r_derivative!(c1, X, π / 4)
+    @test isapprox(s2, c1(π / 4), X, Xval)
 end
 
 @testset "Riemannian gradients and hessians" begin
@@ -130,6 +135,13 @@ end
     @test isapprox(s2, q, r_gradient(f1, q), [0.5, 0.0, -0.5])
     @test isapprox(s2, q, r_gradient(f1, q, rb_onb), [0.5, 0.0, -0.5])
     @test isapprox(s2, q, r_gradient(f1, q, rb_proj), [0.5, 0.0, -0.5])
+    X = similar(q)
+    r_gradient!(f1, X, q)
+    @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
+    r_gradient!(f1, X, q, rb_onb)
+    @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
+    r_gradient!(f1, X, q, rb_proj)
+    @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
 
     rb_onb2 = RiemannianONBDiffBackend(
         diff_backend(),

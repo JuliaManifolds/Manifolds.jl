@@ -125,6 +125,20 @@ function r_derivative(f::AbstractCurve, t::Real, backend::RiemannianONBDiffBacke
     return get_vector(M, p, onb_coords, backend.basis)
 end
 
+function r_derivative!(f::AbstractCurve, X, t::Real, backend::RiemannianONBDiffBackend)
+    M = codomain(f)
+    p = f(t)
+    onb_coords = _derivative(zero(number_eltype(p)), backend.diff_backend) do h
+        return get_coordinates(
+            M,
+            p,
+            inverse_retract(M, p, f(t + h), backend.inverse_retraction),
+            backend.basis,
+        )
+    end
+    return get_vector!(M, X, p, onb_coords, backend.basis)
+end
+
 function r_gradient(f::AbstractRealField, p, backend::RiemannianONBDiffBackend)
     M = domain(f)
     X = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
@@ -132,6 +146,15 @@ function r_gradient(f::AbstractRealField, p, backend::RiemannianONBDiffBackend)
         return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
     end
     return get_vector(M, p, onb_coords, backend.basis)
+end
+
+function r_gradient!(f::AbstractRealField, X, p, backend::RiemannianONBDiffBackend)
+    M = domain(f)
+    X2 = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
+    onb_coords = _gradient(X2, backend.diff_backend) do Y
+        return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
+    end
+    return get_vector!(M, X, p, onb_coords, backend.basis)
 end
 
 """
