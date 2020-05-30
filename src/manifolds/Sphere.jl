@@ -172,7 +172,7 @@ Compute the exponential map from `p` in the tangent direction `X` on the [`Abstr
 `M` by following the great arc eminating from `p` in direction `X`.
 
 ````math
-\exp_p X = \cos(\lVert X \rVert_p)p + \sin(\lVert X \rVert_p)\frac{X}{\lVert X \rVert_p}X,
+\exp_p X = \cos(\lVert X \rVert_p)p + \sin(\lVert X \rVert_p)\frac{X}{\lVert X \rVert_p},
 ````
 where $\lVert X \rVert_p$ is the [`norm`](@ref norm(::AbstractSphere,p,X)) on the
 tangent space at `p` of the [`AbstractSphere`](@ref) `M`.
@@ -289,7 +289,7 @@ opposite points.
 log(::AbstractSphere, ::Any...)
 
 function log!(M::AbstractSphere, X, p, q)
-    cosθ = real(dot(p, q))
+    cosθ = clamp(real(dot(p, q)), -1, 1)
     if cosθ ≈ -1 # appr. opposing points, return deterministic choice from set-valued log
         fill!(X, 0)
         if p[1] ≈ 1
@@ -300,7 +300,6 @@ function log!(M::AbstractSphere, X, p, q)
         copyto!(X, X .- real(dot(p, X)) .* p)
         X .*= π / norm(X)
     else
-        cosθ = cosθ > 1 ? one(cosθ) : cosθ
         θ = acos(cosθ)
         X .= (q .- cosθ .* p) ./ usinc(θ)
     end
