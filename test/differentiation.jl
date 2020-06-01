@@ -1,7 +1,6 @@
 using Test
 using Manifolds
 using Manifolds: _derivative, _derivative!, _gradient, _gradient!, _hessian, _jacobian
-using Manifolds: r_derivative!, r_gradient!
 using FiniteDifferences
 using LinearAlgebra: Diagonal, dot
 
@@ -140,15 +139,15 @@ rb_onb_finite_diff = RiemannianONBDiffBackend(
     @test domain(c1) === ℝ
 
     Xval = [-sqrt(2) / 2, 0.0, sqrt(2) / 2]
-    @test isapprox(s2, c1(π / 4), r_derivative(c1, π / 4), Xval)
+    @test isapprox(s2, c1(π / 4), r_differential(c1, π / 4), Xval)
     X = similar(p)
-    r_derivative!(c1, X, π / 4)
+    r_differential!(c1, X, π / 4)
     @test isapprox(s2, c1(π / 4), X, Xval)
 
     @testset for backend in [rb_onb_fd51, rb_onb_fwd_diff, rb_onb_finite_diff]
-        @test isapprox(s2, c1(π / 4), r_derivative(c1, π / 4, backend), Xval)
+        @test isapprox(s2, c1(π / 4), r_differential(c1, π / 4, backend), Xval)
         X = similar(p)
-        r_derivative!(c1, X, π / 4, backend)
+        r_differential!(c1, X, π / 4, backend)
         @test isapprox(s2, c1(π / 4), X, Xval)
     end
 end

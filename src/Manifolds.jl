@@ -450,8 +450,10 @@ export codomain,
     diff_backend!,
     diff_backends,
     domain,
-    r_derivative,
+    r_differential,
+    r_differential!,
     r_jacobian,
     r_hessian,
-    r_gradient
+    r_gradient,
+    r_gradient!
 end # module

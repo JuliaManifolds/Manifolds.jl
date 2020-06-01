@@ -9,11 +9,11 @@ abstract type AbstractRiemannianDiffBackend end
 
 
 """
-    r_derivative(f::AbstractCurve, t::Real, backend::AbstractDiffBackend = rdiff_backend()
+    r_differential(f::AbstractCurve, t::Real, backend::AbstractDiffBackend = rdiff_backend())
 
-Compute the Riemannian derivative of a curve `f` at time `t` using the given backend.
+Compute the Riemannian differential of a curve `f` at time `t` using the given backend.
 """
-r_derivative(::AbstractCurve, ::Real, ::AbstractRiemannianDiffBackend)
+r_differential(::AbstractCurve, ::Real, ::AbstractRiemannianDiffBackend)
 
 
 """
@@ -37,15 +37,15 @@ Compute the Riemannian Jacobian of a map `f` at point `p` using the given backen
 """
 r_jacobian(::AbstractMap, ::Any, ::AbstractRiemannianDiffBackend)
 
-function r_derivative(f::AbstractCurve, t, backend::AbstractRiemannianDiffBackend)
+function r_differential(f::AbstractCurve, t, backend::AbstractRiemannianDiffBackend)
     return error(
-        "r_derivative not implemented for curve $(typeof(f)), point $(typeof(t)) and " *
+        "r_differential not implemented for curve $(typeof(f)), point $(typeof(t)) and " *
         "backend $(typeof(backend))",
     )
 end
 
-function r_derivative!(f::AbstractCurve, X, t, backend::AbstractRiemannianDiffBackend)
-    return copyto!(X, r_derivative(f, t, backend))
+function r_differential!(f::AbstractCurve, X, t, backend::AbstractRiemannianDiffBackend)
+    return copyto!(X, r_differential(f, t, backend))
 end
 
 function r_gradient(f::AbstractRealField, p, backend::AbstractRiemannianDiffBackend)
@@ -73,9 +73,9 @@ function r_jacobian(f::AbstractMap, p, backend::AbstractRiemannianDiffBackend)
     )
 end
 
-r_derivative(f::AbstractCurve, p) = r_derivative(f, p, rdiff_backend())
+r_differential(f::AbstractCurve, p) = r_differential(f, p, rdiff_backend())
 
-r_derivative!(f::AbstractCurve, X, p) = r_derivative!(f, X, p, rdiff_backend())
+r_differential!(f::AbstractCurve, X, p) = r_differential!(f, X, p, rdiff_backend())
 
 r_gradient(f::AbstractRealField, p) = r_gradient(f, p, rdiff_backend())
 
@@ -111,7 +111,7 @@ struct RiemannianONBDiffBackend{
     basis::TBasis
 end
 
-function r_derivative(f::AbstractCurve, t::Real, backend::RiemannianONBDiffBackend)
+function r_differential(f::AbstractCurve, t::Real, backend::RiemannianONBDiffBackend)
     M = codomain(f)
     p = f(t)
     onb_coords = _derivative(zero(number_eltype(p)), backend.diff_backend) do h
@@ -125,7 +125,7 @@ function r_derivative(f::AbstractCurve, t::Real, backend::RiemannianONBDiffBacke
     return get_vector(M, p, onb_coords, backend.basis)
 end
 
-function r_derivative!(f::AbstractCurve, X, t::Real, backend::RiemannianONBDiffBackend)
+function r_differential!(f::AbstractCurve, X, t::Real, backend::RiemannianONBDiffBackend)
     M = codomain(f)
     p = f(t)
     onb_coords = _derivative(zero(number_eltype(p)), backend.diff_backend) do h
