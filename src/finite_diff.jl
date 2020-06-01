@@ -20,6 +20,10 @@ function _gradient(f, p, backend::FiniteDiffBackend{Method}) where {Method}
     return FiniteDiff.finite_difference_gradient(f, p, Method)
 end
 
+function _gradient!(f, X, p, backend::FiniteDiffBackend{Method}) where {Method}
+    return FiniteDiff.finite_difference_gradient!(X, f, p, Method)
+end
+
 function _jacobian(f, p, backend::FiniteDiffBackend{Method}) where {Method}
     return FiniteDiff.finite_difference_jacobian(f, p, Method)
 end

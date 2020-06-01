@@ -129,7 +129,19 @@ rb_onb_finite_diff = RiemannianONBDiffBackend(
     DefaultOrthonormalBasis(),
 )
 
-@testset "Riemannian derivatives" begin
+rb_onb_default2 = RiemannianONBDiffBackend(
+    diff_backend(),
+    Manifolds.ExponentialRetraction(),
+    Manifolds.LogarithmicInverseRetraction(),
+    CachedBasis(
+        DefaultOrthonormalBasis(),
+        [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
+    ),
+)
+
+rb_proj = Manifolds.RiemannianProjectionDiffBackend(diff_backend())
+
+@testset "Riemannian differentials" begin
     s2 = Sphere(2)
     p = [0.0, 0.0, 1.0]
     q = [1.0, 0.0, 0.0]
@@ -159,37 +171,21 @@ end
     end
     @test codomain(f1) === ℝ
 
-    rb_onb = RiemannianONBDiffBackend(
-        diff_backend(),
-        Manifolds.ExponentialRetraction(),
-        Manifolds.LogarithmicInverseRetraction(),
-        DefaultOrthonormalBasis(),
-    )
-
-    rb_proj = Manifolds.RiemannianProjectionDiffBackend(diff_backend())
-
     q = [sqrt(2) / 2, 0, sqrt(2) / 2]
     @test isapprox(s2, q, r_gradient(f1, q), [0.5, 0.0, -0.5])
-    @test isapprox(s2, q, r_gradient(f1, q, rb_onb), [0.5, 0.0, -0.5])
-    @test isapprox(s2, q, r_gradient(f1, q, rb_proj), [0.5, 0.0, -0.5])
+    for backend in [rb_onb_default, rb_proj]
+        @test isapprox(s2, q, r_gradient(f1, q, backend), [0.5, 0.0, -0.5])
+    end
     X = similar(q)
     r_gradient!(f1, X, q)
     @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
-    r_gradient!(f1, X, q, rb_onb)
-    @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
-    r_gradient!(f1, X, q, rb_proj)
-    @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
-
-    rb_onb2 = RiemannianONBDiffBackend(
-        diff_backend(),
-        Manifolds.ExponentialRetraction(),
-        Manifolds.LogarithmicInverseRetraction(),
-        CachedBasis(
-            DefaultOrthonormalBasis(),
-            [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
-        ),
-    )
+    for backend in [rb_onb_default, rb_proj]
+        r_gradient!(f1, X, q, backend)
+        @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
+    end
 
     @test r_hessian(f1, q) ≈ [-sqrt(2) / 2 0.0; 0.0 -sqrt(2) / 2] atol = 1e-6
-    @test r_hessian(f1, q, rb_onb2) ≈ [-sqrt(2) / 2 0.0; 0.0 -sqrt(2) / 2] atol = 1e-6
+    for backend in [rb_onb_default2]
+        @test r_hessian(f1, q, backend) ≈ [-sqrt(2) / 2 0.0; 0.0 -sqrt(2) / 2] atol = 1e-6
+    end
 end
