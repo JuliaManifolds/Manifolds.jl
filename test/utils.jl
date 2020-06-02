@@ -95,7 +95,8 @@ function test_manifold(
     retraction_rtol_multiplier = 1,
     projection_atol_multiplier = 0,
     rand_tvector_atol_multiplier = 0,
-    is_tangent_atol_multiplier = 1,
+    is_tangent_atol_multiplier = 0,
+    is_point_atol_multiplier = 0,
 )
 
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
@@ -156,9 +157,9 @@ function test_manifold(
 
     @testset "is_manifold_point" begin
         for pt in pts
-            @test is_manifold_point(M, pt)
-            @test check_manifold_point(M, pt) === nothing
-            @test check_manifold_point(M, pt) === nothing
+            atol = is_point_atol_multiplier * find_eps(pt)
+            @test is_manifold_point(M, pt; atol = atol)
+            @test check_manifold_point(M, pt; atol = atol) === nothing
         end
     end
 
