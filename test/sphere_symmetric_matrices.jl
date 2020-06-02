@@ -44,7 +44,7 @@ include("utils.jl")
         test_project_tangent = true,
         test_musical_isomorphisms = true,
         test_vector_transport = true,
-        is_tangent_atol_multiplier = 1,
+        is_tangent_atol_multiplier = 2,
         #is_point_atol_multilplier = 1,
     )
 end
