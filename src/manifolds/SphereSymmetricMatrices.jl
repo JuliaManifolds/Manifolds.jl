@@ -1,34 +1,35 @@
 @doc raw"""
-    SphereSymmetricMatrices{n,ℝ} <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding}
+    SphereSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding}
 
-The [`Manifold`](@ref) consisting of the $n × n$ real symmetric matrices 
+The [`Manifold`](@ref) consisting of the $n × n$ symmetric matrices 
 of unit Frobenius norm, i.e. 
 ````math
-\mathcal{S}_{\text{sym}} :=\bigl\{p  ∈ ℝ^{n × n}\ \big|\ p^T = p, \lVert p \rVert = 1 \bigr\}.
+\mathcal{S}_{\text{sym}} :=\bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = p, \lVert p \rVert = 1 \bigr\},
 ````
+where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
+and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
 
 # Constructor
     SphereSymmetricMatrices(n[, field=ℝ])
 
-Generate the manifold of `n`-by-`n` real-valued symmetric matrices of unit Frobenius norm.
+Generate the manifold of `n`-by-`n` symmetric matrices of unit Frobenius norm.
 """
-struct SphereSymmetricMatrices{N,ℝ} <:
-       AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
+struct SphereSymmetricMatrices{N,𝔽} <:
+       AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
 
 function SphereSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
     return SphereSymmetricMatrices{n,field}()
 end
 
 @doc raw"""
-    check_manifold_point(M::SphereSymmetricMatrices{n,ℝ}, p; kwargs...) 
+    check_manifold_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...) 
 
-Check whether the matrix is a valid point on the
-[`SphereSymmetricMatrices`](@ref) `M`, i.e. is an `n`-by-`n` symmetric matrix of unit 
-Frobenius norm.
+Check whether the matrix is a valid point on the [`SphereSymmetricMatrices`](@ref) `M`, 
+i.e. is an `n`-by-`n` symmetric matrix of unit Frobenius norm.
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
-function check_manifold_point(M::SphereSymmetricMatrices{n,ℝ}, p; kwargs...) where {n,ℝ}
+function check_manifold_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
@@ -46,7 +47,7 @@ end
     check_tangent_vector(M::SphereSymmetricMatrices{n,𝔽}, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
-[`SphereSymmetricMatrices`](@ref) `M`, i.e. `X` has to be a real-valued symmetric matrix of size `(n,n)`
+[`SphereSymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
 of unit Frobenius norm.
 The optional parameter `check_base_point` indicates, whether to call
  [`check_manifold_point`](@ref)  for `p`.
@@ -83,25 +84,26 @@ function check_tangent_vector(
     return nothing
 end
 
-function decorated_manifold(M::SphereSymmetricMatrices{n,ℝ}) where {n,ℝ}
-    return ArraySphere(n, n; field = ℝ)
+function decorated_manifold(M::SphereSymmetricMatrices{n,𝔽}) where {n,𝔽}
+    return ArraySphere(n, n; field = 𝔽)
 end
 
 embed!(M::SphereSymmetricMatrices, q, p) = copyto!(q, p)
 embed!(M::SphereSymmetricMatrices, Y, p, X) = copyto!(Y, X)
 
 @doc raw"""
-    manifold_dimension(M::SphereSymmetricMatrices{n,ℝ})
+    manifold_dimension(M::SphereSymmetricMatrices{n,𝔽})
 
-Return the manifold dimension of the [`SphereSymmetricMatrices`](@ref) `n`-by-`n` real-valued symmetric matrix `M` of unit
-Frobenius norm, i.e.
+Return the manifold dimension of the [`SphereSymmetricMatrices`](@ref) `n`-by-`n` symmetric matrix `M` of unit
+Frobenius norm over the number system `𝔽`, i.e.
 
 ````math
-\dim(\mathcal M) = \frac{n*(n + 1)}{2} - 1.
+\dim(\mathcal{S}_{\text{sym}}) = \frac{n*(n + 1)}{2} \dim_ℝ 𝔽 - 1,
 ````
+where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
-function manifold_dimension(::SphereSymmetricMatrices{n,ℝ}) where {n,ℝ}
-    return div(n * (n + 1), 2) - 1
+function manifold_dimension(::SphereSymmetricMatrices{n,𝔽}) where {n,𝔽}
+    return div(n * (n + 1), 2) * real_dimension(𝔽) - 1
 end
 
 @doc raw"""
@@ -110,13 +112,13 @@ end
 Projects `p` from the embedding onto the [`SphereSymmetricMatrices`](@ref) `M`, i.e.
 
 ````math
-\operatorname{proj}_{\mathcal M}(p) = \frac{p}{\lVert p \rVert}.
+\operatorname{proj}_{\mathcal{S}_{\text{sym}}}(p) = \frac{p}{\lVert p \rVert}.
 ````
 """
 project(::SphereSymmetricMatrices, ::Any)
 
 function project!(M::SphereSymmetricMatrices, q, p)
-    return project!(get_embedding(M), q, (p + transpose(p)) / 2)
+    return project!(get_embedding(M), q, (p + p') ./ 2)
 end
 
 @doc raw"""
@@ -125,17 +127,18 @@ end
 Project the matrix `X` onto the tangent space at `p` on the [`SphereSymmetricMatrices`](@ref) `M`, i.e.
 
 ````math
-\operatorname{proj}_p(X) = \frac{X + X^T}{2} - ⟨p, \frac{X + X^T}{2}⟩p.
+\operatorname{proj}_p(X) = \frac{X + X^{\mathrm{H}}}{2} - ⟨p, \frac{X + X^{\mathrm{H}}}{2}⟩p,
 ````
+where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::SphereSymmetricMatrices, ::Any, ::Any)
 
 function project!(M::SphereSymmetricMatrices, Y, p, X)
-    return project!(get_embedding(M), Y, p, (X + transpose(X)) / 2)
+    return project!(get_embedding(M), Y, p, (X .+ transpose(X)) ./ 2)
 end
 
-@generated representation_size(::SphereSymmetricMatrices{n,ℝ}) where {n,ℝ} = (n, n)
+@generated representation_size(::SphereSymmetricMatrices{n,𝔽}) where {n,𝔽} = (n, n)
 
-function Base.show(io::IO, ::SphereSymmetricMatrices{n,ℝ}) where {n,ℝ}
-    return print(io, "SphereSymmetricMatrices($(n), $(ℝ))")
+function Base.show(io::IO, ::SphereSymmetricMatrices{n,ℝ}) where {n,𝔽}
+    return print(io, "SphereSymmetricMatrices($(n), $(𝔽))")
 end
