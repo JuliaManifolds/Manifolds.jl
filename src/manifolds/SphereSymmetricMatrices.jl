@@ -103,7 +103,7 @@ Frobenius norm over the number system `𝔽`, i.e.
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
 function manifold_dimension(::SphereSymmetricMatrices{n,𝔽}) where {n,𝔽}
-    return div(n * (n + 1), 2) * real_dimension(𝔽) - 1
+    return div(n * (n + 1), 2) * real_dimension(𝔽) - (𝔽 === ℂ ? n : 0) - 1 
 end
 
 @doc raw"""
@@ -134,11 +134,11 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpo
 project(::SphereSymmetricMatrices, ::Any, ::Any)
 
 function project!(M::SphereSymmetricMatrices, Y, p, X)
-    return project!(get_embedding(M), Y, p, (X .+ transpose(X)) ./ 2)
+    return project!(get_embedding(M), Y, p, (X .+ X') ./ 2)
 end
 
 @generated representation_size(::SphereSymmetricMatrices{n,𝔽}) where {n,𝔽} = (n, n)
 
-function Base.show(io::IO, ::SphereSymmetricMatrices{n,ℝ}) where {n,𝔽}
+function Base.show(io::IO, ::SphereSymmetricMatrices{n,𝔽}) where {n,𝔽}
     return print(io, "SphereSymmetricMatrices($(n), $(𝔽))")
 end
