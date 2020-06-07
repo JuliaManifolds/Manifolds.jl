@@ -98,9 +98,11 @@ Return the manifold dimension of the [`SphereSymmetricMatrices`](@ref) `n`-by-`n
 Frobenius norm over the number system `𝔽`, i.e.
 
 ````math
-\dim(\mathcal{S}_{\text{sym}}) = \frac{n*(n + 1)}{2} \dim_ℝ 𝔽 - 1,
+\begin{aligned}
+\dim(\mathcal{S}_{\text{sym}})(n,ℝ) &= \frac{n(n+1)}{2} - 1,\\
+\dim(\mathcal{S}_{\text{sym}})(n,ℂ) &= 2\frac{n(n+1)}{2} - n -1.
+\end{aligned}
 ````
-where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
 function manifold_dimension(::SphereSymmetricMatrices{n,𝔽}) where {n,𝔽}
     return div(n * (n + 1), 2) * real_dimension(𝔽) - (𝔽 === ℂ ? n : 0) - 1 
@@ -112,8 +114,9 @@ end
 Projects `p` from the embedding onto the [`SphereSymmetricMatrices`](@ref) `M`, i.e.
 
 ````math
-\operatorname{proj}_{\mathcal{S}_{\text{sym}}}(p) = \frac{p}{\lVert p \rVert}.
+\operatorname{proj}_{\mathcal{S}_{\text{sym}}}(p) = \frac{1}{2} \bigl( p + p^{\mathrm{H}} \bigr),
 ````
+where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::SphereSymmetricMatrices, ::Any)
 
