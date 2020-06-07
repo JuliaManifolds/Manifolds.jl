@@ -105,7 +105,7 @@ Frobenius norm over the number system `𝔽`, i.e.
 ````
 """
 function manifold_dimension(::SphereSymmetricMatrices{n,𝔽}) where {n,𝔽}
-    return div(n * (n + 1), 2) * real_dimension(𝔽) - (𝔽 === ℂ ? n : 0) - 1 
+    return div(n * (n + 1), 2) * real_dimension(𝔽) - (𝔽 === ℂ ? n : 0) - 1
 end
 
 @doc raw"""

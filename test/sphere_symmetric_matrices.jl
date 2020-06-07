@@ -53,8 +53,12 @@ include("utils.jl")
     @testset "Complex Sphere Symmetric Matrices Basics" begin
         @test repr(M_complex) == "SphereSymmetricMatrices(3, ℂ)"
         @test manifold_dimension(M_complex) == 8
-        H = [7.0 -1.5im 0.0; 1.5im 3.0 -1.0im; 0.0 1.0im 4.5] / norm([7.0 -1.5im 0.0; 1.5im 3.0 -1.0im; 0.0 1.0im 4.5])
-        I = [2.0 4.0 5.0im; 4.0 -1.0 -9.0; -5.0im -9.0 2.5] / norm([2.0 4.0 5.0im; 4.0 -1.0 -9.0; -5.0im -9.0 2.5])
+        H =
+            [7.0 -1.5im 0.0; 1.5im 3.0 -1.0im; 0.0 1.0im 4.5] /
+            norm([7.0 -1.5im 0.0; 1.5im 3.0 -1.0im; 0.0 1.0im 4.5])
+        I =
+            [2.0 4.0 5.0im; 4.0 -1.0 -9.0; -5.0im -9.0 2.5] /
+            norm([2.0 4.0 5.0im; 4.0 -1.0 -9.0; -5.0im -9.0 2.5])
         test_manifold(
             M_complex,
             [C, H, I],
