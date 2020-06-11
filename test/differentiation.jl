@@ -1,6 +1,14 @@
 using Test
 using Manifolds
-using Manifolds: _derivative, _derivative!, _gradient, _gradient!, _hessian, _jacobian
+using Manifolds:
+    _derivative,
+    _derivative!,
+    _gradient,
+    _gradient!,
+    _hessian,
+    _hessian_vector_product,
+    _jacobian
+
 using FiniteDifferences
 using LinearAlgebra: Diagonal, dot
 
@@ -89,7 +97,12 @@ using LinearAlgebra: Diagonal, dot
             @test _gradient(f1, [1.0, -1.0]) ≈ [1.0, -2.0]
             @test _gradient!(f1, v, [1.0, -1.0]) === v
             @test v ≈ [1.0, -2.0]
-            @test _hessian(f2, [1.0, -1.0]) ≈ [0.0 3.0; 3.0 -6.0] atol = 1e-5
+            Hp = [0.0 3.0; 3.0 -6.0]
+            @test _hessian(f2, [1.0, -1.0]) ≈ Hp atol = 1e-5
+            @test _hessian_vector_product(f2, [1.0, -1.0], [2.0, -1.0]) ≈
+                Hp * [2.0, -1.0] atol = 1e-5
+            @test _hessian_vector_product(f2, [1.0, -1.0], [-2.0, 3.0]) ≈
+                Hp * [-2.0, 3.0] atol = 1e-5
         end
         diff_backend!(Manifolds.NoneDiffBackend())
         @testset for backend in [fd51, Manifolds.ForwardDiffBackend()]
@@ -184,8 +197,20 @@ end
         @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
     end
 
-    @test r_hessian(f1, q) ≈ [-sqrt(2) / 2 0.0; 0.0 -sqrt(2) / 2] atol = 1e-6
+    Hp = [-sqrt(2) / 2 0.0; 0.0 -sqrt(2) / 2]
+    @test r_hessian(f1, q) ≈ Hp atol = 1e-6
+    X1 = [-1.0, 1.0, 1.0]
+    X2 = [1.0, 3.0, -1.0]
+    basis = DefaultOrthonormalBasis()
+    @test r_hessian_vector_product(f1, q, X1) ≈
+        get_vector(s2, q, Hp * get_coordinates(s2, q, X1, basis), basis) atol = 1e-6
+    @test r_hessian_vector_product(f1, q, X2) ≈
+        get_vector(s2, q, Hp * get_coordinates(s2, q, X2, basis), basis) atol = 1e-6
     for backend in [rb_onb_default2]
-        @test r_hessian(f1, q, backend) ≈ [-sqrt(2) / 2 0.0; 0.0 -sqrt(2) / 2] atol = 1e-6
+        @test r_hessian(f1, q, backend) ≈ Hp atol = 1e-6
+        @test r_hessian_vector_product(f1, q, X1, backend) ≈
+            get_vector(s2, q, Hp * get_coordinates(s2, q, X1, basis), basis) atol = 1e-6
+        @test r_hessian_vector_product(f1, q, X2, backend) ≈
+            get_vector(s2, q, Hp * get_coordinates(s2, q, X2, basis), basis) atol = 1e-6
     end
 end

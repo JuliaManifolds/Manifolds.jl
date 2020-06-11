@@ -454,6 +454,7 @@ export codomain,
     r_differential!,
     r_jacobian,
     r_hessian,
+    r_hessian_vector_product,
     r_gradient,
     r_gradient!
 end # module

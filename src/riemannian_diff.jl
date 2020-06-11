@@ -66,6 +66,18 @@ function r_hessian(f::AbstractRealField, p, backend::AbstractRiemannianDiffBacke
     )
 end
 
+function r_hessian_vector_product(
+    f::AbstractRealField,
+    p,
+    X,
+    backend::AbstractRiemannianDiffBackend,
+)
+    return error(
+        "r_hessian_vector_product not implemented for field $(typeof(f)), point $(typeof(p)), vector $(typeof(X)) and " *
+        "backend $(typeof(backend))",
+    )
+end
+
 function r_jacobian(f::AbstractMap, p, backend::AbstractRiemannianDiffBackend)
     return error(
         "r_jacobian not implemented for map $(typeof(f)), point $(typeof(p)) and " *
@@ -82,6 +94,10 @@ r_gradient(f::AbstractRealField, p) = r_gradient(f, p, rdiff_backend())
 r_gradient!(f::AbstractRealField, X, p) = r_gradient!(f, X, p, rdiff_backend())
 
 r_hessian(f::AbstractRealField, p) = r_hessian(f, p, rdiff_backend())
+
+function r_hessian_vector_product(f::AbstractRealField, p, X)
+    return r_hessian_vector_product(f, p, X, rdiff_backend())
+end
 
 r_jacobian(f::AbstractMap, p) = r_jacobian(f::AbstractMap, p, rdiff_backend())
 
@@ -173,6 +189,21 @@ function r_hessian(f::AbstractRealField, p, backend::RiemannianONBDiffBackend)
         return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
     end
     return onb_coords
+end
+
+function r_hessian_vector_product(
+    f::AbstractRealField,
+    p,
+    X,
+    backend::RiemannianONBDiffBackend,
+)
+    M = domain(f)
+    X_zero = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
+    X_coords = get_coordinates(M, p, X, backend.basis)
+    onb_coords = _hessian_vector_product(X_zero, X_coords, backend.diff_backend) do Y
+        return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
+    end
+    return get_vector(M, p, onb_coords, backend.basis)
 end
 
 function r_jacobian(f::AbstractMap, p, backend::RiemannianONBDiffBackend)
