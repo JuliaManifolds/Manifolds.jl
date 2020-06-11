@@ -99,10 +99,10 @@ using LinearAlgebra: Diagonal, dot
             @test v ≈ [1.0, -2.0]
             Hp = [0.0 3.0; 3.0 -6.0]
             @test _hessian(f2, [1.0, -1.0]) ≈ Hp atol = 1e-5
-            @test _hessian_vector_product(f2, [1.0, -1.0], [2.0, -1.0]) ≈
-                Hp * [2.0, -1.0] atol = 1e-5
-            @test _hessian_vector_product(f2, [1.0, -1.0], [-2.0, 3.0]) ≈
-                Hp * [-2.0, 3.0] atol = 1e-5
+            @test _hessian_vector_product(f2, [1.0, -1.0], [2.0, -1.0]) ≈ Hp * [2.0, -1.0] atol =
+                1e-5
+            @test _hessian_vector_product(f2, [1.0, -1.0], [-2.0, 3.0]) ≈ Hp * [-2.0, 3.0] atol =
+                1e-5
         end
         diff_backend!(Manifolds.NoneDiffBackend())
         @testset for backend in [fd51, Manifolds.ForwardDiffBackend()]
@@ -203,14 +203,14 @@ end
     X2 = [1.0, 3.0, -1.0]
     basis = DefaultOrthonormalBasis()
     @test r_hessian_vector_product(f1, q, X1) ≈
-        get_vector(s2, q, Hp * get_coordinates(s2, q, X1, basis), basis) atol = 1e-6
+          get_vector(s2, q, Hp * get_coordinates(s2, q, X1, basis), basis) atol = 1e-6
     @test r_hessian_vector_product(f1, q, X2) ≈
-        get_vector(s2, q, Hp * get_coordinates(s2, q, X2, basis), basis) atol = 1e-6
+          get_vector(s2, q, Hp * get_coordinates(s2, q, X2, basis), basis) atol = 1e-6
     for backend in [rb_onb_default2]
         @test r_hessian(f1, q, backend) ≈ Hp atol = 1e-6
         @test r_hessian_vector_product(f1, q, X1, backend) ≈
-            get_vector(s2, q, Hp * get_coordinates(s2, q, X1, basis), basis) atol = 1e-6
+              get_vector(s2, q, Hp * get_coordinates(s2, q, X1, basis), basis) atol = 1e-6
         @test r_hessian_vector_product(f1, q, X2, backend) ≈
-            get_vector(s2, q, Hp * get_coordinates(s2, q, X2, basis), basis) atol = 1e-6
+              get_vector(s2, q, Hp * get_coordinates(s2, q, X2, basis), basis) atol = 1e-6
     end
 end
