@@ -164,13 +164,7 @@ function hessian(f, ft::RealField, p, backend::RiemannianONBDiffBackend)
     return onb_coords
 end
 
-function hessian_vector_product(
-    f,
-    ft::RealField,
-    p,
-    X,
-    backend::RiemannianONBDiffBackend,
-)
+function hessian_vector_product(f, ft::RealField, p, X, backend::RiemannianONBDiffBackend)
     M = domain(ft)
     X_zero = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
     X_coords = get_coordinates(M, p, X, backend.basis)

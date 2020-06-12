@@ -55,8 +55,7 @@ import ManifoldsBase:
 using Base.Iterators: repeated
 using Distributions
 using Einsum: @einsum
-import FiniteDifferences
-using FiniteDifferences: central_fdm, FiniteDifferenceMethod
+using FiniteDifferences: central_fdm, FiniteDifferences, FiniteDifferenceMethod
 using HybridArrays
 using LightGraphs
 using LinearAlgebra
@@ -440,9 +439,5 @@ export get_basis,
 export AbstractMap
 export AbstractDiffBackend,
     AbstractRiemannianDiffBackend, FiniteDifferencesBackend, RiemannianONBDiffBackend
-export codomain,
-    diff_backend,
-    diff_backend!,
-    diff_backends,
-    domain
+export codomain, diff_backend, diff_backend!, diff_backends, domain
 end # module
