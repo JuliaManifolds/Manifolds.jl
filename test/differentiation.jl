@@ -3,10 +3,17 @@ using Manifolds
 using Manifolds:
     _derivative,
     _derivative!,
+    differential,
+    differential!,
+    gradient,
+    gradient!,
     _gradient,
     _gradient!,
+    hessian,
     _hessian,
+    hessian_vector_product,
     _hessian_vector_product,
+    jacobian,
     _jacobian
 
 using FiniteDifferences
@@ -67,15 +74,9 @@ using LinearAlgebra: Diagonal, dot
         diff_backend!(fd51)
         r2 = Euclidean(2)
 
-        c1 = FunctionCurve(r2) do t
-            return [sin(t), cos(t)]
-        end
-        f1 = FunctionRealField(r2) do x
-            return x[1] + x[2]^2
-        end
-        f2 = FunctionRealField(r2) do x
-            return 3 * x[1] * x[2] + x[2]^3
-        end
+        c1(t) = [sin(t), cos(t)]
+        f1(x) = x[1] + x[2]^2
+        f2(x) = 3 * x[1] * x[2] + x[2]^3
 
         @testset "Inference" begin
             v = [-1.0, -1.0]
@@ -156,61 +157,59 @@ rb_proj = Manifolds.RiemannianProjectionDiffBackend(diff_backend())
 
 @testset "Riemannian differentials" begin
     s2 = Sphere(2)
+    s2c = Manifolds.Curve(s2)
     p = [0.0, 0.0, 1.0]
     q = [1.0, 0.0, 0.0]
-    c1 = FunctionCurve(s2) do t
-        return geodesic(s2, q, p, t)
-    end
-    @test domain(c1) === ℝ
+    c1(t) = geodesic(s2, q, p, t)
+    @test domain(s2c) === ℝ
 
     Xval = [-sqrt(2) / 2, 0.0, sqrt(2) / 2]
-    @test isapprox(s2, c1(π / 4), r_differential(c1, π / 4), Xval)
+    @test isapprox(s2, c1(π / 4), differential(c1, s2c, π / 4), Xval)
     X = similar(p)
-    r_differential!(c1, X, π / 4)
+    differential!(c1, s2c, X, π / 4)
     @test isapprox(s2, c1(π / 4), X, Xval)
 
     @testset for backend in [rb_onb_fd51, rb_onb_fwd_diff, rb_onb_finite_diff]
-        @test isapprox(s2, c1(π / 4), r_differential(c1, π / 4, backend), Xval)
+        @test isapprox(s2, c1(π / 4), differential(c1, s2c, π / 4, backend), Xval)
         X = similar(p)
-        r_differential!(c1, X, π / 4, backend)
+        differential!(c1, s2c, X, π / 4, backend)
         @test isapprox(s2, c1(π / 4), X, Xval)
     end
 end
 
 @testset "Riemannian gradients and hessians" begin
     s2 = Sphere(2)
-    f1 = FunctionRealField(s2) do p
-        return p[1]
-    end
-    @test codomain(f1) === ℝ
+    s2f = Manifolds.RealField(s2)
+    f1(p) = p[1]
+    @test codomain(s2f) === ℝ
 
     q = [sqrt(2) / 2, 0, sqrt(2) / 2]
-    @test isapprox(s2, q, r_gradient(f1, q), [0.5, 0.0, -0.5])
+    @test isapprox(s2, q, gradient(f1, s2f, q), [0.5, 0.0, -0.5])
     for backend in [rb_onb_default, rb_proj]
-        @test isapprox(s2, q, r_gradient(f1, q, backend), [0.5, 0.0, -0.5])
+        @test isapprox(s2, q, gradient(f1, s2f, q, backend), [0.5, 0.0, -0.5])
     end
     X = similar(q)
-    r_gradient!(f1, X, q)
+    gradient!(f1, s2f, X, q)
     @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
     for backend in [rb_onb_default, rb_proj]
-        r_gradient!(f1, X, q, backend)
+        gradient!(f1, s2f, X, q, backend)
         @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
     end
 
     Hp = [-sqrt(2) / 2 0.0; 0.0 -sqrt(2) / 2]
-    @test r_hessian(f1, q) ≈ Hp atol = 1e-6
+    @test hessian(f1, s2f, q) ≈ Hp atol = 1e-6
     X1 = [-1.0, 1.0, 1.0]
     X2 = [1.0, 3.0, -1.0]
     basis = DefaultOrthonormalBasis()
-    @test r_hessian_vector_product(f1, q, X1) ≈
+    @test hessian_vector_product(f1, s2f, q, X1) ≈
           get_vector(s2, q, Hp * get_coordinates(s2, q, X1, basis), basis) atol = 1e-6
-    @test r_hessian_vector_product(f1, q, X2) ≈
+    @test hessian_vector_product(f1, s2f, q, X2) ≈
           get_vector(s2, q, Hp * get_coordinates(s2, q, X2, basis), basis) atol = 1e-6
     for backend in [rb_onb_default2]
-        @test r_hessian(f1, q, backend) ≈ Hp atol = 1e-6
-        @test r_hessian_vector_product(f1, q, X1, backend) ≈
+        @test hessian(f1, s2f, q, backend) ≈ Hp atol = 1e-6
+        @test hessian_vector_product(f1, s2f, q, X1, backend) ≈
               get_vector(s2, q, Hp * get_coordinates(s2, q, X1, basis), basis) atol = 1e-6
-        @test r_hessian_vector_product(f1, q, X2, backend) ≈
+        @test hessian_vector_product(f1, s2f, q, X2, backend) ≈
               get_vector(s2, q, Hp * get_coordinates(s2, q, X2, basis), basis) atol = 1e-6
     end
 end

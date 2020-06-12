@@ -9,97 +9,70 @@ abstract type AbstractRiemannianDiffBackend end
 
 
 """
-    r_differential(f::AbstractCurve, t::Real, backend::AbstractDiffBackend = rdiff_backend())
+    differential(f::Any, c::Curve, t::Real, backend::AbstractDiffBackend = rdiff_backend())
 
-Compute the Riemannian differential of a curve `f` at time `t` using the given backend.
+Compute the Riemannian differential of a curve of type `c` represented by function `f`
+at time `t` using the given backend.
 """
-r_differential(::AbstractCurve, ::Real, ::AbstractRiemannianDiffBackend)
+differential(::Any, ::Curve, ::Real, ::AbstractRiemannianDiffBackend)
 
-
-"""
-    r_gradient(f::AbstractRealField, p, backend::AbstractRiemannianDiffBackend = rdiff_backend())
-
-Compute the Riemannian gradient of a real field `f` at point `p` using the given backend.
-"""
-r_gradient(::AbstractRealField, ::Any, ::AbstractRiemannianDiffBackend)
 
 """
-    r_hessian(f::AbstractRealField, p, backend::AbstractRiemannianDiffBackend = rdiff_backend())
+    gradient(f::Any, rf::RealField, p, backend::AbstractRiemannianDiffBackend = rdiff_backend())
 
-Compute the Riemannian Hessian of a real field `f` at point `p` using the given backend.
+Compute the Riemannian gradient of a real field of type `rf` represented by function `f`
+at point `p` using the given backend.
 """
-r_hessian(::AbstractRealField, ::Any, ::AbstractRiemannianDiffBackend)
+gradient(::Any, ::RealField, ::Any, ::AbstractRiemannianDiffBackend)
 
 """
-    r_jacobian(f::AbstractMap, p, backend::AbstractRiemannianDiffBackend = rdiff_backend())
+    hessian(f::Any, rf::RealField, p, backend::AbstractRiemannianDiffBackend = rdiff_backend())
 
-Compute the Riemannian Jacobian of a map `f` at point `p` using the given backend.
+Compute the Riemannian Hessian of a real field of type `rf` represented by function `f`
+at point `p` using the given backend.
 """
-r_jacobian(::AbstractMap, ::Any, ::AbstractRiemannianDiffBackend)
+hessian(::Any, ::RealField, ::Any, ::AbstractRiemannianDiffBackend)
 
-function r_differential(f::AbstractCurve, t, backend::AbstractRiemannianDiffBackend)
-    return error(
-        "r_differential not implemented for curve $(typeof(f)), point $(typeof(t)) and " *
-        "backend $(typeof(backend))",
-    )
+"""
+    jacobian(f::Any, mt::AbstractMap, p, backend::AbstractRiemannianDiffBackend = rdiff_backend())
+
+Compute the Riemannian Jacobian of a map of type `mt` represented by function `f`
+at point `p` using the given backend.
+"""
+jacobian(::Any, ::AbstractMap, ::Any, ::AbstractRiemannianDiffBackend)
+
+function differential!(f::Any, c::Curve, X, t, backend::AbstractRiemannianDiffBackend)
+    return copyto!(X, differential(f, c, t, backend))
 end
 
-function r_differential!(f::AbstractCurve, X, t, backend::AbstractRiemannianDiffBackend)
-    return copyto!(X, r_differential(f, t, backend))
+function gradient!(f, ft::RealField, X, p, backend::AbstractRiemannianDiffBackend)
+    return copyto!(X, gradient(f, ft, p, backend))
 end
 
-function r_gradient(f::AbstractRealField, p, backend::AbstractRiemannianDiffBackend)
-    return error(
-        "r_gradient not implemented for field $(typeof(f)), point $(typeof(p)) and " *
-        "backend $(typeof(backend))",
-    )
+"""
+    hessian_vector_product(f, ft::RealField, p, X, backend::AbstractRiemannianDiffBackend)
+
+
+Compute the product of Riemannian Hessian of a real field of type `rf` represented by
+function `f` at point `p` and the tangent vector `X` at point `p` using the given backend.
+"""
+hessian_vector_product(f, ft::RealField, p, X, backend::AbstractRiemannianDiffBackend)
+
+differential(f, c::Curve, p) = differential(f, c, p, rdiff_backend())
+
+differential!(f, c::Curve, X, p) = differential!(f, c, X, p, rdiff_backend())
+
+gradient(f, rf::RealField, p) = gradient(f, rf, p, rdiff_backend())
+
+gradient!(f, rf::RealField, X, p) = gradient!(f, rf, X, p, rdiff_backend())
+
+hessian(f, rf::RealField, p) = hessian(f, rf, p, rdiff_backend())
+
+function hessian_vector_product(f, rf::RealField, p, X)
+    return hessian_vector_product(f, rf, p, X, rdiff_backend())
 end
 
-function r_gradient!(f::AbstractRealField, X, p, backend::AbstractRiemannianDiffBackend)
-    return copyto!(X, r_gradient(f, p, backend))
-end
-
-function r_hessian(f::AbstractRealField, p, backend::AbstractRiemannianDiffBackend)
-    return error(
-        "r_hessian not implemented for field $(typeof(f)), point $(typeof(p)) and " *
-        "backend $(typeof(backend))",
-    )
-end
-
-function r_hessian_vector_product(
-    f::AbstractRealField,
-    p,
-    X,
-    backend::AbstractRiemannianDiffBackend,
-)
-    return error(
-        "r_hessian_vector_product not implemented for field $(typeof(f)), point $(typeof(p)), vector $(typeof(X)) and " *
-        "backend $(typeof(backend))",
-    )
-end
-
-function r_jacobian(f::AbstractMap, p, backend::AbstractRiemannianDiffBackend)
-    return error(
-        "r_jacobian not implemented for map $(typeof(f)), point $(typeof(p)) and " *
-        "backend $(typeof(backend))",
-    )
-end
-
-r_differential(f::AbstractCurve, p) = r_differential(f, p, rdiff_backend())
-
-r_differential!(f::AbstractCurve, X, p) = r_differential!(f, X, p, rdiff_backend())
-
-r_gradient(f::AbstractRealField, p) = r_gradient(f, p, rdiff_backend())
-
-r_gradient!(f::AbstractRealField, X, p) = r_gradient!(f, X, p, rdiff_backend())
-
-r_hessian(f::AbstractRealField, p) = r_hessian(f, p, rdiff_backend())
-
-function r_hessian_vector_product(f::AbstractRealField, p, X)
-    return r_hessian_vector_product(f, p, X, rdiff_backend())
-end
-
-r_jacobian(f::AbstractMap, p) = r_jacobian(f::AbstractMap, p, rdiff_backend())
+jacobian(f, mt::Map, p) = jacobian(f, mt::Map, p, rdiff_backend())
 
 """
     RiemannianONBDiffBackend(
@@ -127,8 +100,8 @@ struct RiemannianONBDiffBackend{
     basis::TBasis
 end
 
-function r_differential(f::AbstractCurve, t::Real, backend::RiemannianONBDiffBackend)
-    M = codomain(f)
+function differential(f, c::Curve, t::Real, backend::RiemannianONBDiffBackend)
+    M = codomain(c)
     p = f(t)
     onb_coords = _derivative(zero(number_eltype(p)), backend.diff_backend) do h
         return get_coordinates(
@@ -141,8 +114,8 @@ function r_differential(f::AbstractCurve, t::Real, backend::RiemannianONBDiffBac
     return get_vector(M, p, onb_coords, backend.basis)
 end
 
-function r_differential!(f::AbstractCurve, X, t::Real, backend::RiemannianONBDiffBackend)
-    M = codomain(f)
+function differential!(f, c::Curve, X, t::Real, backend::RiemannianONBDiffBackend)
+    M = codomain(c)
     p = f(t)
     onb_coords = _derivative(zero(number_eltype(p)), backend.diff_backend) do h
         return get_coordinates(
@@ -155,8 +128,8 @@ function r_differential!(f::AbstractCurve, X, t::Real, backend::RiemannianONBDif
     return get_vector!(M, X, p, onb_coords, backend.basis)
 end
 
-function r_gradient(f::AbstractRealField, p, backend::RiemannianONBDiffBackend)
-    M = domain(f)
+function gradient(f, ft::RealField, p, backend::RiemannianONBDiffBackend)
+    M = domain(ft)
     X = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
     onb_coords = _gradient(X, backend.diff_backend) do Y
         return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
@@ -164,8 +137,8 @@ function r_gradient(f::AbstractRealField, p, backend::RiemannianONBDiffBackend)
     return get_vector(M, p, onb_coords, backend.basis)
 end
 
-function r_gradient!(f::AbstractRealField, X, p, backend::RiemannianONBDiffBackend)
-    M = domain(f)
+function gradient!(f, ft::RealField, X, p, backend::RiemannianONBDiffBackend)
+    M = domain(ft)
     X2 = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
     onb_coords = _gradient(X2, backend.diff_backend) do Y
         return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
@@ -174,7 +147,7 @@ function r_gradient!(f::AbstractRealField, X, p, backend::RiemannianONBDiffBacke
 end
 
 """
-    r_hessian(f::AbstractRealField, p, backend::RiemannianONBDiffBackend)
+    hessian(f, ft::RealField, p, backend::RiemannianONBDiffBackend)
 
 Compute the Riemannian Hessian using the Euclidean Hessian according to Proposition 5.5.4
 from [^Absil2008] (generalized to arbitrary retractions).
@@ -182,8 +155,8 @@ from [^Absil2008] (generalized to arbitrary retractions).
 [^Absil2008]:
     > Absil, P. A., et al. Optimization Algorithms on Matrix Manifolds. 2008.
 """
-function r_hessian(f::AbstractRealField, p, backend::RiemannianONBDiffBackend)
-    M = domain(f)
+function hessian(f, ft::RealField, p, backend::RiemannianONBDiffBackend)
+    M = domain(ft)
     X = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
     onb_coords = _hessian(X, backend.diff_backend) do Y
         return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
@@ -191,13 +164,14 @@ function r_hessian(f::AbstractRealField, p, backend::RiemannianONBDiffBackend)
     return onb_coords
 end
 
-function r_hessian_vector_product(
-    f::AbstractRealField,
+function hessian_vector_product(
+    f,
+    ft::RealField,
     p,
     X,
     backend::RiemannianONBDiffBackend,
 )
-    M = domain(f)
+    M = domain(ft)
     X_zero = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
     X_coords = get_coordinates(M, p, X, backend.basis)
     onb_coords = _hessian_vector_product(X_zero, X_coords, backend.diff_backend) do Y
@@ -206,9 +180,9 @@ function r_hessian_vector_product(
     return get_vector(M, p, onb_coords, backend.basis)
 end
 
-function r_jacobian(f::AbstractMap, p, backend::RiemannianONBDiffBackend)
-    M = domain(f)
-    N = codomain(f)
+function jacobian(f, mt::AbstractMap, p, backend::RiemannianONBDiffBackend)
+    M = domain(mt)
+    N = codomain(mt)
     fp = f(p)
     X = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
     onb_coords = _jacobian(X, backend.diff_backend) do Y
@@ -288,14 +262,14 @@ struct RiemannianProjectionDiffBackend{TADBackend<:AbstractDiffBackend} <:
     diff_backend::TADBackend
 end
 
-function r_gradient(f::AbstractRealField, p, backend::RiemannianProjectionDiffBackend)
-    M = domain(f)
+function gradient(f, ft::RealField, p, backend::RiemannianProjectionDiffBackend)
+    M = domain(ft)
     amb_grad = _gradient(f, p, backend.diff_backend)
     return project(M, p, amb_grad)
 end
 
-function r_gradient!(f::AbstractRealField, X, p, backend::RiemannianProjectionDiffBackend)
-    M = domain(f)
+function gradient!(f, ft::RealField, X, p, backend::RiemannianProjectionDiffBackend)
+    M = domain(ft)
     amb_grad = embed(M, p, X)
     _gradient!(f, amb_grad, p, backend.diff_backend)
     return project!(M, X, p, amb_grad)
