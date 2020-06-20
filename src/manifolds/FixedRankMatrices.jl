@@ -144,15 +144,15 @@ function check_manifold_point(
             ),
         )
     end
-    if !isapprox(x.U' * x.U, one(zeros(n, n)); kwargs...)
+    if !isapprox(x.U' * x.U, one(zeros(k, k)); kwargs...)
         return DomainError(
-            norm(x.U' * x.U - one(zeros(n, n))),
+            norm(x.U' * x.U - one(zeros(k, k))),
             string(s, " since U is not orthonormal/unitary."),
         )
     end
-    if !isapprox(x.Vt' * x.Vt, one(zeros(n, n)); kwargs...)
+    if !isapprox(x.Vt * x.Vt', one(zeros(k, k)); kwargs...)
         return DomainError(
-            norm(x.Vt' * x.Vt - one(zeros(n, n))),
+            norm(x.Vt * x.Vt' - one(zeros(k, k))),
             string(s, " since V is not orthonormal/unitary."),
         )
     end
