@@ -5,7 +5,7 @@ include("utils.jl")
     M2 = FixedRankMatrices(3, 2, 1)
     Mc = FixedRankMatrices(3, 2, 2, ℂ)
     x = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
-    x2 = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0],1)
+    x2 = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0], 1)
     v = UMVTVector([0.0 0.0; 0.0 0.0; 1.0 1.0], [1.0 0.0; 0.0 1.0], zeros(2, 2))
     @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ)"
     @test repr(Mc) == "FixedRankMatrices(3, 2, 2, ℂ)"
