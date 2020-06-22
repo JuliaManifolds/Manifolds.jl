@@ -2,8 +2,10 @@ include("utils.jl")
 
 @testset "fixed Rank" begin
     M = FixedRankMatrices(3, 2, 2)
+    M2 = FixedRankMatrices(3, 2, 1)
     Mc = FixedRankMatrices(3, 2, 2, ℂ)
     x = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
+    x2 = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0],1)
     v = UMVTVector([0.0 0.0; 0.0 0.0; 1.0 1.0], [1.0 0.0; 0.0 1.0], zeros(2, 2))
     @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ)"
     @test repr(Mc) == "FixedRankMatrices(3, 2, 2, ℂ)"
@@ -51,6 +53,7 @@ include("utils.jl")
             SVDMPoint([1.0 0.0; 0.0 0.0], 2),
             true,
         )
+        @test is_manifold_point(M2, x2)
 
         @test !is_tangent_vector(
             M,
