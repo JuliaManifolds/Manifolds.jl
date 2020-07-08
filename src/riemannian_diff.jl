@@ -58,21 +58,21 @@ function `f` at point `p` and the tangent vector `X` at point `p` using the give
 """
 hessian_vector_product(f, ft::RealField, p, X, backend::AbstractRiemannianDiffBackend)
 
-differential(f, c::Curve, p) = differential(f, c, p, rdiff_backend())
+differential(f, c::Curve, p) = differential(f, c, p, rdifferential_backend())
 
-differential!(f, c::Curve, X, p) = differential!(f, c, X, p, rdiff_backend())
+differential!(f, c::Curve, X, p) = differential!(f, c, X, p, rdifferential_backend())
 
-gradient(f, rf::RealField, p) = gradient(f, rf, p, rdiff_backend())
+gradient(f, rf::RealField, p) = gradient(f, rf, p, rgradient_backend())
 
-gradient!(f, rf::RealField, X, p) = gradient!(f, rf, X, p, rdiff_backend())
+gradient!(f, rf::RealField, X, p) = gradient!(f, rf, X, p, rgradient_backend())
 
-hessian(f, rf::RealField, p) = hessian(f, rf, p, rdiff_backend())
+hessian(f, rf::RealField, p) = hessian(f, rf, p, rhessian_backend())
 
 function hessian_vector_product(f, rf::RealField, p, X)
-    return hessian_vector_product(f, rf, p, X, rdiff_backend())
+    return hessian_vector_product(f, rf, p, X, rhessian_backend())
 end
 
-jacobian(f, mt::Map, p) = jacobian(f, mt::Map, p, rdiff_backend())
+jacobian(f, mt::Map, p) = jacobian(f, mt::Map, p, rjacobian_backend())
 
 """
     RiemannianONBDiffBackend(
@@ -192,7 +192,7 @@ function jacobian(f, mt::AbstractMap, p, backend::RiemannianONBDiffBackend)
 end
 
 """
-    CurrentRiemannianDiffBackend(backend::AbstractRiemannianDiffBackend)
+CurrentRiemannianDiffBackend(backend::AbstractRiemannianDiffBackend)
 
 A mutable struct for storing the current Riemannian differentiation backend in a global
 constant [`_current_rdiff_backend`](@ref).
@@ -206,12 +206,34 @@ mutable struct CurrentRiemannianDiffBackend
 end
 
 """
-    _current_rdiff_backend
+    _current_rgradient_backend
 
-The instance of [`CurrentRiemannianDiffBackend`](@ref) that stores the globally default
+The instance of [`CurrentRiemannianGradientBackend`](@ref) that stores the globally default
 differentiation backend.
 """
-const _current_rdiff_backend = CurrentRiemannianDiffBackend(RiemannianONBDiffBackend(
+const _current_rgradient_backend = CurrentRiemannianDiffBackend(RiemannianONBDiffBackend(
+    diff_backend(),
+    ExponentialRetraction(),
+    LogarithmicInverseRetraction(),
+    DefaultOrthonormalBasis(),
+),)
+
+const _current_rdifferential_backend =
+    CurrentRiemannianDiffBackend(RiemannianONBDiffBackend(
+        diff_backend(),
+        ExponentialRetraction(),
+        LogarithmicInverseRetraction(),
+        DefaultOrthonormalBasis(),
+    ),)
+
+const _current_rhessian_backend = CurrentRiemannianDiffBackend(RiemannianONBDiffBackend(
+    diff_backend(),
+    ExponentialRetraction(),
+    LogarithmicInverseRetraction(),
+    DefaultOrthonormalBasis(),
+),)
+
+const _current_rjacobian_backend = CurrentRiemannianDiffBackend(RiemannianONBDiffBackend(
     diff_backend(),
     ExponentialRetraction(),
     LogarithmicInverseRetraction(),
@@ -219,25 +241,76 @@ const _current_rdiff_backend = CurrentRiemannianDiffBackend(RiemannianONBDiffBac
 ),)
 
 """
-    rdiff_backend() -> AbstractRiemannianDiffBackend
+    rgradient_backend() -> AbstractRiemannianDiffBackend
 
-Get the current differentiation backend.
+Get the current differentiation backend for Riemannian gradients.
 """
-rdiff_backend() = _current_rdiff_backend.backend
+rgradient_backend() = _current_rgradient_backend.backend
 
 """
-    rdiff_backend!(backend::AbstractRiemannianDiffBackend)
+    rgradient_backend!(backend::AbstractRiemannianDiffBackend)
 
-Set current backend for differentiation to `backend`.
+Set current Riemannian gradient backend for differentiation to `backend`.
 """
-function rdiff_backend!(backend::AbstractRiemannianDiffBackend)
-    _current_rdiff_backend.backend = backend
+function rgradient_backend!(backend::AbstractRiemannianDiffBackend)
+    _current_rgradient_backend.backend = backend
+    return backend
+end
+
+"""
+    rdifferential_backend() -> AbstractRiemannianDiffBackend
+
+Get the current differentiation backend for Riemannian differentials.
+"""
+rdifferential_backend() = _current_rdifferential_backend.backend
+
+"""
+    rdifferential_backend!(backend::AbstractRiemannianDiffBackend)
+
+Set current Riemannian differential backend for differentiation to `backend`.
+"""
+function rdifferential_backend!(backend::AbstractRiemannianDiffBackend)
+    _current_rdifferential_backend.backend = backend
     return backend
 end
 
 
 """
-    RiemannianProjectionDiffBackend(
+    rhessian_backend() -> AbstractRiemannianDiffBackend
+
+Get the current differentiation backend for Riemannian Hessians.
+"""
+rhessian_backend() = _current_rhessian_backend.backend
+
+"""
+    rhessian_backend!(backend::AbstractRiemannianDiffBackend)
+
+Set current Riemannian Hessian backend for differentiation to `backend`.
+"""
+function rhessian_backend!(backend::AbstractRiemannianDiffBackend)
+    _current_rhessian_backend.backend = backend
+    return backend
+end
+
+"""
+    rjacobian_backend() -> AbstractRiemannianDiffBackend
+
+Get the current differentiation backend for Riemannian Jacobians.
+"""
+rjacobian_backend() = _current_rjacobian_backend.backend
+
+"""
+    rjacobian_backend!(backend::AbstractRiemannianDiffBackend)
+
+Set current Riemannian Jacobian backend for differentiation to `backend`.
+"""
+function rjacobian_backend!(backend::AbstractRiemannianDiffBackend)
+    _current_rjacobian_backend.backend = backend
+    return backend
+end
+
+"""
+    RiemannianProjectionGradientBackend(
         diff_backend::AbstractDiffBackend
     ) <: AbstractRiemannianDiffBackend
 
@@ -251,18 +324,18 @@ See [^Absil2008], Section 3.6.1 for details.
 [^Absil2008]:
     > Absil, P. A., et al. Optimization Algorithms on Matrix Manifolds. 2008.
 """
-struct RiemannianProjectionDiffBackend{TADBackend<:AbstractDiffBackend} <:
+struct RiemannianProjectionGradientBackend{TADBackend<:AbstractDiffBackend} <:
        AbstractRiemannianDiffBackend
     diff_backend::TADBackend
 end
 
-function gradient(f, ft::RealField, p, backend::RiemannianProjectionDiffBackend)
+function gradient(f, ft::RealField, p, backend::RiemannianProjectionGradientBackend)
     M = domain(ft)
     amb_grad = _gradient(f, p, backend.diff_backend)
     return project(M, p, amb_grad)
 end
 
-function gradient!(f, ft::RealField, X, p, backend::RiemannianProjectionDiffBackend)
+function gradient!(f, ft::RealField, X, p, backend::RiemannianProjectionGradientBackend)
     M = domain(ft)
     amb_grad = embed(M, p, X)
     _gradient!(f, amb_grad, p, backend.diff_backend)

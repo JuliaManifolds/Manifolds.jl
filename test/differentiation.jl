@@ -13,7 +13,6 @@ using Manifolds:
     _hessian,
     hessian_vector_product,
     _hessian_vector_product,
-    jacobian,
     _jacobian
 
 using FiniteDifferences
@@ -153,7 +152,15 @@ rb_onb_default2 = RiemannianONBDiffBackend(
     ),
 )
 
-rb_proj = Manifolds.RiemannianProjectionDiffBackend(diff_backend())
+rb_proj = Manifolds.RiemannianProjectionGradientBackend(diff_backend())
+
+@testset "rdiff_ functions" begin
+    @test Manifolds.rdifferential_backend() ===
+          Manifolds._current_rdifferential_backend.backend
+    @test Manifolds.rjacobian_backend() === Manifolds._current_rjacobian_backend.backend
+    @test Manifolds.rgradient_backend() === Manifolds._current_rgradient_backend.backend
+    @test Manifolds.rhessian_backend() === Manifolds._current_rhessian_backend.backend
+end
 
 @testset "Riemannian differentials" begin
     s2 = Sphere(2)
