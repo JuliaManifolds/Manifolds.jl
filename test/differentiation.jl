@@ -147,6 +147,16 @@ rb_proj = Manifolds.RiemannianProjectionGradientBackend(diff_backend())
     @test Manifolds.rdifferential_backend() ===
           Manifolds._current_rdifferential_backend.backend
     @test Manifolds.rgradient_backend() === Manifolds._current_rgradient_backend.backend
+
+    tmp_diff = Manifolds.rdifferential_backend()
+    Manifolds.rdifferential_backend!(rb_onb_finite_diff)
+    @test Manifolds.rdifferential_backend() === rb_onb_finite_diff
+    Manifolds.rdifferential_backend!(tmp_diff)
+
+    tmp_grad = Manifolds.rgradient_backend()
+    Manifolds.rgradient_backend!(rb_onb_finite_diff)
+    @test Manifolds.rgradient_backend() === rb_onb_finite_diff
+    Manifolds.rgradient_backend!(tmp_grad)
 end
 
 @testset "Riemannian differentials" begin

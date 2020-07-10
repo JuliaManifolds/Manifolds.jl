@@ -22,12 +22,7 @@ specified, it is obtained using the function [`Manifolds.diff_backend`](@ref).
     Not specifying the backend explicitly will usually result in a type instability
     and decreased performance.
 """
-function _derivative(f, t, backend::AbstractDiffBackend)
-    return error(
-        "_derivative not implemented for curve $(typeof(f)), time $(typeof(t)) and " *
-        "backend $(typeof(backend))",
-    )
-end
+function _derivative end
 
 function _derivative!(f, X, t, backend::AbstractDiffBackend)
     return copyto!(X, _derivative(f, t, backend))
@@ -45,12 +40,7 @@ specified, it is obtained using the function [`diff_backend`](@ref).
     Not specifying the backend explicitly will usually result in a type instability
     and decreased performance.
 """
-function _gradient(f, p, backend::AbstractDiffBackend)
-    return error(
-        "_gradient not implemented for field $(typeof(f)), point $(typeof(p)) and " *
-        "backend $(typeof(backend))",
-    )
-end
+function _gradient end
 
 function _gradient!(f, X, p, backend::AbstractDiffBackend)
     return copyto!(X, _gradient(f, p, backend))
