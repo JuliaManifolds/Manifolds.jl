@@ -143,3 +143,7 @@ end
 function _gradient(f, p, backend::FiniteDifferencesBackend)
     return FiniteDifferences.grad(backend.method, f, p)[1]
 end
+
+function _jacobian(f, p, backend::FiniteDifferencesBackend)
+    return FiniteDifferences.jacobian(backend.method, f, p)[1]
+end
