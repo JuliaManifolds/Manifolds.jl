@@ -11,6 +11,7 @@ Manifolds.SizedAbstractArray
 ## Functions
 
 ```@docs
+Manifolds._derivative
 Manifolds._gradient
 Manifolds._jacobian
 Manifolds.eigen_safe

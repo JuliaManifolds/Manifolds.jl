@@ -1,4 +1,4 @@
-include("autodiff.jl")
+include("differentiation.jl")
 include("utils.jl")
 
 @info "Manifolds.jl Test settings:\n\n" *
@@ -24,6 +24,8 @@ end
     @test length(Test.detect_ambiguities(Manifolds)) == 0
     @test length(our_base_ambiguities()) <= 21
 end
+
+include("maps.jl")
 
 include("groups/group_utils.jl")
 include("sized_abstract_array.jl")

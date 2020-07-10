@@ -23,6 +23,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 [compat]
 Distributions = "0.22.6, 0.23"
 Einsum = "0.4"
+FiniteDiff = "2"
 FiniteDifferences = "0.9, 0.10"
 HybridArrays = "0.3"
 LightGraphs = "1"
@@ -36,6 +37,7 @@ julia = "1.0"
 
 [extras]
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
+FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
