@@ -116,12 +116,14 @@ end
 """
 CurrentRiemannianDiffBackend(backend::AbstractRiemannianDiffBackend)
 
-A mutable struct for storing the current Riemannian differentiation backend in a global
-constant [`_current_rdiff_backend`](@ref).
+A mutable struct for storing the current Riemannian differentiation backend in global
+constants [`Manifolds._current_rgradient_backend`](@ref) and
+[`Manifolds._current_rdifferential_backend`](@ref).
 
 # See also
 
-[`AbstractRiemannianDiffBackend`](@ref), [`rdiff_backend`](@ref), [`rdiff_backend!`]
+[`AbstractRiemannianDiffBackend`](@ref), [`rdifferential_backend`](@ref),
+[`rdifferential_backend!`](@ref)
 """
 mutable struct CurrentRiemannianDiffBackend
     backend::AbstractRiemannianDiffBackend
@@ -130,8 +132,8 @@ end
 """
     _current_rgradient_backend
 
-The instance of [`CurrentRiemannianGradientBackend`](@ref) that stores the globally default
-differentiation backend.
+The instance of [`Manifolds.CurrentRiemannianGradientBackend`](@ref) that stores the
+globally default differentiation backend.
 """
 const _current_rgradient_backend = CurrentRiemannianDiffBackend(RiemannianONBDiffBackend(
     diff_backend(),

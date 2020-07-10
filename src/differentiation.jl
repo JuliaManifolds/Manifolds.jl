@@ -14,7 +14,7 @@ struct NoneDiffBackend <: AbstractDiffBackend end
     _derivative(f, t[, backend::AbstractDiffBackend])
 
 Compute the derivative of a callable `f` at time `t` computed using the given `backend`,
-an object of type [`Manifolds..AbstractDiffBackend`](@ref). If the backend is not explicitly
+an object of type [`Manifolds.AbstractDiffBackend`](@ref). If the backend is not explicitly
 specified, it is obtained using the function [`Manifolds.diff_backend`](@ref).
 
 !!! note
