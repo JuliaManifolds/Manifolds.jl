@@ -8,7 +8,7 @@ an example.
 abstract type AbstractRiemannianDiffBackend end
 
 """
-    differential(f::Any, c::Curve, t::Real, backend::AbstractDiffBackend = rdiff_backend())
+    differential(f::Any, c::Curve, t::Real, backend::AbstractDiffBackend = rdifferential_backend())
 
 Compute the Riemannian differential of a curve of type `c` represented by function `f`
 at time `t` using the given backend.
@@ -17,7 +17,7 @@ differential(::Any, ::Curve, ::Real, ::AbstractRiemannianDiffBackend)
 
 
 """
-    gradient(f::Any, rf::RealField, p, backend::AbstractRiemannianDiffBackend = rdiff_backend())
+    gradient(f::Any, rf::RealField, p, backend::AbstractRiemannianDiffBackend = rgradient_backend())
 
 Compute the Riemannian gradient of a real field of type `rf` represented by function `f`
 at point `p` using the given backend.

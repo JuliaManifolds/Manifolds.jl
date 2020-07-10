@@ -14,8 +14,8 @@ struct NoneDiffBackend <: AbstractDiffBackend end
     _derivative(f, t[, backend::AbstractDiffBackend])
 
 Compute the derivative of a callable `f` at time `t` computed using the given `backend`,
-an object of type [`AbstractDiffBackend`](@ref). If the backend is not explicitly
-specified, it is obtained using the function [`diff_backend`](@ref).
+an object of type [`Manifolds..AbstractDiffBackend`](@ref). If the backend is not explicitly
+specified, it is obtained using the function [`Manifolds.diff_backend`](@ref).
 
 !!! note
 
@@ -73,15 +73,15 @@ end
 """
     _current_diff_backend
 
-The instance of [`CurrentDiffBackend`] that stores the globally default differentiation
-backend.
+The instance of [`Manifolds.CurrentDiffBackend`](@ref) that stores the globally default
+differentiation backend.
 """
 const _current_diff_backend = CurrentDiffBackend(NoneDiffBackend())
 
 """
     _diff_backends
 
-A vector of valid [`AbstractDiffBackend`](@ref).
+A vector of valid [`Manifolds.AbstractDiffBackend`](@ref).
 """
 const _diff_backends = AbstractDiffBackend[]
 
