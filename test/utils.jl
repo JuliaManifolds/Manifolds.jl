@@ -184,7 +184,7 @@ function test_manifold(
         @test isapprox(M, pts[2], exp(M, pts[1], X1); atol = atolp1p2, rtol = rtolp1p2)
         @test isapprox(M, pts[1], exp(M, pts[1], X1, 0); atol = atolp1p2, rtol = rtolp1p2)
         @test isapprox(M, pts[2], exp(M, pts[1], X1, 1); atol = atolp1p2, rtol = rtolp1p2)
-        if VERSION >= v"1.6" && M <: Grassmann
+        if VERSION >= v"1.6" && M <: Union{Grassmann{ℂ},GeneralizedStiefel{ℂ}}
             # TODO: investigate why this is so imprecise on newer Julia versions on CI
             @test isapprox(
                 M,
