@@ -1,11 +1,8 @@
 include("autodiff.jl")
-include("utils.jl")
 
-@info "Manifolds.jl Test settings:\n\n" *
-      "Testing Float32:  $(TEST_FLOAT32)\n" *
-      "Testing Double64: $(TEST_DOUBLE64)\n" *
-      "Testing Static:   $(TEST_STATIC_SIZED)\n"
-
+# Ambiguity detection is so much slower on Julia 1.6.0-DEV.430, so this reduces
+# the number of packages involved to a reasonable minimum
+using LinearAlgebra, Manifolds, ManifoldsBase, StaticArrays, Statistics, StatsBase
 
 function our_base_ambiguities()
     ambigs = Test.detect_ambiguities(Base)
@@ -24,6 +21,13 @@ end
     @test length(Test.detect_ambiguities(Manifolds)) == 0
     @test length(our_base_ambiguities()) <= 21
 end
+
+include("utils.jl")
+
+@info "Manifolds.jl Test settings:\n\n" *
+      "Testing Float32:  $(TEST_FLOAT32)\n" *
+      "Testing Double64: $(TEST_DOUBLE64)\n" *
+      "Testing Static:   $(TEST_STATIC_SIZED)\n"
 
 include("groups/group_utils.jl")
 include("sized_abstract_array.jl")
