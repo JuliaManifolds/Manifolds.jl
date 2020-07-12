@@ -190,7 +190,7 @@ function test_manifold(
                 M,
                 pts[1],
                 exp(M, pts[2], X2);
-                atol = atolp1p2 * 10^6,
+                atol = atolp1p2 * 10^8,
                 rtol = rtolp1p2,
             )
         else
