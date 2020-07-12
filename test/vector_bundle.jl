@@ -135,7 +135,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
               0.0
               0.0"""
         end
-        
+
         @test base_manifold(t_x) == M
         @test base_manifold(ct_x) == M
         @test t_x.fiber.manifold == M
