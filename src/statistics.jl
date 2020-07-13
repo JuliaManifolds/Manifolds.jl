@@ -435,7 +435,7 @@ end
 Estimate the Riemannian center of mass of `x` using
 [`ExtrinsicEstimation`](@ref), i.e. by computing the mean in the embedding and projecting
 the result back.
-You can specify a `extrinsic_method` to specify which mean estimation method to sue in the embedding,
+You can specify an `extrinsic_method` to specify which mean estimation method to use in the embedding,
 which defaults to [`GeodesicInterpolation`](@ref).
 
 See [`mean`](@ref mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation))
@@ -534,10 +534,10 @@ Statistics.median(
 
 Estimate the median of `x` using [`ExtrinsicEstimation`](@ref), i.e. by computing the median
 in the embedding and projecting the result back.
-You can specify a `extrinsic_method` to specify which mean estimation method to sue in the embedding,
-which defaults to [`CyclicProximalPointEstimation`](@ref).
+You can specify an `extrinsic_method` to specify which median estimation method to use in
+the embedding, which defaults to [`CyclicProximalPointEstimation`](@ref).
 
-See [`median`](@ref mean(::Manifold, ::AbstractVector, ::AbstractVector, ::CyclicProximalPointEstimation))
+See [`median`](@ref median(::Manifold, ::AbstractVector, ::AbstractVector, ::CyclicProximalPointEstimation))
 for a description of `kwargs`.
 """
 Statistics.median(::Manifold, ::AbstractVector, ::AbstractVector, ::ExtrinsicEstimation)
