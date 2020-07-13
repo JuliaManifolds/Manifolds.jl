@@ -322,69 +322,136 @@ Random.seed!(42)
     @testset "Basis printing" begin
         p = hcat([[1.0, 0.0, 0.0] for i in 1:5]...)
         Bc = get_basis(Ms1, p, DefaultOrthonormalBasis())
-        @test sprint(show, "text/plain", Bc) == """
-        DefaultOrthonormalBasis(ℝ) for a power manifold
-        Basis for component (1,):
-        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
-         E1 =
-          3-element Array{Int64,1}:
-           0
-           1
-           0
-         E2 =
-          3-element Array{Int64,1}:
-           0
-           0
-           1
-        Basis for component (2,):
-        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
-         E1 =
-          3-element Array{Int64,1}:
-           0
-           1
-           0
-         E2 =
-          3-element Array{Int64,1}:
-           0
-           0
-           1
-        Basis for component (3,):
-        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
-         E1 =
-          3-element Array{Int64,1}:
-           0
-           1
-           0
-         E2 =
-          3-element Array{Int64,1}:
-           0
-           0
-           1
-        Basis for component (4,):
-        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
-         E1 =
-          3-element Array{Int64,1}:
-           0
-           1
-           0
-         E2 =
-          3-element Array{Int64,1}:
-           0
-           0
-           1
-        Basis for component (5,):
-        DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
-         E1 =
-          3-element Array{Int64,1}:
-           0
-           1
-           0
-         E2 =
-          3-element Array{Int64,1}:
-           0
-           0
-           1
-        """
+        if VERSION >= v"1.6.0-DEV.430"
+            @test sprint(show, "text/plain", Bc) == """
+            DefaultOrthonormalBasis(ℝ) for a power manifold
+            Basis for component (1,):
+            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+             E1 =
+              3-element Vector{Int64}:
+               0
+               1
+               0
+             E2 =
+              3-element Vector{Int64}:
+               0
+               0
+               1
+            Basis for component (2,):
+            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+             E1 =
+              3-element Vector{Int64}:
+               0
+               1
+               0
+             E2 =
+              3-element Vector{Int64}:
+               0
+               0
+               1
+            Basis for component (3,):
+            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+             E1 =
+              3-element Vector{Int64}:
+               0
+               1
+               0
+             E2 =
+              3-element Vector{Int64}:
+               0
+               0
+               1
+            Basis for component (4,):
+            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+             E1 =
+              3-element Vector{Int64}:
+               0
+               1
+               0
+             E2 =
+              3-element Vector{Int64}:
+               0
+               0
+               1
+            Basis for component (5,):
+            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+             E1 =
+              3-element Vector{Int64}:
+               0
+               1
+               0
+             E2 =
+              3-element Vector{Int64}:
+               0
+               0
+               1
+            """
+        else
+            @test sprint(show, "text/plain", Bc) == """
+            DefaultOrthonormalBasis(ℝ) for a power manifold
+            Basis for component (1,):
+            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+             E1 =
+              3-element Array{Int64,1}:
+               0
+               1
+               0
+             E2 =
+              3-element Array{Int64,1}:
+               0
+               0
+               1
+            Basis for component (2,):
+            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+             E1 =
+              3-element Array{Int64,1}:
+               0
+               1
+               0
+             E2 =
+              3-element Array{Int64,1}:
+               0
+               0
+               1
+            Basis for component (3,):
+            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+             E1 =
+              3-element Array{Int64,1}:
+               0
+               1
+               0
+             E2 =
+              3-element Array{Int64,1}:
+               0
+               0
+               1
+            Basis for component (4,):
+            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+             E1 =
+              3-element Array{Int64,1}:
+               0
+               1
+               0
+             E2 =
+              3-element Array{Int64,1}:
+               0
+               0
+               1
+            Basis for component (5,):
+            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
+             E1 =
+              3-element Array{Int64,1}:
+               0
+               1
+               0
+             E2 =
+              3-element Array{Int64,1}:
+               0
+               0
+               1
+            """
+        end
+
     end
 
     @testset "Power manifold of Circle" begin
