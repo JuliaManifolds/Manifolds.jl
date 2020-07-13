@@ -192,9 +192,9 @@ function inverse_retract!(::Stiefel{n,k}, X, p, q, ::QRInverseRetraction) where 
     A = p' * q
     R = zeros(typeof(one(eltype(p)) * one(eltype(q))), k, k)
     for i in 1:k
-        b = zeros(i)
+        b = zeros(eltype(R), i)
         b[i] = 1
-        b[1:(end - 1)] = real(-transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)])
+        b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
         R[1:i, i] = A[1:i, 1:i] \ b
     end
     return copyto!(X, q * R - p)
