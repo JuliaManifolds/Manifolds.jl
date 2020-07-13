@@ -7,20 +7,21 @@ an example.
 """
 abstract type AbstractRiemannianDiffBackend end
 
-"""
+@doc raw"""
     differential(M::Manifold, f, t::Real, backend::AbstractDiffBackend = rdifferential_backend())
 
-Compute the Riemannian differential of a curve on a manifold `M` represented by function `f`
-at time `t` using the given backend.
+Compute the Riemannian differential of a curve $f: ℝ\to M$ on a manifold `M`
+represented by function `f` at time `t` using the given backend.
+It is calculated as the tangent vector equal to $\mathrm{d}f_t(1)$.
 """
 differential(::Manifold, ::Any, ::Real, ::AbstractRiemannianDiffBackend)
 
 
-"""
+@doc raw"""
     gradient(M::Manifold, f, p, backend::AbstractRiemannianDiffBackend = rgradient_backend())
 
-Compute the Riemannian gradient of a real field on manifold `M` represented by function `f`
-at point `p` using the given backend.
+Compute the Riemannian gradient $∇f(p)$ of a real field on manifold `M` represented by
+function `f` at point `p` using the given backend.
 """
 gradient(::Manifold, ::Any, ::Any, ::AbstractRiemannianDiffBackend)
 
@@ -133,7 +134,7 @@ globally default differentiation backend for calculating gradients.
 
 # See also
 
-[`Manifolds.gradient(::Any, ::RealField, ::Any, ::AbstractRiemannianDiffBackend)`](@ref)
+[`Manifolds.gradient(::Manifold, ::Any, ::Any, ::AbstractRiemannianDiffBackend)`](@ref)
 """
 const _current_rgradient_backend = CurrentRiemannianDiffBackend(RiemannianONBDiffBackend(
     diff_backend(),

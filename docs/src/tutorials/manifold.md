@@ -32,7 +32,7 @@ After that, we will
 There are only two small technical things we need to explain at this point.
 First of all our [`Manifold`](@ref)`{𝔽}` has a parameter `𝔽`.
 This parameter indicates the [`number_system`](@ref) the manifold is based on, for example `ℝ` for real manifolds. It is important primarily for defining bases of tangent spaces.
-See [`SymmetricMatrices`](@ref) as an example of defining both a real-valued and a complex-valued symmetric manifolds using one type.
+See [`SymmetricMatrices`](@ref Main.Manifolds.SymmetricMatrices) as an example of defining both a real-valued and a complex-valued symmetric manifolds using one type.
 
 Second, a main design decision of `Manifold.jl` is that most functions are implemented as mutating functions, i.e. as in-place-computations. There usually exists a non-mutating version that falls back to allocating memory and calling the mutating one. This means you only have to implement the mutating version, _unless_ there is a good reason to provide a special case for the non-mutating one, i.e. because in that case you know a far better performing implementation.
 
