@@ -355,7 +355,7 @@ Estimate the Riemannian center of mass of `x` using
 See [`mean`](@ref mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation))
 for a description of `kwargs`.
 """
-mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolationWithinRadius)
+Statistics.mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolationWithinRadius)
 
 function Statistics.mean!(
     M::Manifold,
@@ -418,6 +418,25 @@ end
     w::AbstractVector;
     kwargs...,
 )
+"""
+    mean(
+        M::Manifold,
+        x::AbstractVector,
+        [w::AbstractWeights,]
+        method::ExtrinsicEstimation;
+        kwargs...,
+    )
+
+Estimate the Riemannian center of mass of `x` using
+[`ExtrinsicEstimation`](@ref), i.e. by computing the mean in the embedding and projecting
+the result back.
+You can specify a `extrinsic_method` to specify which mean estimation method to sue in the embedding,
+which defaults to [`GeodesicInterpolation`](@ref).
+
+See [`mean`](@ref mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation))
+for a description of the remaining `kwargs`.
+"""
+Statistics.mean(::Manifold, ::AbstractVector, ::AbstractVector, ::ExtrinsicEstimation)
 
 function Statistics.mean!(
     M::Manifold,
@@ -425,16 +444,24 @@ function Statistics.mean!(
     x::AbstractVector,
     w::AbstractVector,
     ::ExtrinsicEstimation;
+    extrinsic_method::AbstractEstimationMethod = GeodesicInterpolation(),
     kwargs...,
 )
     embedded_x = map(p -> embed(M, p), x)
-    embedded_y = mean(get_embedding(M), embedded_x, w, GeodesicInterpolation(); kwargs...)
+    embedded_y = mean(get_embedding(M), embedded_x, w, extrinsic_method; kwargs...)
     project!(M, y, embedded_y)
     return y
 end
 
 @doc raw"""
     median(M::Manifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
+    median(
+        M::Manifold,
+        x::AbstractVector,
+        [w::AbstractWeights,]
+        method::AbstractEstimationMethod;
+        kwargs...,
+    )
 
 Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
 [`Manifold`](@ref) `M`, defined as the point that satisfies the minimizer
@@ -447,16 +474,11 @@ This function is nonsmooth (i.e nondifferentiable).
 In the general case, the [`CyclicProximalPointEstimation`](@ref) is used to compute the
 median. However, this default may be overloaded for specific manifolds.
 
-    median(
-        M::Manifold,
-        x::AbstractVector,
-        [w::AbstractWeights,]
-        method::AbstractEstimationMethod;
-        kwargs...,
-    )
-
 Compute the median using the specified `method`.
+"""
+Statistics.median(::Manifold, ::Any...)
 
+"""
     median(
         M::Manifold,
         x::AbstractVector,
@@ -488,7 +510,28 @@ The algorithm is further described in [^Bačák2014].
     > doi: [10.1137/140953393](https://doi.org/10.1137/140953393),
     > arxiv: [1210.2145](https://arxiv.org/abs/1210.2145)
 """
-median(::Manifold, ::Any...)
+Statistics.median(::Manifold, ::AbstractVector, ::AbstractVector, ::CyclicProximalPointEstimation)
+
+"""
+    median(
+        M::Manifold,
+        x::AbstractVector,
+        [w::AbstractWeights,]
+        method::ExtrinsicEstimation;
+        extrinsic_method = CyclicProximalPointEstimation(),
+        kwargs...,
+    )
+
+Estimate the median of `x` using [`ExtrinsicEstimation`](@ref), i.e. by computing the median
+in the embedding and projecting the result back.
+You can specify a `extrinsic_method` to specify which mean estimation method to sue in the embedding,
+which defaults to [`CyclicProximalPointEstimation`](@ref).
+
+See [`median`](@ref mean(::Manifold, ::AbstractVector, ::AbstractVector, ::CyclicProximalPointEstimation))
+for a description of `kwargs`.
+"""
+Statistics.median(::Manifold, ::AbstractVector, ::AbstractVector, ::ExtrinsicEstimation)
+
 function Statistics.median(
     M::Manifold,
     x::AbstractVector,
@@ -569,6 +612,21 @@ function Statistics.median!(
         isapprox(M, q, yold; kwargs...) && break
     end
     return q
+end
+
+function Statistics.median!(
+    M::Manifold,
+    y,
+    x::AbstractVector,
+    w::AbstractVector,
+    ::ExtrinsicEstimation;
+    extrinsic_method::AbstractEstimationMethod = CyclicProximalPointEstimation(),
+    kwargs...,
+)
+    embedded_x = map(p -> embed(M, p), x)
+    embedded_y = median(get_embedding(M), embedded_x, w, extrinsic_method; kwargs...)
+    project!(M, y, embedded_y)
+    return y
 end
 
 @decorator_transparent_signature Statistics.median!(

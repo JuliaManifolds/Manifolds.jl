@@ -695,4 +695,13 @@ end
         mg = mean(S, x, w, ExtrinsicEstimation())
         @test isapprox(S, m, mg)
     end
+    @testset "Extrinsic median" begin
+        rng = MersenneTwister(47)
+        S = Sphere(2)
+        x = [normalize(randn(rng, 3)) for _ in 1:10]
+        w = pweights([rand(rng) for _ in 1:length(x)])
+        m = normalize(median(Euclidean(3), x, w)
+        mg = median(S, x, w, ExtrinsicEstimation())
+        @test isapprox(S, m, mg)
+    end
 end
