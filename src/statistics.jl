@@ -355,7 +355,12 @@ Estimate the Riemannian center of mass of `x` using
 See [`mean`](@ref mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation))
 for a description of `kwargs`.
 """
-Statistics.mean(::Manifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolationWithinRadius)
+Statistics.mean(
+    ::Manifold,
+    ::AbstractVector,
+    ::AbstractVector,
+    ::GeodesicInterpolationWithinRadius,
+)
 
 function Statistics.mean!(
     M::Manifold,
@@ -510,7 +515,12 @@ The algorithm is further described in [^Bačák2014].
     > doi: [10.1137/140953393](https://doi.org/10.1137/140953393),
     > arxiv: [1210.2145](https://arxiv.org/abs/1210.2145)
 """
-Statistics.median(::Manifold, ::AbstractVector, ::AbstractVector, ::CyclicProximalPointEstimation)
+Statistics.median(
+    ::Manifold,
+    ::AbstractVector,
+    ::AbstractVector,
+    ::CyclicProximalPointEstimation,
+)
 
 """
     median(
