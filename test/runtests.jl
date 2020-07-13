@@ -22,7 +22,6 @@ end
     @test length(our_base_ambiguities()) <= 21
 end
 
-include("maps.jl")
 include("utils.jl")
 
 @info "Manifolds.jl Test settings:\n\n" *

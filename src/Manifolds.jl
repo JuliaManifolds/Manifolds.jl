@@ -94,7 +94,6 @@ using StatsBase
 using StatsBase: AbstractWeights
 
 include("utils.jl")
-include("maps.jl")
 include("differentiation.jl")
 include("riemannian_diff.jl")
 include("SizedAbstractArray.jl")

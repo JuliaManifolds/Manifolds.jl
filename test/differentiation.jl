@@ -161,11 +161,9 @@ end
 
 @testset "Riemannian differentials" begin
     s2 = Sphere(2)
-    s2c = Manifolds.Curve(s2)
     p = [0.0, 0.0, 1.0]
     q = [1.0, 0.0, 0.0]
     c1(t) = geodesic(s2, q, p, t)
-    @test domain(s2c) === ℝ
 
     Xval = [-sqrt(2) / 2, 0.0, sqrt(2) / 2]
     @test isapprox(s2, c1(π / 4), differential(s2, c1, π / 4), Xval)
@@ -183,9 +181,7 @@ end
 
 @testset "Riemannian gradients" begin
     s2 = Sphere(2)
-    s2f = Manifolds.RealField(s2)
     f1(p) = p[1]
-    @test codomain(s2f) === ℝ
 
     q = [sqrt(2) / 2, 0, sqrt(2) / 2]
     @test isapprox(s2, q, gradient(s2, f1, q), [0.5, 0.0, -0.5])
