@@ -8,37 +8,37 @@ an example.
 abstract type AbstractRiemannianDiffBackend end
 
 """
-    differential(f::Any, c::Curve, t::Real, backend::AbstractDiffBackend = rdifferential_backend())
+    differential(M::Manifold, f, t::Real, backend::AbstractDiffBackend = rdifferential_backend())
 
-Compute the Riemannian differential of a curve of type `c` represented by function `f`
+Compute the Riemannian differential of a curve on a manifold `M` represented by function `f`
 at time `t` using the given backend.
 """
-differential(::Any, ::Curve, ::Real, ::AbstractRiemannianDiffBackend)
+differential(::Manifold, ::Any, ::Real, ::AbstractRiemannianDiffBackend)
 
 
 """
-    gradient(f::Any, rf::RealField, p, backend::AbstractRiemannianDiffBackend = rgradient_backend())
+    gradient(M::Manifold, f, p, backend::AbstractRiemannianDiffBackend = rgradient_backend())
 
-Compute the Riemannian gradient of a real field of type `rf` represented by function `f`
+Compute the Riemannian gradient of a real field on manifold `M` represented by function `f`
 at point `p` using the given backend.
 """
-gradient(::Any, ::RealField, ::Any, ::AbstractRiemannianDiffBackend)
+gradient(::Manifold, ::Any, ::Any, ::AbstractRiemannianDiffBackend)
 
-function differential!(f::Any, c::Curve, X, t, backend::AbstractRiemannianDiffBackend)
-    return copyto!(X, differential(f, c, t, backend))
+function differential!(M::Manifold, f::Any, X, t, backend::AbstractRiemannianDiffBackend)
+    return copyto!(X, differential(M, f, t, backend))
 end
 
-function gradient!(f, ft::RealField, X, p, backend::AbstractRiemannianDiffBackend)
-    return copyto!(X, gradient(f, ft, p, backend))
+function gradient!(M::Manifold, f, X, p, backend::AbstractRiemannianDiffBackend)
+    return copyto!(X, gradient(M, f, p, backend))
 end
 
-differential(f, c::Curve, p) = differential(f, c, p, rdifferential_backend())
+differential(M::Manifold, f, p) = differential(M, f, p, rdifferential_backend())
 
-differential!(f, c::Curve, X, p) = differential!(f, c, X, p, rdifferential_backend())
+differential!(M::Manifold, f, X, p) = differential!(M, f, X, p, rdifferential_backend())
 
-gradient(f, rf::RealField, p) = gradient(f, rf, p, rgradient_backend())
+gradient(M::Manifold, f, p) = gradient(M, f, p, rgradient_backend())
 
-gradient!(f, rf::RealField, X, p) = gradient!(f, rf, X, p, rgradient_backend())
+gradient!(M::Manifold, f, X, p) = gradient!(M, f, X, p, rgradient_backend())
 
 """
     RiemannianONBDiffBackend(
@@ -66,8 +66,7 @@ struct RiemannianONBDiffBackend{
     basis::TBasis
 end
 
-function differential(f, c::Curve, t::Real, backend::RiemannianONBDiffBackend)
-    M = codomain(c)
+function differential(M::Manifold, f, t::Real, backend::RiemannianONBDiffBackend)
     p = f(t)
     onb_coords = _derivative(zero(number_eltype(p)), backend.diff_backend) do h
         return get_coordinates(
@@ -80,8 +79,7 @@ function differential(f, c::Curve, t::Real, backend::RiemannianONBDiffBackend)
     return get_vector(M, p, onb_coords, backend.basis)
 end
 
-function differential!(f, c::Curve, X, t::Real, backend::RiemannianONBDiffBackend)
-    M = codomain(c)
+function differential!(M::Manifold, f, X, t::Real, backend::RiemannianONBDiffBackend)
     p = f(t)
     onb_coords = _derivative(zero(number_eltype(p)), backend.diff_backend) do h
         return get_coordinates(
@@ -94,8 +92,7 @@ function differential!(f, c::Curve, X, t::Real, backend::RiemannianONBDiffBacken
     return get_vector!(M, X, p, onb_coords, backend.basis)
 end
 
-function gradient(f, ft::RealField, p, backend::RiemannianONBDiffBackend)
-    M = domain(ft)
+function gradient(M::Manifold, f, p, backend::RiemannianONBDiffBackend)
     X = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
     onb_coords = _gradient(X, backend.diff_backend) do Y
         return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
@@ -103,8 +100,7 @@ function gradient(f, ft::RealField, p, backend::RiemannianONBDiffBackend)
     return get_vector(M, p, onb_coords, backend.basis)
 end
 
-function gradient!(f, ft::RealField, X, p, backend::RiemannianONBDiffBackend)
-    M = domain(ft)
+function gradient!(M::Manifold, f, X, p, backend::RiemannianONBDiffBackend)
     X2 = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
     onb_coords = _gradient(X2, backend.diff_backend) do Y
         return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
@@ -218,14 +214,12 @@ struct RiemannianProjectionGradientBackend{TADBackend<:AbstractDiffBackend} <:
     diff_backend::TADBackend
 end
 
-function gradient(f, ft::RealField, p, backend::RiemannianProjectionGradientBackend)
-    M = domain(ft)
+function gradient(M::Manifold, f, p, backend::RiemannianProjectionGradientBackend)
     amb_grad = _gradient(f, p, backend.diff_backend)
     return project(M, p, amb_grad)
 end
 
-function gradient!(f, ft::RealField, X, p, backend::RiemannianProjectionGradientBackend)
-    M = domain(ft)
+function gradient!(M::Manifold, f, X, p, backend::RiemannianProjectionGradientBackend)
     amb_grad = embed(M, p, X)
     _gradient!(f, amb_grad, p, backend.diff_backend)
     return project!(M, X, p, amb_grad)

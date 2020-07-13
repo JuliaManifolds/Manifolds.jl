@@ -168,15 +168,15 @@ end
     @test domain(s2c) === ℝ
 
     Xval = [-sqrt(2) / 2, 0.0, sqrt(2) / 2]
-    @test isapprox(s2, c1(π / 4), differential(c1, s2c, π / 4), Xval)
+    @test isapprox(s2, c1(π / 4), differential(s2, c1, π / 4), Xval)
     X = similar(p)
-    differential!(c1, s2c, X, π / 4)
+    differential!(s2, c1, X, π / 4)
     @test isapprox(s2, c1(π / 4), X, Xval)
 
     @testset for backend in [rb_onb_fd51, rb_onb_fwd_diff, rb_onb_finite_diff]
-        @test isapprox(s2, c1(π / 4), differential(c1, s2c, π / 4, backend), Xval)
+        @test isapprox(s2, c1(π / 4), differential(s2, c1, π / 4, backend), Xval)
         X = similar(p)
-        differential!(c1, s2c, X, π / 4, backend)
+        differential!(s2, c1, X, π / 4, backend)
         @test isapprox(s2, c1(π / 4), X, Xval)
     end
 end
@@ -188,15 +188,15 @@ end
     @test codomain(s2f) === ℝ
 
     q = [sqrt(2) / 2, 0, sqrt(2) / 2]
-    @test isapprox(s2, q, gradient(f1, s2f, q), [0.5, 0.0, -0.5])
+    @test isapprox(s2, q, gradient(s2, f1, q), [0.5, 0.0, -0.5])
     for backend in [rb_onb_default, rb_proj]
-        @test isapprox(s2, q, gradient(f1, s2f, q, backend), [0.5, 0.0, -0.5])
+        @test isapprox(s2, q, gradient(s2, f1, q, backend), [0.5, 0.0, -0.5])
     end
     X = similar(q)
-    gradient!(f1, s2f, X, q)
+    gradient!(s2, f1, X, q)
     @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
     for backend in [rb_onb_default, rb_proj]
-        gradient!(f1, s2f, X, q, backend)
+        gradient!(s2, f1, X, q, backend)
         @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
     end
 end

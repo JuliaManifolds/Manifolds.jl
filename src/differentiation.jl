@@ -17,6 +17,9 @@ Compute the derivative of a callable `f` at time `t` computed using the given `b
 an object of type [`Manifolds.AbstractDiffBackend`](@ref). If the backend is not explicitly
 specified, it is obtained using the function [`Manifolds.diff_backend`](@ref).
 
+This function calculates plain Euclidean derivatives, for Riemannian differentiation see
+for example [`differential`](@ref Manifolds.differential(::Manifold, ::Any, ::Real, ::AbstractRiemannianDiffBackend)).
+
 !!! note
 
     Not specifying the backend explicitly will usually result in a type instability
@@ -34,6 +37,9 @@ end
 Compute the gradient of a callable `f` at point `p` computed using the given `backend`,
 an object of type [`AbstractDiffBackend`](@ref). If the backend is not explicitly
 specified, it is obtained using the function [`diff_backend`](@ref).
+
+This function calculates plain Euclidean gradients, for Riemannian gradient calculation see
+for example [`gradient`](@ref Manifolds.gradient(::Manifold, ::Any, ::Any, ::AbstractRiemannianDiffBackend)).
 
 !!! note
 
