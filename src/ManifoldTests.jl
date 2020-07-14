@@ -49,7 +49,7 @@ that lie on it (contained in `pts`).
 - `inverse_retraction_methods = []`: inverse retraction methods that will be tested.
 - `is_mutating = true`: whether mutating variants of functions should be tested.
 - `is_point_atol_multiplier = 0`: determines atol of `is_manifold_point` checks.
-` `is_tangent_atol_multiplier = 0`: determines atol of `is_tangent_vector` checks.
+- `is_tangent_atol_multiplier = 0`: determines atol of `is_tangent_vector` checks.
 - `mid_point12 = shortest_geodesic(M, pts[1], pts[2], 0.5)`: if not `nothing`, then check
     that `mid_point(M, pts[1], pts[2])` is approximately equal to `mid_point12`.
 - `point_distributions = []` : point distributions to test.
