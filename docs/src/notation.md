@@ -14,12 +14,14 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | $^{\wedge}$ | (n-ary) Cartesian power of a manifold | | see [`PowerManifold`](@ref) |
 | $T^*_p \mathcal M$ | the cotangent space at $p$ | | |
 | $\xi$ | a cotangent vector from $T^*_p \mathcal M$ | $\xi_1, \xi_2,\ldots,\eta,\zeta$ | sometimes written with base point $\xi_p$. |
-| $\mathrm{d}\phi_p$ | differential of a map $\phi: \mathcal M \to \mathcal N$ at a point $p$ | $(\mathrm{d}\phi)_p$, $(\phi_*)_p$ | pushes tangent vectors in $T_p \mathcal M$ forward to $T_{\phi(p)} \mathcal N$ |
+| $\mathrm{d}\phi_p(q)$ | Differential of a map $\phi: \mathcal M \to \mathcal N$ with respect to $p$ at a point $q$. For functions of multiple variables, for example $\phi(p, p_1)$ where $p \in \mathcal M$ and $p_1 \in \mathcal M_1$, variable $p$ is explicitly stated to specify with respect to which argument the differential is calculated. | $\mathrm{d}\phi_q$, $(\mathrm{d}\phi)_q$, $(\phi_*)_q$, $D_p\phi(q)$ | pushes tangent vectors $X \in T_q \mathcal M$ forward to $\mathrm{d}\phi_p(q)[X] \in T_{\phi(q)} \mathcal N$ |
 | $n$ | dimension (of a manifold) | $n_1,n_2,\ldots,m, \dim(\mathcal M)$| for the real dimension sometimes also $\dim_{\mathbb R}(\mathcal M)$|
 | $d(\cdot,\cdot)$ | (Riemannian) distance | $d_{\mathcal M}(\cdot,\cdot)$ | |
-| $F$ | a fiber | | |
-| $\mathbb F$ | a field | | field a manifold is based on, usually $\mathbb F \in \{\mathbb R,\mathbb C\}$ |
+| $\exp_p X$ | exponential map at $p \in \mathcal M$ of a vector $X \in T_p \mathcal M$ | $\exp_p(X)$ | |
+| $F$ | a fiber | | see [`VectorBundleFibers`](@ref) |
+| $\mathbb F$ | a field | | field a manifold or a basis is based on, usually $\mathbb F \in \{\mathbb R,\mathbb C\}$ |
 | $\gamma$ | a geodesic | $\gamma_{p;q}$, $\gamma_{p,X}$ | connecting two points $p,q$ or starting in $p$ with velocity $X$. |
+| $\nabla f(p)$ | gradient of function $f \colon \mathcal{M} \to \mathbb{R}$ at $p \in \mathcal{M}$ | | |
 | $\circ$ | a group operation | |
 | $\cdot^\mathrm{H}$ | Hermitian or conjugate transposed| |
 | $e$ | identity element of a group | |
@@ -28,6 +30,7 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | $\langle\cdot,\cdot\rangle$ | inner product (in $T_p \mathcal M$) | $\langle\cdot,\cdot\rangle_p, g_p(\cdot,\cdot)$ |
 | $\mathfrak g$ | a Lie algebra | |
 | $\mathcal{G}$ | a (Lie) group | |
+| $\log_p q$ | logarithmic map at $p \in \mathcal M$ of a point $q \in \mathcal M$ | $\log_p(q)$ | |
 | $\mathcal M$ | a manifold | $\mathcal M_1, \mathcal M_2,\ldots,\mathcal N$ | |
 | $\operatorname{Exp}$ | the matrix exponential | |
 | $\operatorname{Log}$ | the matrix logarithm | |

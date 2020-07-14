@@ -94,7 +94,8 @@ using StatsBase
 using StatsBase: AbstractWeights
 
 include("utils.jl")
-include("autodiff.jl")
+include("differentiation.jl")
+include("riemannian_diff.jl")
 include("SizedAbstractArray.jl")
 
 include("statistics.jl")
@@ -157,6 +158,11 @@ include("groups/rotation_action.jl")
 include("groups/special_euclidean.jl")
 
 function __init__()
+    @require FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41" begin
+        using .FiniteDiff
+        include("finite_diff.jl")
+    end
+
     @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
         using .ForwardDiff
         include("forward_diff.jl")
@@ -441,4 +447,10 @@ export AbstractBasis,
 export OutOfInjectivityRadiusError
 export get_basis,
     get_coordinates, get_coordinates!, get_vector, get_vector!, get_vectors, number_system
+# maps and differentiation
+export AbstractMap
+export AbstractDiffBackend,
+    AbstractRiemannianDiffBackend, FiniteDifferencesBackend, RiemannianONBDiffBackend
+export codomain, diff_backend, diff_backend!, diff_backends, domain
+
 end # module

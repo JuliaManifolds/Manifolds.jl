@@ -65,7 +65,7 @@ makedocs(
         "Library" => [
             "Public" => "lib/public.md",
             "Internals" => "lib/internals.md",
-            "Automatic differentiation" => "lib/autodiff.md",
+            "Differentiation" => "lib/differentiation.md",
             "Testing" => "lib/testing.md",
         ],
     ],
