@@ -15,12 +15,12 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | $T^*_p \mathcal M$ | the cotangent space at $p$ | | |
 | $\xi$ | a cotangent vector from $T^*_p \mathcal M$ | $\xi_1, \xi_2,\ldots,\eta,\zeta$ | sometimes written with base point $\xi_p$. |
 | $\mathrm{d}\phi_p$ | differential of a map $\phi: \mathcal M \to \mathcal N$ at a point $p$ | $(\mathrm{d}\phi)_p$, $(\phi_*)_p$, $D_p\phi$ | pushes tangent vectors in $T_p \mathcal M$ forward to $T_{\phi(p)} \mathcal N$ |
-| $\nabla f(p)$ | gradient of function $f \colon \mathcal{M} \to \mathbb{R}$ at $p \in \mathcal{M}$ | | |
 | $n$ | dimension (of a manifold) | $n_1,n_2,\ldots,m, \dim(\mathcal M)$| for the real dimension sometimes also $\dim_{\mathbb R}(\mathcal M)$|
 | $d(\cdot,\cdot)$ | (Riemannian) distance | $d_{\mathcal M}(\cdot,\cdot)$ | |
 | $F$ | a fiber | | |
 | $\mathbb F$ | a field | | field a manifold is based on, usually $\mathbb F \in \{\mathbb R,\mathbb C\}$ |
 | $\gamma$ | a geodesic | $\gamma_{p;q}$, $\gamma_{p,X}$ | connecting two points $p,q$ or starting in $p$ with velocity $X$. |
+| $\nabla f(p)$ | gradient of function $f \colon \mathcal{M} \to \mathbb{R}$ at $p \in \mathcal{M}$ | | |
 | $\circ$ | a group operation | |
 | $\cdot^\mathrm{H}$ | Hermitian or conjugate transposed| |
 | $e$ | identity element of a group | |
