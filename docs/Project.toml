@@ -7,7 +7,7 @@ ManifoldsBase = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
-Documenter = "0.24"
+Documenter = "0.24, 0.25"
 HybridArrays = "0.3"
 ManifoldsBase = "0.9"
 StaticArrays = "0.12"

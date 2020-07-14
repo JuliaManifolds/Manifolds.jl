@@ -1,4 +1,4 @@
-include("autodiff.jl")
+include("differentiation.jl")
 
 # Ambiguity detection is so much slower on Julia 1.6.0-DEV.430, so this reduces
 # the number of packages involved to a reasonable minimum

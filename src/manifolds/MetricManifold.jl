@@ -45,7 +45,11 @@ inner product $g(X, X) > 0$ whenever $X$ is not the zero vector.
 abstract type RiemannianMetric <: Metric end
 
 @doc raw"""
-    christoffel_symbols_first(M::MetricManifold, p; backend=:default)
+    christoffel_symbols_first(
+        M::MetricManifold,
+        p;
+        backend::AbstractDiffBackend = diff_backend(),
+    )
 
 Compute the Christoffel symbols of the first kind in local coordinates.
 The Christoffel symbols are (in Einstein summation convention)
@@ -60,7 +64,7 @@ christoffel_symbols_first(::MetricManifold, ::Any)
 @decorator_transparent_function function christoffel_symbols_first(
     M::MetricManifold,
     p;
-    backend = :default,
+    backend::AbstractDiffBackend = diff_backend(),
 )
     ∂g = local_metric_jacobian(M, p; backend = backend)
     n = size(∂g, 1)
@@ -70,7 +74,11 @@ christoffel_symbols_first(::MetricManifold, ::Any)
 end
 
 @doc raw"""
-    christoffel_symbols_second(M::MetricManifold, x; backend=:default)
+    christoffel_symbols_second(
+        M::MetricManifold,
+        x;
+        backend::AbstractDiffBackend = diff_backend(),
+    )
 
 Compute the Christoffel symbols of the second kind in local coordinates.
 The Christoffel symbols are (in Einstein summation convention)
@@ -85,7 +93,7 @@ christoffel_symbols_second(::MetricManifold, ::Any)
 @decorator_transparent_function function christoffel_symbols_second(
     M::MetricManifold,
     p;
-    backend = :default,
+    backend::AbstractDiffBackend = diff_backend(),
 )
     Ginv = inverse_local_metric(M, p)
     Γ₁ = christoffel_symbols_first(M, p; backend = backend)
@@ -95,7 +103,11 @@ christoffel_symbols_second(::MetricManifold, ::Any)
 end
 
 @doc raw"""
-    christoffel_symbols_second_jacobian(M::MetricManifold, p; backend = :default)
+    christoffel_symbols_second_jacobian(
+        M::MetricManifold,
+        p;
+        backend::AbstractDiffBackend = diff_backend(),
+    )
 
 Get partial derivatives of the Christoffel symbols of the second kind
 for manifold `M` at `p` with respect to the coordinates of `p`,
@@ -106,7 +118,7 @@ christoffel_symbols_second_jacobian(::MetricManifold, ::Any)
 @decorator_transparent_function function christoffel_symbols_second_jacobian(
     M::MetricManifold,
     p;
-    backend = :default,
+    backend::AbstractDiffBackend = diff_backend(),
 )
     n = size(p, 1)
     ∂Γ = reshape(
@@ -283,7 +295,7 @@ det_local_metric(::MetricManifold, ::Any)
 end
 
 """
-    einstein_tensor(M::MetricManifold, p; backend = :default)
+    einstein_tensor(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Einstein tensor of the manifold `M` at the point `p`.
 """
@@ -291,7 +303,7 @@ einstein_tensor(::MetricManifold, ::Any)
 @decorator_transparent_function function einstein_tensor(
     M::MetricManifold,
     p;
-    backend = :default,
+    backend::AbstractDiffBackend = diff_backend(),
 )
     Ric = ricci_tensor(M, p; backend = backend)
     g = local_metric(M, p)
@@ -349,7 +361,7 @@ flat(::MetricManifold, ::Any...)
 end
 
 """
-    gaussian_curvature(M::MetricManifold, x; backend = :default)
+    gaussian_curvature(M::MetricManifold, x; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Gaussian curvature of the manifold `M` at the point `x`.
 """
@@ -474,7 +486,11 @@ local_metric(::MetricManifold, ::Any)
 end
 
 @doc raw"""
-    local_metric_jacobian(M::MetricManifold, p; backend=:default)
+    local_metric_jacobian(
+        M::MetricManifold,
+        p;
+        backend::AbstractDiffBackend = diff_backend(),
+    )
 
 Get partial derivatives of the local metric of `M` at `p` with respect to the
 coordinates of `p`, $\frac{∂}{∂ p^k} g_{ij} = g_{ij,k}$. The
@@ -484,7 +500,7 @@ local_metric_jacobian(::MetricManifold, ::Any)
 @decorator_transparent_function :intransparent function local_metric_jacobian(
     M::MetricManifold,
     p;
-    backend = :default,
+    backend::AbstractDiffBackend = diff_backend(),
 )
     n = size(p, 1)
     ∂g = reshape(_jacobian(q -> local_metric(M, q), p, backend), n, n, n)
@@ -527,7 +543,7 @@ function metric(M::MetricManifold)
     return M.metric
 end
 """
-    ricci_curvature(M::MetricManifold, p; backend = :default)
+    ricci_curvature(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Ricci scalar curvature of the manifold `M` at the point `p`.
 """
@@ -535,7 +551,7 @@ ricci_curvature(::MetricManifold, ::Any)
 @decorator_transparent_function :parent function ricci_curvature(
     M::MetricManifold,
     p;
-    backend = :default,
+    backend::AbstractDiffBackend = diff_backend(),
 )
     Ginv = inverse_local_metric(M, p)
     Ric = ricci_tensor(M, p; backend = backend)
@@ -544,7 +560,7 @@ ricci_curvature(::MetricManifold, ::Any)
 end
 
 """
-    ricci_tensor(M::MetricManifold, p; backend = :default)
+    ricci_tensor(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Ricci tensor, also known as the Ricci curvature tensor,
 of the manifold `M` at the point `p`.
@@ -559,7 +575,7 @@ ricci_tensor(::MetricManifold, ::Any)
 end
 
 @doc raw"""
-    riemann_tensor(M::MetricManifold, p)
+    riemann_tensor(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Riemann tensor $R^l_{ijk}$, also known as the Riemann curvature
 tensor, at the point `p`. The dimensions of the resulting multi-dimensional
@@ -569,7 +585,7 @@ riemann_tensor(::MetricManifold, ::Any)
 @decorator_transparent_function function riemann_tensor(
     M::MetricManifold,
     p;
-    backend = :default,
+    backend::AbstractDiffBackend = diff_backend(),
 )
     n = size(p, 1)
     Γ = christoffel_symbols_second(M, p; backend = backend)
@@ -611,7 +627,7 @@ end
         p,
         X,
         tspan;
-        backend = :default,
+        backend::AbstractDiffBackend = diff_backend(),
         solver = AutoVern9(Rodas5()),
         kwargs...,
     )
