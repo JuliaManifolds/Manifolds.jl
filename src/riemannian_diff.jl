@@ -12,7 +12,7 @@ abstract type AbstractRiemannianDiffBackend end
 
 Compute the Riemannian differential of a curve $f: ℝ\to M$ on a manifold `M`
 represented by function `f` at time `t` using the given backend.
-It is calculated as the tangent vector equal to $\mathrm{d}f_t(1)$.
+It is calculated as the tangent vector equal to $\mathrm{d}f_t(t)[1]$.
 """
 differential(::Manifold, ::Any, ::Real, ::AbstractRiemannianDiffBackend)
 
