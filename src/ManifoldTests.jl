@@ -7,7 +7,7 @@ using ..Test
 using ..Distributions
 using ForwardDiff
 using ReverseDiff
-
+using Random
 
 """
     find_eps(x...)
