@@ -4,6 +4,7 @@ module ManifoldTests
 using ..Manifolds
 using ..ManifoldsBase
 using ..Test
+using ..Distributions
 using ForwardDiff
 using ReverseDiff
 
@@ -29,72 +30,96 @@ Test general properties of manifold `M`, given at least three different points
 that lie on it (contained in `pts`).
 
 # Arguments
-- `default_inverse_retraction_method = ManifoldsBase.LogarithmicInverseRetraction()` - default method for inverse retractions ([`log`](@ref))
-- `default_retraction_method = ManifoldsBase.ExponentialRetraction()` - default method for retractions ([`exp`](@ref))
-- `exp_log_atol_multiplier = 0`, change absolute tolerance of exp/log tests (0 use default, i.e. deactivate atol and use rtol)
-- `exp_log_rtol_multiplier = 1`, change the relative tolerance of exp/log tests (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
-- `retraction_atol_multiplier = 0`, change absolute tolerance of (inverse) retraction tests (0 use default, i.e. deactivate atol and use rtol)
-- `retraction_rtol_multiplier = 1`, change the relative tolerance of (inverse) retraction tests (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
+- `basis_has_specialized_diagonalizing_get = false`: if true, assumes that
+    [`DiagonalizingOrthonormalBasis`](@ref) given in `basis_types` has
+    [`get_coordinates`](@ref) and [`get_vector`](@ref) that work without caching.
+- `basis_types_to_from = ()`: basis types that will be tested based on
+    [`get_coordinates`](@ref) and [`get_vector`](@ref).
+- `basis_types_vecs = ()` : basis types that will be tested based on [`get_vectors`](@ref).
+- `default_inverse_retraction_method = ManifoldsBase.LogarithmicInverseRetraction()`:
+    default method for inverse retractions ([`log`](@ref)).
+- `default_retraction_method = ManifoldsBase.ExponentialRetraction()`: default method for
+    retractions ([`exp`](@ref)).
+- `exp_log_atol_multiplier = 0`: change absolute tolerance of exp/log tests
+    (0 use default, i.e. deactivate atol and use rtol).
+- `exp_log_rtol_multiplier = 1`: change the relative tolerance of exp/log tests
+    (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
+- `expected_dimension_type = Integer`: expected type of value returned by
+    [`manifold_dimension`](@ref).
 - `inverse_retraction_methods = []`: inverse retraction methods that will be tested.
-- `mid_point12 = shortest_geodesic(M, pts[1], pts[2], 0.5)`, if not `nothing`, then check that `mid_point(M, pts[1], pts[2])` is approximately equal to `mid_point12`.
-- `point_distributions = []` : point distributions to test
-- `projection_tvector_atol_multiplier = 0` : chage absolute tolerance in testing projections (0 use default, i.e. deactivate atol and use rtol)
--  tvector_distributions = []` : tangent vector distributions to test
-- `basis_types = ()` : basis types that will be tested
-- `rand_tvector_atol_multiplier = 0` : chage absolute tolerance in testing random vectors (0 use default, i.e. deactivate atol and use rtol)
-  random tangent vectors are tangent vectors
+- `is_mutating = true`: whether mutating variants of functions should be tested.
+- `is_point_atol_multiplier = 0`: determines atol of `is_manifold_point` checks.
+` `is_tangent_atol_multiplier = 0`: determines atol of `is_tangent_vector` checks.
+- `mid_point12 = shortest_geodesic(M, pts[1], pts[2], 0.5)`: if not `nothing`, then check
+    that `mid_point(M, pts[1], pts[2])` is approximately equal to `mid_point12`.
+- `point_distributions = []` : point distributions to test.
+- `rand_tvector_atol_multiplier = 0` : chage absolute tolerance in testing random vectors
+    (0 use default, i.e. deactivate atol and use rtol) random tangent vectors are tangent
+    vectors.
+- `retraction_atol_multiplier = 0`: change absolute tolerance of (inverse) retraction tests
+    (0 use default, i.e. deactivate atol and use rtol).
+- `retraction_rtol_multiplier = 1`: change the relative tolerance of (inverse) retraction
+    tests (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
 - `retraction_methods = []`: retraction methods that will be tested.
+- `test_exp_log = true`: if true, checkthat [`exp`](@ref) is the inverse of [`log`](@ref).
 - `test_forward_diff = true`: if true, automatic differentiation using
-  ForwardDiff is tested.
+    ForwardDiff is tested.
+- `test_injectivity_radius = true`: whether implementation of [`injectivity_radius`](@ref)
+    should be tested.
+- `test_is_tangent`: if true check that the `default_inverse_retraction_method`
+    actually returns valid tangent vectors.
+- `test_musical_isomorphisms = false` : test musical isomorphisms.
+- `test_mutating_rand = false` : test the mutating random function for points on manifolds.
+- `test_project_point = false`: test projections onto the manifold.
+- `test_project_tangent = false` : test projections on tangent spaces.
+- `test_representation_size = true` : test repersentation size of points/tvectprs.
 - `test_reverse_diff = true`: if true, automatic differentiation using
-  ReverseDiff is tested.
-- `test_musical_isomorphisms = false` : test musical isomorphisms
-- `test_mutating_rand = false` : test the mutating random function for points on manifolds
-- `test_project_tangent = false` : test projections on tangent spaces
-- `test_representation_size = true` : test repersentation size of points/tvectprs
-- `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace
-- `test_vector_transport = false` : test vector transport
-- `test_vector_spaces = true` : test Vector bundle of this manifold
-
+    ReverseDiff is tested.
+- `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace.
+- `test_vector_spaces = true` : test Vector bundle of this manifold.
+- `test_vector_transport = false` : test vector transport.
+- `test_vee_hat = false`: test [`vee`](@ref) and [`hat`](@ref) functions.
+- `tvector_distributions = []` : tangent vector distributions to test.
+- `vector_transport_methods = []`: vector transport methods that should be tested.
 """
 function test_manifold(
     M::Manifold,
     pts::AbstractVector;
-    test_exp_log = true,
-    test_is_tangent = true,
-    test_injectivity_radius = true,
-    test_forward_diff = true,
-    test_reverse_diff = true,
-    test_tangent_vector_broadcasting = true,
-    test_project_tangent = false,
-    test_project_point = false,
-    test_representation_size = true,
-    test_musical_isomorphisms = false,
-    test_vector_transport = false,
-    test_mutating_rand = false,
-    test_vector_spaces = true,
-    test_vee_hat = false,
-    is_mutating = true,
+    basis_has_specialized_diagonalizing_get = false,
+    basis_types_to_from = (),
+    basis_types_vecs = (),
     default_inverse_retraction_method = ManifoldsBase.LogarithmicInverseRetraction(),
     default_retraction_method = ManifoldsBase.ExponentialRetraction(),
-    retraction_methods = [],
-    inverse_retraction_methods = [],
-    mid_point12 = shortest_geodesic(M, pts[1], pts[2], 0.5),
-    point_distributions = [],
-    tvector_distributions = [],
-    basis_types_vecs = (),
-    basis_types_to_from = (),
-    vector_transport_methods = [],
-    basis_has_specialized_diagonalizing_get = false,
     exp_log_atol_multiplier = 0,
     exp_log_rtol_multiplier = 1,
-    retraction_atol_multiplier = 0,
-    retraction_rtol_multiplier = 1,
+    expected_dimension_type = Integer,
+    inverse_retraction_methods = [],
+    is_mutating = true,
+    is_point_atol_multiplier = 0,
+    is_tangent_atol_multiplier = 0,
+    mid_point12 = shortest_geodesic(M, pts[1], pts[2], 0.5),
+    point_distributions = [],
     projection_atol_multiplier = 0,
     rand_tvector_atol_multiplier = 0,
-    is_tangent_atol_multiplier = 0,
-    is_point_atol_multiplier = 0,
-    expected_dimension_type = Integer,
+    retraction_atol_multiplier = 0,
+    retraction_methods = [],
+    retraction_rtol_multiplier = 1,
+    test_exp_log = true,
+    test_forward_diff = true,
+    test_is_tangent = true,
+    test_injectivity_radius = true,
+    test_musical_isomorphisms = false,
+    test_mutating_rand = false,
+    test_project_point = false,
+    test_project_tangent = false,
+    test_representation_size = true,
+    test_reverse_diff = true,
+    test_tangent_vector_broadcasting = true,
+    test_vector_transport = false,
+    test_vector_spaces = true,
+    test_vee_hat = false,
+    tvector_distributions = [],
+    vector_transport_methods = [],
 )
 
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
