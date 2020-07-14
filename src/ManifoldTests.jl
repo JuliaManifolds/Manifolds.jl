@@ -1,24 +1,13 @@
 
-module ManifoldTests
+@eval ManifoldTests begin
+using Test
 
-using ..Manifolds
-using ..ManifoldsBase
-using ..Test
-using ..Distributions
 using ForwardDiff
 using ReverseDiff
-using Random
 
-"""
-    find_eps(x...)
+end
 
-Find an appropriate tolerance for given points or tangent vectors, or their types.
-"""
-find_eps(x...) = find_eps(Base.promote_type(map(number_eltype, x)...))
-find_eps(x::Type{TN}) where {TN<:Number} = eps(real(TN))
-find_eps(x) = find_eps(number_eltype(x))
-
-
+@eval ManifoldTests begin
 """
     test_manifold(
         M::Manifold,
@@ -634,4 +623,4 @@ end
 
 export test_manifold
 
-end # module
+end # @eval

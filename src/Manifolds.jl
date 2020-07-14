@@ -157,6 +157,26 @@ include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
 
+module ManifoldTests
+
+using ..Manifolds
+using ..ManifoldsBase
+using ..Distributions
+using Random
+
+"""
+    find_eps(x...)
+
+Find an appropriate tolerance for given points or tangent vectors, or their types.
+"""
+find_eps(x...) = find_eps(Base.promote_type(map(number_eltype, x)...))
+find_eps(x::Type{TN}) where {TN<:Number} = eps(real(TN))
+find_eps(x) = find_eps(number_eltype(x))
+
+function test_manifold end
+end # module
+
+
 function __init__()
     @require FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41" begin
         using .FiniteDiff
@@ -447,10 +467,9 @@ export AbstractBasis,
 export OutOfInjectivityRadiusError
 export get_basis,
     get_coordinates, get_coordinates!, get_vector, get_vector!, get_vectors, number_system
-# maps and differentiation
-export AbstractMap
+# differentiation
 export AbstractDiffBackend,
     AbstractRiemannianDiffBackend, FiniteDifferencesBackend, RiemannianONBDiffBackend
-export codomain, diff_backend, diff_backend!, diff_backends, domain
+export diff_backend, diff_backend!, diff_backends
 
 end # module
