@@ -1,4 +1,6 @@
 using Manifolds, ManifoldsBase, Documenter
+# required for loading the Manifolds.ManifoldTests module
+using Test, ForwardDiff, ReverseDiff
 
 generated_path = joinpath(@__DIR__, "src", "generated")
 isdir(generated_path) || mkdir(generated_path)
@@ -11,7 +13,7 @@ cp(
 makedocs(
     # for development, we disable prettyurls
     format = Documenter.HTML(prettyurls = false, assets = ["assets/favicon.ico"]),
-    modules = [Manifolds, ManifoldsBase],
+    modules = [Manifolds, ManifoldsBase, Manifolds.ManifoldTests],
     authors = "Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
     sitename = "Manifolds.jl",
     pages = [
@@ -64,6 +66,7 @@ makedocs(
             "Public" => "lib/public.md",
             "Internals" => "lib/internals.md",
             "Differentiation" => "lib/differentiation.md",
+            "Testing" => "lib/testing.md",
         ],
     ],
 )
