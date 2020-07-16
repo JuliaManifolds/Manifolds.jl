@@ -6,6 +6,6 @@ interface.
 
 ```@autodocs
 Modules = [Manifolds, Manifolds.ManifoldTests]
-Pages = ["ManifoldTests.jl"]
+Pages = ["tests/ManifoldTests.jl", "tests/tests_general.jl"]
 Order = [:type, :function]
 ```
