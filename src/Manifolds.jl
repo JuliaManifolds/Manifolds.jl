@@ -157,25 +157,8 @@ include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
 
-module ManifoldTests
 
-using ..Manifolds
-using ..ManifoldsBase
-using ..Distributions
-using Random
-
-"""
-    find_eps(x...)
-
-Find an appropriate tolerance for given points or tangent vectors, or their types.
-"""
-find_eps(x...) = find_eps(Base.promote_type(map(number_eltype, x)...))
-find_eps(x::Type{TN}) where {TN<:Number} = eps(real(TN))
-find_eps(x) = find_eps(number_eltype(x))
-
-function test_manifold end
-end # module
-
+include("tests/ManifoldTests.jl")
 
 function __init__()
     @require FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41" begin
@@ -194,10 +177,14 @@ function __init__()
     end
 
     @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
+        using .Test: Test
+        include("tests/tests_general.jl")
         @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
-            @require ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267" begin
-                include("ManifoldTests.jl")
-            end
+            include("tests/tests_forwarddiff.jl")
+        end
+
+        @require ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267" begin
+            include("tests/tests_reversediff.jl")
         end
     end
 
