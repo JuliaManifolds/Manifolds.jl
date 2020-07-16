@@ -109,7 +109,7 @@ function ManifoldTests.test_manifold(
     # get a default tangent vector for every of the three tangent spaces
     n = length(pts)
     if default_inverse_retraction_method === nothing
-        tv = [zero_tangent_vector(M, pts[i]) for i = 1:n] # no other available
+        tv = [zero_tangent_vector(M, pts[i]) for i in 1:n] # no other available
     else
         tv = [
             inverse_retract(
@@ -117,7 +117,7 @@ function ManifoldTests.test_manifold(
                 pts[i],
                 pts[((i + 1) % n) + 1],
                 default_inverse_retraction_method,
-            ) for i = 1:n
+            ) for i in 1:n
         ]
     end
     Test.Test.@testset "dimension" begin
@@ -439,24 +439,24 @@ function ManifoldTests.test_manifold(
             N = length(bvectors)
 
             # test orthonormality
-            for i = 1:N
+            for i in 1:N
                 Test.@test norm(M, p, bvectors[i]) ≈ 1
-                for j = (i + 1):N
+                for j in (i + 1):N
                     Test.@test real(inner(M, p, bvectors[i], bvectors[j])) ≈ 0 atol =
                         sqrt(ManifoldTests.find_eps(p))
                 end
             end
             if isa(btype, ProjectedOrthonormalBasis)
                 # check projection idempotency
-                for i = 1:N
+                for i in 1:N
                     Test.@test norm(M, p, bvectors[i]) ≈ 1
-                    for j = (i + 1):N
+                    for j in (i + 1):N
                         Test.@test real(inner(M, p, bvectors[i], bvectors[j])) ≈ 0 atol =
                             sqrt(ManifoldTests.find_eps(p))
                     end
                 end
                 # check projection idempotency
-                for i = 1:N
+                for i in 1:N
                     Test.@test isapprox(M, p, project(M, p, bvectors[i]), bvectors[i])
                 end
             end
@@ -495,12 +495,12 @@ function ManifoldTests.test_manifold(
             Xbi = get_vector(M, p, Xb, btype)
             Test.@test isapprox(M, p, X1, Xbi)
 
-            Xs = [[ifelse(i == j, 1, 0) for j = 1:N] for i = 1:N]
+            Xs = [[ifelse(i == j, 1, 0) for j in 1:N] for i in 1:N]
             Xs_invs = [get_vector(M, p, Xu, btype) for Xu in Xs]
             # check orthonormality of inverse representation
-            for i = 1:N
+            for i in 1:N
                 Test.@test norm(M, p, Xs_invs[i]) ≈ 1 atol = ManifoldTests.find_eps(p)
-                for j = (i + 1):N
+                for j in (i + 1):N
                     Test.@test real(inner(M, p, Xs_invs[i], Xs_invs[j])) ≈ 0 atol =
                         sqrt(ManifoldTests.find_eps(p))
                 end
@@ -602,7 +602,7 @@ function ManifoldTests.test_manifold(
         for p in pts
             prand = allocate(p)
             for pd in point_distributions
-                for _ = 1:10
+                for _ in 1:10
                     Test.@test is_manifold_point(M, rand(pd))
                     if test_mutating_rand
                         rand!(pd, prand)
@@ -616,7 +616,7 @@ function ManifoldTests.test_manifold(
     Test.@testset "tangent vector distributions" begin
         for tvd in tvector_distributions
             supp = Manifolds.support(tvd)
-            for _ = 1:10
+            for _ in 1:10
                 randtv = rand(tvd)
                 atol = rand_tvector_atol_multiplier * ManifoldTests.find_eps(randtv)
                 Test.@test is_tangent_vector(M, supp.point, randtv; atol = atol)
