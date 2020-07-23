@@ -8,7 +8,7 @@ The Elliptope manifold, also known as the set of correlation matricesmanifold of
 \mathcal E(n,k) =
 \bigl\{p ∈ ℝ^{n × n}\ \big|\ &a^\mathrm{T}pa \geq 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\},\\
 &p_{ii} = 1 \text{ for all } i=1,\ldots,n,\\
-&\text{ and } p = qq^{\mathrm{T}} \text{ for } q \in  ℝ^{n × k} \text{ with } \operatorname{rank}(q) = k
+&\text{and } p = qq^{\mathrm{T}} \text{ for } q \in  ℝ^{n × k} \text{ with } \operatorname{rank}(q) = k
 \bigr\}.
 \end{aligned}
 ````
@@ -172,7 +172,7 @@ function project!(::Elliptope, Z, q, Y)
     return Y2 - q*lyap(q'*q, q'*Y2 - Y2'*q)
 end
 
-"""
+@doc raw"""
     retract(M::Elliptope, q, Y, ::ProjectionRetraction)
 
 compute a projection based retraction by projecting $q+Y$ back onto the manifold.
