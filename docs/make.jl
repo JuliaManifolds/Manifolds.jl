@@ -25,6 +25,7 @@ makedocs(
                 "Centered matrices" => "manifolds/centeredmatrices.md",
                 "Cholesky space" => "manifolds/choleskyspace.md",
                 "Circle" => "manifolds/circle.md",
+                "Elliptope" => "manifolds/elliptope.md",
                 "Euclidean" => "manifolds/euclidean.md",
                 "Fixed-rank matrices" => "manifolds/fixedrankmatrices.md",
                 "Generalized Stiefel" => "manifolds/generalizedstiefel.md",
