@@ -44,6 +44,13 @@ struct TensorProductType{TS<:Tuple} <: VectorSpaceType
     spaces::TS
 end
 
+"""
+    ScalarSpaceType()
+
+Vector space of scalars.
+"""
+struct ScalarSpaceType <: VectorSpaceType end
+
 TensorProductType(spaces::VectorSpaceType...) = TensorProductType{typeof(spaces)}(spaces)
 
 """

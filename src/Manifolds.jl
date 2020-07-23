@@ -102,6 +102,8 @@ include("statistics.jl")
 
 include("manifolds/VectorBundle.jl")
 
+include("operators.jl")
+
 include("distributions.jl")
 include("projected_distribution.jl")
 include("product_representations.jl")
