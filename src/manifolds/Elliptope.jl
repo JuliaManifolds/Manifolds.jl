@@ -86,7 +86,7 @@ end
 @doc raw"""
     check_tangent_vector(M::Elliptope, q, Y; check_base_point = true, kwargs... )
 
-Check whether X = qY^{\mathrm{T}} + Yq^{\mathrm{T}} is a tangent vector to
+Check whether $X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}$ is a tangent vector to
 $p=qq^{\mathrm{T}}$ on the [`Elliptope`](@ref) `M`,
 i.e. atfer [`check_manifold_point`](@ref)`(M,p)`, `Y` has to be of same dimension as `q`
 and a symmetric matrix with zero diagonal.
@@ -151,20 +151,35 @@ returns the dimension of
     return N*(K-1) - div(K * (K - 1), 2)
 end
 
-function project(::Elliptope, q, Y)
-    Y2 = _project_rows(q,Y)
+"""
+    project(M::Elliptope, q)
+
+project `q` onto the manifold [`Elliptope`](@ref) `M`, by normalizing the rows of `q`.
+"""
+project(::Elliptope, ::Any)
+
+project!(::Elliptope, r, q) = copyto!(r, q./sum(abs2, q, dims=1) )
+
+"""
+    project(M::Elliptope, q, Y)
+
+Project `Y` onto the tangent space at `q`, i.e. row-wise onto the oblique manifold.
+"""
+project(::Elliptope, ::Any...)
+
+function project!(::Elliptope, Z, q, Y)
+    Y2 =  (Y'-q'.*sum(q'.*Y',dims=1))'
     return Y2 - q*lyap(q'*q, q'*Y2 - Y2'*q)
 end
 
-function _project_rows(q,Y)
-    inners = sum(q'.*Y',dims=1)
-    return (Y'-q'.*inners)'
-end
+"""
+    retract(M::Elliptope, q, Y, ::ProjectionRetraction)
 
-function retract!(::Elliptope, r, q, Y, ::ProjectionRetraction)
-    _normalize_dim(r,q+Y)
-    return r
-end
+compute a projection based retraction by projecting $q+Y$ back onto the manifold.
+"""
+retract(::Elliptope, ::Any, ::Any, ::ProjectionRetraction)
+
+retract!(M::Elliptope, r, q, Y, ::ProjectionRetraction) = project!(M, r, q+Y)
 
 @doc raw"""
     representation_size(M::Elliptope)
@@ -188,6 +203,3 @@ definite matrix `p` on the [`Elliptope`](@ref) manifold `M`.
 zero_tangent_vector(::Elliptope, ::Any...)
 
 zero_tangent_vector!(::Elliptope{N,K}, v, ::Any) where {N, K} = fill!(v, 0)
-
-_normalize_dims(X, d=1) = X./sum(abs2, X, dims=d)
-_normalize_dim(Y, X, d=1) = copyto!(Y, X./sum(abs2, X, dims=d))
