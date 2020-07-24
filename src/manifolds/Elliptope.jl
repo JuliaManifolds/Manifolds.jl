@@ -1,5 +1,5 @@
 @doc raw"""
-    Elliptope{N,K} <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding}
+    Elliptope{N,K} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType}
 
 The Elliptope manifold, also known as the set of correlation matricesmanifold of symmetric positive definite matrices, i.e.
 
@@ -22,7 +22,7 @@ The tangent space at $p$, $T_p\mathcal E(n,k)$ also represented matrices $Y\in �
 
 ````math
 T_p\mathcal E(n,k) = \bigl\{
-X ∈ ℝ^{n × n} | X = qY^{\mathrm{T}} + Yq^{\mathrm{T}} \text{ with } X_{ii} = 0 \text{ for } i=1,\ldots,n
+X ∈ ℝ^{n × n}\,|\,X = qY^{\mathrm{T}} + Yq^{\mathrm{T}} \text{ with } X_{ii} = 0 \text{ for } i=1,\ldots,n
 \bigr\}
 ````
 endowed with the Euclidean metric from the embedding, i.e. from the $ℝ^{n × k}$
@@ -44,7 +44,7 @@ generates the manifold $\mathcal E(n,k) \subset ℝ^{n × n}$.
     > doi: [10.1137/080731359](https://doi.org/10.1137/080731359),
     > arXiv: [0807.4423](http://arxiv.org/abs/0807.4423).
 """
-struct Elliptope{N,K} <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
+struct Elliptope{N,K} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
 
 Elliptope(n::Int, k::Int) = Elliptope{n,k}()
 
@@ -54,30 +54,19 @@ Elliptope(n::Int, k::Int) = Elliptope{n,k}()
 checks, whether `q` is a valid reprsentation of a point $p=qq^{\mathrm{T}}$ on the
 [`Elliptope`](@ref) `M`, i.e. is a matrix
 of size `(N,K)`, such that $p$ is symmetric positive semidefinite and has unit trace.
-The tolerances for these two tests can be set using the `kwargs...`.
+Since by construction $p$ is symmetric, this is not explicitly checked.
+Since $p$ is by construction positive semidefinite, this is not checked.
+The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
 """
 function check_manifold_point(M::Elliptope{N,K}, q; kwargs...) where {N,K}
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
     mpv === nothing || return mpv
-    p = q*q'
-    if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
-        return DomainError(
-            norm(p - transpose(p)),
-            "The point $(p) (given by $(q) times its transpose) does not lie on $(M) since its not a symmetric matrix.",
-        )
-    end
-    if !all(eigvals(p) .>= 0)
-        return DomainError(
-            eigvals(p),
-            "The point $(p) (given by $(q) times its transpose) does not lie on $(M) since its not a positive semidefinite matrix.",
-        )
-    end
-    row_norms_sq = sum(abs2, q; dims=1)
+    row_norms_sq = sum(abs2, q; dims=2)
     if !all(isapprox.(row_norms_sq, 1.0; kwargs...))
         return DomainError(
             row_norms_sq,
-            "The point $(p) (given by $(q) times its transpose) since its diagonal is not only ones (or the norms of q) and hence does not lie on $(M).",
+            "The point $(q) does not represent a point p=qq^T on $(M) diagonal is not only ones and hence does not lie on $(M).",
         )
     end
     return nothing
@@ -91,7 +80,8 @@ $p=qq^{\mathrm{T}}$ on the [`Elliptope`](@ref) `M`,
 i.e. atfer [`check_manifold_point`](@ref)`(M,p)`, `Y` has to be of same dimension as `q`
 and a symmetric matrix with zero diagonal.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `q`.
-The tolerance for the base point check, symmetry and zero diagonal can be set using the `kwargs...`.
+The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
+Note that symmetric of $X$ holds by construction an is not explicitly checked.
 """
 function check_tangent_vector(
     M::Elliptope{N,K},
@@ -101,26 +91,20 @@ function check_tangent_vector(
     kwargs...,
 ) where {N,K}
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_manifold_point(M, q; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(
         check_tangent_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
+        Tuple{supertype(typeof(M)),typeof(q),typeof(Y)},
         M,
-        p,
-        X;
+        q,
+        Y;
         check_base_point = false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
     X = q*Y' + Y*q'
-    if !isapprox(norm(X - transpose(X)), 0.0; kwargs...)
-        return DomainError(
-            X,
-            "The vector $(X) is not a tangent to a point on $(M) (represented as an element of the Lie algebra) since its not symmetric.",
-        )
-    end
     n = diag(X)
     if !all(isapprox.(n,0.0; kwargs...))
         return DomainError(
@@ -169,7 +153,8 @@ project(::Elliptope, ::Any...)
 
 function project!(::Elliptope, Z, q, Y)
     Y2 =  (Y'-q'.*sum(q'.*Y',dims=1))'
-    return Y2 - q*lyap(q'*q, q'*Y2 - Y2'*q)
+    Z .= Y2 - q*lyap(q'*q, q'*Y2 - Y2'*q)
+    return Z
 end
 
 @doc raw"""
@@ -188,7 +173,7 @@ Return the size of an array representing an element on the
 [`Elliptope`](@ref) manifold `M`, i.e. $n × k$, the size of such factor of $p=qq^{\mathrm{T}}$
 on $\mathcal M = \mathcal E(n,k)$.
 """
-@generated representation_size(::Elliptope{N}) where {N,K} = (N, K)
+@generated representation_size(::Elliptope{N,K}) where {N,K} = (N, K)
 
 function Base.show(io::IO, ::Elliptope{N,K}) where {N,K}
     return print(io, "Elliptope($(N), $(K))")
