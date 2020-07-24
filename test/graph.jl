@@ -28,7 +28,7 @@ include("utils.jl")
             N,
             pts;
             test_representation_size = false,
-            test_reverse_diff = VERSION > v"1.2",
+            test_reverse_diff = false,#VERSION > v"1.2",
         )
         @test sprint(show, "text/plain", N) == """
         GraphManifold
