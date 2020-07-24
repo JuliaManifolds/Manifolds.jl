@@ -10,7 +10,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test sprint(show, TangentSpace) == "TangentSpace"
         @test sprint(show, CotangentSpace) == "CotangentSpace"
         tvs = ([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
-        fv_tvs = map(v -> FVector(TangentSpace, v), tvs)
+        fv_tvs = map(v -> TFVector{ℝ}(v), tvs)
         fv1 = fv_tvs[1]
         tv1s = allocate(fv_tvs[1])
         @test isa(tv1s, FVector)
@@ -32,15 +32,15 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test_throws ErrorException flat(
             PM,
             ProductRepr([0.0], [0.0]),
-            FVector(CotangentSpace, ProductRepr([0.0], [0.0])),
+            CoTFVector{ℝ}(ProductRepr([0.0], [0.0])),
         )
         @test_throws ErrorException sharp(
             PM,
             ProductRepr([0.0], [0.0]),
-            FVector(TangentSpace, ProductRepr([0.0], [0.0])),
+            TFVector{ℝ}(ProductRepr([0.0], [0.0])),
         )
 
-        fv2 = FVector(TangentSpace, ProductRepr([1, 0, 0], [1 2]))
+        fv2 = TFVector{ℝ}(ProductRepr([1, 0, 0], [1 2]))
         @test submanifold_component(fv2, 1) == [1, 0, 0]
         @test submanifold_component(fv2, 2) == [1 2]
         @test (@inferred submanifold_component(fv2, Val(1))) == [1, 0, 0]
@@ -147,7 +147,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
     end
 
     @testset "tensor product" begin
-        TT = Manifolds.TensorProductType(TangentSpace, TangentSpace)
+        TT = Manifolds.TensorProductType(TangentSpaceType(ℝ), TangentSpaceType(ℝ))
         @test sprint(show, TT) == "TensorProductType(TangentSpace, TangentSpace)"
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(2))) == 4
         @test vector_space_dimension(VectorBundleFibers(TT, Sphere(3))) == 9
@@ -194,6 +194,6 @@ struct TestVectorSpaceType <: VectorSpaceType end
         tbvt = Manifolds.VectorBundleVectorTransport(ppt, ppt)
         @test TangentBundle(M, tbvt).vector_transport === tbvt
         @test CotangentBundle(M, tbvt).vector_transport === tbvt
-        @test VectorBundle(TangentSpace, M, tbvt).vector_transport === tbvt
+        @test VectorBundle(TangentSpaceType(ℝ), M, tbvt).vector_transport === tbvt
     end
 end

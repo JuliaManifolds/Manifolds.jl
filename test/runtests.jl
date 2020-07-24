@@ -29,6 +29,7 @@ include("utils.jl")
       "Testing Double64: $(TEST_DOUBLE64)\n" *
       "Testing Static:   $(TEST_STATIC_SIZED)\n"
 
+include("vector_space.jl")
 include("groups/group_utils.jl")
 include("sized_abstract_array.jl")
 

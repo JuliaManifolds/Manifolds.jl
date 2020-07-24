@@ -187,8 +187,8 @@ function allocate_result(
     ::typeof(get_vector),
     ::Identity{GT},
     Xⁱ,
-) where {GT<:AbstractGroupManifold}
-    B = VectorBundleFibers(TangentSpace, G)
+) where {𝔽,GT<:AbstractGroupManifold{𝔽}}
+    B = TangentBundleFibers(G)
     return allocate(Xⁱ, Size(representation_size(B)))
 end
 

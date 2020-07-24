@@ -125,12 +125,12 @@ function ManifoldTests.test_manifold(
         Test.@test manifold_dimension(M) ≥ 0
         Test.@test manifold_dimension(M) ==
                    vector_space_dimension(Manifolds.VectorBundleFibers(
-            Manifolds.TangentSpace,
+            Manifolds.TangentSpaceType(ℝ),
             M,
         ))
         Test.@test manifold_dimension(M) ==
                    vector_space_dimension(Manifolds.VectorBundleFibers(
-            Manifolds.CotangentSpace,
+            Manifolds.CotangentSpaceType(ℝ),
             M,
         ))
     end
@@ -145,7 +145,7 @@ function ManifoldTests.test_manifold(
         end
 
         test_repr(Manifolds.representation_size(M))
-        for fiber in (Manifolds.TangentSpace, Manifolds.CotangentSpace)
+        for fiber in (Manifolds.TangentSpaceType(ℝ), Manifolds.CotangentSpaceType(ℝ))
             test_repr(Manifolds.representation_size(Manifolds.VectorBundleFibers(fiber, M)))
         end
     end
@@ -316,7 +316,7 @@ function ManifoldTests.test_manifold(
     test_vector_spaces && Test.@testset "vector spaces tests" begin
         for p in pts
             X = zero_tangent_vector(M, p)
-            mts = Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M)
+            mts = TangentBundleFibers(M)
             Test.@test isapprox(M, p, X, zero_vector(mts, p))
             if is_mutating
                 zero_vector!(mts, X, p)
@@ -559,10 +559,10 @@ function ManifoldTests.test_manifold(
         else
             tv_m = zero_tangent_vector(M, pts[1])
         end
-        ctv_m = flat(M, pts[1], FVector(TangentSpace, tv_m))
-        Test.@test ctv_m.type == CotangentSpace
+        ctv_m = flat(M, pts[1], TFVector{ℝ}(tv_m))
+        Test.@test ctv_m.type == CotangentSpaceType(ℝ)
         tv_m_back = sharp(M, pts[1], ctv_m)
-        Test.@test tv_m_back.type == TangentSpace
+        Test.@test tv_m_back.type == TangentSpaceType(ℝ)
     end
 
     Test.@testset "number_eltype" begin
