@@ -62,7 +62,7 @@ function check_manifold_point(M::Elliptope{N,K}, q; kwargs...) where {N,K}
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
     mpv === nothing || return mpv
-    row_norms_sq = sum(abs2, q; dims=2)
+    row_norms_sq = sum(abs2, q; dims = 2)
     if !all(isapprox.(row_norms_sq, 1.0; kwargs...))
         return DomainError(
             row_norms_sq,
@@ -104,9 +104,9 @@ function check_tangent_vector(
         kwargs...,
     )
     mpv === nothing || return mpv
-    X = q*Y' + Y*q'
+    X = q * Y' + Y * q'
     n = diag(X)
-    if !all(isapprox.(n,0.0; kwargs...))
+    if !all(isapprox.(n, 0.0; kwargs...))
         return DomainError(
             n,
             "The vector $(X) is not a tangent to a point on $(M) (represented py $(q) and $(Y), since its diagonal is nonzero.",
@@ -132,7 +132,7 @@ returns the dimension of
 ````
 """
 @generated function manifold_dimension(::Elliptope{N,K}) where {N,K}
-    return N*(K-1) - div(K * (K - 1), 2)
+    return N * (K - 1) - div(K * (K - 1), 2)
 end
 
 """
@@ -142,7 +142,7 @@ project `q` onto the manifold [`Elliptope`](@ref) `M`, by normalizing the rows o
 """
 project(::Elliptope, ::Any)
 
-project!(::Elliptope, r, q) = copyto!(r, q./sum(abs2, q, dims=1) )
+project!(::Elliptope, r, q) = copyto!(r, q ./ sum(abs2, q, dims = 1))
 
 """
     project(M::Elliptope, q, Y)
@@ -152,8 +152,8 @@ Project `Y` onto the tangent space at `q`, i.e. row-wise onto the oblique manifo
 project(::Elliptope, ::Any...)
 
 function project!(::Elliptope, Z, q, Y)
-    Y2 =  (Y'-q'.*sum(q'.*Y',dims=1))'
-    Z .= Y2 - q*lyap(q'*q, q'*Y2 - Y2'*q)
+    Y2 = (Y' - q' .* sum(q' .* Y', dims = 1))'
+    Z .= Y2 - q * lyap(q' * q, q' * Y2 - Y2' * q)
     return Z
 end
 
@@ -164,7 +164,7 @@ compute a projection based retraction by projecting $q+Y$ back onto the manifold
 """
 retract(::Elliptope, ::Any, ::Any, ::ProjectionRetraction)
 
-retract!(M::Elliptope, r, q, Y, ::ProjectionRetraction) = project!(M, r, q+Y)
+retract!(M::Elliptope, r, q, Y, ::ProjectionRetraction) = project!(M, r, q + Y)
 
 @doc raw"""
     representation_size(M::Elliptope)
@@ -187,4 +187,4 @@ definite matrix `p` on the [`Elliptope`](@ref) manifold `M`.
 """
 zero_tangent_vector(::Elliptope, ::Any...)
 
-zero_tangent_vector!(::Elliptope{N,K}, v, ::Any) where {N, K} = fill!(v, 0)
+zero_tangent_vector!(::Elliptope{N,K}, v, ::Any) where {N,K} = fill!(v, 0)
