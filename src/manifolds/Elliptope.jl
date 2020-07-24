@@ -77,8 +77,8 @@ end
 
 Check whether $X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}$ is a tangent vector to
 $p=qq^{\mathrm{T}}$ on the [`Elliptope`](@ref) `M`,
-i.e. atfer [`check_manifold_point`](@ref)`(M,p)`, `Y` has to be of same dimension as `q`
-and a symmetric matrix with zero diagonal.
+i.e. atfer [`check_manifold_point`](@ref) of `q`, `Y` has to be of same dimension as `q`
+and a $X$ has to be a symmetric matrix with zero diagonal.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `q`.
 The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
 Note that symmetric of $X$ holds by construction an is not explicitly checked.
