@@ -179,6 +179,19 @@ function Base.show(io::IO, ::Elliptope{N,K}) where {N,K}
     return print(io, "Elliptope($(N), $(K))")
 end
 
+"""
+    vector_transport_to(M::Elliptope, p, X, q)
+
+transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
+at `q`.
+"""
+vector_transport_to(::Elliptope, ::Any, ::Any, ::Any, ::ProjectionTransport)
+
+function vector_transport_to!(M::Elliptope, Y, p, X, q, ::ProjectionTransport)
+    project!(M, Y, q, X)
+    return Y
+end
+
 @doc raw"""
     zero_tangent_vector(M::Elliptope,p)
 

@@ -22,6 +22,13 @@ include("utils.jl")
     @test qE2 == q
     q2 = [4.0 / 5 3.0 / 5; 3.0 / 5.0 -4.0 / 5.0; 1.0 0.0; 0.0 1.0]
     q3 = [12.0 / 13.0 5.0 / 13.0; 1.0 0.0; -12.0 / 13.0 5.0 / 13.0; 0.0 1.0]
+    @test is_tangent_vector(
+        M,
+        q2,
+        vector_transport_to(M, q, Y, q2, ProjectionTransport());
+        atol = 10^-15,
+    )
+
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{3,3,Float64,9})
