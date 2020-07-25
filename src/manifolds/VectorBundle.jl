@@ -1,3 +1,57 @@
+"""
+    VectorSpaceType
+
+Abstract type for tangent spaces, cotangent spaces, their tensor products,
+exterior products, etc.
+
+Every vector space `fiber` is supposed to provide:
+* a method of constructing vectors,
+* basic operations: addition, subtraction, multiplication by a scalar
+  and negation (unary minus),
+* [`zero_vector!(fiber, X, p)`](@ref) to construct zero vectors at point `p`,
+* `allocate(X)` and `allocate(X, T)` for vector `X` and type `T`,
+* `copyto!(X, Y)` for vectors `X` and `Y`,
+* `number_eltype(v)` for vector `v`,
+* [`vector_space_dimension(::VectorBundleFibers{<:typeof(fiber)}) where fiber`](@ref).
+
+Optionally:
+* inner product via `inner` (used to provide Riemannian metric on vector
+  bundles),
+* [`flat`](@ref) and [`sharp`](@ref),
+* `norm` (by default uses `inner`),
+* [`project`](@ref) (for embedded vector spaces),
+* [`representation_size`](@ref) (if support for [`ProductArray`](@ref) is desired),
+* broadcasting for basic operations.
+"""
+abstract type VectorSpaceType end
+
+struct TangentSpaceType <: VectorSpaceType end
+
+struct CotangentSpaceType <: VectorSpaceType end
+
+TCoTSpaceType = Union{TangentSpaceType,CotangentSpaceType}
+
+const TangentSpace = TangentSpaceType()
+const CotangentSpace = CotangentSpaceType()
+
+"""
+    TensorProductType(spaces::VectorSpaceType...)
+
+Vector space type corresponding to the tensor product of given vector space
+types.
+"""
+struct TensorProductType{TS<:Tuple} <: VectorSpaceType
+    spaces::TS
+end
+
+"""
+    ScalarSpaceType()
+
+Vector space of scalars.
+"""
+struct ScalarSpaceType <: VectorSpaceType end
+
+TensorProductType(spaces::VectorSpaceType...) = TensorProductType{typeof(spaces)}(spaces)
 
 """
     VectorBundleFibers(fiber::VectorSpaceType, M::Manifold)
@@ -15,34 +69,14 @@ struct VectorBundleFibers{TVS<:VectorSpaceType,TM<:Manifold}
     manifold::TM
 end
 
-const TangentBundleFibers{M} =
-    VectorBundleFibers{TangentSpaceType{𝔽},M} where {𝔽,M<:Manifold{𝔽}}
+const TangentBundleFibers{M} = VectorBundleFibers{TangentSpaceType,M} where {M<:Manifold}
 
-"""
-    TangentBundleFibers(M::Manifold{𝔽}) where {𝔽}
-
-Construct a [`VectorBundleFibers`](@ref) object for the given manifold `M`. By default
-a complex vector space is constructed for complex manifolds. You can directly use
-`VectorBundleFibers(TangentSpaceType(ℝ), M)` for a real-coefficient tangent space.
-
-!!! note
-
-    Number system argument of [`AbstractBasis`](@ref) is used to define a field for
-    coefficients of tangent vectors, not of the vector space. So a real-coefficient
-    tangent space of a complex manifold would correspond to a complex basis of the same
-    tangent space, although complex bases are not guaranteed to always have real
-    coefficients.
-"""
-function TangentBundleFibers(M::Manifold{𝔽}) where {𝔽}
-    return VectorBundleFibers(TangentSpaceType(𝔽), M)
-end
+TangentBundleFibers(M::Manifold) = VectorBundleFibers(TangentSpace, M)
 
 const CotangentBundleFibers{M} =
-    VectorBundleFibers{CotangentSpaceType{𝔽},M} where {𝔽,M<:Manifold{𝔽}}
+    VectorBundleFibers{CotangentSpaceType,M} where {M<:Manifold}
 
-function CotangentBundleFibers(M::Manifold{𝔽}) where {𝔽}
-    return VectorBundleFibers(CotangentSpaceType(𝔽), M)
-end
+CotangentBundleFibers(M::Manifold) = VectorBundleFibers(CotangentSpace, M)
 
 """
     VectorSpaceAtPoint(fiber::VectorBundleFibers, p)
@@ -98,8 +132,6 @@ end
     VectorBundle{𝔽,TVS<:VectorSpaceType,TM<:Manifold{𝔽}} <: Manifold{𝔽}
 
 Vector bundle on a [`Manifold`](@ref) `M` of type [`VectorSpaceType`](@ref).
-Note that the vector space `TVS` may be over a different number system than the wrapped
-manifold.
 
 # Constructor
 
@@ -130,34 +162,18 @@ function VectorBundle(fiber::VectorSpaceType, M::Manifold)
     return VectorBundle(fiber, M, vtbm)
 end
 
-"""
-    TangentBundle{𝔽,M}
+const TangentBundle{𝔽,M} = VectorBundle{𝔽,TangentSpaceType,M} where {𝔽,M<:Manifold{𝔽}}
 
-Tangent bundle over manifold of type `M`. Tangent spaces are over number system `𝔽`
-which may be different than the number system of `M`.
-"""
-const TangentBundle{𝔽,M} = VectorBundle{𝔽,TangentSpaceType{𝔽},M} where {𝔽,M<:Manifold}
-
-function TangentBundle(M::Manifold{𝔽}) where {𝔽}
-    return VectorBundle(TangentSpaceType(𝔽), M)
-end
-function TangentBundle(M::Manifold{𝔽}, vtm::VectorBundleVectorTransport) where {𝔽}
-    return VectorBundle(TangentSpaceType(𝔽), M, vtm)
+TangentBundle(M::Manifold) = VectorBundle(TangentSpace, M)
+function TangentBundle(M::Manifold, vtm::VectorBundleVectorTransport)
+    return VectorBundle(TangentSpace, M, vtm)
 end
 
-"""
-    CotangentBundle{𝔽,M}
+const CotangentBundle{𝔽,M} = VectorBundle{𝔽,CotangentSpaceType,M} where {𝔽,M<:Manifold{𝔽}}
 
-Cotangent bundle over manifold of type `M`. Tangent spaces are over number system `𝔽`
-which may be different than the number system of `M`.
-"""
-const CotangentBundle{𝔽,M} = VectorBundle{𝔽,CotangentSpaceType{𝔽},M} where {𝔽,M<:Manifold}
-
-function CotangentBundle(M::Manifold{𝔽}) where {𝔽}
-    return VectorBundle(CotangentSpaceType(𝔽), M)
-end
-function CotangentBundle(M::Manifold{𝔽}, vtm::VectorBundleVectorTransport) where {𝔽}
-    return VectorBundle(CotangentSpaceType(𝔽), M, vtm)
+CotangentBundle(M::Manifold) = VectorBundle(CotangentSpace, M)
+function CotangentBundle(M::Manifold, vtm::VectorBundleVectorTransport)
+    return VectorBundle(CotangentSpace, M, vtm)
 end
 
 """
@@ -171,36 +187,20 @@ struct FVector{TType<:VectorSpaceType,TData}
     data::TData
 end
 
-const TFVector{𝔽} = FVector{TangentSpaceType{𝔽}}
-const CoTFVector{𝔽} = FVector{CotangentSpaceType{𝔽}}
-
-function TFVector{𝔽}(data) where {𝔽}
-    return FVector(TangentSpaceType(𝔽), data)
-end
-
-function CoTFVector{𝔽}(data) where {𝔽}
-    return FVector(CotangentSpaceType(𝔽), data)
-end
+const TFVector = FVector{TangentSpaceType}
+const CoTFVector = FVector{CotangentSpaceType}
 
 struct VectorBundleBasisData{BBasis<:CachedBasis,TBasis<:CachedBasis}
     base_basis::BBasis
     vec_basis::TBasis
 end
 
-function Base.:+(X::FVector{𝔽}, Y::FVector{𝔽}) where {𝔽}
-    return FVector{𝔽}(X.type, X.data + Y.data)
-end
+Base.:+(X::FVector, Y::FVector) = FVector(X.type, X.data + Y.data)
 
-function Base.:-(X::FVector{𝔽}, Y::FVector{𝔽}) where {𝔽}
-    return FVector{𝔽}(X.type, X.data - Y.data)
-end
-function Base.:-(X::FVector{𝔽}) where {𝔽}
-    return FVector(X.type, -X.data)
-end
+Base.:-(X::FVector, Y::FVector) = FVector(X.type, X.data - Y.data)
+Base.:-(X::FVector) = FVector(X.type, -X.data)
 
-function Base.:*(a::Number, X::FVector{𝔽}) where {𝔽}
-    return FVector{𝔽}(X.type, a * X.data)
-end
+Base.:*(a::Number, X::FVector) = FVector(X.type, a * X.data)
 
 function Base.copyto!(X::FVector, Y::FVector)
     copyto!(X.data, Y.data)
@@ -493,12 +493,12 @@ function inner(B::VectorBundleFibers, p, X, Y)
     )
 end
 inner(B::VectorBundleFibers{<:TangentSpaceType}, p, X, Y) = inner(B.manifold, p, X, Y)
-function inner(B::VectorBundleFibers{<:CotangentSpaceType{𝔽}}, p, X, Y) where {𝔽}
+function inner(B::VectorBundleFibers{<:CotangentSpaceType}, p, X, Y)
     return inner(
         B.manifold,
         p,
-        sharp(B.manifold, p, CoTFVector{𝔽}(X)).data,
-        sharp(B.manifold, p, CoTFVector{𝔽}(Y)).data,
+        sharp(B.manifold, p, FVector(CotangentSpace, X)).data,
+        sharp(B.manifold, p, FVector(CotangentSpace, Y)).data,
     )
 end
 @doc raw"""
@@ -739,11 +739,11 @@ function allocate_result(B::VectorBundleFibers, f, x...)
     T = allocate_result_type(B, f, x)
     return allocate(x[1], T)
 end
-function allocate_result(M::Manifold, ::typeof(flat), w::TFVector{𝔽}, x) where {𝔽}
-    return FVector(CotangentSpaceType(𝔽), allocate(w.data))
+function allocate_result(M::Manifold, ::typeof(flat), w::TFVector, x)
+    return FVector(CotangentSpace, allocate(w.data))
 end
-function allocate_result(M::Manifold, ::typeof(sharp), w::CoTFVector{𝔽}, x) where {𝔽}
-    return FVector(TangentSpaceType(𝔽), allocate(w.data))
+function allocate_result(M::Manifold, ::typeof(sharp), w::CoTFVector, x)
+    return FVector(TangentSpace, allocate(w.data))
 end
 
 """

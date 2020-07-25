@@ -190,16 +190,16 @@ function allocate_result(M::PowerManifoldNested, f, x...)
         for i in get_iterator(M)
     ]
 end
-function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector{𝔽}, x) where {𝔽}
+function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x)
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
-    return FVector(CotangentSpaceType(𝔽), alloc)
+    return FVector(CotangentSpace, alloc)
 end
 function allocate_result(M::PowerManifoldNested, f::typeof(get_vector), p, X)
     return [allocate_result(M.manifold, f, _access_nested(p, i)) for i in get_iterator(M)]
 end
-function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector{𝔽}, x) where {𝔽}
+function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector, x)
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
-    return FVector(TangentSpaceType(𝔽), alloc)
+    return FVector(TangentSpace, alloc)
 end
 function allocate_result(
     M::PowerManifoldNested,
@@ -333,14 +333,14 @@ This can be done elementwise for each entry of `X` (and `p`).
 """
 flat(::AbstractPowerManifold, ::Any...)
 
-function flat!(M::AbstractPowerManifold, ξ::CoTFVector, p, X::TFVector{𝔽}) where {𝔽}
+function flat!(M::AbstractPowerManifold, ξ::CoTFVector, p, X::TFVector)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         flat!(
             M.manifold,
-            FVector(CotangentSpaceType(𝔽), _write(M, rep_size, ξ.data, i)),
+            FVector(CotangentSpace, _write(M, rep_size, ξ.data, i)),
             _read(M, rep_size, p, i),
-            FVector(TangentSpaceType(𝔽), _read(M, rep_size, X.data, i)),
+            FVector(TangentSpace, _read(M, rep_size, X.data, i)),
         )
     end
     return ξ
@@ -845,14 +845,14 @@ This can be done elementwise for every entry of `ξ` (and `p`).
 """
 sharp(::AbstractPowerManifold, ::Any...)
 
-function sharp!(M::AbstractPowerManifold, X::TFVector, p, ξ::CoTFVector{𝔽}) where {𝔽}
+function sharp!(M::AbstractPowerManifold, X::TFVector, p, ξ::CoTFVector)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         sharp!(
             M.manifold,
-            FVector(TangentSpaceType(𝔽), _write(M, rep_size, X.data, i)),
+            FVector(TangentSpace, _write(M, rep_size, X.data, i)),
             _read(M, rep_size, p, i),
-            FVector(CotangentSpaceType(𝔽), _read(M, rep_size, ξ.data, i)),
+            FVector(CotangentSpace, _read(M, rep_size, ξ.data, i)),
         )
     end
     return X

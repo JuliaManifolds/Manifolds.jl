@@ -426,9 +426,9 @@ end
         @test get_basis(M, x, DefaultOrthonormalBasis()).data ==
               get_basis(MM2, x, DefaultOrthonormalBasis()).data
         @test_throws ErrorException get_basis(MM, x, DefaultOrthonormalBasis())
-        cov = flat(M, x, TFVector{ℝ}(v))
-        cow = flat(M, x, TFVector{ℝ}(w))
-        @test cov.data ≈ flat(MM, x, TFVector{ℝ}(v)).data
+        cov = flat(M, x, FVector(TangentSpace, v))
+        cow = flat(M, x, FVector(TangentSpace, w))
+        @test cov.data ≈ flat(MM, x, FVector(TangentSpace, v)).data
         cotspace = CotangentBundleFibers(M)
         cotspace2 = CotangentBundleFibers(MM)
         @test cov.data ≈ 2 * v

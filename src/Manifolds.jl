@@ -94,8 +94,6 @@ using StatsBase
 using StatsBase: AbstractWeights
 
 include("utils.jl")
-include("vector_space.jl")
-
 include("differentiation.jl")
 include("riemannian_diff.jl")
 include("SizedAbstractArray.jl")
@@ -104,6 +102,7 @@ include("statistics.jl")
 
 include("manifolds/VectorBundle.jl")
 
+include("operators.jl")
 
 include("distributions.jl")
 include("projected_distribution.jl")
@@ -224,7 +223,7 @@ export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 export AbstractDecoratorManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export CotangentBundle,
-    CotangentSpaceAtPoint, CotangentBundleFibers, FVector, TFVector, CoTFVector
+    CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
 export AbstractPowerManifold,
     AbstractPowerRepresentation,
     ArrayPowerRepresentation,
@@ -233,7 +232,7 @@ export AbstractPowerManifold,
 export ProductManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers
-export TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
+export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
 export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribution
 export PoleLadderTransport, SchildsLadderTransport
