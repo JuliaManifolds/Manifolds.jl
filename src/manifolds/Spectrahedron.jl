@@ -193,7 +193,7 @@ at `q`.
 vector_transport_to(::Spectrahedron, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
 function vector_transport_to!(M::Spectrahedron, Y, p, X, q, ::ProjectionTransport)
-    project!(M,Y,q,X)
+    project!(M, Y, q, X)
     return Y
 end
 
