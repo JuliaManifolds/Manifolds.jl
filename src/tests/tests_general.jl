@@ -77,7 +77,6 @@ function ManifoldTests.test_manifold(
     is_mutating = true,
     is_point_atol_multiplier = 0,
     is_tangent_atol_multiplier = 0,
-    mid_point12 = shortest_geodesic(M, pts[1], pts[2], 0.5),
     point_distributions = [],
     projection_atol_multiplier = 0,
     rand_tvector_atol_multiplier = 0,
@@ -100,6 +99,7 @@ function ManifoldTests.test_manifold(
     test_vee_hat = false,
     tvector_distributions = [],
     vector_transport_methods = [],
+    mid_point12 = test_exp_log ? shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing,
 )
 
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
