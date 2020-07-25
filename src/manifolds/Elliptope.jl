@@ -6,9 +6,9 @@ The Elliptope manifold, also known as the set of correlation matricesmanifold of
 ````math
 \begin{aligned}
 \mathcal E(n,k) =
-\bigl\{p ∈ ℝ^{n × n}\ \big|\ &a^\mathrm{T}pa \geq 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\},\\
+\bigl\{p ∈ ℝ^{n × n}\ \big|\ &a^\mathrm{T}pa \geq 0 \text{ for all } a ∈ ℝ^{n},\\
 &p_{ii} = 1 \text{ for all } i=1,\ldots,n,\\
-&\text{and } p = qq^{\mathrm{T}} \text{ for } q \in  ℝ^{n × k} \text{ with } \operatorname{rank}(q) = k
+&\text{and } p = qq^{\mathrm{T}} \text{ for } q \in  ℝ^{n × k} \text{ with } \operatorname{rank}(p) = \operatorname{rank}(q) = k
 \bigr\}.
 \end{aligned}
 ````
