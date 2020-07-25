@@ -1,8 +1,8 @@
 @doc raw"""
     Spectrahedron{N,K} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType}
 
-The Spectrahedron manifold, also known as the set of correlation matrices of symmetric
-positive semidefinite matrices of rank $k$ with unit trace.
+The Spectrahedron manifold, also known as the set of correlation matrices (symmetric
+positive semidefinite matrices) of rank $k$ with unit trace.
 
 ````math
 \begin{aligned}
@@ -85,7 +85,7 @@ i.e. atfer [`check_manifold_point`](@ref) of `q`, `Y` has to be of same dimensio
 and a $X$ has to be a symmetric matrix with trace.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `q`.
 The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
-Note that symmetric of $X$ holds by construction an is not explicitly checked.
+Note that symmetry of $X$ holds by construction and is not explicitly checked.
 """
 function check_tangent_vector(
     M::Spectrahedron{N,K},
