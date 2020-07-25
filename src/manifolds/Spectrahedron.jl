@@ -20,7 +20,9 @@ indeed for any orthogonal matrix $A$ we have $(qA)(qA)^{\mathrm{T}} = qq^{\mathr
 so the manifold implemented here is the quotient manifold. The unit trace translates to
 unit frobenius norm of $q$.
 
-The tangent space at $p$, $T_p\mathcal S(n,k)$ also represented matrices $Y\in ℝ^{n × k}$ reads as
+
+The tangent space at $p$, denoted $T_p\mathcal E(n,k)$, is also represented by matrices
+$Y\in ℝ^{n × k}$ and reads as
 
 ````math
 T_p\mathcal S(n,k) = \bigl\{
