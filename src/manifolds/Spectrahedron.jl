@@ -157,8 +157,8 @@ Project `Y` onto the tangent space at `q`, i.e. row-wise onto the oblique manifo
 project(::Spectrahedron, ::Any...)
 
 function project!(::Spectrahedron, Z, q, Y)
-    Y2 = Y - sum(q.*Y)*q
-    Z .= Y - q * lyap(q' * q, - (q' * Y2 - Y2' * q) )
+    Y2 = Y - sum(q .* Y) * q
+    Z .= Y - q * lyap(q' * q, -(q' * Y2 - Y2' * q))
     return Z
 end
 

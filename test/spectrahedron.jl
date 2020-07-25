@@ -1,13 +1,13 @@
 include("utils.jl")
 
-  @testset "Spectrahedron" begin
+@testset "Spectrahedron" begin
     M = Spectrahedron(4, 2)
     @test repr(M) == "Spectrahedron(4, 2)"
     @test manifold_dimension(M) == 6
     @test get_embedding(M) == Euclidean(4, 2)
     @test representation_size(M) == (4, 2)
     q = [1.0 0.0; 0.0 1.0; 1.0 1.0; -1.0 1.0]
-    q = q/norm(q)
+    q = q / norm(q)
     @test is_manifold_point(M, q, true)
     @test base_manifold(M) === M
     qN = [2.0 0.0; 0.0 1.0; 1 / sqrt(2) -1 / sqrt(2); 1 / sqrt(2) 1 / sqrt(2)]
@@ -22,9 +22,9 @@ include("utils.jl")
     @test qE == q
     @test qE2 == q
     q2 = [4.0 / 5 3.0 / 5; 3.0 / 5.0 -4.0 / 5.0; 1.0 0.0; 0.0 1.0]
-    q2 = q2./norm(q2)
+    q2 = q2 ./ norm(q2)
     q3 = [12.0 / 13.0 5.0 / 13.0; 1.0 0.0; -12.0 / 13.0 5.0 / 13.0; 0.0 1.0]
-    q3 = q3./norm(q3)
+    q3 = q3 ./ norm(q3)
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{3,3,Float64,9})
