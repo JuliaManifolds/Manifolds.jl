@@ -136,6 +136,7 @@ include("manifolds/SymmetricPositiveDefinite.jl")
 include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
+include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 
 include("manifolds/Torus.jl")
 include("manifolds/Multinomial.jl")
@@ -215,6 +216,7 @@ export Euclidean,
     Stiefel,
     SymmetricMatrices,
     SymmetricPositiveDefinite,
+    SymmetricPositiveSemidefiniteFixedRank,
     Torus
 export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
