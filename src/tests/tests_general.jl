@@ -559,7 +559,7 @@ function ManifoldTests.test_manifold(
         else
             tv_m = zero_tangent_vector(M, pts[1])
         end
-        ctv_m = flat(M, pts[1], FVector(TangentSpace, tv_m))
+        ctv_m = flat(M, pts[1], TFVector(tv_m))
         Test.@test ctv_m.type == CotangentSpace
         tv_m_back = sharp(M, pts[1], ctv_m)
         Test.@test tv_m_back.type == TangentSpace

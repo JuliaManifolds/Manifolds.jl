@@ -279,8 +279,8 @@ entry in `p`) separately.
 flat(::ProductManifold, ::Any...)
 
 function flat!(M::ProductManifold, ξ::CoTFVector, p, X::TFVector)
-    vfs = map(u -> FVector(CotangentSpace, u), submanifold_components(ξ))
-    wfs = map(u -> FVector(TangentSpace, u), submanifold_components(X))
+    vfs = map(u -> CoTFVector(u), submanifold_components(ξ))
+    wfs = map(u -> TFVector(u), submanifold_components(X))
     map(flat!, M.manifolds, vfs, submanifold_components(M, p), wfs)
     return ξ
 end
@@ -962,8 +962,8 @@ This can be done elementwise for every entry of `ξ` (and `p`) separately
 sharp(::ProductManifold, ::Any...)
 
 function sharp!(M::ProductManifold, X::TFVector, p, ξ::CoTFVector)
-    vfs = map(u -> FVector(TangentSpace, u), submanifold_components(X))
-    wfs = map(u -> FVector(CotangentSpace, u), submanifold_components(ξ))
+    vfs = map(u -> TFVector(u), submanifold_components(X))
+    wfs = map(u -> CoTFVector(u), submanifold_components(ξ))
     map(sharp!, M.manifolds, vfs, submanifold_components(M, p), wfs)
     return X
 end

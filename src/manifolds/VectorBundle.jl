@@ -1,57 +1,3 @@
-"""
-    VectorSpaceType
-
-Abstract type for tangent spaces, cotangent spaces, their tensor products,
-exterior products, etc.
-
-Every vector space `fiber` is supposed to provide:
-* a method of constructing vectors,
-* basic operations: addition, subtraction, multiplication by a scalar
-  and negation (unary minus),
-* [`zero_vector!(fiber, X, p)`](@ref) to construct zero vectors at point `p`,
-* `allocate(X)` and `allocate(X, T)` for vector `X` and type `T`,
-* `copyto!(X, Y)` for vectors `X` and `Y`,
-* `number_eltype(v)` for vector `v`,
-* [`vector_space_dimension(::VectorBundleFibers{<:typeof(fiber)}) where fiber`](@ref).
-
-Optionally:
-* inner product via `inner` (used to provide Riemannian metric on vector
-  bundles),
-* [`flat`](@ref) and [`sharp`](@ref),
-* `norm` (by default uses `inner`),
-* [`project`](@ref) (for embedded vector spaces),
-* [`representation_size`](@ref) (if support for [`ProductArray`](@ref) is desired),
-* broadcasting for basic operations.
-"""
-abstract type VectorSpaceType end
-
-struct TangentSpaceType <: VectorSpaceType end
-
-struct CotangentSpaceType <: VectorSpaceType end
-
-TCoTSpaceType = Union{TangentSpaceType,CotangentSpaceType}
-
-const TangentSpace = TangentSpaceType()
-const CotangentSpace = CotangentSpaceType()
-
-"""
-    TensorProductType(spaces::VectorSpaceType...)
-
-Vector space type corresponding to the tensor product of given vector space
-types.
-"""
-struct TensorProductType{TS<:Tuple} <: VectorSpaceType
-    spaces::TS
-end
-
-"""
-    ScalarSpaceType()
-
-Vector space of scalars.
-"""
-struct ScalarSpaceType <: VectorSpaceType end
-
-TensorProductType(spaces::VectorSpaceType...) = TensorProductType{typeof(spaces)}(spaces)
 
 """
     VectorBundleFibers(fiber::VectorSpaceType, M::Manifold)
@@ -188,7 +134,16 @@ struct FVector{TType<:VectorSpaceType,TData}
 end
 
 const TFVector = FVector{TangentSpaceType}
+
+function TFVector(data)
+    return FVector(TangentSpace, data)
+end
+
 const CoTFVector = FVector{CotangentSpaceType}
+
+function CoTFVector(data)
+    return FVector(CotangentSpace, data)
+end
 
 struct VectorBundleBasisData{BBasis<:CachedBasis,TBasis<:CachedBasis}
     base_basis::BBasis
@@ -740,10 +695,10 @@ function allocate_result(B::VectorBundleFibers, f, x...)
     return allocate(x[1], T)
 end
 function allocate_result(M::Manifold, ::typeof(flat), w::TFVector, x)
-    return FVector(CotangentSpace, allocate(w.data))
+    return CoTFVector(allocate(w.data))
 end
 function allocate_result(M::Manifold, ::typeof(sharp), w::CoTFVector, x)
-    return FVector(TangentSpace, allocate(w.data))
+    return TFVector(allocate(w.data))
 end
 
 """

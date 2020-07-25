@@ -192,14 +192,14 @@ function allocate_result(M::PowerManifoldNested, f, x...)
 end
 function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x)
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
-    return FVector(CotangentSpace, alloc)
+    return CoTFVector(alloc)
 end
 function allocate_result(M::PowerManifoldNested, f::typeof(get_vector), p, X)
     return [allocate_result(M.manifold, f, _access_nested(p, i)) for i in get_iterator(M)]
 end
 function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector, x)
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
-    return FVector(TangentSpace, alloc)
+    return TFVector(alloc)
 end
 function allocate_result(
     M::PowerManifoldNested,
@@ -338,9 +338,9 @@ function flat!(M::AbstractPowerManifold, ξ::CoTFVector, p, X::TFVector)
     for i in get_iterator(M)
         flat!(
             M.manifold,
-            FVector(CotangentSpace, _write(M, rep_size, ξ.data, i)),
+            CoTFVector(_write(M, rep_size, ξ.data, i)),
             _read(M, rep_size, p, i),
-            FVector(TangentSpace, _read(M, rep_size, X.data, i)),
+            TFVector(_read(M, rep_size, X.data, i)),
         )
     end
     return ξ
@@ -850,9 +850,9 @@ function sharp!(M::AbstractPowerManifold, X::TFVector, p, ξ::CoTFVector)
     for i in get_iterator(M)
         sharp!(
             M.manifold,
-            FVector(TangentSpace, _write(M, rep_size, X.data, i)),
+            TFVector(_write(M, rep_size, X.data, i)),
             _read(M, rep_size, p, i),
-            FVector(CotangentSpace, _read(M, rep_size, ξ.data, i)),
+            CoTFVector(_read(M, rep_size, ξ.data, i)),
         )
     end
     return X

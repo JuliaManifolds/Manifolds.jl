@@ -124,7 +124,7 @@ function exp!(M::Circle{ℂ}, q, p, X)
     return q
 end
 
-flat(M::Circle, p::Number, X::TFVector) = FVector(CotangentSpace, X.data)
+flat(M::Circle, p::Number, X::TFVector) = CoTFVector(X.data)
 
 flat!(::Circle, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
@@ -418,7 +418,7 @@ retract(M::Circle, p, q, m::ExponentialRetraction) = exp(M, p, q)
 
 representation_size(::Circle) = ()
 
-sharp(M::Circle, p::Number, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
+sharp(M::Circle, p::Number, ξ::CoTFVector) = TFVector(ξ.data)
 
 sharp!(M::Circle, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 

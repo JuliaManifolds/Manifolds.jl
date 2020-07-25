@@ -54,8 +54,8 @@ include("utils.jl")
         )[] ≈ 2.0
         @test number_of_coordinates(M, DiagonalizingOrthonormalBasis(Ref(-1.0))) == 1
         @test number_of_coordinates(M, DefaultOrthonormalBasis()) == 1
-        @test flat(M, 0.0, FVector(TangentSpace, 1.0)) == FVector(CotangentSpace, 1.0)
-        @test sharp(M, 0.0, FVector(CotangentSpace, 1.0)) == FVector(TangentSpace, 1.0)
+        @test flat(M, 0.0, TFVector(1.0)) == CoTFVector(1.0)
+        @test sharp(M, 0.0, CoTFVector(1.0)) == TFVector(1.0)
         @test vector_transport_to(M, 0.0, 1.0, 1.0, ParallelTransport()) == 1.0
         @test retract(M, 0.0, 1.0) == exp(M, 0.0, 1.0)
         @test injectivity_radius(M) ≈ π
@@ -144,10 +144,8 @@ include("utils.jl")
         @test_throws DomainError is_tangent_vector(Mc, 1 + 1im, 0.0, true)
         @test !is_tangent_vector(Mc, 1im, 2im)
         @test_throws DomainError is_tangent_vector(Mc, 1im, 2im, true)
-        @test flat(Mc, 0.0 + 0.0im, FVector(TangentSpace, 1.0im)) ==
-              FVector(CotangentSpace, 1.0im)
-        @test sharp(Mc, 0.0 + 0.0im, FVector(CotangentSpace, 1.0im)) ==
-              FVector(TangentSpace, 1.0im)
+        @test flat(Mc, 0.0 + 0.0im, TFVector(1.0im)) == CoTFVector(1.0im)
+        @test sharp(Mc, 0.0 + 0.0im, CoTFVector(1.0im)) == TFVector(1.0im)
         @test norm(Mc, 1.0, log(Mc, 1.0, -1.0)) ≈ π
         @test is_tangent_vector(Mc, 1.0, log(Mc, 1.0, -1.0))
         v = MVector(0.0 + 0.0im)

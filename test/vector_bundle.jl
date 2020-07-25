@@ -10,7 +10,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test sprint(show, TangentSpace) == "TangentSpace"
         @test sprint(show, CotangentSpace) == "CotangentSpace"
         tvs = ([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
-        fv_tvs = map(v -> FVector(TangentSpace, v), tvs)
+        fv_tvs = map(v -> TFVector(v), tvs)
         fv1 = fv_tvs[1]
         tv1s = allocate(fv_tvs[1])
         @test isa(tv1s, FVector)
@@ -32,15 +32,15 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test_throws ErrorException flat(
             PM,
             ProductRepr([0.0], [0.0]),
-            FVector(CotangentSpace, ProductRepr([0.0], [0.0])),
+            CoTFVector(ProductRepr([0.0], [0.0])),
         )
         @test_throws ErrorException sharp(
             PM,
             ProductRepr([0.0], [0.0]),
-            FVector(TangentSpace, ProductRepr([0.0], [0.0])),
+            TFVector(ProductRepr([0.0], [0.0])),
         )
 
-        fv2 = FVector(TangentSpace, ProductRepr([1, 0, 0], [1 2]))
+        fv2 = TFVector(ProductRepr([1, 0, 0], [1 2]))
         @test submanifold_component(fv2, 1) == [1, 0, 0]
         @test submanifold_component(fv2, 2) == [1 2]
         @test (@inferred submanifold_component(fv2, Val(1))) == [1, 0, 0]
