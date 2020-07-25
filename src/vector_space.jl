@@ -73,7 +73,10 @@ abstract type AbstractTensorField{
 
 Apply operator `op` at point `p` to arguments (vectors) `v...`.
 """
-function apply_operator(op::AbstractTensorField, p, v...) end
+function apply_operator(op::AbstractTensorField, p, v...)
+    Y = allocate_result(F, apply_operator, p, v...)
+    return apply_operator!(F, Y, p, v...)
+end
 
 const AbstractScalarValuedField{𝔽,TM,VSIn} = AbstractTensorField{
     𝔽,
@@ -119,6 +122,11 @@ end
 
 function apply_operator(op::RieszRepresenterCotangentVectorField, p, X1, X2)
     return inner(op.manifold, p, X1, X2)
+end
+
+function get_coordinates(F::AbstractTensorField, p, X, B::AbstractBasis)
+    Y = allocate_result(F, get_coordinates, p, X, B)
+    return get_coordinates!(F, Y, p, X, B)
 end
 
 """

@@ -53,6 +53,24 @@ function _gradient!(f, X, p, backend::AbstractDiffBackend)
 end
 
 """
+    _jacobian(f, p[, backend::AbstractDiffBackend])
+
+Compute the Jacobian of a callable `f` at point `p` computed using the given `backend`,
+an object of type [`AbstractDiffBackend`](@ref). If the backend is not explicitly
+specified, it is obtained using the function [`diff_backend`](@ref).
+
+!!! note
+
+    Not specifying the backend explicitly will usually result in a type instability
+    and decreased performance.
+"""
+function _jacobian end
+
+function _jacobian_vector_product(f, p, X, backend::AbstractDiffBackend)
+    return _jacobian(f, p, backend) * X
+end
+
+"""
     CurrentDiffBackend(backend::AbstractDiffBackend)
 
 A mutable struct for storing the current differentiation backend in a global
@@ -112,6 +130,8 @@ _derivative!(f, X, t) = _derivative!(f, X, t, diff_backend())
 _gradient(f, p) = _gradient(f, p, diff_backend())
 
 _gradient!(f, X, p) = _gradient!(f, X, p, diff_backend())
+
+_jacobian(f, p) = _jacobian(f, p, diff_backend())
 
 # Finite differences
 
