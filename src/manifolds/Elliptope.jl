@@ -25,7 +25,7 @@ T_p\mathcal E(n,k) = \bigl\{
 X ∈ ℝ^{n × n}\,|\,X = qY^{\mathrm{T}} + Yq^{\mathrm{T}} \text{ with } X_{ii} = 0 \text{ for } i=1,\ldots,n
 \bigr\}
 ````
-endowed with the Euclidean metric from the embedding, i.e. from the $ℝ^{n × k}$
+endowed with the [`Euclidean`](@ref) metric from the embedding, i.e. from the $ℝ^{n × k}$
 
 
 This manifold was for example
@@ -66,7 +66,7 @@ function check_manifold_point(M::Elliptope{N,K}, q; kwargs...) where {N,K}
     if !all(isapprox.(row_norms_sq, 1.0; kwargs...))
         return DomainError(
             row_norms_sq,
-            "The point $(q) does not represent a point p=qq^T on $(M) diagonal is not only ones and hence does not lie on $(M).",
+            "The point $(q) does not represent a point p=qq^T on $(M) diagonal is not only ones.",
         )
     end
     return nothing
