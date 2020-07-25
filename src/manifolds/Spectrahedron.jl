@@ -158,7 +158,7 @@ project(::Spectrahedron, ::Any...)
 
 function project!(::Spectrahedron, Z, q, Y)
     Y2 = Y - sum(q .* Y) * q
-    Z .= Y - q * lyap(q' * q, -(q' * Y2 - Y2' * q))
+    Z .= Y2 - q * lyap(q' * q, -(q' * Y2 - Y2' * q))
     return Z
 end
 
@@ -182,6 +182,19 @@ on $\mathcal M = \mathcal S(n,k)$.
 
 function Base.show(io::IO, ::Spectrahedron{N,K}) where {N,K}
     return print(io, "Spectrahedron($(N), $(K))")
+end
+
+"""
+    vector_transport_to(M::Spectrahedron, p, X, q)
+
+transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
+at `q`.
+"""
+vector_transport_to(::Spectrahedron, ::Any, ::Any, ::Any, ::ProjectionTransport)
+
+function vector_transport_to!(M::Spectrahedron, Y, p, X, q, ::ProjectionTransport)
+    project!(M,Y,q,X)
+    return Y
 end
 
 @doc raw"""

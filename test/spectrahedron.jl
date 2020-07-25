@@ -25,6 +25,8 @@ include("utils.jl")
     q2 = q2 ./ norm(q2)
     q3 = [12.0 / 13.0 5.0 / 13.0; 1.0 0.0; -12.0 / 13.0 5.0 / 13.0; 0.0 1.0]
     q3 = q3 ./ norm(q3)
+    @test is_tangent_vector(M, q2, vector_transport_to(M,q,Y,q2, ProjectionTransport()))
+
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{3,3,Float64,9})
@@ -40,6 +42,8 @@ include("utils.jl")
                 test_forward_diff = false,
                 test_project_tangent = true,
                 test_exp_log = false,
+                test_vector_transport = true,
+                vector_transport_methods = [ProjectionTransport()],
                 default_inverse_retraction_method = nothing,
                 default_retraction_method = ProjectionRetraction(),
             )
