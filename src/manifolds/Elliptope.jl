@@ -1,7 +1,8 @@
 @doc raw"""
     Elliptope{N,K} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType}
 
-The Elliptope manifold, also known as the set of correlation matricesmanifold of symmetric positive definite matrices, i.e.
+The Elliptope manifold, also known as the set of correlation matrices, consists of all
+symmetric positive semidefinite matrices of rank $k$ with unit diagonal, i.e.,
 
 ````math
 \begin{aligned}
@@ -18,7 +19,8 @@ indeed for any orthogonal matrix $A$ we have $(qA)(qA)^{\mathrm{T}} = qq^{\mathr
 so the manifold implemented here is the quotient manifold. The unit diagonal translates to
 unit norm columns of $q$.
 
-The tangent space at $p$, $T_p\mathcal E(n,k)$ also represented matrices $Y\in ℝ^{n × k}$ reads as
+The tangent space at $p$, denoted $T_p\mathcal E(n,k)$, is also represented by matrices
+$Y\in ℝ^{n × k}$ and reads as
 
 ````math
 T_p\mathcal E(n,k) = \bigl\{

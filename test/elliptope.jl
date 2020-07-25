@@ -31,7 +31,7 @@ include("utils.jl")
 
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
-    TEST_STATIC_SIZED && push!(types, MMatrix{3,3,Float64,9})
+    TEST_STATIC_SIZED && push!(types, MMatrix{4,2,Float64,8})
 
     for T in types
         pts = [convert(T, q), convert(T, q2), convert(T, q3)]
