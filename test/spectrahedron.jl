@@ -25,7 +25,7 @@ include("utils.jl")
     q2 = q2 ./ norm(q2)
     q3 = [12.0 / 13.0 5.0 / 13.0; 1.0 0.0; -12.0 / 13.0 5.0 / 13.0; 0.0 1.0]
     q3 = q3 ./ norm(q3)
-    @test is_tangent_vector(M, q2, vector_transport_to(M,q,Y,q2, ProjectionTransport()))
+    @test is_tangent_vector(M, q2, vector_transport_to(M,q,Y,q2, ProjectionTransport());atol=10^-15)
 
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
