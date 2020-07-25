@@ -7,7 +7,7 @@ symmetric positive semidefinite matrices of size $n × n$ and rank $k$, i.e. the
 ````math
 \operatorname{SPS}_k(n) = \bigl\{
 p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = p,
-apa^mathrm{H} \geq 0 \text{ for all } a ∈ 𝔽
+apa^{\mathrm{H}} \geq 0 \text{ for all } a ∈ 𝔽
 \text{ and } \operatorname{rank}(p) = k\bigr\},
 ````
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
