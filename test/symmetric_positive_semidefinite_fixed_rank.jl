@@ -12,9 +12,9 @@ include("utils.jl")
         @test is_tangent_vector(M, q, Y)
         q2 = [2.0 1.0; 0.0 0.0; 0.0 1.0; 0.0 0.0]
         q3 = [0.0 0.0; 1.0 0.0; 0.0 1.0; 0.0 0.0]
-        X = log(M,q,q2)
-        X3 = vector_transport_to(M,q,X,q3, ProjectionTransport())
-        X3t = project(M,q3,X)
+        X = log(M, q, q2)
+        X3 = vector_transport_to(M, q, X, q3, ProjectionTransport())
+        X3t = project(M, q3, X)
         @test is_tangent_vector(M, q3, X3)
         @test isapprox(M, q3, X3, X3t)
 
