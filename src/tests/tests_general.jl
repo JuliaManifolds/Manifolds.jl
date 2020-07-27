@@ -57,7 +57,8 @@ that lie on it (contained in `pts`).
     ReverseDiff is tested.
 - `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace.
 - `test_vector_spaces = true` : test Vector bundle of this manifold.
-- `test_vector_transport = false` : test vector transport.
+- `test_default_vector_transport = false` : test the default vector transport (usually
+    parallel transport).
 - `test_vee_hat = false`: test [`vee`](@ref) and [`hat`](@ref) functions.
 - `tvector_distributions = []` : tangent vector distributions to test.
 - `vector_transport_methods = []`: vector transport methods that should be tested.
@@ -95,7 +96,7 @@ function ManifoldTests.test_manifold(
     test_representation_size = true,
     test_reverse_diff = true,
     test_tangent_vector_broadcasting = true,
-    test_vector_transport = false,
+    test_default_vector_transport = false,
     test_vector_spaces = true,
     test_vee_hat = false,
     tvector_distributions = [],
@@ -384,29 +385,35 @@ function ManifoldTests.test_manifold(
         end
     end
 
-    test_vector_transport &&
-        !(default_inverse_retraction_method === nothing) &&
-        Test.@testset "vector transport" begin
-            tvatol = is_tangent_atol_multiplier * ManifoldTests.find_eps(pts[1])
-            X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
-            X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
-            v1t1 = vector_transport_to(M, pts[1], X1, pts[3])
-            v1t2 = vector_transport_direction(M, pts[1], X1, X2)
-            Test.@test is_tangent_vector(M, pts[3], v1t1; atol = tvatol)
-            Test.@test is_tangent_vector(M, pts[3], v1t2; atol = tvatol)
-            Test.@test isapprox(M, pts[3], v1t1, v1t2)
-            Test.@test isapprox(M, pts[1], vector_transport_to(M, pts[1], X1, pts[1]), X1)
+    !(default_inverse_retraction_method === nothing) && @Test.testset "vector transport" begin
+        tvatol = is_tangent_atol_multiplier * ManifoldTests.find_eps(pts[1])
+        X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
+        X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
+        test_default_vector_transport &&
+            Test.@testset "default vector transport" begin
+                v1t1 = vector_transport_to(M, pts[1], X1, pts[3])
+                v1t2 = vector_transport_direction(M, pts[1], X1, X2)
+                Test.@test is_tangent_vector(M, pts[3], v1t1; atol = tvatol)
+                Test.@test is_tangent_vector(M, pts[3], v1t2; atol = tvatol)
+                Test.@test isapprox(M, pts[3], v1t1, v1t2)
+                Test.@test isapprox(M, pts[1], vector_transport_to(M, pts[1], X1, pts[1]), X1)
 
-            is_mutating && Test.@testset "mutating variants" begin
-                v1t1_m = allocate(v1t1)
-                v1t2_m = allocate(v1t2)
-                vector_transport_to!(M, v1t1_m, pts[1], X1, pts[3])
-                vector_transport_direction!(M, v1t2_m, pts[1], X1, X2)
-                Test.@test isapprox(M, pts[3], v1t1, v1t1_m)
-                Test.@test isapprox(M, pts[3], v1t2, v1t2_m)
-            end
+                is_mutating && Test.@testset "mutating variants" begin
+                    v1t1_m = allocate(v1t1)
+                    v1t2_m = allocate(v1t2)
+                    vector_transport_to!(M, v1t1_m, pts[1], X1, pts[3])
+                    vector_transport_direction!(M, v1t2_m, pts[1], X1, X2)
+                    Test.@test isapprox(M, pts[3], v1t1, v1t1_m)
+                    Test.@test isapprox(M, pts[3], v1t2, v1t2_m)
+                end
+        end
 
-            for vtm in vector_transport_methods
+        for vtm in vector_transport_methods
+            Test.@testset "vector transport method $(vtm)" begin
+
+                tvatol = is_tangent_atol_multiplier * ManifoldTests.find_eps(pts[1])
+                X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
+                X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
                 v1t1 = vector_transport_to(M, pts[1], X1, pts[3], vtm)
                 v1t2 = vector_transport_direction(M, pts[1], X1, X2, vtm)
                 Test.@test is_tangent_vector(M, pts[3], v1t1; atol = tvatol)
@@ -429,6 +436,7 @@ function ManifoldTests.test_manifold(
                 end
             end
         end
+    end
 
     for btype in basis_types_vecs
         Test.@testset "Basis support for $(btype)" begin

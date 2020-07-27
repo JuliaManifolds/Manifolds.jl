@@ -75,7 +75,7 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
             test_vector_spaces = false,
             test_project_tangent = true,
             test_musical_isomorphisms = false,
-            test_vector_transport = true,
+            test_default_vector_transport = true,
             is_mutating = true,
             exp_log_atol_multiplier = 2.0,
             is_tangent_atol_multiplier = 2.0,

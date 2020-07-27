@@ -33,7 +33,7 @@ include("utils.jl")
             test_vector_spaces = true,
             test_project_tangent = false,
             test_musical_isomorphisms = true,
-            test_vector_transport = false,
+            test_default_vector_transport = false,
             is_tangent_atol_multiplier = 5.0,
         )
     end
