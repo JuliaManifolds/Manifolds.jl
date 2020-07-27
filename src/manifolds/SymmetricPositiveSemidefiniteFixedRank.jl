@@ -49,7 +49,8 @@ Generate the manifold of $n × n$ symmetric positive semidefinite matrices of ra
     > SIAM Journal on Matrix Analysis and Applications (41)1, pp. 171–198, 2020.
     > doi: [10.1137/18m1231389](https://doi.org/10.1137/18m1231389),
 """
-struct SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
+struct SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <:
+       AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
 function SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractNumbers = ℝ)
     return SymmetricPositiveSemidefiniteFixedRank{n,k,field}()
@@ -64,14 +65,18 @@ whether `p=q*q'` is a symmetric matrix of size `(n,n)` with values from the corr
 The symmetry of `p` is not explicitly checked since by using `q` p is symmetric by construction.
 The tolerance for the symmetry of `p` can and the rank of `q*q'` be set using `kwargs...`.
 """
-function check_manifold_point(M::SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽}, q; kwargs...) where {n,k,𝔽}
+function check_manifold_point(
+    M::SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽},
+    q;
+    kwargs...,
+) where {n,k,𝔽}
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
     mpv === nothing || return mpv
-    p = q*q'
-    if rank(p*p';kwargs...) < k
+    p = q * q'
+    if rank(p * p'; kwargs...) < k
         return DomainError(
-            rank(p*p';kwargs...),
+            rank(p * p'; kwargs...),
             "The point $(p) does not lie on $M, since its rank is less than $(k).",
         )
     end
@@ -111,7 +116,18 @@ function check_tangent_vector(
     return mpv
 end
 
-decorated_manifold(::SymmetricPositiveSemidefiniteFixedRank{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
+function decorated_manifold(::SymmetricPositiveSemidefiniteFixedRank{N,K,𝔽}) where {N,K,𝔽}
+    return Euclidean(N, K; field = 𝔽)
+end
+
+@doc raw"""
+    distance(M::SymmetricPositiveSemidefiniteFixedRank, p, q)
+
+Compute the distance between two points `p`, `q` on the
+[`SymmetricPositiveSemidefiniteFixedRank`](@ref), which is the Frobenius norm of $Y$ which
+minimizes $\lVert p - qY\rVert$ with respect to $Y$.
+"""
+distance(M::SymmetricPositiveSemidefiniteFixedRank, p, q) = norm(M, p, log(M, p, q))
 
 embed!(::SymmetricPositiveSemidefiniteFixedRank, q, p) = copyto!(q, p)
 embed!(::SymmetricPositiveSemidefiniteFixedRank, Y, ::Any, X) = copyto!(Y, X)
@@ -134,6 +150,19 @@ function exp!(::SymmetricPositiveSemidefiniteFixedRank, q2, q, Y)
 end
 
 @doc raw"""
+    isapprox(M::SymmetricPositiveSemidefiniteFixedRank, p, q; kwargs...)
+
+test, whether two points `p`, `q` are (approximately) nearly the same.
+Since this is a quotient manifold in the embedding, the test is performed by checking
+their distance, if they are not the same, i.e. that $d_{\mathcal M}(p,q) \approx 0$, where
+the comparison is performed with the classical `isapprox`.
+The `kwargs...` are passed on to this accordingly.
+"""
+function isapprox(M::SymmetricPositiveSemidefiniteFixedRank, p, q; kwargs...)
+    return isapprox(norm(p-q), 0.0; kwargs...) || isapprox(distance(M, p, q), 0.0; kwargs...)
+end
+
+@doc raw"""
     log(M::SymmetricPositiveSemidefiniteFixedRank, q, p)
 
 Compute the logarithmic map on the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) manifold
@@ -142,8 +171,8 @@ by minimizing $\lVert p - qY\rVert$ with respect to $Y$.
 log(::SymmetricPositiveSemidefiniteFixedRank, q, p)
 
 function log!(::SymmetricPositiveSemidefiniteFixedRank, Z, q, p)
-    s = svd(q'*p)
-    Z .= p*(s.V*s.U') - q
+    s = svd(q' * p)
+    return Z .= p * (s.V * s.U') - q
 end
 
 @doc raw"""
@@ -163,10 +192,10 @@ where the last $k^2$ is due to the zero imaginary part for Hermitian matrices di
 """
 function manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank) end
 function manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank{N,K,ℝ}) where {N,K}
-    return K*N - div(K*(K-1),2)
+    return K * N - div(K * (K - 1), 2)
 end
 function manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank{N,K,ℂ}) where {N,K}
-    return 2*K*N - K*K
+    return 2 * K * N - K * K
 end
 
 function project!(::SymmetricPositiveSemidefiniteFixedRank, Z, q, Y)
@@ -178,6 +207,32 @@ function Base.show(io::IO, ::SymmetricPositiveSemidefiniteFixedRank{n,k,F}) wher
     return print(io, "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(F))")
 end
 
+"""
+     vector_transport_to(M::SymmetricPositiveSemidefiniteFixedRank, p, X, q)
+
+ transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
+ at `q`.
+ """
+vector_transport_to(
+    ::SymmetricPositiveSemidefiniteFixedRank,
+    ::Any,
+    ::Any,
+    ::Any,
+    ::ProjectionTransport,
+)
+
+function vector_transport_to!(
+    M::SymmetricPositiveSemidefiniteFixedRank,
+    Y,
+    p,
+    X,
+    q,
+    ::ProjectionTransport,
+)
+    project!(M, Y, q, X)
+    return Y
+end
+
 @doc raw"""
      zero_tangent_vector(M::SymmetricPositiveSemidefiniteFixedRank, p)
 
@@ -186,7 +241,11 @@ definite matrix `p` on the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) mani
 """
 zero_tangent_vector(::SymmetricPositiveSemidefiniteFixedRank, ::Any...)
 
-function zero_tangent_vector!(::SymmetricPositiveSemidefiniteFixedRank{N,K}, v, ::Any) where {N,K}
+function zero_tangent_vector!(
+    ::SymmetricPositiveSemidefiniteFixedRank{N,K},
+    v,
+    ::Any,
+) where {N,K}
     fill!(v, 0)
     return v
 end
