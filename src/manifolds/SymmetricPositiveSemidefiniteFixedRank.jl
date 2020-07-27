@@ -214,7 +214,8 @@ Return the dimension of the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) mat
 
 where the last $k^2$ is due to the zero imaginary part for Hermitian matrices diagonal
 """
-function manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank) end
+manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank)
+
 function manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank{N,K,ℝ}) where {N,K}
     return K * N - div(K * (K - 1), 2)
 end
