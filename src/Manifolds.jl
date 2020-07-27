@@ -121,6 +121,7 @@ include("manifolds/Lorentz.jl")
 include("manifolds/CenteredMatrices.jl")
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
+include("manifolds/Elliptope.jl")
 include("manifolds/FixedRankMatrices.jl")
 include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
@@ -129,6 +130,7 @@ include("manifolds/Hyperbolic.jl")
 include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/SkewSymmetric.jl")
+include("manifolds/Spectrahedron.jl")
 include("manifolds/Stiefel.jl")
 include("manifolds/Sphere.jl")
 include("manifolds/SphereSymmetricMatrices.jl")
@@ -201,6 +203,7 @@ export Euclidean,
     CenteredMatrices,
     CholeskySpace,
     Circle,
+    Elliptope,
     FixedRankMatrices,
     GeneralizedGrassmann,
     GeneralizedStiefel,
@@ -212,6 +215,7 @@ export Euclidean,
     ProbabilitySimplex,
     Rotations,
     SkewSymmetricMatrices,
+    Spectrahedron,
     Sphere,
     SphereSymmetricMatrices,
     Stiefel,
