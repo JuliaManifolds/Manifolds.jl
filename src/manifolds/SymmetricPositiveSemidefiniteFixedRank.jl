@@ -35,7 +35,8 @@ The metric was used in[^JourneeBachAbsilSepulchre2010][^MassartAbsil2020].
 
     SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractNumbers=ℝ)
 
-Generate the manifold of $n × n$ symmetric positive semidefinite matrices of rank $k$.
+Generate the manifold of $n × n$ symmetric positive semidefinite matrices of rank $k$
+over the `field` of real numbers `ℝ` or complex numbers `ℂ`.
 
 [^JourneeBachAbsilSepulchre2010]:
     > Journée, M., Bach, F., Absil, P.-A., and Sepulchre, R.:
@@ -142,6 +143,16 @@ which just reads
 ````math
     \exp_q Y = q+Y.
 ````
+!!! note
+
+    Since the manifold is represented in the embedding and is a quotient manifold,
+    the exponential and logarithmic map are a bijection only with respect to the equivalence
+    classes. Computing
+    ````math
+        q_2 = exp_p(log_pq)
+    ````
+    might yield a matrix $q_2\neq q$, but they represent the same point on the quotient
+    manifold, i.e. $d_{\operatorname{SPS}_k(n)}(q_2,q) = 0$.
 """
 exp(::SymmetricPositiveSemidefiniteFixedRank, ::Any, ::Any)
 
@@ -169,6 +180,17 @@ end
 
 Compute the logarithmic map on the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) manifold
 by minimizing $\lVert p - qY\rVert$ with respect to $Y$.
+
+!!! note
+
+    Since the manifold is represented in the embedding and is a quotient manifold,
+    the exponential and logarithmic map are a bijection only with respect to the equivalence
+    classes. Computing
+    ````math
+        q_2 = exp_p(log_pq)
+    ````
+    might yield a matrix $q_2\neq q$, but they represent the same point on the quotient
+    manifold, i.e. $d_{\operatorname{SPS}_k(n)}(q_2,q) = 0$.
 """
 log(::SymmetricPositiveSemidefiniteFixedRank, q, p)
 
