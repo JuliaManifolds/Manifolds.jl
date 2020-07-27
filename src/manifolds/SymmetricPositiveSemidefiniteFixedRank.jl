@@ -149,7 +149,7 @@ which just reads
     the exponential and logarithmic map are a bijection only with respect to the equivalence
     classes. Computing
     ````math
-        q_2 = exp_p(log_pq)
+        q_2 = \exp_p(\log_pq)
     ````
     might yield a matrix $q_2\neq q$, but they represent the same point on the quotient
     manifold, i.e. $d_{\operatorname{SPS}_k(n)}(q_2,q) = 0$.
@@ -187,7 +187,7 @@ by minimizing $\lVert p - qY\rVert$ with respect to $Y$.
     the exponential and logarithmic map are a bijection only with respect to the equivalence
     classes. Computing
     ````math
-        q_2 = exp_p(log_pq)
+        q_2 = \exp_p(\log_pq)
     ````
     might yield a matrix $q_2\neq q$, but they represent the same point on the quotient
     manifold, i.e. $d_{\operatorname{SPS}_k(n)}(q_2,q) = 0$.
@@ -207,8 +207,8 @@ Return the dimension of the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) mat
 
 ````math
 \begin{aligned}
-\dim \mathrm{Sym}(n,ℝ) &= kn - \frac{k(k-1)}{2},\\
-\dim \mathrm{Sym}(n,ℂ) &= 2kn - k^2,
+\dim \operatorname{SPS}_k(n,ℝ) &= kn - \frac{k(k-1)}{2},\\
+\dim \operatorname{SPS}_(n,ℂ) &= 2kn - k^2,
 \end{aligned}
 ````
 
