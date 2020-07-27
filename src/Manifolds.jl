@@ -129,6 +129,7 @@ include("manifolds/Hyperbolic.jl")
 include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/SkewSymmetric.jl")
+include("manifolds/Spectrahedron.jl")
 include("manifolds/Stiefel.jl")
 include("manifolds/Sphere.jl")
 include("manifolds/SphereSymmetricMatrices.jl")
@@ -212,6 +213,7 @@ export Euclidean,
     ProbabilitySimplex,
     Rotations,
     SkewSymmetricMatrices,
+    Spectrahedron,
     Sphere,
     SphereSymmetricMatrices,
     Stiefel,
