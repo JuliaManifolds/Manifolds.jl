@@ -30,8 +30,9 @@ that lie on it (contained in `pts`).
 - `is_mutating = true`: whether mutating variants of functions should be tested.
 - `is_point_atol_multiplier = 0`: determines atol of `is_manifold_point` checks.
 - `is_tangent_atol_multiplier = 0`: determines atol of `is_tangent_vector` checks.
-- `mid_point12 = shortest_geodesic(M, pts[1], pts[2], 0.5)`: if not `nothing`, then check
-    that `mid_point(M, pts[1], pts[2])` is approximately equal to `mid_point12`.
+- `mid_point12 = test_exp_log ? shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing`: if not `nothing`, then check
+    that `mid_point(M, pts[1], pts[2])` is approximately equal to `mid_point12`. This is
+    by default set to `nothing` if `text_exp_log` is set to false.
 - `point_distributions = []` : point distributions to test.
 - `rand_tvector_atol_multiplier = 0` : chage absolute tolerance in testing random vectors
     (0 use default, i.e. deactivate atol and use rtol) random tangent vectors are tangent
@@ -478,6 +479,7 @@ function ManifoldTests.test_manifold(
             end
         end
     end
+
 
     for btype in (basis_types_to_from..., basis_types_vecs...)
         p = pts[1]

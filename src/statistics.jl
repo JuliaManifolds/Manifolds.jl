@@ -188,15 +188,15 @@ The algorithm is further described in[^Afsari2013].
     > SIAM Journal on Control and Optimization (2013), 51(3), pp. 2230–2260,
     > doi: [10.1137/12086282X](https://doi.org/10.1137/12086282X),
     > arxiv: [1201.0925](https://arxiv.org/abs/1201.0925)
-[^PennecArsigny2013]
+[^PennecArsigny2013]:
     > Pennec X., Arsigny V.: Exponential Barycenters of the Canonical Cartan Connection and
     > Invariant Means on Lie Groups.
     > In: Nielsen F., Bhatia R. (eds) Matrix Information Geometry, (2013), pp. 123-166.
     > doi: [10.1007/978-3-642-30232-9_7](https://doi.org/10.1007/978-3-642-30232-9_7),
     > hal: [https://hal.inria.fr/hal-00699361/document](https://hal.inria.fr/hal-00699361/document)
-[^Karcher1997]
+[^Karcher1977]:
     > Karcher, H.: Riemannian center of mass and mollifier smoothing.
-    > Communications on Pure Applied Mathematics (1997), 30, pp. 509–541.
+    > Communications on Pure Applied Mathematics (1977), 30, pp. 509–541.
     > doi [10.1002/cpa.3160300502](https://doi.org/10.1002/cpa.3160300502)
 """
 mean(::Manifold, ::Any...)
