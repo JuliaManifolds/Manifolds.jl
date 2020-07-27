@@ -410,7 +410,6 @@ function ManifoldTests.test_manifold(
 
         for vtm in vector_transport_methods
             Test.@testset "vector transport method $(vtm)" begin
-
                 tvatol = is_tangent_atol_multiplier * ManifoldTests.find_eps(pts[1])
                 X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
                 X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
