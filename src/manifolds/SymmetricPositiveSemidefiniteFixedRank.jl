@@ -216,10 +216,10 @@ where the last $k^2$ is due to the zero imaginary part for Hermitian matrices di
 """
 manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank)
 
-function manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank{N,K,ℝ}) where {N,K}
+@generated function manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank{N,K,ℝ}) where {N,K}
     return K * N - div(K * (K - 1), 2)
 end
-function manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank{N,K,ℂ}) where {N,K}
+@generated function manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank{N,K,ℂ}) where {N,K}
     return 2 * K * N - K * K
 end
 
