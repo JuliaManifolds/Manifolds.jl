@@ -156,14 +156,9 @@ is also a tangent vector at $p$ we obtain
 p^{\mathrm{H}}qs + s(p^{\mathrm{H}}q)^{\mathrm{H}} + 2I_k = 0,
 ````
 which can either be solved by a Lyapunov approach or a continuous-time
-algebraic Riccati equation as described in [^KanekoFioriTanaka2013]
+algebraic Riccati equation.
 
 This implementation follows the Lyapunov approach.
-
-[^KanekoFioriTanaka2013]:
-    > T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
-    > Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
-    > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::PolarInverseRetraction)
 
