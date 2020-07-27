@@ -544,12 +544,16 @@ function ManifoldTests.test_manifold(
     end
 
     mid_point12 !== nothing && Test.@testset "midpoint" begin
+        epsp1p2 = ManifoldTests.find_eps(pts[1], pts[2])
+        atolp1p2 = exp_log_atol_multiplier * epsp1p2
+        rtolp1p2 =
+            exp_log_atol_multiplier == 0.0 ? sqrt(epsp1p2) * exp_log_rtol_multiplier : 0
         mp = mid_point(M, pts[1], pts[2])
-        Test.@test isapprox(M, mp, mid_point12)
+        Test.@test isapprox(M, mp, mid_point12; atol = atolp1p2, rtol = rtolp1p2)
         if is_mutating
             mpm = allocate(mp)
             mid_point!(M, mpm, pts[1], pts[2])
-            Test.@test isapprox(M, mpm, mid_point12)
+            Test.@test isapprox(M, mpm, mid_point12; atol = atolp1p2, rtol = rtolp1p2)
         end
     end
 
