@@ -48,6 +48,7 @@ Generate the manifold of $n × n$ symmetric positive semidefinite matrices of ra
     > "Quotient Geometry with Simple Geodesics for the Manifold of Fixed-Rank Positive-Semidefinite Matrices",
     > SIAM Journal on Matrix Analysis and Applications (41)1, pp. 171–198, 2020.
     > doi: [10.1137/18m1231389](https://doi.org/10.1137/18m1231389),
+    > preprint: [sites.uclouvain.be/absil/2018.06](https://sites.uclouvain.be/absil/2018.06)
 """
 struct SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <:
        AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
