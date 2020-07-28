@@ -2,5 +2,6 @@ Manifest.toml
 docs/Manifest.toml
 docs/build
 docs/src/generated
+docs/src/misc/contributing.md
 benchmark/tune.json
 benchmark/results*
