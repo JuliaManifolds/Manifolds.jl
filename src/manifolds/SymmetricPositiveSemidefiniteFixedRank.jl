@@ -12,6 +12,8 @@ apa^{\mathrm{H}} \geq 0 \text{ for all } a ∈ 𝔽
 ````
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
 and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
+We sometimes $\operatorname{SPS}_{k,𝔽}(n)$, when distinguishing the real- and complex-valued
+manifold is important.
 
 An element is represented by $q ∈ 𝔽^{n × k}$ from the factorization $p = qq^{\mathrm{H}}$.
 Note that since for any unitary (orthogonal) $A ∈ 𝔽^{n × n}$ we have
@@ -25,7 +27,7 @@ by matrices $Y ∈ 𝔽^{n × k}$ and reads as
 T_p\operatorname{SPS}_k(n) = \bigl\{
 X ∈ 𝔽^{n × n}\,|\,X = qY^{\mathrm{H}} + Yq^{\mathrm{H}}
 \text{ i.e. } X = X^{\mathrm{H}}
-\bigr\}
+\bigr\}.
 ````
 
 Note that the metric used yields a non-complete manifold.
@@ -49,7 +51,7 @@ over the `field` of real numbers `ℝ` or complex numbers `ℂ`.
     > "Quotient Geometry with Simple Geodesics for the Manifold of Fixed-Rank Positive-Semidefinite Matrices",
     > SIAM Journal on Matrix Analysis and Applications (41)1, pp. 171–198, 2020.
     > doi: [10.1137/18m1231389](https://doi.org/10.1137/18m1231389),
-    > preprint: [sites.uclouvain.be/absil/2018.06](https://sites.uclouvain.be/absil/2018.06)
+    > preprint: [sites.uclouvain.be/absil/2018.06](https://sites.uclouvain.be/absil/2018.06).
 """
 struct SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <:
        AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
@@ -207,8 +209,8 @@ Return the dimension of the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) mat
 
 ````math
 \begin{aligned}
-\dim \operatorname{SPS}_k(n,ℝ) &= kn - \frac{k(k-1)}{2},\\
-\dim \operatorname{SPS}_(n,ℂ) &= 2kn - k^2,
+\dim \operatorname{SPS}_{k,ℝ}(n) &= kn - \frac{k(k-1)}{2},\\
+\dim \operatorname{SPS}_{k,ℂ}(n) &= 2kn - k^2,
 \end{aligned}
 ````
 
