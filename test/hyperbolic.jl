@@ -49,7 +49,7 @@ include("utils.jl")
                 pts,
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
-                test_vector_transport = true,
+                test_default_vector_transport = true,
                 vector_transport_methods = [
                     ParallelTransport(),
                     SchildsLadderTransport(),

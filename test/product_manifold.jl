@@ -541,7 +541,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             test_reverse_diff = false,
             test_project_tangent = true,
             test_project_point = true,
-            test_vector_transport = true,
+            test_default_vector_transport = true,
             vector_transport_methods = [
                 ProductVectorTransport(ParallelTransport(), ParallelTransport()),
                 ProductVectorTransport(SchildsLadderTransport(), SchildsLadderTransport()),

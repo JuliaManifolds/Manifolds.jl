@@ -176,7 +176,7 @@ Random.seed!(42)
                 test_reverse_diff = true,
                 test_musical_isomorphisms = true,
                 test_injectivity_radius = false,
-                test_vector_transport = true,
+                test_default_vector_transport = true,
                 vector_transport_methods = [
                     PowerVectorTransport(ParallelTransport()),
                     PowerVectorTransport(SchildsLadderTransport()),

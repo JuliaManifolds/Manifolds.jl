@@ -52,6 +52,7 @@ include("sphere_symmetric_matrices.jl")
 include("stiefel.jl")
 include("symmetric.jl")
 include("symmetric_positive_definite.jl")
+include("symmetric_positive_semidefinite_fixed_rank.jl")
 
 include("multinomial_matrices.jl")
 include("oblique.jl")

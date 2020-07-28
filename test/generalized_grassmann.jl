@@ -87,7 +87,7 @@ include("utils.jl")
                 test_injectivity_radius = false,
                 test_is_tangent = true,
                 test_project_tangent = true,
-                test_vector_transport = false,
+                test_default_vector_transport = false,
                 test_forward_diff = false,
                 test_reverse_diff = false,
                 projection_atol_multiplier = 15.0,

@@ -51,6 +51,7 @@ import ManifoldsBase:
     vector_transport_to!,
     zero_tangent_vector,
     zero_tangent_vector!
+import Base: isapprox
 
 using Base.Iterators: repeated
 using Distributions
@@ -138,6 +139,7 @@ include("manifolds/SymmetricPositiveDefinite.jl")
 include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
+include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 
 include("manifolds/Torus.jl")
 include("manifolds/Multinomial.jl")
@@ -219,6 +221,7 @@ export Euclidean,
     Stiefel,
     SymmetricMatrices,
     SymmetricPositiveDefinite,
+    SymmetricPositiveSemidefiniteFixedRank,
     Torus
 export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds

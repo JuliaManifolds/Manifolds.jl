@@ -47,7 +47,7 @@ include("utils.jl")
                 test_forward_diff = false,
                 test_project_tangent = true,
                 test_exp_log = false,
-                test_vector_transport = true,
+                test_default_vector_transport = true,
                 vector_transport_methods = [ProjectionTransport()],
                 default_inverse_retraction_method = nothing,
                 default_retraction_method = ProjectionRetraction(),
