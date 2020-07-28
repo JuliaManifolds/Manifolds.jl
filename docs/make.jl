@@ -73,7 +73,7 @@ makedocs(
             "Contributing" => "misc/contributing.md",
             "Internals" => "misc/internals.md",
             "Notation" => "misc/notation.md",
-        ]
+        ],
     ],
 )
 
