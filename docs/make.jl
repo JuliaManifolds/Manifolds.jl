@@ -65,8 +65,8 @@ makedocs(
             "Differentiation" => "features/differentiation.md",
             "Distributions" => "features/distributions.md",
             "Statistics" => "features/statistics.md",
-            "Utilities" => "features/utilities.md",
             "Testing" => "features/testing.md",
+            "Utilities" => "features/utilities.md",
         ],
         "Miscellanea" => [
             "About" => "misc/about.md",
