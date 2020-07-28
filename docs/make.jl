@@ -2,7 +2,7 @@ using Manifolds, ManifoldsBase, Documenter
 # required for loading the Manifolds.ManifoldTests module
 using Test, ForwardDiff, ReverseDiff
 
-generated_path = joinpath(@__DIR__, "src", "generated")
+generated_path = joinpath(@__DIR__, "src", "misc")
 isdir(generated_path) || mkdir(generated_path)
 cp(
     joinpath(dirname(@__DIR__), "CONTRIBUTING.md"),
@@ -19,7 +19,7 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "ManifoldsBase.jl" => "interface.md",
-        "How to..." => ["implement a Manifold" => "tutorials/manifold.md"],
+        "Examples" => ["How to implement a Manifold" => "examples/manifold.md"],
         "Manifolds" => [
             "Basic manifolds" => [
                 "Centered matrices" => "manifolds/centeredmatrices.md",
@@ -61,17 +61,19 @@ makedocs(
                 "Group manifold" => "manifolds/group.md",
             ],
         ],
-        "Statistics" => "statistics.md",
-        "Distributions" => "distributions.md",
-        "About" => "about.md",
-        "Contributing" => "generated/contributing.md",
-        "Notation" => "notation.md",
-        "Library" => [
-            "Public" => "lib/public.md",
-            "Internals" => "lib/internals.md",
-            "Differentiation" => "lib/differentiation.md",
-            "Testing" => "lib/testing.md",
+        "Features on Manifolds" => [
+            "Differentiation" => "features/differentiation.md",
+            "Distributions" => "features/distributions.md",
+            "Statistics" => "features/statistics.md",
+            "Utilities" => "features/utilities.md",
+            "Testing" => "features/testing.md",
         ],
+        "Miscellanea" => [
+            "About" => "misc/about.md",
+            "Contributing" => "misc/contributing.md",
+            "Internals" => "misc/internals.md",
+            "Notation" => "misc/notation.md",
+        ]
     ],
 )
 
