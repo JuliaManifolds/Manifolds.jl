@@ -60,9 +60,9 @@ function apply_operator(
     F::FunctionLeviCivitaConnection{𝔽,Euclidean{N,𝔽}},
     p,
     X,
-    backend,
+    backend::AbstractRiemannianDiffBackend,
 ) where {N,𝔽}
-    return _derivative(t -> F.f(p .+ t.*X), 0, backend)
+    return _derivative(t -> F.f(p .+ t.*X), 0, backend.diff_backend)
 end
 
 function apply_operator!(
@@ -70,9 +70,9 @@ function apply_operator!(
     Z,
     p,
     X,
-    backend,
+    backend::AbstractRiemannianDiffBackend,
 ) where {N,𝔽}
-    _derivative!(t -> F.f(p .+ t.*X), Z, 0, backend)
+    _derivative!(t -> F.f(p .+ t.*X), Z, 0, backend.diff_backend)
     return Z
 end
 

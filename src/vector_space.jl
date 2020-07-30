@@ -68,16 +68,6 @@ abstract type AbstractTensorField{
     VSOut<:VectorSpaceType,
 } end
 
-"""
-    apply_operator(op::AbstractTensorField, p, v...)
-
-Apply operator `op` at point `p` to arguments (vectors) `v...`.
-"""
-function apply_operator(op::AbstractTensorField, p, v...)
-    Y = allocate_result(F, apply_operator, p, v...)
-    return apply_operator!(F, Y, p, v...)
-end
-
 const AbstractScalarValuedField{𝔽,TM,VSIn} = AbstractTensorField{
     𝔽,
     TM,
@@ -163,9 +153,19 @@ abstract type AbstractAffineConnection{𝔽,TM<:Manifold{𝔽}} <: AbstractTenso
 
 
 """
+    apply_operator(F::AbstractAffineConnection, p, X)
+
+Apply operator `F` at point `p` to vector `X`.
+"""
+function apply_operator(F::AbstractAffineConnection, p, X, backend::AbstractRiemannianDiffBackend)
+    Y = allocate_result(F.manifold, apply_operator, p, X)
+    return apply_operator!(F, Y, p, X, backend)
+end
+
+"""
     LeviCivitaConnection{𝔽,TM<:Manifold{𝔽}} <: AbstractAffineConnection{𝔽,TM}
 
-Represents the Levi-Civita connection on manifold `TM`.
+Represents the Levi-Civita connection on manifold of type `TM`.
 """
 abstract type LeviCivitaConnection{𝔽,TM<:Manifold{𝔽}} <: AbstractAffineConnection{𝔽,TM}
 end
@@ -211,28 +211,50 @@ function apply_operator(
     F::FunctionLeviCivitaConnection{𝔽,<:AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}},
     p,
     X,
+    backend::AbstractRiemannianDiffBackend,
 ) where {𝔽}
     emb_Z = apply_operator(
         FunctionLeviCivitaConnection(base_manifold(F.manifold), q -> embed(F.manifold, q, F.f(q))),
         embed(F.manifold, p),
         embed(F.manifold, p, X),
+        backend,
     )
     return project(F.manifold, p, emb_Z)
 end
+
+function apply_operator(
+    F::FunctionLeviCivitaConnection,
+    p,
+    X,
+)
+    return apply_operator(F, p, X, rdifferential_backend())
+end
+
 
 function apply_operator!(
     F::FunctionLeviCivitaConnection{𝔽,<:AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}},
     Z,
     p,
     X,
+    backend::AbstractRiemannianDiffBackend,
 ) where {𝔽}
-    emb_Z = apply_operator(
+    emb_Z = apply_operator!(
         FunctionLeviCivitaConnection(base_manifold(F.manifold), q -> embed(F.manifold, q, F.f(q))),
         Z,
         embed(L.manifold, p),
         embed(L.manifold, p, X),
+        backend,
     )
     return project!(F.manifold, Z, p, emb_Z)
+end
+
+function apply_operator!(
+    F::FunctionLeviCivitaConnection,
+    Z,
+    p,
+    X,
+)
+    return apply_operator!(F, Z, p, X, rdifferential_backend())
 end
 
 """
