@@ -113,7 +113,9 @@ abstract type AbstractCotangentVectorField{𝔽,TM<:Manifold{𝔽}} <:
 """
     RieszRepresenterCotangentVectorField(M::Manifold)
 
-Defines Riesz representer representation of cotangent vectors.
+Defines Riesz representer representation of cotangent vectors. By default, any tangent
+vector space basis defines a contangent vector space basis in this representation by
+expanding the Riesz representer.
 """
 struct RieszRepresenterCotangentVectorField{𝔽,TM<:Manifold{𝔽}} <:
        AbstractCotangentVectorField{𝔽,TM}
@@ -122,6 +124,16 @@ end
 
 function apply_operator(op::RieszRepresenterCotangentVectorField, p, X1, X2)
     return inner(op.manifold, p, X1, X2)
+end
+
+function get_coordinates!(
+    F::RieszRepresenterCotangentVectorField,
+    Y,
+    p,
+    X,
+    B::AbstractBasis,
+)
+    return get_coordinates!(F.manifold, Y, p, X, B)
 end
 
 function get_coordinates(F::AbstractTensorField, p, X, B::AbstractBasis)
@@ -137,6 +149,90 @@ Get the default representation of cotangent vectors for manifold `M`. Defaults t
 """
 function get_cotangent_operator(M::Manifold)
     return RieszRepresenterCotangentVectorField(M)
+end
+
+
+abstract type AbstractAffineConnection{𝔽,TM<:Manifold{𝔽}} <: AbstractTensorField{
+    𝔽,
+    TM,
+    TensorProductType{Tuple{TangentSpaceType,TangentSpaceType}},
+    𝔽,
+    TM,
+    TangentSpaceType,
+} end
+
+
+"""
+    LeviCivitaConnection{𝔽,TM<:Manifold{𝔽}} <: AbstractAffineConnection{𝔽,TM}
+
+Represents the Levi-Civita connection on manifold `TM`.
+"""
+abstract type LeviCivitaConnection{𝔽,TM<:Manifold{𝔽}} <: AbstractAffineConnection{𝔽,TM}
+end
+
+"""
+    FunctionLeviCivitaConnection{𝔽,TM<:Manifold{𝔽},TF} <: LeviCivitaConnection{𝔽,TM}
+
+Levi-Civita connection of a tangent vector valued function `f` defined on manifold `M`.
+
+
+"""
+struct FunctionLeviCivitaConnection{𝔽,TM<:Manifold{𝔽},TF} <: LeviCivitaConnection{𝔽,TM}
+    manifold::TM
+    f::TF
+end
+
+@doc raw"""
+    apply_operator(F::LeviCivitaConnection, p, X)
+
+Compute the value of the Levi-Civita connection at point `p`, in the direction pointed by
+tangent vector `X` at `p`, of the vector field on `M.manifold` defined by a function `fY`
+defined by `F`.
+The formula reads $(\nabla_X \mathit{fY})_p$.
+"""
+apply_operator(F::LeviCivitaConnection, p, X)
+
+"""
+    apply_operator(
+        F::FunctionLeviCivitaConnection{𝔽,<:AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}},
+        p,
+        X,
+    ) where {𝔽}
+
+Apply the Levi-Civita connection on an isometrically embedded manifold by applying the
+connection in the embedding and projecting it back.
+
+See [^Absil2008], Section 5.3.3 for details.
+
+[^Absil2008]:
+    > Absil, P. A., et al. Optimization Algorithms on Matrix Manifolds. 2008.
+"""
+function apply_operator(
+    F::FunctionLeviCivitaConnection{𝔽,<:AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}},
+    p,
+    X,
+) where {𝔽}
+    emb_Z = apply_operator(
+        FunctionLeviCivitaConnection(base_manifold(F.manifold), q -> embed(F.manifold, q, F.f(q))),
+        embed(F.manifold, p),
+        embed(F.manifold, p, X),
+    )
+    return project(F.manifold, p, emb_Z)
+end
+
+function apply_operator!(
+    F::FunctionLeviCivitaConnection{𝔽,<:AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}},
+    Z,
+    p,
+    X,
+) where {𝔽}
+    emb_Z = apply_operator(
+        FunctionLeviCivitaConnection(base_manifold(F.manifold), q -> embed(F.manifold, q, F.f(q))),
+        Z,
+        embed(L.manifold, p),
+        embed(L.manifold, p, X),
+    )
+    return project!(F.manifold, Z, p, emb_Z)
 end
 
 """
