@@ -12,7 +12,7 @@ This tutorial demonstrates how to easily set your own manifold up within `Manifo
 ## Introduction
 
 If you looked around a little and saw the [interface](../interface.md), the amount of functions and possibilities, it might seem that a manifold might take some time to implement.
-This tutorial demonstrates that you can get your first own manifold quite fast and you only have to implement the functions you actually need. For this tutorial it would be helpful if you take a look at our [notation](../notation.md).
+This tutorial demonstrates that you can get your first own manifold quite fast and you only have to implement the functions you actually need. For this tutorial it would be helpful if you take a look at our [notation](../misc/notation.md).
 This tutorial assumes that you heard of the exponential map, tangent vectors and the dimension of a manifold. If not, please read for example [[do Carmo, 1992](#doCarmo1992)],
 Chapter 3, first.
 

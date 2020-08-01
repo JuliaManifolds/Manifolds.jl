@@ -1,4 +1,3 @@
-
 """
     test_manifold(
         M::Manifold,
