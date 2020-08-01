@@ -103,6 +103,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         @test is_manifold_point(Mpr, p, true)
         @test_throws CompositeException is_manifold_point(Mpr, X, true)
         @test_throws CompositeException is_tangent_vector(Mpr, pf, X, true)
+        @test_throws CompositeException is_tangent_vector(Mpr, p, Xf, true)
     end
 
     @testset "arithmetic" begin
