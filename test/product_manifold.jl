@@ -98,8 +98,8 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         X2 = [1.0, 0.0, 0.2]
         p = ProductRepr(p1, p2)
         X = ProductRepr(X1, X2)
-        pf = ProductRepr(p1,X1)
-        Xf = ProductRepr(X1,p2)
+        pf = ProductRepr(p1, X1)
+        Xf = ProductRepr(X1, p2)
         @test is_manifold_point(Mpr, p, true)
         @test_throws CompositeException is_manifold_point(Mpr, X, true)
         @test_throws CompositeException is_tangent_vector(Mpr, pf, X, true)
