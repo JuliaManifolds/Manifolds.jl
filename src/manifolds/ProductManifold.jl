@@ -161,32 +161,13 @@ The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(
     M::ProductManifold,
-    p::ProductRepr,
-    X::ProductRepr;
+    p::Union{ProductRepr,ProductArray},
+    X::Union{ProductRepr,ProductArray};
     check_base_point = true,
     kwargs...,
 )
     if check_base_point
         perr = check_manifold_point(M, p; kwargs...)
-        perr === nothing || return perr
-    end
-    ts = ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, X))
-    e = [check_tangent_vector(t...; kwargs...) for t in ts]
-    errors = filter(x -> !isnothing(x), e)
-    if length(errors) > 0
-        return CompositeException(errors)
-    end
-    return nothing
-end
-function check_tangent_vector(
-    M::ProductManifold,
-    p::ProductArray,
-    X::ProductArray;
-    check_base_point = true,
-    kwargs...,
-)
-    if check_base_point
-        perr = check_manifold_point(M, p)
         perr === nothing || return perr
     end
     ts = ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, X))
