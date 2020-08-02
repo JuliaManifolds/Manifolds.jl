@@ -13,6 +13,16 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
     @test Mse == ProductManifold(M1) × ProductManifold(M2)
     @test Mse == M1 × ProductManifold(M2)
     @test injectivity_radius(Mse) ≈ π
+    @test injectivity_radius(
+        Mse,
+        ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0]),
+        ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
+    ) ≈ π
+    @test injectivity_radius(
+        Mse,
+        ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0]),
+        ExponentialRetraction(),
+    ) ≈ π
     @test is_default_metric(Mse, ProductMetric())
     @test Manifolds.default_metric_dispatch(Mse, ProductMetric()) === Val{true}()
     @test_throws ErrorException Manifolds.make_reshape(
