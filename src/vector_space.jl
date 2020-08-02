@@ -157,9 +157,15 @@ abstract type AbstractAffineConnection{𝔽,TM<:Manifold{𝔽}} <: AbstractTenso
 
 Apply operator `F` at point `p` to vector `X`.
 """
-function apply_operator(F::AbstractAffineConnection, p, X, backend::AbstractRiemannianDiffBackend)
-    Y = allocate_result(F.manifold, apply_operator, p, X)
-    return apply_operator!(F, Y, p, X, backend)
+function apply_operator(
+    F::AbstractAffineConnection,
+    p,
+    X,
+    Y,
+    backend::AbstractRiemannianDiffBackend,
+)
+    Z = allocate_result(F.manifold, apply_operator, p, X, Y)
+    return apply_operator!(F, Z, p, X, Y, backend)
 end
 
 """
@@ -167,36 +173,26 @@ end
 
 Represents the Levi-Civita connection on manifold of type `TM`.
 """
-abstract type LeviCivitaConnection{𝔽,TM<:Manifold{𝔽}} <: AbstractAffineConnection{𝔽,TM}
-end
-
-"""
-    FunctionLeviCivitaConnection{𝔽,TM<:Manifold{𝔽},TF} <: LeviCivitaConnection{𝔽,TM}
-
-Levi-Civita connection of a tangent vector valued function `f` defined on manifold `M`.
-
-
-"""
-struct FunctionLeviCivitaConnection{𝔽,TM<:Manifold{𝔽},TF} <: LeviCivitaConnection{𝔽,TM}
+struct LeviCivitaConnection{𝔽,TM<:Manifold{𝔽}} <: AbstractAffineConnection{𝔽,TM}
     manifold::TM
-    f::TF
 end
 
 @doc raw"""
-    apply_operator(F::LeviCivitaConnection, p, X)
+    apply_operator(F::LeviCivitaConnection, p, X, Y)
 
 Compute the value of the Levi-Civita connection at point `p`, in the direction pointed by
-tangent vector `X` at `p`, of the vector field on `M.manifold` defined by a function `fY`
-defined by `F`.
-The formula reads $(\nabla_X \mathit{fY})_p$.
+tangent vector `X` at `p`, of the vector field on `M.manifold` defined by a function `Y`.
+The formula reads $(\nabla_X \mathit{Y})_p$.
 """
-apply_operator(F::LeviCivitaConnection, p, X)
+apply_operator(F::LeviCivitaConnection, p, X, Y)
 
 """
     apply_operator(
-        F::FunctionLeviCivitaConnection{𝔽,<:AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}},
+        F::LeviCivitaConnection{𝔽,<:AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}},
         p,
         X,
+        Y,
+        backend::AbstractRiemannianDiffBackend,
     ) where {𝔽}
 
 Apply the Levi-Civita connection on an isometrically embedded manifold by applying the
@@ -208,53 +204,48 @@ See [^Absil2008], Section 5.3.3 for details.
     > Absil, P. A., et al. Optimization Algorithms on Matrix Manifolds. 2008.
 """
 function apply_operator(
-    F::FunctionLeviCivitaConnection{𝔽,<:AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}},
+    F::LeviCivitaConnection{𝔽,<:AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}},
     p,
     X,
+    Y,
     backend::AbstractRiemannianDiffBackend,
 ) where {𝔽}
     emb_Z = apply_operator(
-        FunctionLeviCivitaConnection(base_manifold(F.manifold), q -> embed(F.manifold, q, F.f(q))),
+        LeviCivitaConnection(base_manifold(F.manifold)),
         embed(F.manifold, p),
         embed(F.manifold, p, X),
+        q -> embed(F.manifold, q, Y(q)),
         backend,
     )
     return project(F.manifold, p, emb_Z)
 end
 
-function apply_operator(
-    F::FunctionLeviCivitaConnection,
-    p,
-    X,
-)
-    return apply_operator(F, p, X, rdifferential_backend())
+function apply_operator(F::LeviCivitaConnection, p, X, Y)
+    return apply_operator(F, p, X, Y, rdifferential_backend())
 end
 
 
 function apply_operator!(
-    F::FunctionLeviCivitaConnection{𝔽,<:AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}},
+    F::LeviCivitaConnection{𝔽,<:AbstractEmbeddedManifold{DefaultIsometricEmbeddingType}},
     Z,
     p,
     X,
+    Y,
     backend::AbstractRiemannianDiffBackend,
 ) where {𝔽}
     emb_Z = apply_operator!(
-        FunctionLeviCivitaConnection(base_manifold(F.manifold), q -> embed(F.manifold, q, F.f(q))),
+        LeviCivitaConnection(base_manifold(F.manifold)),
         Z,
         embed(L.manifold, p),
         embed(L.manifold, p, X),
+        q -> embed(F.manifold, q, Y(q)),
         backend,
     )
     return project!(F.manifold, Z, p, emb_Z)
 end
 
-function apply_operator!(
-    F::FunctionLeviCivitaConnection,
-    Z,
-    p,
-    X,
-)
-    return apply_operator!(F, Z, p, X, rdifferential_backend())
+function apply_operator!(F::LeviCivitaConnection, Z, p, X, Y)
+    return apply_operator!(F, Z, p, X, Y, rdifferential_backend())
 end
 
 """
