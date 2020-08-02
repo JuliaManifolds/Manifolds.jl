@@ -230,14 +230,20 @@ Base.:^(M::Manifold, n) = PowerManifold(M, n...)
 
 Check whether `p` is a valid point on an [`AbstractPowerManifold`](@ref) `M`,
 i.e. each element of `p` has to be a valid point on the base manifold.
+If `p` is not a point on `M` a `CompositeException` consisting of all error messages of the
+components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_manifold_point(M::AbstractPowerManifold, p; kwargs...)
     rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        imp = check_manifold_point(M.manifold, _read(M, rep_size, p, i); kwargs...)
-        imp === nothing || return imp
+    e = [
+        check_manifold_point(M.manifold, _read(M, rep_size, p, i); kwargs...)
+        for i in get_iterator(M)
+    ]
+    errors = filter(x -> !isnothing(x), e)
+    if length(errors) > 0
+        return CompositeException(errors)
     end
     return nothing
 end
@@ -249,6 +255,10 @@ Check whether `X` is a tangent vector to `p` an the [`AbstractPowerManifold`](@r
 `M`, i.e. atfer [`check_manifold_point`](@ref)`(M, p)`, and all projections to
 base manifolds must be respective tangent vectors.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
+If `X` is not a tangent vector to `p` on `M` a `CompositeException` consisting of all error
+messages of the components, for which the tests fail is returned.
+
+
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(
@@ -263,14 +273,17 @@ function check_tangent_vector(
         mpe === nothing || return mpe
     end
     rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        imp = check_tangent_vector(
+    e = [
+        check_tangent_vector(
             M.manifold,
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i);
             kwargs...,
-        )
-        imp === nothing || return imp
+        ) for i in get_iterator(M)
+    ]
+    errors = filter(x -> !isnothing(x), e)
+    if length(errors) > 0
+        return CompositeException(errors)
     end
     return nothing
 end
