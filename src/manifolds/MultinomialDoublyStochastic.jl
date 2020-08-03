@@ -160,7 +160,15 @@ function inner(::MultinomialSymmetricDoubleStochasticMatrices, p, X, Y)
     return d
 end
 
+@doc raw"""
+    manifold_dimension(M::MultinomialSymmetricDoubleStochasticMatrices)
 
+returns the dimension of the [`MultinomialSymmetricDoubleStochasticMatrices`](@ref) manifold
+namely
+````math
+\operatorname{dim}_{\mathcal{PS}(n)} = (n-1)^2.
+````
+"""
 @generated function manifold_dimension(
     ::MultinomialSymmetricDoubleStochasticMatrices{n},
 ) where {n}
@@ -168,23 +176,27 @@ end
 end
 
 @doc raw"""
-    project(M::MultinomialSymmetricDoubleStochasticMatrices{n}, X, p, Y) where {n}
+    project(M::MultinomialSymmetricDoubleStochasticMatrices{n}, p, Y) where {n}
 
 Project `Y` onto the tangent space at `p` on the [`MultinomialSymmetricDoubleStochasticMatrices`](@ref) `M`, return the result in `X`.
 The formula reads
 ````math
-    \operatorname{proj}_p)(Y) = Y - (α\mathbf{1}_n^{\mathrm{T}} + \mathbf{1}_nβ^{\mathrm{T}}) ⊙ p,
+    \operatorname{proj}_p(Y) = Y - (α\mathbf{1}_n^{\mathrm{T}} + \mathbf{1}_nβ^{\mathrm{T}}) ⊙ p,
 ````
 where $⊙$ denotes the Hadamard or elementwise product and $\mathbb{1}_n$ is the vector of length $n$ containing ones.
-The two vectors $α, β$ are computed as
+The two vectors $α,β ∈ ℝ^{n×n}$ are computed as a solution (typically using the left pseudo inverse) of
 ````math
-    α = (1-pp^{\mathrm{T}})^\dagger(Y-pY^{\mathrm{T}})\mathbf{1}_n
-    \text{ and }
-    β = Y^{\mathrm{T}}\mathbf{1}_n - p^{\mathrm{T}}α,
+    \begin{pmatrix} I & p\\p^{\mathrm{T}} & I \end{pmatrix}
+    \begin{pmatrix} α\\ β\end{pmatrix}
+    =
+    \begin{pmatrix} Y\mathbf{1}\\Y^{\mathrm{T}}\mathbf{1}\end{pmatrix},
 ````
-where $\circ^{\dagger}$ denotes the left pseude inverse.
+where $\mathbf{1}_n$ is the vector of length $n$ containing ones.
+
 """
-function project(::MultinomialSymmetricDoubleStochasticMatrices{n}, X, p, Y) where {n}
+project(::MultinomialSymmetricDoubleStochasticMatrices, ::Any, ::Any)
+
+function project!(::MultinomialSymmetricDoubleStochasticMatrices{n}, X, p, Y) where {n}
     ζ = [I p; p I] \ [sum(B, dims = 2); sum(B, dims = 1)'] # Formula (25) from 1802.02628
     return X .= Y .- (repeat(ζ[1:n], 1, 3) .+ repeat(ζ[n:end]', 3, 1)) .* p
 end
@@ -193,13 +205,18 @@ end
     project(
         M::MultinomialSymmetricDoubleStochasticMatrices,
         p;
-        maxiter=100,
-        tol=eps(eltype(p))
+        maxiter = 100,
+        tolerance = eps(eltype(p))
     )
 
-    project a matrix `p` with positive entries applying sinkhorns algorithm,
-    transcribed from the matlab code ot [manopt](http://manopt.org).
+project a matrix `p` with positive entries applying Sinkhorn's algorithm.
 """
+function project(M::MultinomialSymmetricDoubleStochasticMatrices, p; kwargs...)
+    q = allocate_result(M, project, p)
+    project!(M, q, p; kwargs...)
+    return q
+end
+
 function project!(
     ::MultinomialSymmetricDoubleStochasticMatrices{n},
     q,
@@ -246,9 +263,9 @@ end
 end
 
 @doc raw"""
-    retract(M::Spectrahedron, q, Y, ::ProjectionRetraction)
+    retract(M::Spectrahedron, p, X, ::ProjectionRetraction)
 
-compute a projection based retraction by projecting $q+Y$ back onto the manifold.
+compute a projection based retraction by projecting $p+X$ back onto the manifold.
 """
 retract(
     ::MultinomialSymmetricDoubleStochasticMatrices,
