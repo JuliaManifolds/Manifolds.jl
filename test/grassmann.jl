@@ -157,8 +157,8 @@ include("utils.jl")
             w = [0.0 1.0; -1.0 0.0; 1.0 0.0]
             z = exp(M, x, w)
             pts = convert.(T, [x, y, z])
-            if VERSION < v"1.1"
-                exp_log_atol_multiplier = 1000.0
+            if Sys.iswindows()
+                exp_log_atol_multiplier = 100.0
             else
                 exp_log_atol_multiplier = 10.0
             end
