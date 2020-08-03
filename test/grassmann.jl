@@ -158,7 +158,7 @@ include("utils.jl")
             z = exp(M, x, w)
             pts = convert.(T, [x, y, z])
             if VERSION < v"1.1"
-                exp_log_atol_multiplier = 100.0
+                exp_log_atol_multiplier = 1000.0
             else
                 exp_log_atol_multiplier = 10.0
             end
