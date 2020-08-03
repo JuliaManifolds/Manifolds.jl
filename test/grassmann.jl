@@ -157,6 +157,11 @@ include("utils.jl")
             w = [0.0 1.0; -1.0 0.0; 1.0 0.0]
             z = exp(M, x, w)
             pts = convert.(T, [x, y, z])
+            if VERSION < v"1.1"
+                exp_log_atol_multiplier = 100.0
+            else
+                exp_log_atol_multiplier = 10.0
+            end
             test_manifold(
                 M,
                 pts,
@@ -172,7 +177,7 @@ include("utils.jl")
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                exp_log_atol_multiplier = 20.0,
+                exp_log_atol_multiplier = exp_log_atol_multiplier,
                 is_tangent_atol_multiplier = 20.0,
             )
 
