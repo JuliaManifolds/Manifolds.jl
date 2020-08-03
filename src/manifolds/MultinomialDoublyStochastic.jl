@@ -121,7 +121,7 @@ function check_tangent_vector(
 end
 
 function decorated_manifold(::MultinomialDoubleStochasticMatrices{N}) where {N}
-    return SymmetricMatrices(N,ℝ)
+    return SymmetricMatrices(N, ℝ)
 end
 
 embed!(::MultinomialDoubleStochasticMatrices, q, p) = copyto!(q, p)
@@ -155,9 +155,7 @@ namely
 \operatorname{dim}_{\mathcal{PS}(n)} = (n-1)^2.
 ````
 """
-@generated function manifold_dimension(
-    ::MultinomialDoubleStochasticMatrices{n},
-) where {n}
+@generated function manifold_dimension(::MultinomialDoubleStochasticMatrices{n}) where {n}
     return (n - 1)^2
 end
 
@@ -184,7 +182,7 @@ project(::MultinomialDoubleStochasticMatrices, ::Any, ::Any)
 
 function project!(::MultinomialDoubleStochasticMatrices{n}, X, p, Y) where {n}
     ζ = [I p; p I] \ [sum(Y, dims = 2); sum(Y, dims = 1)'] # Formula (25) from 1802.02628
-    return X .= Y .- (repeat(ζ[1:n], 1, 3) .+ repeat(ζ[n+1:end]', 3, 1)) .* p
+    return X .= Y .- (repeat(ζ[1:n], 1, 3) .+ repeat(ζ[(n + 1):end]', 3, 1)) .* p
 end
 
 @doc raw"""
@@ -242,9 +240,7 @@ function project!(
     return q
 end
 
-@generated function representation_size(
-    ::MultinomialDoubleStochasticMatrices{n},
-) where {n}
+@generated function representation_size(::MultinomialDoubleStochasticMatrices{n}) where {n}
     return (n, n)
 end
 
@@ -253,20 +249,9 @@ end
 
 compute a projection based retraction by projecting $p+X$ back onto the manifold.
 """
-retract(
-    ::MultinomialDoubleStochasticMatrices,
-    ::Any,
-    ::Any,
-    ::ProjectionRetraction,
-)
+retract(::MultinomialDoubleStochasticMatrices, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract!(
-    M::MultinomialDoubleStochasticMatrices,
-    q,
-    p,
-    X,
-    ::ProjectionRetraction,
-)
+function retract!(M::MultinomialDoubleStochasticMatrices, q, p, X, ::ProjectionRetraction)
     return project!(M, q, p + X)
 end
 
