@@ -1,32 +1,49 @@
 @doc raw"""
-    MultinomialDoublyStochastic{n} <: AbstractPowerManifold{ℝ}
+    MultinomialDoublyStochastic{n} <: AbstractEmbeddedManifold{ℝ, DefaultEmbeddingType}
 
 The multinomial manifold consists of `m` column vectors, where each column is of length
 `n` and unit norm, i.e.
 
 ````math
-\mathcal{PS}(n) \coloneqq \bigl\{ p ∈ ℝ^{n×n}\ \big|\ p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m, p^\mathrm{T} = p, p\text{ is symmetric positive definite} \text{ and } p\mathbb{1}_n = p^{\mathrm{T}}\mathbb{1}_n = \mathbb{1}_n\bigr\},
+\begin{aligned}
+\mathcal{PS}(n) \coloneqq \bigl\{p ∈ ℝ^{n×n}\ \big|\ &p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m,\\
+& p^\mathrm{T} = p,\\
+& p\text{ is symmetric positive definite} \text{ and }\\
+& p\mathbf{1}_n = p^{\mathrm{T}}\mathbf{1}_n = \mathbf{1}_n
+\bigr\},
+\end{aligned}
 ````
-where $\mathbb{1}_n$ is the vector of length $n$ containing ones.
+
+where $\mathbf{1}_n$ is the vector of length $n$ containing ones.
 
 The tangent space can be written as
+
 ````math
 T_p\mathcal{PS}(n) \coloneqq \bigl\{
-X ∈ ℝ^{n×n}\ \big|\
-X = X^{\mathrm{T}} \text{ and } X \mathbb{1}_n = \mathbb{0}_n
+X ∈ ℝ^{n×n}\ \big|\ X = X^{\mathrm{T}} \text{ and }
+X\mathbf{1}_n = X^{\mathrm{T}}\mathbf{1}_n = \mathbf{0}_n
 \bigr\},
 ````
-where $\mathbb{0}_n$ is the vector of length $n$ containing zeros.
+
+where $\mathbf{0}_n$ is the vector of length $n$ containing zeros.
+
+More details can be found in[^DouikHassibi2019].
 
 # Constructor
 
     MultinomialSymmetricDoubleStochasticMatrices(n)
 
 Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic and symmetric.
+
+[^DouikHassibi2019]:
+    > A. Douik, B. Hassibi:
+    > Manifold Optimization Over the Set of Doubly Stochastic Matrices: A Second-Order Geometry,
+    > IEEE Transactions on Signal Processing 67(22), pp. 5761–5774, 2019.
+    > doi: [10.1109/tsp.2019.2946024](http://doi.org/10.1109/tsp.2019.2946024),
+    > arXiv: [1802.02628](https://arxiv.org/abs/1802.02628).
 """
 struct MultinomialSymmetricDoubleStochasticMatrices{N} <:
-       AbstractEmbeddedManifold{ℝ,DefaultEmbedding} where {N}
-end
+       AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType} where {N} end
 
 function MultinomialSymmetricDoubleStochasticMatrices(n::Int)
     return MultinomialSymmetricDoubleStochasticMatrices{n}()
@@ -35,67 +52,107 @@ end
 @doc raw"""
     check_manifold_point(M::MultinomialSymmetricDoubleStochasticMatrices, p)
 
-Checks whether `p` is a valid point on the [`MultinomialSymmetricDoubleStochasticMatrices`](@ref)`(m,n)` `M`, i.e. is a matrix
-of `m` discrete probability distributions as columns from $\mathbb R^{n}$, i.e. each column is a point from
-[`ProbabilitySimplex`](@ref)`(n-1)`.
+Checks whether `p` is a valid point on the [`MultinomialSymmetricDoubleStochasticMatrices`](@ref)`(m,n)` `M`,
+i.e. is a symmetric matrix whose rows and columns sum to one.
 """
 check_manifold_point(::MultinomialSymmetricDoubleStochasticMatrices, ::Any)
-function check_manifold_point(M::MultinomialSymmetricDoubleStochasticMatrices{n,m}, p; kwargs...) where {n,m}
-    if size(p) != (n, m)
+function check_manifold_point(
+    M::MultinomialSymmetricDoubleStochasticMatrices{n},
+    p;
+    kwargs...,
+) where {n}
+    mpv =
+        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+    mpv === nothing || return mpv
+    c = sum(p, dims = 1)
+    if !isapprox(norm(c - ones(1, n)), 0.0; kwargs...)
         return DomainError(
-            length(p),
-            "The matrix in `p` ($(size(p))) does not match the dimensions of $(M).",
+            c,
+            "The point $(p) does not lie on $M, since its columns do not sum up to one.",
         )
     end
-    return check_manifold_point(PowerManifold(M.manifold, m), p; kwargs...)
+    r = sum(p, dims = 2)
+    if !isapprox(norm(r - ones(n, 1)), 0.0; kwargs...)
+        return DomainError(
+            r,
+            "The point $(p) does not lie on $M, since its columns do not sum up to one.",
+        )
+    end
+    if !(minimum(p) > 0)
+        return DomainError(
+            minimum(p),
+            "The point $(p) does not lie on $M, since at least one of its entries is nonpositive.",
+        )
+    end
+    return nothing
 end
 @doc raw"""
     check_tangent_vector(M::MultinomialSymmetricDoubleStochasticMatrices p, X; check_base_point = true, kwargs...)
 
 Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialSymmetricDoubleStochasticMatrices`](@ref) `M`.
-This means, that `p` is valid, that `X` is of correct dimension and columnswise
-a tangent vector to the columns of `p` on the [`ProbabilitySimplex`](@ref).
+This means, that `p` is valid, that `X` is of correct dimension and sums to zero along any
+column or row.
+
 The optional parameter `check_base_point` indicates, whether to call
 [`check_manifold_point`](@ref check_manifold_point(::MultinomialSymmetricDoubleStochasticMatrices, ::Any))  for `p`.
 """
 function check_tangent_vector(
-    M::MultinomialSymmetricDoubleStochasticMatrices{n,m},
+    M::MultinomialSymmetricDoubleStochasticMatrices{n},
     p,
     X;
     check_base_point = true,
     kwargs...,
-) where {n,m}
-    if check_base_point && size(p) != (n, m)
-        return DomainError(
-            length(p),
-            "The matrix `p` ($(size(p))) does not match the dimension of $(M).",
-        )
+) where {n}
+    if check_base_point
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
     end
-    if size(X) != (n, m)
-        return DomainError(
-            length(X),
-            "The matrix `X` ($(size(X))) does not match the dimension of $(M).",
-        )
-    end
-    return check_tangent_vector(
-        PowerManifold(M.manifold, m),
+    mpv = invoke(
+        check_tangent_vector,
+        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
+        M,
         p,
         X;
-        check_base_point = check_base_point,
+        check_base_point = false, # already checked above
         kwargs...,
     )
+    mpv === nothing || return mpv
+    c = sum(X, dims = 1)
+    if !isapprox(norm(c), 0.0; kwargs...)
+        return DomainError(
+            c,
+            "The matrix $(X) is not a tangent vector to $(p) on $(M), since its columns do not sum up to zero.",
+        )
+    end
+    r = sum(p, dims = 2)
+    if !isapprox(norm(r), 0.0; kwargs...)
+        return DomainError(
+            r,
+            "The point $(p) does not lie on $M, since its columns do not sum up to one.",
+        )
+    end
+    return nothing
 end
 
-decorated_manifold(::MultinomialSymmetricDoubleStochasticMatrices{N}) where {N} = Euclidean(N, N; field = ℝ)
-
-function distance(::MultinomialSymmetricDoubleStochasticMatrices, p, q)
-    return sum( 2 * acos.(p.*q) )
+function decorated_manifold(::MultinomialSymmetricDoubleStochasticMatrices{N}) where {N}
+    return SymmetricMatrices(N,ℝ)
 end
 
 embed!(::MultinomialSymmetricDoubleStochasticMatrices, q, p) = copyto!(q, p)
 embed!(::MultinomialSymmetricDoubleStochasticMatrices, Y, p, X) = copyto!(Y, X)
 
+@doc raw"""
+    inner(M::MultinomialSymmetricDoubleStochasticMatrices{n}, p, X, Y) where {n}
+
+Compute the inner product on the tangent space at $p$, which is the elementwise
+inner product similar to the [`Hyperbolic`](@ref) space, i.e.
+
+````math
+    \langle X, Y \rangle_p = \sum_{i,j=1}^n \frac{X_{ij}Y_{ij}}{p_{ij}}.
+````
+"""
 function inner(::MultinomialSymmetricDoubleStochasticMatrices, p, X, Y)
+    # to avoid memory allocations, we sum in a single number
     d = zero(Base.promote_eltype(p, X, Y))
     @inbounds for i in eachindex(p, X, Y)
         d += X[i] * Y[i] / p[i]
@@ -104,10 +161,14 @@ function inner(::MultinomialSymmetricDoubleStochasticMatrices, p, X, Y)
 end
 
 
-@generated manifold_dimension(::MultinomialSymmetricDoubleStochasticMatrices{n}) where {n} = (n - 1)^2
+@generated function manifold_dimension(
+    ::MultinomialSymmetricDoubleStochasticMatrices{n},
+) where {n}
+    return (n - 1)^2
+end
 
 @doc raw"""
-    project(;;MultinomialSymmetricDoubleStochasticMatrices{n}, X, p, Y) where {n}
+    project(M::MultinomialSymmetricDoubleStochasticMatrices{n}, X, p, Y) where {n}
 
 Project `Y` onto the tangent space at `p` on the [`MultinomialSymmetricDoubleStochasticMatrices`](@ref) `M`, return the result in `X`.
 The formula reads
@@ -124,12 +185,113 @@ The two vectors $α, β$ are computed as
 where $\circ^{\dagger}$ denotes the left pseude inverse.
 """
 function project(::MultinomialSymmetricDoubleStochasticMatrices{n}, X, p, Y) where {n}
-    α = (I-p*p') \ sum( Y-p*Y', dims=2)
-    β = sum(Y',dims=2) - p'*α
-    X .= Y .-(repeat(α,1,3) .+ repeat(β',3,1) ) .* p
+    ζ = [I p; p I] \ [sum(B, dims = 2); sum(B, dims = 1)'] # Formula (25) from 1802.02628
+    return X .= Y .- (repeat(ζ[1:n], 1, 3) .+ repeat(ζ[n:end]', 3, 1)) .* p
 end
 
-@generated representation_size(::MultinomialSymmetricDoubleStochasticMatrices{n}) where {n} = (n, n)
+@doc raw"""
+    project(
+        M::MultinomialSymmetricDoubleStochasticMatrices,
+        p;
+        maxiter=100,
+        tol=eps(eltype(p))
+    )
+
+    project a matrix `p` with positive entries applying sinkhorns algorithm,
+    transcribed from the matlab code ot [manopt](http://manopt.org).
+"""
+function project!(
+    ::MultinomialSymmetricDoubleStochasticMatrices{n},
+    q,
+    p;
+    maxiter = 100,
+    tolerance = eps(eltype(p)),
+) where {n}
+    iter = 0
+    d1 = sum(p, dims = 1)
+    any(p * d1' .== 0) && throw(DomainError(
+        p * d1',
+        "The matrix p ($p)  can not be projected, since p*d1' ($(p*d1')).",
+    ))
+    d2 = 1 ./ (p * d1')
+    row = d2' * p
+    gap = maximum(abs.(row .* d1 .- 1))
+    while iter < maxiter && (gap >= tolerance)
+        iter += 1
+        row .= d2' * p
+        any(row .== 0) && throw(DomainError(
+            row,
+            "projection sinkhorn failed with row $row containing a zero.",
+        ))
+        d1 .= 1 ./ row
+        any(d1 .== 0) && throw(DomainError(
+            d1,
+            "projection sinkhorn failed with d1 $d1 containing a zero.",
+        ))
+        d2 .= 1 ./ (p * d1')
+        any(d2 .== 0) && throw(DomainError(
+            d2,
+            "projection sinkhorn failed with d2 $d2 containing a zero.",
+        ))
+        gap = maximum(abs.(row .* d1 .- 1))
+    end
+    q .= p .* (d2 * d1)
+    return q
+end
+
+@generated function representation_size(
+    ::MultinomialSymmetricDoubleStochasticMatrices{n},
+) where {n}
+    return (n, n)
+end
+
+@doc raw"""
+    retract(M::Spectrahedron, q, Y, ::ProjectionRetraction)
+
+compute a projection based retraction by projecting $q+Y$ back onto the manifold.
+"""
+retract(
+    ::MultinomialSymmetricDoubleStochasticMatrices,
+    ::Any,
+    ::Any,
+    ::ProjectionRetraction,
+)
+
+function retract!(
+    M::MultinomialSymmetricDoubleStochasticMatrices,
+    q,
+    p,
+    X,
+    ::ProjectionRetraction,
+)
+    return project!(M, q, p + Y)
+end
+
+"""
+    vector_transport_to(M::MultinomialSymmetricDoubleStochasticMatrices, p, X, q)
+
+transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
+at `q`.
+"""
+vector_transport_to(
+    ::MultinomialSymmetricDoubleStochasticMatrices,
+    ::Any,
+    ::Any,
+    ::Any,
+    ::ProjectionTransport,
+)
+
+function vector_transport_to!(
+    M::MultinomialSymmetricDoubleStochasticMatrices,
+    Y,
+    p,
+    X,
+    q,
+    ::ProjectionTransport,
+)
+    project!(M, Y, q, X)
+    return Y
+end
 
 function Base.show(io::IO, ::MultinomialSymmetricDoubleStochasticMatrices{n}) where {n}
     return print(io, "MultinomialSymmetricDoubleStochasticMatrices($(n))")
