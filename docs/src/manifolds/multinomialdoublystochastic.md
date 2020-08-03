@@ -1,4 +1,4 @@
-# Multinomial matrices
+# Multinomial doubly stochastic matrices
 
 ```@autodocs
 Modules = [Manifolds]

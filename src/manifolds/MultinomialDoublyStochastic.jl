@@ -31,7 +31,7 @@ More details can be found in[^DouikHassibi2019].
 
 # Constructor
 
-    MultinomialSymmetricDoubleStochasticMatrices(n)
+    MultinomialDoubleStochasticMatrices(n)
 
 Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic and symmetric.
 
@@ -42,40 +42,33 @@ Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic 
     > doi: [10.1109/tsp.2019.2946024](http://doi.org/10.1109/tsp.2019.2946024),
     > arXiv: [1802.02628](https://arxiv.org/abs/1802.02628).
 """
-struct MultinomialSymmetricDoubleStochasticMatrices{N} <:
+struct MultinomialDoubleStochasticMatrices{N} <:
        AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType} where {N} end
 
-function MultinomialSymmetricDoubleStochasticMatrices(n::Int)
-    return MultinomialSymmetricDoubleStochasticMatrices{n}()
+function MultinomialDoubleStochasticMatrices(n::Int)
+    return MultinomialDoubleStochasticMatrices{n}()
 end
 
 @doc raw"""
-    check_manifold_point(M::MultinomialSymmetricDoubleStochasticMatrices, p)
+    check_manifold_point(M::MultinomialDoubleStochasticMatrices, p)
 
-Checks whether `p` is a valid point on the [`MultinomialSymmetricDoubleStochasticMatrices`](@ref)`(m,n)` `M`,
+Checks whether `p` is a valid point on the [`MultinomialDoubleStochasticMatrices`](@ref)`(m,n)` `M`,
 i.e. is a symmetric matrix whose rows and columns sum to one.
 """
-check_manifold_point(::MultinomialSymmetricDoubleStochasticMatrices, ::Any)
+check_manifold_point(::MultinomialDoubleStochasticMatrices, ::Any)
 function check_manifold_point(
-    M::MultinomialSymmetricDoubleStochasticMatrices{n},
+    M::MultinomialDoubleStochasticMatrices{n},
     p;
     kwargs...,
 ) where {n}
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
-    c = sum(p, dims = 1)
+    c = sum(p, dims = 1) # due to symmetry we only have to check the cols
     if !isapprox(norm(c - ones(1, n)), 0.0; kwargs...)
         return DomainError(
             c,
-            "The point $(p) does not lie on $M, since its columns do not sum up to one.",
-        )
-    end
-    r = sum(p, dims = 2)
-    if !isapprox(norm(r - ones(n, 1)), 0.0; kwargs...)
-        return DomainError(
-            r,
-            "The point $(p) does not lie on $M, since its columns do not sum up to one.",
+            "The point $(p) does not lie on $M, since its columns/rows do not sum up to one.",
         )
     end
     if !(minimum(p) > 0)
@@ -87,17 +80,17 @@ function check_manifold_point(
     return nothing
 end
 @doc raw"""
-    check_tangent_vector(M::MultinomialSymmetricDoubleStochasticMatrices p, X; check_base_point = true, kwargs...)
+    check_tangent_vector(M::MultinomialDoubleStochasticMatrices p, X; check_base_point = true, kwargs...)
 
-Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialSymmetricDoubleStochasticMatrices`](@ref) `M`.
+Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialDoubleStochasticMatrices`](@ref) `M`.
 This means, that `p` is valid, that `X` is of correct dimension and sums to zero along any
 column or row.
 
 The optional parameter `check_base_point` indicates, whether to call
-[`check_manifold_point`](@ref check_manifold_point(::MultinomialSymmetricDoubleStochasticMatrices, ::Any))  for `p`.
+[`check_manifold_point`](@ref check_manifold_point(::MultinomialDoubleStochasticMatrices, ::Any))  for `p`.
 """
 function check_tangent_vector(
-    M::MultinomialSymmetricDoubleStochasticMatrices{n},
+    M::MultinomialDoubleStochasticMatrices{n},
     p,
     X;
     check_base_point = true,
@@ -117,32 +110,25 @@ function check_tangent_vector(
         kwargs...,
     )
     mpv === nothing || return mpv
-    c = sum(X, dims = 1)
+    c = sum(X, dims = 1) # due to symmetry, we only have to check columns
     if !isapprox(norm(c), 0.0; kwargs...)
         return DomainError(
             c,
-            "The matrix $(X) is not a tangent vector to $(p) on $(M), since its columns do not sum up to zero.",
-        )
-    end
-    r = sum(p, dims = 2)
-    if !isapprox(norm(r), 0.0; kwargs...)
-        return DomainError(
-            r,
-            "The point $(p) does not lie on $M, since its columns do not sum up to one.",
+            "The matrix $(X) is not a tangent vector to $(p) on $(M), since its columns/rows do not sum up to zero.",
         )
     end
     return nothing
 end
 
-function decorated_manifold(::MultinomialSymmetricDoubleStochasticMatrices{N}) where {N}
+function decorated_manifold(::MultinomialDoubleStochasticMatrices{N}) where {N}
     return SymmetricMatrices(N,ℝ)
 end
 
-embed!(::MultinomialSymmetricDoubleStochasticMatrices, q, p) = copyto!(q, p)
-embed!(::MultinomialSymmetricDoubleStochasticMatrices, Y, p, X) = copyto!(Y, X)
+embed!(::MultinomialDoubleStochasticMatrices, q, p) = copyto!(q, p)
+embed!(::MultinomialDoubleStochasticMatrices, Y, p, X) = copyto!(Y, X)
 
 @doc raw"""
-    inner(M::MultinomialSymmetricDoubleStochasticMatrices{n}, p, X, Y) where {n}
+    inner(M::MultinomialDoubleStochasticMatrices{n}, p, X, Y) where {n}
 
 Compute the inner product on the tangent space at $p$, which is the elementwise
 inner product similar to the [`Hyperbolic`](@ref) space, i.e.
@@ -151,7 +137,7 @@ inner product similar to the [`Hyperbolic`](@ref) space, i.e.
     \langle X, Y \rangle_p = \sum_{i,j=1}^n \frac{X_{ij}Y_{ij}}{p_{ij}}.
 ````
 """
-function inner(::MultinomialSymmetricDoubleStochasticMatrices, p, X, Y)
+function inner(::MultinomialDoubleStochasticMatrices, p, X, Y)
     # to avoid memory allocations, we sum in a single number
     d = zero(Base.promote_eltype(p, X, Y))
     @inbounds for i in eachindex(p, X, Y)
@@ -161,24 +147,24 @@ function inner(::MultinomialSymmetricDoubleStochasticMatrices, p, X, Y)
 end
 
 @doc raw"""
-    manifold_dimension(M::MultinomialSymmetricDoubleStochasticMatrices)
+    manifold_dimension(M::MultinomialDoubleStochasticMatrices)
 
-returns the dimension of the [`MultinomialSymmetricDoubleStochasticMatrices`](@ref) manifold
+returns the dimension of the [`MultinomialDoubleStochasticMatrices`](@ref) manifold
 namely
 ````math
 \operatorname{dim}_{\mathcal{PS}(n)} = (n-1)^2.
 ````
 """
 @generated function manifold_dimension(
-    ::MultinomialSymmetricDoubleStochasticMatrices{n},
+    ::MultinomialDoubleStochasticMatrices{n},
 ) where {n}
     return (n - 1)^2
 end
 
 @doc raw"""
-    project(M::MultinomialSymmetricDoubleStochasticMatrices{n}, p, Y) where {n}
+    project(M::MultinomialDoubleStochasticMatrices{n}, p, Y) where {n}
 
-Project `Y` onto the tangent space at `p` on the [`MultinomialSymmetricDoubleStochasticMatrices`](@ref) `M`, return the result in `X`.
+Project `Y` onto the tangent space at `p` on the [`MultinomialDoubleStochasticMatrices`](@ref) `M`, return the result in `X`.
 The formula reads
 ````math
     \operatorname{proj}_p(Y) = Y - (α\mathbf{1}_n^{\mathrm{T}} + \mathbf{1}_nβ^{\mathrm{T}}) ⊙ p,
@@ -194,16 +180,16 @@ The two vectors $α,β ∈ ℝ^{n×n}$ are computed as a solution (typically usi
 where $\mathbf{1}_n$ is the vector of length $n$ containing ones.
 
 """
-project(::MultinomialSymmetricDoubleStochasticMatrices, ::Any, ::Any)
+project(::MultinomialDoubleStochasticMatrices, ::Any, ::Any)
 
-function project!(::MultinomialSymmetricDoubleStochasticMatrices{n}, X, p, Y) where {n}
-    ζ = [I p; p I] \ [sum(B, dims = 2); sum(B, dims = 1)'] # Formula (25) from 1802.02628
-    return X .= Y .- (repeat(ζ[1:n], 1, 3) .+ repeat(ζ[n:end]', 3, 1)) .* p
+function project!(::MultinomialDoubleStochasticMatrices{n}, X, p, Y) where {n}
+    ζ = [I p; p I] \ [sum(Y, dims = 2); sum(Y, dims = 1)'] # Formula (25) from 1802.02628
+    return X .= Y .- (repeat(ζ[1:n], 1, 3) .+ repeat(ζ[n+1:end]', 3, 1)) .* p
 end
 
 @doc raw"""
     project(
-        M::MultinomialSymmetricDoubleStochasticMatrices,
+        M::MultinomialDoubleStochasticMatrices,
         p;
         maxiter = 100,
         tolerance = eps(eltype(p))
@@ -211,14 +197,14 @@ end
 
 project a matrix `p` with positive entries applying Sinkhorn's algorithm.
 """
-function project(M::MultinomialSymmetricDoubleStochasticMatrices, p; kwargs...)
+function project(M::MultinomialDoubleStochasticMatrices, p; kwargs...)
     q = allocate_result(M, project, p)
     project!(M, q, p; kwargs...)
     return q
 end
 
 function project!(
-    ::MultinomialSymmetricDoubleStochasticMatrices{n},
+    ::MultinomialDoubleStochasticMatrices{n},
     q,
     p;
     maxiter = 100,
@@ -257,7 +243,7 @@ function project!(
 end
 
 @generated function representation_size(
-    ::MultinomialSymmetricDoubleStochasticMatrices{n},
+    ::MultinomialDoubleStochasticMatrices{n},
 ) where {n}
     return (n, n)
 end
@@ -268,30 +254,30 @@ end
 compute a projection based retraction by projecting $p+X$ back onto the manifold.
 """
 retract(
-    ::MultinomialSymmetricDoubleStochasticMatrices,
+    ::MultinomialDoubleStochasticMatrices,
     ::Any,
     ::Any,
     ::ProjectionRetraction,
 )
 
 function retract!(
-    M::MultinomialSymmetricDoubleStochasticMatrices,
+    M::MultinomialDoubleStochasticMatrices,
     q,
     p,
     X,
     ::ProjectionRetraction,
 )
-    return project!(M, q, p + Y)
+    return project!(M, q, p + X)
 end
 
 """
-    vector_transport_to(M::MultinomialSymmetricDoubleStochasticMatrices, p, X, q)
+    vector_transport_to(M::MultinomialDoubleStochasticMatrices, p, X, q)
 
 transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
 at `q`.
 """
 vector_transport_to(
-    ::MultinomialSymmetricDoubleStochasticMatrices,
+    ::MultinomialDoubleStochasticMatrices,
     ::Any,
     ::Any,
     ::Any,
@@ -299,7 +285,7 @@ vector_transport_to(
 )
 
 function vector_transport_to!(
-    M::MultinomialSymmetricDoubleStochasticMatrices,
+    M::MultinomialDoubleStochasticMatrices,
     Y,
     p,
     X,
@@ -310,6 +296,6 @@ function vector_transport_to!(
     return Y
 end
 
-function Base.show(io::IO, ::MultinomialSymmetricDoubleStochasticMatrices{n}) where {n}
-    return print(io, "MultinomialSymmetricDoubleStochasticMatrices($(n))")
+function Base.show(io::IO, ::MultinomialDoubleStochasticMatrices{n}) where {n}
+    return print(io, "MultinomialDoubleStochasticMatrices($(n))")
 end
