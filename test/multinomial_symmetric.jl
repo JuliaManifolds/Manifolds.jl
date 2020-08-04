@@ -33,6 +33,8 @@ include("utils.jl")
         vector_transport_to(M, p, X2, p2, ProjectionTransport());
         atol = 10^-15,
     )
+    X3 = [1.0 1.0 1.0; 0.0 0.0 0.0; 0.0 0.0 0.0]
+    @test inner(M, p, X3, X3) == 9.0
 
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
