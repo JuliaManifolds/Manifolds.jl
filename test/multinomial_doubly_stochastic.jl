@@ -9,16 +9,14 @@ include("utils.jl")
     @test is_tangent_vector(M, p, X)
     pf1 = [0.1 0.9 0.1; 0.1 0.9 0.1; 0.1 0.1 0.9] #not sum 1
     @test_throws DomainError is_manifold_point(M, pf1, true)
-    pf2c = [0.8 0.1 0.1; 0.1 0.8 0.1; 0.1 0.1 0.9] # cols do not sum to 1
-    @test_throws DomainError is_manifold_point(M, pf2c, true)
-    pf2r = pf2c'
+    pf2r = [0.1 0.9 0.1; 0.8 0.05 0.15; 0.1 0.05 0.75]
     @test_throws DomainError is_manifold_point(M, pf2r, true)
+    @test_throws DomainError is_manifold_point(M, pf2r', true)
     pf3 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0] # contains nonpositive entries
     @test_throws DomainError is_manifold_point(M, pf3, true)
-    Xf2c = [0.0 -1.0 0.0; -1.0 0.0 0.0; 0.0 0.0 0.0] # nonzero sums
+    Xf2c = [0.0 -1.0 0.0; -1.0 0.0 0.0; 0.0 0.0 0.0] #nonzero columns
     @test_throws DomainError is_tangent_vector(M, p, Xf2c, true)
-    Xf2r = Xf2c'
-    @test_throws DomainError is_tangent_vector(M, p, Xf2r, true)
+    @test_throws DomainError is_tangent_vector(M, p, Xf2c', true)
     @test representation_size(M) == (3, 3)
     pE = similar(p)
     embed!(M, pE, p)
