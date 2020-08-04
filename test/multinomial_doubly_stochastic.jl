@@ -23,6 +23,8 @@ include("utils.jl")
     pE2 = embed(M, p)
     @test pE == p
     @test pE2 == p
+    @test_throws DomainError project(M, -ones(3,3))
+    @test  project(M, p) == p
     p2 = [0.1 0.2 0.7; 0.2 0.7 0.1; 0.7 0.1 0.2]
     p3 = [0.1 0.4 0.5; 0.4 0.5 0.1; 0.5 0.1 0.4]
 
@@ -33,6 +35,8 @@ include("utils.jl")
         vector_transport_to(M, p, X2, p2, ProjectionTransport());
         atol = 10^-15,
     )
+    X3 = [1.0 1.0 1.0; 0.0 0.0 0.0; 0.0 0.0 0.0]
+    @test inner(M,p,X3,X3) == 9.0
 
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})

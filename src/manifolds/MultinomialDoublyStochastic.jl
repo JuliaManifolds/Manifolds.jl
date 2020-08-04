@@ -208,33 +208,20 @@ function project!(
     maxiter = 100,
     tolerance = eps(eltype(p)),
 ) where {n}
+    any(p .<= 0) && throw(DomainError(
+        "The matrix $p can not be projected, since it has nonpositive entries."
+    ))
     iter = 0
     d1 = sum(p, dims = 1)
-    any(p * d1' .== 0) && throw(DomainError(
-        p * d1',
-        "The matrix p ($p)  can not be projected, since p*d1' ($(p*d1')).",
-    ))
     d2 = 1 ./ (p * d1')
     row = d2' * p
-    gap = maximum(abs.(row .* d1 .- 1))
+    gap = 2*tolerance
     while iter < maxiter && (gap >= tolerance)
         iter += 1
         row .= d2' * p
-        any(row .== 0) && throw(DomainError(
-            row,
-            "projection sinkhorn failed with row $row containing a zero.",
-        ))
-        d1 .= 1 ./ row
-        any(d1 .== 0) && throw(DomainError(
-            d1,
-            "projection sinkhorn failed with d1 $d1 containing a zero.",
-        ))
-        d2 .= 1 ./ (p * d1')
-        any(d2 .== 0) && throw(DomainError(
-            d2,
-            "projection sinkhorn failed with d2 $d2 containing a zero.",
-        ))
         gap = maximum(abs.(row .* d1 .- 1))
+        d1 .= 1 ./ row
+        d2 .= 1 ./ (p * d1')
     end
     q .= p .* (d2 * d1)
     return q
