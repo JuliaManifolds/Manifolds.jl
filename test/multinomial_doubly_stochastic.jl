@@ -7,24 +7,26 @@ include("utils.jl")
     X = zeros(3, 3)
     @test is_manifold_point(M, p)
     @test is_tangent_vector(M, p, X)
-    pf1 = [0.1 0.9 0.1; 0.1 0.9 0.1; 0.1 0.1 0.9] #not symmetric
+    pf1 = [0.1 0.9 0.1; 0.1 0.9 0.1; 0.1 0.1 0.9] #not sum 1
     @test_throws DomainError is_manifold_point(M, pf1, true)
-    pf2 = [0.8 0.1 0.1; 0.1 0.8 0.1; 0.1 0.1 0.9] # cols do not sum to 1
-    @test_throws DomainError is_manifold_point(M, pf2, true)
+    pf2c = [0.8 0.1 0.1; 0.1 0.8 0.1; 0.1 0.1 0.9] # cols do not sum to 1
+    @test_throws DomainError is_manifold_point(M, pf2c, true)
+    pf2r = pf2c'
+    @test_throws DomainError is_manifold_point(M, pf2r, true)
     pf3 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0] # contains nonpositive entries
     @test_throws DomainError is_manifold_point(M, pf3, true)
-    Xf1 = [0.0 1.0 -1.0; 0.0 0.0 0.0; 0.0 0.0 0.0] # not symmetric
-    @test_throws DomainError is_tangent_vector(M, p, Xf1, true)
-    Xf2 = [0.0 -1.0 0.0; -1.0 0.0 0.0; 0.0 0.0 0.0] # nonzero sums
-    @test_throws DomainError is_tangent_vector(M, p, Xf2, true)
+    Xf2c = [0.0 -1.0 0.0; -1.0 0.0 0.0; 0.0 0.0 0.0] # nonzero sums
+    @test_throws DomainError is_tangent_vector(M, p, Xf2c, true)
+    Xf2r = Xf2c'
+    @test_throws DomainError is_tangent_vector(M, p, Xf2r, true)
     @test representation_size(M) == (3, 3)
     pE = similar(p)
     embed!(M, pE, p)
     pE2 = embed(M, p)
     @test pE == p
     @test pE2 == p
-    @test_throws DomainError project(M, -ones(3,3))
-    @test  project(M, p) == p
+    @test_throws DomainError project(M, -ones(3, 3))
+    @test project(M, p) == p
     p2 = [0.1 0.2 0.7; 0.2 0.7 0.1; 0.7 0.1 0.2]
     p3 = [0.1 0.4 0.5; 0.4 0.5 0.1; 0.5 0.1 0.4]
 
@@ -36,7 +38,7 @@ include("utils.jl")
         atol = 10^-15,
     )
     X3 = [1.0 1.0 1.0; 0.0 0.0 0.0; 0.0 0.0 0.0]
-    @test inner(M,p,X3,X3) == 9.0
+    @test inner(M, p, X3, X3) == 9.0
 
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})

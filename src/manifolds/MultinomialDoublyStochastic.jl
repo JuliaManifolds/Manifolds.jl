@@ -1,14 +1,12 @@
 @doc raw"""
     MultinomialDoublyStochastic{n} <: AbstractEmbeddedManifold{ℝ, DefaultEmbeddingType}
 
-The multinomial manifold consists of `m` column vectors, where each column is of length
+The set of doubly stochastic multinomial matrices consists of all symmetricThe multinomial manifold consists of `m` column vectors, where each column is of length
 `n` and unit norm, i.e.
 
 ````math
 \begin{aligned}
-\mathcal{PS}(n) \coloneqq \bigl\{p ∈ ℝ^{n×n}\ \big|\ &p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m,\\
-& p^\mathrm{T} = p,\\
-& p\text{ is symmetric positive definite} \text{ and }\\
+\mathcal{DP}(n) \coloneqq \bigl\{p ∈ ℝ^{n×n}\ \big|\ &p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m,\\
 & p\mathbf{1}_n = p^{\mathrm{T}}\mathbf{1}_n = \mathbf{1}_n
 \bigr\},
 \end{aligned}
@@ -19,7 +17,7 @@ where $\mathbf{1}_n$ is the vector of length $n$ containing ones.
 The tangent space can be written as
 
 ````math
-T_p\mathcal{PS}(n) \coloneqq \bigl\{
+T_p\mathcal{DP}(n) \coloneqq \bigl\{
 X ∈ ℝ^{n×n}\ \big|\ X = X^{\mathrm{T}} \text{ and }
 X\mathbf{1}_n = X^{\mathrm{T}}\mathbf{1}_n = \mathbf{0}_n
 \bigr\},
@@ -27,7 +25,7 @@ X\mathbf{1}_n = X^{\mathrm{T}}\mathbf{1}_n = \mathbf{0}_n
 
 where $\mathbf{0}_n$ is the vector of length $n$ containing zeros.
 
-More details can be found in[^DouikHassibi2019].
+More details can be found in Section III[^DouikHassibi2019].
 
 # Constructor
 
@@ -53,7 +51,7 @@ end
     check_manifold_point(M::MultinomialDoubleStochasticMatrices, p)
 
 Checks whether `p` is a valid point on the [`MultinomialDoubleStochasticMatrices`](@ref)`(m,n)` `M`,
-i.e. is a symmetric matrix whose rows and columns sum to one.
+i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
 check_manifold_point(::MultinomialDoubleStochasticMatrices, ::Any)
 function check_manifold_point(
@@ -68,7 +66,14 @@ function check_manifold_point(
     if !isapprox(norm(c - ones(1, n)), 0.0; kwargs...)
         return DomainError(
             c,
-            "The point $(p) does not lie on $M, since its columns/rows do not sum up to one.",
+            "The point $(p) does not lie on $M, since its columns do not sum up to one.",
+        )
+    end
+    r = sum(p, dims = 2) # due to symmetry we only have to check the cols
+    if !isapprox(norm(r - ones(n, 1)), 0.0; kwargs...)
+        return DomainError(
+            r,
+            "The point $(p) does not lie on $M, since its rows do not sum up to one.",
         )
     end
     if !(minimum(p) > 0)
@@ -114,14 +119,21 @@ function check_tangent_vector(
     if !isapprox(norm(c), 0.0; kwargs...)
         return DomainError(
             c,
-            "The matrix $(X) is not a tangent vector to $(p) on $(M), since its columns/rows do not sum up to zero.",
+            "The matrix $(X) is not a tangent vector to $(p) on $(M), since its columns do not sum up to zero.",
+        )
+    end
+    r = sum(X, dims = 2) # due to symmetry, we only have to check columns
+    if !isapprox(norm(r), 0.0; kwargs...)
+        return DomainError(
+            r,
+            "The matrix $(X) is not a tangent vector to $(p) on $(M), since its rows do not sum up to zero.",
         )
     end
     return nothing
 end
 
 function decorated_manifold(::MultinomialDoubleStochasticMatrices{N}) where {N}
-    return SymmetricMatrices(N, ℝ)
+    return Euclidean(N, N; field = ℝ)
 end
 
 embed!(::MultinomialDoubleStochasticMatrices, q, p) = copyto!(q, p)
@@ -152,7 +164,7 @@ end
 returns the dimension of the [`MultinomialDoubleStochasticMatrices`](@ref) manifold
 namely
 ````math
-\operatorname{dim}_{\mathcal{PS}(n)} = (n-1)^2.
+\operatorname{dim}_{\mathcal{DP}(n)} = (n-1)^2.
 ````
 """
 @generated function manifold_dimension(::MultinomialDoubleStochasticMatrices{n}) where {n}
@@ -208,14 +220,13 @@ function project!(
     maxiter = 100,
     tolerance = eps(eltype(p)),
 ) where {n}
-    any(p .<= 0) && throw(DomainError(
-        "The matrix $p can not be projected, since it has nonpositive entries."
-    ))
+    any(p .<= 0) &&
+        throw(DomainError("The matrix $p can not be projected, since it has nonpositive entries."))
     iter = 0
     d1 = sum(p, dims = 1)
     d2 = 1 ./ (p * d1')
     row = d2' * p
-    gap = 2*tolerance
+    gap = 2 * tolerance
     while iter < maxiter && (gap >= tolerance)
         iter += 1
         row .= d2' * p
@@ -232,14 +243,16 @@ end
 end
 
 @doc raw"""
-    retract(M::Spectrahedron, p, X, ::ProjectionRetraction)
+    retract(M::MultinomialDoubleStochasticMatrices, p, X, ::ProjectionRetraction)
 
-compute a projection based retraction by projecting $p+X$ back onto the manifold.
+compute a projection based retraction by projecting $p\odot\exp(X⨸p)$ back onto the manifold,
+where $⊙,⨸$ are elementwise multiplication and division, respectively. Similarly, $\exp$
+refers to the elementwise exponentiation.
 """
 retract(::MultinomialDoubleStochasticMatrices, ::Any, ::Any, ::ProjectionRetraction)
 
 function retract!(M::MultinomialDoubleStochasticMatrices, q, p, X, ::ProjectionRetraction)
-    return project!(M, q, p + X)
+    return project!(M, q, p .* exp.(X ./ p))
 end
 
 """
