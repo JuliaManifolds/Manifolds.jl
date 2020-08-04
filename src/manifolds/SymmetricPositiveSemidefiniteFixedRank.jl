@@ -78,9 +78,10 @@ function check_manifold_point(
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
     mpv === nothing || return mpv
     p = q * q'
-    if rank(p * p'; kwargs...) < k
+    r = (VERSION >= v"1.1") ? rank(p * p'; kwargs...) : rank(p*p')
+    if  r < k
         return DomainError(
-            rank(p * p'; kwargs...),
+            r,
             "The point $(p) does not lie on $M, since its rank is less than $(k).",
         )
     end

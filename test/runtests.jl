@@ -15,7 +15,7 @@ function our_base_ambiguities()
     return our_ambigs
 end
 
-@testset "Ambiguities" begin
+(VERSION >= v"1.1") && @testset "Ambiguities" begin
     # TODO: reduce the number of ambiguities
     @test length(Test.detect_ambiguities(ManifoldsBase)) <= 12
     @test length(Test.detect_ambiguities(Manifolds)) == 0
