@@ -14,7 +14,7 @@ include("utils.jl")
     @test_throws DomainError is_manifold_point(M, pf2r', true)
     pf3 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0] # contains nonpositive entries
     @test_throws DomainError is_manifold_point(M, pf3, true)
-    Xf2c = [0.0 -1.0 0.0; -1.0 0.0 0.0; 0.0 0.0 0.0] #nonzero columns
+    Xf2c = [-0.1 0.0 0.1; -0.2 0.1 0.1; 0.2 -0.1 -0.1] #nonzero columns
     @test_throws DomainError is_tangent_vector(M, p, Xf2c, true)
     @test_throws DomainError is_tangent_vector(M, p, Xf2c', true)
     @test representation_size(M) == (3, 3)
