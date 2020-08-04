@@ -141,12 +141,12 @@ function inner(::MultinomialSymmetric, p, X, Y)
 end
 
 @doc raw"""
-    manifold_dimension(M::MultinomialSymmetric)
+    manifold_dimension(M::MultinomialSymmetric{n}) where {n}
 
 returns the dimension of the [`MultinomialSymmetric`](@ref) manifold
 namely
 ````math
-\operatorname{dim}_{\mathcal{PS}(n)} = (n-1)^2.
+\operatorname{dim}_{\mathcal{SP}(n)} = \frac{n(n-1)}{2}.
 ````
 """
 @generated function manifold_dimension(::MultinomialSymmetric{n}) where {n}
@@ -164,9 +164,9 @@ The formula reads
 where $⊙$ denotes the Hadamard or elementwise product and $\mathbb{1}_n$ is the vector of length $n$ containing ones.
 The two vector $α ∈ ℝ^{n×n}$ is given by solving
 ````math
-    (I+p)α ) Y\mathbf{1}
+    (I_n+p)α =  Y\mathbf{1},
 ````
-where $\mathbf{1}_n$ is the vector of length $n$ containing ones.
+where $I_n$ is teh $n×n$ unit matrix and $\mathbf{1}_n$ is the vector of length $n$ containing ones.
 
 """
 project(::MultinomialSymmetric, ::Any, ::Any)

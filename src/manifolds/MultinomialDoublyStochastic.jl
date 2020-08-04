@@ -159,7 +159,7 @@ function inner(::MultinomialDoubleStochasticMatrices, p, X, Y)
 end
 
 @doc raw"""
-    manifold_dimension(M::MultinomialDoubleStochasticMatrices)
+    manifold_dimension(M::MultinomialDoubleStochasticMatrices{n}) where {n}
 
 returns the dimension of the [`MultinomialDoubleStochasticMatrices`](@ref) manifold
 namely
@@ -182,12 +182,12 @@ The formula reads
 where $⊙$ denotes the Hadamard or elementwise product and $\mathbb{1}_n$ is the vector of length $n$ containing ones.
 The two vectors $α,β ∈ ℝ^{n×n}$ are computed as a solution (typically using the left pseudo inverse) of
 ````math
-    \begin{pmatrix} I & p\\p^{\mathrm{T}} & I \end{pmatrix}
+    \begin{pmatrix} I_n & p\\p^{\mathrm{T}} & I_n \end{pmatrix}
     \begin{pmatrix} α\\ β\end{pmatrix}
     =
     \begin{pmatrix} Y\mathbf{1}\\Y^{\mathrm{T}}\mathbf{1}\end{pmatrix},
 ````
-where $\mathbf{1}_n$ is the vector of length $n$ containing ones.
+where $I_n$ is teh $n×n$ unit matrix and $\mathbf{1}_n$ is the vector of length $n$ containing ones.
 
 """
 project(::MultinomialDoubleStochasticMatrices, ::Any, ::Any)
