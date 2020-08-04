@@ -28,7 +28,7 @@ struct MultinomialMatrices{N,M,S} <:
     manifold::ProbabilitySimplex{S}
 end
 
-@generated function MultinomialMatrices(n::Int, m::Int)
+function MultinomialMatrices(n::Int, m::Int)
     return MultinomialMatrices{n,m,n - 1}(ProbabilitySimplex(n - 1))
 end
 
