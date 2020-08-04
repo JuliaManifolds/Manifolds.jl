@@ -36,6 +36,7 @@ makedocs(
                 "Multinomial matrices" => "manifolds/multinomial.md",
                 "Multinomial doubly stochastic manifolds" =>
                     "manifolds/multinomialdoublystochastic.md",
+                "Multinomial symmetric" => "manifolds/multinomialsymmetric.md",
                 "Oblique manifold" => "manifolds/oblique.md",
                 "Probability simplex" => "manifolds/probabilitysimplex.md",
                 "Rotations" => "manifolds/rotations.md",
