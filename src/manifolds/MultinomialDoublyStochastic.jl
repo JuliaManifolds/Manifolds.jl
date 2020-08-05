@@ -1,7 +1,7 @@
 @doc raw"""
     AbstractMultinomialDoublyStochastic{N} <: AbstractEmbeddedManifold{ℝ, DefaultIsometricEmbeddingType}
 
-A comon type for manifolds that are doubly stochastic, for example by direct constraint
+A common type for manifolds that are doubly stochastic, for example by direct constraint
 [`MultinomialDoublyStochastic`](@ref) or by symmetry [`MultionialSymmetric`](@ref),
 as long as they are also modeled as [`DefaultIsometricEmbeddingType`](@ref)
 [`AbstractEmbeddedManifold`](@ref)s.
@@ -158,7 +158,7 @@ The two vectors $α,β ∈ ℝ^{n×n}$ are computed as a solution (typically usi
     =
     \begin{pmatrix} Y\mathbf{1}\\Y^{\mathrm{T}}\mathbf{1}\end{pmatrix},
 ````
-where $I_n$ is teh $n×n$ unit matrix and $\mathbf{1}_n$ is the vector of length $n$ containing ones.
+where $I_n$ is the $n×n$ unit matrix and $\mathbf{1}_n$ is the vector of length $n$ containing ones.
 
 """
 project(::MultinomialDoubleStochasticMatrices, ::Any, ::Any)
