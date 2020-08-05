@@ -172,7 +172,7 @@ include("utils.jl")
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                exp_log_atol_multiplier = 100.0,
+                exp_log_atol_multiplier = 10.0^3,
                 is_tangent_atol_multiplier = 20.0,
             )
 
