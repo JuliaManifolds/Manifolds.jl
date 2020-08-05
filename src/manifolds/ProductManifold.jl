@@ -141,7 +141,7 @@ function check_manifold_point(
 )
     ts = ziptuples(M.manifolds, submanifold_components(M, p))
     e = [check_manifold_point(t...; kwargs...) for t in ts]
-    errors = filter((x) -> !isnothing(x), e)
+    errors = filter((x) -> !(x === nothing), e)
     if length(errors) > 0
         return CompositeException(errors)
     end
@@ -172,7 +172,7 @@ function check_tangent_vector(
     end
     ts = ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, X))
     e = [check_tangent_vector(t...; kwargs...) for t in ts]
-    errors = filter(x -> !isnothing(x), e)
+    errors = filter(x -> !(x === nothing), e)
     if length(errors) > 0
         return CompositeException(errors)
     end

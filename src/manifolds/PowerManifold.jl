@@ -241,7 +241,7 @@ function check_manifold_point(M::AbstractPowerManifold, p; kwargs...)
         check_manifold_point(M.manifold, _read(M, rep_size, p, i); kwargs...)
         for i in get_iterator(M)
     ]
-    errors = filter(x -> !isnothing(x), e)
+    errors = filter(x -> !(x === nothing), e)
     if length(errors) > 0
         return CompositeException(errors)
     end
@@ -281,7 +281,7 @@ function check_tangent_vector(
             kwargs...,
         ) for i in get_iterator(M)
     ]
-    errors = filter(x -> !isnothing(x), e)
+    errors = filter(x -> !(x === nothing), e)
     if length(errors) > 0
         return CompositeException(errors)
     end
