@@ -170,13 +170,14 @@ end
 
 @doc raw"""
     project(
-        M::MultinomialDoubleStochasticMatrices,
+        M::AbstractMultinomialDoublyStochastic,
         p;
         maxiter = 100,
         tolerance = eps(eltype(p))
     )
 
 project a matrix `p` with positive entries applying Sinkhorn's algorithm.
+Note that this projct method – different from the usual case, accepts keywords.
 """
 function project(M::AbstractMultinomialDoublyStochastic, p; kwargs...)
     q = allocate_result(M, project, p)
