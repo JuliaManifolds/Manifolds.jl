@@ -1,5 +1,5 @@
 @doc raw"""
-    MultinomialSymmetric{n} <: AbstractEmbeddedManifold{ℝ, DefaultEmbeddingType}
+    MultinomialSymmetric{n} <: AbstractMultinomialDoublyStochastic{N}
 
 The multinomial symmetric matrices manifold consists of all symmetric $n×n$ matrices with
 positive entries such that each column sums to one, i.e.
@@ -14,6 +14,11 @@ positive entries such that each column sums to one, i.e.
 ````
 
 where $\mathbf{1}_n$ is the vector of length $n$ containing ones.
+
+It is modeled as an [`DefaultIsometricEmbeddingType`](@ref), [`AbstractEmbeddedManifold`](@ref)
+via the [`AbstractMultinomialDoublyStochastic`](@ref) type, since it shares a few functions
+also with [`AbstractMultinomialDoublyStochastic`](@ref), most and foremost projection of
+a point from the embedding onto the manifold.
 
 The tangent space can be written as
 
@@ -41,7 +46,7 @@ Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic 
     > doi: [10.1109/tsp.2019.2946024](http://doi.org/10.1109/tsp.2019.2946024),
     > arXiv: [1802.02628](https://arxiv.org/abs/1802.02628).
 """
-struct MultinomialSymmetric{N} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType} where {N} end
+struct MultinomialSymmetric{N} <: AbstractMultinomialDoublyStochastic{N} end
 
 function MultinomialSymmetric(n::Int)
     return MultinomialSymmetric{n}()
@@ -53,25 +58,14 @@ end
 Checks whether `p` is a valid point on the [`MultinomialSymmetric`](@ref)`(m,n)` `M`,
 i.e. is a symmetric matrix with positive entries whose rows sum to one.
 """
-check_manifold_point(::MultinomialSymmetric, ::Any)
 function check_manifold_point(M::MultinomialSymmetric{n}, p; kwargs...) where {n}
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
-    r = sum(p, dims = 2)
-    if !isapprox(norm(r - ones(n, 1)), 0.0; kwargs...)
-        return DomainError(
-            r,
-            "The point $(p) does not lie on $M, since its rows do not sum up to one.",
-        )
-    end
-    if !(minimum(p) > 0)
-        return DomainError(
-            minimum(p),
-            "The point $(p) does not lie on $M, since at least one of its entries is nonpositive.",
-        )
-    end
-    return nothing
+    # the embedding checks for positivity and unit sum columns, by symmetry we would get
+    # the same for the rows, so checking symmetry is the only thing left, we can just use
+    # the corresponding manifold for that
+    return check_manifold_point(SymmetricMatrices(n, ℝ), p)
 end
 @doc raw"""
     check_tangent_vector(M::MultinomialSymmetric p, X; check_base_point = true, kwargs...)
@@ -104,41 +98,17 @@ function check_tangent_vector(
         kwargs...,
     )
     mpv === nothing || return mpv
-    r = sum(X, dims = 2) # due to symmetry, we only have to check columns
-    if !isapprox(norm(r), 0.0; kwargs...)
-        return DomainError(
-            r,
-            "The matrix $(X) is not a tangent vector to $(p) on $(M), since its columns/rows do not sum up to zero.",
-        )
-    end
-    return nothing
+    # from the embedding we know that columns sum to zero, only symmety is left, i.e.
+    return check_tangent_vector(SymmetricMatrices(n, ℝ), p, X; check_base_point = false)
 end
 
 function decorated_manifold(::MultinomialSymmetric{N}) where {N}
-    return SymmetricMatrices(N, ℝ)
+    return MultinomialMatrices(N, N)
 end
 
 embed!(::MultinomialSymmetric, q, p) = copyto!(q, p)
 embed!(::MultinomialSymmetric, Y, ::Any, X) = copyto!(Y, X)
 
-@doc raw"""
-    inner(M::MultinomialSymmetric{n}, p, X, Y) where {n}
-
-Compute the inner product on the tangent space at $p$, which is the elementwise
-inner product similar to the [`Hyperbolic`](@ref) space, i.e.
-
-````math
-    \langle X, Y \rangle_p = \sum_{i,j=1}^n \frac{X_{ij}Y_{ij}}{p_{ij}}.
-````
-"""
-function inner(::MultinomialSymmetric, p, X, Y)
-    # to avoid memory allocations, we sum in a single number
-    d = zero(Base.promote_eltype(p, X, Y))
-    @inbounds for i in eachindex(p, X, Y)
-        d += X[i] * Y[i] / p[i]
-    end
-    return d
-end
 
 @doc raw"""
     manifold_dimension(M::MultinomialSymmetric{n}) where {n}
@@ -174,47 +144,6 @@ project(::MultinomialSymmetric, ::Any, ::Any)
 function project!(::MultinomialSymmetric{n}, X, p, Y) where {n}
     α = (I + p) \ sum(Y, dims = 2) # Formula (49) from 1802.02628
     return X .= Y .- (repeat(α, 1, 3) .+ repeat(α', 3, 1)) .* p
-end
-
-@doc raw"""
-    project(
-        M::MultinomialSymmetric,
-        p;
-        maxiter = 100,
-        tolerance = eps(eltype(p))
-    )
-
-project a matrix `p` with positive entries applying Sinkhorn's algorithm.
-"""
-function project(M::MultinomialSymmetric, p; kwargs...)
-    q = allocate_result(M, project, p)
-    project!(M, q, p; kwargs...)
-    return q
-end
-
-function project!(
-    ::MultinomialSymmetric{n},
-    q,
-    p;
-    maxiter = 100,
-    tolerance = eps(eltype(p)),
-) where {n}
-    any(p .<= 0) &&
-        throw(DomainError("The matrix $p can not be projected, since it has nonpositive entries."))
-    iter = 0
-    d1 = sum(p, dims = 1)
-    d2 = 1 ./ (p * d1')
-    row = d2' * p
-    gap = 2 * tolerance
-    while iter < maxiter && (gap >= tolerance)
-        iter += 1
-        row .= d2' * p
-        gap = maximum(abs.(row .* d1 .- 1))
-        d1 .= 1 ./ row
-        d2 .= 1 ./ (p * d1')
-    end
-    q .= p .* (d2 * d1)
-    return q
 end
 
 @generated function representation_size(::MultinomialSymmetric{n}) where {n}

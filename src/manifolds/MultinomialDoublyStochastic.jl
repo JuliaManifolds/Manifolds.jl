@@ -1,5 +1,16 @@
 @doc raw"""
-    MultinomialDoublyStochastic{n} <: AbstractEmbeddedManifold{ℝ, DefaultEmbeddingType}
+    AbstractMultinomialDoublyStochastic{N} <: AbstractEmbeddedManifold{ℝ, DefaultIsometricEmbeddingType}
+
+A comon type for manifolds that are doubly stochastic, for example by direct constraint
+[`MultinomialDoublyStochastic`](@ref) or by symmetry [`MultionialSymmetric`](@ref),
+as long as they are also modeled as [`DefaultIsometricEmbeddingType`](@ref)
+[`AbstractEmbeddedManifold`](@ref)s.
+"""
+abstract type AbstractMultinomialDoublyStochastic{N} <:
+              AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+
+@doc raw"""
+    MultinomialDoublyStochastic{n} <: AbstractMultinomialDoublyStochastic{N}
 
 The set of doubly stochastic multinomial matrices consists of all $n×n$ matrices with
 stochastic columns and rows, i.e.
@@ -39,8 +50,7 @@ Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic 
     > doi: [10.1109/tsp.2019.2946024](http://doi.org/10.1109/tsp.2019.2946024),
     > arXiv: [1802.02628](https://arxiv.org/abs/1802.02628).
 """
-struct MultinomialDoubleStochasticMatrices{N} <:
-       AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType} where {N} end
+struct MultinomialDoubleStochasticMatrices{N} <: AbstractMultinomialDoublyStochastic{N} end
 
 function MultinomialDoubleStochasticMatrices(n::Int)
     return MultinomialDoubleStochasticMatrices{n}()
@@ -52,7 +62,6 @@ end
 Checks whether `p` is a valid point on the [`MultinomialDoubleStochasticMatrices`](@ref)`(n)` `M`,
 i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
-check_manifold_point(::MultinomialDoubleStochasticMatrices, ::Any)
 function check_manifold_point(
     M::MultinomialDoubleStochasticMatrices{n},
     p;
@@ -61,24 +70,12 @@ function check_manifold_point(
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
-    c = sum(p, dims = 1)
-    if !isapprox(norm(c - ones(1, n)), 0.0; kwargs...)
-        return DomainError(
-            c,
-            "The point $(p) does not lie on $M, since its columns do not sum up to one.",
-        )
-    end
+    # positivity and columns are checked in the embedding, we further check
     r = sum(p, dims = 2)
     if !isapprox(norm(r - ones(n, 1)), 0.0; kwargs...)
         return DomainError(
             r,
             "The point $(p) does not lie on $M, since its rows do not sum up to one.",
-        )
-    end
-    if !(minimum(p) > 0)
-        return DomainError(
-            minimum(p),
-            "The point $(p) does not lie on $M, since at least one of its entries is nonpositive.",
         )
     end
     return nothing
@@ -114,13 +111,7 @@ function check_tangent_vector(
         kwargs...,
     )
     mpv === nothing || return mpv
-    c = sum(X, dims = 1) # check stochastic columns
-    if !isapprox(norm(c), 0.0; kwargs...)
-        return DomainError(
-            c,
-            "The matrix $(X) is not a tangent vector to $(p) on $(M), since its columns do not sum up to zero.",
-        )
-    end
+    # columns are checked in the embedding, we further check
     r = sum(X, dims = 2) # check for stochastic rows
     if !isapprox(norm(r), 0.0; kwargs...)
         return DomainError(
@@ -132,30 +123,11 @@ function check_tangent_vector(
 end
 
 function decorated_manifold(::MultinomialDoubleStochasticMatrices{N}) where {N}
-    return Euclidean(N, N; field = ℝ)
+    return MultinomialMatrices(N, N)
 end
 
 embed!(::MultinomialDoubleStochasticMatrices, q, p) = copyto!(q, p)
 embed!(::MultinomialDoubleStochasticMatrices, Y, p, X) = copyto!(Y, X)
-
-@doc raw"""
-    inner(M::MultinomialDoubleStochasticMatrices{n}, p, X, Y) where {n}
-
-Compute the inner product on the tangent space at $p$, which is the elementwise
-inner product similar to the [`Hyperbolic`](@ref) space, i.e.
-
-````math
-    \langle X, Y \rangle_p = \sum_{i,j=1}^n \frac{X_{ij}Y_{ij}}{p_{ij}}.
-````
-"""
-function inner(::MultinomialDoubleStochasticMatrices, p, X, Y)
-    # to avoid memory allocations, we sum in a single number
-    d = zero(Base.promote_eltype(p, X, Y))
-    @inbounds for i in eachindex(p, X, Y)
-        d += X[i] * Y[i] / p[i]
-    end
-    return d
-end
 
 @doc raw"""
     manifold_dimension(M::MultinomialDoubleStochasticMatrices{n}) where {n}
@@ -206,14 +178,14 @@ end
 
 project a matrix `p` with positive entries applying Sinkhorn's algorithm.
 """
-function project(M::MultinomialDoubleStochasticMatrices, p; kwargs...)
+function project(M::AbstractMultinomialDoublyStochastic, p; kwargs...)
     q = allocate_result(M, project, p)
     project!(M, q, p; kwargs...)
     return q
 end
 
 function project!(
-    ::MultinomialDoubleStochasticMatrices{n},
+    ::AbstractMultinomialDoublyStochastic{n},
     q,
     p;
     maxiter = 100,
