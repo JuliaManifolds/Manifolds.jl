@@ -1,8 +1,8 @@
 @doc raw"""
     MultinomialSymmetric{n} <: AbstractEmbeddedManifold{ℝ, DefaultEmbeddingType}
 
-The multinomial symmetric matrices manifold consists of all matrices with unit sum columns`m` column vectors, where each column is of length
-`n` and unit norm, i.e.
+The multinomial symmetric matrices manifold consists of all symmetric $n×n$ matrices with
+positive entries such that each column sums to one, i.e.
 
 ````math
 \begin{aligned}

@@ -1,9 +1,8 @@
 @doc raw"""
     MultinomialDoublyStochastic{n} <: AbstractEmbeddedManifold{ℝ, DefaultEmbeddingType}
 
-The set of doubly stochastic multinomial matrices consists of all symmetricThe multinomial manifold consists of `m` column vectors, where each column is of length
-`n` and unit norm, i.e.
-
+The set of doubly stochastic multinomial matrices consists of all $n×n$ matrices with
+stochastic columns and rows, i.e.
 ````math
 \begin{aligned}
 \mathcal{DP}(n) \coloneqq \bigl\{p ∈ ℝ^{n×n}\ \big|\ &p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m,\\
@@ -50,7 +49,7 @@ end
 @doc raw"""
     check_manifold_point(M::MultinomialDoubleStochasticMatrices, p)
 
-Checks whether `p` is a valid point on the [`MultinomialDoubleStochasticMatrices`](@ref)`(m,n)` `M`,
+Checks whether `p` is a valid point on the [`MultinomialDoubleStochasticMatrices`](@ref)`(n)` `M`,
 i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
 check_manifold_point(::MultinomialDoubleStochasticMatrices, ::Any)
@@ -62,14 +61,14 @@ function check_manifold_point(
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
-    c = sum(p, dims = 1) # due to symmetry we only have to check the cols
+    c = sum(p, dims = 1)
     if !isapprox(norm(c - ones(1, n)), 0.0; kwargs...)
         return DomainError(
             c,
             "The point $(p) does not lie on $M, since its columns do not sum up to one.",
         )
     end
-    r = sum(p, dims = 2) # due to symmetry we only have to check the cols
+    r = sum(p, dims = 2)
     if !isapprox(norm(r - ones(n, 1)), 0.0; kwargs...)
         return DomainError(
             r,
@@ -115,14 +114,14 @@ function check_tangent_vector(
         kwargs...,
     )
     mpv === nothing || return mpv
-    c = sum(X, dims = 1) # due to symmetry, we only have to check columns
+    c = sum(X, dims = 1) # check stochastic columns
     if !isapprox(norm(c), 0.0; kwargs...)
         return DomainError(
             c,
             "The matrix $(X) is not a tangent vector to $(p) on $(M), since its columns do not sum up to zero.",
         )
     end
-    r = sum(X, dims = 2) # due to symmetry, we only have to check columns
+    r = sum(X, dims = 2) # check for stochastic rows
     if !isapprox(norm(r), 0.0; kwargs...)
         return DomainError(
             r,

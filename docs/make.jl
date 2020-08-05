@@ -33,9 +33,9 @@ makedocs(
                 "Grassmann" => "manifolds/grassmann.md",
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
                 "Lorentzian manifold" => "manifolds/lorentz.md",
-                "Multinomial matrices" => "manifolds/multinomial.md",
                 "Multinomial doubly stochastic matrices" =>
                     "manifolds/multinomialdoublystochastic.md",
+                "Multinomial matrices" => "manifolds/multinomial.md",
                 "Multinomial symmetric matrices" => "manifolds/multinomialsymmetric.md",
                 "Oblique manifold" => "manifolds/oblique.md",
                 "Probability simplex" => "manifolds/probabilitysimplex.md",
