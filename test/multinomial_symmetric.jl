@@ -3,6 +3,7 @@ include("utils.jl")
 @testset "Multinomial symmetric matrices" begin
     M = MultinomialSymmetric(3)
     @test manifold_dimension(M) == 3
+    @test repr(M) == "MultinomialSymmetric(3)"
     p = ones(3, 3) ./ 3
     X = zeros(3, 3)
     @test is_manifold_point(M, p)
