@@ -15,9 +15,9 @@ Manifolds.ArrayReshaper
 Manifolds.make_reshape
 ```
 
-# Specific error messages
+## Specific exception types
 
-For some manifolds it is useful to keep an extra index, at which point on the manifold, the error occured as well as to collect all errors that occured on a manifold. This page contains the manifold-specific error messages this package introduces.
+For some manifolds it is useful to keep an extra index, at which point on the manifold, the error occurred as well as to collect all errors that occurred on a manifold. This page contains the manifold-specific error messages this package introduces.
 
 ```@autodocs
 Modules = [Manifolds]
