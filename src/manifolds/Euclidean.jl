@@ -56,6 +56,28 @@ function allocation_promotion_function(
     return complex
 end
 
+function apply_operator(
+    F::LeviCivitaConnection{𝔽,Euclidean{N,𝔽}},
+    p,
+    X,
+    Y,
+    backend::AbstractRiemannianDiffBackend,
+) where {N,𝔽}
+    return _derivative(t -> Y(p .+ t .* X), 0, backend.diff_backend)
+end
+
+function apply_operator!(
+    F::LeviCivitaConnection{𝔽,Euclidean{N,𝔽}},
+    Z,
+    p,
+    X,
+    Y,
+    backend::AbstractRiemannianDiffBackend,
+) where {N,𝔽}
+    _derivative!(t -> Y(p .+ t .* X), Z, 0, backend.diff_backend)
+    return Z
+end
+
 function check_manifold_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
     if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(

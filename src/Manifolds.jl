@@ -98,6 +98,7 @@ include("utils.jl")
 include("differentiation.jl")
 include("riemannian_diff.jl")
 include("SizedAbstractArray.jl")
+include("connections.jl")
 
 include("statistics.jl")
 
