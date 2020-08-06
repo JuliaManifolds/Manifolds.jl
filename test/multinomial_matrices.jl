@@ -10,6 +10,7 @@ include("utils.jl")
         @test repr(M) == "MultinomialMatrices(3,2)"
         @test representation_size(M) == (3, 2)
         @test manifold_dimension(M) == 4
+        @test Manifolds.get_iterator(ProbabilitySimplex(3)^4) === Base.OneTo(4)
         p = [2, 0, 0]
         p2 = [p p]
         @test !is_manifold_point(M, p)

@@ -127,6 +127,8 @@ include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Grassmann.jl")
 include("manifolds/Hyperbolic.jl")
+include("manifolds/MultinomialDoublyStochastic.jl")
+include("manifolds/MultinomialSymmetric.jl")
 include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/SkewSymmetric.jl")
@@ -141,6 +143,7 @@ include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 
+# Product or power based manifolds
 include("manifolds/Torus.jl")
 include("manifolds/Multinomial.jl")
 include("manifolds/Oblique.jl")
@@ -210,7 +213,9 @@ export Euclidean,
     Grassmann,
     Hyperbolic,
     Lorentz,
+    MultinomialDoubleStochasticMatrices,
     MultinomialMatrices,
+    MultinomialSymmetric,
     Oblique,
     ProbabilitySimplex,
     Rotations,
