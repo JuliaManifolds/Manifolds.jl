@@ -2,7 +2,7 @@
     AbstractMultinomialDoublyStochastic{N} <: AbstractEmbeddedManifold{ℝ, DefaultIsometricEmbeddingType}
 
 A common type for manifolds that are doubly stochastic, for example by direct constraint
-[`MultinomialDoublyStochastic`](@ref) or by symmetry [`MultionialSymmetric`](@ref),
+[`MultinomialDoubleStochastic`](@ref) or by symmetry [`MultinomialSymmetric`](@ref),
 as long as they are also modeled as [`DefaultIsometricEmbeddingType`](@ref)
 [`AbstractEmbeddedManifold`](@ref)s.
 """
@@ -39,7 +39,7 @@ More details can be found in Section III[^DouikHassibi2019].
 
 # Constructor
 
-    MultinomialDoubleStochasticMatrices(n)
+    MultinomialDoubleStochastic(n)
 
 Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic and symmetric.
 
@@ -50,23 +50,19 @@ Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic 
     > doi: [10.1109/tsp.2019.2946024](http://doi.org/10.1109/tsp.2019.2946024),
     > arXiv: [1802.02628](https://arxiv.org/abs/1802.02628).
 """
-struct MultinomialDoubleStochasticMatrices{N} <: AbstractMultinomialDoublyStochastic{N} end
+struct MultinomialDoubleStochastic{N} <: AbstractMultinomialDoublyStochastic{N} end
 
-function MultinomialDoubleStochasticMatrices(n::Int)
-    return MultinomialDoubleStochasticMatrices{n}()
+function MultinomialDoubleStochastic(n::Int)
+    return MultinomialDoubleStochastic{n}()
 end
 
 @doc raw"""
-    check_manifold_point(M::MultinomialDoubleStochasticMatrices, p)
+    check_manifold_point(M::MultinomialDoubleStochastic, p)
 
-Checks whether `p` is a valid point on the [`MultinomialDoubleStochasticMatrices`](@ref)`(n)` `M`,
+Checks whether `p` is a valid point on the [`MultinomialDoubleStochastic`](@ref)`(n)` `M`,
 i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
-function check_manifold_point(
-    M::MultinomialDoubleStochasticMatrices{n},
-    p;
-    kwargs...,
-) where {n}
+function check_manifold_point(M::MultinomialDoubleStochastic{n}, p; kwargs...) where {n}
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
@@ -81,17 +77,17 @@ function check_manifold_point(
     return nothing
 end
 @doc raw"""
-    check_tangent_vector(M::MultinomialDoubleStochasticMatrices p, X; check_base_point = true, kwargs...)
+    check_tangent_vector(M::MultinomialDoubleStochastic p, X; check_base_point = true, kwargs...)
 
-Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialDoubleStochasticMatrices`](@ref) `M`.
+Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialDoubleStochastic`](@ref) `M`.
 This means, that `p` is valid, that `X` is of correct dimension and sums to zero along any
 column or row.
 
 The optional parameter `check_base_point` indicates, whether to call
-[`check_manifold_point`](@ref check_manifold_point(::MultinomialDoubleStochasticMatrices, ::Any))  for `p`.
+[`check_manifold_point`](@ref check_manifold_point(::MultinomialDoubleStochastic, ::Any))  for `p`.
 """
 function check_tangent_vector(
-    M::MultinomialDoubleStochasticMatrices{n},
+    M::MultinomialDoubleStochastic{n},
     p,
     X;
     check_base_point = true,
@@ -122,30 +118,30 @@ function check_tangent_vector(
     return nothing
 end
 
-function decorated_manifold(::MultinomialDoubleStochasticMatrices{N}) where {N}
+function decorated_manifold(::MultinomialDoubleStochastic{N}) where {N}
     return MultinomialMatrices(N, N)
 end
 
-embed!(::MultinomialDoubleStochasticMatrices, q, p) = copyto!(q, p)
-embed!(::MultinomialDoubleStochasticMatrices, Y, p, X) = copyto!(Y, X)
+embed!(::MultinomialDoubleStochastic, q, p) = copyto!(q, p)
+embed!(::MultinomialDoubleStochastic, Y, p, X) = copyto!(Y, X)
 
 @doc raw"""
-    manifold_dimension(M::MultinomialDoubleStochasticMatrices{n}) where {n}
+    manifold_dimension(M::MultinomialDoubleStochastic{n}) where {n}
 
-returns the dimension of the [`MultinomialDoubleStochasticMatrices`](@ref) manifold
+returns the dimension of the [`MultinomialDoubleStochastic`](@ref) manifold
 namely
 ````math
 \operatorname{dim}_{\mathcal{DP}(n)} = (n-1)^2.
 ````
 """
-@generated function manifold_dimension(::MultinomialDoubleStochasticMatrices{n}) where {n}
+@generated function manifold_dimension(::MultinomialDoubleStochastic{n}) where {n}
     return (n - 1)^2
 end
 
 @doc raw"""
-    project(M::MultinomialDoubleStochasticMatrices{n}, p, Y) where {n}
+    project(M::MultinomialDoubleStochastic{n}, p, Y) where {n}
 
-Project `Y` onto the tangent space at `p` on the [`MultinomialDoubleStochasticMatrices`](@ref) `M`, return the result in `X`.
+Project `Y` onto the tangent space at `p` on the [`MultinomialDoubleStochastic`](@ref) `M`, return the result in `X`.
 The formula reads
 ````math
     \operatorname{proj}_p(Y) = Y - (α\mathbf{1}_n^{\mathrm{T}} + \mathbf{1}_nβ^{\mathrm{T}}) ⊙ p,
@@ -161,9 +157,9 @@ The two vectors $α,β ∈ ℝ^{n×n}$ are computed as a solution (typically usi
 where $I_n$ is the $n×n$ unit matrix and $\mathbf{1}_n$ is the vector of length $n$ containing ones.
 
 """
-project(::MultinomialDoubleStochasticMatrices, ::Any, ::Any)
+project(::MultinomialDoubleStochastic, ::Any, ::Any)
 
-function project!(::MultinomialDoubleStochasticMatrices{n}, X, p, Y) where {n}
+function project!(::MultinomialDoubleStochastic{n}, X, p, Y) where {n}
     ζ = [I p; p I] \ [sum(Y, dims = 2); sum(Y, dims = 1)'] # Formula (25) from 1802.02628
     return X .= Y .- (repeat(ζ[1:n], 1, 3) .+ repeat(ζ[(n + 1):end]', 3, 1)) .* p
 end
@@ -210,31 +206,31 @@ function project!(
     return q
 end
 
-@generated function representation_size(::MultinomialDoubleStochasticMatrices{n}) where {n}
+@generated function representation_size(::MultinomialDoubleStochastic{n}) where {n}
     return (n, n)
 end
 
 @doc raw"""
-    retract(M::MultinomialDoubleStochasticMatrices, p, X, ::ProjectionRetraction)
+    retract(M::MultinomialDoubleStochastic, p, X, ::ProjectionRetraction)
 
 compute a projection based retraction by projecting $p\odot\exp(X⨸p)$ back onto the manifold,
 where $⊙,⨸$ are elementwise multiplication and division, respectively. Similarly, $\exp$
 refers to the elementwise exponentiation.
 """
-retract(::MultinomialDoubleStochasticMatrices, ::Any, ::Any, ::ProjectionRetraction)
+retract(::MultinomialDoubleStochastic, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract!(M::MultinomialDoubleStochasticMatrices, q, p, X, ::ProjectionRetraction)
+function retract!(M::MultinomialDoubleStochastic, q, p, X, ::ProjectionRetraction)
     return project!(M, q, p .* exp.(X ./ p))
 end
 
 """
-    vector_transport_to(M::MultinomialDoubleStochasticMatrices, p, X, q)
+    vector_transport_to(M::MultinomialDoubleStochastic, p, X, q)
 
 transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
 at `q`.
 """
 vector_transport_to(
-    ::MultinomialDoubleStochasticMatrices,
+    ::MultinomialDoubleStochastic,
     ::Any,
     ::Any,
     ::Any,
@@ -242,7 +238,7 @@ vector_transport_to(
 )
 
 function vector_transport_to!(
-    M::MultinomialDoubleStochasticMatrices,
+    M::MultinomialDoubleStochastic,
     Y,
     p,
     X,
@@ -253,6 +249,6 @@ function vector_transport_to!(
     return Y
 end
 
-function Base.show(io::IO, ::MultinomialDoubleStochasticMatrices{n}) where {n}
-    return print(io, "MultinomialDoubleStochasticMatrices($(n))")
+function Base.show(io::IO, ::MultinomialDoubleStochastic{n}) where {n}
+    return print(io, "MultinomialDoubleStochastic($(n))")
 end

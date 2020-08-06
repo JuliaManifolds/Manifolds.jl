@@ -242,7 +242,7 @@ function check_manifold_point(M::AbstractPowerManifold, p; kwargs...)
         for i in get_iterator(M)
     ]
     errors = filter((x) -> !(x[2] === nothing), e)
-    cerr = [ ComponentManifoldError(er...) for er in errors]
+    cerr = [ComponentManifoldError(er...) for er in errors]
     (length(errors) > 1) && return CompositeManifoldError(cerr)
     (length(errors) == 1) && return cerr[1]
     return nothing
@@ -274,15 +274,18 @@ function check_tangent_vector(
     end
     rep_size = representation_size(M.manifold)
     e = [
-        (i, check_tangent_vector(
-            M.manifold,
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i);
-            kwargs...,
-        )) for i in get_iterator(M)
+        (
+            i,
+            check_tangent_vector(
+                M.manifold,
+                _read(M, rep_size, p, i),
+                _read(M, rep_size, X, i);
+                kwargs...,
+            ),
+        ) for i in get_iterator(M)
     ]
     errors = filter((x) -> !(x[2] === nothing), e)
-    cerr = [ ComponentManifoldError(er...) for er in errors]
+    cerr = [ComponentManifoldError(er...) for er in errors]
     (length(errors) > 1) && return CompositeManifoldError(cerr)
     (length(errors) == 1) && return cerr[1]
     return nothing
