@@ -15,9 +15,6 @@ include("group_utils.jl")
         eg = Identity(G, [0.0, 0.0])
         @test repr(eg) === "Identity($(G), $([0.0, 0.0]))"
         @test number_eltype(eg) == Bool
-        p = similar(x)
-        copyto!(p, eg)
-        @test p == eg.p
         @test is_manifold_point(G, eg) # identity transparent
         @test isapprox(G, eg, p)
         @test isapprox(G, p, eg)

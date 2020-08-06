@@ -15,7 +15,7 @@ include("group_utils.jl")
     @test repr(A_right) == "GroupOperationAction($(repr(G)), RightAction())"
 
     @test switch_direction(LeftAction()) == RightAction()
-    switch_direction(RightAction()) == LeftAction()
+    @test switch_direction(RightAction()) == LeftAction()
 
     for type in types
         a_pts = convert.(type, [reshape(i:(i + 3), 2, 2) for i in 1:3])
