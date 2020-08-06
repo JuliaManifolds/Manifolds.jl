@@ -64,7 +64,7 @@ function Base.showerror(io::IO, ex::CompositeManifoldError)
         showerror(io, ex.errors[1])
         remaining = length(ex) - 1
         if remaining > 0
-            print(io, string("\n\n...and ", remaining, " more errors(s).\n"))
+            print(io, string("\n\n...and ", remaining, " more error(s).\n"))
         end
     else
         print(io, "CompositeManifoldError()\n")

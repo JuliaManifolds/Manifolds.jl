@@ -22,4 +22,10 @@ include("utils.jl")
     @test repr(e4) == "CompositeManifoldError([$(repr(e2)), ])"
     s4 = sprint(showerror, e4)
     @test s4 == "CompositeManifoldError: $(s2)"
+
+    eV = [e2,e2]
+    e5 = CompositeManifoldError(eV)
+    @test repr(e5) == "CompositeManifoldError([$(repr(e2)), $(repr(e2)), ])"
+    s5 = sprint(showerror, e5)
+    @test s5 == "CompositeManifoldError: $(s2)\n\n...and $(length(eV)-1) more error(s).\n"
 end
