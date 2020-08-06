@@ -37,20 +37,20 @@ isempty(c::CompositeManifoldError) = isempty(c.errors)
 length(c::CompositeManifoldError) = length(c.errors)
 
 function Base.show(io::IO, ex::ComponentManifoldError)
-   return print(io,"ComponentManifoldError($(ex.index), $(ex.error))")
+    return print(io, "ComponentManifoldError($(ex.index), $(ex.error))")
 end
 function Base.show(io::IO, ex::CompositeManifoldError)
     print(io, "CompositeManifoldError(")
     if !isempty(ex)
         print(io, "[")
-        start=true
+        start = true
         for e in ex.errors
             show(io, e)
-            print(io,", ")
+            print(io, ", ")
         end
         print(io, "]")
     end
-    print(io, ")")
+    return print(io, ")")
 end
 
 function Base.showerror(io::IO, ex::ComponentManifoldError)
