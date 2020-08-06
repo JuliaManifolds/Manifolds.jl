@@ -398,65 +398,15 @@ Random.seed!(42)
             @test sprint(show, "text/plain", Bc) == """
             DefaultOrthonormalBasis(ℝ) for a power manifold
             Basis for component (1,):
-            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
-             E1 =
-              3-element Array{Int64,1}:
-               0
-               1
-               0
-             E2 =
-              3-element Array{Int64,1}:
-               0
-               0
-               1
+            $(sprint(show, "text/plain", Bc.data.bases[1]))
             Basis for component (2,):
-            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
-             E1 =
-              3-element Array{Int64,1}:
-               0
-               1
-               0
-             E2 =
-              3-element Array{Int64,1}:
-               0
-               0
-               1
+            $(sprint(show, "text/plain", Bc.data.bases[2]))
             Basis for component (3,):
-            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
-             E1 =
-              3-element Array{Int64,1}:
-               0
-               1
-               0
-             E2 =
-              3-element Array{Int64,1}:
-               0
-               0
-               1
+            $(sprint(show, "text/plain", Bc.data.bases[3]))
             Basis for component (4,):
-            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
-             E1 =
-              3-element Array{Int64,1}:
-               0
-               1
-               0
-             E2 =
-              3-element Array{Int64,1}:
-               0
-               0
-               1
+            $(sprint(show, "text/plain", Bc.data.bases[4]))
             Basis for component (5,):
-            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
-             E1 =
-              3-element Array{Int64,1}:
-               0
-               1
-               0
-             E2 =
-              3-element Array{Int64,1}:
-               0
-               0
-               1
+            $(sprint(show, "text/plain", Bc.data.bases[5]))
             """
         end
 

@@ -28,7 +28,7 @@ with [`ComponentManifoldError`](@ref) to store a set of errors that occured.
 struct CompositeManifoldError{T} <: Exception where {T<:Exception}
     errors::Vector{T}
 end
-CompositeManifoldError() = CompositeManifoldError{Exception}(Exception[], "")
+CompositeManifoldError() = CompositeManifoldError{Exception}(Exception[])
 function CompositeManifoldError(errors::Vector{T}) where {T<:Exception}
     return CompositeManifoldError{T}(errors)
 end
@@ -36,12 +36,29 @@ end
 isempty(c::CompositeManifoldError) = isempty(c.errors)
 length(c::CompositeManifoldError) = length(c.errors)
 
-function showerror(io::IO, ex::ComponentManifoldError)
+function Base.show(io::IO, ex::ComponentManifoldError)
+   return print(io,"ComponentManifoldError($(ex.index), $(ex.error))")
+end
+function Base.show(io::IO, ex::CompositeManifoldError)
+    print(io, "CompositeManifoldError(")
+    if !isempty(ex)
+        print(io, "[")
+        start=true
+        for e in ex.errors
+            show(io, e)
+            print(io,", ")
+        end
+        print(io, "]")
+    end
+    print(io, ")")
+end
+
+function Base.showerror(io::IO, ex::ComponentManifoldError)
     print(io, "At #$(ex.index): ")
     return showerror(io, ex.error)
 end
 
-function showerror(io::IO, ex::CompositeManifoldError)
+function Base.showerror(io::IO, ex::CompositeManifoldError)
     return if !isempty(ex)
         print(io, "CompositeManifoldError: ")
         showerror(io, ex.errors[1])
