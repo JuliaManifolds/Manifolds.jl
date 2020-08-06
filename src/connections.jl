@@ -105,7 +105,11 @@ Defines the Hessian operator for the given connection. Definition follows [^Absi
 Section 5.5.
 
 [^Absil2008]:
-    > Absil, P. A., et al. Optimization Algorithms on Matrix Manifolds. 2008.
+    >Absil, P.-A., Mahony, R., Sepulchre, R.:
+    >Optimization Algorithms on Matrix Manifolds,
+    > Princeton University Press, 2008,
+    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244),
+    > [open access](http://press.princeton.edu/chapters/absil/).
 """
 struct HessianOperator{TC<:AbstractAffineConnection}
     conn::TC
