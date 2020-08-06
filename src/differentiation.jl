@@ -27,7 +27,8 @@ for example [`differential`](@ref Manifolds.differential(::Manifold, ::Any, ::Re
 """
 function _derivative end
 
-function _derivative!(f, X, t, backend::AbstractDiffBackend)
+function _derivative!(f::TF, X, t, backend::AbstractDiffBackend) where {TF}
+    # that where statement is intentional as it forces specialization
     return copyto!(X, _derivative(f, t, backend))
 end
 
@@ -48,7 +49,8 @@ for example [`gradient`](@ref Manifolds.gradient(::Manifold, ::Any, ::Any, ::Abs
 """
 function _gradient end
 
-function _gradient!(f, X, p, backend::AbstractDiffBackend)
+function _gradient!(f::TF, X, p, backend::AbstractDiffBackend) where {TF}
+    # that where statement is intentional as it forces specialization
     return copyto!(X, _gradient(f, p, backend))
 end
 

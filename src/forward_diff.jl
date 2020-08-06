@@ -5,7 +5,7 @@ function Manifolds._derivative(f, p, ::ForwardDiffBackend)
     return ForwardDiff.derivative(f, p)
 end
 
-function _derivative!(f, X, t, ::ForwardDiffBackend)
+function _derivative!(f::TF, X, t, ::ForwardDiffBackend) where {TF}
     return ForwardDiff.derivative!(X, f, t)
 end
 
@@ -13,7 +13,7 @@ function _gradient(f, p, ::ForwardDiffBackend)
     return ForwardDiff.gradient(f, p)
 end
 
-function _gradient!(f, X, t, ::ForwardDiffBackend)
+function _gradient!(f::TF, X, t, ::ForwardDiffBackend) where {TF}
     return ForwardDiff.gradient!(X, f, t)
 end
 

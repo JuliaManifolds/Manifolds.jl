@@ -20,6 +20,6 @@ function _gradient(f, p, backend::FiniteDiffBackend{Method}) where {Method}
     return FiniteDiff.finite_difference_gradient(f, p, Method)
 end
 
-function _gradient!(f, X, p, backend::FiniteDiffBackend{Method}) where {Method}
+function _gradient!(f::TF, X, p, backend::FiniteDiffBackend{Method}) where {TF,Method}
     return FiniteDiff.finite_difference_gradient!(X, f, p, Method)
 end

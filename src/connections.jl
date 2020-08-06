@@ -162,7 +162,7 @@ function apply_operator!(
         Z,
         p,
         X,
-        q -> gradient(bas_manifold(F.conn), f, p, grad_backend),
+        q -> gradient(base_manifold(F.conn), f, q, grad_backend),
         diff_backend,
     )
 end
@@ -179,7 +179,12 @@ function apply_operator(
         F.conn,
         p,
         X,
-        q -> gradient(bas_manifold(F.conn), f, p, grad_backend),
+        let M = base_manifold(F.conn),
+            f = f,
+            grad_backend = grad_backend
+            
+            q -> gradient(M, f, q, grad_backend)
+        end,
         diff_backend,
     )
 end

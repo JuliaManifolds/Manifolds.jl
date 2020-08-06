@@ -471,5 +471,7 @@ export get_basis,
 export AbstractDiffBackend,
     AbstractRiemannianDiffBackend, FiniteDifferencesBackend, RiemannianONBDiffBackend
 export diff_backend, diff_backend!, diff_backends
+export HessianOperator, LeviCivitaConnection
+export apply_operator, apply_operator!
 
 end # module
