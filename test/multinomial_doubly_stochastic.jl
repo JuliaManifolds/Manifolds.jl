@@ -1,9 +1,9 @@
 include("utils.jl")
 
 @testset "Multinomial doubly stochastic Matrices" begin
-    M = MultinomialDoubleStochasticMatrices(3)
+    M = MultinomialDoubleStochastic(3)
     @test manifold_dimension(M) == 4
-    @test repr(M) == "MultinomialDoubleStochasticMatrices(3)"
+    @test repr(M) == "MultinomialDoubleStochastic(3)"
     p = ones(3, 3) ./ 3
     X = zeros(3, 3)
     @test is_manifold_point(M, p)
