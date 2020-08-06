@@ -14,6 +14,14 @@ include("group_utils.jl")
         v = [2.0, 3.0]
         eg = Identity(G, [0.0, 0.0])
         @test repr(eg) === "Identity($(G), $([0.0, 0.0]))"
+        @test number_eltype(eg) == Bool
+        p = similar(x)
+        copyto!(p,eg)
+        @test p == eg.p
+        @test is_manifold_point(G,eg) # identity transparent
+        @test isapprox(G,eg,p)
+        @test isapprox(G,p,eg)
+        @test isapprox(G,eg,eg)
         @test length(methods(is_group_decorator)) == 1
 
         @test Manifolds.is_group_decorator(G)
@@ -195,12 +203,13 @@ include("group_utils.jl")
         @test ge + x ≈ x
         @test x + ge ≈ x
         @test ge + ge === ge
-        @test -ge === ge
-        @test +ge === ge
+        @test -(ge) === ge
+        @test +(ge) === ge
         @test ge * 1 === ge
         @test 1 * ge === ge
         @test ge * ge === ge
         @test ge.p ≈ zero(x)
+        @test zero(ge) == ge
         @test inv(G, x) ≈ -x
         @test inv(G, ge) === ge
         @test identity(G, x) ≈ zero(x)
