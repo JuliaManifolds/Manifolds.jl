@@ -109,7 +109,7 @@ function apply_operator(
         embed(F.manifold, p, X),
         q -> embed(F.manifold, q, Y(q)),
         backend,
-     )
+    )
     return project(F.manifold, p, emb_Z)
 end
 
@@ -179,10 +179,7 @@ function apply_operator(
         F.conn,
         p,
         X,
-        let M = base_manifold(F.conn),
-            f = f,
-            grad_backend = grad_backend
-            
+        let M = base_manifold(F.conn), f = f, grad_backend = grad_backend
             q -> gradient(M, f, q, grad_backend)
         end,
         diff_backend,

@@ -25,11 +25,23 @@ function `f` at point `p` using the given backend.
 """
 gradient(::Manifold, ::Any, ::Any, ::AbstractRiemannianDiffBackend)
 
-function differential!(M::Manifold, f::TF, X, t, backend::AbstractRiemannianDiffBackend) where {TF}
+function differential!(
+    M::Manifold,
+    f::TF,
+    X,
+    t,
+    backend::AbstractRiemannianDiffBackend,
+) where {TF}
     return copyto!(X, differential(M, f, t, backend))
 end
 
-function gradient!(M::Manifold, f::TF, X, p, backend::AbstractRiemannianDiffBackend) where {TF}
+function gradient!(
+    M::Manifold,
+    f::TF,
+    X,
+    p,
+    backend::AbstractRiemannianDiffBackend,
+) where {TF}
     return copyto!(X, gradient(M, f, p, backend))
 end
 
@@ -80,7 +92,13 @@ function differential(M::Manifold, f, t::Real, backend::RiemannianONBDiffBackend
     return get_vector(M, p, onb_coords, backend.basis)
 end
 
-function differential!(M::Manifold, f::TF, X, t::Real, backend::RiemannianONBDiffBackend) where {TF}
+function differential!(
+    M::Manifold,
+    f::TF,
+    X,
+    t::Real,
+    backend::RiemannianONBDiffBackend,
+) where {TF}
     p = f(t)
     onb_coords = _derivative(zero(number_eltype(p)), backend.diff_backend) do h
         return get_coordinates(
@@ -220,7 +238,13 @@ function gradient(M::Manifold, f, p, backend::RiemannianProjectionGradientBacken
     return project(M, p, amb_grad)
 end
 
-function gradient!(M::Manifold, f::TF, X, p, backend::RiemannianProjectionGradientBackend) where {TF}
+function gradient!(
+    M::Manifold,
+    f::TF,
+    X,
+    p,
+    backend::RiemannianProjectionGradientBackend,
+) where {TF}
     amb_grad = embed(M, p, X)
     _gradient!(f, amb_grad, p, backend.diff_backend)
     return project!(M, X, p, amb_grad)
