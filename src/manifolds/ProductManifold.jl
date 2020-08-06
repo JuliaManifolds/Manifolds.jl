@@ -129,7 +129,7 @@ end
     check_manifold_point(M::ProductManifold, p; kwargs...)
 
 Check whether `p` is a valid point on the [`ProductManifold`](@ref) `M`.
-If `p` is not a point on `M` a `CompositeException` consisting of all error messages of the
+If `p` is not a point on `M` a [`CompositeManifoldError`](@ref) consisting of all error messages of the
 components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
@@ -139,12 +139,12 @@ function check_manifold_point(
     p::Union{ProductRepr,ProductArray};
     kwargs...,
 )
-    ts = ziptuples(M.manifolds, submanifold_components(M, p))
-    e = [check_manifold_point(t...; kwargs...) for t in ts]
-    errors = filter((x) -> !(x === nothing), e)
-    if length(errors) > 0
-        return CompositeException(errors)
-    end
+    ts = ziptuples(Tuple(1:length(M.manifolds)), M.manifolds, submanifold_components(M, p))
+    e = [(t[1], check_manifold_point(t[2:end]...; kwargs...)) for t in ts]
+    errors = filter((x) -> !(x[2] === nothing), e)
+    cerr = [ComponentManifoldError(er...) for er in errors]
+    (length(errors) > 1) && return CompositeManifoldError(cerr)
+    (length(errors) == 1) && return cerr[1]
     return nothing
 end
 
@@ -154,7 +154,7 @@ end
 Check whether `X` is a tangent vector to `p` on the [`ProductManifold`](@ref)
 `M`, i.e. after [`check_manifold_point`](@ref)`(M, p)`, and all projections to
 base manifolds must be respective tangent vectors.
-If `X` is not a tangent vector to `p` on `M` a `CompositeException` consisting of all error
+If `X` is not a tangent vector to `p` on `M` a [`CompositeManifoldError`](@ref) consisting of all error
 messages of the components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
@@ -170,12 +170,17 @@ function check_tangent_vector(
         perr = check_manifold_point(M, p; kwargs...)
         perr === nothing || return perr
     end
-    ts = ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, X))
-    e = [check_tangent_vector(t...; kwargs...) for t in ts]
-    errors = filter(x -> !(x === nothing), e)
-    if length(errors) > 0
-        return CompositeException(errors)
-    end
+    ts = ziptuples(
+        Tuple(1:length(M.manifolds)),
+        M.manifolds,
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    e = [(t[1], check_tangent_vector(t[2:end]...; kwargs...)) for t in ts]
+    errors = filter(x -> !(x[2] === nothing), e)
+    cerr = [ComponentManifoldError(er...) for er in errors]
+    (length(errors) > 1) && return CompositeManifoldError(cerr)
+    (length(errors) == 1) && return cerr[1]
     return nothing
 end
 
