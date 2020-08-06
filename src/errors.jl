@@ -3,30 +3,28 @@
 
 Store an error that occured in a component, where the additional `index` is stored.
 """
-struct ComponentManifoldError{I,E} <: Exception where {I, E<:Exception,T}
+struct ComponentManifoldError{I,E} <: Exception where {I, E<:Exception}
     index::I
     error::E
-    componentType::T
 end
-ComponentManifoldError(i::I, e::E) where {I, E<:Exception} = ComponentManifoldError{I,E,String}(i,e,"component")
+ComponentManifoldError(i::I, e::E) where {I, E<:Exception} = ComponentManifoldError{I,E}(i,e)
 
 struct CompositeManifoldError{T} <: Exception where{T <: Exception}
     errors::Vector{T}
-    prefix::String
 end
 CompositeManifoldError() = CompositeManifoldError{Exception}(Exception[],"")
 function CompositeManifoldError(errors::Vector{T}) where {T<:Exception}
-    return ComponentManifoldError{T}(errors,"")
+    return CompositeManifoldError{T}(errors)
 end
 function CompositeManifoldError(errors::Vector{T},prefix) where {T<:Exception}
-    return ComponentManifoldError{T}(errors,"",prefix)
+    return CompositeManifoldError{T}(errors)
 end
 
-isempty(c::CompositeManifoldError) = isempty(c.components)
-length(c::CompositeManifoldError) = length(c.components)
+isempty(c::CompositeManifoldError) = isempty(c.errors)
+length(c::CompositeManifoldError) = length(c.errors)
 
 function showerror(io::IO,  ex::ComponentManifoldError)
-    println(io, "At $(ex.componentType) #$(ex.index): ")
+    print(io, "At #$(ex.index): ")
     showerror(io,ex.error)
 end
 

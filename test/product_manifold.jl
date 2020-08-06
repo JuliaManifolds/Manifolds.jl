@@ -100,7 +100,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         @test prs1[Mse, Val(2)] == 2 * p3
     end
 
-    @testset "CompositeException" begin
+    @testset "CompositeManifoldError" begin
         Mpr = Sphere(2) × Sphere(2)
         p1 = [1.0, 0.0, 0.0]
         p2 = [0.0, 1.0, 0.0]
@@ -111,9 +111,9 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         pf = ProductRepr(p1, X1)
         Xf = ProductRepr(X1, p2)
         @test is_manifold_point(Mpr, p, true)
-        @test_throws CompositeException is_manifold_point(Mpr, X, true)
-        @test_throws CompositeException is_tangent_vector(Mpr, pf, X, true)
-        @test_throws CompositeException is_tangent_vector(Mpr, p, Xf, true)
+        @test_throws CompositeManifoldError is_manifold_point(Mpr, X, true)
+        @test_throws ComponentManifoldError is_tangent_vector(Mpr, pf, X, true)
+        @test_throws ComponentManifoldError is_tangent_vector(Mpr, p, Xf, true)
     end
 
     @testset "arithmetic" begin
