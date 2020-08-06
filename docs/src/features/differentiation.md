@@ -17,3 +17,12 @@ Modules = [Manifolds]
 Pages = ["riemannian_diff.jl"]
 Order = [:type, :function, :constant]
 ```
+
+## Connections
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["connections.jl"]
+Order = [:type, :function]
+```
+

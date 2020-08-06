@@ -1,4 +1,41 @@
+
+"""
+    AbstractAffineConnection{𝔽,TM<:Manifold{𝔽}}
+
+Affine connection on a manifold of type `TM`. Connection operation is defined using
+[`apply_operator`](@ref).
+"""
 abstract type AbstractAffineConnection{𝔽,TM<:Manifold{𝔽}} end
+
+@doc raw"""
+    HessianOperator{TC<:AbstractAffineConnection}
+
+Defines the Hessian operator for the given connection. Definition follows [^Absil2008],
+Section 5.5. The formula reads:
+````math
+    \operatorname{Hess} f(p)[X_p] = \nabla_{X_p} \operatorname{grad} f
+````
+
+[^Absil2008]:
+    >Absil, P.-A., Mahony, R., Sepulchre, R.:
+    >Optimization Algorithms on Matrix Manifolds,
+    > Princeton University Press, 2008,
+    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244),
+    > [open access](http://press.princeton.edu/chapters/absil/).
+"""
+struct HessianOperator{TC<:AbstractAffineConnection}
+    conn::TC
+end
+
+"""
+    LeviCivitaConnection{𝔽,TM<:Manifold{𝔽}} <: AbstractAffineConnection{𝔽,TM}
+
+Represents the Levi-Civita connection on manifold of type `TM`.
+"""
+struct LeviCivitaConnection{𝔽,TM<:Manifold{𝔽}} <: AbstractAffineConnection{𝔽,TM}
+    manifold::TM
+end
+
 
 """
     apply_operator(F::AbstractAffineConnection, p, X[, backend::AbstractRiemannianDiffBackend])
@@ -25,14 +62,6 @@ function apply_operator!(F::AbstractAffineConnection, Z, p, X, Y)
     return apply_operator!(F, Z, p, X, Y, rdifferential_backend())
 end
 
-"""
-    LeviCivitaConnection{𝔽,TM<:Manifold{𝔽}} <: AbstractAffineConnection{𝔽,TM}
-
-Represents the Levi-Civita connection on manifold of type `TM`.
-"""
-struct LeviCivitaConnection{𝔽,TM<:Manifold{𝔽}} <: AbstractAffineConnection{𝔽,TM}
-    manifold::TM
-end
 
 base_manifold(F::LeviCivitaConnection) = F.manifold
 
@@ -59,8 +88,13 @@ connection in the embedding and projecting it back.
 
 See [^Absil2008], Section 5.3.3 for details.
 
+
 [^Absil2008]:
-    > Absil, P. A., et al. Optimization Algorithms on Matrix Manifolds. 2008.
+    >Absil, P.-A., Mahony, R., Sepulchre, R.:
+    >Optimization Algorithms on Matrix Manifolds,
+    > Princeton University Press, 2008,
+    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244),
+    > [open access](http://press.princeton.edu/chapters/absil/).
 """
 function apply_operator(
     F::LeviCivitaConnection{𝔽,<:AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}},
@@ -75,7 +109,7 @@ function apply_operator(
         embed(F.manifold, p, X),
         q -> embed(F.manifold, q, Y(q)),
         backend,
-    )
+     )
     return project(F.manifold, p, emb_Z)
 end
 
@@ -99,24 +133,7 @@ function apply_operator!(
 end
 
 """
-    HessianOperator{TC<:AbstractAffineConnection}
-
-Defines the Hessian operator for the given connection. Definition follows [^Absil2008],
-Section 5.5.
-
-[^Absil2008]:
-    >Absil, P.-A., Mahony, R., Sepulchre, R.:
-    >Optimization Algorithms on Matrix Manifolds,
-    > Princeton University Press, 2008,
-    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244),
-    > [open access](http://press.princeton.edu/chapters/absil/).
-"""
-struct HessianOperator{TC<:AbstractAffineConnection}
-    conn::TC
-end
-
-"""
-    apply_operator!(
+    apply_operator(
         F::HessianOperator,
         p,
         X,
@@ -125,10 +142,11 @@ end
         grad_backend::AbstractRiemannianDiffBackend,
     )
 
-Apply the Hessian operator `F` at point `p` to function `f` in the direction `f` using
-given differentiation backends.
+Apply the Hessian operator `F` at point `p` to function `f` in the direction `X` using
+given differentiation backends: `diff_backend` is used for connection-related
+differentiation and `grad_backend` is used for gradient-related differentiation.
 """
-apply_operator(F::HessianOperator, p, X, Y)
+apply_operator(F::HessianOperator, p, X, f)
 
 function apply_operator!(
     F::HessianOperator,
