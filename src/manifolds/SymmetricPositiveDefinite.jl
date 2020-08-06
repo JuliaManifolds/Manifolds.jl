@@ -33,13 +33,13 @@ function check_manifold_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) whe
     mpv === nothing || return mpv
     if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
         return DomainError(
-            norm(p),
+            norm(p - transpose(p)),
             "The point $(p) does not lie on $(M) since its not a symmetric matrix:",
         )
     end
     if !all(eigvals(p) .> 0)
         return DomainError(
-            norm(p),
+            eigvals(p),
             "The point $p does not lie on $(M) since its not a positive definite matrix.",
         )
     end
@@ -79,7 +79,7 @@ function check_tangent_vector(
     mpv === nothing || return mpv
     if !isapprox(norm(X - transpose(X)), 0.0; kwargs...)
         return DomainError(
-            size(X),
+            X,
             "The vector $(X) is not a tangent to a point on $(M) (represented as an element of the Lie algebra) since its not symmetric.",
         )
     end

@@ -6,7 +6,7 @@ include("utils.jl")
     A = [1 2; 4 5; -5 -7]
     B = [1 2 3; 4 5 6; -5 -7 -9]    #wrong dimensions
     C = [-3 -im; 2 im; 1 0]         #complex
-    D = [1 2; 3 4; 5 6]             #not centered 
+    D = [1 2; 3 4; 5 6]             #not centered
     types = [Matrix{Float64}]
     @testset "Real Centered Matrices Basics" begin
         @test repr(M) == "CenteredMatrices(3, 2, ℝ)"
@@ -38,7 +38,7 @@ include("utils.jl")
             test_reverse_diff = false,
             test_project_tangent = true,
             test_musical_isomorphisms = true,
-            test_vector_transport = true,
+            test_default_vector_transport = true,
             is_tangent_atol_multiplier = 1,
             is_point_atol_multiplier = 1,
         )
@@ -55,7 +55,7 @@ include("utils.jl")
             test_reverse_diff = false,
             test_project_tangent = true,
             test_musical_isomorphisms = true,
-            test_vector_transport = true,
+            test_default_vector_transport = true,
             is_tangent_atol_multiplier = 1,
             is_point_atol_multiplier = 1,
         )

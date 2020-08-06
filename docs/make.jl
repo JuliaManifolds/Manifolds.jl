@@ -2,7 +2,7 @@ using Manifolds, ManifoldsBase, Documenter
 # required for loading the Manifolds.ManifoldTests module
 using Test, ForwardDiff, ReverseDiff
 
-generated_path = joinpath(@__DIR__, "src", "generated")
+generated_path = joinpath(@__DIR__, "src", "misc")
 isdir(generated_path) || mkdir(generated_path)
 cp(
     joinpath(dirname(@__DIR__), "CONTRIBUTING.md"),
@@ -19,12 +19,13 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "ManifoldsBase.jl" => "interface.md",
-        "How to..." => ["implement a Manifold" => "tutorials/manifold.md"],
+        "Examples" => ["How to implement a Manifold" => "examples/manifold.md"],
         "Manifolds" => [
             "Basic manifolds" => [
                 "Centered matrices" => "manifolds/centeredmatrices.md",
                 "Cholesky space" => "manifolds/choleskyspace.md",
                 "Circle" => "manifolds/circle.md",
+                "Elliptope" => "manifolds/elliptope.md",
                 "Euclidean" => "manifolds/euclidean.md",
                 "Fixed-rank matrices" => "manifolds/fixedrankmatrices.md",
                 "Generalized Stiefel" => "manifolds/generalizedstiefel.md",
@@ -32,16 +33,22 @@ makedocs(
                 "Grassmann" => "manifolds/grassmann.md",
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
                 "Lorentzian manifold" => "manifolds/lorentz.md",
+                "Multinomial doubly stochastic matrices" =>
+                    "manifolds/multinomialdoublystochastic.md",
                 "Multinomial matrices" => "manifolds/multinomial.md",
+                "Multinomial symmetric matrices" => "manifolds/multinomialsymmetric.md",
                 "Oblique manifold" => "manifolds/oblique.md",
                 "Probability simplex" => "manifolds/probabilitysimplex.md",
                 "Rotations" => "manifolds/rotations.md",
                 "Skew-symmetric matrices" => "manifolds/skewsymmetric.md",
+                "Spectrahedron" => "manifolds/spectrahedron.md",
                 "Sphere" => "manifolds/sphere.md",
                 "Stiefel" => "manifolds/stiefel.md",
                 "Symmetric matrices" => "manifolds/symmetric.md",
                 "Symmetric positive definite" =>
                     "manifolds/symmetricpositivedefinite.md",
+                "Symmetric positive semidefinite fixed rank" =>
+                    "manifolds/symmetricpsdfixedrank.md",
                 "Torus" => "manifolds/torus.md",
                 "Unit-norm symmetric matrices" =>
                     "manifolds/spheresymmetricmatrices.md",
@@ -57,16 +64,18 @@ makedocs(
                 "Group manifold" => "manifolds/group.md",
             ],
         ],
-        "Statistics" => "statistics.md",
-        "Distributions" => "distributions.md",
-        "About" => "about.md",
-        "Contributing" => "generated/contributing.md",
-        "Notation" => "notation.md",
-        "Library" => [
-            "Public" => "lib/public.md",
-            "Internals" => "lib/internals.md",
-            "Differentiation" => "lib/differentiation.md",
-            "Testing" => "lib/testing.md",
+        "Features on Manifolds" => [
+            "Differentiation" => "features/differentiation.md",
+            "Distributions" => "features/distributions.md",
+            "Statistics" => "features/statistics.md",
+            "Testing" => "features/testing.md",
+            "Utilities" => "features/utilities.md",
+        ],
+        "Miscellanea" => [
+            "About" => "misc/about.md",
+            "Contributing" => "misc/contributing.md",
+            "Internals" => "misc/internals.md",
+            "Notation" => "misc/notation.md",
         ],
     ],
 )

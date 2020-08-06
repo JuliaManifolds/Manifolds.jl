@@ -97,7 +97,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_vee_hat = true,
                 test_project_tangent = true,
                 test_project_point = true,
-                test_vector_transport = true,
+                test_default_vector_transport = true,
                 basis_types_vecs = basis_types,
                 projection_atol_multiplier = 4,
             )

@@ -67,7 +67,7 @@ include("utils.jl")
                 test_exp_log = true,
                 test_injectivity_radius = false,
                 test_project_tangent = true,
-                test_vector_transport = false,
+                test_default_vector_transport = false,
                 point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
                 test_forward_diff = false,
                 test_reverse_diff = false,
@@ -158,7 +158,7 @@ include("utils.jl")
             z = exp(M, x, w)
             pts = convert.(T, [x, y, z])
             if Sys.iswindows()
-                exp_log_atol_multiplier = 100.0
+                exp_log_atol_multiplier = 1.0e4
             else
                 exp_log_atol_multiplier = 10.0
             end
@@ -168,7 +168,7 @@ include("utils.jl")
                 test_exp_log = true,
                 test_injectivity_radius = false,
                 test_project_tangent = true,
-                test_vector_transport = false,
+                test_default_vector_transport = false,
                 test_forward_diff = false,
                 test_reverse_diff = false,
                 test_vee_hat = false,

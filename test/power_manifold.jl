@@ -148,6 +148,14 @@ Random.seed!(42)
         @test view(pn1, Msn1, 1) isa SubArray
     end
 
+    @testset "ComponenException" begin
+        M = PowerManifold(Sphere(2), NestedPowerRepresentation(), 2)
+        p = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+        X = [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+        @test_throws CompositeException is_manifold_point(M, X, true)
+        @test_throws CompositeException is_tangent_vector(M, p, X, true)
+    end
+
     @testset "power vector transport" begin
         m = PowerVectorTransport(ParallelTransport())
         p = repeat([1.0, 0.0, 0.0], 1, 5)
@@ -176,7 +184,7 @@ Random.seed!(42)
                 test_reverse_diff = true,
                 test_musical_isomorphisms = true,
                 test_injectivity_radius = false,
-                test_vector_transport = true,
+                test_default_vector_transport = true,
                 vector_transport_methods = [
                     PowerVectorTransport(ParallelTransport()),
                     PowerVectorTransport(SchildsLadderTransport()),

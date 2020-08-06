@@ -15,7 +15,7 @@ function our_base_ambiguities()
     return our_ambigs
 end
 
-@testset "Ambiguities" begin
+(VERSION >= v"1.1") && @testset "Ambiguities" begin
     # TODO: reduce the number of ambiguities
     @test length(Test.detect_ambiguities(ManifoldsBase)) <= 12
     @test length(Test.detect_ambiguities(Manifolds)) == 0
@@ -37,20 +37,25 @@ include("connections.jl")
 include("centered_matrices.jl")
 include("circle.jl")
 include("cholesky_space.jl")
+include("elliptope.jl")
 include("euclidean.jl")
 include("fixed_rank.jl")
 include("generalized_grassmann.jl")
 include("generalized_stiefel.jl")
 include("grassmann.jl")
 include("hyperbolic.jl")
+include("multinomial_doubly_stochastic.jl")
+include("multinomial_symmetric.jl")
 include("probability_simplex.jl")
 include("rotations.jl")
 include("skewsymmetric.jl")
+include("spectrahedron.jl")
 include("sphere.jl")
 include("sphere_symmetric_matrices.jl")
 include("stiefel.jl")
 include("symmetric.jl")
 include("symmetric_positive_definite.jl")
+include("symmetric_positive_semidefinite_fixed_rank.jl")
 
 include("multinomial_matrices.jl")
 include("oblique.jl")

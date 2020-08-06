@@ -10,12 +10,13 @@ include("utils.jl")
         @test repr(M) == "MultinomialMatrices(3,2)"
         @test representation_size(M) == (3, 2)
         @test manifold_dimension(M) == 4
+        @test Manifolds.get_iterator(ProbabilitySimplex(3)^4) === Base.OneTo(4)
         p = [2, 0, 0]
         p2 = [p p]
         @test !is_manifold_point(M, p)
         @test_throws DomainError is_manifold_point(M, p, true)
         @test !is_manifold_point(M, p2)
-        @test_throws DomainError is_manifold_point(M, p2, true)
+        @test_throws CompositeException is_manifold_point(M, p2, true)
         @test !is_tangent_vector(M, p2, 0.0)
         @test_throws DomainError is_tangent_vector(M, p2, [-1.0, 0.0, 0.0], true)
         @test !is_tangent_vector(M, p2, [-1.0, 0.0, 0.0])
@@ -33,7 +34,7 @@ include("utils.jl")
             test_vector_spaces = true,
             test_project_tangent = false,
             test_musical_isomorphisms = true,
-            test_vector_transport = false,
+            test_default_vector_transport = false,
             is_tangent_atol_multiplier = 5.0,
         )
     end

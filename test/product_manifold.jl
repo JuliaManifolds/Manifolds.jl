@@ -13,6 +13,16 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
     @test Mse == ProductManifold(M1) × ProductManifold(M2)
     @test Mse == M1 × ProductManifold(M2)
     @test injectivity_radius(Mse) ≈ π
+    @test injectivity_radius(
+        Mse,
+        ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0]),
+        ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
+    ) ≈ π
+    @test injectivity_radius(
+        Mse,
+        ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0]),
+        ExponentialRetraction(),
+    ) ≈ π
     @test is_default_metric(Mse, ProductMetric())
     @test Manifolds.default_metric_dispatch(Mse, ProductMetric()) === Val{true}()
     @test_throws ErrorException Manifolds.make_reshape(
@@ -88,6 +98,22 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         @test get_component(Mse, prs1, Val(2)) == p3
         prs1[Mse, Val(2)] = 2 * p3
         @test prs1[Mse, Val(2)] == 2 * p3
+    end
+
+    @testset "CompositeException" begin
+        Mpr = Sphere(2) × Sphere(2)
+        p1 = [1.0, 0.0, 0.0]
+        p2 = [0.0, 1.0, 0.0]
+        X1 = [0.0, 1.0, 0.2]
+        X2 = [1.0, 0.0, 0.2]
+        p = ProductRepr(p1, p2)
+        X = ProductRepr(X1, X2)
+        pf = ProductRepr(p1, X1)
+        Xf = ProductRepr(X1, p2)
+        @test is_manifold_point(Mpr, p, true)
+        @test_throws CompositeException is_manifold_point(Mpr, X, true)
+        @test_throws CompositeException is_tangent_vector(Mpr, pf, X, true)
+        @test_throws CompositeException is_tangent_vector(Mpr, p, Xf, true)
     end
 
     @testset "arithmetic" begin
@@ -541,7 +567,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             test_reverse_diff = false,
             test_project_tangent = true,
             test_project_point = true,
-            test_vector_transport = true,
+            test_default_vector_transport = true,
             vector_transport_methods = [
                 ProductVectorTransport(ParallelTransport(), ParallelTransport()),
                 ProductVectorTransport(SchildsLadderTransport(), SchildsLadderTransport()),

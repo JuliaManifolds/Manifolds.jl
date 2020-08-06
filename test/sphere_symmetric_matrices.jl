@@ -46,7 +46,7 @@ include("utils.jl")
             test_vector_spaces = true,
             test_project_tangent = true,
             test_musical_isomorphisms = true,
-            test_vector_transport = true,
+            test_default_vector_transport = true,
             is_tangent_atol_multiplier = 2,
         )
     end
@@ -68,7 +68,7 @@ include("utils.jl")
             test_vector_spaces = true,
             test_project_tangent = true,
             test_musical_isomorphisms = true,
-            test_vector_transport = true,
+            test_default_vector_transport = true,
             is_tangent_atol_multiplier = 2,
             is_point_atol_multiplier = 2,
             projection_atol_multiplier = 2,
