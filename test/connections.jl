@@ -105,3 +105,43 @@ end
     )
 
 end
+
+@testset "Hessian on Sphere" begin
+    M = Sphere(2)
+    f(p) = p[1]^2 - p[1] * p[2]^2 + 10*p[3]^2*p[1]
+
+    Hop = HessianOperator(LeviCivitaConnection(M))
+    p = [1.0, 0.0, 0.0]
+    X1 = [0.0, 1.0, 0.0]
+    X2 = [0.0, 0.0, 2.0]
+    @test isapprox(M, p, apply_operator(Hop, p, X1, f), [0.0, -4.0, 0.0], atol = 1e-8)
+    @test isapprox(M, p, apply_operator(Hop, p, X2, f), [0.0, 0.0, 36.0], atol = 1e-8)
+
+    Z = similar(X1)
+    apply_operator!(Hop, Z, p, X1, f)
+    @test isapprox(M, p, Z, [0.0, -4.0, 0.0], atol = 1e-8)
+    apply_operator!(Hop, Z, p, X2, f)
+    @test isapprox(M, p, Z, [0.0, 0.0, 36.0], atol = 1e-8)
+
+    rb_onb_fwd_diff = RiemannianONBDiffBackend(
+        Manifolds.ForwardDiffBackend(),
+        Manifolds.ExponentialRetraction(),
+        Manifolds.LogarithmicInverseRetraction(),
+        DefaultOrthonormalBasis(),
+    )
+
+    @test isapprox(
+        M,
+        p,
+        apply_operator(Hop, p, X1, f, rb_onb_fwd_diff, rb_onb_fwd_diff),
+        [0.0, -4.0, 0.0],
+    )
+    @test isapprox(
+        M,
+        p,
+        apply_operator(Hop, p, X2, f, rb_onb_fwd_diff, rb_onb_fwd_diff),
+        [0.0, 0.0, 36.0],
+    )
+
+end
+
