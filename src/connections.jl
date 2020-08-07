@@ -71,7 +71,7 @@ base_manifold(F::LeviCivitaConnection) = F.manifold
 Compute the value of the Levi-Civita connection of type [`LeviCivitaConnection`](@ref) at
 point `p`, in the direction pointed by tangent vector `X` at `p`, of the vector field on
 `F.manifold` defined by a function `Y`.
-The formula reads $(\nabla_X \mathit{Y})_p$.
+The formula reads $(\nabla_X Y)_p$.
 """
 apply_operator(F::LeviCivitaConnection, p, X, Y)
 
@@ -154,16 +154,19 @@ function apply_operator!(
     Z,
     p,
     X,
-    f,
+    f::TF,
     diff_backend::AbstractRiemannianDiffBackend,
     grad_backend::AbstractRiemannianDiffBackend,
-)
+) where {TF}
+    M = base_manifold(F.conn)
     return apply_operator!(
         F.conn,
         Z,
         p,
         X,
-        q -> gradient(base_manifold(F.conn), f, q, grad_backend),
+        let M = M, ZG = allocate_result(M, gradient, p, X), f = f
+            q -> gradient!(M, f, ZG, q, grad_backend)
+        end,
         diff_backend,
     )
 end
@@ -193,6 +196,6 @@ function apply_operator(F::HessianOperator, p, X, f)
     return apply_operator(F, p, X, f, rdifferential_backend(), rgradient_backend())
 end
 
-function apply_operator!(F::HessianOperator, Z, p, X, Y)
-    return apply_operator!(F, Z, p, X, Y, rdifferential_backend(), rgradient_backend())
+function apply_operator!(F::HessianOperator, Z, p, X, f)
+    return apply_operator!(F, Z, p, X, f, rdifferential_backend(), rgradient_backend())
 end
