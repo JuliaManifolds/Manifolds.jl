@@ -40,7 +40,7 @@ end
 """
     apply_operator(F::AbstractAffineConnection, p, X[, backend::AbstractRiemannianDiffBackend])
 
-Apply connection `F` at point `p` to vector field `Y` in direction `X`.
+Apply [`AbstractAffineConnection`](@ref) `F` at point `p` to vector field `Y` in direction `X`.
 """
 function apply_operator(
     F::AbstractAffineConnection,
@@ -68,8 +68,9 @@ base_manifold(F::LeviCivitaConnection) = F.manifold
 @doc raw"""
     apply_operator(F::LeviCivitaConnection, p, X, Y)
 
-Compute the value of the Levi-Civita connection at point `p`, in the direction pointed by
-tangent vector `X` at `p`, of the vector field on `F.manifold` defined by a function `Y`.
+Compute the value of the Levi-Civita connection of type [`LeviCivitaConnection`](@ref) at
+point `p`, in the direction pointed by tangent vector `X` at `p`, of the vector field on
+`F.manifold` defined by a function `Y`.
 The formula reads $(\nabla_X \mathit{Y})_p$.
 """
 apply_operator(F::LeviCivitaConnection, p, X, Y)
@@ -142,8 +143,8 @@ end
         grad_backend::AbstractRiemannianDiffBackend,
     )
 
-Apply the Hessian operator `F` at point `p` to function `f` in the direction `X` using
-given differentiation backends: `diff_backend` is used for connection-related
+Apply the [`HessianOperator`](@ref) `F` at point `p` to function `f` in the direction `X`
+using given differentiation backends: `diff_backend` is used for connection-related
 differentiation and `grad_backend` is used for gradient-related differentiation.
 """
 apply_operator(F::HessianOperator, p, X, f)

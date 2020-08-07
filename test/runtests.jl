@@ -34,6 +34,7 @@ include("sized_abstract_array.jl")
 include("connections.jl")
 
 include("errors.jl")
+
 # starting with tests of simple manifolds
 include("centered_matrices.jl")
 include("circle.jl")
