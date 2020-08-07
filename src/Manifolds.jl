@@ -51,7 +51,7 @@ import ManifoldsBase:
     vector_transport_to!,
     zero_tangent_vector,
     zero_tangent_vector!
-import Base: isapprox
+import Base: isapprox, length, isempty, showerror
 
 using Base.Iterators: repeated
 using Distributions
@@ -99,6 +99,7 @@ include("differentiation.jl")
 include("riemannian_diff.jl")
 include("SizedAbstractArray.jl")
 include("connections.jl")
+include("errors.jl")
 
 include("statistics.jl")
 
@@ -214,7 +215,7 @@ export Euclidean,
     Grassmann,
     Hyperbolic,
     Lorentz,
-    MultinomialDoubleStochasticMatrices,
+    MultinomialDoubleStochastic,
     MultinomialMatrices,
     MultinomialSymmetric,
     Oblique,
@@ -290,6 +291,7 @@ export CachedBasis,
     DefaultOrthonormalBasis,
     DiagonalizingOrthonormalBasis,
     ProjectedOrthonormalBasis
+export ComponentManifoldError, CompositeManifoldError
 export ×,
     allocate,
     allocate_result,
