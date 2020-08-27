@@ -164,8 +164,12 @@ function apply_operator!(
         Z,
         p,
         X,
-        let M = M, ZG = allocate_result(M, gradient, p, X), f = f
-            q -> gradient!(M, f, ZG, q, grad_backend)
+        let M = M, f = f
+            q -> begin
+                ZG = allocate_result(M, gradient, p, X)
+                gradient!(M, f, ZG, q, grad_backend)
+                return ZG
+            end
         end,
         diff_backend,
     )
