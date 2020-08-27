@@ -729,11 +729,7 @@ end
 function project!(M::AbstractPowerManifold, q, p)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        project!(
-            M.manifold,
-            _write(M, rep_size, q, i),
-            _read(M, rep_size, p, i),
-        )
+        project!(M.manifold, _write(M, rep_size, q, i), _read(M, rep_size, p, i))
     end
     return q
 end
