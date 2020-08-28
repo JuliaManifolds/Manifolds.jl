@@ -726,6 +726,14 @@ function power_dimensions(M::PowerManifold{𝔽,<:Manifold,TSize}) where {𝔽,T
     return size_to_tuple(TSize)
 end
 
+@doc raw"""
+    project(M::AbstractPowerManifold, p)
+
+Project the point `p` from the embedding onto the [`AbstractPowerManifold`](@ref) `M`
+by projecting all components.
+"""
+project(::AbstractPowerManifold, ::Any)
+
 function project!(M::AbstractPowerManifold, q, p)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
@@ -733,6 +741,14 @@ function project!(M::AbstractPowerManifold, q, p)
     end
     return q
 end
+
+@doc raw"""
+    project(M::AbstractPowerManifold, p, X)
+
+Project the point `X` onto the tangent space at `p` on the
+[`AbstractPowerManifold`](@ref) `M` by projecting all components.
+"""
+project(::AbstractPowerManifold, ::Any, ::Any)
 
 function project!(M::AbstractPowerManifold, Z, q, Y)
     rep_size = representation_size(M.manifold)
