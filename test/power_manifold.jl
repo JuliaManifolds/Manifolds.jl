@@ -185,6 +185,8 @@ Random.seed!(42)
                 test_musical_isomorphisms = true,
                 test_injectivity_radius = false,
                 test_default_vector_transport = true,
+                test_project_point = true,
+                test_project_tangent = true,
                 vector_transport_methods = [
                     PowerVectorTransport(ParallelTransport()),
                     PowerVectorTransport(SchildsLadderTransport()),
