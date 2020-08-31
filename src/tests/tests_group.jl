@@ -2,9 +2,11 @@
     test_group(
         G,
         g_pts::AbstractVector,
-        v_pts::AbstractVector = [];
+        v_pts::AbstractVector = [],
+        ve_pts::AbstractVector = [];
         atol = 1e-10,
         test_mutating = true,
+        test_group_exp_log = true,
         test_diff = false,
         test_invariance = false,
         diff_convs = [(), (LeftAction(),), (RightAction(),)],
@@ -410,7 +412,8 @@ end
     test_action(
         A::AbstractGroupAction,
         a_pts::AbstractVector,
-        m_pts::AbstractVector;
+        m_pts::AbstractVector,
+        v_pts = [];
         atol = 1e-10,
         test_optimal_alignment = false,
         test_mutating = true,
