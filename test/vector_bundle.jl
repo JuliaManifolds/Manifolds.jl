@@ -116,7 +116,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         ct_x = CotangentSpaceAtPoint(M, x)
         if VERSION >= v"1.6.0-DEV.772"
             @test sprint(show, "text/plain", t_x) == """
-            TangentSpaceAtPoint{Sphere{2,ℝ}, Vector{Float64}}
+            TangentSpaceAtPoint{Sphere{2, ℝ},Vector{Float64}}
             Fiber:
              VectorBundleFibers(TangentSpace, Sphere(2, ℝ))
             Base point:
