@@ -9,9 +9,9 @@ include("utils.jl")
     v = UMVTVector([0.0 0.0; 0.0 0.0; 1.0 1.0], [1.0 0.0; 0.0 1.0], zeros(2, 2))
     @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ)"
     @test repr(Mc) == "FixedRankMatrices(3, 2, 2, ℂ)"
-    if VERSION >= v"1.6.0-DEV.430"
+    if VERSION >= v"1.6.0-DEV.772"
         @test sprint(show, "text/plain", x) == """
-        SVDMPoint{Matrix{Float64},Vector{Float64},Matrix{Float64}}
+        SVDMPoint{Matrix{Float64}, Vector{Float64}, Matrix{Float64}}
         U factor:
          3×2 Matrix{Float64}:
           1.0  0.0
@@ -26,7 +26,7 @@ include("utils.jl")
           1.0  0.0
           0.0  1.0"""
         @test sprint(show, "text/plain", v) == """
-        UMVTVector{Matrix{Float64},Matrix{Float64},Matrix{Float64}}
+        UMVTVector{Matrix{Float64}, Matrix{Float64}, Matrix{Float64}}
         U factor:
          3×2 Matrix{Float64}:
           0.0  0.0

@@ -166,7 +166,12 @@ function ManifoldTests.test_group(
             for conv in convs
                 g = allocate(g_pts[1])
                 Test.@test translate!(G, g, g_pts[1], g_pts[2], conv...) === g
-                Test.@test isapprox(G, g, translate(G, g_pts[1], g_pts[2], conv...); atol = atol)
+                Test.@test isapprox(
+                    G,
+                    g,
+                    translate(G, g_pts[1], g_pts[2], conv...);
+                    atol = atol,
+                )
 
                 g = translate(G, g_pts[1], g_pts[2], conv...)
                 g2 = allocate(g)
@@ -455,7 +460,12 @@ function ManifoldTests.test_action(
             Test.Test.@testset "over g-manifold" begin
                 for a in a_pts, m in m_pts
                     Test.@test is_manifold_point(M, apply(A, a, m), true; atol = atol)
-                    Test.@test is_manifold_point(M, inverse_apply(A, a, m), true; atol = atol)
+                    Test.@test is_manifold_point(
+                        M,
+                        inverse_apply(A, a, m),
+                        true;
+                        atol = atol,
+                    )
                 end
             end
         end
@@ -578,7 +588,13 @@ function ManifoldTests.test_action(
             a2m = apply(A, a_pts[2], m)
             a12v = apply_diff(A, a12, m, v)
             a2v = apply_diff(A, a_pts[2], m, v)
-            Test.@test isapprox(M, a2m, apply_diff(A, a_pts[1], a2m, a2v), a12v; atol = atol)
+            Test.@test isapprox(
+                M,
+                a2m,
+                apply_diff(A, a_pts[1], a2m, a2v),
+                a12v;
+                atol = atol,
+            )
 
             Test.@test isapprox(M, m, apply_diff(A, e, m, v), v; atol = atol)
             Test.@test isapprox(M, m, inverse_apply_diff(A, e, m, v), v; atol = atol)
