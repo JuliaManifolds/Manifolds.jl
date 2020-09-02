@@ -415,6 +415,7 @@ end
         m_pts::AbstractVector,
         v_pts = [];
         atol = 1e-10,
+        atol_inverse = nothing,
         test_optimal_alignment = false,
         test_mutating = true,
         test_diff = false,
@@ -430,6 +431,7 @@ function ManifoldTests.test_action(
     m_pts::AbstractVector,
     v_pts = [];
     atol = 1e-10,
+    atol_inverse = nothing,
     test_optimal_alignment = false,
     test_mutating = true,
     test_diff = false,
@@ -563,16 +565,32 @@ function ManifoldTests.test_action(
         end
 
         Test.Test.@testset "Inverse" begin
-            for a in a_pts
-                ainv = inv(G, a)
-                Test.@test isapprox(G, compose(A, a, ainv), e)
-                Test.@test isapprox(G, compose(A, ainv, a), e)
-                Test.@test isapprox(G, e, compose(A, a, ainv))
-                Test.@test isapprox(G, e, compose(A, ainv, a))
+            # Test stdlib doesn't accept splatting in `isapprox` tests
+            if atol_inverse === nothing
+                for a in a_pts
+                    ainv = inv(G, a)
+                    Test.@test isapprox(G, compose(A, a, ainv), e)
+                    Test.@test isapprox(G, compose(A, ainv, a), e)
+                    Test.@test isapprox(G, e, compose(A, a, ainv))
+                    Test.@test isapprox(G, e, compose(A, ainv, a))
 
-                for m in m_pts
-                    Test.@test isapprox(M, apply(A, a, m), inverse_apply(A, ainv, m))
-                    Test.@test isapprox(M, apply(A, ainv, m), inverse_apply(A, a, m))
+                    for m in m_pts
+                        Test.@test isapprox(M, apply(A, a, m), inverse_apply(A, ainv, m))
+                        Test.@test isapprox(M, apply(A, ainv, m), inverse_apply(A, a, m))
+                    end
+                end
+            else
+                for a in a_pts
+                    ainv = inv(G, a)
+                    Test.@test isapprox(G, compose(A, a, ainv), e; atol = atol_inverse)
+                    Test.@test isapprox(G, compose(A, ainv, a), e; atol = atol_inverse)
+                    Test.@test isapprox(G, e, compose(A, a, ainv); atol = atol_inverse)
+                    Test.@test isapprox(G, e, compose(A, ainv, a); atol = atol_inverse)
+
+                    for m in m_pts
+                        Test.@test isapprox(M, apply(A, a, m), inverse_apply(A, ainv, m); atol = atol_inverse)
+                        Test.@test isapprox(M, apply(A, ainv, m), inverse_apply(A, a, m); atol = atol_inverse)
+                    end
                 end
             end
         end
