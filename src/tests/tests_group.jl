@@ -573,8 +573,18 @@ function ManifoldTests.test_action(
                 Test.@test isapprox(G, e, compose(A, ainv, a); atol = atol)
 
                 for m in m_pts
-                    Test.@test isapprox(M, apply(A, a, m), inverse_apply(A, ainv, m); atol = atol)
-                    Test.@test isapprox(M, apply(A, ainv, m), inverse_apply(A, a, m); atol = atol)
+                    Test.@test isapprox(
+                        M,
+                        apply(A, a, m),
+                        inverse_apply(A, ainv, m);
+                        atol = atol,
+                    )
+                    Test.@test isapprox(
+                        M,
+                        apply(A, ainv, m),
+                        inverse_apply(A, a, m);
+                        atol = atol,
+                    )
                 end
             end
         end
