@@ -123,6 +123,15 @@ and higher order arrays, the matrix and ternsor Frobenius norm, respectively.
 """
 distance(::Euclidean, p, q) = norm(p .- q)
 
+"""
+    embed(M::Euclidean, p)
+
+Embed the point `p` in `M`. Equivalent to an identity map.
+"""
+embed(::Euclidean, p)
+
+embed!(::Euclidean, q, p) = copyto!(q, p)
+
 @doc raw"""
     exp(M::Euclidean, p, X)
 
