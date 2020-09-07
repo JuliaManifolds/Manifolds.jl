@@ -472,6 +472,11 @@ function get_vectors(M::VectorBundleFibers, p, B::CachedBasis)
 end
 Base.@propagate_inbounds Base.getindex(x::FVector, i) = getindex(x.data, i)
 
+function Base.getproperty(TpM::TangentSpaceAtPoint, sym::Symbol)
+    (sym === :manifold) && return getproperty(TpM.fiber, sym)
+    return getfield(TpM,sym)
+end
+
 """
     inner(B::VectorBundleFibers, p, X, Y)
 
@@ -701,7 +706,7 @@ end
 function Base.show(io::IO, fiber::VectorBundleFibers)
     return print(io, "VectorBundleFibers($(fiber.fiber), $(fiber.manifold))")
 end
-function Base.show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
+function Base.show(io::IO, ::MIME"text/plain", vs::VectorSpaceAtPoint)
     summary(io, vs)
     println(io, "\nFiber:")
     pre = " "
@@ -710,6 +715,13 @@ function Base.show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
     println(io, pre, sf)
     println(io, "Base point:")
     sp = sprint(show, "text/plain", vs.point; context = io, sizehint = 0)
+    sp = replace(sp, '\n' => "\n$(pre)")
+    return print(io, pre, sp)
+end
+function Base.show(io::IO, ::MIME"text/plain", TpM::TangentSpaceAtPoint)
+    println(io, "Tangent space to the manifold $(TpM.manifold) at point:")
+    pre = " "
+    sp = sprint(show, "text/plain", TpM.point; context = io, sizehint = 0)
     sp = replace(sp, '\n' => "\n$(pre)")
     return print(io, pre, sp)
 end

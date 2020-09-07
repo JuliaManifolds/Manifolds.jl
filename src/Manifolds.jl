@@ -51,7 +51,7 @@ import ManifoldsBase:
     vector_transport_to!,
     zero_tangent_vector,
     zero_tangent_vector!
-import Base: isapprox, length, isempty, showerror
+import Base: in, getproperty, isapprox, isempty, length, setproperty!, showerror
 
 using Base.Iterators: repeated
 using Distributions
@@ -165,8 +165,28 @@ include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
 
-
 include("tests/ManifoldTests.jl")
+
+@doc raw"""
+    p ∈ M
+    Base.in(p,M; kwargs...)
+
+Check, whether a point `p` is a valid point (i.e. in) a [`Manifold`](@ref) `M`.
+This method employs [`is_manifold_point`](@ref) deaticating the error throwing option.
+"""
+Base.in(p, M::Manifold; kwargs...) = is_manifold_point(M,p,false; kwargs...)
+
+@doc raw"""
+    X ∈ TangentSpaceAtPoint(M,p)
+    Base.in(p, TpM::TangentSpaceAtPoint; kwargs...)
+
+Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
+the [`TangentSpaceAtPoint`](@ref) at `p` on the [`Manifold`](@ref) `M`.
+This method uses [`is_tangent_vector`](@ref) deactivating the error throw option.
+"""
+function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
+    return is_tangent_vector(TpM.manifold,TpM.point,X,false; kwargs...)
+end
 
 function __init__()
     @require FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41" begin
@@ -316,6 +336,7 @@ export ×,
     geodesic,
     get_component,
     get_embedding,
+    getproperty,
     hat,
     hat!,
     incident_log,
@@ -332,6 +353,7 @@ export ×,
     is_manifold_point,
     is_tangent_vector,
     isapprox,
+    in,
     inner,
     kurtosis,
     local_metric,
@@ -367,6 +389,7 @@ export ×,
     retract!,
     riemann_tensor,
     set_component!,
+    setproperty!,
     sharp,
     sharp!,
     shortest_geodesic,
