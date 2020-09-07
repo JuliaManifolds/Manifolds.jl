@@ -207,6 +207,7 @@ function __init__()
     @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
         using .Test: Test
         include("tests/tests_general.jl")
+        include("tests/tests_group.jl")
         @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
             include("tests/tests_forwarddiff.jl")
         end

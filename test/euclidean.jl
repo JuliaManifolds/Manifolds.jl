@@ -15,6 +15,7 @@ include("utils.jl")
     @test det_local_metric(EM, p) == one(eltype(p))
     @test log_local_metric_density(EM, p) == zero(eltype(p))
     @test project!(E, p, p) == p
+    @test embed!(E, p, p) == p
     @test manifold_dimension(Ec) == 2 * manifold_dimension(E)
     X = zeros(3)
     X[1] = 1.0

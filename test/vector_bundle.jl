@@ -119,7 +119,6 @@ struct TestVectorSpaceType <: VectorSpaceType end
         sp = replace(sp, '\n' => "\n ")
         t_xs_test = "Tangent space to the manifold $(M) at point:\n $(sp)"
         @test t_xs == t_xs_test
-
         @test base_manifold(t_x) == M
         @test base_manifold(ct_x) == M
         @test t_x.fiber.manifold == M
