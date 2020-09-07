@@ -474,7 +474,7 @@ Base.@propagate_inbounds Base.getindex(x::FVector, i) = getindex(x.data, i)
 
 function Base.getproperty(TpM::TangentSpaceAtPoint, sym::Symbol)
     (sym === :manifold) && return getproperty(TpM.fiber, sym)
-    return getfield(TpM,sym)
+    return getfield(TpM, sym)
 end
 
 """

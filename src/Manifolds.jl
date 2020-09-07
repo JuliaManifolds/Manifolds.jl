@@ -174,7 +174,7 @@ include("tests/ManifoldTests.jl")
 Check, whether a point `p` is a valid point (i.e. in) a [`Manifold`](@ref) `M`.
 This method employs [`is_manifold_point`](@ref) deaticating the error throwing option.
 """
-Base.in(p, M::Manifold; kwargs...) = is_manifold_point(M,p,false; kwargs...)
+Base.in(p, M::Manifold; kwargs...) = is_manifold_point(M, p, false; kwargs...)
 
 @doc raw"""
     X ∈ TangentSpaceAtPoint(M,p)
@@ -185,7 +185,7 @@ the [`TangentSpaceAtPoint`](@ref) at `p` on the [`Manifold`](@ref) `M`.
 This method uses [`is_tangent_vector`](@ref) deactivating the error throw option.
 """
 function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
-    return is_tangent_vector(TpM.manifold,TpM.point,X,false; kwargs...)
+    return is_tangent_vector(TpM.manifold, TpM.point, X, false; kwargs...)
 end
 
 function __init__()
