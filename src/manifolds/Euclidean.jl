@@ -133,6 +133,39 @@ embed(::Euclidean, p)
 embed!(::Euclidean, q, p) = copyto!(q, p)
 
 @doc raw"""
+    embed(::EmbeddedManifold{𝔽,Euclidean{𝔽},Euclidean{𝔽}}, p)
+
+A [`Euclidean`](@ref) `M` manifold can be embedded into a [`Euclidean`](@ref) `N`
+if the length of the array dimension and representation size is elementwise less or equal.
+The remainder is filles with zeros for sure.
+"""
+function decorator_transparent_dispatch(
+    ::typeof(embed!),
+    ::EmbeddedManifold{𝔽,Euclidean{m,𝔽},Euclidean{n,𝔽}},
+    args...,
+) where {m,n,𝔽}
+    return Val(:parent)
+end
+function embed!(M::EmbeddedManifold{𝔽,Euclidean{𝔽},Euclidean{𝔽}}, q, p) where {𝔽}
+    n = representation_size(M.manifold)
+    ln = length(n)
+    m = representation_size(M.embedding)
+    lm = length(m)
+    (length(n) > length(m)) &&
+        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m)."))
+    any(n[1:lm] .> m) &&
+        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m))."))
+    # put p into q
+    q[[1:ind_n for ind_n in n]..., ones(lm - ln)...] .= p
+    # set remaining entries to zero
+    q[
+        [n[i] == m[i] ? (1:n[i]) : ((n[i] + 1):m[i]) for i in 1:lm]...,
+        [1:n[i] for i in (lm + 1):ln]...,
+    ] .= zero(eltype(p))
+    return q
+end
+
+@doc raw"""
     exp(M::Euclidean, p, X)
 
 Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `p` in direction
