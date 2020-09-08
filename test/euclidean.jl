@@ -147,4 +147,26 @@ include("utils.jl")
         @test ℍ^2 === Euclidean(2; field = ℍ)
         @test ℍ^(2, 3) === Euclidean(2, 3; field = ℍ)
     end
+
+    @testset "Embeddings into larger Euclidean Manifolds" begin
+        M = Euclidean(3,3)
+        N = Euclidean(4,4)
+        O = EmbeddedManifold(M,N)
+        # first test with same length of sizes
+        p = ones(3,3)
+        q = zeros(4,4)
+        qT = zeros(4,4)
+        qT[1:3,1:3] .= 1.
+        embed!(O,q,p)
+        @test norm(qT-q) == 0
+        # test with different sizes, check that it only fills first element
+        q2 = zeros(4,4,3)
+        q2T = zeros(4,4,3)
+        q2T[1:3,1:3,1] .= 1.
+        embed!(O,q2,p)
+        @test norm(q2T-q2) == 0
+        # wrong size error checks
+        @test_throws DomainError embed!(O,zeros(3,3),zeros(3,3,5))
+        @test_throws DomainError embed!(O,zeros(3,3),zeros(4,4))
+    end
 end

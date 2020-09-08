@@ -133,35 +133,31 @@ embed(::Euclidean, p)
 embed!(::Euclidean, q, p) = copyto!(q, p)
 
 @doc raw"""
-    embed(::EmbeddedManifold{𝔽,Euclidean{𝔽},Euclidean{𝔽}}, p)
+    embed(::EmbeddedManifold{𝔽,Euclidean{𝔽},Euclidean{𝔽},ET}, p)
 
 A [`Euclidean`](@ref) `M` manifold can be embedded into a [`Euclidean`](@ref) `N`
 if the length of the array dimension and representation size is elementwise less or equal.
 The remainder is filles with zeros for sure.
 """
-function decorator_transparent_dispatch(
-    ::typeof(embed!),
-    ::EmbeddedManifold{𝔽,Euclidean{m,𝔽},Euclidean{n,𝔽}},
-    args...,
-) where {m,n,𝔽}
-    return Val(:parent)
+function embed(M::EmbeddedManifold{𝔽, Euclidean{n,𝔽}, Euclidean{m,𝔽},ET}, p) where {n,m,𝔽,ET}
+    q = allocate(p, representation_size(M.embedding))
+    embed!(M, q, p)
+    return q
 end
-function embed!(M::EmbeddedManifold{𝔽,Euclidean{𝔽},Euclidean{𝔽}}, q, p) where {𝔽}
-    n = representation_size(M.manifold)
+
+function embed!(M::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽},ET}, q, p) where {nL, mL, 𝔽, ET}
+    n = size(p)
     ln = length(n)
-    m = representation_size(M.embedding)
+    m = size(q)
     lm = length(m)
     (length(n) > length(m)) &&
         throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m)."))
-    any(n[1:lm] .> m) &&
+    any(n .> m[1:ln]) &&
         throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m))."))
     # put p into q
-    q[[1:ind_n for ind_n in n]..., ones(lm - ln)...] .= p
-    # set remaining entries to zero
-    q[
-        [n[i] == m[i] ? (1:n[i]) : ((n[i] + 1):m[i]) for i in 1:lm]...,
-        [1:n[i] for i in (lm + 1):ln]...,
-    ] .= zero(eltype(p))
+    fill!(q, 0.0)
+    # fill „top left edge“ of q with p.
+    q[[1:ind_n for ind_n in n]..., ones(Int,lm - ln)...] .= p
     return q
 end
 
@@ -176,7 +172,7 @@ Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `p` in 
 """
 exp(::Euclidean, ::Any...)
 
-exp!(M::Euclidean, q, p, X) = (q .= p .+ X)
+exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 
 """
     flat(M::Euclidean, p, X)
