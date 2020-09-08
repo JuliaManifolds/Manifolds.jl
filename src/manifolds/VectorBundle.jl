@@ -479,10 +479,7 @@ function get_vectors(M::VectorBundleFibers, p, B::CachedBasis)
 end
 Base.@propagate_inbounds Base.getindex(x::FVector, i) = getindex(x.data, i)
 
-function Base.getproperty(TpM::TangentSpaceAtPoint, sym::Symbol)
-    (sym === :manifold) && return getproperty(TpM.fiber, sym)
-    return getfield(TpM, sym)
-end
+base_manifold(TpM::TangentSpaceAtPoint) = TpM.fiber.manifold
 
 """
     inner(B::VectorBundleFibers, p, X, Y)
@@ -726,7 +723,7 @@ function Base.show(io::IO, ::MIME"text/plain", vs::VectorSpaceAtPoint)
     return print(io, pre, sp)
 end
 function Base.show(io::IO, ::MIME"text/plain", TpM::TangentSpaceAtPoint)
-    println(io, "Tangent space to the manifold $(TpM.manifold) at point:")
+    println(io, "Tangent space to the manifold $(base_manifold(TpM)) at point:")
     pre = " "
     sp = sprint(show, "text/plain", TpM.point; context = io, sizehint = 0)
     sp = replace(sp, '\n' => "\n$(pre)")
@@ -765,7 +762,7 @@ Returns type of element of the array that will represent the result of
 function `f` for representing an operation with result in the vector space `fiber`
 for manifold `M` on given arguments (passed at a tuple).
 """
-function allocate_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where {N}
+function allocate_result_type(::VectorBundleFibers, f, args::NTuple{N,Any}) where {N}
     T = typeof(reduce(+, one(number_eltype(eti)) for eti in args))
     return T
 end
@@ -787,7 +784,7 @@ Determine the vector tranport used for [`exp`](@ref exp(::VectorBundle, ::Any...
 [`log`](@ref log(::VectorBundle, ::Any...)) maps on a vector bundle with vector space type
 `fiber` and manifold `M`.
 """
-vector_bundle_transport(fiber::VectorSpaceType, M::Manifold) = ParallelTransport()
+vector_bundle_transport(::VectorSpaceType, ::Manifold) = ParallelTransport()
 
 """
     vector_space_dimension(B::VectorBundleFibers)

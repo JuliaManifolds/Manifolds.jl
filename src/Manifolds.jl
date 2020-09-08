@@ -51,7 +51,7 @@ import ManifoldsBase:
     vector_transport_to!,
     zero_tangent_vector,
     zero_tangent_vector!
-import Base: in, getproperty, isapprox, isempty, length, showerror
+import Base: in, isapprox, isempty, length, showerror
 
 using Base.Iterators: repeated
 using Distributions
@@ -185,7 +185,7 @@ the [`TangentSpaceAtPoint`](@ref) at `p` on the [`Manifold`](@ref) `M`.
 This method uses [`is_tangent_vector`](@ref) deactivating the error throw option.
 """
 function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
-    return is_tangent_vector(TpM.manifold, TpM.point, X, false; kwargs...)
+    return is_tangent_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
 end
 
 function __init__()
