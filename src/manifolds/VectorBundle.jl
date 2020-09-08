@@ -89,9 +89,16 @@ const TangentSpaceAtPoint{M} =
     TangentSpaceAtPoint(M::Manifold, p)
 
 Return an object of type [`VectorSpaceAtPoint`](@ref) representing tangent
-space at `p`.
+space at `p` on the [`Manifold`](@ref) `M`.
 """
 TangentSpaceAtPoint(M::Manifold, p) = VectorSpaceAtPoint(TangentBundleFibers(M), p)
+
+"""
+    TangentSpace(M::Manifold, p)
+
+Return a [`TangentSpaceAtPoint`](@ref) representing tangent space at `p` on the [`Manifold`](@ref) `M`.
+"""
+TangentSpace(M::Manifold, p) = VectorSpaceAtPoint(TangentBundleFibers(M), p)
 
 const CotangentSpaceAtPoint{M} =
     VectorSpaceAtPoint{CotangentBundleFibers{M}} where {M<:Manifold}
