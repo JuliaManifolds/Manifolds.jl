@@ -139,13 +139,17 @@ A [`Euclidean`](@ref) `M` manifold can be embedded into a [`Euclidean`](@ref) `N
 if the length of the array dimension and representation size is elementwise less or equal.
 The remainder is filles with zeros for sure.
 """
-function embed(M::EmbeddedManifold{𝔽, Euclidean{n,𝔽}, Euclidean{m,𝔽},ET}, p) where {n,m,𝔽,ET}
+function embed(M::EmbeddedManifold{𝔽,Euclidean{n,𝔽},Euclidean{m,𝔽},ET}, p) where {n,m,𝔽,ET}
     q = allocate(p, representation_size(M.embedding))
     embed!(M, q, p)
     return q
 end
 
-function embed!(M::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽},ET}, q, p) where {nL, mL, 𝔽, ET}
+function embed!(
+    M::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽},ET},
+    q,
+    p,
+) where {nL,mL,𝔽,ET}
     n = size(p)
     ln = length(n)
     m = size(q)
@@ -157,7 +161,7 @@ function embed!(M::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽},E
     # put p into q
     fill!(q, 0.0)
     # fill „top left edge“ of q with p.
-    q[[1:ind_n for ind_n in n]..., ones(Int,lm - ln)...] .= p
+    q[[1:ind_n for ind_n in n]..., ones(Int, lm - ln)...] .= p
     return q
 end
 
