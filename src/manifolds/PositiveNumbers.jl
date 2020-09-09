@@ -1,8 +1,8 @@
 @doc raw"""
     PositiveNumbers <: Manifold{ℝ}
 
-The hyperbolic manifold of positive numbers $H^1$ is a the hyperbolic manifold either
-represented by just positive numbers or the [Poiincaré half-plane model](https://en.wikipedia.org/wiki/Poincaré_half-plane_model).
+The hyperbolic manifold of positive numbers $H^1$ is a the hyperbolic manifold represented
+by just positive numbers.
 
 # Constructor
 
@@ -47,7 +47,7 @@ function check_manifold_point(M::PositiveNumbers, p; kwargs...)
     if p <= 0
         return DomainError(
             p,
-            "The point $(p) does not lie on $(M), since its is nonpositive.",
+            "The point $(p) does not lie on $(M), since it is nonpositive.",
         )
     end
     return nothing
@@ -91,7 +91,7 @@ Compute the exponential map on the [`PositiveNumbers`](@ref) `M`.
 """
 Base.exp(::PositiveNumbers, p::Real, X::Real) = p * exp(X / p)
 
-flat(::PositiveNumbers, ::Number, X::TFVector) = FVector(CotangentSpace, X.data)
+flat(::PositiveNumbers, ::Real, X::TFVector) = FVector(CotangentSpace, X.data)
 
 @doc raw"""
     injectivity_radius(M::PositiveNumbers[, p])
@@ -124,15 +124,10 @@ g_p(X,Y) = \frac{XY}{p^2}.
 inner(::PositiveNumbers, ::Any...)
 @inline inner(::PositiveNumbers, p::Real, X::Real, Y::Real) = X * Y / p^2
 
-function inverse_retract(M::PositiveNumbers, x::Number, y::Number)
+function inverse_retract(M::PositiveNumbers, x, y)
     return inverse_retract(M, x, y, LogarithmicInverseRetraction())
 end
-function inverse_retract(
-    M::PositiveNumbers,
-    x::Number,
-    y::Number,
-    ::LogarithmicInverseRetraction,
-)
+function inverse_retract(M::PositiveNumbers, x, y, ::LogarithmicInverseRetraction)
     return log(M, x, y)
 end
 
@@ -158,7 +153,7 @@ i.e. of the 1-dimensional hyperbolic space,
 """
 manifold_dimension(::PositiveNumbers) = 1
 
-mid_point(M::PositiveNumbers, p1, p2) = exp(M, p1, 0.5 * log(M, p1, p2))
+mid_point(M::PositiveNumbers, p1, p2) = exp(M, p1, log(M, p1, p2) / 2)
 
 @inline LinearAlgebra.norm(::PositiveNumbers, p, X) = abs(X / p)
 
@@ -175,7 +170,7 @@ retract(M::PositiveNumbers, p, q, ::ExponentialRetraction) = exp(M, p, q)
 
 representation_size(::PositiveNumbers) = ()
 
-sharp(::PositiveNumbers, ::Number, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
+sharp(::PositiveNumbers, ::Real, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
 
 Base.show(io::IO, ::PositiveNumbers) = print(io, "PositiveNumbers()")
 
@@ -212,13 +207,13 @@ end
 
 function vector_transport_direction(
     M::PositiveNumbers,
-    p::Number,
-    X::Number,
-    Y::Number,
+    p,
+    X,
+    Y,
     m::AbstractVectorTransportMethod,
 )
     q = exp(M, p, Y)
     return vector_transport_to(M, p, X, q, m)
 end
 
-zero_tangent_vector(::PositiveNumbers, p::Number) = zero(p)
+zero_tangent_vector(::PositiveNumbers, p::Real) = zero(p)
