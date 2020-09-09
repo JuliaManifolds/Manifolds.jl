@@ -42,4 +42,21 @@ include("utils.jl")
             )
         end
     end
+    @testset "Power of Positive Numbers" begin
+        M2 = PositiveVectors(2)
+        for T in types
+            pts2 = [convert.(Ref(T), v) for v in [[1.0, 1.1], [3.0, 3.3], [2.0, 2.2]]]
+            test_manifold(
+                M2,
+                pts2,
+                test_forward_diff = false,
+                test_reverse_diff = false,
+                test_vector_spaces = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                test_vee_hat = false,
+            )
+        end
+    end
 end

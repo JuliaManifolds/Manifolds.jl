@@ -44,7 +44,7 @@ PositiveArrays(n::Vararg{Int,I}) where {I} = PositiveNumbers()^(n)
 Check whether `p` is a point on the [`PositiveNumbers`](@ref) `M`, i.e. $p>0$.
 """
 function check_manifold_point(M::PositiveNumbers, p; kwargs...)
-    if p <= 0
+    if any(p .<= 0.0)
         return DomainError(
             p,
             "The point $(p) does not lie on $(M), since it is nonpositive.",
@@ -79,7 +79,10 @@ Compute the distance on the [`PositiveNumbers`](@ref) `M`, which is
 d(p,q) = \Bigl\lvert \log \frac{p}{q} \Bigr\rvert = \lvert \log p - \log q\rvert.
 ````
 """
+distacne(::PositiveNumbers, ::Any, ::Any)
+
 distance(::PositiveNumbers, p::Real, q::Real) = abs(log(p / q))
+distacne(::PositiveNumbers, p, q) = sum(abs.(log.(p ./ q)))
 
 @doc raw"""
     exp(M::PositiveNumbers, p, X)
@@ -89,9 +92,15 @@ Compute the exponential map on the [`PositiveNumbers`](@ref) `M`.
 \exp_p X = p\operatorname{exp}(X/p).
 ```
 """
+Base.exp(::PositiveNumbers, ::Any, ::Any)
+
 Base.exp(::PositiveNumbers, p::Real, X::Real) = p * exp(X / p)
 
+exp!(::PositiveNumbers, q, p, X) = (q .= p .* exp.(X ./ p))
+
 flat(::PositiveNumbers, ::Real, X::TFVector) = FVector(CotangentSpace, X.data)
+
+flat!(::PositiveNumbers, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 @doc raw"""
     injectivity_radius(M::PositiveNumbers[, p])
@@ -123,7 +132,7 @@ g_p(X,Y) = \frac{XY}{p^2}.
 """
 inner(::PositiveNumbers, ::Any...)
 @inline inner(::PositiveNumbers, p::Real, X::Real, Y::Real) = X * Y / p^2
-
+@inline inner(::PositiveNumbers, p, X, Y) = sum((X .* Y) ./ (p .^ 2))
 function inverse_retract(M::PositiveNumbers, x, y)
     return inverse_retract(M, x, y, LogarithmicInverseRetraction())
 end
@@ -139,7 +148,10 @@ Compute the logarithmic map on the [`PositiveNumbers`](@ref) `M`.
 \log_p q = p\log\frac{q}{p}.
 ````
 """
+Base.log(::PositiveNumbers, ::Any, ::Any)
 Base.log(::PositiveNumbers, p::Real, q::Real) = p * log(q / p)
+
+log!(::PositiveNumbers, X, p, q) = (X .= p .* log.(q ./ p))
 
 @doc raw"""
     manifold_dimension(M::PositiveNumbers)
@@ -155,7 +167,7 @@ manifold_dimension(::PositiveNumbers) = 1
 
 mid_point(M::PositiveNumbers, p1, p2) = exp(M, p1, log(M, p1, p2) / 2)
 
-@inline LinearAlgebra.norm(::PositiveNumbers, p, X) = abs(X / p)
+@inline LinearAlgebra.norm(::PositiveNumbers, p, X) = sum(abs.(X ./ p))
 
 @doc raw"""
     project(M::PositiveNumbers, p, X)
@@ -163,7 +175,10 @@ mid_point(M::PositiveNumbers, p1, p2) = exp(M, p1, log(M, p1, p2) / 2)
 Project a value `X` onto the tangent space of the point `p` on the [`PositiveNumbers`](@ref) `M`,
 which is just the identity.
 """
+project(::PositiveNumbers, ::Any, ::Any)
 project(::PositiveNumbers, ::Real, X::Real) = X
+
+project!(::PositiveNumbers, Y, p, X) = (Y .= X)
 
 retract(M::PositiveNumbers, p, q) = retract(M, p, q, ExponentialRetraction())
 retract(M::PositiveNumbers, p, q, ::ExponentialRetraction) = exp(M, p, q)
@@ -171,6 +186,8 @@ retract(M::PositiveNumbers, p, q, ::ExponentialRetraction) = exp(M, p, q)
 representation_size(::PositiveNumbers) = ()
 
 sharp(::PositiveNumbers, ::Real, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
+
+sharp!(::PositiveNumbers, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 Base.show(io::IO, ::PositiveNumbers) = print(io, "PositiveNumbers()")
 
@@ -205,6 +222,10 @@ function vector_transport_to(
     return X * q / p
 end
 
+function vector_transport_to!(::PositiveNumbers, Y, p, X, q, ::ParallelTransport)
+    return (Y .= X .* q ./ p)
+end
+
 function vector_transport_direction(
     M::PositiveNumbers,
     p,
@@ -217,3 +238,4 @@ function vector_transport_direction(
 end
 
 zero_tangent_vector(::PositiveNumbers, p::Real) = zero(p)
+zero_tangent_vector!(::PositiveNumbers, X, p) = fill!(X, 0)
