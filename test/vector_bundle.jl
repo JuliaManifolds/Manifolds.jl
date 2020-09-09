@@ -134,7 +134,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         v_x = VectorSpaceAtPoint(fiber, x)
         v_xs = sprint(show, "text/plain", v_x)
         fiber_s = sprint(show, "text/plain", fiber)
-        v_xs_test = "VectorSpaceAtPoint{VectorBundleFibers{TestVectorSpaceType,Sphere{2,ℝ}},Array{Float64,1}}\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
+        v_xs_test = "VectorSpaceAtPoint{VectorBundleFibers{TestVectorSpaceType,$(typeof(M))},$(typeof(x))}\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
         @test v_xs == v_xs_test
     end
 
