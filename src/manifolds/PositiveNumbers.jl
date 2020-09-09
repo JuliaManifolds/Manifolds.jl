@@ -91,11 +91,7 @@ Compute the exponential map on the [`PositiveNumbers`](@ref) `M`.
 """
 Base.exp(::PositiveNumbers, p::Real, X::Real) = p * exp(X / p)
 
-exp!(::PositiveNumbers, q, p, X) = (q .= p * exp(X / p))
-
 flat(::PositiveNumbers, ::Number, X::TFVector) = FVector(CotangentSpace, X.data)
-
-flat!(::PositiveNumbers, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 @doc raw"""
     injectivity_radius(M::PositiveNumbers[, p])
@@ -150,8 +146,6 @@ Compute the logarithmic map on the [`PositiveNumbers`](@ref) `M`.
 """
 Base.log(::PositiveNumbers, p::Real, q::Real) = p * log(q / p)
 
-log!(::PositiveNumbers, X, p, q) = (X .= p * log(q / p))
-
 @doc raw"""
     manifold_dimension(M::PositiveNumbers)
 
@@ -182,8 +176,6 @@ retract(M::PositiveNumbers, p, q, ::ExponentialRetraction) = exp(M, p, q)
 representation_size(::PositiveNumbers) = ()
 
 sharp(::PositiveNumbers, ::Number, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
-
-sharp!(::PositiveNumbers, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 Base.show(io::IO, ::PositiveNumbers) = print(io, "PositiveNumbers()")
 
@@ -217,7 +209,6 @@ function vector_transport_to(
 )
     return X * q / p
 end
-vector_transport_to!(::PositiveNumbers, Y, p, X, q, ::ParallelTransport) = (Y .= X * q / p)
 
 function vector_transport_direction(
     M::PositiveNumbers,
@@ -231,4 +222,3 @@ function vector_transport_direction(
 end
 
 zero_tangent_vector(::PositiveNumbers, p::Number) = zero(p)
-zero_tangent_vector!(::PositiveNumbers, X, p) = fill!(X, 0)

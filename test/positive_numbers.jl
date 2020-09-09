@@ -12,15 +12,16 @@ include("utils.jl")
         @test !is_manifold_point(M, -1.0)
         @test_throws DomainError is_manifold_point(M, -1.0, true)
         @test is_tangent_vector(M, 1.0, 0.0; check_base_point = false)
-        @test flat(M, 0.0, FVector(TangentSpace, 1.0)) == FVector(CotangentSpace, 1.0)
-        @test sharp(M, 0.0, FVector(CotangentSpace, 1.0)) == FVector(TangentSpace, 1.0)
+        @test flat(M, 1.0, FVector(TangentSpace, 1.0)) == FVector(CotangentSpace, 1.0)
+        @test sharp(M, 1.0, FVector(CotangentSpace, 1.0)) == FVector(TangentSpace, 1.0)
         @test vector_transport_to(M, 1.0, 3.0, 2.0, ParallelTransport()) == 6.0
         @test retract(M, 1.0, 1.0) == exp(M, 1.0, 1.0)
         @test isinf(injectivity_radius(M))
-        @test isinf(injectivity_radius(M, Ref(-2.0)))
-        @test isinf(injectivity_radius(M, Ref(-2.0), ExponentialRetraction()))
+        @test isinf(injectivity_radius(M, -2.0))
+        @test isinf(injectivity_radius(M, -2.0, ExponentialRetraction()))
         @test isinf(injectivity_radius(M, ExponentialRetraction()))
         @test project(M, 1.5, 1.0) == 1.0
+        @test zero_tangent_vector(M,1.0) == 0.0
     end
     types = [Float64]
     TEST_FLOAT32 && push!(types, Float32)
