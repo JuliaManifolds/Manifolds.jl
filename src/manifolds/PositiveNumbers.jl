@@ -1,44 +1,53 @@
 @doc raw"""
-    PositiveNumbers{𝔽} <: Manifold{𝔽}
+    PositiveNumbers <: Manifold{ℝ}
 
-The hyprebolic manifold of positive numbers $H^1$ is a the hyperbolic manifold either
+The hyperbolic manifold of positive numbers $H^1$ is a the hyperbolic manifold either
 represented by just positive numbers or the [Poiincaré half-plane model](https://en.wikipedia.org/wiki/Poincaré_half-plane_model).
 
 # Constructor
 
-    PositiveNumbers(𝔽=ℝ)
+    PositiveNumbers()
 
-Generate the `ℝ`-valued hyperbolic model represented by positive numbers, which
-alternatively can be set to use the half-plan model `𝔽=ℂ` of complex numbers with positive
-imaginary part. The real-valued case can also be performed in 1-element arrays using [`SymmetricPositiveDefinite`](@ref)(1)
+Generate the `ℝ`-valued hyperbolic model represented by positive positive numbers.
+To use this with arrays (1-element arrays),
+please use [`SymmetricPositiveDefinite`](@ref)`(1)`.
 """
-struct PositiveNumbers{𝔽} <: Manifold{𝔽} end
+struct PositiveNumbers <: Manifold{ℝ} end
 
-PositiveNumbers(𝔽::AbstractNumbers = ℝ) = PositiveNumbers{𝔽}()
+"""
+    PositiveVectors(n)
+
+Generate the manifold of vectors with positive entries.
+This manifold is modeled as a [`PowerManifold`](@ref) of [`PositiveNumbers`](@ref).
+"""
+PositiveVectors(n::Integer) = PositiveNumbers()^n
+
+"""
+    PositiveMatrices(m,n)
+
+Generate the manifold of matrices with positive entries.
+This manifold is modeled as a [`PowerManifold`](@ref) of [`PositiveNumbers`](@ref).
+"""
+PositiveMatrices(n::Integer, m::Integer) = PositiveNumbers()^(n, m)
+
+"""
+    PositiveArrays(n₁,n₂,...,nᵢ)
+
+Generate the manifold of `i`-dimensional arrays with positive entries.
+This manifold is modeled as a [`PowerManifold`](@ref) of [`PositiveNumbers`](@ref).
+"""
+PositiveArrays(n::Vararg{Int,I}) where {I} = PositiveNumbers()^(n)
 
 @doc raw"""
     check_manifold_point(M::PositiveNumbers, p)
 
-Check whether `p` is a point on the [`PositiveNumbers`](@ref) `M`.
-For the real-valued case, `x` is an angle and hence it checks that $p  ∈ [-π,π)$.
-for the complex-valued case, it is a unit number, $p ∈ ℂ$ with $\lvert p \rvert = 1$.
+Check whether `p` is a point on the [`PositiveNumbers`](@ref) `M`, i.e. $p>0$.
 """
-check_manifold_point(::PositiveNumbers, ::Any...)
-
-function check_manifold_point(M::PositiveNumbers{ℝ}, p; kwargs...)
+function check_manifold_point(M::PositiveNumbers, p; kwargs...)
     if p <= 0
         return DomainError(
             p,
             "The point $(p) does not lie on $(M), since its is nonpositive.",
-        )
-    end
-    return nothing
-end
-function check_manifold_point(M::PositiveNumbers{ℂ}, p; kwargs...)
-    if imag(p) <= 0
-        return DomainError(
-            imag(p),
-            "The point $(p) does not lie on the $(M) since its imaginary part is nonpositive.",
         )
     end
     return nothing
@@ -53,19 +62,10 @@ For the real-valued case represented by positive numbers, all `X` are valid, sin
 For the complex-valued case `X` [...]
 
 """
-check_tangent_vector(::PositiveNumbers, ::Any...; ::Any...)
-
-function check_tangent_vector(M::PositiveNumbers{ℝ}, p, X; check_base_point = true, kwargs...)
+function check_tangent_vector(M::PositiveNumbers, p, X; check_base_point = true, kwargs...)
     if check_base_point
         perr = check_manifold_point(M, p; kwargs...)
         return perr # if x is valid all v that are real numbers are valid
-    end
-    return nothing
-end
-function check_tangent_vector(M::PositiveNumbers{ℂ}, p, X; check_base_point = true, kwargs...)
-    if check_base_point
-        perr = check_manifold_point(M, p)
-        perr === nothing || return perr
     end
     return nothing
 end
@@ -74,34 +74,24 @@ end
     distance(M::PositiveNumbers, p, q)
 
 Compute the distance on the [`PositiveNumbers`](@ref) `M`, which is
-the absolute value of the symmetric remainder of `p` and `q` for the real-valued
-case and the angle between both complex numbers in the Gaussian plane for the
-complex-valued case.
+
+````math
+d(p,q) = \Bigl\lvert \log \frac{p}{q} \Bigr\rvert = \lvert \log p - \log q\rvert.
+````
 """
-distance(::PositiveNumbers, ::Any...)
-distance(::PositiveNumbers{ℝ}, p::Real, q::Real) = abs(log(p)-log(q))
-function distance(::PositiveNumbers{ℂ}, p::Complex, q::Complex)
-    return acosh(1 + ( (real(q)-real(p))^2 + (imag(q)-imag(p))^2)/(2*imag(q)*imag(p)) )
-end
+distance(::PositiveNumbers, p::Real, q::Real) = abs(log(p / q))
 
 @doc raw"""
     exp(M::PositiveNumbers, p, X)
 
-Compute the exponential map on the [`PositiveNumbers`](@ref).
+Compute the exponential map on the [`PositiveNumbers`](@ref) `M`.
 ```math
-\exp_p X = p\operatorname{exp}(X/p),
+\exp_p X = p\operatorname{exp}(X/p).
 ```
-
-For the complex-valued case, the same formula as for the [`Sphere`](@ref) $𝕊^1$ is applied to values in the
-complex plane.
 """
-exp(::PositiveNumbers, ::Any...)
-Base.exp(::PositiveNumbers{ℝ}, p::Real, X::Real) = p*exp(X/p)
-function Base.exp(M::PositiveNumbers{ℂ}, x::Number, v::Number)
-    error("Stil Todo")
-end
+Base.exp(::PositiveNumbers, p::Real, X::Real) = p * exp(X / p)
 
-exp!(::PositiveNumbers{ℝ}, q, p, X) = (q .= p*exp(X/p))
+exp!(::PositiveNumbers, q, p, X) = (q .= p * exp(X / p))
 
 flat(::PositiveNumbers, ::Number, X::TFVector) = FVector(CotangentSpace, X.data)
 
@@ -129,53 +119,54 @@ eval(
     inner(M::PositiveNumbers, p, X, Y)
 
 Compute the inner product of the two tangent vectors `X,Y` from the tangent plane at `p` on
-the [`PositiveNumbers`](@ref) `M` using the restriction of the metric from the embedding,
-i.e.
+the [`PositiveNumbers`](@ref) `M`, i.e.
 
 ````math
-g_p(X,Y) = X*Y
+g_p(X,Y) = \frac{XY}{p^2}.
 ````
-
-for the real case and
-
-````math
-g_p(X,Y) = Y^\mathrm{T}X
-````
-
-for the complex case interpreting complex numbers in the Gaussian plane.
 """
 inner(::PositiveNumbers, ::Any...)
-@inline inner(::PositiveNumbers{ℝ}, p, X, Y) = X * Y / p^2
-@inline inner(::PositiveNumbers{ℝ}, p::Real, X::Real, Y::Real) = X * Y / p^2
-@inline inner(::PositiveNumbers{ℂ}, p, X, Y) = (real(X)*real(Y) + imag(X)*imag(Y))/(imag(p)^2)
+@inline inner(::PositiveNumbers, p::Real, X::Real, Y::Real) = X * Y / p^2
+
+function inverse_retract(M::PositiveNumbers, x::Number, y::Number)
+    return inverse_retract(M, x, y, LogarithmicInverseRetraction())
+end
+function inverse_retract(
+    M::PositiveNumbers,
+    x::Number,
+    y::Number,
+    ::LogarithmicInverseRetraction,
+)
+    return log(M, x, y)
+end
 
 @doc raw"""
     log(M::PositiveNumbers, p, q)
 
 Compute the logarithmic map on the [`PositiveNumbers`](@ref) `M`.
 ````math
-\log_p q = p\log\frac{q}{p}
+\log_p q = p\log\frac{q}{p}.
 ````
 """
-log(::PositiveNumbers, ::Any...)
-Base.log(::PositiveNumbers{ℝ}, p::Real, q::Real) = p*log(q/p)
+Base.log(::PositiveNumbers, p::Real, q::Real) = p * log(q / p)
 
-log!(::PositiveNumbers{ℝ}, X, p, q) = (X .= p*log(q/p))
+log!(::PositiveNumbers, X, p, q) = (X .= p * log(q / p))
 
 @doc raw"""
     manifold_dimension(M::PositiveNumbers)
 
 Return the dimension of the [`PositiveNumbers`](@ref) `M`,
-i.e. $\dim(H^1) = 1$ for the real-valued case and
-$\dim(H^2) = 2$ for the half-plane model.
+i.e. of the 1-dimensional hyperbolic space,
+
+````math
+\dim(H^1) = 1
+````
 """
-manifold_dimension(::PositiveNumbers{ℝ}) = 1
-manifold_dimension(::PositiveNumbers{ℂ}) = 2
+manifold_dimension(::PositiveNumbers) = 1
 
-mid_point(M::PositiveNumbers{ℝ}, p1, p2) = exp(M, p1, 0.5 * log(M, p1, p2))
-mid_point(M::PositiveNumbers{ℂ}, p1::Complex, p2::Complex) = exp(M, p1, 0.5 * log(M, p1, p2))
+mid_point(M::PositiveNumbers, p1, p2) = exp(M, p1, 0.5 * log(M, p1, p2))
 
-@inline LinearAlgebra.norm(::PositiveNumbers, p, X) = sum(abs, X/p)
+@inline LinearAlgebra.norm(::PositiveNumbers, p, X) = abs(X / p)
 
 @doc raw"""
     project(M::PositiveNumbers, p, X)
@@ -183,12 +174,7 @@ mid_point(M::PositiveNumbers{ℂ}, p1::Complex, p2::Complex) = exp(M, p1, 0.5 * 
 Project a value `X` onto the tangent space of the point `p` on the [`PositiveNumbers`](@ref) `M`,
 which is just the identity.
 """
-project(::PositiveNumbers, ::Any, ::Any)
-project(::PositiveNumbers{ℝ}, ::Real, X::Real) = X
-project(::PositiveNumbers{ℂ}, ::Number, X::Number) = X
-
-project!(::PositiveNumbers{ℝ}, Y, p, X) = (Y .= X)
-project!(::PositiveNumbers{ℂ}, Y, p, X) = (Y .= X)
+project(::PositiveNumbers, ::Real, X::Real) = X
 
 retract(M::PositiveNumbers, p, q) = retract(M, p, q, ExponentialRetraction())
 retract(M::PositiveNumbers, p, q, ::ExponentialRetraction) = exp(M, p, q)
@@ -199,7 +185,17 @@ sharp(::PositiveNumbers, ::Number, ξ::CoTFVector) = FVector(TangentSpace, ξ.da
 
 sharp!(::PositiveNumbers, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
-Base.show(io::IO, ::PositiveNumbers{𝔽}) where {𝔽} = print(io, "PositiveNumbers($(𝔽))")
+Base.show(io::IO, ::PositiveNumbers) = print(io, "PositiveNumbers()")
+
+function Base.show(
+    io::IO,
+    ::PowerManifold{ℝ,PositiveNumbers,TSize,ArrayPowerRepresentation},
+) where {TSize}
+    s = [TSize.parameters...]
+    (length(s) == 1) && return print(io, "PositiveVectors($(s[1]))")
+    (length(s) == 2) && return print(io, "PositiveMatrices($(s[1]), $(s[2]))")
+    return print(io, "PositiveArrays($(join(s, ", ")))")
+end
 
 @doc raw"""
     vector_transport_to(M::PositiveNumbers, p, X, q, ::ParallelTransport)
@@ -208,12 +204,20 @@ Compute the parallel transport of `X` from the tangent space at `p` to the tange
 `q` on the [`PositiveNumbers`](@ref) `M`.
 
 ````math
-\mathcal P_{q\gets p}(X) = X*q/p.
+\mathcal P_{q\gets p}(X) = X\cdot\frac{q}{p}.
 ````
 """
 vector_transport_to(::PositiveNumbers, ::Any, ::Any, ::Any, ::ParallelTransport)
-vector_transport_to(::PositiveNumbers{ℝ}, p::Real, X::Real, q::Real, ::ParallelTransport) = X*q/p
-vector_transport_to!(::PositiveNumbers{ℝ}, Y, p, X, q, ::ParallelTransport) = (Y .= X * q / p )
+function vector_transport_to(
+    ::PositiveNumbers,
+    p::Real,
+    X::Real,
+    q::Real,
+    ::ParallelTransport,
+)
+    return X * q / p
+end
+vector_transport_to!(::PositiveNumbers, Y, p, X, q, ::ParallelTransport) = (Y .= X * q / p)
 
 function vector_transport_direction(
     M::PositiveNumbers,

@@ -39,6 +39,7 @@ makedocs(
                 "Multinomial symmetric matrices" => "manifolds/multinomialsymmetric.md",
                 "Oblique manifold" => "manifolds/oblique.md",
                 "Probability simplex" => "manifolds/probabilitysimplex.md",
+                "Positive numbers" => "manifolds/positivenumbers.md",
                 "Rotations" => "manifolds/rotations.md",
                 "Skew-symmetric matrices" => "manifolds/skewsymmetric.md",
                 "Spectrahedron" => "manifolds/spectrahedron.md",
