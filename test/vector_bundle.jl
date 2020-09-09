@@ -113,7 +113,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
     @testset "spaces at point" begin
         x = [1.0, 0.0, 0.0]
         t_x = TangentSpaceAtPoint(M, x)
-        t_x2 = TangentSpace(M,x)
+        t_x2 = TangentSpace(M, x)
         @test t_x == t_x2
         ct_x = CotangentSpaceAtPoint(M, x)
         t_xs = sprint(show, "text/plain", t_x)
