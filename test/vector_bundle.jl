@@ -129,6 +129,13 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test ct_x.fiber.fiber == CotangentSpace
         @test t_x.point == x
         @test ct_x.point == x
+        # generic vector space at
+        fiber = VectorBundleFibers(TestVectorSpaceType(), M)
+        v_x = VectorSpaceAtPoint(fiber, x)
+        v_xs = sprint(show, "text/plain", v_x)
+        fiber_s = sprint(show, "text/plain", fiber)
+        v_xs_test = "VectorSpaceAtPoint{VectorBundleFibers{TestVectorSpaceType,Sphere{2,ℝ}},Array{Float64,1}}\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
+        @test v_xs == v_xs_test
     end
 
     @testset "tensor product" begin
