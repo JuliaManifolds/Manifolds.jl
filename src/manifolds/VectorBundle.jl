@@ -479,8 +479,6 @@ function get_vectors(M::VectorBundleFibers, p, B::CachedBasis)
 end
 Base.@propagate_inbounds Base.getindex(x::FVector, i) = getindex(x.data, i)
 
-base_manifold(VpM::VectorSpaceAtPoint) = VpM.fiber.manifold
-
 """
     inner(B::VectorBundleFibers, p, X, Y)
 
