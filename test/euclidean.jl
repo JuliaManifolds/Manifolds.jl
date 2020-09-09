@@ -159,7 +159,7 @@ include("utils.jl")
         qT[1:3, 1:3] .= 1.0
         embed!(O, q, p)
         @test norm(qT - q) == 0
-        qM = embed(O,p)
+        qM = embed(O, p)
         @test norm(qT - qM) == 0
         # test with different sizes, check that it only fills first element
         q2 = zeros(4, 4, 3)
@@ -167,8 +167,8 @@ include("utils.jl")
         q2T[1:3, 1:3, 1] .= 1.0
         embed!(O, q2, p)
         @test norm(q2T - q2) == 0
-        O2 = EmbeddedManifold(M, Euclidean(4,4,3))
-        q2M = embed(O2,p)
+        O2 = EmbeddedManifold(M, Euclidean(4, 4, 3))
+        q2M = embed(O2, p)
         @test norm(q2T - q2M) == 0
         # wrong size error checks
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(3, 3, 5))
