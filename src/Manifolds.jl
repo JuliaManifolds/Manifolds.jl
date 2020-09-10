@@ -131,6 +131,7 @@ include("manifolds/Hyperbolic.jl")
 include("manifolds/MultinomialDoublyStochastic.jl")
 include("manifolds/MultinomialSymmetric.jl")
 include("manifolds/ProbabilitySimplex.jl")
+include("manifolds/PositiveNumbers.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/SkewSymmetric.jl")
 include("manifolds/Spectrahedron.jl")
@@ -239,6 +240,10 @@ export Euclidean,
     MultinomialMatrices,
     MultinomialSymmetric,
     Oblique,
+    PositiveArrays,
+    PositiveMatrices,
+    PositiveNumbers,
+    PositiveVectors,
     ProbabilitySimplex,
     Rotations,
     SkewSymmetricMatrices,
