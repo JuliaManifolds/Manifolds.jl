@@ -188,8 +188,7 @@ eval(
 )
 
 
-get_vector(M::Circle{ℝ}, p, X, B::AbstractBasis) = X
-get_vector(M::Circle{ℝ}, p, X, B::DefaultOrthonormalBasis) = X
+get_vector(::Circle{ℝ}, p, X, ::AbstractBasis) = X
 function get_vector(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     return X .* (sbv == 0 ? 1 : sbv)
