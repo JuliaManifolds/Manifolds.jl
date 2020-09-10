@@ -161,7 +161,7 @@ function embed!(
     # put p into q
     fill!(q, 0.0)
     # fill „top left edge“ of q with p.
-    q[[1:ind_n for ind_n in n]..., ones(Int, lm - ln)...] .= p
+    q[n_ind -> map(Base.OneTo(ind_n), n)..., ntuple(_ -> 1, lm - ln)...] .= p
     return q
 end
 
