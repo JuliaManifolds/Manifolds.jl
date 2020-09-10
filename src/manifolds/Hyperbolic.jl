@@ -31,12 +31,117 @@ struct Hyperbolic{N} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingTy
 
 Hyperbolic(n::Int) = Hyperbolic{n}()
 
+#
+# Representations
+#
+
+@doc raw"""
+    HyperboloidPoint <: MPoint
+
+In the Hyperboloid model of the [`Hyperbolic`](@ref) $H^n$ points are represented
+as vectors in $ℝ^{n+1}$ with [`MinkowskiMetric`](@ref) equal to $-1$.
+
+This representation is the default, i.e. vectors are assumed to have this repesentation.
 """
+struct HyperboloidPoint{T} <: MPoint
+    value::Vector{T}
+end
+function convert(::Type{HyperboloidPoint{T1}}, x::Array{T2,1}) where {T1,T2}
+    return HyperboloidPoint{T1}(x)
+end
+convert(::Array{T1,1}, x::HyperboloidPoint{T2}) where {T1,T2} = x.value
+
+@doc raw"""
+    HyperboloidTVector <: TVector
+
+In the Hyperboloid model of the [`Hyperbolic`](@ref) $ℍ^n$ tangent vctors are represented
+as vectors in $ℝ^{n+1}$ with [`MinkowskiMetric`](@ref) $⟨p,X⟩_{\mathrm{M}}=0$ to their base
+point $p$.
+
+This representation is the default, i.e. vectors are assumed to have this repesentation.
+"""
+struct HyperboloidTVector{T} <: MPoint
+    value::Vector{T}
+end
+function convert(::Type{HyperboloidTVector{T1}}, x::Array{T2,1}) where {T1,T2}
+    return HyperboloidTVector{T1}(x)
+end
+convert(::Array{T1,1}, x::HyperboloidTVector{T2}) where {T1,T2} = x.value
+
+@doc raw"""
+    PoincareBallPoint <: MPoint
+
+A point on the [`Hyperbolic`](@ref) manifold $ℍ^n$ can be represented as a vector of norm
+less than one in $\mathbb R^n$.
+"""
+struct PoincareBallPoint{T} <: MPoint
+    value::Vector{T}
+end
+
+struct PoincareBallTVector{T} <: MPoint
+    value::Vector{T}
+end
+
+@doc raw"""
+    convert(::Type{PoincareBallPoint}, x::HyperboloidPoint)
+
+convert a [`HyperboloidPoint`](@ref) $x∈ℝ^{n+1}$ from the hyperboloid model of the [`Hyperbolic`](@ref)
+manifold $ℍ^n$ to a [`PoincareBallPoint`](@ref) $π(x)∈ℝ^{n}$ in the Poincaré ball model.
+The isometry is defined by
+
+````math
+π(x) = \frac{1}{1+x_{d+1}} \begin{pmatrix}x_1\\\vdots\\x_d\end{pmatrix}
+````
+
+Note that this is also used, when `x` is a vector.
+"""
+function convert(t::Type{PoincareBallPoint{T1}}, x::HyperboloidPoint{T2}) where {T1,T2}
+    return convert(t, x.value)
+end
+function convert(::Type{PoincareBallPoint{T1}}, x::Array{T2,1}) where {T1,T2}
+    return PoincareBallPoint{T1}(1 / (1 + last(x)) .* x[1:(end - 1)])
+end
+
+@doc raw"""
+    convert(::Type{HyperboloidPoint}, x::PoincareBallPoint)
+
+convert a point [`PoincareBallPoint`](@ref) `x` (from $ℝ^n$) from the
+Poincaré ball model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a [`HyperboloidPoint`](@ref) $π(x) ∈ ℝ^{n+1}$
+Poincaré ball model. The isometry is defined by
+
+````math
+π(x) = \frac{1}{1+\lVert x \rVert^2}
+\begin{pmatrix}2x_1\\\vdots\\2x_d\\1+\lVert x \rVert^2\end{pmatrix}
+````
+
+Note that this is also used, when the type to convert to is a vector.
+"""
+function convert(::Type{HyperboloidPoint{T1}}, x::PoincareBallPoint{T2}) where {T1,T2}
+    return HyperboloidPoint(convert(Array{T1,1}, x))
+end
+function convert(::Type{Array{T1,1}}, x::PoincareBallPoint{T2}) where {T1,T2}
+    return 1 / (1 - norm(x.value)^2) .* [(2 .* x.value)..., 1 + norm(x.value)^2]
+end
+
+struct PoincareHalfPlanePoint{T} <: MPoint
+    value::Vector{T}
+end
+
+struct PoincareHalfPlaneTVector{T} <: MPoint
+    value::Vector{T}
+end
+
+@doc raw"""
     check_manifold_point(M::Hyperbolic, p; kwargs...)
 
-Check whether `p` is a valid point on the [`Hyperbolic`](@ref) `M`, i.e. is a `p` vector with
-inner product in the embedding of -1, see [`MinkowskiMetric`](@ref).
+Check whether `p` is a valid point on the [`Hyperbolic`](@ref) `M`.
+
+For the [`HyperboloidPoint`](@ref) or plain arrays this means that, `p` is a vector of
+length $n+1$ with inner product in the embedding of -1, see [`MinkowskiMetric`](@ref).
 The tolerance for the last test can be set using the `kwargs...`.
+
+For the [`PoincareBallPoint`](@ref) a valid point is a vector from $ℝ^n$ with a norm stricly
+less than 1.
 """
 function check_manifold_point(M::Hyperbolic, p; kwargs...)
     mpv =
@@ -50,16 +155,29 @@ function check_manifold_point(M::Hyperbolic, p; kwargs...)
     end
     return nothing
 end
-
-"""
-    check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwargs... )
+function check_manifold_point(M::Hyperbolic{N}, p::PoincareBallPoint; kwargs...) where {N}
+    mpv = check_manifold_point(Euclidean(N), p.value; kwargs...)
+    mpv === nothing || return mpv
+    if !(norm(p.value) < 1)
+        return DomainError(
+            norm(p.value),
+            "The point $(p) does not lie on $(M) since its norm is not less than 1.",
+        )
+    end
+end
+@doc raw"""
+    check_tangent_vector(M::Hyperbolic{n}, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`Hyperbolic`](@ref) `M`, i.e.
-after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of the same dimension as `p`
-and orthogonal to `p` with respect to the inner product from the embedding, see
-[`MinkowskiMetric`](@ref). The optional parameter `check_base_point` indicates whether to
+after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of the same dimension as `p`.
+The optional parameter `check_base_point` indicates whether to
 call [`check_manifold_point`](@ref)  for `p`. The tolerance for the last test can be set
 using the `kwargs...`.
+
+For a the hyperboloid model or vectors, `X` has to be  orthogonal to `p` with respect
+to the inner product from the embedding, see [`MinkowskiMetric`](@ref).
+
+For a the Poincaré ball model, `X` has to be a vector from $ℝ^{n}$.
 """
 function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwargs...)
     if check_base_point
@@ -84,8 +202,20 @@ function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwar
     end
     return nothing
 end
-
-decorated_manifold(M::Hyperbolic{N}) where {N} = Lorentz(N + 1, MinkowskiMetric())
+function check_tangent_vector(
+    ::Hyperbolic{N},
+    p,
+    X::PoincareBallTVector;
+    check_base_point = true,
+    kwargs...,
+) where {N}
+    if check_base_point
+        mpe = check_manifold_point(M, p; kwargs...)
+        mpe === nothing || return mpe
+    end
+    return check_manifold_point(Euclidean(N), X.value; kwargs...)
+end
+decorated_manifold(::Hyperbolic{N}) where {N} = Lorentz(N + 1, MinkowskiMetric())
 
 default_metric_dispatch(::Hyperbolic, ::MinkowskiMetric) = Val(true)
 
@@ -101,11 +231,23 @@ d_{ℍ^n}(p,q) = \operatorname{acosh}( - ⟨p, q⟩_{\mathrm{M}}),
 where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
 the [`Lorentz`](@ref)ian manifold.
 """
-distance(M::Hyperbolic, p, q) = acosh(max(-minkowski_metric(p, q), 1.0))
+distance(::Hyperbolic, p, q) = acosh(max(-minkowski_metric(p, q), 1.0))
+function distance(M::Hyperbolic, p::PoincareBallPoint{T}, q::PoincareBallPoint{T}) where {T}
+    return distance(M, convert(Array{T,1}, p), convert(Array{T,1}, q))
+end
+function distance(
+    M::Hyperbolic,
+    p::PoincareHalfPlanePoint{T},
+    q::PoincareHalfPlanePoint{T},
+) where {T}
+    return distance(M, convert(Array{T,1}, p), convert(Array{T,1}, q))
+end
 
-embed!(::Hyperbolic, q, p) = (q .= p)
+embed!(::Hyperbolic, q, p::Array) = (q .= p)
+embed!(::Hyperbolic, Y, ::Array, X::Array) = (Y .= X)
 
-embed!(::Hyperbolic, Y, p, X) = (Y .= X)
+embed!(::Hyperbolic, q, p::HyperboloidPoint) = (q .= p.value)
+embed!(::Hyperbolic, Y::Array, p::HyperboloidPoint, X::HyperboloidTVector) = (Y .= X.value)
 
 @doc raw"""
     exp(M::Hyperbolic, p, X)
@@ -217,6 +359,16 @@ project(::Hyperbolic, ::Any, ::Any)
 project!(M::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)
 
 Base.show(io::IO, ::Hyperbolic{N}) where {N} = print(io, "Hyperbolic($(N))")
+Base.show(io::IO, p::HyperboloidPoint) = print(io, "HyperboloidPoint($(p.value))")
+Base.show(io::IO, v::HyperboloidTVector) = print(io, "HyperboloidTVector($(v.value))")
+Base.show(io::IO, p::PoincareBallPoint) = print(io, "PoincareBallPoint($(p.value))")
+Base.show(io::IO, v::PoincareBallTVector) = print(io, "PoincareBallTVector($(v.value))")
+function Base.show(io::IO, p::PoincareHalfPlanePoint)
+    return print(io, "PoincareHalfPlanePoint($(p.value))")
+end
+function Base.show(io::IO, v::PoincareHalfPlaneTVector)
+    return print(io, "PoincareHalfPlaneTVector($(v.value))")
+end
 
 @doc raw"""
     vector_transport_to(M::Hyperbolic, p, X, q, ::ParallelTransport)
@@ -238,4 +390,18 @@ function vector_transport_to!(M::Hyperbolic, Y, p, X, q, ::ParallelTransport)
     wn = norm(M, p, w)
     wn < eps(eltype(p + q)) && return copyto!(Y, X)
     return copyto!(Y, X - (inner(M, p, w, X) * (w + log(M, q, p)) / wn^2))
+end
+
+function zero_tangent_vector(::Hyperbolic, p::PoincareBallPoint)
+    return PoincareBallTVector(zeros(p.value))
+end
+function zero_tangent_vector(::Hyperbolic, p::PoincareBallPoint)
+    return PoincareBallTVector(zeros(p.value))
+end
+
+function zero_tangent_vector!(::Hyperbolic, X::PoincareBallTVector, ::PoincareBallPoint)
+    return fill!(X.value, 0)
+end
+function zero_tangent_vector!(::Hyperbolic, X::PoincareHalfPlanePoint, ::PoincareBallPoint)
+    return fill!(X.value, 0)
 end

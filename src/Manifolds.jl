@@ -51,7 +51,7 @@ import ManifoldsBase:
     vector_transport_to!,
     zero_tangent_vector,
     zero_tangent_vector!
-import Base: in, isapprox, isempty, length, showerror
+import Base: convert, in, isapprox, isempty, length, showerror
 
 using Base.Iterators: repeated
 using Distributions
