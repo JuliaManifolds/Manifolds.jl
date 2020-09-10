@@ -89,9 +89,16 @@ const TangentSpaceAtPoint{M} =
     TangentSpaceAtPoint(M::Manifold, p)
 
 Return an object of type [`VectorSpaceAtPoint`](@ref) representing tangent
-space at `p`.
+space at `p` on the [`Manifold`](@ref) `M`.
 """
 TangentSpaceAtPoint(M::Manifold, p) = VectorSpaceAtPoint(TangentBundleFibers(M), p)
+
+"""
+    TangentSpace(M::Manifold, p)
+
+Return a [`TangentSpaceAtPoint`](@ref) representing tangent space at `p` on the [`Manifold`](@ref) `M`.
+"""
+TangentSpace(M::Manifold, p) = VectorSpaceAtPoint(TangentBundleFibers(M), p)
 
 const CotangentSpaceAtPoint{M} =
     VectorSpaceAtPoint{CotangentBundleFibers{M}} where {M<:Manifold}
@@ -701,7 +708,7 @@ end
 function Base.show(io::IO, fiber::VectorBundleFibers)
     return print(io, "VectorBundleFibers($(fiber.fiber), $(fiber.manifold))")
 end
-function Base.show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
+function Base.show(io::IO, ::MIME"text/plain", vs::VectorSpaceAtPoint)
     summary(io, vs)
     println(io, "\nFiber:")
     pre = " "
@@ -710,6 +717,13 @@ function Base.show(io::IO, mime::MIME"text/plain", vs::VectorSpaceAtPoint)
     println(io, pre, sf)
     println(io, "Base point:")
     sp = sprint(show, "text/plain", vs.point; context = io, sizehint = 0)
+    sp = replace(sp, '\n' => "\n$(pre)")
+    return print(io, pre, sp)
+end
+function Base.show(io::IO, ::MIME"text/plain", TpM::TangentSpaceAtPoint)
+    println(io, "Tangent space to the manifold $(base_manifold(TpM)) at point:")
+    pre = " "
+    sp = sprint(show, "text/plain", TpM.point; context = io, sizehint = 0)
     sp = replace(sp, '\n' => "\n$(pre)")
     return print(io, pre, sp)
 end
@@ -746,7 +760,7 @@ Returns type of element of the array that will represent the result of
 function `f` for representing an operation with result in the vector space `fiber`
 for manifold `M` on given arguments (passed at a tuple).
 """
-function allocate_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where {N}
+function allocate_result_type(::VectorBundleFibers, f, args::NTuple{N,Any}) where {N}
     T = typeof(reduce(+, one(number_eltype(eti)) for eti in args))
     return T
 end
@@ -768,7 +782,7 @@ Determine the vector tranport used for [`exp`](@ref exp(::VectorBundle, ::Any...
 [`log`](@ref log(::VectorBundle, ::Any...)) maps on a vector bundle with vector space type
 `fiber` and manifold `M`.
 """
-vector_bundle_transport(fiber::VectorSpaceType, M::Manifold) = ParallelTransport()
+vector_bundle_transport(::VectorSpaceType, ::Manifold) = ParallelTransport()
 
 """
     vector_space_dimension(B::VectorBundleFibers)
