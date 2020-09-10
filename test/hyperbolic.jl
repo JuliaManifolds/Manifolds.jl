@@ -38,6 +38,12 @@ include("utils.jl")
         p = [0.0, 0.0, 1.0]
         pH = HyperboloidPoint(p)
         @test convert(HyperboloidPoint, p).value == pH.value
+        @test convert(Vector, pH) == p
+        X = [1.0, 0.0, 0.0]
+        XH = HyperboloidTVector(X)
+        @test convert(HyperboloidTVector, X).value == XH.value
+        @test convert(Vector, XH) == X
+        @test convert(HyperboloidPoint, p).value == pH.value
         is_manifold_point(M, pH)
         pB = convert(PoincareBallPoint, p)
         @test pB.value == convert(PoincareBallPoint, pH).value
@@ -55,7 +61,21 @@ include("utils.jl")
 
         pS = convert(PoincareHalfSpacePoint, p)
         pS2 = convert(PoincareHalfSpacePoint, pB)
+        pS3 = convert(PoincareHalfSpacePoint, pH)
+
+        @test_throws DomainError is_manifold_point(
+            M,
+            PoincareHalfSpacePoint([0.0, 0.0, 1.0]),
+            true,
+        )
+        @test_throws DomainError is_manifold_point(
+            M,
+            PoincareHalfSpacePoint([0.0, -1.0]),
+            true,
+        )
+
         @test pS.value == pS2.value
+        @test pS.value == pS3.value
         @test convert(Vector, pS) == convert(HyperboloidPoint, pS).value
         @test convert(PoincareBallPoint, pS2).value == pB.value
     end
