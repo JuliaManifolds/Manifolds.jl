@@ -49,9 +49,9 @@ function Base.:^(::Euclidean{T,𝔽}, n::NTuple{N,Int}) where {T,𝔽,N}
 end
 
 function allocation_promotion_function(
-    M::Euclidean{<:Tuple,ℂ},
+    ::Euclidean{<:Tuple,ℂ},
     ::Union{typeof(get_vector),typeof(get_coordinates)},
-    args::Tuple,
+    ::Tuple,
 )
     return complex
 end
@@ -139,17 +139,17 @@ A [`Euclidean`](@ref) `M` manifold can be embedded into a [`Euclidean`](@ref) `N
 if the length of the array dimension and representation size is elementwise less or equal.
 The remainder is filles with zeros for sure.
 """
-function embed(M::EmbeddedManifold{𝔽,Euclidean{n,𝔽a},Euclidean{m,𝔽b},ET}, p) where {n,m,𝔽,𝔽a,𝔽b,ET}
+function embed(M::EmbeddedManifold{𝔽,Euclidean{n,𝔽2},Euclidean{m,𝔽},ET}, p) where {n,m,𝔽,𝔽2,ET}
     q = allocate(p, representation_size(M.embedding))
     embed!(M, q, p)
     return q
 end
 
 function embed!(
-    ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽a},Euclidean{mL,𝔽b},ET},
+    ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽2},Euclidean{mL,𝔽},ET},
     q,
     p,
-) where {nL,mL,𝔽,𝔽a,𝔽b,ET}
+) where {nL,mL,𝔽,𝔽2,ET}
     n = size(p)
     ln = length(n)
     m = size(q)
