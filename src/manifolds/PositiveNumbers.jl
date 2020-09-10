@@ -79,10 +79,10 @@ Compute the distance on the [`PositiveNumbers`](@ref) `M`, which is
 d(p,q) = \Bigl\lvert \log \frac{p}{q} \Bigr\rvert = \lvert \log p - \log q\rvert.
 ````
 """
-distacne(::PositiveNumbers, ::Any, ::Any)
+distance(::PositiveNumbers, ::Any, ::Any)
 
 distance(::PositiveNumbers, p::Real, q::Real) = abs(log(p / q))
-distacne(::PositiveNumbers, p, q) = sum(abs.(log.(p ./ q)))
+distance(::PositiveNumbers, p, q) = sum(abs.(log.(p ./ q)))
 
 @doc raw"""
     exp(M::PositiveNumbers, p, X)
