@@ -139,17 +139,17 @@ A [`Euclidean`](@ref) `M` manifold can be embedded into a [`Euclidean`](@ref) `N
 if the length of the array dimension and representation size is elementwise less or equal.
 The remainder is filles with zeros for sure.
 """
-function embed(M::EmbeddedManifold{𝔽,Euclidean{n,𝔽},Euclidean{m,𝔽},ET}, p) where {n,m,𝔽,ET}
+function embed(M::EmbeddedManifold{𝔽,Euclidean{n,𝔽a},Euclidean{m,𝔽b},ET}, p) where {n,m,𝔽,𝔽a,𝔽b,ET}
     q = allocate(p, representation_size(M.embedding))
     embed!(M, q, p)
     return q
 end
 
 function embed!(
-    M::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽},ET},
+    ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽a},Euclidean{mL,𝔽b},ET},
     q,
     p,
-) where {nL,mL,𝔽,ET}
+) where {nL,mL,𝔽,𝔽a,𝔽b,ET}
     n = size(p)
     ln = length(n)
     m = size(q)
@@ -161,7 +161,7 @@ function embed!(
     # put p into q
     fill!(q, 0.0)
     # fill „top left edge“ of q with p.
-    q[n_ind -> map(Base.OneTo(ind_n), n)..., ntuple(_ -> 1, lm - ln)...] .= p
+    q[map(ind_n -> Base.OneTo(ind_n), n)..., ntuple(_ -> 1, lm - ln)...] .= p
     return q
 end
 
