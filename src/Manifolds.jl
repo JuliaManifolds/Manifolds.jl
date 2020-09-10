@@ -250,7 +250,10 @@ export Euclidean,
     SymmetricPositiveDefinite,
     SymmetricPositiveSemidefiniteFixedRank,
     Torus
-export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
+export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint
+export HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector
+export AbstractNumbers, ℝ, ℂ, ℍ
+
 # decorator manifolds
 export AbstractDecoratorManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector

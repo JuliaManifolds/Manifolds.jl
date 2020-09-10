@@ -34,9 +34,35 @@ include("utils.jl")
         @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
         @test manifold_dimension(M) == 2
     end
+    @testset "Hyperbolic Representation Conversion" begin
+        p = [0.0, 0.0, 1.0]
+        pH = HyperboloidPoint(p)
+        @test convert(HyperboloidPoint, p).value == pH.value
+        is_manifold_point(M, pH)
+        pB = convert(PoincareBallPoint, p)
+        @test pB.value == convert(PoincareBallPoint, pH).value
+        @test is_manifold_point(M, pB)
+        @test convert(Vector, pB) == p # convert back yields again p
+        @test convert(HyperboloidPoint, pB).value == pH.value
+        @test_throws DomainError is_manifold_point(
+            M,
+            PoincareBallPoint([0.9, 0.0, 0.0]),
+            true,
+        )
+        @test_throws DomainError is_manifold_point(M, PoincareBallPoint([1.0, 0.0]), true)
+
+        @test is_tangent_vector(M, pB, PoincareBallTVector([2.0, 2.0]))
+
+        pS = convert(PoincareHalfSpacePoint, p)
+        pS2 = convert(PoincareHalfSpacePoint, pB)
+        @test pS.value == pS2.value
+        @test convert(Vector, pS) == convert(HyperboloidPoint, pS).value
+        @test convert(PoincareBallPoint, pS2).value == pB.value
+    end
+
+
     types = [Vector{Float64}, SizedVector{3,Float64}]
     TEST_FLOAT32 && push!(types, Vector{Float32})
-
     for T in types
         @testset "Type $T" begin
             pts = [
