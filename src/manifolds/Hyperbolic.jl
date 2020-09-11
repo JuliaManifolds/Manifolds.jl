@@ -106,20 +106,24 @@ _HyperbolicTangentTypes =
 _HyperbolicTypes = [_HyperbolicPointTypes..., _HyperbolicTangentTypes...]
 
 for T ∈ _HyperbolicTangentTypes
-    Base.:*(v::T, s::Number) = T(v.value * s)
-    Base.:*(s::Number, v::T) = T(s * v.value)
-    Base.:/(v::T, s::Number) = T(v.value / s)
-    Base.:\(s::Number, v::T) = T(s \ v.value)
-    Base.:+(v::T, w::T) = T(v.value + w.value)
-    Base.:-(v::T, w::T) = T(v.value - w.value)
-    Base.:-(v::T) = T(-v.value)
-    Base.:+(v::T) = T(v.value)
-    Base.:(==)(v::T, w::T) = (v.value == w.value)
+    @eval begin
+        Base.:*(v::$T, s::Number) = $T(v.value * s)
+        Base.:*(s::Number, v::$T) = $T(s * v.value)
+        Base.:/(v::$T, s::Number) = $T(v.value / s)
+        Base.:\(s::Number, v::$T) = $T(s \ v.value)
+        Base.:+(v::$T, w::$T) = $T(v.value + w.value)
+        Base.:-(v::$T, w::$T) = $T(v.value - w.value)
+        Base.:-(v::$T) = $T(-v.value)
+        Base.:+(v::$T) = $T(v.value)
+        Base.:(==)(v::$T, w::$T) = (v.value == w.value)
+    end
 end
 
 for T ∈ _HyperbolicTypes
-    allocate(p::T) = T(allocate(p.value))
-    allocate(p::T, ::Type{P}) where {P} = T(allocate(p.value, P))
+    @eval begin
+        allocate(p::$T) = $T(allocate(p.value))
+        allocate(p::$T, ::Type{P}) where {P} = $T(allocate(p.value, P))
+    end
 end
 
 function convert(::Type{HyperboloidTVector}, x::T) where {T<:AbstractVector}
@@ -370,7 +374,7 @@ function check_tangent_vector(
 end
 
 for T in _HyperbolicTypes
-    copyto!(p::T, q::T) = copyto!(p.value, q.value)
+    @eval copyto!(p::$T, q::$T) = copyto!(p.value, q.value)
 end
 
 decorated_manifold(::Hyperbolic{N}) where {N} = Lorentz(N + 1, MinkowskiMetric())
@@ -472,10 +476,10 @@ function inner(
 end
 
 for T in _HyperbolicPointTypes
-    isapprox(::Hyperbolic, p::T, q::T; kwargs...) = isapprox(p.value, q.value; kwargs...)
+    @eval isapprox(::Hyperbolic, p::$T, q::$T; kwargs...) = isapprox(p.value, q.value; kwargs...)
 end
 for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
-    function isapprox(::Hyperbolic, ::P, X::T, Y::T; kwargs...)
+    @eval function isapprox(::Hyperbolic, ::$P, X::$T, Y::$T; kwargs...)
         return isapprox(X.value, Y.value; kwargs...)
     end
 end
@@ -548,7 +552,7 @@ function Statistics.mean!(M::Hyperbolic, p, x::AbstractVector, w::AbstractVector
 end
 
 for T in _HyperbolicTypes
-    number_eltype(p::T) = typeof(one(eltype(p.value)))
+    @eval number_eltype(p::$T) = typeof(one(eltype(p.value)))
 end
 
 @doc raw"""
