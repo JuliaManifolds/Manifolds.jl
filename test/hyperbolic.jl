@@ -81,7 +81,13 @@ include("utils.jl")
     end
 
 
-    types = [Vector{Float64}, SizedVector{3,Float64}]
+    types = [
+        Vector{Float64},
+        SizedVector{3,Float64},
+        HyperboloidPoint,
+        PoincareBallPoint,
+        PoincareHalfSpacePoint,
+    ]
     TEST_FLOAT32 && push!(types, Vector{Float32})
     for T in types
         @testset "Type $T" begin

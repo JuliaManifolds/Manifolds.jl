@@ -59,14 +59,6 @@ This representation is the default, i.e. vectors are assumed to have this repese
 struct HyperboloidTVector{TValue<:AbstractVector} <: MPoint
     value::TValue
 end
-function convert(::Type{HyperboloidTVector}, x::T) where {T<:AbstractVector}
-    return HyperboloidTVector(x)
-end
-convert(::Type{<:AbstractVector}, x::HyperboloidTVector) = x.value
-function convert(::Type{HyperboloidPoint}, x::T) where {T<:AbstractVector}
-    return HyperboloidPoint(x)
-end
-convert(::Type{<:AbstractVector}, x::HyperboloidPoint) = x.value
 
 @doc raw"""
     PoincareBallPoint <: MPoint
@@ -107,6 +99,37 @@ represented as vectors in $ℝ^{n}$.
 struct PoincareHalfSpaceTVector{TValue<:AbstractVector} <: MPoint
     value::TValue
 end
+
+_HyperbolicPointTypes = [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint]
+_HyperbolicTangentTypes =
+    [HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector]
+_HyperbolicTypes = [_HyperbolicPointTypes..., _HyperbolicTangentTypes...]
+
+for T ∈ _HyperbolicTangentTypes
+    Base.:*(v::T, s::Number) = T(v.value * s)
+    Base.:*(s::Number, v::T) = T(s * v.value)
+    Base.:/(v::T, s::Number) = T(v.value / s)
+    Base.:\(s::Number, v::T) = T(s \ v.value)
+    Base.:+(v::T, w::T) = T(v.value + w.value)
+    Base.:-(v::T, w::T) = T(v.value - w.value)
+    Base.:-(v::T) = T(-v.value)
+    Base.:+(v::T) = T(v.value)
+    Base.:(==)(v::T, w::T) = (v.value == w.value)
+end
+
+for T ∈ _HyperbolicTypes
+    allocate(p::T) = T(allocate(p.value))
+    allocate(p::T, ::Type{P}) where {P} = T(allocate(p.value, P))
+end
+
+function convert(::Type{HyperboloidTVector}, x::T) where {T<:AbstractVector}
+    return HyperboloidTVector(x)
+end
+convert(::Type{<:AbstractVector}, x::HyperboloidTVector) = x.value
+function convert(::Type{HyperboloidPoint}, x::T) where {T<:AbstractVector}
+    return HyperboloidPoint(x)
+end
+convert(::Type{<:AbstractVector}, x::HyperboloidPoint) = x.value
 
 @doc raw"""
     convert(::Type{PoincareBallPoint}, x::HyperboloidPoint)
@@ -346,6 +369,9 @@ function check_tangent_vector(
     return check_manifold_point(Euclidean(N), X.value; kwargs...)
 end
 
+for T in _HyperbolicTypes
+    copyto!(p::T, q::T) = copyto!(p.value, q.value)
+end
 
 decorated_manifold(::Hyperbolic{N}) where {N} = Lorentz(N + 1, MinkowskiMetric())
 
@@ -445,6 +471,16 @@ function inner(
     return dot(X.value, Y.value) / last(p.value)^2
 end
 
+for T in _HyperbolicPointTypes
+    isapprox(::Hyperbolic, p::T, q::T; kwargs...) = isapprox(p.value, q.value; kwargs...)
+end
+for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
+    function isapprox(::Hyperbolic, ::P, X::T, Y::T; kwargs...)
+        return isapprox(X.value, Y.value; kwargs...)
+    end
+end
+
+
 @doc raw"""
     log(M::Hyperbolic, p, q)
 
@@ -509,6 +545,10 @@ mean(::Hyperbolic, ::Any...)
 
 function Statistics.mean!(M::Hyperbolic, p, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean!(M, p, x, w, CyclicProximalPointEstimation(); kwargs...)
+end
+
+for T in _HyperbolicTypes
+    number_eltype(p::T) = typeof(one(eltype(p.value)))
 end
 
 @doc raw"""
