@@ -490,7 +490,7 @@ function inner(
     X::PoincareBallTVector,
     Y::PoincareBallTVector,
 )
-    return inner(M, conert(AVector, p), convert(Vector, X), convert(Vector, Y))
+    return inner(M, conert(Vector, p), convert(Vector, X), convert(Vector, Y))
 end
 
 for T in _HyperbolicPointTypes
