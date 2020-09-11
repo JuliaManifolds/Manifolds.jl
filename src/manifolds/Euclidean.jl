@@ -140,7 +140,7 @@ if the length of the array dimension and representation size is elementwise less
 The remainder is filles with zeros for sure.
 """
 function embed(
-    M::EmbeddedManifold{𝔽,Euclidean{n,𝔽2},Euclidean{m,𝔽},ET},
+    M::EmbeddedManifold{𝔽,Euclidean{n,𝔽},Euclidean{m,𝔽2},ET},
     p,
 ) where {n,m,𝔽,𝔽2,ET}
     q = allocate(p, representation_size(M.embedding))
@@ -149,7 +149,7 @@ function embed(
 end
 
 function embed!(
-    ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽2},Euclidean{mL,𝔽},ET},
+    ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2},ET},
     q,
     p,
 ) where {nL,mL,𝔽,𝔽2,ET}

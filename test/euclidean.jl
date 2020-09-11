@@ -174,4 +174,19 @@ include("utils.jl")
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(3, 3, 5))
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(4, 4))
     end
+
+    @testset "Embedding Real into Complex" begin
+        M = Euclidean(3, 3)
+        N = Euclidean(3, 4; field=ℂ)
+        O = EmbeddedManifold(M,N)
+        p = ones(3, 3)
+        qT = zeros(ComplexF64, 3, 4)
+        qT[1:3, 1:3] .= 1.0
+        q = embed(O,p)
+        @test is_manifold_point(N,q)
+        @test q==qT
+        q2 = zeros(ComplexF64, 3, 4)
+        embed!(O, q2, p)
+        @test q2==qT
+    end
 end
