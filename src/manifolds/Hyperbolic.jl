@@ -105,7 +105,7 @@ _HyperbolicTangentTypes =
     [HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector]
 _HyperbolicTypes = [_HyperbolicPointTypes..., _HyperbolicTangentTypes...]
 
-for T ∈ _HyperbolicTangentTypes
+for T in _HyperbolicTangentTypes
     @eval begin
         Base.:*(v::$T, s::Number) = $T(v.value * s)
         Base.:*(s::Number, v::$T) = $T(s * v.value)
@@ -119,11 +119,17 @@ for T ∈ _HyperbolicTangentTypes
     end
 end
 
-for T ∈ _HyperbolicTypes
+for T in _HyperbolicTypes
     @eval begin
         allocate(p::$T) = $T(allocate(p.value))
         allocate(p::$T, ::Type{P}) where {P} = $T(allocate(p.value, P))
     end
+end
+
+for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
+    @eval allocate(p::$P, ::Type{$T}) = $T(allocate(p.value))
+    @eval allocate_result_type(::Hyperbolic, ::typeof(log), ::Tuple{$P,$P}) = $T
+    @eval allocate_result_type(::Hyperbolic, ::typeof(inverse_retract), ::Tuple{$P,$P}) = $T
 end
 
 function convert(::Type{HyperboloidTVector}, x::T) where {T<:AbstractVector}
@@ -432,19 +438,15 @@ function exp!(M::Hyperbolic, q, p, X)
     vn < eps(eltype(p)) && return copyto!(q, p)
     return copyto!(q, cosh(vn) * p + sinh(vn) / vn * X)
 end
-
-function exp!(
-    M::Hyperbolic,
-    q::PoincareBallPoint,
-    p::PoincareBallPoint,
-    X::PoincareBallTVector,
-)
-    q.value .=
-        convert(
-            PoincareBallPoint,
-            exp(M, convert(AbstractVector, p), convert(AbstractVector, X)),
-        ).value
-    return q
+for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
+    @eval function exp!(M::Hyperbolic, q::$P, p::$P, X::$T)
+        q.value .=
+            convert(
+                $P,
+                exp(M, convert(AbstractVector, p), convert(AbstractVector, X)),
+            ).value
+        return q
+    end
 end
 
 @doc raw"""
@@ -474,9 +476,27 @@ function inner(
 )
     return dot(X.value, Y.value) / last(p.value)^2
 end
+function inner(
+    M::Hyperbolic,
+    p::HyperboloidPoint,
+    X::HyperboloidTVector,
+    Y::HyperboloidTVector,
+)
+    return inner(M, p.value, X.value, Y.value)
+end
+function inner(
+    M::Hyperbolic,
+    p::PoincareBallPoint,
+    X::PoincareBallTVector,
+    Y::PoincareBallTVector,
+)
+    return inner(M, conert(AVector, p), convert(Vector, X), convert(Vector, Y))
+end
 
 for T in _HyperbolicPointTypes
-    @eval isapprox(::Hyperbolic, p::$T, q::$T; kwargs...) = isapprox(p.value, q.value; kwargs...)
+    @eval function isapprox(::Hyperbolic, p::$T, q::$T; kwargs...)
+        return isapprox(p.value, q.value; kwargs...)
+    end
 end
 for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
     @eval function isapprox(::Hyperbolic, ::$P, X::$T, Y::$T; kwargs...)
@@ -511,14 +531,8 @@ function log!(M::Hyperbolic, X, p, q)
     return X
 end
 
-for (P,T) ∈ zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
-    @eval allocate_result_type(::Hyperbolic, ::typeof(log), ::$P, ::$P) = $T
-    @eval function log!(
-        M::Hyperbolic,
-        X::$T,
-        p::$P,
-        q::$P,
-    )
+for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
+    @eval function log!(M::Hyperbolic, X::$T, p::$P, q::$P)
         X.value .=
             convert(
                 $T,
@@ -553,7 +567,7 @@ function Statistics.mean!(M::Hyperbolic, p, x::AbstractVector, w::AbstractVector
     return mean!(M, p, x, w, CyclicProximalPointEstimation(); kwargs...)
 end
 
-for T ∈ _HyperbolicTypes
+for T in _HyperbolicTypes
     @eval number_eltype(p::$T) = typeof(one(eltype(p.value)))
 end
 
@@ -588,7 +602,7 @@ function project!(
 end
 
 Base.show(io::IO, ::Hyperbolic{N}) where {N} = print(io, "Hyperbolic($(N))")
-for T ∈ _HyperbolicTypes
+for T in _HyperbolicTypes
     @eval Base.show(io::IO, p::$T) = print(io, "$($T)($(p.value))")
 end
 
