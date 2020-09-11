@@ -374,7 +374,7 @@ function check_tangent_vector(
 end
 
 for T in _HyperbolicTypes
-    @eval copyto!(p::$T, q::$T) = copyto!(p.value, q.value)
+    @eval Base.copyto!(p::$T, q::$T) = copyto!(p.value, q.value)
 end
 
 decorated_manifold(::Hyperbolic{N}) where {N} = Lorentz(N + 1, MinkowskiMetric())
@@ -511,20 +511,22 @@ function log!(M::Hyperbolic, X, p, q)
     return X
 end
 
-function log!(
-    M::Hyperbolic,
-    X::PoincareBallTVector,
-    p::PoincareBallPoint,
-    q::PoincareBallPoint,
-)
-    X.value .=
-        convert(
-            PoincareBallTVector,
-            exp(M, convert(AbstractVector, p), convert(AbstractVector, q)),
-        ).value
-    return X
+for (P,T) ∈ zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
+    @eval allocate_result_type(::Hyperbolic, ::typeof(log), ::$P, ::$P) = $T
+    @eval function log!(
+        M::Hyperbolic,
+        X::$T,
+        p::$P,
+        q::$P,
+    )
+        X.value .=
+            convert(
+                $T,
+                exp(M, convert(AbstractVector, p), convert(AbstractVector, q)),
+            ).value
+        return X
+    end
 end
-
 
 @doc raw"""
     manifold_dimension(M::Hyperbolic)
@@ -551,7 +553,7 @@ function Statistics.mean!(M::Hyperbolic, p, x::AbstractVector, w::AbstractVector
     return mean!(M, p, x, w, CyclicProximalPointEstimation(); kwargs...)
 end
 
-for T in _HyperbolicTypes
+for T ∈ _HyperbolicTypes
     @eval number_eltype(p::$T) = typeof(one(eltype(p.value)))
 end
 
@@ -586,15 +588,8 @@ function project!(
 end
 
 Base.show(io::IO, ::Hyperbolic{N}) where {N} = print(io, "Hyperbolic($(N))")
-Base.show(io::IO, p::HyperboloidPoint) = print(io, "HyperboloidPoint($(p.value))")
-Base.show(io::IO, v::HyperboloidTVector) = print(io, "HyperboloidTVector($(v.value))")
-Base.show(io::IO, p::PoincareBallPoint) = print(io, "PoincareBallPoint($(p.value))")
-Base.show(io::IO, v::PoincareBallTVector) = print(io, "PoincareBallTVector($(v.value))")
-function Base.show(io::IO, p::PoincareHalfSpacePoint)
-    return print(io, "PoincareHalfSpacePoint($(p.value))")
-end
-function Base.show(io::IO, v::PoincareHalfSpaceTVector)
-    return print(io, "PoincareHalfPlaneTVector($(v.value))")
+for T ∈ _HyperbolicTypes
+    @eval Base.show(io::IO, p::$T) = print(io, "$($T)($(p.value))")
 end
 
 @doc raw"""
