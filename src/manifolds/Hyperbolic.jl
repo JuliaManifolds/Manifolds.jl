@@ -455,10 +455,10 @@ end
 
 Return the injectivity radius on the [`Hyperbolic`](@ref), which is $∞$.
 """
-injectivity_radius(M::Hyperbolic) = Inf
-injectivity_radius(M::Hyperbolic, ::ExponentialRetraction) = Inf
-injectivity_radius(M::Hyperbolic, ::Any) = Inf
-injectivity_radius(M::Hyperbolic, ::Any, ::ExponentialRetraction) = Inf
+injectivity_radius(::Hyperbolic) = Inf
+injectivity_radius(::Hyperbolic, ::ExponentialRetraction) = Inf
+injectivity_radius(::Hyperbolic, ::Any) = Inf
+injectivity_radius(::Hyperbolic, ::Any, ::ExponentialRetraction) = Inf
 eval(
     quote
         @invoke_maker 1 Manifold injectivity_radius(
@@ -536,7 +536,7 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
         X.value .=
             convert(
                 $T,
-                exp(M, convert(AbstractVector, p), convert(AbstractVector, q)),
+                log(M, convert(AbstractVector, p), convert(AbstractVector, q)),
             ).value
         return X
     end
@@ -569,6 +569,10 @@ end
 
 for T in _HyperbolicTypes
     @eval number_eltype(p::$T) = typeof(one(eltype(p.value)))
+end
+
+function minkowski_metric(a::HyperboloidPoint, b::HyperboloidPoint)
+    return minkowski_metric(convert(Vector,a), convert(Vector,b))
 end
 
 @doc raw"""
@@ -628,20 +632,7 @@ function vector_transport_to!(M::Hyperbolic, Y, p, X, q, ::ParallelTransport)
     return copyto!(Y, X - (inner(M, p, w, X) * (w + log(M, q, p)) / wn^2))
 end
 
-function zero_tangent_vector(::Hyperbolic, p::PoincareBallPoint)
-    return PoincareBallTVector(zeros(p.value))
-end
-function zero_tangent_vector(::Hyperbolic, p::PoincareHalfSpacePoint)
-    return PoincareBallTVector(zeros(p.value))
-end
-
-function zero_tangent_vector!(::Hyperbolic, X::PoincareBallTVector, ::PoincareBallPoint)
-    return fill!(X.value, 0)
-end
-function zero_tangent_vector!(
-    ::Hyperbolic,
-    X::PoincareHalfSpacePoint,
-    ::PoincareHalfSpacePoint,
-)
-    return fill!(X.value, 0)
+for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
+    @eval zero_tangent_vector(::Hyperbolic, p::$P) = $T(zero(p.value))
+    @eval zero_tangent_vector!(::Hyperbolic, X::$T, ::$P) = fill!(X.value, 0)
 end

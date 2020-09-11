@@ -111,6 +111,8 @@ include("utils.jl")
                 exp_log_atol_multiplier = 10.0,
                 retraction_methods = (ExponentialRetraction(),),
                 test_vee_hat = false,
+                test_forward_diff = !( T ∉ [HyperboloidPoint, PoincareBallPoint, PoincareBallPoint] ),
+                test_backward_diff = !( T ∉ [HyperboloidPoint, PoincareBallPoint, PoincareBallPoint] ),
             )
         end
     end
