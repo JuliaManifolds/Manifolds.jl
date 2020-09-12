@@ -49,11 +49,14 @@ end
 function convert(::Type{HyperboloidTVector}, X::T) where {T<:AbstractVector}
     return HyperboloidTVector(X)
 end
-function convert(::Type{HyperboloidTVector}, (p,X)::Tuple{T,T}) where {T<:AbstractVector}
+function convert(::Type{HyperboloidTVector}, (p, X)::Tuple{T,T}) where {T<:AbstractVector}
     return HyperboloidTVector(X)
 end
 convert(::Type{<:AbstractVector}, X::HyperboloidTVector) = X.value
-function convert(::Type{<:AbstractVector}, (p,X)::Tuple{HyperboloidPoint,HyperboloidTVector})
+function convert(
+    ::Type{<:AbstractVector},
+    (p, X)::Tuple{HyperboloidPoint,HyperboloidTVector},
+)
     return X.value
 end
 
@@ -121,17 +124,17 @@ The push forward $π_*(p)$ maps from $ℝ^n$ to a subspace of $ℝ^{n+1}$, the f
 """
 function convert(
     ::Type{HyperboloidTVector},
-    (p,X)::Tuple{PoincareBallPoint,PoincareBallTVector},
+    (p, X)::Tuple{PoincareBallPoint,PoincareBallTVector},
 )
-    return HyperboloidTVector(convert(AbstractVector,(p,X)))
+    return HyperboloidTVector(convert(AbstractVector, (p, X)))
 end
 function convert(
     ::Type{<:AbstractVector},
-    (p,X)::Tuple{PoincareBallPoint,PoincareBallTVector}
+    (p, X)::Tuple{PoincareBallPoint,PoincareBallTVector},
 )
-    den = 4*dot(p.value,X.value)/( (1-norm(p.value)^2)^2 )
+    den = 4 * dot(p.value, X.value) / ((1 - norm(p.value)^2)^2)
     c1 = 2 .* X.value + den .* p.value
-    return [c1...,den]
+    return [c1..., den]
 end
 
 @doc raw"""
@@ -152,15 +155,15 @@ for the formulae.
 """
 function convert(
     ::Type{Tuple{HyperboloidPoint,HyperboloidTVector}},
-    (p,X)::Tuple{PoincareBallPoint,PoincareBallTVector},
+    (p, X)::Tuple{PoincareBallPoint,PoincareBallTVector},
 )
-    return (convert(HyperboloidPoint,p), convert(HyperboloidTVector,(p,X)))
+    return (convert(HyperboloidPoint, p), convert(HyperboloidTVector, (p, X)))
 end
 function convert(
     ::Type{Tuple{T,T}},
-    (p,X)::Tuple{HyperboloidPoint,HyperboloidTVector}
+    (p, X)::Tuple{HyperboloidPoint,HyperboloidTVector},
 ) where {T<:AbstractVector}
-    return (convert(T,p), convert(T,(p,X)))
+    return (convert(T, p), convert(T, (p, X)))
 end
 
 
@@ -180,13 +183,17 @@ Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a
 
 This is done in two steps, namely transforming it to a Poincare ball point and from there further on to a Hyperboloid point.
 """
-function convert(t::Type{HyperboloidTVector}, (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTVector})
-    (q,Y) = convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p,X))
-    return convert(t, (q,Y))
+function convert(
+    t::Type{HyperboloidTVector},
+    (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector},
+)
+    return convert(t, convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)))
 end
-function convert(t::Type{<:AbstractVector}, (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTVector})
-    (q,Y) = convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p,X))
-    return convert(t, (q,Y))
+function convert(
+    t::Type{<:AbstractVector},
+    (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector},
+)
+    return convert(t, convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)))
 end
 
 @doc raw"""
@@ -207,13 +214,17 @@ simultaneously.
 This is done in two steps, namely transforming it to the Poincare ball model and from there
 further on to a Hyperboloid.
 """
-function convert(t::Type{Tuple{HyperboloidPoint,HyperboloidTVector}}, (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTVector})
-    (q,Y) = convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p,X))
-    return convert(t, (q,Y))
+function convert(
+    t::Type{Tuple{HyperboloidPoint,HyperboloidTVector}},
+    (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector},
+)
+    return convert(t, convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)))
 end
-function convert(t::Type{Tuple{T,T}}, (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTVector}) where {T<:AbstractVector}
-    (q,Y) = convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p,X))
-    return convert(t, (q,Y))
+function convert(
+    t::Type{Tuple{T,T}},
+    (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector},
+) where {T<:AbstractVector}
+    return convert(t, convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)))
 end
 
 @doc raw"""

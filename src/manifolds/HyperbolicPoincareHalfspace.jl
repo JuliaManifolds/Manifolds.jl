@@ -120,8 +120,10 @@ function convert(
     ::Type{PoincareHalfSpaceTVector},
     (p, X)::Tuple{T,T},
 ) where {T<:AbstractVector}
-    (q, Y) = convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X))
-    return convert(PoincareHalfSpaceTVector, (q, Y))
+    return convert(
+        PoincareHalfSpaceTVector,
+        convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)),
+    )
 end
 
 @doc raw"""
@@ -163,15 +165,25 @@ function convert(
     ::Type{Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector}},
     (p, X)::Tuple{HyperboloidPoint,HyperboloidTVector},
 )
-    (q, Y) = convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X))
-    return (convert(PoincareHalfSpacePoint, p), convert(PoincareBallTVector, (q, Y)))
+    return (
+        convert(PoincareHalfSpacePoint, p),
+        convert(
+            PoincareBallTVector,
+            convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)),
+        )
+    )
 end
 function convert(
     ::Type{Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector}},
     (p, X)::Tuple{T,T},
 ) where {T<:AbstractVector}
-    (q, Y) = convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X))
-    return (convert(PoincareHalfSpacePoint, q), convert(PoincareHalfSpaceTVector, (q, Y)))
+    return (
+        convert(PoincareHalfSpacePoint, q),
+        convert(
+            PoincareHalfSpaceTVector,
+            convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)),
+            ),
+    )
 end
 
 

@@ -192,5 +192,5 @@ function inner(
     X::PoincareBallTVector,
     Y::PoincareBallTVector,
 )
-    return 4 / (1 - norm(p)^2)^2 * dot(X.value, Y.value)
+    return 4 / (1 - norm(p.value)^2)^2 * dot(X.value, Y.value)
 end

@@ -369,12 +369,15 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
         Y.value .=
             convert(
                 $T,
-                vector_transport_to(
-                    M,
-                    convert(Vector, p),
-                    convert(Vector, X),
+                (
                     convert(Vector, q),
-                    m,
+                    vector_transport_to(
+                        M,
+                        convert(Vector, p),
+                        convert(Vector, (p, X)),
+                        convert(Vector, q),
+                        m,
+                    ),
                 ),
             ).value
         return Y
