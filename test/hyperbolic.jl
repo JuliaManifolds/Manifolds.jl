@@ -91,6 +91,7 @@ include("utils.jl")
     TEST_FLOAT32 && push!(types, Vector{Float32})
     for T in types
         @testset "Type $T" begin
+            is_plain_array = T ∉ [HyperboloidPoint, PoincareBallPoint, PoincareBallPoint]
             pts = [
                 convert(T, [0.0, 0.0, 1.0]),
                 convert(T, [1.0, 0.0, sqrt(2.0)]),
@@ -100,7 +101,7 @@ include("utils.jl")
                 M,
                 pts,
                 test_project_tangent = true,
-                test_musical_isomorphisms = true,
+                test_musical_isomorphisms = is_plain_array,
                 test_default_vector_transport = true,
                 vector_transport_methods = [
                     ParallelTransport(),
@@ -111,12 +112,10 @@ include("utils.jl")
                 exp_log_atol_multiplier = 10.0,
                 retraction_methods = (ExponentialRetraction(),),
                 test_vee_hat = false,
-                test_forward_diff = !(
-                    T ∉ [HyperboloidPoint, PoincareBallPoint, PoincareBallPoint]
-                ),
-                test_reverse_diff = !(
-                    T ∉ [HyperboloidPoint, PoincareBallPoint, PoincareBallPoint]
-                ),
+                test_forward_diff = is_plain_array,
+                test_reverse_diff = is_plain_array,
+                test_tangent_vector_broadcasting = is_plain_array,
+                test_vector_spaces = is_plain_array,
             )
         end
     end

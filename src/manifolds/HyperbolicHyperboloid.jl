@@ -71,7 +71,7 @@ Poincaré ball model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a [`Hyperbo
 The isometry is defined by
 
 ````math
-π(p) = \frac{1}{1+\lVert p \rVert^2}
+π(p) = \frac{1}{1-\lVert p \rVert^2}
 \begin{pmatrix}2p_1\\\vdots\\2p_n\\1+\lVert p \rVert^2\end{pmatrix}
 ````
 
@@ -99,6 +99,70 @@ end
 function convert(t::Type{<:AbstractVector}, p::PoincareHalfSpacePoint)
     return convert(t, convert(PoincareBallPoint, p))
 end
+
+@doc raw"""
+    convert(::Type{HyperboloidTVector}, (p,X)::Tuple{PoincareBallPoint,PoincareBallTVector})
+    convert(::Type{<:AbstractVector}, (p,X)::Tuple{PoincareBallPoint,PoincareBallTVector})
+
+Convert the [`PoincareBallTVector`](@ref) `X` from the tangent space at `p` to a
+[`HyperboloidTVector`](@ref) by computing the push forward of the isometric map, cf.
+[`convert(::Type{HyperboloidPoint}, p::PoincareBallPoint)`](@ref).
+
+The push forward $π_*(p)$ maps from $ℝ^n$ to a subspace of $ℝ^{n+1}$, the formula reads
+
+````math
+π_*(p)[X] = \begin{pmatrix}
+    2X_1 + \frac{4}{(1-\lVert p \rVert^2)^2}⟨X,p⟩p_1\\
+    ⋮\\
+    2X_n + \frac{4}{(1-\lVert p \rVert^2)^2}⟨X,p⟩p_n\\
+    \frac{4}{(1-\lVert p \rVert^2)^2}⟨X,p⟩
+\end{pmatrix}.
+````
+"""
+function convert(
+    ::Type{HyperboloidTVector},
+    (p,X)::Tuple{PoincareBallPoint,PoincareBallTVector},
+)
+    return HyperboloidTVector(convert(AbstractVector,(p,X)))
+end
+function convert(
+    ::Type{<:AbstractVector},
+    (p,X)::Tuple{PoincareBallPoint,PoincareBallTVector}
+)
+    den = 4*dot(p.value,X.value)/( (1-norm(p.value)^2)^2 )
+    c1 = 2 .* X.value + den .* p.value
+    return [c1...,den]
+end
+
+@doc raw"""
+    convert(
+        ::Type{Tuple{HyperboloidPoint,HyperboloidTVector}}.
+        (p,X)::Tuple{PoincareBallPoint,PoincareBallTVector}
+    )
+    convert(
+        ::Type{Tuple{T,T}},
+        (p, X)::Tuple{PoincareBallPoint,PoincareBallTVector},
+    ) where {T <: AbstractVector}
+
+Convert a [`PoincareBallPoint`](@ref) `p` and a [`PoincareBallTVector`](@ref) `X`
+to a [`HyperboloidPoint`](@ref) and a [`HyperboloidTVector`](@ref) simultaneously,
+see [`convert(::Type{HyperboloidPoint}, ::PoincareBallPoint)`](@ref) and
+[`convert(::Type{HyperboloidTVector}, ::Tuple{PoincareBallPoint,PoincareBallTVector})`](@ref)
+for the formulae.
+"""
+function convert(
+    ::Type{Tuple{HyperboloidPoint,HyperboloidTVector}},
+    (p,X)::Tuple{PoincareBallPoint,PoincareBallTVector},
+)
+    return (convert(HyperboloidPoint,p), convert(HyperboloidTVector,(p,X)))
+end
+function convert(
+    ::Type{Tuple{T,T}},
+    (p,X)::Tuple{HyperboloidPoint,HyperboloidTVector}
+) where {T<:AbstractVector}
+    return (convert(T,p), convert(T,(p,X)))
+end
+
 
 @doc raw"""
     convert(
