@@ -96,6 +96,36 @@ end
 
 @doc raw"""
     convert(
+        ::Type{PoincareHalfSpaceTVector},
+        (p,X)::Tuple{HyperboloidPoint,HyperboloidTVector}
+    )
+    convert(::Type{PoincareHalfSpaceTVector}, (p, X)::Tuple{T,T}) where {T<:AbstractVector}
+
+convert a [`HyperboloidTVector`](@ref) `X` at `p` to a [`PoincareHalfSpaceTVector`](@ref)
+on the [`Hyperbolic`](@ref) manifold $ℍ^n$ by computing the push forward $π_*(p)[X]$ of
+the isometry $π$ that maps from the Hyperboloid to the Poincaré half space,
+cf. [`convert(::Type{PoincareHalfSpacePoint}, ::HyperboloidPoint)`](@ref).
+
+This is done similarly to the approach there, i.e. by using the Poincaré ball model as
+an intermediate step.
+"""
+convert(::Type{PoincareHalfSpaceTVector}, ::Any)
+function convert(
+    t::Type{PoincareHalfSpaceTVector},
+    (p, X)::Tuple{HyperboloidPoint,HyperboloidTVector},
+)
+    return convert(t, (convert(AbstractVector, p), convert(AbstractVector, X)))
+end
+function convert(
+    ::Type{PoincareHalfSpaceTVector},
+    (p, X)::Tuple{T,T},
+) where {T<:AbstractVector}
+    (q, Y) = convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X))
+    return convert(PoincareHalfSpaceTVector, (q, Y))
+end
+
+@doc raw"""
+    convert(
         ::Type{Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector}},
         (p,X)::Tuple{PoincareBallPoint,PoincareBallTVector}
     )
@@ -112,6 +142,38 @@ function convert(
 )
     return (convert(PoincareBallPoint, p), convert(PoincareBallTVector, (p, X)))
 end
+
+@doc raw"""
+    convert(
+        ::Type{Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector}},
+        (p,X)::Tuple{HyperboloidPoint,HyperboloidTVector}
+    )
+    convert(
+        ::Type{Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector}},
+        (p, X)::Tuple{T,T},
+    ) where {T <: AbstractVector}
+
+Convert a [`HyperboloidPoint`](@ref) `p` and a [`HyperboloidTVector`](@ref) `X`
+to a [`PoincareHalfSpacePoint`](@ref) and a [`PoincareHalfSpaceTVector`](@ref) simultaneously,
+see [`convert(::Type{PoincareHalfSpacePoint}, ::HyperboloidPoint)`](@ref) and
+[`convert(::Type{PoincareHalfSpaceTVector}, ::Tuple{HyperboloidPoint,HyperboloidTVector})`](@ref)
+for the formulae.
+"""
+function convert(
+    ::Type{Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector}},
+    (p, X)::Tuple{HyperboloidPoint,HyperboloidTVector},
+)
+    (q, Y) = convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X))
+    return (convert(PoincareHalfSpacePoint, p), convert(PoincareBallTVector, (q, Y)))
+end
+function convert(
+    ::Type{Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector}},
+    (p, X)::Tuple{T,T},
+) where {T<:AbstractVector}
+    (q, Y) = convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X))
+    return (convert(PoincareHalfSpacePoint, q), convert(PoincareHalfSpaceTVector, (q, Y)))
+end
+
 
 @doc raw"""
     distance(::Hyperbolic, p::PoincareHalfSpacePoint, q::PoincareHalfSpacePoint)

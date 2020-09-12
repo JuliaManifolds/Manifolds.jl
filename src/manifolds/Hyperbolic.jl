@@ -220,7 +220,7 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
         q.value .=
             convert(
                 $P,
-                exp(M, convert(AbstractVector, p), convert(AbstractVector, X)),
+                exp(M, convert(AbstractVector, p), convert(AbstractVector, (p, X))),
             ).value
         return q
     end
@@ -279,7 +279,10 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
         X.value .=
             convert(
                 $T,
-                log(M, convert(AbstractVector, p), convert(AbstractVector, q)),
+                (
+                    convert(AbstractVector, p),
+                    log(M, convert(AbstractVector, p), convert(AbstractVector, q)),
+                ),
             ).value
         return X
     end

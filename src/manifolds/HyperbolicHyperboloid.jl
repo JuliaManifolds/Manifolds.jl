@@ -46,14 +46,21 @@ function check_tangent_vector(
     return check_tangent_vector(M, p.value, X.value; kwargs...)
 end
 
-function convert(::Type{HyperboloidTVector}, x::T) where {T<:AbstractVector}
-    return HyperboloidTVector(x)
+function convert(::Type{HyperboloidTVector}, X::T) where {T<:AbstractVector}
+    return HyperboloidTVector(X)
 end
-convert(::Type{<:AbstractVector}, x::HyperboloidTVector) = x.value
-function convert(::Type{HyperboloidPoint}, x::T) where {T<:AbstractVector}
-    return HyperboloidPoint(x)
+function convert(::Type{HyperboloidTVector}, (p,X)::Tuple{T,T}) where {T<:AbstractVector}
+    return HyperboloidTVector(X)
 end
-convert(::Type{<:AbstractVector}, x::HyperboloidPoint) = x.value
+convert(::Type{<:AbstractVector}, X::HyperboloidTVector) = X.value
+function convert(::Type{<:AbstractVector}, (p,X)::Tuple{HyperboloidPoint,HyperboloidTVector})
+    return X.value
+end
+
+function convert(::Type{HyperboloidPoint}, p::T) where {T<:AbstractVector}
+    return HyperboloidPoint(p)
+end
+convert(::Type{<:AbstractVector}, p::HyperboloidPoint) = p.value
 
 @doc raw"""
     convert(::Type{HyperboloidPoint}, p::PoincareBallPoint)
@@ -86,12 +93,63 @@ Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a [`H
 
 This is done in two steps, namely transforming it to a Poincare ball point and from there further on to a Hyperboloid point.
 """
-
 function convert(t::Type{HyperboloidPoint}, p::PoincareHalfSpacePoint)
     return convert(t, convert(PoincareBallPoint, p))
 end
 function convert(t::Type{<:AbstractVector}, p::PoincareHalfSpacePoint)
     return convert(t, convert(PoincareBallPoint, p))
+end
+
+@doc raw"""
+    convert(
+        ::Type{HyperboloidTVector},
+        (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTVector}
+    )
+    convert(
+        ::Type{<:AbstractVector},
+        (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTVector}
+    )
+
+convert a point [`PoincareHalfSpaceTVector`](@ref) `X` (from $ℝ^n$) at `p` from the
+Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a
+[`HyperboloidTVector`](@ref) $π(p) ∈ ℝ^{n+1}$.
+
+This is done in two steps, namely transforming it to a Poincare ball point and from there further on to a Hyperboloid point.
+"""
+function convert(t::Type{HyperboloidTVector}, (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTVector})
+    (q,Y) = convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p,X))
+    return convert(t, (q,Y))
+end
+function convert(t::Type{<:AbstractVector}, (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTVector})
+    (q,Y) = convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p,X))
+    return convert(t, (q,Y))
+end
+
+@doc raw"""
+    convert(
+        ::Type{Tuple{HyperboloidPoint,HyperboloidTVector},
+        (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTVector}
+    )
+    convert(
+        ::Type{Tuple{T,T},
+        (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTVector}
+    ) where {T<:AbstractVector}
+
+convert a point [`PoincareHalfSpaceTVector`](@ref) `X` (from $ℝ^n$) at `p` from the
+Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $ℍ^n$
+to a tuple of a [`HyperboloidPoint`](@ref) and a [`HyperboloidTVector`](@ref) $π(p) ∈ ℝ^{n+1}$
+simultaneously.
+
+This is done in two steps, namely transforming it to the Poincare ball model and from there
+further on to a Hyperboloid.
+"""
+function convert(t::Type{Tuple{HyperboloidPoint,HyperboloidTVector}}, (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTVector})
+    (q,Y) = convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p,X))
+    return convert(t, (q,Y))
+end
+function convert(t::Type{Tuple{T,T}}, (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTVector}) where {T<:AbstractVector}
+    (q,Y) = convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p,X))
+    return convert(t, (q,Y))
 end
 
 @doc raw"""

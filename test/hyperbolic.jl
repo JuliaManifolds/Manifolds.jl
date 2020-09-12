@@ -114,7 +114,7 @@ include("utils.jl")
                 test_forward_diff = !(
                     T ∉ [HyperboloidPoint, PoincareBallPoint, PoincareBallPoint]
                 ),
-                test_backward_diff = !(
+                test_reverse_diff = !(
                     T ∉ [HyperboloidPoint, PoincareBallPoint, PoincareBallPoint]
                 ),
             )
