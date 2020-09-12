@@ -162,24 +162,72 @@ function convert(::Type{PoincareBallPoint}, x::T) where {T<:AbstractVector}
 end
 
 @doc raw"""
-    convert(::Type{HyperboloidPoint}, x::PoincareBallPoint)
+    convert(::Type{HyperboloidPoint}, p::PoincareBallPoint)
 
 convert a point [`PoincareBallPoint`](@ref) `x` (from $ℝ^n$) from the
-Poincaré ball model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a [`HyperboloidPoint`](@ref) $π(x) ∈ ℝ^{n+1}$.
+Poincaré ball model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a [`HyperboloidPoint`](@ref) $π(p) ∈ ℝ^{n+1}$.
 The isometry is defined by
 
 ````math
-π(x) = \frac{1}{1+\lVert x \rVert^2}
-\begin{pmatrix}2x_1\\\vdots\\2x_n\\1+\lVert x \rVert^2\end{pmatrix}
+π(p) = \frac{1}{1+\lVert p \rVert^2}
+\begin{pmatrix}2p_1\\\vdots\\2p_n\\1+\lVert p \rVert^2\end{pmatrix}
 ````
 
 Note that this is also used, when the type to convert to is a vector.
 """
-function convert(::Type{HyperboloidPoint}, x::PoincareBallPoint)
-    return HyperboloidPoint(convert(AbstractVector, x))
+function convert(::Type{HyperboloidPoint}, p::PoincareBallPoint)
+    return HyperboloidPoint(convert(AbstractVector, p))
 end
-function convert(::Type{<:AbstractVector}, x::PoincareBallPoint)
-    return 1 / (1 - norm(x.value)^2) .* [(2 .* x.value)..., 1 + norm(x.value)^2]
+function convert(::Type{<:AbstractVector}, p::PoincareBallPoint)
+    return 1 / (1 - norm(p.value)^2) .* [(2 .* p.value)..., 1 + norm(p.value)^2]
+end
+
+@doc raw"""
+    convert(
+        ::Type{PoincareBallTVector},
+        (p,X)::Tuple{HyperboloidPoint,HyperboloidTVector}
+    )
+
+convert a [`HyperboloidTVector`](@ref) `X` at `p` to a [`PoincareBallTVector`](@ref)
+on the [`Hyperbolic`](@ref) manifold $ℍ^n$ by computing the push forward $π_*(p)[X]$ of
+the isometry $π$ that maps from the Hyperboloid to the Poincaré ball,
+cf. [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref).
+
+The formula reads
+
+````math
+π_*(p)[X] = \frac{1}{p_{n+1}+1}\Bigl(\tilde X - \frac{X_{n+1}}{p_{n+1}+1}\tilde p \Bigl),
+````
+
+where $\tilde X = \begin{pmatrix}X_1\\\vdots\\X_n\end{pmatrix}$
+and $\tilde p = \begin{pmatrix}p_1\\\vdots\\p_n\end{pmatrix}$.
+"""
+function convert(
+    ::Type{PoincareBallTVector},
+    (p, X)::Tuple{HyperboloidPoint,HyperboloidTVector},
+)
+    return PoincareBallTVector(
+        1 / (p[end] + 1) .* (X[1:(end - 1)] .- (X[end] / (p[end] + 1) .* p[1:(end - 1)])),
+    )
+end
+
+@doc raw"""
+    convert(
+        ::Type{Tuple{PoincareBallPoint,PoincareBallTVector}},
+        (p,X)::Tuple{HyperboloidPoint,HyperboloidTVector}
+    )
+
+Convert a [`HyperboloidPoint`](@ref) `p` and a [`HyperboloidTVector`](@ref) `X`
+to a [`PoincareBallPoint`](@ref) and a [`PoincareBallTVector`](@ref) simultaneously,
+see [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref) and
+[`convert(::Type{PoincareBallTVector}, ::Tuple{HyperboloidPoint,HyperboloidTVector})`](@ref)
+for the formulae.
+"""
+function convert(
+    ::Type{Tuple{PoincareBallPoint,PoincareBallTVector}},
+    (p, X)::Tuple{HyperboloidPoint,HyperboloidTVector},
+)
+    return (convert(PoincareBallPoint, p), convert(PoincareBallTVector, (p, X)))
 end
 
 @doc raw"""
@@ -191,7 +239,7 @@ Denote by $\tilde x = (x_1,\ldots,x_{d-1})$. Then the isometry is defined by
 
 ````math
 π(x) = \frac{1}{\lVert \tilde x \rVert^2 - (x_n-1)^2}
-\begin{pmatrix}2x_1\\\vdots\\2x_{n-1}\\1-\lVert\tilde x\rVert^2 - x_n^2-1\end{pmatrix}.
+\begin{pmatrix}2x_1\\\vdots\\2x_{n-1}\\1-\lVert\tilde x\rVert^2 - x_n^2\end{pmatrix}.
 ````
 """
 function convert(::Type{PoincareHalfSpacePoint}, x::PoincareBallPoint)
@@ -202,23 +250,114 @@ function convert(::Type{PoincareHalfSpacePoint}, x::PoincareBallPoint)
 end
 
 @doc raw"""
-    convert(::Type{PoincareBallPoint}, x::PoincareHalfSpacePoint)
+    convert(
+        ::Type{PoincareHalfSpaceTVector},
+        (p,X)::Tuple{PoincareBallPoint,PoincareBallTVector}
+    )
 
-convert a point [`PoincareHalfSpacePoint`](@ref) `x` (from $ℝ^n$) from the
-Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a [`PoincareBallPoint`](@ref) $π(x) ∈ ℝ^n$.
-Denote by $\tilde x = (x_1,\ldots,x_{d-1})$. Then the isometry is defined by
+convert a [`PoincareBallTVector`](@ref) `X` at `p` to a [`PoincareHalfSpacePoint`](@ref)
+on the [`Hyperbolic`](@ref) manifold $ℍ^n$ by computing the push forward $π_*(p)[X]$ of
+the isometry $π$ that maps from the Poincaré ball to the Poincaré half space,
+cf. [`convert(::Type{PoincareHalfSpacePoint}, ::PoincareBallPoint)`](@ref).
+
+The formula reads
 
 ````math
-π(x) = \frac{1}{\lVert \tilde x \rVert^2 + (x_n+1)^2}
-\begin{pmatrix}2x_1\\\vdots\\2x_{n-1}\\\lVert\tilde x\rVert^2 + x_n^2-1\end{pmatrix}.
+π_*(p)[X] =
+\frac{1}{\lVert \tilde p\rVert^2 + (1+p_n)^2}
+\begin{pmatrix}
+2X_1\\
+⋮\\
+2X_{n-1}\\
+-2⟨X,p⟩
+\end{pmatrix}
+-
+\frac{2}{(\lVert \tilde p\rVert^2 + (1+p_n)^2)^2}
+\begin{pmatrix}
+2p_1(⟨X,p⟩-X_1)\\
+⋮\\
+2p_{n-1}(⟨X,p⟩-X_{n-1})\\
+(\lVert p \rVert^2-1)(⟨X,p⟩-X_n)
+\end{pmatrix}
+````
+where $\tilde p = \begin{pmatrix}p_1\\\vdots\\p_{n-1}\end{pmatrix}$.
+"""
+function convert(
+    ::Type{PoincareHalfSpaceTVector},
+    (p, X)::Tuple{PoincareBallPoint,PoincareBallTVector},
+)
+    den = 1 + norm(p.value[1:end-1])^2 + (last(p.value)+1)^2
+    scp = dot(p.value,X.value)
+    c1 = (2/den .* X.value[1:end-1])
+        .- 4 .* p.value[1:end-1] .* (scp .- X.value[1:end-1]) ./ (den^2)
+    c2 = -2*scp/den + 2*(norm(p.value)^2-1)*(scp-last(X.value)) / (den^2)
+    return PoincareHalfSpaceTVector([c1...,c2])
+end
+
+@doc raw"""
+    convert(::Type{PoincareBallPoint}, p::PoincareHalfSpacePoint)
+
+convert a point [`PoincareHalfSpacePoint`](@ref) `p` (from $ℝ^n$) from the
+Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a [`PoincareBallPoint`](@ref) $π(p) ∈ ℝ^n$.
+Denote by $\tilde p = (p_1,\ldots,p_{d-1})$. Then the isometry is defined by
+
+````math
+π(p) = \frac{1}{\lVert \tilde p \rVert^2 + (p_n+1)^2}
+\begin{pmatrix}2p_1\\\vdots\\2p_{n-1}\\\lVert p\rVert^2 - 1\end{pmatrix}.
 ````
 """
-function convert(::Type{PoincareBallPoint}, x::PoincareHalfSpacePoint)
+function convert(::Type{PoincareBallPoint}, p::PoincareHalfSpacePoint)
     return PoincareBallPoint(
-        1 / (norm(x.value[1:(end - 1)])^2 + (last(x.value) + 1)^2) .*
-        [x.value[1:(end - 1)]..., norm(x.value[1:(end - 1)])^2 + last(x.value)^2 - 1],
+        1 / (norm(p.value[1:(end - 1)])^2 + (last(p.value) + 1)^2) .*
+        [p.value[1:(end - 1)]..., norm(p.value)^2 - 1],
     )
 end
+
+@doc raw"""
+    convert(
+        ::Type{PoincareBallTVector},
+        (p,X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector}
+    )
+
+convert a [`PoincareHalfSpaceTVector`](@ref) `X` at `p` to a [`PoincareBallTVector`](@ref)
+on the [`Hyperbolic`](@ref) manifold $ℍ^n$ by computing the push forward $π_*(p)[X]$ of
+the isometry $π$ that maps from the Poincaré half space to the Poincaré ball,
+cf. [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref).
+
+The formula reads
+
+````math
+π_*(p)[X] =
+\frac{1}{\lVert \tilde p\rVert^2 + (1+p_n)^2}
+\begin{pmatrix}
+2X_1\\
+⋮\\
+2X_{n-1}\\
+2⟨X,p⟩
+\end{pmatrix}
+-
+\frac{2}{(\lVert \tilde p\rVert^2 + (1+p_n)^2)^2}
+\begin{pmatrix}
+2p_1(⟨X,p⟩+X_1)\\
+⋮\\
+2p_{n-1}(⟨X,p⟩+X_{n-1})\\
+(1-\lVert p \rVert^2)(⟨X,p⟩+X_n)
+\end{pmatrix}
+````
+where $\tilde p = \begin{pmatrix}p_1\\\vdots\\p_{n-1}\end{pmatrix}$.
+"""
+function convert(
+    ::Type{PoincareBallTVector},
+    (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector},
+)
+    den = 1 + norm(p.value[1:end-1])^2 + (last(p.value)+1)^2
+    scp = dot(p.value,X.value)
+    c1 = (2/den .* X.value[1:end-1])
+        .- 4 .* p.value[1:end-1] .* (scp .+ X.value[1:end-1]) ./ (den^2)
+    c2 = 2*scp/den + 2*(1-norm(p.value)^2)*(scp + last(X.value))
+    return PoincareBallTVector([c1...,c2])
+end
+
 
 @doc raw"""
     convert(::Type{HyperboloidPoint, x::PoincareHalfSpacePoint)
@@ -389,6 +528,7 @@ default_metric_dispatch(::Hyperbolic, ::MinkowskiMetric) = Val(true)
 
 @doc raw"""
     distance(M::Hyperbolic, p, q)
+    distance(M::Hyperbolic, p::HyperboloidPoint, q::HyperboloidPoint)
 
 Compute the distance on the [`Hyperbolic`](@ref) `M`, which reads
 
@@ -400,15 +540,41 @@ where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on 
 the [`Lorentz`](@ref)ian manifold.
 """
 distance(::Hyperbolic, p, q) = acosh(max(-minkowski_metric(p, q), 1.0))
-function distance(M::Hyperbolic, p::PoincareBallPoint{T}, q::PoincareBallPoint{T}) where {T}
-    return distance(M, convert(AbstractVector, p), convert(AbstractVector, q))
+function distance(M::Hyperbolic, p::HyperboloidPoint, q::HyperboloidPoint)
+    return distance(M, p.value, q.value)
 end
-function distance(
-    M::Hyperbolic,
-    p::PoincareHalfSpacePoint{T},
-    q::PoincareHalfSpacePoint{T},
-) where {T}
-    return distance(M, convert(AbstractVector, p), convert(AbstractVector, q))
+@doc raw"""
+    distance(::Hyperbolic, p::PoincareHalfSpacePoint, q::PoincareHalfSpacePoint)
+
+Compute the distance on the [`Hyperbolic`](@ref) manifold $ℍ^n$ represented in the
+Poincaré half space model. The formula reads
+
+````math
+d_{ℍ^n}(p,q) = \operatorname{acosh}\Bigl( 1 + \frac{\lVert p - q \rVert^2}{2 p_n q_n} \Bigr)
+````
+"""
+function distance(::Hyperbolic, p::PoincareHalfSpacePoint, q::PoincareHalfSpacePoint)
+    return acosh(1 + norm(p.value .- q.value)^2 / (2 * p.value[end] * q.value[end]))
+end
+
+@doc raw"""
+    distance(::Hyperbolic, p::PoincareBallPoint, q::PoincareBallPoint)
+
+Compute the distance on the [`Hyperbolic`](@ref) manifold $ℍ^n$ represented in the
+Poincaré ball model. The formula reads
+
+````math
+d_{ℍ^n}(p,q) =
+\operatorname{acosh}\Bigl(
+  1 + \frac{2\lVert p - q \rVert^2}{(1-\lVert p\rVert^2)(1-\lVert q\rVert^2)}
+\Bigr)
+````
+"""
+function distance(::Hyperbolic, p::PoincareBallPoint, q::PoincareBallPoint)
+    return acosh(
+        1 +
+        2 * norm(p.value .- q.value)^2 / ((1 - norm(p.value)^2) * (1 - norm(q.value)^2)),
+    )
 end
 
 embed!(::Hyperbolic, q, p::T) where {T<:AbstractVector} = (q .= p)
@@ -468,6 +634,19 @@ eval(
     end,
 )
 
+@doc raw"""
+    inner(
+        ::Hyperbolic{n},
+        p::PoincareHalfSpacePoint,
+        X::PoincareHalfSpaceTVector,
+        Y::PoincareHalfSpaceTVector
+    )
+
+Compute the inner product in the Poincaré half space model. The formula reads
+````math
+g_p(X,Y) = \frac{⟨X,Y⟩}{p_n^2}.
+````
+"""
 function inner(
     ::Hyperbolic,
     p::PoincareHalfSpacePoint,
@@ -476,6 +655,16 @@ function inner(
 )
     return dot(X.value, Y.value) / last(p.value)^2
 end
+@doc raw"""
+    inner(M::Hyperbolic{n}, p::HyperboloidPoint, X::HyperboloidTVector, Y::HyperboloidTVector)
+
+Cmpute the inner product in the Hyperboloid model, i.e. the [`minkowski_metric`](@ref) in
+the embedding. The formula reads
+
+````math
+g_p(X,Y) = ⟨X,Y⟩_{\mathrm{M}} = -X_{n}Y_{n} + \displaystyle\sum_{k=1}^{n-1} X_kY_k.
+````
+"""
 function inner(
     M::Hyperbolic,
     p::HyperboloidPoint,
@@ -484,13 +673,22 @@ function inner(
 )
     return inner(M, p.value, X.value, Y.value)
 end
+
+@doc raw"""
+    inner(::Hyperbolic, p::PoincareBallPoint, X::PoincareBallTVector, Y::PoincareBallTVector)
+
+Compute the inner producz in the Poincaré ball model. The formula reads
+````math
+g_p(X,Y) = \frac{4}{(1-\lVert p \rVert^2)^2}  ⟨X, Y⟩ .
+````
+"""
 function inner(
-    M::Hyperbolic,
+    ::Hyperbolic,
     p::PoincareBallPoint,
     X::PoincareBallTVector,
     Y::PoincareBallTVector,
 )
-    return inner(M, conert(Vector, p), convert(Vector, X), convert(Vector, Y))
+    return 4 / (1 - norm(p)^2)^2 * dot(X.value, Y.value)
 end
 
 for T in _HyperbolicPointTypes
@@ -572,7 +770,7 @@ for T in _HyperbolicTypes
 end
 
 function minkowski_metric(a::HyperboloidPoint, b::HyperboloidPoint)
-    return minkowski_metric(convert(Vector,a), convert(Vector,b))
+    return minkowski_metric(convert(Vector, a), convert(Vector, b))
 end
 
 @doc raw"""
@@ -633,6 +831,27 @@ function vector_transport_to!(M::Hyperbolic, Y, p, X, q, ::ParallelTransport)
 end
 
 for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
+    @eval function vector_transport_to!(
+        M::Hyperbolic,
+        Y::$T,
+        p::$P,
+        X::$T,
+        q::$P,
+        m::ParallelTransport,
+    )
+        Y.value .=
+            convert(
+                $T,
+                vector_transport_to(
+                    M,
+                    convert(Vector, p),
+                    convert(Vector, X),
+                    convert(Vector, q),
+                    m,
+                ),
+            ).value
+        return Y
+    end
     @eval zero_tangent_vector(::Hyperbolic, p::$P) = $T(zero(p.value))
     @eval zero_tangent_vector!(::Hyperbolic, X::$T, ::$P) = fill!(X.value, 0)
 end
