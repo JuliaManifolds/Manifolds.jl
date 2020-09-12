@@ -170,7 +170,7 @@ function convert(
         convert(
             PoincareBallTVector,
             convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)),
-        )
+        ),
     )
 end
 function convert(
@@ -182,7 +182,7 @@ function convert(
         convert(
             PoincareHalfSpaceTVector,
             convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)),
-            ),
+        ),
     )
 end
 
@@ -221,4 +221,21 @@ function inner(
     Y::PoincareHalfSpaceTVector,
 )
     return dot(X.value, Y.value) / last(p.value)^2
+end
+
+@doc raw"""
+    project(::Hyperbolic, ::PoincareHalfSpacePoint ::PoincareHalfSpaceTVector)
+
+projction of tangent vectors in the Poincaré half space model is just the identity, since
+the tangent space consists of all $ℝ^n$.
+"""
+project(::Hyperbolic, ::PoincareHalfSpacePoint::PoincareHalfSpaceTVector)
+
+function project!(
+    ::Hyperbolic,
+    Y::PoincareHalfSpaceTVector,
+    ::PoincareHalfSpacePoint,
+    X::PoincareHalfSpaceTVector,
+)
+    return (Y.value .= X.value)
 end

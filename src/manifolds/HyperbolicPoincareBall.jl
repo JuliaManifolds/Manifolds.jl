@@ -159,6 +159,29 @@ function convert(
 end
 
 @doc raw"""
+    convert(
+        ::Type{Tuple{PoincareBallPoint,PoincareBallTVector}},
+        (p,X)::Tuple{HyperboloidPoint,HyperboloidTVector}
+    )
+    convert(
+        ::Type{Tuple{PoincareBallPoint,PoincareBallTVector}},
+        (p, X)::Tuple{T,T},
+    ) where {T <: AbstractVector}
+
+Convert a [`PoincareHalfSpacePoint`](@ref) `p` and a [`PoincareHalfSpaceTVector`](@ref) `X`
+to a [`PoincareBallPoint`](@ref) and a [`PoincareBallTVector`](@ref) simultaneously,
+see [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref) and
+[`convert(::Type{PoincareBallTVector}, ::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector})`](@ref)
+for the formulae.
+"""
+function convert(
+    ::Type{Tuple{PoincareBallPoint,PoincareBallTVector}},
+    (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector},
+)
+    return (convert(PoincareBallPoint, p), convert(PoincareBallTVector, (p, X)))
+end
+
+@doc raw"""
     distance(::Hyperbolic, p::PoincareBallPoint, q::PoincareBallPoint)
 
 Compute the distance on the [`Hyperbolic`](@ref) manifold $ℍ^n$ represented in the
@@ -193,4 +216,21 @@ function inner(
     Y::PoincareBallTVector,
 )
     return 4 / (1 - norm(p.value)^2)^2 * dot(X.value, Y.value)
+end
+
+@doc raw"""
+    project(::Hyperbolic, ::PoincareBallPoint, ::PoincareBallTVector)
+
+projction of tangent vectors in the Poincaré ball model is just the identity, since
+the tangent space consists of all $ℝ^n$.
+"""
+project(::Hyperbolic, ::PoincareBallPoint, ::PoincareBallTVector)
+
+function project!(
+    ::Hyperbolic,
+    Y::PoincareBallTVector,
+    ::PoincareBallPoint,
+    X::PoincareBallTVector,
+)
+    return (Y.value .= X.value)
 end
