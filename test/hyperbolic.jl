@@ -91,7 +91,8 @@ include("utils.jl")
     TEST_FLOAT32 && push!(types, Vector{Float32})
     for T in types
         @testset "Type $T" begin
-            is_plain_array = T ∉ [HyperboloidPoint, PoincareBallPoint, PoincareBallPoint]
+            is_plain_array =
+                T ∉ [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint]
             pts = [
                 convert(T, [0.0, 0.0, 1.0]),
                 convert(T, [1.0, 0.0, sqrt(2.0)]),
