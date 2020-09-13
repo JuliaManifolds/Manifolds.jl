@@ -54,9 +54,9 @@ function convert(::Type{HyperboloidTVector}, (p, X)::Tuple{T,T}) where {T<:Abstr
 end
 convert(::Type{<:AbstractVector}, X::HyperboloidTVector) = X.value
 function convert(
-    ::Type{<:AbstractVector},
+    ::Type{T},
     (p, X)::Tuple{HyperboloidPoint,HyperboloidTVector},
-)
+) where {T<:AbstractVector}
     return X.value
 end
 
@@ -129,9 +129,9 @@ function convert(
     return HyperboloidTVector(convert(AbstractVector, (p, X)))
 end
 function convert(
-    ::Type{<:AbstractVector},
+    ::Type{T},
     (p, X)::Tuple{PoincareBallPoint,PoincareBallTVector},
-)
+) where {T<:AbstractVector}
     den = 4 * dot(p.value, X.value) / ((1 - norm(p.value)^2)^2)
     c1 = 2 .* X.value + den .* p.value
     return [c1..., den]
@@ -190,9 +190,9 @@ function convert(
     return convert(t, convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)))
 end
 function convert(
-    t::Type{<:AbstractVector},
+    t::Type{T},
     (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector},
-)
+) where {T<:AbstractVector}
     return convert(t, convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)))
 end
 
