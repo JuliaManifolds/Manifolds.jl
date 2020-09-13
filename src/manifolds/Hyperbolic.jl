@@ -189,6 +189,17 @@ for T in _HyperbolicTypes
     @eval Base.copyto!(p::$T, q::$T) = copyto!(p.value, q.value)
 end
 
+for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
+    @eval convert(::Type{Tuple{$P,$T}}, (p, X)::Tuple{$P,$T}) = (p, X)
+    @eval convert(::Type{$T}, (p, X)::Tuple{$P,$T}) = X
+    @eval function convert(
+        ::Type{Tuple{T,T}},
+        (p, X)::Tuple{$P,$T},
+    ) where {T<:AbstractVector}
+        return (convert(T, p), convert(T, (p, X)))
+    end
+end
+
 decorated_manifold(::Hyperbolic{N}) where {N} = Lorentz(N + 1, MinkowskiMetric())
 
 default_metric_dispatch(::Hyperbolic, ::MinkowskiMetric) = Val(true)

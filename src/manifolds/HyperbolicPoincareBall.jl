@@ -76,7 +76,7 @@ function convert(
     t::Type{PoincareBallTVector},
     (p, X)::Tuple{HyperboloidPoint,HyperboloidTVector},
 )
-    return convert(t, (convert(AbstractVector, p), convert(AbstractVector, X)))
+    return convert(t, (convert(AbstractVector, p), convert(AbstractVector, (p, X))))
 end
 function convert(::Type{PoincareBallTVector}, (p, X)::Tuple{T,T}) where {T<:AbstractVector}
     return PoincareBallTVector(

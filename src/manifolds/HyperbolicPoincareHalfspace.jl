@@ -179,7 +179,7 @@ function convert(
     (p, X)::Tuple{T,T},
 ) where {T<:AbstractVector}
     return (
-        convert(PoincareHalfSpacePoint, q),
+        convert(PoincareHalfSpacePoint, convert(PoincareBallPoint, p)),
         convert(
             PoincareHalfSpaceTVector,
             convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)),

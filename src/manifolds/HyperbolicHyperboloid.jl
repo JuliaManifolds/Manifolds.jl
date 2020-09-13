@@ -160,13 +160,6 @@ function convert(
 )
     return (convert(HyperboloidPoint, p), convert(HyperboloidTVector, (p, X)))
 end
-function convert(
-    ::Type{Tuple{T,T}},
-    (p, X)::Tuple{HyperboloidPoint,HyperboloidTVector},
-) where {T<:AbstractVector}
-    return (convert(T, p), convert(T, (p, X)))
-end
-
 
 @doc raw"""
     convert(
@@ -219,12 +212,6 @@ function convert(
     t::Type{Tuple{HyperboloidPoint,HyperboloidTVector}},
     (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector},
 )
-    return convert(t, convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)))
-end
-function convert(
-    t::Type{Tuple{T,T}},
-    (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector},
-) where {T<:AbstractVector}
     return convert(t, convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)))
 end
 
