@@ -36,7 +36,7 @@ end
 
 convert a point [`PoincareHalfSpacePoint`](@ref) `p` (from $ℝ^n$) from the
 Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a [`PoincareBallPoint`](@ref) $π(p) ∈ ℝ^n$.
-Denote by $\tilde p = (p_1,\ldots,p_{d-1})$. Then the isometry is defined by
+Denote by $\tilde p = (p_1,\ldots,p_{d-1})^{\mathrm{T}}$. Then the isometry is defined by
 
 ````math
 π(p) = \frac{1}{\lVert \tilde p \rVert^2 + (p_n+1)^2}
@@ -46,7 +46,7 @@ Denote by $\tilde p = (p_1,\ldots,p_{d-1})$. Then the isometry is defined by
 function convert(::Type{PoincareBallPoint}, p::PoincareHalfSpacePoint)
     return PoincareBallPoint(
         1 / (norm(p.value[1:(end - 1)])^2 + (last(p.value) + 1)^2) .*
-        [p.value[1:(end - 1)]..., norm(p.value)^2 - 1],
+        [2 .* p.value[1:(end - 1)]..., norm(p.value)^2 - 1],
     )
 end
 

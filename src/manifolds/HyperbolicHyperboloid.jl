@@ -115,9 +115,9 @@ The push forward $π_*(p)$ maps from $ℝ^n$ to a subspace of $ℝ^{n+1}$, the f
 
 ````math
 π_*(p)[X] = \begin{pmatrix}
-    2X_1 + \frac{4}{(1-\lVert p \rVert^2)^2}⟨X,p⟩p_1\\
+    \frac{2X_1}{1-\lVert p \rVert^2} + \frac{4}{(1-\lVert p \rVert^2)^2}⟨X,p⟩p_1\\
     ⋮\\
-    2X_n + \frac{4}{(1-\lVert p \rVert^2)^2}⟨X,p⟩p_n\\
+    \frac{2X_n}{1-\lVert p \rVert^2} + \frac{4}{(1-\lVert p \rVert^2)^2}⟨X,p⟩p_n\\
     \frac{4}{(1-\lVert p \rVert^2)^2}⟨X,p⟩
 \end{pmatrix}.
 ````
@@ -132,8 +132,9 @@ function convert(
     ::Type{T},
     (p, X)::Tuple{PoincareBallPoint,PoincareBallTVector},
 ) where {T<:AbstractVector}
-    den = 4 * dot(p.value, X.value) / ((1 - norm(p.value)^2)^2)
-    c1 = 2 .* X.value + den .* p.value
+    t = (1 - norm(p.value)^2)
+    den = 4 * dot(p.value, X.value) / (t^2)
+    c1 = (2/t) .* X.value + den .* p.value
     return [c1..., den]
 end
 
