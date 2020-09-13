@@ -138,10 +138,10 @@ The formula reads
 -
 \frac{2}{(\lVert \tilde p\rVert^2 + (1+p_n)^2)^2}
 \begin{pmatrix}
-2p_1(⟨X,p⟩+X_1)\\
+2p_1(⟨X,p⟩+X_n)\\
 ⋮\\
-2p_{n-1}(⟨X,p⟩+X_{n-1})\\
-(1-\lVert p \rVert^2)(⟨X,p⟩+X_n)
+2p_{n-1}(⟨X,p⟩+X_n)\\
+(\lVert p \rVert^2-1)(⟨X,p⟩+X_n)
 \end{pmatrix}
 ````
 where $\tilde p = \begin{pmatrix}p_1\\\vdots\\p_{n-1}\end{pmatrix}$.
@@ -153,8 +153,8 @@ function convert(
     den = 1 + norm(p.value[1:(end - 1)])^2 + (last(p.value) + 1)^2
     scp = dot(p.value, X.value)
     c1 = (2 / den .* X.value[1:(end - 1)])
-    .-4 .* p.value[1:(end - 1)] .* (scp .+ X.value[1:(end - 1)]) ./ (den^2)
-    c2 = 2 * scp / den + 2 * (1 - norm(p.value)^2) * (scp + last(X.value))
+    .-4 .* p.value[1:(end - 1)] .* (scp .+ last(X.value)) ./ (den^2)
+    c2 = 2 * scp / den - 2 * (norm(p.value)^2-1) * (scp + last(X.value)) / (den^2)
     return PoincareBallTVector([c1..., c2])
 end
 
