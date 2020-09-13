@@ -18,7 +18,7 @@ manifold $ℍ^n$ to a [`PoincareBallPoint`](@ref) $π(x)∈ℝ^{n}$ in the Poinc
 The isometry is defined by
 
 ````math
-π(x) = \frac{1}{1+x_{n+1}} \begin{pmatrix}x_1\\\vdots\\x_n\end{pmatrix}
+π(x) = \frac{1}{1+x_{n+1}} \begin{pmatrix}x_1\\⋮\\x_n\end{pmatrix}
 ````
 
 Note that this is also used, when `x` is a vector.
@@ -40,7 +40,7 @@ Denote by $\tilde p = (p_1,\ldots,p_{d-1})^{\mathrm{T}}$. Then the isometry is d
 
 ````math
 π(p) = \frac{1}{\lVert \tilde p \rVert^2 + (p_n+1)^2}
-\begin{pmatrix}2p_1\\\vdots\\2p_{n-1}\\\lVert p\rVert^2 - 1\end{pmatrix}.
+\begin{pmatrix}2p_1\\⋮\\2p_{n-1}\\\lVert p\rVert^2 - 1\end{pmatrix}.
 ````
 """
 function convert(::Type{PoincareBallPoint}, p::PoincareHalfSpacePoint)
@@ -68,8 +68,8 @@ The formula reads
 π_*(p)[X] = \frac{1}{p_{n+1}+1}\Bigl(\tilde X - \frac{X_{n+1}}{p_{n+1}+1}\tilde p \Bigl),
 ````
 
-where $\tilde X = \begin{pmatrix}X_1\\\vdots\\X_n\end{pmatrix}$
-and $\tilde p = \begin{pmatrix}p_1\\\vdots\\p_n\end{pmatrix}$.
+where $\tilde X = \begin{pmatrix}X_1\\⋮\\X_n\end{pmatrix}$
+and $\tilde p = \begin{pmatrix}p_1\\⋮\\p_n\end{pmatrix}$.
 """
 convert(::Type{PoincareBallTVector}, ::Any)
 function convert(
@@ -144,17 +144,18 @@ The formula reads
 (\lVert p \rVert^2-1)(⟨X,p⟩+X_n)
 \end{pmatrix}
 ````
-where $\tilde p = \begin{pmatrix}p_1\\\vdots\\p_{n-1}\end{pmatrix}$.
+where $\tilde p = \begin{pmatrix}p_1\\⋮\\p_{n-1}\end{pmatrix}$.
 """
 function convert(
     ::Type{PoincareBallTVector},
     (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector},
 )
-    den = 1 + norm(p.value[1:(end - 1)])^2 + (last(p.value) + 1)^2
+    den = norm(p.value[1:(end - 1)])^2 + (last(p.value) + 1)^2
     scp = dot(p.value, X.value)
-    c1 = (2 / den .* X.value[1:(end - 1)])
-    .-4 .* p.value[1:(end - 1)] .* (scp .+ last(X.value)) ./ (den^2)
-    c2 = 2 * scp / den - 2 * (norm(p.value)^2-1) * (scp + last(X.value)) / (den^2)
+    c1 =
+        (2 / den .* X.value[1:(end - 1)]) .-
+        (4 * (scp + last(X.value)) / (den^2)) .* p.value[1:(end - 1)]
+    c2 = 2 * scp / den - 2 * (norm(p.value)^2 - 1) * (scp + last(X.value)) / (den^2)
     return PoincareBallTVector([c1..., c2])
 end
 

@@ -75,7 +75,7 @@ The isometry is defined by
 
 ````math
 π(p) = \frac{1}{1-\lVert p \rVert^2}
-\begin{pmatrix}2p_1\\\vdots\\2p_n\\1+\lVert p \rVert^2\end{pmatrix}
+\begin{pmatrix}2p_1\\⋮\\2p_n\\1+\lVert p \rVert^2\end{pmatrix}
 ````
 
 Note that this is also used, when the type to convert to is a vector.
@@ -134,7 +134,7 @@ function convert(
 ) where {T<:AbstractVector}
     t = (1 - norm(p.value)^2)
     den = 4 * dot(p.value, X.value) / (t^2)
-    c1 = (2/t) .* X.value + den .* p.value
+    c1 = (2 / t) .* X.value + den .* p.value
     return [c1..., den]
 end
 

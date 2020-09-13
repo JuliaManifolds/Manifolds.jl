@@ -22,7 +22,7 @@ Denote by $\tilde p = (p_1,\ldots,p_{n-1})$. Then the isometry is defined by
 
 ````math
 π(p) = \frac{1}{\lVert \tilde p \rVert^2 - (p_n-1)^2}
-\begin{pmatrix}2p_1\\\vdots\\2p_{n-1}\\1-\lVert p\rVert^2\end{pmatrix}.
+\begin{pmatrix}2p_1\\⋮\\2p_{n-1}\\1-\lVert p\rVert^2\end{pmatrix}.
 ````
 """
 function convert(::Type{PoincareHalfSpacePoint}, p::PoincareBallPoint)
@@ -80,16 +80,18 @@ The formula reads
 (\lVert p \rVert^2-1)(⟨X,p⟩-X_n)
 \end{pmatrix}
 ````
-where $\tilde p = \begin{pmatrix}p_1\\\vdots\\p_{n-1}\end{pmatrix}$.
+where $\tilde p = \begin{pmatrix}p_1\\⋮\\p_{n-1}\end{pmatrix}$.
 """
 function convert(
     ::Type{PoincareHalfSpaceTVector},
     (p, X)::Tuple{PoincareBallPoint,PoincareBallTVector},
 )
-    den = 1 + norm(p.value[1:(end - 1)])^2 + (last(p.value) - 1)^2
+    den = norm(p.value[1:(end - 1)])^2 + (last(p.value) - 1)^2
     scp = dot(p.value, X.value)
-    c1 = (2 / den .* X.value[1:(end - 1)]) .- (4 * (scp - last(X.value)) / (den^2) ) .* p.value[1:(end - 1)]
-    c2 = -2 * scp / den - 2 * (1-norm(p.value)^2) * (scp - last(X.value)) / (den^2)
+    c1 =
+        (2 / den .* X.value[1:(end - 1)]) .-
+        (4 * (scp - last(X.value)) / (den^2)) .* p.value[1:(end - 1)]
+    c2 = -2 * scp / den - 2 * (1 - norm(p.value)^2) * (scp - last(X.value)) / (den^2)
     return PoincareHalfSpaceTVector([c1..., c2])
 end
 
