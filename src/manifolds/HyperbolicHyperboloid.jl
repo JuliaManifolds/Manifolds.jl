@@ -70,7 +70,7 @@ convert(::Type{<:AbstractVector}, p::HyperboloidPoint) = p.value
     convert(::Type{<:AbstractVector}, p::PoincareBallPoint)
 
 convert a point [`PoincareBallPoint`](@ref) `x` (from $ℝ^n$) from the
-Poincaré ball model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a [`HyperboloidPoint`](@ref) $π(p) ∈ ℝ^{n+1}$.
+Poincaré ball model of the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ to a [`HyperboloidPoint`](@ref) $π(p) ∈ ℝ^{n+1}$.
 The isometry is defined by
 
 ````math
@@ -92,7 +92,7 @@ end
     convert(::Type{<:AbstractVector}, x::PoincareHalfSpacePoint)
 
 convert a point [`PoincareHalfSpacePoint`](@ref) `p` (from $ℝ^n$) from the
-Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a [`HyperboloidPoint`](@ref) $π(p) ∈ ℝ^{n+1}$.
+Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ to a [`HyperboloidPoint`](@ref) $π(p) ∈ ℝ^{n+1}$.
 
 This is done in two steps, namely transforming it to a Poincare ball point and from there further on to a Hyperboloid point.
 """
@@ -172,7 +172,7 @@ end
     )
 
 convert a point [`PoincareHalfSpaceTVector`](@ref) `X` (from $ℝ^n$) at `p` from the
-Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a
+Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ to a
 [`HyperboloidTVector`](@ref) $π(p) ∈ ℝ^{n+1}$.
 
 This is done in two steps, namely transforming it to a Poincare ball point and from there further on to a Hyperboloid point.
@@ -201,7 +201,7 @@ end
     ) where {T<:AbstractVector}
 
 convert a point [`PoincareHalfSpaceTVector`](@ref) `X` (from $ℝ^n$) at `p` from the
-Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $ℍ^n$
+Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $\mathcal H^n$
 to a tuple of a [`HyperboloidPoint`](@ref) and a [`HyperboloidTVector`](@ref) $π(p) ∈ ℝ^{n+1}$
 simultaneously.
 
@@ -222,7 +222,7 @@ end
 Compute the distance on the [`Hyperbolic`](@ref) `M`, which reads
 
 ````math
-d_{ℍ^n}(p,q) = \operatorname{acosh}( - ⟨p, q⟩_{\mathrm{M}}),
+d_{\mathcal H^n}(p,q) = \operatorname{acosh}( - ⟨p, q⟩_{\mathrm{M}}),
 ````
 
 where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,

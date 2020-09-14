@@ -1,19 +1,19 @@
 @doc raw"""
     Hyperbolic{N} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType}
 
-The hyperbolic space $ℍ^n$ represented by $n+1$-Tuples, i.e. embedded in the
+The hyperbolic space $\mathcal H^n$ represented by $n+1$-Tuples, i.e. embedded in the
 [`Lorentz`](@ref)ian manifold equipped with the [`MinkowskiMetric`](@ref)
 $⟨\cdot,\cdot⟩_{\mathrm{M}}$. The space is defined as
 
 ```math
-ℍ^n = \Bigl\{p ∈ ℝ^{n+1}\ \Big|\ ⟨p,p⟩_{\mathrm{M}}= -p_{n+1}^2
+\mathcal H^n = \Bigl\{p ∈ ℝ^{n+1}\ \Big|\ ⟨p,p⟩_{\mathrm{M}}= -p_{n+1}^2
   + \displaystyle\sum_{k=1}^n p_k^2 = -1, p_{n+1} > 0\Bigr\},.
 ```
 
-The tangent space $T_p ℍ^n$ is given by
+The tangent space $T_p \mathcal H^n$ is given by
 
 ````math
-T_p ℍ^n := \bigl\{
+T_p \mathcal H^n := \bigl\{
 X ∈ ℝ^{n+1} : ⟨p,X⟩_{\mathrm{M}} = 0
 \bigr\}.
 ````
@@ -40,7 +40,7 @@ Hyperbolic(n::Int) = Hyperbolic{n}()
 @doc raw"""
     HyperboloidPoint <: MPoint
 
-In the Hyperboloid model of the [`Hyperbolic`](@ref) $ℍ^n$ points are represented
+In the Hyperboloid model of the [`Hyperbolic`](@ref) $\mathcal H^n$ points are represented
 as vectors in $ℝ^{n+1}$ with [`MinkowskiMetric`](@ref) equal to $-1$.
 
 This representation is the default, i.e. vectors are assumed to have this repesentation.
@@ -52,7 +52,7 @@ end
 @doc raw"""
     HyperboloidTVector <: TVector
 
-In the Hyperboloid model of the [`Hyperbolic`](@ref) $ℍ^n$ tangent vctors are represented
+In the Hyperboloid model of the [`Hyperbolic`](@ref) $\mathcal H^n$ tangent vctors are represented
 as vectors in $ℝ^{n+1}$ with [`MinkowskiMetric`](@ref) $⟨p,X⟩_{\mathrm{M}}=0$ to their base
 point $p$.
 
@@ -65,7 +65,7 @@ end
 @doc raw"""
     PoincareBallPoint <: MPoint
 
-A point on the [`Hyperbolic`](@ref) manifold $ℍ^n$ can be represented as a vector of norm
+A point on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ can be represented as a vector of norm
 less than one in $\mathbb R^n$.
 """
 struct PoincareBallPoint{TValue<:AbstractVector} <: MPoint
@@ -75,7 +75,7 @@ end
 @doc raw"""
     PoincareBallTVector <: TVector
 
-In the Poincaré ball model of the [`Hyperbolic`](@ref) $ℍ^n$ tangent vctors are represented
+In the Poincaré ball model of the [`Hyperbolic`](@ref) $\mathcal H^n$ tangent vctors are represented
 as vectors in $ℝ^{n}$.
 """
 struct PoincareBallTVector{TValue<:AbstractVector} <: MPoint
@@ -85,7 +85,7 @@ end
 @doc raw"""
     PoincareHalfSpacePoint <: MPoint
 
-A point on the [`Hyperbolic`](@ref) manifold $ℍ^n$ can be represented as a vector in the
+A point on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ can be represented as a vector in the
 half plane, i.e. $x ∈ ℝ^n$ with $x_d > 0$.
 """
 struct PoincareHalfSpacePoint{TValue<:AbstractVector} <: MPoint
@@ -95,7 +95,7 @@ end
 @doc raw"""
     PoincareHalfPlaneTVector <: TVector
 
-In the Poincaré half plane model of the [`Hyperbolic`](@ref) $ℍ^n$ tangent vctors are
+In the Poincaré half plane model of the [`Hyperbolic`](@ref) $\mathcal H^n$ tangent vctors are
 represented as vectors in $ℝ^{n}$.
 """
 struct PoincareHalfSpaceTVector{TValue<:AbstractVector} <: MPoint
@@ -212,7 +212,7 @@ embed!(::Hyperbolic, Y, ::HyperboloidPoint, X::HyperboloidTVector) = (Y.value .=
 @doc raw"""
     exp(M::Hyperbolic, p, X)
 
-Compute the exponential map on the [`Hyperbolic`](@ref) space $ℍ^n$ emanating
+Compute the exponential map on the [`Hyperbolic`](@ref) space $\mathcal H^n$ emanating
 from `p` towards `X`. The formula reads
 
 ````math
@@ -270,12 +270,12 @@ end
 @doc raw"""
     log(M::Hyperbolic, p, q)
 
-Compute the logarithmic map on the [`Hyperbolic`](@ref) space $ℍ^n$, the tangent
+Compute the logarithmic map on the [`Hyperbolic`](@ref) space $\mathcal H^n$, the tangent
 vector representing the [`geodesic`](@ref) starting from `p`
 reaches `q` after time 1. The formula reads for $p ≠ q$
 
 ```math
-\log_p q = d_{ℍ^n}(p,q)
+\log_p q = d_{\mathcal H^n}(p,q)
 \frac{q-⟨p,q⟩_{\mathrm{M}} p}{\lVert q-⟨p,q⟩_{\mathrm{M}} p \rVert_2},
 ```
 
@@ -301,7 +301,7 @@ end
 @doc raw"""
     manifold_dimension(M::Hyperbolic)
 
-Return the dimension of the hyperbolic space manifold $ℍ^n$, i.e. $\dim(ℍ^n) = n$.
+Return the dimension of the hyperbolic space manifold $\mathcal H^n$, i.e. $\dim(\mathcal H^n) = n$.
 """
 manifold_dimension(::Hyperbolic{N}) where {N} = N
 
@@ -356,11 +356,11 @@ end
     vector_transport_to(M::Hyperbolic, p, X, q, ::ParallelTransport)
 
 Compute the paralllel transport of the `X` from the tangent space at `p` on the
-[`Hyperbolic`](@ref) space $ℍ^n$ to the tangent at `q` along the [`geodesic`](@ref)
+[`Hyperbolic`](@ref) space $\mathcal H^n$ to the tangent at `q` along the [`geodesic`](@ref)
 connecting `p` and `q`. The formula reads
 
 ````math
-\mathcal P_{q←p}X = X - \frac{⟨\log_p q,X⟩_p}{d^2_{ℍ^n}(p,q)}
+\mathcal P_{q←p}X = X - \frac{⟨\log_p q,X⟩_p}{d^2_{\mathcal H^n}(p,q)}
 \bigl(\log_p q + \log_qp \bigr),
 ````
 where $⟨\cdot,\cdot⟩_p$ denotes the inner product in the tangent space at `p`.

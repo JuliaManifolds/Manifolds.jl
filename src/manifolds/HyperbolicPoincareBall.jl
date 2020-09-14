@@ -14,7 +14,7 @@ end
     convert(::Type{PoincareBallPoint}, x::T) where {T<:AbstractVector}
 
 convert a [`HyperboloidPoint`](@ref) $x∈ℝ^{n+1}$ from the hyperboloid model of the [`Hyperbolic`](@ref)
-manifold $ℍ^n$ to a [`PoincareBallPoint`](@ref) $π(x)∈ℝ^{n}$ in the Poincaré ball model.
+manifold $\mathcal H^n$ to a [`PoincareBallPoint`](@ref) $π(x)∈ℝ^{n}$ in the Poincaré ball model.
 The isometry is defined by
 
 ````math
@@ -35,7 +35,7 @@ end
     convert(::Type{PoincareBallPoint}, p::PoincareHalfSpacePoint)
 
 convert a point [`PoincareHalfSpacePoint`](@ref) `p` (from $ℝ^n$) from the
-Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a [`PoincareBallPoint`](@ref) $π(p) ∈ ℝ^n$.
+Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ to a [`PoincareBallPoint`](@ref) $π(p) ∈ ℝ^n$.
 Denote by $\tilde p = (p_1,\ldots,p_{d-1})^{\mathrm{T}}$. Then the isometry is defined by
 
 ````math
@@ -58,7 +58,7 @@ end
     convert(::Type{PoincareBallTVector}, (p, X)::Tuple{T,T}) where {T<:AbstractVector}
 
 convert a [`HyperboloidTVector`](@ref) `X` at `p` to a [`PoincareBallTVector`](@ref)
-on the [`Hyperbolic`](@ref) manifold $ℍ^n$ by computing the push forward $π_*(p)[X]$ of
+on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ by computing the push forward $π_*(p)[X]$ of
 the isometry $π$ that maps from the Hyperboloid to the Poincaré ball,
 cf. [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref).
 
@@ -120,7 +120,7 @@ end
     )
 
 convert a [`PoincareHalfSpaceTVector`](@ref) `X` at `p` to a [`PoincareBallTVector`](@ref)
-on the [`Hyperbolic`](@ref) manifold $ℍ^n$ by computing the push forward $π_*(p)[X]$ of
+on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ by computing the push forward $π_*(p)[X]$ of
 the isometry $π$ that maps from the Poincaré half space to the Poincaré ball,
 cf. [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref).
 
@@ -185,11 +185,11 @@ end
 @doc raw"""
     distance(::Hyperbolic, p::PoincareBallPoint, q::PoincareBallPoint)
 
-Compute the distance on the [`Hyperbolic`](@ref) manifold $ℍ^n$ represented in the
+Compute the distance on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ represented in the
 Poincaré ball model. The formula reads
 
 ````math
-d_{ℍ^n}(p,q) =
+d_{\mathcal H^n}(p,q) =
 \operatorname{acosh}\Bigl(
   1 + \frac{2\lVert p - q \rVert^2}{(1-\lVert p\rVert^2)(1-\lVert q\rVert^2)}
 \Bigr)

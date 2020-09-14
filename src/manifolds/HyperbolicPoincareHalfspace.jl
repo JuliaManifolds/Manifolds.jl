@@ -17,7 +17,7 @@ end
     convert(::Type{PoincareHalfSpacePoint}, p::PoincareBallPoint)
 
 convert a point [`PoincareBallPoint`](@ref) `p` (from $ℝ^n$) from the
-Poincaré ball model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a [`PoincareHalfSpacePoint`](@ref) $π(p) ∈ ℝ^n$.
+Poincaré ball model of the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ to a [`PoincareHalfSpacePoint`](@ref) $π(p) ∈ ℝ^n$.
 Denote by $\tilde p = (p_1,\ldots,p_{n-1})$. Then the isometry is defined by
 
 ````math
@@ -37,7 +37,7 @@ end
     convert(::Type{PoincareHalfSpacePoint}, p)
 
 convert a [`HyperboloidPoint`](@ref) or `Vector``p` (from $ℝ^{n+1}$) from the
-Hyperboloid model of the [`Hyperbolic`](@ref) manifold $ℍ^n$ to a [`PoincareHalfSpacePoint`](@ref) $π(x) ∈ ℝ^{n}$.
+Hyperboloid model of the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ to a [`PoincareHalfSpacePoint`](@ref) $π(x) ∈ ℝ^{n}$.
 
 This is done in two steps, namely transforming it to a Poincare ball point and from there further on to a PoincareHalfSpacePoint point.
 """
@@ -56,7 +56,7 @@ end
     )
 
 convert a [`PoincareBallTVector`](@ref) `X` at `p` to a [`PoincareHalfSpacePoint`](@ref)
-on the [`Hyperbolic`](@ref) manifold $ℍ^n$ by computing the push forward $π_*(p)[X]$ of
+on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ by computing the push forward $π_*(p)[X]$ of
 the isometry $π$ that maps from the Poincaré ball to the Poincaré half space,
 cf. [`convert(::Type{PoincareHalfSpacePoint}, ::PoincareBallPoint)`](@ref).
 
@@ -103,7 +103,7 @@ end
     convert(::Type{PoincareHalfSpaceTVector}, (p, X)::Tuple{T,T}) where {T<:AbstractVector}
 
 convert a [`HyperboloidTVector`](@ref) `X` at `p` to a [`PoincareHalfSpaceTVector`](@ref)
-on the [`Hyperbolic`](@ref) manifold $ℍ^n$ by computing the push forward $π_*(p)[X]$ of
+on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ by computing the push forward $π_*(p)[X]$ of
 the isometry $π$ that maps from the Hyperboloid to the Poincaré half space,
 cf. [`convert(::Type{PoincareHalfSpacePoint}, ::HyperboloidPoint)`](@ref).
 
@@ -191,11 +191,11 @@ end
 @doc raw"""
     distance(::Hyperbolic, p::PoincareHalfSpacePoint, q::PoincareHalfSpacePoint)
 
-Compute the distance on the [`Hyperbolic`](@ref) manifold $ℍ^n$ represented in the
+Compute the distance on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ represented in the
 Poincaré half space model. The formula reads
 
 ````math
-d_{ℍ^n}(p,q) = \operatorname{acosh}\Bigl( 1 + \frac{\lVert p - q \rVert^2}{2 p_n q_n} \Bigr)
+d_{\mathcal H^n}(p,q) = \operatorname{acosh}\Bigl( 1 + \frac{\lVert p - q \rVert^2}{2 p_n q_n} \Bigr)
 ````
 """
 function distance(::Hyperbolic, p::PoincareHalfSpacePoint, q::PoincareHalfSpacePoint)
