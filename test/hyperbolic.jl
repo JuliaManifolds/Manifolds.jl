@@ -41,14 +41,14 @@ include("utils.jl")
             [HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector],
         )
             p = convert(P, [1.0, 0.0, sqrt(2.0)])
-            X = convert(T, ([1.0, 0.0, sqrt(2.0)], [0.0,1.0,0.0]) )
+            X = convert(T, ([1.0, 0.0, sqrt(2.0)], [0.0, 1.0, 0.0]))
             @test number_eltype(p) == eltype(p.value)
-            @test X*2.0 == T( X.value * 2.0)
-            @test 2\X == T( 2 \ X.value)
+            @test X * 2.0 == T(X.value * 2.0)
+            @test 2 \ X == T(2 \ X.value)
             @test +X == T(+X.value)
-            @test Manifolds.allocate_result_type(M, log, (p,p)) == T
-            @test Manifolds.allocate_result_type(M, inverse_retract, (p,p)) == T
-            convert(T, (p,X)) == X
+            @test Manifolds.allocate_result_type(M, log, (p, p)) == T
+            @test Manifolds.allocate_result_type(M, inverse_retract, (p, p)) == T
+            convert(T, (p, X)) == X
         end
     end
     @testset "Hyperbolic Representation Conversion I" begin
@@ -187,7 +187,7 @@ include("utils.jl")
         p2 = HyperboloidPoint(p)
         X2 = HyperboloidTVector(X)
         q2 = HyperboloidPoint(similar(p))
-        @test embed(M,p2).value == p2.value
+        @test embed(M, p2).value == p2.value
         embed!(M, q2, p2)
         @test q2.value == p2.value
         @test embed(M, p2, X2).value == X2.value
