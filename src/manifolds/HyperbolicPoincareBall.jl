@@ -46,7 +46,7 @@ Denote by $\tilde p = (p_1,\ldots,p_{d-1})^{\mathrm{T}}$. Then the isometry is d
 function convert(::Type{PoincareBallPoint}, p::PoincareHalfSpacePoint)
     return PoincareBallPoint(
         1 / (norm(p.value[1:(end - 1)])^2 + (last(p.value) + 1)^2) .*
-        vcat( 2 .* p.value[1:(end - 1)], norm(p.value)^2 - 1),
+        vcat(2 .* p.value[1:(end - 1)], norm(p.value)^2 - 1),
     )
 end
 
