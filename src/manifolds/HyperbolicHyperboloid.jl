@@ -88,7 +88,7 @@ function convert(::Type{<:AbstractVector}, p::PoincareBallPoint)
 end
 
 @doc raw"""
-    convert(::Type{HyperboloidPoint, p::PoincareHalfSpacePoint)
+    convert(::Type{HyperboloidPoint}, p::PoincareHalfSpacePoint)
     convert(::Type{<:AbstractVector}, x::PoincareHalfSpacePoint)
 
 convert a point [`PoincareHalfSpacePoint`](@ref) `p` (from $ℝ^n$) from the
@@ -135,7 +135,7 @@ function convert(
     t = (1 - norm(p.value)^2)
     den = 4 * dot(p.value, X.value) / (t^2)
     c1 = (2 / t) .* X.value + den .* p.value
-    return [c1..., den]
+    return vcat(c1, den)
 end
 
 @doc raw"""

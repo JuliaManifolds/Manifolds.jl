@@ -92,7 +92,7 @@ function convert(
         (2 / den .* X.value[1:(end - 1)]) .-
         (4 * (scp - last(X.value)) / (den^2)) .* p.value[1:(end - 1)]
     c2 = -2 * scp / den - 2 * (1 - norm(p.value)^2) * (scp - last(X.value)) / (den^2)
-    return PoincareHalfSpaceTVector([c1..., c2])
+    return PoincareHalfSpaceTVector(vcat(c1,c2))
 end
 
 @doc raw"""
