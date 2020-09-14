@@ -28,7 +28,7 @@ Denote by $\tilde p = (p_1,\ldots,p_{n-1})$. Then the isometry is defined by
 function convert(::Type{PoincareHalfSpacePoint}, p::PoincareBallPoint)
     return PoincareHalfSpacePoint(
         1 / (norm(p.value[1:(end - 1)])^2 + (last(p.value) - 1)^2) .*
-        [2 .* p.value[1:(end - 1)]..., 1 - norm(p.value)^2],
+        vcat(2 .* p.value[1:(end - 1)], 1 - norm(p.value)^2),
     )
 end
 
