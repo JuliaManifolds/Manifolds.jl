@@ -56,18 +56,18 @@ include("utils.jl")
         pH = HyperboloidPoint(p)
         @test minkowski_metric(pH, pH) == minkowski_metric(p, p)
         @test convert(HyperboloidPoint, p).value == pH.value
-        @test convert(Vector, pH) == p
+        @test convert(AbstractVector, pH) == p
         X = [1.0, 0.0, 0.0]
         XH = HyperboloidTVector(X)
 
         @test convert(HyperboloidTVector, X).value == XH.value
-        @test convert(Vector, XH) == X
+        @test convert(AbstractVector, XH) == X
         @test convert(HyperboloidPoint, p).value == pH.value
         is_manifold_point(M, pH)
         pB = convert(PoincareBallPoint, p)
         @test pB.value == convert(PoincareBallPoint, pH).value
         @test is_manifold_point(M, pB)
-        @test convert(Vector, pB) == p # convert back yields again p
+        @test convert(AbstractVector, pB) == p # convert back yields again p
         @test convert(HyperboloidPoint, pB).value == pH.value
         @test_throws DomainError is_manifold_point(
             M,
@@ -95,7 +95,7 @@ include("utils.jl")
 
         @test pS.value == pS2.value
         @test pS.value == pS3.value
-        @test convert(Vector, pS) == convert(HyperboloidPoint, pS).value
+        @test convert(AbstractVector, pS) == convert(HyperboloidPoint, pS).value
         @test convert(PoincareBallPoint, pS2).value == pB.value
     end
     @testset "Hyperbolic Representation Conversion II" begin
@@ -104,7 +104,7 @@ include("utils.jl")
         X = log(M, pts[2], pts[1])
         # For HyperboloidTVector we can do a plain wrap/unwrap
         X1 = convert(HyperboloidTVector, X)
-        @test convert(Vector, X1) == X
+        @test convert(AbstractVector, X1) == X
         # Convert to types and back to Array
         for (P, T) in zip(
             [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
@@ -123,8 +123,11 @@ include("utils.jl")
                 @test isapprox(M, convert(P2, p1), convert(P2, pts[2]))
                 @test convert(T, (p1, X1)) == convert(T, (pts[2], X))
                 (p3, X3) = convert(Tuple{P2,T2}, (pts[2], X))
+                (p3a, X3a) = convert(Tuple{P2,T2}, (p1, X1))
+                @test isapprox(M, p3, p3a)
+                @test isapprox(M, p3, X3, X3a)
                 @test isapprox(M, convert(P2, p2), p3)
-                @test isapprox(M, pts[2], convert(Vector, p3))
+                @test isapprox(M, pts[2], convert(AbstractVector, p3))
                 @test isapprox(M, p3, convert(T2, (p2, X2)), X3)
                 # coupled conversion
                 (pT, XT) = convert(Tuple{Vector,Vector}, (p2, X2))

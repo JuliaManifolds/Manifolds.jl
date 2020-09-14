@@ -143,7 +143,7 @@ function convert(
     ::Type{Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector}},
     (p, X)::Tuple{PoincareBallPoint,PoincareBallTVector},
 )
-    return (convert(PoincareBallPoint, p), convert(PoincareBallTVector, (p, X)))
+    return (convert(PoincareHalfSpacePoint, p), convert(PoincareHalfSpaceTVector, (p, X)))
 end
 
 @doc raw"""
@@ -169,7 +169,7 @@ function convert(
     return (
         convert(PoincareHalfSpacePoint, p),
         convert(
-            PoincareBallTVector,
+            PoincareHalfSpaceTVector,
             convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)),
         ),
     )

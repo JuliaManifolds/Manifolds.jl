@@ -270,7 +270,7 @@ function log!(M::Hyperbolic, X, p, q)
 end
 
 function minkowski_metric(a::HyperboloidPoint, b::HyperboloidPoint)
-    return minkowski_metric(convert(Vector, a), convert(Vector, b))
+    return minkowski_metric(convert(AbstractVector, a), convert(AbstractVector, b))
 end
 
 project!(::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)

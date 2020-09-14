@@ -153,7 +153,6 @@ Base.copyto!(e::TE, ::TE) where {TE<:Identity} = e
 Base.copyto!(p, ::TE) where {TE<:Identity} = copyto!(p, e.p)
 Base.copyto!(p::AbstractArray, e::TE) where {TE<:Identity} = copyto!(p, e.p)
 
-Base.isapprox(e1::Identity, e2::Identity; kwargs...) = isapprox(e.group, e1, e2; kwargs...)
 Base.isapprox(p, e::Identity; kwargs...) = isapprox(e::Identity, p; kwargs...)
 Base.isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
 Base.isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true

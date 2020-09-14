@@ -380,12 +380,12 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
             convert(
                 $T,
                 (
-                    convert(Vector, q),
+                    convert(AbstractVector, q),
                     vector_transport_to(
                         M,
-                        convert(Vector, p),
-                        convert(Vector, (p, X)),
-                        convert(Vector, q),
+                        convert(AbstractVector, p),
+                        convert(AbstractVector, (p, X)),
+                        convert(AbstractVector, q),
                         m,
                     ),
                 ),
