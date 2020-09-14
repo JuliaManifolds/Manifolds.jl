@@ -190,7 +190,6 @@ for T in _HyperbolicTypes
 end
 
 for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
-    @eval convert(::Type{Tuple{$P,$T}}, (p, X)::Tuple{$P,$T}) = (p, X)
     @eval convert(::Type{$T}, (p, X)::Tuple{$P,$T}) = X
     @eval function convert(
         ::Type{Tuple{T,T}},
@@ -207,8 +206,8 @@ default_metric_dispatch(::Hyperbolic, ::MinkowskiMetric) = Val(true)
 embed!(::Hyperbolic, q, p::T) where {T<:AbstractVector} = (q .= p)
 embed!(::Hyperbolic, Y, p, X::T) where {T<:AbstractVector} = (Y .= X)
 
-embed!(::Hyperbolic, q, p::HyperboloidPoint) = (q .= p.value)
-embed!(::Hyperbolic, Y, ::HyperboloidPoint, X::HyperboloidTVector) = (Y .= X.value)
+embed!(::Hyperbolic, q, p::HyperboloidPoint) = (q.value .= p.value)
+embed!(::Hyperbolic, Y, ::HyperboloidPoint, X::HyperboloidTVector) = (Y.value .= X.value)
 
 @doc raw"""
     exp(M::Hyperbolic, p, X)

@@ -5,6 +5,7 @@ include("utils.jl")
     @testset "Hyperbolic Basics" begin
         @test repr(M) == "Hyperbolic(2)"
         @test base_manifold(M) == M
+        @test manifold_dimension(M) == 2
         @test typeof(get_embedding(M)) ==
               MetricManifold{ℝ,Euclidean{Tuple{3},ℝ},MinkowskiMetric}
         @test representation_size(M) == (3,)
@@ -17,6 +18,7 @@ include("utils.jl")
         @test_throws DomainError is_manifold_point(M, [2.0, 0.0, 0.0], true)
         @test !is_manifold_point(M, [2.0, 0.0, 0.0])
         @test !is_tangent_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
+        @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
         @test_throws DomainError is_tangent_vector(
             M,
             [1.0, 0.0, 0.0],
@@ -33,6 +35,21 @@ include("utils.jl")
         @test is_default_metric(M, MinkowskiMetric())
         @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
         @test manifold_dimension(M) == 2
+
+        for (P, T) in zip(
+            [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
+            [HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector],
+        )
+            p = convert(P, [1.0, 0.0, sqrt(2.0)])
+            X = convert(T, ([1.0, 0.0, sqrt(2.0)], [0.0,1.0,0.0]) )
+            @test number_eltype(p) == eltype(p.value)
+            @test X*2.0 == T( X.value * 2.0)
+            @test 2\X == T( 2 \ X.value)
+            @test +X == T(+X.value)
+            @test Manifolds.allocate_result_type(M, log, (p,p)) == T
+            @test Manifolds.allocate_result_type(M, inverse_retract, (p,p)) == T
+            convert(T, (p,X)) == X
+        end
     end
     @testset "Hyperbolic Representation Conversion I" begin
         p = [0.0, 0.0, 1.0]
@@ -117,7 +134,6 @@ include("utils.jl")
         end
     end
 
-
     types = [
         Vector{Float64},
         SizedVector{3,Float64},
@@ -168,6 +184,16 @@ include("utils.jl")
         Y = similar(X)
         embed!(M, Y, p, X)
         @test Y == X
+        p2 = HyperboloidPoint(p)
+        X2 = HyperboloidTVector(X)
+        q2 = HyperboloidPoint(similar(p))
+        @test embed(M,p2).value == p2.value
+        embed!(M, q2, p2)
+        @test q2.value == p2.value
+        @test embed(M, p2, X2).value == X2.value
+        Y2 = HyperboloidTVector(similar(X))
+        embed!(M, Y2, p2, X2)
+        @test Y2.value == X2.value
     end
     @testset "Hyperbolic mean test" begin
         pts = [
