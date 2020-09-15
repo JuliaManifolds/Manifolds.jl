@@ -132,15 +132,6 @@ embed(::Euclidean, p)
 
 embed!(::Euclidean, q, p) = copyto!(q, p)
 
-@doc raw"""
-    embed(::EmbeddedManifold{𝔽,Euclidean{n,𝔽},Euclidean{m,𝔽2},ET}, p)
-
-A [`Euclidean`](@ref) `M` manifold can be embedded into a [`Euclidean`](@ref) `N`
-if the length of the array dimension and representation size is elementwise less or equal.
-The remainder is filles with zeros for sure.
-"""
-embed(::EmbeddedManifold{𝔽,Euclidean{n,𝔽},Euclidean{m,𝔽2},ET}, ::Any) where {n,m,𝔽,𝔽2,ET}
-
 function embed!(
     ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2},ET},
     q,
