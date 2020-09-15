@@ -139,14 +139,7 @@ A [`Euclidean`](@ref) `M` manifold can be embedded into a [`Euclidean`](@ref) `N
 if the length of the array dimension and representation size is elementwise less or equal.
 The remainder is filles with zeros for sure.
 """
-function embed(
-    M::EmbeddedManifold{𝔽,Euclidean{n,𝔽},Euclidean{m,𝔽2},ET},
-    p,
-) where {n,m,𝔽,𝔽2,ET}
-    q = allocate(p, representation_size(M.embedding))
-    embed!(M, q, p)
-    return q
-end
+embed(::EmbeddedManifold{𝔽,Euclidean{n,𝔽},Euclidean{m,𝔽2},ET}, ::Any) where {n,m,𝔽,𝔽2,ET}
 
 function embed!(
     ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2},ET},
@@ -411,7 +404,7 @@ is of course just the identity map.
 """
 project(::Euclidean, ::Any)
 
-project!(M::Euclidean, q, p) = copyto!(q, p)
+project!(::Euclidean, q, p) = copyto!(q, p)
 
 """
     project(M::Euclidean, p, X)
@@ -422,7 +415,7 @@ space of `M` can be identified with all of `M`.
 """
 project(::Euclidean, ::Any, ::Any)
 
-project!(M::Euclidean, Y, p, X) = copyto!(Y, X)
+project!(::Euclidean, Y, p, X) = copyto!(Y, X)
 
 """
     projected_distribution(M::Euclidean, d, [p])
@@ -454,7 +447,7 @@ case, this yields just the identity.
 """
 sharp(::Euclidean, ::Any...)
 
-sharp!(M::Euclidean, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
+sharp!(::Euclidean, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 function Base.show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
     return print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")
@@ -500,4 +493,4 @@ Return the zero vector in the tangent space of `x` on the [`Euclidean`](@ref)
 """
 zero_tangent_vector(::Euclidean, ::Any...)
 
-zero_tangent_vector!(M::Euclidean, v, x) = fill!(v, 0)
+zero_tangent_vector!(::Euclidean, v, x) = fill!(v, 0)
