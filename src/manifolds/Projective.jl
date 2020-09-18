@@ -1,4 +1,5 @@
-abstract type AbstractProjective{𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
+abstract type AbstractProjective{𝔽} <:
+              AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
 struct Projective{N,𝔽} <: AbstractProjective{𝔽} end
 Projective(n::Int, field::AbstractNumbers = ℝ) = Projective{n,field}()
@@ -26,7 +27,13 @@ function check_manifold_point(M::AbstractProjective, p; kwargs...)
     return nothing
 end
 
-function check_tangent_vector(M::AbstractProjective, p, X; check_base_point = true, kwargs...)
+function check_tangent_vector(
+    M::AbstractProjective,
+    p,
+    X;
+    check_base_point = true,
+    kwargs...,
+)
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
@@ -86,14 +93,22 @@ eval(
     end,
 )
 
-function inverse_retract!(::AbstractProjective, X, p, q, ::Union{ProjectionInverseRetraction,PolarInverseRetraction,QRInverseRetraction})
+function inverse_retract!(
+    ::AbstractProjective,
+    X,
+    p,
+    q,
+    ::Union{ProjectionInverseRetraction,PolarInverseRetraction,QRInverseRetraction},
+)
     return (X .= q ./ dot(p, q) .- p)
 end
 
 function Base.isapprox(M::AbstractProjective, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
 end
-Base.isapprox(M::AbstractProjective, p, q; kwargs...) = isapprox(distance(M, p, q), 0; kwargs...)
+function Base.isapprox(M::AbstractProjective, p, q; kwargs...)
+    return isapprox(distance(M, p, q), 0; kwargs...)
+end
 
 function log!(M::AbstractProjective, X, p, q)
     z = dot(q, p)
@@ -101,7 +116,7 @@ function log!(M::AbstractProjective, X, p, q)
     θ = acos(absz)
     signz = z isa Real ? sign(z) : z / ifelse(iszero(absz), one(absz), absz)
     X .= (signz .* q .- absz .* p) ./ usinc(θ)
-    project!(M, X, p, X)
+    return project!(M, X, p, X)
 end
 
 @doc raw"""
@@ -169,7 +184,13 @@ representation size of the embedding.
 @generated representation_size(::ArrayProjective{N}) where {N} = size_to_tuple(N)
 @generated representation_size(::Projective{N}) where {N} = (N + 1,)
 
-function retract!(M::AbstractProjective, q, p, X, ::Union{ProjectionRetraction,PolarRetraction,QRRetraction})
+function retract!(
+    M::AbstractProjective,
+    q,
+    p,
+    X,
+    ::Union{ProjectionRetraction,PolarRetraction,QRRetraction},
+)
     q .= p .+ X
     return project!(M, q, q)
 end
