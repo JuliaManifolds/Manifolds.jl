@@ -197,12 +197,12 @@ function Base.show(io::IO, ::ArrayProjectiveSpace{N,𝔽}) where {N,𝔽}
 end
 
 """
-    uniform_distribution(M::ProjectiveSpace{ℝ}, p)
+    uniform_distribution(M::ProjectiveSpace{n,ℝ}, p) where {n}
 
 Uniform distribution on given [`ProjectiveSpace`](@ref) `M`. Generated points will be of
 similar type as `p`.
 """
-function uniform_distribution(M::ProjectiveSpace{ℝ}, p)
+function uniform_distribution(M::ProjectiveSpace{n,ℝ}, p) where {n}
     d = Distributions.MvNormal(zero(p), 1.0)
     return ProjectedPointDistribution(M, d, project!, p)
 end
