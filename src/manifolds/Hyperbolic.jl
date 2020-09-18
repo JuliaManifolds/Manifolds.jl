@@ -129,6 +129,7 @@ for T in _HyperbolicTypes
     @eval begin
         allocate(p::$T) = $T(allocate(p.value))
         allocate(p::$T, ::Type{P}) where {P} = $T(allocate(p.value, P))
+        allocate(p::$T, ::Type{P}, dims::Tuple) where {P} = $T(allocate(p.value, P, dims))
     end
 end
 
@@ -383,7 +384,7 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
                 vector_transport_to(
                     M,
                     convert(AbstractVector, p),
-                    convert(AbstractVector, (p, X)),
+                    convert(AbstractVector, p, X),
                     convert(AbstractVector, q),
                     m,
                 ),

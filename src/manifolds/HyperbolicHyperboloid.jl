@@ -1,3 +1,4 @@
+
 function check_manifold_point(M::Hyperbolic, p; kwargs...)
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
@@ -269,7 +270,16 @@ function log!(M::Hyperbolic, X, p, q)
 end
 
 function minkowski_metric(a::HyperboloidPoint, b::HyperboloidPoint)
-    return minkowski_metric(convert(AbstractVector, a), convert(AbstractVector, b))
+    return minkowski_metric(a.value, b.value)
+end
+function minkowski_metric(a::HyperboloidTVector, b::HyperboloidPoint)
+    return minkowski_metric(a.value, b.value)
+end
+function minkowski_metric(a::HyperboloidPoint, b::HyperboloidTVector)
+    return minkowski_metric(a.value, b.value)
+end
+function minkowski_metric(a::HyperboloidTVector, b::HyperboloidTVector)
+    return minkowski_metric(a.value, b.value)
 end
 
 project!(::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)

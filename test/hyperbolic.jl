@@ -157,7 +157,7 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_project_tangent = true,
+                test_project_tangent = is_plain_array || T == HyperboloidPoint,
                 test_musical_isomorphisms = is_plain_array,
                 test_default_vector_transport = true,
                 vector_transport_methods = [
