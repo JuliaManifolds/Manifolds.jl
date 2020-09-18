@@ -107,11 +107,9 @@ function Base.isapprox(M::AbstractProjective, p, q; kwargs...)
 end
 
 function log!(M::AbstractProjective, X, p, q)
-    z = dot(q, p)
-    absz = min(abs(z), 1)
-    θ = acos(absz)
-    signz = z isa Real ? sign(z) : z / ifelse(iszero(absz), one(absz), absz)
-    X .= (signz .* q .- absz .* p) ./ usinc(θ)
+    z = dot(p, q)
+    cosθ = abs(z)
+    X .= (sign(z)' .* q .- cosθ .* p) ./ usinc_from_cos(cosθ)
     return project!(M, X, p, X)
 end
 
