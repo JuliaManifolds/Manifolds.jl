@@ -110,7 +110,8 @@ end
 function log!(M::AbstractProjectiveSpace, X, p, q)
     z = dot(p, q)
     cosθ = abs(z)
-    X .= (sign(z)' .* q .- cosθ .* p) ./ usinc_from_cos(cosθ)
+    signz = z isa Real ? sign(z) : z / ifelse(iszero(cosθ), one(cosθ), cosθ)
+    X .= (signz' .* q .- cosθ .* p) ./ usinc_from_cos(cosθ)
     return project!(M, X, p, X)
 end
 
@@ -148,9 +149,9 @@ end
 
 function mid_point!(::ProjectiveSpace, q, p1, p2)
     z = dot(p1, p2)
-    absz = abs(z)
-    signz = z isa Real ? sign(z) : z / ifelse(iszero(absz), one(absz), absz)
-    q .= (p1 .+ signz' .* p2) ./ sqrt(2 + 2absz)
+    cosθ = abs(z)
+    signz = z isa Real ? sign(z) : z / ifelse(iszero(cosθ), one(cosθ), cosθ)
+    q .= (signz' .* p2 .+ p1) ./ sqrt(2 + 2cosθ)
     return q
 end
 
