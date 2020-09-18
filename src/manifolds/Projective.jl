@@ -80,10 +80,8 @@ flat!(::AbstractProjective, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 injectivity_radius(::AbstractProjective) = π / 2
 injectivity_radius(::AbstractProjective, ::ExponentialRetraction) = π / 2
-injectivity_radius(::AbstractProjective, ::ProjectionRetraction) = π / 4
 injectivity_radius(::AbstractProjective, ::Any) = π / 2
 injectivity_radius(::AbstractProjective, ::Any, ::ExponentialRetraction) = π / 2
-injectivity_radius(::AbstractProjective, ::Any, ::ProjectionRetraction) = π / 4
 eval(
     quote
         @invoke_maker 1 Manifold injectivity_radius(
