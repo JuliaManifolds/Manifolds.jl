@@ -103,11 +103,8 @@ function inverse_retract!(
     return (X .= q ./ dot(p, q) .- p)
 end
 
-function Base.isapprox(M::AbstractProjectiveSpace, p, X, Y; kwargs...)
-    return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
-end
-function Base.isapprox(M::AbstractProjectiveSpace, p, q; kwargs...)
-    return isapprox(distance(M, p, q), 0; kwargs...)
+function Base.isapprox(::AbstractProjectiveSpace, p, q; kwargs...)
+    return isapprox(abs2(dot(p, q)), 1; kwargs...)
 end
 
 function log!(M::AbstractProjectiveSpace, X, p, q)
