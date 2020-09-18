@@ -132,6 +132,7 @@ include("manifolds/MultinomialDoublyStochastic.jl")
 include("manifolds/MultinomialSymmetric.jl")
 include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/PositiveNumbers.jl")
+include("manifolds/Projective.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/SkewSymmetric.jl")
 include("manifolds/Spectrahedron.jl")
@@ -223,8 +224,9 @@ end
 
 #
 export CoTVector, Manifold, MPoint, TVector, Manifold
-export AbstractSphere
+export AbstractSphere, AbstractProjective
 export Euclidean,
+    ArrayProjective,
     ArraySphere,
     CenteredMatrices,
     CholeskySpace,
@@ -245,6 +247,7 @@ export Euclidean,
     PositiveNumbers,
     PositiveVectors,
     ProbabilitySimplex,
+    Projective,
     Rotations,
     SkewSymmetricMatrices,
     Spectrahedron,
