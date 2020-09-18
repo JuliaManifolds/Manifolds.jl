@@ -24,11 +24,11 @@ The isometry is defined by
 Note that this is also used, when `x` is a vector.
 """
 convert(::Type{PoincareBallPoint}, ::Any)
-function convert(t::Type{PoincareBallPoint}, x::HyperboloidPoint)
-    return convert(t, x.value)
+function convert(t::Type{PoincareBallPoint}, p::HyperboloidPoint)
+    return convert(t, p.value)
 end
-function convert(::Type{PoincareBallPoint}, x::T) where {T<:AbstractVector}
-    return PoincareBallPoint(1 / (1 + last(x)) .* x[1:(end - 1)])
+function convert(::Type{PoincareBallPoint}, p::T) where {T<:AbstractVector}
+    return PoincareBallPoint(1 / (1 + last(p)) .* p[1:(end - 1)])
 end
 
 @doc raw"""
@@ -51,11 +51,8 @@ function convert(::Type{PoincareBallPoint}, p::PoincareHalfSpacePoint)
 end
 
 @doc raw"""
-    convert(
-        ::Type{PoincareBallTVector},
-        (p,X)::Tuple{HyperboloidPoint,HyperboloidTVector}
-    )
-    convert(::Type{PoincareBallTVector}, (p, X)::Tuple{T,T}) where {T<:AbstractVector}
+    convert(::Type{PoincareBallTVector}, p::HyperboloidPoint, X::HyperboloidTVector)
+    convert(::Type{PoincareBallTVector}, p::P, X::T) where {P<:AbstractVector, T<:AbstractVector}
 
 convert a [`HyperboloidTVector`](@ref) `X` at `p` to a [`PoincareBallTVector`](@ref)
 on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ by computing the push forward $π_*(p)[X]$ of
@@ -72,13 +69,14 @@ where $\tilde X = \begin{pmatrix}X_1\\⋮\\X_n\end{pmatrix}$
 and $\tilde p = \begin{pmatrix}p_1\\⋮\\p_n\end{pmatrix}$.
 """
 convert(::Type{PoincareBallTVector}, ::Any)
-function convert(
-    t::Type{PoincareBallTVector},
-    (p, X)::Tuple{HyperboloidPoint,HyperboloidTVector},
-)
-    return convert(t, (convert(AbstractVector, p), convert(AbstractVector, (p, X))))
+function convert(t::Type{PoincareBallTVector}, p::HyperboloidPoint, X::HyperboloidTVector)
+    return convert(t, convert(AbstractVector, p), convert(AbstractVector, p, X))
 end
-function convert(::Type{PoincareBallTVector}, (p, X)::Tuple{T,T}) where {T<:AbstractVector}
+function convert(
+    ::Type{PoincareBallTVector},
+    p::P,
+    X::T,
+) where {P<:AbstractVector,T<:AbstractVector}
     return PoincareBallTVector(
         1 / (p[end] + 1) .* (X[1:(end - 1)] .- (X[end] / (p[end] + 1) .* p[1:(end - 1)])),
     )
@@ -91,32 +89,33 @@ end
     )
     convert(
         ::Type{Tuple{PoincareBallPoint,PoincareBallTVector}},
-        (p, X)::Tuple{T,T},
-    ) where {T <: AbstractVector}
+        (p, X)::Tuple{P,T},
+    ) where {P<:AbstractVector, T <: AbstractVector}
 
 Convert a [`HyperboloidPoint`](@ref) `p` and a [`HyperboloidTVector`](@ref) `X`
 to a [`PoincareBallPoint`](@ref) and a [`PoincareBallTVector`](@ref) simultaneously,
 see [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref) and
-[`convert(::Type{PoincareBallTVector}, ::Tuple{HyperboloidPoint,HyperboloidTVector})`](@ref)
+[`convert(::Type{PoincareBallTVector}, ::HyperboloidPoint, ::HyperboloidTVector)`](@ref)
 for the formulae.
 """
 function convert(
     ::Type{Tuple{PoincareBallPoint,PoincareBallTVector}},
     (p, X)::Tuple{HyperboloidPoint,HyperboloidTVector},
 )
-    return (convert(PoincareBallPoint, p), convert(PoincareBallTVector, (p, X)))
+    return (convert(PoincareBallPoint, p), convert(PoincareBallTVector, p, X))
 end
 function convert(
     ::Type{Tuple{PoincareBallPoint,PoincareBallTVector}},
-    (p, X)::Tuple{T,T},
-) where {T<:AbstractVector}
-    return (convert(PoincareBallPoint, p), convert(PoincareBallTVector, (p, X)))
+    (p, X)::Tuple{P,T},
+) where {P<:AbstractVector,T<:AbstractVector}
+    return (convert(PoincareBallPoint, p), convert(PoincareBallTVector, p, X))
 end
 
 @doc raw"""
     convert(
         ::Type{PoincareBallTVector},
-        (p,X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector}
+        p::PoincareHalfSpacePoint,
+        X::PoincareHalfSpaceTVector
     )
 
 convert a [`PoincareHalfSpaceTVector`](@ref) `X` at `p` to a [`PoincareBallTVector`](@ref)
@@ -148,7 +147,8 @@ where $\tilde p = \begin{pmatrix}p_1\\⋮\\p_{n-1}\end{pmatrix}$.
 """
 function convert(
     ::Type{PoincareBallTVector},
-    (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector},
+    p::PoincareHalfSpacePoint,
+    X::PoincareHalfSpaceTVector,
 )
     den = norm(p.value[1:(end - 1)])^2 + (last(p.value) + 1)^2
     scp = dot(p.value, X.value)
@@ -172,14 +172,14 @@ end
 Convert a [`PoincareHalfSpacePoint`](@ref) `p` and a [`PoincareHalfSpaceTVector`](@ref) `X`
 to a [`PoincareBallPoint`](@ref) and a [`PoincareBallTVector`](@ref) simultaneously,
 see [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref) and
-[`convert(::Type{PoincareBallTVector}, ::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector})`](@ref)
+[`convert(::Type{PoincareBallTVector}, ::PoincareHalfSpacePoint, ::PoincareHalfSpaceTVector)`](@ref)
 for the formulae.
 """
 function convert(
     ::Type{Tuple{PoincareBallPoint,PoincareBallTVector}},
     (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector},
 )
-    return (convert(PoincareBallPoint, p), convert(PoincareBallTVector, (p, X)))
+    return (convert(PoincareBallPoint, p), convert(PoincareBallTVector, p, X))
 end
 
 @doc raw"""

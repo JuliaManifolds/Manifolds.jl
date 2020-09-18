@@ -189,13 +189,15 @@ for T in _HyperbolicTypes
     @eval Base.copyto!(p::$T, q::$T) = copyto!(p.value, q.value)
 end
 
+# Define self conversions
+#
 for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
-    @eval convert(::Type{$T}, (p, X)::Tuple{$P,$T}) = X
+    @eval convert(::Type{$T}, p::$P, X::$T) = X
     @eval function convert(
-        ::Type{Tuple{T,T}},
+        ::Type{Tuple{P,T}},
         (p, X)::Tuple{$P,$T},
-    ) where {T<:AbstractVector}
-        return (convert(T, p), convert(T, (p, X)))
+    ) where {P<:AbstractVector,T<:AbstractVector}
+        return (convert(T, p), convert(T, p, X))
     end
 end
 
@@ -230,7 +232,7 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
         q.value .=
             convert(
                 $P,
-                exp(M, convert(AbstractVector, p), convert(AbstractVector, (p, X))),
+                exp(M, convert(AbstractVector, p), convert(AbstractVector, p, X)),
             ).value
         return q
     end
@@ -289,10 +291,8 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
         X.value .=
             convert(
                 $T,
-                (
-                    convert(AbstractVector, p),
-                    log(M, convert(AbstractVector, p), convert(AbstractVector, q)),
-                ),
+                convert(AbstractVector, p),
+                log(M, convert(AbstractVector, p), convert(AbstractVector, q)),
             ).value
         return X
     end
@@ -379,15 +379,13 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
         Y.value .=
             convert(
                 $T,
-                (
+                convert(AbstractVector, q),
+                vector_transport_to(
+                    M,
+                    convert(AbstractVector, p),
+                    convert(AbstractVector, (p, X)),
                     convert(AbstractVector, q),
-                    vector_transport_to(
-                        M,
-                        convert(AbstractVector, p),
-                        convert(AbstractVector, (p, X)),
-                        convert(AbstractVector, q),
-                        m,
-                    ),
+                    m,
                 ),
             ).value
         return Y

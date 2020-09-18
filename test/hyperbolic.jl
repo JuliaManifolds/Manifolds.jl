@@ -41,14 +41,14 @@ include("utils.jl")
             [HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector],
         )
             p = convert(P, [1.0, 0.0, sqrt(2.0)])
-            X = convert(T, ([1.0, 0.0, sqrt(2.0)], [0.0, 1.0, 0.0]))
+            X = convert(T, [1.0, 0.0, sqrt(2.0)], [0.0, 1.0, 0.0])
             @test number_eltype(p) == eltype(p.value)
             @test X * 2.0 == T(X.value * 2.0)
             @test 2 \ X == T(2 \ X.value)
             @test +X == T(+X.value)
             @test Manifolds.allocate_result_type(M, log, (p, p)) == T
             @test Manifolds.allocate_result_type(M, inverse_retract, (p, p)) == T
-            convert(T, (p, X)) == X
+            convert(T, p, X) == X
         end
     end
     @testset "Hyperbolic Representation Conversion I" begin
@@ -112,7 +112,7 @@ include("utils.jl")
         )
             # convert to P,T
             p1 = convert(P, pts[2])
-            X1 = convert(T, (pts[2], X))
+            X1 = convert(T, pts[2], X)
             (p2, X2) = convert(Tuple{P,T}, (pts[2], X))
             @test isapprox(M, p1, p2)
             @test isapprox(M, p1, X1, X2)
@@ -121,14 +121,14 @@ include("utils.jl")
                 [HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector],
             )
                 @test isapprox(M, convert(P2, p1), convert(P2, pts[2]))
-                @test convert(T, (p1, X1)) == convert(T, (pts[2], X))
+                @test convert(T, p1, X1) == convert(T, pts[2], X)
                 (p3, X3) = convert(Tuple{P2,T2}, (pts[2], X))
                 (p3a, X3a) = convert(Tuple{P2,T2}, (p1, X1))
                 @test isapprox(M, p3, p3a)
                 @test isapprox(M, p3, X3, X3a)
                 @test isapprox(M, convert(P2, p2), p3)
                 @test isapprox(M, pts[2], convert(AbstractVector, p3))
-                @test isapprox(M, p3, convert(T2, (p2, X2)), X3)
+                @test isapprox(M, p3, convert(T2, p2, X2), X3)
                 # coupled conversion
                 (pT, XT) = convert(Tuple{Vector,Vector}, (p2, X2))
                 @test isapprox(M, pts[2], pT)

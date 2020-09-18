@@ -225,7 +225,7 @@ function ManifoldTests.test_manifold(
                 log(M, p, p);
                 atol = epsx * exp_log_atol_multiplier,
                 rtol = exp_log_atol_multiplier == 0.0 ?
-                           sqrt(epsx) * exp_log_rtol_multiplier : 0,
+                       sqrt(epsx) * exp_log_rtol_multiplier : 0,
             )
             Test.@test isapprox(
                 M,
@@ -234,7 +234,7 @@ function ManifoldTests.test_manifold(
                 inverse_retract(M, p, p);
                 atol = epsx * exp_log_atol_multiplier,
                 rtol = exp_log_atol_multiplier == 0.0 ?
-                           sqrt(epsx) * exp_log_rtol_multiplier : 0.0,
+                       sqrt(epsx) * exp_log_rtol_multiplier : 0.0,
             )
         end
         atolp1 = exp_log_atol_multiplier * ManifoldTests.find_eps(pts[1])
