@@ -160,6 +160,7 @@ include("utils.jl")
         embed!(O, q, p)
         @test norm(qT - q) == 0
         qM = embed(O, p)
+        @test norm(project(O, qM) - p) == 0
         @test norm(qT - qM) == 0
         # test with different sizes, check that it only fills first element
         q2 = zeros(4, 4, 3)
@@ -173,6 +174,8 @@ include("utils.jl")
         # wrong size error checks
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(3, 3, 5))
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(4, 4))
+        @test_throws DomainError project!(O, zeros(3, 3, 5), zeros(3, 3))
+        @test_throws DomainError project!(O, zeros(4, 4), zeros(3, 3))
     end
 
     @testset "Embedding Real into Complex" begin

@@ -133,10 +133,10 @@ embed(::Euclidean, p)
 embed!(::Euclidean, q, p) = copyto!(q, p)
 
 function embed!(
-    ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2},ET},
+    ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2}},
     q,
     p,
-) where {nL,mL,𝔽,𝔽2,ET}
+) where {nL,mL,𝔽,𝔽2}
     n = size(p)
     ln = length(n)
     m = size(q)
@@ -146,7 +146,7 @@ function embed!(
     any(n .> m[1:ln]) &&
         throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m))."))
     # put p into q
-    fill!(q, 0.0)
+    fill!(q, 0)
     # fill „top left edge“ of q with p.
     q[map(ind_n -> Base.OneTo(ind_n), n)..., ntuple(_ -> 1, lm - ln)...] .= p
     return q
@@ -385,6 +385,24 @@ projected to tangent space at `p`.
 function normal_tvector_distribution(M::Euclidean{Tuple{N}}, p, σ) where {N}
     d = Distributions.MvNormal(zero(p), σ)
     return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project!, p)
+end
+
+function project!(
+    ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2}},
+    q,
+    p,
+) where {nL,mL,𝔽,𝔽2}
+    n = size(p)
+    ln = length(n)
+    m = size(q)
+    lm = length(m)
+    (length(n) < length(m)) &&
+        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m)."))
+    any(n .< m[1:ln]) &&
+        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m))."))
+    #  fill q with the „top left edge“ of p.
+    q .= p[map(ind_n -> Base.OneTo(ind_n), n)..., ntuple(_ -> 1, lm - ln)...]
+    return q
 end
 
 @doc raw"""
