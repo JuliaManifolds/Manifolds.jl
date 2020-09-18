@@ -70,4 +70,59 @@ include("utils.jl")
             @test isa(rand(ugd_mmatrix), MVector)
         end
     end
+
+    @testset "Complex" begin
+        M = ProjectiveSpace(2, ℂ)
+        @testset "Basics" begin
+            @test repr(M) == "ProjectiveSpace(2, ℂ)"
+            @test representation_size(M) == (3,)
+            @test manifold_dimension(M) == 5
+            @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
+            @test injectivity_radius(M) == π / 2
+        end
+        types = [Vector{ComplexF64}]
+        @testset "Type $T" for T in types
+            x = [0.5 + 0.5im, 0.5 + 0.5im, 0]
+            v = [0.0, 0.0, 1.0 - im]
+            y = im * exp(M, x, v)
+            w = [0.0 + 0.5im, -1.0 + 0.5im, 0.0 + 0.5im]
+            z = (sqrt(0.5) - sqrt(0.5) * im) * exp(M, x, w)
+            pts = convert.(T, [x, y, z])
+            test_manifold(
+                M,
+                pts,
+                test_exp_log = true,
+                test_injectivity_radius = false,
+                test_project_tangent = true,
+                test_default_vector_transport = false,
+                test_forward_diff = false,
+                test_reverse_diff = false,
+                test_vee_hat = false,
+                retraction_methods = [
+                    ProjectionRetraction(),
+                    PolarRetraction(),
+                    QRRetraction(),
+                ],
+                inverse_retraction_methods = [
+                    ProjectionInverseRetraction(),
+                    PolarInverseRetraction(),
+                    QRInverseRetraction(),
+                ],
+                exp_log_atol_multiplier = 10.0^3,
+                is_tangent_atol_multiplier = 20.0,
+            )
+
+            @testset "inner/norm" begin
+                v1 = inverse_retract(M, pts[1], pts[2], PolarInverseRetraction())
+                v2 = inverse_retract(M, pts[1], pts[3], PolarInverseRetraction())
+
+                @test real(inner(M, pts[1], v1, v2)) ≈ real(inner(M, pts[1], v2, v1))
+                @test imag(inner(M, pts[1], v1, v2)) ≈ -imag(inner(M, pts[1], v2, v1))
+                @test imag(inner(M, pts[1], v1, v1)) ≈ 0
+
+                @test norm(M, pts[1], v1) isa Real
+                @test norm(M, pts[1], v1) ≈ sqrt(inner(M, pts[1], v1, v1))
+            end
+        end
+    end
 end
