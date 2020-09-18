@@ -68,8 +68,6 @@ embed!(::AbstractProjective, q, p) = (q .= p)
 
 embed!(::AbstractProjective, Y, p, X) = (Y .= X)
 
-exp(::AbstractProjective, ::Any...)
-
 function exp!(M::AbstractProjective, q, p, X)
     θ = norm(M, p, X)
     q .= cos(θ) .* p .+ usinc(θ) .* X
