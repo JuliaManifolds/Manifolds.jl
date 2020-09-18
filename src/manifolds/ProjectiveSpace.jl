@@ -9,6 +9,10 @@ function ArrayProjectiveSpace(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) wh
     return ArrayProjectiveSpace{Tuple{n...},field}()
 end
 
+function allocation_promotion_function(::AbstractProjectiveSpace{ℂ}, f, args::Tuple)
+    return complex
+end
+
 function check_manifold_point(M::AbstractProjectiveSpace, p; kwargs...)
     mpv = invoke(
         check_manifold_point,
