@@ -1,15 +1,15 @@
-abstract type AbstractProjective{𝔽} <:
+abstract type AbstractProjectiveSpace{𝔽} <:
               AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
-struct Projective{N,𝔽} <: AbstractProjective{𝔽} end
-Projective(n::Int, field::AbstractNumbers = ℝ) = Projective{n,field}()
+struct ProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} end
+ProjectiveSpace(n::Int, field::AbstractNumbers = ℝ) = ProjectiveSpace{n,field}()
 
-struct ArrayProjective{N,𝔽} <: AbstractProjective{𝔽} where {N<:Tuple} end
-function ArrayProjective(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
-    return ArrayProjective{Tuple{n...},field}()
+struct ArrayProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} where {N<:Tuple} end
+function ArrayProjectiveSpace(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
+    return ArrayProjectiveSpace{Tuple{n...},field}()
 end
 
-function check_manifold_point(M::AbstractProjective, p; kwargs...)
+function check_manifold_point(M::AbstractProjectiveSpace, p; kwargs...)
     mpv = invoke(
         check_manifold_point,
         Tuple{(typeof(get_embedding(M))),typeof(p)},
@@ -28,7 +28,7 @@ function check_manifold_point(M::AbstractProjective, p; kwargs...)
 end
 
 function check_tangent_vector(
-    M::AbstractProjective,
+    M::AbstractProjectiveSpace,
     p,
     X;
     check_base_point = true,
@@ -57,40 +57,40 @@ function check_tangent_vector(
     return nothing
 end
 
-function decorated_manifold(M::AbstractProjective{𝔽}) where {𝔽}
+function decorated_manifold(M::AbstractProjectiveSpace{𝔽}) where {𝔽}
     return Euclidean(representation_size(M)...; field = 𝔽)
 end
-get_embedding(M::AbstractProjective{𝔽}) where {𝔽} = decorated_manifold(M)
+get_embedding(M::AbstractProjectiveSpace{𝔽}) where {𝔽} = decorated_manifold(M)
 
-distance(::AbstractProjective, p, q) = acos(min(abs(dot(p, q)), 1))
+distance(::AbstractProjectiveSpace, p, q) = acos(min(abs(dot(p, q)), 1))
 
-embed!(::AbstractProjective, q, p) = (q .= p)
+embed!(::AbstractProjectiveSpace, q, p) = (q .= p)
 
-embed!(::AbstractProjective, Y, p, X) = (Y .= X)
+embed!(::AbstractProjectiveSpace, Y, p, X) = (Y .= X)
 
-function exp!(M::AbstractProjective, q, p, X)
+function exp!(M::AbstractProjectiveSpace, q, p, X)
     θ = norm(M, p, X)
     q .= cos(θ) .* p .+ usinc(θ) .* X
     return q
 end
 
-flat!(::AbstractProjective, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
+flat!(::AbstractProjectiveSpace, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-injectivity_radius(::AbstractProjective) = π / 2
-injectivity_radius(::AbstractProjective, ::ExponentialRetraction) = π / 2
-injectivity_radius(::AbstractProjective, ::Any) = π / 2
-injectivity_radius(::AbstractProjective, ::Any, ::ExponentialRetraction) = π / 2
+injectivity_radius(::AbstractProjectiveSpace) = π / 2
+injectivity_radius(::AbstractProjectiveSpace, ::ExponentialRetraction) = π / 2
+injectivity_radius(::AbstractProjectiveSpace, ::Any) = π / 2
+injectivity_radius(::AbstractProjectiveSpace, ::Any, ::ExponentialRetraction) = π / 2
 eval(
     quote
         @invoke_maker 1 Manifold injectivity_radius(
-            M::AbstractProjective,
+            M::AbstractProjectiveSpace,
             rm::AbstractRetractionMethod,
         )
     end,
 )
 
 function inverse_retract!(
-    ::AbstractProjective,
+    ::AbstractProjectiveSpace,
     X,
     p,
     q,
@@ -99,14 +99,14 @@ function inverse_retract!(
     return (X .= q ./ dot(p, q) .- p)
 end
 
-function Base.isapprox(M::AbstractProjective, p, X, Y; kwargs...)
+function Base.isapprox(M::AbstractProjectiveSpace, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
 end
-function Base.isapprox(M::AbstractProjective, p, q; kwargs...)
+function Base.isapprox(M::AbstractProjectiveSpace, p, q; kwargs...)
     return isapprox(distance(M, p, q), 0; kwargs...)
 end
 
-function log!(M::AbstractProjective, X, p, q)
+function log!(M::AbstractProjectiveSpace, X, p, q)
     z = dot(p, q)
     cosθ = abs(z)
     X .= (sign(z)' .* q .- cosθ .* p) ./ usinc_from_cos(cosθ)
@@ -114,16 +114,16 @@ function log!(M::AbstractProjective, X, p, q)
 end
 
 @doc raw"""
-    manifold_dimension(M::AbstractProjective)
+    manifold_dimension(M::AbstractProjectiveSpace)
 
-Return the dimension of the [`AbstractProjective`](@ref) `M`, respectively i.e. the
+Return the dimension of the [`AbstractProjectiveSpace`](@ref) `M`, respectively i.e. the
 dimension of the embedding -1.
 """
-manifold_dimension(M::AbstractProjective) = manifold_dimension(get_embedding(M)) - 1
+manifold_dimension(M::AbstractProjectiveSpace) = manifold_dimension(get_embedding(M)) - 1
 
 """
     mean(
-        M::AbstractProjective,
+        M::AbstractProjectiveSpace,
         x::AbstractVector,
         [w::AbstractWeights,]
         method = GeodesicInterpolationWithinRadius(π/4);
@@ -133,10 +133,10 @@ manifold_dimension(M::AbstractProjective) = manifold_dimension(get_embedding(M))
 Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
-mean(::AbstractProjective, ::Any...)
+mean(::AbstractProjectiveSpace, ::Any...)
 
 function Statistics.mean!(
-    M::AbstractProjective,
+    M::AbstractProjectiveSpace,
     p,
     x::AbstractVector,
     w::AbstractVector;
@@ -145,7 +145,7 @@ function Statistics.mean!(
     return mean!(M, p, x, w, GeodesicInterpolationWithinRadius(π / 4); kwargs...)
 end
 
-function mid_point!(::Projective, q, p1, p2)
+function mid_point!(::ProjectiveSpace, q, p1, p2)
     z = dot(p1, p2)
     absz = abs(z)
     signz = z isa Real ? sign(z) : z / ifelse(iszero(absz), one(absz), absz)
@@ -154,32 +154,32 @@ function mid_point!(::Projective, q, p1, p2)
 end
 
 """
-    normal_tvector_distribution(M::Projective{n,ℝ}, p, σ)
+    normal_tvector_distribution(M::ProjectiveSpace{n,ℝ}, p, σ)
 
 Generate a distribution in the tangent space at `p` by generating a
 normal distribution in ambient space with standard deviation `σ`
 projected to the tangent space at `p`.
 """
-function normal_tvector_distribution(M::Projective{n,ℝ}, p, σ) where {n}
+function normal_tvector_distribution(M::ProjectiveSpace{n,ℝ}, p, σ) where {n}
     d = Distributions.MvNormal(zero(p), σ)
     return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project!, p)
 end
 
-project!(::AbstractProjective, q, p) = copyto!(q, p ./ norm(p))
+project!(::AbstractProjectiveSpace, q, p) = copyto!(q, p ./ norm(p))
 
-project!(::AbstractProjective, Y, p, X) = (Y .= X .- dot(p, X) .* p)
+project!(::AbstractProjectiveSpace, Y, p, X) = (Y .= X .- dot(p, X) .* p)
 
 @doc raw"""
-    representation_size(M::AbstractProjective)
+    representation_size(M::AbstractProjectiveSpace)
 
-Return the size points on the [`AbstractProjective`](@ref) `M` are represented as, i.e., the
+Return the size points on the [`AbstractProjectiveSpace`](@ref) `M` are represented as, i.e., the
 representation size of the embedding.
 """
-@generated representation_size(::ArrayProjective{N}) where {N} = size_to_tuple(N)
-@generated representation_size(::Projective{N}) where {N} = (N + 1,)
+@generated representation_size(::ArrayProjectiveSpace{N}) where {N} = size_to_tuple(N)
+@generated representation_size(::ProjectiveSpace{N}) where {N} = (N + 1,)
 
 function retract!(
-    M::AbstractProjective,
+    M::AbstractProjectiveSpace,
     q,
     p,
     X,
@@ -189,18 +189,20 @@ function retract!(
     return project!(M, q, q)
 end
 
-Base.show(io::IO, ::Projective{n,𝔽}) where {n,𝔽} = print(io, "Projective($(n), $(𝔽))")
-function Base.show(io::IO, ::ArrayProjective{N,𝔽}) where {N,𝔽}
-    return print(io, "ArrayProjective($(join(N.parameters, ", ")); field = $(𝔽))")
+function Base.show(io::IO, ::ProjectiveSpace{n,𝔽}) where {n,𝔽}
+    return print(io, "ProjectiveSpace($(n), $(𝔽))")
+end
+function Base.show(io::IO, ::ArrayProjectiveSpace{N,𝔽}) where {N,𝔽}
+    return print(io, "ArrayProjectiveSpace($(join(N.parameters, ", ")); field = $(𝔽))")
 end
 
 """
-    uniform_distribution(M::Projective{ℝ}, p)
+    uniform_distribution(M::ProjectiveSpace{ℝ}, p)
 
-Uniform distribution on given [`Projective`](@ref) `M`. Generated points will be of
+Uniform distribution on given [`ProjectiveSpace`](@ref) `M`. Generated points will be of
 similar type as `p`.
 """
-function uniform_distribution(M::Projective{ℝ}, p)
+function uniform_distribution(M::ProjectiveSpace{ℝ}, p)
     d = Distributions.MvNormal(zero(p), 1.0)
     return ProjectedPointDistribution(M, d, project!, p)
 end

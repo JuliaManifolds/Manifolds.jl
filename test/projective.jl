@@ -1,10 +1,10 @@
 include("utils.jl")
 
-@testset "Projective" begin
+@testset "ProjectiveSpace" begin
     @testset "Real" begin
-        M = Projective(2)
+        M = ProjectiveSpace(2)
         @testset "Basics" begin
-            @test repr(M) == "Projective(2, ℝ)"
+            @test repr(M) == "ProjectiveSpace(2, ℝ)"
             @test representation_size(M) == (3,)
             @test manifold_dimension(M) == 2
             @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
