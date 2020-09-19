@@ -174,8 +174,8 @@ project!(::AbstractProjectiveSpace, Y, p, X) = (Y .= X .- dot(p, X) .* p)
 @doc raw"""
     representation_size(M::AbstractProjectiveSpace)
 
-Return the size points on the [`AbstractProjectiveSpace`](@ref) `M` are represented as, i.e., the
-representation size of the embedding.
+Return the size points on the [`AbstractProjectiveSpace`](@ref) `M` are represented as,
+i.e., the representation size of the embedding.
 """
 @generated representation_size(::ArrayProjectiveSpace{N}) where {N} = size_to_tuple(N)
 @generated representation_size(::ProjectiveSpace{N}) where {N} = (N + 1,)
@@ -207,4 +207,67 @@ similar type as `p`.
 function uniform_distribution(M::ProjectiveSpace{n,ℝ}, p) where {n}
     d = Distributions.MvNormal(zero(p), 1.0)
     return ProjectedPointDistribution(M, d, project!, p)
+end
+
+@doc raw"""
+vector_transport_to(M::AbstractProjectiveSpace, p, X, q, method::ParallelTransport)
+
+Parallel transport a vector `X` from the tangent space at a point `p` on the
+[`AbstractProjectiveSpace`](@ref) `M` along the `shortest_geodesic`](@ref) to the tangent
+space at another point `q`.
+"""
+vector_transport_to(::AbstractProjectiveSpace, p, X, q, ::ParallelTransport)
+
+@doc raw"""
+    vector_transport_to(M::AbstractProjectiveSpace, p, X, q, method::ProjectionTransport)
+
+Transport a vector `X` from the tangent space at `p` on the
+[`AbstractProjectiveSpace`](@ref) `M` by interpreting it as an element of the embedding and
+then projecting it onto the tangent space at `q`.
+"""
+vector_transport_to(::AbstractProjectiveSpace, ::Any, ::Any, ::Any, ::ProjectionTransport)
+
+@doc raw"""
+    vector_transport_direction(M::AbstractProjectiveSpace, p, X, d, method::ParallelTransport)
+
+Parallel transport a vector `X` from the tangent space at a point `p` on the
+[`AbstractProjectiveSpace`](@ref) `M` along the geodesic in the direction indicated by the
+tangent vector `d`.
+"""
+vector_transport_direction(::AbstractProjectiveSpace, p, X, d, ::ParallelTransport)
+
+function vector_transport_to!(::AbstractProjectiveSpace, Y, p, X, q, ::ParallelTransport)
+    z = dot(p, q)
+    cosθ = abs(z)
+    signz = sign_from_abs(z, cosθ)
+    factor = if z isa Real
+        signz * dot(q, X) / (1 + cosθ)
+    else
+        (signz * dot(q, X) - cosθ * dot(p, X)) / (1 + cosθ)
+    end
+    # multiply by `sign(z)` to bring from T_{\exp_p(\log_p q)} M to T_q M
+    # this ensures that downstream functions like `exp` do the right thing
+    Y .= signz .* (X .- (p .+ signz' .* q) .* factor)
+    return Y
+end
+function vector_transport_to!(M::AbstractProjectiveSpace, Y, p, X, q, ::ProjectionTransport)
+    project!(M, Y, q, X)
+    return Y
+end
+
+function vector_transport_direction!(
+    M::AbstractProjectiveSpace,
+    Y,
+    p,
+    X,
+    d,
+    ::ParallelTransport,
+)
+    θ = norm(M, p, d)
+    cosθ = cos(θ)
+    dX = inner(M, p, d, X)
+    α = usinc(θ) * dX
+    β = ifelse(iszero(θ), zero(cosθ), (1 - cosθ) / θ^2) * dX
+    Y .= X .- α .* p .- β .* d
+    return Y
 end
