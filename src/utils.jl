@@ -22,6 +22,14 @@ computed from $x = cos(θ)$.
     end
 end
 
+@doc raw"""
+    sign_from_abs(z, absz)
+
+Compute `sign(z)` from precomputed `absz = abs(z)`, returning 0 for `absz = 0`.
+"""
+@inline sign_from_abs(z, absz) = z / ifelse(iszero(absz), one(absz), absz)
+@inline sign_from_abs(z::Real, absz) = sign(z)
+
 allocate(p, s::Size{S}) where {S} = similar(p, S...)
 allocate(p::StaticArray, s::Size{S}) where {S} = similar(p, maybesize(s))
 allocate(p, ::Type{T}, s::Size{S}) where {S,T} = similar(p, T, S...)
