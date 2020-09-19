@@ -434,7 +434,7 @@ to `q`, provided, the [`geodesic`](@ref) between `p` and `q` is unique. The form
 
 ````math
 P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_𝕊(p,q)}
-\bigl(\log_xy + \log_yx \bigr).
+\bigl(\log_p q + \log_q p \bigr).
 ````
 """
 vector_transport_to(::AbstractSphere, ::Any, ::Any, ::Any, ::Any, ::ParallelTransport)
