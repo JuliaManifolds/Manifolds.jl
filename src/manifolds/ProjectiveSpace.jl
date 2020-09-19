@@ -150,8 +150,8 @@ end
 function mid_point!(::ProjectiveSpace, q, p1, p2)
     z = dot(p1, p2)
     cosθ = abs(z)
-    q .= (signz' .* p2 .+ p1) ./ sqrt(2 + 2cosθ)
     signz = sign_from_abs(z, cosθ)
+    q .= (p1 .+ signz' .* p2) ./ sqrt(2 * (1 + cosθ)) # exp_p1(log_p1(p2) / 2)
     return q
 end
 

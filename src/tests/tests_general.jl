@@ -385,17 +385,18 @@ function ManifoldTests.test_manifold(
         end
     end
 
-    !(default_inverse_retraction_method === nothing) &&
+    !(default_retraction_method === nothing || default_inverse_retraction_method === nothing) &&
         Test.@testset "vector transport" begin
             tvatol = is_tangent_atol_multiplier * ManifoldTests.find_eps(pts[1])
             X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
             X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
+            pts32 = retract(M, pts[1], X2, default_retraction_method)
             test_default_vector_transport && Test.@testset "default vector transport" begin
-                v1t1 = vector_transport_to(M, pts[1], X1, pts[3])
+                v1t1 = vector_transport_to(M, pts[1], X1, pts32)
                 v1t2 = vector_transport_direction(M, pts[1], X1, X2)
-                Test.@test is_tangent_vector(M, pts[3], v1t1; atol = tvatol)
-                Test.@test is_tangent_vector(M, pts[3], v1t2; atol = tvatol)
-                Test.@test isapprox(M, pts[3], v1t1, v1t2)
+                Test.@test is_tangent_vector(M, pts32, v1t1; atol = tvatol)
+                Test.@test is_tangent_vector(M, pts32, v1t2; atol = tvatol)
+                Test.@test isapprox(M, pts32, v1t1, v1t2)
                 Test.@test isapprox(
                     M,
                     pts[1],
@@ -406,10 +407,10 @@ function ManifoldTests.test_manifold(
                 is_mutating && Test.@testset "mutating variants" begin
                     v1t1_m = allocate(v1t1)
                     v1t2_m = allocate(v1t2)
-                    vector_transport_to!(M, v1t1_m, pts[1], X1, pts[3])
+                    vector_transport_to!(M, v1t1_m, pts[1], X1, pts32)
                     vector_transport_direction!(M, v1t2_m, pts[1], X1, X2)
-                    Test.@test isapprox(M, pts[3], v1t1, v1t1_m)
-                    Test.@test isapprox(M, pts[3], v1t2, v1t2_m)
+                    Test.@test isapprox(M, pts32, v1t1, v1t1_m)
+                    Test.@test isapprox(M, pts32, v1t2, v1t2_m)
                 end
             end
 
@@ -428,11 +429,12 @@ function ManifoldTests.test_manifold(
                         pts[3],
                         default_inverse_retraction_method,
                     )
-                    v1t1 = vector_transport_to(M, pts[1], X1, pts[3], vtm)
+                    pts32 = retract(M, pts[1], X2, default_retraction_method)
+                    v1t1 = vector_transport_to(M, pts[1], X1, pts32, vtm)
                     v1t2 = vector_transport_direction(M, pts[1], X1, X2, vtm)
-                    Test.@test is_tangent_vector(M, pts[3], v1t1; atol = tvatol)
-                    Test.@test is_tangent_vector(M, pts[3], v1t2; atol = tvatol)
-                    Test.@test isapprox(M, pts[3], v1t1, v1t2)
+                    Test.@test is_tangent_vector(M, pts32, v1t1; atol = tvatol)
+                    Test.@test is_tangent_vector(M, pts32, v1t2; atol = tvatol)
+                    Test.@test isapprox(M, pts32, v1t1, v1t2)
                     Test.@test isapprox(
                         M,
                         pts[1],
@@ -443,10 +445,10 @@ function ManifoldTests.test_manifold(
                     is_mutating && Test.@testset "mutating variants" begin
                         v1t1_m = allocate(v1t1)
                         v1t2_m = allocate(v1t2)
-                        vector_transport_to!(M, v1t1_m, pts[1], X1, pts[3], vtm)
+                        vector_transport_to!(M, v1t1_m, pts[1], X1, pts32, vtm)
                         vector_transport_direction!(M, v1t2_m, pts[1], X1, X2, vtm)
-                        Test.@test isapprox(M, pts[3], v1t1, v1t1_m)
-                        Test.@test isapprox(M, pts[3], v1t2, v1t2_m)
+                        Test.@test isapprox(M, pts32, v1t1, v1t1_m)
+                        Test.@test isapprox(M, pts32, v1t2, v1t2_m)
                     end
                 end
             end
