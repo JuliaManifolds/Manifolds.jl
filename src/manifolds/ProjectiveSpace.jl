@@ -80,6 +80,50 @@ end
 
 flat!(::AbstractProjectiveSpace, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
+function get_basis(::ProjectiveSpace{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) where {n}
+    return get_basis(Sphere{n,ℝ}(), p, B)
+end
+
+@doc raw"""
+    get_coordinates(M::ProjectiveSpace, p, X, B::DefaultOrthonormalBasis)
+
+Represent the tangent vector `X` at point `p` from the [`ProjectiveSpace`](@ref) `M` in
+an orthonormal basis by rotating the vector `X` using the rotation matrix
+$2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
+"""
+function get_coordinates(::ProjectiveSpace{n,ℝ}, p, X, ::DefaultOrthonormalBasis) where {n}
+    isapprox(p[1], 1) && return X[2:end]
+    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n + 1)
+    return ((2 * dot(xp1, X) / dot(xp1, xp1)) .* xp1 - X)[2:end]
+end
+
+function get_coordinates!(
+    M::ProjectiveSpace{n,ℝ},
+    Y,
+    p,
+    X,
+    B::DefaultOrthonormalBasis,
+) where {n}
+    return copyto!(Y, get_coordinates(M, p, X, B))
+end
+
+function get_vector(::ProjectiveSpace{n,ℝ}, p, X, ::DefaultOrthonormalBasis) where {n}
+    p[1] ≈ 1 && return vcat(0, X)
+    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n + 1)
+    X0 = vcat(0, X)
+    return (2 * dot(xp1, X0) / dot(xp1, xp1)) .* xp1 .- X0
+end
+
+function get_vector!(
+    M::ProjectiveSpace{n,ℝ},
+    Y::AbstractVector,
+    p,
+    X,
+    B::DefaultOrthonormalBasis,
+) where {n}
+    return copyto!(Y, get_vector(M, p, X, B))
+end
+
 injectivity_radius(::AbstractProjectiveSpace) = π / 2
 injectivity_radius(::AbstractProjectiveSpace, ::ExponentialRetraction) = π / 2
 injectivity_radius(::AbstractProjectiveSpace, ::Any) = π / 2

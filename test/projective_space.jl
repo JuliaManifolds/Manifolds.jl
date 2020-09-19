@@ -42,6 +42,8 @@ include("utils.jl")
                 point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
                 test_forward_diff = false,
                 test_reverse_diff = false,
+                basis_types_vecs = (DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),),
+                basis_types_to_from = basis_types,
                 test_vee_hat = false,
                 retraction_methods = [
                     ProjectionRetraction(),
