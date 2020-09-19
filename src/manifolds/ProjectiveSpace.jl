@@ -64,7 +64,8 @@ end
 function decorated_manifold(M::AbstractProjectiveSpace{𝔽}) where {𝔽}
     return Euclidean(representation_size(M)...; field = 𝔽)
 end
-get_embedding(M::AbstractProjectiveSpace{𝔽}) where {𝔽} = decorated_manifold(M)
+
+get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)
 
 distance(::AbstractProjectiveSpace, p, q) = acos(min(abs(dot(p, q)), 1))
 
