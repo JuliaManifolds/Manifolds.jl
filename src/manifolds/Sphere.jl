@@ -339,8 +339,8 @@ function Statistics.mean!(
 end
 
 function mid_point!(::Sphere, q, p1, p2)
-    q .= p1 .+ p2
-    q ./= norm(q)
+    cosθ = real(dot(p1, p2))
+    q .= (p1 .+ p2) ./ sqrt(2 * (1 + cosθ)) # (p1 + p2) / norm(p1 + p2)
     return q
 end
 
@@ -439,13 +439,8 @@ P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_𝕊(p,q)}
 """
 vector_transport_to(::AbstractSphere, ::Any, ::Any, ::Any, ::Any, ::ParallelTransport)
 
-function vector_transport_to!(M::AbstractSphere, Y, p, X, q, ::ParallelTransport)
-    X_pq = log(M, p, q)
-    Xl = norm(M, p, X_pq)
-    copyto!(Y, X)
-    if Xl > 0
-        factor = 2 * real(dot(X, q)) / (norm(p + q)^2)
-        Y .-= factor .* (p .+ q)
-    end
+function vector_transport_to!(::AbstractSphere, Y, p, X, q, ::ParallelTransport)
+    cosθ = real(dot(p, q))
+    Y .= X .- (p .+ q) .* (real(dot(q, X)) / (1 + cosθ))
     return Y
 end
