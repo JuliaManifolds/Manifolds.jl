@@ -416,12 +416,12 @@ function Base.show(io::IO, ::ArraySphere{N,𝔽}) where {N,𝔽}
 end
 
 """
-    uniform_distribution(M::AbstractSphere, p)
+    uniform_distribution(M::Sphere{n,ℝ}, p) where {n}
 
-Uniform distribution on given [`AbstractSphere`](@ref) `M`. Generated points will be of
+Uniform distribution on given [`Sphere`](@ref) `M`. Generated points will be of
 similar type as `p`.
 """
-function uniform_distribution(M::AbstractSphere, p)
+function uniform_distribution(M::Sphere{n,ℝ}, p) where {n}
     d = Distributions.MvNormal(zero(p), 1.0)
     return ProjectedPointDistribution(M, d, project!, p)
 end
