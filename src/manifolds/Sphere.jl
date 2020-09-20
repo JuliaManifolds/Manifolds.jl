@@ -338,9 +338,10 @@ function Statistics.mean!(
     return mean!(S, p, x, w, GeodesicInterpolationWithinRadius(π / 2); kwargs...)
 end
 
-function mid_point!(::Sphere, q, p1, p2)
+function mid_point!(S::Sphere, q, p1, p2)
     cosθ = real(dot(p1, p2))
-    q .= (p1 .+ p2) ./ sqrt(2 * (1 + cosθ)) # (p1 + p2) / norm(p1 + p2)
+    q .= p1 .+ p2
+    project!(S, q, q)
     return q
 end
 
