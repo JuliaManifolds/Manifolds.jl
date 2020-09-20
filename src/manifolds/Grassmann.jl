@@ -215,7 +215,7 @@ g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}Y),
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-inner(::Grassmann, p, X, Y) = dot(X,Y)
+inner(::Grassmann, p, X, Y) = dot(X, Y)
 
 @doc raw"""
     inverse_retract(M::Grassmann, p, q, ::PolarInverseRetraction)
@@ -283,7 +283,7 @@ function log!(::Grassmann{n,k}, X, p, q) where {n,k}
     At = q' - z * p'
     Bt = z \ At
     d = svd(Bt')
-    return X .= view(d.U, :, 1:k) * Diagonal(atan.(view(d.S, 1:k))) * view(d.Vt, 1:k, :))
+    return X .= view(d.U, :, 1:k) * Diagonal(atan.(view(d.S, 1:k))) * view(d.Vt, 1:k, :)
 end
 
 @doc raw"""
@@ -382,10 +382,12 @@ end
 function retract!(::Grassmann{N,K}, q, p, X, ::QRRetraction) where {N,K}
     qrfac = qr(p + X)
     d = diag(qrfac.R)
-    D = Diagonal(sign.(sign.(d .+ 0.5)))
-    q .= zeros(N, K)
-    q[1:K, 1:K] .= D
-    return copyto!(q, Array(qrfac.Q) * D)
+    # avoid promoting to Float64 unless necessary
+    D = Diagonal(sign.(d .+ 1//2))
+    # avoid filling q before overwriting
+    # multiply in-place
+    mul!(q, Array(qrfac.Q), D)
+    return q
 end
 
 function Base.show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽}
