@@ -145,11 +145,11 @@ b_{i}=\begin{cases}
 \end{cases}
 ````
 """
-function distance(M::Grassmann, p, q)
+function distance(::Grassmann, p, q)
     p ≈ q && return zero(real(eltype(p)))
     a = svd(p' * q).S
     a[a .> 1] .= 1
-    return sqrt(sum((real(acos.(a))) .^ 2))
+    return sqrt(sum(x -> abs2(real(acos(x))), a))
 end
 
 embed!(::Grassmann, q, p) = (q .= p)
@@ -215,7 +215,7 @@ g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}Y),
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-inner(::Grassmann, p, X, Y) = dot(abs.(X), abs.(Y))
+inner(::Grassmann, p, X, Y) = dot(X,Y)
 
 @doc raw"""
     inverse_retract(M::Grassmann, p, q, ::PolarInverseRetraction)
