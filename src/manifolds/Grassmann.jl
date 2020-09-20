@@ -34,7 +34,7 @@ X ∈ 𝔽^{n × k} :
 X^{\mathrm{H}}p + p^{\mathrm{H}}X = 0_{k} \bigr\},
 ````
 
-where $0_{k}$ denotes the $k × k$ zero matrix.
+where $0_k$ is the $k × k$ zero matrix and $\overline{\cdot}$ the complex conjugate.
 
 Note that a point $p ∈ \operatorname{Gr}(n,k)$ might be represented by
 different matrices (i.e. matrices with unitary column vectors that span
@@ -86,11 +86,11 @@ Check whether `X` is a tangent vector in the tangent space of `p` on
 the [`Grassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
 
 ````math
-    p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0_k,
+    p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0_k,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and $0_k$
-denotes the $k × k$ zero natrix.
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
+$\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ the $k × k$ zero natrix.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
 function check_tangent_vector(
@@ -114,9 +114,9 @@ function check_tangent_vector(
         kwargs...,
     )
     mpv === nothing || return mpv
-    if !isapprox(p' * X + X' * p, zeros(k, k); kwargs...)
+    if !isapprox(p' * X + conj(X' * p), zeros(k, k); kwargs...)
         return DomainError(
-            norm(p' * X + X' * p),
+            norm(p' * X + conj(X' * p)),
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since p'X + X'p is not the zero matrix.",
         )
     end
@@ -149,7 +149,7 @@ function distance(M::Grassmann, p, q)
     p ≈ q && return zero(real(eltype(p)))
     a = svd(p' * q).S
     a[a .> 1] .= 1
-    return sqrt(sum((acos.(a)) .^ 2))
+    return sqrt(sum((real(acos.(a))) .^ 2))
 end
 
 embed!(::Grassmann, q, p) = (q .= p)
@@ -215,7 +215,7 @@ g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}Y),
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-inner(::Grassmann, p, X, Y) = dot(X, Y)
+inner(::Grassmann, p, X, Y) = dot(abs.(X), abs.(Y))
 
 @doc raw"""
     inverse_retract(M::Grassmann, p, q, ::PolarInverseRetraction)
@@ -278,12 +278,12 @@ In this formula the $\operatorname{atan}$ is meant elementwise.
 """
 log(::Grassmann, ::Any...)
 
-function log!(M::Grassmann, X, p, q)
+function log!(::Grassmann{n,k}, X, p, q) where {n,k}
     z = q' * p
     At = q' - z * p'
     Bt = z \ At
     d = svd(Bt')
-    return copyto!(X, d.U * Diagonal(atan.(d.S)) * d.Vt)
+    return copyto!(X, d.U[:,1:k] * Diagonal(atan.(d.S[1:k])) * d.Vt[1:k,:])
 end
 
 @doc raw"""
@@ -337,7 +337,7 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 project(::Grassmann, ::Any...)
 
-project!(M::Grassmann, v, x, w) = copyto!(v, w - x * x' * w)
+project!(::Grassmann, Y, p, X) = copyto!(Y, X - p * p' * X)
 
 @doc raw"""
     representation_size(M::Grassmann{n,k})

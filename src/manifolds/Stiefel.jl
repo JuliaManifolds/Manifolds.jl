@@ -14,10 +14,10 @@ $I_k ∈ ℝ^{k × k}$ denotes the $k × k$ identity matrix.
 The tangent space at a point $p ∈ \mathcal M$ is given by
 
 ````math
-T_p \mathcal M = \{ X ∈ 𝔽^{n × k} : p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0_k\},
+T_p \mathcal M = \{ X ∈ 𝔽^{n × k} : p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0_k\},
 ````
 
-where $0_k$ is the $k × k$ zero matrix.
+where $0_k$ is the $k × k$ zero matrix and $\overline{\cdot}$ the (elementwise) complex conjugate.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
@@ -65,7 +65,8 @@ end
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
 `M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](@ref) fits and
-it (approximately) holds that $p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0$.
+it (approximately) holds that $p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0$,
+where $\cdot^{\mathrm{H}}$ denotes the Hermitian and $\overline{\cdot}$ the (elementwise) complex conjugate.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The settings for approximately can be set with `kwargs...`.
 """
@@ -90,9 +91,9 @@ function check_tangent_vector(
         kwargs...,
     )
     mpv === nothing || return mpv
-    if !isapprox(p' * X + X' * p, zeros(k, k); kwargs...)
+    if !isapprox(p' * X + conj(X' * p), zeros(k, k); kwargs...)
         return DomainError(
-            norm(p' * X + X' * p),
+            norm(p' * X + conj(X' * p)),
             "The matrix $(X) is does not lie in the tangent space of $(p) on the Stiefel manifold of dimension ($(n),$(k)), since x'v + v'x is not the zero matrix.",
         )
     end
