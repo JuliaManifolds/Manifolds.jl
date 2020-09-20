@@ -283,7 +283,7 @@ function log!(::Grassmann{n,k}, X, p, q) where {n,k}
     At = q' - z * p'
     Bt = z \ At
     d = svd(Bt')
-    return copyto!(X, d.U[:, 1:k] * Diagonal(atan.(d.S[1:k])) * d.Vt[1:k, :])
+    return X .= view(d.U, :, 1:k) * Diagonal(atan.(view(d.S, 1:k))) * view(d.Vt, 1:k, :))
 end
 
 @doc raw"""

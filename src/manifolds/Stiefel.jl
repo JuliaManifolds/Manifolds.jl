@@ -91,7 +91,7 @@ function check_tangent_vector(
         kwargs...,
     )
     mpv === nothing || return mpv
-    if !isapprox(p' * X + conj(X' * p), zeros(k, k); kwargs...)
+    if !isapprox(p' * X, -conj(X' * p); kwargs...)
         return DomainError(
             norm(p' * X + conj(X' * p)),
             "The matrix $(X) is does not lie in the tangent space of $(p) on the Stiefel manifold of dimension ($(n),$(k)), since x'v + v'x is not the zero matrix.",
