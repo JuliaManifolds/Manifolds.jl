@@ -52,7 +52,7 @@ function check_tangent_vector(
         kwargs...,
     )
     mpv === nothing || return mpv
-    if !isapprox(real(dot(p, X)), 0; kwargs...)
+    if !isapprox(dot(p, X), 0; kwargs...)
         return DomainError(
             dot(p, X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding.",
@@ -286,14 +286,9 @@ function vector_transport_to!(::AbstractProjectiveSpace, Y, p, X, q, ::ParallelT
     z = dot(p, q)
     cosθ = abs(z)
     signz = sign_from_abs(z, cosθ)
-    factor = if z isa Real
-        signz * dot(q, X) / (1 + cosθ)
-    else
-        (signz * dot(q, X) - cosθ * dot(p, X)) / (1 + cosθ)
-    end
     # multiply by `sign(z)` to bring from T_{\exp_p(\log_p q)} M to T_q M
-    # this ensures that downstream functions like `exp` do the right thing
-    Y .= signz .* (X .- (p .+ signz' .* q) .* factor)
+    # this ensures that subsequent functions like `exp(M, q, Y)` do the right thing
+    Y .= signz .* (X .- (p .+ signz' .* q) .* (signz * dot(q, X) / (1 + cosθ)))
     return Y
 end
 function vector_transport_to!(M::AbstractProjectiveSpace, Y, p, X, q, ::ProjectionTransport)
