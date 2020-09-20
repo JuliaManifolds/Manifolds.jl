@@ -213,7 +213,7 @@ function normal_tvector_distribution(M::ProjectiveSpace{n,ℝ}, p, σ) where {n}
     return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project!, p)
 end
 
-project!(::AbstractProjectiveSpace, q, p) = copyto!(q, p ./ norm(p))
+@inline project!(::AbstractProjectiveSpace, q, p) = normalize!(copyto!(q, p))
 
 project!(::AbstractProjectiveSpace, Y, p, X) = (Y .= X .- dot(p, X) .* p)
 
