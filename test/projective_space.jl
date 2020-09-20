@@ -93,7 +93,7 @@ include("utils.jl")
             x = [0.5 + 0.5im, 0.5 + 0.5im, 0]
             v = [0.0, 0.0, 1.0 - im]
             y = im * exp(M, x, v)
-            w = [0.0 + 0.5im, -1.0 + 0.5im, 0.0 + 0.5im]
+            w = [0.5, -0.5, 0.5im]
             z = (sqrt(0.5) - sqrt(0.5) * im) * exp(M, x, w)
             pts = convert.(T, [x, y, z])
             test_manifold(
