@@ -8,7 +8,7 @@ include("utils.jl")
     B_skewsym = [0 -2 -3; 2 0 -1; 3 1 0]
     M_complex = SkewSymmetricMatrices(3, ℂ)
     A_skewsym_complex = [1.0im -2.0 -3.0; 2.0 0.0 1.0; 3.0 -1.0 0.0]
-    B_skewsym_complex = [2.0im -2.0 - 2.0im -3.0; 2.0 - 2.0im 0.0 -1.0; 3.0 1.0 0.0]
+    B_skewsym_complex = [2.0im -2.0-2.0im -3.0; 2.0-2.0im 0.0 -1.0; 3.0 1.0 0.0]
     @test repr(M_complex) == "SkewSymmetricMatrices(3, ℂ)"
     C = [0 -1 im; 1 0 -im; im -im 0]
     D = [1 0; 0 1]

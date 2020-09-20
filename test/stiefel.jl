@@ -121,7 +121,7 @@ include("utils.jl")
         end
         types = [Matrix{ComplexF64}]
         @testset "Type $T" for T in types
-            x = [0.5 + 0.5im 0.5 + 0.5im; 0.5 + 0.5im -0.5 - 0.5im; 0.0 0.0]
+            x = [0.5+0.5im 0.5+0.5im; 0.5+0.5im -0.5-0.5im; 0.0 0.0]
             y = exp(M, x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
             z = exp(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0])
             pts = convert.(T, [x, y, z])

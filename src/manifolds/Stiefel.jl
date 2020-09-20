@@ -134,7 +134,7 @@ function exp!(M::Stiefel{n,k}, q, p, X) where {n,k}
     return copyto!(
         q,
         [p X] *
-        exp([p'X -X' * X; one(zeros(eltype(p), k, k)) p' * X]) *
+        exp([p'X -X'*X; one(zeros(eltype(p), k, k)) p'*X]) *
         [exp(-p'X); zeros(eltype(p), k, k)],
     )
 end
