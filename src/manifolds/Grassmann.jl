@@ -148,8 +148,7 @@ b_{i}=\begin{cases}
 function distance(::Grassmann, p, q)
     p ≈ q && return zero(real(eltype(p)))
     a = svd(p' * q).S
-    a[a .> 1] .= 1
-    return sqrt(sum(x -> abs2(acos(x)), a))
+    return sqrt(sum(x -> abs2(acos(clamp(x, -1, 1))), a))
 end
 
 embed!(::Grassmann, q, p) = (q .= p)
