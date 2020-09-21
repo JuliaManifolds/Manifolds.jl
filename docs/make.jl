@@ -82,18 +82,18 @@ makedocs(
 )
 
 function should_push_preview(event_path = get(ENV, "GITHUB_EVENT_PATH", nothing))
-     event_path === nothing && return false
-     event = JSON.parsefile(event_path)
-     labels = [x["name"] for x in event["pull_request"]["labels"]]
-     # https://developer.github.com/v3/activity/events/types/#pullrequestevent
-     yes = "deploydocs" in labels
-     if yes
-         @info "Trying to push preview as label `deploydocs` is specified." labels
-     else
-         @info "Not pushing preview as label `deploydocs` is not specified." labels
-     end
-     return yes
- end
+    event_path === nothing && return false
+    event = JSON.parsefile(event_path)
+    labels = [x["name"] for x in event["pull_request"]["labels"]]
+    # https://developer.github.com/v3/activity/events/types/#pullrequestevent
+    yes = "deploydocs" in labels
+    if yes
+        @info "Trying to push preview as label `deploydocs` is specified." labels
+    else
+        @info "Not pushing preview as label `deploydocs` is not specified." labels
+    end
+    return yes
+end
 
 deploydocs(
     repo = "github.com/JuliaManifolds/Manifolds.jl.git",

@@ -6,10 +6,10 @@ include("utils.jl")
     @test manifold_dimension(M) == 3
     @test get_embedding(M) == Euclidean(4, 2)
     @test representation_size(M) == (4, 2)
-    q = [1.0 0.0; 0.0 1.0; 1 / sqrt(2) -1 / sqrt(2); 1 / sqrt(2) 1 / sqrt(2)]
+    q = [1.0 0.0; 0.0 1.0; 1/sqrt(2) -1/sqrt(2); 1/sqrt(2) 1/sqrt(2)]
     @test is_manifold_point(M, q, true; atol = 10^-15)
     @test base_manifold(M) === M
-    qN = [2.0 0.0; 0.0 1.0; 1 / sqrt(2) -1 / sqrt(2); 1 / sqrt(2) 1 / sqrt(2)]
+    qN = [2.0 0.0; 0.0 1.0; 1/sqrt(2) -1/sqrt(2); 1/sqrt(2) 1/sqrt(2)]
     @test_throws DomainError is_manifold_point(M, qN, true)
     Y = [0.0 1.0; 1.0 0.0; 0.0 0.0; 0.0 0.0]
     @test is_tangent_vector(M, q, Y, true; check_base_point = false)
@@ -20,8 +20,8 @@ include("utils.jl")
     qE2 = embed(M, q)
     @test qE == q
     @test qE2 == q
-    q2 = [4.0 / 5 3.0 / 5; 3.0 / 5.0 -4.0 / 5.0; 1.0 0.0; 0.0 1.0]
-    q3 = [12.0 / 13.0 5.0 / 13.0; 1.0 0.0; -12.0 / 13.0 5.0 / 13.0; 0.0 1.0]
+    q2 = [4.0/5 3.0/5; 3.0/5.0 -4.0/5.0; 1.0 0.0; 0.0 1.0]
+    q3 = [12.0/13.0 5.0/13.0; 1.0 0.0; -12.0/13.0 5.0/13.0; 0.0 1.0]
     @test is_tangent_vector(
         M,
         q2,
