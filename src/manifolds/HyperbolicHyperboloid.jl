@@ -57,7 +57,7 @@ function convert(
 ) where {P<:AbstractVector,T<:AbstractVector}
     return HyperboloidTVector(X)
 end
-convert(::Type{<:AbstractVector}, X::HyperboloidTVector) = X.value
+convert(::Type{AbstractVector}, X::HyperboloidTVector) = X.value
 function convert(
     ::Type{T},
     p::HyperboloidPoint,
@@ -69,11 +69,11 @@ end
 function convert(::Type{HyperboloidPoint}, p::T) where {T<:AbstractVector}
     return HyperboloidPoint(p)
 end
-convert(::Type{<:AbstractVector}, p::HyperboloidPoint) = p.value
+convert(::Type{AbstractVector}, p::HyperboloidPoint) = p.value
 
 @doc raw"""
     convert(::Type{HyperboloidPoint}, p::PoincareBallPoint)
-    convert(::Type{<:AbstractVector}, p::PoincareBallPoint)
+    convert(::Type{AbstractVector}, p::PoincareBallPoint)
 
 convert a point [`PoincareBallPoint`](@ref) `x` (from $ℝ^n$) from the
 Poincaré ball model of the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ to a [`HyperboloidPoint`](@ref) $π(p) ∈ ℝ^{n+1}$.
@@ -89,13 +89,13 @@ Note that this is also used, when the type to convert to is a vector.
 function convert(::Type{HyperboloidPoint}, p::PoincareBallPoint)
     return HyperboloidPoint(convert(AbstractVector, p))
 end
-function convert(::Type{<:AbstractVector}, p::PoincareBallPoint)
-    return 1 / (1 - norm(p.value)^2) .* [(2 .* p.value)..., 1 + norm(p.value)^2]
+function convert(::Type{AbstractVector}, p::PoincareBallPoint)
+    return 1 / (1 - norm(p.value)^2) .* vcat(2 .* p.value, 1 + norm(p.value)^2)
 end
 
 @doc raw"""
     convert(::Type{HyperboloidPoint}, p::PoincareHalfSpacePoint)
-    convert(::Type{<:AbstractVector}, p::PoincareHalfSpacePoint)
+    convert(::Type{AbstractVector}, p::PoincareHalfSpacePoint)
 
 convert a point [`PoincareHalfSpacePoint`](@ref) `p` (from $ℝ^n$) from the
 Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ to a [`HyperboloidPoint`](@ref) $π(p) ∈ ℝ^{n+1}$.
@@ -105,13 +105,13 @@ This is done in two steps, namely transforming it to a Poincare ball point and f
 function convert(t::Type{HyperboloidPoint}, p::PoincareHalfSpacePoint)
     return convert(t, convert(PoincareBallPoint, p))
 end
-function convert(t::Type{<:AbstractVector}, p::PoincareHalfSpacePoint)
+function convert(t::Type{AbstractVector}, p::PoincareHalfSpacePoint)
     return convert(t, convert(PoincareBallPoint, p))
 end
 
 @doc raw"""
     convert(::Type{HyperboloidTVector}, p::PoincareBallPoint, X::PoincareBallTVector)
-    convert(::Type{<:AbstractVector}, p::PoincareBallPoint, X::PoincareBallTVector)
+    convert(::Type{AbstractVector}, p::PoincareBallPoint, X::PoincareBallTVector)
 
 Convert the [`PoincareBallTVector`](@ref) `X` from the tangent space at `p` to a
 [`HyperboloidTVector`](@ref) by computing the push forward of the isometric map, cf.
@@ -167,7 +167,7 @@ end
 
 @doc raw"""
     convert(::Type{HyperboloidTVector}, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTVector)
-    convert(::Type{<:AbstractVector}, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTVector)
+    convert(::Type{AbstractVector}, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTVector)
 
 convert a point [`PoincareHalfSpaceTVector`](@ref) `X` (from $ℝ^n$) at `p` from the
 Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ to a

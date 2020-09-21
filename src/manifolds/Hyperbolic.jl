@@ -195,10 +195,10 @@ end
 for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
     @eval convert(::Type{$T}, p::$P, X::$T) = X
     @eval function convert(
-        ::Type{Tuple{P,T}},
+        ::Type{Tuple{AbstractVector,AbstractVector}},
         (p, X)::Tuple{$P,$T},
-    ) where {P<:AbstractVector,T<:AbstractVector}
-        return (convert(T, p), convert(T, p, X))
+    )
+        return (convert(AbstractVector, p), convert(AbstractVector, p, X))
     end
 end
 

@@ -130,7 +130,7 @@ include("utils.jl")
                 @test isapprox(M, pts[2], convert(AbstractVector, p3))
                 @test isapprox(M, p3, convert(T2, p2, X2), X3)
                 # coupled conversion
-                (pT, XT) = convert(Tuple{Vector,Vector}, (p2, X2))
+                (pT, XT) = convert(Tuple{AbstractVector,AbstractVector}, (p2, X2))
                 @test isapprox(M, pts[2], pT)
                 @test isapprox(M, pts[2], X, XT)
             end
