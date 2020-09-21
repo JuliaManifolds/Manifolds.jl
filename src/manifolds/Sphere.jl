@@ -161,9 +161,9 @@ d_{𝕊}(p,q) = \arccos(⟨p,q⟩).
 """
 distance(::AbstractSphere, p, q) = acos(clamp(real(dot(p, q)), -1, 1))
 
-embed!(::AbstractSphere, q, p) = (q .= p)
+embed!(::AbstractSphere, q, p) = copyto!(q, p)
 
-embed!(::AbstractSphere, Y, p, X) = (Y .= X)
+embed!(::AbstractSphere, Y, p, X) = copyto!(Y, X)
 
 @doc raw"""
     exp(M::AbstractSphere, p, X)
