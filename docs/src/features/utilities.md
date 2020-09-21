@@ -1,6 +1,6 @@
 # Ease of notation
 
-The following terms introduce a nicer notation for some operations, line using $p ∈ \mathcal M$ to determine, whether $p$ is a point on the [`Manifold`](@ref) $\mathcal M$.
+The following terms introduce a nicer notation for some operations, for example using the ∈ operator, $p ∈ \mathcal M$, to determine whether $p$ is a point on the [`Manifold`](@ref) $\mathcal M$.
 
 ````@docs
 in

@@ -43,7 +43,7 @@ Hyperbolic(n::Int) = Hyperbolic{n}()
 In the Hyperboloid model of the [`Hyperbolic`](@ref) $\mathcal H^n$ points are represented
 as vectors in $ℝ^{n+1}$ with [`MinkowskiMetric`](@ref) equal to $-1$.
 
-This representation is the default, i.e. vectors are assumed to have this repesentation.
+This representation is the default, i.e. `AbstractVector`s are assumed to have this repesentation.
 """
 struct HyperboloidPoint{TValue<:AbstractVector} <: MPoint
     value::TValue
@@ -58,7 +58,7 @@ point $p$.
 
 This representation is the default, i.e. vectors are assumed to have this repesentation.
 """
-struct HyperboloidTVector{TValue<:AbstractVector} <: MPoint
+struct HyperboloidTVector{TValue<:AbstractVector} <: TVector
     value::TValue
 end
 
@@ -75,7 +75,7 @@ end
 @doc raw"""
     PoincareBallTVector <: TVector
 
-In the Poincaré ball model of the [`Hyperbolic`](@ref) $\mathcal H^n$ tangent vctors are represented
+In the Poincaré ball model of the [`Hyperbolic`](@ref) $\mathcal H^n$ tangent vectors are represented
 as vectors in $ℝ^{n}$.
 """
 struct PoincareBallTVector{TValue<:AbstractVector} <: MPoint
@@ -95,10 +95,10 @@ end
 @doc raw"""
     PoincareHalfPlaneTVector <: TVector
 
-In the Poincaré half plane model of the [`Hyperbolic`](@ref) $\mathcal H^n$ tangent vctors are
+In the Poincaré half plane model of the [`Hyperbolic`](@ref) $\mathcal H^n$ tangent vectors are
 represented as vectors in $ℝ^{n}$.
 """
-struct PoincareHalfSpaceTVector{TValue<:AbstractVector} <: MPoint
+struct PoincareHalfSpaceTVector{TValue<:AbstractVector} <: TVector
     value::TValue
 end
 
