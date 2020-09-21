@@ -208,7 +208,8 @@ function ManifoldTests.test_manifold(
                 M,
                 pts[1],
                 exp(M, pts[2], X2);
-                atol = atolp1p2 * 10^8,
+                # yields 5*10^-8 for the usual 10^-13 we impose on earlier Julia versions
+                atol = atolp1p2 * 5 * 10^5,
                 rtol = rtolp1p2,
             )
         else
