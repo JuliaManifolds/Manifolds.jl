@@ -10,15 +10,15 @@ function check_manifold_point(M::Hyperbolic{N}, p::PoincareBallPoint; kwargs...)
 end
 
 @doc raw"""
-    convert(::Type{PoincareBallPoint}, x::HyperboloidPoint)
-    convert(::Type{PoincareBallPoint}, x::T) where {T<:AbstractVector}
+    convert(::Type{PoincareBallPoint}, p::HyperboloidPoint)
+    convert(::Type{PoincareBallPoint}, p::T) where {T<:AbstractVector}
 
-convert a [`HyperboloidPoint`](@ref) $x∈ℝ^{n+1}$ from the hyperboloid model of the [`Hyperbolic`](@ref)
-manifold $\mathcal H^n$ to a [`PoincareBallPoint`](@ref) $π(x)∈ℝ^{n}$ in the Poincaré ball model.
+convert a [`HyperboloidPoint`](@ref) $p∈ℝ^{n+1}$ from the hyperboloid model of the [`Hyperbolic`](@ref)
+manifold $\mathcal H^n$ to a [`PoincareBallPoint`](@ref) $π(p)∈ℝ^{n}$ in the Poincaré ball model.
 The isometry is defined by
 
 ````math
-π(x) = \frac{1}{1+x_{n+1}} \begin{pmatrix}x_1\\⋮\\x_n\end{pmatrix}
+π(p) = \frac{1}{1+p_{n+1}} \begin{pmatrix}p_1\\⋮\\p_n\end{pmatrix}
 ````
 
 Note that this is also used, when `x` is a vector.
