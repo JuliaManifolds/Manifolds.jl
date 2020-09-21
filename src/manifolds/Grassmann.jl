@@ -278,9 +278,10 @@ In this formula the $\operatorname{atan}$ is meant elementwise.
 log(::Grassmann, ::Any...)
 
 function log!(::Grassmann{n,k}, X, p, q) where {n,k}
-    z = p' * q
-    B = q / z - p
-    d = svd(B)
+    z = q' * p
+    At = q' - z * p'
+    Bt = z \ At
+    d = svd(Bt')
     return X .= view(d.U, :, 1:k) * Diagonal(atan.(view(d.S, 1:k))) * view(d.Vt, 1:k, :)
 end
 
