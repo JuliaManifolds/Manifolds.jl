@@ -441,7 +441,9 @@ P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_𝕊(p,q)}
 vector_transport_to(::AbstractSphere, ::Any, ::Any, ::Any, ::Any, ::ParallelTransport)
 
 function vector_transport_to!(::AbstractSphere, Y, p, X, q, ::ParallelTransport)
-    cosθ = real(dot(p, q))
-    Y .= X .- (p .+ q) .* (real(dot(q, X)) / (1 + cosθ))
+    m = p .+ q
+    mnorm2 = real(dot(m, m))
+    factor = 2 * real(dot(X, q)) / mnorm2
+    Y .= X .- m .* factor
     return Y
 end

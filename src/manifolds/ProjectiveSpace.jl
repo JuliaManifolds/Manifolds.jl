@@ -282,13 +282,15 @@ tangent vector `d`.
 """
 vector_transport_direction(::AbstractProjectiveSpace, p, X, d, ::ParallelTransport)
 
-function vector_transport_to!(M::AbstractProjectiveSpace, Y, p, X, q, ::ParallelTransport)
-    signz = sign(dot(p, q))
-    # transport to T_{\exp_p(\log_p q)} M
-    vector_transport_direction!(M, Y, p, X, log(M, p, q), ParallelTransport())
+function vector_transport_to!(::AbstractProjectiveSpace, Y, p, X, q, ::ParallelTransport)
+    z = dot(p, q)
+    signz = sign(z)
+    m = p .+ signz' .* q # un-normalized midpoint
+    mnorm2 = real(dot(m, m))
+    factor = signz * dot(q, X) * (2 / mnorm2)
     # multiply by `sign(z)` to bring from T_{\exp_p(\log_p q)} M to T_q M
     # this ensures that subsequent functions like `exp(M, q, Y)` do the right thing
-    Y .*= signz
+    Y .= signz .* (X .- m .* factor)
     return Y
 end
 function vector_transport_to!(M::AbstractProjectiveSpace, Y, p, X, q, ::ProjectionTransport)
