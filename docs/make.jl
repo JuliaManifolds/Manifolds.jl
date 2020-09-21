@@ -1,4 +1,4 @@
-using Manifolds, ManifoldsBase, Documenter
+using Manifolds, ManifoldsBase, Documenter, JSON
 # required for loading the Manifolds.ManifoldTests module
 using Test, ForwardDiff, ReverseDiff
 
