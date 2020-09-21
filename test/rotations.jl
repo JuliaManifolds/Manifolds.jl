@@ -88,23 +88,25 @@ include("utils.jl")
             ptd = Manifolds.normal_rotation_distribution(SOn, Matrix(1.0I, n, n), 1.0)
             tvd = Manifolds.normal_tvector_distribution(SOn, Matrix(1.0I, n, n), 1.0)
             pts = [rand(ptd) for _ in 1:3]
-            test_manifold(
-                SOn,
-                pts;
-                test_forward_diff = n == 3,
-                test_reverse_diff = false,
-                test_injectivity_radius = false,
-                test_musical_isomorphisms = true,
-                test_mutating_rand = true,
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
-                point_distributions = [ptd],
-                tvector_distributions = [tvd],
-                basis_types_to_from = basis_types,
-                exp_log_atol_multiplier = 20,
-                retraction_atol_multiplier = 12,
-            )
-
+            # there is some Julia bug that occurs there
+            if n != 4 || VERSION < v"1.4" || VERSION >= v"1.6-"
+                test_manifold(
+                    SOn,
+                    pts;
+                    test_forward_diff = n == 3,
+                    test_reverse_diff = false,
+                    test_injectivity_radius = false,
+                    test_musical_isomorphisms = true,
+                    test_mutating_rand = true,
+                    retraction_methods = retraction_methods,
+                    inverse_retraction_methods = inverse_retraction_methods,
+                    point_distributions = [ptd],
+                    tvector_distributions = [tvd],
+                    basis_types_to_from = basis_types,
+                    exp_log_atol_multiplier = 20,
+                    retraction_atol_multiplier = 12,
+                )
+            end
             @testset "vee/hat" begin
                 x = Matrix(1.0I, n, n)
                 v = randn(manifold_dimension(SOn))
