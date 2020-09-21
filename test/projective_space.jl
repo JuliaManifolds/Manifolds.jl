@@ -124,6 +124,7 @@ include("utils.jl")
                 ],
                 exp_log_atol_multiplier = 10.0^3,
                 is_tangent_atol_multiplier = 20.0,
+                retraction_atol_multiplier = 10.0,
             )
 
             @testset "inner/norm" begin
