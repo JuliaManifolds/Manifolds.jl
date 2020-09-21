@@ -370,7 +370,7 @@ norm for the case $m>1$.
 """
 project(::AbstractSphere, ::Any)
 
-@inline project!(::AbstractSphere, q, p) = normalize!(copyto!(q, p))
+project!(S::AbstractSphere, q, p) = copyto!(q, p ./ norm(p))
 
 @doc raw"""
     project(M::AbstractSphere, p, X)
