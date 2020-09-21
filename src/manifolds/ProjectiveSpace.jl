@@ -285,7 +285,7 @@ vector_transport_direction(::AbstractProjectiveSpace, p, X, d, ::ParallelTranspo
 function vector_transport_to!(M::AbstractProjectiveSpace, Y, p, X, q, ::ParallelTransport)
     signz = sign(dot(p, q))
     # transport to T_{\exp_p(\log_p q)} M
-    vector_transport_to!(M, Y, p, X, log(M, p, q), ParallelTransport())
+    vector_transport_direction!(M, Y, p, X, log(M, p, q), ParallelTransport())
     # multiply by `sign(z)` to bring from T_{\exp_p(\log_p q)} M to T_q M
     # this ensures that subsequent functions like `exp(M, q, Y)` do the right thing
     Y .*= signz
