@@ -125,7 +125,7 @@ include("utils.jl")
     for T in types
         @testset "Type $T" begin
             y = retract(M, x, v, PolarRetraction())
-            z = SVDMPoint([1 / sqrt(2) 1 / sqrt(2); 1 / sqrt(2) -1 / sqrt(2); 0.0 0.0])
+            z = SVDMPoint([1/sqrt(2) 1/sqrt(2); 1/sqrt(2) -1/sqrt(2); 0.0 0.0])
             pts = []
             for p in [x, y, z]
                 push!(pts, SVDMPoint(convert.(T, [p.U, p.S, p.Vt])...))

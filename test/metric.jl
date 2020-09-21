@@ -251,12 +251,11 @@ end
             @test norm(M, x, v) ≈ sqrt(dot(v, G * v)) atol = 1e-6
 
             xcart = sph_to_cart(θ, ϕ)
-            vcart =
-                [
-                    cos(ϕ) * cos(θ) -sin(ϕ) * sin(θ)
-                    sin(ϕ) * cos(θ) cos(ϕ) * sin(θ)
-                    -sin(θ) 0
-                ] * v
+            vcart = [
+                cos(ϕ)*cos(θ) -sin(ϕ)*sin(θ)
+                sin(ϕ)*cos(θ) cos(ϕ)*sin(θ)
+                -sin(θ) 0
+            ] * v
 
             if VERSION ≥ v"1.1" && (!Sys.iswindows() || Sys.ARCH == :x86_64)
                 @testset "numerically integrated geodesics for $vtype" begin

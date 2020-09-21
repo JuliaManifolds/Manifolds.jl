@@ -151,7 +151,7 @@ include("utils.jl")
         end
         types = [Matrix{ComplexF64}]
         @testset "Type $T" for T in types
-            x = [0.5 + 0.5im 0.5 + 0.5im; 0.5 + 0.5im -0.5 - 0.5im; 0.0 0.0]
+            x = [0.5+0.5im 0.5+0.5im; 0.5+0.5im -0.5-0.5im; 0.0 0.0]
             v = [0.0 0.0; 0.0 0.0; 0.0 1.0]
             y = exp(M, x, v)
             w = [0.0 1.0; -1.0 0.0; 1.0 0.0]
