@@ -202,7 +202,7 @@ function ManifoldTests.test_manifold(
             atol = atolp1p2,
             rtol = rtolp1p2,
         )
-        if VERSION >= v"1.6-DEV" && isa(M, Union{Grassmann,GeneralizedStiefel})
+        if VERSION >= v"1.5" && isa(M, Union{Grassmann,GeneralizedStiefel})
             # TODO: investigate why this is so imprecise on newer Julia versions on CI
             Test.@test isapprox(
                 M,
