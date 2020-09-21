@@ -46,7 +46,7 @@ include("utils.jl")
     @testset "Complex Centered Matrices Basics" begin
         @test repr(M_complex) == "CenteredMatrices(3, 2, ℂ)"
         @test manifold_dimension(M_complex) == 8
-        G = [1.0 1.0im; -1.0im 0.0; -1.0 + 1.0im -1.0im]
+        G = [1.0 1.0im; -1.0im 0.0; -1.0+1.0im -1.0im]
         H = [1.0im 0.0; -2.0im 1.0im; 1.0im -1.0im]
         test_manifold(
             M_complex,
