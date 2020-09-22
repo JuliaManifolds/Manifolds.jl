@@ -5,6 +5,7 @@ include("utils.jl")
     @testset "Hyperbolic Basics" begin
         @test repr(M) == "Hyperbolic(2)"
         @test base_manifold(M) == M
+        @test manifold_dimension(M) == 2
         @test typeof(get_embedding(M)) ==
               MetricManifold{ℝ,Euclidean{Tuple{3},ℝ},MinkowskiMetric}
         @test representation_size(M) == (3,)
@@ -17,6 +18,7 @@ include("utils.jl")
         @test_throws DomainError is_manifold_point(M, [2.0, 0.0, 0.0], true)
         @test !is_manifold_point(M, [2.0, 0.0, 0.0])
         @test !is_tangent_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
+        @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
         @test_throws DomainError is_tangent_vector(
             M,
             [1.0, 0.0, 0.0],
@@ -33,12 +35,120 @@ include("utils.jl")
         @test is_default_metric(M, MinkowskiMetric())
         @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
         @test manifold_dimension(M) == 2
-    end
-    types = [Vector{Float64}, SizedVector{3,Float64}]
-    TEST_FLOAT32 && push!(types, Vector{Float32})
 
+        for (P, T) in zip(
+            [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
+            [HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector],
+        )
+            p = convert(P, [1.0, 0.0, sqrt(2.0)])
+            X = convert(T, [1.0, 0.0, sqrt(2.0)], [0.0, 1.0, 0.0])
+            @test number_eltype(p) == eltype(p.value)
+            @test X * 2.0 == T(X.value * 2.0)
+            @test 2 \ X == T(2 \ X.value)
+            @test +X == T(+X.value)
+            @test Manifolds.allocate_result_type(M, log, (p, p)) == T
+            @test Manifolds.allocate_result_type(M, inverse_retract, (p, p)) == T
+            convert(T, p, X) == X
+        end
+    end
+    @testset "Hyperbolic Representation Conversion I" begin
+        p = [0.0, 0.0, 1.0]
+        pH = HyperboloidPoint(p)
+        @test minkowski_metric(pH, pH) == minkowski_metric(p, p)
+        @test convert(HyperboloidPoint, p).value == pH.value
+        @test convert(AbstractVector, pH) == p
+        X = [1.0, 0.0, 0.0]
+        XH = HyperboloidTVector(X)
+
+        @test convert(HyperboloidTVector, X).value == XH.value
+        @test convert(AbstractVector, XH) == X
+        @test convert(HyperboloidPoint, p).value == pH.value
+        is_manifold_point(M, pH)
+        pB = convert(PoincareBallPoint, p)
+        @test pB.value == convert(PoincareBallPoint, pH).value
+        @test is_manifold_point(M, pB)
+        @test convert(AbstractVector, pB) == p # convert back yields again p
+        @test convert(HyperboloidPoint, pB).value == pH.value
+        @test_throws DomainError is_manifold_point(
+            M,
+            PoincareBallPoint([0.9, 0.0, 0.0]),
+            true,
+        )
+        @test_throws DomainError is_manifold_point(M, PoincareBallPoint([1.0, 0.0]), true)
+
+        @test is_tangent_vector(M, pB, PoincareBallTVector([2.0, 2.0]))
+
+        pS = convert(PoincareHalfSpacePoint, p)
+        pS2 = convert(PoincareHalfSpacePoint, pB)
+        pS3 = convert(PoincareHalfSpacePoint, pH)
+
+        @test_throws DomainError is_manifold_point(
+            M,
+            PoincareHalfSpacePoint([0.0, 0.0, 1.0]),
+            true,
+        )
+        @test_throws DomainError is_manifold_point(
+            M,
+            PoincareHalfSpacePoint([0.0, -1.0]),
+            true,
+        )
+
+        @test pS.value == pS2.value
+        @test pS.value == pS3.value
+        @test convert(AbstractVector, pS) == convert(HyperboloidPoint, pS).value
+        @test convert(PoincareBallPoint, pS2).value == pB.value
+    end
+    @testset "Hyperbolic Representation Conversion II" begin
+        M = Hyperbolic(2)
+        pts = [[0.0, 0.0, 1.0], [1.0, 0.0, sqrt(2.0)]]
+        X = log(M, pts[2], pts[1])
+        # For HyperboloidTVector we can do a plain wrap/unwrap
+        X1 = convert(HyperboloidTVector, X)
+        @test convert(AbstractVector, X1) == X
+        # Convert to types and back to Array
+        for (P, T) in zip(
+            [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
+            [HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector],
+        )
+            # convert to P,T
+            p1 = convert(P, pts[2])
+            X1 = convert(T, pts[2], X)
+            (p2, X2) = convert(Tuple{P,T}, (pts[2], X))
+            @test isapprox(M, p1, p2)
+            @test isapprox(M, p1, X1, X2)
+            for (P2, T2) in zip(
+                [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
+                [HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector],
+            )
+                @test isapprox(M, convert(P2, p1), convert(P2, pts[2]))
+                @test convert(T, p1, X1) == convert(T, pts[2], X)
+                (p3, X3) = convert(Tuple{P2,T2}, (pts[2], X))
+                (p3a, X3a) = convert(Tuple{P2,T2}, (p1, X1))
+                @test isapprox(M, p3, p3a)
+                @test isapprox(M, p3, X3, X3a)
+                @test isapprox(M, convert(P2, p2), p3)
+                @test isapprox(M, pts[2], convert(AbstractVector, p3))
+                @test isapprox(M, p3, convert(T2, p2, X2), X3)
+                # coupled conversion
+                (pT, XT) = convert(Tuple{AbstractVector,AbstractVector}, (p2, X2))
+                @test isapprox(M, pts[2], pT)
+                @test isapprox(M, pts[2], X, XT)
+            end
+        end
+    end
+
+    types = [
+        Vector{Float64},
+        SizedVector{3,Float64},
+        HyperboloidPoint,
+        PoincareBallPoint,
+        PoincareHalfSpacePoint,
+    ]
+    TEST_FLOAT32 && push!(types, Vector{Float32})
     for T in types
         @testset "Type $T" begin
+            is_plain_array =
+                T ∉ [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint]
             pts = [
                 convert(T, [0.0, 0.0, 1.0]),
                 convert(T, [1.0, 0.0, sqrt(2.0)]),
@@ -47,8 +157,8 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
+                test_project_tangent = is_plain_array || T == HyperboloidPoint,
+                test_musical_isomorphisms = is_plain_array,
                 test_default_vector_transport = true,
                 vector_transport_methods = [
                     ParallelTransport(),
@@ -59,6 +169,10 @@ include("utils.jl")
                 exp_log_atol_multiplier = 10.0,
                 retraction_methods = (ExponentialRetraction(),),
                 test_vee_hat = false,
+                test_forward_diff = is_plain_array,
+                test_reverse_diff = is_plain_array,
+                test_tangent_vector_broadcasting = is_plain_array,
+                test_vector_spaces = is_plain_array,
             )
         end
     end
@@ -73,6 +187,16 @@ include("utils.jl")
         Y = similar(X)
         embed!(M, Y, p, X)
         @test Y == X
+        p2 = HyperboloidPoint(p)
+        X2 = HyperboloidTVector(X)
+        q2 = HyperboloidPoint(similar(p))
+        @test embed(M, p2).value == p2.value
+        embed!(M, q2, p2)
+        @test q2.value == p2.value
+        @test embed(M, p2, X2).value == X2.value
+        Y2 = HyperboloidTVector(similar(X))
+        embed!(M, Y2, p2, X2)
+        @test Y2.value == X2.value
     end
     @testset "Hyperbolic mean test" begin
         pts = [

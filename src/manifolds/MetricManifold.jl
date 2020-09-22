@@ -433,7 +433,7 @@ function is_default_metric(M::MetricManifold)
     return _extract_val(default_metric_dispatch(M))
 end
 
-function Base.convert(T::Type{MetricManifold{𝔽,MT,GT}}, M::MT) where {𝔽,MT,GT}
+function Base.convert(::Type{MetricManifold{𝔽,MT,GT}}, M::MT) where {𝔽,MT,GT}
     return _convert_with_default(M, GT, default_metric_dispatch(M, GT()))
 end
 
