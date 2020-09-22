@@ -122,9 +122,6 @@ function decorated_manifold(::MultinomialDoubleStochastic{N}) where {N}
     return MultinomialMatrices(N, N)
 end
 
-embed!(::MultinomialDoubleStochastic, q, p) = copyto!(q, p)
-embed!(::MultinomialDoubleStochastic, Y, p, X) = copyto!(Y, X)
-
 @doc raw"""
     manifold_dimension(M::MultinomialDoubleStochastic{n}) where {n}
 

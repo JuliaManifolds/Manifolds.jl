@@ -134,9 +134,6 @@ minimizes $\lVert p - qY\rVert$ with respect to $Y$.
 """
 distance(M::SymmetricPositiveSemidefiniteFixedRank, p, q) = norm(M, p, log(M, p, q))
 
-embed!(::SymmetricPositiveSemidefiniteFixedRank, q, p) = copyto!(q, p)
-embed!(::SymmetricPositiveSemidefiniteFixedRank, Y, ::Any, X) = copyto!(Y, X)
-
 @doc raw"""
     exp(M::SymmetricPositiveSemidefiniteFixedRank, q, Y)
 

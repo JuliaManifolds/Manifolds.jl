@@ -90,9 +90,6 @@ function decorated_manifold(M::SymmetricPositiveDefinite)
     return Euclidean(representation_size(M)...; field = ℝ)
 end
 
-embed!(M::SymmetricPositiveDefinite, q, p) = (q .= p)
-embed!(M::SymmetricPositiveDefinite, Y, p, X) = (Y .= X)
-
 @doc raw"""
     injectivity_radius(M::SymmetricPositiveDefinite[, p])
     injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}[, p])

@@ -206,12 +206,6 @@ decorated_manifold(::Hyperbolic{N}) where {N} = Lorentz(N + 1, MinkowskiMetric()
 
 default_metric_dispatch(::Hyperbolic, ::MinkowskiMetric) = Val(true)
 
-embed!(::Hyperbolic, q, p::T) where {T<:AbstractVector} = (q .= p)
-embed!(::Hyperbolic, Y, p, X::T) where {T<:AbstractVector} = (Y .= X)
-
-embed!(::Hyperbolic, q, p::HyperboloidPoint) = (q.value .= p.value)
-embed!(::Hyperbolic, Y, ::HyperboloidPoint, X::HyperboloidTVector) = (Y.value .= X.value)
-
 @doc raw"""
     exp(M::Hyperbolic, p, X)
 

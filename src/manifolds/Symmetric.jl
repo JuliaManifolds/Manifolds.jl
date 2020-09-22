@@ -99,9 +99,6 @@ end
 
 decorated_manifold(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field = 𝔽)
 
-embed!(M::SymmetricMatrices, q, p) = copyto!(q, p)
-embed!(M::SymmetricMatrices, Y, p, X) = copyto!(Y, X)
-
 function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
     Ξ = get_basis(M, p, DefaultOrthonormalBasis()).data
     κ = zeros(real(eltype(p)), manifold_dimension(M))

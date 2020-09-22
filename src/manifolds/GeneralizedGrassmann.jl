@@ -159,9 +159,6 @@ function distance(M::GeneralizedGrassmann, p, q)
     return sqrt(sum((acos.(a)) .^ 2))
 end
 
-embed!(::GeneralizedGrassmann, q, p) = (q .= p)
-embed!(::GeneralizedGrassmann, Y, p, X) = (Y .= X)
-
 @doc raw"""
     exp(M::GeneralizedGrassmann, p, X)
 
