@@ -114,7 +114,7 @@ function check_tangent_vector(
         kwargs...,
     )
     mpv === nothing || return mpv
-    if !isapprox(p' * X + conj(X' * p), zeros(k, k); kwargs...)
+    if !isapprox(p' * X, - conj(X' * p); kwargs...)
         return DomainError(
             norm(p' * X + conj(X' * p)),
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since p'X + X'p is not the zero matrix.",
@@ -123,7 +123,7 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(M::Grassmann{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
+decorated_manifold(::Grassmann{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
 
 @doc raw"""
     distance(M::Grassmann, p, q)
