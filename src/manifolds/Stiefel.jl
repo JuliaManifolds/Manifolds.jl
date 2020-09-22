@@ -130,7 +130,7 @@ $0_k$ are the identity matrix and the zero matrix of dimension $k × k$, respect
 """
 exp(::Stiefel, ::Any...)
 
-function exp!(M::Stiefel{n,k}, q, p, X) where {n,k}
+function exp!(::Stiefel{n,k}, q, p, X) where {n,k}
     return copyto!(
         q,
         [p X] *
@@ -228,7 +228,7 @@ where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transpo
 """
 project(::Stiefel, ::Any, ::Any)
 
-function project!(M::Stiefel, q, p)
+function project!(::Stiefel, q, p)
     s = svd(p)
     mul!(q, s.U, s.Vt)
     return q

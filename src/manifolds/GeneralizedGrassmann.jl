@@ -90,11 +90,11 @@ Check whether `X` is a tangent vector in the tangent space of `p` on
 the [`GeneralizedGrassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
 
 ````math
-    p^{\mathrm{H}}BX + X^{\mathrm{H}}Bp = 0_k,
+    p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0_k,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and $0_k$
-denotes the $k × k$ zero natrix.
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
+$\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ denotes the $k × k$ zero natrix.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
 function check_tangent_vector(
@@ -118,9 +118,9 @@ function check_tangent_vector(
         kwargs...,
     )
     mpv === nothing || return mpv
-    if !isapprox(p' * M.B * X + X' * M.B * p, zeros(k, k); kwargs...)
+    if !isapprox(p' * M.B * X, -conj(X' * M.B * p); kwargs...)
         return DomainError(
-            norm(p' * M.B * X + X' * M.B * p),
+            norm(p' * M.B * X + conj(X' * M.B * p)),
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since x'Bv + v'Bx is not the zero matrix.",
         )
     end
@@ -156,7 +156,7 @@ function distance(M::GeneralizedGrassmann, p, q)
     p ≈ q && return zero(real(eltype(p)))
     a = svd(p' * M.B * q).S
     a[a .> 1] .= 1
-    return sqrt(sum((acos.(a)) .^ 2))
+    return sqrt(sum(x -> abs2(acos(clamp(x, -1, 1))), a))
 end
 
 embed!(::GeneralizedGrassmann, q, p) = (q .= p)
@@ -252,12 +252,12 @@ In this formula the $\operatorname{atan}$ is meant elementwise.
 """
 log(::GeneralizedGrassmann, ::Any...)
 
-function log!(M::GeneralizedGrassmann, X, p, q)
+function log!(M::GeneralizedGrassmann{n,k}, X, p, q) where {n,k}
     z = q' * M.B * p
     At = q' - z * p'
     Bt = z \ At
     d = svd(Bt')
-    return copyto!(X, d.U * Diagonal(atan.(d.S)) * d.Vt)
+    return X .= view(d.U, :, 1:k) * Diagonal(atan.(view(d.S, 1:k))) * view(d.Vt, 1:k, :)
 end
 
 @doc raw"""
