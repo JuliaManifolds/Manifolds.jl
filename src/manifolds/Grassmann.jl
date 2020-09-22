@@ -114,7 +114,7 @@ function check_tangent_vector(
         kwargs...,
     )
     mpv === nothing || return mpv
-    if !isapprox(p' * X, - conj(X' * p); kwargs...)
+    if !isapprox(p' * X, -conj(X' * p); kwargs...)
         return DomainError(
             norm(p' * X + conj(X' * p)),
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since p'X + X'p is not the zero matrix.",
