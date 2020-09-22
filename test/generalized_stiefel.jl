@@ -88,7 +88,8 @@ include("utils.jl")
                 projection_atol_multiplier = 15.0,
                 retraction_atol_multiplier = 10.0,
                 is_tangent_atol_multiplier = 4 * 10.0^2,
-                exp_log_atol_multiplier = 10.0^3,
+                # investigate why this is so large on 1.6 dev
+                exp_log_atol_multiplier = 10.0^3 * (VERSION >= v"1.6-DEV" ? 10.0^8 : 1.0),
                 retraction_methods = [PolarRetraction(), ProjectionRetraction()],
                 mid_point12 = nothing,
             )

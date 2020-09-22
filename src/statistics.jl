@@ -401,7 +401,7 @@ function Statistics.mean!(
     yold = allocate_result(M, mean, q)
     ytmp = copy(yold)
     X = zero_tangent_vector(M, q)
-    wv = convert(Vector, w) ./ sum(w)
+    wv = convert(AbstractVector, w) ./ sum(w)
     for i in 1:stop_iter
         λ = 0.5 / i
         copyto!(yold, q)
@@ -609,7 +609,7 @@ function Statistics.median!(
     yold = allocate_result(M, median, q)
     ytmp = copy(yold)
     v = zero_tangent_vector(M, q)
-    wv = convert(Vector, w) ./ sum(w)
+    wv = convert(AbstractVector, w) ./ sum(w)
     for i in 1:stop_iter
         λ = 0.5 / i
         copyto!(yold, q)
@@ -671,7 +671,7 @@ function Statistics.var(
     m;
     corrected::Bool = false,
 )
-    wv = convert(Vector, w)
+    wv = convert(AbstractVector, w)
     s = sum(eachindex(x, w)) do i
         return @inbounds w[i] * distance(M, m, x[i])^2
     end

@@ -19,7 +19,7 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | $d(\cdot,\cdot)$ | (Riemannian) distance | $d_{\mathcal M}(\cdot,\cdot)$ | |
 | $\exp_p X$ | exponential map at $p \in \mathcal M$ of a vector $X \in T_p \mathcal M$ | $\exp_p(X)$ | |
 | $F$ | a fiber | | see [`VectorBundleFibers`](@ref) |
-| $\mathbb F$ | a field | | field a manifold or a basis is based on, usually $\mathbb F \in \{\mathbb R,\mathbb C\}$ |
+| $\mathbb F$ | a field, usually $\mathbb F \in \{\mathbb R,\mathbb C, \mathbb H\}$, i.e. the real, complex, and quaternion numbers, respectively. | |field a manifold or a basis is based on |
 | $\gamma$ | a geodesic | $\gamma_{p;q}$, $\gamma_{p,X}$ | connecting two points $p,q$ or starting in $p$ with velocity $X$. |
 | $\nabla f(p)$ | gradient of function $f \colon \mathcal{M} \to \mathbb{R}$ at $p \in \mathcal{M}$ | | |
 | $\circ$ | a group operation | |
