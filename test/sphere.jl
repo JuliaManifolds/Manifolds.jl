@@ -117,7 +117,7 @@ include("utils.jl")
         @test is_tangent_vector(M, q, X, true; atol = 10^(-14))
     end
 
-    @testset "Tensor Sphere" begin
+    @testset "Array Sphere" begin
         M = ArraySphere(2, 2; field = ℝ)
         @test repr(M) == "ArraySphere(2, 2; field = ℝ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℝ}
