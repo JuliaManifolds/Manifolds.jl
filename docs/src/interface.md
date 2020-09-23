@@ -161,18 +161,6 @@ We introduce the embedded manifolds hence as an [`AbstractDecoratorManifold`](@r
 This decorator enables to use such an embedding in an transparent way.
 Different types of embeddings can be distinguished using the [`AbstractEmbeddingType`](@ref).
 
-The embedding also covers representation of tangent vectors.
-For both points and tangent vectors the function [`embed`](@ref) returns their representation in the embedding.
-For any point or vector in the embedding the functions [`project`](@ref) can be used to obtain the closest point on the manifold and tangent vector in the tangent space.
-Note that both [`embed`](@ref) and [`project`](@ref) may also be implemented on a [`Manifold`](@ref) already, assuming that the default implementation of that manifold has an (implicitly assumed) embedding.
-If there exists more than one embedding or to foster using functions from the embedding, like [`inner`](@ref),
-this decorator can be employed. The different embeddings might also refer to different representations or parametrisations of an embedding.
-A specific example where [`embed`](@ref) and [`project`](@ref) actually do change the representation are Lie groups.
-Here, tangent vectors are often represented in the Lie algebra, i.e. in the tangent space of the identity element.
-Then, projection first projects onto a tangent space but also takes care to return the correct representation, i.e. the element from the Lie algebra corresponding to the projected tangent vector.
-Similarly, before embedding a tangent vector that is represented by an element from the Lie algebra,
-the group opration is applied.
-
 ### Isometric Embeddings
 
 For isometric embeddings the type [`AbstractIsometricEmbeddingType`](@ref) can be used to avoid reimplementing the metric.
@@ -187,14 +175,15 @@ See [`SymmetricMatrices`](@ref) for an example.
 
 In both cases of course [`check_manifold_point`](@ref) and [`check_tangent_vector`](@ref) have to be implemented.
 
-### Technical Details
+### Further Embeddings
 
-Semantically we use the idea of the embedding to efficiently implement a manifold by not having to implement those functions that are already given by its embedding. Hence we decorate in some sense the manifold we implement.
-Still, technically [`base_manifold`](@ref) returns the embedding as long as [`EmbeddedManifold`](@ref) is used.
-For the abstract case, [`AbstractEmbeddedManifold`](@ref) the base manfiold might differ.
-Note that internally [`base_manifold`](@ref) uses [`decorated_manifold`](@ref) for one step of removing multiple decorators.
+A first embedding can also just be given implementing [`embed!`](@ref) ann [`project!`](@ref)
+for a manifold. This is considered to be the most usual or default embedding.
 
-Clearly [`get_embedding`](@ref) always returns the embedding.
+If you have two different embeddings for your manifold, a second one can be specified using
+the [`EmbeddedManifold`](@ref), a type that “couples” two manifolds, more precisely a
+manifold and its embedding, to define embedding and projection functions between these
+two manifolds.
 
 ### Types
 

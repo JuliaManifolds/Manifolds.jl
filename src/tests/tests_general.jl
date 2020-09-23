@@ -202,18 +202,7 @@ function ManifoldTests.test_manifold(
             atol = atolp1p2,
             rtol = rtolp1p2,
         )
-        if VERSION >= v"1.6-DEV" && isa(M, Union{Grassmann,GeneralizedStiefel})
-            # TODO: investigate why this is so imprecise on newer Julia versions on CI
-            Test.@test isapprox(
-                M,
-                pts[1],
-                exp(M, pts[2], X2);
-                atol = atolp1p2 * 10^8,
-                rtol = rtolp1p2,
-            )
-        else
-            Test.@test isapprox(M, pts[1], exp(M, pts[2], X2); atol = atolp1p2, rtol = rtolp1p2)
-        end
+        Test.@test isapprox(M, pts[1], exp(M, pts[2], X2); atol = atolp1p2, rtol = rtolp1p2)
         Test.@test is_manifold_point(
             M,
             exp(M, pts[1], X1);
@@ -236,7 +225,7 @@ function ManifoldTests.test_manifold(
                 log(M, p, p);
                 atol = epsx * exp_log_atol_multiplier,
                 rtol = exp_log_atol_multiplier == 0.0 ?
-                           sqrt(epsx) * exp_log_rtol_multiplier : 0,
+                       sqrt(epsx) * exp_log_rtol_multiplier : 0,
             )
             Test.@test isapprox(
                 M,
@@ -245,7 +234,7 @@ function ManifoldTests.test_manifold(
                 inverse_retract(M, p, p);
                 atol = epsx * exp_log_atol_multiplier,
                 rtol = exp_log_atol_multiplier == 0.0 ?
-                           sqrt(epsx) * exp_log_rtol_multiplier : 0.0,
+                       sqrt(epsx) * exp_log_rtol_multiplier : 0.0,
             )
         end
         atolp1 = exp_log_atol_multiplier * ManifoldTests.find_eps(pts[1])

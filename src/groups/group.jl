@@ -913,11 +913,13 @@ struct AdditionOperation <: AbstractGroupOperation end
 const AdditionGroup = AbstractGroupManifold{𝔽,AdditionOperation} where {𝔽}
 
 Base.:+(e::Identity{G}) where {G<:AdditionGroup} = e
+Base.:+(p::Identity{G}, ::Identity{G}) where {G<:AdditionGroup} = p
 Base.:+(::Identity{G}, p) where {G<:AdditionGroup} = p
 Base.:+(p, ::Identity{G}) where {G<:AdditionGroup} = p
 Base.:+(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
 Base.:-(e::Identity{G}) where {G<:AdditionGroup} = e
+Base.:-(e::Identity{G}, ::Identity{G}) where {G<:AdditionGroup} = e
 Base.:-(::Identity{G}, p) where {G<:AdditionGroup} = -p
 Base.:-(p, ::Identity{G}) where {G<:AdditionGroup} = p
 Base.:-(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e

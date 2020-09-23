@@ -49,9 +49,9 @@ function Base.:^(::Euclidean{T,𝔽}, n::NTuple{N,Int}) where {T,𝔽,N}
 end
 
 function allocation_promotion_function(
-    M::Euclidean{<:Tuple,ℂ},
+    ::Euclidean{<:Tuple,ℂ},
     ::Union{typeof(get_vector),typeof(get_coordinates)},
-    args::Tuple,
+    ::Tuple,
 )
     return complex
 end
@@ -132,6 +132,26 @@ embed(::Euclidean, p)
 
 embed!(::Euclidean, q, p) = copyto!(q, p)
 
+function embed!(
+    ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2}},
+    q,
+    p,
+) where {nL,mL,𝔽,𝔽2}
+    n = size(p)
+    ln = length(n)
+    m = size(q)
+    lm = length(m)
+    (length(n) > length(m)) &&
+        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m)."))
+    any(n .> m[1:ln]) &&
+        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m))."))
+    # put p into q
+    fill!(q, 0)
+    # fill „top left edge“ of q with p.
+    q[map(ind_n -> Base.OneTo(ind_n), n)..., ntuple(_ -> 1, lm - ln)...] .= p
+    return q
+end
+
 @doc raw"""
     exp(M::Euclidean, p, X)
 
@@ -143,7 +163,7 @@ Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `p` in 
 """
 exp(::Euclidean, ::Any...)
 
-exp!(M::Euclidean, q, p, X) = (q .= p .+ X)
+exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 
 """
     flat(M::Euclidean, p, X)
@@ -367,6 +387,24 @@ function normal_tvector_distribution(M::Euclidean{Tuple{N}}, p, σ) where {N}
     return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project!, p)
 end
 
+function project!(
+    ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2}},
+    q,
+    p,
+) where {nL,mL,𝔽,𝔽2}
+    n = size(p)
+    ln = length(n)
+    m = size(q)
+    lm = length(m)
+    (length(n) < length(m)) &&
+        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m)."))
+    any(n .< m[1:ln]) &&
+        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m))."))
+    #  fill q with the „top left edge“ of p.
+    q .= p[map(i -> Base.OneTo(i), m)..., ntuple(_ -> 1, lm - ln)...]
+    return q
+end
+
 @doc raw"""
     project(M::Euclidean, p)
 
@@ -375,7 +413,7 @@ is of course just the identity map.
 """
 project(::Euclidean, ::Any)
 
-project!(M::Euclidean, q, p) = copyto!(q, p)
+project!(::Euclidean, q, p) = copyto!(q, p)
 
 """
     project(M::Euclidean, p, X)
@@ -386,7 +424,7 @@ space of `M` can be identified with all of `M`.
 """
 project(::Euclidean, ::Any, ::Any)
 
-project!(M::Euclidean, Y, p, X) = copyto!(Y, X)
+project!(::Euclidean, Y, p, X) = copyto!(Y, X)
 
 """
     projected_distribution(M::Euclidean, d, [p])
@@ -418,7 +456,7 @@ case, this yields just the identity.
 """
 sharp(::Euclidean, ::Any...)
 
-sharp!(M::Euclidean, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
+sharp!(::Euclidean, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 function Base.show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
     return print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")
@@ -464,4 +502,4 @@ Return the zero vector in the tangent space of `x` on the [`Euclidean`](@ref)
 """
 zero_tangent_vector(::Euclidean, ::Any...)
 
-zero_tangent_vector!(M::Euclidean, v, x) = fill!(v, 0)
+zero_tangent_vector!(::Euclidean, v, x) = fill!(v, 0)

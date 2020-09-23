@@ -1,7 +1,15 @@
+# Ease of notation
+
+The following terms introduce a nicer notation for some operations, for example using the ∈ operator, $p ∈ \mathcal M$, to determine whether $p$ is a point on the [`Manifold`](@ref) $\mathcal M$.
+
+````@docs
+in
+TangentSpace
+````
+
 # Public documentation
 
-Documentation for `Manifolds.jl`'s public interface.
-It mainly covers functions that are of interest for extending and using the [`ProductManifold`](@ref).
+The following functions are of interest for extending and using the [`ProductManifold`](@ref).
 
 ```@docs
 Manifolds.ShapeSpecification

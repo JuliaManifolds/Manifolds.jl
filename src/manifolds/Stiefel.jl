@@ -101,10 +101,6 @@ end
 
 decorated_manifold(M::Stiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
 
-embed!(::Stiefel, q, p) = (q .= p)
-
-embed!(::Stiefel, Y, p, X) = (Y .= X)
-
 @doc raw"""
     exp(M::Stiefel, p, X)
 
@@ -133,7 +129,7 @@ function exp!(M::Stiefel{n,k}, q, p, X) where {n,k}
     return copyto!(
         q,
         [p X] *
-        exp([p'X -X' * X; one(zeros(eltype(p), k, k)) p' * X]) *
+        exp([p'X -X'*X; one(zeros(eltype(p), k, k)) p'*X]) *
         [exp(-p'X); zeros(eltype(p), k, k)],
     )
 end

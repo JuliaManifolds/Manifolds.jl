@@ -121,9 +121,6 @@ function decorated_manifold(M::Elliptope)
     return Euclidean(representation_size(M)...; field = ℝ)
 end
 
-embed!(::Elliptope, q, p) = (q .= p)
-embed!(::Elliptope, Y, ::Any, X) = (Y .= X)
-
 @doc raw"""
     manifold_dimension(M::Elliptope)
 

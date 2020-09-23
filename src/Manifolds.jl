@@ -51,7 +51,7 @@ import ManifoldsBase:
     vector_transport_to!,
     zero_tangent_vector,
     zero_tangent_vector!
-import Base: in, isapprox, isempty, length, showerror
+import Base: copyto!, convert, in, isapprox, isempty, length, showerror
 
 using Base.Iterators: repeated
 using Distributions
@@ -258,7 +258,10 @@ export Euclidean,
     SymmetricPositiveDefinite,
     SymmetricPositiveSemidefiniteFixedRank,
     Torus
-export SVDMPoint, UMVTVector, AbstractNumbers, ℝ, ℂ, ℍ
+export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint
+export HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector
+export AbstractNumbers, ℝ, ℂ, ℍ
+
 # decorator manifolds
 export AbstractDecoratorManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
