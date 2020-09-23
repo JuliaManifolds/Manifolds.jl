@@ -141,7 +141,9 @@ function inverse_retract!(
     q,
     ::Union{ProjectionInverseRetraction,PolarInverseRetraction,QRInverseRetraction},
 )
-    return (X .= q ./ dot(p, q) .- p)
+    signz = sign(dot(p, q))
+    X .= q .* signz' .- p
+    return X
 end
 
 function Base.isapprox(::AbstractProjectiveSpace, p, q; kwargs...)
@@ -152,7 +154,7 @@ function log!(M::AbstractProjectiveSpace, X, p, q)
     z = dot(p, q)
     cosθ = abs(z)
     signz = sign_from_abs(z, cosθ)
-    X .= (signz' .* q .- cosθ .* p) ./ usinc_from_cos(cosθ)
+    X .= (q .* signz' .- cosθ .* p) ./ usinc_from_cos(cosθ)
     return project!(M, X, p, X)
 end
 
@@ -192,7 +194,7 @@ function mid_point!(M::ProjectiveSpace, q, p1, p2)
     z = dot(p1, p2)
     cosθ = abs(z)
     signz = sign_from_abs(z, cosθ)
-    q .= p1 .+ signz' .* p2
+    q .= p1 .+ p2 .* signz'
     project!(M, q, q)
     return q
 end
@@ -211,7 +213,7 @@ end
 
 project!(::AbstractProjectiveSpace, q, p) = (q .= p ./ norm(p))
 
-project!(::AbstractProjectiveSpace, Y, p, X) = (Y .= X .- dot(p, X) .* p)
+project!(::AbstractProjectiveSpace, Y, p, X) = (Y .= X .- p .* dot(p, X))
 
 @doc raw"""
     representation_size(M::AbstractProjectiveSpace)
@@ -286,7 +288,7 @@ function vector_transport_to!(::AbstractProjectiveSpace, Y, p, X, q, ::ParallelT
     factor = signz * dot(q, X) * (2 / mnorm2)
     # multiply by `sign(z)` to bring from T_{\exp_p(\log_p q)} M to T_q M
     # this ensures that subsequent functions like `exp(M, q, Y)` do the right thing
-    Y .= signz .* (X .- m .* factor)
+    Y .= (X .- m .* factor) .* signz
     return Y
 end
 function vector_transport_to!(M::AbstractProjectiveSpace, Y, p, X, q, ::ProjectionTransport)
@@ -307,6 +309,6 @@ function vector_transport_direction!(
     dX = inner(M, p, d, X)
     α = usinc(θ) * dX
     β = ifelse(iszero(θ), zero(cosθ), (1 - cosθ) / θ^2) * dX
-    Y .= X .- α .* p .- β .* d
+    Y .= X .- p .* α .- d .* β
     return Y
 end
