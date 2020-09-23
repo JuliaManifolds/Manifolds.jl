@@ -69,10 +69,6 @@ get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)
 
 distance(::AbstractProjectiveSpace, p, q) = acos(min(abs(dot(p, q)), 1))
 
-embed!(::AbstractProjectiveSpace, q, p) = copyto!(q, p)
-
-embed!(::AbstractProjectiveSpace, Y, p, X) = copyto!(Y, X)
-
 function exp!(M::AbstractProjectiveSpace, q, p, X)
     θ = norm(M, p, X)
     q .= cos(θ) .* p .+ usinc(θ) .* X
