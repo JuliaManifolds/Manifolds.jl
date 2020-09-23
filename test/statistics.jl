@@ -643,6 +643,27 @@ end
             @test m == mg
         end
 
+        @testset "ProjectiveSpace default" begin
+            rng = MersenneTwister(47)
+            M = ProjectiveSpace(2)
+            p0 = [1.0, 0, 0]
+            x = [normalize(randn(rng, 3)) for _ in 1:10]
+            x = [x; -x]
+            w = pweights([rand(rng) for _ in 1:length(x)])
+            m = mean(M, x, w)
+            mg = mean(M, x, w, GeodesicInterpolation())
+            mf = mean(M, x, w, GradientDescentEstimation(); p0 = mg)
+            @test !isapprox(M, m, mg)
+            @test isapprox(M, m, mf)
+
+            μ = randn(rng, 3) .* 10
+            x = [normalize(randn(rng, 3) .+ μ) for _ in 1:10]
+            w = pweights([rand(rng) for _ in 1:length(x)])
+            m = mean(M, x, w)
+            mg = mean(M, x, w, GeodesicInterpolation())
+            @test m == mg
+        end
+
         @testset "Rotations default" begin
             rng = MersenneTwister(47)
             R = Manifolds.Rotations(3)
