@@ -39,6 +39,7 @@ include("utils.jl")
                 M,
                 pts,
                 test_injectivity_radius = false,
+                test_project_point = true,
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_default_vector_transport = true,
@@ -102,7 +103,28 @@ include("utils.jl")
             @test representation_size(M) == (3,)
             @test manifold_dimension(M) == 5
             @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
+            @test !is_manifold_point(M, [1.0 + 0im, 0.0, 0.0, 0.0])
+            @test !is_tangent_vector(M, [1.0 + 0im, 0.0, 0.0, 0.0], [0.0 + 0im, 1.0, 0.0])
+            @test_throws DomainError is_manifold_point(M, [1.0, im, 0.0], true)
+            @test !is_manifold_point(M, [1.0, im, 0.0])
+            @test !is_tangent_vector(M, [1.0 + 0im, 0.0, 0.0], [1.0 + 0im, 0.0, 0.0])
+            @test !is_tangent_vector(M, [1.0 + 0im, 0.0, 0.0], [-0.5im, 0.0, 0.0])
+            @test_throws DomainError is_tangent_vector(
+                M,
+                [1.0 + 0im, 0.0, 0.0],
+                [1.0 + 0im, 0.0, 0.0],
+                true,
+            )
+            @test_throws DomainError is_tangent_vector(
+                M,
+                [1.0 + 0im, 0.0, 0.0],
+                [-0.5im, 0.0, 0.0],
+                true,
+            )
             @test injectivity_radius(M) == π / 2
+            @test injectivity_radius(M, ExponentialRetraction()) == π / 2
+            @test injectivity_radius(M, [1.0 + 0im, 0.0, 0.0]) == π / 2
+            @test injectivity_radius(M, [1.0 + 0im, 0.0, 0.0], ExponentialRetraction()) == π / 2
         end
         types = [Vector{ComplexF64}]
         @testset "Type $T" for T in types
@@ -115,9 +137,10 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_exp_log = true,
                 test_injectivity_radius = false,
+                test_project_point = true,
                 test_project_tangent = true,
+                test_musical_isomorphisms = true,
                 test_default_vector_transport = true,
                 vector_transport_methods = [
                     ParallelTransport(),
@@ -138,22 +161,18 @@ include("utils.jl")
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                exp_log_atol_multiplier = 10.0^3,
-                is_tangent_atol_multiplier = 20.0,
-                retraction_atol_multiplier = 10.0,
+                is_tangent_atol_multiplier = 1,
             )
+        end
 
-            @testset "inner/norm" begin
-                v1 = inverse_retract(M, pts[1], pts[2], PolarInverseRetraction())
-                v2 = inverse_retract(M, pts[1], pts[3], PolarInverseRetraction())
-
-                @test real(inner(M, pts[1], v1, v2)) ≈ real(inner(M, pts[1], v2, v1))
-                @test imag(inner(M, pts[1], v1, v2)) ≈ -imag(inner(M, pts[1], v2, v1))
-                @test imag(inner(M, pts[1], v1, v1)) ≈ 0
-
-                @test norm(M, pts[1], v1) isa Real
-                @test norm(M, pts[1], v1) ≈ sqrt(inner(M, pts[1], v1, v1))
-            end
+        @testset "equivalence" begin
+            x = [1.0 + 0im, 0.0, 0.0]
+            v = [0.0, im, 0.0]
+            s = sqrt(0.5) - sqrt(0.5)*im
+            @test isapprox(M, x, s * x)
+            @test isapprox(M, x, exp(M, x, π * v))
+            @test log(M, x, s * x) ≈ zero(v)
+            @test isapprox(M, s * x, vector_transport_to(M, x, v, s * x), s * v)
         end
     end
 end
