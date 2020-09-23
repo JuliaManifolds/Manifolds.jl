@@ -82,7 +82,7 @@ function get_basis(::ProjectiveSpace{n,ℝ}, p, B::DiagonalizingOrthonormalBasis
 end
 
 @doc raw"""
-    get_coordinates(M::ProjectiveSpace, p, X, B::DefaultOrthonormalBasis)
+    get_coordinates(M::ProjectiveSpace{n,ℝ}, p, X, B::DefaultOrthonormalBasis) where {n}
 
 Represent the tangent vector `X` at point `p` from the [`ProjectiveSpace`](@ref) `M` in
 an orthonormal basis by rotating the vector `X` using the rotation matrix
