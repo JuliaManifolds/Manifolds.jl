@@ -257,9 +257,8 @@ function ManifoldTests.test_manifold(
 
         X3 = log(M, pts[1], pts[3])
 
-        Test.@test real(inner(M, pts[1], X1, X3)) ≈ real(inner(M, pts[1], X3, X1))
-        Test.@test imag(inner(M, pts[1], X1, X3)) ≈ -imag(inner(M, pts[1], X3, X1))
-        Test.@test imag(inner(M, pts[1], X1, X1)) ≈ 0
+        Test.@test inner(M, pts[1], X1, X3) ≈ conj(inner(M, pts[1], X3, X1))
+        Test.@test inner(M, pts[1], X1, X1) ≈ real(inner(M, pts[1], X1, X1))
 
         Test.@test norm(M, pts[1], X1) isa Real
         Test.@test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
