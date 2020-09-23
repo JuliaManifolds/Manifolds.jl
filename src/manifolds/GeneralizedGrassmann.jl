@@ -155,7 +155,6 @@ b_{i}=\begin{cases}
 function distance(M::GeneralizedGrassmann, p, q)
     p ≈ q && return zero(real(eltype(p)))
     a = svd(p' * M.B * q).S
-    a[a .> 1] .= 1
     return sqrt(sum(x -> abs2(acos(clamp(x, -1, 1))), a))
 end
 

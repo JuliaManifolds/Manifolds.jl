@@ -381,10 +381,7 @@ end
 function retract!(::Grassmann{N,K}, q, p, X, ::QRRetraction) where {N,K}
     qrfac = qr(p + X)
     d = diag(qrfac.R)
-    # avoid promoting to Float64 unless necessary
     D = Diagonal(sign.(d .+ 1//2))
-    # avoid filling q before overwriting
-    # multiply in-place
     mul!(q, Array(qrfac.Q), D)
     return q
 end
