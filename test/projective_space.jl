@@ -9,6 +9,15 @@ include("utils.jl")
             @test manifold_dimension(M) == 2
             @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_tangent_vector(M, [1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0])
+            @test_throws DomainError is_manifold_point(M, [2.0, 0.0, 0.0], true)
+            @test !is_manifold_point(M, [2.0, 0.0, 0.0])
+            @test !is_tangent_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
+            @test_throws DomainError is_tangent_vector(
+                M,
+                [1.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                true,
+            )
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
             @test injectivity_radius(M, [1.0, 0.0, 0.0]) == π / 2
@@ -18,7 +27,7 @@ include("utils.jl")
         TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
 
         TEST_FLOAT32 && push!(types, Vector{Float32})
-        basis_types = (ProjectedOrthonormalBasis(:gram_schmidt),)
+        basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
         @testset "Type $T" for T in types
             x = [1.0, 0.0, 0.0]
             v = [0.0, 1.0, 0.0]
@@ -29,9 +38,9 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_exp_log = true,
                 test_injectivity_radius = false,
                 test_project_tangent = true,
+                test_musical_isomorphisms = true,
                 test_default_vector_transport = true,
                 vector_transport_methods = [
                     ParallelTransport(),
@@ -40,9 +49,17 @@ include("utils.jl")
                     PoleLadderTransport(),
                 ],
                 point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
+                tvector_distributions = [Manifolds.normal_tvector_distribution(
+                    M,
+                    pts[1],
+                    1.0,
+                )],
                 test_forward_diff = false,
                 test_reverse_diff = false,
-                basis_types_vecs = (DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),),
+                basis_types_vecs = (
+                    DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),
+                    basis_types...,
+                ),
                 basis_types_to_from = basis_types,
                 test_vee_hat = false,
                 retraction_methods = [
@@ -55,27 +72,26 @@ include("utils.jl")
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                #basis_types_vecs = basis_types,
-                exp_log_atol_multiplier = 10.0,
-                is_tangent_atol_multiplier = 20.0,
+                is_tangent_atol_multiplier = 1,
             )
-
-            @testset "inner/norm" begin
-                v1 = inverse_retract(M, pts[1], pts[2], PolarInverseRetraction())
-                v2 = inverse_retract(M, pts[1], pts[3], PolarInverseRetraction())
-
-                @test real(inner(M, pts[1], v1, v2)) ≈ real(inner(M, pts[1], v2, v1))
-                @test imag(inner(M, pts[1], v1, v2)) ≈ -imag(inner(M, pts[1], v2, v1))
-                @test imag(inner(M, pts[1], v1, v1)) ≈ 0
-
-                @test norm(M, pts[1], v1) isa Real
-                @test norm(M, pts[1], v1) ≈ sqrt(inner(M, pts[1], v1, v1))
-            end
         end
 
-        @testset "Distribution tests" begin
+        @testset "equivalence" begin
+            x = [1.0, 0.0, 0.0]
+            v = [0.0, 1.0, 0.0]
+            @test isapprox(M, x, -x)
+            @test isapprox(M, x, exp(M, x, π * v))
+            @test log(M, x, -x) ≈ zero(v)
+            @test isapprox(M, -x, vector_transport_to(M, x, v, -x), -v)
+        end
+
+        @testset "Distribution MVector tests" begin
             upd_mvector = Manifolds.uniform_distribution(M, @MVector [1.0, 0.0, 0.0])
             @test isa(rand(upd_mvector), MVector)
+
+            gtpd_mvector =
+                Manifolds.normal_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
+            @test isa(rand(gtpd_mvector), MVector)
         end
     end
 
