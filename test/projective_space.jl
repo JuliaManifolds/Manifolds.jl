@@ -175,4 +175,22 @@ include("utils.jl")
             @test isapprox(M, s * x, vector_transport_to(M, x, v, s * x), s * v)
         end
     end
+
+    @testset "ArrayProjectiveSpace" begin
+        M = ArrayProjectiveSpace(2, 2; field = ℝ)
+        @test repr(M) == "ArrayProjectiveSpace(2, 2; field = ℝ)"
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℝ}
+        @test representation_size(M) == (2, 2)
+        p = ones(2, 2)
+        q = project(M, p)
+        @test is_manifold_point(M, q)
+        Y = [1.0 0.0; 0.0 1.1]
+        X = project(M, q, Y)
+        @test is_tangent_vector(M, q, X)
+
+        M = ArrayProjectiveSpace(2, 2; field = ℂ)
+        @test repr(M) == "ArrayProjectiveSpace(2, 2; field = ℂ)"
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℂ}
+        @test representation_size(M) == (2, 2)
+    end
 end
