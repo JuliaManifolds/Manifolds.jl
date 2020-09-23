@@ -113,10 +113,6 @@ end
 
 decorated_manifold(M::GeneralizedStiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
 
-embed!(::GeneralizedStiefel, q, p) = (q .= p)
-
-embed!(::GeneralizedStiefel, Y, p, X) = (Y .= X)
-
 @doc raw"""
     inner(M::GeneralizedStiefel, p, X, Y)
 

@@ -101,10 +101,6 @@ end
 
 decorated_manifold(M::Stiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
 
-embed!(::Stiefel, q, p) = (q .= p)
-
-embed!(::Stiefel, Y, p, X) = (Y .= X)
-
 @doc raw"""
     exp(M::Stiefel, p, X)
 

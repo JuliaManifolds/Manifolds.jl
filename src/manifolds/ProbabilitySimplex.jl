@@ -150,9 +150,6 @@ function distance(::ProbabilitySimplex, p, q)
     return 2 * acos(sumsqrt)
 end
 
-embed!(::ProbabilitySimplex, q, p) = copyto!(q, p)
-embed!(::ProbabilitySimplex, Y, p, X) = copyto!(Y, X)
-
 @doc raw"""
     exp(M::ProbabilitySimplex,p,X)
 

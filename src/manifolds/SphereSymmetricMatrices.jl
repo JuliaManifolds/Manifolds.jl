@@ -1,8 +1,8 @@
 @doc raw"""
     SphereSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding}
 
-The [`Manifold`](@ref) consisting of the $n × n$ symmetric matrices 
-of unit Frobenius norm, i.e. 
+The [`Manifold`](@ref) consisting of the $n × n$ symmetric matrices
+of unit Frobenius norm, i.e.
 ````math
 \mathcal{S}_{\text{sym}} :=\bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = p, \lVert p \rVert = 1 \bigr\},
 ````
@@ -22,9 +22,9 @@ function SphereSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
 end
 
 @doc raw"""
-    check_manifold_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...) 
+    check_manifold_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...)
 
-Check whether the matrix is a valid point on the [`SphereSymmetricMatrices`](@ref) `M`, 
+Check whether the matrix is a valid point on the [`SphereSymmetricMatrices`](@ref) `M`,
 i.e. is an `n`-by-`n` symmetric matrix of unit Frobenius norm.
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
@@ -87,9 +87,6 @@ end
 function decorated_manifold(M::SphereSymmetricMatrices{n,𝔽}) where {n,𝔽}
     return ArraySphere(n, n; field = 𝔽)
 end
-
-embed!(M::SphereSymmetricMatrices, q, p) = copyto!(q, p)
-embed!(M::SphereSymmetricMatrices, Y, p, X) = copyto!(Y, X)
 
 @doc raw"""
     manifold_dimension(M::SphereSymmetricMatrices{n,𝔽})

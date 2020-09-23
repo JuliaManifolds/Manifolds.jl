@@ -19,10 +19,10 @@ function CenteredMatrices(m::Int, n::Int, field::AbstractNumbers = ℝ)
 end
 
 @doc raw"""
-    check_manifold_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...) 
+    check_manifold_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...)
 
 Check whether the matrix is a valid point on the
-[`CenteredMatrices`](@ref) `M`, i.e. is an `m`-by-`n` matrix whose columns sum to 
+[`CenteredMatrices`](@ref) `M`, i.e. is an `m`-by-`n` matrix whose columns sum to
 zero.
 
 The tolerance for the column sums of `p` can be set using `kwargs...`.
@@ -83,9 +83,6 @@ end
 
 decorated_manifold(M::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽} = Euclidean(m, n; field = 𝔽)
 
-embed!(M::CenteredMatrices, q, p) = copyto!(q, p)
-embed!(M::CenteredMatrices, Y, p, X) = copyto!(Y, X)
-
 @doc raw"""
     manifold_dimension(M::CenteredMatrices{m,n,𝔽})
 
@@ -107,7 +104,7 @@ end
 Projects `p` from the embedding onto the [`CenteredMatrices`](@ref) `M`, i.e.
 
 ````math
-\operatorname{proj}_{\mathcal M}(p) = p - \begin{bmatrix} 
+\operatorname{proj}_{\mathcal M}(p) = p - \begin{bmatrix}
 1\\
 ⋮\\
 1
@@ -125,7 +122,7 @@ project!(M::CenteredMatrices, q, p) = copyto!(q, p .- mean(p, dims = 1))
 Project the matrix `X` onto the tangent space at `p` on the [`CenteredMatrices`](@ref) `M`, i.e.
 
 ````math
-\operatorname{proj}_p(X) = X - \begin{bmatrix} 
+\operatorname{proj}_p(X) = X - \begin{bmatrix}
 1\\
 ⋮\\
 1
