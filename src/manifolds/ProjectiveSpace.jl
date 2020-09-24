@@ -1,6 +1,44 @@
+"""
+    AbstractProjectiveSpace{𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
+
+An abstract type to represent a projective space over `𝔽` that is represented isometrically
+in the embedding.
+"""
 abstract type AbstractProjectiveSpace{𝔽} <:
               AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
+@doc raw"""
+    ProjectiveSpace{n,𝔽} <: AbstractProjectiveSpace{𝔽}
+
+The projective space $𝔽ℙ^n$ is the set of all lines in $𝔽^{n+1}$.
+The default representation is in the embedding, i.e. as unit norm vectors in
+$𝔽^{n+1}$:
+````math
+𝔽ℙ^n := \bigl\{ p \in 𝔽^{n+1}, p ∼ p z \ \big|\ \lVert p \rVert = 1, z \in 𝔽, |z| = 1 \bigr\},
+````
+where $\sim$ indicates equivalence.
+For example, the real projective space $ℝℙ^n$ is represented as the unit sphere $𝕊^n$, where
+antipodal points are considered equivalent.
+
+The tangent space at point $p$ is given by
+
+````math
+T_p 𝔽ℙ^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ |\ ⟨p,X⟩ = 0 \bigr \},
+````
+
+where $⟨\cdot,\cdot⟩$ denotes the inner product in the embedding $𝔽^{n+1}$.
+
+Note that when $𝔽 = ℍ$, this implementation of $ℍℙ^n$ is the right-quaternionic projective
+space.
+
+# Constructor
+
+ProjectiveSpace(n[, field=ℝ])
+
+Generate the projective space $ℙ𝔽^{n} ⊂ 𝔽^{n+1}$, defaulting to the real projective space
+$ℙℝ^n$, where `field` can also be used to generate the complex- and right-quaternionic
+projective spaces.
+"""
 struct ProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} end
 ProjectiveSpace(n::Int, field::AbstractNumbers = ℝ) = ProjectiveSpace{n,field}()
 
@@ -55,7 +93,8 @@ function check_tangent_vector(
     if !isapprox(dot(p, X), 0; kwargs...)
         return DomainError(
             dot(p, X),
-            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding.",
+            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not" *
+            " orthogonal in the embedding.",
         )
     end
     return nothing
@@ -256,7 +295,7 @@ function uniform_distribution(M::ProjectiveSpace{n,ℝ}, p) where {n}
 end
 
 @doc raw"""
-vector_transport_to(M::AbstractProjectiveSpace, p, X, q, method::ParallelTransport)
+    vector_transport_to(M::AbstractProjectiveSpace, p, X, q, method::ParallelTransport)
 
 Parallel transport a vector `X` from the tangent space at a point `p` on the
 [`AbstractProjectiveSpace`](@ref) `M` along the `shortest_geodesic`](@ref) to the tangent
@@ -279,6 +318,8 @@ vector_transport_to(::AbstractProjectiveSpace, ::Any, ::Any, ::Any, ::Projection
 Parallel transport a vector `X` from the tangent space at a point `p` on the
 [`AbstractProjectiveSpace`](@ref) `M` along the geodesic in the direction indicated by the
 tangent vector `d`.
+
+This implementation assumes that $d = log_p(\exp_p d)$, i.e. that $\lVert d \rVert < \frac{π}{2}$.
 """
 vector_transport_direction(::AbstractProjectiveSpace, p, X, d, ::ParallelTransport)
 
