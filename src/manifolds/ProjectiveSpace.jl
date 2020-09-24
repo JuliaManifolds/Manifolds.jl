@@ -35,8 +35,8 @@ space.
 
     ProjectiveSpace(n[, field=ℝ])
 
-Generate the projective space $ℙ𝔽^{n} ⊂ 𝔽^{n+1}$, defaulting to the real projective space
-$ℙℝ^n$, where `field` can also be used to generate the complex- and right-quaternionic
+Generate the projective space $𝔽ℙ^{n} ⊂ 𝔽^{n+1}$, defaulting to the real projective space
+$ℝℙ^n$, where `field` can also be used to generate the complex- and right-quaternionic
 projective spaces.
 """
 struct ProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} end
