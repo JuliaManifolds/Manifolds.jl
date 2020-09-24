@@ -159,12 +159,14 @@ function log!(M::AbstractProjectiveSpace, X, p, q)
 end
 
 @doc raw"""
-    manifold_dimension(M::AbstractProjectiveSpace)
+    manifold_dimension(M::AbstractProjectiveSpace{𝔽}) where {𝔽}
 
-Return the dimension of the [`AbstractProjectiveSpace`](@ref) `M`, respectively i.e. the
-dimension of the embedding -1.
+Return the real dimension of the [`AbstractProjectiveSpace`](@ref) `M`, respectively i.e.
+the real dimension of the embedding minus the real dimension of the field `𝔽`.
 """
-manifold_dimension(M::AbstractProjectiveSpace) = manifold_dimension(get_embedding(M)) - 1
+function manifold_dimension(M::AbstractProjectiveSpace{𝔽}) where {𝔽}
+    return manifold_dimension(get_embedding(M)) - real_dimension(𝔽)
+end
 
 """
     mean(

@@ -101,7 +101,7 @@ include("utils.jl")
         @testset "Basics" begin
             @test repr(M) == "ProjectiveSpace(2, ℂ)"
             @test representation_size(M) == (3,)
-            @test manifold_dimension(M) == 5
+            @test manifold_dimension(M) == 4
             @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
             @test !is_manifold_point(M, [1.0 + 0im, 0.0, 0.0, 0.0])
             @test !is_tangent_vector(M, [1.0 + 0im, 0.0, 0.0, 0.0], [0.0 + 0im, 1.0, 0.0])
