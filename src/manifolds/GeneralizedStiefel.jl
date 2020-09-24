@@ -78,7 +78,7 @@ end
 Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`](@ref)
 `M`=$\operatorname{St}(n,k,B)$, i.e. the [`AbstractNumbers`](@ref) fits,
 `p` is a valid point on `M` and
-it (approximately) holds that $p^{\mathrm{H}}BX + X^{\mathrm{H}}Bp = 0$, where
+it (approximately) holds that $p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0$, where
 `kwargs...` is passed to the `isapprox`.
 """
 function check_tangent_vector(
@@ -102,9 +102,9 @@ function check_tangent_vector(
         kwargs...,
     )
     mpv === nothing || return mpv
-    if !isapprox(p' * M.B * X + X' * M.B * p, zeros(k, k); kwargs...)
+    if !isapprox(p' * M.B * X, -conj(X' * M.B * p); kwargs...)
         return DomainError(
-            norm(p' * M.B * X + X' * M.B * p),
+            norm(p' * M.B * X + conj(X' * M.B * p)),
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since x'Bv + v'Bx is not the zero matrix.",
         )
     end
