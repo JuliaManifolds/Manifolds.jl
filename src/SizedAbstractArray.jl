@@ -42,12 +42,7 @@ end
     return SizedAbstractArray{S,T,N,N}(undef)
 end
 @inline function SizedAbstractArray{S,T}(::UndefInitializer) where {S,T}
-    return SizedAbstractArray{
-        S,
-        T,
-        StaticArrays.tuple_length(S),
-        StaticArrays.tuple_length(S),
-    }(
+    return SizedAbstractArray{S,T,StaticArrays.tuple_length(S),StaticArrays.tuple_length(S)}(
         undef,
     )
 end
