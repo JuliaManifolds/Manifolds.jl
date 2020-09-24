@@ -14,16 +14,16 @@ The projective space $𝔽ℙ^n$ is the manifold of all lines in $𝔽^{n+1}$.
 The default representation is in the embedding, i.e. as unit norm vectors in
 $𝔽^{n+1}$:
 ````math
-𝔽ℙ^n := \bigl\{ p \in 𝔽^{n+1}, p ∼ p z \ \big|\ \lVert p \rVert = 1, z \in 𝔽, |z| = 1 \bigr\},
+𝔽ℙ^n := \bigl\{ [p] ⊂ 𝔽^{n+1} \ \big|\ \lVert p \rVert = 1, z \in 𝔽, |z| = 1, p ∼ p z \bigr\},
 ````
-where $\sim$ indicates equivalence.
+where $[p]$ is an equivalence class of points $p$, and $\sim$ indicates equivalence.
 For example, the real projective space $ℝℙ^n$ is represented as the unit sphere $𝕊^n$, where
 antipodal points are considered equivalent.
 
 The tangent space at point $p$ is given by
 
 ````math
-T_p 𝔽ℙ^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ |\ ⟨p,X⟩ = 0 \bigr \},
+T_p 𝔽ℙ^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ \big|\ ⟨p,X⟩ = 0 \bigr \},
 ````
 
 where $⟨\cdot,\cdot⟩$ denotes the inner product in the embedding $𝔽^{n+1}$.
@@ -50,9 +50,9 @@ The default representation is in the embedding, i.e. as unit (Frobenius) norm ma
 $𝔽^{n₁,n₂,…,nᵢ}$:
 
 ````math
-𝔽ℙ^{n_1, n_2, …, n_i} := \bigl\{ p \in 𝔽^{n_1, n_2, …, n_i}, p ∼ p z \ \big|\ \lVert p \rVert = 1, z \in 𝔽, |z| = 1 \bigr\}.
+𝔽ℙ^{n_1, n_2, …, n_i} := \bigl\{ [p] ⊂ 𝔽^{n_1, n_2, …, n_i} \ \big|\ \lVert p \rVert = 1, z \in 𝔽, |z| = 1, p ∼ p z \bigr\}.
 ````
-where $\sim$ indicates equivalence.
+where $[p]$ is an equivalence class of points $p$, and $\sim$ indicates equivalence.
 Note that unlike [`ProjectiveSpace`](@ref), the argument for `ArrayProjectiveSpace`
 is given by the size of the embedding.
 This means that [`ProjectiveSpace(2)`](@ref) and `ArrayProjectiveSpace(3)` are the same
