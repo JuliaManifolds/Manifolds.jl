@@ -216,8 +216,8 @@ end
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
-[`GeodesicInterpolationWithinRadius`](@ref).
+Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of points in vector `x`
+using [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::AbstractProjectiveSpace, ::Any...)
 
@@ -319,7 +319,8 @@ Parallel transport a vector `X` from the tangent space at a point `p` on the
 [`AbstractProjectiveSpace`](@ref) `M` along the geodesic in the direction indicated by the
 tangent vector `d`.
 
-This implementation assumes that $d = log_p(\exp_p d)$, i.e. that $\lVert d \rVert < \frac{π}{2}$.
+This implementation assumes that $d = \log_p(\exp_p d)$, i.e. that
+$\lVert d \rVert < \frac{π}{2}$.
 """
 vector_transport_direction(::AbstractProjectiveSpace, p, X, d, ::ParallelTransport)
 
