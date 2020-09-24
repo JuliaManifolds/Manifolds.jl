@@ -124,7 +124,8 @@ include("utils.jl")
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
             @test injectivity_radius(M, [1.0 + 0im, 0.0, 0.0]) == π / 2
-            @test injectivity_radius(M, [1.0 + 0im, 0.0, 0.0], ExponentialRetraction()) == π / 2
+            @test injectivity_radius(M, [1.0 + 0im, 0.0, 0.0], ExponentialRetraction()) ==
+                  π / 2
         end
         types = [Vector{ComplexF64}]
         @testset "Type $T" for T in types
@@ -170,7 +171,7 @@ include("utils.jl")
         @testset "equivalence" begin
             x = [1.0 + 0im, 0.0, 0.0]
             v = [0.0, im, 0.0]
-            s = sqrt(0.5) - sqrt(0.5)*im
+            s = sqrt(0.5) - sqrt(0.5) * im
             @test isapprox(M, x, s * x)
             @test isapprox(M, x, exp(M, x, π * v))
             @test log(M, x, s * x) ≈ zero(v)
@@ -185,11 +186,23 @@ include("utils.jl")
             @test representation_size(M) == (3,)
             @test manifold_dimension(M) == 8
             @test !is_manifold_point(M, Quaternion[1.0 + 0im, 0.0, 0.0, 0.0])
-            @test !is_tangent_vector(M, Quaternion[1.0 + 0im, 0.0, 0.0, 0.0], Quaternion[0.0 + 0im, 1.0, 0.0])
+            @test !is_tangent_vector(
+                M,
+                Quaternion[1.0 + 0im, 0.0, 0.0, 0.0],
+                Quaternion[0.0 + 0im, 1.0, 0.0],
+            )
             @test_throws DomainError is_manifold_point(M, Quaternion[1.0, im, 0.0], true)
             @test !is_manifold_point(M, Quaternion[1.0, im, 0.0])
-            @test !is_tangent_vector(M, Quaternion[1.0 + 0im, 0.0, 0.0], Quaternion[1.0 + 0im, 0.0, 0.0])
-            @test !is_tangent_vector(M, Quaternion[1.0 + 0im, 0.0, 0.0], Quaternion[-0.5im, 0.0, 0.0])
+            @test !is_tangent_vector(
+                M,
+                Quaternion[1.0 + 0im, 0.0, 0.0],
+                Quaternion[1.0 + 0im, 0.0, 0.0],
+            )
+            @test !is_tangent_vector(
+                M,
+                Quaternion[1.0 + 0im, 0.0, 0.0],
+                Quaternion[-0.5im, 0.0, 0.0],
+            )
             @test_throws DomainError is_tangent_vector(
                 M,
                 Quaternion[1.0 + 0im, 0.0, 0.0],
@@ -205,14 +218,22 @@ include("utils.jl")
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
             @test injectivity_radius(M, Quaternion[1.0 + 0im, 0.0, 0.0]) == π / 2
-            @test injectivity_radius(M, Quaternion[1.0 + 0im, 0.0, 0.0], ExponentialRetraction()) == π / 2
+            @test injectivity_radius(
+                M,
+                Quaternion[1.0 + 0im, 0.0, 0.0],
+                ExponentialRetraction(),
+            ) == π / 2
         end
         types = [Vector{Quaternion{Float64}}]
         @testset "Type $T" for T in types
             x = [Quaternion(0.5, 0, 0, 0.5), Quaternion(0, 0, 0.5, 0.5), 0]
             v = [Quaternion(0), Quaternion(0), Quaternion(0.0, -0.5, -0.5, 0.0)]
             y = Quaternion(0, 0, 0, 1) * exp(M, x, v)
-            w = [Quaternion(0.25, -0.25, 0.25, 0.25), Quaternion(0.25, 0.25, -0.25, -0.25), 1]
+            w = [
+                Quaternion(0.25, -0.25, 0.25, 0.25),
+                Quaternion(0.25, 0.25, -0.25, -0.25),
+                1,
+            ]
             z = Quaternion(0.5, -0.5, 0.5, -0.5) * exp(M, x, w)
             pts = convert.(T, [x, y, z])
             test_manifold(
