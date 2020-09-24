@@ -10,7 +10,7 @@ abstract type AbstractProjectiveSpace{𝔽} <:
 @doc raw"""
     ProjectiveSpace{n,𝔽} <: AbstractProjectiveSpace{𝔽}
 
-The projective space $𝔽ℙ^n$ is the set of all lines in $𝔽^{n+1}$.
+The projective space $𝔽ℙ^n$ is the manifold of all lines in $𝔽^{n+1}$.
 The default representation is in the embedding, i.e. as unit norm vectors in
 $𝔽^{n+1}$:
 ````math
