@@ -178,6 +178,87 @@ include("utils.jl")
         end
     end
 
+    @testset "Right Quaternion" begin
+        M = ProjectiveSpace(2, ℍ)
+        @testset "Basics" begin
+            @test repr(M) == "ProjectiveSpace(2, ℍ)"
+            @test representation_size(M) == (3,)
+            @test manifold_dimension(M) == 8
+            @test !is_manifold_point(M, Quaternion[1.0 + 0im, 0.0, 0.0, 0.0])
+            @test !is_tangent_vector(M, Quaternion[1.0 + 0im, 0.0, 0.0, 0.0], Quaternion[0.0 + 0im, 1.0, 0.0])
+            @test_throws DomainError is_manifold_point(M, Quaternion[1.0, im, 0.0], true)
+            @test !is_manifold_point(M, Quaternion[1.0, im, 0.0])
+            @test !is_tangent_vector(M, Quaternion[1.0 + 0im, 0.0, 0.0], Quaternion[1.0 + 0im, 0.0, 0.0])
+            @test !is_tangent_vector(M, Quaternion[1.0 + 0im, 0.0, 0.0], Quaternion[-0.5im, 0.0, 0.0])
+            @test_throws DomainError is_tangent_vector(
+                M,
+                Quaternion[1.0 + 0im, 0.0, 0.0],
+                Quaternion[1.0 + 0im, 0.0, 0.0],
+                true,
+            )
+            @test_throws DomainError is_tangent_vector(
+                M,
+                Quaternion[1.0 + 0im, 0.0, 0.0],
+                Quaternion[-0.5im, 0.0, 0.0],
+                true,
+            )
+            @test injectivity_radius(M) == π / 2
+            @test injectivity_radius(M, ExponentialRetraction()) == π / 2
+            @test injectivity_radius(M, Quaternion[1.0 + 0im, 0.0, 0.0]) == π / 2
+            @test injectivity_radius(M, Quaternion[1.0 + 0im, 0.0, 0.0], ExponentialRetraction()) == π / 2
+        end
+        types = [Vector{Quaternion{Float64}}]
+        @testset "Type $T" for T in types
+            x = [Quaternion(0.5, 0, 0, 0.5), Quaternion(0, 0, 0.5, 0.5), 0]
+            v = [Quaternion(0), Quaternion(0), Quaternion(0.0, -0.5, -0.5, 0.0)]
+            y = Quaternion(0, 0, 0, 1) * exp(M, x, v)
+            w = [Quaternion(0.25, -0.25, 0.25, 0.25), Quaternion(0.25, 0.25, -0.25, -0.25), 1]
+            z = Quaternion(0.5, -0.5, 0.5, -0.5) * exp(M, x, w)
+            pts = convert.(T, [x, y, z])
+            test_manifold(
+                M,
+                pts,
+                test_injectivity_radius = false,
+                test_project_point = true,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                vector_transport_methods = [
+                    ParallelTransport(),
+                    ProjectionTransport(),
+                    SchildsLadderTransport(),
+                    PoleLadderTransport(),
+                ],
+                test_forward_diff = false,
+                test_reverse_diff = false,
+                test_vee_hat = false,
+                retraction_methods = [
+                    ProjectionRetraction(),
+                    PolarRetraction(),
+                    QRRetraction(),
+                ],
+                inverse_retraction_methods = [
+                    ProjectionInverseRetraction(),
+                    PolarInverseRetraction(),
+                    QRInverseRetraction(),
+                ],
+                is_tangent_atol_multiplier = 10,
+                exp_log_atol_multiplier = 10.0^3,
+                retraction_atol_multiplier = 10.0,
+            )
+        end
+
+        @testset "equivalence" begin
+            x = Quaternion[1.0 + 0im, 0.0, 0.0]
+            v = Quaternion[0.0, im, 0.0]
+            s = Quaternion(0.5, -0.5, 0.5, -0.5)
+            @test isapprox(M, x, x * s)
+            @test isapprox(M, x, exp(M, x, π * v))
+            @test log(M, x, x * s) ≈ zero(v)
+            @test isapprox(M, x * s, vector_transport_to(M, x, v, x * s), v * s)
+        end
+    end
+
     @testset "ArrayProjectiveSpace" begin
         M = ArrayProjectiveSpace(2, 2; field = ℝ)
         @test repr(M) == "ArrayProjectiveSpace(2, 2; field = ℝ)"
