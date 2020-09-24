@@ -50,7 +50,7 @@ The default representation is in the embedding, i.e. as unit (Frobenius) norm ma
 $𝔽^{n₁,n₂,…,nᵢ}$:
 
 ````math
-𝔽ℙ^{n_1, n_2, \ldots, n_i} := \bigl\{ p \in 𝔽^{n_1, n_2, …, n_i}, p ∼ p z \ \big|\ \lVert p \rVert = 1, z \in 𝔽, |z| = 1 \bigr\}.
+𝔽ℙ^{n_1, n_2, …, n_i} := \bigl\{ p \in 𝔽^{n_1, n_2, …, n_i}, p ∼ p z \ \big|\ \lVert p \rVert = 1, z \in 𝔽, |z| = 1 \bigr\}.
 ````
 where $\sim$ indicates equivalence.
 Note that unlike [`ProjectiveSpace`](@ref), the argument for `ArrayProjectiveSpace`
@@ -63,7 +63,7 @@ the same.
 The tangent space at point $p$ is given by
 
 ````math
-T_p 𝔽ℙ^{n_1, n_2, \ldots, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, \ldots, n_i}\ |\ ⟨p,X⟩ = 0 \bigr \},
+T_p 𝔽ℙ^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i}\ |\ ⟨p,X⟩ = 0 \bigr \},
 ````
 
 where $⟨\cdot,\cdot⟩$ denotes the inner product in the embedding $𝔽^{n_1, n_2, …, n_i}$.
