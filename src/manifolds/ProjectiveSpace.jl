@@ -42,6 +42,38 @@ projective spaces.
 struct ProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} end
 ProjectiveSpace(n::Int, field::AbstractNumbers = ℝ) = ProjectiveSpace{n,field}()
 
+@doc raw"""
+    ArrayProjectiveSpace{T<:Tuple,𝔽} <: AbstractProjectiveSpace{𝔽}
+
+The projective space $𝔽ℙ^{n₁,n₂,…,nᵢ}$ is the manifold of all lines in $𝔽^{n₁,n₂,…,nᵢ}$.
+The default representation is in the embedding, i.e. as unit (Frobenius) norm matrices in
+$𝔽^{n₁,n₂,…,nᵢ}$:
+
+````math
+𝔽ℙ^{n_1, n_2, \ldots, n_i} := \bigl\{ p \in 𝔽^{n_1, n_2, …, n_i}, p ∼ p z \ \big|\ \lVert p \rVert = 1, z \in 𝔽, |z| = 1 \bigr\}.
+````
+where $\sim$ indicates equivalence.
+Note that compared to this classical case, the argument for the generalized case here is
+given by the dimension of the embedding.
+This means that [`ProjectiveSpace(2)`](@ref) and `ArrayProjectiveSpace(3)` are the same
+manifold.
+
+The tangent space at point $p$ is given by
+
+````math
+T_p 𝔽ℙ^{n_1, n_2, \ldots, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, \ldots, n_i}\ |\ ⟨p,X⟩ = 0 \bigr \},
+````
+
+where $⟨\cdot,\cdot⟩$ denotes the inner product in the embedding $𝔽^{n_1, n_2, …, n_i}$.
+
+# Constructor
+
+    ArrayProjectiveSpace(n₁,n₂,...,nᵢ; field=ℝ)
+
+Generate the projective space $𝔽ℙ^{n_1, n_2, …, n_i}$, defaulting to the real projective
+space, where `field` can also be used to generate the complex- and right-quaternionic
+projective spaces.
+"""
 struct ArrayProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} where {N<:Tuple} end
 function ArrayProjectiveSpace(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
     return ArrayProjectiveSpace{Tuple{n...},field}()
