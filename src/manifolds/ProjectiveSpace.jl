@@ -53,10 +53,12 @@ $𝔽^{n₁,n₂,…,nᵢ}$:
 𝔽ℙ^{n_1, n_2, \ldots, n_i} := \bigl\{ p \in 𝔽^{n_1, n_2, …, n_i}, p ∼ p z \ \big|\ \lVert p \rVert = 1, z \in 𝔽, |z| = 1 \bigr\}.
 ````
 where $\sim$ indicates equivalence.
-Note that compared to this classical case, the argument for the generalized case here is
-given by the dimension of the embedding.
+Note that unlike [`ProjectiveSpace`](@ref), the argument for `ArrayProjectiveSpace`
+is given by the size of the embedding.
 This means that [`ProjectiveSpace(2)`](@ref) and `ArrayProjectiveSpace(3)` are the same
 manifold.
+Additionally, `ArrayProjectiveSpace(n,1;field=𝔽)` and [`Grassmann(n,1;field=𝔽)`](@ref) are
+the same.
 
 The tangent space at point $p$ is given by
 
