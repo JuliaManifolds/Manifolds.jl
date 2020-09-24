@@ -59,14 +59,14 @@ where $𝔽\in\{ℝ,ℂ\}$. Setting $i=1$ and $𝔽=ℝ$  this  simplifies to un
 the argument for the generalized case here is given by the dimension of the embedding.
 This means that `Sphere(2)` and `ArraySphere(3)` are the same manifold.
 
-The tangent space at point p is given by
+The tangent space at point $p$ is given by
 
 ````math
-T_p𝕊^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i}\ |\ ⟨p,X⟩ = 0 \bigr \},
+T_p 𝕊^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i}\ |\ ⟨p,X⟩ = 0 \bigr \},
 ````
 
 where $𝔽\in\{ℝ,ℂ\}$ and $⟨\cdot,\cdot⟩$ denotes the inner product in the
-embedding $\mathbb 𝔽^{n_1, n_2, …, n_i}$.
+embedding $𝔽^{n_1, n_2, …, n_i}$.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
