@@ -33,7 +33,7 @@ space.
 
 # Constructor
 
-ProjectiveSpace(n[, field=ℝ])
+    ProjectiveSpace(n[, field=ℝ])
 
 Generate the projective space $ℙ𝔽^{n} ⊂ 𝔽^{n+1}$, defaulting to the real projective space
 $ℙℝ^n$, where `field` can also be used to generate the complex- and right-quaternionic
