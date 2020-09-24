@@ -8,7 +8,7 @@ abstract type AbstractSphere{𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsome
 @doc raw"""
     Sphere{n,𝔽} <: AbstractSphere{𝔽}
 
-The (unit) sphere manifold $𝕊^{n}$ is the set of all unit norm vectors in $𝔽^{N}$, $𝔽 elements.
+The (unit) sphere manifold $𝕊^{n}$ is the set of all unit norm vectors in $𝔽^{n+1}$.
 The sphere is represented in the embedding, i.e.
 
 ````math
@@ -21,11 +21,11 @@ argument `n` of the manifold is the dimension of the manifold, i.e. $𝕊^{n} �
 The tangent space at point $p$ is given by
 
 ````math
-T_p𝕊^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ |\ ⟨p,X⟩ = 0 \bigr \},
+T_p𝕊^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ |\ \Re(⟨p,X⟩) = 0 \bigr \},
 ````
 
 where $𝔽\in\{ℝ,ℂ\}$ and $⟨\cdot,\cdot⟩$ denotes the inner product in the
-embedding $\mathbb 𝔽^{n+1}$.
+embedding $𝔽^{n+1}$.
 
 This manifold is modeled as a special case of the more general case, i.e. as an embedded
 manifold to the [`Euclidean`](@ref), and several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product
