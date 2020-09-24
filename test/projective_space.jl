@@ -282,6 +282,7 @@ include("utils.jl")
 
     @testset "ArrayProjectiveSpace" begin
         M = ArrayProjectiveSpace(2, 2; field = ℝ)
+        @test manifold_dimension(M) == 3
         @test repr(M) == "ArrayProjectiveSpace(2, 2; field = ℝ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℝ}
         @test representation_size(M) == (2, 2)
@@ -293,6 +294,7 @@ include("utils.jl")
         @test is_tangent_vector(M, q, X)
 
         M = ArrayProjectiveSpace(2, 2; field = ℂ)
+        @test manifold_dimension(M) == 6
         @test repr(M) == "ArrayProjectiveSpace(2, 2; field = ℂ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℂ}
         @test representation_size(M) == (2, 2)
