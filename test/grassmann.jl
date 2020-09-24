@@ -190,4 +190,14 @@ include("utils.jl")
             end
         end
     end
+
+    @testset "Complex and conjugate" begin
+        G = Grassmann(3, 1, ℂ)
+        p = reshape([im, 0.0, 0.0], 3, 1)
+        @test is_manifold_point(G, p)
+        X = reshape([-0.5; 0.5; 0], 3, 1)
+        @test_throws DomainError is_tangent_vector(G, p, X, true)
+        Y = project(G, p, X)
+        @test is_tangent_vector(G, p, Y)
+    end
 end
