@@ -14,7 +14,7 @@ The projective space $𝔽ℙ^n$ is the manifold of all lines in $𝔽^{n+1}$.
 The default representation is in the embedding, i.e. as unit norm vectors in
 $𝔽^{n+1}$:
 ````math
-𝔽ℙ^n := \bigl\{ [p] ⊂ 𝔽^{n+1} \ \big|\ \lVert p \rVert = 1, z \in 𝔽, |z| = 1, p ∼ p z \bigr\},
+𝔽ℙ^n := \bigl\{ [p] ⊂ 𝔽^{n+1} \ \big|\ \lVert p \rVert = 1, λ ∈ 𝔽, |λ| = 1, p ∼ p λ \bigr\},
 ````
 where $[p]$ is an equivalence class of points $p$, and $\sim$ indicates equivalence.
 For example, the real projective space $ℝℙ^n$ is represented as the unit sphere $𝕊^n$, where
@@ -50,7 +50,7 @@ The default representation is in the embedding, i.e. as unit (Frobenius) norm ma
 $𝔽^{n₁,n₂,…,nᵢ}$:
 
 ````math
-𝔽ℙ^{n_1, n_2, …, n_i} := \bigl\{ [p] ⊂ 𝔽^{n_1, n_2, …, n_i} \ \big|\ \lVert p \rVert = 1, z \in 𝔽, |z| = 1, p ∼ p z \bigr\}.
+𝔽ℙ^{n_1, n_2, …, n_i} := \bigl\{ [p] ⊂ 𝔽^{n_1, n_2, …, n_i} \ \big|\ \lVert p \rVert = 1, λ ∈ 𝔽, |λ| = 1, p ∼ p λ \bigr\}.
 ````
 where $[p]$ is an equivalence class of points $p$, and $\sim$ indicates equivalence.
 Note that unlike [`ProjectiveSpace`](@ref), the argument for `ArrayProjectiveSpace`
@@ -214,8 +214,8 @@ function inverse_retract!(
     q,
     ::Union{ProjectionInverseRetraction,PolarInverseRetraction,QRInverseRetraction},
 )
-    signz = sign(dot(p, q))
-    X .= q .* signz' .- p
+    λ = sign(dot(p, q))
+    X .= q .* λ' .- p
     return X
 end
 
@@ -226,8 +226,8 @@ end
 function log!(M::AbstractProjectiveSpace, X, p, q)
     z = dot(p, q)
     cosθ = abs(z)
-    signz = sign_from_abs(z, cosθ)
-    X .= (q .* signz' .- cosθ .* p) ./ usinc_from_cos(cosθ)
+    λ = sign_from_abs(z, cosθ)
+    X .= (q .* λ' .- cosθ .* p) ./ usinc_from_cos(cosθ)
     return project!(M, X, p, X)
 end
 
@@ -268,8 +268,8 @@ end
 function mid_point!(M::ProjectiveSpace, q, p1, p2)
     z = dot(p1, p2)
     cosθ = abs(z)
-    signz = sign_from_abs(z, cosθ)
-    q .= p1 .+ p2 .* signz'
+    λ = sign_from_abs(z, cosθ)
+    q .= p1 .+ p2 .* λ'
     project!(M, q, q)
     return q
 end
@@ -360,13 +360,13 @@ vector_transport_direction(::AbstractProjectiveSpace, p, X, d, ::ParallelTranspo
 
 function vector_transport_to!(::AbstractProjectiveSpace, Y, p, X, q, ::ParallelTransport)
     z = dot(p, q)
-    signz = sign(z)
-    m = p .+ signz' .* q # un-normalized midpoint
+    λ = sign(z)
+    m = p .+ λ' .* q # un-normalized midpoint
     mnorm2 = real(dot(m, m))
-    factor = signz * dot(q, X) * (2 / mnorm2)
-    # multiply by `sign(z)` to bring from T_{\exp_p(\log_p q)} M to T_q M
+    factor = λ * dot(q, X) * (2 / mnorm2)
+    # multiply by λ to bring from T_{\exp_p(\log_p q)} M to T_q M
     # this ensures that subsequent functions like `exp(M, q, Y)` do the right thing
-    Y .= (X .- m .* factor) .* signz
+    Y .= (X .- m .* factor) .* λ
     return Y
 end
 function vector_transport_to!(M::AbstractProjectiveSpace, Y, p, X, q, ::ProjectionTransport)
