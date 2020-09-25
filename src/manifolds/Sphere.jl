@@ -15,7 +15,7 @@ The sphere is represented in the embedding, i.e.
 𝕊^{n} := \bigl\{ p \in 𝔽^{n+1}\ \big|\ \lVert p \rVert = 1 \bigr\}
 ````
 
-where $𝔽\in\{ℝ,ℂ\}$. Note that compared to the [`ArraySphere`](@ref), here the
+where $𝔽\in\{ℝ,ℂ,ℍ\}$. Note that compared to the [`ArraySphere`](@ref), here the
 argument `n` of the manifold is the dimension of the manifold, i.e. $𝕊^{n} ⊂ 𝔽^{n+1}$, $n\in ℕ$.
 
 The tangent space at point $p$ is given by
@@ -24,8 +24,15 @@ The tangent space at point $p$ is given by
 T_p𝕊^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ |\ \Re(⟨p,X⟩) = 0 \bigr \},
 ````
 
-where $𝔽\in\{ℝ,ℂ\}$ and $⟨\cdot,\cdot⟩$ denotes the inner product in the
+where $𝔽\in\{ℝ,ℂ,ℍ\}$ and $⟨\cdot,\cdot⟩$ denotes the inner product in the
 embedding $𝔽^{n+1}$.
+
+For $𝔽=ℂ$, the manifold is the complex sphere, written $ℂ𝕊^n$, embedded in $ℂ^{n+1}$.
+$ℂ𝕊^n$ is the complexification of the real sphere $𝕊^{2n+1}$.
+Likewise, the quaternionic sphere $ℍ𝕊^n$ is the quaternionification of the real sphere
+$𝕊^{4n+3}$.
+Consequently, $ℂ𝕊^0$ is equivalent to $𝕊^1$ and [`Circle`](@ref), while $ℂ𝕊^1$ and $ℍ𝕊^0$
+are equivalent to $𝕊^3$, though with different default representations.
 
 This manifold is modeled as a special case of the more general case, i.e. as an embedded
 manifold to the [`Euclidean`](@ref), and several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product
@@ -36,7 +43,7 @@ and the [`zero_tangent_vector`](@ref zero_tangent_vector(::Euclidean, ::Any...))
     Sphere(n[, field=ℝ])
 
 Generate the (real-valued) sphere $𝕊^{n} ⊂ ℝ^{n+1}$, where `field` can also be used to
-generate the complex-valued sphere.
+generate the complex- and quaternionic-valued sphere.
 """
 struct Sphere{N,𝔽} <: AbstractSphere{𝔽} end
 Sphere(n::Int, field::AbstractNumbers = ℝ) = Sphere{n,field}()
@@ -46,7 +53,7 @@ Sphere(n::Int, field::AbstractNumbers = ℝ) = Sphere{n,field}()
     ArraySphere{T<:Tuple,𝔽} <: AbstractSphere{𝔽}
 
 The (unit) sphere manifold $𝕊^{n₁,n₂,...,nᵢ}$ is the set of all unit (Frobenius) norm elements of
-$𝔽^{n₁,n₂,...,nᵢ}$, where $𝔽\in\{ℝ,ℂ\}. The generalized sphere is
+$𝔽^{n₁,n₂,...,nᵢ}$, where $𝔽\in\{ℝ,ℂ,ℍ\}. The generalized sphere is
 represented in the embedding, and supports arbitrary sized arrays or in other words arbitrary
 tensors of unit norm. The set formally reads
 
@@ -54,7 +61,7 @@ tensors of unit norm. The set formally reads
 𝕊^{n_1, n_2, …, n_i} := \bigl\{ p \in 𝔽^{n_1, n_2, …, n_i}\ \big|\ \lVert p \rVert = 1 \bigr\}
 ````
 
-where $𝔽\in\{ℝ,ℂ\}$. Setting $i=1$ and $𝔽=ℝ$  this  simplifies to unit vectors in $ℝ^n$, see
+where $𝔽\in\{ℝ,ℂ,ℍ\}$. Setting $i=1$ and $𝔽=ℝ$  this  simplifies to unit vectors in $ℝ^n$, see
 [`Sphere`](@ref) for this special case. Note that compared to this classical case,
 the argument for the generalized case here is given by the dimension of the embedding.
 This means that `Sphere(2)` and `ArraySphere(3)` are the same manifold.
@@ -65,7 +72,7 @@ The tangent space at point $p$ is given by
 T_p 𝕊^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i}\ |\ ⟨p,X⟩ = 0 \bigr \},
 ````
 
-where $𝔽\in\{ℝ,ℂ\}$ and $⟨\cdot,\cdot⟩$ denotes the inner product in the
+where $𝔽\in\{ℝ,ℂ,ℍ\}$ and $⟨\cdot,\cdot⟩$ denotes the inner product in the
 embedding $𝔽^{n_1, n_2, …, n_i}$.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
@@ -76,7 +83,7 @@ several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product 
 
     ArraySphere(n₁,n₂,...,nᵢ; field=ℝ)
 
-Generate sphere in $𝔽^{n_1, n_2, …, n_i}$, where 𝔽 defaults to the real-valued case ℝ.
+Generate sphere in $𝔽^{n_1, n_2, …, n_i}$, where $𝔽$ defaults to the real-valued case $ℝ$.
 """
 struct ArraySphere{N,𝔽} <: AbstractSphere{𝔽} where {N<:Tuple} end
 function ArraySphere(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
