@@ -361,7 +361,7 @@ vector_transport_direction(::AbstractProjectiveSpace, p, X, d, ::ParallelTranspo
 function vector_transport_to!(::AbstractProjectiveSpace, Y, p, X, q, ::ParallelTransport)
     z = dot(p, q)
     λ = sign(z)
-    m = p .+ λ' .* q # un-normalized midpoint
+    m = p .+ q .* λ' # un-normalized midpoint
     mnorm2 = real(dot(m, m))
     factor = λ * dot(q, X) * (2 / mnorm2)
     # multiply by λ to bring from T_{\exp_p(\log_p q)} M to T_q M
