@@ -77,6 +77,14 @@ include("utils.jl")
             )
         end
 
+        @testset "retract/inverse_retract" begin
+            x = [1.0, 0.0, 0.0]
+            v = [0.0, 1.0, 0.0]
+            y = retract(M, x, v, ProjectionRetraction())
+            v2 = inverse_retract(M, x, y, ProjectionInverseRetraction())
+            @test v ≈ v2
+        end
+
         @testset "equivalence" begin
             x = [1.0, 0.0, 0.0]
             v = [0.0, 1.0, 0.0]
@@ -166,6 +174,14 @@ include("utils.jl")
                 exp_log_atol_multiplier = 10.0^3,
                 retraction_atol_multiplier = 10.0,
             )
+        end
+
+        @testset "retract/inverse_retract" begin
+            x = [0.5 + 0.5im, 0.5 + 0.5im, 0]
+            v = [0.0, 0.0, 1.0 - im]
+            y = retract(M, x, v, ProjectionRetraction())
+            v2 = inverse_retract(M, x, y, ProjectionInverseRetraction())
+            @test v ≈ v2
         end
 
         @testset "equivalence" begin
@@ -267,6 +283,14 @@ include("utils.jl")
                 exp_log_atol_multiplier = 10.0^3,
                 retraction_atol_multiplier = 10.0,
             )
+        end
+
+        @testset "retract/inverse_retract" begin
+            x = [Quaternion(0.5, 0, 0, 0.5), Quaternion(0, 0, 0.5, 0.5), 0]
+            v = [Quaternion(0), Quaternion(0), Quaternion(0.0, -0.5, -0.5, 0.0)]
+            y = retract(M, x, v, ProjectionRetraction())
+            v2 = inverse_retract(M, x, y, ProjectionInverseRetraction())
+            @test v ≈ v2
         end
 
         @testset "equivalence" begin
