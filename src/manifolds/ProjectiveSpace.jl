@@ -161,37 +161,37 @@ Represent the tangent vector `X` at point `p` from the [`ProjectiveSpace`](@ref)
 an orthonormal basis by rotating the vector `X` using the rotation matrix
 $2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
 """
-function get_coordinates(::ProjectiveSpace{n,ℝ}, p, X, ::DefaultOrthonormalBasis) where {n}
-    isapprox(p[1], 1) && return X[2:end]
-    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n + 1)
-    return ((2 * dot(xp1, X) / dot(xp1, xp1)) .* xp1 - X)[2:end]
-end
+get_coordinates(::ProjectiveSpace{n,ℝ}, p, X, ::DefaultOrthonormalBasis) where {n}
 
 function get_coordinates!(
-    M::ProjectiveSpace{n,ℝ},
+    ::ProjectiveSpace{n,ℝ},
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis,
+    ::DefaultOrthonormalBasis,
 ) where {n}
-    return copyto!(Y, get_coordinates(M, p, X, B))
+    factor = X[1] / (1 + p[1])
+    Y .= factor .* view(p, 2:(n + 1)) .- view(X, 2:(n + 1))
+    return Y
 end
 
-function get_vector(::ProjectiveSpace{n,ℝ}, p, X, ::DefaultOrthonormalBasis) where {n}
-    p[1] ≈ 1 && return vcat(0, X)
-    xp1 = p .+ ntuple(i -> ifelse(i == 1, 1, 0), n + 1)
-    X0 = vcat(0, X)
-    return (2 * dot(xp1, X0) / dot(xp1, xp1)) .* xp1 .- X0
-end
+# TODO: add docstring
+@doc raw"""
+"""
+get_vector(::ProjectiveSpace{n,ℝ}, p, X, ::DefaultOrthonormalBasis) where {n}
 
 function get_vector!(
-    M::ProjectiveSpace{n,ℝ},
+    ::ProjectiveSpace{n,ℝ},
     Y::AbstractVector,
     p,
     X,
-    B::DefaultOrthonormalBasis,
+    ::DefaultOrthonormalBasis,
 ) where {n}
-    return copyto!(Y, get_vector(M, p, X, B))
+    pend = view(p, 2:(n + 1))
+    pX = dot(pend, X)
+    Y[1] = pX
+    Y[2:(n + 1)] .= (pX / (1 + p[1])) .* pend .- X
+    return Y
 end
 
 injectivity_radius(::AbstractProjectiveSpace) = π / 2
