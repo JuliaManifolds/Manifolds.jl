@@ -214,8 +214,8 @@ function inverse_retract!(
     q,
     ::Union{ProjectionInverseRetraction,PolarInverseRetraction,QRInverseRetraction},
 )
-    λ = sign(dot(p, q))
-    X .= q .* λ' .- p
+    λ = sign(dot(q, p))
+    X .= q .* λ .- p
     return X
 end
 
@@ -224,10 +224,10 @@ function Base.isapprox(::AbstractProjectiveSpace, p, q; kwargs...)
 end
 
 function log!(M::AbstractProjectiveSpace, X, p, q)
-    z = dot(p, q)
+    z = dot(q, p)
     cosθ = abs(z)
     λ = sign_from_abs(z, cosθ)
-    X .= (q .* λ' .- cosθ .* p) ./ usinc_from_cos(cosθ)
+    X .= (q .* λ .- cosθ .* p) ./ usinc_from_cos(cosθ)
     return project!(M, X, p, X)
 end
 
@@ -266,10 +266,10 @@ function Statistics.mean!(
 end
 
 function mid_point!(M::ProjectiveSpace, q, p1, p2)
-    z = dot(p1, p2)
+    z = dot(p2, p1)
     cosθ = abs(z)
     λ = sign_from_abs(z, cosθ)
-    q .= p1 .+ p2 .* λ'
+    q .= p1 .+ p2 .* λ
     project!(M, q, q)
     return q
 end
@@ -359,14 +359,14 @@ $\lVert d \rVert < \frac{π}{2}$.
 vector_transport_direction(::AbstractProjectiveSpace, p, X, d, ::ParallelTransport)
 
 function vector_transport_to!(::AbstractProjectiveSpace, Y, p, X, q, ::ParallelTransport)
-    z = dot(p, q)
+    z = dot(q, p)
     λ = sign(z)
-    m = p .+ q .* λ' # un-normalized midpoint
+    m = p .+ q .* λ # un-normalized midpoint
     mnorm2 = real(dot(m, m))
-    factor = λ * dot(q, X) * (2 / mnorm2)
-    # multiply by λ to bring from T_{\exp_p(\log_p q)} M to T_q M
+    factor = λ' * dot(q, X) * (2 / mnorm2) # λ' * dot(q, X) ≡ dot(q * λ, X)
+    # multiply by λ' to bring from T_{\exp_p(\log_p q)} M to T_q M
     # this ensures that subsequent functions like `exp(M, q, Y)` do the right thing
-    Y .= (X .- m .* factor) .* λ
+    Y .= (X .- m .* factor) .* λ'
     return Y
 end
 function vector_transport_to!(M::AbstractProjectiveSpace, Y, p, X, q, ::ProjectionTransport)
