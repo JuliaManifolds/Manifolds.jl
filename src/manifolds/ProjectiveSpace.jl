@@ -214,8 +214,7 @@ function inverse_retract!(
     q,
     ::Union{ProjectionInverseRetraction,PolarInverseRetraction,QRInverseRetraction},
 )
-    λ = sign(dot(q, p))
-    X .= q .* λ .- p
+    X .= q ./ dot(p, q) .- p
     return X
 end
 
