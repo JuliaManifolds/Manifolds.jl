@@ -20,9 +20,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
   note:
-    name: "Documentation deployment skipped."
+    name: "Documentation deployment note."
     runs-on: ubuntu-latest
     if: "!contains( github.event.pull_request.labels.*.name, 'preview docs')"
     steps:
       - name: echo instructions
-        run: echo 'Documentation neither generated nor pushed. Set the “preview docs” label to activate'
+        run: echo 'The Documentation is only gnerated and pushed on a PR if the “preview docs” label is added.'
