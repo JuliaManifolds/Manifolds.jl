@@ -21,6 +21,7 @@ jobs:
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
   note:
     name: Note
+    runs-on: ubuntu-latest
     if: "!contains( github.event.pull_request.labels.*.name, 'preview docs')"
     steps:
       - name: echo instructions
