@@ -25,4 +25,4 @@ jobs:
     if: "!contains( github.event.pull_request.labels.*.name, 'preview docs')"
     steps:
       - name: echo instructions
-        run: echo 'Documentation neither generated nor pushed. Set the “deploy docs” label to activate'
+        run: echo 'Documentation neither generated nor pushed. Set the “preview docs” label to activate'
