@@ -25,4 +25,4 @@ jobs:
     if: "!contains( github.event.pull_request.labels.*.name, 'preview docs')"
     steps:
       - name: echo instructions
-        run: echo 'The Documentation is only gnerated and pushed on a PR if the “preview docs” label is added.'
+        run: echo 'The Documentation is only generated and pushed on a PR if the “preview docs” label is added.'
