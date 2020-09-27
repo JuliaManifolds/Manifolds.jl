@@ -20,7 +20,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
   note:
-    name: Note
+    name: "Documentation deployment skipped."
     runs-on: ubuntu-latest
     if: "!contains( github.event.pull_request.labels.*.name, 'preview docs')"
     steps:
