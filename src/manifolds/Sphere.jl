@@ -354,7 +354,6 @@ function Statistics.mean!(
 end
 
 function mid_point!(S::Sphere, q, p1, p2)
-    cosθ = real(dot(p1, p2))
     q .= p1 .+ p2
     project!(S, q, q)
     return q

@@ -365,8 +365,7 @@ end
 
 function mid_point!(M::ProjectiveSpace, q, p1, p2)
     z = dot(p2, p1)
-    cosθ = abs(z)
-    λ = sign_from_abs(z, cosθ)
+    λ = sign(z)
     q .= p1 .+ p2 .* λ
     project!(M, q, q)
     return q
