@@ -464,8 +464,6 @@ then projecting it onto the tangent space at `q`.
 """
 vector_transport_to(::AbstractProjectiveSpace, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
-"""
-
 function vector_transport_to!(::AbstractProjectiveSpace, Y, p, X, q, ::ParallelTransport)
     z = dot(q, p)
     λ = sign(z)
