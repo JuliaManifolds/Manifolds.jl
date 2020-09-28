@@ -65,7 +65,7 @@ The tangent space at point $p$ is given by
 T_p 𝔽ℙ^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i}\ |\ ⟨p,X⟩ = 0 \bigr \},
 ````
 
-where $⟨\cdot,\cdot⟩$ denotes the inner product in the embedding $𝔽^{n_1, n_2, …, n_i}$.
+where $⟨⋅,⋅⟩$ denotes the (Frobenius) inner product in the embedding $𝔽^{n_1, n_2, …, n_i}$.
 
 # Constructor
 
