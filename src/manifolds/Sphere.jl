@@ -206,42 +206,46 @@ function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) w
 end
 
 @doc raw"""
-    get_coordinates(M::Sphere, p, X, B::DefaultOrthonormalBasis)
+    get_coordinates(M::AbstractSphere{ℝ}, p, X, B::DefaultOrthonormalBasis)
 
-Represent the tangent vector `X` at point `p` from the [`Sphere`](@ref) `M` in
+Represent the tangent vector `X` at point `p` from the [`AbstractSphere`](@ref) `M` in
 an orthonormal basis by rotating the vector `X` using the rotation matrix
 $2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
 """
-get_coordinates(::Sphere{n,ℝ}, p, X, B::DefaultOrthonormalBasis) where {n}
+get_coordinates(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
 function get_coordinates!(
-    ::Sphere{n,ℝ},
+    M::AbstractSphere{ℝ},
     Y,
     p,
     X,
     ::DefaultOrthonormalBasis,
-) where {n}
-    factor = X[1] / (1 + p[1])
-    Y .= factor .* view(p, 2:(n + 1)) .- view(X, 2:(n + 1))
+)
+    n = manifold_dimension(M)
+    factor = X[1] / (1 + p[1]) # 2 (q'X)/(q'q)
+    pend, Xend = view(p, 2:(n + 1)), view(X, 2:(n + 1))
+    Y .= pend .* factor .- Xend
     return Y
 end
 
 # TODO: add docstring
 @doc raw"""
 """
-get_vector(::Sphere{n,ℝ}, p, X, ::DefaultOrthonormalBasis) where {n}
+get_vector(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
 function get_vector!(
-    ::Sphere{n,ℝ},
-    Y::AbstractVector,
+    M::AbstractSphere{ℝ},
+    Y,
     p,
     X,
     ::DefaultOrthonormalBasis,
-) where {n}
+)
+    n = manifold_dimension(M)
     pend = view(p, 2:(n + 1))
-    pX = dot(pend, X)
-    Y[1] = pX
-    Y[2:(n + 1)] .= (pX / (1 + p[1])) .* pend .- X
+    Y1 = dot(pend, X)
+    Y[1] = Y1
+    factor = Y1 / (1 + p[1])
+    Y[2:(n + 1)] .= pend .* factor .- X
     return Y
 end
 

@@ -155,42 +155,46 @@ function get_basis(::ProjectiveSpace{n,ℝ}, p, B::DiagonalizingOrthonormalBasis
 end
 
 @doc raw"""
-    get_coordinates(M::ProjectiveSpace{n,ℝ}, p, X, B::DefaultOrthonormalBasis) where {n}
+    get_coordinates(M::AbstractProjectiveSpace{ℝ}, p, X, B::DefaultOrthonormalBasis)
 
-Represent the tangent vector `X` at point `p` from the [`ProjectiveSpace`](@ref) `M` in
-an orthonormal basis by rotating the vector `X` using the rotation matrix
+Represent the tangent vector `X` at point `p` from the [`AbstractProjectiveSpace`](@ref) `M`
+in an orthonormal basis by rotating the vector `X` using the rotation matrix
 $2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
 """
-get_coordinates(::ProjectiveSpace{n,ℝ}, p, X, ::DefaultOrthonormalBasis) where {n}
+get_coordinates(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
 function get_coordinates!(
-    ::ProjectiveSpace{n,ℝ},
+    M::AbstractProjectiveSpace{ℝ},
     Y,
     p,
     X,
     ::DefaultOrthonormalBasis,
-) where {n}
-    factor = X[1] / (1 + p[1])
-    Y .= factor .* view(p, 2:(n + 1)) .- view(X, 2:(n + 1))
+)
+    n = manifold_dimension(M)
+    factor = X[1] / (1 + p[1]) # 2 (q'X)/(q'q)
+    pend, Xend = view(p, 2:(n + 1)), view(X, 2:(n + 1))
+    Y .= pend .* factor .- Xend
     return Y
 end
 
 # TODO: add docstring
 @doc raw"""
 """
-get_vector(::ProjectiveSpace{n,ℝ}, p, X, ::DefaultOrthonormalBasis) where {n}
+get_vector(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
 function get_vector!(
-    ::ProjectiveSpace{n,ℝ},
-    Y::AbstractVector,
+    M::AbstractProjectiveSpace{ℝ},
+    Y,
     p,
     X,
     ::DefaultOrthonormalBasis,
-) where {n}
+)
+    n = manifold_dimension(M)
     pend = view(p, 2:(n + 1))
-    pX = dot(pend, X)
-    Y[1] = pX
-    Y[2:(n + 1)] .= (pX / (1 + p[1])) .* pend .- X
+    Y1 = dot(pend, X)
+    Y[1] = Y1
+    factor = Y1 / (1 + p[1])
+    Y[2:(n + 1)] .= pend .* factor .- X
     return Y
 end
 
