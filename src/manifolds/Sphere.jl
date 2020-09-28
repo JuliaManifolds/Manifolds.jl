@@ -69,10 +69,10 @@ This means that `Sphere(2)` and `ArraySphere(3)` are the same manifold.
 The tangent space at point $p$ is given by
 
 ````math
-T_p 𝕊^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i}\ |\ ⟨p,X⟩ = 0 \bigr \},
+T_p 𝕊^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i}\ |\ \Re(⟨p,X⟩) = 0 \bigr \},
 ````
 
-where $𝔽\in\{ℝ,ℂ,ℍ\}$ and $⟨\cdot,\cdot⟩$ denotes the inner product in the
+where $𝔽\in\{ℝ,ℂ,ℍ\}$ and $⟨\cdot,\cdot⟩$ denotes the (Frobenius) inner product in the
 embedding $𝔽^{n_1, n_2, …, n_i}$.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
@@ -163,7 +163,7 @@ The formula is given by the (shorter) great arc length on the (or a) great circl
 both `p` and `q` lie on.
 
 ````math
-d_{𝕊}(p,q) = \arccos(⟨p,q⟩).
+d_{𝕊}(p,q) = \arccos(\Re(⟨p,q⟩)).
 ````
 """
 distance(::AbstractSphere, p, q) = acos(clamp(real(dot(p, q)), -1, 1))
@@ -210,7 +210,8 @@ end
 
 Represent the tangent vector `X` at point `p` from the [`AbstractSphere`](@ref) `M` in
 an orthonormal basis by rotating the vector `X` using the rotation matrix
-$2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
+$2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$, which takes `p`
+to $(1, 0, …, 0)$.
 """
 get_coordinates(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
@@ -228,8 +229,15 @@ function get_coordinates!(
     return Y
 end
 
-# TODO: add docstring
 @doc raw"""
+    get_vector(M::AbstractSphere{ℝ}, p, X, B::DefaultOrthonormalBasis)
+
+Convert a one-dimensional vector of coefficients `X` in the basis `B` of the tangent space
+at `p` on the [`AbstractSphere`](@ref) `M` to a tangent vector `Y` at `p`, given by
+````math
+Y = \left(2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I\right) \begin{pmatrix} 0 \\ X \end{pmatrix},
+````
+where $q = p + (1, 0, …, 0)$.
 """
 get_vector(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
@@ -279,10 +287,10 @@ eval(
 
 Compute the inverse of the projection based retraction on the [`AbstractSphere`](@ref) `M`,
 i.e. rearranging $p+X = q\lVert p+X\rVert_2$ yields
-since $⟨p,X⟩ = 0$ and when $d_{𝕊^2}(p,q) ≤ \frac{π}{2}$ that
+since $\Re(⟨p,X⟩) = 0$ and when $d_{𝕊^2}(p,q) ≤ \frac{π}{2}$ that
 
 ````math
-\operatorname{retr}_p^{-1}(q) = \frac{q}{⟨p, q⟩} - p.
+\operatorname{retr}_p^{-1}(q) = \frac{q}{\Re(⟨p, q⟩)} - p.
 ````
 """
 inverse_retract(::AbstractSphere, ::Any, ::Any, ::ProjectionInverseRetraction)
@@ -299,7 +307,7 @@ whose geodesic starting from `p` reaches `q` after time 1.
 The formula reads for $x ≠ -y$
 
 ````math
-\log_p q = d_{𝕊}(p,q) \frac{q-⟨p,q⟩ p}{\lVert q-⟨p,q⟩ p \rVert_2},
+\log_p q = d_{𝕊}(p,q) \frac{q-\Re(⟨p,q⟩) p}{\lVert q-\Re(⟨p,q⟩) p \rVert_2},
 ````
 
 and a deterministic choice from the set of tangent vectors is returned if $x=-y$, i.e. for
@@ -382,7 +390,7 @@ end
 Project the point `p` from the embedding onto the [`Sphere`](@ref) `M`.
 
 ````math
-    \operatorname{proj}(p) = \frac{p}{\lVert p \rVert},
+\operatorname{proj}(p) = \frac{p}{\lVert p \rVert},
 ````
 where $\lVert\cdot\rVert$ denotes the usual 2-norm for vectors if $m=1$ and the Frobenius
 norm for the case $m>1$.
@@ -397,7 +405,7 @@ project!(::AbstractSphere, q, p) = (q .= p ./ norm(p))
 Project the point `X` onto the tangent space at `p` on the [`Sphere`](@ref) `M`.
 
 ````math
-\operatorname{proj}_{p}(X) = X - ⟨p, X⟩p
+\operatorname{proj}_{p}(X) = X - \Re(⟨p, X⟩)p
 ````
 """
 project(::AbstractSphere, ::Any, ::Any)
@@ -453,7 +461,7 @@ Compute the parallel transport on the [`Sphere`](@ref) of the tangent vector `X`
 to `q`, provided, the [`geodesic`](@ref) between `p` and `q` is unique. The formula reads
 
 ````math
-P_{p←q}(X) = X - \frac{\langle \log_p q,X\rangle_p}{d^2_𝕊(p,q)}
+P_{p←q}(X) = X - \frac{\Re(⟨\log_p q,X⟩_p)}{d^2_𝕊(p,q)}
 \bigl(\log_p q + \log_q p \bigr).
 ````
 """
