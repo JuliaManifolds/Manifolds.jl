@@ -171,8 +171,8 @@ function get_coordinates!(
     ::DefaultOrthonormalBasis,
 )
     n = manifold_dimension(M)
-    factor = X[1] / (1 + p[1]) # 2 (q'X)/(q'q)
     pend, Xend = view(p, 2:(n + 1)), view(X, 2:(n + 1))
+    factor = X[1] / (1 + p[1]) # 2 (q'X)/(q'q)
     Y .= pend .* factor .- Xend
     return Y
 end
