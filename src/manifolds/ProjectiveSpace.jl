@@ -16,7 +16,7 @@ $𝔽^{n+1}$:
 ````math
 𝔽ℙ^n := \bigl\{ [p] ⊂ 𝔽^{n+1} \ \big|\ \lVert p \rVert = 1, λ ∈ 𝔽, |λ| = 1, p ∼ p λ \bigr\},
 ````
-where $[p]$ is an equivalence class of points $p$, and $\sim$ indicates equivalence.
+where $[p]$ is an equivalence class of points $p$, and $∼$ indicates equivalence.
 For example, the real projective space $ℝℙ^n$ is represented as the unit sphere $𝕊^n$, where
 antipodal points are considered equivalent.
 
@@ -25,10 +25,9 @@ The tangent space at point $p$ is given by
 ````math
 T_p 𝔽ℙ^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ \big|\ ⟨p,X⟩ = 0 \bigr \},
 ````
+where $⟨⋅,⋅⟩$ denotes the inner product in the embedding $𝔽^{n+1}$.
 
-where $⟨\cdot,\cdot⟩$ denotes the inner product in the embedding $𝔽^{n+1}$.
-
-Note that when $𝔽 = ℍ$, this implementation of $ℍℙ^n$ is the right-quaternionic projective
+When $𝔽 = ℍ$, this implementation of $ℍℙ^n$ is the right-quaternionic projective
 space.
 
 # Constructor
@@ -85,6 +84,13 @@ function allocation_promotion_function(::AbstractProjectiveSpace{ℂ}, f, args::
     return complex
 end
 
+@doc raw"""
+    check_manifold_point(M::AbstractProjectiveSpace, p; kwargs...)
+
+Check whether `p` is a valid point on the [`AbstractProjectiveSpace`](@ref) `M`, i.e.
+that it has the same size as elements of the embedding and has unit Frobenius norm.
+The tolerance for the norm check can be set using the `kwargs...`.
+"""
 function check_manifold_point(M::AbstractProjectiveSpace, p; kwargs...)
     mpv = invoke(
         check_manifold_point,
@@ -103,6 +109,19 @@ function check_manifold_point(M::AbstractProjectiveSpace, p; kwargs...)
     return nothing
 end
 
+@doc doc"""
+    check_tangent_vector(M::AbstractProjectiveSpace, p, X; check_base_point = true, kwargs... )
+
+Check whether `X` is a tangent vector in the tangent space of `p` on
+the [`AbstractProjectiveSpace`](@ref) `M`, i.e. that `X` has the same size as elements of
+the tangent space of the embedding and that
+````math
+⟨p, X⟩_{\mathrm{F}} = 0,
+````
+where $⟨⋅, ⋅⟩_{\mathrm{F}}$ denotes the Frobenius inner product.
+The optional parameter `check_base_point` indicates whether to call
+[`check_manifold_point`](@ref) for `p`.
+"""
 function check_tangent_vector(
     M::AbstractProjectiveSpace,
     p,
@@ -140,6 +159,20 @@ end
 
 get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)
 
+@doc raw"""
+    distance(M::AbstractProjectiveSpace, p, q)
+
+Compute the Riemannian distance on [`AbstractProjectiveSpace`](@ref) `M`$=𝔽ℙ^n$ between
+points `p` and `q`$, i.e.
+
+````math
+d_{𝔽ℙ^n}(p, q) = \arccos\bigl| ⟨p, q⟩_{\mathrm{F}} \bigr|.
+````
+
+Note that this definition is similar to that of the [`AbstractSphere`](@ref).
+However, the absolute value ensures that all equivalent `p` and `q` have the same pairwise
+distance.
+"""
 distance(::AbstractProjectiveSpace, p, q) = acos(min(abs(dot(p, q)), 1))
 
 function exp!(M::AbstractProjectiveSpace, q, p, X)
@@ -159,7 +192,8 @@ end
 
 Represent the tangent vector `X` at point `p` from the [`AbstractProjectiveSpace`](@ref) `M`
 in an orthonormal basis by rotating the vector `X` using the rotation matrix
-$2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$.
+$2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$, which takes `p`
+to $(1, 0, …, 0)$.
 """
 get_coordinates(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
@@ -177,8 +211,15 @@ function get_coordinates!(
     return Y
 end
 
-# TODO: add docstring
 @doc raw"""
+    get_vector(M::AbstractProjectiveSpace{ℝ}, p, X, B::DefaultOrthonormalBasis)
+
+Convert a one-dimensional vector of coefficients `X` in the basis `B` of the tangent space
+at `p` on the [`AbstractProjectiveSpace`](@ref) `M` to a tangent vector `Y` at `p`, given by
+````math
+Y = \left(2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I\right) \begin{pmatrix} 0 \\ X \end{pmatrix},
+````
+where $q = p + (1, 0, …, 0)$.
 """
 get_vector(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
@@ -211,6 +252,32 @@ eval(
     end,
 )
 
+@doc raw"""
+    inverse_retract(M::AbstractProjectiveSpace, p, q, method::ProjectionInverseRetraction)
+    inverse_retract(M::AbstractProjectiveSpace, p, q, method::PolarInverseRetraction)
+    inverse_retract(M::AbstractProjectiveSpace, p, q, method::QRInverseRetraction)
+
+Compute the inverse retraction for the [`ProjectionInverseRetraction`](@ref) $𝔽ℙ^n$,
+[`PolarRetraction`](@ref), and [`QRInverseRetraction`](@ref)
+[`AbstractProjectiveSpace`](@ref) manifold `M`, i.e.,
+
+````math
+\operatorname{retr}_p^{-1} q = q \frac{1}{⟨p, q⟩_{\mathrm{F}}} - p,
+````
+where $⟨⋅, ⋅⟩_{\mathrm{F}}$ is the Frobenius inner product.
+
+Note that this inverse retraction is equivalent to that of [`Grassmann(n+1,1,𝔽)`](@ref),
+where the three inverse retractions in this case coincide.
+For $ℝℙ^n$, it is the same as the `ProjectionInverseRetraction` on the real
+[`Sphere`](@ref).
+"""
+inverse_retract(
+    ::AbstractProjectiveSpace,
+    p,
+    q,
+    ::Union{ProjectionInverseRetraction,PolarInverseRetraction,QRInverseRetraction},
+)
+
 function inverse_retract!(
     ::AbstractProjectiveSpace,
     X,
@@ -222,9 +289,41 @@ function inverse_retract!(
     return X
 end
 
+@doc raw"""
+    isapprox(M::AbstractProjectiveSpace, p, q; kwargs...)
+
+Check that points `p` and `q` on the [`AbstractProjectiveSpace`](@ref) `M`$=𝔽ℙ^n$ are
+members of the same equivalence class, i.e. that $p = q λ$ for some element $λ ∈ 𝔽$ with
+unit absolute value, that is, $|λ| = 1$.
+This is equivalent to the Riemannian
+[`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) being 0.
+"""
 function Base.isapprox(::AbstractProjectiveSpace, p, q; kwargs...)
     return isapprox(abs2(dot(p, q)), 1; kwargs...)
 end
+
+@doc raw"""
+    log(M::AbstractProjectiveSpace, p, q)
+
+Compute the logarithmic map on [`AbstractProjectiveSpace`](@ref) `M`$ = 𝔽ℙ^n$,
+i.e. the tangent vector whose corresponding [`geodesic`](@ref) starting from `p`
+reaches `q` after time 1 on `M`. The formula reads
+
+````math
+\log_p q = (q λ - \cos θ p) \frac{θ}{\sin θ},
+````
+where $θ = \arccos|⟨q, p⟩_{\mathrm{F}}|$ is the [`distance`](@ref) between $p$ and $q$,
+$⟨⋅, ⋅⟩_{\mathrm{F}}$ is the Frobenius inner product, and
+$λ = \frac{⟨q, p⟩_{\mathrm{F}}}{|⟨q, p⟩_{\mathrm{F}}|} ∈ 𝔽$ is the unit scalar that
+minimizes $d_{𝔽^{n+1}}(p - q λ)$.
+That is, $q λ$ is the member of the equivalence class $[q]$ that is closest to $p$ in the
+embedding.
+As a result, $\exp_p \circ \log_p \colon q ↦ q λ$.
+
+The logarithmic maps for the real [`AbstractSphere`](@ref) $𝕊^n$ and the real projective
+space $ℝℙ^n$ are identical when $p$ and $q$ are in the same hemisphere.
+"""
+log(::AbstractProjectiveSpace, p, q)
 
 function log!(M::AbstractProjectiveSpace, X, p, q)
     z = dot(q, p)
@@ -289,7 +388,35 @@ function normal_tvector_distribution(M::ProjectiveSpace{n,ℝ}, p, σ) where {n}
     return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project!, p)
 end
 
+@doc raw"""
+    project(M::AbstractProjectiveSpace, p)
+
+Orthogonally project the point `p` from the embedding onto the
+[`AbstractProjectiveSpace`](@ref) `M`:
+````math
+\operatorname{proj}(p) = \frac{p}{\lVert p \rVert}_{\mathrm{F}},
+````
+where $\lVert\cdot\rVert$ denotes the Frobenius norm $\lVert p \rVert_{\mathrm{F}}$.
+This is identical to projection to the [`AbstractSphere`](@ref).
+"""
+project(::AbstractProjectiveSpace, ::Any)
+
 project!(::AbstractProjectiveSpace, q, p) = (q .= p ./ norm(p))
+
+@doc raw"""
+    project(M::AbstractProjectiveSpace, p, X)
+
+Orthogonally project the point `X` onto the tangent space at `p` on the
+[`AbstractProjectiveSpace`](@ref) `M`:
+
+````math
+\operatorname{proj}_p (X) = X - p⟨p, X⟩_{\mathrm{F}},
+````
+where $⟨⋅, ⋅⟩_{\mathrm{F}}$ denotes the Frobenius inner product.
+For the real [`AbstractSphere`](@ref) and `AbstractProjectiveSpace`, this projection is the
+same.
+"""
+project(::AbstractProjectiveSpace, ::Any, ::Any)
 
 project!(::AbstractProjectiveSpace, Y, p, X) = (Y .= X .- p .* dot(p, X))
 
@@ -349,17 +476,7 @@ then projecting it onto the tangent space at `q`.
 """
 vector_transport_to(::AbstractProjectiveSpace, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
-@doc raw"""
-    vector_transport_direction(M::AbstractProjectiveSpace, p, X, d, method::ParallelTransport)
-
-Parallel transport a vector `X` from the tangent space at a point `p` on the
-[`AbstractProjectiveSpace`](@ref) `M` along the geodesic in the direction indicated by the
-tangent vector `d`.
-
-This implementation assumes that $d = \log_p(\exp_p d)$, i.e. that
-$\lVert d \rVert < \frac{π}{2}$.
 """
-vector_transport_direction(::AbstractProjectiveSpace, p, X, d, ::ParallelTransport)
 
 function vector_transport_to!(::AbstractProjectiveSpace, Y, p, X, q, ::ParallelTransport)
     z = dot(q, p)
@@ -376,6 +493,21 @@ function vector_transport_to!(M::AbstractProjectiveSpace, Y, p, X, q, ::Projecti
     project!(M, Y, q, X)
     return Y
 end
+
+@doc raw"""
+    vector_transport_direction(M::AbstractProjectiveSpace, p, X, d, method::ParallelTransport)
+
+Parallel transport a vector `X` from the tangent space at a point `p` on the
+[`AbstractProjectiveSpace`](@ref) `M` along the [`geodesic`](@ref) in the direction
+indicated by the tangent vector `d`, i.e.
+````math
+P_{exp_p (d) ← p}(X) = X - \left(p \frac{\sin θ}{θ} + d \frac{1 - \cos θ}{θ^2}\right) ⟨d, X⟩_p,
+````
+where $θ = \lVert d \rVert$, and $⟨⋅, ⋅⟩_p$ is the [`inner`](@ref) product at the point $p$.
+For the real projective space, this is equivalent to the same vector transport on the real
+[`AbstractSphere`](@ref).
+"""
+vector_transport_direction(::AbstractProjectiveSpace, ::Any, ::Any, ::Any, ::ParallelTransport)
 
 function vector_transport_direction!(
     M::AbstractProjectiveSpace,
