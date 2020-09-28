@@ -459,19 +459,22 @@ end
     vector_transport_to(M::AbstractProjectiveSpace, p, X, q, method::ParallelTransport)
 
 Parallel transport a vector `X` from the tangent space at a point `p` on the
-[`AbstractProjectiveSpace`](@ref) `M` along the `shortest_geodesic`](@ref) to the tangent
-space at another point `q`.
-"""
-vector_transport_to(::AbstractProjectiveSpace, p, X, q, ::ParallelTransport)
+[`AbstractProjectiveSpace`](@ref) `M`$=𝔽ℙ^n$ to the tangent space at another point `q`.
 
-@doc raw"""
-    vector_transport_to(M::AbstractProjectiveSpace, p, X, q, method::ProjectionTransport)
-
-Transport a vector `X` from the tangent space at `p` on the
-[`AbstractProjectiveSpace`](@ref) `M` by interpreting it as an element of the embedding and
-then projecting it onto the tangent space at `q`.
+This implementation proceeds by transporting $X$ to $T_{q λ} M$ using the same approach as
+[`vector_transport_direction`](@ref), where
+$λ = \frac{⟨q, p⟩_{\mathrm{F}}}{|⟨q, p⟩_{\mathrm{F}}|} ∈ 𝔽$ is the unit scalar that takes
+$q$ to the member $q λ$ of its equivalence class $[q]$ closest to $p$ in the embedding.
+It then maps the transported vector from $T_{q λ} M$ to $T_{q} M$.
+The resulting transport to $T_{q} M$ is
+````math
+P_{q ← p}(X) = \left(X - \left(p \frac{\sin θ}{θ} + d \frac{1 - \cos θ}{θ^2}\right) ⟨d, X⟩_p\right) \overline{λ},
+````
+where $d = \log_p q$ is the direction of the transport, $θ = \lVert d \rVert_p$ is the
+[`distance`](@ref) between $p$ and $q$, and $\overline{⋅}$ denotes complex or quaternionic
+conjugation.
 """
-vector_transport_to(::AbstractProjectiveSpace, ::Any, ::Any, ::Any, ::ProjectionTransport)
+vector_transport_to(::AbstractProjectiveSpace, ::Any, ::Any, ::Any, ::ParallelTransport)
 
 function vector_transport_to!(::AbstractProjectiveSpace, Y, p, X, q, ::ParallelTransport)
     z = dot(q, p)
