@@ -255,17 +255,17 @@ eval(
     inverse_retract(M::AbstractProjectiveSpace, p, q, method::PolarInverseRetraction)
     inverse_retract(M::AbstractProjectiveSpace, p, q, method::QRInverseRetraction)
 
-Compute the inverse retraction for the [`ProjectionInverseRetraction`](@ref) $𝔽ℙ^n$,
-[`PolarRetraction`](@ref), and [`QRInverseRetraction`](@ref)
-[`AbstractProjectiveSpace`](@ref) manifold `M`, i.e.,
-
+Compute the equivalent inverse retraction [`ProjectionInverseRetraction`](@ref),
+[`PolarInverseRetraction`](@ref), and [`QRInverseRetraction`](@ref) on the
+[`AbstractProjectiveSpace`](@ref) manifold `M`$=𝔽ℙ^n$, i.e.
 ````math
 \operatorname{retr}_p^{-1} q = q \frac{1}{⟨p, q⟩_{\mathrm{F}}} - p,
 ````
 where $⟨⋅, ⋅⟩_{\mathrm{F}}$ is the Frobenius inner product.
 
-Note that this inverse retraction is equivalent to that of [`Grassmann(n+1,1,𝔽)`](@ref),
-where the three inverse retractions in this case coincide.
+Note that this inverse retraction is equivalent to the three corresponding inverse
+retractions on [`Grassmann(n+1,1,𝔽)`](@ref), where the three inverse retractions in this
+case coincide.
 For $ℝℙ^n$, it is the same as the `ProjectionInverseRetraction` on the real
 [`Sphere`](@ref).
 """
@@ -425,6 +425,29 @@ i.e., the representation size of the embedding.
 """
 @generated representation_size(::ArrayProjectiveSpace{N}) where {N} = size_to_tuple(N)
 @generated representation_size(::ProjectiveSpace{N}) where {N} = (N + 1,)
+
+@doc raw"""
+    retract(M::AbstractProjectiveSpace, p, X, method::ProjectionRetraction)
+    retract(M::AbstractProjectiveSpace, p, X, method::PolarRetraction)
+    retract(M::AbstractProjectiveSpace, p, X, method::QRRetraction)
+
+Compute the equivalent retraction [`ProjectionRetraction`](@ref), [`PolarRetraction`](@ref),
+and [`QRRetraction`](@ref) on the [`AbstractProjectiveSpace`](@ref) manifold `M`$=𝔽ℙ^n$,
+i.e.
+````math
+\operatorname{retr}_p X = \operatorname{proj}(p + X).
+````
+
+Note that this retraction is equivalent to the three corresponding retractions on
+[`Grassmann(n+1,1,𝔽)`](@ref), where in this case they coincide.
+For $ℝℙ^n$, it is the same as the `ProjectionRetraction` on the real [`Sphere`](@ref).
+"""
+retract(
+    ::AbstractProjectiveSpace,
+    p,
+    X,
+    ::Union{ProjectionRetraction,PolarRetraction,QRRetraction},
+)
 
 function retract!(
     M::AbstractProjectiveSpace,
