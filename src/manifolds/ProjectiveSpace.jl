@@ -197,13 +197,7 @@ to $(1, 0, …, 0)$.
 """
 get_coordinates(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates!(
-    M::AbstractProjectiveSpace{ℝ},
-    Y,
-    p,
-    X,
-    ::DefaultOrthonormalBasis,
-)
+function get_coordinates!(M::AbstractProjectiveSpace{ℝ}, Y, p, X, ::DefaultOrthonormalBasis)
     n = manifold_dimension(M)
     pend, Xend = view(p, 2:(n + 1)), view(X, 2:(n + 1))
     factor = X[1] / (1 + p[1]) # 2 (q'X)/(q'q)
@@ -223,13 +217,7 @@ where $q = p + (1, 0, …, 0)$.
 """
 get_vector(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_vector!(
-    M::AbstractProjectiveSpace{ℝ},
-    Y,
-    p,
-    X,
-    ::DefaultOrthonormalBasis,
-)
+function get_vector!(M::AbstractProjectiveSpace{ℝ}, Y, p, X, ::DefaultOrthonormalBasis)
     n = manifold_dimension(M)
     pend = view(p, 2:(n + 1))
     Y1 = dot(pend, X)
@@ -507,7 +495,13 @@ where $θ = \lVert d \rVert$, and $⟨⋅, ⋅⟩_p$ is the [`inner`](@ref) prod
 For the real projective space, this is equivalent to the same vector transport on the real
 [`AbstractSphere`](@ref).
 """
-vector_transport_direction(::AbstractProjectiveSpace, ::Any, ::Any, ::Any, ::ParallelTransport)
+vector_transport_direction(
+    ::AbstractProjectiveSpace,
+    ::Any,
+    ::Any,
+    ::Any,
+    ::ParallelTransport,
+)
 
 function vector_transport_direction!(
     M::AbstractProjectiveSpace,

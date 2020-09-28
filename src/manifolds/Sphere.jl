@@ -215,13 +215,7 @@ to $(1, 0, …, 0)$.
 """
 get_coordinates(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates!(
-    M::AbstractSphere{ℝ},
-    Y,
-    p,
-    X,
-    ::DefaultOrthonormalBasis,
-)
+function get_coordinates!(M::AbstractSphere{ℝ}, Y, p, X, ::DefaultOrthonormalBasis)
     n = manifold_dimension(M)
     pend, Xend = view(p, 2:(n + 1)), view(X, 2:(n + 1))
     factor = X[1] / (1 + p[1]) # 2 (q'X)/(q'q)
@@ -241,13 +235,7 @@ where $q = p + (1, 0, …, 0)$.
 """
 get_vector(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_vector!(
-    M::AbstractSphere{ℝ},
-    Y,
-    p,
-    X,
-    ::DefaultOrthonormalBasis,
-)
+function get_vector!(M::AbstractSphere{ℝ}, Y, p, X, ::DefaultOrthonormalBasis)
     n = manifold_dimension(M)
     pend = view(p, 2:(n + 1))
     Y1 = dot(pend, X)

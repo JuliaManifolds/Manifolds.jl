@@ -122,10 +122,10 @@ include("utils.jl")
         @test repr(M) == "Sphere(2, ℍ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3},ℍ}
         @test representation_size(M) == (3,)
-        p = [Quaternion(1.0), Quaternion(1.0im), Quaternion(0.0,0.0,-1.0,0.0)]
+        p = [Quaternion(1.0), Quaternion(1.0im), Quaternion(0.0, 0.0, -1.0, 0.0)]
         q = project(M, p)
         @test is_manifold_point(M, q)
-        Y = [Quaternion(2.0), Quaternion(1.0im), Quaternion(0.0,0.0,20.0,0.0)]
+        Y = [Quaternion(2.0), Quaternion(1.0im), Quaternion(0.0, 0.0, 20.0, 0.0)]
         X = project(M, q, Y)
         @test is_tangent_vector(M, q, X, true; atol = 10^(-14))
     end
