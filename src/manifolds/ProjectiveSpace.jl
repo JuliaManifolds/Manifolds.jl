@@ -14,7 +14,7 @@ The projective space $𝔽ℙ^n$ is the manifold of all lines in $𝔽^{n+1}$.
 The default representation is in the embedding, i.e. as unit norm vectors in
 $𝔽^{n+1}$:
 ````math
-𝔽ℙ^n := \bigl\{ [p] ⊂ 𝔽^{n+1} \ \big|\ \lVert p \rVert = 1, λ ∈ 𝔽, |λ| = 1, p ∼ p λ \bigr\},
+𝔽ℙ^n := \bigl\{ [p] ⊂ 𝔽^{n+1} \ \big|\ ‖p‖ = 1, λ ∈ 𝔽, |λ| = 1, p ∼ p λ \bigr\},
 ````
 where $[p]$ is an equivalence class of points $p$, and $∼$ indicates equivalence.
 For example, the real projective space $ℝℙ^n$ is represented as the unit sphere $𝕊^n$, where
@@ -49,10 +49,10 @@ The default representation is in the embedding, i.e. as unit (Frobenius) norm ma
 $𝔽^{n₁,n₂,…,nᵢ}$:
 
 ````math
-𝔽ℙ^{n_1, n_2, …, n_i} := \bigl\{ [p] ⊂ 𝔽^{n_1, n_2, …, n_i} \ \big|\ \lVert p \rVert_{\mathrm{F}} = 1, λ ∈ 𝔽, |λ| = 1, p ∼ p λ \bigr\}.
+𝔽ℙ^{n_1, n_2, …, n_i} := \bigl\{ [p] ⊂ 𝔽^{n_1, n_2, …, n_i} \ \big|\ ‖p‖_{\mathrm{F}} = 1, λ ∈ 𝔽, |λ| = 1, p ∼ p λ \bigr\}.
 ````
 where $[p]$ is an equivalence class of points $p$, $\sim$ indicates equivalence, and
-$\lVert ⋅ \rVert_{\mathrm{F}}$ is the Frobenius norm.
+$‖⋅‖_{\mathrm{F}}$ is the Frobenius norm.
 Note that unlike [`ProjectiveSpace`](@ref), the argument for `ArrayProjectiveSpace`
 is given by the size of the embedding.
 This means that [`ProjectiveSpace(2)`](@ref) and `ArrayProjectiveSpace(3)` are the same
@@ -191,10 +191,10 @@ end
 Represent the tangent vector `X` at point `p` from the [`AbstractProjectiveSpace`](@ref) `M`
 in an orthonormal basis by rotating the vector `X` to `Y`:
 ````math
-\begin{pmatrix} 0 \\ Y \end{pmatrix} = \left(2\frac{q q^\mathrm{H}}{\lVert q \rVert_{\mathrm{F}}^2} - I\right) X,
+\begin{pmatrix} 0 \\ Y \end{pmatrix} = \left(2\frac{q q^\mathrm{H}}{‖q‖_{\mathrm{F}}^2} - I\right) X,
 ````
 where $q = p λ + (1, 0, …, 0)$, $λ=\frac{\overline{p_1}}{|p_1|}$,
-$\lVert ⋅ \rVert_{\mathrm{F}}$ denotes the Frobenius norm, and $\overline{⋅}$ denotes
+$‖⋅‖_{\mathrm{F}}$ denotes the Frobenius norm, and $\overline{⋅}$ denotes
 complex or quaternionic conjugation.
 """
 get_coordinates(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
@@ -216,10 +216,10 @@ end
 Convert a one-dimensional vector of coefficients `X` in the basis `B` of the tangent space
 at `p` on the [`AbstractProjectiveSpace`](@ref) `M` to a tangent vector `Y` at `p`, given by
 ````math
-Y = \left(2\frac{q q^\mathrm{H}}{\lVert q \rVert_{\mathrm{F}}^2} - I\right) \begin{pmatrix} 0 \\ X \end{pmatrix},
+Y = \left(2\frac{q q^\mathrm{H}}{‖q‖_{\mathrm{F}}^2} - I\right) \begin{pmatrix} 0 \\ X \end{pmatrix},
 ````
 where $q = p λ + (1, 0, …, 0)$, $λ=\frac{\overline{p_1}}{|p_1|}$,
-$\lVert ⋅ \rVert_{\mathrm{F}}$ denotes the Frobenius norm, and $\overline{⋅}$ denotes
+$‖⋅‖_{\mathrm{F}}$ denotes the Frobenius norm, and $\overline{⋅}$ denotes
 complex or quaternionic conjugation.
 """
 get_vector(::AbstractProjectiveSpace, p, X, ::DefaultOrthonormalBasis{ℝ})
@@ -391,9 +391,9 @@ end
 Orthogonally project the point `p` from the embedding onto the
 [`AbstractProjectiveSpace`](@ref) `M`:
 ````math
-\operatorname{proj}(p) = \frac{p}{\lVert p \rVert}_{\mathrm{F}},
+\operatorname{proj}(p) = \frac{p}{‖p‖}_{\mathrm{F}},
 ````
-where $\lVert ⋅ \rVert_{\mathrm{F}}$ denotes the Frobenius norm.
+where $‖⋅‖_{\mathrm{F}}$ denotes the Frobenius norm.
 This is identical to projection onto the [`AbstractSphere`](@ref).
 """
 project(::AbstractProjectiveSpace, ::Any)
@@ -493,7 +493,7 @@ The resulting transport to $T_{q} M$ is
 ````math
 \mathcal{P}_{q ← p}(X) = \left(X - \left(p \frac{\sin θ}{θ} + d \frac{1 - \cos θ}{θ^2}\right) ⟨d, X⟩_p\right) \overline{λ},
 ````
-where $d = \log_p q$ is the direction of the transport, $θ = \lVert d \rVert_p$ is the
+where $d = \log_p q$ is the direction of the transport, $θ = ‖d‖_p$ is the
 [`distance`](@ref) between $p$ and $q$, and $\overline{⋅}$ denotes complex or quaternionic
 conjugation.
 """
@@ -524,7 +524,7 @@ indicated by the tangent vector `d`, i.e.
 ````math
 \mathcal{P}_{\exp_p (d) ← p}(X) = X - \left(p \frac{\sin θ}{θ} + d \frac{1 - \cos θ}{θ^2}\right) ⟨d, X⟩_p,
 ````
-where $θ = \lVert d \rVert$, and $⟨⋅, ⋅⟩_p$ is the [`inner`](@ref) product at the point $p$.
+where $θ = ‖d‖$, and $⟨⋅, ⋅⟩_p$ is the [`inner`](@ref) product at the point $p$.
 For the real projective space, this is equivalent to the same vector transport on the real
 [`AbstractSphere`](@ref).
 """
