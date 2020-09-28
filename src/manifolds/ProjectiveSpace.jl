@@ -202,10 +202,11 @@ get_coordinates(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
 function get_coordinates!(M::AbstractProjectiveSpace, Y, p, X, ::DefaultOrthonormalBasis{ℝ})
     m = length(p)
-    p1 = p[1]
-    λ = sign(p1')
+    z = p[1]' # p'[1,0,…,0]
+    cosθ = abs(z)
+    λ = sign_from_abs(z, cosθ)
     pend, Xend = view(p, 2:m), view(X, 2:m)
-    factor = λ * X[1] / (1 + abs(p1)) # 2 λ (q'X)/(q'q)
+    factor = λ * X[1] / (1 + cosθ) # 2 λ (q'X)/(q'q)
     Y .= pend .* factor .- Xend
     return Y
 end
@@ -225,12 +226,13 @@ get_vector(::AbstractProjectiveSpace, p, X, ::DefaultOrthonormalBasis{ℝ})
 
 function get_vector!(M::AbstractProjectiveSpace, Y, p, X, ::DefaultOrthonormalBasis{ℝ})
     m = length(p)
-    p1 = p[1]
-    λ = sign(p1)
+    z = p[1] # [1,0,…,0]'p
+    cosθ = abs(z)
+    λ = sign_from_abs(z, cosθ)
     pend = view(p, 2:m)
     pX = dot(pend, X)
     Y[1] = λ * pX
-    factor = pX / (1 + abs(p1)) # 2 (q'X)/(q'q)
+    factor = pX / (1 + cosθ) # 2 (q'X)/(q'q)
     Y[2:m] .= pend .* factor .- X
     return Y
 end
