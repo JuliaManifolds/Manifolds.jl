@@ -188,42 +188,50 @@ function get_basis(::ProjectiveSpace{n,ℝ}, p, B::DiagonalizingOrthonormalBasis
 end
 
 @doc raw"""
-    get_coordinates(M::AbstractProjectiveSpace{ℝ}, p, X, B::DefaultOrthonormalBasis)
+    get_coordinates(M::AbstractProjectiveSpace, p, X, B::DefaultOrthonormalBasis{ℝ})
 
 Represent the tangent vector `X` at point `p` from the [`AbstractProjectiveSpace`](@ref) `M`
-in an orthonormal basis by rotating the vector `X` using the rotation matrix
-$2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$, which takes `p`
-to $(1, 0, …, 0)$.
+in an orthonormal basis by rotating the vector `X` to `Y`:
+````math
+\begin{pmatrix} 0 \\ Y \end{pmatrix} = \left(2\frac{q q^\mathrm{H}}{q^\mathrm{H} q} - I\right) X,
+````
+where $q = p λ + (1, 0, …, 0)$, where $λ=\frac{\overline{p_1}}{|p_1|}$, and $\overline{⋅}$
+denotes complex or quaternionic conjugation.
 """
 get_coordinates(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates!(M::AbstractProjectiveSpace{ℝ}, Y, p, X, ::DefaultOrthonormalBasis)
-    n = manifold_dimension(M)
-    pend, Xend = view(p, 2:(n + 1)), view(X, 2:(n + 1))
-    factor = X[1] / (1 + p[1]) # 2 (q'X)/(q'q)
+function get_coordinates!(M::AbstractProjectiveSpace, Y, p, X, ::DefaultOrthonormalBasis{ℝ})
+    m = length(p)
+    p1 = p[1]
+    λ = sign(p1')
+    pend, Xend = view(p, 2:m), view(X, 2:m)
+    factor = λ * X[1] / (1 + abs(p1)) # 2 λ (q'X)/(q'q)
     Y .= pend .* factor .- Xend
     return Y
 end
 
 @doc raw"""
-    get_vector(M::AbstractProjectiveSpace{ℝ}, p, X, B::DefaultOrthonormalBasis)
+    get_vector(M::AbstractProjectiveSpace, p, X, B::DefaultOrthonormalBasis{ℝ})
 
 Convert a one-dimensional vector of coefficients `X` in the basis `B` of the tangent space
 at `p` on the [`AbstractProjectiveSpace`](@ref) `M` to a tangent vector `Y` at `p`, given by
 ````math
-Y = \left(2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I\right) \begin{pmatrix} 0 \\ X \end{pmatrix},
+Y = \left(2\frac{q q^\mathrm{H}}{q^\mathrm{H} q} - I\right) \begin{pmatrix} 0 \\ X \end{pmatrix},
 ````
-where $q = p + (1, 0, …, 0)$.
+where $q = p λ + (1, 0, …, 0)$, $λ=\frac{\overline{p_1}}{|p_1|}$, and $\overline{⋅}$
+denotes complex or quaternionic conjugation.
 """
-get_vector(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
+get_vector(::AbstractProjectiveSpace, p, X, ::DefaultOrthonormalBasis{ℝ})
 
-function get_vector!(M::AbstractProjectiveSpace{ℝ}, Y, p, X, ::DefaultOrthonormalBasis)
-    n = manifold_dimension(M)
-    pend = view(p, 2:(n + 1))
-    Y1 = dot(pend, X)
-    Y[1] = Y1
-    factor = Y1 / (1 + p[1])
-    Y[2:(n + 1)] .= pend .* factor .- X
+function get_vector!(M::AbstractProjectiveSpace, Y, p, X, ::DefaultOrthonormalBasis{ℝ})
+    m = length(p)
+    p1 = p[1]
+    λ = sign(p1)
+    pend = view(p, 2:m)
+    pX = dot(pend, X)
+    Y[1] = λ * pX
+    factor = pX / (1 + abs(p1)) # 2 (q'X)/(q'q)
+    Y[2:m] .= pend .* factor .- X
     return Y
 end
 

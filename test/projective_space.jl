@@ -159,6 +159,7 @@ include("utils.jl")
                 ],
                 test_forward_diff = false,
                 test_reverse_diff = false,
+                basis_types_to_from = (DefaultOrthonormalBasis(),),
                 test_vee_hat = false,
                 retraction_methods = [
                     ProjectionRetraction(),
@@ -268,6 +269,7 @@ include("utils.jl")
                 ],
                 test_forward_diff = false,
                 test_reverse_diff = false,
+                basis_types_to_from = (DefaultOrthonormalBasis(),),
                 test_vee_hat = false,
                 retraction_methods = [
                     ProjectionRetraction(),

@@ -240,7 +240,7 @@ function get_vector!(M::AbstractSphere{ℝ}, Y, p, X, ::DefaultOrthonormalBasis)
     pend = view(p, 2:(n + 1))
     Y1 = dot(pend, X)
     Y[1] = Y1
-    factor = Y1 / (1 + p[1])
+    factor = Y1 / (1 + p[1]) # 2 (q'X)/(q'q)
     Y[2:(n + 1)] .= pend .* factor .- X
     return Y
 end
