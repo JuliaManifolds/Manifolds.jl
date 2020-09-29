@@ -377,7 +377,7 @@ end
 function retract!(::Grassmann{N,K}, q, p, X, ::QRRetraction) where {N,K}
     qrfac = qr(p + X)
     d = diag(qrfac.R)
-    D = Diagonal(sign.(d .+ 1//2))
+    D = Diagonal(sign.(d .+ 1 // 2))
     mul!(q, Array(qrfac.Q), D)
     return q
 end
