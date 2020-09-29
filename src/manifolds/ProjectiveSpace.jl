@@ -189,7 +189,7 @@ end
     get_coordinates(M::AbstractProjectiveSpace, p, X, B::DefaultOrthonormalBasis{ℝ})
 
 Represent the tangent vector `X` at point `p` from the [`AbstractProjectiveSpace`](@ref) `M`
-in an orthonormal basis by rotating the vector `X` to `Y`:
+in an orthonormal basis by reflecting the vector `X` to `Y`:
 ````math
 \begin{pmatrix} 0 \\ Y \end{pmatrix} = \left(2\frac{q q^\mathrm{H}}{‖q‖_{\mathrm{F}}^2} - I\right) X,
 ````

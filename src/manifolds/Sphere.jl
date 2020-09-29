@@ -209,7 +209,7 @@ end
     get_coordinates(M::AbstractSphere{ℝ}, p, X, B::DefaultOrthonormalBasis)
 
 Represent the tangent vector `X` at point `p` from the [`AbstractSphere`](@ref) `M` in
-an orthonormal basis by rotating the vector `X` using the rotation matrix
+an orthonormal basis by reflecting the vector `X` using the Householder matrix
 $2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$, which takes `p`
 to $(1, 0, …, 0)$.
 """
