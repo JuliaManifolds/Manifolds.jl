@@ -328,7 +328,8 @@ reaches `q` after time 1 on `M`. The formula reads
 ````math
 \log_p q = (q λ - \cos θ p) \frac{θ}{\sin θ},
 ````
-where $θ = \arccos|⟨q, p⟩_{\mathrm{F}}|$ is the [`distance`](@ref) between $p$ and $q$,
+where $θ = \arccos|⟨q, p⟩_{\mathrm{F}}|$ is the
+[`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) between $p$ and $q$,
 $⟨⋅, ⋅⟩_{\mathrm{F}}$ is the Frobenius inner product, and
 $λ = \frac{⟨q, p⟩_{\mathrm{F}}}{|⟨q, p⟩_{\mathrm{F}}|} ∈ 𝔽$ is the unit scalar that
 minimizes $d_{𝔽^{n+1}}(p - q λ)$.
@@ -503,9 +504,10 @@ Parallel transport a vector `X` from the tangent space at a point `p` on the
 [`AbstractProjectiveSpace`](@ref) `M`$=𝔽ℙ^n$ to the tangent space at another point `q`.
 
 This implementation proceeds by transporting $X$ to $T_{q λ} M$ using the same approach as
-[`vector_transport_direction`](@ref), where
-$λ = \frac{⟨q, p⟩_{\mathrm{F}}}{|⟨q, p⟩_{\mathrm{F}}|} ∈ 𝔽$ is the unit scalar that takes
-$q$ to the member $q λ$ of its equivalence class $[q]$ closest to $p$ in the embedding.
+[`vector_transport_direction`](@ref vector_transport_direction(::AbstractProjectiveSpace, p, X, d, ::ParallelTransport)),
+where $λ = \frac{⟨q, p⟩_{\mathrm{F}}}{|⟨q, p⟩_{\mathrm{F}}|} ∈ 𝔽$ is the unit scalar that
+takes $q$ to the member $q λ$ of its equivalence class $[q]$ closest to $p$ in the
+embedding.
 It then maps the transported vector from $T_{q λ} M$ to $T_{q} M$.
 The resulting transport to $T_{q} M$ is
 ````math
