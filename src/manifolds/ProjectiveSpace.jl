@@ -202,7 +202,13 @@ formula for $Y$ is
 """
 get_coordinates(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates!(M::AbstractProjectiveSpace{𝔽}, Y, p, X, ::DefaultOrthonormalBasis{ℝ}) where {𝔽}
+function get_coordinates!(
+    M::AbstractProjectiveSpace{𝔽},
+    Y,
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ},
+) where {𝔽}
     n = div(manifold_dimension(M), real_dimension(𝔽))
     z = p[1]
     cosθ = abs(z)
@@ -231,7 +237,13 @@ Y = \left(X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\
 """
 get_vector(::AbstractProjectiveSpace, p, X, ::DefaultOrthonormalBasis{ℝ})
 
-function get_vector!(M::AbstractProjectiveSpace{𝔽}, Y, p, X, ::DefaultOrthonormalBasis{ℝ}) where {𝔽}
+function get_vector!(
+    M::AbstractProjectiveSpace{𝔽},
+    Y,
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ},
+) where {𝔽}
     n = div(manifold_dimension(M), real_dimension(𝔽))
     z = p[1]
     cosθ = abs(z)
