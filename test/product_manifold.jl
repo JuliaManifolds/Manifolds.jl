@@ -616,60 +616,14 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         p = ProductRepr([1.0, 0.0, 0.0], [1.0, 0.0])
         B = DefaultOrthonormalBasis()
         Bc = get_basis(Mse, p, B)
-        if VERSION >= v"1.6.0-DEV.430"
-            @test sprint(show, "text/plain", Bc) == """
-            DefaultOrthonormalBasis(ℝ) for a product manifold
-            Basis for component 1:
-            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
-             E1 =
-              3-element Vector{Int64}:
-               0
-               1
-               0
-             E2 =
-              3-element Vector{Int64}:
-               0
-               0
-               1
-            Basis for component 2:
-            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
-             E1 =
-              2-element Vector{Float64}:
-               1.0
-               0.0
-             E2 =
-              2-element Vector{Float64}:
-               0.0
-               1.0
-            """
-        else
-            @test sprint(show, "text/plain", Bc) == """
-            DefaultOrthonormalBasis(ℝ) for a product manifold
-            Basis for component 1:
-            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
-             E1 =
-              3-element Array{Int64,1}:
-               0
-               1
-               0
-             E2 =
-              3-element Array{Int64,1}:
-               0
-               0
-               1
-            Basis for component 2:
-            DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
-             E1 =
-              2-element Array{Float64,1}:
-               1.0
-               0.0
-             E2 =
-              2-element Array{Float64,1}:
-               0.0
-               1.0
-            """
-        end
-
+        Bc_components_s = sprint.(show, "text/plain", Bc.data.parts)
+        @test sprint(show, "text/plain", Bc) == """
+        DefaultOrthonormalBasis(ℝ) for a product manifold
+        Basis for component 1:
+        $(Bc_components_s[1])
+        Basis for component 2:
+        $(Bc_components_s[2])
+        """
     end
 
     @testset "Basis-related errors" begin

@@ -22,6 +22,22 @@ computed from $x = cos(θ)$.
     end
 end
 
+@doc raw"""
+    nzsign(z[, absz])
+
+Compute a modified `sign(z)` that is always nonzero, i.e. where
+````math
+\operatorname(nzsign)(z) = \begin{cases}
+    1 & \text{if } z = 0\\
+    \frac{z}{|z|} & \text{otherwise}
+\end{cases}
+````
+"""
+@inline function nzsign(z, absz = abs(z))
+    psignz = z / absz
+    return ifelse(iszero(absz), one(psignz), psignz)
+end
+
 allocate(p, s::Size{S}) where {S} = similar(p, S...)
 allocate(p::StaticArray, s::Size{S}) where {S} = similar(p, maybesize(s))
 allocate(p, ::Type{T}, s::Size{S}) where {S,T} = similar(p, T, S...)

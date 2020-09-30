@@ -40,6 +40,7 @@ makedocs(
                 "Oblique manifold" => "manifolds/oblique.md",
                 "Probability simplex" => "manifolds/probabilitysimplex.md",
                 "Positive numbers" => "manifolds/positivenumbers.md",
+                "Projective space" => "manifolds/projectivespace.md",
                 "Rotations" => "manifolds/rotations.md",
                 "Skew-symmetric matrices" => "manifolds/skewsymmetric.md",
                 "Spectrahedron" => "manifolds/spectrahedron.md",

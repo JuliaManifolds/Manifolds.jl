@@ -10,6 +10,7 @@ using LinearAlgebra
 using Distributions
 using DoubleFloats
 using ForwardDiff
+using Quaternions
 using Random
 using ReverseDiff
 using StaticArrays

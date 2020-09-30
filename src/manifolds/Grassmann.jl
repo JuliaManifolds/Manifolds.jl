@@ -90,7 +90,7 @@ the [`Grassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
-$\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ the $k × k$ zero natrix.
+$\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ the $k × k$ zero matrix.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
 function check_tangent_vector(
@@ -377,7 +377,7 @@ end
 function retract!(::Grassmann{N,K}, q, p, X, ::QRRetraction) where {N,K}
     qrfac = qr(p + X)
     d = diag(qrfac.R)
-    D = Diagonal(sign.(d .+ 1//2))
+    D = Diagonal(sign.(d .+ 1 // 2))
     mul!(q, Array(qrfac.Q), D)
     return q
 end
