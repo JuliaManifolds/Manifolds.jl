@@ -188,52 +188,58 @@ end
 @doc raw"""
     get_coordinates(M::AbstractProjectiveSpace, p, X, B::DefaultOrthonormalBasis{ℝ})
 
-Represent the tangent vector `X` at point `p` from the [`AbstractProjectiveSpace`](@ref) `M`
-in an orthonormal basis by reflecting the vector `X` to `Y`:
+Represent the tangent vector $X$ at point $p$ from the [`AbstractProjectiveSpace`](@ref)
+$M = 𝔽ℙ^n$ in an orthonormal basis by unitarily transforming the hyperplane containing $X$,
+whose normal is $p$, to the hyperplane whose normal is the $x$-axis.
+
+Given $q = p \overline{λ} + x$, where
+$λ = \frac{⟨x, p⟩_{\mathrm{F}}}{|⟨x, p⟩_{\mathrm{F}}|}$, $⟨⋅, ⋅⟩_{\mathrm{F}}$ denotes the
+Frobenius inner product, and $\overline{⋅}$ denotes complex or quaternionic conjugation, the
+formula for $Y$ is
 ````math
-\begin{pmatrix} 0 \\ Y \end{pmatrix} = \left(2\frac{q q^\mathrm{H}}{\lVert q \rVert_{\mathrm{F}}^2} - I\right) X,
+\begin{pmatrix}0 \\ Y\end{pmatrix} = \left(X - q\frac{2 ⟨q, X⟩_{\mathrm{F}}}{⟨q, q⟩_{\mathrm{F}}}\right)\overline{λ}.
 ````
-where $q = p λ + (1, 0, …, 0)$, $λ=\frac{\overline{p_1}}{|p_1|}$,
-$\lVert ⋅ \rVert_{\mathrm{F}}$ denotes the Frobenius norm, and $\overline{⋅}$ denotes
-complex or quaternionic conjugation.
 """
 get_coordinates(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates!(M::AbstractProjectiveSpace, Y, p, X, ::DefaultOrthonormalBasis{ℝ})
-    m = length(p)
-    z = p[1]' # p'[1,0,…,0]
+function get_coordinates!(M::AbstractProjectiveSpace{𝔽}, Y, p, X, ::DefaultOrthonormalBasis{ℝ}) where {𝔽}
+    n = div(manifold_dimension(M), real_dimension(𝔽))
+    z = p[1]
     cosθ = abs(z)
-    pend, Xend = view(p, 2:m), view(X, 2:m)
-    factor = λ * X[1] / (1 + cosθ) # 2 λ (q'X)/(q'q)
-    Y .= pend .* factor .- Xend
     λ = nzsign(z, cosθ)
+    pend, Xend = view(p, 2:(n + 1)), view(X, 2:(n + 1))
+    factor = λ' * X[1] / (1 + cosθ)
+    Y .= (Xend .- pend .* factor) .* λ'
     return Y
 end
 
 @doc raw"""
     get_vector(M::AbstractProjectiveSpace, p, X, B::DefaultOrthonormalBasis{ℝ})
 
-Convert a one-dimensional vector of coefficients `X` in the basis `B` of the tangent space
-at `p` on the [`AbstractProjectiveSpace`](@ref) `M` to a tangent vector `Y` at `p`, given by
+Convert a one-dimensional vector of coefficients $X$ in the basis `B` of the tangent space
+at $p$ on the [`AbstractProjectiveSpace`](@ref) $M=𝔽ℙ^n$ to a tangent vector $Y$ at $p$ by
+unitarily transforming the hyperplane containing $X$, whose normal is the $x$-axis, to the
+hyperplane whose normal is $p$.
+
+Given $q = p \overline{λ} + x$, where
+$λ = \frac{⟨x, p⟩_{\mathrm{F}}}{|⟨x, p⟩_{\mathrm{F}}|}$, $⟨⋅, ⋅⟩_{\mathrm{F}}$ denotes the
+Frobenius inner product, and $\overline{⋅}$ denotes complex or quaternionic conjugation, the
+formula for $Y$ is
 ````math
-Y = \left(2\frac{q q^\mathrm{H}}{\lVert q \rVert_{\mathrm{F}}^2} - I\right) \begin{pmatrix} 0 \\ X \end{pmatrix},
+Y = \left(X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\rangle_{\mathrm{F}}}{⟨q, q⟩_{\mathrm{F}}}\right) λ.
 ````
-where $q = p λ + (1, 0, …, 0)$, $λ=\frac{\overline{p_1}}{|p_1|}$,
-$\lVert ⋅ \rVert_{\mathrm{F}}$ denotes the Frobenius norm, and $\overline{⋅}$ denotes
-complex or quaternionic conjugation.
 """
 get_vector(::AbstractProjectiveSpace, p, X, ::DefaultOrthonormalBasis{ℝ})
 
-function get_vector!(M::AbstractProjectiveSpace, Y, p, X, ::DefaultOrthonormalBasis{ℝ})
-    m = length(p)
-    z = p[1] # [1,0,…,0]'p
+function get_vector!(M::AbstractProjectiveSpace{𝔽}, Y, p, X, ::DefaultOrthonormalBasis{ℝ}) where {𝔽}
+    n = div(manifold_dimension(M), real_dimension(𝔽))
+    z = p[1]
     cosθ = abs(z)
-    pend = view(p, 2:m)
     λ = nzsign(z, cosθ)
+    pend = view(p, 2:(n + 1))
     pX = dot(pend, X)
-    Y[1] = λ * pX
-    factor = pX / (1 + cosθ) # 2 (q'X)/(q'q)
-    Y[2:m] .= pend .* factor .- X
+    Y[1] = -λ * pX * λ
+    Y[2:(n + 1)] .= (X .- pend .* (pX / (1 + cosθ))) .* λ
     return Y
 end
 

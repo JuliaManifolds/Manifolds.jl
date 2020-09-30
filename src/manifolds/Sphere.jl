@@ -209,17 +209,25 @@ end
     get_coordinates(M::AbstractSphere{ℝ}, p, X, B::DefaultOrthonormalBasis)
 
 Represent the tangent vector `X` at point `p` from the [`AbstractSphere`](@ref) `M` in
-an orthonormal basis by reflecting the vector `X` using the Householder matrix
-$2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I$ where $q = p + (1, 0, …, 0)$, which takes `p`
-to $(1, 0, …, 0)$.
+an orthonormal basis by rotating the hyperplane containing `X` to a hyperplane whose
+normal is the $x$-axis.
+
+Given $q = p λ + x$, where $λ = \operatorname{sgn}(⟨x, p⟩)$, and $⟨⋅, ⋅⟩_{\mathrm{F}}$
+denotes the Frobenius inner product, the formula for $Y$ is
+````math
+\begin{pmatrix}0 \\ Y\end{pmatrix} = X - q\frac{2 ⟨q, X⟩_{\mathrm{F}}}{⟨q, q⟩_{\mathrm{F}}}.
+````
 """
 get_coordinates(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates!(M::AbstractSphere{ℝ}, Y, p, X, ::DefaultOrthonormalBasis)
+function get_coordinates!(M::AbstractSphere{ℝ}, Y, p, X, ::DefaultOrthonormalBasis{ℝ})
     n = manifold_dimension(M)
+    p1 = p[1]
+    cosθ = abs(p1)
+    λ = nzsign(p1, cosθ)
     pend, Xend = view(p, 2:(n + 1)), view(X, 2:(n + 1))
-    factor = X[1] / (1 + p[1]) # 2 (q'X)/(q'q)
-    Y .= pend .* factor .- Xend
+    factor = λ * X[1] / (1 + cosθ)
+    Y .= Xend .- pend .* factor
     return Y
 end
 
@@ -227,21 +235,28 @@ end
     get_vector(M::AbstractSphere{ℝ}, p, X, B::DefaultOrthonormalBasis)
 
 Convert a one-dimensional vector of coefficients `X` in the basis `B` of the tangent space
-at `p` on the [`AbstractSphere`](@ref) `M` to a tangent vector `Y` at `p`, given by
+at `p` on the [`AbstractSphere`](@ref) `M` to a tangent vector `Y` at `p` by rotating the
+hyperplane containing `X`, whose normal is the $x$-axis, to the hyperplane whose normal is
+`p`.
+
+Given $q = p λ + x$, where $λ = \operatorname{sgn}(⟨x, p⟩)$, and $⟨⋅, ⋅⟩_{\mathrm{F}}$
+denotes the Frobenius inner product, the formula for $Y$ is
 ````math
-Y = \left(2\frac{q q^\mathrm{T}}{q^\mathrm{T} q} - I\right) \begin{pmatrix} 0 \\ X \end{pmatrix},
+Y = X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\rangle_{\mathrm{F}}}{⟨q, q⟩_{\mathrm{F}}}.
 ````
-where $q = p + (1, 0, …, 0)$.
 """
 get_vector(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_vector!(M::AbstractSphere{ℝ}, Y, p, X, ::DefaultOrthonormalBasis)
+function get_vector!(M::AbstractSphere{ℝ}, Y, p, X, ::DefaultOrthonormalBasis{ℝ})
     n = manifold_dimension(M)
+    p1 = p[1]
+    cosθ = abs(p1)
+    λ = nzsign(p1, cosθ)
     pend = view(p, 2:(n + 1))
-    Y1 = dot(pend, X)
-    Y[1] = Y1
-    factor = Y1 / (1 + p[1]) # 2 (q'X)/(q'q)
-    Y[2:(n + 1)] .= pend .* factor .- X
+    pX = dot(pend, X)
+    factor = pX / (1 + cosθ)
+    Y[1] = -λ * pX
+    Y[2:(n + 1)] .= X .- pend .* factor
     return Y
 end
 
