@@ -514,8 +514,8 @@ The resulting transport to $T_{q} M$ is
 \mathcal{P}_{q ← p}(X) = \left(X - \left(p \frac{\sin θ}{θ} + d \frac{1 - \cos θ}{θ^2}\right) ⟨d, X⟩_p\right) \overline{λ},
 ````
 where $d = \log_p q$ is the direction of the transport, $θ = \lVert d \rVert_p$ is the
-[`distance`](@ref) between $p$ and $q$, and $\overline{⋅}$ denotes complex or quaternionic
-conjugation.
+[`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) between $p$ and $q$, and
+$\overline{⋅}$ denotes complex or quaternionic conjugation.
 """
 vector_transport_to(::AbstractProjectiveSpace, ::Any, ::Any, ::Any, ::ParallelTransport)
 
