@@ -623,14 +623,14 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
              E1 =
               3-element Vector{Float64}:
-                0.0
-               -1.0
+               -0.0
+                1.0
                 0.0
              E2 =
               3-element Vector{Float64}:
+               -0.0
                 0.0
-                0.0
-               -1.0
+                1.0
             Basis for component 2:
             DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
              E1 =
@@ -649,14 +649,14 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
              E1 =
               3-element Array{Float64,1}:
-                0.0
-               -1.0
+               -0.0
+                1.0
                 0.0
              E2 =
               3-element Array{Float64,1}:
+               -0.0
                 0.0
-                0.0
-               -1.0
+                1.0
             Basis for component 2:
             DefaultOrthonormalBasis(ℝ) with 2 basis vectors:
              E1 =
