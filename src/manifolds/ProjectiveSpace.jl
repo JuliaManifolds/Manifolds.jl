@@ -453,7 +453,7 @@ Compute the equivalent retraction [`ProjectionRetraction`](@ref), [`PolarRetract
 and [`QRRetraction`](@ref) on the [`AbstractProjectiveSpace`](@ref) manifold `M`$=𝔽ℙ^n$,
 i.e.
 ````math
-\operatorname{retr}_p X = \operatorname{proj}(p + X).
+\operatorname{retr}_p X = \operatorname{proj}_p(p + X).
 ````
 
 Note that this retraction is equivalent to the three corresponding retractions on
