@@ -203,10 +203,10 @@ function get_coordinates!(M::AbstractProjectiveSpace, Y, p, X, ::DefaultOrthonor
     m = length(p)
     z = p[1]' # p'[1,0,…,0]
     cosθ = abs(z)
-    λ = sign_from_abs(z, cosθ)
     pend, Xend = view(p, 2:m), view(X, 2:m)
     factor = λ * X[1] / (1 + cosθ) # 2 λ (q'X)/(q'q)
     Y .= pend .* factor .- Xend
+    λ = nzsign(z, cosθ)
     return Y
 end
 
@@ -228,8 +228,8 @@ function get_vector!(M::AbstractProjectiveSpace, Y, p, X, ::DefaultOrthonormalBa
     m = length(p)
     z = p[1] # [1,0,…,0]'p
     cosθ = abs(z)
-    λ = sign_from_abs(z, cosθ)
     pend = view(p, 2:m)
+    λ = nzsign(z, cosθ)
     pX = dot(pend, X)
     Y[1] = λ * pX
     factor = pX / (1 + cosθ) # 2 (q'X)/(q'q)
@@ -326,7 +326,7 @@ log(::AbstractProjectiveSpace, p, q)
 function log!(M::AbstractProjectiveSpace, X, p, q)
     z = dot(q, p)
     cosθ = abs(z)
-    λ = sign_from_abs(z, cosθ)
+    λ = nzsign(z, cosθ)
     X .= (q .* λ .- cosθ .* p) ./ usinc_from_cos(cosθ)
     return project!(M, X, p, X)
 end
@@ -367,7 +367,7 @@ end
 
 function mid_point!(M::ProjectiveSpace, q, p1, p2)
     z = dot(p2, p1)
-    λ = sign(z)
+    λ = nzsign(z)
     q .= p1 .+ p2 .* λ
     project!(M, q, q)
     return q
@@ -501,7 +501,7 @@ vector_transport_to(::AbstractProjectiveSpace, ::Any, ::Any, ::Any, ::ParallelTr
 
 function vector_transport_to!(::AbstractProjectiveSpace, Y, p, X, q, ::ParallelTransport)
     z = dot(q, p)
-    λ = sign(z)
+    λ = nzsign(z)
     m = p .+ q .* λ # un-normalized midpoint
     mnorm2 = real(dot(m, m))
     factor = λ' * dot(q, X) * (2 / mnorm2) # λ' * dot(q, X) ≡ dot(q * λ, X)

@@ -23,12 +23,20 @@ computed from $x = cos(θ)$.
 end
 
 @doc raw"""
-    sign_from_abs(z, absz)
+    nzsign(z[, absz])
 
-Compute `sign(z)` from precomputed `absz = abs(z)`, returning 0 for `absz = 0`.
+Compute a modified `sign(z)` that is always nonzero, i.e. where
+````math
+\operatorname(nzsign)(z) = \begin{cases}
+    1 & \text{if } z = 0\\
+    \frac{z}{|z|} & \text{otherwise}
+\end{cases}
+````
 """
-@inline sign_from_abs(z, absz) = z / ifelse(iszero(absz), one(absz), absz)
-@inline sign_from_abs(z::Real, absz) = sign(z)
+@inline function nzsign(z, absz = abs(z))
+    psignz = z / absz
+    return ifelse(iszero(absz), one(psignz), psignz)
+end
 
 allocate(p, s::Size{S}) where {S} = similar(p, S...)
 allocate(p::StaticArray, s::Size{S}) where {S} = similar(p, maybesize(s))
