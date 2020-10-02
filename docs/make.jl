@@ -81,5 +81,4 @@ makedocs(
         ],
     ],
 )
-
 deploydocs(repo = "github.com/JuliaManifolds/Manifolds.jl.git", push_preview = true)
