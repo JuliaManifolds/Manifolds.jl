@@ -415,7 +415,7 @@ with
   \operatorname{P}_p = I - \frac{1}{2}pp^{\mathrm{H}}
 ````
 """
-vector_transport_to(::Stiefel, p, X, d, ::CaleyVectorTransport)
+vector_transport_direction(M::Stiefel, p, X, d, ::CaleyVectorTransport)
 
 function vector_transport_direction!(::Stiefel, Y, p, X, d, ::CaleyVectorTransport)
     Pp = p * p'
