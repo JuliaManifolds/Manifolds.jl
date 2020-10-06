@@ -81,7 +81,7 @@ function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,�
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
             norm(c - one(c)),
-            "The point $(p) does not lie on $(M), because x'x is not the unit matrix.",
+            "The point $(p) does not lie on $(M), because p'p is not the unit matrix.",
         )
     end
     return nothing
@@ -121,7 +121,7 @@ function check_tangent_vector(
     if !isapprox(p' * X, -conj(X' * p); kwargs...)
         return DomainError(
             norm(p' * X + conj(X' * p)),
-            "The matrix $(X) is does not lie in the tangent space of $(p) on the Stiefel manifold of dimension ($(n),$(k)), since x'v + v'x is not the zero matrix.",
+            "The matrix $(X) is does not lie in the tangent space of $(p) on the Stiefel manifold of dimension ($(n),$(k)), since p'X + X'p is not the zero matrix.",
         )
     end
     return nothing
@@ -379,11 +379,11 @@ function retract!(::Stiefel, q, p, X, ::PadeRetraction{m}) where {m}
     WpX = Pp * X * p' - p * X' * Pp
     pm = sum([
         factorial(2m - k) * factorial(m) /
-        (factorial(2m) * factorial(m - k)Ü * factorial(k)) * WpX^k for k in 0:m
+        (factorial(2m) * factorial(m - k) * factorial(k)) * WpX^k for k in 0:m
     ])
     qm = sum([
         factorial(2m - k) * factorial(m) /
-        (factorial(2m) * factorial(m - k)Ü * factorial(k)) * (-WpX)^k for k in 0:m
+        (factorial(2m) * factorial(m - k) * factorial(k)) * (-WpX)^k for k in 0:m
     ])
     return copyto!(q, (qm \ pm) * p)
 end
@@ -419,10 +419,10 @@ vector_transport_to(::Stiefel, p, X, d, ::CaleyVectorTransport)
 
 function vector_transport_direction!(::Stiefel, Y, p, X, d, ::CaleyVectorTransport)
     Pp = p * p'
-    Pp .= one(Pp) - Pp
+    Pp .= one(Pp) - 1 // 2 * Pp
     Wpd = Pp * d * p' - p * d' * Pp
-    WpX = Pp * Y * p' - p * Y' * Pp
-    q1 = one(Wpd - 1 // 2 * Wpd)
+    WpX = Pp * X * p' - p * X' * Pp
+    q1 = one(Wpd) - 1 // 2 * Wpd
     return copyto!(Y, (q1 \ WpX) * (q1 \ p))
 end
 
@@ -434,8 +434,8 @@ i.e. `(n,k)`, which is the matrix dimensions.
 """
 @generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
 
+Base.show(io::IO, ::CaleyRetraction) = print(io, "CaleyRetraction()")
 Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($(m))")
-
 Base.show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")
 
 """

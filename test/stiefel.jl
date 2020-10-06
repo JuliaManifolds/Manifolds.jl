@@ -176,4 +176,20 @@ include("utils.jl")
             @test manifold_dimension(M) == 18
         end
     end
+
+    @testset "Padé & Caley retractions" begin
+        M = Stiefel(3, 2)
+        p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+        X = [0.0 0.0; 0.0 0.0; 1.0 1.0]
+        r1 = CaleyRetraction()
+        @test r1 == PadeRetraction(1)
+        @test repr(r1) == "CaleyRetraction()"
+        q1 = retract(M, p, X, r1)
+        @test is_manifold_point(M, q1)
+        @test is_tangent_vector(M, q1, Y)
+        r2 = PadeRetraction(2)
+        @test repr(r2) == "PadeRetraction(2)"
+        q2 = retract(M, p, X, r2)
+        @test is_manifold_point(M, q2)
+    end
 end
