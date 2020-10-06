@@ -304,7 +304,7 @@ It is implemented as the case $m=1$ of the [`PadeRetraction`](@ref).
 retract(::Stiefel, ::Any, ::Any, ::CaleyRetraction)
 
 @doc raw"""
-    retract(M::Stiefel, p, X, ::PadeRetraction{m}) where {m}
+    retract(M::Stiefel, p, X, ::PadeRetraction{m})
 
 Compute the retraction on the [`Stiefel`](@ref) manifold `M` based on the Padé approximation of order $m$[^ZhuDuan2018].
 Let $p_m$ and $q_m$ be defined for any matrix $A ∈ ℝ^{n×x}$ as
@@ -335,7 +335,7 @@ the retraction reads
     > Optimizazion Letters 13(5), pp. 1069–1083, 2018.
     > doi [10.1007/s11590-018-1341-z](https://doi.org/10.1007/s11590-018-1341-z).
 """
-retract(::Stiefel, ::Any, ::Any, ::PadeRetraction{m}) where {m}
+retract(::Stiefel, ::Any, ::Any, ::PadeRetraction)
 
 @doc raw"""
     retract(M::Stiefel, p, X, ::PolarRetraction)
