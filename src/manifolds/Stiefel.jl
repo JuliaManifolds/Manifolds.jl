@@ -414,6 +414,9 @@ with
   \quad\text{where} 
   \operatorname{P}_p = I - \frac{1}{2}pp^{\mathrm{H}}
 ````
+
+Since this is the differentiated retraction as a vector transport, the result will be in the
+tangent space at $q=\operatorname{retr}_p(d)$ using the [`CaleyRetraction`](@ref).
 """
 vector_transport_direction(M::Stiefel, p, X, d, ::CaleyVectorTransport)
 
