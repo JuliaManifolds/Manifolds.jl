@@ -423,7 +423,7 @@ function vector_transport_direction!(::Stiefel, Y, p, X, d, ::CaleyVectorTranspo
     Pp = I - 1 // 2 * p * p'
     Wpd = Pp * d * p' - p * d' * Pp
     WpX = Pp * X * p' - p * X' * Pp
-    q1 = one(Wpd) - 1 // 2 * Wpd
+    q1 = I - 1 // 2 * Wpd
     return copyto!(Y, (q1 \ WpX) * (q1 \ p))
 end
 
