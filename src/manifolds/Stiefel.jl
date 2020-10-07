@@ -374,7 +374,7 @@ where $\operatorname{sgn}(p) = \begin{cases}
 retract(::Stiefel, ::Any, ::Any, ::QRRetraction)
 
 function retract!(::Stiefel, q, p, X, ::PadeRetraction{m}) where {m}
-    Pp = I - p * p'
+    Pp = I - 1 // 2 * p * p'
     WpX = Pp * X * p' - p * X' * Pp
     pm = sum([
         factorial(2m - k) * factorial(m) /
@@ -420,7 +420,7 @@ tangent space at $q=\operatorname{retr}_p(d)$ using the [`CaleyRetraction`](@ref
 vector_transport_direction(M::Stiefel, p, X, d, ::CaleyVectorTransport)
 
 function vector_transport_direction!(::Stiefel, Y, p, X, d, ::CaleyVectorTransport)
-    Pp = I - p * p'
+    Pp = I - 1 // 2 * p * p'
     Wpd = Pp * d * p' - p * d' * Pp
     WpX = Pp * X * p' - p * X' * Pp
     q1 = one(Wpd) - 1 // 2 * Wpd
