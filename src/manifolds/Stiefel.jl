@@ -379,14 +379,14 @@ function retract!(::Stiefel, q, p, X, ::PadeRetraction{m}) where {m}
     pm = zeros(size(WpX))
     qm = zeros(size(WpX))
     WpXk = similar(WpX)
-    copyto!(WpXk, factorial(m) / factorial(2*m) * I) # factorial factor independent of k
-    for k ∈ 0:m
+    copyto!(WpXk, factorial(m) / factorial(2 * m) * I) # factorial factor independent of k
+    for k in 0:m
         # incrementally build (2m-k)!/(m-k)!(k)! for k > 0, i.e.
         # remove factor (2m-k+1) in the nominator, (m-k+1) in the denominator and multiply by 1/k
-        WpXk .*= ( k==0 ? 2 : (m-k+1)/( (2*m-k+1) * k) )
+        WpXk .*= (k == 0 ? 2 : (m - k + 1) / ((2 * m - k + 1) * k))
         pm .+= WpXk
-        if k%2 == 0
-            qm .+=WpXk
+        if k % 2 == 0
+            qm .+= WpXk
         else
             qm .-= WpXk
         end
