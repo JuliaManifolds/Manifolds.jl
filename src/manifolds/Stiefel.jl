@@ -309,11 +309,11 @@ retract(::Stiefel, ::Any, ::Any, ::CaleyRetraction)
 Compute the retraction on the [`Stiefel`](@ref) manifold `M` based on the Padé approximation of order $m$[^ZhuDuan2018].
 Let $p_m$ and $q_m$ be defined for any matrix $A ∈ ℝ^{n×x}$ as
 ````math
-  p_m(A) = \sum_{k=0}^m \frac{2m-k)!m!}{(2m)!(m-k)!}\frac{A^k}{k!}
+  p_m(A) = \sum_{k=0}^m \frac{(2m-k)!m!}{(2m)!(m-k)!}\frac{A^k}{k!}
 ````
 and
 ````math
-  q_m(A) = \sum_{k=0}^m \frac{2m-k)!m!}{(2m)!(m-k)!}\frac{(-A)^k}{k!}
+  q_m(A) = \sum_{k=0}^m \frac{(2m-k)!m!}{(2m)!(m-k)!}\frac{(-A)^k}{k!}
 ````
 respectively. Then the Padé approximation (of the matrix exponential $\exp(A)$) reads
 ````math
@@ -376,14 +376,22 @@ retract(::Stiefel, ::Any, ::Any, ::QRRetraction)
 function retract!(::Stiefel, q, p, X, ::PadeRetraction{m}) where {m}
     Pp = I - 1 // 2 * p * p'
     WpX = Pp * X * p' - p * X' * Pp
-    pm = sum([
-        factorial(2m - k) * factorial(m) /
-        (factorial(2m) * factorial(m - k) * factorial(k)) * WpX^k for k in 0:m
-    ])
-    qm = sum([
-        factorial(2m - k) * factorial(m) /
-        (factorial(2m) * factorial(m - k) * factorial(k)) * (-WpX)^k for k in 0:m
-    ])
+    pm = zeros(size(WpX))
+    qm = zeros(size(WpX))
+    WpXk = similar(WpX)
+    copyto!(WpXk, factorial(m) / factorial(2*m) * I) # factorial factor independent of k
+    for k ∈ 0:m
+        # incrementally build (2m-k)!/(m-k)!(k)! for k > 0, i.e.
+        # remove factor (2m-k+1) in the nominator, (m-k+1) in the denominator and multiply by 1/k
+        WpXk .*= ( k==0 ? 2 : (m-k+1)/( (2*m-k+1) * k) )
+        pm .+= WpXk
+        if k%2 == 0
+            qm .+=WpXk
+        else
+            qm .-= WpXk
+        end
+        WpXk *= WpX
+    end
     return copyto!(q, (qm \ pm) * p)
 end
 function retract!(::Stiefel, q, p, X, ::PolarRetraction)
