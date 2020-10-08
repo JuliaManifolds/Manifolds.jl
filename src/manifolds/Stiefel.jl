@@ -191,7 +191,8 @@ function inverse_retract!(M::Stiefel{n,k}, X, p, q, ::QRInverseRetraction) where
         mul!(X, q, R)
     elseif k == 2
         R11 = inv(A[1, 1])
-        @inbounds R = hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
+        @inbounds R =
+            hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
         mul!(X, q, UpperTriangular(R))
     else
         if A isa StaticArray
