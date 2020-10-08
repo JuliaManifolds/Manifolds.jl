@@ -187,7 +187,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         shape_se =
             Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M1, M1, M2, M2, M2)
         p = Manifolds.ProductArray(shape_se, Float64[1, 0, 0, 0, 1, 0, 1, 2, 3, 4, 5, 6])
-        
+
         @test sprint(show, "text/plain", p) == """
         ProductArray with 5 submanifold components:
          Component 1 =
@@ -245,7 +245,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
           2-element $(sprint(show, Vector{Float64})):
            3.0
            4.0"""
-        
+
 
         p = Manifolds.ProductRepr(
             Float64[1, 0, 0],
