@@ -49,10 +49,32 @@ include("utils.jl")
         TEST_FLOAT32 && push!(types, Matrix{Float32})
         TEST_STATIC_SIZED && push!(types, MMatrix{3,2,Float64,6})
 
+        @testset "Stiefel(2, 1) special case" begin
+            M21 = Stiefel(2, 1)
+            w = inverse_retract(
+                M21,
+                SMatrix{2,1}([0.0, 1.0]),
+                SMatrix{2,1}([sqrt(2), sqrt(2)]),
+                QRInverseRetraction(),
+            )
+            @test isapprox(M21, w, SMatrix{2,1}([1.0, 0.0]))
+        end
+
         @testset "Type $T" for T in types
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             y = exp(M, x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
             z = exp(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0])
+            @test isapprox(
+                M,
+                retract(
+                    M,
+                    SMatrix{3,2}(x),
+                    SA[0.0 0.0; 0.0 0.0; -1.0 1.0],
+                    PolarRetraction(),
+                ),
+                retract(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0], PolarRetraction()),
+                atol = 1e-15,
+            )
             pts = convert.(T, [x, y, z])
             v = inverse_retract(M, x, y, PolarInverseRetraction())
             @test !is_manifold_point(M, 2 * x)
