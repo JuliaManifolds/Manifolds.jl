@@ -178,18 +178,37 @@ function inverse_retract!(::Stiefel, X, p, q, ::PolarInverseRetraction)
     A = p' * q
     H = -2 * one(p' * p)
     B = lyap(A, H)
-    return copyto!(X, q * B - p)
+    mul!(X, q, B)
+    X .-= p
+    return X
 end
-function inverse_retract!(::Stiefel{n,k}, X, p, q, ::QRInverseRetraction) where {n,k}
+function inverse_retract!(M::Stiefel{n,k}, X, p, q, ::QRInverseRetraction) where {n,k}
     A = p' * q
-    R = zeros(typeof(one(eltype(p)) * one(eltype(q))), k, k)
-    for i in 1:k
-        b = zeros(eltype(R), i)
-        b[i] = 1
-        b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
-        R[1:i, i] = A[1:i, 1:i] \ b
+    @boundscheck size(A) === (k, k)
+    ElT = typeof(one(eltype(p)) * one(eltype(q)))
+    if k == 1
+        @inbounds R = SMatrix{1,1}(inv(A[1, 1]))
+        mul!(X, q, R)
+    elseif k == 2
+        R11 = inv(A[1, 1])
+        @inbounds R = hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
+        mul!(X, q, UpperTriangular(R))
+    else
+        if A isa StaticArray
+            R = zeros(MMatrix{k,k,ElT})
+        else
+            R = zeros(ElT, k, k)
+        end
+        @inbounds for i in 1:k
+            b = zeros(eltype(R), i)
+            b[i] = 1
+            b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
+            R[1:i, i] = A[1:i, 1:i] \ b
+        end
+        mul!(X, q, UpperTriangular(R))
     end
-    return copyto!(X, q * R - p)
+    X .-= p
+    return X
 end
 
 function Base.isapprox(M::Stiefel, p, X, Y; kwargs...)
@@ -287,6 +306,9 @@ where $\operatorname{sgn}(p) = \begin{cases}
 """
 retract(::Stiefel, ::Any, ::Any, ::QRRetraction)
 
+_qrfac_to_q(qrfac) = Matrix(qrfac.Q)
+_qrfac_to_q(qrfac::StaticArrays.QR) = qrfac.Q
+
 function retract!(::Stiefel, q, p, X, ::PolarRetraction)
     s = svd(p + X)
     return mul!(q, s.U, s.Vt)
@@ -295,7 +317,7 @@ function retract!(::Stiefel, q, p, X, ::QRRetraction)
     qrfac = qr(p + X)
     d = diag(qrfac.R)
     D = Diagonal(sign.(sign.(d .+ 0.5)))
-    return copyto!(q, Matrix(qrfac.Q) * D)
+    return mul!(q, _qrfac_to_q(qrfac), D)
 end
 
 @doc raw"""
