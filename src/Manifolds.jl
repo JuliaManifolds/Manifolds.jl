@@ -277,7 +277,8 @@ export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
-export AbstractVectorTransportMethod, ParallelTransport, ProjectedPointDistribution
+export AbstractVectorTransportMethod,
+    CaleyVectorTransport, ParallelTransport, ProjectedPointDistribution
 export PoleLadderTransport, SchildsLadderTransport
 export PowerVectorTransport, ProductVectorTransport
 export AbstractEmbeddedManifold
@@ -297,11 +298,13 @@ export AbstractEmbeddingType, AbstractIsometricEmbeddingType
 export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod,
+    CaleyRetraction,
     ExponentialRetraction,
     QRRetraction,
     PolarRetraction,
     ProjectionRetraction,
     SoftmaxRetraction,
+    PadeRetraction,
     ProductRetraction,
     PowerRetraction
 export AbstractInverseRetractionMethod,

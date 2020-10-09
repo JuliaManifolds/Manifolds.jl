@@ -17,9 +17,15 @@ end
 
 (VERSION >= v"1.1") && @testset "Ambiguities" begin
     # TODO: reduce the number of ambiguities
-    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 12
-    @test length(Test.detect_ambiguities(Manifolds)) == 0
-    @test length(our_base_ambiguities()) <= 21
+    if VERSION >= v"1.6-DEV"
+        @test length(Test.detect_ambiguities(ManifoldsBase)) <= 3
+        @test length(Test.detect_ambiguities(Manifolds)) <= 98
+        @test length(our_base_ambiguities()) <= 4
+    else
+        @test length(Test.detect_ambiguities(ManifoldsBase)) <= 12
+        @test length(Test.detect_ambiguities(Manifolds)) == 0
+        @test length(our_base_ambiguities()) <= 21
+    end
 end
 
 include("utils.jl")

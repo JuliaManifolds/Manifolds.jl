@@ -152,140 +152,72 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
 
         shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M1)
         p = Manifolds.ProductArray(shape_se, Float64[1, 0, 0])
-        if VERSION >= v"1.6.0-DEV.430"
-            @test sprint(show, "text/plain", p) == """
-            ProductArray with 1 submanifold component:
-             Component 1 =
-              3-element view(::Vector{Float64}, 1:3) with eltype Float64:
-               1.0
-               0.0
-               0.0"""
-        else
-            @test sprint(show, "text/plain", p) == """
-            ProductArray with 1 submanifold component:
-             Component 1 =
-              3-element view(::Array{Float64,1}, 1:3) with eltype Float64:
-               1.0
-               0.0
-               0.0"""
-        end
+        @test sprint(show, "text/plain", p) == """
+        ProductArray with 1 submanifold component:
+         Component 1 =
+          3-element view(::$(sprint(show, Vector{Float64})), 1:3) with eltype Float64:
+           1.0
+           0.0
+           0.0"""
 
 
         shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M1, M1, M2, M2)
         p = Manifolds.ProductArray(shape_se, Float64[1, 0, 0, 0, 1, 0, 1, 2, 3, 4])
-        if VERSION >= v"1.6.0-DEV.430"
-            @test sprint(show, "text/plain", p) == """
-            ProductArray with 4 submanifold components:
-             Component 1 =
-              3-element view(::Vector{Float64}, 1:3) with eltype Float64:
-               1.0
-               0.0
-               0.0
-             Component 2 =
-              3-element view(::Vector{Float64}, 4:6) with eltype Float64:
-               0.0
-               1.0
-               0.0
-             Component 3 =
-              2-element view(::Vector{Float64}, 7:8) with eltype Float64:
-               1.0
-               2.0
-             Component 4 =
-              2-element view(::Vector{Float64}, 9:10) with eltype Float64:
-               3.0
-               4.0"""
-        else
-            @test sprint(show, "text/plain", p) == """
-            ProductArray with 4 submanifold components:
-             Component 1 =
-              3-element view(::Array{Float64,1}, 1:3) with eltype Float64:
-               1.0
-               0.0
-               0.0
-             Component 2 =
-              3-element view(::Array{Float64,1}, 4:6) with eltype Float64:
-               0.0
-               1.0
-               0.0
-             Component 3 =
-              2-element view(::Array{Float64,1}, 7:8) with eltype Float64:
-               1.0
-               2.0
-             Component 4 =
-              2-element view(::Array{Float64,1}, 9:10) with eltype Float64:
-               3.0
-               4.0"""
-        end
-
+        @test sprint(show, "text/plain", p) == """
+        ProductArray with 4 submanifold components:
+         Component 1 =
+          3-element view(::$(sprint(show, Vector{Float64})), 1:3) with eltype Float64:
+           1.0
+           0.0
+           0.0
+         Component 2 =
+          3-element view(::$(sprint(show, Vector{Float64})), 4:6) with eltype Float64:
+           0.0
+           1.0
+           0.0
+         Component 3 =
+          2-element view(::$(sprint(show, Vector{Float64})), 7:8) with eltype Float64:
+           1.0
+           2.0
+         Component 4 =
+          2-element view(::$(sprint(show, Vector{Float64})), 9:10) with eltype Float64:
+           3.0
+           4.0"""
 
         shape_se =
             Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M1, M1, M2, M2, M2)
         p = Manifolds.ProductArray(shape_se, Float64[1, 0, 0, 0, 1, 0, 1, 2, 3, 4, 5, 6])
-        if VERSION >= v"1.6.0-DEV.430"
-            @test sprint(show, "text/plain", p) == """
-            ProductArray with 5 submanifold components:
-             Component 1 =
-              3-element view(::Vector{Float64}, 1:3) with eltype Float64:
-               1.0
-               0.0
-               0.0
-             Component 2 =
-              3-element view(::Vector{Float64}, 4:6) with eltype Float64:
-               0.0
-               1.0
-               0.0
-             ⋮
-             Component 4 =
-              2-element view(::Vector{Float64}, 9:10) with eltype Float64:
-               3.0
-               4.0
-             Component 5 =
-              2-element view(::Vector{Float64}, 11:12) with eltype Float64:
-               5.0
-               6.0"""
-        else
-            @test sprint(show, "text/plain", p) == """
-            ProductArray with 5 submanifold components:
-             Component 1 =
-              3-element view(::Array{Float64,1}, 1:3) with eltype Float64:
-               1.0
-               0.0
-               0.0
-             Component 2 =
-              3-element view(::Array{Float64,1}, 4:6) with eltype Float64:
-               0.0
-               1.0
-               0.0
-             ⋮
-             Component 4 =
-              2-element view(::Array{Float64,1}, 9:10) with eltype Float64:
-               3.0
-               4.0
-             Component 5 =
-              2-element view(::Array{Float64,1}, 11:12) with eltype Float64:
-               5.0
-               6.0"""
-        end
+
+        @test sprint(show, "text/plain", p) == """
+        ProductArray with 5 submanifold components:
+         Component 1 =
+          3-element view(::$(sprint(show, Vector{Float64})), 1:3) with eltype Float64:
+           1.0
+           0.0
+           0.0
+         Component 2 =
+          3-element view(::$(sprint(show, Vector{Float64})), 4:6) with eltype Float64:
+           0.0
+           1.0
+           0.0
+         ⋮
+         Component 4 =
+          2-element view(::$(sprint(show, Vector{Float64})), 9:10) with eltype Float64:
+           3.0
+           4.0
+         Component 5 =
+          2-element view(::$(sprint(show, Vector{Float64})), 11:12) with eltype Float64:
+           5.0
+           6.0"""
 
         p = Manifolds.ProductRepr(Float64[1, 0, 0])
-        if VERSION >= v"1.6.0-DEV.430"
-            @test sprint(show, "text/plain", p) == """
-            ProductRepr with 1 submanifold component:
-             Component 1 =
-              3-element Vector{Float64}:
-               1.0
-               0.0
-               0.0"""
-        else
-            @test sprint(show, "text/plain", p) == """
-            ProductRepr with 1 submanifold component:
-             Component 1 =
-              3-element Array{Float64,1}:
-               1.0
-               0.0
-               0.0"""
-
-        end
+        @test sprint(show, "text/plain", p) == """
+        ProductRepr with 1 submanifold component:
+         Component 1 =
+          3-element $(sprint(show, Vector{Float64})):
+           1.0
+           0.0
+           0.0"""
 
         p = Manifolds.ProductRepr(
             Float64[1, 0, 0],
@@ -293,49 +225,26 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             Float64[1, 2],
             Float64[3, 4],
         )
-        if VERSION >= v"1.6.0-DEV.430"
-            @test sprint(show, "text/plain", p) == """
-            ProductRepr with 4 submanifold components:
-             Component 1 =
-              3-element Vector{Float64}:
-               1.0
-               0.0
-               0.0
-             Component 2 =
-              3-element Vector{Float64}:
-               0.0
-               1.0
-               0.0
-             Component 3 =
-              2-element Vector{Float64}:
-               1.0
-               2.0
-             Component 4 =
-              2-element Vector{Float64}:
-               3.0
-               4.0"""
-        else
-            @test sprint(show, "text/plain", p) == """
-            ProductRepr with 4 submanifold components:
-             Component 1 =
-              3-element Array{Float64,1}:
-               1.0
-               0.0
-               0.0
-             Component 2 =
-              3-element Array{Float64,1}:
-               0.0
-               1.0
-               0.0
-             Component 3 =
-              2-element Array{Float64,1}:
-               1.0
-               2.0
-             Component 4 =
-              2-element Array{Float64,1}:
-               3.0
-               4.0"""
-        end
+        @test sprint(show, "text/plain", p) == """
+        ProductRepr with 4 submanifold components:
+         Component 1 =
+          3-element $(sprint(show, Vector{Float64})):
+           1.0
+           0.0
+           0.0
+         Component 2 =
+          3-element $(sprint(show, Vector{Float64})):
+           0.0
+           1.0
+           0.0
+         Component 3 =
+          2-element $(sprint(show, Vector{Float64})):
+           1.0
+           2.0
+         Component 4 =
+          2-element $(sprint(show, Vector{Float64})):
+           3.0
+           4.0"""
 
 
         p = Manifolds.ProductRepr(
@@ -345,51 +254,27 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             Float64[3, 4],
             Float64[5, 6],
         )
-        if VERSION >= v"1.6.0-DEV.430"
-            @test sprint(show, "text/plain", p) == """
-            ProductRepr with 5 submanifold components:
-             Component 1 =
-              3-element Vector{Float64}:
-               1.0
-               0.0
-               0.0
-             Component 2 =
-              3-element Vector{Float64}:
-               0.0
-               1.0
-               0.0
-             ⋮
-             Component 4 =
-              2-element Vector{Float64}:
-               3.0
-               4.0
-             Component 5 =
-              2-element Vector{Float64}:
-               5.0
-               6.0"""
-        else
-            @test sprint(show, "text/plain", p) == """
-            ProductRepr with 5 submanifold components:
-             Component 1 =
-              3-element Array{Float64,1}:
-               1.0
-               0.0
-               0.0
-             Component 2 =
-              3-element Array{Float64,1}:
-               0.0
-               1.0
-               0.0
-             ⋮
-             Component 4 =
-              2-element Array{Float64,1}:
-               3.0
-               4.0
-             Component 5 =
-              2-element Array{Float64,1}:
-               5.0
-               6.0"""
-        end
+        @test sprint(show, "text/plain", p) == """
+        ProductRepr with 5 submanifold components:
+         Component 1 =
+          3-element $(sprint(show, Vector{Float64})):
+           1.0
+           0.0
+           0.0
+         Component 2 =
+          3-element $(sprint(show, Vector{Float64})):
+           0.0
+           1.0
+           0.0
+         ⋮
+         Component 4 =
+          2-element $(sprint(show, Vector{Float64})):
+           3.0
+           4.0
+         Component 5 =
+          2-element $(sprint(show, Vector{Float64})):
+           5.0
+           6.0"""
     end
 
     for T in types, reshaper in reshapers
@@ -435,6 +320,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
                     distr_tv_M2,
                 )],
                 is_tangent_atol_multiplier = 1,
+                exp_log_atol_multiplier = 1,
             )
         end
     end
@@ -490,6 +376,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         test_forward_diff = false,
         test_reverse_diff = false,
         is_tangent_atol_multiplier = 1,
+        exp_log_atol_multiplier = 1,
     )
 
     @testset "product vector transport" begin
@@ -576,6 +463,7 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
             basis_types_vecs = (basis_types[1], basis_types[3], basis_types[4]),
             basis_types_to_from = basis_types,
             is_tangent_atol_multiplier = 1,
+            exp_log_atol_multiplier = 1,
         )
         @test number_eltype(pts[1]) === Float64
         @test submanifold_component(Mse, pts[1], 1) === pts[1].parts[1]
