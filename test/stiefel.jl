@@ -60,6 +60,32 @@ include("utils.jl")
             @test isapprox(M21, w, SMatrix{2,1}([1.0, 0.0]))
         end
 
+        @testset "inverse QR retraction cases" begin
+            M43 = Stiefel(4, 3)
+            p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0; 0.0 0.0 0.0]
+            q = exp(M43, p, [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0; 1.0 1.0 1.0])
+            X1 = inverse_retract(
+                M43,
+                SMatrix{4,3}(p),
+                SMatrix{4,3}(q),
+                QRInverseRetraction(),
+            )
+            X2 = inverse_retract(M43, p, q, QRInverseRetraction())
+            @test isapprox(M43, p, X1, X2)
+
+            p2 = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            q2 = exp(M, p2, [0.0 0.0; 0.0 0.0; 1.0 1.0])
+
+            X1 = inverse_retract(
+                M,
+                SMatrix{3,2}(p2),
+                SMatrix{3,2}(q2),
+                QRInverseRetraction(),
+            )
+            X2 = inverse_retract(M, p2, q2, QRInverseRetraction())
+            @test isapprox(M43, p2, X1, X2)
+        end
+
         @testset "Type $T" for T in types
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             y = exp(M, x, [0.0 0.0; 0.0 0.0; 1.0 1.0])

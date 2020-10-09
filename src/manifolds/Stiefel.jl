@@ -265,7 +265,13 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     R = zeros(MMatrix{k,k,ElT})
     return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
 end
-function _stiefel_inv_retr_qr_mul_by_r!(::Stiefel{n,k}, X, q, A) where {n,k}
+function _stiefel_inv_retr_qr_mul_by_r!(
+    M::Stiefel{n,k},
+    X,
+    q,
+    A,
+    ::Type{ElT},
+) where {n,k,ElT}
     R = zeros(ElT, k, k)
     return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
 end
