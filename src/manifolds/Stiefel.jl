@@ -35,7 +35,34 @@ struct Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbedd
 
 Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ) = Stiefel{n,k,field}()
 
-function allocation_promotion_function(M::Stiefel{n,k,ℂ}, f, args::Tuple) where {n,k}
+@doc raw"""
+    PadeRetraction{m} <: AbstractRetractionMethod
+
+A retraction based on the Padé approximation of order $m$
+"""
+struct PadeRetraction{m} <: AbstractRetractionMethod end
+
+function PadeRetraction(m::Int)
+    (m < 1) &&
+        error("The Padé based retraction is only available for positive orders, not for order $m.")
+    return PadeRetraction{m}()
+end
+@doc raw"""
+    CaleyRetraction <: AbstractRetractionMethod
+
+A retraction based on the Caley transform, which is realized by using the
+[`PadeRetraction`](@ref)`{1}`.
+"""
+const CaleyRetraction = PadeRetraction{1}
+
+"""
+    CaleyVectorTransport <: AbstractVectorTransportMethod
+
+A vector transport that one obtains by differentiating a [`CaleyRetraction`](@ref).
+"""
+struct CaleyVectorTransport <: AbstractVectorTransportMethod end
+
+function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where {n,k}
     return complex
 end
 
@@ -54,7 +81,7 @@ function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,�
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
             norm(c - one(c)),
-            "The point $(p) does not lie on $(M), because x'x is not the unit matrix.",
+            "The point $(p) does not lie on $(M), because p'p is not the unit matrix.",
         )
     end
     return nothing
@@ -94,7 +121,7 @@ function check_tangent_vector(
     if !isapprox(p' * X, -conj(X' * p); kwargs...)
         return DomainError(
             norm(p' * X + conj(X' * p)),
-            "The matrix $(X) is does not lie in the tangent space of $(p) on the Stiefel manifold of dimension ($(n),$(k)), since x'v + v'x is not the zero matrix.",
+            "The matrix $(X) is does not lie in the tangent space of $(p) on the Stiefel manifold of dimension ($(n),$(k)), since p'X + X'p is not the zero matrix.",
         )
     end
     return nothing
@@ -252,6 +279,65 @@ function project!(::Stiefel, Y, p, X)
 end
 
 @doc raw"""
+    retract(::Stiefel, p, X, ::CaleyRetraction)
+
+Compute the retraction on the [`Stiefel`](@ref) that is based on the Caley transform[^Zhu2016].
+Using
+````math
+  W_{p,X} = \operatorname{P}_pXp^{\mathrm{H}} - pX^{\mathrm{H}}\operatorname{P_p}
+  \quad\text{where} 
+  \operatorname{P}_p = I - \frac{1}{2}pp^{\mathrm{H}}
+````
+the formula reads
+````math
+    \operatorname{retr}_pX = \Bigl(I - \frac{1}{2}W_{p,X}\Bigr)^{-1}\Bigl(I + \frac{1}{2}W_{p,X}\Bigr)p.
+````
+
+It is implemented as the case $m=1$ of the [`PadeRetraction`](@ref).
+
+[^Zhu2016]:
+    > X. Zhu:
+    > A Riemannian conjugate gradient method for optimizazion on the Stiefel manifold,
+    > Computational Optimization and Applications 67(1), pp. 73–110, 2016.
+    > doi [10.1007/s10589-016-9883-4](https://doi.org/10.1007/s10589-016-9883-4).
+"""
+retract(::Stiefel, ::Any, ::Any, ::CaleyRetraction)
+
+@doc raw"""
+    retract(M::Stiefel, p, X, ::PadeRetraction{m})
+
+Compute the retraction on the [`Stiefel`](@ref) manifold `M` based on the Padé approximation of order $m$[^ZhuDuan2018].
+Let $p_m$ and $q_m$ be defined for any matrix $A ∈ ℝ^{n×x}$ as
+````math
+  p_m(A) = \sum_{k=0}^m \frac{(2m-k)!m!}{(2m)!(m-k)!}\frac{A^k}{k!}
+````
+and
+````math
+  q_m(A) = \sum_{k=0}^m \frac{(2m-k)!m!}{(2m)!(m-k)!}\frac{(-A)^k}{k!}
+````
+respectively. Then the Padé approximation (of the matrix exponential $\exp(A)$) reads
+````math
+  r_m(A) = q_m(A)^{-1}p_m(A)
+````
+Defining further
+````math
+  W_{p,X} = \operatorname{P}_pXp^{\mathrm{H}} - pX^{\mathrm{H}}\operatorname{P_p}
+  \quad\text{where} 
+  \operatorname{P}_p = I - \frac{1}{2}pp^{\mathrm{H}}
+````
+the retraction reads
+````math
+  \operatorname{retr}_pX = r_m(W_{p,X})p
+````
+[^ZhuDuan2018]:
+    > X. Zhu, C. Duan:
+    > On matrix exponentials and their approximations related to optimization on the Stiefel manifold,
+    > Optimizazion Letters 13(5), pp. 1069–1083, 2018.
+    > doi [10.1007/s11590-018-1341-z](https://doi.org/10.1007/s11590-018-1341-z).
+"""
+retract(::Stiefel, ::Any, ::Any, ::PadeRetraction)
+
+@doc raw"""
     retract(M::Stiefel, p, X, ::PolarRetraction)
 
 Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
@@ -264,7 +350,7 @@ Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
 
 @doc raw"""
-    retract(M::Stiefel, p, X, ::QRRetraction )
+    retract(M::Stiefel, p, X, ::QRRetraction)
 
 Compute the QR-based retraction [`QRRetraction`](@ref) on the
 [`Stiefel`](@ref) manifold `M`. With $QR = p + X$ the retraction reads
@@ -287,6 +373,27 @@ where $\operatorname{sgn}(p) = \begin{cases}
 """
 retract(::Stiefel, ::Any, ::Any, ::QRRetraction)
 
+function retract!(::Stiefel, q, p, X, ::PadeRetraction{m}) where {m}
+    Pp = I - 1 // 2 * p * p'
+    WpX = Pp * X * p' - p * X' * Pp
+    pm = zeros(size(WpX))
+    qm = zeros(size(WpX))
+    WpXk = similar(WpX)
+    copyto!(WpXk, factorial(m) / factorial(2 * m) * I) # factorial factor independent of k
+    for k in 0:m
+        # incrementally build (2m-k)!/(m-k)!(k)! for k > 0, i.e.
+        # remove factor (2m-k+1) in the nominator, (m-k+1) in the denominator and multiply by 1/k
+        WpXk .*= (k == 0 ? 2 : (m - k + 1) / ((2 * m - k + 1) * k))
+        pm .+= WpXk
+        if k % 2 == 0
+            qm .+= WpXk
+        else
+            qm .-= WpXk
+        end
+        WpXk *= WpX
+    end
+    return copyto!(q, (qm \ pm) * p)
+end
 function retract!(::Stiefel, q, p, X, ::PolarRetraction)
     s = svd(p + X)
     return mul!(q, s.U, s.Vt)
@@ -299,6 +406,36 @@ function retract!(::Stiefel, q, p, X, ::QRRetraction)
 end
 
 @doc raw"""
+    vector_transport_direction(::Stiefel, p, X, d, ::CaleyVectorTransport)
+
+Compute the vector transport given by the differentiated retraction of the [`CaleyRetraction`](@ref), cf. [^Zhu2016] Equation (17).
+
+The formula reads
+````math
+\operatorname{T}_{d}(X) =
+\Bigl(I - \frac{1}{2}W_{p,d}\Bigr)^{-1}W_{p,X}\Bigl(I - \frac{1}{2}W_{p,d}\Bigr)^{-1}p,
+````
+with
+````math
+  W_{p,X} = \operatorname{P}_pXp^{\mathrm{H}} - pX^{\mathrm{H}}\operatorname{P_p}
+  \quad\text{where} 
+  \operatorname{P}_p = I - \frac{1}{2}pp^{\mathrm{H}}
+````
+
+Since this is the differentiated retraction as a vector transport, the result will be in the
+tangent space at $q=\operatorname{retr}_p(d)$ using the [`CaleyRetraction`](@ref).
+"""
+vector_transport_direction(M::Stiefel, p, X, d, ::CaleyVectorTransport)
+
+function vector_transport_direction!(::Stiefel, Y, p, X, d, ::CaleyVectorTransport)
+    Pp = I - 1 // 2 * p * p'
+    Wpd = Pp * d * p' - p * d' * Pp
+    WpX = Pp * X * p' - p * X' * Pp
+    q1 = I - 1 // 2 * Wpd
+    return copyto!(Y, (q1 \ WpX) * (q1 \ p))
+end
+
+@doc raw"""
     representation_size(M::Stiefel)
 
 Returns the representation size of the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$,
@@ -306,6 +443,8 @@ i.e. `(n,k)`, which is the matrix dimensions.
 """
 @generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
 
+Base.show(io::IO, ::CaleyRetraction) = print(io, "CaleyRetraction()")
+Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($(m))")
 Base.show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")
 
 """
