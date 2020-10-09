@@ -20,13 +20,7 @@ using LinearAlgebra: Diagonal, dot
         @test length(diff_backends()) == 1
         @test diff_backends()[1] isa Manifolds.FiniteDifferencesBackend
 
-        if hasproperty(fd51.method, :p)
-            # for FiniteDifferences <0.11
-            @test fd51.method.p == 5
-        else
-            # for FiniteDifferences >= 0.11
-            @test length(fd51.method.grid) == 5
-        end
+        @test length(fd51.method.grid) == 5
         @test fd51.method.q == 1
         fd71 = Manifolds.FiniteDifferencesBackend(central_fdm(7, 1))
         @test diff_backend!(fd71) == fd71
