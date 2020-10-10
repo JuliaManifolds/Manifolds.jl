@@ -17,15 +17,7 @@ jobs:
       - name: Install JuliaFormatter and format
         run: |
           julia  -e 'using Pkg; Pkg.add(PackageSpec(name="JuliaFormatter"))'
-          julia  -e 'using JuliaFormatter; format(
-              ".",
-              short_to_long_function_def = true,
-              always_for_in = true,
-              whitespace_ops_in_indices = true,
-              pipe_to_function_call = true,
-              import_to_using = true,
-              always_use_return = true,
-          )'
+          julia  -e 'using JuliaFormatter; format(".")'
       - name: Check format
         run: |
           julia -e '
