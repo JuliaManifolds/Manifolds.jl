@@ -69,6 +69,8 @@ dimensions will be appended to the dimensions already present, for example
 `PowerManifold(PowerManifold(Sphere(2), 2), 3)` is equivalent to
 `PowerManifold(Sphere(2), 2, 3)`. This feature preserves the representation of the inner
 power manifold (unless it's explicitly overridden).
+If you specify `NestedPowerRepresentation()`, the sizes are not concatenated but you end up
+with a nested power manifold within a power manifold.
 """
 struct PowerManifold{𝔽,TM<:Manifold{𝔽},TSize,TPR<:AbstractPowerRepresentation} <:
        AbstractPowerManifold{𝔽,TM,TPR}
@@ -98,7 +100,20 @@ function PowerManifold(
 ) where {𝔽,TM<:Manifold{𝔽},TSize,TPR<:AbstractPowerRepresentation}
     return PowerManifold{𝔽,TM,Tuple{TSize.parameters...,size...},TPR}(M.manifold)
 end
-
+function PowerManifold(
+    M::PowerManifold{𝔽,TM,TSize},
+    ::NestedPowerRepresentation,
+    size::Integer...,
+) where {𝔽,TM<:Manifold{𝔽},TSize}
+    return PowerManifold{
+        𝔽,
+        PowerManifold{𝔽,TM,TSize},
+        Tuple{size...},
+        NestedPowerRepresentation,
+    }(
+        M,
+    )
+end
 @doc raw"""
     PowerMetric <: Metric
 
@@ -430,7 +445,7 @@ function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonorm
         # TODO: this view is really suboptimal when `dim` can be statically determined
         get_coordinates!(
             M.manifold,
-            view(Y, v_iter:(v_iter + dim - 1)),
+            view(Y, v_iter:(v_iter+dim-1)),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             B,
@@ -452,7 +467,7 @@ function get_coordinates!(
     for i in get_iterator(M)
         get_coordinates!(
             M.manifold,
-            view(Y, v_iter:(v_iter + dim - 1)),
+            view(Y, v_iter:(v_iter+dim-1)),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _access_nested(B.data.bases, i),
@@ -485,7 +500,7 @@ function get_vector!(
             M.manifold,
             _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i),
-            X[v_iter:(v_iter + dim - 1)],
+            X[v_iter:(v_iter+dim-1)],
             _access_nested(B.data.bases, i),
         )
         v_iter += dim
@@ -501,7 +516,7 @@ function get_vector!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBas
             M.manifold,
             _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i),
-            X[v_iter:(v_iter + dim - 1)],
+            X[v_iter:(v_iter+dim-1)],
             B,
         )
         v_iter += dim

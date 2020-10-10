@@ -15,6 +15,10 @@ Random.seed!(42)
     Ms2 = PowerManifold(Ms, 5, 7)
     @test power_dimensions(Ms2) == (5, 7)
     @test manifold_dimension(Ms2) == 70
+    Ms2n = PowerManifold(Ms1, NestedPowerRepresentation(), 7)
+    @test power_dimensions(Ms2n) == (7,)
+    @test manifold_dimension(Ms2n) == 70
+
     Mr = Manifolds.Rotations(3)
     Mr1 = PowerManifold(Mr, 5)
     Mrn1 = PowerManifold(Mr, Manifolds.NestedPowerRepresentation(), 5)
