@@ -62,8 +62,9 @@ include("utils.jl")
 
         @testset "inverse QR retraction cases" begin
             M43 = Stiefel(4, 3)
-            p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0; 0.0 0.0 0.0]
-            q = exp(M43, p, [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0; 1.0 1.0 1.0])
+            p = SA[1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0; 0.0 0.0 0.0]
+            Xinit = SA[0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0; 1.0 1.0 1.0]
+            q = retract(M43, p, Xinit, QRRetraction())
             X1 = inverse_retract(
                 M43,
                 SMatrix{4,3}(p),
@@ -72,6 +73,7 @@ include("utils.jl")
             )
             X2 = inverse_retract(M43, p, q, QRInverseRetraction())
             @test isapprox(M43, p, X1, X2)
+            @test isapprox(M43, p, X1, Xinit)
 
             p2 = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             q2 = exp(M, p2, [0.0 0.0; 0.0 0.0; 1.0 1.0])
