@@ -208,7 +208,9 @@ function _stiefel_inv_retr_qr_mul_by_r_generic!(::Stiefel{n,k}, X, q, R, A) wher
         b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
         R[1:i, i] = A[1:i, 1:i] \ b
     end
-    return mul!(X, q, UpperTriangular(R))
+    #TODO: replace with this once it's supported by StaticArrays
+    #return mul!(X, q, UpperTriangular(R))
+    return mul!(X, q, R)
 end
 
 function _stiefel_inv_retr_qr_mul_by_r!(::Stiefel{n,1}, X, q, A, ::Type) where {n}
@@ -236,7 +238,10 @@ function _stiefel_inv_retr_qr_mul_by_r!(::Stiefel{n,2}, X, q, A, ::Type{ElT}) wh
     R11 = inv(A[1, 1])
     @inbounds R =
         hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
-    return mul!(X, q, UpperTriangular(R))
+
+    #TODO: replace with this once it's supported by StaticArrays
+    #return mul!(X, q, UpperTriangular(R))
+    return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
     M::Stiefel{n,2},
