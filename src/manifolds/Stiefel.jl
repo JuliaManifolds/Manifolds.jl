@@ -201,22 +201,101 @@ in [^KanekoFioriTanaka2013].
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)
 
-function inverse_retract!(::Stiefel, X, p, q, ::PolarInverseRetraction)
-    A = p' * q
-    H = -2 * one(p' * p)
-    B = lyap(A, H)
-    return copyto!(X, q * B - p)
-end
-function inverse_retract!(::Stiefel{n,k}, X, p, q, ::QRInverseRetraction) where {n,k}
-    A = p' * q
-    R = zeros(typeof(one(eltype(p)) * one(eltype(q))), k, k)
-    for i in 1:k
+function _stiefel_inv_retr_qr_mul_by_r_generic!(::Stiefel{n,k}, X, q, R, A) where {n,k}
+    @inbounds for i in 1:k
         b = zeros(eltype(R), i)
         b[i] = 1
         b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
         R[1:i, i] = A[1:i, 1:i] \ b
     end
-    return copyto!(X, q * R - p)
+    #TODO: replace with this once it's supported by StaticArrays
+    #return mul!(X, q, UpperTriangular(R))
+    return mul!(X, q, R)
+end
+
+function _stiefel_inv_retr_qr_mul_by_r!(::Stiefel{n,1}, X, q, A, ::Type) where {n}
+    @inbounds R = SMatrix{1,1}(inv(A[1, 1]))
+    return mul!(X, q, R)
+end
+function _stiefel_inv_retr_qr_mul_by_r!(
+    M::Stiefel{n,1},
+    X,
+    q,
+    A::StaticArray,
+    ::Type{ElT},
+) where {n,ElT}
+    return invoke(
+        _stiefel_inv_retr_qr_mul_by_r!,
+        Tuple{Stiefel{n,1},typeof(X),typeof(q),AbstractArray,typeof(ElT)},
+        M,
+        X,
+        q,
+        A,
+        ElT,
+    )
+end
+function _stiefel_inv_retr_qr_mul_by_r!(::Stiefel{n,2}, X, q, A, ::Type{ElT}) where {n,ElT}
+    R11 = inv(A[1, 1])
+    @inbounds R =
+        hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
+
+    #TODO: replace with this once it's supported by StaticArrays
+    #return mul!(X, q, UpperTriangular(R))
+    return mul!(X, q, R)
+end
+function _stiefel_inv_retr_qr_mul_by_r!(
+    M::Stiefel{n,2},
+    X,
+    q,
+    A::StaticArray,
+    ::Type{ElT},
+) where {n,ElT}
+    return invoke(
+        _stiefel_inv_retr_qr_mul_by_r!,
+        Tuple{Stiefel{n,2},typeof(X),typeof(q),AbstractArray,typeof(ElT)},
+        M,
+        X,
+        q,
+        A,
+        ElT,
+    )
+end
+function _stiefel_inv_retr_qr_mul_by_r!(
+    M::Stiefel{n,k},
+    X,
+    q,
+    A::StaticArray,
+    ::Type{ElT},
+) where {n,k,ElT}
+    R = zeros(MMatrix{k,k,ElT})
+    return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
+end
+function _stiefel_inv_retr_qr_mul_by_r!(
+    M::Stiefel{n,k},
+    X,
+    q,
+    A,
+    ::Type{ElT},
+) where {n,k,ElT}
+    R = zeros(ElT, k, k)
+    return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
+end
+
+function inverse_retract!(::Stiefel, X, p, q, ::PolarInverseRetraction)
+    A = p' * q
+    H = -2 * one(p' * p)
+    B = lyap(A, H)
+    mul!(X, q, B)
+    X .-= p
+    return X
+end
+function inverse_retract!(M::Stiefel{n,k}, X, p, q, ::QRInverseRetraction) where {n,k}
+    A = p' * q
+    @boundscheck size(A) === (k, k)
+    ElT = typeof(one(eltype(p)) * one(eltype(q)))
+    _stiefel_inv_retr_qr_mul_by_r!(M, X, q, A, ElT)
+    X .-= p
+    return X
 end
 
 function Base.isapprox(M::Stiefel, p, X, Y; kwargs...)
@@ -373,6 +452,9 @@ where $\operatorname{sgn}(p) = \begin{cases}
 """
 retract(::Stiefel, ::Any, ::Any, ::QRRetraction)
 
+_qrfac_to_q(qrfac) = Matrix(qrfac.Q)
+_qrfac_to_q(qrfac::StaticArrays.QR) = qrfac.Q
+
 function retract!(::Stiefel, q, p, X, ::PadeRetraction{m}) where {m}
     Pp = I - 1 // 2 * p * p'
     WpX = Pp * X * p' - p * X' * Pp
@@ -402,7 +484,9 @@ function retract!(::Stiefel, q, p, X, ::QRRetraction)
     qrfac = qr(p + X)
     d = diag(qrfac.R)
     D = Diagonal(sign.(sign.(d .+ 0.5)))
-    return copyto!(q, Matrix(qrfac.Q) * D)
+    #TODO: replace with this once it's supported by StaticArrays
+    #return mul!(q, _qrfac_to_q(qrfac), D)
+    return copyto!(q, _qrfac_to_q(qrfac) * D)
 end
 
 @doc raw"""
