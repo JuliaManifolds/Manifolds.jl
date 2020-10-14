@@ -484,7 +484,9 @@ function retract!(::Stiefel, q, p, X, ::QRRetraction)
     qrfac = qr(p + X)
     d = diag(qrfac.R)
     D = Diagonal(sign.(sign.(d .+ 0.5)))
-    return mul!(q, _qrfac_to_q(qrfac), D)
+    #TODO: replace with this once it's supported by StaticArrays
+    #return mul!(q, _qrfac_to_q(qrfac), D)
+    return copyto!(q, _qrfac_to_q(qrfac) * D)
 end
 
 @doc raw"""
