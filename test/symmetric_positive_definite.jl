@@ -108,9 +108,9 @@ using Manifolds: default_metric_dispatch
         X = get_vectors(base_manifold(M2), x, donb)
         k = donb.data.eigenvalues
         @test isapprox(0.0, first(k))
-        for i = 1:length(X)
+        for i in 1:length(X)
             @test isapprox(1.0, norm(M2, x, X[i]))
-            for j = (i+1):length(X)
+            for j in (i + 1):length(X)
                 @test isapprox(0.0, inner(M2, x, X[i], X[j]))
             end
         end

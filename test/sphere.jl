@@ -91,8 +91,8 @@ include("utils.jl")
         B = DefaultOrthonormalBasis(ℝ)
         n = manifold_dimension(M)
         p = [1; zeros(n)]
-        for i = 1:n  # p'x ± 1
-            vcoord = [j == i for j = 1:n]
+        for i in 1:n  # p'x ± 1
+            vcoord = [j == i for j in 1:n]
             v = [0; vcoord]
             @test get_coordinates(M, p, v, B) ≈ vcoord
             @test get_vector(M, p, vcoord, B) ≈ v
@@ -100,8 +100,8 @@ include("utils.jl")
             @test get_vector(M, -p, vcoord, B) ≈ v
         end
         p = [0; 1; zeros(n - 1)] # p'x = 0
-        for i = 1:n
-            vcoord = [j == i for j = 1:n]
+        for i in 1:n
+            vcoord = [j == i for j in 1:n]
             v = get_vector(M, p, vcoord, B)
             @test is_tangent_vector(M, p, v)
             @test get_coordinates(M, p, v, B) ≈ vcoord

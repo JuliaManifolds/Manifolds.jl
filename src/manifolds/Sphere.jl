@@ -201,7 +201,7 @@ function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) w
         V = cat(B.frame_direction / norm(M, p, B.frame_direction), V; dims = 2)
         κ[1] = 0 # no curvature along the geodesic direction, if x!=y
     end
-    Ξ = [V[:, i] for i = 1:n]
+    Ξ = [V[:, i] for i in 1:n]
     return CachedBasis(B, κ, Ξ)
 end
 
@@ -225,7 +225,7 @@ function get_coordinates!(M::AbstractSphere{ℝ}, Y, p, X, ::DefaultOrthonormalB
     p1 = p[1]
     cosθ = abs(p1)
     λ = nzsign(p1, cosθ)
-    pend, Xend = view(p, 2:(n+1)), view(X, 2:(n+1))
+    pend, Xend = view(p, 2:(n + 1)), view(X, 2:(n + 1))
     factor = λ * X[1] / (1 + cosθ)
     Y .= Xend .- pend .* factor
     return Y
@@ -252,11 +252,11 @@ function get_vector!(M::AbstractSphere{ℝ}, Y, p, X, ::DefaultOrthonormalBasis{
     p1 = p[1]
     cosθ = abs(p1)
     λ = nzsign(p1, cosθ)
-    pend = view(p, 2:(n+1))
+    pend = view(p, 2:(n + 1))
     pX = dot(pend, X)
     factor = pX / (1 + cosθ)
     Y[1] = -λ * pX
-    Y[2:(n+1)] .= X .- pend .* factor
+    Y[2:(n + 1)] .= X .- pend .* factor
     return Y
 end
 

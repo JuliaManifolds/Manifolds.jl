@@ -216,10 +216,10 @@ include("utils.jl")
         p = Manifolds._hyperbolize(M, [1.0, 0.0])
         B = get_basis(M, p, DefaultOrthonormalBasis())
         V = get_vectors(M, p, B)
-        for v ∈ V
+        for v in V
             @test is_tangent_vector(M, p, v, true)
         end
-        for v ∈ V, w ∈ V
+        for v in V, w in V
             @test inner(M, p, v, w) ≈ (v == w ? 1 : 0)
         end
         X = 0.5 * V[1] + 1.0 .* V[2]

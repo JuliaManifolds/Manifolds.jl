@@ -31,17 +31,17 @@ function add_manifold(
     SUITE["manifolds"][name]["log"] = @benchmarkable log($M, $(pts[1]), $(pts[2]))
     SUITE["manifolds"][name]["log!"] = @benchmarkable log!($M, $tv, $(pts[1]), $(pts[2]))
     for iretr in inverse_retraction_methods
-        SUITE["manifolds"][name]["inverse_retract: "*string(iretr)] =
+        SUITE["manifolds"][name]["inverse_retract: " * string(iretr)] =
             @benchmarkable inverse_retract($M, $(pts[1]), $(pts[2]), $iretr)
-        SUITE["manifolds"][name]["inverse_retract!: "*string(iretr)] =
+        SUITE["manifolds"][name]["inverse_retract!: " * string(iretr)] =
             @benchmarkable inverse_retract!($M, $tv, $(pts[1]), $(pts[2]), $iretr)
     end
     SUITE["manifolds"][name]["exp"] = @benchmarkable exp($M, $(pts[1]), $tv1)
     SUITE["manifolds"][name]["exp!"] = @benchmarkable exp!($M, $p, $(pts[1]), $tv1)
     for retr in retraction_methods
-        SUITE["manifolds"][name]["retract: "*string(retr)] =
+        SUITE["manifolds"][name]["retract: " * string(retr)] =
             @benchmarkable retract($M, $(pts[1]), $tv1, $retr)
-        SUITE["manifolds"][name]["retract!: "*string(retr)] =
+        SUITE["manifolds"][name]["retract!: " * string(retr)] =
             @benchmarkable retract!($M, $p, $(pts[1]), $tv1, $retr)
     end
     SUITE["manifolds"][name]["norm"] = @benchmarkable norm($M, $(pts[1]), $tv1)
@@ -63,13 +63,13 @@ function add_manifold(
     for pd in point_distributions
         distr_name = string(pd)
         distr_name = distr_name[1:min(length(distr_name), 50)]
-        SUITE["manifolds"][name]["point distribution "*distr_name] =
+        SUITE["manifolds"][name]["point distribution " * distr_name] =
             @benchmarkable rand($pd)
     end
     for tvd in point_distributions
         distr_name = string(tvd)
         distr_name = distr_name[1:min(length(distr_name), 50)]
-        SUITE["manifolds"][name]["tangent vector distribution "*distr_name] =
+        SUITE["manifolds"][name]["tangent vector distribution " * distr_name] =
             @benchmarkable rand($tvd)
     end
     return nothing
@@ -252,7 +252,7 @@ function add_manifold_benchmarks()
         trim(s::String) = s[1:min(length(s), 20)]
 
         for T in types_s1
-            pts1 = [convert(T, rand(power_s1_pt_dist)) for _ = 1:3]
+            pts1 = [convert(T, rand(power_s1_pt_dist)) for _ in 1:3]
             add_manifold(
                 Ms1,
                 pts1,
@@ -261,7 +261,7 @@ function add_manifold_benchmarks()
             )
         end
         for T in types_s2
-            pts2 = [convert(T, rand(power_s2_pt_dist)) for _ = 1:3]
+            pts2 = [convert(T, rand(power_s2_pt_dist)) for _ in 1:3]
             add_manifold(
                 Ms2,
                 pts2,
@@ -271,7 +271,7 @@ function add_manifold_benchmarks()
         end
 
         for T in types_r1
-            pts1 = [convert(T, rand(power_r1_pt_dist)) for _ = 1:3]
+            pts1 = [convert(T, rand(power_r1_pt_dist)) for _ in 1:3]
             add_manifold(
                 Mr1,
                 pts1,
@@ -280,7 +280,7 @@ function add_manifold_benchmarks()
             )
         end
         for T in types_r2
-            pts2 = [convert(T, rand(power_r2_pt_dist)) for _ = 1:3]
+            pts2 = [convert(T, rand(power_r2_pt_dist)) for _ in 1:3]
             add_manifold(
                 Mr2,
                 pts2,

@@ -213,7 +213,7 @@ function get_coordinates!(
     z = p[1]
     cosθ = abs(z)
     λ = nzsign(z, cosθ)
-    pend, Xend = view(p, 2:(n+1)), view(X, 2:(n+1))
+    pend, Xend = view(p, 2:(n + 1)), view(X, 2:(n + 1))
     factor = λ' * X[1] / (1 + cosθ)
     Y .= (Xend .- pend .* factor) .* λ'
     return Y
@@ -248,10 +248,10 @@ function get_vector!(
     z = p[1]
     cosθ = abs(z)
     λ = nzsign(z, cosθ)
-    pend = view(p, 2:(n+1))
+    pend = view(p, 2:(n + 1))
     pX = dot(pend, X)
     Y[1] = -λ * pX * λ
-    Y[2:(n+1)] .= (X .- pend .* (pX / (1 + cosθ))) .* λ
+    Y[2:(n + 1)] .= (X .- pend .* (pX / (1 + cosθ))) .* λ
     return Y
 end
 

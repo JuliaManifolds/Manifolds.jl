@@ -217,7 +217,7 @@ end
 function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis{ℂ})
     S = representation_size(M)
     N = div(length(X), 2)
-    Y .= reshape(X[1:N] + im * X[(N+1):end], S)
+    Y .= reshape(X[1:N] + im * X[(N + 1):end], S)
     return Y
 end
 

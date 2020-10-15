@@ -67,7 +67,7 @@ function Manifolds.vector_transport_to!(::BaseManifold, vto, x, v, y, ::Parallel
     return (vto .= v)
 end
 function Manifolds.get_basis(::BaseManifold{N}, x, B::DefaultOrthonormalBasis) where {N}
-    return CachedBasis(B, [(Matrix{eltype(x)}(I, N, N)[:, i]) for i = 1:N])
+    return CachedBasis(B, [(Matrix{eltype(x)}(I, N, N)[:, i]) for i in 1:N])
 end
 Manifolds.get_coordinates!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
 Manifolds.get_vector!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
@@ -270,7 +270,7 @@ end
             end
 
             Γ₁ = christoffel_symbols_first(M, x)
-            for i = 1:n, j = 1:n, k = 1:n
+            for i in 1:n, j in 1:n, k in 1:n
                 if (i, j, k) == (1, 2, 2) || (i, j, k) == (2, 1, 2)
                     @test Γ₁[i, j, k] ≈ r^2 * cos(θ) * sin(θ) atol = 1e-6
                 elseif (i, j, k) == (2, 2, 1)
@@ -281,7 +281,7 @@ end
             end
 
             Γ₂ = christoffel_symbols_second(M, x)
-            for l = 1:n, i = 1:n, j = 1:n
+            for l in 1:n, i in 1:n, j in 1:n
                 if (l, i, j) == (1, 2, 2)
                     @test Γ₂[l, i, j] ≈ -cos(θ) * sin(θ) atol = 1e-6
                 elseif (l, i, j) == (2, 1, 2) || (l, i, j) == (2, 2, 1)
@@ -292,7 +292,7 @@ end
             end
 
             R = riemann_tensor(M, x)
-            for l = 1:n, i = 1:n, j = 1:n, k = 1:n
+            for l in 1:n, i in 1:n, j in 1:n, k in 1:n
                 if (l, i, j, k) == (2, 1, 1, 2)
                     @test R[l, i, j, k] ≈ -1 atol = 2e-6
                 elseif (l, i, j, k) == (2, 1, 2, 1)

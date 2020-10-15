@@ -158,7 +158,7 @@ project(::MultinomialDoubleStochastic, ::Any, ::Any)
 
 function project!(::MultinomialDoubleStochastic{n}, X, p, Y) where {n}
     ζ = [I p; p I] \ [sum(Y, dims = 2); sum(Y, dims = 1)'] # Formula (25) from 1802.02628
-    return X .= Y .- (repeat(ζ[1:n], 1, 3) .+ repeat(ζ[(n+1):end]', 3, 1)) .* p
+    return X .= Y .- (repeat(ζ[1:n], 1, 3) .+ repeat(ζ[(n + 1):end]', 3, 1)) .* p
 end
 
 @doc raw"""

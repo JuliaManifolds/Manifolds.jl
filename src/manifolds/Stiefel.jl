@@ -202,10 +202,10 @@ in [^KanekoFioriTanaka2013].
 inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)
 
 function _stiefel_inv_retr_qr_mul_by_r_generic!(::Stiefel{n,k}, X, q, R, A) where {n,k}
-    @inbounds for i = 1:k
+    @inbounds for i in 1:k
         b = zeros(eltype(R), i)
         b[i] = 1
-        b[1:(end-1)] = -transpose(R[1:(i-1), 1:(i-1)]) * A[i, 1:(i-1)]
+        b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
         R[1:i, i] = A[1:i, 1:i] \ b
     end
     #TODO: replace with this once it's supported by StaticArrays
@@ -237,7 +237,7 @@ end
 function _stiefel_inv_retr_qr_mul_by_r!(::Stiefel{n,2}, X, q, A, ::Type{ElT}) where {n,ElT}
     R11 = inv(A[1, 1])
     @inbounds R =
-        hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11*A[2, 1], one(ElT)])
+        hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
 
     #TODO: replace with this once it's supported by StaticArrays
     #return mul!(X, q, UpperTriangular(R))
@@ -462,7 +462,7 @@ function retract!(::Stiefel, q, p, X, ::PadeRetraction{m}) where {m}
     qm = zeros(size(WpX))
     WpXk = similar(WpX)
     copyto!(WpXk, factorial(m) / factorial(2 * m) * I) # factorial factor independent of k
-    for k = 0:m
+    for k in 0:m
         # incrementally build (2m-k)!/(m-k)!(k)! for k > 0, i.e.
         # remove factor (2m-k+1) in the nominator, (m-k+1) in the denominator and multiply by 1/k
         WpXk .*= (k == 0 ? 2 : (m - k + 1) / ((2 * m - k + 1) * k))

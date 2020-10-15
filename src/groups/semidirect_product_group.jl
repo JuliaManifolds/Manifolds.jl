@@ -137,7 +137,7 @@ function get_vector!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
     np, hp = submanifold_components(G, p)
     nY, hY = submanifold_components(G, Y)
     get_vector!(N, nY, np, view(X, 1:dimN), B)
-    get_vector!(H, hY, hp, view(X, (dimN+1):(dimN+dimH)), B)
+    get_vector!(H, hY, hp, view(X, (dimN + 1):(dimN + dimH)), B)
     @inbounds _padvector!(G, Y)
     return Y
 end
@@ -162,7 +162,7 @@ function get_coordinates!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBa
     np, hp = submanifold_components(G, p)
     nY, hY = submanifold_components(G, X)
     get_coordinates!(N, view(Y, 1:dimN), np, nY, B)
-    get_coordinates!(H, view(Y, (dimN+1):(dimN+dimH)), hp, hY, B)
+    get_coordinates!(H, view(Y, (dimN + 1):(dimN + dimH)), hp, hY, B)
     return Y
 end
 eval(

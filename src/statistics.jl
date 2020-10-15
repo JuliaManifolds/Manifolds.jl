@@ -268,11 +268,11 @@ function Statistics.mean!(
     v = zero_tangent_vector(M, y)
     vtmp = copy(v)
     α = w ./ cumsum(w)
-    for i = 1:stop_iter
+    for i in 1:stop_iter
         copyto!(yold, y)
         # Online weighted mean
         @inbounds inverse_retract!(M, v, yold, x[1], inverse_retraction)
-        @inbounds for j = 2:n
+        @inbounds for j in 2:n
             inverse_retract!(M, vtmp, yold, x[j], inverse_retraction)
             v .+= α[j] .* (vtmp .- v)
         end
@@ -329,7 +329,7 @@ function Statistics.mean!(
     end
     v = zero_tangent_vector(M, q)
     ytmp = allocate_result(M, mean, q)
-    @inbounds for i = 2:n
+    @inbounds for i in 2:n
         j = order[i]
         s += w[j]
         t = w[j] / s
@@ -402,10 +402,10 @@ function Statistics.mean!(
     ytmp = copy(yold)
     X = zero_tangent_vector(M, q)
     wv = convert(AbstractVector, w) ./ sum(w)
-    for i = 1:stop_iter
+    for i in 1:stop_iter
         λ = 0.5 / i
         copyto!(yold, q)
-        for j = 1:n
+        for j in 1:n
             @inbounds t = (2 * λ * wv[j]) / (1 + 2 * λ * wv[j])
             @inbounds inverse_retract!(M, X, q, x[j], inverse_retraction)
             retract!(M, ytmp, q, X, t, retraction)
@@ -610,10 +610,10 @@ function Statistics.median!(
     ytmp = copy(yold)
     v = zero_tangent_vector(M, q)
     wv = convert(AbstractVector, w) ./ sum(w)
-    for i = 1:stop_iter
+    for i in 1:stop_iter
         λ = 0.5 / i
         copyto!(yold, q)
-        for j = 1:n
+        for j in 1:n
             @inbounds t = min(λ * wv[j] / distance(M, q, x[j]), 1.0)
             @inbounds inverse_retract!(M, v, q, x[j], inverse_retraction)
             retract!(M, ytmp, q, v, t, retraction)
@@ -798,7 +798,7 @@ function StatsBase.mean_and_var(
     v = zero_tangent_vector(M, y)
     M₂ = zero(number_eltype(v))
     ytmp = allocate_result(M, mean, y)
-    @inbounds for i = 2:n
+    @inbounds for i in 2:n
         j = order[i]
         snew = s + w[j]
         t = w[j] / snew
