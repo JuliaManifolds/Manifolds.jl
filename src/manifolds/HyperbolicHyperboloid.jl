@@ -241,33 +241,33 @@ end
 
 function get_basis(M::Hyperbolic, p, B::DefaultOrthonormalBasis)
     n = manifold_dimension(M)
-    V = [ _hyperbolize(M, p, [i==k ? 1 : 0 for k=1:n]) for i=1:n]
+    V = [_hyperbolize(M, p, [i == k ? 1 : 0 for k = 1:n]) for i = 1:n]
     _gram_schmidt!(M, V, p, V)
-    return CachedNases(B,V)
+    return CachedBasis(B, V)
 end
 
 function get_basis(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)
     n = manifold_dimension(M)
-    X = B.framedirection
-    V = [ _hyperbolize(M, p, [i==k ? 1 : 0 for k=1:n]) for i=1:n]
+    X = B.frame_direction
+    V = [_hyperbolize(M, p, [i == k ? 1 : 0 for k = 1:n]) for i = 1:n]
     κ = -ones(n)
-    if norm(M,p,X) != 0
+    if norm(M, p, X) != 0
         placed = false
-        for j ∈ 1:n
-            if norm(M,p,V[i] - inner(M,p,X,V[i]) .* V[i]) ≈ 0 # is X a multiple of V[i]?
+        for i ∈ 1:n
+            if norm(M, p, V[i] - inner(M, p, X, V[i]) .* V[i]) ≈ 0 # is X a multiple of V[i]?
                 V[i] .= V[1]
                 V[1] .= X
                 placed = true
                 break
             end
         end
-        if !places
+        if !placed
             V[1] .= X
         end
-        κ[1] = 0.
+        κ[1] = 0.0
     end
     _gram_schmidt!(M, V, p, V)
-    return CachedNases(B,DiagonalizingBasisData(B.framedirection, κ, V))
+    return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, κ, V))
 end
 
 @doc raw"""
@@ -279,8 +279,14 @@ the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hype
 """
 get_coordinates(M::Hyperbolic, p, X, B::DefaultOrthonormalBasis)
 
-function get_coordinates!(M::Hyperbolic,c,p,X, B::Union{DefaultOrthonormalBasis,DiagonalizingOrthonormalBasis})
-    c = get_coordinates!(M, c, p, X, get_basis(M,p,B))
+function get_coordinates!(
+    M::Hyperbolic,
+    c,
+    p,
+    X,
+    B::Union{DefaultOrthonormalBasis,DiagonalizingOrthonormalBasis},
+)
+    c = get_coordinates!(M, c, p, X, get_basis(M, p, B))
     return c
 end
 
@@ -293,8 +299,14 @@ the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hype
 """
 get_vector(M::Hyperbolic, p, c, ::DefaultOrthonormalBasis)
 
-function get_vector!(M::Hyperbolic, X, p, c,B::Union{DefaultOrthonormalBasis,DiagonalizingOrthonormalBasis})
-    X = get_coordinates!(M, X, p, c, get_basis(M,p,B))
+function get_vector!(
+    M::Hyperbolic,
+    X,
+    p,
+    c,
+    B::Union{DefaultOrthonormalBasis,DiagonalizingOrthonormalBasis},
+)
+    X = get_coordinates!(M, X, p, c, get_basis(M, p, B))
     return X
 end
 
@@ -306,7 +318,7 @@ $q\in ℝ^n$ can be set onto the manifold by computing its last component such t
 resulting `p` we have that its [`minkowski_metric`](@ref) is $⟨p,p⟩_{\mathrm{M}} = - 1$,
 i.e. $p_{n+1} = \sqrt{\lVert q \rVert^2-^}$
 """
-_hyperbolize(M::Hyperbolic, q) = [q..., sqrt(norm(q)^2+1) ]
+_hyperbolize(M::Hyperbolic, q) = [q..., sqrt(norm(q)^2 + 1)]
 
 @doc raw"""
     _hyperbolize(M, p, Y)
@@ -317,7 +329,7 @@ component such that for the
 resulting `p` we have that its [`minkowski_metric`](@ref) is $⟨p,X⟩_{\mathrm{M}} = 0$,
 i.e. $X_{n+1} = \frac{⟨\tilde p, Y⟩}{p_{n+1}}$, where $\tilde p = (p_1,\ldots,p_n)$.
 """
-_hyperbolize(M::Hyperbolic, p, Y) = [Y..., -dot(p[1:end-1],Y)/p[end]]
+_hyperbolize(M::Hyperbolic, p, Y) = [Y..., dot(p[1:end-1], Y) / p[end]]
 
 @doc raw"""
     _gram_schmidt!(M, W, p, V)
@@ -328,18 +340,18 @@ This method throws an error if you provide more vectors than [`manifold_dimensio
 The result is returned in W
 """
 function _gram_schmidt!(M::Manifold, W, p, V::AbstractVector)
-    manifold_dimension(M) < length(V) && throw(
-        ErrorException("The set of vectors cvontains too many ($(length(V))) vectors for the manifold $(M) of dimension $(manifold_dimension(M))")
-    )
+    manifold_dimension(M) < length(V) &&
+        throw(ErrorException("The set of vectors cvontains too many ($(length(V))) vectors for the manifold $(M) of dimension $(manifold_dimension(M))"))
     n = norm(M, p, W[1])
     n == 0 && throw(ErrorException("Vector #1 of the set of vectors is zero."))
     W[1] ./= n
     for i ∈ 2:length(V)
         for j ∈ 1:i-1
-            W[i] .-= inner(M,p,W[i],W[j]) .* W[j]
+            W[i] .-= inner(M, p, W[i], W[j]) .* W[j]
         end
         n = norm(M, p, W[i])
-        n == 0 && throw(ErrorException("Vector #$(i) is in the span of the previous vectors."))
+        n == 0 &&
+            throw(ErrorException("Vector #$(i) is in the span of the previous vectors."))
         W[i] ./= n
     end
     return W
