@@ -123,6 +123,7 @@ include("manifolds/CenteredMatrices.jl")
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
 include("manifolds/Elliptope.jl")
+#include("manifolds/EssentialManifold.jl")
 include("manifolds/FixedRankMatrices.jl")
 include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
@@ -209,6 +210,7 @@ export Euclidean,
     CholeskySpace,
     Circle,
     Elliptope,
+    #EssentialManifold,
     FixedRankMatrices,
     GeneralizedGrassmann,
     GeneralizedStiefel,
