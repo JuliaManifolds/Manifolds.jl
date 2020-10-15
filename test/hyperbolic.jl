@@ -213,27 +213,27 @@ include("utils.jl")
     end
     @testset "Hyperbolic ONB test" begin
         M = Hyperbolic(2)
-        p = Manifolds._hyperbolize(M,[1.0,0.0])
-        B = get_basis(M,p,DefaultOrthonormalBasis())
-        V = get_vectors(M,p,B)
+        p = Manifolds._hyperbolize(M, [1.0, 0.0])
+        B = get_basis(M, p, DefaultOrthonormalBasis())
+        V = get_vectors(M, p, B)
         for v ∈ V
-            @test is_tangent_vector(M,p,v,true)
+            @test is_tangent_vector(M, p, v, true)
         end
         for v ∈ V, w ∈ V
-            @test inner(M,p,v,w) ≈ (v==w ? 1 : 0)
+            @test inner(M, p, v, w) ≈ (v == w ? 1 : 0)
         end
         X = 0.5 * V[1] + 1.0 .* V[2]
-        @test is_tangent_vector(M,p,X)
-        c = get_coordinates(M,p,X,B)
+        @test is_tangent_vector(M, p, X)
+        c = get_coordinates(M, p, X, B)
         @test c ≈ [0.5, 1.0]
         B2 = DiagonalizingOrthonormalBasis(X)
-        V = get_vectors(M,p,get_basis(M,p,B2))
-        @test V[1] ≈ X ./ norm(M,p,X)
+        V = get_vectors(M, p, get_basis(M, p, B2))
+        @test V[1] ≈ X ./ norm(M, p, X)
         @test norm(M, p, V[2]) ≈ 1
-        @test inner(M,p,V[1],V[2]) ≈ 0.0 atol=1e-16
-        V[2] .= zero_tangent_vector(M,p)
-        @test_throws ErrorException Manifolds._gram_schmidt!(M,V,p,V)
-        V[1] .= zero_tangent_vector(M,p)
-        @test_throws ErrorException Manifolds._gram_schmidt!(M,V,p,V)
+        @test inner(M, p, V[1], V[2]) ≈ 0.0 atol = 1e-16
+        V[2] .= zero_tangent_vector(M, p)
+        @test_throws ErrorException Manifolds._gram_schmidt!(M, V, p, V)
+        V[1] .= zero_tangent_vector(M, p)
+        @test_throws ErrorException Manifolds._gram_schmidt!(M, V, p, V)
     end
 end

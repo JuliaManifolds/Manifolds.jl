@@ -332,7 +332,7 @@ exp(::MetricManifold, ::Any...)
     tspan = (0.0, 1.0)
     sol = solve_exp_ode(M, p, X, tspan; dense = false, saveat = [1.0])
     n = length(p)
-    return copyto!(q, sol.u[1][(n + 1):end])
+    return copyto!(q, sol.u[1][(n+1):end])
 end
 
 @doc raw"""

@@ -363,7 +363,7 @@ function get_coordinates!(M::VectorBundle, Y, p, X, B::AbstractBasis)
     VXM, VXF = submanifold_components(M.manifold, X)
     n = manifold_dimension(M.manifold)
     get_coordinates!(M.manifold, view(Y, 1:n), px, VXM, B)
-    get_coordinates!(M.fiber, view(Y, (n + 1):length(Y)), px, VXF, B)
+    get_coordinates!(M.fiber, view(Y, (n+1):length(Y)), px, VXF, B)
     return Y
 end
 function get_coordinates!(
@@ -377,7 +377,7 @@ function get_coordinates!(
     VXM, VXF = submanifold_components(M.manifold, X)
     n = manifold_dimension(M.manifold)
     get_coordinates!(M.manifold, view(Y, 1:n), px, VXM, B.data.base_basis)
-    get_coordinates!(M.fiber, view(Y, (n + 1):length(Y)), px, VXF, B.data.vec_basis)
+    get_coordinates!(M.fiber, view(Y, (n+1):length(Y)), px, VXF, B.data.vec_basis)
     return Y
 end
 for BT in [
@@ -418,7 +418,7 @@ function get_vector!(M::VectorBundle, Y, p, X, B::DefaultOrthonormalBasis)
     n = manifold_dimension(M.manifold)
     xp1 = submanifold_component(p, Val(1))
     get_vector!(M.manifold, submanifold_component(Y, Val(1)), xp1, X[1:n], B)
-    get_vector!(M.fiber, submanifold_component(Y, Val(2)), xp1, X[(n + 1):end], B)
+    get_vector!(M.fiber, submanifold_component(Y, Val(2)), xp1, X[(n+1):end], B)
     return Y
 end
 function get_vector!(
@@ -441,7 +441,7 @@ function get_vector!(
         M.fiber,
         submanifold_component(Y, Val(2)),
         xp1,
-        X[(n + 1):end],
+        X[(n+1):end],
         B.data.vec_basis,
     )
     return Y

@@ -445,7 +445,7 @@ function get_coordinates!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonorm
         # TODO: this view is really suboptimal when `dim` can be statically determined
         get_coordinates!(
             M.manifold,
-            view(Y, v_iter:(v_iter + dim - 1)),
+            view(Y, v_iter:(v_iter+dim-1)),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             B,
@@ -467,7 +467,7 @@ function get_coordinates!(
     for i in get_iterator(M)
         get_coordinates!(
             M.manifold,
-            view(Y, v_iter:(v_iter + dim - 1)),
+            view(Y, v_iter:(v_iter+dim-1)),
             _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
             _access_nested(B.data.bases, i),
@@ -500,7 +500,7 @@ function get_vector!(
             M.manifold,
             _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i),
-            X[v_iter:(v_iter + dim - 1)],
+            X[v_iter:(v_iter+dim-1)],
             _access_nested(B.data.bases, i),
         )
         v_iter += dim
@@ -516,7 +516,7 @@ function get_vector!(M::AbstractPowerManifold, Y, p, X, B::DefaultOrthonormalBas
             M.manifold,
             _write(M, rep_size, Y, i),
             _read(M, rep_size, p, i),
-            X[v_iter:(v_iter + dim - 1)],
+            X[v_iter:(v_iter+dim-1)],
             B,
         )
         v_iter += dim

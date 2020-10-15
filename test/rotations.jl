@@ -87,7 +87,7 @@ include("utils.jl")
             SOn = Manifolds.Rotations(n)
             ptd = Manifolds.normal_rotation_distribution(SOn, Matrix(1.0I, n, n), 1.0)
             tvd = Manifolds.normal_tvector_distribution(SOn, Matrix(1.0I, n, n), 1.0)
-            pts = [rand(ptd) for _ in 1:3]
+            pts = [rand(ptd) for _ = 1:3]
             test_manifold(
                 SOn,
                 pts;

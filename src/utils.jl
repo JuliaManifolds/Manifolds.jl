@@ -99,7 +99,7 @@ lengths, the result is trimmed to the length of the shorter tuple.
 """
 @generated function ziptuples(a::NTuple{N,Any}, b::NTuple{M,Any}) where {N,M}
     ex = Expr(:tuple)
-    for i in 1:min(N, M)
+    for i = 1:min(N, M)
         push!(ex.args, :((a[$i], b[$i])))
     end
     return ex
@@ -110,7 +110,7 @@ end
     c::NTuple{L,Any},
 ) where {N,M,L}
     ex = Expr(:tuple)
-    for i in 1:min(N, M, L)
+    for i = 1:min(N, M, L)
         push!(ex.args, :((a[$i], b[$i], c[$i])))
     end
     return ex
@@ -122,7 +122,7 @@ end
     d::NTuple{K,Any},
 ) where {N,M,L,K}
     ex = Expr(:tuple)
-    for i in 1:min(N, M, L, K)
+    for i = 1:min(N, M, L, K)
         push!(ex.args, :((a[$i], b[$i], c[$i], d[$i])))
     end
     return ex
@@ -135,7 +135,7 @@ end
     e::NTuple{J,Any},
 ) where {N,M,L,K,J}
     ex = Expr(:tuple)
-    for i in 1:min(N, M, L, K, J)
+    for i = 1:min(N, M, L, K, J)
         push!(ex.args, :((a[$i], b[$i], c[$i], d[$i], e[$i])))
     end
     return ex

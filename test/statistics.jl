@@ -191,7 +191,7 @@ function test_moments(M, x)
     n = length(x)
     @testset "moments unweighted" begin
         m = mean(M, x)
-        for i in 1:5
+        for i = 1:5
             @test moment(M, x, i) ≈ mean(distance.(Ref(M), Ref(m), x) .^ i)
             @test moment(M, x, i, m) ≈ moment(M, x, i)
         end
@@ -212,7 +212,7 @@ function test_moments(M, x)
 
         for w in (w1, w2, w3)
             m = mean(M, x, w)
-            for i in 1:5
+            for i = 1:5
                 @test moment(M, x, i, w) ≈ mean(distance.(Ref(M), Ref(m), x) .^ i, w)
                 @test moment(M, x, i, w, m) ≈ moment(M, x, i, w)
             end
@@ -423,7 +423,7 @@ end
             M = TestStatsEuclidean(1)
 
             rng = MersenneTwister(42)
-            x = [randn(rng, 1) for _ in 1:10]
+            x = [randn(rng, 1) for _ = 1:10]
             vx = vcat(x...)
 
             test_mean(M, x, mean(x))
@@ -442,7 +442,7 @@ end
             M = TestStatsEuclidean(5)
 
             rng = MersenneTwister(42)
-            x = [randn(rng, 5) for _ in 1:10]
+            x = [randn(rng, 5) for _ = 1:10]
             test_mean(M, x, mean(x))
             test_var(M, x, sum(var(x)))
             test_std(M, x, sqrt(sum(std(x) .^ 2)))
@@ -504,8 +504,8 @@ end
             rng = MersenneTwister(1212)
             @testset "exact for Euclidean" begin
                 M = Euclidean(2, 2)
-                x = [randn(rng, 2, 2) for _ in 1:10]
-                w = pweights([rand(rng) for _ in 1:10])
+                x = [randn(rng, 2, 2) for _ = 1:10]
+                w = pweights([rand(rng) for _ = 1:10])
                 @test mean(M, x, GeodesicInterpolation()) ≈ mean(x)
                 @test mean(M, x, w, GeodesicInterpolation()) ≈
                       mean(M, x, w, GradientDescentEstimation())
@@ -531,8 +531,8 @@ end
 
             @testset "resumable" begin
                 S = Sphere(2)
-                x = [normalize(randn(rng, 3)) for _ in 1:10]
-                w = pweights([rand(rng) for _ in 1:10])
+                x = [normalize(randn(rng, 3)) for _ = 1:10]
+                w = pweights([rand(rng) for _ = 1:10])
                 ypart = mean(S, x[1:5], pweights(w[1:5]), GeodesicInterpolation())
                 yfull = mean(S, x, w, GeodesicInterpolation())
                 x2 = [[ypart]; x[6:end]]
@@ -546,8 +546,8 @@ end
 
             @testset "exact for Euclidean" begin
                 M = TestStatsEuclidean(4)
-                x = [randn(rng, 4) for _ in 1:10]
-                w = pweights([rand(rng) for _ in 1:10])
+                x = [randn(rng, 4) for _ = 1:10]
+                w = pweights([rand(rng) for _ = 1:10])
                 m1, v1 = mean_and_var(M, x, GeodesicInterpolation())
                 @test m1 ≈ mean(x)
                 @test v1 ≈ sum(var(x))
@@ -612,8 +612,8 @@ end
             P2 = MetricManifold(P1, LinearAffineMetric())
             @testset "$P" for P in [P1, P2]
                 p0 = collect(exp(Symmetric(randn(rng, 3, 3) * 0.1)))
-                x = [exp(P, p0, Symmetric(randn(rng, 3, 3) * 0.1)) for _ in 1:10]
-                w = pweights([rand(rng) for _ in 1:length(x)])
+                x = [exp(P, p0, Symmetric(randn(rng, 3, 3) * 0.1)) for _ = 1:10]
+                w = pweights([rand(rng) for _ = 1:length(x)])
                 m = mean(P, x, w)
                 mg = mean(P, x, w, GeodesicInterpolation())
                 mf = mean(P, x, w, GradientDescentEstimation())
@@ -626,9 +626,9 @@ end
             rng = MersenneTwister(47)
             S = Sphere(2)
             p0 = [1.0, 0, 0]
-            x = [normalize(randn(rng, 3)) for _ in 1:10]
+            x = [normalize(randn(rng, 3)) for _ = 1:10]
             x = [x; -x]
-            w = pweights([rand(rng) for _ in 1:length(x)])
+            w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(S, x, w)
             mg = mean(S, x, w, GeodesicInterpolation())
             mf = mean(S, x, w, GradientDescentEstimation(); p0 = mg)
@@ -636,8 +636,8 @@ end
             @test m == mf
 
             μ = randn(rng, 3) .* 10
-            x = [normalize(randn(rng, 3) .+ μ) for _ in 1:10]
-            w = pweights([rand(rng) for _ in 1:length(x)])
+            x = [normalize(randn(rng, 3) .+ μ) for _ = 1:10]
+            w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(S, x, w)
             mg = mean(S, x, w, GeodesicInterpolation())
             @test m == mg
@@ -647,9 +647,9 @@ end
             rng = MersenneTwister(47)
             M = ProjectiveSpace(2)
             p0 = [1.0, 0, 0]
-            x = [normalize(randn(rng, 3)) for _ in 1:10]
+            x = [normalize(randn(rng, 3)) for _ = 1:10]
             x = [x; -x]
-            w = pweights([rand(rng) for _ in 1:length(x)])
+            w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(M, x, w)
             mg = mean(M, x, w, GeodesicInterpolation())
             mf = mean(M, x, w, GradientDescentEstimation(); p0 = mg)
@@ -657,8 +657,8 @@ end
             @test isapprox(M, m, mf)
 
             μ = randn(rng, 3) .* 10
-            x = [normalize(randn(rng, 3) .+ μ) for _ in 1:10]
-            w = pweights([rand(rng) for _ in 1:length(x)])
+            x = [normalize(randn(rng, 3) .+ μ) for _ = 1:10]
+            w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(M, x, w)
             mg = mean(M, x, w, GeodesicInterpolation())
             @test m == mg
@@ -671,7 +671,7 @@ end
             v1 = hat(R, p0, [1.0, 0.0, 0.0])
             v2 = hat(R, p0, [0.0, 1.0, 0.0])
             x = [geodesic(R, p0, v1, π / 2 * (1:4)); geodesic(R, p0, v2, π / 2 * (1:4))]
-            w = pweights([rand(rng) for _ in 1:length(x)])
+            w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(R, x, w)
             mg = mean(R, x, w, GeodesicInterpolation())
             mf = mean(R, x, w, GradientDescentEstimation(); p0 = mg)
@@ -680,8 +680,8 @@ end
 
             μ = project(R, randn(3, 3))
             d = normal_tvector_distribution(R, μ, 0.1)
-            x = [exp(R, μ, rand(rng, d)) for _ in 1:10]
-            w = pweights([rand(rng) for _ in 1:length(x)])
+            x = [exp(R, μ, rand(rng, d)) for _ = 1:10]
+            w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(R, x, w)
             mg = mean(R, x, w, GeodesicInterpolation())
             @test m == mg
@@ -691,16 +691,16 @@ end
             rng = MersenneTwister(47)
             G = Manifolds.Grassmann(3, 2)
             p0 = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            x = [exp(G, p0, project(G, p0, randn(rng, 3, 2) * 10)) for _ in 1:10]
-            w = pweights([rand(rng) for _ in 1:length(x)])
+            x = [exp(G, p0, project(G, p0, randn(rng, 3, 2) * 10)) for _ = 1:10]
+            w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(G, x, w)
             mg = mean(G, x, w, GeodesicInterpolation())
             mf = mean(G, x, w, GradientDescentEstimation(); p0 = mg)
             @test m != mg
             @test m == mf
 
-            x = [exp(G, p0, project(G, p0, randn(rng, 3, 2) * 0.01)) for _ in 1:10]
-            w = pweights([rand(rng) for _ in 1:length(x)])
+            x = [exp(G, p0, project(G, p0, randn(rng, 3, 2) * 0.01)) for _ = 1:10]
+            w = pweights([rand(rng) for _ = 1:length(x)])
             m = mean(G, x, w)
             mg = mean(G, x, w, GeodesicInterpolation())
             @test m == mg
@@ -710,8 +710,8 @@ end
     @testset "Extrinsic mean" begin
         rng = MersenneTwister(47)
         S = Sphere(2)
-        x = [normalize(randn(rng, 3)) for _ in 1:10]
-        w = pweights([rand(rng) for _ in 1:length(x)])
+        x = [normalize(randn(rng, 3)) for _ = 1:10]
+        w = pweights([rand(rng) for _ = 1:length(x)])
         m = normalize(mean(reduce(hcat, x), w; dims = 2)[:, 1])
         mg = mean(S, x, w, ExtrinsicEstimation())
         @test isapprox(S, m, mg)
@@ -720,8 +720,8 @@ end
     @testset "Extrinsic median" begin
         rng = MersenneTwister(47)
         S = Sphere(2)
-        x = [normalize(randn(rng, 3)) for _ in 1:10]
-        w = pweights([rand(rng) for _ in 1:length(x)])
+        x = [normalize(randn(rng, 3)) for _ = 1:10]
+        w = pweights([rand(rng) for _ = 1:length(x)])
         m = normalize(median(Euclidean(3), x, w))
         mg = median(S, x, w, ExtrinsicEstimation())
         @test isapprox(S, m, mg)
