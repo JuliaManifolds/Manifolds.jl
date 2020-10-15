@@ -17,9 +17,15 @@ end
 
 (VERSION >= v"1.1") && @testset "Ambiguities" begin
     # TODO: reduce the number of ambiguities
-    @test length(Test.detect_ambiguities(ManifoldsBase)) <= 12
-    @test length(Test.detect_ambiguities(Manifolds)) == 0
-    @test length(our_base_ambiguities()) <= 21
+    if VERSION >= v"1.6-DEV"
+        @test length(Test.detect_ambiguities(ManifoldsBase)) <= 3
+        @test length(Test.detect_ambiguities(Manifolds)) <= 98
+        @test length(our_base_ambiguities()) <= 4
+    else
+        @test length(Test.detect_ambiguities(ManifoldsBase)) <= 12
+        @test length(Test.detect_ambiguities(Manifolds)) == 0
+        @test length(our_base_ambiguities()) <= 21
+    end
 end
 
 include("utils.jl")
@@ -32,6 +38,7 @@ include("utils.jl")
 include("groups/group_utils.jl")
 include("sized_abstract_array.jl")
 include("errors.jl")
+include("notation.jl")
 # starting with tests of simple manifolds
 include("centered_matrices.jl")
 include("circle.jl")
@@ -45,7 +52,9 @@ include("grassmann.jl")
 include("hyperbolic.jl")
 include("multinomial_doubly_stochastic.jl")
 include("multinomial_symmetric.jl")
+include("positive_numbers.jl")
 include("probability_simplex.jl")
+include("projective_space.jl")
 include("rotations.jl")
 include("skewsymmetric.jl")
 include("spectrahedron.jl")

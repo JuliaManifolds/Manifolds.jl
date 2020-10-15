@@ -125,9 +125,6 @@ function decorated_manifold(M::Spectrahedron)
     return Euclidean(representation_size(M)...; field = ℝ)
 end
 
-embed!(::Spectrahedron, q, p) = (q .= p)
-embed!(::Spectrahedron, Y, ::Any, X) = (Y .= X)
-
 @doc raw"""
     manifold_dimension(M::Spectrahedron)
 

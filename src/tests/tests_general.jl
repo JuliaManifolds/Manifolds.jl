@@ -202,13 +202,14 @@ function ManifoldTests.test_manifold(
             atol = atolp1p2,
             rtol = rtolp1p2,
         )
-        if VERSION >= v"1.6-DEV" && isa(M, Union{Grassmann,GeneralizedStiefel})
+        if VERSION >= v"1.5" && isa(M, Union{Grassmann,GeneralizedStiefel})
             # TODO: investigate why this is so imprecise on newer Julia versions on CI
             Test.@test isapprox(
                 M,
                 pts[1],
                 exp(M, pts[2], X2);
-                atol = atolp1p2 * 10^8,
+                # yields 5*10^-8 for the usual 10^-13 we impose on earlier Julia versions
+                atol = atolp1p2 * 5 * 10^5,
                 rtol = rtolp1p2,
             )
         else
@@ -236,7 +237,7 @@ function ManifoldTests.test_manifold(
                 log(M, p, p);
                 atol = epsx * exp_log_atol_multiplier,
                 rtol = exp_log_atol_multiplier == 0.0 ?
-                           sqrt(epsx) * exp_log_rtol_multiplier : 0,
+                       sqrt(epsx) * exp_log_rtol_multiplier : 0,
             )
             Test.@test isapprox(
                 M,
@@ -245,7 +246,7 @@ function ManifoldTests.test_manifold(
                 inverse_retract(M, p, p);
                 atol = epsx * exp_log_atol_multiplier,
                 rtol = exp_log_atol_multiplier == 0.0 ?
-                           sqrt(epsx) * exp_log_rtol_multiplier : 0.0,
+                       sqrt(epsx) * exp_log_rtol_multiplier : 0.0,
             )
         end
         atolp1 = exp_log_atol_multiplier * ManifoldTests.find_eps(pts[1])
@@ -268,9 +269,8 @@ function ManifoldTests.test_manifold(
 
         X3 = log(M, pts[1], pts[3])
 
-        Test.@test real(inner(M, pts[1], X1, X3)) ≈ real(inner(M, pts[1], X3, X1))
-        Test.@test imag(inner(M, pts[1], X1, X3)) ≈ -imag(inner(M, pts[1], X3, X1))
-        Test.@test imag(inner(M, pts[1], X1, X1)) ≈ 0
+        Test.@test inner(M, pts[1], X1, X3) ≈ conj(inner(M, pts[1], X3, X1))
+        Test.@test inner(M, pts[1], X1, X1) ≈ real(inner(M, pts[1], X1, X1))
 
         Test.@test norm(M, pts[1], X1) isa Real
         Test.@test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
@@ -385,72 +385,61 @@ function ManifoldTests.test_manifold(
         end
     end
 
-    !(default_inverse_retraction_method === nothing) &&
-        Test.@testset "vector transport" begin
-            tvatol = is_tangent_atol_multiplier * ManifoldTests.find_eps(pts[1])
-            X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
-            X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
-            test_default_vector_transport && Test.@testset "default vector transport" begin
-                v1t1 = vector_transport_to(M, pts[1], X1, pts[3])
-                v1t2 = vector_transport_direction(M, pts[1], X1, X2)
-                Test.@test is_tangent_vector(M, pts[3], v1t1; atol = tvatol)
-                Test.@test is_tangent_vector(M, pts[3], v1t2; atol = tvatol)
-                Test.@test isapprox(M, pts[3], v1t1, v1t2)
+    !(
+        default_retraction_method === nothing ||
+        default_inverse_retraction_method === nothing
+    ) && Test.@testset "vector transport" begin
+        tvatol = is_tangent_atol_multiplier * ManifoldTests.find_eps(pts[1])
+        X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
+        X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
+        pts32 = retract(M, pts[1], X2, default_retraction_method)
+        test_default_vector_transport && Test.@testset "default vector transport" begin
+            v1t1 = vector_transport_to(M, pts[1], X1, pts32)
+            v1t2 = vector_transport_direction(M, pts[1], X1, X2)
+            Test.@test is_tangent_vector(M, pts32, v1t1; atol = tvatol)
+            Test.@test is_tangent_vector(M, pts32, v1t2; atol = tvatol)
+            Test.@test isapprox(M, pts32, v1t1, v1t2)
+            Test.@test isapprox(M, pts[1], vector_transport_to(M, pts[1], X1, pts[1]), X1)
+
+            is_mutating && Test.@testset "mutating variants" begin
+                v1t1_m = allocate(v1t1)
+                v1t2_m = allocate(v1t2)
+                vector_transport_to!(M, v1t1_m, pts[1], X1, pts32)
+                vector_transport_direction!(M, v1t2_m, pts[1], X1, X2)
+                Test.@test isapprox(M, pts32, v1t1, v1t1_m)
+                Test.@test isapprox(M, pts32, v1t2, v1t2_m)
+            end
+        end
+
+        for vtm in vector_transport_methods
+            Test.@testset "vector transport method $(vtm)" begin
+                tvatol = is_tangent_atol_multiplier * ManifoldTests.find_eps(pts[1])
+                X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
+                X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
+                pts32 = retract(M, pts[1], X2, default_retraction_method)
+                v1t1 = vector_transport_to(M, pts[1], X1, pts32, vtm)
+                v1t2 = vector_transport_direction(M, pts[1], X1, X2, vtm)
+                Test.@test is_tangent_vector(M, pts32, v1t1; atol = tvatol)
+                Test.@test is_tangent_vector(M, pts32, v1t2; atol = tvatol)
+                Test.@test isapprox(M, pts32, v1t1, v1t2)
                 Test.@test isapprox(
                     M,
                     pts[1],
-                    vector_transport_to(M, pts[1], X1, pts[1]),
+                    vector_transport_to(M, pts[1], X1, pts[1], vtm),
                     X1,
                 )
 
                 is_mutating && Test.@testset "mutating variants" begin
                     v1t1_m = allocate(v1t1)
                     v1t2_m = allocate(v1t2)
-                    vector_transport_to!(M, v1t1_m, pts[1], X1, pts[3])
-                    vector_transport_direction!(M, v1t2_m, pts[1], X1, X2)
-                    Test.@test isapprox(M, pts[3], v1t1, v1t1_m)
-                    Test.@test isapprox(M, pts[3], v1t2, v1t2_m)
-                end
-            end
-
-            for vtm in vector_transport_methods
-                Test.@testset "vector transport method $(vtm)" begin
-                    tvatol = is_tangent_atol_multiplier * ManifoldTests.find_eps(pts[1])
-                    X1 = inverse_retract(
-                        M,
-                        pts[1],
-                        pts[2],
-                        default_inverse_retraction_method,
-                    )
-                    X2 = inverse_retract(
-                        M,
-                        pts[1],
-                        pts[3],
-                        default_inverse_retraction_method,
-                    )
-                    v1t1 = vector_transport_to(M, pts[1], X1, pts[3], vtm)
-                    v1t2 = vector_transport_direction(M, pts[1], X1, X2, vtm)
-                    Test.@test is_tangent_vector(M, pts[3], v1t1; atol = tvatol)
-                    Test.@test is_tangent_vector(M, pts[3], v1t2; atol = tvatol)
-                    Test.@test isapprox(M, pts[3], v1t1, v1t2)
-                    Test.@test isapprox(
-                        M,
-                        pts[1],
-                        vector_transport_to(M, pts[1], X1, pts[1], vtm),
-                        X1,
-                    )
-
-                    is_mutating && Test.@testset "mutating variants" begin
-                        v1t1_m = allocate(v1t1)
-                        v1t2_m = allocate(v1t2)
-                        vector_transport_to!(M, v1t1_m, pts[1], X1, pts[3], vtm)
-                        vector_transport_direction!(M, v1t2_m, pts[1], X1, X2, vtm)
-                        Test.@test isapprox(M, pts[3], v1t1, v1t1_m)
-                        Test.@test isapprox(M, pts[3], v1t2, v1t2_m)
-                    end
+                    vector_transport_to!(M, v1t1_m, pts[1], X1, pts32, vtm)
+                    vector_transport_direction!(M, v1t2_m, pts[1], X1, X2, vtm)
+                    Test.@test isapprox(M, pts32, v1t1, v1t1_m)
+                    Test.@test isapprox(M, pts32, v1t2, v1t2_m)
                 end
             end
         end
+    end
 
     for btype in basis_types_vecs
         Test.@testset "Basis support for $(btype)" begin

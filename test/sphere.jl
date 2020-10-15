@@ -87,6 +87,27 @@ include("utils.jl")
         @test Y == X
     end
 
+    @testset "DefaultOrthonormalBasis edge cases" begin
+        B = DefaultOrthonormalBasis(ℝ)
+        n = manifold_dimension(M)
+        p = [1; zeros(n)]
+        for i in 1:n  # p'x ± 1
+            vcoord = [j == i for j in 1:n]
+            v = [0; vcoord]
+            @test get_coordinates(M, p, v, B) ≈ vcoord
+            @test get_vector(M, p, vcoord, B) ≈ v
+            @test get_coordinates(M, -p, v, B) ≈ vcoord
+            @test get_vector(M, -p, vcoord, B) ≈ v
+        end
+        p = [0; 1; zeros(n - 1)] # p'x = 0
+        for i in 1:n
+            vcoord = [j == i for j in 1:n]
+            v = get_vector(M, p, vcoord, B)
+            @test is_tangent_vector(M, p, v)
+            @test get_coordinates(M, p, v, B) ≈ vcoord
+        end
+    end
+
     @testset "log edge case" begin
         n = manifold_dimension(M)
         x = normalize(randn(n + 1))
@@ -117,7 +138,20 @@ include("utils.jl")
         @test is_tangent_vector(M, q, X, true; atol = 10^(-14))
     end
 
-    @testset "Tensor Sphere" begin
+    @testset "Quaternion Sphere" begin
+        M = Sphere(2, ℍ)
+        @test repr(M) == "Sphere(2, ℍ)"
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{3},ℍ}
+        @test representation_size(M) == (3,)
+        p = [Quaternion(1.0), Quaternion(1.0im), Quaternion(0.0, 0.0, -1.0, 0.0)]
+        q = project(M, p)
+        @test is_manifold_point(M, q)
+        Y = [Quaternion(2.0), Quaternion(1.0im), Quaternion(0.0, 0.0, 20.0, 0.0)]
+        X = project(M, q, Y)
+        @test is_tangent_vector(M, q, X, true; atol = 10^(-14))
+    end
+
+    @testset "Array Sphere" begin
         M = ArraySphere(2, 2; field = ℝ)
         @test repr(M) == "ArraySphere(2, 2; field = ℝ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℝ}

@@ -49,10 +49,60 @@ include("utils.jl")
         TEST_FLOAT32 && push!(types, Matrix{Float32})
         TEST_STATIC_SIZED && push!(types, MMatrix{3,2,Float64,6})
 
+        @testset "Stiefel(2, 1) special case" begin
+            M21 = Stiefel(2, 1)
+            w = inverse_retract(
+                M21,
+                SMatrix{2,1}([0.0, 1.0]),
+                SMatrix{2,1}([sqrt(2), sqrt(2)]),
+                QRInverseRetraction(),
+            )
+            @test isapprox(M21, w, SMatrix{2,1}([1.0, 0.0]))
+        end
+
+        @testset "inverse QR retraction cases" begin
+            M43 = Stiefel(4, 3)
+            p = SA[1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0; 0.0 0.0 0.0]
+            Xinit = SA[0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0; 1.0 1.0 1.0]
+            q = retract(M43, p, Xinit, QRRetraction())
+            X1 = inverse_retract(
+                M43,
+                SMatrix{4,3}(p),
+                SMatrix{4,3}(q),
+                QRInverseRetraction(),
+            )
+            X2 = inverse_retract(M43, p, q, QRInverseRetraction())
+            @test isapprox(M43, p, X1, X2)
+            @test isapprox(M43, p, X1, Xinit)
+
+            p2 = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            q2 = exp(M, p2, [0.0 0.0; 0.0 0.0; 1.0 1.0])
+
+            X1 = inverse_retract(
+                M,
+                SMatrix{3,2}(p2),
+                SMatrix{3,2}(q2),
+                QRInverseRetraction(),
+            )
+            X2 = inverse_retract(M, p2, q2, QRInverseRetraction())
+            @test isapprox(M43, p2, X1, X2)
+        end
+
         @testset "Type $T" for T in types
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             y = exp(M, x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
             z = exp(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0])
+            @test isapprox(
+                M,
+                retract(
+                    M,
+                    SMatrix{3,2}(x),
+                    SA[0.0 0.0; 0.0 0.0; -1.0 1.0],
+                    PolarRetraction(),
+                ),
+                retract(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0], PolarRetraction()),
+                atol = 1e-15,
+            )
             pts = convert.(T, [x, y, z])
             v = inverse_retract(M, x, y, PolarInverseRetraction())
             @test !is_manifold_point(M, 2 * x)
@@ -121,7 +171,7 @@ include("utils.jl")
         end
         types = [Matrix{ComplexF64}]
         @testset "Type $T" for T in types
-            x = [0.5 + 0.5im 0.5 + 0.5im; 0.5 + 0.5im -0.5 - 0.5im; 0.0 0.0]
+            x = [0.5+0.5im 0.5+0.5im; 0.5+0.5im -0.5-0.5im; 0.0 0.0]
             y = exp(M, x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
             z = exp(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0])
             pts = convert.(T, [x, y, z])
@@ -175,5 +225,22 @@ include("utils.jl")
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 18
         end
+    end
+
+    @testset "Padé & Caley retractions and Caley based transport" begin
+        M = Stiefel(3, 2)
+        p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+        X = [0.0 0.0; 0.0 0.0; 1.0 1.0]
+        r1 = CaleyRetraction()
+        @test r1 == PadeRetraction(1)
+        @test repr(r1) == "CaleyRetraction()"
+        q1 = retract(M, p, X, r1)
+        @test is_manifold_point(M, q1)
+        Y = vector_transport_direction(M, p, X, X, CaleyVectorTransport())
+        @test is_tangent_vector(M, q1, Y; atol = 10^-15)
+        r2 = PadeRetraction(2)
+        @test repr(r2) == "PadeRetraction(2)"
+        q2 = retract(M, p, X, r2)
+        @test is_manifold_point(M, q2)
     end
 end

@@ -78,7 +78,8 @@ include("utils.jl")
                     QRInverseRetraction(),
                 ],
                 #basis_types_vecs = basis_types,
-                exp_log_atol_multiplier = 10.0,
+                # investigate why this is so large on dev
+                exp_log_atol_multiplier = 10.0 * (VERSION >= v"1.6-DEV" ? 10.0^8 : 1.0),
                 is_tangent_atol_multiplier = 20.0,
             )
 
@@ -151,7 +152,7 @@ include("utils.jl")
         end
         types = [Matrix{ComplexF64}]
         @testset "Type $T" for T in types
-            x = [0.5 + 0.5im 0.5 + 0.5im; 0.5 + 0.5im -0.5 - 0.5im; 0.0 0.0]
+            x = [0.5+0.5im 0.5+0.5im; 0.5+0.5im -0.5-0.5im; 0.0 0.0]
             v = [0.0 0.0; 0.0 0.0; 0.0 1.0]
             y = exp(M, x, v)
             w = [0.0 1.0; -1.0 0.0; 1.0 0.0]
@@ -188,5 +189,15 @@ include("utils.jl")
                 @test norm(M, pts[1], v1) ≈ sqrt(inner(M, pts[1], v1, v1))
             end
         end
+    end
+
+    @testset "Complex and conjugate" begin
+        G = Grassmann(3, 1, ℂ)
+        p = reshape([im, 0.0, 0.0], 3, 1)
+        @test is_manifold_point(G, p)
+        X = reshape([-0.5; 0.5; 0], 3, 1)
+        @test_throws DomainError is_tangent_vector(G, p, X, true)
+        Y = project(G, p, X)
+        @test is_tangent_vector(G, p, Y)
     end
 end

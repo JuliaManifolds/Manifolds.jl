@@ -100,9 +100,6 @@ end
 
 decorated_manifold(M::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field = 𝔽)
 
-embed!(M::SkewSymmetricMatrices, q, p) = copyto!(q, p)
-embed!(M::SkewSymmetricMatrices, Y, p, X) = copyto!(Y, X)
-
 function get_basis(M::SkewSymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
     Ξ = get_basis(M, p, DefaultOrthonormalBasis()).data
     κ = zeros(real(eltype(p)), manifold_dimension(M))

@@ -34,7 +34,7 @@ X ∈ 𝔽^{n × k} :
 X^{\mathrm{H}}p + p^{\mathrm{H}}X = 0_{k} \bigr\},
 ````
 
-where $0_{k}$ denotes the $k × k$ zero matrix.
+where $0_k$ is the $k × k$ zero matrix and $\overline{\cdot}$ the complex conjugate.
 
 Note that a point $p ∈ \operatorname{Gr}(n,k)$ might be represented by
 different matrices (i.e. matrices with unitary column vectors that span
@@ -86,11 +86,11 @@ Check whether `X` is a tangent vector in the tangent space of `p` on
 the [`Grassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
 
 ````math
-    p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0_k,
+    p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0_k,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and $0_k$
-denotes the $k × k$ zero natrix.
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
+$\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ the $k × k$ zero matrix.
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
 function check_tangent_vector(
@@ -114,16 +114,16 @@ function check_tangent_vector(
         kwargs...,
     )
     mpv === nothing || return mpv
-    if !isapprox(p' * X + X' * p, zeros(k, k); kwargs...)
+    if !isapprox(p' * X, -conj(X' * p); kwargs...)
         return DomainError(
-            norm(p' * X + X' * p),
+            norm(p' * X + conj(X' * p)),
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since p'X + X'p is not the zero matrix.",
         )
     end
     return nothing
 end
 
-decorated_manifold(M::Grassmann{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
+decorated_manifold(::Grassmann{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
 
 @doc raw"""
     distance(M::Grassmann, p, q)
@@ -145,16 +145,11 @@ b_{i}=\begin{cases}
 \end{cases}
 ````
 """
-function distance(M::Grassmann, p, q)
+function distance(::Grassmann, p, q)
     p ≈ q && return zero(real(eltype(p)))
     a = svd(p' * q).S
-    a[a .> 1] .= 1
-    return sqrt(sum((acos.(a)) .^ 2))
+    return sqrt(sum(x -> abs2(acos(clamp(x, -1, 1))), a))
 end
-
-embed!(::Grassmann, q, p) = (q .= p)
-
-embed!(::Grassmann, Y, p, X) = (Y .= X)
 
 @doc raw"""
     exp(M::Grassmann, p, X)
@@ -278,12 +273,12 @@ In this formula the $\operatorname{atan}$ is meant elementwise.
 """
 log(::Grassmann, ::Any...)
 
-function log!(M::Grassmann, X, p, q)
+function log!(::Grassmann{n,k}, X, p, q) where {n,k}
     z = q' * p
     At = q' - z * p'
     Bt = z \ At
     d = svd(Bt')
-    return copyto!(X, d.U * Diagonal(atan.(d.S)) * d.Vt)
+    return X .= view(d.U, :, 1:k) * Diagonal(atan.(view(d.S, 1:k))) * view(d.Vt, 1:k, :)
 end
 
 @doc raw"""
@@ -337,7 +332,7 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 project(::Grassmann, ::Any...)
 
-project!(M::Grassmann, v, x, w) = copyto!(v, w - x * x' * w)
+project!(::Grassmann, Y, p, X) = copyto!(Y, X - p * p' * X)
 
 @doc raw"""
     representation_size(M::Grassmann{n,k})
@@ -382,10 +377,9 @@ end
 function retract!(::Grassmann{N,K}, q, p, X, ::QRRetraction) where {N,K}
     qrfac = qr(p + X)
     d = diag(qrfac.R)
-    D = Diagonal(sign.(sign.(d .+ 0.5)))
-    q .= zeros(N, K)
-    q[1:K, 1:K] .= D
-    return copyto!(q, Array(qrfac.Q) * D)
+    D = Diagonal(sign.(d .+ 1 // 2))
+    mul!(q, Array(qrfac.Q), D)
+    return q
 end
 
 function Base.show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽}

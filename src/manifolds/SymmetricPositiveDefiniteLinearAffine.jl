@@ -23,8 +23,9 @@ where $\operatorname{Log}$ denotes the matrix logarithm and
 $\lVert\cdot\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
 """
 function distance(M::SymmetricPositiveDefinite{N}, p, q) where {N}
-    s = real.(eigvals(p, q))
-    return any(s .<= eps()) ? 0 : sqrt(sum(abs.(log.(s)) .^ 2))
+    cq = cholesky(q)
+    s = eigvals(Symmetric(cq.L \ p / cq.U))
+    return any(s .<= eps()) ? zero(eltype(p)) : sqrt(sum(abs.(log.(s)) .^ 2))
 end
 
 @doc raw"""

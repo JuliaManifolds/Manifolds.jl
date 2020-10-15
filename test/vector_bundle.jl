@@ -113,29 +113,14 @@ struct TestVectorSpaceType <: VectorSpaceType end
     @testset "spaces at point" begin
         x = [1.0, 0.0, 0.0]
         t_x = TangentSpaceAtPoint(M, x)
+        t_x2 = TangentSpace(M, x)
+        @test t_x == t_x2
         ct_x = CotangentSpaceAtPoint(M, x)
-        if VERSION >= v"1.6.0-DEV.772"
-            @test sprint(show, "text/plain", t_x) == """
-            TangentSpaceAtPoint{Sphere{2, ℝ},Vector{Float64}}
-            Fiber:
-             VectorBundleFibers(TangentSpace, Sphere(2, ℝ))
-            Base point:
-             3-element Vector{Float64}:
-              1.0
-              0.0
-              0.0"""
-        else
-            @test sprint(show, "text/plain", t_x) == """
-            VectorSpaceAtPoint{VectorBundleFibers{Manifolds.TangentSpaceType,Sphere{2,ℝ}},Array{Float64,1}}
-            Fiber:
-             VectorBundleFibers(TangentSpace, Sphere(2, ℝ))
-            Base point:
-             3-element Array{Float64,1}:
-              1.0
-              0.0
-              0.0"""
-        end
-
+        t_xs = sprint(show, "text/plain", t_x)
+        sp = sprint(show, "text/plain", x)
+        sp = replace(sp, '\n' => "\n ")
+        t_xs_test = "Tangent space to the manifold $(M) at point:\n $(sp)"
+        @test t_xs == t_xs_test
         @test base_manifold(t_x) == M
         @test base_manifold(ct_x) == M
         @test t_x.fiber.manifold == M
@@ -144,6 +129,13 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test ct_x.fiber.fiber == CotangentSpace
         @test t_x.point == x
         @test ct_x.point == x
+        # generic vector space at
+        fiber = VectorBundleFibers(TestVectorSpaceType(), M)
+        v_x = VectorSpaceAtPoint(fiber, x)
+        v_xs = sprint(show, "text/plain", v_x)
+        fiber_s = sprint(show, "text/plain", fiber)
+        v_xs_test = "$(typeof(v_x))\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
+        @test v_xs == v_xs_test
     end
 
     @testset "tensor product" begin
