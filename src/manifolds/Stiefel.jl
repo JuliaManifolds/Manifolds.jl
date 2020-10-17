@@ -181,17 +181,17 @@ the upper matrix of $a$ to build a skew symmetric matrix and the matrix b, the d
 basis is constructed.
 """
 function get_basis(::Stiefel{n,k,ℝ}, p, B::DefaultBasis{ℝ}) where {n,k}
-    p⊥ = nullspace([p zeros(n,n-k)])
-    an = div(k*(k-1),2)
-    bn = (n-k)*k
+    p⊥ = nullspace([p zeros(n, n - k)])
+    an = div(k * (k - 1), 2)
+    bn = (n - k) * k
     V = [
-        [p*_vec2skew(_euclidean_unit_vector(an,i),k) for i=1:an]...,
-        [p⊥*reshape(_euclidean_unit_vector(bn,j),(n-k,k)) for j=1:bn]...,
+        [p * _vec2skew(_euclidean_unit_vector(an, i), k) for i in 1:an]...,
+        [p⊥ * reshape(_euclidean_unit_vector(bn, j), (n - k, k)) for j in 1:bn]...,
     ]
-    return CachedBasis(B,V)
+    return CachedBasis(B, V)
 end
 
-_euclidean_unit_vector(n,i) = [ k==i ? 1.0 : 0.0 for k ∈ 1:n]
+_euclidean_unit_vector(n, i) = [k == i ? 1.0 : 0.0 for k in 1:n]
 """
     vec2skew(v,k)
 
@@ -204,12 +204,12 @@ yields
 ]
 ````
 """
-function _vec2skew(v,k)
-    m=0;
-    n = div(k*(k-1),2)
+function _vec2skew(v, k)
+    m = 0
+    n = div(k * (k - 1), 2)
     length(v) < n && error("The vector $(v) is too short (expected $(n) got $(length(v))).")
-    A = [ i<j ? (m+=1; v[m]) : 0.0 for i=1:k, j=1:k ]
-    return A-A'
+    A = [i < j ? (m += 1; v[m]) : 0.0 for i in 1:k, j in 1:k]
+    return A - A'
 end
 
 @doc raw"""
