@@ -163,6 +163,56 @@ function exp!(::Stiefel{n,k}, q, p, X) where {n,k}
 end
 
 @doc raw"""
+    get_basis(M::Stiefel{n,k,ℝ}, p, B::DefaultBasis) where {n,k}
+
+Create the default basis using the parametrization for any $X ∈ T_p\mathcal M$.
+Set $p_\bot \in ℝ^{n\times(n-k)}$ the matrix such that the $n\times n$ matrix of the common
+columns $[p\ p_\bot]$ is an ONB.
+For any skew symmetric matrix $a ∈ ℝ^{k\times k}$ and any $b ∈ ℝ^{(n-k)\times k}$ the matrix
+
+````math
+X = pa + p_\bot b ∈ T_p\mathcal M
+````
+
+and we can use the $\frac{1}{2}k(k-1) + (n-k)k = nk-\frac{1}{2}k(k+1)$ entries
+of $a$ and $b$ to specify a basis for the tangent space.
+using unit vectors for constructing both
+the upper matrix of $a$ to build a skew symmetric matrix and the matrix b, the default
+basis is constructed.
+"""
+function get_basis(::Stiefel{n,k,ℝ}, p, B::DefaultBasis{ℝ}) where {n,k}
+    p⊥ = nullspace([p zeros(n,n-k)])
+    an = div(k*(k-1),2)
+    bn = (n-k)*k
+    V = [
+        [p*_vec2skew(_euclidean_unit_vector(an,i),k) for i=1:an]...,
+        [p⊥*reshape(_euclidean_unit_vector(bn,j),(n-k,k)) for j=1:bn]...,
+    ]
+    return CachedBasis(B,V)
+end
+
+_euclidean_unit_vector(n,i) = [ k==i ? 1.0 : 0.0 for k ∈ 1:n]
+"""
+    vec2skew(v,k)
+
+create a skew symmetric matrix from a vector, for example for `v=[1,2,3]` and `k=3` this
+yields
+````julia
+[  0  1  2;
+  -1  0  3;
+  -2 -3  0
+]
+````
+"""
+function _vec2skew(v,k)
+    m=0;
+    n = div(k*(k-1),2)
+    length(v) < n && error("The vector $(v) is too short (expected $(n) got $(length(v))).")
+    A = [ i<j ? (m+=1; v[m]) : 0.0 for i=1:k, j=1:k ]
+    return A-A'
+end
+
+@doc raw"""
     inverse_retract(M::Stiefel, p, q, ::PolarInverseRetraction)
 
 Compute the inverse retraction based on a singular value decomposition
