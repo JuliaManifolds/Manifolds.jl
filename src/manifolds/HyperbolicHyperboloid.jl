@@ -279,13 +279,11 @@ the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hype
 """
 get_coordinates(M::Hyperbolic, p, X, B::DefaultOrthonormalBasis)
 
-function get_coordinates!(
-    M::Hyperbolic,
-    c,
-    p,
-    X,
-    B::Union{DefaultOrthonormalBasis,DiagonalizingOrthonormalBasis},
-)
+function get_coordinates!(M::Hyperbolic, c, p, X, B::DefaultOrthonormalBasis)
+    c = get_coordinates!(M, c, p, X, get_basis(M, p, B))
+    return c
+end
+function get_coordinates!(M::Hyperbolic, c, p, X, B::DiagonalizingOrthonormalBasis)
     c = get_coordinates!(M, c, p, X, get_basis(M, p, B))
     return c
 end
@@ -299,13 +297,11 @@ the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hype
 """
 get_vector(M::Hyperbolic, p, c, ::DefaultOrthonormalBasis)
 
-function get_vector!(
-    M::Hyperbolic,
-    X,
-    p,
-    c,
-    B::Union{DefaultOrthonormalBasis,DiagonalizingOrthonormalBasis},
-)
+function get_vector!(M::Hyperbolic, X, p, c, B::DefaultOrthonormalBasis)
+    X = get_coordinates!(M, X, p, c, get_basis(M, p, B))
+    return X
+end
+function get_vector!(M::Hyperbolic, X, p, c, B::DiagonalizingOrthonormalBasis)
     X = get_coordinates!(M, X, p, c, get_basis(M, p, B))
     return X
 end
