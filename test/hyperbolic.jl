@@ -218,6 +218,9 @@ include("utils.jl")
         V = get_vectors(M, p, B)
         for v in V
             @test is_tangent_vector(M, p, v, true)
+            for b ∈ [DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis(V[1])]
+                @test isapprox(M, p, v, get_vector(M, p, get_coordinates(M, p, v, b), b))
+            end
         end
         for v in V, w in V
             @test inner(M, p, v, w) ≈ (v == w ? 1 : 0)
