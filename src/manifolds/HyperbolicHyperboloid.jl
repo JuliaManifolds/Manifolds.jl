@@ -241,7 +241,7 @@ end
 
 function get_basis(M::Hyperbolic, p, B::DefaultOrthonormalBasis)
     n = manifold_dimension(M)
-    V = [_hyperbolize(M, p, [i == k ? 1 : 0 for k = 1:n]) for i = 1:n]
+    V = [_hyperbolize(M, p, [i == k ? 1 : 0 for k in 1:n]) for i in 1:n]
     _gram_schmidt!(M, V, p, V)
     return CachedBasis(B, V)
 end
@@ -249,11 +249,11 @@ end
 function get_basis(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)
     n = manifold_dimension(M)
     X = B.frame_direction
-    V = [_hyperbolize(M, p, [i == k ? 1 : 0 for k = 1:n]) for i = 1:n]
+    V = [_hyperbolize(M, p, [i == k ? 1 : 0 for k in 1:n]) for i in 1:n]
     κ = -ones(n)
     if norm(M, p, X) != 0
         placed = false
-        for i = 1:n
+        for i in 1:n
             if norm(M, p, V[i] - inner(M, p, X, V[i]) .* V[i]) ≈ 0 # is X a multiple of V[i]?
                 V[i] .= V[1]
                 V[1] .= X
@@ -325,7 +325,7 @@ component such that for the
 resulting `p` we have that its [`minkowski_metric`](@ref) is $⟨p,X⟩_{\mathrm{M}} = 0$,
 i.e. $X_{n+1} = \frac{⟨\tilde p, Y⟩}{p_{n+1}}$, where $\tilde p = (p_1,\ldots,p_n)$.
 """
-_hyperbolize(M::Hyperbolic, p, Y) = [Y..., dot(p[1:(end-1)], Y) / p[end]]
+_hyperbolize(M::Hyperbolic, p, Y) = [Y..., dot(p[1:(end - 1)], Y) / p[end]]
 
 @doc raw"""
     _gram_schmidt!(M, W, p, V)
@@ -341,8 +341,8 @@ function _gram_schmidt!(M::Manifold, W, p, V::AbstractVector)
     n = norm(M, p, W[1])
     n == 0 && throw(ErrorException("Vector #1 of the set of vectors is zero."))
     W[1] ./= n
-    for i = 2:length(V)
-        for j = 1:(i-1)
+    for i in 2:length(V)
+        for j in 1:(i - 1)
             W[i] .-= inner(M, p, W[i], W[j]) .* W[j]
         end
         n = norm(M, p, W[i])
