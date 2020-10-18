@@ -180,8 +180,11 @@ using unit vectors for constructing both
 the upper matrix of $a$ to build a skew symmetric matrix and the matrix b, the default
 basis is constructed.
 
-Since $[p\ p_\bot]$ is an automorphism on $ℝ^{n\tims p}$ the elements of $a$ and $b$ are
-orthonormal coordinates for the tangent space.
+Since $[p\ p_\bot]$ is an automorphism on $ℝ^{n\times p}$ the elements of $a$ and $b$ are
+orthonormal coordinates for the tangent space. To be precise exactly one element in the upper
+trangular entries of $a$ is set to $1$ its symmetric entry to $-1$ and we normalize with
+the factor $\frac{1}{\sqrt{2}}$ and for $b$ one can just use unit vectors reshaped to a matrix
+to obtain orthonormal set of parameters.
 """
 function get_basis(M::Stiefel{n,k,ℝ}, p, B::DefaultOrthonormalBasis{ℝ}) where {n,k}
     V = get_vectors(M, p, B)
