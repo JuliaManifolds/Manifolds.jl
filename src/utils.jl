@@ -91,6 +91,35 @@ Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
 """
 Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
 
+@doc raw"""
+    vec2skew!(X, v, k)
+
+create a skew symmetric matrix inplace in `X` of size $k\times k$ from a vector `v`,
+for example for `v=[1,2,3]` and `k=3` this
+yields
+````julia
+[  0  1  2;
+  -1  0  3;
+  -2 -3  0
+]
+````
+"""
+function vec2skew!(X, v)
+    k = size(X)[1]
+    size(X)[2] != k && error("X is of wrong size, expected ($k,$k) got $(size(X)).")
+    n = div(k * (k - 1), 2)
+    length(v) < n && error("The vector $(v) is too short, expected $(n) got $(length(v)).")
+    m = 0
+    X .= [i < j ? (m += 1; v[m]) : 0.0 for i in 1:k, j in 1:k]
+    X .= X - X'
+    return X
+end
+function vec2skew(v, k)
+    X = zeros(eltype(v), k, k)
+    vec2skew!(X, v)
+    return X
+end
+
 """
     ziptuples(a, b[, c[, d[, e]]])
 
