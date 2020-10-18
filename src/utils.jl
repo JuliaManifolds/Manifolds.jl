@@ -110,7 +110,7 @@ function vec2skew!(X, v)
     n = div(k * (k - 1), 2)
     length(v) < n && error("The vector $(v) is too short, expected $(n) got $(length(v)).")
     m = 0
-    X .= [i < j ? (m += 1; v[m]) : 0.0 for i in 1:k, j in 1:k]
+    X .= [i < j ? (m += 1; v[m]) : zero(eltype(v)) for i in 1:k, j in 1:k]
     X .= X - X'
     return X
 end

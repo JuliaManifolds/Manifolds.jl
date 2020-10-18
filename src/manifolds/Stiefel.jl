@@ -215,10 +215,10 @@ function get_vectors(::Stiefel{n,k,ℝ}, p, ::DefaultOrthonormalBasis{ℝ}) wher
     p⊥ = nullspace([p zeros(n, n - k)])
     an = div(k * (k - 1), 2)
     bn = (n - k) * k
-    V = [
-        [p * vec2skew(1 / sqrt(2) .* _euclidean_unit_vector(an, i), k) for i in 1:an]...,
-        [p⊥ * reshape(_euclidean_unit_vector(bn, j), (n - k, k)) for j in 1:bn]...,
-    ]
+    V = vcat(
+        [p * vec2skew(1 / sqrt(2) .* _euclidean_unit_vector(an, i), k) for i in 1:an],
+        [p⊥ * reshape(_euclidean_unit_vector(bn, j), (n - k, k)) for j in 1:bn],
+    )
     return V
 end
 
