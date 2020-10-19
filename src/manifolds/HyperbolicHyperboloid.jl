@@ -314,7 +314,7 @@ $q\in ℝ^n$ can be set onto the manifold by computing its last component such t
 resulting `p` we have that its [`minkowski_metric`](@ref) is $⟨p,p⟩_{\mathrm{M}} = - 1$,
 i.e. $p_{n+1} = \sqrt{\lVert q \rVert^2-^}$
 """
-_hyperbolize(M::Hyperbolic, q) = [q..., sqrt(norm(q)^2 + 1)]
+_hyperbolize(M::Hyperbolic, q) = vcat(q, sqrt(norm(q)^2 + 1))
 
 @doc raw"""
     _hyperbolize(M, p, Y)
@@ -325,7 +325,7 @@ component such that for the
 resulting `p` we have that its [`minkowski_metric`](@ref) is $⟨p,X⟩_{\mathrm{M}} = 0$,
 i.e. $X_{n+1} = \frac{⟨\tilde p, Y⟩}{p_{n+1}}$, where $\tilde p = (p_1,\ldots,p_n)$.
 """
-_hyperbolize(M::Hyperbolic, p, Y) = [Y..., dot(p[1:(end - 1)], Y) / p[end]]
+_hyperbolize(M::Hyperbolic, p, Y) = vcat(Y, dot(p[1:(end - 1)], Y) / p[end])
 
 @doc raw"""
     _gram_schmidt!(M, W, p, V)
