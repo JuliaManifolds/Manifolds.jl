@@ -230,13 +230,15 @@ include("utils.jl")
         c = get_coordinates(M, p, X, B)
         @test c ≈ [0.5, 1.0]
         B2 = DiagonalizingOrthonormalBasis(X)
-        V = get_vectors(M, p, get_basis(M, p, B2))
-        @test V[1] ≈ X ./ norm(M, p, X)
-        @test norm(M, p, V[2]) ≈ 1
-        @test inner(M, p, V[1], V[2]) ≈ 0.0 atol = 5e-16
-        V[2] .= zero_tangent_vector(M, p)
-        @test_throws ErrorException Manifolds._gram_schmidt!(M, V, p, V)
-        V[1] .= zero_tangent_vector(M, p)
-        @test_throws ErrorException Manifolds._gram_schmidt!(M, V, p, V)
+        V2 = get_vectors(M, p, get_basis(M, p, B2))
+        @test V2[1] ≈ X ./ norm(M, p, X)
+        @test inner(M, p, V2[1], V2[2]) ≈ 0.0 atol = 5e-16
+        V2[2] .= zero_tangent_vector(M, p)
+        @test_throws ErrorException Manifolds._gram_schmidt!(M, V2, p, V2)
+        V2[1] .= zero_tangent_vector(M, p)
+        @test_throws ErrorException Manifolds._gram_schmidt!(M, V2, p, V2)
+        B3 = DiagonalizingOrthonormalBasis(-V[2])
+        V3 = get_vectors(M, p, get_basis(M, p, B3))
+        @test isapprox(M, p, V3[1], -V[2])
     end
 end
