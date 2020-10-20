@@ -254,7 +254,7 @@ function get_basis(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)
     if norm(M, p, X) != 0
         placed = false
         for i in 1:n
-            if norm(M, p, V[i] - inner(M, p, X, V[i]) .* V[i]) ≈ 0 # is X a multiple of V[i]?
+            if abs(inner(M, p, X, V[i])) ≈ norm(M, p, X) # is X a multiple of V[i]?
                 V[i] .= V[1]
                 V[1] .= X
                 placed = true

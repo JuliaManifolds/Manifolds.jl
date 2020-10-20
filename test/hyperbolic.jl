@@ -233,7 +233,7 @@ include("utils.jl")
         V = get_vectors(M, p, get_basis(M, p, B2))
         @test V[1] ≈ X ./ norm(M, p, X)
         @test norm(M, p, V[2]) ≈ 1
-        @test inner(M, p, V[1], V[2]) ≈ 0.0 atol = 1e-16
+        @test inner(M, p, V[1], V[2]) ≈ 0.0 atol = 5e-16
         V[2] .= zero_tangent_vector(M, p)
         @test_throws ErrorException Manifolds._gram_schmidt!(M, V, p, V)
         V[1] .= zero_tangent_vector(M, p)
