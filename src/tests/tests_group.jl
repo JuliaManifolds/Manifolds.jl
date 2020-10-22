@@ -431,6 +431,7 @@ function ManifoldTests.test_action(
     m_pts::AbstractVector,
     v_pts = [];
     atol = 1e-10,
+    atol_ident_compose = 0,
     test_optimal_alignment = false,
     test_mutating = true,
     test_diff = false,
@@ -514,12 +515,12 @@ function ManifoldTests.test_action(
             Test.@test compose(A, e, e) === e
 
             for a in a_pts
-                Test.@test isapprox(G, compose(A, a, e), a)
-                Test.@test isapprox(G, compose(A, e, a), a)
+                Test.@test isapprox(G, compose(A, a, e), a; atol = atol_ident_compose)
+                Test.@test isapprox(G, compose(A, e, a), a; atol = atol_ident_compose)
 
                 ge = identity(G, a)
-                Test.@test isapprox(G, compose(A, a, ge), a)
-                Test.@test isapprox(G, compose(A, ge, a), a)
+                Test.@test isapprox(G, compose(A, a, ge), a; atol = atol_ident_compose)
+                Test.@test isapprox(G, compose(A, ge, a), a; atol = atol_ident_compose)
 
                 for m in m_pts
                     Test.@test isapprox(M, apply(A, e, m), m)
