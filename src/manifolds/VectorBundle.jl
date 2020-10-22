@@ -77,13 +77,17 @@ CotangentBundleFibers(M::Manifold) = VectorBundleFibers(CotangentSpace, M)
 A vector space (fiber type `fiber` of a vector bundle) at point `p` from
 the manifold `fiber.manifold`.
 """
-struct VectorSpaceAtPoint{TFiber<:VectorBundleFibers,TX}
+struct VectorSpaceAtPoint{
+    𝔽,
+    TFiber<:VectorBundleFibers{<:VectorSpaceType,<:Manifold{𝔽}},
+    TX,
+} <: Manifold{𝔽}
     fiber::TFiber
     point::TX
 end
 
 const TangentSpaceAtPoint{M} =
-    VectorSpaceAtPoint{TangentBundleFibers{M}} where {M<:Manifold}
+    VectorSpaceAtPoint{𝔽,TangentBundleFibers{M}} where {𝔽,M<:Manifold{𝔽}}
 
 """
     TangentSpaceAtPoint(M::Manifold, p)
@@ -101,7 +105,7 @@ Return a [`TangentSpaceAtPoint`](@ref) representing tangent space at `p` on the 
 TangentSpace(M::Manifold, p) = VectorSpaceAtPoint(TangentBundleFibers(M), p)
 
 const CotangentSpaceAtPoint{M} =
-    VectorSpaceAtPoint{CotangentBundleFibers{M}} where {M<:Manifold}
+    VectorSpaceAtPoint{𝔽,CotangentBundleFibers{M}} where {𝔽,M<:Manifold{𝔽}}
 
 """
     CotangentSpaceAtPoint(M::Manifold, p)
