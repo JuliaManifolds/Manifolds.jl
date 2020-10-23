@@ -415,6 +415,7 @@ end
         m_pts::AbstractVector,
         v_pts = [];
         atol = 1e-10,
+        atol_ident_compose = 0,
         test_optimal_alignment = false,
         test_mutating = true,
         test_diff = false,
@@ -424,6 +425,10 @@ end
 Tests general properties of the action `A`, given at least three different points
 that lie on it (contained in `a_pts`) and three different point that lie
 on the manifold it acts upon (contained in `m_pts`).
+
+# Arguments
+- `atol_ident_compose = 0`: absolute tolerance for the test that composition with identity
+  doesn't change the group element.
 """
 function ManifoldTests.test_action(
     A::AbstractGroupAction,

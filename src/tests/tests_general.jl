@@ -69,7 +69,6 @@ function ManifoldTests.test_manifold(
     basis_has_specialized_diagonalizing_get = false,
     basis_types_to_from = (),
     basis_types_vecs = (),
-    copyto_atol = 0,
     default_inverse_retraction_method = LogarithmicInverseRetraction(),
     default_retraction_method = ExponentialRetraction(),
     exp_log_atol_multiplier = 0,
@@ -594,7 +593,7 @@ function ManifoldTests.test_manifold(
         for (p, X) in zip(pts, tv)
             p2 = allocate(p)
             copyto!(p2, p)
-            Test.@test isapprox(M, p2, p; atol = copyto_atol)
+            Test.@test isapprox(M, p2, p)
 
             X2 = allocate(X)
             if default_inverse_retraction_method === nothing
