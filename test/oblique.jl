@@ -25,6 +25,7 @@ include("utils.jl")
         y = [1.0 0.0 0.0; 1/sqrt(2) 1/sqrt(2) 0.0]'
         z = [1/sqrt(2) 1/sqrt(2) 0.0; 1.0 0.0 0.0]'
         basis_types = (DefaultOrthonormalBasis(),)
+        transports = [ParallelTransport(), PowerVectorTransport(ParallelTransport())]
         test_manifold(
             M,
             [x, y, z],
@@ -33,7 +34,8 @@ include("utils.jl")
             test_vector_spaces = true,
             test_project_tangent = false,
             test_musical_isomorphisms = true,
-            test_default_vector_transport = false,
+            test_default_vector_transport = true,
+            vector_transport_methods = transports,
             basis_types_to_from = basis_types,
         )
     end
