@@ -104,7 +104,10 @@ struct TestVectorSpaceType <: VectorSpaceType end
             )
 
             # tangent space at point
-            pts_TpM = map(p -> convert(T, p), [[0.0, 0.0, 1.0], [0.0, 2.0, 0.0], [0.0, -1.0, 1.0]])
+            pts_TpM = map(
+                p -> convert(T, p),
+                [[0.0, 0.0, 1.0], [0.0, 2.0, 0.0], [0.0, -1.0, 1.0]],
+            )
             test_manifold(
                 TpM,
                 pts_TpM,

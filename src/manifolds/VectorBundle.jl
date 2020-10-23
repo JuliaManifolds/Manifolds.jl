@@ -497,22 +497,10 @@ function get_vector!(
     )
     return Y
 end
-function get_vector!(
-    M::TangentBundleFibers,
-    Y,
-    p,
-    X,
-    B::ManifoldsBase.all_uncached_bases,
-)
+function get_vector!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncached_bases)
     return get_vector!(M.manifold, Y, p, X, B)
 end
-function get_vector!(
-    M::TangentSpaceAtPoint,
-    Y,
-    p,
-    X,
-    B::ManifoldsBase.all_uncached_bases,
-)
+function get_vector!(M::TangentSpaceAtPoint, Y, p, X, B::ManifoldsBase.all_uncached_bases)
     return get_vector!(M.fiber.manifold, Y, M.point, X, B)
 end
 
