@@ -115,7 +115,7 @@ function vec2skew!(X, v)
     return X
 end
 function vec2skew(v, k)
-    X = zeros(eltype(v), k, k)
+    X = similar(v, k, k)
     vec2skew!(X, v)
     return X
 end
