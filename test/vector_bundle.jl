@@ -57,8 +57,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
     TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
 
     for T in types
-        x = convert(T, [1.0, 0.0, 0.0])
+        p = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)
+        TpM = TangentSpaceAtPoint(M, p)
         @test sprint(show, TB) == "TangentBundle(Sphere(2, ℝ))"
         @test base_manifold(TB) == M
         @test manifold_dimension(TB) == 2 * manifold_dimension(M)
@@ -99,6 +100,23 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_project_point = true,
                 test_default_vector_transport = true,
                 basis_types_vecs = basis_types,
+                projection_atol_multiplier = 4,
+            )
+
+            # tangent space at point
+            pts_TpM = map(p -> convert(T, p), [[0.0, 0.0, 1.0], [0.0, 2.0, 0.0], [0.0, -1.0, 1.0]])
+            test_manifold(
+                TpM,
+                pts_TpM,
+                test_injectivity_radius = true,
+                test_reverse_diff = isa(T, Vector),
+                test_forward_diff = isa(T, Vector),
+                test_tangent_vector_broadcasting = true,
+                test_vee_hat = false,
+                test_project_tangent = true,
+                test_project_point = true,
+                test_default_vector_transport = true,
+                basis_types_to_from = (DefaultOrthonormalBasis(),),
                 projection_atol_multiplier = 4,
             )
         end
