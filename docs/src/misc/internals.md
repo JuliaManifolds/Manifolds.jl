@@ -19,5 +19,6 @@ Manifolds.size_to_tuple
 Manifolds.select_from_tuple
 Manifolds.usinc
 Manifolds.usinc_from_cos
+Manifolds.vec2skew!
 Manifolds.ziptuples
 ```

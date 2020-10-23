@@ -114,6 +114,8 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
+                basis_types_to_from = (DefaultOrthonormalBasis(),),
+                basis_types_vecs = (DefaultOrthonormalBasis(),),
                 test_exp_log = false,
                 default_inverse_retraction_method = PolarInverseRetraction(),
                 test_injectivity_radius = false,
