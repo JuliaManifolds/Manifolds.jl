@@ -14,7 +14,7 @@ The following is a set of guidelines to [`Manifolds.jl`](https://juliamanifolds.
 ## I just have a question
 
 The developers can most easily be reached in the Julia Slack channel [#manifolds](https://julialang.slack.com/archives/CP4QF0K5Z).
-You can apply for the Julia Slack workspace [here](https://slackinvite.julialang.org) if you haven't joined yet.
+You can apply for the Julia Slack workspace [here](https://julialang.org/slack/) if you haven't joined yet.
 You can also ask your question on [discourse.julialang.org](https://discourse.julialang.org).
 
 ## How can I file an issue?
