@@ -108,6 +108,10 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 p -> convert(T, p),
                 [[0.0, 0.0, 1.0], [0.0, 2.0, 0.0], [0.0, -1.0, 1.0]],
             )
+            basis_types = (
+                DefaultOrthonormalBasis(),
+                get_basis(TpM, pts_TpM[1], DefaultOrthonormalBasis()),
+            )
             test_manifold(
                 TpM,
                 pts_TpM,
@@ -119,7 +123,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_project_tangent = true,
                 test_project_point = true,
                 test_default_vector_transport = true,
-                basis_types_to_from = (DefaultOrthonormalBasis(),),
+                basis_types_vecs = basis_types,
                 projection_atol_multiplier = 4,
             )
         end
