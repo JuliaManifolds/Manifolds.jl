@@ -72,6 +72,20 @@ const CotangentBundleFibers{M} =
 CotangentBundleFibers(M::Manifold) = VectorBundleFibers(CotangentSpace, M)
 
 """
+    VectorSpaceAtPoint{
+        𝔽,
+        TFiber<:VectorBundleFibers{<:VectorSpaceType,<:Manifold{𝔽}},
+        TX,
+    } <: Manifold{𝔽}   
+
+A vector space at a point `p` on the manifold.
+This is modelled using [`VectorBundleFibers`](@ref) with only a vector-like part
+and fixing the point-like part to be just `p`.
+
+This vector space itself is also a `manifold`. Especially, it's flat and hence isometric
+to the [`Euclidean`](@ref) manifold.
+
+# Constructor
     VectorSpaceAtPoint(fiber::VectorBundleFibers, p)
 
 A vector space (fiber type `fiber` of a vector bundle) at point `p` from
@@ -360,6 +374,9 @@ end
 function get_basis(M::VectorBundle, p, B::CachedBasis)
     return invoke(get_basis, Tuple{Manifold,Any,CachedBasis}, M, p, B)
 end
+function get_basis(M::TangentSpaceAtPoint, p, B::CachedBasis)
+    return invoke(get_basis, Tuple{Manifold,Any,CachedBasis}, M.fiber.manifold, M.point, B)
+end
 
 function get_basis(M::VectorBundle, p, B::DiagonalizingOrthonormalBasis)
     xp1 = submanifold_component(p, Val(1))
@@ -445,6 +462,9 @@ end
 function get_coordinates!(M::VectorBundle, Y, p, X, B::CachedBasis)
     return error("get_coordinates! called on $M with an incorrect CachedBasis. Expected a CachedBasis with VectorBundleBasisData, given $B")
 end
+function get_coordinates!(M::TangentSpaceAtPoint, Y, p, X, B::CachedBasis)
+    return get_coordinates!(M.fiber.manifold, Y, M.point, X, B)
+end
 
 function get_coordinates!(
     M::TangentBundleFibers,
@@ -501,6 +521,29 @@ function get_vector!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncac
     return get_vector!(M.manifold, Y, p, X, B)
 end
 function get_vector!(M::TangentSpaceAtPoint, Y, p, X, B::ManifoldsBase.all_uncached_bases)
+    return get_vector!(M.fiber.manifold, Y, M.point, X, B)
+end
+for BT in [
+    DefaultBasis,
+    DefaultOrthogonalBasis,
+    DefaultOrthonormalBasis,
+    ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
+    ProjectedOrthonormalBasis{:svd,ℝ},
+    VeeOrthogonalBasis,
+]
+    eval(
+        quote
+            @invoke_maker 5 AbstractBasis get_vector!(
+                M::TangentSpaceAtPoint,
+                Y,
+                p,
+                X,
+                B::$BT,
+            )
+        end,
+    )
+end
+function get_vector!(M::TangentSpaceAtPoint, Y, p, X, B::CachedBasis)
     return get_vector!(M.fiber.manifold, Y, M.point, X, B)
 end
 
