@@ -27,6 +27,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test (-fv1).type == TangentSpace
         @test isa(2 * fv1, FVector)
         @test (2 * fv1).type == TangentSpace
+        @test fv1[1] == tvs[1][1]
 
         PM = ProductManifold(Sphere(2), Euclidean(2))
         @test_throws ErrorException flat(
@@ -112,6 +113,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 DefaultOrthonormalBasis(),
                 get_basis(TpM, pts_TpM[1], DefaultOrthonormalBasis()),
             )
+            @test get_basis(TpM, pts_TpM[1], basis_types[2]) === basis_types[2]
             test_manifold(
                 TpM,
                 pts_TpM,
@@ -136,31 +138,33 @@ struct TestVectorSpaceType <: VectorSpaceType end
 
     @test base_manifold(TangentBundle(M)) == M
     @testset "spaces at point" begin
-        x = [1.0, 0.0, 0.0]
-        t_x = TangentSpaceAtPoint(M, x)
-        t_x2 = TangentSpace(M, x)
-        @test t_x == t_x2
-        ct_x = CotangentSpaceAtPoint(M, x)
-        t_xs = sprint(show, "text/plain", t_x)
-        sp = sprint(show, "text/plain", x)
+        p = [1.0, 0.0, 0.0]
+        t_p = TangentSpaceAtPoint(M, p)
+        t_p2 = TangentSpace(M, p)
+        @test t_p == t_p2
+        ct_p = CotangentSpaceAtPoint(M, p)
+        t_ps = sprint(show, "text/plain", t_p)
+        sp = sprint(show, "text/plain", p)
         sp = replace(sp, '\n' => "\n ")
-        t_xs_test = "Tangent space to the manifold $(M) at point:\n $(sp)"
-        @test t_xs == t_xs_test
-        @test base_manifold(t_x) == M
-        @test base_manifold(ct_x) == M
-        @test t_x.fiber.manifold == M
-        @test ct_x.fiber.manifold == M
-        @test t_x.fiber.fiber == TangentSpace
-        @test ct_x.fiber.fiber == CotangentSpace
-        @test t_x.point == x
-        @test ct_x.point == x
+        t_ps_test = "Tangent space to the manifold $(M) at point:\n $(sp)"
+        @test t_ps == t_ps_test
+        @test base_manifold(t_p) == M
+        @test base_manifold(ct_p) == M
+        @test t_p.fiber.manifold == M
+        @test ct_p.fiber.manifold == M
+        @test t_p.fiber.fiber == TangentSpace
+        @test ct_p.fiber.fiber == CotangentSpace
+        @test t_p.point == p
+        @test ct_p.point == p
+        @test injectivity_radius(t_p) == Inf
+        @test representation_size(t_p) == representation_size(M)
         # generic vector space at
         fiber = VectorBundleFibers(TestVectorSpaceType(), M)
-        v_x = VectorSpaceAtPoint(fiber, x)
-        v_xs = sprint(show, "text/plain", v_x)
+        v_p = VectorSpaceAtPoint(fiber, p)
+        v_ps = sprint(show, "text/plain", v_p)
         fiber_s = sprint(show, "text/plain", fiber)
-        v_xs_test = "$(typeof(v_x))\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
-        @test v_xs == v_xs_test
+        v_ps_test = "$(typeof(v_p))\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
+        @test v_ps == v_ps_test
     end
 
     @testset "tensor product" begin
