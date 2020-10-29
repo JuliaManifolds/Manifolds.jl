@@ -242,8 +242,7 @@ end
 function get_basis(M::Hyperbolic, p, B::DefaultOrthonormalBasis)
     n = manifold_dimension(M)
     V = [_hyperbolize(M, p, [i == k ? 1 : 0 for k in 1:n]) for i in 1:n]
-    _gram_schmidt!(M, V, p, V)
-    return CachedBasis(B, V)
+    return CachedBasis(B, gram_schmidt(M, p, V))
 end
 
 function get_basis(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)
@@ -266,7 +265,7 @@ function get_basis(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)
         end
         κ[1] = 0.0
     end
-    _gram_schmidt!(M, V, p, V)
+    V = gram_schmidt(M, p, V; atol=4*eps(eltype(V[1])))
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, κ, V))
 end
 
@@ -326,32 +325,6 @@ resulting `p` we have that its [`minkowski_metric`](@ref) is $⟨p,X⟩_{\mathrm
 i.e. $X_{n+1} = \frac{⟨\tilde p, Y⟩}{p_{n+1}}$, where $\tilde p = (p_1,\ldots,p_n)$.
 """
 _hyperbolize(M::Hyperbolic, p, Y) = vcat(Y, dot(p[1:(end - 1)], Y) / p[end])
-
-@doc raw"""
-    _gram_schmidt!(M, W, p, V)
-
-perform a Gram-SChmidt orthognalization of the vectors from V in the tangent space of p.
-This method throws an error if you provide more vectors than [`manifold_dimension`](@ref)`(M)`.
-
-The result is returned in W
-"""
-function _gram_schmidt!(M::Manifold, W, p, V::AbstractVector)
-    manifold_dimension(M) < length(V) &&
-        throw(ErrorException("The set of vectors cvontains too many ($(length(V))) vectors for the manifold $(M) of dimension $(manifold_dimension(M))"))
-    n = norm(M, p, W[1])
-    n == 0 && throw(ErrorException("Vector #1 of the set of vectors is zero."))
-    W[1] ./= n
-    for i in 2:length(V)
-        for j in 1:(i - 1)
-            W[i] .-= inner(M, p, W[i], W[j]) .* W[j]
-        end
-        n = norm(M, p, W[i])
-        n == 0 &&
-            throw(ErrorException("Vector #$(i) is in the span of the previous vectors."))
-        W[i] ./= n
-    end
-    return W
-end
 
 @doc raw"""
     inner(M::Hyperbolic{n}, p, X, Y)
