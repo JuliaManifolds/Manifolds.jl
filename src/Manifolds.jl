@@ -27,6 +27,7 @@ import ManifoldsBase:
     get_vector,
     get_vector!,
     get_vectors,
+    gram_schmidt,
     injectivity_radius,
     inner,
     inner__intransparent,
