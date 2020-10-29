@@ -265,7 +265,7 @@ function get_basis(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)
         end
         κ[1] = 0.0
     end
-    V = gram_schmidt(M, p, V; atol=4*eps(eltype(V[1])))
+    V = gram_schmidt(M, p, V; atol = 4 * eps(eltype(V[1])))
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, κ, V))
 end
 
