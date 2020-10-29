@@ -365,7 +365,7 @@ Compute the QR-based retraction [`QRRetraction`](@ref) on the
 ````
 where D is a $m × n$ matrix with
 ````math
-D = \operatorname{diag}( \operatorname{sgn}(R_{ii}+0,5)_{i=1}^n ).
+D = \operatorname{diag}\left( \operatorname{sgn}\left(R_{ii}+\frac{1}{2}\right)_{i=1}^n \right).
 ````
 """
 retract(::Grassmann, ::Any, ::Any, ::QRRetraction)
