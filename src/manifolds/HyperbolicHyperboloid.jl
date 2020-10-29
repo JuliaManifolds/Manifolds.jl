@@ -241,14 +241,18 @@ end
 
 function get_basis(M::Hyperbolic, p, B::DefaultOrthonormalBasis)
     n = manifold_dimension(M)
-    V = [_hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for i in 1:n]
+    V = [
+        _hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for i in 1:n
+    ]
     return CachedBasis(B, gram_schmidt(M, p, V))
 end
 
 function get_basis(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)
     n = manifold_dimension(M)
     X = B.frame_direction
-    V = [_hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for i in 1:n]
+    V = [
+        _hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for i in 1:n
+    ]
     κ = -ones(n)
     if norm(M, p, X) != 0
         placed = false
