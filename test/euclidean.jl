@@ -22,6 +22,7 @@ include("utils.jl")
     Y = similar(X)
     project!(E, Y, p, X)
     @test Y == X
+    @test embed(E, p, X) == X
 
     # real manifold does not allow complex values
     @test_throws DomainError is_manifold_point(Ec, [:a, :b, :b], true)

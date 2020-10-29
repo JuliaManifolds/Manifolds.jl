@@ -290,6 +290,13 @@ function number_eltype(::Type{FVector{TType,TData}}) where {TType<:VectorSpaceTy
 end
 number_eltype(v::FVector) = number_eltype(v.data)
 
+function embed!(M::TangentSpaceAtPoint, q, p)
+    return embed!(M.fiber.manifold, q, M.point, p)
+end
+function embed!(M::TangentSpaceAtPoint, Y, p, X)
+    return embed!(M.fiber.manifold, Y, M.point, X)
+end
+
 @doc raw"""
     exp(B::VectorBundle, p, X)
 

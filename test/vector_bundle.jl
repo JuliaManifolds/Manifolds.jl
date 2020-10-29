@@ -158,6 +158,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test ct_p.point == p
         @test injectivity_radius(t_p) == Inf
         @test representation_size(t_p) == representation_size(M)
+        v = [0.0, 0.0, 1.0]
+        @test embed(t_p, v) == v
+        @test embed(t_p, v, v) == v
         # generic vector space at
         fiber = VectorBundleFibers(TestVectorSpaceType(), M)
         v_p = VectorSpaceAtPoint(fiber, p)

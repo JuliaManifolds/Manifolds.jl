@@ -174,5 +174,5 @@ function center_of_orbit(
     mean_method::AbstractEstimationMethod = GradientDescentEstimation(),
 )
     alignments = map(p -> optimal_alignment(A, q, p), pts)
-    return mean(g_manifold(A), alignments, mean_method)
+    return mean(base_group(A), alignments, mean_method)
 end
