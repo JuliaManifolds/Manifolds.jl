@@ -19,7 +19,7 @@ end
     # TODO: reduce the number of ambiguities
     if VERSION >= v"1.6-DEV"
         @test length(Test.detect_ambiguities(ManifoldsBase)) <= 3
-        @test length(Test.detect_ambiguities(Manifolds)) <= 98
+        @test length(Test.detect_ambiguities(Manifolds)) <= 101
         @test length(our_base_ambiguities()) <= 4
     else
         @test length(Test.detect_ambiguities(ManifoldsBase)) <= 17
