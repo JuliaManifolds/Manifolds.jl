@@ -11,22 +11,17 @@ using Manifolds, Plots, RecipesBase
     wireframe_lon=33,
     curve_interpolation = -1,
 ) where {T}
-    x = zeros(wireframe_lat,wireframe_lon); y = deepcopy(x); z = deepcopy(y)
-    for (i,lon) ∈ enumerate(range(0,stop=2*π,length=wireframe_lat))
-        for (j,lat) ∈ enumerate(range(0,stop=π,length=wireframe_lon))
-            @inbounds x[i,j] = cos(lon) * sin(lat)
-            @inbounds y[i,j] = sin(lon) * sin(lat)
-            @inbounds z[i,j] = cos(lat)
-        end
-    end
+    φ_range = range(0,stop=2*π,length=wireframe_lon)
+    λ_range = range(0,stop=π,length=wireframe_lat)
+    x = [cos(φ) * sin(λ) for φ ∈ φ_range, λ ∈ λ_range]
+    y = [sin(φ) * sin(λ) for φ ∈ φ_range, λ ∈ λ_range]
+    z = [cos(λ) for φ ∈ φ_range, λ ∈ λ_range]
     # global options
-    options = []
-    scene = surface(; options...)
+    scene = plot()
     show_sphere && surface!(
         scene,
         x,y,z,
         color = fill(sphere_color, wireframe_lat, wireframe_lon),
-        options...
     )
     show_wireframe && wireframe!(
         scene,
@@ -34,14 +29,16 @@ using Manifolds, Plots, RecipesBase
         y,
         z,
         linewidth = 1.2, color = wireframe_color,
-        options...
     )
-    (curve_interpolation < 0) && scatter!(
-        scene,
-        pts,
-        options...
-    )
-    if curve_interpolation >= 0
+    framestyle -> :none
+    axis -> false
+    xlims -> (-1.01, 1.01)
+    ylims -> (-1.01, 1.01)
+    zlims -> (-1.01, 1.01)
+    if curve_interpolation < 0
+        seriestype --> :scatter
+        return [p[1] for p ∈ pts], [p[2] for p ∈ pts], [p[3] for p ∈ pts]
+    else
         lpts = empty(pts)
         for i=1:(length(pts)-1)
             # push interims points on geodesics between two points.
@@ -56,11 +53,11 @@ using Manifolds, Plots, RecipesBase
         end
         push!(lpts,last(pts)) # add last end point
         # split into x, y, z and plot as curve
-        plot!(scene, [p[1], p ∈ lpts], [p[2], p ∈ lpts], [p[3], p ∈ lpts])
+        seriestype --> :path
+        return [p[1] for p ∈ lpts], [p[2] for p ∈ lpts], [p[3] for p ∈ lpts]
     end
-    return scene
 end
 
 M = Sphere(2)
 pts = [ [1.0, 0.0, 0.0], [0.0, 1.0, 0.0] ]
-plot(M, pts)
+plot(M, pts; curve_interpolation=18,show_axis=false)
