@@ -31,10 +31,12 @@ using Manifolds, Plots, RecipesBase
         linewidth = 1.2, color = wireframe_color,
     )
     framestyle -> :none
-    axis -> false
-    xlims -> (-1.01, 1.01)
-    ylims -> (-1.01, 1.01)
-    zlims -> (-1.01, 1.01)
+    axis --> false
+    xlims --> (-1.01, 1.01)
+    ylims --> (-1.01, 1.01)
+    zlims --> (-1.01, 1.01)
+    grid --> false
+    tickfontcolor --> RGBA(1.0, 1.0, 1.0, 1.0)
     if curve_interpolation < 0
         seriestype --> :scatter
         return [p[1] for p ∈ pts], [p[2] for p ∈ pts], [p[3] for p ∈ pts]
@@ -60,4 +62,4 @@ end
 
 M = Sphere(2)
 pts = [ [1.0, 0.0, 0.0], [0.0, 1.0, 0.0] ]
-plot(M, pts; curve_interpolation=18,show_axis=false)
+plot(M, pts; curve_interpolation=18)
