@@ -234,11 +234,9 @@ end
     pts::AbstractVector{T};
     circle_points = 720,
     geodesic_interpolation = -1,
-    hyperbolic_border_color = RGBA(0.0, 0.0, 0.0, 1.0),
 ) where {T<:PoincareHalfSpacePoint}
-    framestyle -> :none
     aspect_ratio --> :equal
-    tickfontcolor --> RGBA(1.0, 1.0, 1.0, 1.0)
+    framestyle --> :origin
     if geodesic_interpolation < 0
         seriestype --> :scatter
         return [p.value[1] for p in pts], [p.value[2] for p in pts]
