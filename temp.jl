@@ -1,4 +1,6 @@
-using Manifolds, Plots, RecipesBase
+using Manifolds
+using Plots
+using RecipesBase
 
 @recipe function f(
     M::Sphere{2},
@@ -17,9 +19,14 @@ using Manifolds, Plots, RecipesBase
     y = [sin(φ) * sin(λ) for φ ∈ φ_range, λ ∈ λ_range]
     z = [cos(λ) for φ ∈ φ_range, λ ∈ λ_range]
     # global options
+    @series begin
+        #seriestype := :surface
+        x,y,z
+    end
+    #=
     scene = plot()
     show_sphere && surface!(
-        scene,
+        plotattributes[:plot_object],
         x,y,z,
         color = fill(sphere_color, wireframe_lat, wireframe_lon),
     )
@@ -30,6 +37,7 @@ using Manifolds, Plots, RecipesBase
         z,
         linewidth = 1.2, color = wireframe_color,
     )
+    =#
     framestyle -> :none
     axis --> false
     xlims --> (-1.01, 1.01)
