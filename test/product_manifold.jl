@@ -429,6 +429,15 @@ end
         @test submanifold_component(pts[1], Val(1)) === pts[1].parts[1]
         @test submanifold_components(Mse, pts[1]) === pts[1].parts
         @test submanifold_components(pts[1]) === pts[1].parts
+
+        p_inf = parray(Mse, randn(5))
+        @test (@inferred ManifoldsBase.allocate_result_type(
+            Mse,
+            Manifolds.log,
+            (p_inf, p_inf),
+        )) === Float64
+        @test (@inferred number_eltype(typeof(p_inf))) === Float64
+        @test pts_prod[1] .+ fill(1.0, 5) == pts_prod[1] .+ 1.0
     end
 
     @testset "ProductRepr" begin
@@ -472,12 +481,6 @@ end
             is_tangent_atol_multiplier = 1,
             exp_log_atol_multiplier = 1,
         )
-        p_inf = parray(Mse, randn(5))
-        @test (@inferred ManifoldsBase.allocate_result_type(
-            Mse,
-            Manifolds.log,
-            (p_inf, p_inf),
-        )) === Float64
         @test number_eltype(pts[1]) === Float64
         @test submanifold_component(Mse, pts[1], 1) === pts[1].parts[1]
         @test submanifold_component(Mse, pts[1], Val(1)) === pts[1].parts[1]
