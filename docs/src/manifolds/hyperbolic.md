@@ -29,13 +29,20 @@ Order = [:type, :function]
 ```
 
 ### Plotting
+
 For the case of [`Hyperbolic`](@ref)`(2)` there is a plotting available based on a [PlottingRecipe](https://docs.juliaplots.org/latest/recipes/) you can easily plot points, connecting geodesics as well as tangent vectors.
 
+!!! note
+    The recipes are only loaded if [Plots.jl](http://docs.juliaplots.org/latest/) or
+    [RecipesBase.jl](http://juliaplots.org/RecipesBase.jl/stable/) is loaded.
+
 If we consider a set of points, we can first plot these and their connecting
-geodeics using the `geodesic_interpolation` For the points. This variable specifies with how many points a geodesic between two successive points is sampled (per default it's `-1`, which deactivates geodesics) and the line style is set to be a path.
+geodesics using the `geodesic_interpolation` For the points. This variable specifies with how many points a geodesic between two successive points is sampled (per default it's `-1`, which deactivates geodesics) and the line style is set to be a path.
+Another keyword argument added is the border of the Poincaré disc, namely
+`circle_points = 720` resolution of the drawn boundary (every hlaf angle) as well as its color, `hyperbolic_border_color = RGBA(0.0, 0.0, 0.0, 1.0)`.
 
 ```@example poincareball
-using Colors, Manifolds, Plots, RecipesBase
+using Manifolds, Plots
 M = Hyperbolic(2)
 pts = PoincareBallPoint.( [0.85 .* [cos(φ), sin(φ)] for φ ∈ range(0,2π,length=11)])
 scene = plot(M, pts, geodesic_interpolation = 100)
@@ -70,12 +77,18 @@ Order = [:type, :function]
 ```
 
 ### Plotting
+
 For the case of [`Hyperbolic`](@ref)`(2)` there is a plotting available based on a [PlottingRecipe](https://docs.juliaplots.org/latest/recipes/) you can easily plot points, connecting geodesics as well as tangent vectors.
+
+!!! note
+    The recipes are only loaded if [Plots.jl](http://docs.juliaplots.org/latest/) or
+    [RecipesBase.jl](http://juliaplots.org/RecipesBase.jl/stable/) is loaded.
+
 We again have two different recipes, one for points, one for tangent vectors, where the first one again can be equipped with geodesics between the points.
 In the following example we generate 7 points on an ellipse in the [Hyperboloid model](#hyperboloid-model).
 
 ```@example poincarehalfplane
-using Colors, Manifolds, Plots, RecipesBase
+using Manifolds, Plots
 M = Hyperbolic(2)
 pre_pts = [2.0 .* [5.0*cos(φ), sin(φ)] for φ ∈ range(0,2π,length=7)]
 pts = convert.(
