@@ -293,7 +293,7 @@ end
     vecs::AbstractVector{T},
     circle_points = 720,
     hyperbolic_border_color = RGBA(0.0, 0.0, 0.0, 1.0),
-) where {P<:PoincareBallPoint, T<:PoincareBallTVector}
+) where {P<:PoincareBallPoint,T<:PoincareBallTVector}
     @series begin
         φr = range(0, stop = 2 * π, length = circle_points)
         x = [cos(φ) for φ in φr]
@@ -312,6 +312,6 @@ end
     aspect_ratio --> :equal
     tickfontcolor --> RGBA(1.0, 1.0, 1.0, 1.0)
     seriestype := :quiver
-    quiver := ([v.value[1] for v ∈ vecs], [v.value[2] for v ∈ vecs])
+    quiver := ([v.value[1] for v in vecs], [v.value[2] for v in vecs])
     return [p.value[1] for p in pts], [p.value[2] for p in pts]
 end

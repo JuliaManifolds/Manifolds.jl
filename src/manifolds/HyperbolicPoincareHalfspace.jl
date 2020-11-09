@@ -264,10 +264,10 @@ end
     ::Hyperbolic{2},
     pts::AbstractVector{P},
     vecs::AbstractVector{T},
-) where {P<:PoincareHalfSpacePoint, T<:PoincareHalfSpaceTVector}
+) where {P<:PoincareHalfSpacePoint,T<:PoincareHalfSpaceTVector}
     aspect_ratio --> :equal
     framestyle --> :origin
     seriestype := :quiver
-    quiver := ([v.value[1] for v ∈ vecs], [v.value[2] for v ∈ vecs])
+    quiver := ([v.value[1] for v in vecs], [v.value[2] for v in vecs])
     return [p.value[1] for p in pts], [p.value[2] for p in pts]
 end
