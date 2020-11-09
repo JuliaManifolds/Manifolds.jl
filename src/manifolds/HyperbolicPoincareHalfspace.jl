@@ -232,7 +232,6 @@ end
 @recipe function f(
     M::Hyperbolic{2},
     pts::AbstractVector{T};
-    circle_points = 720,
     geodesic_interpolation = -1,
 ) where {T<:PoincareHalfSpacePoint}
     aspect_ratio --> :equal
@@ -259,4 +258,16 @@ end
         seriestype --> :path
         return [p.value[1] for p in lpts], [p.value[2] for p in lpts]
     end
+end
+
+@recipe function f(
+    ::Hyperbolic{2},
+    pts::AbstractVector{P},
+    vecs::AbstractVector{T},
+) where {P<:PoincareHalfSpacePoint, T<:PoincareHalfSpaceTVector}
+    aspect_ratio --> :equal
+    framestyle --> :origin
+    seriestype := :quiver
+    quiver := ([v.value[1] for v ∈ vecs], [v.value[2] for v ∈ vecs])
+    return [p.value[1] for p in pts], [p.value[2] for p in pts]
 end
