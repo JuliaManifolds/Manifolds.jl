@@ -88,6 +88,9 @@ using ManifoldsBase:
     manifold_function_not_implemented_message
 using Markdown: @doc_str
 using Random
+using RecipesBase
+using RecipesBase: @recipe, @series
+using Colors: RGBA
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
