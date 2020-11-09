@@ -35,7 +35,7 @@ If we consider a set of points, we can first plot these and their connecting
 geodeics using the `geodesic_interpolation` For the points. This variable specifies with how many points a geodesic between two successive points is sampled (per default it's `-1`, which deactivates geodesics) and the line style is set to be a path.
 
 ```@example poincareball
-using Manifolds, Plots
+using Colors, Manifolds, Plots, RecipesBase
 M = Hyperbolic(2)
 pts = PoincareBallPoint.( [0.85 .* [cos(φ), sin(φ)] for φ ∈ range(0,2π,length=11)])
 scene = plot(M, pts, geodesic_interpolation = 100)
@@ -75,7 +75,7 @@ We again have two different recipes, one for points, one for tangent vectors, wh
 In the following example we generate 7 points on an ellipse in the [Hyperboloid model](#hyperboloid-model).
 
 ```@example poincarehalfplane
-using Manifolds, Plots
+using Colors, Manifolds, Plots, RecipesBase
 M = Hyperbolic(2)
 pre_pts = [2.0 .* [5.0*cos(φ), sin(φ)] for φ ∈ range(0,2π,length=7)]
 pts = convert.(

@@ -88,9 +88,6 @@ using ManifoldsBase:
     manifold_function_not_implemented_message
 using Markdown: @doc_str
 using Random
-using RecipesBase
-using RecipesBase: @recipe, @series
-using Colors: RGBA
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
@@ -223,6 +220,11 @@ function __init__()
         end
     end
 
+    @require RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01" begin
+        using .RecipesBase: @recipe, @series
+        using Colors: RGBA
+        include("recipes.jl")
+    end
     return nothing
 end
 
