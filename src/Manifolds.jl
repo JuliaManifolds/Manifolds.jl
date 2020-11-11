@@ -159,7 +159,7 @@ include("groups/array_manifold.jl")
 include("groups/product_group.jl")
 include("groups/semidirect_product_group.jl")
 
-include("groups/general_linear_group.jl")
+include("groups/general_linear.jl")
 include("groups/translation_group.jl")
 include("groups/special_orthogonal.jl")
 include("groups/circle_group.jl")
