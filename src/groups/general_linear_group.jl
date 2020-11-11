@@ -1,5 +1,3 @@
-struct GeneralLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation} end
-
 @doc raw"""
     GeneralLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation}
 
@@ -12,6 +10,8 @@ where $X_e = p^{-1}X_p ∈ 𝔤l(n) = T_e \mathrm{GL}(n, 𝔽) = 𝔽^{n×n}$ is
 vector in the Lie algebra. In the default implementations, all tangent vectors $X_p$ are
 instead represented with their corresponding Lie algebra vectors.
 """
+struct GeneralLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation} end
+
 GeneralLinear(n, 𝔽::AbstractNumbers = ℝ) = GeneralLinear{n,𝔽}()
 
 @doc raw"""
