@@ -68,6 +68,27 @@ converted to a `Matrix` before computing the log.
     return SizedMatrix{s[1],s[2]}(log(Matrix(parent(x))))
 end
 
+sqrt_safe(x) = sqrt(x)
+sqrt_safe(x::Real) = sqrt(Complex(x))
+
+exp_2x2(X) = exp(X)
+exp_2x2(X::AbstractMatrix{T}) where {T<:Union{Real,Complex}} = exp_2x2!(similar(X), X)
+
+exp_2x2!(Y, X) = copyto!(Y, exp(X))
+function exp_2x2!(Y, X::AbstractMatrix{T}) where {T<:Union{Real,Complex}}
+    size(X) === (2, 2) || throw(DomainError())
+    @inbounds a, c, b, d = X[1], X[2], X[3], X[4]
+    s = (a + d) / 2
+    z = sqrt_safe((a - d)^2 + 4 * b * c) / 2
+    sinhz, coshz = sinh(z), cosh(z)
+    usinhz = ifelse(iszero(z), one(sinhz), sinhz / z)
+    exps = exp(s)
+    α = exps * (coshz - s * usinhz)
+    β = exps * usinhz
+    Y .= α * I + β .* X
+    return Y
+end
+
 @generated maybesize(s::Size{S}) where {S} = prod(S) > 100 ? S : :(s)
 
 """
