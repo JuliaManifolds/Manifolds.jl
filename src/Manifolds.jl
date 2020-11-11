@@ -207,6 +207,11 @@ function __init__()
         include("ode.jl")
     end
 
+    @require NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56" begin
+        using .NLsolve
+        include("nlsolve.jl")
+    end
+
     @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
         using .Test: Test
         include("tests/tests_general.jl")
