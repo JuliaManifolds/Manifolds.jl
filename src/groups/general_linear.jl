@@ -101,11 +101,9 @@ function exp!(::GeneralLinear{1}, q, p, X)
     return q
 end
 function exp!(::GeneralLinear{2}, q, p, X)
-    A = exp_2x2(X)'
-    B = similar(X)
-    B .= X .- X'
-    exp_2x2!(B, B)
-    mul!(q, A, B)
+    A = SizedMatrix{2,2}(X')
+    B = SizedMatrix{2,2}(X) - A
+    mul!(q, exp(A), exp(B))
     return copyto!(q, p * q)
 end
 function exp!(
@@ -150,7 +148,7 @@ function group_exp!(::GeneralLinear{1}, q, X)
     q[1] = exp(X[1])
     return q
 end
-group_exp!(::GeneralLinear{2}, q, X) = exp_2x2!(q, X)
+group_exp!(::GeneralLinear{2}, q, X) = copyto!(q, exp(SizedMatrix{2,2}(X)))
 
 function group_log!(::GeneralLinear{1}, X, p)
     X[1] = log(p[1])
