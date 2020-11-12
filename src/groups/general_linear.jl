@@ -127,7 +127,13 @@ flat!(::GeneralLinear, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 get_coordinates(::GeneralLinear{n,ℝ}, p, X, ::DefaultOrthonormalBasis) where {n} = vec(X)
 
-function get_coordinates!(::GeneralLinear{n,ℝ}, Xⁱ, p, X, ::DefaultOrthonormalBasis) where {n}
+function get_coordinates!(
+    ::GeneralLinear{n,ℝ},
+    Xⁱ,
+    p,
+    X,
+    ::DefaultOrthonormalBasis,
+) where {n}
     return copyto!(Xⁱ, X)
 end
 
@@ -208,7 +214,12 @@ function log!(
     inverse_retract!(G, X, p, q, inverse_retraction)
     return X
 end
-function log!(M::MetricManifold{𝔽,<:GeneralLinear{1,𝔽},<:LeftGLInvariantMetric}, X, p, q) where {𝔽}
+function log!(
+    M::MetricManifold{𝔽,<:GeneralLinear{1,𝔽},<:LeftGLInvariantMetric},
+    X,
+    p,
+    q,
+) where {𝔽}
     return log!(M.manifold, X, p, q)
 end
 
