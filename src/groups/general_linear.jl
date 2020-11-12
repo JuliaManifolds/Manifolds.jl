@@ -180,12 +180,12 @@ end
 
 function log!(G::GeneralLinear, X, p, q)
     pinvq = inverse_translate(G, p, q, LeftAction())
-    X0 = similar(X)
     # use first term of baker-campbell-hausdorff formula
     # 1st order approximation of hermitian part of p \ X
     # 2nd order approximation of skew-hermitian part of p \ X
-    copyto!(X0, log_safe(pinvq))
-    solve_inverse_retract!(G, X, Identity(G, p), pinvq, X0, ExponentialRetraction())
+    X0 = number_system(G) === ℝ ? real(log_safe(pinvq)) : log_safe(pinvq)
+    inverse_retraction = ApproximateInverseRetraction(ExponentialRetraction())
+    inverse_retract!(G, X, p, q, inverse_retraction)
     return X
 end
 function log!(::GeneralLinear{1}, X, p, q)
@@ -200,12 +200,12 @@ function log!(
     q,
 ) where {n,𝔽}
     pinvq = inverse_translate(M, p, q, LeftAction())
-    X0 = similar(X)
     # use first term of baker-campbell-hausdorff formula
     # 1st order approximation of hermitian part of p \ X
     # 2nd order approximation of skew-hermitian part of p \ X
-    copyto!(X0, log_safe(pinvq))
-    solve_inverse_retract!(M, X, Identity(G.manifold, p), pinvq, X0, ExponentialRetraction())
+    X0 = number_system(G) === ℝ ? real(log_safe(pinvq)) : log_safe(pinvq)
+    inverse_retraction = ApproximateInverseRetraction(ExponentialRetraction())
+    inverse_retract!(G, X, p, q, inverse_retraction)
     return X
 end
 function log!(M::MetricManifold{𝔽,<:GeneralLinear{1,𝔽},<:LeftGLInvariantMetric}, X, p, q) where {𝔽}

@@ -315,6 +315,7 @@ export AbstractRetractionMethod,
     ProductRetraction,
     PowerRetraction
 export AbstractInverseRetractionMethod,
+    ApproximateInverseRetraction,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,
