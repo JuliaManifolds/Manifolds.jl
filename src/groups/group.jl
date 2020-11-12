@@ -29,8 +29,8 @@ Abstract type for a Lie group, a group that is also a smooth manifold with an
 implement at least [`inv`](@ref), [`identity`](@ref), [`compose`](@ref), and
 [`translate_diff`](@ref).
 """
-abstract type AbstractGroupManifold{𝔽,O<:AbstractGroupOperation} <:
-              AbstractDecoratorManifold{𝔽} end
+abstract type AbstractGroupManifold{𝔽,O<:AbstractGroupOperation,T<:AbstractEmbeddingType} <:
+              AbstractEmbeddedManifold{𝔽,T} end
 
 """
     GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <: AbstractGroupManifold{𝔽,O}
@@ -45,7 +45,7 @@ Group manifolds by default forward metric-related operations to the wrapped mani
     GroupManifold(manifold, op)
 """
 struct GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <:
-       AbstractGroupManifold{𝔽,O}
+       AbstractGroupManifold{𝔽,O,TransparentIsometricEmbedding}
     manifold::M
     op::O
 end
@@ -66,6 +66,8 @@ function base_group(M::Manifold)
     return error("base_group: no base group found.")
 end
 base_group(G::AbstractGroupManifold) = G
+
+base_manifold(G::GroupManifold) = G.manifold
 
 decorator_group_dispatch(M::Manifold) = Val(false)
 function decorator_group_dispatch(M::AbstractDecoratorManifold)
@@ -322,14 +324,16 @@ for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
     )
 end
 
-@decorator_transparent_fallback :transparent function check_manifold_point(
+manifold_dimension(G::GroupManifold) = manifold_dimension(G.manifold)
+
+function check_manifold_point(
     G::AbstractGroupManifold,
     e::Identity;
     kwargs...,
 )
     return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
-@decorator_transparent_fallback :transparent function check_manifold_point(
+function check_manifold_point(
     G::GT,
     e::Identity{GT};
     kwargs...,
