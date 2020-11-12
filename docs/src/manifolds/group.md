@@ -44,6 +44,14 @@ Pages = ["groups/circle_group.jl"]
 Order = [:type, :function]
 ```
 
+### General linear group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/general_linear.jl"]
+Order = [:type, :function]
+```
+
 ### Special orthogonal group
 
 ```@autodocs
