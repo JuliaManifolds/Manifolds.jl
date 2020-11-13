@@ -69,11 +69,11 @@ base_group(G::AbstractGroupManifold) = G
 
 base_manifold(G::GroupManifold) = G.manifold
 
-decorator_group_dispatch(M::Manifold) = Val(false)
+decorator_group_dispatch(::Manifold) = Val(false)
 function decorator_group_dispatch(M::AbstractDecoratorManifold)
     return decorator_group_dispatch(decorated_manifold(M))
 end
-decorator_group_dispatch(M::AbstractGroupManifold) = Val(true)
+decorator_group_dispatch(::AbstractGroupManifold) = Val(true)
 
 function is_group_decorator(M::Manifold)
     return _extract_val(decorator_group_dispatch(M))
@@ -86,6 +86,22 @@ if VERSION ≥ v"1.3"
     (op::AbstractGroupOperation)(M::Manifold) = GroupManifold(M, op)
     (::Type{T})(M::Manifold) where {T<:AbstractGroupOperation} = GroupManifold(M, T())
 end
+
+function decorator_transparent_dispatch(
+    ::typeof(get_coordinates!),
+    ::AbstractGroupManifold,
+    args...,
+)
+    return Val(:transparent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(get_vector!),
+    ::AbstractGroupManifold,
+    args...,
+)
+    return Val(:transparent)
+end
+
 
 ###################
 # Action directions
