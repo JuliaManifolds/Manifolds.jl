@@ -81,7 +81,7 @@ function check_manifold_point(M::Rotations{N}, p; kwargs...) where {N}
     if !isapprox(transpose(p) * p, one(p); kwargs...)
         return DomainError(
             norm(transpose(p) * p - one(p)),
-            "$p has to be orthogonal but it's not at kwargs $kwargs",
+            "$p must be orthogonal but it's not at kwargs $kwargs",
         )
     end
     return nothing
