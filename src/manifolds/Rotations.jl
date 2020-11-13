@@ -79,7 +79,10 @@ function check_manifold_point(M::Rotations{N}, p; kwargs...) where {N}
         return DomainError(det(p), "The determinant of $p has to be +1 but it is $(det(p))")
     end
     if !isapprox(transpose(p) * p, one(p); kwargs...)
-        return DomainError(norm(p), "$p has to be orthogonal but it's not")
+        return DomainError(
+            norm(transpose(p) * p - one(p)),
+            "$p has to be orthogonal but it's not at kwargs $kwargs",
+        )
     end
     return nothing
 end
