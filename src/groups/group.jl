@@ -342,11 +342,7 @@ end
 
 manifold_dimension(G::GroupManifold) = manifold_dimension(G.manifold)
 
-function check_manifold_point(
-    G::AbstractGroupManifold,
-    e::Identity;
-    kwargs...,
-)
+function check_manifold_point(G::AbstractGroupManifold, e::Identity; kwargs...)
     return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
 function check_manifold_point(
