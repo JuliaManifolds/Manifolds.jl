@@ -14,6 +14,7 @@ Manifolds.SizedAbstractArray
 Manifolds.complexify
 Manifolds.eigen_safe
 Manifolds.find_pv
+Manifolds.isnormal
 Manifolds.log_safe
 Manifolds.mul!_safe
 Manifolds.nzsign

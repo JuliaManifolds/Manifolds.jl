@@ -177,6 +177,21 @@ function vec2skew(v, k)
     return X
 end
 
+@doc raw"""
+    isnormal(x; kwargs...) -> Bool
+
+Check if the matrix or number `x` is normal, that is, if it commutes with its adjoint:
+````math
+x x^\mathrm{H} = x^\mathrm{H} x.
+````
+By default, this is an equality check. Provide `kwargs` for `isapprox` to perform an
+approximate check.
+"""
+isnormal(x; kwargs...) = isapprox(x * x', x' * x; kwargs...)
+isnormal(x) = x * x' == x' * x
+isnormal(::LinearAlgebra.RealHermSymComplexHerm; kwargs...) = true
+isnormal(::Diagonal; kwargs...) = true
+
 """
     ziptuples(a, b[, c[, d[, e]]])
 
