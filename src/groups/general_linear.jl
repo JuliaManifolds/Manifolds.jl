@@ -73,6 +73,9 @@ end
 
 function exp!(G::GeneralLinear, q, p, X)
     expX = exp(X)
+    if isnormal(X; atol = sqrt(eps(real(eltype(X)))))
+        return compose!(G, q, p, expX)
+    end
     compose!(G, q, expX', exp(X - X'))
     compose!(G, q, p, q)
     return q
@@ -83,6 +86,9 @@ function exp!(::GeneralLinear{1}, q, p, X)
     return q
 end
 function exp!(G::GeneralLinear{2}, q, p, X)
+    if isnormal(X; atol = sqrt(eps(real(eltype(X)))))
+        return compose!(G, q, p, exp(SizedMatrix{2,2}(X)))
+    end
     A = SizedMatrix{2,2}(X')
     B = SizedMatrix{2,2}(X) - A
     compose!(G, q, exp(A), exp(B))
