@@ -78,4 +78,51 @@ using NLsolve
             )
         end
     end
+
+    @testset "Complex" begin
+        G = GeneralLinear(2, ℂ)
+        types = [Matrix{ComplexF64}]
+        pts = [
+            [-1 - 5im -1 + 3im; -6 - 4im 4 + 6im],
+            [1 + 3im -1 - 4im; -2 - 2im -3 - 1im],
+            [-6 + 0im 1 + 1im; 1 - 1im -4 + 0im],
+        ]
+        vpts = [[1 + 0im -2 - 1im; -1 - 2im -4 + 1im], [-2 + 2im -1 - 1im; -1 - 1im -3 + 0im]]
+
+        retraction_methods = [
+            Manifolds.GroupExponentialRetraction(LeftAction()),
+            Manifolds.GroupExponentialRetraction(RightAction()),
+        ]
+
+        inverse_retraction_methods = [
+            Manifolds.GroupLogarithmicInverseRetraction(LeftAction()),
+            Manifolds.GroupLogarithmicInverseRetraction(RightAction()),
+        ]
+
+        for T in types
+            gpts = convert.(T, pts)
+            vgpts = convert.(T, vpts)
+            test_group(G, gpts, vgpts, vgpts; test_diff = true, test_invariance = true)
+            test_manifold(
+                G,
+                gpts;
+                test_reverse_diff = false,
+                test_forward_diff = false,
+                test_project_point = true,
+                test_injectivity_radius = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                vector_transport_methods = [
+                    ParallelTransport(),
+                    SchildsLadderTransport(),
+                    PoleLadderTransport(),
+                ],
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                exp_log_atol_multiplier = 1e8,
+                retraction_atol_multiplier = 1e8,
+            )
+        end
+    end
 end
