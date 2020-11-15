@@ -210,8 +210,10 @@ x x^\mathrm{H} = x^\mathrm{H} x.
 By default, this is an equality check. Provide `kwargs` for `isapprox` to perform an
 approximate check.
 """
-isnormal(x; kwargs...) = isapprox(x * x', x' * x; kwargs...)
-isnormal(x) = x * x' == x' * x
+function isnormal(x; kwargs...)
+    isempty(kwargs) && return x * x' == x' * x
+    return isapprox(x * x', x' * x; kwargs...)
+end
 isnormal(::LinearAlgebra.RealHermSymComplexHerm; kwargs...) = true
 isnormal(::Diagonal; kwargs...) = true
 
