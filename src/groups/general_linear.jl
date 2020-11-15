@@ -120,7 +120,7 @@ function group_log!(::GeneralLinear{1}, X, p)
     return X
 end
 
-inner(::GeneralLinear, X, Y) = dot(X, Y)
+inner(::GeneralLinear, p, X, Y) = dot(X, Y)
 
 invariant_metric_dispatch(::GeneralLinear, ::LeftAction) = Val(true)
 
