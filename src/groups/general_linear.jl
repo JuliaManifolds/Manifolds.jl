@@ -1,5 +1,6 @@
 @doc raw"""
-    GeneralLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType}
+    GeneralLinear{n,𝔽} <:
+        AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType}
 
 The general linear group, that is, the group of all invertible matrices in $𝔽^{n×n}$.
 
@@ -23,7 +24,8 @@ instead represented with their corresponding Lie algebra vectors.
     > doi: [10.1016/j.geomphys.2014.08.009](https://doi.org/10.1016/j.geomphys.2014.08.009),
     > arXiv: [1109.0520v1](https://arxiv.org/abs/1109.0520v1).
 """
-struct GeneralLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType} end
+struct GeneralLinear{n,𝔽} <:
+       AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType} end
 
 GeneralLinear(n, 𝔽::AbstractNumbers = ℝ) = GeneralLinear{n,𝔽}()
 

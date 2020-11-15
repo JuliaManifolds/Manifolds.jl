@@ -19,7 +19,7 @@ using NLsolve
         Gh = GeneralLinear(4, ℍ)
         @test repr(Gh) == "GeneralLinear(4, ℍ)"
         @test number_system(Gh) == ℍ
-        @test manifold_dimension(Gh) == 4*16
+        @test manifold_dimension(Gh) == 4 * 16
         @test representation_size(Gh) == (4, 4)
 
         @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(true)
@@ -28,14 +28,20 @@ using NLsolve
             G,
             InvariantMetric(EuclideanMetric(), LeftAction()),
         )) === true
-        @test Manifolds.default_metric_dispatch(MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction()))) ===
-            Val{true}()
+        @test Manifolds.default_metric_dispatch(MetricManifold(
+            G,
+            InvariantMetric(EuclideanMetric(), LeftAction()),
+        )) === Val{true}()
     end
 
     @testset "Real" begin
         G = GeneralLinear(3)
         types = [Matrix{Float64}]
-        pts = [Matrix(Diagonal([1, 2, 3])), [-2 5 -5; 0 2 -1; -3 -5 -2], [-5 1 0; 1 0 1; 0 1 3]]
+        pts = [
+            Matrix(Diagonal([1, 2, 3])),
+            [-2 5 -5; 0 2 -1; -3 -5 -2],
+            [-5 1 0; 1 0 1; 0 1 3],
+        ]
         vpts = [[-1 -2 0; -2 1 -2; 2 0 2], [1 1 1; 0 0 -2; 2 0 0]]
 
         retraction_methods = [
@@ -83,11 +89,11 @@ using NLsolve
         G = GeneralLinear(2, ℂ)
         types = [Matrix{ComplexF64}]
         pts = [
-            [-1 - 5im -1 + 3im; -6 - 4im 4 + 6im],
-            [1 + 3im -1 - 4im; -2 - 2im -3 - 1im],
-            [-6 + 0im 1 + 1im; 1 - 1im -4 + 0im],
+            [-1-5im -1+3im; -6-4im 4+6im],
+            [1+3im -1-4im; -2-2im -3-1im],
+            [-6+0im 1+1im; 1-1im -4+0im],
         ]
-        vpts = [[1 + 0im -2 - 1im; -1 - 2im -4 + 1im], [-2 + 2im -1 - 1im; -1 - 1im -3 + 0im]]
+        vpts = [[1+0im -2-1im; -1-2im -4+1im], [-2+2im -1-1im; -1-1im -3+0im]]
 
         retraction_methods = [
             Manifolds.GroupExponentialRetraction(LeftAction()),

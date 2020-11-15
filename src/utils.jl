@@ -125,11 +125,11 @@ Y = \begin{pmatrix}A & -B \\ B & A \end{pmatrix}.
 ````
 """
 function realify!(Y, X, ::typeof(ℂ), n = LinearAlgebra.checksquare(X))
-    axul, axlr = 1:n, (n+1):2n
+    axul, axlr = 1:n, (n + 1):(2n)
     @views begin
-        Y[axul,axul] .= Y[axlr,axlr] .= real.(X)
-        Y[axlr,axul] .= imag.(X)
-        Y[axul,axlr] .= .-imag.(X)
+        Y[axul, axul] .= Y[axlr, axlr] .= real.(X)
+        Y[axlr, axul] .= imag.(X)
+        Y[axul, axlr] .= .-imag.(X)
     end
     return Y
 end
@@ -147,12 +147,13 @@ See [`realify!`](@ref) for the inverse of this function.
 unrealify!(X, Y, 𝔽)
 
 function unrealify!(X, Y, ::typeof(ℂ), n = LinearAlgebra.checksquare(X))
-    axul, axlr = 1:n, (n+1):2n
+    axul, axlr = 1:n, (n + 1):(2n)
     @views begin
-        X .= complex.(
-            (Y[axul,axul] .+ Y[axlr,axlr]) ./ 2,
-            (Y[axlr,axul] .- Y[axul,axlr]) ./ 2,
-        )
+        X .=
+            complex.(
+                (Y[axul, axul] .+ Y[axlr, axlr]) ./ 2,
+                (Y[axlr, axul] .- Y[axul, axlr]) ./ 2,
+            )
     end
     return X
 end
