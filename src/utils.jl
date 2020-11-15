@@ -75,6 +75,56 @@ Call `mul!` safely, that is, `A` and/or `B` are permitted to alias with `Y`.
 """
 mul!_safe(Y, A, B) = (Y === A || Y === B) ? copyto!(Y, A * B) : mul!(Y, A, B)
 
+@doc raw"""
+    realify(X::AbstractMatrix{<:Complex}) -> Y::AbstractMatrix{<:Real}
+
+Given a matrix $X = A + i B ∈ ℂ^{n × n}$, compute $Y ∈ ℝ^{2n × 2n}$ with the map $ϕ$,
+where
+````math
+ϕ \colon X = A + i B ↦ \begin{pmatrix}A & -B \\ B & A \end{pmatrix} = Y.
+````
+The resulting real matrix preserves the complex matrix product. That is, for all
+$C,D ∈ ℂ^{n × n}$, $ϕ(C) ϕ(D) = ϕ(CD)$.
+[`complexify`](@ref) computes the inverse of $ϕ$.
+"""
+function realify(X)
+    n = LinearAlgebra.checksquare(X)
+    Y = allocate(X, real(eltype(X)), 2n, 2n)
+    return realify!(Y, X, n)
+end
+
+function realify!(Y, X, n = LinearAlgebra.checksquare(X))
+    axul, axlr = 1:n, (n+1):2n
+    @views begin
+        Y[axul,axul] .= Y[axlr,axlr] .= real.(X)
+        Y[axlr,axul] .= imag.(X)
+        Y[axul,axlr] .= .-imag.(X)
+    end
+    return Y
+end
+
+"""
+    complexify(X::AbstractMatrix{<:Real}) -> Y::AbstractMatrix{<:Complex}
+
+Compute the inverse of [`realify`](@ref)`.
+"""
+function complexify(Y)
+    n = Int(LinearAlgebra.checksquare(Y) // 2)
+    X = allocate(Y, complex(eltype(Y)), n, n)
+    return complexify!(X, Y, n)
+end
+
+function complexify!(X, Y, n = LinearAlgebra.checksquare(X))
+    axul, axlr = 1:n, (n+1):2n
+    @views begin
+        X .= complex.(
+            (Y[axul,axul] .+ Y[axlr,axlr]) ./ 2,
+            (Y[axlr,axul] .- Y[axul,axlr]) ./ 2,
+        )
+    end
+    return X
+end
+
 @generated maybesize(s::Size{S}) where {S} = prod(S) > 100 ? S : :(s)
 
 """

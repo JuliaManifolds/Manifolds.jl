@@ -11,11 +11,13 @@ Manifolds.SizedAbstractArray
 ## Functions
 
 ```@docs
+Manifolds.complexify
 Manifolds.eigen_safe
 Manifolds.find_pv
 Manifolds.log_safe
 Manifolds.mul!_safe
 Manifolds.nzsign
+Manifolds.realify
 Manifolds.size_to_tuple
 Manifolds.select_from_tuple
 Manifolds.usinc
