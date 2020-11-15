@@ -14,6 +14,7 @@ Manifolds.SizedAbstractArray
 Manifolds.eigen_safe
 Manifolds.find_pv
 Manifolds.log_safe
+Manifolds.mul!_safe
 Manifolds.nzsign
 Manifolds.size_to_tuple
 Manifolds.select_from_tuple

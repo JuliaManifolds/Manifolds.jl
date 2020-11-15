@@ -1020,8 +1020,7 @@ inv!(G::MultiplicationGroup, q, p) = copyto!(q, inv(G, p))
 
 compose(::MultiplicationGroup, p, q) = p * q
 
-# TODO: x might alias with p or q, we might be able to optimize it if it doesn't.
-compose!(::MultiplicationGroup, x, p, q) = copyto!(x, p * q)
+compose!(::MultiplicationGroup, x, p, q) = mul!_safe(x, p, q)
 
 inverse_translate(::MultiplicationGroup, p, q, ::LeftAction) = p \ q
 inverse_translate(::MultiplicationGroup, p, q, ::RightAction) = q / p

@@ -68,6 +68,13 @@ converted to a `Matrix` before computing the log.
     return SizedMatrix{s[1],s[2]}(log(Matrix(parent(x))))
 end
 
+"""
+    mul!_safe(Y, A, B) -> Y
+
+Call `mul!` safely, that is, `A` and/or `B` are permitted to alias with `Y`.
+"""
+mul!_safe(Y, A, B) = (Y === A || Y === B) ? copyto!(Y, A * B) : mul!(Y, A, B)
+
 @generated maybesize(s::Size{S}) where {S} = prod(S) > 100 ? S : :(s)
 
 """
