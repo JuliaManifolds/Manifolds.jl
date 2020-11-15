@@ -188,8 +188,6 @@ project(::GeneralLinear, p, X) = X
 project!(::GeneralLinear, q, p) = copyto!(q, p)
 project!(::GeneralLinear, Y, p, X) = copyto!(Y, X)
 
-@generated representation_size(::GeneralLinear{n}) where {n} = (n, n)
-
 sharp!(::GeneralLinear{n}, X::TFVector, p, ξ::CoTFVector) where {n} = copyto!(X, ξ)
 
 Base.show(io::IO, ::GeneralLinear{n,𝔽}) where {n,𝔽} = print(io, "GeneralLinear($n, $𝔽)")
