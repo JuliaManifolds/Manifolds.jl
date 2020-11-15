@@ -180,6 +180,10 @@ manifold_dimension(G::GeneralLinear) = manifold_dimension(decorated_manifold(G))
 
 LinearAlgebra.norm(::GeneralLinear, p, X) = norm(X)
 
+project(::GeneralLinear, p) = p
+project(::GeneralLinear, p, X) = X
+
+project!(::GeneralLinear, q, p) = copyto!(q, p)
 project!(::GeneralLinear, Y, p, X) = copyto!(Y, X)
 
 @generated representation_size(::GeneralLinear{n}) where {n} = (n, n)
