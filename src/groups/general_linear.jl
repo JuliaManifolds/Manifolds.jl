@@ -137,14 +137,37 @@ function inverse_translate_diff!(G::GeneralLinear, Y, p, q, X, conv::ActionDirec
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
 end
 
-function log!(G::GeneralLinear, X, p, q)
+function _log_project_SOn_S⁺!(X, q, n = size(q, 1))
+    F = svd(q)
+    d = allocate(q, n)
+    s = mean(F.S)
+    fill!(d, s)
+    d[n] = det(F.U) * det(F.Vt) * s
+    expX = F.U * Diagonal(d) * F.Vt
+    return copyto!(X, eltype(X) <: Real ? real(log_safe(expX)) : log_safe(expX))
+end
+
+function log!(G::GeneralLinear{n}, X, p, q) where {n}
     pinvq = inverse_translate(G, p, q, LeftAction())
-    # use first term of baker-campbell-hausdorff formula
-    # 1st order approximation of hermitian part of p \ X
-    # 2nd order approximation of skew-hermitian part of p \ X
-    X0 = number_system(G) === ℝ ? real(log_safe(pinvq)) : log_safe(pinvq)
-    inverse_retraction = ApproximateInverseRetraction(ExponentialRetraction())
-    inverse_retract!(G, X, p, q, inverse_retraction)
+    if isnormal(pinvq; atol = sqrt(eps(real(eltype(pinvq)))))
+        copyto!(X, log_safe(pinvq))
+    else
+        𝔽 = number_system(G)
+        if 𝔽 === ℝ
+            e = Identity(G, pinvq)
+            _log_project_SOn_S⁺!(X, pinvq, n)
+            inverse_retraction = ApproximateInverseRetraction(ExponentialRetraction())
+            inverse_retract!(G, X, e, pinvq, inverse_retraction; X0 = X)
+        else
+            # compute the equivalent logarithm on GL(dim(𝔽) * n, ℝ)
+            Gᵣ = GeneralLinear(real_dimension(𝔽) * n, ℝ)
+            pinvqᵣ = realify(pinvq, 𝔽)
+            Xᵣ = realify(X, 𝔽)
+            eᵣ = Identity(Gᵣ, pinvqᵣ)
+            log!(Gᵣ, Xᵣ, eᵣ, pinvqᵣ)
+            unrealify!(X, Xᵣ, 𝔽, n)
+        end
+    end
     return X
 end
 function log!(::GeneralLinear{1}, X, p, q)
