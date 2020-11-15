@@ -71,20 +71,23 @@ function default_metric_dispatch(
     return Val(true)
 end
 
-function exp!(::GeneralLinear, q, p, X)
-    mul!(q, exp(X)', exp(X - X'))
-    return copyto!(q, p * q)
+function exp!(G::GeneralLinear, q, p, X)
+    expX = exp(X)
+    compose!(G, q, expX', exp(X - X'))
+    compose!(G, q, p, q)
+    return q
 end
 function exp!(::GeneralLinear{1}, q, p, X)
     p1 = p isa Identity ? p : p[1]
     q[1] = p1 * exp(X[1])
     return q
 end
-function exp!(::GeneralLinear{2}, q, p, X)
+function exp!(G::GeneralLinear{2}, q, p, X)
     A = SizedMatrix{2,2}(X')
     B = SizedMatrix{2,2}(X) - A
-    mul!(q, exp(A), exp(B))
-    return copyto!(q, p * q)
+    compose!(G, q, exp(A), exp(B))
+    compose!(G, q, p, q)
+    return q
 end
 
 flat!(::GeneralLinear, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
