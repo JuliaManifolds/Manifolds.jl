@@ -107,7 +107,6 @@ end
 
 function get_vector!(::GeneralLinear{n,ℝ}, X, p, Xⁱ, ::DefaultOrthonormalBasis) where {n}
     return copyto!(X, Xⁱ)
-    return X
 end
 
 function group_exp!(::GeneralLinear{1}, q, X)
