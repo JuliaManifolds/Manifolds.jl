@@ -150,13 +150,13 @@ function _log_project_SOn_S⁺!(X, q, n = size(q, 1))
     fill!(d, s)
     d[n] = det(F.U) * det(F.Vt) * s
     expX = F.U * Diagonal(d) * F.Vt
-    return copyto!(X, eltype(X) <: Real ? real(log_safe(expX)) : log_safe(expX))
+    return log_safe!(X, expX)
 end
 
 function log!(G::GeneralLinear{n}, X, p, q) where {n}
     pinvq = inverse_translate(G, p, q, LeftAction())
     if isnormal(pinvq; atol = sqrt(eps(real(eltype(pinvq)))))
-        copyto!(X, log_safe(pinvq))
+        log_safe!(X, pinvq)
     else
         𝔽 = number_system(G)
         if 𝔽 === ℝ

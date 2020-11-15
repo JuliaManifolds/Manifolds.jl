@@ -68,6 +68,16 @@ converted to a `Matrix` before computing the log.
     return SizedMatrix{s[1],s[2]}(log(Matrix(parent(x))))
 end
 
+function log_safe!(Y, X)
+    if eltype(Y) <: Real
+        # handle imprecision by coercing to real
+        Y .= real.(log_safe(X))
+    else
+        copyto!(Y, log_safe(X))
+    end
+    return Y
+end
+
 """
     mul!_safe(Y, A, B) -> Y
 
