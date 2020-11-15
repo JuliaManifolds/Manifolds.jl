@@ -172,7 +172,7 @@ function log!(G::GeneralLinear{n}, X, p, q) where {n}
 end
 function log!(::GeneralLinear{1}, X, p, q)
     p1 = p isa Identity ? p : p[1]
-    X[1] = p1 * log(q[1])
+    X[1] = log(p1 \ q[1])
     return X
 end
 
