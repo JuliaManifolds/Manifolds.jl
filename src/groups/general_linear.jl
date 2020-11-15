@@ -9,43 +9,23 @@ $$⟨X_p,Y_p⟩_p = ⟨p^{-1}X_p,p^{-1}Y_p⟩_\mathrm{F} = ⟨X_e, Y_e⟩_\mathr
 where $X_e = p^{-1}X_p ∈ 𝔤l(n) = T_e \mathrm{GL}(n, 𝔽) = 𝔽^{n×n}$ is the corresponding
 vector in the Lie algebra. In the default implementations, all tangent vectors $X_p$ are
 instead represented with their corresponding Lie algebra vectors.
+
+[^MartinNeff2016]:
+    > Martin, R. J. and Neff, P.:
+    > “Minimal geodesics on GL(n) for left-invariant, right-O(n)-invariant Riemannian metrics”,
+    > Journal of Geometric Mechanics 8(3), pp. 323-357, 2016.
+    > doi: [10.3934/jgm.2016010](https://doi.org/10.3934/jgm.2016010),
+    > arXiv: [1409.7849v2](https://arxiv.org/abs/1409.7849v2).
+[^AndruchowLarotondaRechtVarela2014]:
+    > Andruchow E., Larotonda G., Recht L., and Varela A.:
+    > “The left invariant metric in the general linear group”,
+    > Journal of Geometry and Physics 86, pp. 241-257, 2014.
+    > doi: [10.1016/j.geomphys.2014.08.009](https://doi.org/10.1016/j.geomphys.2014.08.009),
+    > arXiv: [1109.0520v1](https://arxiv.org/abs/1109.0520v1).
 """
 struct GeneralLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation} end
 
 GeneralLinear(n, 𝔽::AbstractNumbers = ℝ) = GeneralLinear{n,𝔽}()
-
-@doc raw"""
-    GLInvariantMetric{T<:Real,D<:ActionDirection} <: Metric
-
-If the matrix is normal, then the resulting geodesic at the identity element is equivalent
-to the group exponential map.
-
-[^MartinNeff2016]:
-> Martin, R. J. and Neff, P.:
-> “Minimal geodesics on GL(n) for left-invariant, right-O(n)-invariant Riemannian metrics”,
-> Journal of Geometric Mechanics 8(3), pp. 323-357, 2016.
-> doi: [10.3934/jgm.2016010](https://doi.org/10.3934/jgm.2016010),
-> arXiv: [1409.7849v2](https://arxiv.org/abs/1409.7849v2).
-[^AndruchowLarotondaRechtVarela2014]:
-> Andruchow E., Larotonda G., Recht L., and Varela A.:
-> “The left invariant metric in the general linear group”,
-> Journal of Geometry and Physics 86, pp. 241-257, 2014.
-> doi: [10.1016/j.geomphys.2014.08.009](https://doi.org/10.1016/j.geomphys.2014.08.009),
-> arXiv: [1109.0520v1](https://arxiv.org/abs/1109.0520v1).
-"""
-struct GLInvariantMetric{T,D} <: RiemannianMetric
-    μ::T # shear modulus
-    μc::T # spin modulus
-    κ::T # bulk modulus
-    direction::D
-end
-
-const LeftGLInvariantMetric{T} = GLInvariantMetric{T,LeftAction}
-
-GLInvariantMetric(μ, μc, κ) = GLInvariantMetric(μ, μc, κ, LeftAction())
-GLInvariantMetric() = GLInvariantMetric(1, 1, 1)
-
-LeftGLInvariantMetric(μ, μc, κ) = GLInvariantMetric(μ, μc, κ, LeftAction())
 
 function allocation_promotion_function(::GeneralLinear{n,ℂ}, f, ::Tuple) where {n}
     return complex
@@ -106,20 +86,6 @@ function exp!(::GeneralLinear{2}, q, p, X)
     mul!(q, exp(A), exp(B))
     return copyto!(q, p * q)
 end
-function exp!(
-    M::MetricManifold{𝔽,<:GeneralLinear{n,𝔽},<:LeftGLInvariantMetric},
-    q,
-    p,
-    X,
-) where {n,𝔽}
-    g = metric(M)
-    T = eltype(X)
-    ω = T(g.μc / g.μ)
-    α, β = (1 - ω) / 2, (1 + ω) / 2
-    mul!(q, exp(α .* X .+ β .* X'), exp(β .* (X .- X')))
-    copyto!(q, p * q)
-    return q
-end
 
 flat!(::GeneralLinear, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
@@ -156,19 +122,6 @@ function group_log!(::GeneralLinear{1}, X, p)
 end
 
 inner(::GeneralLinear, X, Y) = dot(X, Y)
-function inner(
-    M::MetricManifold{𝔽,<:GeneralLinear{n,𝔽},<:LeftGLInvariantMetric},
-    p,
-    X,
-    Y,
-) where {n,𝔽}
-    g = metric(M)
-    return (
-        (g.μ + g.μc) * dot(X, Y) / 2 +
-        (g.μ - g.μc) * dot(X, Y') / 2 +
-        (g.κ - g.μ) * tr(X) * tr(Y) / n
-    )
-end
 
 invariant_metric_dispatch(::GeneralLinear, ::LeftAction) = Val(true)
 
@@ -196,29 +149,6 @@ function log!(::GeneralLinear{1}, X, p, q)
     p1 = p isa Identity ? p : p[1]
     X[1] = p1 * log(q[1])
     return X
-end
-function log!(
-    M::MetricManifold{𝔽,<:GeneralLinear{n,𝔽},<:LeftGLInvariantMetric},
-    X,
-    p,
-    q,
-) where {n,𝔽}
-    pinvq = inverse_translate(M, p, q, LeftAction())
-    # use first term of baker-campbell-hausdorff formula
-    # 1st order approximation of hermitian part of p \ X
-    # 2nd order approximation of skew-hermitian part of p \ X
-    X0 = number_system(G) === ℝ ? real(log_safe(pinvq)) : log_safe(pinvq)
-    inverse_retraction = ApproximateInverseRetraction(ExponentialRetraction())
-    inverse_retract!(G, X, p, q, inverse_retraction)
-    return X
-end
-function log!(
-    M::MetricManifold{𝔽,<:GeneralLinear{1,𝔽},<:LeftGLInvariantMetric},
-    X,
-    p,
-    q,
-) where {𝔽}
-    return log!(M.manifold, X, p, q)
 end
 
 function manifold_dimension(::GeneralLinear{n,𝔽}) where {n,𝔽}
