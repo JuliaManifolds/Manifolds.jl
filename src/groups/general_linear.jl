@@ -1,5 +1,5 @@
 @doc raw"""
-    GeneralLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation}
+    GeneralLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType}
 
 The general linear group, that is, the group of all invertible matrices in $𝔽^{n×n}$.
 
@@ -23,7 +23,7 @@ instead represented with their corresponding Lie algebra vectors.
     > doi: [10.1016/j.geomphys.2014.08.009](https://doi.org/10.1016/j.geomphys.2014.08.009),
     > arXiv: [1109.0520v1](https://arxiv.org/abs/1109.0520v1).
 """
-struct GeneralLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation} end
+struct GeneralLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType} end
 
 GeneralLinear(n, 𝔽::AbstractNumbers = ℝ) = GeneralLinear{n,𝔽}()
 
@@ -32,7 +32,7 @@ function allocation_promotion_function(::GeneralLinear{n,ℂ}, f, ::Tuple) where
 end
 
 function check_manifold_point(G::GeneralLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv = check_manifold_point(Euclidean(n, n; field = 𝔽); kwargs...)
+    mpv = check_manifold_point(decorated_manifold(G), p; kwargs...)
     mpv === nothing || return mpv
     detp = det(p)
     if iszero(detp)
@@ -55,21 +55,15 @@ function check_tangent_vector(
         mpe = check_manifold_point(G, p; kwargs...)
         mpe === nothing || return mpe
     end
-    mpv = check_tangent_vector(Euclidean(n, n; field = 𝔽), p, X; kwargs...)
+    mpv = check_tangent_vector(decorated_manifold(G), p, X; kwargs...)
     mpv === nothing || return mpv
     return nothing
 end
 
-decorator_transparent_dispatch(::typeof(exp), ::GeneralLinear, args...) = Val(:parent)
-decorator_transparent_dispatch(::typeof(retract!), ::GeneralLinear, args...) = Val(:parent)
-decorator_transparent_dispatch(::typeof(log), ::GeneralLinear, args...) = Val(:parent)
+decorated_manifold(::GeneralLinear{n,𝔽}) where {n,𝔽} = Euclidean(n, n; field = 𝔽)
 
-function default_metric_dispatch(
-    ::GeneralLinear{n,ℝ},
-    ::LeftInvariantMetric{EuclideanMetric},
-) where {n}
-    return Val(true)
-end
+default_metric_dispatch(::GeneralLinear, ::EuclideanMetric) = Val(true)
+default_metric_dispatch(::GeneralLinear, ::LeftInvariantMetric{EuclideanMetric}) = Val(true)
 
 function exp!(G::GeneralLinear, q, p, X)
     expX = exp(X)
@@ -182,9 +176,7 @@ function log!(::GeneralLinear{1}, X, p, q)
     return X
 end
 
-function manifold_dimension(::GeneralLinear{n,𝔽}) where {n,𝔽}
-    return manifold_dimension(Euclidean(n, n; field = 𝔽))
-end
+manifold_dimension(G::GeneralLinear) = manifold_dimension(decorated_manifold(G))
 
 LinearAlgebra.norm(::GeneralLinear, p, X) = norm(X)
 
@@ -203,6 +195,6 @@ function translate_diff!(G::GeneralLinear, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, translate_diff(G, p, q, X, conv))
 end
 
-zero_tangent_vector(::GeneralLinear, p) = zero(p)
+vector_transport_to(::GeneralLinear, p, X, q, ::ParallelTransport) = X
 
-zero_tangent_vector!(::GeneralLinear, X, p) = fill!(X, 0)
+vector_transport_to!(::GeneralLinear, Y, p, X, q, ::ParallelTransport) = copyto!(Y, X)
