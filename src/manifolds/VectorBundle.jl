@@ -918,8 +918,7 @@ function `f` for representing an operation with result in the vector space `fibe
 for manifold `M` on given arguments (passed at a tuple).
 """
 function allocate_result_type(::VectorBundleFibers, f, args::NTuple{N,Any}) where {N}
-    T = typeof(reduce(+, one(number_eltype(eti)) for eti in args))
-    return T
+    return typeof(mapreduce(eti -> one(number_eltype(eti)), +, args))
 end
 
 Base.size(x::FVector) = size(x.data)
