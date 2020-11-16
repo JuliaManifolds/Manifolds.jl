@@ -61,6 +61,61 @@ function manifold_dimension(G::SpecialLinear)
     return manifold_dimension(decorated_manifold(G)) - real_dimension(number_system(G))
 end
 
+@doc raw"""
+    project(G::SpecialLinear, p)
+
+Project $p ∈ \mathrm{GL}(n, 𝔽)$ to the [`SpecialLinear`](@ref) group $G=\mathrm{SL}(n, 𝔽)$.
+
+Given the singular value decomposition of $p$, written $p = U S V^\mathrm{H}$, the
+formula for the projection is
+
+````math
+\operatorname{proj}_{\mathrm{SL}(n, 𝔽)}(p) = U S D V^\mathrm{H},
+````
+where
+
+````math
+D_{ij} = δ_{ij} \begin{cases}
+    1            & \text{ if } i ≠ n \\
+    \det(p)^{-1} & \text{ if } i = n
+\end{cases}.
+````
+"""
+project(::SpecialLinear, p)
+
+function project!(::SpecialLinear{n}, q, p) where {n}
+    detp = det(p)
+    if !isapprox(detp, 1)
+        F = svd(p)
+        d = similar(F.S)
+        q .= F.U .* F.S'
+        q[:, n] ./= detp
+        mul!_safe(q, q, F.Vt)
+    end
+    return q
+end
+
+@doc raw"""
+    project(G::SpecialLinear, p, X)
+
+Orthogonally project $X ∈ 𝔽^{n × n}$ onto the tangent space of $p$ to the
+[`SpecialLinear`](@ref) $G = \mathrm{SL}(n, 𝔽)$. The formula reads
+````math
+\operatorname{proj}_{p}
+    = (\mathrm{d}L_p)_e ∘ \operatorname{proj}_{𝔰𝔩(n, 𝔽)} ∘ (\mathrm{d}L_p^{-1})_p
+    \colon X ↦ X - \frac{\operatorname{tr}(X)}{n} I,
+````
+where the last expression uses the tangent space representation as the Lie algebra.
+"""
+project(::SpecialLinear, p, X)
+
+function project!(G::SpecialLinear{n}, Y, p, X) where {n}
+    inverse_translate_diff!(G, Y, p, p, X, LeftAction())
+    Y[diagind(n)] .-= tr(Y) / n
+    translate_diff!(G, Y, p, p, Y, LeftAction())
+    return Y
+end
+
 Base.show(io::IO, ::SpecialLinear{n,𝔽}) where {n,𝔽} = print(io, "SpecialLinear($n, $𝔽)")
 
 translate_diff(::SpecialLinear, p, q, X, ::LeftAction) = X

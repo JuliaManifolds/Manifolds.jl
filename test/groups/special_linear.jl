@@ -60,9 +60,9 @@ using NLsolve
                 gpts;
                 test_reverse_diff = false,
                 test_forward_diff = false,
-                # test_project_point = true,
                 test_injectivity_radius = false,
-                # test_project_tangent = true,
+                test_project_point = true,
+                test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_default_vector_transport = true,
                 vector_transport_methods = [
@@ -109,6 +109,8 @@ using NLsolve
                 test_reverse_diff = false,
                 test_forward_diff = false,
                 test_injectivity_radius = false,
+                test_project_point = true,
+                test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_default_vector_transport = true,
                 vector_transport_methods = [
