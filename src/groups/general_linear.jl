@@ -146,7 +146,7 @@ function _log_project_SOn_S⁺!(X, q, n = size(q, 1))
     fill!(d, s)
     d[n] *= det(q) / prod(F.S) # adjust sign of determinant
     expX = F.U * Diagonal(d) * F.Vt
-    return log_safe!(X, expX)
+    return copyto!(X, eltype(X) <: Real ? real(log_safe(expX)) : log_safe(expX))
 end
 
 function log!(G::GeneralLinear{n}, X, p, q) where {n}
@@ -154,7 +154,7 @@ function log!(G::GeneralLinear{n}, X, p, q) where {n}
     number_system(G) === ℝ && det(pinvq) ≤ 0 && throw(OutOfInjectivityRadiusError())
     e = Identity(G, pinvq)
     if isnormal(pinvq; atol = sqrt(eps(real(eltype(pinvq)))))
-        log_safe!(X, pinvq)
+        copyto!(X, log_safe(pinvq))
     else
         𝔽 = number_system(G)
         if 𝔽 === ℝ

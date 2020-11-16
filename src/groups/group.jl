@@ -1051,6 +1051,6 @@ function group_exp!(G::MultiplicationGroup, q, X)
 end
 
 function group_log!(G::MultiplicationGroup, X, q)
-    q isa Union{Number,AbstractMatrix} && return log_safe!(X, q)
+    q isa Union{Number,AbstractMatrix} && return copyto!(X, log_safe(q))
     return error("group_log! not implemented on $(typeof(G)) for element $(typeof(q)) and vector $(typeof(X)).")
 end
