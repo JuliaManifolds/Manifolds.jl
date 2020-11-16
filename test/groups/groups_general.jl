@@ -346,11 +346,18 @@ struct NotImplementedAction <: AbstractGroupAction{LeftAction} end
     end
 end
 
-struct DefaultEmbeddedGroup <: AbstractGroupManifold{ℝ,AdditionOperation,DefaultEmbeddingType}
-end
+struct DefaultEmbeddedGroup <:
+       AbstractGroupManifold{ℝ,AdditionOperation,DefaultEmbeddingType} end
 
 @testset "DefaltEmbeddedGroup" begin
     G = DefaultEmbeddedGroup()
-    @test ManifoldsBase.decorator_transparent_dispatch(get_vector!, G, [1], [1], [1]) === Val(:parent)
-    @test ManifoldsBase.decorator_transparent_dispatch(get_coordinates!, G, [1], [1], [1]) === Val(:parent)
+    @test ManifoldsBase.decorator_transparent_dispatch(get_vector!, G, [1], [1], [1]) ===
+          Val(:parent)
+    @test ManifoldsBase.decorator_transparent_dispatch(
+        get_coordinates!,
+        G,
+        [1],
+        [1],
+        [1],
+    ) === Val(:parent)
 end
