@@ -144,7 +144,7 @@ function _log_project_SOn_S⁺!(X, q, n = size(q, 1))
     d = allocate(q, n)
     s = mean(F.S)
     fill!(d, s)
-    d[n] = det(F.U) * det(F.Vt) * s
+    d[n] *= det(q) / prod(F.S) # adjust sign of determinant
     expX = F.U * Diagonal(d) * F.Vt
     return log_safe!(X, expX)
 end
