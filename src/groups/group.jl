@@ -89,14 +89,14 @@ end
 
 function decorator_transparent_dispatch(
     ::typeof(get_coordinates!),
-    ::AbstractGroupManifold,
+    ::AbstractGroupManifold{<:Any,<:AbstractGroupOperation,TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(get_vector!),
-    ::AbstractGroupManifold,
+    ::AbstractGroupManifold{<:Any,<:AbstractGroupOperation,TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
