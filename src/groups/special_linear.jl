@@ -34,12 +34,12 @@ function check_tangent_vector(G::SpecialLinear, p, X; check_base_point = true, k
         kwargs...,
     )
     mpv === nothing || return mpv
-    trX = tr(X)
+    trX = tr(inverse_translate_diff(G, p, p, X, LeftAction()))
     if !isapprox(trX, 0; kwargs...)
         return DomainError(
             trX,
-            "The matrix $(X) does not lie in the tangent space of $(G) at $(p), since it " *
-            "is not traceless.",
+            "The matrix $(X) does not lie in the tangent space of $(G) at $(p), since " *
+            "its Lie algebra representation is not traceless.",
         )
     end
     return nothing

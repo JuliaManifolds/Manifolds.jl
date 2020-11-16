@@ -170,6 +170,7 @@ function log!(G::GeneralLinear{n}, X, p, q) where {n}
             unrealify!(X, Xᵣ, 𝔽, n)
         end
     end
+    translate_diff!(G, X, p, e, X, LeftAction())
     return X
 end
 function log!(::GeneralLinear{1}, X, p, q)
