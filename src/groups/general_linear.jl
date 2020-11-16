@@ -151,12 +151,13 @@ end
 
 function log!(G::GeneralLinear{n}, X, p, q) where {n}
     pinvq = inverse_translate(G, p, q, LeftAction())
+    number_system(G) === ℝ && det(pinvq) > 0 || throw(OutOfInjectivityRadiusError())
+    e = Identity(G, pinvq)
     if isnormal(pinvq; atol = sqrt(eps(real(eltype(pinvq)))))
         log_safe!(X, pinvq)
     else
         𝔽 = number_system(G)
         if 𝔽 === ℝ
-            e = Identity(G, pinvq)
             _log_project_SOn_S⁺!(X, pinvq, n)
             inverse_retraction = ApproximateInverseRetraction(ExponentialRetraction())
             inverse_retract!(G, X, e, pinvq, inverse_retraction; X0 = X)
