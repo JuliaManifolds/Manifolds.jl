@@ -116,6 +116,10 @@ function project!(G::SpecialLinear{n}, Y, p, X) where {n}
     return Y
 end
 
+function decorator_transparent_dispatch(::typeof(project), ::SpecialLinear, args...)
+    return Val(:parent)
+end
+
 Base.show(io::IO, ::SpecialLinear{n,𝔽}) where {n,𝔽} = print(io, "SpecialLinear($n, $𝔽)")
 
 translate_diff(::SpecialLinear, p, q, X, ::LeftAction) = X
