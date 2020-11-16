@@ -111,7 +111,7 @@ project(::SpecialLinear, p, X)
 
 function project!(G::SpecialLinear{n}, Y, p, X) where {n}
     inverse_translate_diff!(G, Y, p, p, X, LeftAction())
-    Y[diagind(n)] .-= tr(Y) / n
+    Y[diagind(n, n)] .-= tr(Y) / n
     translate_diff!(G, Y, p, p, Y, LeftAction())
     return Y
 end
