@@ -76,7 +76,7 @@ CotangentBundleFibers(M::Manifold) = VectorBundleFibers(CotangentSpace, M)
         𝔽,
         TFiber<:VectorBundleFibers{<:VectorSpaceType,<:Manifold{𝔽}},
         TX,
-    } <: Manifold{𝔽}   
+    } <: Manifold{𝔽}
 
 A vector space at a point `p` on the manifold.
 This is modelled using [`VectorBundleFibers`](@ref) with only a vector-like part
@@ -633,8 +633,10 @@ function inner(B::VectorBundle, p, X, Y)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
-    return inner(B.manifold, px, VXM, VYM) + inner(B.fiber, Vx, VXF, VYF)
+    return inner(B.manifold, px, VXM, VYM) +
+           inner(VectorSpaceAtPoint(B.fiber, px), Vx, VXF, VYF)
 end
+
 """
     inner(M::TangentSpaceAtPoint, p, X, Y)
 
