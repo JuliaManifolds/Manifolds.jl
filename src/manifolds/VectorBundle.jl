@@ -633,7 +633,7 @@ function inner(B::VectorBundle, p, X, Y)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
-    return inner(B.manifold, px, VXM, VYM) + inner(B.fiber, Vx, VXF, VYF)
+    return inner(B.manifold, px, VXM, VYM) + inner(VectorSpaceAtPoint(B.fiber, px), Vx, VXF, VYF)
 end
 function inner(B::TangentBundle, p, X, Y)
     px, Vx = submanifold_components(B.manifold, p)
