@@ -994,15 +994,15 @@ function vector_transport_to!(M::TangentBundle, Y, p, X, q, m::VectorBundleVecto
     vector_transport_to!(M.manifold, VYF, px, VXF, qx, m.method_vector)
     return Y
 end
-function vector_transport_to!(M::VectorBundle, Y, p, X, q, m::ParallelTransport)
-    return vector_transport_to!(
-        M,
-        Y,
-        p,
-        X,
-        q,
-        VectorBundleVectorTransport(ParallelTransport(), ParallelTransport()),
-    )
+function vector_transport_to!(
+    M::TangentBundle,
+    Y,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod,
+)
+    return vector_transport_to!(M, Y, p, X, q, VectorBundleVectorTransport(m, m))
 end
 function vector_transport_to!(M::TangentSpaceAtPoint, Y, p, X, q)
     return copyto!(Y, X)
