@@ -2,6 +2,13 @@ include("utils.jl")
 
 struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
 
+function parray(M, x)
+    return Manifolds.ProductArray(
+        Manifolds.ShapeSpecification(Manifolds.StaticReshaper(), M.manifolds...),
+        x,
+    )
+end
+
 @testset "Product manifold" begin
     @test_throws MethodError ProductManifold()
     M1 = Sphere(2)
@@ -422,6 +429,15 @@ struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
         @test submanifold_component(pts[1], Val(1)) === pts[1].parts[1]
         @test submanifold_components(Mse, pts[1]) === pts[1].parts
         @test submanifold_components(pts[1]) === pts[1].parts
+
+        p_inf = parray(Mse, randn(5))
+        @test (@inferred ManifoldsBase.allocate_result_type(
+            Mse,
+            Manifolds.log,
+            (p_inf, p_inf),
+        )) === Float64
+        @test (@inferred number_eltype(typeof(p_inf))) === Float64
+        @test pts_prod[1] .+ fill(1.0, 5) == pts_prod[1] .+ 1.0
     end
 
     @testset "ProductRepr" begin

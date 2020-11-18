@@ -22,8 +22,10 @@ d_{\mathcal P(n)}(p,q)
 where $\operatorname{Log}$ denotes the matrix logarithm and
 $\lVert\cdot\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
 """
-function distance(M::SymmetricPositiveDefinite{N}, p, q) where {N}
-    cq = cholesky(q)
+function distance(::SymmetricPositiveDefinite{N}, p, q) where {N}
+    # avoid numerical instabilities in cholesky
+    norm(p - q) < eps(eltype(p + q)) && return zero(eltype(p + q))
+    cq = cholesky(Symmetric(q)) # to avoid numerical inaccuracies
     s = eigvals(Symmetric(cq.L \ p / cq.U))
     return any(s .<= eps()) ? zero(eltype(p)) : sqrt(sum(abs.(log.(s)) .^ 2))
 end
@@ -44,7 +46,7 @@ where $\operatorname{Exp}$ denotes to the matrix exponential.
 """
 exp(::SymmetricPositiveDefinite, ::Any...)
 
-function exp!(M::SymmetricPositiveDefinite{N}, q, p, X) where {N}
+function exp!(::SymmetricPositiveDefinite{N}, q, p, X) where {N}
     e = eigen(Symmetric(p))
     U = e.vectors
     S = e.values
@@ -71,7 +73,7 @@ Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 with eigenvalues `κ` and where the direction `B.frame_direction` has curvature `0`.
 """
 function get_basis(
-    M::SymmetricPositiveDefinite{N},
+    ::SymmetricPositiveDefinite{N},
     p,
     B::DiagonalizingOrthonormalBasis,
 ) where {N}
@@ -93,7 +95,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis,
+    ::DefaultOrthonormalBasis,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -113,7 +115,7 @@ function get_vector!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis,
+    ::DefaultOrthonormalBasis,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (div(N * (N + 1), 2),)
@@ -140,7 +142,7 @@ a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
 g_p(X,Y) = \operatorname{tr}(p^{-1} X p^{-1} Y),
 ````
 """
-function inner(M::SymmetricPositiveDefinite, p, X, Y)
+function inner(::SymmetricPositiveDefinite, p, X, Y)
     F = cholesky(Symmetric(p))
     return tr((F \ Symmetric(X)) * (F \ Symmetric(Y)))
 end

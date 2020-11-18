@@ -163,6 +163,71 @@ function exp!(::Stiefel{n,k}, q, p, X) where {n,k}
 end
 
 @doc raw"""
+    get_basis(M::Stiefel{n,k,ℝ}, p, B::DefaultOrthonormalBasis) where {n,k}
+
+Create the default basis using the parametrization for any $X ∈ T_p\mathcal M$.
+Set $p_\bot \in ℝ^{n\times(n-k)}$ the matrix such that the $n\times n$ matrix of the common
+columns $[p\ p_\bot]$ is an ONB.
+For any skew symmetric matrix $a ∈ ℝ^{k\times k}$ and any $b ∈ ℝ^{(n-k)\times k}$ the matrix
+
+````math
+X = pa + p_\bot b ∈ T_p\mathcal M
+````
+
+and we can use the $\frac{1}{2}k(k-1) + (n-k)k = nk-\frac{1}{2}k(k+1)$ entries
+of $a$ and $b$ to specify a basis for the tangent space.
+using unit vectors for constructing both
+the upper matrix of $a$ to build a skew symmetric matrix and the matrix b, the default
+basis is constructed.
+
+Since $[p\ p_\bot]$ is an automorphism on $ℝ^{n\times p}$ the elements of $a$ and $b$ are
+orthonormal coordinates for the tangent space. To be precise exactly one element in the upper
+trangular entries of $a$ is set to $1$ its symmetric entry to $-1$ and we normalize with
+the factor $\frac{1}{\sqrt{2}}$ and for $b$ one can just use unit vectors reshaped to a matrix
+to obtain orthonormal set of parameters.
+"""
+function get_basis(M::Stiefel{n,k,ℝ}, p, B::DefaultOrthonormalBasis{ℝ}) where {n,k}
+    V = get_vectors(M, p, B)
+    return CachedBasis(B, V)
+end
+
+function get_coordinates!(
+    M::Stiefel{n,k,ℝ},
+    c,
+    p,
+    X,
+    B::DefaultOrthonormalBasis{ℝ},
+) where {n,k}
+    V = get_vectors(M, p, B)
+    c .= [inner(M, p, v, X) for v in V]
+    return c
+end
+
+function get_vector!(M::Stiefel{n,k,ℝ}, X, p, c, B::DefaultOrthonormalBasis{ℝ}) where {n,k}
+    V = get_vectors(M, p, B)
+    zero_tangent_vector!(M, X, p)
+    length(c) < length(V) &&
+        error("Coordinate vector too short. Excpected $(length(V)), but only got $(length(c)) entries.")
+    @inbounds for i in 1:length(V)
+        X .+= c[i] .* V[i]
+    end
+    return X
+end
+
+function get_vectors(::Stiefel{n,k,ℝ}, p, ::DefaultOrthonormalBasis{ℝ}) where {n,k}
+    p⊥ = nullspace([p zeros(n, n - k)])
+    an = div(k * (k - 1), 2)
+    bn = (n - k) * k
+    V = vcat(
+        [p * vec2skew(1 / sqrt(2) .* _euclidean_unit_vector(an, i), k) for i in 1:an],
+        [p⊥ * reshape(_euclidean_unit_vector(bn, j), (n - k, k)) for j in 1:bn],
+    )
+    return V
+end
+
+_euclidean_unit_vector(n, i) = [k == i ? 1.0 : 0.0 for k in 1:n]
+
+@doc raw"""
     inverse_retract(M::Stiefel, p, q, ::PolarInverseRetraction)
 
 Compute the inverse retraction based on a singular value decomposition

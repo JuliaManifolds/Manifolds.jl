@@ -211,4 +211,30 @@ include("utils.jl")
         @test isapprox(M, mean(M, pts, ws), pts[1]; atol = 10^-4)
         @test_throws DimensionMismatch mean(M, pts, UnitWeights{Float64}(length(pts) + 1))
     end
+    @testset "Hyperbolic ONB test" begin
+        M = Hyperbolic(2)
+        p = Manifolds._hyperbolize(M, [1.0, 0.0])
+        B = get_basis(M, p, DefaultOrthonormalBasis())
+        V = get_vectors(M, p, B)
+        for v in V
+            @test is_tangent_vector(M, p, v, true)
+            for b in [DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis(V[1])]
+                @test isapprox(M, p, v, get_vector(M, p, get_coordinates(M, p, v, b), b))
+            end
+        end
+        for v in V, w in V
+            @test inner(M, p, v, w) ≈ (v == w ? 1 : 0)
+        end
+        X = 0.5 * V[1] + 1.0 .* V[2]
+        @test is_tangent_vector(M, p, X)
+        c = get_coordinates(M, p, X, B)
+        @test c ≈ [0.5, 1.0]
+        B2 = DiagonalizingOrthonormalBasis(X)
+        V2 = get_vectors(M, p, get_basis(M, p, B2))
+        @test V2[1] ≈ X ./ norm(M, p, X)
+        @test inner(M, p, V2[1], V2[2]) ≈ 0.0 atol = 5e-16
+        B3 = DiagonalizingOrthonormalBasis(-V[2])
+        V3 = get_vectors(M, p, get_basis(M, p, B3))
+        @test isapprox(M, p, V3[1], -V[2])
+    end
 end

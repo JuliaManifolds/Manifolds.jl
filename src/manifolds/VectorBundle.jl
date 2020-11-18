@@ -72,18 +72,36 @@ const CotangentBundleFibers{M} =
 CotangentBundleFibers(M::Manifold) = VectorBundleFibers(CotangentSpace, M)
 
 """
+    VectorSpaceAtPoint{
+        𝔽,
+        TFiber<:VectorBundleFibers{<:VectorSpaceType,<:Manifold{𝔽}},
+        TX,
+    } <: Manifold{𝔽}
+
+A vector space at a point `p` on the manifold.
+This is modelled using [`VectorBundleFibers`](@ref) with only a vector-like part
+and fixing the point-like part to be just `p`.
+
+This vector space itself is also a `manifold`. Especially, it's flat and hence isometric
+to the [`Euclidean`](@ref) manifold.
+
+# Constructor
     VectorSpaceAtPoint(fiber::VectorBundleFibers, p)
 
 A vector space (fiber type `fiber` of a vector bundle) at point `p` from
 the manifold `fiber.manifold`.
 """
-struct VectorSpaceAtPoint{TFiber<:VectorBundleFibers,TX}
+struct VectorSpaceAtPoint{
+    𝔽,
+    TFiber<:VectorBundleFibers{<:VectorSpaceType,<:Manifold{𝔽}},
+    TX,
+} <: Manifold{𝔽}
     fiber::TFiber
     point::TX
 end
 
 const TangentSpaceAtPoint{M} =
-    VectorSpaceAtPoint{TangentBundleFibers{M}} where {M<:Manifold}
+    VectorSpaceAtPoint{𝔽,TangentBundleFibers{M}} where {𝔽,M<:Manifold{𝔽}}
 
 """
     TangentSpaceAtPoint(M::Manifold, p)
@@ -101,7 +119,7 @@ Return a [`TangentSpaceAtPoint`](@ref) representing tangent space at `p` on the 
 TangentSpace(M::Manifold, p) = VectorSpaceAtPoint(TangentBundleFibers(M), p)
 
 const CotangentSpaceAtPoint{M} =
-    VectorSpaceAtPoint{CotangentBundleFibers{M}} where {M<:Manifold}
+    VectorSpaceAtPoint{𝔽,CotangentBundleFibers{M}} where {𝔽,M<:Manifold{𝔽}}
 
 """
     CotangentSpaceAtPoint(M::Manifold, p)
@@ -257,11 +275,27 @@ function distance(B::VectorBundle, p, q)
     dist_vec = distance(B.fiber, xp, Vp, vy_x)
     return sqrt(dist_man^2 + dist_vec^2)
 end
+"""
+    distance(M::TangentSpaceAtPoint, p, q)
+
+Distance between vectors `p` and `q` from the vector space `M`. It is calculated as the norm
+of their difference.
+"""
+function distance(M::TangentSpaceAtPoint, p, q)
+    return norm(M.fiber.manifold, M.point, q - p)
+end
 
 function number_eltype(::Type{FVector{TType,TData}}) where {TType<:VectorSpaceType,TData}
     return number_eltype(TData)
 end
 number_eltype(v::FVector) = number_eltype(v.data)
+
+function embed!(M::TangentSpaceAtPoint, q, p)
+    return embed!(M.fiber.manifold, q, M.point, p)
+end
+function embed!(M::TangentSpaceAtPoint, Y, p, X)
+    return embed!(M.fiber.manifold, Y, M.point, X)
+end
 
 @doc raw"""
     exp(B::VectorBundle, p, X)
@@ -285,7 +319,15 @@ where $V_{\exp}$ is the result of vector transport of $V_p + V_{X,F}$
 to the point $\exp_{x_p}(V_{X,M})$.
 The sum $V_p + V_{X,F}$ corresponds to the exponential map in the vector space $F$.
 """
-exp(::VectorBundle, ::Any)
+exp(::VectorBundle, ::Any, ::Any)
+
+@doc raw"""
+    exp(M::TangentSpaceAtPoint, p, X)
+
+Exponential map of tangent vectors `X` and `p` from the tangent space `M`. It is
+calculated as their sum.
+"""
+exp(::TangentSpaceAtPoint, ::Any, ::Any)
 
 function exp!(B::VectorBundle, q, p, X)
     xp, Xp = submanifold_components(B.manifold, p)
@@ -293,6 +335,10 @@ function exp!(B::VectorBundle, q, p, X)
     VXM, VXF = submanifold_components(B.manifold, X)
     exp!(B.manifold, xq, xp, VXM)
     vector_transport_to!(B.manifold, Xq, xp, Xp + VXF, xq, B.vector_transport.method_point)
+    return q
+end
+function exp!(M::TangentSpaceAtPoint, q, p, X)
+    copyto!(q, p + X)
     return q
 end
 
@@ -335,6 +381,9 @@ end
 function get_basis(M::VectorBundle, p, B::CachedBasis)
     return invoke(get_basis, Tuple{Manifold,Any,CachedBasis}, M, p, B)
 end
+function get_basis(M::TangentSpaceAtPoint, p, B::CachedBasis)
+    return invoke(get_basis, Tuple{Manifold,Any,CachedBasis}, M.fiber.manifold, M.point, B)
+end
 
 function get_basis(M::VectorBundle, p, B::DiagonalizingOrthonormalBasis)
     xp1 = submanifold_component(p, Val(1))
@@ -353,9 +402,15 @@ for BT in [
     eval(quote
         @invoke_maker 3 AbstractBasis get_basis(M::VectorBundle, p, B::$BT)
     end)
+    eval(quote
+        @invoke_maker 3 AbstractBasis get_basis(M::TangentSpaceAtPoint, p, B::$BT)
+    end)
 end
 function get_basis(M::TangentBundleFibers, p, B::AbstractBasis)
     return get_basis(M.manifold, p, B)
+end
+function get_basis(M::TangentSpaceAtPoint, p, B::AbstractBasis)
+    return get_basis(M.fiber.manifold, M.point, B)
 end
 
 function get_coordinates!(M::VectorBundle, Y, p, X, B::AbstractBasis)
@@ -399,9 +454,23 @@ for BT in [
             )
         end,
     )
+    eval(
+        quote
+            @invoke_maker 5 AbstractBasis get_coordinates!(
+                M::TangentSpaceAtPoint,
+                Y,
+                p,
+                X,
+                B::$BT,
+            )
+        end,
+    )
 end
 function get_coordinates!(M::VectorBundle, Y, p, X, B::CachedBasis)
     return error("get_coordinates! called on $M with an incorrect CachedBasis. Expected a CachedBasis with VectorBundleBasisData, given $B")
+end
+function get_coordinates!(M::TangentSpaceAtPoint, Y, p, X, B::CachedBasis)
+    return get_coordinates!(M.fiber.manifold, Y, M.point, X, B)
 end
 
 function get_coordinates!(
@@ -410,8 +479,17 @@ function get_coordinates!(
     p,
     X,
     B::ManifoldsBase.all_uncached_bases,
-) where {N}
+)
     return get_coordinates!(M.manifold, Y, p, X, B)
+end
+function get_coordinates!(
+    M::TangentSpaceAtPoint,
+    Y,
+    p,
+    X,
+    B::ManifoldsBase.all_uncached_bases,
+)
+    return get_coordinates!(M.fiber.manifold, Y, M.point, X, B)
 end
 
 function get_vector!(M::VectorBundle, Y, p, X, B::DefaultOrthonormalBasis)
@@ -446,14 +524,34 @@ function get_vector!(
     )
     return Y
 end
-function get_vector!(
-    M::TangentBundleFibers,
-    Y,
-    p,
-    X,
-    B::ManifoldsBase.all_uncached_bases,
-) where {N}
+function get_vector!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncached_bases)
     return get_vector!(M.manifold, Y, p, X, B)
+end
+function get_vector!(M::TangentSpaceAtPoint, Y, p, X, B::ManifoldsBase.all_uncached_bases)
+    return get_vector!(M.fiber.manifold, Y, M.point, X, B)
+end
+for BT in [
+    DefaultBasis,
+    DefaultOrthogonalBasis,
+    DefaultOrthonormalBasis,
+    ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
+    ProjectedOrthonormalBasis{:svd,ℝ},
+    VeeOrthogonalBasis,
+]
+    eval(
+        quote
+            @invoke_maker 5 AbstractBasis get_vector!(
+                M::TangentSpaceAtPoint,
+                Y,
+                p,
+                X,
+                B::$BT,
+            )
+        end,
+    )
+end
+function get_vector!(M::TangentSpaceAtPoint, Y, p, X, B::CachedBasis)
+    return get_vector!(M.fiber.manifold, Y, M.point, X, B)
 end
 
 function get_vectors(
@@ -477,7 +575,18 @@ end
 function get_vectors(M::VectorBundleFibers, p, B::CachedBasis)
     return get_vectors(M.manifold, p, B)
 end
+function get_vectors(M::TangentSpaceAtPoint, p, B::CachedBasis)
+    return get_vectors(M.fiber.manifold, M.point, B)
+end
+
 Base.@propagate_inbounds Base.getindex(x::FVector, i) = getindex(x.data, i)
+
+@doc raw"""
+    injectivity_radius(M::TangentSpaceAtPoint)
+
+Return the injectivity radius on the [`TangentSpaceAtPoint`](@ref) `M`, which is $∞$.
+"""
+injectivity_radius(::TangentSpaceAtPoint) = Inf
 
 """
     inner(B::VectorBundleFibers, p, X, Y)
@@ -524,7 +633,17 @@ function inner(B::VectorBundle, p, X, Y)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
-    return inner(B.manifold, px, VXM, VYM) + inner(B.fiber, Vx, VXF, VYF)
+    return inner(B.manifold, px, VXM, VYM) +
+           inner(VectorSpaceAtPoint(B.fiber, px), Vx, VXF, VYF)
+end
+
+"""
+    inner(M::TangentSpaceAtPoint, p, X, Y)
+
+Inner product of vectors `X` and `Y` from the tangent space at `M`.
+"""
+function inner(M::TangentSpaceAtPoint, p, X, Y)
+    return inner(M.fiber.manifold, M.point, X, Y)
 end
 
 function Base.isapprox(B::VectorBundle, p, q; kwargs...)
@@ -540,8 +659,8 @@ function Base.isapprox(B::VectorBundle, p, X, Y; kwargs...)
     return isapprox(B.manifold, VXM, VYM; kwargs...) &&
            isapprox(VectorSpaceAtPoint(B.fiber, px), VXF, VYF; kwargs...)
 end
-function Base.isapprox(B::TangentSpaceAtPoint, X, Y; kwargs...)
-    return isapprox(B.fiber.manifold, B.point, X, Y; kwargs...)
+function Base.isapprox(M::TangentSpaceAtPoint, X, Y; kwargs...)
+    return isapprox(M.fiber.manifold, M.point, X, Y; kwargs...)
 end
 
 @doc raw"""
@@ -564,6 +683,13 @@ where $V_{\log}$ is the result of vector transport of $V_q$ to the point $x_p$.
 The difference $V_{\log} - V_p$ corresponds to the logarithmic map in the vector space $F$.
 """
 log(::VectorBundle, ::Any...)
+"""
+    log(M::TangentSpaceAtPoint, p, q)
+
+Logarithmic map on the tangent space manifold `M`, calculated as the difference of tangent
+vectors `q` and `p` from `M`.
+"""
+log(::TangentSpaceAtPoint, ::Any...)
 
 function log!(B::VectorBundle, X, p, q)
     px, Vx = submanifold_components(B.manifold, p)
@@ -574,9 +700,16 @@ function log!(B::VectorBundle, X, p, q)
     copyto!(VXF, VXF - Vx)
     return X
 end
+function log!(M::TangentSpaceAtPoint, X, p, q)
+    copyto!(X, q - p)
+    return X
+end
 
 function manifold_dimension(B::VectorBundle)
     return manifold_dimension(B.manifold) + vector_space_dimension(B.fiber)
+end
+function manifold_dimension(M::VectorSpaceAtPoint)
+    return vector_space_dimension(M.fiber)
 end
 
 """
@@ -587,6 +720,7 @@ at point `p` from manifold `B.manifold`.
 """
 LinearAlgebra.norm(B::VectorBundleFibers, p, X) = sqrt(inner(B, p, X, X))
 LinearAlgebra.norm(B::VectorBundleFibers{<:TangentSpaceType}, p, X) = norm(B.manifold, p, X)
+LinearAlgebra.norm(M::VectorSpaceAtPoint, p, X) = norm(M.fiber.manifold, M.point, X)
 
 @doc raw"""
     project(B::VectorBundle, p)
@@ -605,12 +739,24 @@ and then projecting the vector $V_p$ to the tangent space $T_{x_p}\mathcal M$.
 """
 project(::VectorBundle, ::Any)
 
+
+@doc raw"""
+    project(M::TangentSpaceAtPoint, p)
+
+Project the point `p` from the tangent space `M`, that is project the vector `p`
+tangent at `M.point`.
+"""
+project(::TangentSpaceAtPoint, ::Any)
+
 function project!(B::VectorBundle, q, p)
     px, pVx = submanifold_components(B.manifold, p)
     qx, qVx = submanifold_components(B.manifold, q)
     project!(B.manifold, qx, px)
     project!(B.manifold, qVx, qx, pVx)
     return q
+end
+function project!(M::TangentSpaceAtPoint, q, p)
+    return project!(M.fiber.manifold, q, M.point, p)
 end
 
 @doc raw"""
@@ -632,6 +778,13 @@ The projection is calculated by projecting $V_{X,M}$ to tangent space $T_{x_p}\m
 and then projecting the vector $V_{X,F}$ to the fiber $F$.
 """
 project(::VectorBundle, ::Any, ::Any)
+@doc raw"""
+    project(M::TangentSpaceAtPoint, p, X)
+
+Project the vector `X` from the tangent space `M`, that is project the vector `X`
+tangent at `M.point`.
+"""
+project(::TangentSpaceAtPoint, ::Any, ::Any)
 
 function project!(B::VectorBundle, Y, p, X)
     px, Vx = submanifold_components(B.manifold, p)
@@ -640,6 +793,9 @@ function project!(B::VectorBundle, Y, p, X)
     project!(B.manifold, VYM, px, VXM)
     project!(B.manifold, VYF, px, VXF)
     return Y
+end
+function project!(M::TangentSpaceAtPoint, Y, p, X)
+    return project!(M.fiber.manifold, Y, M.point, X)
 end
 
 """
@@ -668,6 +824,9 @@ function representation_size(B::VectorBundle)
     len_manifold = prod(representation_size(B.manifold))
     len_vs = prod(representation_size(B.fiber))
     return (len_manifold + len_vs,)
+end
+function representation_size(B::TangentSpaceAtPoint)
+    return representation_size(B.fiber.manifold)
 end
 
 @doc raw"""
@@ -761,8 +920,7 @@ function `f` for representing an operation with result in the vector space `fibe
 for manifold `M` on given arguments (passed at a tuple).
 """
 function allocate_result_type(::VectorBundleFibers, f, args::NTuple{N,Any}) where {N}
-    T = typeof(reduce(+, one(number_eltype(eti)) for eti in args))
-    return T
+    return typeof(mapreduce(eti -> one(number_eltype(eti)), +, args))
 end
 
 Base.size(x::FVector) = size(x.data)
@@ -834,6 +992,12 @@ function vector_transport_to!(M::VectorBundle, Y, p, X, q, m::VectorBundleVector
     vector_transport_to!(M.manifold, VYF, px, VXF, qx, m.method_vector)
     return Y
 end
+function vector_transport_to!(M::TangentSpaceAtPoint, Y, p, X, q)
+    return copyto!(Y, X)
+end
+function vector_transport_to!(M::TangentSpaceAtPoint, Y, p, X, q, ::ParallelTransport)
+    return copyto!(Y, X)
+end
 
 """
     zero_vector(B::VectorBundleFibers, p)
@@ -879,10 +1043,21 @@ $\mathbf{0}_F$ is the zero element of the vector space $F$.
 """
 zero_tangent_vector(::VectorBundle, ::Any...)
 
+@doc raw"""
+    zero_tangent_vector(M::TangentSpaceAtPoint, p)
+
+Zero tangent vector at point `p` from the tangent space `M`, that is the zero tangent vector
+at point `M.point`.
+"""
+zero_tangent_vector(::TangentSpaceAtPoint, ::Any...)
+
 function zero_tangent_vector!(B::VectorBundle, X, p)
     xp, Vp = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     zero_tangent_vector!(B.manifold, VXM, xp)
     zero_vector!(B.fiber, VXF, Vp)
     return X
+end
+function zero_tangent_vector!(M::TangentSpaceAtPoint, X, p)
+    return zero_tangent_vector!(M.fiber.manifold, X, M.point)
 end

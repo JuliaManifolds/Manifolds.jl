@@ -14,6 +14,7 @@ The important difference between functions operating on `VectorBundle` and `Vect
 `VectorBundleFibers` refers to the whole set of fibers of a vector bundle.
 There is also another type, [`VectorSpaceAtPoint`](@ref), that represents a specific fiber at a given point.
 This distinction is made to reduce the need to repeatedly construct objects of type [`VectorSpaceAtPoint`](@ref) in certain usage scenarios.
+This is also considered a manifold.
 
 ## FVector
 

@@ -239,6 +239,97 @@ function exp!(M::Hyperbolic, q, p, X)
     return copyto!(q, cosh(vn) * p + sinh(vn) / vn * X)
 end
 
+function get_basis(M::Hyperbolic, p, B::DefaultOrthonormalBasis)
+    n = manifold_dimension(M)
+    V = [
+        _hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for i in 1:n
+    ]
+    return CachedBasis(B, gram_schmidt(M, p, V))
+end
+
+function get_basis(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)
+    n = manifold_dimension(M)
+    X = B.frame_direction
+    V = [
+        _hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for i in 1:n
+    ]
+    κ = -ones(n)
+    if norm(M, p, X) != 0
+        placed = false
+        for i in 1:n
+            if abs(inner(M, p, X, V[i])) ≈ norm(M, p, X) # is X a multiple of V[i]?
+                V[i] .= V[1]
+                V[1] .= X
+                placed = true
+                break
+            end
+        end
+        if !placed
+            V[1] .= X
+        end
+        κ[1] = 0.0
+    end
+    V = gram_schmidt(M, p, V; atol = 4 * eps(eltype(V[1])))
+    return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, κ, V))
+end
+
+@doc raw"""
+    get_coordinates(M::Hyperbolic, p, X, ::DefaultOrthonormalBasis)
+
+Compute the coordinates of the vector `X` with respect to the orthogonalized version of
+the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hyperbolic`](@ref)
+ `M`, utting them intop the tangent space at `p` and orthonormalizing them.
+"""
+get_coordinates(M::Hyperbolic, p, X, B::DefaultOrthonormalBasis)
+
+function get_coordinates!(M::Hyperbolic, c, p, X, B::DefaultOrthonormalBasis)
+    c = get_coordinates!(M, c, p, X, get_basis(M, p, B))
+    return c
+end
+function get_coordinates!(M::Hyperbolic, c, p, X, B::DiagonalizingOrthonormalBasis)
+    c = get_coordinates!(M, c, p, X, get_basis(M, p, B))
+    return c
+end
+
+@doc raw"""
+    get_vector(M::Hyperbolic, p, c, ::DefaultOrthonormalBasis)
+
+Compute the vector from the coordinates with respect to the orthogonalized version of
+the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hyperbolic`](@ref)
+ `M`, utting them intop the tangent space at `p` and orthonormalizing them.
+"""
+get_vector(M::Hyperbolic, p, c, ::DefaultOrthonormalBasis)
+
+function get_vector!(M::Hyperbolic, X, p, c, B::DefaultOrthonormalBasis)
+    X = get_vector!(M, X, p, c, get_basis(M, p, B))
+    return X
+end
+function get_vector!(M::Hyperbolic, X, p, c, B::DiagonalizingOrthonormalBasis)
+    X = get_vector!(M, X, p, c, get_basis(M, p, B))
+    return X
+end
+
+@doc raw"""
+    _hyperbolize(M,q)
+
+Given the [`Hyperbolic`](@ref)`(n)` manifold using the hyperboloid model, a point from the
+$q\in ℝ^n$ can be set onto the manifold by computing its last component such that for the
+resulting `p` we have that its [`minkowski_metric`](@ref) is $⟨p,p⟩_{\mathrm{M}} = - 1$,
+i.e. $p_{n+1} = \sqrt{\lVert q \rVert^2-^}$
+"""
+_hyperbolize(M::Hyperbolic, q) = vcat(q, sqrt(norm(q)^2 + 1))
+
+@doc raw"""
+    _hyperbolize(M, p, Y)
+
+Given the [`Hyperbolic`](@ref)`(n)` manifold using the hyperboloid model and a point `p`
+thereon, we can put a vector $Y\in ℝ^n$  into the tangent space by computing its last
+component such that for the
+resulting `p` we have that its [`minkowski_metric`](@ref) is $⟨p,X⟩_{\mathrm{M}} = 0$,
+i.e. $X_{n+1} = \frac{⟨\tilde p, Y⟩}{p_{n+1}}$, where $\tilde p = (p_1,\ldots,p_n)$.
+"""
+_hyperbolize(M::Hyperbolic, p, Y) = vcat(Y, dot(p[1:(end - 1)], Y) / p[end])
+
 @doc raw"""
     inner(M::Hyperbolic{n}, p, X, Y)
     inner(M::Hyperbolic{n}, p::HyperboloidPoint, X::HyperboloidTVector, Y::HyperboloidTVector)

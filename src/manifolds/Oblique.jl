@@ -88,6 +88,21 @@ end
 
 @generated representation_size(::Oblique{n,m}) where {n,m} = (n, m)
 
+@doc raw"""
+    vector_transport_to(M::Oblique, p, X, q, ::ParallelTransport)
+
+Compute the parallel transport on the [`Oblique`](@ref) manifold by
+doing a column wise parallel transport on the [`Sphere`](@ref)
+
+This is a shortcut to using [`PowerVectorTransport{ParallelTransport}`](@ref)
+from the [`AbstractPowerManifold`](@ref).
+"""
+vector_transport_to(::Oblique, ::Any, ::Any, ::Any, ::Any, ::ParallelTransport)
+
+function vector_transport_to!(M::Oblique, Y, p, X, q, m::ParallelTransport)
+    return vector_transport_to!(M, Y, p, X, q, PowerVectorTransport(m))
+end
+
 function Base.show(io::IO, ::Oblique{n,m,𝔽}) where {n,m,𝔽}
     return print(io, "Oblique($(n),$(m); field = $(𝔽))")
 end

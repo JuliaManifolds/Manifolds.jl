@@ -269,7 +269,8 @@ function Base.:*(
     return ProductArray(ShapeSpec, a * v.data, v.reshapers)
 end
 
-number_eltype(::Type{ProductArray{TM,TData,TV}}) where {TM,TData,TV} = eltype(TData)
+number_eltype(a::ProductArray) = number_eltype(a.data)
+number_eltype(::Type{TPA}) where {TM,TData,TPA<:ProductArray{TM,TData}} = eltype(TData)
 
 function _show_component(io::IO, v; pre = "", head = "")
     sx = sprint(show, "text/plain", v, context = io, sizehint = 0)
