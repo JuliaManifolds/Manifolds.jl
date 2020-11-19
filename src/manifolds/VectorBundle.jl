@@ -633,6 +633,8 @@ function inner(B::VectorBundle, p, X, Y)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
+    # for tangent bundle Vx is discarded by the method of inner for TangentSpaceAtPoint
+    # and px is actually used as the base point
     return inner(B.manifold, px, VXM, VYM) +
            inner(VectorSpaceAtPoint(B.fiber, px), Vx, VXF, VYF)
 end
@@ -983,7 +985,7 @@ end
 function vector_transport_to!(M::VectorBundle, Y, p, X, q)
     return vector_transport_to!(M, Y, p, X, q, M.vector_transport)
 end
-function vector_transport_to!(M::VectorBundle, Y, p, X, q, m::VectorBundleVectorTransport)
+function vector_transport_to!(M::TangentBundle, Y, p, X, q, m::VectorBundleVectorTransport)
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     VYM, VYF = submanifold_components(M.manifold, Y)
@@ -992,6 +994,24 @@ function vector_transport_to!(M::VectorBundle, Y, p, X, q, m::VectorBundleVector
     vector_transport_to!(M.manifold, VYF, px, VXF, qx, m.method_vector)
     return Y
 end
+function vector_transport_to!(
+    M::TangentBundle,
+    Y,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod,
+)
+    return vector_transport_to!(M, Y, p, X, q, VectorBundleVectorTransport(m, m))
+end
+@invoke_maker 6 AbstractVectorTransportMethod vector_transport_to!(
+    M::TangentBundle,
+    Y,
+    p,
+    X,
+    q,
+    m::PoleLadderTransport,
+)
 function vector_transport_to!(M::TangentSpaceAtPoint, Y, p, X, q)
     return copyto!(Y, X)
 end
