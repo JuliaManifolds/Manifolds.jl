@@ -1004,6 +1004,14 @@ function vector_transport_to!(
 )
     return vector_transport_to!(M, Y, p, X, q, VectorBundleVectorTransport(m, m))
 end
+@invoke_maker 6 AbstractVectorTransportMethod vector_transport_to!(
+    M::TangentBundle,
+    Y,
+    p,
+    X,
+    q,
+    m::PoleLadderTransport,
+)
 function vector_transport_to!(M::TangentSpaceAtPoint, Y, p, X, q)
     return copyto!(Y, X)
 end
