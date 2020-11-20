@@ -109,6 +109,7 @@ include("distributions.jl")
 include("projected_distribution.jl")
 include("product_representations.jl")
 
+
 # It's included early to ensure visibility of `Identity`
 include("groups/group.jl")
 
