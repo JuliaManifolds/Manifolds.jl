@@ -689,62 +689,21 @@ function inverse_retract!(M::AbstractPowerManifold, X, p, q, method::InversePowe
     return X
 end
 # log and power have to be explicitly stated to avoid an ambiguity in the third case with AbstractPower
-function inverse_retract!(
-    M::PowerManifold,
-    X::T,
-    q::P1,
-    p::P2,
+@invoke_maker 5 AbstractInverseRetractionMethod inverse_retract!(
+    M::AbstractPowerManifold,
+    X,
+    q,
+    p,
     m::LogarithmicInverseRetraction,
-) where {T,P1,P2}
-    return invoke(
-        inverse_retract!,
-        Tuple{
-            AbstractPowerManifold,
-            T,
-            P1,
-            P2,
-            InversePowerRetraction{LogarithmicInverseRetraction},
-        },
-        M,
-        q,
-        p,
-        X,
-        InversePowerRetraction(m),
-    )
-end
+)
 function inverse_retract!(
-    M::PowerManifold,
-    X::T,
-    q::P1,
-    p::P2,
-    m::InversePowerRetraction,
-) where {T,P1,P2}
-    return invoke(
-        inverse_retract!,
-        Tuple{AbstractPowerManifold,T,P1,P2,InversePowerRetraction},
-        M,
-        q,
-        p,
-        X,
-        m,
-    )
-end
-function inverse_retract!(
-    M::PowerManifold,
-    X::T,
-    q::P1,
-    p::P2,
-    m::IRM,
-) where {T,P1,P2,IRM<:AbstractInverseRetractionMethod}
-    return invoke(
-        inverse_retract!,
-        Tuple{AbstractPowerManifold,T,P1,P2,InversePowerRetraction{IRM}},
-        M,
-        q,
-        p,
-        X,
-        InversePowerRetraction(m),
-    )
+    M::AbstractPowerManifold,
+    X,
+    q,
+    p,
+    m::AbstractInverseRetractionMethod,
+)
+    return inverse_retract!(M, X, q, p, InversePowerRetraction(m))
 end
 
 @doc raw"""
@@ -960,50 +919,15 @@ function retract!(M::AbstractPowerManifold, q, p, X, method::PowerRetraction)
     return q
 end
 # exp and power have to be explicitly stated, since the third case otherwise introduces and ambiguity.
-function retract!(
-    M::PowerManifold,
-    q::P1,
-    p::P2,
-    X::T,
+@invoke_maker 5 AbstractRetractionMethod retract!(
+    M::AbstractPowerManifold,
+    q,
+    p,
+    X,
     m::ExponentialRetraction,
-) where {P1,P2,T}
-    return invoke(
-        retract!,
-        Tuple{AbstractPowerManifold,P1,P2,T,PowerRetraction{ExponentialRetraction}},
-        M,
-        q,
-        p,
-        X,
-        PowerRetraction(m),
-    )
-end
-function retract!(M::PowerManifold, q::P1, p::P2, X::T, m::PowerRetraction) where {P1,P2,T}
-    return invoke(
-        retract!,
-        Tuple{AbstractPowerManifold,P1,P2,T,PowerRetraction},
-        M,
-        q,
-        p,
-        X,
-        m,
-    )
-end
-function retract!(
-    M::PowerManifold,
-    q::P1,
-    p::P2,
-    X::T,
-    m::RM,
-) where {P1,P2,T,RM<:AbstractRetractionMethod}
-    return invoke(
-        retract!,
-        Tuple{AbstractPowerManifold,P1,P2,T,PowerRetraction{RM}},
-        M,
-        q,
-        p,
-        X,
-        PowerRetraction(m),
-    )
+)
+function retract!(M::AbstractPowerManifold, q, p, X, m::AbstractRetractionMethod)
+    return retract!(M, q, p, X, PowerRetraction(m))
 end
 
 
@@ -1104,42 +1028,35 @@ function vector_transport_direction!(M::AbstractPowerManifold, Y, p, X, d)
     )
 end
 function vector_transport_direction!(
-    M::PowerManifold,
-    Y::T1,
-    p::P,
-    X::T2,
-    d::D,
-    m::PowerVectorTransport,
-) where {P,T1,T2,D}
-    return invoke(
-        vector_transport_direction!,
-        Tuple{AbstractPowerManifold,T1,P,T2,D,PowerVectorTransport},
-        M,
-        Y,
-        p,
-        X,
-        d,
-        m,
-    )
+    M::AbstractPowerManifold,
+    Y,
+    p,
+    X,
+    d,
+    m::AbstractVectorTransportMethod,
+)
+    return vector_transport_direction!(M, Y, p, X, d, PowerVectorTransport(m))
 end
 function vector_transport_direction!(
-    M::PowerManifold,
-    Y::T1,
-    p::P,
-    X::T2,
-    d::D,
-    m::VTM,
-) where {P,T1,T2,D,VTM<:AbstractVectorTransportMethod}
-    return invoke(
-        vector_transport_direction!,
-        Tuple{AbstractPowerManifold,T1,P,T2,D,PowerVectorTransport{VTM}},
-        M,
-        Y,
-        p,
-        X,
-        d,
-        PowerVectorTransport(m),
-    )
+    M::AbstractPowerManifold,
+    Y,
+    p,
+    X,
+    d,
+    m::PowerVectorTransport,
+)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        vector_transport_direction!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, d, i),
+            m.method,
+        )
+    end
+    return Y
 end
 
 @doc raw"""
@@ -1174,41 +1091,27 @@ function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q, m::PowerVect
 end
 
 function vector_transport_to!(
-    M::PowerManifold,
-    Y::T1,
-    p::P1,
-    X::T2,
-    q::P2,
-    m::PowerVectorTransport,
-) where {P1,P2,T1,T2}
-    return invoke(
-        vector_transport_to!,
-        Tuple{AbstractPowerManifold,T1,P1,T2,P2,PowerVectorTransport},
-        M,
-        Y,
-        p,
-        X,
-        q,
-        m,
-    )
+    M::AbstractPowerManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod,
+)
+    return vector_transport_to!(M, Y, p, X, q, PowerVectorTransport(m))
 end
-function vector_transport_to!(
-    M::PowerManifold,
-    Y::T1,
-    p::P1,
-    X::T2,
-    q::P2,
-    m::VTM,
-) where {P1,P2,T1,T2,VTM<:AbstractVectorTransportMethod}
-    return invoke(
-        vector_transport_to!,
-        Tuple{AbstractPowerManifold,T1,P1,T2,P2,PowerVectorTransport{VTM}},
-        M,
-        Y,
-        p,
-        X,
-        q,
-        PowerVectorTransport(m),
+for VT in ManifoldsBase.VECTOR_TRANSPORT_DISAMBIGUATION
+    eval(
+        quote
+            @invoke_maker 6 AbstractVectorTransportMethod vector_transport_to!(
+                M::AbstractPowerManifold,
+                Y,
+                p,
+                X,
+                q,
+                B::$VT,
+            )
+        end,
     )
 end
 
