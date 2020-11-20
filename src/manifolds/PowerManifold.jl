@@ -127,8 +127,8 @@ struct PowerMetric <: Metric end
     PowerRetraction{TR<:AbstractRetractionMethod} <: AbstractRetractionMethod
 
 The `PowerRetraction` avoids ambiguities between dispatching on the [`AbstractPowerManifold`](@ref)
-and dispatching on the [`AbstractRetractionMethod`](@ref) and ecapsulates this.
-This container should only be used in rare cases outide of this package. Usually an
+and dispatching on the [`AbstractRetractionMethod`](@ref) and encapsulates this.
+This container should only be used in rare cases outside of this package. Usually a
 subtype of the [`AbstractPowerManifold`](@ref) should define a way how to treat
 its [`AbstractRetractionMethod`](@ref)s.
 
@@ -145,7 +145,7 @@ end
 
 The `InversePowerRetraction` avoids ambiguities between dispatching on the [`AbstractPowerManifold`](@ref)
 and dispatching on the [`AbstractInverseRetractionMethod`](@ref) and encapsulates this.
-This container should only be used in rare cases outide of this package. Usually an
+This container should only be used in rare cases outside of this package. Usually a
 subtype of the [`AbstractPowerManifold`](@ref) should define a way how to treat
 its [`AbstractRetractionMethod`](@ref)s.
 
@@ -194,7 +194,7 @@ end
 
 The `PowerVectorTransport` avoids ambiguities between dispatching on the [`AbstractPowerManifold`](@ref)
 and dispatching on the [`AbstractVectorTransportMethod`](@ref) and encapsulates this.
-This container should only be used in rare cases outide of this package. Usually an
+This container should only be used in rare cases outside of this package. Usually a
 subtype of the [`AbstractPowerManifold`](@ref) should define a way how to treat
 its [`AbstractVectorTransportMethod`](@ref)s.
 
