@@ -116,8 +116,6 @@ whose geodesic starting from `p` reaches `q` after time 1.
 """
 function log!(M::EssentialManifold, X, p, q)
     # compute the closest representative of q
-
-    ##berechne t und q2
     t = 0
     fMin = Inf 
     q2_candidate = zeros(size(q))
@@ -125,7 +123,17 @@ function log!(M::EssentialManifold, X, p, q)
 
     if !M.is_signed
         for k = 1:4 
-            t_temp, f_temp, q2_candidate = distMinAnglePair(p, q, k)
+            #flip q
+            if k == 2
+                q[1][2:3, :] = -q[1][2:3, :]
+                q[2][[1 3],:] = -q[2][[1 3],:]
+            elseif k == 3
+                q[2][1:2, :] = -q[2][1:2, :]
+            elseif k == 4
+                q[1][2:3, :] = -q[1][2:3, :]
+                q[2][2:3, :] = -q[2][2:3, :]
+            end 
+            t_temp, f_temp, q2_candidate = dist_min_angle_pair(p, q)
             if f_temp < fMin
                 fMin = f_temp
                 t = t_temp
@@ -133,7 +141,7 @@ function log!(M::EssentialManifold, X, p, q)
             end
         end
     else
-        t, f, q2 = distMinAnglePair(p, q, 1) #ignore f 
+        t, _, q2 = dist_min_angle_pair(p, q) 
     end
         
     #t = tMin[1] 
@@ -147,32 +155,14 @@ function log!(M::EssentialManifold, X, p, q)
     return X
 end
 
-function distMinAnglePair(p, q, k)
-    #flip q
-    if k == 
-        #do nothing
-        break #insert something better 
-    elseif k == 2
-        q[1][2:3, :] = -q[1][2:3, :]
-        q[2][[1 3],:] = -q[2][[1 3],:]
-    elseif k == 3
-        q[2][1:2, :] = -q[2][1:2, :]
-    elseif k == 4
-        q[1][2:3, :] = -q[1][2:3, :]
-        q[2][2:3, :] = -q[2][2:3, :]
-    else 
-        return DomainError(
-            k,
-            "Value of $k is invalid.",
-        )
-    end 
+function dist_min_angle_pair(p, q)
     #compute rotations
     q211 = q[1]*p[1]'
     q212 = q[2]*p[2]'
 
     #compute values from Proposition ...
-    t_break1, c1, m1, p1 = distMinAnglePair_discontinuityDistance(q211)
-    t_break2, c2, m2, p2 = distMinAnglePair_discontinuityDistance(q212)
+    t_break1, c1, m1, p1 = dist_min_angle_pair_discontinuity_distance(q211)
+    t_break2, c2, m2, p2 = dist_min_angle_pair_discontinuity_distance(q212)
 
     #check if cost is constant
     tolMZero = 1e-15
@@ -185,23 +175,63 @@ function distMinAnglePair(p, q, k)
             t = t_break1 + pi
             f = 0
         else
+            t_search1 = t_break1
+            t_search2 = t_break2
+            if t_search1 > t_search2
+                t_search1 = t_search1 - 2 * pi
+            end
             
+            #compute derivatives of each term at discontinuity points
+            df1_break1 = dist_min_angle_pair_compute_df_break(t_break1, q211)
+            df2_break2 = dist_min_angle_pair_compute_df_break(t_break2, q212)
 
-    
+            #compute derivative of each term at other's discontinuity
+            θ1_break2 = acos(clamp((m1 * sin(t_break2 + p1) + c1 - 1) / 2 , -1.0, 1.0))
+            df1_break2= -θ1_break2 * (m1 * cos(t_break2 + p1)) / (2 * sin(θ1_break2))
+            θ2_break1 = acos(clamp((m2 * sin(t_break1 + p2) + c2 - 1) / 2 , -1.0, 1.0))
+            df2_break1= -θ2_break1 * (m2 * cos(t_break1 + p2)) / (2 * sin(θ2_break1))
+
+            #compute left and right derivatives of sum of the two terms
+            df_break1n = df1_break1 + df2_break1
+            df_break1p = -df1_break1 + df2_break1
+            df_break2n = df2_break2 + df1_break2
+            df_break2p = -df2_break2 + df1_break2
+
+            f_min = Inf
+            if sign(df_break1p) != sign(df_break2n)
+                #parabolic prediction of min
+                t_min0 = t_search1 - df_break1p * (t_search2 - t_search1) / (df_break2n - df_break1p)
+                #use Newton's search to find t_min
+                t_min, f_min = dist_min_angle_pair_df_newton(m1, p1, c1, m2, p2, c2, t_min0, t_search2, t_search1)
+            end
 
     return t, f, q2_candidate
 end
 
-function distMinAnglePair_discontinuityDistance(q)
+function dist_min_angle_pair_discontinuity_distance(q)
     c1 = q[1, 1] + q[2, 2]
     c2 = q[1, 2] - q[2, 1]
     c3 = q[3, 3]
 
-    m = norm[c1 c2]
-    p = atan(c1, c2) #order
+    m = norm([c1 c2])
+    p = atan(c1, c2) 
 
-    t_break = -0.5 * pi - p #why different than in paper? 
+    t_break = -0.5 * pi - p
     return t_break, c3, m, p
+end
+
+function dist_min_angle_pair_compute_df_break(t_break, q) #compute derivatives of each term at discontinuity points
+    c = cos(t_break)
+    s = sin(t_break)
+
+    q1_r_break_q1 = [c -s 0; s c 0; 0 0 1] * q
+    F = svd(q1_r_break_q1 + I(3))    
+    df_break = pi * abs(F.U[3, 1])
+    return df_break
+end
+
+function dist_min_angle_pair_df_newton(m1, p1, c1, m2, p2, c2, t_min0, t_search2, t_search1)
+    return t_min, f_min
 end
 
 
