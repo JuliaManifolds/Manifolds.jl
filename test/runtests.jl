@@ -91,3 +91,5 @@ include("groups/group_operation_action.jl")
 include("groups/rotation_action.jl")
 include("groups/translation_action.jl")
 include("groups/metric.jl")
+
+include("recipes.jl")

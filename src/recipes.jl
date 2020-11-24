@@ -1,10 +1,15 @@
 #
+# Defaults
+#
+CIRCLE_DEFAULT_PLOT_POINTS = 720
+
+#
 # Plotting Recipe – Poincaré Ball
 #
 @recipe function f(
     M::Hyperbolic{2},
     pts::AbstractVector{P};
-    circle_points = 720,
+    circle_points = CIRCLE_DEFAULT_PLOT_POINTS,
     geodesic_interpolation = -1,
     hyperbolic_border_color = RGBA(0.0, 0.0, 0.0, 1.0),
 ) where {P<:PoincareBallPoint}
@@ -53,7 +58,7 @@ end
     ::Hyperbolic{2},
     pts::AbstractVector{P},
     vecs::AbstractVector{T},
-    circle_points = 720,
+    circle_points = CIRCLE_DEFAULT_PLOT_POINTS,
     hyperbolic_border_color = RGBA(0.0, 0.0, 0.0, 1.0),
 ) where {P<:PoincareBallPoint,T<:PoincareBallTVector}
     @series begin
