@@ -269,7 +269,8 @@ function Base.:*(
     return ProductArray(ShapeSpec, a * v.data, v.reshapers)
 end
 
-number_eltype(::Type{ProductArray{TM,TData,TV}}) where {TM,TData,TV} = eltype(TData)
+number_eltype(a::ProductArray) = number_eltype(a.data)
+number_eltype(::Type{TPA}) where {TM,TData,TPA<:ProductArray{TM,TData}} = eltype(TData)
 
 function _show_component(io::IO, v; pre = "", head = "")
     sx = sprint(show, "text/plain", v, context = io, sizehint = 0)
@@ -368,11 +369,12 @@ Base.:*(v::ProductRepr, a::Number) = ProductRepr(map(t -> t * a, submanifold_com
 
 Base.:/(v::ProductRepr, a::Number) = ProductRepr(map(t -> t / a, submanifold_components(v)))
 
-function Base.convert(::Type{TPR}, x::ProductRepr) where {TPR<:ProductRepr}
-    return ProductRepr(map(
-        t -> convert(t...),
-        ziptuples(tuple(TPR.parameters[1].parameters...), submanifold_components(x)),
-    ))
+function Base.convert(::Type{ProductRepr{TPR}}, x::ProductRepr) where {TPR<:Tuple}
+    if @isdefined TPR
+        return ProductRepr(convert(TPR, submanifold_components(x)))
+    else
+        return x
+    end
 end
 
 function Base.show(io::IO, ::MIME"text/plain", x::ProductRepr)

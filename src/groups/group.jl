@@ -29,8 +29,8 @@ Abstract type for a Lie group, a group that is also a smooth manifold with an
 implement at least [`inv`](@ref), [`identity`](@ref), [`compose`](@ref), and
 [`translate_diff`](@ref).
 """
-abstract type AbstractGroupManifold{𝔽,O<:AbstractGroupOperation} <:
-              AbstractDecoratorManifold{𝔽} end
+abstract type AbstractGroupManifold{𝔽,O<:AbstractGroupOperation,T<:AbstractEmbeddingType} <:
+              AbstractEmbeddedManifold{𝔽,T} end
 
 """
     GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <: AbstractGroupManifold{𝔽,O}
@@ -45,7 +45,7 @@ Group manifolds by default forward metric-related operations to the wrapped mani
     GroupManifold(manifold, op)
 """
 struct GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <:
-       AbstractGroupManifold{𝔽,O}
+       AbstractGroupManifold{𝔽,O,TransparentIsometricEmbedding}
     manifold::M
     op::O
 end
@@ -67,11 +67,13 @@ function base_group(M::Manifold)
 end
 base_group(G::AbstractGroupManifold) = G
 
-decorator_group_dispatch(M::Manifold) = Val(false)
+base_manifold(G::GroupManifold) = G.manifold
+
+decorator_group_dispatch(::Manifold) = Val(false)
 function decorator_group_dispatch(M::AbstractDecoratorManifold)
     return decorator_group_dispatch(decorated_manifold(M))
 end
-decorator_group_dispatch(M::AbstractGroupManifold) = Val(true)
+decorator_group_dispatch(::AbstractGroupManifold) = Val(true)
 
 function is_group_decorator(M::Manifold)
     return _extract_val(decorator_group_dispatch(M))
@@ -84,6 +86,22 @@ if VERSION ≥ v"1.3"
     (op::AbstractGroupOperation)(M::Manifold) = GroupManifold(M, op)
     (::Type{T})(M::Manifold) where {T<:AbstractGroupOperation} = GroupManifold(M, T())
 end
+
+function decorator_transparent_dispatch(
+    ::typeof(get_coordinates!),
+    ::AbstractGroupManifold{<:Any,<:AbstractGroupOperation,TransparentIsometricEmbedding},
+    args...,
+)
+    return Val(:transparent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(get_vector!),
+    ::AbstractGroupManifold{<:Any,<:AbstractGroupOperation,TransparentIsometricEmbedding},
+    args...,
+)
+    return Val(:transparent)
+end
+
 
 ###################
 # Action directions
@@ -322,14 +340,12 @@ for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
     )
 end
 
-@decorator_transparent_fallback :transparent function check_manifold_point(
-    G::AbstractGroupManifold,
-    e::Identity;
-    kwargs...,
-)
+manifold_dimension(G::GroupManifold) = manifold_dimension(G.manifold)
+
+function check_manifold_point(G::AbstractGroupManifold, e::Identity; kwargs...)
     return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
-@decorator_transparent_fallback :transparent function check_manifold_point(
+function check_manifold_point(
     G::GT,
     e::Identity{GT};
     kwargs...,
