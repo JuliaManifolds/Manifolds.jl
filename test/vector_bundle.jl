@@ -60,6 +60,10 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test p[TB, :vector] === p.parts[2]
         p[TB, :vector] = [0.0, 3.0, 1.0]
         @test p.parts[2] == [0.0, 3.0, 1.0]
+        p[TB, :point] = [0.0, 1.0, 0.0]
+        @test p.parts[1] == [0.0, 1.0, 0.0]
+        @test_throws DomainError p[TB, :error]
+        @test_throws DomainError p[TB, :error] = [1,2,3]
     end
 
     types = [Vector{Float64}]
