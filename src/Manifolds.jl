@@ -222,14 +222,16 @@ function __init__()
 
     @require Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
         using RecipesBase: @recipe, @series
-        using Colors
+        using Colors: RGBA
         include("recipes.jl")
     end
 
     @require RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01" begin
-        using .RecipesBase: @recipe, @series
-        using Colors: RGBA
-        include("recipes.jl")
+        @require Colors = "5ae59095-9a9b-59fe-a467-6f913c188581" begin
+            using .RecipesBase: @recipe, @series
+            using Colors: RGBA
+            include("recipes.jl")
+        end
     end
     return nothing
 end

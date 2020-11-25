@@ -1,4 +1,4 @@
-using RecipesBase, VisualRegressionTests, Plots
+using RecipesBase, VisualRegressionTests, Plots, Colors
 include("utils.jl")
 # Note that the `false` in the test avoids to start Gtk
 # I (kellertuer)  think it also avoids asking whether a new reference should be
