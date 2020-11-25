@@ -582,11 +582,11 @@ end
 Base.@propagate_inbounds Base.getindex(x::FVector, i) = getindex(x.data, i)
 
 """
-    getindex(p::ProductRepr, M::CotangentBundle, s::Symbol
-    p[M::CotangentBundle, s]
+    getindex(p::ProductRepr, M::VectorBundle, s::Symbol)
+    p[M::VectorBundle, s]
 
-Access the element(s) at index `s` of a point `p` on a [`Cotangentbundle`](@ref) `M` by
-using the symbols `:base` and `:cotangent` for the base and tangent component, respectively.
+Access the element(s) at index `s` of a point `p` on a [`VectorBundle`](@ref) `M` by
+using the symbols `:point` and `:vector` for the base and vector component, respectively.
 """
 @inline function Base.getindex(p::ProductRepr, M::VectorBundle, s::Symbol)
     (s === :point) && return submanifold_component(M, p, Val(1))
@@ -832,6 +832,17 @@ end
 
 Base.@propagate_inbounds Base.setindex!(x::FVector, val, i) = setindex!(x.data, val, i)
 
+"""
+    setindex!(p::ProductRepr, val, M::VectorBundle, s::Symbol)
+    p[M::VectorBundle, s] = val
+
+Set the element(s) at index `s` of a point `p` on a [`VectorBundle`](@ref) `M` to `val` by
+using the symbols `:point` and `:vector` for the base and vector component, respectively.
+
+!!! note
+
+    The *content* of element of `p` is replaced, not the element itself.
+"""
 @inline function Base.setindex!(x::ProductRepr, val, M::VectorBundle, s::Symbol)
     if s === :point
         return copyto!(submanifold_component(M, x, Val(1)), val)
