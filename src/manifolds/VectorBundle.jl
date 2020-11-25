@@ -588,65 +588,10 @@ Base.@propagate_inbounds Base.getindex(x::FVector, i) = getindex(x.data, i)
 Access the element(s) at index `s` of a point `p` on a [`Cotangentbundle`](@ref) `M` by
 using the symbols `:base` and `:cotangent` for the base and tangent component, respectively.
 """
-Base.@propagate_inbounds function Base.getindex(
-    p::ProductRepr,
-    M::TangentBundle,
-    s::Symbol
-)
-    (s==:base) && return submanifold_component(M,p,1)
-    (s==:ctangent) && return submanifold_component(M,p,2)
-    throw(DomainError(s, "unknown vomponent on $s on $M."))
-end
-
-"""
-    getindex(p::ProductRepr, M::TangentBundle, s::Symbol
-    p[M::TangentBundle, s]
-
-Access the element(s) at index `s` of a point `p` on a [`Tangentbundle`](@ref) `M` by
-using the symbols `:base` and `:tangent` for the base and tangent component, respectively.
-"""
-Base.@propagate_inbounds function Base.getindex(
-    p::ProductRepr,
-    M::TangentBundle,
-    s::Symbol
-)
-    (s==:base) && return submanifold_component(M,p,1)
-    (s==:tangent) && return submanifold_component(M,p,2)
-    throw(DomainError(s, "unknown vomponent on $s on $M."))
-end
-
-"""
-    getindex(p::ProductArray, M::CotangentBundle, s::Symbol
-    p[M::CotangentBundle, s]
-
-Access the element(s) at index `s` of a point `p` on a [`Cotangentbundle`](@ref) `M` by
-using the symbols `:base` and `:cotangent` for the base and tangent component, respectively.
-"""
-Base.@propagate_inbounds function Base.getindex(
-    p::PtRepr,
-    M::TangentBundle,
-    s::Symbol
-)
-    (s==:base) && return p[M,1]
-    (s==:cotangent) && return p[M,2]
-    throw(DomainError(s, "unknown vomponent on $s on $M."))
-end
-
-"""
-    getindex(p::ProductArray, M::CotangentBundle, s::Symbol
-    p[M::CotangentBundle, s]
-
-Access the element(s) at index `s` of a point `p` on a [`Cotangentbundle`](@ref) `M` by
-using the symbols `:base` and `:cotangent` for the base and tangent component, respectively.
-"""
-Base.@propagate_inbounds function Base.getindex(
-    p::ProductArray,
-    M::TangentBundle,
-    s::Symbol
-)
-    (s==:base) && return p[M,1]
-    (s==:tangent) && return p[M,2]
-    throw(DomainError(s, "unknown vomponent on $s on $M."))
+@inline function Base.getindex(p::ProductRepr, M::VectorBundle, s::Symbol)
+    (s === :point) && return submanifold_component(M, p, Val(1))
+    (s === :vector) && return submanifold_component(M, p, Val(2))
+    return throw(DomainError(s, "unknown component $s on $M."))
 end
 
 @doc raw"""
@@ -887,16 +832,14 @@ end
 
 Base.@propagate_inbounds Base.setindex!(x::FVector, val, i) = setindex!(x.data, val, i)
 
-function Base.@propagate_inbounds Base.setindex!(x::ProductArray, M::CotangentBundle, s::Symbol)
-    (s===:base) && return setindex!(x.data, val, 1)
-    (s===:cotangent) && return setindex(x.data, val, 2)
-    throw(DomainError(s, "Can not set index $s of a point $x on $M: Unknown component. Expected `:base` or `:cotangent`"))
-end
-
-function Base.@propagate_inbounds Base.setindex!(x::ProductArray, M::TangentBundle, s::Symbol)
-    (s===:base) && return setindex!(x.data, val, 1)
-    (s===:tangent) && return setindex(x.data, val, 2)
-    throw(DomainError(s, "Can not set index $s of a point $x on $M: Unknown component. Expected `:base` or `:tangent`"))
+@inline function Base.setindex!(x::ProductRepr, val, M::VectorBundle, s::Symbol)
+    if s === :point
+        return copyto!(submanifold_component(M, x, Val(1)), val)
+    elseif s === :vector
+        return copyto!(submanifold_component(M, x, Val(2)), val)
+    else
+        throw(DomainError(s, "unknown component $s on $M."))
+    end
 end
 
 function representation_size(B::VectorBundleFibers{<:TCoTSpaceType})

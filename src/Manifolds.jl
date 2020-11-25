@@ -103,11 +103,12 @@ include("errors.jl")
 
 include("statistics.jl")
 
+include("product_representations.jl")
+
 include("manifolds/VectorBundle.jl")
 
 include("distributions.jl")
 include("projected_distribution.jl")
-include("product_representations.jl")
 
 
 # It's included early to ensure visibility of `Identity`
