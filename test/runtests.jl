@@ -24,7 +24,7 @@ end
     else
         @test length(Test.detect_ambiguities(ManifoldsBase)) <= 17
         @test length(Test.detect_ambiguities(Manifolds)) == 0
-        @test length(our_base_ambiguities()) <= 21
+        @test length(our_base_ambiguities()) <= 24
     end
 end
 
