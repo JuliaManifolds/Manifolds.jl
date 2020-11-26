@@ -581,6 +581,19 @@ end
 
 Base.@propagate_inbounds Base.getindex(x::FVector, i) = getindex(x.data, i)
 
+"""
+    getindex(p::ProductRepr, M::VectorBundle, s::Symbol)
+    p[M::VectorBundle, s]
+
+Access the element(s) at index `s` of a point `p` on a [`VectorBundle`](@ref) `M` by
+using the symbols `:point` and `:vector` for the base and vector component, respectively.
+"""
+@inline function Base.getindex(p::ProductRepr, M::VectorBundle, s::Symbol)
+    (s === :point) && return submanifold_component(M, p, Val(1))
+    (s === :vector) && return submanifold_component(M, p, Val(2))
+    return throw(DomainError(s, "unknown component $s on $M."))
+end
+
 @doc raw"""
     injectivity_radius(M::TangentSpaceAtPoint)
 
@@ -702,7 +715,7 @@ function log!(B::VectorBundle, X, p, q)
     copyto!(VXF, VXF - Vx)
     return X
 end
-function log!(M::TangentSpaceAtPoint, X, p, q)
+function log!(::TangentSpaceAtPoint, X, p, q)
     copyto!(X, q - p)
     return X
 end
@@ -818,6 +831,27 @@ function project!(B::VectorBundleFibers, Y, p, X)
 end
 
 Base.@propagate_inbounds Base.setindex!(x::FVector, val, i) = setindex!(x.data, val, i)
+
+"""
+    setindex!(p::ProductRepr, val, M::VectorBundle, s::Symbol)
+    p[M::VectorBundle, s] = val
+
+Set the element(s) at index `s` of a point `p` on a [`VectorBundle`](@ref) `M` to `val` by
+using the symbols `:point` and `:vector` for the base and vector component, respectively.
+
+!!! note
+
+    The *content* of element of `p` is replaced, not the element itself.
+"""
+@inline function Base.setindex!(x::ProductRepr, val, M::VectorBundle, s::Symbol)
+    if s === :point
+        return copyto!(submanifold_component(M, x, Val(1)), val)
+    elseif s === :vector
+        return copyto!(submanifold_component(M, x, Val(2)), val)
+    else
+        throw(DomainError(s, "unknown component $s on $M."))
+    end
+end
 
 function representation_size(B::VectorBundleFibers{<:TCoTSpaceType})
     return representation_size(B.manifold)

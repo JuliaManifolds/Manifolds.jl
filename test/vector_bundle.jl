@@ -53,6 +53,19 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test submanifold_components(PM, fv2) == ([1.0, 0.0, 0.0], [1.0 2.0])
     end
 
+    @testset "Nice access to vector bundle components" begin
+        TB = TangentBundle(M)
+        p = ProductRepr([1.0, 0.0, 0.0], [0.0, 2.0, 4.0])
+        @test p[TB, :point] === p.parts[1]
+        @test p[TB, :vector] === p.parts[2]
+        p[TB, :vector] = [0.0, 3.0, 1.0]
+        @test p.parts[2] == [0.0, 3.0, 1.0]
+        p[TB, :point] = [0.0, 1.0, 0.0]
+        @test p.parts[1] == [0.0, 1.0, 0.0]
+        @test_throws DomainError p[TB, :error]
+        @test_throws DomainError p[TB, :error] = [1, 2, 3]
+    end
+
     types = [Vector{Float64}]
     TEST_FLOAT32 && push!(types, Vector{Float32})
     TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
