@@ -24,6 +24,7 @@ import ManifoldsBase:
     get_coordinates,
     get_coordinates!,
     get_embedding,
+    get_iterator,
     get_vector,
     get_vector!,
     get_vectors,
