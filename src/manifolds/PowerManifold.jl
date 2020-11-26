@@ -57,7 +57,6 @@ end
 const PowerManifoldMultidimensional =
     AbstractPowerManifold{𝔽,<:Manifold{𝔽},ArrayPowerRepresentation} where {𝔽}
 
-
 Base.:^(M::Manifold, n) = PowerManifold(M, n...)
 
 function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x)
@@ -186,12 +185,6 @@ function Base.show(
     M::PowerManifold{𝔽,TM,TSize,ArrayPowerRepresentation},
 ) where {𝔽,TM,TSize}
     return print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
-end
-function Base.show(io::IO, M::PowerManifold{𝔽,TM,TSize,TPR}) where {𝔽,TM,TSize,TPR}
-    return print(
-        io,
-        "PowerManifold($(M.manifold), $(TPR()), $(join(TSize.parameters, ", ")))",
-    )
 end
 
 Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)
