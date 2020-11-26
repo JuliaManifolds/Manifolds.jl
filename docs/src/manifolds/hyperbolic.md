@@ -1,9 +1,14 @@
 # Hyperbolic space
 
-The hyperbolic space can be represented in three different ways. In the following the common functions are collected.
-Then, specific methods for each of the representations, especially conversions between those.
+The hyperbolic space can be represented in three different models.
 
-A function in this general section uses vectors interpreted as if in the [hyperboloid model](@ref),
+* [Hyperboloid](@ref hyperboloid_model) which is the default model, i.e. is used when using arbitrary array types for points and tangent vectors
+* [Poincaré ball](@ref poincare_ball) with separate types for points and tangent vectors and a [visualization](@ref poincare_ball_plot) for the two-dimensional case
+* [Poincaré half space](@ref poincare_halfspace) with separate types for points and tangent vectors and a [visualization](@ref poincare_half_plane_plot) for the two-dimensional cae.
+
+In the following the common functions are collected.
+
+A function in this general section uses vectors interpreted as if in the [hyperboloid model](@ref hyperboloid_model),
 and other representations usually just convert to this representation to use these general functions.
 
 ```@autodocs
@@ -12,15 +17,27 @@ Pages = ["manifolds/Hyperbolic.jl"]
 Order = [:type, :function]
 ```
 
-## hyperboloid model
+## [hyperboloid model](@id hyperboloid_model)
 
 ```@autodocs
 Modules = [Manifolds]
+Private = false
 Pages = ["manifolds/HyperbolicHyperboloid.jl"]
 Order = [:type, :function]
 ```
 
-## Poincaré ball model
+### Internal functions
+
+The following functions are available for internal use to construct points in the hyperboloid model
+
+```@autodocs
+Modules = [Manifolds]
+Public = false
+Pages = ["manifolds/HyperbolicHyperboloid.jl"]
+Order = [:type, :function]
+```
+
+## [Poincaré ball model](@id poincare_ball)
 
 ```@autodocs
 Modules = [Manifolds]
@@ -28,7 +45,7 @@ Pages = ["manifolds/HyperbolicPoincareBall.jl"]
 Order = [:type, :function]
 ```
 
-### Plotting
+### [Visualization of the Poincaré ball](@id poincare_ball_plot)
 
 For the case of [`Hyperbolic`](@ref)`(2)` there is a plotting available based on a [PlottingRecipe](https://docs.juliaplots.org/latest/recipes/) you can easily plot points, connecting geodesics as well as tangent vectors.
 
@@ -68,7 +85,7 @@ Just to illustrate, for the first point the tangent vector is pointing along the
 plot!(scene, M, [pts[1], pts2[1]], geodesic_interpolation=100)
 ```
 
-## Poincaré half space model
+## [Poincaré half space model](@id poincare_halfspace)
 
 ```@autodocs
 Modules = [Manifolds]
@@ -76,7 +93,7 @@ Pages = ["manifolds/HyperbolicPoincareHalfspace.jl"]
 Order = [:type, :function]
 ```
 
-### Plotting
+### [Visualization on the Poincaré half plane](@id poincare_half_plane_plot)
 
 For the case of [`Hyperbolic`](@ref)`(2)` there is a plotting available based on a [PlottingRecipe](https://docs.juliaplots.org/latest/recipes/) you can easily plot points, connecting geodesics as well as tangent vectors.
 
