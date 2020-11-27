@@ -1,6 +1,7 @@
 module Manifolds
 
 import ManifoldsBase:
+    _access_nested,
     _read,
     _write,
     allocate,
@@ -23,6 +24,7 @@ import ManifoldsBase:
     # TODO: uncomment the import if `flat!` goes to ManifoldsBase
     # flat!__intransparent,
     get_basis,
+    get_component,
     get_coordinates,
     get_coordinates!,
     get_embedding,
@@ -53,6 +55,7 @@ import ManifoldsBase:
     representation_size,
     retract,
     retract!,
+    set_component!,
     size_to_tuple,
     vector_transport_direction,
     vector_transport_direction!,
@@ -87,6 +90,7 @@ using ManifoldsBase:
     DefaultManifold,
     DefaultOrDiagonalizingBasis,
     DiagonalizingBasisData,
+    InversePowerRetraction,
     PowerManifold,
     PowerManifoldNested,
     PowerRetraction,
