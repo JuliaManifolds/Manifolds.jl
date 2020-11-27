@@ -75,6 +75,8 @@ using ManifoldsBase:
     AbstractPowerManifold,
     AbstractPowerRepresentation,
     AbstractVectorTransportMethod,
+    ComponentManifoldError,
+    CompositeManifoldError,
     DefaultManifold,
     DefaultOrDiagonalizingBasis,
     DiagonalizingBasisData,
@@ -104,7 +106,6 @@ include("utils.jl")
 include("differentiation.jl")
 include("riemannian_diff.jl")
 include("SizedAbstractArray.jl")
-include("errors.jl")
 
 include("statistics.jl")
 
