@@ -84,13 +84,6 @@ For example `select_from_tuple(("a", "b", "c"), Val((3, 1, 1)))` returns
     return Expr(:tuple, [Expr(:ref, :t, k) for k in P]...)
 end
 
-"""
-    size_to_tuple(::Type{S}) where S<:Tuple
-
-Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
-"""
-Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
-
 @doc raw"""
     vec2skew!(X, v, k)
 

@@ -1,6 +1,8 @@
 module Manifolds
 
 import ManifoldsBase:
+    _read,
+    _write,
     allocate,
     allocate_result,
     allocate_result_type,
@@ -34,8 +36,10 @@ import ManifoldsBase:
     inner__intransparent,
     is_manifold_point,
     is_tangent_vector,
+    isempty,
     inverse_retract,
     inverse_retract!,
+    length,
     log!,
     manifold_dimension,
     mid_point,
@@ -44,9 +48,11 @@ import ManifoldsBase:
     number_of_coordinates,
     project,
     project!,
+    rep_size_to_colons,
     representation_size,
     retract,
     retract!,
+    size_to_tuple,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,
