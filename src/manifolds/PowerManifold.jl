@@ -124,18 +124,34 @@ tangent space of the power manifold.
 struct PowerMetric <: Metric end
 
 """
-    PowerRetraction(retraction::AbstractRetractionMethod)
+    PowerRetraction{TR<:AbstractRetractionMethod} <: AbstractRetractionMethod
 
-Power retraction based on `retraction`. Works on [`AbstractPowerManifold`](@ref)s.
+The `PowerRetraction` avoids ambiguities between dispatching on the [`AbstractPowerManifold`](@ref)
+and dispatching on the [`AbstractRetractionMethod`](@ref) and encapsulates this.
+This container should only be used in rare cases outside of this package. Usually a
+subtype of the [`AbstractPowerManifold`](@ref) should define a way how to treat
+its [`AbstractRetractionMethod`](@ref)s.
+
+# Constructor
+
+    PowerRetraction(retraction::AbstractRetractionMethod)
 """
 struct PowerRetraction{TR<:AbstractRetractionMethod} <: AbstractRetractionMethod
     retraction::TR
 end
 
 """
-    InversePowerRetraction(inverse_retractions::AbstractInverseRetractionMethod...)
+    InversePowerRetraction{TR<:AbstractInverseRetractionMethod} <: AbstractInverseRetractionMethod
 
-Power inverse retraction of `inverse_retractions`. Works on [`AbstractPowerManifold`](@ref)s.
+The `InversePowerRetraction` avoids ambiguities between dispatching on the [`AbstractPowerManifold`](@ref)
+and dispatching on the [`AbstractInverseRetractionMethod`](@ref) and encapsulates this.
+This container should only be used in rare cases outside of this package. Usually a
+subtype of the [`AbstractPowerManifold`](@ref) should define a way how to treat
+its [`AbstractRetractionMethod`](@ref)s.
+
+# Constructor
+
+    InversePowerRetraction(inverse_retractions::AbstractInverseRetractionMethod...)
 """
 struct InversePowerRetraction{TR<:AbstractInverseRetractionMethod} <:
        AbstractInverseRetractionMethod
@@ -173,9 +189,18 @@ struct PowerFVectorDistribution{
 end
 
 """
-    PowerVectorTransport(method::AbstractVectorTransportMethod)
+    PowerVectorTransport{TR<:AbstractVectorTransportMethod} <:
+       AbstractVectorTransportMethod
 
-Power vector transport method based on `method`. Works on [`AbstractPowerManifold`](@ref)s.
+The `PowerVectorTransport` avoids ambiguities between dispatching on the [`AbstractPowerManifold`](@ref)
+and dispatching on the [`AbstractVectorTransportMethod`](@ref) and encapsulates this.
+This container should only be used in rare cases outside of this package. Usually a
+subtype of the [`AbstractPowerManifold`](@ref) should define a way how to treat
+its [`AbstractVectorTransportMethod`](@ref)s.
+
+# Constructor
+
+    PowerVectorTransport(method::AbstractVectorTransportMethod)
 """
 struct PowerVectorTransport{TR<:AbstractVectorTransportMethod} <:
        AbstractVectorTransportMethod
@@ -588,30 +613,6 @@ eval(
 )
 
 @doc raw"""
-    inverse_retract(M::AbstractPowerManifold, p, q, m::InversePowerRetraction)
-
-Compute the inverse retraction from `p` with respect to `q` on an [`AbstractPowerManifold`](@ref) `M`
-using an [`InversePowerRetraction`](@ref), which by default encapsulates a inverse retraction
-of the base manifold. Then this method is performed elementwise, so the encapsulated inverse
-retraction method has to be one that is available on the base [`Manifold`](@ref).
-"""
-inverse_retract(::AbstractPowerManifold, ::Any...)
-
-function inverse_retract!(M::AbstractPowerManifold, X, p, q, method::InversePowerRetraction)
-    rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        inverse_retract!(
-            M.manifold,
-            _write(M, rep_size, X, i),
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, q, i),
-            method.inverse_retraction,
-        )
-    end
-    return X
-end
-
-@doc raw"""
     inner(M::AbstractPowerManifold, p, X, Y)
 
 Compute the inner product of `X` and `Y` from the tangent space at `p` on an
@@ -662,6 +663,47 @@ function Base.isapprox(M::AbstractPowerManifold, p, X, Y; kwargs...)
         )
     end
     return result
+end
+
+@doc raw"""
+    inverse_retract(M::AbstractPowerManifold, p, q, m::InversePowerRetraction)
+
+Compute the inverse retraction from `p` with respect to `q` on an [`AbstractPowerManifold`](@ref) `M`
+using an [`InversePowerRetraction`](@ref), which by default encapsulates a inverse retraction
+of the base manifold. Then this method is performed elementwise, so the encapsulated inverse
+retraction method has to be one that is available on the base [`Manifold`](@ref).
+"""
+inverse_retract(::AbstractPowerManifold, ::Any...)
+
+function inverse_retract!(M::AbstractPowerManifold, X, p, q, method::InversePowerRetraction)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        inverse_retract!(
+            M.manifold,
+            _write(M, rep_size, X, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, q, i),
+            method.inverse_retraction,
+        )
+    end
+    return X
+end
+# log and power have to be explicitly stated to avoid an ambiguity in the third case with AbstractPower
+@invoke_maker 5 AbstractInverseRetractionMethod inverse_retract!(
+    M::AbstractPowerManifold,
+    X,
+    q,
+    p,
+    m::LogarithmicInverseRetraction,
+)
+function inverse_retract!(
+    M::AbstractPowerManifold,
+    X,
+    q,
+    p,
+    m::AbstractInverseRetractionMethod,
+)
+    return inverse_retract!(M, X, q, p, InversePowerRetraction(m))
 end
 
 @doc raw"""
@@ -737,7 +779,7 @@ end
 
 return the power of `M`,
 """
-function power_dimensions(M::PowerManifold{𝔽,<:Manifold,TSize}) where {𝔽,TSize}
+function power_dimensions(::PowerManifold{𝔽,<:Manifold,TSize}) where {𝔽,TSize}
     return size_to_tuple(TSize)
 end
 
@@ -876,6 +918,18 @@ function retract!(M::AbstractPowerManifold, q, p, X, method::PowerRetraction)
     end
     return q
 end
+# exp and power have to be explicitly stated, since the third case otherwise introduces and ambiguity.
+@invoke_maker 5 AbstractRetractionMethod retract!(
+    M::AbstractPowerManifold,
+    q,
+    p,
+    X,
+    m::ExponentialRetraction,
+)
+function retract!(M::AbstractPowerManifold, q, p, X, m::AbstractRetractionMethod)
+    return retract!(M, q, p, X, PowerRetraction(m))
+end
+
 
 """
     set_component!(M::AbstractPowerManifold, q, p, idx...)
@@ -973,6 +1027,37 @@ function vector_transport_direction!(M::AbstractPowerManifold, Y, p, X, d)
         PowerVectorTransport(ParallelTransport()),
     )
 end
+function vector_transport_direction!(
+    M::AbstractPowerManifold,
+    Y,
+    p,
+    X,
+    d,
+    m::AbstractVectorTransportMethod,
+)
+    return vector_transport_direction!(M, Y, p, X, d, PowerVectorTransport(m))
+end
+function vector_transport_direction!(
+    M::AbstractPowerManifold,
+    Y,
+    p,
+    X,
+    d,
+    m::PowerVectorTransport,
+)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        vector_transport_direction!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, d, i),
+            m.method,
+        )
+    end
+    return Y
+end
 
 @doc raw"""
     vector_transport_to(M::AbstractPowerManifold, p, X, q, method::PowerVectorTransport)
@@ -1003,6 +1088,31 @@ function vector_transport_to!(M::AbstractPowerManifold, Y, p, X, q, m::PowerVect
         )
     end
     return Y
+end
+
+function vector_transport_to!(
+    M::AbstractPowerManifold,
+    Y,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod,
+)
+    return vector_transport_to!(M, Y, p, X, q, PowerVectorTransport(m))
+end
+for VT in ManifoldsBase.VECTOR_TRANSPORT_DISAMBIGUATION
+    eval(
+        quote
+            @invoke_maker 6 AbstractVectorTransportMethod vector_transport_to!(
+                M::AbstractPowerManifold,
+                Y,
+                p,
+                X,
+                q,
+                B::$VT,
+            )
+        end,
+    )
 end
 
 """

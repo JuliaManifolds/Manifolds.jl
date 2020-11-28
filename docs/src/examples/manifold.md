@@ -107,7 +107,7 @@ For this one can use the easy interface [`is_manifold_point`](@ref is_manifold_p
 This is what we want to implement.
 We have to return the error if `p` is not on `M` and `nothing` otherwise.
 
-We have to check two things: that a point `p` is a vector with `N+1` entries and it's norm is the desired radius.
+We have to check two things: that a point `p` is a vector with `N+1` entries and its norm is the desired radius.
 To spare a few lines, we can use [short-circuit evaluation](https://docs.julialang.org/en/v1/manual/control-flow/#Short-Circuit-Evaluation-1) instead of `if` statements.
 If something has to only hold up to precision, we can pass that down, too using the `kwargs...`.
 

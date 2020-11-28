@@ -460,6 +460,11 @@ end
             DiagonalizingOrthonormalBasis(ProductRepr([0.0, 1.0, 0.0], [1.0, 0.0])),
         )
 
+        @test (@inferred convert(
+            ProductRepr{Tuple{T,Float64,T} where T},
+            ProductRepr(9, 10, 11),
+        )) == ProductRepr(9, 10.0, 11)
+
         test_manifold(
             Mse,
             pts,

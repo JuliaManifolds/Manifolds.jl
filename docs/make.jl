@@ -1,4 +1,4 @@
-using Manifolds, ManifoldsBase, Documenter
+using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter
 # required for loading the Manifolds.ManifoldTests module
 using Test, ForwardDiff, ReverseDiff
 

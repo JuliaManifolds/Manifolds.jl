@@ -314,8 +314,8 @@ end
 
 Given the [`Hyperbolic`](@ref)`(n)` manifold using the hyperboloid model, a point from the
 $q\in ℝ^n$ can be set onto the manifold by computing its last component such that for the
-resulting `p` we have that its [`minkowski_metric`](@ref) is $⟨p,p⟩_{\mathrm{M}} = - 1$,
-i.e. $p_{n+1} = \sqrt{\lVert q \rVert^2-^}$
+resulting `p` we have that its [`minkowski_metric`](@ref) is ``⟨p,p⟩_{\mathrm{M}} = - 1``,
+i.e. ``p_{n+1} = \sqrt{\lVert q \rVert^2 - 1}``
 """
 _hyperbolize(M::Hyperbolic, q) = vcat(q, sqrt(norm(q)^2 + 1))
 
