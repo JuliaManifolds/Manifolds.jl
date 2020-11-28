@@ -5,3 +5,5 @@ Modules = [Manifolds]
 Pages = ["manifolds/EssentialManifold.jl"]
 Order = [:type, :function]
 ```
+
+## Literature

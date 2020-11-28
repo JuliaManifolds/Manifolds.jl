@@ -124,7 +124,6 @@ include("manifolds/CenteredMatrices.jl")
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
 include("manifolds/Elliptope.jl")
-#include("manifolds/EssentialManifold.jl")
 include("manifolds/FixedRankMatrices.jl")
 include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
@@ -152,6 +151,7 @@ include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 include("manifolds/Torus.jl")
 include("manifolds/Multinomial.jl")
 include("manifolds/Oblique.jl")
+include("manifolds/EssentialManifold.jl")
 
 include("groups/metric.jl")
 include("groups/group_action.jl")
@@ -234,7 +234,7 @@ export Euclidean,
     CholeskySpace,
     Circle,
     Elliptope,
-    #EssentialManifold,
+    EssentialManifold,
     FixedRankMatrices,
     GeneralizedGrassmann,
     GeneralizedStiefel,
