@@ -18,11 +18,6 @@ the quotient space
 
 Generate the manifold 
 """
-#=
-struct EssentialManifold <: Manifold{ℝ} 
-    is_signed::Bool
-    rotation::Rotations
-end =#
 
 struct EssentialManifold <:
     AbstractPowerManifold{ℝ, Rotations{3}, NestedPowerRepresentation} 
@@ -117,34 +112,31 @@ whose geodesic starting from `p` reaches `q` after time 1.
 function log!(M::EssentialManifold, X, p, q)
     # compute the closest representative of q
     t = 0
-    fMin = Inf 
-    q2_candidate = zeros(size(q))
-    q2 = zeros(size(q))
+    f_min = Inf 
+    q2 = deepcopy(q)
 
     if !M.is_signed
         for k = 1:4 
             #flip q
             if k == 2
-                q[1][2:3, :] = -q[1][2:3, :]
-                q[2][[1 3],:] = -q[2][[1 3],:]
+                q2[1][2:3, :] = -q[1][2:3, :]
+                q2[2][[1 3],:] = -q[2][[1 3],:]
             elseif k == 3
-                q[2][1:2, :] = -q[2][1:2, :]
+                q2[2][1:2, :] = -q[2][1:2, :]
             elseif k == 4
-                q[1][2:3, :] = -q[1][2:3, :]
-                q[2][2:3, :] = -q[2][2:3, :]
+                q2[1][2:3, :] = -q[1][2:3, :]
+                q2[2][2:3, :] = -q[2][2:3, :]
             end 
-            t_temp, f_temp, q2_candidate = dist_min_angle_pair(p, q)
-            if f_temp < fMin
-                fMin = f_temp
+            t_temp, f_temp = dist_min_angle_pair(p, q2)
+            if f_temp < f_min
+                f_min = f_temp
                 t = t_temp
-                q2 = q2_candidate
             end
         end
     else
-        t, _, q2 = dist_min_angle_pair(p, q) 
+        t, _ = dist_min_angle_pair(p, q2) 
     end
         
-    #t = tMin[1] 
     Rz=[cos(t) -sin(t) 0; sin(t) cos(t) 0; 0 0 1]
     representative_q = zeros(size(q2))
     representative_q[1] = Rz * q2[1]
@@ -160,20 +152,19 @@ function dist_min_angle_pair(p, q)
     q211 = q[1]*p[1]'
     q212 = q[2]*p[2]'
 
-    #compute values from Proposition ...
-    t_break1, c1, m1, p1 = dist_min_angle_pair_discontinuity_distance(q211)
-    t_break2, c2, m2, p2 = dist_min_angle_pair_discontinuity_distance(q212)
-
+    #compute values from Proposition ... 
+    t_break1, c1, m1, Φ1 = dist_min_angle_pair_discontinuity_distance(q211)
+    t_break2, c2, m2, Φ2 = dist_min_angle_pair_discontinuity_distance(q212)
+    
     #check if cost is constant
-    tolMZero = 1e-15
+    tolMZero = 1e-15 
     if abs(m1) < tolMZero && abs(m2) < tolMZero
-        t = 0
-        f = 2*pi^2
-        tMinAll = 0
+        t_min = 0
+        f_min = 2*pi^2
     else
         if abs(mod(t_break1 - t_break2 + pi, 2 * pi) - pi)
-            t = t_break1 + pi
-            f = 0
+            t_min = t_break1 + pi
+            f_min = 0
         else
             t_search1 = t_break1
             t_search2 = t_break2
@@ -186,10 +177,10 @@ function dist_min_angle_pair(p, q)
             df2_break2 = dist_min_angle_pair_compute_df_break(t_break2, q212)
 
             #compute derivative of each term at other's discontinuity
-            θ1_break2 = acos(clamp((m1 * sin(t_break2 + p1) + c1 - 1) / 2 , -1.0, 1.0))
-            df1_break2= -θ1_break2 * (m1 * cos(t_break2 + p1)) / (2 * sin(θ1_break2))
-            θ2_break1 = acos(clamp((m2 * sin(t_break1 + p2) + c2 - 1) / 2 , -1.0, 1.0))
-            df2_break1= -θ2_break1 * (m2 * cos(t_break1 + p2)) / (2 * sin(θ2_break1))
+            θ1_break2 = acos(clamp((m1 * sin(t_break2 + Φ1) + c1 - 1) / 2 , -1.0, 1.0))
+            df1_break2= -θ1_break2 * (m1 * cos(t_break2 + Φ1)) / (2 * sin(θ1_break2))
+            θ2_break1 = acos(clamp((m2 * sin(t_break1 + Φ2) + c2 - 1) / 2 , -1.0, 1.0))
+            df2_break1= -θ2_break1 * (m2 * cos(t_break1 + Φ2)) / (2 * sin(θ2_break1))
 
             #compute left and right derivatives of sum of the two terms
             df_break1n = df1_break1 + df2_break1
@@ -202,10 +193,23 @@ function dist_min_angle_pair(p, q)
                 #parabolic prediction of min
                 t_min0 = t_search1 - df_break1p * (t_search2 - t_search1) / (df_break2n - df_break1p)
                 #use Newton's search to find t_min
-                t_min, f_min = dist_min_angle_pair_df_newton(m1, p1, c1, m2, p2, c2, t_min0, t_search2, t_search1)
+                t_min, f_min = dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min0, t_search1, t_search2)
             end
-
-    return t, f, q2_candidate
+            t_search1 = t_search1 + 2 * pi
+            if sign(df_break2p) != sign(df_break1n)
+                #parabolic prediction of min
+                t_min0 = t_search2 - df_break2p * (t_search1 - t_search2) / (df_break1n - df_break2p)
+                #use Newton's search to find t_min
+                t_min2, f_min2 = dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min0, t_search2, t_search1)
+                #choose t with lower function values
+                if f_min2 < f_min
+                    t_min = t_min2
+                    f_min = f_min2
+                end
+            end
+        end    
+    end
+    return t_min, f_min
 end
 
 function dist_min_angle_pair_discontinuity_distance(q)
@@ -214,10 +218,10 @@ function dist_min_angle_pair_discontinuity_distance(q)
     c3 = q[3, 3]
 
     m = norm([c1 c2])
-    p = atan(c1, c2) 
+    Φ = atan(c1, c2) 
 
-    t_break = -0.5 * pi - p
-    return t_break, c3, m, p
+    t_break = -0.5 * pi - Φ
+    return t_break, c3, m, Φ
 end
 
 function dist_min_angle_pair_compute_df_break(t_break, q) #compute derivatives of each term at discontinuity points
@@ -230,7 +234,39 @@ function dist_min_angle_pair_compute_df_break(t_break, q) #compute derivatives o
     return df_break
 end
 
-function dist_min_angle_pair_df_newton(m1, p1, c1, m2, p2, c2, t_min0, t_search2, t_search1)
+function dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t_high)
+    tol_dist = 1e-8
+    for i = 1:100
+        #compute auxiliary values
+        mc1 = m1 * cos(t_min + Φ1)
+        mc2 = m2 * cos(t_min + Φ2)
+        s1 = 2 * sin(θ1)
+        s2 = 2 * sin(θ2)
+        eztuSq1 = (mc1 / s1)^2
+        eztuSq2 = (mc2 / s2)^2
+        
+        #compute θ_i
+        θ1 = acos(clamp(((m1 * sin(t_min + Φ1) + c1 - 1) / 2), -1, 1))
+        θ2 = acos(clamp(((m2 * sin(t_min + Φ2) + c2 - 1) / 2), -1, 1))
+
+        #compute the first derivatives
+        d1 = (-θ1 * mc1) / s1 
+        d2 = (-θ2 * mc2) / s2
+        d = d1 + d2
+        
+        #compute the second derivatives
+        dd1 = eztuSq1 + θ1 / 2 * cot(θ1 / 2) * (1 - eztuSq1)
+        dd2 = eztuSq2 + θ2 / 2 * cot(θ2 / 2) * (1 - eztuSq2)
+        dd = dd1 + dd2
+
+        #compute the new t_min
+        t_old = t_min;
+        t_min = clamp(t_old - d / dd, t_low + tol_dist, t_high - tol-dist)
+        if abs(t_min - t_old) < tol_dist
+            break
+        end
+    end
+    f_min = θ1^2 + θ2^2
     return t_min, f_min
 end
 
@@ -293,9 +329,9 @@ vector_transport_to(::EssentialManifold, ::Any, ::Any, ::Any, ::ParallelTranspor
 
 function vector_transport_to!(::EssentialManifold, Y, p, X, q, ::ParallelTransport)
     # group operation in the ambient group
-    pq = (q.').*p
+    pq = (q').*p
     # left translation
-    copyto!(Y, pq.*X.*pq.')
+    copyto!(Y, pq.*X.*pq')
     return Y
 end
 
