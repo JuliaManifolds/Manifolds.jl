@@ -257,7 +257,7 @@ where $pq$ and $\sqrt{p}$ is meant elementwise.
 """
 log(::ProbabilitySimplex, ::Any...)
 
-function log!(M::ProbabilitySimplex, X, p, q)
+function log!(::ProbabilitySimplex, X, p, q)
     if p ≈ q
         fill!(X, 0)
     else
