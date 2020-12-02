@@ -38,10 +38,8 @@ import ManifoldsBase:
     inner__intransparent,
     is_manifold_point,
     is_tangent_vector,
-    isempty,
     inverse_retract,
     inverse_retract!,
-    length,
     log!,
     manifold_dimension,
     mid_point,
@@ -51,12 +49,10 @@ import ManifoldsBase:
     power_dimensions,
     project,
     project!,
-    rep_size_to_colons,
     representation_size,
     retract,
     retract!,
     set_component!,
-    size_to_tuple,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,
@@ -105,7 +101,9 @@ using ManifoldsBase:
     combine_allocation_promotion_functions,
     is_decorator_transparent,
     is_default_decorator,
-    manifold_function_not_implemented_message
+    manifold_function_not_implemented_message,
+    rep_size_to_colons,
+    size_to_tuple
 using Markdown: @doc_str
 using Random
 using Requires
