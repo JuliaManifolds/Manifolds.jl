@@ -35,7 +35,6 @@ include("utils.jl")
 
 include("groups/group_utils.jl")
 include("sized_abstract_array.jl")
-include("errors.jl")
 include("notation.jl")
 # starting with tests of simple manifolds
 include("centered_matrices.jl")
