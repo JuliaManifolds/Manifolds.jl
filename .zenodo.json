@@ -31,7 +31,7 @@
             "orcid": "0000-0001-8342-7218"
         }
     ],
-    "description": "Manopifolds.jl is a library of Riemannian manifolds in Julia",
+    "description": "Manifolds.jl is a library of Riemannian manifolds in Julia",
     "keywords": [
         "Riemannian manifolds",
         "manifolds",
