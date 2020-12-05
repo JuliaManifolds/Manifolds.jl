@@ -129,7 +129,7 @@ end
     check_manifold_point(M::ProductManifold, p; kwargs...)
 
 Check whether `p` is a valid point on the [`ProductManifold`](@ref) `M`.
-If `p` is not a point on `M` a [`CompositeManifoldError`](@ref) consisting of all error messages of the
+If `p` is not a point on `M` a `CompositeManifoldError` consisting of all error messages of the
 components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
@@ -154,7 +154,7 @@ end
 Check whether `X` is a tangent vector to `p` on the [`ProductManifold`](@ref)
 `M`, i.e. after [`check_manifold_point`](@ref)`(M, p)`, and all projections to
 base manifolds must be respective tangent vectors.
-If `X` is not a tangent vector to `p` on `M` a [`CompositeManifoldError`](@ref) consisting of all error
+If `X` is not a tangent vector to `p` on `M` a `CompositeManifoldError` consisting of all error
 messages of the components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
