@@ -67,8 +67,8 @@ end
 #
 @recipe function f(
     M::Hyperbolic{2},
-    pts::Union{AbstractVector{P},Nothing}=nothing,
-    vecs::Union{AbstractVector{T}}=nothing;
+    pts::Union{AbstractVector{P},Nothing} = nothing,
+    vecs::Union{AbstractVector{T},Nothing} = nothing;
     geodesic_interpolation = -1,
 ) where {P<:PoincareHalfSpacePoint,T<:PoincareHalfSpaceTVector}
     aspect_ratio --> :equal
@@ -193,8 +193,8 @@ end
 #
 @recipe function f(
     M::Sphere{2,ℝ},
-    pts::Union{AbstractVector{P},Nothing}=nothing,
-    vecs::Union{AbstractVector{T},Nothing}=nothing;
+    pts::Union{AbstractVector{P},Nothing} = nothing,
+    vecs::Union{AbstractVector{T},Nothing} = nothing;
     geodesic_interpolation = -1,
     wiresphere = true,
     wires = WIREFRAME_DEFAULT,
