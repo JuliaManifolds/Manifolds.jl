@@ -27,29 +27,31 @@ Order = [:function]
 ## Visualization on `Sphere{2,ℝ}`
 You can visualize both points and tangent vectors on the sphere.
 
+!!! note
+    There seems to be no unified way to draw spheres in the backends of [Plots.jl](http://docs.juliaplots.org/latest/).
+    This recipe currently uses the `seriestype` `wireframe` and `surface`, which does not yet work with the default backend [`GR`](https://github.com/jheinen/GR.jl).
+
+In general you can plot the surface of the hyperboloid either as wireframe (`wireframe=true`) additionally specifying `wires` (or `wires_lat` and `wires_lon`) for more precision and a `wireframe_color`. The same holds for the plot as a `surface` (which is `false` by default) and its `surface_resolution` (or `surface_resolution_lat` or `surface_resolution_lon`) and a `surface_color`.
+
 ```@example sphereplot1
-using Manifolds Plots
+using Manifolds, Plots
 M = Sphere(2)
-pts = [ [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0] ]
-scene = plot(M,pts)
+pts = [ [-1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [-1.0, 0.0, 0.0] ]
+scene = plot(M,pts, wireframe=false)
 ```
 
-which scatters our points. We can also draw connecting geodesics, which here is a geodesic triangle. Here we discretise each geodesic with 100 points along the geodesic.
+which scatters our points. We can also draw connecting geodesics, which here is a geodesic triangle. Here we discretize each geodesic with 100 points along the geodesic.
+The default value is `geodesic_interpolation=-1` which switches to scatter plot the data.
 
 ```@example sphereplot1
-plot!(scene, M, pts; geodesic_interpoaltion=100)
+plot!(scene, M, pts; geodesic_interpolation=100)
 ```
 
 And we can also add tangent vectors, for example tangents pointing to the middle
 
 ```@example sphereplot1
-pts2 =  [ [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0] ]
-p3 = 1/sqrt(3) .* [1.0, 1.0, 1.0]
+pts2 =  [ [-1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0] ]
+p3 = 1/sqrt(3) .* [-1.0, 1.0, 1.0]
 vecs = log.(Ref(M), pts2, Ref(p3))
-plot!(scene, M, pts2, vecs)
+plot!(scene, M, pts2, vecs; wireframe = false)
 ```
-
-!!! note
-    The recipes are only loaded if [Plots.jl](http://docs.juliaplots.org/latest/) or
-    [RecipesBase.jl](http://juliaplots.org/RecipesBase.jl/stable/) is loaded.
-    Furthermore, the `surface` does not yet work in the `GR` backend.
