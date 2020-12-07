@@ -181,7 +181,7 @@ end
                 seriestype --> :scatter
                 x = [p[1] for p in pts]
                 y = [p[2] for p in pts]
-                z =  [p[3] for p in pts]
+                z = [p[3] for p in pts]
             else
                 lpts = empty(pts)
                 for i in 1:(length(pts) - 1)
