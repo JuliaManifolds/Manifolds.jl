@@ -1,0 +1,43 @@
+{
+        "contributors": [
+        {
+            "name": "Mathieu Besançon",
+            "type": "Other",
+            "orcid": "0000-0002-6284-3033"
+        },
+        {
+            "name": "Dornig, Renée",
+            "type": "Project Member"
+        },
+        {
+            "name": "Weiß, Manuel",
+            "type": "Project Member"
+        }
+    ],
+    "creators": [
+        {
+            "affiliation": "University of California, San Francisco",
+            "name": "Axen, Seth",
+            "orcid": "0000-0003-3933-8247"
+        },
+        {
+            "affiliation": "AGH University of Science and Technology",
+            "name": "Baran, Mateusz",
+            "orcid": "0000-0001-9667-5579"
+        },
+        {
+            "affiliation": "Technische Universität Chemnitz",
+            "name": "Bergmann, Ronny",
+            "orcid": "0000-0001-8342-7218"
+        }
+    ],
+    "description": "Manifolds.jl is a library of Riemannian manifolds in Julia",
+    "keywords": [
+        "Riemannian manifolds",
+        "manifolds",
+        "Julia"
+    ],
+    "license": "MIT",
+    "title": "Manifolds.jl",
+    "upload_type": "software"
+}
