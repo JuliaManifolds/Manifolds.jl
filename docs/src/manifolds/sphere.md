@@ -35,23 +35,24 @@ In general you can plot the surface of the hyperboloid either as wireframe (`wir
 
 ```@example sphereplot1
 using Manifolds, Plots
+pyplot()
 M = Sphere(2)
-pts = [ [-1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [-1.0, 0.0, 0.0] ]
-scene = plot(M,pts, wireframe=false)
+pts = [ [1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0] ]
+scene = plot(M,pts; wireframe_color=colorant"#CCCCCC", markersize=10)
 ```
 
 which scatters our points. We can also draw connecting geodesics, which here is a geodesic triangle. Here we discretize each geodesic with 100 points along the geodesic.
 The default value is `geodesic_interpolation=-1` which switches to scatter plot the data.
 
 ```@example sphereplot1
-plot!(scene, M, pts; geodesic_interpolation=100)
+plot!(scene, M, pts; wireframe=false, geodesic_interpolation=100, linewidth=2)
 ```
 
 And we can also add tangent vectors, for example tangents pointing to the middle
 
 ```@example sphereplot1
-pts2 =  [ [-1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0] ]
-p3 = 1/sqrt(3) .* [-1.0, 1.0, 1.0]
+pts2 =  [ [1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0] ]
+p3 = 1/sqrt(3) .* [1.0, -1.0, 1.0]
 vecs = log.(Ref(M), pts2, Ref(p3))
-plot!(scene, M, pts2, vecs; wireframe = false)
+plot!(scene, M, pts2, vecs; wireframe = false, linewidth=1.5)
 ```

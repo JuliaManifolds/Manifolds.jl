@@ -261,12 +261,11 @@ end
     show_axis --> false
     framestyle -> :none
     axis --> false
-    xlims --> (-1.01, 1.01)
-    ylims --> (-1.01, 1.01)
-    zlims --> (-1.01, 1.01)
+    xlims --> (-1.05, 1.05)
+    ylims --> (-1.05, 1.05)
+    zlims --> (-1.05, 1.05)
     grid --> false
     colorbar --> false
-    aspect_ratio --> :equal
     tickfontcolor --> RGBA(1.0, 1.0, 1.0, 1.0)
     x = []
     y = []
