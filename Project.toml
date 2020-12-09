@@ -53,6 +53,7 @@ RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 VisualRegressionTests = "34922c18-7c2a-561c-bac1-01e79b2c4c92"
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
 
 [targets]
 test = ["Test", "Colors", "DoubleFloats", "FiniteDiff", "ForwardDiff", "ImageIO", "ImageMagick", "OrdinaryDiffEq", "Plots", "Quaternions", "QuartzImageIO", "RecipesBase", "ReverseDiff", "VisualRegressionTests"]
