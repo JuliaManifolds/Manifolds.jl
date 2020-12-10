@@ -96,7 +96,12 @@ include("utils.jl")
         function Sphere2_plot_geo()
             M = Sphere(2)
             pts = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]]
-            return plot(M, pts; wireframe_color = colorant"#CCCCCC", geodesic_interpolation=80)
+            return plot(
+                M,
+                pts;
+                wireframe_color = colorant"#CCCCCC",
+                geodesic_interpolation = 80,
+            )
         end
         @plottest Sphere2_plot_geo joinpath(references_folder, "Sphere2PlotGeo.png") false
 
