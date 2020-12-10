@@ -1,4 +1,5 @@
-using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter
+ENV["PYTHON"] = ""
+using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PyPlot
 # required for loading the Manifolds.ManifoldTests module
 using Test, ForwardDiff, ReverseDiff
 

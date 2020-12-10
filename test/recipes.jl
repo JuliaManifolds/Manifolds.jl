@@ -1,3 +1,4 @@
+ENV["PYTHON"] = ""
 using RecipesBase, VisualRegressionTests, Plots, Colors, Gtk
 include("utils.jl")
 # Note that the `false`s avoid popups and the tests directly fail.
@@ -6,6 +7,7 @@ include("utils.jl")
 @testset "Recipes Test" begin
     references_folder = joinpath(@__DIR__, "assets")
     @testset "2D Recipes in GR" begin
+        ENV["GKSwstype"] = "100"
         gr()
         function Hyp2PB_plot()
             M = Hyperbolic(2)
@@ -58,6 +60,7 @@ include("utils.jl")
         @plottest Hyp2PH_quiver joinpath(references_folder, "Hyp2PHQuiver.png") false
     end
     @testset "3D Recipes in GR" begin
+        ENV["GKSwstype"] = "100"
         gr()
         function Hyp2_plot()
             M = Hyperbolic(2)
@@ -88,7 +91,7 @@ include("utils.jl")
             pts = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]]
             return plot(M, pts; wireframe_color = colorant"#CCCCCC", markersize = 10)
         end
-        @plottest Sphere2_plot joinpath(references_folder, "Sphere2Plot.png") false
+        @plottest Sphere2_plot joinpath(references_folder, "Sphere2Plot.png") true
 
         function Sphere2_plot_geo()
             M = Sphere(2)
