@@ -20,6 +20,6 @@ jobs:
           version: nightly
           arch: x64
       - uses: julia-actions/julia-buildpkg@latest
+      - uses: julia-actions/julia-runtest@latest
         env:
           PYTHON: ""
-      - uses: julia-actions/julia-runtest@latest
