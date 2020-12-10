@@ -1,5 +1,4 @@
-ENV["PYTHON"] = ""
-using RecipesBase, VisualRegressionTests, Plots, Colors, Gtk
+using RecipesBase, VisualRegressionTests, Plots, Colors, Gtk, PyPlot
 include("utils.jl")
 # Note that the `false`s avoid popups and the tests directly fail.
 # If you have changed something and need to recreate the reference in the test avoids to start Gtk

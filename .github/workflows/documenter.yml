@@ -15,6 +15,8 @@ jobs:
       - uses: julia-actions/setup-julia@latest
         with:
           version: 1.5
+        env:
+          PYTHON: ""
       - uses: julia-actions/julia-docdeploy@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
