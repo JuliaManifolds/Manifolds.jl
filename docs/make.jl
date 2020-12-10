@@ -1,6 +1,7 @@
 using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PyPlot
 # required for loading the Manifolds.ManifoldTests module
 using Test, ForwardDiff, ReverseDiff
+    ENV["GKSwstype"] = "100"
 
 generated_path = joinpath(@__DIR__, "src", "misc")
 isdir(generated_path) || mkdir(generated_path)

@@ -90,7 +90,7 @@ include("utils.jl")
             pts = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]]
             return plot(M, pts; wireframe_color = colorant"#CCCCCC", markersize = 10)
         end
-        @plottest Sphere2_plot joinpath(references_folder, "Sphere2Plot.png") true
+        @plottest Sphere2_plot joinpath(references_folder, "Sphere2Plot.png") false
 
         function Sphere2_plot_geo()
             M = Sphere(2)
