@@ -83,10 +83,17 @@ include("utils.jl")
     end
     @testset "3D Recipes in pyplot" begin
         pyplot()
-        function Sphere2_plot_geo()
+        function Sphere2_plot()
             M = Sphere(2)
             pts = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]]
             return plot(M, pts; wireframe_color = colorant"#CCCCCC", markersize = 10)
+        end
+        @plottest Sphere2_plot joinpath(references_folder, "Sphere2Plot.png") false
+
+        function Sphere2_plot_geo()
+            M = Sphere(2)
+            pts = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]]
+            return plot(M, pts; wireframe_color = colorant"#CCCCCC", geodesic_interpolation=80)
         end
         @plottest Sphere2_plot_geo joinpath(references_folder, "Sphere2PlotGeo.png") false
 
