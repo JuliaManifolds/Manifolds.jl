@@ -109,7 +109,6 @@ end
                 y = [p.value[2] for p in lpts]
             end
         else
-            print("Hi.")
             quiver := ([v.value[1] for v in vecs], [v.value[2] for v in vecs])
             seriestype := :quiver
             x = [p.value[1] for p in pts]
