@@ -31,7 +31,7 @@ You can visualize both points and tangent vectors on the sphere.
     There seems to be no unified way to draw spheres in the backends of [Plots.jl](http://docs.juliaplots.org/latest/).
     This recipe currently uses the `seriestype` `wireframe` and `surface`, which does not yet work with the default backend [`GR`](https://github.com/jheinen/GR.jl).
 
-In general you can plot the surface of the hyperboloid either as wireframe (`wireframe=true`) additionally specifying `wires` (or `wires_lat` and `wires_lon`) for more precision and a `wireframe_color`. The same holds for the plot as a `surface` (which is `false` by default) and its `surface_resolution` (or `surface_resolution_lat` or `surface_resolution_lon`) and a `surface_color`.
+In general you can plot the surface of the hyperboloid either as wireframe (`wireframe=true`) additionally specifying `wires` (or `wires_x` and `wires_y`) to change the density of the wires and a `wireframe_color` for their color. The same holds for the plot as a `surface` (which is `false` by default) and its `surface_resolution` (or `surface_resolution_lat` or `surface_resolution_lon`) and a `surface_color`.
 
 ```@example sphereplot1
 using Manifolds, Plots

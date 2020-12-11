@@ -66,7 +66,7 @@ include("utils.jl")
             p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 1.0]])
             return plot(M, p)
         end
-        @plottest Hyp2_plot joinpath(references_folder, "Hyp2Plot.png") true
+        @plottest Hyp2_plot joinpath(references_folder, "Hyp2Plot.png") false
 
         function Hyp2_plot_geo()
             M = Hyperbolic(2)
@@ -95,7 +95,7 @@ include("utils.jl")
         function Sphere2_plot_geo()
             M = Sphere(2)
             pts = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]]
-            return plot(
+            return Plots.plot(
                 M,
                 pts;
                 wireframe_color = colorant"#CCCCCC",
