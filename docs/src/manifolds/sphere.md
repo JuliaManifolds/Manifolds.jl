@@ -38,17 +38,17 @@ using Manifolds, Plots
 pyplot()
 M = Sphere(2)
 pts = [ [1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0] ]
-scene = plot(M,pts; wireframe_color=colorant"#CCCCCC", markersize=10)
+scene = plot(M, pts; wireframe_color=colorant"#CCCCCC", markersize=10)
 ```
 
 which scatters our points. We can also draw connecting geodesics, which here is a geodesic triangle. Here we discretize each geodesic with 100 points along the geodesic.
-The default value is `geodesic_interpolation=-1` which switches to scatter plot the data.
+The default value is `geodesic_interpolation=-1` which switches to scatter plot of the data.
 
 ```@example sphereplot1
 plot!(scene, M, pts; wireframe=false, geodesic_interpolation=100, linewidth=2)
 ```
 
-And we can also add tangent vectors, for example tangents pointing to the middle
+And we can also add tangent vectors, for example tangents pointing towards the geometric center of given points.
 
 ```@example sphereplot1
 pts2 =  [ [1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0] ]
