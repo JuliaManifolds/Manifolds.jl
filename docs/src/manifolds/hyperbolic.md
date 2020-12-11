@@ -26,6 +26,46 @@ Pages = ["manifolds/HyperbolicHyperboloid.jl"]
 Order = [:type, :function]
 ```
 
+### [Visualization of the Hyperboloid](@id hyperboloid_plot)
+
+For the case of [`Hyperbolic`](@ref)`(2)` there is plotting available based on a [PlottingRecipe](https://docs.juliaplots.org/latest/recipes/). You can easily plot points, connecting geodesics as well as tangent vectors.
+
+!!! note
+    The recipes are only loaded if [Plots.jl](http://docs.juliaplots.org/latest/) or
+    [RecipesBase.jl](http://juliaplots.org/RecipesBase.jl/stable/) is loaded.
+
+If we consider a set of points, we can first plot these and their connecting
+geodesics using the `geodesic_interpolation` for the points. This variable specifies with how many points a geodesic between two successive points is sampled (per default it's `-1`, which deactivates geodesics) and the line style is set to be a path.
+
+In general you can plot the surface of the hyperboloid either as wireframe (`wireframe=true`) additionally specifying `wires` (or `wires_x` and `wires_y`) to change the density of wires and a `wireframe_color`. The same holds for the plot as a `surface` (which is `false` by default) and its `surface_resolution` (or `surface_resolution_x` or `surface_resolution_y`) and a `surface_color`.
+
+```@example hyperboloid
+using Manifolds, Plots
+M = Hyperbolic(2)
+pts =  [ [0.85*cos(φ), 0.85*sin(φ), sqrt(0.85^2+1)] for φ ∈ range(0,2π,length=11) ]
+scene = plot(M, pts; geodesic_interpolation=100)
+```
+
+To just plot the points atop, we can just omit the `geodesic_interpolation` parameter to obtain a scatter plot. Note that we avoid redrawing the wireframe in the following `plot!` calls.
+
+```@example hyperboloid
+plot!(scene, M, pts; wireframe=false)
+```
+
+We can further generate tangent vectors in these spaces and use a plot for there. Keep in mind that a tangent vector in plotting always requires its base point.
+
+```@example hyperboloid
+pts2 = [ [0.45 .*cos(φ + 6π/11), 0.45 .*sin(φ + 6π/11), sqrt(0.45^2+1) ] for φ ∈ range(0,2π,length=11)]
+vecs = log.(Ref(M),pts,pts2)
+plot!(scene, M, pts, vecs; wireframe=false)
+```
+
+Just to illustrate, for the first point the tangent vector is pointing along the following geodesic
+
+```@example hyperboloid
+plot!(scene, M, [pts[1], pts2[1]]; geodesic_interpolation=100, wireframe=false)
+```
+
 ### Internal functions
 
 The following functions are available for internal use to construct points in the hyperboloid model

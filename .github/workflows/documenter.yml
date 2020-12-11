@@ -17,6 +17,7 @@ jobs:
           version: 1.5
       - uses: julia-actions/julia-docdeploy@v1
         env:
+          PYTHON: ""
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
   note:

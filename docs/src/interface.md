@@ -140,6 +140,14 @@ Pages = ["DecoratorManifold.jl"]
 Order = [:macro, :type, :function]
 ```
 
+## Abstract Power Manifold
+
+```@autodocs
+Modules = [ ManifoldsBase]
+Pages = ["PowerManifold.jl"]
+Order = [:macro, :type, :function]
+```
+
 ## ValidationManifold
 
 [`ValidationManifold`](@ref) is a simple decorator that “decorates” a manifold with tests that all involved arrays are correct. For example involved input and output paratemers are checked before and after running a function, repectively.
@@ -209,4 +217,14 @@ Since when using `Manifolds.jl` the [`Euclidean`](@ref) is available, the `Defau
 
 ```@docs
 ManifoldsBase.DefaultManifold
+```
+
+## Error Messages
+especially to collect and display errors on [`AbstractPowerManifold`](@ref)s the following
+component and collection error messages are available.
+
+```@autodocs
+Modules = [ManifoldsBase]
+Pages = ["errors.jl"]
+Order = [:type]
 ```

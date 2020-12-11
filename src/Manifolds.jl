@@ -106,6 +106,9 @@ using ManifoldsBase:
     size_to_tuple
 using Markdown: @doc_str
 using Random
+using RecipesBase
+using RecipesBase: @recipe, @series
+using Colors: RGBA
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
