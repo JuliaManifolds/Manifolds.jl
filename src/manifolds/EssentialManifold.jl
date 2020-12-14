@@ -1,37 +1,44 @@
 @doc raw"""
     EssentialManifold <: AbstractPowerManifold{ℝ}
 
-The [`Manifold`](@ref) is the space of the essential matrices which is represented as 
+The essential manifold is the space of the essential matrices which is represented as 
 the quotient space 
 ````math
-\mathcal{M}_{\text{E}} := (\text{SO}(3)×\text{SO}(3))/(\text{SO}(2))\text{[^Tron2014]}.
+\mathcal{M}_{\text{E}} := (\text{SO}(3)×\text{SO}(3))/(\text{SO}(2)).
 ````
-
-[^Tron2014]:
-    > Tron R.; Daniilidis K.; On the Quotient Representation for the Essential 
-    > Manifold.
-    > IEEE Conference on Computer Vision and Pattern Recognition (2014),
-    > [pdf](https://ieeexplore.ieee.org/document/6909600).
+An essential matrix is defined as
+````math
+E = (R'_1)^T [T'_2 - T'_1]_{×} R'_2,
+````
+where the poses of two cameras $(R_i', T_i'), i=1,2,$ are contained in the space of 
+rigid body transformations $SE(3)$ and the operator $[⋅]_{×}\colon ℝ^3 \to \operatorname{SkewSym}(3)$ 
+denotes the matrix representation of the cross product operator. For more details see [^Tron2017].
 
 # Constructor
     EssentialManifold(is_signed)
 
-Generate the manifold 
-"""
+Generate the manifold of essential matrices.
 
+[^Tron2017]:
+    > Tron R.; Daniilidis K.; The Space of Essential Matrices as a Riemannian Quotient 
+    > Manifold.
+    > SIAM Journal on Imaging Sciences (2017),
+    > DOI: [10.1137/16M1091332](https://doi.org/10.1137/16M1091332),
+    > PDF: [https://www.cis.upenn.edu/~kostas/mypub.dir/tron17siam.pdf](https://www.cis.upenn.edu/~kostas/mypub.dir/tron17siam.pdf).
+"""
 struct EssentialManifold <:
     AbstractPowerManifold{ℝ, Rotations{3}, NestedPowerRepresentation} 
     is_signed::Bool
     manifold::Rotations{3}
 end
 
-EssentialManifold(is_signed::Bool = true) = Essential(is_signed, Rotations(3))  
+EssentialManifold(is_signed::Bool = true) = EssentialManifold(is_signed, Rotations(3))  
 
 @doc raw"""
     check_manifold_point(M::EssentialManifold, p; kwargs...) 
 
 Check whether the matrix is a valid point on the [`EssentialManifold`](@ref) `M`, 
-i.e. is a Tuple of two SO(3) matrices.
+i.e. a Tuple of two SO(3) matrices.
 """
 function check_manifold_point(M::EssentialManifold, p; kwargs...) 
     if length(p)!=2
@@ -41,7 +48,6 @@ function check_manifold_point(M::EssentialManifold, p; kwargs...)
         )
     end
     return check_manifold_point(PowerManifold(M.manifold, 2), p; kwargs...)
-    #Checke noch, ob signed
     return nothing
 end
 
@@ -50,10 +56,7 @@ end
 
 Check whether `X` is a tangent vector to manifold point `p` on the [`EssentialManifold`](@ref) `M`, 
 i.e. `X` has to be a Tuple of two `3`-by-`3` skew-symmetric matrices. The optional parameter `check_base_point` 
-indicates, whether to call
- [`check_manifold_point`](@ref)  for `p`.
-
-The tolerance for the ... of `p` and `X` can be set using `kwargs...`.
+indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
 function check_tangent_vector(
     M::EssentialManifold,
@@ -88,10 +91,10 @@ end
 Compute the exponential map on the [`EssentialManifold`](@ref) from `p` into direction
 `X`, i.e.
 ````math
-\text{exp}_p(X) =\text{exp}_g(̃Y),   g \in \text(SO)(3)^2,
+\text{exp}_p(X) =\text{exp}_g( \tilde X),  \quad g \in \text(SO)(3)^2,
 ````
-where $Ỹ$ is the horizontal lift of $Y$.
-"""#define Y
+where $\tilde X$ is the horizontal lift of $X$.
+"""
 exp(::EssentialManifold, ::Any...)
 
 function exp!(M::EssentialManifold, q, p, X)
@@ -107,7 +110,32 @@ get_iterator(M::EssentialManifold) = Base.OneTo(2)
     log(M::EssentialManifold, p, q)
 
 Compute the logarithmic map on the [`EssentialManifold`](@ref) `M`, i.e. the tangent vector,
-whose geodesic starting from `p` reaches `q` after time 1.
+whose geodesic starting from `p` reaches `q` after time 1. Here, $p=(R_{p_1},R_{p_2})$ and 
+$q=(R_{q_1},R_{q_2})$ are elements of $SO(3)^2$. We use that any essential matrix can, up to 
+scale, be decomposed to
+````math
+E = R_1^T [e_z]_{×}R_2,
+````
+where $(R_1,R_2)∈SO(3)^2$. Two points in $SO(3)^2$ are equivalent iff their corresponding 
+essential matrices are equal (up to a sign flip). 
+To compute the logarithm, we first move `q` to another representative of its equivalence class.
+For this, we find $t= t_{\text{opt}}$ for which the function
+````math
+f(t) = \sum_{i=1,2} f_i, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}),
+````
+where $d(⋅,⋅)$ is the distance function in $SO(3)$, is minimized. Further, the group $H_z$ acting 
+on the left on $SO(3)^2$ is defined as
+````math
+H_z = \{(R_z(θ),R_z(θ))\colon θ \in [-π,π) \},
+````
+where $R_z(θ)$ is the rotation around the z axis with angle $θ$. Points in $H_z$ are denoted by 
+$S_z$. Then, the logarithm is defined 
+as 
+````math
+\log_p (S_z(t_{\text{opt}})q) = [\text{Log}(R_{p_i}^T R_z(t_{\text{opt}})R_{b_i})]_{i=1,2}, 
+````
+where $\text{Log}$ is the [`logarithm`](@ref log(::Rotations, ::Any...)) on $SO(3)$. For more 
+details see [^Tron2017].
 """
 function log!(M::EssentialManifold, X, p, q)
     # compute the closest representative of q
@@ -117,7 +145,7 @@ function log!(M::EssentialManifold, X, p, q)
 
     if !M.is_signed
         for k = 1:4 
-            #flip q
+            #flip sign in q to get another member of its equivalence class
             if k == 2
                 q2[1][2:3, :] = -q[1][2:3, :]
                 q2[2][[1 3],:] = -q[2][[1 3],:]
@@ -142,17 +170,29 @@ function log!(M::EssentialManifold, X, p, q)
     representative_q[1] = Rz * q2[1]
     representative_q[2] = Rz * q2[2]
 
-    # use the logarithmic map in SO(3)^2 and the corresponding geodesic between p and representative_p to compute the solution 
+    # use the logarithmic map in SO(3)^2 and the corresponding geodesic between p and representative_q to compute the solution 
     log!.(Ref(M.manifold), X, p, representative_q)
     return X
 end
 
+@doc raw"""
+    dist_min_angle_pair(p, q)
+
+This function computes the global minimizer of the function 
+````math
+f(t) = \sum_{i=1,2} f_i, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}),
+````
+for the given values. This is done by finding the discontinuity points $t_{d_i}, i=1,2$ of its derivative 
+and using Newton's method to minimize the function over the intervals $[t_{d_1},t_{d_2}]$ and $[t_{d_2},t_{d_1}+2π]$
+separately. Then, the minimizer for which $f$ is minimal is chosen and given back together with the minimal value. 
+For more details see Algorithm 1 in [^Tron2017].
+"""
 function dist_min_angle_pair(p, q)
     #compute rotations
     q211 = q[1]*p[1]'
     q212 = q[2]*p[2]'
 
-    #compute values from Proposition ... 
+    #compute values from Proposition 9
     t_break1, c1, m1, Φ1 = dist_min_angle_pair_discontinuity_distance(q211)
     t_break2, c2, m2, Φ2 = dist_min_angle_pair_discontinuity_distance(q212)
     
@@ -162,7 +202,7 @@ function dist_min_angle_pair(p, q)
         t_min = 0
         f_min = 2*pi^2
     else
-        if abs(mod(t_break1 - t_break2 + pi, 2 * pi) - pi)
+        if abs(mod(t_break1 - t_break2 + pi, 2 * pi) - pi) < 1e-8
             t_min = t_break1 + pi
             f_min = 0
         else
@@ -212,6 +252,16 @@ function dist_min_angle_pair(p, q)
     return t_min, f_min
 end
 
+@doc raw"""
+    dist_min_angle_pair_discontinuity_distance(q)
+
+This function computes the point $t_{\text{di}}$ for which the first derivative of 
+````math
+f(t) = \sum_{i=1,2} f_i, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}),
+````
+does not exist. This is the case for $\sin(θ_i(t_{\text{di}})) = 0$. For more details see Proposition 9 
+and its proof, as well as Lemma 1 in [^Tron2017].
+"""
 function dist_min_angle_pair_discontinuity_distance(q)
     c1 = q[1, 1] + q[2, 2]
     c2 = q[1, 2] - q[2, 1]
@@ -224,7 +274,12 @@ function dist_min_angle_pair_discontinuity_distance(q)
     return t_break, c3, m, Φ
 end
 
-function dist_min_angle_pair_compute_df_break(t_break, q) #compute derivatives of each term at discontinuity points
+@doc raw"""
+    dist_min_angle_pair_compute_df_break(t_break, q)
+
+This function computes the derivatives of each term at discontinuity points. For more details see [^Tron2017].
+"""
+function dist_min_angle_pair_compute_df_break(t_break, q) 
     c = cos(t_break)
     s = sin(t_break)
 
@@ -234,6 +289,15 @@ function dist_min_angle_pair_compute_df_break(t_break, q) #compute derivatives o
     return df_break
 end
 
+@doc raw"""
+    dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t_high)
+
+This function computes the minimizer of the function 
+````math
+f(t) = \sum_{i=1,2} f_i, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}),
+````
+in the interval $[t_\text{low}, t_\text{high}] using Newton's method. For more details see [^Tron2017].
+"""
 function dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t_high)
     tol_dist = 1e-8
     for i = 1:100
@@ -274,7 +338,21 @@ end
 @doc raw"""
     manifold_dimension(M::EssentialManifold{is_signed, ℝ})
 
-Return the manifold dimension of the [`EssentialManifold`](@ref), which is `5`.
+Return the manifold dimension of the [`EssentialManifold`](@ref). Let 
+````math
+H_z = \{(R_z(θ),R_z(θ))\colon θ \in [-π,π) \}
+````
+and 
+````math
+H_π = \{(I,I), (R_y(π),R_y(π)), (I,R_z(π)), (R_y(π),R_x(π))\},
+````
+where $R_x(α), R_y(α), R_z(α)$ are the rotations around the x, y, and z axes, respectively, with angle $α$. Then 
+the space of all essential matrices is 
+````math
+\mathcal{M}_{\text{E}} := (\text{SO}(3)×\text{SO}(3))/(H_z × H_π).
+````
+Since $SO(3)^2$ has dimension two, $H_z$ has dimension one and the discrete group $H_π$ does not change the dimension 
+of the space, the space of all essential matrices has dimension `5`[^Tron2017].
 """
 function manifold_dimension(::EssentialManifold) 
     return 5
@@ -285,15 +363,15 @@ end
 
 Project the matrix `X` onto the tangent space
 ````math
-T_{p}\text{SO}(3)^2 = T_{\text{vp}}\text{SO}(3)^2 ⊕ T_{\text{hp}}\text{SO}(3)^2,
+T_{p} \text{SO}(3)^2 = T_{\text{vp}}\text{SO}(3)^2 ⊕ T_{\text{hp}}\text{SO}(3)^2,
 ````
 by first computing its projection onto the vertical space $T_{\text{vp}}\text{SO}(3)^2$ using [`vert_proj`](@ref).
 Then the orthogonal projection of `X` onto the horizontal space $T_{\text{hp}}\text{SO}(3)^2$ is defined as
 ````math
-\Pi_h(X) = X - \frac{\text{vert/_proj}_p(X)}{2} \begin{bmatrix} R_1^T e_z \\ R_2^T e_z \end{bmatrix},
+\Pi_h(X) = X - \frac{\text{vert\_proj}_p(X)}{2} \begin{bmatrix} R_1^T e_z \\ R_2^T e_z \end{bmatrix},
 ````
-with $R_i = R_0 R^'_i, i=1,2,$ where $R^'_i$ is part of the pose of camera $i$ $g_i = (R^'_i,T^'_i) ∈ \text{SE}(3)$ 
-and $R_0 ∈ \text{SO}(3)$ such that $R_0(T^'_2-T^'_1) = e_z$.
+with $R_i = R_0 R'_i, i=1,2,$ where $R'_i$ is part of the pose of camera $i$ $g_i = (R'_i,T'_i) ∈ \text{SE}(3)$ 
+and $R_0 ∈ \text{SO}(3)$ such that $R_0(T'_2-T'_1) = e_z$.
 """
 project(::EssentialManifold, ::Any, ::Any)
 
@@ -340,10 +418,10 @@ end
 
 Project 'X' onto the vertical space $T_{\text{vp}}\text{SO}(3)^2$ with
 ````math
-\text{vert/_proj}_p(X) = e_z^T(R_1 X_1 + R_2 X_2),
+\text{vert\_proj}_p(X) = e_z^T(R_1 X_1 + R_2 X_2),
 ````
-where $e_z$ is the third unit vector, $X_i ∈ T_{p}\text{SO}(3) for i=1,2,$ and it holds $R_i = R_0 R^'_i, i=1,2,$ where $R^'_i$ is part of the 
-pose of camera $i$ $g_i = (R^'_i,T^'_i) ∈ \text{SE}(3)$ and $R_0 ∈ \text{SO}(3)$ such that $R_0(T^'_2-T^'_1) = e_z$.
+where $e_z$ is the third unit vector, $X_i ∈ T_{p}\text{SO}(3)$ for $i=1,2,$ and it holds $R_i = R_0 R'_i, i=1,2,$ where $R'_i$ is part of the 
+pose of camera $i$ $g_i = (R_i,T'_i) ∈ \text{SE}(3)$ and $R_0 ∈ \text{SO}(3)$ such that $R_0(T'_2-T'_1) = e_z$ [^Tron2017].
 
 """
 vert_proj(M::EssentialManifold, p, X) = vert_proj(M.manifold, p[1], X[1]) + vert_proj(M.manifold, p[2], X[2])
