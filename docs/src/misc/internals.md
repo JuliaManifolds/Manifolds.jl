@@ -2,11 +2,6 @@
 
 This page documents the internal types and methods of `Manifolds.jl`'s that might be of use for writing your own manifold.
 
-## Types
-
-```@docs
-```
-
 ## Functions
 
 ```@docs

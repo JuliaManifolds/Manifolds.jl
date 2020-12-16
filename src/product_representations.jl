@@ -3,7 +3,7 @@ abstract type AbstractReshaper end
 """
     StaticReshaper()
 
-Reshaper that constructs [`SizedArray`](@ref).
+Reshaper that constructs `SizedArray` from the `StaticArrays.jl` package.
 """
 struct StaticReshaper <: AbstractReshaper end
 
