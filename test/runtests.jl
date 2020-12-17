@@ -34,7 +34,6 @@ include("utils.jl")
       "Testing Static:   $(TEST_STATIC_SIZED)\n"
 
 include("groups/group_utils.jl")
-include("sized_abstract_array.jl")
 include("notation.jl")
 # starting with tests of simple manifolds
 include("centered_matrices.jl")

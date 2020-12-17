@@ -3,7 +3,7 @@ abstract type AbstractReshaper end
 """
     StaticReshaper()
 
-Reshaper that constructs [`SizedAbstractArray`](@ref).
+Reshaper that constructs `SizedArray` from the `StaticArrays.jl` package.
 """
 struct StaticReshaper <: AbstractReshaper end
 
@@ -16,7 +16,7 @@ function make_reshape(reshaper::AbstractReshaper, ::Type{Size}, data) where {Siz
     return error("make_reshape is not defined for reshaper of type $(typeof(reshaper)), size $(Size) and data of type $(typeof(data)).")
 end
 function make_reshape(::StaticReshaper, ::Type{Size}, data) where {Size}
-    return SizedAbstractArray{Size}(data)
+    return SizedArray{Size}(data)
 end
 
 """
