@@ -12,14 +12,14 @@ E = (R'_1)^T [T'_2 - T'_1]_{×} R'_2,
 ````
 where the poses of two cameras $(R_i', T_i'), i=1,2,$ are contained in the space of 
 rigid body transformations $SE(3)$ and the operator $[⋅]_{×}\colon ℝ^3 \to \operatorname{SkewSym}(3)$ 
-denotes the matrix representation of the cross product operator. For more details see [^Tron2017].
+denotes the matrix representation of the cross product operator. For more details see [^TronDaniilidis2017].
 
 # Constructor
     EssentialManifold(is_signed)
 
 Generate the manifold of essential matrices.
 
-[^Tron2017]:
+[^TronDaniilidis2017]:
     > Tron R.; Daniilidis K.; The Space of Essential Matrices as a Riemannian Quotient 
     > Manifold.
     > SIAM Journal on Imaging Sciences (2017),
@@ -47,7 +47,7 @@ function check_manifold_point(M::EssentialManifold, p; kwargs...)
             "The point $(p) does not lie on $M, since it does not contain exactly two elements.",
         )
     end
-    return check_manifold_point(PowerManifold(M.manifold, 2), p; kwargs...)
+    return check_manifold_point(PowerManifold(M.manifold, NestedPowerRepresentation(), 2), p; kwargs...)
     return nothing
 end
 
@@ -76,7 +76,7 @@ function check_tangent_vector(
         )
     end
     return check_tangent_vector(
-        PowerManifold(M.manifold, 2),
+        PowerManifold(M.manifold, NestedPowerRepresentation(), 2),
         p,
         X;
         check_base_point = check_base_point,
@@ -93,7 +93,7 @@ Compute the exponential map on the [`EssentialManifold`](@ref) from `p` into dir
 ````math
 \text{exp}_p(X) =\text{exp}_g( \tilde X),  \quad g \in \text(SO)(3)^2,
 ````
-where $\tilde X$ is the horizontal lift of $X$.
+where $\tilde X$ is the horizontal lift of $X$[^TronDaniilidis2017].
 """
 exp(::EssentialManifold, ::Any...)
 
@@ -121,7 +121,7 @@ essential matrices are equal (up to a sign flip).
 To compute the logarithm, we first move `q` to another representative of its equivalence class.
 For this, we find $t= t_{\text{opt}}$ for which the function
 ````math
-f(t) = \sum_{i=1,2} f_i, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}),
+f(t) = f_1 + f_2, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}) \text{ for } i=1,2,
 ````
 where $d(⋅,⋅)$ is the distance function in $SO(3)$, is minimized. Further, the group $H_z$ acting 
 on the left on $SO(3)^2$ is defined as
@@ -135,7 +135,7 @@ as
 \log_p (S_z(t_{\text{opt}})q) = [\text{Log}(R_{p_i}^T R_z(t_{\text{opt}})R_{b_i})]_{i=1,2}, 
 ````
 where $\text{Log}$ is the [`logarithm`](@ref log(::Rotations, ::Any...)) on $SO(3)$. For more 
-details see [^Tron2017].
+details see [^TronDaniilidis2017].
 """
 function log!(M::EssentialManifold, X, p, q)
     # compute the closest representative of q
@@ -180,12 +180,12 @@ end
 
 This function computes the global minimizer of the function 
 ````math
-f(t) = \sum_{i=1,2} f_i, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}),
+f(t) = f_1 + f_2, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}) \text{ for } i=1,2,
 ````
 for the given values. This is done by finding the discontinuity points $t_{d_i}, i=1,2$ of its derivative 
 and using Newton's method to minimize the function over the intervals $[t_{d_1},t_{d_2}]$ and $[t_{d_2},t_{d_1}+2π]$
 separately. Then, the minimizer for which $f$ is minimal is chosen and given back together with the minimal value. 
-For more details see Algorithm 1 in [^Tron2017].
+For more details see Algorithm 1 in [^TronDaniilidis2017].
 """
 function dist_min_angle_pair(p, q)
     #compute rotations
@@ -257,10 +257,10 @@ end
 
 This function computes the point $t_{\text{di}}$ for which the first derivative of 
 ````math
-f(t) = \sum_{i=1,2} f_i, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}),
+f(t) = f_1 + f_2, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}) \text{ for } i=1,2,
 ````
 does not exist. This is the case for $\sin(θ_i(t_{\text{di}})) = 0$. For more details see Proposition 9 
-and its proof, as well as Lemma 1 in [^Tron2017].
+and its proof, as well as Lemma 1 in [^TronDaniilidis2017].
 """
 function dist_min_angle_pair_discontinuity_distance(q)
     c1 = q[1, 1] + q[2, 2]
@@ -277,7 +277,7 @@ end
 @doc raw"""
     dist_min_angle_pair_compute_df_break(t_break, q)
 
-This function computes the derivatives of each term at discontinuity points. For more details see [^Tron2017].
+This function computes the derivatives of each term $f_i, i=1,2,$ at discontinuity point `t_break`. For more details see [^TronDaniilidis2017].
 """
 function dist_min_angle_pair_compute_df_break(t_break, q) 
     c = cos(t_break)
@@ -294,9 +294,9 @@ end
 
 This function computes the minimizer of the function 
 ````math
-f(t) = \sum_{i=1,2} f_i, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}),
+f(t) = f_1 + f_2, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}) \text{ for } i=1,2,
 ````
-in the interval $[t_\text{low}, t_\text{high}] using Newton's method. For more details see [^Tron2017].
+in the interval $[$`t_low`, `t_high`$]$ using Newton's method. For more details see [^TronDaniilidis2017].
 """
 function dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t_high)
     tol_dist = 1e-8
@@ -352,7 +352,7 @@ the space of all essential matrices is
 \mathcal{M}_{\text{E}} := (\text{SO}(3)×\text{SO}(3))/(H_z × H_π).
 ````
 Since $SO(3)^2$ has dimension two, $H_z$ has dimension one and the discrete group $H_π$ does not change the dimension 
-of the space, the space of all essential matrices has dimension `5`[^Tron2017].
+of the space, the space of all essential matrices has dimension `5`[^TronDaniilidis2017].
 """
 function manifold_dimension(::EssentialManifold) 
     return 5
@@ -421,7 +421,7 @@ Project 'X' onto the vertical space $T_{\text{vp}}\text{SO}(3)^2$ with
 \text{vert\_proj}_p(X) = e_z^T(R_1 X_1 + R_2 X_2),
 ````
 where $e_z$ is the third unit vector, $X_i ∈ T_{p}\text{SO}(3)$ for $i=1,2,$ and it holds $R_i = R_0 R'_i, i=1,2,$ where $R'_i$ is part of the 
-pose of camera $i$ $g_i = (R_i,T'_i) ∈ \text{SE}(3)$ and $R_0 ∈ \text{SO}(3)$ such that $R_0(T'_2-T'_1) = e_z$ [^Tron2017].
+pose of camera $i$ $g_i = (R_i,T'_i) ∈ \text{SE}(3)$ and $R_0 ∈ \text{SO}(3)$ such that $R_0(T'_2-T'_1) = e_z$ [^TronDaniilidis2017].
 
 """
 vert_proj(M::EssentialManifold, p, X) = vert_proj(M.manifold, p[1], X[1]) + vert_proj(M.manifold, p[2], X[2])
