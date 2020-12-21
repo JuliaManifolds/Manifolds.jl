@@ -26,14 +26,14 @@ include("utils.jl")
         test_manifold(
             M,
             [x, y, z],
-            test_forward_diff = false,
-            test_reverse_diff = false,
-            test_vector_spaces = true,
-            test_project_tangent = false,
-            test_musical_isomorphisms = true,
-            test_default_vector_transport = false,
-            basis_types_to_from = basis_types,
-            is_tangent_atol_multiplier = 1,
+            test_forward_diff=false,
+            test_reverse_diff=false,
+            test_vector_spaces=true,
+            test_project_tangent=false,
+            test_musical_isomorphisms=true,
+            test_default_vector_transport=false,
+            basis_types_to_from=basis_types,
+            is_tangent_atol_multiplier=1,
         )
     end
 end

@@ -754,7 +754,6 @@ and then projecting the vector $V_p$ to the tangent space $T_{x_p}\mathcal M$.
 """
 project(::VectorBundle, ::Any)
 
-
 @doc raw"""
     project(M::TangentSpaceAtPoint, p)
 
@@ -907,18 +906,18 @@ function Base.show(io::IO, ::MIME"text/plain", vs::VectorSpaceAtPoint)
     summary(io, vs)
     println(io, "\nFiber:")
     pre = " "
-    sf = sprint(show, "text/plain", vs.fiber; context = io, sizehint = 0)
+    sf = sprint(show, "text/plain", vs.fiber; context=io, sizehint=0)
     sf = replace(sf, '\n' => "\n$(pre)")
     println(io, pre, sf)
     println(io, "Base point:")
-    sp = sprint(show, "text/plain", vs.point; context = io, sizehint = 0)
+    sp = sprint(show, "text/plain", vs.point; context=io, sizehint=0)
     sp = replace(sp, '\n' => "\n$(pre)")
     return print(io, pre, sp)
 end
 function Base.show(io::IO, ::MIME"text/plain", TpM::TangentSpaceAtPoint)
     println(io, "Tangent space to the manifold $(base_manifold(TpM)) at point:")
     pre = " "
-    sp = sprint(show, "text/plain", TpM.point; context = io, sizehint = 0)
+    sp = sprint(show, "text/plain", TpM.point; context=io, sizehint=0)
     sp = replace(sp, '\n' => "\n$(pre)")
     return print(io, pre, sp)
 end

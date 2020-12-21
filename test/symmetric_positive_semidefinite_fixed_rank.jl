@@ -27,11 +27,11 @@ include("utils.jl")
                 test_manifold(
                     M,
                     pts,
-                    exp_log_atol_multiplier = 5,
-                    is_tangent_atol_multiplier = 5,
-                    test_forward_diff = false,
-                    test_reverse_diff = false,
-                    test_project_tangent = true,
+                    exp_log_atol_multiplier=5,
+                    is_tangent_atol_multiplier=5,
+                    test_forward_diff=false,
+                    test_reverse_diff=false,
+                    test_project_tangent=true,
                 )
             end
         end
@@ -40,6 +40,5 @@ include("utils.jl")
         M = SymmetricPositiveSemidefiniteFixedRank(4, 2, ℂ)
         @test repr(M) == "SymmetricPositiveSemidefiniteFixedRank(4, 2, ℂ)"
         @test manifold_dimension(M) == 12
-
     end
 end

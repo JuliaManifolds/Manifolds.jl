@@ -124,7 +124,6 @@ function ProductVectorTransport(methods::AbstractVectorTransportMethod...)
     return ProductVectorTransport{typeof(methods)}(methods)
 end
 
-
 """
     check_manifold_point(M::ProductManifold, p; kwargs...)
 
@@ -163,7 +162,7 @@ function check_tangent_vector(
     M::ProductManifold,
     p::Union{ProductRepr,ProductArray},
     X::Union{ProductRepr,ProductArray};
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 )
     if check_base_point
@@ -961,21 +960,21 @@ function sharp!(M::ProductManifold, X::TFVector, p, ξ::CoTFVector)
     return X
 end
 
-function _show_submanifold(io::IO, M::Manifold; pre = "")
-    sx = sprint(show, "text/plain", M, context = io, sizehint = 0)
+function _show_submanifold(io::IO, M::Manifold; pre="")
+    sx = sprint(show, "text/plain", M, context=io, sizehint=0)
     if occursin('\n', sx)
-        sx = sprint(show, M, context = io, sizehint = 0)
+        sx = sprint(show, M, context=io, sizehint=0)
     end
     sx = replace(sx, '\n' => "\n$(pre)")
     print(io, pre, sx)
     return nothing
 end
 
-function _show_submanifold_range(io::IO, Ms, range; pre = "")
+function _show_submanifold_range(io::IO, Ms, range; pre="")
     for i in range
         M = Ms[i]
         print(io, '\n')
-        _show_submanifold(io, M; pre = pre)
+        _show_submanifold(io, M; pre=pre)
     end
     return nothing
 end
@@ -991,15 +990,15 @@ function _show_product_manifold_no_header(io::IO, M)
         inds = [1:half_height; (n - div(screen_height - 1, 2) + 1):n]
     end
     if n ≤ screen_height
-        _show_submanifold_range(io, M.manifolds, 1:n; pre = pre)
+        _show_submanifold_range(io, M.manifolds, 1:n; pre=pre)
     else
-        _show_submanifold_range(io, M.manifolds, 1:half_height; pre = pre)
+        _show_submanifold_range(io, M.manifolds, 1:half_height; pre=pre)
         print(io, "\n$(pre)⋮")
         _show_submanifold_range(
             io,
             M.manifolds,
             (n - div(screen_height - 1, 2) + 1):n;
-            pre = pre,
+            pre=pre,
         )
     end
     return nothing

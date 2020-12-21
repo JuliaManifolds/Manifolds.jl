@@ -64,9 +64,9 @@ christoffel_symbols_first(::MetricManifold, ::Any)
 @decorator_transparent_function function christoffel_symbols_first(
     M::MetricManifold,
     p;
-    backend::AbstractDiffBackend = diff_backend(),
+    backend::AbstractDiffBackend=diff_backend(),
 )
-    ∂g = local_metric_jacobian(M, p; backend = backend)
+    ∂g = local_metric_jacobian(M, p; backend=backend)
     n = size(∂g, 1)
     Γ = allocate(∂g, Size(n, n, n))
     @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
@@ -93,10 +93,10 @@ christoffel_symbols_second(::MetricManifold, ::Any)
 @decorator_transparent_function function christoffel_symbols_second(
     M::MetricManifold,
     p;
-    backend::AbstractDiffBackend = diff_backend(),
+    backend::AbstractDiffBackend=diff_backend(),
 )
     Ginv = inverse_local_metric(M, p)
-    Γ₁ = christoffel_symbols_first(M, p; backend = backend)
+    Γ₁ = christoffel_symbols_first(M, p; backend=backend)
     Γ₂ = allocate(Γ₁)
     @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
     return Γ₂
@@ -118,11 +118,11 @@ christoffel_symbols_second_jacobian(::MetricManifold, ::Any)
 @decorator_transparent_function function christoffel_symbols_second_jacobian(
     M::MetricManifold,
     p;
-    backend::AbstractDiffBackend = diff_backend(),
+    backend::AbstractDiffBackend=diff_backend(),
 )
     n = size(p, 1)
     ∂Γ = reshape(
-        _jacobian(q -> christoffel_symbols_second(M, q; backend = backend), p, backend),
+        _jacobian(q -> christoffel_symbols_second(M, q; backend=backend), p, backend),
         n,
         n,
         n,
@@ -303,9 +303,9 @@ einstein_tensor(::MetricManifold, ::Any)
 @decorator_transparent_function function einstein_tensor(
     M::MetricManifold,
     p;
-    backend::AbstractDiffBackend = diff_backend(),
+    backend::AbstractDiffBackend=diff_backend(),
 )
-    Ric = ricci_tensor(M, p; backend = backend)
+    Ric = ricci_tensor(M, p; backend=backend)
     g = local_metric(M, p)
     Ginv = inverse_local_metric(M, p)
     S = sum(Ginv .* Ric)
@@ -330,7 +330,7 @@ exp(::MetricManifold, ::Any...)
 
 @decorator_transparent_fallback function exp!(M::MetricManifold, q, p, X)
     tspan = (0.0, 1.0)
-    sol = solve_exp_ode(M, p, X, tspan; dense = false, saveat = [1.0])
+    sol = solve_exp_ode(M, p, X, tspan; dense=false, saveat=[1.0])
     n = length(p)
     return copyto!(q, sol.u[1][(n + 1):end])
 end
@@ -500,7 +500,7 @@ local_metric_jacobian(::MetricManifold, ::Any)
 @decorator_transparent_function :intransparent function local_metric_jacobian(
     M::MetricManifold,
     p;
-    backend::AbstractDiffBackend = diff_backend(),
+    backend::AbstractDiffBackend=diff_backend(),
 )
     n = size(p, 1)
     ∂g = reshape(_jacobian(q -> local_metric(M, q), p, backend), n, n, n)
@@ -551,10 +551,10 @@ ricci_curvature(::MetricManifold, ::Any)
 @decorator_transparent_function :parent function ricci_curvature(
     M::MetricManifold,
     p;
-    backend::AbstractDiffBackend = diff_backend(),
+    backend::AbstractDiffBackend=diff_backend(),
 )
     Ginv = inverse_local_metric(M, p)
-    Ric = ricci_tensor(M, p; backend = backend)
+    Ric = ricci_tensor(M, p; backend=backend)
     S = sum(Ginv .* Ric)
     return S
 end
@@ -585,11 +585,11 @@ riemann_tensor(::MetricManifold, ::Any)
 @decorator_transparent_function function riemann_tensor(
     M::MetricManifold,
     p;
-    backend::AbstractDiffBackend = diff_backend(),
+    backend::AbstractDiffBackend=diff_backend(),
 )
     n = size(p, 1)
-    Γ = christoffel_symbols_second(M, p; backend = backend)
-    ∂Γ = christoffel_symbols_second_jacobian(M, p; backend = backend) ./ n
+    Γ = christoffel_symbols_second(M, p; backend=backend)
+    ∂Γ = christoffel_symbols_second_jacobian(M, p; backend=backend) ./ n
     R = allocate(∂Γ, Size(n, n, n, n))
     @einsum R[l, i, j, k] =
         ∂Γ[l, i, k, j] - ∂Γ[l, i, j, k] + Γ[s, i, k] * Γ[l, s, j] - Γ[s, i, j] * Γ[l, s, k]

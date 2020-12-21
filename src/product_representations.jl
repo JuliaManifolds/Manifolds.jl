@@ -272,37 +272,37 @@ end
 number_eltype(a::ProductArray) = number_eltype(a.data)
 number_eltype(::Type{TPA}) where {TM,TData,TPA<:ProductArray{TM,TData}} = eltype(TData)
 
-function _show_component(io::IO, v; pre = "", head = "")
-    sx = sprint(show, "text/plain", v, context = io, sizehint = 0)
+function _show_component(io::IO, v; pre="", head="")
+    sx = sprint(show, "text/plain", v, context=io, sizehint=0)
     sx = replace(sx, '\n' => "\n$(pre)")
     return print(io, head, pre, sx)
 end
 
-function _show_component_range(io::IO, vs, range; pre = "", sym = "Component ")
+function _show_component_range(io::IO, vs, range; pre="", sym="Component ")
     for i in range
-        _show_component(io, vs[i]; pre = pre, head = "\n$(sym)$(i) =\n")
+        _show_component(io, vs[i]; pre=pre, head="\n$(sym)$(i) =\n")
     end
     return nothing
 end
 
-function _show_product_repr(io::IO, x; name = "Product representation", nmax = 4)
+function _show_product_repr(io::IO, x; name="Product representation", nmax=4)
     n = length(x.parts)
     print(io, "$(name) with $(n) submanifold component$(n == 1 ? "" : "s"):")
     half_nmax = div(nmax, 2)
     pre = "  "
     sym = " Component "
     if n ≤ nmax
-        _show_component_range(io, x.parts, 1:n; pre = pre, sym = sym)
+        _show_component_range(io, x.parts, 1:n; pre=pre, sym=sym)
     else
-        _show_component_range(io, x.parts, 1:half_nmax; pre = pre, sym = sym)
+        _show_component_range(io, x.parts, 1:half_nmax; pre=pre, sym=sym)
         print(io, "\n ⋮")
-        _show_component_range(io, x.parts, (n - half_nmax + 1):n; pre = pre, sym = sym)
+        _show_component_range(io, x.parts, (n - half_nmax + 1):n; pre=pre, sym=sym)
     end
     return nothing
 end
 
 function Base.show(io::IO, ::MIME"text/plain", x::ProductArray)
-    return _show_product_repr(io, x; name = "ProductArray")
+    return _show_product_repr(io, x; name="ProductArray")
 end
 
 function allocate(x::ProductArray{ShapeSpec}) where {ShapeSpec<:ShapeSpecification}
@@ -378,7 +378,7 @@ function Base.convert(::Type{ProductRepr{TPR}}, x::ProductRepr) where {TPR<:Tupl
 end
 
 function Base.show(io::IO, ::MIME"text/plain", x::ProductRepr)
-    return _show_product_repr(io, x; name = "ProductRepr")
+    return _show_product_repr(io, x; name="ProductRepr")
 end
 
 ManifoldsBase._get_vector_cache_broadcast(::ProductRepr) = Val(false)

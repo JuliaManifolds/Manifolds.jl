@@ -11,9 +11,9 @@ $𝔽^{n₁,…,nᵢ}$ = `Euclidean(n₁,...,nᵢ; field = 𝔽)`, which is isom
 """
 const TranslationGroup{T<:Tuple,𝔽} = GroupManifold{𝔽,Euclidean{T,𝔽},AdditionOperation}
 
-function TranslationGroup(n::Int...; field::AbstractNumbers = ℝ)
+function TranslationGroup(n::Int...; field::AbstractNumbers=ℝ)
     return TranslationGroup{Tuple{n...},field}(
-        Euclidean(n...; field = field),
+        Euclidean(n...; field=field),
         AdditionOperation(),
     )
 end

@@ -38,13 +38,7 @@ This means, that `p` is valid, that `X` is of correct dimension and elementwise
 a tangent vector to the elements of `p` on the [`Circle`](@ref).
 The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
-function check_tangent_vector(
-    M::Torus{N},
-    p,
-    X;
-    check_base_point = true,
-    kwargs...,
-) where {N}
+function check_tangent_vector(M::Torus{N}, p, X; check_base_point=true, kwargs...) where {N}
     if check_base_point && length(p) != N
         return DomainError(
             length(p),
@@ -61,7 +55,7 @@ function check_tangent_vector(
         PowerManifold(M.manifold, N),
         p,
         X;
-        check_base_point = check_base_point,
+        check_base_point=check_base_point,
         kwargs...,
     )
 end

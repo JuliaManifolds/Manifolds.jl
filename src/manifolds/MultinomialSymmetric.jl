@@ -81,7 +81,7 @@ function check_tangent_vector(
     M::MultinomialSymmetric{n},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {n}
     if check_base_point
@@ -94,12 +94,12 @@ function check_tangent_vector(
         M,
         p,
         X;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
     # from the embedding we know that columns sum to zero, only symmety is left, i.e.
-    return check_tangent_vector(SymmetricMatrices(n, ℝ), p, X; check_base_point = false)
+    return check_tangent_vector(SymmetricMatrices(n, ℝ), p, X; check_base_point=false)
 end
 
 function decorated_manifold(::MultinomialSymmetric{N}) where {N}
@@ -108,7 +108,6 @@ end
 
 embed!(::MultinomialSymmetric, q, p) = copyto!(q, p)
 embed!(::MultinomialSymmetric, Y, ::Any, X) = copyto!(Y, X)
-
 
 @doc raw"""
     manifold_dimension(M::MultinomialSymmetric{n}) where {n}
@@ -142,7 +141,7 @@ where $I_n$ is teh $n×n$ unit matrix and $\mathbf{1}_n$ is the vector of length
 project(::MultinomialSymmetric, ::Any, ::Any)
 
 function project!(::MultinomialSymmetric{n}, X, p, Y) where {n}
-    α = (I + p) \ sum(Y, dims = 2) # Formula (49) from 1802.02628
+    α = (I + p) \ sum(Y, dims=2) # Formula (49) from 1802.02628
     return X .= Y .- (repeat(α, 1, 3) .+ repeat(α', 3, 1)) .* p
 end
 

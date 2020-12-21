@@ -157,22 +157,22 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_project_tangent = is_plain_array || T == HyperboloidPoint,
-                test_musical_isomorphisms = is_plain_array,
-                test_default_vector_transport = true,
-                vector_transport_methods = [
+                test_project_tangent=is_plain_array || T == HyperboloidPoint,
+                test_musical_isomorphisms=is_plain_array,
+                test_default_vector_transport=true,
+                vector_transport_methods=[
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                is_tangent_atol_multiplier = 10.0,
-                exp_log_atol_multiplier = 10.0,
-                retraction_methods = (ExponentialRetraction(),),
-                test_vee_hat = false,
-                test_forward_diff = is_plain_array,
-                test_reverse_diff = is_plain_array,
-                test_tangent_vector_broadcasting = is_plain_array,
-                test_vector_spaces = is_plain_array,
+                is_tangent_atol_multiplier=10.0,
+                exp_log_atol_multiplier=10.0,
+                retraction_methods=(ExponentialRetraction(),),
+                test_vee_hat=false,
+                test_forward_diff=is_plain_array,
+                test_reverse_diff=is_plain_array,
+                test_tangent_vector_broadcasting=is_plain_array,
+                test_vector_spaces=is_plain_array,
             )
         end
     end
@@ -207,8 +207,8 @@ include("utils.jl")
             [0.0, -1.0, sqrt(2.0)],
         ]
         ws = UnitWeights{Float64}(length(pts))
-        @test isapprox(M, mean(M, pts), pts[1]; atol = 10^-4)
-        @test isapprox(M, mean(M, pts, ws), pts[1]; atol = 10^-4)
+        @test isapprox(M, mean(M, pts), pts[1]; atol=10^-4)
+        @test isapprox(M, mean(M, pts, ws), pts[1]; atol=10^-4)
         @test_throws DimensionMismatch mean(M, pts, UnitWeights{Float64}(length(pts) + 1))
     end
     @testset "Hyperbolic ONB test" begin

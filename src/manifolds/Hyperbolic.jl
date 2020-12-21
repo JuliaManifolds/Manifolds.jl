@@ -176,7 +176,7 @@ function check_tangent_vector(
     M::Hyperbolic{N},
     p,
     X::Union{PoincareBallTVector,PoincareHalfSpaceTVector};
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {N}
     if check_base_point
@@ -262,7 +262,6 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
         return isapprox(X.value, Y.value; kwargs...)
     end
 end
-
 
 @doc raw"""
     log(M::Hyperbolic, p, q)

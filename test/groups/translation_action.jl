@@ -60,10 +60,9 @@ include("group_utils.jl")
             a_pts,
             m_pts,
             v_pts;
-            test_optimal_alignment = false,
-            test_diff = true,
-            atol = atol,
+            test_optimal_alignment=false,
+            test_diff=true,
+            atol=atol,
         )
     end
-
 end

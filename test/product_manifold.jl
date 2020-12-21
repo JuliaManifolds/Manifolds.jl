@@ -167,7 +167,6 @@ end
            0.0
            0.0"""
 
-
         shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M1, M1, M2, M2)
         p = Manifolds.ProductArray(shape_se, Float64[1, 0, 0, 0, 1, 0, 1, 2, 3, 4])
         @test sprint(show, "text/plain", p) == """
@@ -253,7 +252,6 @@ end
            3.0
            4.0"""
 
-
         p = Manifolds.ProductRepr(
             Float64[1, 0, 0],
             Float64[0, 1, 0],
@@ -310,24 +308,24 @@ end
             test_manifold(
                 Mse,
                 pts;
-                test_reverse_diff = isa(T, Vector),
-                test_musical_isomorphisms = true,
-                test_injectivity_radius = true,
-                test_project_point = true,
-                test_project_tangent = true,
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
-                test_mutating_rand = isa(T, Vector),
-                point_distributions = [Manifolds.ProductPointDistribution(
+                test_reverse_diff=isa(T, Vector),
+                test_musical_isomorphisms=true,
+                test_injectivity_radius=true,
+                test_project_point=true,
+                test_project_tangent=true,
+                retraction_methods=retraction_methods,
+                inverse_retraction_methods=inverse_retraction_methods,
+                test_mutating_rand=isa(T, Vector),
+                point_distributions=[Manifolds.ProductPointDistribution(
                     distr_M1,
                     distr_M2,
                 )],
-                tvector_distributions = [Manifolds.ProductFVectorDistribution(
+                tvector_distributions=[Manifolds.ProductFVectorDistribution(
                     distr_tv_M1,
                     distr_tv_M2,
                 )],
-                is_tangent_atol_multiplier = 1,
-                exp_log_atol_multiplier = 1,
+                is_tangent_atol_multiplier=1,
+                exp_log_atol_multiplier=1,
             )
         end
     end
@@ -379,11 +377,11 @@ end
     test_manifold(
         Mser,
         pts,
-        test_injectivity_radius = false,
-        test_forward_diff = false,
-        test_reverse_diff = false,
-        is_tangent_atol_multiplier = 1,
-        exp_log_atol_multiplier = 1,
+        test_injectivity_radius=false,
+        test_forward_diff=false,
+        test_reverse_diff=false,
+        is_tangent_atol_multiplier=1,
+        exp_log_atol_multiplier=1,
     )
 
     @testset "product vector transport" begin
@@ -441,7 +439,6 @@ end
     end
 
     @testset "ProductRepr" begin
-
         Ts = SizedVector{3,Float64}
         Tr2 = SizedVector{2,Float64}
         pts_sphere = [
@@ -468,23 +465,23 @@ end
         test_manifold(
             Mse,
             pts,
-            test_injectivity_radius = false,
-            test_musical_isomorphisms = true,
-            test_tangent_vector_broadcasting = false,
-            test_forward_diff = false,
-            test_reverse_diff = false,
-            test_project_tangent = true,
-            test_project_point = true,
-            test_default_vector_transport = true,
-            vector_transport_methods = [
+            test_injectivity_radius=false,
+            test_musical_isomorphisms=true,
+            test_tangent_vector_broadcasting=false,
+            test_forward_diff=false,
+            test_reverse_diff=false,
+            test_project_tangent=true,
+            test_project_point=true,
+            test_default_vector_transport=true,
+            vector_transport_methods=[
                 ProductVectorTransport(ParallelTransport(), ParallelTransport()),
                 ProductVectorTransport(SchildsLadderTransport(), SchildsLadderTransport()),
                 ProductVectorTransport(PoleLadderTransport(), PoleLadderTransport()),
             ],
-            basis_types_vecs = (basis_types[1], basis_types[3], basis_types[4]),
-            basis_types_to_from = basis_types,
-            is_tangent_atol_multiplier = 1,
-            exp_log_atol_multiplier = 1,
+            basis_types_vecs=(basis_types[1], basis_types[3], basis_types[4]),
+            basis_types_to_from=basis_types,
+            is_tangent_atol_multiplier=1,
+            exp_log_atol_multiplier=1,
         )
         @test number_eltype(pts[1]) === Float64
         @test submanifold_component(Mse, pts[1], 1) === pts[1].parts[1]

@@ -16,7 +16,6 @@ It is calculated as the tangent vector equal to $\mathrm{d}f_t(t)[1]$.
 """
 differential(::Manifold, ::Any, ::Real, ::AbstractRiemannianDiffBackend)
 
-
 @doc raw"""
     gradient(M::Manifold, f, p, backend::AbstractRiemannianDiffBackend = rgradient_backend())
 
@@ -108,7 +107,6 @@ function gradient!(M::Manifold, f, X, p, backend::RiemannianONBDiffBackend)
     end
     return get_vector!(M, X, p, onb_coords, backend.basis)
 end
-
 
 """
     CurrentRiemannianDiffBackend(backend::AbstractRiemannianDiffBackend)

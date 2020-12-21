@@ -64,23 +64,23 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_exp_log = true,
-                test_injectivity_radius = false,
-                test_project_tangent = true,
-                test_default_vector_transport = false,
-                point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                test_vee_hat = false,
-                retraction_methods = [PolarRetraction(), QRRetraction()],
-                inverse_retraction_methods = [
+                test_exp_log=true,
+                test_injectivity_radius=false,
+                test_project_tangent=true,
+                test_default_vector_transport=false,
+                point_distributions=[Manifolds.uniform_distribution(M, pts[1])],
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                test_vee_hat=false,
+                retraction_methods=[PolarRetraction(), QRRetraction()],
+                inverse_retraction_methods=[
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
                 #basis_types_vecs = basis_types,
                 # investigate why this is so large on dev
-                exp_log_atol_multiplier = 10.0 * (VERSION >= v"1.6-DEV" ? 10.0^8 : 1.0),
-                is_tangent_atol_multiplier = 20.0,
+                exp_log_atol_multiplier=10.0 * (VERSION >= v"1.6-DEV" ? 10.0^8 : 1.0),
+                is_tangent_atol_multiplier=20.0,
             )
 
             @testset "inner/norm" begin
@@ -115,7 +115,7 @@ include("utils.jl")
                 y,
                 vector_transport_to(M, x, v, y, ProjectionTransport()),
                 true;
-                atol = 10^-15,
+                atol=10^-15,
             )
         end
     end
@@ -161,20 +161,20 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_exp_log = true,
-                test_injectivity_radius = false,
-                test_project_tangent = true,
-                test_default_vector_transport = false,
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                test_vee_hat = false,
-                retraction_methods = [PolarRetraction(), QRRetraction()],
-                inverse_retraction_methods = [
+                test_exp_log=true,
+                test_injectivity_radius=false,
+                test_project_tangent=true,
+                test_default_vector_transport=false,
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                test_vee_hat=false,
+                retraction_methods=[PolarRetraction(), QRRetraction()],
+                inverse_retraction_methods=[
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                exp_log_atol_multiplier = 10.0^3,
-                is_tangent_atol_multiplier = 20.0,
+                exp_log_atol_multiplier=10.0^3,
+                is_tangent_atol_multiplier=20.0,
             )
 
             @testset "inner/norm" begin

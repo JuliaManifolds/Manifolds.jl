@@ -10,7 +10,7 @@ include("utils.jl")
         @test_throws DomainError is_manifold_point(M, 9.0, true)
         @test !is_tangent_vector(M, 9.0, 0.0)
         @test_throws DomainError is_tangent_vector(M, 9.0, 0.0, true)
-        @test is_tangent_vector(M, 0.0, 0.0; check_base_point = false)
+        @test is_tangent_vector(M, 0.0, 0.0; check_base_point=false)
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_coordinates(
             M,
@@ -77,7 +77,7 @@ include("utils.jl")
         log!(M, v, x, SVector(π / 4))
         @test norm(M, x, v) ≈ π / 4
         @test is_tangent_vector(M, x, v)
-        @test is_tangent_vector(M, [], v; check_base_point = false)
+        @test is_tangent_vector(M, [], v; check_base_point=false)
         @test project(M, 1.0) == 1.0
         x = MVector(0.0)
         project!(M, x, x)
@@ -102,32 +102,32 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                test_vector_spaces = false,
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                test_vee_hat = false,
-                is_mutating = false,
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                test_vector_spaces=false,
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                test_vee_hat=false,
+                is_mutating=false,
             )
             ptsS = SVector.(pts)
             test_manifold(
                 M,
                 ptsS,
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                vector_transport_methods = [
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                vector_transport_methods=[
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                test_vee_hat = true,
-                basis_types_vecs = basis_types_real,
-                basis_types_to_from = basis_types_real,
+                test_vee_hat=true,
+                basis_types_vecs=basis_types_real,
+                basis_types_to_from=basis_types_real,
             )
         end
     end
@@ -181,31 +181,31 @@ include("utils.jl")
             test_manifold(
                 Mc,
                 pts,
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                test_vector_spaces = false,
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                is_mutating = false,
-                test_vee_hat = false,
-                exp_log_atol_multiplier = 2.0,
-                is_tangent_atol_multiplier = 2.0,
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                test_vector_spaces=false,
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                is_mutating=false,
+                test_vee_hat=false,
+                exp_log_atol_multiplier=2.0,
+                is_tangent_atol_multiplier=2.0,
             )
             ptsS = SVector.(pts)
             test_manifold(
                 Mc,
                 ptsS,
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                test_vee_hat = true,
-                exp_log_atol_multiplier = 2.0,
-                is_tangent_atol_multiplier = 2.0,
-                basis_types_vecs = basis_types,
-                basis_types_to_from = basis_types,
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                test_vee_hat=true,
+                exp_log_atol_multiplier=2.0,
+                is_tangent_atol_multiplier=2.0,
+                basis_types_vecs=basis_types,
+                basis_types_to_from=basis_types,
             )
         end
     end

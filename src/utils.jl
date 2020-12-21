@@ -33,7 +33,7 @@ Compute a modified `sign(z)` that is always nonzero, i.e. where
 \end{cases}
 ````
 """
-@inline function nzsign(z, absz = abs(z))
+@inline function nzsign(z, absz=abs(z))
     psignz = z / absz
     return ifelse(iszero(absz), one(psignz), psignz)
 end

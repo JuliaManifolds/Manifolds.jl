@@ -27,18 +27,18 @@ include("group_utils.jl")
             A_left,
             a_pts,
             m_pts;
-            test_optimal_alignment = false,
-            test_diff = false,
-            atol = atol,
+            test_optimal_alignment=false,
+            test_diff=false,
+            atol=atol,
         )
 
         test_action(
             A_right,
             a_pts,
             m_pts;
-            test_optimal_alignment = false,
-            test_diff = false,
-            atol = atol,
+            test_optimal_alignment=false,
+            test_diff=false,
+            atol=atol,
         )
     end
 
@@ -63,21 +63,7 @@ include("group_utils.jl")
     @test repr(A_left) == "GroupOperationAction($(repr(G)), LeftAction())"
     @test repr(A_right) == "GroupOperationAction($(repr(G)), RightAction())"
 
-    test_action(
-        A_left,
-        a_pts,
-        m_pts,
-        v_pts;
-        test_optimal_alignment = true,
-        test_diff = true,
-    )
+    test_action(A_left, a_pts, m_pts, v_pts; test_optimal_alignment=true, test_diff=true)
 
-    test_action(
-        A_right,
-        a_pts,
-        m_pts,
-        v_pts;
-        test_optimal_alignment = true,
-        test_diff = true,
-    )
+    test_action(A_right, a_pts, m_pts, v_pts; test_optimal_alignment=true, test_diff=true)
 end

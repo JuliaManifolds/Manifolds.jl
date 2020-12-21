@@ -58,7 +58,7 @@ and a symmetric matrix.
 The optional parameter `check_base_point` indicates whether to call [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the tests can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::CholeskySpace, p, X; check_base_point = true, kwargs...)
+function check_tangent_vector(M::CholeskySpace, p, X; check_base_point=true, kwargs...)
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe !== nothing && return mpe

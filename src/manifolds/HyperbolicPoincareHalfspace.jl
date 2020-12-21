@@ -172,7 +172,6 @@ function convert(
     return (convert(PoincareHalfSpacePoint, p), convert(PoincareHalfSpaceTVector, p, X))
 end
 
-
 @doc raw"""
     distance(::Hyperbolic, p::PoincareHalfSpacePoint, q::PoincareHalfSpacePoint)
 
