@@ -49,15 +49,15 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_injectivity_radius = false,
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_vee_hat = false,
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                is_tangent_atol_multiplier = 5.0,
-                inverse_retraction_methods = [SoftmaxInverseRetraction()],
-                retraction_methods = [SoftmaxRetraction()],
+                test_injectivity_radius=false,
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_vee_hat=false,
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                is_tangent_atol_multiplier=5.0,
+                inverse_retraction_methods=[SoftmaxInverseRetraction()],
+                retraction_methods=[SoftmaxRetraction()],
             )
         end
     end
@@ -73,7 +73,7 @@ include("utils.jl")
         X = log(M, q, p)
         X2 = X + [1, 2, 3]
         Y = project(M, q, X2)
-        @test is_tangent_vector(M, q, Y; atol = 1e-15)
+        @test is_tangent_vector(M, q, Y; atol=1e-15)
 
         @test_throws DomainError project(M, [1, -1, 2])
         @test isapprox(M, [0.6, 0.2, 0.2], project(M, [0.3, 0.1, 0.1]))

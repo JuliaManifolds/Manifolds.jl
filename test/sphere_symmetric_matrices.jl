@@ -40,14 +40,14 @@ include("utils.jl")
         test_manifold(
             M,
             [A, F, G],
-            test_injectivity_radius = false,
-            test_forward_diff = false,
-            test_reverse_diff = false,
-            test_vector_spaces = true,
-            test_project_tangent = true,
-            test_musical_isomorphisms = true,
-            test_default_vector_transport = true,
-            is_tangent_atol_multiplier = 2,
+            test_injectivity_radius=false,
+            test_forward_diff=false,
+            test_reverse_diff=false,
+            test_vector_spaces=true,
+            test_project_tangent=true,
+            test_musical_isomorphisms=true,
+            test_default_vector_transport=true,
+            is_tangent_atol_multiplier=2,
         )
     end
     @testset "Complex Sphere Symmetric Matrices Basics" begin
@@ -62,17 +62,17 @@ include("utils.jl")
         test_manifold(
             M_complex,
             [C, H, I],
-            test_injectivity_radius = false,
-            test_forward_diff = false,
-            test_reverse_diff = false,
-            test_vector_spaces = true,
-            test_project_tangent = true,
-            test_musical_isomorphisms = true,
-            test_default_vector_transport = true,
-            is_tangent_atol_multiplier = 2,
-            is_point_atol_multiplier = 2,
-            projection_atol_multiplier = 2,
-            exp_log_atol_multiplier = 2,
+            test_injectivity_radius=false,
+            test_forward_diff=false,
+            test_reverse_diff=false,
+            test_vector_spaces=true,
+            test_project_tangent=true,
+            test_musical_isomorphisms=true,
+            test_default_vector_transport=true,
+            is_tangent_atol_multiplier=2,
+            is_point_atol_multiplier=2,
+            projection_atol_multiplier=2,
+            exp_log_atol_multiplier=2,
         )
     end
 end

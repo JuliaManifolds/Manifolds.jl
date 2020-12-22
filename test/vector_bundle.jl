@@ -2,7 +2,6 @@ include("utils.jl")
 
 struct TestVectorSpaceType <: VectorSpaceType end
 
-
 @testset "Tangent bundle" begin
     M = Sphere(2)
 
@@ -105,17 +104,17 @@ struct TestVectorSpaceType <: VectorSpaceType end
             test_manifold(
                 TB,
                 pts_tb,
-                test_injectivity_radius = false,
-                test_reverse_diff = isa(T, Vector),
-                test_forward_diff = isa(T, Vector),
-                test_tangent_vector_broadcasting = false,
-                test_vee_hat = true,
-                test_project_tangent = true,
-                test_project_point = true,
-                test_default_vector_transport = true,
-                vector_transport_methods = [ParallelTransport()],
-                basis_types_vecs = basis_types,
-                projection_atol_multiplier = 4,
+                test_injectivity_radius=false,
+                test_reverse_diff=isa(T, Vector),
+                test_forward_diff=isa(T, Vector),
+                test_tangent_vector_broadcasting=false,
+                test_vee_hat=true,
+                test_project_tangent=true,
+                test_project_point=true,
+                test_default_vector_transport=true,
+                vector_transport_methods=[ParallelTransport()],
+                basis_types_vecs=basis_types,
+                projection_atol_multiplier=4,
             )
 
             # tangent space at point
@@ -131,16 +130,16 @@ struct TestVectorSpaceType <: VectorSpaceType end
             test_manifold(
                 TpM,
                 pts_TpM,
-                test_injectivity_radius = true,
-                test_reverse_diff = isa(T, Vector),
-                test_forward_diff = isa(T, Vector),
-                test_tangent_vector_broadcasting = true,
-                test_vee_hat = false,
-                test_project_tangent = true,
-                test_project_point = true,
-                test_default_vector_transport = true,
-                basis_types_vecs = basis_types,
-                projection_atol_multiplier = 4,
+                test_injectivity_radius=true,
+                test_reverse_diff=isa(T, Vector),
+                test_forward_diff=isa(T, Vector),
+                test_tangent_vector_broadcasting=true,
+                test_vee_hat=false,
+                test_project_tangent=true,
+                test_project_point=true,
+                test_default_vector_transport=true,
+                basis_types_vecs=basis_types,
+                projection_atol_multiplier=4,
             )
         end
     end

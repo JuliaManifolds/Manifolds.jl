@@ -9,7 +9,6 @@ abstract type AbstractDiffBackend end
 
 struct NoneDiffBackend <: AbstractDiffBackend end
 
-
 """
     _derivative(f, t[, backend::AbstractDiffBackend])
 

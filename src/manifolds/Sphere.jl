@@ -46,8 +46,7 @@ Generate the (real-valued) sphere $𝕊^{n} ⊂ ℝ^{n+1}$, where `field` can al
 generate the complex- and quaternionic-valued sphere.
 """
 struct Sphere{N,𝔽} <: AbstractSphere{𝔽} end
-Sphere(n::Int, field::AbstractNumbers = ℝ) = Sphere{n,field}()
-
+Sphere(n::Int, field::AbstractNumbers=ℝ) = Sphere{n,field}()
 
 @doc raw"""
     ArraySphere{T<:Tuple,𝔽} <: AbstractSphere{𝔽}
@@ -86,7 +85,7 @@ several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product 
 Generate sphere in $𝔽^{n_1, n_2, …, n_i}$, where $𝔽$ defaults to the real-valued case $ℝ$.
 """
 struct ArraySphere{N,𝔽} <: AbstractSphere{𝔽} where {N<:Tuple} end
-function ArraySphere(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
+function ArraySphere(n::Vararg{Int,I}; field::AbstractNumbers=ℝ) where {I}
     return ArraySphere{Tuple{n...},field}()
 end
 
@@ -125,7 +124,7 @@ The optional parameter `check_base_point` indicates, whether to call
 [`check_manifold_point`](@ref)  for `p` or not.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::AbstractSphere, p, X; check_base_point = true, kwargs...)
+function check_tangent_vector(M::AbstractSphere, p, X; check_base_point=true, kwargs...)
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
@@ -136,7 +135,7 @@ function check_tangent_vector(M::AbstractSphere, p, X; check_base_point = true, 
         get_embedding(M),
         p,
         X;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -150,10 +149,9 @@ function check_tangent_vector(M::AbstractSphere, p, X; check_base_point = true, 
 end
 
 function decorated_manifold(M::AbstractSphere{𝔽}) where {𝔽}
-    return Euclidean(representation_size(M)...; field = 𝔽)
+    return Euclidean(representation_size(M)...; field=𝔽)
 end
 get_embedding(M::AbstractSphere{𝔽}) where {𝔽} = decorated_manifold(M)
-
 
 @doc raw"""
     distance(M::AbstractSphere, p, q)
@@ -198,7 +196,7 @@ function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) w
     κ = ones(n)
     if !iszero(B.frame_direction)
         # if we have a nonzero direction for the geodesic, add it and it gets curvature zero from the tensor
-        V = cat(B.frame_direction / norm(M, p, B.frame_direction), V; dims = 2)
+        V = cat(B.frame_direction / norm(M, p, B.frame_direction), V; dims=2)
         κ[1] = 0 # no curvature along the geodesic direction, if x!=y
     end
     Ξ = [V[:, i] for i in 1:n]
@@ -422,7 +420,6 @@ representation size of the embedding.
 """
 @generated representation_size(M::ArraySphere{N}) where {N} = size_to_tuple(N)
 @generated representation_size(M::Sphere{N}) where {N} = (N + 1,)
-
 
 @doc raw"""
     retract(M::AbstractSphere, p, X, ::ProjectionRetraction)

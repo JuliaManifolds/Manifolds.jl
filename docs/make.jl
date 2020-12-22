@@ -8,16 +8,16 @@ isdir(generated_path) || mkdir(generated_path)
 cp(
     joinpath(dirname(@__DIR__), "CONTRIBUTING.md"),
     joinpath(generated_path, "contributing.md");
-    force = true,
+    force=true,
 )
 
 makedocs(
     # for development, we disable prettyurls
-    format = Documenter.HTML(prettyurls = false, assets = ["assets/favicon.ico"]),
-    modules = [Manifolds, ManifoldsBase, Manifolds.ManifoldTests],
-    authors = "Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
-    sitename = "Manifolds.jl",
-    pages = [
+    format=Documenter.HTML(prettyurls=false, assets=["assets/favicon.ico"]),
+    modules=[Manifolds, ManifoldsBase, Manifolds.ManifoldTests],
+    authors="Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
+    sitename="Manifolds.jl",
+    pages=[
         "Home" => "index.md",
         "ManifoldsBase.jl" => "interface.md",
         "Examples" => ["How to implement a Manifold" => "examples/manifold.md"],
@@ -82,4 +82,4 @@ makedocs(
         ],
     ],
 )
-deploydocs(repo = "github.com/JuliaManifolds/Manifolds.jl.git", push_preview = true)
+deploydocs(repo="github.com/JuliaManifolds/Manifolds.jl.git", push_preview=true)

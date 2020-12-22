@@ -15,7 +15,7 @@ function check_manifold_point(M::Hyperbolic, p::HyperboloidPoint; kwargs...)
     return check_manifold_point(M, p.value; kwargs...)
 end
 
-function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwargs...)
+function check_tangent_vector(M::Hyperbolic, p, X; check_base_point=true, kwargs...)
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
@@ -26,7 +26,7 @@ function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwar
         M,
         p,
         X;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -269,7 +269,7 @@ function get_basis(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)
         end
         κ[1] = 0.0
     end
-    V = gram_schmidt(M, p, V; atol = 4 * eps(eltype(V[1])))
+    V = gram_schmidt(M, p, V; atol=4 * eps(eltype(V[1])))
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, κ, V))
 end
 

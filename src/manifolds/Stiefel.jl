@@ -33,7 +33,7 @@ Generate the (real-valued) Stiefel manifold of $n × k$ dimensional orthonormal 
 """
 struct Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
-Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ) = Stiefel{n,k,field}()
+Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ) = Stiefel{n,k,field}()
 
 @doc raw"""
     PadeRetraction{m} <: AbstractRetractionMethod
@@ -101,7 +101,7 @@ function check_tangent_vector(
     M::Stiefel{n,k,𝔽},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {n,k,𝔽}
     if check_base_point
@@ -114,7 +114,7 @@ function check_tangent_vector(
         M,
         p,
         X;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -127,7 +127,7 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(M::Stiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
+decorated_manifold(M::Stiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field=𝔽)
 
 @doc raw"""
     exp(M::Stiefel, p, X)

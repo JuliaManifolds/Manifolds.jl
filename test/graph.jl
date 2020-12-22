@@ -27,8 +27,8 @@ include("utils.jl")
         test_manifold(
             N,
             pts;
-            test_representation_size = false,
-            test_reverse_diff = false, #VERSION > v"1.2",
+            test_representation_size=false,
+            test_reverse_diff=false, #VERSION > v"1.2",
         )
         @test sprint(show, "text/plain", N) == """
         GraphManifold
@@ -50,8 +50,8 @@ include("utils.jl")
         test_manifold(
             NE,
             [x[1:2], y[1:2], z[1:2]];
-            test_representation_size = false,
-            test_reverse_diff = false, #VERSION > v"1.2",
+            test_representation_size=false,
+            test_reverse_diff=false, #VERSION > v"1.2",
         )
         @test sprint(show, "text/plain", NE) == """
         GraphManifold

@@ -34,7 +34,7 @@ include("utils.jl")
         M,
         p2,
         vector_transport_to(M, p, X2, p2, ProjectionTransport());
-        atol = 10^-15,
+        atol=10^-15,
     )
     X3 = [1.0 1.0 1.0; 0.0 0.0 0.0; 0.0 0.0 0.0]
     @test inner(M, p, X3, X3) == 9.0
@@ -49,17 +49,17 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_injectivity_radius = false,
-                test_reverse_diff = false,
-                test_forward_diff = false,
-                test_project_tangent = true,
-                test_exp_log = false,
-                test_default_vector_transport = true,
-                vector_transport_methods = [ProjectionTransport()],
-                default_inverse_retraction_method = nothing,
-                default_retraction_method = ProjectionRetraction(),
-                is_tangent_atol_multiplier = 20,
-                is_point_atol_multiplier = 20,
+                test_injectivity_radius=false,
+                test_reverse_diff=false,
+                test_forward_diff=false,
+                test_project_tangent=true,
+                test_exp_log=false,
+                test_default_vector_transport=true,
+                vector_transport_methods=[ProjectionTransport()],
+                default_inverse_retraction_method=nothing,
+                default_retraction_method=ProjectionRetraction(),
+                is_tangent_atol_multiplier=20,
+                is_point_atol_multiplier=20,
             )
         end
     end

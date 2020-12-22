@@ -31,7 +31,7 @@ include("group_utils.jl")
 
     ge = allocate(pts[1])
     copyto!(ge, make_identity(G, pts[1]))
-    @test isapprox(ge, I; atol = 1e-10)
+    @test isapprox(ge, I; atol=1e-10)
 
     gI = Identity(G, ge)
     gT = allocate_result(G, exp, gI, log(G, pts[1], pts[2]))
@@ -48,7 +48,7 @@ include("group_utils.jl")
         @test translate_diff(G, gpts[2], gpts[1], vgpts[1], LeftAction()) ≈ vgpts[1]
         @test translate_diff(G, gpts[2], gpts[1], vgpts[1], RightAction()) ≈
               transpose(gpts[2]) * vgpts[1] * gpts[2]
-        test_group(G, gpts, vgpts, vgpts; test_diff = true, test_invariance = true)
+        test_group(G, gpts, vgpts, vgpts; test_diff=true, test_invariance=true)
     end
 
     @testset "Decorator forwards to group" begin
@@ -61,7 +61,7 @@ include("group_utils.jl")
             make_identity(TranslationGroup(3), [1, 2, 3]),
             true,
         )
-        test_group(DM, pts, vpts, vpts; test_diff = true)
+        test_group(DM, pts, vpts, vpts; test_diff=true)
     end
 
     @testset "Group forwards to decorated" begin
@@ -82,15 +82,15 @@ include("group_utils.jl")
         test_manifold(
             G,
             pts;
-            test_reverse_diff = false,
-            test_injectivity_radius = false,
-            test_project_tangent = true,
-            test_musical_isomorphisms = false,
-            retraction_methods = retraction_methods,
-            inverse_retraction_methods = inverse_retraction_methods,
-            exp_log_atol_multiplier = 20,
-            retraction_atol_multiplier = 12,
-            is_tangent_atol_multiplier = 1.2,
+            test_reverse_diff=false,
+            test_injectivity_radius=false,
+            test_project_tangent=true,
+            test_musical_isomorphisms=false,
+            retraction_methods=retraction_methods,
+            inverse_retraction_methods=inverse_retraction_methods,
+            exp_log_atol_multiplier=20,
+            retraction_atol_multiplier=12,
+            is_tangent_atol_multiplier=1.2,
         )
 
         @test injectivity_radius(G) == injectivity_radius(M)
@@ -134,7 +134,7 @@ include("group_utils.jl")
         @test Xⁱ ≈ vee(G, pe, X)
 
         X2 = hat(G, make_identity(G, pts[1]), Xⁱ)
-        @test isapprox(M, pe, X2, hat(G, pe, Xⁱ); atol = 1e-6)
+        @test isapprox(M, pe, X2, hat(G, pe, Xⁱ); atol=1e-6)
     end
     @testset "Identity and get_vector/get_coordinates" begin
         e = Identity(G, Matrix{Float64}(I, 3, 3))

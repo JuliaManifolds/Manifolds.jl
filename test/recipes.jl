@@ -20,7 +20,7 @@ include("utils.jl")
             M = Hyperbolic(2)
             p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 1.0]])
             p2 = convert.(Ref(PoincareBallPoint), p)
-            return plot(M, p2; geodesic_interpolation = 80)
+            return plot(M, p2; geodesic_interpolation=80)
         end
         @plottest Hyp2PB_plot_geo joinpath(references_folder, "Hyp2PBPlotGeo.png") false
 
@@ -45,7 +45,7 @@ include("utils.jl")
             M = Hyperbolic(2)
             p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 1.0]])
             p2 = convert.(Ref(PoincareHalfSpacePoint), p)
-            return plot(M, p2; geodesic_interpolation = 80)
+            return plot(M, p2; geodesic_interpolation=80)
         end
         @plottest Hyp2PH_plot_geo joinpath(references_folder, "Hyp2PHPlotGeo.png") false
 
@@ -71,7 +71,7 @@ include("utils.jl")
         function Hyp2_plot_geo()
             M = Hyperbolic(2)
             p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 1.0]])
-            return plot(M, p; geodesic_interpolation = 80)
+            return plot(M, p; geodesic_interpolation=80)
         end
         @plottest Hyp2_plot_geo joinpath(references_folder, "Hyp2PlotGeo.png") false
 
@@ -88,7 +88,7 @@ include("utils.jl")
         function Sphere2_plot()
             M = Sphere(2)
             pts = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]]
-            return plot(M, pts; wireframe_color = colorant"#CCCCCC", markersize = 10)
+            return plot(M, pts; wireframe_color=colorant"#CCCCCC", markersize=10)
         end
         @plottest Sphere2_plot joinpath(references_folder, "Sphere2Plot.png") false
 
@@ -98,8 +98,8 @@ include("utils.jl")
             return Plots.plot(
                 M,
                 pts;
-                wireframe_color = colorant"#CCCCCC",
-                geodesic_interpolation = 80,
+                wireframe_color=colorant"#CCCCCC",
+                geodesic_interpolation=80,
             )
         end
         @plottest Sphere2_plot_geo joinpath(references_folder, "Sphere2PlotGeo.png") false
@@ -110,7 +110,7 @@ include("utils.jl")
             pts2 = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0]]
             p3 = 1 / sqrt(3) .* [1.0, -1.0, 1.0]
             vecs = log.(Ref(M), pts2, Ref(p3))
-            return plot(M, pts2, vecs; wireframe_color = colorant"#CCCCCC", linewidth = 1.5)
+            return plot(M, pts2, vecs; wireframe_color=colorant"#CCCCCC", linewidth=1.5)
         end
         @plottest Sphere2_quiver joinpath(references_folder, "Sphere2Quiver.png") false
     end

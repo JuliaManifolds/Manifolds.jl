@@ -60,7 +60,7 @@ function check_tangent_vector(
     M::SymmetricPositiveDefinite{N},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {N}
     if check_base_point
@@ -73,7 +73,7 @@ function check_tangent_vector(
         M,
         p,
         X;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -87,7 +87,7 @@ function check_tangent_vector(
 end
 
 function decorated_manifold(M::SymmetricPositiveDefinite)
-    return Euclidean(representation_size(M)...; field = ℝ)
+    return Euclidean(representation_size(M)...; field=ℝ)
 end
 
 @doc raw"""
