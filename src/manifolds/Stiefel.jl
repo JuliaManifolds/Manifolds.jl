@@ -55,6 +55,23 @@ A retraction based on the Caley transform, which is realized by using the
 """
 const CaleyRetraction = PadeRetraction{1}
 
+
+# This could maybe also be moved to Base.
+"""
+    DifferentiatedRetraction{R<:AbstractRetractionMethod} <: AbstractVectorTransportMethod
+
+A type to specify a vector transport that is given by differentiating a retraction
+
+# Constructor
+
+    DifferentiatedRetraction(m::AbstractRetractionMethod)
+"""
+struct DifferentiatedRetraction{R<:AbstractRetractionMethod} <:
+       AbstractVectorTransportMethod end
+function DifferentiatedRetraction(::R) where {R<:AbstractRetractionMethod}
+    return DifferentiatedRetraction{R}()
+end
+
 function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where {n,k}
     return complex
 end
@@ -120,7 +137,7 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(M::Stiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field=𝔽)
+decorated_manifold(::Stiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field=𝔽)
 
 @doc raw"""
     exp(M::Stiefel, p, X)
@@ -359,7 +376,7 @@ end
 function Base.isapprox(M::Stiefel, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
 end
-Base.isapprox(M::Stiefel, p, q; kwargs...) = isapprox(norm(p - q), 0; kwargs...)
+Base.isapprox(::Stiefel, p, q; kwargs...) = isapprox(norm(p - q), 0; kwargs...)
 
 @doc raw"""
     manifold_dimension(M::Stiefel)
@@ -418,7 +435,7 @@ end
 @doc raw"""
     retract(::Stiefel, p, X, ::CaleyRetraction)
 
-Compute the retraction on the [`Stiefel`](@ref) that is based on the Caley transform[^Zhu2016].
+Compute the retraction on the [`Stiefel`](@ref) that is based on the Caley transform[^Zhu2017].
 Using
 ````math
   W_{p,X} = \operatorname{P}_pXp^{\mathrm{H}} - pX^{\mathrm{H}}\operatorname{P_p}
@@ -432,10 +449,10 @@ the formula reads
 
 It is implemented as the case $m=1$ of the [`PadeRetraction`](@ref).
 
-[^Zhu2016]:
+[^Zhu2017]:
     > X. Zhu:
     > A Riemannian conjugate gradient method for optimizazion on the Stiefel manifold,
-    > Computational Optimization and Applications 67(1), pp. 73–110, 2016.
+    > Computational Optimization and Applications 67(1), pp. 73–110, 2017.
     > doi [10.1007/s10589-016-9883-4](https://doi.org/10.1007/s10589-016-9883-4).
 """
 retract(::Stiefel, ::Any, ::Any, ::CaleyRetraction)
@@ -595,7 +612,7 @@ end
 @doc raw"""
     vector_transport_direction(::Stiefel, p, X, d, ::DifferentiatedRetraction{CaleyRetraction})
 
-Compute the vector transport given by the differentiated retraction of the [`CaleyRetraction`](@ref), cf. [^Zhu2016] Equation (17).
+Compute the vector transport given by the differentiated retraction of the [`CaleyRetraction`](@ref), cf. [^Zhu2017] Equation (17).
 
 The formula reads
 ````math
@@ -617,8 +634,8 @@ vector_transport_direction(M::Stiefel, p, X, d, ::DifferentiatedRetraction{Caley
 @doc raw"""
     vector_transport_direction(M::Stiefel, p, X, d, DifferentiatedRetraction{PolarRetraction})
 
-Compute the vector transport by computing the push forward of the
-[`retract(M::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref) Section 3.5 of [^Zhu2017]:
+Compute the vector transport by computing the push forward of
+[`retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref) Section 3.5 of [^Zhu2017]:
 
 ```math
 T_{p,d}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(1+d^\mathrm{T}d)^{-\frac{1}{2}},
@@ -629,11 +646,6 @@ where $q = \operatorname{retr}^{\mathrm{Pol}}_p(d)$, and $Λ$ is the unique solu
 ```math
     Λ(I+d^\mathrm{T}d)^{\frac{1}{2}} + (I + d^\mathrm{T}d)^{\frac{1}{2}} = q^\mathrm{T}X - X^\mathrm{T}q
 ```
-
-[^Zhu2017]:
-    > Zhu, X: A Riemannian conjugate gradient method for optimization on the Stiefel manifold
-    > Computational Optimization and Applications (2017), Volume 67, pp. 73-110
-    > doi: [10.1007/s10589-016-9883-4](https://doi.org/10.1007/s10589-016-9883-4)
 """
 vector_transport_direction(
     ::Stiefel,
@@ -646,7 +658,8 @@ vector_transport_direction(
     vector_transport_direction(M::Stiefel, p, X, d, DifferentiatedRetraction{QRRetraction})
 
 Compute the vector transport by computing the push forward of the
-[`retract(M::Stiefel, ::Any, ::Any, ::QRRetraction)`](@ref). See [^AbsilMahonySepulchre2008], p. 173, or Section 3.5 of [^Zhu2017]:
+[`retract(::Stiefel, ::Any, ::Any, ::QRRetraction)`](@ref),
+See [^AbsilMahonySepulchre2008], p. 173, or Section 3.5 of [^Zhu2017].
 ```math
 T_{p,d}^{\text{QR}}(X) = q*\rho_{\mathrm{s}}(q^\mathrm{T}XR^{-1}) + (I-qq^{\mathrm{T}})XR^{-1},
 ```
@@ -666,10 +679,6 @@ A_{ij}&\text{ if } i > j\\
     > Princeton University Press, 2008,
     > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244)
     > [open access](http://press.princeton.edu/chapters/absil/)
-[^Zhu2017]:
-    > Zhu, X: A Riemannian conjugate gradient method for optimization on the Stiefel manifold
-    > Computational Optimization and Applications (2017), Volume 67, pp. 73-110
-    > doi: [10.1007/s10589-016-9883-4](https://doi.org/10.1007/s10589-016-9883-4)
 """
 vector_transport_direction(
     ::Stiefel,
@@ -743,10 +752,6 @@ and $Λ$ is the unique solution of the Sylvester equation
     > SIAM Journal of Optimization, 2015, Vol. 25, No. 3, pp. 1660–1685
     > doi: [10.1137/140955483](https://doi.org/10.1137/140955483)
     > pdf: [tech. report](https://www.math.fsu.edu/~whuang2/pdf/RBroydenBasic_techrep.pdf)
-[^Zhu2017]:
-    > Zhu, X: A Riemannian conjugate gradient method for optimization on the Stiefel manifold
-    > Computational Optimization and Applications (2017), Volume 67, pp. 73-110
-    > doi: [10.1007/s10589-016-9883-4](https://doi.org/10.1007/s10589-016-9883-4)
 """
 vector_transport_to(
     ::Stiefel,
@@ -760,7 +765,9 @@ vector_transport_to(
     vector_transport_to(M::Stiefel, p, X, q, DifferentiatedRetraction{QRRetraction})
 
 Compute the vector transport by computing the push forward of the
-[`retract(M::Stiefel, ::Any, ::Any, ::QRRetraction)`](@ref). See [^AbsilMahonySepulchre2008], p. 173, or Section 3.5 of [^Zhu2017]:
+[`retract(M::Stiefel, ::Any, ::Any, ::QRRetraction)`](@ref),
+see [^AbsilMahonySepulchre2008], p. 173, or Section 3.5 of [^Zhu2017].
+
 ```math
 T_{q \gets p}^{\text{QR}}(X) = q*\rho_{\mathrm{s}}(q^\mathrm{T}XR^{-1}) + (I-qq^{\mathrm{T}})XR^{-1},
 ```
@@ -774,16 +781,6 @@ A_{ij}&\text{ if } i > j\\
 -A_{ji} \text{ if } i < j.\\
 \end{cases}
 ```
-[^AbsilMahonySepulchre2008]:
-    >Absil, P.-A., Mahony, R. and Sepulchre R.,
-    > _Optimization Algorithms on Matrix Manifolds_
-    > Princeton University Press, 2008,
-    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244)
-    > [open access](http://press.princeton.edu/chapters/absil/)
-[^Zhu2017]:
-    > Zhu, X: A Riemannian conjugate gradient method for optimization on the Stiefel manifold
-    > Computational Optimization and Applications (2017), Volume 67, pp. 73-110
-    > doi: [10.1007/s10589-016-9883-4](https://doi.org/10.1007/s10589-016-9883-4)
 """
 vector_transport_to(
     ::Stiefel,
