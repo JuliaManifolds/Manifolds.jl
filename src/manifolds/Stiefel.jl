@@ -55,13 +55,6 @@ A retraction based on the Caley transform, which is realized by using the
 """
 const CaleyRetraction = PadeRetraction{1}
 
-"""
-    CaleyVectorTransport <: AbstractVectorTransportMethod
-
-A vector transport that one obtains by differentiating a [`CaleyRetraction`](@ref).
-"""
-struct CaleyVectorTransport <: AbstractVectorTransportMethod end
-
 function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where {n,k}
     return complex
 end
@@ -553,7 +546,7 @@ function retract!(::Stiefel, q, p, X, ::PolarRetraction)
     s = svd(p + X)
     return mul!(q, s.U, s.Vt)
 end
-function retract!(M::Stiefekl, q, p, X, ::ProjectionRetraction)
+function retract!(M::Stiefel, q, p, X, ::ProjectionRetraction)
     return project!(M, q, X)
 end
 function retract!(::Stiefel, q, p, X, ::QRRetraction)
@@ -600,7 +593,7 @@ function uniform_distribution(M::Stiefel{n,k,ℝ}, p) where {n,k}
 end
 
 @doc raw"""
-    vector_transport_direction(::Stiefel, p, X, d, ::CaleyVectorTransport)
+    vector_transport_direction(::Stiefel, p, X, d, ::DifferentiatedRetraction{CaleyRetraction})
 
 Compute the vector transport given by the differentiated retraction of the [`CaleyRetraction`](@ref), cf. [^Zhu2016] Equation (17).
 
@@ -619,15 +612,168 @@ with
 Since this is the differentiated retraction as a vector transport, the result will be in the
 tangent space at $q=\operatorname{retr}_p(d)$ using the [`CaleyRetraction`](@ref).
 """
-vector_transport_direction(M::Stiefel, p, X, d, ::CaleyVectorTransport)
+vector_transport_direction(M::Stiefel, p, X, d, ::DifferentiatedRetraction{CaleyRetraction})
 
-function vector_transport_direction!(::Stiefel, Y, p, X, d, ::CaleyVectorTransport)
+@doc raw"""
+    vector_transport_direction(M::Stiefel, p, X, d, DifferentiatedRetraction{PolarRetraction})
+
+Compute the vector transport by computing the push forward of the
+[`retract(M::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref) Section 3.5 of [^Zhu2017]:
+
+```math
+T_{p,d}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(1+d^\mathrm{T}d)^{-\frac{1}{2}},
+```
+
+where $q = \operatorname{retr}^{\mathrm{Pol}}_p(d)$, and $Λ$ is the unique solution of the Sylvester equation
+
+```math
+    Λ(I+d^\mathrm{T}d)^{\frac{1}{2}} + (I + d^\mathrm{T}d)^{\frac{1}{2}} = q^\mathrm{T}X - X^\mathrm{T}q
+```
+
+[^Zhu2017]:
+    > Zhu, X: A Riemannian conjugate gradient method for optimization on the Stiefel manifold
+    > Computational Optimization and Applications (2017), Volume 67, pp. 73-110
+    > doi: [10.1007/s10589-016-9883-4](https://doi.org/10.1007/s10589-016-9883-4)
+"""
+vector_transport_direction(
+    ::Stiefel,
+    ::Any,
+    ::Any,
+    ::Any,
+    ::DifferentiatedRetraction{PolarRetraction},
+)
+@doc raw"""
+    vector_transport_direction(M::Stiefel, p, X, d, DifferentiatedRetraction{QRRetraction})
+
+Compute the vector transport by computing the push forward of the
+[`retract(M::Stiefel, ::Any, ::Any, ::QRRetraction)`](@ref). See [^AbsilMahonySepulchre2008], p. 173, or Section 3.5 of [^Zhu2017]:
+```math
+T_{p,d}^{\text{QR}}(X) = q*\rho_{\mathrm{s}}(q^\mathrm{T}XR^{-1}) + (I-qq^{\mathrm{T}})XR^{-1},
+```
+where $q = \operatorname{retr}^{\mathrm{QR}}_p(d)$, $R$ is the $R$ factor of the QR
+decomposition of $p + d$, and
+```math
+\bigl( \rho_{\mathrm{s}}(A) \bigr)_{ij}
+= \begin{cases}
+A_{ij}&\text{ if } i > j\\
+0 \text{ if } i = j\\
+-A_{ji} \text{ if } i < j.\\
+\end{cases}
+```
+[^AbsilMahonySepulchre2008]:
+    >Absil, P.-A., Mahony, R. and Sepulchre R.,
+    > _Optimization Algorithms on Matrix Manifolds_
+    > Princeton University Press, 2008,
+    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244)
+    > [open access](http://press.princeton.edu/chapters/absil/)
+[^Zhu2017]:
+    > Zhu, X: A Riemannian conjugate gradient method for optimization on the Stiefel manifold
+    > Computational Optimization and Applications (2017), Volume 67, pp. 73-110
+    > doi: [10.1007/s10589-016-9883-4](https://doi.org/10.1007/s10589-016-9883-4)
+"""
+vector_transport_direction(
+    ::Stiefel,
+    ::Any,
+    ::Any,
+    ::Any,
+    ::DifferentiatedRetraction{QRRetraction},
+)
+
+function vector_transport_direction!(
+    ::Stiefel,
+    Y,
+    p,
+    X,
+    d,
+    ::DifferentiatedRetraction{CaleyRetraction},
+)
     Pp = I - 1 // 2 * p * p'
     Wpd = Pp * d * p' - p * d' * Pp
     WpX = Pp * X * p' - p * X' * Pp
     q1 = I - 1 // 2 * Wpd
     return copyto!(Y, (q1 \ WpX) * (q1 \ p))
 end
+
+function vector_transport_direction!(M::Stiefel, Y, p, X, d, ::DifferentiatedRetraction{PolarRetraction})
+    q = retract(M, p, d, PolarRetraction())
+    Iddsqrt = sqrt(I+d'*d)
+    Λ = sylvester(Iddsqrt, Iddsqrt, - q'*X + X'*q)
+    copyto!(Y, q*Λ + ((I - q*q')X) / Iddsqrt)
+end
+function vector_transport_direction!(
+    M::Stiefel,
+    Y,
+    p,
+    X,
+    d,
+    ::DifferentiatedRetraction{QRRetraction},
+)
+q = retract(M, p, d, QRRetraction())
+rf = qr(p+d).q
+return copyto!(Y, q*matUpper2skew((q'*X) / rf) + ((I+q*q')*X) / rf)
+end
+
+@doc raw"""
+    vector_transport_to(M::Stiefel, p, X, q, DifferentiatedRetraction{PolarRetraction})
+
+Compute the vector transport by computing the push forward of the
+[`retract(M::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref), see
+Section 4 of [^HuangGallivanAbsil2015] or  Section 3.5 of [^Zhu2017]:
+
+```math
+T_{q\gets p}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(1+d^\mathrm{T}d)^{-\frac{1}{2}},
+```
+
+where $d = \bigl( \operatorname{retr}^{\mathrm{Pol}}_p\bigr)^{-1}(q)$,
+and $Λ$ is the unique solution of the Sylvester equation
+
+```math
+    Λ(I+d^\mathrm{T}d)^{\frac{1}{2}} + (I + d^\mathrm{T}d)^{\frac{1}{2}} = q^\mathrm{T}X - X^\mathrm{T}q
+```
+[^HuangGallivanAbsil2015]:
+    > Huang, W., Gallivan, K. A., and Absil, P.-A.:
+    > _A Broyden class of quasi-Newton methods for Riemannian optimization_
+    > SIAM Journal of Optimization, 2015, Vol. 25, No. 3, pp. 1660–1685
+    > doi: [10.1137/140955483](https://doi.org/10.1137/140955483)
+    > pdf: [tech. report](https://www.math.fsu.edu/~whuang2/pdf/RBroydenBasic_techrep.pdf)
+[^Zhu2017]:
+    > Zhu, X: A Riemannian conjugate gradient method for optimization on the Stiefel manifold
+    > Computational Optimization and Applications (2017), Volume 67, pp. 73-110
+    > doi: [10.1007/s10589-016-9883-4](https://doi.org/10.1007/s10589-016-9883-4)
+"""
+vector_transport_to(::Stiefel, ::Any, ::Any, ::Any, ::DifferentiatedRetraction{PolarRetraction})
+
+
+@doc raw"""
+    vector_transport_to(M::Stiefel, p, X, q, DifferentiatedRetraction{QRRetraction})
+
+Compute the vector transport by computing the push forward of the
+[`retract(M::Stiefel, ::Any, ::Any, ::QRRetraction)`](@ref). See [^AbsilMahonySepulchre2008], p. 173, or Section 3.5 of [^Zhu2017]:
+```math
+T_{q \gets p}^{\text{QR}}(X) = q*\rho_{\mathrm{s}}(q^\mathrm{T}XR^{-1}) + (I-qq^{\mathrm{T}})XR^{-1},
+```
+where $d = \bigl(\operatorname{retr}^{\mathrm{QR}}\bigr)^{-1}_p(q)$, $R$ is the $R$ factor of the QR
+decomposition of $p+X$, and
+```math
+\bigl( \rho_{\mathrm{s}}(A) \bigr)_{ij}
+= \begin{cases}
+A_{ij}&\text{ if } i > j\\
+0 \text{ if } i = j\\
+-A_{ji} \text{ if } i < j.\\
+\end{cases}
+```
+[^AbsilMahonySepulchre2008]:
+    >Absil, P.-A., Mahony, R. and Sepulchre R.,
+    > _Optimization Algorithms on Matrix Manifolds_
+    > Princeton University Press, 2008,
+    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244)
+    > [open access](http://press.princeton.edu/chapters/absil/)
+[^Zhu2017]:
+    > Zhu, X: A Riemannian conjugate gradient method for optimization on the Stiefel manifold
+    > Computational Optimization and Applications (2017), Volume 67, pp. 73-110
+    > doi: [10.1007/s10589-016-9883-4](https://doi.org/10.1007/s10589-016-9883-4)
+"""
+vector_transport_to(::Stiefel, ::Any, ::Any, ::Any, ::DifferentiatedRetraction{QRRetraction})
 
 @doc raw"""
     vector_transport_to(M::Stiefel, p, X, q, ::ProjectionTransport)
@@ -637,6 +783,31 @@ projection it onto the tangent space at `q`.
 """
 vector_transport_to(::Stiefel, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
+function vector_transport_to!(
+    M::Stiefel,
+    Y,
+    p,
+    X,
+    q,
+    ::DifferentiatedRetraction{PolarRetraction},
+)
+    d = inverse_retract(M, p, q, PolarInverseRetraction())
+    Iddsqrt = sqrt(I+d'*d)
+    Λ = sylvester(Iddsqrt, Iddsqrt, - q'*X + X'*q)
+    copyto!(Y, q*Λ + ((I - q*q')X) / Iddsqrt)
+end
+function vector_transport_to!(
+    M::Stiefel,
+    Y,
+    p,
+    X,
+    q,
+    ::DifferentiatedRetraction{QRRetraction},
+)
+    d = inverse_retract(M, p, q, QRInverseRetraction())
+    rf = qr(p+d).q
+    return copyto!(Y, q*matUpper2skew((q'*X) / rf) + ((I+q*q')*X) / rf)
+end
 function vector_transport_to!(M::Stiefel, Y, ::Any, X, q, ::ProjectionTransport)
     return project!(M, Y, q, X)
 end

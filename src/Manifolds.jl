@@ -116,6 +116,21 @@ using Statistics
 using StatsBase
 using StatsBase: AbstractWeights
 
+"""
+    DifferentiatedRetraction{R<:AbstractRetractionMethod} <: AbstractVectorTransportMethod
+
+A type to specify a vector transport that is given by differentiating a retraction
+
+# Constructor
+
+    DifferentiatedRetraction(m::AbstractRetractionMethod)
+"""
+struct DifferentiatedRetraction{R<:AbstractRetractionMethod} <:
+       AbstractVectorTransportMethod end
+function DifferentiatedRetraction(m::R) where {R<:AbstractRetractionMethod}
+    return DifferentiatedRetraction{R}()
+end
+
 include("utils.jl")
 include("differentiation.jl")
 include("riemannian_diff.jl")
@@ -312,7 +327,7 @@ export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibe
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
 export AbstractVectorTransportMethod,
-    CaleyVectorTransport, ParallelTransport, ProjectedPointDistribution
+    DifferentiatedRetraction, ParallelTransport, ProjectedPointDistribution
 export PoleLadderTransport, SchildsLadderTransport
 export PowerVectorTransport, ProductVectorTransport
 export AbstractEmbeddedManifold
