@@ -494,6 +494,14 @@ Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
 
 @doc raw"""
+    retract(M::Stiefel, p, X, ::ProjectionRetraction)
+
+Compute a retraction by performing a projection of the tangent vector `X` onto
+the [`Stiefel`](@ref) manifold `M`.
+"""
+retract(::Stiefel, ::Any, ::Any, ::ProjectionRetraction)
+
+@doc raw"""
     retract(M::Stiefel, p, X, ::QRRetraction)
 
 Compute the QR-based retraction [`QRRetraction`](@ref) on the
@@ -545,43 +553,14 @@ function retract!(::Stiefel, q, p, X, ::PolarRetraction)
     s = svd(p + X)
     return mul!(q, s.U, s.Vt)
 end
+function retract!(M::Stiefekl, q, p, X, ::ProjectionRetraction)
+    return project!(M, q, X)
+end
 function retract!(::Stiefel, q, p, X, ::QRRetraction)
     qrfac = qr(p + X)
     d = diag(qrfac.R)
     D = Diagonal(sign.(sign.(d .+ 0.5)))
-    #TODO: replace with this once it's supported by StaticArrays
-    #return mul!(q, _qrfac_to_q(qrfac), D)
-    return copyto!(q, _qrfac_to_q(qrfac) * D)
-end
-
-@doc raw"""
-    vector_transport_direction(::Stiefel, p, X, d, ::CaleyVectorTransport)
-
-Compute the vector transport given by the differentiated retraction of the [`CaleyRetraction`](@ref), cf. [^Zhu2016] Equation (17).
-
-The formula reads
-````math
-\operatorname{T}_{d}(X) =
-\Bigl(I - \frac{1}{2}W_{p,d}\Bigr)^{-1}W_{p,X}\Bigl(I - \frac{1}{2}W_{p,d}\Bigr)^{-1}p,
-````
-with
-````math
-  W_{p,X} = \operatorname{P}_pXp^{\mathrm{H}} - pX^{\mathrm{H}}\operatorname{P_p}
-  \quad\text{where} 
-  \operatorname{P}_p = I - \frac{1}{2}pp^{\mathrm{H}}
-````
-
-Since this is the differentiated retraction as a vector transport, the result will be in the
-tangent space at $q=\operatorname{retr}_p(d)$ using the [`CaleyRetraction`](@ref).
-"""
-vector_transport_direction(M::Stiefel, p, X, d, ::CaleyVectorTransport)
-
-function vector_transport_direction!(::Stiefel, Y, p, X, d, ::CaleyVectorTransport)
-    Pp = I - 1 // 2 * p * p'
-    Wpd = Pp * d * p' - p * d' * Pp
-    WpX = Pp * X * p' - p * X' * Pp
-    q1 = I - 1 // 2 * Wpd
-    return copyto!(Y, (q1 \ WpX) * (q1 \ p))
+    return mul!(q, _qrfac_to_q(qrfac), D)
 end
 
 @doc raw"""
@@ -618,4 +597,46 @@ function uniform_distribution(M::Stiefel{n,k,ℝ}, p) where {n,k}
     d = MatrixNormal(μ, Σ1, Σ2)
 
     return ProjectedPointDistribution(M, d, project!, p)
+end
+
+@doc raw"""
+    vector_transport_direction(::Stiefel, p, X, d, ::CaleyVectorTransport)
+
+Compute the vector transport given by the differentiated retraction of the [`CaleyRetraction`](@ref), cf. [^Zhu2016] Equation (17).
+
+The formula reads
+````math
+\operatorname{T}_{d}(X) =
+\Bigl(I - \frac{1}{2}W_{p,d}\Bigr)^{-1}W_{p,X}\Bigl(I - \frac{1}{2}W_{p,d}\Bigr)^{-1}p,
+````
+with
+````math
+  W_{p,X} = \operatorname{P}_pXp^{\mathrm{H}} - pX^{\mathrm{H}}\operatorname{P_p}
+  \quad\text{where} 
+  \operatorname{P}_p = I - \frac{1}{2}pp^{\mathrm{H}}
+````
+
+Since this is the differentiated retraction as a vector transport, the result will be in the
+tangent space at $q=\operatorname{retr}_p(d)$ using the [`CaleyRetraction`](@ref).
+"""
+vector_transport_direction(M::Stiefel, p, X, d, ::CaleyVectorTransport)
+
+function vector_transport_direction!(::Stiefel, Y, p, X, d, ::CaleyVectorTransport)
+    Pp = I - 1 // 2 * p * p'
+    Wpd = Pp * d * p' - p * d' * Pp
+    WpX = Pp * X * p' - p * X' * Pp
+    q1 = I - 1 // 2 * Wpd
+    return copyto!(Y, (q1 \ WpX) * (q1 \ p))
+end
+
+@doc raw"""
+    vector_transport_to(M::Stiefel, p, X, q, ::ProjectionTransport)
+
+Compute a vector transport by projection, i.e. project `X` from the tangent space at `x` by
+projection it onto the tangent space at `q`.
+"""
+vector_transport_to(::Stiefel, ::Any, ::Any, ::Any, ::ProjectionTransport)
+
+function vector_transport_to!(M::Stiefel, Y, ::Any, X, q, ::ProjectionTransport)
+    return project!(M, Y, q, X)
 end
