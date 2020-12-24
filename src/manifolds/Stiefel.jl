@@ -694,11 +694,18 @@ function vector_transport_direction!(
     return copyto!(Y, (q1 \ WpX) * (q1 \ p))
 end
 
-function vector_transport_direction!(M::Stiefel, Y, p, X, d, ::DifferentiatedRetraction{PolarRetraction})
+function vector_transport_direction!(
+    M::Stiefel,
+    Y,
+    p,
+    X,
+    d,
+    ::DifferentiatedRetraction{PolarRetraction},
+)
     q = retract(M, p, d, PolarRetraction())
-    Iddsqrt = sqrt(I+d'*d)
-    Λ = sylvester(Iddsqrt, Iddsqrt, - q'*X + X'*q)
-    copyto!(Y, q*Λ + ((I - q*q')X) / Iddsqrt)
+    Iddsqrt = sqrt(I + d' * d)
+    Λ = sylvester(Iddsqrt, Iddsqrt, -q' * X + X' * q)
+    return copyto!(Y, q * Λ + ((I - q * q')X) / Iddsqrt)
 end
 function vector_transport_direction!(
     M::Stiefel,
@@ -708,9 +715,9 @@ function vector_transport_direction!(
     d,
     ::DifferentiatedRetraction{QRRetraction},
 )
-q = retract(M, p, d, QRRetraction())
-rf = qr(p+d).q
-return copyto!(Y, q*matUpper2skew((q'*X) / rf) + ((I+q*q')*X) / rf)
+    q = retract(M, p, d, QRRetraction())
+    rf = qr(p + d).q
+    return copyto!(Y, q * matUpper2skew((q' * X) / rf) + ((I + q * q') * X) / rf)
 end
 
 @doc raw"""
@@ -741,8 +748,13 @@ and $Λ$ is the unique solution of the Sylvester equation
     > Computational Optimization and Applications (2017), Volume 67, pp. 73-110
     > doi: [10.1007/s10589-016-9883-4](https://doi.org/10.1007/s10589-016-9883-4)
 """
-vector_transport_to(::Stiefel, ::Any, ::Any, ::Any, ::DifferentiatedRetraction{PolarRetraction})
-
+vector_transport_to(
+    ::Stiefel,
+    ::Any,
+    ::Any,
+    ::Any,
+    ::DifferentiatedRetraction{PolarRetraction},
+)
 
 @doc raw"""
     vector_transport_to(M::Stiefel, p, X, q, DifferentiatedRetraction{QRRetraction})
@@ -773,7 +785,13 @@ A_{ij}&\text{ if } i > j\\
     > Computational Optimization and Applications (2017), Volume 67, pp. 73-110
     > doi: [10.1007/s10589-016-9883-4](https://doi.org/10.1007/s10589-016-9883-4)
 """
-vector_transport_to(::Stiefel, ::Any, ::Any, ::Any, ::DifferentiatedRetraction{QRRetraction})
+vector_transport_to(
+    ::Stiefel,
+    ::Any,
+    ::Any,
+    ::Any,
+    ::DifferentiatedRetraction{QRRetraction},
+)
 
 @doc raw"""
     vector_transport_to(M::Stiefel, p, X, q, ::ProjectionTransport)
@@ -792,9 +810,9 @@ function vector_transport_to!(
     ::DifferentiatedRetraction{PolarRetraction},
 )
     d = inverse_retract(M, p, q, PolarInverseRetraction())
-    Iddsqrt = sqrt(I+d'*d)
-    Λ = sylvester(Iddsqrt, Iddsqrt, - q'*X + X'*q)
-    copyto!(Y, q*Λ + ((I - q*q')X) / Iddsqrt)
+    Iddsqrt = sqrt(I + d' * d)
+    Λ = sylvester(Iddsqrt, Iddsqrt, -q' * X + X' * q)
+    return copyto!(Y, q * Λ + ((I - q * q')X) / Iddsqrt)
 end
 function vector_transport_to!(
     M::Stiefel,
@@ -805,8 +823,8 @@ function vector_transport_to!(
     ::DifferentiatedRetraction{QRRetraction},
 )
     d = inverse_retract(M, p, q, QRInverseRetraction())
-    rf = qr(p+d).q
-    return copyto!(Y, q*matUpper2skew((q'*X) / rf) + ((I+q*q')*X) / rf)
+    rf = qr(p + d).q
+    return copyto!(Y, q * matUpper2skew((q' * X) / rf) + ((I + q * q') * X) / rf)
 end
 function vector_transport_to!(M::Stiefel, Y, ::Any, X, q, ::ProjectionTransport)
     return project!(M, Y, q, X)
