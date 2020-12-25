@@ -725,22 +725,8 @@ function vector_transport_direction!(
 )
     q = retract(M, p, d, QRRetraction())
     rf = qr(p + d).R
-    return copyto!(Y, q * matUpper2skew((q' * X) / rf) + ((I + q * q') * X) / rf)
+    return copyto!(Y, q * matUpper2skew((q' * X) / rf) + (X - q * (q' * X)) / rf)
 end
-
-@doc raw"""
-    vector_transport_to(M::Stiefel, p, X, q, ::DifferentiatedRetraction{CaleyRetraction})
-
-Compute the vector transport by computing the push forward of the [`CaleyRetraction`](@ref).
-
-"""
-vector_transport_to(
-    ::Stiefel,
-    ::Any,
-    ::Any,
-    ::Any,
-    ::DifferentiatedRetraction{CaleyRetraction},
-)
 
 @doc raw"""
     vector_transport_to(M::Stiefel, p, X, q, DifferentiatedRetraction{PolarRetraction})

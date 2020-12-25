@@ -62,9 +62,11 @@ that lie on it (contained in `pts`).
 - `test_vee_hat = false`: test [`vee`](@ref) and [`hat`](@ref) functions.
 - `tvector_distributions = []` : tangent vector distributions to test.
 - `vector_transport_methods = []`: vector transport methods that should be tested.
-- `vector_transport_to = [ true for i ∈ 1:length(vector_transport_methods)]`: whether
+- `vector_transport_inverse_retractions = [default_inverse_retraction_method for _ in 1:length(vector_transport_methods)]``
+  inverse retractions to use with the vector transport method (especially the differentiated ones)
+- `vector_transport_to = [ true for _ in 1:length(vector_transport_methods)]`: whether
    to check the `to` variant of vector transport
-- `vector_transport_direction = [ true for i ∈ 1:length(vector_transport_methods)]`: whether
+- `vector_transport_direction = [ true for _ in 1:length(vector_transport_methods)]`: whether
    to check the `direction` variant of vector transport
 """
 function ManifoldTests.test_manifold(
@@ -104,8 +106,11 @@ function ManifoldTests.test_manifold(
     test_vee_hat=false,
     tvector_distributions=[],
     vector_transport_methods=[],
-    test_vector_transport_to=[true for i in 1:length(vector_transport_methods)],
-    test_vector_transport_direction=[true for i in 1:length(vector_transport_methods)],
+    vector_transport_inverse_retractions=[
+        default_inverse_retraction_method for _ in 1:length(vector_transport_methods)
+    ],
+    test_vector_transport_to=[true for _ in 1:length(vector_transport_methods)],
+    test_vector_transport_direction=[true for _ in 1:length(vector_transport_methods)],
     mid_point12=test_exp_log ? shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing,
 )
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
@@ -393,23 +398,23 @@ function ManifoldTests.test_manifold(
             end
         end
 
-        for (vtm, test_to, test_dir) in zip(
+        for (vtm, test_to, test_dir, irtr_m) in zip(
             vector_transport_methods,
             test_vector_transport_to,
             test_vector_transport_direction,
+            vector_transport_inverse_retractions,
         )
             Test.@testset "vector transport method $(vtm)" begin
                 tvatol = is_tangent_atol_multiplier * ManifoldTests.find_eps(pts[1])
-                X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
-                X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
-                pts32 = retract(M, pts[1], X2, default_retraction_method)
-                test_to && (v1t1 = vector_transport_to(M, pts[1], X1, pts32, vtm))
+                X1 = inverse_retract(M, pts[1], pts[2], irtr_m)
+                X2 = inverse_retract(M, pts[1], pts[3], irtr_m)
+                test_to && (v1t1 = vector_transport_to(M, pts[1], X1, pts[3], vtm))
                 test_dir && (v1t2 = vector_transport_direction(M, pts[1], X1, X2, vtm))
                 test_to &&
-                    Test.@test is_tangent_vector(M, pts32, v1t1, true; atol=tvatol)
+                    Test.@test is_tangent_vector(M, pts[3], v1t1, true; atol=tvatol)
                 test_dir &&
-                    Test.@test is_tangent_vector(M, pts32, v1t2, true; atol=tvatol)
-                (test_to && test_dir) && Test.@test isapprox(M, pts32, v1t1, v1t2)
+                    Test.@test is_tangent_vector(M, pts[3], v1t2, true; atol=tvatol)
+                (test_to && test_dir) && Test.@test isapprox(M, pts[3], v1t1, v1t2)
                 test_to && Test.@test isapprox(
                     M,
                     pts[1],

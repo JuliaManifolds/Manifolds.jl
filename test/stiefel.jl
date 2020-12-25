@@ -142,11 +142,14 @@ include("utils.jl")
                 vector_transport_methods=[
                     DifferentiatedRetraction{PolarRetraction}(),
                     DifferentiatedRetraction{QRRetraction}(),
-                    DifferentiatedRetraction{CaleyRetraction}(),
                     ProjectionTransport(),
                 ],
-                test_vector_transport_to=[true, true, false, true],
-                test_vector_transport_direction=[false, false, false, true], # TODO check the first three
+                vector_transport_inverse_retractions=[
+                    PolarInverseRetraction(),
+                    QRInverseRetraction(),
+                    PolarInverseRetraction(),
+                ],
+                test_vector_transport_direction=[true, true, false],
                 mid_point12=nothing,
             )
 
@@ -220,11 +223,14 @@ include("utils.jl")
                 vector_transport_methods=[
                     DifferentiatedRetraction{PolarRetraction}(),
                     DifferentiatedRetraction{QRRetraction}(),
-                    DifferentiatedRetraction{CaleyRetraction}(),
                     ProjectionTransport(),
                 ],
-                test_vector_transport_to=[true, true, false, true],
-                test_vector_transport_direction=[false, false, false, true], # TODO check the first three
+                vector_transport_inverse_retractions=[
+                    PolarInverseRetraction(),
+                    QRInverseRetraction(),
+                    PolarInverseRetraction(),
+                ],
+                test_vector_transport_direction=[true, true, false],
                 mid_point12=nothing,
             )
 
