@@ -503,14 +503,6 @@ Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
 
 @doc raw"""
-    retract(M::Stiefel, p, X, ::ProjectionRetraction)
-
-Compute a retraction by performing a projection of the tangent vector `X` onto
-the [`Stiefel`](@ref) manifold `M`.
-"""
-retract(::Stiefel, ::Any, ::Any, ::ProjectionRetraction)
-
-@doc raw"""
     retract(M::Stiefel, p, X, ::QRRetraction)
 
 Compute the QR-based retraction [`QRRetraction`](@ref) on the
@@ -561,9 +553,6 @@ end
 function retract!(::Stiefel, q, p, X, ::PolarRetraction)
     s = svd(p + X)
     return mul!(q, s.U, s.Vt)
-end
-function retract!(M::Stiefel, q, p, X, ::ProjectionRetraction)
-    return project!(M, q, X)
 end
 function retract!(::Stiefel, q, p, X, ::QRRetraction)
     qrfac = qr(p + X)
