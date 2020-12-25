@@ -144,6 +144,11 @@ include("utils.jl")
                     DifferentiatedRetraction{QRRetraction}(),
                     ProjectionTransport(),
                 ],
+                vector_transport_retractions=[
+                    PolarRetraction(),
+                    QRRetraction(),
+                    PolarRetraction(),
+                ],
                 vector_transport_inverse_retractions=[
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
@@ -224,6 +229,11 @@ include("utils.jl")
                     DifferentiatedRetraction{PolarRetraction}(),
                     DifferentiatedRetraction{QRRetraction}(),
                     ProjectionTransport(),
+                ],
+                vector_transport_retractions=[
+                    PolarRetraction(),
+                    QRRetraction(),
+                    PolarRetraction(),
                 ],
                 vector_transport_inverse_retractions=[
                     PolarInverseRetraction(),
