@@ -405,8 +405,10 @@ function ManifoldTests.test_manifold(
                 pts32 = retract(M, pts[1], X2, default_retraction_method)
                 test_to && (v1t1 = vector_transport_to(M, pts[1], X1, pts32, vtm))
                 test_dir && (v1t2 = vector_transport_direction(M, pts[1], X1, X2, vtm))
-                test_to && Test.@test is_tangent_vector(M, pts32, v1t1, true; atol=tvatol)
-                test_dir && Test.@test is_tangent_vector(M, pts32, v1t2, true; atol=tvatol)
+                test_to &&
+                    Test.@test is_tangent_vector(M, pts32, v1t1, true; atol=tvatol)
+                test_dir &&
+                    Test.@test is_tangent_vector(M, pts32, v1t2, true; atol=tvatol)
                 (test_to && test_dir) && Test.@test isapprox(M, pts32, v1t1, v1t2)
                 test_to && Test.@test isapprox(
                     M,
@@ -417,7 +419,13 @@ function ManifoldTests.test_manifold(
                 test_dir && Test.@test isapprox(
                     M,
                     pts[1],
-                    vector_transport_direction(M, pts[1], X1, zero_tangent_vector(M, pts[1]), vtm),
+                    vector_transport_direction(
+                        M,
+                        pts[1],
+                        X1,
+                        zero_tangent_vector(M, pts[1]),
+                        vtm,
+                    ),
                     X1,
                 )
 

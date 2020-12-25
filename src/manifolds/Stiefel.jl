@@ -713,7 +713,7 @@ function vector_transport_direction!(
     q = retract(M, p, d, PolarRetraction())
     Iddsqrt = sqrt(I + d' * d)
     Λ = sylvester(Iddsqrt, Iddsqrt, -q' * X + X' * q)
-    return copyto!(Y, q * Λ + (X - q * (q'*X)) / Iddsqrt)
+    return copyto!(Y, q * Λ + (X - q * (q' * X)) / Iddsqrt)
 end
 function vector_transport_direction!(
     M::Stiefel,
@@ -724,7 +724,7 @@ function vector_transport_direction!(
     ::DifferentiatedRetraction{QRRetraction},
 )
     q = retract(M, p, d, QRRetraction())
-    rf = qr(p + d).q
+    rf = qr(p + d).R
     return copyto!(Y, q * matUpper2skew((q' * X) / rf) + ((I + q * q') * X) / rf)
 end
 
@@ -822,7 +822,7 @@ function vector_transport_to!(
     d = inverse_retract(M, p, q, PolarInverseRetraction())
     Iddsqrt = sqrt(I + d' * d)
     Λ = sylvester(Iddsqrt, Iddsqrt, -q' * X + X' * q)
-    return copyto!(Y, q * Λ + (X - q * (q'*X)) / Iddsqrt)
+    return copyto!(Y, q * Λ + (X - q * (q' * X)) / Iddsqrt)
 end
 function vector_transport_to!(
     M::Stiefel,
@@ -833,9 +833,8 @@ function vector_transport_to!(
     ::DifferentiatedRetraction{QRRetraction},
 )
     d = inverse_retract(M, p, q, QRInverseRetraction())
-    rf = qr(p + d).Q
-    println((q' * X), "\n", rf, " \n\n", X + q * (q'* X),"\n", rf)
-    return copyto!(Y, q * matUpper2skew((q' * X) / rf) + (X + q * (q'* X)) / rf)
+    rf = qr(p + d).R
+    return copyto!(Y, q * matUpper2skew((q' * X) / rf) + (X - q * (q' * X)) / rf)
 end
 function vector_transport_to!(M::Stiefel, Y, ::Any, X, q, ::ProjectionTransport)
     return project!(M, Y, q, X)

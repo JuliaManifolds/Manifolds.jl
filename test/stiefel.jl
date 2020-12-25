@@ -145,8 +145,8 @@ include("utils.jl")
                     DifferentiatedRetraction{CaleyRetraction}(),
                     ProjectionTransport(),
                 ],
-                test_vector_transport_to = [false, true, false, true], # todo check first two
-                test_vector_transport_direction = [false, false, false, true], # TODO check the first two
+                test_vector_transport_to=[true, true, false, true],
+                test_vector_transport_direction=[false, false, false, true], # TODO check the first three
                 mid_point12=nothing,
             )
 
@@ -223,8 +223,8 @@ include("utils.jl")
                     DifferentiatedRetraction{CaleyRetraction}(),
                     ProjectionTransport(),
                 ],
-                test_vector_transport_to = [false, false, false, true],
-                test_vector_transport_direction = [false, false, true, true], # TODO check the first two
+                test_vector_transport_to=[true, true, false, true],
+                test_vector_transport_direction=[false, false, false, true], # TODO check the first three
                 mid_point12=nothing,
             )
 
