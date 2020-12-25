@@ -129,11 +129,24 @@ include("utils.jl")
                 projection_atol_multiplier=15.0,
                 retraction_atol_multiplier=10.0,
                 is_tangent_atol_multiplier=4 * 10.0^2,
-                retraction_methods=[PolarRetraction(), QRRetraction()],
+                retraction_methods=[
+                    PolarRetraction(),
+                    QRRetraction(),
+                    CaleyRetraction(),
+                    PadeRetraction(2),
+                ],
                 inverse_retraction_methods=[
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
+                vector_transport_methods=[
+                    DifferentiatedRetraction{PolarRetraction}(),
+                    DifferentiatedRetraction{QRRetraction}(),
+                    DifferentiatedRetraction{CaleyRetraction}(),
+                    ProjectionTransport(),
+                ],
+                test_vector_transport_to = [false, true, false, true], # todo check first two
+                test_vector_transport_direction = [false, false, false, true], # TODO check the first two
                 mid_point12=nothing,
             )
 
@@ -204,6 +217,14 @@ include("utils.jl")
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
+                vector_transport_methods=[
+                    DifferentiatedRetraction{PolarRetraction}(),
+                    DifferentiatedRetraction{QRRetraction}(),
+                    DifferentiatedRetraction{CaleyRetraction}(),
+                    ProjectionTransport(),
+                ],
+                test_vector_transport_to = [false, false, false, true],
+                test_vector_transport_direction = [false, false, true, true], # TODO check the first two
                 mid_point12=nothing,
             )
 
