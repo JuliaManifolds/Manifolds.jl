@@ -1,9 +1,9 @@
 include("utils.jl")
 @info "Manifolds.jl Test settings:\n\n" *
-    "Testing Float32:  $(TEST_FLOAT32)\n" *
-    "Testing Double64: $(TEST_DOUBLE64)\n" *
-    "Testing Static:   $(TEST_STATIC_SIZED)\n\n"*
-    "Check test/utils.jl if you wish to change these settings."
+      "Testing Float32:  $(TEST_FLOAT32)\n" *
+      "Testing Double64: $(TEST_DOUBLE64)\n" *
+      "Testing Static:   $(TEST_STATIC_SIZED)\n\n" *
+      "Check test/utils.jl if you wish to change these settings."
 
 @testset "Manifolds.jl" begin
     include_test("differentiation.jl")

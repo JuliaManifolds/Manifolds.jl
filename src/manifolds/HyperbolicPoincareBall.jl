@@ -227,7 +227,12 @@ the tangent space consists of all $ℝ^n$.
 """
 project(::Hyperbolic, ::PoincareBallPoint, ::PoincareBallTVector)
 
-function allocate_result(::Hyperbolic, ::typeof(project), X::PoincareBallTVector, ::PoincareBallPoint)
+function allocate_result(
+    ::Hyperbolic,
+    ::typeof(project),
+    X::PoincareBallTVector,
+    ::PoincareBallPoint,
+)
     return PoincareBallTVector(allocate(X.value))
 end
 

@@ -23,9 +23,9 @@ using SimpleWeightedGraphs
 using Manifolds.ManifoldTests
 
 function include_test(path)
-     @info "Testing $path"
-     @time include(path)  # show basic timing, (this will print a newline at end)
- end
+    @info "Testing $path"
+    @time include(path)  # show basic timing, (this will print a newline at end)
+end
 
 function our_base_ambiguities()
     ambigs = Test.detect_ambiguities(Base)

@@ -2,7 +2,7 @@ include("utils.jl")
 
 @testset "Probability simplex" begin
     M = ProbabilitySimplex(2)
-    @test M^4 == MultinomialMatrices(3,4)
+    @test M^4 == MultinomialMatrices(3, 4)
     p = [0.1, 0.7, 0.2]
     q = [0.3, 0.6, 0.1]
     X = zeros(3)

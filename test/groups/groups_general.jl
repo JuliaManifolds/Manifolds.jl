@@ -321,8 +321,8 @@ include("group_utils.jl")
         G = TranslationGroup(3)
         e = Identity(zeros(3))
         @test get_vector(G, e, ones(3), DefaultOrthogonalBasis()) == ones(3)
-        @test e-e == e
-        @test ones(3)+e == ones(3)
+        @test e - e == e
+        @test ones(3) + e == ones(3)
     end
 end
 

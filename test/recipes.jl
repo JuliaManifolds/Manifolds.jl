@@ -102,7 +102,13 @@ include("utils.jl")
         function Sphere2_surfplot()
             M = Sphere(2)
             pts = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]]
-            return plot(M, pts; surface=true, wireframe_color=colorant"#CCCCCC", markersize=10)
+            return plot(
+                M,
+                pts;
+                surface=true,
+                wireframe_color=colorant"#CCCCCC",
+                markersize=10,
+            )
         end
         @plottest Sphere2_surfplot joinpath(references_folder, "Sphere2SurfPlot.png") false
 
