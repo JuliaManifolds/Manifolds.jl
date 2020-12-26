@@ -435,16 +435,13 @@ project(::Euclidean, ::Any, ::Any)
 project!(::Euclidean, Y, p, X) = copyto!(Y, X)
 
 """
-    projected_distribution(M::Euclidean, d, [p])
+    projected_distribution(M::Euclidean, d, [p=rand(d)])
 
 Wrap the standard distribution `d` into a manifold-valued distribution. Generated
 points will be of similar type to `p`. By default, the type is not changed.
 """
-function projected_distribution(M::Euclidean, d, p)
+function projected_distribution(M::Euclidean, d, p=rand(d))
     return ProjectedPointDistribution(M, d, project!, p)
-end
-function projected_distribution(M::Euclidean, d)
-    return ProjectedPointDistribution(M, d, project!, rand(d))
 end
 
 """

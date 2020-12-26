@@ -120,7 +120,7 @@ function ManifoldTests.test_manifold(
             ) for i in 1:n
         ]
     end
-    Test.Test.@testset "dimension" begin
+    Test.@testset "dimension" begin
         Test.@test isa(manifold_dimension(M), expected_dimension_type)
         Test.@test manifold_dimension(M) ≥ 0
         Test.@test manifold_dimension(M) ==
