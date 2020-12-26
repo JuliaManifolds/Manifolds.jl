@@ -150,14 +150,14 @@ end
             x, y, z
         end
     end
-    # part II: solid sphere
+    # part II: solid hyperboloid
     if surface
         x = range(min(px...), max(px...), length=surface_resolution_x)
         y = range(min(py...), max(py...), length=surface_resolution_y)
         z = sqrt.(1 .+ (x .^ 2)' .+ y .^ 2)
         @series begin
             seriestype := :surface
-            color := surface_color
+            seriescolor := surface_color
             x, y, z
         end
     end
@@ -253,7 +253,7 @@ end
         z = repeat(cos.(v)', outer=[wires_lon + 1, 1])
         @series begin
             seriestype := :surface
-            color := surface_color
+            seriescolor := surface_color
             return x, y, z
         end
     end

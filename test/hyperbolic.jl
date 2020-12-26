@@ -253,6 +253,15 @@ include("utils.jl")
         project!(M, Y, p, X)
         @test Y == X
         Z = project(M, p, X)
+        @test isa(Z, PoincareBallTVector)
         @test Z == X
+        p2 = PoincareHalfSpacePoint([1.1,1.1])
+        X2 = PoincareHalfSpaceTVector([0.2, 0.2])
+        Y2 = PoincareHalfSpaceTVector(allocate(X2.value))
+        project!(M, Y2, p2, X2)
+        @test Y2 == X2
+        Z2 = project(M, p2, X2)
+        @test isa(Z2, PoincareHalfSpaceTVector)
+        @test Z2 == X2
     end
 end

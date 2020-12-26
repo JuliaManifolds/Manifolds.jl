@@ -24,6 +24,11 @@ include("utils.jl")
     pE2 = embed(M, p)
     @test pE == p
     @test pE2 == p
+    XE = similar(X)
+    embed!(M, XE, p, X)
+    XE2 = embed(M,p,X)
+    @test XE == X
+    @test XE2 == X
     @test_throws DomainError project(M, -ones(3, 3))
     @test project(M, p) == p
     p2 = [0.1 0.2 0.7; 0.2 0.7 0.1; 0.7 0.1 0.2]

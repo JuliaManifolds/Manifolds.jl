@@ -216,6 +216,11 @@ the tangent space consists of all $ℝ^n$.
 """
 project(::Hyperbolic, ::PoincareHalfSpacePoint::PoincareHalfSpaceTVector)
 
+function allocate_result(::Hyperbolic, ::typeof(project), X::PoincareHalfSpaceTVector, ::PoincareHalfSpacePoint)
+    return PoincareHalfSpaceTVector(allocate(X.value))
+end
+
+
 function project!(
     ::Hyperbolic,
     Y::PoincareHalfSpaceTVector,
