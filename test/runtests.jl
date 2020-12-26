@@ -19,6 +19,11 @@ include("utils.jl")
         end
     end
 
+    @testset "utils test" begin
+        @test Manifolds.usinc_from_cos(-1) == 0
+        @test Manifolds.usinc_from_cos(-1.0) == 0.0
+    end
+
     include_test("groups/group_utils.jl")
     include_test("notation.jl")
     # starting with tests of simple manifolds
