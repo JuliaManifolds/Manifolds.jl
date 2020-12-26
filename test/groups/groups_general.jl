@@ -319,7 +319,7 @@ include("group_utils.jl")
 
     @testset "Identity on Group Manifolds" begin
         G = TranslationGroup(3)
-        e = Identity(zeros(3))
+        e = Identity(G, zeros(3))
         @test get_vector(G, e, ones(3), DefaultOrthogonalBasis()) == ones(3)
         @test e - e == e
         @test ones(3) + e == ones(3)
