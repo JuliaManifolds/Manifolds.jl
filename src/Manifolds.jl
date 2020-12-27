@@ -332,7 +332,7 @@ export AbstractEmbeddingType, AbstractIsometricEmbeddingType
 export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod,
-    CaleyRetraction,
+    CayleyRetraction,
     ExponentialRetraction,
     QRRetraction,
     PolarRetraction,

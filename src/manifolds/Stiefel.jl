@@ -48,12 +48,12 @@ function PadeRetraction(m::Int)
     return PadeRetraction{m}()
 end
 @doc raw"""
-    CaleyRetraction <: AbstractRetractionMethod
+    CayleyRetraction <: AbstractRetractionMethod
 
 A retraction based on the Caley transform, which is realized by using the
 [`PadeRetraction`](@ref)`{1}`.
 """
-const CaleyRetraction = PadeRetraction{1}
+const CayleyRetraction = PadeRetraction{1}
 
 # This could maybe also be moved to Base.
 """
@@ -432,7 +432,7 @@ function project!(::Stiefel, Y, p, X)
 end
 
 @doc raw"""
-    retract(::Stiefel, p, X, ::CaleyRetraction)
+    retract(::Stiefel, p, X, ::CayleyRetraction)
 
 Compute the retraction on the [`Stiefel`](@ref) that is based on the Caley transform[^Zhu2017].
 Using
@@ -454,7 +454,7 @@ It is implemented as the case $m=1$ of the [`PadeRetraction`](@ref).
     > Computational Optimization and Applications 67(1), pp. 73–110, 2017.
     > doi [10.1007/s10589-016-9883-4](https://doi.org/10.1007/s10589-016-9883-4).
 """
-retract(::Stiefel, ::Any, ::Any, ::CaleyRetraction)
+retract(::Stiefel, ::Any, ::Any, ::CayleyRetraction)
 
 @doc raw"""
     retract(M::Stiefel, p, X, ::PadeRetraction{m})
@@ -569,7 +569,7 @@ i.e. `(n,k)`, which is the matrix dimensions.
 """
 @generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
 
-Base.show(io::IO, ::CaleyRetraction) = print(io, "CaleyRetraction()")
+Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
 Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($(m))")
 Base.show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")
 
@@ -598,9 +598,9 @@ function uniform_distribution(M::Stiefel{n,k,ℝ}, p) where {n,k}
 end
 
 @doc raw"""
-    vector_transport_direction(::Stiefel, p, X, d, ::DifferentiatedRetraction{CaleyRetraction})
+    vector_transport_direction(::Stiefel, p, X, d, ::DifferentiatedRetraction{CayleyRetraction})
 
-Compute the vector transport given by the differentiated retraction of the [`CaleyRetraction`](@ref), cf. [^Zhu2017] Equation (17).
+Compute the vector transport given by the differentiated retraction of the [`CayleyRetraction`](@ref), cf. [^Zhu2017] Equation (17).
 
 The formula reads
 ````math
@@ -615,9 +615,9 @@ with
 ````
 
 Since this is the differentiated retraction as a vector transport, the result will be in the
-tangent space at $q=\operatorname{retr}_p(d)$ using the [`CaleyRetraction`](@ref).
+tangent space at $q=\operatorname{retr}_p(d)$ using the [`CayleyRetraction`](@ref).
 """
-vector_transport_direction(M::Stiefel, p, X, d, ::DifferentiatedRetraction{CaleyRetraction})
+vector_transport_direction(M::Stiefel, p, X, d, ::DifferentiatedRetraction{CayleyRetraction})
 
 @doc raw"""
     vector_transport_direction(M::Stiefel, p, X, d, DifferentiatedRetraction{PolarRetraction})
@@ -682,7 +682,7 @@ function vector_transport_direction!(
     p,
     X,
     d,
-    ::DifferentiatedRetraction{CaleyRetraction},
+    ::DifferentiatedRetraction{CayleyRetraction},
 )
     Pp = I - 1 // 2 * p * p'
     Wpd = Pp * d * p' - p * d' * Pp

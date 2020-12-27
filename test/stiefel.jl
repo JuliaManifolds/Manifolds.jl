@@ -132,7 +132,7 @@ include("utils.jl")
                 retraction_methods=[
                     PolarRetraction(),
                     QRRetraction(),
-                    CaleyRetraction(),
+                    CayleyRetraction(),
                     PadeRetraction(2),
                 ],
                 inverse_retraction_methods=[
@@ -270,9 +270,9 @@ include("utils.jl")
         M = Stiefel(3, 2)
         p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
         X = [0.0 0.0; 0.0 0.0; 1.0 1.0]
-        r1 = CaleyRetraction()
+        r1 = CayleyRetraction()
         @test r1 == PadeRetraction(1)
-        @test repr(r1) == "CaleyRetraction()"
+        @test repr(r1) == "CayleyRetraction()"
         q1 = retract(M, p, X, r1)
         @test is_manifold_point(M, q1)
         Y = vector_transport_direction(
@@ -280,7 +280,7 @@ include("utils.jl")
             p,
             X,
             X,
-            DifferentiatedRetraction(CaleyRetraction()),
+            DifferentiatedRetraction(CayleyRetraction()),
         )
         @test is_tangent_vector(M, q1, Y; atol=10^-15)
         Y2 = vector_transport_direction(
@@ -288,7 +288,7 @@ include("utils.jl")
             p,
             X,
             X,
-            DifferentiatedRetraction{CaleyRetraction}(),
+            DifferentiatedRetraction{CayleyRetraction}(),
         )
         @test is_tangent_vector(M, q1, Y2; atol=10^-15)
         r2 = PadeRetraction(2)
