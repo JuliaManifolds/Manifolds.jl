@@ -140,8 +140,8 @@ include("utils.jl")
                     QRInverseRetraction(),
                 ],
                 vector_transport_methods=[
-                    DifferentiatedRetraction{PolarRetraction}(),
-                    DifferentiatedRetraction{QRRetraction}(),
+                    DifferentiatedRetractionVectorTransport{PolarRetraction}(),
+                    DifferentiatedRetractionVectorTransport{QRRetraction}(),
                     ProjectionTransport(),
                 ],
                 vector_transport_retractions=[
@@ -226,8 +226,8 @@ include("utils.jl")
                     QRInverseRetraction(),
                 ],
                 vector_transport_methods=[
-                    DifferentiatedRetraction{PolarRetraction}(),
-                    DifferentiatedRetraction{QRRetraction}(),
+                    DifferentiatedRetractionVectorTransport{PolarRetraction}(),
+                    DifferentiatedRetractionVectorTransport{QRRetraction}(),
                     ProjectionTransport(),
                 ],
                 vector_transport_retractions=[
@@ -280,7 +280,7 @@ include("utils.jl")
             p,
             X,
             X,
-            DifferentiatedRetraction(CayleyRetraction()),
+            DifferentiatedRetractionVectorTransport(CayleyRetraction()),
         )
         @test is_tangent_vector(M, q1, Y; atol=10^-15)
         Y2 = vector_transport_direction(
@@ -288,7 +288,7 @@ include("utils.jl")
             p,
             X,
             X,
-            DifferentiatedRetraction{CayleyRetraction}(),
+            DifferentiatedRetractionVectorTransport{CayleyRetraction}(),
         )
         @test is_tangent_vector(M, q1, Y2; atol=10^-15)
         r2 = PadeRetraction(2)

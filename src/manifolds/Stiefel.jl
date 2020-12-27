@@ -56,19 +56,43 @@ A retraction based on the Caley transform, which is realized by using the
 const CayleyRetraction = PadeRetraction{1}
 
 # This could maybe also be moved to Base.
-"""
-    DifferentiatedRetraction{R<:AbstractRetractionMethod} <: AbstractVectorTransportMethod
+@doc raw"""
+    DifferentiatedRetractionVectorTransport{R<:AbstractRetractionMethod} <:
+        AbstractVectorTransportMethod
 
-A type to specify a vector transport that is given by differentiating a retraction
+A type to specify a vector transport that is given by differentiating a retraction.
+This can be introduced in two ways. Let ``\mathcal M`` be a Riemannian manifold,
+``p\in\mathcal M`` a point, and ``X,Y\in T_p\mathcal M`` denote two tangent vectors at ``p``.
+
+Given a retraction (cf. [`AbstractRetractionMethod`](@ref)) ``\operatorname{retr}``,
+the vector transport of `X` in direction `Y` (cf. [`vector_transport_direction`](@ref))
+by differentiation this retraction, is given by
+
+```math
+\mathcal T^{\operatorname{retr}}_{p,Y}X
+= D_Y\operatorname{retr}_x(Y)[X]
+= \frac{\mathrm{d}}{\mathrm{d}t}\operatorname{retr}_x(Y+tX)\Bigr|_{t=1}.
+```
+see [^AbsilMahonySepulchre2008], Section 8.1.2 for more details.
+
+This can be phrased similarly as a [`vector_transport_to`](@ref) by introducing
+``q=\operatorname{retr}_pX`` and defining
+
+```math
+\mathcal T^{\operatorname{retr}}_{q \gets p}X = \mathcal T^{\operatorname{retr}}_{p,Y}X
+```
+
+which in practice usually requires the [`inverse_retract`](@ref) to exists in order to
+compute ``Y = \operatorname{retr}_p^{-1}q``.
 
 # Constructor
 
-    DifferentiatedRetraction(m::AbstractRetractionMethod)
+    DifferentiatedRetractionVectorTransport(m::AbstractRetractionMethod)
 """
-struct DifferentiatedRetraction{R<:AbstractRetractionMethod} <:
+struct DifferentiatedRetractionVectorTransport{R<:AbstractRetractionMethod} <:
        AbstractVectorTransportMethod end
-function DifferentiatedRetraction(::R) where {R<:AbstractRetractionMethod}
-    return DifferentiatedRetraction{R}()
+function DifferentiatedRetractionVectorTransport(::R) where {R<:AbstractRetractionMethod}
+    return DifferentiatedRetractionVectorTransport{R}()
 end
 
 function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where {n,k}
@@ -598,7 +622,7 @@ function uniform_distribution(M::Stiefel{n,k,ℝ}, p) where {n,k}
 end
 
 @doc raw"""
-    vector_transport_direction(::Stiefel, p, X, d, ::DifferentiatedRetraction{CayleyRetraction})
+    vector_transport_direction(::Stiefel, p, X, d, ::DifferentiatedRetractionVectorTransport{CayleyRetraction})
 
 Compute the vector transport given by the differentiated retraction of the [`CayleyRetraction`](@ref), cf. [^Zhu2017] Equation (17).
 
@@ -617,10 +641,16 @@ with
 Since this is the differentiated retraction as a vector transport, the result will be in the
 tangent space at $q=\operatorname{retr}_p(d)$ using the [`CayleyRetraction`](@ref).
 """
-vector_transport_direction(M::Stiefel, p, X, d, ::DifferentiatedRetraction{CayleyRetraction})
+vector_transport_direction(
+    M::Stiefel,
+    p,
+    X,
+    d,
+    ::DifferentiatedRetractionVectorTransport{CayleyRetraction},
+)
 
 @doc raw"""
-    vector_transport_direction(M::Stiefel, p, X, d, DifferentiatedRetraction{PolarRetraction})
+    vector_transport_direction(M::Stiefel, p, X, d, DifferentiatedRetractionVectorTransport{PolarRetraction})
 
 Compute the vector transport by computing the push forward of
 [`retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref) Section 3.5 of [^Zhu2017]:
@@ -640,10 +670,10 @@ vector_transport_direction(
     ::Any,
     ::Any,
     ::Any,
-    ::DifferentiatedRetraction{PolarRetraction},
+    ::DifferentiatedRetractionVectorTransport{PolarRetraction},
 )
 @doc raw"""
-    vector_transport_direction(M::Stiefel, p, X, d, DifferentiatedRetraction{QRRetraction})
+    vector_transport_direction(M::Stiefel, p, X, d, DifferentiatedRetractionVectorTransport{QRRetraction})
 
 Compute the vector transport by computing the push forward of the
 [`retract(::Stiefel, ::Any, ::Any, ::QRRetraction)`](@ref),
@@ -673,7 +703,7 @@ vector_transport_direction(
     ::Any,
     ::Any,
     ::Any,
-    ::DifferentiatedRetraction{QRRetraction},
+    ::DifferentiatedRetractionVectorTransport{QRRetraction},
 )
 
 function vector_transport_direction!(
@@ -682,7 +712,7 @@ function vector_transport_direction!(
     p,
     X,
     d,
-    ::DifferentiatedRetraction{CayleyRetraction},
+    ::DifferentiatedRetractionVectorTransport{CayleyRetraction},
 )
     Pp = I - 1 // 2 * p * p'
     Wpd = Pp * d * p' - p * d' * Pp
@@ -697,7 +727,7 @@ function vector_transport_direction!(
     p,
     X,
     d,
-    ::DifferentiatedRetraction{PolarRetraction},
+    ::DifferentiatedRetractionVectorTransport{PolarRetraction},
 )
     q = retract(M, p, d, PolarRetraction())
     Iddsqrt = sqrt(I + d' * d)
@@ -710,7 +740,7 @@ function vector_transport_direction!(
     p,
     X,
     d,
-    ::DifferentiatedRetraction{QRRetraction},
+    ::DifferentiatedRetractionVectorTransport{QRRetraction},
 )
     q = retract(M, p, d, QRRetraction())
     rf = qr(p + d).R
@@ -718,7 +748,7 @@ function vector_transport_direction!(
 end
 
 @doc raw"""
-    vector_transport_to(M::Stiefel, p, X, q, DifferentiatedRetraction{PolarRetraction})
+    vector_transport_to(M::Stiefel, p, X, q, DifferentiatedRetractionVectorTransport{PolarRetraction})
 
 Compute the vector transport by computing the push forward of the
 [`retract(M::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref), see
@@ -746,11 +776,11 @@ vector_transport_to(
     ::Any,
     ::Any,
     ::Any,
-    ::DifferentiatedRetraction{PolarRetraction},
+    ::DifferentiatedRetractionVectorTransport{PolarRetraction},
 )
 
 @doc raw"""
-    vector_transport_to(M::Stiefel, p, X, q, DifferentiatedRetraction{QRRetraction})
+    vector_transport_to(M::Stiefel, p, X, q, DifferentiatedRetractionVectorTransport{QRRetraction})
 
 Compute the vector transport by computing the push forward of the
 [`retract(M::Stiefel, ::Any, ::Any, ::QRRetraction)`](@ref),
@@ -775,7 +805,7 @@ vector_transport_to(
     ::Any,
     ::Any,
     ::Any,
-    ::DifferentiatedRetraction{QRRetraction},
+    ::DifferentiatedRetractionVectorTransport{QRRetraction},
 )
 
 @doc raw"""
@@ -792,7 +822,7 @@ function vector_transport_to!(
     p,
     X,
     q,
-    ::DifferentiatedRetraction{PolarRetraction},
+    ::DifferentiatedRetractionVectorTransport{PolarRetraction},
 )
     d = inverse_retract(M, p, q, PolarInverseRetraction())
     Iddsqrt = sqrt(I + d' * d)
@@ -805,7 +835,7 @@ function vector_transport_to!(
     p,
     X,
     q,
-    ::DifferentiatedRetraction{QRRetraction},
+    ::DifferentiatedRetractionVectorTransport{QRRetraction},
 )
     d = inverse_retract(M, p, q, QRInverseRetraction())
     rf = qr(p + d).R
