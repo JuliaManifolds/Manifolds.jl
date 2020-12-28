@@ -744,7 +744,9 @@ function vector_transport_direction!(
 )
     q = retract(M, p, d, QRRetraction())
     rf = qr(p + d).R
-    return copyto!(Y, q * matUpper2skew((q' * X) / rf) + (X - q * (q' * X)) / rf)
+    Xrf = X / rf
+    qtXrf = q' * Xrf
+    return copyto!(Y, q * matUpper2skew(qtXrf) + Xrf - q * qtXrf)
 end
 
 @doc raw"""
