@@ -746,7 +746,10 @@ function vector_transport_direction!(
     rf = UpperTriangular(qr(p + d).R)
     Xrf = X / rf
     qtXrf = q' * Xrf
-    return copyto!(Y, q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf)
+    return copyto!(
+        Y,
+        q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf,
+    )
 end
 
 @doc raw"""
@@ -843,7 +846,10 @@ function vector_transport_to!(
     rf = UpperTriangular(qr(p + d).R)
     Xrf = X / rf
     qtXrf = q' * Xrf
-    return copyto!(Y, q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf)
+    return copyto!(
+        Y,
+        q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf,
+    )
 end
 function vector_transport_to!(M::Stiefel, Y, ::Any, X, q, ::ProjectionTransport)
     return project!(M, Y, q, X)
