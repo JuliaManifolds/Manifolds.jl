@@ -112,11 +112,6 @@ function vec2skew(v, k)
     vec2skew!(X, v)
     return X
 end
-function matUpper2skew(A)
-    return [
-        sign(i - j) * (i > j ? A[i, j] : A[j, i]) for i in 1:size(A, 1), j in 1:size(A, 2)
-    ]
-end
 
 """
     ziptuples(a, b[, c[, d[, e]]])

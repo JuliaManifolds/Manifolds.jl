@@ -743,10 +743,10 @@ function vector_transport_direction!(
     ::DifferentiatedRetractionVectorTransport{QRRetraction},
 )
     q = retract(M, p, d, QRRetraction())
-    rf = qr(p + d).R
+    rf = UpperTriangular(qr(p + d).R)
     Xrf = X / rf
     qtXrf = q' * Xrf
-    return copyto!(Y, q * matUpper2skew(qtXrf) + Xrf - q * qtXrf)
+    return copyto!(Y, q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf)
 end
 
 @doc raw"""
@@ -840,8 +840,10 @@ function vector_transport_to!(
     ::DifferentiatedRetractionVectorTransport{QRRetraction},
 )
     d = inverse_retract(M, p, q, QRInverseRetraction())
-    rf = qr(p + d).R
-    return copyto!(Y, q * matUpper2skew((q' * X) / rf) + (X - q * (q' * X)) / rf)
+    rf = UpperTriangular(qr(p + d).R)
+    Xrf = X / rf
+    qtXrf = q' * Xrf
+    return copyto!(Y, q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf)
 end
 function vector_transport_to!(M::Stiefel, Y, ::Any, X, q, ::ProjectionTransport)
     return project!(M, Y, q, X)
