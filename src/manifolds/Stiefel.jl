@@ -50,7 +50,7 @@ end
 @doc raw"""
     CayleyRetraction <: AbstractRetractionMethod
 
-A retraction based on the Caley transform, which is realized by using the
+A retraction based on the Cayley transform, which is realized by using the
 [`PadeRetraction`](@ref)`{1}`.
 """
 const CayleyRetraction = PadeRetraction{1}
@@ -458,7 +458,7 @@ end
 @doc raw"""
     retract(::Stiefel, p, X, ::CayleyRetraction)
 
-Compute the retraction on the [`Stiefel`](@ref) that is based on the Caley transform[^Zhu2017].
+Compute the retraction on the [`Stiefel`](@ref) that is based on the Cayley transform[^Zhu2017].
 Using
 ````math
   W_{p,X} = \operatorname{P}_pXp^{\mathrm{H}} - pX^{\mathrm{H}}\operatorname{P_p}
