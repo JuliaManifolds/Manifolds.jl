@@ -70,8 +70,8 @@ by differentiation this retraction, is given by
 
 ```math
 \mathcal T^{\operatorname{retr}}_{p,Y}X
-= D_Y\operatorname{retr}_x(Y)[X]
-= \frac{\mathrm{d}}{\mathrm{d}t}\operatorname{retr}_x(Y+tX)\Bigr|_{t=1}.
+= D_Y\operatorname{retr}_p(Y)[X]
+= \frac{\mathrm{d}}{\mathrm{d}t}\operatorname{retr}_p(Y+tX)\Bigr|_{t=0}.
 ```
 see [^AbsilMahonySepulchre2008], Section 8.1.2 for more details.
 
