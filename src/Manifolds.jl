@@ -81,6 +81,8 @@ using ManifoldsBase:
     AbstractPowerManifold,
     AbstractPowerRepresentation,
     AbstractVectorTransportMethod,
+    AbstractLinearVectorTransportMethod,
+    DifferentiatedRetractionVectorTransport,
     ComponentManifoldError,
     CompositeManifoldError,
     DefaultManifold,
