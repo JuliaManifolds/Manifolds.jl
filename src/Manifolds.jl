@@ -81,6 +81,8 @@ using ManifoldsBase:
     AbstractPowerManifold,
     AbstractPowerRepresentation,
     AbstractVectorTransportMethod,
+    AbstractLinearVectorTransportMethod,
+    DifferentiatedRetractionVectorTransport,
     ComponentManifoldError,
     CompositeManifoldError,
     DefaultManifold,
@@ -312,7 +314,7 @@ export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibe
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
 export AbstractVectorTransportMethod,
-    CaleyVectorTransport, ParallelTransport, ProjectedPointDistribution
+    DifferentiatedRetractionVectorTransport, ParallelTransport, ProjectedPointDistribution
 export PoleLadderTransport, SchildsLadderTransport
 export PowerVectorTransport, ProductVectorTransport
 export AbstractEmbeddedManifold
@@ -332,7 +334,7 @@ export AbstractEmbeddingType, AbstractIsometricEmbeddingType
 export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod,
-    CaleyRetraction,
+    CayleyRetraction,
     ExponentialRetraction,
     QRRetraction,
     PolarRetraction,
