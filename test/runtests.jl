@@ -8,7 +8,7 @@ include("utils.jl")
 @testset "Manifolds.jl" begin
     include_test("differentiation.jl")
 
-    (VERSION >= v"1.1") && @testset "Ambiguities" begin
+    @testset "Ambiguities" begin
         # TODO: reduce the number of ambiguities
         if VERSION.prerelease == () #
             @test length(Test.detect_ambiguities(ManifoldsBase)) <= 17
