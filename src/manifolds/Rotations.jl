@@ -716,6 +716,8 @@ end
 
 Base.show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
 
+Distributions.support(d::NormalRotationDistribution) = MPointSupport(d.manifold)
+
 @doc raw"""
     zero_tangent_vector(M::Rotations, p)
 
