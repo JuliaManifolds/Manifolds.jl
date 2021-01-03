@@ -202,25 +202,11 @@ decorator_transparent_dispatch(::typeof(median), M::MetricManifold, args...) = V
 function decorator_transparent_dispatch(::typeof(median!), M::MetricManifold, args...)
     return Val(:intransparent)
 end
-function decorator_transparent_dispatch(
-    ::typeof(normal_tvector_distribution),
-    M::MetricManifold,
-    arge...,
-)
-    return Val(:intransparent)
-end
 function decorator_transparent_dispatch(::typeof(norm), M::MetricManifold, args...)
     return Val(:intransparent)
 end
 decorator_transparent_dispatch(::typeof(project), M::MetricManifold, args...) = Val(:parent)
 function decorator_transparent_dispatch(::typeof(project!), M::MetricManifold, args...)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(projected_distribution),
-    M::MetricManifold,
-    arge...,
-)
     return Val(:intransparent)
 end
 decorator_transparent_dispatch(::typeof(sharp), M::MetricManifold, args...) = Val(:parent)
@@ -441,7 +427,9 @@ function _convert_with_default(M::MT, T::Type{<:Metric}, ::Val{true}) where {MT<
     return MetricManifold(M, T())
 end
 function _convert_with_default(M::MT, T::Type{<:Metric}, ::Val{false}) where {MT<:Manifold}
-    return error("Can not convert $(M) to a MetricManifold{$(MT),$(T)}, since $(T) is not the default metric.")
+    return error(
+        "Can not convert $(M) to a MetricManifold{$(MT),$(T)}, since $(T) is not the default metric.",
+    )
 end
 
 @doc raw"""
@@ -655,5 +643,7 @@ in an embedded space.
     ```
 """
 function solve_exp_ode(M, p, X, tspan; kwargs...)
-    return error("solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq` on Julia 1.1 or greater.")
+    return error(
+        "solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq` on Julia 1.1 or greater.",
+    )
 end

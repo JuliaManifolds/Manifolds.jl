@@ -50,11 +50,9 @@ include("utils.jl")
                     PoleLadderTransport(),
                 ],
                 point_distributions=[Manifolds.uniform_distribution(M, pts[1])],
-                tvector_distributions=[Manifolds.normal_tvector_distribution(
-                    M,
-                    pts[1],
-                    1.0,
-                )],
+                tvector_distributions=[
+                    Manifolds.normal_tvector_distribution(M, pts[1], 1.0),
+                ],
                 test_forward_diff=false,
                 test_reverse_diff=false,
                 basis_types_vecs=(

@@ -149,10 +149,16 @@ function embed!(
     ln = length(n)
     m = size(q)
     lm = length(m)
-    (length(n) > length(m)) &&
-        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m)."))
-    any(n .> m[1:ln]) &&
-        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m))."))
+    (length(n) > length(m)) && throw(
+        DomainError(
+            "Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m).",
+        ),
+    )
+    any(n .> m[1:ln]) && throw(
+        DomainError(
+            "Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m)).",
+        ),
+    )
     # put p into q
     fill!(q, 0)
     # fill „top left edge“ of q with p.
@@ -384,17 +390,6 @@ in this case, just the (Frobenius) norm of `X`.
 LinearAlgebra.norm(::Euclidean, p, X) = norm(X)
 LinearAlgebra.norm(::MetricManifold{ℝ,<:Manifold,EuclideanMetric}, p, X) = norm(X)
 
-"""
-    normal_tvector_distribution(M::Euclidean, p, σ)
-
-Normal distribution in ambient space with standard deviation `σ`
-projected to tangent space at `p`.
-"""
-function normal_tvector_distribution(M::Euclidean{Tuple{N}}, p, σ) where {N}
-    d = Distributions.MvNormal(zero(p), σ)
-    return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project!, p)
-end
-
 function project!(
     ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2}},
     q,
@@ -404,10 +399,16 @@ function project!(
     ln = length(n)
     m = size(q)
     lm = length(m)
-    (length(n) < length(m)) &&
-        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m)."))
-    any(n .< m[1:ln]) &&
-        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m))."))
+    (length(n) < length(m)) && throw(
+        DomainError(
+            "Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m).",
+        ),
+    )
+    any(n .< m[1:ln]) && throw(
+        DomainError(
+            "Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m)).",
+        ),
+    )
     #  fill q with the „top left edge“ of p.
     q .= p[map(i -> Base.OneTo(i), m)..., ntuple(_ -> 1, lm - ln)...]
     return q
@@ -433,16 +434,6 @@ space of `M` can be identified with all of `M`.
 project(::Euclidean, ::Any, ::Any)
 
 project!(::Euclidean, Y, p, X) = copyto!(Y, X)
-
-"""
-    projected_distribution(M::Euclidean, d, [p=rand(d)])
-
-Wrap the standard distribution `d` into a manifold-valued distribution. Generated
-points will be of similar type to `p`. By default, the type is not changed.
-"""
-function projected_distribution(M::Euclidean, d, p=rand(d))
-    return ProjectedPointDistribution(M, d, project!, p)
-end
 
 """
     representation_size(M::Euclidean)

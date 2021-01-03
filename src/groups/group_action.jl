@@ -50,7 +50,9 @@ Apply action `a` to the point `p` with the rule specified by `A`.
 The result is saved in `q`.
 """
 function apply!(A::AbstractGroupAction{LeftAction}, q, a, p)
-    return error("apply! not implemented for action $(typeof(A)) and points $(typeof(q)), $(typeof(p)) and $(typeof(a)).")
+    return error(
+        "apply! not implemented for action $(typeof(A)) and points $(typeof(q)), $(typeof(p)) and $(typeof(a)).",
+    )
 end
 function apply!(A::AbstractGroupAction{RightAction}, q, a, p)
     ainv = inv(base_group(A), a)
@@ -91,11 +93,15 @@ differential transports vectors
 ````
 """
 function apply_diff(A::AbstractGroupAction, a, p, X)
-    return error("apply_diff not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(p)), and vector $(typeof(X))")
+    return error(
+        "apply_diff not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(p)), and vector $(typeof(X))",
+    )
 end
 
 function apply_diff!(A::AbstractGroupAction, Y, a, p, X)
-    return error("apply_diff! not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(p)), vectors $(typeof(Y)) and $(typeof(X))")
+    return error(
+        "apply_diff! not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(p)), vectors $(typeof(Y)) and $(typeof(X))",
+    )
 end
 
 @doc raw"""
@@ -135,7 +141,9 @@ the element closest to `q` in the metric of the G-manifold:
 where $\mathcal{G}$ is the group that acts on the G-manifold $\mathcal M$.
 """
 function optimal_alignment(A::AbstractGroupAction, p, q)
-    return error("optimal_alignment not implemented for $(typeof(A)) and points $(typeof(p)) and $(typeof(q)).")
+    return error(
+        "optimal_alignment not implemented for $(typeof(A)) and points $(typeof(p)) and $(typeof(q)).",
+    )
 end
 
 """

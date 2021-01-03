@@ -185,8 +185,11 @@ function project!(
     maxiter=100,
     tolerance=eps(eltype(p)),
 ) where {n}
-    any(p .<= 0) &&
-        throw(DomainError("The matrix $p can not be projected, since it has nonpositive entries."))
+    any(p .<= 0) && throw(
+        DomainError(
+            "The matrix $p can not be projected, since it has nonpositive entries.",
+        ),
+    )
     iter = 0
     d1 = sum(p, dims=1)
     d2 = 1 ./ (p * d1')

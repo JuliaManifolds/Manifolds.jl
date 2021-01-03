@@ -34,7 +34,9 @@ function check_manifold_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...) where
     if !isapprox(sum(p, dims=1), zeros(1, n); kwargs...)
         return DomainError(
             p,
-            string("The point $(p) does not lie on $(M), since its columns do not sum to zero."),
+            string(
+                "The point $(p) does not lie on $(M), since its columns do not sum to zero.",
+            ),
         )
     end
     return nothing

@@ -72,10 +72,9 @@ include("group_utils.jl")
             Identity(SpecialOrthogonal(3), x),
             v,
         )
-        @test_throws ErrorException base_group(MetricManifold(
-            Euclidean(3),
-            EuclideanMetric(),
-        ))
+        @test_throws ErrorException base_group(
+            MetricManifold(Euclidean(3), EuclideanMetric()),
+        )
         @test_throws ErrorException hat(Rotations(3), eg, [1, 2, 3])
         @test_throws ErrorException hat(
             GroupManifold(Rotations(3), NotImplementedOperation()),

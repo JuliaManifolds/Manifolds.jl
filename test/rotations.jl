@@ -152,11 +152,9 @@ include("utils.jl")
                 end
             end
 
-            v = Matrix(Manifolds.hat(
-                SOn,
-                pts[1],
-                π * normalize(randn(manifold_dimension(SOn))),
-            ))
+            v = Matrix(
+                Manifolds.hat(SOn, pts[1], π * normalize(randn(manifold_dimension(SOn)))),
+            )
             x = exp(SOn, pts[1], v)
             v2 = log(SOn, pts[1], x)
             @test x ≈ exp(SOn, pts[1], v2)
