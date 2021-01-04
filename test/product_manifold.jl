@@ -373,8 +373,8 @@ end
     angles = (0.0, π / 2, 2π / 3)
     pts_rot = [[cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)] for ϕ in angles]
     pts = [
-        Manifolds.prod_point(shape_ser, p[1], p[2], p[3])
-        for p in zip(pts_sphere, pts_r2, pts_rot)
+        Manifolds.prod_point(shape_ser, p[1], p[2], p[3]) for
+        p in zip(pts_sphere, pts_r2, pts_rot)
     ]
     test_manifold(
         Mser,
