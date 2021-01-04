@@ -7,9 +7,14 @@ The following is a set of guidelines to [`Manifolds.jl`](https://juliamanifolds.
 
 #### Table of Contents
 
-* [I just have a question](#i-just-have-a-question)
-* [How can I file an issue?](#how-can-i-file-an-issue)
-* [How can I contribute?](#how-can-i-contribute)
+- [Contributing to `Manifolds.jl`](#contributing-to-manifoldsjl)
+      - [Table of Contents](#table-of-contents)
+  - [I just have a question](#i-just-have-a-question)
+  - [How can I file an issue?](#how-can-i-file-an-issue)
+  - [How can I contribute?](#how-can-i-contribute)
+    - [Add a missing method](#add-a-missing-method)
+    - [Provide a new manifold](#provide-a-new-manifold)
+    - [Code style](#code-style)
 
 ## I just have a question
 
@@ -64,21 +69,7 @@ exp(::MyManifold, ::Any...)
 ### Code style
 
 We try to follow the [documentation guidelines](https://docs.julialang.org/en/v1/manual/documentation/) from the Julia documentation as well as [Blue Style](https://github.com/invenia/BlueStyle).
-We run [`JuliaFormatter.jl`](https://github.com/domluna/JuliaFormatter.jl) on the repo in the following way, which enforces a number of conventions consistent with Blue Style:
-
-```julia
-using JuliaFormatter
-
-format(
-    ".",
-    short_to_long_function_def = true,
-    always_for_in = true,
-    whitespace_ops_in_indices = true,
-    pipe_to_function_call = true,
-    import_to_using = true,
-    always_use_return = true,
-)
-```
+We run [`JuliaFormatter.jl`](https://github.com/domluna/JuliaFormatter.jl) on the repo in the way set in the `.JuliaFormatter.toml` file, which enforces a number of conventions consistent with the Blue Style.
 
 We also follow a few internal conventions:
 

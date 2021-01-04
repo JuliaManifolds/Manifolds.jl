@@ -9,7 +9,7 @@ end
 
 function GroupOperationAction(
     G::AbstractGroupManifold,
-    ::TAD = LeftAction(),
+    ::TAD=LeftAction(),
 ) where {TAD<:ActionDirection}
     return GroupOperationAction{typeof(G),TAD}(G)
 end

@@ -100,7 +100,7 @@ function check_tangent_vector(
     M::Rotations{N},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {N}
     if check_base_point
@@ -216,7 +216,7 @@ function exp!(M::Rotations{4}, q, p, X)
     α² = α^2
     β² = β^2
     Δ = β² - α²
-    if !isapprox(Δ, 0; atol = 1e-6)  # Case α > β ≥ 0
+    if !isapprox(Δ, 0; atol=1e-6)  # Case α > β ≥ 0
         sincα = sinα / α
         sincβ = β == 0 ? one(T) : sinβ / β
         a₀ = (β² * cosα - α² * cosβ) / Δ
@@ -617,7 +617,7 @@ check with `check_det = false`.
 """
 project(::Rotations, ::Any)
 
-function project!(M::Rotations{N}, q, p; check_det = true) where {N}
+function project!(M::Rotations{N}, q, p; check_det=true) where {N}
     F = svd(p)
     copyto!(q, F.U * F.Vt)
     if check_det && det(q) < 0
@@ -722,7 +722,7 @@ function retract!(M::Rotations, q::AbstractArray{T}, p, X, method::QRRetraction)
 end
 function retract!(M::Rotations, q, p, X, method::PolarRetraction)
     A = p + p * X
-    return project!(M, q, A; check_det = false)
+    return project!(M, q, A; check_det=false)
 end
 
 Base.show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")

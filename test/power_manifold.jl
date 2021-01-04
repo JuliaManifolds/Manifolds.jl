@@ -185,13 +185,13 @@ Random.seed!(42)
             test_manifold(
                 Ms1,
                 pts1;
-                test_reverse_diff = true,
-                test_musical_isomorphisms = true,
-                test_injectivity_radius = false,
-                test_default_vector_transport = true,
-                test_project_point = true,
-                test_project_tangent = true,
-                vector_transport_methods = [
+                test_reverse_diff=true,
+                test_musical_isomorphisms=true,
+                test_injectivity_radius=false,
+                test_default_vector_transport=true,
+                test_project_point=true,
+                test_project_tangent=true,
+                vector_transport_methods=[
                     PowerVectorTransport(ParallelTransport()),
                     PowerVectorTransport(SchildsLadderTransport()),
                     PowerVectorTransport(PoleLadderTransport()),
@@ -199,15 +199,15 @@ Random.seed!(42)
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                test_vee_hat = true,
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
-                point_distributions = [power_s1_pt_dist],
-                tvector_distributions = [power_s1_tv_dist],
-                basis_types_to_from = (basis_diag, basis_arb, basis_types...),
-                rand_tvector_atol_multiplier = 6.0,
-                retraction_atol_multiplier = 12.0,
-                is_tangent_atol_multiplier = 12.0,
+                test_vee_hat=true,
+                retraction_methods=retraction_methods,
+                inverse_retraction_methods=inverse_retraction_methods,
+                point_distributions=[power_s1_pt_dist],
+                tvector_distributions=[power_s1_tv_dist],
+                basis_types_to_from=(basis_diag, basis_arb, basis_types...),
+                rand_tvector_atol_multiplier=6.0,
+                retraction_atol_multiplier=12.0,
+                is_tangent_atol_multiplier=12.0,
             )
         end
     end
@@ -217,17 +217,17 @@ Random.seed!(42)
             test_manifold(
                 Ms2,
                 pts2;
-                test_reverse_diff = true,
-                test_musical_isomorphisms = true,
-                test_injectivity_radius = false,
-                test_vee_hat = true,
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
-                point_distributions = [power_s2_pt_dist],
-                tvector_distributions = [power_s2_tv_dist],
-                rand_tvector_atol_multiplier = 6.0,
-                retraction_atol_multiplier = 12,
-                is_tangent_atol_multiplier = 12.0,
+                test_reverse_diff=true,
+                test_musical_isomorphisms=true,
+                test_injectivity_radius=false,
+                test_vee_hat=true,
+                retraction_methods=retraction_methods,
+                inverse_retraction_methods=inverse_retraction_methods,
+                point_distributions=[power_s2_pt_dist],
+                tvector_distributions=[power_s2_tv_dist],
+                rand_tvector_atol_multiplier=6.0,
+                retraction_atol_multiplier=12,
+                is_tangent_atol_multiplier=12.0,
             )
         end
     end
@@ -238,18 +238,18 @@ Random.seed!(42)
             test_manifold(
                 Mr1,
                 pts1;
-                test_reverse_diff = false,
-                test_injectivity_radius = false,
-                test_musical_isomorphisms = true,
-                test_vee_hat = true,
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
-                point_distributions = [power_r1_pt_dist],
-                tvector_distributions = [power_r1_tv_dist],
-                basis_types_to_from = basis_types,
-                rand_tvector_atol_multiplier = 5.0,
-                retraction_atol_multiplier = 12,
-                is_tangent_atol_multiplier = 12.0,
+                test_reverse_diff=false,
+                test_injectivity_radius=false,
+                test_musical_isomorphisms=true,
+                test_vee_hat=true,
+                retraction_methods=retraction_methods,
+                inverse_retraction_methods=inverse_retraction_methods,
+                point_distributions=[power_r1_pt_dist],
+                tvector_distributions=[power_r1_tv_dist],
+                basis_types_to_from=basis_types,
+                rand_tvector_atol_multiplier=5.0,
+                retraction_atol_multiplier=12,
+                is_tangent_atol_multiplier=12.0,
             )
         end
     end
@@ -260,18 +260,18 @@ Random.seed!(42)
             test_manifold(
                 Mrn1,
                 pts1;
-                test_reverse_diff = false,
-                test_injectivity_radius = false,
-                test_musical_isomorphisms = true,
-                test_vee_hat = true,
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
-                point_distributions = [power_rn1_pt_dist],
-                tvector_distributions = [power_rn1_tv_dist],
-                basis_types_to_from = basis_types,
-                rand_tvector_atol_multiplier = 5.0,
-                retraction_atol_multiplier = 12,
-                is_tangent_atol_multiplier = 12.0,
+                test_reverse_diff=false,
+                test_injectivity_radius=false,
+                test_musical_isomorphisms=true,
+                test_vee_hat=true,
+                retraction_methods=retraction_methods,
+                inverse_retraction_methods=inverse_retraction_methods,
+                point_distributions=[power_rn1_pt_dist],
+                tvector_distributions=[power_rn1_tv_dist],
+                basis_types_to_from=basis_types,
+                rand_tvector_atol_multiplier=5.0,
+                retraction_atol_multiplier=12,
+                is_tangent_atol_multiplier=12.0,
             )
         end
     end
@@ -281,17 +281,17 @@ Random.seed!(42)
             test_manifold(
                 Mr2,
                 pts2;
-                test_reverse_diff = false,
-                test_injectivity_radius = false,
-                test_musical_isomorphisms = true,
-                test_vee_hat = true,
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
-                point_distributions = [power_r2_pt_dist],
-                tvector_distributions = [power_r2_tv_dist],
-                rand_tvector_atol_multiplier = 5.0,
-                retraction_atol_multiplier = 12,
-                is_tangent_atol_multiplier = 12.0,
+                test_reverse_diff=false,
+                test_injectivity_radius=false,
+                test_musical_isomorphisms=true,
+                test_vee_hat=true,
+                retraction_methods=retraction_methods,
+                inverse_retraction_methods=inverse_retraction_methods,
+                point_distributions=[power_r2_pt_dist],
+                tvector_distributions=[power_r2_tv_dist],
+                rand_tvector_atol_multiplier=5.0,
+                retraction_atol_multiplier=12,
+                is_tangent_atol_multiplier=12.0,
             )
         end
     end
@@ -301,17 +301,17 @@ Random.seed!(42)
             test_manifold(
                 Mrn2,
                 pts2;
-                test_reverse_diff = false,
-                test_injectivity_radius = false,
-                test_musical_isomorphisms = true,
-                test_vee_hat = true,
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
-                point_distributions = [power_rn2_pt_dist],
-                tvector_distributions = [power_rn2_tv_dist],
-                rand_tvector_atol_multiplier = 5.0,
-                retraction_atol_multiplier = 12,
-                is_tangent_atol_multiplier = 12.0,
+                test_reverse_diff=false,
+                test_injectivity_radius=false,
+                test_musical_isomorphisms=true,
+                test_vee_hat=true,
+                retraction_methods=retraction_methods,
+                inverse_retraction_methods=inverse_retraction_methods,
+                point_distributions=[power_rn2_pt_dist],
+                tvector_distributions=[power_rn2_tv_dist],
+                rand_tvector_atol_multiplier=5.0,
+                retraction_atol_multiplier=12,
+                is_tangent_atol_multiplier=12.0,
             )
         end
     end
@@ -323,16 +323,16 @@ Random.seed!(42)
         test_manifold(
             MT,
             pts_t;
-            test_reverse_diff = false,
-            test_forward_diff = false,
-            test_injectivity_radius = false,
-            test_musical_isomorphisms = true,
-            test_vee_hat = true,
-            retraction_methods = retraction_methods,
-            inverse_retraction_methods = inverse_retraction_methods,
-            rand_tvector_atol_multiplier = 5.0,
-            retraction_atol_multiplier = 12,
-            is_tangent_atol_multiplier = 12.0,
+            test_reverse_diff=false,
+            test_forward_diff=false,
+            test_injectivity_radius=false,
+            test_musical_isomorphisms=true,
+            test_vee_hat=true,
+            retraction_methods=retraction_methods,
+            inverse_retraction_methods=inverse_retraction_methods,
+            rand_tvector_atol_multiplier=5.0,
+            retraction_atol_multiplier=12,
+            is_tangent_atol_multiplier=12.0,
         )
     end
 
@@ -352,7 +352,6 @@ Random.seed!(42)
         Basis for component (5,):
         $(sprint(show, "text/plain", Bc.data.bases[5]))
         """
-
     end
 
     @testset "Power manifold of Circle" begin
@@ -362,16 +361,15 @@ Random.seed!(42)
         test_manifold(
             MT,
             pts_t;
-            test_reverse_diff = false,
-            test_forward_diff = false,
-            test_injectivity_radius = false,
-            test_musical_isomorphisms = true,
-            retraction_methods = retraction_methods,
-            inverse_retraction_methods = inverse_retraction_methods,
-            rand_tvector_atol_multiplier = 5.0,
-            retraction_atol_multiplier = 12,
-            is_tangent_atol_multiplier = 12.0,
+            test_reverse_diff=false,
+            test_forward_diff=false,
+            test_injectivity_radius=false,
+            test_musical_isomorphisms=true,
+            retraction_methods=retraction_methods,
+            inverse_retraction_methods=inverse_retraction_methods,
+            rand_tvector_atol_multiplier=5.0,
+            retraction_atol_multiplier=12,
+            is_tangent_atol_multiplier=12.0,
         )
     end
-
 end

@@ -7,14 +7,14 @@ include("utils.jl")
     @test get_embedding(M) == Euclidean(4, 2)
     @test representation_size(M) == (4, 2)
     q = [1.0 0.0; 0.0 1.0; 1/sqrt(2) -1/sqrt(2); 1/sqrt(2) 1/sqrt(2)]
-    @test is_manifold_point(M, q, true; atol = 10^-15)
+    @test is_manifold_point(M, q, true; atol=10^-15)
     @test base_manifold(M) === M
     qN = [2.0 0.0; 0.0 1.0; 1/sqrt(2) -1/sqrt(2); 1/sqrt(2) 1/sqrt(2)]
     @test_throws DomainError is_manifold_point(M, qN, true)
     Y = [0.0 1.0; 1.0 0.0; 0.0 0.0; 0.0 0.0]
-    @test is_tangent_vector(M, q, Y, true; check_base_point = false)
+    @test is_tangent_vector(M, q, Y, true; check_base_point=false)
     YN = [0.1 1.0; 1.0 0.1; 0.0 0.0; 0.0 0.0]
-    @test_throws DomainError is_tangent_vector(M, q, YN, true; check_base_point = false)
+    @test_throws DomainError is_tangent_vector(M, q, YN, true; check_base_point=false)
     qE = similar(q)
     embed!(M, qE, q)
     qE2 = embed(M, q)
@@ -26,7 +26,7 @@ include("utils.jl")
         M,
         q2,
         vector_transport_to(M, q, Y, q2, ProjectionTransport());
-        atol = 10^-15,
+        atol=10^-15,
     )
 
     types = [Matrix{Float64}]
@@ -39,14 +39,14 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_injectivity_radius = false,
-                test_reverse_diff = false,
-                test_forward_diff = false,
-                test_project_tangent = true,
-                test_exp_log = false,
-                default_inverse_retraction_method = nothing,
-                default_retraction_method = ProjectionRetraction(),
-                is_tangent_atol_multiplier = 1,
+                test_injectivity_radius=false,
+                test_reverse_diff=false,
+                test_forward_diff=false,
+                test_project_tangent=true,
+                test_exp_log=false,
+                default_inverse_retraction_method=nothing,
+                default_retraction_method=ProjectionRetraction(),
+                is_tangent_atol_multiplier=1,
             )
         end
     end

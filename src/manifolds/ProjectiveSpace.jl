@@ -39,7 +39,7 @@ $ℝℙ^n$, where `field` can also be used to generate the complex- and right-qu
 projective spaces.
 """
 struct ProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} end
-ProjectiveSpace(n::Int, field::AbstractNumbers = ℝ) = ProjectiveSpace{n,field}()
+ProjectiveSpace(n::Int, field::AbstractNumbers=ℝ) = ProjectiveSpace{n,field}()
 
 @doc raw"""
     ArrayProjectiveSpace{T<:Tuple,𝔽} <: AbstractProjectiveSpace{𝔽}
@@ -78,7 +78,7 @@ space, where `field` can also be used to generate the complex- and right-quatern
 projective spaces.
 """
 struct ArrayProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} where {N<:Tuple} end
-function ArrayProjectiveSpace(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
+function ArrayProjectiveSpace(n::Vararg{Int,I}; field::AbstractNumbers=ℝ) where {I}
     return ArrayProjectiveSpace{Tuple{n...},field}()
 end
 
@@ -125,7 +125,7 @@ function check_tangent_vector(
     M::AbstractProjectiveSpace,
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 )
     if check_base_point
@@ -138,7 +138,7 @@ function check_tangent_vector(
         get_embedding(M),
         p,
         X;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -153,7 +153,7 @@ function check_tangent_vector(
 end
 
 function decorated_manifold(M::AbstractProjectiveSpace{𝔽}) where {𝔽}
-    return Euclidean(representation_size(M)...; field = 𝔽)
+    return Euclidean(representation_size(M)...; field=𝔽)
 end
 
 get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)

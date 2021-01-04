@@ -99,7 +99,7 @@ function check_tangent_vector(
     M::VertexGraphManifold,
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 )
     if check_base_point && size(p) != (nv(M.graph),)
@@ -115,15 +115,9 @@ function check_tangent_vector(
         )
     end
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), nv(M.graph))
-    return check_tangent_vector(PM, p, X; check_base_point = check_base_point, kwargs...)
+    return check_tangent_vector(PM, p, X; check_base_point=check_base_point, kwargs...)
 end
-function check_tangent_vector(
-    M::EdgeGraphManifold,
-    p,
-    X;
-    check_base_point = true,
-    kwargs...,
-)
+function check_tangent_vector(M::EdgeGraphManifold, p, X; check_base_point=true, kwargs...)
     if check_base_point && size(p) != (ne(M.graph),)
         return DomainError(
             length(p),
@@ -137,7 +131,7 @@ function check_tangent_vector(
         )
     end
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), ne(M.graph))
-    return check_tangent_vector(PM, p, X; check_base_point = check_base_point, kwargs...)
+    return check_tangent_vector(PM, p, X; check_base_point=check_base_point, kwargs...)
 end
 
 get_iterator(M::EdgeGraphManifold) = 1:ne(M.graph)
@@ -229,21 +223,21 @@ function manifold_dimension(M::EdgeGraphManifold)
     return manifold_dimension(M.manifold) * ne(M.graph)
 end
 
-function _show_graph_manifold(io::IO, M; man_desc = "", pre = "")
+function _show_graph_manifold(io::IO, M; man_desc="", pre="")
     println(io, "GraphManifold\nGraph:")
-    sg = sprint(show, "text/plain", M.graph, context = io, sizehint = 0)
+    sg = sprint(show, "text/plain", M.graph, context=io, sizehint=0)
     sg = replace(sg, '\n' => "\n$(pre)")
     println(io, pre, sg)
     println(io, "Manifold$(man_desc):")
-    sm = sprint(show, "text/plain", M.manifold, context = io, sizehint = 0)
+    sm = sprint(show, "text/plain", M.manifold, context=io, sizehint=0)
     sm = replace(sm, '\n' => "\n$(pre)")
     print(io, pre, sm)
     return nothing
 end
 
 function Base.show(io::IO, mime::MIME"text/plain", M::EdgeGraphManifold)
-    return _show_graph_manifold(io, M; man_desc = " on edges", pre = " ")
+    return _show_graph_manifold(io, M; man_desc=" on edges", pre=" ")
 end
 function Base.show(io::IO, mime::MIME"text/plain", M::VertexGraphManifold)
-    return _show_graph_manifold(io, M; man_desc = " on vertices", pre = " ")
+    return _show_graph_manifold(io, M; man_desc=" on vertices", pre=" ")
 end

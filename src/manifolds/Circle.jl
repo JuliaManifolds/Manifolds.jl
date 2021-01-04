@@ -14,7 +14,7 @@ represented by `ℂ`-valued circle of unit numbers.
 """
 struct Circle{𝔽} <: Manifold{𝔽} end
 
-Circle(𝔽::AbstractNumbers = ℝ) = Circle{𝔽}()
+Circle(𝔽::AbstractNumbers=ℝ) = Circle{𝔽}()
 
 @doc raw"""
     check_manifold_point(M::Circle, p)
@@ -56,14 +56,14 @@ The optional parameter `check_base_point` indicates, whether to call [`check_man
 """
 check_tangent_vector(::Circle{ℝ}, ::Any...; ::Any...)
 
-function check_tangent_vector(M::Circle{ℝ}, p, X; check_base_point = true, kwargs...)
+function check_tangent_vector(M::Circle{ℝ}, p, X; check_base_point=true, kwargs...)
     if check_base_point
         perr = check_manifold_point(M, p; kwargs...)
         return perr # if x is valid all v that are real numbers are valid
     end
     return nothing
 end
-function check_tangent_vector(M::Circle{ℂ}, p, X; check_base_point = true, kwargs...)
+function check_tangent_vector(M::Circle{ℂ}, p, X; check_base_point=true, kwargs...)
     if check_base_point
         perr = check_manifold_point(M, p)
         perr === nothing || return perr
@@ -186,7 +186,6 @@ eval(
         )
     end,
 )
-
 
 get_vector(::Circle{ℝ}, p, X, ::AbstractBasis) = X
 function get_vector(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
@@ -429,10 +428,10 @@ Base.show(io::IO, ::Circle{𝔽}) where {𝔽} = print(io, "Circle($(𝔽))")
 Compute symmetric remainder of `x` with respect to the interall 2*`T`, i.e.
 `(x+T)%2T`, where the default for `T` is $π$
 """
-function sym_rem(x::N, T = π) where {N<:Number}
+function sym_rem(x::N, T=π) where {N<:Number}
     return (x ≈ T ? convert(N, -T) : rem(x, convert(N, 2 * T), RoundNearest))
 end
-sym_rem(x, T = π) where {N} = map(sym_rem, x, Ref(T))
+sym_rem(x, T=π) where {N} = map(sym_rem, x, Ref(T))
 
 @doc raw"""
     vector_transport_to(M::Circle, p, X, q, ::ParallelTransport)

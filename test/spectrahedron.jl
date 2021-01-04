@@ -13,9 +13,9 @@ include("utils.jl")
     qN = [2.0 0.0; 0.0 1.0; 1/sqrt(2) -1/sqrt(2); 1/sqrt(2) 1/sqrt(2)]
     @test_throws DomainError is_manifold_point(M, qN, true)
     Y = [0.0 1.0; 1.0 0.0; 0.0 0.0; 0.0 0.0]
-    @test is_tangent_vector(M, q, Y, true; check_base_point = false)
+    @test is_tangent_vector(M, q, Y, true; check_base_point=false)
     YN = [0.1 1.0; 1.0 0.1; 0.0 0.0; 0.0 0.0]
-    @test_throws DomainError is_tangent_vector(M, q, YN, true; check_base_point = false)
+    @test_throws DomainError is_tangent_vector(M, q, YN, true; check_base_point=false)
     qE = similar(q)
     embed!(M, qE, q)
     qE2 = embed(M, q)
@@ -29,7 +29,7 @@ include("utils.jl")
         M,
         q2,
         vector_transport_to(M, q, Y, q2, ProjectionTransport());
-        atol = 10^-15,
+        atol=10^-15,
     )
 
     types = [Matrix{Float64}]
@@ -42,15 +42,15 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_injectivity_radius = false,
-                test_reverse_diff = false,
-                test_forward_diff = false,
-                test_project_tangent = true,
-                test_exp_log = false,
-                test_default_vector_transport = true,
-                vector_transport_methods = [ProjectionTransport()],
-                default_inverse_retraction_method = nothing,
-                default_retraction_method = ProjectionRetraction(),
+                test_injectivity_radius=false,
+                test_reverse_diff=false,
+                test_forward_diff=false,
+                test_project_tangent=true,
+                test_exp_log=false,
+                test_default_vector_transport=true,
+                vector_transport_methods=[ProjectionTransport()],
+                default_inverse_retraction_method=nothing,
+                default_retraction_method=ProjectionRetraction(),
             )
         end
     end

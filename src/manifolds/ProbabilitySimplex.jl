@@ -99,13 +99,7 @@ The optional parameter `check_base_point` indicates, whether to call
 [`check_manifold_point`](@ref check_manifold_point(::ProbabilitySimplex, ::Any))  for `p` or not.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(
-    M::ProbabilitySimplex,
-    p,
-    X;
-    check_base_point = true,
-    kwargs...,
-)
+function check_tangent_vector(M::ProbabilitySimplex, p, X; check_base_point=true, kwargs...)
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
@@ -116,7 +110,7 @@ function check_tangent_vector(
         get_embedding(M),
         p,
         X;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -129,7 +123,7 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(M::ProbabilitySimplex) = Euclidean(representation_size(M)...; field = ℝ)
+decorated_manifold(M::ProbabilitySimplex) = Euclidean(representation_size(M)...; field=ℝ)
 
 default_metric_dispatch(::ProbabilitySimplex, ::FisherRaoMetric) = Val(true)
 
@@ -242,7 +236,6 @@ function inverse_retract!(
     X .-= meanlogdiff
     return X
 end
-
 
 @doc raw"""
     log(M::ProbabilitySimplex, p, q)

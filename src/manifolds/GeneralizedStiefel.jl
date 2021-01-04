@@ -43,8 +43,8 @@ end
 function GeneralizedStiefel(
     n::Int,
     k::Int,
-    B::AbstractMatrix = Matrix{Float64}(I, n, n),
-    𝔽::AbstractNumbers = ℝ,
+    B::AbstractMatrix=Matrix{Float64}(I, n, n),
+    𝔽::AbstractNumbers=ℝ,
 )
     return GeneralizedStiefel{n,k,𝔽,typeof(B)}(B)
 end
@@ -71,7 +71,6 @@ function check_manifold_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) whe
     return nothing
 end
 
-
 @doc raw"""
     check_tangent_vector(M::GeneralizedStiefel, p, X; kwargs...)
 
@@ -85,7 +84,7 @@ function check_tangent_vector(
     M::GeneralizedStiefel{n,k,𝔽},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {n,k,B,𝔽}
     if check_base_point
@@ -98,7 +97,7 @@ function check_tangent_vector(
         M,
         p,
         X;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -111,7 +110,7 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(M::GeneralizedStiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
+decorated_manifold(M::GeneralizedStiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field=𝔽)
 
 @doc raw"""
     inner(M::GeneralizedStiefel, p, X, Y)
@@ -126,7 +125,6 @@ i.e. the metric induced by the scalar product `B` from the embedding, restricted
 tangent space.
 """
 inner(M::GeneralizedStiefel, p, X, Y) = dot(X, M.B * Y)
-
 
 @doc raw"""
     manifold_dimension(M::GeneralizedStiefel)
@@ -213,7 +211,6 @@ end
 function Base.show(io::IO, M::GeneralizedStiefel{n,k,𝔽}) where {n,k,𝔽}
     return print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽))")
 end
-
 
 @doc raw"""
     vector_transport_to(M::GeneralizedStiefel, p, X, q, ::ProjectionTransport)

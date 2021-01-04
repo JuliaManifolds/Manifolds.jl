@@ -253,10 +253,10 @@ function Statistics.mean!(
     x::AbstractVector,
     w::AbstractVector,
     ::GradientDescentEstimation;
-    p0 = x[1],
-    stop_iter = 100,
-    retraction::AbstractRetractionMethod = ExponentialRetraction(),
-    inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
+    p0=x[1],
+    stop_iter=100,
+    retraction::AbstractRetractionMethod=ExponentialRetraction(),
+    inverse_retraction::AbstractInverseRetractionMethod=LogarithmicInverseRetraction(),
     kwargs...,
 )
     n = length(x)
@@ -312,9 +312,9 @@ function Statistics.mean!(
     x::AbstractVector,
     w::AbstractVector,
     ::GeodesicInterpolation;
-    shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
-    retraction::AbstractRetractionMethod = ExponentialRetraction(),
-    inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
+    shuffle_rng::Union{AbstractRNG,Nothing}=nothing,
+    retraction::AbstractRetractionMethod=ExponentialRetraction(),
+    inverse_retraction::AbstractInverseRetractionMethod=LogarithmicInverseRetraction(),
     kwargs...,
 )
     n = length(x)
@@ -368,15 +368,15 @@ function Statistics.mean!(
     x::AbstractVector,
     w::AbstractVector,
     method::GeodesicInterpolationWithinRadius;
-    shuffle_rng = nothing,
+    shuffle_rng=nothing,
     kwargs...,
 )
-    mean!(M, q, x, w, GeodesicInterpolation(); shuffle_rng = shuffle_rng, kwargs...)
+    mean!(M, q, x, w, GeodesicInterpolation(); shuffle_rng=shuffle_rng, kwargs...)
     radius = method.radius
     injectivity_radius(M, q) ≤ radius && return q
     for i in eachindex(x)
         @inbounds if distance(M, q, x[i]) ≥ radius
-            return mean!(M, q, x, w, GradientDescentEstimation(); p0 = q, kwargs...)
+            return mean!(M, q, x, w, GradientDescentEstimation(); p0=q, kwargs...)
         end
     end
     return q
@@ -387,10 +387,10 @@ function Statistics.mean!(
     x::AbstractVector,
     w::AbstractVector,
     ::CyclicProximalPointEstimation;
-    p0 = x[1],
-    stop_iter = 1000000,
-    retraction::AbstractRetractionMethod = ExponentialRetraction(),
-    inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
+    p0=x[1],
+    stop_iter=1000000,
+    retraction::AbstractRetractionMethod=ExponentialRetraction(),
+    inverse_retraction::AbstractInverseRetractionMethod=LogarithmicInverseRetraction(),
     kwargs...,
 )
     n = length(x)
@@ -449,7 +449,7 @@ function Statistics.mean!(
     x::AbstractVector,
     w::AbstractVector,
     ::ExtrinsicEstimation;
-    extrinsic_method::AbstractEstimationMethod = GeodesicInterpolation(),
+    extrinsic_method::AbstractEstimationMethod=GeodesicInterpolation(),
     kwargs...,
 )
     embedded_x = map(p -> embed(M, p), x)
@@ -595,10 +595,10 @@ function Statistics.median!(
     x::AbstractVector,
     w::AbstractVector,
     ::CyclicProximalPointEstimation;
-    p0 = x[1],
-    stop_iter = 1000000,
-    retraction::AbstractRetractionMethod = ExponentialRetraction(),
-    inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
+    p0=x[1],
+    stop_iter=1000000,
+    retraction::AbstractRetractionMethod=ExponentialRetraction(),
+    inverse_retraction::AbstractInverseRetractionMethod=LogarithmicInverseRetraction(),
     kwargs...,
 )
     n = length(x)
@@ -630,7 +630,7 @@ function Statistics.median!(
     x::AbstractVector,
     w::AbstractVector,
     ::ExtrinsicEstimation;
-    extrinsic_method::AbstractEstimationMethod = CyclicProximalPointEstimation(),
+    extrinsic_method::AbstractEstimationMethod=CyclicProximalPointEstimation(),
     kwargs...,
 )
     embedded_x = map(p -> embed(M, p), x)
@@ -669,7 +669,7 @@ function Statistics.var(
     x::AbstractVector,
     w::AbstractWeights,
     m;
-    corrected::Bool = false,
+    corrected::Bool=false,
 )
     wv = convert(AbstractVector, w)
     s = sum(eachindex(x, w)) do i
@@ -678,10 +678,10 @@ function Statistics.var(
     c = StatsBase.varcorrection(w, corrected)
     return c * s
 end
-function Statistics.var(M::Manifold, x::AbstractVector, m; corrected::Bool = true)
+function Statistics.var(M::Manifold, x::AbstractVector, m; corrected::Bool=true)
     n = length(x)
     w = _unit_weights(n)
-    return var(M, x, w, m; corrected = corrected)
+    return var(M, x, w, m; corrected=corrected)
 end
 function Statistics.var(M::Manifold, x::AbstractVector, w::AbstractWeights; kwargs...)
     return mean_and_var(M, x, w; kwargs...)[2]
@@ -729,23 +729,23 @@ function StatsBase.mean_and_var(
     x::AbstractVector,
     w::AbstractWeights,
     method::AbstractEstimationMethod...;
-    corrected = false,
+    corrected=false,
     kwargs...,
 )
     m = mean(M, x, w, method...; kwargs...)
-    v = var(M, x, w, m; corrected = corrected)
+    v = var(M, x, w, m; corrected=corrected)
     return m, v
 end
 function StatsBase.mean_and_var(
     M::Manifold,
     x::AbstractVector,
     method::AbstractEstimationMethod...;
-    corrected = true,
+    corrected=true,
     kwargs...,
 )
     n = length(x)
     w = _unit_weights(n)
-    return mean_and_var(M, x, w, method...; corrected = corrected, kwargs...)
+    return mean_and_var(M, x, w, method...; corrected=corrected, kwargs...)
 end
 
 @doc raw"""
@@ -779,10 +779,10 @@ function StatsBase.mean_and_var(
     x::AbstractVector,
     w::AbstractWeights,
     ::GeodesicInterpolation;
-    shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
-    corrected = false,
-    retraction::AbstractRetractionMethod = ExponentialRetraction(),
-    inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
+    shuffle_rng::Union{AbstractRNG,Nothing}=nothing,
+    corrected=false,
+    retraction::AbstractRetractionMethod=ExponentialRetraction(),
+    inverse_retraction::AbstractInverseRetractionMethod=LogarithmicInverseRetraction(),
     kwargs...,
 )
     n = length(x)
@@ -835,8 +835,8 @@ function StatsBase.mean_and_var(
     x::AbstractVector,
     w::AbstractWeights,
     method::GeodesicInterpolationWithinRadius;
-    shuffle_rng = nothing,
-    corrected = false,
+    shuffle_rng=nothing,
+    corrected=false,
     kwargs...,
 )
     y, v = mean_and_var(
@@ -844,16 +844,16 @@ function StatsBase.mean_and_var(
         x,
         w,
         GeodesicInterpolation();
-        shuffle_rng = shuffle_rng,
-        corrected = corrected,
+        shuffle_rng=shuffle_rng,
+        corrected=corrected,
         kwargs...,
     )
     radius = method.radius
     injectivity_radius(M, y) ≤ radius && return y, v
     for i in eachindex(x)
         @inbounds if distance(M, y, x[i]) ≥ radius
-            mean!(M, y, x, w, GradientDescentEstimation(); p0 = y, kwargs...)
-            v = var(M, x, w, y; corrected = corrected)
+            mean!(M, y, x, w, GradientDescentEstimation(); p0=y, kwargs...)
+            v = var(M, x, w, y; corrected=corrected)
             return y, v
         end
     end
@@ -895,14 +895,14 @@ function StatsBase.moment(
     x::AbstractVector,
     k::Int,
     w::AbstractWeights,
-    m = mean(M, x, w),
+    m=mean(M, x, w),
 )
     s = sum(eachindex(x, w)) do i
         return @inbounds w[i] * distance(M, m, x[i])^k
     end
     return s / sum(w)
 end
-function StatsBase.moment(M::Manifold, x::AbstractVector, k::Int, m = mean(M, x))
+function StatsBase.moment(M::Manifold, x::AbstractVector, k::Int, m=mean(M, x))
     w = _unit_weights(length(x))
     return moment(M, x, k, w, m)
 end
@@ -915,11 +915,11 @@ provide weights `w` and/or a precomputed
 [`mean`](@ref mean(::Manifold, args...)) `m`.
 """
 function StatsBase.skewness(M::Manifold, x::AbstractVector, w::AbstractWeights)
-    m, s = mean_and_std(M, x, w; corrected = false)
+    m, s = mean_and_std(M, x, w; corrected=false)
     return moment(M, x, 3, w, m) / s^3
 end
 function StatsBase.skewness(M::Manifold, x::AbstractVector, w::AbstractWeights, m)
-    return moment(M, x, 3, w, m) / std(M, x, w, m; corrected = false)^3
+    return moment(M, x, 3, w, m) / std(M, x, w, m; corrected=false)^3
 end
 function StatsBase.skewness(M::Manifold, x::AbstractVector, args...)
     w = _unit_weights(length(x))
@@ -934,11 +934,11 @@ provide weights `w` and/or a precomputed
 [`mean`](@ref mean(::Manifold, args...)) `m`.
 """
 function StatsBase.kurtosis(M::Manifold, x::AbstractVector, w::AbstractWeights)
-    m, v = mean_and_var(M, x, w; corrected = false)
+    m, v = mean_and_var(M, x, w; corrected=false)
     return moment(M, x, 4, w, m) / v^2 - 3
 end
 function StatsBase.kurtosis(M::Manifold, x::AbstractVector, w::AbstractWeights, m)
-    return moment(M, x, 4, w, m) / var(M, x, w, m; corrected = false)^2 - 3
+    return moment(M, x, 4, w, m) / var(M, x, w, m; corrected=false)^2 - 3
 end
 function StatsBase.kurtosis(M::Manifold, x::AbstractVector, args...)
     w = _unit_weights(length(x))

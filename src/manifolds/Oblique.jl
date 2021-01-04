@@ -21,7 +21,7 @@ struct Oblique{N,M,𝔽,S} <:
     manifold::Sphere{S,𝔽}
 end
 
-function Oblique(n::Int, m::Int, field::AbstractNumbers = ℝ)
+function Oblique(n::Int, m::Int, field::AbstractNumbers=ℝ)
     return Oblique{n,m,field,n - 1}(Sphere(n - 1, field))
 end
 
@@ -56,7 +56,7 @@ function check_tangent_vector(
     M::Oblique{n,m},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {n,m}
     if check_base_point && size(p) != (n, m)
@@ -75,7 +75,7 @@ function check_tangent_vector(
         PowerManifold(M.manifold, m),
         p,
         X;
-        check_base_point = check_base_point,
+        check_base_point=check_base_point,
         kwargs...,
     )
 end

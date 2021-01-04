@@ -1,6 +1,9 @@
 module Manifolds
 
 import ManifoldsBase:
+    _access_nested,
+    _read,
+    _write,
     allocate,
     allocate_result,
     allocate_result_type,
@@ -21,9 +24,11 @@ import ManifoldsBase:
     # TODO: uncomment the import if `flat!` goes to ManifoldsBase
     # flat!__intransparent,
     get_basis,
+    get_component,
     get_coordinates,
     get_coordinates!,
     get_embedding,
+    get_iterator,
     get_vector,
     get_vector!,
     get_vectors,
@@ -41,11 +46,13 @@ import ManifoldsBase:
     mid_point!,
     number_eltype,
     number_of_coordinates,
+    power_dimensions,
     project,
     project!,
     representation_size,
     retract,
     retract!,
+    set_component!,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,
@@ -71,10 +78,21 @@ using ManifoldsBase:
     AbstractNumbers,
     AbstractOrthogonalBasis,
     AbstractOrthonormalBasis,
+    AbstractPowerManifold,
+    AbstractPowerRepresentation,
     AbstractVectorTransportMethod,
+    AbstractLinearVectorTransportMethod,
+    DifferentiatedRetractionVectorTransport,
+    ComponentManifoldError,
+    CompositeManifoldError,
     DefaultManifold,
     DefaultOrDiagonalizingBasis,
     DiagonalizingBasisData,
+    InversePowerRetraction,
+    PowerManifold,
+    PowerManifoldNested,
+    PowerRetraction,
+    PowerVectorTransport,
     VeeOrthogonalBasis,
     @decorator_transparent_fallback,
     @decorator_transparent_function,
@@ -85,9 +103,14 @@ using ManifoldsBase:
     combine_allocation_promotion_functions,
     is_decorator_transparent,
     is_default_decorator,
-    manifold_function_not_implemented_message
+    manifold_function_not_implemented_message,
+    rep_size_to_colons,
+    size_to_tuple
 using Markdown: @doc_str
 using Random
+using RecipesBase
+using RecipesBase: @recipe, @series
+using Colors: RGBA
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
@@ -98,8 +121,6 @@ using StatsBase: AbstractWeights
 include("utils.jl")
 include("differentiation.jl")
 include("riemannian_diff.jl")
-include("SizedAbstractArray.jl")
-include("errors.jl")
 
 include("statistics.jl")
 
@@ -109,7 +130,6 @@ include("manifolds/VectorBundle.jl")
 
 include("distributions.jl")
 include("projected_distribution.jl")
-
 
 # It's included early to ensure visibility of `Identity`
 include("groups/group.jl")
@@ -296,7 +316,7 @@ export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibe
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
 export AbstractVectorTransportMethod,
-    CaleyVectorTransport, ParallelTransport, ProjectedPointDistribution
+    DifferentiatedRetractionVectorTransport, ParallelTransport, ProjectedPointDistribution
 export PoleLadderTransport, SchildsLadderTransport
 export PowerVectorTransport, ProductVectorTransport
 export AbstractEmbeddedManifold
@@ -316,7 +336,7 @@ export AbstractEmbeddingType, AbstractIsometricEmbeddingType
 export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod,
-    CaleyRetraction,
+    CayleyRetraction,
     ExponentialRetraction,
     QRRetraction,
     PolarRetraction,

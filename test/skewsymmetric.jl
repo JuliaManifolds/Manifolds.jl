@@ -52,22 +52,22 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_injectivity_radius = false,
-                test_reverse_diff = isa(T, Vector),
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                vector_transport_methods = [
+                test_injectivity_radius=false,
+                test_reverse_diff=isa(T, Vector),
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                vector_transport_methods=[
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                basis_types_vecs = (
+                basis_types_vecs=(
                     DiagonalizingOrthonormalBasis(log(M, pts[1], pts[2])),
                     bases...,
                 ),
-                basis_types_to_from = bases,
-                is_tangent_atol_multiplier = 1,
+                basis_types_to_from=bases,
+                is_tangent_atol_multiplier=1,
             )
         end
     end
@@ -81,14 +81,14 @@ include("utils.jl")
             test_manifold(
                 M_complex,
                 pts_complex,
-                test_injectivity_radius = false,
-                test_reverse_diff = isa(T, Vector),
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                basis_types_vecs = (DefaultOrthonormalBasis(ℂ),),
-                basis_types_to_from = (DefaultOrthonormalBasis(ℂ),),
-                is_tangent_atol_multiplier = 1,
+                test_injectivity_radius=false,
+                test_reverse_diff=isa(T, Vector),
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                basis_types_vecs=(DefaultOrthonormalBasis(ℂ),),
+                basis_types_to_from=(DefaultOrthonormalBasis(ℂ),),
+                is_tangent_atol_multiplier=1,
             )
             @test isapprox(
                 -pts_complex[1],

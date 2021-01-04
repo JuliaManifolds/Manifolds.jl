@@ -17,7 +17,7 @@ end
 function RotationAction(
     M::Manifold,
     SOn::SpecialOrthogonal,
-    ::TAD = LeftAction(),
+    ::TAD=LeftAction(),
 ) where {TAD<:ActionDirection}
     return RotationAction{typeof(M),typeof(SOn),TAD}(M, SOn)
 end

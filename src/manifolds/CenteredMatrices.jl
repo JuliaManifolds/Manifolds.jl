@@ -14,7 +14,7 @@ Generate the manifold of `m`-by-`n` (`field`-valued) matrices whose columns sum 
 """
 struct CenteredMatrices{M,N,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
 
-function CenteredMatrices(m::Int, n::Int, field::AbstractNumbers = ℝ)
+function CenteredMatrices(m::Int, n::Int, field::AbstractNumbers=ℝ)
     return CenteredMatrices{m,n,field}()
 end
 
@@ -31,7 +31,7 @@ function check_manifold_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...) where
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
-    if !isapprox(sum(p, dims = 1), zeros(1, n); kwargs...)
+    if !isapprox(sum(p, dims=1), zeros(1, n); kwargs...)
         return DomainError(
             p,
             string("The point $(p) does not lie on $(M), since its columns do not sum to zero."),
@@ -39,7 +39,6 @@ function check_manifold_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...) where
     end
     return nothing
 end
-
 
 """
     check_tangent_vector(M::CenteredMatrices{m,n,𝔽}, p, X; check_base_point = true, kwargs... )
@@ -55,7 +54,7 @@ function check_tangent_vector(
     M::CenteredMatrices{m,n,𝔽},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {m,n,𝔽}
     if check_base_point
@@ -68,11 +67,11 @@ function check_tangent_vector(
         M,
         p,
         X;
-        check_base_point = false,
+        check_base_point=false,
         kwargs...,
     )
     mpv === nothing || return mpv
-    if !isapprox(sum(X, dims = 1), zeros(1, n); kwargs...)
+    if !isapprox(sum(X, dims=1), zeros(1, n); kwargs...)
         return DomainError(
             X,
             "The vector $(X) is not a tangent vector to $(p) on $(M), since its columns do not sum to zero.",
@@ -81,7 +80,7 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(M::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽} = Euclidean(m, n; field = 𝔽)
+decorated_manifold(M::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽} = Euclidean(m, n; field=𝔽)
 
 @doc raw"""
     manifold_dimension(M::CenteredMatrices{m,n,𝔽})
@@ -114,7 +113,7 @@ where $c_i = \frac{1}{m}\sum_{j=1}^m p_{j,i}$ for $i = 1, \dots, n$.
 """
 project(::CenteredMatrices, ::Any)
 
-project!(M::CenteredMatrices, q, p) = copyto!(q, p .- mean(p, dims = 1))
+project!(M::CenteredMatrices, q, p) = copyto!(q, p .- mean(p, dims=1))
 
 @doc raw"""
     project(M::CenteredMatrices, p, X)
@@ -132,7 +131,7 @@ where $c_i = \frac{1}{m}\sum_{j=1}^m x_{j,i}$  for $i = 1, \dots, n$.
 """
 project(::CenteredMatrices, ::Any, ::Any)
 
-project!(M::CenteredMatrices, Y, p, X) = (Y .= X .- mean(X, dims = 1))
+project!(M::CenteredMatrices, Y, p, X) = (Y .= X .- mean(X, dims=1))
 
 @generated representation_size(::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽} = (m, n)
 

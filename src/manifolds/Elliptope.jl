@@ -64,7 +64,7 @@ function check_manifold_point(M::Elliptope{N,K}, q; kwargs...) where {N,K}
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
     mpv === nothing || return mpv
-    row_norms_sq = sum(abs2, q; dims = 2)
+    row_norms_sq = sum(abs2, q; dims=2)
     if !all(isapprox.(row_norms_sq, 1.0; kwargs...))
         return DomainError(
             row_norms_sq,
@@ -89,7 +89,7 @@ function check_tangent_vector(
     M::Elliptope{N,K},
     q,
     Y;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {N,K}
     if check_base_point
@@ -102,7 +102,7 @@ function check_tangent_vector(
         M,
         q,
         Y;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -118,7 +118,7 @@ function check_tangent_vector(
 end
 
 function decorated_manifold(M::Elliptope)
-    return Euclidean(representation_size(M)...; field = ℝ)
+    return Euclidean(representation_size(M)...; field=ℝ)
 end
 
 @doc raw"""
@@ -141,7 +141,7 @@ project `q` onto the manifold [`Elliptope`](@ref) `M`, by normalizing the rows o
 """
 project(::Elliptope, ::Any)
 
-project!(::Elliptope, r, q) = copyto!(r, q ./ sum(abs2, q, dims = 1))
+project!(::Elliptope, r, q) = copyto!(r, q ./ sum(abs2, q, dims=1))
 
 """
     project(M::Elliptope, q, Y)
@@ -151,7 +151,7 @@ Project `Y` onto the tangent space at `q`, i.e. row-wise onto the oblique manifo
 project(::Elliptope, ::Any...)
 
 function project!(::Elliptope, Z, q, Y)
-    Y2 = (Y' - q' .* sum(q' .* Y', dims = 1))'
+    Y2 = (Y' - q' .* sum(q' .* Y', dims=1))'
     Z .= Y2 - q * lyap(q' * q, q' * Y2 - Y2' * q)
     return Z
 end

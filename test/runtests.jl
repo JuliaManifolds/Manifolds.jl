@@ -17,14 +17,12 @@ end
 
 (VERSION >= v"1.1") && @testset "Ambiguities" begin
     # TODO: reduce the number of ambiguities
-    if VERSION >= v"1.6-DEV"
-        @test length(Test.detect_ambiguities(ManifoldsBase)) <= 4
-        @test length(Test.detect_ambiguities(Manifolds)) <= 102
-        @test length(our_base_ambiguities()) <= 4
-    else
+    if VERSION.prerelease == () #
         @test length(Test.detect_ambiguities(ManifoldsBase)) <= 17
         @test length(Test.detect_ambiguities(Manifolds)) == 0
         @test length(our_base_ambiguities()) <= 24
+    else
+        @info "Skipping Ambiguity tests for pre-release versions"
     end
 end
 
@@ -36,8 +34,6 @@ include("utils.jl")
       "Testing Static:   $(TEST_STATIC_SIZED)\n"
 
 include("groups/group_utils.jl")
-include("sized_abstract_array.jl")
-include("errors.jl")
 include("notation.jl")
 # starting with tests of simple manifolds
 include("centered_matrices.jl")

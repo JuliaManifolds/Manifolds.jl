@@ -56,7 +56,7 @@ over the `field` of real numbers `ℝ` or complex numbers `ℂ`.
 struct SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <:
        AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
-function SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractNumbers = ℝ)
+function SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractNumbers=ℝ)
     return SymmetricPositiveSemidefiniteFixedRank{n,k,field}()
 end
 
@@ -102,7 +102,7 @@ function check_tangent_vector(
     M::SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽},
     q,
     Y;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {n,k,𝔽}
     if check_base_point
@@ -115,14 +115,14 @@ function check_tangent_vector(
         M,
         q,
         Y;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     return mpv
 end
 
 function decorated_manifold(::SymmetricPositiveSemidefiniteFixedRank{N,K,𝔽}) where {N,K,𝔽}
-    return Euclidean(N, K; field = 𝔽)
+    return Euclidean(N, K; field=𝔽)
 end
 
 @doc raw"""
