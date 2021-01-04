@@ -10,6 +10,6 @@ Order = [:type, :function]
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["projected_distributions.jl"]
+Pages = ["projected_distribution.jl"]
 Order = [:type, :function]
 ```
