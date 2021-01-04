@@ -86,6 +86,29 @@ function check_tangent_vector(
 end
 
 @doc raw"""
+    distance(M::EssentialManifold, p, q)
+
+Compute the Riemannian distance between the two points `p` and `q` on the [`EssentialManifold`](@ref). This is done by 
+computing the distance of the equivalence classes $[p]$ and $[q]$ of the points 
+$p=(R_{p_1},R_{p_2}), q=(R_{q_1},R_{q_2}) ∈ SO(3)^2$, respectively. Two points in $SO(3)^2$ are equivalent iff their 
+corresponding essential matrices, given by 
+````math
+E = R_1^T [e_z]_{×}R_2,
+````
+are equal (up to a sign flip). Using the logarithmic map, the distance is given by 
+````math
+\text{dist}([p],[q]) = \| \text{log}_{[p]} [q] \| = \| \log_p (S_z(t_{\text{opt}})q) \|,
+````
+where $S_z ∈ H_z = \{(R_z(θ),R_z(θ))\colon θ \in [-π,π) \}$ in which $R_z(θ)$ is the rotation around the z axis with angle
+$θ$ and $t_{\text{opt}}$ is the minimizer of the cost function 
+````math
+f(t) = f_1 + f_2, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}) \text{ for } i=1,2,
+````
+where $d(⋅,⋅)$ is the distance function in $SO(3)$[^TronDaniilidis2017].
+"""
+distance(M::EssentialManifold, p, q) = norm(M, p, log(M, p, q))
+
+@doc raw"""
     exp(M::EssentialManifold, p, X)
 
 Compute the exponential map on the [`EssentialManifold`](@ref) from `p` into direction
@@ -107,7 +130,7 @@ end
 get_iterator(M::EssentialManifold) = Base.OneTo(2)
 
 @doc raw"""
-    log(M::EssentialManifold, p, q)
+    log(M::EssentialManifold, X, p, q)
 
 Compute the logarithmic map on the [`EssentialManifold`](@ref) `M`, i.e. the tangent vector,
 whose geodesic starting from `p` reaches `q` after time 1. Here, $p=(R_{p_1},R_{p_2})$ and 
@@ -157,7 +180,7 @@ function log!(M::EssentialManifold, X, p, q)
             end 
             t_temp, f_temp = dist_min_angle_pair(p, q2)
             if f_temp < f_min
-                f_min = f_temp
+                f_min = f_temp 
                 t = t_temp
             end
         end
@@ -167,8 +190,7 @@ function log!(M::EssentialManifold, X, p, q)
         
     Rz=[cos(t) -sin(t) 0; sin(t) cos(t) 0; 0 0 1]
     representative_q = zeros(size(q2))
-    representative_q[1] = Rz * q2[1]
-    representative_q[2] = Rz * q2[2]
+    representative_q = [Rz * q2[1], Rz * q2[2]]
 
     # use the logarithmic map in SO(3)^2 and the corresponding geodesic between p and representative_q to compute the solution 
     log!.(Ref(M.manifold), X, p, representative_q)
@@ -198,7 +220,7 @@ function dist_min_angle_pair(p, q)
     
     #check if cost is constant
     tolMZero = 1e-15 
-    if abs(m1) < tolMZero && abs(m2) < tolMZero
+    if (abs(m1) < tolMZero) && (abs(m2) < tolMZero)
         t_min = 0
         f_min = 2*pi^2
     else
@@ -300,32 +322,34 @@ in the interval $[$`t_low`, `t_high`$]$ using Newton's method. For more details 
 """
 function dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t_high)
     tol_dist = 1e-8
+    θ1 = 0  
+    θ2 = 0  
     for i = 1:100
         #compute auxiliary values
         mc1 = m1 * cos(t_min + Φ1)
         mc2 = m2 * cos(t_min + Φ2)
-        s1 = 2 * sin(θ1)
-        s2 = 2 * sin(θ2)
-        eztuSq1 = (mc1 / s1)^2
-        eztuSq2 = (mc2 / s2)^2
         
-        #compute θ_i
+        #compute θi, i=1,2
         θ1 = acos(clamp(((m1 * sin(t_min + Φ1) + c1 - 1) / 2), -1, 1))
         θ2 = acos(clamp(((m2 * sin(t_min + Φ2) + c2 - 1) / 2), -1, 1))
 
-        #compute the first derivatives
+        #compute the first derivatives di, i=1,2
+        s1 = 2 * sin(θ1)
+        s2 = 2 * sin(θ2)
         d1 = (-θ1 * mc1) / s1 
         d2 = (-θ2 * mc2) / s2
         d = d1 + d2
         
-        #compute the second derivatives
+        #compute the second derivatives ddi, i=1,2
+        eztuSq1 = (mc1 / s1)^2
+        eztuSq2 = (mc2 / s2)^2
         dd1 = eztuSq1 + θ1 / 2 * cot(θ1 / 2) * (1 - eztuSq1)
         dd2 = eztuSq2 + θ2 / 2 * cot(θ2 / 2) * (1 - eztuSq2)
         dd = dd1 + dd2
 
         #compute the new t_min
         t_old = t_min;
-        t_min = clamp(t_old - d / dd, t_low + tol_dist, t_high - tol-dist)
+        t_min = clamp(t_old - d / dd, t_low + tol_dist, t_high - tol_dist)
         if abs(t_min - t_old) < tol_dist
             break
         end
@@ -391,7 +415,7 @@ end
 Return the array dimensions required to represent an element on the
 [`EssentialManifold`](@ref) `M`, i.e. the vector of all array dimensions.
 """
-@generated representation_size(::EssentialManifold) = ((3, 3), 2)
+@generated representation_size(M::EssentialManifold) = (3, 3, 2)
 
 function Base.show(io::IO, M::EssentialManifold) 
     return print(io, "EssentialManifold($(M.is_signed))")
@@ -405,6 +429,14 @@ Compute the vector transport of the tangent vector `X` at `p` to `q` on the
 """
 vector_transport_to(::EssentialManifold, ::Any, ::Any, ::Any, ::ParallelTransport)
 
+function vector_transport_to(M::EssentialManifold, p, X, q)
+    return vector_transport_to(M, p, X, q, ParallelTransport())
+end
+
+function vector_transport_to!(M::EssentialManifold, Y, p, X, q)
+    return vector_transport_to!(M, Y, p, X, q, ParallelTransport())
+end
+
 function vector_transport_to!(::EssentialManifold, Y, p, X, q, ::ParallelTransport)
     # group operation in the ambient group
     pq = (q').*p
@@ -412,6 +444,7 @@ function vector_transport_to!(::EssentialManifold, Y, p, X, q, ::ParallelTranspo
     copyto!(Y, pq.*X.*pq')
     return Y
 end
+
 
 @doc raw"""
     vert_proj(M::EssentialManifold, p, X)
