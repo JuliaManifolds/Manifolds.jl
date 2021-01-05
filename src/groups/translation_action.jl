@@ -19,7 +19,7 @@ end
 function TranslationAction(
     M::Manifold,
     Rn::TranslationGroup,
-    ::TAD = LeftAction(),
+    ::TAD=LeftAction(),
 ) where {TAD<:ActionDirection}
     return TranslationAction{typeof(M),typeof(Rn),TAD}(M, Rn)
 end

@@ -37,7 +37,7 @@ struct InvariantMetric{G<:Metric,D<:ActionDirection} <: Metric
     metric::G
 end
 
-function InvariantMetric(metric, conv = LeftAction())
+function InvariantMetric(metric, conv=LeftAction())
     return InvariantMetric{typeof(metric),typeof(conv)}(metric)
 end
 
@@ -97,7 +97,7 @@ has_approx_invariant_metric(
     X,
     Y,
     qs,
-    conv::ActionDirection = LeftAction();
+    conv::ActionDirection=LeftAction();
     kwargs...,
 )
     gpXY = inner(M, p, X, Y)
@@ -124,7 +124,6 @@ function exp!(
     end
     return invoke(exp!, Tuple{MetricManifold,typeof(q),typeof(p),typeof(X)}, M, q, p, X)
 end
-
 
 """
     biinvariant_metric_dispatch(G::AbstractGroupManifold) -> Val

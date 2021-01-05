@@ -21,17 +21,17 @@ include("utils.jl")
         test_manifold(
             M,
             pts;
-            test_injectivity_radius = false,
-            test_default_vector_transport = true,
-            vector_transport_methods = [
+            test_injectivity_radius=false,
+            test_default_vector_transport=true,
+            vector_transport_methods=[
                 ParallelTransport(),
                 SchildsLadderTransport(),
                 PoleLadderTransport(),
             ],
-            test_forward_diff = false,
-            test_reverse_diff = false,
-            test_vee_hat = false,
-            exp_log_atol_multiplier = 8.0,
+            test_forward_diff=false,
+            test_reverse_diff=false,
+            test_vee_hat=false,
+            exp_log_atol_multiplier=8.0,
         )
     end
     @testset "Test Error cases in is_manifold_point and is_tangent_vector" begin

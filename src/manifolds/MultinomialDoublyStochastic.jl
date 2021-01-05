@@ -67,7 +67,7 @@ function check_manifold_point(M::MultinomialDoubleStochastic{n}, p; kwargs...) w
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     # positivity and columns are checked in the embedding, we further check
-    r = sum(p, dims = 2)
+    r = sum(p, dims=2)
     if !isapprox(norm(r - ones(n, 1)), 0.0; kwargs...)
         return DomainError(
             r,
@@ -90,7 +90,7 @@ function check_tangent_vector(
     M::MultinomialDoubleStochastic{n},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {n}
     if check_base_point
@@ -103,12 +103,12 @@ function check_tangent_vector(
         M,
         p,
         X;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
     # columns are checked in the embedding, we further check
-    r = sum(X, dims = 2) # check for stochastic rows
+    r = sum(X, dims=2) # check for stochastic rows
     if !isapprox(norm(r), 0.0; kwargs...)
         return DomainError(
             r,
@@ -157,7 +157,7 @@ where $I_n$ is the $n×n$ unit matrix and $\mathbf{1}_n$ is the vector of length
 project(::MultinomialDoubleStochastic, ::Any, ::Any)
 
 function project!(::MultinomialDoubleStochastic{n}, X, p, Y) where {n}
-    ζ = [I p; p I] \ [sum(Y, dims = 2); sum(Y, dims = 1)'] # Formula (25) from 1802.02628
+    ζ = [I p; p I] \ [sum(Y, dims=2); sum(Y, dims=1)'] # Formula (25) from 1802.02628
     return X .= Y .- (repeat(ζ[1:n], 1, 3) .+ repeat(ζ[(n + 1):end]', 3, 1)) .* p
 end
 
@@ -182,13 +182,13 @@ function project!(
     ::AbstractMultinomialDoublyStochastic{n},
     q,
     p;
-    maxiter = 100,
-    tolerance = eps(eltype(p)),
+    maxiter=100,
+    tolerance=eps(eltype(p)),
 ) where {n}
     any(p .<= 0) &&
         throw(DomainError("The matrix $p can not be projected, since it has nonpositive entries."))
     iter = 0
-    d1 = sum(p, dims = 1)
+    d1 = sum(p, dims=1)
     d2 = 1 ./ (p * d1')
     row = d2' * p
     gap = 2 * tolerance

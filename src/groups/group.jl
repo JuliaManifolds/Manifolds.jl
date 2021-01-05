@@ -89,19 +89,18 @@ end
 
 function decorator_transparent_dispatch(
     ::typeof(get_coordinates!),
-    ::AbstractGroupManifold,
+    ::AbstractGroupManifold{<:Any,<:AbstractGroupOperation,TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
 end
 function decorator_transparent_dispatch(
     ::typeof(get_vector!),
-    ::AbstractGroupManifold,
+    ::AbstractGroupManifold{<:Any,<:AbstractGroupOperation,TransparentIsometricEmbedding},
     args...,
 )
     return Val(:transparent)
 end
-
 
 ###################
 # Action directions
@@ -811,7 +810,7 @@ For more details, see
 """
 struct GroupExponentialRetraction{D<:ActionDirection} <: AbstractRetractionMethod end
 
-function GroupExponentialRetraction(conv::ActionDirection = LeftAction())
+function GroupExponentialRetraction(conv::ActionDirection=LeftAction())
     return GroupExponentialRetraction{typeof(conv)}()
 end
 
@@ -831,7 +830,7 @@ For more details, see
 struct GroupLogarithmicInverseRetraction{D<:ActionDirection} <:
        AbstractInverseRetractionMethod end
 
-function GroupLogarithmicInverseRetraction(conv::ActionDirection = LeftAction())
+function GroupLogarithmicInverseRetraction(conv::ActionDirection=LeftAction())
     return GroupLogarithmicInverseRetraction{typeof(conv)}()
 end
 

@@ -101,7 +101,7 @@ include("utils.jl")
                     PolarRetraction(),
                 ),
                 retract(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0], PolarRetraction()),
-                atol = 1e-15,
+                atol=1e-15,
             )
             pts = convert.(T, [x, y, z])
             v = inverse_retract(M, x, y, PolarInverseRetraction())
@@ -114,27 +114,48 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                basis_types_to_from = (DefaultOrthonormalBasis(),),
-                basis_types_vecs = (DefaultOrthonormalBasis(),),
-                test_exp_log = false,
-                default_inverse_retraction_method = PolarInverseRetraction(),
-                test_injectivity_radius = false,
-                test_is_tangent = true,
-                test_project_tangent = true,
-                test_default_vector_transport = false,
-                point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                test_vee_hat = false,
-                projection_atol_multiplier = 15.0,
-                retraction_atol_multiplier = 10.0,
-                is_tangent_atol_multiplier = 4 * 10.0^2,
-                retraction_methods = [PolarRetraction(), QRRetraction()],
-                inverse_retraction_methods = [
+                basis_types_to_from=(DefaultOrthonormalBasis(),),
+                basis_types_vecs=(DefaultOrthonormalBasis(),),
+                test_exp_log=false,
+                default_inverse_retraction_method=PolarInverseRetraction(),
+                test_injectivity_radius=false,
+                test_is_tangent=true,
+                test_project_tangent=true,
+                test_default_vector_transport=false,
+                point_distributions=[Manifolds.uniform_distribution(M, pts[1])],
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                test_vee_hat=false,
+                projection_atol_multiplier=15.0,
+                retraction_atol_multiplier=10.0,
+                is_tangent_atol_multiplier=4 * 10.0^2,
+                retraction_methods=[
+                    PolarRetraction(),
+                    QRRetraction(),
+                    CayleyRetraction(),
+                    PadeRetraction(2),
+                ],
+                inverse_retraction_methods=[
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                mid_point12 = nothing,
+                vector_transport_methods=[
+                    DifferentiatedRetractionVectorTransport{PolarRetraction}(),
+                    DifferentiatedRetractionVectorTransport{QRRetraction}(),
+                    ProjectionTransport(),
+                ],
+                vector_transport_retractions=[
+                    PolarRetraction(),
+                    QRRetraction(),
+                    PolarRetraction(),
+                ],
+                vector_transport_inverse_retractions=[
+                    PolarInverseRetraction(),
+                    QRInverseRetraction(),
+                    PolarInverseRetraction(),
+                ],
+                test_vector_transport_direction=[true, true, false],
+                mid_point12=nothing,
             )
 
             @testset "inner/norm" begin
@@ -187,24 +208,40 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_exp_log = false,
-                default_inverse_retraction_method = PolarInverseRetraction(),
-                test_injectivity_radius = false,
-                test_is_tangent = true,
-                test_project_tangent = true,
-                test_default_vector_transport = false,
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                test_vee_hat = false,
-                projection_atol_multiplier = 15.0,
-                retraction_atol_multiplier = 10.0,
-                is_tangent_atol_multiplier = 4 * 10.0^2,
-                retraction_methods = [PolarRetraction(), QRRetraction()],
-                inverse_retraction_methods = [
+                test_exp_log=false,
+                default_inverse_retraction_method=PolarInverseRetraction(),
+                test_injectivity_radius=false,
+                test_is_tangent=true,
+                test_project_tangent=true,
+                test_default_vector_transport=false,
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                test_vee_hat=false,
+                projection_atol_multiplier=15.0,
+                retraction_atol_multiplier=10.0,
+                is_tangent_atol_multiplier=4 * 10.0^2,
+                retraction_methods=[PolarRetraction(), QRRetraction()],
+                inverse_retraction_methods=[
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                mid_point12 = nothing,
+                vector_transport_methods=[
+                    DifferentiatedRetractionVectorTransport{PolarRetraction}(),
+                    DifferentiatedRetractionVectorTransport{QRRetraction}(),
+                    ProjectionTransport(),
+                ],
+                vector_transport_retractions=[
+                    PolarRetraction(),
+                    QRRetraction(),
+                    PolarRetraction(),
+                ],
+                vector_transport_inverse_retractions=[
+                    PolarInverseRetraction(),
+                    QRInverseRetraction(),
+                    PolarInverseRetraction(),
+                ],
+                test_vector_transport_direction=[true, true, false],
+                mid_point12=nothing,
             )
 
             @testset "inner/norm" begin
@@ -233,13 +270,27 @@ include("utils.jl")
         M = Stiefel(3, 2)
         p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
         X = [0.0 0.0; 0.0 0.0; 1.0 1.0]
-        r1 = CaleyRetraction()
+        r1 = CayleyRetraction()
         @test r1 == PadeRetraction(1)
-        @test repr(r1) == "CaleyRetraction()"
+        @test repr(r1) == "CayleyRetraction()"
         q1 = retract(M, p, X, r1)
         @test is_manifold_point(M, q1)
-        Y = vector_transport_direction(M, p, X, X, CaleyVectorTransport())
-        @test is_tangent_vector(M, q1, Y; atol = 10^-15)
+        Y = vector_transport_direction(
+            M,
+            p,
+            X,
+            X,
+            DifferentiatedRetractionVectorTransport(CayleyRetraction()),
+        )
+        @test is_tangent_vector(M, q1, Y; atol=10^-15)
+        Y2 = vector_transport_direction(
+            M,
+            p,
+            X,
+            X,
+            DifferentiatedRetractionVectorTransport{CayleyRetraction}(),
+        )
+        @test is_tangent_vector(M, q1, Y2; atol=10^-15)
         r2 = PadeRetraction(2)
         @test repr(r2) == "PadeRetraction(2)"
         q2 = retract(M, p, X, r2)

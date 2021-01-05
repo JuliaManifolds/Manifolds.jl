@@ -29,7 +29,7 @@ which is by default set to the [`MinkowskiMetric`](@ref).
 """
 const Lorentz = MetricManifold{ℝ,Euclidean{Tuple{N},ℝ},<:LorentzMetric} where {N}
 
-function Lorentz(n, m::MT = MinkowskiMetric()) where {MT<:LorentzMetric}
+function Lorentz(n, m::MT=MinkowskiMetric()) where {MT<:LorentzMetric}
     return Lorentz{n,typeof(m)}(Euclidean(n), m)
 end
 

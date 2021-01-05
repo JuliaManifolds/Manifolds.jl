@@ -43,9 +43,9 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
             pts,
             vpts,
             vpts;
-            test_diff = true,
-            test_mutating = false,
-            test_invariance = true,
+            test_diff=true,
+            test_mutating=false,
+            test_invariance=true,
         )
     end
 
@@ -59,9 +59,9 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
             pts,
             vpts,
             vpts;
-            test_diff = true,
-            test_mutating = true,
-            test_invariance = true,
+            test_diff=true,
+            test_mutating=true,
+            test_invariance=true,
         )
     end
 
@@ -70,15 +70,15 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
         test_manifold(
             G,
             pts,
-            test_forward_diff = false,
-            test_reverse_diff = false,
-            test_vector_spaces = false,
-            test_project_tangent = true,
-            test_musical_isomorphisms = false,
-            test_default_vector_transport = true,
-            is_mutating = true,
-            exp_log_atol_multiplier = 2.0,
-            is_tangent_atol_multiplier = 2.0,
+            test_forward_diff=false,
+            test_reverse_diff=false,
+            test_vector_spaces=false,
+            test_project_tangent=true,
+            test_musical_isomorphisms=false,
+            test_default_vector_transport=true,
+            is_mutating=true,
+            exp_log_atol_multiplier=2.0,
+            is_tangent_atol_multiplier=2.0,
         )
     end
 end

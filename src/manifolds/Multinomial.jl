@@ -66,7 +66,7 @@ function check_tangent_vector(
     M::MultinomialMatrices{n,m},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {n,m}
     if check_base_point && size(p) != (n, m)
@@ -85,7 +85,7 @@ function check_tangent_vector(
         PowerManifold(M.manifold, m),
         p,
         X;
-        check_base_point = check_base_point,
+        check_base_point=check_base_point,
         kwargs...,
     )
 end

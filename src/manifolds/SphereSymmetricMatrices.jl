@@ -17,7 +17,7 @@ Generate the manifold of `n`-by-`n` symmetric matrices of unit Frobenius norm.
 struct SphereSymmetricMatrices{N,𝔽} <:
        AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
 
-function SphereSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
+function SphereSymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
     return SphereSymmetricMatrices{n,field}()
 end
 
@@ -42,7 +42,6 @@ function check_manifold_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...) 
     return nothing
 end
 
-
 """
     check_tangent_vector(M::SphereSymmetricMatrices{n,𝔽}, p, X; check_base_point = true, kwargs... )
 
@@ -58,7 +57,7 @@ function check_tangent_vector(
     M::SphereSymmetricMatrices{n,𝔽},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {n,𝔽}
     if check_base_point
@@ -71,7 +70,7 @@ function check_tangent_vector(
         M,
         p,
         X;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -85,7 +84,7 @@ function check_tangent_vector(
 end
 
 function decorated_manifold(M::SphereSymmetricMatrices{n,𝔽}) where {n,𝔽}
-    return ArraySphere(n, n; field = 𝔽)
+    return ArraySphere(n, n; field=𝔽)
 end
 
 @doc raw"""

@@ -33,7 +33,7 @@ Compute a modified `sign(z)` that is always nonzero, i.e. where
 \end{cases}
 ````
 """
-@inline function nzsign(z, absz = abs(z))
+@inline function nzsign(z, absz=abs(z))
     psignz = z / absz
     return ifelse(iszero(absz), one(psignz), psignz)
 end
@@ -164,13 +164,6 @@ For example `select_from_tuple(("a", "b", "c"), Val((3, 1, 1)))` returns
     end
     return Expr(:tuple, [Expr(:ref, :t, k) for k in P]...)
 end
-
-"""
-    size_to_tuple(::Type{S}) where S<:Tuple
-
-Converts a size given by `Tuple{N, M, ...}` into a tuple `(N, M, ...)`.
-"""
-Base.@pure size_to_tuple(::Type{S}) where {S<:Tuple} = tuple(S.parameters...)
 
 @doc raw"""
     vec2skew!(X, v, k)

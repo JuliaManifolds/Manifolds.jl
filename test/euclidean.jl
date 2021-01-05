@@ -2,11 +2,11 @@ include("utils.jl")
 
 @testset "Euclidean" begin
     E = Euclidean(3)
-    Ec = Euclidean(3; field = ℂ)
+    Ec = Euclidean(3; field=ℂ)
     EM = Manifolds.MetricManifold(E, Manifolds.EuclideanMetric())
     @test repr(E) == "Euclidean(3; field = ℝ)"
     @test repr(Ec) == "Euclidean(3; field = ℂ)"
-    @test repr(Euclidean(2, 3; field = ℍ)) == "Euclidean(2, 3; field = ℍ)"
+    @test repr(Euclidean(2, 3; field=ℍ)) == "Euclidean(2, 3; field = ℍ)"
     @test Manifolds.allocation_promotion_function(Ec, get_vector, ()) === complex
     @test is_default_metric(EM)
     @test is_default_metric(E, Manifolds.EuclideanMetric())
@@ -38,7 +38,7 @@ include("utils.jl")
     @test E^2 === Euclidean(3, 2)
     @test ^(E, 2) === Euclidean(3, 2)
     @test E^(2,) === Euclidean(3, 2)
-    @test Ec^(4, 5) === Euclidean(3, 4, 5; field = ℂ)
+    @test Ec^(4, 5) === Euclidean(3, 4, 5; field=ℂ)
 
     manifolds = [E, EM, Ec]
     types = [Vector{Float64}]
@@ -77,30 +77,30 @@ include("utils.jl")
                 test_manifold(
                     M,
                     pts,
-                    test_reverse_diff = isa(T, Vector),
-                    test_project_point = true,
-                    test_project_tangent = true,
-                    test_musical_isomorphisms = true,
-                    test_default_vector_transport = true,
-                    vector_transport_methods = [
+                    test_reverse_diff=isa(T, Vector),
+                    test_project_point=true,
+                    test_project_tangent=true,
+                    test_musical_isomorphisms=true,
+                    test_default_vector_transport=true,
+                    vector_transport_methods=[
                         ParallelTransport(),
                         SchildsLadderTransport(),
                         PoleLadderTransport(),
                     ],
-                    test_mutating_rand = isa(T, Vector),
-                    point_distributions = [Manifolds.projected_distribution(
+                    test_mutating_rand=isa(T, Vector),
+                    point_distributions=[Manifolds.projected_distribution(
                         M,
                         Distributions.MvNormal(zero(pts[1]), 1.0),
                     )],
-                    tvector_distributions = [Manifolds.normal_tvector_distribution(
+                    tvector_distributions=[Manifolds.normal_tvector_distribution(
                         M,
                         pts[1],
                         1.0,
                     )],
-                    basis_types_vecs = basis_types,
-                    basis_types_to_from = basis_types,
-                    basis_has_specialized_diagonalizing_get = true,
-                    test_vee_hat = isa(M, Euclidean),
+                    basis_types_vecs=basis_types,
+                    basis_types_to_from=basis_types,
+                    basis_has_specialized_diagonalizing_get=true,
+                    test_vee_hat=isa(M, Euclidean),
                 )
             end
         end
@@ -115,11 +115,11 @@ include("utils.jl")
             test_manifold(
                 Ec,
                 pts,
-                test_reverse_diff = isa(T, Vector),
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                test_vee_hat = false,
+                test_reverse_diff=isa(T, Vector),
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                test_vee_hat=false,
             )
         end
     end
@@ -142,11 +142,11 @@ include("utils.jl")
         @test ℝ^2 === Euclidean(2)
         @test ℝ^(2, 3) === Euclidean(2, 3)
 
-        @test ℂ^2 === Euclidean(2; field = ℂ)
-        @test ℂ^(2, 3) === Euclidean(2, 3; field = ℂ)
+        @test ℂ^2 === Euclidean(2; field=ℂ)
+        @test ℂ^(2, 3) === Euclidean(2, 3; field=ℂ)
 
-        @test ℍ^2 === Euclidean(2; field = ℍ)
-        @test ℍ^(2, 3) === Euclidean(2, 3; field = ℍ)
+        @test ℍ^2 === Euclidean(2; field=ℍ)
+        @test ℍ^(2, 3) === Euclidean(2, 3; field=ℍ)
     end
 
     @testset "Embeddings into larger Euclidean Manifolds" begin
@@ -181,7 +181,7 @@ include("utils.jl")
 
     @testset "Embedding Real into Complex" begin
         M = Euclidean(3, 3)
-        N = Euclidean(3, 4; field = ℂ)
+        N = Euclidean(3, 4; field=ℂ)
         O = EmbeddedManifold(M, N)
         p = ones(3, 3)
         qT = zeros(ComplexF64, 3, 4)

@@ -170,21 +170,21 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_exp_log = false,
-                default_inverse_retraction_method = nothing,
-                test_injectivity_radius = false,
-                default_retraction_method = PolarRetraction(),
-                test_is_tangent = false,
-                test_project_tangent = true,
-                test_default_vector_transport = false,
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                test_vector_spaces = false,
-                test_vee_hat = false,
-                test_tangent_vector_broadcasting = false, #broadcast not so easy for 3 matrix type
-                projection_atol_multiplier = 15,
-                retraction_methods = [PolarRetraction()],
-                mid_point12 = nothing,
+                test_exp_log=false,
+                default_inverse_retraction_method=nothing,
+                test_injectivity_radius=false,
+                default_retraction_method=PolarRetraction(),
+                test_is_tangent=false,
+                test_project_tangent=true,
+                test_default_vector_transport=false,
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                test_vector_spaces=false,
+                test_vee_hat=false,
+                test_tangent_vector_broadcasting=false, #broadcast not so easy for 3 matrix type
+                projection_atol_multiplier=15,
+                retraction_methods=[PolarRetraction()],
+                mid_point12=nothing,
             )
         end
     end

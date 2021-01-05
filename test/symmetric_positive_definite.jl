@@ -61,16 +61,16 @@ using Manifolds: default_metric_dispatch
                 test_manifold(
                     M,
                     pts;
-                    test_default_vector_transport = true,
-                    vector_transport_methods = typeof(M) == SymmetricPositiveDefinite{3} ?
-                                               [ParallelTransport()] : [],
-                    test_forward_diff = false,
-                    test_reverse_diff = false,
-                    test_vee_hat = M === M2,
-                    exp_log_atol_multiplier = exp_log_atol_multiplier,
-                    basis_types_vecs = basis_types,
-                    basis_types_to_from = basis_types,
-                    is_tangent_atol_multiplier = 1,
+                    test_default_vector_transport=true,
+                    vector_transport_methods=typeof(M) == SymmetricPositiveDefinite{3} ?
+                                             [ParallelTransport()] : [],
+                    test_forward_diff=false,
+                    test_reverse_diff=false,
+                    test_vee_hat=M === M2,
+                    exp_log_atol_multiplier=exp_log_atol_multiplier,
+                    basis_types_vecs=basis_types,
+                    basis_types_to_from=basis_types,
+                    is_tangent_atol_multiplier=1,
                 )
             end
             @testset "Test Error cases in is_manifold_point and is_tangent_vector" begin
@@ -128,7 +128,7 @@ using Manifolds: default_metric_dispatch
         Y1 = vector_transport_to(M, p1, X1, p2)
         @test is_tangent_vector(M, p2, Y1)
         Y2 = vector_transport_to(M, p1, X1, p2, PoleLadderTransport())
-        @test is_tangent_vector(M, p2, Y2, atol = 10^-16)
+        @test is_tangent_vector(M, p2, Y2, atol=10^-16)
         Y3 = vector_transport_to(M, p1, X1, p2, SchildsLadderTransport())
         @test is_tangent_vector(M, p2, Y3)
         @test isapprox(M, p2, Y1, Y2) # pole is exact on SPDs, i.e. identical to parallel transport

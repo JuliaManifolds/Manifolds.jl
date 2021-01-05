@@ -62,7 +62,7 @@ For the real-valued case represented by positive numbers, all `X` are valid, sin
 For the complex-valued case `X` [...]
 
 """
-function check_tangent_vector(M::PositiveNumbers, p, X; check_base_point = true, kwargs...)
+function check_tangent_vector(M::PositiveNumbers, p, X; check_base_point=true, kwargs...)
     if check_base_point
         perr = check_manifold_point(M, p; kwargs...)
         return perr # if x is valid all v that are real numbers are valid

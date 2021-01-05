@@ -42,15 +42,15 @@ include("utils.jl")
         test_manifold(
             M,
             pts;
-            test_reverse_diff = false,
-            test_injectivity_radius = false,
-            test_project_tangent = true,
-            test_musical_isomorphisms = true,
-            retraction_methods = retraction_methods,
-            inverse_retraction_methods = inverse_retraction_methods,
-            point_distributions = [Manifolds.normal_rotation_distribution(M, pts[1], 1.0)],
-            tvector_distributions = [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
-            basis_types_to_from = basis_types,
+            test_reverse_diff=false,
+            test_injectivity_radius=false,
+            test_project_tangent=true,
+            test_musical_isomorphisms=true,
+            retraction_methods=retraction_methods,
+            inverse_retraction_methods=inverse_retraction_methods,
+            point_distributions=[Manifolds.normal_rotation_distribution(M, pts[1], 1.0)],
+            tvector_distributions=[Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
+            basis_types_to_from=basis_types,
         )
 
         @testset "log edge cases" begin
@@ -91,18 +91,18 @@ include("utils.jl")
             test_manifold(
                 SOn,
                 pts;
-                test_forward_diff = n == 3,
-                test_reverse_diff = false,
-                test_injectivity_radius = false,
-                test_musical_isomorphisms = true,
-                test_mutating_rand = true,
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
-                point_distributions = [ptd],
-                tvector_distributions = [tvd],
-                basis_types_to_from = basis_types,
-                exp_log_atol_multiplier = 20,
-                retraction_atol_multiplier = 12,
+                test_forward_diff=n == 3,
+                test_reverse_diff=false,
+                test_injectivity_radius=false,
+                test_musical_isomorphisms=true,
+                test_mutating_rand=true,
+                retraction_methods=retraction_methods,
+                inverse_retraction_methods=inverse_retraction_methods,
+                point_distributions=[ptd],
+                tvector_distributions=[tvd],
+                basis_types_to_from=basis_types,
+                exp_log_atol_multiplier=20,
+                retraction_atol_multiplier=12,
             )
 
             @testset "vee/hat" begin
@@ -141,7 +141,7 @@ include("utils.jl")
                             @test ForwardDiff.derivative(t -> exp(SOn, one(x), t * V), 0) ≈
                                   V
                             x2 = exp(log(SOn, one(x), x))
-                            @test isapprox(x, x2; atol = 1e-6)
+                            @test isapprox(x, x2; atol=1e-6)
                         end
                     end
                 end

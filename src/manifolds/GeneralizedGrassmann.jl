@@ -51,8 +51,8 @@ end
 function GeneralizedGrassmann(
     n::Int,
     k::Int,
-    B::AbstractMatrix = Matrix{Float64}(I, n, n),
-    field::AbstractNumbers = ℝ,
+    B::AbstractMatrix=Matrix{Float64}(I, n, n),
+    field::AbstractNumbers=ℝ,
 )
     return GeneralizedGrassmann{n,k,field,typeof(B)}(B)
 end
@@ -101,7 +101,7 @@ function check_tangent_vector(
     M::GeneralizedGrassmann{n,k,𝔽},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {n,k,𝔽}
     if check_base_point
@@ -114,7 +114,7 @@ function check_tangent_vector(
         get_embedding(M),
         p,
         X;
-        check_base_point = check_base_point,
+        check_base_point=check_base_point,
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -128,7 +128,7 @@ function check_tangent_vector(
 end
 
 function decorated_manifold(M::GeneralizedGrassmann{N,K,𝔽}) where {N,K,𝔽}
-    return Euclidean(N, K; field = 𝔽)
+    return Euclidean(N, K; field=𝔽)
 end
 
 @doc raw"""

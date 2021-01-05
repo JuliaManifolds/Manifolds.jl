@@ -231,8 +231,8 @@ include("group_utils.jl")
         @test group_log(G, x) === x
 
         y = identity(G, x)
-        @test isapprox(y, ge; atol = 1e-10)
-        @test isapprox(ge, y; atol = 1e-10)
+        @test isapprox(y, ge; atol=1e-10)
+        @test isapprox(ge, y; atol=1e-10)
         @test isapprox(ge, ge)
     end
 
@@ -243,7 +243,7 @@ include("group_utils.jl")
             [[1.0 2.0; 3.0 4.0], [2.0 3.0; 4.0 5.0], [3.0 4.0; 5.0 6.0]],
             [],
             [[1.0 2.0; 3.0 4.0]];
-            test_group_exp_log = false,
+            test_group_exp_log=false,
         )
 
         x = [1.0 2.0; 2.0 3.0]
@@ -344,4 +344,20 @@ struct NotImplementedAction <: AbstractGroupAction{LeftAction} end
         @test_throws ErrorException optimal_alignment(A, x, x)
         @test_throws ErrorException optimal_alignment!(A, a, x, x)
     end
+end
+
+struct DefaultEmbeddedGroup <:
+       AbstractGroupManifold{ℝ,AdditionOperation,DefaultEmbeddingType} end
+
+@testset "DefaltEmbeddedGroup" begin
+    G = DefaultEmbeddedGroup()
+    @test ManifoldsBase.decorator_transparent_dispatch(get_vector!, G, [1], [1], [1]) ===
+          Val(:parent)
+    @test ManifoldsBase.decorator_transparent_dispatch(
+        get_coordinates!,
+        G,
+        [1],
+        [1],
+        [1],
+    ) === Val(:parent)
 end

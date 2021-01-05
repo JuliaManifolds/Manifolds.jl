@@ -22,11 +22,11 @@ The dimension of this space is $k \dim_ℝ 𝔽$, where $\dim_ℝ 𝔽$ is the
 """
 struct Euclidean{N,𝔽} <: Manifold{𝔽} where {N<:Tuple} end
 
-function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers = ℝ) where {I}
+function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers=ℝ) where {I}
     return Euclidean{Tuple{n...},field}()
 end
 
-Base.:^(𝔽::AbstractNumbers, n) = Euclidean(n...; field = 𝔽)
+Base.:^(𝔽::AbstractNumbers, n) = Euclidean(n...; field=𝔽)
 
 """
     EuclideanMetric <: RiemannianMetric
@@ -82,7 +82,7 @@ function check_tangent_vector(
     M::Euclidean{N,𝔽},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {N,𝔽}
     if check_base_point
@@ -329,10 +329,10 @@ function StatsBase.mean_and_var(
     ::Euclidean{Tuple{1}},
     x::AbstractVector{<:Number},
     w::AbstractWeights;
-    corrected = false,
+    corrected=false,
     kwargs...,
 )
-    m, v = mean_and_var(x, w; corrected = corrected, kwargs...)
+    m, v = mean_and_var(x, w; corrected=corrected, kwargs...)
     return m, sum(v)
 end
 function StatsBase.mean_and_var(
@@ -499,7 +499,7 @@ end
 
 Statistics.var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
 function Statistics.var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T}
-    return sum(var(x; mean = m, kwargs...))
+    return sum(var(x; mean=m, kwargs...))
 end
 
 """
