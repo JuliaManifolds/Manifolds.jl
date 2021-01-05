@@ -428,8 +428,8 @@ function project!(M::EssentialManifold, Y, p, X)
         Y,
         X_proj_skew -
         (s / 2) .* vcat(
-            get_vector(M.manifold, p[1], p[1][3, :]),
-            get_vector(M.manifold, p[2], p[2][3, :]),
+            get_vector(M.manifold, p[1], p[1][3, :], DefaultOrthogonalBasis()),
+            get_vector(M.manifold, p[2], p[2][3, :], DefaultOrthogonalBasis()),
         ),
     )
     return Y
@@ -465,16 +465,16 @@ end
 
 function vector_transport_to!(::EssentialManifold, Y, p, X, q, ::ParallelTransport)
     # group operation in the ambient group
-    pq = (q') .* p
+    pq = [qe'*pe for (pe,qe) in zip(p,q)]
     # left translation
-    copyto!(Y, pq .* X .* pq')
+    pq = [qe'*pe for (pe,qe) in zip(p,q)]
     return Y
 end
 
 @doc raw"""
     vert_proj(M::EssentialManifold, p, X)
 
-Project 'X' onto the vertical space $T_{\text{vp}}\text{SO}(3)^2$ with
+Project `X` onto the vertical space $T_{\text{vp}}\text{SO}(3)^2$ with
 ````math
 \text{vert\_proj}_p(X) = e_z^T(R_1 X_1 + R_2 X_2),
 ````
@@ -483,6 +483,6 @@ pose of camera $i$ $g_i = (R_i,T'_i) ∈ \text{SE}(3)$ and $R_0 ∈ \text{SO}(3)
 
 """
 function vert_proj(M::EssentialManifold, p, X)
-    return vert_proj(M.manifold, p[1], X[1]) + vert_proj(M.manifold, p[2], X[2])
+    return (p[1] * get_coordinates(M, p[1], X[2], DefaultOrthogonalBasis()))[3]+(p[2] * get_coordinates(M, p[2], X[2], DefaultOrthogonalBasis()))[3]
 end
-vert_proj(M::Rotations{3}, p, X) = (p * get_coordinates(M, p, X))[3]
+
