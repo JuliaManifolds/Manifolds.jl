@@ -289,7 +289,7 @@ function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthogonalBasis
     end
     return Xⁱ
 end
-function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthonormalBasis) where {N}
+function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, ::DefaultOrthonormalBasis) where {N}
     T = Base.promote_eltype(p, X)
     get_coordinates!(M, Xⁱ, p, X, DefaultOrthogonalBasis())
     Xⁱ .*= sqrt(T(2))
@@ -308,7 +308,7 @@ get_vector(::Rotations, ::Any...)
 function get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultOrthogonalBasis)
     return get_vector!(M, X, p, Xⁱ[1], B)
 end
-function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultOrthogonalBasis)
+function get_vector!(::Rotations{2}, X, p, Xⁱ::Real, ::DefaultOrthogonalBasis)
     @assert length(X) == 4
     @inbounds begin
         X[1] = 0

@@ -125,9 +125,9 @@ end
 
 get_iterator(::EssentialManifold) = Base.OneTo(2)
 
-isapprox(M::EssentialManifold, p, q; kwargs...) = isapprox(distance(M,p,q), 0.0;kwargs...)
-isapprox(M::EssentialManifold, p, X, Y; kwargs...) = isapprox(norm(M,p,X-Y), 0.0;kwargs...)
-
+function isapprox(M::EssentialManifold, p, q; kwargs...)
+    return isapprox(distance(M, p, q), 0.0; kwargs...)
+end
 
 @doc raw"""
     log(M::EssentialManifold, X, p, q)
@@ -430,11 +430,12 @@ function project!(M::EssentialManifold, Y, p, X)
     # orthogonal projection
     copyto!(
         Y,
-        X_proj_skew -
-        (s / 2) .* vcat(
-            get_vector(M.manifold, p[1], p[1][3, :], DefaultOrthogonalBasis()),
-            get_vector(M.manifold, p[2], p[2][3, :], DefaultOrthogonalBasis()),
-        ),
+        [
+            X_proj_skew[1] -
+            (s / 2) * get_vector(M.manifold, p[1], p[1][3, :], DefaultOrthogonalBasis()),
+            X_proj_skew[2] -
+            (s / 2) * get_vector(M.manifold, p[2], p[2][3, :], DefaultOrthogonalBasis()),
+        ],
     )
     return Y
 end
@@ -445,10 +446,30 @@ end
 Return the array dimensions required to represent an element on the
 [`EssentialManifold`](@ref) `M`, i.e. the vector of all array dimensions.
 """
-@generated representation_size(M::EssentialManifold) = (3, 3, 2)
+@generated representation_size(::EssentialManifold) = (3, 3, 2)
 
 function Base.show(io::IO, M::EssentialManifold)
     return print(io, "EssentialManifold($(M.is_signed))")
+end
+
+function vector_transport_direction(M::EssentialManifold, p, X, d)
+    return vector_transport_direction(M, p, X, d, ParallelTransport())
+end
+
+function vector_transport_direction!(M::EssentialManifold, Y, p, X, d)
+    return vector_transport_direction!(M, Y, p, X, d, ParallelTransport())
+end
+
+function vector_transport_direction!(
+    M::EssentialManifold,
+    Y,
+    p,
+    X,
+    d,
+    m::ParallelTransport,
+)
+    y = exp(M, p, d)
+    return vector_transport_to!(M, Y, p, X, y, m)
 end
 
 @doc raw"""
@@ -469,9 +490,9 @@ end
 
 function vector_transport_to!(::EssentialManifold, Y, p, X, q, ::ParallelTransport)
     # group operation in the ambient group
-    pq = [qe'*pe for (pe,qe) in zip(p,q)]
+    pq = [qe' * pe for (pe, qe) in zip(p, q)]
     # left translation
-    pq = [qe'*pe for (pe,qe) in zip(p,q)]
+    copyto!(Y, [ pqe * Xe * pqe' for (pqe,Xe) in zip(pq,X)])
     return Y
 end
 
@@ -487,5 +508,8 @@ pose of camera $i$ $g_i = (R_i,T'_i) ∈ \text{SE}(3)$ and $R_0 ∈ \text{SO}(3)
 
 """
 function vert_proj(M::EssentialManifold, p, X)
-    return (p[1] * get_coordinates(M, p[1], X[2], DefaultOrthogonalBasis()))[3]+(p[2] * get_coordinates(M, p[2], X[2], DefaultOrthogonalBasis()))[3]
+    return sum(vert_proj.(Ref(M.manifold), p, X))
+end
+function vert_proj(M::Rotations{3}, p, X)
+    return (p[3, :]' * get_coordinates(M, p, X, DefaultOrthogonalBasis()))
 end
