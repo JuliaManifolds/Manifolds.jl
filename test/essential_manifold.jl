@@ -20,7 +20,7 @@ p3 = [r2, r2]
 np1 = [r1, nr]
 np2 = [nr, nr]
 np3 = [r1, r2, r3]
-@test !is_manifold_point(M, r1)                                      #tests single rotation matrix 
+@test !is_manifold_point(M, r1)                                      #tests single rotation matrix
 @test_throws DomainError is_manifold_point(M, r1, true)
 @test_throws DomainError is_manifold_point(M, np3, true)
 @test is_manifold_point(M, p1)                                       #tests an essential matrix
@@ -46,7 +46,7 @@ test_manifold(
     test_musical_isomorphisms=false,
     test_default_vector_transport=false,
     test_representation_size=true,
-    test_exp_log=true, 
+    test_exp_log=true,
     exp_log_atol_multiplier=1,
 )
 #end
