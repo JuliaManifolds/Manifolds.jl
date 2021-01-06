@@ -119,7 +119,6 @@ exp(::EssentialManifold, ::Any...)
 
 function exp!(M::EssentialManifold, q, p, X)
     exp!.(Ref(M.manifold), q, p, X)
-    q .= p .* q
     return q
 end
 
@@ -460,14 +459,7 @@ function vector_transport_direction!(M::EssentialManifold, Y, p, X, d)
     return vector_transport_direction!(M, Y, p, X, d, ParallelTransport())
 end
 
-function vector_transport_direction!(
-    M::EssentialManifold,
-    Y,
-    p,
-    X,
-    d,
-    m::ParallelTransport,
-)
+function vector_transport_direction!(M::EssentialManifold, Y, p, X, d, m::ParallelTransport)
     y = exp(M, p, d)
     return vector_transport_to!(M, Y, p, X, y, m)
 end
@@ -492,7 +484,7 @@ function vector_transport_to!(::EssentialManifold, Y, p, X, q, ::ParallelTranspo
     # group operation in the ambient group
     pq = [qe' * pe for (pe, qe) in zip(p, q)]
     # left translation
-    copyto!(Y, [ pqe * Xe * pqe' for (pqe,Xe) in zip(pq,X)])
+    copyto!(Y, [pqe * Xe * pqe' for (pqe, Xe) in zip(pq, X)])
     return Y
 end
 
