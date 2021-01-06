@@ -79,7 +79,6 @@ function check_tangent_vector(M::EssentialManifold, p, X; check_base_point=true,
         check_base_point=check_base_point,
         kwargs...,
     )
-    return nothing
 end
 
 @doc raw"""
