@@ -422,18 +422,16 @@ and $R_0 ∈ \text{SO}(3)$ such that $R_0(T'_2-T'_1) = e_z$.
 project(::EssentialManifold, ::Any, ::Any)
 
 function project!(M::EssentialManifold, Y, p, X)
-    X_proj = p' .* X
-    X_proj_skew = 0.5 * (X_proj - X_proj')
+    X_proj = [pe' * Xe for (pe, Xe) in zip(p, X)]
+    X_proj .= [0.5 * (Xe - Xe') for Xe in X_proj]
     # projection on the vertical component
-    s = vert_proj(M, p, X_proj_skew)
+    s = vert_proj(M, p, X_proj)
     # orthogonal projection
     copyto!(
         Y,
         [
-            X_proj_skew[1] -
-            (s / 2) * get_vector(M.manifold, p[1], p[1][3, :], DefaultOrthogonalBasis()),
-            X_proj_skew[2] -
-            (s / 2) * get_vector(M.manifold, p[2], p[2][3, :], DefaultOrthogonalBasis()),
+            Xe - (s / 2) * get_vector(M.manifold, pe, pe[3, :], DefaultOrthogonalBasis())
+            for (Xe, pe) in zip(X_proj, p)
         ],
     )
     return Y

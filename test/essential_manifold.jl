@@ -35,6 +35,9 @@ include("utils.jl")
         )
         @test !is_tangent_vector(M, np1, [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0])
         @test !is_tangent_vector(M, p1, p2)
+        # projection test
+        @test is_tangent_vector(M, p1, project(M, p1, log(M, p1, p2)))
+        @test is_tangent_vector(M, p1, project(M, p1, log(M, p2, p1)))
     end
     test_manifold(
         M,
