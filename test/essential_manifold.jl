@@ -39,20 +39,40 @@ include("utils.jl")
         @test is_tangent_vector(M, p1, project(M, p1, log(M, p1, p2)))
         @test is_tangent_vector(M, p1, project(M, p1, log(M, p2, p1)))
     end
-    test_manifold(
-        M,
-        [p1, p2, p3],
-        test_forward_diff=false,
-        test_reverse_diff=false,
-        test_vector_spaces=true,
-        test_project_point=true,
-        projection_atol_multiplier=10,
-        test_project_tangent=false, # since it includes vert_proj.
-        test_musical_isomorphisms=false,
-        test_default_vector_transport=true,
-        test_representation_size=true,
-        test_exp_log=true,
-        mid_point12=nothing,
-        exp_log_atol_multiplier=4,
-    )
+    @testset "Signed Essential" begin
+        test_manifold(
+            M,
+            [p1, p2, p3],
+            test_forward_diff=false,
+            test_reverse_diff=false,
+            test_vector_spaces=true,
+            test_project_point=true,
+            projection_atol_multiplier=10,
+            test_project_tangent=false, # since it includes vert_proj.
+            test_musical_isomorphisms=false,
+            test_default_vector_transport=true,
+            test_representation_size=true,
+            test_exp_log=true,
+            mid_point12=nothing,
+            exp_log_atol_multiplier=4,
+        )
+    end
+    @testset "Unsigned Essential" begin
+        test_manifold(
+            EssentialManifold(false),
+            [p1, p2, p3],
+            test_forward_diff=false,
+            test_reverse_diff=false,
+            test_vector_spaces=true,
+            test_project_point=true,
+            projection_atol_multiplier=10,
+            test_project_tangent=false, # since it includes vert_proj.
+            test_musical_isomorphisms=false,
+            test_default_vector_transport=true,
+            test_representation_size=true,
+            test_exp_log=true,
+            mid_point12=nothing,
+            exp_log_atol_multiplier=4,
+        )
+    end
 end

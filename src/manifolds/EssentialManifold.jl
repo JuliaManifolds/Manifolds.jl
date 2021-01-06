@@ -165,6 +165,7 @@ function log!(M::EssentialManifold, X, p, q)
     q2 = deepcopy(q)
 
     if !M.is_signed
+        q2min = deepcopy(q)
         for k in 1:4
             #flip sign in q to get another member of its equivalence class
             if k == 2
@@ -178,14 +179,15 @@ function log!(M::EssentialManifold, X, p, q)
             end
             t_temp, f_temp = dist_min_angle_pair(p, q2)
             if f_temp < f_min
+                q2min = deepcopy(q2)
                 f_min = f_temp
                 t = t_temp
             end
         end
+        q2 = q2min
     else
         t, _ = dist_min_angle_pair(p, q2)
     end
-
     Rz = [cos(t) -sin(t) 0; sin(t) cos(t) 0; 0 0 1]
     representative_q = zeros(size(q2))
     representative_q = [Rz * q2[1], Rz * q2[2]]
