@@ -51,7 +51,6 @@ function check_manifold_point(M::EssentialManifold, p; kwargs...)
         p;
         kwargs...,
     )
-    return nothing
 end
 
 """
