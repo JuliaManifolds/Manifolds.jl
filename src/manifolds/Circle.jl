@@ -356,8 +356,9 @@ angles.
 mean(::Circle{ℂ}, ::Any)
 function Statistics.mean(M::Circle{ℂ}, x::AbstractVector{<:Complex}; kwargs...)
     s = sum(x)
-    abs(s) == 0 &&
-        return error("The mean for $(x) on $(M) is not defined/unique, since the sum of the complex numbers is zero")
+    abs(s) == 0 && return error(
+        "The mean for $(x) on $(M) is not defined/unique, since the sum of the complex numbers is zero",
+    )
     return s / abs(s)
 end
 function Statistics.mean(
@@ -367,8 +368,9 @@ function Statistics.mean(
     kwargs...,
 )
     s = sum(w .* x)
-    abs(s) == 0 &&
-        error("The mean for $(x) on $(M) is not defined/unique, since the sum of the complex numbers is zero")
+    abs(s) == 0 && error(
+        "The mean for $(x) on $(M) is not defined/unique, since the sum of the complex numbers is zero",
+    )
     return s /= abs(s)
 end
 

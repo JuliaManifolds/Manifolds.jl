@@ -42,14 +42,18 @@ end
     TEST_FLOAT32 && push!(types, Vector{Float32})
     TEST_STATIC_SIZED && push!(types, MVector{5,Float64})
 
-    retraction_methods = [Manifolds.ProductRetraction(
-        ManifoldsBase.ExponentialRetraction(),
-        ManifoldsBase.ExponentialRetraction(),
-    )]
-    inverse_retraction_methods = [Manifolds.InverseProductRetraction(
-        ManifoldsBase.LogarithmicInverseRetraction(),
-        ManifoldsBase.LogarithmicInverseRetraction(),
-    )]
+    retraction_methods = [
+        Manifolds.ProductRetraction(
+            ManifoldsBase.ExponentialRetraction(),
+            ManifoldsBase.ExponentialRetraction(),
+        ),
+    ]
+    inverse_retraction_methods = [
+        Manifolds.InverseProductRetraction(
+            ManifoldsBase.LogarithmicInverseRetraction(),
+            ManifoldsBase.LogarithmicInverseRetraction(),
+        ),
+    ]
 
     reshapers = (Manifolds.StaticReshaper(), Manifolds.ArrayReshaper())
 
@@ -316,14 +320,12 @@ end
                 retraction_methods=retraction_methods,
                 inverse_retraction_methods=inverse_retraction_methods,
                 test_mutating_rand=isa(T, Vector),
-                point_distributions=[Manifolds.ProductPointDistribution(
-                    distr_M1,
-                    distr_M2,
-                )],
-                tvector_distributions=[Manifolds.ProductFVectorDistribution(
-                    distr_tv_M1,
-                    distr_tv_M2,
-                )],
+                point_distributions=[
+                    Manifolds.ProductPointDistribution(distr_M1, distr_M2),
+                ],
+                tvector_distributions=[
+                    Manifolds.ProductFVectorDistribution(distr_tv_M1, distr_tv_M2),
+                ],
                 is_tangent_atol_multiplier=1,
                 exp_log_atol_multiplier=1,
             )
@@ -371,8 +373,8 @@ end
     angles = (0.0, π / 2, 2π / 3)
     pts_rot = [[cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)] for ϕ in angles]
     pts = [
-        Manifolds.prod_point(shape_ser, p[1], p[2], p[3])
-        for p in zip(pts_sphere, pts_r2, pts_rot)
+        Manifolds.prod_point(shape_ser, p[1], p[2], p[3]) for
+        p in zip(pts_sphere, pts_r2, pts_rot)
     ]
     test_manifold(
         Mser,

@@ -134,12 +134,14 @@ globally default differentiation backend for calculating gradients.
 
 [`Manifolds.gradient(::Manifold, ::Any, ::Any, ::AbstractRiemannianDiffBackend)`](@ref)
 """
-const _current_rgradient_backend = CurrentRiemannianDiffBackend(RiemannianONBDiffBackend(
-    diff_backend(),
-    ExponentialRetraction(),
-    LogarithmicInverseRetraction(),
-    DefaultOrthonormalBasis(),
-),)
+const _current_rgradient_backend = CurrentRiemannianDiffBackend(
+    RiemannianONBDiffBackend(
+        diff_backend(),
+        ExponentialRetraction(),
+        LogarithmicInverseRetraction(),
+        DefaultOrthonormalBasis(),
+    ),
+)
 
 """
     _current_rdifferential_backend
@@ -151,13 +153,14 @@ globally default differentiation backend for calculating differentials.
 
 [`Manifolds.differential`](@ref)
 """
-const _current_rdifferential_backend =
-    CurrentRiemannianDiffBackend(RiemannianONBDiffBackend(
+const _current_rdifferential_backend = CurrentRiemannianDiffBackend(
+    RiemannianONBDiffBackend(
         diff_backend(),
         ExponentialRetraction(),
         LogarithmicInverseRetraction(),
         DefaultOrthonormalBasis(),
-    ),)
+    ),
+)
 
 """
     rgradient_backend() -> AbstractRiemannianDiffBackend

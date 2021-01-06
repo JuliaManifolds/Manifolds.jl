@@ -149,10 +149,16 @@ function embed!(
     ln = length(n)
     m = size(q)
     lm = length(m)
-    (length(n) > length(m)) &&
-        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m)."))
-    any(n .> m[1:ln]) &&
-        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m))."))
+    (length(n) > length(m)) && throw(
+        DomainError(
+            "Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m).",
+        ),
+    )
+    any(n .> m[1:ln]) && throw(
+        DomainError(
+            "Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m)).",
+        ),
+    )
     # put p into q
     fill!(q, 0)
     # fill „top left edge“ of q with p.
@@ -404,10 +410,16 @@ function project!(
     ln = length(n)
     m = size(q)
     lm = length(m)
-    (length(n) < length(m)) &&
-        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m)."))
-    any(n .< m[1:ln]) &&
-        throw(DomainError("Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m))."))
+    (length(n) < length(m)) && throw(
+        DomainError(
+            "Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m).",
+        ),
+    )
+    any(n .< m[1:ln]) && throw(
+        DomainError(
+            "Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m)).",
+        ),
+    )
     #  fill q with the „top left edge“ of p.
     q .= p[map(i -> Base.OneTo(i), m)..., ntuple(_ -> 1, lm - ln)...]
     return q
