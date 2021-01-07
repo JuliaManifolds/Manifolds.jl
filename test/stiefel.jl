@@ -62,8 +62,8 @@ include("utils.jl")
 
         @testset "inverse QR retraction cases" begin
             M43 = Stiefel(4, 3)
-            p = SA[1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0; 0.0 0.0 0.0]
-            Xinit = SA[0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0; 1.0 1.0 1.0]
+            p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0; 0.0 0.0 0.0]
+            Xinit = [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0; 1.0 1.0 1.0]
             q = retract(M43, p, Xinit, QRRetraction())
             X1 = inverse_retract(
                 M43,
