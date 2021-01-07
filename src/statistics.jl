@@ -879,6 +879,7 @@ function StatsBase.mean_and_var(
             return y, v
         end
     end
+    return y, v
 end
 
 @doc raw"""
