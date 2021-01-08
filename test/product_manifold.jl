@@ -544,4 +544,11 @@ end
             CachedBasis(DefaultOrthonormalBasis(), []),
         )
     end
+
+    @testset "allocation promotion" begin
+        M2c = Euclidean(2; field=ℂ)
+        Msec = ProductManifold(M1, M2c)
+        @test Manifolds.allocation_promotion_function(Msec, get_vector, ()) === complex
+        @test Manifolds.allocation_promotion_function(Mse, get_vector, ()) === identity
+    end
 end

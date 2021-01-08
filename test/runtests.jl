@@ -1,91 +1,83 @@
-include("differentiation.jl")
-
-# Ambiguity detection is so much slower on Julia 1.6.0-DEV.430, so this reduces
-# the number of packages involved to a reasonable minimum
-using LinearAlgebra, Manifolds, ManifoldsBase, StaticArrays, Statistics, StatsBase
-
-function our_base_ambiguities()
-    ambigs = Test.detect_ambiguities(Base)
-    modules_we_care_about =
-        [Base, LinearAlgebra, Manifolds, ManifoldsBase, StaticArrays, Statistics, StatsBase]
-    our_ambigs = filter(ambigs) do (m1, m2)
-        we_care = m1.module in modules_we_care_about && m2.module in modules_we_care_about
-        return we_care && (m1.module === Manifolds || m2.module === Manifolds)
-    end
-    return our_ambigs
-end
-
-(VERSION >= v"1.1") && @testset "Ambiguities" begin
-    # TODO: reduce the number of ambiguities
-    if VERSION.prerelease == () #
-        @test length(Test.detect_ambiguities(ManifoldsBase)) <= 17
-        @test length(Test.detect_ambiguities(Manifolds)) == 0
-        @test length(our_base_ambiguities()) <= 24
-    else
-        @info "Skipping Ambiguity tests for pre-release versions"
-    end
-end
-
 include("utils.jl")
-
 @info "Manifolds.jl Test settings:\n\n" *
       "Testing Float32:  $(TEST_FLOAT32)\n" *
       "Testing Double64: $(TEST_DOUBLE64)\n" *
-      "Testing Static:   $(TEST_STATIC_SIZED)\n"
+      "Testing Static:   $(TEST_STATIC_SIZED)\n\n" *
+      "Check test/utils.jl if you wish to change these settings."
 
-include("groups/group_utils.jl")
-include("notation.jl")
-# starting with tests of simple manifolds
-include("centered_matrices.jl")
-include("circle.jl")
-include("cholesky_space.jl")
-include("elliptope.jl")
-include("euclidean.jl")
-include("fixed_rank.jl")
-include("generalized_grassmann.jl")
-include("generalized_stiefel.jl")
-include("grassmann.jl")
-include("hyperbolic.jl")
-include("multinomial_doubly_stochastic.jl")
-include("multinomial_symmetric.jl")
-include("positive_numbers.jl")
-include("probability_simplex.jl")
-include("projective_space.jl")
-include("rotations.jl")
-include("skewsymmetric.jl")
-include("spectrahedron.jl")
-include("sphere.jl")
-include("sphere_symmetric_matrices.jl")
-include("stiefel.jl")
-include("symmetric.jl")
-include("symmetric_positive_definite.jl")
-include("symmetric_positive_semidefinite_fixed_rank.jl")
+@testset "Manifolds.jl" begin
+    include_test("differentiation.jl")
 
-include("multinomial_matrices.jl")
-include("oblique.jl")
-include("torus.jl")
+    @testset "Ambiguities" begin
+        # TODO: reduce the number of ambiguities
+        if VERSION.prerelease == () #
+            @test length(Test.detect_ambiguities(ManifoldsBase)) <= 17
+            @test length(Test.detect_ambiguities(Manifolds)) == 0
+            @test length(our_base_ambiguities()) <= 24
+        else
+            @info "Skipping Ambiguity tests for pre-release versions"
+        end
+    end
 
-#meta manifolds
-include("product_manifold.jl")
-include("power_manifold.jl")
-include("vector_bundle.jl")
-include("graph.jl")
+    @testset "utils test" begin
+        @test Manifolds.usinc_from_cos(-1) == 0
+        @test Manifolds.usinc_from_cos(-1.0) == 0.0
+    end
 
-include("metric.jl")
-include("statistics.jl")
+    include_test("groups/group_utils.jl")
+    include_test("notation.jl")
+    # starting with tests of simple manifolds
+    include_test("centered_matrices.jl")
+    include_test("circle.jl")
+    include_test("cholesky_space.jl")
+    include_test("elliptope.jl")
+    include_test("euclidean.jl")
+    include_test("fixed_rank.jl")
+    include_test("generalized_grassmann.jl")
+    include_test("generalized_stiefel.jl")
+    include_test("grassmann.jl")
+    include_test("hyperbolic.jl")
+    include_test("multinomial_doubly_stochastic.jl")
+    include_test("multinomial_symmetric.jl")
+    include_test("positive_numbers.jl")
+    include_test("probability_simplex.jl")
+    include_test("projective_space.jl")
+    include_test("rotations.jl")
+    include_test("skewsymmetric.jl")
+    include_test("spectrahedron.jl")
+    include_test("sphere.jl")
+    include_test("sphere_symmetric_matrices.jl")
+    include_test("stiefel.jl")
+    include_test("symmetric.jl")
+    include_test("symmetric_positive_definite.jl")
+    include_test("symmetric_positive_semidefinite_fixed_rank.jl")
 
-# Lie groups and actions
-include("groups/groups_general.jl")
-include("groups/array_manifold.jl")
-include("groups/circle_group.jl")
-include("groups/translation_group.jl")
-include("groups/special_orthogonal.jl")
-include("groups/product_group.jl")
-include("groups/semidirect_product_group.jl")
-include("groups/special_euclidean.jl")
-include("groups/group_operation_action.jl")
-include("groups/rotation_action.jl")
-include("groups/translation_action.jl")
-include("groups/metric.jl")
+    include_test("multinomial_matrices.jl")
+    include_test("oblique.jl")
+    include_test("torus.jl")
 
-include("recipes.jl")
+    #meta manifolds
+    include_test("product_manifold.jl")
+    include_test("power_manifold.jl")
+    include_test("vector_bundle.jl")
+    include_test("graph.jl")
+
+    include_test("metric.jl")
+    include_test("statistics.jl")
+
+    # Lie groups and actions
+    include_test("groups/groups_general.jl")
+    include_test("groups/array_manifold.jl")
+    include_test("groups/circle_group.jl")
+    include_test("groups/translation_group.jl")
+    include_test("groups/special_orthogonal.jl")
+    include_test("groups/product_group.jl")
+    include_test("groups/semidirect_product_group.jl")
+    include_test("groups/special_euclidean.jl")
+    include_test("groups/group_operation_action.jl")
+    include_test("groups/rotation_action.jl")
+    include_test("groups/translation_action.jl")
+    include_test("groups/metric.jl")
+
+    include_test("recipes.jl")
+end

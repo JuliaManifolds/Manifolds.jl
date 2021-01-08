@@ -25,6 +25,16 @@ function ProjectedPointDistribution(
     )
 end
 
+"""
+    projected_distribution(M::Manifold, d, [p=rand(d)])
+
+Wrap the standard distribution `d` into a manifold-valued distribution. Generated
+points will be of similar type to `p`. By default, the type is not changed.
+"""
+function projected_distribution(M::Manifold, d, p=rand(d))
+    return ProjectedPointDistribution(M, d, project!, p)
+end
+
 function Random.rand(
     rng::AbstractRNG,
     d::ProjectedPointDistribution{TResult},
@@ -101,6 +111,17 @@ function Distributions._rand!(
 )
     # calling _rand!(rng, d.d, v) doesn't work for all arrays types
     return copyto!(X, rand(rng, d))
+end
+
+"""
+    normal_tvector_distribution(M::Euclidean, p, σ)
+
+Normal distribution in ambient space with standard deviation `σ`
+projected to tangent space at `p`.
+"""
+function normal_tvector_distribution(M::Manifold, p, σ)
+    d = Distributions.MvNormal(zero(vec(p)), σ)
+    return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project!, p)
 end
 
 function Distributions.support(tvd::ProjectedFVectorDistribution)

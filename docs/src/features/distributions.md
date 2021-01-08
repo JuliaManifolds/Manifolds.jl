@@ -8,7 +8,8 @@ Pages = ["distributions.jl"]
 Order = [:type, :function]
 ```
 
-```@docs
-Manifolds.ProjectedPointDistribution
-Manifolds.ProjectedFVectorDistribution
+```@autodocs
+Modules = [Manifolds]
+Pages = ["projected_distribution.jl"]
+Order = [:type, :function]
 ```
