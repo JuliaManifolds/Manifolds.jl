@@ -74,23 +74,28 @@ function test_mean(M, x, yexp=nothing, method...; kwargs...)
     return nothing
 end
 
-function test_median(M, x, yexp=nothing; kwargs...)
-    @testset "median unweighted" begin
-        y = median(M, x; kwargs...)
+function test_median(M, x, yexp=nothing; method::Union{Nothing,AbstractEstimationMethod}=nothing, kwargs...)
+    println(method)
+    @testset "median unweighted$(!isnothing(method) ? " ($method)" : "")" begin
+        y = isnothing(method) ? median(M, x; kwargs...) : median(M, x, method; kwargs...)
         @test is_manifold_point(M, y; atol=10^-9)
         if yexp !== nothing
             @test isapprox(M, y, yexp; atol=10^-5)
         end
     end
 
-    @testset "median weighted" begin
+    @testset "median weighted$(!isnothing(method) ? " ($method)" : "")" begin
         n = length(x)
         w1 = pweights(ones(n) / n)
         w2 = pweights(ones(n))
         w3 = pweights(2 * ones(n))
         y = median(M, x; kwargs...)
         for w in (w1, w2, w3)
-            @test is_manifold_point(M, median(M, x, w; kwargs...); atol=10^-9)
+            if isnothing(method)
+                @test is_manifold_point(M, median(M, x, w; kwargs...); atol=10^-9)
+            else
+                @test is_manifold_point(M, median(M, x, w,method; kwargs...); atol=10^-9)
+            end
             @test isapprox(M, median(M, x, w; kwargs...), y; atol=10^-4)
         end
         @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
@@ -388,6 +393,7 @@ end
             ]
             test_mean(M, x)
             test_median(M, x; atol=10^-12)
+            test_median(M, x; method=WeiszfeldEstimation())
             test_var(M, x)
             test_std(M, x)
             test_moments(M, x)
