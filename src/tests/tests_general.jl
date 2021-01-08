@@ -134,7 +134,7 @@ function ManifoldTests.test_manifold(
             ) for i in 1:n
         ]
     end
-    Test.Test.@testset "dimension" begin
+    Test.@testset "dimension" begin
         Test.@test isa(manifold_dimension(M), expected_dimension_type)
         Test.@test manifold_dimension(M) ≥ 0
         Test.@test manifold_dimension(M) == vector_space_dimension(
@@ -625,6 +625,7 @@ function ManifoldTests.test_manifold(
         for p in pts
             prand = allocate(p)
             for pd in point_distributions
+                Test.@test Manifolds.support(pd) isa Manifolds.MPointSupport{typeof(M)}
                 for _ in 1:10
                     Test.@test is_manifold_point(M, rand(pd))
                     if test_mutating_rand
@@ -639,6 +640,7 @@ function ManifoldTests.test_manifold(
     Test.@testset "tangent vector distributions" begin
         for tvd in tvector_distributions
             supp = Manifolds.support(tvd)
+            Test.@test supp isa Manifolds.FVectorSupport{TangentBundleFibers{typeof(M)}}
             for _ in 1:10
                 randtv = rand(tvd)
                 atol = rand_tvector_atol_multiplier * ManifoldTests.find_eps(randtv)

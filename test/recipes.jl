@@ -68,6 +68,13 @@ include("utils.jl")
         end
         @plottest Hyp2_plot joinpath(references_folder, "Hyp2Plot.png") false
 
+        function Hyp2_surfplot()
+            M = Hyperbolic(2)
+            p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 1.0]])
+            return plot(M, p; surface=true)
+        end
+        @plottest Hyp2_surfplot joinpath(references_folder, "Hyp2SurfPlot.png") false
+
         function Hyp2_plot_geo()
             M = Hyperbolic(2)
             p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 1.0]])
@@ -91,6 +98,19 @@ include("utils.jl")
             return plot(M, pts; wireframe_color=colorant"#CCCCCC", markersize=10)
         end
         @plottest Sphere2_plot joinpath(references_folder, "Sphere2Plot.png") false
+
+        function Sphere2_surfplot()
+            M = Sphere(2)
+            pts = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]]
+            return plot(
+                M,
+                pts;
+                surface=true,
+                wireframe_color=colorant"#CCCCCC",
+                markersize=10,
+            )
+        end
+        @plottest Sphere2_surfplot joinpath(references_folder, "Sphere2SurfPlot.png") false
 
         function Sphere2_plot_geo()
             M = Sphere(2)

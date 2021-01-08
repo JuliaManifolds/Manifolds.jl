@@ -51,10 +51,8 @@ include("group_utils.jl")
         z = similar(x)
         copyto!(z, eg)
         @test z == eg.p
-        if VERSION ≥ v"1.3"
-            @test NotImplementedOperation(NotImplementedManifold()) === G
-            @test (NotImplementedOperation())(NotImplementedManifold()) === G
-        end
+        @test NotImplementedOperation(NotImplementedManifold()) === G
+        @test (NotImplementedOperation())(NotImplementedManifold()) === G
 
         @test_throws ErrorException allocate_result(
             G,
@@ -316,6 +314,14 @@ include("group_utils.jl")
             )
             @test isapprox(G, x2, x3)
         end
+    end
+
+    @testset "Identity on Group Manifolds" begin
+        G = TranslationGroup(3)
+        e = Identity(G, zeros(3))
+        @test get_vector(G, e, ones(3), DefaultOrthogonalBasis()) == ones(3)
+        @test e - e == e
+        @test ones(3) + e == ones(3)
     end
 end
 
