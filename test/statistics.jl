@@ -103,11 +103,11 @@ function test_median(
             end
             @test isapprox(M, median(M, x, w; kwargs...), y; atol=10^-4)
         end
-            if isnothing(method)
-                @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
-            else
-                @test_throws Exception median(M, x, pweights(ones(n + 1)), method; kwargs...)
-            end
+        if isnothing(method)
+            @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
+        else
+            @test_throws Exception median(M, x, pweights(ones(n + 1)), method; kwargs...)
+        end
     end
     return nothing
 end
