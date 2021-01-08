@@ -74,7 +74,13 @@ function test_mean(M, x, yexp=nothing, method...; kwargs...)
     return nothing
 end
 
-function test_median(M, x, yexp=nothing; method::Union{Nothing,AbstractEstimationMethod}=nothing, kwargs...)
+function test_median(
+    M,
+    x,
+    yexp=nothing;
+    method::Union{Nothing,AbstractEstimationMethod}=nothing,
+    kwargs...,
+)
     println(method)
     @testset "median unweighted$(!isnothing(method) ? " ($method)" : "")" begin
         y = isnothing(method) ? median(M, x; kwargs...) : median(M, x, method; kwargs...)
@@ -94,7 +100,7 @@ function test_median(M, x, yexp=nothing; method::Union{Nothing,AbstractEstimatio
             if isnothing(method)
                 @test is_manifold_point(M, median(M, x, w; kwargs...); atol=10^-9)
             else
-                @test is_manifold_point(M, median(M, x, w,method; kwargs...); atol=10^-9)
+                @test is_manifold_point(M, median(M, x, w, method; kwargs...); atol=10^-9)
             end
             @test isapprox(M, median(M, x, w; kwargs...), y; atol=10^-4)
         end
