@@ -295,13 +295,7 @@ function median!(
     return fill!(y, 5)
 end
 
-function var(
-    ::TestStatsOverload1,
-    ::AbstractVector,
-    ::AbstractWeights,
-    m;
-    corrected=false,
-)
+function var(::TestStatsOverload1, ::AbstractVector, ::AbstractWeights, m; corrected=false)
     return 4 + 5 * corrected
 end
 function mean_and_var(
