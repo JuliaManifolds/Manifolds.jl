@@ -81,7 +81,6 @@ function test_median(
     method::Union{Nothing,AbstractEstimationMethod}=nothing,
     kwargs...,
 )
-    println(method)
     @testset "median unweighted$(!isnothing(method) ? " ($method)" : "")" begin
         y = isnothing(method) ? median(M, x; kwargs...) : median(M, x, method; kwargs...)
         @test is_manifold_point(M, y; atol=10^-9)
@@ -104,7 +103,11 @@ function test_median(
             end
             @test isapprox(M, median(M, x, w; kwargs...), y; atol=10^-4)
         end
-        @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
+            if isnothing(method)
+                @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
+            else
+                @test_throws Exception median(M, x, pweights(ones(n + 1)), method; kwargs...)
+            end
     end
     return nothing
 end
@@ -249,15 +252,15 @@ struct TestStatsOverload3 <: Manifold{ℝ} end
 struct TestStatsMethod1 <: AbstractEstimationMethod end
 
 function mean!(
-    M::TestStatsOverload1,
+    ::TestStatsOverload1,
     y,
-    x::AbstractVector,
-    w::AbstractWeights,
-    method::GradientDescentEstimation,
+    ::AbstractVector,
+    ::AbstractWeights,
+    ::GradientDescentEstimation,
 )
     return fill!(y, 3)
 end
-mean!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights) = fill!(y, 4)
+mean!(::TestStatsOverload2, y, ::AbstractVector, ::AbstractWeights) = fill!(y, 4)
 function mean!(
     ::TestStatsOverload2,
     y,
@@ -286,7 +289,7 @@ function median!(
 )
     return fill!(y, 3)
 end
-median!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights) = fill!(y, 4)
+median!(::TestStatsOverload2, y, ::AbstractVector, ::AbstractWeights) = fill!(y, 4)
 function median!(
     ::TestStatsOverload2,
     y,
@@ -398,7 +401,8 @@ end
                 α in range(0, 2 * π - 2 * π / n, length=n)
             ]
             test_mean(M, x)
-            test_median(M, x; atol=10^-12)
+            test_median(M, x; atol=1e-12)
+            test_median(M, x; method=CyclicProximalPointEstimation(), atol=1e-12)
             test_median(M, x; method=WeiszfeldEstimation())
             test_var(M, x)
             test_std(M, x)
