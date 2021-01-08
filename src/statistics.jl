@@ -587,12 +587,30 @@ change between two iterates is small. For more stopping criteria check the
 
 The parameter ``α\in (0,2]`` is a step size.
 
+The algorithm is further described in [^FletcherVenkatasubramanianJoshi2008],
+especially the update rule in Eq. (6), i.e. Let ``q_{k}`` denote the current
+iterate, $n$ the number of points ``x_1,\ldots,x_n``, and
+
+```math
+I_k = \bigl\{ i \in \{1,\ldots,n\} \big| x_i \neq q_k \bigr\}
+```
+
+all indices of points that are not equal to the current iterate. Then the update reads
+``q_{k+1} = \exp_{q_k}(αX)``, where
+
+```math
+X = \frac{1}{s}\sum_{i\in I_k} \frac{w_i}{d_{\mathcal M}(q_k,x_i)}\log_{q_k}x_i
+\quad
+\text{ with }
+\quad
+s = \sum_{i\in I_k} \frac{w_i}{d_{\mathcal M}(q_k,x_i)},
+```
+
+and where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
+
 Optionally, pass `retraction` and `inverse_retraction` method types to specify
 the (inverse) retraction, which by default use the exponential and logarithmic map,
 respectively.
-
-The algorithm is further described in [^FletcherVenkatasubramanianJoshi2008],
-especially the update rule in Eq. (6).
 
 [^FletcherVenkatasubramanianJoshi2008]:
     > Fletcher, T., Venkatasubramanian, S., Joshi, S:
