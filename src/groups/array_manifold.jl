@@ -91,13 +91,9 @@ function translate_diff(M::ValidationManifold, p, q, X, conv::ActionDirection; k
     is_manifold_point(M, p, true; kwargs...)
     is_manifold_point(M, q, true; kwargs...)
     is_tangent_vector(M, q, X, true; kwargs...)
-    Y = ValidationTVector(translate_diff(
-        M.manifold,
-        array_value(p),
-        array_value(q),
-        array_value(X),
-        conv,
-    ))
+    Y = ValidationTVector(
+        translate_diff(M.manifold, array_value(p), array_value(q), array_value(X), conv),
+    )
     pq = translate(M, p, q, conv)
     is_tangent_vector(M, pq, Y, true; kwargs...)
     return Y
@@ -139,13 +135,15 @@ function inverse_translate_diff(
     is_manifold_point(M, p, true; kwargs...)
     is_manifold_point(M, q, true; kwargs...)
     is_tangent_vector(M, q, X, true; kwargs...)
-    Y = ValidationTVector(inverse_translate_diff(
-        M.manifold,
-        array_value(p),
-        array_value(q),
-        array_value(X),
-        conv,
-    ))
+    Y = ValidationTVector(
+        inverse_translate_diff(
+            M.manifold,
+            array_value(p),
+            array_value(q),
+            array_value(X),
+            conv,
+        ),
+    )
     pinvq = inverse_translate(M, p, q, conv)
     is_tangent_vector(M, pinvq, Y, true; kwargs...)
     return Y

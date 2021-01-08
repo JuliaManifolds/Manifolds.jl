@@ -309,10 +309,12 @@ project(::ProbabilitySimplex, ::Any, ::Any)
 
 function project!(::ProbabilitySimplex, q, p)
     if any(x -> x <= 0, p)
-        throw(DomainError(
-            p,
-            "All coordinates of point from the embedding, that should be projected, must be positive, otherwise the projection is not well defined.",
-        ))
+        throw(
+            DomainError(
+                p,
+                "All coordinates of point from the embedding, that should be projected, must be positive, otherwise the projection is not well defined.",
+            ),
+        )
     end
     q .= p ./ sum(p)
     return q

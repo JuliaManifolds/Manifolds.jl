@@ -137,16 +137,12 @@ function ManifoldTests.test_manifold(
     Test.Test.@testset "dimension" begin
         Test.@test isa(manifold_dimension(M), expected_dimension_type)
         Test.@test manifold_dimension(M) ≥ 0
-        Test.@test manifold_dimension(M) ==
-                   vector_space_dimension(Manifolds.VectorBundleFibers(
-            Manifolds.TangentSpace,
-            M,
-        ))
-        Test.@test manifold_dimension(M) ==
-                   vector_space_dimension(Manifolds.VectorBundleFibers(
-            Manifolds.CotangentSpace,
-            M,
-        ))
+        Test.@test manifold_dimension(M) == vector_space_dimension(
+            Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M),
+        )
+        Test.@test manifold_dimension(M) == vector_space_dimension(
+            Manifolds.VectorBundleFibers(Manifolds.CotangentSpace, M),
+        )
     end
 
     test_representation_size && Test.@testset "representation" begin

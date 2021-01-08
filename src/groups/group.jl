@@ -194,10 +194,14 @@ function decorator_transparent_dispatch(
 end
 function allocate_result(M::Manifold, f::typeof(get_vector), e::Identity, Xⁱ)
     is_group_decorator(M) && return allocate_result(base_group(M), f, e, Xⁱ)
-    return error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(Xⁱ).")
+    return error(
+        "allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(Xⁱ).",
+    )
 end
 function allocate_result(M::AbstractGroupManifold, f::typeof(get_vector), e::Identity, Xⁱ)
-    return error("allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(Xⁱ).")
+    return error(
+        "allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(Xⁱ).",
+    )
 end
 function allocate_result(
     G::GT,
@@ -223,7 +227,9 @@ function allocate_result(
     X,
 )
     is_group_decorator(M) && return allocate_result(base_group(M), f, e, X)
-    return error("allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(X).")
+    return error(
+        "allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(X).",
+    )
 end
 function allocate_result(
     M::AbstractGroupManifold,
@@ -231,7 +237,9 @@ function allocate_result(
     e::Identity,
     X,
 )
-    return error("allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(X).")
+    return error(
+        "allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(X).",
+    )
 end
 function allocate_result(
     G::GT,
@@ -1025,7 +1033,9 @@ Base.identity(::MultiplicationGroup, p) = one(p)
 
 function identity!(G::GT, q, p) where {GT<:MultiplicationGroup}
     isa(p, Identity{GT}) || return copyto!(q, one(p))
-    return error("identity! not implemented on $(typeof(G)) for points $(typeof(q)) and $(typeof(p))")
+    return error(
+        "identity! not implemented on $(typeof(G)) for points $(typeof(q)) and $(typeof(p))",
+    )
 end
 identity!(::MultiplicationGroup, q::AbstractMatrix, p) = copyto!(q, I)
 
@@ -1047,5 +1057,7 @@ end
 
 function group_exp!(G::MultiplicationGroup, q, X)
     X isa Union{Number,AbstractMatrix} && return copyto!(q, exp(X))
-    return error("group_exp! not implemented on $(typeof(G)) for vector $(typeof(X)) and element $(typeof(q)).")
+    return error(
+        "group_exp! not implemented on $(typeof(G)) for vector $(typeof(X)) and element $(typeof(q)).",
+    )
 end

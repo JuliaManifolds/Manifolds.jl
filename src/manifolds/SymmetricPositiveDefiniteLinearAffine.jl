@@ -82,8 +82,8 @@ function get_basis(
     V = eigv.vectors
     Ξ = [
         (i == j ? 1 / 2 : 1 / sqrt(2)) *
-        (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) for i in 1:N
-        for j in i:N
+        (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) for i in 1:N for
+        j in i:N
     ]
     λ = eigv.values
     κ = [-1 / 4 * (λ[i] - λ[j])^2 for i in 1:N for j in i:N]

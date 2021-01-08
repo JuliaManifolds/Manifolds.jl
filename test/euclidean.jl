@@ -88,15 +88,15 @@ include("utils.jl")
                         PoleLadderTransport(),
                     ],
                     test_mutating_rand=isa(T, Vector),
-                    point_distributions=[Manifolds.projected_distribution(
-                        M,
-                        Distributions.MvNormal(zero(pts[1]), 1.0),
-                    )],
-                    tvector_distributions=[Manifolds.normal_tvector_distribution(
-                        M,
-                        pts[1],
-                        1.0,
-                    )],
+                    point_distributions=[
+                        Manifolds.projected_distribution(
+                            M,
+                            Distributions.MvNormal(zero(pts[1]), 1.0),
+                        ),
+                    ],
+                    tvector_distributions=[
+                        Manifolds.normal_tvector_distribution(M, pts[1], 1.0),
+                    ],
                     basis_types_vecs=basis_types,
                     basis_types_to_from=basis_types,
                     basis_has_specialized_diagonalizing_get=true,
