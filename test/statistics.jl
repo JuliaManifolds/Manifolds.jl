@@ -388,8 +388,8 @@ end
             p = [0.0, 0.0, 1.0]
             n = 3
             x = [
-                exp(M, p, π / 6 * [cos(α), sin(α), 0.0])
-                for α in range(0, 2 * π - 2 * π / n, length=n)
+                exp(M, p, π / 6 * [cos(α), sin(α), 0.0]) for
+                α in range(0, 2 * π - 2 * π / n, length=n)
             ]
             test_mean(M, x)
             test_median(M, x; atol=10^-12)

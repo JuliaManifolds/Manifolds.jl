@@ -76,6 +76,11 @@ include("utils.jl")
             Manifolds.normal_rotation_distribution(M, (@MMatrix [1.0 0.0; 0.0 1.0]), 1.0)
         @test isa(rand(usd_mmatrix), MMatrix)
 
+        usd1_mmatrix =
+            Manifolds.normal_rotation_distribution(Rotations(1), (@MMatrix [1.0]), 1.0)
+        @test isa(rand(usd1_mmatrix), MMatrix)
+        @test rand(usd1_mmatrix) == @MMatrix [1.0]
+
         gtsd_mvector =
             Manifolds.normal_tvector_distribution(M, (@MMatrix [1.0 0.0; 0.0 1.0]), 1.0)
         @test isa(rand(gtsd_mvector), MMatrix)
@@ -147,11 +152,9 @@ include("utils.jl")
                 end
             end
 
-            v = Matrix(Manifolds.hat(
-                SOn,
-                pts[1],
-                π * normalize(randn(manifold_dimension(SOn))),
-            ))
+            v = Matrix(
+                Manifolds.hat(SOn, pts[1], π * normalize(randn(manifold_dimension(SOn)))),
+            )
             x = exp(SOn, pts[1], v)
             v2 = log(SOn, pts[1], x)
             @test x ≈ exp(SOn, pts[1], v2)

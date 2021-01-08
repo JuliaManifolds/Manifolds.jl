@@ -125,7 +125,9 @@ struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
 
     function GeodesicInterpolationWithinRadius(radius::T) where {T}
         radius > 0 && return new{T}(radius)
-        return throw(DomainError("The radius must be strictly postive, received $(radius)."))
+        return throw(
+            DomainError("The radius must be strictly postive, received $(radius)."),
+        )
     end
 end
 
@@ -261,7 +263,11 @@ function Statistics.mean!(
 )
     n = length(x)
     if length(w) != n
-        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+        throw(
+            DimensionMismatch(
+                "The number of weights ($(length(w))) does not match the number of points for the mean ($(n)).",
+            ),
+        )
     end
     copyto!(y, p0)
     yold = allocate_result(M, mean, y)
@@ -319,7 +325,11 @@ function Statistics.mean!(
 )
     n = length(x)
     if length(w) != n
-        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+        throw(
+            DimensionMismatch(
+                "The number of weights ($(length(w))) does not match the number of points for the mean ($(n)).",
+            ),
+        )
     end
     order = shuffle_rng === nothing ? (1:n) : shuffle(shuffle_rng, 1:n)
     @inbounds begin
@@ -395,7 +405,11 @@ function Statistics.mean!(
 )
     n = length(x)
     if length(w) != n
-        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+        throw(
+            DimensionMismatch(
+                "The number of weights ($(length(w))) does not match the number of points for the mean ($(n)).",
+            ),
+        )
     end
     copyto!(q, p0)
     yold = allocate_result(M, mean, q)
@@ -603,7 +617,11 @@ function Statistics.median!(
 )
     n = length(x)
     if length(w) != n
-        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
+        throw(
+            DimensionMismatch(
+                "The number of weights ($(length(w))) does not match the number of points for the median ($(n)).",
+            ),
+        )
     end
     copyto!(q, p0)
     yold = allocate_result(M, median, q)
@@ -787,7 +805,11 @@ function StatsBase.mean_and_var(
 )
     n = length(x)
     if length(w) != n
-        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+        throw(
+            DimensionMismatch(
+                "The number of weights ($(length(w))) does not match the number of points for the mean ($(n)).",
+            ),
+        )
     end
     order = shuffle_rng === nothing ? (1:n) : shuffle(shuffle_rng, 1:n)
     @inbounds begin

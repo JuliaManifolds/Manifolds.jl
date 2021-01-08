@@ -223,14 +223,16 @@ Compute the distance between two points `p` and `q` on the [`ProductManifold`](@
 the 2-norm of the elementwise distances on the internal manifolds that build `M`.
 """
 function distance(M::ProductManifold, p, q)
-    return sqrt(sum(
-        map(
-            distance,
-            M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, q),
-        ) .^ 2,
-    ))
+    return sqrt(
+        sum(
+            map(
+                distance,
+                M.manifolds,
+                submanifold_components(M, p),
+                submanifold_components(M, q),
+            ) .^ 2,
+        ),
+    )
 end
 
 @doc raw"""
@@ -241,12 +243,14 @@ which is the elementwise exponential map on the internal manifolds that build `M
 """
 exp(::ProductManifold, ::Any...)
 function Base.exp(M::ProductManifold, p::ProductRepr, X::ProductRepr)
-    return ProductRepr(map(
-        exp,
-        M.manifolds,
-        submanifold_components(M, p),
-        submanifold_components(M, X),
-    )...)
+    return ProductRepr(
+        map(
+            exp,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+        )...,
+    )
 end
 
 function exp!(M::ProductManifold, q, p, X)
@@ -285,11 +289,13 @@ function get_basis(M::ProductManifold, p, B::CachedBasis)
     return invoke(get_basis, Tuple{Manifold,Any,CachedBasis}, M, p, B)
 end
 function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
-    vs = map(ziptuples(
-        M.manifolds,
-        submanifold_components(p),
-        submanifold_components(B.frame_direction),
-    )) do t
+    vs = map(
+        ziptuples(
+            M.manifolds,
+            submanifold_components(p),
+            submanifold_components(B.frame_direction),
+        ),
+    ) do t
         return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
     end
     return CachedBasis(B, ProductBasisData(vs))
@@ -561,7 +567,9 @@ for BT in PRODUCT_BASIS_LIST
     )
 end
 function get_vector!(M::ProductManifold, Y, p, X, B::CachedBasis)
-    return error("get_vector! called on $M with an incorrect CachedBasis. Expected a CachedBasis with ProductBasisData, given $B")
+    return error(
+        "get_vector! called on $M with an incorrect CachedBasis. Expected a CachedBasis with ProductBasisData, given $B",
+    )
 end
 
 function get_vectors(
@@ -615,19 +623,23 @@ function injectivity_radius(M::ProductManifold, p)
     return min(map(injectivity_radius, M.manifolds, submanifold_components(M, p))...)
 end
 function injectivity_radius(M::ProductManifold, p, m::AbstractRetractionMethod)
-    return min(map(
-        (lM, lp) -> injectivity_radius(lM, lp, m),
-        M.manifolds,
-        submanifold_components(M, p),
-    )...)
+    return min(
+        map(
+            (lM, lp) -> injectivity_radius(lM, lp, m),
+            M.manifolds,
+            submanifold_components(M, p),
+        )...,
+    )
 end
 function injectivity_radius(M::ProductManifold, p, m::ProductRetraction)
-    return min(map(
-        (lM, lp, lm) -> injectivity_radius(lM, lp, lm),
-        M.manifolds,
-        submanifold_components(M, p),
-        m.retractions,
-    )...)
+    return min(
+        map(
+            (lM, lp, lm) -> injectivity_radius(lM, lp, lm),
+            M.manifolds,
+            submanifold_components(M, p),
+            m.retractions,
+        )...,
+    )
 end
 eval(
     quote
@@ -722,12 +734,14 @@ which can be computed using the logarithmic maps of the manifolds elementwise.
 """
 log(::ProductManifold, ::Any...)
 function Base.log(M::ProductManifold, p::ProductRepr, q::ProductRepr)
-    return ProductRepr(map(
-        log,
-        M.manifolds,
-        submanifold_components(M, p),
-        submanifold_components(M, q),
-    )...)
+    return ProductRepr(
+        map(
+            log,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
+        )...,
+    )
 end
 
 function log!(M::ProductManifold, X, p, q)
@@ -807,7 +821,9 @@ function ProductFVectorDistribution(distributions::FVectorDistribution...)
     M = ProductManifold(map(d -> support(d).space.manifold, distributions)...)
     fiber = support(distributions[1]).space.fiber
     if !all(d -> support(d).space.fiber == fiber, distributions)
-        error("Not all distributions have support in vector spaces of the same type, which is currently not supported")
+        error(
+            "Not all distributions have support in vector spaces of the same type, which is currently not supported",
+        )
     end
     # Probably worth considering sum spaces in the future?
     x = ProductRepr(map(d -> support(d).point, distributions)...)
@@ -832,12 +848,14 @@ function project!(M::ProductManifold, q, p)
 end
 
 function project(M::ProductManifold, p::ProductRepr, X::ProductRepr)
-    return ProductRepr(map(
-        project,
-        M.manifolds,
-        submanifold_components(M, p),
-        submanifold_components(M, X),
-    )...)
+    return ProductRepr(
+        map(
+            project,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+        )...,
+    )
 end
 
 function project!(M::ProductManifold, Y, p, X)

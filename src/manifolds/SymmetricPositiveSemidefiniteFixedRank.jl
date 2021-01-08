@@ -78,7 +78,7 @@ function check_manifold_point(
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
     mpv === nothing || return mpv
     p = q * q'
-    r = (VERSION >= v"1.1") ? rank(p * p'; kwargs...) : rank(p * p')
+    r = rank(p * p'; kwargs...)
     if r < k
         return DomainError(
             r,

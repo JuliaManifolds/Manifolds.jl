@@ -237,4 +237,31 @@ include("utils.jl")
         V3 = get_vectors(M, p, get_basis(M, p, B3))
         @test isapprox(M, p, V3[1], -V[2])
     end
+    @testset "Hyperboloid Minkowski Metric tests" begin
+        p = Manifolds._hyperbolize(M, [0.0, 1.0])
+        X = [1.0, 0.0, 0.0]
+        pH = HyperboloidPoint(p)
+        XH = HyperboloidTVector(X)
+        @test minkowski_metric(XH, pH) == minkowski_metric(X, p)
+        @test minkowski_metric(pH, XH) == minkowski_metric(p, X)
+        @test minkowski_metric(XH, XH) == minkowski_metric(X, X)
+    end
+    @testset "PoincareBall project tangent test" begin
+        p = PoincareBallPoint([0.5, 0.0])
+        X = PoincareBallTVector([0.2, 0.2])
+        Y = PoincareBallTVector(allocate(X.value))
+        project!(M, Y, p, X)
+        @test Y == X
+        Z = project(M, p, X)
+        @test isa(Z, PoincareBallTVector)
+        @test Z == X
+        p2 = PoincareHalfSpacePoint([1.1, 1.1])
+        X2 = PoincareHalfSpaceTVector([0.2, 0.2])
+        Y2 = PoincareHalfSpaceTVector(allocate(X2.value))
+        project!(M, Y2, p2, X2)
+        @test Y2 == X2
+        Z2 = project(M, p2, X2)
+        @test isa(Z2, PoincareHalfSpaceTVector)
+        @test Z2 == X2
+    end
 end

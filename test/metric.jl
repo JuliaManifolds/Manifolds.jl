@@ -381,10 +381,8 @@ end
         @test_throws ErrorException local_metric_jacobian(MM2, x)
         @test_throws ErrorException christoffel_symbols_second_jacobian(MM2, x)
         # MM falls back to nondefault error
-        @test_throws ErrorException projected_distribution(MM, 1, x)
-        @test_throws ErrorException projected_distribution(MM, 1)
-        # normal_tvector is not implemented
-        @test_throws ErrorException normal_tvector_distribution(MM, x, 0.2)
+        @test_throws MethodError projected_distribution(MM, 1, x)
+        @test_throws MethodError projected_distribution(MM, 1)
 
         @test inner(MM2, x, v, w) === inner(M, x, v, w)
         @test norm(MM2, x, v) === norm(M, x, v)
@@ -461,7 +459,7 @@ end
         for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
             @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:parent}()
         end
-        for f in [get_basis, inner, normal_tvector_distribution, projected_distribution]
+        for f in [get_basis, inner]
             @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:intransparent}()
         end
         for f in [get_coordinates!, get_vector!]
