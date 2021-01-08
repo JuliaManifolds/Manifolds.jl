@@ -43,7 +43,7 @@ function zero_tangent_vector!(::TestStatsEuclidean{N}, v, x; kwargs...) where {N
     return zero_tangent_vector!(Euclidean(N), v, x; kwargs...)
 end
 
-function test_mean(M, x, yexp=nothing; kwargs...)
+function test_mean(M, x, yexp=nothing, method...; kwargs...)
     @testset "mean unweighted" begin
         y = mean(M, x; kwargs...)
         @test is_manifold_point(M, y; atol=10^-9)
@@ -238,15 +238,15 @@ struct TestStatsOverload3 <: Manifold{ℝ} end
 struct TestStatsMethod1 <: AbstractEstimationMethod end
 
 function mean!(
-    ::TestStatsOverload1,
+    M::TestStatsOverload1,
     y,
-    ::AbstractVector,
-    ::AbstractWeights,
-    ::GradientDescentEstimation,
+    x::AbstractVector,
+    w::AbstractWeights,
+    method::GradientDescentEstimation,
 )
     return fill!(y, 3)
 end
-mean!(::TestStatsOverload2, y, ::AbstractVector, ::AbstractWeights) = fill!(y, 4)
+mean!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights) = fill!(y, 4)
 function mean!(
     ::TestStatsOverload2,
     y,
@@ -275,7 +275,7 @@ function median!(
 )
     return fill!(y, 3)
 end
-median!(::TestStatsOverload2, y, ::AbstractVector, ::AbstractWeights) = fill!(y, 4)
+median!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights) = fill!(y, 4)
 function median!(
     ::TestStatsOverload2,
     y,
@@ -295,7 +295,13 @@ function median!(
     return fill!(y, 5)
 end
 
-function var(::TestStatsOverload1, ::AbstractVector, ::AbstractWeights, ; corrected=false)
+function var(
+    ::TestStatsOverload1,
+    ::AbstractVector,
+    ::AbstractWeights,
+    m;
+    corrected=false,
+)
     return 4 + 5 * corrected
 end
 function mean_and_var(
