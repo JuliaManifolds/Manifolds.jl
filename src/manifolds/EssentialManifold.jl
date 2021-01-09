@@ -2,10 +2,34 @@
     EssentialManifold <: AbstractPowerManifold{ℝ}
 
 The essential manifold is the space of the essential matrices which is represented as
-the quotient space
+a quotient space of the [`Rotations`](@ref) manifold product ``\mathrm{SO}(3)^2``.
+
+Let ``R_x(θ), R_y(θ), R_x(θ) \in ℝ^{x\times 3}`` denote the rotation around the ``z``,
+``y``, and ``x`` axis in ``ℝ^3``, respectively, and further the groups
+
+```math
+H_z = \bigl\{(R_z(θ),R_z(θ))\ \big|\ θ ∈ [-π,π) \bigr\}
+```
+
+and
+
+```math
+H_π = \bigl\{ (I,I), (R_x(π), R_x(π)), (I,R_z(π)), (R_x(π), R_y(π))  \bigr\}
+```
+
+acting elementwise on the left from ``\mathrm{SO}(3)^2`` (component wise).
+
+Then the unsigned Essential manifold ``\mathcal{M}_{\text{E}}`` can be identified
+with the quotient space
 ````math
-\mathcal{M}_{\text{E}} := (\text{SO}(3)×\text{SO}(3))/(\text{SO}(2)).
+\mathcal{M}_{\text{E}} := (\text{SO}(3)×\text{SO}(3))/(H_z × H_π),
 ````
+
+and for the signed Essential manifold $\mathcal{M}_{\text{Ǝ}}$, the quotient reads
+````math
+\mathcal{M}_{\text{Ǝ}} := (\text{SO}(3)×\text{SO}(3))/(H_z).
+````
+
 An essential matrix is defined as
 ````math
 E = (R'_1)^T [T'_2 - T'_1]_{×} R'_2,
@@ -15,9 +39,10 @@ rigid body transformations $SE(3)$ and the operator $[⋅]_{×}\colon ℝ^3 \to 
 denotes the matrix representation of the cross product operator. For more details see [^TronDaniilidis2017].
 
 # Constructor
-    EssentialManifold(is_signed)
+    EssentialManifold(is_signed=true)
 
-Generate the manifold of essential matrices.
+Generate the manifold of essential matrices, either the signed (`is_signed=true`) or
+unsigned (`is_signed=false`) variant.
 
 [^TronDaniilidis2017]:
     > Tron R.; Daniilidis K.; The Space of Essential Matrices as a Riemannian Quotient
@@ -384,21 +409,7 @@ end
 @doc raw"""
     manifold_dimension(M::EssentialManifold{is_signed, ℝ})
 
-Return the manifold dimension of the [`EssentialManifold`](@ref). Let
-````math
-H_z = \{(R_z(θ),R_z(θ))\colon θ \in [-π,π) \}
-````
-and
-````math
-H_π = \{(I,I), (R_y(π),R_y(π)), (I,R_z(π)), (R_y(π),R_x(π))\},
-````
-where $R_x(α), R_y(α), R_z(α)$ are the rotations around the x, y, and z axes, respectively, with angle $α$. Then
-the space of all essential matrices is
-````math
-\mathcal{M}_{\text{E}} := (\text{SO}(3)×\text{SO}(3))/(H_z × H_π).
-````
-Since $SO(3)^2$ has dimension two, $H_z$ has dimension one and the discrete group $H_π$ does not change the dimension
-of the space, the space of all essential matrices has dimension `5`[^TronDaniilidis2017].
+Return the manifold dimension of the [`EssentialManifold`](@ref), which is `5`[^TronDaniilidis2017].
 """
 function manifold_dimension(::EssentialManifold)
     return 5
