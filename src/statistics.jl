@@ -751,7 +751,7 @@ function Statistics.median!(
     for i in 1:stop_iter
         d .= [distance(M, q, xi) for xi in x] # compute distances
         # compute new weights / exclude points xi=q
-        d .= [di > 0 ? wi / di : 0 for (di, wi) in zip(d, w)]
+        d .= [di > 0 ? wi / di : zero(typeof(wi / di)) for (di, wi) in zip(d, w)]
         copyto!(yold, q)
         zero_tangent_vector!(M, v, q)
         for j in 1:n
