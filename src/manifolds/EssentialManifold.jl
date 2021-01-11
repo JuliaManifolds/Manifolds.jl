@@ -448,14 +448,6 @@ function project!(M::EssentialManifold, Y, p, X)
     return Y
 end
 
-"""
-    representation_size(M::EssentialManifold)
-
-Return the array dimensions required to represent an element on the
-[`EssentialManifold`](@ref) `M`, i.e. the vector of all array dimensions.
-"""
-@generated representation_size(::EssentialManifold) = (3, 3, 2)
-
 function Base.show(io::IO, M::EssentialManifold)
     return print(io, "EssentialManifold($(M.is_signed))")
 end

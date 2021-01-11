@@ -15,7 +15,6 @@ include("utils.jl")
     @testset "Essential manifold Basics" begin
         @test M.manifold == Rotations(3)
         @test repr(M) == "EssentialManifold(true)"
-        @test representation_size(M) == (3, 3, 2)
         @test manifold_dimension(M) == 5
         np1 = [r1, nr]
         np2 = [nr, nr]
@@ -51,7 +50,7 @@ include("utils.jl")
             test_project_tangent=false, # since it includes vert_proj.
             test_musical_isomorphisms=false,
             test_default_vector_transport=true,
-            test_representation_size=true,
+            test_representation_size=false,
             test_exp_log=true,
             mid_point12=nothing,
             exp_log_atol_multiplier=4,
@@ -69,7 +68,7 @@ include("utils.jl")
             test_project_tangent=false, # since it includes vert_proj.
             test_musical_isomorphisms=false,
             test_default_vector_transport=true,
-            test_representation_size=true,
+            test_representation_size=false,
             test_exp_log=true,
             mid_point12=nothing,
             exp_log_atol_multiplier=4,
