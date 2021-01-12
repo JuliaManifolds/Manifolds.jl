@@ -13,8 +13,6 @@ using Manifolds:
 using FiniteDifferences
 using LinearAlgebra: Diagonal, dot
 
-
-
 @testset "Differentiation backend" begin
     fd51 = Manifolds.FiniteDifferencesBackend()
     @testset "diff_backend" begin
