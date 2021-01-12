@@ -13,6 +13,8 @@ using Manifolds:
 using FiniteDifferences
 using LinearAlgebra: Diagonal, dot
 
+
+
 @testset "Differentiation backend" begin
     fd51 = Manifolds.FiniteDifferencesBackend()
     @testset "diff_backend" begin
@@ -21,7 +23,8 @@ using LinearAlgebra: Diagonal, dot
         @test diff_backends()[1] isa Manifolds.FiniteDifferencesBackend
 
         @test length(fd51.method.grid) == 5
-        @test fd51.method.q == 1
+        # check method order
+        @test typeof(fd51.method).parameters[2] == 1
         fd71 = Manifolds.FiniteDifferencesBackend(central_fdm(7, 1))
         @test diff_backend!(fd71) == fd71
         @test diff_backend() == fd71
