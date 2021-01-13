@@ -152,7 +152,7 @@ function isapprox(M::EssentialManifold, p, q; kwargs...)
 end
 
 @doc raw"""
-    log(M::EssentialManifold, X, p, q)
+    log(M::EssentialManifold, p, q)
 
 Compute the logarithmic map on the [`EssentialManifold`](@ref) `M`, i.e. the tangent vector,
 whose geodesic starting from `p` reaches `q` after time 1. Here, $p=(R_{p_1},R_{p_2})$ and
@@ -182,6 +182,8 @@ as
 where $\text{Log}$ is the [`logarithm`](@ref log(::Rotations, ::Any...)) on $SO(3)$. For more
 details see [^TronDaniilidis2017].
 """
+log(M::EssentialManifold, ::Any, ::Any)
+
 function log!(M::EssentialManifold, X, p, q)
     # compute the closest representative of q
     t = 0
