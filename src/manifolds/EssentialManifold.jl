@@ -62,7 +62,7 @@ EssentialManifold(is_signed::Bool=true) = EssentialManifold(is_signed, Rotations
     check_manifold_point(M::EssentialManifold, p; kwargs...)
 
 Check whether the matrix is a valid point on the [`EssentialManifold`](@ref) `M`,
-i.e. a Tuple of two SO(3) matrices.
+i.e. a 2-element array containing SO(3) matrices.
 """
 function check_manifold_point(M::EssentialManifold, p; kwargs...)
     if length(p) != 2
@@ -82,8 +82,8 @@ end
     check_tangent_vector(M::EssentialManifold, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the [`EssentialManifold`](@ref) `M`,
-i.e. `X` has to be a Tuple of two `3`-by-`3` skew-symmetric matrices. The optional parameter `check_base_point`
-indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
+i.e. `X` has to be a 2-element array of `3`-by-`3` skew-symmetric matrices.
+The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
 function check_tangent_vector(M::EssentialManifold, p, X; check_base_point=true, kwargs...)
     if check_base_point
@@ -243,12 +243,13 @@ function dist_min_angle_pair(p, q)
     t_break2, c2, m2, Φ2 = dist_min_angle_pair_discontinuity_distance(q212)
 
     #check if cost is constant
-    tolMZero = 1e-15
-    if (abs(m1) < tolMZero) && (abs(m2) < tolMZero)
+    tol_m_zero = 5*eps(eltype(q211)) # i.e. promoted from p and q
+    tol_break = sqrt(eps(eltype(q211)))
+    if (abs(m1) < tol_m_zero) && (abs(m2) < tol_m_zero)
         t_min = 0
         f_min = 2 * pi^2
     else
-        if abs(mod(t_break1 - t_break2 + pi, 2 * pi) - pi) < 1e-8
+        if abs(mod(t_break1 - t_break2 + pi, 2 * pi) - pi) < tol_break
             t_min = t_break1 + pi
             f_min = 0
         else
@@ -369,9 +370,9 @@ f(t) = f_1 + f_2, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z
 in the interval $[$`t_low`, `t_high`$]$ using Newton's method. For more details see [^TronDaniilidis2017].
 """
 function dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t_high)
-    tol_dist = 1e-8
-    θ1 = 0
-    θ2 = 0
+    tol_dist = sqrt(eps(eltype(t_min)))
+    θ1 = zero(t_min)
+    θ2 = zero(t_min)
     for i in 1:100
         #compute auxiliary values
         mc1 = m1 * cos(t_min + Φ1)
