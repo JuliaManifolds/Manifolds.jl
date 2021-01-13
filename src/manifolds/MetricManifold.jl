@@ -283,14 +283,14 @@ end
 
 Return the determinant of local matrix representation of the metric tensor $g$.
 """
-det_local_metric(::MetricManifold, ::Any)
+det_local_metric(::MetricManifold, A::AbstractAtlas, ::Any, ::Any)
 @decorator_transparent_function function det_local_metric(
     M::MetricManifold,
     A::AbstractAtlas,
     i,
     p,
 )
-    return det(local_metric(M, p))
+    return det(local_metric(M, A, i, p))
 end
 
 """
