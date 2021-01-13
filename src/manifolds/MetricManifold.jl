@@ -58,13 +58,15 @@ where $g_{ij,k}=\frac{∂}{∂ p^k} g_{ij}$ is the coordinate
 derivative of the local representation of the metric tensor. The dimensions of
 the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
-christoffel_symbols_first(::MetricManifold, ::Any)
+christoffel_symbols_first(::MetricManifold, A::AbstractAtlas, ::Any, ::Any)
 @decorator_transparent_function function christoffel_symbols_first(
     M::MetricManifold,
+    A::AbstractAtlas,
+    i,
     p;
     backend::AbstractDiffBackend=diff_backend(),
 )
-    ∂g = local_metric_jacobian(M, p; backend=backend)
+    ∂g = local_metric_jacobian(M, A, i, p; backend=backend)
     n = size(∂g, 1)
     Γ = allocate(∂g, Size(n, n, n))
     @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
@@ -74,7 +76,9 @@ end
 @doc raw"""
     christoffel_symbols_second(
         M::MetricManifold,
-        x;
+        A::AbstractAtlas,
+        i,
+        p;
         backend::AbstractDiffBackend = diff_backend(),
     )
 
@@ -90,11 +94,13 @@ The dimensions of the resulting multi-dimensional array are ordered $(l,i,j)$.
 christoffel_symbols_second(::MetricManifold, ::Any)
 @decorator_transparent_function function christoffel_symbols_second(
     M::MetricManifold,
+    A::AbstractAtlas,
+    i,
     p;
     backend::AbstractDiffBackend=diff_backend(),
 )
     Ginv = inverse_local_metric(M, p)
-    Γ₁ = christoffel_symbols_first(M, p; backend=backend)
+    Γ₁ = christoffel_symbols_first(M, A, i, p; backend=backend)
     Γ₂ = allocate(Γ₁)
     @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
     return Γ₂
@@ -103,6 +109,8 @@ end
 @doc raw"""
     christoffel_symbols_second_jacobian(
         M::MetricManifold,
+        A::AbstractAtlas,
+        i,
         p;
         backend::AbstractDiffBackend = diff_backend(),
     )
@@ -115,12 +123,14 @@ The dimensions of the resulting multi-dimensional array are ordered $(i,j,k,l)$.
 christoffel_symbols_second_jacobian(::MetricManifold, ::Any)
 @decorator_transparent_function function christoffel_symbols_second_jacobian(
     M::MetricManifold,
+    A::AbstractAtlas,
+    i,
     p;
     backend::AbstractDiffBackend=diff_backend(),
 )
     n = size(p, 1)
     ∂Γ = reshape(
-        _jacobian(q -> christoffel_symbols_second(M, q; backend=backend), p, backend),
+        _jacobian(q -> christoffel_symbols_second(M, A, i, q; backend=backend), p, backend),
         n,
         n,
         n,
@@ -269,29 +279,31 @@ function decorator_transparent_dispatch(
 end
 
 @doc raw"""
-    det_local_metric(M::MetricManifold, p)
+    det_local_metric(M::MetricManifold, A::AbstractAtlas, i, p)
 
 Return the determinant of local matrix representation of the metric tensor $g$.
 """
 det_local_metric(::MetricManifold, ::Any)
-@decorator_transparent_function function det_local_metric(M::MetricManifold, p)
+@decorator_transparent_function function det_local_metric(M::MetricManifold, A::AbstractAtlas, i, p)
     return det(local_metric(M, p))
 end
 
 """
-    einstein_tensor(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
+    einstein_tensor(M::MetricManifold, A::AbstractAtlas, i, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Einstein tensor of the manifold `M` at the point `p`.
 """
 einstein_tensor(::MetricManifold, ::Any)
 @decorator_transparent_function function einstein_tensor(
     M::MetricManifold,
+    A::AbstractAtlas,
+    i,
     p;
     backend::AbstractDiffBackend=diff_backend(),
 )
-    Ric = ricci_tensor(M, p; backend=backend)
-    g = local_metric(M, p)
-    Ginv = inverse_local_metric(M, p)
+    Ric = ricci_tensor(M, A, i, p; backend=backend)
+    g = local_metric(M, A, i, p)
+    Ginv = inverse_local_metric(M, A, i, p)
     S = sum(Ginv .* Ric)
     G = Ric - g .* S / 2
     return G
@@ -314,7 +326,9 @@ exp(::MetricManifold, ::Any...)
 
 @decorator_transparent_fallback function exp!(M::MetricManifold, q, p, X)
     tspan = (0.0, 1.0)
-    sol = solve_exp_ode(M, p, X, tspan; dense=false, saveat=[1.0])
+    A = get_default_atlas(M)
+    i = select_chart(M, A, p)
+    sol = solve_exp_ode(M, A, i, p, X, tspan; dense=false, saveat=[1.0])
     n = length(p)
     return copyto!(q, sol.u[1][(n + 1):end])
 end
@@ -339,7 +353,7 @@ flat(::MetricManifold, ::Any...)
     p,
     X::TFVector,
 )
-    g = local_metric(M, p)
+    g = local_metric(M, A, i, p)
     copyto!(ξ.data, g * X.data)
     return ξ
 end
@@ -349,9 +363,9 @@ end
 
 Compute the Gaussian curvature of the manifold `M` at the point `x`.
 """
-gaussian_curvature(::MetricManifold, ::Any)
-@decorator_transparent_function function gaussian_curvature(M::MetricManifold, p; kwargs...)
-    return ricci_curvature(M, p; kwargs...) / 2
+gaussian_curvature(::MetricManifold, ::AbstractAtlas, ::Any, ::Any)
+@decorator_transparent_function function gaussian_curvature(M::MetricManifold, A::AbstractAtlas, i, p; kwargs...)
+    return ricci_curvature(M, A, i, p; kwargs...) / 2
 end
 
 function injectivity_radius(M::MetricManifold, p)
@@ -371,14 +385,14 @@ function injectivity_radius(M::MetricManifold, p, m::ExponentialRetraction)
 end
 
 @doc raw"""
-    inverse_local_metric(M::MetricManifold, p)
+    inverse_local_metric(M::MetricManifold, A::AbstractAtlas, i, p)
 
 Return the local matrix representation of the inverse metric (cometric) tensor, usually
 written $g^{ij}$.
 """
-inverse_local_metric(::MetricManifold, ::Any)
-@decorator_transparent_function function inverse_local_metric(M::MetricManifold, p)
-    return inv(local_metric(M, p))
+inverse_local_metric(::MetricManifold, ::AbstractAtlas, ::Any, ::Any)
+@decorator_transparent_function function inverse_local_metric(M::MetricManifold, A::AbstractAtlas, i, p)
+    return inv(local_metric(M, A, i, p))
 end
 
 default_decorator_dispatch(M::MetricManifold) = default_metric_dispatch(M)
@@ -443,7 +457,7 @@ g_p(X, Y) = ⟨X, G_p Y⟩,
 ````
 where $G_p$ is the loal matrix representation of the [`Metric`](@ref) `G`.
 """
-inner(::MetricManifold, ::Any)
+inner(::MetricManifold, ::Any, ::Any, ::Any)
 
 function inner__intransparent(M::MMT, p, X, Y) where {MMT<:MetricManifold}
     return dot(X, local_metric(M, p) * Y)
@@ -454,26 +468,28 @@ function inner(
     X,
     Y,
 ) where {MMT<:MetricManifold}
-    Ginv = inverse_local_metric(B.manifold, p)
+    Ginv = inverse_local_metric(B.manifold, A, i, p)
     return dot(X, Ginv * Y)
 end
 
 @doc raw"""
-    local_metric(M::MetricManifold, p)
+    local_metric(M::MetricManifold, A::AbstractAtlas, i, p)
 
 Return the local matrix representation at the point `p` of the metric
 tensor $g$ on the [`Manifold`](@ref) `M`, usually written $g_{ij}$.
 The matrix has the property that $g(X, Y)=X^\mathrm{T} [g_{ij}] Y = g_{ij} X^i Y^j$,
 where the latter expression uses Einstein summation convention.
 """
-local_metric(::MetricManifold, ::Any)
-@decorator_transparent_function :intransparent function local_metric(M::MetricManifold, p)
+local_metric(::MetricManifold, ::AbstractAtlas, ::Any, ::Any)
+@decorator_transparent_function :intransparent function local_metric(M::MetricManifold, A::AbstractAtlas, i, p)
     return error("Local metric not implemented on $(typeof(M)) for point $(typeof(p))")
 end
 
 @doc raw"""
     local_metric_jacobian(
         M::MetricManifold,
+        A::AbstractAtlas,
+        i,
         p;
         backend::AbstractDiffBackend = diff_backend(),
     )
@@ -485,11 +501,13 @@ dimensions of the resulting multi-dimensional array are ordered $(i,j,k)$.
 local_metric_jacobian(::MetricManifold, ::Any)
 @decorator_transparent_function :intransparent function local_metric_jacobian(
     M::MetricManifold,
+    A::AbstractAtlas,
+    i,
     p;
     backend::AbstractDiffBackend=diff_backend(),
 )
     n = size(p, 1)
-    ∂g = reshape(_jacobian(q -> local_metric(M, q), p, backend), n, n, n)
+    ∂g = reshape(_jacobian(q -> local_metric(M, A, i, q), p, backend), n, n, n)
     return ∂g
 end
 
@@ -513,9 +531,11 @@ is given by $ρ = \log \sqrt{|\det [g_{ij}]|}$.
 log_local_metric_density(::MetricManifold, ::Any)
 @decorator_transparent_function :parent function log_local_metric_density(
     M::MetricManifold,
+    A::AbstractAtlas,
+    i,
     p,
 )
-    return log(abs(det_local_metric(M, p))) / 2
+    return log(abs(det_local_metric(M, A, i, p))) / 2
 end
 
 @doc raw"""
@@ -529,31 +549,33 @@ function metric(M::MetricManifold)
     return M.metric
 end
 """
-    ricci_curvature(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
+    ricci_curvature(M::MetricManifold, A::AbstractAtlas, i, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Ricci scalar curvature of the manifold `M` at the point `p`.
 """
-ricci_curvature(::MetricManifold, ::Any)
+ricci_curvature(::MetricManifold, ::AbstractAtlas, ::Any, ::Any)
 @decorator_transparent_function :parent function ricci_curvature(
     M::MetricManifold,
+    A::AbstractAtlas,
+    i,
     p;
     backend::AbstractDiffBackend=diff_backend(),
 )
-    Ginv = inverse_local_metric(M, p)
-    Ric = ricci_tensor(M, p; backend=backend)
+    Ginv = inverse_local_metric(M, A, i, p)
+    Ric = ricci_tensor(M, A, i, p; backend=backend)
     S = sum(Ginv .* Ric)
     return S
 end
 
 """
-    ricci_tensor(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
+    ricci_tensor(M::MetricManifold, A::AbstractAtlas, i, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Ricci tensor, also known as the Ricci curvature tensor,
 of the manifold `M` at the point `p`.
 """
-ricci_tensor(::MetricManifold, ::Any)
-@decorator_transparent_function function ricci_tensor(M::MetricManifold, p; kwargs...)
-    R = riemann_tensor(M, p; kwargs...)
+ricci_tensor(::MetricManifold, ::AbstractAtlas, ::Any, ::Any)
+@decorator_transparent_function function ricci_tensor(M::MetricManifold, A::AbstractAtlas, i, p; kwargs...)
+    R = riemann_tensor(M, A, i, p; kwargs...)
     n = size(R, 1)
     Ric = allocate(R, Size(n, n))
     @einsum Ric[i, j] = R[l, i, l, j]
@@ -561,7 +583,7 @@ ricci_tensor(::MetricManifold, ::Any)
 end
 
 @doc raw"""
-    riemann_tensor(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
+    riemann_tensor(M::MetricManifold, A::AbstractAtlas, i, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Riemann tensor $R^l_{ijk}$, also known as the Riemann curvature
 tensor, at the point `p`. The dimensions of the resulting multi-dimensional
@@ -570,12 +592,14 @@ array are ordered $(l,i,j,k)$.
 riemann_tensor(::MetricManifold, ::Any)
 @decorator_transparent_function function riemann_tensor(
     M::MetricManifold,
+    A::AbstractAtlas,
+    i,
     p;
     backend::AbstractDiffBackend=diff_backend(),
 )
     n = size(p, 1)
-    Γ = christoffel_symbols_second(M, p; backend=backend)
-    ∂Γ = christoffel_symbols_second_jacobian(M, p; backend=backend) ./ n
+    Γ = christoffel_symbols_second(M, A, i, p; backend=backend)
+    ∂Γ = christoffel_symbols_second_jacobian(M, A, i, p; backend=backend) ./ n
     R = allocate(∂Γ, Size(n, n, n, n))
     @einsum R[l, i, j, k] =
         ∂Γ[l, i, k, j] - ∂Γ[l, i, j, k] + Γ[s, i, k] * Γ[l, s, j] - Γ[s, i, j] * Γ[l, s, k]
@@ -595,10 +619,10 @@ computing
 where $G_p$ is the local matrix representation of `G`, i.e. one employs
 [`inverse_local_metric`](@ref) here to obtain $G_p^{-1}$.
 """
-sharp(::MetricManifold, ::Any)
+sharp(::MetricManifold, ::Any, ::CoTFVector)
 
 function sharp!(M::N, X::TFVector, p, ξ::CoTFVector) where {N<:MetricManifold}
-    Ginv = inverse_local_metric(M, p)
+    Ginv = inverse_local_metric(M, A, i, p)
     copyto!(X.data, Ginv * ξ.data)
     return X
 end
@@ -610,6 +634,8 @@ end
 @doc raw"""
     solve_exp_ode(
         M::MetricManifold,
+        A::AbstractAtlas,
+        i,
         p,
         X,
         tspan;
@@ -634,13 +660,13 @@ coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
 
 !!! note
-    This function only works for Julia 1.1 or greater, when
+    This function only works when
     [OrdinaryDiffEq.jl](https://github.com/JuliaDiffEq/OrdinaryDiffEq.jl) is loaded with
     ```julia
     using OrdinaryDiffEq
     ```
 """
-function solve_exp_ode(M, p, X, tspan; kwargs...)
+function solve_exp_ode(M, A::AbstractAtlas, i, p, X, tspan; kwargs...)
     return error(
         "solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq` on Julia 1.1 or greater.",
     )
