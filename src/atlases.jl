@@ -12,7 +12,11 @@ abstract type AbstractAtlas end
 An atlas indexed by points on a manifold, such that coordinate transformations are performed
 using retractions, inverse retractions and coordinate calculation for a given basis.
 """
-struct RetractionAtlas{TInvRetr<:AbstractInverseRetractionMethod,TRetr<:AbstractRetractionMethod,TBasis<:AbstractBasis} <: AbstractAtlas
+struct RetractionAtlas{
+    TInvRetr<:AbstractInverseRetractionMethod,
+    TRetr<:AbstractRetractionMethod,
+    TBasis<:AbstractBasis,
+} <: AbstractAtlas
     invretr::TInvRetr
     retr::TRetr
     basis::TBasis

@@ -284,7 +284,12 @@ end
 Return the determinant of local matrix representation of the metric tensor $g$.
 """
 det_local_metric(::MetricManifold, ::Any)
-@decorator_transparent_function function det_local_metric(M::MetricManifold, A::AbstractAtlas, i, p)
+@decorator_transparent_function function det_local_metric(
+    M::MetricManifold,
+    A::AbstractAtlas,
+    i,
+    p,
+)
     return det(local_metric(M, p))
 end
 
@@ -364,7 +369,13 @@ end
 Compute the Gaussian curvature of the manifold `M` at the point `x`.
 """
 gaussian_curvature(::MetricManifold, ::AbstractAtlas, ::Any, ::Any)
-@decorator_transparent_function function gaussian_curvature(M::MetricManifold, A::AbstractAtlas, i, p; kwargs...)
+@decorator_transparent_function function gaussian_curvature(
+    M::MetricManifold,
+    A::AbstractAtlas,
+    i,
+    p;
+    kwargs...,
+)
     return ricci_curvature(M, A, i, p; kwargs...) / 2
 end
 
@@ -391,7 +402,12 @@ Return the local matrix representation of the inverse metric (cometric) tensor, 
 written $g^{ij}$.
 """
 inverse_local_metric(::MetricManifold, ::AbstractAtlas, ::Any, ::Any)
-@decorator_transparent_function function inverse_local_metric(M::MetricManifold, A::AbstractAtlas, i, p)
+@decorator_transparent_function function inverse_local_metric(
+    M::MetricManifold,
+    A::AbstractAtlas,
+    i,
+    p,
+)
     return inv(local_metric(M, A, i, p))
 end
 
@@ -481,7 +497,12 @@ The matrix has the property that $g(X, Y)=X^\mathrm{T} [g_{ij}] Y = g_{ij} X^i Y
 where the latter expression uses Einstein summation convention.
 """
 local_metric(::MetricManifold, ::AbstractAtlas, ::Any, ::Any)
-@decorator_transparent_function :intransparent function local_metric(M::MetricManifold, A::AbstractAtlas, i, p)
+@decorator_transparent_function :intransparent function local_metric(
+    M::MetricManifold,
+    A::AbstractAtlas,
+    i,
+    p,
+)
     return error("Local metric not implemented on $(typeof(M)) for point $(typeof(p))")
 end
 
@@ -574,7 +595,13 @@ Compute the Ricci tensor, also known as the Ricci curvature tensor,
 of the manifold `M` at the point `p`.
 """
 ricci_tensor(::MetricManifold, ::AbstractAtlas, ::Any, ::Any)
-@decorator_transparent_function function ricci_tensor(M::MetricManifold, A::AbstractAtlas, i, p; kwargs...)
+@decorator_transparent_function function ricci_tensor(
+    M::MetricManifold,
+    A::AbstractAtlas,
+    i,
+    p;
+    kwargs...,
+)
     R = riemann_tensor(M, A, i, p; kwargs...)
     n = size(R, 1)
     Ric = allocate(R, Size(n, n))
