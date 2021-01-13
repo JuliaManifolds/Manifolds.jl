@@ -245,7 +245,7 @@ function dist_min_angle_pair(p, q)
     t_break2, c2, m2, Φ2 = dist_min_angle_pair_discontinuity_distance(q212)
 
     #check if cost is constant
-    tol_m_zero = 5*eps(eltype(q211)) # i.e. promoted from p and q
+    tol_m_zero = 5 * eps(eltype(q211)) # i.e. promoted from p and q
     tol_break = sqrt(eps(eltype(q211)))
     if (abs(m1) < tol_m_zero) && (abs(m2) < tol_m_zero)
         t_min = 0
