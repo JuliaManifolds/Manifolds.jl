@@ -4,41 +4,42 @@ using Random: GLOBAL_RNG, seed!
 import ManifoldsBase: manifold_dimension, exp!, log!, inner, zero_tangent_vector!
 using Manifolds:
     AbstractEstimationMethod,
-    GradientDescentEstimation,
     CyclicProximalPointEstimation,
     GeodesicInterpolation,
-    GeodesicInterpolationWithinRadius
+    GeodesicInterpolationWithinRadius,
+    GradientDescentEstimation,
+    WeiszfeldEstimation
 import Manifolds: mean!, median!, var, mean_and_var
 
 struct TestStatsSphere{N} <: Manifold{ℝ} end
 TestStatsSphere(N) = TestStatsSphere{N}()
-manifold_dimension(M::TestStatsSphere{N}) where {N} = manifold_dimension(Sphere(N))
-function exp!(M::TestStatsSphere{N}, w, x, y; kwargs...) where {N}
+manifold_dimension(::TestStatsSphere{N}) where {N} = manifold_dimension(Sphere(N))
+function exp!(::TestStatsSphere{N}, w, x, y; kwargs...) where {N}
     return exp!(Sphere(N), w, x, y; kwargs...)
 end
-function log!(M::TestStatsSphere{N}, y, x, v; kwargs...) where {N}
+function log!(::TestStatsSphere{N}, y, x, v; kwargs...) where {N}
     return log!(Sphere(N), y, x, v; kwargs...)
 end
-function inner(M::TestStatsSphere{N}, x, v, w; kwargs...) where {N}
+function inner(::TestStatsSphere{N}, x, v, w; kwargs...) where {N}
     return inner(Sphere(N), x, v, w; kwargs...)
 end
-function zero_tangent_vector!(M::TestStatsSphere{N}, v, x; kwargs...) where {N}
+function zero_tangent_vector!(::TestStatsSphere{N}, v, x; kwargs...) where {N}
     return zero_tangent_vector!(Sphere(N), v, x; kwargs...)
 end
 
 struct TestStatsEuclidean{N} <: Manifold{ℝ} end
 TestStatsEuclidean(N) = TestStatsEuclidean{N}()
-manifold_dimension(M::TestStatsEuclidean{N}) where {N} = manifold_dimension(Euclidean(N))
-function exp!(M::TestStatsEuclidean{N}, y, x, v; kwargs...) where {N}
+manifold_dimension(::TestStatsEuclidean{N}) where {N} = manifold_dimension(Euclidean(N))
+function exp!(::TestStatsEuclidean{N}, y, x, v; kwargs...) where {N}
     return exp!(Euclidean(N), y, x, v; kwargs...)
 end
-function log!(M::TestStatsEuclidean{N}, w, x, y; kwargs...) where {N}
+function log!(::TestStatsEuclidean{N}, w, x, y; kwargs...) where {N}
     return log!(Euclidean(N), w, x, y; kwargs...)
 end
-function inner(M::TestStatsEuclidean{N}, x, v, w; kwargs...) where {N}
+function inner(::TestStatsEuclidean{N}, x, v, w; kwargs...) where {N}
     return inner(Euclidean(N), x, v, w; kwargs...)
 end
-function zero_tangent_vector!(M::TestStatsEuclidean{N}, v, x; kwargs...) where {N}
+function zero_tangent_vector!(::TestStatsEuclidean{N}, v, x; kwargs...) where {N}
     return zero_tangent_vector!(Euclidean(N), v, x; kwargs...)
 end
 
@@ -73,26 +74,40 @@ function test_mean(M, x, yexp=nothing, method...; kwargs...)
     return nothing
 end
 
-function test_median(M, x, yexp=nothing; kwargs...)
-    @testset "median unweighted" begin
-        y = median(M, x; kwargs...)
+function test_median(
+    M,
+    x,
+    yexp=nothing;
+    method::Union{Nothing,AbstractEstimationMethod}=nothing,
+    kwargs...,
+)
+    @testset "median unweighted$(!isnothing(method) ? " ($method)" : "")" begin
+        y = isnothing(method) ? median(M, x; kwargs...) : median(M, x, method; kwargs...)
         @test is_manifold_point(M, y; atol=10^-9)
         if yexp !== nothing
             @test isapprox(M, y, yexp; atol=10^-5)
         end
     end
 
-    @testset "median weighted" begin
+    @testset "median weighted$(!isnothing(method) ? " ($method)" : "")" begin
         n = length(x)
         w1 = pweights(ones(n) / n)
         w2 = pweights(ones(n))
         w3 = pweights(2 * ones(n))
         y = median(M, x; kwargs...)
         for w in (w1, w2, w3)
-            @test is_manifold_point(M, median(M, x, w; kwargs...); atol=10^-9)
+            if isnothing(method)
+                @test is_manifold_point(M, median(M, x, w; kwargs...); atol=10^-9)
+            else
+                @test is_manifold_point(M, median(M, x, w, method; kwargs...); atol=10^-9)
+            end
             @test isapprox(M, median(M, x, w; kwargs...), y; atol=10^-4)
         end
-        @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
+        if isnothing(method)
+            @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
+        else
+            @test_throws Exception median(M, x, pweights(ones(n + 1)), method; kwargs...)
+        end
     end
     return nothing
 end
@@ -237,85 +252,79 @@ struct TestStatsOverload3 <: Manifold{ℝ} end
 struct TestStatsMethod1 <: AbstractEstimationMethod end
 
 function mean!(
-    M::TestStatsOverload1,
+    ::TestStatsOverload1,
     y,
-    x::AbstractVector,
-    w::AbstractWeights,
-    method::GradientDescentEstimation,
+    ::AbstractVector,
+    ::AbstractWeights,
+    ::GradientDescentEstimation,
 )
     return fill!(y, 3)
 end
-mean!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights) = fill!(y, 4)
+mean!(::TestStatsOverload2, y, ::AbstractVector, ::AbstractWeights) = fill!(y, 4)
 function mean!(
-    M::TestStatsOverload2,
+    ::TestStatsOverload2,
     y,
-    x::AbstractVector,
-    w::AbstractWeights,
-    method::GradientDescentEstimation,
+    ::AbstractVector,
+    ::AbstractWeights,
+    ::GradientDescentEstimation,
 )
     return fill!(y, 3)
 end
 function mean!(
-    M::TestStatsOverload3,
+    ::TestStatsOverload3,
     y,
-    x::AbstractVector,
-    w::AbstractWeights,
-    method::TestStatsMethod1=TestStatsMethod1(),
+    ::AbstractVector,
+    ::AbstractWeights,
+    ::TestStatsMethod1=TestStatsMethod1(),
 )
     return fill!(y, 5)
 end
 
 function median!(
-    M::TestStatsOverload1,
+    ::TestStatsOverload1,
     y,
-    x::AbstractVector,
-    w::AbstractWeights,
-    method::CyclicProximalPointEstimation,
+    ::AbstractVector,
+    ::AbstractWeights,
+    ::CyclicProximalPointEstimation,
 )
     return fill!(y, 3)
 end
-median!(M::TestStatsOverload2, y, x::AbstractVector, w::AbstractWeights) = fill!(y, 4)
+median!(::TestStatsOverload2, y, ::AbstractVector, ::AbstractWeights) = fill!(y, 4)
 function median!(
-    M::TestStatsOverload2,
+    ::TestStatsOverload2,
     y,
-    x::AbstractVector,
-    w::AbstractWeights,
-    method::CyclicProximalPointEstimation,
+    ::AbstractVector,
+    ::AbstractWeights,
+    ::CyclicProximalPointEstimation,
 )
     return fill!(y, 3)
 end
 function median!(
-    M::TestStatsOverload3,
+    ::TestStatsOverload3,
     y,
-    x::AbstractVector,
-    w::AbstractWeights,
-    method::TestStatsMethod1=TestStatsMethod1(),
+    ::AbstractVector,
+    ::AbstractWeights,
+    ::TestStatsMethod1=TestStatsMethod1(),
 )
     return fill!(y, 5)
 end
 
-function var(
-    M::TestStatsOverload1,
-    x::AbstractVector,
-    w::AbstractWeights,
-    m;
-    corrected=false,
-)
+function var(::TestStatsOverload1, ::AbstractVector, ::AbstractWeights, m; corrected=false)
     return 4 + 5 * corrected
 end
 function mean_and_var(
-    M::TestStatsOverload1,
-    x::AbstractVector,
-    w::AbstractWeights;
+    ::TestStatsOverload1,
+    ::AbstractVector,
+    ::AbstractWeights;
     corrected=false,
     kwargs...,
 )
     return [4.0], 4 + 5 * corrected
 end
 function mean_and_var(
-    M::TestStatsOverload1,
-    x::AbstractVector,
-    w::AbstractWeights,
+    ::TestStatsOverload1,
+    ::AbstractVector,
+    ::AbstractWeights,
     ::TestStatsMethod1;
     corrected=false,
     kwargs...,
@@ -392,7 +401,9 @@ end
                 α in range(0, 2 * π - 2 * π / n, length=n)
             ]
             test_mean(M, x)
-            test_median(M, x; atol=10^-12)
+            test_median(M, x; atol=1e-12)
+            test_median(M, x; method=CyclicProximalPointEstimation(), atol=1e-12)
+            test_median(M, x; method=WeiszfeldEstimation())
             test_var(M, x)
             test_std(M, x)
             test_moments(M, x)
