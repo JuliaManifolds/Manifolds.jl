@@ -21,20 +21,24 @@ acting elementwise on the left from ``\mathrm{SO}(3)^2`` (component wise).
 
 Then the unsigned Essential manifold ``\mathcal{M}_{\text{E}}`` can be identified
 with the quotient space
+
 ````math
 \mathcal{M}_{\text{E}} := (\text{SO}(3)×\text{SO}(3))/(H_z × H_π),
 ````
 
 and for the signed Essential manifold $\mathcal{M}_{\text{Ǝ}}$, the quotient reads
+
 ````math
 \mathcal{M}_{\text{Ǝ}} := (\text{SO}(3)×\text{SO}(3))/(H_z).
 ````
 
 An essential matrix is defined as
+
 ````math
 E = (R'_1)^T [T'_2 - T'_1]_{×} R'_2,
 ````
-where the poses of two cameras $(R_i', T_i'), i=1,2,$ are contained in the space of
+
+where the poses of two cameras ``(R_i', T_i'), i=1,2``, are contained in the space of
 rigid body transformations $SE(3)$ and the operator $[⋅]_{×}\colon ℝ^3 \to \operatorname{SkewSym}(3)$
 denotes the matrix representation of the cross product operator. For more details see [^TronDaniilidis2017].
 
