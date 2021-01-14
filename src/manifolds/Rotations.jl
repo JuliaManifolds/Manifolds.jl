@@ -289,7 +289,7 @@ function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthogonalBasis
     end
     return Xⁱ
 end
-function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthonormalBasis) where {N}
+function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, ::DefaultOrthonormalBasis) where {N}
     T = Base.promote_eltype(p, X)
     get_coordinates!(M, Xⁱ, p, X, DefaultOrthogonalBasis())
     Xⁱ .*= sqrt(T(2))
@@ -308,7 +308,7 @@ get_vector(::Rotations, ::Any...)
 function get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultOrthogonalBasis)
     return get_vector!(M, X, p, Xⁱ[1], B)
 end
-function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultOrthogonalBasis)
+function get_vector!(::Rotations{2}, X, p, Xⁱ::Real, ::DefaultOrthogonalBasis)
     @assert length(X) == 4
     @inbounds begin
         X[1] = 0
@@ -525,7 +525,7 @@ Return the dimension of the manifold $\mathrm{SO}(n)$, i.e.
 \dim_{\mathrm{SO}(n)} = \frac{n(n-1)}{2}.
 ```
 """
-manifold_dimension(M::Rotations{N}) where {N} = div(N * (N - 1), 2)
+manifold_dimension(::Rotations{N}) where {N} = div(N * (N - 1), 2)
 
 """
     mean(
@@ -606,7 +606,7 @@ check with `check_det = false`.
 """
 project(::Rotations, ::Any)
 
-function project!(M::Rotations{N}, q, p; check_det=true) where {N}
+function project!(::Rotations{N}, q, p; check_det=true) where {N}
     F = svd(p)
     copyto!(q, F.U * F.Vt)
     if check_det && det(q) < 0
