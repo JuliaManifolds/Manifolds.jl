@@ -99,7 +99,7 @@ christoffel_symbols_second(::MetricManifold, ::Any)
     p;
     backend::AbstractDiffBackend=diff_backend(),
 )
-    Ginv = inverse_local_metric(M, p)
+    Ginv = inverse_local_metric(M, A, i, p)
     Γ₁ = christoffel_symbols_first(M, A, i, p; backend=backend)
     Γ₂ = allocate(Γ₁)
     @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
@@ -478,7 +478,9 @@ where $G_p$ is the loal matrix representation of the [`Metric`](@ref) `G`.
 inner(::MetricManifold, ::Any, ::Any, ::Any)
 
 function inner__intransparent(M::MMT, p, X, Y) where {MMT<:MetricManifold}
-    return dot(X, local_metric(M, p) * Y)
+    A = get_default_atlas(M)
+    i = select_chart(M, A, p)
+    return dot(X, local_metric(M, A, i, p) * Y)
 end
 function inner(
     B::VectorBundleFibers{<:CotangentSpaceType,MMT},
@@ -486,6 +488,8 @@ function inner(
     X,
     Y,
 ) where {MMT<:MetricManifold}
+    A = get_default_atlas(B.manifold)
+    i = select_chart(B.manifold, A, p)
     Ginv = inverse_local_metric(B.manifold, A, i, p)
     return dot(X, Ginv * Y)
 end
