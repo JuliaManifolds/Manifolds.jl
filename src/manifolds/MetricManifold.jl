@@ -358,6 +358,8 @@ flat(::MetricManifold, ::Any...)
     p,
     X::TFVector,
 )
+    A = get_default_atlas(M)
+    i = p
     g = local_metric(M, A, i, p)
     copyto!(ξ.data, g * X.data)
     return ξ

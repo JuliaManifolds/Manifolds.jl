@@ -58,7 +58,9 @@ import ManifoldsBase:
     vector_transport_to,
     vector_transport_to!,
     zero_tangent_vector,
-    zero_tangent_vector!
+    zero_tangent_vector!,
+    CotangentSpace,
+    TangentSpace
 import Base: copyto!, convert, in, isapprox, isempty, length, showerror
 
 using Base.Iterators: repeated
@@ -82,17 +84,24 @@ using ManifoldsBase:
     AbstractPowerRepresentation,
     AbstractVectorTransportMethod,
     AbstractLinearVectorTransportMethod,
-    DifferentiatedRetractionVectorTransport,
     ComponentManifoldError,
     CompositeManifoldError,
+    CotangentSpaceType,
+    CoTFVector,
     DefaultManifold,
     DefaultOrDiagonalizingBasis,
     DiagonalizingBasisData,
+    DifferentiatedRetractionVectorTransport,
+    FVector,
     InversePowerRetraction,
     PowerManifold,
     PowerManifoldNested,
     PowerRetraction,
     PowerVectorTransport,
+    TangentSpaceType,
+    TCoTSpaceType,
+    TFVector,
+    VectorSpaceType,
     VeeOrthogonalBasis,
     @decorator_transparent_fallback,
     @decorator_transparent_function,
@@ -121,6 +130,7 @@ using StatsBase: AbstractWeights
 include("utils.jl")
 
 include("atlases.jl")
+include("cotangent_space.jl")
 include("differentiation.jl")
 include("riemannian_diff.jl")
 

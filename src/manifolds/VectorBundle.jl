@@ -1,38 +1,3 @@
-"""
-    VectorSpaceType
-
-Abstract type for tangent spaces, cotangent spaces, their tensor products,
-exterior products, etc.
-
-Every vector space `fiber` is supposed to provide:
-* a method of constructing vectors,
-* basic operations: addition, subtraction, multiplication by a scalar
-  and negation (unary minus),
-* [`zero_vector!(fiber, X, p)`](@ref) to construct zero vectors at point `p`,
-* `allocate(X)` and `allocate(X, T)` for vector `X` and type `T`,
-* `copyto!(X, Y)` for vectors `X` and `Y`,
-* `number_eltype(v)` for vector `v`,
-* [`vector_space_dimension(::VectorBundleFibers{<:typeof(fiber)}) where fiber`](@ref).
-
-Optionally:
-* inner product via `inner` (used to provide Riemannian metric on vector
-  bundles),
-* [`flat`](@ref) and [`sharp`](@ref),
-* `norm` (by default uses `inner`),
-* [`project`](@ref) (for embedded vector spaces),
-* [`representation_size`](@ref) (if support for [`ProductArray`](@ref) is desired),
-* broadcasting for basic operations.
-"""
-abstract type VectorSpaceType end
-
-struct TangentSpaceType <: VectorSpaceType end
-
-struct CotangentSpaceType <: VectorSpaceType end
-
-TCoTSpaceType = Union{TangentSpaceType,CotangentSpaceType}
-
-const TangentSpace = TangentSpaceType()
-const CotangentSpace = CotangentSpaceType()
 
 """
     TensorProductType(spaces::VectorSpaceType...)
@@ -194,35 +159,9 @@ function CotangentBundle(M::Manifold, vtm::VectorBundleVectorTransport)
     return VectorBundle(CotangentSpace, M, vtm)
 end
 
-"""
-    FVector(type::VectorSpaceType, data)
-
-Decorator indicating that the vector `data` is from a fiber of a vector bundle
-of type `type`.
-"""
-struct FVector{TType<:VectorSpaceType,TData}
-    type::TType
-    data::TData
-end
-
-const TFVector = FVector{TangentSpaceType}
-const CoTFVector = FVector{CotangentSpaceType}
-
 struct VectorBundleBasisData{BBasis<:CachedBasis,TBasis<:CachedBasis}
     base_basis::BBasis
     vec_basis::TBasis
-end
-
-Base.:+(X::FVector, Y::FVector) = FVector(X.type, X.data + Y.data)
-
-Base.:-(X::FVector, Y::FVector) = FVector(X.type, X.data - Y.data)
-Base.:-(X::FVector) = FVector(X.type, -X.data)
-
-Base.:*(a::Number, X::FVector) = FVector(X.type, a * X.data)
-
-function Base.copyto!(X::FVector, Y::FVector)
-    copyto!(X.data, Y.data)
-    return X
 end
 
 base_manifold(B::VectorBundleFibers) = base_manifold(B.manifold)
@@ -284,11 +223,6 @@ of their difference.
 function distance(M::TangentSpaceAtPoint, p, q)
     return norm(M.fiber.manifold, M.point, q - p)
 end
-
-function number_eltype(::Type{FVector{TType,TData}}) where {TType<:VectorSpaceType,TData}
-    return number_eltype(TData)
-end
-number_eltype(v::FVector) = number_eltype(v.data)
 
 function embed!(M::TangentSpaceAtPoint, q, p)
     return embed!(M.fiber.manifold, q, M.point, p)

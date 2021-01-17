@@ -32,10 +32,9 @@ function RetractionAtlas(
 )
     return RetractionAtlas(invretr, retr, DefaultOrthonormalBasis())
 end
+RetractionAtlas() = RetractionAtlas(LogarithmicInverseRetraction(), ExponentialRetraction())
 
-function get_default_atlas(M::Manifold)
-    return RetractionAtlas(LogarithmicInverseRetraction(), ExponentialRetraction())
-end
+get_default_atlas(M::Manifold) = RetractionAtlas()
 
 """
     get_point_coordinates(M::Manifold, A::AbstractAtlas, i, p)
@@ -120,4 +119,39 @@ end
 
 function transition_map!(M::Manifold, y, A::AbstractAtlas, i_from, i_to, x)
     return transition_map!(M, y, A, i_from, A, i_to, x)
+end
+
+"""
+    induced_basis(M::Manifold, A::AbstractAtlas, i, p, VST::VectorSpaceType)
+
+Basis of vector space of type `VST` at point `p` from manifold `M` induced by
+chart (`A`, `i`).
+"""
+induced_basis(M::Manifold, A::AbstractAtlas, i, VST::VectorSpaceType)
+
+function induced_basis(
+    M::Manifold,
+    A::RetractionAtlas{
+        <:AbstractInverseRetractionMethod,
+        <:AbstractRetractionMethod,
+        <:DefaultOrthonormalBasis,
+    },
+    i,
+    p,
+    ::TangentSpaceType,
+)
+    return A.basis
+end
+function induced_basis(
+    M::Manifold,
+    A::RetractionAtlas{
+        <:AbstractInverseRetractionMethod,
+        <:AbstractRetractionMethod,
+        <:DefaultOrthonormalBasis,
+    },
+    i,
+    p,
+    ::CotangentSpaceType,
+)
+    return A.basis
 end
