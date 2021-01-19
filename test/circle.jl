@@ -148,10 +148,8 @@ using Manifolds: TFVector, CoTFVector
         @test !is_tangent_vector(Mc, 1im, 2im)
         @test_throws DomainError is_tangent_vector(Mc, 1im, 2im, true)
         rrcv = CoTFVector(Manifolds.RieszRepresenterCotangentVector(Mc, 0.0 + 0.0im, 1.0im))
-        @test flat(Mc, 0.0 + 0.0im, TFVector(1.0im)) ==
-              rrcv
-        @test sharp(Mc, 0.0 + 0.0im, rrcv) ==
-              TFVector(1.0im)
+        @test flat(Mc, 0.0 + 0.0im, TFVector(1.0im)) == rrcv
+        @test sharp(Mc, 0.0 + 0.0im, rrcv) == TFVector(1.0im)
         @test norm(Mc, 1.0, log(Mc, 1.0, -1.0)) ≈ π
         @test is_tangent_vector(Mc, 1.0, log(Mc, 1.0, -1.0))
         v = MVector(0.0 + 0.0im)

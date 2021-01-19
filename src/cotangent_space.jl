@@ -33,7 +33,12 @@ end
 function flat!(M::Manifold, ξ::CoTFVector{<:Any,Nothing}, p, X::TFVector{<:Any,Nothing})
     return flat!(M, ξ.data, p, X.data)
 end
-function flat!(M::Manifold, ξ::CoTFVector{<:Any,<:AbstractBasis}, p, X::TFVector{<:Any,<:AbstractBasis})
+function flat!(
+    M::Manifold,
+    ξ::CoTFVector{<:Any,<:AbstractBasis},
+    p,
+    X::TFVector{<:Any,<:AbstractBasis},
+)
     # TODO: check handle basis change here? Right now it assumes dual basis.
     copyto!(ξ.data, X.data)
     return ξ
@@ -48,7 +53,12 @@ end
 function sharp!(M::Manifold, X::TFVector{<:Any,Nothing}, p, ξ::CoTFVector{<:Any,Nothing})
     return sharp!(M, X.data, p, ξ.data)
 end
-function sharp!(M::Manifold, X::TFVector{<:Any,<:AbstractBasis}, p, ξ::CoTFVector{<:Any,<:AbstractBasis})
+function sharp!(
+    M::Manifold,
+    X::TFVector{<:Any,<:AbstractBasis},
+    p,
+    ξ::CoTFVector{<:Any,<:AbstractBasis},
+)
     # TODO: check handle basis change here? Right now it assumes dual basis.
     copyto!(X.data, ξ.data)
     return X
