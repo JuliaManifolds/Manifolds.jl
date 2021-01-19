@@ -19,7 +19,7 @@ using retractions, inverse retractions and coordinate calculation for a given ba
 struct RetractionAtlas{
     TInvRetr<:AbstractInverseRetractionMethod,
     TRetr<:AbstractRetractionMethod,
-    TBasis<:AbstractBasis,
+    TBasis<:AbstractBasis{<:Any,TangentSpaceType},
 } <: AbstractAtlas
     invretr::TInvRetr
     retr::TRetr
@@ -153,5 +153,5 @@ function induced_basis(
     p,
     ::CotangentSpaceType,
 )
-    return A.basis
+    return dual_basis(A.basis)
 end

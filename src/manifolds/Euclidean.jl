@@ -179,17 +179,6 @@ exp(::Euclidean, ::Any...)
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 
-"""
-    flat(M::Euclidean, p, X)
-
-Transform a tangent vector `X` into a cotangent. Since they can directly be identified in the
-[`Euclidean`](@ref) case, this yields just the identity for a tangent vector `w` in the
-tangent space of `p` on `M`.
-"""
-flat(::Euclidean, ::Any...)
-
-flat!(M::Euclidean, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
-
 function get_basis(M::Euclidean, p, B::DefaultOrthonormalBasis{ℝ})
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     return CachedBasis(B, vecs)
@@ -442,17 +431,6 @@ Return the array dimensions required to represent an element on the
 [`Euclidean`](@ref) `M`, i.e. the vector of all array dimensions.
 """
 @generated representation_size(::Euclidean{N}) where {N} = size_to_tuple(N)
-
-"""
-    sharp(M::Euclidean, p, ξ)
-
-Transform the cotangent vector `ξ` at `p` on the [`Euclidean`](@ref) `M` to a tangent vector `X`.
-Since cotangent and tangent vectors can directly be identified in the [`Euclidean`](@ref)
-case, this yields just the identity.
-"""
-sharp(::Euclidean, ::Any...)
-
-sharp!(::Euclidean, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 function Base.show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
     return print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")

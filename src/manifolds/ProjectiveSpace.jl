@@ -179,8 +179,6 @@ function exp!(M::AbstractProjectiveSpace, q, p, X)
     return q
 end
 
-flat!(::AbstractProjectiveSpace, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
-
 function get_basis(::ProjectiveSpace{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) where {n}
     return get_basis(Sphere{n,ℝ}(), p, B)
 end

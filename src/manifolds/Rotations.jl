@@ -250,8 +250,6 @@ function exp!(M::Rotations{4}, q, p, X)
     return copyto!(q, p * pinvq)
 end
 
-flat!(M::Rotations, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
-
 @doc raw"""
     get_coordinates(M::Rotations, p, X)
 
@@ -640,8 +638,6 @@ Return the `size()` of a point on the [`Rotations`](@ref) `M`, i.e. for the
 $\mathrm{SO}(n)$ it's `(n,n)`.
 """
 @generated representation_size(::Rotations{N}) where {N} = (N, N)
-
-sharp!(M::Rotations, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 function Random.rand(
     rng::AbstractRNG,

@@ -124,19 +124,17 @@ function exp!(M::Circle{ℂ}, q, p, X)
     return q
 end
 
-flat(::Circle, ::Number, X::TFVector) = FVector(CotangentSpace, X.data)
-
-flat!(::Circle, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
-
 function get_basis(M::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
     return CachedBasis(B, (@SVector [0]), vs)
 end
-get_coordinates(M::Circle{ℝ}, p, X, B::DefaultOrthonormalBasis) = X
+
+get_coordinates(::Circle{ℝ}, p, X, ::AbstractBasis) = X
+get_coordinates(::Circle{ℝ}, p, X, ::DefaultOrthonormalBasis) = X
 function get_coordinates(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
-    return X .* (sbv == 0 ? 1 : sbv)
+    return X .* (sbv == 0 ? one(sbv) : sbv)
 end
 """
     get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
@@ -188,16 +186,27 @@ eval(
 )
 
 get_vector(::Circle{ℝ}, p, X, ::AbstractBasis) = X
-function get_vector(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
+get_vector(::Circle{ℝ}, p, X, ::DefaultOrthonormalBasis) = X
+function get_vector(::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
-    return X .* (sbv == 0 ? 1 : sbv)
+    return X .* (sbv == 0 ? one(sbv) : sbv)
 end
 """
     get_vector(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
 Return tangent vector from the coordinates in the Lie algebra of the [`Circle`](@ref).
 """
-get_vector(M::Circle{ℂ}, p, X, B::AbstractBasis) = @SVector [1im * X[1] * p[1]]
+get_vector(::Circle{ℂ}, p, X, ::AbstractBasis) = @SVector [1im * X[1] * p[1]]
+eval(
+    quote
+        @invoke_maker 4 AbstractBasis get_vector(
+            M::Circle{ℂ},
+            p,
+            X,
+            B::DefaultOrthonormalBasis,
+        )
+    end,
+)
 
 function get_vector!(M::Circle, Y::AbstractArray, p, X, B::AbstractBasis)
     Y[] = get_vector(M, p, X, B)[]
@@ -417,10 +426,6 @@ retract(M::Circle, p, q) = retract(M, p, q, ExponentialRetraction())
 retract(M::Circle, p, q, m::ExponentialRetraction) = exp(M, p, q)
 
 representation_size(::Circle) = ()
-
-sharp(::Circle, p::Number, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
-
-sharp!(::Circle, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 Base.show(io::IO, ::Circle{𝔽}) where {𝔽} = print(io, "Circle($(𝔽))")
 

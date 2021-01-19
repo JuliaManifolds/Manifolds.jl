@@ -186,8 +186,6 @@ function exp!(M::AbstractSphere, q, p, X)
     return q
 end
 
-flat!(M::AbstractSphere, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
-
 function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) where {n}
     A = zeros(n + 1, n + 1)
     A[1, :] = transpose(p)

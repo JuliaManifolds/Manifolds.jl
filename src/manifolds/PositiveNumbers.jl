@@ -98,10 +98,6 @@ Base.exp(::PositiveNumbers, p::Real, X::Real) = p * exp(X / p)
 
 exp!(::PositiveNumbers, q, p, X) = (q .= p .* exp.(X ./ p))
 
-flat(::PositiveNumbers, ::Real, X::TFVector) = FVector(CotangentSpace, X.data)
-
-flat!(::PositiveNumbers, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
-
 @doc raw"""
     injectivity_radius(M::PositiveNumbers[, p])
 
@@ -184,10 +180,6 @@ retract(M::PositiveNumbers, p, q) = retract(M, p, q, ExponentialRetraction())
 retract(M::PositiveNumbers, p, q, ::ExponentialRetraction) = exp(M, p, q)
 
 representation_size(::PositiveNumbers) = ()
-
-sharp(::PositiveNumbers, ::Real, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
-
-sharp!(::PositiveNumbers, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 Base.show(io::IO, ::PositiveNumbers) = print(io, "PositiveNumbers()")
 
