@@ -73,14 +73,14 @@ function get_point!(M::Manifold, p, A::RetractionAtlas, i, x)
 end
 
 """
-    select_chart(M::Manifold, A::AbstractAtlas, p)
+    get_chart_index(M::Manifold, A::AbstractAtlas, p)
 
 Select a chart from atlas `A` for manifold `M` that is suitable for representing
 neighborhood of point `p`.
 """
-select_chart(::Manifold, ::AbstractAtlas, ::Any)
+get_chart_index(::Manifold, ::AbstractAtlas, ::Any)
 
-select_chart(::Manifold, ::RetractionAtlas, p) = p
+get_chart_index(::Manifold, ::RetractionAtlas, p) = p
 
 """
     transition_map(M::Manifold, A_from::AbstractAtlas, i_from, A_to::AbstractAtlas, i_to, x)
