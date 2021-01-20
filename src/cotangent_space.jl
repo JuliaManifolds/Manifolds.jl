@@ -15,14 +15,6 @@ function (ξ::RieszRepresenterCotangentVector)(Y)
     return inner(ξ.manifold, ξ.p, ξ.X, Y)
 end
 
-function get_coordinates(M::Manifold, p, ξ, B::DefaultOrthonormalBasis)
-    return get_coordinates(M, p, ξ.X, B)
-end
-
-function get_vector(M::Manifold, p, v, B::DefaultOrthonormalBasis)
-    X = get_vector(M, p, v, B)
-    return RieszRepresenterCotangentVector(M, p, X)
-end
 
 flat(M::Manifold, p, X) = RieszRepresenterCotangentVector(M, p, X)
 flat(M::Manifold, p, X::TFVector{<:Any,Nothing}) = CoTFVector(flat(M, p, X.data))
@@ -39,9 +31,46 @@ function flat!(
     p,
     X::TFVector{<:Any,<:AbstractBasis},
 )
-    # TODO: check handle basis change here? Right now it assumes dual basis.
-    copyto!(ξ.data, X.data)
+    Xv = get_vector(M, p, X.data, X.basis)
+    ξv = flat(M, p, Xv)
+    get_coordinates!(M, ξ.data, p, ξv, ξ.basis)
     return ξ
+end
+
+function get_coordinates(
+    M::Manifold,
+    p,
+    ξ::RieszRepresenterCotangentVector,
+    ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+) where {𝔽}
+    return get_coordinates(M, p, ξ.X, DefaultOrthonormalBasis{𝔽}())
+end
+
+function get_coordinates!(
+    M::Manifold,
+    v,
+    p,
+    ξ::RieszRepresenterCotangentVector,
+    ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+) where {𝔽}
+    get_coordinates!(M, v, p, ξ.X, DefaultOrthonormalBasis{𝔽}())
+    return v
+end
+
+function get_vector(M::Manifold, p, v, ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType}) where {𝔽}
+    X = get_vector(M, p, v, DefaultOrthonormalBasis{𝔽}())
+    return RieszRepresenterCotangentVector(M, p, X)
+end
+
+function get_vector!(
+    M::Manifold,
+    ξr::RieszRepresenterCotangentVector,
+    p,
+    v,
+    ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+) where {𝔽}
+    get_vector!(M, ξr.X, p, v, DefaultOrthonormalBasis{𝔽}())
+    return ξr
 end
 
 sharp(::Manifold, p, ξ::RieszRepresenterCotangentVector) = ξ.X
@@ -59,7 +88,8 @@ function sharp!(
     p,
     ξ::CoTFVector{<:Any,<:AbstractBasis},
 )
-    # TODO: check handle basis change here? Right now it assumes dual basis.
-    copyto!(X.data, ξ.data)
+    ξv = get_vector(M, p, ξ.data, ξ.basis)
+    Xv = sharp(M, p, ξv)
+    get_coordinates!(M, X.data, p, Xv, X.basis)
     return X
 end
