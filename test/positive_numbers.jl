@@ -12,8 +12,6 @@ include("utils.jl")
         @test !is_manifold_point(M, -1.0)
         @test_throws DomainError is_manifold_point(M, -1.0, true)
         @test is_tangent_vector(M, 1.0, 0.0; check_base_point=false)
-        @test flat(M, 1.0, FVector(TangentSpace, 1.0)) == FVector(CotangentSpace, 1.0)
-        @test sharp(M, 1.0, FVector(CotangentSpace, 1.0)) == FVector(TangentSpace, 1.0)
         @test vector_transport_to(M, 1.0, 3.0, 2.0, ParallelTransport()) == 6.0
         @test retract(M, 1.0, 1.0) == exp(M, 1.0, 1.0)
         @test isinf(injectivity_radius(M))

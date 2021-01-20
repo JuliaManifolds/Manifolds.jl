@@ -276,36 +276,6 @@ function exp!(M::TangentSpaceAtPoint, q, p, X)
     return q
 end
 
-@doc raw"""
-    flat(M::Manifold, p, X::FVector)
-
-Compute the flat isomorphism (one of the musical isomorphisms) of tangent vector `X`
-from the vector space of type `M` at point `p` from the underlying [`Manifold`](@ref).
-
-The function can be used for example to transform vectors
-from the tangent bundle to vectors from the cotangent bundle
-$♭ : T\mathcal M → T^{*}\mathcal M$
-"""
-function flat(M::Manifold, p, X::FVector)
-    ξ = allocate_result(M, flat, X, p)
-    return flat!(M, ξ, p, X)
-end
-
-function flat!(M::Manifold, ξ::FVector, p, X::FVector)
-    return error(
-        "flat! not implemented for vector bundle fibers space " *
-        "of type $(typeof(M)), vector of type $(typeof(ξ)), point of " *
-        "type $(typeof(p)) and vector of type $(typeof(X)).",
-    )
-end
-
-@decorator_transparent_signature flat!(
-    M::AbstractDecoratorManifold,
-    ξ::CoTFVector,
-    p,
-    X::TFVector,
-)
-
 function get_basis(M::VectorBundle, p, B::AbstractBasis)
     xp1 = submanifold_component(p, Val(1))
     base_basis = get_basis(M.manifold, xp1, B)
@@ -802,38 +772,6 @@ function representation_size(B::TangentSpaceAtPoint)
     return representation_size(B.fiber.manifold)
 end
 
-@doc raw"""
-    sharp(M::Manifold, p, ξ::FVector)
-
-Compute the sharp isomorphism (one of the musical isomorphisms) of vector `ξ`
-from the vector space `M` at point `p` from the underlying [`Manifold`](@ref).
-
-The function can be used for example to transform vectors
-from the cotangent bundle to vectors from the tangent bundle
-$♯ : T^{*}\mathcal M → T\mathcal M$
-"""
-function sharp(M::Manifold, p, ξ::FVector)
-    X = allocate_result(M, sharp, ξ, p)
-    return sharp!(M, X, p, ξ)
-end
-
-function sharp!(M::Manifold, X::FVector, p, ξ::FVector)
-    return error(
-        "sharp! not implemented for vector bundle fibers space " *
-        "of type $(typeof(M)), vector of type $(typeof(X)), point of " *
-        "type $(typeof(p)) and vector of type $(typeof(ξ)).",
-    )
-end
-
-@decorator_transparent_signature sharp!(
-    M::AbstractDecoratorManifold,
-    X::TFVector,
-    p,
-    ξ::CoTFVector,
-)
-
-Base.show(io::IO, ::TangentSpaceType) = print(io, "TangentSpace")
-Base.show(io::IO, ::CotangentSpaceType) = print(io, "CotangentSpace")
 function Base.show(io::IO, tpt::TensorProductType)
     return print(io, "TensorProductType(", join(tpt.spaces, ", "), ")")
 end
@@ -862,9 +800,6 @@ end
 Base.show(io::IO, vb::VectorBundle) = print(io, "VectorBundle($(vb.type), $(vb.manifold))")
 Base.show(io::IO, vb::TangentBundle) = print(io, "TangentBundle($(vb.manifold))")
 Base.show(io::IO, vb::CotangentBundle) = print(io, "CotangentBundle($(vb.manifold))")
-
-allocate(x::FVector) = FVector(x.type, allocate(x.data))
-allocate(x::FVector, ::Type{T}) where {T} = FVector(x.type, allocate(x.data, T))
 
 """
     allocate_result(B::VectorBundleFibers, f, x...)
@@ -895,8 +830,6 @@ for manifold `M` on given arguments (passed at a tuple).
 function allocate_result_type(::VectorBundleFibers, f, args::NTuple{N,Any}) where {N}
     return typeof(mapreduce(eti -> one(number_eltype(eti)), +, args))
 end
-
-Base.size(x::FVector) = size(x.data)
 
 function submanifold_component(M::Manifold, x::FVector, i::Val)
     return submanifold_component(M, x.data, i)

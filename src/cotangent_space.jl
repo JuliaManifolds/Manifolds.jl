@@ -15,16 +15,28 @@ function (ξ::RieszRepresenterCotangentVector)(Y)
     return inner(ξ.manifold, ξ.p, ξ.X, Y)
 end
 
+@decorator_transparent_signature flat!(
+    M::AbstractDecoratorManifold,
+    ξ::CoTFVector,
+    p,
+    X::TFVector,
+)
 
+@doc raw"""
+    flat(M::Manifold, p, X)
+
+Compute the flat isomorphism (one of the musical isomorphisms) of tangent vector `X`
+from the vector space of type `M` at point `p` from the underlying [`Manifold`](@ref).
+
+The function can be used for example to transform vectors
+from the tangent bundle to vectors from the cotangent bundle
+$♭ : T\mathcal M → T^{*}\mathcal M$
+"""
 flat(M::Manifold, p, X) = RieszRepresenterCotangentVector(M, p, X)
-flat(M::Manifold, p, X::TFVector{<:Any,Nothing}) = CoTFVector(flat(M, p, X.data))
 function flat(M::Manifold, p, X::TFVector{<:Any,<:AbstractBasis})
     return CoTFVector(X.data, dual_basis(M, p, X.basis))
 end
 
-function flat!(M::Manifold, ξ::CoTFVector{<:Any,Nothing}, p, X::TFVector{<:Any,Nothing})
-    return flat!(M, ξ.data, p, X.data)
-end
 function flat!(
     M::Manifold,
     ξ::CoTFVector{<:Any,<:AbstractBasis},
@@ -73,15 +85,30 @@ function get_vector!(
     return ξr
 end
 
+@doc raw"""
+    sharp(M::Manifold, p, ξ)
+
+Compute the sharp isomorphism (one of the musical isomorphisms) of vector `ξ`
+from the vector space `M` at point `p` from the underlying [`Manifold`](@ref).
+
+The function can be used for example to transform vectors
+from the cotangent bundle to vectors from the tangent bundle
+$♯ : T^{*}\mathcal M → T\mathcal M$
+"""
+sharp(::Manifold, p, ξ)
+
 sharp(::Manifold, p, ξ::RieszRepresenterCotangentVector) = ξ.X
-sharp(M::Manifold, p, X::CoTFVector{<:Any,Nothing}) = TFVector(sharp(M, p, X.data))
 function sharp(M::Manifold, p, X::TFVector{<:Any,<:AbstractBasis})
     return TFVector(X.data, dual_basis(M, p, X.basis))
 end
 
-function sharp!(M::Manifold, X::TFVector{<:Any,Nothing}, p, ξ::CoTFVector{<:Any,Nothing})
-    return sharp!(M, X.data, p, ξ.data)
-end
+@decorator_transparent_signature sharp!(
+    M::AbstractDecoratorManifold,
+    X::TFVector,
+    p,
+    ξ::CoTFVector,
+)
+
 function sharp!(
     M::Manifold,
     X::TFVector{<:Any,<:AbstractBasis},
