@@ -160,7 +160,7 @@ end
         M = MetricManifold(BaseManifold{2}(), NotImplementedMetric())
         A = Manifolds.get_default_atlas(M)
         p = [3, 4]
-        i = Manifolds.select_chart(M, A, p)
+        i = Manifolds.get_chart_index(M, A, p)
         @test_throws ErrorException local_metric(M, A, i, p)
     end
     @testset "scaled Euclidean metric" begin
@@ -180,7 +180,7 @@ end
         @test base_manifold(M) === E
         @test metric(M) === g
 
-        i_zeros = Manifolds.select_chart(M, A, zeros(3))
+        i_zeros = Manifolds.get_chart_index(M, A, zeros(3))
         @test_throws ErrorException local_metric_jacobian(E, A, i_zeros, zeros(3))
         @test_throws ErrorException christoffel_symbols_second_jacobian(
             E,
@@ -192,7 +192,7 @@ end
         for vtype in (Vector, MVector{n})
             p, X, Y = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
 
-            chart_p = Manifolds.select_chart(M, A, p)
+            chart_p = Manifolds.get_chart_index(M, A, p)
 
             @test check_manifold_point(M, p) == check_manifold_point(E, p)
             @test check_tangent_vector(M, p, X) == check_tangent_vector(E, p, X)
@@ -260,7 +260,7 @@ end
 
         for vtype in (Vector, MVector{n})
             p = vtype([θ, ϕ])
-            chart_p = Manifolds.select_chart(M, A, p)
+            chart_p = Manifolds.get_chart_index(M, A, p)
             G = Diagonal(vtype([1, sin(θ)^2])) .* r^2
             invG = Diagonal(vtype([1, 1 / sin(θ)^2])) ./ r^2
             X, Y = normalize(randn(n)), normalize(randn(n))
@@ -404,7 +404,7 @@ end
         @test is_tangent_vector(MM, p, X) === is_tangent_vector(M, p, X)
 
         A = Manifolds.get_default_atlas(MM2)
-        chart_p = Manifolds.select_chart(MM2, A, p)
+        chart_p = Manifolds.get_chart_index(MM2, A, p)
         @test_throws ErrorException local_metric(MM2, A, chart_p, p)
         @test_throws ErrorException local_metric_jacobian(MM2, A, chart_p, p)
         @test_throws ErrorException christoffel_symbols_second_jacobian(MM2, A, chart_p, p)

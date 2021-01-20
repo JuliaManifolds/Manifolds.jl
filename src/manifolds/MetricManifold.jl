@@ -332,7 +332,7 @@ exp(::MetricManifold, ::Any...)
 @decorator_transparent_fallback function exp!(M::MetricManifold, q, p, X)
     tspan = (0.0, 1.0)
     A = get_default_atlas(M)
-    i = select_chart(M, A, p)
+    i = get_chart_index(M, A, p)
     sol = solve_exp_ode(M, A, i, p, X, tspan; dense=false, saveat=[1.0])
     n = length(p)
     return copyto!(q, sol.u[1][(n + 1):end])
@@ -479,7 +479,7 @@ inner(::MetricManifold, ::Any, ::Any, ::Any)
 
 function inner__intransparent(M::MMT, p, X, Y) where {MMT<:MetricManifold}
     A = get_default_atlas(M)
-    i = select_chart(M, A, p)
+    i = get_chart_index(M, A, p)
     return dot(X, local_metric(M, A, i, p) * Y)
 end
 function inner(
@@ -489,7 +489,7 @@ function inner(
     Y,
 ) where {MMT<:MetricManifold}
     A = get_default_atlas(B.manifold)
-    i = select_chart(B.manifold, A, p)
+    i = get_chart_index(B.manifold, A, p)
     Ginv = inverse_local_metric(B.manifold, A, i, p)
     return dot(X, Ginv * Y)
 end
