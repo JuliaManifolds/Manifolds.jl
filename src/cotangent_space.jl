@@ -69,7 +69,12 @@ function get_coordinates!(
     return v
 end
 
-function get_vector(M::Manifold, p, v, ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType}) where {𝔽}
+function get_vector(
+    M::Manifold,
+    p,
+    v,
+    ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+) where {𝔽}
     X = get_vector(M, p, v, DefaultOrthonormalBasis{𝔽}())
     return RieszRepresenterCotangentVector(M, p, X)
 end
