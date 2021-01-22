@@ -267,13 +267,25 @@ For $\mathrm{SO}(n)$ where $n ≥ 4$, the additional elements of $X^i$ are
 $X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
 """
 get_coordinates(::Rotations, ::Any...)
-get_coordinates(::Rotations{2}, p, X, ::DefaultOrthogonalBasis) = [X[2]]
+get_coordinates(::Rotations{2}, p, X, ::DefaultOrthogonalBasis{ℝ,TangentSpaceType}) = [X[2]]
 
-function get_coordinates!(::Rotations{2}, Xⁱ, p, X, ::DefaultOrthogonalBasis)
+function get_coordinates!(
+    ::Rotations{2},
+    Xⁱ,
+    p,
+    X,
+    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
+)
     Xⁱ[1] = X[2]
     return Xⁱ
 end
-function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthogonalBasis) where {N}
+function get_coordinates!(
+    M::Rotations{N},
+    Xⁱ,
+    p,
+    X,
+    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
+) where {N}
     @inbounds begin
         Xⁱ[1] = X[3, 2]
         Xⁱ[2] = X[1, 3]
@@ -287,7 +299,13 @@ function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthogonalBasis
     end
     return Xⁱ
 end
-function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthonormalBasis) where {N}
+function get_coordinates!(
+    M::Rotations{N},
+    Xⁱ,
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+) where {N}
     T = Base.promote_eltype(p, X)
     get_coordinates!(M, Xⁱ, p, X, DefaultOrthogonalBasis())
     Xⁱ .*= sqrt(T(2))
@@ -295,7 +313,7 @@ function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthonormalBasi
 end
 
 @doc raw"""
-    get_vector(M::Rotations, p, Xⁱ, B:: DefaultOrthogonalBasis)
+    get_vector(M::Rotations, p, Xⁱ, B::DefaultOrthogonalBasis)
 
 Convert the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
 group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. See
@@ -303,10 +321,22 @@ group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. S
 """
 get_vector(::Rotations, ::Any...)
 
-function get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultOrthogonalBasis)
+function get_vector!(
+    M::Rotations{2},
+    X,
+    p,
+    Xⁱ,
+    B::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
+)
     return get_vector!(M, X, p, Xⁱ[1], B)
 end
-function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultOrthogonalBasis)
+function get_vector!(
+    M::Rotations{2},
+    X,
+    p,
+    Xⁱ::Real,
+    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
+)
     @assert length(X) == 4
     @inbounds begin
         X[1] = 0
@@ -316,7 +346,13 @@ function get_vector!(M::Rotations{2}, X, p, Xⁱ::Real, ::DefaultOrthogonalBasis
     end
     return X
 end
-function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultOrthogonalBasis) where {N}
+function get_vector!(
+    M::Rotations{N},
+    X,
+    p,
+    Xⁱ,
+    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
+) where {N}
     @assert size(X) == (N, N)
     @assert length(Xⁱ) == manifold_dimension(M)
     @inbounds begin
@@ -341,7 +377,7 @@ function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultOrthogonalBasis) wher
     end
     return X
 end
-function get_vector!(M::Rotations, X, p, Xⁱ, B::DefaultOrthonormalBasis)
+function get_vector!(M::Rotations, X, p, Xⁱ, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
     T = Base.promote_eltype(p, X)
     get_vector!(M, X, p, Xⁱ, DefaultOrthogonalBasis())
     X ./= sqrt(T(2))

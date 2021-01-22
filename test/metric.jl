@@ -75,11 +75,31 @@ end
 function Manifolds.vector_transport_to!(::BaseManifold, Y, p, X, q, ::ParallelTransport)
     return (Y .= X)
 end
-function Manifolds.get_basis(::BaseManifold{N}, p, B::DefaultOrthonormalBasis) where {N}
+function Manifolds.get_basis(
+    ::BaseManifold{N},
+    p,
+    B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType},
+) where {N}
     return CachedBasis(B, [(Matrix{eltype(p)}(I, N, N)[:, i]) for i in 1:N])
 end
-Manifolds.get_coordinates!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
-Manifolds.get_vector!(::BaseManifold, Y, p, X, ::DefaultOrthonormalBasis) = (Y .= X)
+function Manifolds.get_coordinates!(
+    ::BaseManifold,
+    Y,
+    p,
+    X,
+    ::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType},
+)
+    return Y .= X
+end
+function Manifolds.get_vector!(
+    ::BaseManifold,
+    Y,
+    p,
+    X,
+    ::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType},
+)
+    return Y .= X
+end
 Manifolds.default_metric_dispatch(::BaseManifold, ::DefaultBaseManifoldMetric) = Val(true)
 function Manifolds.projected_distribution(M::BaseManifold, d)
     return ProjectedPointDistribution(M, d, project!, rand(d))
@@ -455,11 +475,11 @@ end
         @test coY(X) ≈ inner(M, p, X, Y)
         cotspace = CotangentBundleFibers(M)
         cotspace2 = CotangentBundleFibers(MM)
-        @test cov.data ≈ 2 * X
-        @test inner(M, p, X, Y) ≈ inner(cotspace, p, cov.data, cow.data)
-        @test inner(MM, p, X, Y) ≈ inner(cotspace, p, cov.data, cow.data)
-        @test inner(MM, p, X, Y) ≈ inner(cotspace2, p, cov.data, cow.data)
-        @test sharp(M, p, cov).data ≈ X
+        @test coX.X ≈ X
+        @test inner(M, p, X, Y) ≈ inner(cotspace, p, coX, coY)
+        @test inner(MM, p, X, Y) ≈ inner(cotspace, p, coX, coY)
+        @test inner(MM, p, X, Y) ≈ inner(cotspace2, p, coX, coY)
+        @test sharp(M, p, coX) ≈ X
 
         psample = [[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
         Y = pweights([0.5, 0.5])

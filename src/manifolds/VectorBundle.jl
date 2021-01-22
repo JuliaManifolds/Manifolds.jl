@@ -310,10 +310,10 @@ for BT in [
         @invoke_maker 3 AbstractBasis get_basis(M::TangentSpaceAtPoint, p, B::$BT)
     end)
 end
-function get_basis(M::TangentBundleFibers, p, B::AbstractBasis)
+function get_basis(M::TangentBundleFibers, p, B::AbstractBasis{<:Any,TangentSpaceType})
     return get_basis(M.manifold, p, B)
 end
-function get_basis(M::TangentSpaceAtPoint, p, B::AbstractBasis)
+function get_basis(M::TangentSpaceAtPoint, p, B::AbstractBasis{<:Any,TangentSpaceType})
     return get_basis(M.fiber.manifold, M.point, B)
 end
 
@@ -522,12 +522,7 @@ function inner(B::VectorBundleFibers, p, X, Y)
 end
 inner(B::VectorBundleFibers{<:TangentSpaceType}, p, X, Y) = inner(B.manifold, p, X, Y)
 function inner(B::VectorBundleFibers{<:CotangentSpaceType}, p, X, Y)
-    return inner(
-        B.manifold,
-        p,
-        sharp(B.manifold, p, FVector(CotangentSpace, X)).data,
-        sharp(B.manifold, p, FVector(CotangentSpace, Y)).data,
-    )
+    return inner(B.manifold, p, sharp(B.manifold, p, X), sharp(B.manifold, p, Y))
 end
 @doc raw"""
     inner(B::VectorBundle, p, X, Y)

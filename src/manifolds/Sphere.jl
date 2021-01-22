@@ -216,7 +216,13 @@ denotes the Frobenius inner product, the formula for $Y$ is
 """
 get_coordinates(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates!(M::AbstractSphere{ℝ}, Y, p, X, ::DefaultOrthonormalBasis{ℝ})
+function get_coordinates!(
+    M::AbstractSphere{ℝ},
+    Y,
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+)
     n = manifold_dimension(M)
     p1 = p[1]
     cosθ = abs(p1)
@@ -243,7 +249,13 @@ Y = X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\rangle
 """
 get_vector(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_vector!(M::AbstractSphere{ℝ}, Y, p, X, ::DefaultOrthonormalBasis{ℝ})
+function get_vector!(
+    M::AbstractSphere{ℝ},
+    Y,
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+)
     n = manifold_dimension(M)
     p1 = p[1]
     cosθ = abs(p1)

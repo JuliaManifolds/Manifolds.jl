@@ -179,11 +179,15 @@ exp(::Euclidean, ::Any...)
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 
-function get_basis(M::Euclidean, p, B::DefaultOrthonormalBasis{ℝ})
+function get_basis(M::Euclidean, p, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     return CachedBasis(B, vecs)
 end
-function get_basis(M::Euclidean{<:Tuple,ℂ}, p, B::DefaultOrthonormalBasis{ℂ})
+function get_basis(
+    M::Euclidean{<:Tuple,ℂ},
+    p,
+    B::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
+)
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     return CachedBasis(B, [vecs; im * vecs])
 end
@@ -193,7 +197,7 @@ function get_basis(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates!(M::Euclidean, Y, p, X, B::DefaultOrDiagonalizingBasis{ℝ})
+function get_coordinates!(M::Euclidean, Y, p, X, ::DefaultOrDiagonalizingBasis{ℝ})
     S = representation_size(M)
     PS = prod(S)
     copyto!(Y, reshape(X, PS))
@@ -212,12 +216,12 @@ function get_coordinates!(
     return Y
 end
 
-function get_vector!(M::Euclidean, Y, p, X, B::DefaultOrDiagonalizingBasis{ℝ})
+function get_vector!(M::Euclidean, Y, p, X, ::DefaultOrDiagonalizingBasis{ℝ})
     S = representation_size(M)
     Y .= reshape(X, S)
     return Y
 end
-function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, B::DefaultOrDiagonalizingBasis{ℂ})
+function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, p, X, ::DefaultOrDiagonalizingBasis{ℂ})
     S = representation_size(M)
     N = div(length(X), 2)
     Y .= reshape(X[1:N] + im * X[(N + 1):end], S)

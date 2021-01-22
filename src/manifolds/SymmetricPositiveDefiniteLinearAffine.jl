@@ -95,7 +95,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -115,7 +115,7 @@ function get_vector!(
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (div(N * (N + 1), 2),)

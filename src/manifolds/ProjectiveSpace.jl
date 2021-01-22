@@ -205,7 +205,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ},
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {𝔽}
     n = div(manifold_dimension(M), real_dimension(𝔽))
     z = p[1]
@@ -240,7 +240,7 @@ function get_vector!(
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ},
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {𝔽}
     n = div(manifold_dimension(M), real_dimension(𝔽))
     z = p[1]

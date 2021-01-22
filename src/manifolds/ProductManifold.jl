@@ -25,8 +25,11 @@ ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
 const PRODUCT_BASIS_LIST = [
     VeeOrthogonalBasis,
     DefaultBasis,
+    DefaultBasis{<:Any,TangentSpaceType},
     DefaultOrthogonalBasis,
+    DefaultOrthogonalBasis{<:Any,TangentSpaceType},
     DefaultOrthonormalBasis,
+    DefaultOrthonormalBasis{<:Any,TangentSpaceType},
     ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
     ProjectedOrthonormalBasis{:svd,ℝ},
 ]

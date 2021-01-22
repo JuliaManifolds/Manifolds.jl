@@ -239,7 +239,7 @@ function exp!(M::Hyperbolic, q, p, X)
     return copyto!(q, cosh(vn) * p + sinh(vn) / vn * X)
 end
 
-function get_basis(M::Hyperbolic, p, B::DefaultOrthonormalBasis)
+function get_basis(M::Hyperbolic, p, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
     n = manifold_dimension(M)
     V = [
         _hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for
@@ -284,7 +284,13 @@ the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hype
 """
 get_coordinates(M::Hyperbolic, p, X, B::DefaultOrthonormalBasis)
 
-function get_coordinates!(M::Hyperbolic, c, p, X, B::DefaultOrthonormalBasis)
+function get_coordinates!(
+    M::Hyperbolic,
+    c,
+    p,
+    X,
+    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+)
     c = get_coordinates!(M, c, p, X, get_basis(M, p, B))
     return c
 end
@@ -302,7 +308,7 @@ the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hype
 """
 get_vector(M::Hyperbolic, p, c, ::DefaultOrthonormalBasis)
 
-function get_vector!(M::Hyperbolic, X, p, c, B::DefaultOrthonormalBasis)
+function get_vector!(M::Hyperbolic, X, p, c, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
     X = get_vector!(M, X, p, c, get_basis(M, p, B))
     return X
 end
