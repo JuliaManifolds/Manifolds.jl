@@ -482,17 +482,6 @@ function inner__intransparent(M::MMT, p, X, Y) where {MMT<:MetricManifold}
     i = get_chart_index(M, A, p)
     return dot(X, local_metric(M, A, i, p) * Y)
 end
-function inner(
-    B::VectorBundleFibers{<:CotangentSpaceType,MMT},
-    p,
-    X,
-    Y,
-) where {MMT<:MetricManifold}
-    A = get_default_atlas(B.manifold)
-    i = get_chart_index(B.manifold, A, p)
-    Ginv = inverse_local_metric(B.manifold, A, i, p)
-    return dot(X, Ginv * Y)
-end
 
 @doc raw"""
     local_metric(M::MetricManifold, A::AbstractAtlas, i, p)
