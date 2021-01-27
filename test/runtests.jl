@@ -52,6 +52,7 @@ include("utils.jl")
     include_test("symmetric_positive_definite.jl")
     include_test("symmetric_positive_semidefinite_fixed_rank.jl")
 
+    include_test("essential_manifold.jl")
     include_test("multinomial_matrices.jl")
     include_test("oblique.jl")
     include_test("torus.jl")

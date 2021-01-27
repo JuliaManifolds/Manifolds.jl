@@ -559,7 +559,7 @@ Return the dimension of the manifold $\mathrm{SO}(n)$, i.e.
 \dim_{\mathrm{SO}(n)} = \frac{n(n-1)}{2}.
 ```
 """
-manifold_dimension(M::Rotations{N}) where {N} = div(N * (N - 1), 2)
+manifold_dimension(::Rotations{N}) where {N} = div(N * (N - 1), 2)
 
 """
     mean(
@@ -640,7 +640,7 @@ check with `check_det = false`.
 """
 project(::Rotations, ::Any)
 
-function project!(M::Rotations{N}, q, p; check_det=true) where {N}
+function project!(::Rotations{N}, q, p; check_det=true) where {N}
     F = svd(p)
     copyto!(q, F.U * F.Vt)
     if check_det && det(q) < 0
