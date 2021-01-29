@@ -307,9 +307,15 @@ for BT in [
     eval(quote
         @invoke_maker 3 AbstractBasis get_basis(M::VectorBundle, p, B::$BT)
     end)
-    eval(quote
-        @invoke_maker 3 AbstractBasis{<:Any,TangentSpaceType} get_basis(M::TangentSpaceAtPoint, p, B::$BT)
-    end)
+    eval(
+        quote
+            @invoke_maker 3 AbstractBasis{<:Any,TangentSpaceType} get_basis(
+                M::TangentSpaceAtPoint,
+                p,
+                B::$BT,
+            )
+        end,
+    )
 end
 function get_basis(M::TangentBundleFibers, p, B::AbstractBasis{<:Any,TangentSpaceType})
     return get_basis(M.manifold, p, B)
@@ -431,10 +437,22 @@ function get_vector!(
     )
     return Y
 end
-function get_vector!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncached_bases{TangentSpaceType})
+function get_vector!(
+    M::TangentBundleFibers,
+    Y,
+    p,
+    X,
+    B::ManifoldsBase.all_uncached_bases{TangentSpaceType},
+)
     return get_vector!(M.manifold, Y, p, X, B)
 end
-function get_vector!(M::TangentSpaceAtPoint, Y, p, X, B::ManifoldsBase.all_uncached_bases{TangentSpaceType})
+function get_vector!(
+    M::TangentSpaceAtPoint,
+    Y,
+    p,
+    X,
+    B::ManifoldsBase.all_uncached_bases{TangentSpaceType},
+)
     return get_vector!(M.fiber.manifold, Y, M.point, X, B)
 end
 for BT in [

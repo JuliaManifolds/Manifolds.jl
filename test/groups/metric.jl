@@ -106,7 +106,8 @@ invariant_metric_dispatch(::TestDefaultInvariantMetricManifold, ::RightAction) =
         @test_broken norm(G, p, X) ≈ sqrt(inner(G, p, X, X))
 
         G = MetricManifold(SO3, rmetric)
-        @test_broken inner(G, p, X, Y) ≈ dot(p * X * p', Diagonal([1.0, 2.0, 3.0]) * p * Y * p')
+        @test_broken inner(G, p, X, Y) ≈
+                     dot(p * X * p', Diagonal([1.0, 2.0, 3.0]) * p * Y * p')
         @test_broken norm(G, p, X) ≈ sqrt(inner(G, p, X, X))
     end
 
