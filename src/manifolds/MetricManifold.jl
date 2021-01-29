@@ -477,12 +477,6 @@ where $G_p$ is the loal matrix representation of the [`Metric`](@ref) `G`.
 """
 inner(::MetricManifold, ::Any, ::Any, ::Any)
 
-function inner__intransparent(M::MMT, p, X, Y) where {MMT<:MetricManifold}
-    A = get_default_atlas(M)
-    i = get_chart_index(M, A, p)
-    return dot(X, local_metric(M, A, i, p) * Y)
-end
-
 @doc raw"""
     local_metric(M::MetricManifold, A::AbstractAtlas, i, p)
 

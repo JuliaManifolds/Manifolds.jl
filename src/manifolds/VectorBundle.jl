@@ -300,6 +300,7 @@ end
 
 for BT in [
     DefaultOrthonormalBasis,
+    DefaultOrthonormalBasis{<:Any,TangentSpaceType},
     ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
     ProjectedOrthonormalBasis{:svd,ℝ},
 ]
@@ -307,7 +308,7 @@ for BT in [
         @invoke_maker 3 AbstractBasis get_basis(M::VectorBundle, p, B::$BT)
     end)
     eval(quote
-        @invoke_maker 3 AbstractBasis get_basis(M::TangentSpaceAtPoint, p, B::$BT)
+        @invoke_maker 3 AbstractBasis{<:Any,TangentSpaceType} get_basis(M::TangentSpaceAtPoint, p, B::$BT)
     end)
 end
 function get_basis(M::TangentBundleFibers, p, B::AbstractBasis{<:Any,TangentSpaceType})
@@ -360,7 +361,7 @@ for BT in [
     )
     eval(
         quote
-            @invoke_maker 5 AbstractBasis get_coordinates!(
+            @invoke_maker 5 AbstractBasis{<:Any,TangentSpaceType} get_coordinates!(
                 M::TangentSpaceAtPoint,
                 Y,
                 p,
@@ -384,7 +385,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::ManifoldsBase.all_uncached_bases,
+    B::ManifoldsBase.all_uncached_bases{TangentSpaceType},
 )
     return get_coordinates!(M.manifold, Y, p, X, B)
 end
@@ -393,7 +394,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::ManifoldsBase.all_uncached_bases,
+    B::ManifoldsBase.all_uncached_bases{TangentSpaceType},
 )
     return get_coordinates!(M.fiber.manifold, Y, M.point, X, B)
 end
@@ -430,10 +431,10 @@ function get_vector!(
     )
     return Y
 end
-function get_vector!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncached_bases)
+function get_vector!(M::TangentBundleFibers, Y, p, X, B::ManifoldsBase.all_uncached_bases{TangentSpaceType})
     return get_vector!(M.manifold, Y, p, X, B)
 end
-function get_vector!(M::TangentSpaceAtPoint, Y, p, X, B::ManifoldsBase.all_uncached_bases)
+function get_vector!(M::TangentSpaceAtPoint, Y, p, X, B::ManifoldsBase.all_uncached_bases{TangentSpaceType})
     return get_vector!(M.fiber.manifold, Y, M.point, X, B)
 end
 for BT in [
@@ -446,7 +447,7 @@ for BT in [
 ]
     eval(
         quote
-            @invoke_maker 5 AbstractBasis get_vector!(
+            @invoke_maker 5 AbstractBasis{<:Any,TangentSpaceType} get_vector!(
                 M::TangentSpaceAtPoint,
                 Y,
                 p,
