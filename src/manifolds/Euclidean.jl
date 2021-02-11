@@ -20,7 +20,10 @@ The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is ``k \dim_ℝ 𝔽``, where ``\dim_ℝ 𝔽`` is the
 [`real_dimension`](@ref) of the field ``𝔽``.
 
-For an `ℝ`-, `ℂ`-valued  real- or complex-valued
+    Euclidean(; field=ℝ)
+
+Generate the 1D Euclidean manifold for an `ℝ`-, `ℂ`-valued  real- or complex-valued immutable
+values (in contrast to 1-element arrays from the constructor above).
 """
 struct Euclidean{N,𝔽} <: Manifold{𝔽} where {N<:Tuple} end
 
