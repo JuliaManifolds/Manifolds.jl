@@ -133,8 +133,8 @@ include("utils.jl")
             @testset "Type $T" begin
                 M = (T <: Complex) ? CM : RM
                 pts = convert.(Ref(T), [1.0, 4.0, 2.0])
-                @test embed(M,pts[1]) == pts[1]
-                @test project(M,pts[1]) == pts[1]
+                @test embed(M, pts[1]) == pts[1]
+                @test project(M, pts[1]) == pts[1]
                 @test retract(M, pts[1], pts[2]) == exp(M, pts[1], pts[2])
                 test_manifold(
                     M,
