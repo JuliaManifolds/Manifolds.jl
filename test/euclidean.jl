@@ -124,6 +124,30 @@ include("utils.jl")
         end
     end
 
+    number_types = [Float64, ComplexF64]
+    TEST_FLOAT32 && push!(number_types, Float32)
+    @testset "(Nonmutating) Real and Complex Numbers" begin
+        RM = Euclidean()
+        CM = Euclidean(; field=ℂ)
+        for T in number_types
+            @testset "Type $T" begin
+                pts = convert.(Ref(T), [1.0, 4.0, 2.0])
+                test_manifold(
+                    T <: Complex ? CM : RM,
+                    pts,
+                    test_forward_diff=false,
+                    test_reverse_diff=false,
+                    test_vector_spaces=false,
+                    test_project_tangent=true,
+                    test_musical_isomorphisms=true,
+                    test_default_vector_transport=true,
+                    test_vee_hat=false,
+                    is_mutating=false,
+                )
+            end
+        end
+    end
+
     @testset "hat/vee" begin
         E = Euclidean(3, 2)
         p = collect(reshape(1.0:6.0, (3, 2)))
