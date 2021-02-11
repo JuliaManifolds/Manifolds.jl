@@ -135,7 +135,7 @@ distance(::Euclidean{Tuple{}}, p::T, q::T) where {T<:Number} = abs(p - q)
 Embed the point `p` in `M`. Equivalent to an identity map.
 """
 embed(::Euclidean, p)
-ember(::Euclidean{Tuple{}}, p) = p
+embed(::Euclidean{Tuple{}}, p) = p
 
 """
     embed(M::Euclidean, p, X)
@@ -387,19 +387,6 @@ function Statistics.median(
     kwargs...,
 )
     return median(x, w)
-end
-
-function Statistics.median!(::Euclidean{Tuple{1}}, p, x::AbstractVector; kwargs...)
-    return copyto!(p, [median(reduce(vcat, x))])
-end
-function Statistics.median!(
-    ::Euclidean{Tuple{1}},
-    p,
-    x::AbstractVector,
-    w::AbstractWeights;
-    kwargs...,
-)
-    return copyto!(p, [median(reduce(vcat, x), w)])
 end
 
 mid_point(::Euclidean, p1, p2) = (p1 .+ p2) ./ 2

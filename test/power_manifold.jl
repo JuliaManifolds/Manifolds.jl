@@ -275,7 +275,7 @@ Random.seed!(42)
                 rand_tvector_atol_multiplier=5.0,
                 retraction_atol_multiplier=12,
                 is_tangent_atol_multiplier=12.0,
-                exp_log_atol_multiplier=2e2 * prod(power_dimensions(Mrn1)),
+                exp_log_atol_multiplier=4e2 * prod(power_dimensions(Mrn1)),
             )
         end
     end

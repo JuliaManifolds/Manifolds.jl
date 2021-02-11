@@ -131,9 +131,13 @@ include("utils.jl")
         CM = Euclidean(; field=ℂ)
         for T in number_types
             @testset "Type $T" begin
+                M = (T <: Complex) ? CM : RM
                 pts = convert.(Ref(T), [1.0, 4.0, 2.0])
+                @test embed(M,pts[1]) == pts[1]
+                @test project(M,pts[1]) == pts[1]
+                @test retract(M, pts[1], pts[2]) == exp(M, pts[1], pts[2])
                 test_manifold(
-                    T <: Complex ? CM : RM,
+                    M,
                     pts,
                     test_forward_diff=false,
                     test_reverse_diff=false,
