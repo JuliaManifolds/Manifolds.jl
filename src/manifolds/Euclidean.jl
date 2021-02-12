@@ -127,7 +127,7 @@ manifold `M`, i.e. for vectors it's just the norm of the difference, for matrice
 and higher order arrays, the matrix and ternsor Frobenius norm, respectively.
 """
 distance(::Euclidean, p, q) = norm(p .- q)
-distance(::Euclidean{Tuple{}}, p::T, q::T) where {T<:Number} = abs(p - q)
+distance(::Euclidean{Tuple{}}, p::Number, q::Number) = abs(p - q)
 
 """
     embed(M::Euclidean, p)
@@ -183,7 +183,7 @@ Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `p` in 
 ````
 """
 Base.exp(::Euclidean, ::Any...)
-Base.exp(::Euclidean, p::T, q::T) where {T<:Number} = p + q
+Base.exp(::Euclidean, p::Number, q::Number) = p + q
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 
