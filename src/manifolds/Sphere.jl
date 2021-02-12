@@ -471,3 +471,40 @@ function vector_transport_to!(::AbstractSphere, Y, p, X, q, ::ParallelTransport)
     Y .= X .- m .* factor
     return Y
 end
+
+"""
+    StereographicAtlas()
+
+The stereographic atlas of ``S^n`` with only one chart with the singular
+point (-1, 0, ..., 0).
+"""
+struct StereographicAtlas <: AbstractAtlas end
+
+get_chart_index(::Sphere{n,ℝ}, ::StereographicAtlas, ::Any) where {n} = nothing
+
+function get_point_coordinates!(
+    ::Sphere{n,ℝ},
+    x,
+    ::StereographicAtlas,
+    ::Nothing,
+    p,
+) where {n}
+    return x .= p[2:end] ./ (1 + p[1])
+end
+
+function Manifolds.get_point!(
+    ::Sphere{n,ℝ},
+    p,
+    ::Manifolds.StereographicAtlas,
+    ::Nothing,
+    x,
+) where {n}
+    xnorm2 = dot(x, x)
+    p[1] = (1 - xnorm2) / (1 + xnorm2)
+    return p[2:end] .= 2 * x / (xnorm2 + 1)
+end
+
+function local_metric(M::Sphere{n,ℝ}, A::StereographicAtlas, i::Nothing, p) where {n}
+    x = get_point_coordinates(M, A, i, p)
+    return (4 / (1 + dot(x, x))^2) * I
+end

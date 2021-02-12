@@ -49,6 +49,11 @@ function get_point_coordinates(M::Manifold, A::AbstractAtlas, i, p)
     return x
 end
 
+function allocate_result(M::Manifold, f::typeof(get_point_coordinates), p)
+    T = allocate_result_type(M, f, (p,))
+    return allocate(p, T, manifold_dimension(M))
+end
+
 function get_point_coordinates!(M::Manifold, x, A::RetractionAtlas, i, p)
     return get_coordinates!(M, x, i, inverse_retract(M, i, p, A.invretr), A.basis)
 end
@@ -63,6 +68,17 @@ end
 Calculate point at coordinates `x` on manifold `M` in chart from atlas `A` at index `i`.
 """
 get_point(::Manifold, ::AbstractAtlas, ::Any, ::Any)
+
+function get_point(M::Manifold, A::AbstractAtlas, i, x)
+    p = allocate_result(M, get_point, x)
+    get_point!(M, p, A, i, x)
+    return p
+end
+
+function allocate_result(M::Manifold, f::typeof(get_point), x)
+    T = allocate_result_type(M, f, (x,))
+    return allocate(x, T, representation_size(M)...)
+end
 
 function get_point(M::Manifold, A::RetractionAtlas, i, x)
     return retract(M, i, get_vector(M, i, x, A.basis), A.retr)
@@ -154,4 +170,18 @@ function induced_basis(
     ::CotangentSpaceType,
 )
     return dual_basis(A.basis)
+end
+
+# disambiguation 
+function allocate_result(M::PowerManifoldNested, f::typeof(get_point), x)
+    return [allocate_result(M.manifold, f, _access_nested(x, i)) for i in get_iterator(M)]
+end
+function allocate_result(M::PowerManifoldNested, f::typeof(get_point_coordinates), p)
+    return invoke(
+        allocate_result,
+        Tuple{Manifold,typeof(get_point_coordinates),Any},
+        M,
+        f,
+        p,
+    )
 end

@@ -12,8 +12,9 @@ include("utils.jl")
     @test is_default_metric(E, Manifolds.EuclideanMetric())
     @test Manifolds.default_metric_dispatch(E, Manifolds.EuclideanMetric()) === Val{true}()
     p = zeros(3)
-    @test det_local_metric(EM, p) == one(eltype(p))
-    @test log_local_metric_density(EM, p) == zero(eltype(p))
+    A = Manifolds.RetractionAtlas()
+    @test det_local_metric(EM, A, p, p) == one(eltype(p))
+    @test log_local_metric_density(EM, A, p, p) == zero(eltype(p))
     @test project!(E, p, p) == p
     @test embed!(E, p, p) == p
     @test manifold_dimension(Ec) == 2 * manifold_dimension(E)

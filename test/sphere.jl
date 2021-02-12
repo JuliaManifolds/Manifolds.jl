@@ -166,4 +166,14 @@ include("utils.jl")
         @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℂ}
         @test representation_size(M) == (2, 2)
     end
+
+    @testset "StereographicAtlas" begin
+        M = Sphere(2)
+        A = Manifolds.StereographicAtlas()
+        p = randn(3)
+        p ./= norm(p)
+        x = Manifolds.get_point_coordinates(M, A, nothing, p)
+        q = Manifolds.get_point(M, A, nothing, x)
+        @test isapprox(M, p, q)
+    end
 end

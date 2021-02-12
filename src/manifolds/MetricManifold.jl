@@ -533,12 +533,12 @@ falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for
 log(::MetricManifold, ::Any...)
 
 @doc raw"""
-    log_local_metric_density(M::MetricManifold, p)
+    log_local_metric_density(M::MetricManifold, ::RetractionAtlas, i, p)
 
 Return the natural logarithm of the metric density $ρ$ of `M` at `p`, which
 is given by $ρ = \log \sqrt{|\det [g_{ij}]|}$.
 """
-log_local_metric_density(::MetricManifold, ::Any)
+log_local_metric_density(::MetricManifold, ::RetractionAtlas, ::Any, ::Any)
 @decorator_transparent_function :parent function log_local_metric_density(
     M::MetricManifold,
     A::AbstractAtlas,

@@ -110,7 +110,12 @@ function check_tangent_vector(
     return nothing
 end
 
-function det_local_metric(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
+function det_local_metric(
+    ::MetricManifold{𝔽,<:Manifold,EuclideanMetric},
+    ::RetractionAtlas,
+    ::Any,
+    p,
+) where {𝔽}
     return one(eltype(p))
 end
 
@@ -258,13 +263,23 @@ inner(::Euclidean, ::Any...)
 @inline inner(::Euclidean, p, X, Y) = dot(X, Y)
 @inline inner(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p, X, Y) where {𝔽} = dot(X, Y)
 
-function inverse_local_metric(M::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
-    return local_metric(M, p)
+function inverse_local_metric(
+    M::MetricManifold{𝔽,<:Manifold,EuclideanMetric},
+    A::RetractionAtlas,
+    i,
+    p,
+) where {𝔽}
+    return local_metric(M, A, i, p)
 end
 
 default_metric_dispatch(::Euclidean, ::EuclideanMetric) = Val(true)
 
-function local_metric(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
+function local_metric(
+    ::MetricManifold{𝔽,<:Manifold,EuclideanMetric},
+    A::RetractionAtlas,
+    ::Any,
+    p,
+) where {𝔽}
     return Diagonal(ones(SVector{size(p, 1),eltype(p)}))
 end
 
@@ -283,6 +298,8 @@ log!(M::Euclidean, X, p, q) = (X .= q .- p)
 
 function log_local_metric_density(
     ::MetricManifold{𝔽,<:Manifold,EuclideanMetric},
+    ::RetractionAtlas,
+    ::Any,
     p,
 ) where {𝔽}
     return zero(eltype(p))
