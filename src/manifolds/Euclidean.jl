@@ -195,7 +195,7 @@ Transform a tangent vector `X` into a cotangent. Since they can directly be iden
 tangent space of `p` on `M`.
 """
 flat(::Euclidean, ::Any...)
-function flat(::Euclidean{Tuple{}}, ::T, X::TFVector) where {T<:Number}
+function flat(::Euclidean{Tuple{}}, ::Number, X::TFVector)
     return FVector(CotangentSpace, X.data)
 end
 
@@ -295,10 +295,10 @@ function inverse_retract(M::Euclidean{Tuple{}}, x::T, y::T) where {T<:Number}
 end
 function inverse_retract(
     M::Euclidean{Tuple{}},
-    x::T,
-    y::T,
+    x::Number,
+    y::Number,
     ::LogarithmicInverseRetraction,
-) where {T<:Number}
+)
     return log(M, x, y)
 end
 
@@ -312,7 +312,7 @@ which in this case is just
 ````
 """
 Base.log(::Euclidean, ::Any...)
-Base.log(::Euclidean{Tuple{}}, p::T, q::T) where {T<:Number} = q - p
+Base.log(::Euclidean{Tuple{}}, p::Number, q::Number) = q - p
 
 log!(::Euclidean, X, p, q) = (X .= q .- p)
 
@@ -390,7 +390,7 @@ function Statistics.median(
 end
 
 mid_point(::Euclidean, p1, p2) = (p1 .+ p2) ./ 2
-mid_point(::Euclidean{Tuple{}}, p1::T, p2::T) where {T<:Number} = (p1 + p2) / 2
+mid_point(::Euclidean{Tuple{}}, p1::Number, p2::Number) = (p1 + p2) / 2
 
 function mid_point!(::Euclidean, q, p1, p2)
     q .= (p1 .+ p2) ./ 2
@@ -438,7 +438,7 @@ Project an arbitrary point `p` onto the [`Euclidean`](@ref) manifold `M`, which
 is of course just the identity map.
 """
 project(::Euclidean, ::Any)
-project(::Euclidean{Tuple{}}, p::T) where {T<:Number} = p
+project(::Euclidean{Tuple{}}, p::Number) = p
 
 project!(::Euclidean, q, p) = copyto!(q, p)
 
@@ -450,7 +450,7 @@ Project an arbitrary vector `X` into the tangent space of a point `p` on the
 space of `M` can be identified with all of `M`.
 """
 project(::Euclidean, ::Any, ::Any)
-project(::Euclidean{Tuple{}}, ::T, X::T) where {T<:Number} = X
+project(::Euclidean{Tuple{}}, ::Number, X::Number) = X
 
 project!(::Euclidean, Y, p, X) = copyto!(Y, X)
 
@@ -463,15 +463,10 @@ Return the array dimensions required to represent an element on the
 @generated representation_size(::Euclidean{N}) where {N} = size_to_tuple(N)
 @generated representation_size(::Euclidean{Tuple{}}) = ()
 
-function retract(M::Euclidean{Tuple{}}, p::T, q::T) where {T<:Number}
+function retract(M::Euclidean{Tuple{}}, p::Number, q::Number)
     return retract(M, p, q, ExponentialRetraction())
 end
-function retract(
-    M::Euclidean{Tuple{}},
-    p::T,
-    q::T,
-    ::ExponentialRetraction,
-) where {T<:Number}
+function retract(M::Euclidean{Tuple{}}, p::Number, q::Number, ::ExponentialRetraction)
     return exp(M, p, q)
 end
 
@@ -484,7 +479,7 @@ case, this yields just the identity.
 """
 sharp(::Euclidean, ::Any...)
 
-function sharp(::Euclidean{Tuple{}}, ::T, ξ::CoTFVector) where {T<:Number}
+function sharp(::Euclidean{Tuple{}}, ::Number, ξ::CoTFVector)
     return FVector(TangentSpace, ξ.data)
 end
 
@@ -496,11 +491,11 @@ end
 
 function vector_transport_direction(
     M::Euclidean{Tuple{}},
-    p::T,
-    X::T,
-    Y::T,
+    p::Number,
+    X::Number,
+    Y::Number,
     m::AbstractVectorTransportMethod,
-) where {T<:Number}
+)
     q = exp(M, p, Y)
     return vector_transport_to(M, p, X, q, m)
 end
@@ -514,11 +509,11 @@ on the [`Euclidean`](@ref) `M`, which simplifies to the identity.
 vector_transport_to(::Euclidean, ::Any, ::Any, ::Any, ::AbstractVectorTransportMethod)
 function vector_transport_to(
     ::Euclidean{Tuple{}},
-    ::T,
-    X::T,
-    ::T,
+    ::Number,
+    X::Number,
+    ::Number,
     ::AbstractVectorTransportMethod,
-) where {T<:Number}
+)
     return X
 end
 
@@ -549,7 +544,7 @@ for VT in ManifoldsBase.VECTOR_TRANSPORT_DISAMBIGUATION
 end
 
 Statistics.var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
-function Statistics.var(::Euclidean, x::AbstractVector{T}, m::T; kwargs...) where {T}
+function Statistics.var(::Euclidean, x::AbstractVector{<:Number}, m::Number; kwargs...)
     return sum(var(x; mean=m, kwargs...))
 end
 
@@ -560,6 +555,6 @@ Return the zero vector in the tangent space of `x` on the [`Euclidean`](@ref)
 `M`, which here is just a zero filled array the same size as `x`.
 """
 zero_tangent_vector(::Euclidean, ::Any...)
-zero_tangent_vector(::Euclidean{Tuple{}}, p::T) where {T<:Number} = zero(p)
+zero_tangent_vector(::Euclidean{Tuple{}}, p::Number) = zero(p)
 
 zero_tangent_vector!(::Euclidean, v, ::Any) = fill!(v, 0)
