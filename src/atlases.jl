@@ -172,7 +172,29 @@ function induced_basis(
     return dual_basis(A.basis)
 end
 
-# disambiguation 
+"""
+    InducedBasis(vs::VectorSpaceType, A::AbstractAtlas, i)
+
+The basis induced by chart `i` from atlas `A` of vector space of type `vs`.
+"""
+struct InducedBasis{𝔽,VST<:VectorSpaceType,TA<:AbstractAtlas,TI} <: AbstractBasis{𝔽,VST}
+    vs::VST
+    A::TA
+    i::TI
+end
+
+function induced_basis(M::Manifold{𝔽}, A::AbstractAtlas, i, VST::VectorSpaceType) where {𝔽}
+    return InducedBasis{𝔽,typeof(VST),typeof(A),typeof(i)}(VST, A, i)
+end
+
+"""
+    local_metric(M::Manifold, B::InducedBasis, p)
+
+Compute the local metric tensor for vectors expressed in terms of coordinates
+in basis `B` on manifold `M`. The point `p` is not checked.
+"""
+local_metric(::Manifold, ::InducedBasis, ::Any)
+
 function allocate_result(M::PowerManifoldNested, f::typeof(get_point), x)
     return [allocate_result(M.manifold, f, _access_nested(x, i)) for i in get_iterator(M)]
 end

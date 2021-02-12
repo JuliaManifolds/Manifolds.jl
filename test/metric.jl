@@ -17,6 +17,13 @@ function Manifolds.local_metric(
 )
     return Diagonal(1.0:manifold_dimension(M))
 end
+function Manifolds.local_metric(
+    M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
+    A::Manifolds.InducedBasis,
+    p,
+)
+    return Diagonal(1.0:manifold_dimension(M))
+end
 
 struct TestSphere{N,T} <: Manifold{ℝ}
     r::T
@@ -221,8 +228,11 @@ end
             @test inverse_local_metric(M, A, chart_p, p) ≈ invG
             @test det_local_metric(M, A, chart_p, p) ≈ *(1.0:n...)
             @test log_local_metric_density(M, A, chart_p, p) ≈ sum(log.(1.0:n)) / 2
-            @test_broken inner(M, p, X, Y) ≈ dot(X, G * Y) atol = 1e-6
-            @test_broken norm(M, p, X) ≈ sqrt(dot(X, G * X)) atol = 1e-6
+            B = Manifolds.induced_basis(M, A, chart_p, TangentSpace)
+            fX = ManifoldsBase.TFVector(X, B)
+            fY = ManifoldsBase.TFVector(Y, B)
+            @test inner(M, p, fX, fY) ≈ dot(X, G * Y) atol = 1e-6
+            @test norm(M, p, fX) ≈ sqrt(dot(X, G * X)) atol = 1e-6
 
             if VERSION ≥ v"1.1"
                 T = 0:0.5:10

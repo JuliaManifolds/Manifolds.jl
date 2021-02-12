@@ -477,6 +477,12 @@ where $G_p$ is the loal matrix representation of the [`Metric`](@ref) `G`.
 """
 inner(::MetricManifold, ::Any, ::Any, ::Any)
 
+function inner__intransparent(M::MetricManifold, p, X::TFVector, Y::TFVector)
+    X.basis === Y.basis ||
+        error("calculating inner product of vectors from different bases is not supported")
+    return dot(X.data, local_metric(M, X.basis, p) * Y.data)
+end
+
 @doc raw"""
     local_metric(M::MetricManifold, A::AbstractAtlas, i, p)
 
@@ -494,6 +500,17 @@ local_metric(::MetricManifold, ::AbstractAtlas, ::Any, ::Any)
 )
     return error("Local metric not implemented on $(typeof(M)) for point $(typeof(p))")
 end
+
+@doc raw"""
+    local_metric(M::MetricManifold, B::AbstractBasis, p)
+
+Return the local matrix representation at the point `p` of the metric
+tensor $g$ on the [`Manifold`](@ref) `M`, usually written $g_{ij}$.
+The matrix has the property that $g(X, Y)=X^\mathrm{T} [g_{ij}] Y = g_{ij} X^i Y^j$,
+where the latter expression uses Einstein summation convention.
+The metric tensor is such that the formula works for the given [`AbstractBasis`](@ref) `B`.
+"""
+local_metric(::MetricManifold, ::AbstractBasis, ::Any)
 
 @doc raw"""
     local_metric_jacobian(
