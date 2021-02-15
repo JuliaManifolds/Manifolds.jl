@@ -1,7 +1,6 @@
 function solve_exp_ode(
     M::MetricManifold,
-    A::AbstractAtlas,
-    i,
+    B::AbstractBasis,
     x,
     v,
     tspan;
@@ -22,7 +21,7 @@ function solve_exp_ode(
         x = u[ix]
         ddx = allocate(u, Size(n))
         du = allocate(u)
-        Γ = christoffel_symbols_second(M, A, i, x; backend=backend)
+        Γ = christoffel_symbols_second(M, B, x; backend=backend)
         @einsum ddx[k] = -Γ[k, i, j] * dx[i] * dx[j]
         du[iv] .= ddx
         du[ix] .= dx

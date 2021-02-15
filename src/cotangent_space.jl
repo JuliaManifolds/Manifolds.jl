@@ -103,7 +103,7 @@ $♯ : T^{*}\mathcal M → T\mathcal M$
 sharp(::Manifold, p, ξ)
 
 sharp(::Manifold, p, ξ::RieszRepresenterCotangentVector) = ξ.X
-function sharp(M::Manifold, p, X::TFVector{<:Any,<:AbstractBasis})
+function sharp(M::Manifold, p, X::CoTFVector{<:Any,<:AbstractBasis})
     return TFVector(X.data, dual_basis(M, p, X.basis))
 end
 

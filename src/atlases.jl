@@ -183,8 +183,15 @@ struct InducedBasis{𝔽,VST<:VectorSpaceType,TA<:AbstractAtlas,TI} <: AbstractB
     i::TI
 end
 
-function induced_basis(M::Manifold{𝔽}, A::AbstractAtlas, i, VST::VectorSpaceType) where {𝔽}
+function induced_basis(::Manifold{𝔽}, A::AbstractAtlas, i, VST::VectorSpaceType) where {𝔽}
     return InducedBasis{𝔽,typeof(VST),typeof(A),typeof(i)}(VST, A, i)
+end
+
+function dual_basis(M::Manifold{𝔽}, ::Any, B::InducedBasis{𝔽,TangentSpaceType}) where {𝔽}
+    return induced_basis(M, B.A, B.i, CotangentSpace)
+end
+function dual_basis(M::Manifold{𝔽}, ::Any, B::InducedBasis{𝔽,CotangentSpaceType}) where {𝔽}
+    return induced_basis(M, B.A, B.i, TangentSpace)
 end
 
 """

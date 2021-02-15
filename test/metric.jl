@@ -1,7 +1,7 @@
 using FiniteDifferences, ForwardDiff
 using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
-import Manifolds: mean!, median!
+import Manifolds: mean!, median!, InducedBasis, induced_basis, get_chart_index
 
 include("utils.jl")
 
@@ -11,16 +11,15 @@ struct TestEuclideanMetric <: Metric end
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
 function Manifolds.local_metric(
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
-    A::Manifolds.AbstractAtlas,
-    i,
-    p,
+    ::InducedBasis,
+    ::Any,
 )
     return Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.local_metric(
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
-    A::Manifolds.InducedBasis,
-    p,
+    ::InducedBasis,
+    ::Any,
 )
     return Diagonal(1.0:manifold_dimension(M))
 end
@@ -34,8 +33,7 @@ struct TestSphericalMetric <: Metric end
 Manifolds.manifold_dimension(::TestSphere{N}) where {N} = N
 function Manifolds.local_metric(
     M::MetricManifold{ℝ,<:TestSphere,<:TestSphericalMetric},
-    A::Manifolds.AbstractAtlas,
-    i,
+    ::InducedBasis,
     p,
 )
     r = base_manifold(M).r
@@ -65,8 +63,7 @@ Manifolds.injectivity_radius(::BaseManifold, ::Any, ::AbstractRetractionMethod) 
 Manifolds.injectivity_radius(::BaseManifold, ::Any, ::ExponentialRetraction) = Inf
 function Manifolds.local_metric(
     ::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},
-    A::Manifolds.AbstractAtlas,
-    i,
+    ::InducedBasis,
     p,
 ) where {N}
     return 2 * one(p * p')
@@ -187,8 +184,10 @@ end
         M = MetricManifold(BaseManifold{2}(), NotImplementedMetric())
         A = Manifolds.get_default_atlas(M)
         p = [3, 4]
-        i = Manifolds.get_chart_index(M, A, p)
-        @test_throws ErrorException local_metric(M, A, i, p)
+        i = get_chart_index(M, A, p)
+        
+        B = induced_basis(M, A, i, TangentSpace)
+        @test_throws ErrorException local_metric(M, B, p)
     end
     @testset "scaled Euclidean metric" begin
         n = 3
@@ -207,30 +206,31 @@ end
         @test base_manifold(M) === E
         @test metric(M) === g
 
-        i_zeros = Manifolds.get_chart_index(M, A, zeros(3))
-        @test_throws ErrorException local_metric_jacobian(E, A, i_zeros, zeros(3))
+        i_zeros = get_chart_index(M, A, zeros(3))
+        B_i_zeros = induced_basis(M, A, i_zeros, TangentSpace)
+        @test_throws ErrorException local_metric_jacobian(E, B_i_zeros, zeros(3))
         @test_throws ErrorException christoffel_symbols_second_jacobian(
             E,
-            A,
-            i_zeros,
+            B_i_zeros,
             zeros(3),
         )
 
         for vtype in (Vector, MVector{n})
             p, X, Y = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
 
-            chart_p = Manifolds.get_chart_index(M, A, p)
+            chart_p = get_chart_index(M, A, p)
+            B_chart_p = induced_basis(M, A, chart_p, TangentSpace)
 
             @test check_manifold_point(M, p) == check_manifold_point(E, p)
             @test check_tangent_vector(M, p, X) == check_tangent_vector(E, p, X)
 
-            @test local_metric(M, A, chart_p, p) ≈ G
-            @test inverse_local_metric(M, A, chart_p, p) ≈ invG
-            @test det_local_metric(M, A, chart_p, p) ≈ *(1.0:n...)
-            @test log_local_metric_density(M, A, chart_p, p) ≈ sum(log.(1.0:n)) / 2
-            B = Manifolds.induced_basis(M, A, chart_p, TangentSpace)
-            fX = ManifoldsBase.TFVector(X, B)
-            fY = ManifoldsBase.TFVector(Y, B)
+            @test local_metric(M, B_chart_p, p) ≈ G
+            @test inverse_local_metric(M, B_chart_p, p) ≈ invG
+            @test det_local_metric(M, B_chart_p, p) ≈ *(1.0:n...)
+            @test log_local_metric_density(M, B_chart_p, p) ≈ sum(log.(1.0:n)) / 2
+            
+            fX = ManifoldsBase.TFVector(X, B_chart_p)
+            fY = ManifoldsBase.TFVector(Y, B_chart_p)
             @test inner(M, p, fX, fY) ≈ dot(X, G * Y) atol = 1e-6
             @test norm(M, p, fX) ≈ sqrt(dot(X, G * X)) atol = 1e-6
 
@@ -239,37 +239,37 @@ end
                 @test geodesic(M, p, X, T) ≈ [p + t * X for t in T] atol = 1e-6
             end
 
-            @test christoffel_symbols_first(M, A, chart_p, p) ≈ zeros(n, n, n) atol = 1e-6
-            @test christoffel_symbols_second(M, A, chart_p, p) ≈ zeros(n, n, n) atol = 1e-6
-            @test riemann_tensor(M, A, chart_p, p) ≈ zeros(n, n, n, n) atol = 1e-6
-            @test ricci_tensor(M, A, chart_p, p) ≈ zeros(n, n) atol = 1e-6
-            @test ricci_curvature(M, A, chart_p, p) ≈ 0 atol = 1e-6
-            @test gaussian_curvature(M, A, chart_p, p) ≈ 0 atol = 1e-6
-            @test einstein_tensor(M, A, chart_p, p) ≈ zeros(n, n) atol = 1e-6
+            @test christoffel_symbols_first(M, B_chart_p, p) ≈ zeros(n, n, n) atol = 1e-6
+            @test christoffel_symbols_second(M, B_chart_p, p) ≈ zeros(n, n, n) atol = 1e-6
+            @test riemann_tensor(M, B_chart_p, p) ≈ zeros(n, n, n, n) atol = 1e-6
+            @test ricci_tensor(M, B_chart_p, p) ≈ zeros(n, n) atol = 1e-6
+            @test ricci_curvature(M, B_chart_p, p) ≈ 0 atol = 1e-6
+            @test gaussian_curvature(M, B_chart_p, p) ≈ 0 atol = 1e-6
+            @test einstein_tensor(M, B_chart_p, p) ≈ zeros(n, n) atol = 1e-6
 
             fdm = FiniteDifferencesBackend(forward_fdm(2, 1))
-            @test christoffel_symbols_first(M, A, chart_p, p; backend=fdm) ≈ zeros(n, n, n) atol =
+            @test christoffel_symbols_first(M, B_chart_p, p; backend=fdm) ≈ zeros(n, n, n) atol =
                 1e-6
-            @test christoffel_symbols_second(M, A, chart_p, p; backend=fdm) ≈ zeros(n, n, n) atol =
+            @test christoffel_symbols_second(M, B_chart_p, p; backend=fdm) ≈ zeros(n, n, n) atol =
                 1e-6
-            @test riemann_tensor(M, A, chart_p, p; backend=fdm) ≈ zeros(n, n, n, n) atol =
+            @test riemann_tensor(M, B_chart_p, p; backend=fdm) ≈ zeros(n, n, n, n) atol =
                 1e-6
-            @test ricci_tensor(M, A, chart_p, p; backend=fdm) ≈ zeros(n, n) atol = 1e-6
-            @test ricci_curvature(M, A, chart_p, p; backend=fdm) ≈ 0 atol = 1e-6
-            @test gaussian_curvature(M, A, chart_p, p; backend=fdm) ≈ 0 atol = 1e-6
-            @test einstein_tensor(M, A, chart_p, p; backend=fdm) ≈ zeros(n, n) atol = 1e-6
+            @test ricci_tensor(M, B_chart_p, p; backend=fdm) ≈ zeros(n, n) atol = 1e-6
+            @test ricci_curvature(M, B_chart_p, p; backend=fdm) ≈ 0 atol = 1e-6
+            @test gaussian_curvature(M, B_chart_p, p; backend=fdm) ≈ 0 atol = 1e-6
+            @test einstein_tensor(M, B_chart_p, p; backend=fdm) ≈ zeros(n, n) atol = 1e-6
 
             fwd_diff = Manifolds.ForwardDiffBackend()
-            @test christoffel_symbols_first(M, A, chart_p, p; backend=fwd_diff) ≈
+            @test christoffel_symbols_first(M, B_chart_p, p; backend=fwd_diff) ≈
                   zeros(n, n, n) atol = 1e-6
-            @test christoffel_symbols_second(M, A, chart_p, p; backend=fwd_diff) ≈
+            @test christoffel_symbols_second(M, B_chart_p, p; backend=fwd_diff) ≈
                   zeros(n, n, n) atol = 1e-6
-            @test riemann_tensor(M, A, chart_p, p; backend=fwd_diff) ≈ zeros(n, n, n, n) atol =
+            @test riemann_tensor(M, B_chart_p, p; backend=fwd_diff) ≈ zeros(n, n, n, n) atol =
                 1e-6
-            @test ricci_tensor(M, A, chart_p, p; backend=fwd_diff) ≈ zeros(n, n) atol = 1e-6
-            @test ricci_curvature(M, A, chart_p, p; backend=fwd_diff) ≈ 0 atol = 1e-6
-            @test gaussian_curvature(M, A, chart_p, p; backend=fwd_diff) ≈ 0 atol = 1e-6
-            @test einstein_tensor(M, A, chart_p, p; backend=fwd_diff) ≈ zeros(n, n) atol =
+            @test ricci_tensor(M, B_chart_p, p; backend=fwd_diff) ≈ zeros(n, n) atol = 1e-6
+            @test ricci_curvature(M, B_chart_p, p; backend=fwd_diff) ≈ 0 atol = 1e-6
+            @test gaussian_curvature(M, B_chart_p, p; backend=fwd_diff) ≈ 0 atol = 1e-6
+            @test einstein_tensor(M, B_chart_p, p; backend=fwd_diff) ≈ zeros(n, n) atol =
                 1e-6
         end
     end
@@ -290,18 +290,21 @@ end
 
         for vtype in (Vector, MVector{n})
             p = vtype([θ, ϕ])
-            chart_p = Manifolds.get_chart_index(M, A, p)
+            chart_p = get_chart_index(M, A, p)
+            B_p = induced_basis(M, A, chart_p, TangentSpace)
             G = Diagonal(vtype([1, sin(θ)^2])) .* r^2
             invG = Diagonal(vtype([1, 1 / sin(θ)^2])) ./ r^2
             X, Y = normalize(randn(n)), normalize(randn(n))
 
-            @test local_metric(M, A, chart_p, p) ≈ G atol = 1e-6
-            @test inverse_local_metric(M, A, chart_p, p) ≈ invG atol = 1e-6
-            @test det_local_metric(M, A, chart_p, p) ≈ r^4 * sin(θ)^2 atol = 1e-6
-            @test log_local_metric_density(M, A, chart_p, p) ≈ 2 * log(r) + log(sin(θ)) atol =
+            @test local_metric(M, B_p, p) ≈ G atol = 1e-6
+            @test inverse_local_metric(M, B_p, p) ≈ invG atol = 1e-6
+            @test det_local_metric(M, B_p, p) ≈ r^4 * sin(θ)^2 atol = 1e-6
+            @test log_local_metric_density(M, B_p, p) ≈ 2 * log(r) + log(sin(θ)) atol =
                 1e-6
-            @test_broken inner(M, p, X, Y) ≈ dot(X, G * Y) atol = 1e-6
-            @test_broken norm(M, p, X) ≈ sqrt(dot(X, G * X)) atol = 1e-6
+            fX = ManifoldsBase.TFVector(X, B_p)
+            fY = ManifoldsBase.TFVector(Y, B_p)
+            @test inner(M, p, fX, fY) ≈ dot(X, G * Y) atol = 1e-6
+            @test norm(M, p, fX) ≈ sqrt(dot(X, G * X)) atol = 1e-6
 
             pcart = sph_to_cart(θ, ϕ)
             Xcart = [
@@ -310,7 +313,7 @@ end
                 -sin(θ) 0
             ] * X
 
-            if VERSION ≥ v"1.1" && (!Sys.iswindows() || Sys.ARCH == :x86_64)
+            if !Sys.iswindows() || Sys.ARCH == :x86_64
                 @testset "numerically integrated geodesics for $vtype" begin
                     T = 0:0.1:1
                     @test isapprox(
@@ -322,7 +325,7 @@ end
                 end
             end
 
-            Γ₁ = christoffel_symbols_first(M, A, chart_p, p)
+            Γ₁ = christoffel_symbols_first(M, B_p, p)
             for i in 1:n, j in 1:n, k in 1:n
                 if (i, j, k) == (1, 2, 2) || (i, j, k) == (2, 1, 2)
                     @test Γ₁[i, j, k] ≈ r^2 * cos(θ) * sin(θ) atol = 1e-6
@@ -333,7 +336,7 @@ end
                 end
             end
 
-            Γ₂ = christoffel_symbols_second(M, A, chart_p, p)
+            Γ₂ = christoffel_symbols_second(M, B_p, p)
             for l in 1:n, i in 1:n, j in 1:n
                 if (l, i, j) == (1, 2, 2)
                     @test Γ₂[l, i, j] ≈ -cos(θ) * sin(θ) atol = 1e-6
@@ -344,7 +347,7 @@ end
                 end
             end
 
-            R = riemann_tensor(M, A, chart_p, p)
+            R = riemann_tensor(M, B_p, p)
             for l in 1:n, i in 1:n, j in 1:n, k in 1:n
                 if (l, i, j, k) == (2, 1, 1, 2)
                     @test R[l, i, j, k] ≈ -1 atol = 2e-6
@@ -359,11 +362,11 @@ end
                 end
             end
 
-            @test ricci_tensor(M, A, chart_p, p) ≈ G ./ r^2 atol = 2e-6
-            @test ricci_curvature(M, A, chart_p, p) ≈ 2 / r^2 atol = 2e-6
-            @test gaussian_curvature(M, A, chart_p, p) ≈ 1 / r^2 atol = 2e-6
-            @test einstein_tensor(M, A, chart_p, p) ≈
-                  ricci_tensor(M, A, chart_p, p) - gaussian_curvature(M, A, chart_p, p) .* G atol =
+            @test ricci_tensor(M, B_p, p) ≈ G ./ r^2 atol = 2e-6
+            @test ricci_curvature(M, B_p, p) ≈ 2 / r^2 atol = 2e-6
+            @test gaussian_curvature(M, B_p, p) ≈ 1 / r^2 atol = 2e-6
+            @test einstein_tensor(M, B_p, p) ≈
+                  ricci_tensor(M, B_p, p) - gaussian_curvature(M, B_p, p) .* G atol =
                 1e-6
         end
     end
@@ -381,6 +384,7 @@ end
 
         g2 = DefaultBaseManifoldMetric()
         MM2 = MetricManifold(M, g2)
+        A = Manifolds.get_default_atlas(M)
 
         @test (@inferred Manifolds.default_metric_dispatch(MM)) ===
               (@inferred Manifolds.default_metric_dispatch(base_manifold(MM), metric(MM)))
@@ -402,9 +406,14 @@ end
         Y = [0.13, 0.17, 0.19]
         q = allocate(p)
 
+        chart_p = get_chart_index(M, A, p)
+        B_p = induced_basis(M, A, chart_p, TangentSpace)
+        fX = ManifoldsBase.TFVector(X, B_p)
+        fY = ManifoldsBase.TFVector(Y, B_p)
+
         @test inner(M, p, X, Y) == 2 * dot(X, Y)
-        @test_broken inner(MM, p, X, Y) === inner(M, p, X, Y)
-        @test_broken norm(MM, p, X) === norm(M, p, X)
+        @test inner(MM, p, fX, fY) === inner(M, p, X, Y)
+        @test norm(MM, p, fX) === norm(M, p, X)
         @test exp(M, p, X) == p + 2 * X
         @test exp(MM2, p, X) == exp(M, p, X)
         @test exp!(MM, q, p, X) === exp!(M, q, p, X)
@@ -434,10 +443,11 @@ end
         @test is_tangent_vector(MM, p, X) === is_tangent_vector(M, p, X)
 
         A = Manifolds.get_default_atlas(MM2)
-        chart_p = Manifolds.get_chart_index(MM2, A, p)
-        @test_throws ErrorException local_metric(MM2, A, chart_p, p)
-        @test_throws ErrorException local_metric_jacobian(MM2, A, chart_p, p)
-        @test_throws ErrorException christoffel_symbols_second_jacobian(MM2, A, chart_p, p)
+        chart_p = get_chart_index(MM2, A, p)
+        B_p = induced_basis(MM2, A, chart_p, TangentSpace)
+        @test_throws ErrorException local_metric(MM2, B_p, p)
+        @test_throws ErrorException local_metric_jacobian(MM2, B_p, p)
+        @test_throws ErrorException christoffel_symbols_second_jacobian(MM2, B_p, p)
         # MM falls back to nondefault error
         @test_throws MethodError projected_distribution(MM, 1, p)
         @test_throws MethodError projected_distribution(MM, 1)
@@ -479,16 +489,22 @@ end
         @test get_basis(M, p, DefaultOrthonormalBasis()).data ==
               get_basis(MM2, p, DefaultOrthonormalBasis()).data
         @test_throws ErrorException get_basis(MM, p, DefaultOrthonormalBasis())
+
+        fX = ManifoldsBase.TFVector(X, B_p)
+        fY = ManifoldsBase.TFVector(Y, B_p)
         coX = flat(M, p, X)
         coY = flat(M, p, Y)
+        cofX = flat(M, p, fX)
+        cofY = flat(M, p, fY)
         @test coX(X) ≈ norm(M, p, X)^2
         @test coY(X) ≈ inner(M, p, X, Y)
         cotspace = CotangentBundleFibers(M)
         cotspace2 = CotangentBundleFibers(MM)
         @test coX.X ≈ X
         @test inner(M, p, X, Y) ≈ inner(cotspace, p, coX, coY)
-        @test_broken inner(MM, p, X, Y) ≈ inner(cotspace, p, coX, coY)
-        @test_broken inner(MM, p, X, Y) ≈ inner(cotspace2, p, coX, coY)
+        @test inner(MM, p, fX, fY) ≈ inner(cotspace, p, coX, coY)
+        
+        @test inner(MM, p, fX, fY) ≈ inner(cotspace2, p, cofX, cofY)
         @test sharp(M, p, coX) ≈ X
 
         psample = [[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]

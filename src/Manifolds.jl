@@ -17,6 +17,7 @@ import ManifoldsBase:
     decorator_transparent_dispatch,
     default_decorator_dispatch,
     distance,
+    dual_basis,
     embed,
     embed!,
     exp!,

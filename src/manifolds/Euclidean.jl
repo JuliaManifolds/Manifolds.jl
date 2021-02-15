@@ -112,8 +112,7 @@ end
 
 function det_local_metric(
     ::MetricManifold{𝔽,<:Manifold,EuclideanMetric},
-    ::RetractionAtlas,
-    ::Any,
+    ::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
     p,
 ) where {𝔽}
     return one(eltype(p))
