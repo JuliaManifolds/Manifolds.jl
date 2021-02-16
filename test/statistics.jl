@@ -469,7 +469,7 @@ end
 
     @testset "Euclidean statistics" begin
         @testset "N=1" begin
-            M = Euclidean(1)
+            M = Euclidean()
             @testset "scalar" begin
                 x = [1.0, 2.0, 3.0, 4.0]
                 w = pweights(ones(length(x)) / length(x))

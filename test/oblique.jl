@@ -37,6 +37,7 @@ include("utils.jl")
             test_default_vector_transport=true,
             vector_transport_methods=transports,
             basis_types_to_from=basis_types,
+            exp_log_atol_multiplier=1,
         )
     end
 end
