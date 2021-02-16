@@ -492,19 +492,30 @@ function get_point_coordinates!(
     return x .= p[2:end] ./ (1 + p[1])
 end
 
-function Manifolds.get_point!(
-    ::Sphere{n,ℝ},
-    p,
-    ::Manifolds.StereographicAtlas,
-    ::Nothing,
-    x,
-) where {n}
+function get_point!(::Sphere{n,ℝ}, p, ::StereographicAtlas, ::Nothing, x) where {n}
     xnorm2 = dot(x, x)
     p[1] = (1 - xnorm2) / (1 + xnorm2)
     return p[2:end] .= 2 * x / (xnorm2 + 1)
 end
 
-function local_metric(M::Sphere{n,ℝ}, A::StereographicAtlas, i::Nothing, p) where {n}
-    x = get_point_coordinates(M, A, i, p)
+function get_coordinates!(
+    ::Sphere{n,ℝ},
+    Y,
+    p,
+    X,
+    B::InducedBasis{ℝ,TangentSpaceType,<:StereographicAtlas},
+) where {n}
+    for i in 1:n
+        Y[i] = X[i + 1] / (1 + p[1]) - X[1] * p[i + 1] / (1 + p[1])^2
+    end
+    return Y
+end
+
+function local_metric(
+    M::Sphere{n,ℝ},
+    B::InducedBasis{ℝ,TangentSpaceType,StereographicAtlas,Nothing},
+    p,
+) where {n}
+    x = get_point_coordinates(M, B.A, B.i, p)
     return (4 / (1 + dot(x, x))^2) * I
 end

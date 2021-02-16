@@ -491,7 +491,9 @@ local_metric(::MetricManifold, ::AbstractBasis, ::Any)
     B::AbstractBasis,
     p,
 )
-    return error("Local metric not implemented on $(typeof(M)) for basis $(typeof(B)) and point $(typeof(p))")
+    return error(
+        "Local metric not implemented on $(typeof(M)) for basis $(typeof(B)) and point $(typeof(p))",
+    )
 end
 
 @doc raw"""

@@ -185,7 +185,7 @@ end
         A = Manifolds.get_default_atlas(M)
         p = [3, 4]
         i = get_chart_index(M, A, p)
-        
+
         B = induced_basis(M, A, i, TangentSpace)
         @test_throws ErrorException local_metric(M, B, p)
     end
@@ -228,7 +228,7 @@ end
             @test inverse_local_metric(M, B_chart_p, p) ≈ invG
             @test det_local_metric(M, B_chart_p, p) ≈ *(1.0:n...)
             @test log_local_metric_density(M, B_chart_p, p) ≈ sum(log.(1.0:n)) / 2
-            
+
             fX = ManifoldsBase.TFVector(X, B_chart_p)
             fY = ManifoldsBase.TFVector(Y, B_chart_p)
             @test inner(M, p, fX, fY) ≈ dot(X, G * Y) atol = 1e-6
@@ -299,8 +299,7 @@ end
             @test local_metric(M, B_p, p) ≈ G atol = 1e-6
             @test inverse_local_metric(M, B_p, p) ≈ invG atol = 1e-6
             @test det_local_metric(M, B_p, p) ≈ r^4 * sin(θ)^2 atol = 1e-6
-            @test log_local_metric_density(M, B_p, p) ≈ 2 * log(r) + log(sin(θ)) atol =
-                1e-6
+            @test log_local_metric_density(M, B_p, p) ≈ 2 * log(r) + log(sin(θ)) atol = 1e-6
             fX = ManifoldsBase.TFVector(X, B_p)
             fY = ManifoldsBase.TFVector(Y, B_p)
             @test inner(M, p, fX, fY) ≈ dot(X, G * Y) atol = 1e-6
@@ -366,8 +365,7 @@ end
             @test ricci_curvature(M, B_p, p) ≈ 2 / r^2 atol = 2e-6
             @test gaussian_curvature(M, B_p, p) ≈ 1 / r^2 atol = 2e-6
             @test einstein_tensor(M, B_p, p) ≈
-                  ricci_tensor(M, B_p, p) - gaussian_curvature(M, B_p, p) .* G atol =
-                1e-6
+                  ricci_tensor(M, B_p, p) - gaussian_curvature(M, B_p, p) .* G atol = 1e-6
         end
     end
 
@@ -503,7 +501,7 @@ end
         @test coX.X ≈ X
         @test inner(M, p, X, Y) ≈ inner(cotspace, p, coX, coY)
         @test inner(MM, p, fX, fY) ≈ inner(cotspace, p, coX, coY)
-        
+
         @test inner(MM, p, fX, fY) ≈ inner(cotspace2, p, cofX, cofY)
         @test sharp(M, p, coX) ≈ X
 
