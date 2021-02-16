@@ -195,7 +195,7 @@ function vector_bundle_transport(fiber::VectorSpaceType, M::PowerManifold)
 end
 
 @inline function _write(
-    M::PowerManifoldMultidimensional,
+    ::PowerManifoldMultidimensional,
     rep_size::Tuple,
     x::AbstractArray,
     i::Tuple,

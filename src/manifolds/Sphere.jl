@@ -398,7 +398,7 @@ Project the point `X` onto the tangent space at `p` on the [`Sphere`](@ref) `M`.
 """
 project(::AbstractSphere, ::Any, ::Any)
 
-project!(S::AbstractSphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
+project!(::AbstractSphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
 
 @doc raw"""
     representation_size(M::AbstractSphere)

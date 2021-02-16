@@ -80,7 +80,7 @@ function check_tangent_vector(
     )
 end
 
-get_iterator(M::Oblique{n,m}) where {n,m} = Base.OneTo(m)
+get_iterator(::Oblique{n,m}) where {n,m} = Base.OneTo(m)
 
 @generated function manifold_dimension(::Oblique{n,m,𝔽}) where {n,m,𝔽}
     return (n * real_dimension(𝔽) - 1) * m
@@ -97,7 +97,7 @@ doing a column wise parallel transport on the [`Sphere`](@ref)
 This is a shortcut to using [`PowerVectorTransport{ParallelTransport}`](@ref)
 from the [`AbstractPowerManifold`](@ref).
 """
-vector_transport_to(::Oblique, ::Any, ::Any, ::Any, ::Any, ::ParallelTransport)
+vector_transport_to(::Oblique, ::Any, ::Any, ::Any, ::ParallelTransport)
 
 function vector_transport_to!(M::Oblique, Y, p, X, q, m::ParallelTransport)
     return vector_transport_to!(M, Y, p, X, q, PowerVectorTransport(m))
