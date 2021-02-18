@@ -475,27 +475,43 @@ end
 """
     StereographicAtlas()
 
-The stereographic atlas of ``S^n`` with only one chart with the singular
-point (-1, 0, ..., 0).
+The stereographic atlas of ``S^n`` with two charts: one with the singular
+point (-1, 0, ..., 0) (called `:north`) and one with the singular
+point (1, 0, ..., 0) (called `:south`).
 """
 struct StereographicAtlas <: AbstractAtlas end
 
-get_chart_index(::Sphere{n,ℝ}, ::StereographicAtlas, ::Any) where {n} = nothing
+function get_chart_index(::Sphere{n,ℝ}, ::StereographicAtlas, p) where {n}
+    if p[1] < 0
+        return :south
+    else
+        return :north
+    end
+end
 
 function get_point_coordinates!(
     ::Sphere{n,ℝ},
     x,
     ::StereographicAtlas,
-    ::Nothing,
+    i::Symbol,
     p,
 ) where {n}
-    return x .= p[2:end] ./ (1 + p[1])
+    if i === :north
+        return x .= p[2:end] ./ (1 + p[1])
+    else
+        return x .= p[2:end] ./ (1 - p[1])
+    end
 end
 
-function get_point!(::Sphere{n,ℝ}, p, ::StereographicAtlas, ::Nothing, x) where {n}
+function get_point!(::Sphere{n,ℝ}, p, ::StereographicAtlas, i::Symbol, x) where {n}
     xnorm2 = dot(x, x)
-    p[1] = (1 - xnorm2) / (1 + xnorm2)
-    return p[2:end] .= 2 * x / (xnorm2 + 1)
+    if i === :north
+        p[1] = (1 - xnorm2) / (xnorm2 + 1)
+    else
+        p[1] = (xnorm2 - 1) / (xnorm2 + 1)
+    end
+    p[2:end] .= 2 * x / (xnorm2 + 1)
+    return p
 end
 
 function get_coordinates!(
@@ -505,15 +521,51 @@ function get_coordinates!(
     X,
     B::InducedBasis{ℝ,TangentSpaceType,<:StereographicAtlas},
 ) where {n}
-    for i in 1:n
-        Y[i] = X[i + 1] / (1 + p[1]) - X[1] * p[i + 1] / (1 + p[1])^2
+    if B.i === :north
+        for i in 1:n
+            Y[i] = X[i + 1] / (1 + p[1]) - X[1] * p[i + 1] / (1 + p[1])^2
+        end
+    else
+        for i in 1:n
+            Y[i] = X[i + 1] / (-1 + p[1]) - X[1] * p[i + 1] / (-1 + p[1])^2
+        end
+    end
+    return Y
+end
+
+function get_vector!(
+    M::Sphere{n,ℝ},
+    Y,
+    p,
+    X,
+    B::InducedBasis{ℝ,TangentSpaceType,<:StereographicAtlas},
+) where {n}
+    x = get_point_coordinates(M, B.A, B.i, p)
+    mult = inv(1 + dot(x, x))^2
+
+    Y[1] = 0
+    for j in 1:n
+        Y[1] -= 4 * x[j] * mult * X[j]
+    end
+    for i in 2:(n + 1)
+        Y[i] = 0
+        for j in 1:n
+            if i == j + 1
+                Y[i] += 2 * (1 + dot(x, x) - 2 * x[i - 1]^2) * mult * X[j]
+            else
+                Y[i] -= 4 * x[i - 1] * x[j] * mult * X[j]
+            end
+        end
+        if B.i === :south
+            Y[i] *= -1
+        end
     end
     return Y
 end
 
 function local_metric(
     M::Sphere{n,ℝ},
-    B::InducedBasis{ℝ,TangentSpaceType,StereographicAtlas,Nothing},
+    B::InducedBasis{ℝ,TangentSpaceType,StereographicAtlas,Symbol},
     p,
 ) where {n}
     x = get_point_coordinates(M, B.A, B.i, p)

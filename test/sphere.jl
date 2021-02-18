@@ -175,20 +175,29 @@ using ManifoldsBase: TFVector
         A = Manifolds.StereographicAtlas()
         p = randn(3)
         p ./= norm(p)
-        @test Manifolds.get_chart_index(M, A, p) === nothing
-        x = Manifolds.get_point_coordinates(M, A, nothing, p)
-        q = Manifolds.get_point(M, A, nothing, x)
-        @test isapprox(M, p, q)
+        for k in [1, -1]
+            p *= k
+            i = Manifolds.get_chart_index(M, A, p)
+            @test i === (p[1] < 0 ? :south : :north)
+            x = Manifolds.get_point_coordinates(M, A, i, p)
+            q = Manifolds.get_point(M, A, i, x)
+            @test isapprox(M, p, q)
 
-        p2 = randn(3)
-        p3 = randn(3)
-        X2 = log(M, p, p2)
-        X3 = log(M, p, p3)
-        B = induced_basis(M, A, nothing, TangentSpace)
+            p2 = randn(3)
+            p3 = randn(3)
+            X2 = log(M, p, p2)
+            X3 = log(M, p, p3)
+            B = induced_basis(M, A, i, TangentSpace)
 
-        X2B = get_coordinates(M, p, X2, B)
-        X3B = get_coordinates(M, p, X3, B)
+            X2B = get_coordinates(M, p, X2, B)
+            X3B = get_coordinates(M, p, X3, B)
 
-        @test inner(M, p, X2, X3) ≈ X2B' * local_metric(M, B, p) * X3B
+            @test inner(M, p, X2, X3) ≈ X2B' * local_metric(M, B, p) * X3B
+
+            X2back = get_vector(M, p, X2B, B)
+            X3back = get_vector(M, p, X3B, B)
+            @test isapprox(M, p, X2, X2back)
+            @test isapprox(M, p, X3, X3back)
+        end
     end
 end
