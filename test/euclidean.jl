@@ -1,5 +1,7 @@
 include("utils.jl")
 
+using Manifolds: induced_basis
+
 @testset "Euclidean" begin
     E = Euclidean(3)
     Ec = Euclidean(3; field=ℂ)
@@ -13,8 +15,9 @@ include("utils.jl")
     @test Manifolds.default_metric_dispatch(E, Manifolds.EuclideanMetric()) === Val{true}()
     p = zeros(3)
     A = Manifolds.RetractionAtlas()
-    @test det_local_metric(EM, A, p, p) == one(eltype(p))
-    @test log_local_metric_density(EM, A, p, p) == zero(eltype(p))
+    B = induced_basis(EM, A, p, TangentSpace)
+    @test det_local_metric(EM, B, p) == one(eltype(p))
+    @test log_local_metric_density(EM, B, p) == zero(eltype(p))
     @test project!(E, p, p) == p
     @test embed!(E, p, p) == p
     @test manifold_dimension(Ec) == 2 * manifold_dimension(E)
@@ -122,6 +125,34 @@ include("utils.jl")
                 test_default_vector_transport=true,
                 test_vee_hat=false,
             )
+        end
+    end
+
+    number_types = [Float64, ComplexF64]
+    TEST_FLOAT32 && push!(number_types, Float32)
+    @testset "(Nonmutating) Real and Complex Numbers" begin
+        RM = Euclidean()
+        CM = Euclidean(; field=ℂ)
+        for T in number_types
+            @testset "Type $T" begin
+                M = (T <: Complex) ? CM : RM
+                pts = convert.(Ref(T), [1.0, 4.0, 2.0])
+                @test embed(M, pts[1]) == pts[1]
+                @test project(M, pts[1]) == pts[1]
+                @test retract(M, pts[1], pts[2]) == exp(M, pts[1], pts[2])
+                test_manifold(
+                    M,
+                    pts,
+                    test_forward_diff=false,
+                    test_reverse_diff=false,
+                    test_vector_spaces=false,
+                    test_project_tangent=true,
+                    test_musical_isomorphisms=true,
+                    test_default_vector_transport=true,
+                    test_vee_hat=false,
+                    is_mutating=false,
+                )
+            end
         end
     end
 
