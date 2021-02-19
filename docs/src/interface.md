@@ -63,16 +63,20 @@ julia> y[1]
  6.90031725726027e-310
 ```
 
-* [`allocate_result`](@ref) allocates a result of a particular function (for example [`exp`], [`flat`], etc.) on a particular manifold with particular arguments.
+* [`allocate_result`](@ref) allocates a result of a particular function (for example [`exp`](@ref), [`flat`](@ref), etc.) on a particular manifold with particular arguments.
   It takes into account the possibility that different arguments may have different numeric [`number_eltype`](@ref) types thorough the [`ManifoldsBase.allocate_result_type`](@ref) function.
 
 ## Bases
 
-The following functions and types provide support for bases of the tangent space of different manifolds.
+The following functions and types provide support for bases of a the tangent space of different manifolds.
+Moreover, bases of the cotangent space are also supported, though this description focuses on the tangent space.
 An orthonormal basis of the tangent space $T_p \mathcal M$ of (real) dimension $n$ has a real-coefficient basis $e_1, e_2, …, e_n$ if $\mathrm{Re}(g_p(e_i, e_j)) = δ_{ij}$ for each $i,j ∈ \{1, 2, …, n\}$ where $g_p$ is the Riemannian metric at point $p$.
 A vector $X$ from the tangent space $T_p \mathcal M$ can be expressed in Einstein notation as a sum $X = X^i e_i$, where (real) coefficients $X^i$ are calculated as $X^i = \mathrm{Re}(g_p(X, e_i))$.
 
+Bases are closely related to [atlases](@ref atlases_and_charts).
+
 The main types are:
+
 * [`DefaultOrthonormalBasis`](@ref), which is designed to work when no special properties of the tangent space basis are required.
    It is designed to make [`get_coordinates`](@ref) and [`get_vector`](@ref) fast.
 * [`DiagonalizingOrthonormalBasis`](@ref), which diagonalizes the curvature tensor and makes the curvature in the selected direction equal to 0.
@@ -86,9 +90,17 @@ The main functions are:
 * [`get_vector`](@ref) returns a vector for the specified coordinates.
 * [`get_vectors`](@ref) returns a vector of basis vectors. Calling it should be avoided for high-dimensional manifolds.
 
+Coordinates of a vector in a basis can be stored in an [`FVector`](@ref) to explicitly indicate which basis they are expressed in. It is useful to avoid potential ambiguities.
+
 ```@autodocs
 Modules = [ManifoldsBase,Manifolds]
 Pages = ["bases.jl"]
+Order = [:type, :function]
+```
+
+```@autodocs
+Modules = [ManifoldsBase,Manifolds]
+Pages = ["vector_spaces.jl"]
 Order = [:type, :function]
 ```
 
@@ -143,7 +155,7 @@ Order = [:macro, :type, :function]
 ## Abstract Power Manifold
 
 ```@autodocs
-Modules = [ ManifoldsBase]
+Modules = [ ManifoldsBase, Manifolds]
 Pages = ["PowerManifold.jl"]
 Order = [:macro, :type, :function]
 ```

@@ -15,6 +15,11 @@ abstract type AbstractAtlas end
 
 An atlas indexed by points on a manifold, such that coordinate transformations are performed
 using retractions, inverse retractions and coordinate calculation for a given basis.
+
+# See also
+
+[`AbstractAtlas`](@ref), [`AbstractInverseRetractionMethod`](@ref),
+[`AbstractRetractionMethod`](@ref), [`AbstractBasis`](@ref)
 """
 struct RetractionAtlas{
     TInvRetr<:AbstractInverseRetractionMethod,
@@ -39,7 +44,8 @@ get_default_atlas(M::Manifold) = RetractionAtlas()
 """
     get_point_coordinates(M::Manifold, A::AbstractAtlas, i, p)
 
-Calculate coordinates of point `p` on manifold `M` in chart from atlas `A` at index `i`.
+Calculate coordinates of point `p` on manifold `M` in chart from an [`AbstractAtlas`](@ref)
+`A` at index `i`.
 """
 get_point_coordinates(::Manifold, ::AbstractAtlas, ::Any, ::Any)
 
@@ -65,7 +71,8 @@ end
 """
     get_point(M::Manifold, A::AbstractAtlas, i, x)
 
-Calculate point at coordinates `x` on manifold `M` in chart from atlas `A` at index `i`.
+Calculate point at coordinates `x` on manifold `M` in chart from an [`AbstractAtlas`](@ref)
+`A` at index `i`.
 """
 get_point(::Manifold, ::AbstractAtlas, ::Any, ::Any)
 
@@ -91,8 +98,8 @@ end
 """
     get_chart_index(M::Manifold, A::AbstractAtlas, p)
 
-Select a chart from atlas `A` for manifold `M` that is suitable for representing
-neighborhood of point `p`.
+Select a chart from an [`AbstractAtlas`](@ref) `A` for manifold `M` that is suitable for
+representing neighborhood of point `p`.
 """
 get_chart_index(::Manifold, ::AbstractAtlas, ::Any)
 
@@ -105,6 +112,10 @@ get_chart_index(::Manifold, ::RetractionAtlas, p) = p
 Given coordinates `x` in chart `(A_from, i_from)` of a point on manifold `M`, returns
 coordinates of that point in chart `(A_to, i_to)`. If `A_from` and `A_to` are equal, `A_to`
 can be omitted.
+
+# See also
+
+[`AbstractAtlas`](@ref)
 """
 function transition_map(
     M::Manifold,
@@ -142,11 +153,15 @@ end
 
 Basis of vector space of type `VST` at point `p` from manifold `M` induced by
 chart (`A`, `i`).
+
+# See also
+
+[`VectorSpaceType`](@ref), [`AbstractAtlas`](@ref)
 """
 induced_basis(M::Manifold, A::AbstractAtlas, i, VST::VectorSpaceType)
 
 function induced_basis(
-    M::Manifold,
+    ::Manifold,
     A::RetractionAtlas{
         <:AbstractInverseRetractionMethod,
         <:AbstractRetractionMethod,
@@ -169,13 +184,18 @@ function induced_basis(
     p,
     ::CotangentSpaceType,
 )
-    return dual_basis(A.basis)
+    return dual_basis(M, p, A.basis)
 end
 
 """
     InducedBasis(vs::VectorSpaceType, A::AbstractAtlas, i)
 
-The basis induced by chart `i` from atlas `A` of vector space of type `vs`.
+The basis induced by chart with index `i` from an [`AbstractAtlas`](@ref) `A` of vector
+space of type `vs`.
+
+# See also
+
+[`VectorSpaceType`](@ref), [`AbstractBasis`](@ref)
 """
 struct InducedBasis{𝔽,VST<:VectorSpaceType,TA<:AbstractAtlas,TI} <: AbstractBasis{𝔽,VST}
     vs::VST
@@ -183,6 +203,12 @@ struct InducedBasis{𝔽,VST<:VectorSpaceType,TA<:AbstractAtlas,TI} <: AbstractB
     i::TI
 end
 
+"""
+    induced_basis(::Manifold, A::AbstractAtlas, i, VST::VectorSpaceType)
+
+Get the basis induced by chart with index `i` from an [`AbstractAtlas`](@ref) `A` of vector
+space of type `vs`. Returns an object of type [`InducedBasis`](@ref).
+"""
 function induced_basis(::Manifold{𝔽}, A::AbstractAtlas, i, VST::VectorSpaceType) where {𝔽}
     return InducedBasis{𝔽,typeof(VST),typeof(A),typeof(i)}(VST, A, i)
 end
