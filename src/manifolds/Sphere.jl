@@ -372,18 +372,6 @@ function mid_point!(S::Sphere, q, p1, p2)
     return q
 end
 
-"""
-    normal_tvector_distribution(S::Sphere{n,ℝ}, p, σ)
-
-Generate a distribution in the tangent space at `p` by generating a
-normal distribution in ambient space with standard deviation `σ`
-projected to the tangent space at `p`.
-"""
-function normal_tvector_distribution(S::Sphere{n,ℝ}, p, σ) where {n}
-    d = Distributions.MvNormal(zero(p), σ)
-    return ProjectedFVectorDistribution(TangentBundleFibers(S), p, d, project!, p)
-end
-
 @doc raw"""
     project(M::AbstractSphere, p)
 
@@ -410,7 +398,7 @@ Project the point `X` onto the tangent space at `p` on the [`Sphere`](@ref) `M`.
 """
 project(::AbstractSphere, ::Any, ::Any)
 
-project!(S::AbstractSphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
+project!(::AbstractSphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
 
 @doc raw"""
     representation_size(M::AbstractSphere)

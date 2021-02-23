@@ -21,3 +21,19 @@ using LightGraphs
 using SimpleWeightedGraphs
 
 using Manifolds.ManifoldTests
+
+function include_test(path)
+    @info "Testing $path"
+    @time include(path)  # show basic timing, (this will print a newline at end)
+end
+
+function our_base_ambiguities()
+    ambigs = Test.detect_ambiguities(Base)
+    modules_we_care_about =
+        [Base, LinearAlgebra, Manifolds, ManifoldsBase, StaticArrays, Statistics, StatsBase]
+    our_ambigs = filter(ambigs) do (m1, m2)
+        we_care = m1.module in modules_we_care_about && m2.module in modules_we_care_about
+        return we_care && (m1.module === Manifolds || m2.module === Manifolds)
+    end
+    return our_ambigs
+end

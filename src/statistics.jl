@@ -29,6 +29,13 @@ in the ambient space.
 """
 struct ExtrinsicEstimation <: AbstractEstimationMethod end
 
+"""
+    WeiszfeldEstimation <: AbstractEstimationMethod
+
+Method for estimation using the Weiszfeld algorithm for the [`median`](@ref)
+"""
+struct WeiszfeldEstimation <: AbstractEstimationMethod end
+
 _unit_weights(n::Int) = StatsBase.UnitWeights{Float64}(n)
 
 @doc raw"""
@@ -125,7 +132,9 @@ struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
 
     function GeodesicInterpolationWithinRadius(radius::T) where {T}
         radius > 0 && return new{T}(radius)
-        return throw(DomainError("The radius must be strictly postive, received $(radius)."))
+        return throw(
+            DomainError("The radius must be strictly postive, received $(radius)."),
+        )
     end
 end
 
@@ -261,7 +270,11 @@ function Statistics.mean!(
 )
     n = length(x)
     if length(w) != n
-        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+        throw(
+            DimensionMismatch(
+                "The number of weights ($(length(w))) does not match the number of points for the mean ($(n)).",
+            ),
+        )
     end
     copyto!(y, p0)
     yold = allocate_result(M, mean, y)
@@ -319,7 +332,11 @@ function Statistics.mean!(
 )
     n = length(x)
     if length(w) != n
-        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+        throw(
+            DimensionMismatch(
+                "The number of weights ($(length(w))) does not match the number of points for the mean ($(n)).",
+            ),
+        )
     end
     order = shuffle_rng === nothing ? (1:n) : shuffle(shuffle_rng, 1:n)
     @inbounds begin
@@ -395,7 +412,11 @@ function Statistics.mean!(
 )
     n = length(x)
     if length(w) != n
-        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+        throw(
+            DimensionMismatch(
+                "The number of weights ($(length(w))) does not match the number of points for the mean ($(n)).",
+            ),
+        )
     end
     copyto!(q, p0)
     yold = allocate_result(M, mean, q)
@@ -542,6 +563,63 @@ for a description of `kwargs`.
 """
 Statistics.median(::Manifold, ::AbstractVector, ::AbstractVector, ::ExtrinsicEstimation)
 
+@doc raw"""
+    median(
+        M::Manifold,
+        x::AbstractVector,
+        [w::AbstractWeights,]
+        method::WeiszfeldEstimation;
+        α = 1.0,
+        p0=x[1],
+        stop_iter=2000,
+        retraction::AbstractRetractionMethod = ExponentialRetraction(),
+        inverse_retraction::AbstractInverseRetractionMethod = LogarithmicInverseRetraction(),
+        kwargs...,
+    )
+
+Compute the median using [`WeiszfeldEstimation`](@ref).
+
+Optionally, provide `p0`, the starting point (by default set to the first
+data point). `stop_iter` denotes the maximal number of iterations to perform
+and the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal
+change between two iterates is small. For more stopping criteria check the
+[`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
+
+The parameter ``α\in (0,2]`` is a step size.
+
+The algorithm is further described in [^FletcherVenkatasubramanianJoshi2008],
+especially the update rule in Eq. (6), i.e. Let ``q_{k}`` denote the current
+iterate, $n$ the number of points ``x_1,\ldots,x_n``, and
+
+```math
+I_k = \bigl\{ i \in \{1,\ldots,n\} \big| x_i \neq q_k \bigr\}
+```
+
+all indices of points that are not equal to the current iterate. Then the update reads
+``q_{k+1} = \exp_{q_k}(αX)``, where
+
+```math
+X = \frac{1}{s}\sum_{i\in I_k} \frac{w_i}{d_{\mathcal M}(q_k,x_i)}\log_{q_k}x_i
+\quad
+\text{ with }
+\quad
+s = \sum_{i\in I_k} \frac{w_i}{d_{\mathcal M}(q_k,x_i)},
+```
+
+and where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
+
+Optionally, pass `retraction` and `inverse_retraction` method types to specify
+the (inverse) retraction, which by default use the exponential and logarithmic map,
+respectively.
+
+[^FletcherVenkatasubramanianJoshi2008]:
+    > Fletcher, T., Venkatasubramanian, S., Joshi, S:
+    > Robust statistics on Riemannian manifolds via the geometric median
+    > 2008 IEEE Conference on Computer Vision and Pattern Recognition,
+    > doi: [10.1109/CVPR.2008.4587747](https://doi.org/10.1109/CVPR.2008.4587747),
+"""
+Statistics.median(::Manifold, ::AbstractVector, ::AbstractVector, ::WeiszfeldEstimation)
+
 function Statistics.median(
     M::Manifold,
     x::AbstractVector,
@@ -603,7 +681,11 @@ function Statistics.median!(
 )
     n = length(x)
     if length(w) != n
-        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the median ($(n))."))
+        throw(
+            DimensionMismatch(
+                "The number of weights ($(length(w))) does not match the number of points for the median ($(n)).",
+            ),
+        )
     end
     copyto!(q, p0)
     yold = allocate_result(M, median, q)
@@ -637,6 +719,49 @@ function Statistics.median!(
     embedded_y = median(get_embedding(M), embedded_x, w, extrinsic_method; kwargs...)
     project!(M, y, embedded_y)
     return y
+end
+
+function Statistics.median!(
+    M::Manifold,
+    q,
+    x::AbstractVector,
+    w::AbstractVector,
+    ::WeiszfeldEstimation;
+    p0=x[1],
+    stop_iter=2000,
+    α=1.0,
+    retraction::AbstractRetractionMethod=ExponentialRetraction(),
+    inverse_retraction::AbstractInverseRetractionMethod=LogarithmicInverseRetraction(),
+    kwargs...,
+)
+    n = length(x)
+    if length(w) != n
+        throw(
+            DimensionMismatch(
+                "The number of weights ($(length(w))) does not match the number of points for the median ($(n)).",
+            ),
+        )
+    end
+    copyto!(q, p0)
+    yold = allocate_result(M, median, q)
+    ytmp = copy(yold)
+    d = zeros(n)
+    v = zero_tangent_vector(M, q)
+    wv = convert(AbstractVector, w) ./ sum(w)
+    for i in 1:stop_iter
+        d .= [distance(M, q, xi) for xi in x] # compute distances
+        # compute new weights / exclude points xi=q
+        d .= [di > 0 ? wi / di : zero(typeof(wi / di)) for (di, wi) in zip(d, w)]
+        copyto!(yold, q)
+        zero_tangent_vector!(M, v, q)
+        for j in 1:n
+            @inbounds v .+= d[j] * inverse_retract(M, q, x[j], inverse_retraction)
+        end
+        retract!(M, ytmp, q, v, α / sum(d), retraction)
+        copyto!(q, ytmp)
+        isapprox(M, q, yold; kwargs...) && break
+    end
+    return q
 end
 
 @decorator_transparent_signature Statistics.median!(
@@ -787,7 +912,11 @@ function StatsBase.mean_and_var(
 )
     n = length(x)
     if length(w) != n
-        throw(DimensionMismatch("The number of weights ($(length(w))) does not match the number of points for the mean ($(n))."))
+        throw(
+            DimensionMismatch(
+                "The number of weights ($(length(w))) does not match the number of points for the mean ($(n)).",
+            ),
+        )
     end
     order = shuffle_rng === nothing ? (1:n) : shuffle(shuffle_rng, 1:n)
     @inbounds begin

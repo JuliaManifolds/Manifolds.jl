@@ -88,15 +88,15 @@ include("utils.jl")
                         PoleLadderTransport(),
                     ],
                     test_mutating_rand=isa(T, Vector),
-                    point_distributions=[Manifolds.projected_distribution(
-                        M,
-                        Distributions.MvNormal(zero(pts[1]), 1.0),
-                    )],
-                    tvector_distributions=[Manifolds.normal_tvector_distribution(
-                        M,
-                        pts[1],
-                        1.0,
-                    )],
+                    point_distributions=[
+                        Manifolds.projected_distribution(
+                            M,
+                            Distributions.MvNormal(zero(pts[1]), 1.0),
+                        ),
+                    ],
+                    tvector_distributions=[
+                        Manifolds.normal_tvector_distribution(M, pts[1], 1.0),
+                    ],
                     basis_types_vecs=basis_types,
                     basis_types_to_from=basis_types,
                     basis_has_specialized_diagonalizing_get=true,
@@ -121,6 +121,34 @@ include("utils.jl")
                 test_default_vector_transport=true,
                 test_vee_hat=false,
             )
+        end
+    end
+
+    number_types = [Float64, ComplexF64]
+    TEST_FLOAT32 && push!(number_types, Float32)
+    @testset "(Nonmutating) Real and Complex Numbers" begin
+        RM = Euclidean()
+        CM = Euclidean(; field=ℂ)
+        for T in number_types
+            @testset "Type $T" begin
+                M = (T <: Complex) ? CM : RM
+                pts = convert.(Ref(T), [1.0, 4.0, 2.0])
+                @test embed(M, pts[1]) == pts[1]
+                @test project(M, pts[1]) == pts[1]
+                @test retract(M, pts[1], pts[2]) == exp(M, pts[1], pts[2])
+                test_manifold(
+                    M,
+                    pts,
+                    test_forward_diff=false,
+                    test_reverse_diff=false,
+                    test_vector_spaces=false,
+                    test_project_tangent=true,
+                    test_musical_isomorphisms=true,
+                    test_default_vector_transport=true,
+                    test_vee_hat=false,
+                    is_mutating=false,
+                )
+            end
         end
     end
 

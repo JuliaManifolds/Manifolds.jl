@@ -13,7 +13,9 @@ struct StaticReshaper <: AbstractReshaper end
 Reshape array `data` to size `Size` using method provided by `reshaper`.
 """
 function make_reshape(reshaper::AbstractReshaper, ::Type{Size}, data) where {Size}
-    return error("make_reshape is not defined for reshaper of type $(typeof(reshaper)), size $(Size) and data of type $(typeof(data)).")
+    return error(
+        "make_reshape is not defined for reshaper of type $(typeof(reshaper)), size $(Size) and data of type $(typeof(data)).",
+    )
 end
 function make_reshape(::StaticReshaper, ::Type{Size}, data) where {Size}
     return SizedArray{Size}(data)

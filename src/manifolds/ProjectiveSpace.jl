@@ -392,18 +392,6 @@ function mid_point!(M::ProjectiveSpace, q, p1, p2)
     return q
 end
 
-"""
-    normal_tvector_distribution(M::ProjectiveSpace{n,ℝ}, p, σ)
-
-Generate a distribution in the tangent space at `p` by generating a
-normal distribution in ambient space with standard deviation `σ`
-projected to the tangent space at `p`.
-"""
-function normal_tvector_distribution(M::ProjectiveSpace{n,ℝ}, p, σ) where {n}
-    d = Distributions.MvNormal(zero(p), σ)
-    return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project!, p)
-end
-
 @doc raw"""
     project(M::AbstractProjectiveSpace, p)
 

@@ -260,8 +260,3 @@ end
     end
     return ex
 end
-
-# TODO: make a better implementation for StaticArrays
-function LinearAlgebra.eigvals(A::StaticArray, B::StaticArray; kwargs...)
-    return eigvals(Array(A), Array(B); kwargs...)
-end
