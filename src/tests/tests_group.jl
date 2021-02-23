@@ -23,14 +23,14 @@ invariance should be checked for the provided points.
 function ManifoldTests.test_group(
     G,
     g_pts::AbstractVector,
-    v_pts::AbstractVector = [],
-    ve_pts::AbstractVector = [];
-    atol = 1e-10,
-    test_mutating = true,
-    test_group_exp_log = true,
-    test_diff = false,
-    test_invariance = false,
-    diff_convs = [(), (LeftAction(),), (RightAction(),)],
+    v_pts::AbstractVector=[],
+    ve_pts::AbstractVector=[];
+    atol=1e-10,
+    test_mutating=true,
+    test_group_exp_log=true,
+    test_diff=false,
+    test_invariance=false,
+    diff_convs=[(), (LeftAction(),), (RightAction(),)],
 )
     e = make_identity(G, g_pts[1])
 
@@ -38,14 +38,14 @@ function ManifoldTests.test_group(
         Test.Test.@testset "Closed" begin
             for g1 in g_pts, g2 in g_pts
                 g3 = compose(G, g1, g2)
-                Test.@test is_manifold_point(G, g3, true; atol = atol)
+                Test.@test is_manifold_point(G, g3, true; atol=atol)
             end
         end
 
         Test.Test.@testset "Associative" begin
             g12_3 = compose(G, compose(G, g_pts[1], g_pts[2]), g_pts[3])
             g1_23 = compose(G, g_pts[1], compose(G, g_pts[2], g_pts[3]))
-            Test.@test isapprox(G, g12_3, g1_23; atol = atol)
+            Test.@test isapprox(G, g12_3, g1_23; atol=atol)
 
             test_mutating && Test.Test.@testset "mutating" begin
                 g12, g23, g12_3, g1_23 = allocate.(repeat([g_pts[1]], 4))
@@ -53,7 +53,7 @@ function ManifoldTests.test_group(
                 Test.@test compose!(G, g23, g_pts[2], g_pts[3]) === g23
                 Test.@test compose!(G, g12_3, g12, g_pts[3]) === g12_3
                 Test.@test compose!(G, g1_23, g_pts[1], g23) === g1_23
-                Test.@test isapprox(G, g12_3, g1_23; atol = atol)
+                Test.@test isapprox(G, g12_3, g1_23; atol=atol)
             end
         end
 
@@ -96,22 +96,22 @@ function ManifoldTests.test_group(
         Test.Test.@testset "Inverse" begin
             for g in g_pts
                 ginv = inv(G, g)
-                Test.@test isapprox(G, compose(G, g, ginv), e; atol = atol)
-                Test.@test isapprox(G, compose(G, ginv, g), e; atol = atol)
-                Test.@test isapprox(G, e, compose(G, g, ginv); atol = atol)
-                Test.@test isapprox(G, e, compose(G, ginv, g); atol = atol)
+                Test.@test isapprox(G, compose(G, g, ginv), e; atol=atol)
+                Test.@test isapprox(G, compose(G, ginv, g), e; atol=atol)
+                Test.@test isapprox(G, e, compose(G, g, ginv); atol=atol)
+                Test.@test isapprox(G, e, compose(G, ginv, g); atol=atol)
                 Test.@test inv(G, e) === e
 
                 test_mutating && Test.Test.@testset "mutating" begin
                     ginv = allocate(g)
                     Test.@test inv!(G, ginv, g) === ginv
-                    Test.@test isapprox(G, compose(G, g, ginv), e; atol = atol)
-                    Test.@test isapprox(G, compose(G, ginv, g), e; atol = atol)
+                    Test.@test isapprox(G, compose(G, g, ginv), e; atol=atol)
+                    Test.@test isapprox(G, compose(G, ginv, g), e; atol=atol)
 
                     Test.@test inv(G, e) === e
                     geinv = allocate(g)
                     Test.@test inv!(G, geinv, e) === geinv
-                    Test.@test isapprox(G, geinv, e; atol = atol)
+                    Test.@test isapprox(G, geinv, e; atol=atol)
                 end
             end
         end
@@ -124,19 +124,19 @@ function ManifoldTests.test_group(
             G,
             translate(G, g_pts[1], g_pts[2]),
             compose(G, g_pts[1], g_pts[2]);
-            atol = atol,
+            atol=atol,
         )
         Test.@test isapprox(
             G,
             translate(G, g_pts[1], g_pts[2], LeftAction()),
             compose(G, g_pts[1], g_pts[2]);
-            atol = atol,
+            atol=atol,
         )
         Test.@test isapprox(
             G,
             translate(G, g_pts[1], g_pts[2], RightAction()),
             compose(G, g_pts[2], g_pts[1]);
-            atol = atol,
+            atol=atol,
         )
 
         for conv in convs
@@ -149,7 +149,7 @@ function ManifoldTests.test_group(
                     conv...,
                 ),
                 g_pts[2];
-                atol = atol,
+                atol=atol,
             )
             Test.@test isapprox(
                 G,
@@ -160,7 +160,7 @@ function ManifoldTests.test_group(
                     conv...,
                 ),
                 g_pts[2];
-                atol = atol,
+                atol=atol,
             )
         end
 
@@ -172,18 +172,18 @@ function ManifoldTests.test_group(
                     G,
                     g,
                     translate(G, g_pts[1], g_pts[2], conv...);
-                    atol = atol,
+                    atol=atol,
                 )
 
                 g = translate(G, g_pts[1], g_pts[2], conv...)
                 g2 = allocate(g)
                 Test.@test inverse_translate!(G, g2, g_pts[1], g, conv...) === g2
-                Test.@test isapprox(G, g2, g_pts[2]; atol = atol)
+                Test.@test isapprox(G, g2, g_pts[2]; atol=atol)
 
                 g = inverse_translate(G, g_pts[1], g_pts[2], conv...)
                 g2 = allocate(g)
                 Test.@test translate!(G, g2, g_pts[1], g, conv...) === g2
-                Test.@test isapprox(G, g2, g_pts[2]; atol = atol)
+                Test.@test isapprox(G, g2, g_pts[2]; atol=atol)
             end
         end
     end
@@ -197,21 +197,21 @@ function ManifoldTests.test_group(
             g12,
             translate_diff(G, g_pts[2], g_pts[1], X),
             translate_diff(G, g_pts[2], g_pts[1], X, LeftAction());
-            atol = atol,
+            atol=atol,
         )
         Test.@test is_tangent_vector(
             G,
             g12,
             translate_diff(G, g_pts[2], g_pts[1], X, LeftAction()),
             true;
-            atol = atol,
+            atol=atol,
         )
         RightAction() in diff_convs && Test.@test is_tangent_vector(
             G,
             g21,
             translate_diff(G, g_pts[2], g_pts[1], X, RightAction()),
             true;
-            atol = atol,
+            atol=atol,
         )
 
         for conv in diff_convs
@@ -228,7 +228,7 @@ function ManifoldTests.test_group(
                     conv...,
                 ),
                 X;
-                atol = atol,
+                atol=atol,
             )
             Test.@test isapprox(
                 G,
@@ -241,16 +241,16 @@ function ManifoldTests.test_group(
                     conv...,
                 ),
                 X;
-                atol = atol,
+                atol=atol,
             )
             Xe = inverse_translate_diff(G, g_pts[1], g_pts[1], X, conv...)
-            Test.@test isapprox(G, e, Xe, translate_diff(G, e, e, Xe, conv...); atol = atol)
+            Test.@test isapprox(G, e, Xe, translate_diff(G, e, e, Xe, conv...); atol=atol)
             Test.@test isapprox(
                 G,
                 e,
                 Xe,
                 inverse_translate_diff(G, e, e, Xe, conv...);
-                atol = atol,
+                atol=atol,
             )
         end
 
@@ -265,18 +265,18 @@ function ManifoldTests.test_group(
                     g2g1,
                     Y,
                     translate_diff(G, g_pts[2], g_pts[1], X, conv...);
-                    atol = atol,
+                    atol=atol,
                 )
 
                 Y = translate_diff(G, g_pts[2], g_pts[1], X, conv...)
                 Z = allocate(Y)
                 Test.@test inverse_translate_diff!(G, Z, g_pts[2], g2g1, Y, conv...) === Z
-                Test.@test isapprox(G, g_pts[1], Z, X; atol = atol)
+                Test.@test isapprox(G, g_pts[1], Z, X; atol=atol)
 
                 Y = inverse_translate_diff(G, g_pts[2], g_pts[1], X, conv...)
                 Z = allocate(Y)
                 Test.@test translate_diff!(G, Z, g_pts[2], g2invg1, Y, conv...) === Z
-                Test.@test isapprox(G, g_pts[1], Z, X; atol = atol)
+                Test.@test isapprox(G, g_pts[1], Z, X; atol=atol)
             end
         end
     end
@@ -285,34 +285,34 @@ function ManifoldTests.test_group(
         Test.Test.@testset "e = exp(0)" begin
             v = group_log(G, identity(G, g_pts[1]))
             g = group_exp(G, v)
-            Test.@test isapprox(G, make_identity(G, g_pts[1]), g; atol = atol)
+            Test.@test isapprox(G, make_identity(G, g_pts[1]), g; atol=atol)
 
             test_mutating && Test.Test.@testset "mutating" begin
                 v = allocate(ve_pts[1])
                 Test.@test group_log!(G, v, identity(G, g_pts[1])) === v
                 g = allocate(g_pts[1])
                 Test.@test group_exp!(G, g, v) === g
-                Test.@test isapprox(G, make_identity(G, g_pts[1]), g; atol = atol)
+                Test.@test isapprox(G, make_identity(G, g_pts[1]), g; atol=atol)
             end
         end
 
         Test.Test.@testset "v = log(exp(v))" begin
             for v in ve_pts
                 g = group_exp(G, v)
-                Test.@test is_manifold_point(G, g; atol = atol)
+                Test.@test is_manifold_point(G, g; atol=atol)
                 v2 = group_log(G, g)
-                Test.@test isapprox(G, make_identity(G, g_pts[1]), v2, v; atol = atol)
+                Test.@test isapprox(G, make_identity(G, g_pts[1]), v2, v; atol=atol)
             end
 
             test_mutating && Test.Test.@testset "mutating" begin
                 for v in ve_pts
                     g = allocate(g_pts[1])
                     Test.@test group_exp!(G, g, v) === g
-                    Test.@test is_manifold_point(G, g; atol = atol)
-                    Test.@test isapprox(G, g, group_exp(G, v); atol = atol)
+                    Test.@test is_manifold_point(G, g; atol=atol)
+                    Test.@test isapprox(G, g, group_exp(G, v); atol=atol)
                     v2 = allocate(v)
                     Test.@test group_log!(G, v2, g) === v2
-                    Test.@test isapprox(G, make_identity(G, g_pts[1]), v2, v; atol = atol)
+                    Test.@test isapprox(G, make_identity(G, g_pts[1]), v2, v; atol=atol)
                 end
             end
         end
@@ -321,7 +321,7 @@ function ManifoldTests.test_group(
             g = g_pts[1]
             v = group_log(G, g)
             ginv = group_exp(G, -v)
-            Test.@test isapprox(G, ginv, inv(G, g); atol = atol)
+            Test.@test isapprox(G, ginv, inv(G, g); atol=atol)
         end
 
         Test.Test.@testset "exp(sv)∘exp(tv) = exp((s+t)v)" begin
@@ -330,8 +330,8 @@ function ManifoldTests.test_group(
             g12 = group_exp(G, 0.5 * ve_pts[1])
             g1_g2 = compose(G, g1, g2)
             g2_g1 = compose(G, g2, g1)
-            isapprox(G, g1_g2, g12; atol = atol)
-            isapprox(G, g2_g1, g12; atol = atol)
+            isapprox(G, g1_g2, g12; atol=atol)
+            isapprox(G, g2_g1, g12; atol=atol)
         end
     end
 
@@ -345,14 +345,14 @@ function ManifoldTests.test_group(
                     v_pts[1],
                     Manifolds.GroupExponentialRetraction(conv...),
                 )
-                Test.@test is_manifold_point(G, y; atol = atol)
+                Test.@test is_manifold_point(G, y; atol=atol)
                 v2 = inverse_retract(
                     G,
                     g_pts[1],
                     y,
                     Manifolds.GroupLogarithmicInverseRetraction(conv...),
                 )
-                Test.@test isapprox(G, g_pts[1], v2, v_pts[1]; atol = atol)
+                Test.@test isapprox(G, g_pts[1], v2, v_pts[1]; atol=atol)
             end
 
             test_mutating && Test.Test.@testset "mutating" begin
@@ -365,7 +365,7 @@ function ManifoldTests.test_group(
                         v_pts[1],
                         Manifolds.GroupExponentialRetraction(conv...),
                     ) === y
-                    Test.@test is_manifold_point(G, y; atol = atol)
+                    Test.@test is_manifold_point(G, y; atol=atol)
                     v2 = allocate(v_pts[1])
                     Test.@test inverse_retract!(
                         G,
@@ -374,7 +374,7 @@ function ManifoldTests.test_group(
                         y,
                         Manifolds.GroupLogarithmicInverseRetraction(conv...),
                     ) === v2
-                    Test.@test isapprox(G, g_pts[1], v2, v_pts[1]; atol = atol)
+                    Test.@test isapprox(G, g_pts[1], v2, v_pts[1]; atol=atol)
                 end
             end
         end
@@ -434,15 +434,14 @@ function ManifoldTests.test_action(
     A::AbstractGroupAction,
     a_pts::AbstractVector,
     m_pts::AbstractVector,
-    v_pts = [];
-    atol = 1e-10,
-    atol_ident_compose = 0,
-    test_optimal_alignment = false,
-    test_mutating = true,
-    test_diff = false,
-    test_switch_direction = true,
+    v_pts=[];
+    atol=1e-10,
+    atol_ident_compose=0,
+    test_optimal_alignment=false,
+    test_mutating=true,
+    test_diff=false,
+    test_switch_direction=true,
 )
-
     G = base_group(A)
     M = g_manifold(A)
     e = make_identity(G, a_pts[1])
@@ -465,18 +464,13 @@ function ManifoldTests.test_action(
             Test.Test.@testset "over actions" begin
                 for a1 in a_pts, a2 in a_pts
                     a3 = compose(A, a1, a2)
-                    Test.@test is_manifold_point(G, a3, true; atol = atol)
+                    Test.@test is_manifold_point(G, a3, true; atol=atol)
                 end
             end
             Test.Test.@testset "over g-manifold" begin
                 for a in a_pts, m in m_pts
-                    Test.@test is_manifold_point(M, apply(A, a, m), true; atol = atol)
-                    Test.@test is_manifold_point(
-                        M,
-                        inverse_apply(A, a, m),
-                        true;
-                        atol = atol,
-                    )
+                    Test.@test is_manifold_point(M, apply(A, a, m), true; atol=atol)
+                    Test.@test is_manifold_point(M, inverse_apply(A, a, m), true; atol=atol)
                 end
             end
         end
@@ -488,14 +482,14 @@ function ManifoldTests.test_action(
             Test.Test.@testset "over compose" begin
                 a12_a3 = compose(A, a12, a_pts[3])
                 a1_a23 = compose(A, a_pts[1], a23)
-                Test.@test isapprox(G, a12_a3, a1_a23; atol = atol)
+                Test.@test isapprox(G, a12_a3, a1_a23; atol=atol)
             end
 
             Test.Test.@testset "over apply" begin
                 for m in m_pts
                     a12_a3_m = apply(A, a12, apply(A, a_pts[3], m))
                     a1_a23_m = apply(A, a_pts[1], apply(A, a23, m))
-                    Test.@test isapprox(M, a12_a3_m, a1_a23_m; atol = atol)
+                    Test.@test isapprox(M, a12_a3_m, a1_a23_m; atol=atol)
                 end
             end
 
@@ -505,13 +499,13 @@ function ManifoldTests.test_action(
                 Test.@test compose!(A, a23, a_pts[2], a_pts[3]) === a23
                 Test.@test compose!(A, a12_3, a12, a_pts[3]) === a12_3
                 Test.@test compose!(A, a1_23, a_pts[1], a23) === a1_23
-                Test.@test isapprox(G, a12_3, a1_23; atol = atol)
+                Test.@test isapprox(G, a12_3, a1_23; atol=atol)
 
                 for m in m_pts
                     a12_a3_m, a1_a23_m = allocate(m), allocate(m)
                     Test.@test apply!(A, a12_a3_m, a12, apply(A, a_pts[3], m)) === a12_a3_m
                     Test.@test apply!(A, a1_a23_m, a_pts[1], apply(A, a23, m)) === a1_a23_m
-                    Test.@test isapprox(M, a12_a3_m, a1_a23_m; atol = atol)
+                    Test.@test isapprox(M, a12_a3_m, a1_a23_m; atol=atol)
                 end
             end
         end
@@ -520,12 +514,12 @@ function ManifoldTests.test_action(
             Test.@test compose(A, e, e) === e
 
             for a in a_pts
-                Test.@test isapprox(G, compose(A, a, e), a; atol = atol_ident_compose)
-                Test.@test isapprox(G, compose(A, e, a), a; atol = atol_ident_compose)
+                Test.@test isapprox(G, compose(A, a, e), a; atol=atol_ident_compose)
+                Test.@test isapprox(G, compose(A, e, a), a; atol=atol_ident_compose)
 
                 ge = identity(G, a)
-                Test.@test isapprox(G, compose(A, a, ge), a; atol = atol_ident_compose)
-                Test.@test isapprox(G, compose(A, ge, a), a; atol = atol_ident_compose)
+                Test.@test isapprox(G, compose(A, a, ge), a; atol=atol_ident_compose)
+                Test.@test isapprox(G, compose(A, ge, a), a; atol=atol_ident_compose)
 
                 for m in m_pts
                     Test.@test isapprox(M, apply(A, e, m), m)
@@ -573,23 +567,23 @@ function ManifoldTests.test_action(
         Test.Test.@testset "Inverse" begin
             for a in a_pts
                 ainv = inv(G, a)
-                Test.@test isapprox(G, compose(A, a, ainv), e; atol = atol)
-                Test.@test isapprox(G, compose(A, ainv, a), e; atol = atol)
-                Test.@test isapprox(G, e, compose(A, a, ainv); atol = atol)
-                Test.@test isapprox(G, e, compose(A, ainv, a); atol = atol)
+                Test.@test isapprox(G, compose(A, a, ainv), e; atol=atol)
+                Test.@test isapprox(G, compose(A, ainv, a), e; atol=atol)
+                Test.@test isapprox(G, e, compose(A, a, ainv); atol=atol)
+                Test.@test isapprox(G, e, compose(A, ainv, a); atol=atol)
 
                 for m in m_pts
                     Test.@test isapprox(
                         M,
                         apply(A, a, m),
                         inverse_apply(A, ainv, m);
-                        atol = atol,
+                        atol=atol,
                     )
                     Test.@test isapprox(
                         M,
                         apply(A, ainv, m),
                         inverse_apply(A, a, m);
-                        atol = atol,
+                        atol=atol,
                     )
                 end
             end
@@ -601,24 +595,18 @@ function ManifoldTests.test_action(
             for a in a_pts
                 am, av = apply(A, a, m), apply_diff(A, a, m, v)
                 ainvm, ainvv = inverse_apply(A, a, m), inverse_apply_diff(A, a, m, v)
-                Test.@test is_tangent_vector(M, am, av, true; atol = atol)
-                Test.@test is_tangent_vector(M, ainvm, ainvv, true; atol = atol)
+                Test.@test is_tangent_vector(M, am, av, true; atol=atol)
+                Test.@test is_tangent_vector(M, ainvm, ainvv, true; atol=atol)
             end
 
             a12 = compose(A, a_pts[1], a_pts[2])
             a2m = apply(A, a_pts[2], m)
             a12v = apply_diff(A, a12, m, v)
             a2v = apply_diff(A, a_pts[2], m, v)
-            Test.@test isapprox(
-                M,
-                a2m,
-                apply_diff(A, a_pts[1], a2m, a2v),
-                a12v;
-                atol = atol,
-            )
+            Test.@test isapprox(M, a2m, apply_diff(A, a_pts[1], a2m, a2v), a12v; atol=atol)
 
-            Test.@test isapprox(M, m, apply_diff(A, e, m, v), v; atol = atol)
-            Test.@test isapprox(M, m, inverse_apply_diff(A, e, m, v), v; atol = atol)
+            Test.@test isapprox(M, m, apply_diff(A, e, m, v), v; atol=atol)
+            Test.@test isapprox(M, m, inverse_apply_diff(A, e, m, v), v; atol=atol)
         end
 
         test_mutating && Test.Test.@testset "mutating" begin
@@ -630,8 +618,8 @@ function ManifoldTests.test_action(
                     ainvm = inverse_apply(A, a, m)
                     ainvv = allocate(v)
                     Test.@test inverse_apply_diff!(A, ainvv, a, m, v) === ainvv
-                    Test.@test is_tangent_vector(M, am, av, true; atol = atol)
-                    Test.@test is_tangent_vector(M, ainvm, ainvv, true; atol = atol)
+                    Test.@test is_tangent_vector(M, am, av, true; atol=atol)
+                    Test.@test is_tangent_vector(M, ainvm, ainvv, true; atol=atol)
                 end
 
                 a12 = compose(A, a_pts[1], a_pts[2])
@@ -641,14 +629,14 @@ function ManifoldTests.test_action(
                 Test.@test apply_diff!(A, a12v, a12, m, v) === a12v
                 Test.@test apply_diff!(A, a2v, a_pts[2], m, v) === a2v
                 Test.@test apply_diff!(A, a1_a2v, a_pts[1], a2m, a2v) === a1_a2v
-                Test.@test isapprox(M, a12m, a1_a2v, a12v; atol = atol)
+                Test.@test isapprox(M, a12m, a1_a2v, a12v; atol=atol)
 
                 ev = allocate(v)
                 Test.@test apply_diff!(A, ev, e, m, v) === ev
-                Test.@test isapprox(G, m, ev, v; atol = atol)
+                Test.@test isapprox(G, m, ev, v; atol=atol)
                 ev = allocate(v)
                 Test.@test inverse_apply_diff!(A, ev, e, m, v) === ev
-                Test.@test isapprox(G, m, ev, v; atol = atol)
+                Test.@test isapprox(G, m, ev, v; atol=atol)
             end
         end
     end
@@ -657,13 +645,13 @@ function ManifoldTests.test_action(
         act = center_of_orbit(A, [m_pts[1]], m_pts[2])
         act2 = center_of_orbit(A, [m_pts[1]], m_pts[2], GradientDescentEstimation())
         act_opt = optimal_alignment(A, m_pts[2], m_pts[1])
-        Test.@test isapprox(G, act, act_opt; atol = atol)
-        Test.@test isapprox(G, act2, act_opt; atol = atol)
+        Test.@test isapprox(G, act, act_opt; atol=atol)
+        Test.@test isapprox(G, act2, act_opt; atol=atol)
 
         test_mutating && Test.Test.@testset "mutating" begin
             act_opt2 = allocate(act_opt)
             optimal_alignment!(A, act_opt2, m_pts[2], m_pts[1])
-            Test.@test isapprox(G, act_opt, act_opt2; atol = atol)
+            Test.@test isapprox(G, act_opt, act_opt2; atol=atol)
         end
     end
     return nothing

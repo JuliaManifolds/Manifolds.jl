@@ -38,42 +38,42 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_injectivity_radius = false,
-                test_project_point = true,
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                vector_transport_methods = [
+                test_injectivity_radius=false,
+                test_project_point=true,
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                vector_transport_methods=[
                     ParallelTransport(),
                     ProjectionTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
-                tvector_distributions = [Manifolds.normal_tvector_distribution(
+                point_distributions=[Manifolds.uniform_distribution(M, pts[1])],
+                tvector_distributions=[Manifolds.normal_tvector_distribution(
                     M,
                     pts[1],
                     1.0,
                 )],
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                basis_types_vecs = (
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                basis_types_vecs=(
                     DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),
                     basis_types...,
                 ),
-                basis_types_to_from = basis_types,
-                test_vee_hat = false,
-                retraction_methods = [
+                basis_types_to_from=basis_types,
+                test_vee_hat=false,
+                retraction_methods=[
                     ProjectionRetraction(),
                     PolarRetraction(),
                     QRRetraction(),
                 ],
-                inverse_retraction_methods = [
+                inverse_retraction_methods=[
                     ProjectionInverseRetraction(),
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                is_tangent_atol_multiplier = 1,
+                is_tangent_atol_multiplier=1,
             )
         end
 
@@ -146,34 +146,34 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_injectivity_radius = false,
-                test_project_point = true,
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                vector_transport_methods = [
+                test_injectivity_radius=false,
+                test_project_point=true,
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                vector_transport_methods=[
                     ParallelTransport(),
                     ProjectionTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                basis_types_to_from = (DefaultOrthonormalBasis(),),
-                test_vee_hat = false,
-                retraction_methods = [
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                basis_types_to_from=(DefaultOrthonormalBasis(),),
+                test_vee_hat=false,
+                retraction_methods=[
                     ProjectionRetraction(),
                     PolarRetraction(),
                     QRRetraction(),
                 ],
-                inverse_retraction_methods = [
+                inverse_retraction_methods=[
                     ProjectionInverseRetraction(),
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                is_tangent_atol_multiplier = 1,
-                exp_log_atol_multiplier = 10.0^3,
-                retraction_atol_multiplier = 10.0,
+                is_tangent_atol_multiplier=1,
+                exp_log_atol_multiplier=10.0^3,
+                retraction_atol_multiplier=10.0,
             )
         end
 
@@ -256,34 +256,34 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_injectivity_radius = false,
-                test_project_point = true,
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                vector_transport_methods = [
+                test_injectivity_radius=false,
+                test_project_point=true,
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                vector_transport_methods=[
                     ParallelTransport(),
                     ProjectionTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                basis_types_to_from = (DefaultOrthonormalBasis(),),
-                test_vee_hat = false,
-                retraction_methods = [
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                basis_types_to_from=(DefaultOrthonormalBasis(),),
+                test_vee_hat=false,
+                retraction_methods=[
                     ProjectionRetraction(),
                     PolarRetraction(),
                     QRRetraction(),
                 ],
-                inverse_retraction_methods = [
+                inverse_retraction_methods=[
                     ProjectionInverseRetraction(),
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                is_tangent_atol_multiplier = 10,
-                exp_log_atol_multiplier = 10.0^3,
-                retraction_atol_multiplier = 10.0,
+                is_tangent_atol_multiplier=10,
+                exp_log_atol_multiplier=10.0^3,
+                retraction_atol_multiplier=10.0,
             )
         end
 
@@ -307,7 +307,7 @@ include("utils.jl")
     end
 
     @testset "ArrayProjectiveSpace" begin
-        M = ArrayProjectiveSpace(2, 2; field = ℝ)
+        M = ArrayProjectiveSpace(2, 2; field=ℝ)
         @test manifold_dimension(M) == 3
         @test repr(M) == "ArrayProjectiveSpace(2, 2; field = ℝ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℝ}
@@ -319,7 +319,7 @@ include("utils.jl")
         X = project(M, q, Y)
         @test is_tangent_vector(M, q, X)
 
-        M = ArrayProjectiveSpace(2, 2; field = ℂ)
+        M = ArrayProjectiveSpace(2, 2; field=ℂ)
         @test manifold_dimension(M) == 6
         @test repr(M) == "ArrayProjectiveSpace(2, 2; field = ℂ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℂ}

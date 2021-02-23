@@ -182,7 +182,7 @@ function group_exp(M::ValidationManifold, X; kwargs...)
         make_identity(M.manifold, array_value(X)),
         array_value(X),
         true;
-        check_base_point = false,
+        check_base_point=false,
         kwargs...,
     )
     q = array_point(group_exp(M.manifold, array_value(X)))
@@ -196,7 +196,7 @@ function group_exp!(M::ValidationManifold, q, X; kwargs...)
         make_identity(M.manifold, array_value(X)),
         array_value(X),
         true;
-        check_base_point = false,
+        check_base_point=false,
         kwargs...,
     )
     group_exp!(M.manifold, array_value(q), array_value(X))
@@ -212,7 +212,7 @@ function group_log(M::ValidationManifold, q; kwargs...)
         make_identity(M.manifold, array_value(X)),
         array_value(X),
         true;
-        check_base_point = false,
+        check_base_point=false,
         kwargs...,
     )
     return X
@@ -226,7 +226,7 @@ function group_log!(M::ValidationManifold, X, q; kwargs...)
         make_identity(M.manifold, array_value(X)),
         array_value(X),
         true;
-        check_base_point = false,
+        check_base_point=false,
         kwargs...,
     )
     return X

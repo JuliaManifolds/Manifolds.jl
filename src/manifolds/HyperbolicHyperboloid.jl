@@ -15,7 +15,7 @@ function check_manifold_point(M::Hyperbolic, p::HyperboloidPoint; kwargs...)
     return check_manifold_point(M, p.value; kwargs...)
 end
 
-function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwargs...)
+function check_tangent_vector(M::Hyperbolic, p, X; check_base_point=true, kwargs...)
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
@@ -26,7 +26,7 @@ function check_tangent_vector(M::Hyperbolic, p, X; check_base_point = true, kwar
         M,
         p,
         X;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -269,7 +269,7 @@ function get_basis(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)
         end
         κ[1] = 0.0
     end
-    V = gram_schmidt(M, p, V; atol = 4 * eps(eltype(V[1])))
+    V = gram_schmidt(M, p, V; atol=4 * eps(eltype(V[1])))
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, κ, V))
 end
 
@@ -314,8 +314,8 @@ end
 
 Given the [`Hyperbolic`](@ref)`(n)` manifold using the hyperboloid model, a point from the
 $q\in ℝ^n$ can be set onto the manifold by computing its last component such that for the
-resulting `p` we have that its [`minkowski_metric`](@ref) is $⟨p,p⟩_{\mathrm{M}} = - 1$,
-i.e. $p_{n+1} = \sqrt{\lVert q \rVert^2-^}$
+resulting `p` we have that its [`minkowski_metric`](@ref) is ``⟨p,p⟩_{\mathrm{M}} = - 1``,
+i.e. ``p_{n+1} = \sqrt{\lVert q \rVert^2 - 1}``
 """
 _hyperbolize(M::Hyperbolic, q) = vcat(q, sqrt(norm(q)^2 + 1))
 

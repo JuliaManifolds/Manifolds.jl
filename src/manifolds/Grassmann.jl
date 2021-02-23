@@ -53,7 +53,7 @@ case `field = ℝ` is the default.
 """
 struct Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
-Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ) = Grassmann{n,k,field}()
+Grassmann(n::Int, k::Int, field::AbstractNumbers=ℝ) = Grassmann{n,k,field}()
 
 function allocation_promotion_function(M::Grassmann{n,k,ℂ}, f, args::Tuple) where {n,k}
     return complex
@@ -97,7 +97,7 @@ function check_tangent_vector(
     M::Grassmann{n,k,𝔽},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {n,k,𝔽}
     if check_base_point
@@ -110,7 +110,7 @@ function check_tangent_vector(
         M,
         p,
         X;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -123,7 +123,7 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(::Grassmann{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field = 𝔽)
+decorated_manifold(::Grassmann{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field=𝔽)
 
 @doc raw"""
     distance(M::Grassmann, p, q)

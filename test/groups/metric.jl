@@ -118,11 +118,11 @@ invariant_metric_dispatch(::TestDefaultInvariantMetricManifold, ::RightAction) =
 
         G = MetricManifold(SO3, InvariantMetric(TestBiInvariantMetricBase(), LeftAction()))
         @test isapprox(SO3, exp(G, p, X), exp(SO3, p, X))
-        @test isapprox(SO3, p, log(G, p, q), log(SO3, p, q); atol = 1e-6)
+        @test isapprox(SO3, p, log(G, p, q), log(SO3, p, q); atol=1e-6)
 
         G = MetricManifold(SO3, InvariantMetric(TestBiInvariantMetricBase(), RightAction()))
         @test isapprox(SO3, exp(G, p, X), exp(SO3, p, X))
-        @test isapprox(SO3, p, log(G, p, q), log(SO3, p, q); atol = 1e-6)
+        @test isapprox(SO3, p, log(G, p, q), log(SO3, p, q); atol=1e-6)
     end
 
     @testset "exp τ-invariant" begin

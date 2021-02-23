@@ -24,7 +24,7 @@ Generate the manifold of $n × n$ symmetric matrices.
 struct SkewSymmetricMatrices{n,𝔽} <:
        AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
 
-function SkewSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ)
+function SkewSymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
     return SkewSymmetricMatrices{n,field}()
 end
 
@@ -72,7 +72,7 @@ function check_tangent_vector(
     M::SkewSymmetricMatrices{n,𝔽},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {n,𝔽}
     if check_base_point
@@ -85,7 +85,7 @@ function check_tangent_vector(
         M,
         p,
         X;
-        check_base_point = false, # already checked above
+        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -98,7 +98,7 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(M::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field = 𝔽)
+decorated_manifold(M::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
 
 function get_basis(M::SkewSymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
     Ξ = get_basis(M, p, DefaultOrthonormalBasis()).data

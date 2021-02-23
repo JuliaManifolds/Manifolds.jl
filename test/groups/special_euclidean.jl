@@ -66,8 +66,8 @@ include("group_utils.jl")
                     pts,
                     v_pts,
                     v_pts;
-                    test_diff = true,
-                    diff_convs = [(), (LeftAction(),)],
+                    test_diff=true,
+                    diff_convs=[(), (LeftAction(),)],
                 )
             end
         end
@@ -100,8 +100,8 @@ include("group_utils.jl")
                 pts,
                 v_pts,
                 v_pts;
-                test_diff = true,
-                diff_convs = [(), (LeftAction(),)],
+                test_diff=true,
+                diff_convs=[(), (LeftAction(),)],
             )
         end
 
@@ -113,8 +113,8 @@ include("group_utils.jl")
                 pts,
                 v_pts,
                 v_pts;
-                test_diff = true,
-                diff_convs = [(), (LeftAction(),)],
+                test_diff=true,
+                diff_convs=[(), (LeftAction(),)],
             )
         end
 

@@ -76,7 +76,7 @@ CotangentBundleFibers(M::Manifold) = VectorBundleFibers(CotangentSpace, M)
         𝔽,
         TFiber<:VectorBundleFibers{<:VectorSpaceType,<:Manifold{𝔽}},
         TX,
-    } <: Manifold{𝔽}   
+    } <: Manifold{𝔽}
 
 A vector space at a point `p` on the manifold.
 This is modelled using [`VectorBundleFibers`](@ref) with only a vector-like part
@@ -581,6 +581,19 @@ end
 
 Base.@propagate_inbounds Base.getindex(x::FVector, i) = getindex(x.data, i)
 
+"""
+    getindex(p::ProductRepr, M::VectorBundle, s::Symbol)
+    p[M::VectorBundle, s]
+
+Access the element(s) at index `s` of a point `p` on a [`VectorBundle`](@ref) `M` by
+using the symbols `:point` and `:vector` for the base and vector component, respectively.
+"""
+@inline function Base.getindex(p::ProductRepr, M::VectorBundle, s::Symbol)
+    (s === :point) && return submanifold_component(M, p, Val(1))
+    (s === :vector) && return submanifold_component(M, p, Val(2))
+    return throw(DomainError(s, "unknown component $s on $M."))
+end
+
 @doc raw"""
     injectivity_radius(M::TangentSpaceAtPoint)
 
@@ -633,8 +646,12 @@ function inner(B::VectorBundle, p, X, Y)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
-    return inner(B.manifold, px, VXM, VYM) + inner(B.fiber, Vx, VXF, VYF)
+    # for tangent bundle Vx is discarded by the method of inner for TangentSpaceAtPoint
+    # and px is actually used as the base point
+    return inner(B.manifold, px, VXM, VYM) +
+           inner(VectorSpaceAtPoint(B.fiber, px), Vx, VXF, VYF)
 end
+
 """
     inner(M::TangentSpaceAtPoint, p, X, Y)
 
@@ -698,7 +715,7 @@ function log!(B::VectorBundle, X, p, q)
     copyto!(VXF, VXF - Vx)
     return X
 end
-function log!(M::TangentSpaceAtPoint, X, p, q)
+function log!(::TangentSpaceAtPoint, X, p, q)
     copyto!(X, q - p)
     return X
 end
@@ -736,7 +753,6 @@ The projection is calculated by projecting the point $x_p$ to the manifold $\mat
 and then projecting the vector $V_p$ to the tangent space $T_{x_p}\mathcal M$.
 """
 project(::VectorBundle, ::Any)
-
 
 @doc raw"""
     project(M::TangentSpaceAtPoint, p)
@@ -815,6 +831,27 @@ end
 
 Base.@propagate_inbounds Base.setindex!(x::FVector, val, i) = setindex!(x.data, val, i)
 
+"""
+    setindex!(p::ProductRepr, val, M::VectorBundle, s::Symbol)
+    p[M::VectorBundle, s] = val
+
+Set the element(s) at index `s` of a point `p` on a [`VectorBundle`](@ref) `M` to `val` by
+using the symbols `:point` and `:vector` for the base and vector component, respectively.
+
+!!! note
+
+    The *content* of element of `p` is replaced, not the element itself.
+"""
+@inline function Base.setindex!(x::ProductRepr, val, M::VectorBundle, s::Symbol)
+    if s === :point
+        return copyto!(submanifold_component(M, x, Val(1)), val)
+    elseif s === :vector
+        return copyto!(submanifold_component(M, x, Val(2)), val)
+    else
+        throw(DomainError(s, "unknown component $s on $M."))
+    end
+end
+
 function representation_size(B::VectorBundleFibers{<:TCoTSpaceType})
     return representation_size(B.manifold)
 end
@@ -869,18 +906,18 @@ function Base.show(io::IO, ::MIME"text/plain", vs::VectorSpaceAtPoint)
     summary(io, vs)
     println(io, "\nFiber:")
     pre = " "
-    sf = sprint(show, "text/plain", vs.fiber; context = io, sizehint = 0)
+    sf = sprint(show, "text/plain", vs.fiber; context=io, sizehint=0)
     sf = replace(sf, '\n' => "\n$(pre)")
     println(io, pre, sf)
     println(io, "Base point:")
-    sp = sprint(show, "text/plain", vs.point; context = io, sizehint = 0)
+    sp = sprint(show, "text/plain", vs.point; context=io, sizehint=0)
     sp = replace(sp, '\n' => "\n$(pre)")
     return print(io, pre, sp)
 end
 function Base.show(io::IO, ::MIME"text/plain", TpM::TangentSpaceAtPoint)
     println(io, "Tangent space to the manifold $(base_manifold(TpM)) at point:")
     pre = " "
-    sp = sprint(show, "text/plain", TpM.point; context = io, sizehint = 0)
+    sp = sprint(show, "text/plain", TpM.point; context=io, sizehint=0)
     sp = replace(sp, '\n' => "\n$(pre)")
     return print(io, pre, sp)
 end
@@ -981,7 +1018,7 @@ end
 function vector_transport_to!(M::VectorBundle, Y, p, X, q)
     return vector_transport_to!(M, Y, p, X, q, M.vector_transport)
 end
-function vector_transport_to!(M::VectorBundle, Y, p, X, q, m::VectorBundleVectorTransport)
+function vector_transport_to!(M::TangentBundle, Y, p, X, q, m::VectorBundleVectorTransport)
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     VYM, VYF = submanifold_components(M.manifold, Y)
@@ -990,6 +1027,24 @@ function vector_transport_to!(M::VectorBundle, Y, p, X, q, m::VectorBundleVector
     vector_transport_to!(M.manifold, VYF, px, VXF, qx, m.method_vector)
     return Y
 end
+function vector_transport_to!(
+    M::TangentBundle,
+    Y,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod,
+)
+    return vector_transport_to!(M, Y, p, X, q, VectorBundleVectorTransport(m, m))
+end
+@invoke_maker 6 AbstractVectorTransportMethod vector_transport_to!(
+    M::TangentBundle,
+    Y,
+    p,
+    X,
+    q,
+    m::PoleLadderTransport,
+)
 function vector_transport_to!(M::TangentSpaceAtPoint, Y, p, X, q)
     return copyto!(Y, X)
 end

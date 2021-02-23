@@ -33,7 +33,7 @@ normal_coord_to_vector(M, x, rθ, B) = get_vector(M, x, collect(polar_to_cart(r�
 
 normal_coord_to_point(M, x, rθ, B) = exp(M, x, normal_coord_to_vector(M, x, rθ, B))
 
-function plot_normal_coord!(ax, M, x, B, rs, θs; ncirc = 9, options = Dict(), kwargs...)
+function plot_normal_coord!(ax, M, x, B, rs, θs; ncirc=9, options=Dict(), kwargs...)
     for r in rs[2:(end - 1)]
         push!(
             ax,
@@ -43,7 +43,7 @@ function plot_normal_coord!(ax, M, x, B, rs, θs; ncirc = 9, options = Dict(), k
             ),
         )
     end
-    for θ in range(0, 2π; length = ncirc)
+    for θ in range(0, 2π; length=ncirc)
         push!(
             ax,
             Plot3(
@@ -55,7 +55,7 @@ function plot_normal_coord!(ax, M, x, B, rs, θs; ncirc = 9, options = Dict(), k
     return ax
 end
 
-function plot_patch!(ax, M, x, B, r, θs; options = Dict())
+function plot_patch!(ax, M, x, B, r, θs; options=Dict())
     push!(
         ax,
         Plot3(
@@ -66,9 +66,9 @@ function plot_patch!(ax, M, x, B, r, θs; options = Dict())
     return ax
 end
 
-function plot_geodesic!(ax, M, x, y; n = 100, options = Dict())
+function plot_geodesic!(ax, M, x, y; n=100, options=Dict())
     γ = shortest_geodesic(M, x, y)
-    T = range(0, 1; length = n)
+    T = range(0, 1; length=n)
     push!(ax, Plot3(options, Coordinates(Tuple.(γ(T)))))
     return ax
 end
@@ -125,8 +125,8 @@ else
         ymax = 1.0,
     })
 end
-rs = range(0, π / 5; length = 6)
-θs = range(0, 2π; length = 100)
+rs = range(0, π / 5; length=6)
+θs = range(0, 2π; length=100)
 
 #
 # Plot manifold patches
@@ -139,14 +139,14 @@ for i in eachindex(base_points)
     B = DiagonalizingOrthonormalBasis(basis_vectors[i])
     basis = get_basis(S, x, B)
     optionsP = @pgf {fill = patch_colors[i], draw = "none", opacity = patch_opacity}
-    plot_patch!(tp, S, x, basis, π / 5, θs; options = optionsP)
+    plot_patch!(tp, S, x, basis, π / 5, θs; options=optionsP)
     optionsL = @pgf {
         meshlinestyle,
         color = dark_mode ? "white" : "black",
         line_width = mesh_line_width,
         opacity = mesh_opacity,
     }
-    plot_normal_coord!(tp, S, x, basis, rs, θs; options = optionsL)
+    plot_normal_coord!(tp, S, x, basis, rs, θs; options=optionsL)
 end
 
 #
@@ -158,9 +158,9 @@ options = @pgf {
     line_width = geo_line_width,
     color = dark_mode ? "white" : "black",
 }
-plot_geodesic!(tp, S, base_points[1], base_points[2]; options = options)
-plot_geodesic!(tp, S, base_points[1], base_points[3]; options = options)
-plot_geodesic!(tp, S, base_points[2], base_points[3]; options = options)
+plot_geodesic!(tp, S, base_points[1], base_points[2]; options=options)
+plot_geodesic!(tp, S, base_points[1], base_points[3]; options=options)
+plot_geodesic!(tp, S, base_points[2], base_points[3]; options=options)
 
 #
 # Export Logo.

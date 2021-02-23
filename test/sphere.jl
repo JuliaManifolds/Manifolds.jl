@@ -38,28 +38,28 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_reverse_diff = isa(T, Vector),
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                vector_transport_methods = [
+                test_reverse_diff=isa(T, Vector),
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                vector_transport_methods=[
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                test_mutating_rand = isa(T, Vector),
-                point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
-                tvector_distributions = [Manifolds.normal_tvector_distribution(
+                test_mutating_rand=isa(T, Vector),
+                point_distributions=[Manifolds.uniform_distribution(M, pts[1])],
+                tvector_distributions=[Manifolds.normal_tvector_distribution(
                     M,
                     pts[1],
                     1.0,
                 )],
-                basis_types_vecs = (DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),),
-                basis_types_to_from = basis_types,
-                test_vee_hat = false,
-                retraction_methods = [ProjectionRetraction(), ExponentialRetraction()],
-                inverse_retraction_methods = [ProjectionInverseRetraction()],
-                is_tangent_atol_multiplier = 1,
+                basis_types_vecs=(DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),),
+                basis_types_to_from=basis_types,
+                test_vee_hat=false,
+                retraction_methods=[ProjectionRetraction(), ExponentialRetraction()],
+                inverse_retraction_methods=[ProjectionInverseRetraction()],
+                is_tangent_atol_multiplier=1,
             )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end
@@ -113,14 +113,14 @@ include("utils.jl")
         x = normalize(randn(n + 1))
         v = log(M, x, -x)
         @test norm(v) ≈ π
-        @test isapprox(dot(x, v), 0; atol = 1e-12)
+        @test isapprox(dot(x, v), 0; atol=1e-12)
         vexp = normalize(project(M, x, [1, zeros(n)...]))
         @test v ≈ π * vexp
 
         x = [1, zeros(n)...]
         v = log(M, x, -x)
         @test norm(v) ≈ π
-        @test isapprox(dot(x, v), 0; atol = 1e-12)
+        @test isapprox(dot(x, v), 0; atol=1e-12)
         vexp = normalize(project(M, x, [0, 1, zeros(n - 1)...]))
         @test v ≈ π * vexp
     end
@@ -135,7 +135,7 @@ include("utils.jl")
         @test is_manifold_point(M, q)
         Y = [2.0, 1.0im, 20.0]
         X = project(M, q, Y)
-        @test is_tangent_vector(M, q, X, true; atol = 10^(-14))
+        @test is_tangent_vector(M, q, X, true; atol=10^(-14))
     end
 
     @testset "Quaternion Sphere" begin
@@ -148,11 +148,11 @@ include("utils.jl")
         @test is_manifold_point(M, q)
         Y = [Quaternion(2.0), Quaternion(1.0im), Quaternion(0.0, 0.0, 20.0, 0.0)]
         X = project(M, q, Y)
-        @test is_tangent_vector(M, q, X, true; atol = 10^(-14))
+        @test is_tangent_vector(M, q, X, true; atol=10^(-14))
     end
 
     @testset "Array Sphere" begin
-        M = ArraySphere(2, 2; field = ℝ)
+        M = ArraySphere(2, 2; field=ℝ)
         @test repr(M) == "ArraySphere(2, 2; field = ℝ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℝ}
         @test representation_size(M) == (2, 2)
@@ -162,7 +162,7 @@ include("utils.jl")
         Y = [1.0 0.0; 0.0 1.1]
         X = project(M, q, Y)
         @test is_tangent_vector(M, q, X)
-        M = ArraySphere(2, 2; field = ℂ)
+        M = ArraySphere(2, 2; field=ℂ)
 
         @test repr(M) == "ArraySphere(2, 2; field = ℂ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℂ}

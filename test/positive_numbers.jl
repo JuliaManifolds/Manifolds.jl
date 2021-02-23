@@ -11,7 +11,7 @@ include("utils.jl")
         @test manifold_dimension(M) == 1
         @test !is_manifold_point(M, -1.0)
         @test_throws DomainError is_manifold_point(M, -1.0, true)
-        @test is_tangent_vector(M, 1.0, 0.0; check_base_point = false)
+        @test is_tangent_vector(M, 1.0, 0.0; check_base_point=false)
         @test flat(M, 1.0, FVector(TangentSpace, 1.0)) == FVector(CotangentSpace, 1.0)
         @test sharp(M, 1.0, FVector(CotangentSpace, 1.0)) == FVector(TangentSpace, 1.0)
         @test vector_transport_to(M, 1.0, 3.0, 2.0, ParallelTransport()) == 6.0
@@ -34,14 +34,14 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                test_vector_spaces = false,
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                test_vee_hat = false,
-                is_mutating = false,
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                test_vector_spaces=false,
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                test_vee_hat=false,
+                is_mutating=false,
             )
         end
     end
@@ -52,13 +52,13 @@ include("utils.jl")
             test_manifold(
                 M2,
                 pts2,
-                test_forward_diff = false,
-                test_reverse_diff = false,
-                test_vector_spaces = false,
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                test_vee_hat = false,
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                test_vector_spaces=false,
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                test_vee_hat=false,
             )
         end
     end

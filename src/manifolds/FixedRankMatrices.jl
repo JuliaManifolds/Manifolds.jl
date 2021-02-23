@@ -43,7 +43,7 @@ Generate the manifold of `m`-by-`n` (`field`-valued) matrices of rank `k`.
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
 struct FixedRankMatrices{M,N,K,𝔽} <: Manifold{𝔽} end
-function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers = ℝ)
+function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers=ℝ)
     return FixedRankMatrices{m,n,k,field}()
 end
 
@@ -171,7 +171,7 @@ function check_tangent_vector(
     M::FixedRankMatrices{m,n,k},
     p::SVDMPoint,
     X::UMVTVector;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {m,n,k}
     if check_base_point
@@ -180,7 +180,7 @@ function check_tangent_vector(
     end
     if (size(X.U) != (m, k)) || (size(X.Vt) != (k, n)) || (size(X.M) != (k, k))
         return DomainError(
-            cat(size(X.U), size(X.M), size(X.Vt), dims = 1),
+            cat(size(X.U), size(X.M), size(X.Vt), dims=1),
             "The tangent vector $(X) is not a tangent vector to $(p) on $(M), since matrix dimensions do not agree (expected $(m)x$(k), $(k)x$(k), $(k)x$(n)).",
         )
     end
@@ -307,15 +307,15 @@ function Base.show(io::IO, mime::MIME"text/plain", p::SVDMPoint)
     pre = " "
     summary(io, p)
     println(io, "\nU factor:")
-    su = sprint(show, "text/plain", p.U; context = io, sizehint = 0)
+    su = sprint(show, "text/plain", p.U; context=io, sizehint=0)
     su = replace(su, '\n' => "\n$(pre)")
     println(io, pre, su)
     println(io, "singular values:")
-    ss = sprint(show, "text/plain", p.S; context = io, sizehint = 0)
+    ss = sprint(show, "text/plain", p.S; context=io, sizehint=0)
     ss = replace(ss, '\n' => "\n$(pre)")
     println(io, pre, ss)
     println(io, "Vt factor:")
-    sv = sprint(show, "text/plain", p.Vt; context = io, sizehint = 0)
+    sv = sprint(show, "text/plain", p.Vt; context=io, sizehint=0)
     sv = replace(sv, '\n' => "\n$(pre)")
     return print(io, pre, sv)
 end
@@ -323,15 +323,15 @@ function Base.show(io::IO, mime::MIME"text/plain", X::UMVTVector)
     pre = " "
     summary(io, X)
     println(io, "\nU factor:")
-    su = sprint(show, "text/plain", X.U; context = io, sizehint = 0)
+    su = sprint(show, "text/plain", X.U; context=io, sizehint=0)
     su = replace(su, '\n' => "\n$(pre)")
     println(io, pre, su)
     println(io, "M factor:")
-    sm = sprint(show, "text/plain", X.M; context = io, sizehint = 0)
+    sm = sprint(show, "text/plain", X.M; context=io, sizehint=0)
     sm = replace(sm, '\n' => "\n$(pre)")
     println(io, pre, sm)
     println(io, "Vt factor:")
-    sv = sprint(show, "text/plain", X.Vt; context = io, sizehint = 0)
+    sv = sprint(show, "text/plain", X.Vt; context=io, sizehint=0)
     sv = replace(sv, '\n' => "\n$(pre)")
     return print(io, pre, sv)
 end
