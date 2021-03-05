@@ -827,12 +827,6 @@ function allocate_result(B::VectorBundleFibers, f, x...)
     T = allocate_result_type(B, f, x)
     return allocate(x[1], T)
 end
-function allocate_result(M::Manifold, ::typeof(flat), w::TFVector, x)
-    return FVector(CotangentSpace, allocate(w.data))
-end
-function allocate_result(M::Manifold, ::typeof(sharp), w::CoTFVector, x)
-    return FVector(TangentSpace, allocate(w.data))
-end
 
 """
     allocate_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where N
@@ -862,23 +856,14 @@ Determine the vector tranport used for [`exp`](@ref exp(::VectorBundle, ::Any...
 """
 vector_bundle_transport(::VectorSpaceType, ::Manifold) = ParallelTransport()
 
-"""
-    vector_space_dimension(B::VectorBundleFibers)
-
-Dimension of the vector space of type `B`.
-"""
 function vector_space_dimension(B::VectorBundleFibers)
-    return error(
-        "vector_space_dimension not implemented for vector space family $(typeof(B)).",
-    )
+    return vector_space_dimension(B.manifold, B.fiber)
 end
-function vector_space_dimension(B::VectorBundleFibers{<:TCoTSpaceType})
-    return manifold_dimension(B.manifold)
-end
-function vector_space_dimension(B::VectorBundleFibers{<:TensorProductType})
+
+function vector_space_dimension(M::Manifold, V::TensorProductType)
     dim = 1
-    for space in B.fiber.spaces
-        dim *= vector_space_dimension(VectorBundleFibers(space, B.manifold))
+    for space in V.spaces
+        dim *= vector_space_dimension(M, space)
     end
     return dim
 end

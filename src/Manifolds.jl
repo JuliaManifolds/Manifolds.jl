@@ -54,6 +54,7 @@ import ManifoldsBase:
     retract,
     retract!,
     set_component!,
+    vector_space_dimension,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,

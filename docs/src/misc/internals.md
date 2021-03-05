@@ -15,4 +15,5 @@ Manifolds.usinc
 Manifolds.usinc_from_cos
 Manifolds.vec2skew!
 Manifolds.ziptuples
+Manifolds.ProductArray
 ```
