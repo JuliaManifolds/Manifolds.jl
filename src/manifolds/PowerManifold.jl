@@ -147,6 +147,14 @@ Base.@propagate_inbounds @inline function _read(
 end
 Base.@propagate_inbounds @inline function _read(
     ::PowerManifoldMultidimensional,
+    rep_size::Tuple{},
+    x::AbstractArray,
+    i::NTuple{N,Int},
+) where {N}
+    return x[i...]
+end
+Base.@propagate_inbounds @inline function _read(
+    ::PowerManifoldMultidimensional,
     rep_size::Tuple,
     x::HybridArray,
     i::Tuple,
