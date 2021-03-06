@@ -1,9 +1,47 @@
 # Stiefel
 
+## Common and metric independent functions
+
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["manifolds/Stiefel.jl"]
 Order = [:type, :function]
+```
+
+## Default metric: the Euclidean metric
+
+The [`EuclideanMetric`](@ref) is obtained from the embedding of the Stiefel manifold in ``ℝ^{n,k}``.
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/StiefelEuclideanMetric.jl"]
+Order = [:function]
+```
+
+## The canonical metric
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/StiefelCanonicalMetric.jl"]
+Order = [:type]
+```
+
+Any ``X∈T_p\mathcal M``, ``p∈\mathcal M``, can be written as
+
+```math
+X = pA + (I_n-pp^{\mathrm{T}})B,
+\quad
+A ∈ ℝ^{p\imes p} \text{skew-symmetric},
+B ∈ ℝ^{n\times p} \text{arbitrary.}
+```
+
+In the Euclidean case, the elements from ``A`` are counted twice (i.e. weighted with a factor of 2).
+The canonical metric avoids this.
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/StiefelCanonicalMetric.jl"]
+Order = [:function]
 ```
 
 ## Literature

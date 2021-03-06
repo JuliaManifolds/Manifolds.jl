@@ -13,9 +13,9 @@ manifold, see for example[^EdelmanAriasSmith1998].
 """
 struct CanonicalMetric <: RiemannianMetric end
 
-"""
-    q = exp(MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, p, X)
-    exp!(MetricManifold{ℝ, Stiefel{n,k,ℝ}, q, CanonicalMetric}, p, X)
+@doc raw"""
+    q = exp(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, p, X)
+    exp!(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, q, CanonicalMetric}, p, X)
 
 Compute the exponential map on the [`Stiefel`](@ref)`(n,k)` manifold with respect to the [`CanonicalMetric`](@ref).
 
@@ -49,19 +49,33 @@ q = \exp_p X = pC + QB.
 ```
 For more details, see [^EdelmanAriasSmith1998][^Zimmermann2017].
 """
-exp(::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, ::Any...) where {n,k}
+exp(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, ::Any...) where {n,k}
 
-function exp!(::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, Q, p, X) where{n,k}
-    A = p'*X
-    QR = qr(X-p*A)
-    BC_ext = exp([A -QR.R'; QR.R, zeros(k,k)])
-    q .= [p Matrix(QR.Q)] * BC_ext[:,1:k]
+function exp!(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, Q, p, X) where {n,k}
+    A = p' * X
+    QR = qr(X - p * A)
+    BC_ext = exp([A -QR.R'; QR.R, zeros(k, k)])
+    q .= [p Matrix(QR.Q)] * BC_ext[:, 1:k]
     return q
 end
 
+@doc raw"""
+    inner(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, X, CanonicalMetric}, p,, X, Y)
+
+compute the inner procuct on the [`Stiefel`](@ref) manifold with respect to the
+[`CanonicalMetric`](@ref). The formula reads
+
+```
+g_p(X,Y) = \operatorname{tr}\bigl( X^{\mathrm{T}}(I_n - \frac{1}{2}pp^{\mathrm{T}})Y \bigr).
+```
 """
-    X = log(MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, p, q)
-    log!(MetricManifold{ℝ, Stiefel{n,k,ℝ}, X, CanonicalMetric}, p, q)
+function inner(::MetricManifold{ℝ,Stiefel{n,k,ℝ},X,CanonicalMetric}, p, X, Y) where {n,k}
+    return tr(X' * (Matrix(I, n, n) - 0.5 * p * p') * Y)
+end
+
+@doc raw"""
+    X = log(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, p, q)
+    log!(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, X, CanonicalMetric}, p, q)
 
 Compute the logarithmic map on the [`Stiefel`](@ref)`(n,k)` manifold with respect to the [`CanonicalMetric`](@ref)
 using a matrix-algebraic based approach to an iterative inversion of the formula of the
@@ -75,21 +89,27 @@ The algorithm is derived in[^Zimmermann2017].
     > doi: [10.1137/16M1074485](https://doi.org/10.1137/16M1074485),
     > arXiv: [1604.05054](https://arxiv.org/abs/1604.05054).
 """
-log(::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, ::Any...) where {n,k}
+log(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, ::Any...) where {n,k}
 
-function log!(::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, p, q; tolerance=1e-9, maxiter=1e5) where{n,k}
-    M = p'*q
-    QR = qr(q-p*M)
-    V = qr([M;Matrix(QR.R)]).Q*Matrix(I, 2*k,2*k)
-    S = svd(V[(k+1):2*k, (k+1):2k]) #bottom right corner
-    V[:,(k+1):2*k] = V[:,(k+1):2*k]*(S.V*S.U')
+function log!(
+    ::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
+    p,
+    q;
+    tolerance=1e-9,
+    maxiter=1e5,
+) where {n,k}
+    M = p' * q
+    QR = qr(q - p * M)
+    V = qr([M; Matrix(QR.R)]).Q * Matrix(I, 2 * k, 2 * k)
+    S = svd(V[(k + 1):(2 * k), (k + 1):(2k)]) #bottom right corner
+    V[:, (k + 1):(2 * k)] = V[:, (k + 1):(2 * k)] * (S.V * S.U')
     LV = log(V)
-    C = view(LV, (k+1):2*k, (k+1):2*k)
-    i=0
+    C = view(LV, (k + 1):(2 * k), (k + 1):(2 * k))
+    i = 0
     while (i < maxiter) && (norm(C) > tolerance)
         LV = log(V)
-        V[:, (k+1):2*k] *= exp(-C)
+        V[:, (k + 1):(2 * k)] *= exp(-C)
     end
-    X .= p*LV[1:k,1:k] + QR.Q*LV[(k+1):2*k, 1:k]
+    X .= p * LV[1:k, 1:k] + QR.Q * LV[(k + 1):(2 * k), 1:k]
     return X
 end

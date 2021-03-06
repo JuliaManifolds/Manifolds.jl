@@ -1,10 +1,6 @@
 default_metric_dispatch(::Stiefel, ::EuclideanMetric) = Val(true)
 
-function decorator_transparent_dispatch(
-    ::typeof(distance),
-    ::Stiefel,
-    args...,
-)
+function decorator_transparent_dispatch(::typeof(distance), ::Stiefel, args...)
     return Val(:intransparent)
 end
 

@@ -46,7 +46,7 @@ makedocs(
                 "Rotations" => "manifolds/rotations.md",
                 "Skew-symmetric matrices" => "manifolds/skewsymmetric.md",
                 "Spectrahedron" => "manifolds/spectrahedron.md",
-                "Sphere" => "manifolds/sphere.md",
+#                "Sphere" => "manifolds/sphere.md",
                 "Stiefel" => "manifolds/stiefel.md",
                 "Symmetric matrices" => "manifolds/symmetric.md",
                 "Symmetric positive definite" =>
