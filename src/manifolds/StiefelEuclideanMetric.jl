@@ -29,12 +29,8 @@ $0_k$ are the identity matrix and the zero matrix of dimension $k × k$, respect
 exp(::Stiefel, ::Any...)
 
 function exp!(::Stiefel{n,k}, q, p, X) where {n,k}
-    return copyto!(
-        q,
-        [p X] *
-        exp([p'X -X'*X; one(zeros(eltype(p), k, k)) p'*X]) *
-        [exp(-p'X); zeros(eltype(p), k, k)],
-    )
+    A = p'*X
+    return copyto!(q, [p X] * exp([A -X'*X; I p'*X]) * [exp(-A); 0*I])
 end
 
 @doc raw"""
@@ -74,7 +70,7 @@ function get_coordinates!(
     B::DefaultOrthonormalBasis{ℝ},
 ) where {n,k}
     V = get_vectors(M, p, B)
-    c .= [inner(M, p, v, X) for v in V]
+    c .= inner.(Ref(M), Ref(p), V, Ref(X))
     return c
 end
 
@@ -135,7 +131,9 @@ project(::Stiefel, ::Any...)
 
 function project!(::Stiefel, Y, p, X)
     A = p' * X
-    copyto!(Y, X - p * Hermitian((A + A') / 2))
+    T = eltype(Y)
+    copyto!(Y, X)
+    mul!(Y, p, A + A', T(-0.5), true)
     return Y
 end
 

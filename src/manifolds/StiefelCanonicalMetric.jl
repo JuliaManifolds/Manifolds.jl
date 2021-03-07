@@ -54,8 +54,8 @@ exp(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, ::Any...) where {n,k
 function exp!(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, Q, p, X) where {n,k}
     A = p' * X
     QR = qr(X - p * A)
-    BC_ext = exp([A -QR.R'; QR.R, zeros(k, k)])
-    q .= [p Matrix(QR.Q)] * BC_ext[:, 1:k]
+    BC_ext = exp([A -QR.R'; QR.R 0*I])
+    q .= [p Matrix(QR.Q)] * @view(BC_ext[:, 1:k])
     return q
 end
 
@@ -70,7 +70,7 @@ g_p(X,Y) = \operatorname{tr}\bigl( X^{\mathrm{T}}(I_n - \frac{1}{2}pp^{\mathrm{T
 ```
 """
 function inner(::MetricManifold{ℝ,Stiefel{n,k,ℝ},X,CanonicalMetric}, p, X, Y) where {n,k}
-    return tr(X' * (Matrix(I, n, n) - 0.5 * p * p') * Y)
+    return dot(X, (Y .- (p * (p'Y)) ./ 2))
 end
 
 @doc raw"""
@@ -93,6 +93,7 @@ log(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, ::Any...) where {n,k
 
 function log!(
     ::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
+    X,
     p,
     q;
     tolerance=1e-9,
@@ -100,16 +101,19 @@ function log!(
 ) where {n,k}
     M = p' * q
     QR = qr(q - p * M)
-    V = qr([M; Matrix(QR.R)]).Q * Matrix(I, 2 * k, 2 * k)
-    S = svd(V[(k + 1):(2 * k), (k + 1):(2k)]) #bottom right corner
-    V[:, (k + 1):(2 * k)] = V[:, (k + 1):(2 * k)] * (S.V * S.U')
+    V = Matrix(qr([M; QR.R]).Q)
+    Vcorner = @view V[(k + 1):(2 * k), (k + 1):(2k)] #bottom right corner
+    S = svd!(Vcorner)
+    mul!(Vcorner, Vcorner * S.V, S.U')
     LV = log(V)
     C = view(LV, (k + 1):(2 * k), (k + 1):(2 * k))
+    expnC = exp(-C)
     i = 0
     while (i < maxiter) && (norm(C) > tolerance)
         LV = log(V)
-        V[:, (k + 1):(2 * k)] *= exp(-C)
+        copyto!(Vcorner, Vcorner*expnC)
     end
-    X .= p * LV[1:k, 1:k] + QR.Q * LV[(k + 1):(2 * k), 1:k]
+    mul!(X, p, @view(LV[1:k, 1:k]))
+    mul!(X, QR.Q, @view(LV[(k + 1):(2 * k), 1:k]), true, true)
     return X
 end
