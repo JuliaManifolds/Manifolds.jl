@@ -107,11 +107,11 @@ function log!(
 ) where {n,k}
     M = p' * q
     QR = qr(q - p * M)
-    V = Matrix(qr([M; QR.R]).Q*I)
+    V = Matrix(qr([M; QR.R]).Q * I)
     Vcorner = @view V[(k + 1):(2 * k), (k + 1):(2k)] #bottom right corner
     S = svd!(Vcorner)
     mul!(Vcorner, Vcorner * S.U, S.V')
-    V[:,1:k] .= [M; QR.R]
+    V[:, 1:k] .= [M; QR.R]
     LV = real(log(V))
     C = view(LV, (k + 1):(2 * k), (k + 1):(2 * k))
     expnC = exp(-C)
@@ -121,6 +121,7 @@ function log!(
         copyto!(Vcorner, Vcorner * expnC)
     end
     mul!(X, p, @view(LV[1:k, 1:k]))
-    mul!(X, QR.Q, @view(LV[(k + 1):(2 * k), 1:k]), true, true)
+    # force the first - Q - to be the reduced form, not the full matrix
+    mul!(X, @view(QR.Q[:, 1:k]), @view(LV[(k + 1):(2 * k), 1:k]), true, true)
     return X
 end
