@@ -117,7 +117,7 @@ function log!(
     i = 0
     while (i < maxiter) && (norm(C) > tolerance)
         LV = log(V)
-        copyto!(Vcorner, Vcorner*expnC)
+        copyto!(Vcorner, Vcorner * expnC)
     end
     mul!(X, p, @view(LV[1:k, 1:k]))
     mul!(X, QR.Q, @view(LV[(k + 1):(2 * k), 1:k]), true, true)

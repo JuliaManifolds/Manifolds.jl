@@ -29,8 +29,8 @@ $0_k$ are the identity matrix and the zero matrix of dimension $k × k$, respect
 exp(::Stiefel, ::Any...)
 
 function exp!(::Stiefel{n,k}, q, p, X) where {n,k}
-    A = p'*X
-    return copyto!(q, [p X] * exp([A -X'*X; I A]) * [exp(-A); 0*I])
+    A = p' * X
+    return copyto!(q, [p X] * exp([A -X'*X; I A]) * [exp(-A); 0 * I])
 end
 
 @doc raw"""
