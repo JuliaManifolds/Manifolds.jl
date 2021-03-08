@@ -26,7 +26,6 @@ using Manifolds: default_metric_dispatch
                 1 * im * zero_tangent_vector(M, x),
                 true,
             )
-
         end
         @testset "Embedding and Projection" begin
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
@@ -304,7 +303,7 @@ using Manifolds: default_metric_dispatch
     end
 
     @testset "Canonical Metric" begin
-        M3 = MetricManifold(Stiefel(3,2), CanonicalMetric())
+        M3 = MetricManifold(Stiefel(3, 2), CanonicalMetric())
         p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
         X = [0.0 0.0; 0.0 0.0; 1.0 1.0]
         q = exp(M3, p, X)
