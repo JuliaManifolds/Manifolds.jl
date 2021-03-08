@@ -53,6 +53,7 @@ exp(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, ::Any...) where {n,k
 
 function exp!(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, Q, p, X) where {n,k}
     A = p' * X
+    n == k && return mul!(q, p, exp(A))
     QR = qr(X - p * A)
     BC_ext = exp([A -QR.R'; QR.R 0*I])
     q .= [p Matrix(QR.Q)] * @view(BC_ext[:, 1:k])
@@ -70,7 +71,12 @@ g_p(X,Y) = \operatorname{tr}\bigl( X^{\mathrm{T}}(I_n - \frac{1}{2}pp^{\mathrm{T
 ```
 """
 function inner(::MetricManifold{ℝ,Stiefel{n,k,ℝ},X,CanonicalMetric}, p, X, Y) where {n,k}
-    return dot(X, (Y .- (p * (p'Y)) ./ 2))
+    T = Base.promote_eltype(p, X, Y)
+    s = T(dot(X, Y))
+    if n != k
+        s -= dot(p'X, p'Y) / 2
+    end
+    return s
 end
 
 @doc raw"""
