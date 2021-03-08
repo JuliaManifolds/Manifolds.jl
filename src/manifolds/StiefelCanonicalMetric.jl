@@ -26,8 +26,8 @@ respect to ``p``, i.e.
 X = pp^{\mathrm{T}}X + (I_n-pp^{\mathrm{T}})X,
 ```
 where ``I_n`` is the ``n\times n`` identity matrix.
-We introduce ``A=p^{\mathrm{T}}X`` and ``QR = (I_n-pp^{\mathrm{T}})X``` the qr decomposition
-of the vertical component. Then using the matrix exponential ``operatorname{Exp}`` we introduce ``B`` and ``C`` as
+We introduce ``A=p^{\mathrm{T}}X`` and ``QR = (I_n-pp^{\mathrm{T}})X`` the `qr` decomposition
+of the vertical component. Then using the matrix exponential ``\operatorname{Exp}`` we introduce ``B`` and ``C`` as
 
 ```math
 \begin{pmatrix}
@@ -66,11 +66,11 @@ end
 compute the inner procuct on the [`Stiefel`](@ref) manifold with respect to the
 [`CanonicalMetric`](@ref). The formula reads
 
-```
+```math
 g_p(X,Y) = \operatorname{tr}\bigl( X^{\mathrm{T}}(I_n - \frac{1}{2}pp^{\mathrm{T}})Y \bigr).
 ```
 """
-function inner(::MetricManifold{ℝ,Stiefel{n,k,ℝ},X,CanonicalMetric}, p, X, Y) where {n,k}
+function inner(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, p, X, Y) where {n,k}
     T = Base.promote_eltype(p, X, Y)
     s = T(dot(X, Y))
     if n != k
@@ -85,7 +85,7 @@ end
 
 Compute the logarithmic map on the [`Stiefel`](@ref)`(n,k)` manifold with respect to the [`CanonicalMetric`](@ref)
 using a matrix-algebraic based approach to an iterative inversion of the formula of the
-[`exp`](@ref exp(::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, ::Any...)).
+[`exp`](@ref exp(::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, ::Any...) where {n,k}).
 
 The algorithm is derived in[^Zimmermann2017].
 
