@@ -106,14 +106,14 @@ end
 
 Base.@propagate_inbounds function Base.getindex(
     p::AbstractArray,
-    M::AbstractPowerManifold,
+    M::PowerManifoldMultidimensional,
     I::Integer...,
 )
     return collect(get_component(M, p, I...))
 end
 Base.@propagate_inbounds function Base.getindex(
     p::AbstractArray{T,N},
-    M::AbstractPowerManifold,
+    M::PowerManifoldMultidimensional,
     I::Vararg{Integer,N},
 ) where {T,N}
     return get_component(M, p, I...)
