@@ -333,6 +333,7 @@ export Metric,
     MinkowskiMetric,
     PowerMetric,
     ProductMetric,
+    CanonicalMetric,
     MetricManifold
 export AbstractEmbeddingType, AbstractIsometricEmbeddingType
 export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding

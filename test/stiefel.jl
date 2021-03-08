@@ -1,11 +1,15 @@
 include("utils.jl")
 
+using Manifolds: default_metric_dispatch
+
 @testset "Stiefel" begin
     @testset "Real" begin
         M = Stiefel(3, 2)
+        M2 = MetricManifold(M, EuclideanMetric())
         @testset "Basics" begin
             @test repr(M) == "Stiefel(3, 2, ℝ)"
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            @test (@inferred default_metric_dispatch(M2)) === Val(true)
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 3
             base_manifold(M) === M
@@ -22,6 +26,7 @@ include("utils.jl")
                 1 * im * zero_tangent_vector(M, x),
                 true,
             )
+
         end
         @testset "Embedding and Projection" begin
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
@@ -92,6 +97,7 @@ include("utils.jl")
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             y = exp(M, x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
             z = exp(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0])
+            @test_throws ErrorException distance(M, x, y)
             @test isapprox(
                 M,
                 retract(
@@ -295,5 +301,17 @@ include("utils.jl")
         @test repr(r2) == "PadeRetraction(2)"
         q2 = retract(M, p, X, r2)
         @test is_manifold_point(M, q2)
+    end
+
+    @testset "Canonical Metric" begin
+        M3 = MetricManifold(Stiefel(3,2), CanonicalMetric())
+        p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+        X = [0.0 0.0; 0.0 0.0; 1.0 1.0]
+        q = exp(M3, p, X)
+        Y = [0.0 0.0; 0.0 0.0; -1.0 1.0]
+        r = exp(M3, p, Y)
+        @test isapprox(M3, p, log(M3, p, q), X)
+        @test isapprox(M3, p, log(M3, p, r), Y)
+        @test inner(M3, p, X, Y) == 0
     end
 end

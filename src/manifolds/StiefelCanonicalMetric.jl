@@ -51,7 +51,7 @@ For more details, see [^EdelmanAriasSmith1998][^Zimmermann2017].
 """
 exp(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, ::Any...) where {n,k}
 
-function exp!(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, Q, p, X) where {n,k}
+function exp!(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, q, p, X) where {n,k}
     A = p' * X
     n == k && return mul!(q, p, exp(A))
     QR = qr(X - p * A)
@@ -107,11 +107,12 @@ function log!(
 ) where {n,k}
     M = p' * q
     QR = qr(q - p * M)
-    V = Matrix(qr([M; QR.R]).Q)
+    V = Matrix(qr([M; QR.R]).Q*I)
     Vcorner = @view V[(k + 1):(2 * k), (k + 1):(2k)] #bottom right corner
     S = svd!(Vcorner)
-    mul!(Vcorner, Vcorner * S.V, S.U')
-    LV = log(V)
+    mul!(Vcorner, Vcorner * S.U, S.V')
+    V[:,1:k] .= [M; QR.R]
+    LV = real(log(V))
     C = view(LV, (k + 1):(2 * k), (k + 1):(2 * k))
     expnC = exp(-C)
     i = 0
