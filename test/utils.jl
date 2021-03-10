@@ -40,7 +40,7 @@ end
 
 @testset "utils" begin
     @testset "log_safe!" begin
-        n = 10
+        n = 8
         Q = qr(randn(n, n)).Q
         A1 = Q * Diagonal(rand(n)) * Q'
         @test exp(Manifolds.log_safe!(similar(A1), A1)) ≈ A1
