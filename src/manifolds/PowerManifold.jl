@@ -104,6 +104,21 @@ function flat!(M::AbstractPowerManifold, ξ::CoTFVector, p, X::TFVector)
     return ξ
 end
 
+Base.@propagate_inbounds function Base.getindex(
+    p::AbstractArray,
+    M::PowerManifoldMultidimensional,
+    I::Integer...,
+)
+    return collect(get_component(M, p, I...))
+end
+Base.@propagate_inbounds function Base.getindex(
+    p::AbstractArray{T,N},
+    M::PowerManifoldMultidimensional,
+    I::Vararg{Integer,N},
+) where {T,N}
+    return get_component(M, p, I...)
+end
+
 function Random.rand(rng::AbstractRNG, d::PowerFVectorDistribution)
     fv = zero_vector(d.type, d.point)
     Distributions._rand!(rng, d, fv)
@@ -147,11 +162,28 @@ Base.@propagate_inbounds @inline function _read(
 end
 Base.@propagate_inbounds @inline function _read(
     ::PowerManifoldMultidimensional,
+    rep_size::Tuple{},
+    x::AbstractArray,
+    i::NTuple{N,Int},
+) where {N}
+    return x[i...]
+end
+Base.@propagate_inbounds @inline function _read(
+    ::PowerManifoldMultidimensional,
     rep_size::Tuple,
     x::HybridArray,
     i::Tuple,
 )
     return x[rep_size_to_colons(rep_size)..., i...]
+end
+Base.@propagate_inbounds @inline function _read(
+    ::PowerManifoldMultidimensional,
+    rep_size::Tuple{},
+    x::HybridArray,
+    i::NTuple{N,Int},
+) where {N}
+    # disambiguation
+    return x[i...]
 end
 
 function representation_size(M::PowerManifold{𝔽,<:Manifold,TSize}) where {𝔽,TSize}
