@@ -129,9 +129,6 @@ inner(::GeneralLinear, p, X, Y) = dot(X, Y)
 
 invariant_metric_dispatch(::GeneralLinear, ::LeftAction) = Val(true)
 
-inverse_translate(::GeneralLinear, p, q, ::LeftAction) = p \ q
-inverse_translate(::GeneralLinear, p, q, ::RightAction) = q / p
-
 inverse_translate_diff(::GeneralLinear, p, q, X, ::LeftAction) = X
 inverse_translate_diff(::GeneralLinear, p, q, X, ::RightAction) = p * X / p
 
