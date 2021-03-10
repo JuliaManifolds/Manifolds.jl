@@ -68,6 +68,48 @@ converted to a `Matrix` before computing the log.
     return SizedMatrix{s[1],s[2]}(log(Matrix(parent(x))))
 end
 
+# NOTE: workaround until https://github.com/JuliaLang/julia/pull/39973 or similar is merged
+"""
+    log_safe!(y, x)
+
+Compute the matrix logarithm of `x`. If the eltype of `y` is real, then the imaginary part
+of `x` is ignored, and a `DomainError` is raised if `real(x)` has no real logarithm.
+"""
+function log_safe!(Y, A)
+    if eltype(Y) <: Real
+        if ishermitian(A)
+            eigenF = eigen(Symmetric(real(A)))
+            i = findfirst(≤(0), eigenF.values)
+            if i !== nothing
+                throw(DomainError(eigenF.values[i], "All eigenvalues must be positive to compute a real logarithm."))
+            end
+            mul!(Y, eigenF.vectors .* log.(eigenF.values'), eigenF.vectors')
+        elseif istriu(A)
+            i = findfirst(≤(0), @view(A[diagind(A)]))
+            if i !== nothing
+                throw(DomainError(A[i,i], "All eigenvalues must be positive to compute a real logarithm."))
+            end
+            copyto!(Y, real(log(UpperTriangular(A))))
+        else
+            schurF = schur(convert(Matrix, real(A)))
+            i = findfirst(x -> isreal(x) && real(x) ≤ 0, schurF.values)
+            if i !== nothing
+                throw(DomainError(schurF.values[i], "All eigenvalues must be positive to compute a real logarithm."))
+            end
+            if istriu(schurF.T)
+                mul!(Y, schurF.Z, real(log(UpperTriangular(schurF.T))) * schurF.Z')
+            else
+                schurS = schur(complex(schurF.T))
+                Y .= real.(schurS.Z * log(UpperTriangular(schurS.T)) * schurS.Z')
+                mul!(Y, schurF.Z * Y, schurF.Z')
+            end
+        end
+    else
+        copyto!(Y, log_safe(A))
+    end
+    return Y
+end
+
 """
     mul!_safe(Y, A, B) -> Y
 
