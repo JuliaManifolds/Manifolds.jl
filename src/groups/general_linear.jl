@@ -67,6 +67,8 @@ decorated_manifold(::GeneralLinear{n,𝔽}) where {n,𝔽} = Euclidean(n, n; fie
 default_metric_dispatch(::GeneralLinear, ::EuclideanMetric) = Val(true)
 default_metric_dispatch(::GeneralLinear, ::LeftInvariantMetric{EuclideanMetric}) = Val(true)
 
+distance(G::GeneralLinear, p, q) = norm(G, p, log(G, p, q))
+
 function exp!(G::GeneralLinear, q, p, X)
     expX = exp(X)
     if isnormal(X; atol = sqrt(eps(real(eltype(X)))))
