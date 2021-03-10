@@ -72,9 +72,9 @@ using NLsolve
                 ],
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
-                exp_log_atol_multiplier = 1e8,
+                exp_log_atol_multiplier = 1e10,
                 retraction_atol_multiplier = 1e8,
-                is_tangent_atol_multiplier = 1e8,
+                is_tangent_atol_multiplier = 1e10,
             )
         end
     end
