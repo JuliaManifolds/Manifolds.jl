@@ -87,7 +87,6 @@ function project!(::SpecialLinear{n}, q, p) where {n}
     detp = det(p)
     isapprox(detp, 1) && return copyto!(q, p)
     F = svd(p)
-    d = similar(F.S)
     q .= F.U .* F.S'
     q[:, n] ./= detp
     mul!_safe(q, q, F.Vt)
