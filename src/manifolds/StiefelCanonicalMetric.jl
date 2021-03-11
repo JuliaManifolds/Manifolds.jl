@@ -65,7 +65,7 @@ function exp!(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, q, p, X) w
 end
 
 @doc raw"""
-    inner(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, X, CanonicalMetric}, p,, X, Y)
+    inner(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, X, CanonicalMetric}, p, X, Y)
 
 compute the inner procuct on the [`Stiefel`](@ref) manifold with respect to the
 [`CanonicalMetric`](@ref). The formula reads
