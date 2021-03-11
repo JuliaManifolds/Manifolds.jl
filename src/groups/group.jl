@@ -1056,7 +1056,4 @@ function group_exp!(G::MultiplicationGroup, q, X)
     )
 end
 
-function group_log!(G::MultiplicationGroup, X, q)
-    q isa AbstractMatrix && return log_safe!(X, q)
-    return error("group_log! not implemented on $(typeof(G)) for element $(typeof(q)) and vector $(typeof(X)).")
-end
+group_log!(::MultiplicationGroup, X::AbstractMatrix, q::AbstractMatrix) = log_safe!(X, q)
