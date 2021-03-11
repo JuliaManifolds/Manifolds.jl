@@ -13,6 +13,10 @@ manifold, see for example[^EdelmanAriasSmith1998].
 """
 struct CanonicalMetric <: RiemannianMetric end
 
+function distance(M::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, q, p) where {n,k}
+    return norm(M, p, log(M, p, q))
+end
+
 @doc raw"""
     q = exp(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, p, X)
     exp!(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, q, CanonicalMetric}, p, X)
@@ -80,14 +84,19 @@ function inner(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, p, X, Y) 
 end
 
 @doc raw"""
-    X = log(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, p, q)
-    log!(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, X, CanonicalMetric}, p, q)
+    X = log(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, p, q; kwargs..)
+    log!(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, X, CanonicalMetric}, p, q; kwargs...)
 
 Compute the logarithmic map on the [`Stiefel`](@ref)`(n,k)` manifold with respect to the [`CanonicalMetric`](@ref)
 using a matrix-algebraic based approach to an iterative inversion of the formula of the
 [`exp`](@ref exp(::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, ::Any...) where {n,k}).
 
 The algorithm is derived in[^Zimmermann2017].
+
+# Keyword arguments
+
+Both `maxiter`(`=1e5`) and `tolerance`(`=1e-9`) can be given to the iterative process as
+stoppping criteria.
 
 [^Zimmermann2017]:
     > Zimmermann, R.: _A matrix-algebraic algorithm for the Riemannian logarithm on the Stiefel manifold under the canoncial metric.
@@ -97,13 +106,25 @@ The algorithm is derived in[^Zimmermann2017].
 """
 log(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, ::Any...) where {n,k}
 
+function log(
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
+    p,
+    q;
+    maxiter=1e5,
+    tolerance=1e-9,
+) where {n,k}
+    X = allocate_result(M, log, p, q)
+    log!(M, X, p, q; maxiter=maxiter, tolerance=tolerance)
+    return X
+end
+
 function log!(
     ::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
     X,
     p,
     q;
-    tolerance=1e-9,
     maxiter=1e5,
+    tolerance=1e-9,
 ) where {n,k}
     M = p' * q
     QR = qr(q - p * M)
@@ -119,11 +140,13 @@ function log!(
     expnC = exp(-C)
     i = 0
     while (i < maxiter) && (norm(C) > tolerance)
+        println("q\n",q)
         i = i + 1
         LV .= real.(log(V))
         expnC .= exp(-C)
         copyto!(Vpcols, Vpcols * expnC)
     end
+    (i>0) && println(i)
     LV .= real.(LV)
     mul!(X, p, @view(LV[1:k, 1:k]))
     # force the first - Q - to be the reduced form, not the full matrix

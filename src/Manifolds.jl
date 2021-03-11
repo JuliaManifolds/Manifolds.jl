@@ -40,6 +40,7 @@ import ManifoldsBase:
     is_tangent_vector,
     inverse_retract,
     inverse_retract!,
+    log, #for extension, e.g. in Stiefel.
     log!,
     manifold_dimension,
     mid_point,

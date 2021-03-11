@@ -312,6 +312,8 @@ using Manifolds: default_metric_dispatch
         @test isapprox(M3, p, log(M3, p, q), X)
         @test isapprox(M3, p, log(M3, p, r), Y)
         @test inner(M3, p, X, Y) == 0
+        @test inner(M3, p, X, 2*X + 3*Y) == 2*inner(M3, p, X, X)
+        @test norm(M3, p, X) ≈ distance(M3, p, q)
         a = 1.4
         Z = [0.0 2a; -2a 0.0; -a/2 a/2]
         s = exp(M3, p, Z)
