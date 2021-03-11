@@ -33,7 +33,7 @@ function allocation_promotion_function(::GeneralLinear{n,ℂ}, f, ::Tuple) where
     return complex
 end
 
-function check_manifold_point(G::GeneralLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
+function check_manifold_point(G::GeneralLinear, p; kwargs...)
     mpv = check_manifold_point(decorated_manifold(G), p; kwargs...)
     mpv === nothing || return mpv
     detp = det(p)
@@ -44,6 +44,10 @@ function check_manifold_point(G::GeneralLinear{n,𝔽}, p; kwargs...) where {n,�
         )
     end
     return nothing
+end
+check_manifold_point(::GT, ::Identity{GT}; kwargs...) where {GT<:GeneralLinear} = nothing
+function check_manifold_point(G::GeneralLinear, e::Identity; kwargs...)
+    return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
 
 function check_tangent_vector(
