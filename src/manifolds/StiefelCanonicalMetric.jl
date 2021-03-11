@@ -107,19 +107,20 @@ function log!(
 ) where {n,k}
     M = p' * q
     QR = qr(q - p * M)
-    V = Complex.(Matrix(qr([M; QR.R]).Q * I))
+    V = Matrix(qr([M; QR.R]).Q * I)
     Vcorner = @view V[(k + 1):(2 * k), (k + 1):(2k)] #bottom right corner
-    Vpcols = @view V[:, (k + 1):(2 * k)]
-    S = svd!(Vcorner)
-    mul!(Vcorner, Vcorner * S.U, S.V')
+    Vpcols = @view V[:, (k + 1):(2 * k)] #second half of the columns
+    S = svd(Vcorner) # preprocessing: Procrustes
+    mul!(Vpcols, Vpcols * S.U, S.V')
     V[:, 1:k] .= [M; QR.R]
-    LV = log(V)
+
+    LV = real.(log(V)) # this can be replaced by log_safe.
     C = view(LV, (k + 1):(2 * k), (k + 1):(2 * k))
     expnC = exp(-C)
     i = 0
     while (i < maxiter) && (norm(C) > tolerance)
         i = i + 1
-        LV .= log(V)
+        LV .= real.(log(V))
         expnC .= exp(-C)
         copyto!(Vpcols, Vpcols * expnC)
     end

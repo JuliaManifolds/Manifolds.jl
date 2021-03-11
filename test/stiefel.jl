@@ -316,6 +316,6 @@ using Manifolds: default_metric_dispatch
         Z = [0.0 2a; -2a 0.0; -a/2 a/2]
         s = exp(M3, p, Z)
         Z2 = log(M3, p, s)
-        @test_broken isapprox(M3, p, Z, Z2)
+        @test isapprox(M3, p, Z, Z2)
     end
 end
