@@ -7,7 +7,7 @@ function allocation_promotion_function(::SpecialLinear{n,ℂ}, f, args::Tuple) w
     return complex
 end
 
-function check_manifold_point(G::SpecialLinear, p; kwargs...)
+function check_manifold_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
     mpv = check_manifold_point(Euclidean(n, n; field=𝔽), p; kwargs...)
     mpv === nothing || return mpv
     detp = det(p)
