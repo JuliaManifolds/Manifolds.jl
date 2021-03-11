@@ -44,7 +44,7 @@ end
         Q = qr(randn(n, n)).Q
         A1 = Q * Diagonal(rand(n)) * Q'
         @test exp(Manifolds.log_safe!(similar(A1), A1)) ≈ A1
-        A1_fail = Q * Diagonal([-1; rand(n-1)]) * Q'
+        A1_fail = Q * Diagonal([-1; rand(n - 1)]) * Q'
         @test_throws DomainError Manifolds.log_safe!(similar(A1_fail), A1_fail)
 
         T = triu!(randn(n, n))

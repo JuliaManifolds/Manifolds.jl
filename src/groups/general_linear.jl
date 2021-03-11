@@ -27,7 +27,7 @@ instead represented with their corresponding Lie algebra vectors.
 struct GeneralLinear{n,𝔽} <:
        AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType} end
 
-GeneralLinear(n, 𝔽::AbstractNumbers = ℝ) = GeneralLinear{n,𝔽}()
+GeneralLinear(n, 𝔽::AbstractNumbers=ℝ) = GeneralLinear{n,𝔽}()
 
 function allocation_promotion_function(::GeneralLinear{n,ℂ}, f, ::Tuple) where {n}
     return complex
@@ -54,7 +54,7 @@ function check_tangent_vector(
     G::GeneralLinear{n,𝔽},
     p,
     X;
-    check_base_point = true,
+    check_base_point=true,
     kwargs...,
 ) where {n,𝔽}
     if check_base_point
@@ -66,7 +66,7 @@ function check_tangent_vector(
     return nothing
 end
 
-decorated_manifold(::GeneralLinear{n,𝔽}) where {n,𝔽} = Euclidean(n, n; field = 𝔽)
+decorated_manifold(::GeneralLinear{n,𝔽}) where {n,𝔽} = Euclidean(n, n; field=𝔽)
 
 default_metric_dispatch(::GeneralLinear, ::EuclideanMetric) = Val(true)
 default_metric_dispatch(::GeneralLinear, ::LeftInvariantMetric{EuclideanMetric}) = Val(true)
@@ -75,7 +75,7 @@ distance(G::GeneralLinear, p, q) = norm(G, p, log(G, p, q))
 
 function exp!(G::GeneralLinear, q, p, X)
     expX = exp(X)
-    if isnormal(X; atol = sqrt(eps(real(eltype(X)))))
+    if isnormal(X; atol=sqrt(eps(real(eltype(X)))))
         return compose!(G, q, p, expX)
     end
     compose!(G, q, expX', exp(X - X'))
@@ -88,7 +88,7 @@ function exp!(::GeneralLinear{1}, q, p, X)
     return q
 end
 function exp!(G::GeneralLinear{2}, q, p, X)
-    if isnormal(X; atol = sqrt(eps(real(eltype(X)))))
+    if isnormal(X; atol=sqrt(eps(real(eltype(X)))))
         return compose!(G, q, p, exp(SizedMatrix{2,2}(X)))
     end
     A = SizedMatrix{2,2}(X')
@@ -142,7 +142,7 @@ function inverse_translate_diff!(G::GeneralLinear, Y, p, q, X, conv::ActionDirec
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
 end
 
-function _log_project_SOn_S⁺!(X, q, n = size(q, 1))
+function _log_project_SOn_S⁺!(X, q, n=size(q, 1))
     F = svd(q)
     d = allocate(q, n)
     s = mean(F.S)
@@ -155,14 +155,14 @@ function log!(G::GeneralLinear{n}, X, p, q) where {n}
     pinvq = inverse_translate(G, p, q, LeftAction())
     number_system(G) === ℝ && det(pinvq) ≤ 0 && throw(OutOfInjectivityRadiusError())
     e = Identity(G, pinvq)
-    if isnormal(pinvq; atol = sqrt(eps(real(eltype(pinvq)))))
+    if isnormal(pinvq; atol=sqrt(eps(real(eltype(pinvq)))))
         log_safe!(X, pinvq)
     else
         𝔽 = number_system(G)
         if 𝔽 === ℝ
             _log_project_SOn_S⁺!(X, pinvq, n)
             inverse_retraction = ApproximateInverseRetraction(ExponentialRetraction())
-            inverse_retract!(G, X, e, pinvq, inverse_retraction; X0 = X)
+            inverse_retract!(G, X, e, pinvq, inverse_retraction; X0=X)
         else
             # compute the equivalent logarithm on GL(dim(𝔽) * n, ℝ)
             Gᵣ = GeneralLinear(real_dimension(𝔽) * n, ℝ)

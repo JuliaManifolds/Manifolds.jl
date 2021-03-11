@@ -24,14 +24,12 @@ using NLsolve
 
         @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(true)
         @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(false)
-        @test is_default_metric(MetricManifold(
-            G,
-            InvariantMetric(EuclideanMetric(), LeftAction()),
-        )) === true
-        @test Manifolds.default_metric_dispatch(MetricManifold(
-            G,
-            InvariantMetric(EuclideanMetric(), LeftAction()),
-        )) === Val{true}()
+        @test is_default_metric(
+            MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction())),
+        ) === true
+        @test Manifolds.default_metric_dispatch(
+            MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction())),
+        ) === Val{true}()
     end
 
     @testset "Real" begin
@@ -59,28 +57,28 @@ using NLsolve
         for T in types
             gpts = convert.(T, pts)
             vgpts = convert.(T, vpts)
-            test_group(G, gpts, vgpts, vgpts; test_diff = true, test_invariance = true)
+            test_group(G, gpts, vgpts, vgpts; test_diff=true, test_invariance=true)
             test_manifold(
                 G,
                 gpts;
-                test_reverse_diff = false,
-                test_forward_diff = false,
-                test_project_point = true,
-                test_injectivity_radius = false,
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                vector_transport_methods = [
+                test_reverse_diff=false,
+                test_forward_diff=false,
+                test_project_point=true,
+                test_injectivity_radius=false,
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                vector_transport_methods=[
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
-                basis_types_vecs = basis_types,
-                basis_types_to_from = basis_types,
-                exp_log_atol_multiplier = 1e7,
-                retraction_atol_multiplier = 1e7,
+                retraction_methods=retraction_methods,
+                inverse_retraction_methods=inverse_retraction_methods,
+                basis_types_vecs=basis_types,
+                basis_types_to_from=basis_types,
+                exp_log_atol_multiplier=1e7,
+                retraction_atol_multiplier=1e7,
             )
         end
     end
@@ -108,26 +106,26 @@ using NLsolve
         for T in types
             gpts = convert.(T, pts)
             vgpts = convert.(T, vpts)
-            test_group(G, gpts, vgpts, vgpts; test_diff = true, test_invariance = true)
+            test_group(G, gpts, vgpts, vgpts; test_diff=true, test_invariance=true)
             test_manifold(
                 G,
                 gpts;
-                test_reverse_diff = false,
-                test_forward_diff = false,
-                test_project_point = true,
-                test_injectivity_radius = false,
-                test_project_tangent = true,
-                test_musical_isomorphisms = true,
-                test_default_vector_transport = true,
-                vector_transport_methods = [
+                test_reverse_diff=false,
+                test_forward_diff=false,
+                test_project_point=true,
+                test_injectivity_radius=false,
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_default_vector_transport=true,
+                vector_transport_methods=[
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                retraction_methods = retraction_methods,
-                inverse_retraction_methods = inverse_retraction_methods,
-                exp_log_atol_multiplier = 1e8,
-                retraction_atol_multiplier = 1e8,
+                retraction_methods=retraction_methods,
+                inverse_retraction_methods=inverse_retraction_methods,
+                exp_log_atol_multiplier=1e8,
+                retraction_atol_multiplier=1e8,
             )
         end
     end

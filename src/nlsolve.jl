@@ -66,8 +66,8 @@ function inverse_retract!(
     p,
     q,
     method::ApproximateInverseRetraction;
-    X0 = zero_tangent_vector(M, p),
-    nlsolve_kwargs = NamedTuple(),
+    X0=zero_tangent_vector(M, p),
+    nlsolve_kwargs=NamedTuple(),
     kwargs...,
 )
     # TODO: this should probably use Optim and do manifold optimization on the Frobenius norm

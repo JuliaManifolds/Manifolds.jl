@@ -81,20 +81,35 @@ function log_safe!(Y, A)
             eigenF = eigen(Symmetric(real(A)))
             i = findfirst(≤(0), eigenF.values)
             if i !== nothing
-                throw(DomainError(eigenF.values[i], "All eigenvalues must be positive to compute a real logarithm."))
+                throw(
+                    DomainError(
+                        eigenF.values[i],
+                        "All eigenvalues must be positive to compute a real logarithm.",
+                    ),
+                )
             end
             mul!(Y, eigenF.vectors .* log.(eigenF.values'), eigenF.vectors')
         elseif istriu(A)
             i = findfirst(≤(0), @view(A[diagind(A)]))
             if i !== nothing
-                throw(DomainError(A[i,i], "All eigenvalues must be positive to compute a real logarithm."))
+                throw(
+                    DomainError(
+                        A[i, i],
+                        "All eigenvalues must be positive to compute a real logarithm.",
+                    ),
+                )
             end
             copyto!(Y, real(log(UpperTriangular(A))))
         else
             schurF = schur(convert(Matrix, real(A)))
             i = findfirst(x -> isreal(x) && real(x) ≤ 0, schurF.values)
             if i !== nothing
-                throw(DomainError(schurF.values[i], "All eigenvalues must be positive to compute a real logarithm."))
+                throw(
+                    DomainError(
+                        schurF.values[i],
+                        "All eigenvalues must be positive to compute a real logarithm.",
+                    ),
+                )
             end
             if istriu(schurF.T)
                 mul!(Y, schurF.Z, real(log(UpperTriangular(schurF.T))) * schurF.Z')
@@ -138,7 +153,6 @@ function realify(X, 𝔽)
 end
 realify(X, ::typeof(ℝ)) = X
 
-
 """
     realify!(Y::AbstractMatrix{<:Real}, X::AbstractMatrix{T𝔽}, 𝔽::AbstractNumbers)
 
@@ -156,7 +170,7 @@ where
 Y = \begin{pmatrix}A & -B \\ B & A \end{pmatrix}.
 ````
 """
-function realify!(Y, X, ::typeof(ℂ), n = LinearAlgebra.checksquare(X))
+function realify!(Y, X, ::typeof(ℂ), n=LinearAlgebra.checksquare(X))
     axul, axlr = 1:n, (n + 1):(2n)
     @views begin
         Y[axul, axul] .= Y[axlr, axlr] .= real.(X)
@@ -178,7 +192,7 @@ See [`realify!`](@ref) for the inverse of this function.
 """
 unrealify!(X, Y, 𝔽)
 
-function unrealify!(X, Y, ::typeof(ℂ), n = LinearAlgebra.checksquare(X))
+function unrealify!(X, Y, ::typeof(ℂ), n=LinearAlgebra.checksquare(X))
     axul, axlr = 1:n, (n + 1):(2n)
     @views begin
         X .=
