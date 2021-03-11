@@ -140,13 +140,11 @@ function log!(
     expnC = exp(-C)
     i = 0
     while (i < maxiter) && (norm(C) > tolerance)
-        println("q\n",q)
         i = i + 1
         LV .= real.(log(V))
         expnC .= exp(-C)
         copyto!(Vpcols, Vpcols * expnC)
     end
-    (i>0) && println(i)
     LV .= real.(LV)
     mul!(X, p, @view(LV[1:k, 1:k]))
     # force the first - Q - to be the reduced form, not the full matrix
