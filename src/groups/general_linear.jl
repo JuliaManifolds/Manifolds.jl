@@ -10,19 +10,6 @@ $$⟨X_p,Y_p⟩_p = ⟨p^{-1}X_p,p^{-1}Y_p⟩_\mathrm{F} = ⟨X_e, Y_e⟩_\mathr
 where $X_e = p^{-1}X_p ∈ 𝔤l(n) = T_e \mathrm{GL}(n, 𝔽) = 𝔽^{n×n}$ is the corresponding
 vector in the Lie algebra. In the default implementations, all tangent vectors $X_p$ are
 instead represented with their corresponding Lie algebra vectors.
-
-[^MartinNeff2016]:
-    > Martin, R. J. and Neff, P.:
-    > “Minimal geodesics on GL(n) for left-invariant, right-O(n)-invariant Riemannian metrics”,
-    > Journal of Geometric Mechanics 8(3), pp. 323-357, 2016.
-    > doi: [10.3934/jgm.2016010](https://doi.org/10.3934/jgm.2016010),
-    > arXiv: [1409.7849v2](https://arxiv.org/abs/1409.7849v2).
-[^AndruchowLarotondaRechtVarela2014]:
-    > Andruchow E., Larotonda G., Recht L., and Varela A.:
-    > “The left invariant metric in the general linear group”,
-    > Journal of Geometry and Physics 86, pp. 241-257, 2014.
-    > doi: [10.1016/j.geomphys.2014.08.009](https://doi.org/10.1016/j.geomphys.2014.08.009),
-    > arXiv: [1109.0520v1](https://arxiv.org/abs/1109.0520v1).
 """
 struct GeneralLinear{n,𝔽} <:
        AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType} end
@@ -72,6 +59,31 @@ default_metric_dispatch(::GeneralLinear, ::EuclideanMetric) = Val(true)
 default_metric_dispatch(::GeneralLinear, ::LeftInvariantMetric{EuclideanMetric}) = Val(true)
 
 distance(G::GeneralLinear, p, q) = norm(G, p, log(G, p, q))
+
+@doc raw"""
+    exp(G::GeneralLinear, p, X)
+
+Compute the exponential map on the [`GeneralLinear`](@ref) group.
+
+The exponential map is
+````math
+\exp_p \colon X ↦ = p \exp(X^\mathrm{H}) \exp(X - X^\mathrm{H}).
+````
+
+[^MartinNeff2016]:
+    > Martin, R. J. and Neff, P.:
+    > “Minimal geodesics on GL(n) for left-invariant, right-O(n)-invariant Riemannian metrics”,
+    > Journal of Geometric Mechanics 8(3), pp. 323-357, 2016.
+    > doi: [10.3934/jgm.2016010](https://doi.org/10.3934/jgm.2016010),
+    > arXiv: [1409.7849v2](https://arxiv.org/abs/1409.7849v2).
+[^AndruchowLarotondaRechtVarela2014]:
+    > Andruchow E., Larotonda G., Recht L., and Varela A.:
+    > “The left invariant metric in the general linear group”,
+    > Journal of Geometry and Physics 86, pp. 241-257, 2014.
+    > doi: [10.1016/j.geomphys.2014.08.009](https://doi.org/10.1016/j.geomphys.2014.08.009),
+    > arXiv: [1109.0520v1](https://arxiv.org/abs/1109.0520v1).
+"""
+exp(::GeneralLinear, p, X)
 
 function exp!(G::GeneralLinear, q, p, X)
     expX = exp(X)
@@ -150,6 +162,23 @@ function _log_project_SOn_S⁺!(X, q, n=size(q, 1))
     d[n] *= det(q) / prod(F.S) # adjust sign of determinant
     return log_safe!(X, F.U * Diagonal(d) * F.Vt)
 end
+
+@doc raw"""
+    log(G::GeneralLinear, p, q)
+
+Compute the logarithmic map on the [`GeneralLinear`(n)](@ref) group.
+
+The algorithm proceeds in two stages. First, the point $r = p^{-1} q$ is projected to the
+nearest element of the direct product subgroup $\mathrm{SO}(n) × S^+$, whose logarithmic
+map is exactly computed using the matrix logarithm. This initial tangent vector is then
+refined using the  [`ApproximateInverseRetraction`](@ref).
+
+For `GeneralLinear(n, ℂ)`, the logarithmic map is instead computed on the realified
+supergroup `GeneralLinear(2n)` and the point is then complexified.
+
+Note that this implementation is experimental.
+"""
+log(::GeneralLinear, p, q)
 
 function log!(G::GeneralLinear{n}, X, p, q) where {n}
     pinvq = inverse_translate(G, p, q, LeftAction())
