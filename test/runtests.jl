@@ -96,6 +96,7 @@ include("utils.jl")
 
     include_test("metric.jl")
     include_test("statistics.jl")
+    include_test("nlsolve.jl")
 
     # Lie groups and actions
     include_test("groups/groups_general.jl")
