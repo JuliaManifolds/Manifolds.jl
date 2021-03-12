@@ -398,11 +398,7 @@ function zero_vector(::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,n,k}
     return v
 end
 
-function zero_vector!(
-    ::FixedRankMatrices{m,n,k},
-    X::UMVTVector,
-    p::SVDMPoint,
-) where {m,n,k}
+function zero_vector!(::FixedRankMatrices{m,n,k}, X::UMVTVector, p::SVDMPoint) where {m,n,k}
     X.U .= zeros(eltype(X.U), m, k)
     X.M .= zeros(eltype(X.M), k, k)
     X.Vt .= zeros(eltype(X.Vt), k, n)

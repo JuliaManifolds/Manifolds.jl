@@ -425,13 +425,7 @@ function ManifoldTests.test_manifold(
                 test_dir && Test.@test isapprox(
                     M,
                     pts[1],
-                    vector_transport_direction(
-                        M,
-                        pts[1],
-                        X1,
-                        zero_vector(M, pts[1]),
-                        vtm,
-                    ),
+                    vector_transport_direction(M, pts[1], X1, zero_vector(M, pts[1]), vtm),
                     X1,
                 )
 
