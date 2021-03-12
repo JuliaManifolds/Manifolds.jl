@@ -365,6 +365,8 @@ Random.seed!(42)
         pts_t = [[0.0, 1.0, 2.0], [1.0, 1.0, 2.4], [0.0, 2.0, 1.0]]
         MT = PowerManifold(Circle(), 3)
         @test representation_size(MT) == (3,)
+        @test pts_t[1][MT, 2] == 1.0
+        @test HybridVector{3}(pts_t[1])[MT, 2] == 1.0
         test_manifold(
             MT,
             pts_t;

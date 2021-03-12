@@ -82,7 +82,6 @@ d(p,q) = \Bigl\lvert \log \frac{p}{q} \Bigr\rvert = \lvert \log p - \log q\rvert
 distance(::PositiveNumbers, ::Any, ::Any)
 
 distance(::PositiveNumbers, p::Real, q::Real) = abs(log(p / q))
-distance(::PositiveNumbers, p, q) = sum(abs.(log.(p ./ q)))
 
 @doc raw"""
     exp(M::PositiveNumbers, p, X)
@@ -128,7 +127,6 @@ g_p(X,Y) = \frac{XY}{p^2}.
 """
 inner(::PositiveNumbers, ::Any...)
 @inline inner(::PositiveNumbers, p::Real, X::Real, Y::Real) = X * Y / p^2
-@inline inner(::PositiveNumbers, p, X, Y) = sum((X .* Y) ./ (p .^ 2))
 function inverse_retract(M::PositiveNumbers, x, y)
     return inverse_retract(M, x, y, LogarithmicInverseRetraction())
 end
