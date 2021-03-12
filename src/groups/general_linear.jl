@@ -37,13 +37,7 @@ function check_manifold_point(G::GeneralLinear, e::Identity; kwargs...)
     return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
 
-function check_tangent_vector(
-    G::GeneralLinear{n,𝔽},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {n,𝔽}
+function check_tangent_vector(G::GeneralLinear, p, X; check_base_point=true, kwargs...)
     if check_base_point
         mpe = check_manifold_point(G, p; kwargs...)
         mpe === nothing || return mpe
@@ -221,7 +215,7 @@ project(::GeneralLinear, p, X) = X
 project!(::GeneralLinear, q, p) = copyto!(q, p)
 project!(::GeneralLinear, Y, p, X) = copyto!(Y, X)
 
-sharp!(::GeneralLinear{n}, X::TFVector, p, ξ::CoTFVector) where {n} = copyto!(X, ξ)
+sharp!(::GeneralLinear, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 Base.show(io::IO, ::GeneralLinear{n,𝔽}) where {n,𝔽} = print(io, "GeneralLinear($n, $𝔽)")
 
