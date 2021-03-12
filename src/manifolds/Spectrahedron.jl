@@ -197,11 +197,11 @@ function vector_transport_to!(M::Spectrahedron, Y, p, X, q, ::ProjectionTranspor
 end
 
 @doc raw"""
-    zero_tangent_vector(M::Spectrahedron,p)
+    zero_vector(M::Spectrahedron,p)
 
 returns the zero tangent vector in the tangent space of the symmetric positive
 definite matrix `p` on the [`Spectrahedron`](@ref) manifold `M`.
 """
-zero_tangent_vector(::Spectrahedron, ::Any...)
+zero_vector(::Spectrahedron, ::Any...)
 
-zero_tangent_vector!(::Spectrahedron{N,K}, v, ::Any) where {N,K} = fill!(v, 0)
+zero_vector!(::Spectrahedron{N,K}, v, ::Any) where {N,K} = fill!(v, 0)

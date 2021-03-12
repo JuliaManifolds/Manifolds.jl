@@ -363,7 +363,7 @@ function log!(M::Hyperbolic, X, p, q)
     scp = minkowski_metric(p, q)
     w = q + scp * p
     wn = sqrt(max(scp .^ 2 - 1, 0.0))
-    wn < eps(eltype(p)) && return zero_tangent_vector!(M, X, p)
+    wn < eps(eltype(p)) && return zero_vector!(M, X, p)
     X .= acosh(max(1.0, -scp)) / wn .* w
     return X
 end

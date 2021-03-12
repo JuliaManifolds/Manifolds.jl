@@ -361,11 +361,11 @@ function Base.show(io::IO, ::ProbabilitySimplex{n}) where {n}
 end
 
 @doc raw"""
-    zero_tangent_vector(M::ProbabilitySimplex,p)
+    zero_vector(M::ProbabilitySimplex,p)
 
 returns the zero tangent vector in the tangent space of the point `p`  from the
 [`ProbabilitySimplex`](@ref) `M`, i.e. its representation by the zero vector in the embedding.
 """
-zero_tangent_vector(::ProbabilitySimplex, ::Any)
+zero_vector(::ProbabilitySimplex, ::Any)
 
-zero_tangent_vector!(M::ProbabilitySimplex, v, p) = fill!(v, 0)
+zero_vector!(M::ProbabilitySimplex, v, p) = fill!(v, 0)

@@ -485,7 +485,7 @@ function get_vectors(
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData},
 ) where {𝔽}
     xp1 = submanifold_component(p, Val(1))
-    zero_m = zero_tangent_vector(M.manifold, xp1)
+    zero_m = zero_vector(M.manifold, xp1)
     zero_f = zero_vector(M.fiber, xp1)
     vs = typeof(ProductRepr(zero_m, zero_f))[]
     for bv in get_vectors(M.manifold, xp1, B.data.base_basis)
@@ -947,11 +947,11 @@ function zero_vector!(B::VectorBundleFibers, X, p)
     )
 end
 function zero_vector!(B::VectorBundleFibers{<:TangentSpaceType}, X, p)
-    return zero_tangent_vector!(B.manifold, X, p)
+    return zero_vector!(B.manifold, X, p)
 end
 
 @doc raw"""
-    zero_tangent_vector(B::VectorBundle, p)
+    zero_vector(B::VectorBundle, p)
 
 Zero tangent vector at point `p` from the vector bundle `B`
 over manifold `B.fiber` (denoted $\mathcal M$). The zero vector belongs to the space $T_{p}B$
@@ -968,23 +968,23 @@ $\mathbf{0}_{p} = (\mathbf{0}_{x_p}, \mathbf{0}_F)$
 where $\mathbf{0}_{x_p}$ is the zero tangent vector from $T_{x_p}\mathcal M$ and
 $\mathbf{0}_F$ is the zero element of the vector space $F$.
 """
-zero_tangent_vector(::VectorBundle, ::Any...)
+zero_vector(::VectorBundle, ::Any...)
 
 @doc raw"""
-    zero_tangent_vector(M::TangentSpaceAtPoint, p)
+    zero_vector(M::TangentSpaceAtPoint, p)
 
 Zero tangent vector at point `p` from the tangent space `M`, that is the zero tangent vector
 at point `M.point`.
 """
-zero_tangent_vector(::TangentSpaceAtPoint, ::Any...)
+zero_vector(::TangentSpaceAtPoint, ::Any...)
 
-function zero_tangent_vector!(B::VectorBundle, X, p)
+function zero_vector!(B::VectorBundle, X, p)
     xp, Vp = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
-    zero_tangent_vector!(B.manifold, VXM, xp)
+    zero_vector!(B.manifold, VXM, xp)
     zero_vector!(B.fiber, VXF, Vp)
     return X
 end
-function zero_tangent_vector!(M::TangentSpaceAtPoint, X, p)
-    return zero_tangent_vector!(M.fiber.manifold, X, M.point)
+function zero_vector!(M::TangentSpaceAtPoint, X, p)
+    return zero_vector!(M.fiber.manifold, X, M.point)
 end

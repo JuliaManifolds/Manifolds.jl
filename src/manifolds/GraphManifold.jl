@@ -149,7 +149,7 @@ If the internal graph is a `SimpleWeightedGraph` the weighted sum of the
 tangent vectors is computed.
 """
 function incident_log(M::VertexGraphManifold, p)
-    v = zero_tangent_vector(M, p)
+    v = zero_vector(M, p)
     return incident_log!(M, v, p)
 end
 

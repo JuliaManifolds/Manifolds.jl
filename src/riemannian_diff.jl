@@ -93,7 +93,7 @@ function differential!(M::Manifold, f, X, t::Real, backend::RiemannianONBDiffBac
 end
 
 function gradient(M::Manifold, f, p, backend::RiemannianONBDiffBackend)
-    X = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
+    X = get_coordinates(M, p, zero_vector(M, p), backend.basis)
     onb_coords = _gradient(X, backend.diff_backend) do Y
         return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
     end
@@ -101,7 +101,7 @@ function gradient(M::Manifold, f, p, backend::RiemannianONBDiffBackend)
 end
 
 function gradient!(M::Manifold, f, X, p, backend::RiemannianONBDiffBackend)
-    X2 = get_coordinates(M, p, zero_tangent_vector(M, p), backend.basis)
+    X2 = get_coordinates(M, p, zero_vector(M, p), backend.basis)
     onb_coords = _gradient(X2, backend.diff_backend) do Y
         return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
     end

@@ -19,9 +19,9 @@ include("utils.jl")
         @test isinf(injectivity_radius(M, -2.0, ExponentialRetraction()))
         @test isinf(injectivity_radius(M, ExponentialRetraction()))
         @test project(M, 1.5, 1.0) == 1.0
-        @test zero_tangent_vector(M, 1.0) == 0.0
+        @test zero_vector(M, 1.0) == 0.0
         X = similar([1.0])
-        zero_tangent_vector!(M, X, 1.0)
+        zero_vector!(M, X, 1.0)
         @test X == [0.0]
     end
     types = [Float64]

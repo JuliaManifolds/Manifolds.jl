@@ -227,5 +227,5 @@ function vector_transport_direction(
     return vector_transport_to(M, p, X, q, m)
 end
 
-zero_tangent_vector(::PositiveNumbers, p::Real) = zero(p)
-zero_tangent_vector!(::PositiveNumbers, X, p) = fill!(X, 0)
+zero_vector(::PositiveNumbers, p::Real) = zero(p)
+zero_vector!(::PositiveNumbers, X, p) = fill!(X, 0)

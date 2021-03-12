@@ -427,7 +427,7 @@ end
         # @test_throws ErrorException exp(MM,x, X, 1:3)
         # @test_throws ErrorException exp!(MM, q, p, X)
         # these always fall back anyways.
-        @test zero_tangent_vector!(MM, X, p) === zero_tangent_vector!(M, X, p)
+        @test zero_vector!(MM, X, p) === zero_vector!(M, X, p)
 
         @test injectivity_radius(MM, p) === injectivity_radius(M, p)
         @test injectivity_radius(MM) === injectivity_radius(M)
@@ -463,7 +463,7 @@ end
         @test project!(MM2, q, p) === project!(M, q, p)
         @test project!(MM2, Y, p, X) === project!(M, Y, p, X)
         @test vector_transport_to!(MM2, Y, p, X, q) == vector_transport_to!(M, Y, p, X, q)
-        @test zero_tangent_vector!(MM2, X, p) === zero_tangent_vector!(M, X, p)
+        @test zero_vector!(MM2, X, p) === zero_vector!(M, X, p)
         @test injectivity_radius(MM2, p) === injectivity_radius(M, p)
         @test injectivity_radius(MM2) === injectivity_radius(M)
         @test injectivity_radius(MM2, p, ExponentialRetraction()) ===

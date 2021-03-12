@@ -263,14 +263,14 @@ function vector_transport_to!(
 end
 
 @doc raw"""
-     zero_tangent_vector(M::SymmetricPositiveSemidefiniteFixedRank, p)
+     zero_vector(M::SymmetricPositiveSemidefiniteFixedRank, p)
 
 returns the zero tangent vector in the tangent space of the symmetric positive
 definite matrix `p` on the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) manifold `M`.
 """
-zero_tangent_vector(::SymmetricPositiveSemidefiniteFixedRank, ::Any...)
+zero_vector(::SymmetricPositiveSemidefiniteFixedRank, ::Any...)
 
-function zero_tangent_vector!(
+function zero_vector!(
     ::SymmetricPositiveSemidefiniteFixedRank{N,K},
     v,
     ::Any,

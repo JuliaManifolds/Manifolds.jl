@@ -383,13 +383,13 @@ function Base.copyto!(X::UMVTVector, Y::UMVTVector)
 end
 
 @doc raw"""
-    zero_tangent_vector(M::FixedRankMatrices, p::SVDMPoint)
+    zero_vector(M::FixedRankMatrices, p::SVDMPoint)
 
 Return a [`UMVTVector`](@ref) representing the zero tangent vector in the tangent space of
 `p` on the [`FixedRankMatrices`](@ref) `M`, for example all three elements of the resulting
 structure are zero matrices.
 """
-function zero_tangent_vector(::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,n,k}
+function zero_vector(::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,n,k}
     v = UMVTVector(
         zeros(eltype(p.U), m, k),
         zeros(eltype(p.S), k, k),
@@ -398,7 +398,7 @@ function zero_tangent_vector(::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,
     return v
 end
 
-function zero_tangent_vector!(
+function zero_vector!(
     ::FixedRankMatrices{m,n,k},
     X::UMVTVector,
     p::SVDMPoint,

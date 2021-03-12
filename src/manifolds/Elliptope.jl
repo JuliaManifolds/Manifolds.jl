@@ -192,11 +192,11 @@ function vector_transport_to!(M::Elliptope, Y, p, X, q, ::ProjectionTransport)
 end
 
 @doc raw"""
-    zero_tangent_vector(M::Elliptope,p)
+    zero_vector(M::Elliptope,p)
 
 returns the zero tangent vector in the tangent space of the symmetric positive
 definite matrix `p` on the [`Elliptope`](@ref) manifold `M`.
 """
-zero_tangent_vector(::Elliptope, ::Any...)
+zero_vector(::Elliptope, ::Any...)
 
-zero_tangent_vector!(::Elliptope{N,K}, v, ::Any) where {N,K} = fill!(v, 0)
+zero_vector!(::Elliptope{N,K}, v, ::Any) where {N,K} = fill!(v, 0)

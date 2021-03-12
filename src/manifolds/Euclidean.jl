@@ -537,12 +537,12 @@ function Statistics.var(::Euclidean, x::AbstractVector{<:Number}, m::Number; kwa
 end
 
 """
-    zero_tangent_vector(M::Euclidean, x)
+    zero_vector(M::Euclidean, x)
 
 Return the zero vector in the tangent space of `x` on the [`Euclidean`](@ref)
 `M`, which here is just a zero filled array the same size as `x`.
 """
-zero_tangent_vector(::Euclidean, ::Any...)
-zero_tangent_vector(::Euclidean{Tuple{}}, p::Number) = zero(p)
+zero_vector(::Euclidean, ::Any...)
+zero_vector(::Euclidean{Tuple{}}, p::Number) = zero(p)
 
-zero_tangent_vector!(::Euclidean, v, ::Any) = fill!(v, 0)
+zero_vector!(::Euclidean, v, ::Any) = fill!(v, 0)

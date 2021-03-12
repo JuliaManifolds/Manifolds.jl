@@ -19,7 +19,7 @@ include("utils.jl")
             @test_throws DomainError is_tangent_vector(
                 M,
                 x,
-                1 * im * zero_tangent_vector(M, x),
+                1 * im * zero_vector(M, x),
                 true,
             )
         end

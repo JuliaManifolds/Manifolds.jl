@@ -1,7 +1,7 @@
 include("utils.jl")
 using StatsBase: AbstractWeights, pweights
 using Random: GLOBAL_RNG, seed!
-import ManifoldsBase: manifold_dimension, exp!, log!, inner, zero_tangent_vector!
+import ManifoldsBase: manifold_dimension, exp!, log!, inner, zero_vector!
 using Manifolds:
     AbstractEstimationMethod,
     CyclicProximalPointEstimation,
@@ -23,8 +23,8 @@ end
 function inner(::TestStatsSphere{N}, x, v, w; kwargs...) where {N}
     return inner(Sphere(N), x, v, w; kwargs...)
 end
-function zero_tangent_vector!(::TestStatsSphere{N}, v, x; kwargs...) where {N}
-    return zero_tangent_vector!(Sphere(N), v, x; kwargs...)
+function zero_vector!(::TestStatsSphere{N}, v, x; kwargs...) where {N}
+    return zero_vector!(Sphere(N), v, x; kwargs...)
 end
 
 struct TestStatsEuclidean{N} <: Manifold{ℝ} end
@@ -39,8 +39,8 @@ end
 function inner(::TestStatsEuclidean{N}, x, v, w; kwargs...) where {N}
     return inner(Euclidean(N), x, v, w; kwargs...)
 end
-function zero_tangent_vector!(::TestStatsEuclidean{N}, v, x; kwargs...) where {N}
-    return zero_tangent_vector!(Euclidean(N), v, x; kwargs...)
+function zero_vector!(::TestStatsEuclidean{N}, v, x; kwargs...) where {N}
+    return zero_vector!(Euclidean(N), v, x; kwargs...)
 end
 
 function test_mean(M, x, yexp=nothing, method...; kwargs...)

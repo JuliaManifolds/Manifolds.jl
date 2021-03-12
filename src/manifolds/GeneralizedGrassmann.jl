@@ -219,7 +219,7 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 inner(M::GeneralizedGrassmann{n,k}, p, X, Y) where {n,k} = dot(X, M.B * Y)
 
 function Base.isapprox(M::GeneralizedGrassmann, p, X, Y; kwargs...)
-    return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
+    return isapprox(sqrt(inner(M, p, zero_vector(M, p), X - Y)), 0; kwargs...)
 end
 function Base.isapprox(M::GeneralizedGrassmann, p, q; kwargs...)
     return isapprox(distance(M, p, q), 0.0; kwargs...)
@@ -378,11 +378,11 @@ function vector_transport_to!(M::GeneralizedGrassmann, Y, p, X, q, ::ProjectionT
 end
 
 @doc raw"""
-    zero_tangent_vector(M::GeneralizedGrassmann, p)
+    zero_vector(M::GeneralizedGrassmann, p)
 
 Return the zero tangent vector from the tangent space at `p` on the
 [`GeneralizedGrassmann`](@ref) `M`, which is given by a zero matrix the same size as `p`.
 """
-zero_tangent_vector(::GeneralizedGrassmann, ::Any...)
+zero_vector(::GeneralizedGrassmann, ::Any...)
 
-zero_tangent_vector!(::GeneralizedGrassmann, X, p) = fill!(X, 0)
+zero_vector!(::GeneralizedGrassmann, X, p) = fill!(X, 0)

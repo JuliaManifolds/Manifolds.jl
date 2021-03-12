@@ -278,7 +278,7 @@ function Statistics.mean!(
     end
     copyto!(y, p0)
     yold = allocate_result(M, mean, y)
-    v = zero_tangent_vector(M, y)
+    v = zero_vector(M, y)
     vtmp = copy(v)
     α = w ./ cumsum(w)
     for i in 1:stop_iter
@@ -344,7 +344,7 @@ function Statistics.mean!(
         s = w[j]
         copyto!(q, x[j])
     end
-    v = zero_tangent_vector(M, q)
+    v = zero_vector(M, q)
     ytmp = allocate_result(M, mean, q)
     @inbounds for i in 2:n
         j = order[i]
@@ -421,7 +421,7 @@ function Statistics.mean!(
     copyto!(q, p0)
     yold = allocate_result(M, mean, q)
     ytmp = copy(yold)
-    X = zero_tangent_vector(M, q)
+    X = zero_vector(M, q)
     wv = convert(AbstractVector, w) ./ sum(w)
     for i in 1:stop_iter
         λ = 0.5 / i
@@ -690,7 +690,7 @@ function Statistics.median!(
     copyto!(q, p0)
     yold = allocate_result(M, median, q)
     ytmp = copy(yold)
-    v = zero_tangent_vector(M, q)
+    v = zero_vector(M, q)
     wv = convert(AbstractVector, w) ./ sum(w)
     for i in 1:stop_iter
         λ = 0.5 / i
@@ -746,14 +746,14 @@ function Statistics.median!(
     yold = allocate_result(M, median, q)
     ytmp = copy(yold)
     d = zeros(n)
-    v = zero_tangent_vector(M, q)
+    v = zero_vector(M, q)
     wv = convert(AbstractVector, w) ./ sum(w)
     for i in 1:stop_iter
         d .= [distance(M, q, xi) for xi in x] # compute distances
         # compute new weights / exclude points xi=q
         d .= [di > 0 ? wi / di : zero(typeof(wi / di)) for (di, wi) in zip(d, w)]
         copyto!(yold, q)
-        zero_tangent_vector!(M, v, q)
+        zero_vector!(M, v, q)
         for j in 1:n
             @inbounds v .+= d[j] * inverse_retract(M, q, x[j], inverse_retraction)
         end
@@ -924,7 +924,7 @@ function StatsBase.mean_and_var(
         s = w[j]
         y = copy(x[j])
     end
-    v = zero_tangent_vector(M, y)
+    v = zero_vector(M, y)
     M₂ = zero(number_eltype(v))
     ytmp = allocate_result(M, mean, y)
     @inbounds for i in 2:n

@@ -36,7 +36,7 @@ are equivalent to $𝕊^3$, though with different default representations.
 
 This manifold is modeled as a special case of the more general case, i.e. as an embedded
 manifold to the [`Euclidean`](@ref), and several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product
-and the [`zero_tangent_vector`](@ref zero_tangent_vector(::Euclidean, ::Any...)) are inherited from the embedding.
+and the [`zero_vector`](@ref zero_vector(::Euclidean, ::Any...)) are inherited from the embedding.
 
 # Constructor
 
@@ -76,7 +76,7 @@ embedding $𝔽^{n_1, n_2, …, n_i}$.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
-[`zero_tangent_vector`](@ref zero_tangent_vector(::Euclidean, ::Any...)) are inherited from the embedding.
+[`zero_vector`](@ref zero_vector(::Euclidean, ::Any...)) are inherited from the embedding.
 
 # Constructor
 

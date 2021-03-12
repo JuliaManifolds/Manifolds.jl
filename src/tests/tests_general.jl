@@ -123,7 +123,7 @@ function ManifoldTests.test_manifold(
     # get a default tangent vector for every of the three tangent spaces
     n = length(pts)
     if default_inverse_retraction_method === nothing
-        tv = [zero_tangent_vector(M, pts[i]) for i in 1:n] # no other available
+        tv = [zero_vector(M, pts[i]) for i in 1:n] # no other available
     else
         tv = [
             inverse_retract(
@@ -219,7 +219,7 @@ function ManifoldTests.test_manifold(
             Test.@test isapprox(
                 M,
                 p,
-                zero_tangent_vector(M, p),
+                zero_vector(M, p),
                 log(M, p, p);
                 atol=epsx * exp_log_atol_multiplier,
                 rtol=exp_log_atol_multiplier == 0.0 ?
@@ -228,7 +228,7 @@ function ManifoldTests.test_manifold(
             Test.@test isapprox(
                 M,
                 p,
-                zero_tangent_vector(M, p),
+                zero_vector(M, p),
                 inverse_retract(M, p, p);
                 atol=epsx * exp_log_atol_multiplier,
                 rtol=exp_log_atol_multiplier == 0.0 ?
@@ -237,11 +237,11 @@ function ManifoldTests.test_manifold(
         end
         atolp1 = exp_log_atol_multiplier * ManifoldTests.find_eps(pts[1])
         if is_mutating
-            zero_tangent_vector!(M, X1, pts[1])
+            zero_vector!(M, X1, pts[1])
         else
-            X1 = zero_tangent_vector(M, pts[1])
+            X1 = zero_vector(M, pts[1])
         end
-        Test.@test isapprox(M, pts[1], X1, zero_tangent_vector(M, pts[1]); atol=atolp1)
+        Test.@test isapprox(M, pts[1], X1, zero_vector(M, pts[1]); atol=atolp1)
         if is_mutating
             log!(M, X1, pts[1], pts[2])
         else
@@ -290,7 +290,7 @@ function ManifoldTests.test_manifold(
                 Test.@test isapprox(
                     M,
                     p,
-                    zero_tangent_vector(M, p),
+                    zero_vector(M, p),
                     inverse_retract(M, p, p, inv_retr_method);
                     atol=epsx * retraction_atol_multiplier,
                     rtol=retraction_atol_multiplier == 0 ?
@@ -302,12 +302,12 @@ function ManifoldTests.test_manifold(
 
     test_vector_spaces && Test.@testset "vector spaces tests" begin
         for p in pts
-            X = zero_tangent_vector(M, p)
+            X = zero_vector(M, p)
             mts = Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M)
             Test.@test isapprox(M, p, X, zero_vector(mts, p))
             if is_mutating
                 zero_vector!(mts, X, p)
-                Test.@test isapprox(M, p, X, zero_tangent_vector(M, p))
+                Test.@test isapprox(M, p, X, zero_vector(M, p))
             end
         end
     end
@@ -318,7 +318,7 @@ function ManifoldTests.test_manifold(
                 M,
                 p,
                 0 * X,
-                zero_tangent_vector(M, p);
+                zero_vector(M, p);
                 atol=ManifoldTests.find_eps(pts[1]),
             )
             Test.@test isapprox(M, p, 2 * X, X + X)
@@ -429,7 +429,7 @@ function ManifoldTests.test_manifold(
                         M,
                         pts[1],
                         X1,
-                        zero_tangent_vector(M, pts[1]),
+                        zero_vector(M, pts[1]),
                         vtm,
                     ),
                     X1,
@@ -580,7 +580,7 @@ function ManifoldTests.test_manifold(
         if default_inverse_retraction_method !== nothing
             tv_m = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
         else
-            tv_m = zero_tangent_vector(M, pts[1])
+            tv_m = zero_vector(M, pts[1])
         end
         ctv_m = flat(M, pts[1], tv_m)
         Test.@test ctv_m(tv_m) ≈ norm(M, pts[1], tv_m)^2
@@ -604,9 +604,9 @@ function ManifoldTests.test_manifold(
 
             X2 = allocate(X)
             if default_inverse_retraction_method === nothing
-                X3 = zero_tangent_vector(M, p)
+                X3 = zero_vector(M, p)
                 copyto!(X2, X3)
-                Test.@test isapprox(M, p, X2, zero_tangent_vector(M, p))
+                Test.@test isapprox(M, p, X2, zero_vector(M, p))
             else
                 q = retract(M, p, X, default_retraction_method)
                 X3 = inverse_retract(M, p, q, default_inverse_retraction_method)

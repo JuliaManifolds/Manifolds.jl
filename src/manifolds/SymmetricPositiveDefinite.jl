@@ -163,11 +163,11 @@ function Base.show(io::IO, ::SymmetricPositiveDefinite{N}) where {N}
 end
 
 @doc raw"""
-    zero_tangent_vector(M::SymmetricPositiveDefinite,x)
+    zero_vector(M::SymmetricPositiveDefinite,x)
 
 returns the zero tangent vector in the tangent space of the symmetric positive
 definite matrix `x` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
 """
-zero_tangent_vector(::SymmetricPositiveDefinite, ::Any)
+zero_vector(::SymmetricPositiveDefinite, ::Any)
 
-zero_tangent_vector!(M::SymmetricPositiveDefinite{N}, v, x) where {N} = fill!(v, 0)
+zero_vector!(M::SymmetricPositiveDefinite{N}, v, x) where {N} = fill!(v, 0)

@@ -29,7 +29,7 @@ include("utils.jl")
         @test_throws DomainError is_tangent_vector(
             M,
             B_skewsym,
-            1 * im * zero_tangent_vector(M, B_skewsym),
+            1 * im * zero_vector(M, B_skewsym),
             true,
         )
         @test manifold_dimension(M) == 3

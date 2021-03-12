@@ -519,5 +519,5 @@ function vector_transport_direction(
     return vector_transport_to(M, p, X, q, m)
 end
 
-zero_tangent_vector(::Circle, p::Number) = zero(p)
-zero_tangent_vector!(::Circle, X, p) = fill!(X, 0)
+zero_vector(::Circle, p::Number) = zero(p)
+zero_vector!(::Circle, X, p) = fill!(X, 0)

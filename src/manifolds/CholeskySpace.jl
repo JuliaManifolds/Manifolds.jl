@@ -213,10 +213,10 @@ function vector_transport_to!(::CholeskySpace, Y, p, X, q, ::ParallelTransport)
 end
 
 @doc raw"""
-    zero_tangent_vector(M::CholeskySpace, p)
+    zero_vector(M::CholeskySpace, p)
 
 Return the zero tangent vector on the [`CholeskySpace`](@ref) `M` at `p`.
 """
-zero_tangent_vector(::CholeskySpace, ::Any...)
+zero_vector(::CholeskySpace, ::Any...)
 
-zero_tangent_vector!(M::CholeskySpace, X, p) = fill!(X, 0)
+zero_vector!(M::CholeskySpace, X, p) = fill!(X, 0)

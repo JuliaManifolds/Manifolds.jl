@@ -583,7 +583,7 @@ function get_vectors(
     N = number_of_components(M)
     xparts = submanifold_components(p)
     BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.data.parts))
-    zero_tvs = map(t -> zero_tangent_vector(t...), ziptuples(M.manifolds, xparts))
+    zero_tvs = map(t -> zero_vector(t...), ziptuples(M.manifolds, xparts))
     vs = typeof(ProductRepr(zero_tvs...))[]
     for i in 1:N, k in 1:length(BVs[i])
         push!(vs, ProductRepr(zero_tvs[1:(i - 1)]..., BVs[i][k], zero_tvs[(i + 1):end]...))
@@ -1146,9 +1146,9 @@ function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTr
     return Y
 end
 
-function zero_tangent_vector!(M::ProductManifold, X, p)
+function zero_vector!(M::ProductManifold, X, p)
     map(
-        zero_tangent_vector!,
+        zero_vector!,
         M.manifolds,
         submanifold_components(M, X),
         submanifold_components(M, p),

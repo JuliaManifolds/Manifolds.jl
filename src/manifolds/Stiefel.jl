@@ -21,7 +21,7 @@ where $0_k$ is the $k × k$ zero matrix and $\overline{\cdot}$ the (elementwise)
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
-[`zero_tangent_vector`](@ref zero_tangent_vector(::Euclidean, ::Any...)) are inherited from the embedding.
+[`zero_vector`](@ref zero_vector(::Euclidean, ::Any...)) are inherited from the embedding.
 
 The manifold is named after
 [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
@@ -199,7 +199,7 @@ end
 
 function get_vector!(M::Stiefel{n,k,ℝ}, X, p, c, B::DefaultOrthonormalBasis{ℝ}) where {n,k}
     V = get_vectors(M, p, B)
-    zero_tangent_vector!(M, X, p)
+    zero_vector!(M, X, p)
     length(c) < length(V) && error(
         "Coordinate vector too short. Excpected $(length(V)), but only got $(length(c)) entries.",
     )
@@ -359,7 +359,7 @@ function inverse_retract!(M::Stiefel{n,k}, X, p, q, ::QRInverseRetraction) where
 end
 
 function Base.isapprox(M::Stiefel, p, X, Y; kwargs...)
-    return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
+    return isapprox(sqrt(inner(M, p, zero_vector(M, p), X - Y)), 0; kwargs...)
 end
 Base.isapprox(::Stiefel, p, q; kwargs...) = isapprox(norm(p - q), 0; kwargs...)
 

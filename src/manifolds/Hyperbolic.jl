@@ -384,6 +384,6 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
             ).value
         return Y
     end
-    @eval zero_tangent_vector(::Hyperbolic, p::$P) = $T(zero(p.value))
-    @eval zero_tangent_vector!(::Hyperbolic, X::$T, ::$P) = fill!(X.value, 0)
+    @eval zero_vector(::Hyperbolic, p::$P) = $T(zero(p.value))
+    @eval zero_vector!(::Hyperbolic, X::$T, ::$P) = fill!(X.value, 0)
 end

@@ -246,7 +246,7 @@ inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 inverse_retract!(::Grassmann, X, p, q, ::QRInverseRetraction) = copyto!(X, q / (p' * q) - p)
 
 function Base.isapprox(M::Grassmann, p, X, Y; kwargs...)
-    return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
+    return isapprox(sqrt(inner(M, p, zero_vector(M, p), X - Y)), 0; kwargs...)
 end
 Base.isapprox(M::Grassmann, p, q; kwargs...) = isapprox(distance(M, p, q), 0.0; kwargs...)
 
@@ -425,11 +425,11 @@ function vector_transport_to!(M::Grassmann, Y, p, X, q, ::ProjectionTransport)
 end
 
 @doc raw"""
-    zero_tangent_vector(M::Grassmann, p)
+    zero_vector(M::Grassmann, p)
 
 Return the zero tangent vector from the tangent space at `p` on the [`Grassmann`](@ref) `M`,
 which is given by a zero matrix the same size as `p`.
 """
-zero_tangent_vector(::Grassmann, ::Any...)
+zero_vector(::Grassmann, ::Any...)
 
-zero_tangent_vector!(::Grassmann, X, p) = fill!(X, 0)
+zero_vector!(::Grassmann, X, p) = fill!(X, 0)

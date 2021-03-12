@@ -59,8 +59,8 @@ import ManifoldsBase:
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
-    zero_tangent_vector,
-    zero_tangent_vector!,
+    zero_vector,
+    zero_vector!,
     CotangentSpace,
     TangentSpace
 import Base: copyto!, convert, in, isapprox, isempty, length, showerror
@@ -475,9 +475,7 @@ export ×,
     vee,
     vee!,
     zero_vector,
-    zero_vector!,
-    zero_tangent_vector,
-    zero_tangent_vector!
+    zero_vector!
 # Lie group types & functions
 export AbstractGroupAction,
     AbstractGroupOperation,

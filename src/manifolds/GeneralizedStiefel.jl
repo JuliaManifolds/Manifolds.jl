@@ -24,7 +24,7 @@ T_p\mathcal M = \{ X \in 𝔽^{n × k} : p^{\mathrm{H}}BX + X^{\mathrm{H}}Bp=0_n
 where $0_k$ is the $k × k$ zero matrix.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
-several functions like the [`zero_tangent_vector`](@ref) are inherited from the embedding.
+several functions like the [`zero_vector`](@ref) are inherited from the embedding.
 
 The manifold is named after
 [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).

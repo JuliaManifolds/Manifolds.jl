@@ -751,11 +751,11 @@ Base.show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
 Distributions.support(d::NormalRotationDistribution) = MPointSupport(d.manifold)
 
 @doc raw"""
-    zero_tangent_vector(M::Rotations, p)
+    zero_vector(M::Rotations, p)
 
 Return the zero tangent vector from the tangent space art `p` on the [`Rotations`](@ref)
 as an element of the Lie group, i.e. the zero matrix.
 """
-zero_tangent_vector(M::Rotations, p) = zero(p)
+zero_vector(M::Rotations, p) = zero(p)
 
-zero_tangent_vector!(M::Rotations, X, p) = fill!(X, 0)
+zero_vector!(M::Rotations, X, p) = fill!(X, 0)
