@@ -3,7 +3,7 @@
 Operations using atlases and charts are available through the following types and functions.
 
 ```@autodocs
-Modules = [Manifolds]
+Modules = [Manifolds,ManifoldsBase]
 Pages = ["atlases.jl"]
 Order = [:type, :function]
 ```
@@ -14,7 +14,16 @@ Related to atlases, there is also support for the cotangent space and coefficien
 cotangent vectors in bases of the cotangent space.
 
 ```@autodocs
-Modules = [Manifolds]
+Modules = [Manifolds,ManifoldsBase]
 Pages = ["cotangent_space.jl"]
 Order = [:type, :function]
+```
+
+## Musical isomorphisms
+
+Functions [`sharp`](@ref) and [`flat`](@ref) implement musical isomorphisms for arbitrary vector bundles.
+
+```@docs
+sharp
+flat
 ```

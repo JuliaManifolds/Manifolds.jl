@@ -155,7 +155,7 @@ Order = [:macro, :type, :function]
 ## Abstract Power Manifold
 
 ```@autodocs
-Modules = [ ManifoldsBase]
+Modules = [Manifolds, ManifoldsBase]
 Pages = ["src/PowerManifold.jl"]
 Order = [:macro, :type, :function]
 ```
