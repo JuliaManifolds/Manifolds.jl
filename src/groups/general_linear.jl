@@ -126,7 +126,7 @@ function group_exp!(::GeneralLinear{1}, q, X)
 end
 group_exp!(::GeneralLinear{2}, q, X) = copyto!(q, exp(SizedMatrix{2,2}(X)))
 
-function group_log!(::GeneralLinear{1}, X, p)
+function group_log!(::GeneralLinear{1}, X::AbstractMatrix, p::AbstractMatrix)
     X[1] = log(p[1])
     return X
 end
