@@ -1,6 +1,5 @@
-function _inverse_retract_nlsolve!(
+function _inverse_retract_nlsolve(
     M::Manifold,
-    X,
     p,
     q,
     retraction,

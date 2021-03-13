@@ -84,9 +84,8 @@ inverse_retract(::Manifold, p, q, ::NLsolveInverseRetraction; kwargs...)
 
 function inverse_retract!(M::Manifold, X, p, q, method::NLsolveInverseRetraction; kwargs...)
     X0 = method.X0 === nothing ? zero_tangent_vector(M, p) : method.X0
-    res = _inverse_retract_nlsolve!(
+    res = _inverse_retract_nlsolve(
         M,
-        X,
         p,
         q,
         method.retraction,
@@ -100,5 +99,5 @@ function inverse_retract!(M::Manifold, X, p, q, method::NLsolveInverseRetraction
         @debug res
         throw(OutOfInjectivityRadiusError())
     end
-    return copyto!(X0, res.zero)
+    return copyto!(X, res.zero)
 end
