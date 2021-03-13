@@ -81,6 +81,25 @@ include("utils.jl")
             @test isnormal(Matrix(qr(randn(3, 3)).Q); atol=sqrt(eps()))
             @test isnormal(Matrix(qr(randn(ComplexF64, 3, 3)).Q); atol=sqrt(eps()))
         end
+        @testset "realify/unrealify!" begin
+            # round trip real
+            x = randn(3, 3)
+            @test Manifolds.realify(x, ℝ) === x
+            @test Manifolds.unrealify!(similar(x), x, ℝ) == x
+
+            # round trip complex
+            x2 = randn(ComplexF64, 3, 3)
+            x2r = Manifolds.realify(x2, ℂ)
+            @test eltype(x2r) <: Real
+            @test size(x2r) == (6, 6)
+            x2c = Manifolds.unrealify!(similar(x2), x2r, ℂ)
+            @test x2c ≈ x2
+
+            # matrix multiplication is preserved
+            x3 = randn(ComplexF64, 3, 3)
+            x3r = Manifolds.realify(x3, ℂ)
+            @test x2 * x3 ≈ Manifolds.unrealify!(similar(x2), x2r * x3r, ℂ)
+        end
     end
 
     include_test("groups/group_utils.jl")
