@@ -195,20 +195,16 @@ function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
     if isnormal(pinvq; atol=sqrt(eps(real(eltype(pinvq)))))
         log_safe!(X, pinvq)
     else
-        if 𝔽 === ℝ
-            log_safe!(X, _project_Un_S⁺(pinvq))
-            inverse_retraction = NLsolveInverseRetraction(ExponentialRetraction(), X)
-            inverse_retract!(G, X, e, pinvq, inverse_retraction)
-        else
-            # compute the equivalent logarithm on GL(dim(𝔽) * n, ℝ)
-            # this is significantly more stable than computing the complex algorithm
-            Gᵣ = GeneralLinear(real_dimension(𝔽) * n, ℝ)
-            pinvqᵣ = realify(pinvq, 𝔽)
-            Xᵣ = realify(X, 𝔽)
-            eᵣ = Identity(Gᵣ, pinvqᵣ)
-            log!(Gᵣ, Xᵣ, eᵣ, pinvqᵣ)
-            unrealify!(X, Xᵣ, 𝔽, n)
-        end
+        # compute the equivalent logarithm on GL(dim(𝔽) * n, ℝ)
+        # this is significantly more stable than computing the complex algorithm
+        Gᵣ = GeneralLinear(real_dimension(𝔽) * n, ℝ)
+        pinvqᵣ = realify(pinvq, 𝔽)
+        Xᵣ = realify(X, 𝔽)
+        eᵣ = Identity(Gᵣ, pinvqᵣ)
+        log_safe!(Xᵣ, _project_Un_S⁺(pinvqᵣ))
+        inverse_retraction = NLsolveInverseRetraction(ExponentialRetraction(), Xᵣ)
+        inverse_retract!(Gᵣ, Xᵣ, eᵣ, pinvqᵣ, inverse_retraction)
+        unrealify!(X, Xᵣ, 𝔽, n)
     end
     translate_diff!(G, X, p, e, X, LeftAction())
     return X
