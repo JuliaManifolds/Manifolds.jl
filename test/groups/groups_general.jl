@@ -240,7 +240,7 @@ include("group_utils.jl")
             [[2.0 1.0; 3.0 4.0], [3.0 2.0; 4.0 5.0], [4.0 3.0; 5.0 6.0]],
             [],
             [[1.0 2.0; 3.0 4.0]];
-            test_group_exp_log=false,
+            test_group_exp_log=true,
         )
 
         x = [2.0 1.0; 2.0 3.0]
@@ -297,6 +297,9 @@ include("group_utils.jl")
         X = [1.0 2.0; 3.0 4.0]
         @test group_exp!(G, y, X) === y
         @test y ≈ exp(X)
+        Y = allocate(X)
+        @test group_log!(G, Y, y) === Y
+        @test Y ≈ log(y)
 
         @testset "identity optimization" begin
             x2 = copy(x)
