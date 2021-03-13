@@ -154,13 +154,13 @@ function inverse_translate_diff!(G::GeneralLinear, Y, p, q, X, conv::ActionDirec
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
 end
 
-function _log_project_SOn_S⁺!(X, q, n=size(q, 1))
-    F = svd(q)
-    d = allocate(q, n)
+# find sU for s ∈ S⁺ and U ∈ U(n, 𝔽) that minimizes ‖sU - p‖²
+function _project_Un_S⁺(p)
+    n = LinearAlgebra.checksquare(p)
+    F = svd(p)
     s = mean(F.S)
-    fill!(d, s)
-    d[n] *= det(q) / prod(F.S) # adjust sign of determinant
-    return log_safe!(X, F.U * Diagonal(d) * F.Vt)
+    U = F.U * F.Vt
+    return rmul!(U, s)
 end
 
 @doc raw"""
@@ -169,12 +169,12 @@ end
 Compute the logarithmic map on the [`GeneralLinear(n)`](@ref) group.
 
 The algorithm proceeds in two stages. First, the point $r = p^{-1} q$ is projected to the
-nearest element of the direct product subgroup $\mathrm{SO}(n) × S^+$, whose logarithmic
-map is exactly computed using the matrix logarithm. This initial tangent vector is then
-refined using the  [`NLsolveInverseRetraction`](@ref).
+nearest element (under the Frobenius norm) of the direct product subgroup
+$\mathrm{O}(n) × S^+$, whose logarithmic map is exactly computed using the matrix logarithm.
+This initial tangent vector is then refined using the  [`NLsolveInverseRetraction`](@ref).
 
 For `GeneralLinear(n, ℂ)`, the logarithmic map is instead computed on the realified
-supergroup `GeneralLinear(2n)` and the point is then complexified.
+supergroup `GeneralLinear(2n)` and the resulting tangent vector is then complexified.
 
 Note that this implementation is experimental.
 """
@@ -182,20 +182,20 @@ log(::GeneralLinear, p, q)
 
 # TODO: Look into using geodesic shooting method in §6.2 of http://hdl.handle.net/2078.1/132587
 
-function log!(G::GeneralLinear{n}, X, p, q) where {n}
+function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
     pinvq = inverse_translate(G, p, q, LeftAction())
-    number_system(G) === ℝ && det(pinvq) ≤ 0 && throw(OutOfInjectivityRadiusError())
+    𝔽 === ℝ && det(pinvq) ≤ 0 && throw(OutOfInjectivityRadiusError())
     e = Identity(G, pinvq)
     if isnormal(pinvq; atol=sqrt(eps(real(eltype(pinvq)))))
         log_safe!(X, pinvq)
     else
-        𝔽 = number_system(G)
         if 𝔽 === ℝ
-            _log_project_SOn_S⁺!(X, pinvq, n)
+            log_safe!(X, _project_Un_S⁺(pinvq))
             inverse_retraction = NLsolveInverseRetraction(ExponentialRetraction(), X)
             inverse_retract!(G, X, e, pinvq, inverse_retraction)
         else
             # compute the equivalent logarithm on GL(dim(𝔽) * n, ℝ)
+            # this is significantly more stable than computing the complex algorithm
             Gᵣ = GeneralLinear(real_dimension(𝔽) * n, ℝ)
             pinvqᵣ = realify(pinvq, 𝔽)
             Xᵣ = realify(X, 𝔽)
