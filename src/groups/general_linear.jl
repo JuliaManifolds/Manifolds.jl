@@ -7,9 +7,12 @@ The general linear group, that is, the group of all invertible matrices in $𝔽
 The default metric is the left-$\mathrm{GL}(n)$-right-$\mathrm{O}(n)$-invariant metric whose
 inner product is written
 $$⟨X_p,Y_p⟩_p = ⟨p^{-1}X_p,p^{-1}Y_p⟩_\mathrm{F} = ⟨X_e, Y_e⟩_\mathrm{F},$$
-where $X_e = p^{-1}X_p ∈ 𝔤l(n) = T_e \mathrm{GL}(n, 𝔽) = 𝔽^{n×n}$ is the corresponding
-vector in the Lie algebra. In the default implementations, all tangent vectors $X_p$ are
-instead represented with their corresponding Lie algebra vectors.
+where $X_p, Y_p ∈ T_p \mathrm{GL}(n, 𝔽)$,
+$X_e = p^{-1}X_p ∈ 𝔤𝔩(n) = T_e \mathrm{GL}(n, 𝔽) = 𝔽^{n×n}$ is the corresponding
+vector in the Lie algebra, and $⟨⋅,⋅⟩_\mathrm{F}$ denotes the Frobenius inner product.
+
+By default, tangent vectors $X_p$ are represented with their corresponding Lie algebra
+vectors $X_e = p^{-1}X_p$.
 """
 struct GeneralLinear{n,𝔽} <:
        AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType} end
@@ -61,8 +64,11 @@ Compute the exponential map on the [`GeneralLinear`](@ref) group.
 
 The exponential map is
 ````math
-\exp_p \colon X ↦ = p \exp(X^\mathrm{H}) \exp(X - X^\mathrm{H}).
+\exp_p \colon X ↦ p \operatorname{Exp}(X^\mathrm{H}) \operatorname{Exp}(X - X^\mathrm{H}),
 ````
+
+where $\operatorname{Exp}(⋅)$ denotes the matrix exponential, and $⋅^\mathrm{H}$ is
+the conjugate transpose.
 
 [^MartinNeff2016]:
     > Martin, R. J. and Neff, P.:
@@ -160,12 +166,12 @@ end
 @doc raw"""
     log(G::GeneralLinear, p, q)
 
-Compute the logarithmic map on the [`GeneralLinear`(n)](@ref) group.
+Compute the logarithmic map on the [`GeneralLinear(n)`](@ref) group.
 
 The algorithm proceeds in two stages. First, the point $r = p^{-1} q$ is projected to the
 nearest element of the direct product subgroup $\mathrm{SO}(n) × S^+$, whose logarithmic
 map is exactly computed using the matrix logarithm. This initial tangent vector is then
-refined using the  [`ApproximateInverseRetraction`](@ref).
+refined using the  [`NLsolveInverseRetraction`](@ref).
 
 For `GeneralLinear(n, ℂ)`, the logarithmic map is instead computed on the realified
 supergroup `GeneralLinear(2n)` and the point is then complexified.
