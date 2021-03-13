@@ -57,7 +57,7 @@ include("utils.jl")
 
         @testset "Circle(ℂ)" begin
             M = Circle(ℂ)
-            p = [1.0*im]
+            p = [1.0 * im]
             X = [p[1] * im * (π / 4)]
             q = exp(M, p, X)
             X_exp = log(M, p, q)
