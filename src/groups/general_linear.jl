@@ -180,6 +180,8 @@ Note that this implementation is experimental.
 """
 log(::GeneralLinear, p, q)
 
+# TODO: Look into using geodesic shooting method in §6.2 of http://hdl.handle.net/2078.1/132587
+
 function log!(G::GeneralLinear{n}, X, p, q) where {n}
     pinvq = inverse_translate(G, p, q, LeftAction())
     number_system(G) === ℝ && det(pinvq) ≤ 0 && throw(OutOfInjectivityRadiusError())
