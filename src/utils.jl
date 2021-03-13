@@ -261,11 +261,11 @@ By default, this is an equality check. Provide `kwargs` for `isapprox` to perfor
 approximate check.
 """
 function isnormal(x; kwargs...)
+    (isdiag(x) || ishermitian(x)) && return true
     isempty(kwargs) && return x * x' == x' * x
     return isapprox(x * x', x' * x; kwargs...)
 end
 isnormal(::LinearAlgebra.RealHermSymComplexHerm; kwargs...) = true
-isnormal(::Diagonal; kwargs...) = true
 
 """
     ziptuples(a, b[, c[, d[, e]]])
