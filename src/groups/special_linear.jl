@@ -11,9 +11,9 @@ $p ∈ \mathrm{SL}(n,𝔽)$ are represented with their corresponding Lie algebra
 $X_e = p^{-1}X_p ∈ 𝔰𝔩(n, 𝔽)$.
 
 The default metric is the same left-$\mathrm{GL}(n)$-right-$\mathrm{O}(n)$-invariant metric
-used for [`GeneralLinear(n, 𝔽)`]. The resulting geodesic on $\mathrm{GL}(n,𝔽)$ emanating
-from an element of $\mathrm{SL}(n,𝔽)$ in the direction of an element of $𝔰𝔩(n, 𝔽)$ is a
-closed subgroup of $\mathrm{SL}(n,𝔽)$. As a result, most metric functions forward to
+used for [`GeneralLinear(n, 𝔽)`](@ref). The resulting geodesic on $\mathrm{GL}(n,𝔽)$
+emanating from an element of $\mathrm{SL}(n,𝔽)$ in the direction of an element of $𝔰𝔩(n, 𝔽)$
+is a closed subgroup of $\mathrm{SL}(n,𝔽)$. As a result, most metric functions forward to
 `GeneralLinear`.
 """
 struct SpecialLinear{n,𝔽} <:
