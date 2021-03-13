@@ -54,32 +54,32 @@ include("utils.jl")
             @test exp(Manifolds.log_safe!(similar(A4), A4)) ≈ A4 atol = 1e-8
         end
         @testset "isnormal" begin
-            @test !isnormal([1.0 2.0; 3.0 4.0])
-            @test !isnormal(complex.(reshape(1:4, 2, 2), reshape(5:8, 2, 2)))
+            @test !Manifolds.isnormal([1.0 2.0; 3.0 4.0])
+            @test !Manifolds.isnormal(complex.(reshape(1:4, 2, 2), reshape(5:8, 2, 2)))
 
             # diagonal
-            @test isnormal(diagm(randn(5)))
-            @test isnormal(diagm(randn(ComplexF64, 5)))
-            @test isnormal(Diagonal(randn(5)))
-            @test isnormal(Diagonal(randn(ComplexF64, 5)))
+            @test Manifolds.isnormal(diagm(randn(5)))
+            @test Manifolds.isnormal(diagm(randn(ComplexF64, 5)))
+            @test Manifolds.isnormal(Diagonal(randn(5)))
+            @test Manifolds.isnormal(Diagonal(randn(ComplexF64, 5)))
 
             # symmetric/hermitian
-            @test isnormal(Symmetric(randn(3, 3)))
-            @test isnormal(Hermitian(randn(3, 3)))
-            @test isnormal(Hermitian(randn(ComplexF64, 3, 3)))
+            @test Manifolds.isnormal(Symmetric(randn(3, 3)))
+            @test Manifolds.isnormal(Hermitian(randn(3, 3)))
+            @test Manifolds.isnormal(Hermitian(randn(ComplexF64, 3, 3)))
             x = Matrix(Symmetric(randn(3, 3)))
             x[3,1] += eps()
-            @test !isnormal(x)
-            @test isnormal(x; atol=sqrt(eps()))
+            @test !Manifolds.isnormal(x)
+            @test Manifolds.isnormal(x; atol=sqrt(eps()))
 
             # skew-symmetric/skew-hermitian
             skew(x) = x-x'
-            @test isnormal(skew(randn(3, 3)))
-            @test isnormal(skew(randn(ComplexF64, 3, 3)))
+            @test Manifolds.isnormal(skew(randn(3, 3)))
+            @test Manifolds.isnormal(skew(randn(ComplexF64, 3, 3)))
 
             # orthogonal/unitary
-            @test isnormal(Matrix(qr(randn(3, 3)).Q); atol=sqrt(eps()))
-            @test isnormal(Matrix(qr(randn(ComplexF64, 3, 3)).Q); atol=sqrt(eps()))
+            @test Manifolds.isnormal(Matrix(qr(randn(3, 3)).Q); atol=sqrt(eps()))
+            @test Manifolds.isnormal(Matrix(qr(randn(ComplexF64, 3, 3)).Q); atol=sqrt(eps()))
         end
         @testset "realify/unrealify!" begin
             # round trip real
