@@ -9,14 +9,14 @@ include("utils.jl")
         @testset "constructor" begin
             X = randn(3)
 
-            m1 = ApproximateInverseRetraction(ExponentialRetraction())
+            m1 = NLsolveInverseRetraction(ExponentialRetraction())
             @test m1.retraction === ExponentialRetraction()
             @test m1.X0 === nothing
             @test !m1.project_tangent
             @test !m1.project_point
             @test isempty(m1.nlsolve_kwargs)
 
-            m2 = ApproximateInverseRetraction(
+            m2 = NLsolveInverseRetraction(
                 PolarRetraction(),
                 [1.0, 2.0, 3.0];
                 project_tangent=true,
@@ -34,7 +34,7 @@ include("utils.jl")
             p = [1.0, 2.0, 3.0]
             q = [4.0, 5.0, 6.0]
             retr_method = ExponentialRetraction()
-            inv_retr_method = ApproximateInverseRetraction(retr_method)
+            inv_retr_method = NLsolveInverseRetraction(retr_method)
             X = inverse_retract(M, p, q, inv_retr_method)
             @test is_tangent_vector(M, p, X)
             @test X isa Vector{Float64}
@@ -49,7 +49,7 @@ include("utils.jl")
             # vector must be nonzero to converge
             X0 = randn(3) .* eps()
             inv_retr_method =
-                ApproximateInverseRetraction(ProjectionRetraction(), X0; project_point=true)
+                NLsolveInverseRetraction(ProjectionRetraction(), X0; project_point=true)
             X = inverse_retract(M, p, q, inv_retr_method)
             @test is_tangent_vector(M, p, X; atol=1e-9)
             @test X ≈ X_exp
@@ -57,14 +57,14 @@ include("utils.jl")
 
         @testset "Circle(ℂ)" begin
             M = Circle(ℂ)
-            p = [sign(randn(ComplexF64))]
+            p = [1.0*im]
             X = [p[1] * im * (π / 4)]
             q = exp(M, p, X)
             X_exp = log(M, p, q)
             inv_retr_method =
-                ApproximateInverseRetraction(ExponentialRetraction(); project_point=true)
+                NLsolveInverseRetraction(ExponentialRetraction(); project_point=true)
             X = inverse_retract(M, p, q, inv_retr_method)
-            @test is_tangent_vector(M, p, X)
+            @test is_tangent_vector(M, p, X; atol=1e-8)
             @test X ≈ X_exp
         end
     end
