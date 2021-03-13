@@ -184,7 +184,7 @@ function log!(G::GeneralLinear{n}, X, p, q) where {n}
         𝔽 = number_system(G)
         if 𝔽 === ℝ
             _log_project_SOn_S⁺!(X, pinvq, n)
-            inverse_retraction = ApproximateInverseRetraction(ExponentialRetraction(), X)
+            inverse_retraction = NLsolveInverseRetraction(ExponentialRetraction(), X)
             inverse_retract!(G, X, e, pinvq, inverse_retraction)
         else
             # compute the equivalent logarithm on GL(dim(𝔽) * n, ℝ)

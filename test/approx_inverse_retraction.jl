@@ -1,11 +1,11 @@
 using NLsolve
-using Manifolds: ApproximateInverseRetraction
+using Manifolds: NLsolveInverseRetraction
 using LinearAlgebra
 
 include("utils.jl")
 
-@testset "nlsolve tests" begin
-    @testset "ApproximateInverseRetraction" begin
+@testset "approximate inverse retractions" begin
+    @testset "NLsolveInverseRetraction" begin
         @testset "constructor" begin
             X = randn(3)
 

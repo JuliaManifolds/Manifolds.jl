@@ -131,6 +131,8 @@ include("manifolds/VectorBundle.jl")
 include("distributions.jl")
 include("projected_distribution.jl")
 
+include("approx_inverse_retraction.jl")
+
 # It's included early to ensure visibility of `Identity`
 include("groups/group.jl")
 
@@ -233,7 +235,7 @@ function __init__()
     end
 
     @require NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56" begin
-        using .NLsolve
+        using .NLsolve: NLsolve
         include("nlsolve.jl")
     end
 
