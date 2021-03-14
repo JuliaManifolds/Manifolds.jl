@@ -68,20 +68,20 @@ The exponential map is
 ````
 
 where $\operatorname{Exp}(⋅)$ denotes the matrix exponential, and $⋅^\mathrm{H}$ is
-the conjugate transpose.
+the conjugate transpose. [^AndruchowLarotondaRechtVarela2014][^MartinNeff2016]
 
-[^MartinNeff2016]:
-    > Martin, R. J. and Neff, P.:
-    > “Minimal geodesics on GL(n) for left-invariant, right-O(n)-invariant Riemannian metrics”,
-    > Journal of Geometric Mechanics 8(3), pp. 323-357, 2016.
-    > doi: [10.3934/jgm.2016010](https://doi.org/10.3934/jgm.2016010),
-    > arXiv: [1409.7849v2](https://arxiv.org/abs/1409.7849v2).
 [^AndruchowLarotondaRechtVarela2014]:
     > Andruchow E., Larotonda G., Recht L., and Varela A.:
     > “The left invariant metric in the general linear group”,
     > Journal of Geometry and Physics 86, pp. 241-257, 2014.
     > doi: [10.1016/j.geomphys.2014.08.009](https://doi.org/10.1016/j.geomphys.2014.08.009),
     > arXiv: [1109.0520v1](https://arxiv.org/abs/1109.0520v1).
+[^MartinNeff2016]:
+    > Martin, R. J. and Neff, P.:
+    > “Minimal geodesics on GL(n) for left-invariant, right-O(n)-invariant Riemannian metrics”,
+    > Journal of Geometric Mechanics 8(3), pp. 323-357, 2016.
+    > doi: [10.3934/jgm.2016010](https://doi.org/10.3934/jgm.2016010),
+    > arXiv: [1409.7849v2](https://arxiv.org/abs/1409.7849v2).
 """
 exp(::GeneralLinear, p, X)
 
