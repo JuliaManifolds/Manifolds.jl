@@ -8,10 +8,12 @@ using NLsolve
         @test G === GeneralLinear(3, ℝ)
         @test repr(G) == "GeneralLinear(3, ℝ)"
         @test base_manifold(G) === GeneralLinear(3)
+        @test decorated_manifold(G) === Euclidean(3, 3)
         @test number_system(G) === ℝ
         @test manifold_dimension(G) == 9
         @test representation_size(G) == (3, 3)
         Gc = GeneralLinear(2, ℂ)
+        @test decorated_manifold(Gc) === Euclidean(2, 2; field=ℂ)
         @test repr(Gc) == "GeneralLinear(2, ℂ)"
         @test number_system(Gc) == ℂ
         @test manifold_dimension(Gc) == 8
@@ -30,10 +32,57 @@ using NLsolve
         @test Manifolds.default_metric_dispatch(
             MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction())),
         ) === Val{true}()
+        @test Manifolds.allocation_promotion_function(Gc, exp!, (1,)) === complex
+    end
+
+    @testset "GL(1,𝔽) special cases" begin
+        @testset "real" begin
+            G = GeneralLinear(1)
+            p = 3.0 * ones(1, 1)
+            X = 1.0 * ones(1, 1)
+            @test exp(G, p, X) ≈ p * exp(X)' * exp(X - X')
+            q = exp(G, p, X)
+            Y = log(G, p, q)
+            @test Y ≈ X
+            @test group_exp(G, X) ≈ exp(X)
+            @test group_log(G, exp(X)) ≈ X
+        end
+        @testset "complex" begin
+            G = GeneralLinear(1, ℂ)
+            p = (1 + im) * ones(1, 1)
+            X = (1 - im) * ones(1, 1)
+            @test exp(G, p, X) ≈ p * exp(X)' * exp(X - X')
+            q = exp(G, p, X)
+            Y = log(G, p, q)
+            @test Y ≈ X
+            @test group_exp(G, X) ≈ exp(X)
+            @test group_log(G, exp(X)) ≈ X
+        end
     end
 
     @testset "Real" begin
         G = GeneralLinear(3)
+
+        @test_throws DomainError is_manifold_point(G, randn(2, 3), true)
+        @test_throws DomainError is_manifold_point(G, randn(2, 2), true)
+        @test_throws DomainError is_manifold_point(G, randn(ComplexF64, 3, 3), true)
+        @test_throws DomainError is_manifold_point(G, zeros(3, 3), true)
+        @test_throws DomainError is_manifold_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
+        @test_throws DomainError is_manifold_point(
+            G,
+            make_identity(GeneralLinear(2), ones(2, 2)),
+            true,
+        )
+        @test is_manifold_point(G, Float64[0 0 1; 0 1 1; 1 1 1], true)
+        @test is_manifold_point(G, make_identity(G, ones(3, 3)), true)
+        @test_throws DomainError is_tangent_vector(
+            G,
+            Float64[0 1 1; 0 1 1; 1 0 0],
+            randn(3, 3),
+            true,
+        )
+        @test is_tangent_vector(G, Float64[0 0 1; 0 1 1; 1 1 1], randn(3, 3), true)
+
         types = [Matrix{Float64}]
         pts = [
             Matrix(Diagonal([1, 2, 3])),
@@ -85,6 +134,27 @@ using NLsolve
 
     @testset "Complex" begin
         G = GeneralLinear(2, ℂ)
+
+        @test_throws DomainError is_manifold_point(G, randn(ComplexF64, 2, 3), true)
+        @test_throws DomainError is_manifold_point(G, randn(ComplexF64, 3, 3), true)
+        @test_throws DomainError is_manifold_point(G, zeros(2, 2), true)
+        @test_throws DomainError is_manifold_point(G, ComplexF64[1 im; 1 im], true)
+        @test is_manifold_point(G, ComplexF64[1 1; im 1], true)
+        @test is_manifold_point(G, make_identity(G, ones(ComplexF64, 2, 2)), true)
+        @test_throws DomainError is_manifold_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
+        @test_throws DomainError is_manifold_point(
+            G,
+            make_identity(GeneralLinear(3), ones(3, 3)),
+            true,
+        )
+        @test_throws DomainError is_tangent_vector(
+            G,
+            ComplexF64[im im; im im],
+            randn(ComplexF64, 2, 2),
+            true,
+        )
+        @test is_tangent_vector(G, ComplexF64[1 im; im im], randn(ComplexF64, 2, 2), true)
+
         types = [Matrix{ComplexF64}]
         pts = [
             [-1-5im -1+3im; -6-4im 4+6im],

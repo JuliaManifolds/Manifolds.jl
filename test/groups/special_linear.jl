@@ -8,10 +8,12 @@ using NLsolve
         @test G === SpecialLinear(3, ℝ)
         @test repr(G) == "SpecialLinear(3, ℝ)"
         @test base_manifold(G) === SpecialLinear(3)
+        @test decorated_manifold(G) == GeneralLinear(3)
         @test number_system(G) === ℝ
         @test manifold_dimension(G) == 8
         @test representation_size(G) == (3, 3)
         Gc = SpecialLinear(2, ℂ)
+        @test decorated_manifold(Gc) == GeneralLinear(2, ℂ)
         @test repr(Gc) == "SpecialLinear(2, ℂ)"
         @test number_system(Gc) == ℂ
         @test manifold_dimension(Gc) == 6
@@ -30,10 +32,46 @@ using NLsolve
         @test Manifolds.default_metric_dispatch(
             MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction())),
         ) === Val{true}()
+        @test Manifolds.allocation_promotion_function(Gc, exp!, (1,)) === complex
     end
 
     @testset "Real" begin
         G = SpecialLinear(3)
+
+        @test_throws DomainError is_manifold_point(G, randn(2, 3), true)
+        @test_throws DomainError is_manifold_point(G, Float64[2 1; 1 1], true)
+        @test_throws DomainError is_manifold_point(G, [1 0 im; im 0 0; 0 -1 0], true)
+        @test_throws DomainError is_manifold_point(G, zeros(3, 3), true)
+        @test_throws DomainError is_manifold_point(G, Float64[1 3 3; 1 1 2; 1 2 3], true)
+        @test_throws DomainError is_manifold_point(
+            G,
+            make_identity(SpecialLinear(2), ones(2, 2)),
+            true,
+        )
+        @test is_manifold_point(G, Float64[1 1 1; 2 2 1; 2 3 3], true)
+        @test is_manifold_point(G, make_identity(G, ones(3, 3)), true)
+        @test_throws DomainError is_tangent_vector(
+            G,
+            Float64[2 3 2; 3 1 2; 1 1 1],
+            randn(3, 3),
+            true;
+            atol=1e-6,
+        )
+        @test_throws DomainError is_tangent_vector(
+            G,
+            Float64[2 1 2; 3 2 2; 2 2 1],
+            Float64[2 1 -1; 2 2 1; 1 1 -1],
+            true;
+            atol=1e-6,
+        )
+        @test is_tangent_vector(
+            G,
+            Float64[2 1 2; 3 2 2; 2 2 1],
+            Float64[-1 -1 -1; 1 -1 2; -1 -1 2],
+            true;
+            atol=1e-6,
+        )
+
         types = [Matrix{Float64}]
         pts =
             [[2 -1 -3; 4 -1 -6; -1 1 2], [0 2 1; 0 -3 -1; 1 0 2], [-2 0 -1; 1 0 0; -1 -1 2]]
@@ -75,10 +113,62 @@ using NLsolve
                 is_tangent_atol_multiplier=1e10,
             )
         end
+
+        @testset "project" begin
+            p = randn(3, 3)
+            @test !is_manifold_point(G, p)
+            q = project(G, p)
+            @test is_manifold_point(G, q)
+            @test project(G, q) ≈ q
+
+            X = randn(3, 3)
+            @test !is_tangent_vector(G, q, X; atol=1e-6)
+            Y = project(G, q, X)
+            @test is_tangent_vector(G, q, Y; atol=1e-6)
+            @test project(G, q, Y) ≈ Y
+        end
     end
 
     @testset "Complex" begin
         G = SpecialLinear(2, ℂ)
+
+        @test_throws DomainError is_manifold_point(G, randn(ComplexF64, 2, 3), true)
+        @test_throws DomainError is_manifold_point(G, randn(2, 2), true)
+        @test_throws DomainError is_manifold_point(
+            G,
+            ComplexF64[1 0 im; im 0 0; 0 -1 0],
+            true,
+        )
+        @test_throws DomainError is_manifold_point(G, ComplexF64[1 im; im 1], true)
+        @test_throws DomainError is_manifold_point(
+            G,
+            make_identity(SpecialLinear(2), ones(ComplexF64, 2, 2)),
+            true,
+        )
+        @test is_manifold_point(G, ComplexF64[im 1; -2 im], true)
+        @test is_manifold_point(G, make_identity(G, ones(3, 3)), true)
+        @test_throws DomainError is_tangent_vector(
+            G,
+            ComplexF64[-1+im -1; -im 1],
+            ComplexF64[1-im 1+im; 1 -1+im],
+            true;
+            atol=1e-6,
+        )
+        @test_throws DomainError is_tangent_vector(
+            G,
+            ComplexF64[1 1+im; -1+im -1],
+            ComplexF64[1-im -1-im; -im im],
+            true;
+            atol=1e-6,
+        )
+        @test is_tangent_vector(
+            G,
+            ComplexF64[1 1+im; -1+im -1],
+            ComplexF64[1-im 1+im; 1 -1+im],
+            true;
+            atol=1e-6,
+        )
+
         types = [Matrix{ComplexF64}]
         pts = [
             [0+1im 0+2im; 0+1im 0+1im],
@@ -122,6 +212,20 @@ using NLsolve
                 retraction_atol_multiplier=1e8,
                 is_tangent_atol_multiplier=1e8,
             )
+        end
+
+        @testset "project" begin
+            p = randn(ComplexF64, 2, 2)
+            @test !is_manifold_point(G, p)
+            q = project(G, p)
+            @test is_manifold_point(G, q)
+            @test project(G, q) ≈ q
+
+            X = randn(ComplexF64, 2, 2)
+            @test !is_tangent_vector(G, q, X; atol=1e-6)
+            Y = project(G, q, X)
+            @test is_tangent_vector(G, q, Y; atol=1e-6)
+            @test project(G, q, Y) ≈ Y
         end
     end
 end
