@@ -68,18 +68,21 @@ include("utils.jl")
             @test Manifolds.isnormal(Hermitian(randn(3, 3)))
             @test Manifolds.isnormal(Hermitian(randn(ComplexF64, 3, 3)))
             x = Matrix(Symmetric(randn(3, 3)))
-            x[3,1] += eps()
+            x[3, 1] += eps()
             @test !Manifolds.isnormal(x)
             @test Manifolds.isnormal(x; atol=sqrt(eps()))
 
             # skew-symmetric/skew-hermitian
-            skew(x) = x-x'
+            skew(x) = x - x'
             @test Manifolds.isnormal(skew(randn(3, 3)))
             @test Manifolds.isnormal(skew(randn(ComplexF64, 3, 3)))
 
             # orthogonal/unitary
             @test Manifolds.isnormal(Matrix(qr(randn(3, 3)).Q); atol=sqrt(eps()))
-            @test Manifolds.isnormal(Matrix(qr(randn(ComplexF64, 3, 3)).Q); atol=sqrt(eps()))
+            @test Manifolds.isnormal(
+                Matrix(qr(randn(ComplexF64, 3, 3)).Q);
+                atol=sqrt(eps()),
+            )
         end
         @testset "realify/unrealify!" begin
             # round trip real
