@@ -6,7 +6,8 @@ An abstract type for representing approximate inverse retraction methods.
 abstract type ApproximateInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
-    NLsolveInverseRetraction{T<:AbstractRetractionMethod} <: ApproximateInverseRetraction
+    NLsolveInverseRetraction{T<:AbstractRetractionMethod,TV,TK} <:
+        ApproximateInverseRetraction
 
 An inverse retraction method for approximating the inverse of a retraction using `NLsolve`.
 
@@ -25,17 +26,17 @@ vector is projected before the retraction using `project`. If `project_point` is
 then the resulting point is projected after the retraction. `nlsolve_kwargs` are keyword
 arguments passed to `NLsolve.nlsolve`.
 """
-struct NLsolveInverseRetraction{TR<:AbstractRetractionMethod,TV} <:
+struct NLsolveInverseRetraction{TR<:AbstractRetractionMethod,TV,TK} <:
        AbstractInverseRetractionMethod
     retraction::TR
     X0::TV
     project_tangent::Bool
     project_point::Bool
-    nlsolve_kwargs
+    nlsolve_kwargs::TK
     function NLsolveInverseRetraction(m, X0, project_point, project_tangent, nlsolve_kwargs)
         isdefined(Manifolds, :NLsolve) ||
             @warn "To use NLsolveInverseRetraction, NLsolve must be loaded using `using NLsolve`."
-        return new{typeof(m),typeof(X0)}(
+        return new{typeof(m),typeof(X0),typeof(nlsolve_kwargs)}(
             m,
             X0,
             project_point,
