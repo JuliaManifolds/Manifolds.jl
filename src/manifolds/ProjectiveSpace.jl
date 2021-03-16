@@ -111,7 +111,7 @@ function check_manifold_point(M::AbstractProjectiveSpace, p; kwargs...)
     return nothing
 end
 
-@doc doc"""
+@doc raw"""
     check_tangent_vector(M::AbstractProjectiveSpace, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector in the tangent space of `p` on the
