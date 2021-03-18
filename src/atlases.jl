@@ -99,7 +99,8 @@ end
     get_chart_index(M::Manifold, A::AbstractAtlas, p)
 
 Select a chart from an [`AbstractAtlas`](@ref) `A` for manifold `M` that is suitable for
-representing neighborhood of point `p`.
+representing neighborhood of point `p`. This selection should be deterministic, although
+different charts may be selected for arbitrarily close but distinct points.
 """
 get_chart_index(::Manifold, ::AbstractAtlas, ::Any)
 
