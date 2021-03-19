@@ -109,6 +109,13 @@ end
         @test get_component(Mse, prs1, Val(2)) == p3
         prs1[Mse, Val(2)] = 2 * p3
         @test prs1[Mse, Val(2)] == 2 * p3
+
+        p1c = copy(p1)
+        p1c.parts[1][1] = -123.0
+        @test p1c.parts[1][1] == -123.0
+        @test p1.parts[1][1] == 0.0
+        copyto!(p1c, p1)
+        @test p1c.parts[1][1] == 0.0
     end
 
     @testset "CompositeManifoldError" begin

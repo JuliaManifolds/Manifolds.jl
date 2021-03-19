@@ -352,6 +352,8 @@ end
 allocate(p::ProductRepr, ::Type{T}, s::Size{S}) where {S,T} = Vector{T}(undef, S)
 allocate(p::ProductRepr, ::Type{T}, s::Integer) where {S,T} = Vector{T}(undef, s)
 
+Base.copy(x::ProductRepr) = ProductRepr(map(copy, x.parts))
+
 function Base.copyto!(x::ProductRepr, y::ProductRepr)
     map(copyto!, submanifold_components(x), submanifold_components(y))
     return x
