@@ -540,20 +540,20 @@ function get_vector!(
     X,
     B::InducedBasis{ℝ,TangentSpaceType,<:StereographicAtlas},
 ) where {n}
-    x = get_point_coordinates(M, B.A, B.i, p)
-    mult = inv(1 + dot(x, x))^2
+    a = get_point_coordinates(M, B.A, B.i, p)
+    mult = inv(1 + dot(a, a))^2
 
     Y[1] = 0
     for j in 1:n
-        Y[1] -= 4 * x[j] * mult * X[j]
+        Y[1] -= 4 * a[j] * mult * X[j]
     end
     for i in 2:(n + 1)
         Y[i] = 0
         for j in 1:n
             if i == j + 1
-                Y[i] += 2 * (1 + dot(x, x) - 2 * x[i - 1]^2) * mult * X[j]
+                Y[i] += 2 * (1 + dot(a, a) - 2 * a[i - 1]^2) * mult * X[j]
             else
-                Y[i] -= 4 * x[i - 1] * x[j] * mult * X[j]
+                Y[i] -= 4 * a[i - 1] * a[j] * mult * X[j]
             end
         end
         if B.i === :south
@@ -568,6 +568,6 @@ function local_metric(
     B::InducedBasis{ℝ,TangentSpaceType,StereographicAtlas,Symbol},
     p,
 ) where {n}
-    x = get_point_coordinates(M, B.A, B.i, p)
-    return (4 / (1 + dot(x, x))^2) * I
+    a = get_point_coordinates(M, B.A, B.i, p)
+    return (4 / (1 + dot(a, a))^2) * I
 end

@@ -12,6 +12,7 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\tau_p`` | action map by group element ``p`` | ``\mathrm{L}_p``, ``\mathrm{R}_p`` | either left or right |
 | ``\times`` | Cartesian product of two manifolds | | see [`ProductManifold`](@ref) |
 | ``^{\wedge}`` | (n-ary) Cartesian power of a manifold | | see [`PowerManifold`](@ref) |
+| ``a`` | coordinates of a point in a chart | | see [`Manifolds.get_point_coordinates`](@ref) |
 | ``T^*_p \mathcal M`` | the cotangent space at ``p`` | | |
 | ``\xi`` | a cotangent vector from ``T^*_p \mathcal M`` | ``\xi_1, \xi_2,\ldots,\eta,\zeta`` | sometimes written with base point ``\xi_p``. |
 | ``\mathrm{d}\phi_p(q)`` | Differential of a map ``\phi: \mathcal M \to \mathcal N`` with respect to ``p`` at a point ``q``. For functions of multiple variables, for example ``\phi(p, p_1)`` where ``p \in \mathcal M`` and ``p_1 \in \mathcal M_1``, variable ``p`` is explicitly stated to specify with respect to which argument the differential is calculated. | ``\mathrm{d}\phi_q``, ``(\mathrm{d}\phi)_q``, ``(\phi_*)_q``, ``D_p\phi(q)`` | pushes tangent vectors ``X \in T_q \mathcal M`` forward to ``\mathrm{d}\phi_p(q)[X] \in T_{\phi(q)} \mathcal N`` |

@@ -50,7 +50,7 @@ The non-mutating one (e.g. `exp`) always falls back to use the mutating one, so 
 suffice to implement the mutating one (e.g. `exp!`).
 
 Note that since the first argument is _always_ the [`Manifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.Manifold), the mutated argument is always the second one in the signature.
-In the example we have `exp(M, x, v)` for the exponential map and `exp!(M, y, v, x)` for the mutating one, that stores the result in `y`.
+In the example we have `exp(M, p, X)` for the exponential map and `exp!(M, q, X, p)` for the mutating one, that stores the result in `q`.
 
 On the other hand, the user will most likely look for the documentation of the non-mutating version, so we recommend adding the docstring for the non-mutating one, where all different signatures should be collected in one string when reasonable.
 This can best be achieved by adding a docstring to the method with a general signature with the first argument being your manifold:
@@ -59,7 +59,7 @@ This can best be achieved by adding a docstring to the method with a general sig
 struct MyManifold <: Manifold end
 
 @doc raw"""
-    exp(M::MyManifold, x, v)
+    exp(M::MyManifold, p, X)
 
 Describe the function.
 """

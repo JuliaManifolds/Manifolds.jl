@@ -20,7 +20,7 @@ Circle(𝔽::AbstractNumbers=ℝ) = Circle{𝔽}()
     check_manifold_point(M::Circle, p)
 
 Check whether `p` is a point on the [`Circle`](@ref) `M`.
-For the real-valued case, `x` is an angle and hence it checks that $p  ∈ [-π,π)$.
+For the real-valued case, `p` is an angle and hence it checks that $p  ∈ [-π,π)$.
 for the complex-valued case, it is a unit number, $p ∈ ℂ$ with $\lvert p \rvert = 1$.
 """
 check_manifold_point(::Circle, ::Any...)
@@ -59,7 +59,7 @@ check_tangent_vector(::Circle{ℝ}, ::Any...; ::Any...)
 function check_tangent_vector(M::Circle{ℝ}, p, X; check_base_point=true, kwargs...)
     if check_base_point
         perr = check_manifold_point(M, p; kwargs...)
-        return perr # if x is valid all v that are real numbers are valid
+        return perr # if p is valid all X that are real numbers are valid
     end
     return nothing
 end
@@ -112,9 +112,9 @@ complex plane.
 """
 exp(::Circle, ::Any...)
 Base.exp(::Circle{ℝ}, p::Real, X::Real) = sym_rem(p + X)
-function Base.exp(M::Circle{ℂ}, x::Number, v::Number)
-    θ = norm(M, x, v)
-    return cos(θ) * x + usinc(θ) * v
+function Base.exp(M::Circle{ℂ}, p::Number, X::Number)
+    θ = norm(M, p, X)
+    return cos(θ) * p + usinc(θ) * X
 end
 
 exp!(::Circle{ℝ}, q, p, X) = (q .= sym_rem(p + X))
@@ -291,11 +291,11 @@ inner(::Circle, ::Any...)
 @inline inner(::Circle{ℝ}, p::Real, X::Real, Y::Real) = X * Y
 @inline inner(::Circle{ℂ}, p, X, Y) = complex_dot(X, Y)
 
-function inverse_retract(M::Circle, x::Number, y::Number)
-    return inverse_retract(M, x, y, LogarithmicInverseRetraction())
+function inverse_retract(M::Circle, p::Number, q::Number)
+    return inverse_retract(M, p, q, LogarithmicInverseRetraction())
 end
-function inverse_retract(M::Circle, x::Number, y::Number, ::LogarithmicInverseRetraction)
-    return log(M, x, y)
+function inverse_retract(M::Circle, p::Number, q::Number, ::LogarithmicInverseRetraction)
+    return log(M, p, q)
 end
 
 @doc raw"""

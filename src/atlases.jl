@@ -46,13 +46,17 @@ get_default_atlas(M::Manifold) = RetractionAtlas()
 
 Calculate coordinates of point `p` on manifold `M` in chart from an [`AbstractAtlas`](@ref)
 `A` at index `i`.
+
+# See also
+
+[`get_point`](@ref), [`get_chart_index`](@ref)
 """
 get_point_coordinates(::Manifold, ::AbstractAtlas, ::Any, ::Any)
 
 function get_point_coordinates(M::Manifold, A::AbstractAtlas, i, p)
-    x = allocate_result(M, get_point_coordinates, p)
-    get_point_coordinates!(M, x, A, i, p)
-    return x
+    a = allocate_result(M, get_point_coordinates, p)
+    get_point_coordinates!(M, a, A, i, p)
+    return a
 end
 
 function allocate_result(M::Manifold, f::typeof(get_point_coordinates), p)
@@ -60,8 +64,8 @@ function allocate_result(M::Manifold, f::typeof(get_point_coordinates), p)
     return allocate(p, T, manifold_dimension(M))
 end
 
-function get_point_coordinates!(M::Manifold, x, A::RetractionAtlas, i, p)
-    return get_coordinates!(M, x, i, inverse_retract(M, i, p, A.invretr), A.basis)
+function get_point_coordinates!(M::Manifold, a, A::RetractionAtlas, i, p)
+    return get_coordinates!(M, a, i, inverse_retract(M, i, p, A.invretr), A.basis)
 end
 
 function get_point_coordinates(M::Manifold, A::RetractionAtlas, i, p)
@@ -69,30 +73,34 @@ function get_point_coordinates(M::Manifold, A::RetractionAtlas, i, p)
 end
 
 """
-    get_point(M::Manifold, A::AbstractAtlas, i, x)
+    get_point(M::Manifold, A::AbstractAtlas, i, a)
 
-Calculate point at coordinates `x` on manifold `M` in chart from an [`AbstractAtlas`](@ref)
+Calculate point at coordinates `a` on manifold `M` in chart from an [`AbstractAtlas`](@ref)
 `A` at index `i`.
+
+# See also
+
+[`get_point_coordinates`](@ref), [`get_chart_index`](@ref)
 """
 get_point(::Manifold, ::AbstractAtlas, ::Any, ::Any)
 
-function get_point(M::Manifold, A::AbstractAtlas, i, x)
-    p = allocate_result(M, get_point, x)
-    get_point!(M, p, A, i, x)
+function get_point(M::Manifold, A::AbstractAtlas, i, a)
+    p = allocate_result(M, get_point, a)
+    get_point!(M, p, A, i, a)
     return p
 end
 
-function allocate_result(M::Manifold, f::typeof(get_point), x)
-    T = allocate_result_type(M, f, (x,))
-    return allocate(x, T, representation_size(M)...)
+function allocate_result(M::Manifold, f::typeof(get_point), a)
+    T = allocate_result_type(M, f, (a,))
+    return allocate(a, T, representation_size(M)...)
 end
 
-function get_point(M::Manifold, A::RetractionAtlas, i, x)
-    return retract(M, i, get_vector(M, i, x, A.basis), A.retr)
+function get_point(M::Manifold, A::RetractionAtlas, i, a)
+    return retract(M, i, get_vector(M, i, a, A.basis), A.retr)
 end
 
-function get_point!(M::Manifold, p, A::RetractionAtlas, i, x)
-    return retract!(M, p, i, get_vector(M, i, x, A.basis), A.retr)
+function get_point!(M::Manifold, p, A::RetractionAtlas, i, a)
+    return retract!(M, p, i, get_vector(M, i, a, A.basis), A.retr)
 end
 
 """
@@ -107,10 +115,10 @@ get_chart_index(::Manifold, ::AbstractAtlas, ::Any)
 get_chart_index(::Manifold, ::RetractionAtlas, p) = p
 
 """
-    transition_map(M::Manifold, A_from::AbstractAtlas, i_from, A_to::AbstractAtlas, i_to, x)
-    transition_map(M::Manifold, A::AbstractAtlas, i_from, i_to, x)
+    transition_map(M::Manifold, A_from::AbstractAtlas, i_from, A_to::AbstractAtlas, i_to, a)
+    transition_map(M::Manifold, A::AbstractAtlas, i_from, i_to, a)
 
-Given coordinates `x` in chart `(A_from, i_from)` of a point on manifold `M`, returns
+Given coordinates `a` in chart `(A_from, i_from)` of a point on manifold `M`, returns
 coordinates of that point in chart `(A_to, i_to)`. If `A_from` and `A_to` are equal, `A_to`
 can be omitted.
 
@@ -124,13 +132,13 @@ function transition_map(
     i_from,
     A_to::AbstractAtlas,
     i_to,
-    x,
+    a,
 )
-    return get_point_coordinates(M, A_to, i_to, get_point(M, A_from, i_from, x))
+    return get_point_coordinates(M, A_to, i_to, get_point(M, A_from, i_from, a))
 end
 
-function transition_map(M::Manifold, A::AbstractAtlas, i_from, i_to, x)
-    return transition_map(M, A, i_from, A, i_to, x)
+function transition_map(M::Manifold, A::AbstractAtlas, i_from, i_to, a)
+    return transition_map(M, A, i_from, A, i_to, a)
 end
 
 function transition_map!(
@@ -140,13 +148,13 @@ function transition_map!(
     i_from,
     A_to::AbstractAtlas,
     i_to,
-    x,
+    a,
 )
-    return get_point_coordinates!(M, y, A_to, i_to, get_point(M, A_from, i_from, x))
+    return get_point_coordinates!(M, y, A_to, i_to, get_point(M, A_from, i_from, a))
 end
 
-function transition_map!(M::Manifold, y, A::AbstractAtlas, i_from, i_to, x)
-    return transition_map!(M, y, A, i_from, A, i_to, x)
+function transition_map!(M::Manifold, y, A::AbstractAtlas, i_from, i_to, a)
+    return transition_map!(M, y, A, i_from, A, i_to, a)
 end
 
 """
