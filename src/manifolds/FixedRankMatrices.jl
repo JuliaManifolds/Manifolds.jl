@@ -405,3 +405,21 @@ function zero_tangent_vector!(
     X.Vt .= zeros(eltype(X.Vt), k, n)
     return X
 end
+
+@doc raw"""
+    to_ambient(X::SVDMPoint)
+
+Reconstruct a low-rank matrix from the its `SVDMPoint` representation.
+"""
+function to_ambient(X::SVDMPoint)
+    return X.U * diagm(X.S) * X.Vt
+end
+
+@doc raw"""
+    to_ambient(X::SVDMPoint, T::UMVTVector)
+
+Reconstruct a tangent vector from its `UMVTVector` representation.
+"""
+function to_ambient(X::SVDMPoint, T::UMVTVector)
+    return X.U * T.M * X.Vt + T.U * X.Vt + X.U * T.Vt
+end
