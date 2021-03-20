@@ -2,19 +2,19 @@
     GeneralLinear{n,𝔽} <:
         AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType}
 
-The general linear group, that is, the group of all invertible matrices in $𝔽^{n×n}$.
+The general linear group, that is, the group of all invertible matrices in ``𝔽^{n×n}``.
 
-The default metric is the left-$\mathrm{GL}(n)$-right-$\mathrm{O}(n)$-invariant metric whose
+The default metric is the left-``\mathrm{GL}(n)``-right-``\mathrm{O}(n)``-invariant metric whose
 inner product is written
 ```math
 ⟨X_p,Y_p⟩_p = ⟨p^{-1}X_p,p^{-1}Y_p⟩_\mathrm{F} = ⟨X_e, Y_e⟩_\mathrm{F},
 ```
 where ``X_p, Y_p ∈ T_p \mathrm{GL}(n, 𝔽)``,
-$X_e = p^{-1}X_p ∈ 𝔤𝔩(n) = T_e \mathrm{GL}(n, 𝔽) = 𝔽^{n×n}$ is the corresponding
-vector in the Lie algebra, and $⟨⋅,⋅⟩_\mathrm{F}$ denotes the Frobenius inner product.
+``X_e = p^{-1}X_p ∈ 𝔤𝔩(n) = T_e \mathrm{GL}(n, 𝔽) = 𝔽^{n×n}`` is the corresponding
+vector in the Lie algebra, and ``⟨⋅,⋅⟩_\mathrm{F}`` denotes the Frobenius inner product.
 
-By default, tangent vectors $X_p$ are represented with their corresponding Lie algebra
-vectors $X_e = p^{-1}X_p$.
+By default, tangent vectors ``X_p`` are represented with their corresponding Lie algebra
+vectors ``X_e = p^{-1}X_p``.
 """
 struct GeneralLinear{n,𝔽} <:
        AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType} end
@@ -69,7 +69,7 @@ The exponential map is
 \exp_p \colon X ↦ p \operatorname{Exp}(X^\mathrm{H}) \operatorname{Exp}(X - X^\mathrm{H}),
 ````
 
-where $\operatorname{Exp}(⋅)$ denotes the matrix exponential, and $⋅^\mathrm{H}$ is
+where ``\operatorname{Exp}(⋅)`` denotes the matrix exponential, and ``⋅^\mathrm{H}`` is
 the conjugate transpose. [^AndruchowLarotondaRechtVarela2014][^MartinNeff2016]
 
 [^AndruchowLarotondaRechtVarela2014]:
@@ -170,10 +170,11 @@ end
 
 Compute the logarithmic map on the [`GeneralLinear(n)`](@ref) group.
 
-The algorithm proceeds in two stages. First, the point $r = p^{-1} q$ is projected to the
+The algorithm proceeds in two stages. First, the point ``r = p^{-1} q`` is projected to the
 nearest element (under the Frobenius norm) of the direct product subgroup
-$\mathrm{O}(n) × S^+$, whose logarithmic map is exactly computed using the matrix logarithm.
-This initial tangent vector is then refined using the  [`NLsolveInverseRetraction`](@ref).
+``\mathrm{O}(n) × S^+``, whose logarithmic map is exactly computed using the matrix
+logarithm. This initial tangent vector is then refined using the
+[`NLsolveInverseRetraction`](@ref).
 
 For `GeneralLinear(n, ℂ)`, the logarithmic map is instead computed on the realified
 supergroup `GeneralLinear(2n)` and the resulting tangent vector is then complexified.

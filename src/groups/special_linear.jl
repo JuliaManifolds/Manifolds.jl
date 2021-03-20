@@ -2,19 +2,19 @@
     SpecialLinear{n,𝔽} <:
         AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType}
 
-The special linear group $\mathrm{SL}(n,𝔽)$ that is, the group of all invertible matrices
-with unit determinant in $𝔽^{n×n}$.
+The special linear group ``\mathrm{SL}(n,𝔽)`` that is, the group of all invertible matrices
+with unit determinant in ``𝔽^{n×n}``.
 
-The Lie algebra $𝔰𝔩(n, 𝔽) = T_e \mathrm{SL}(n,𝔽)$ is the set of all matrices in $𝔽^{n×n}$
-with trace of zero. By default, tangent vectors $X_p ∈ T_p \mathrm{SL}(n,𝔽)$ for
-$p ∈ \mathrm{SL}(n,𝔽)$ are represented with their corresponding Lie algebra vector
-$X_e = p^{-1}X_p ∈ 𝔰𝔩(n, 𝔽)$.
+The Lie algebra ``𝔰𝔩(n, 𝔽) = T_e \mathrm{SL}(n,𝔽)`` is the set of all matrices in
+``𝔽^{n×n}`` with trace of zero. By default, tangent vectors ``X_p ∈ T_p \mathrm{SL}(n,𝔽)``
+for ``p ∈ \mathrm{SL}(n,𝔽)`` are represented with their corresponding Lie algebra vector
+``X_e = p^{-1}X_p ∈ 𝔰𝔩(n, 𝔽)``.
 
-The default metric is the same left-$\mathrm{GL}(n)$-right-$\mathrm{O}(n)$-invariant metric
-used for [`GeneralLinear(n, 𝔽)`](@ref). The resulting geodesic on $\mathrm{GL}(n,𝔽)$
-emanating from an element of $\mathrm{SL}(n,𝔽)$ in the direction of an element of $𝔰𝔩(n, 𝔽)$
-is a closed subgroup of $\mathrm{SL}(n,𝔽)$. As a result, most metric functions forward to
-`GeneralLinear`.
+The default metric is the same left-``\mathrm{GL}(n)``-right-``\mathrm{O}(n)``-invariant
+metric used for [`GeneralLinear(n, 𝔽)`](@ref). The resulting geodesic on
+``\mathrm{GL}(n,𝔽)`` emanating from an element of ``\mathrm{SL}(n,𝔽)`` in the direction of
+an element of ``𝔰𝔩(n, 𝔽)`` is a closed subgroup of ``\mathrm{SL}(n,𝔽)``. As a result, most
+metric functions forward to `GeneralLinear`.
 """
 struct SpecialLinear{n,𝔽} <:
        AbstractGroupManifold{𝔽,MultiplicationOperation,TransparentIsometricEmbedding} end
@@ -81,9 +81,10 @@ end
 @doc raw"""
     project(G::SpecialLinear, p)
 
-Project $p ∈ \mathrm{GL}(n, 𝔽)$ to the [`SpecialLinear`](@ref) group $G=\mathrm{SL}(n, 𝔽)$.
+Project ``p ∈ \mathrm{GL}(n, 𝔽)`` to the [`SpecialLinear`](@ref) group
+``G=\mathrm{SL}(n, 𝔽)``.
 
-Given the singular value decomposition of $p$, written $p = U S V^\mathrm{H}$, the
+Given the singular value decomposition of ``p``, written ``p = U S V^\mathrm{H}``, the
 formula for the projection is
 
 ````math
@@ -113,8 +114,8 @@ end
 @doc raw"""
     project(G::SpecialLinear, p, X)
 
-Orthogonally project $X ∈ 𝔽^{n × n}$ onto the tangent space of $p$ to the
-[`SpecialLinear`](@ref) $G = \mathrm{SL}(n, 𝔽)$. The formula reads
+Orthogonally project ``X ∈ 𝔽^{n × n}`` onto the tangent space of ``p`` to the
+[`SpecialLinear`](@ref) ``G = \mathrm{SL}(n, 𝔽)``. The formula reads
 ````math
 \operatorname{proj}_{p}
     = (\mathrm{d}L_p)_e ∘ \operatorname{proj}_{𝔰𝔩(n, 𝔽)} ∘ (\mathrm{d}L_p^{-1})_p
