@@ -6,8 +6,10 @@ The general linear group, that is, the group of all invertible matrices in $𝔽
 
 The default metric is the left-$\mathrm{GL}(n)$-right-$\mathrm{O}(n)$-invariant metric whose
 inner product is written
-$$⟨X_p,Y_p⟩_p = ⟨p^{-1}X_p,p^{-1}Y_p⟩_\mathrm{F} = ⟨X_e, Y_e⟩_\mathrm{F},$$
-where $X_p, Y_p ∈ T_p \mathrm{GL}(n, 𝔽)$,
+```math
+⟨X_p,Y_p⟩_p = ⟨p^{-1}X_p,p^{-1}Y_p⟩_\mathrm{F} = ⟨X_e, Y_e⟩_\mathrm{F},
+```
+where ``X_p, Y_p ∈ T_p \mathrm{GL}(n, 𝔽)``,
 $X_e = p^{-1}X_p ∈ 𝔤𝔩(n) = T_e \mathrm{GL}(n, 𝔽) = 𝔽^{n×n}$ is the corresponding
 vector in the Lie algebra, and $⟨⋅,⋅⟩_\mathrm{F}$ denotes the Frobenius inner product.
 
