@@ -183,14 +183,6 @@ Note that this implementation is experimental.
 """
 log(::GeneralLinear, p, q)
 
-# TODO: Look into using geodesic shooting method in §6.2 of http://hdl.handle.net/2078.1/132587
-# TODO: Explore projecting to nearest normal matrix for initial guess
-#       - complex: Ruhe, A. Closest normal matrix finally found!. BIT 27, 585–598 (1987).
-#                  https://doi.org/10.1007/BF01937278
-#       - real: Guglielmi, N., Scalone, C. Computing the closest real normal matrix and
-#               normal completion. Adv Comput Math 45, 2867–2891 (2019).
-#               https://doi.org/10.1007/s10444-019-09717-6
-
 function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
     pinvq = inverse_translate(G, p, q, LeftAction())
     𝔽 === ℝ && det(pinvq) ≤ 0 && throw(OutOfInjectivityRadiusError())
