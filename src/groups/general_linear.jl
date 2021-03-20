@@ -4,8 +4,8 @@
 
 The general linear group, that is, the group of all invertible matrices in ``𝔽^{n×n}``.
 
-The default metric is the left-``\mathrm{GL}(n)``-right-``\mathrm{O}(n)``-invariant metric whose
-inner product is
+The default metric is the left-``\mathrm{GL}(n)``-right-``\mathrm{O}(n)``-invariant metric
+whose inner product is
 ```math
 ⟨X_p,Y_p⟩_p = ⟨p^{-1}X_p,p^{-1}Y_p⟩_\mathrm{F} = ⟨X_e, Y_e⟩_\mathrm{F},
 ```
