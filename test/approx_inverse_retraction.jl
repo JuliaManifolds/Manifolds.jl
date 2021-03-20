@@ -54,7 +54,12 @@ include("utils.jl")
             X = inverse_retract(M, p, q, inv_retr_method)
             @test is_tangent_vector(M, p, X; atol=1e-9)
             @test X ≈ X_exp
-            @test_throws OutOfInjectivityRadiusError inverse_retract(M, p, -p, inv_retr_method)
+            @test_throws OutOfInjectivityRadiusError inverse_retract(
+                M,
+                p,
+                -p,
+                inv_retr_method,
+            )
         end
 
         @testset "Circle(ℂ)" begin
