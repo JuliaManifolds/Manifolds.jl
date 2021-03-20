@@ -27,7 +27,7 @@ then the resulting point is projected after the retraction. `nlsolve_kwargs` are
 arguments passed to `NLsolve.nlsolve`.
 """
 struct NLsolveInverseRetraction{TR<:AbstractRetractionMethod,TV,TK} <:
-       AbstractInverseRetractionMethod
+       ApproximateInverseRetraction
     retraction::TR
     X0::TV
     project_tangent::Bool

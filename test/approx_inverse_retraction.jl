@@ -1,5 +1,5 @@
 using NLsolve
-using Manifolds: NLsolveInverseRetraction
+using Manifolds: NLsolveInverseRetraction, ApproximateInverseRetraction
 using LinearAlgebra
 
 include("utils.jl")
@@ -9,6 +9,7 @@ include("utils.jl")
         @testset "constructor" begin
             X = randn(3)
 
+            @test NLsolveInverseRetraction <: ApproximateInverseRetraction
             m1 = NLsolveInverseRetraction(ExponentialRetraction())
             @test m1.retraction === ExponentialRetraction()
             @test m1.X0 === nothing
