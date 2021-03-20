@@ -81,9 +81,9 @@ Base.:(==)(x::SVDMPoint, y::SVDMPoint) = (x.U == y.U) && (x.S == y.S) && (x.Vt =
 @doc raw"""
     UMVTVector <: TVector
 
-A tangent vector that can be described as a product $UMV^\mathrm{H}$, at least
-together with its base point, see for example [`FixedRankMatrices`](@ref). This
-vector structure stores the additionally (to the point) required fields.
+A tangent vector that can be described as a product $UMV^\mathrm{H} + U_p V^\mathrm{H} + U V_p^\mathrm{H}$,
+where $X = U\Sigma V^\mathrm{H}$ is its base point, see for example [`FixedRankMatrices`](@ref).
+This vector structure stores the additionally (to the point) required fields.
 
 # Constructors
 * `UMVTVector(U,M,Vt)` store umv factors to initialize the `UMVTVector`
@@ -260,9 +260,6 @@ function project!(::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, A::AbstractM
     Y.U .= A * p.Vt' - p.U * uTav
     Y.Vt .= (aTu - p.Vt' * uTav')'
     return Y
-end
-function project!(M::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, X::UMVTVector)
-    return project!(M, Y, p, X.U * X.M * X.Vt)
 end
 
 @doc raw"""
