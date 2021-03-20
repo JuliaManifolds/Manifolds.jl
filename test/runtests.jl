@@ -27,9 +27,9 @@ include("utils.jl")
         @testset "log_safe!" begin
             n = 8
             Q = qr(randn(n, n)).Q
-            A1 = Q * Diagonal(rand(n)) * Q'
+            A1 = Matrix(Hermitian(Q * Diagonal(rand(n)) * Q'))
             @test exp(Manifolds.log_safe!(similar(A1), A1)) ≈ A1 atol = 1e-6
-            A1_fail = Q * Diagonal([-1; rand(n - 1)]) * Q'
+            A1_fail = Matrix(Hermitian(Q * Diagonal([-1; rand(n - 1)]) * Q'))
             @test_throws DomainError Manifolds.log_safe!(similar(A1_fail), A1_fail)
 
             T = triu!(randn(n, n))
