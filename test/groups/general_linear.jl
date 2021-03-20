@@ -29,9 +29,19 @@ using NLsolve
         @test is_default_metric(
             MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction())),
         ) === true
-        @test Manifolds.default_metric_dispatch(
-            MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction())),
-        ) === Val{true}()
+        @test @inferred(Manifolds.default_metric_dispatch(G, EuclideanMetric())) ===
+              Val(true)
+        @test @inferred(
+            Manifolds.default_metric_dispatch(
+                G,
+                InvariantMetric(EuclideanMetric(), LeftAction()),
+            )
+        ) === Val(true)
+        @test @inferred(
+            Manifolds.default_metric_dispatch(
+                MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction())),
+            )
+        ) === Val(true)
         @test Manifolds.allocation_promotion_function(Gc, exp!, (1,)) === complex
     end
 
