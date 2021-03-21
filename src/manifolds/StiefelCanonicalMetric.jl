@@ -1,8 +1,8 @@
 @doc raw"""
     CanonicalMetric <: Metric
 
-The Canonical Metric is name used on several manifolds, for example for the [`Stiefel`](@ref)
-manifold, see for example[^EdelmanAriasSmith1998].
+The Canonical Metric refers to a metric for the [`Stiefel`](@ref)
+manifold, see[^EdelmanAriasSmith1998].
 
 [^EdelmanAriasSmith1998]:
     > Edelman, A., Ariar, T. A., Smith, S. T.:
@@ -134,13 +134,13 @@ function log!(
     S = svd(Vcorner) # preprocessing: Procrustes
     mul!(Vpcols, Vpcols * S.U, S.V')
     V[1:k, 1:k] .= M
-    V[(k+1):(2*k), 1:k] .= QR.R
+    V[(k + 1):(2 * k), 1:k] .= QR.R
 
     LV = real.(log(V)) # this can be replaced by log_safe.
     C = view(LV, (k + 1):(2 * k), (k + 1):(2 * k))
     expnC = exp(-C)
     i = 0
-    new_Vpcols = Vpcols*expnC # allocate once
+    new_Vpcols = Vpcols * expnC # allocate once
     while (i < maxiter) && (norm(C) > tolerance)
         i = i + 1
         LV .= real.(log(V))

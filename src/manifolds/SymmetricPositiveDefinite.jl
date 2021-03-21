@@ -170,4 +170,4 @@ definite matrix `x` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
 """
 zero_tangent_vector(::SymmetricPositiveDefinite, ::Any)
 
-zero_tangent_vector!(::SymmetricPositiveDefinite, v, x) = fill!(v, 0)
+zero_tangent_vector!(::SymmetricPositiveDefinite, v, ::Any) = fill!(v, 0)
