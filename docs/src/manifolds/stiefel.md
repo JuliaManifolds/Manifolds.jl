@@ -19,13 +19,6 @@ Order = [:function]
 ```
 
 ## The canonical metric
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["manifolds/StiefelCanonicalMetric.jl"]
-Order = [:type]
-```
-
 Any ``X∈T_p\mathcal M``, ``p∈\mathcal M``, can be written as
 
 ```math
@@ -36,8 +29,14 @@ A ∈ ℝ^{p×p} \text{ skew-symmetric},
 B ∈ ℝ^{n×p} \text{ arbitrary.}
 ```
 
-In the Euclidean case, the elements from ``A`` are counted twice (i.e. weighted with a factor of 2).
+In the [`EuclideanMetric`](@ref), the elements from ``A`` are counted twice (i.e. weighted with a factor of 2).
 The canonical metric avoids this.
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/StiefelCanonicalMetric.jl"]
+Order = [:type]
+```
 
 ```@autodocs
 Modules = [Manifolds]

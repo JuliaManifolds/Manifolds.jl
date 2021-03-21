@@ -133,19 +133,21 @@ function log!(
     Vpcols = @view V[:, (k + 1):(2 * k)] #second half of the columns
     S = svd(Vcorner) # preprocessing: Procrustes
     mul!(Vpcols, Vpcols * S.U, S.V')
-    V[:, 1:k] .= [M; QR.R]
+    V[1:k, 1:k] .= M
+    V[(k+1):(2*k), 1:k] .= QR.R
 
     LV = real.(log(V)) # this can be replaced by log_safe.
     C = view(LV, (k + 1):(2 * k), (k + 1):(2 * k))
     expnC = exp(-C)
     i = 0
+    new_Vpcols = Vpcols*expnC # allocate once
     while (i < maxiter) && (norm(C) > tolerance)
         i = i + 1
         LV .= real.(log(V))
         expnC .= exp(-C)
-        copyto!(Vpcols, Vpcols * expnC)
+        mul!(new_Vpcols, Vpcols, expnC)
+        copyto!(Vpcols, new_Vpcols)
     end
-    LV .= real.(LV)
     mul!(X, p, @view(LV[1:k, 1:k]))
     # force the first - Q - to be the reduced form, not the full matrix
     mul!(X, @view(QR.Q[:, 1:k]), @view(LV[(k + 1):(2 * k), 1:k]), true, true)
