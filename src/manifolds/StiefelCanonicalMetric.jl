@@ -1,8 +1,8 @@
 @doc raw"""
     CanonicalMetric <: Metric
 
-The Canonical Metric is name used on several manifolds, for example for the [`Stiefel`](@ref)
-manifold, see for example[^EdelmanAriasSmith1998].
+The Canonical Metric refers to a metric for the [`Stiefel`](@ref)
+manifold, see[^EdelmanAriasSmith1998].
 
 [^EdelmanAriasSmith1998]:
     > Edelman, A., Ariar, T. A., Smith, S. T.:
@@ -60,7 +60,10 @@ function exp!(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, q, p, X) w
     n == k && return mul!(q, p, exp(A))
     QR = qr(X - p * A)
     BC_ext = exp([A -QR.R'; QR.R 0*I])
-    q .= [p Matrix(QR.Q)] * @view(BC_ext[:, 1:k])
+    @views begin
+        mul!(q, p, BC_ext[1:k, 1:k])
+        mul!(q, Matrix(QR.Q), BC_ext[(k + 1):(2 * k), 1:k], true, true)
+    end
     return q
 end
 
@@ -128,24 +131,26 @@ function log!(
 ) where {n,k}
     M = p' * q
     QR = qr(q - p * M)
-    V = Matrix(qr([M; QR.R]).Q * I)
+    V = convert(Matrix, qr([M; QR.R]).Q * I)
     Vcorner = @view V[(k + 1):(2 * k), (k + 1):(2k)] #bottom right corner
     Vpcols = @view V[:, (k + 1):(2 * k)] #second half of the columns
     S = svd(Vcorner) # preprocessing: Procrustes
     mul!(Vpcols, Vpcols * S.U, S.V')
-    V[:, 1:k] .= [M; QR.R]
+    V[1:k, 1:k] .= M
+    V[(k + 1):(2 * k), 1:k] .= QR.R
 
-    LV = real.(log(V)) # this can be replaced by log_safe.
+    LV = log_safe!(allocate(V), V)
     C = view(LV, (k + 1):(2 * k), (k + 1):(2 * k))
     expnC = exp(-C)
     i = 0
+    new_Vpcols = Vpcols * expnC # allocate once
     while (i < maxiter) && (norm(C) > tolerance)
         i = i + 1
-        LV .= real.(log(V))
-        expnC .= exp(-C)
-        copyto!(Vpcols, Vpcols * expnC)
+        log_safe!(LV, V)
+        expnC = exp(-C)
+        mul!(new_Vpcols, Vpcols, expnC)
+        copyto!(Vpcols, new_Vpcols)
     end
-    LV .= real.(LV)
     mul!(X, p, @view(LV[1:k, 1:k]))
     # force the first - Q - to be the reduced form, not the full matrix
     mul!(X, @view(QR.Q[:, 1:k]), @view(LV[(k + 1):(2 * k), 1:k]), true, true)

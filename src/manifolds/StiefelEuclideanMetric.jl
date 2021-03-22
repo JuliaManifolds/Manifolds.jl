@@ -30,7 +30,13 @@ exp(::Stiefel, ::Any...)
 
 function exp!(::Stiefel{n,k}, q, p, X) where {n,k}
     A = p' * X
-    return copyto!(q, [p X] * exp([A -X'*X; I A]) * [exp(-A); 0 * I])
+    B = exp([A -X'*X; I A])
+    @views begin
+        r = p * B[1:k, 1:k]
+        mul!(r, X, B[(k + 1):(2 * k), 1:k], true, true)
+    end
+    mul!(q, r, exp(-A))
+    return q
 end
 
 @doc raw"""

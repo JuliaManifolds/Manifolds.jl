@@ -270,11 +270,6 @@ definite matrix `p` on the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) mani
 """
 zero_tangent_vector(::SymmetricPositiveSemidefiniteFixedRank, ::Any...)
 
-function zero_tangent_vector!(
-    ::SymmetricPositiveSemidefiniteFixedRank{N,K},
-    v,
-    ::Any,
-) where {N,K}
-    fill!(v, 0)
-    return v
+function zero_tangent_vector!(::SymmetricPositiveSemidefiniteFixedRank, v, ::Any)
+    return fill!(v, 0)
 end
