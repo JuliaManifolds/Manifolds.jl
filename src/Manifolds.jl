@@ -40,6 +40,7 @@ import ManifoldsBase:
     is_tangent_vector,
     inverse_retract,
     inverse_retract!,
+    log, #for extension, e.g. in Stiefel.
     log!,
     manifold_dimension,
     mid_point,
@@ -162,6 +163,8 @@ include("manifolds/Rotations.jl")
 include("manifolds/SkewSymmetric.jl")
 include("manifolds/Spectrahedron.jl")
 include("manifolds/Stiefel.jl")
+include("manifolds/StiefelEuclideanMetric.jl")
+include("manifolds/StiefelCanonicalMetric.jl")
 include("manifolds/Sphere.jl")
 include("manifolds/SphereSymmetricMatrices.jl")
 include("manifolds/Symmetric.jl")
@@ -340,6 +343,7 @@ export Metric,
     MinkowskiMetric,
     PowerMetric,
     ProductMetric,
+    CanonicalMetric,
     MetricManifold
 export AbstractEmbeddingType, AbstractIsometricEmbeddingType
 export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding
