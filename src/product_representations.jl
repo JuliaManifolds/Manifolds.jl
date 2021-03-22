@@ -392,9 +392,14 @@ ManifoldsBase._get_vector_cache_broadcast(::ProductRepr) = Val(false)
 function Broadcast.BroadcastStyle(::Type{<:ProductRepr})
     return Broadcast.Style{ProductRepr}()
 end
-Broadcast.BroadcastStyle(::Broadcast.AbstractArrayStyle{0}, b::Broadcast.Style{ProductRepr}) = b
+function Broadcast.BroadcastStyle(
+    ::Broadcast.AbstractArrayStyle{0},
+    b::Broadcast.Style{ProductRepr},
+)
+    return b
+end
 
-Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{ProductRepr}, Nothing}) = bc
+Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{ProductRepr},Nothing}) = bc
 function Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{ProductRepr}})
     Broadcast.check_broadcast_axes(bc.axes, bc.args...)
     return bc
@@ -413,7 +418,10 @@ Base.@propagate_inbounds Broadcast._broadcast_getindex(v::ProductRepr, I) = v.pa
 
 Base.axes(v::ProductRepr) = axes(v.parts)
 
-@inline function Base.copyto!(dest::ProductRepr, bc::Broadcast.Broadcasted{Broadcast.Style{ProductRepr}})
+@inline function Base.copyto!(
+    dest::ProductRepr,
+    bc::Broadcast.Broadcasted{Broadcast.Style{ProductRepr}},
+)
     axes(dest) == axes(bc) || Broadcast.throwdm(axes(dest), axes(bc))
     # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
     if bc.f === identity && bc.args isa Tuple{ProductRepr} # only a single input argument to broadcast!
