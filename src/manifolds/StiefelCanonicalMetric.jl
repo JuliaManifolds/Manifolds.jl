@@ -146,8 +146,8 @@ function log!(
     new_Vpcols = Vpcols * expnC # allocate once
     while (i < maxiter) && (norm(C) > tolerance)
         i = i + 1
-        expnC .= exp(-C)
         log_safe!(LV, V)
+        expnC = exp(-C)
         mul!(new_Vpcols, Vpcols, expnC)
         copyto!(Vpcols, new_Vpcols)
     end
