@@ -166,6 +166,20 @@ include("utils.jl")
                 @test oneP == one(x)
                 oneV = UMVTVector(one(zeros(3, 3)), one(zeros(2, 2)), one(zeros(2, 2)), 2)
                 @test oneV == one(v)
+
+                # broadcasting
+                @test axes(w) === ()
+                wc = copy(w)
+                @test wc.U !== w.U
+                wb = w .+ v .* 2
+                @test wb isa UMVTVector
+                @test wb == w + v * 2
+
+                wb .= 2 .* w .+ v
+                @test wb == 2 * w + v
+
+                wb .= w
+                @test wb == w
             end
             test_manifold(
                 M,
