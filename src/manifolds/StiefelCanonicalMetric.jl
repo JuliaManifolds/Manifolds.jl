@@ -139,15 +139,15 @@ function log!(
     V[1:k, 1:k] .= M
     V[(k + 1):(2 * k), 1:k] .= QR.R
 
-    LV = real.(log(V)) # this can be replaced by log_safe.
+    LV = log_safe!(allocate(V), V)
     C = view(LV, (k + 1):(2 * k), (k + 1):(2 * k))
     expnC = exp(-C)
     i = 0
     new_Vpcols = Vpcols * expnC # allocate once
     while (i < maxiter) && (norm(C) > tolerance)
         i = i + 1
-        LV .= real.(log(V))
         expnC .= exp(-C)
+        log_safe!(LV, V)
         mul!(new_Vpcols, Vpcols, expnC)
         copyto!(Vpcols, new_Vpcols)
     end
