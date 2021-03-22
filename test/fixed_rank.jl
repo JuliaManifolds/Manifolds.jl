@@ -170,7 +170,10 @@ include("utils.jl")
                 # broadcasting
                 @test axes(w) === ()
                 wc = copy(w)
+                # test that the copy is equal to the original, but represented by
+                # a new array
                 @test wc.U !== w.U
+                @test wc.U == w.U
                 wb = w .+ v .* 2
                 @test wb isa UMVTVector
                 @test wb == w + v * 2
