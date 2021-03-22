@@ -131,7 +131,7 @@ function log!(
 ) where {n,k}
     M = p' * q
     QR = qr(q - p * M)
-    V = Matrix(qr([M; QR.R]).Q * I)
+    V = convert(Matrix, qr([M; QR.R]).Q * I)
     Vcorner = @view V[(k + 1):(2 * k), (k + 1):(2k)] #bottom right corner
     Vpcols = @view V[:, (k + 1):(2 * k)] #second half of the columns
     S = svd(Vcorner) # preprocessing: Procrustes
