@@ -60,7 +60,10 @@ function exp!(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, q, p, X) w
     n == k && return mul!(q, p, exp(A))
     QR = qr(X - p * A)
     BC_ext = exp([A -QR.R'; QR.R 0*I])
-    q .= [p Matrix(QR.Q)] * @view(BC_ext[:, 1:k])
+    @views begin
+        mul!(q, p, BC_ext[1:k, 1:k])
+        mul!(q, Matrix(QR.Q), BC_ext[(k + 1):(2 * k), 1:k], true, true)
+    end
     return q
 end
 
