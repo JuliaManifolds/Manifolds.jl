@@ -10,7 +10,7 @@ include("utils.jl")
 
     @testset "Ambiguities" begin
         # TODO: reduce the number of ambiguities
-        if VERSION.prerelease == () #
+        if VERSION.prerelease == () && !Sys.iswindows() #
             @test length(Test.detect_ambiguities(ManifoldsBase)) <= 17
             @test length(Test.detect_ambiguities(Manifolds)) == 0
             @test length(our_base_ambiguities()) <= 24
