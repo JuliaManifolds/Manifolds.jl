@@ -68,6 +68,138 @@ converted to a `Matrix` before computing the log.
     return SizedMatrix{s[1],s[2]}(log(Matrix(parent(x))))
 end
 
+# NOTE: workaround until https://github.com/JuliaLang/julia/pull/39973 or similar is merged
+"""
+    log_safe!(y, x)
+
+Compute the matrix logarithm of `x`. If the eltype of `y` is real, then the imaginary part
+of `x` is ignored, and a `DomainError` is raised if `real(x)` has no real logarithm.
+"""
+function log_safe!(Y, A)
+    if eltype(Y) <: Real
+        if ishermitian(A)
+            eigenF = eigen(Symmetric(real(A)))
+            i = findfirst(≤(0), eigenF.values)
+            if i !== nothing
+                throw(
+                    DomainError(
+                        eigenF.values[i],
+                        "All eigenvalues must be positive to compute a real logarithm.",
+                    ),
+                )
+            end
+            mul!(Y, eigenF.vectors .* log.(eigenF.values'), eigenF.vectors')
+        elseif istriu(A)
+            i = findfirst(≤(0), @view(A[diagind(A)]))
+            if i !== nothing
+                throw(
+                    DomainError(
+                        A[i, i],
+                        "All eigenvalues must be positive to compute a real logarithm.",
+                    ),
+                )
+            end
+            copyto!(Y, real(log(UpperTriangular(A))))
+        else
+            schurF = schur(convert(Matrix, real(A)))
+            i = findfirst(x -> isreal(x) && real(x) ≤ 0, schurF.values)
+            if i !== nothing
+                throw(
+                    DomainError(
+                        schurF.values[i],
+                        "All eigenvalues must be positive to compute a real logarithm.",
+                    ),
+                )
+            end
+            if istriu(schurF.T)
+                mul!(Y, schurF.Z, real(log(UpperTriangular(schurF.T))) * schurF.Z')
+            else
+                schurS = schur(complex(schurF.T))
+                Y .= real.(schurS.Z * log(UpperTriangular(schurS.T)) * schurS.Z')
+                mul!(Y, schurF.Z * Y, schurF.Z')
+            end
+        end
+    else
+        copyto!(Y, log_safe(A))
+    end
+    return Y
+end
+
+"""
+    mul!_safe(Y, A, B) -> Y
+
+Call `mul!` safely, that is, `A` and/or `B` are permitted to alias with `Y`.
+"""
+mul!_safe(Y, A, B) = (Y === A || Y === B) ? copyto!(Y, A * B) : mul!(Y, A, B)
+
+@doc raw"""
+    realify(X::AbstractMatrix{T𝔽}, 𝔽::AbstractNumbers) -> Y::AbstractMatrix{<:Real}
+
+Given a matrix $X ∈ 𝔽^{n × n}$, compute $Y ∈ ℝ^{m × m}$, where $m = n \operatorname{dim}_𝔽$,
+and $\operatorname{dim}_𝔽$ is the [`real_dimension`](@ref) of the number field $𝔽$, using
+the map $ϕ \colon X ↦ Y$, that preserves the matrix product, so that for all
+$C,D ∈ 𝔽^{n × n}$,
+````math
+ϕ(C) ϕ(D) = ϕ(CD).
+````
+See [`realify!`](@ref) for an in-place version, and [`unrealify!`](@ref) to compute the
+inverse of $ϕ$.
+"""
+function realify(X, 𝔽)
+    n = LinearAlgebra.checksquare(X)
+    nℝ = real_dimension(𝔽) * n
+    Y = allocate(X, real(eltype(X)), nℝ, nℝ)
+    return realify!(Y, X, 𝔽, n)
+end
+realify(X, ::typeof(ℝ)) = X
+
+"""
+    realify!(Y::AbstractMatrix{<:Real}, X::AbstractMatrix{T𝔽}, 𝔽::AbstractNumbers)
+
+In-place version of [`realify`](@ref).
+"""
+realify!(Y, X, 𝔽)
+
+@doc raw"""
+    realify!(Y::AbstractMatrix{<:Real}, X::AbstractMatrix{<:Complex}, ::typeof(ℂ))
+
+Given a complex matrix $X = A + iB ∈ ℂ^{n × n}$, compute its realified matrix
+$Y ∈ ℝ^{2n × 2n}$, written
+where
+````math
+Y = \begin{pmatrix}A & -B \\ B & A \end{pmatrix}.
+````
+"""
+function realify!(Y, X, ::typeof(ℂ), n=LinearAlgebra.checksquare(X))
+    for i in 1:n, j in 1:n
+        Xr, Xi = reim(X[i, j])
+        Y[i, j] = Y[n + i, n + j] = Xr
+        Y[n + i, j] = Xi
+        Y[i, n + j] = -Xi
+    end
+    return Y
+end
+
+@doc raw"""
+    unrealify!(X::AbstractMatrix{T𝔽}, Y::AbstractMatrix{<:Real}, 𝔽::AbstractNumbers[, n])
+
+Given a real matrix $Y ∈ ℝ^{m × m}$, where $m = n \operatorname{dim}_𝔽$, and
+$\operatorname{dim}_𝔽$ is the [`real_dimension`](@ref) of the number field $𝔽$, compute
+in-place its equivalent matrix $X ∈ 𝔽^{n × n}$. Note that this function does not check that
+$Y$ has a valid structure to be un-realified.
+
+See [`realify!`](@ref) for the inverse of this function.
+"""
+unrealify!(X, Y, 𝔽)
+
+function unrealify!(X, Y, ::typeof(ℂ), n=LinearAlgebra.checksquare(X))
+    for i in 1:n, j in 1:n
+        X[i, j] = complex((Y[i, j] + Y[n + i, n + j]) / 2, (Y[n + i, j] - Y[i, n + j]) / 2)
+    end
+    return X
+end
+unrealify!(Y, X, ::typeof(ℝ), args...) = copyto!(Y, X)
+
 @generated maybesize(s::Size{S}) where {S} = prod(S) > 100 ? S : :(s)
 
 """
@@ -112,6 +244,23 @@ function vec2skew(v, k)
     vec2skew!(X, v)
     return X
 end
+
+@doc raw"""
+    isnormal(x; kwargs...) -> Bool
+
+Check if the matrix or number `x` is normal, that is, if it commutes with its adjoint:
+````math
+x x^\mathrm{H} = x^\mathrm{H} x.
+````
+By default, this is an equality check. Provide `kwargs` for `isapprox` to perform an
+approximate check.
+"""
+function isnormal(x; kwargs...)
+    (isdiag(x) || ishermitian(x)) && return true
+    isempty(kwargs) && return x * x' == x' * x
+    return isapprox(x * x', x' * x; kwargs...)
+end
+isnormal(::LinearAlgebra.RealHermSymComplexHerm; kwargs...) = true
 
 """
     ziptuples(a, b[, c[, d[, e]]])

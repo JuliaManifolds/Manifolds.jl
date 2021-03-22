@@ -44,6 +44,9 @@ end
 group_exp!(G::SpecialOrthogonal, q, X) = exp!(G, q, make_identity(G, q).p, X)
 
 group_log!(G::SpecialOrthogonal, X, q) = log!(G, X, make_identity(G, q).p, q)
+function group_log!(G::SpecialOrthogonal, X::AbstractMatrix, q::AbstractMatrix)
+    return log!(G, X, make_identity(G, q).p, q)
+end
 
 function allocate_result(
     ::GT,

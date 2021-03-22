@@ -350,15 +350,10 @@ end
 manifold_dimension(G::GroupManifold) = manifold_dimension(G.manifold)
 
 function check_manifold_point(G::AbstractGroupManifold, e::Identity; kwargs...)
+    e.group === G && return nothing
     return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
-function check_manifold_point(
-    G::GT,
-    e::Identity{GT};
-    kwargs...,
-) where {GT<:AbstractGroupManifold}
-    return nothing
-end
+
 ##########################
 # Group-specific functions
 ##########################
@@ -1045,8 +1040,7 @@ inv!(G::MultiplicationGroup, q, p) = copyto!(q, inv(G, p))
 
 compose(::MultiplicationGroup, p, q) = p * q
 
-# TODO: x might alias with p or q, we might be able to optimize it if it doesn't.
-compose!(::MultiplicationGroup, x, p, q) = copyto!(x, p * q)
+compose!(::MultiplicationGroup, x, p, q) = mul!_safe(x, p, q)
 
 inverse_translate(::MultiplicationGroup, p, q, ::LeftAction) = p \ q
 inverse_translate(::MultiplicationGroup, p, q, ::RightAction) = q / p
@@ -1061,3 +1055,5 @@ function group_exp!(G::MultiplicationGroup, q, X)
         "group_exp! not implemented on $(typeof(G)) for vector $(typeof(X)) and element $(typeof(q)).",
     )
 end
+
+group_log!(::MultiplicationGroup, X::AbstractMatrix, q::AbstractMatrix) = log_safe!(X, q)
