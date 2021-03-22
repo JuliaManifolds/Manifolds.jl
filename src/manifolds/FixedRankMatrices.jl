@@ -284,16 +284,18 @@ singular values and $U$ and $V$ are shortened accordingly.
 retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)
 
 function retract!(
-    ::FixedRankMatrices{M,N,k},
+    ::FixedRankMatrices{m, n, k},
     q::SVDMPoint,
     p::SVDMPoint,
     X::UMVTVector,
     ::PolarRetraction,
-) where {M,N,k}
-    s = svd(p.U * Diagonal(p.S) * p.Vt + (p.U * X.M * p.Vt + X.U * p.Vt + X.U * X.Vt))
-    q.U .= s.U[:, 1:k]
-    q.S .= s.S[1:k]
-    q.Vt .= s.Vt[1:k, :]
+) where {m, n, k}
+    QU, RU = qr([p.U X.U])
+    QV, RV = qr([p.Vt' X.Vt'])
+    T = svd(RU * [diagm(p.S) + X.M I; I zeros(k, k)] * RV')
+    q.U .= QU * T.U[:, 1:k]
+    q.S .= T.S[1:k]
+    q.Vt .= T.Vt[1:k, :] * QV'
     return q
 end
 
