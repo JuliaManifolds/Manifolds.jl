@@ -118,6 +118,30 @@ end
         @test p1c.parts[1][1] == 0.0
     end
 
+    @testset "Broadcasting" begin
+        p1 = ProductRepr([0.0, 1.0, 0.0], [0.0, 1.0])
+        p2 = ProductRepr([3.0, 4.0, 5.0], [2.0, 5.0])
+        br_result = p1 .+ 2.0 .* p2
+        @test br_result isa ProductRepr
+        @test br_result.parts[1] ≈ [6.0, 9.0, 10.0]
+        @test br_result.parts[2] ≈ [4.0, 11.0]
+
+        br_result .= 2.0 .* p1 .+ p2
+        @test br_result.parts[1] ≈ [3.0, 6.0, 5.0]
+        @test br_result.parts[2] ≈ [2.0, 7.0]
+
+        br_result .= p1
+        @test br_result.parts[1] ≈ [0.0, 1.0, 0.0]
+        @test br_result.parts[2] ≈ [0.0, 1.0]
+
+        @test axes(p1) == (Base.OneTo(2),)
+
+        # errors 
+        p3 = ProductRepr([3.0, 4.0, 5.0], [2.0, 5.0], [3.0, 2.0])
+        @test_throws DimensionMismatch p1 .+ p3
+        @test_throws DimensionMismatch p1 .= p3
+    end
+
     @testset "CompositeManifoldError" begin
         Mpr = Sphere(2) × Sphere(2)
         p1 = [1.0, 0.0, 0.0]

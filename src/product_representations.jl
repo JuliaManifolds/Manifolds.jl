@@ -386,3 +386,47 @@ function Base.show(io::IO, ::MIME"text/plain", x::ProductRepr)
 end
 
 ManifoldsBase._get_vector_cache_broadcast(::ProductRepr) = Val(false)
+
+# Tuple-like broadcasting of ProductRepr
+
+function Broadcast.BroadcastStyle(::Type{<:ProductRepr})
+    return Broadcast.Style{ProductRepr}()
+end
+Broadcast.BroadcastStyle(::Broadcast.AbstractArrayStyle{0}, b::Broadcast.Style{ProductRepr}) = b
+
+Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{ProductRepr}, Nothing}) = bc
+function Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{ProductRepr}})
+    Broadcast.check_broadcast_axes(bc.axes, bc.args...)
+    return bc
+end
+
+Broadcast.broadcastable(v::ProductRepr) = v
+
+@inline function Base.copy(bc::Broadcast.Broadcasted{Broadcast.Style{ProductRepr}})
+    dim = axes(bc)
+    length(dim) == 1 || throw(DimensionMismatch("ProductRepr only supports one dimension"))
+    N = length(dim[1])
+    return ProductRepr(ntuple(k -> @inbounds(Broadcast._broadcast_getindex(bc, k)), Val(N)))
+end
+
+Base.@propagate_inbounds Broadcast._broadcast_getindex(v::ProductRepr, I) = v.parts[I[1]]
+
+Base.axes(v::ProductRepr) = axes(v.parts)
+
+@inline function Base.copyto!(dest::ProductRepr, bc::Broadcast.Broadcasted{Broadcast.Style{ProductRepr}})
+    axes(dest) == axes(bc) || Broadcast.throwdm(axes(dest), axes(bc))
+    # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
+    if bc.f === identity && bc.args isa Tuple{ProductRepr} # only a single input argument to broadcast!
+        A = bc.args[1]
+        if axes(dest) == axes(A)
+            return copyto!(dest, A)
+        end
+    end
+    bc′ = Broadcast.preprocess(dest, bc)
+    # Performance may vary depending on whether `@inbounds` is placed outside the
+    # for loop or not. (cf. https://github.com/JuliaLang/julia/issues/38086)
+    @inbounds @simd for I in eachindex(bc′)
+        copyto!(dest.parts[I], bc′[I])
+    end
+    return dest
+end
