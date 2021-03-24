@@ -10,20 +10,20 @@ where $𝔽 ∈ \{ℝ,ℂ\}$ and the rank is the number of linearly independent 
 # Representation with 3 matrix factors
 
 A point $p ∈ \mathcal M$ can be stored using unitary matrices $U ∈ 𝔽^{m × k}$, $V ∈ 𝔽^{n × k}$ as well as the $k$
-singular values of $p = USV^\mathrm{H}$, where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or
+singular values of $p = U_p S V_p^\mathrm{H}$, where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or
 Hermitian. In other words, $U$ and $V$ are from the manifolds [`Stiefel`](@ref)`(m,k,𝔽)` and [`Stiefel`](@ref)`(n,k,𝔽)`,
 respectively; see [`SVDMPoint`](@ref) for details.
 
-The tangent space $T_p \mathcal M$ at a point $p ∈ \mathcal M$ with $p=USV^\mathrm{H}$
+The tangent space $T_p \mathcal M$ at a point $p ∈ \mathcal M$ with $p=U_p S V_p^\mathrm{H}$
 is given by
 ````math
-T_p\mathcal M = \bigl\{ UMV^\mathrm{T} + U_pV^\mathrm{H} + UV_p^\mathrm{H} :
+T_p\mathcal M = \bigl\{ U_p M V_p^\mathrm{T} + U_X V_p^\mathrm{H} + U_p V_X^\mathrm{H} :
     M  ∈ 𝔽^{k × k},
-    U_p  ∈ 𝔽^{m × k},
-    V_p  ∈ 𝔽^{n × k}
+    U_X  ∈ 𝔽^{m × k},
+    V_X  ∈ 𝔽^{n × k}
     \text{ s.t. }
-    U_p^\mathrm{H}U = 0_k,
-    V_p^\mathrm{H}V = 0_k
+    U_p^\mathrm{H}U_X = 0_k,
+    V_p^\mathrm{H}V_X = 0_k
 \bigr\},
 ````
 where $0_k$ is the $k × k$ zero matrix. See [`UMVTVector`](@ref) for details.
