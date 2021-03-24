@@ -308,7 +308,7 @@ function retract!(
 
     mul!(q.U, QU, @view(T.U[:, 1:k]))
     q.S .= @view(T.S[1:k])
-    mul!(q.Vt, @view(T.Vt[1:k, :]), Matrix(QV)')
+    copyto!(q.Vt, @view(T.Vt[1:k, :]) * QV')
 
     return q
 end
