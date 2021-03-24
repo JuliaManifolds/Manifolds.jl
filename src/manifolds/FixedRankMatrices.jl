@@ -284,12 +284,12 @@ singular values and $U$ and $V$ are shortened accordingly.
 retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)
 
 function retract!(
-    ::FixedRankMatrices{m, n, k},
+    ::FixedRankMatrices{m,n,k},
     q::SVDMPoint,
     p::SVDMPoint,
     X::UMVTVector,
     ::PolarRetraction,
-) where {m, n, k}
+) where {m,n,k}
     QU, RU = qr([p.U X.U])
     QV, RV = qr([p.Vt' X.Vt'])
 
@@ -429,10 +429,10 @@ Embed the point `p` from its `SVDMPoint` representation.
 """
 
 function embed!(::FixedRankMatrices, q, p)
-    q .= p.U * Diagonal(p.S) * p.Vt
+    return q .= p.U * Diagonal(p.S) * p.Vt
 end
-function embed(M::FixedRankMatrices{m, n, k}, p) where {m,n,k}
-    q = zeros(m,n)
+function embed(M::FixedRankMatrices{m,n,k}, p) where {m,n,k}
+    q = zeros(m, n)
     return embed!(M, q, p)
 end
 
@@ -445,10 +445,10 @@ its `UMVTVector` representation.
 function embed!(::FixedRankMatrices, Y, p, X)
     Y = p.U * X.M * p.Vt
     mul!(Y, X.U, p.Vt, true, true)
-    mul!(Y, p.U, X.Vt, true, true)
+    return mul!(Y, p.U, X.Vt, true, true)
 end
 
-function embed(M::FixedRankMatrices{m, n, k}, p, X) where {m,n,k}
-    Y = zeros(m,n)
+function embed(M::FixedRankMatrices{m,n,k}, p, X) where {m,n,k}
+    Y = zeros(m, n)
     return embed!(M, Y, p, X)
 end
