@@ -429,7 +429,7 @@ Embed the point `p` from its `SVDMPoint` representation.
 """
 
 function embed!(::FixedRankMatrices, q, p)
-    return q .= p.U * Diagonal(p.S) * p.Vt
+    return mul!(q, p.U * Diagonal(p.S), p.Vt)
 end
 function embed(M::FixedRankMatrices{m,n,k}, p) where {m,n,k}
     q = zeros(m, n)
@@ -437,14 +437,17 @@ function embed(M::FixedRankMatrices{m,n,k}, p) where {m,n,k}
 end
 
 @doc raw"""
-    embed(::FixedRankMatrices, Y, p, X)
+    embed(M::FixedRankMatrices, p, X)
 
 Embed the tangent vector `X` at point `p` in `M` from
-its `UMVTVector` representation.
+its [`UMVTVector`](@ref) representation.
 """
+embed(::FixedRankMatrices, p, X)
+
 function embed!(::FixedRankMatrices, Y, p, X)
-    Y = p.U * X.M * p.Vt
-    mul!(Y, X.U, p.Vt, true, true)
+    tmp = p.U * X.M
+    tmp .+= X.U
+    mul!(Y, tmp, p.Vt)
     return mul!(Y, p.U, X.Vt, true, true)
 end
 
