@@ -292,10 +292,24 @@ function retract!(
 ) where {m, n, k}
     QU, RU = qr([p.U X.U])
     QV, RV = qr([p.Vt' X.Vt'])
-    T = svd(RU * [diagm(p.S) + X.M I; I zeros(k, k)] * RV')
-    q.U .= QU * T.U[:, 1:k]
-    q.S .= T.S[1:k]
-    q.Vt .= T.Vt[1:k, :] * QV'
+
+    # Compute T = svd(RU * [diagm(p.S) + X.M I; I zeros(k, k)] * RV')
+    @views begin
+        RU11 = RU[:, 1:k]
+        RU12 = RU[:, (k + 1):(2 * k)]
+        RV11 = RV[:, 1:k]
+        RV12 = RV[:, (k + 1):(2 * k)]
+    end
+    tmp = RU11 .* p.S' .+ RU12
+    mul!(tmp, RU11, X.M, true, true)
+    tmp2 = tmp * RV11'
+    mul!(tmp2, RU11, RV12', true, true)
+    T = svd(tmp2)
+
+    mul!(q.U, QU, @view(T.U[:, 1:k]))
+    q.S .= @view(T.S[1:k])
+    mul!(q.Vt, @view(T.Vt[1:k, :]), Matrix(QV)')
+
     return q
 end
 
