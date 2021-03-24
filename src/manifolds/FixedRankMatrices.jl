@@ -429,7 +429,7 @@ Embed the point `p` from its `SVDMPoint` representation.
 """
 
 function embed!(::FixedRankMatrices, q, p)
-    return q .= p.U * Diagonal(p.S) * p.Vt
+    return mul!(q, p.U * Diagonal(p.S), p.Vt)
 end
 function embed(M::FixedRankMatrices{m,n,k}, p) where {m,n,k}
     q = zeros(m, n)
