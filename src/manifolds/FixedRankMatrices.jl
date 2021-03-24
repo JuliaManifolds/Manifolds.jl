@@ -445,8 +445,9 @@ its [`UMVTVector`](@ref) representation.
 embed(::FixedRankMatrices, p, X)
 
 function embed!(::FixedRankMatrices, Y, p, X)
-    Y = p.U * X.M * p.Vt
-    mul!(Y, X.U, p.Vt, true, true)
+    tmp = p.U * X.M
+    tmp .+= X.U
+    mul!(Y, tmp, p.Vt)
     return mul!(Y, p.U, X.Vt, true, true)
 end
 
