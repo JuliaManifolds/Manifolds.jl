@@ -409,19 +409,32 @@ function zero_tangent_vector!(
 end
 
 @doc raw"""
-    to_ambient(X::SVDMPoint)
+    embed(p::SVDMPoint)
 
-Reconstruct a low-rank matrix from the its `SVDMPoint` representation.
+Embed the point `p` from its `SVDMPoint` representation.
 """
-function to_ambient(X::SVDMPoint)
-    return X.U * diagm(X.S) * X.Vt
+
+function embed!(::FixedRankMatrices, q, p)
+    q .= p.U * Diagonal(p.S) * p.Vt
+end
+function embed(M::FixedRankMatrices{m, n, k}, p) where {m,n,k}
+    q = zeros(m,n)
+    return embed!(M, q, p)
 end
 
 @doc raw"""
-    to_ambient(X::SVDMPoint, T::UMVTVector)
+    embed(::FixedRankMatrices, Y, p, X)
 
-Reconstruct a tangent vector from its `UMVTVector` representation.
+Embed the tangent vector `X` at point `p` in `M` from
+its `UMVTVector` representation.
 """
-function to_ambient(X::SVDMPoint, T::UMVTVector)
-    return X.U * T.M * X.Vt + T.U * X.Vt + X.U * T.Vt
+function embed!(::FixedRankMatrices, Y, p, X)
+    Y = p.U * X.M * p.Vt
+    mul!(Y, X.U, p.Vt, true, true)
+    mul!(Y, p.U, X.Vt, true, true)
+end
+
+function embed(M::FixedRankMatrices{m, n, k}, p, X) where {m,n,k}
+    Y = zeros(m,n)
+    return embed!(M, Y, p, X)
 end
