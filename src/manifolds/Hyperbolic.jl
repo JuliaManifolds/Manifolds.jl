@@ -130,6 +130,10 @@ for T in _HyperbolicTypes
         allocate(p::$T) = $T(allocate(p.value))
         allocate(p::$T, ::Type{P}) where {P} = $T(allocate(p.value, P))
         allocate(p::$T, ::Type{P}, dims::Tuple) where {P} = $T(allocate(p.value, P, dims))
+        getindex(p::$T, i...) = getindex(p.value, i...)
+        setindex!(p::$T, v, i...) = setindex!(p.value, v, i...)
+        length(p::$T) = length(p.value)
+        iterate(p::$T, i...) = iterate(p.value, i...)
     end
 end
 
