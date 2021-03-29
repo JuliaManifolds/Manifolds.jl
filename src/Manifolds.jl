@@ -60,8 +60,7 @@ import ManifoldsBase:
     vector_transport_to!,
     zero_tangent_vector,
     zero_tangent_vector!
-import Base:
-    copyto!, convert, in, isapprox, isempty, length, showerror, getindex, setindex!, iterate
+import Base: copyto!, convert, in, isapprox, isempty, length, showerror
 
 using Base.Iterators: repeated
 using Distributions
