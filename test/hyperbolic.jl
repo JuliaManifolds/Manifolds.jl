@@ -124,6 +124,8 @@ include("utils.jl")
             X1s = similar(X1)
             X1s .= 2 .* X1
             @test X1s == 2 * X1
+            X1s .= X1
+            @test X1s == X1
 
             for (P2, T2) in zip(
                 [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
