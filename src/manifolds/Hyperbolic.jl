@@ -131,11 +131,11 @@ for T in _HyperbolicTypes
         allocate(p::$T) = $T(allocate(p.value))
         allocate(p::$T, ::Type{P}) where {P} = $T(allocate(p.value, P))
         allocate(p::$T, ::Type{P}, dims::Tuple) where {P} = $T(allocate(p.value, P, dims))
-        
+
         @inline Base.copy(p::$T) = $T(copy(p.value))
 
         Base.similar(p::$T) = $T(similar(p.value))
-                
+
         function Broadcast.BroadcastStyle(::Type{<:$T})
             return Broadcast.Style{$T}()
         end
@@ -180,7 +180,6 @@ for T in _HyperbolicTypes
             copyto!(dest.value, bc′[1])
             return dest
         end
-
     end
 end
 
