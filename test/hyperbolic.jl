@@ -116,6 +116,17 @@ include("utils.jl")
             (p2, X2) = convert(Tuple{P,T}, (pts[2], X))
             @test isapprox(M, p1, p2)
             @test isapprox(M, p1, X1, X2)
+            # Test broadcast
+            @test 2 .* X1 == T(2 .* X1.value)
+            @test 2 .* p1 == P(2 .* p1.value)
+            @test copy(X1) == X1
+            @test copy(X1) !== X1
+            X1s = similar(X1)
+            X1s .= 2 .* X1
+            @test X1s == 2 * X1
+            X1s .= X1
+            @test X1s == X1
+
             for (P2, T2) in zip(
                 [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
                 [HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector],

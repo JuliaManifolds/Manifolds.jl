@@ -121,15 +121,65 @@ for T in _HyperbolicTangentTypes
         Base.:-(v::$T, w::$T) = $T(v.value - w.value)
         Base.:-(v::$T) = $T(-v.value)
         Base.:+(v::$T) = $T(v.value)
-        Base.:(==)(v::$T, w::$T) = (v.value == w.value)
     end
 end
 
 for T in _HyperbolicTypes
     @eval begin
+        Base.:(==)(v::$T, w::$T) = (v.value == w.value)
+
         allocate(p::$T) = $T(allocate(p.value))
         allocate(p::$T, ::Type{P}) where {P} = $T(allocate(p.value, P))
         allocate(p::$T, ::Type{P}, dims::Tuple) where {P} = $T(allocate(p.value, P, dims))
+
+        @inline Base.copy(p::$T) = $T(copy(p.value))
+
+        Base.similar(p::$T) = $T(similar(p.value))
+
+        function Broadcast.BroadcastStyle(::Type{<:$T})
+            return Broadcast.Style{$T}()
+        end
+        function Broadcast.BroadcastStyle(
+            ::Broadcast.AbstractArrayStyle{0},
+            b::Broadcast.Style{$T},
+        )
+            return b
+        end
+
+        Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{$T},Nothing}) = bc
+        function Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{$T}})
+            Broadcast.check_broadcast_axes(bc.axes, bc.args...)
+            return bc
+        end
+
+        Broadcast.broadcastable(v::$T) = v
+
+        @inline function Base.copy(bc::Broadcast.Broadcasted{Broadcast.Style{$T}})
+            return $T(Broadcast._broadcast_getindex(bc, 1))
+        end
+
+        Base.@propagate_inbounds Broadcast._broadcast_getindex(v::$T, I) = v.value
+
+        Base.axes(v::$T) = axes(v.value)
+
+        @inline function Base.copyto!(
+            dest::$T,
+            bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
+        )
+            axes(dest) == axes(bc) || Broadcast.throwdm(axes(dest), axes(bc))
+            # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
+            if bc.f === identity && bc.args isa Tuple{$T} # only a single input argument to broadcast!
+                A = bc.args[1]
+                if axes(dest) == axes(A)
+                    return copyto!(dest, A)
+                end
+            end
+            bc′ = Broadcast.preprocess(dest, bc)
+            # Performance may vary depending on whether `@inbounds` is placed outside the
+            # for loop or not. (cf. https://github.com/JuliaLang/julia/issues/38086)
+            copyto!(dest.value, bc′[1])
+            return dest
+        end
     end
 end
 
