@@ -37,8 +37,3 @@ Order = [:type, :function]
 ## Musical isomorphisms
 
 Functions [`sharp`](@ref) and [`flat`](@ref) implement musical isomorphisms for arbitrary vector bundles.
-
-```@docs
-sharp
-flat
-```
