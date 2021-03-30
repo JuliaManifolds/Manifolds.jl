@@ -20,6 +20,7 @@ include("utils.jl")
     end
 
     @testset "utils test" begin
+        Random.seed!(42)
         @testset "usinc_from_cos" begin
             @test Manifolds.usinc_from_cos(-1) == 0
             @test Manifolds.usinc_from_cos(-1.0) == 0.0
