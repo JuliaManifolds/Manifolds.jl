@@ -109,6 +109,63 @@ Base.:-(v::UMVTVector) = UMVTVector(-v.U, -v.M, -v.Vt)
 Base.:+(v::UMVTVector) = UMVTVector(v.U, v.M, v.Vt)
 Base.:(==)(v::UMVTVector, w::UMVTVector) = (v.U == w.U) && (v.M == w.M) && (v.Vt == w.Vt)
 
+Base.copy(v::UMVTVector) = UMVTVector(copy(v.U), copy(v.M), copy(v.Vt))
+
+# Tuple-like broadcasting of UMVTVector
+
+function Broadcast.BroadcastStyle(::Type{<:UMVTVector})
+    return Broadcast.Style{UMVTVector}()
+end
+function Broadcast.BroadcastStyle(
+    ::Broadcast.AbstractArrayStyle{0},
+    b::Broadcast.Style{UMVTVector},
+)
+    return b
+end
+
+Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{UMVTVector},Nothing}) = bc
+function Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{UMVTVector}})
+    Broadcast.check_broadcast_axes(bc.axes, bc.args...)
+    return bc
+end
+
+Broadcast.broadcastable(v::UMVTVector) = v
+
+@inline function Base.copy(bc::Broadcast.Broadcasted{Broadcast.Style{UMVTVector}})
+    return UMVTVector(
+        @inbounds(Broadcast._broadcast_getindex(bc, Val(:U))),
+        @inbounds(Broadcast._broadcast_getindex(bc, Val(:M))),
+        @inbounds(Broadcast._broadcast_getindex(bc, Val(:Vt))),
+    )
+end
+
+Base.@propagate_inbounds function Broadcast._broadcast_getindex(
+    v::UMVTVector,
+    ::Val{I},
+) where {I}
+    return getfield(v, I)
+end
+
+Base.axes(::UMVTVector) = ()
+
+@inline function Base.copyto!(
+    dest::UMVTVector,
+    bc::Broadcast.Broadcasted{Broadcast.Style{UMVTVector}},
+)
+    # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
+    if bc.f === identity && bc.args isa Tuple{UMVTVector} # only a single input argument to broadcast!
+        A = bc.args[1]
+        return copyto!(dest, A)
+    end
+    bc′ = Broadcast.preprocess(dest, bc)
+    copyto!(dest.U, Broadcast._broadcast_getindex(bc′, Val(:U)))
+    copyto!(dest.M, Broadcast._broadcast_getindex(bc′, Val(:M)))
+    copyto!(dest.Vt, Broadcast._broadcast_getindex(bc′, Val(:Vt)))
+    return dest
+end
+
+####
+
 @doc raw"""
     check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...)
 

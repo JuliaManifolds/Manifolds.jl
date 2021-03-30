@@ -170,4 +170,4 @@ definite matrix `x` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
 """
 zero_vector(::SymmetricPositiveDefinite, ::Any)
 
-zero_vector!(M::SymmetricPositiveDefinite{N}, v, x) where {N} = fill!(v, 0)
+zero_vector!(::SymmetricPositiveDefinite{N}, v, ::Any) where {N} = fill!(v, 0)

@@ -41,6 +41,7 @@ import ManifoldsBase:
     is_tangent_vector,
     inverse_retract,
     inverse_retract!,
+    log, #for extension, e.g. in Stiefel.
     log!,
     manifold_dimension,
     mid_point,
@@ -145,6 +146,8 @@ include("manifolds/VectorBundle.jl")
 include("distributions.jl")
 include("projected_distribution.jl")
 
+include("approx_inverse_retraction.jl")
+
 # It's included early to ensure visibility of `Identity`
 include("groups/group.jl")
 
@@ -174,6 +177,8 @@ include("manifolds/Rotations.jl")
 include("manifolds/SkewSymmetric.jl")
 include("manifolds/Spectrahedron.jl")
 include("manifolds/Stiefel.jl")
+include("manifolds/StiefelEuclideanMetric.jl")
+include("manifolds/StiefelCanonicalMetric.jl")
 include("manifolds/Sphere.jl")
 include("manifolds/SphereSymmetricMatrices.jl")
 include("manifolds/Symmetric.jl")
@@ -196,6 +201,8 @@ include("groups/array_manifold.jl")
 include("groups/product_group.jl")
 include("groups/semidirect_product_group.jl")
 
+include("groups/general_linear.jl")
+include("groups/special_linear.jl")
 include("groups/translation_group.jl")
 include("groups/special_orthogonal.jl")
 include("groups/circle_group.jl")
@@ -242,6 +249,11 @@ function __init__()
     @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
         using .OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
         include("ode.jl")
+    end
+
+    @require NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56" begin
+        using .NLsolve: NLsolve
+        include("nlsolve.jl")
     end
 
     @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
@@ -345,6 +357,7 @@ export Metric,
     MinkowskiMetric,
     PowerMetric,
     ProductMetric,
+    CanonicalMetric,
     MetricManifold
 export AbstractEmbeddingType, AbstractIsometricEmbeddingType
 export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding
@@ -360,6 +373,7 @@ export AbstractRetractionMethod,
     ProductRetraction,
     PowerRetraction
 export AbstractInverseRetractionMethod,
+    ApproximateInverseRetraction,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,
@@ -483,6 +497,7 @@ export AbstractGroupAction,
     ActionDirection,
     AdditionOperation,
     CircleGroup,
+    GeneralLinear,
     GroupManifold,
     GroupOperationAction,
     Identity,
@@ -497,6 +512,7 @@ export AbstractGroupAction,
     RotationAction,
     SemidirectProductGroup,
     SpecialEuclidean,
+    SpecialLinear,
     SpecialOrthogonal,
     TranslationGroup,
     TranslationAction

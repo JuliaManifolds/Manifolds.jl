@@ -79,4 +79,4 @@ function group_log(G::CircleGroup, q)
     end
 end
 
-group_log!(G::CircleGroup, X, q) = (X .= group_log(G, q))
+group_log!(G::CircleGroup, X::AbstractVector, q::AbstractVector) = (X .= group_log(G, q))

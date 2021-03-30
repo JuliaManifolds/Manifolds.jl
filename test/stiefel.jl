@@ -1,11 +1,15 @@
 include("utils.jl")
 
+using Manifolds: default_metric_dispatch
+
 @testset "Stiefel" begin
     @testset "Real" begin
         M = Stiefel(3, 2)
+        M2 = MetricManifold(M, EuclideanMetric())
         @testset "Basics" begin
             @test repr(M) == "Stiefel(3, 2, ℝ)"
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            @test (@inferred default_metric_dispatch(M2)) === Val(true)
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 3
             base_manifold(M) === M
@@ -92,6 +96,7 @@ include("utils.jl")
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             y = exp(M, x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
             z = exp(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0])
+            @test_throws ErrorException distance(M, x, y)
             @test isapprox(
                 M,
                 retract(
@@ -295,5 +300,27 @@ include("utils.jl")
         @test repr(r2) == "PadeRetraction(2)"
         q2 = retract(M, p, X, r2)
         @test is_manifold_point(M, q2)
+    end
+
+    @testset "Canonical Metric" begin
+        M3 = MetricManifold(Stiefel(3, 2), CanonicalMetric())
+        p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+        X = [0.0 0.0; 0.0 0.0; 1.0 1.0]
+        q = exp(M3, p, X)
+        Y = [0.0 0.0; 0.0 0.0; -1.0 1.0]
+        r = exp(M3, p, Y)
+        @test isapprox(M3, p, log(M3, p, q), X)
+        @test isapprox(M3, p, log(M3, p, r), Y)
+        @test inner(M3, p, X, Y) == 0
+        @test inner(M3, p, X, 2 * X + 3 * Y) == 2 * inner(M3, p, X, X)
+        @test norm(M3, p, X) ≈ distance(M3, p, q)
+        # check on a higher dimensional manifold, that the iterations are actually used
+        M4 = MetricManifold(Stiefel(10, 2), CanonicalMetric())
+        p = Matrix{Float64}(I, 10, 2)
+        Random.seed!(42)
+        Z = project(base_manifold(M4), p, randn(size(p)))
+        s = exp(M4, p, Z)
+        Z2 = log(M4, p, s)
+        @test isapprox(M4, p, Z, Z2)
     end
 end
