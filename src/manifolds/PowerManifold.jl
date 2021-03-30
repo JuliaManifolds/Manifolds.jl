@@ -83,7 +83,7 @@ function det_local_metric(
 end
 
 @doc raw"""
-    flat(M::AbstractPowerManifold, p, X::FVector{TangentSpaceType})
+    flat(M::AbstractPowerManifold, p, X)
 
 use the musical isomorphism to transform the tangent vector `X` from the tangent space at
 `p` on an [`AbstractPowerManifold`](@ref) `M` to a cotangent vector.
@@ -91,14 +91,15 @@ This can be done elementwise for each entry of `X` (and `p`).
 """
 flat(::AbstractPowerManifold, ::Any...)
 
-function flat!(M::AbstractPowerManifold, ξ::CoTFVector, p, X::TFVector)
+function flat!(M::AbstractPowerManifold, ξ::RieszRepresenterCotangentVector, p, X)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
+        p_i = _read(M, rep_size, p, i)
         flat!(
             M.manifold,
-            FVector(CotangentSpace, _write(M, rep_size, ξ.data, i)),
-            _read(M, rep_size, p, i),
-            FVector(TangentSpace, _read(M, rep_size, X.data, i)),
+            RieszRepresenterCotangentVector(M.manifold, p_i, _write(M, rep_size, ξ.X, i)),
+            p_i,
+            _read(M, rep_size, X, i),
         )
     end
     return ξ
@@ -191,7 +192,7 @@ function representation_size(M::PowerManifold{𝔽,<:Manifold,TSize}) where {�
 end
 
 @doc raw"""
-    sharp(M::AbstractPowerManifold, p, ξ::FVector{CotangentSpaceType})
+    sharp(M::AbstractPowerManifold, p, ξ::RieszRepresenterCotangentVector)
 
 Use the musical isomorphism to transform the cotangent vector `ξ` from the tangent space at
 `p` on an [`AbstractPowerManifold`](@ref) `M` to a tangent vector.
@@ -199,14 +200,15 @@ This can be done elementwise for every entry of `ξ` (and `p`).
 """
 sharp(::AbstractPowerManifold, ::Any...)
 
-function sharp!(M::AbstractPowerManifold, X::TFVector, p, ξ::CoTFVector)
+function sharp!(M::AbstractPowerManifold, X, p, ξ::RieszRepresenterCotangentVector)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
+        p_i = _read(M, rep_size, p, i)
         sharp!(
             M.manifold,
-            FVector(TangentSpace, _write(M, rep_size, X.data, i)),
-            _read(M, rep_size, p, i),
-            FVector(CotangentSpace, _read(M, rep_size, ξ.data, i)),
+            _write(M, rep_size, X, i),
+            p_i,
+            RieszRepresenterCotangentVector(M.manifold, p_i, _read(M, rep_size, ξ.X, i)),
         )
     end
     return X

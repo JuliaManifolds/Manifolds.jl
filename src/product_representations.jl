@@ -158,6 +158,10 @@ function ProductArray(
 end
 ProductArray(M::ShapeSpecification, data) = ProductArray(typeof(M), data, M.reshapers)
 
+function Base.copy(x::ProductArray{TShape}) where {TShape}
+    return ProductArray(TShape, copy(x.data), x.reshapers)
+end
+
 @doc raw"""
     prod_point(M::ShapeSpecification, pts...)
 

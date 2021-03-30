@@ -114,23 +114,41 @@ end
 
 flat!(::GeneralLinear, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
-get_coordinates(::GeneralLinear{n,ℝ}, p, X, ::DefaultOrthonormalBasis) where {n} = vec(X)
+function get_coordinates(
+    ::GeneralLinear{n,ℝ},
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+) where {n}
+    return vec(X)
+end
 
 function get_coordinates!(
     ::GeneralLinear{n,ℝ},
     Xⁱ,
     p,
     X,
-    ::DefaultOrthonormalBasis,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {n}
     return copyto!(Xⁱ, X)
 end
 
-function get_vector(::GeneralLinear{n,ℝ}, p, Xⁱ, ::DefaultOrthonormalBasis) where {n}
+function get_vector(
+    ::GeneralLinear{n,ℝ},
+    p,
+    Xⁱ,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+) where {n}
     return reshape(Xⁱ, n, n)
 end
 
-function get_vector!(::GeneralLinear{n,ℝ}, X, p, Xⁱ, ::DefaultOrthonormalBasis) where {n}
+function get_vector!(
+    ::GeneralLinear{n,ℝ},
+    X,
+    p,
+    Xⁱ,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+) where {n}
     return copyto!(X, Xⁱ)
 end
 

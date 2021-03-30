@@ -580,6 +580,15 @@ function ManifoldTests.test_manifold(
         Test.@test ctv_m(tv_m) ≈ norm(M, pts[1], tv_m)^2
         tv_m_back = sharp(M, pts[1], ctv_m)
         Test.@test isapprox(M, pts[1], tv_m, tv_m_back)
+
+        if is_mutating
+            ctv_m_s = allocate(ctv_m)
+            flat!(M, ctv_m_s, pts[1], tv_m)
+            Test.@test ctv_m_s(tv_m) ≈ ctv_m(tv_m)
+            tv_m_s_back = allocate(tv_m_back)
+            sharp!(M, tv_m_s_back, pts[1], ctv_m_s)
+            Test.@test isapprox(M, pts[1], tv_m, tv_m_s_back)
+        end
     end
 
     Test.@testset "number_eltype" begin

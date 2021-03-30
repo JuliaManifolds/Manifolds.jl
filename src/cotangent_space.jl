@@ -11,6 +11,10 @@ struct RieszRepresenterCotangentVector{TM<:Manifold,TP,TX}
     X::TX
 end
 
+function allocate(ξ::RieszRepresenterCotangentVector)
+    return RieszRepresenterCotangentVector(ξ.manifold, copy(ξ.p), allocate(ξ.X))
+end
+
 function (ξ::RieszRepresenterCotangentVector)(Y)
     return inner(ξ.manifold, ξ.p, ξ.X, Y)
 end
@@ -46,6 +50,12 @@ function flat!(
     Xv = get_vector(M, p, X.data, X.basis)
     ξv = flat(M, p, Xv)
     get_coordinates!(M, ξ.data, p, ξv, ξ.basis)
+    return ξ
+end
+function flat!(::Manifold, ξ::RieszRepresenterCotangentVector, p, X)
+    # TODO: maybe assert that ξ.p is equal to p? Allowing for varying p in ξ leads to
+    # issues with power manifold.
+    copyto!(ξ.X, X)
     return ξ
 end
 
@@ -123,5 +133,9 @@ function sharp!(
     ξv = get_vector(M, p, ξ.data, ξ.basis)
     Xv = sharp(M, p, ξv)
     get_coordinates!(M, X.data, p, Xv, X.basis)
+    return X
+end
+function sharp!(::Manifold, X, p, ξ::RieszRepresenterCotangentVector)
+    copyto!(X, ξ.X)
     return X
 end
