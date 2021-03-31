@@ -444,6 +444,24 @@ end
     w::AbstractVector;
     kwargs...,
 )
+
+function decorator_transparent_dispatch(
+    ::typeof(mean!),
+    ::AbstractEmbeddedManifold,
+    args...;
+    kwargs...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(mean!),
+    ::AbstractEmbeddedManifold{𝔽,<:TransparentIsometricEmbedding},
+    args...;
+    kwargs...,
+) where {𝔽}
+    return Val(:transparent)
+end
+
 """
     mean(
         M::Manifold,
@@ -771,6 +789,23 @@ end
     w::AbstractVector;
     kwargs...,
 )
+
+function decorator_transparent_dispatch(
+    ::typeof(median!),
+    ::AbstractEmbeddedManifold,
+    args...;
+    kwargs...,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(median!),
+    ::AbstractEmbeddedManifold{𝔽,<:TransparentIsometricEmbedding},
+    args...;
+    kwargs...,
+) where {𝔽}
+    return Val(:transparent)
+end
 
 @doc raw"""
     var(M, x, m=mean(M, x); corrected=true)
