@@ -43,6 +43,21 @@ function zero_tangent_vector!(::TestStatsEuclidean{N}, v, x; kwargs...) where {N
     return zero_tangent_vector!(Euclidean(N), v, x; kwargs...)
 end
 
+struct TestStatsNotImplementedEmbeddedManifold <:
+       AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
+decorated_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
+base_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
+
+struct TestStatsNotImplementedEmbeddedManifold2 <:
+       AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+decorated_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
+base_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
+
+struct TestStatsNotImplementedEmbeddedManifold3 <:
+       AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType} end
+decorated_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
+base_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
+
 function test_mean(M, x, yexp=nothing, method...; kwargs...)
     @testset "mean unweighted" begin
         y = mean(M, x; kwargs...)
@@ -388,6 +403,27 @@ end
             @test mean_and_std(M, x, TestStatsMethod1()) == ([5.0], 4.0)
             @test mean_and_std(M, x, w, TestStatsMethod1()) == ([5.0], 3.0)
         end
+    end
+
+    @testset "decorator dispatch" begin
+        ps = [normalize([1, 0, 0] .+ 0.1 .* randn(3)) for _ in 1:3]
+        M1 = TestStatsNotImplementedEmbeddedManifold()
+        @test mean!(M1, similar(ps[1]), ps) == mean!(Sphere(2), similar(ps[1]), ps)
+        @test mean(M1, ps) == mean(Sphere(2), ps)
+        @test median!(M1, similar(ps[1]), ps) == median!(Sphere(2), similar(ps[1]), ps)
+        @test median(M1, ps) == median(Sphere(2), ps)
+
+        M2 = TestStatsNotImplementedEmbeddedManifold2()
+        @test_throws ErrorException mean(M2, ps)
+        @test_throws ErrorException mean!(M2, similar(ps[1]), ps)
+        @test_throws ErrorException median(M2, ps)
+        @test_throws ErrorException median!(M2, similar(ps[1]), ps)
+
+        M3 = TestStatsNotImplementedEmbeddedManifold3()
+        @test_throws ErrorException mean(M3, ps)
+        @test_throws ErrorException mean!(M3, similar(ps[1]), ps)
+        @test_throws ErrorException median(M3, ps)
+        @test_throws ErrorException median!(M3, similar(ps[1]), ps)
     end
 
     @testset "TestStatsSphere" begin
