@@ -1,7 +1,14 @@
 include("utils.jl")
 using StatsBase: AbstractWeights, pweights
 using Random: GLOBAL_RNG, seed!
-import ManifoldsBase: manifold_dimension, exp!, log!, inner, zero_tangent_vector!
+import ManifoldsBase:
+    manifold_dimension,
+    exp!,
+    log!,
+    inner,
+    zero_tangent_vector!,
+    decorated_manifold,
+    base_manifold
 using Manifolds:
     AbstractEstimationMethod,
     CyclicProximalPointEstimation,
