@@ -71,9 +71,9 @@ end
 Compute the group exponential map on the [`Unitary(2,ℂ)`](@ref) group, which is
 
 ````math
-\exp_e \colon X ↦ e^{\tr(X) / 2} \left(\cos θ I + \frac{\sin θ}{θ} (X - \frac{\tr(X)}{2} I)\right),
+\exp_e \colon X ↦ e^{\operatorname{tr}(X) / 2} \left(\cos θ I + \frac{\sin θ}{θ} \left(X - \frac{\operatorname{tr}(X)}{2} I\right)\right),
 ````
-where ``θ = \sqrt{\det(X) - \left(\frac{\tr(X)}{2}\right)^2}``.
+where ``θ = \frac{1}{2} \sqrt{4\det(X) - \operatorname{tr}(X)^2}``.
 """
 group_exp(::Unitary{2,ℂ}, X)
 
