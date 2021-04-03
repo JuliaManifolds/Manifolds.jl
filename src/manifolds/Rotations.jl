@@ -131,10 +131,9 @@ By convention, the returned values are sorted in increasing order. See
 [`angles_4d_skew_sym_matrix`](@ref).
 """
 function cos_angles_4d_rotation_matrix(R)
-    trR = tr(R)
-    a = trR / 4
-    b = sqrt(clamp(tr((R .- transpose(R))^2) / 16 - a^2 + 1, 0, Inf))
-    return (a + b, a - b)
+    a = tr(R)
+    b = sqrt(clamp(2 * dot(transpose(R), R) - a^2 + 8, 0, Inf))
+    return ((a + b) / 4, (a - b) / 4)
 end
 
 @doc raw"""
