@@ -60,6 +60,22 @@ Pages = ["groups/special_linear.jl"]
 Order = [:type, :function]
 ```
 
+### Unitary group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/unitary.jl"]
+Order = [:type, :function]
+```
+
+### Orthogonal group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/orthogonal.jl"]
+Order = [:type, :function]
+```
+
 ### Special orthogonal group
 
 ```@autodocs
