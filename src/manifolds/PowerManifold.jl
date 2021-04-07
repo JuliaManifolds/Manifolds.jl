@@ -80,7 +80,6 @@ function allocate_result(M::PowerManifoldNested, ::typeof(sharp), w::CoTFVector,
     return FVector(TangentSpace, alloc)
 end
 
-
 default_metric_dispatch(::AbstractPowerManifold, ::PowerMetric) = Val(true)
 
 function det_local_metric(
