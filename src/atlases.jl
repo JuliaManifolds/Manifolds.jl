@@ -8,8 +8,8 @@ abstract type AbstractAtlas end
 
 """
     RetractionAtlas{
-        TInvRetr<:AbstractInverseRetractionMethod,
         TRetr<:AbstractRetractionMethod,
+        TInvRetr<:AbstractInverseRetractionMethod,
         TBasis<:AbstractBasis,
     } <: AbstractAtlas
 
@@ -22,22 +22,22 @@ using retractions, inverse retractions, and coordinate calculation for a given b
 [`AbstractRetractionMethod`](@ref), [`AbstractBasis`](@ref)
 """
 struct RetractionAtlas{
-    TInvRetr<:AbstractInverseRetractionMethod,
     TRetr<:AbstractRetractionMethod,
+    TInvRetr<:AbstractInverseRetractionMethod,
     TBasis<:AbstractBasis{<:Any,TangentSpaceType},
 } <: AbstractAtlas
-    invretr::TInvRetr
     retr::TRetr
+    invretr::TInvRetr
     basis::TBasis
 end
 
 function RetractionAtlas(
-    invretr::AbstractInverseRetractionMethod,
     retr::AbstractRetractionMethod,
+    invretr::AbstractInverseRetractionMethod,
 )
-    return RetractionAtlas(invretr, retr, DefaultOrthonormalBasis())
+    return RetractionAtlas(retr, invretr, DefaultOrthonormalBasis())
 end
-RetractionAtlas() = RetractionAtlas(LogarithmicInverseRetraction(), ExponentialRetraction())
+RetractionAtlas() = RetractionAtlas(ExponentialRetraction(), LogarithmicInverseRetraction())
 
 get_default_atlas(M::Manifold) = RetractionAtlas()
 
@@ -172,8 +172,8 @@ induced_basis(M::Manifold, A::AbstractAtlas, i, VST::VectorSpaceType)
 function induced_basis(
     ::Manifold,
     A::RetractionAtlas{
-        <:AbstractInverseRetractionMethod,
         <:AbstractRetractionMethod,
+        <:AbstractInverseRetractionMethod,
         <:DefaultOrthonormalBasis,
     },
     i,
@@ -185,8 +185,8 @@ end
 function induced_basis(
     M::Manifold,
     A::RetractionAtlas{
-        <:AbstractInverseRetractionMethod,
         <:AbstractRetractionMethod,
+        <:AbstractInverseRetractionMethod,
         <:DefaultOrthonormalBasis,
     },
     i,
