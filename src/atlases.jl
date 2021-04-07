@@ -1,20 +1,20 @@
 
 """
-    abstract type AbstractAtlas end
+    AbstractAtlas
 
 An abstract class for atlases.
 """
 abstract type AbstractAtlas end
 
 """
-    struct RetractionAtlas{
+    RetractionAtlas{
         TInvRetr<:AbstractInverseRetractionMethod,
         TRetr<:AbstractRetractionMethod,
         TBasis<:AbstractBasis,
     } <: AbstractAtlas
 
 An atlas indexed by points on a manifold, such that coordinate transformations are performed
-using retractions, inverse retractions and coordinate calculation for a given basis.
+using retractions, inverse retractions, and coordinate calculation for a given basis.
 
 # See also
 
@@ -107,7 +107,7 @@ end
     get_chart_index(M::Manifold, A::AbstractAtlas, p)
 
 Select a chart from an [`AbstractAtlas`](@ref) `A` for manifold `M` that is suitable for
-representing neighborhood of point `p`. This selection should be deterministic, although
+representing the neighborhood of point `p`. This selection should be deterministic, although
 different charts may be selected for arbitrarily close but distinct points.
 """
 get_chart_index(::Manifold, ::AbstractAtlas, ::Any)

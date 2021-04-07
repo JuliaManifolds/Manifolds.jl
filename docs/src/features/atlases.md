@@ -25,8 +25,7 @@ Order = [:type, :function]
 
 ## Cotangent space and musical isomorphisms
 
-Related to atlases, there is also support for the cotangent space and coefficients of
-cotangent vectors in bases of the cotangent space.
+Related to atlases, there is also support for the cotangent space and coefficients of cotangent vectors in bases of the cotangent space.
 
 Functions [`sharp`](@ref) and [`flat`](@ref) implement musical isomorphisms for arbitrary vector bundles.
 
