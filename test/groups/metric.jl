@@ -8,15 +8,15 @@ struct TestInvariantMetricBase <: Metric end
 
 function local_metric(
     ::MetricManifold{𝔽,<:Manifold,TestInvariantMetricBase},
-    ::DefaultOrthonormalBasis,
     ::Identity,
+    ::DefaultOrthonormalBasis,
 ) where {𝔽}
     return Diagonal([1.0, 2.0, 3.0])
 end
 function local_metric(
     ::MetricManifold{𝔽,<:Manifold,<:InvariantMetric{TestInvariantMetricBase}},
-    ::DefaultOrthonormalBasis,
     p,
+    ::DefaultOrthonormalBasis,
 ) where {𝔽}
     return Diagonal([1.0, 2.0, 3.0])
 end
@@ -32,8 +32,8 @@ end
 
 function local_metric(
     ::MetricManifold{𝔽,<:Manifold,<:TestBiInvariantMetricBase},
-    ::DefaultOrthonormalBasis,
     ::Identity,
+    ::DefaultOrthonormalBasis,
 ) where {𝔽}
     return Diagonal(0.4I, 3)
 end
