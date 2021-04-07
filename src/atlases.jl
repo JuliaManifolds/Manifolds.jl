@@ -236,16 +236,3 @@ Compute the local metric tensor for vectors expressed in terms of coordinates
 in basis `B` on manifold `M`. The point `p` is not checked.
 """
 local_metric(::Manifold, ::InducedBasis, ::Any)
-
-function allocate_result(M::PowerManifoldNested, f::typeof(get_point), x)
-    return [allocate_result(M.manifold, f, _access_nested(x, i)) for i in get_iterator(M)]
-end
-function allocate_result(M::PowerManifoldNested, f::typeof(get_point_coordinates), p)
-    return invoke(
-        allocate_result,
-        Tuple{Manifold,typeof(get_point_coordinates),Any},
-        M,
-        f,
-        p,
-    )
-end

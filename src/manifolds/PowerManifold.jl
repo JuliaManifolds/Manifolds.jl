@@ -59,14 +59,27 @@ const PowerManifoldMultidimensional =
 
 Base.:^(M::Manifold, n) = PowerManifold(M, n...)
 
-function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x)
+function allocate_result(M::PowerManifoldNested, ::typeof(flat), w::TFVector, x)
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
     return FVector(CotangentSpace, alloc)
 end
-function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector, x)
+function allocate_result(M::PowerManifoldNested, f::typeof(get_point), x)
+    return [allocate_result(M.manifold, f, _access_nested(x, i)) for i in get_iterator(M)]
+end
+function allocate_result(M::PowerManifoldNested, f::typeof(get_point_coordinates), p)
+    return invoke(
+        allocate_result,
+        Tuple{Manifold,typeof(get_point_coordinates),Any},
+        M,
+        f,
+        p,
+    )
+end
+function allocate_result(M::PowerManifoldNested, ::typeof(sharp), w::CoTFVector, x)
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
     return FVector(TangentSpace, alloc)
 end
+
 
 default_metric_dispatch(::AbstractPowerManifold, ::PowerMetric) = Val(true)
 
