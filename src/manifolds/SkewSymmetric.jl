@@ -49,10 +49,10 @@ function check_manifold_point(M::SkewSymmetricMatrices{n,𝔽}, p; kwargs...) wh
     mpv =
         invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
-    if !isapprox(norm(p + p'), 0.0; kwargs...)
+    if !isapprox(p, -p'; kwargs...)
         return DomainError(
             norm(p + p'),
-            "The point $(p) does not lie on $M, since it is not symmetric.",
+            "The point $(p) does not lie on $M, since it is not skew-symmetric.",
         )
     end
     return nothing
