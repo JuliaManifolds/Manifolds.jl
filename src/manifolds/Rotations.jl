@@ -415,7 +415,7 @@ inverse_retract(::Rotations, ::Any, ::Any, ::QRInverseRetraction)
 function inverse_retract!(M::Rotations, X, p, q, method::PolarInverseRetraction)
     A = transpose(p) * q
     Amat = A isa StaticMatrix ? A : convert(Matrix, A)
-    H = copyto!(allocate(Amat), 2I)
+    H = copyto!(allocate(Amat), -2I)
     try
         B = lyap(A, A, H)
     catch e
