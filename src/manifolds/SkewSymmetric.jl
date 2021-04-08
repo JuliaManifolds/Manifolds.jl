@@ -180,20 +180,19 @@ end
 @doc raw"""
     manifold_dimension(M::SkewSymmetricMatrices{n,𝔽})
 
-Return the dimension of the [`SkewSymmetricMatrices`](@ref) matrix `M` over the number system
-`𝔽`, i.e.
+Return the dimension of the [`SkewSymmetricMatrices`](@ref) matrix `M` over the number
+system `𝔽`, i.e.
 
 ````math
-\begin{aligned}
-\dim \mathrm{SkewSym}(n,ℝ) &= \frac{n(n-1)}{2},\\
-\dim \mathrm{SkewSym}(n,ℂ) &= 2*\frac{n(n-1)}{2} + n = n^2,
-\end{aligned}
+\dim \mathrm{SkewSym}(n,ℝ) &= \frac{n(n+1)}{2} \dim_ℝ 𝔽 - n,\\
 ````
 
-where the last $n$ is due to an imaginary diagonal that is allowed $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@ref) of ``𝔽``. The first term corresponds to
+only the upper triangular elements of the matrix being unique, and the second term
+corresponds to the constraint that the real part of the diagonal be zero.
 """
 function manifold_dimension(::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽}
-    return div(N * (N - 1), 2) * real_dimension(𝔽) + (𝔽 === ℂ ? N : 0)
+    return div(N * (N + 1), 2) * real_dimension(𝔽) + N
 end
 
 @doc raw"""
