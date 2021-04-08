@@ -91,7 +91,7 @@ function ManifoldTests.test_manifold(
     retraction_atol_multiplier=0,
     retraction_methods=[],
     retraction_rtol_multiplier=1,
-    test_atlases = (),
+    test_atlases=(),
     test_exp_log=true,
     test_forward_diff=true,
     test_is_tangent=true,
