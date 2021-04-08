@@ -46,20 +46,19 @@ whether `p` is a skew-symmetric matrix of size `(n,n)` with values from the corr
 The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
 """
 function check_manifold_point(M::SkewSymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+    mpv = check_manifold_point(decorated_manifold(M), p; kwargs...)
     mpv === nothing || return mpv
-    if !isapprox(norm(p + p'), 0.0; kwargs...)
+    if !isapprox(p, -p'; kwargs...)
         return DomainError(
             norm(p + p'),
-            "The point $(p) does not lie on $M, since it is not symmetric.",
+            "The point $(p) does not lie on $M, since it is not skew-symmetric.",
         )
     end
     return nothing
 end
 
 """
-    check_tangent_vector(M::SkewSymmetricMatrices{n,𝔽}, p, X; check_base_point = true, kwargs... )
+    check_tangent_vector(M::SkewSymmetricMatrices{n}, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SkewSymmetricMatrices`](@ref) `M`, i.e. `X` has to be a skew-symmetric matrix of size `(n,n)`
@@ -69,33 +68,17 @@ The optional parameter `check_base_point` indicates, whether to call
 The tolerance for the skew-symmetry of `p` and `X` can be set using `kwargs...`.
 """
 function check_tangent_vector(
-    M::SkewSymmetricMatrices{n,𝔽},
+    M::SkewSymmetricMatrices,
     p,
     X;
     check_base_point=true,
     kwargs...,
-) where {n,𝔽}
+)
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
-    mpv = invoke(
-        check_tangent_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        check_base_point=false, # already checked above
-        kwargs...,
-    )
-    mpv === nothing || return mpv
-    if !isapprox(norm(X + adjoint(X)), 0.0; kwargs...)
-        return DomainError(
-            norm(X + adjoint(X)),
-            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not symmetric.",
-        )
-    end
-    return nothing
+    return check_manifold_point(M, X; kwargs...)  # manifold is its own tangent space
 end
 
 decorated_manifold(M::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
@@ -197,20 +180,19 @@ end
 @doc raw"""
     manifold_dimension(M::SkewSymmetricMatrices{n,𝔽})
 
-Return the dimension of the [`SkewSymmetricMatrices`](@ref) matrix `M` over the number system
-`𝔽`, i.e.
+Return the dimension of the [`SkewSymmetricMatrices`](@ref) matrix `M` over the number
+system `𝔽`, i.e.
 
 ````math
-\begin{aligned}
-\dim \mathrm{SkewSym}(n,ℝ) &= \frac{n(n-1)}{2},\\
-\dim \mathrm{SkewSym}(n,ℂ) &= 2*\frac{n(n-1)}{2} + n = n^2,
-\end{aligned}
+\dim \mathrm{SkewSym}(n,ℝ) &= \frac{n(n+1)}{2} \dim_ℝ 𝔽 - n,\\
 ````
 
-where the last $n$ is due to an imaginary diagonal that is allowed $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@ref) of ``𝔽``. The first term corresponds to
+only the upper triangular elements of the matrix being unique, and the second term
+corresponds to the constraint that the real part of the diagonal be zero.
 """
 function manifold_dimension(::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽}
-    return div(N * (N - 1), 2) * real_dimension(𝔽) + (𝔽 === ℂ ? N : 0)
+    return div(N * (N + 1), 2) * real_dimension(𝔽) - N
 end
 
 @doc raw"""
@@ -226,7 +208,10 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpo
 """
 project(::SkewSymmetricMatrices, ::Any)
 
-project!(M::SkewSymmetricMatrices, q, p) = copyto!(q, (p - p') ./ 2)
+function project!(M::SkewSymmetricMatrices, q, p)
+    q .= (p .- p') ./ 2
+    return q
+end
 
 @doc raw"""
     project(M::SkewSymmetricMatrices, p, X)
@@ -241,7 +226,7 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpo
 """
 project(::SkewSymmetricMatrices, ::Any, ::Any)
 
-project!(M::SkewSymmetricMatrices, Y, p, X) = (Y .= (X .- X') ./ 2)
+project!(M::SkewSymmetricMatrices, Y, p, X) = project!(M, Y, X)
 
 function Base.show(io::IO, ::SkewSymmetricMatrices{n,F}) where {n,F}
     return print(io, "SkewSymmetricMatrices($(n), $(F))")
