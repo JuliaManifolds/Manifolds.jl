@@ -252,6 +252,7 @@ include("group_utils.jl")
         @test y ≈ one(x)
         @test one(ge) === ge
         @test transpose(ge) === ge
+        @test adjoint(ge) === ge
         @test det(ge) == 1
         @test ge * x ≈ x
         @test x * ge ≈ x

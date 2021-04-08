@@ -1016,6 +1016,8 @@ Base.one(e::Identity{G}) where {G<:MultiplicationGroup} = e
 
 Base.transpose(e::Identity{G}) where {G<:MultiplicationGroup} = e
 
+Base.adjoint(e::Identity{G}) where {G<:MultiplicationGroup} = e
+
 LinearAlgebra.det(::Identity{<:MultiplicationGroup}) = 1
 
 LinearAlgebra.mul!(q, e::Identity{G}, p) where {G<:MultiplicationGroup} = copyto!(q, p)
