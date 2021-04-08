@@ -107,19 +107,7 @@ function check_tangent_vector(
         perr = check_manifold_point(M, p)
         perr === nothing || return perr
     end
-    if size(X) != (N, N)
-        return DomainError(
-            size(X),
-            "The array $(X) is not a tangent to a point on $M since its size does not match $((N, N)).",
-        )
-    end
-    if !isapprox(transpose(X) + X, zero(X); kwargs...)
-        return DomainError(
-            size(X),
-            "The array $(X) is not a tangent to a point on $M since it is not skew-symmetric.",
-        )
-    end
-    return nothing
+    return check_manifold_point(SkewSymmetricMatrices(n), X)
 end
 
 @doc raw"""
