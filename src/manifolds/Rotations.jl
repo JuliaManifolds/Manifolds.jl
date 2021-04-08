@@ -426,7 +426,7 @@ function inverse_retract!(M::Rotations, X, p, q, method::PolarInverseRetraction)
             rethrow()
         end
     end
-    return project!(M, p, X)
+    return project!(M, X, p, X)
 end
 function inverse_retract!(M::Rotations{N}, X, p, q, ::QRInverseRetraction) where {N}
     A = transpose(p) * q
@@ -438,7 +438,7 @@ function inverse_retract!(M::Rotations{N}, X, p, q, ::QRInverseRetraction) where
         R[1:i, i] = A[1:i, 1:i] \ b
     end
     mul!(X, A, R)
-    return project!(M, p, X)
+    return project!(M, X, p, X)
 end
 
 @doc raw"""
@@ -480,7 +480,7 @@ function log!(M::Rotations{3}, X, p, q)
         return get_vector!(M, X, p, π * ax, DefaultOrthogonalBasis())
     end
     X .= U ./ usinc_from_cos(cosθ)
-    return project!(M, p, X)
+    return project!(M, X, p, X)
 end
 function log!(M::Rotations{4}, X, p, q)
     U = transpose(p) * q
