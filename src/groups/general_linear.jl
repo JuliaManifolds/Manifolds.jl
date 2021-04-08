@@ -158,7 +158,6 @@ end
 
 # find sU for s ∈ S⁺ and U ∈ U(n, 𝔽) that minimizes ‖sU - p‖²
 function _project_Un_S⁺(p)
-    n = LinearAlgebra.checksquare(p)
     F = svd(p)
     s = mean(F.S)
     U = F.U * F.Vt
