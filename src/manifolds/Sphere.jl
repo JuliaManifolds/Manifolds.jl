@@ -479,7 +479,7 @@ The stereographic atlas of ``S^n`` with two charts: one with the singular
 point (-1, 0, ..., 0) (called `:north`) and one with the singular
 point (1, 0, ..., 0) (called `:south`).
 """
-struct StereographicAtlas <: AbstractAtlas end
+struct StereographicAtlas <: AbstractAtlas{ℝ} end
 
 function get_chart_index(::Sphere{n,ℝ}, ::StereographicAtlas, p) where {n}
     if p[1] < 0

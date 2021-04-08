@@ -1,17 +1,20 @@
 
 """
-    AbstractAtlas
+    AbstractAtlas{𝔽}
 
-An abstract class for atlases.
+An abstract class for atlases whith charts that have values in the vector space `𝔽ⁿ`
+for some value of `n`. `𝔽` is a number system determined by an [`AbstractNumbers`](@ref)
+object.
 """
-abstract type AbstractAtlas end
+abstract type AbstractAtlas{𝔽} end
 
 """
     RetractionAtlas{
+        𝔽,
         TRetr<:AbstractRetractionMethod,
         TInvRetr<:AbstractInverseRetractionMethod,
         TBasis<:AbstractBasis,
-    } <: AbstractAtlas
+    } <: AbstractAtlas{𝔽}
 
 An atlas indexed by points on a manifold, such that coordinate transformations are performed
 using retractions, inverse retractions, and coordinate calculation for a given basis.
@@ -22,10 +25,11 @@ using retractions, inverse retractions, and coordinate calculation for a given b
 [`AbstractRetractionMethod`](@ref), [`AbstractBasis`](@ref)
 """
 struct RetractionAtlas{
+    𝔽,
     TRetr<:AbstractRetractionMethod,
     TInvRetr<:AbstractInverseRetractionMethod,
     TBasis<:AbstractBasis{<:Any,TangentSpaceType},
-} <: AbstractAtlas
+} <: AbstractAtlas{𝔽}
     retr::TRetr
     invretr::TInvRetr
     basis::TBasis
@@ -35,7 +39,12 @@ function RetractionAtlas(
     retr::AbstractRetractionMethod,
     invretr::AbstractInverseRetractionMethod,
 )
-    return RetractionAtlas(retr, invretr, DefaultOrthonormalBasis())
+    basis = DefaultOrthonormalBasis()
+    return RetractionAtlas{ℝ,typeof(retr),typeof(invretr),typeof(basis)}(
+        retr,
+        invretr,
+        basis,
+    )
 end
 RetractionAtlas() = RetractionAtlas(ExponentialRetraction(), LogarithmicInverseRetraction())
 
@@ -45,7 +54,7 @@ get_default_atlas(M::Manifold) = RetractionAtlas()
     get_point_coordinates(M::Manifold, A::AbstractAtlas, i, p)
 
 Calculate coordinates of point `p` on manifold `M` in chart from an [`AbstractAtlas`](@ref)
-`A` at index `i`.
+`A` at index `i`. Coordinates are in the number system determined by `A`.
 
 # See also
 
@@ -230,9 +239,9 @@ function dual_basis(M::Manifold{𝔽}, ::Any, B::InducedBasis{𝔽,CotangentSpac
 end
 
 """
-    local_metric(M::Manifold, B::InducedBasis, p)
+    local_metric(M::Manifold, p, B::InducedBasis)
 
 Compute the local metric tensor for vectors expressed in terms of coordinates
 in basis `B` on manifold `M`. The point `p` is not checked.
 """
-local_metric(::Manifold, ::InducedBasis, ::Any)
+local_metric(::Manifold, ::Any, ::InducedBasis)
