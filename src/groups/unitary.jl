@@ -47,7 +47,7 @@ function check_tangent_vector(G::Unitary{n,𝔽}, p, X; check_base_point=true, k
         mpe = check_manifold_point(G, p; kwargs...)
         mpe === nothing || return mpe
     end
-    return check_base_point(SkewSymmetricMatrices(n, 𝔽), p, X; kwargs...)
+    return check_manifold_point(SkewSymmetricMatrices(n, 𝔽), X; kwargs...)
 end
 
 decorated_manifold(::Unitary{n,𝔽}) where {n,𝔽} = Euclidean(n, n; field=𝔽)
