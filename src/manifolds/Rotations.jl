@@ -630,7 +630,7 @@ where tangent vectors are represented by elements from the Lie group
 """
 project(::Rotations, ::Any, ::Any)
 
-project!(M::Rotations, Y, p, X) = (Y .= (X .- transpose(X)) ./ 2)
+project!(M::Rotations{N}, Y, p, X) where {N} = project!(SkewSymmetricMatrices(N), Y, X)
 
 @doc raw"""
     representation_size(M::Rotations)
