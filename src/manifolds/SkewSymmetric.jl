@@ -226,7 +226,7 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpo
 """
 project(::SkewSymmetricMatrices, ::Any, ::Any)
 
-project!(M::SkewSymmetricMatrices, Y, p, X) = (Y .= (X .- X') ./ 2)
+project!(M::SkewSymmetricMatrices, Y, p, X) = project!(M, Y, X)
 
 function Base.show(io::IO, ::SkewSymmetricMatrices{n,F}) where {n,F}
     return print(io, "SkewSymmetricMatrices($(n), $(F))")
