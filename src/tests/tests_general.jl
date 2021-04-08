@@ -41,6 +41,7 @@ that lie on it (contained in `pts`).
 - `retraction_rtol_multiplier = 1`: change the relative tolerance of (inverse) retraction
     tests (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
 - `retraction_methods = []`: retraction methods that will be tested.
+- `test_atlases = []`: Vector or tuple of atlases that should be tested.
 - `test_exp_log = true`: if true, checkthat [`exp`](@ref) is the inverse of [`log`](@ref).
 - `test_forward_diff = true`: if true, automatic differentiation using
     ForwardDiff is tested.
@@ -90,6 +91,7 @@ function ManifoldTests.test_manifold(
     retraction_atol_multiplier=0,
     retraction_methods=[],
     retraction_rtol_multiplier=1,
+    test_atlases = (),
     test_exp_log=true,
     test_forward_diff=true,
     test_is_tangent=true,
@@ -296,6 +298,27 @@ function ManifoldTests.test_manifold(
                     rtol=retraction_atol_multiplier == 0 ?
                          sqrt(epsx) * retraction_rtol_multiplier : 0,
                 )
+            end
+        end
+    end
+
+    Test.@testset "atlases" begin
+        if !isempty(test_atlases)
+            Test.@test get_default_atlas(M) isa AbstractAtlas{ℝ}
+        end
+        for A in test_atlases
+            i = get_chart_index(M, A, pts[1])
+            a = get_point_coordinates(M, A, i, pts[1])
+            Test.@test isa(a, AbstractVector)
+            Test.@test length(a) == manifold_dimension(M)
+            Test.@test isapprox(M, pts[1], get_point(M, A, i, a))
+            if is_mutating
+                get_point_coordinates!(M, a, A, i, pts[2])
+                Test.@test a ≈ get_point_coordinates(M, A, i, pts[2])
+
+                q = allocate(pts[1])
+                get_point!(M, q, A, i, a)
+                Test.@test isapprox(M, pts[2], q)
             end
         end
     end

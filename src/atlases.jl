@@ -48,7 +48,14 @@ function RetractionAtlas(
 end
 RetractionAtlas() = RetractionAtlas(ExponentialRetraction(), LogarithmicInverseRetraction())
 
-get_default_atlas(M::Manifold) = RetractionAtlas()
+"""
+    get_default_atlas(::Manifold)
+
+Determine the default real-valued atlas for the given manifold.
+"""
+function get_default_atlas(::Manifold)
+    return RetractionAtlas()
+end
 
 """
     get_point_coordinates(M::Manifold, A::AbstractAtlas, i, p)
@@ -118,6 +125,10 @@ end
 Select a chart from an [`AbstractAtlas`](@ref) `A` for manifold `M` that is suitable for
 representing the neighborhood of point `p`. This selection should be deterministic, although
 different charts may be selected for arbitrarily close but distinct points.
+
+# See also
+
+[`get_default_atlas`](@ref)
 """
 get_chart_index(::Manifold, ::AbstractAtlas, ::Any)
 

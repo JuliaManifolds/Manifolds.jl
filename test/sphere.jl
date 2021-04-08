@@ -31,6 +31,7 @@ using ManifoldsBase: TFVector
     TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
 
     basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
+    test_atlases = (Manifolds.StereographicAtlas(), Manifolds.RetractionAtlas())
     for T in types
         @testset "Type $T" begin
             pts = [
@@ -61,6 +62,7 @@ using ManifoldsBase: TFVector
                 retraction_methods=[ProjectionRetraction(), ExponentialRetraction()],
                 inverse_retraction_methods=[ProjectionInverseRetraction()],
                 is_tangent_atol_multiplier=1,
+                test_atlases=test_atlases,
             )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end

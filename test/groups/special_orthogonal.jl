@@ -89,6 +89,7 @@ include("group_utils.jl")
             exp_log_atol_multiplier=20,
             retraction_atol_multiplier=12,
             is_tangent_atol_multiplier=1.2,
+            test_atlases=(Manifolds.RetractionAtlas(),),
         )
 
         @test injectivity_radius(G) == injectivity_radius(M)
