@@ -192,7 +192,7 @@ only the upper triangular elements of the matrix being unique, and the second te
 corresponds to the constraint that the real part of the diagonal be zero.
 """
 function manifold_dimension(::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽}
-    return div(N * (N + 1), 2) * real_dimension(𝔽) + N
+    return div(N * (N + 1), 2) * real_dimension(𝔽) - N
 end
 
 @doc raw"""
