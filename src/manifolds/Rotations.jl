@@ -449,9 +449,8 @@ function inverse_retract!(M::Rotations{N}, X, p, q, ::QRInverseRetraction) where
         b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
         R[1:i, i] = A[1:i, 1:i] \ b
     end
-    C = A * R
-    X .= (C .- transpose(C)) ./ 2
-    return X
+    mul!(X, A, R)
+    return project!(M, p, X)
 end
 
 @doc raw"""
@@ -492,8 +491,8 @@ function log!(M::Rotations{3}, X, p, q)
         ax = eig.vectors[inds, ival]
         return get_vector!(M, X, p, π * ax, DefaultOrthogonalBasis())
     end
-    X .= ((U .- transpose(U)) ./ (2 * usinc_from_cos(cosθ)))
-    return X
+    X .= U ./ usinc_from_cos(cosθ)
+    return project!(M, p, X)
 end
 function log!(M::Rotations{4}, X, p, q)
     U = transpose(p) * q
@@ -608,7 +607,7 @@ project(::Rotations, ::Any)
 
 function project!(::Rotations{N}, q, p; check_det=true) where {N}
     F = svd(p)
-    copyto!(q, F.U * F.Vt)
+    mul!(q, F.U, F.Vt)
     if check_det && det(q) < 0
         d = similar(F.S)
         @inbounds fill!(view(d, 1:(N - 1)), 1)
