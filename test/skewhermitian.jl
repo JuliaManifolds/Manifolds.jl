@@ -1,20 +1,25 @@
 include("utils.jl")
 
 @testset "SkewSymmetricMatrices" begin
-    M = SkewSymmetricMatrices(3, ℝ)
+    @test SkewSymmetricMatrices(3) === SkewHermitianMatrices(3)
+    @test SkewSymmetricMatrices(3, ℂ) === SkewHermitianMatrices(3, ℂ)
+end
+
+@testset "SkewHermitianMatrices" begin
+    M = SkewHermitianMatrices(3, ℝ)
     A = [1 2 3; 4 5 6; 7 8 9]
     A_skewsym = [0 -2 -3; 2 0 1; 3 -1 0]
     A_skewsym2 = [0 -2 -3; 2 0 1; 3 -1 0]
     B_skewsym = [0 -2 -3; 2 0 -1; 3 1 0]
-    M_complex = SkewSymmetricMatrices(3, ℂ)
+    M_complex = SkewHermitianMatrices(3, ℂ)
     A_skewsym_complex = [1.0im -2.0 -3.0; 2.0 0.0 1.0; 3.0 -1.0 0.0]
     B_skewsym_complex = [2.0im -2.0-2.0im -3.0; 2.0-2.0im 0.0 -1.0; 3.0 1.0 0.0]
-    @test repr(M_complex) == "SkewSymmetricMatrices(3, ℂ)"
+    @test repr(M_complex) == "SkewHermitianMatrices(3, ℂ)"
     C = [0 -1 im; 1 0 -im; im -im 0]
     D = [1 0; 0 1]
     X = zeros(3, 3)
     @testset "Real Skew-Symmetric Matrices Basics" begin
-        @test repr(M) == "SkewSymmetricMatrices(3, ℝ)"
+        @test repr(M) == "SkewSymmetricMatrices(3)"
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3,3},ℝ}
