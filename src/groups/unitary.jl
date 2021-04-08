@@ -10,10 +10,17 @@ The tangent vectors ``X_p ∈ T_p \mathrm{U}(n, 𝔽)`` are represented instead 
 corresponding element ``X_e = p^\mathrm{H} X_p`` of the Lie algebra ``𝔲(n, 𝔽)``, which
 consists of the skew-hermitian matrices, that is, all ``X_e ∈ 𝔽^{n × n}`` where
 ``X_e = -X_e^\mathrm{H}``.
+
+# Constructor
+
+    Unitary(n, 𝔽=ℂ)
+
+Constructs ``\mathrm{U}(n, 𝔽)``. See also [`Orthogonal(n)`](@ref) for the special case
+``\mathrm{O}(n)=\mathrm{U}(n, ℝ)``.
 """
 struct Unitary{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType} end
 
-Unitary(n, 𝔽::AbstractNumbers=ℝ) = Unitary{n,𝔽}()
+Unitary(n, 𝔽::AbstractNumbers=ℂ) = Unitary{n,𝔽}()
 
 function allocation_promotion_function(::Unitary{n,ℂ}, f, ::Tuple) where {n}
     return complex
