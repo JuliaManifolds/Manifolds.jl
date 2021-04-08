@@ -78,7 +78,7 @@ function check_tangent_vector(
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
-    return check_base_point(M, X; kwargs...)  # manifold is its own tangent space
+    return check_manifold_point(M, X; kwargs...)  # manifold is its own tangent space
 end
 
 decorated_manifold(M::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
