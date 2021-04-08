@@ -2,24 +2,25 @@
     SkewHermitianMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
 
 The [`Manifold`](@ref) $ \operatorname{SkewSym}(n)$ consisting of the real- or
-complex-valued skew-symmetric matrices of size $n × n$, i.e. the set
+complex-valued skew-hermitian matrices of size ``n × n``, i.e. the set
 
 ````math
-\operatorname{SkewSym}(n) = \bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = -p \bigr\},
+\operatorname{SkewHerm}(n) = \bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = -p \bigr\},
 ````
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
-and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
+and the field $𝔽 ∈ \{ ℝ, ℂ, ℍ\}$.
 
-Though it is slightly redundant, usually the matrices are stored as $n × n$ arrays.
+Though it is slightly redundant, usually the matrices are stored as ``n × n`` arrays.
 
-Note that in this representation, the (real-valued part of) the diagonal has to be zero,
-which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::SkewHermitianMatrices{N,𝔽}) where {N,𝔽}).
+Note that in this representation, the real-valued part of the diagonal must be zero,
+which is also reflected in the
+[`manifold_dimension`](@ref manifold_dimension(::SkewHermitianMatrices{N,𝔽}) where {N,𝔽}).
 
 # Constructor
 
     SkewHermitianMatrices(n::Int, field::AbstractNumbers=ℝ)
 
-Generate the manifold of $n × n$ symmetric matrices.
+Generate the manifold of ``n × n`` skew-hermitian matrices.
 """
 struct SkewHermitianMatrices{n,𝔽} <:
        AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
@@ -28,6 +29,16 @@ function SkewHermitianMatrices(n::Int, field::AbstractNumbers=ℝ)
     return SkewHermitianMatrices{n,field}()
 end
 
+@doc raw"""
+    SkewSymmetricMatrices{n}
+
+Generate the manifold of ``n × n`` real skew-symmetric matrices.
+This is equivalent to [`SkewHermitian(n, ℝ)`](@ref).
+
+# Constructor
+
+    SkewSymmetricMatrices(n::Int)
+"""
 const SkewSymmetricMatrices{n} = SkewHermitianMatrices{n,ℝ}
 
 SkewSymmetricMatrices(n::Int) = SkewSymmetricMatrices{n}()
@@ -45,7 +56,7 @@ end
     check_manifold_point(M::SkewHermitianMatrices{n,𝔽}, p; kwargs...)
 
 Check whether `p` is a valid manifold point on the [`SkewHermitianMatrices`](@ref) `M`, i.e.
-whether `p` is a skew-symmetric matrix of size `(n,n)` with values from the corresponding
+whether `p` is a skew-hermitian matrix of size `(n,n)` with values from the corresponding
 [`AbstractNumbers`](@ref) `𝔽`.
 
 The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
@@ -56,7 +67,7 @@ function check_manifold_point(M::SkewHermitianMatrices{n,𝔽}, p; kwargs...) wh
     if !isapprox(p, -p'; kwargs...)
         return DomainError(
             norm(p + p'),
-            "The point $(p) does not lie on $M, since it is not skew-symmetric.",
+            "The point $(p) does not lie on $M, since it is not skew-hermitian.",
         )
     end
     return nothing
@@ -66,7 +77,7 @@ end
     check_tangent_vector(M::SkewHermitianMatrices{n}, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
-[`SkewHermitianMatrices`](@ref) `M`, i.e. `X` has to be a skew-symmetric matrix of size `(n,n)`
+[`SkewHermitianMatrices`](@ref) `M`, i.e. `X` must be a skew-hermitian matrix of size `(n,n)`
 and its values have to be from the correct [`AbstractNumbers`](@ref).
 The optional parameter `check_base_point` indicates, whether to call
  [`check_manifold_point`](@ref)  for `p`.
@@ -95,7 +106,7 @@ function get_basis(M::SkewHermitianMatrices, p, B::DiagonalizingOrthonormalBasis
 end
 
 function get_coordinates!(
-    M::SkewHermitianMatrices{N,ℝ},
+    M::SkewSymmetricMatrices{N},
     Y,
     p,
     X,
@@ -138,7 +149,7 @@ function get_coordinates!(
 end
 
 function get_vector!(
-    M::SkewHermitianMatrices{N,ℝ},
+    M::SkewSymmetricMatrices{N},
     Y,
     p,
     X,
