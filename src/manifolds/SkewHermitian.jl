@@ -247,3 +247,6 @@ project!(M::SkewHermitianMatrices, Y, p, X) = project!(M, Y, X)
 function Base.show(io::IO, ::SkewHermitianMatrices{n,F}) where {n,F}
     return print(io, "SkewHermitianMatrices($(n), $(F))")
 end
+function Base.show(io::IO, ::SkewSymmetricMatrices{n}) where {n}
+    return print(io, "SkewSymmetricMatrices($(n))")
+end

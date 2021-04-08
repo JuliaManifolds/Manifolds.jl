@@ -19,7 +19,7 @@ end
     D = [1 0; 0 1]
     X = zeros(3, 3)
     @testset "Real Skew-Symmetric Matrices Basics" begin
-        @test repr(M) == "SkewHermitianMatrices(3, ℝ)"
+        @test repr(M) == "SkewSymmetricMatrices(3)"
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3,3},ℝ}
