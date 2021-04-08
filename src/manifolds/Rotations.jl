@@ -107,7 +107,7 @@ function check_tangent_vector(
         perr = check_manifold_point(M, p)
         perr === nothing || return perr
     end
-    return check_manifold_point(SkewSymmetricMatrices(n), X)
+    return check_manifold_point(SkewSymmetricMatrices(N), X)
 end
 
 @doc raw"""
