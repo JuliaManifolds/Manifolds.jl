@@ -208,7 +208,10 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpo
 """
 project(::SkewSymmetricMatrices, ::Any)
 
-project!(M::SkewSymmetricMatrices, q, p) = copyto!(q, (p - p') ./ 2)
+function project!(M::SkewSymmetricMatrices, q, p)
+    q .= (p .- p') ./ 2
+    return q
+end
 
 @doc raw"""
     project(M::SkewSymmetricMatrices, p, X)
