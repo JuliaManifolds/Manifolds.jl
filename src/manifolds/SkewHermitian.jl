@@ -1,7 +1,7 @@
 @doc raw"""
     SkewHermitianMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
 
-The [`Manifold`](@ref) $ \operatorname{SkewSym}(n)$ consisting of the real- or
+The [`Manifold`](@ref) $ \operatorname{SkewHerm}(n)$ consisting of the real- or
 complex-valued skew-hermitian matrices of size ``n × n``, i.e. the set
 
 ````math
@@ -200,7 +200,7 @@ Return the dimension of the [`SkewHermitianMatrices`](@ref) matrix `M` over the 
 system `𝔽`, i.e.
 
 ````math
-\dim \mathrm{SkewSym}(n,ℝ) &= \frac{n(n+1)}{2} \dim_ℝ 𝔽 - n,\\
+\dim \mathrm{SkewHerm}(n,ℝ) = \frac{n(n+1)}{2} \dim_ℝ 𝔽 - n,
 ````
 
 where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@ref) of ``𝔽``. The first term corresponds to
@@ -217,7 +217,7 @@ end
 Projects `p` from the embedding onto the [`SkewHermitianMatrices`](@ref) `M`, i.e.
 
 ````math
-\operatorname{proj}_{\operatorname{SkewSym}(n)}(p) = \frac{1}{2} \bigl( p - p^{\mathrm{H}} \bigr),
+\operatorname{proj}_{\operatorname{SkewHerm}(n)}(p) = \frac{1}{2} \bigl( p - p^{\mathrm{H}} \bigr),
 ````
 
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
