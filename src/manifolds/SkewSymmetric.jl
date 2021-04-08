@@ -46,8 +46,7 @@ whether `p` is a skew-symmetric matrix of size `(n,n)` with values from the corr
 The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
 """
 function check_manifold_point(M::SkewSymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+    mpv = check_manifold_point(decorated_manifold(M), p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(p, -p'; kwargs...)
         return DomainError(
@@ -59,7 +58,7 @@ function check_manifold_point(M::SkewSymmetricMatrices{n,𝔽}, p; kwargs...) wh
 end
 
 """
-    check_tangent_vector(M::SkewSymmetricMatrices{n,𝔽}, p, X; check_base_point = true, kwargs... )
+    check_tangent_vector(M::SkewSymmetricMatrices{n}, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SkewSymmetricMatrices`](@ref) `M`, i.e. `X` has to be a skew-symmetric matrix of size `(n,n)`
@@ -69,33 +68,17 @@ The optional parameter `check_base_point` indicates, whether to call
 The tolerance for the skew-symmetry of `p` and `X` can be set using `kwargs...`.
 """
 function check_tangent_vector(
-    M::SkewSymmetricMatrices{n,𝔽},
+    M::SkewSymmetricMatrices,
     p,
     X;
     check_base_point=true,
     kwargs...,
-) where {n,𝔽}
+)
     if check_base_point
         mpe = check_manifold_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
-    mpv = invoke(
-        check_tangent_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        check_base_point=false, # already checked above
-        kwargs...,
-    )
-    mpv === nothing || return mpv
-    if !isapprox(norm(X + adjoint(X)), 0.0; kwargs...)
-        return DomainError(
-            norm(X + adjoint(X)),
-            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not symmetric.",
-        )
-    end
-    return nothing
+    return check_base_point(M, X; kwargs...)  # manifold is its own tangent space
 end
 
 decorated_manifold(M::SkewSymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
