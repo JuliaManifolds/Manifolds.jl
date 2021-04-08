@@ -47,7 +47,7 @@ function check_tangent_vector(G::Unitary{n,𝔽}, p, X; check_base_point=true, k
         mpe = check_manifold_point(G, p; kwargs...)
         mpe === nothing || return mpe
     end
-    return check_manifold_point(SkewSymmetricMatrices(n, 𝔽), X; kwargs...)
+    return check_manifold_point(SkewHermitianMatrices(n, 𝔽), X; kwargs...)
 end
 
 decorated_manifold(::Unitary{n,𝔽}) where {n,𝔽} = Euclidean(n, n; field=𝔽)
@@ -147,7 +147,7 @@ function log!(G::Unitary, X, p, q)
 end
 
 function manifold_dimension(G::Unitary{n,𝔽}) where {n,𝔽}
-    return manifold_dimension(SkewSymmetricMatrices(n, 𝔽))
+    return manifold_dimension(SkewHermitianMatrices(n, 𝔽))
 end
 
 """
@@ -202,7 +202,7 @@ removes the Hermitian part of ``X``:
 """
 project(::Unitary, p, X)
 
-project!(::Unitary{n,𝔽}, Y, p, X) where {n,𝔽} = project!(SkewSymmetricMatrices(n, 𝔽), Y, X)
+project!(::Unitary{n,𝔽}, Y, p, X) where {n,𝔽} = project!(SkewHermitianMatrices(n, 𝔽), Y, X)
 
 sharp!(::Unitary, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
