@@ -413,11 +413,11 @@ inverse_retract(::Rotations, ::Any, ::Any, ::QRInverseRetraction)
 
 function inverse_retract!(M::Rotations, X, p, q, method::PolarInverseRetraction)
     A = transpose(p) * q
-    H = 2 * one(p)
+    Amat = A isa StaticMatrix ? A : convert(Matrix, A)
+    H = copyto!(allocate(Amat), -2I)
     try
-        B = sylvester(collect(A), collect(transpose(A)), collect(H))
-        C = A * B
-        X .= (transpose(C) .- C) ./ 2
+        B = lyap(A, H)
+        mul!(X, A, B)
     catch e
         if isa(e, LinearAlgebra.LAPACKException)
             throw(OutOfInjectivityRadiusError())
@@ -425,7 +425,7 @@ function inverse_retract!(M::Rotations, X, p, q, method::PolarInverseRetraction)
             rethrow()
         end
     end
-    return X
+    return project!(M, X, p, X)
 end
 function inverse_retract!(M::Rotations{N}, X, p, q, ::QRInverseRetraction) where {N}
     A = transpose(p) * q
@@ -436,9 +436,8 @@ function inverse_retract!(M::Rotations{N}, X, p, q, ::QRInverseRetraction) where
         b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
         R[1:i, i] = A[1:i, 1:i] \ b
     end
-    C = A * R
-    X .= (C .- transpose(C)) ./ 2
-    return X
+    mul!(X, A, R)
+    return project!(M, X, p, X)
 end
 
 @doc raw"""
@@ -479,8 +478,8 @@ function log!(M::Rotations{3}, X, p, q)
         ax = eig.vectors[inds, ival]
         return get_vector!(M, X, p, π * ax, DefaultOrthogonalBasis())
     end
-    X .= ((U .- transpose(U)) ./ (2 * usinc_from_cos(cosθ)))
-    return X
+    X .= U ./ usinc_from_cos(cosθ)
+    return project!(M, X, p, X)
 end
 function log!(M::Rotations{4}, X, p, q)
     U = transpose(p) * q
@@ -595,7 +594,7 @@ project(::Rotations, ::Any)
 
 function project!(::Rotations{N}, q, p; check_det=true) where {N}
     F = svd(p)
-    copyto!(q, F.U * F.Vt)
+    mul!(q, F.U, F.Vt)
     if check_det && det(q) < 0
         d = similar(F.S)
         @inbounds fill!(view(d, 1:(N - 1)), 1)
@@ -618,7 +617,7 @@ where tangent vectors are represented by elements from the Lie group
 """
 project(::Rotations, ::Any, ::Any)
 
-project!(M::Rotations, Y, p, X) = (Y .= (X .- transpose(X)) ./ 2)
+project!(M::Rotations{N}, Y, p, X) where {N} = project!(SkewSymmetricMatrices(N), Y, X)
 
 @doc raw"""
     representation_size(M::Rotations)
