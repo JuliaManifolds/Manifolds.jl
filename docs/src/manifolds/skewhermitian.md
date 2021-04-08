@@ -1,7 +1,7 @@
-# Skew-symmetric matrices
+# Skew-hermitian matrices
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["manifolds/SkewSymmetric.jl"]
+Pages = ["manifolds/SkewHermitian.jl"]
 Order = [:type, :function]
 ```
