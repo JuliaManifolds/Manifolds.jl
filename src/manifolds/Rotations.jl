@@ -417,7 +417,8 @@ function inverse_retract!(M::Rotations, X, p, q, method::PolarInverseRetraction)
     Amat = A isa StaticMatrix ? A : convert(Matrix, A)
     H = copyto!(allocate(Amat), -2I)
     try
-        B = lyap(A, A, H)
+        B = lyap(A, H)
+        mul!(X, A, B)
     catch e
         if isa(e, LinearAlgebra.LAPACKException)
             throw(OutOfInjectivityRadiusError())
@@ -425,7 +426,6 @@ function inverse_retract!(M::Rotations, X, p, q, method::PolarInverseRetraction)
             rethrow()
         end
     end
-    mul!(X, A, B)
     return project!(M, p, X)
 end
 function inverse_retract!(M::Rotations{N}, X, p, q, ::QRInverseRetraction) where {N}
