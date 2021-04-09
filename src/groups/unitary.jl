@@ -106,6 +106,11 @@ function group_log!(::Unitary{1}, X::AbstractMatrix, p::AbstractMatrix)
     X[1] = log(p[1])
     return X
 end
+function group_log!(G::Unitary, X::AbstractMatrix, p::AbstractMatrix)
+    log_safe!(X, p)
+    project!(G, X, Identity(G, p), X)
+    return X
+end
 
 @doc raw"""
     injectivity_radius(G::Unitary)
