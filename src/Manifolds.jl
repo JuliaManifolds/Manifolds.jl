@@ -192,6 +192,7 @@ include("groups/special_linear.jl")
 include("groups/translation_group.jl")
 include("groups/unitary.jl")
 include("groups/orthogonal.jl")
+include("groups/special_unitary.jl")
 include("groups/special_orthogonal.jl")
 include("groups/circle_group.jl")
 
@@ -505,6 +506,7 @@ export AbstractGroupAction,
     SemidirectProductGroup,
     SpecialEuclidean,
     SpecialLinear,
+    SpecialUnitary,
     SpecialOrthogonal,
     TranslationGroup,
     TranslationAction,
