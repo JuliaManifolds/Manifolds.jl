@@ -42,7 +42,13 @@ function check_manifold_point(G::Unitary, e::Identity; kwargs...)
     return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
 
-function check_tangent_vector(G::Unitary{n,𝔽}, p, X; check_base_point=true, kwargs...) where {n,𝔽}
+function check_tangent_vector(
+    G::Unitary{n,𝔽},
+    p,
+    X;
+    check_base_point=true,
+    kwargs...,
+) where {n,𝔽}
     if check_base_point
         mpe = check_manifold_point(G, p; kwargs...)
         mpe === nothing || return mpe
