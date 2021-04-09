@@ -40,6 +40,22 @@ decorated_manifold(::SpecialUnitary{n,𝔽}) where {n,𝔽} = Unitary{n,𝔽}()
 
 decorator_transparent_dispatch(::typeof(project), ::SpecialUnitary, args...) = Val(:parent)
 
+@doc raw"""
+    injectivity_radius(G::SpecialUnitary)
+    injectivity_radius(G::SpecialUnitary, p)
+
+Return the injectivity radius on the ``\mathrm{SU}(n,𝔽)=``[`SpecialUnitary`](@ref) group
+`G`, which is globally ``\sqrt{2} π``.
+"""
+function injectivity_radius(::SpecialUnitary, p)
+    T = float(real(eltype(p)))
+    return π * sqrt(T(2))
+end
+function injectivity_radius(::SpecialUnitary, p, ::ExponentialRetraction)
+    T = float(real(eltype(p)))
+    return π * sqrt(T(2))
+end
+
 function manifold_dimension(::SpecialUnitary{n,𝔽}) where {n,𝔽}
     return manifold_dimension(Unitary(n, 𝔽)) - (real_dimension(𝔽) - 1)
 end
