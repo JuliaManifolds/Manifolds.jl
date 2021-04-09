@@ -41,3 +41,34 @@ decorated_manifold(::SpecialUnitary{n,𝔽}) where {n,𝔽} = Unitary{n,𝔽}()
 function manifold_dimension(::SpecialUnitary{n,𝔽}) where {n,𝔽}
     return manifold_dimension(Unitary(n, 𝔽)) - (real_dimension(𝔽) - 1)
 end
+
+@doc raw"""
+    project(G::SpecialUnitary, p)
+
+Project `p` to the nearest point on the [`SpecialUnitary`](@ref) group `G`.
+
+Given the singular value decomposition ``p = U S V^\mathrm{H}``, with the
+singular values sorted in descending order, the projection is
+
+````math
+\operatorname{proj}_{\mathrm{SU}(n)}(p) =
+U\operatorname{diag}\left[1,1,…,\det(U V^\mathrm{H})\right] V^\mathrm{H}.
+````
+
+The diagonal matrix ensures that the determinant of the result is $+1$.
+"""
+project(::SpecialUnitary, ::Any)
+
+function project!(::SpecialUnitary{n}, q, p) where {n}
+    F = svd(p)
+    detUVt = det(F.U) * det(F.Vt)
+    if !isreal(detUVt) || real(detUVt) < 0
+        d = similar(F.S, eltype(detUVt))
+        fill!(d, 1)
+        d[n] = conj(detUVt)
+        mul!(q, F.U, Diagonal(d) * F.Vt)
+    else
+        mul!(q, F.U, F.Vt)
+    end
+    return q
+end

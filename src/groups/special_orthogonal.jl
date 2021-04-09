@@ -113,37 +113,6 @@ function inverse_retract!(G::SpecialOrthogonal{n}, X, p, q, ::QRInverseRetractio
 end
 
 @doc raw"""
-    project(G::SpecialOrthogonal, p; check_det = true)
-
-Project `p` to the nearest point on the group `G`.
-
-Given the singular value decomposition $p = U Σ V^\mathrm{T}$, with the
-singular values sorted in descending order, the projection is
-
-````math
-\operatorname{proj}_{\mathrm{SO}(n)}(p) =
-U\operatorname{diag}\left[1,1,…,\det(U V^\mathrm{T})\right] V^\mathrm{T}
-````
-
-The diagonal matrix ensures that the determinant of the result is $+1$.
-If `p` is expected to be almost special orthogonal, then you may avoid this
-check with `check_det = false`.
-"""
-project(::SpecialOrthogonal, ::Any)
-
-function project!(::SpecialOrthogonal{n}, q, p; check_det=true) where {n}
-    F = svd(p)
-    mul!(q, F.U, F.Vt)
-    if check_det && det(q) < 0
-        d = similar(F.S)
-        @inbounds fill!(view(d, 1:(n - 1)), 1)
-        @inbounds d[n] = -1
-        copyto!(q, F.U * Diagonal(d) * F.Vt)
-    end
-    return q
-end
-
-@doc raw"""
     retract(G::SpecialOrthogonal, p, X, ::PolarRetraction)
 
 Compute the SVD-based retraction on the [`SpecialOrthogonal`](@ref) `G` from `p` in
@@ -181,5 +150,5 @@ function retract!(G::SpecialOrthogonal, q, p, X, ::QRRetraction)
 end
 function retract!(G::SpecialOrthogonal, q, p, X, ::PolarRetraction)
     A = p + p * X
-    return project!(G, q, A; check_det=false)
+    return project!(G, q, A)
 end
