@@ -17,6 +17,18 @@ function default_metric_dispatch(
 end
 default_metric_dispatch(::SpecialOrthogonal, ::EuclideanMetric) = Val(true)
 
+for f in (:inverse_retract, :project, :retract)
+    @eval begin
+        function decorator_transparent_dispatch(
+            ::typeof($(f)),
+            ::SpecialOrthogonal,
+            args...,
+        )
+            return Val(:parent)
+        end
+    end
+end
+
 SpecialOrthogonal(n) = SpecialOrthogonal{n}()
 
 Base.show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
