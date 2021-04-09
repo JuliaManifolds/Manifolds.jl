@@ -82,3 +82,7 @@ function project!(G::SpecialUnitary{n,𝔽}, Y, p, X) where {n,𝔽}
     translate_diff!(G, Y, p, p, Y, LeftAction())
     return Y
 end
+
+function Base.show(io::IO, ::SpecialUnitary{n,𝔽}) where {n,𝔽}
+    return print(io, "SpecialUnitary($(n), $(𝔽))")
+end
