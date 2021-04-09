@@ -35,8 +35,8 @@ g^{-1} = (n, h)^{-1} = (θ_{h^{-1}}(n^{-1}), h^{-1}).
 ````
 """
 function SemidirectProductGroup(
-    N::GroupManifold{𝔽},
-    H::GroupManifold{𝔽},
+    N::Manifold{𝔽},
+    H::Manifold{𝔽},
     A::AbstractGroupAction,
 ) where {𝔽}
     N === g_manifold(A) || error("Subgroup $(N) must be the G-manifold of action $(A)")

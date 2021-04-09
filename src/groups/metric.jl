@@ -61,7 +61,7 @@ RightInvariantMetric(metric) = InvariantMetric{typeof(metric),RightAction}(metri
 
 @doc raw"""
     has_approx_invariant_metric(
-        G::AbstractGroupManifold,
+        G::Manifold,
         p,
         X,
         Y,
@@ -83,16 +83,9 @@ This is necessary but not sufficient for invariance.
 
 Optionally, `kwargs` passed to `isapprox` may be provided.
 """
-has_approx_invariant_metric(
-    ::AbstractGroupManifold,
-    ::Any,
-    ::Any,
-    ::Any,
-    ::Any,
-    ::ActionDirection,
-)
-@decorator_transparent_function function has_approx_invariant_metric(
-    M::AbstractGroupManifold,
+has_approx_invariant_metric(::Manifold, ::Any, ::Any, ::Any, ::Any, ::ActionDirection)
+function has_approx_invariant_metric(
+    M::Manifold,
     p,
     X,
     Y,
@@ -112,12 +105,7 @@ end
 
 direction(::InvariantMetric{G,D}) where {G,D} = D()
 
-function exp!(
-    M::MetricManifold{𝔽,<:AbstractGroupManifold,<:InvariantMetric},
-    q,
-    p,
-    X,
-) where {𝔽}
+function exp!(M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric}, q, p, X) where {𝔽}
     if has_biinvariant_metric(M)
         conv = direction(metric(M))
         return retract!(base_group(M), q, p, X, GroupExponentialRetraction(conv))
@@ -126,7 +114,7 @@ function exp!(
 end
 
 """
-    biinvariant_metric_dispatch(G::AbstractGroupManifold) -> Val
+    biinvariant_metric_dispatch(G::Manifold) -> Val
 
 Return `Val(true)` if the metric on the manifold is bi-invariant, that is, if the metric
 is both left- and right-invariant (see [`invariant_metric_dispatch`](@ref)).
@@ -141,7 +129,7 @@ end
 has_biinvariant_metric(M::Manifold) = _extract_val(biinvariant_metric_dispatch(M))
 
 @doc raw"""
-    invariant_metric_dispatch(G::AbstractGroupManifold, conv::ActionDirection) -> Val
+    invariant_metric_dispatch(G::Manifold, conv::ActionDirection) -> Val
 
 Return `Val(true)` if the metric on the group $\mathcal{G}$ is invariant under translations
 by the specified direction, that is, given a group $\mathcal{G}$, a left- or right group
@@ -155,7 +143,7 @@ g_p(X, Y) = g_{τ_q p}((\mathrm{d}τ_q)_p X, (\mathrm{d}τ_q)_p Y),
 for $X,Y ∈ T_q \mathcal{G}$ and all $q ∈ \mathcal{G}$, where $(\mathrm{d}τ_q)_p$ is the
 differential of translation by $q$ evaluated at $p$ (see [`translate_diff`](@ref)).
 """
-invariant_metric_dispatch(::MetricManifold, ::ActionDirection)
+invariant_metric_dispatch(::Manifold, ::ActionDirection)
 
 @decorator_transparent_signature invariant_metric_dispatch(
     M::AbstractDecoratorManifold,
@@ -196,12 +184,7 @@ function default_metric_dispatch(
     return invariant_metric_dispatch(N, direction(imetric))
 end
 
-function log!(
-    M::MetricManifold{𝔽,<:AbstractGroupManifold,<:InvariantMetric},
-    X,
-    p,
-    q,
-) where {𝔽}
+function log!(M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric}, X, p, q) where {𝔽}
     if has_biinvariant_metric(M)
         imetric = metric(M)
         conv = direction(imetric)

@@ -252,10 +252,10 @@ end
 
 function get_vector(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group && error("On $(M) the identity $(e) does not match to perform get_vector.")
-    return get_vector(decorated_manifold(M), e.p, X, B)
+    return get_vector(M, e.p, X, B)
 end
 function get_vector(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold &&
+    base_group(M) != e.group &&
         error("On $(M) the identity $(e) does not match to perform get_vector.")
     return get_vector(M, e.p, X, B)
 end
@@ -276,7 +276,7 @@ function get_vector!(M::AbstractGroupManifold, Y, e::Identity, X, B::VeeOrthogon
     return get_vector!(decorated_manifold(M), Y, e.p, X, B)
 end
 function get_vector!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold &&
+    base_group(M) != e.group &&
         error("On $(M) the identity $(e) does not match to perform get_vector!")
     return get_vector!(M, Y, e.p, X, B)
 end
@@ -297,10 +297,10 @@ end
 function get_coordinates(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group &&
         error("On $(M) the identity $(e) does not match to perform get_coordinates")
-    return get_coordinates(decorated_manifold(M), e.p, X, B)
+    return get_coordinates(M, e.p, X, B)
 end
 function get_coordinates(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold &&
+    base_group(M) != e.group &&
         error("On $(M) the identity $(e) does not match to perform get_coordinates")
     return get_coordinates(M, e.p, X, B)
 end
@@ -329,7 +329,7 @@ function get_coordinates!(
     return get_coordinates!(decorated_manifold(M), Y, e.p, X, B)
 end
 function get_coordinates!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold &&
+    base_group(M) != e.group &&
         error("On $(M) the identity $(e) does not match to perform get_coordinates!")
     return get_coordinates!(M, Y, e.p, X, B)
 end
