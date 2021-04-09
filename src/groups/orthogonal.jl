@@ -65,12 +65,11 @@ function get_vector!(G::Orthogonal{2}, X, p, Xⁱ, B::DefaultOrthogonalBasis)
     return get_vector!(G, X, p, Xⁱ[1], B)
 end
 function get_vector!(::Orthogonal{2}, X, p, Xⁱ::Real, ::DefaultOrthogonalBasis)
-    @assert length(X) == 4
+    @assert size(X) == (2, 2)
     @inbounds begin
-        X[1] = 0
-        X[2] = Xⁱ
-        X[3] = -Xⁱ
-        X[4] = 0
+        X[1, 1] = X[2, 2] = 0
+        X[2, 1] = Xⁱ
+        X[1, 2] = -Xⁱ
     end
     return X
 end
@@ -162,10 +161,9 @@ function group_exp!(::Orthogonal{3}, q, X)
         a = sin(θ) / θ
         b = (1 - cos(θ)) / θ^2
     end
-    q .= a .* X .+ b .* X^2
-    for i in 1:3
-        q[i, i] += 1
-    end
+    copyto!(q, I)
+    q .+= a .* X
+    mul!(q, X, X, b, true)
     return q
 end
 function group_exp!(::Orthogonal{4}, q, X)
@@ -184,17 +182,16 @@ function group_exp!(::Orthogonal{4}, q, X)
         a₂ = (cosα - cosβ) / Δ
         a₃ = (sincα - sincβ) / Δ
     elseif α == 0 # Case α = β = 0
-        a₀ = one(T)
-        a₁ = one(T)
-        a₂ = T(1 / 2)
-        a₃ = T(1 / 6)
+        a₀ = a₁ = one(T)
+        a₂ = inv(T(2))
+        a₃ = inv(T(6))
     else  # Case α ⪆ β ≥ 0, α ≠ 0
         sincα = sinα / α
         r = β / α
         c = 1 / (1 + r)
         d = α * (α - β) / 2
         if α < 1e-2
-            e = @evalpoly(α², T(1 / 3), T(-1 / 30), T(1 / 840), T(-1 / 45360))
+            e = evalpoly(α², (inv(T(3)), inv(T(-30)), inv(T(840)), inv(T(-45360))))
         else
             e = (sincα - cosα) / α²
         end
@@ -205,11 +202,9 @@ function group_exp!(::Orthogonal{4}, q, X)
     end
 
     X² = X * X
-    X³ = X² * X
-    q .= a₁ .* X .+ a₂ .* X² .+ a₃ .* X³
-    for i in 1:4
-        q[i, i] += a₀
-    end
+    copyto!(q, a₀ * I)
+    q .+= a₂ .* X²
+    mul!(q, X², X, a₃, true)
     return q
 end
 
@@ -245,10 +240,8 @@ function group_log!(G::Orthogonal{4}, X::AbstractMatrix, q::AbstractMatrix)
         E = similar(q)
         fill!(E, 0)
         α = acos(clamp(cosα, -1, 1))
-        @inbounds begin
-            E[2, 1] = -α
-            E[1, 2] = α
-        end
+        E[2, 1] = -α
+        E[1, 2] = α
         copyto!(X, P * E * transpose(P))
     else
         log_safe!(X, q)
@@ -265,11 +258,11 @@ Return the injectivity radius on the [`Orthogonal`](@ref) group `G`, which is gl
 """
 function injectivity_radius(::Orthogonal, p)
     T = float(real(eltype(p)))
-    return T(sqrt(2)) * π
+    return π * sqrt(T(2))
 end
 function injectivity_radius(::Orthogonal, p, ::ExponentialRetraction)
     T = float(real(eltype(p)))
-    return T(sqrt(2)) * π
+    return π * sqrt(T(2))
 end
 
 """
