@@ -1,6 +1,6 @@
 struct SpecialUnitary{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
 
-SpecialUnitary(n, 𝔽::AbstractNumbers=ℝ) = SpecialUnitary{n,𝔽}()
+SpecialUnitary(n, 𝔽::AbstractNumbers=ℂ) = SpecialUnitary{n,ℂ}()
 
 function check_manifold_point(G::SpecialUnitary{n,𝔽}, p; kwargs...) where {n,𝔽}
     mpv = check_manifold_point(Euclidean(n, n; field=𝔽), p; kwargs...)
