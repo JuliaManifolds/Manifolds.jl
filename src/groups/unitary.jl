@@ -208,7 +208,11 @@ removes the Hermitian part of ``X``:
 """
 project(::Unitary, p, X)
 
-project!(::Unitary{n,𝔽}, Y, p, X) where {n,𝔽} = project!(SkewHermitianMatrices(n, 𝔽), Y, X)
+function project!(G::Unitary{n,𝔽}, Y, p, X) where {n,𝔽}
+    inverse_translate_diff!(G, Y, p, p, X, LeftAction())
+    project!(SkewHermitianMatrices(n, 𝔽), Y, X)
+    translate_diff!(G, Y, p, p, Y, LeftAction())
+end
 
 sharp!(::Unitary, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
