@@ -60,6 +60,30 @@ function manifold_dimension(::SpecialUnitary{n,𝔽}) where {n,𝔽}
     return manifold_dimension(Unitary(n, 𝔽)) - (real_dimension(𝔽) - 1)
 end
 
+"""
+    mean(
+        G::SpecialUnitary,
+        x::AbstractVector,
+        [w::AbstractWeights,]
+        method = GeodesicInterpolationWithinRadius(π/2/√2);
+        kwargs...,
+    )
+
+Compute the Riemannian [`mean`](@ref mean(G::Manifold, args...)) of `x` using
+[`GeodesicInterpolationWithinRadius`](@ref).
+"""
+mean(::SpecialUnitary, ::Any)
+
+function Statistics.mean!(
+    G::SpecialUnitary,
+    q,
+    x::AbstractVector,
+    w::AbstractVector;
+    kwargs...,
+)
+    return mean!(G, q, x, w, GeodesicInterpolationWithinRadius(π / 2 / √2); kwargs...)
+end
+
 @doc raw"""
     project(G::SpecialUnitary, p)
 
