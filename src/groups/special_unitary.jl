@@ -38,6 +38,8 @@ end
 
 decorated_manifold(::SpecialUnitary{n,𝔽}) where {n,𝔽} = Unitary{n,𝔽}()
 
+decorator_transparent_dispatch(::typeof(project), ::SpecialUnitary, args...) = Val(:parent)
+
 function manifold_dimension(::SpecialUnitary{n,𝔽}) where {n,𝔽}
     return manifold_dimension(Unitary(n, 𝔽)) - (real_dimension(𝔽) - 1)
 end
@@ -71,4 +73,12 @@ function project!(::SpecialUnitary{n}, q, p) where {n}
         mul!(q, F.U, F.Vt)
     end
     return q
+end
+
+function project!(G::SpecialUnitary{n,𝔽}, Y, p, X) where {n,𝔽}
+    inverse_translate_diff!(G, Y, p, p, X, LeftAction())
+    project!(SkewHermitianMatrices(n, 𝔽), Y, Y)
+    Y[diagind(n, n)] .-= tr(Y) / n
+    translate_diff!(G, Y, p, p, Y, LeftAction())
+    return Y
 end
