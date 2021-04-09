@@ -1,12 +1,12 @@
 @doc raw"""
-    SpecialOrthogonal{n} <: GroupManifold{ℝ,Rotations{n},MultiplicationOperation}
+    SpecialOrthogonal{n} = SpecialUnitary{n,ℝ}
 
 Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
 
 # Constructor
     SpecialOrthogonal(n)
 """
-const SpecialOrthogonal{n} = GroupManifold{ℝ,Rotations{n},MultiplicationOperation}
+const SpecialOrthogonal{n} = SpecialUnitary{n,ℝ}
 
 invariant_metric_dispatch(::SpecialOrthogonal, ::ActionDirection) = Val(true)
 
@@ -17,7 +17,7 @@ function default_metric_dispatch(
 end
 default_metric_dispatch(::SpecialOrthogonal, ::EuclideanMetric) = Val(true)
 
-SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
+SpecialOrthogonal(n) = SpecialOrthogonal{n}()
 
 Base.show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
 
