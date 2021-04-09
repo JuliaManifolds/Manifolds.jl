@@ -148,7 +148,7 @@ function log!(G::Unitary, X, p, q)
     pinvq = inverse_translate(G, p, q)
     Xₑ = group_log!(G, X, pinvq)
     e = Identity(G, pinvq)
-    copyto!(X, translate_diff(G, p, e, Xₑ, LeftAction()))
+    translate_diff!(G, X, p, e, Xₑ, LeftAction())
     return X
 end
 
