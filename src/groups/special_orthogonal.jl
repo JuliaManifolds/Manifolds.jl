@@ -142,13 +142,13 @@ This is also the default retraction on the [`SpecialOrthogonal`](@ref) group.
 """
 retract(::SpecialOrthogonal, ::Any, ::Any, ::QRRetraction)
 
-function retract!(G::SpecialOrthogonal, q, p, X, ::QRRetraction)
+function retract!(::SpecialOrthogonal{n}, q, p, X, ::QRRetraction) where {n}
     A = p + p * X
-    qr_decomp = qr(A)
-    d = diag(qr_decomp.R)
+    Q, R = qr(A)
+    d = @view R[diagind(n, n)]
     T = eltype(q)
-    D = Diagonal(sign.(d .+ convert(T, 0.5)))
-    return copyto!(q, qr_decomp.Q * D)
+    q .= Q .* sign.(d' .+ inv(T(2)))
+    return q
 end
 function retract!(G::SpecialOrthogonal, q, p, X, ::PolarRetraction)
     A = p + p * X
