@@ -17,7 +17,7 @@ function default_metric_dispatch(
 end
 default_metric_dispatch(::SpecialOrthogonal, ::EuclideanMetric) = Val(true)
 
-for f in (:inverse_retract, :project, :retract)
+for f in (:inverse_retract, :retract)
     @eval begin
         function decorator_transparent_dispatch(
             ::typeof($(f)),
@@ -111,6 +111,8 @@ function inverse_retract!(G::SpecialOrthogonal{n}, X, p, q, ::QRInverseRetractio
     project!(G, X, e, X)
     return translate_diff!(G, X, p, e, X, LeftAction())
 end
+
+project!(::SpecialOrthogonal{n}, Y, p, X) where {n} = project!(Orthogonal(n), Y, p, X)
 
 @doc raw"""
     retract(G::SpecialOrthogonal, p, X, ::PolarRetraction)
