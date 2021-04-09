@@ -216,7 +216,7 @@ project(::Unitary, p, X)
 function project!(G::Unitary{n,𝔽}, Y, p, X) where {n,𝔽}
     inverse_translate_diff!(G, Y, p, p, X, LeftAction())
     project!(SkewHermitianMatrices(n, 𝔽), Y, X)
-    translate_diff!(G, Y, p, p, Y, LeftAction())
+    return translate_diff!(G, Y, p, p, Y, LeftAction())
 end
 
 sharp!(::Unitary, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
