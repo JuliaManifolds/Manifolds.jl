@@ -256,6 +256,19 @@ function check_tangent_vector(
     return nothing
 end
 
+function copyto!(q::SVDMPoint, p::SVDMPoint)
+    copyto!(q.S, p.S)
+    copyto!(q.U, p.U)
+    copyto!(q.Vt, p.Vt)
+    return q
+end
+function copyto!(q::UMVTVector, p::UMVTVector)
+    copyto!(q.M, p.M)
+    copyto!(q.U, p.U)
+    copyto!(q.Vt, p.Vt)
+    return q
+end
+
 @doc raw"""
     inner(M::FixedRankMatrices, p::SVDMPoint, X::UMVTVector, Y::UMVTVector)
 

@@ -183,6 +183,21 @@ function check_tangent_vector(
     return nothing
 end
 
+function copyto!(M::ProductManifold, q::ProductRepr, p::ProductRepr)
+    map(copyto!, M.manifolds, submanifold_components(q), submanifold_components(p))
+    return y
+end
+function copyto!(M::ProductManifold, Y::ProductRepr, p::ProductRepr, X::ProductRepr)
+    map(
+        copyto!,
+        M.manifolds,
+        submanifold_components(Y),
+        submanifold_components(p),
+        submanifold_components(X),
+    )
+    return y
+end
+
 @doc raw"""
     cross(M,N)
     cross(M1, M2, M3,...)
