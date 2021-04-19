@@ -44,7 +44,7 @@ makedocs(
                 "Positive numbers" => "manifolds/positivenumbers.md",
                 "Projective space" => "manifolds/projectivespace.md",
                 "Rotations" => "manifolds/rotations.md",
-                "Skew-symmetric matrices" => "manifolds/skewsymmetric.md",
+                "Skew-Hermitian matrices" => "manifolds/skewhermitian.md",
                 "Spectrahedron" => "manifolds/spectrahedron.md",
                 "Sphere" => "manifolds/sphere.md",
                 "Stiefel" => "manifolds/stiefel.md",
