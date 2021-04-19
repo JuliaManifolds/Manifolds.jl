@@ -1,5 +1,5 @@
 @doc raw"""
-    Euclidean{T<:Tuple,𝔽} <: Manifold{𝔽}
+    Euclidean{T<:Tuple,𝔽} <: AbstractManifold{𝔽}
 
 Euclidean vector space.
 
@@ -25,7 +25,7 @@ The dimension of this space is ``k \dim_ℝ 𝔽``, where ``\dim_ℝ 𝔽`` is t
 Generate the 1D Euclidean manifold for an `ℝ`-, `ℂ`-valued  real- or complex-valued immutable
 values (in contrast to 1-element arrays from the constructor above).
 """
-struct Euclidean{N,𝔽} <: Manifold{𝔽} where {N<:Tuple} end
+struct Euclidean{N,𝔽} <: AbstractManifold{𝔽} where {N<:Tuple} end
 
 function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers=ℝ) where {I}
     return Euclidean{Tuple{n...},field}()
@@ -116,7 +116,7 @@ function check_tangent_vector(
 end
 
 function det_local_metric(
-    ::MetricManifold{𝔽,<:Manifold,EuclideanMetric},
+    ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
     ::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
     p,
 ) where {𝔽}
@@ -272,10 +272,17 @@ where ``\cdot^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate trans
 """
 inner(::Euclidean, ::Any...)
 @inline inner(::Euclidean, p, X, Y) = dot(X, Y)
-@inline inner(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p, X, Y) where {𝔽} = dot(X, Y)
+@inline function inner(
+    ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
+    p,
+    X,
+    Y,
+) where {𝔽}
+    return dot(X, Y)
+end
 
 function inverse_local_metric(
-    M::MetricManifold{𝔽,<:Manifold,EuclideanMetric},
+    M::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
     B::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
     p,
 ) where {𝔽}
@@ -285,7 +292,7 @@ end
 default_metric_dispatch(::Euclidean, ::EuclideanMetric) = Val(true)
 
 function local_metric(
-    ::MetricManifold{𝔽,<:Manifold,EuclideanMetric},
+    ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
     B::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
     p,
 ) where {𝔽}
@@ -319,7 +326,7 @@ Base.log(::Euclidean{Tuple{}}, p::Number, q::Number) = q - p
 log!(::Euclidean, X, p, q) = (X .= q .- p)
 
 function log_local_metric_density(
-    ::MetricManifold{𝔽,<:Manifold,EuclideanMetric},
+    ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
     ::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
     p,
 ) where {𝔽}
@@ -408,7 +415,7 @@ Compute the norm of a tangent vector `X` at `p` on the [`Euclidean`](@ref)
 in this case, just the (Frobenius) norm of `X`.
 """
 LinearAlgebra.norm(::Euclidean, ::Any, X) = norm(X)
-LinearAlgebra.norm(::MetricManifold{ℝ,<:Manifold,EuclideanMetric}, p, X) = norm(X)
+LinearAlgebra.norm(::MetricManifold{ℝ,<:AbstractManifold,EuclideanMetric}, p, X) = norm(X)
 
 function project!(
     ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2}},

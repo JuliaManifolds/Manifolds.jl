@@ -5,7 +5,7 @@ import Manifolds: mean!, median!, InducedBasis, induced_basis, get_chart_index
 
 include("utils.jl")
 
-struct TestEuclidean{N} <: Manifold{ℝ} end
+struct TestEuclidean{N} <: AbstractManifold{ℝ} end
 struct TestEuclideanMetric <: Metric end
 
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
@@ -24,7 +24,7 @@ function Manifolds.local_metric(
     return Diagonal(1.0:manifold_dimension(M))
 end
 
-struct TestSphere{N,T} <: Manifold{ℝ}
+struct TestSphere{N,T} <: AbstractManifold{ℝ}
     r::T
 end
 
@@ -44,7 +44,7 @@ function Manifolds.local_metric(
 end
 sph_to_cart(θ, ϕ) = [cos(ϕ) * sin(θ), sin(ϕ) * sin(θ), cos(θ)]
 
-struct BaseManifold{N} <: Manifold{ℝ} end
+struct BaseManifold{N} <: AbstractManifold{ℝ} end
 struct BaseManifoldMetric{M} <: Metric end
 struct DefaultBaseManifoldMetric <: Metric end
 struct NotImplementedMetric <: Metric end
@@ -165,7 +165,7 @@ end
     # some tests failed due to insufficient accuracy for a particularly bad RNG state
     Random.seed!(42)
     @testset "Metric Basics" begin
-        #one for MetricManifold, one for Manifold & Metric
+        #one for MetricManifold, one for AbstractManifold & Metric
         @test length(methods(is_default_metric)) == 2
     end
 

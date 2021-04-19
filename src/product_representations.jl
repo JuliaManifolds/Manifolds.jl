@@ -33,7 +33,7 @@ function make_reshape(::ArrayReshaper, ::Type{Size}, data) where {Size}
 end
 
 """
-    ShapeSpecification(reshapers, manifolds::Manifold...)
+    ShapeSpecification(reshapers, manifolds::AbstractManifold...)
 
 A structure for specifying array size and offset information for linear
 storage of points and tangent vectors on the product manifold of `manifolds`.
@@ -79,7 +79,7 @@ struct ShapeSpecification{TRanges,TSizes,TReshapers}
     reshapers::TReshapers
 end
 
-function ShapeSpecification(reshapers, manifolds::Manifold...)
+function ShapeSpecification(reshapers, manifolds::AbstractManifold...)
     sizes = map(m -> representation_size(m), manifolds)
     lengths = map(prod, sizes)
     ranges = UnitRange{Int64}[]
@@ -193,29 +193,29 @@ function prod_point(M::ShapeSpecification, pts...)
 end
 
 @doc raw"""
-    submanifold_component(M::Manifold, p, i::Integer)
-    submanifold_component(M::Manifold, p, ::Val(i)) where {i}
+    submanifold_component(M::AbstractManifold, p, i::Integer)
+    submanifold_component(M::AbstractManifold, p, ::Val(i)) where {i}
     submanifold_component(p, i::Integer)
     submanifold_component(p, ::Val(i)) where {i}
 
 Project the product array `p` on `M` to its `i`th component. A new array is returned.
 """
 submanifold_component(::Any...)
-@inline function submanifold_component(M::Manifold, p, i::Integer)
+@inline function submanifold_component(M::AbstractManifold, p, i::Integer)
     return submanifold_component(M, p, Val(i))
 end
-@inline submanifold_component(M::Manifold, p, i::Val) = submanifold_component(p, i)
+@inline submanifold_component(M::AbstractManifold, p, i::Val) = submanifold_component(p, i)
 @inline submanifold_component(p, ::Val{I}) where {I} = p.parts[I]
 @inline submanifold_component(p, i::Integer) = submanifold_component(p, Val(i))
 
 @doc raw"""
-    submanifold_components(M::Manifold, p)
+    submanifold_components(M::AbstractManifold, p)
     submanifold_components(p)
 
 Get the projected components of `p` on the submanifolds of `M`. The components are returned in a Tuple.
 """
 submanifold_components(::Any...)
-@inline submanifold_components(M::Manifold, p) = submanifold_components(p)
+@inline submanifold_components(M::AbstractManifold, p) = submanifold_components(p)
 @inline submanifold_components(p) = p.parts
 
 function Base.BroadcastStyle(

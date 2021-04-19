@@ -33,7 +33,7 @@ abstract type AbstractGroupManifold{𝔽,O<:AbstractGroupOperation,T<:AbstractEm
               AbstractEmbeddedManifold{𝔽,T} end
 
 """
-    GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <: AbstractGroupManifold{𝔽,O}
+    GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <: AbstractGroupManifold{𝔽,O}
 
 Decorator for a smooth manifold that equips the manifold with a group operation, thus making
 it a Lie group. See [`AbstractGroupManifold`](@ref) for more details.
@@ -44,7 +44,7 @@ Group manifolds by default forward metric-related operations to the wrapped mani
 
     GroupManifold(manifold, op)
 """
-struct GroupManifold{𝔽,M<:Manifold{𝔽},O<:AbstractGroupOperation} <:
+struct GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <:
        AbstractGroupManifold{𝔽,O,TransparentIsometricEmbedding}
     manifold::M
     op::O
@@ -56,26 +56,26 @@ const GROUP_MANIFOLD_BASIS_DISAMBIGUATION =
     [AbstractDecoratorManifold, ValidationManifold, VectorBundle]
 
 """
-    base_group(M::Manifold) -> AbstractGroupManifold
+    base_group(M::AbstractManifold) -> AbstractGroupManifold
 
 Un-decorate `M` until an `AbstractGroupManifold` is encountered.
 Return an error if the [`base_manifold`](@ref) is reached without encountering a group.
 """
 base_group(M::AbstractDecoratorManifold) = base_group(decorated_manifold(M))
-function base_group(M::Manifold)
+function base_group(M::AbstractManifold)
     return error("base_group: no base group found.")
 end
 base_group(G::AbstractGroupManifold) = G
 
 base_manifold(G::GroupManifold) = G.manifold
 
-decorator_group_dispatch(::Manifold) = Val(false)
+decorator_group_dispatch(::AbstractManifold) = Val(false)
 function decorator_group_dispatch(M::AbstractDecoratorManifold)
     return decorator_group_dispatch(decorated_manifold(M))
 end
 decorator_group_dispatch(::AbstractGroupManifold) = Val(true)
 
-function is_group_decorator(M::Manifold)
+function is_group_decorator(M::AbstractManifold)
     return _extract_val(decorator_group_dispatch(M))
 end
 
@@ -83,8 +83,10 @@ default_decorator_dispatch(::AbstractGroupManifold) = Val(false)
 
 # piping syntax for decoration
 if VERSION ≥ v"1.3"
-    (op::AbstractGroupOperation)(M::Manifold) = GroupManifold(M, op)
-    (::Type{T})(M::Manifold) where {T<:AbstractGroupOperation} = GroupManifold(M, T())
+    (op::AbstractGroupOperation)(M::AbstractManifold) = GroupManifold(M, op)
+    function (::Type{T})(M::AbstractManifold) where {T<:AbstractGroupOperation}
+        return GroupManifold(M, T())
+    end
 end
 
 function decorator_transparent_dispatch(
@@ -151,7 +153,7 @@ struct Identity{G<:AbstractGroupManifold,PT}
 end
 
 Identity(M::AbstractDecoratorManifold, p) = Identity(decorated_manifold(M), p)
-function Identity(M::Manifold, p)
+function Identity(M::AbstractManifold, p)
     return error("Identity not implemented for manifold $(M) and point $(p).")
 end
 
@@ -159,7 +161,7 @@ function Base.:(==)(e1::Identity, e2::Identity)
     return e1.p == e2.p && e1.group == e2.group
 end
 
-make_identity(M::Manifold, p) = Identity(M, identity(M, p))
+make_identity(M::AbstractManifold, p) = Identity(M, identity(M, p))
 
 Base.show(io::IO, e::Identity) = print(io, "Identity($(e.group), $(e.p))")
 
@@ -175,7 +177,7 @@ Base.isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
 Base.isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
 function allocate_result(
-    M::Manifold,
+    M::AbstractManifold,
     f::typeof(get_coordinates),
     e::Identity,
     X,
@@ -192,7 +194,7 @@ function decorator_transparent_dispatch(
 )
     return Val(:parent)
 end
-function allocate_result(M::Manifold, f::typeof(get_vector), e::Identity, Xⁱ)
+function allocate_result(M::AbstractManifold, f::typeof(get_vector), e::Identity, Xⁱ)
     is_group_decorator(M) && return allocate_result(base_group(M), f, e, Xⁱ)
     return error(
         "allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(Xⁱ).",
@@ -254,7 +256,7 @@ function get_vector(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBa
     M != e.group && error("On $(M) the identity $(e) does not match to perform get_vector.")
     return get_vector(decorated_manifold(M), e.p, X, B)
 end
-function get_vector(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
+function get_vector(M::AbstractManifold, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group.manifold &&
         error("On $(M) the identity $(e) does not match to perform get_vector.")
     return get_vector(M, e.p, X, B)
@@ -262,7 +264,7 @@ end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
     eval(
         quote
-            @invoke_maker 1 Manifold get_vector(
+            @invoke_maker 1 AbstractManifold get_vector(
                 M::$MT,
                 e::Identity,
                 X,
@@ -275,7 +277,7 @@ function get_vector!(M::AbstractGroupManifold, Y, e::Identity, X, B::VeeOrthogon
     M != e.group && error("On $(M) the identity $(e) does not match to perform get_vector!")
     return get_vector!(decorated_manifold(M), Y, e.p, X, B)
 end
-function get_vector!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
+function get_vector!(M::AbstractManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group.manifold &&
         error("On $(M) the identity $(e) does not match to perform get_vector!")
     return get_vector!(M, Y, e.p, X, B)
@@ -283,7 +285,7 @@ end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
     eval(
         quote
-            @invoke_maker 1 Manifold get_vector!(
+            @invoke_maker 1 AbstractManifold get_vector!(
                 M::$MT,
                 Y,
                 e::Identity,
@@ -299,7 +301,7 @@ function get_coordinates(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogo
         error("On $(M) the identity $(e) does not match to perform get_coordinates")
     return get_coordinates(decorated_manifold(M), e.p, X, B)
 end
-function get_coordinates(M::Manifold, e::Identity, X, B::VeeOrthogonalBasis)
+function get_coordinates(M::AbstractManifold, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group.manifold &&
         error("On $(M) the identity $(e) does not match to perform get_coordinates")
     return get_coordinates(M, e.p, X, B)
@@ -307,7 +309,7 @@ end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
     eval(
         quote
-            @invoke_maker 1 Manifold get_coordinates(
+            @invoke_maker 1 AbstractManifold get_coordinates(
                 M::$MT,
                 e::Identity,
                 X,
@@ -328,7 +330,7 @@ function get_coordinates!(
         error("On $(M) the identity $(e) does not match to perform get_coordinates!")
     return get_coordinates!(decorated_manifold(M), Y, e.p, X, B)
 end
-function get_coordinates!(M::Manifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
+function get_coordinates!(M::AbstractManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group.manifold &&
         error("On $(M) the identity $(e) does not match to perform get_coordinates!")
     return get_coordinates!(M, Y, e.p, X, B)
@@ -336,7 +338,7 @@ end
 for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
     eval(
         quote
-            @invoke_maker 1 Manifold get_coordinates!(
+            @invoke_maker 1 AbstractManifold get_coordinates!(
                 M::$MT,
                 Y,
                 e::Identity,

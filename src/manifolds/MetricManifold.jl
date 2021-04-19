@@ -7,15 +7,15 @@ varying inner products on the tangent space. See [`inner`](@ref).
 abstract type Metric end
 
 # piping syntax for decoration
-(metric::Metric)(M::Manifold) = MetricManifold(M, metric)
-(::Type{T})(M::Manifold) where {T<:Metric} = MetricManifold(M, T())
+(metric::Metric)(M::AbstractManifold) = MetricManifold(M, metric)
+(::Type{T})(M::AbstractManifold) where {T<:Metric} = MetricManifold(M, T())
 
 """
-    MetricManifold{𝔽,M<:Manifold{𝔽},G<:Metric} <: AbstractDecoratorManifold{𝔽}
+    MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:Metric} <: AbstractDecoratorManifold{𝔽}
 
-Equip a [`Manifold`](@ref) explicitly with a [`Metric`](@ref) `G`.
+Equip a [`AbstractManifold`](@ref) explicitly with a [`Metric`](@ref) `G`.
 
-For a Metric Manifold, by default, assumes, that you implement the linear form
+For a Metric AbstractManifold, by default, assumes, that you implement the linear form
 from [`local_metric`](@ref) in order to evaluate the exponential map.
 
 If the corresponding [`Metric`](@ref) `G` yields closed form formulae for e.g.
@@ -26,9 +26,9 @@ you can of course still implement that directly.
 
     MetricManifold(M, G)
 
-Generate the [`Manifold`](@ref) `M` as a manifold with the [`Metric`](@ref) `G`.
+Generate the [`AbstractManifold`](@ref) `M` as a manifold with the [`Metric`](@ref) `G`.
 """
-struct MetricManifold{𝔽,M<:Manifold{𝔽},G<:Metric} <: AbstractDecoratorManifold{𝔽}
+struct MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:Metric} <: AbstractDecoratorManifold{𝔽}
     manifold::M
     metric::G
 end
@@ -311,7 +311,7 @@ end
 @doc raw"""
     exp(N::MetricManifold{M,G}, p, X)
 
-Copute the exponential map on the [`Manifold`](@ref) `M` equipped with the [`Metric`](@ref) `G`.
+Copute the exponential map on the [`AbstractManifold`](@ref) `M` equipped with the [`Metric`](@ref) `G`.
 
 If the metric was declared the default metric using [`is_default_metric`](@ref), this method
 falls back to `exp(M, p, X)`.
@@ -337,7 +337,7 @@ end
     flat(N::MetricManifold{M,G}, p, X::FVector{TangentSpaceType})
 
 Compute the musical isomorphism to transform the tangent vector `X` from the
-[`Manifold`](@ref) `M` equipped with [`Metric`](@ref) `G` to a cotangent by
+[`AbstractManifold`](@ref) `M` equipped with [`Metric`](@ref) `G` to a cotangent by
 computing
 
 ````math
@@ -412,17 +412,17 @@ default_decorator_dispatch(M::MetricManifold) = default_metric_dispatch(M)
     is_default_metric(M, G)
 
 Indicate whether the [`Metric`](@ref) `G` is the default metric for
-the [`Manifold`](@ref) `M`. This means that any occurence of
+the [`AbstractManifold`](@ref) `M`. This means that any occurence of
 [`MetricManifold`](@ref)(M,G) where `typeof(is_default_metric(M,G)) = true`
-falls back to just be called with `M` such that the [`Manifold`](@ref) `M`
+falls back to just be called with `M` such that the [`AbstractManifold`](@ref) `M`
 implicitly has this metric, for example if this was the first one implemented
 or is the one most commonly assumed to be used.
 """
-function is_default_metric(M::Manifold, G::Metric)
+function is_default_metric(M::AbstractManifold, G::Metric)
     return _extract_val(default_metric_dispatch(M, G))
 end
 
-default_metric_dispatch(::Manifold, ::Metric) = Val(false)
+default_metric_dispatch(::AbstractManifold, ::Metric) = Val(false)
 function default_metric_dispatch(M::MetricManifold)
     return default_metric_dispatch(base_manifold(M), metric(M))
 end
@@ -431,10 +431,10 @@ end
     is_default_metric(MM::MetricManifold)
 
 Indicate whether the [`Metric`](@ref) `MM.G` is the default metric for
-the [`Manifold`](@ref) `MM.manifold,` within the [`MetricManifold`](@ref) `MM`.
+the [`AbstractManifold`](@ref) `MM.manifold,` within the [`MetricManifold`](@ref) `MM`.
 This means that any occurence of
 [`MetricManifold`](@ref)`(MM.manifold, MM.G)` where `is_default_metric(MM.manifold, MM.G)) = true`
-falls back to just be called with `MM.manifold,` such that the [`Manifold`](@ref) `MM.manifold`
+falls back to just be called with `MM.manifold,` such that the [`AbstractManifold`](@ref) `MM.manifold`
 implicitly has the metric `MM.G`, for example if this was the first one
 implemented or is the one most commonly assumed to be used.
 """
@@ -446,10 +446,18 @@ function Base.convert(::Type{MetricManifold{𝔽,MT,GT}}, M::MT) where {𝔽,MT,
     return _convert_with_default(M, GT, default_metric_dispatch(M, GT()))
 end
 
-function _convert_with_default(M::MT, T::Type{<:Metric}, ::Val{true}) where {MT<:Manifold}
+function _convert_with_default(
+    M::MT,
+    T::Type{<:Metric},
+    ::Val{true},
+) where {MT<:AbstractManifold}
     return MetricManifold(M, T())
 end
-function _convert_with_default(M::MT, T::Type{<:Metric}, ::Val{false}) where {MT<:Manifold}
+function _convert_with_default(
+    M::MT,
+    T::Type{<:Metric},
+    ::Val{false},
+) where {MT<:AbstractManifold}
     return error(
         "Can not convert $(M) to a MetricManifold{$(MT),$(T)}, since $(T) is not the default metric.",
     )
@@ -459,7 +467,7 @@ end
     inner(N::MetricManifold{M,G}, p, X, Y)
 
 Compute the inner product of `X` and `Y` from the tangent space at `p` on the
-[`Manifold`](@ref) `M` using the [`Metric`](@ref) `G`. If `G` is the default
+[`AbstractManifold`](@ref) `M` using the [`Metric`](@ref) `G`. If `G` is the default
 metric (see [`is_default_metric`](@ref)) this is done using `inner(M, p, X, Y)`,
 otherwise the [`local_metric`](@ref)`(M, p)` is employed as
 
@@ -480,7 +488,7 @@ end
     local_metric(M::MetricManifold, p, B::AbstractBasis)
 
 Return the local matrix representation at the point `p` of the metric
-tensor $g$ on the [`Manifold`](@ref) `M`, usually written $g_{ij}$.
+tensor $g$ on the [`AbstractManifold`](@ref) `M`, usually written $g_{ij}$.
 The matrix has the property that $g(X, Y)=X^\mathrm{T} [g_{ij}] Y = g_{ij} X^i Y^j$,
 where the latter expression uses Einstein summation convention.
 The metric tensor is such that the formula works for the given [`AbstractBasis`](@ref) `B`.
@@ -523,7 +531,7 @@ end
 @doc raw"""
     log(N::MetricManifold{M,G}, p, q)
 
-Copute the logarithmic map on the [`Manifold`](@ref) `M` equipped with the [`Metric`](@ref) `G`.
+Copute the logarithmic map on the [`AbstractManifold`](@ref) `M` equipped with the [`Metric`](@ref) `G`.
 
 If the metric was declared the default metric using [`is_default_metric`](@ref), this method
 falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for the non-default
@@ -621,7 +629,7 @@ end
     sharp(N::MetricManifold{M,G}, p, ξ::FVector{CotangentSpaceType})
 
 Compute the musical isomorphism to transform the cotangent vector `ξ` from the
-[`Manifold`](@ref) `M` equipped with [`Metric`](@ref) `G` to a tangent by
+[`AbstractManifold`](@ref) `M` equipped with [`Metric`](@ref) `G` to a tangent by
 computing
 
 ````math

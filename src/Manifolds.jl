@@ -215,20 +215,20 @@ include("groups/special_euclidean.jl")
 include("tests/ManifoldTests.jl")
 
 @doc raw"""
-    Base.in(p, M::Manifold; kwargs...)
+    Base.in(p, M::AbstractManifold; kwargs...)
     p ∈ M
 
-Check, whether a point `p` is a valid point (i.e. in) a [`Manifold`](@ref) `M`.
+Check, whether a point `p` is a valid point (i.e. in) a [`AbstractManifold`](@ref) `M`.
 This method employs [`is_manifold_point`](@ref) deaticating the error throwing option.
 """
-Base.in(p, M::Manifold; kwargs...) = is_manifold_point(M, p, false; kwargs...)
+Base.in(p, M::AbstractManifold; kwargs...) = is_manifold_point(M, p, false; kwargs...)
 
 @doc raw"""
     Base.in(p, TpM::TangentSpaceAtPoint; kwargs...)
     X ∈ TangentSpaceAtPoint(M,p)
 
 Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
-the [`TangentSpaceAtPoint`](@ref) at `p` on the [`Manifold`](@ref) `M`.
+the [`TangentSpaceAtPoint`](@ref) at `p` on the [`AbstractManifold`](@ref) `M`.
 This method uses [`is_tangent_vector`](@ref) deactivating the error throw option.
 """
 function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
@@ -286,7 +286,7 @@ function __init__()
 end
 
 #
-export CoTVector, Manifold, MPoint, TVector, Manifold
+export CoTVector, AbstractManifold, AbstractManifoldPoint, TVector, AbstractManifold
 export AbstractSphere, AbstractProjectiveSpace
 export Euclidean,
     ArrayProjectiveSpace,

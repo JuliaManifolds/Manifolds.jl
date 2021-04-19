@@ -50,7 +50,7 @@ unsigned (`is_signed=false`) variant.
 
 [^TronDaniilidis2017]:
     > Tron R.; Daniilidis K.; The Space of Essential Matrices as a Riemannian Quotient
-    > Manifold.
+    > AbstractManifold.
     > SIAM Journal on Imaging Sciences (2017),
     > DOI: [10.1137/16M1091332](https://doi.org/10.1137/16M1091332),
     > PDF: [https://www.cis.upenn.edu/~kostas/mypub.dir/tron17siam.pdf](https://www.cis.upenn.edu/~kostas/mypub.dir/tron17siam.pdf).

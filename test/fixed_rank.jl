@@ -100,7 +100,7 @@ include("utils.jl")
             for p in pts
                 @test is_manifold_point(M, p)
             end
-            @testset "SVD MPoint Basics" begin
+            @testset "SVD AbstractManifoldPoint Basics" begin
                 s = svd(x.U * Diagonal(x.S) * x.Vt)
                 x2 = SVDMPoint(s)
                 x3 = SVDMPoint(s.U, s.S, s.Vt)

@@ -1,5 +1,5 @@
 function _inverse_retract_nlsolve(
-    M::Manifold,
+    M::AbstractManifold,
     p,
     q,
     retraction,

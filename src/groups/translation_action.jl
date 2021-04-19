@@ -1,6 +1,6 @@
 @doc raw"""
     TranslationAction(
-        M::Manifold,
+        M::AbstractManifold,
         Rn::TranslationGroup,
         AD::ActionDirection = LeftAction(),
     )
@@ -10,14 +10,14 @@ manifold `M`.
 
 The left and right actions are equivalent.
 """
-struct TranslationAction{TM<:Manifold,TRn<:TranslationGroup,TAD<:ActionDirection} <:
+struct TranslationAction{TM<:AbstractManifold,TRn<:TranslationGroup,TAD<:ActionDirection} <:
        AbstractGroupAction{TAD}
     manifold::TM
     Rn::TRn
 end
 
 function TranslationAction(
-    M::Manifold,
+    M::AbstractManifold,
     Rn::TranslationGroup,
     ::TAD=LeftAction(),
 ) where {TAD<:ActionDirection}

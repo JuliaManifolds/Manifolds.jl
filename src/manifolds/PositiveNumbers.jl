@@ -1,5 +1,5 @@
 @doc raw"""
-    PositiveNumbers <: Manifold{ℝ}
+    PositiveNumbers <: AbstractManifold{ℝ}
 
 The hyperbolic manifold of positive numbers $H^1$ is a the hyperbolic manifold represented
 by just positive numbers.
@@ -12,7 +12,7 @@ Generate the `ℝ`-valued hyperbolic model represented by positive positive numb
 To use this with arrays (1-element arrays),
 please use [`SymmetricPositiveDefinite`](@ref)`(1)`.
 """
-struct PositiveNumbers <: Manifold{ℝ} end
+struct PositiveNumbers <: AbstractManifold{ℝ} end
 
 """
     PositiveVectors(n)
@@ -108,7 +108,7 @@ injectivity_radius(::PositiveNumbers, ::Any) = Inf
 injectivity_radius(::PositiveNumbers, ::Any, ::ExponentialRetraction) = Inf
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::PositiveNumbers,
             rm::AbstractRetractionMethod,
         )

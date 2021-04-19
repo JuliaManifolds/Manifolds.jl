@@ -12,7 +12,7 @@ using Manifolds:
     WeiszfeldEstimation
 import Manifolds: mean!, median!, var, mean_and_var
 
-struct TestStatsSphere{N} <: Manifold{ℝ} end
+struct TestStatsSphere{N} <: AbstractManifold{ℝ} end
 TestStatsSphere(N) = TestStatsSphere{N}()
 manifold_dimension(::TestStatsSphere{N}) where {N} = manifold_dimension(Sphere(N))
 function exp!(::TestStatsSphere{N}, w, x, y; kwargs...) where {N}
@@ -28,7 +28,7 @@ function zero_vector!(::TestStatsSphere{N}, v, x; kwargs...) where {N}
     return zero_vector!(Sphere(N), v, x; kwargs...)
 end
 
-struct TestStatsEuclidean{N} <: Manifold{ℝ} end
+struct TestStatsEuclidean{N} <: AbstractManifold{ℝ} end
 TestStatsEuclidean(N) = TestStatsEuclidean{N}()
 manifold_dimension(::TestStatsEuclidean{N}) where {N} = manifold_dimension(Euclidean(N))
 function exp!(::TestStatsEuclidean{N}, y, x, v; kwargs...) where {N}
@@ -262,9 +262,9 @@ function test_moments(M, x)
     return nothing
 end
 
-struct TestStatsOverload1 <: Manifold{ℝ} end
-struct TestStatsOverload2 <: Manifold{ℝ} end
-struct TestStatsOverload3 <: Manifold{ℝ} end
+struct TestStatsOverload1 <: AbstractManifold{ℝ} end
+struct TestStatsOverload2 <: AbstractManifold{ℝ} end
+struct TestStatsOverload3 <: AbstractManifold{ℝ} end
 struct TestStatsMethod1 <: AbstractEstimationMethod end
 
 function mean!(

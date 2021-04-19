@@ -1,5 +1,5 @@
 @doc raw"""
-    Circle{𝔽} <: Manifold{𝔽}
+    Circle{𝔽} <: AbstractManifold{𝔽}
 
 The circle $𝕊^1$ is a manifold here represented by
 real-valued points in $[-π,π)$ or complex-valued points $z ∈ ℂ$ of absolute value
@@ -12,7 +12,7 @@ Generate the `ℝ`-valued Circle represented by angles, which
 alternatively can be set to use the [`AbstractNumbers`](@ref) `𝔽=ℂ` to obtain the circle
 represented by `ℂ`-valued circle of unit numbers.
 """
-struct Circle{𝔽} <: Manifold{𝔽} end
+struct Circle{𝔽} <: AbstractManifold{𝔽} end
 
 Circle(𝔽::AbstractNumbers=ℝ) = Circle{𝔽}()
 
@@ -154,7 +154,7 @@ end
 
 eval(
     quote
-        @invoke_maker 1 Manifold get_coordinates(
+        @invoke_maker 1 AbstractManifold get_coordinates(
             M::Circle,
             e::Identity,
             X,
@@ -186,7 +186,7 @@ end
 
 eval(
     quote
-        @invoke_maker 1 Manifold get_coordinates!(
+        @invoke_maker 1 AbstractManifold get_coordinates!(
             M::Circle,
             Y::AbstractArray,
             p,
@@ -260,7 +260,7 @@ injectivity_radius(::Circle, ::Any) = π
 injectivity_radius(::Circle, ::Any, ::ExponentialRetraction) = π
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::Circle,
             rm::AbstractRetractionMethod,
         )
@@ -352,7 +352,7 @@ manifold_dimension(::Circle) = 1
 @doc raw"""
     mean(M::Circle{ℝ}, x::AbstractVector[, w::AbstractWeights])
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` of points on
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` of points on
 the [`Circle`](@ref) $𝕊^1$, reprsented by real numbers, i.e. the angular mean
 ````math
 \operatorname{atan}\Bigl( \sum_{i=1}^n w_i\sin(x_i),  \sum_{i=1}^n w_i\sin(x_i) \Bigr).
@@ -373,7 +373,7 @@ end
 @doc raw"""
     mean(M::Circle{ℂ}, x::AbstractVector[, w::AbstractWeights])
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` of points on
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` of points on
 the [`Circle`](@ref) $𝕊^1$, reprsented by complex numbers, i.e. embedded in the complex plade.
 Comuting the sum
 ````math

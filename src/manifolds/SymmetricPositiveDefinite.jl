@@ -105,7 +105,7 @@ injectivity_radius(::SymmetricPositiveDefinite, ::Any) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, ::Any, ::ExponentialRetraction) = Inf
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::SymmetricPositiveDefinite,
             rm::AbstractRetractionMethod,
         )
@@ -134,7 +134,7 @@ end
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
 [`GeodesicInterpolation`](@ref).
 """
 mean(::SymmetricPositiveDefinite, ::Any)

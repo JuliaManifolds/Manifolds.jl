@@ -131,14 +131,14 @@ end
 Return `Val(true)` if the metric on the manifold is bi-invariant, that is, if the metric
 is both left- and right-invariant (see [`invariant_metric_dispatch`](@ref)).
 """
-function biinvariant_metric_dispatch(M::Manifold)
+function biinvariant_metric_dispatch(M::AbstractManifold)
     return Val(
         invariant_metric_dispatch(M, LeftAction()) === Val(true) &&
         invariant_metric_dispatch(M, RightAction()) === Val(true),
     )
 end
 
-has_biinvariant_metric(M::Manifold) = _extract_val(biinvariant_metric_dispatch(M))
+has_biinvariant_metric(M::AbstractManifold) = _extract_val(biinvariant_metric_dispatch(M))
 
 @doc raw"""
     invariant_metric_dispatch(G::AbstractGroupManifold, conv::ActionDirection) -> Val
@@ -166,19 +166,19 @@ function invariant_metric_dispatch(M::MetricManifold, conv::ActionDirection)
     return Val(false)
 end
 function invariant_metric_dispatch(
-    M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric},
+    M::MetricManifold{𝔽,<:AbstractManifold,<:InvariantMetric},
     conv::ActionDirection,
 ) where {𝔽}
     direction(metric(M)) === conv && return Val(true)
     return invoke(invariant_metric_dispatch, Tuple{MetricManifold,typeof(conv)}, M, conv)
 end
-invariant_metric_dispatch(M::Manifold, ::ActionDirection) = Val(false)
+invariant_metric_dispatch(M::AbstractManifold, ::ActionDirection) = Val(false)
 
-function has_invariant_metric(M::Manifold, conv::ActionDirection)
+function has_invariant_metric(M::AbstractManifold, conv::ActionDirection)
     return _extract_val(invariant_metric_dispatch(M, conv))
 end
 
-function inner(M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric}, p, X, Y) where {𝔽}
+function inner(M::MetricManifold{𝔽,<:AbstractManifold,<:InvariantMetric}, p, X, Y) where {𝔽}
     imetric = metric(M)
     conv = direction(imetric)
     N = MetricManifold(M.manifold, imetric.metric)
@@ -188,7 +188,7 @@ function inner(M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric}, p, X, Y) wh
 end
 
 function default_metric_dispatch(
-    M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric},
+    M::MetricManifold{𝔽,<:AbstractManifold,<:InvariantMetric},
 ) where {𝔽}
     imetric = metric(M)
     N = MetricManifold(M.manifold, imetric.metric)
@@ -217,7 +217,7 @@ function log!(
 end
 
 function LinearAlgebra.norm(
-    M::MetricManifold{𝔽,<:Manifold,<:InvariantMetric},
+    M::MetricManifold{𝔽,<:AbstractManifold,<:InvariantMetric},
     p,
     X,
 ) where {𝔽}

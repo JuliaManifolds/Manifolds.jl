@@ -1,6 +1,6 @@
 @doc raw"""
     RotationAction(
-        M::Manifold,
+        M::AbstractManifold,
         SOn::SpecialOrthogonal,
         AD::ActionDirection = LeftAction(),
     )
@@ -8,14 +8,14 @@
 Space of actions of the [`SpecialOrthogonal`](@ref) group $\mathrm{SO}(n)$ on a
 Euclidean-like manifold `M` of dimension `n`.
 """
-struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal,TAD<:ActionDirection} <:
+struct RotationAction{TM<:AbstractManifold,TSO<:SpecialOrthogonal,TAD<:ActionDirection} <:
        AbstractGroupAction{TAD}
     manifold::TM
     SOn::TSO
 end
 
 function RotationAction(
-    M::Manifold,
+    M::AbstractManifold,
     SOn::SpecialOrthogonal,
     ::TAD=LeftAction(),
 ) where {TAD<:ActionDirection}

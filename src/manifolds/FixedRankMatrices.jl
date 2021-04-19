@@ -1,5 +1,5 @@
 @doc raw"""
-    FixedRankMatrices{m,n,k,𝔽} <: Manifold{𝔽}
+    FixedRankMatrices{m,n,k,𝔽} <: AbstractManifold{𝔽}
 
 The manifold of $m × n$ real-valued or complex-valued matrices of fixed rank $k$, i.e.
 ````math
@@ -42,13 +42,13 @@ Generate the manifold of `m`-by-`n` (`field`-valued) matrices of rank `k`.
     > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
-struct FixedRankMatrices{M,N,K,𝔽} <: Manifold{𝔽} end
+struct FixedRankMatrices{M,N,K,𝔽} <: AbstractManifold{𝔽} end
 function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers=ℝ)
     return FixedRankMatrices{m,n,k,field}()
 end
 
 @doc raw"""
-    SVDMPoint <: MPoint
+    SVDMPoint <: AbstractManifoldPoint
 
 A point on a certain manifold, where the data is stored in a svd like fashion,
 i.e. in the form $USV^\mathrm{H}$, where this structure stores $U$, $S$ and
@@ -66,7 +66,8 @@ and accordingly shortened $U$ (columns) and $V^\mathrm{T}$ (rows).
 * `SVDMPoint(U,S,Vt,k)` for the svd factors to initialize the `SVDMPoint`,
   stores its svd factors shortened to the best rank $k$ approximation
 """
-struct SVDMPoint{TU<:AbstractMatrix,TS<:AbstractVector,TVt<:AbstractMatrix} <: MPoint
+struct SVDMPoint{TU<:AbstractMatrix,TS<:AbstractVector,TVt<:AbstractMatrix} <:
+       AbstractManifoldPoint
     U::TU
     S::TS
     Vt::TVt

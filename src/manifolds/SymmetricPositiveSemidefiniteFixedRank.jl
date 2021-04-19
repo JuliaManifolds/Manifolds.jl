@@ -1,7 +1,7 @@
 @doc raw"""
     SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
 
-The [`Manifold`](@ref) $ \operatorname{SPS}_k(n)$ consisting of the real- or complex-valued
+The [`AbstractManifold`](@ref) $ \operatorname{SPS}_k(n)$ consisting of the real- or complex-valued
 symmetric positive semidefinite matrices of size $n × n$ and rank $k$, i.e. the set
 
 ````math
@@ -48,7 +48,7 @@ over the `field` of real numbers `ℝ` or complex numbers `ℂ`.
     > arXiv: [0807.4423](http://arxiv.org/abs/0807.4423).
 [^MassartAbsil2020]:
     > Massart, E., Absil, P.-A.:
-    > "Quotient Geometry with Simple Geodesics for the Manifold of Fixed-Rank Positive-Semidefinite Matrices",
+    > "Quotient Geometry with Simple Geodesics for the AbstractManifold of Fixed-Rank Positive-Semidefinite Matrices",
     > SIAM Journal on Matrix Analysis and Applications (41)1, pp. 171–198, 2020.
     > doi: [10.1137/18m1231389](https://doi.org/10.1137/18m1231389),
     > preprint: [sites.uclouvain.be/absil/2018.06](https://sites.uclouvain.be/absil/2018.06).

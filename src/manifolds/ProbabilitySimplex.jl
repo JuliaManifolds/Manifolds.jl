@@ -189,7 +189,7 @@ injectivity_radius(M::ProbabilitySimplex, ::SoftmaxRetraction) = 0
 injectivity_radius(M::ProbabilitySimplex, ::ExponentialRetraction) = 0
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::ProbabilitySimplex,
             rm::AbstractRetractionMethod,
         )
@@ -280,7 +280,7 @@ manifold_dimension(::ProbabilitySimplex{n}) where {n} = n
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
 [`GeodesicInterpolation`](@ref).
 """
 mean(::ProbabilitySimplex, ::Any...)

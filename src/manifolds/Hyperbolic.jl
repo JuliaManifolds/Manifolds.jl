@@ -38,14 +38,14 @@ struct Hyperbolic{N} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingTy
 Hyperbolic(n::Int) = Hyperbolic{n}()
 
 @doc raw"""
-    HyperboloidPoint <: MPoint
+    HyperboloidPoint <: AbstractManifoldPoint
 
 In the Hyperboloid model of the [`Hyperbolic`](@ref) $\mathcal H^n$ points are represented
 as vectors in $ℝ^{n+1}$ with [`MinkowskiMetric`](@ref) equal to $-1$.
 
 This representation is the default, i.e. `AbstractVector`s are assumed to have this repesentation.
 """
-struct HyperboloidPoint{TValue<:AbstractVector} <: MPoint
+struct HyperboloidPoint{TValue<:AbstractVector} <: AbstractManifoldPoint
     value::TValue
 end
 
@@ -63,12 +63,12 @@ struct HyperboloidTVector{TValue<:AbstractVector} <: TVector
 end
 
 @doc raw"""
-    PoincareBallPoint <: MPoint
+    PoincareBallPoint <: AbstractManifoldPoint
 
 A point on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ can be represented as a vector of norm
 less than one in $\mathbb R^n$.
 """
-struct PoincareBallPoint{TValue<:AbstractVector} <: MPoint
+struct PoincareBallPoint{TValue<:AbstractVector} <: AbstractManifoldPoint
     value::TValue
 end
 
@@ -78,17 +78,17 @@ end
 In the Poincaré ball model of the [`Hyperbolic`](@ref) $\mathcal H^n$ tangent vectors are represented
 as vectors in $ℝ^{n}$.
 """
-struct PoincareBallTVector{TValue<:AbstractVector} <: MPoint
+struct PoincareBallTVector{TValue<:AbstractVector} <: AbstractManifoldPoint
     value::TValue
 end
 
 @doc raw"""
-    PoincareHalfSpacePoint <: MPoint
+    PoincareHalfSpacePoint <: AbstractManifoldPoint
 
 A point on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ can be represented as a vector in the
 half plane, i.e. $x ∈ ℝ^n$ with $x_d > 0$.
 """
-struct PoincareHalfSpacePoint{TValue<:AbstractVector} <: MPoint
+struct PoincareHalfSpacePoint{TValue<:AbstractVector} <: AbstractManifoldPoint
     value::TValue
 end
 
@@ -295,7 +295,7 @@ injectivity_radius(::Hyperbolic, ::Any) = Inf
 injectivity_radius(::Hyperbolic, ::Any, ::ExponentialRetraction) = Inf
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::Hyperbolic,
             rm::AbstractRetractionMethod,
         )
@@ -358,7 +358,7 @@ manifold_dimension(::Hyperbolic{N}) where {N} = N
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` on the
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` on the
 [`Hyperbolic`](@ref) space using [`CyclicProximalPointEstimation`](@ref).
 """
 mean(::Hyperbolic, ::Any...)

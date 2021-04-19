@@ -20,7 +20,7 @@ tangent space of the power manifold.
 """
 struct PowerMetric <: Metric end
 
-function PowerManifold(M::Manifold{𝔽}, size::Integer...) where {𝔽}
+function PowerManifold(M::AbstractManifold{𝔽}, size::Integer...) where {𝔽}
     return PowerManifold{𝔽,typeof(M),Tuple{size...},ArrayPowerRepresentation}(M)
 end
 
@@ -55,9 +55,9 @@ struct PowerFVectorDistribution{
 end
 
 const PowerManifoldMultidimensional =
-    AbstractPowerManifold{𝔽,<:Manifold{𝔽},ArrayPowerRepresentation} where {𝔽}
+    AbstractPowerManifold{𝔽,<:AbstractManifold{𝔽},ArrayPowerRepresentation} where {𝔽}
 
-Base.:^(M::Manifold, n) = PowerManifold(M, n...)
+Base.:^(M::AbstractManifold, n) = PowerManifold(M, n...)
 
 function allocate_result(M::PowerManifoldNested, ::typeof(flat), w::TFVector, x)
     alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
@@ -69,7 +69,7 @@ end
 function allocate_result(M::PowerManifoldNested, f::typeof(get_point_coordinates), p)
     return invoke(
         allocate_result,
-        Tuple{Manifold,typeof(get_point_coordinates),Any},
+        Tuple{AbstractManifold,typeof(get_point_coordinates),Any},
         M,
         f,
         p,
@@ -199,7 +199,7 @@ Base.@propagate_inbounds @inline function _read(
     return x[i...]
 end
 
-function representation_size(M::PowerManifold{𝔽,<:Manifold,TSize}) where {𝔽,TSize}
+function representation_size(M::PowerManifold{𝔽,<:AbstractManifold,TSize}) where {𝔽,TSize}
     return (representation_size(M.manifold)..., size_to_tuple(TSize)...)
 end
 

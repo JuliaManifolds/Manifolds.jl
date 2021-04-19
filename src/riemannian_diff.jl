@@ -8,37 +8,45 @@ an example.
 abstract type AbstractRiemannianDiffBackend end
 
 @doc raw"""
-    differential(M::Manifold, f, t::Real, backend::AbstractDiffBackend = rdifferential_backend())
+    differential(M::AbstractManifold, f, t::Real, backend::AbstractDiffBackend = rdifferential_backend())
 
 Compute the Riemannian differential of a curve $f: ℝ\to M$ on a manifold `M`
 represented by function `f` at time `t` using the given backend.
 It is calculated as the tangent vector equal to $\mathrm{d}f_t(t)[1]$.
 """
-differential(::Manifold, ::Any, ::Real, ::AbstractRiemannianDiffBackend)
+differential(::AbstractManifold, ::Any, ::Real, ::AbstractRiemannianDiffBackend)
 
 @doc raw"""
-    gradient(M::Manifold, f, p, backend::AbstractRiemannianDiffBackend = rgradient_backend())
+    gradient(M::AbstractManifold, f, p, backend::AbstractRiemannianDiffBackend = rgradient_backend())
 
 Compute the Riemannian gradient $∇f(p)$ of a real field on manifold `M` represented by
 function `f` at point `p` using the given backend.
 """
-gradient(::Manifold, ::Any, ::Any, ::AbstractRiemannianDiffBackend)
+gradient(::AbstractManifold, ::Any, ::Any, ::AbstractRiemannianDiffBackend)
 
-function differential!(M::Manifold, f::Any, X, t, backend::AbstractRiemannianDiffBackend)
+function differential!(
+    M::AbstractManifold,
+    f::Any,
+    X,
+    t,
+    backend::AbstractRiemannianDiffBackend,
+)
     return copyto!(X, differential(M, f, t, backend))
 end
 
-function gradient!(M::Manifold, f, X, p, backend::AbstractRiemannianDiffBackend)
+function gradient!(M::AbstractManifold, f, X, p, backend::AbstractRiemannianDiffBackend)
     return copyto!(X, gradient(M, f, p, backend))
 end
 
-differential(M::Manifold, f, p) = differential(M, f, p, rdifferential_backend())
+differential(M::AbstractManifold, f, p) = differential(M, f, p, rdifferential_backend())
 
-differential!(M::Manifold, f, X, p) = differential!(M, f, X, p, rdifferential_backend())
+function differential!(M::AbstractManifold, f, X, p)
+    return differential!(M, f, X, p, rdifferential_backend())
+end
 
-gradient(M::Manifold, f, p) = gradient(M, f, p, rgradient_backend())
+gradient(M::AbstractManifold, f, p) = gradient(M, f, p, rgradient_backend())
 
-gradient!(M::Manifold, f, X, p) = gradient!(M, f, X, p, rgradient_backend())
+gradient!(M::AbstractManifold, f, X, p) = gradient!(M, f, X, p, rgradient_backend())
 
 """
     RiemannianONBDiffBackend(
@@ -66,7 +74,7 @@ struct RiemannianONBDiffBackend{
     basis::TBasis
 end
 
-function differential(M::Manifold, f, t::Real, backend::RiemannianONBDiffBackend)
+function differential(M::AbstractManifold, f, t::Real, backend::RiemannianONBDiffBackend)
     p = f(t)
     onb_coords = _derivative(zero(number_eltype(p)), backend.diff_backend) do h
         return get_coordinates(
@@ -79,7 +87,13 @@ function differential(M::Manifold, f, t::Real, backend::RiemannianONBDiffBackend
     return get_vector(M, p, onb_coords, backend.basis)
 end
 
-function differential!(M::Manifold, f, X, t::Real, backend::RiemannianONBDiffBackend)
+function differential!(
+    M::AbstractManifold,
+    f,
+    X,
+    t::Real,
+    backend::RiemannianONBDiffBackend,
+)
     p = f(t)
     onb_coords = _derivative(zero(number_eltype(p)), backend.diff_backend) do h
         return get_coordinates(
@@ -92,7 +106,7 @@ function differential!(M::Manifold, f, X, t::Real, backend::RiemannianONBDiffBac
     return get_vector!(M, X, p, onb_coords, backend.basis)
 end
 
-function gradient(M::Manifold, f, p, backend::RiemannianONBDiffBackend)
+function gradient(M::AbstractManifold, f, p, backend::RiemannianONBDiffBackend)
     X = get_coordinates(M, p, zero_vector(M, p), backend.basis)
     onb_coords = _gradient(X, backend.diff_backend) do Y
         return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
@@ -100,7 +114,7 @@ function gradient(M::Manifold, f, p, backend::RiemannianONBDiffBackend)
     return get_vector(M, p, onb_coords, backend.basis)
 end
 
-function gradient!(M::Manifold, f, X, p, backend::RiemannianONBDiffBackend)
+function gradient!(M::AbstractManifold, f, X, p, backend::RiemannianONBDiffBackend)
     X2 = get_coordinates(M, p, zero_vector(M, p), backend.basis)
     onb_coords = _gradient(X2, backend.diff_backend) do Y
         return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
@@ -132,7 +146,7 @@ globally default differentiation backend for calculating gradients.
 
 # See also
 
-[`Manifolds.gradient(::Manifold, ::Any, ::Any, ::AbstractRiemannianDiffBackend)`](@ref)
+[`Manifolds.gradient(::AbstractManifold, ::Any, ::Any, ::AbstractRiemannianDiffBackend)`](@ref)
 """
 const _current_rgradient_backend = CurrentRiemannianDiffBackend(
     RiemannianONBDiffBackend(
@@ -216,12 +230,18 @@ struct RiemannianProjectionGradientBackend{TADBackend<:AbstractDiffBackend} <:
     diff_backend::TADBackend
 end
 
-function gradient(M::Manifold, f, p, backend::RiemannianProjectionGradientBackend)
+function gradient(M::AbstractManifold, f, p, backend::RiemannianProjectionGradientBackend)
     amb_grad = _gradient(f, p, backend.diff_backend)
     return project(M, p, amb_grad)
 end
 
-function gradient!(M::Manifold, f, X, p, backend::RiemannianProjectionGradientBackend)
+function gradient!(
+    M::AbstractManifold,
+    f,
+    X,
+    p,
+    backend::RiemannianProjectionGradientBackend,
+)
     amb_grad = embed(M, p, X)
     _gradient!(f, amb_grad, p, backend.diff_backend)
     return project!(M, X, p, amb_grad)

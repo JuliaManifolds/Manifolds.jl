@@ -1,6 +1,6 @@
 include("utils.jl")
 
-@testset "Graph Manifold" begin
+@testset "Graph AbstractManifold" begin
     M = Euclidean(2)
     x = [[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]]
     y = [[4.0, 5.0], [6.0, 7.0], [8.0, 9.0]]
@@ -34,7 +34,7 @@ include("utils.jl")
         GraphManifold
         Graph:
          {3, 2} undirected simple Int64 graph
-        Manifold on vertices:
+        AbstractManifold on vertices:
          Euclidean(2; field = ℝ)"""
 
         NE = GraphManifold(G, M, EdgeManifold())
@@ -57,7 +57,7 @@ include("utils.jl")
         GraphManifold
         Graph:
          {3, 2} undirected simple Int64 graph
-        Manifold on edges:
+        AbstractManifold on edges:
          Euclidean(2; field = ℝ)"""
 
         G2 = SimpleDiGraph(3)

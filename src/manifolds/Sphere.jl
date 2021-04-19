@@ -286,7 +286,7 @@ injectivity_radius(::AbstractSphere, ::Any, ::ExponentialRetraction) = π
 injectivity_radius(::AbstractSphere, ::Any, ::ProjectionRetraction) = π / 2
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::AbstractSphere,
             rm::AbstractRetractionMethod,
         )
@@ -361,7 +361,7 @@ manifold_dimension(M::AbstractSphere) = manifold_dimension(get_embedding(M)) - 1
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::AbstractSphere, ::Any...)

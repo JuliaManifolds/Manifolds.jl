@@ -1,11 +1,11 @@
 
 """
-    RieszRepresenterCotangentVector(M::Manifold, p, X)
+    RieszRepresenterCotangentVector(M::AbstractManifold, p, X)
 
 Cotangent vector in Riesz representer form on manifold `M` at point `p` with Riesz
 representer `X`.
 """
-struct RieszRepresenterCotangentVector{TM<:Manifold,TP,TX}
+struct RieszRepresenterCotangentVector{TM<:AbstractManifold,TP,TX}
     manifold::TM
     p::TP
     X::TX
@@ -27,22 +27,22 @@ end
 )
 
 @doc raw"""
-    flat(M::Manifold, p, X)
+    flat(M::AbstractManifold, p, X)
 
 Compute the flat isomorphism (one of the musical isomorphisms) of tangent vector `X`
-from the vector space of type `M` at point `p` from the underlying [`Manifold`](@ref).
+from the vector space of type `M` at point `p` from the underlying [`AbstractManifold`](@ref).
 
 The function can be used for example to transform vectors
 from the tangent bundle to vectors from the cotangent bundle
 $♭ : T\mathcal M → T^{*}\mathcal M$
 """
-flat(M::Manifold, p, X) = RieszRepresenterCotangentVector(M, p, X)
-function flat(M::Manifold, p, X::TFVector{<:Any,<:AbstractBasis})
+flat(M::AbstractManifold, p, X) = RieszRepresenterCotangentVector(M, p, X)
+function flat(M::AbstractManifold, p, X::TFVector{<:Any,<:AbstractBasis})
     return CoTFVector(X.data, dual_basis(M, p, X.basis))
 end
 
 function flat!(
-    M::Manifold,
+    M::AbstractManifold,
     ξ::CoTFVector{<:Any,<:AbstractBasis},
     p,
     X::TFVector{<:Any,<:AbstractBasis},
@@ -52,7 +52,7 @@ function flat!(
     get_coordinates!(M, ξ.data, p, ξv, ξ.basis)
     return ξ
 end
-function flat!(::Manifold, ξ::RieszRepresenterCotangentVector, p, X)
+function flat!(::AbstractManifold, ξ::RieszRepresenterCotangentVector, p, X)
     # TODO: maybe assert that ξ.p is equal to p? Allowing for varying p in ξ leads to
     # issues with power manifold.
     copyto!(ξ.X, X)
@@ -60,7 +60,7 @@ function flat!(::Manifold, ξ::RieszRepresenterCotangentVector, p, X)
 end
 
 function get_coordinates(
-    M::Manifold,
+    M::AbstractManifold,
     p,
     ξ::RieszRepresenterCotangentVector,
     ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
@@ -69,7 +69,7 @@ function get_coordinates(
 end
 
 function get_coordinates!(
-    M::Manifold,
+    M::AbstractManifold,
     v,
     p,
     ξ::RieszRepresenterCotangentVector,
@@ -80,7 +80,7 @@ function get_coordinates!(
 end
 
 function get_vector(
-    M::Manifold,
+    M::AbstractManifold,
     p,
     v,
     ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
@@ -90,7 +90,7 @@ function get_vector(
 end
 
 function get_vector!(
-    M::Manifold,
+    M::AbstractManifold,
     ξr::RieszRepresenterCotangentVector,
     p,
     v,
@@ -101,19 +101,19 @@ function get_vector!(
 end
 
 @doc raw"""
-    sharp(M::Manifold, p, ξ)
+    sharp(M::AbstractManifold, p, ξ)
 
 Compute the sharp isomorphism (one of the musical isomorphisms) of vector `ξ`
-from the vector space `M` at point `p` from the underlying [`Manifold`](@ref).
+from the vector space `M` at point `p` from the underlying [`AbstractManifold`](@ref).
 
 The function can be used for example to transform vectors
 from the cotangent bundle to vectors from the tangent bundle
 $♯ : T^{*}\mathcal M → T\mathcal M$
 """
-sharp(::Manifold, p, ξ)
+sharp(::AbstractManifold, p, ξ)
 
-sharp(::Manifold, p, ξ::RieszRepresenterCotangentVector) = ξ.X
-function sharp(M::Manifold, p, X::CoTFVector{<:Any,<:AbstractBasis})
+sharp(::AbstractManifold, p, ξ::RieszRepresenterCotangentVector) = ξ.X
+function sharp(M::AbstractManifold, p, X::CoTFVector{<:Any,<:AbstractBasis})
     return TFVector(X.data, dual_basis(M, p, X.basis))
 end
 
@@ -125,7 +125,7 @@ end
 )
 
 function sharp!(
-    M::Manifold,
+    M::AbstractManifold,
     X::TFVector{<:Any,<:AbstractBasis},
     p,
     ξ::CoTFVector{<:Any,<:AbstractBasis},
@@ -135,7 +135,7 @@ function sharp!(
     get_coordinates!(M, X.data, p, Xv, X.basis)
     return X
 end
-function sharp!(::Manifold, X, p, ξ::RieszRepresenterCotangentVector)
+function sharp!(::AbstractManifold, X, p, ξ::RieszRepresenterCotangentVector)
     copyto!(X, ξ.X)
     return X
 end

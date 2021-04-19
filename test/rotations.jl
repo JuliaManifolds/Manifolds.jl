@@ -160,7 +160,7 @@ include("utils.jl")
             @test x ≈ exp(SOn, pts[1], v2)
         end
     end
-    @testset "Test Manifold Point and Tangent Vector checks" begin
+    @testset "Test AbstractManifold Point and Tangent Vector checks" begin
         M = Manifolds.Rotations(2)
         for x in [1, [2.0 0.0; 0.0 1.0], [1.0 0.5; 0.0 1.0]]
             @test_throws DomainError is_manifold_point(M, x, true)

@@ -1,5 +1,5 @@
 @doc raw"""
-    Rotations{N} <: Manifold{ℝ}
+    Rotations{N} <: AbstractManifold{ℝ}
 
 The special orthogonal manifold $\mathrm{SO}(n)$ represented by $n × n$
 real-valued orthogonal matrices with determinant $+1$ is the manifold of `Rotations`,
@@ -11,7 +11,7 @@ since these matrices represent all rotations of points in $ℝ^n$.
 
 Generate the $\mathrm{SO}(n) \subset ℝ^{n × n}$
 """
-struct Rotations{N} <: Manifold{ℝ} end
+struct Rotations{N} <: AbstractManifold{ℝ} end
 
 Rotations(n::Int) = Rotations{n}()
 
@@ -391,7 +391,7 @@ injectivity_radius(::Rotations) = π * sqrt(2.0)
 injectivity_radius(::Rotations, ::ExponentialRetraction) = π * sqrt(2.0)
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::Rotations,
             rm::AbstractRetractionMethod,
         )
@@ -557,7 +557,7 @@ manifold_dimension(::Rotations{N}) where {N} = div(N * (N - 1), 2)
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::Rotations, ::Any)

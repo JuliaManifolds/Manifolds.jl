@@ -259,7 +259,7 @@ injectivity_radius(::AbstractProjectiveSpace, ::Any) = π / 2
 injectivity_radius(::AbstractProjectiveSpace, ::Any, ::ExponentialRetraction) = π / 2
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::AbstractProjectiveSpace,
             rm::AbstractRetractionMethod,
         )
@@ -367,7 +367,7 @@ end
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of points in vector `x`
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of points in vector `x`
 using [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::AbstractProjectiveSpace, ::Any...)

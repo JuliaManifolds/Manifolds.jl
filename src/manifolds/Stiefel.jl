@@ -157,7 +157,7 @@ in [^KanekoFioriTanaka2013].
 
 [^KanekoFioriTanaka2013]:
     > T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
-    > Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
+    > Compact Stiefel AbstractManifold", IEEE Transactions on Signal Processing, 2013,
     > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)

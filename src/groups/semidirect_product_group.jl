@@ -143,7 +143,7 @@ function get_vector!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
 end
 eval(
     quote
-        @invoke_maker 1 Manifold get_vector!(
+        @invoke_maker 1 AbstractManifold get_vector!(
             M::SemidirectProductGroup,
             Xⁱ,
             e::Identity,
@@ -167,7 +167,7 @@ function get_coordinates!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBa
 end
 eval(
     quote
-        @invoke_maker 1 Manifold get_coordinates!(
+        @invoke_maker 1 AbstractManifold get_coordinates!(
             M::SemidirectProductGroup,
             Y,
             e::Identity,

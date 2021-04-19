@@ -191,7 +191,7 @@ injectivity_radius(::Grassmann, ::Any) = π / 2
 injectivity_radius(::Grassmann, ::Any, ::ExponentialRetraction) = π / 2
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::Grassmann,
             rm::AbstractRetractionMethod,
         )
@@ -303,7 +303,7 @@ manifold_dimension(::Grassmann{n,k,𝔽}) where {n,k,𝔽} = k * (n - k) * real_
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::Grassmann{n,k} where {n,k}, ::Any...)

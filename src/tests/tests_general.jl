@@ -1,6 +1,6 @@
 """
     test_manifold(
-        M::Manifold,
+        M::AbstractManifold,
         pts::AbstractVector;
         args,
     )
@@ -71,7 +71,7 @@ that lie on it (contained in `pts`).
    to check the `direction` variant of vector transport
 """
 function ManifoldTests.test_manifold(
-    M::Manifold,
+    M::AbstractManifold,
     pts::AbstractVector;
     basis_has_specialized_diagonalizing_get=false,
     basis_types_to_from=(),

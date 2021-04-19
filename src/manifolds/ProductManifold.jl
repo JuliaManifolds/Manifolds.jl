@@ -1,5 +1,5 @@
 @doc raw"""
-    ProductManifold{𝔽,TM<:Tuple} <: Manifold{𝔽}
+    ProductManifold{𝔽,TM<:Tuple} <: AbstractManifold{𝔽}
 
 Product manifold $M_1 × M_2 × …  × M_n$ with product geometry.
 
@@ -11,11 +11,11 @@ generates the product manifold $M_1 × M_2 × … × M_n$.
 Alternatively, the same manifold can be contructed using the `×` operator:
 `M_1 × M_2 × M_3`.
 """
-struct ProductManifold{𝔽,TM<:Tuple} <: Manifold{𝔽}
+struct ProductManifold{𝔽,TM<:Tuple} <: AbstractManifold{𝔽}
     manifolds::TM
 end
 
-function ProductManifold(manifolds::Manifold...)
+function ProductManifold(manifolds::AbstractManifold...)
     𝔽 = ManifoldsBase._unify_number_systems((number_system.(manifolds))...)
     return ProductManifold{𝔽,typeof(manifolds)}(manifolds)
 end
@@ -190,7 +190,7 @@ end
     cross(M,N)
     cross(M1, M2, M3,...)
 
-Return the [`ProductManifold`](@ref) For two [`Manifold`](@ref)s `M` and `N`,
+Return the [`ProductManifold`](@ref) For two [`AbstractManifold`](@ref)s `M` and `N`,
 where for the case that one of them is a [`ProductManifold`](@ref) itself,
 the other is either prepended (if `N` is a product) or appenden (if `M`) is.
 If both are product manifold, they are combined into one product manifold,
@@ -199,12 +199,12 @@ keeping the order.
 For the case that more than one is a product manifold of these is build with the
 same approach as above
 """
-cross(::Manifold...)
-LinearAlgebra.cross(M1::Manifold, M2::Manifold) = ProductManifold(M1, M2)
-function LinearAlgebra.cross(M1::ProductManifold, M2::Manifold)
+cross(::AbstractManifold...)
+LinearAlgebra.cross(M1::AbstractManifold, M2::AbstractManifold) = ProductManifold(M1, M2)
+function LinearAlgebra.cross(M1::ProductManifold, M2::AbstractManifold)
     return ProductManifold(M1.manifolds..., M2)
 end
-function LinearAlgebra.cross(M1::Manifold, M2::ProductManifold)
+function LinearAlgebra.cross(M1::AbstractManifold, M2::ProductManifold)
     return ProductManifold(M1, M2.manifolds...)
 end
 function LinearAlgebra.cross(M1::ProductManifold, M2::ProductManifold)
@@ -289,7 +289,7 @@ function get_basis(M::ProductManifold, p, B::AbstractBasis)
     return CachedBasis(B, ProductBasisData(parts))
 end
 function get_basis(M::ProductManifold, p, B::CachedBasis)
-    return invoke(get_basis, Tuple{Manifold,Any,CachedBasis}, M, p, B)
+    return invoke(get_basis, Tuple{AbstractManifold,Any,CachedBasis}, M, p, B)
 end
 function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
     vs = map(
@@ -345,7 +345,7 @@ for BT in PRODUCT_BASIS_LIST_CACHED
 end
 eval(
     quote
-        @invoke_maker 1 Manifold get_coordinates(
+        @invoke_maker 1 AbstractManifold get_coordinates(
             M::ProductManifold,
             e::Identity,
             X,
@@ -433,7 +433,7 @@ for BT in PRODUCT_BASIS_LIST
 end
 eval(
     quote
-        @invoke_maker 1 Manifold get_coordinates!(
+        @invoke_maker 1 AbstractManifold get_coordinates!(
             M::ProductManifold,
             Y,
             e::Identity,
@@ -474,7 +474,7 @@ eval(
 )
 eval(
     quote
-        @invoke_maker 1 Manifold get_vector(
+        @invoke_maker 1 AbstractManifold get_vector(
             M::ProductManifold,
             e::Identity,
             X,
@@ -552,7 +552,7 @@ function get_vector!(
 end
 eval(
     quote
-        @invoke_maker 1 Manifold get_vector!(
+        @invoke_maker 1 AbstractManifold get_vector!(
             M::ProductManifold,
             Xⁱ,
             e::Identity,
@@ -804,7 +804,7 @@ number_of_components(M::ProductManifold{𝔽,<:NTuple{N,Any}}) where {𝔽,N} = 
 
 function ProductFVectorDistribution(
     type::VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
-    p::Union{AbstractArray,MPoint,ProductRepr},
+    p::Union{AbstractArray,AbstractManifoldPoint,ProductRepr},
     distributions::FVectorDistribution...,
 )
     return ProductFVectorDistribution{typeof(type),typeof(distributions),typeof(p)}(
@@ -943,7 +943,7 @@ end
 """
     set_component!(M::ProductManifold, q, p, i)
 
-Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`, where `p` is a point on the [`Manifold`](@ref) this factor of the product manifold consists of.
+Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`, where `p` is a point on the [`AbstractManifold`](@ref) this factor of the product manifold consists of.
 """
 function set_component!(M::ProductManifold, q, p, i)
     return copyto!(submanifold_component(M, q, i), p)
@@ -981,7 +981,7 @@ function sharp!(M::ProductManifold, X::TFVector, p, ξ::CoTFVector)
     return X
 end
 
-function _show_submanifold(io::IO, M::Manifold; pre="")
+function _show_submanifold(io::IO, M::AbstractManifold; pre="")
     sx = sprint(show, "text/plain", M, context=io, sizehint=0)
     if occursin('\n', sx)
         sx = sprint(show, M, context=io, sizehint=0)
