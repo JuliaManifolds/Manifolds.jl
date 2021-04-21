@@ -288,7 +288,7 @@ include("group_utils.jl")
         z2 = allocate(x)
         copyto!(G.manifold, z2, x)
         @test z == z2
-        X = zeros(2,2)
+        X = zeros(2, 2)
         Y = allocate(X)
         copyto!(G, Y, X)
         Y2 = allocate(X)
