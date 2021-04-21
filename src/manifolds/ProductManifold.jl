@@ -185,7 +185,7 @@ end
 
 function copyto!(M::ProductManifold, q::ProductRepr, p::ProductRepr)
     map(copyto!, M.manifolds, submanifold_components(q), submanifold_components(p))
-    return y
+    return q
 end
 function copyto!(M::ProductManifold, Y::ProductRepr, p::ProductRepr, X::ProductRepr)
     map(
@@ -195,7 +195,7 @@ function copyto!(M::ProductManifold, Y::ProductRepr, p::ProductRepr, X::ProductR
         submanifold_components(p),
         submanifold_components(X),
     )
-    return y
+    return Y
 end
 
 @doc raw"""

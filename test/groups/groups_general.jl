@@ -288,9 +288,9 @@ include("group_utils.jl")
         z2 = allocate(x)
         copyto!(G.manifold, z2, x)
         @test z == z2
-        X = zero_tangent_vector(G, x)
+        X = zeros(2,2)
         Y = allocate(X)
-        copyto!(G, Y, x)
+        copyto!(G, Y, X)
         Y2 = allocate(X)
         copyto!(G.manifold, Y2, X)
         @test Y == Y2
@@ -370,7 +370,7 @@ end
 struct DefaultEmbeddedGroup <:
        AbstractGroupManifold{ℝ,AdditionOperation,DefaultEmbeddingType} end
 
-@testset "DefaltEmbeddedGroup" begin
+@testset "DefaultEmbeddedGroup" begin
     G = DefaultEmbeddedGroup()
     @test ManifoldsBase.decorator_transparent_dispatch(get_vector!, G, [1], [1], [1]) ===
           Val(:parent)

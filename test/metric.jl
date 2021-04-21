@@ -353,7 +353,7 @@ end
         @test z == z2
         X = zero_tangent_vector(MM, x)
         Y = allocate(X)
-        copyto!(MM, Y, x)
+        copyto!(MM, Y, X)
         Y2 = allocate(X)
         copyto!(M, Y2, X)
         @test Y == Y2

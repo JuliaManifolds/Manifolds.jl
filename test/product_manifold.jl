@@ -116,10 +116,17 @@ end
         @test p1.parts[1][1] == 0.0
         copyto!(p1c, p1)
         @test p1c.parts[1][1] == 0.0
+    end
 
-        p1c2 = allocate(p1)
-        copyto!(M, p1c2, p1)
-        @test p1c2.parts == p1.parts
+    @testset "copyto!" begin
+        p = ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0])
+        X = ProductRepr([1.0, 0.0, 0.0], [1.0, 0.0])
+        q = allocate(p)
+        copyto!(Mse, q, p)
+        @test p.parts == q.parts
+        Y = allocate(X)
+        copyto!(Mse, Y, p, X)
+        @test Y.parts == X.parts
     end
 
     @testset "Broadcasting" begin

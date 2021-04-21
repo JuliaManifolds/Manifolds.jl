@@ -237,10 +237,6 @@ function check_tangent_vector(
     return check_manifold_point(Euclidean(N), X.value; kwargs...)
 end
 
-for T in _HyperbolicTypes
-    @eval Base.copyto!(p::$T, q::$T) = copyto!(p.value, q.value)
-end
-
 # Define self conversions
 #
 for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
