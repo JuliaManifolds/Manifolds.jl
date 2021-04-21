@@ -52,6 +52,9 @@ end
 
 Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
+Base.copyto!(M::GroupManifold, q, p) = copyto!(M.manifold, q, p)
+Base.copyto!(M::GroupManifold, Y, p, X) = copyto!(M.manifold, Y, p, X)
+
 const GROUP_MANIFOLD_BASIS_DISAMBIGUATION =
     [AbstractDecoratorManifold, ValidationManifold, VectorBundle]
 

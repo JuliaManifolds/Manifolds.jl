@@ -283,6 +283,18 @@ include("group_utils.jl")
         y = allocate(x)
         identity!(G, y, x)
         @test y ≈ one(x)
+        z = allocate(x)
+        copyto!(G, z, x)
+        z2 = allocate(x)
+        copyto!(G.manifold, z2, x)
+        @test z == z2
+        X = zero_tangent_vector(G, x)
+        Y = allocate(X)
+        copyto!(G, Y, x)
+        Y2 = allocate(X)
+        copyto!(G.manifold, Y2, X)
+        @test Y == Y2
+
         @test_throws ErrorException identity!(G, [0.0], ge)
         @test compose(G, x, x) ≈ x * x
         @test compose(G, x, ge) ≈ x

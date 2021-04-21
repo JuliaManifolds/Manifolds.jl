@@ -346,6 +346,18 @@ end
         w = [0.13, 0.17, 0.19]
         y = allocate(x)
 
+        z = allocate(x)
+        copyto!(MM, z, x)
+        z2 = allocate(x)
+        copyto!(M, z2, x)
+        @test z == z2
+        X = zero_tangent_vector(MM, x)
+        Y = allocate(X)
+        copyto!(MM, Y, x)
+        Y2 = allocate(X)
+        copyto!(M, Y2, X)
+        @test Y == Y2
+
         @test inner(M, x, v, w) == 2 * dot(v, w)
         @test inner(MM, x, v, w) === inner(M, x, v, w)
         @test norm(MM, x, v) === norm(M, x, v)
