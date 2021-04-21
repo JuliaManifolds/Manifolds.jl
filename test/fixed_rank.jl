@@ -147,6 +147,13 @@ include("utils.jl")
                 xF2 = SVDMPoint(x.U, x.S, 2 * x.Vt)
                 @test !is_manifold_point(M, xF2)
                 @test_throws DomainError is_manifold_point(M, xF2, true)
+
+                # copyto
+                yC = allocate(y)
+                copyto!(M, yC, y)
+                @test yC.U == y.U
+                @test yC.S == y.S
+                @test yC.Vt == y.Vt
             end
             @testset "UMV TVector Basics" begin
                 w = UMVTVector(v.U, 2 * v.M, v.Vt)
@@ -167,6 +174,12 @@ include("utils.jl")
                 oneV = UMVTVector(one(zeros(3, 3)), one(zeros(2, 2)), one(zeros(2, 2)), 2)
                 @test oneV == one(v)
 
+                # copyto
+                w2 = allocate(w)
+                copyto!(M, w2, w)
+                @test w.U == w2.U
+                @test w.M == w2.M
+                @test w.Vt == w2.Vt
                 # broadcasting
                 @test axes(w) === ()
                 wc = copy(w)

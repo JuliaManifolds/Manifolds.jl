@@ -163,7 +163,6 @@ for T in _HyperbolicTypes
 
         Base.axes(v::$T) = axes(v.value)
 
-        @inline Base.copyto!(y::$T, x::$T) = copyto!(y.value, x.value)
         @inline function Base.copyto!(
             dest::$T,
             bc::Broadcast.Broadcasted{Broadcast.Style{$T}},

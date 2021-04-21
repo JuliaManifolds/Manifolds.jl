@@ -116,6 +116,10 @@ end
         @test p1.parts[1][1] == 0.0
         copyto!(p1c, p1)
         @test p1c.parts[1][1] == 0.0
+
+        p1c2 = allocate(p1)
+        copyto!(M, p1c2, p1)
+        @test p1c2.parts == p1.parts
     end
 
     @testset "Broadcasting" begin
@@ -136,7 +140,7 @@ end
 
         @test axes(p1) == (Base.OneTo(2),)
 
-        # errors 
+        # errors
         p3 = ProductRepr([3.0, 4.0, 5.0], [2.0, 5.0], [3.0, 2.0])
         @test_throws DimensionMismatch p1 .+ p3
         @test_throws DimensionMismatch p1 .= p3
