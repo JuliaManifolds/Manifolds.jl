@@ -290,9 +290,9 @@ include("group_utils.jl")
         @test z == z2
         X = zeros(2, 2)
         Y = allocate(X)
-        copyto!(G, Y, X)
+        copyto!(G, Y, x, X)
         Y2 = allocate(X)
-        copyto!(G.manifold, Y2, X)
+        copyto!(G.manifold, Y2, x, X)
         @test Y == Y2
 
         @test_throws ErrorException identity!(G, [0.0], ge)

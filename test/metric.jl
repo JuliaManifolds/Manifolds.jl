@@ -353,9 +353,9 @@ end
         @test z == z2
         X = zero_tangent_vector(MM, x)
         Y = allocate(X)
-        copyto!(MM, Y, X)
+        copyto!(MM, Y, x, X)
         Y2 = allocate(X)
-        copyto!(M, Y2, X)
+        copyto!(M, Y2, x, X)
         @test Y == Y2
 
         @test inner(M, x, v, w) == 2 * dot(v, w)
