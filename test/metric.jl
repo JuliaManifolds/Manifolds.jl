@@ -505,6 +505,11 @@ end
         @test inner(MM, p, fX, fY) ≈ inner(cotspace2, p, cofX, cofY)
         @test sharp(M, p, coX) ≈ X
 
+        coMMfX = flat(MM, p, fX)
+        coMMfY = flat(MM, p, fY)
+        @test inner(MM, p, fX, fY) ≈ inner(cotspace2, p, coMMfX, coMMfY)
+        @test sharp(MM, p, coMMfX) ≈ fX
+
         psample = [[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
         Y = pweights([0.5, 0.5])
         # test despatch with results from above

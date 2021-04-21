@@ -214,8 +214,11 @@ end
 function det_local_metric(
     M::MetricManifold{ProductMetric,𝔽,ProductManifold{𝔽}},
     p::ProductArray,
+    B::DefaultOrthonormalBasis,
 ) where {𝔽}
-    dets = map(det_local_metric, M.manifolds, submanifold_components(M, p))
+    dets = map(ziptuples(M.manifolds, submanifold_components(p))) do t
+        return det_local_metric(t[1], t[2], B)
+    end
     return prod(dets)
 end
 
