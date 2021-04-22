@@ -283,6 +283,18 @@ include("group_utils.jl")
         y = allocate(x)
         identity!(G, y, x)
         @test y ≈ one(x)
+        z = allocate(x)
+        copyto!(G, z, x)
+        z2 = allocate(x)
+        copyto!(G.manifold, z2, x)
+        @test z == z2
+        X = zeros(2, 2)
+        Y = allocate(X)
+        copyto!(G, Y, x, X)
+        Y2 = allocate(X)
+        copyto!(G.manifold, Y2, x, X)
+        @test Y == Y2
+
         @test_throws ErrorException identity!(G, [0.0], ge)
         @test compose(G, x, x) ≈ x * x
         @test compose(G, x, ge) ≈ x
@@ -358,7 +370,7 @@ end
 struct DefaultEmbeddedGroup <:
        AbstractGroupManifold{ℝ,AdditionOperation,DefaultEmbeddingType} end
 
-@testset "DefaltEmbeddedGroup" begin
+@testset "DefaultEmbeddedGroup" begin
     G = DefaultEmbeddedGroup()
     @test ManifoldsBase.decorator_transparent_dispatch(get_vector!, G, [1], [1], [1]) ===
           Val(:parent)

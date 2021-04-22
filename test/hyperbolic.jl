@@ -49,6 +49,13 @@ include("utils.jl")
             @test Manifolds.allocate_result_type(M, log, (p, p)) == T
             @test Manifolds.allocate_result_type(M, inverse_retract, (p, p)) == T
             convert(T, p, X) == X
+            # copyto
+            pC = allocate(p)
+            copyto!(M, pC, p)
+            @test pC.value == p.value
+            XC = allocate(X)
+            copyto!(M, XC, p, X)
+            @test XC.value == X.value
         end
     end
     @testset "Hyperbolic Representation Conversion I" begin

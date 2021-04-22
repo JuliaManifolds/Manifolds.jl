@@ -133,6 +133,7 @@ for T in _HyperbolicTypes
         allocate(p::$T, ::Type{P}, dims::Tuple) where {P} = $T(allocate(p.value, P, dims))
 
         @inline Base.copy(p::$T) = $T(copy(p.value))
+        Base.copyto!(q::$T, p::$T) = copyto!(q.value, p.value)
 
         Base.similar(p::$T) = $T(similar(p.value))
 
@@ -234,10 +235,6 @@ function check_tangent_vector(
         mpe === nothing || return mpe
     end
     return check_manifold_point(Euclidean(N), X.value; kwargs...)
-end
-
-for T in _HyperbolicTypes
-    @eval Base.copyto!(p::$T, q::$T) = copyto!(p.value, q.value)
 end
 
 # Define self conversions

@@ -129,6 +129,9 @@ christoffel_symbols_second_jacobian(::MetricManifold, ::Any)
     return ∂Γ
 end
 
+Base.copyto!(M::MetricManifold, q, p) = copyto!(M.manifold, q, p)
+Base.copyto!(M::MetricManifold, Y, p, X) = copyto!(M.manifold, Y, p, X)
+
 decorator_transparent_dispatch(::typeof(exp), M::MetricManifold, args...) = Val(:parent)
 function decorator_transparent_dispatch(::typeof(exp!), M::MetricManifold, args...)
     return Val(:intransparent)
