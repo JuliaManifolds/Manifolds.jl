@@ -176,7 +176,7 @@ include("utils.jl")
 
                 # copyto
                 w2 = allocate(w)
-                copyto!(M, w2, w)
+                copyto!(M, w2, x, w)
                 @test w.U == w2.U
                 @test w.M == w2.M
                 @test w.Vt == w2.Vt
