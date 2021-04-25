@@ -26,7 +26,7 @@ end
 
 access the `i`th manifold component from the [`ProductManifold`](@ref) `M`.
 """
-@inline Base.getindex(M::ProductManifold, i) = M.manifolds[i]
+@inline Base.getindex(M::ProductManifold, i::Integer) = M.manifolds[i]
 
 ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
 
