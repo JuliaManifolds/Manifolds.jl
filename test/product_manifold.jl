@@ -19,6 +19,8 @@ end
     @test Mse == ProductManifold(M1) × M2
     @test Mse == ProductManifold(M1) × ProductManifold(M2)
     @test Mse == M1 × ProductManifold(M2)
+    @test Mse[1] == M1
+    @test Mse[2] == M2
     @test injectivity_radius(Mse) ≈ π
     @test injectivity_radius(
         Mse,

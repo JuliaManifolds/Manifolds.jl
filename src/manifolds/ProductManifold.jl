@@ -20,6 +20,14 @@ function ProductManifold(manifolds::Manifold...)
     return ProductManifold{𝔽,typeof(manifolds)}(manifolds)
 end
 
+"""
+    getindex(M::ProductManifold, i)
+    M[i]
+
+access the `i`th manifold component from the [`ProductManifold`](@ref) `M`.
+"""
+@inline Base.getindex(M::ProductManifold, i::Integer) = M.manifolds[i]
+
 ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
 
 const PRODUCT_BASIS_LIST = [
