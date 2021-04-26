@@ -8,8 +8,14 @@ It is not necessary to use this decorator if you implement just one (or the firs
 If you later introduce a second, the old (first) metric can be used with the (non [`MetricManifold`](@ref)) [`AbstractManifold`](@ref), i.e. without an explicitly stated metric.
 
 This manifold decorator serves two purposes:
+
 1. to implement different metrics (e.g. in closed form) for one [`AbstractManifold`](@ref)
 2. to provide a way to compute geodesics on manifolds, where this [`Metric`](@ref) does not yield closed formula.
+
+```@contents
+Pages = ["metric.md"]
+Depth = 2
+```
 
 Let's first look at the provided types.
 
@@ -38,3 +44,9 @@ Modules = [Manifolds, ManifoldsBase]
 Pages = ["manifolds/MetricManifold.jl"]
 Order = [:function]
 ```
+
+## Metrics, charts and bases of vector spaces
+
+All metric-related functions take a basis of a vector space as one of the arguments. This needed because generally there is no way to define these functions without referencing a basis. In some cases there is no need to be explicit about this basis, and then for example a [`DefaultOrthonormalBasis`](@ref) object can be used. In cases where being explicit about these bases is needed, for example when using multiple charts, a basis can be specified, for example using [`induced_basis`](@ref Main.Manifolds.induced_basis).
+
+Metric-related functions can take bases of associated tangent spaces as arguments. For example [`local_metric`](@ref) can take the basis of the tangent space it is supposed to operate on instead of a custom basis of the space of symmetric bilinear operators.
