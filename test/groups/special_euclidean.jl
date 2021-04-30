@@ -15,9 +15,9 @@ include("group_utils.jl")
 
         if n == 2
             t = Vector{Float64}.([1:2, 2:3, 3:4])
-            ω = [[1.0, 2.0], [2.0, 1.0], [1.0, 3.0]]
+            ω = [[1.0,], [2.0,], [1.0,]]
             tuple_pts = [(ti, exp(Rn, x, hat(Rn, x, ωi))) for (ti, ωi) in zip(t, ω)]
-            tuple_v = ([-1.0, 2.0], hat(Rn, x, [1.0, -0.5]))
+            tuple_v = ([-1.0, 2.0], hat(Rn, x, [1.0,]))
         elseif n == 3
             t = Vector{Float64}.([1:3, 2:4, 4:6])
             ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
