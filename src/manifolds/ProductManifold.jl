@@ -20,6 +20,14 @@ function ProductManifold(manifolds::AbstractManifold...)
     return ProductManifold{𝔽,typeof(manifolds)}(manifolds)
 end
 
+"""
+    getindex(M::ProductManifold, i)
+    M[i]
+
+access the `i`th manifold component from the [`ProductManifold`](@ref) `M`.
+"""
+@inline Base.getindex(M::ProductManifold, i::Integer) = M.manifolds[i]
+
 ProductManifold() = throw(MethodError("No method matching ProductManifold()."))
 
 const PRODUCT_BASIS_LIST = [
@@ -184,6 +192,21 @@ function check_tangent_vector(
     (length(errors) > 1) && return CompositeManifoldError(cerr)
     (length(errors) == 1) && return cerr[1]
     return nothing
+end
+
+function copyto!(M::ProductManifold, q::ProductRepr, p::ProductRepr)
+    map(copyto!, M.manifolds, submanifold_components(q), submanifold_components(p))
+    return q
+end
+function copyto!(M::ProductManifold, Y::ProductRepr, p::ProductRepr, X::ProductRepr)
+    map(
+        copyto!,
+        M.manifolds,
+        submanifold_components(Y),
+        submanifold_components(p),
+        submanifold_components(X),
+    )
+    return Y
 end
 
 @doc raw"""
