@@ -117,8 +117,8 @@ end
 
 function det_local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
-    ::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
     p,
+    ::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
 ) where {𝔽}
     return one(eltype(p))
 end
@@ -283,18 +283,18 @@ end
 
 function inverse_local_metric(
     M::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
-    B::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
     p,
+    B::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
 ) where {𝔽}
-    return local_metric(M, B, p)
+    return local_metric(M, p, B)
 end
 
 default_metric_dispatch(::Euclidean, ::EuclideanMetric) = Val(true)
 
 function local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
-    B::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
     p,
+    B::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
 ) where {𝔽}
     return Diagonal(ones(SVector{size(p, 1),eltype(p)}))
 end
@@ -327,8 +327,8 @@ log!(::Euclidean, X, p, q) = (X .= q .- p)
 
 function log_local_metric_density(
     ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
-    ::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
     p,
+    ::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
 ) where {𝔽}
     return zero(eltype(p))
 end
