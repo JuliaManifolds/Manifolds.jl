@@ -20,7 +20,10 @@ makedocs(
     pages=[
         "Home" => "index.md",
         "ManifoldsBase.jl" => "interface.md",
-        "Examples" => ["How to implement a Manifold" => "examples/manifold.md"],
+        "Examples" => [
+            "How to implement a Manifold" => "examples/manifold.md",
+            "Dime Tour, Rotations" => "examples/dimetourrotations.md"
+        ],
         "Manifolds" => [
             "Basic manifolds" => [
                 "Centered matrices" => "manifolds/centeredmatrices.md",
