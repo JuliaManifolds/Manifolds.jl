@@ -91,9 +91,9 @@ _xθi_ = get_coordinates(M, xR0, xXi_, e0)[1]
 
 ### Actions and Operations
 
-With the basics in hand on how to move between the coordinate, algebra, and group representations, let's briefly look at composition and application of points on the manifold.  For example, a `Rotation(n)` manifold is the mathematical representation, but points have an application purpose to retain information regarding a a specific rotation -- i.e. using Euler angles, or Euclidean(n) space to store rotation information quicly becomes problematic.  Other rotation represenation methods, including quaternions, Pauli matrices, etc., have similar features.
+With the basics in hand on how to move between the coordinate, algebra, and group representations, let's briefly look at composition and application of points on the manifold.  For example, a `Rotation(n)` manifold is the mathematical representation, but the points have an application purpose in retaining information regarding a specific rotation.  In contrast, using Euler angles, or Euclidean(n) space to store rotation information quickly becomes problematic.  Other rotation representation methods, including quaternions, Pauli matrices, etc., have similar features.
 
-Therefore points from a manifold may well have an associated action which we [`apply`](@ref).  Consider rotating through `θ = π/6` three vectors `V` from their native domain `Euclidean(2)`, from the reference frame `a` to frame `b`.  Keeping with our two-dimensional example above:
+Therefore, points from a manifold may have an associated action which we [`apply`](@ref).  Consider rotating through `θ = π/6` three vectors `V` from their native domain `Euclidean(2)`, from the reference frame `a` to frame `b`.  Keeping with our two-dimensional example above:
 ```julia
 aV1 = [1;0]
 aV2 = [0;1]
