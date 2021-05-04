@@ -1,4 +1,4 @@
-# Dime Tour, Rotations
+# [Dime Tour, Rotations](@id dime_tour_rotations)
 
 This tutorial is meant to give the briefest of overviews on how to use Manifolds.jl in a manner familiar to those needing rigid body transforms.  This tutorial will introduce some of the common function calls needed to convert between the various data types and hopefully show the user something more about to combine some of the function calls listed elsewhere in the documentation.
 
