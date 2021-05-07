@@ -172,7 +172,7 @@ end
         @test metric(M) === g
 
         @test_throws ErrorException local_metric_jacobian(E, zeros(3))
-        @test_throws ErrorException christoffel_symbols_second_jacobian(E, zeros(3))
+        @test_throws MethodError christoffel_symbols_second_jacobian(E, zeros(3))
 
         for vtype in (Vector, MVector{n})
             x, v, w = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))

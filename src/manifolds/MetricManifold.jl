@@ -59,7 +59,7 @@ derivative of the local representation of the metric tensor. The dimensions of
 the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
 christoffel_symbols_first(::MetricManifold, ::Any)
-@decorator_transparent_function function christoffel_symbols_first(
+function christoffel_symbols_first(
     M::MetricManifold,
     p;
     backend::AbstractDiffBackend=diff_backend(),
@@ -70,6 +70,7 @@ christoffel_symbols_first(::MetricManifold, ::Any)
     @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
     return Γ
 end
+@decorator_transparent_signature christoffel_symbols_first(M::MD, p; kwargs...) where {MD <:AbstractDecoratorManifold}
 
 @doc raw"""
     christoffel_symbols_second(
@@ -88,7 +89,7 @@ $g^{kl}$ is the inverse of the local representation of the metric tensor.
 The dimensions of the resulting multi-dimensional array are ordered $(l,i,j)$.
 """
 christoffel_symbols_second(::MetricManifold, ::Any)
-@decorator_transparent_function function christoffel_symbols_second(
+function christoffel_symbols_second(
     M::MetricManifold,
     p;
     backend::AbstractDiffBackend=diff_backend(),
@@ -99,6 +100,7 @@ christoffel_symbols_second(::MetricManifold, ::Any)
     @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
     return Γ₂
 end
+@decorator_transparent_signature christoffel_symbols_second(M::MD, p; kwargs...) where {MD <:AbstractDecoratorManifold}
 
 @doc raw"""
     christoffel_symbols_second_jacobian(
@@ -113,7 +115,7 @@ $\frac{∂}{∂ p^l} Γ^{k}_{ij} = Γ^{k}_{ij,l}.$
 The dimensions of the resulting multi-dimensional array are ordered $(i,j,k,l)$.
 """
 christoffel_symbols_second_jacobian(::MetricManifold, ::Any)
-@decorator_transparent_function function christoffel_symbols_second_jacobian(
+function christoffel_symbols_second_jacobian(
     M::MetricManifold,
     p;
     backend::AbstractDiffBackend=diff_backend(),
@@ -128,6 +130,7 @@ christoffel_symbols_second_jacobian(::MetricManifold, ::Any)
     )
     return ∂Γ
 end
+@decorator_transparent_signature christoffel_symbols_second_jacobian(M::MD, p; kwargs...) where {MD <:AbstractDecoratorManifold}
 
 Base.copyto!(M::MetricManifold, q, p) = copyto!(M.manifold, q, p)
 Base.copyto!(M::MetricManifold, Y, p, X) = copyto!(M.manifold, Y, p, X)
@@ -486,7 +489,7 @@ coordinates of `p`, $\frac{∂}{∂ p^k} g_{ij} = g_{ij,k}$. The
 dimensions of the resulting multi-dimensional array are ordered $(i,j,k)$.
 """
 local_metric_jacobian(::MetricManifold, ::Any)
-@decorator_transparent_function :intransparent function local_metric_jacobian(
+function local_metric_jacobian(
     M::MetricManifold,
     p;
     backend::AbstractDiffBackend=diff_backend(),
@@ -495,6 +498,8 @@ local_metric_jacobian(::MetricManifold, ::Any)
     ∂g = reshape(_jacobian(q -> local_metric(M, q), p, backend), n, n, n)
     return ∂g
 end
+@decorator_transparent_signature local_metric_jacobian(M::MD, p; kwargs...) where {MD <:AbstractDecoratorManifold}
+
 
 @doc raw"""
     log(N::MetricManifold{M,G}, p, q)
