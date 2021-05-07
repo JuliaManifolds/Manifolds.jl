@@ -52,35 +52,20 @@ include("utils.jl")
         @test_throws DomainError is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), true)
         @test is_point(M2, x2)
 
-        @test !is_tangent_vector(
+        @test !is_vector(
             M,
             SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0]),
             UMVTVector(zeros(2, 1), zeros(1, 2), zeros(2, 2)),
         )
-        @test !is_tangent_vector(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), v)
-        @test_throws DomainError is_tangent_vector(
-            M,
-            SVDMPoint([1.0 0.0; 0.0 0.0], 2),
-            v,
-            true,
-        )
-        @test !is_tangent_vector(M, x, UMVTVector(x.U, v.M, x.Vt, 2))
-        @test_throws DomainError is_tangent_vector(
-            M,
-            x,
-            UMVTVector(x.U, v.M, x.Vt, 2),
-            true,
-        )
-        @test !is_tangent_vector(M, x, UMVTVector(v.U, v.M, x.Vt, 2))
-        @test_throws DomainError is_tangent_vector(
-            M,
-            x,
-            UMVTVector(v.U, v.M, x.Vt, 2),
-            true,
-        )
+        @test !is_vector(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), v)
+        @test_throws DomainError is_vector(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), v, true)
+        @test !is_vector(M, x, UMVTVector(x.U, v.M, x.Vt, 2))
+        @test_throws DomainError is_vector(M, x, UMVTVector(x.U, v.M, x.Vt, 2), true)
+        @test !is_vector(M, x, UMVTVector(v.U, v.M, x.Vt, 2))
+        @test_throws DomainError is_vector(M, x, UMVTVector(v.U, v.M, x.Vt, 2), true)
 
         @test is_point(M, x)
-        @test is_tangent_vector(M, x, v)
+        @test is_vector(M, x, v)
     end
     types = [[Matrix{Float64}, Vector{Float64}, Matrix{Float64}]]
     TEST_FLOAT32 && push!(types, [Matrix{Float32}, Vector{Float32}, Matrix{Float32}])

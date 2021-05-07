@@ -14,16 +14,11 @@ using ManifoldsBase: TFVector
         @test injectivity_radius(M, ProjectionRetraction()) == π / 2
         @test base_manifold(M) === M
         @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
-        @test !is_tangent_vector(M, [1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0])
+        @test !is_vector(M, [1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0])
         @test_throws DomainError is_point(M, [2.0, 0.0, 0.0], true)
         @test !is_point(M, [2.0, 0.0, 0.0])
-        @test !is_tangent_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
-        @test_throws DomainError is_tangent_vector(
-            M,
-            [1.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0],
-            true,
-        )
+        @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
+        @test_throws DomainError is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], true)
         @test injectivity_radius(M, [1.0, 0.0, 0.0], ProjectionRetraction()) == π / 2
     end
     types = [Vector{Float64}]
@@ -106,7 +101,7 @@ using ManifoldsBase: TFVector
         for i in 1:n
             vcoord = [j == i for j in 1:n]
             v = get_vector(M, p, vcoord, B)
-            @test is_tangent_vector(M, p, v)
+            @test is_vector(M, p, v)
             @test get_coordinates(M, p, v, B) ≈ vcoord
         end
     end
@@ -138,7 +133,7 @@ using ManifoldsBase: TFVector
         @test is_point(M, q)
         Y = [2.0, 1.0im, 20.0]
         X = project(M, q, Y)
-        @test is_tangent_vector(M, q, X, true; atol=10^(-14))
+        @test is_vector(M, q, X, true; atol=10^(-14))
     end
 
     @testset "Quaternion Sphere" begin
@@ -151,7 +146,7 @@ using ManifoldsBase: TFVector
         @test is_point(M, q)
         Y = [Quaternion(2.0), Quaternion(1.0im), Quaternion(0.0, 0.0, 20.0, 0.0)]
         X = project(M, q, Y)
-        @test is_tangent_vector(M, q, X, true; atol=10^(-14))
+        @test is_vector(M, q, X, true; atol=10^(-14))
     end
 
     @testset "Array Sphere" begin
@@ -164,7 +159,7 @@ using ManifoldsBase: TFVector
         @test is_point(M, q)
         Y = [1.0 0.0; 0.0 1.1]
         X = project(M, q, Y)
-        @test is_tangent_vector(M, q, X)
+        @test is_vector(M, q, X)
         M = ArraySphere(2, 2; field=ℂ)
 
         @test repr(M) == "ArraySphere(2, 2; field = ℂ)"

@@ -54,7 +54,7 @@ function check_point(M::MultinomialMatrices{n,m}, p; kwargs...) where {n,m}
     return check_point(PowerManifold(M.manifold, m), p; kwargs...)
 end
 @doc raw"""
-    check_tangent_vector(M::MultinomialMatrices p, X; check_base_point = true, kwargs...)
+    check_vector(M::MultinomialMatrices p, X; check_base_point = true, kwargs...)
 
 Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialMatrices`](@ref) `M`.
 This means, that `p` is valid, that `X` is of correct dimension and columnswise
@@ -62,7 +62,7 @@ a tangent vector to the columns of `p` on the [`ProbabilitySimplex`](@ref).
 The optional parameter `check_base_point` indicates, whether to call
 [`check_point`](@ref check_point(::MultinomialMatrices, ::Any))  for `p`.
 """
-function check_tangent_vector(
+function check_vector(
     M::MultinomialMatrices{n,m},
     p,
     X;
@@ -81,7 +81,7 @@ function check_tangent_vector(
             "The matrix `X` ($(size(X))) does not match the dimension of $(M).",
         )
     end
-    return check_tangent_vector(
+    return check_vector(
         PowerManifold(M.manifold, m),
         p,
         X;

@@ -90,7 +90,7 @@ function check_point(M::ProbabilitySimplex, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::ProbabilitySimplex, p, X; check_base_point = true, kwargs... )
+    check_vector(M::ProbabilitySimplex, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`ProbabilitySimplex`](@ref) `M`, i.e.
 after [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
@@ -99,13 +99,13 @@ The optional parameter `check_base_point` indicates, whether to call
 [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))  for `p` or not.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::ProbabilitySimplex, p, X; check_base_point=true, kwargs...)
+function check_vector(M::ProbabilitySimplex, p, X; check_base_point=true, kwargs...)
     if check_base_point
         mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
         get_embedding(M),
         p,

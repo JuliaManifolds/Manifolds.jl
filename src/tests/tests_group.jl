@@ -199,14 +199,14 @@ function ManifoldTests.test_group(
             translate_diff(G, g_pts[2], g_pts[1], X, LeftAction());
             atol=atol,
         )
-        Test.@test is_tangent_vector(
+        Test.@test is_vector(
             G,
             g12,
             translate_diff(G, g_pts[2], g_pts[1], X, LeftAction()),
             true;
             atol=atol,
         )
-        RightAction() in diff_convs && Test.@test is_tangent_vector(
+        RightAction() in diff_convs && Test.@test is_vector(
             G,
             g21,
             translate_diff(G, g_pts[2], g_pts[1], X, RightAction()),
@@ -595,8 +595,8 @@ function ManifoldTests.test_action(
             for a in a_pts
                 am, av = apply(A, a, m), apply_diff(A, a, m, v)
                 ainvm, ainvv = inverse_apply(A, a, m), inverse_apply_diff(A, a, m, v)
-                Test.@test is_tangent_vector(M, am, av, true; atol=atol)
-                Test.@test is_tangent_vector(M, ainvm, ainvv, true; atol=atol)
+                Test.@test is_vector(M, am, av, true; atol=atol)
+                Test.@test is_vector(M, ainvm, ainvv, true; atol=atol)
             end
 
             a12 = compose(A, a_pts[1], a_pts[2])
@@ -618,8 +618,8 @@ function ManifoldTests.test_action(
                     ainvm = inverse_apply(A, a, m)
                     ainvv = allocate(v)
                     Test.@test inverse_apply_diff!(A, ainvv, a, m, v) === ainvv
-                    Test.@test is_tangent_vector(M, am, av, true; atol=atol)
-                    Test.@test is_tangent_vector(M, ainvm, ainvv, true; atol=atol)
+                    Test.@test is_vector(M, am, av, true; atol=atol)
+                    Test.@test is_vector(M, ainvm, ainvv, true; atol=atol)
                 end
 
                 a12 = compose(A, a_pts[1], a_pts[2])

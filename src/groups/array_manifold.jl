@@ -90,12 +90,12 @@ end
 function translate_diff(M::ValidationManifold, p, q, X, conv::ActionDirection; kwargs...)
     is_point(M, p, true; kwargs...)
     is_point(M, q, true; kwargs...)
-    is_tangent_vector(M, q, X, true; kwargs...)
+    is_vector(M, q, X, true; kwargs...)
     Y = ValidationTVector(
         translate_diff(M.manifold, array_value(p), array_value(q), array_value(X), conv),
     )
     pq = translate(M, p, q, conv)
-    is_tangent_vector(M, pq, Y, true; kwargs...)
+    is_vector(M, pq, Y, true; kwargs...)
     return Y
 end
 
@@ -110,7 +110,7 @@ function translate_diff!(
 )
     is_point(M, p, true; kwargs...)
     is_point(M, q, true; kwargs...)
-    is_tangent_vector(M, q, X, true; kwargs...)
+    is_vector(M, q, X, true; kwargs...)
     translate_diff!(
         M.manifold,
         array_value(Y),
@@ -120,7 +120,7 @@ function translate_diff!(
         conv,
     )
     pq = translate(M, p, q, conv)
-    is_tangent_vector(M, pq, Y, true; kwargs...)
+    is_vector(M, pq, Y, true; kwargs...)
     return Y
 end
 
@@ -134,7 +134,7 @@ function inverse_translate_diff(
 )
     is_point(M, p, true; kwargs...)
     is_point(M, q, true; kwargs...)
-    is_tangent_vector(M, q, X, true; kwargs...)
+    is_vector(M, q, X, true; kwargs...)
     Y = ValidationTVector(
         inverse_translate_diff(
             M.manifold,
@@ -145,7 +145,7 @@ function inverse_translate_diff(
         ),
     )
     pinvq = inverse_translate(M, p, q, conv)
-    is_tangent_vector(M, pinvq, Y, true; kwargs...)
+    is_vector(M, pinvq, Y, true; kwargs...)
     return Y
 end
 
@@ -160,7 +160,7 @@ function inverse_translate_diff!(
 )
     is_point(M, p, true; kwargs...)
     is_point(M, q, true; kwargs...)
-    is_tangent_vector(M, q, X, true; kwargs...)
+    is_vector(M, q, X, true; kwargs...)
     inverse_translate_diff!(
         M.manifold,
         array_value(Y),
@@ -170,12 +170,12 @@ function inverse_translate_diff!(
         conv,
     )
     pinvq = inverse_translate(M, p, q, conv)
-    is_tangent_vector(M, pinvq, Y, true; kwargs...)
+    is_vector(M, pinvq, Y, true; kwargs...)
     return Y
 end
 
 function group_exp(M::ValidationManifold, X; kwargs...)
-    is_tangent_vector(
+    is_vector(
         M,
         make_identity(M.manifold, array_value(X)),
         array_value(X),
@@ -189,7 +189,7 @@ function group_exp(M::ValidationManifold, X; kwargs...)
 end
 
 function group_exp!(M::ValidationManifold, q, X; kwargs...)
-    is_tangent_vector(
+    is_vector(
         M,
         make_identity(M.manifold, array_value(X)),
         array_value(X),
@@ -205,7 +205,7 @@ end
 function group_log(M::ValidationManifold, q; kwargs...)
     is_point(M, q, true; kwargs...)
     X = ValidationTVector(group_log(M.manifold, array_value(q)))
-    is_tangent_vector(
+    is_vector(
         M,
         make_identity(M.manifold, array_value(X)),
         array_value(X),
@@ -219,7 +219,7 @@ end
 function group_log!(M::ValidationManifold, X, q; kwargs...)
     is_point(M, q, true; kwargs...)
     group_log!(M.manifold, array_value(X), array_value(q))
-    is_tangent_vector(
+    is_vector(
         M,
         make_identity(M.manifold, array_value(X)),
         array_value(X),

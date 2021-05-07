@@ -67,7 +67,7 @@ function check_point(M::MultinomialSymmetric{n}, p; kwargs...) where {n}
     return check_point(SymmetricMatrices(n, ℝ), p)
 end
 @doc raw"""
-    check_tangent_vector(M::MultinomialSymmetric p, X; check_base_point = true, kwargs...)
+    check_vector(M::MultinomialSymmetric p, X; check_base_point = true, kwargs...)
 
 Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialSymmetric`](@ref) `M`.
 This means, that `p` is valid, that `X` is of correct dimension, symmetric, and sums to zero
@@ -76,7 +76,7 @@ along any row.
 The optional parameter `check_base_point` indicates, whether to call
 [`check_point`](@ref check_point(::MultinomialSymmetric, ::Any))  for `p`.
 """
-function check_tangent_vector(
+function check_vector(
     M::MultinomialSymmetric{n},
     p,
     X;
@@ -88,7 +88,7 @@ function check_tangent_vector(
         mpe === nothing || return mpe
     end
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
@@ -98,7 +98,7 @@ function check_tangent_vector(
     )
     mpv === nothing || return mpv
     # from the embedding we know that columns sum to zero, only symmety is left, i.e.
-    return check_tangent_vector(SymmetricMatrices(n, ℝ), p, X; check_base_point=false)
+    return check_vector(SymmetricMatrices(n, ℝ), p, X; check_base_point=false)
 end
 
 function decorated_manifold(::MultinomialSymmetric{N}) where {N}

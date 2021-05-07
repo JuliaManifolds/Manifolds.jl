@@ -50,7 +50,7 @@ function check_point(M::CholeskySpace, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::CholeskySpace, p, X; check_base_point = true, kwargs... )
+    check_vector(M::CholeskySpace, p, X; check_base_point = true, kwargs... )
 
 Check whether `v` is a tangent vector to `p` on the [`CholeskySpace`](@ref) `M`, i.e.
 after [`check_point`](@ref)`(M,p)`, `X` has to have the same dimension as `p`
@@ -58,7 +58,7 @@ and a symmetric matrix.
 The optional parameter `check_base_point` indicates whether to call [`check_point`](@ref)  for `p`.
 The tolerance for the tests can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::CholeskySpace, p, X; check_base_point=true, kwargs...)
+function check_vector(M::CholeskySpace, p, X; check_base_point=true, kwargs...)
     if check_base_point
         mpe = check_point(M, p; kwargs...)
         mpe !== nothing && return mpe

@@ -45,7 +45,7 @@ function check_point(M::Circle{ℂ}, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::Circle, p, X; check_base_point, kwargs...)
+    check_vector(M::Circle, p, X; check_base_point, kwargs...)
 
 Check whether `X` is a tangent vector in the tangent space of `p` on the
 [`Circle`](@ref) `M`.
@@ -54,16 +54,16 @@ For the complex-valued case `X` has to lie on the line parallel to the tangent l
 in the complex plane, i.e. their inner product has to be zero.
 The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 """
-check_tangent_vector(::Circle{ℝ}, ::Any...; ::Any...)
+check_vector(::Circle{ℝ}, ::Any...; ::Any...)
 
-function check_tangent_vector(M::Circle{ℝ}, p, X; check_base_point=true, kwargs...)
+function check_vector(M::Circle{ℝ}, p, X; check_base_point=true, kwargs...)
     if check_base_point
         perr = check_point(M, p; kwargs...)
         return perr # if p is valid all X that are real numbers are valid
     end
     return nothing
 end
-function check_tangent_vector(M::Circle{ℂ}, p, X; check_base_point=true, kwargs...)
+function check_vector(M::Circle{ℂ}, p, X; check_base_point=true, kwargs...)
     if check_base_point
         perr = check_point(M, p)
         perr === nothing || return perr

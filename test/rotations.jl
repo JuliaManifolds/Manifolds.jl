@@ -170,12 +170,12 @@ include("utils.jl")
         @test is_point(M, x)
         @test is_point(M, x, true)
         for v in [1, [0.0 1.0; 0.0 0.0]]
-            @test_throws DomainError is_tangent_vector(M, x, v, true)
-            @test !is_tangent_vector(M, x, v)
+            @test_throws DomainError is_vector(M, x, v, true)
+            @test !is_vector(M, x, v)
         end
         v = [0.0 1.0; -1.0 0.0]
-        @test is_tangent_vector(M, x, v)
-        @test is_tangent_vector(M, x, v, true)
+        @test is_vector(M, x, v)
+        @test is_vector(M, x, v, true)
     end
     @testset "Project point" begin
         M = Manifolds.Rotations(2)

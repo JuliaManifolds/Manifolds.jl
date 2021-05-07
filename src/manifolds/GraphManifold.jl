@@ -86,24 +86,18 @@ function check_point(M::EdgeGraphManifold, p; kwargs...)
 end
 
 @doc raw"""
-    check_tangent_vector(M::GraphManifold, p, X; check_base_point = true, kwargs...)
+    check_vector(M::GraphManifold, p, X; check_base_point = true, kwargs...)
 
 Check whether `p` is a valid point on the [`GraphManifold`](@ref), and
 `X` it from its tangent space, i.e. its
 length equals the number of vertices (for [`VertexManifold`](@ref)s) or
 the number of edges (for [`EdgeManifold`](@ref)s) and that each element of `X`
 together with its corresponding entry of `p` passes the
-[`check_tangent_vector`](@ref) test for the base manifold `M.manifold`.
+[`check_vector`](@ref) test for the base manifold `M.manifold`.
 The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 """
-check_tangent_vector(::GraphManifold, ::Any...)
-function check_tangent_vector(
-    M::VertexGraphManifold,
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-)
+check_vector(::GraphManifold, ::Any...)
+function check_vector(M::VertexGraphManifold, p, X; check_base_point=true, kwargs...)
     if check_base_point && size(p) != (nv(M.graph),)
         return DomainError(
             length(p),
@@ -117,9 +111,9 @@ function check_tangent_vector(
         )
     end
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), nv(M.graph))
-    return check_tangent_vector(PM, p, X; check_base_point=check_base_point, kwargs...)
+    return check_vector(PM, p, X; check_base_point=check_base_point, kwargs...)
 end
-function check_tangent_vector(M::EdgeGraphManifold, p, X; check_base_point=true, kwargs...)
+function check_vector(M::EdgeGraphManifold, p, X; check_base_point=true, kwargs...)
     if check_base_point && size(p) != (ne(M.graph),)
         return DomainError(
             length(p),
@@ -133,7 +127,7 @@ function check_tangent_vector(M::EdgeGraphManifold, p, X; check_base_point=true,
         )
     end
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), ne(M.graph))
-    return check_tangent_vector(PM, p, X; check_base_point=check_base_point, kwargs...)
+    return check_vector(PM, p, X; check_base_point=check_base_point, kwargs...)
 end
 
 get_iterator(M::EdgeGraphManifold) = 1:ne(M.graph)

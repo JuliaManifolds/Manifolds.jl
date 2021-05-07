@@ -208,7 +208,7 @@ last entry, i.e. $p_n>0$
 check_point(::Hyperbolic, ::Any)
 
 @doc raw"""
-    check_tangent_vector(M::Hyperbolic{n}, p, X; check_base_point = true, kwargs... )
+    check_vector(M::Hyperbolic{n}, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`Hyperbolic`](@ref) `M`, i.e.
 after [`check_point`](@ref)`(M,p)`, `X` has to be of the same dimension as `p`.
@@ -221,9 +221,9 @@ to the inner product from the embedding, see [`MinkowskiMetric`](@ref).
 
 For a the Poincaré ball as well as the Poincaré half plane model, `X` has to be a vector from $ℝ^{n}$.
 """
-check_tangent_vector(::Hyperbolic, ::Any, ::Any)
+check_vector(::Hyperbolic, ::Any, ::Any)
 
-function check_tangent_vector(
+function check_vector(
     M::Hyperbolic{N},
     p,
     X::Union{PoincareBallTVector,PoincareHalfSpaceTVector};

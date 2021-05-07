@@ -85,13 +85,13 @@ using NLsolve
         )
         @test is_point(G, Float64[0 0 1; 0 1 1; 1 1 1], true)
         @test is_point(G, make_identity(G, ones(3, 3)), true)
-        @test_throws DomainError is_tangent_vector(
+        @test_throws DomainError is_vector(
             G,
             Float64[0 1 1; 0 1 1; 1 0 0],
             randn(3, 3),
             true,
         )
-        @test is_tangent_vector(G, Float64[0 0 1; 0 1 1; 1 1 1], randn(3, 3), true)
+        @test is_vector(G, Float64[0 0 1; 0 1 1; 1 1 1], randn(3, 3), true)
 
         types = [Matrix{Float64}]
         pts = [
@@ -157,13 +157,13 @@ using NLsolve
             make_identity(GeneralLinear(3), ones(3, 3)),
             true,
         )
-        @test_throws DomainError is_tangent_vector(
+        @test_throws DomainError is_vector(
             G,
             ComplexF64[im im; im im],
             randn(ComplexF64, 2, 2),
             true,
         )
-        @test is_tangent_vector(G, ComplexF64[1 im; im im], randn(ComplexF64, 2, 2), true)
+        @test is_vector(G, ComplexF64[1 im; im im], randn(ComplexF64, 2, 2), true)
 
         types = [Matrix{ComplexF64}]
         pts = [

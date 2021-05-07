@@ -112,7 +112,7 @@ function check_point(M::AbstractProjectiveSpace, p; kwargs...)
 end
 
 @doc raw"""
-    check_tangent_vector(M::AbstractProjectiveSpace, p, X; check_base_point = true, kwargs... )
+    check_vector(M::AbstractProjectiveSpace, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector in the tangent space of `p` on the
 [`AbstractProjectiveSpace`](@ref) `M`, i.e. that `X` has the same size as elements of the
@@ -121,19 +121,13 @@ $⟨p, X⟩_{\mathrm{F}} = 0$.
 The optional parameter `check_base_point` indicates whether to call
 [`check_point`](@ref) for `p`.
 """
-function check_tangent_vector(
-    M::AbstractProjectiveSpace,
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-)
+function check_vector(M::AbstractProjectiveSpace, p, X; check_base_point=true, kwargs...)
     if check_base_point
         mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
         get_embedding(M),
         p,

@@ -12,7 +12,7 @@ import ManifoldsBase:
     base_manifold,
     check_point,
     check_point__transparent,
-    check_tangent_vector,
+    check_vector,
     decorated_manifold,
     decorator_transparent_dispatch,
     default_decorator_dispatch,
@@ -38,7 +38,7 @@ import ManifoldsBase:
     inner,
     inner__intransparent,
     is_point,
-    is_tangent_vector,
+    is_vector,
     inverse_retract,
     inverse_retract!,
     log, #for extension, e.g. in Stiefel.
@@ -229,10 +229,10 @@ Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
 
 Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
 the [`TangentSpaceAtPoint`](@ref) at `p` on the [`AbstractManifold`](@ref) `M`.
-This method uses [`is_tangent_vector`](@ref) deactivating the error throw option.
+This method uses [`is_vector`](@ref) deactivating the error throw option.
 """
 function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
-    return is_tangent_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
+    return is_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
 end
 
 function __init__()
@@ -399,7 +399,7 @@ export ×,
     base_manifold,
     bundle_projection,
     check_point,
-    check_tangent_vector,
+    check_vector,
     christoffel_symbols_first,
     christoffel_symbols_second,
     christoffel_symbols_second_jacobian,
@@ -433,7 +433,7 @@ export ×,
     is_default_metric,
     is_default_decorator,
     is_point,
-    is_tangent_vector,
+    is_vector,
     isapprox,
     kurtosis,
     local_metric,

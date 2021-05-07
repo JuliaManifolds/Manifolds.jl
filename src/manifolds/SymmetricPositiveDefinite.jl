@@ -46,7 +46,7 @@ function check_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
 end
 
 """
-    check_tangent_vector(M::SymmetricPositiveDefinite, p, X; check_base_point = true, kwargs... )
+    check_vector(M::SymmetricPositiveDefinite, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`SymmetricPositiveDefinite`](@ref) `M`,
 i.e. atfer [`check_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
@@ -55,7 +55,7 @@ Lie group.
 The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(
+function check_vector(
     M::SymmetricPositiveDefinite{N},
     p,
     X;
@@ -67,7 +67,7 @@ function check_tangent_vector(
         mpe === nothing || return mpe
     end
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,

@@ -17,7 +17,7 @@ This tutorial assumes that you heard of the exponential map, tangent vectors and
 Chapter 3, first.
 
 In general you need just a datatype (`struct`) that inherits from [`AbstractManifold`](@ref) to define a manifold. No function is _per se_ required to be implemented.
-However, it is a good idea to provide functions that might be useful to others, for example [`check_point`](@ref) and [`check_tangent_vector`](@ref), as we do in this tutorial.
+However, it is a good idea to provide functions that might be useful to others, for example [`check_point`](@ref) and [`check_vector`](@ref), as we do in this tutorial.
 
 We start with two technical preliminaries. If you want to start directly, you can [skip](@ref manifold-tutorial-task) this paragraph and revisit it for two of the implementation details.
 
@@ -64,7 +64,7 @@ For implementing a manifold, loading the interface should suffice for quite some
 
 ```@example manifold-tutorial
 using ManifoldsBase, LinearAlgebra, Test
-import ManifoldsBase: check_point, check_tangent_vector, manifold_dimension, exp!
+import ManifoldsBase: check_point, check_vector, manifold_dimension, exp!
 ```
 
 ## [Goal](@id manifold-tutorial-task)
@@ -125,7 +125,7 @@ nothing #hide
 Similarly, we can verify, whether a tangent vector `X` is valid. It has to fulfill the same size requirements and it has to be orthogonal to `p`. We can again use the `kwargs`, but also provide a way to check `p`, too.
 
 ```@example manifold-tutorial
-function check_tangent_vector(M::MySphere, p, X, check_base_point = true, kwargs...)
+function check_vector(M::MySphere, p, X, check_base_point = true, kwargs...)
     if check_base_point
         mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
@@ -147,7 +147,7 @@ is_point(S, [1.0,0.0,0.0]) # norm 1, so not on S, returns false
 p = [1.5,0.0,0.0]
 X = [0.0,1.0,0.0]
 # The following two tests return true
-[ is_point(S, p); is_tangent_vector(S,p,X) ]
+[ is_point(S, p); is_vector(S,p,X) ]
 ```
 
 ## [Functions on the manifold](@id manifold-tutorial-fn)

@@ -27,11 +27,11 @@ end
         @test_throws DomainError is_point(M, A, true)
         @test_throws DomainError is_point(M, C, true)
         @test_throws DomainError is_point(M, D, true)
-        @test check_tangent_vector(M, B_skewsym, B_skewsym) === nothing
-        @test_throws DomainError is_tangent_vector(M, B_skewsym, A, true)
-        @test_throws DomainError is_tangent_vector(M, A, B_skewsym, true)
-        @test_throws DomainError is_tangent_vector(M, B_skewsym, D, true)
-        @test_throws DomainError is_tangent_vector(
+        @test check_vector(M, B_skewsym, B_skewsym) === nothing
+        @test_throws DomainError is_vector(M, B_skewsym, A, true)
+        @test_throws DomainError is_vector(M, A, B_skewsym, true)
+        @test_throws DomainError is_vector(M, B_skewsym, D, true)
+        @test_throws DomainError is_vector(
             M,
             B_skewsym,
             1 * im * zero_vector(M, B_skewsym),

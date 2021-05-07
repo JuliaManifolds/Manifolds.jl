@@ -71,7 +71,7 @@ function check_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) where {n,k,�
 end
 
 @doc raw"""
-    check_tangent_vector(M::GeneralizedStiefel, p, X; kwargs...)
+    check_vector(M::GeneralizedStiefel, p, X; kwargs...)
 
 Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`](@ref)
 `M`=$\operatorname{St}(n,k,B)$, i.e. the [`AbstractNumbers`](@ref) fits,
@@ -79,7 +79,7 @@ Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`]
 it (approximately) holds that $p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0$, where
 `kwargs...` is passed to the `isapprox`.
 """
-function check_tangent_vector(
+function check_vector(
     M::GeneralizedStiefel{n,k,𝔽},
     p,
     X;
@@ -91,7 +91,7 @@ function check_tangent_vector(
         mpe === nothing || return mpe
     end
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,

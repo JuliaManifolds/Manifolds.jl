@@ -31,14 +31,14 @@ function check_point(M::Torus{N}, p; kwargs...) where {N}
     return check_point(PowerManifold(M.manifold, N), p; kwargs...)
 end
 @doc raw"""
-    check_tangent_vector(M::Torus{n}, p, X; check_base_point = true, kwargs...)
+    check_vector(M::Torus{n}, p, X; check_base_point = true, kwargs...)
 
 Checks whether `X` is a valid tangent vector to `p` on the [`Torus`](@ref) `M`.
 This means, that `p` is valid, that `X` is of correct dimension and elementwise
 a tangent vector to the elements of `p` on the [`Circle`](@ref).
 The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 """
-function check_tangent_vector(M::Torus{N}, p, X; check_base_point=true, kwargs...) where {N}
+function check_vector(M::Torus{N}, p, X; check_base_point=true, kwargs...) where {N}
     if check_base_point && length(p) != N
         return DomainError(
             length(p),
@@ -51,7 +51,7 @@ function check_tangent_vector(M::Torus{N}, p, X; check_base_point=true, kwargs..
             "The number of elements in `X` ($(length(X))) does not match the dimension of the torus ($(N)).",
         )
     end
-    return check_tangent_vector(
+    return check_vector(
         PowerManifold(M.manifold, N),
         p,
         X;

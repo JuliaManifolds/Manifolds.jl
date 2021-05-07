@@ -84,7 +84,7 @@ function check_point(M::GeneralizedGrassmann{n,k,𝔽}, p; kwargs...) where {n,k
 end
 
 @doc raw"""
-    check_tangent_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; check_base_point = true, kwargs...)
+    check_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; check_base_point = true, kwargs...)
 
 Check whether `X` is a tangent vector in the tangent space of `p` on
 the [`GeneralizedGrassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
@@ -97,7 +97,7 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
 $\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ denotes the $k × k$ zero natrix.
 The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 """
-function check_tangent_vector(
+function check_vector(
     M::GeneralizedGrassmann{n,k,𝔽},
     p,
     X;
@@ -109,7 +109,7 @@ function check_tangent_vector(
         mpe === nothing || return mpe
     end
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
         get_embedding(M),
         p,

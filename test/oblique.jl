@@ -16,10 +16,10 @@ include("utils.jl")
         @test_throws DomainError is_point(M, p, true)
         @test !is_point(M, p2)
         @test_throws CompositeManifoldError is_point(M, p2, true)
-        @test !is_tangent_vector(M, p2, 0.0)
-        @test_throws DomainError is_tangent_vector(M, p2, [0.0, 0.0, 0.0], true)
-        @test !is_tangent_vector(M, p2, [0.0, 0.0, 0.0])
-        @test_throws DomainError is_tangent_vector(M, p, [0.0, 0.0, 0.0], true)
+        @test !is_vector(M, p2, 0.0)
+        @test_throws DomainError is_vector(M, p2, [0.0, 0.0, 0.0], true)
+        @test !is_vector(M, p2, [0.0, 0.0, 0.0])
+        @test_throws DomainError is_vector(M, p, [0.0, 0.0, 0.0], true)
         @test injectivity_radius(M) ≈ π
         x = [1.0 0.0 0.0; 1.0 0.0 0.0]'
         y = [1.0 0.0 0.0; 1/sqrt(2) 1/sqrt(2) 0.0]'

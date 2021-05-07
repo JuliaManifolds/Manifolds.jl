@@ -13,14 +13,9 @@ include("utils.jl")
             @test base_manifold(M) === M
             @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
             @test_throws DomainError is_point(M, 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
-            @test !is_tangent_vector(M, x, [0.0, 0.0, 1.0, 0.0])
-            @test_throws DomainError is_tangent_vector(M, x, [0.0, 0.0, 1.0, 0.0], true)
-            @test_throws DomainError is_tangent_vector(
-                M,
-                x,
-                1 * im * zero_vector(M, x),
-                true,
-            )
+            @test !is_vector(M, x, [0.0, 0.0, 1.0, 0.0])
+            @test_throws DomainError is_vector(M, x, [0.0, 0.0, 1.0, 0.0], true)
+            @test_throws DomainError is_vector(M, x, 1 * im * zero_vector(M, x), true)
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
             @test injectivity_radius(M, x) == π / 2
@@ -72,8 +67,8 @@ include("utils.jl")
             pts = convert.(T, [x, y, z])
             @test !is_point(M, 2 * x)
             @test_throws DomainError !is_point(M, 2 * x, true)
-            @test !is_tangent_vector(M, x, y)
-            @test_throws DomainError is_tangent_vector(M, x, y, true)
+            @test !is_vector(M, x, y)
+            @test_throws DomainError is_vector(M, x, y, true)
             test_manifold(
                 M,
                 pts,
@@ -104,7 +99,7 @@ include("utils.jl")
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 4
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
-            @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
+            @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             x = [1.0 0.0; 0.0 0.5; 0.0 0.0]
 
             x = [1im 0.0; 0.0 0.5im; 0.0 0.0]

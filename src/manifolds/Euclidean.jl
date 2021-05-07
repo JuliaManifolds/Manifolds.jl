@@ -83,13 +83,7 @@ function check_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
     return nothing
 end
 
-function check_tangent_vector(
-    M::Euclidean{N,𝔽},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {N,𝔽}
+function check_vector(M::Euclidean{N,𝔽}, p, X; check_base_point=true, kwargs...) where {N,𝔽}
     if check_base_point
         mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe

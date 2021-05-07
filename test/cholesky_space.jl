@@ -34,7 +34,7 @@ include("utils.jl")
             exp_log_atol_multiplier=8.0,
         )
     end
-    @testset "Test Error cases in is_point and is_tangent_vector" begin
+    @testset "Test Error cases in is_point and is_vector" begin
         pt1f = zeros(2, 3) # wrong size
         pt2f = [1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 1.0] # nonpos diag
         pt3f = [2.0 0.0 1.0; 0.0 1.0 0.0; 0.0 0.0 4.0] # no lower and nonsym
@@ -46,12 +46,12 @@ include("utils.jl")
         @test !is_point(M, pt3f)
         @test_throws DomainError is_point(M, pt3f, true)
         @test is_point(M, pt4)
-        @test !is_tangent_vector(M, pt3f, pt1f)
-        @test_throws DomainError is_tangent_vector(M, pt3f, pt1f, true)
-        @test !is_tangent_vector(M, pt4, pt1f)
-        @test_throws DomainError is_tangent_vector(M, pt4, pt1f, true)
-        @test !is_tangent_vector(M, pt4, pt3f)
-        @test_throws DomainError is_tangent_vector(M, pt4, pt3f, true)
-        @test is_tangent_vector(M, pt4, pt2f)
+        @test !is_vector(M, pt3f, pt1f)
+        @test_throws DomainError is_vector(M, pt3f, pt1f, true)
+        @test !is_vector(M, pt4, pt1f)
+        @test_throws DomainError is_vector(M, pt4, pt1f, true)
+        @test !is_vector(M, pt4, pt3f)
+        @test_throws DomainError is_vector(M, pt4, pt3f, true)
+        @test is_vector(M, pt4, pt2f)
     end
 end

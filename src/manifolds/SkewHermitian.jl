@@ -74,7 +74,7 @@ function check_point(M::SkewHermitianMatrices{n,ùîΩ}, p; kwargs...) where {n,ù
 end
 
 """
-    check_tangent_vector(M::SkewHermitianMatrices{n}, p, X; check_base_point = true, kwargs... )
+    check_vector(M::SkewHermitianMatrices{n}, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SkewHermitianMatrices`](@ref) `M`, i.e. `X` must be a skew-hermitian matrix of size `(n,n)`
@@ -83,13 +83,7 @@ The optional parameter `check_base_point` indicates, whether to call
  [`check_point`](@ref)  for `p`.
 The tolerance for the skew-symmetry of `p` and `X` can be set using `kwargs...`.
 """
-function check_tangent_vector(
-    M::SkewHermitianMatrices,
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-)
+function check_vector(M::SkewHermitianMatrices, p, X; check_base_point=true, kwargs...)
     if check_base_point
         mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe

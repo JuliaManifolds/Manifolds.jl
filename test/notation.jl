@@ -8,6 +8,6 @@ include("utils.jl")
     X1 = [0.0, 1.0, 0.0]
     X2 = [1.0, 0.0, 0.0]
     TpM = TangentSpaceAtPoint(M, p1)
-    @test (X1 ∈ TpM) == is_tangent_vector(M, p1, X1)
-    @test (X2 ∈ TpM) == is_tangent_vector(M, p1, X2)
+    @test (X1 ∈ TpM) == is_vector(M, p1, X1)
+    @test (X2 ∈ TpM) == is_vector(M, p1, X2)
 end

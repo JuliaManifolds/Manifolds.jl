@@ -14,24 +14,14 @@ include("utils.jl")
         @test isinf(injectivity_radius(M, [0.0, 0.0, 1.0]))
         @test isinf(injectivity_radius(M, [0.0, 0.0, 1.0], ExponentialRetraction()))
         @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
-        @test !is_tangent_vector(M, [0.0, 0.0, 1.0], [0.0, 0.0, 1.0, 0.0])
+        @test !is_vector(M, [0.0, 0.0, 1.0], [0.0, 0.0, 1.0, 0.0])
         @test_throws DomainError is_point(M, [2.0, 0.0, 0.0], true)
         @test !is_point(M, [2.0, 0.0, 0.0])
-        @test !is_tangent_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
+        @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
         @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
-        @test_throws DomainError is_tangent_vector(
-            M,
-            [1.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0],
-            true,
-        )
-        @test !is_tangent_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0])
-        @test_throws DomainError is_tangent_vector(
-            M,
-            [0.0, 0.0, 1.0],
-            [1.0, 0.0, 1.0],
-            true,
-        )
+        @test_throws DomainError is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], true)
+        @test !is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0])
+        @test_throws DomainError is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0], true)
         @test is_default_metric(M, MinkowskiMetric())
         @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
         @test manifold_dimension(M) == 2
@@ -79,7 +69,7 @@ include("utils.jl")
         @test_throws DomainError is_point(M, PoincareBallPoint([0.9, 0.0, 0.0]), true)
         @test_throws DomainError is_point(M, PoincareBallPoint([1.0, 0.0]), true)
 
-        @test is_tangent_vector(M, pB, PoincareBallTVector([2.0, 2.0]))
+        @test is_vector(M, pB, PoincareBallTVector([2.0, 2.0]))
 
         pS = convert(PoincareHalfSpacePoint, p)
         pS2 = convert(PoincareHalfSpacePoint, pB)
@@ -223,7 +213,7 @@ include("utils.jl")
         B = get_basis(M, p, DefaultOrthonormalBasis())
         V = get_vectors(M, p, B)
         for v in V
-            @test is_tangent_vector(M, p, v, true)
+            @test is_vector(M, p, v, true)
             for b in [DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis(V[1])]
                 @test isapprox(M, p, v, get_vector(M, p, get_coordinates(M, p, v, b), b))
             end
@@ -232,7 +222,7 @@ include("utils.jl")
             @test inner(M, p, v, w) ≈ (v == w ? 1 : 0)
         end
         X = 0.5 * V[1] + 1.0 .* V[2]
-        @test is_tangent_vector(M, p, X)
+        @test is_vector(M, p, X)
         c = get_coordinates(M, p, X, B)
         @test c ≈ [0.5, 1.0]
         B2 = DiagonalizingOrthonormalBasis(X)

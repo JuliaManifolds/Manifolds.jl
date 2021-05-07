@@ -14,13 +14,13 @@ function check_point(M::Hyperbolic, p::HyperboloidPoint; kwargs...)
     return check_point(M, p.value; kwargs...)
 end
 
-function check_tangent_vector(M::Hyperbolic, p, X; check_base_point=true, kwargs...)
+function check_vector(M::Hyperbolic, p, X; check_base_point=true, kwargs...)
     if check_base_point
         mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
@@ -37,13 +37,8 @@ function check_tangent_vector(M::Hyperbolic, p, X; check_base_point=true, kwargs
     end
     return nothing
 end
-function check_tangent_vector(
-    M::Hyperbolic,
-    p::HyperboloidPoint,
-    X::HyperboloidTVector;
-    kwargs...,
-)
-    return check_tangent_vector(M, p.value, X.value; kwargs...)
+function check_vector(M::Hyperbolic, p::HyperboloidPoint, X::HyperboloidTVector; kwargs...)
+    return check_vector(M, p.value, X.value; kwargs...)
 end
 
 function convert(::Type{HyperboloidTVector}, X::T) where {T<:AbstractVector}

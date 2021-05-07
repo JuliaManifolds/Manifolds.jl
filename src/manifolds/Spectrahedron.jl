@@ -78,7 +78,7 @@ function check_point(M::Spectrahedron{N,K}, q; kwargs...) where {N,K}
 end
 
 @doc raw"""
-    check_tangent_vector(M::Spectrahedron, q, Y; check_base_point = true, kwargs...)
+    check_vector(M::Spectrahedron, q, Y; check_base_point = true, kwargs...)
 
 Check whether $X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}$ is a tangent vector to
 $p=qq^{\mathrm{T}}$ on the [`Spectrahedron`](@ref) `M`,
@@ -88,7 +88,7 @@ The optional parameter `check_base_point` indicates, whether to call [`check_poi
 The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
 Note that symmetry of $X$ holds by construction and is not explicitly checked.
 """
-function check_tangent_vector(
+function check_vector(
     M::Spectrahedron{N,K},
     q,
     Y;
@@ -100,7 +100,7 @@ function check_tangent_vector(
         mpe === nothing || return mpe
     end
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(q),typeof(Y)},
         M,
         q,

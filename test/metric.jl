@@ -222,7 +222,7 @@ end
             B_chart_p = induced_basis(M, A, chart_p, TangentSpace)
 
             @test check_point(M, p) == check_point(E, p)
-            @test check_tangent_vector(M, p, X) == check_tangent_vector(E, p, X)
+            @test check_vector(M, p, X) == check_vector(E, p, X)
 
             @test local_metric(M, p, B_chart_p) ≈ G
             @test inverse_local_metric(M, p, B_chart_p) ≈ invG
@@ -450,7 +450,7 @@ end
         @test injectivity_radius(MM) === injectivity_radius(M)
 
         @test is_point(MM, p) === is_point(M, p)
-        @test is_tangent_vector(MM, p, X) === is_tangent_vector(M, p, X)
+        @test is_vector(MM, p, X) === is_vector(M, p, X)
 
         A = Manifolds.get_default_atlas(MM2)
         chart_p = get_chart_index(MM2, A, p)
@@ -487,7 +487,7 @@ end
         @test injectivity_radius(MM2, ProjectionRetraction()) ===
               injectivity_radius(M, ProjectionRetraction())
         @test is_point(MM2, p) === is_point(M, p)
-        @test is_tangent_vector(MM2, p, X) === is_tangent_vector(M, p, X)
+        @test is_vector(MM2, p, X) === is_vector(M, p, X)
 
         a = Manifolds.projected_distribution(M, Distributions.MvNormal(zero(zeros(3)), 1.0))
         b = Manifolds.projected_distribution(

@@ -74,7 +74,7 @@ function check_point(M::Elliptope{N,K}, q; kwargs...) where {N,K}
 end
 
 @doc raw"""
-    check_tangent_vector(M::Elliptope, q, Y; check_base_point = true, kwargs... )
+    check_vector(M::Elliptope, q, Y; check_base_point = true, kwargs... )
 
 Check whether $X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}$ is a tangent vector to
 $p=qq^{\mathrm{T}}$ on the [`Elliptope`](@ref) `M`,
@@ -84,19 +84,13 @@ The optional parameter `check_base_point` indicates, whether to call [`check_poi
 The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
 Note that symmetric of $X$ holds by construction an is not explicitly checked.
 """
-function check_tangent_vector(
-    M::Elliptope{N,K},
-    q,
-    Y;
-    check_base_point=true,
-    kwargs...,
-) where {N,K}
+function check_vector(M::Elliptope{N,K}, q, Y; check_base_point=true, kwargs...) where {N,K}
     if check_base_point
         mpe = check_point(M, q; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(q),typeof(Y)},
         M,
         q,

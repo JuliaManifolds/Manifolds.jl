@@ -169,7 +169,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         p2 = ProductRepr([-1.047, -1.047], [0.0, 0.0])
         X1 = log(N, p1, p2)
         @test isapprox(N, p2, exp(N, p1, X1))
-        @test is_tangent_vector(N, p2, vector_transport_to(N, p1, X1, p2))
+        @test is_vector(N, p2, vector_transport_to(N, p1, X1, p2))
 
         M2 = ProductManifold(Circle(ℝ), Euclidean(2))
         N2 = TangentBundle(M2)

@@ -157,7 +157,7 @@ Random.seed!(42)
         p = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
         X = [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
         @test_throws ComponentManifoldError is_point(M, X, true)
-        @test_throws ComponentManifoldError is_tangent_vector(M, p, X, true)
+        @test_throws ComponentManifoldError is_vector(M, p, X, true)
     end
 
     @testset "power vector transport" begin

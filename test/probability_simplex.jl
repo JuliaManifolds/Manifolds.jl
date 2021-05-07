@@ -12,11 +12,11 @@ include("utils.jl")
     @test_throws DomainError is_point(M, [0], true)
     @test_throws DomainError is_point(M, -ones(3), true)
     @test manifold_dimension(M) == 2
-    @test is_tangent_vector(M, p, X)
-    @test is_tangent_vector(M, p, Y)
-    @test_throws DomainError is_tangent_vector(M, p .+ 1, X, true)
-    @test_throws DomainError is_tangent_vector(M, p, zeros(4), true)
-    @test_throws DomainError is_tangent_vector(M, p, Y .+ 1, true)
+    @test is_vector(M, p, X)
+    @test is_vector(M, p, Y)
+    @test_throws DomainError is_vector(M, p .+ 1, X, true)
+    @test_throws DomainError is_vector(M, p, zeros(4), true)
+    @test_throws DomainError is_vector(M, p, Y .+ 1, true)
 
     @test Manifolds.default_metric_dispatch(M, Manifolds.FisherRaoMetric()) === Val{true}()
 
@@ -74,7 +74,7 @@ include("utils.jl")
         X = log(M, q, p)
         X2 = X + [1, 2, 3]
         Y = project(M, q, X2)
-        @test is_tangent_vector(M, q, Y; atol=1e-15)
+        @test is_vector(M, q, Y; atol=1e-15)
 
         @test_throws DomainError project(M, [1, -1, 2])
         @test isapprox(M, [0.6, 0.2, 0.2], project(M, [0.3, 0.1, 0.1]))

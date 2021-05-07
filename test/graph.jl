@@ -16,11 +16,11 @@ include("utils.jl")
         @test is_point(N, x)
         @test !is_point(N, [x..., [0.0, 0.0]]) # an entry too much
         @test_throws DomainError is_point(N, [x..., [0.0, 0.0]], true)
-        @test is_tangent_vector(N, x, log(N, x, y))
-        @test !is_tangent_vector(N, x[1:2], log(N, x, y))
-        @test_throws DomainError is_tangent_vector(N, x[1:2], log(N, x, y), true)
-        @test !is_tangent_vector(N, x[1:2], log(N, x, y)[1:2])
-        @test_throws DomainError is_tangent_vector(N, x, log(N, x, y)[1:2], true)
+        @test is_vector(N, x, log(N, x, y))
+        @test !is_vector(N, x[1:2], log(N, x, y))
+        @test_throws DomainError is_vector(N, x[1:2], log(N, x, y), true)
+        @test !is_vector(N, x[1:2], log(N, x, y)[1:2])
+        @test_throws DomainError is_vector(N, x, log(N, x, y)[1:2], true)
         @test incident_log(N, x) == [x[2] - x[1], x[1] - x[2] + x[3] - x[2], x[2] - x[3]]
 
         pts = [x, y, z]
@@ -41,11 +41,11 @@ include("utils.jl")
         @test is_point(NE, x[1:2])
         @test !is_point(NE, x) # an entry too much
         @test_throws DomainError is_point(NE, x, true)
-        @test is_tangent_vector(NE, x[1:2], log(N, x, y)[1:2])
-        @test !is_tangent_vector(NE, x, log(N, x, y))
-        @test_throws DomainError is_tangent_vector(NE, x, log(N, x, y), true)
-        @test !is_tangent_vector(N, x[1:2], log(N, x, y))
-        @test_throws DomainError is_tangent_vector(NE, x[1:2], log(N, x, y), true)
+        @test is_vector(NE, x[1:2], log(N, x, y)[1:2])
+        @test !is_vector(NE, x, log(N, x, y))
+        @test_throws DomainError is_vector(NE, x, log(N, x, y), true)
+        @test !is_vector(N, x[1:2], log(N, x, y))
+        @test_throws DomainError is_vector(NE, x[1:2], log(N, x, y), true)
 
         test_manifold(
             NE,

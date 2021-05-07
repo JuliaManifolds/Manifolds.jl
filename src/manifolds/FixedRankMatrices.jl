@@ -214,14 +214,14 @@ function check_point(M::FixedRankMatrices{m,n,k}, x::SVDMPoint; kwargs...) where
 end
 
 @doc raw"""
-    check_tangent_vector(M:FixedRankMatrices{m,n,k}, p, X; check_base_point = true, kwargs...)
+    check_vector(M:FixedRankMatrices{m,n,k}, p, X; check_base_point = true, kwargs...)
 
 Check whether the tangent [`UMVTVector`](@ref) `X` is from the tangent space of the [`SVDMPoint`](@ref) `p` on the
 [`FixedRankMatrices`](@ref) `M`, i.e. that `v.U` and `v.Vt` are (columnwise) orthogonal to `x.U` and `x.Vt`,
 respectively, and its dimensions are consistent with `p` and `X.M`, i.e. correspond to `m`-by-`n` matrices of rank `k`.
 The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 """
-function check_tangent_vector(
+function check_vector(
     M::FixedRankMatrices{m,n,k},
     p::SVDMPoint,
     X::UMVTVector;

@@ -155,7 +155,7 @@ function check_point(M::ProductManifold, p::Union{ProductRepr,ProductArray}; kwa
 end
 
 """
-    check_tangent_vector(M::ProductManifold, p, X; check_base_point = true, kwargs... )
+    check_vector(M::ProductManifold, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`ProductManifold`](@ref)
 `M`, i.e. after [`check_point`](@ref)`(M, p)`, and all projections to
@@ -165,7 +165,7 @@ messages of the components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(
+function check_vector(
     M::ProductManifold,
     p::Union{ProductRepr,ProductArray},
     X::Union{ProductRepr,ProductArray};
@@ -182,7 +182,7 @@ function check_tangent_vector(
         submanifold_components(M, p),
         submanifold_components(M, X),
     )
-    e = [(t[1], check_tangent_vector(t[2:end]...; kwargs...)) for t in ts]
+    e = [(t[1], check_vector(t[2:end]...; kwargs...)) for t in ts]
     errors = filter(x -> !(x[2] === nothing), e)
     cerr = [ComponentManifoldError(er...) for er in errors]
     (length(errors) > 1) && return CompositeManifoldError(cerr)

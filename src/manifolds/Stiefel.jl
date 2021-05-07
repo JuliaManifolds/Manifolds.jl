@@ -81,7 +81,7 @@ function check_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
 end
 
 @doc raw"""
-    check_tangent_vector(M::Stiefel, p, X; check_base_point = true, kwargs...)
+    check_vector(M::Stiefel, p, X; check_base_point = true, kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
 `M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](@ref) fits and
@@ -90,7 +90,7 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian and $\overline{\cdot}$ the (ele
 The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 The settings for approximately can be set with `kwargs...`.
 """
-function check_tangent_vector(
+function check_vector(
     M::Stiefel{n,k,𝔽},
     p,
     X;
@@ -102,7 +102,7 @@ function check_tangent_vector(
         mpe === nothing || return mpe
     end
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
