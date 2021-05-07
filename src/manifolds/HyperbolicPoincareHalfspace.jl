@@ -1,8 +1,4 @@
-function check_point(
-    M::Hyperbolic{N},
-    p::PoincareHalfSpacePoint;
-    kwargs...,
-) where {N}
+function check_point(M::Hyperbolic{N}, p::PoincareHalfSpacePoint; kwargs...) where {N}
     mpv = check_point(Euclidean(N), p.value; kwargs...)
     mpv === nothing || return mpv
     if !(last(p.value) > 0)

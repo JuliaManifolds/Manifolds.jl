@@ -8,8 +8,8 @@ using Manifolds: TFVector, CoTFVector
         @test repr(M) == "Circle(ℝ)"
         @test representation_size(M) == ()
         @test manifold_dimension(M) == 1
-        @test !is_manifold_point(M, 9.0)
-        @test_throws DomainError is_manifold_point(M, 9.0, true)
+        @test !is_point(M, 9.0)
+        @test_throws DomainError is_point(M, 9.0, true)
         @test !is_tangent_vector(M, 9.0, 0.0)
         @test_throws DomainError is_tangent_vector(M, 9.0, 0.0, true)
         @test is_tangent_vector(M, 0.0, 0.0; check_base_point=false)
@@ -140,9 +140,9 @@ using Manifolds: TFVector, CoTFVector
         @test representation_size(Mc) == ()
         @test manifold_dimension(Mc) == 1
         @test is_tangent_vector(Mc, 1im, 0.0)
-        @test is_manifold_point(Mc, 1im)
-        @test !is_manifold_point(Mc, 1 + 1im)
-        @test_throws DomainError is_manifold_point(Mc, 1 + 1im, true)
+        @test is_point(Mc, 1im)
+        @test !is_point(Mc, 1 + 1im)
+        @test_throws DomainError is_point(Mc, 1 + 1im, true)
         @test !is_tangent_vector(Mc, 1 + 1im, 0.0)
         @test_throws DomainError is_tangent_vector(Mc, 1 + 1im, 0.0, true)
         @test !is_tangent_vector(Mc, 1im, 2im)

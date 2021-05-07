@@ -61,8 +61,7 @@ Since $p$ is by construction positive semidefinite, this is not checked.
 The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
 """
 function check_point(M::Elliptope{N,K}, q; kwargs...) where {N,K}
-    mpv =
-        invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
     mpv === nothing || return mpv
     row_norms_sq = sum(abs2, q; dims=2)
     if !all(isapprox.(row_norms_sq, 1.0; kwargs...))

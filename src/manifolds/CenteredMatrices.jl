@@ -28,8 +28,7 @@ zero.
 The tolerance for the column sums of `p` can be set using `kwargs...`.
 """
 function check_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...) where {m,n,𝔽}
-    mpv =
-        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(sum(p, dims=1), zeros(1, n); kwargs...)
         return DomainError(

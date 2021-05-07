@@ -29,9 +29,9 @@ using Manifolds: induced_basis
     @test embed(E, p, X) == X
 
     # real manifold does not allow complex values
-    @test_throws DomainError is_manifold_point(Ec, [:a, :b, :b], true)
-    @test_throws DomainError is_manifold_point(E, [1.0, 1.0im, 0.0], true)
-    @test_throws DomainError is_manifold_point(E, [1], true)
+    @test_throws DomainError is_point(Ec, [:a, :b, :b], true)
+    @test_throws DomainError is_point(E, [1.0, 1.0im, 0.0], true)
+    @test_throws DomainError is_point(E, [1], true)
     @test_throws DomainError is_tangent_vector(Ec, [:a, :b, :b], [1.0, 1.0, 0.0], true)
     @test_throws DomainError is_tangent_vector(E, [1.0, 1.0im, 0.0], [1.0, 1.0, 0.0], true) # real manifold does not allow complex values
     @test_throws DomainError is_tangent_vector(E, [1], [1.0, 1.0, 0.0], true)
@@ -219,7 +219,7 @@ using Manifolds: induced_basis
         qT = zeros(ComplexF64, 3, 4)
         qT[1:3, 1:3] .= 1.0
         q = embed(O, p)
-        @test is_manifold_point(N, q)
+        @test is_point(N, q)
         @test q == qT
         q2 = zeros(ComplexF64, 3, 4)
         embed!(O, q2, p)

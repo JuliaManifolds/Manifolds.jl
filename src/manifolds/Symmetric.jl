@@ -45,8 +45,7 @@ whether `p` is a symmetric matrix of size `(n,n)` with values from the correspon
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
 function check_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv =
-        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(norm(p - p'), 0.0; kwargs...)
         return DomainError(

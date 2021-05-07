@@ -187,11 +187,7 @@ function check_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {m,n,k}
     end
     return nothing
 end
-function check_point(
-    M::FixedRankMatrices{m,n,k},
-    x::SVDMPoint;
-    kwargs...,
-) where {m,n,k}
+function check_point(M::FixedRankMatrices{m,n,k}, x::SVDMPoint; kwargs...) where {m,n,k}
     s = "The point $(x) does not lie on $(M), "
     if (size(x.U) != (m, k)) || (length(x.S) != k) || (size(x.Vt) != (k, n))
         return DomainError(

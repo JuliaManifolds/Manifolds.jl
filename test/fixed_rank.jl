@@ -48,13 +48,9 @@ include("utils.jl")
         @test representation_size(Mc) == (3, 2)
         @test manifold_dimension(M) == 6
         @test manifold_dimension(Mc) == 12
-        @test !is_manifold_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2))
-        @test_throws DomainError is_manifold_point(
-            M,
-            SVDMPoint([1.0 0.0; 0.0 0.0], 2),
-            true,
-        )
-        @test is_manifold_point(M2, x2)
+        @test !is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2))
+        @test_throws DomainError is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), true)
+        @test is_point(M2, x2)
 
         @test !is_tangent_vector(
             M,
@@ -83,7 +79,7 @@ include("utils.jl")
             true,
         )
 
-        @test is_manifold_point(M, x)
+        @test is_point(M, x)
         @test is_tangent_vector(M, x, v)
     end
     types = [[Matrix{Float64}, Vector{Float64}, Matrix{Float64}]]
@@ -98,7 +94,7 @@ include("utils.jl")
                 push!(pts, SVDMPoint(convert.(T, [p.U, p.S, p.Vt])...))
             end
             for p in pts
-                @test is_manifold_point(M, p)
+                @test is_point(M, p)
             end
             @testset "SVD AbstractManifoldPoint Basics" begin
                 s = svd(x.U * Diagonal(x.S) * x.Vt)
@@ -126,27 +122,19 @@ include("utils.jl")
                 @test y2.Vt == y3.Vt
                 @test y2 == y3
 
-                @test is_manifold_point(M, x)
+                @test is_point(M, x)
                 xM = x.U * Diagonal(x.S) * x.Vt
-                @test is_manifold_point(M, xM)
-                @test !is_manifold_point(M, xM[1:2, :])
-                @test_throws DomainError is_manifold_point(M, xM[1:2, :], true)
-                @test_throws DomainError is_manifold_point(
-                    FixedRankMatrices(3, 2, 1),
-                    x,
-                    true,
-                )
-                @test_throws DomainError is_manifold_point(
-                    FixedRankMatrices(3, 2, 1),
-                    xM,
-                    true,
-                )
+                @test is_point(M, xM)
+                @test !is_point(M, xM[1:2, :])
+                @test_throws DomainError is_point(M, xM[1:2, :], true)
+                @test_throws DomainError is_point(FixedRankMatrices(3, 2, 1), x, true)
+                @test_throws DomainError is_point(FixedRankMatrices(3, 2, 1), xM, true)
                 xF1 = SVDMPoint(2 * x.U, x.S, x.Vt)
-                @test !is_manifold_point(M, xF1)
-                @test_throws DomainError is_manifold_point(M, xF1, true)
+                @test !is_point(M, xF1)
+                @test_throws DomainError is_point(M, xF1, true)
                 xF2 = SVDMPoint(x.U, x.S, 2 * x.Vt)
-                @test !is_manifold_point(M, xF2)
-                @test_throws DomainError is_manifold_point(M, xF2, true)
+                @test !is_point(M, xF2)
+                @test_throws DomainError is_point(M, xF2, true)
 
                 # copyto
                 yC = allocate(y)

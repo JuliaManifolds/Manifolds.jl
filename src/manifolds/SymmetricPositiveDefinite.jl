@@ -28,8 +28,7 @@ of size `(N,N)`, symmetric and positive definite.
 The tolerance for the second to last test can be set using the `kwargs...`.
 """
 function check_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
-    mpv =
-        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
         return DomainError(

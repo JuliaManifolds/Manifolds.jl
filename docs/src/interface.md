@@ -164,7 +164,7 @@ Order = [:macro, :type, :function]
 ## ValidationManifold
 
 [`ValidationManifold`](@ref) is a simple decorator that “decorates” a manifold with tests that all involved arrays are correct. For example involved input and output paratemers are checked before and after running a function, repectively.
-This is done by calling [`is_manifold_point`](@ref) or [`is_tangent_vector`](@ref) whenever applicable.
+This is done by calling [`is_point`](@ref) or [`is_tangent_vector`](@ref) whenever applicable.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]

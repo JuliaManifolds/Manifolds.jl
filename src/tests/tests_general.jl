@@ -27,7 +27,7 @@ that lie on it (contained in `pts`).
     [`manifold_dimension`](@ref).
 - `inverse_retraction_methods = []`: inverse retraction methods that will be tested.
 - `is_mutating = true`: whether mutating variants of functions should be tested.
-- `is_point_atol_multiplier = 0`: determines atol of `is_manifold_point` checks.
+- `is_point_atol_multiplier = 0`: determines atol of `is_point` checks.
 - `is_tangent_atol_multiplier = 0`: determines atol of `is_tangent_vector` checks.
 - `mid_point12 = test_exp_log ? shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing`: if not `nothing`, then check
     that `mid_point(M, pts[1], pts[2])` is approximately equal to `mid_point12`. This is
@@ -172,10 +172,10 @@ function ManifoldTests.test_manifold(
         end
     end
 
-    Test.@testset "is_manifold_point" begin
+    Test.@testset "is_point" begin
         for pt in pts
             atol = is_point_atol_multiplier * ManifoldTests.find_eps(pt)
-            Test.@test is_manifold_point(M, pt; atol=atol)
+            Test.@test is_point(M, pt; atol=atol)
             Test.@test check_point(M, pt; atol=atol) === nothing
         end
     end
@@ -214,7 +214,7 @@ function ManifoldTests.test_manifold(
         else
             Test.@test isapprox(M, pts[1], exp(M, pts[2], X2); atol=atolp1p2, rtol=rtolp1p2)
         end
-        Test.@test is_manifold_point(M, exp(M, pts[1], X1); atol=atolp1p2, rtol=rtolp1p2)
+        Test.@test is_point(M, exp(M, pts[1], X1); atol=atolp1p2, rtol=rtolp1p2)
         Test.@test isapprox(M, pts[1], exp(M, pts[1], X1, 0); atol=atolp1p2, rtol=rtolp1p2)
         for p in pts
             epsx = ManifoldTests.find_eps(p)
@@ -268,7 +268,7 @@ function ManifoldTests.test_manifold(
         for (p, X) in zip(pts, tv)
             epsx = ManifoldTests.find_eps(p)
             for retr_method in retraction_methods
-                Test.@test is_manifold_point(M, retract(M, p, X, retr_method))
+                Test.@test is_point(M, retract(M, p, X, retr_method))
                 Test.@test isapprox(
                     M,
                     p,
@@ -283,7 +283,7 @@ function ManifoldTests.test_manifold(
                 else
                     new_pt = retract(M, p, X, retr_method)
                 end
-                Test.@test is_manifold_point(M, new_pt)
+                Test.@test is_point(M, new_pt)
             end
         end
         for p in pts
@@ -653,10 +653,10 @@ function ManifoldTests.test_manifold(
             for pd in point_distributions
                 Test.@test Manifolds.support(pd) isa Manifolds.MPointSupport{typeof(M)}
                 for _ in 1:10
-                    Test.@test is_manifold_point(M, rand(pd))
+                    Test.@test is_point(M, rand(pd))
                     if test_mutating_rand
                         rand!(pd, prand)
-                        Test.@test is_manifold_point(M, prand)
+                        Test.@test is_point(M, prand)
                     end
                 end
             end

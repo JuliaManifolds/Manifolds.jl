@@ -58,8 +58,7 @@ is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the complex conju
 transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv =
-        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     c = p' * M.B * p
     if !isapprox(c, one(c); kwargs...)

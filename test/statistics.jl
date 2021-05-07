@@ -62,7 +62,7 @@ base_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
 function test_mean(M, x, yexp=nothing, method...; kwargs...)
     @testset "mean unweighted" begin
         y = mean(M, x; kwargs...)
-        @test is_manifold_point(M, y; atol=10^-9)
+        @test is_point(M, y; atol=10^-9)
         if yexp !== nothing
             @test isapprox(M, y, yexp; atol=10^-7)
         end
@@ -79,7 +79,7 @@ function test_mean(M, x, yexp=nothing, method...; kwargs...)
         w3 = pweights(2 * ones(n))
         y = mean(M, x; kwargs...)
         for w in (w1, w2, w3)
-            @test is_manifold_point(M, mean(M, x, w; kwargs...); atol=10^-9)
+            @test is_point(M, mean(M, x, w; kwargs...); atol=10^-9)
             @test isapprox(M, mean(M, x, w; kwargs...), y)
 
             @test isapprox(M, mean_and_var(M, x, w; kwargs...)[1], y; atol=10^-7)
@@ -99,7 +99,7 @@ function test_median(
 )
     @testset "median unweighted$(!isnothing(method) ? " ($method)" : "")" begin
         y = isnothing(method) ? median(M, x; kwargs...) : median(M, x, method; kwargs...)
-        @test is_manifold_point(M, y; atol=10^-9)
+        @test is_point(M, y; atol=10^-9)
         if yexp !== nothing
             @test isapprox(M, y, yexp; atol=10^-5)
         end
@@ -113,9 +113,9 @@ function test_median(
         y = median(M, x; kwargs...)
         for w in (w1, w2, w3)
             if isnothing(method)
-                @test is_manifold_point(M, median(M, x, w; kwargs...); atol=10^-9)
+                @test is_point(M, median(M, x, w; kwargs...); atol=10^-9)
             else
-                @test is_manifold_point(M, median(M, x, w, method; kwargs...); atol=10^-9)
+                @test is_point(M, median(M, x, w, method; kwargs...); atol=10^-9)
             end
             @test isapprox(M, median(M, x, w; kwargs...), y; atol=10^-4)
         end

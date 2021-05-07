@@ -68,8 +68,7 @@ Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{S
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv =
-        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     c = p' * p
     if !isapprox(c, one(c); kwargs...)

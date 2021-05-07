@@ -6,14 +6,14 @@ include("utils.jl")
     @test repr(M) == "MultinomialSymmetric(3)"
     p = ones(3, 3) ./ 3
     X = zeros(3, 3)
-    @test is_manifold_point(M, p)
+    @test is_point(M, p)
     @test is_tangent_vector(M, p, X)
     pf1 = [0.1 0.9 0.1; 0.1 0.9 0.1; 0.1 0.1 0.9] #not symmetric
-    @test_throws CompositeManifoldError is_manifold_point(M, pf1, true)
+    @test_throws CompositeManifoldError is_point(M, pf1, true)
     pf2 = [0.8 0.1 0.1; 0.1 0.8 0.1; 0.1 0.1 0.9] # cols do not sum to 1
-    @test_throws ComponentManifoldError is_manifold_point(M, pf2, true)
+    @test_throws ComponentManifoldError is_point(M, pf2, true)
     pf3 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0] # contains nonpositive entries
-    @test_throws CompositeManifoldError is_manifold_point(M, pf3, true)
+    @test_throws CompositeManifoldError is_point(M, pf3, true)
     Xf1 = [0.0 1.0 -1.0; 0.0 0.0 0.0; 0.0 0.0 0.0] # not symmetric
     @test_throws CompositeManifoldError is_tangent_vector(M, p, Xf1, true)
     Xf2 = [0.0 -1.0 0.0; -1.0 0.0 0.0; 0.0 0.0 0.0] # nonzero sums

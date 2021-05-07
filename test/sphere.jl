@@ -13,10 +13,10 @@ using ManifoldsBase: TFVector
         @test injectivity_radius(M, ExponentialRetraction()) == π
         @test injectivity_radius(M, ProjectionRetraction()) == π / 2
         @test base_manifold(M) === M
-        @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
+        @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
         @test !is_tangent_vector(M, [1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0])
-        @test_throws DomainError is_manifold_point(M, [2.0, 0.0, 0.0], true)
-        @test !is_manifold_point(M, [2.0, 0.0, 0.0])
+        @test_throws DomainError is_point(M, [2.0, 0.0, 0.0], true)
+        @test !is_point(M, [2.0, 0.0, 0.0])
         @test !is_tangent_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
         @test_throws DomainError is_tangent_vector(
             M,
@@ -135,7 +135,7 @@ using ManifoldsBase: TFVector
         @test representation_size(M) == (3,)
         p = [1.0, 1.0im, 1.0]
         q = project(M, p)
-        @test is_manifold_point(M, q)
+        @test is_point(M, q)
         Y = [2.0, 1.0im, 20.0]
         X = project(M, q, Y)
         @test is_tangent_vector(M, q, X, true; atol=10^(-14))
@@ -148,7 +148,7 @@ using ManifoldsBase: TFVector
         @test representation_size(M) == (3,)
         p = [Quaternion(1.0), Quaternion(1.0im), Quaternion(0.0, 0.0, -1.0, 0.0)]
         q = project(M, p)
-        @test is_manifold_point(M, q)
+        @test is_point(M, q)
         Y = [Quaternion(2.0), Quaternion(1.0im), Quaternion(0.0, 0.0, 20.0, 0.0)]
         X = project(M, q, Y)
         @test is_tangent_vector(M, q, X, true; atol=10^(-14))
@@ -161,7 +161,7 @@ using ManifoldsBase: TFVector
         @test representation_size(M) == (2, 2)
         p = ones(2, 2)
         q = project(M, p)
-        @test is_manifold_point(M, q)
+        @test is_point(M, q)
         Y = [1.0 0.0; 0.0 1.1]
         X = project(M, q, Y)
         @test is_tangent_vector(M, q, X)

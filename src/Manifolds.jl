@@ -37,7 +37,7 @@ import ManifoldsBase:
     injectivity_radius,
     inner,
     inner__intransparent,
-    is_manifold_point,
+    is_point,
     is_tangent_vector,
     inverse_retract,
     inverse_retract!,
@@ -219,9 +219,9 @@ include("tests/ManifoldTests.jl")
     p ∈ M
 
 Check, whether a point `p` is a valid point (i.e. in) a [`AbstractManifold`](@ref) `M`.
-This method employs [`is_manifold_point`](@ref) deaticating the error throwing option.
+This method employs [`is_point`](@ref) deaticating the error throwing option.
 """
-Base.in(p, M::AbstractManifold; kwargs...) = is_manifold_point(M, p, false; kwargs...)
+Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
 
 @doc raw"""
     Base.in(p, TpM::TangentSpaceAtPoint; kwargs...)
@@ -432,7 +432,7 @@ export ×,
     is_decorator_transparent,
     is_default_metric,
     is_default_decorator,
-    is_manifold_point,
+    is_point,
     is_tangent_vector,
     isapprox,
     kurtosis,

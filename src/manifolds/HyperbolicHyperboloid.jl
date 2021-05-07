@@ -1,7 +1,6 @@
 
 function check_point(M::Hyperbolic, p; kwargs...)
-    mpv =
-        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(minkowski_metric(p, p), -1.0; kwargs...)
         return DomainError(

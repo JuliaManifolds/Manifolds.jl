@@ -449,7 +449,7 @@ end
               injectivity_radius(M, ExponentialRetraction())
         @test injectivity_radius(MM) === injectivity_radius(M)
 
-        @test is_manifold_point(MM, p) === is_manifold_point(M, p)
+        @test is_point(MM, p) === is_point(M, p)
         @test is_tangent_vector(MM, p, X) === is_tangent_vector(M, p, X)
 
         A = Manifolds.get_default_atlas(MM2)
@@ -486,7 +486,7 @@ end
               injectivity_radius(M, p, ProjectionRetraction())
         @test injectivity_radius(MM2, ProjectionRetraction()) ===
               injectivity_radius(M, ProjectionRetraction())
-        @test is_manifold_point(MM2, p) === is_manifold_point(M, p)
+        @test is_point(MM2, p) === is_point(M, p)
         @test is_tangent_vector(MM2, p, X) === is_tangent_vector(M, p, X)
 
         a = Manifolds.projected_distribution(M, Distributions.MvNormal(zero(zeros(3)), 1.0))

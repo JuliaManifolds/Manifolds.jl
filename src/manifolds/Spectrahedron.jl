@@ -65,8 +65,7 @@ Since $p$ is by construction positive semidefinite, this is not checked.
 The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
 """
 function check_point(M::Spectrahedron{N,K}, q; kwargs...) where {N,K}
-    mpv =
-        invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
     mpv === nothing || return mpv
     fro_n = norm(q)
     if !isapprox(fro_n, 1.0; kwargs...)

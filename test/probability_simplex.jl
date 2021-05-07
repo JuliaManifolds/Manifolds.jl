@@ -7,10 +7,10 @@ include("utils.jl")
     q = [0.3, 0.6, 0.1]
     X = zeros(3)
     Y = [-0.1, 0.05, 0.05]
-    @test is_manifold_point(M, p)
-    @test_throws DomainError is_manifold_point(M, p .+ 1, true)
-    @test_throws DomainError is_manifold_point(M, [0], true)
-    @test_throws DomainError is_manifold_point(M, -ones(3), true)
+    @test is_point(M, p)
+    @test_throws DomainError is_point(M, p .+ 1, true)
+    @test_throws DomainError is_point(M, [0], true)
+    @test_throws DomainError is_point(M, -ones(3), true)
     @test manifold_dimension(M) == 2
     @test is_tangent_vector(M, p, X)
     @test is_tangent_vector(M, p, Y)

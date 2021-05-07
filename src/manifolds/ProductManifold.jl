@@ -144,11 +144,7 @@ components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_point(
-    M::ProductManifold,
-    p::Union{ProductRepr,ProductArray};
-    kwargs...,
-)
+function check_point(M::ProductManifold, p::Union{ProductRepr,ProductArray}; kwargs...)
     ts = ziptuples(Tuple(1:length(M.manifolds)), M.manifolds, submanifold_components(M, p))
     e = [(t[1], check_point(t[2:end]...; kwargs...)) for t in ts]
     errors = filter((x) -> !(x[2] === nothing), e)

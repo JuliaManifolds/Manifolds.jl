@@ -6,9 +6,9 @@ include("utils.jl")
         @test repr(M) == "SymmetricPositiveSemidefiniteFixedRank(4, 2, ℝ)"
         @test manifold_dimension(M) == 7
         q = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
-        @test is_manifold_point(M, q)
+        @test is_point(M, q)
         Y = [1.0 0.0; 0.0 0.0; 0.0 0.0; 0.0 0.0]
-        @test_throws DomainError is_manifold_point(M, Y, true)
+        @test_throws DomainError is_point(M, Y, true)
         @test is_tangent_vector(M, q, Y)
         q2 = [2.0 1.0; 0.0 0.0; 0.0 1.0; 0.0 0.0]
         q3 = [0.0 0.0; 1.0 0.0; 0.0 1.0; 0.0 0.0]

@@ -156,7 +156,7 @@ Random.seed!(42)
         M = PowerManifold(Sphere(2), NestedPowerRepresentation(), 2)
         p = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
         X = [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
-        @test_throws ComponentManifoldError is_manifold_point(M, X, true)
+        @test_throws ComponentManifoldError is_point(M, X, true)
         @test_throws ComponentManifoldError is_tangent_vector(M, p, X, true)
     end
 

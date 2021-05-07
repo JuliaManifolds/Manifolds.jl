@@ -66,8 +66,7 @@ Check whether `p` is representing a point on the [`Grassmann`](@ref) `M`, i.e. i
 a `n`-by-`k` matrix of unitary column vectors and of correct `eltype` with respect to `𝔽`.
 """
 function check_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv =
-        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     c = p' * p
     if !isapprox(c, one(c); kwargs...)

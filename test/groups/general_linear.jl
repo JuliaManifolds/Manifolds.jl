@@ -73,18 +73,18 @@ using NLsolve
     @testset "Real" begin
         G = GeneralLinear(3)
 
-        @test_throws DomainError is_manifold_point(G, randn(2, 3), true)
-        @test_throws DomainError is_manifold_point(G, randn(2, 2), true)
-        @test_throws DomainError is_manifold_point(G, randn(ComplexF64, 3, 3), true)
-        @test_throws DomainError is_manifold_point(G, zeros(3, 3), true)
-        @test_throws DomainError is_manifold_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
-        @test_throws DomainError is_manifold_point(
+        @test_throws DomainError is_point(G, randn(2, 3), true)
+        @test_throws DomainError is_point(G, randn(2, 2), true)
+        @test_throws DomainError is_point(G, randn(ComplexF64, 3, 3), true)
+        @test_throws DomainError is_point(G, zeros(3, 3), true)
+        @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
+        @test_throws DomainError is_point(
             G,
             make_identity(GeneralLinear(2), ones(2, 2)),
             true,
         )
-        @test is_manifold_point(G, Float64[0 0 1; 0 1 1; 1 1 1], true)
-        @test is_manifold_point(G, make_identity(G, ones(3, 3)), true)
+        @test is_point(G, Float64[0 0 1; 0 1 1; 1 1 1], true)
+        @test is_point(G, make_identity(G, ones(3, 3)), true)
         @test_throws DomainError is_tangent_vector(
             G,
             Float64[0 1 1; 0 1 1; 1 0 0],
@@ -145,14 +145,14 @@ using NLsolve
     @testset "Complex" begin
         G = GeneralLinear(2, ℂ)
 
-        @test_throws DomainError is_manifold_point(G, randn(ComplexF64, 2, 3), true)
-        @test_throws DomainError is_manifold_point(G, randn(ComplexF64, 3, 3), true)
-        @test_throws DomainError is_manifold_point(G, zeros(2, 2), true)
-        @test_throws DomainError is_manifold_point(G, ComplexF64[1 im; 1 im], true)
-        @test is_manifold_point(G, ComplexF64[1 1; im 1], true)
-        @test is_manifold_point(G, make_identity(G, ones(ComplexF64, 2, 2)), true)
-        @test_throws DomainError is_manifold_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
-        @test_throws DomainError is_manifold_point(
+        @test_throws DomainError is_point(G, randn(ComplexF64, 2, 3), true)
+        @test_throws DomainError is_point(G, randn(ComplexF64, 3, 3), true)
+        @test_throws DomainError is_point(G, zeros(2, 2), true)
+        @test_throws DomainError is_point(G, ComplexF64[1 im; 1 im], true)
+        @test is_point(G, ComplexF64[1 1; im 1], true)
+        @test is_point(G, make_identity(G, ones(ComplexF64, 2, 2)), true)
+        @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
+        @test_throws DomainError is_point(
             G,
             make_identity(GeneralLinear(3), ones(3, 3)),
             true,

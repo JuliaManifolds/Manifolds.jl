@@ -103,7 +103,7 @@ S = MySphere(1.5, 2)
 ## [Checking points and tangents](@id manifold-tutorial-checks)
 
 If we have now a point, represented as an array, we would first like to check, that it is a valid point on the manifold.
-For this one can use the easy interface [`is_manifold_point`](@ref is_manifold_point(M::AbstractManifold, p; kwargs...)). This internally uses [`check_point`](@ref check_point(M, p; kwargs...)).
+For this one can use the easy interface [`is_point`](@ref is_point(M::AbstractManifold, p; kwargs...)). This internally uses [`check_point`](@ref check_point(M, p; kwargs...)).
 This is what we want to implement.
 We have to return the error if `p` is not on `M` and `nothing` otherwise.
 
@@ -142,12 +142,12 @@ nothing #hide
 to test points we can now use
 
 ```@example manifold-tutorial
-is_manifold_point(S, [1.0,0.0,0.0]) # norm 1, so not on S, returns false
-@test_throws DomainError is_manifold_point(S, [1.5,0.0], true) # only on R^2, throws an error.
+is_point(S, [1.0,0.0,0.0]) # norm 1, so not on S, returns false
+@test_throws DomainError is_point(S, [1.5,0.0], true) # only on R^2, throws an error.
 p = [1.5,0.0,0.0]
 X = [0.0,1.0,0.0]
 # The following two tests return true
-[ is_manifold_point(S, p); is_tangent_vector(S,p,X) ]
+[ is_point(S, p); is_tangent_vector(S,p,X) ]
 ```
 
 ## [Functions on the manifold](@id manifold-tutorial-fn)
@@ -188,7 +188,7 @@ A first easy check can be done taking `p` from above and any vector `X` of lengt
 
 ```@example manifold-tutorial
 q = exp(S,p, [0.0,1.5π,0.0])
-[isapprox(p,-q); is_manifold_point(S,q)]
+[isapprox(p,-q); is_point(S,q)]
 ```
 
 ## [Conclusion](@id manifold-tutorial-outlook)

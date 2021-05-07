@@ -63,8 +63,7 @@ Checks whether `p` is a valid point on the [`MultinomialDoubleStochastic`](@ref)
 i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
 function check_point(M::MultinomialDoubleStochastic{n}, p; kwargs...) where {n}
-    mpv =
-        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     # positivity and columns are checked in the embedding, we further check
     r = sum(p, dims=2)

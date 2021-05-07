@@ -12,10 +12,10 @@ include("utils.jl")
         @test manifold_dimension(M) == 4
         p = [2, 0, 0]
         p2 = [p p]
-        @test !is_manifold_point(M, p)
-        @test_throws DomainError is_manifold_point(M, p, true)
-        @test !is_manifold_point(M, p2)
-        @test_throws CompositeManifoldError is_manifold_point(M, p2, true)
+        @test !is_point(M, p)
+        @test_throws DomainError is_point(M, p, true)
+        @test !is_point(M, p2)
+        @test_throws CompositeManifoldError is_point(M, p2, true)
         @test !is_tangent_vector(M, p2, 0.0)
         @test_throws DomainError is_tangent_vector(M, p2, [0.0, 0.0, 0.0], true)
         @test !is_tangent_vector(M, p2, [0.0, 0.0, 0.0])

@@ -74,8 +74,7 @@ function check_point(
     q;
     kwargs...,
 ) where {n,k,𝔽}
-    mpv =
-        invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
     mpv === nothing || return mpv
     p = q * q'
     r = rank(p * p'; kwargs...)

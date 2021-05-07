@@ -59,8 +59,7 @@ Checks whether `p` is a valid point on the [`MultinomialSymmetric`](@ref)`(m,n)`
 i.e. is a symmetric matrix with positive entries whose rows sum to one.
 """
 function check_point(M::MultinomialSymmetric{n}, p; kwargs...) where {n}
-    mpv =
-        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     # the embedding checks for positivity and unit sum columns, by symmetry we would get
     # the same for the rows, so checking symmetry is the only thing left, we can just use
