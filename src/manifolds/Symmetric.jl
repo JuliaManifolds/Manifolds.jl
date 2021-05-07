@@ -36,7 +36,7 @@ function allocation_promotion_function(
 end
 
 @doc raw"""
-    check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...)
+    check_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...)
 
 Check whether `p` is a valid manifold point on the [`SymmetricMatrices`](@ref) `M`, i.e.
 whether `p` is a symmetric matrix of size `(n,n)` with values from the corresponding
@@ -44,9 +44,9 @@ whether `p` is a symmetric matrix of size `(n,n)` with values from the correspon
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
-function check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
+function check_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
     mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(norm(p - p'), 0.0; kwargs...)
         return DomainError(
@@ -64,7 +64,7 @@ Check whether `X` is a tangent vector to manifold point `p` on the
 [`SymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
 and its values have to be from the correct [`AbstractNumbers`](@ref).
 The optional parameter `check_base_point` indicates, whether to call
- [`check_manifold_point`](@ref)  for `p`.
+ [`check_point`](@ref)  for `p`.
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
 function check_tangent_vector(
@@ -75,7 +75,7 @@ function check_tangent_vector(
     kwargs...,
 ) where {n,𝔽}
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(

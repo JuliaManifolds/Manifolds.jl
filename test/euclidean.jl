@@ -16,8 +16,8 @@ using Manifolds: induced_basis
     p = zeros(3)
     A = Manifolds.RetractionAtlas()
     B = induced_basis(EM, A, p, TangentSpace)
-    @test det_local_metric(EM, B, p) == one(eltype(p))
-    @test log_local_metric_density(EM, B, p) == zero(eltype(p))
+    @test det_local_metric(EM, p, B) == one(eltype(p))
+    @test log_local_metric_density(EM, p, B) == zero(eltype(p))
     @test project!(E, p, p) == p
     @test embed!(E, p, p) == p
     @test manifold_dimension(Ec) == 2 * manifold_dimension(E)

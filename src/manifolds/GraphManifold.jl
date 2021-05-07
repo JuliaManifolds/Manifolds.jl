@@ -57,14 +57,14 @@ const VertexGraphManifold{𝔽} =
     GraphManifold{<:AbstractGraph,𝔽,<:AbstractManifold{𝔽},VertexManifold}
 
 @doc raw"""
-    check_manifold_point(M::GraphManifold, p)
+    check_point(M::GraphManifold, p)
 
 Check whether `p` is a valid point on the [`GraphManifold`](@ref), i.e. its length equals the number of vertices
 (for [`VertexManifold`](@ref)s) or the number of edges (for [`EdgeManifold`](@ref)s) and that each element of `p`
-passes the [`check_manifold_point`](@ref) test for the base manifold `M.manifold`.
+passes the [`check_point`](@ref) test for the base manifold `M.manifold`.
 """
-check_manifold_point(::GraphManifold, ::Any...)
-function check_manifold_point(M::VertexGraphManifold, p; kwargs...)
+check_point(::GraphManifold, ::Any...)
+function check_point(M::VertexGraphManifold, p; kwargs...)
     if size(p) != (nv(M.graph),)
         return DomainError(
             length(p),
@@ -72,9 +72,9 @@ function check_manifold_point(M::VertexGraphManifold, p; kwargs...)
         )
     end
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), nv(M.graph))
-    return check_manifold_point(PM, p; kwargs...)
+    return check_point(PM, p; kwargs...)
 end
-function check_manifold_point(M::EdgeGraphManifold, p; kwargs...)
+function check_point(M::EdgeGraphManifold, p; kwargs...)
     if size(p) != (ne(M.graph),)
         return DomainError(
             length(p),
@@ -82,7 +82,7 @@ function check_manifold_point(M::EdgeGraphManifold, p; kwargs...)
         )
     end
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), ne(M.graph))
-    return check_manifold_point(PM, p; kwargs...)
+    return check_point(PM, p; kwargs...)
 end
 
 @doc raw"""
@@ -94,7 +94,7 @@ length equals the number of vertices (for [`VertexManifold`](@ref)s) or
 the number of edges (for [`EdgeManifold`](@ref)s) and that each element of `X`
 together with its corresponding entry of `p` passes the
 [`check_tangent_vector`](@ref) test for the base manifold `M.manifold`.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
+The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 """
 check_tangent_vector(::GraphManifold, ::Any...)
 function check_tangent_vector(

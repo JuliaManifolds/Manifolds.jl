@@ -59,15 +59,15 @@ See for example the [`ProbabilitySimplex`](@ref).
 struct FisherRaoMetric <: AbstractMetric end
 
 """
-    check_manifold_point(M::ProbabilitySimplex, p; kwargs...)
+    check_point(M::ProbabilitySimplex, p; kwargs...)
 
 Check whether `p` is a valid point on the [`ProbabilitySimplex`](@ref) `M`, i.e. is a point in
 the embedding with positive entries that sum to one
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_manifold_point(M::ProbabilitySimplex, p; kwargs...)
+function check_point(M::ProbabilitySimplex, p; kwargs...)
     mpv = invoke(
-        check_manifold_point,
+        check_point,
         Tuple{(typeof(get_embedding(M))),typeof(p)},
         get_embedding(M),
         p;
@@ -93,15 +93,15 @@ end
     check_tangent_vector(M::ProbabilitySimplex, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`ProbabilitySimplex`](@ref) `M`, i.e.
-after [`check_manifold_point`](@ref check_manifold_point(::ProbabilitySimplex, ::Any))`(M,p)`,
+after [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
 `X` has to be of same dimension as `p` and its elements have to sum to one.
 The optional parameter `check_base_point` indicates, whether to call
-[`check_manifold_point`](@ref check_manifold_point(::ProbabilitySimplex, ::Any))  for `p` or not.
+[`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))  for `p` or not.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(M::ProbabilitySimplex, p, X; check_base_point=true, kwargs...)
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(

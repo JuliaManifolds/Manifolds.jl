@@ -1,7 +1,7 @@
 
-function check_manifold_point(M::Hyperbolic, p; kwargs...)
+function check_point(M::Hyperbolic, p; kwargs...)
     mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(minkowski_metric(p, p), -1.0; kwargs...)
         return DomainError(
@@ -11,13 +11,13 @@ function check_manifold_point(M::Hyperbolic, p; kwargs...)
     end
     return nothing
 end
-function check_manifold_point(M::Hyperbolic, p::HyperboloidPoint; kwargs...)
-    return check_manifold_point(M, p.value; kwargs...)
+function check_point(M::Hyperbolic, p::HyperboloidPoint; kwargs...)
+    return check_point(M, p.value; kwargs...)
 end
 
 function check_tangent_vector(M::Hyperbolic, p, X; check_base_point=true, kwargs...)
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(

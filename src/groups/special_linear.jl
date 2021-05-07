@@ -25,8 +25,8 @@ function allocation_promotion_function(::SpecialLinear{n,ℂ}, f, args::Tuple) w
     return complex
 end
 
-function check_manifold_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv = check_manifold_point(Euclidean(n, n; field=𝔽), p; kwargs...)
+function check_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
+    mpv = check_point(Euclidean(n, n; field=𝔽), p; kwargs...)
     mpv === nothing || return mpv
     detp = det(p)
     if !isapprox(detp, 1; kwargs...)
@@ -38,14 +38,14 @@ function check_manifold_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,�
     end
     return nothing
 end
-check_manifold_point(::GT, ::Identity{GT}; kwargs...) where {GT<:SpecialLinear} = nothing
-function check_manifold_point(G::SpecialLinear, e::Identity; kwargs...)
+check_point(::GT, ::Identity{GT}; kwargs...) where {GT<:SpecialLinear} = nothing
+function check_point(G::SpecialLinear, e::Identity; kwargs...)
     return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
 
 function check_tangent_vector(G::SpecialLinear, p, X; check_base_point=true, kwargs...)
     if check_base_point
-        mpe = check_manifold_point(G, p; kwargs...)
+        mpe = check_point(G, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv =

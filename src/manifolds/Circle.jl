@@ -17,15 +17,15 @@ struct Circle{𝔽} <: AbstractManifold{𝔽} end
 Circle(𝔽::AbstractNumbers=ℝ) = Circle{𝔽}()
 
 @doc raw"""
-    check_manifold_point(M::Circle, p)
+    check_point(M::Circle, p)
 
 Check whether `p` is a point on the [`Circle`](@ref) `M`.
 For the real-valued case, `p` is an angle and hence it checks that $p  ∈ [-π,π)$.
 for the complex-valued case, it is a unit number, $p ∈ ℂ$ with $\lvert p \rvert = 1$.
 """
-check_manifold_point(::Circle, ::Any...)
+check_point(::Circle, ::Any...)
 
-function check_manifold_point(M::Circle{ℝ}, p; kwargs...)
+function check_point(M::Circle{ℝ}, p; kwargs...)
     if !isapprox(sym_rem(p), p; kwargs...)
         return DomainError(
             p,
@@ -34,7 +34,7 @@ function check_manifold_point(M::Circle{ℝ}, p; kwargs...)
     end
     return nothing
 end
-function check_manifold_point(M::Circle{ℂ}, p; kwargs...)
+function check_point(M::Circle{ℂ}, p; kwargs...)
     if !isapprox(sum(abs.(p)), 1.0; kwargs...)
         return DomainError(
             abs(p),
@@ -52,20 +52,20 @@ Check whether `X` is a tangent vector in the tangent space of `p` on the
 For the real-valued case represented by angles, all `X` are valid, since the tangent space is the whole real line.
 For the complex-valued case `X` has to lie on the line parallel to the tangent line at `p`
 in the complex plane, i.e. their inner product has to be zero.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
+The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 """
 check_tangent_vector(::Circle{ℝ}, ::Any...; ::Any...)
 
 function check_tangent_vector(M::Circle{ℝ}, p, X; check_base_point=true, kwargs...)
     if check_base_point
-        perr = check_manifold_point(M, p; kwargs...)
+        perr = check_point(M, p; kwargs...)
         return perr # if p is valid all X that are real numbers are valid
     end
     return nothing
 end
 function check_tangent_vector(M::Circle{ℂ}, p, X; check_base_point=true, kwargs...)
     if check_base_point
-        perr = check_manifold_point(M, p)
+        perr = check_point(M, p)
         perr === nothing || return perr
     end
     if !isapprox(abs(complex_dot(p, X)), 0.0; kwargs...)

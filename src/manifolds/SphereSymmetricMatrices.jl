@@ -22,16 +22,16 @@ function SphereSymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
 end
 
 @doc raw"""
-    check_manifold_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...)
+    check_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...)
 
 Check whether the matrix is a valid point on the [`SphereSymmetricMatrices`](@ref) `M`,
 i.e. is an `n`-by-`n` symmetric matrix of unit Frobenius norm.
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
-function check_manifold_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
+function check_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
     mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(norm(p - p'), 0.0; kwargs...)
         return DomainError(
@@ -49,7 +49,7 @@ Check whether `X` is a tangent vector to manifold point `p` on the
 [`SphereSymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
 of unit Frobenius norm.
 The optional parameter `check_base_point` indicates, whether to call
- [`check_manifold_point`](@ref)  for `p`.
+ [`check_point`](@ref)  for `p`.
 
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
@@ -61,7 +61,7 @@ function check_tangent_vector(
     kwargs...,
 ) where {n,𝔽}
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(

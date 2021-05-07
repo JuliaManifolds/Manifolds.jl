@@ -21,15 +21,15 @@ struct SymmetricPositiveDefinite{N} <: AbstractEmbeddedManifold{ℝ,DefaultEmbed
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
 
 @doc raw"""
-    check_manifold_point(M::SymmetricPositiveDefinite, p; kwargs...)
+    check_point(M::SymmetricPositiveDefinite, p; kwargs...)
 
 checks, whether `p` is a valid point on the [`SymmetricPositiveDefinite`](@ref) `M`, i.e. is a matrix
 of size `(N,N)`, symmetric and positive definite.
 The tolerance for the second to last test can be set using the `kwargs...`.
 """
-function check_manifold_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
+function check_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
     mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
         return DomainError(
@@ -50,10 +50,10 @@ end
     check_tangent_vector(M::SymmetricPositiveDefinite, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`SymmetricPositiveDefinite`](@ref) `M`,
-i.e. atfer [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
+i.e. atfer [`check_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
 and a symmetric matrix, i.e. this stores tangent vetors as elements of the corresponding
 Lie group.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
+The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(
@@ -64,7 +64,7 @@ function check_tangent_vector(
     kwargs...,
 ) where {N}
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(

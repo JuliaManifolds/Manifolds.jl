@@ -191,7 +191,7 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
 end
 
 @doc raw"""
-    check_manifold_point(M::Hyperbolic, p; kwargs...)
+    check_point(M::Hyperbolic, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Hyperbolic`](@ref) `M`.
 
@@ -205,15 +205,15 @@ less than 1.
 For the [`PoincareHalfSpacePoint`](@ref) a valid point is a vector from $p ∈ ℝ^n$ with a positive
 last entry, i.e. $p_n>0$
 """
-check_manifold_point(::Hyperbolic, ::Any)
+check_point(::Hyperbolic, ::Any)
 
 @doc raw"""
     check_tangent_vector(M::Hyperbolic{n}, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`Hyperbolic`](@ref) `M`, i.e.
-after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of the same dimension as `p`.
+after [`check_point`](@ref)`(M,p)`, `X` has to be of the same dimension as `p`.
 The optional parameter `check_base_point` indicates whether to
-call [`check_manifold_point`](@ref)  for `p`. The tolerance for the last test can be set
+call [`check_point`](@ref)  for `p`. The tolerance for the last test can be set
 using the `kwargs...`.
 
 For a the hyperboloid model or vectors, `X` has to be  orthogonal to `p` with respect
@@ -231,10 +231,10 @@ function check_tangent_vector(
     kwargs...,
 ) where {N}
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
-    return check_manifold_point(Euclidean(N), X.value; kwargs...)
+    return check_point(Euclidean(N), X.value; kwargs...)
 end
 
 # Define self conversions

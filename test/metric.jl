@@ -221,7 +221,7 @@ end
             chart_p = get_chart_index(M, A, p)
             B_chart_p = induced_basis(M, A, chart_p, TangentSpace)
 
-            @test check_manifold_point(M, p) == check_manifold_point(E, p)
+            @test check_point(M, p) == check_point(E, p)
             @test check_tangent_vector(M, p, X) == check_tangent_vector(E, p, X)
 
             @test local_metric(M, p, B_chart_p) ≈ G

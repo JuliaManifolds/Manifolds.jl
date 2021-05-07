@@ -168,7 +168,7 @@ end
 ####
 
 @doc raw"""
-    check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...)
+    check_point(M::FixedRankMatrices{m,n,k}, p; kwargs...)
 
 Check whether the matrix or [`SVDMPoint`](@ref) `x` ids a valid point on the
 [`FixedRankMatrices`](@ref)`{m,n,k,𝔽}` `M`, i.e. is an `m`-by`n` matrix of
@@ -176,7 +176,7 @@ rank `k`. For the [`SVDMPoint`](@ref) the internal representation also has to ha
 shape, i.e. `p.U` and `p.Vt` have to be unitary. The keyword arguments are passed to the
 `rank` function that verifies the rank of `p`.
 """
-function check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {m,n,k}
+function check_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {m,n,k}
     r = rank(p; kwargs...)
     s = "The point $(p) does not lie on $(M), "
     if size(p) != (m, n)
@@ -187,7 +187,7 @@ function check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {
     end
     return nothing
 end
-function check_manifold_point(
+function check_point(
     M::FixedRankMatrices{m,n,k},
     x::SVDMPoint;
     kwargs...,
@@ -223,7 +223,7 @@ end
 Check whether the tangent [`UMVTVector`](@ref) `X` is from the tangent space of the [`SVDMPoint`](@ref) `p` on the
 [`FixedRankMatrices`](@ref) `M`, i.e. that `v.U` and `v.Vt` are (columnwise) orthogonal to `x.U` and `x.Vt`,
 respectively, and its dimensions are consistent with `p` and `X.M`, i.e. correspond to `m`-by-`n` matrices of rank `k`.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
+The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 """
 function check_tangent_vector(
     M::FixedRankMatrices{m,n,k},
@@ -233,7 +233,7 @@ function check_tangent_vector(
     kwargs...,
 ) where {m,n,k}
     if check_base_point
-        c = check_manifold_point(M, p; kwargs...)
+        c = check_point(M, p; kwargs...)
         c === nothing || return c
     end
     if (size(X.U) != (m, k)) || (size(X.Vt) != (k, n)) || (size(X.M) != (k, k))

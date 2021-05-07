@@ -17,7 +17,7 @@ This tutorial assumes that you heard of the exponential map, tangent vectors and
 Chapter 3, first.
 
 In general you need just a datatype (`struct`) that inherits from [`AbstractManifold`](@ref) to define a manifold. No function is _per se_ required to be implemented.
-However, it is a good idea to provide functions that might be useful to others, for example [`check_manifold_point`](@ref) and [`check_tangent_vector`](@ref), as we do in this tutorial.
+However, it is a good idea to provide functions that might be useful to others, for example [`check_point`](@ref) and [`check_tangent_vector`](@ref), as we do in this tutorial.
 
 We start with two technical preliminaries. If you want to start directly, you can [skip](@ref manifold-tutorial-task) this paragraph and revisit it for two of the implementation details.
 
@@ -64,7 +64,7 @@ For implementing a manifold, loading the interface should suffice for quite some
 
 ```@example manifold-tutorial
 using ManifoldsBase, LinearAlgebra, Test
-import ManifoldsBase: check_manifold_point, check_tangent_vector, manifold_dimension, exp!
+import ManifoldsBase: check_point, check_tangent_vector, manifold_dimension, exp!
 ```
 
 ## [Goal](@id manifold-tutorial-task)
@@ -103,7 +103,7 @@ S = MySphere(1.5, 2)
 ## [Checking points and tangents](@id manifold-tutorial-checks)
 
 If we have now a point, represented as an array, we would first like to check, that it is a valid point on the manifold.
-For this one can use the easy interface [`is_manifold_point`](@ref is_manifold_point(M::AbstractManifold, p; kwargs...)). This internally uses [`check_manifold_point`](@ref check_manifold_point(M, p; kwargs...)).
+For this one can use the easy interface [`is_manifold_point`](@ref is_manifold_point(M::AbstractManifold, p; kwargs...)). This internally uses [`check_point`](@ref check_point(M, p; kwargs...)).
 This is what we want to implement.
 We have to return the error if `p` is not on `M` and `nothing` otherwise.
 
@@ -112,7 +112,7 @@ To spare a few lines, we can use [short-circuit evaluation](https://docs.juliala
 If something has to only hold up to precision, we can pass that down, too using the `kwargs...`.
 
 ```@example manifold-tutorial
-function check_manifold_point(M::MySphere{N}, p; kwargs...) where {N}
+function check_point(M::MySphere{N}, p; kwargs...) where {N}
     (size(p)) == (N+1,) || return DomainError(size(p),"The size of $p is not $((N+1,)).")
     if !isapprox(norm(p), M.radius; kwargs...)
         return DomainError(norm(p), "The norm of $p is not $(M.radius).")
@@ -127,7 +127,7 @@ Similarly, we can verify, whether a tangent vector `X` is valid. It has to fulfi
 ```@example manifold-tutorial
 function check_tangent_vector(M::MySphere, p, X, check_base_point = true, kwargs...)
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     size(X) != size(p) && return DomainError(size(X), "The size of $X is not $(size(p)).")

@@ -61,14 +61,14 @@ function angles_4d_skew_sym_matrix(A)
 end
 
 """
-    check_manifold_point(M, p; kwargs...)
+    check_point(M, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Rotations`](@ref) `M`,
 i.e. is an array of size [`manifold_dimension`](@ref)`(M)` and represents a
 valid rotation.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_manifold_point(M::Rotations{N}, p; kwargs...) where {N}
+function check_point(M::Rotations{N}, p; kwargs...) where {N}
     if size(p) != (N, N)
         return DomainError(
             size(p),
@@ -91,9 +91,9 @@ end
     check_tangent_vector(M, p, X; check_base_point = true, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`Rotations`](@ref)
-space `M`, i.e. after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same
+space `M`, i.e. after [`check_point`](@ref)`(M,p)`, `X` has to be of same
 dimension and orthogonal to `p`.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
+The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_tangent_vector(
@@ -104,10 +104,10 @@ function check_tangent_vector(
     kwargs...,
 ) where {N}
     if check_base_point
-        perr = check_manifold_point(M, p)
+        perr = check_point(M, p)
         perr === nothing || return perr
     end
-    return check_manifold_point(SkewSymmetricMatrices(N), X)
+    return check_point(SkewSymmetricMatrices(N), X)
 end
 
 @doc raw"""

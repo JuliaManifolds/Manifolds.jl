@@ -39,11 +39,11 @@ This manifold is modeled as a [`PowerManifold`](@ref) of [`PositiveNumbers`](@re
 PositiveArrays(n::Vararg{Int,I}) where {I} = PositiveNumbers()^(n)
 
 @doc raw"""
-    check_manifold_point(M::PositiveNumbers, p)
+    check_point(M::PositiveNumbers, p)
 
 Check whether `p` is a point on the [`PositiveNumbers`](@ref) `M`, i.e. $p>0$.
 """
-function check_manifold_point(M::PositiveNumbers, p; kwargs...)
+function check_point(M::PositiveNumbers, p; kwargs...)
     if any(p .<= 0.0)
         return DomainError(
             p,
@@ -64,7 +64,7 @@ For the complex-valued case `X` [...]
 """
 function check_tangent_vector(M::PositiveNumbers, p, X; check_base_point=true, kwargs...)
     if check_base_point
-        perr = check_manifold_point(M, p; kwargs...)
+        perr = check_point(M, p; kwargs...)
         return perr # if x is valid all v that are real numbers are valid
     end
     return nothing

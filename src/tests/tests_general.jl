@@ -176,7 +176,7 @@ function ManifoldTests.test_manifold(
         for pt in pts
             atol = is_point_atol_multiplier * ManifoldTests.find_eps(pt)
             Test.@test is_manifold_point(M, pt; atol=atol)
-            Test.@test check_manifold_point(M, pt; atol=atol) === nothing
+            Test.@test check_point(M, pt; atol=atol) === nothing
         end
     end
 

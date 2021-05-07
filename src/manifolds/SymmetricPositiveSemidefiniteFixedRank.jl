@@ -61,7 +61,7 @@ function SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractN
 end
 
 @doc raw"""
-    check_manifold_point(M::SymmetricPositiveSemidefiniteFixedRank{n,𝔽}, q; kwargs...)
+    check_point(M::SymmetricPositiveSemidefiniteFixedRank{n,𝔽}, q; kwargs...)
 
 Check whether `q` is a valid manifold point on the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`, i.e.
 whether `p=q*q'` is a symmetric matrix of size `(n,n)` with values from the corresponding
@@ -69,13 +69,13 @@ whether `p=q*q'` is a symmetric matrix of size `(n,n)` with values from the corr
 The symmetry of `p` is not explicitly checked since by using `q` p is symmetric by construction.
 The tolerance for the symmetry of `p` can and the rank of `q*q'` be set using `kwargs...`.
 """
-function check_manifold_point(
+function check_point(
     M::SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽},
     q;
     kwargs...,
 ) where {n,k,𝔽}
     mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
+        invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
     mpv === nothing || return mpv
     p = q * q'
     r = rank(p * p'; kwargs...)
@@ -95,7 +95,7 @@ Check whether `X` is a tangent vector to manifold point `p` on the
 [`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
 and its values have to be from the correct [`AbstractNumbers`](@ref).
 The optional parameter `check_base_point` indicates, whether to call
- [`check_manifold_point`](@ref)  for `p`.
+ [`check_point`](@ref)  for `p`.
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
 function check_tangent_vector(
@@ -106,7 +106,7 @@ function check_tangent_vector(
     kwargs...,
 ) where {n,k,𝔽}
     if check_base_point
-        mpe = check_manifold_point(M, q; kwargs...)
+        mpe = check_point(M, q; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(

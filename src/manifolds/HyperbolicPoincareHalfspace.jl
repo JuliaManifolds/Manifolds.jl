@@ -1,9 +1,9 @@
-function check_manifold_point(
+function check_point(
     M::Hyperbolic{N},
     p::PoincareHalfSpacePoint;
     kwargs...,
 ) where {N}
-    mpv = check_manifold_point(Euclidean(N), p.value; kwargs...)
+    mpv = check_point(Euclidean(N), p.value; kwargs...)
     mpv === nothing || return mpv
     if !(last(p.value) > 0)
         return DomainError(

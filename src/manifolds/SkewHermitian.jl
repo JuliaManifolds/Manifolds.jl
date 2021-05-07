@@ -53,7 +53,7 @@ function allocation_promotion_function(
 end
 
 @doc raw"""
-    check_manifold_point(M::SkewHermitianMatrices{n,𝔽}, p; kwargs...)
+    check_point(M::SkewHermitianMatrices{n,𝔽}, p; kwargs...)
 
 Check whether `p` is a valid manifold point on the [`SkewHermitianMatrices`](@ref) `M`, i.e.
 whether `p` is a skew-hermitian matrix of size `(n,n)` with values from the corresponding
@@ -61,8 +61,8 @@ whether `p` is a skew-hermitian matrix of size `(n,n)` with values from the corr
 
 The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
 """
-function check_manifold_point(M::SkewHermitianMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv = check_manifold_point(decorated_manifold(M), p; kwargs...)
+function check_point(M::SkewHermitianMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
+    mpv = check_point(decorated_manifold(M), p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(p, -p'; kwargs...)
         return DomainError(
@@ -80,7 +80,7 @@ Check whether `X` is a tangent vector to manifold point `p` on the
 [`SkewHermitianMatrices`](@ref) `M`, i.e. `X` must be a skew-hermitian matrix of size `(n,n)`
 and its values have to be from the correct [`AbstractNumbers`](@ref).
 The optional parameter `check_base_point` indicates, whether to call
- [`check_manifold_point`](@ref)  for `p`.
+ [`check_point`](@ref)  for `p`.
 The tolerance for the skew-symmetry of `p` and `X` can be set using `kwargs...`.
 """
 function check_tangent_vector(
@@ -91,10 +91,10 @@ function check_tangent_vector(
     kwargs...,
 )
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
-    return check_manifold_point(M, X; kwargs...)  # manifold is its own tangent space
+    return check_point(M, X; kwargs...)  # manifold is its own tangent space
 end
 
 decorated_manifold(M::SkewHermitianMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)

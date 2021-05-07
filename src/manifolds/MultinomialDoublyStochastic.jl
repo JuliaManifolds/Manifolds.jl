@@ -57,14 +57,14 @@ function MultinomialDoubleStochastic(n::Int)
 end
 
 @doc raw"""
-    check_manifold_point(M::MultinomialDoubleStochastic, p)
+    check_point(M::MultinomialDoubleStochastic, p)
 
 Checks whether `p` is a valid point on the [`MultinomialDoubleStochastic`](@ref)`(n)` `M`,
 i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
-function check_manifold_point(M::MultinomialDoubleStochastic{n}, p; kwargs...) where {n}
+function check_point(M::MultinomialDoubleStochastic{n}, p; kwargs...) where {n}
     mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     # positivity and columns are checked in the embedding, we further check
     r = sum(p, dims=2)
@@ -84,7 +84,7 @@ This means, that `p` is valid, that `X` is of correct dimension and sums to zero
 column or row.
 
 The optional parameter `check_base_point` indicates, whether to call
-[`check_manifold_point`](@ref check_manifold_point(::MultinomialDoubleStochastic, ::Any))  for `p`.
+[`check_point`](@ref check_point(::MultinomialDoubleStochastic, ::Any))  for `p`.
 """
 function check_tangent_vector(
     M::MultinomialDoubleStochastic{n},
@@ -94,7 +94,7 @@ function check_tangent_vector(
     kwargs...,
 ) where {n}
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(

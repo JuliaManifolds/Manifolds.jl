@@ -19,7 +19,7 @@ function CenteredMatrices(m::Int, n::Int, field::AbstractNumbers=ℝ)
 end
 
 @doc raw"""
-    check_manifold_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...)
+    check_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...)
 
 Check whether the matrix is a valid point on the
 [`CenteredMatrices`](@ref) `M`, i.e. is an `m`-by-`n` matrix whose columns sum to
@@ -27,9 +27,9 @@ zero.
 
 The tolerance for the column sums of `p` can be set using `kwargs...`.
 """
-function check_manifold_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...) where {m,n,𝔽}
+function check_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...) where {m,n,𝔽}
     mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(sum(p, dims=1), zeros(1, n); kwargs...)
         return DomainError(
@@ -49,7 +49,7 @@ Check whether `X` is a tangent vector to manifold point `p` on the
 [`CenteredMatrices`](@ref) `M`, i.e. that `X` is a matrix of size `(m,n)` whose columns
 sum to zero and its values are from the correct [`AbstractNumbers`](@ref).
 The optional parameter `check_base_point` indicates, whether to call
- [`check_manifold_point`](@ref)  for `p`.
+ [`check_point`](@ref)  for `p`.
 The tolerance for the column sums of `p` and `X` can be set using `kwargs...`.
 """
 function check_tangent_vector(
@@ -60,7 +60,7 @@ function check_tangent_vector(
     kwargs...,
 ) where {m,n,𝔽}
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(

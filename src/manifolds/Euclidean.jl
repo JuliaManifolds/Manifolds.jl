@@ -61,7 +61,7 @@ function allocation_promotion_function(
     return complex
 end
 
-function check_manifold_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
+function check_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
     if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
@@ -91,7 +91,7 @@ function check_tangent_vector(
     kwargs...,
 ) where {N,𝔽}
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     if (𝔽 === ℝ) && !(eltype(X) <: Real)

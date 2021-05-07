@@ -53,19 +53,19 @@ function MultinomialSymmetric(n::Int)
 end
 
 @doc raw"""
-    check_manifold_point(M::MultinomialSymmetric, p)
+    check_point(M::MultinomialSymmetric, p)
 
 Checks whether `p` is a valid point on the [`MultinomialSymmetric`](@ref)`(m,n)` `M`,
 i.e. is a symmetric matrix with positive entries whose rows sum to one.
 """
-function check_manifold_point(M::MultinomialSymmetric{n}, p; kwargs...) where {n}
+function check_point(M::MultinomialSymmetric{n}, p; kwargs...) where {n}
     mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+        invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     # the embedding checks for positivity and unit sum columns, by symmetry we would get
     # the same for the rows, so checking symmetry is the only thing left, we can just use
     # the corresponding manifold for that
-    return check_manifold_point(SymmetricMatrices(n, ℝ), p)
+    return check_point(SymmetricMatrices(n, ℝ), p)
 end
 @doc raw"""
     check_tangent_vector(M::MultinomialSymmetric p, X; check_base_point = true, kwargs...)
@@ -75,7 +75,7 @@ This means, that `p` is valid, that `X` is of correct dimension, symmetric, and 
 along any row.
 
 The optional parameter `check_base_point` indicates, whether to call
-[`check_manifold_point`](@ref check_manifold_point(::MultinomialSymmetric, ::Any))  for `p`.
+[`check_point`](@ref check_point(::MultinomialSymmetric, ::Any))  for `p`.
 """
 function check_tangent_vector(
     M::MultinomialSymmetric{n},
@@ -85,7 +85,7 @@ function check_tangent_vector(
     kwargs...,
 ) where {n}
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(

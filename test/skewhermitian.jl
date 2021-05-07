@@ -23,7 +23,7 @@ end
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3,3},ℝ}
-        @test check_manifold_point(M, B_skewsym) === nothing
+        @test check_point(M, B_skewsym) === nothing
         @test_throws DomainError is_manifold_point(M, A, true)
         @test_throws DomainError is_manifold_point(M, C, true)
         @test_throws DomainError is_manifold_point(M, D, true)

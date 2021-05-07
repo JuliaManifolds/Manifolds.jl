@@ -58,15 +58,15 @@ function GeneralizedGrassmann(
 end
 
 @doc raw"""
-    check_manifold_point(M::GeneralizedGrassmann{n,k,𝔽}, p)
+    check_point(M::GeneralizedGrassmann{n,k,𝔽}, p)
 
 Check whether `p` is representing a point on the [`GeneralizedGrassmann`](@ref) `M`, i.e. its
 a `n`-by-`k` matrix of unitary column vectors with respect to the B inner prudct and
 of correct `eltype` with respect to `𝔽`.
 """
-function check_manifold_point(M::GeneralizedGrassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
+function check_point(M::GeneralizedGrassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
     mpv = invoke(
-        check_manifold_point,
+        check_point,
         Tuple{typeof(get_embedding(M)),typeof(p)},
         get_embedding(M),
         p;
@@ -95,7 +95,7 @@ the [`GeneralizedGrassmann`](@ref) `M`, i.e. that `X` is of size and type as wel
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
 $\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ denotes the $k × k$ zero natrix.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
+The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 """
 function check_tangent_vector(
     M::GeneralizedGrassmann{n,k,𝔽},
@@ -105,7 +105,7 @@ function check_tangent_vector(
     kwargs...,
 ) where {n,k,𝔽}
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(

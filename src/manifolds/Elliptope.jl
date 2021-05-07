@@ -51,7 +51,7 @@ struct Elliptope{N,K} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingT
 Elliptope(n::Int, k::Int) = Elliptope{n,k}()
 
 @doc raw"""
-    check_manifold_point(M::Elliptope, q; kwargs...)
+    check_point(M::Elliptope, q; kwargs...)
 
 checks, whether `q` is a valid reprsentation of a point $p=qq^{\mathrm{T}}$ on the
 [`Elliptope`](@ref) `M`, i.e. is a matrix
@@ -60,9 +60,9 @@ Since by construction $p$ is symmetric, this is not explicitly checked.
 Since $p$ is by construction positive semidefinite, this is not checked.
 The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
 """
-function check_manifold_point(M::Elliptope{N,K}, q; kwargs...) where {N,K}
+function check_point(M::Elliptope{N,K}, q; kwargs...) where {N,K}
     mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
+        invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
     mpv === nothing || return mpv
     row_norms_sq = sum(abs2, q; dims=2)
     if !all(isapprox.(row_norms_sq, 1.0; kwargs...))
@@ -79,9 +79,9 @@ end
 
 Check whether $X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}$ is a tangent vector to
 $p=qq^{\mathrm{T}}$ on the [`Elliptope`](@ref) `M`,
-i.e. atfer [`check_manifold_point`](@ref) of `q`, `Y` has to be of same dimension as `q`
+i.e. atfer [`check_point`](@ref) of `q`, `Y` has to be of same dimension as `q`
 and a $X$ has to be a symmetric matrix with zero diagonal.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `q`.
+The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `q`.
 The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
 Note that symmetric of $X$ holds by construction an is not explicitly checked.
 """
@@ -93,7 +93,7 @@ function check_tangent_vector(
     kwargs...,
 ) where {N,K}
     if check_base_point
-        mpe = check_manifold_point(M, q; kwargs...)
+        mpe = check_point(M, q; kwargs...)
         mpe === nothing || return mpe
     end
     mpv = invoke(

@@ -63,19 +63,19 @@ end
 EssentialManifold(is_signed::Bool=true) = EssentialManifold(is_signed, Rotations(3))
 
 @doc raw"""
-    check_manifold_point(M::EssentialManifold, p; kwargs...)
+    check_point(M::EssentialManifold, p; kwargs...)
 
 Check whether the matrix is a valid point on the [`EssentialManifold`](@ref) `M`,
 i.e. a 2-element array containing SO(3) matrices.
 """
-function check_manifold_point(M::EssentialManifold, p; kwargs...)
+function check_point(M::EssentialManifold, p; kwargs...)
     if length(p) != 2
         return DomainError(
             length(p),
             "The point $(p) does not lie on $M, since it does not contain exactly two elements.",
         )
     end
-    return check_manifold_point(
+    return check_point(
         PowerManifold(M.manifold, NestedPowerRepresentation(), 2),
         p;
         kwargs...,
@@ -87,11 +87,11 @@ end
 
 Check whether `X` is a tangent vector to manifold point `p` on the [`EssentialManifold`](@ref) `M`,
 i.e. `X` has to be a 2-element array of `3`-by-`3` skew-symmetric matrices.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
+The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 """
 function check_tangent_vector(M::EssentialManifold, p, X; check_base_point=true, kwargs...)
     if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
+        mpe = check_point(M, p; kwargs...)
         mpe === nothing || return mpe
     end
     if length(X) != 2

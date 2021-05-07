@@ -194,7 +194,7 @@ and logarithmic maps as well as retractions and vector transports of the embeddi
 used for the embedded manifold as well.
 See [`SymmetricMatrices`](@ref) for an example.
 
-In both cases of course [`check_manifold_point`](@ref) and [`check_tangent_vector`](@ref) have to be implemented.
+In both cases of course [`check_point`](@ref) and [`check_tangent_vector`](@ref) have to be implemented.
 
 ### Further Embeddings
 

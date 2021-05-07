@@ -28,21 +28,21 @@ end
 Base.:^(M::Sphere{N,𝔽}, m::Int) where {N,𝔽} = Oblique{manifold_dimension(M) + 1,m,𝔽,N}(M)
 
 @doc raw"""
-    check_manifold_point(M::Oblique{n,m},p)
+    check_point(M::Oblique{n,m},p)
 
 Checks whether `p` is a valid point on the [`Oblique`](@ref)`{m,n}` `M`, i.e. is a matrix
 of `m` unit columns from $\mathbb R^{n}$, i.e. each column is a point from
 [`Sphere`](@ref)`(n-1)`.
 """
-check_manifold_point(::Oblique, ::Any)
-function check_manifold_point(M::Oblique{n,m}, p; kwargs...) where {n,m}
+check_point(::Oblique, ::Any)
+function check_point(M::Oblique{n,m}, p; kwargs...) where {n,m}
     if size(p) != (n, m)
         return DomainError(
             length(p),
             "The matrix in `p` ($(size(p))) does not match the dimension of $(M).",
         )
     end
-    return check_manifold_point(PowerManifold(M.manifold, m), p; kwargs...)
+    return check_point(PowerManifold(M.manifold, m), p; kwargs...)
 end
 @doc raw"""
     check_tangent_vector(M::Oblique p, X; check_base_point = true, kwargs...)
@@ -50,7 +50,7 @@ end
 Checks whether `X` is a valid tangent vector to `p` on the [`Oblique`](@ref) `M`.
 This means, that `p` is valid, that `X` is of correct dimension and columnswise
 a tangent vector to the columns of `p` on the [`Sphere`](@ref).
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
+The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 """
 function check_tangent_vector(
     M::Oblique{n,m},
