@@ -48,7 +48,7 @@ Describes an inverse retraction that is based on the softmax function.
 struct SoftmaxInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
-    FisherRaoMetric <: Metric
+    FisherRaoMetric <: AbstractMetric
 
 The Fisher-Rao metric or Fisher information metric is a particular Riemannian metric which
 can be defined on a smooth statistical manifold, i.e., a smooth manifold whose points are
@@ -56,7 +56,7 @@ probability measures defined on a common probability space.
 
 See for example the [`ProbabilitySimplex`](@ref).
 """
-struct FisherRaoMetric <: Metric end
+struct FisherRaoMetric <: AbstractMetric end
 
 """
     check_manifold_point(M::ProbabilitySimplex, p; kwargs...)

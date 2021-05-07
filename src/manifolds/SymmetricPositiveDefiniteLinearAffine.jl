@@ -1,5 +1,5 @@
 @doc raw"""
-    LinearAffineMetric <: Metric
+    LinearAffineMetric <: AbstractMetric
 
 The linear affine metric is the metric for symmetric positive definite matrices, that employs
 matrix logarithms and exponentials, which yields a linear and affine metric.

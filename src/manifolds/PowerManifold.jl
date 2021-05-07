@@ -12,13 +12,13 @@ direction.
 struct ArrayPowerRepresentation <: AbstractPowerRepresentation end
 
 @doc raw"""
-    PowerMetric <: Metric
+    PowerMetric <: AbstractMetric
 
-Represent the [`Metric`](@ref) on an [`AbstractPowerManifold`](@ref), i.e. the inner
+Represent the [`AbstractMetric`](@ref) on an [`AbstractPowerManifold`](@ref), i.e. the inner
 product on the tangent space is the sum of the inner product of each elements
 tangent space of the power manifold.
 """
-struct PowerMetric <: Metric end
+struct PowerMetric <: AbstractMetric end
 
 function PowerManifold(M::AbstractManifold{𝔽}, size::Integer...) where {𝔽}
     return PowerManifold{𝔽,typeof(M),Tuple{size...},ArrayPowerRepresentation}(M)

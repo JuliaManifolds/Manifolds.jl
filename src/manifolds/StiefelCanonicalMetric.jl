@@ -1,5 +1,5 @@
 @doc raw"""
-    CanonicalMetric <: Metric
+    CanonicalMetric <: AbstractMetric
 
 The Canonical Metric refers to a metric for the [`Stiefel`](@ref)
 manifold, see[^EdelmanAriasSmith1998].

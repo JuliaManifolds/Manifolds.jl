@@ -1,11 +1,11 @@
 @doc raw"""
-    LorentzMetric <: Metric
+    LorentzMetric <: AbstractMetric
 
 Abstract type for Lorentz metrics, which have a single time dimension. These
 metrics assume the spacelike convention with the time dimension being last,
 giving the signature $(++...+-)$.
 """
-abstract type LorentzMetric <: Metric end
+abstract type LorentzMetric <: AbstractMetric end
 
 @doc raw"""
     MinkowskiMetric <: LorentzMetric

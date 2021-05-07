@@ -54,11 +54,11 @@ end
 const PRODUCT_BASIS_LIST_CACHED = [CachedBasis]
 
 """
-    ProductMetric <: Metric
+    ProductMetric <: AbstractMetric
 
 A type to represent the product of metrics for a [`ProductManifold`](@ref).
 """
-struct ProductMetric <: Metric end
+struct ProductMetric <: AbstractMetric end
 
 """
     ProductFVectorDistribution([type::VectorBundleFibers], [x], distrs...)

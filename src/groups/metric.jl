@@ -1,5 +1,5 @@
 @doc raw"""
-    InvariantMetric{G<:Metric,D<:ActionDirection} <: Metric
+    InvariantMetric{G<:AbstractMetric,D<:ActionDirection} <: AbstractMetric
 
 Extend a metric on the Lie algebra of an [`AbstractGroupManifold`](@ref) to the whole group
 via translation in the specified direction.
@@ -31,9 +31,9 @@ provided.
 
 # Constructor
 
-    InvariantMetric(metric::Metric, conv::ActionDirection = LeftAction())
+    InvariantMetric(metric::AbstractMetric, conv::ActionDirection = LeftAction())
 """
-struct InvariantMetric{G<:Metric,D<:ActionDirection} <: Metric
+struct InvariantMetric{G<:AbstractMetric,D<:ActionDirection} <: AbstractMetric
     metric::G
 end
 
@@ -41,19 +41,19 @@ function InvariantMetric(metric, conv=LeftAction())
     return InvariantMetric{typeof(metric),typeof(conv)}(metric)
 end
 
-const LeftInvariantMetric{G} = InvariantMetric{G,LeftAction} where {G<:Metric}
+const LeftInvariantMetric{G} = InvariantMetric{G,LeftAction} where {G<:AbstractMetric}
 
 """
-    LeftInvariantMetric(metric::Metric)
+    LeftInvariantMetric(metric::AbstractMetric)
 
 Alias for a left-[`InvariantMetric`](@ref).
 """
 LeftInvariantMetric(metric) = InvariantMetric{typeof(metric),LeftAction}(metric)
 
-const RightInvariantMetric{G} = InvariantMetric{G,RightAction} where {G<:Metric}
+const RightInvariantMetric{G} = InvariantMetric{G,RightAction} where {G<:AbstractMetric}
 
 """
-    RightInvariantMetric(metric::Metric)
+    RightInvariantMetric(metric::AbstractMetric)
 
 Alias for a right-[`InvariantMetric`](@ref).
 """

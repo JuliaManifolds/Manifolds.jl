@@ -6,7 +6,7 @@ import Manifolds: mean!, median!, InducedBasis, induced_basis, get_chart_index
 include("utils.jl")
 
 struct TestEuclidean{N} <: AbstractManifold{ℝ} end
-struct TestEuclideanMetric <: Metric end
+struct TestEuclideanMetric <: AbstractMetric end
 
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
 function Manifolds.local_metric(
@@ -28,7 +28,7 @@ struct TestSphere{N,T} <: AbstractManifold{ℝ}
     r::T
 end
 
-struct TestSphericalMetric <: Metric end
+struct TestSphericalMetric <: AbstractMetric end
 
 Manifolds.manifold_dimension(::TestSphere{N}) where {N} = N
 function Manifolds.local_metric(
@@ -45,9 +45,9 @@ end
 sph_to_cart(θ, ϕ) = [cos(ϕ) * sin(θ), sin(ϕ) * sin(θ), cos(θ)]
 
 struct BaseManifold{N} <: AbstractManifold{ℝ} end
-struct BaseManifoldMetric{M} <: Metric end
-struct DefaultBaseManifoldMetric <: Metric end
-struct NotImplementedMetric <: Metric end
+struct BaseManifoldMetric{M} <: AbstractMetric end
+struct DefaultBaseManifoldMetric <: AbstractMetric end
+struct NotImplementedMetric <: AbstractMetric end
 
 Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
 Manifolds.inner(::BaseManifold, p, X, Y) = 2 * dot(X, Y)

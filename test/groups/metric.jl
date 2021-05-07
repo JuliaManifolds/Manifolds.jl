@@ -4,7 +4,7 @@ include("group_utils.jl")
 using OrdinaryDiffEq
 import Manifolds: invariant_metric_dispatch, default_metric_dispatch, local_metric
 
-struct TestInvariantMetricBase <: Metric end
+struct TestInvariantMetricBase <: AbstractMetric end
 
 function local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,TestInvariantMetricBase},
@@ -21,7 +21,7 @@ function local_metric(
     return Diagonal([1.0, 2.0, 3.0])
 end
 
-struct TestBiInvariantMetricBase <: Metric end
+struct TestBiInvariantMetricBase <: AbstractMetric end
 
 function invariant_metric_dispatch(
     ::MetricManifold{𝔽,<:AbstractManifold,<:InvariantMetric{TestBiInvariantMetricBase}},
