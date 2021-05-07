@@ -520,7 +520,7 @@ end
         coMMfX = flat(MM, p, fX)
         coMMfY = flat(MM, p, fY)
         @test inner(MM, p, fX, fY) ≈ inner(cotspace2, p, coMMfX, coMMfY)
-        @test isapprox(MM, p, sharp(MM, p, coMMfX), fX)
+        @test isapprox(sharp(MM, p, coMMfX).data, fX.data)
 
         psample = [[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
         Y = pweights([0.5, 0.5])
