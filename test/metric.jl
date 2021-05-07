@@ -171,7 +171,7 @@ end
         @test base_manifold(M) === E
         @test metric(M) === g
 
-        @test_throws ErrorException local_metric_jacobian(E, zeros(3))
+        @test_throws MethodError local_metric_jacobian(E, zeros(3))
         @test_throws MethodError christoffel_symbols_second_jacobian(E, zeros(3))
 
         for vtype in (Vector, MVector{n})

@@ -70,7 +70,11 @@ function christoffel_symbols_first(
     @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
     return Γ
 end
-@decorator_transparent_signature christoffel_symbols_first(M::MD, p; kwargs...) where {MD <:AbstractDecoratorManifold}
+@decorator_transparent_signature christoffel_symbols_first(
+    M::MD,
+    p;
+    kwargs...,
+) where {MD<:AbstractDecoratorManifold}
 
 @doc raw"""
     christoffel_symbols_second(
@@ -100,7 +104,11 @@ function christoffel_symbols_second(
     @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
     return Γ₂
 end
-@decorator_transparent_signature christoffel_symbols_second(M::MD, p; kwargs...) where {MD <:AbstractDecoratorManifold}
+@decorator_transparent_signature christoffel_symbols_second(
+    M::MD,
+    p;
+    kwargs...,
+) where {MD<:AbstractDecoratorManifold}
 
 @doc raw"""
     christoffel_symbols_second_jacobian(
@@ -130,7 +138,11 @@ function christoffel_symbols_second_jacobian(
     )
     return ∂Γ
 end
-@decorator_transparent_signature christoffel_symbols_second_jacobian(M::MD, p; kwargs...) where {MD <:AbstractDecoratorManifold}
+@decorator_transparent_signature christoffel_symbols_second_jacobian(
+    M::MD,
+    p;
+    kwargs...,
+) where {MD<:AbstractDecoratorManifold}
 
 Base.copyto!(M::MetricManifold, q, p) = copyto!(M.manifold, q, p)
 Base.copyto!(M::MetricManifold, Y, p, X) = copyto!(M.manifold, Y, p, X)
@@ -498,8 +510,11 @@ function local_metric_jacobian(
     ∂g = reshape(_jacobian(q -> local_metric(M, q), p, backend), n, n, n)
     return ∂g
 end
-@decorator_transparent_signature local_metric_jacobian(M::MD, p; kwargs...) where {MD <:AbstractDecoratorManifold}
-
+@decorator_transparent_signature local_metric_jacobian(
+    M::MD,
+    p;
+    kwargs...,
+) where {MD<:AbstractDecoratorManifold}
 
 @doc raw"""
     log(N::MetricManifold{M,G}, p, q)
