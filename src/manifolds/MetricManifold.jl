@@ -70,7 +70,11 @@ function christoffel_symbols_first(
     @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
     return Γ
 end
-@decorator_transparent_signature christoffel_symbols_first(M::AbstractDecoratorManifold, p; kwargs...)
+@decorator_transparent_signature christoffel_symbols_first(
+    M::AbstractDecoratorManifold,
+    p;
+    kwargs...,
+)
 function decorator_transparent_dispatch(
     ::typeof(christoffel_symbols_first),
     ::MetricManifold,
@@ -107,7 +111,11 @@ function christoffel_symbols_second(
     @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
     return Γ₂
 end
-@decorator_transparent_signature christoffel_symbols_second(M::AbstractDecoratorManifold, p; kwargs...)
+@decorator_transparent_signature christoffel_symbols_second(
+    M::AbstractDecoratorManifold,
+    p;
+    kwargs...,
+)
 function decorator_transparent_dispatch(
     ::typeof(christoffel_symbols_second),
     ::MetricManifold,
@@ -144,7 +152,11 @@ function christoffel_symbols_second_jacobian(
     )
     return ∂Γ
 end
-@decorator_transparent_signature christoffel_symbols_second_jacobian(M::AbstractDecoratorManifold, p; kwargs...)
+@decorator_transparent_signature christoffel_symbols_second_jacobian(
+    M::AbstractDecoratorManifold,
+    p;
+    kwargs...,
+)
 function decorator_transparent_dispatch(
     ::typeof(christoffel_symbols_second_jacobian),
     ::MetricManifold,
@@ -330,7 +342,7 @@ end
 function decorator_transparent_dispatch(
     ::typeof(einstein_tensor),
     ::MetricManifold,
-    args...
+    args...,
 )
     return Val(:parent)
 end
@@ -371,7 +383,12 @@ where $G_p$ is the local matrix representation of `G`, see [`local_metric`](@ref
 """
 flat(::MetricManifold, ::Any...)
 
-@decorator_transparent_fallback function flat!(M::MetricManifold, ξ::CoTFVector, p, X::TFVector)
+@decorator_transparent_fallback function flat!(
+    M::MetricManifold,
+    ξ::CoTFVector,
+    p,
+    X::TFVector,
+)
     g = local_metric(M, p)
     copyto!(ξ.data, g * X.data)
     return ξ
@@ -386,11 +403,15 @@ gaussian_curvature(::Manifold, ::Any)
 function gaussian_curvature(M::Manifold, p; kwargs...)
     return ricci_curvature(M, p; kwargs...) / 2
 end
-@decorator_transparent_signature gaussian_curvature(M::AbstractDecoratorManifold, p; kwargs...)
+@decorator_transparent_signature gaussian_curvature(
+    M::AbstractDecoratorManifold,
+    p;
+    kwargs...,
+)
 function decorator_transparent_dispatch(
     ::typeof(gaussian_curvature),
     ::MetricManifold,
-    args...
+    args...,
 )
     return Val(:parent)
 end
@@ -425,7 +446,7 @@ end
 function decorator_transparent_dispatch(
     ::typeof(inverse_local_metric),
     ::MetricManifold,
-    args...
+    args...,
 )
     return Val(:parent)
 end
@@ -494,7 +515,12 @@ where $G_p$ is the loal matrix representation of the [`Metric`](@ref) `G`.
 """
 inner(::MetricManifold, ::Any)
 
-@decorator_transparent_fallback :intransparent function inner(M::MMT, p, X, Y) where {MMT<:MetricManifold}
+@decorator_transparent_fallback :intransparent function inner(
+    M::MMT,
+    p,
+    X,
+    Y,
+) where {MMT<:MetricManifold}
     return dot(X, local_metric(M, p) * Y)
 end
 function inner(
@@ -517,11 +543,7 @@ where the latter expression uses Einstein summation convention.
 """
 local_metric(::Manifold, ::Any...)
 @decorator_transparent_signature local_metric(M::Manifold, p; kwargs...)
-function decorator_transparent_dispatch(
-    ::typeof(local_metric),
-    ::MetricManifold,
-    args...,
-)
+function decorator_transparent_dispatch(::typeof(local_metric), ::MetricManifold, args...)
     return Val(:parent)
 end
 
@@ -542,7 +564,11 @@ function local_metric_jacobian(M::Manifold, p; backend::AbstractDiffBackend=diff
     ∂g = reshape(_jacobian(q -> local_metric(M, q), p, backend), n, n, n)
     return ∂g
 end
-@decorator_transparent_signature local_metric_jacobian(M::AbstractDecoratorManifold, p; kwargs...)
+@decorator_transparent_signature local_metric_jacobian(
+    M::AbstractDecoratorManifold,
+    p;
+    kwargs...,
+)
 function decorator_transparent_dispatch(
     ::typeof(local_metric_jacobian),
     ::MetricManifold,
@@ -597,11 +623,7 @@ end
 Compute the Ricci scalar curvature of the manifold `M` at the point `p`.
 """
 ricci_curvature(::Manifold, ::Any)
-function ricci_curvature(
-    M::Manifold,
-    p;
-    backend::AbstractDiffBackend=diff_backend(),
-)
+function ricci_curvature(M::Manifold, p; backend::AbstractDiffBackend=diff_backend())
     Ginv = inverse_local_metric(M, p)
     Ric = ricci_tensor(M, p; backend=backend)
     S = sum(Ginv .* Ric)

@@ -151,7 +151,7 @@ end
     end
     @testset "Local Metric Error message" begin
         M = MetricManifold(BaseManifold{2}(), NotImplementedMetric())
-        @test_throws ErrorException local_metric(M, [3, 4])
+        @test_throws MethodError local_metric(M, [3, 4])
     end
     @testset "scaled Euclidean metric" begin
         n = 3
