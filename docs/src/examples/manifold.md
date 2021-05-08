@@ -125,11 +125,7 @@ nothing #hide
 Similarly, we can verify, whether a tangent vector `X` is valid. It has to fulfill the same size requirements and it has to be orthogonal to `p`. We can again use the `kwargs`, but also provide a way to check `p`, too.
 
 ```@example manifold-tutorial
-function check_vector(M::MySphere, p, X, check_base_point = true, kwargs...)
-    if check_base_point
-        mpe = check_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::MySphere, p, X; kwargs...)
     size(X) != size(p) && return DomainError(size(X), "The size of $X is not $(size(p)).")
     if !isapprox(dot(p,X), 0.0; kwargs...)
         return DomainError(dot(p,X), "The tangent $X is not orthogonal to $p.")
