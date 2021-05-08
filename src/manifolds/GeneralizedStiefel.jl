@@ -79,24 +79,13 @@ Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`]
 it (approximately) holds that $p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0$, where
 `kwargs...` is passed to the `isapprox`.
 """
-function check_vector(
-    M::GeneralizedStiefel{n,k,𝔽},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {n,k,B,𝔽}
-    if check_base_point
-        mpe = check_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::GeneralizedStiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,B,𝔽}
     mpv = invoke(
         check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv

@@ -18,7 +18,12 @@ include("utils.jl")
         @test !is_point(M, p2)
         @test_throws CompositeManifoldError is_point(M, p2, true)
         @test !is_vector(M, p2, 0.0)
-        @test_throws DomainError is_vector(M, p2, [-1.0, 0.0, 0.0], true)
+        @test_throws CompositeManifoldError{ComponentManifoldError{Int64,DomainError}} is_vector(
+            M,
+            p2,
+            [-1.0, 0.0, 0.0],
+            true,
+        )
         @test !is_vector(M, p2, [-1.0, 0.0, 0.0])
         @test_throws DomainError is_vector(M, p, [-1.0, 0.0, 0.0], true)
         @test injectivity_radius(M) ≈ 0

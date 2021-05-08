@@ -208,13 +208,11 @@ last entry, i.e. $p_n>0$
 check_point(::Hyperbolic, ::Any)
 
 @doc raw"""
-    check_vector(M::Hyperbolic{n}, p, X; check_base_point = true, kwargs... )
+    check_vector(M::Hyperbolic{n}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`Hyperbolic`](@ref) `M`, i.e.
 after [`check_point`](@ref)`(M,p)`, `X` has to be of the same dimension as `p`.
-The optional parameter `check_base_point` indicates whether to
-call [`check_point`](@ref)  for `p`. The tolerance for the last test can be set
-using the `kwargs...`.
+The tolerance for the last test can be set using the `kwargs...`.
 
 For a the hyperboloid model or vectors, `X` has to be  orthogonal to `p` with respect
 to the inner product from the embedding, see [`MinkowskiMetric`](@ref).
@@ -227,13 +225,8 @@ function check_vector(
     M::Hyperbolic{N},
     p,
     X::Union{PoincareBallTVector,PoincareHalfSpaceTVector};
-    check_base_point=true,
     kwargs...,
 ) where {N}
-    if check_base_point
-        mpe = check_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
     return check_point(Euclidean(N), X.value; kwargs...)
 end
 

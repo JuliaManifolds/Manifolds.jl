@@ -42,33 +42,20 @@ function check_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...) where {m,n,�
 end
 
 """
-    check_vector(M::CenteredMatrices{m,n,𝔽}, p, X; check_base_point = true, kwargs... )
+    check_vector(M::CenteredMatrices{m,n,𝔽}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
-[`CenteredMatrices`](@ref) `M`, i.e. that `X` is a matrix of size `(m,n)` whose columns
+[`CenteredMatrices`](@ref) `M`, i.e. that `X` is a matrix of size `(m, n)` whose columns
 sum to zero and its values are from the correct [`AbstractNumbers`](@ref).
-The optional parameter `check_base_point` indicates, whether to call
- [`check_point`](@ref)  for `p`.
 The tolerance for the column sums of `p` and `X` can be set using `kwargs...`.
 """
-function check_vector(
-    M::CenteredMatrices{m,n,𝔽},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {m,n,𝔽}
-    if check_base_point
-        mpe = check_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::CenteredMatrices{m,n,𝔽}, p, X; kwargs...) where {m,n,𝔽}
     mpv = invoke(
         check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false,
         kwargs...,
     )
     mpv === nothing || return mpv

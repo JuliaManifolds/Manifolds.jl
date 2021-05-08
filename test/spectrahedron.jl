@@ -13,9 +13,9 @@ include("utils.jl")
     qN = [2.0 0.0; 0.0 1.0; 1/sqrt(2) -1/sqrt(2); 1/sqrt(2) 1/sqrt(2)]
     @test_throws DomainError is_point(M, qN, true)
     Y = [0.0 1.0; 1.0 0.0; 0.0 0.0; 0.0 0.0]
-    @test is_vector(M, q, Y, true; check_base_point=false)
+    @test is_vector(M, q, Y, true)
     YN = [0.1 1.0; 1.0 0.1; 0.0 0.0; 0.0 0.0]
-    @test_throws DomainError is_vector(M, q, YN, true; check_base_point=false)
+    @test_throws DomainError is_vector(M, q, YN, true)
     qE = similar(q)
     embed!(M, qE, q)
     qE2 = embed(M, q)

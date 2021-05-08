@@ -76,33 +76,19 @@ function check_point(M::MultinomialDoubleStochastic{n}, p; kwargs...) where {n}
     return nothing
 end
 @doc raw"""
-    check_vector(M::MultinomialDoubleStochastic p, X; check_base_point = true, kwargs...)
+    check_vector(M::MultinomialDoubleStochastic p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialDoubleStochastic`](@ref) `M`.
 This means, that `p` is valid, that `X` is of correct dimension and sums to zero along any
 column or row.
-
-The optional parameter `check_base_point` indicates, whether to call
-[`check_point`](@ref check_point(::MultinomialDoubleStochastic, ::Any))  for `p`.
 """
-function check_vector(
-    M::MultinomialDoubleStochastic{n},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {n}
-    if check_base_point
-        mpe = check_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::MultinomialDoubleStochastic{n}, p, X; kwargs...) where {n}
     mpv = invoke(
         check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv

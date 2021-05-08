@@ -11,7 +11,7 @@ include("utils.jl")
         @test manifold_dimension(M) == 1
         @test !is_point(M, -1.0)
         @test_throws DomainError is_point(M, -1.0, true)
-        @test is_vector(M, 1.0, 0.0; check_base_point=false)
+        @test is_vector(M, 1.0, 0.0)
         @test vector_transport_to(M, 1.0, 3.0, 2.0, ParallelTransport()) == 6.0
         @test retract(M, 1.0, 1.0) == exp(M, 1.0, 1.0)
         @test isinf(injectivity_radius(M))

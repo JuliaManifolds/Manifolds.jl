@@ -83,17 +83,12 @@ function check_point(M::EssentialManifold, p; kwargs...)
 end
 
 """
-    check_vector(M::EssentialManifold, p, X; check_base_point = true, kwargs... )
+    check_vector(M::EssentialManifold, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the [`EssentialManifold`](@ref) `M`,
 i.e. `X` has to be a 2-element array of `3`-by-`3` skew-symmetric matrices.
-The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 """
-function check_vector(M::EssentialManifold, p, X; check_base_point=true, kwargs...)
-    if check_base_point
-        mpe = check_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::EssentialManifold, p, X; kwargs...)
     if length(X) != 2
         return DomainError(
             length(X),
@@ -104,7 +99,6 @@ function check_vector(M::EssentialManifold, p, X; check_base_point=true, kwargs.
         PowerManifold(M.manifold, NestedPowerRepresentation(), 2),
         p,
         X;
-        check_base_point=check_base_point,
         kwargs...,
     )
 end

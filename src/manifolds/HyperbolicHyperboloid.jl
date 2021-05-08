@@ -14,18 +14,13 @@ function check_point(M::Hyperbolic, p::HyperboloidPoint; kwargs...)
     return check_point(M, p.value; kwargs...)
 end
 
-function check_vector(M::Hyperbolic, p, X; check_base_point=true, kwargs...)
-    if check_base_point
-        mpe = check_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::Hyperbolic, p, X; kwargs...)
     mpv = invoke(
         check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv

@@ -81,33 +81,21 @@ function check_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
 end
 
 @doc raw"""
-    check_vector(M::Stiefel, p, X; check_base_point = true, kwargs...)
+    check_vector(M::Stiefel, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
 `M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](@ref) fits and
 it (approximately) holds that $p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0$,
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian and $\overline{\cdot}$ the (elementwise) complex conjugate.
-The optional parameter `check_base_point` indicates, whether to call [`check_point`](@ref)  for `p`.
 The settings for approximately can be set with `kwargs...`.
 """
-function check_vector(
-    M::Stiefel{n,k,𝔽},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {n,k,𝔽}
-    if check_base_point
-        mpe = check_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::Stiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     mpv = invoke(
         check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv

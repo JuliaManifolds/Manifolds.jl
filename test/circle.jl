@@ -12,7 +12,7 @@ using Manifolds: TFVector, CoTFVector
         @test_throws DomainError is_point(M, 9.0, true)
         @test !is_vector(M, 9.0, 0.0)
         @test_throws DomainError is_vector(M, 9.0, 0.0, true)
-        @test is_vector(M, 0.0, 0.0; check_base_point=false)
+        @test is_vector(M, 0.0, 0.0)
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_coordinates(
             M,
@@ -80,7 +80,7 @@ using Manifolds: TFVector, CoTFVector
         log!(M, v, x, SVector(π / 4))
         @test norm(M, x, v) ≈ π / 4
         @test is_vector(M, x, v)
-        @test is_vector(M, [], v; check_base_point=false)
+        @test is_vector(M, [], v)
         @test project(M, 1.0) == 1.0
         x = MVector(0.0)
         project!(M, x, x)

@@ -155,13 +155,12 @@ function check_point(M::ProductManifold, p::Union{ProductRepr,ProductArray}; kwa
 end
 
 """
-    check_vector(M::ProductManifold, p, X; check_base_point = true, kwargs... )
+    check_vector(M::ProductManifold, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`ProductManifold`](@ref)
-`M`, i.e. after [`check_point`](@ref)`(M, p)`, and all projections to
-base manifolds must be respective tangent vectors.
-If `X` is not a tangent vector to `p` on `M` a [`CompositeManifoldError`](@ref) consisting of all error
-messages of the components, for which the tests fail is returned.
+`M`, i.e. all projections to base manifolds must be respective tangent vectors.
+If `X` is not a tangent vector to `p` on `M` a [`CompositeManifoldError`](@ref) consisting
+of all error messages of the components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
@@ -169,13 +168,8 @@ function check_vector(
     M::ProductManifold,
     p::Union{ProductRepr,ProductArray},
     X::Union{ProductRepr,ProductArray};
-    check_base_point=true,
     kwargs...,
 )
-    if check_base_point
-        perr = check_point(M, p; kwargs...)
-        perr === nothing || return perr
-    end
     ts = ziptuples(
         Tuple(1:length(M.manifolds)),
         M.manifolds,

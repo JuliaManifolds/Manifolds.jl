@@ -42,11 +42,7 @@ function check_point(G::GeneralLinear, e::Identity; kwargs...)
     return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
 
-function check_vector(G::GeneralLinear, p, X; check_base_point=true, kwargs...)
-    if check_base_point
-        mpe = check_point(G, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(G::GeneralLinear, p, X; kwargs...)
     mpv = check_vector(decorated_manifold(G), p, X; kwargs...)
     mpv === nothing || return mpv
     return nothing
