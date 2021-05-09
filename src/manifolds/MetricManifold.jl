@@ -1,8 +1,15 @@
 @doc raw"""
     Metric
 
-Abstract type for the pseudo-Riemannian metric tensor $g$, a family of smoothly
+Abstract type for the pseudo-Riemannian metric tensor ``g``, a family of smoothly
 varying inner products on the tangent space. See [`inner`](@ref).
+
+# Constructors
+
+    Metric(M)
+
+Generate the manifold `M` with the correstponding metric (subtype of this type).
+See also [`MetricManifold`](@ref).
 """
 abstract type Metric end
 
@@ -37,8 +44,8 @@ end
     RiemannianMetric <: Metric
 
 Abstract type for Riemannian metrics, a family of positive definite inner
-products. The positive definite property means that for $X  ∈ T_p \mathcal M$, the
-inner product $g(X, X) > 0$ whenever $X$ is not the zero vector.
+products. The positive definite property means that for ``X  ∈ T_p \mathcal M``, the
+inner product ``g(X, X) > 0`` whenever ``X`` is not the zero vector.
 """
 abstract type RiemannianMetric <: Metric end
 
@@ -52,11 +59,13 @@ abstract type RiemannianMetric <: Metric end
 Compute the Christoffel symbols of the first kind in local coordinates.
 The Christoffel symbols are (in Einstein summation convention)
 
-$Γ_{ijk} = \frac{1}{2} \Bigl[g_{kj,i} + g_{ik,j} - g_{ij,k}\Bigr],$
+```math
+Γ_{ijk} = \frac{1}{2} \Bigl[g_{kj,i} + g_{ik,j} - g_{ij,k}\Bigr],
+```
 
-where $g_{ij,k}=\frac{∂}{∂ p^k} g_{ij}$ is the coordinate
+where ``g_{ij,k}=\frac{∂}{∂ p^k} g_{ij}`` is the coordinate
 derivative of the local representation of the metric tensor. The dimensions of
-the resulting multi-dimensional array are ordered $(i,j,k)$.
+the resulting multi-dimensional array are ordered ``(i,j,k)``.
 """
 christoffel_symbols_first(::Manifold, ::Any)
 function christoffel_symbols_first(
@@ -93,11 +102,13 @@ end
 Compute the Christoffel symbols of the second kind in local coordinates.
 The Christoffel symbols are (in Einstein summation convention)
 
-$Γ^{l}_{ij} = g^{kl} Γ_{ijk},$
+````math
+Γ^{l}_{ij} = g^{kl} Γ_{ijk},
+````
 
-where $Γ_{ijk}$ are the Christoffel symbols of the first kind, and
-$g^{kl}$ is the inverse of the local representation of the metric tensor.
-The dimensions of the resulting multi-dimensional array are ordered $(l,i,j)$.
+where ``Γ_{ijk}`` are the Christoffel symbols of the first kind, and
+``g^{kl}`` is the inverse of the local representation of the metric tensor.
+The dimensions of the resulting multi-dimensional array are ordered ``(l,i,j)``.
 """
 christoffel_symbols_second(::Manifold, ::Any)
 function christoffel_symbols_second(
@@ -126,15 +137,19 @@ end
 
 @doc raw"""
     christoffel_symbols_second_jacobian(
-        M::MetricManifold,
+        M::Manifold,
         p;
         backend::AbstractDiffBackend = diff_backend(),
     )
 
 Get partial derivatives of the Christoffel symbols of the second kind
-for manifold `M` at `p` with respect to the coordinates of `p`,
-$\frac{∂}{∂ p^l} Γ^{k}_{ij} = Γ^{k}_{ij,l}.$
-The dimensions of the resulting multi-dimensional array are ordered $(i,j,k,l)$.
+for manifold `M` at `p` with respect to the coordinates of `p`, i.e.
+
+```math
+\frac{∂}{∂ p^l} Γ^{k}_{ij} = Γ^{k}_{ij,l}.
+```
+
+The dimensions of the resulting multi-dimensional array are ordered ``(i,j,k,l)``.
 """
 christoffel_symbols_second_jacobian(::Manifold, ::Any)
 function christoffel_symbols_second_jacobian(
@@ -308,9 +323,12 @@ function decorator_transparent_dispatch(
 end
 
 @doc raw"""
-    det_local_metric(M::MetricManifold, p)
+    det_local_metric(M::Manifold, p)
 
-Return the determinant of local matrix representation of the metric tensor $g$.
+Return the determinant of local matrix representation of the metric tensor ``g``, i.e. of the
+matrix ``G(p)`` representing the metric in the tangent space at ``p`` with as a matrix.
+
+See also [`local_metric`](@ref)
 """
 det_local_metric(::Manifold, ::Any)
 function det_local_metric(M::Manifold, p)
@@ -325,7 +343,7 @@ function decorator_transparent_dispatch(
     return Val(:parent)
 end
 """
-    einstein_tensor(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
+    einstein_tensor(M::Manifold, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Einstein tensor of the manifold `M` at the point `p`.
 """
@@ -379,7 +397,7 @@ computing
 ````math
 X^♭= G_p X,
 ````
-where $G_p$ is the local matrix representation of `G`, see [`local_metric`](@ref)
+where ``G_p`` is the local matrix representation of `G`, see [`local_metric`](@ref)
 """
 flat(::MetricManifold, ::Any...)
 
@@ -395,7 +413,7 @@ flat(::MetricManifold, ::Any...)
 end
 
 """
-    gaussian_curvature(M::MetricManifold, x; backend::AbstractDiffBackend = diff_backend())
+    gaussian_curvature(M::Manifold, x; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Gaussian curvature of the manifold `M` at the point `x`.
 """
@@ -433,10 +451,12 @@ function injectivity_radius(M::MetricManifold, p, m::ExponentialRetraction)
 end
 
 @doc raw"""
-    inverse_local_metric(M::MetricManifold, p)
+    inverse_local_metric(M::Manifold, p)
 
 Return the local matrix representation of the inverse metric (cometric) tensor, usually
-written $g^{ij}$.
+written ``g^{ij}``.
+
+See also [`local_metric`](@ref)
 """
 inverse_local_metric(::Manifold, ::Any)
 function inverse_local_metric(M::Manifold, p)
@@ -511,7 +531,7 @@ otherwise the [`local_metric`](@ref)`(M, p)` is employed as
 ````math
 g_p(X, Y) = ⟨X, G_p Y⟩,
 ````
-where $G_p$ is the loal matrix representation of the [`Metric`](@ref) `G`.
+where ``G_p`` is the loal matrix representation of the [`Metric`](@ref) `G`.
 """
 inner(::MetricManifold, ::Any)
 
@@ -534,11 +554,11 @@ function inner(
 end
 
 @doc raw"""
-    local_metric(M::MetricManifold, p, B)
+    local_metric(M::Manifold, p, B)
 
-Return the local matrix representation at the point `p` of the metric tensor $g$ with
-respect to the [`AbstractBasis`](@ref) `B` on the [`Manifold`](@ref) `M`, usually written $g_{ij}$.
-The matrix has the property that $g(X, Y)=X^\mathrm{T} [g_{ij}] Y = g_{ij} X^i Y^j$,
+Return the local matrix representation at the point `p` of the metric tensor ``g`` with
+respect to the [`AbstractBasis`](@ref) `B` on the [`Manifold`](@ref) `M`, usually written ``g_{ij}``.
+The matrix has the property that ``g(X, Y)=X^\mathrm{T} [g_{ij}] Y = g_{ij} X^i Y^j``,
 where the latter expression uses Einstein summation convention.
 """
 local_metric(::Manifold, ::Any...)
@@ -555,8 +575,8 @@ end
     )
 
 Get partial derivatives of the local metric of `M` at `p` with respect to the
-coordinates of `p`, $\frac{∂}{∂ p^k} g_{ij} = g_{ij,k}$. The
-dimensions of the resulting multi-dimensional array are ordered $(i,j,k)$.
+coordinates of `p`, ``\frac{∂}{∂ p^k} g_{ij} = g_{ij,k}``. The
+dimensions of the resulting multi-dimensional array are ordered ``(i,j,k)``.
 """
 local_metric_jacobian(::Manifold, ::Any)
 function local_metric_jacobian(M::Manifold, p; backend::AbstractDiffBackend=diff_backend())
@@ -591,8 +611,8 @@ log(::MetricManifold, ::Any...)
 @doc raw"""
     log_local_metric_density(M::Manifold, p)
 
-Return the natural logarithm of the metric density $ρ$ of `M` at `p`, which
-is given by $ρ = \log \sqrt{|\det [g_{ij}]|}$.
+Return the natural logarithm of the metric density ``ρ`` of `M` at `p`, which
+is given by ``ρ = \log \sqrt{|\det [g_{ij}]|}``.
 """
 log_local_metric_density(::Manifold, ::Any)
 function log_local_metric_density(M::Manifold, p)
@@ -610,15 +630,16 @@ end
 @doc raw"""
     metric(M::MetricManifold)
 
-Get the metric $g$ of the manifold `M`.
+Get the metric ``g`` of the manifold `M`.
 """
 metric(::MetricManifold)
 
 function metric(M::MetricManifold)
     return M.metric
 end
+
 """
-    ricci_curvature(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
+    ricci_curvature(M::Manifold, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Ricci scalar curvature of the manifold `M` at the point `p`.
 """
@@ -638,7 +659,7 @@ function decorator_transparent_dispatch(
     return Val(:parent)
 end
 """
-    ricci_tensor(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
+    ricci_tensor(M::Manifold, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Ricci tensor, also known as the Ricci curvature tensor,
 of the manifold `M` at the point `p`.
@@ -656,11 +677,11 @@ function decorator_transparent_dispatch(::typeof(ricci_tensor), ::MetricManifold
     return Val(:parent)
 end
 @doc raw"""
-    riemann_tensor(M::MetricManifold, p; backend::AbstractDiffBackend = diff_backend())
+    riemann_tensor(M::Manifold, p; backend::AbstractDiffBackend = diff_backend())
 
-Compute the Riemann tensor $R^l_{ijk}$, also known as the Riemann curvature
+Compute the Riemann tensor ``R^l_{ijk}``, also known as the Riemann curvature
 tensor, at the point `p`. The dimensions of the resulting multi-dimensional
-array are ordered $(l,i,j,k)$.
+array are ordered ``(l,i,j,k)``.
 """
 riemann_tensor(::Manifold, ::Any...)
 function riemann_tensor(M::Manifold, p; backend::AbstractDiffBackend=diff_backend())
@@ -687,8 +708,8 @@ computing
 ````math
 ξ^♯ = G_p^{-1} ξ,
 ````
-where $G_p$ is the local matrix representation of `G`, i.e. one employs
-[`inverse_local_metric`](@ref) here to obtain $G_p^{-1}$.
+where ``G_p`` is the local matrix representation of `G`, i.e. one employs
+[`inverse_local_metric`](@ref) here to obtain ``G_p^{-1}``.
 """
 sharp(::MetricManifold, ::Any)
 
@@ -717,9 +738,11 @@ Approximate the exponential map on the manifold over the provided timespan
 assuming the Levi-Civita connection by solving the ordinary differential
 equation
 
-$\frac{d^2}{dt^2} p^k + Γ^k_{ij} \frac{d}{dt} p_i \frac{d}{dt} p_j = 0,$
+```math
+\frac{d^2}{dt^2} p^k + Γ^k_{ij} \frac{d}{dt} p_i \frac{d}{dt} p_j = 0,
+```
 
-where $Γ^k_{ij}$ are the Christoffel symbols of the second kind, and
+where ``Γ^k_{ij}`` are the Christoffel symbols of the second kind, and
 the Einstein summation convention is assumed. The arguments `tspan` and
 `solver` follow the `OrdinaryDiffEq` conventions. `kwargs...` specify keyword
 arguments that will be passed to `OrdinaryDiffEq.solve`.
