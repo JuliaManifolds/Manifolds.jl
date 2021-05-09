@@ -345,7 +345,7 @@ end
 """
     einstein_tensor(M::Manifold, p; backend::AbstractDiffBackend = diff_backend())
 
-Compute the Einstein tensor of the manifold `M` at the point `p`.
+Compute the Einstein tensor of the manifold `M` at the point `p`, see [https://en.wikipedia.org/wiki/Einstein_tensor](https://en.wikipedia.org/wiki/Einstein_tensor)
 """
 einstein_tensor(::Manifold, ::Any...)
 function einstein_tensor(M::Manifold, p; backend::AbstractDiffBackend=diff_backend())
@@ -662,7 +662,7 @@ end
     ricci_tensor(M::Manifold, p; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Ricci tensor, also known as the Ricci curvature tensor,
-of the manifold `M` at the point `p`.
+of the manifold `M` at the point `p`, see [https://en.wikipedia.org/wiki/Ricci_curvature#Introduction_and_local_definition](https://en.wikipedia.org/wiki/Ricci_curvature#Introduction_and_local_definition).
 """
 ricci_tensor(::Manifold, ::Any)
 function ricci_tensor(M::Manifold, p; kwargs...)
