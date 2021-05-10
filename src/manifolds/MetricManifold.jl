@@ -4,12 +4,13 @@
 Abstract type for the pseudo-Riemannian metric tensor ``g``, a family of smoothly
 varying inner products on the tangent space. See [`inner`](@ref).
 
-# Constructors
+# Functor
 
-    Metric(M)
+    (metric::Metric)(M::Manifold)
 
-Generate the manifold `M` with the correstponding metric (subtype of this type).
-See also [`MetricManifold`](@ref).
+Generate the `MetricManifold` that wraps the manifold `M` with given `metric`.
+This works for both a variable containing the metric as well as a subtype `T<:Metric`,
+where a zero parameter constructor `T()` is availabe.
 """
 abstract type Metric end
 
@@ -562,7 +563,7 @@ The matrix has the property that ``g(X, Y)=X^\mathrm{T} [g_{ij}] Y = g_{ij} X^i 
 where the latter expression uses Einstein summation convention.
 """
 local_metric(::Manifold, ::Any...)
-@decorator_transparent_signature local_metric(M::Manifold, p; kwargs...)
+@decorator_transparent_signature local_metric(M::AbstractDecoratorManifold, p; kwargs...)
 function decorator_transparent_dispatch(::typeof(local_metric), ::MetricManifold, args...)
     return Val(:parent)
 end
