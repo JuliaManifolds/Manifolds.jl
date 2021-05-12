@@ -151,7 +151,7 @@ end
     end
     @testset "Local Metric Error message" begin
         M = MetricManifold(BaseManifold{2}(), NotImplementedMetric())
-        @test_throws ErrorException local_metric(M, [3, 4])
+        @test_throws MethodError local_metric(M, [3, 4])
     end
     @testset "scaled Euclidean metric" begin
         n = 3
@@ -171,8 +171,8 @@ end
         @test base_manifold(M) === E
         @test metric(M) === g
 
-        @test_throws ErrorException local_metric_jacobian(E, zeros(3))
-        @test_throws ErrorException christoffel_symbols_second_jacobian(E, zeros(3))
+        @test_throws MethodError local_metric_jacobian(E, zeros(3))
+        @test_throws MethodError christoffel_symbols_second_jacobian(E, zeros(3))
 
         for vtype in (Vector, MVector{n})
             x, v, w = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
@@ -389,9 +389,9 @@ end
         @test is_manifold_point(MM, x) === is_manifold_point(M, x)
         @test is_tangent_vector(MM, x, v) === is_tangent_vector(M, x, v)
 
-        @test_throws ErrorException local_metric(MM2, x)
-        @test_throws ErrorException local_metric_jacobian(MM2, x)
-        @test_throws ErrorException christoffel_symbols_second_jacobian(MM2, x)
+        @test_throws MethodError local_metric(MM2, x)
+        @test_throws MethodError local_metric_jacobian(MM2, x)
+        @test_throws MethodError christoffel_symbols_second_jacobian(MM2, x)
         # MM falls back to nondefault error
         @test_throws MethodError projected_distribution(MM, 1, x)
         @test_throws MethodError projected_distribution(MM, 1)
