@@ -58,7 +58,7 @@ specifies a type. The following ones are available.
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
 Pages = ["retractions.jl"]
-Order = [:types]
+Order = [:type]
 ```
 
 ### Projections
@@ -68,24 +68,24 @@ Often this is implicitly assumed, for example the complex [`Circle`](@ref) is em
 Let‘s keep the circle in mind in the following as a simple example.
 For the general case see of explicitly stating an embedding and/or distinguising several, different embeddings, see [Embedded Manifolds](@ref EmbeddedmanifoldSec) below.
 
-To make this a little more concrete, let‘s assume we have a manifold ``\mathcal M`` which is embedded in some manifold ``\mathcal N`` and the image ``i(\mathcal)`` of the embedding function ``i`` is a closed set (with respect to the topology on ``\mathcal N``). Then we can do two kinds of projections.
+To make this a little more concrete, let‘s assume we have a manifold ``\mathcal M`` which is embedded in some manifold ``\mathcal N`` and the image ``i(\mathcal M)`` of the embedding function ``i`` is a closed set (with respect to the topology on ``\mathcal N``). Then we can do two kinds of projections.
 
 To make this concrete in an example for the Circle ``\mathcal M=\mathcal C := \{ p ∈ ℂ | |p| = 1\}``
 the embedding can be chosen to be the manifold ``N = ℂ`` and due to our representation of ``\mathcal C`` as complex numbers already, we have ``i(p) = p`` the identity as the embedding function.
 
 1. Given a point ``p∈\mathcal N`` we can look for the closest point on the manifold ``\mathcal M`` formally as
 
-```math
-  \operatorname{arg\,min}_{q\in \cM} d_{\mathcal N}(i(q),p)
-```
+  ```math
+    \operatorname*{arg\,min}_{q\in \mathcal M} d_{\mathcal N}(i(q),p)
+  ```
 
-And this resulting ``q`` we call the projection of ``p`` onto the manifold ``\mathcal M``.
+  And this resulting ``q`` we call the projection of ``p`` onto the manifold ``\mathcal M``.
 
-1. Given a point ``p∈\mathcal M`` and a vector in ``X\inT_{i(p)}\mathcal N`` in the embedding we can similarly look for the closest point to ``Y∈ T_p\mathcal M`` using the push forward ``i_*`` of the embedding.
+2. Given a point ``p∈\mathcal M`` and a vector in ``X\inT_{i(p)}\mathcal N`` in the embedding we can similarly look for the closest point to ``Y∈ T_p\mathcal M`` using the push forward ``i_*`` of the embedding.
 
-```math
-  \operatorname_{arg\,min}_{Y\in T_p\mathcal M} \lVert i_*(p)[Y] - X \rVert_{i(p)}
-```
+  ```math
+    \operatorname*{arg\,min}_{Y\in T_p\mathcal M} \lVert i_*(p)[Y] - X \rVert_{i(p)}
+  ```
 
 And we call the resulting ``Y`` the projection of ``X`` onto the tangent space ``T_p\mathcal M`` at ``p``.
 
