@@ -89,6 +89,7 @@ using ManifoldsBase:
     DefaultManifold,
     DefaultOrDiagonalizingBasis,
     DiagonalizingBasisData,
+    NLsolveInverseRetraction,
     InversePowerRetraction,
     PowerManifold,
     PowerManifoldNested,
@@ -131,8 +132,6 @@ include("manifolds/VectorBundle.jl")
 
 include("distributions.jl")
 include("projected_distribution.jl")
-
-include("approx_inverse_retraction.jl")
 
 # It's included early to ensure visibility of `Identity`
 include("groups/group.jl")

@@ -22,11 +22,10 @@ We would like to highlight a few of the types and functions in the next two sect
 
 Besides the most central type, that of a [`Manifold`](@ref), the other three are used in a lazy fashion, i.e. usually, if you implement a manifold, neither points on a manifold nor (co)tangent vectors have their own type but are just matrices. Exceptions are, if your points/vectors require a structure anyways (see [`FixedRankMatrices`](@ref) for an example) or if you have several representations of the manifold (see [Hyperbolic](@ref HyperbolicSpace) for an example).
 
-```@docs
-Manifold
-MPoint
-TVector
-CoVector
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["maintypes.jl"]
+Order = [:type, :function]
 ```
 
 ### The exponential and the logarithmic map and geodesics
@@ -36,42 +35,30 @@ Together with geodesics one also obtains the exponential map and its inverse, th
 Informally speaking, the exponential map takes a vector (think of a direction and a length) at one point and returns another point,
 which lies towards this direction at distance of the specified length. The logarithmic map does the inverse, i..e. given two points, what is the vector that “points towards” the other point.
 
-```@docs
-exp
-exp!
-log
-log!
-geodesic
-shortest_geodesic
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["exp_log_geo.jl"]
+Order = [:function]
 ```
+
 
 ### Retractions and inverse Retractions
 
 The exponential and logarithmic map might be too expensive to evaluate or not be available in a very stable numerical way. Retractions provide a possibly cheap, fast and stable alternative.
 
-```@docs
-retract
-retract!
-inverse_retract
-inverse_retract!
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["retractions.jl"]
+Order = [:function]
 ```
 
 To distinguish different types of retractions, the last argument of the (inverse) retraction
 specifies a type. The following ones are available.
-```@docs
-AbstractRetractionMethod
-AbstractInverseRetractionMethod
-ApproximateRetractionMethod
-ApproximateInverseRetractionMethod
-ExponentialRetraction
-LogarithmicInverseRetraction
-PolarRetraction
-PolarInverseRetraction
-ProjectionRetraction
-ProjectionInverseRetraction
-QRRetraction
-QRInverseRetraction
-NLsolveInverseRetraction
+
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["retractions.jl"]
+Order = [:types]
 ```
 
 ### Projections
@@ -94,7 +81,7 @@ the embedding can be chosen to be the manifold ``N = ℂ`` and due to our repres
 
 And this resulting ``q`` we call the projection of ``p`` onto the manifold ``\mathcal M``.
 
-2. Given a point ``p∈\mathcal M`` and a vector in ``X\inT_{i(p)}\mathcal N`` in the embedding we can similarly look for the closest point to ``Y∈ T_p\mathcal M`` using the push forward ``i_*`` of the embedding.
+1. Given a point ``p∈\mathcal M`` and a vector in ``X\inT_{i(p)}\mathcal N`` in the embedding we can similarly look for the closest point to ``Y∈ T_p\mathcal M`` using the push forward ``i_*`` of the embedding.
 
 ```math
   \operatorname_{arg\,min}_{Y\in T_p\mathcal M} \lVert i_*(p)[Y] - X \rVert_{i(p)}
@@ -114,9 +101,10 @@ TODO
 
 and the function signatures are as follows.
 
-```@docs
-project
-project!
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["projections.jl"]
+Order = [:function]
 ```
 
 ### Remaining functions
