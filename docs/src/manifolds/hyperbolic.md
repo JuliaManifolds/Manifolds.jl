@@ -1,4 +1,4 @@
-# Hyperbolic space
+# [Hyperbolic space](@id HyperbolicSpace)
 
 The hyperbolic space can be represented in three different models.
 

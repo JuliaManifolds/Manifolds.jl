@@ -16,6 +16,111 @@ Additionally the [`AbstractDecoratorManifold`](@ref) is provided as well as the 
 The following functions are currently available from the interface.
 If a manifold that you implement for your own package fits this interface, we happily look forward to a [Pull Request](https://github.com/JuliaManifolds/Manifolds.jl/compare) to add it here.
 
+We would like to highlight a few of the types and functions in the next two sections before listing the remaining types and functions alphabetically.
+
+### The Manifold Type
+
+Besides the most central type, that of a [`Manifold`](@ref), the other three are used in a lazy fashion, i.e. usually, if you implement a manifold, neither points on a manifold nor (co)tangent vectors have their own type but are just matrices. Exceptions are, if your points/vectors require a structure anyways (see [`FixedRankMatrices`](@ref) for an example) or if you have several representations of the manifold (see [Hyperbolic](@ref HyperbolicSpace) for an example).
+
+```@docs
+Manifold
+MPoint
+TVector
+CoVector
+```
+
+### The exponential and the logarithmic map and geodesics
+
+Geodesics are the generalizations of a straight line to manifolds, i.e. their intrinsic acceleration is zero.
+Together with geodesics one also obtains the exponential map and its inverse, the logarithmic map.
+Informally speaking, the exponential map takes a vector (think of a direction and a length) at one point and returns another point,
+which lies towards this direction at distance of the specified length. The logarithmic map does the inverse, i..e. given two points, what is the vector that “points towards” the other point.
+
+```@docs
+exp
+exp!
+log
+log!
+geodesic
+shortest_geodesic
+```
+
+### Retractions and inverse Retractions
+
+The exponential and logarithmic map might be too expensive to evaluate or not be available in a very stable numerical way. Retractions provide a possibly cheap, fast and stable alternative.
+
+```@docs
+retract
+retract!
+inverse_retract
+inverse_retract!
+```
+
+To distinguish different types of retractions, the last argument of the (inverse) retraction
+specifies a type. The following ones are available.
+```@docs
+AbstractRetractionMethod
+AbstractInverseRetractionMethod
+ApproximateRetractionMethod
+ApproximateInverseRetractionMethod
+ExponentialRetraction
+LogarithmicInverseRetraction
+PolarRetraction
+PolarInverseRetraction
+ProjectionRetraction
+ProjectionInverseRetraction
+QRRetraction
+QRInverseRetraction
+NLsolveInverseRetraction
+```
+
+### Projections
+
+A manifold might be embedded in some space.
+Often this is implicitly assumed, for example the complex [`Circle`](@ref) is embedded in the complex plane.
+Let‘s keep the circle in mind in the following as a simple example.
+For the general case see of explicitly stating an embedding and/or distinguising several, different embeddings, see [Embedded Manifolds](@ref EmbeddedmanifoldSec) below.
+
+To make this a little more concrete, let‘s assume we have a manifold ``\mathcal M`` which is embedded in some manifold ``\mathcal N`` and the image ``i(\mathcal)`` of the embedding function ``i`` is a closed set (with respect to the topology on ``\mathcal N``). Then we can do two kinds of projections.
+
+To make this concrete in an example for the Circle ``\mathcal M=\mathcal C := \{ p ∈ ℂ | |p| = 1\}``
+the embedding can be chosen to be the manifold ``N = ℂ`` and due to our representation of ``\mathcal C`` as complex numbers already, we have ``i(p) = p`` the identity as the embedding function.
+
+1. Given a point ``p∈\mathcal N`` we can look for the closest point on the manifold ``\mathcal M`` formally as
+
+```math
+  \operatorname{arg\,min}_{q\in \cM} d_{\mathcal N}(i(q),p)
+```
+
+And this resulting ``q`` we call the projection of ``p`` onto the manifold ``\mathcal M``.
+
+2. Given a point ``p∈\mathcal M`` and a vector in ``X\inT_{i(p)}\mathcal N`` in the embedding we can similarly look for the closest point to ``Y∈ T_p\mathcal M`` using the push forward ``i_*`` of the embedding.
+
+```math
+  \operatorname_{arg\,min}_{Y\in T_p\mathcal M} \lVert i_*(p)[Y] - X \rVert_{i(p)}
+```
+
+And we call the resulting ``Y`` the projection of ``X`` onto the tangent space ``T_p\mathcal M`` at ``p``.
+
+Let‘s look at the little more concrete example of the Circle again.
+Here, the closest point of ``p ∈ ℂ`` is just the projection onto the circle, or in other words ``q = \frac{p}{\lvert p \rvert}``. A tangent space ``T_p\mathcal C`` in the embedding is the line orthogonal to a point ``p∈\mathcal C`` through the origin.
+This can be better visualized by looking at ``p+T_p\mathcal C`` which is actually the line tangent to ``p``.
+
+Here the projection can be computed as the classical projection onto the line, i.e.  ``Y = X - ⟨X,p⟩X``.
+
+this is illustrated in the following figure
+
+TODO
+
+and the function signatures are as follows.
+
+```@docs
+project
+project!
+```
+
+### Remaining functions
+
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
 Pages = ["ManifoldsBase.jl"]
@@ -159,7 +264,7 @@ Pages = ["ValidationManifold.jl"]
 Order = [:macro, :type, :function]
 ```
 
-## EmbeddedManifold
+## [EmbeddedManifold](@id EmbeddedmanifoldSec)
 
 Some manifolds can easily be defined by using a certain embedding.
 For example the [`Sphere`](@ref)`(n)` is embedded in [`Euclidean`](@ref)`(n+1)`.

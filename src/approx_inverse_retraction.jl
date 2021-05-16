@@ -1,11 +1,4 @@
 """
-    ApproximateInverseRetraction <: AbstractInverseRetractionMethod
-
-An abstract type for representing approximate inverse retraction methods.
-"""
-abstract type ApproximateInverseRetraction <: AbstractInverseRetractionMethod end
-
-"""
     NLsolveInverseRetraction{T<:AbstractRetractionMethod,TV,TK} <:
         ApproximateInverseRetraction
 
