@@ -241,14 +241,6 @@ function __init__()
 
     @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
         using .Test: Test
-        """
-            find_eps(x...)
-
-        Find an appropriate tolerance for given points or tangent vectors, or their types.
-        """
-        find_eps(x...) = find_eps(Base.promote_type(map(number_eltype, x)...))
-        find_eps(x::Type{TN}) where {TN<:Number} = eps(real(TN))
-        find_eps(x) = find_eps(number_eltype(x))
         include("tests/tests_general.jl")
         export test_manifold
         include("tests/tests_group.jl")

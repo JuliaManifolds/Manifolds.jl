@@ -1,4 +1,13 @@
 """
+    find_eps(x...)
+
+Find an appropriate tolerance for given points or tangent vectors, or their types.
+"""
+find_eps(x...) = find_eps(Base.promote_type(map(number_eltype, x)...))
+find_eps(x::Type{TN}) where {TN<:Number} = eps(real(TN))
+find_eps(x) = find_eps(number_eltype(x))
+
+"""
     test_manifold(
         M::Manifold,
         pts::AbstractVector;

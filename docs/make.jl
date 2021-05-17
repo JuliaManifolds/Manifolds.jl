@@ -1,5 +1,5 @@
 using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PyPlot
-# required for loading the Manifolds.ManifoldTests module
+# required for loading the manifold tests functios
 using Test, ForwardDiff, ReverseDiff
 ENV["GKSwstype"] = "100"
 
@@ -14,7 +14,7 @@ cp(
 makedocs(
     # for development, we disable prettyurls
     format=Documenter.HTML(prettyurls=false, assets=["assets/favicon.ico"]),
-    modules=[Manifolds],
+    modules=[Manifolds, ManifoldsBase],
     authors="Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
     sitename="Manifolds.jl",
     pages=[
