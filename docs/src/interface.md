@@ -11,7 +11,7 @@ Depth = 2
 
 Additionally the [`AbstractDecoratorManifold`](@ref) is provided as well as the [`ValidationManifold`](@ref) as a specific example of such a decorator.
 
-## Types and functions
+## [Types and functions](@id interface-types-and-functions)
 
 The following functions are currently available from the interface.
 If a manifold that you implement for your own package fits this interface, we happily look forward to a [Pull Request](https://github.com/JuliaManifolds/Manifolds.jl/compare) to add it here.
