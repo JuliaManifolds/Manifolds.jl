@@ -20,7 +20,7 @@ specified in `diff_convs`.
 If the group is equipped with an invariant metric, `test_invariance` indicates that the
 invariance should be checked for the provided points.
 """
-function ManifoldTests.test_group(
+function test_group(
     G,
     g_pts::AbstractVector,
     v_pts::AbstractVector=[],
@@ -430,7 +430,7 @@ on the manifold it acts upon (contained in `m_pts`).
 - `atol_ident_compose = 0`: absolute tolerance for the test that composition with identity
   doesn't change the group element.
 """
-function ManifoldTests.test_action(
+function test_action(
     A::AbstractGroupAction,
     a_pts::AbstractVector,
     m_pts::AbstractVector,

@@ -53,3 +53,6 @@ function _inverse_retract_nlsolve(
     res = NLsolve.nlsolve(f!, X0; nlsolve_kwargs...)
     return res
 end
+function inverse_retract!(M::AbstractPowerManifold, X, q, p, m::NLsolveInverseRetraction)
+    return inverse_retract!(M, X, q, p, InversePowerRetraction(m))
+end

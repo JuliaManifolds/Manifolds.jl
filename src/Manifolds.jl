@@ -197,8 +197,6 @@ include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
 
-include("tests/ManifoldTests.jl")
-
 @doc raw"""
     Base.in(p, M::Manifold; kwargs...)
     p ∈ M
@@ -243,14 +241,26 @@ function __init__()
 
     @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
         using .Test: Test
+        """
+            find_eps(x...)
+
+        Find an appropriate tolerance for given points or tangent vectors, or their types.
+        """
+        find_eps(x...) = find_eps(Base.promote_type(map(number_eltype, x)...))
+        find_eps(x::Type{TN}) where {TN<:Number} = eps(real(TN))
+        find_eps(x) = find_eps(number_eltype(x))
         include("tests/tests_general.jl")
+        export test_manifold
         include("tests/tests_group.jl")
+        export test_group, test_action
         @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
             include("tests/tests_forwarddiff.jl")
+            export test_forwarddiff
         end
 
         @require ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267" begin
             include("tests/tests_reversediff.jl")
+            export test_reversediff
         end
     end
 
