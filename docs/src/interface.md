@@ -46,6 +46,10 @@ Order = [:function]
 
 The exponential and logarithmic map might be too expensive to evaluate or not be available in a very stable numerical way. Retractions provide a possibly cheap, fast and stable alternative.
 
+The following figure compares the exponential map [`exp`](@ref)`(M, p, X)` on the [`Circle`](@ref)`(ℂ)` (or [`Sphere`](@ref)`(1)` embedded in $ℝ^2$ with one possible retraction, the one based on projections. Note especially that ``\mathrm{dist}(p,q)=\lVert X\rVert_p`` while this is not the case for ``q'``.
+
+![A comparson of the exponential map and a retraction on the Circle.](assets/images/retraction_illustration_600.png)
+
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
 Pages = ["retractions.jl"]
@@ -89,15 +93,15 @@ And this resulting ``q`` we call the projection of ``p`` onto the manifold ``\ma
 
 And we call the resulting ``Y`` the projection of ``X`` onto the tangent space ``T_p\mathcal M`` at ``p``.
 
-Let‘s look at the little more concrete example of the Circle again.
+Let‘s look at the little more concrete example of the complex Circle again.
 Here, the closest point of ``p ∈ ℂ`` is just the projection onto the circle, or in other words ``q = \frac{p}{\lvert p \rvert}``. A tangent space ``T_p\mathcal C`` in the embedding is the line orthogonal to a point ``p∈\mathcal C`` through the origin.
-This can be better visualized by looking at ``p+T_p\mathcal C`` which is actually the line tangent to ``p``.
+This can be better visualized by looking at ``p+T_p\mathcal C`` which is actually the line tangent to ``p``. NOte that this shift does not change the resulting projection relative to the origin of the tangent space.
 
 Here the projection can be computed as the classical projection onto the line, i.e.  ``Y = X - ⟨X,p⟩X``.
 
 this is illustrated in the following figure
 
-TODO
+![An example illustrating the two kinds of projections on the Circle.](assets/images/retraction_illustration_600.png)
 
 and the function signatures are as follows.
 
