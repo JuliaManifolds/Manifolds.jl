@@ -189,7 +189,7 @@ using ManifoldsBase: TFVector
             X2B = get_coordinates(M, p, X2, B)
             X3B = get_coordinates(M, p, X3, B)
 
-            @test inner(M, p, X2, X3) ≈ dot(X2B, local_metric(M, B, p) * X3B)
+            @test inner(M, p, X2, X3) ≈ dot(X2B, local_metric(M, p, B) * X3B)
 
             X2back = get_vector(M, p, X2B, B)
             X3back = get_vector(M, p, X3B, B)

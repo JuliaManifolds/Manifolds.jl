@@ -558,8 +558,8 @@ end
 
 function local_metric(
     M::Sphere{n,ℝ},
-    B::InducedBasis{ℝ,TangentSpaceType,StereographicAtlas,Symbol},
     p,
+    B::InducedBasis{ℝ,TangentSpaceType,StereographicAtlas,Symbol},
 ) where {n}
     a = get_point_coordinates(M, B.A, B.i, p)
     return (4 / (1 + dot(a, a))^2) * I
