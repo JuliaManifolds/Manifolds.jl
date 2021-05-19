@@ -85,6 +85,7 @@ function ManifoldTests.test_manifold(
     is_mutating=true,
     is_point_atol_multiplier=0,
     is_tangent_atol_multiplier=0,
+    musical_isomorphism_bases=[],
     point_distributions=[],
     projection_atol_multiplier=0,
     rand_tvector_atol_multiplier=0,
@@ -609,6 +610,14 @@ function ManifoldTests.test_manifold(
             tv_m_s_back = allocate(tv_m_back)
             sharp!(M, tv_m_s_back, pts[1], ctv_m_s)
             Test.@test isapprox(M, pts[1], tv_m, tv_m_s_back)
+        end
+
+        for basis in musical_isomorphism_bases
+            tv_m_f = ManifoldsBase.TFVector(get_coordinates(M, pts[1], tv_m, basis), basis)
+            ctv_m_f = flat(M, pts[1], tv_m_f)
+            Test.@test isa(ctv_m_f, CoTFVector)
+            tv_m_f_back = sharp(M, pts[1], ctv_m_f)
+            Test.@test isapprox(tv_m_f.data, tv_m_f_back.data)
         end
     end
 

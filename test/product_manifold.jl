@@ -358,6 +358,7 @@ end
                 pts;
                 test_reverse_diff=isa(T, Vector),
                 test_musical_isomorphisms=true,
+                musical_isomorphism_bases=[DefaultOrthonormalBasis()],
                 test_injectivity_radius=true,
                 test_project_point=true,
                 test_project_tangent=true,

@@ -293,13 +293,6 @@ entry in `p`) separately.
 """
 flat(::ProductManifold, ::Any...)
 
-function flat!(M::ProductManifold, ξ::CoTFVector, p, X::TFVector)
-    vfs = map(u -> FVector(CotangentSpace, u), submanifold_components(ξ))
-    wfs = map(u -> FVector(TangentSpace, u), submanifold_components(X))
-    map(flat!, M.manifolds, vfs, submanifold_components(M, p), wfs)
-    return ξ
-end
-
 function get_basis(M::ProductManifold, p, B::AbstractBasis)
     parts = map(t -> get_basis(t..., B), ziptuples(M.manifolds, submanifold_components(p)))
     return CachedBasis(B, ProductBasisData(parts))
@@ -989,13 +982,6 @@ Use the musical isomorphism to transform the cotangent vector `ξ` from the tang
 This can be done elementwise for every entry of `ξ` (and `p`) separately
 """
 sharp(::ProductManifold, ::Any...)
-
-function sharp!(M::ProductManifold, X::TFVector, p, ξ::CoTFVector)
-    vfs = map(u -> FVector(TangentSpace, u), submanifold_components(X))
-    wfs = map(u -> FVector(CotangentSpace, u), submanifold_components(ξ))
-    map(sharp!, M.manifolds, vfs, submanifold_components(M, p), wfs)
-    return X
-end
 
 function _show_submanifold(io::IO, M::AbstractManifold; pre="")
     sx = sprint(show, "text/plain", M, context=io, sizehint=0)
