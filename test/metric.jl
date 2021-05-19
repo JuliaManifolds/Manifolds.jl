@@ -187,7 +187,7 @@ end
         i = get_chart_index(M, A, p)
 
         B = induced_basis(M, A, i, TangentSpace)
-        @test_throws ErrorException local_metric(M, p, B)
+        @test_throws MethodError local_metric(M, p, B)
     end
     @testset "scaled Euclidean metric" begin
         n = 3
@@ -208,12 +208,8 @@ end
 
         i_zeros = get_chart_index(M, A, zeros(3))
         B_i_zeros = induced_basis(M, A, i_zeros, TangentSpace)
-        @test_throws ErrorException local_metric_jacobian(E, zeros(3), B_i_zeros)
-        @test_throws ErrorException christoffel_symbols_second_jacobian(
-            E,
-            zeros(3),
-            B_i_zeros,
-        )
+        @test_throws MethodError local_metric_jacobian(E, zeros(3), B_i_zeros)
+        @test_throws MethodError christoffel_symbols_second_jacobian(E, zeros(3), B_i_zeros)
 
         for vtype in (Vector, MVector{n})
             p, X, Y = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
@@ -455,9 +451,9 @@ end
         A = Manifolds.get_default_atlas(MM2)
         chart_p = get_chart_index(MM2, A, p)
         B_p = induced_basis(MM2, A, chart_p, TangentSpace)
-        @test_throws ErrorException local_metric(MM2, p, B_p)
-        @test_throws ErrorException local_metric_jacobian(MM2, p, B_p)
-        @test_throws ErrorException christoffel_symbols_second_jacobian(MM2, p, B_p)
+        @test_throws MethodError local_metric(MM2, p, B_p)
+        @test_throws MethodError local_metric_jacobian(MM2, p, B_p)
+        @test_throws MethodError christoffel_symbols_second_jacobian(MM2, p, B_p)
         # MM falls back to nondefault error
         @test_throws MethodError projected_distribution(MM, 1, p)
         @test_throws MethodError projected_distribution(MM, 1)

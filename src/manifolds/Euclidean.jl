@@ -278,6 +278,7 @@ function inverse_local_metric(
 ) where {𝔽}
     return local_metric(M, p, B)
 end
+inverse_local_metric(M::Euclidean, p) = local_metric(M, p)
 
 default_metric_dispatch(::Euclidean, ::EuclideanMetric) = Val(true)
 
@@ -286,6 +287,9 @@ function local_metric(
     p,
     B::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
 ) where {𝔽}
+    return Diagonal(ones(SVector{size(p, 1),eltype(p)}))
+end
+function local_metric(::Euclidean, p)
     return Diagonal(ones(SVector{size(p, 1),eltype(p)}))
 end
 
