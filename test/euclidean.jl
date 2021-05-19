@@ -229,24 +229,27 @@ using Manifolds: induced_basis
     @testset "Euclidean metric tests" begin
         M = Euclidean(2)
         p = zeros(2)
-        C1 = christoffel_symbols_first(M, p)
+        A = Manifolds.get_default_atlas(M)
+        i = Manifolds.get_chart_index(M, A, p)
+        B = Manifolds.induced_basis(M, A, i, TangentSpace)
+        C1 = christoffel_symbols_first(M, p, B)
         @test size(C1) == (2, 2, 2)
         @test norm(C1) ≈ 0.0 atol = 1e-13
-        C2 = christoffel_symbols_second(M, p)
+        C2 = christoffel_symbols_second(M, p, B)
         @test size(C2) == (2, 2, 2)
         @test norm(C2) ≈ 0.0 atol = 1e-13
-        C2j = christoffel_symbols_second_jacobian(M, p)
+        C2j = christoffel_symbols_second_jacobian(M, p, B)
         @test size(C2j) == (2, 2, 2, 2)
         @test norm(C2j) ≈ 0.0 atol = 1e-16
-        @test einstein_tensor(M, p) == zeros(2, 2)
-        @test ricci_curvature(M, p) ≈ 0 atol = 1e-16
-        RC = ricci_tensor(M, p)
+        @test einstein_tensor(M, p, B) == zeros(2, 2)
+        @test ricci_curvature(M, p, B) ≈ 0 atol = 1e-16
+        RC = ricci_tensor(M, p, B)
         @test size(RC) == (2, 2)
         @test norm(RC) ≈ 0.0 atol = 1e-16
-        @test local_metric(M, p) == Diagonal(ones(2))
-        @test inverse_local_metric(M, p) == Diagonal(ones(2))
-        @test det_local_metric(M, p) == 1
-        RT = riemann_tensor(M, p)
+        @test local_metric(M, p, B) == Diagonal(ones(2))
+        @test inverse_local_metric(M, p, B) == Diagonal(ones(2))
+        @test det_local_metric(M, p, B) == 1
+        RT = riemann_tensor(M, p, B)
         @test size(RT) == (2, 2, 2, 2)
         @test norm(RT) ≈ 0.0 atol = 1e-16
     end
