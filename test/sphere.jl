@@ -176,12 +176,14 @@ using ManifoldsBase: TFVector
             p *= k
             i = Manifolds.get_chart_index(M, A, p)
             @test i === (p[1] < 0 ? :south : :north)
-            a = Manifolds.get_point_coordinates(M, A, i, p)
-            q = Manifolds.get_point(M, A, i, a)
+            a = get_point_coordinates(M, A, i, p)
+            q = get_point(M, A, i, a)
             @test isapprox(M, p, q)
 
             p2 = randn(3)
+            p2 ./= norm(p2)
             p3 = randn(3)
+            p3 ./= norm(p3)
             X2 = log(M, p, p2)
             X3 = log(M, p, p3)
             B = induced_basis(M, A, i, TangentSpace)
@@ -195,6 +197,16 @@ using ManifoldsBase: TFVector
             X3back = get_vector(M, p, X3B, B)
             @test isapprox(M, p, X2, X2back)
             @test isapprox(M, p, X3, X3back)
+
+            @testset "transition_map" begin
+                other_chart = i === :south ? :north : :south
+                a_other = Manifolds.transition_map(M, A, i, other_chart, a)
+                @test isapprox(M, p, get_point(M, A, other_chart, a_other))
+
+                a_other2 = allocate(a_other)
+                Manifolds.transition_map!(M, a_other2, A, i, A, other_chart, a)
+                @test isapprox(M, p, get_point(M, A, other_chart, a_other2))
+            end
         end
     end
 end

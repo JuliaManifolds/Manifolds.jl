@@ -108,8 +108,6 @@ function exp!(G::GeneralLinear{2}, q, p, X)
     return q
 end
 
-flat!(::GeneralLinear, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
-
 function get_coordinates(
     ::GeneralLinear{n,ℝ},
     p,
@@ -233,8 +231,6 @@ project(::GeneralLinear, p, X) = X
 
 project!(::GeneralLinear, q, p) = copyto!(q, p)
 project!(::GeneralLinear, Y, p, X) = copyto!(Y, X)
-
-sharp!(::GeneralLinear, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 Base.show(io::IO, ::GeneralLinear{n,𝔽}) where {n,𝔽} = print(io, "GeneralLinear($n, $𝔽)")
 
