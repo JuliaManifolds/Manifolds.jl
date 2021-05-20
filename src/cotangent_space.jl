@@ -41,17 +41,6 @@ function flat(M::AbstractManifold, p, X::TFVector{<:Any,<:AbstractBasis})
     return CoTFVector(X.data, dual_basis(M, p, X.basis))
 end
 
-function flat!(
-    M::AbstractManifold,
-    ξ::CoTFVector{<:Any,<:AbstractBasis},
-    p,
-    X::TFVector{<:Any,<:AbstractBasis},
-)
-    Xv = get_vector(M, p, X.data, X.basis)
-    ξv = flat(M, p, Xv)
-    get_coordinates!(M, ξ.data, p, ξv, ξ.basis)
-    return ξ
-end
 function flat!(::AbstractManifold, ξ::RieszRepresenterCotangentVector, p, X)
     # TODO: maybe assert that ξ.p is equal to p? Allowing for varying p in ξ leads to
     # issues with power manifold.
@@ -124,17 +113,6 @@ end
     ξ::CoTFVector,
 )
 
-function sharp!(
-    M::AbstractManifold,
-    X::TFVector{<:Any,<:AbstractBasis},
-    p,
-    ξ::CoTFVector{<:Any,<:AbstractBasis},
-)
-    ξv = get_vector(M, p, ξ.data, ξ.basis)
-    Xv = sharp(M, p, ξv)
-    get_coordinates!(M, X.data, p, Xv, X.basis)
-    return X
-end
 function sharp!(::AbstractManifold, X, p, ξ::RieszRepresenterCotangentVector)
     copyto!(X, ξ.X)
     return X

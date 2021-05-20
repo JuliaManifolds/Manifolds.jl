@@ -206,6 +206,10 @@ using ManifoldsBase: TFVector
                 a_other2 = allocate(a_other)
                 Manifolds.transition_map!(M, a_other2, A, i, A, other_chart, a)
                 @test isapprox(M, p, get_point(M, A, other_chart, a_other2))
+
+                a_other2 = allocate(a_other)
+                Manifolds.transition_map!(M, a_other2, A, i, other_chart, a)
+                @test isapprox(M, p, get_point(M, A, other_chart, a_other2))
             end
         end
     end
