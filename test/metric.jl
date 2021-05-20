@@ -518,6 +518,24 @@ end
         @test inner(MM, p, fX, fY) ≈ inner(cotspace2, p, coMMfX, coMMfY)
         @test isapprox(sharp(MM, p, coMMfX).data, fX.data)
 
+        @testset "Mutating flat/sharp" begin
+            cofX2 = allocate(cofX)
+            flat!(M, cofX2, p, fX)
+            @test isapprox(cofX2.data, cofX.data)
+
+            fX2 = allocate(fX)
+            sharp!(M, fX2, p, cofX2)
+            @test isapprox(fX2.data, fX.data)
+
+            cofX2 = allocate(cofX)
+            flat!(MM, cofX2, p, fX)
+            @test isapprox(cofX2.data, cofX.data)
+
+            fX2 = allocate(fX)
+            sharp!(MM, fX2, p, cofX2)
+            @test isapprox(fX2.data, fX.data)
+        end
+
         psample = [[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
         Y = pweights([0.5, 0.5])
         # test despatch with results from above

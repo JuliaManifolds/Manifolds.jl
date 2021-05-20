@@ -435,9 +435,7 @@ flat(::MetricManifold, ::Any...)
     p,
     X::TFVector,
 )
-    A = get_default_atlas(M)
-    i = get_chart_index(M, A, p)
-    g = local_metric(M, InducedBasis(TangentSpace, A, i), p)
+    g = local_metric(M, p, ξ.basis)
     copyto!(ξ.data, g * X.data)
     return ξ
 end

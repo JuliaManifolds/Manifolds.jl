@@ -515,8 +515,6 @@ function get_vectors(M::TangentSpaceAtPoint, p, B::CachedBasis)
     return get_vectors(M.fiber.manifold, M.point, B)
 end
 
-Base.@propagate_inbounds Base.getindex(x::FVector, i) = getindex(x.data, i)
-
 """
     getindex(p::ProductRepr, M::VectorBundle, s::Symbol)
     p[M::VectorBundle, s]
@@ -762,8 +760,6 @@ function project!(B::VectorBundleFibers, Y, p, X)
     )
 end
 
-Base.@propagate_inbounds Base.setindex!(x::FVector, val, i) = setindex!(x.data, val, i)
-
 """
     setindex!(p::ProductRepr, val, M::VectorBundle, s::Symbol)
     p[M::VectorBundle, s] = val
@@ -849,14 +845,6 @@ for manifold `M` on given arguments (passed at a tuple).
 function allocate_result_type(::VectorBundleFibers, f, args::NTuple{N,Any}) where {N}
     return typeof(mapreduce(eti -> one(number_eltype(eti)), +, args))
 end
-
-function submanifold_component(M::AbstractManifold, x::FVector, i::Val)
-    return submanifold_component(M, x.data, i)
-end
-submanifold_component(x::FVector, i::Val) = submanifold_component(x.data, i)
-
-submanifold_components(M::AbstractManifold, x::FVector) = submanifold_components(M, x.data)
-submanifold_components(x::FVector) = submanifold_components(x.data)
 
 """
     vector_bundle_transport(fiber::VectorSpaceType, M::AbstractManifold)
