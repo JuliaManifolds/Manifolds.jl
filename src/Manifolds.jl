@@ -358,6 +358,7 @@ export AbstractMetric,
     ProductMetric,
     CanonicalMetric,
     MetricManifold
+export AbstractAtlas, RetractionAtlas
 export AbstractEmbeddingType, AbstractIsometricEmbeddingType
 export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport

@@ -381,4 +381,16 @@ Random.seed!(42)
             is_tangent_atol_multiplier=12.0,
         )
     end
+
+    @testset "Atlas & Induced Basis" begin
+        M = ProductManifold(Euclidean(2), Euclidean(2))
+        p = ProductRepr(zeros(2), ones(2))
+        X = ProductRepr(ones(2), 2 .* ones(2))
+        A = RetractionAtlas()
+        a = get_point_coordinates(M, A, p, p)
+        p2 = get_point(M, A, p, a)
+        @test all(p2.parts .== p.parts)
+        MM = MetricManifold(M, ProductMetric())
+        # det_local_metric(MM, p, DefaultOrthonormalBasis()) to check transparency!
+    end
 end

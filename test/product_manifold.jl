@@ -596,4 +596,17 @@ end
         @test Manifolds.allocation_promotion_function(Msec, get_vector, ()) === complex
         @test Manifolds.allocation_promotion_function(Mse, get_vector, ()) === identity
     end
+
+    @testset "Atlas & Induced Basis" begin
+        M = PowerManifold(Euclidean(2), NestedPowerRepresentation(), 2)
+        p = [zeros(2), ones(2)]
+        X = [ones(2), 2 .* ones(2)]
+        A = RetractionAtlas()
+        a = get_point_coordinates(M, A, p, p)
+        p2 = get_point(M, A, p, a)
+        @test all(p2 .== p)
+        MM = MetricManifold(M, PowerMetric())
+        # det_local_metric(MM, p, DefaultOrthonormalBasis()) to check transparency!
+    end
+    e
 end
