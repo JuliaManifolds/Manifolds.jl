@@ -28,6 +28,7 @@ include("utils.jl")
         @test_throws DomainError is_vector(M, p, [-1.0, 0.0, 0.0], true)
         @test injectivity_radius(M) ≈ 0
         x = [0.5 0.4 0.1; 0.5 0.4 0.1]'
+        @test_throws DomainError is_vector(M, x, [0.0, 0.0, 0.0], true) # tangent wrong
         y = [0.6 0.3 0.1; 0.4 0.5 0.1]'
         z = [0.3 0.6 0.1; 0.6 0.3 0.1]'
         test_manifold(
