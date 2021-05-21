@@ -37,6 +37,7 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\operatorname{Log}`` | the matrix logarithm | |
 | ``\mathcal P_{q\gets p}X`` | parallel transport | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``
 | ``\mathcal P_{p,Y}X`` | parallel transport in direction ``Y`` | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``, ``q = exp_pY``
+| ``\mathcal P_{t_1\gets t_0}^cX`` | parallel transport along the curve ``c``| ``\mathcal P^cX=\mathcal P_{1\gets 0}^cX`` | of the vector ``X`` from ``p=c(0)`` to ``c(1)``
 | ``p`` | a point on ``\mathcal M`` | ``p_1, p_2, \ldots,q`` | for 3 points one might use ``x,y,z`` |
 | ``\operatorname{retr}_pX``|  a retraction | |
 | ``ξ`` | a set of tangent vectors | ``\{X_1,\ldots,X_n\}`` | |
