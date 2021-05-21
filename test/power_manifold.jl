@@ -383,14 +383,12 @@ Random.seed!(42)
     end
 
     @testset "Atlas & Induced Basis" begin
-        M = ProductManifold(Euclidean(2), Euclidean(2))
-        p = ProductRepr(zeros(2), ones(2))
-        X = ProductRepr(ones(2), 2 .* ones(2))
+        M = PowerManifold(Euclidean(2), NestedPowerRepresentation(), 2)
+        p = [zeros(2), ones(2)]
+        X = [ones(2), 2 .* ones(2)]
         A = RetractionAtlas()
         a = get_point_coordinates(M, A, p, p)
         p2 = get_point(M, A, p, a)
-        @test all(p2.parts .== p.parts)
-        MM = MetricManifold(M, ProductMetric())
-        # det_local_metric(MM, p, DefaultOrthonormalBasis()) to check transparency!
+        @test all(p2 .== p)
     end
 end

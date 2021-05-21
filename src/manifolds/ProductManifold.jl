@@ -224,17 +224,6 @@ function LinearAlgebra.cross(M1::ProductManifold, M2::ProductManifold)
     return ProductManifold(M1.manifolds..., M2.manifolds...)
 end
 
-function det_local_metric(
-    M::MetricManifold{ProductMetric,𝔽,ProductManifold{𝔽}},
-    p::ProductArray,
-    B::DefaultOrthonormalBasis,
-) where {𝔽}
-    dets = map(ziptuples(M.manifolds, submanifold_components(p))) do t
-        return det_local_metric(t[1], t[2], B)
-    end
-    return prod(dets)
-end
-
 @doc raw"""
     distance(M::ProductManifold, p, q)
 

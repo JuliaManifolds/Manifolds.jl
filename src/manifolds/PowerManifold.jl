@@ -74,19 +74,6 @@ end
 
 default_metric_dispatch(::AbstractPowerManifold, ::PowerMetric) = Val(true)
 
-function det_local_metric(
-    M::MetricManifold{PowerMetric,𝔽,<:AbstractPowerManifold{𝔽}},
-    p::AbstractArray,
-    B::DefaultOrthonormalBasis,
-) where {𝔽}
-    result = one(number_eltype(p))
-    rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        result *= det_local_metric(M.manifold, _read(M, rep_size, p, i), B)
-    end
-    return result
-end
-
 @doc raw"""
     flat(M::AbstractPowerManifold, p, X)
 
