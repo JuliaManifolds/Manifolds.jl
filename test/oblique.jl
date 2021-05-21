@@ -24,9 +24,10 @@ include("utils.jl")
             true,
         )
         @test !is_vector(M, p2, [0.0, 0.0, 0.0])
-        @test_throws DomainError is_vector(M, p, [0.0, 0.0, 0.0], true)
+        @test_throws DomainError is_vector(M, p, [0.0, 0.0, 0.0], true) # p wrong
         @test injectivity_radius(M) ≈ π
         x = [1.0 0.0 0.0; 1.0 0.0 0.0]'
+        @test_throws DomainError is_vector(M, x, [0.0, 0.0, 0.0], true) # tangent wrong
         y = [1.0 0.0 0.0; 1/sqrt(2) 1/sqrt(2) 0.0]'
         z = [1/sqrt(2) 1/sqrt(2) 0.0; 1.0 0.0 0.0]'
         basis_types = (DefaultOrthonormalBasis(),)

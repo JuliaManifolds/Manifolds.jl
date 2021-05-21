@@ -55,7 +55,7 @@ function check_vector(M::Oblique{n,m}, p, X; kwargs...) where {n,m}
     if size(X) != (n, m)
         return DomainError(
             length(X),
-            "The matrix `X` ($(size(X))) does not match the dimension of $(M).",
+            "The matrix `X` ($(size(X))) does not match the required dimension ($(representation_size(M))) for $(M).",
         )
     end
     return check_vector(PowerManifold(M.manifold, m), p, X; kwargs...)

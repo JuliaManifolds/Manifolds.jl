@@ -47,7 +47,7 @@ function check_vector(M::Torus{N}, p, X; kwargs...) where {N}
     return check_vector(PowerManifold(M.manifold, N), p, X; kwargs...)
 end
 
-get_iterator(M::Torus{N}) where {N} = 1:N
+get_iterator(::Torus{N}) where {N} = 1:N
 
 @generated manifold_dimension(::Torus{N}) where {N} = N
 
