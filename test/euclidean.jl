@@ -253,4 +253,24 @@ using Manifolds: induced_basis
         @test size(RT) == (2, 2, 2, 2)
         @test norm(RT) ≈ 0.0 atol = 1e-16
     end
+    @testset "Induced Basis and local metric for EuclideanMetric" begin
+        struct DefaultManifold <: AbstractManifold{ℝ} end
+        p = zeros(3)
+        M = DefaultManifold()
+        TpM = TangentSpace(M, p)
+        B = induced_basis(M, Manifolds.get_default_atlas(M), p, TangentSpace)
+        MM = MetricManifold(M, EuclideanMetric())
+        @test local_metric(MM, p, B) == Diagonal(ones(3))
+        @test inverse_local_metric(MM, p, B) == Diagonal(ones(3))
+        @test det_local_metric(MM, p, B) == 1.0
+        DB1 = dual_basis(MM, p, B)
+        @test DB1 isa InducedBasis
+        @test DB1.vs isa ManifoldsBase.CotangentSpaceType
+        DB2 = induced_basis(M, Manifolds.get_default_atlas(M), p, CotangentSpace)
+        @test DB2 isa InducedBasis
+        @test DB2.vs isa ManifoldsBase.CotangentSpaceType
+        DDB = dual_basis(MM, p, DB2)
+        @test DDB isa InducedBasis
+        @test DDB.vs isa ManifoldsBase.TangentSpaceType
+    end
 end
