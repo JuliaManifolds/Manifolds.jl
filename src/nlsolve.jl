@@ -3,17 +3,17 @@
     inverse_retract(M, p, q method::NLsolveInverseRetraction; kwargs...)
 
 Approximate the inverse of the retraction specified by `method.retraction` from `p` with
-respect to `q` on the [`Manifold`](@ref) `M` using NLsolve. This inverse retraction is
+respect to `q` on the [`AbstractManifold`](@ref) `M` using NLsolve. This inverse retraction is
 not guaranteed to succeed and probably will not unless `q` is close to `p` and the initial
 guess `X0` is close.
 
 If the solver fails to converge, an [`OutOfInjectivityRadiusError`](@ref) is raised.
 See [`NLsolveInverseRetraction`](@ref) for configurable parameters.
 """
-inverse_retract(::Manifold, p, q, ::NLsolveInverseRetraction; kwargs...)
+inverse_retract(::AbstractManifold, p, q, ::NLsolveInverseRetraction; kwargs...)
 
-function inverse_retract!(M::Manifold, X, p, q, method::NLsolveInverseRetraction; kwargs...)
-    X0 = method.X0 === nothing ? zero_tangent_vector(M, p) : method.X0
+function inverse_retract!(M::AbstractManifold, X, p, q, method::NLsolveInverseRetraction; kwargs...)
+    X0 = method.X0 === nothing ? zero_vector(M, p) : method.X0
     res = _inverse_retract_nlsolve(
         M,
         p,

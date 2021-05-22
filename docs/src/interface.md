@@ -20,7 +20,11 @@ We would like to highlight a few of the types and functions in the next two sect
 
 ### The Manifold Type
 
-Besides the most central type, that of a [`Manifold`](@ref), the other three are used in a lazy fashion, i.e. usually, if you implement a manifold, neither points on a manifold nor (co)tangent vectors have their own type but are just matrices. Exceptions are, if your points/vectors require a structure anyways (see [`FixedRankMatrices`](@ref) for an example) or if you have several representations of the manifold (see [Hyperbolic](@ref HyperbolicSpace) for an example).
+Besides the most central type, that of a [`AbstractManifold`](@ref) accompanied by [`AbstractManifoldPoint`](@ref) to represent points thereon, note that the point type is meant in a lazy fashion.
+This is mean as follows: if you implement a new manifold and your points are represented by matrices, vectors or arrays, then it is best to not type the poitns `p` in functions, such that the methods work for example for other array representation types as well.
+You should subtype your new points on a manifold, if the structure you use is more structured, see for example[`FixedRankMatrices`](@ref).
+Another reason is, if you want to distinguish (and hence dispatch on) different representation of points on the manifold.
+For an example, see the [Hyperbolic](@ref HyperbolicSpace) manifold, which has different models to be represented.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
@@ -40,7 +44,6 @@ Modules = [Manifolds, ManifoldsBase]
 Pages = ["exp_log_geo.jl"]
 Order = [:function]
 ```
-
 
 ### Retractions and inverse Retractions
 
@@ -102,8 +105,6 @@ Here the projection can be computed as the classical projection onto the line, i
 this is illustrated in the following figure
 
 ![An example illustrating the two kinds of projections on the Circle.](assets/images/retraction_illustration_600.png)
-
-and the function signatures are as follows.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]

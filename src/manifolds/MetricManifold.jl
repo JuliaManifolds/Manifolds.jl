@@ -591,7 +591,7 @@ end
     local_metric(M::AbstractManifold, p, B::AbstractBasis)
 
 Return the local matrix representation at the point `p` of the metric tensor ``g`` with
-respect to the [`AbstractBasis`](@ref) `B` on the [`Manifold`](@ref) `M`, usually written ``g_{ij}``.
+respect to the [`AbstractBasis`](@ref) `B` on the [`AbstractManifold`](@ref) `M`, usually written ``g_{ij}``.
 The matrix has the property that ``g(X, Y)=X^\mathrm{T} [g_{ij}] Y = g_{ij} X^i Y^j``,
 where the latter expression uses Einstein summation convention.
 The metric tensor is such that the formula works for the given [`AbstractBasis`](@ref) `B`.
