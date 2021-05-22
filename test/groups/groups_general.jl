@@ -15,7 +15,7 @@ include("group_utils.jl")
         eg = Identity(G, [0.0, 0.0])
         @test repr(eg) === "Identity($(G), $([0.0, 0.0]))"
         @test number_eltype(eg) == Bool
-        @test is_manifold_point(G, eg) # identity transparent
+        @test is_point(G, eg) # identity transparent
         p = similar(x)
         copyto!(p, eg)
         @test p == eg.p
@@ -176,7 +176,7 @@ include("group_utils.jl")
         G = GroupManifold(NotImplementedManifold(), Manifolds.AdditionOperation())
         test_group(G, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]], [], [[1.0, 2.0]])
 
-        @test_throws DomainError is_manifold_point(
+        @test_throws DomainError is_point(
             G,
             Identity(
                 GroupManifold(NotImplementedManifold(), NotImplementedOperation()),

@@ -7,7 +7,7 @@ is a vector from a fiber of a vector bundle.
 struct FVectorvariate <: VariateForm end
 
 """
-    FVectorSupport(space::Manifold, VectorBundleFibers)
+    FVectorSupport(space::AbstractManifold, VectorBundleFibers)
 
 Value support for vector bundle fiber-valued distributions (values from a fiber of a vector
 bundle at a `point` from the given manifold).
@@ -37,21 +37,21 @@ is a point on a manifold.
 struct MPointvariate <: VariateForm end
 
 """
-    MPointSupport(M::Manifold)
+    MPointSupport(M::AbstractManifold)
 
 Value support for manifold-valued distributions (values from given
-[`Manifold`](@ref) `M`).
+[`AbstractManifold`](@ref) `M`).
 """
-struct MPointSupport{TM<:Manifold} <: ValueSupport
+struct MPointSupport{TM<:AbstractManifold} <: ValueSupport
     manifold::TM
 end
 
 """
-    MPointDistribution{TM<:Manifold}
+    MPointDistribution{TM<:AbstractManifold}
 
 An abstract distribution for points on manifold of type `TM`.
 """
-abstract type MPointDistribution{TM<:Manifold} <:
+abstract type MPointDistribution{TM<:AbstractManifold} <:
               Distribution{MPointvariate,MPointSupport{TM}} end
 
 """

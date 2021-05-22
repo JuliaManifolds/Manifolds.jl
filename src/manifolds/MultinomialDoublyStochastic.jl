@@ -45,7 +45,7 @@ Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic 
 
 [^DouikHassibi2019]:
     > A. Douik, B. Hassibi:
-    > Manifold Optimization Over the Set of Doubly Stochastic Matrices: A Second-Order Geometry,
+    > AbstractManifold Optimization Over the Set of Doubly Stochastic Matrices: A Second-Order Geometry,
     > IEEE Transactions on Signal Processing 67(22), pp. 5761–5774, 2019.
     > doi: [10.1109/tsp.2019.2946024](http://doi.org/10.1109/tsp.2019.2946024),
     > arXiv: [1802.02628](https://arxiv.org/abs/1802.02628).
@@ -57,14 +57,13 @@ function MultinomialDoubleStochastic(n::Int)
 end
 
 @doc raw"""
-    check_manifold_point(M::MultinomialDoubleStochastic, p)
+    check_point(M::MultinomialDoubleStochastic, p)
 
 Checks whether `p` is a valid point on the [`MultinomialDoubleStochastic`](@ref)`(n)` `M`,
 i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
-function check_manifold_point(M::MultinomialDoubleStochastic{n}, p; kwargs...) where {n}
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+function check_point(M::MultinomialDoubleStochastic{n}, p; kwargs...) where {n}
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     # positivity and columns are checked in the embedding, we further check
     r = sum(p, dims=2)
@@ -77,33 +76,19 @@ function check_manifold_point(M::MultinomialDoubleStochastic{n}, p; kwargs...) w
     return nothing
 end
 @doc raw"""
-    check_tangent_vector(M::MultinomialDoubleStochastic p, X; check_base_point = true, kwargs...)
+    check_vector(M::MultinomialDoubleStochastic p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialDoubleStochastic`](@ref) `M`.
 This means, that `p` is valid, that `X` is of correct dimension and sums to zero along any
 column or row.
-
-The optional parameter `check_base_point` indicates, whether to call
-[`check_manifold_point`](@ref check_manifold_point(::MultinomialDoubleStochastic, ::Any))  for `p`.
 """
-function check_tangent_vector(
-    M::MultinomialDoubleStochastic{n},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {n}
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::MultinomialDoubleStochastic{n}, p, X; kwargs...) where {n}
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv

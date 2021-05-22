@@ -1,6 +1,6 @@
 include("utils.jl")
 
-@testset "Graph Manifold" begin
+@testset "Graph AbstractManifold" begin
     M = Euclidean(2)
     x = [[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]]
     y = [[4.0, 5.0], [6.0, 7.0], [8.0, 9.0]]
@@ -13,14 +13,14 @@ include("utils.jl")
         @test manifold_dimension(N) == manifold_dimension(M) * nv(G)
         @test manifold_dimension(GraphManifold(G, M, EdgeManifold())) ==
               manifold_dimension(M) * ne(G)
-        @test is_manifold_point(N, x)
-        @test !is_manifold_point(N, [x..., [0.0, 0.0]]) # an entry too much
-        @test_throws DomainError is_manifold_point(N, [x..., [0.0, 0.0]], true)
-        @test is_tangent_vector(N, x, log(N, x, y))
-        @test !is_tangent_vector(N, x[1:2], log(N, x, y))
-        @test_throws DomainError is_tangent_vector(N, x[1:2], log(N, x, y), true)
-        @test !is_tangent_vector(N, x[1:2], log(N, x, y)[1:2])
-        @test_throws DomainError is_tangent_vector(N, x, log(N, x, y)[1:2], true)
+        @test is_point(N, x)
+        @test !is_point(N, [x..., [0.0, 0.0]]) # an entry too much
+        @test_throws DomainError is_point(N, [x..., [0.0, 0.0]], true)
+        @test is_vector(N, x, log(N, x, y))
+        @test !is_vector(N, x[1:2], log(N, x, y))
+        @test_throws DomainError is_vector(N, x[1:2], log(N, x, y), true)
+        @test !is_vector(N, x[1:2], log(N, x, y)[1:2])
+        @test_throws DomainError is_vector(N, x, log(N, x, y)[1:2], true)
         @test incident_log(N, x) == [x[2] - x[1], x[1] - x[2] + x[3] - x[2], x[2] - x[3]]
 
         pts = [x, y, z]
@@ -34,18 +34,18 @@ include("utils.jl")
         GraphManifold
         Graph:
          {3, 2} undirected simple Int64 graph
-        Manifold on vertices:
+        AbstractManifold on vertices:
          Euclidean(2; field = ℝ)"""
 
         NE = GraphManifold(G, M, EdgeManifold())
-        @test is_manifold_point(NE, x[1:2])
-        @test !is_manifold_point(NE, x) # an entry too much
-        @test_throws DomainError is_manifold_point(NE, x, true)
-        @test is_tangent_vector(NE, x[1:2], log(N, x, y)[1:2])
-        @test !is_tangent_vector(NE, x, log(N, x, y))
-        @test_throws DomainError is_tangent_vector(NE, x, log(N, x, y), true)
-        @test !is_tangent_vector(N, x[1:2], log(N, x, y))
-        @test_throws DomainError is_tangent_vector(NE, x[1:2], log(N, x, y), true)
+        @test is_point(NE, x[1:2])
+        @test !is_point(NE, x) # an entry too much
+        @test_throws DomainError is_point(NE, x, true)
+        @test is_vector(NE, x[1:2], log(N, x, y)[1:2])
+        @test !is_vector(NE, x, log(N, x, y))
+        @test_throws DomainError is_vector(NE, x, log(N, x, y), true)
+        @test !is_vector(N, x[1:2], log(N, x, y))
+        @test_throws DomainError is_vector(NE, x[1:2], log(N, x, y), true)
 
         test_manifold(
             NE,
@@ -57,7 +57,7 @@ include("utils.jl")
         GraphManifold
         Graph:
          {3, 2} undirected simple Int64 graph
-        Manifold on edges:
+        AbstractManifold on edges:
          Euclidean(2; field = ℝ)"""
 
         G2 = SimpleDiGraph(3)

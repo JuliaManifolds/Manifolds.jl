@@ -48,7 +48,7 @@ Describes an inverse retraction that is based on the softmax function.
 struct SoftmaxInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
-    FisherRaoMetric <: Metric
+    FisherRaoMetric <: AbstractMetric
 
 The Fisher-Rao metric or Fisher information metric is a particular Riemannian metric which
 can be defined on a smooth statistical manifold, i.e., a smooth manifold whose points are
@@ -56,18 +56,18 @@ probability measures defined on a common probability space.
 
 See for example the [`ProbabilitySimplex`](@ref).
 """
-struct FisherRaoMetric <: Metric end
+struct FisherRaoMetric <: AbstractMetric end
 
 """
-    check_manifold_point(M::ProbabilitySimplex, p; kwargs...)
+    check_point(M::ProbabilitySimplex, p; kwargs...)
 
 Check whether `p` is a valid point on the [`ProbabilitySimplex`](@ref) `M`, i.e. is a point in
 the embedding with positive entries that sum to one
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_manifold_point(M::ProbabilitySimplex, p; kwargs...)
+function check_point(M::ProbabilitySimplex, p; kwargs...)
     mpv = invoke(
-        check_manifold_point,
+        check_point,
         Tuple{(typeof(get_embedding(M))),typeof(p)},
         get_embedding(M),
         p;
@@ -90,27 +90,20 @@ function check_manifold_point(M::ProbabilitySimplex, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::ProbabilitySimplex, p, X; check_base_point = true, kwargs... )
+    check_vector(M::ProbabilitySimplex, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`ProbabilitySimplex`](@ref) `M`, i.e.
-after [`check_manifold_point`](@ref check_manifold_point(::ProbabilitySimplex, ::Any))`(M,p)`,
+after [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
 `X` has to be of same dimension as `p` and its elements have to sum to one.
-The optional parameter `check_base_point` indicates, whether to call
-[`check_manifold_point`](@ref check_manifold_point(::ProbabilitySimplex, ::Any))  for `p` or not.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::ProbabilitySimplex, p, X; check_base_point=true, kwargs...)
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::ProbabilitySimplex, p, X; kwargs...)
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
         get_embedding(M),
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -189,7 +182,7 @@ injectivity_radius(M::ProbabilitySimplex, ::SoftmaxRetraction) = 0
 injectivity_radius(M::ProbabilitySimplex, ::ExponentialRetraction) = 0
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::ProbabilitySimplex,
             rm::AbstractRetractionMethod,
         )
@@ -280,7 +273,7 @@ manifold_dimension(::ProbabilitySimplex{n}) where {n} = n
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
 [`GeodesicInterpolation`](@ref).
 """
 mean(::ProbabilitySimplex, ::Any...)
@@ -361,11 +354,11 @@ function Base.show(io::IO, ::ProbabilitySimplex{n}) where {n}
 end
 
 @doc raw"""
-    zero_tangent_vector(M::ProbabilitySimplex,p)
+    zero_vector(M::ProbabilitySimplex,p)
 
 returns the zero tangent vector in the tangent space of the point `p`  from the
 [`ProbabilitySimplex`](@ref) `M`, i.e. its representation by the zero vector in the embedding.
 """
-zero_tangent_vector(::ProbabilitySimplex, ::Any)
+zero_vector(::ProbabilitySimplex, ::Any)
 
-zero_tangent_vector!(M::ProbabilitySimplex, v, p) = fill!(v, 0)
+zero_vector!(M::ProbabilitySimplex, v, p) = fill!(v, 0)

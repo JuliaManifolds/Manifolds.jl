@@ -21,8 +21,8 @@ To install the package just type
 ] add Manifolds
 ```
 
-Then you can directly start, for example to stop half way from the north pole on the [`Sphere`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/sphere.html) to a point on the the equator, you can generate the [`shortest_geodesic`](https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html#ManifoldsBase.shortest_geodesic-Tuple{Manifold,Any,Any}).
-It internally employs [`exp`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#Base.exp-Tuple{Manifold,Any,Any}) and [`log`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#Base.log-Tuple{Manifold,Any,Any}).
+Then you can directly start, for example to stop half way from the north pole on the [`Sphere`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/sphere.html) to a point on the the equator, you can generate the [`shortest_geodesic`](https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html#ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold,Any,Any}).
+It internally employs [`exp`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#Base.exp-Tuple{AbstractManifold,Any,Any}) and [`log`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#Base.log-Tuple{AbstractManifold,Any,Any}).
 
 ```julia
 using Manifolds

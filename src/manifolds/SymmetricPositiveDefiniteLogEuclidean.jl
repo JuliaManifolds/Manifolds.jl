@@ -1,5 +1,5 @@
 @doc raw"""
-    LogEuclideanMetric <: Metric
+    LogEuclideanMetric <: RiemannianMetric
 
 The LogEuclidean Metric consists of the Euclidean metric applied to all elements after mapping them
 into the Lie Algebra, i.e. performing a matrix logarithm beforehand.

@@ -10,14 +10,14 @@ include("utils.jl")
         @test repr(M) == "Torus(2)"
         @test representation_size(M) == (2,)
         @test manifold_dimension(M) == 2
-        @test !is_manifold_point(M, 9.0)
-        @test_throws DomainError is_manifold_point(M, 9.0, true)
-        @test !is_manifold_point(M, [9.0; 9.0])
-        @test_throws CompositeManifoldError is_manifold_point(M, [9.0 9.0], true)
-        @test !is_tangent_vector(M, [9.0; 9.0], 0.0)
-        @test_throws DomainError is_tangent_vector(M, 9.0, 0.0, true)
-        @test !is_tangent_vector(M, [9.0; 9.0], [0.0; 0.0])
-        @test_throws DomainError is_tangent_vector(M, 9.0, 0.0, true)
+        @test !is_point(M, 9.0)
+        @test_throws DomainError is_point(M, 9.0, true)
+        @test !is_point(M, [9.0; 9.0])
+        @test_throws CompositeManifoldError is_point(M, [9.0 9.0], true)
+        @test !is_vector(M, [9.0; 9.0], 0.0)
+        @test_throws DomainError is_vector(M, 9.0, 0.0, true) # point false and checked
+        @test !is_vector(M, [9.0; 9.0], [0.0; 0.0])
+        @test_throws DomainError is_vector(M, [0.0, 0.0], 0.0, true)
         @test injectivity_radius(M) ≈ π
         x = [1.0, 2.0]
         y = [-1.0, 2.0]

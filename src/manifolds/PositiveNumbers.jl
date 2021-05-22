@@ -1,5 +1,5 @@
 @doc raw"""
-    PositiveNumbers <: Manifold{ℝ}
+    PositiveNumbers <: AbstractManifold{ℝ}
 
 The hyperbolic manifold of positive numbers $H^1$ is a the hyperbolic manifold represented
 by just positive numbers.
@@ -12,7 +12,7 @@ Generate the `ℝ`-valued hyperbolic model represented by positive positive numb
 To use this with arrays (1-element arrays),
 please use [`SymmetricPositiveDefinite`](@ref)`(1)`.
 """
-struct PositiveNumbers <: Manifold{ℝ} end
+struct PositiveNumbers <: AbstractManifold{ℝ} end
 
 """
     PositiveVectors(n)
@@ -39,11 +39,11 @@ This manifold is modeled as a [`PowerManifold`](@ref) of [`PositiveNumbers`](@re
 PositiveArrays(n::Vararg{Int,I}) where {I} = PositiveNumbers()^(n)
 
 @doc raw"""
-    check_manifold_point(M::PositiveNumbers, p)
+    check_point(M::PositiveNumbers, p)
 
 Check whether `p` is a point on the [`PositiveNumbers`](@ref) `M`, i.e. $p>0$.
 """
-function check_manifold_point(M::PositiveNumbers, p; kwargs...)
+function check_point(M::PositiveNumbers, p; kwargs...)
     if any(p .<= 0.0)
         return DomainError(
             p,
@@ -54,7 +54,7 @@ function check_manifold_point(M::PositiveNumbers, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::PositiveNumbers, p, X; check_base_point, kwargs...)
+    check_vector(M::PositiveNumbers, p, X; kwargs...)
 
 Check whether `X` is a tangent vector in the tangent space of `p` on the
 [`PositiveNumbers`](@ref) `M`.
@@ -62,11 +62,7 @@ For the real-valued case represented by positive numbers, all `X` are valid, sin
 For the complex-valued case `X` [...]
 
 """
-function check_tangent_vector(M::PositiveNumbers, p, X; check_base_point=true, kwargs...)
-    if check_base_point
-        perr = check_manifold_point(M, p; kwargs...)
-        return perr # if x is valid all v that are real numbers are valid
-    end
+function check_vector(M::PositiveNumbers, p, X; kwargs...)
     return nothing
 end
 
@@ -97,10 +93,6 @@ Base.exp(::PositiveNumbers, p::Real, X::Real) = p * exp(X / p)
 
 exp!(::PositiveNumbers, q, p, X) = (q .= p .* exp.(X ./ p))
 
-flat(::PositiveNumbers, ::Real, X::TFVector) = FVector(CotangentSpace, X.data)
-
-flat!(::PositiveNumbers, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
-
 @doc raw"""
     injectivity_radius(M::PositiveNumbers[, p])
 
@@ -112,7 +104,7 @@ injectivity_radius(::PositiveNumbers, ::Any) = Inf
 injectivity_radius(::PositiveNumbers, ::Any, ::ExponentialRetraction) = Inf
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::PositiveNumbers,
             rm::AbstractRetractionMethod,
         )
@@ -183,10 +175,6 @@ retract(M::PositiveNumbers, p, q, ::ExponentialRetraction) = exp(M, p, q)
 
 representation_size(::PositiveNumbers) = ()
 
-sharp(::PositiveNumbers, ::Real, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
-
-sharp!(::PositiveNumbers, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
-
 Base.show(io::IO, ::PositiveNumbers) = print(io, "PositiveNumbers()")
 
 function Base.show(
@@ -235,5 +223,5 @@ function vector_transport_direction(
     return vector_transport_to(M, p, X, q, m)
 end
 
-zero_tangent_vector(::PositiveNumbers, p::Real) = zero(p)
-zero_tangent_vector!(::PositiveNumbers, X, p) = fill!(X, 0)
+zero_vector(::PositiveNumbers, p::Real) = zero(p)
+zero_vector!(::PositiveNumbers, X, p) = fill!(X, 0)

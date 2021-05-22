@@ -6,16 +6,16 @@ include("utils.jl")
         @test repr(M) == "SymmetricPositiveSemidefiniteFixedRank(4, 2, ℝ)"
         @test manifold_dimension(M) == 7
         q = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
-        @test is_manifold_point(M, q)
+        @test is_point(M, q)
         Y = [1.0 0.0; 0.0 0.0; 0.0 0.0; 0.0 0.0]
-        @test_throws DomainError is_manifold_point(M, Y, true)
-        @test is_tangent_vector(M, q, Y)
+        @test_throws DomainError is_point(M, Y, true)
+        @test is_vector(M, q, Y)
         q2 = [2.0 1.0; 0.0 0.0; 0.0 1.0; 0.0 0.0]
         q3 = [0.0 0.0; 1.0 0.0; 0.0 1.0; 0.0 0.0]
         X = log(M, q, q2)
         X3 = vector_transport_to(M, q, X, q3, ProjectionTransport())
         X3t = project(M, q3, X)
-        @test is_tangent_vector(M, q3, X3)
+        @test is_vector(M, q3, X3)
         @test isapprox(M, q3, X3, X3t)
 
         types = [Matrix{Float64}]

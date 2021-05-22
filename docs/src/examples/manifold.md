@@ -16,8 +16,8 @@ This tutorial demonstrates that you can get your first own manifold quite fast a
 This tutorial assumes that you heard of the exponential map, tangent vectors and the dimension of a manifold. If not, please read for example [[do Carmo, 1992](#doCarmo1992)],
 Chapter 3, first.
 
-In general you need just a datatype (`struct`) that inherits from [`Manifold`](@ref) to define a manifold. No function is _per se_ required to be implemented.
-However, it is a good idea to provide functions that might be useful to others, for example [`check_manifold_point`](@ref) and [`check_tangent_vector`](@ref), as we do in this tutorial.
+In general you need just a datatype (`struct`) that inherits from [`AbstractManifold`](@ref) to define a manifold. No function is _per se_ required to be implemented.
+However, it is a good idea to provide functions that might be useful to others, for example [`check_point`](@ref) and [`check_vector`](@ref), as we do in this tutorial.
 
 We start with two technical preliminaries. If you want to start directly, you can [skip](@ref manifold-tutorial-task) this paragraph and revisit it for two of the implementation details.
 
@@ -30,14 +30,14 @@ After that, we will
 ## [Technical preliminaries](@id manifold-tutorial-prel)
 
 There are only two small technical things we need to explain at this point.
-First of all our [`Manifold`](@ref)`{𝔽}` has a parameter `𝔽`.
+First of all our [`AbstractManifold`](@ref)`{𝔽}` has a parameter `𝔽`.
 This parameter indicates the [`number_system`](@ref) the manifold is based on, for example `ℝ` for real manifolds. It is important primarily for defining bases of tangent spaces.
 See [`SymmetricMatrices`](@ref Main.Manifolds.SymmetricMatrices) as an example of defining both a real-valued and a complex-valued symmetric manifolds using one type.
 
-Second, a main design decision of `Manifold.jl` is that most functions are implemented as mutating functions, i.e. as in-place-computations. There usually exists a non-mutating version that falls back to allocating memory and calling the mutating one. This means you only have to implement the mutating version, _unless_ there is a good reason to provide a special case for the non-mutating one, i.e. because in that case you know a far better performing implementation.
+Second, a main design decision of `Manifolds.jl` is that most functions are implemented as mutating functions, i.e. as in-place-computations. There usually exists a non-mutating version that falls back to allocating memory and calling the mutating one. This means you only have to implement the mutating version, _unless_ there is a good reason to provide a special case for the non-mutating one, i.e. because in that case you know a far better performing implementation.
 
 Let's look at an example. The exponential map $\exp_p\colon T_p\mathcal M \to \mathcal M$ that maps a tangent vector $X\in T_p\mathcal M$ from the tangent space at $p\in \mathcal M$ to the manifold.
-The function [`exp`](@ref exp(M::Manifold, p, X)) has to know the manifold `M`, the point `p` and the tangent vector `X` as input, so to compute the resulting point `q` you need to call
+The function [`exp`](@ref exp(M::AbstractManifold, p, X)) has to know the manifold `M`, the point `p` and the tangent vector `X` as input, so to compute the resulting point `q` you need to call
 
 ```julia
 q = exp(M, p, X)
@@ -50,11 +50,11 @@ q = similar(p)
 exp!(M, q, p, X)
 ```
 
-calls [`exp!`](@ref exp!(M::Manifold, q, p, X)), which modifies its input `q` and returns the resulting point in there.
-Actually these two lines are (almost) the default implementation for [`exp`](@ref exp(M::Manifold, p, X)). [`allocate_result`](@ref) that is actually used there just calls `similar` for simple `Array`s.
+calls [`exp!`](@ref exp!(M::AbstractManifold, q, p, X)), which modifies its input `q` and returns the resulting point in there.
+Actually these two lines are (almost) the default implementation for [`exp`](@ref exp(M::AbstractManifold, p, X)). [`allocate_result`](@ref) that is actually used there just calls `similar` for simple `Array`s.
 Note that for a unified interface, the manifold `M` is _always_ the first parameter, and the variable the result will be stored to in the mutating variants is _always_ the second parameter.
 
-Long story short: if possible, implement the mutating version [`exp!`](@ref exp!(M::Manifold, q, p, X)), you get the [`exp`](@ref exp(M::Manifold, p, X)) for free.
+Long story short: if possible, implement the mutating version [`exp!`](@ref exp!(M::AbstractManifold, q, p, X)), you get the [`exp`](@ref exp(M::AbstractManifold, p, X)) for free.
 Many functions that build upon basic functions employ the mutating variant, too, to avoid reallocations.
 
 ## [Startup](@id manifold-tutorial-startup)
@@ -64,7 +64,7 @@ For implementing a manifold, loading the interface should suffice for quite some
 
 ```@example manifold-tutorial
 using ManifoldsBase, LinearAlgebra, Test
-import ManifoldsBase: check_manifold_point, check_tangent_vector, manifold_dimension, exp!
+import ManifoldsBase: check_point, check_vector, manifold_dimension, exp!
 ```
 
 ## [Goal](@id manifold-tutorial-task)
@@ -81,11 +81,11 @@ For our example we define
 
 ```@example manifold-tutorial
 """
-    MySphere{N} <: Manifold{ℝ}
+    MySphere{N} <: AbstractManifold{ℝ}
 
 Define an `n`-sphere of radius `r`. Construct by `MySphere(radius,n)`
 """
-struct MySphere{N} <: Manifold{ManifoldsBase.ℝ} where {N}
+struct MySphere{N} <: AbstractManifold{ManifoldsBase.ℝ} where {N}
     radius::Float64
 end
 MySphere(radius, n) = MySphere{n}(radius)
@@ -103,7 +103,7 @@ S = MySphere(1.5, 2)
 ## [Checking points and tangents](@id manifold-tutorial-checks)
 
 If we have now a point, represented as an array, we would first like to check, that it is a valid point on the manifold.
-For this one can use the easy interface [`is_manifold_point`](@ref is_manifold_point(M::Manifold, p; kwargs...)). This internally uses [`check_manifold_point`](@ref check_manifold_point(M, p; kwargs...)).
+For this one can use the easy interface [`is_point`](@ref is_point(M::AbstractManifold, p; kwargs...)). This internally uses [`check_point`](@ref check_point(M, p; kwargs...)).
 This is what we want to implement.
 We have to return the error if `p` is not on `M` and `nothing` otherwise.
 
@@ -112,7 +112,7 @@ To spare a few lines, we can use [short-circuit evaluation](https://docs.juliala
 If something has to only hold up to precision, we can pass that down, too using the `kwargs...`.
 
 ```@example manifold-tutorial
-function check_manifold_point(M::MySphere{N}, p; kwargs...) where {N}
+function check_point(M::MySphere{N}, p; kwargs...) where {N}
     (size(p)) == (N+1,) || return DomainError(size(p),"The size of $p is not $((N+1,)).")
     if !isapprox(norm(p), M.radius; kwargs...)
         return DomainError(norm(p), "The norm of $p is not $(M.radius).")
@@ -125,11 +125,7 @@ nothing #hide
 Similarly, we can verify, whether a tangent vector `X` is valid. It has to fulfill the same size requirements and it has to be orthogonal to `p`. We can again use the `kwargs`, but also provide a way to check `p`, too.
 
 ```@example manifold-tutorial
-function check_tangent_vector(M::MySphere, p, X, check_base_point = true, kwargs...)
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::MySphere, p, X; kwargs...)
     size(X) != size(p) && return DomainError(size(X), "The size of $X is not $(size(p)).")
     if !isapprox(dot(p,X), 0.0; kwargs...)
         return DomainError(dot(p,X), "The tangent $X is not orthogonal to $p.")
@@ -142,17 +138,17 @@ nothing #hide
 to test points we can now use
 
 ```@example manifold-tutorial
-is_manifold_point(S, [1.0,0.0,0.0]) # norm 1, so not on S, returns false
-@test_throws DomainError is_manifold_point(S, [1.5,0.0], true) # only on R^2, throws an error.
+is_point(S, [1.0,0.0,0.0]) # norm 1, so not on S, returns false
+@test_throws DomainError is_point(S, [1.5,0.0], true) # only on R^2, throws an error.
 p = [1.5,0.0,0.0]
 X = [0.0,1.0,0.0]
 # The following two tests return true
-[ is_manifold_point(S, p); is_tangent_vector(S,p,X) ]
+[ is_point(S, p); is_vector(S,p,X) ]
 ```
 
 ## [Functions on the manifold](@id manifold-tutorial-fn)
 
-For the [`manifold_dimension`](@ref manifold_dimension(M::Manifold)) we have to just return the `N` parameter
+For the [`manifold_dimension`](@ref manifold_dimension(M::AbstractManifold)) we have to just return the `N` parameter
 
 ```@example manifold-tutorial
 manifold_dimension(::MySphere{N}) where {N} = N
@@ -188,21 +184,21 @@ A first easy check can be done taking `p` from above and any vector `X` of lengt
 
 ```@example manifold-tutorial
 q = exp(S,p, [0.0,1.5π,0.0])
-[isapprox(p,-q); is_manifold_point(S,q)]
+[isapprox(p,-q); is_point(S,q)]
 ```
 
 ## [Conclusion](@id manifold-tutorial-outlook)
 
 You can now just continue implementing further functions from the [interface](../interface.md),
-but with just [`exp!`](@ref exp!(M::Manifold, q, p, X)) you for example already have
+but with just [`exp!`](@ref exp!(M::AbstractManifold, q, p, X)) you for example already have
 
-* [`geodesic`](@ref geodesic(M::Manifold, p, X)) the (not necessarily shortest) geodesic emanating from `p` in direction `X`.
-* the [`ExponentialRetraction`](@ref), that the [`retract`](@ref retract(M::Manifold, p, X)) function uses by default.
+* [`geodesic`](@ref geodesic(M::AbstractManifold, p, X)) the (not necessarily shortest) geodesic emanating from `p` in direction `X`.
+* the [`ExponentialRetraction`](@ref), that the [`retract`](@ref retract(M::AbstractManifold, p, X)) function uses by default.
 
-For the [`shortest_geodesic`](@ref shortest_geodesic(M::Manifold, p, q)) the implementation of a logarithm [`log`](@ref ManifoldsBase.log(M::Manifold, p, q)), again better a [`log!`](@ref log!(M::Manifold, X, p, q)) is necessary.
+For the [`shortest_geodesic`](@ref shortest_geodesic(M::AbstractManifold, p, q)) the implementation of a logarithm [`log`](@ref ManifoldsBase.log(M::AbstractManifold, p, q)), again better a [`log!`](@ref log!(M::AbstractManifold, X, p, q)) is necessary.
 
-Sometimes a default implementation is provided; for example if you implemented [`inner`](@ref inner(M::Manifold, p, X, Y)), the [`norm`](@ref norm(M, p, X)) is defined. You should overwrite it, if you can provide a more efficient version. For a start the default should suffice.
-With [`log!`](@ref log!(M::Manifold, X, p, q)) and [`inner`](@ref inner(M::Manifold, p, X, Y)) you get the [`distance`](@ref distance(M::Manifold, p, q)), and so.
+Sometimes a default implementation is provided; for example if you implemented [`inner`](@ref inner(M::AbstractManifold, p, X, Y)), the [`norm`](@ref norm(M, p, X)) is defined. You should overwrite it, if you can provide a more efficient version. For a start the default should suffice.
+With [`log!`](@ref log!(M::AbstractManifold, X, p, q)) and [`inner`](@ref inner(M::AbstractManifold, p, X, Y)) you get the [`distance`](@ref distance(M::AbstractManifold, p, q)), and so.
 
 In summary with just these few functions you can already explore the first things on your own manifold. Whenever a function from `Manifolds.jl` requires another function to be specifically implemented, you get a reasonable error message.
 

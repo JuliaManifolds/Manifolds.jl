@@ -1,11 +1,11 @@
 """
-    ProjectedPointDistribution(M::Manifold, d, proj!, p)
+    ProjectedPointDistribution(M::AbstractManifold, d, proj!, p)
 
 Generates a random point in ambient space of `M` and projects it to `M`
 using function `proj!`. Generated arrays are of type `TResult`, which can be
 specified by providing the `p` argument.
 """
-struct ProjectedPointDistribution{TResult,TM<:Manifold,TD<:Distribution,TProj} <:
+struct ProjectedPointDistribution{TResult,TM<:AbstractManifold,TD<:Distribution,TProj} <:
        MPointDistribution{TM}
     manifold::TM
     distribution::TD
@@ -13,7 +13,7 @@ struct ProjectedPointDistribution{TResult,TM<:Manifold,TD<:Distribution,TProj} <
 end
 
 function ProjectedPointDistribution(
-    M::Manifold,
+    M::AbstractManifold,
     d::Distribution,
     proj!,
     ::TResult,
@@ -26,12 +26,12 @@ function ProjectedPointDistribution(
 end
 
 """
-    projected_distribution(M::Manifold, d, [p=rand(d)])
+    projected_distribution(M::AbstractManifold, d, [p=rand(d)])
 
 Wrap the standard distribution `d` into a manifold-valued distribution. Generated
 points will be of similar type to `p`. By default, the type is not changed.
 """
-function projected_distribution(M::Manifold, d, p=rand(d))
+function projected_distribution(M::AbstractManifold, d, p=rand(d))
     return ProjectedPointDistribution(M, d, project!, p)
 end
 
@@ -119,7 +119,7 @@ end
 Normal distribution in ambient space with standard deviation `σ`
 projected to tangent space at `p`.
 """
-function normal_tvector_distribution(M::Manifold, p, σ)
+function normal_tvector_distribution(M::AbstractManifold, p, σ)
     d = Distributions.MvNormal(zero(vec(p)), σ)
     return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project!, p)
 end

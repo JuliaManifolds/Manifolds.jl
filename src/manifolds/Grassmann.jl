@@ -60,14 +60,13 @@ function allocation_promotion_function(M::Grassmann{n,k,ℂ}, f, args::Tuple) wh
 end
 
 @doc raw"""
-    check_manifold_point(M::Grassmann{n,k,𝔽}, p)
+    check_point(M::Grassmann{n,k,𝔽}, p)
 
 Check whether `p` is representing a point on the [`Grassmann`](@ref) `M`, i.e. its
 a `n`-by-`k` matrix of unitary column vectors and of correct `eltype` with respect to `𝔽`.
 """
-function check_manifold_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+function check_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
@@ -80,7 +79,7 @@ function check_manifold_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,�
 end
 
 @doc raw"""
-    check_tangent_vector(M::Grassmann{n,k,𝔽}, p, X; check_base_point = true, kwargs...)
+    check_vector(M::Grassmann{n,k,𝔽}, p, X; kwargs...)
 
 Check whether `X` is a tangent vector in the tangent space of `p` on
 the [`Grassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
@@ -91,26 +90,14 @@ the [`Grassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
 $\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ the $k × k$ zero matrix.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
-function check_tangent_vector(
-    M::Grassmann{n,k,𝔽},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {n,k,𝔽}
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::Grassmann{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -191,7 +178,7 @@ injectivity_radius(::Grassmann, ::Any) = π / 2
 injectivity_radius(::Grassmann, ::Any, ::ExponentialRetraction) = π / 2
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::Grassmann,
             rm::AbstractRetractionMethod,
         )
@@ -246,7 +233,7 @@ inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 inverse_retract!(::Grassmann, X, p, q, ::QRInverseRetraction) = copyto!(X, q / (p' * q) - p)
 
 function Base.isapprox(M::Grassmann, p, X, Y; kwargs...)
-    return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
+    return isapprox(sqrt(inner(M, p, zero_vector(M, p), X - Y)), 0; kwargs...)
 end
 Base.isapprox(M::Grassmann, p, q; kwargs...) = isapprox(distance(M, p, q), 0.0; kwargs...)
 
@@ -303,7 +290,7 @@ manifold_dimension(::Grassmann{n,k,𝔽}) where {n,k,𝔽} = k * (n - k) * real_
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::Grassmann{n,k} where {n,k}, ::Any...)
@@ -425,11 +412,11 @@ function vector_transport_to!(M::Grassmann, Y, p, X, q, ::ProjectionTransport)
 end
 
 @doc raw"""
-    zero_tangent_vector(M::Grassmann, p)
+    zero_vector(M::Grassmann, p)
 
 Return the zero tangent vector from the tangent space at `p` on the [`Grassmann`](@ref) `M`,
 which is given by a zero matrix the same size as `p`.
 """
-zero_tangent_vector(::Grassmann, ::Any...)
+zero_vector(::Grassmann, ::Any...)
 
-zero_tangent_vector!(::Grassmann, X, p) = fill!(X, 0)
+zero_vector!(::Grassmann, X, p) = fill!(X, 0)

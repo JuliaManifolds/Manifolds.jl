@@ -11,20 +11,11 @@ include("utils.jl")
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 2
             @test base_manifold(M) === M
-            @test_throws DomainError is_manifold_point(M, [1.0, 0.0, 0.0, 0.0], true)
-            @test_throws DomainError is_manifold_point(
-                M,
-                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                true,
-            )
-            @test !is_tangent_vector(M, x, [0.0, 0.0, 1.0, 0.0])
-            @test_throws DomainError is_tangent_vector(M, x, [0.0, 0.0, 1.0, 0.0], true)
-            @test_throws DomainError is_tangent_vector(
-                M,
-                x,
-                1 * im * zero_tangent_vector(M, x),
-                true,
-            )
+            @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
+            @test_throws DomainError is_point(M, 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test !is_vector(M, x, [0.0, 0.0, 1.0, 0.0])
+            @test_throws DomainError is_vector(M, x, [0.0, 0.0, 1.0, 0.0], true)
+            @test_throws DomainError is_vector(M, x, 1 * im * zero_vector(M, x), true)
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
             @test injectivity_radius(M, x) == π / 2
@@ -38,7 +29,7 @@ include("utils.jl")
             embed!(M, y, x)
             @test y == z
             a = [1.0 0.0; 0.0 2.0; 0.0 0.0]
-            @test !is_manifold_point(M, a)
+            @test !is_point(M, a)
             b = similar(a)
             c = project(M, a)
             @test c == x
@@ -59,8 +50,8 @@ include("utils.jl")
         @test inner(M, x, X, Y) == 0
         y = retract(M, x, X)
         z = retract(M, x, Y)
-        @test is_manifold_point(M, y)
-        @test is_manifold_point(M, z)
+        @test is_point(M, y)
+        @test is_point(M, z)
         @test retract(M, x, X) == exp(M, x, X)
 
         a = project(M, x + X)
@@ -74,10 +65,10 @@ include("utils.jl")
         @test vector_transport_to(M, x, X, y, ProjectionTransport()) == project(M, y, X)
         @testset "Type $T" for T in types
             pts = convert.(T, [x, y, z])
-            @test !is_manifold_point(M, 2 * x)
-            @test_throws DomainError !is_manifold_point(M, 2 * x, true)
-            @test !is_tangent_vector(M, x, y)
-            @test_throws DomainError is_tangent_vector(M, x, y, true)
+            @test !is_point(M, 2 * x)
+            @test_throws DomainError !is_point(M, 2 * x, true)
+            @test !is_vector(M, x, y)
+            @test_throws DomainError is_vector(M, x, y, true)
             test_manifold(
                 M,
                 pts,
@@ -107,13 +98,13 @@ include("utils.jl")
                   "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℂ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 4
-            @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
-            @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
+            @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
+            @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             x = [1.0 0.0; 0.0 0.5; 0.0 0.0]
 
             x = [1im 0.0; 0.0 0.5im; 0.0 0.0]
-            @test is_manifold_point(M, x)
-            @test !is_manifold_point(M, 2 * x)
+            @test is_point(M, x)
+            @test !is_point(M, 2 * x)
         end
     end
 

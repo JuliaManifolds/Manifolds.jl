@@ -50,7 +50,7 @@ unsigned (`is_signed=false`) variant.
 
 [^TronDaniilidis2017]:
     > Tron R.; Daniilidis K.; The Space of Essential Matrices as a Riemannian Quotient
-    > Manifold.
+    > AbstractManifold.
     > SIAM Journal on Imaging Sciences (2017),
     > DOI: [10.1137/16M1091332](https://doi.org/10.1137/16M1091332),
     > PDF: [https://www.cis.upenn.edu/~kostas/mypub.dir/tron17siam.pdf](https://www.cis.upenn.edu/~kostas/mypub.dir/tron17siam.pdf).
@@ -63,19 +63,19 @@ end
 EssentialManifold(is_signed::Bool=true) = EssentialManifold(is_signed, Rotations(3))
 
 @doc raw"""
-    check_manifold_point(M::EssentialManifold, p; kwargs...)
+    check_point(M::EssentialManifold, p; kwargs...)
 
 Check whether the matrix is a valid point on the [`EssentialManifold`](@ref) `M`,
 i.e. a 2-element array containing SO(3) matrices.
 """
-function check_manifold_point(M::EssentialManifold, p; kwargs...)
+function check_point(M::EssentialManifold, p; kwargs...)
     if length(p) != 2
         return DomainError(
             length(p),
             "The point $(p) does not lie on $M, since it does not contain exactly two elements.",
         )
     end
-    return check_manifold_point(
+    return check_point(
         PowerManifold(M.manifold, NestedPowerRepresentation(), 2),
         p;
         kwargs...,
@@ -83,28 +83,22 @@ function check_manifold_point(M::EssentialManifold, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::EssentialManifold, p, X; check_base_point = true, kwargs... )
+    check_vector(M::EssentialManifold, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the [`EssentialManifold`](@ref) `M`,
 i.e. `X` has to be a 2-element array of `3`-by-`3` skew-symmetric matrices.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
-function check_tangent_vector(M::EssentialManifold, p, X; check_base_point=true, kwargs...)
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::EssentialManifold, p, X; kwargs...)
     if length(X) != 2
         return DomainError(
             length(X),
             "$(X) is not a tangent vector to the manifold $M, since it does not contain exactly two elements.",
         )
     end
-    return check_tangent_vector(
+    return check_vector(
         PowerManifold(M.manifold, NestedPowerRepresentation(), 2),
         p,
         X;
-        check_base_point=check_base_point,
         kwargs...,
     )
 end

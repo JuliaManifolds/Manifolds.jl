@@ -17,7 +17,7 @@ an object of type [`Manifolds.AbstractDiffBackend`](@ref). If the backend is not
 specified, it is obtained using the function [`Manifolds.diff_backend`](@ref).
 
 This function calculates plain Euclidean derivatives, for Riemannian differentiation see
-for example [`differential`](@ref Manifolds.differential(::Manifold, ::Any, ::Real, ::AbstractRiemannianDiffBackend)).
+for example [`differential`](@ref Manifolds.differential(::AbstractManifold, ::Any, ::Real, ::AbstractRiemannianDiffBackend)).
 
 !!! note
 
@@ -38,7 +38,7 @@ an object of type [`AbstractDiffBackend`](@ref). If the backend is not explicitl
 specified, it is obtained using the function [`diff_backend`](@ref).
 
 This function calculates plain Euclidean gradients, for Riemannian gradient calculation see
-for example [`gradient`](@ref Manifolds.gradient(::Manifold, ::Any, ::Any, ::AbstractRiemannianDiffBackend)).
+for example [`gradient`](@ref Manifolds.gradient(::AbstractManifold, ::Any, ::Any, ::AbstractRiemannianDiffBackend)).
 
 !!! note
 

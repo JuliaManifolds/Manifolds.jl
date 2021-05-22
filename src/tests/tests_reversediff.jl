@@ -1,5 +1,5 @@
 
-function ManifoldTests.test_reversediff(M::Manifold, pts, tv)
+function ManifoldTests.test_reversediff(M::AbstractManifold, pts, tv)
     return for (p, X) in zip(pts, tv)
         exp_f(t) = distance(M, p, exp(M, p, t[1] * X))
         d12 = norm(M, p, X)

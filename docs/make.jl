@@ -69,6 +69,7 @@ makedocs(
             ],
         ],
         "Features on Manifolds" => [
+            "Atlases and charts" => "features/atlases.md",
             "Differentiation" => "features/differentiation.md",
             "Distributions" => "features/distributions.md",
             "Statistics" => "features/statistics.md",

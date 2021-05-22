@@ -165,10 +165,10 @@ end
         X = ProductRepr(X1, X2)
         pf = ProductRepr(p1, X1)
         Xf = ProductRepr(X1, p2)
-        @test is_manifold_point(Mpr, p, true)
-        @test_throws CompositeManifoldError is_manifold_point(Mpr, X, true)
-        @test_throws ComponentManifoldError is_tangent_vector(Mpr, pf, X, true)
-        @test_throws ComponentManifoldError is_tangent_vector(Mpr, p, Xf, true)
+        @test is_point(Mpr, p, true)
+        @test_throws CompositeManifoldError is_point(Mpr, X, true)
+        @test_throws ComponentManifoldError is_vector(Mpr, pf, X, true)
+        @test_throws ComponentManifoldError is_vector(Mpr, p, Xf, true)
     end
 
     @testset "arithmetic" begin
@@ -358,6 +358,7 @@ end
                 pts;
                 test_reverse_diff=isa(T, Vector),
                 test_musical_isomorphisms=true,
+                musical_isomorphism_bases=[DefaultOrthonormalBasis()],
                 test_injectivity_radius=true,
                 test_project_point=true,
                 test_project_tangent=true,
@@ -594,5 +595,15 @@ end
         Msec = ProductManifold(M1, M2c)
         @test Manifolds.allocation_promotion_function(Msec, get_vector, ()) === complex
         @test Manifolds.allocation_promotion_function(Mse, get_vector, ()) === identity
+    end
+
+    @testset "Atlas & Induced Basis" begin
+        M = ProductManifold(Euclidean(2), Euclidean(2))
+        p = ProductRepr(zeros(2), ones(2))
+        X = ProductRepr(ones(2), 2 .* ones(2))
+        A = RetractionAtlas()
+        a = get_point_coordinates(M, A, p, p)
+        p2 = get_point(M, A, p, a)
+        @test all(p2.parts .== p.parts)
     end
 end

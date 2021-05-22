@@ -7,37 +7,33 @@ include("utils.jl")
             @test repr(M) == "Grassmann(3, 2, ℝ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 2
-            @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
-            @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
-            @test_throws DomainError is_manifold_point(M, [2.0 0.0; 0.0 1.0; 0.0 0.0], true)
-            @test_throws DomainError is_tangent_vector(
+            @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
+            @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
+            @test_throws DomainError is_point(M, [2.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test_throws DomainError is_vector(
                 M,
                 [2.0 0.0; 0.0 1.0; 0.0 0.0],
                 zeros(3, 2),
                 true,
             )
-            @test_throws DomainError is_tangent_vector(
+            @test_throws DomainError is_vector(
                 M,
                 [1.0 0.0; 0.0 1.0; 0.0 0.0],
                 ones(3, 2),
                 true,
             )
-            @test is_manifold_point(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
-            @test_throws DomainError is_manifold_point(
-                M,
-                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                true,
-            )
-            @test is_tangent_vector(
+            @test is_point(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test_throws DomainError is_point(M, 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test is_vector(
                 M,
                 [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                zero_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]),
+                zero_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]),
                 true,
             )
-            @test_throws DomainError is_tangent_vector(
+            @test_throws DomainError is_vector(
                 M,
                 [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                1im * zero_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]),
+                1im * zero_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]),
                 true,
             )
             @test injectivity_radius(M) == π / 2
@@ -110,7 +106,7 @@ include("utils.jl")
             v = [0.0 0.0; 0.0 0.0; 0.0 1.0]
             y = exp(M, x, v)
             @test vector_transport_to(M, x, v, y, ProjectionTransport()) == project(M, y, v)
-            @test is_tangent_vector(
+            @test is_vector(
                 M,
                 y,
                 vector_transport_to(M, x, v, y, ProjectionTransport()),
@@ -126,28 +122,28 @@ include("utils.jl")
             @test repr(M) == "Grassmann(3, 2, ℂ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 4
-            @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
-            @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
+            @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
+            @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
-            @test_throws DomainError is_manifold_point(M, [2.0 0.0; 0.0 1.0; 0.0 0.0], true)
-            @test_throws DomainError is_tangent_vector(
+            @test_throws DomainError is_point(M, [2.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test_throws DomainError is_vector(
                 M,
                 [2.0 0.0; 0.0 1.0; 0.0 0.0],
                 zeros(3, 2),
                 true,
             )
-            @test_throws DomainError is_tangent_vector(
+            @test_throws DomainError is_vector(
                 M,
                 [1.0 0.0; 0.0 1.0; 0.0 0.0],
                 ones(3, 2),
                 true,
             )
-            @test is_tangent_vector(
+            @test is_vector(
                 M,
                 [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                1im * zero_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]),
+                1im * zero_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]),
             )
-            @test is_manifold_point(M, [1.0 0.0; 0.0 1.0; 0.0 0.0])
+            @test is_point(M, [1.0 0.0; 0.0 1.0; 0.0 0.0])
             @test injectivity_radius(M) == π / 2
         end
         types = [Matrix{ComplexF64}]
@@ -194,10 +190,10 @@ include("utils.jl")
     @testset "Complex and conjugate" begin
         G = Grassmann(3, 1, ℂ)
         p = reshape([im, 0.0, 0.0], 3, 1)
-        @test is_manifold_point(G, p)
+        @test is_point(G, p)
         X = reshape([-0.5; 0.5; 0], 3, 1)
-        @test_throws DomainError is_tangent_vector(G, p, X, true)
+        @test_throws DomainError is_vector(G, p, X, true)
         Y = project(G, p, X)
-        @test is_tangent_vector(G, p, Y)
+        @test is_vector(G, p, Y)
     end
 end

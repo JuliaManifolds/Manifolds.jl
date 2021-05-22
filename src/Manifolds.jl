@@ -10,13 +10,14 @@ import ManifoldsBase:
     allocation_promotion_function,
     array_value,
     base_manifold,
-    check_manifold_point,
-    check_manifold_point__transparent,
-    check_tangent_vector,
+    check_point,
+    check_point__transparent,
+    check_vector,
     decorated_manifold,
     decorator_transparent_dispatch,
     default_decorator_dispatch,
     distance,
+    dual_basis,
     embed,
     embed!,
     exp!,
@@ -34,8 +35,8 @@ import ManifoldsBase:
     injectivity_radius,
     inner,
     inner__intransparent,
-    is_manifold_point,
-    is_tangent_vector,
+    is_point,
+    is_vector,
     inverse_retract,
     inverse_retract!,
     log,
@@ -52,12 +53,15 @@ import ManifoldsBase:
     retract,
     retract!,
     set_component!,
+    vector_space_dimension,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
-    zero_tangent_vector,
-    zero_tangent_vector!
+    zero_vector,
+    zero_vector!,
+    CotangentSpace,
+    TangentSpace
 import Base: copyto!, convert, in, isapprox, isempty, length, showerror
 
 using Base.Iterators: repeated
@@ -81,17 +85,24 @@ using ManifoldsBase:
     AbstractPowerRepresentation,
     AbstractVectorTransportMethod,
     AbstractLinearVectorTransportMethod,
-    DifferentiatedRetractionVectorTransport,
     ComponentManifoldError,
     CompositeManifoldError,
+    CotangentSpaceType,
+    CoTFVector,
     DefaultManifold,
     DefaultOrDiagonalizingBasis,
     DiagonalizingBasisData,
+    DifferentiatedRetractionVectorTransport,
+    FVector,
     InversePowerRetraction,
     PowerManifold,
     PowerManifoldNested,
     PowerRetraction,
     PowerVectorTransport,
+    TangentSpaceType,
+    TCoTSpaceType,
+    TFVector,
+    VectorSpaceType,
     VeeOrthogonalBasis,
     @decorator_transparent_fallback,
     @decorator_transparent_function,
@@ -118,6 +129,9 @@ using StatsBase
 using StatsBase: AbstractWeights
 
 include("utils.jl")
+
+include("atlases.jl")
+include("cotangent_space.jl")
 include("differentiation.jl")
 include("riemannian_diff.jl")
 
@@ -199,24 +213,24 @@ include("groups/special_euclidean.jl")
 include("tests/ManifoldTests.jl")
 
 @doc raw"""
-    Base.in(p, M::Manifold; kwargs...)
+    Base.in(p, M::AbstractManifold; kwargs...)
     p ∈ M
 
-Check, whether a point `p` is a valid point (i.e. in) a [`Manifold`](@ref) `M`.
-This method employs [`is_manifold_point`](@ref) deaticating the error throwing option.
+Check, whether a point `p` is a valid point (i.e. in) a [`AbstractManifold`](@ref) `M`.
+This method employs [`is_point`](@ref) deaticating the error throwing option.
 """
-Base.in(p, M::Manifold; kwargs...) = is_manifold_point(M, p, false; kwargs...)
+Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
 
 @doc raw"""
     Base.in(p, TpM::TangentSpaceAtPoint; kwargs...)
     X ∈ TangentSpaceAtPoint(M,p)
 
 Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
-the [`TangentSpaceAtPoint`](@ref) at `p` on the [`Manifold`](@ref) `M`.
-This method uses [`is_tangent_vector`](@ref) deactivating the error throw option.
+the [`TangentSpaceAtPoint`](@ref) at `p` on the [`AbstractManifold`](@ref) `M`.
+This method uses [`is_vector`](@ref) deactivating the error throw option.
 """
 function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
-    return is_tangent_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
+    return is_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
 end
 
 function __init__()
@@ -270,7 +284,7 @@ function __init__()
 end
 
 #
-export CoTVector, Manifold, MPoint, TVector, Manifold
+export CoTVector, AbstractManifold, AbstractManifoldPoint, TVector, AbstractManifold
 export AbstractSphere, AbstractProjectiveSpace
 export Euclidean,
     ArrayProjectiveSpace,
@@ -331,7 +345,7 @@ export AbstractVectorTransportMethod,
 export PoleLadderTransport, SchildsLadderTransport
 export PowerVectorTransport, ProductVectorTransport
 export AbstractEmbeddedManifold
-export Metric,
+export AbstractMetric,
     RiemannianMetric,
     LorentzMetric,
     EmbeddedManifold,
@@ -344,6 +358,7 @@ export Metric,
     ProductMetric,
     CanonicalMetric,
     MetricManifold
+export AbstractAtlas, RetractionAtlas
 export AbstractEmbeddingType, AbstractIsometricEmbeddingType
 export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
@@ -375,6 +390,7 @@ export CachedBasis,
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
     DiagonalizingOrthonormalBasis,
+    InducedBasis,
     ProjectedOrthonormalBasis
 export ComponentManifoldError, CompositeManifoldError
 export ×,
@@ -382,8 +398,8 @@ export ×,
     allocate_result,
     base_manifold,
     bundle_projection,
-    check_manifold_point,
-    check_tangent_vector,
+    check_point,
+    check_vector,
     christoffel_symbols_first,
     christoffel_symbols_second,
     christoffel_symbols_second_jacobian,
@@ -392,6 +408,7 @@ export ×,
     decorated_manifold,
     det_local_metric,
     distance,
+    dual_basis,
     einstein_tensor,
     embed,
     embed!,
@@ -401,10 +418,12 @@ export ×,
     flat!,
     gaussian_curvature,
     geodesic,
+    get_default_atlas,
     get_component,
     get_embedding,
     hat,
     hat!,
+    induced_basis,
     incident_log,
     injectivity_radius,
     inner,
@@ -416,8 +435,8 @@ export ×,
     is_decorator_transparent,
     is_default_metric,
     is_default_decorator,
-    is_manifold_point,
-    is_tangent_vector,
+    is_point,
+    is_vector,
     isapprox,
     kurtosis,
     local_metric,
@@ -474,9 +493,7 @@ export ×,
     vee,
     vee!,
     zero_vector,
-    zero_vector!,
-    zero_tangent_vector,
-    zero_tangent_vector!
+    zero_vector!
 # Lie group types & functions
 export AbstractGroupAction,
     AbstractGroupOperation,
@@ -560,5 +577,7 @@ export get_basis,
 export AbstractDiffBackend,
     AbstractRiemannianDiffBackend, FiniteDifferencesBackend, RiemannianONBDiffBackend
 export diff_backend, diff_backend!, diff_backends
+# atlases and charts
+export get_point, get_point!, get_point_coordinates, get_point_coordinates!
 
 end # module

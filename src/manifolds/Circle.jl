@@ -1,5 +1,5 @@
 @doc raw"""
-    Circle{𝔽} <: Manifold{𝔽}
+    Circle{𝔽} <: AbstractManifold{𝔽}
 
 The circle $𝕊^1$ is a manifold here represented by
 real-valued points in $[-π,π)$ or complex-valued points $z ∈ ℂ$ of absolute value
@@ -12,20 +12,20 @@ Generate the `ℝ`-valued Circle represented by angles, which
 alternatively can be set to use the [`AbstractNumbers`](@ref) `𝔽=ℂ` to obtain the circle
 represented by `ℂ`-valued circle of unit numbers.
 """
-struct Circle{𝔽} <: Manifold{𝔽} end
+struct Circle{𝔽} <: AbstractManifold{𝔽} end
 
 Circle(𝔽::AbstractNumbers=ℝ) = Circle{𝔽}()
 
 @doc raw"""
-    check_manifold_point(M::Circle, p)
+    check_point(M::Circle, p)
 
 Check whether `p` is a point on the [`Circle`](@ref) `M`.
-For the real-valued case, `x` is an angle and hence it checks that $p  ∈ [-π,π)$.
+For the real-valued case, `p` is an angle and hence it checks that $p  ∈ [-π,π)$.
 for the complex-valued case, it is a unit number, $p ∈ ℂ$ with $\lvert p \rvert = 1$.
 """
-check_manifold_point(::Circle, ::Any...)
+check_point(::Circle, ::Any...)
 
-function check_manifold_point(M::Circle{ℝ}, p; kwargs...)
+function check_point(M::Circle{ℝ}, p; kwargs...)
     if !isapprox(sym_rem(p), p; kwargs...)
         return DomainError(
             p,
@@ -34,7 +34,7 @@ function check_manifold_point(M::Circle{ℝ}, p; kwargs...)
     end
     return nothing
 end
-function check_manifold_point(M::Circle{ℂ}, p; kwargs...)
+function check_point(M::Circle{ℂ}, p; kwargs...)
     if !isapprox(sum(abs.(p)), 1.0; kwargs...)
         return DomainError(
             abs(p),
@@ -45,29 +45,20 @@ function check_manifold_point(M::Circle{ℂ}, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::Circle, p, X; check_base_point, kwargs...)
+    check_vector(M::Circle, p, X; kwargs...)
 
 Check whether `X` is a tangent vector in the tangent space of `p` on the
 [`Circle`](@ref) `M`.
 For the real-valued case represented by angles, all `X` are valid, since the tangent space is the whole real line.
 For the complex-valued case `X` has to lie on the line parallel to the tangent line at `p`
 in the complex plane, i.e. their inner product has to be zero.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
-check_tangent_vector(::Circle{ℝ}, ::Any...; ::Any...)
+check_vector(::Circle{ℝ}, ::Any...; ::Any...)
 
-function check_tangent_vector(M::Circle{ℝ}, p, X; check_base_point=true, kwargs...)
-    if check_base_point
-        perr = check_manifold_point(M, p; kwargs...)
-        return perr # if x is valid all v that are real numbers are valid
-    end
+function check_vector(M::Circle{ℝ}, p, X; kwargs...)
     return nothing
 end
-function check_tangent_vector(M::Circle{ℂ}, p, X; check_base_point=true, kwargs...)
-    if check_base_point
-        perr = check_manifold_point(M, p)
-        perr === nothing || return perr
-    end
+function check_vector(M::Circle{ℂ}, p, X; kwargs...)
     if !isapprox(abs(complex_dot(p, X)), 0.0; kwargs...)
         return DomainError(
             abs(complex_dot(p, X)),
@@ -112,9 +103,9 @@ complex plane.
 """
 exp(::Circle, ::Any...)
 Base.exp(::Circle{ℝ}, p::Real, X::Real) = sym_rem(p + X)
-function Base.exp(M::Circle{ℂ}, x::Number, v::Number)
-    θ = norm(M, x, v)
-    return cos(θ) * x + usinc(θ) * v
+function Base.exp(M::Circle{ℂ}, p::Number, X::Number)
+    θ = norm(M, p, X)
+    return cos(θ) * p + usinc(θ) * X
 end
 
 exp!(::Circle{ℝ}, q, p, X) = (q .= sym_rem(p + X))
@@ -124,26 +115,29 @@ function exp!(M::Circle{ℂ}, q, p, X)
     return q
 end
 
-flat(::Circle, ::Number, X::TFVector) = FVector(CotangentSpace, X.data)
-
-flat!(::Circle, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
-
-function get_basis(M::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
+function get_basis(::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
     return CachedBasis(B, (@SVector [0]), vs)
 end
-get_coordinates(M::Circle{ℝ}, p, X, B::DefaultOrthonormalBasis) = X
+
+get_coordinates(::Circle{ℝ}, p, X, ::AbstractBasis{<:Any,TangentSpaceType}) = X
+get_coordinates(::Circle{ℝ}, p, X, ::DefaultOrthonormalBasis{<:Any,TangentSpaceType}) = X
 function get_coordinates(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
-    return X .* (sbv == 0 ? 1 : sbv)
+    return X .* (sbv == 0 ? one(sbv) : sbv)
 end
 """
     get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
 Return tangent vector coordinates in the Lie algebra of the [`Circle`](@ref).
 """
-function get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
+function get_coordinates(
+    ::Circle{ℂ},
+    p,
+    X,
+    ::DefaultOrthonormalBasis{<:Any,TangentSpaceType},
+)
     X, p = X[1], p[1]
     Xⁱ = imag(X) * real(p) - real(X) * imag(p)
     return @SVector [Xⁱ]
@@ -151,7 +145,7 @@ end
 
 eval(
     quote
-        @invoke_maker 1 Manifold get_coordinates(
+        @invoke_maker 1 AbstractManifold get_coordinates(
             M::Circle,
             e::Identity,
             X,
@@ -160,7 +154,13 @@ eval(
     end,
 )
 
-function get_coordinates!(M::Circle, Y::AbstractArray, p, X, B::DefaultOrthonormalBasis)
+function get_coordinates!(
+    M::Circle,
+    Y::AbstractArray,
+    p,
+    X,
+    B::DefaultOrthonormalBasis{<:Any,TangentSpaceType},
+)
     Y[] = get_coordinates(M, p, X, B)[]
     return Y
 end
@@ -177,7 +177,7 @@ end
 
 eval(
     quote
-        @invoke_maker 1 Manifold get_coordinates!(
+        @invoke_maker 1 AbstractManifold get_coordinates!(
             M::Circle,
             Y::AbstractArray,
             p,
@@ -187,27 +187,50 @@ eval(
     end,
 )
 
-get_vector(::Circle{ℝ}, p, X, ::AbstractBasis) = X
-function get_vector(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
+get_vector(::Circle{ℝ}, p, X, ::AbstractBasis{ℝ,TangentSpaceType}) = X
+get_vector(::Circle{ℝ}, p, X, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType}) = X
+function get_vector(::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
-    return X .* (sbv == 0 ? 1 : sbv)
+    return X .* (sbv == 0 ? one(sbv) : sbv)
 end
 """
     get_vector(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
 Return tangent vector from the coordinates in the Lie algebra of the [`Circle`](@ref).
 """
-get_vector(M::Circle{ℂ}, p, X, B::AbstractBasis) = @SVector [1im * X[1] * p[1]]
-
-function get_vector!(M::Circle, Y::AbstractArray, p, X, B::AbstractBasis)
-    Y[] = get_vector(M, p, X, B)[]
-    return Y
+function get_vector(::Circle{ℂ}, p, X, ::AbstractBasis{<:Any,TangentSpaceType})
+    @SVector [1im * X[1] * p[1]]
 end
-for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES
+eval(
+    quote
+        @invoke_maker 4 AbstractBasis get_vector(
+            M::Circle{ℂ},
+            p,
+            X,
+            B::DefaultOrthonormalBasis{<:Any,TangentSpaceType},
+        )
+    end,
+)
+
+for BT in [AbstractBasis{<:Any,TangentSpaceType}]
+    eval(quote
+        function get_vector!(::Circle{ℝ}, Y::AbstractArray, p, X, ::$BT)
+            Y[] = X[]
+            return Y
+        end
+    end)
+    eval(quote
+        function get_vector!(::Circle{ℂ}, Y::AbstractArray, p, X, ::$BT)
+            Y[] = 1im * X[1] * p[1]
+            return Y
+        end
+    end)
+end
+for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES, CT in [Circle, Circle{ℝ}, Circle{ℂ}]
     eval(
         quote
             @invoke_maker 5 $(supertype(BT)) get_vector!(
-                M::Circle,
+                M::$CT,
                 Y::AbstractArray,
                 p,
                 X,
@@ -228,7 +251,7 @@ injectivity_radius(::Circle, ::Any) = π
 injectivity_radius(::Circle, ::Any, ::ExponentialRetraction) = π
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::Circle,
             rm::AbstractRetractionMethod,
         )
@@ -259,11 +282,11 @@ inner(::Circle, ::Any...)
 @inline inner(::Circle{ℝ}, p::Real, X::Real, Y::Real) = X * Y
 @inline inner(::Circle{ℂ}, p, X, Y) = complex_dot(X, Y)
 
-function inverse_retract(M::Circle, x::Number, y::Number)
-    return inverse_retract(M, x, y, LogarithmicInverseRetraction())
+function inverse_retract(M::Circle, p::Number, q::Number)
+    return inverse_retract(M, p, q, LogarithmicInverseRetraction())
 end
-function inverse_retract(M::Circle, x::Number, y::Number, ::LogarithmicInverseRetraction)
-    return log(M, x, y)
+function inverse_retract(M::Circle, p::Number, q::Number, ::LogarithmicInverseRetraction)
+    return log(M, p, q)
 end
 
 @doc raw"""
@@ -320,7 +343,7 @@ manifold_dimension(::Circle) = 1
 @doc raw"""
     mean(M::Circle{ℝ}, x::AbstractVector[, w::AbstractWeights])
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` of points on
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` of points on
 the [`Circle`](@ref) $𝕊^1$, reprsented by real numbers, i.e. the angular mean
 ````math
 \operatorname{atan}\Bigl( \sum_{i=1}^n w_i\sin(x_i),  \sum_{i=1}^n w_i\sin(x_i) \Bigr).
@@ -341,7 +364,7 @@ end
 @doc raw"""
     mean(M::Circle{ℂ}, x::AbstractVector[, w::AbstractWeights])
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` of points on
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` of points on
 the [`Circle`](@ref) $𝕊^1$, reprsented by complex numbers, i.e. embedded in the complex plade.
 Comuting the sum
 ````math
@@ -418,10 +441,6 @@ retract(M::Circle, p, q, m::ExponentialRetraction) = exp(M, p, q)
 
 representation_size(::Circle) = ()
 
-sharp(::Circle, p::Number, ξ::CoTFVector) = FVector(TangentSpace, ξ.data)
-
-sharp!(::Circle, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
-
 Base.show(io::IO, ::Circle{𝔽}) where {𝔽} = print(io, "Circle($(𝔽))")
 
 @doc raw"""
@@ -491,5 +510,5 @@ function vector_transport_direction(
     return vector_transport_to(M, p, X, q, m)
 end
 
-zero_tangent_vector(::Circle, p::Number) = zero(p)
-zero_tangent_vector!(::Circle, X, p) = fill!(X, 0)
+zero_vector(::Circle, p::Number) = zero(p)
+zero_vector!(::Circle, X, p) = fill!(X, 0)

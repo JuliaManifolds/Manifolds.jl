@@ -54,7 +54,7 @@ struct Spectrahedron{N,K} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbedd
 Spectrahedron(n::Int, k::Int) = Spectrahedron{n,k}()
 
 @doc raw"""
-    check_manifold_point(M::Spectrahedron, q; kwargs...)
+    check_point(M::Spectrahedron, q; kwargs...)
 
 checks, whether `q` is a valid reprsentation of a point $p=qq^{\mathrm{T}}$ on the
 [`Spectrahedron`](@ref) `M`, i.e. is a matrix
@@ -64,9 +64,8 @@ Since by construction $p$ is symmetric, this is not explicitly checked.
 Since $p$ is by construction positive semidefinite, this is not checked.
 The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
 """
-function check_manifold_point(M::Spectrahedron{N,K}, q; kwargs...) where {N,K}
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
+function check_point(M::Spectrahedron{N,K}, q; kwargs...) where {N,K}
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
     mpv === nothing || return mpv
     fro_n = norm(q)
     if !isapprox(fro_n, 1.0; kwargs...)
@@ -79,34 +78,22 @@ function check_manifold_point(M::Spectrahedron{N,K}, q; kwargs...) where {N,K}
 end
 
 @doc raw"""
-    check_tangent_vector(M::Spectrahedron, q, Y; check_base_point = true, kwargs...)
+    check_vector(M::Spectrahedron, q, Y; kwargs...)
 
 Check whether $X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}$ is a tangent vector to
 $p=qq^{\mathrm{T}}$ on the [`Spectrahedron`](@ref) `M`,
-i.e. atfer [`check_manifold_point`](@ref) of `q`, `Y` has to be of same dimension as `q`
+i.e. atfer [`check_point`](@ref) of `q`, `Y` has to be of same dimension as `q`
 and a $X$ has to be a symmetric matrix with trace.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `q`.
 The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
 Note that symmetry of $X$ holds by construction and is not explicitly checked.
 """
-function check_tangent_vector(
-    M::Spectrahedron{N,K},
-    q,
-    Y;
-    check_base_point=true,
-    kwargs...,
-) where {N,K}
-    if check_base_point
-        mpe = check_manifold_point(M, q; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::Spectrahedron{N,K}, q, Y; kwargs...) where {N,K}
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(q),typeof(Y)},
         M,
         q,
         Y;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -197,11 +184,11 @@ function vector_transport_to!(M::Spectrahedron, Y, p, X, q, ::ProjectionTranspor
 end
 
 @doc raw"""
-    zero_tangent_vector(M::Spectrahedron,p)
+    zero_vector(M::Spectrahedron,p)
 
 returns the zero tangent vector in the tangent space of the symmetric positive
 definite matrix `p` on the [`Spectrahedron`](@ref) manifold `M`.
 """
-zero_tangent_vector(::Spectrahedron, ::Any...)
+zero_vector(::Spectrahedron, ::Any...)
 
-zero_tangent_vector!(::Spectrahedron{N,K}, v, ::Any) where {N,K} = fill!(v, 0)
+zero_vector!(::Spectrahedron{N,K}, v, ::Any) where {N,K} = fill!(v, 0)

@@ -1,7 +1,7 @@
 @doc raw"""
     SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
 
-The [`Manifold`](@ref) $ \operatorname{SPS}_k(n)$ consisting of the real- or complex-valued
+The [`AbstractManifold`](@ref) $ \operatorname{SPS}_k(n)$ consisting of the real- or complex-valued
 symmetric positive semidefinite matrices of size $n × n$ and rank $k$, i.e. the set
 
 ````math
@@ -48,7 +48,7 @@ over the `field` of real numbers `ℝ` or complex numbers `ℂ`.
     > arXiv: [0807.4423](http://arxiv.org/abs/0807.4423).
 [^MassartAbsil2020]:
     > Massart, E., Absil, P.-A.:
-    > "Quotient Geometry with Simple Geodesics for the Manifold of Fixed-Rank Positive-Semidefinite Matrices",
+    > "Quotient Geometry with Simple Geodesics for the AbstractManifold of Fixed-Rank Positive-Semidefinite Matrices",
     > SIAM Journal on Matrix Analysis and Applications (41)1, pp. 171–198, 2020.
     > doi: [10.1137/18m1231389](https://doi.org/10.1137/18m1231389),
     > preprint: [sites.uclouvain.be/absil/2018.06](https://sites.uclouvain.be/absil/2018.06).
@@ -61,7 +61,7 @@ function SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractN
 end
 
 @doc raw"""
-    check_manifold_point(M::SymmetricPositiveSemidefiniteFixedRank{n,𝔽}, q; kwargs...)
+    check_point(M::SymmetricPositiveSemidefiniteFixedRank{n,𝔽}, q; kwargs...)
 
 Check whether `q` is a valid manifold point on the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`, i.e.
 whether `p=q*q'` is a symmetric matrix of size `(n,n)` with values from the corresponding
@@ -69,13 +69,12 @@ whether `p=q*q'` is a symmetric matrix of size `(n,n)` with values from the corr
 The symmetry of `p` is not explicitly checked since by using `q` p is symmetric by construction.
 The tolerance for the symmetry of `p` can and the rank of `q*q'` be set using `kwargs...`.
 """
-function check_manifold_point(
+function check_point(
     M::SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽},
     q;
     kwargs...,
 ) where {n,k,𝔽}
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
     mpv === nothing || return mpv
     p = q * q'
     r = rank(p * p'; kwargs...)
@@ -89,33 +88,25 @@ function check_manifold_point(
 end
 
 """
-    check_tangent_vector(M::SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽}, p, X; check_base_point = true, kwargs... )
+    check_vector(M::SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
 and its values have to be from the correct [`AbstractNumbers`](@ref).
-The optional parameter `check_base_point` indicates, whether to call
- [`check_manifold_point`](@ref)  for `p`.
-The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
+The tolerance for the symmetry of `X` can be set using `kwargs...`.
 """
-function check_tangent_vector(
+function check_vector(
     M::SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽},
     q,
     Y;
-    check_base_point=true,
     kwargs...,
 ) where {n,k,𝔽}
-    if check_base_point
-        mpe = check_manifold_point(M, q; kwargs...)
-        mpe === nothing || return mpe
-    end
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(q),typeof(Y)},
         M,
         q,
         Y;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     return mpv
@@ -263,13 +254,13 @@ function vector_transport_to!(
 end
 
 @doc raw"""
-     zero_tangent_vector(M::SymmetricPositiveSemidefiniteFixedRank, p)
+     zero_vector(M::SymmetricPositiveSemidefiniteFixedRank, p)
 
 returns the zero tangent vector in the tangent space of the symmetric positive
 definite matrix `p` on the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) manifold `M`.
 """
-zero_tangent_vector(::SymmetricPositiveSemidefiniteFixedRank, ::Any...)
+zero_vector(::SymmetricPositiveSemidefiniteFixedRank, ::Any...)
 
-function zero_tangent_vector!(::SymmetricPositiveSemidefiniteFixedRank, v, ::Any)
+function zero_vector!(::SymmetricPositiveSemidefiniteFixedRank, v, ::Any)
     return fill!(v, 0)
 end

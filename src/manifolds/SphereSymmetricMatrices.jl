@@ -1,7 +1,7 @@
 @doc raw"""
     SphereSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding}
 
-The [`Manifold`](@ref) consisting of the $n × n$ symmetric matrices
+The [`AbstractManifold`](@ref) consisting of the $n × n$ symmetric matrices
 of unit Frobenius norm, i.e.
 ````math
 \mathcal{S}_{\text{sym}} :=\bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = p, \lVert p \rVert = 1 \bigr\},
@@ -22,16 +22,15 @@ function SphereSymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
 end
 
 @doc raw"""
-    check_manifold_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...)
+    check_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...)
 
 Check whether the matrix is a valid point on the [`SphereSymmetricMatrices`](@ref) `M`,
 i.e. is an `n`-by-`n` symmetric matrix of unit Frobenius norm.
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
-function check_manifold_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+function check_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(norm(p - p'), 0.0; kwargs...)
         return DomainError(
@@ -43,34 +42,21 @@ function check_manifold_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...) 
 end
 
 """
-    check_tangent_vector(M::SphereSymmetricMatrices{n,𝔽}, p, X; check_base_point = true, kwargs... )
+    check_vector(M::SphereSymmetricMatrices{n,𝔽}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SphereSymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
 of unit Frobenius norm.
-The optional parameter `check_base_point` indicates, whether to call
- [`check_manifold_point`](@ref)  for `p`.
 
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
-function check_tangent_vector(
-    M::SphereSymmetricMatrices{n,𝔽},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {n,𝔽}
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::SphereSymmetricMatrices{n,𝔽}, p, X; kwargs...) where {n,𝔽}
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv

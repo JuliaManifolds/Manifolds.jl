@@ -21,7 +21,7 @@ where $0_k$ is the $k × k$ zero matrix and $\overline{\cdot}$ the (elementwise)
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
-[`zero_tangent_vector`](@ref zero_tangent_vector(::Euclidean, ::Any...)) are inherited from the embedding.
+[`zero_vector`](@ref zero_vector(::Euclidean, ::Any...)) are inherited from the embedding.
 
 The manifold is named after
 [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
@@ -61,15 +61,14 @@ function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where
 end
 
 @doc raw"""
-    check_manifold_point(M::Stiefel, p; kwargs...)
+    check_point(M::Stiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$, i.e. that it has the right
 [`AbstractNumbers`](@ref) type and $p^{\mathrm{H}}p$ is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
-function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+function check_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
@@ -82,33 +81,21 @@ function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,�
 end
 
 @doc raw"""
-    check_tangent_vector(M::Stiefel, p, X; check_base_point = true, kwargs...)
+    check_vector(M::Stiefel, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
 `M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](@ref) fits and
 it (approximately) holds that $p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0$,
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian and $\overline{\cdot}$ the (elementwise) complex conjugate.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The settings for approximately can be set with `kwargs...`.
 """
-function check_tangent_vector(
-    M::Stiefel{n,k,𝔽},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {n,k,𝔽}
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::Stiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -157,7 +144,7 @@ in [^KanekoFioriTanaka2013].
 
 [^KanekoFioriTanaka2013]:
     > T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
-    > Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
+    > Compact Stiefel AbstractManifold", IEEE Transactions on Signal Processing, 2013,
     > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)
@@ -260,7 +247,7 @@ function inverse_retract!(M::Stiefel{n,k}, X, p, q, ::QRInverseRetraction) where
 end
 
 function Base.isapprox(M::Stiefel, p, X, Y; kwargs...)
-    return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
+    return isapprox(sqrt(inner(M, p, zero_vector(M, p), X - Y)), 0; kwargs...)
 end
 Base.isapprox(::Stiefel, p, q; kwargs...) = isapprox(norm(p - q), 0; kwargs...)
 

@@ -37,57 +37,37 @@ function Base.:^(M::ProbabilitySimplex{N}, m::Int) where {N}
 end
 
 @doc raw"""
-    check_manifold_point(M::MultinomialMatrices, p)
+    check_point(M::MultinomialMatrices, p)
 
 Checks whether `p` is a valid point on the [`MultinomialMatrices`](@ref)`(m,n)` `M`, i.e. is a matrix
 of `m` discrete probability distributions as columns from $\mathbb R^{n}$, i.e. each column is a point from
 [`ProbabilitySimplex`](@ref)`(n-1)`.
 """
-check_manifold_point(::MultinomialMatrices, ::Any)
-function check_manifold_point(M::MultinomialMatrices{n,m}, p; kwargs...) where {n,m}
+check_point(::MultinomialMatrices, ::Any)
+function check_point(M::MultinomialMatrices{n,m}, p; kwargs...) where {n,m}
     if size(p) != (n, m)
         return DomainError(
             length(p),
             "The matrix in `p` ($(size(p))) does not match the dimensions of $(M).",
         )
     end
-    return check_manifold_point(PowerManifold(M.manifold, m), p; kwargs...)
+    return check_point(PowerManifold(M.manifold, m), p; kwargs...)
 end
 @doc raw"""
-    check_tangent_vector(M::MultinomialMatrices p, X; check_base_point = true, kwargs...)
+    check_vector(M::MultinomialMatrices p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialMatrices`](@ref) `M`.
 This means, that `p` is valid, that `X` is of correct dimension and columnswise
 a tangent vector to the columns of `p` on the [`ProbabilitySimplex`](@ref).
-The optional parameter `check_base_point` indicates, whether to call
-[`check_manifold_point`](@ref check_manifold_point(::MultinomialMatrices, ::Any))  for `p`.
 """
-function check_tangent_vector(
-    M::MultinomialMatrices{n,m},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {n,m}
-    if check_base_point && size(p) != (n, m)
-        return DomainError(
-            length(p),
-            "The matrix `p` ($(size(p))) does not match the dimension of $(M).",
-        )
-    end
+function check_vector(M::MultinomialMatrices{n,m}, p, X; kwargs...) where {n,m}
     if size(X) != (n, m)
         return DomainError(
             length(X),
-            "The matrix `X` ($(size(X))) does not match the dimension of $(M).",
+            "The matrix `X` ($(size(X))) does not match the required dimension ($(representation_size(M))) for $(M).",
         )
     end
-    return check_tangent_vector(
-        PowerManifold(M.manifold, m),
-        p,
-        X;
-        check_base_point=check_base_point,
-        kwargs...,
-    )
+    return check_vector(PowerManifold(M.manifold, m), p, X; kwargs...)
 end
 
 get_iterator(::MultinomialMatrices{n,m}) where {n,m} = Base.OneTo(m)

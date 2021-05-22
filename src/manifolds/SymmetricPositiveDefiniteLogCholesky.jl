@@ -1,5 +1,5 @@
 @doc raw"""
-    LogCholeskyMetric <: Metric
+    LogCholeskyMetric <: RiemannianMetric
 
 The Log-Cholesky metric imposes a metric based on the Cholesky decomposition as
 introduced by [^Lin2019].

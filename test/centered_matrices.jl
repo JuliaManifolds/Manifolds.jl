@@ -13,14 +13,14 @@ include("utils.jl")
         @test representation_size(M) == (3, 2)
         @test base_manifold(M) === M
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3,2},ℝ}
-        @test check_manifold_point(M, A) === nothing
-        @test_throws DomainError is_manifold_point(M, B, true)
-        @test_throws DomainError is_manifold_point(M, C, true)
-        @test_throws DomainError is_manifold_point(M, D, true)
-        @test check_tangent_vector(M, A, A) === nothing
-        @test_throws DomainError is_tangent_vector(M, A, D, true)
-        @test_throws DomainError is_tangent_vector(M, D, A, true)
-        @test_throws DomainError is_tangent_vector(M, A, B, true)
+        @test check_point(M, A) === nothing
+        @test_throws DomainError is_point(M, B, true)
+        @test_throws DomainError is_point(M, C, true)
+        @test_throws DomainError is_point(M, D, true)
+        @test check_vector(M, A, A) === nothing
+        @test_throws DomainError is_vector(M, A, D, true)
+        @test_throws DomainError is_vector(M, D, A, true)
+        @test_throws DomainError is_vector(M, A, B, true)
         @test manifold_dimension(M) == 4
         @test A == project!(M, A, A)
         @test A == project(M, A, A)

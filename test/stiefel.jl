@@ -13,19 +13,10 @@ using Manifolds: default_metric_dispatch
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 3
             base_manifold(M) === M
-            @test_throws DomainError is_manifold_point(M, [1.0, 0.0, 0.0, 0.0], true)
-            @test_throws DomainError is_manifold_point(
-                M,
-                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                true,
-            )
-            @test !is_tangent_vector(M, x, [0.0, 0.0, 1.0, 0.0])
-            @test_throws DomainError is_tangent_vector(
-                M,
-                x,
-                1 * im * zero_tangent_vector(M, x),
-                true,
-            )
+            @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
+            @test_throws DomainError is_point(M, 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test !is_vector(M, x, [0.0, 0.0, 1.0, 0.0])
+            @test_throws DomainError is_vector(M, x, 1 * im * zero_vector(M, x), true)
         end
         @testset "Embedding and Projection" begin
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
@@ -35,7 +26,7 @@ using Manifolds: default_metric_dispatch
             embed!(M, y, x)
             @test y == z
             a = [1.0 0.0; 0.0 2.0; 0.0 0.0]
-            @test !is_manifold_point(M, a)
+            @test !is_point(M, a)
             b = similar(a)
             c = project(M, a)
             @test c == x
@@ -110,12 +101,12 @@ using Manifolds: default_metric_dispatch
             )
             pts = convert.(T, [x, y, z])
             v = inverse_retract(M, x, y, PolarInverseRetraction())
-            @test !is_manifold_point(M, 2 * x)
-            @test_throws DomainError !is_manifold_point(M, 2 * x, true)
-            @test !is_tangent_vector(M, 2 * x, v)
-            @test_throws DomainError !is_tangent_vector(M, 2 * x, v, true)
-            @test !is_tangent_vector(M, x, y)
-            @test_throws DomainError is_tangent_vector(M, x, y, true)
+            @test !is_point(M, 2 * x)
+            @test_throws DomainError !is_point(M, 2 * x, true)
+            @test !is_vector(M, 2 * x, v)
+            @test_throws DomainError !is_vector(M, 2 * x, v, true)
+            @test !is_vector(M, x, y)
+            @test_throws DomainError is_vector(M, x, y, true)
             test_manifold(
                 M,
                 pts,
@@ -193,8 +184,8 @@ using Manifolds: default_metric_dispatch
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 8
             @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
-            @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
-            @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
+            @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
+            @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
         end
         types = [Matrix{ComplexF64}]
@@ -204,12 +195,12 @@ using Manifolds: default_metric_dispatch
             z = exp(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0])
             pts = convert.(T, [x, y, z])
             v = inverse_retract(M, x, y, PolarInverseRetraction())
-            @test !is_manifold_point(M, 2 * x)
-            @test_throws DomainError !is_manifold_point(M, 2 * x, true)
-            @test !is_tangent_vector(M, 2 * x, v)
-            @test_throws DomainError !is_tangent_vector(M, 2 * x, v, true)
-            @test !is_tangent_vector(M, x, y)
-            @test_throws DomainError is_tangent_vector(M, x, y, true)
+            @test !is_point(M, 2 * x)
+            @test_throws DomainError !is_point(M, 2 * x, true)
+            @test !is_vector(M, 2 * x, v)
+            @test_throws DomainError !is_vector(M, 2 * x, v, true)
+            @test !is_vector(M, x, y)
+            @test_throws DomainError is_vector(M, x, y, true)
             test_manifold(
                 M,
                 pts,
@@ -279,7 +270,7 @@ using Manifolds: default_metric_dispatch
         @test r1 == PadeRetraction(1)
         @test repr(r1) == "CayleyRetraction()"
         q1 = retract(M, p, X, r1)
-        @test is_manifold_point(M, q1)
+        @test is_point(M, q1)
         Y = vector_transport_direction(
             M,
             p,
@@ -287,7 +278,7 @@ using Manifolds: default_metric_dispatch
             X,
             DifferentiatedRetractionVectorTransport(CayleyRetraction()),
         )
-        @test is_tangent_vector(M, q1, Y; atol=10^-15)
+        @test is_vector(M, q1, Y; atol=10^-15)
         Y2 = vector_transport_direction(
             M,
             p,
@@ -295,11 +286,11 @@ using Manifolds: default_metric_dispatch
             X,
             DifferentiatedRetractionVectorTransport{CayleyRetraction}(),
         )
-        @test is_tangent_vector(M, q1, Y2; atol=10^-15)
+        @test is_vector(M, q1, Y2; atol=10^-15)
         r2 = PadeRetraction(2)
         @test repr(r2) == "PadeRetraction(2)"
         q2 = retract(M, p, X, r2)
-        @test is_manifold_point(M, q2)
+        @test is_point(M, q2)
     end
 
     @testset "Canonical Metric" begin
