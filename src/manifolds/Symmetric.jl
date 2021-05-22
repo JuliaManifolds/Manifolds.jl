@@ -1,7 +1,7 @@
 @doc raw"""
     SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
 
-The [`Manifold`](@ref) $ \operatorname{Sym}(n)$ consisting of the real- or complex-valued
+The [`AbstractManifold`](@ref) $ \operatorname{Sym}(n)$ consisting of the real- or complex-valued
 symmetric matrices of size $n × n$, i.e. the set
 
 ````math
@@ -36,7 +36,7 @@ function allocation_promotion_function(
 end
 
 @doc raw"""
-    check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...)
+    check_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...)
 
 Check whether `p` is a valid manifold point on the [`SymmetricMatrices`](@ref) `M`, i.e.
 whether `p` is a symmetric matrix of size `(n,n)` with values from the corresponding
@@ -44,9 +44,8 @@ whether `p` is a symmetric matrix of size `(n,n)` with values from the correspon
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
-function check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+function check_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(norm(p - p'), 0.0; kwargs...)
         return DomainError(
@@ -58,33 +57,21 @@ function check_manifold_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where 
 end
 
 """
-    check_tangent_vector(M::SymmetricMatrices{n,𝔽}, p, X; check_base_point = true, kwargs... )
+    check_vector(M::SymmetricMatrices{n,𝔽}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
 and its values have to be from the correct [`AbstractNumbers`](@ref).
-The optional parameter `check_base_point` indicates, whether to call
- [`check_manifold_point`](@ref)  for `p`.
-The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
+
+The tolerance for the symmetry of `X` can be set using `kwargs...`.
 """
-function check_tangent_vector(
-    M::SymmetricMatrices{n,𝔽},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {n,𝔽}
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::SymmetricMatrices{n,𝔽}, p, X; kwargs...) where {n,𝔽}
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -110,7 +97,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ},
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -129,7 +116,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℂ},
+    ::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -153,7 +140,7 @@ function get_vector!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ},
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
@@ -172,7 +159,7 @@ function get_vector!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℂ},
+    ::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)

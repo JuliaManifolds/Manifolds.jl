@@ -160,16 +160,20 @@ julia> y[1]
  6.90031725726027e-310
 ```
 
-* [`allocate_result`](@ref) allocates a result of a particular function (for example [`exp`], [`flat`], etc.) on a particular manifold with particular arguments.
+* [`allocate_result`](@ref) allocates a result of a particular function (for example [`exp`](@ref), [`flat`](@ref), etc.) on a particular manifold with particular arguments.
   It takes into account the possibility that different arguments may have different numeric [`number_eltype`](@ref) types thorough the [`ManifoldsBase.allocate_result_type`](@ref) function.
 
 ## Bases
 
 The following functions and types provide support for bases of the tangent space of different manifolds.
+Moreover, bases of the cotangent space are also supported, though this description focuses on the tangent space.
 An orthonormal basis of the tangent space $T_p \mathcal M$ of (real) dimension $n$ has a real-coefficient basis $e_1, e_2, …, e_n$ if $\mathrm{Re}(g_p(e_i, e_j)) = δ_{ij}$ for each $i,j ∈ \{1, 2, …, n\}$ where $g_p$ is the Riemannian metric at point $p$.
 A vector $X$ from the tangent space $T_p \mathcal M$ can be expressed in Einstein notation as a sum $X = X^i e_i$, where (real) coefficients $X^i$ are calculated as $X^i = \mathrm{Re}(g_p(X, e_i))$.
 
+Bases are closely related to [atlases](@ref atlases_and_charts).
+
 The main types are:
+
 * [`DefaultOrthonormalBasis`](@ref), which is designed to work when no special properties of the tangent space basis are required.
    It is designed to make [`get_coordinates`](@ref) and [`get_vector`](@ref) fast.
 * [`DiagonalizingOrthonormalBasis`](@ref), which diagonalizes the curvature tensor and makes the curvature in the selected direction equal to 0.
@@ -183,9 +187,18 @@ The main functions are:
 * [`get_vector`](@ref) returns a vector for the specified coordinates.
 * [`get_vectors`](@ref) returns a vector of basis vectors. Calling it should be avoided for high-dimensional manifolds.
 
+Coordinates of a vector in a basis can be stored in an [`FVector`](@ref) to explicitly indicate which basis they are expressed in.
+It is useful to avoid potential ambiguities.
+
 ```@autodocs
 Modules = [ManifoldsBase,Manifolds]
 Pages = ["bases.jl"]
+Order = [:type, :function]
+```
+
+```@autodocs
+Modules = [ManifoldsBase,Manifolds]
+Pages = ["vector_spaces.jl"]
 Order = [:type, :function]
 ```
 
@@ -210,8 +223,8 @@ Order = [:type, :function]
 
 ## A Decorator for manifolds
 
-A decorator manifold extends the functionality of a [`Manifold`](@ref) in a semi-transparent way.
-It internally stores the [`Manifold`](@ref) it extends and by default for functions defined in the [`ManifoldsBase`](interface.md) it acts transparently in the sense that it passes all functions through to the base except those that it actually affects.
+A decorator manifold extends the functionality of a [`AbstractManifold`](@ref) in a semi-transparent way.
+It internally stores the [`AbstractManifold`](@ref) it extends and by default for functions defined in the [`ManifoldsBase`](interface.md) it acts transparently in the sense that it passes all functions through to the base except those that it actually affects.
 For example, because the [`ValidationManifold`](@ref) affects nearly all functions, it overwrites nearly all functions, except a few like [`manifold_dimension`](@ref).
 On the other hand, the [`MetricManifold`](@ref) only affects functions that involve metrics, especially [`exp`](@ref) and [`log`](@ref) but not the [`manifold_dimension`](@ref).
 Contrary to the previous decorator, the [`MetricManifold`](@ref) does not overwrite functions.
@@ -240,15 +253,15 @@ Order = [:macro, :type, :function]
 ## Abstract Power Manifold
 
 ```@autodocs
-Modules = [ ManifoldsBase]
-Pages = ["PowerManifold.jl"]
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["src/PowerManifold.jl"]
 Order = [:macro, :type, :function]
 ```
 
 ## ValidationManifold
 
 [`ValidationManifold`](@ref) is a simple decorator that “decorates” a manifold with tests that all involved arrays are correct. For example involved input and output paratemers are checked before and after running a function, repectively.
-This is done by calling [`is_manifold_point`](@ref) or [`is_tangent_vector`](@ref) whenever applicable.
+This is done by calling [`is_point`](@ref) or [`is_vector`](@ref) whenever applicable.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
@@ -278,7 +291,7 @@ and logarithmic maps as well as retractions and vector transports of the embeddi
 used for the embedded manifold as well.
 See [`SymmetricMatrices`](@ref) for an example.
 
-In both cases of course [`check_manifold_point`](@ref) and [`check_tangent_vector`](@ref) have to be implemented.
+In both cases of course [`check_point`](@ref) and [`check_vector`](@ref) have to be implemented.
 
 ### Further Embeddings
 

@@ -41,7 +41,7 @@ Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic 
 
 [^DouikHassibi2019]:
     > A. Douik, B. Hassibi:
-    > Manifold Optimization Over the Set of Doubly Stochastic Matrices: A Second-Order Geometry,
+    > AbstractManifold Optimization Over the Set of Doubly Stochastic Matrices: A Second-Order Geometry,
     > IEEE Transactions on Signal Processing 67(22), pp. 5761–5774, 2019.
     > doi: [10.1109/tsp.2019.2946024](http://doi.org/10.1109/tsp.2019.2946024),
     > arXiv: [1802.02628](https://arxiv.org/abs/1802.02628).
@@ -53,53 +53,38 @@ function MultinomialSymmetric(n::Int)
 end
 
 @doc raw"""
-    check_manifold_point(M::MultinomialSymmetric, p)
+    check_point(M::MultinomialSymmetric, p)
 
 Checks whether `p` is a valid point on the [`MultinomialSymmetric`](@ref)`(m,n)` `M`,
 i.e. is a symmetric matrix with positive entries whose rows sum to one.
 """
-function check_manifold_point(M::MultinomialSymmetric{n}, p; kwargs...) where {n}
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+function check_point(M::MultinomialSymmetric{n}, p; kwargs...) where {n}
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     # the embedding checks for positivity and unit sum columns, by symmetry we would get
     # the same for the rows, so checking symmetry is the only thing left, we can just use
     # the corresponding manifold for that
-    return check_manifold_point(SymmetricMatrices(n, ℝ), p)
+    return check_point(SymmetricMatrices(n, ℝ), p)
 end
 @doc raw"""
-    check_tangent_vector(M::MultinomialSymmetric p, X; check_base_point = true, kwargs...)
+    check_vector(M::MultinomialSymmetric p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialSymmetric`](@ref) `M`.
 This means, that `p` is valid, that `X` is of correct dimension, symmetric, and sums to zero
 along any row.
-
-The optional parameter `check_base_point` indicates, whether to call
-[`check_manifold_point`](@ref check_manifold_point(::MultinomialSymmetric, ::Any))  for `p`.
 """
-function check_tangent_vector(
-    M::MultinomialSymmetric{n},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {n}
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::MultinomialSymmetric{n}, p, X; kwargs...) where {n}
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
     # from the embedding we know that columns sum to zero, only symmety is left, i.e.
-    return check_tangent_vector(SymmetricMatrices(n, ℝ), p, X; check_base_point=false)
+    return check_vector(SymmetricMatrices(n, ℝ), p, X; kwargs...)
 end
 
 function decorated_manifold(::MultinomialSymmetric{N}) where {N}

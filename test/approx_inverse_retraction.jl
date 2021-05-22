@@ -37,7 +37,7 @@ include("utils.jl")
             retr_method = ExponentialRetraction()
             inv_retr_method = NLsolveInverseRetraction(retr_method)
             X = inverse_retract(M, p, q, inv_retr_method)
-            @test is_tangent_vector(M, p, X)
+            @test is_vector(M, p, X)
             @test X isa Vector{Float64}
             @test X ≈ q - p
         end
@@ -52,7 +52,7 @@ include("utils.jl")
             inv_retr_method =
                 NLsolveInverseRetraction(ProjectionRetraction(), X0; project_point=true)
             X = inverse_retract(M, p, q, inv_retr_method)
-            @test is_tangent_vector(M, p, X; atol=1e-9)
+            @test is_vector(M, p, X; atol=1e-9)
             @test X ≈ X_exp
             @test_throws OutOfInjectivityRadiusError inverse_retract(
                 M,
@@ -71,7 +71,7 @@ include("utils.jl")
             inv_retr_method =
                 NLsolveInverseRetraction(ExponentialRetraction(); project_point=true)
             X = inverse_retract(M, p, q, inv_retr_method)
-            @test is_tangent_vector(M, p, X; atol=1e-8)
+            @test is_vector(M, p, X; atol=1e-8)
             @test X ≈ X_exp
         end
     end

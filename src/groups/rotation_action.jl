@@ -1,6 +1,6 @@
 @doc raw"""
     RotationAction(
-        M::Manifold,
+        M::AbstractManifold,
         SOn::SpecialOrthogonal,
         AD::ActionDirection = LeftAction(),
     )
@@ -8,14 +8,14 @@
 Space of actions of the [`SpecialOrthogonal`](@ref) group $\mathrm{SO}(n)$ on a
 Euclidean-like manifold `M` of dimension `n`.
 """
-struct RotationAction{TM<:Manifold,TSO<:SpecialOrthogonal,TAD<:ActionDirection} <:
+struct RotationAction{TM<:AbstractManifold,TSO<:SpecialOrthogonal,TAD<:ActionDirection} <:
        AbstractGroupAction{TAD}
     manifold::TM
     SOn::TSO
 end
 
 function RotationAction(
-    M::Manifold,
+    M::AbstractManifold,
     SOn::SpecialOrthogonal,
     ::TAD=LeftAction(),
 ) where {TAD<:ActionDirection}
@@ -70,8 +70,8 @@ end
 inverse_apply_diff(A::RotationActionOnVector{N,F,RightAction}, a, p, X) where {N,F} = a * X
 
 function optimal_alignment(A::RotationActionOnVector{N,T,LeftAction}, p, q) where {N,T}
-    is_manifold_point(A.manifold, p, true)
-    is_manifold_point(A.manifold, q, true)
+    is_point(A.manifold, p, true)
+    is_point(A.manifold, q, true)
 
     Xmul = p * transpose(q)
     F = svd(Xmul)

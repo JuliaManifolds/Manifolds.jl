@@ -12,7 +12,7 @@ SUITE = BenchmarkGroup()
 Random.seed!(12334)
 
 function add_manifold(
-    M::Manifold,
+    M::AbstractManifold,
     pts,
     name;
     test_tangent_vector_broadcasting=true,
@@ -157,7 +157,7 @@ function add_manifold_benchmarks()
     add_manifold(
         m_prod,
         pts_prod_mpoints,
-        "ProductManifold with MPoint";
+        "ProductManifold with AbstractManifoldPoint";
         test_tangent_vector_broadcasting=false,
     )
 

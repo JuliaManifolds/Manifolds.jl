@@ -23,12 +23,12 @@ struct VertexManifold <: GraphManifoldType end
 @doc raw"""
     GraphManifold{G,𝔽,M,T} <: AbstractPowerManifold{𝔽,M,NestedPowerRepresentation}
 
-Build a manifold, that is a [`PowerManifold`](@ref) of the [`Manifold`](@ref) `M` either on
+Build a manifold, that is a [`PowerManifold`](@ref) of the [`AbstractManifold`](@ref) `M` either on
 the edges or vertices of a graph `G` depending on the [`GraphManifoldType`](@ref) `T`.
 
 # Fields
 * `G` is an `AbstractSimpleGraph`
-* `M` is a [`Manifold`](@ref)
+* `M` is a [`AbstractManifold`](@ref)
 """
 struct GraphManifold{G<:AbstractGraph,𝔽,TM,T<:GraphManifoldType} <:
        AbstractPowerManifold{𝔽,TM,NestedPowerRepresentation}
@@ -40,29 +40,31 @@ function GraphManifold(
     g::G,
     M::TM,
     ::VertexManifold,
-) where {G<:AbstractGraph,𝔽,TM<:Manifold{<:𝔽}}
+) where {G<:AbstractGraph,𝔽,TM<:AbstractManifold{<:𝔽}}
     return GraphManifold{G,𝔽,TM,VertexManifold}(g, M)
 end
 function GraphManifold(
     g::G,
     M::TM,
     ::EdgeManifold,
-) where {G<:AbstractGraph,𝔽,TM<:Manifold{<:𝔽}}
+) where {G<:AbstractGraph,𝔽,TM<:AbstractManifold{<:𝔽}}
     return GraphManifold{G,𝔽,TM,EdgeManifold}(g, M)
 end
 
-const EdgeGraphManifold{𝔽} = GraphManifold{<:AbstractGraph,𝔽,<:Manifold{𝔽},EdgeManifold}
-const VertexGraphManifold{𝔽} = GraphManifold{<:AbstractGraph,𝔽,<:Manifold{𝔽},VertexManifold}
+const EdgeGraphManifold{𝔽} =
+    GraphManifold{<:AbstractGraph,𝔽,<:AbstractManifold{𝔽},EdgeManifold}
+const VertexGraphManifold{𝔽} =
+    GraphManifold{<:AbstractGraph,𝔽,<:AbstractManifold{𝔽},VertexManifold}
 
 @doc raw"""
-    check_manifold_point(M::GraphManifold, p)
+    check_point(M::GraphManifold, p)
 
 Check whether `p` is a valid point on the [`GraphManifold`](@ref), i.e. its length equals the number of vertices
 (for [`VertexManifold`](@ref)s) or the number of edges (for [`EdgeManifold`](@ref)s) and that each element of `p`
-passes the [`check_manifold_point`](@ref) test for the base manifold `M.manifold`.
+passes the [`check_point`](@ref) test for the base manifold `M.manifold`.
 """
-check_manifold_point(::GraphManifold, ::Any...)
-function check_manifold_point(M::VertexGraphManifold, p; kwargs...)
+check_point(::GraphManifold, ::Any...)
+function check_point(M::VertexGraphManifold, p; kwargs...)
     if size(p) != (nv(M.graph),)
         return DomainError(
             length(p),
@@ -70,9 +72,9 @@ function check_manifold_point(M::VertexGraphManifold, p; kwargs...)
         )
     end
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), nv(M.graph))
-    return check_manifold_point(PM, p; kwargs...)
+    return check_point(PM, p; kwargs...)
 end
-function check_manifold_point(M::EdgeGraphManifold, p; kwargs...)
+function check_point(M::EdgeGraphManifold, p; kwargs...)
     if size(p) != (ne(M.graph),)
         return DomainError(
             length(p),
@@ -80,34 +82,21 @@ function check_manifold_point(M::EdgeGraphManifold, p; kwargs...)
         )
     end
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), ne(M.graph))
-    return check_manifold_point(PM, p; kwargs...)
+    return check_point(PM, p; kwargs...)
 end
 
 @doc raw"""
-    check_tangent_vector(M::GraphManifold, p, X; check_base_point = true, kwargs...)
+    check_vector(M::GraphManifold, p, X; kwargs...)
 
 Check whether `p` is a valid point on the [`GraphManifold`](@ref), and
 `X` it from its tangent space, i.e. its
 length equals the number of vertices (for [`VertexManifold`](@ref)s) or
 the number of edges (for [`EdgeManifold`](@ref)s) and that each element of `X`
 together with its corresponding entry of `p` passes the
-[`check_tangent_vector`](@ref) test for the base manifold `M.manifold`.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
+[`check_vector`](@ref) test for the base manifold `M.manifold`.
 """
-check_tangent_vector(::GraphManifold, ::Any...)
-function check_tangent_vector(
-    M::VertexGraphManifold,
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-)
-    if check_base_point && size(p) != (nv(M.graph),)
-        return DomainError(
-            length(p),
-            "The number of points in `x` ($(size(p)) does not match the number of nodes in the graph ($(nv(M.graph))).",
-        )
-    end
+check_vector(::GraphManifold, ::Any...)
+function check_vector(M::VertexGraphManifold, p, X; kwargs...)
     if size(X) != (nv(M.graph),)
         return DomainError(
             length(X),
@@ -115,15 +104,9 @@ function check_tangent_vector(
         )
     end
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), nv(M.graph))
-    return check_tangent_vector(PM, p, X; check_base_point=check_base_point, kwargs...)
+    return check_vector(PM, p, X; kwargs...)
 end
-function check_tangent_vector(M::EdgeGraphManifold, p, X; check_base_point=true, kwargs...)
-    if check_base_point && size(p) != (ne(M.graph),)
-        return DomainError(
-            length(p),
-            "The number of elements in `x` ($(size(p)) does not match the number of edges in the graph ($(ne(M.graph))).",
-        )
-    end
+function check_vector(M::EdgeGraphManifold, p, X; kwargs...)
     if size(X) != (ne(M.graph),)
         return DomainError(
             length(X),
@@ -131,7 +114,7 @@ function check_tangent_vector(M::EdgeGraphManifold, p, X; check_base_point=true,
         )
     end
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), ne(M.graph))
-    return check_tangent_vector(PM, p, X; check_base_point=check_base_point, kwargs...)
+    return check_vector(PM, p, X; kwargs...)
 end
 
 get_iterator(M::EdgeGraphManifold) = 1:ne(M.graph)
@@ -149,7 +132,7 @@ If the internal graph is a `SimpleWeightedGraph` the weighted sum of the
 tangent vectors is computed.
 """
 function incident_log(M::VertexGraphManifold, p)
-    v = zero_tangent_vector(M, p)
+    v = zero_vector(M, p)
     return incident_log!(M, v, p)
 end
 
@@ -170,7 +153,7 @@ function incident_log!(M::VertexGraphManifold, X, p)
     return X
 end
 function incident_log!(
-    M::GraphManifold{<:AbstractSimpleWeightedGraph,𝔽,<:Manifold{𝔽},VertexManifold},
+    M::GraphManifold{<:AbstractSimpleWeightedGraph,𝔽,<:AbstractManifold{𝔽},VertexManifold},
     X,
     p,
 ) where {𝔽}
@@ -228,7 +211,7 @@ function _show_graph_manifold(io::IO, M; man_desc="", pre="")
     sg = sprint(show, "text/plain", M.graph, context=io, sizehint=0)
     sg = replace(sg, '\n' => "\n$(pre)")
     println(io, pre, sg)
-    println(io, "Manifold$(man_desc):")
+    println(io, "AbstractManifold$(man_desc):")
     sm = sprint(show, "text/plain", M.manifold, context=io, sizehint=0)
     sm = replace(sm, '\n' => "\n$(pre)")
     print(io, pre, sm)

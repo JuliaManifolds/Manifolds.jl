@@ -15,18 +15,18 @@ include("utils.jl")
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test typeof(get_embedding(M)) === ArraySphere{Tuple{3,3},ℝ}
-        @test check_manifold_point(M, A) === nothing
-        @test_throws DomainError is_manifold_point(M, B, true)
-        @test_throws DomainError is_manifold_point(M, C, true)
-        @test_throws DomainError is_manifold_point(M, D, true)
-        @test_throws DomainError is_manifold_point(M, E, true)
-        @test check_tangent_vector(M, A, zeros(3, 3)) === nothing
-        @test_throws DomainError is_tangent_vector(M, A, B, true)
-        @test_throws DomainError is_tangent_vector(M, A, C, true)
-        @test_throws DomainError is_tangent_vector(M, A, D, true)
-        @test_throws DomainError is_tangent_vector(M, D, A, true)
-        @test_throws DomainError is_tangent_vector(M, A, E, true)
-        @test_throws DomainError is_tangent_vector(M, J, K, true)
+        @test check_point(M, A) === nothing
+        @test_throws DomainError is_point(M, B, true)
+        @test_throws DomainError is_point(M, C, true)
+        @test_throws DomainError is_point(M, D, true)
+        @test_throws DomainError is_point(M, E, true)
+        @test check_vector(M, A, zeros(3, 3)) === nothing
+        @test_throws DomainError is_vector(M, A, B, true)
+        @test_throws DomainError is_vector(M, A, C, true)
+        @test_throws DomainError is_vector(M, A, D, true)
+        @test_throws DomainError is_vector(M, D, A, true)
+        @test_throws DomainError is_vector(M, A, E, true)
+        @test_throws DomainError is_vector(M, J, K, true)
         @test manifold_dimension(M) == 5
         A2 = similar(A)
         @test A == project!(M, A2, A)

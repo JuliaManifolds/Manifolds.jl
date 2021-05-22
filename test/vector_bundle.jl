@@ -5,53 +5,6 @@ struct TestVectorSpaceType <: VectorSpaceType end
 @testset "Tangent bundle" begin
     M = Sphere(2)
 
-    @testset "FVector" begin
-        @test sprint(show, TangentSpace) == "TangentSpace"
-        @test sprint(show, CotangentSpace) == "CotangentSpace"
-        tvs = ([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
-        fv_tvs = map(v -> FVector(TangentSpace, v), tvs)
-        fv1 = fv_tvs[1]
-        tv1s = allocate(fv_tvs[1])
-        @test isa(tv1s, FVector)
-        @test size(tv1s) == (3,)
-        @test tv1s.type == TangentSpace
-        @test size(tv1s.data) == size(tvs[1])
-        @test number_eltype(tv1s) == number_eltype(tvs[1])
-        @test number_eltype(tv1s) == number_eltype(typeof(tv1s))
-        @test isa(fv1 + fv1, FVector)
-        @test (fv1 + fv1).type == TangentSpace
-        @test isa(fv1 - fv1, FVector)
-        @test (fv1 - fv1).type == TangentSpace
-        @test isa(-fv1, FVector)
-        @test (-fv1).type == TangentSpace
-        @test isa(2 * fv1, FVector)
-        @test (2 * fv1).type == TangentSpace
-        @test fv1[1] == tvs[1][1]
-
-        PM = ProductManifold(Sphere(2), Euclidean(2))
-        @test_throws ErrorException flat(
-            PM,
-            ProductRepr([0.0], [0.0]),
-            FVector(CotangentSpace, ProductRepr([0.0], [0.0])),
-        )
-        @test_throws ErrorException sharp(
-            PM,
-            ProductRepr([0.0], [0.0]),
-            FVector(TangentSpace, ProductRepr([0.0], [0.0])),
-        )
-
-        fv2 = FVector(TangentSpace, ProductRepr([1, 0, 0], [1 2]))
-        @test submanifold_component(fv2, 1) == [1, 0, 0]
-        @test submanifold_component(fv2, 2) == [1 2]
-        @test (@inferred submanifold_component(fv2, Val(1))) == [1, 0, 0]
-        @test (@inferred submanifold_component(fv2, Val(2))) == [1 2]
-        @test submanifold_component(PM, fv2, 1) == [1, 0, 0]
-        @test submanifold_component(PM, fv2, 2) == [1 2]
-        @test (@inferred submanifold_component(PM, fv2, Val(1))) == [1, 0, 0]
-        @test (@inferred submanifold_component(PM, fv2, Val(2))) == [1 2]
-        @test submanifold_components(PM, fv2) == ([1.0, 0.0, 0.0], [1.0 2.0])
-    end
-
     @testset "Nice access to vector bundle components" begin
         TB = TangentBundle(M)
         p = ProductRepr([1.0, 0.0, 0.0], [0.0, 2.0, 4.0])
@@ -198,7 +151,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test_throws ErrorException inner(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws ErrorException Manifolds.project!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws ErrorException zero_vector!(vbf, [1, 2, 3], [1, 2, 3])
-        @test_throws ErrorException vector_space_dimension(vbf)
+        @test_throws MethodError vector_space_dimension(vbf)
         a = fill(0.0, 6)
         @test_throws ErrorException get_coordinates!(
             TangentBundle(M),
@@ -216,7 +169,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         p2 = ProductRepr([-1.047, -1.047], [0.0, 0.0])
         X1 = log(N, p1, p2)
         @test isapprox(N, p2, exp(N, p1, X1))
-        @test is_tangent_vector(N, p2, vector_transport_to(N, p1, X1, p2))
+        @test is_vector(N, p2, vector_transport_to(N, p1, X1, p2))
 
         M2 = ProductManifold(Circle(ℝ), Euclidean(2))
         N2 = TangentBundle(M2)

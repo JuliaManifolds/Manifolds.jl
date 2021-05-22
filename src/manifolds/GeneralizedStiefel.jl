@@ -24,7 +24,7 @@ T_p\mathcal M = \{ X \in 𝔽^{n × k} : p^{\mathrm{H}}BX + X^{\mathrm{H}}Bp=0_n
 where $0_k$ is the $k × k$ zero matrix.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
-several functions like the [`zero_tangent_vector`](@ref) are inherited from the embedding.
+several functions like the [`zero_vector`](@ref) are inherited from the embedding.
 
 The manifold is named after
 [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
@@ -50,16 +50,15 @@ function GeneralizedStiefel(
 end
 
 @doc raw"""
-    check_manifold_point(M::GeneralizedStiefel, p; kwargs...)
+    check_point(M::GeneralizedStiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`GeneralizedStiefel`](@ref) `M`=$\operatorname{St}(n,k,B)$,
 i.e. that it has the right [`AbstractNumbers`](@ref) type and $x^{\mathrm{H}}Bx$
 is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
-function check_manifold_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+function check_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     c = p' * M.B * p
     if !isapprox(c, one(c); kwargs...)
@@ -72,7 +71,7 @@ function check_manifold_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) whe
 end
 
 @doc raw"""
-    check_tangent_vector(M::GeneralizedStiefel, p, X; kwargs...)
+    check_vector(M::GeneralizedStiefel, p, X; kwargs...)
 
 Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`](@ref)
 `M`=$\operatorname{St}(n,k,B)$, i.e. the [`AbstractNumbers`](@ref) fits,
@@ -80,24 +79,13 @@ Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`]
 it (approximately) holds that $p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0$, where
 `kwargs...` is passed to the `isapprox`.
 """
-function check_tangent_vector(
-    M::GeneralizedStiefel{n,k,𝔽},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {n,k,B,𝔽}
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::GeneralizedStiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,B,𝔽}
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv

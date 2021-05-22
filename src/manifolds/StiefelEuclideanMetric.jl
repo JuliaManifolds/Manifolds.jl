@@ -82,7 +82,7 @@ end
 
 function get_vector!(M::Stiefel{n,k,ℝ}, X, p, c, B::DefaultOrthonormalBasis{ℝ}) where {n,k}
     V = get_vectors(M, p, B)
-    zero_tangent_vector!(M, X, p)
+    zero_vector!(M, X, p)
     length(c) < length(V) && error(
         "Coordinate vector too short. Excpected $(length(V)), but only got $(length(c)) entries.",
     )

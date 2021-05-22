@@ -87,15 +87,15 @@ function allocation_promotion_function(::AbstractProjectiveSpace{ℂ}, f, args::
 end
 
 @doc raw"""
-    check_manifold_point(M::AbstractProjectiveSpace, p; kwargs...)
+    check_point(M::AbstractProjectiveSpace, p; kwargs...)
 
 Check whether `p` is a valid point on the [`AbstractProjectiveSpace`](@ref) `M`, i.e.
 that it has the same size as elements of the embedding and has unit Frobenius norm.
 The tolerance for the norm check can be set using the `kwargs...`.
 """
-function check_manifold_point(M::AbstractProjectiveSpace, p; kwargs...)
+function check_point(M::AbstractProjectiveSpace, p; kwargs...)
     mpv = invoke(
-        check_manifold_point,
+        check_point,
         Tuple{(typeof(get_embedding(M))),typeof(p)},
         get_embedding(M),
         p;
@@ -111,34 +111,21 @@ function check_manifold_point(M::AbstractProjectiveSpace, p; kwargs...)
     return nothing
 end
 
-@doc doc"""
-    check_tangent_vector(M::AbstractProjectiveSpace, p, X; check_base_point = true, kwargs... )
+@doc raw"""
+    check_vector(M::AbstractProjectiveSpace, p, X; kwargs... )
 
 Check whether `X` is a tangent vector in the tangent space of `p` on the
 [`AbstractProjectiveSpace`](@ref) `M`, i.e. that `X` has the same size as elements of the
 tangent space of the embedding and that the Frobenius inner product
 $⟨p, X⟩_{\mathrm{F}} = 0$.
-The optional parameter `check_base_point` indicates whether to call
-[`check_manifold_point`](@ref) for `p`.
 """
-function check_tangent_vector(
-    M::AbstractProjectiveSpace,
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-)
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::AbstractProjectiveSpace, p, X; kwargs...)
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
         get_embedding(M),
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -179,8 +166,6 @@ function exp!(M::AbstractProjectiveSpace, q, p, X)
     return q
 end
 
-flat!(::AbstractProjectiveSpace, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
-
 function get_basis(::ProjectiveSpace{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) where {n}
     return get_basis(Sphere{n,ℝ}(), p, B)
 end
@@ -207,7 +192,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ},
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {𝔽}
     n = div(manifold_dimension(M), real_dimension(𝔽))
     z = p[1]
@@ -242,7 +227,7 @@ function get_vector!(
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ},
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {𝔽}
     n = div(manifold_dimension(M), real_dimension(𝔽))
     z = p[1]
@@ -261,7 +246,7 @@ injectivity_radius(::AbstractProjectiveSpace, ::Any) = π / 2
 injectivity_radius(::AbstractProjectiveSpace, ::Any, ::ExponentialRetraction) = π / 2
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::AbstractProjectiveSpace,
             rm::AbstractRetractionMethod,
         )
@@ -369,7 +354,7 @@ end
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of points in vector `x`
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of points in vector `x`
 using [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::AbstractProjectiveSpace, ::Any...)

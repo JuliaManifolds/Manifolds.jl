@@ -1,5 +1,5 @@
 @doc raw"""
-    FixedRankMatrices{m,n,k,𝔽} <: Manifold{𝔽}
+    FixedRankMatrices{m,n,k,𝔽} <: AbstractManifold{𝔽}
 
 The manifold of $m × n$ real-valued or complex-valued matrices of fixed rank $k$, i.e.
 ````math
@@ -42,13 +42,13 @@ Generate the manifold of `m`-by-`n` (`field`-valued) matrices of rank `k`.
     > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
-struct FixedRankMatrices{M,N,K,𝔽} <: Manifold{𝔽} end
+struct FixedRankMatrices{M,N,K,𝔽} <: AbstractManifold{𝔽} end
 function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers=ℝ)
     return FixedRankMatrices{m,n,k,field}()
 end
 
 @doc raw"""
-    SVDMPoint <: MPoint
+    SVDMPoint <: AbstractManifoldPoint
 
 A point on a certain manifold, where the data is stored in a svd like fashion,
 i.e. in the form $USV^\mathrm{H}$, where this structure stores $U$, $S$ and
@@ -66,7 +66,8 @@ and accordingly shortened $U$ (columns) and $V^\mathrm{T}$ (rows).
 * `SVDMPoint(U,S,Vt,k)` for the svd factors to initialize the `SVDMPoint`,
   stores its svd factors shortened to the best rank $k$ approximation
 """
-struct SVDMPoint{TU<:AbstractMatrix,TS<:AbstractVector,TVt<:AbstractMatrix} <: MPoint
+struct SVDMPoint{TU<:AbstractMatrix,TS<:AbstractVector,TVt<:AbstractMatrix} <:
+       AbstractManifoldPoint
     U::TU
     S::TS
     Vt::TVt
@@ -167,7 +168,7 @@ end
 ####
 
 @doc raw"""
-    check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...)
+    check_point(M::FixedRankMatrices{m,n,k}, p; kwargs...)
 
 Check whether the matrix or [`SVDMPoint`](@ref) `x` ids a valid point on the
 [`FixedRankMatrices`](@ref)`{m,n,k,𝔽}` `M`, i.e. is an `m`-by`n` matrix of
@@ -175,7 +176,7 @@ rank `k`. For the [`SVDMPoint`](@ref) the internal representation also has to ha
 shape, i.e. `p.U` and `p.Vt` have to be unitary. The keyword arguments are passed to the
 `rank` function that verifies the rank of `p`.
 """
-function check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {m,n,k}
+function check_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {m,n,k}
     r = rank(p; kwargs...)
     s = "The point $(p) does not lie on $(M), "
     if size(p) != (m, n)
@@ -186,11 +187,7 @@ function check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {
     end
     return nothing
 end
-function check_manifold_point(
-    M::FixedRankMatrices{m,n,k},
-    x::SVDMPoint;
-    kwargs...,
-) where {m,n,k}
+function check_point(M::FixedRankMatrices{m,n,k}, x::SVDMPoint; kwargs...) where {m,n,k}
     s = "The point $(x) does not lie on $(M), "
     if (size(x.U) != (m, k)) || (length(x.S) != k) || (size(x.Vt) != (k, n))
         return DomainError(
@@ -217,24 +214,18 @@ function check_manifold_point(
 end
 
 @doc raw"""
-    check_tangent_vector(M:FixedRankMatrices{m,n,k}, p, X; check_base_point = true, kwargs...)
+    check_vector(M:FixedRankMatrices{m,n,k}, p, X; kwargs...)
 
 Check whether the tangent [`UMVTVector`](@ref) `X` is from the tangent space of the [`SVDMPoint`](@ref) `p` on the
 [`FixedRankMatrices`](@ref) `M`, i.e. that `v.U` and `v.Vt` are (columnwise) orthogonal to `x.U` and `x.Vt`,
 respectively, and its dimensions are consistent with `p` and `X.M`, i.e. correspond to `m`-by-`n` matrices of rank `k`.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
-function check_tangent_vector(
+function check_vector(
     M::FixedRankMatrices{m,n,k},
     p::SVDMPoint,
     X::UMVTVector;
-    check_base_point=true,
     kwargs...,
 ) where {m,n,k}
-    if check_base_point
-        c = check_manifold_point(M, p; kwargs...)
-        c === nothing || return c
-    end
     if (size(X.U) != (m, k)) || (size(X.Vt) != (k, n)) || (size(X.M) != (k, k))
         return DomainError(
             cat(size(X.U), size(X.M), size(X.Vt), dims=1),
@@ -440,13 +431,13 @@ function Base.copyto!(X::UMVTVector, Y::UMVTVector)
 end
 
 @doc raw"""
-    zero_tangent_vector(M::FixedRankMatrices, p::SVDMPoint)
+    zero_vector(M::FixedRankMatrices, p::SVDMPoint)
 
 Return a [`UMVTVector`](@ref) representing the zero tangent vector in the tangent space of
 `p` on the [`FixedRankMatrices`](@ref) `M`, for example all three elements of the resulting
 structure are zero matrices.
 """
-function zero_tangent_vector(::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,n,k}
+function zero_vector(::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,n,k}
     v = UMVTVector(
         zeros(eltype(p.U), m, k),
         zeros(eltype(p.S), k, k),
@@ -455,11 +446,7 @@ function zero_tangent_vector(::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,
     return v
 end
 
-function zero_tangent_vector!(
-    ::FixedRankMatrices{m,n,k},
-    X::UMVTVector,
-    p::SVDMPoint,
-) where {m,n,k}
+function zero_vector!(::FixedRankMatrices{m,n,k}, X::UMVTVector, p::SVDMPoint) where {m,n,k}
     X.U .= zeros(eltype(X.U), m, k)
     X.M .= zeros(eltype(X.M), k, k)
     X.Vt .= zeros(eltype(X.Vt), k, n)

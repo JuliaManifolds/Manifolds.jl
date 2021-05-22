@@ -36,7 +36,7 @@ are equivalent to $𝕊^3$, though with different default representations.
 
 This manifold is modeled as a special case of the more general case, i.e. as an embedded
 manifold to the [`Euclidean`](@ref), and several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product
-and the [`zero_tangent_vector`](@ref zero_tangent_vector(::Euclidean, ::Any...)) are inherited from the embedding.
+and the [`zero_vector`](@ref zero_vector(::Euclidean, ::Any...)) are inherited from the embedding.
 
 # Constructor
 
@@ -76,7 +76,7 @@ embedding $𝔽^{n_1, n_2, …, n_i}$.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
-[`zero_tangent_vector`](@ref zero_tangent_vector(::Euclidean, ::Any...)) are inherited from the embedding.
+[`zero_vector`](@ref zero_vector(::Euclidean, ::Any...)) are inherited from the embedding.
 
 # Constructor
 
@@ -90,15 +90,15 @@ function ArraySphere(n::Vararg{Int,I}; field::AbstractNumbers=ℝ) where {I}
 end
 
 """
-    check_manifold_point(M::AbstractSphere, p; kwargs...)
+    check_point(M::AbstractSphere, p; kwargs...)
 
 Check whether `p` is a valid point on the [`AbstractSphere`](@ref) `M`, i.e. is a point in
 the embedding of unit length.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_manifold_point(M::AbstractSphere, p; kwargs...)
+function check_point(M::AbstractSphere, p; kwargs...)
     mpv = invoke(
-        check_manifold_point,
+        check_point,
         Tuple{(typeof(get_embedding(M))),typeof(p)},
         get_embedding(M),
         p;
@@ -115,27 +115,20 @@ function check_manifold_point(M::AbstractSphere, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::AbstractSphere, p, X; check_base_point = true, kwargs... )
+    check_vector(M::AbstractSphere, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`AbstractSphere`](@ref) `M`, i.e.
-after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
+after [`check_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
 and orthogonal to `p`.
-The optional parameter `check_base_point` indicates, whether to call
-[`check_manifold_point`](@ref)  for `p` or not.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::AbstractSphere, p, X; check_base_point=true, kwargs...)
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::AbstractSphere, p, X; kwargs...)
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
         get_embedding(M),
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -186,8 +179,6 @@ function exp!(M::AbstractSphere, q, p, X)
     return q
 end
 
-flat!(M::AbstractSphere, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
-
 function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) where {n}
     A = zeros(n + 1, n + 1)
     A[1, :] = transpose(p)
@@ -218,7 +209,13 @@ denotes the Frobenius inner product, the formula for $Y$ is
 """
 get_coordinates(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates!(M::AbstractSphere{ℝ}, Y, p, X, ::DefaultOrthonormalBasis{ℝ})
+function get_coordinates!(
+    M::AbstractSphere{ℝ},
+    Y,
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+)
     n = manifold_dimension(M)
     p1 = p[1]
     cosθ = abs(p1)
@@ -245,7 +242,13 @@ Y = X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\rangle
 """
 get_vector(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_vector!(M::AbstractSphere{ℝ}, Y, p, X, ::DefaultOrthonormalBasis{ℝ})
+function get_vector!(
+    M::AbstractSphere{ℝ},
+    Y,
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+)
     n = manifold_dimension(M)
     p1 = p[1]
     cosθ = abs(p1)
@@ -276,7 +279,7 @@ injectivity_radius(::AbstractSphere, ::Any, ::ExponentialRetraction) = π
 injectivity_radius(::AbstractSphere, ::Any, ::ProjectionRetraction) = π / 2
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::AbstractSphere,
             rm::AbstractRetractionMethod,
         )
@@ -351,7 +354,7 @@ manifold_dimension(M::AbstractSphere) = manifold_dimension(get_embedding(M)) - 1
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::AbstractSphere, ::Any...)
@@ -460,4 +463,104 @@ function vector_transport_to!(::AbstractSphere, Y, p, X, q, ::ParallelTransport)
     factor = 2 * real(dot(X, q)) / mnorm2
     Y .= X .- m .* factor
     return Y
+end
+
+"""
+    StereographicAtlas()
+
+The stereographic atlas of ``S^n`` with two charts: one with the singular
+point (-1, 0, ..., 0) (called `:north`) and one with the singular
+point (1, 0, ..., 0) (called `:south`).
+"""
+struct StereographicAtlas <: AbstractAtlas{ℝ} end
+
+function get_chart_index(::Sphere{n,ℝ}, ::StereographicAtlas, p) where {n}
+    if p[1] < 0
+        return :south
+    else
+        return :north
+    end
+end
+
+function get_point_coordinates!(
+    ::Sphere{n,ℝ},
+    x,
+    ::StereographicAtlas,
+    i::Symbol,
+    p,
+) where {n}
+    if i === :north
+        return x .= p[2:end] ./ (1 + p[1])
+    else
+        return x .= p[2:end] ./ (1 - p[1])
+    end
+end
+
+function get_point!(::Sphere{n,ℝ}, p, ::StereographicAtlas, i::Symbol, x) where {n}
+    xnorm2 = dot(x, x)
+    if i === :north
+        p[1] = (1 - xnorm2) / (xnorm2 + 1)
+    else
+        p[1] = (xnorm2 - 1) / (xnorm2 + 1)
+    end
+    p[2:end] .= 2 * x / (xnorm2 + 1)
+    return p
+end
+
+function get_coordinates!(
+    ::Sphere{n,ℝ},
+    Y,
+    p,
+    X,
+    B::InducedBasis{ℝ,TangentSpaceType,<:StereographicAtlas},
+) where {n}
+    if B.i === :north
+        for i in 1:n
+            Y[i] = X[i + 1] / (1 + p[1]) - X[1] * p[i + 1] / (1 + p[1])^2
+        end
+    else
+        for i in 1:n
+            Y[i] = X[i + 1] / (-1 + p[1]) - X[1] * p[i + 1] / (-1 + p[1])^2
+        end
+    end
+    return Y
+end
+
+function get_vector!(
+    M::Sphere{n,ℝ},
+    Y,
+    p,
+    X,
+    B::InducedBasis{ℝ,TangentSpaceType,<:StereographicAtlas},
+) where {n}
+    a = get_point_coordinates(M, B.A, B.i, p)
+    mult = inv(1 + dot(a, a))^2
+
+    Y[1] = 0
+    for j in 1:n
+        Y[1] -= 4 * a[j] * mult * X[j]
+    end
+    for i in 2:(n + 1)
+        Y[i] = 0
+        for j in 1:n
+            if i == j + 1
+                Y[i] += 2 * (1 + dot(a, a) - 2 * a[i - 1]^2) * mult * X[j]
+            else
+                Y[i] -= 4 * a[i - 1] * a[j] * mult * X[j]
+            end
+        end
+        if B.i === :south
+            Y[i] *= -1
+        end
+    end
+    return Y
+end
+
+function local_metric(
+    M::Sphere{n,ℝ},
+    p,
+    B::InducedBasis{ℝ,TangentSpaceType,StereographicAtlas,Symbol},
+) where {n}
+    a = get_point_coordinates(M, B.A, B.i, p)
+    return (4 / (1 + dot(a, a))^2) * I
 end

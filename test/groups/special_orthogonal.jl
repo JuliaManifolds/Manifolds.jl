@@ -54,7 +54,7 @@ include("group_utils.jl")
         @test (@inferred Manifolds.decorator_group_dispatch(DM)) === Val(true)
         @test Manifolds.is_group_decorator(DM)
         @test base_group(DM) === G
-        @test_throws DomainError is_manifold_point(
+        @test_throws DomainError is_point(
             DM,
             make_identity(TranslationGroup(3), [1, 2, 3]),
             true,
@@ -89,6 +89,7 @@ include("group_utils.jl")
             exp_log_atol_multiplier=20,
             retraction_atol_multiplier=12,
             is_tangent_atol_multiplier=1.2,
+            test_atlases=(Manifolds.RetractionAtlas(),),
         )
 
         @test injectivity_radius(G) == injectivity_radius(M)

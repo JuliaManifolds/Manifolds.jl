@@ -1,5 +1,5 @@
 
-function test_forwarddiff(M::Manifold, pts, tv)
+function test_forwarddiff(M::AbstractManifold, pts, tv)
     return for (p, X) in zip(pts, tv)
         exp_f(t) = distance(M, p, exp(M, p, t[1] * X))
         d12 = norm(M, p, X)

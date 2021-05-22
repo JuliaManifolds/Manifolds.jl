@@ -160,37 +160,37 @@ include("utils.jl")
             @test x ≈ exp(SOn, pts[1], v2)
         end
     end
-    @testset "Test Manifold Point and Tangent Vector checks" begin
+    @testset "Test AbstractManifold Point and Tangent Vector checks" begin
         M = Manifolds.Rotations(2)
         for x in [1, [2.0 0.0; 0.0 1.0], [1.0 0.5; 0.0 1.0]]
-            @test_throws DomainError is_manifold_point(M, x, true)
-            @test !is_manifold_point(M, x)
+            @test_throws DomainError is_point(M, x, true)
+            @test !is_point(M, x)
         end
         x = one(zeros(2, 2))
-        @test is_manifold_point(M, x)
-        @test is_manifold_point(M, x, true)
+        @test is_point(M, x)
+        @test is_point(M, x, true)
         for v in [1, [0.0 1.0; 0.0 0.0]]
-            @test_throws DomainError is_tangent_vector(M, x, v, true)
-            @test !is_tangent_vector(M, x, v)
+            @test_throws DomainError is_vector(M, x, v, true)
+            @test !is_vector(M, x, v)
         end
         v = [0.0 1.0; -1.0 0.0]
-        @test is_tangent_vector(M, x, v)
-        @test is_tangent_vector(M, x, v, true)
+        @test is_vector(M, x, v)
+        @test is_vector(M, x, v, true)
     end
     @testset "Project point" begin
         M = Manifolds.Rotations(2)
         x = Matrix{Float64}(I, 2, 2)
         x1 = project(M, x)
-        @test is_manifold_point(M, x1, true)
+        @test is_point(M, x1, true)
 
         M = Manifolds.Rotations(3)
         x = collect(reshape(1.0:9.0, (3, 3)))
         x2 = project(M, x)
-        @test is_manifold_point(M, x2, true)
+        @test is_point(M, x2, true)
 
         rng = MersenneTwister(44)
         x3 = project(M, randn(rng, 3, 3))
-        @test is_manifold_point(M, x3, true)
+        @test is_point(M, x3, true)
     end
     @testset "Edge cases of Rotations" begin
         @test_throws OutOfInjectivityRadiusError inverse_retract(

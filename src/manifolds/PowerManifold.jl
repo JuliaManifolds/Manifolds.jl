@@ -12,15 +12,15 @@ direction.
 struct ArrayPowerRepresentation <: AbstractPowerRepresentation end
 
 @doc raw"""
-    PowerMetric <: Metric
+    PowerMetric <: AbstractMetric
 
-Represent the [`Metric`](@ref) on an [`AbstractPowerManifold`](@ref), i.e. the inner
+Represent the [`AbstractMetric`](@ref) on an [`AbstractPowerManifold`](@ref), i.e. the inner
 product on the tangent space is the sum of the inner product of each elements
 tangent space of the power manifold.
 """
-struct PowerMetric <: Metric end
+struct PowerMetric <: AbstractMetric end
 
-function PowerManifold(M::Manifold{𝔽}, size::Integer...) where {𝔽}
+function PowerManifold(M::AbstractManifold{𝔽}, size::Integer...) where {𝔽}
     return PowerManifold{𝔽,typeof(M),Tuple{size...},ArrayPowerRepresentation}(M)
 end
 
@@ -55,35 +55,14 @@ struct PowerFVectorDistribution{
 end
 
 const PowerManifoldMultidimensional =
-    AbstractPowerManifold{𝔽,<:Manifold{𝔽},ArrayPowerRepresentation} where {𝔽}
+    AbstractPowerManifold{𝔽,<:AbstractManifold{𝔽},ArrayPowerRepresentation} where {𝔽}
 
-Base.:^(M::Manifold, n) = PowerManifold(M, n...)
-
-function allocate_result(M::PowerManifoldNested, f::typeof(flat), w::TFVector, x)
-    alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
-    return FVector(CotangentSpace, alloc)
-end
-function allocate_result(M::PowerManifoldNested, f::typeof(sharp), w::CoTFVector, x)
-    alloc = [allocate(_access_nested(w.data, i)) for i in get_iterator(M)]
-    return FVector(TangentSpace, alloc)
-end
+Base.:^(M::AbstractManifold, n) = PowerManifold(M, n...)
 
 default_metric_dispatch(::AbstractPowerManifold, ::PowerMetric) = Val(true)
 
-function det_local_metric(
-    M::MetricManifold{PowerMetric,𝔽,<:AbstractPowerManifold{𝔽}},
-    p::AbstractArray,
-) where {𝔽}
-    result = one(number_eltype(p))
-    rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        result *= det_local_metric(M.manifold, _read(M, rep_size, p, i))
-    end
-    return result
-end
-
 @doc raw"""
-    flat(M::AbstractPowerManifold, p, X::FVector{TangentSpaceType})
+    flat(M::AbstractPowerManifold, p, X)
 
 use the musical isomorphism to transform the tangent vector `X` from the tangent space at
 `p` on an [`AbstractPowerManifold`](@ref) `M` to a cotangent vector.
@@ -91,14 +70,15 @@ This can be done elementwise for each entry of `X` (and `p`).
 """
 flat(::AbstractPowerManifold, ::Any...)
 
-function flat!(M::AbstractPowerManifold, ξ::CoTFVector, p, X::TFVector)
+function flat!(M::AbstractPowerManifold, ξ::RieszRepresenterCotangentVector, p, X)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
+        p_i = _read(M, rep_size, p, i)
         flat!(
             M.manifold,
-            FVector(CotangentSpace, _write(M, rep_size, ξ.data, i)),
-            _read(M, rep_size, p, i),
-            FVector(TangentSpace, _read(M, rep_size, X.data, i)),
+            RieszRepresenterCotangentVector(M.manifold, p_i, _write(M, rep_size, ξ.X, i)),
+            p_i,
+            _read(M, rep_size, X, i),
         )
     end
     return ξ
@@ -186,12 +166,12 @@ Base.@propagate_inbounds @inline function _read(
     return x[i...]
 end
 
-function representation_size(M::PowerManifold{𝔽,<:Manifold,TSize}) where {𝔽,TSize}
+function representation_size(M::PowerManifold{𝔽,<:AbstractManifold,TSize}) where {𝔽,TSize}
     return (representation_size(M.manifold)..., size_to_tuple(TSize)...)
 end
 
 @doc raw"""
-    sharp(M::AbstractPowerManifold, p, ξ::FVector{CotangentSpaceType})
+    sharp(M::AbstractPowerManifold, p, ξ::RieszRepresenterCotangentVector)
 
 Use the musical isomorphism to transform the cotangent vector `ξ` from the tangent space at
 `p` on an [`AbstractPowerManifold`](@ref) `M` to a tangent vector.
@@ -199,14 +179,15 @@ This can be done elementwise for every entry of `ξ` (and `p`).
 """
 sharp(::AbstractPowerManifold, ::Any...)
 
-function sharp!(M::AbstractPowerManifold, X::TFVector, p, ξ::CoTFVector)
+function sharp!(M::AbstractPowerManifold, X, p, ξ::RieszRepresenterCotangentVector)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
+        p_i = _read(M, rep_size, p, i)
         sharp!(
             M.manifold,
-            FVector(TangentSpace, _write(M, rep_size, X.data, i)),
-            _read(M, rep_size, p, i),
-            FVector(CotangentSpace, _read(M, rep_size, ξ.data, i)),
+            _write(M, rep_size, X, i),
+            p_i,
+            RieszRepresenterCotangentVector(M.manifold, p_i, _read(M, rep_size, ξ.X, i)),
         )
     end
     return X

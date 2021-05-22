@@ -19,24 +19,24 @@ include("utils.jl")
         np1 = [r1, nr]
         np2 = [nr, nr]
         np3 = [r1, r2, r3]
-        @test !is_manifold_point(M, r1)
-        @test_throws DomainError is_manifold_point(M, r1, true)
-        @test_throws DomainError is_manifold_point(M, np3, true)
-        @test is_manifold_point(M, p1)
-        @test_throws ComponentManifoldError is_manifold_point(M, np1, true)
-        @test_throws CompositeManifoldError is_manifold_point(M, np2, true)
-        @test !is_tangent_vector(M, p1, 0.0)
-        @test_throws DomainError is_tangent_vector(
+        @test !is_point(M, r1)
+        @test_throws DomainError is_point(M, r1, true)
+        @test_throws DomainError is_point(M, np3, true)
+        @test is_point(M, p1)
+        @test_throws ComponentManifoldError is_point(M, np1, true)
+        @test_throws CompositeManifoldError is_point(M, np2, true)
+        @test !is_vector(M, p1, 0.0)
+        @test_throws DomainError is_vector(
             M,
             p1,
             [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0],
             true,
         )
-        @test !is_tangent_vector(M, np1, [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0])
-        @test !is_tangent_vector(M, p1, p2)
+        @test !is_vector(M, np1, [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0])
+        @test !is_vector(M, p1, p2)
         # projection test
-        @test is_tangent_vector(M, p1, project(M, p1, log(M, p1, p2)))
-        @test is_tangent_vector(M, p1, project(M, p1, log(M, p2, p1)))
+        @test is_vector(M, p1, project(M, p1, log(M, p1, p2)))
+        @test is_vector(M, p1, project(M, p1, log(M, p2, p1)))
     end
     @testset "Signed Essential" begin
         test_manifold(

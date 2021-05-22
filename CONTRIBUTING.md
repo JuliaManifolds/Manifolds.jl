@@ -38,28 +38,28 @@ Even providing a single new method is a good contribution.
 
 A main contribution you can provide is another manifold that is not yet included in the
 package.
-A manifold is a concrete type of [`Manifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.Manifold) from [`ManifoldsBase.jl`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html).
+A manifold is a concrete type of [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) from [`ManifoldsBase.jl`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html).
 This package also provides the main set of functions a manifold can/should implement.
 Don't worry if you can only implement some of the functions.
 If the application you have in mind only requires a subset of these functions, implement those.
 The [`ManifoldsBase.jl`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html) interface provides concrete error messages for the remaining unimplemented functions.
 
 One important detail is that the interface usually provides a mutating as well as a non-mutating variant
-See for example [exp!](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.exp!-Tuple{Manifold,Any,Any,Any}) and [exp](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#Base.exp-Tuple{Manifold,Any,Any}).
+See for example [exp!](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.exp!-Tuple{AbstractManifold,Any,Any,Any}) and [exp](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#Base.exp-Tuple{AbstractManifold,Any,Any}).
 The non-mutating one (e.g. `exp`) always falls back to use the mutating one, so in most cases it should
 suffice to implement the mutating one (e.g. `exp!`).
 
-Note that since the first argument is _always_ the [`Manifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.Manifold), the mutated argument is always the second one in the signature.
-In the example we have `exp(M, x, v)` for the exponential map and `exp!(M, y, v, x)` for the mutating one, that stores the result in `y`.
+Note that since the first argument is _always_ the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold), the mutated argument is always the second one in the signature.
+In the example we have `exp(M, p, X)` for the exponential map and `exp!(M, q, X, p)` for the mutating one, which stores the result in `q`.
 
 On the other hand, the user will most likely look for the documentation of the non-mutating version, so we recommend adding the docstring for the non-mutating one, where all different signatures should be collected in one string when reasonable.
 This can best be achieved by adding a docstring to the method with a general signature with the first argument being your manifold:
 
 ````julia
-struct MyManifold <: Manifold end
+struct MyManifold <: AbstractManifold end
 
 @doc raw"""
-    exp(M::MyManifold, x, v)
+    exp(M::MyManifold, p, X)
 
 Describe the function.
 """
@@ -73,7 +73,7 @@ We run [`JuliaFormatter.jl`](https://github.com/domluna/JuliaFormatter.jl) on th
 
 We also follow a few internal conventions:
 
-- It is preferred that the `Manifold`'s struct contain a reference to the general theory.
+- It is preferred that the `AbstractManifold`'s struct contain a reference to the general theory.
 - Any implemented function should be accompanied by its mathematical formulae if a closed form exists.
 - Within the source code of one manifold, the type of the manifold should be the first element of the file, and an alphabetical order of the functions is preferable.
 - The above implies that the mutating variant of a function follows the non-mutating variant.

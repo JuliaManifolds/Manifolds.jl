@@ -33,7 +33,7 @@ function inverse_retract!(M::Manifold, X, p, q, method::NLsolveInverseRetraction
 end
 
 function _inverse_retract_nlsolve(
-    M::Manifold,
+    M::AbstractManifold,
     p,
     q,
     retraction,

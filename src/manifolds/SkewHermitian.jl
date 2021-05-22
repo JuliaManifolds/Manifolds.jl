@@ -1,7 +1,7 @@
 @doc raw"""
     SkewHermitianMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
 
-The [`Manifold`](@ref) $ \operatorname{SkewHerm}(n)$ consisting of the real- or
+The [`AbstractManifold`](@ref) $ \operatorname{SkewHerm}(n)$ consisting of the real- or
 complex-valued skew-hermitian matrices of size ``n × n``, i.e. the set
 
 ````math
@@ -53,7 +53,7 @@ function allocation_promotion_function(
 end
 
 @doc raw"""
-    check_manifold_point(M::SkewHermitianMatrices{n,𝔽}, p; kwargs...)
+    check_point(M::SkewHermitianMatrices{n,𝔽}, p; kwargs...)
 
 Check whether `p` is a valid manifold point on the [`SkewHermitianMatrices`](@ref) `M`, i.e.
 whether `p` is a skew-hermitian matrix of size `(n,n)` with values from the corresponding
@@ -61,8 +61,8 @@ whether `p` is a skew-hermitian matrix of size `(n,n)` with values from the corr
 
 The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
 """
-function check_manifold_point(M::SkewHermitianMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv = check_manifold_point(decorated_manifold(M), p; kwargs...)
+function check_point(M::SkewHermitianMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
+    mpv = check_point(decorated_manifold(M), p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(p, -p'; kwargs...)
         return DomainError(
@@ -74,27 +74,15 @@ function check_manifold_point(M::SkewHermitianMatrices{n,𝔽}, p; kwargs...) wh
 end
 
 """
-    check_tangent_vector(M::SkewHermitianMatrices{n}, p, X; check_base_point = true, kwargs... )
+    check_vector(M::SkewHermitianMatrices{n}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SkewHermitianMatrices`](@ref) `M`, i.e. `X` must be a skew-hermitian matrix of size `(n,n)`
 and its values have to be from the correct [`AbstractNumbers`](@ref).
-The optional parameter `check_base_point` indicates, whether to call
- [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the skew-symmetry of `p` and `X` can be set using `kwargs...`.
 """
-function check_tangent_vector(
-    M::SkewHermitianMatrices,
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-)
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
-    return check_manifold_point(M, X; kwargs...)  # manifold is its own tangent space
+function check_vector(M::SkewHermitianMatrices, p, X; kwargs...)
+    return check_point(M, X; kwargs...)  # manifold is its own tangent space
 end
 
 decorated_manifold(M::SkewHermitianMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
@@ -110,7 +98,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ},
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -128,7 +116,7 @@ function get_coordinates!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℂ},
+    ::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -153,7 +141,7 @@ function get_vector!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ},
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
@@ -174,7 +162,7 @@ function get_vector!(
     Y,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℂ},
+    ::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)

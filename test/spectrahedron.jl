@@ -8,14 +8,14 @@ include("utils.jl")
     @test representation_size(M) == (4, 2)
     q = [1.0 0.0; 0.0 1.0; 1.0 1.0; -1.0 1.0]
     q = q / norm(q)
-    @test is_manifold_point(M, q, true)
+    @test is_point(M, q, true)
     @test base_manifold(M) === M
     qN = [2.0 0.0; 0.0 1.0; 1/sqrt(2) -1/sqrt(2); 1/sqrt(2) 1/sqrt(2)]
-    @test_throws DomainError is_manifold_point(M, qN, true)
+    @test_throws DomainError is_point(M, qN, true)
     Y = [0.0 1.0; 1.0 0.0; 0.0 0.0; 0.0 0.0]
-    @test is_tangent_vector(M, q, Y, true; check_base_point=false)
+    @test is_vector(M, q, Y, true)
     YN = [0.1 1.0; 1.0 0.1; 0.0 0.0; 0.0 0.0]
-    @test_throws DomainError is_tangent_vector(M, q, YN, true; check_base_point=false)
+    @test_throws DomainError is_vector(M, q, YN, true)
     qE = similar(q)
     embed!(M, qE, q)
     qE2 = embed(M, q)
@@ -25,7 +25,7 @@ include("utils.jl")
     q2 = q2 ./ norm(q2)
     q3 = [12.0/13.0 5.0/13.0; 1.0 0.0; -12.0/13.0 5.0/13.0; 0.0 1.0]
     q3 = q3 ./ norm(q3)
-    @test is_tangent_vector(
+    @test is_vector(
         M,
         q2,
         vector_transport_to(M, q, Y, q2, ProjectionTransport());

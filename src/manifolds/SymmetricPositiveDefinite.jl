@@ -21,15 +21,14 @@ struct SymmetricPositiveDefinite{N} <: AbstractEmbeddedManifold{ℝ,DefaultEmbed
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
 
 @doc raw"""
-    check_manifold_point(M::SymmetricPositiveDefinite, p; kwargs...)
+    check_point(M::SymmetricPositiveDefinite, p; kwargs...)
 
 checks, whether `p` is a valid point on the [`SymmetricPositiveDefinite`](@ref) `M`, i.e. is a matrix
 of size `(N,N)`, symmetric and positive definite.
 The tolerance for the second to last test can be set using the `kwargs...`.
 """
-function check_manifold_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+function check_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
         return DomainError(
@@ -47,33 +46,21 @@ function check_manifold_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) whe
 end
 
 """
-    check_tangent_vector(M::SymmetricPositiveDefinite, p, X; check_base_point = true, kwargs... )
+    check_vector(M::SymmetricPositiveDefinite, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`SymmetricPositiveDefinite`](@ref) `M`,
-i.e. atfer [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
+i.e. atfer [`check_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
 and a symmetric matrix, i.e. this stores tangent vetors as elements of the corresponding
 Lie group.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(
-    M::SymmetricPositiveDefinite{N},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {N}
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::SymmetricPositiveDefinite{N}, p, X; kwargs...) where {N}
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -105,7 +92,7 @@ injectivity_radius(::SymmetricPositiveDefinite, ::Any) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, ::Any, ::ExponentialRetraction) = Inf
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::SymmetricPositiveDefinite,
             rm::AbstractRetractionMethod,
         )
@@ -134,7 +121,7 @@ end
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
 [`GeodesicInterpolation`](@ref).
 """
 mean(::SymmetricPositiveDefinite, ::Any)
@@ -163,11 +150,11 @@ function Base.show(io::IO, ::SymmetricPositiveDefinite{N}) where {N}
 end
 
 @doc raw"""
-    zero_tangent_vector(M::SymmetricPositiveDefinite,x)
+    zero_vector(M::SymmetricPositiveDefinite,x)
 
 returns the zero tangent vector in the tangent space of the symmetric positive
 definite matrix `x` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
 """
-zero_tangent_vector(::SymmetricPositiveDefinite, ::Any)
+zero_vector(::SymmetricPositiveDefinite, ::Any)
 
-zero_tangent_vector!(::SymmetricPositiveDefinite, v, ::Any) = fill!(v, 0)
+zero_vector!(::SymmetricPositiveDefinite{N}, v, ::Any) where {N} = fill!(v, 0)

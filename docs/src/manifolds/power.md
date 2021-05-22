@@ -1,6 +1,6 @@
 # Power manifold
 
-A power manifold is based on a [`Manifold`](@ref) $\mathcal M$ to build a $\mathcal M^{n_1 \times n_2 \times \cdots \times n_m}$.
+A power manifold is based on a [`AbstractManifold`](@ref) $\mathcal M$ to build a $\mathcal M^{n_1 \times n_2 \times \cdots \times n_m}$.
 In the case where $m=1$ we can represent a manifold-valued vector of data of length $n_1$, for example a time series.
 The case where $m=2$ is useful for representing manifold-valued matrices of data of size $n_1 \times n_2$, for example certain types of images.
 
@@ -26,7 +26,7 @@ p = cat([1.0, 0.0, 0.0],
 which is a valid point i.e.
 
 ```@example 1
-is_manifold_point(M, p)
+is_point(M, p)
 ```
 
 This can also be used in combination with [HybridArrays.jl](https://github.com/mateuszbaran/HybridArrays.jl) and [StaticArrays.jl](https://github.com/JuliaArrays/StaticArrays.jl), by setting
@@ -54,7 +54,7 @@ p = [ [1.0, 0.0, 0.0],
     ]
 ```
 
-which is again a valid point so [`is_manifold_point`](@ref)`(M, p)` here also yields true.
+which is again a valid point so [`is_point`](@ref)`(M, p)` here also yields true.
 A disadvantage might be that with nested arrays one loses a little bit of performance.
 The data however is nicely encapsulated. Accessing the first data item is just `p[1]`.
 

@@ -2,13 +2,7 @@ include("utils.jl")
 using StatsBase: AbstractWeights, pweights
 using Random: GLOBAL_RNG, seed!
 import ManifoldsBase:
-    manifold_dimension,
-    exp!,
-    log!,
-    inner,
-    zero_tangent_vector!,
-    decorated_manifold,
-    base_manifold
+    manifold_dimension, exp!, log!, inner, zero_vector!, decorated_manifold, base_manifold
 using Manifolds:
     AbstractEstimationMethod,
     CyclicProximalPointEstimation,
@@ -18,7 +12,7 @@ using Manifolds:
     WeiszfeldEstimation
 import Manifolds: mean!, median!, var, mean_and_var
 
-struct TestStatsSphere{N} <: Manifold{ℝ} end
+struct TestStatsSphere{N} <: AbstractManifold{ℝ} end
 TestStatsSphere(N) = TestStatsSphere{N}()
 manifold_dimension(::TestStatsSphere{N}) where {N} = manifold_dimension(Sphere(N))
 function exp!(::TestStatsSphere{N}, w, x, y; kwargs...) where {N}
@@ -30,11 +24,11 @@ end
 function inner(::TestStatsSphere{N}, x, v, w; kwargs...) where {N}
     return inner(Sphere(N), x, v, w; kwargs...)
 end
-function zero_tangent_vector!(::TestStatsSphere{N}, v, x; kwargs...) where {N}
-    return zero_tangent_vector!(Sphere(N), v, x; kwargs...)
+function zero_vector!(::TestStatsSphere{N}, v, x; kwargs...) where {N}
+    return zero_vector!(Sphere(N), v, x; kwargs...)
 end
 
-struct TestStatsEuclidean{N} <: Manifold{ℝ} end
+struct TestStatsEuclidean{N} <: AbstractManifold{ℝ} end
 TestStatsEuclidean(N) = TestStatsEuclidean{N}()
 manifold_dimension(::TestStatsEuclidean{N}) where {N} = manifold_dimension(Euclidean(N))
 function exp!(::TestStatsEuclidean{N}, y, x, v; kwargs...) where {N}
@@ -46,8 +40,8 @@ end
 function inner(::TestStatsEuclidean{N}, x, v, w; kwargs...) where {N}
     return inner(Euclidean(N), x, v, w; kwargs...)
 end
-function zero_tangent_vector!(::TestStatsEuclidean{N}, v, x; kwargs...) where {N}
-    return zero_tangent_vector!(Euclidean(N), v, x; kwargs...)
+function zero_vector!(::TestStatsEuclidean{N}, v, x; kwargs...) where {N}
+    return zero_vector!(Euclidean(N), v, x; kwargs...)
 end
 
 struct TestStatsNotImplementedEmbeddedManifold <:
@@ -68,7 +62,7 @@ base_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
 function test_mean(M, x, yexp=nothing, method...; kwargs...)
     @testset "mean unweighted" begin
         y = mean(M, x; kwargs...)
-        @test is_manifold_point(M, y; atol=10^-9)
+        @test is_point(M, y; atol=10^-9)
         if yexp !== nothing
             @test isapprox(M, y, yexp; atol=10^-7)
         end
@@ -85,7 +79,7 @@ function test_mean(M, x, yexp=nothing, method...; kwargs...)
         w3 = pweights(2 * ones(n))
         y = mean(M, x; kwargs...)
         for w in (w1, w2, w3)
-            @test is_manifold_point(M, mean(M, x, w; kwargs...); atol=10^-9)
+            @test is_point(M, mean(M, x, w; kwargs...); atol=10^-9)
             @test isapprox(M, mean(M, x, w; kwargs...), y)
 
             @test isapprox(M, mean_and_var(M, x, w; kwargs...)[1], y; atol=10^-7)
@@ -105,7 +99,7 @@ function test_median(
 )
     @testset "median unweighted$(!isnothing(method) ? " ($method)" : "")" begin
         y = isnothing(method) ? median(M, x; kwargs...) : median(M, x, method; kwargs...)
-        @test is_manifold_point(M, y; atol=10^-9)
+        @test is_point(M, y; atol=10^-9)
         if yexp !== nothing
             @test isapprox(M, y, yexp; atol=10^-5)
         end
@@ -119,9 +113,9 @@ function test_median(
         y = median(M, x; kwargs...)
         for w in (w1, w2, w3)
             if isnothing(method)
-                @test is_manifold_point(M, median(M, x, w; kwargs...); atol=10^-9)
+                @test is_point(M, median(M, x, w; kwargs...); atol=10^-9)
             else
-                @test is_manifold_point(M, median(M, x, w, method; kwargs...); atol=10^-9)
+                @test is_point(M, median(M, x, w, method; kwargs...); atol=10^-9)
             end
             @test isapprox(M, median(M, x, w; kwargs...), y; atol=10^-4)
         end
@@ -268,9 +262,9 @@ function test_moments(M, x)
     return nothing
 end
 
-struct TestStatsOverload1 <: Manifold{ℝ} end
-struct TestStatsOverload2 <: Manifold{ℝ} end
-struct TestStatsOverload3 <: Manifold{ℝ} end
+struct TestStatsOverload1 <: AbstractManifold{ℝ} end
+struct TestStatsOverload2 <: AbstractManifold{ℝ} end
+struct TestStatsOverload3 <: AbstractManifold{ℝ} end
 struct TestStatsMethod1 <: AbstractEstimationMethod end
 
 function mean!(

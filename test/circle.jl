@@ -1,16 +1,18 @@
 include("utils.jl")
 
+using Manifolds: TFVector, CoTFVector
+
 @testset "Circle" begin
     M = Circle()
     @testset "Real Circle Basics" begin
         @test repr(M) == "Circle(ℝ)"
         @test representation_size(M) == ()
         @test manifold_dimension(M) == 1
-        @test !is_manifold_point(M, 9.0)
-        @test_throws DomainError is_manifold_point(M, 9.0, true)
-        @test !is_tangent_vector(M, 9.0, 0.0)
-        @test_throws DomainError is_tangent_vector(M, 9.0, 0.0, true)
-        @test is_tangent_vector(M, 0.0, 0.0; check_base_point=false)
+        @test !is_point(M, 9.0)
+        @test_throws DomainError is_point(M, 9.0, true)
+        @test !is_vector(M, 9.0, 0.0)
+        @test_throws DomainError is_vector(M, 9.0, 0.0, true)
+        @test is_vector(M, 0.0, 0.0)
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_coordinates(
             M,
@@ -54,8 +56,18 @@ include("utils.jl")
         )[] ≈ 2.0
         @test number_of_coordinates(M, DiagonalizingOrthonormalBasis(Ref(-1.0))) == 1
         @test number_of_coordinates(M, DefaultOrthonormalBasis()) == 1
-        @test flat(M, 0.0, FVector(TangentSpace, 1.0)) == FVector(CotangentSpace, 1.0)
-        @test sharp(M, 0.0, FVector(CotangentSpace, 1.0)) == FVector(TangentSpace, 1.0)
+        rrcv = Manifolds.RieszRepresenterCotangentVector(M, 0.0, 1.0)
+        @test flat(M, 0.0, 1.0) == rrcv
+        @test sharp(M, 0.0, rrcv) == 1.0
+        B_cot = Manifolds.dual_basis(M, 0.0, DefaultOrthonormalBasis())
+        @test get_coordinates(M, 0.0, rrcv, B_cot) ≈ 1.0
+        @test get_vector(M, 0.0, 1.0, B_cot) isa Manifolds.RieszRepresenterCotangentVector
+        a = fill(NaN)
+        get_coordinates!(M, a, 0.0, rrcv, B_cot)
+        @test a[] ≈ 1.0
+        rrcv2 = Manifolds.RieszRepresenterCotangentVector(M, fill(0.0), fill(-10.0))
+        get_vector!(M, rrcv2, 0.0, 1.0, B_cot)
+        @test isapprox(rrcv.X, rrcv2.X[])
         @test vector_transport_to(M, 0.0, 1.0, 1.0, ParallelTransport()) == 1.0
         @test retract(M, 0.0, 1.0) == exp(M, 0.0, 1.0)
         @test injectivity_radius(M) ≈ π
@@ -76,8 +88,8 @@ include("utils.jl")
         x = SVector(0.0)
         log!(M, v, x, SVector(π / 4))
         @test norm(M, x, v) ≈ π / 4
-        @test is_tangent_vector(M, x, v)
-        @test is_tangent_vector(M, [], v; check_base_point=false)
+        @test is_vector(M, x, v)
+        @test is_vector(M, [], v)
         @test project(M, 1.0) == 1.0
         x = MVector(0.0)
         project!(M, x, x)
@@ -136,25 +148,24 @@ include("utils.jl")
         @test repr(Mc) == "Circle(ℂ)"
         @test representation_size(Mc) == ()
         @test manifold_dimension(Mc) == 1
-        @test is_tangent_vector(Mc, 1im, 0.0)
-        @test is_manifold_point(Mc, 1im)
-        @test !is_manifold_point(Mc, 1 + 1im)
-        @test_throws DomainError is_manifold_point(Mc, 1 + 1im, true)
-        @test !is_tangent_vector(Mc, 1 + 1im, 0.0)
-        @test_throws DomainError is_tangent_vector(Mc, 1 + 1im, 0.0, true)
-        @test !is_tangent_vector(Mc, 1im, 2im)
-        @test_throws DomainError is_tangent_vector(Mc, 1im, 2im, true)
-        @test flat(Mc, 0.0 + 0.0im, FVector(TangentSpace, 1.0im)) ==
-              FVector(CotangentSpace, 1.0im)
-        @test sharp(Mc, 0.0 + 0.0im, FVector(CotangentSpace, 1.0im)) ==
-              FVector(TangentSpace, 1.0im)
+        @test is_vector(Mc, 1im, 0.0)
+        @test is_point(Mc, 1im)
+        @test !is_point(Mc, 1 + 1im)
+        @test_throws DomainError is_point(Mc, 1 + 1im, true)
+        @test !is_vector(Mc, 1 + 1im, 0.0)
+        @test_throws DomainError is_vector(Mc, 1 + 1im, 0.0, true)
+        @test !is_vector(Mc, 1im, 2im)
+        @test_throws DomainError is_vector(Mc, 1im, 2im, true)
+        rrcv = Manifolds.RieszRepresenterCotangentVector(Mc, 0.0 + 0.0im, 1.0im)
+        @test flat(Mc, 0.0 + 0.0im, 1.0im) == rrcv
+        @test sharp(Mc, 0.0 + 0.0im, rrcv) == 1.0im
         @test norm(Mc, 1.0, log(Mc, 1.0, -1.0)) ≈ π
-        @test is_tangent_vector(Mc, 1.0, log(Mc, 1.0, -1.0))
+        @test is_vector(Mc, 1.0, log(Mc, 1.0, -1.0))
         v = MVector(0.0 + 0.0im)
         x = SVector(1.0 + 0.0im)
         log!(Mc, v, x, SVector(-1.0 + 0.0im))
         @test norm(Mc, SVector(1.0), v) ≈ π
-        @test is_tangent_vector(Mc, x, v)
+        @test is_vector(Mc, x, v)
         @test project(Mc, 1.0) == 1.0
         project(Mc, 1 / sqrt(2.0) + 1 / sqrt(2.0) * im) ==
         1 / sqrt(2.0) + 1 / sqrt(2.0) * im
