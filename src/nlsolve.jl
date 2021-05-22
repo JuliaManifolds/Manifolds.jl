@@ -50,6 +50,8 @@ function _inverse_retract_nlsolve(
         F .-= q
         return F
     end
+    isdefined(ManifoldsBase, :NLsolve) ||
+        @warn "To use NLsolveInverseRetraction, NLsolve must be loaded using `using NLsolve`."
     res = NLsolve.nlsolve(f!, X0; nlsolve_kwargs...)
     return res
 end
