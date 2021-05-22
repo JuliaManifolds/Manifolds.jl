@@ -1,10 +1,10 @@
-# [Dime Tour, Rotations](@id dime_tour_rotations)
+# [How to work with Rotations](@id how_to_work_with_rotations)
 
 This tutorial is meant to give the briefest of overviews on how to use Manifolds.jl in a manner familiar to those needing rigid body transforms.  This tutorial will introduce some of the common function calls needed to convert between the various data types and hopefully show the user something more about to combine some of the function calls listed elsewhere in the documentation.
 
 ## Rotations with SO(2)
 
-Consider rotations on an xy-plane, commonly known (among others) as rotation matrices `R`, Direction Cosine Matrices `DCM`, `SpecialOrthogonal(2)` Lie Groups and associated Lie Algebra.  Let's load the necessary packages first:
+Consider rotations on an xy-plane, commonly known (among others) as rotation matrices `R`, Direction Cosine Matrices `DCM`, `SpecialOrthogonal(2)` Lie Groups and associated Lie Algebra.  Let's load some packages first:
 ```julia
 using Manifolds
 using LinearAlgebra
@@ -23,7 +23,7 @@ M = base_manifold(G)
 Pretty soon we will require some default definitions:
 ```julia
 # default basis
-e0 = DefaultOrthogonalBasis()
+B = DefaultOrthogonalBasis()
 # default data type
 p0 = @SMatrix [1.0 0; 0 1]
 
@@ -31,30 +31,40 @@ p0 = @SMatrix [1.0 0; 0 1]
 xR0 = identity(G, p0)
 ```
 
-Now let's say we want to define a manifold point `i` some rotation θ from the [`identity`](@ref) reference `xR0`.  This is easier to envision on `Rotations(2)`, while more complicated would likely use a generalized notion of distance between points instead.  For now considering a rotation, say
+!!! note
+    Throughout the Manifolds code you will likely find the point `p` on the manifold with `X` a tangent vector at `p` (for example on the sphere `p=[1.0,0.0,0.0]` and `X=[0.0,0.5,0.5]`, and notice that points on the sphere are represented as unit vectors and all tangent space vectors at `p` are orthogonal to `p`).
+
+Let's say we want to define a manifold point `p_i` some rotation θ from the [`identity`](@ref) reference rotation `xR0` (another point on the manifold that we will use as reference)
 ```julia
 # + radians rotation from x-axis on plane to point i
 xθi = π/6
 ```
 
+!!! note
+    The angle θ is easier to envision with `Rotations(2)`.  Depending on the manifold, more generalized notions of distance between points exist.
+
 ### From Coordinates
 
 To get our first Lie algebra element using the text book [`hat`](@ref), or equivaliently a more generalized [`get_vector`](@ref), function:
 ```julia
-X_ = hat(G, xR0, xθi)             # specific definition
-xXi = get_vector(G, xR0, xθi, e0)  # generalized definition
+X_ = hat(G, xR0, xθi)              # specific definition to Lie groups
+xXi = get_vector(G, xR0, xθi, B)  # generalized definition beyond Lie groups
 # 2×2 MMatrix{2, 2, Float64, 4} with indices SOneTo(2)×SOneTo(2):
 #  0.0       -0.523599
 #  0.523599   0.0
 @assert isapprox( X_, xXi )
 ```
 
-Note, in this case the same would work given the base manifold [`Rotations(2)`](@ref):
-```julia
-_X_ = hat(M, xR0, xθi)             # specific definition
-_X = get_vector(M, xR0, xθi, e0)  # generalized definition
-@assert _X_ == xXi; @assert _X == xXi
-```
+Note that `hat` here assumes a default basis for the more general `get_vector`.
+
+!!! note
+    In this case, the same would work given the base manifold [`Rotations(2)`](@ref):
+    ```julia
+    _X_ = hat(M, xR0, xθi)             # Lie groups definition
+    _X = get_vector(M, xR0, xθi, B)   # generalized definition
+    @assert _X_ == xXi; @assert _X == xXi
+    ```
+    One more caveat here is that for the Rotation matrices, the tangent vectors are always stored as elements from the Lie algebra.
 
 Now, let's place this algebra element on the manifold using the exponential map [`exp`](@ref):
 ```julia
@@ -81,19 +91,24 @@ xθi__ = vee(G, xR0, xXi_)[1]
 _xθi__ = vee(M, xR0, xXi_)[1]
 
 # OR, the preferred generalized get_coordinate function
-xθi_ = get_coordinates(G, xR0, xXi_, e0)[1]
-_xθi_ = get_coordinates(M, xR0, xXi_, e0)[1]
+xθi_ = get_coordinates(G, xR0, xXi_, B)[1]
+_xθi_ = get_coordinates(M, xR0, xXi_, B)[1]
 
 # confirm all versions are correct
 @assert isapprox( xθi, xθi_ ); @assert isapprox( xθi, _xθi_ )
 @assert isapprox( xθi, xθi__ ); @assert isapprox( xθi, _xθi__ )
-```
+```  
+
+!!! note
+    The disadvantage might be that the representation of `X` is not nice, i.e. it uses too much space or doing vector-calculations is not so easy.  E.g. fixed rank matrices are overloaded for all vector operations, but maybe that is “not enough” for a general user application that really wants vectors. But: Given a basis `B` one can look at the coefficients of the tangent vector `X` with respect to basis `B`.  From the Sphere example note above the basis would be `Y1=[0.0,1.0,0.0]` and `Y2=[0.0,0.0,1.0]`, the so to get the coordinates would be `c = get_coordinates(Sphere(2), p, X, B)`.  Visa versa, if you have a coordinate vector with respect to a basis `B` of the tangent space at `p` and want the vector back, then you do `X2 = get_vector(M, p, c, B)` (and you should have `X2==X`).  The coordinate vector `c` might also have the advantage of saving memory. E.g. SPD matrix tangent vectors take n^2 entries to save, i.e. storing the full matrix, but the coordinate vectors only take n(n+1)/2.
 
 ### Actions and Operations
 
-With the basics in hand on how to move between the coordinate, algebra, and group representations, let's briefly look at composition and application of points on the manifold.  For example, a `Rotation(n)` manifold is the mathematical representation, but the points have an application purpose in retaining information regarding a specific rotation.  In contrast, using Euler angles, or Euclidean(n) space to store rotation information quickly becomes problematic.  Other rotation representation methods, including quaternions, Pauli matrices, etc., have similar features.
+With the basics in hand on how to move between the coordinate, algebra, and group representations, let's briefly look at composition and application of points on the manifold.  For example, a `Rotation(n)` manifold is the mathematical representation, but the points have an application purpose in retaining information regarding a specific rotation.     
 
-Therefore, points from a manifold may have an associated action which we [`apply`](@ref).  Consider rotating through `θ = π/6` three vectors `V` from their native domain `Euclidean(2)`, from the reference frame `a` to frame `b`.  Keeping with our two-dimensional example above:
+Points from a Lie group may have an associated action (i.e. a rotation) which we [`apply`](@ref).  Consider rotating through `θ = π/6` three vectors `V` from their native domain `Euclidean(2)`, from the reference point `a` to a new point `b`.  Engineering disciplines sometimes refer to the action of a manifold point `a` or `b` as reference frames.  More generally, by taking the tangent space at point `p`, we are defining a local coordinate frame with basis `B`, and should not be confused with "reference frame" `a` or `b`.
+
+Keeping with our two-dimensional example above:
 ```julia
 aV1 = [1;0]
 aV2 = [0;1]
@@ -102,7 +117,7 @@ aV3 = [10;10]
 A_left = RotationAction(Euclidean(2), G)
 
 bθa = π/6
-bXa = get_vector(base_manifold(G), xR0, bθa, e0)
+bXa = get_vector(base_manifold(G), xR0, bθa, B)
 
 bRa = exp(G, R0, bXa)
 
@@ -134,7 +149,7 @@ end
 
 # drop back to a algebra, then coordinate
 aXi = log(G, xR0, aRi)
-aθi = get_coordinates(G, xR0, aXi, e0)
+aθi = get_coordinates(G, xR0, aXi, B)
 
 # should wrap around to 3rd quadrant of xy-plane
 @assert isapprox( -3π/4, aθi[1])
@@ -142,3 +157,5 @@ aθi = get_coordinates(G, xR0, aXi, e0)
 
 !!! warning
     `compose` or `apply` must be done with group (not algebra) elements.  This example shows how these two element types can easily be confused, since both the manifold group and algebra elements can have exactly the same data storage type -- i.e. a 2x2 matrix.
+    
+As a last note, other rotation representations, including quaternions, Pauli matrices, etc., have similar features.  A contrasting example in rotations, however, are Euler angles which can also store rotation information but quickly becomes problematic with familiar problems such as ["gimbal-lock"](https://en.wikipedia.org/wiki/Gimbal_lock).
