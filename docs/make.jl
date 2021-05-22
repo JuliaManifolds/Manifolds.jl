@@ -22,7 +22,7 @@ makedocs(
         "ManifoldsBase.jl" => "interface.md",
         "Examples" => [
             "How to implement a Manifold" => "examples/manifold.md",
-            "How to work with Rotations" => "examples/dimetourrotations.md"
+            "How to work with Rotations" => "examples/dimetourrotations.md",
         ],
         "Manifolds" => [
             "Basic manifolds" => [
