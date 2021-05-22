@@ -1,5 +1,4 @@
 using NLsolve
-using Manifolds: NLsolveInverseRetraction, ApproximateInverseRetraction
 using LinearAlgebra
 
 include("utils.jl")

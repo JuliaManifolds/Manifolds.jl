@@ -9,7 +9,7 @@ varying inner products on the tangent space. See [`inner`](@ref).
     (metric::Metric)(M::Manifold)
 
 Generate the `MetricManifold` that wraps the manifold `M` with given `metric`.
-This works for both a variable containing the metric as well as a subtype `T<:Metric`,
+This works for both a variable containing the metric as well as a subtype `T<:AbstractMetric`,
 where a zero parameter constructor `T()` is availabe.
 """
 abstract type AbstractMetric end
