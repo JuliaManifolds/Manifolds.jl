@@ -138,7 +138,7 @@ A_left = RotationAction(M, G)
 aRi = deepcopy(xR0)
 
 iθi_ = π/4
-x_θ = get_vector(M, xR0, iθi_, e0) #hat(Rn, R0, θ)
+x_θ = get_vector(M, xR0, iθi_, B) #hat(Rn, R0, θ)
 iRi_ = exp(M, xR0, x_θ)
 
 # do 5 times over:
