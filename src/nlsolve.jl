@@ -12,7 +12,14 @@ See [`NLsolveInverseRetraction`](@ref) for configurable parameters.
 """
 inverse_retract(::AbstractManifold, p, q, ::NLsolveInverseRetraction; kwargs...)
 
-function inverse_retract!(M::AbstractManifold, X, p, q, method::NLsolveInverseRetraction; kwargs...)
+function inverse_retract!(
+    M::AbstractManifold,
+    X,
+    p,
+    q,
+    method::NLsolveInverseRetraction;
+    kwargs...,
+)
     X0 = method.X0 === nothing ? zero_vector(M, p) : method.X0
     res = _inverse_retract_nlsolve(
         M,
