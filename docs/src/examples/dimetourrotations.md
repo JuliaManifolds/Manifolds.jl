@@ -104,7 +104,7 @@ _xθi_ = get_coordinates(M, xR0, xXi_, B)[1]
 
 ### Actions and Operations
 
-With the basics in hand on how to move between the coordinate, algebra, and group representations, let's briefly look at composition and application of points on the manifold.  For example, a `Rotation(n)` manifold is the mathematical representation, but the points have an application purpose in retaining information regarding a specific rotation.     
+With the basics in hand on how to move between the coordinate, algebra, and group representations, let's briefly look at composition and application of points on the manifold.  For example, a `Rotations(n)` manifold is the mathematical representation, but the points have an application purpose in retaining information regarding a specific rotation.     
 
 Points from a Lie group may have an associated action (i.e. a rotation) which we [`apply`](@ref).  Consider rotating through `θ = π/6` three vectors `V` from their native domain `Euclidean(2)`, from the reference point `a` to a new point `b`.  Engineering disciplines sometimes refer to the action of a manifold point `a` or `b` as reference frames.  More generally, by taking the tangent space at point `p`, we are defining a local coordinate frame with basis `B`, and should not be confused with "reference frame" `a` or `b`.
 
