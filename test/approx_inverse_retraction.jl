@@ -41,7 +41,7 @@ include("utils.jl")
             @test X ≈ q - p
         end
         @testset "Power" begin
-            M = M = PowerManifold(Euclidean(2), NestedPowerRepresentation(), 2)
+            M = PowerManifold(Euclidean(2), NestedPowerRepresentation(), 2)
             p = [[1.0, 2.0], [3.0, 4.0]]
             q = [[5.0, 6.0], [7.0, 8.0]]
             retr_method = ExponentialRetraction()
