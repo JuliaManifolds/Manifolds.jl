@@ -40,7 +40,17 @@ include("utils.jl")
             @test X isa Vector{Float64}
             @test X ≈ q - p
         end
-
+        @testset "Power" begin
+            M = M = PowerManifold(Euclidean(2), NestedPowerRepresentation(), 2)
+            p = [[1.0, 2.0], [3.0, 4.0]]
+            q = [[5.0, 6.0], [7.0, 8.0]]
+            retr_method = ExponentialRetraction()
+            inv_retr_method = NLsolveInverseRetraction(retr_method)
+            X = inverse_retract(M, p, q, inv_retr_method)
+            @test is_vector(M, p, X)
+            @test X isa Vector{Vector{Float64}}
+            @test X ≈ q - p
+        end
         @testset "Sphere" begin
             M = Sphere(2)
             p = [1.0, 0.0, 0.0]
