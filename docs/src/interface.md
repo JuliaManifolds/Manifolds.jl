@@ -20,9 +20,9 @@ We would like to highlight a few of the types and functions in the next two sect
 
 ### The Manifold Type
 
-Besides the most central type, that of a [`AbstractManifold`](@ref) accompanied by [`AbstractManifoldPoint`](@ref) to represent points thereon, note that the point type is meant in a lazy fashion.
-This is mean as follows: if you implement a new manifold and your points are represented by matrices, vectors or arrays, then it is best to not type the poitns `p` in functions, such that the methods work for example for other array representation types as well.
-You should subtype your new points on a manifold, if the structure you use is more structured, see for example[`FixedRankMatrices`](@ref).
+Besides the most central type, that of an [`AbstractManifold`](@ref) accompanied by [`AbstractManifoldPoint`](@ref) to represent points thereon, note that the point type is meant in a lazy fashion.
+This is mean as follows: if you implement a new manifold and your points are represented by matrices, vectors or arrays, then it is best to not restrict types of the points `p` in functions, such that the methods work for example for other array representation types as well.
+You should subtype your new points on a manifold, if the structure you use is more structured, see for example [`FixedRankMatrices`](@ref).
 Another reason is, if you want to distinguish (and hence dispatch on) different representation of points on the manifold.
 For an example, see the [Hyperbolic](@ref HyperbolicSpace) manifold, which has different models to be represented.
 
@@ -32,12 +32,12 @@ Pages = ["maintypes.jl"]
 Order = [:type, :function]
 ```
 
-### The exponential and the logarithmic map and geodesics
+### The exponential and the logarithmic map, and geodesics
 
 Geodesics are the generalizations of a straight line to manifolds, i.e. their intrinsic acceleration is zero.
 Together with geodesics one also obtains the exponential map and its inverse, the logarithmic map.
 Informally speaking, the exponential map takes a vector (think of a direction and a length) at one point and returns another point,
-which lies towards this direction at distance of the specified length. The logarithmic map does the inverse, i..e. given two points, what is the vector that “points towards” the other point.
+which lies towards this direction at distance of the specified length. The logarithmic map does the inverse, i.e. given two points, it tells which vector “points towards” the other point.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
@@ -88,7 +88,7 @@ the embedding can be chosen to be the manifold ``N = ℂ`` and due to our repres
 
 And this resulting ``q`` we call the projection of ``p`` onto the manifold ``\mathcal M``.
 
-2. Given a point ``p∈\mathcal M`` and a vector in ``X\inT_{i(p)}\mathcal N`` in the embedding we can similarly look for the closest point to ``Y∈ T_p\mathcal M`` using the push forward ``i_*`` of the embedding.
+2. Given a point ``p∈\mathcal M`` and a vector in ``X\inT_{i(p)}\mathcal N`` in the embedding we can similarly look for the closest point to ``Y∈ T_p\mathcal M`` using the pushforward ``i_*`` of the embedding.
 
 ```math
   \operatorname*{arg\,min}_{Y\in T_p\mathcal M} \lVert i_*(p)[Y] - X \rVert_{i(p)}
