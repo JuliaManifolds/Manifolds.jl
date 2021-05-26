@@ -1,4 +1,4 @@
-# Fixed-rank matrices
+# [Fixed-rank matrices](@id FixedRankMatrices)
 
 ```@autodocs
 Modules = [Manifolds]

@@ -24,7 +24,7 @@ You can also ask your question on [discourse.julialang.org](https://discourse.ju
 
 ## How can I file an issue?
 
-If you found a bug or want to propose a feature, we track our issues within the [GitHub repository](https://github.com/JuliaNLSolvers/Manifolds.jl/issues).
+If you found a bug or want to propose a feature, we track our issues within the [GitHub repository](https://github.com/JuliaManifolds/Manifolds.jl/issues).
 
 ## How can I contribute?
 
