@@ -87,7 +87,7 @@ get_component(M, p, 4)
 
 ### `NestedReplacingPowerRepresentation`
 
-The final representation is the [`NestedReplacingPowerRepresentation`](@ref). It is similar to the `NestedPowerRepresentation` but it does not perform mutating operations on the points on the underlying manifold. The example below uses this representation to store points on a power manifold of the [`SpecialEuclidean`](@ref) group in-line in an `Vector` for improved efficiency. Points on this manifold are not represented as arrays, so `ArrayPowerRepresentation` can't be used. Also, `NestedPowerRepresentation` would prevent in-line storage.
+The final representation is the [`NestedReplacingPowerRepresentation`](@ref). It is similar to the [`NestedPowerRepresentation`](@ref) but it does not perform mutating operations on the points on the underlying manifold. The example below uses this representation to store points on a power manifold of the [`SpecialEuclidean`](@ref) group in-line in an `Vector` for improved efficiency. Points on this manifold are not represented as arrays, so [`ArrayPowerRepresentation`](@ref) can't be used. Also, [`NestedPowerRepresentation`](@ref) would prevent in-line storage.
 
 ```@example 4
 using Manifolds, ManifoldsBase, StaticArrays
