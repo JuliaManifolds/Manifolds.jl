@@ -90,12 +90,12 @@ get_component(M, p, 4)
 The final representation is the [`NestedReplacingPowerRepresentation`](@ref). It is similar to the [`NestedPowerRepresentation`](@ref) but it does not perform mutating operations on the points on the underlying manifold. The example below uses this representation to store points on a power manifold of the [`SpecialEuclidean`](@ref) group in-line in an `Vector` for improved efficiency. When having a mixture of both, i.e. an array structure that is nested (like [´NestedPowerRepresentation](@ref)) in the sense that the elements of the main vector are immutable, then changing the elements can not be done in a mutating way and hence [`NestedReplacingPowerRepresentation`](@ref) has to be used.
 
 ```@example 4
-using Manifolds, ManifoldsBase, StaticArrays
+using Manifolds, StaticArrays
 R2 = Rotations(2)
 
 G = SpecialEuclidean(2)
 N = 5
-GN = PowerManifold(G, ManifoldsBase.NestedReplacingPowerRepresentation(), N)
+GN = PowerManifold(G, NestedReplacingPowerRepresentation(), N)
 
 q = [1.0 0.0; 0.0 1.0]
 p1 = [ProductRepr(SVector{2,Float64}([i - 0.1, -i]), SMatrix{2,2,Float64}(exp(R2, q, hat(R2, q, i)))) for i in 1:N]

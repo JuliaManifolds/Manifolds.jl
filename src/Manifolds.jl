@@ -338,6 +338,7 @@ export AbstractPowerManifold,
     AbstractPowerRepresentation,
     ArrayPowerRepresentation,
     NestedPowerRepresentation,
+    NestedReplacingPowerRepresentation,
     PowerManifold
 export ProductManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
