@@ -20,8 +20,6 @@ using Test
 using LightGraphs
 using SimpleWeightedGraphs
 
-using Manifolds.ManifoldTests
-
 function include_test(path)
     @info "Testing $path"
     @time include(path)  # show basic timing, (this will print a newline at end)

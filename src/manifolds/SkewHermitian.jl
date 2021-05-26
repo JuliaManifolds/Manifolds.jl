@@ -33,7 +33,7 @@ end
     SkewSymmetricMatrices{n}
 
 Generate the manifold of ``n × n`` real skew-symmetric matrices.
-This is equivalent to [`SkewHermitian(n, ℝ)`](@ref).
+This is equivalent to [`SkewHermitianMatrices(n, ℝ)`](@ref).
 
 # Constructor
 
@@ -45,7 +45,7 @@ SkewSymmetricMatrices(n::Int) = SkewSymmetricMatrices{n}()
 @deprecate SkewSymmetricMatrices(n::Int, 𝔽) SkewHermitianMatrices(n, 𝔽)
 
 function allocation_promotion_function(
-    M::SkewHermitianMatrices{<:Any,ℂ},
+    ::SkewHermitianMatrices{<:Any,ℂ},
     ::typeof(get_vector),
     args::Tuple,
 )

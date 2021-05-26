@@ -12,7 +12,8 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\tau_p`` | action map by group element ``p`` | ``\mathrm{L}_p``, ``\mathrm{R}_p`` | either left or right |
 | ``\times`` | Cartesian product of two manifolds | | see [`ProductManifold`](@ref) |
 | ``^{\wedge}`` | (n-ary) Cartesian power of a manifold | | see [`PowerManifold`](@ref) |
-| ``a`` | coordinates of a point in a chart | | see [`Manifolds.get_point_coordinates`](@ref) |
+| ``a`` | coordinates of a point in a chart | | see [`get_point_coordinates`](@ref) |
+| ``\frac{\mathrm{D}}{\mathrm{d}t}`` | covariant derivative of a vector field ``X(t)`` | | |
 | ``T^*_p \mathcal M`` | the cotangent space at ``p`` | | |
 | ``ξ`` | a cotangent vector from ``T^*_p \mathcal M`` | ``ξ_1, ξ_2,… ,η,\zeta`` | sometimes written with base point ``ξ_p``. |
 | ``\mathrm{d}\phi_p(q)`` | Differential of a map ``\phi: \mathcal M \to \mathcal N`` with respect to ``p`` at a point ``q``. For functions of multiple variables, for example ``\phi(p, p_1)`` where ``p \in \mathcal M`` and ``p_1 \in \mathcal M_1``, variable ``p`` is explicitly stated to specify with respect to which argument the differential is calculated. | ``\mathrm{d}\phi_q``, ``(\mathrm{d}\phi)_q``, ``(\phi_*)_q``, ``D_p\phi(q)`` | pushes tangent vectors ``X \in T_q \mathcal M`` forward to ``\mathrm{d}\phi_p(q)[X] \in T_{\phi(q)} \mathcal N`` |
@@ -37,7 +38,8 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\operatorname{Exp}`` | the matrix exponential | |
 | ``\operatorname{Log}`` | the matrix logarithm | |
 | ``\mathcal P_{q\gets p}X`` | parallel transport | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``
-| ``\mathcal P_{p,Y}X`` | parallel transport in direction ``Y`` | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``, ``q = exp_pY``
+| ``\mathcal P_{p,Y}X`` | parallel transport in direction ``Y`` | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``, ``q = \exp_pY``
+| ``\mathcal P_{t_1\gets t_0}^cX`` | parallel transport along the curve ``c``| ``\mathcal P^cX=\mathcal P_{1\gets 0}^cX`` | of the vector ``X`` from ``p=c(0)`` to ``c(1)``
 | ``p`` | a point on ``\mathcal M`` | ``p_1, p_2, \ldots,q`` | for 3 points one might use ``x,y,z`` |
 | ``\operatorname{retr}_pX``|  a retraction | |
 | ``ξ`` | a set of tangent vectors | ``\{X_1,\ldots,X_n\}`` | |
