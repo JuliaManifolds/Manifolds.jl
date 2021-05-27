@@ -21,7 +21,7 @@ are given in ``T_p\mathcal M``.
 This means, that a chart ``\varphi_p = \mathrm{cord}\circ\mathrm{retr}_p^{-1}`` is only locally
 defined (around ``p``), where ``\mathrm{cord}`` is the decomposition of the tangent vector
 into coordinates with respect to the given basis of the tangent space, cf. [`get_coordinates`](@ref).
-The parametrization is given by ``\varphi_^{-1}=\mathrm{retr}_p\circ\mathrm{vec}``,
+The parametrization is given by ``\varphi_p^{-1}=\mathrm{retr}_p\circ\mathrm{vec}``,
 where ``\mathrm{vec}`` turns the basis coordinates into a tangent vector, cf. [`get_vector`](@ref).
 
 In short: The coordinates with respect to a basis are used together with a retraction as a parametrization.
