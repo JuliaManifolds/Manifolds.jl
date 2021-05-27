@@ -4,6 +4,12 @@ abstract type AbstractReshaper end
     StaticReshaper()
 
 Reshaper that constructs `SizedArray` from the `StaticArrays.jl` package.
+
+
+!!! note
+
+    Usage of this type has been deprecated. Please switch to [`ProductRepr`](@ref)
+    as a representation of points and tangent vectors on product manifolds.
 """
 struct StaticReshaper <: AbstractReshaper end
 
@@ -11,6 +17,11 @@ struct StaticReshaper <: AbstractReshaper end
     make_reshape(reshaper::AbstractReshaper, ::Type{Size}, data) where Size
 
 Reshape array `data` to size `Size` using method provided by `reshaper`.
+
+!!! note
+
+    Usage of this function has been deprecated. Please switch to [`ProductRepr`](@ref)
+    as a representation of points and tangent vectors on product manifolds.
 """
 function make_reshape(reshaper::AbstractReshaper, ::Type{Size}, data) where {Size}
     return error(
@@ -25,6 +36,11 @@ end
     ArrayReshaper()
 
 Reshaper that constructs `Base.ReshapedArray`.
+
+!!! note
+
+    Usage of this type has been deprecated. Please switch to [`ProductRepr`](@ref)
+    as a representation of points and tangent vectors on product manifolds.
 """
 struct ArrayReshaper <: AbstractReshaper end
 
@@ -74,6 +90,11 @@ numbers and is second, so the next four numbers are allocated to it (`4:7`).
 represent points. In this case, `Sphere(2)` expects a three-element vector, so
 the corresponding size is `Tuple{3}`. On the other hand, `Rotations(2)`
 expects two-by-two matrices, so its size specification is `Tuple{2,2}`.
+
+!!! note
+
+    Usage of this type has been deprecated. Please switch to [`ProductRepr`](@ref)
+    as a representation of points and tangent vectors on product manifolds.
 """
 struct ShapeSpecification{TRanges,TSizes,TReshapers}
     reshapers::TReshapers
@@ -104,6 +125,11 @@ An array-based representation for points and tangent vectors on the
 product manifold. `data` contains underlying representation of points
 arranged according to `TRanges` and `TSizes` from `shape`.
 Internal views for each specific sub-point are created and stored in `parts`.
+
+!!! note
+
+    Usage of this type has been deprecated. Please switch to [`ProductRepr`](@ref)
+    as a representation of points and tangent vectors on product manifolds.
 """
 struct ProductArray{
     TM<:ShapeSpecification,
@@ -182,6 +208,11 @@ corresponds to array representations expected by `Sphere(2)` and `Euclidean(2)`.
 
 Next, the desired point on the product manifold can be obtained by calling
 `Manifolds.prod_point(Mshape, [1.0, 0.0, 0.0], [-3.0, 2.0])`.
+
+!!! note
+
+    Usage of this type has been deprecated. Please switch to [`ProductRepr`](@ref)
+    as a representation of points and tangent vectors on product manifolds.
 """
 function prod_point(M::ShapeSpecification, pts...)
     data = mapreduce(vcat, pts) do pt
