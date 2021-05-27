@@ -98,13 +98,13 @@ And we call the resulting ``Y`` the projection of ``X`` onto the tangent space `
 
 Let‘s look at the little more concrete example of the complex Circle again.
 Here, the closest point of ``p ∈ ℂ`` is just the projection onto the circle, or in other words ``q = \frac{p}{\lvert p \rvert}``. A tangent space ``T_p\mathcal C`` in the embedding is the line orthogonal to a point ``p∈\mathcal C`` through the origin.
-This can be better visualized by looking at ``p+T_p\mathcal C`` which is actually the line tangent to ``p``. NOte that this shift does not change the resulting projection relative to the origin of the tangent space.
+This can be better visualized by looking at ``p+T_p\mathcal C`` which is actually the line tangent to ``p``. Note that this shift does not change the resulting projection relative to the origin of the tangent space.
 
 Here the projection can be computed as the classical projection onto the line, i.e.  ``Y = X - ⟨X,p⟩X``.
 
 this is illustrated in the following figure
 
-![An example illustrating the two kinds of projections on the Circle.](assets/images/retraction_illustration_600.png)
+![An example illustrating the two kinds of projections on the Circle.](assets/images/projection_illustration_600.png)
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
