@@ -11,7 +11,7 @@ include("utils.jl")
     @testset "Ambiguities" begin
         # TODO: reduce the number of ambiguities for Julia 1.6
         if VERSION.prerelease == () && !Sys.iswindows() && VERSION < v"1.6.0"
-            @test length(Test.detect_ambiguities(ManifoldsBase)) <= 58
+            @test length(Test.detect_ambiguities(ManifoldsBase)) <= 65
             @test length(Test.detect_ambiguities(Manifolds)) == 0
             @test length(our_base_ambiguities()) <= 24
         else
