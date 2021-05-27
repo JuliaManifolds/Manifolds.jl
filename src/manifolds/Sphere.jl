@@ -482,13 +482,7 @@ function get_chart_index(::Sphere{n,ℝ}, ::StereographicAtlas, p) where {n}
     end
 end
 
-function get_point_coordinates!(
-    ::Sphere{n,ℝ},
-    x,
-    ::StereographicAtlas,
-    i::Symbol,
-    p,
-) where {n}
+function get_parameters!(::Sphere{n,ℝ}, x, ::StereographicAtlas, i::Symbol, p) where {n}
     if i === :north
         return x .= p[2:end] ./ (1 + p[1])
     else
@@ -533,7 +527,7 @@ function get_vector!(
     X,
     B::InducedBasis{ℝ,TangentSpaceType,<:StereographicAtlas},
 ) where {n}
-    a = get_point_coordinates(M, B.A, B.i, p)
+    a = get_parameters(M, B.A, B.i, p)
     mult = inv(1 + dot(a, a))^2
 
     Y[1] = 0
@@ -561,6 +555,6 @@ function local_metric(
     p,
     B::InducedBasis{ℝ,TangentSpaceType,StereographicAtlas,Symbol},
 ) where {n}
-    a = get_point_coordinates(M, B.A, B.i, p)
+    a = get_parameters(M, B.A, B.i, p)
     return (4 / (1 + dot(a, a))^2) * I
 end

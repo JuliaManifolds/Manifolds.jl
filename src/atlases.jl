@@ -8,7 +8,7 @@ object.
 """
 abstract type AbstractAtlas{𝔽} end
 
-"""
+@doc raw"""
     RetractionAtlas{
         𝔽,
         TRetr<:AbstractRetractionMethod,
@@ -16,8 +16,15 @@ abstract type AbstractAtlas{𝔽} end
         TBasis<:AbstractBasis,
     } <: AbstractAtlas{𝔽}
 
-An atlas indexed by points on a manifold, such that coordinate transformations are performed
-using retractions, inverse retractions, and coordinate calculation for a given basis.
+An atlas indexed by points on a manifold, ``\mathcal M = I`` and parameters (local coordinates)
+are given in ``T_p\mathcal M``.
+This means, that a chart ``\varphi_p = \mathrm{cord}\circ\mathrm{retr}_p^{-1}`` is only locally
+defined (around ``p``), where ``\mathrm{cord}`` is the decomposition of the tangent vector
+into coordinates with respect to the given basis of the tangent space, cf. [`get_coordinates`](@ref).
+The parametrization is given by ``\varphi_^{-1}=\mathrm{retr}_p\circ\mathrm{vec}``,
+where ``\mathrm{vec}`` turns the basis coordinates into a tangent vector, cf. [`get_vector`](@ref).
+
+In short: The coordinates with respect to a basis are used together with a retraction as a parametrization.
 
 # See also
 
@@ -57,46 +64,51 @@ function get_default_atlas(::AbstractManifold)
     return RetractionAtlas()
 end
 
-"""
-    get_point_coordinates(M::AbstractManifold, A::AbstractAtlas, i, p)
+@doc raw"""
+    get_parameters(M::AbstractManifold, A::AbstractAtlas, i, p)
 
-Calculate coordinates of point `p` on manifold `M` in chart from an [`AbstractAtlas`](@ref)
-`A` at index `i`. Coordinates are in the number system determined by `A`.
+Calculate parameters (local coordinates) of point `p` on manifold `M` in chart from an [`AbstractAtlas`](@ref)
+`A` at index `i`.
+This function is hence animplementation chart ``\varphi_i(p), i\in I``.
+The parameters are in the number system determined by `A`.
+If the point ``p\notin U_i`` is not in the domain of the chart, this method shoudl throw an error.
 
 # See also
 
 [`get_point`](@ref), [`get_chart_index`](@ref)
-"""
-get_point_coordinates(::AbstractManifold, ::AbstractAtlas, ::Any, ::Any)
 
-function get_point_coordinates(M::AbstractManifold, A::AbstractAtlas, i, p)
-    a = allocate_result(M, get_point_coordinates, p)
-    get_point_coordinates!(M, a, A, i, p)
+"""
+get_parameters(::AbstractManifold, ::AbstractAtlas, ::Any, ::Any)
+
+function get_parameters(M::AbstractManifold, A::AbstractAtlas, i, p)
+    a = allocate_result(M, get_parameters, p)
+    get_parameters!(M, a, A, i, p)
     return a
 end
 
-function allocate_result(M::AbstractManifold, f::typeof(get_point_coordinates), p)
+function allocate_result(M::AbstractManifold, f::typeof(get_parameters), p)
     T = allocate_result_type(M, f, (p,))
     return allocate(p, T, manifold_dimension(M))
 end
 
-function get_point_coordinates!(M::AbstractManifold, a, A::RetractionAtlas, i, p)
+function get_parameters!(M::AbstractManifold, a, A::RetractionAtlas, i, p)
     return get_coordinates!(M, a, i, inverse_retract(M, i, p, A.invretr), A.basis)
 end
 
-function get_point_coordinates(M::AbstractManifold, A::RetractionAtlas, i, p)
+function get_parameters(M::AbstractManifold, A::RetractionAtlas, i, p)
     return get_coordinates(M, i, inverse_retract(M, i, p, A.invretr), A.basis)
 end
 
-"""
+@doc raw"""
     get_point(M::AbstractManifold, A::AbstractAtlas, i, a)
 
-Calculate point at coordinates `a` on manifold `M` in chart from an [`AbstractAtlas`](@ref)
-`A` at index `i`.
+Calculate point at parameters (local coordinates) `a` on manifold `M` in chart from
+an [`AbstractAtlas`](@ref) `A` at index `i`.
+This function is hence an implementation of the inverse ``\varphi_i^{-1}(a), i\in I`` of a chart, also called a parametrization.
 
 # See also
 
-[`get_point_coordinates`](@ref), [`get_chart_index`](@ref)
+[`get_parameters`](@ref), [`get_chart_index`](@ref)
 """
 get_point(::AbstractManifold, ::AbstractAtlas, ::Any, ::Any)
 
@@ -134,7 +146,7 @@ get_chart_index(::AbstractManifold, ::AbstractAtlas, ::Any)
 
 get_chart_index(::AbstractManifold, ::RetractionAtlas, p) = p
 
-"""
+@doc raw"""
     transition_map(M::AbstractManifold, A_from::AbstractAtlas, i_from, A_to::AbstractAtlas, i_to, a)
     transition_map(M::AbstractManifold, A::AbstractAtlas, i_from, i_to, a)
 
@@ -142,9 +154,21 @@ Given coordinates `a` in chart `(A_from, i_from)` of a point on manifold `M`, re
 coordinates of that point in chart `(A_to, i_to)`. If `A_from` and `A_to` are equal, `A_to`
 can be omitted.
 
+Mathematically this function is the transition map or change of charts, but it
+might even be between to atlasses ``A_{\text{from}} = \{(U_i,\varphi_i)\}_{i\in I} `` and ``A_{\text{to}} = \{(V_j,\psi_j)\}_{j\in J}``,
+and hence ``I, J`` are their index sets.
+We have ``i_{\text{from}}\in I``, ``i_{\text{to}}\in J`` and this method computes
+
+This method then computes
+```math
+\bigl(\psi{i_{\text{to}}}\circ\varphi_{i_{\text{from}}}^{-1}\bigr)(a)
+```
+
+Note that, similar to [`get_parameters`](@ref) this method should fail the same way if ``V_{i_{\text{to}}}\cap U_{i_{\text{from}}}=\emptyset``.
+
 # See also
 
-[`AbstractAtlas`](@ref)
+[`AbstractAtlas`](@ref), [`get_parameters`](@ref), [`get_point`](@ref)
 """
 function transition_map(
     M::AbstractManifold,
@@ -154,7 +178,7 @@ function transition_map(
     i_to,
     a,
 )
-    return get_point_coordinates(M, A_to, i_to, get_point(M, A_from, i_from, a))
+    return get_parameters(M, A_to, i_to, get_point(M, A_from, i_from, a))
 end
 
 function transition_map(M::AbstractManifold, A::AbstractAtlas, i_from, i_to, a)
@@ -170,7 +194,7 @@ function transition_map!(
     i_to,
     a,
 )
-    return get_point_coordinates!(M, y, A_to, i_to, get_point(M, A_from, i_from, a))
+    return get_parameters!(M, y, A_to, i_to, get_point(M, A_from, i_from, a))
 end
 
 function transition_map!(M::AbstractManifold, y, A::AbstractAtlas, i_from, i_to, a)
@@ -216,11 +240,13 @@ function induced_basis(
     return dual_basis(M, p, A.basis)
 end
 
-"""
+@doc raw"""
     InducedBasis(vs::VectorSpaceType, A::AbstractAtlas, i)
 
 The basis induced by chart with index `i` from an [`AbstractAtlas`](@ref) `A` of vector
-space of type `vs`.
+space of type `vs`, i.e. if you write the chart ``\varphi_i = (\varphi_i^1,...,\varphi_n^1)^{\mathrm{T}}``.
+as its coordinate functions, then the basis consists of the partial derivatives ``\Bigl(\frac{\partial}{\partial\varphi_i^j}\Bigr)_p``.
+
 
 # See also
 
