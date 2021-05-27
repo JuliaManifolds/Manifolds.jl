@@ -4,12 +4,22 @@ A power manifold is based on a [`AbstractManifold`](@ref) $\mathcal M$ to build 
 In the case where $m=1$ we can represent a manifold-valued vector of data of length $n_1$, for example a time series.
 The case where $m=2$ is useful for representing manifold-valued matrices of data of size $n_1 \times n_2$, for example certain types of images.
 
+There are three available representations for points and vectors on a power manifold:
+
+* [`ArrayPowerRepresentation`](@ref) (the default one), very efficient but only applicable when points on the underlying manifold are represented using plain `AbstractArray`s.
+* [`NestedPowerRepresentation`](@ref), applicable to any manifold. It assumes that points on the underlying manifold are represented using mutable data types.
+* [`NestedReplacingPowerRepresentation`](@ref), applicable to any manifold. It does not mutate points on the underlying manifold, replacing them instead when appropriate.
+
+Below are some examples of usage of these representations.
+
 ## Example
 
 There are two ways to store the data: in a multidimensional array or in a nested array.
 
 Let's look at an example for both.
 Let $\mathcal M$ be `Sphere(2)` the 2-sphere and we want to look at vectors of length 4.
+
+### `ArrayPowerRepresentation`
 
 For the default, the [`ArrayPowerRepresentation`](@ref), we store the data in a multidimensional array,
 
@@ -42,6 +52,8 @@ An advantage of this representation is that it is quite efficient, especially wh
 A disadvantage is not being able to easily identify parts of the multidimensional array that correspond to a single point on the base manifold.
 Another problem is, that accessing a single point is ` p[:, 1]` which might be unintuitive.
 
+### `NestedPowerRepresentation`
+
 For the [`NestedPowerRepresentation`](@ref) we can now do
 
 ```@example 2
@@ -71,6 +83,27 @@ p = [ [1.0, 0.0, 0.0],
     ]
 set_component!(M, p, [0.0, 0.0, 1.0], 4)
 get_component(M, p, 4)
+```
+
+### `NestedReplacingPowerRepresentation`
+
+The final representation is the [`NestedReplacingPowerRepresentation`](@ref). It is similar to the [`NestedPowerRepresentation`](@ref) but it does not perform mutating operations on the points on the underlying manifold. The example below uses this representation to store points on a power manifold of the [`SpecialEuclidean`](@ref) group in-line in an `Vector` for improved efficiency. When having a mixture of both, i.e. an array structure that is nested (like [´NestedPowerRepresentation](@ref)) in the sense that the elements of the main vector are immutable, then changing the elements can not be done in a mutating way and hence [`NestedReplacingPowerRepresentation`](@ref) has to be used.
+
+```@example 4
+using Manifolds, StaticArrays
+R2 = Rotations(2)
+
+G = SpecialEuclidean(2)
+N = 5
+GN = PowerManifold(G, NestedReplacingPowerRepresentation(), N)
+
+q = [1.0 0.0; 0.0 1.0]
+p1 = [ProductRepr(SVector{2,Float64}([i - 0.1, -i]), SMatrix{2,2,Float64}(exp(R2, q, hat(R2, q, i)))) for i in 1:N]
+p2 = [ProductRepr(SVector{2,Float64}([i - 0.1, -i]), SMatrix{2,2,Float64}(exp(R2, q, hat(R2, q, -i)))) for i in 1:N]
+
+X = similar(p1);
+
+log!(GN, X, p1, p2)
 ```
 
 ## Types and Functions
