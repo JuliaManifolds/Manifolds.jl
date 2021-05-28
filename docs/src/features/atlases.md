@@ -25,7 +25,7 @@ Operations using atlases and charts are available through the following function
 * [`get_chart_index`](@ref Main.Manifolds.get_chart_index) can be used to select an appropriate chart for the neighborhood of a given point ``p``. This function should work deterministically, i.e. for a fixed ``p`` always return the same chart.
 * [`get_parameters`](@ref Main.Manifolds.get_parameters) converts a point to its local coordinates, also called parameters with respect to the chart in a chart.
 * [`get_point`](@ref Main.Manifolds.get_point) converts parameters (local coordinates) in a chart to the point that corresponds to them.
-* [`induced_basis`](@ref Main.Manifolds.induced_basis) returns a basis of a given vector space at a point induced by a chart ``\varphi``, by taking the derivative of the coordinate functions ``\varphi^k``, ``k=1,\ldots,n``.
+* [`induced_basis`](@ref Main.Manifolds.induced_basis) returns a basis of a given vector space at a point induced by a chart ``\varphi``.
 * [`transition_map`](@ref Main.Manifolds.transition_map) converts coordinates of a point between two charts, e.g. computes ``\varphi_i\circ\varphi_j^{-1}: \mathbb{R}^n\to\mathbb{R}^n``, ``i,j\in I``.
 
 While an atlas could store charts as explicit functions, it is favourable, that the [`get_parameters`] actually implements a chart ``\varphi``, [`get_point`](@ref) its inverse, the prametrization ``\varphi^{-1}``.
