@@ -8,13 +8,13 @@ For an atlas ``\mathcal A`` we further require that
 \displaystyle\bigcup_{i\in I} U_i = \mathcal M.
 ```
 
-We say ``\varphi_i`` is a chart about ``p``, if ``p\in U_i``
+We say that ``\varphi_i`` is a chart about ``p``, if ``p\in U_i``.
 An atlas provides a connection between a manifold and the Euclidean space ``\mathbb{R}^n``, since
-locally, a chart about ``p`` can be used to identify its neighborhood (as long as you sta in ``U_i``) “looks like” the Euclidean space.
-Most manifolds we consider are smooth, i.e. any change of charts ``\varphi_i\circ\varphi_j^{-1}: \mathbb{R}^n\to\mathbb{R}^n``, ``i,j\in I``, is a smooth function. These change of charts are also called transition maps
+locally, a chart about ``p`` can be used to identify its neighborhood (as long as you stay in ``U_i``) with a subset of a Euclidean space.
+Most manifolds we consider are smooth, i.e. any change of charts ``\varphi_i\circ\varphi_j^{-1}: \mathbb{R}^n\to\mathbb{R}^n``, where ``i,j\in I``, is a smooth function. These changes of charts are also called transition maps.
 
 Most operations on manifolds in `Manifolds.jl` avoid operating in a chart through appropriate embeddings and formulas derived for particular manifolds, though atlases provide the most general way of working with manifolds.
-Compared to these approaches, using an atlas ist often more technical and time-consuming.
+Compared to these approaches, using an atlas is often more technical and time-consuming.
 They are extensively used in metric-related functions on [`MetricManifold`](@ref Main.Manifolds.MetricManifold)s.
 
 Atlases are represented by objects of subtypes of [`AbstractAtlas`](@ref Main.Manifolds.AbstractAtlas).
@@ -22,7 +22,7 @@ There are no type restrictions for indices of charts in atlases.
 
 Operations using atlases and charts are available through the following functions:
 
-* [`get_chart_index`](@ref Main.Manifolds.get_chart_index) can be used to select an appropriate chart for the neighborhood of a given point ``p``. This function shoudl work deterministic, i.e. for a fixed ``p`` always return the same chart.
+* [`get_chart_index`](@ref Main.Manifolds.get_chart_index) can be used to select an appropriate chart for the neighborhood of a given point ``p``. This function should work deterministically, i.e. for a fixed ``p`` always return the same chart.
 * [`get_parameters`](@ref Main.Manifolds.get_parameters) converts a point to its local coordinates, also called parameters with respect to the chart in a chart.
 * [`get_point`](@ref Main.Manifolds.get_point) converts parameters (local coordinates) in a chart to the point that corresponds to them.
 * [`induced_basis`](@ref Main.Manifolds.induced_basis) returns a basis of a given vector space at a point induced by a chart ``\varphi``, by taking the derivative of the coordinate functions ``\varphi^k``, ``k=1,\ldots,n``.

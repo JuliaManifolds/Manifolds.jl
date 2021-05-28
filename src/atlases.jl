@@ -18,7 +18,7 @@ abstract type AbstractAtlas{𝔽} end
 
 An atlas indexed by points on a manifold, ``\mathcal M = I`` and parameters (local coordinates)
 are given in ``T_p\mathcal M``.
-This means, that a chart ``\varphi_p = \mathrm{cord}\circ\mathrm{retr}_p^{-1}`` is only locally
+This means that a chart ``\varphi_p = \mathrm{cord}\circ\mathrm{retr}_p^{-1}`` is only locally
 defined (around ``p``), where ``\mathrm{cord}`` is the decomposition of the tangent vector
 into coordinates with respect to the given basis of the tangent space, cf. [`get_coordinates`](@ref).
 The parametrization is given by ``\varphi_p^{-1}=\mathrm{retr}_p\circ\mathrm{vec}``,
@@ -69,9 +69,9 @@ end
 
 Calculate parameters (local coordinates) of point `p` on manifold `M` in chart from an [`AbstractAtlas`](@ref)
 `A` at index `i`.
-This function is hence animplementation chart ``\varphi_i(p), i\in I``.
+This function is hence an implementation of the chart ``\varphi_i(p), i\in I``.
 The parameters are in the number system determined by `A`.
-If the point ``p\notin U_i`` is not in the domain of the chart, this method shoudl throw an error.
+If the point ``p\notin U_i`` is not in the domain of the chart, this method should throw an error.
 
 # See also
 
@@ -155,7 +155,7 @@ coordinates of that point in chart `(A_to, i_to)`. If `A_from` and `A_to` are eq
 can be omitted.
 
 Mathematically this function is the transition map or change of charts, but it
-might even be between to atlasses ``A_{\text{from}} = \{(U_i,\varphi_i)\}_{i\in I} `` and ``A_{\text{to}} = \{(V_j,\psi_j)\}_{j\in J}``,
+might even be between two atlases ``A_{\text{from}} = \{(U_i,\varphi_i)\}_{i\in I} `` and ``A_{\text{to}} = \{(V_j,\psi_j)\}_{j\in J}``,
 and hence ``I, J`` are their index sets.
 We have ``i_{\text{from}}\in I``, ``i_{\text{to}}\in J`` and this method computes
 
@@ -164,7 +164,7 @@ This method then computes
 \bigl(\psi{i_{\text{to}}}\circ\varphi_{i_{\text{from}}}^{-1}\bigr)(a)
 ```
 
-Note that, similar to [`get_parameters`](@ref) this method should fail the same way if ``V_{i_{\text{to}}}\cap U_{i_{\text{from}}}=\emptyset``.
+Note that, similarly to [`get_parameters`](@ref), this method should fail the same way if ``V_{i_{\text{to}}}\cap U_{i_{\text{from}}}=\emptyset``.
 
 # See also
 
