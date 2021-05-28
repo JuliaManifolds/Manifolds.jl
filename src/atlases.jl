@@ -18,10 +18,10 @@ abstract type AbstractAtlas{𝔽} end
 
 An atlas indexed by points on a manifold, ``\mathcal M = I`` and parameters (local coordinates)
 are given in ``T_p\mathcal M``.
-This means that a chart ``\varphi_p = \mathrm{cord}\circ\mathrm{retr}_p^{-1}`` is only locally
+This means that a chart ``φ_p = \mathrm{cord}\circ\mathrm{retr}_p^{-1}`` is only locally
 defined (around ``p``), where ``\mathrm{cord}`` is the decomposition of the tangent vector
 into coordinates with respect to the given basis of the tangent space, cf. [`get_coordinates`](@ref).
-The parametrization is given by ``\varphi_p^{-1}=\mathrm{retr}_p\circ\mathrm{vec}``,
+The parametrization is given by ``φ_p^{-1}=\mathrm{retr}_p\circ\mathrm{vec}``,
 where ``\mathrm{vec}`` turns the basis coordinates into a tangent vector, cf. [`get_vector`](@ref).
 
 In short: The coordinates with respect to a basis are used together with a retraction as a parametrization.
@@ -69,7 +69,7 @@ end
 
 Calculate parameters (local coordinates) of point `p` on manifold `M` in chart from an [`AbstractAtlas`](@ref)
 `A` at index `i`.
-This function is hence an implementation of the chart ``\varphi_i(p), i\in I``.
+This function is hence an implementation of the chart ``φ_i(p), i\in I``.
 The parameters are in the number system determined by `A`.
 If the point ``p\notin U_i`` is not in the domain of the chart, this method should throw an error.
 
@@ -104,7 +104,7 @@ end
 
 Calculate point at parameters (local coordinates) `a` on manifold `M` in chart from
 an [`AbstractAtlas`](@ref) `A` at index `i`.
-This function is hence an implementation of the inverse ``\varphi_i^{-1}(a), i\in I`` of a chart, also called a parametrization.
+This function is hence an implementation of the inverse ``φ_i^{-1}(a), i\in I`` of a chart, also called a parametrization.
 
 # See also
 
@@ -155,13 +155,13 @@ coordinates of that point in chart `(A_to, i_to)`. If `A_from` and `A_to` are eq
 can be omitted.
 
 Mathematically this function is the transition map or change of charts, but it
-might even be between two atlases ``A_{\text{from}} = \{(U_i,\varphi_i)\}_{i\in I} `` and ``A_{\text{to}} = \{(V_j,\psi_j)\}_{j\in J}``,
+might even be between two atlases ``A_{\text{from}} = \{(U_i,φ_i)\}_{i\in I} `` and ``A_{\text{to}} = \{(V_j,\psi_j)\}_{j\in J}``,
 and hence ``I, J`` are their index sets.
 We have ``i_{\text{from}}\in I``, ``i_{\text{to}}\in J``.
 
 This method then computes
 ```math
-\bigl(\psi{i_{\text{to}}}\circ\varphi_{i_{\text{from}}}^{-1}\bigr)(a)
+\bigl(\psi{i_{\text{to}}}\circ φ_{i_{\text{from}}}^{-1}\bigr)(a)
 ```
 
 Note that, similarly to [`get_parameters`](@ref), this method should fail the same way if ``V_{i_{\text{to}}}\cap U_{i_{\text{from}}}=\emptyset``.
@@ -244,8 +244,10 @@ end
     InducedBasis(vs::VectorSpaceType, A::AbstractAtlas, i)
 
 The basis induced by chart with index `i` from an [`AbstractAtlas`](@ref) `A` of vector
-space of type `vs`, i.e. if you write the chart ``\varphi_i = (\varphi_i^1,...,\varphi_n^1)^{\mathrm{T}}``.
-as its coordinate functions, then the basis consists of the partial derivatives ``\Bigl(\frac{\partial}{\partial\varphi_i^j}\Bigr)_p``.
+space of type `vs`.
+This follows
+, i.e. if you write the chart ``φ_i = (φ_i^1,...,φ_n^1)^{\mathrm{T}}``.
+as its coordinate functions, then the basis consists of the partial derivatives ``\Bigl(\frac{\partial}{\partialφ_i^j}\Bigr)_p``.
 
 
 # See also
