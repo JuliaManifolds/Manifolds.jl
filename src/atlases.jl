@@ -157,7 +157,7 @@ can be omitted.
 Mathematically this function is the transition map or change of charts, but it
 might even be between two atlases ``A_{\text{from}} = \{(U_i,\varphi_i)\}_{i\in I} `` and ``A_{\text{to}} = \{(V_j,\psi_j)\}_{j\in J}``,
 and hence ``I, J`` are their index sets.
-We have ``i_{\text{from}}\in I``, ``i_{\text{to}}\in J`` and this method computes
+We have ``i_{\text{from}}\in I``, ``i_{\text{to}}\in J``.
 
 This method then computes
 ```math
