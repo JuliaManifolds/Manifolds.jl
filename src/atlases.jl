@@ -245,10 +245,23 @@ end
 
 The basis induced by chart with index `i` from an [`AbstractAtlas`](@ref) `A` of vector
 space of type `vs`.
-This follows
-, i.e. if you write the chart ``φ_i = (φ_i^1,...,φ_n^1)^{\mathrm{T}}``.
-as its coordinate functions, then the basis consists of the partial derivatives ``\Bigl(\frac{\partial}{\partialφ_i^j}\Bigr)_p``.
 
+For the `vs` a `TangentSpace` this works as  follows:
+
+Let ``n`` denote the dimension of the manifold ``\mathcal M``.
+
+Let the parameter ``a=φ_i(p) ∈ \mathbb R^n`` and ``j∈\{1,…,n\}``.
+We can look at the ``j``th parameter curve ``b_j(t) = a + te_j``, where ``e_j`` denotes the ``j``th unit vector.
+Using the parametrisation we obtain a curve ``c_i(t) = φ^{-1}(b_j(t))`` which fulfills ``c(0) = p``.
+
+Now taking the derivative(s) with respect to ``t`` (and evaluate at ``t=0``),
+we obtain a tangent vector for each `corresponding to an equivalence class of curves (having the same derivative) as
+
+```math
+X_j = [c_j] = \frac{\mathrm{d}}{\mathrm{d}t} c_i(t) \Bigl|_{t=0}
+```
+
+and the set ``\{X_1,\ldots,X_n\}`` is the chart-induced basis of ``T_p\mathcal M``.
 
 # See also
 

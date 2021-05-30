@@ -47,6 +47,7 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``X`` | a tangent vector from ``T_p \mathcal M`` | ``X_1,X_2,\ldots,Y,Z`` | sometimes written with base point ``X_p`` |
 | ``\operatorname{tr}`` | trace (of a matrix) | |
 | ``\cdot^\mathrm{T}`` | transposed | |
+| ``e_i \in \mathbb R^n`` | the ``i``th unit vector | ``e_i^n`` | the space dimension (``n``) is omited, when clear from context
 | ``B`` | a vector bundle | |
 | ``\mathcal T_{q\gets p}X`` | vector transport | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``
 | ``\mathcal T_{p,Y}X`` | vector transport in direction ``Y`` | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``, where ``q`` is deretmined by ``Y``, for example using the exponential map or some retraction.
