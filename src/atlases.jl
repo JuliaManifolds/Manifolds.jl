@@ -161,7 +161,7 @@ We have ``i_{\text{from}}\in I``, ``i_{\text{to}}\in J``.
 
 This method then computes
 ```math
-\bigl(\psi{i_{\text{to}}}\circ φ_{i_{\text{from}}}^{-1}\bigr)(a)
+\bigl(\psi_{i_{\text{to}}}\circ φ_{i_{\text{from}}}^{-1}\bigr)(a)
 ```
 
 Note that, similarly to [`get_parameters`](@ref), this method should fail the same way if ``V_{i_{\text{to}}}\cap U_{i_{\text{from}}}=\emptyset``.
@@ -246,16 +246,16 @@ end
 The basis induced by chart with index `i` from an [`AbstractAtlas`](@ref) `A` of vector
 space of type `vs`.
 
-For the `vs` a `TangentSpace` this works as  follows:
+For the `vs` a [`TangentSpace`](@ref) this works as  follows:
 
 Let ``n`` denote the dimension of the manifold ``\mathcal M``.
 
 Let the parameter ``a=φ_i(p) ∈ \mathbb R^n`` and ``j∈\{1,…,n\}``.
 We can look at the ``j``th parameter curve ``b_j(t) = a + te_j``, where ``e_j`` denotes the ``j``th unit vector.
-Using the parametrisation we obtain a curve ``c_i(t) = φ^{-1}(b_j(t))`` which fulfills ``c(0) = p``.
+Using the parametrisation we obtain a curve ``c_j(t) = φ_i^{-1}(b_j(t))`` which fulfills ``c(0) = p``.
 
 Now taking the derivative(s) with respect to ``t`` (and evaluate at ``t=0``),
-we obtain a tangent vector for each `corresponding to an equivalence class of curves (having the same derivative) as
+we obtain a tangent vector for each ``j`` corresponding to an equivalence class of curves (having the same derivative) as
 
 ```math
 X_j = [c_j] = \frac{\mathrm{d}}{\mathrm{d}t} c_i(t) \Bigl|_{t=0}
