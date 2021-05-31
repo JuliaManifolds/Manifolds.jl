@@ -176,7 +176,7 @@ using ManifoldsBase: TFVector
             p *= k
             i = Manifolds.get_chart_index(M, A, p)
             @test i === (p[1] < 0 ? :south : :north)
-            a = get_point_coordinates(M, A, i, p)
+            a = get_parameters(M, A, i, p)
             q = get_point(M, A, i, a)
             @test isapprox(M, p, q)
 
