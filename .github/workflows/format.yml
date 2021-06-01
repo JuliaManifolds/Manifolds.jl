@@ -13,22 +13,15 @@ jobs:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
         with:
-          version: 1.4
+          version: 1
       - name: Install JuliaFormatter and format
         run: |
           julia  -e 'using Pkg; Pkg.add(PackageSpec(name="JuliaFormatter"))'
-          julia  -e 'using JuliaFormatter; format(".")'
-      - name: Check format
-        run: |
-          julia -e '
-          out = Cmd(`git diff --name-only`) |> read |> String
-          if out == ""
-              exit(0)
-          else
-              @error "The following files have not been formatted:"
-              write(stdout, out)
-              out_diff = Cmd(`git diff`) |> read |> String
-              @error "Diff:"
-              write(stdout, out_diff)
-              exit(1)
-          end'
+          julia  -e 'using JuliaFormatter; format("."; verbose=true)'
+        shell: julia --color=yes {0}
+      - name: Suggest formatting changes
+        uses: reviewdog/action-suggester@v1
+        if: github.event_name == 'pull_request'
+        with:
+          tool_name: JuliaFormatter
+          fail_on_error: true
