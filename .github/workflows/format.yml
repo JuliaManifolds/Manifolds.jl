@@ -16,8 +16,10 @@ jobs:
           version: 1
       - name: Install JuliaFormatter and format
         run: |
-          julia  -e 'using Pkg; Pkg.add(PackageSpec(name="JuliaFormatter"))'
-          julia  -e 'using JuliaFormatter; format("."; verbose=true)'
+          using Pkg
+          Pkg.add(PackageSpec(name="JuliaFormatter"))
+          using JuliaFormatter
+          format("."; verbose=true)
         shell: julia --color=yes {0}
       - name: Suggest formatting changes
         uses: reviewdog/action-suggester@v1
