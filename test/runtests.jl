@@ -5,10 +5,6 @@ include("utils.jl")
       "Testing Static:   $(TEST_STATIC_SIZED)\n\n" *
       "Check test/utils.jl if you wish to change these settings."
 
-function foo(x)
-return x
-end
-
 @testset "Manifolds.jl" begin
     include_test("differentiation.jl")
 
