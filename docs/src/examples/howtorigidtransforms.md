@@ -183,7 +183,7 @@ x_01b_ = get_coordinates(G, p0, log(G, p0, p_01b), B)
 @assert isapprox( abs(x_01b_[3]),   π/2 , atol = 1e-10 )
 ```
 
-Notice that both the `log` and `get_coordinates` operations are performed relative to our choosen reference point `p0`.  These operations therefore are extracting the tangent space vector (and it's coordinates) relative to the origin.  If we were to extract the vector coordinates of `p_01b` relative to `p_01a`, we would expect to get the same numerical coordinate values used to construction the relative transform `p1b`.
+Notice that both the `log` and `get_coordinates` operations are performed relative to our choosen reference point `p0`.  These operations therefore are extracting the tangent space vector (and its coordinates) relative to the origin.  If we were to extract the vector coordinates of `p_01b` relative to `p_01a`, we would expect to get the same numerical coordinate values used to construction the relative transform `p1b`.
 
 Similarly, we check that the opposite corner of the walked rectangle is as we expect
 ```julia
