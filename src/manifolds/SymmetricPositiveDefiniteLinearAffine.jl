@@ -49,7 +49,7 @@ exp(::SymmetricPositiveDefinite, ::Any...)
 function exp!(::SymmetricPositiveDefinite{N}, q, p, X) where {N}
     e = eigen(Symmetric(p))
     U = e.vectors
-    S = e.values
+    S = max.(e.values, floatmin(eltype(e.values)))
     Ssqrt = Diagonal(sqrt.(S))
     SsqrtInv = Diagonal(1 ./ sqrt.(S))
     pSqrt = Symmetric(U * Ssqrt * transpose(U))
@@ -165,7 +165,7 @@ log(::SymmetricPositiveDefinite, ::Any...)
 function log!(M::SymmetricPositiveDefinite{N}, X, p, q) where {N}
     e = eigen(Symmetric(p))
     U = e.vectors
-    S = e.values
+    S = max.(e.values, floatmin(eltype(e.values)))
     Ssqrt = Diagonal(sqrt.(S))
     SsqrtInv = Diagonal(1 ./ sqrt.(S))
     pSqrt = Symmetric(U * Ssqrt * transpose(U))
@@ -215,8 +215,8 @@ function vector_transport_to!(
     distance(M, p, q) < 2 * eps(eltype(p)) && copyto!(Y, X)
     e = eigen(Symmetric(p))
     U = e.vectors
-    S = e.values
-    Ssqrt = sqrt.(e.values)
+    S = max.(e.values, floatmin(eltype(e.values)))
+    Ssqrt = sqrt.(S)
     SsqrtInv = Diagonal(1 ./ Ssqrt)
     Ssqrt = Diagonal(Ssqrt)
     pSqrt = Symmetric(U * Ssqrt * transpose(U)) # p^1/2
@@ -224,7 +224,7 @@ function vector_transport_to!(
     tv = Symmetric(pSqrtInv * X * pSqrtInv) # p^(-1/2)Xp^{-1/2}
     ty = Symmetric(pSqrtInv * q * pSqrtInv) # p^(-1/2)qp^(-1/2)
     e2 = eigen(ty)
-    Se = Diagonal(log.(e2.values))
+    Se = Diagonal(log.(max.(e2.values, floatmin(eltype(e2.values)))))
     Ue = e2.vectors
     logty = Symmetric(Ue * Se * transpose(Ue)) # nearly log_pq without the outer p^1/2
     e3 = eigen(logty) # since they cancel with the pInvSqrt in the next line
