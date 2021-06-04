@@ -13,6 +13,17 @@ manifold, see[^EdelmanAriasSmith1998].
 """
 struct CanonicalMetric <: RiemannianMetric end
 
+"""
+    ApproximateLogarithmicMap <: ApproximateInverseRetraction
+
+An approximate implementation of the logarithmic map, which is an [`inverse_retract`](@ref)ion.
+See [`inverse_retract(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, ::Any, ::Any, ::ApproximateLogarithmicMap) where {n,k}`](@ref) for a use case.
+"""
+struct ApproximateLogarithmicMap{T} <: ApproximateInverseRetraction
+    max_iterations::T
+    tolerance::T
+end
+
 function distance(M::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, q, p) where {n,k}
     return norm(M, p, log(M, p, q))
 end
@@ -87,19 +98,15 @@ function inner(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, p, X, Y) 
 end
 
 @doc raw"""
-    X = log(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, p, q; kwargs..)
-    log!(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, X, CanonicalMetric}, p, q; kwargs...)
+    X = inverse_retract(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
+    inverse_retract!(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, X, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
 
-Compute the logarithmic map on the [`Stiefel`](@ref)`(n,k)` manifold with respect to the [`CanonicalMetric`](@ref)
+Compute an approximation to the logarithmic map on the [`Stiefel`](@ref)`(n,k)` manifold with respect to the [`CanonicalMetric`](@ref)
 using a matrix-algebraic based approach to an iterative inversion of the formula of the
 [`exp`](@ref exp(::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, ::Any...) where {n,k}).
 
-The algorithm is derived in[^Zimmermann2017].
-
-# Keyword arguments
-
-Both `maxiter`(`=1e5`) and `tolerance`(`=1e-9`) can be given to the iterative process as
-stoppping criteria.
+The algorithm is derived in[^Zimmermann2017] and it uses the `max_iterations` and the `tolerance` field
+from the [`ApproximateLogarithmicMap`](@ref).
 
 [^Zimmermann2017]:
     > Zimmermann, R.: _A matrix-algebraic algorithm for the Riemannian logarithm on the Stiefel manifold under the canoncial metric.
@@ -107,7 +114,12 @@ stoppping criteria.
     > doi: [10.1137/16M1074485](https://doi.org/10.1137/16M1074485),
     > arXiv: [1604.05054](https://arxiv.org/abs/1604.05054).
 """
-log(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, ::Any...) where {n,k}
+inverse_retract(
+    ::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
+    ::Any,
+    ::Any,
+    ::ApproximateLogarithmicMap,
+) where {n,k}
 
 function log(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
@@ -117,17 +129,28 @@ function log(
     tolerance=1e-9,
 ) where {n,k}
     X = allocate_result(M, log, p, q)
-    log!(M, X, p, q; maxiter=maxiter, tolerance=tolerance)
+    inverse_retract!(M, X, p, q, ApproximateLogarithmicMap(maxiter, tolerance))
     return X
 end
 
 function log!(
-    ::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
     X,
     p,
     q;
     maxiter=1e5,
     tolerance=1e-9,
+) where {n,k}
+    inverse_retract!(M, X, p, q, ApproximateLogarithmicMap(maxiter, tolerance))
+    return X
+end
+
+function inverse_retract!(
+    ::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
+    X,
+    p,
+    q,
+    a::ApproximateInverseRetraction,
 ) where {n,k}
     M = p' * q
     QR = qr(q - p * M)
@@ -144,7 +167,7 @@ function log!(
     expnC = exp(-C)
     i = 0
     new_Vpcols = Vpcols * expnC # allocate once
-    while (i < maxiter) && (norm(C) > tolerance)
+    while (i < a.max_iterations) && (norm(C) > a.tolerance)
         i = i + 1
         log_safe!(LV, V)
         expnC = exp(-C)
