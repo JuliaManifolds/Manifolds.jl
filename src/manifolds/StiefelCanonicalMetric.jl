@@ -20,7 +20,7 @@ An approximate implementation of the logarithmic map, which is an [`inverse_retr
 See [`inverse_retract(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, ::Any, ::Any, ::ApproximateLogarithmicMap) where {n,k}`](@ref) for a use case.
 """
 struct ApproximateLogarithmicMap{T} <: ApproximateInverseRetraction
-    max_iterations::T
+    max_iterations::Int
     tolerance::T
 end
 
