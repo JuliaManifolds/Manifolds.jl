@@ -373,6 +373,7 @@ export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod,
     CayleyRetraction,
     ExponentialRetraction,
+    HOSVDRetraction,
     QRRetraction,
     PolarRetraction,
     ProjectionRetraction,
