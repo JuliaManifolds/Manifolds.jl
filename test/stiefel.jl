@@ -313,5 +313,8 @@ using Manifolds: default_metric_dispatch
         s = exp(M4, p, Z)
         Z2 = log(M4, p, s)
         @test isapprox(M4, p, Z, Z2)
+        Z3 = simliar(Z2)
+        log!(M4, Z3, p, s)
+        @test isapprox(M4, p, Z2, Z3)
     end
 end
