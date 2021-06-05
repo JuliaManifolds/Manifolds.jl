@@ -69,6 +69,7 @@ using Distributions
 using Einsum: @einsum
 using FiniteDifferences
 using HybridArrays
+using Kronecker
 using LightGraphs
 using LinearAlgebra
 using ManifoldsBase
@@ -187,6 +188,7 @@ include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
+include("manifolds/Tucker.jl")
 
 # Product or power based manifolds
 include("manifolds/Torus.jl")
@@ -324,9 +326,10 @@ export Euclidean,
     SymmetricMatrices,
     SymmetricPositiveDefinite,
     SymmetricPositiveSemidefiniteFixedRank,
-    Torus
-export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint
-export HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector
+    Torus,
+    Tucker
+export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint, TuckerPoint
+export HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector, TuckerTVector
 export AbstractNumbers, ℝ, ℂ, ℍ
 
 # decorator manifolds
