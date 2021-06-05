@@ -49,7 +49,7 @@ const LeftInvariantMetric{G} = InvariantMetric{G,LeftAction} where {G<:AbstractM
 Alias for a left-[`InvariantMetric`](@ref).
 """
 function LeftInvariantMetric(metric::T) where {T<:AbstractMetric}
-    return InvariantMetric{Ttypeof(metric),LeftAction}(metric)
+    return InvariantMetric{T,LeftAction}(metric)
 end
 
 const RightInvariantMetric{G} = InvariantMetric{G,RightAction} where {G<:AbstractMetric}
