@@ -1,3 +1,4 @@
+using Test: Error
 
 include("../utils.jl")
 include("group_utils.jl")

@@ -169,14 +169,14 @@ make_identity(M::AbstractManifold, p) = Identity(M, identity(M, p))
 Base.show(io::IO, e::Identity) = print(io, "Identity($(e.group), $(e.p))")
 
 # To ensure allocate_result_type works
-number_eltype(e::Identity) = Bool
+number_eltype(::Identity) = Bool
 
 Base.copyto!(e::TE, ::TE) where {TE<:Identity} = e
 Base.copyto!(p, ::TE) where {TE<:Identity} = copyto!(p, e.p)
 Base.copyto!(p::AbstractArray, e::TE) where {TE<:Identity} = copyto!(p, e.p)
 
-Base.isapprox(p, e::Identity; kwargs...) = isapprox(e::Identity, p; kwargs...)
-Base.isapprox(e::Identity, p; kwargs...) = isapprox(e.group, e, p; kwargs...)
+Base.isapprox(p, e::E; kwargs...) where {E<:Identity} = isapprox(e, p; kwargs...)
+Base.isapprox(e::E, p; kwargs...) where {E<:Identity} = isapprox(e.group, e, p; kwargs...)
 Base.isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
 
 function allocate_result(
@@ -254,7 +254,6 @@ function allocate_result(
 ) where {GT<:AbstractGroupManifold}
     return allocate(X, Size(manifold_dimension(G)))
 end
-
 function get_vector(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBasis)
     M != e.group && error("On $(M) the identity $(e) does not match to perform get_vector.")
     return get_vector(decorated_manifold(M), e.p, X, B)
