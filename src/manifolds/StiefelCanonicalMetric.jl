@@ -18,6 +18,12 @@ struct CanonicalMetric <: RiemannianMetric end
 
 An approximate implementation of the logarithmic map, which is an [`inverse_retract`](@ref)ion.
 See [`inverse_retract(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, ::Any, ::Any, ::ApproximateLogarithmicMap) where {n,k}`](@ref) for a use case.
+
+# Fields
+
+* `max_iterations` – maximal number of iterations used in the approximation
+* `tolerance` – a tolerance used as a stopping criterion
+
 """
 struct ApproximateLogarithmicMap{T} <: ApproximateInverseRetraction
     max_iterations::Int
@@ -125,7 +131,7 @@ function log(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
     p,
     q;
-    maxiter=1e5,
+    maxiter::Int=10000,
     tolerance=1e-9,
 ) where {n,k}
     X = allocate_result(M, log, p, q)
@@ -138,7 +144,7 @@ function log!(
     X,
     p,
     q;
-    maxiter=1e5,
+    maxiter::Int=10000,
     tolerance=1e-9,
 ) where {n,k}
     inverse_retract!(M, X, p, q, ApproximateLogarithmicMap(maxiter, tolerance))
