@@ -205,10 +205,12 @@ end
 Base.convert(::Type{Matrix}, basis :: CachedHOSVDBasis{𝔽, T, D}) where {𝔽, T, D} = convert(Matrix{T}, basis)
 
 """
+    Base.convert(::Type{Array}, A :: TuckerPoint) where {T, TA <: T, D}
     Base.convert(::Type{Array{T,D}}, A :: TuckerPoint{TA, D}) where {T, TA <: T, D}
 
 Convert a point on the Tucker manifold to a full tensor. 
 
+    Base.convert(::Type{Array}, A :: TuckerPoint, X)
     Base.convert(::Type{Array{T,D}}, A :: TuckerPoint{TA, D}, X :: TuckerTVector) where {T, TA <: T, D}
 
 Convert a tangent vector X to the Tucker manifold at a point A to full tensor.
