@@ -54,9 +54,8 @@ function TuckerPoint(core :: AbstractArray{T, D}, factors :: Vararg{MtxT, D}) wh
     factors′ = Q .* decomp.U
     TuckerPoint(HOSVD{T, D}(factors′, decomp.core, decomp.σ))
 end
-function TuckerPoint(A :: AbstractArray, mlrank :: NTuple{D, Int}) where {D}
-    #TODO  
-    error("Not implemented")
+function TuckerPoint(A :: AbstractArray{T, D}, mlrank :: NTuple{D, Int}) where {T, D}
+    TuckerPoint(st_hosvd(A, mlrank))
 end
 
 @doc raw"""
@@ -243,8 +242,8 @@ manifold_dimension(:: Tucker{n⃗, r⃗}) where {n⃗, r⃗} = prod(r⃗) + sum(
 
 Base.ndims(:: TuckerPoint{T, D}) where {T,D} = D
 
-number_eltype(p::TuckerPoint{T,D}) where {T, D} = T
-number_eltype(x::TuckerTVector{T,D}) where {T, D} = T
+number_eltype(::TuckerPoint{T,D}) where {T, D} = T
+number_eltype(::TuckerTVector{T,D}) where {T, D} = T
 
 function retract!(::Tucker, q::TuckerPoint, p::TuckerPoint{T, D}, x::TuckerTVector, ::HOSVDRetraction) where {T, D}
     U = p.hosvd.U 
@@ -330,30 +329,42 @@ The sequentially truncated HOSVD, as in
 > Nick Vannieuwenhoven, Raf Vandebril, Karl Meerbergen: "A new truncation strategy for the higher-order singular value decomposition"
 > SIAM Journal on Scientific Computing, 34(2), pp. 1027-1052, 2012
 > doi: [10.1137/110836067](https://doi.org/10.1137/110836067)
+
+This is the HOSVD of an approimation of 𝔄, i.e. the core of this decomposition
+is also in HOSVD format.
 """
 function st_hosvd(𝔄, mlrank=size(𝔄)) 
     T = eltype(𝔄)
     D = ndims(𝔄)
     n⃗ = size(𝔄)
-    U :: Vector{Matrix{T}} = collect(ntuple(d -> Matrix{T}(undef, n⃗[d], mlrank[d]), D))
-    σ :: Vector{Vector{T}} = [Vector{T}(undef, mlrank[d]) for d = 1:D]
+    # Add type assertions to U and σ for type stability
+    U :: NTuple{D, Matrix{T}} = ntuple(d -> Matrix{T}(undef, n⃗[d], mlrank[d]), D)
+    σ :: NTuple{D, Vector{T}} = ntuple(d -> Vector{T}(undef, mlrank[d]), D)
 
     for d = 1:D
         # unfold
-        r_d  = mlrank[d]
-        𝔄⁽ᵈ⁾ = unfold(𝔄, d)
+        r_d   = mlrank[d]
+        𝔄⁽ᵈ⁾  = unfold(𝔄, d)
         # truncated SVD + incremental construction of the core
-        UΣVᵀ = svd(𝔄⁽ᵈ⁾)
-        U[d] = UΣVᵀ.U[:,1:r_d]
-        σ[d] = UΣVᵀ.S[1:r_d]
-        𝔄⁽ᵈ⁾ = Diagonal(σ[d]) * UΣVᵀ.Vt[1:r_d,:]
+        UΣVᵀ  = svd(𝔄⁽ᵈ⁾)
+        U[d] .= UΣVᵀ.U[:,1:r_d]
+        σ[d] .= UΣVᵀ.S[1:r_d]
+        𝔄⁽ᵈ⁾  = Diagonal(σ[d]) * UΣVᵀ.Vt[1:r_d,:]
         # reshape back into a tensor
         # (compiler doesn't know we are reshaping back into order D array without type assertion)
         m⃗ :: NTuple{D, Int} = tuple(mlrank[1:d]..., n⃗[d+1:D]...)
         𝔄 = fold(𝔄⁽ᵈ⁾, d, m⃗)
     end
 
-    HOSVD{T, D}(tuple(U...), 𝔄, tuple(σ...))
+    # Make sure the truncated core is in "all-orthogonal" HOSVD format
+    if mlrank ≠ n⃗
+        hosvd_core = st_hosvd(𝔄, mlrank)
+        U = U .* hosvd_core.U
+        𝔄 = hosvd_core.core
+        σ = hosvd_core.σ
+    end
+
+    HOSVD{T, D}(U, 𝔄, σ)
 end
 
 """
