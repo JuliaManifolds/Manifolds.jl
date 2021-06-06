@@ -160,6 +160,22 @@ end
 
 Base.copy(x :: TuckerTVector) = TuckerTVector(copy(x.Ċ), map(copy, x.U̇))
 
+function Base.copyto!(q :: TuckerPoint, p :: TuckerPoint)
+    for d in 1:ndims(q)
+        copyto!(q.hosvd.U[d], p.hosvd.U[d])
+        copyto!(q.hosvd.σ[d], p.hosvd.σ[d])
+    end
+    copyto!(q.hosvd.core, p.hosvd.core)
+    q
+end
+function Base.copyto!(y :: TuckerTVector, x :: TuckerTVector)
+    for d in 1:ndims(y.Ċ)
+        copyto!(y.U̇[d], x.U̇[d])
+    end
+    copyto!(y.Ċ, x.Ċ)
+    y
+end
+
 """
 Inverse of the k'th unfolding of a size n₁ × ... × n_D tensor
 """
@@ -232,6 +248,24 @@ function get_vector(::Tucker, 𝔄 :: TuckerPoint, ξ :: AbstractVector{T}, ℬ 
 end
 
 """
+Euclidean metric
+"""
+function inner(::Tucker, 𝔄::TuckerPoint, x::TuckerTVector, y::TuckerTVector)
+    ℭ = 𝔄.hosvd.core
+    dotprod = dot(x.Ċ, y.Ċ)
+    for d = 1:ndims(𝔄)
+        dotprod += dot(x.U̇[d] * unfold(ℭ, d), y.U̇[d] * unfold(ℭ, d))
+    end
+    dotprod
+end
+
+isapprox(p::TuckerPoint, q::TuckerPoint; kwargs...) = isapprox(convert(Array, p), convert(Array, q); kwargs...)
+isapprox(::Tucker, p :: TuckerPoint, q :: TuckerPoint; kwargs...) = isapprox(p, q; kwargs...)
+function isapprox(::Tucker, p::TuckerPoint, x::TuckerTVector, y::TuckerTVector; kwargs...)
+    isaprox(convert(Array, p, x), convert(Array, p, y); kwargs...)
+end
+
+"""
     isValidTuckerRank(n⃗, r⃗)
 
 Determines whether there are tensors of dimensions n⃗ with multilinear rank r⃗
@@ -244,6 +278,8 @@ Base.ndims(:: TuckerPoint{T, D}) where {T,D} = D
 
 number_eltype(::TuckerPoint{T,D}) where {T, D} = T
 number_eltype(::TuckerTVector{T,D}) where {T, D} = T
+
+ManifoldsBase.representation_size(ℳ :: Tucker{N}) where N = N
 
 function retract!(::Tucker, q::TuckerPoint, p::TuckerPoint{T, D}, x::TuckerTVector, ::HOSVDRetraction) where {T, D}
     U = p.hosvd.U 
@@ -378,4 +414,11 @@ function unfold(𝔄, k)
 	reshape(𝔄_, size(𝔄, k), div(length(𝔄), size(𝔄, k)))
 end
 
+zero_vector(::Tucker, 𝔄::TuckerPoint) = TuckerTVector(zero(𝔄.hosvd.core), zero.(𝔄.hosvd.U))
+function zero_vector!(::Tucker, X::TuckerTVector, ::TuckerPoint)
+    for U̇ in X.U̇
+        fill!(U̇, zero(eltype(U̇)))
+    end
+    fill!(X.Ċ, zero(eltype(Ċ)))
+end
 
