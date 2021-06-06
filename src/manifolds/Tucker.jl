@@ -54,6 +54,10 @@ function TuckerPoint(core :: AbstractArray{T, D}, factors :: Vararg{MtxT, D}) wh
     factors′ = Q .* decomp.U
     TuckerPoint(HOSVD{T, D}(factors′, decomp.core, decomp.σ))
 end
+function TuckerPoint(A :: AbstractArray, mlrank :: NTuple{D, Int}) where {D}
+    #TODO  
+    error("Not implemented")
+end
 
 @doc raw"""
     TuckerTVectort{T, D} <: TVector
@@ -89,6 +93,16 @@ end
 CachedHOSVDBasis{𝔽, T, D} = CachedBasis{𝔽,DefaultOrthonormalBasis{𝔽, TangentSpaceType},HOSVDBasis{T, D}}
 
 ⊗ᴿ(a...) = Kronecker.:⊗(reverse(a)...)
+
+Base.:*(s::Number, x::TuckerTVector) = TuckerTVector(s * x.Ċ, s .* x.U̇)
+Base.:*(x::TuckerTVector, s::Number) = TuckerTVector(x.Ċ * s, x.U̇ .* s)
+Base.:/(x::TuckerTVector, s::Number) = TuckerTVector(x.Ċ / s, x.U̇ ./ s)
+Base.:\(s::Number, x::TuckerTVector) = TuckerTVector(s \ x.Ċ, s .\ x.U̇)
+Base.:+(x::TuckerTVector, y::TuckerTVector) = TuckerTVector(x.Ċ + y.Ċ, x.U̇ .+ y.U̇)
+Base.:-(x::TuckerTVector, y::TuckerTVector) = TuckerTVector(x.Ċ - y.Ċ, x.U̇ .- y.U̇)
+Base.:-(x::TuckerTVector) = TuckerTVector(-x.Ċ, map(-, x.U̇))
+Base.:+(x::TuckerTVector) = TuckerTVector(x.Ċ, x.U̇)
+Base.:(==)(x :: TuckerTVector, y :: TuckerTVector) = (x.Ċ == y.Ċ) && (x.U̇ .== y.U̇)
 
 allocate(p :: TuckerPoint) = allocate(p, number_eltype(p))
 function allocate(p::TuckerPoint, ::Type{T}) where T
@@ -128,6 +142,24 @@ function Base.convert(::Type{Matrix{T}}, basis :: CachedHOSVDBasis{𝔽, T, D}) 
     end
     J
 end
+Base.convert(::Type{Matrix}, basis :: CachedHOSVDBasis{𝔽, T, D}) where {𝔽, T, D} = convert(Matrix{T}, basis)
+
+function Base.convert(::Type{Array{T,D}}, 𝔄 :: TuckerPoint{TA, D}) where {T, TA <: T, D}
+    reshape(⊗ᴿ(𝔄.hosvd.U...) * vec(𝔄.hosvd.core), size(𝔄))
+end
+Base.convert(::Type{Array}, 𝔄 :: TuckerPoint{T, D}) where {T,D} = convert(Array{T,D}, 𝔄)
+function Base.convert(::Type{Array{T,D}}, 𝔄 :: TuckerPoint{TA, D}, X :: TuckerTVector) where {T, TA <: T, D}
+    X_ambient = ⊗ᴿ(𝔄.hosvd.U...) * vec(X.Ċ)
+    for d = 1:D
+        X_ambient += ⊗ᴿ(ntuple(d_ -> d_ == d ? X.U̇[d_] : 𝔄.hosvd.U[d_], D)...) * vec(𝔄.hosvd.core)
+    end
+    reshape(X_ambient, size(𝔄))
+end
+function Base.convert(::Type{Array}, 𝔄 :: TuckerPoint{T, D}, X :: TuckerTVector) where {T,D}
+    convert(Array{T,D}, 𝔄, X)
+end
+
+Base.copy(x :: TuckerTVector) = TuckerTVector(copy(x.Ċ), map(copy, x.U̇))
 
 """
 Inverse of the k'th unfolding of a size n₁ × ... × n_D tensor
@@ -238,7 +270,7 @@ function retract!(::Tucker, q::TuckerPoint, p::TuckerPoint{T, D}, x::TuckerTVect
     end
 
     #Convert to truncated HOSVD of p + x
-    hosvd_S = st_hosvd(S, mlrank=r⃗)
+    hosvd_S = st_hosvd(S, r⃗)
     factors = UQ .* hosvd_S.U 
     for i in 1:D
         q.hosvd.U[i] .= factors[i]
@@ -291,7 +323,7 @@ end
 Base.size(𝔄 :: TuckerPoint) = map(u -> size(u,1), 𝔄.hosvd.U)
 
 """
-    st_hosvd(𝔄; mlrank=size(𝔄)) 
+    st_hosvd(𝔄, mlrank=size(𝔄)) 
 
 The sequentially truncated HOSVD, as in 
 [^Vannieuwenhoven2012]
@@ -299,7 +331,7 @@ The sequentially truncated HOSVD, as in
 > SIAM Journal on Scientific Computing, 34(2), pp. 1027-1052, 2012
 > doi: [10.1137/110836067](https://doi.org/10.1137/110836067)
 """
-function st_hosvd(𝔄; mlrank=size(𝔄)) 
+function st_hosvd(𝔄, mlrank=size(𝔄)) 
     T = eltype(𝔄)
     D = ndims(𝔄)
     n⃗ = size(𝔄)
