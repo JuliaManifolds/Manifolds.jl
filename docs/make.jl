@@ -54,6 +54,7 @@ makedocs(
                 "Symmetric positive semidefinite fixed rank" =>
                     "manifolds/symmetricpsdfixedrank.md",
                 "Torus" => "manifolds/torus.md",
+                "Tucker" => "manifolds/tucker.md",
                 "Unit-norm symmetric matrices" =>
                     "manifolds/spheresymmetricmatrices.md",
             ],
