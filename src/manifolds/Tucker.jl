@@ -50,7 +50,7 @@ function TuckerPoint(core :: AbstractArray{T, D}, factors :: Vararg{MtxT, D}) wh
     core′   = reshape(Kronecker.:⊗(reverse(R)...) * vec(core), size(core))
     
     # Convert to HOSVD format by taking the HOSVD of the core
-    decomp   = hosvd(core′)
+    decomp   = st_hosvd(core′)
     factors′ = Q .* decomp.U
     TuckerPoint(HOSVD{T, D}(factors′, decomp.core, decomp.σ))
 end
@@ -66,8 +66,29 @@ where $\dot_{U}_d^\mathrm{H} U_d = 0$
 """
 struct TuckerTVector{T, D} <: TVector
     Ċ :: Array{T, D}
-    U̇ :: Vector{Matrix{T}}
+    U̇ :: NTuple{D, Matrix{T}}
 end
+
+"""
+    HOSVDBasis{T, D}
+
+A implicitly stored basis of the tangent space to the Tucker manifold.
+If 𝔄 = (U¹ ⊗ ... ⊗ Uᴰ) C is a HOSVD, then this basis is defined as follows:
+
+ℬ = {(U¹ ⊗ ... ⊗ Uᴰ) eᵢ} ∪ {(U¹ ⊗ ... ⊗ 1/σ[d][j] Uᵈ⊥ eᵢ eⱼᵀ ⊗ ... ⊗ Uᴰ) C}
+
+See also:
+[^Dewaele2021]
+> Nick Dewaele, Paul Breiding, Nick Vannieuwenhoven, "The condition number of many tensor decompositions is invariant under Tucker compression"
+#TODO arXiv
+"""
+struct HOSVDBasis{T, D}
+	point :: TuckerPoint{T, D}
+    U⊥    :: NTuple{D, Matrix{T}}
+end
+CachedHOSVDBasis{𝔽, T, D} = CachedBasis{𝔽,DefaultOrthonormalBasis{𝔽, TangentSpaceType},HOSVDBasis{T, D}}
+
+⊗ᴿ(a...) = Kronecker.:⊗(reverse(a)...)
 
 allocate(p :: TuckerPoint) = allocate(p, number_eltype(p))
 function allocate(p::TuckerPoint, ::Type{T}) where T
@@ -78,6 +99,34 @@ end
 allocate(x :: TuckerTVector) = allocate(x, number_eltype(x))
 function allocate(x::TuckerTVector, ::Type{T}) where T
     TuckerTVector(allocate(x.Ċ, T), allocate(x.U̇, T))
+end
+
+"""
+An orthonormal basis for the tangent space to the Tucker manifold at a point 𝔄, represented as a matrix
+"""
+function Base.convert(::Type{Matrix{T}}, basis :: CachedHOSVDBasis{𝔽, T, D}) where {𝔽, T, D}
+    𝔄    = basis.data.point
+    U⊥   = basis.data.U⊥
+    U    = 𝔄.hosvd.U
+    σ    = 𝔄.hosvd.σ
+    ℭ    = 𝔄.hosvd.core
+    r⃗    = size(ℭ)
+    n⃗    = size(𝔄)
+
+    J = Matrix{T}(undef, prod(n⃗), manifold_dimension(Tucker(n⃗, r⃗)))
+    # compute all possible ∂𝔄╱∂ℭ
+    J[:, 1:prod(r⃗)] = ⊗ᴿ(U...)
+    # compute all possible ∂𝔄╱∂U[d] for d = 1,...,D
+    nextcolumn = prod(r⃗)
+    for d = 1:D
+        Udᵀ𝔄⁽ᵈ⁾ :: Matrix{T} = unfold(ℭ, d) * ⊗ᴿ(U[1:d-1]..., U[d+1:end]...)'
+        for i = 1:size(U⊥[d], 2), j = 1:r⃗[d]
+            ∂𝔄ᵢⱼ⁽ᵈ⁾ = 1/σ[d][j] * U⊥[d][:,i] * Udᵀ𝔄⁽ᵈ⁾[j,:]'
+            ∂𝔄ᵢⱼ    = fold(∂𝔄ᵢⱼ⁽ᵈ⁾, d, n⃗)
+            J[:,nextcolumn += 1] = vec(∂𝔄ᵢⱼ)
+        end
+    end
+    J
 end
 
 """
@@ -93,12 +142,74 @@ function fold(𝔄♭ :: AbstractMatrix{T}, k, n⃗ :: NTuple{D, Int}) :: Array{
     permutedims(reshape(𝔄♭, size_pre_permute), perm)
 end
 
+function get_basis(:: Tucker, 𝔄 :: TuckerPoint, basisType::DefaultOrthonormalBasis{𝔽, TangentSpaceType}) where 𝔽
+    D = ndims(𝔄)
+    n⃗ = size(𝔄) 
+    r⃗ = size(𝔄.hosvd.core) 
+
+    U = 𝔄.hosvd.U
+    U⊥ = ntuple(d -> Matrix(qr(I - U[d]*U[d]', Val(true)).Q)[:,1:n⃗[d]-r⃗[d]], D)
+
+    basis = HOSVDBasis(𝔄, U⊥)
+	CachedBasis(basisType, basis)
+end
+
+function get_coordinates(::Tucker, 𝔄, X, ℬ::CachedBasis)
+    coords = vec(X.Ċ)
+    for d = 1:length(X.U̇)
+        coord_mtx = (ℬ.data.U⊥[d] \ X.U̇[d]) * Diagonal(𝔄.hosvd.σ[d])
+        coords = vcat(coords, vec(coord_mtx'))
+    end
+    coords
+end
+
+function get_vector(::Tucker, 𝔄 :: TuckerPoint, ξ :: AbstractVector{T}, ℬ :: CachedHOSVDBasis) where T
+    U = 𝔄.hosvd.U
+    ℭ = 𝔄.hosvd.core
+    σ = 𝔄.hosvd.σ
+    U⊥ = ℬ.data.U⊥
+    D = ndims(ℭ)
+    r⃗ = size(ℭ)
+    n⃗ = size(𝔄)
+
+    # split ξ into ξ_core and ξU so that vcat(ξ_core, ξU...) == ξ
+    ξ_core     = ξ[1:length(ℭ)]
+    ξU         = Vector{T}[]
+    nextcolumn = length(ℭ) + 1
+    for d = 1:D
+        numcols = r⃗[d]*(n⃗[d] - r⃗[d])
+        push!(ξU, ξ[nextcolumn:nextcolumn + numcols - 1])
+        nextcolumn += numcols
+    end
+
+    # Construct ∂U[d] by plugging in the definition of
+    #    our orthonormal basis:
+    # V[d] = ∂U[d] = ∑ᵢⱼ { ξ[d]ᵢⱼ (σ[d]ⱼ)⁻¹ U⊥[d] 𝐞ᵢ 𝐞ⱼᵀ }
+    #      = ∑ⱼ (σ[d]ⱼ)⁻¹ U⊥[d] ( ∑ᵢ ξ[d]ᵢⱼ  𝐞ᵢ) 𝐞ⱼᵀ
+    ∂U = similar.(U)
+    for d = 1:D
+        # Assuming ξ = [ξ₁₁, ..., ξ₁ⱼ, ..., ξᵢ₁, ..., ξᵢⱼ, ..., ], we can
+        # reshape ξU[d] into a matrix with row indices i and column indices j
+        grid = transpose(reshape(ξU[d], r⃗[d], n⃗[d] - r⃗[d]))
+        # Notice that ∑ᵢ ξᵈᵢⱼ𝐞ᵢ = grid[:,j].
+        # This means V[d] = U⊥[d] * grid * Diagonal(σ[d])⁻¹
+        ∂U[d][:,:] = U⊥[d] * grid * Diagonal(1 ./ σ[d])
+    end
+
+    ∂C = reshape(ξ_core, size(ℭ))
+    TuckerTVector(∂C, ∂U)
+end
+
 """
     isValidTuckerRank(n⃗, r⃗)
 
 Determines whether there are tensors of dimensions n⃗ with multilinear rank r⃗
 """
 isValidTuckerRank(n⃗, r⃗) = all(r⃗ .≤ n⃗) && all(ntuple(i -> r⃗[i] ≤ prod(r⃗) ÷ r⃗[i], length(r⃗)))
+
+manifold_dimension(:: Tucker{n⃗, r⃗}) where {n⃗, r⃗} = prod(r⃗) + sum(r⃗ .* (n⃗ .- r⃗))
+
+Base.ndims(:: TuckerPoint{T, D}) where {T,D} = D
 
 number_eltype(p::TuckerPoint{T,D}) where {T, D} = T
 number_eltype(x::TuckerTVector{T,D}) where {T, D} = T
@@ -168,6 +279,16 @@ function Base.show(io::IO, ::MIME"text/plain", x::TuckerTVector)
     su = replace(su, '\n' => "\n$(pre)")
     print(io, pre, su)
 end
+function Base.show(io :: IO, mime::MIME"text/plain", ℬ :: CachedHOSVDBasis{𝔽, T, D}) where {𝔽, T, D} 
+    summary(io, ℬ)
+    print(" ≅")
+    su = sprint(show, "text/plain", convert(Matrix{T}, ℬ); context=io, sizehint=0)
+    su = replace(su, '\n' => "\n ")
+    println(io, " ", su)
+end
+
+
+Base.size(𝔄 :: TuckerPoint) = map(u -> size(u,1), 𝔄.hosvd.U)
 
 """
     st_hosvd(𝔄; mlrank=size(𝔄)) 
