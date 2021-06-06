@@ -156,7 +156,7 @@ function inverse_retract!(
     X,
     p,
     q,
-    a::ApproximateInverseRetraction,
+    a::ApproximateLogarithmicMap,
 ) where {n,k}
     M = p' * q
     QR = qr(q - p * M)
