@@ -168,7 +168,7 @@ Base.:+(x::TuckerTVector, y::TuckerTVector) = TuckerTVector(x.Ċ + y.Ċ, x.U̇
 Base.:-(x::TuckerTVector, y::TuckerTVector) = TuckerTVector(x.Ċ - y.Ċ, x.U̇ .- y.U̇)
 Base.:-(x::TuckerTVector) = TuckerTVector(-x.Ċ, map(-, x.U̇))
 Base.:+(x::TuckerTVector) = TuckerTVector(x.Ċ, x.U̇)
-Base.:(==)(x::TuckerTVector, y::TuckerTVector) = (x.Ċ == y.Ċ) && (x.U̇ .== y.U̇)
+Base.:(==)(x::TuckerTVector, y::TuckerTVector) = (x.Ċ == y.Ċ) && all(x.U̇ .== y.U̇)
 
 allocate(p::TuckerPoint) = allocate(p, number_eltype(p))
 function allocate(p::TuckerPoint, ::Type{T}) where {T}
@@ -194,10 +194,10 @@ For a [`TuckerPoint`](@ref) it is checked that the point is in correct HOSVD for
 """
 function check_point(M::Tucker{N,R,D}, x; kwargs...) where {N,R,D}
     s = "The point $(x) does not lie on $(M), "
-    size(x) == N || return DomainError(size(x), s*"since its size is not $(N).")
+    size(x) == N || return DomainError(size(x), s * "since its size is not $(N).")
     for d in 1:ndims(x)
         r = rank(unfold(x, d); kwargs...)
-        r == R[d] || return DomainError(size(x), s*"since its rank is not $(R).")
+        r == R[d] || return DomainError(size(x), s * "since its rank is not $(R).")
     end
     return nothing
 end
@@ -205,33 +205,43 @@ function check_point(M::Tucker{N,R,D}, x::TuckerPoint; kwargs...) where {N,R,D}
     s = "The point $(x) does not lie on $(M), "
     U = x.hosvd.U
     ℭ = x.hosvd.core
-    ncolsU = map(u -> size(u,2), U)
+    ncolsU = map(u -> size(u, 2), U)
     if ncolsU ≠ size(ℭ)
-        return DomainError(ncolsU,
-            s*"since the dimensions of the Tucker factors do not match")
+        return DomainError(
+            ncolsU, s * "since the dimensions of the Tucker factors do not match"
+        )
     end
     if size(ℭ) ≠ R
-        return DomainError(size(x.hosvd.core), s*"since the size of the core is not $(R).")
+        return DomainError(
+            size(x.hosvd.core), s * "since the size of the core is not $(R)."
+        )
     end
     if size(x) ≠ N
-        return DomainError(size(x), s*"since its dimensions are not $(N).")
+        return DomainError(size(x), s * "since its dimensions are not $(N).")
     end
     for u in U
-        if u'*u ≉ LinearAlgebra.I
-            return DomainError(norm(u'*u - LinearAlgebra.I),
-            s*"since its factor matrices are not unitary.")
+        if u' * u ≉ LinearAlgebra.I
+            return DomainError(
+                norm(u' * u - LinearAlgebra.I),
+                s * "since its factor matrices are not unitary.",
+            )
         end
     end
     for d in 1:ndims(x.hosvd.core)
-        gram = unfold(ℭ,d)*unfold(ℭ,d)'
+        gram = unfold(ℭ, d) * unfold(ℭ, d)'
         if gram ≉ Diagonal(x.hosvd.σ[d])^2
-            return DomainError(norm(gram - Diagonal(x.hosvd.σ[d])^2),
-            s*"since the unfoldings of the core are not diagonalised by" *
-            "the singular values.")
+            return DomainError(
+                norm(gram - Diagonal(x.hosvd.σ[d])^2),
+                s *
+                "since the unfoldings of the core are not diagonalised by" *
+                "the singular values.",
+            )
         end
-        if rank(Diagonal(σ[d]); kwargs...) ≠ R[d]
-            return DomainError(minimum(x.hosvd.σ[d]),
-            s*"since the core does not have full multilinear rank.")
+        if rank(Diagonal(x.hosvd.σ[d]); kwargs...) ≠ R[d]
+            return DomainError(
+                minimum(x.hosvd.σ[d]),
+                s * "since the core does not have full multilinear rank.",
+            )
         end
     end
     return nothing
@@ -244,16 +254,23 @@ Check whether a [`TuckerTVector`](@ref) `v` is is in the tangent space to `M` at
 is the case when the dimensions of the factors in `v` agree with those of `p` and the factor
 matrices of `v` are in the orthogonal complement of the HOSVD factors of `p`.
 """
-function check_vector(M::Tucker{N,R,D}, p::TuckerPoint{T,D}, v::TuckerTVector) where {N,R,T,D}
+function check_vector(
+    M::Tucker{N,R,D}, p::TuckerPoint{T,D}, v::TuckerTVector
+) where {N,R,T,D}
     s = "The tangent vector $(v) is not a tangent vector to $(p) on $(M), "
-    if size(p.hosvd.core) ≠ size(v.Ċ) || any(size.(v.U̇) .≠ size(p.hosvd.U))
-        return DomainError(size(v.Ċ), s*"since the array dimensons of $(p) and $(v)" *
-        "do not agree.")
+    if size(p.hosvd.core) ≠ size(v.Ċ) || any(size.(v.U̇) .≠ size.(p.hosvd.U))
+        return DomainError(
+            size(v.Ċ), s * "since the array dimensons of $(p) and $(v)" * "do not agree."
+        )
     end
     for (U, U̇) in zip(p.hosvd.U, v.U̇)
-        if U'*U̇ ≉ zeros(size(U,2), size(U,2))
-            return DomainError(norm(U'*U̇), s*"since the columns of x.hosvd.U are not"*
-            "orthogonal to those of v.U̇.")
+        if norm(U' * U̇) ≥ √eps(eltype(U)) * √length(U)
+            return DomainError(
+                norm(U' * U̇),
+                s *
+                "since the columns of x.hosvd.U are not" *
+                "orthogonal to those of v.U̇.",
+            )
         end
     end
     return nothing
@@ -472,7 +489,7 @@ function isapprox(p::TuckerPoint, q::TuckerPoint; kwargs...)
 end
 isapprox(::Tucker, p::TuckerPoint, q::TuckerPoint; kwargs...) = isapprox(p, q; kwargs...)
 function isapprox(::Tucker, p::TuckerPoint, x::TuckerTVector, y::TuckerTVector; kwargs...)
-    return isaprox(convert(Array, p, x), convert(Array, p, y); kwargs...)
+    return isapprox(convert(Array, p, x), convert(Array, p, y); kwargs...)
 end
 
 """
