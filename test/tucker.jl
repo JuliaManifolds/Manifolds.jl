@@ -35,8 +35,10 @@ include("utils.jl")
     test_manifold(
         M,
         pts;
+        #basis_types_to_from = (DefaultOrthonormalBasis(),),
+        #basis_types_vecs = (DefaultOrthonormalBasis(),),
         test_exp_log=false,
-        default_inverse_retraction_method=nothing,
+        default_inverse_retraction_method=ProjectionInverseRetraction(),
         test_injectivity_radius=false,
         default_retraction_method=HOSVDRetraction(),
         test_is_tangent=false,
@@ -49,6 +51,7 @@ include("utils.jl")
         test_tangent_vector_broadcasting=false,
         projection_atol_multiplier=15,
         retraction_methods=[HOSVDRetraction()],
+        inverse_retraction_methods=[ProjectionInverseRetraction()],
         mid_point12=nothing,
     )
 end

@@ -172,7 +172,7 @@ Base.:(==)(x::TuckerTVector, y::TuckerTVector) = (x.Ċ == y.Ċ) && all(x.U̇ .
 
 allocate(p::TuckerPoint) = allocate(p, number_eltype(p))
 function allocate(p::TuckerPoint, ::Type{T}) where {T}
-    # This is not necessarily a valid HOSVD it's not worth computing the HOSVD
+    # This is not necessarily a valid HOSVD but it's not worth computing the HOSVD
     # just for allocation
     return TuckerPoint(
         HOSVD(allocate(p.hosvd.U, T), allocate(p.hosvd.core, T), allocate(p.hosvd.σ, T))
@@ -479,7 +479,7 @@ end
     inner(::Tucker, A::TuckerPoint, x::TuckerTVector, y::TuckerTVector)
 
 The Euclidean inner product between tangent vectors `x` and `y` at the point `A` on
-the Tucker manifold.
+the Tucker manifold.function
 
     inner(::Tucker, A::TuckerPoint, x::TuckerTVector, y)
     inner(::Tucker, A::TuckerPoint, x, y::TuckerTVector)
@@ -498,6 +498,25 @@ function inner(::Tucker, 𝔄::TuckerPoint, x::TuckerTVector, y::TuckerTVector)
 end
 inner(::Tucker, 𝔄::TuckerPoint, x::TuckerTVector, y) = dot(convert(Array, 𝔄, x), y)
 inner(::Tucker, 𝔄::TuckerPoint, x, y::TuckerTVector) = dot(x, convert(Array, 𝔄, y))
+
+"""
+    inverse_retract(ℳ::Tucker, A::TuckerPoint, B::TuckerPoint, r::ProjectionInverseRetraction)
+
+The projection inverse retraction on the Tucker manifold interprets `B` as a point in the
+ambient Euclidean space and projects it onto the tangent space at to `ℳ` at `A`.
+"""
+function inverse_retract(
+    ℳ::Tucker, 𝔄::TuckerPoint, 𝔅::TuckerPoint, r::ProjectionInverseRetraction
+)
+    # default allocate_result implementation gives the wrong answer
+    return inverse_retract!(ℳ, zero_vector(ℳ, 𝔄), 𝔄, 𝔅, r)
+end
+function inverse_retract!(
+    ℳ::Tucker, X, 𝔄::TuckerPoint, 𝔅::TuckerPoint, ::ProjectionInverseRetraction
+)
+    diffVector = convert(Array, 𝔅) - convert(Array, 𝔄)
+    return project!(ℳ, X, 𝔄, diffVector)
+end
 
 function isapprox(p::TuckerPoint, q::TuckerPoint; kwargs...)
     return isapprox(convert(Array, p), convert(Array, q); kwargs...)
