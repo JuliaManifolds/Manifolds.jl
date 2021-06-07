@@ -330,6 +330,8 @@ function Base.convert(
 ) where {T,TA<:T,D}
     X_ambient = ⊗ᴿ(𝔄.hosvd.U...) * vec(X.Ċ)
     for d in 1:D
+        # TODO: a lot of products between factor matrices and unfoldings of the core
+        # will be recomputed
         X_ambient +=
             ⊗ᴿ(ntuple(d_ -> d_ == d ? X.U̇[d_] : 𝔄.hosvd.U[d_], D)...) * vec(𝔄.hosvd.core)
     end
@@ -469,11 +471,22 @@ function get_vector(
     return TuckerTVector(∂C, ∂U)
 end
 
+function get_vectors(ℳ::Tucker, 𝔄::TuckerPoint, ℬ::CachedHOSVDBasis)
+    return collect(iterate_vectors(ℳ, 𝔄, ℬ))
+end
+
 """
     inner(::Tucker, A::TuckerPoint, x::TuckerTVector, y::TuckerTVector)
 
-The Euclidean inner product between tangent vectors x and y at the point A on the Tucker
-manifold.
+The Euclidean inner product between tangent vectors `x` and `y` at the point `A` on
+the Tucker manifold.
+
+    inner(::Tucker, A::TuckerPoint, x::TuckerTVector, y)
+    inner(::Tucker, A::TuckerPoint, x, y::TuckerTVector)
+
+The Euclidean inner product between `x` and `y` where `x` is a vector tangent to the Tucker
+manifold at `A` and `y` is a vector or the ambient space or vice versa. The vector in the
+ambient space is represented as a full tensor.
 """
 function inner(::Tucker, 𝔄::TuckerPoint, x::TuckerTVector, y::TuckerTVector)
     ℭ = 𝔄.hosvd.core
@@ -483,6 +496,8 @@ function inner(::Tucker, 𝔄::TuckerPoint, x::TuckerTVector, y::TuckerTVector)
     end
     return dotprod
 end
+inner(::Tucker, 𝔄::TuckerPoint, x::TuckerTVector, y) = dot(convert(Array, 𝔄, x), y)
+inner(::Tucker, 𝔄::TuckerPoint, x, y::TuckerTVector) = dot(x, convert(Array, 𝔄, y))
 
 function isapprox(p::TuckerPoint, q::TuckerPoint; kwargs...)
     return isapprox(convert(Array, p), convert(Array, q); kwargs...)
@@ -499,6 +514,21 @@ Determines whether there are tensors of dimensions n⃗ with multilinear rank r�
 """
 function isValidTuckerRank(n⃗, r⃗)
     return all(r⃗ .≤ n⃗) && all(ntuple(i -> r⃗[i] ≤ prod(r⃗) ÷ r⃗[i], length(r⃗)))
+end
+
+function iterate_vectors(ℳ::Tucker, 𝔄::TuckerPoint{T,D}, ℬ::CachedHOSVDBasis) where {T,D}
+    # TODO: This is a lazy implementation. This is very similar to convert(Matrix, ℬ).
+    dimℳ = manifold_dimension(ℳ)
+    coords = zeros(T, dimℳ)
+
+    function iᵗʰvector(i)
+        coords[i] = 1
+        vector = get_vector(ℳ, 𝔄, coords, ℬ)
+        coords[i] = 0
+        return vector
+    end
+    iterator = (iᵗʰvector(i) for i in 1:dimℳ)
+    return iterator
 end
 
 @doc raw"""
@@ -521,6 +551,20 @@ Base.ndims(::TuckerPoint{T,D}) where {T,D} = D
 
 number_eltype(::TuckerPoint{T,D}) where {T,D} = T
 number_eltype(::TuckerTVector{T,D}) where {T,D} = T
+
+"""
+    project(ℳ::Tucker, 𝔄::TuckerPoint, X)
+
+The least-squares projection of a tensor `X` to the tangent space to `ℳ` at `A`.
+"""
+project(ℳ::Tucker, 𝔄::TuckerPoint, X) = project!(ℳ, zero_vector(ℳ, 𝔄), 𝔄, X)
+#Default implementation of project does allocate_result with the wrong type
+function project!(ℳ::Tucker, Y, 𝔄::TuckerPoint, X)
+    ℬ = get_basis(ℳ, 𝔄, DefaultOrthonormalBasis())
+    coords = [inner(ℳ, 𝔄, ℬᵢ, X) for ℬᵢ in iterate_vectors(ℳ, 𝔄, ℬ)]
+    copyto!(Y, get_vector(ℳ, 𝔄, coords, ℬ))
+    return Y
+end
 
 representation_size(::Tucker{N}) where {N} = N
 
