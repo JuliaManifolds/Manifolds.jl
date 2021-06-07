@@ -183,6 +183,82 @@ function allocate(x::TuckerTVector, ::Type{T}) where {T}
     return TuckerTVector(allocate(x.Ċ, T), allocate(x.U̇, T))
 end
 
+@doc raw"""
+    check_point(M::Tucker{N,R,D}, x; kwargs...) where {N,R,D}
+
+Check whether the array or [`TuckerPoint`](@ref) x is a point on the [`Tucker`](@ref)
+manifold, i.e. it is an $N_1 \times \dots \times N_D$ tensor of multilinear rank
+$(R_1,\dots,R_D)$. The keyword arguments are passed to the matrix rank function applied to
+the unfoldings.
+For a [`TuckerPoint`](@ref) it is checked that the point is in correct HOSVD form.
+"""
+function check_point(M::Tucker{N,R,D}, x; kwargs...) where {N,R,D}
+    s = "The point $(x) does not lie on $(M), "
+    size(x) == N || return DomainError(size(x), s*"since its size is not $(N).")
+    for d in 1:ndims(x)
+        r = rank(unfold(x, d); kwargs...)
+        r == R[d] || return DomainError(size(x), s*"since its rank is not $(R).")
+    end
+    return nothing
+end
+function check_point(M::Tucker{N,R,D}, x::TuckerPoint; kwargs...) where {N,R,D}
+    s = "The point $(x) does not lie on $(M), "
+    U = x.hosvd.U
+    ℭ = x.hosvd.core
+    ncolsU = map(u -> size(u,2), U)
+    if ncolsU ≠ size(ℭ)
+        return DomainError(ncolsU,
+            s*"since the dimensions of the Tucker factors do not match")
+    end
+    if size(ℭ) ≠ R
+        return DomainError(size(x.hosvd.core), s*"since the size of the core is not $(R).")
+    end
+    if size(x) ≠ N
+        return DomainError(size(x), s*"since its dimensions are not $(N).")
+    end
+    for u in U
+        if u'*u ≉ LinearAlgebra.I
+            return DomainError(norm(u'*u - LinearAlgebra.I),
+            s*"since its factor matrices are not unitary.")
+        end
+    end
+    for d in 1:ndims(x.hosvd.core)
+        gram = unfold(ℭ,d)*unfold(ℭ,d)'
+        if gram ≉ Diagonal(x.hosvd.σ[d])^2
+            return DomainError(norm(gram - Diagonal(x.hosvd.σ[d])^2),
+            s*"since the unfoldings of the core are not diagonalised by" *
+            "the singular values.")
+        end
+        if rank(Diagonal(σ[d]); kwargs...) ≠ R[d]
+            return DomainError(minimum(x.hosvd.σ[d]),
+            s*"since the core does not have full multilinear rank.")
+        end
+    end
+    return nothing
+end
+
+@doc raw"""
+    check_vector(M::Tucker{N,R,D}, p::TuckerPoint{T,D}, v::TuckerTVector) where {N,R,T,D}
+
+Check whether a [`TuckerTVector`](@ref) `v` is is in the tangent space to `M` at `p`. This
+is the case when the dimensions of the factors in `v` agree with those of `p` and the factor
+matrices of `v` are in the orthogonal complement of the HOSVD factors of `p`.
+"""
+function check_vector(M::Tucker{N,R,D}, p::TuckerPoint{T,D}, v::TuckerTVector) where {N,R,T,D}
+    s = "The tangent vector $(v) is not a tangent vector to $(p) on $(M), "
+    if size(p.hosvd.core) ≠ size(v.Ċ) || any(size.(v.U̇) .≠ size(p.hosvd.U))
+        return DomainError(size(v.Ċ), s*"since the array dimensons of $(p) and $(v)" *
+        "do not agree.")
+    end
+    for (U, U̇) in zip(p.hosvd.U, v.U̇)
+        if U'*U̇ ≉ zeros(size(U,2), size(U,2))
+            return DomainError(norm(U'*U̇), s*"since the columns of x.hosvd.U are not"*
+            "orthogonal to those of v.U̇.")
+        end
+    end
+    return nothing
+end
+
 """
     Base.convert(::Type{Matrix{T}}, basis :: CachedBasis{𝔽,DefaultOrthonormalBasis{𝔽, TangentSpaceType},HOSVDBasis{T, D}}) where {𝔽, T, D}
     Base.convert(::Type{Matrix}, basis :: CachedBasis{𝔽,DefaultOrthonormalBasis{𝔽, TangentSpaceType},HOSVDBasis{T, D}}) where {𝔽, T, D}
