@@ -537,7 +537,7 @@ function test_manifold(
             Xs_invs = [get_vector(M, p, Xu, btype) for Xu in Xs]
             # check orthonormality of inverse representation
             for i in 1:N
-                Test.@test norm(M, p, Xs_invs[i]) ≈ 1 atol = sqrt(find_eps(p)
+                Test.@test norm(M, p, Xs_invs[i]) ≈ 1 atol = sqrt(find_eps(p))
                 for j in (i + 1):N
                     Test.@test real(inner(M, p, Xs_invs[i], Xs_invs[j])) ≈ 0 atol =
                         sqrt(find_eps(p))

@@ -52,7 +52,7 @@ include("utils.jl")
         test_tangent_vector_broadcasting=false,
         projection_atol_multiplier=15,
         retraction_methods=[PolarRetraction()],
-        inverse_retraction_methods=[PolarRetraction()],
+        inverse_retraction_methods=[ProjectionInverseRetraction()],
         mid_point12=nothing,
     )
 end
