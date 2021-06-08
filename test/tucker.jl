@@ -41,7 +41,7 @@ include("utils.jl")
         test_exp_log=false,
         default_inverse_retraction_method=ProjectionInverseRetraction(),
         test_injectivity_radius=false,
-        default_retraction_method=HOSVDRetraction(),
+        default_retraction_method=PolarRetraction(),
         test_is_tangent=false,
         test_project_tangent=false,
         test_default_vector_transport=false,
@@ -51,8 +51,8 @@ include("utils.jl")
         test_vee_hat=false,
         test_tangent_vector_broadcasting=false,
         projection_atol_multiplier=15,
-        retraction_methods=[HOSVDRetraction()],
-        inverse_retraction_methods=[ProjectionInverseRetraction()],
+        retraction_methods=[PolarRetraction()],
+        inverse_retraction_methods=[PolarRetraction()],
         mid_point12=nothing,
     )
 end

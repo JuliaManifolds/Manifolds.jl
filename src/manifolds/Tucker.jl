@@ -70,13 +70,6 @@ struct HOSVD{T,D}
     σ::NTuple{D,Vector{T}}
 end
 
-@doc raw"""
-    HOSVDRetraction <: AbstractRetractionMethod
-
-Retraction based on the higher-order singular value decomposition of a tensor
-"""
-struct HOSVDRetraction <: AbstractRetractionMethod end
-
 """
     TuckerPoint{T, D}
 
@@ -137,19 +130,8 @@ struct TuckerTVector{T,D} <: TVector
     U̇::NTuple{D,Matrix{T}}
 end
 
-#=
-    HOSVDBasis{T, D}
-
-A implicitly stored basis of the tangent space to the Tucker manifold.
-If 𝔄 = (U¹ ⊗ ... ⊗ Uᴰ) C is a HOSVD, then this basis is defined as follows:
-
-ℬ = {(U¹ ⊗ ... ⊗ Uᴰ) eᵢ} ∪ {(U¹ ⊗ ... ⊗ 1/σ[d][j] Uᵈ⊥ eᵢ eⱼᵀ ⊗ ... ⊗ Uᴰ) C}
-
-See also:
-[^Dewaele2021]
-> Nick Dewaele, Paul Breiding, Nick Vannieuwenhoven, "The condition number of many tensor decompositions is invariant under Tucker compression"
-#TODO arXiv
-=#
+# An implicitly stored basis of the tangent space to the Tucker manifold. This is the basis
+# from [Dewaele2021] and acts as the default orthonormal basis.
 struct HOSVDBasis{T,D}
     point::TuckerPoint{T,D}
     U⊥::NTuple{D,Matrix{T}}
@@ -370,9 +352,7 @@ function Base.copyto!(y::TuckerTVector, x::TuckerTVector)
     return y
 end
 
-#=
-Inverse of the k'th unfolding of a size n₁ × ... × n_D tensor
-=#
+# Inverse of the k'th unfolding of a size n₁ × ... × n_D tensor
 function fold(𝔄♭::AbstractMatrix{T}, k, n⃗::NTuple{D,Int})::Array{T,D} where {T,D,Int}
     @assert 1 ≤ k ≤ D
     @assert size(𝔄♭, 1) == n⃗[k]
@@ -468,17 +448,14 @@ function get_vector!(
         nextcolumn += numcols
     end
 
-    # Construct ∂U[d] by plugging in the definition of
-    #    our orthonormal basis:
-    # V[d] = ∂U[d] = ∑ᵢⱼ { ξ[d]ᵢⱼ (σ[d]ⱼ)⁻¹ U⊥[d] 𝐞ᵢ 𝐞ⱼᵀ }
-    #      = ∑ⱼ (σ[d]ⱼ)⁻¹ U⊥[d] ( ∑ᵢ ξ[d]ᵢⱼ  𝐞ᵢ) 𝐞ⱼᵀ
+    # Construct ∂U[d] by plugging in the definition of the orthonormal basis:
+    # ∂U[d] = ∑ᵢⱼ { ξ[d]ᵢⱼ (σ[d]ⱼ)⁻¹ U⊥[d] 𝐞ᵢ 𝐞ⱼᵀ }
+    #       = ∑ⱼ (σ[d]ⱼ)⁻¹ U⊥[d] ( ∑ᵢ ξ[d]ᵢⱼ  𝐞ᵢ) 𝐞ⱼᵀ
     ∂U = similar.(U)
     for d in 1:D
-        # Assuming ξ = [ξ₁₁, ..., ξ₁ⱼ, ..., ξᵢ₁, ..., ξᵢⱼ, ..., ], we can
-        # reshape ξU[d] into a matrix with row indices i and column indices j
+        # ξU = [ξ₁₁, ..., ξ₁ⱼ, ..., ξᵢ₁, ..., ξᵢⱼ, ..., ] with (i,j) as in [Dewaele2021]
+        # => turn these i and j into matrix indices and do matrix operations
         grid = transpose(reshape(ξU[d], r⃗[d], n⃗[d] - r⃗[d]))
-        # Notice that ∑ᵢ ξᵈᵢⱼ𝐞ᵢ = grid[:,j].
-        # This means V[d] = U⊥[d] * grid * Diagonal(σ[d])⁻¹
         ∂U[d][:, :] = U⊥[d] * grid * Diagonal(1 ./ σ[d])
     end
 
@@ -598,7 +575,7 @@ end
 representation_size(::Tucker{N}) where {N} = N
 
 @doc raw"""
-    retract(::Tucker, A, x, ::HOSVDRetraction)
+    retract(::Tucker, A, x, ::PolarRetraction)
 
 The truncated HOSVD-based retraction [^Kressner2014] to the Tucker manifold, i.e.
 $R_{\mathcal{A}}(x)$ is the sequentially tuncated HOSVD of $\mathcal{A} + x$
@@ -609,10 +586,10 @@ $R_{\mathcal{A}}(x)$ is the sequentially tuncated HOSVD of $\mathcal{A} + x$
     > doi: [10.1007/s10543-013-0455-z](https://doi.org/10.1007/s10543-013-0455-z)
 
 """
-retract(::Tucker, ::Any, ::Any, ::HOSVDRetraction)
+retract(::Tucker, ::Any, ::Any, ::PolarRetraction)
 
 function retract!(
-    ::Tucker, q::TuckerPoint, p::TuckerPoint{T,D}, x::TuckerTVector, ::HOSVDRetraction
+    ::Tucker, q::TuckerPoint, p::TuckerPoint{T,D}, x::TuckerTVector, ::PolarRetraction
 ) where {T,D}
     U = p.hosvd.U
     V = x.U̇
@@ -694,8 +671,7 @@ The dimensions of a tensor of low multilinear rank
 Base.size(𝔄::TuckerPoint) = map(u -> size(u, 1), 𝔄.hosvd.U)
 
 #=
-    st_hosvd(𝔄, mlrank=size(𝔄))
-
+Modification of the ST-HOSVD from [Vannieuwenhoven2012]
 This is the HOSVD of an approximation of 𝔄, i.e. the core of this decomposition
 is also in HOSVD format.
 =#
@@ -708,7 +684,6 @@ function st_hosvd(𝔄, mlrank=size(𝔄))
     σ::NTuple{D,Vector{T}} = ntuple(d -> Vector{T}(undef, mlrank[d]), D)
 
     for d in 1:D
-        # unfold
         r_d = mlrank[d]
         𝔄⁽ᵈ⁾ = unfold(𝔄, d)
         # truncated SVD + incremental construction of the core
@@ -716,8 +691,7 @@ function st_hosvd(𝔄, mlrank=size(𝔄))
         U[d] .= UΣVᵀ.U[:, 1:r_d]
         σ[d] .= UΣVᵀ.S[1:r_d]
         𝔄⁽ᵈ⁾ = Diagonal(σ[d]) * UΣVᵀ.Vt[1:r_d, :]
-        # reshape back into a tensor (compiler doesn't know we are reshaping back into
-        # an order D array without type assertion)
+        # Reshape; compiler doesn't know the order of the result without type assertion
         m⃗::NTuple{D,Int} = tuple(mlrank[1:d]..., n⃗[(d + 1):D]...)
         𝔄 = fold(𝔄⁽ᵈ⁾, d, m⃗)
     end
@@ -733,11 +707,7 @@ function st_hosvd(𝔄, mlrank=size(𝔄))
     return HOSVD{T,D}(U, 𝔄, σ)
 end
 
-#=
-	unfold(𝔄, k)
-
-Mode-k unfolding of the array 𝔄 of order d ≥ k
-=#
+#Mode-k unfolding of the array 𝔄 of order D ≥ k
 function unfold(𝔄, k)
     d = ndims(𝔄)
     𝔄_ = permutedims(𝔄, vcat(k, 1:(k - 1), (k + 1):d))
