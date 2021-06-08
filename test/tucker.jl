@@ -36,8 +36,8 @@ include("utils.jl")
         M,
         pts;
         is_mutating = false, # avoid allocations of the wrong type
-        #basis_types_to_from = (DefaultOrthonormalBasis(),),
-        #basis_types_vecs = (DefaultOrthonormalBasis(),),
+        basis_types_to_from = (DefaultOrthonormalBasis(),),
+        basis_types_vecs = (DefaultOrthonormalBasis(),),
         test_exp_log=false,
         default_inverse_retraction_method=ProjectionInverseRetraction(),
         test_injectivity_radius=false,
