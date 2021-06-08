@@ -172,8 +172,6 @@ Base.:(==)(x::TuckerTVector, y::TuckerTVector) = (x.Ċ == y.Ċ) && all(x.U̇ .
 
 allocate(p::TuckerPoint) = allocate(p, number_eltype(p))
 function allocate(p::TuckerPoint, ::Type{T}) where {T}
-    # This is not necessarily a valid HOSVD but it's not worth computing the HOSVD
-    # just for allocation
     return TuckerPoint(
         HOSVD(allocate(p.hosvd.U, T), allocate(p.hosvd.core, T), allocate(p.hosvd.σ, T))
     )
@@ -181,6 +179,19 @@ end
 allocate(x::TuckerTVector) = allocate(x, number_eltype(x))
 function allocate(x::TuckerTVector, ::Type{T}) where {T}
     return TuckerTVector(allocate(x.Ċ, T), allocate(x.U̇, T))
+end
+
+function allocate_vector(ℳ::Tucker, 𝔄::TuckerPoint)
+    return TuckerTVector(allocate(𝔄.hosvd.core), allocate(𝔄.hosvd.U))
+end
+
+# The standard implementation of allocate_result on vector-values functions gives an element
+# of the same type as the manifold point. We want a vector instead.
+vector_result_fcns = [:get_vector, :inverse_retract, :project, :zero_vector]
+for fun in vector_result_fcns
+    @eval function ManifoldsBase.allocate_result(M::Tucker, f::typeof($(fun)), p, args...)
+        return allocate_vector(M, p)
+    end
 end
 
 @doc raw"""
@@ -426,15 +437,19 @@ function get_coordinates(::Tucker, 𝔄, X, ℬ::CachedHOSVDBasis)
     end
     return coords
 end
+function get_coordinates(M::Tucker, 𝔄, X, ℬ::DefaultOrthonormalBasis)
+    return get_coordinates(M, 𝔄, X, get_basis(M, 𝔄, ℬ))
+end
 
 """
     get_vector(::Tucker, A, x, b)
 
 The tangent vector at a point A whose coordinates with respect to the basis b are x.
 """
-function get_vector(
-    ::Tucker, 𝔄::TuckerPoint, ξ::AbstractVector{T}, ℬ::CachedHOSVDBasis
+function get_vector!(
+    ::Tucker, y, 𝔄::TuckerPoint, x::AbstractVector{T}, ℬ::CachedHOSVDBasis
 ) where {T}
+    ξ = convert(Vector{promote_type(number_eltype(𝔄), eltype(x))}, x)
     U = 𝔄.hosvd.U
     ℭ = 𝔄.hosvd.core
     σ = 𝔄.hosvd.σ
@@ -468,7 +483,10 @@ function get_vector(
     end
 
     ∂C = reshape(ξ_core, size(ℭ))
-    return TuckerTVector(∂C, ∂U)
+    return copyto!(y, TuckerTVector(∂C, ∂U))
+end
+function get_vector!(ℳ::Tucker, y, 𝔄::TuckerPoint, x, ℬ::DefaultOrthonormalBasis)
+    return get_vector!(ℳ, y, 𝔄, x, get_basis(ℳ, 𝔄, ℬ))
 end
 
 function get_vectors(ℳ::Tucker, 𝔄::TuckerPoint, ℬ::CachedHOSVDBasis)
@@ -505,12 +523,6 @@ inner(::Tucker, 𝔄::TuckerPoint, x, y::TuckerTVector) = dot(x, convert(Array, 
 The projection inverse retraction on the Tucker manifold interprets `B` as a point in the
 ambient Euclidean space and projects it onto the tangent space at to `ℳ` at `A`.
 """
-function inverse_retract(
-    ℳ::Tucker, 𝔄::TuckerPoint, 𝔅::TuckerPoint, r::ProjectionInverseRetraction
-)
-    # default allocate_result implementation gives the wrong answer
-    return inverse_retract!(ℳ, zero_vector(ℳ, 𝔄), 𝔄, 𝔅, r)
-end
 function inverse_retract!(
     ℳ::Tucker, X, 𝔄::TuckerPoint, 𝔅::TuckerPoint, ::ProjectionInverseRetraction
 )
@@ -576,8 +588,6 @@ number_eltype(::TuckerTVector{T,D}) where {T,D} = T
 
 The least-squares projection of a tensor `X` to the tangent space to `ℳ` at `A`.
 """
-project(ℳ::Tucker, 𝔄::TuckerPoint, X) = project!(ℳ, zero_vector(ℳ, 𝔄), 𝔄, X)
-#Default implementation of project does allocate_result with the wrong type
 function project!(ℳ::Tucker, Y, 𝔄::TuckerPoint, X)
     ℬ = get_basis(ℳ, 𝔄, DefaultOrthonormalBasis())
     coords = [inner(ℳ, 𝔄, ℬᵢ, X) for ℬᵢ in iterate_vectors(ℳ, 𝔄, ℬ)]
@@ -739,12 +749,10 @@ end
 
 The zero element in the tangent space to A on the Tucker manifold
 """
-zero_vector(::Tucker, 𝔄::TuckerPoint) = TuckerTVector(zero(𝔄.hosvd.core), zero.(𝔄.hosvd.U))
-
 function zero_vector!(::Tucker, X::TuckerTVector, ::TuckerPoint)
     for U̇ in X.U̇
         fill!(U̇, zero(eltype(U̇)))
     end
-    fill!(X.Ċ, zero(eltype(Ċ)))
+    fill!(X.Ċ, zero(eltype(X.Ċ)))
     return X
 end
