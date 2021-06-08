@@ -1,5 +1,6 @@
 module Manifolds
 
+using Base: is_valid_continuation
 import ManifoldsBase:
     _access_nested,
     _read,
