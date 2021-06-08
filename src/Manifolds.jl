@@ -62,7 +62,7 @@ import ManifoldsBase:
     zero_vector!,
     CotangentSpace,
     TangentSpace
-import Base: copyto!, convert, in, isapprox, isempty, length, ndims, showerror, size
+import Base: copyto!, convert, foreach, in, isapprox, isempty, length, ndims, showerror, size
 
 using Base.Iterators: repeated
 using Distributions

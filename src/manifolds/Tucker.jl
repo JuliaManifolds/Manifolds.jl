@@ -167,15 +167,6 @@ function allocate_vector(ℳ::Tucker, 𝔄::TuckerPoint)
     return TuckerTVector(allocate(𝔄.hosvd.core), allocate(𝔄.hosvd.U))
 end
 
-# The standard implementation of allocate_result on vector-values functions gives an element
-# of the same type as the manifold point. We want a vector instead.
-vector_result_fcns = [:get_vector, :inverse_retract, :project, :zero_vector]
-for fun in vector_result_fcns
-    @eval function ManifoldsBase.allocate_result(M::Tucker, f::typeof($(fun)), p, args...)
-        return allocate_vector(M, p)
-    end
-end
-
 @doc raw"""
     check_point(M::Tucker{N,R,D}, x; kwargs...) where {N,R,D}
 
@@ -275,63 +266,25 @@ end
 
 Convert a HOSVD basis to a matrix whose columns are the vectorisations of the basis vectors.
 """
-function Base.convert(::Type{Matrix{T}}, basis::CachedHOSVDBasis{𝔽,T,D}) where {𝔽,T,D}
-    𝔄 = basis.data.point
-    U⊥ = basis.data.U⊥
-    U = 𝔄.hosvd.U
-    σ = 𝔄.hosvd.σ
-    ℭ = 𝔄.hosvd.core
-    r⃗ = size(ℭ)
+function Base.convert(::Type{Matrix{T}}, ℬ::CachedHOSVDBasis{𝔽,T,D}) where {𝔽,T,D}
+    𝔄 = ℬ.data.point
+    r⃗ = size(𝔄.hosvd.core)
     n⃗ = size(𝔄)
+    ℳ = Tucker(n⃗, r⃗)
 
-    J = Matrix{T}(undef, prod(n⃗), manifold_dimension(Tucker(n⃗, r⃗)))
-    # compute all possible ∂𝔄╱∂ℭ
+    J = Matrix{T}(undef, prod(n⃗), manifold_dimension(ℳ))
+    # compute all possible ∂𝔄╱∂ℭ (in one go is quicker than one vector at a time)
     J[:, 1:prod(r⃗)] = ⊗ᴿ(U...)
     # compute all possible ∂𝔄╱∂U[d] for d = 1,...,D
-    nextcolumn = prod(r⃗)
-    for d in 1:D
-        Udᵀ𝔄⁽ᵈ⁾::Matrix{T} = unfold(ℭ, d) * ⊗ᴿ(U[1:(d - 1)]..., U[(d + 1):end]...)'
-        for i in 1:size(U⊥[d], 2), j in 1:r⃗[d]
-            ∂𝔄ᵢⱼ⁽ᵈ⁾ = 1 / σ[d][j] * U⊥[d][:, i] * Udᵀ𝔄⁽ᵈ⁾[j, :]'
-            ∂𝔄ᵢⱼ = fold(∂𝔄ᵢⱼ⁽ᵈ⁾, d, n⃗)
-            J[:, nextcolumn += 1] = vec(∂𝔄ᵢⱼ)
-        end
+    function fill_column!(i, vᵢ)
+        Jᵢ_tensor = reshape(view(J, :, i), n⃗) # changes to this apply to J as well
+        return embed!(ℳ, Jᵢ_tensor, 𝔄, vᵢ)
     end
+    foreach(fill_column!, ℳ, 𝔄, ℬ, (prod(r⃗) + 1):manifold_dimension(ℳ))
     return J
 end
 function Base.convert(::Type{Matrix}, basis::CachedHOSVDBasis{𝔽,T,D}) where {𝔽,T,D}
     return convert(Matrix{T}, basis)
-end
-
-"""
-    Base.convert(::Type{Array}, A :: TuckerPoint) where {T, TA <: T, D}
-    Base.convert(::Type{Array{T,D}}, A :: TuckerPoint{TA, D}) where {T, TA <: T, D}
-
-Convert a point on the Tucker manifold to a full tensor.
-
-    Base.convert(::Type{Array}, A :: TuckerPoint, X)
-    Base.convert(::Type{Array{T,D}}, A :: TuckerPoint{TA, D}, X :: TuckerTVector) where {T, TA <: T, D}
-
-Convert a tangent vector X to the Tucker manifold at a point A to full tensor.
-"""
-function Base.convert(::Type{Array{T,D}}, 𝔄::TuckerPoint{TA,D}) where {T,TA<:T,D}
-    return reshape(⊗ᴿ(𝔄.hosvd.U...) * vec(𝔄.hosvd.core), size(𝔄))
-end
-Base.convert(::Type{Array}, 𝔄::TuckerPoint{T,D}) where {T,D} = convert(Array{T,D}, 𝔄)
-function Base.convert(
-    ::Type{Array{T,D}}, 𝔄::TuckerPoint{TA,D}, X::TuckerTVector
-) where {T,TA<:T,D}
-    X_ambient = ⊗ᴿ(𝔄.hosvd.U...) * vec(X.Ċ)
-    for d in 1:D
-        # TODO: a lot of products between factor matrices and unfoldings of the core
-        # will be recomputed
-        X_ambient +=
-            ⊗ᴿ(ntuple(d_ -> d_ == d ? X.U̇[d_] : 𝔄.hosvd.U[d_], D)...) * vec(𝔄.hosvd.core)
-    end
-    return reshape(X_ambient, size(𝔄))
-end
-function Base.convert(::Type{Array}, 𝔄::TuckerPoint{T,D}, X::TuckerTVector) where {T,D}
-    return convert(Array{T,D}, 𝔄, X)
 end
 
 Base.copy(x::TuckerTVector) = TuckerTVector(copy(x.Ċ), map(copy, x.U̇))
@@ -352,6 +305,30 @@ function Base.copyto!(y::TuckerTVector, x::TuckerTVector)
     return y
 end
 
+@doc raw"""
+    embed(::Tucker, A :: TuckerPoint)
+
+Convert a point `A` on the Tucker manifold to a full tensor, represented as an
+$N_1 \times \dots \times N_D$-array.
+
+    embed(::Tucker, A::TuckerPoint, X::TuckerTVector)
+
+Convert a tangent vector `X` with base point `A` on the Tucker manifold to a full tensor,
+epresented as an $N_1 \times \dots \times N_D$-array.
+"""
+function embed!(::Tucker, q, p::TuckerPoint)
+    return copyto!(q, reshape(⊗ᴿ(p.hosvd.U...) * vec(p.hosvd.core), size(p)))
+end
+function embed!(ℳ::Tucker, Y, 𝔄::TuckerPoint{T,D}, X::TuckerTVector) where {T,D}
+    Y .= reshape(⊗ᴿ(𝔄.hosvd.U...) * vec(X.Ċ), size(Y))
+    Uℭ = embed(ℳ, 𝔄)
+    n⃗ = size(Uℭ)
+    for d in 1:D
+        Y .= Y + fold(X.U̇[d] * (𝔄.hosvd.U[d]' * unfold(Uℭ, d)), d, n⃗)
+    end
+    return Y
+end
+
 # Inverse of the k'th unfolding of a size n₁ × ... × n_D tensor
 function fold(𝔄♭::AbstractMatrix{T}, k, n⃗::NTuple{D,Int})::Array{T,D} where {T,D,Int}
     @assert 1 ≤ k ≤ D
@@ -361,6 +338,32 @@ function fold(𝔄♭::AbstractMatrix{T}, k, n⃗::NTuple{D,Int})::Array{T,D} wh
     size_pre_permute::NTuple{D,Int} = (n⃗[k], n⃗[1:(k - 1)]..., n⃗[(k + 1):D]...)
     perm::NTuple{D,Int} = ((2:k)..., 1, ((k + 1):D)...)
     return permutedims(reshape(𝔄♭, size_pre_permute), perm)
+end
+
+@doc raw"""
+    Base.foreach(f, M::Tucker, p::TuckerPoint, basis::AbstractBasis)
+
+Let `basis` be and [`AbstractBasis`](@ref) at a point `p` on `M`. Suppose `f` is a function
+that takes an index and a vector as an argument.
+This function applies `f` to `i` and the `i`th basis vector sequentially for each `i` in
+`indices`.
+Using a [`CachedBasis`](@ref) may speed up the computation.
+
+**NOTE**: The i'th basis vector is overwritten in each iteration. If any information about
+the vector is to be stored, `f` must make a copy.
+"""
+function Base.foreach(
+    f, M::Tucker, p::TuckerPoint, basis::AbstractBasis, indices=1:manifold_dimension(M)
+)
+    # Use mutating variants to avoid superfluous allocation
+    bᵢ = allocate_vector(M, p)
+    eᵢ = zeros(number_eltype(p), manifold_dimension(M))
+    for i in indices
+        eᵢ[i] = one(eltype(eᵢ))
+        get_vector!(M, bᵢ, p, eᵢ, basis)
+        eᵢ[i] = zero(eltype(eᵢ))
+        f(i, bᵢ)
+    end
 end
 
 @doc raw"""
@@ -404,12 +407,12 @@ function get_basis(
 end
 
 """
-    get_coordinates(::Tucker, A, X, b)
+    get_coordinates(::Tucker, A, X :: TuckerTVector, b)
 
 The coordinates of a tangent vector X at point A on the Tucker manifold with respect to the
 basis b.
 """
-function get_coordinates(::Tucker, 𝔄, X, ℬ::CachedHOSVDBasis)
+function get_coordinates(::Tucker, 𝔄, X::TuckerTVector, ℬ::CachedHOSVDBasis)
     coords = vec(X.Ċ)
     for d in 1:length(X.U̇)
         coord_mtx = (ℬ.data.U⊥[d] \ X.U̇[d]) * Diagonal(𝔄.hosvd.σ[d])
@@ -430,7 +433,6 @@ function get_vector!(
     ::Tucker, y, 𝔄::TuckerPoint, x::AbstractVector{T}, ℬ::CachedHOSVDBasis
 ) where {T}
     ξ = convert(Vector{promote_type(number_eltype(𝔄), eltype(x))}, x)
-    U = 𝔄.hosvd.U
     ℭ = 𝔄.hosvd.core
     σ = 𝔄.hosvd.σ
     U⊥ = ℬ.data.U⊥
@@ -438,36 +440,40 @@ function get_vector!(
     r⃗ = size(ℭ)
     n⃗ = size(𝔄)
 
-    # split ξ into ξ_core and ξU so that vcat(ξ_core, ξU...) == ξ
-    ξ_core = ξ[1:length(ℭ)]
-    ξU = Vector{T}[]
+    # split ξ into ξ_core and ξU so that vcat(ξ_core, ξU...) == ξ, but avoid copying
+    ξ_core = view(ξ, 1:length(ℭ))
+    ξU = Vector{typeof(ξ_core)}(undef, D)
     nextcolumn = length(ℭ) + 1
     for d in 1:D
         numcols = r⃗[d] * (n⃗[d] - r⃗[d])
-        push!(ξU, ξ[nextcolumn:(nextcolumn + numcols - 1)])
+        ξU[d] = view(ξ, nextcolumn:(nextcolumn + numcols - 1))
         nextcolumn += numcols
     end
 
-    # Construct ∂U[d] by plugging in the definition of the orthonormal basis:
-    # ∂U[d] = ∑ᵢⱼ { ξ[d]ᵢⱼ (σ[d]ⱼ)⁻¹ U⊥[d] 𝐞ᵢ 𝐞ⱼᵀ }
-    #       = ∑ⱼ (σ[d]ⱼ)⁻¹ U⊥[d] ( ∑ᵢ ξ[d]ᵢⱼ  𝐞ᵢ) 𝐞ⱼᵀ
-    ∂U = similar.(U)
+    # Construct ∂U[d] by plugging in the definition of the orthonormal basis [Dewaele2021]
+    # ∂U[d] = ∑ᵢⱼ { ξU[d]ᵢⱼ (σ[d]ⱼ)⁻¹ U⊥[d] 𝐞ᵢ 𝐞ⱼᵀ }
+    #       = U⊥[d] * ∑ⱼ (σ[d]ⱼ)⁻¹ (∑ᵢ ξU[d]ᵢⱼ  𝐞ᵢ) 𝐞ⱼᵀ
+    # ξU[d] = [ξ₁₁, ..., ξ₁ⱼ, ..., ξᵢ₁, ..., ξᵢⱼ, ..., ]
+    # => turn these i and j into matrix indices and do matrix operations
     for d in 1:D
-        # ξU = [ξ₁₁, ..., ξ₁ⱼ, ..., ξᵢ₁, ..., ξᵢⱼ, ..., ] with (i,j) as in [Dewaele2021]
-        # => turn these i and j into matrix indices and do matrix operations
         grid = transpose(reshape(ξU[d], r⃗[d], n⃗[d] - r⃗[d]))
-        ∂U[d][:, :] = U⊥[d] * grid * Diagonal(1 ./ σ[d])
+        y.U̇[d] .= U⊥[d] * grid * Diagonal(1 ./ σ[d])
     end
 
-    ∂C = reshape(ξ_core, size(ℭ))
-    return copyto!(y, TuckerTVector(∂C, ∂U))
+    y.Ċ .= reshape(ξ_core, size(y.Ċ))
+    return y
 end
 function get_vector!(ℳ::Tucker, y, 𝔄::TuckerPoint, x, ℬ::DefaultOrthonormalBasis)
     return get_vector!(ℳ, y, 𝔄, x, get_basis(ℳ, 𝔄, ℬ))
 end
 
-function get_vectors(ℳ::Tucker, 𝔄::TuckerPoint, ℬ::CachedHOSVDBasis)
-    return collect(iterate_vectors(ℳ, 𝔄, ℬ))
+function get_vectors(ℳ::Tucker, 𝔄::TuckerPoint{T,D}, ℬ::CachedHOSVDBasis) where {T,D}
+    vectors = Vector{TuckerTVector{T,D}}(undef, manifold_dimension(ℳ))
+    foreach((i, vᵢ) -> setindex!(vectors, copy(vᵢ), i), ℳ, 𝔄, ℬ)
+    return vectors
+end
+function get_vectors(ℳ::Tucker, 𝔄::TuckerPoint, ℬ::DefaultOrthonormalBasis)
+    return get_vectors(ℳ, 𝔄, get_basis(ℳ, 𝔄, ℬ))
 end
 
 """
@@ -491,8 +497,8 @@ function inner(::Tucker, 𝔄::TuckerPoint, x::TuckerTVector, y::TuckerTVector)
     end
     return dotprod
 end
-inner(::Tucker, 𝔄::TuckerPoint, x::TuckerTVector, y) = dot(convert(Array, 𝔄, x), y)
-inner(::Tucker, 𝔄::TuckerPoint, x, y::TuckerTVector) = dot(x, convert(Array, 𝔄, y))
+inner(M::Tucker, 𝔄::TuckerPoint, x::TuckerTVector, y) = dot(embed(M, 𝔄, x), y)
+inner(M::Tucker, 𝔄::TuckerPoint, x, y::TuckerTVector) = dot(x, embed(M, 𝔄, y))
 
 """
     inverse_retract(ℳ::Tucker, A::TuckerPoint, B::TuckerPoint, r::ProjectionInverseRetraction)
@@ -503,16 +509,17 @@ ambient Euclidean space and projects it onto the tangent space at to `ℳ` at `A
 function inverse_retract!(
     ℳ::Tucker, X, 𝔄::TuckerPoint, 𝔅::TuckerPoint, ::ProjectionInverseRetraction
 )
-    diffVector = convert(Array, 𝔅) - convert(Array, 𝔄)
+    diffVector = embed(ℳ, 𝔅) - embed(ℳ, 𝔄)
     return project!(ℳ, X, 𝔄, diffVector)
 end
 
 function isapprox(p::TuckerPoint, q::TuckerPoint; kwargs...)
-    return isapprox(convert(Array, p), convert(Array, q); kwargs...)
+    ℳ = Tucker(size(p), size(p.hosvd.core))
+    return isapprox(embed(ℳ, p), embed(ℳ, q); kwargs...)
 end
 isapprox(::Tucker, p::TuckerPoint, q::TuckerPoint; kwargs...) = isapprox(p, q; kwargs...)
-function isapprox(::Tucker, p::TuckerPoint, x::TuckerTVector, y::TuckerTVector; kwargs...)
-    return isapprox(convert(Array, p, x), convert(Array, p, y); kwargs...)
+function isapprox(M::Tucker, p::TuckerPoint, x::TuckerTVector, y::TuckerTVector; kwargs...)
+    return isapprox(embed(M, p, x), embed(M, p, y); kwargs...)
 end
 
 """
@@ -522,21 +529,6 @@ Determines whether there are tensors of dimensions n⃗ with multilinear rank r�
 """
 function isValidTuckerRank(n⃗, r⃗)
     return all(r⃗ .≤ n⃗) && all(ntuple(i -> r⃗[i] ≤ prod(r⃗) ÷ r⃗[i], length(r⃗)))
-end
-
-function iterate_vectors(ℳ::Tucker, 𝔄::TuckerPoint{T,D}, ℬ::CachedHOSVDBasis) where {T,D}
-    # TODO: This is a lazy implementation. This is very similar to convert(Matrix, ℬ).
-    dimℳ = manifold_dimension(ℳ)
-    coords = zeros(T, dimℳ)
-
-    function iᵗʰvector(i)
-        coords[i] = 1
-        vector = get_vector(ℳ, 𝔄, coords, ℬ)
-        coords[i] = 0
-        return vector
-    end
-    iterator = (iᵗʰvector(i) for i in 1:dimℳ)
-    return iterator
 end
 
 @doc raw"""
@@ -567,9 +559,10 @@ The least-squares projection of a tensor `X` to the tangent space to `ℳ` at `A
 """
 function project!(ℳ::Tucker, Y, 𝔄::TuckerPoint, X)
     ℬ = get_basis(ℳ, 𝔄, DefaultOrthonormalBasis())
-    coords = [inner(ℳ, 𝔄, ℬᵢ, X) for ℬᵢ in iterate_vectors(ℳ, 𝔄, ℬ)]
-    copyto!(Y, get_vector(ℳ, 𝔄, coords, ℬ))
-    return Y
+    coords = Vector{number_eltype(𝔄)}(undef, manifold_dimension(ℳ))
+    f!(i, ℬᵢ) = setindex!(coords, inner(ℳ, 𝔄, ℬᵢ, X), i)
+    foreach(f!, ℳ, 𝔄, ℬ)
+    return get_vector!(ℳ, Y, 𝔄, coords, ℬ)
 end
 
 representation_size(::Tucker{N}) where {N} = N
@@ -725,4 +718,18 @@ function zero_vector!(::Tucker, X::TuckerTVector, ::TuckerPoint)
     end
     fill!(X.Ċ, zero(eltype(X.Ċ)))
     return X
+end
+
+# The standard implementation of allocate_result on vector-valued functions gives an element
+# of the same type as the manifold point. We want a vector instead.
+vector_result_fcns = [:get_vector, :inverse_retract, :project, :zero_vector]
+for fun in vector_result_fcns
+    @eval function ManifoldsBase.allocate_result(M::Tucker, f::typeof($(fun)), p, args...)
+        return allocate_vector(M, p)
+    end
+end
+
+function ManifoldsBase.allocate_result(M::Tucker, f::typeof(embed), p, args...)
+    dims = representation_size(M)
+    return Array{number_eltype(p),length(dims)}(undef, dims)
 end
