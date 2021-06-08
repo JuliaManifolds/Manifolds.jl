@@ -274,7 +274,7 @@ function Base.convert(::Type{Matrix{T}}, ℬ::CachedHOSVDBasis{𝔽,T,D}) where 
 
     J = Matrix{T}(undef, prod(n⃗), manifold_dimension(ℳ))
     # compute all possible ∂𝔄╱∂ℭ (in one go is quicker than one vector at a time)
-    J[:, 1:prod(r⃗)] = ⊗ᴿ(U...)
+    J[:, 1:prod(r⃗)] = ⊗ᴿ(𝔄.hosvd.U...)
     # compute all possible ∂𝔄╱∂U[d] for d = 1,...,D
     function fill_column!(i, vᵢ)
         Jᵢ_tensor = reshape(view(J, :, i), n⃗) # changes to this apply to J as well
@@ -341,7 +341,7 @@ function fold(𝔄♭::AbstractMatrix{T}, k, n⃗::NTuple{D,Int})::Array{T,D} wh
 end
 
 @doc raw"""
-    Base.foreach(f, M::Tucker, p::TuckerPoint, basis::AbstractBasis)
+    Base.foreach(f, M::Tucker, p::TuckerPoint, basis::AbstractBasis, indices=1:manifold_dimension(M))
 
 Let `basis` be and [`AbstractBasis`](@ref) at a point `p` on `M`. Suppose `f` is a function
 that takes an index and a vector as an argument.
