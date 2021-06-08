@@ -51,7 +51,7 @@ $(R_1, \dots, R_D)$
 """
 struct Tucker{N,R,D,𝔽} <: AbstractManifold{𝔽} end
 function Tucker(n⃗::NTuple{D,Int}, r⃗::NTuple{D,Int}, field::AbstractNumbers=ℝ) where {D}
-    @assert isValidTuckerRank(n⃗, r⃗)
+    @assert is_valid_mlrank(n⃗, r⃗)
     return Tucker{n⃗,r⃗,D,field}()
 end
 
@@ -111,6 +111,7 @@ function TuckerPoint(
     return TuckerPoint(HOSVD{T,D}(factors′, decomp.core, decomp.σ))
 end
 function TuckerPoint(A::AbstractArray{T,D}, mlrank::NTuple{D,Int}) where {T,D}
+    @assert is_valid_mlrank(size(A), mlrank)
     return TuckerPoint(st_hosvd(A, mlrank))
 end
 
@@ -523,11 +524,11 @@ function isapprox(M::Tucker, p::TuckerPoint, x::TuckerTVector, y::TuckerTVector;
 end
 
 """
-    isValidTuckerRank(n⃗, r⃗)
+    is_valid_mlrank(n⃗, r⃗)
 
 Determines whether there are tensors of dimensions n⃗ with multilinear rank r⃗
 """
-function isValidTuckerRank(n⃗, r⃗)
+function is_valid_mlrank(n⃗, r⃗)
     return all(r⃗ .≤ n⃗) && all(ntuple(i -> r⃗[i] ≤ prod(r⃗) ÷ r⃗[i], length(r⃗)))
 end
 
