@@ -317,6 +317,8 @@ $N_1 \times \dots \times N_D$-array.
 Convert a tangent vector `X` with base point `A` on the Tucker manifold to a full tensor,
 epresented as an $N_1 \times \dots \times N_D$-array.
 """
+embed(::Tucker, ::Any, ::TuckerPoint)
+
 function embed!(::Tucker, q, p::TuckerPoint)
     return copyto!(q, reshape(⊗ᴿ(p.hosvd.U...) * vec(p.hosvd.core), size(p)))
 end
@@ -407,12 +409,12 @@ function get_basis(
     return CachedBasis(basisType, basis)
 end
 
-"""
+#=
     get_coordinates(::Tucker, A, X :: TuckerTVector, b)
 
 The coordinates of a tangent vector X at point A on the Tucker manifold with respect to the
 basis b.
-"""
+=#
 function get_coordinates(::Tucker, 𝔄, X::TuckerTVector, ℬ::CachedHOSVDBasis)
     coords = vec(X.Ċ)
     for d in 1:length(X.U̇)
@@ -425,11 +427,11 @@ function get_coordinates(M::Tucker, 𝔄, X, ℬ::DefaultOrthonormalBasis)
     return get_coordinates(M, 𝔄, X, get_basis(M, 𝔄, ℬ))
 end
 
-"""
+#=
     get_vector(::Tucker, A, x, b)
 
 The tangent vector at a point A whose coordinates with respect to the basis b are x.
-"""
+=#
 function get_vector!(
     ::Tucker, y, 𝔄::TuckerPoint, x::AbstractVector{T}, ℬ::CachedHOSVDBasis
 ) where {T}
@@ -507,6 +509,8 @@ inner(M::Tucker, 𝔄::TuckerPoint, x, y::TuckerTVector) = dot(x, embed(M, 𝔄,
 The projection inverse retraction on the Tucker manifold interprets `B` as a point in the
 ambient Euclidean space and projects it onto the tangent space at to `ℳ` at `A`.
 """
+inverse_retract(::Tucker, ::Any, ::TuckerPoint, ::TuckerPoint, ::ProjectionInverseRetraction)
+
 function inverse_retract!(
     ℳ::Tucker, X, 𝔄::TuckerPoint, 𝔅::TuckerPoint, ::ProjectionInverseRetraction
 )
@@ -523,11 +527,9 @@ function isapprox(M::Tucker, p::TuckerPoint, x::TuckerTVector, y::TuckerTVector;
     return isapprox(embed(M, p, x), embed(M, p, y); kwargs...)
 end
 
-"""
-    is_valid_mlrank(n⃗, r⃗)
-
+#=
 Determines whether there are tensors of dimensions n⃗ with multilinear rank r⃗
-"""
+=#
 function is_valid_mlrank(n⃗, r⃗)
     return all(r⃗ .≤ n⃗) && all(ntuple(i -> r⃗[i] ≤ prod(r⃗) ÷ r⃗[i], length(r⃗)))
 end
@@ -544,9 +546,9 @@ rank $R_1 \times \dots \times R_D$, i.e.
 manifold_dimension(::Tucker{n⃗,r⃗}) where {n⃗,r⃗} = prod(r⃗) + sum(r⃗ .* (n⃗ .- r⃗))
 
 @doc raw"""
-    Base.ndims(:: TuckerPoint{T, D})
+    Base.ndims(A :: TuckerPoint{T, D})
 
-The order of a tensor of low multilinear rank
+The order of the tensor corresponding to the [`TuckerPoint`](@ref) `A`
 """
 Base.ndims(::TuckerPoint{T,D}) where {T,D} = D
 
@@ -558,6 +560,8 @@ number_eltype(::TuckerTVector{T,D}) where {T,D} = T
 
 The least-squares projection of a tensor `X` to the tangent space to `ℳ` at `A`.
 """
+project(::Tucker, ::Any, ::TuckerPoint, ::Any)
+
 function project!(ℳ::Tucker, Y, 𝔄::TuckerPoint, X)
     ℬ = get_basis(ℳ, 𝔄, DefaultOrthonormalBasis())
     coords = Vector{number_eltype(𝔄)}(undef, manifold_dimension(ℳ))
@@ -658,9 +662,9 @@ function Base.show(io::IO, mime::MIME"text/plain", ℬ::CachedHOSVDBasis{𝔽,T,
 end
 
 """
-    Base.size(::TuckerPoint)
+    Base.size(A::TuckerPoint)
 
-The dimensions of a tensor of low multilinear rank
+The dimensions of a [`TuckerPoint`](@ref) `A`, when regarded as a full tensor
 """
 Base.size(𝔄::TuckerPoint) = map(u -> size(u, 1), 𝔄.hosvd.U)
 
@@ -711,7 +715,8 @@ end
 @doc raw"""
     zero_vector(::Tucker, A::TuckerPoint)
 
-The zero element in the tangent space to A on the Tucker manifold
+The zero element in the tangent space to A on the Tucker manifold, represented as a
+[`TuckerTVector`](@ref)
 """
 function zero_vector!(::Tucker, X::TuckerTVector, ::TuckerPoint)
     for U̇ in X.U̇
