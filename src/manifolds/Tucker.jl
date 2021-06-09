@@ -509,7 +509,9 @@ inner(M::Tucker, 𝔄::TuckerPoint, x, y::TuckerTVector) = dot(x, embed(M, 𝔄,
 The projection inverse retraction on the Tucker manifold interprets `B` as a point in the
 ambient Euclidean space and projects it onto the tangent space at to `ℳ` at `A`.
 """
-inverse_retract(::Tucker, ::Any, ::TuckerPoint, ::TuckerPoint, ::ProjectionInverseRetraction)
+inverse_retract(
+    ::Tucker, ::Any, ::TuckerPoint, ::TuckerPoint, ::ProjectionInverseRetraction
+)
 
 function inverse_retract!(
     ℳ::Tucker, X, 𝔄::TuckerPoint, 𝔅::TuckerPoint, ::ProjectionInverseRetraction

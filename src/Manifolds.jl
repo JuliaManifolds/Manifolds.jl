@@ -63,7 +63,8 @@ import ManifoldsBase:
     zero_vector!,
     CotangentSpace,
     TangentSpace
-import Base: copyto!, convert, foreach, in, isapprox, isempty, length, ndims, showerror, size
+import Base:
+    copyto!, convert, foreach, in, isapprox, isempty, length, ndims, showerror, size
 
 using Base.Iterators: repeated
 using Distributions
@@ -330,7 +331,8 @@ export Euclidean,
     Torus,
     Tucker
 export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint, TuckerPoint
-export HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector, TuckerTVector
+export HyperboloidTVector,
+    PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector, TuckerTVector
 export AbstractNumbers, ℝ, ℂ, ℍ
 
 # decorator manifolds
@@ -374,7 +376,6 @@ export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod,
     CayleyRetraction,
     ExponentialRetraction,
-    HOSVDRetraction,
     QRRetraction,
     PolarRetraction,
     ProjectionRetraction,
