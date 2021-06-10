@@ -379,6 +379,7 @@ export AbstractRetractionMethod,
     PowerRetraction
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
+    ApproximateLogarithmicMap,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,
