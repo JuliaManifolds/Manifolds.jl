@@ -46,6 +46,8 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
             test_diff=true,
             test_mutating=false,
             test_invariance=true,
+            test_lie_bracket=true,
+            test_adjoint_action=true,
         )
     end
 
@@ -62,6 +64,8 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
             test_diff=true,
             test_mutating=true,
             test_invariance=true,
+            test_lie_bracket=true,
+            test_adjoint_action=true,
         )
     end
 

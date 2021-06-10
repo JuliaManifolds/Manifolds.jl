@@ -17,12 +17,21 @@ include("group_utils.jl")
         @test base_manifold(G) === Euclidean(2, 3)
 
         pts = [reshape(i:(i + 5), (2, 3)) for i in 1:3]
-        vpts = [reshape(-2:3, (2, 3))]
+        vpts = [reshape(-2:3, (2, 3)), reshape(-1:4, (2, 3))]
         for T in types
             gpts = convert.(T, pts)
             vgpts = convert.(T, vpts)
             @test compose(G, gpts[1], gpts[2]) ≈ gpts[1] + gpts[2]
-            test_group(G, gpts, vgpts, vgpts; test_diff=true, test_invariance=true)
+            test_group(
+                G,
+                gpts,
+                vgpts,
+                vgpts;
+                test_diff=true,
+                test_invariance=true,
+                test_lie_bracket=true,
+                test_adjoint_action=true,
+            )
         end
     end
 
@@ -34,13 +43,22 @@ include("group_utils.jl")
         @test base_manifold(G) === Euclidean(2, 3; field=ℂ)
 
         pts = [reshape(complex.(i:(i + 5), (i + 1):(i + 6)), (2, 3)) for i in 1:3]
-        vpts = [reshape(complex.(-2:3, -1:4), (2, 3))]
+        vpts = [reshape(complex.(-2:3, -1:4), (2, 3)), reshape(complex.(-1:4, 0:5), (2, 3))]
         for T in types
             gpts = convert.(T, pts)
             vgpts = convert.(T, vpts)
             @test compose(G, gpts[1], gpts[2]) ≈ gpts[1] + gpts[2]
             @test translate_diff(G, gpts[2], gpts[1], vgpts[1]) ≈ vgpts[1]
-            test_group(G, gpts, vgpts, vgpts; test_diff=true, test_invariance=true)
+            test_group(
+                G,
+                gpts,
+                vgpts,
+                vgpts;
+                test_diff=true,
+                test_invariance=true,
+                test_lie_bracket=true,
+                test_adjoint_action=true,
+            )
         end
     end
 end

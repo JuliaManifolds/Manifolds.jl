@@ -71,6 +71,16 @@ include("../utils.jl")
     group_log!(AG, logp, p2)
     @test isapprox(G, e, logp.value, group_log(G, p))
 
+    @test lie_bracket(AG, X, X2) isa ValidationTVector
+    Xlb = allocate(X2)
+    lie_bracket!(AG, Xlb, X, X2)
+    @test isapprox(G, e, Xlb.value, lie_bracket(G, X, X2.value))
+
+    @test adjoint_action(AG, p, X) isa ValidationTVector
+    Xaa = allocate(X2)
+    adjoint_action!(AG, Xaa, p, X2)
+    @test isapprox(G, e, Xaa.value, adjoint_action(G, p, X2.value))
+
     for conv in (LeftAction(), RightAction())
         @test translate(AG, p2, q2, conv) isa ValidationMPoint
         @test isapprox(G, translate(AG, p2, q2, conv).value, translate(G, p, q, conv))

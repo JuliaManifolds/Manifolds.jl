@@ -46,6 +46,13 @@ function inverse_translate(
     return map(/, q, p)
 end
 
+lie_bracket(::CircleGroup, X, Y) = zero(X)
+
+function lie_bracket!(::CircleGroup, Z, X, Y)
+    fill(Z, 0)
+    return Z
+end
+
 translate_diff(::GT, p, q, X, ::ActionDirection) where {GT<:CircleGroup} = map(*, p, X)
 function translate_diff(
     ::GT,

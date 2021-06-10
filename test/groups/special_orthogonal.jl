@@ -46,7 +46,16 @@ include("group_utils.jl")
         @test translate_diff(G, gpts[2], gpts[1], vgpts[1], LeftAction()) ≈ vgpts[1]
         @test translate_diff(G, gpts[2], gpts[1], vgpts[1], RightAction()) ≈
               transpose(gpts[2]) * vgpts[1] * gpts[2]
-        test_group(G, gpts, vgpts, vgpts; test_diff=true, test_invariance=true)
+        test_group(
+            G,
+            gpts,
+            vgpts,
+            vgpts;
+            test_diff=true,
+            test_invariance=true,
+            test_lie_bracket=true,
+            test_adjoint_action=true,
+        )
     end
 
     @testset "Decorator forwards to group" begin

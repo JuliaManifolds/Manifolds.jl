@@ -364,6 +364,31 @@ end
 ##########################
 
 @doc raw"""
+    adjoint_action(G::AbstractGroupManifold, p, X)
+
+Adjoint action of the element `p` of the Lie group `G` on the element `X`
+of the corresponding Lie algebra.
+
+It is defined as the differential of the group authomorphism $Ψ_p(q) = pqp⁻¹$ at
+the identity of `G`.
+
+The formula reads
+````math
+\operatorname{Ad}_p(X) = dΨ_p(e)[X]
+````
+where $e$ is the identity element of `G`.
+"""
+adjoint_action(G::AbstractGroupManifold, p, X)
+@decorator_transparent_function :intransparent function adjoint_action(
+    G::AbstractGroupManifold,
+    p,
+    X,
+)
+    Y = allocate_result(G, adjoint_action, p)
+    return adjoint_action!(G, Y, p, X)
+end
+
+@doc raw"""
     inv(G::AbstractGroupManifold, p)
 
 Inverse $p^{-1} ∈ \mathcal{G}$ of an element $p ∈ \mathcal{G}$, such that
@@ -482,6 +507,18 @@ function decorator_transparent_dispatch(
     q,
 )
     return Val(:intransparent)
+end
+
+"""
+    lie_bracket(G::AbstractGroupManifold, X, Y)
+
+Lie bracket between elements `X`, `Y` of the Lie algebra corresponding to the Lie group `G`.
+"""
+lie_bracket(G::AbstractGroupManifold, X, Y)
+@decorator_transparent_signature lie_bracket(M::AbstractDecoratorManifold, X, Y)
+function lie_bracket(G::AbstractGroupManifold, X, Y)
+    Z = allocate(G, lie_bracket, X, Y)
+    return lie_bracket!(G, Z, X, Y)
 end
 
 _action_order(p, q, conv::LeftAction) = (p, q)
@@ -951,6 +988,13 @@ Base.:*(e::Identity{G}, p) where {G<:AdditionGroup} = e
 Base.:*(p, e::Identity{G}) where {G<:AdditionGroup} = e
 Base.:*(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
+adjoint_action(::AdditionGroup, p, X) = X
+
+function adjoint_action!(::AdditionGroup, Y, p, X)
+    copyto!(Y, X)
+    return Y
+end
+
 Base.zero(e::Identity{G}) where {G<:AdditionGroup} = e
 
 Base.identity(::AdditionGroup, p) = zero(p)
@@ -988,6 +1032,13 @@ group_log(::AdditionGroup, q) = q
 
 group_log!(::AdditionGroup, X, q) = copyto!(X, q)
 
+lie_bracket(::AdditionGroup, X, Y) = zero(X)
+
+function lie_bracket!(::AdditionGroup, Z, X, Y)
+    fill(Z, 0)
+    return Z
+end
+
 #######################################
 # Overloads for MultiplicationOperation
 #######################################
@@ -1014,6 +1065,13 @@ Base.:/(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
 Base.:\(p, ::Identity{G}) where {G<:MultiplicationGroup} = inv(p)
 Base.:\(::Identity{G}, p) where {G<:MultiplicationGroup} = p
 Base.:\(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
+
+adjoint_action(G::MultiplicationGroup, p, X) = p * X / p
+
+function adjoint_action!(::MultiplicationGroup, Y, p, X)
+    copyto!(Y, p * X / p)
+    return Y
+end
 
 Base.inv(e::Identity{G}) where {G<:MultiplicationGroup} = e
 
@@ -1062,3 +1120,10 @@ function group_exp!(G::MultiplicationGroup, q, X)
 end
 
 group_log!(::MultiplicationGroup, X::AbstractMatrix, q::AbstractMatrix) = log_safe!(X, q)
+
+lie_bracket(::MultiplicationGroup, X, Y) = X * Y - Y * X
+
+function lie_bracket!(::MultiplicationGroup, Z, X, Y)
+    copyto!(Z, X * Y - Y * X)
+    return Z
+end
