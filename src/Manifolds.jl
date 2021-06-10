@@ -584,6 +584,6 @@ export AbstractDiffBackend,
     AbstractRiemannianDiffBackend, FiniteDifferencesBackend, RiemannianONBDiffBackend
 export diff_backend, diff_backend!, diff_backends
 # atlases and charts
-export get_point, get_point!, get_point_coordinates, get_point_coordinates!
+export get_point, get_point!, get_parameters, get_parameters!
 
 end # module

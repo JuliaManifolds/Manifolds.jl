@@ -387,7 +387,7 @@ Random.seed!(42)
         p = [zeros(2), ones(2)]
         X = [ones(2), 2 .* ones(2)]
         A = RetractionAtlas()
-        a = get_point_coordinates(M, A, p, p)
+        a = get_parameters(M, A, p, p)
         p2 = get_point(M, A, p, a)
         @test all(p2 .== p)
     end
