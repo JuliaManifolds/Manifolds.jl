@@ -98,7 +98,14 @@ R & t \\
 \end{pmatrix}.
 ````
 
+This function embeds $\mathrm{SE}(n)$ in the general linear group $\mathrm{GL}(n+1)$.
+It is an isometric embedding and group homomorphism [^RicoMatrinex1988].
+
 See also [`screw_matrix`](@ref) for matrix representations of the Lie algebra.
+
+[^RicoMatrinex1988]:
+    > Rico Martinez, J. M., “Representations of the Euclidean group and its applications
+    > to the kinematics of spatial chains,” PhD Thesis, University of Florida, 1988.
 """
 function affine_matrix(G::SpecialEuclidean{n}, p) where {n}
     pis = submanifold_components(G, p)
@@ -127,6 +134,8 @@ the $n + 1 × n + 1$ matrix
 0^\mathrm{T} & 0
 \end{pmatrix}.
 ````
+
+This function embeds $𝔰𝔢(n)$ in the general linear Lie algebra $𝔤𝔩(n+1)$.
 
 See also [`affine_matrix`](@ref) for matrix representations of the Lie group.
 """
