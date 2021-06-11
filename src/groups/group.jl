@@ -512,7 +512,7 @@ end
 """
     lie_bracket(G::AbstractGroupManifold, X, Y)
 
-Lie bracket between elements `X`, `Y` of the Lie algebra corresponding to the Lie group `G`.
+Lie bracket between elements `X` and `Y` of the Lie algebra corresponding to the Lie group `G`.
 """
 lie_bracket(G::AbstractGroupManifold, X, Y)
 @decorator_transparent_signature lie_bracket(M::AbstractDecoratorManifold, X, Y)
@@ -990,10 +990,7 @@ Base.:*(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
 adjoint_action(::AdditionGroup, p, X) = X
 
-function adjoint_action!(::AdditionGroup, Y, p, X)
-    copyto!(Y, X)
-    return Y
-end
+adjoint_action!(::AdditionGroup, Y, p, X) = copyto!(Y, X)
 
 Base.zero(e::Identity{G}) where {G<:AdditionGroup} = e
 
@@ -1034,10 +1031,7 @@ group_log!(::AdditionGroup, X, q) = copyto!(X, q)
 
 lie_bracket(::AdditionGroup, X, Y) = zero(X)
 
-function lie_bracket!(::AdditionGroup, Z, X, Y)
-    fill(Z, 0)
-    return Z
-end
+lie_bracket!(::AdditionGroup, Z, X, Y) = fill!(Z, 0)
 
 #######################################
 # Overloads for MultiplicationOperation
@@ -1121,9 +1115,10 @@ end
 
 group_log!(::MultiplicationGroup, X::AbstractMatrix, q::AbstractMatrix) = log_safe!(X, q)
 
-lie_bracket(::MultiplicationGroup, X, Y) = X * Y - Y * X
+lie_bracket(::MultiplicationGroup, X, Y) = mul!(X * Y, Y, X, -1, true)
 
 function lie_bracket!(::MultiplicationGroup, Z, X, Y)
-    copyto!(Z, X * Y - Y * X)
+    mul!(Z, X, Y)
+    mul!(Z, Y, X, -1, true)
     return Z
 end

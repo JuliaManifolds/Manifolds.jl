@@ -99,11 +99,11 @@ R & t \\
 ````
 
 This function embeds $\mathrm{SE}(n)$ in the general linear group $\mathrm{GL}(n+1)$.
-It is an isometric embedding and group homomorphism [^RicoMatrinex1988].
+It is an isometric embedding and group homomorphism [^RicoMartinez1988].
 
 See also [`screw_matrix`](@ref) for matrix representations of the Lie algebra.
 
-[^RicoMatrinex1988]:
+[^RicoMartinez1988]:
     > Rico Martinez, J. M., “Representations of the Euclidean group and its applications
     > to the kinematics of spatial chains,” PhD Thesis, University of Florida, 1988.
 """
