@@ -638,7 +638,7 @@ function test_action(
             for a in a_pts
                 am, aX = apply(A, a, m), apply_diff(A, a, m, X)
                 ainvm, ainvv = inverse_apply(A, a, m), inverse_apply_diff(A, a, m, X)
-                Test.@test is_vector(M, am, av, true; atol=atol)
+                Test.@test is_vector(M, am, aX, true; atol=atol)
                 Test.@test is_vector(M, ainvm, ainvv, true; atol=atol)
             end
 
@@ -656,12 +656,12 @@ function test_action(
             for (m, X) in zip(m_pts, X_pts)
                 for a in a_pts
                     am = apply(A, a, m)
-                    av = allocate(X)
-                    Test.@test apply_diff!(A, av, a, m, X) === av
+                    aX = allocate(X)
+                    Test.@test apply_diff!(A, aX, a, m, X) === aX
                     ainvm = inverse_apply(A, a, m)
                     ainvv = allocate(X)
                     Test.@test inverse_apply_diff!(A, ainvv, a, m, X) === ainvv
-                    Test.@test is_vector(M, am, av, true; atol=atol)
+                    Test.@test is_vector(M, am, aX, true; atol=atol)
                     Test.@test is_vector(M, ainvm, ainvv, true; atol=atol)
                 end
 

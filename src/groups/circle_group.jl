@@ -14,6 +14,13 @@ invariant_metric_dispatch(::CircleGroup, ::ActionDirection) = Val(true)
 
 default_metric_dispatch(::MetricManifold{ℂ,CircleGroup,EuclideanMetric}) = Val(true)
 
+adjoint_action(::CircleGroup, p, X) = X
+
+function adjoint_action!(::CircleGroup, Y, p, X)
+    copyto!(Y, X)
+    return Y
+end
+
 function compose(G::CircleGroup, p::AbstractVector, q::AbstractVector)
     return map(compose, repeated(G), p, q)
 end

@@ -35,14 +35,14 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
 
     @testset "scalar points" begin
         pts = [1.0 + 0.0im, 0.0 + 1.0im, (1.0 + 1.0im) / √2]
-        vpts = [0.0 + 0.5im]
+        Xpts = [0.0 + 0.5im, 0.0 - 1.5im]
         @test compose(G, pts[2], pts[1]) ≈ pts[2] * pts[1]
-        @test translate_diff(G, pts[2], pts[1], vpts[1]) ≈ pts[2] * vpts[1]
+        @test translate_diff(G, pts[2], pts[1], Xpts[1]) ≈ pts[2] * Xpts[1]
         test_group(
             G,
             pts,
-            vpts,
-            vpts;
+            Xpts,
+            Xpts;
             test_diff=true,
             test_mutating=false,
             test_invariance=true,
@@ -53,14 +53,14 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
 
     @testset "vector points" begin
         pts = [[1.0 + 0.0im], [0.0 + 1.0im], [(1.0 + 1.0im) / √2]]
-        vpts = [[0.0 + 0.5im]]
+        Xpts = [[0.0 + 0.5im], [0.0 - 1.5im]]
         @test compose(G, pts[2], pts[1]) ≈ pts[2] .* pts[1]
-        @test translate_diff(G, pts[2], pts[1], vpts[1]) ≈ pts[2] .* vpts[1]
+        @test translate_diff(G, pts[2], pts[1], Xpts[1]) ≈ pts[2] .* Xpts[1]
         test_group(
             G,
             pts,
-            vpts,
-            vpts;
+            Xpts,
+            Xpts;
             test_diff=true,
             test_mutating=true,
             test_invariance=true,
