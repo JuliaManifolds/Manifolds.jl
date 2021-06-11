@@ -455,7 +455,7 @@ function test_group(
 
         if test_mutating
             Z = allocate(X)
-            lie_bracket(G, Z, X, Y)
+            lie_bracket!(G, Z, X, Y)
             Test.@test isapprox(G, e, Z, lie_bracket(G, X, Y))
         end
     end
