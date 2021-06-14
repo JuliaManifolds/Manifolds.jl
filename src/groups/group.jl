@@ -379,13 +379,18 @@ The formula reads
 where $e$ is the identity element of `G`.
 """
 adjoint_action(G::AbstractGroupManifold, p, X)
-@decorator_transparent_function :intransparent function adjoint_action(
-    G::AbstractGroupManifold,
-    p,
-    X,
-)
-    Y = allocate_result(G, adjoint_action, p)
-    return adjoint_action!(G, Y, p, X)
+@decorator_transparent_function :intransparent function adjoint_action(G::AbstractGroupManifold, p, Xₑ)
+    e = make_identity(G, p)
+    Xₚ = translate_diff(G, p, e, Xₑ, LeftAction())
+    Y = inverse_translate_diff(G, p, p, Xₚ, RightAction())
+    return Y
+end
+
+function adjoint_action!(G::AbstractGroupManifold, Y, p, Xₑ)
+    e = make_identity(G, p)
+    Xₚ = translate_diff(G, p, e, Xₑ, LeftAction())
+    inverse_translate_diff!(G, Y, p, p, Xₚ, RightAction())
+    return Y
 end
 
 @doc raw"""
@@ -516,10 +521,6 @@ Lie bracket between elements `X` and `Y` of the Lie algebra corresponding to the
 """
 lie_bracket(G::AbstractGroupManifold, X, Y)
 @decorator_transparent_signature lie_bracket(M::AbstractDecoratorManifold, X, Y)
-function lie_bracket(G::AbstractGroupManifold, X, Y)
-    Z = allocate(G, lie_bracket, X, Y)
-    return lie_bracket!(G, Z, X, Y)
-end
 
 _action_order(p, q, conv::LeftAction) = (p, q)
 _action_order(p, q, conv::RightAction) = (q, p)
@@ -1059,13 +1060,6 @@ Base.:/(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
 Base.:\(p, ::Identity{G}) where {G<:MultiplicationGroup} = inv(p)
 Base.:\(::Identity{G}, p) where {G<:MultiplicationGroup} = p
 Base.:\(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
-
-function adjoint_action(G::MultiplicationGroup, p, Xₑ)
-    e = make_identity(G, p)
-    Xₚ = translate_diff(G, p, e, Xₑ, LeftAction())
-    Y = inverse_translate_diff(G, p, p, Xₚ, RightAction())
-    return Y
-end
 
 function adjoint_action!(::MultiplicationGroup, Y, p, X)
     copyto!(Y, p * X / p)
