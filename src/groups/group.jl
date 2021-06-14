@@ -1060,7 +1060,12 @@ Base.:\(p, ::Identity{G}) where {G<:MultiplicationGroup} = inv(p)
 Base.:\(::Identity{G}, p) where {G<:MultiplicationGroup} = p
 Base.:\(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
 
-adjoint_action(G::MultiplicationGroup, p, X) = p * X / p
+function adjoint_action(G::MultiplicationGroup, p, Xₑ)
+    e = make_identity(G, p)
+    Xₚ = translate_diff(G, p, e, Xₑ, LeftAction())
+    Y = inverse_translate_diff(G, p, p, Xₚ, RightAction())
+    return Y
+end
 
 function adjoint_action!(::MultiplicationGroup, Y, p, X)
     copyto!(Y, p * X / p)
