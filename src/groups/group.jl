@@ -377,6 +377,9 @@ The formula reads
 \operatorname{Ad}_p(X) = dΨ_p(e)[X]
 ````
 where $e$ is the identity element of `G`.
+
+Note that the adjoint representation of a Lie group isn't generally faithful.
+Notably the adjoint representation of SO(2) is trivial.
 """
 adjoint_action(G::AbstractGroupManifold, p, X)
 @decorator_transparent_function :intransparent function adjoint_action(
@@ -522,6 +525,10 @@ end
     lie_bracket(G::AbstractGroupManifold, X, Y)
 
 Lie bracket between elements `X` and `Y` of the Lie algebra corresponding to the Lie group `G`.
+
+This can be used to compute the adjoint representation of a Lie algebra.
+Note that this representation isn't generally faithful. Notably the adjoint
+representation of 𝔰𝔬(2) is trivial.
 """
 lie_bracket(G::AbstractGroupManifold, X, Y)
 @decorator_transparent_signature lie_bracket(M::AbstractDecoratorManifold, X, Y)
@@ -1064,11 +1071,6 @@ Base.:/(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
 Base.:\(p, ::Identity{G}) where {G<:MultiplicationGroup} = inv(p)
 Base.:\(::Identity{G}, p) where {G<:MultiplicationGroup} = p
 Base.:\(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
-
-function adjoint_action!(::MultiplicationGroup, Y, p, X)
-    copyto!(Y, p * X / p)
-    return Y
-end
 
 Base.inv(e::Identity{G}) where {G<:MultiplicationGroup} = e
 

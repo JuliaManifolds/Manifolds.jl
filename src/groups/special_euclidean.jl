@@ -84,6 +84,15 @@ Base.@propagate_inbounds function _padvector!(
     return X
 end
 
+function adjoint_action(::SpecialEuclidean{3}, p, fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}})
+    t = p.parts[1]
+    R = p.parts[2]
+    r = fX.data[SA[1, 2, 3]]
+    ω = fX.data[SA[4, 5, 6]]
+    Rω = R * ω
+    return TFVector([cross(Rω, t) + R * r; Rω], fX.basis)
+end
+
 @doc raw"""
     affine_matrix(G::SpecialEuclidean, p) -> AbstractMatrix
 
@@ -394,4 +403,22 @@ function group_log!(G::SpecialEuclidean{3}, X, q)
     mul!(b, Jₗ⁻¹, t)
     @inbounds _padvector!(G, X)
     return X
+end
+
+translate_diff(::SpecialEuclidean, p, q, X, ::LeftAction) = X
+function translate_diff(
+    ::SpecialEuclidean{N},
+    p,
+    q,
+    X::ProductRepr,
+    ::RightAction,
+) where {N}
+    p_aff = affine_matrix(G, p)
+    X_screw = screw_matrix(G, X)
+    diff_aff = p_aff \ X_screw * p_aff
+    return ProductRepr(diff_aff[1:N, N + 1], diff_aff[1:N, 1:N])
+end
+
+function translate_diff!(G::SpecialEuclidean, Y, p, q, X, conv::ActionDirection)
+    return copyto!(Y, translate_diff(G, p, q, X, conv))
 end
