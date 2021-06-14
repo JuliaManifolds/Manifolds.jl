@@ -379,7 +379,11 @@ The formula reads
 where $e$ is the identity element of `G`.
 """
 adjoint_action(G::AbstractGroupManifold, p, X)
-@decorator_transparent_function :intransparent function adjoint_action(G::AbstractGroupManifold, p, Xₑ)
+@decorator_transparent_function :intransparent function adjoint_action(
+    G::AbstractGroupManifold,
+    p,
+    Xₑ,
+)
     e = make_identity(G, p)
     Xₚ = translate_diff(G, p, e, Xₑ, LeftAction())
     Y = inverse_translate_diff(G, p, p, Xₚ, RightAction())
