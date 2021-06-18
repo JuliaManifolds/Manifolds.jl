@@ -33,15 +33,15 @@ If you use `Manifolds.jl` in your work, please cite the following
 
 ```biblatex
 @online{2106.08777,
-Author = {Seth D. Axen and Mateusz Baran and Ronny Bergmann and Krzysztof Rzecki},
-Title = {Manifolds.jl: An Extensible Julia Framework for Data Analysis on Manifolds},
-Year = {2021},
-Eprint = {2106.08777},
-Eprinttype = {arXiv},
+    Author = {Seth D. Axen and Mateusz Baran and Ronny Bergmann and Krzysztof Rzecki},
+    Title = {Manifolds.jl: An Extensible Julia Framework for Data Analysis on Manifolds},
+    Year = {2021},
+    Eprint = {2106.08777},
+    Eprinttype = {arXiv},
 }
 ```
 
-and to refer to a certain version we recommend to also cite for example
+To refer to a certain version we recommend to also cite for example
 
 ```biblatex
 @softawre{manifoldsjl-zenodo-mostrecent,
@@ -56,3 +56,4 @@ and to refer to a certain version we recommend to also cite for example
 ```
 
 for the most recent version or a corresponding version specific DOI, see [the list of all versions](https://zenodo.org/search?page=1&size=20&q=conceptrecid:%224292129%22&sort=-version&all_versions=True).
+Note that both citations are in [BibLaTeX](https://ctan.org/pkg/biblatex) format.
