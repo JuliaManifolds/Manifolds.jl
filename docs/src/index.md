@@ -45,7 +45,7 @@ To refer to a certain version we recommend to also cite for example
 
 ```biblatex
 @softawre{manifoldsjl-zenodo-mostrecent,
-  Author = {Set D. Axen and Mateusz Baran and Ronny Bergmann},
+  Author = {Seth D. Axen and Mateusz Baran and Ronny Bergmann},
   Title = {Manifolds.jl},
   Doi = {10.5281/ZENODO.4292129},
   Url = {https://zenodo.org/record/4292129},
