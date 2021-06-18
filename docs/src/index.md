@@ -26,3 +26,33 @@ M = Sphere(2)
 γ = shortest_geodesic(M, [0., 0., 1.], [0., 1., 0.])
 γ(0.5)
 ```
+
+## Citation
+
+If you use `Manifolds.jl` in your work, please cite the following
+
+```biblatex
+@online{2106.08777,
+Author = {Seth D. Axen and Mateusz Baran and Ronny Bergmann and Krzysztof Rzecki},
+Title = {Manifolds.jl: An Extensible Julia Framework for Data Analysis on Manifolds},
+Year = {2021},
+Eprint = {2106.08777},
+Eprinttype = {arXiv},
+}
+```
+
+and to refer to a certain version we recommend to also cite for example
+
+```biblatex
+@softawre{manifoldsjl-zenodo-mostrecent,
+  Author = {Set D. Axen and Mateusz Baran and Ronny Bergmann},
+  Title = {Manifolds.jl},
+  Doi = {10.5281/ZENODO.4292129},
+  Url = {https://zenodo.org/record/4292129},
+  Publisher = {Zenodo},
+  Year = {2021},
+  Copyright = {MIT License}
+}
+```
+
+for the most recent version or a corresponding version specific DOI, see [the list of all versions](https://zenodo.org/search?page=1&size=20&q=conceptrecid:%224292129%22&sort=-version&all_versions=True).
