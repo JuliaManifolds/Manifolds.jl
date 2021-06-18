@@ -112,7 +112,6 @@ function compose!(G::GT, x, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Iden
     return identity!(G, x, e)
 end
 
-
 @doc raw"""
     translate_diff!(G::SemidirectProductGroup, Y, p, q, X, conX::LeftAction)
 
