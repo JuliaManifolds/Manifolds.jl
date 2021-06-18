@@ -405,7 +405,6 @@ function group_log!(G::SpecialEuclidean{3}, X, q)
     return X
 end
 
-translate_diff(::SpecialEuclidean, p, q, X, ::LeftAction) = X
 function translate_diff(
     ::SpecialEuclidean{N},
     p,
@@ -419,6 +418,6 @@ function translate_diff(
     return ProductRepr(diff_aff[1:N, N + 1], diff_aff[1:N, 1:N])
 end
 
-function translate_diff!(G::SpecialEuclidean, Y, p, q, X, conv::ActionDirection)
+function translate_diff!(G::SpecialEuclidean, Y, p, q, X, conv::RightAction)
     return copyto!(Y, translate_diff(G, p, q, X, conv))
 end
