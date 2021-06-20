@@ -565,7 +565,7 @@ The projection inverse retraction on the Tucker manifold interprets `B` as a poi
 ambient Euclidean space and projects it onto the tangent space at to `ℳ` at `A`.
 """
 inverse_retract(
-    ::Tucker, ::Any, ::TuckerPoint, ::TuckerPoint, ::ProjectionInverseRetraction
+    ::Tucker, ::TuckerPoint, ::TuckerPoint, ::ProjectionInverseRetraction
 )
 
 function inverse_retract!(
