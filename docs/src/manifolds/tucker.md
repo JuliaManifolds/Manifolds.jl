@@ -1,4 +1,4 @@
-# [Tucker manifold](@id FixedRankMatrices)
+# [Tucker manifold](@id Tucker)
 
 ```@autodocs
 Modules = [Manifolds]

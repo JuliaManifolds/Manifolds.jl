@@ -61,7 +61,7 @@ include("utils.jl")
                 test_reverse_diff=false,
                 test_vector_spaces=false,
                 test_vee_hat=false,
-                test_tangent_vector_broadcasting=false,
+                test_tangent_vector_broadcasting=true,
                 projection_atol_multiplier=15,
                 retraction_methods=[PolarRetraction()],
                 inverse_retraction_methods=[ProjectionInverseRetraction()],
