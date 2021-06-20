@@ -441,6 +441,27 @@ end
         @test isapprox(Mse, q, Y, Z)
     end
 
+    @testset "Implicit product vector transport" begin
+        p = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
+        q = ProductRepr([0.0, 1.0, 0.0], [2.0, 0.0])
+        X = log(Mse, p, q)
+        for m in [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
+            Y = vector_transport_to(Mse, p, X, q, m)
+            Z1 = vector_transport_to(
+                Mse.manifolds[1],
+                submanifold_component.([p, X, q], Ref(1))...,
+                m,
+            )
+            Z2 = vector_transport_to(
+                Mse.manifolds[2],
+                submanifold_component.([p, X, q], Ref(2))...,
+                m,
+            )
+            Z = ProductRepr(Z1, Z2)
+            @test isapprox(Mse, q, Y, Z)
+        end
+    end
+
     @testset "prod_point" begin
         shape_se = Manifolds.ShapeSpecification(reshapers[1], M1, M2)
         Ts = SizedVector{3,Float64}
