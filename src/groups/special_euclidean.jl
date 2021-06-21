@@ -409,7 +409,6 @@ function translate_diff!(G::SpecialEuclidean, Y, p, q, X, ::RightAction)
     np, hp = submanifold_components(G, p)
     nX, hX = submanifold_components(G, X)
     nY, hY = submanifold_components(G, Y)
-    
     hY .= hp' * hX * hp
     copyto!(nY, hp' * (nX + hX * np))
     @inbounds _padvector!(G, Y)
