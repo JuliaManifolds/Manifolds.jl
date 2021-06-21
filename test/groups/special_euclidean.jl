@@ -69,7 +69,7 @@ using ManifoldsBase: VeeOrthogonalBasis
                     X_pts,
                     X_pts;
                     test_diff=true,
-                    diff_convs=[(), (LeftAction(),)],
+                    diff_convs=[(), (LeftAction(),), (RightAction(),)],
                 )
             end
         end
@@ -103,7 +103,7 @@ using ManifoldsBase: VeeOrthogonalBasis
                 X_pts,
                 X_pts;
                 test_diff=true,
-                diff_convs=[(), (LeftAction(),)],
+                diff_convs=[(), (LeftAction(),), (RightAction(),)],
             )
         end
 
@@ -116,7 +116,7 @@ using ManifoldsBase: VeeOrthogonalBasis
                 X_pts,
                 X_pts;
                 test_diff=true,
-                diff_convs=[(), (LeftAction(),)],
+                diff_convs=[(), (LeftAction(),), (RightAction(),)],
             )
         end
 
