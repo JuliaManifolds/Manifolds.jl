@@ -192,29 +192,6 @@ flat(::MetricManifold, ::Any...)
     return ξ
 end
 
-"""
-    gaussian_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
-
-Compute the Gaussian curvature of the manifold `M` at the point `p` using basis `B`.
-"""
-gaussian_curvature(::AbstractManifold, ::Any, ::AbstractBasis)
-function gaussian_curvature(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
-    return ricci_curvature(M, p, B; kwargs...) / 2
-end
-@decorator_transparent_signature gaussian_curvature(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
-    kwargs...,
-)
-function decorator_transparent_dispatch(
-    ::typeof(gaussian_curvature),
-    ::MetricManifold,
-    args...,
-)
-    return Val(:parent)
-end
-
 @doc raw"""
     inverse_local_metric(M::AbstractcManifold, p, B::AbstractBasis)
 
