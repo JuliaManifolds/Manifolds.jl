@@ -151,6 +151,7 @@ include("projected_distribution.jl")
 # It's included early to ensure visibility of `Identity`
 include("groups/group.jl")
 
+include("manifolds/ConnectionManifold.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/ProductManifold.jl")
 include("manifolds/PowerManifold.jl")

@@ -405,19 +405,19 @@ function group_log!(G::SpecialEuclidean{3}, X, q)
     return X
 end
 
-function translate_diff(
-    ::SpecialEuclidean{N},
-    p,
-    q,
-    X::ProductRepr,
-    ::RightAction,
-) where {N}
-    p_aff = affine_matrix(G, p)
-    X_screw = screw_matrix(G, X)
-    diff_aff = p_aff \ X_screw * p_aff
-    return ProductRepr(diff_aff[1:N, N + 1], diff_aff[1:N, 1:N])
+function translate_diff!(G::SpecialEuclidean, Y, p, q, X, ::RightAction)
+    np, hp = submanifold_components(G, p)
+    nX, hX = submanifold_components(G, X)
+    nY, hY = submanifold_components(G, Y)
+    mul!(hY, hX, hp)
+    mul!(nY, exp(hX), np)
+    nY .+= nX
+    @inbounds _padvector!(G, Y)
+    return Y
 end
 
-function translate_diff!(G::SpecialEuclidean, Y, p, q, X, conv::RightAction)
-    return copyto!(Y, translate_diff(G, p, q, X, conv))
+function translate_diff!(G::SpecialEuclidean, Y, ::Identity, q, X, ::RightAction)
+    copyto!(G, Y, X)
+    @inbounds _padvector!(G, Y)
+    return Y
 end
