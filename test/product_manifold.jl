@@ -460,6 +460,21 @@ end
             Z = ProductRepr(Z1, Z2)
             @test isapprox(Mse, q, Y, Z)
         end
+        for m in [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
+            Y = vector_transport_direction(Mse, p, X, X, m)
+            Z1 = vector_transport_direction(
+                Mse.manifolds[1],
+                submanifold_component.([p, X, X], Ref(1))...,
+                m,
+            )
+            Z2 = vector_transport_direction(
+                Mse.manifolds[2],
+                submanifold_component.([p, X, X], Ref(2))...,
+                m,
+            )
+            Z = ProductRepr(Z1, Z2)
+            @test isapprox(Mse, q, Y, Z)
+        end
     end
 
     @testset "prod_point" begin
