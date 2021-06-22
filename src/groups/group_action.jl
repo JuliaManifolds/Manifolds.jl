@@ -105,17 +105,6 @@ function apply_diff!(A::AbstractGroupAction, Y, a, p, X)
 end
 
 @doc raw"""
-    apply_diff_group(A::AbstractGroupAction, a, Xa, p)
-
-For point $p ∈ \mathcal M$, group element $a ∈ \mathcal{G}$ and a tangent vector
-$X_a ∈ T_a \mathcal G$, compute the differential of group action with respect to the
-group element.
-
-Return an element of the tangent space $T_{τ_a p} \mathcal M$.
-"""
-apply_diff_group(A::AbstractGroupAction, a, Xa, p)
-
-@doc raw"""
     inverse_apply_diff(A::AbstractGroupAction, a, p, X)
 
 For group point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action

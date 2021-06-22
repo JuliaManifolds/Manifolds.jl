@@ -145,45 +145,6 @@ function translate_diff!(G::SemidirectProductGroup, Y, p, q, X, conX::LeftAction
     return Y
 end
 
-@doc raw"""
-    translate_diff!(G::SemidirectProductGroup, p, q, X, conX::RightAction)
-
-Perform differential of the right translation on the semidirect product group `G`.
-
-Since the right translation is defined as (cf. [`SemidirectProductGroup`](@ref)):
-
-````math
-R_{(n', h')} (n, h) = ( R_{θ_{h}(n')} n, R_{h'} h)
-````
-
-then its differential can be computed as
-
-````math
-\mathrm{d}R_{(n', h')}(X_n, X_h) = (
-    \mathrm{d}L_{n} \mathrm{d}θ^{n'}(X_h) + \mathrm{d}R_{θ_{h}(n')}(X_n),
-    \mathrm{d}R_{h'} X_h).
-````
-
-where $θ^n : H \to N$ is defined as $θ^n(h) = θ_{h}(n)$.
-"""
-translate_diff(G::SemidirectProductGroup, p, q, X, conX::RightAction)
-
-#=function translate_diff!(G::SemidirectProductGroup, Y, p, q, X, conX::RightAction)
-    M = base_manifold(G)
-    N, H = M.manifolds
-    A = G.op.action
-    np, hp = submanifold_components(G, p)
-    nq, hq = submanifold_components(G, q)
-    nX, hX = submanifold_components(G, X)
-    nY, hY = submanifold_components(G, Y)
-    translate_diff!(H, hY, hp, hq, hX, LeftAction())
-    apply_diff_group!(A, nY, hp, hX, np) # \mathrm{d}L_{n} \mathrm{d}θ^{n'}(X_h)
-    nr = apply(A, hq, np)
-    nY .+= translate_diff(N, nr, nq, nX, conX) # \mathrm{d}R_{θ_{h}(n')}(X_n)
-    @inbounds _padvector!(G, Y)
-    return Y
-end=#
-
 function get_vector!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
     M = base_manifold(G)
     N, H = M.manifolds
