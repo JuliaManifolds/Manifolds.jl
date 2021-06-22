@@ -3,7 +3,7 @@
         G,
         g_pts::AbstractVector,
         X_pts::AbstractVector = [],
-        ve_pts::AbstractVector = [];
+        Xe_pts::AbstractVector = [];
         atol = 1e-10,
         test_mutating = true,
         test_group_exp_log = true,
@@ -17,6 +17,7 @@ elements of it (contained in `g_pts`).
 Optionally, specify `test_diff` to test differentials of translation, using `X_pts`, which
 must contain at least one tangent vector at `g_pts[1]`, and the direction conventions
 specified in `diff_convs`.
+`Xe_pts` should contain tangent vectors at identity for testing Lie algebra operations.
 If the group is equipped with an invariant metric, `test_invariance` indicates that the
 invariance should be checked for the provided points.
 """
@@ -24,7 +25,7 @@ function test_group(
     G,
     g_pts::AbstractVector,
     X_pts::AbstractVector=[],
-    ve_pts::AbstractVector=[];
+    Xe_pts::AbstractVector=[];
     atol=1e-10,
     test_mutating=true,
     test_group_exp_log=true,
@@ -290,7 +291,7 @@ function test_group(
             Test.@test isapprox(G, make_identity(G, g_pts[1]), g; atol=atol)
 
             test_mutating && Test.@testset "mutating" begin
-                X = allocate(ve_pts[1])
+                X = allocate(Xe_pts[1])
                 Test.@test group_log!(G, X, identity(G, g_pts[1])) === X
                 g = allocate(g_pts[1])
                 Test.@test group_exp!(G, g, X) === g
@@ -299,7 +300,7 @@ function test_group(
         end
 
         Test.@testset "X = log(exp(X))" begin
-            for X in ve_pts
+            for X in Xe_pts
                 g = group_exp(G, X)
                 Test.@test is_point(G, g; atol=atol)
                 v2 = group_log(G, g)
@@ -307,7 +308,7 @@ function test_group(
             end
 
             test_mutating && Test.@testset "mutating" begin
-                for X in ve_pts
+                for X in Xe_pts
                     g = allocate(g_pts[1])
                     Test.@test group_exp!(G, g, X) === g
                     Test.@test is_point(G, g; atol=atol)
@@ -327,9 +328,9 @@ function test_group(
         end
 
         Test.@testset "exp(sv)∘exp(tv) = exp((s+t)X)" begin
-            g1 = group_exp(G, 0.2 * ve_pts[1])
-            g2 = group_exp(G, 0.3 * ve_pts[1])
-            g12 = group_exp(G, 0.5 * ve_pts[1])
+            g1 = group_exp(G, 0.2 * Xe_pts[1])
+            g2 = group_exp(G, 0.3 * Xe_pts[1])
+            g12 = group_exp(G, 0.5 * Xe_pts[1])
             g1_g2 = compose(G, g1, g2)
             g2_g1 = compose(G, g2, g1)
             isapprox(G, g1_g2, g12; atol=atol)
@@ -410,32 +411,33 @@ function test_group(
 
     test_adjoint_action && Test.@testset "Adjoint action" begin
         # linearity
-        X = X_pts[1]
-        Y = X_pts[2]
+        X = Xe_pts[1]
+        Y = Xe_pts[2]
+        e = identity(G, X)
         Test.@test isapprox(
             G,
-            g_pts[1],
+            e,
             adjoint_action(G, g_pts[2], X + Y),
             adjoint_action(G, g_pts[2], X) + adjoint_action(G, g_pts[2], Y),
         )
         # inverse property
         Test.@test isapprox(
             G,
-            g_pts[1],
+            e,
             adjoint_action(G, g_pts[2], adjoint_action(G, inv(G, g_pts[2]), X)),
             X,
         )
         if test_mutating
             Z = allocate(X)
             adjoint_action!(G, Z, g_pts[2], X)
-            Test.@test isapprox(G, g_pts[1], Z, adjoint_action(G, g_pts[2], X))
+            Test.@test isapprox(G, e, Z, adjoint_action(G, g_pts[2], X))
         end
 
         # interaction with Lie bracket
         if test_lie_bracket
             Test.@test isapprox(
                 G,
-                g_pts[1],
+                e,
                 adjoint_action(G, g_pts[2], lie_bracket(G, X, Y)),
                 lie_bracket(
                     G,

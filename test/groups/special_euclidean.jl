@@ -19,12 +19,15 @@ using ManifoldsBase: VeeOrthogonalBasis
             t = Vector{Float64}.([1:2, 2:3, 3:4])
             ω = [[1.0], [2.0], [1.0]]
             tuple_pts = [(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
-            tuple_X = ([-1.0, 2.0], hat(Rn, p, [1.0]))
+            tuple_X = [([-1.0, 2.0], hat(Rn, p, [1.0])), ([1.0, -2.0], hat(Rn, p, [0.5]))]
         elseif n == 3
             t = Vector{Float64}.([1:3, 2:4, 4:6])
             ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
             tuple_pts = [(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
-            tuple_X = ([-1.0, 2.0, 1.0], hat(Rn, p, [1.0, 0.5, -0.5]))
+            tuple_X = [
+                ([-1.0, 2.0, 1.0], hat(Rn, p, [1.0, 0.5, -0.5])),
+                ([-2.0, 1.0, 0.5], hat(Rn, p, [-1.0, -0.5, 1.1])),
+            ]
         else # n == 4
             t = Vector{Float64}.([1:4, 2:5, 3:6])
             ω = [
@@ -33,7 +36,10 @@ using ManifoldsBase: VeeOrthogonalBasis
                 [1.0, 3.0, 2.0, 1.0, 2.0, 3.0],
             ]
             tuple_pts = [(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
-            tuple_X = ([-1.0, 2.0, 1.0, 3.0], hat(Rn, p, [1.0, 0.5, -0.5, 0.0, 2.0, 1.0]))
+            tuple_X = [
+                ([-1.0, 2.0, 1.0, 3.0], hat(Rn, p, [1.0, 0.5, -0.5, 0.0, 2.0, 1.0])),
+                ([-2.0, 1.5, -1.0, 2.0], hat(Rn, p, [1.0, -0.5, 0.5, 1.0, 0.0, 1.0])),
+            ]
         end
 
         @testset "product point" begin
@@ -41,7 +47,7 @@ using ManifoldsBase: VeeOrthogonalBasis
             for reshaper in reshapers
                 shape_se = Manifolds.ShapeSpecification(reshaper, M.manifolds...)
                 pts = [Manifolds.prod_point(shape_se, tp...) for tp in tuple_pts]
-                X_pts = [Manifolds.prod_point(shape_se, tuple_X...)]
+                X_pts = [Manifolds.prod_point(shape_se, tX...) for tX in tuple_X]
 
                 g1, g2 = pts[1:2]
                 t1, R1 = g1.parts
@@ -76,7 +82,7 @@ using ManifoldsBase: VeeOrthogonalBasis
 
         @testset "product repr" begin
             pts = [ProductRepr(tp...) for tp in tuple_pts]
-            X_pts = [ProductRepr(tuple_X...)]
+            X_pts = [ProductRepr(tX...) for tX in tuple_X]
 
             g1, g2 = pts[1:2]
             t1, R1 = g1.parts
@@ -103,19 +109,22 @@ using ManifoldsBase: VeeOrthogonalBasis
                 X_pts,
                 X_pts;
                 test_diff=true,
+                test_lie_bracket=true,
+                test_adjoint_action=true,
                 diff_convs=[(), (LeftAction(),), (RightAction(),)],
             )
         end
 
         @testset "affine matrix" begin
             pts = [affine_matrix(G, ProductRepr(tp...)) for tp in tuple_pts]
-            X_pts = [screw_matrix(G, ProductRepr(tuple_X...))]
+            X_pts = [screw_matrix(G, ProductRepr(tX...)) for tX in tuple_X]
             test_group(
                 G,
                 pts,
                 X_pts,
                 X_pts;
                 test_diff=true,
+                test_lie_bracket=true,
                 diff_convs=[(), (LeftAction(),), (RightAction(),)],
             )
         end
@@ -124,7 +133,7 @@ using ManifoldsBase: VeeOrthogonalBasis
             shape_se =
                 Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M.manifolds...)
             p = Manifolds.prod_point(shape_se, tuple_pts[1]...)
-            V = Manifolds.prod_point(shape_se, tuple_X...)
+            V = Manifolds.prod_point(shape_se, tuple_X[1]...)
             vexp = [V.parts[1]; vee(Rn, p.parts[2], V.parts[2])]
             v = vee(G, p, V)
             @test v ≈ vexp
@@ -140,6 +149,36 @@ using ManifoldsBase: VeeOrthogonalBasis
     @test affine_matrix(G, make_identity(G, ones(12, 12))) isa
           Diagonal{Float64,Vector{Float64}}
     @test affine_matrix(G, make_identity(G, ones(12, 12))) == Diagonal(ones(11))
+
+    @testset "Explicit embedding in GL(n+1)" begin
+        G = SpecialEuclidean(3)
+        t = Vector{Float64}.([1:3, 2:4, 4:6])
+        ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
+        p = Matrix(I, 3, 3)
+        Rn = Rotations(3)
+        pts = [ProductRepr(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
+        X = ProductRepr([-1.0, 2.0, 1.0], hat(Rn, p, [1.0, 0.5, -0.5]))
+        q = ProductRepr([0.0, 0.0, 0.0], p)
+
+        GL = GeneralLinear(4)
+        SEGL = EmbeddedManifold(G, GL)
+        pts_gl = [embed(SEGL, pp) for pp in pts]
+        q_gl = embed(SEGL, q)
+        X_gl = embed(SEGL, pts_gl[1], X)
+
+        @test isapprox(G, pts[1], project(SEGL, pts_gl[1]))
+        @test isapprox(G, pts[1], X, project(SEGL, pts_gl[1], X_gl))
+
+        for conv in [LeftAction(), RightAction()]
+            println(conv)
+            tpgl = translate(GL, pts_gl[2], pts_gl[1], conv)
+            tXgl = translate_diff(GL, pts_gl[2], pts_gl[1], X_gl, conv)
+            tpse = translate(G, pts[2], pts[1], conv)
+            tXse = translate_diff(G, pts[2], pts[1], X, conv)
+            @test isapprox(G, tpse, project(SEGL, tpgl))
+            @test isapprox(G, tpse, tXse, project(SEGL, tpgl, tXgl))
+        end
+    end
 
     @testset "Adjoint action on 𝔰𝔢(3)" begin
         G = SpecialEuclidean(3)

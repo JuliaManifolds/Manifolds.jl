@@ -144,7 +144,8 @@ the $n + 1 × n + 1$ matrix
 \end{pmatrix}.
 ````
 
-This function embeds $𝔰𝔢(n)$ in the general linear Lie algebra $𝔤𝔩(n+1)$.
+This function embeds $𝔰𝔢(n)$ in the general linear Lie algebra $𝔤𝔩(n+1)$ but it's not
+a homomorphic embedding (see [`SE_in_GL`](@ref) for a homomorphic one).
 
 See also [`affine_matrix`](@ref) for matrix representations of the Lie group.
 """
@@ -405,18 +406,100 @@ function group_log!(G::SpecialEuclidean{3}, X, q)
     return X
 end
 
+function lie_bracket(G::SpecialEuclidean, X::ProductRepr, Y::ProductRepr)
+    nX, hX = submanifold_components(G, X)
+    nY, hY = submanifold_components(G, Y)
+    return ProductRepr(hX * nY - hY * nX, lie_bracket(G.manifold.manifolds[2], hX, hY))
+end
+function lie_bracket(::SpecialEuclidean, X::AbstractMatrix, Y::AbstractMatrix)
+    return X * Y - Y * X
+end
+
+function lie_bracket!(G::SpecialEuclidean, Z, X, Y)
+    nX, hX = submanifold_components(G, X)
+    nY, hY = submanifold_components(G, Y)
+    nZ, hZ = submanifold_components(G, Z)
+    lie_bracket!(G.manifold.manifolds[2], hZ, hX, hY)
+    nZ .= hX * nY .- hY * nX
+    @inbounds _padvector!(G, Z)
+    return Z
+end
+
 function translate_diff!(G::SpecialEuclidean, Y, p, q, X, ::RightAction)
     np, hp = submanifold_components(G, p)
+    nq, hq = submanifold_components(G, q)
     nX, hX = submanifold_components(G, X)
     nY, hY = submanifold_components(G, Y)
     hY .= hp' * hX * hp
-    copyto!(nY, hp' * (nX + hX * np))
+    copyto!(nY, hq * (hX * np + hq' * nX))
     @inbounds _padvector!(G, Y)
     return Y
 end
-
 function translate_diff!(G::SpecialEuclidean, Y, ::Identity, q, X, ::RightAction)
     copyto!(G, Y, X)
     @inbounds _padvector!(G, Y)
     return Y
+end
+function translate_diff!(G::SpecialEuclidean, Y, p, ::Identity, X, ::RightAction)
+    np, hp = submanifold_components(G, p)
+    nX, hX = submanifold_components(G, X)
+    nY, hY = submanifold_components(G, Y)
+    hY .= hp' * hX * hp
+    copyto!(nY, hX * np + nX)
+    @inbounds _padvector!(G, Y)
+end
+function translate_diff!(G::SpecialEuclidean, Y, ::Identity, ::Identity, X, ::RightAction)
+    copyto!(G, Y, X)
+    @inbounds _padvector!(G, Y)
+    return Y
+end
+
+"""
+    SE_in_GL
+
+An explicit isometric and homomorphic embedding of SE(n) in GL(n+1) and 𝔰𝔢(n) in 𝔤𝔩(n+1).
+Note that this is *not* a transparently isometric embedding.
+"""
+const SE_in_GL = EmbeddedManifold{ℝ,<:SpecialEuclidean,<:GeneralLinear}
+
+function embed(M::SE_in_GL, p)
+    G = M.manifold
+    return affine_matrix(G, p)
+end
+function embed(M::SE_in_GL, p, X)
+    G = M.manifold
+    np, hp = submanifold_components(G, p)
+    nX, hX = submanifold_components(G, X)
+    Y = allocate_result(G, screw_matrix, nX, hX)
+    nY, hY = submanifold_components(G, Y)
+    copyto!(hY, hX)
+    copyto!(nY, hp' * nX)
+    @inbounds _padvector!(G, Y)
+    return Y
+end
+
+function embed!(M::SE_in_GL, q, p)
+    return copyto!(q, embed(M, p))
+end
+function embed!(M::SE_in_GL, Y, p, X)
+    return copyto!(Y, embed(M, p, X))
+end
+
+function project(M::SE_in_GL, p)
+    G = M.manifold
+    np, hp = submanifold_components(G, p)
+    return ProductRepr(np, hp)
+end
+function project(M::SE_in_GL, p, X)
+    G = M.manifold
+    np, hp = submanifold_components(G, p)
+    nX, hX = submanifold_components(G, X)
+    return ProductRepr(hp * nX, hX)
+end
+
+function project!(M::SE_in_GL, q, p)
+    return copyto!(q, project(M, p))
+end
+function project!(M::SE_in_GL, Y, p, X)
+    return copyto!(Y, project(M, p, X))
 end
