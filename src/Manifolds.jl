@@ -77,6 +77,7 @@ using ManifoldsBase:
     ℂ,
     ℍ,
     AbstractBasis,
+    AbstractDecoratorType,
     AbstractIsometricEmbeddingType,
     AbstractNumbers,
     AbstractOrthogonalBasis,
