@@ -193,7 +193,12 @@ using ManifoldsBase: VeeOrthogonalBasis
             @test isapprox(G, tpse, project(SEGL, tpgl))
             @test isapprox(G, tpse, tXse, project(SEGL, tpgl, tXgl))
 
-            @test isapprox(G, pts_gl[1], X_gl, translate_diff(G, Identity(G, pts_gl[1]), pts_gl[1], X_gl, conv))
+            @test isapprox(
+                G,
+                pts_gl[1],
+                X_gl,
+                translate_diff(G, Identity(G, pts_gl[1]), pts_gl[1], X_gl, conv),
+            )
         end
     end
 
