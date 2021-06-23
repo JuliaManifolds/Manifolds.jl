@@ -971,8 +971,39 @@ end
 
 group_log!(::MultiplicationGroup, X::AbstractMatrix, q::AbstractMatrix) = log_safe!(X, q)
 
-# (a) changes / parent - none
-
+# (a) changes / parent
+for f in [
+    distance,
+    exp,
+    exp!,
+    inner,
+    inverse_retract,
+    inverse_retract!,
+    log,
+    log!,
+    mid_point,
+    mid_point!,
+    project!,
+    project,
+    retract,
+    retract!,
+    vector_transport_along,
+    vector_transport_direction,
+    get_vector!,
+    isapprox,
+]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractGroupManifold,
+                args...,
+            )
+                return Val(:transparent)
+            end
+        end,
+    )
+end
 # (b) changes / transparencies.
 for f in [
     distance,
@@ -992,7 +1023,7 @@ for f in [
     vector_transport_along,
     vector_transport_direction,
     get_vector!,
-    isapprox
+    isapprox,
 ]
     eval(
         quote
@@ -1008,7 +1039,7 @@ for f in [
 end
 
 # (b) changes / intransparencies.
-for f in [identity!,compose!, translate_diff!, group_exp!, group_log!]
+for f in [identity!, compose,compose!, translate_diff!,  groupo_exp, group_exp!, group_log, group_log!]
     eval(
         quote
             function decorator_transparent_dispatch(

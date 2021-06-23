@@ -635,6 +635,7 @@ for f in [
     christoffel_symbols_second_jacobian,
     det_local_metric,
     einstein_tensor,
+    exp,
     gaussian_curvature,
     flat,
     get_coordinates,
@@ -642,6 +643,7 @@ for f in [
     inverse_local_metric,
     local_metric,
     local_metric_jacobian,
+    log,
     log_local_metric_density,
     mean,
     median,
@@ -650,7 +652,10 @@ for f in [
     ricci_tensor,
     riemann_tensor,
     sharp,
+    vector_transport_along,
+    vector_transport_direction,
     vector_transport_direction!, #since it has a default using _to!
+    vector_transport_to,
 ]
     eval(
         quote

@@ -138,9 +138,6 @@ include("group_utils.jl")
         @test_throws ErrorException group_log(G, x)
         @test_throws ErrorException group_log!(G, v, x)
 
-        for f in [compose, compose!, translate_diff!, translate_diff]
-            @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:transparent}()
-        end
         for f in [translate, translate!]
             @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:intransparent}()
         end
