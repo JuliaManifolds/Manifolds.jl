@@ -467,7 +467,7 @@ Note that this is *not* a transparently isometric embedding.
 """
 const SE_in_GL = EmbeddedManifold{ℝ,<:SpecialEuclidean,<:GeneralLinear}
 
-SE_in_GL(n) = EmbeddedManifold(SpecialEuclidean(n), GeneralLinear(n+1))
+SE_in_GL(n) = EmbeddedManifold(SpecialEuclidean(n), GeneralLinear(n + 1))
 
 function embed(M::SE_in_GL, p)
     G = M.manifold
