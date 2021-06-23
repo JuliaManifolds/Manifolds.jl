@@ -645,10 +645,12 @@ for f in [
     log_local_metric_density,
     mean,
     median,
+    project,
     ricci_curvature,
     ricci_tensor,
     riemann_tensor,
     sharp,
+    vector_transport_direction!, #since it has a default using _to!
 ]
     eval(
         quote
@@ -672,7 +674,7 @@ for f in [
     get_basis,
     inner,
     inverse_retract!,
-    log1,
+    log!,
     mean!,
     median!,
     norm,
@@ -680,7 +682,6 @@ for f in [
     sharp!,
     retract!,
     vector_transport_along!,
-    vector_transport_direction!,
     vector_transport_to!,
 ]
     eval(

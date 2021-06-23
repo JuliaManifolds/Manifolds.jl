@@ -331,7 +331,7 @@ export HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVe
 export AbstractNumbers, ℝ, ℂ, ℍ
 
 # decorator manifolds
-export AbstractDecoratorManifold
+export AbstractDecoratorManifold, MetricDecoratorType, GroupDecoratorType
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
