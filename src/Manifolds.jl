@@ -351,6 +351,7 @@ export AbstractVectorTransportMethod,
 export PoleLadderTransport, SchildsLadderTransport
 export PowerVectorTransport, ProductVectorTransport
 export AbstractEmbeddedManifold
+export AbstractConnectionManifold, LeviCivitaConnection
 export AbstractMetric,
     RiemannianMetric,
     LorentzMetric,

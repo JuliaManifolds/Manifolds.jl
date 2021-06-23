@@ -454,13 +454,20 @@ function translate_diff!(G::SpecialEuclidean, Y, ::Identity, ::Identity, X, ::Ri
     return Y
 end
 
-"""
+@doc raw"""
     SE_in_GL
 
-An explicit isometric and homomorphic embedding of SE(n) in GL(n+1) and 𝔰𝔢(n) in 𝔤𝔩(n+1).
+An explicit isometric and homomorphic embedding of $\mathrm{SE}(n)$ in $\mathrm{GL}(n+1)$
+and $𝔰𝔢(n)$ in $𝔤𝔩(n+1)$.
 Note that this is *not* a transparently isometric embedding.
+
+# Constructor
+
+    SE_in_GL(n)
 """
 const SE_in_GL = EmbeddedManifold{ℝ,<:SpecialEuclidean,<:GeneralLinear}
+
+SE_in_GL(n) = EmbeddedManifold(SpecialEuclidean(n), GeneralLinear(n+1))
 
 function embed(M::SE_in_GL, p)
     G = M.manifold
