@@ -15,7 +15,7 @@ struct LeviCivitaConnection <: AbstractAffineConnection end
 """
     AbstractConnectionManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractAffineConnection} <: AbstractDecoratorManifold{𝔽}
 
-Equip a [`AbstractManifold`](@ref) explicitly with an [`AbstractAffineConnection`](@ref) `G`.
+Equip an [`AbstractManifold`](@ref) explicitly with an [`AbstractAffineConnection`](@ref) `G`.
 
 `AbstractConnectionManifold` is defined by values of [`christoffel_symbols_second`](@ref),
 which is used for a default implementation of [`exp`](@ref), [`log`](@ref) and

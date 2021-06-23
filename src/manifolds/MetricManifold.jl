@@ -110,6 +110,13 @@ function christoffel_symbols_second(
     return Γ₂
 end
 
+"""
+    connection(::MetricManifold)
+
+Return the [`LeviCivitaConnection`](@ref) for a metric manifold.
+"""
+connection(::MetricManifold) = LeviCivitaConnection()
+
 @doc raw"""
     det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
 

@@ -166,17 +166,34 @@ using ManifoldsBase: VeeOrthogonalBasis
         q_gl = embed(SEGL, q)
         X_gl = embed(SEGL, pts_gl[1], X)
 
+        q_gl2 = allocate(q_gl)
+        embed!(SEGL, q_gl2, q)
+        @test isapprox(SEGL, q_gl2, q_gl)
+
+        q2 = allocate(q)
+        project!(SEGL, q2, q_gl)
+        @test isapprox(G, q, q2)
+
         @test isapprox(G, pts[1], project(SEGL, pts_gl[1]))
         @test isapprox(G, pts[1], X, project(SEGL, pts_gl[1], X_gl))
 
+        X_gl2 = allocate(X_gl)
+        embed!(SEGL, X_gl2, pts_gl[1], X)
+        @test isapprox(SEGL, pts_gl[1], X_gl2, X_gl)
+
+        X2 = allocate(X)
+        project!(SEGL, X2, pts_gl[1], X_gl)
+        @test isapprox(G, pts[1], X, X2)
+
         for conv in [LeftAction(), RightAction()]
-            println(conv)
             tpgl = translate(GL, pts_gl[2], pts_gl[1], conv)
             tXgl = translate_diff(GL, pts_gl[2], pts_gl[1], X_gl, conv)
             tpse = translate(G, pts[2], pts[1], conv)
             tXse = translate_diff(G, pts[2], pts[1], X, conv)
             @test isapprox(G, tpse, project(SEGL, tpgl))
             @test isapprox(G, tpse, tXse, project(SEGL, tpgl, tXgl))
+
+            @test isapprox(G, pts_gl[1], X_gl, translate_diff(G, Identity(G, pts_gl[1]), pts_gl[1], X_gl, conv))
         end
     end
 
