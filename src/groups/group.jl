@@ -1039,7 +1039,16 @@ for f in [
 end
 
 # (b) changes / intransparencies.
-for f in [identity!, compose,compose!, translate_diff!,  groupo_exp, group_exp!, group_log, group_log!]
+for f in [
+    identity!,
+    compose,
+    compose!,
+    translate_diff!,
+    groupo_exp,
+    group_exp!,
+    group_log,
+    group_log!,
+]
     eval(
         quote
             function decorator_transparent_dispatch(
