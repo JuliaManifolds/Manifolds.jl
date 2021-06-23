@@ -215,6 +215,7 @@ using ManifoldsBase: VeeOrthogonalBasis
         # adjoint action of SE(3)
         fX = TFVector(vee(G, q, X), VeeOrthogonalBasis())
         fXp = adjoint_action(G, pts[1], fX)
-        fXp2 = vee(G, q, compose(G, pts[1], exp(G, q, X)))
+        fXp2 = adjoint_action(G, pts[1], X)
+        @test isapprox(G, pts[1], hat(G, pts[1], fXp.data), fXp2)
     end
 end

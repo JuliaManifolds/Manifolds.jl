@@ -90,7 +90,7 @@ function adjoint_action(::SpecialEuclidean{3}, p, fX::TFVector{<:Any,VeeOrthogon
     r = fX.data[SA[1, 2, 3]]
     ω = fX.data[SA[4, 5, 6]]
     Rω = R * ω
-    return TFVector([cross(Rω, t) + R * r; Rω], fX.basis)
+    return TFVector([cross(t, Rω) + R * r; Rω], fX.basis)
 end
 
 @doc raw"""
