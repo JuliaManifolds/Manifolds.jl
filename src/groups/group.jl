@@ -974,7 +974,7 @@ end
 group_log!(::MultiplicationGroup, X::AbstractMatrix, q::AbstractMatrix) = log_safe!(X, q)
 
 # (a) changes / parent.
-for f in [get_vector, get_vector!, get_coordinates, get_coordinates!]
+for f in [get_vector, get_coordinates]
     eval(
         quote
             function decorator_transparent_dispatch(
