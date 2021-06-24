@@ -666,6 +666,8 @@ group_exp(::AbstractGroupManifold, ::Any...)
     return group_exp!(G, q, X)
 end
 
+@decorator_transparent_signature group_exp!(M::AbstractDecoratorManifold, q, X)
+
 @doc raw"""
     group_log(G::AbstractGroupManifold, q)
 
@@ -971,27 +973,8 @@ end
 
 group_log!(::MultiplicationGroup, X::AbstractMatrix, q::AbstractMatrix) = log_safe!(X, q)
 
-# (a) changes / parent
-for f in [
-    distance,
-    exp,
-    exp!,
-    inner,
-    inverse_retract,
-    inverse_retract!,
-    log,
-    log!,
-    mid_point,
-    mid_point!,
-    project!,
-    project,
-    retract,
-    retract!,
-    vector_transport_along,
-    vector_transport_direction,
-    get_vector!,
-    isapprox,
-]
+# (a) changes / parent.
+for f in [get_vector, get_vector!, get_coordinates, get_coordinates!]
     eval(
         quote
             function decorator_transparent_dispatch(
@@ -999,12 +982,12 @@ for f in [
                 ::AbstractGroupManifold,
                 args...,
             )
-                return Val(:transparent)
+                return Val(:parent)
             end
         end,
     )
 end
-# (b) changes / transparencies.
+# (b) changes / transparencies
 for f in [
     distance,
     exp,
@@ -1012,6 +995,7 @@ for f in [
     inner,
     inverse_retract,
     inverse_retract!,
+    isapprox,
     log,
     log!,
     mid_point,
@@ -1022,8 +1006,6 @@ for f in [
     retract!,
     vector_transport_along,
     vector_transport_direction,
-    get_vector!,
-    isapprox,
 ]
     eval(
         quote
@@ -1038,16 +1020,20 @@ for f in [
     )
 end
 
-# (b) changes / intransparencies.
+# (c) changes / intransparencies.
 for f in [
-    identity!,
     compose,
     compose!,
-    translate_diff!,
-    groupo_exp,
+    group_exp,
     group_exp!,
     group_log,
     group_log!,
+    identity,
+    identity!,
+    translate,
+    translate!,
+    translate_diff,
+    translate_diff!,
 ]
     eval(
         quote
@@ -1061,7 +1047,7 @@ for f in [
         end,
     )
 end
-
+# (d) specials
 for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
     eval(
         quote
