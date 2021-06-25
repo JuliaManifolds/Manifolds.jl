@@ -165,7 +165,7 @@ function exp!(M::Rotations{2}, q, p, X)
     @assert size(q) == (2, 2)
     θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
     sinθ, cosθ = sincos(θ)
-    return copyto!(q, p * [cosθ sinθ; -sinθ cosθ])
+    return copyto!(q, p * SA[cosθ sinθ; -sinθ cosθ])
 end
 function exp!(M::Rotations{3}, q, p, X)
     θ = norm(M, p, X) / sqrt(2)
