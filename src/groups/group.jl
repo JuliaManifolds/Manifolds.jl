@@ -101,7 +101,7 @@ While functions like `inner` might be overwritten to use the (decorated) manifol
 representing the group, the `base_manifold` is the manifold itself.
 Hence for this abstract case, just `M` is returned.
 """
-base_manifold(M::AbstractGroupManifold, ::Val{N} = Val(-1)) where {N} = M
+base_manifold(M::AbstractGroupManifold, ::Val{N}=Val(-1)) where {N} = M
 
 """
     base_manifold(M::GroupManifold, d::Val{N} = Val(-1))
@@ -109,7 +109,7 @@ base_manifold(M::AbstractGroupManifold, ::Val{N} = Val(-1)) where {N} = M
 Return the base manifold of `M` that is enhanced with its group.
 Here, the internally stored enhanced manifold `M.manifold` is returned.
 """
-base_manifold(G::GroupManifold, ::Val{N} = Val(-1)) where {N} = G.manifold
+base_manifold(G::GroupManifold, ::Val{N}=Val(-1)) where {N} = G.manifold
 
 decorator_group_dispatch(::AbstractManifold) = Val(false)
 function decorator_group_dispatch(M::AbstractDecoratorManifold)
