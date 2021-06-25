@@ -62,6 +62,13 @@ include("utils.jl")
         v = log(M, pts[1], pts[2])
         @test norm(M, pts[1], v) ≈ (angles[2] - angles[1]) * sqrt(2)
 
+        # check that exp! does not have a side effect
+        q = allocate(pts[1])
+        copyto!(M, q, pts[1])
+        q2 = exp(M, pts[1], v)
+        exp!(M, q, q, v)
+        @test norm(q - q2) ≈ 0
+
         v14_polar = inverse_retract(M, pts[1], pts[4], Manifolds.PolarInverseRetraction())
         p4_polar = retract(M, pts[1], v14_polar, Manifolds.PolarRetraction())
         @test isapprox(M, pts[4], p4_polar)
