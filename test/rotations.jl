@@ -63,7 +63,8 @@ include("utils.jl")
         @test norm(M, pts[1], v) ≈ (angles[2] - angles[1]) * sqrt(2)
 
         # check that exp! does not have a side effect
-        q = copy(M, pts[1])
+        q = allocate(pts[1])
+        copyto!(M, q, pts[1])
         q2 = exp(M, pts[1], v)
         exp!(M, q, q, v)
         @test norm(q - q2) ≈ 0
