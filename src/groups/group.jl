@@ -22,9 +22,27 @@ Note that a manifold is connected with an operation by wrapping it with a decora
 abstract type AbstractGroupOperation end
 
 """
-    struct GroupDecroatorType <: AbstractDecoratorType
+    abstract type AbstractGroupDecroatorType <: AbstractDecoratorType
+
+    A common decorator type for all group decorators
 """
-struct GroupDecoratorType <: AbstractDecoratorType end
+abstract type AbstractGroupDecoratorType <: AbstractDecoratorType end
+
+"""
+    struct DefaultGroupDecoratorType <: AbstractDecoratorType
+
+A default group decorator type with no special properties
+"""
+struct DefaultGroupDecoratorType <: AbstractGroupDecoratorType end
+"""
+    struct TransparentGroupDecoratorType <: AbstractDecoratorType
+
+A transparent grou pdecorator type that acts transparent similar to
+the [`TransparentIsometricEmbedding`](@ref), i.e. it inherits the
+logarithmic and exponential map as well as retraction and inverse retractions
+from the manifold it decorates.
+"""
+struct TransparentGroupDecoratorType <: AbstractGroupDecoratorType end
 
 @doc raw"""
     AbstractGroupManifold{𝔽,O<:AbstractGroupOperation} <: AbstractDecoratorManifold{𝔽}
@@ -50,7 +68,7 @@ Group manifolds by default forward metric-related operations to the wrapped mani
     GroupManifold(manifold, op)
 """
 struct GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <:
-       AbstractGroupManifold{𝔽,O,GroupDecoratorType}
+       AbstractGroupManifold{𝔽,O,TransparentGroupDecoratorType}
     manifold::M
     op::O
 end
@@ -75,7 +93,23 @@ function base_group(::AbstractManifold)
 end
 base_group(G::AbstractGroupManifold) = G
 
-base_manifold(G::GroupManifold) = G.manifold
+"""
+    base_manifold(M::AbstractGroupManifold, d::Val{N} = Val(-1))
+
+Return the base manifold of `M` that is enhanced with its group.
+While functions like `inner` might be overwritten to use the (decorated) manifold
+representing the group, the `base_manifold` is the manifold itself.
+Hence for this abstract case, just `M` is returned.
+"""
+base_manifold(M::AbstractGroupManifold, ::Val{N} = Val(-1)) where {N} = M
+
+"""
+    base_manifold(M::GroupManifold, d::Val{N} = Val(-1))
+
+Return the base manifold of `M` that is enhanced with its group.
+Here, the internally stored enhanced manifold `M.manifold` is returned.
+"""
+base_manifold(G::GroupManifold, ::Val{N} = Val(-1)) where {N} = G.manifold
 
 decorator_group_dispatch(::AbstractManifold) = Val(false)
 function decorator_group_dispatch(M::AbstractDecoratorManifold)
@@ -974,14 +1008,29 @@ end
 group_log!(::MultiplicationGroup, X::AbstractMatrix, q::AbstractMatrix) = log_safe!(X, q)
 
 # (a) changes / parent.
-for f in [get_vector, get_coordinates]
+for f in [
+    embed,
+    get_basis,
+    get_coordinates,
+    get_coordinates!,
+    get_vector,
+    get_vector!,
+    inverse_retract!,
+    mid_point!,
+    project,
+    retract!,
+    vector_transport_along,
+    vector_transport_direction,
+    vector_transport_direction!,
+    vector_transport_to,
+]
     eval(
         quote
             function decorator_transparent_dispatch(
                 ::typeof($f),
-                ::AbstractGroupManifold,
+                ::AbstractGroupManifold{𝔽,O,<:AbstractGroupDecoratorType},
                 args...,
-            )
+            ) where {𝔽,O}
                 return Val(:parent)
             end
         end,
@@ -989,9 +1038,14 @@ for f in [get_vector, get_coordinates]
 end
 # (b) changes / transparencies
 for f in [
+    check_point,
+    check_vector,
     distance,
     exp,
     exp!,
+    embed!,
+    get_coordinates!,
+    get_vector!,
     inner,
     inverse_retract,
     inverse_retract!,
@@ -1011,9 +1065,9 @@ for f in [
         quote
             function decorator_transparent_dispatch(
                 ::typeof($f),
-                ::AbstractGroupManifold,
+                ::AbstractGroupManifold{𝔽,O,<:TransparentGroupDecoratorType},
                 args...,
-            )
+            ) where {𝔽,O}
                 return Val(:transparent)
             end
         end,
@@ -1053,14 +1107,25 @@ for f in [vector_transport_along!, vector_transport_direction!, vector_transport
         quote
             function decorator_transparent_dispatch(
                 ::typeof($f),
-                ::AbstractGroupManifold,
+                ::AbstractGroupManifold{𝔽,O,<:TransparentGroupDecoratorType},
                 Y,
                 p,
                 X,
                 q,
                 ::T,
-            ) where {T}
+            ) where {𝔽,O,T}
                 return Val(:transparent)
+            end
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractGroupManifold{𝔽,O,<:AbstractGroupDecoratorType},
+                Y,
+                p,
+                X,
+                q,
+                ::T,
+            ) where {𝔽,O,T}
+                return Val(:intransparent)
             end
         end,
     )
@@ -1069,13 +1134,24 @@ for f in [vector_transport_along!, vector_transport_direction!, vector_transport
             quote
                 function decorator_transparent_dispatch(
                     ::typeof($f),
-                    ::AbstractGroupManifold,
+                    ::AbstractGroupManifold{𝔽,O,<:TransparentGroupDecoratorType},
                     Y,
                     p,
                     X,
                     q,
                     ::$m,
-                ) where {𝔽,E}
+                ) where {𝔽,O}
+                    return Val(:parent)
+                end
+                function decorator_transparent_dispatch(
+                    ::typeof($f),
+                    ::AbstractGroupManifold{𝔽,O,<:AbstractGroupDecoratorType},
+                    Y,
+                    p,
+                    X,
+                    q,
+                    ::$m,
+                ) where {𝔽,O}
                     return Val(:parent)
                 end
             end,
