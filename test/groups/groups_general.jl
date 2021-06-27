@@ -1,3 +1,5 @@
+using Manifolds: decorator_transparent_dispatch
+using Base: decode_overlong
 
 include("../utils.jl")
 include("group_utils.jl")
@@ -197,8 +199,10 @@ include("group_utils.jl")
         @test ge + x ≈ x
         @test x + ge ≈ x
         @test ge + ge === ge
+        @test ge + Identity(G, 1) === ge
         @test -(ge) === ge
         @test +(ge) === ge
+        @test ge - Identity(G, 1) === ge
         @test ge * 1 === ge
         @test 1 * ge === ge
         @test ge * ge === ge
@@ -305,6 +309,7 @@ include("group_utils.jl")
         @test y ≈ x
         X = [1.0 2.0; 3.0 4.0]
         @test group_exp!(G, y, X) === y
+        @test_throws ErrorException group_exp!(G, y, :a)
         @test y ≈ exp(X)
         Y = allocate(X)
         @test group_log!(G, Y, y) === Y
@@ -335,6 +340,26 @@ include("group_utils.jl")
         @test get_vector(G, e, ones(3), DefaultOrthogonalBasis()) == ones(3)
         @test e - e == e
         @test ones(3) + e == ones(3)
+    end
+
+    @testset "Transparency tests" begin
+        G = DefaultTransparencyGroup(Euclidean(3), AdditionOperation())
+        p = ones(3)
+        q = 2 * p
+        X = zeros(3)
+        Y = similar(X)
+        for f in
+            [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
+            @test ManifoldsBase.decorator_transparent_dispatch(
+                f,
+                G,
+                Y,
+                p,
+                X,
+                q,
+                ParallelTransport(),
+            ) == Val(:intransparent)
+        end
     end
 end
 
