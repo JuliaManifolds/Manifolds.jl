@@ -233,7 +233,7 @@ The decorator sets functions like [`exp`](@ref) and [`log`](@ref) to be implemen
 An exception is not issued if a metric is additionally set to be the default metric (see [`is_default_metric`](@ref), since this makes all functions act transparently.
 this last case assumes that the newly specified metric type is actually the one already implemented on a manifold initially.
 
-By default, i.e. for a plain new decorator, all functions are passed down.
+By default, i.e. for a plain new decorator, all functions are transparent, i.e. passed down to the manifold the [`AbstractDecoratorManifold`](@ref) decorates.
 To implement a method for a decorator that behaves differently from the method of the same function for the internal manifold, two steps are required.
 Let's assume the function is called `f(M, arg1, arg2)`, and our decorator manifold `DM` of type `OurDecoratorManifold` decorates `M`.
 Then
@@ -242,13 +242,16 @@ Then
 2. implement `f(DM::OurDecoratorManifold, arg1, arg2)`
 
 This makes it possible to extend a manifold or all manifolds with a feature or replace a feature of the original manifold.
+
 The [`MetricManifold`](@ref) is the best example of the second case, since the default metric indicates for which metric the manifold was originally implemented, such that those functions are just passed through.
 This can best be seen in the [`SymmetricPositiveDefinite`](@ref) manifold with its [`LinearAffineMetric`](@ref).
+
+A final techical note – if several manifold have similar transparency rules concerning functions from the interface, the last parameter `T` of the [`AbstractDecoratorManifold`](@ref)`{𝔽,T<:`[`AbstractDecoratorType`](@ref)`}`. Can be used to dispatch on different transparency schemes.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
 Pages = ["DecoratorManifold.jl"]
-Order = [:macro, :type, :function]
+Order = [:type, :macro, :function]
 ```
 
 ## Abstract Power Manifold
@@ -261,7 +264,8 @@ Order = [:macro, :type, :function]
 
 ## ValidationManifold
 
-[`ValidationManifold`](@ref) is a simple decorator that “decorates” a manifold with tests that all involved arrays are correct. For example involved input and output paratemers are checked before and after running a function, repectively.
+[`ValidationManifold`](@ref) is a simple decorator using the [`AbstractDecoratorManifold`](@ref) that “decorates” a manifold with tests that all involved arrays are correct.
+For example involved input and output paratemers are checked before and after running a function, repectively.
 This is done by calling [`is_point`](@ref) or [`is_vector`](@ref) whenever applicable.
 
 ```@autodocs
@@ -278,7 +282,8 @@ Similar to the metric and [`MetricManifold`](@ref), an embedding is often implic
 We introduce the embedded manifolds hence as an [`AbstractDecoratorManifold`](@ref).
 
 This decorator enables to use such an embedding in an transparent way.
-Different types of embeddings can be distinguished using the [`AbstractEmbeddingType`](@ref).
+Different types of embeddings can be distinguished using the [`AbstractEmbeddingType`](@ref),
+which is am [`AbstractDecoratorType`](@ref).
 
 ### Isometric Embeddings
 
