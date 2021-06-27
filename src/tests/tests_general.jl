@@ -51,11 +51,14 @@ that lie on it (contained in `pts`).
     tests (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
 - `retraction_methods = []`: retraction methods that will be tested.
 - `test_atlases = []`: Vector or tuple of atlases that should be tested.
-- `test_exp_log = true`: if true, checkthat [`exp`](@ref) is the inverse of [`log`](@ref).
+- `test_exp_log = true`: if true, check that [`exp`](@ref) is the inverse of [`log`](@ref).
 - `test_forward_diff = true`: if true, automatic differentiation using
     ForwardDiff is tested.
 - `test_injectivity_radius = true`: whether implementation of [`injectivity_radius`](@ref)
     should be tested.
+- `test_inplace = false` : if true check if inplace variants work if they are activated,
+   e.g. check that `exp!(M, p, p, X)` work if `test_exp_log = true`.
+   This in general requires `is_mutating` to be true.
 - `test_is_tangent`: if true check that the `default_inverse_retraction_method`
     actually returns valid tangent vectors.
 - `test_musical_isomorphisms = false` : test musical isomorphisms.
@@ -106,6 +109,7 @@ function test_manifold(
     test_forward_diff=true,
     test_is_tangent=true,
     test_injectivity_radius=true,
+    test_inplace=false,
     test_musical_isomorphisms=false,
     test_mutating_rand=false,
     test_project_point=false,
@@ -272,6 +276,16 @@ function test_manifold(
 
         Test.@test norm(M, pts[1], X1) isa Real
         Test.@test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
+
+        (test_inplace && is_mutating) && Test.@testset "inplace test for exp!" begin
+            p = deepcopy(pts[1])
+            X = deepcopy(X1)
+            q = exp(M, p, X)
+            exp!(M, p, p, X)
+            Test.@test p == q
+            # This test is not reasonable for `log!(M, X, p, q)`,
+            # since X is of different type/concept than p,q
+        end
     end
 
     Test.@testset "(inverse &) retraction tests" begin
@@ -294,6 +308,15 @@ function test_manifold(
                     new_pt = retract(M, p, X, retr_method)
                 end
                 Test.@test is_point(M, new_pt)
+                (test_inplace && is_mutating) && Test.@testset "inplace test for retract!" begin
+                    p2 = deepcopy(p)
+                    X2 = deepcopy(X)
+                    q = retract(M, p2, X2, retr_method)
+                    retract!(M, p2, p2, X, retr_method)
+                    Test.@test p2 == q
+                    # This test is not reasonable for `inverse_retract!(M, X, p, q, m)`,
+                    # since X is of different type/concept than p,q
+                end
             end
         end
         for p in pts
@@ -459,11 +482,28 @@ function test_manifold(
                         v1t1_m = allocate(v1t1)
                         vector_transport_to!(M, v1t1_m, pts[1], X1, pts32, vtm)
                         Test.@test isapprox(M, pts32, v1t1, v1t1_m)
+                        test_inplace &&
+                            Test.@testset "inplace test for vector_transport_to!" begin
+                                X1a = deepcopy(X1)
+                                Xt = vector_transport_to(M, pts[1], X1, pts32, vtm)
+                                vector_transport_to!(M, X1a, pts[1], X1a, pts32, vtm)
+                                Test.@test X1a == Xt
+                            end
                     end
                     if test_dir
                         v1t2_m = allocate(v1t2)
                         vector_transport_direction!(M, v1t2_m, pts[1], X1, X2, vtm)
                         Test.@test isapprox(M, pts32, v1t2, v1t2_m)
+                        test_inplace &&
+                            Test.@testset "inplace test for vector_transport_to!" begin
+                                X1a = deepcopy(X1)
+                                X2a = deepcopy(X2)
+                                Xt = vector_transport_direction(M, pts[1], X1, X2, vtm)
+                                vector_transport_direction!(M, X1a, pts[1], X1a, X2, vtm)
+                                vector_transport_direction!(M, X2a, pts[1], X1, X2a, vtm)
+                                Test.@test X1a == Xt
+                                Test.@test X2a == Xt
+                            end
                     end
                 end
             end
@@ -584,6 +624,15 @@ function test_manifold(
             mpm = allocate(mp)
             mid_point!(M, mpm, pts[1], pts[2])
             Test.@test isapprox(M, mpm, mid_point12; atol=atolp1p2, rtol=rtolp1p2)
+            test_inplace && Test.@testset "inplace test for vector_transport_to!" begin
+                p1 = deepcopy(pts[1])
+                p2 = deepcopy(pts[2])
+                p3 = mid_point(M, pts[1], pts[2])
+                mid_point!(M, p1, p1, pts[2])
+                mid_point!(M, p2, pts[1], p2)
+                Test.@test p3 == p1
+                Test.@test p3 == p2
+            end
         end
     end
 

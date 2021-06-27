@@ -58,6 +58,7 @@ using ManifoldsBase: TFVector
                 inverse_retraction_methods=[ProjectionInverseRetraction()],
                 is_tangent_atol_multiplier=1,
                 test_atlases=test_atlases,
+                test_inplace=true,
             )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end
