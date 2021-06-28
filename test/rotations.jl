@@ -51,6 +51,7 @@ include("utils.jl")
             point_distributions=[Manifolds.normal_rotation_distribution(M, pts[1], 1.0)],
             tvector_distributions=[Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
             basis_types_to_from=basis_types,
+            test_inplace=true,
         )
 
         @testset "log edge cases" begin
@@ -115,6 +116,7 @@ include("utils.jl")
                 basis_types_to_from=basis_types,
                 exp_log_atol_multiplier=20,
                 retraction_atol_multiplier=12,
+                test_inplace=true,
             )
 
             @testset "vee/hat" begin

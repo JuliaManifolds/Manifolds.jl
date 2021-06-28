@@ -68,6 +68,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 vector_transport_methods=[ParallelTransport()],
                 basis_types_vecs=basis_types,
                 projection_atol_multiplier=4,
+                test_inplace=true,
             )
 
             # tangent space at point
@@ -93,6 +94,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_default_vector_transport=true,
                 basis_types_vecs=basis_types,
                 projection_atol_multiplier=4,
+                test_inplace=true,
             )
         end
     end

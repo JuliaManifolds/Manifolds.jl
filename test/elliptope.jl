@@ -47,6 +47,7 @@ include("utils.jl")
                 default_inverse_retraction_method=nothing,
                 default_retraction_method=ProjectionRetraction(),
                 is_tangent_atol_multiplier=1,
+                test_inplace=true,
             )
         end
     end

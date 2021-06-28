@@ -58,6 +58,7 @@ include("utils.jl")
             test_default_vector_transport=true,
             is_tangent_atol_multiplier=1,
             is_point_atol_multiplier=1,
+            test_inplace=true,
         )
     end
 end

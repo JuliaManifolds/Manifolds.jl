@@ -630,8 +630,8 @@ function test_manifold(
                 p3 = mid_point(M, pts[1], pts[2])
                 mid_point!(M, p1, p1, pts[2])
                 mid_point!(M, p2, pts[1], p2)
-                Test.@test p3 == p1
-                Test.@test p3 == p2
+                Test.@test isapprox(M, p3, p1)
+                Test.@test isapprox(M, p3, p2)
             end
         end
     end
