@@ -282,7 +282,7 @@ function test_manifold(
             X = deepcopy(X1)
             q = exp(M, p, X)
             exp!(M, p, p, X)
-            Test.@test p == q
+            Test.@test isapprox(M, p, q)
             # This test is not reasonable for `log!(M, X, p, q)`,
             # since X is of different type/concept than p,q
         end
