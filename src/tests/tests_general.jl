@@ -313,7 +313,7 @@ function test_manifold(
                     X2 = deepcopy(X)
                     q = retract(M, p2, X2, retr_method)
                     retract!(M, p2, p2, X, retr_method)
-                    Test.@test p2 == q
+                    Test.@test isapprox(M, p2, q)
                     # This test is not reasonable for `inverse_retract!(M, X, p, q, m)`,
                     # since X is of different type/concept than p,q
                 end
@@ -487,7 +487,7 @@ function test_manifold(
                                 X1a = deepcopy(X1)
                                 Xt = vector_transport_to(M, pts[1], X1, pts32, vtm)
                                 vector_transport_to!(M, X1a, pts[1], X1a, pts32, vtm)
-                                Test.@test X1a == Xt
+                                Test.@test isapprox(M, pts[1], X1a, Xt)
                             end
                     end
                     if test_dir
@@ -501,8 +501,8 @@ function test_manifold(
                                 Xt = vector_transport_direction(M, pts[1], X1, X2, vtm)
                                 vector_transport_direction!(M, X1a, pts[1], X1a, X2, vtm)
                                 vector_transport_direction!(M, X2a, pts[1], X1, X2a, vtm)
-                                Test.@test X1a == Xt
-                                Test.@test X2a == Xt
+                                Test.@test isapprox(M, pts[1], X1a, Xt)
+                                Test.@test isapprox(M, pts[1], X2a, Xt)
                             end
                     end
                 end
