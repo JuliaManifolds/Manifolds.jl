@@ -49,6 +49,6 @@ Order = [:function]
 
 ## Metrics, charts and bases of vector spaces
 
-All metric-related functions take a basis of a vector space as one of the arguments. This needed because generally there is no way to define these functions without referencing a basis. In some cases there is no need to be explicit about this basis, and then for example a [`DefaultOrthonormalBasis`](@ref) object can be used. In cases where being explicit about these bases is needed, for example when using multiple charts, a basis can be specified, for example using [`induced_basis`](@ref Main.Manifolds.induced_basis).
+Metric-related functions, similarly to connection-related functions, need to operate in a basis of a vector space, see [here](@ref connections_charts).
 
 Metric-related functions can take bases of associated tangent spaces as arguments. For example [`local_metric`](@ref) can take the basis of the tangent space it is supposed to operate on instead of a custom basis of the space of symmetric bilinear operators.
