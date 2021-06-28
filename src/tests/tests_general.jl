@@ -495,7 +495,7 @@ function test_manifold(
                         vector_transport_direction!(M, v1t2_m, pts[1], X1, X2, vtm)
                         Test.@test isapprox(M, pts32, v1t2, v1t2_m)
                         test_inplace &&
-                            Test.@testset "inplace test for vector_transport_to!" begin
+                            Test.@testset "inplace test for vector_transport_direction!" begin
                                 X1a = deepcopy(X1)
                                 X2a = deepcopy(X2)
                                 Xt = vector_transport_direction(M, pts[1], X1, X2, vtm)
@@ -624,7 +624,7 @@ function test_manifold(
             mpm = allocate(mp)
             mid_point!(M, mpm, pts[1], pts[2])
             Test.@test isapprox(M, mpm, mid_point12; atol=atolp1p2, rtol=rtolp1p2)
-            test_inplace && Test.@testset "inplace test for vector_transport_to!" begin
+            test_inplace && Test.@testset "inplace test for midpoint!" begin
                 p1 = deepcopy(pts[1])
                 p2 = deepcopy(pts[2])
                 p3 = mid_point(M, pts[1], pts[2])
