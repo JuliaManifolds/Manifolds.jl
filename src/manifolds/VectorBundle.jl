@@ -274,7 +274,14 @@ function exp!(B::VectorBundle, q, p, X)
     VXM, VXF = submanifold_components(B.manifold, X)
     # this temporary avoids overwriting `p` when `q` and `p` occupy the same memory
     xqt = exp(B.manifold, xp, VXM)
-    vector_transport_to!(B.manifold, Xq, xp, Xp + VXF, xqt, B.vector_transport.method_point)
+    vector_transport_direction!(
+        B.manifold,
+        Xq,
+        xp,
+        Xp + VXF,
+        VXM,
+        B.vector_transport.method_point,
+    )
     copyto!(B.manifold, xq, xqt)
     return q
 end
