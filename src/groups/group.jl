@@ -21,6 +21,44 @@ Note that a manifold is connected with an operation by wrapping it with a decora
 """
 abstract type AbstractGroupOperation end
 
+"""
+    AbstractCartanSchoutenConnection
+
+Abstract type for Cartan-Schouten connections, that is connections whose geodesics
+going through group identity are one-parameter subgroups. See [^Pennec2020] for details.
+
+[^Pennec2020]:
+    > X. Pennec and M. Lorenzi, “5 - Beyond Riemannian geometry: The affine connection
+    > setting for transformation groups,” in Riemannian Geometric Statistics in Medical Image
+    > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
+    > doi: 10.1016/B978-0-12-814725-2.00012-1.
+"""
+abstract type AbstractCartanSchoutenConnection <: AbstractAffineConnection end
+
+"""
+    CartanSchoutenMinus
+
+The unique Cartan-Schouten connection such that all left-invariant vector fields are
+globally defined by their value at identity.
+"""
+struct CartanSchoutenMinus <: AbstractCartanSchoutenConnection end
+
+"""
+    CartanSchoutenPlus
+
+The unique Cartan-Schouten connection such that all right-invariant vector fields are
+globally defined by their value at identity.
+"""
+struct CartanSchoutenPlus <: AbstractCartanSchoutenConnection end
+
+"""
+    CartanSchoutenZero
+
+The unique torsion-free Cartan-Schouten connection. If the metric on the underlying manifold
+is bi-invariant then it is equivalent to the Levi-Civita connection of that metric.
+"""
+struct CartanSchoutenZero <: AbstractCartanSchoutenConnection end
+
 @doc raw"""
     AbstractGroupManifold{𝔽,O<:AbstractGroupOperation} <: AbstractDecoratorManifold{𝔽}
 
@@ -749,7 +787,8 @@ end
 @doc raw"""
     group_exp(G::AbstractGroupManifold, X)
 
-Compute the group exponential of the Lie algebra element `X`.
+Compute the group exponential of the Lie algebra element `X`. It is equivalent to the
+exponential map defined by the [`CartanSchoutenMinus`](@ref) connection.
 
 Given an element $X ∈ 𝔤 = T_e \mathcal{G}$, where $e$ is the [`identity`](@ref) element of
 the group $\mathcal{G}$, and $𝔤$ is its Lie algebra, the group exponential is the map
@@ -807,7 +846,8 @@ end
 @doc raw"""
     group_log(G::AbstractGroupManifold, q)
 
-Compute the group logarithm of the group element `q`.
+Compute the group logarithm of the group element `q`. It is equivalent to the
+logarithmic map defined by the [`CartanSchoutenMinus`](@ref) connection.
 
 Given an element $q ∈ \mathcal{G}$, compute the right inverse of the group exponential map
 [`group_exp`](@ref), that is, the element $\log q = X ∈ 𝔤 = T_e \mathcal{G}$, such that
