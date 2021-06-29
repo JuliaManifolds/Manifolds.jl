@@ -25,6 +25,7 @@ abstract type AbstractGroupOperation end
     abstract type AbstractGroupDecroatorType <: AbstractDecoratorType
 
 A common decorator type for all group decorators.
+It is similar to [`DefaultEmbeddingType`](@ref) but for groups.
 """
 abstract type AbstractGroupDecoratorType <: AbstractDecoratorType end
 
