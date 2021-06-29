@@ -1,5 +1,7 @@
 include("utils.jl")
 
+using Manifolds: induced_basis
+
 @testset "Euclidean" begin
     E = Euclidean(3)
     Ec = Euclidean(3; field=ℂ)
@@ -12,8 +14,10 @@ include("utils.jl")
     @test is_default_metric(E, Manifolds.EuclideanMetric())
     @test Manifolds.default_metric_dispatch(E, Manifolds.EuclideanMetric()) === Val{true}()
     p = zeros(3)
-    @test det_local_metric(EM, p) == one(eltype(p))
-    @test log_local_metric_density(EM, p) == zero(eltype(p))
+    A = Manifolds.RetractionAtlas()
+    B = induced_basis(EM, A, p, TangentSpace)
+    @test det_local_metric(EM, p, B) == one(eltype(p))
+    @test log_local_metric_density(EM, p, B) == zero(eltype(p))
     @test project!(E, p, p) == p
     @test embed!(E, p, p) == p
     @test manifold_dimension(Ec) == 2 * manifold_dimension(E)
@@ -25,15 +29,15 @@ include("utils.jl")
     @test embed(E, p, X) == X
 
     # real manifold does not allow complex values
-    @test_throws DomainError is_manifold_point(Ec, [:a, :b, :b], true)
-    @test_throws DomainError is_manifold_point(E, [1.0, 1.0im, 0.0], true)
-    @test_throws DomainError is_manifold_point(E, [1], true)
-    @test_throws DomainError is_tangent_vector(Ec, [:a, :b, :b], [1.0, 1.0, 0.0], true)
-    @test_throws DomainError is_tangent_vector(E, [1.0, 1.0im, 0.0], [1.0, 1.0, 0.0], true) # real manifold does not allow complex values
-    @test_throws DomainError is_tangent_vector(E, [1], [1.0, 1.0, 0.0], true)
-    @test_throws DomainError is_tangent_vector(E, [0.0, 0.0, 0.0], [1.0], true)
-    @test_throws DomainError is_tangent_vector(E, [0.0, 0.0, 0.0], [1.0, 0.0, 1.0im], true)
-    @test_throws DomainError is_tangent_vector(Ec, [0.0, 0.0, 0.0], [:a, :b, :c], true)
+    @test_throws DomainError is_point(Ec, [:a, :b, :b], true)
+    @test_throws DomainError is_point(E, [1.0, 1.0im, 0.0], true)
+    @test_throws DomainError is_point(E, [1], true)
+    @test_throws DomainError is_vector(Ec, [:a, :b, :b], [1.0, 1.0, 0.0], true)
+    @test_throws DomainError is_vector(E, [1.0, 1.0im, 0.0], [1.0, 1.0, 0.0], true) # real manifold does not allow complex values
+    @test_throws DomainError is_vector(E, [1], [1.0, 1.0, 0.0], true)
+    @test_throws DomainError is_vector(E, [0.0, 0.0, 0.0], [1.0], true)
+    @test_throws DomainError is_vector(E, [0.0, 0.0, 0.0], [1.0, 0.0, 1.0im], true)
+    @test_throws DomainError is_vector(Ec, [0.0, 0.0, 0.0], [:a, :b, :c], true)
 
     @test E^2 === Euclidean(3, 2)
     @test ^(E, 2) === Euclidean(3, 2)
@@ -215,10 +219,58 @@ include("utils.jl")
         qT = zeros(ComplexF64, 3, 4)
         qT[1:3, 1:3] .= 1.0
         q = embed(O, p)
-        @test is_manifold_point(N, q)
+        @test is_point(N, q)
         @test q == qT
         q2 = zeros(ComplexF64, 3, 4)
         embed!(O, q2, p)
         @test q2 == qT
+    end
+
+    @testset "Euclidean metric tests" begin
+        M = Euclidean(2)
+        p = zeros(2)
+        A = Manifolds.get_default_atlas(M)
+        i = Manifolds.get_chart_index(M, A, p)
+        B = Manifolds.induced_basis(M, A, i, TangentSpace)
+        C1 = christoffel_symbols_first(M, p, B)
+        @test size(C1) == (2, 2, 2)
+        @test norm(C1) ≈ 0.0 atol = 1e-13
+        C2 = christoffel_symbols_second(M, p, B)
+        @test size(C2) == (2, 2, 2)
+        @test norm(C2) ≈ 0.0 atol = 1e-13
+        C2j = christoffel_symbols_second_jacobian(M, p, B)
+        @test size(C2j) == (2, 2, 2, 2)
+        @test norm(C2j) ≈ 0.0 atol = 1e-16
+        @test einstein_tensor(M, p, B) == zeros(2, 2)
+        @test ricci_curvature(M, p, B) ≈ 0 atol = 1e-16
+        RC = ricci_tensor(M, p, B)
+        @test size(RC) == (2, 2)
+        @test norm(RC) ≈ 0.0 atol = 1e-16
+        @test local_metric(M, p, B) == Diagonal(ones(2))
+        @test inverse_local_metric(M, p, B) == Diagonal(ones(2))
+        @test det_local_metric(M, p, B) == 1
+        RT = riemann_tensor(M, p, B)
+        @test size(RT) == (2, 2, 2, 2)
+        @test norm(RT) ≈ 0.0 atol = 1e-16
+    end
+    @testset "Induced Basis and local metric for EuclideanMetric" begin
+        struct DefaultManifold <: AbstractManifold{ℝ} end
+        p = zeros(3)
+        M = DefaultManifold()
+        TpM = TangentSpace(M, p)
+        B = induced_basis(M, Manifolds.get_default_atlas(M), p, TangentSpace)
+        MM = MetricManifold(M, EuclideanMetric())
+        @test local_metric(MM, p, B) == Diagonal(ones(3))
+        @test inverse_local_metric(MM, p, B) == Diagonal(ones(3))
+        @test det_local_metric(MM, p, B) == 1.0
+        DB1 = dual_basis(MM, p, B)
+        @test DB1 isa InducedBasis
+        @test DB1.vs isa ManifoldsBase.CotangentSpaceType
+        DB2 = induced_basis(M, Manifolds.get_default_atlas(M), p, CotangentSpace)
+        @test DB2 isa InducedBasis
+        @test DB2.vs isa ManifoldsBase.CotangentSpaceType
+        DDB = dual_basis(MM, p, DB2)
+        @test DDB isa InducedBasis
+        @test DDB.vs isa ManifoldsBase.TangentSpaceType
     end
 end

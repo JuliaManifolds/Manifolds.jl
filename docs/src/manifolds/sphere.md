@@ -17,6 +17,12 @@ To create the unit sphere of $3×2$ real-valued matrices, write `ArraySphere(3,2
 ArraySphere
 ```
 
+There is also one atlas available on the sphere.
+
+```@docs
+Manifolds.StereographicAtlas
+```
+
 ## Functions on unit spheres
 ```@autodocs
 Modules = [Manifolds]

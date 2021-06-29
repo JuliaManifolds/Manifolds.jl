@@ -58,15 +58,15 @@ function GeneralizedGrassmann(
 end
 
 @doc raw"""
-    check_manifold_point(M::GeneralizedGrassmann{n,k,𝔽}, p)
+    check_point(M::GeneralizedGrassmann{n,k,𝔽}, p)
 
 Check whether `p` is representing a point on the [`GeneralizedGrassmann`](@ref) `M`, i.e. its
 a `n`-by-`k` matrix of unitary column vectors with respect to the B inner prudct and
 of correct `eltype` with respect to `𝔽`.
 """
-function check_manifold_point(M::GeneralizedGrassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
+function check_point(M::GeneralizedGrassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
     mpv = invoke(
-        check_manifold_point,
+        check_point,
         Tuple{typeof(get_embedding(M)),typeof(p)},
         get_embedding(M),
         p;
@@ -84,7 +84,7 @@ function check_manifold_point(M::GeneralizedGrassmann{n,k,𝔽}, p; kwargs...) w
 end
 
 @doc raw"""
-    check_tangent_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; check_base_point = true, kwargs...)
+    check_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; kwargs...)
 
 Check whether `X` is a tangent vector in the tangent space of `p` on
 the [`GeneralizedGrassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
@@ -95,26 +95,14 @@ the [`GeneralizedGrassmann`](@ref) `M`, i.e. that `X` is of size and type as wel
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
 $\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ denotes the $k × k$ zero natrix.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
-function check_tangent_vector(
-    M::GeneralizedGrassmann{n,k,𝔽},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {n,k,𝔽}
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
         get_embedding(M),
         p,
         X;
-        check_base_point=check_base_point,
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -197,7 +185,7 @@ injectivity_radius(::GeneralizedGrassmann, ::Any) = π / 2
 injectivity_radius(::GeneralizedGrassmann, ::Any, ::ExponentialRetraction) = π / 2
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::GeneralizedGrassmann,
             rm::AbstractRetractionMethod,
         )
@@ -219,7 +207,7 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 inner(M::GeneralizedGrassmann{n,k}, p, X, Y) where {n,k} = dot(X, M.B * Y)
 
 function Base.isapprox(M::GeneralizedGrassmann, p, X, Y; kwargs...)
-    return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
+    return isapprox(sqrt(inner(M, p, zero_vector(M, p), X - Y)), 0; kwargs...)
 end
 function Base.isapprox(M::GeneralizedGrassmann, p, q; kwargs...)
     return isapprox(distance(M, p, q), 0.0; kwargs...)
@@ -280,7 +268,7 @@ end
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::GeneralizedGrassmann{n,k} where {n,k}, ::Any...)
@@ -378,11 +366,11 @@ function vector_transport_to!(M::GeneralizedGrassmann, Y, p, X, q, ::ProjectionT
 end
 
 @doc raw"""
-    zero_tangent_vector(M::GeneralizedGrassmann, p)
+    zero_vector(M::GeneralizedGrassmann, p)
 
 Return the zero tangent vector from the tangent space at `p` on the
 [`GeneralizedGrassmann`](@ref) `M`, which is given by a zero matrix the same size as `p`.
 """
-zero_tangent_vector(::GeneralizedGrassmann, ::Any...)
+zero_vector(::GeneralizedGrassmann, ::Any...)
 
-zero_tangent_vector!(::GeneralizedGrassmann, X, p) = fill!(X, 0)
+zero_vector!(::GeneralizedGrassmann, X, p) = fill!(X, 0)

@@ -1,7 +1,6 @@
 
-function check_manifold_point(M::Hyperbolic, p; kwargs...)
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+function check_point(M::Hyperbolic, p; kwargs...)
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     if !isapprox(minkowski_metric(p, p), -1.0; kwargs...)
         return DomainError(
@@ -11,22 +10,17 @@ function check_manifold_point(M::Hyperbolic, p; kwargs...)
     end
     return nothing
 end
-function check_manifold_point(M::Hyperbolic, p::HyperboloidPoint; kwargs...)
-    return check_manifold_point(M, p.value; kwargs...)
+function check_point(M::Hyperbolic, p::HyperboloidPoint; kwargs...)
+    return check_point(M, p.value; kwargs...)
 end
 
-function check_tangent_vector(M::Hyperbolic, p, X; check_base_point=true, kwargs...)
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::Hyperbolic, p, X; kwargs...)
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -38,13 +32,8 @@ function check_tangent_vector(M::Hyperbolic, p, X; check_base_point=true, kwargs
     end
     return nothing
 end
-function check_tangent_vector(
-    M::Hyperbolic,
-    p::HyperboloidPoint,
-    X::HyperboloidTVector;
-    kwargs...,
-)
-    return check_tangent_vector(M, p.value, X.value; kwargs...)
+function check_vector(M::Hyperbolic, p::HyperboloidPoint, X::HyperboloidTVector; kwargs...)
+    return check_vector(M, p.value, X.value; kwargs...)
 end
 
 function convert(::Type{HyperboloidTVector}, X::T) where {T<:AbstractVector}
@@ -239,7 +228,7 @@ function exp!(M::Hyperbolic, q, p, X)
     return copyto!(q, cosh(vn) * p + sinh(vn) / vn * X)
 end
 
-function get_basis(M::Hyperbolic, p, B::DefaultOrthonormalBasis)
+function get_basis(M::Hyperbolic, p, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
     n = manifold_dimension(M)
     V = [
         _hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for
@@ -284,7 +273,13 @@ the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hype
 """
 get_coordinates(M::Hyperbolic, p, X, B::DefaultOrthonormalBasis)
 
-function get_coordinates!(M::Hyperbolic, c, p, X, B::DefaultOrthonormalBasis)
+function get_coordinates!(
+    M::Hyperbolic,
+    c,
+    p,
+    X,
+    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+)
     c = get_coordinates!(M, c, p, X, get_basis(M, p, B))
     return c
 end
@@ -302,7 +297,7 @@ the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hype
 """
 get_vector(M::Hyperbolic, p, c, ::DefaultOrthonormalBasis)
 
-function get_vector!(M::Hyperbolic, X, p, c, B::DefaultOrthonormalBasis)
+function get_vector!(M::Hyperbolic, X, p, c, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
     X = get_vector!(M, X, p, c, get_basis(M, p, B))
     return X
 end
@@ -357,7 +352,7 @@ function log!(M::Hyperbolic, X, p, q)
     scp = minkowski_metric(p, q)
     w = q + scp * p
     wn = sqrt(max(scp .^ 2 - 1, 0.0))
-    wn < eps(eltype(p)) && return zero_tangent_vector!(M, X, p)
+    wn < eps(eltype(p)) && return zero_vector!(M, X, p)
     X .= acosh(max(1.0, -scp)) / wn .* w
     return X
 end

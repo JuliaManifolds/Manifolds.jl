@@ -156,8 +156,8 @@ Random.seed!(42)
         M = PowerManifold(Sphere(2), NestedPowerRepresentation(), 2)
         p = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
         X = [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
-        @test_throws ComponentManifoldError is_manifold_point(M, X, true)
-        @test_throws ComponentManifoldError is_tangent_vector(M, p, X, true)
+        @test_throws ComponentManifoldError is_point(M, X, true)
+        @test_throws ComponentManifoldError is_vector(M, p, X, true)
     end
 
     @testset "power vector transport" begin
@@ -249,7 +249,7 @@ Random.seed!(42)
                 point_distributions=[power_r1_pt_dist],
                 tvector_distributions=[power_r1_tv_dist],
                 basis_types_to_from=basis_types,
-                rand_tvector_atol_multiplier=5.0,
+                rand_tvector_atol_multiplier=8.0,
                 retraction_atol_multiplier=12,
                 is_tangent_atol_multiplier=12.0,
                 exp_log_atol_multiplier=2e2 * prod(power_dimensions(Mr2)),
@@ -293,7 +293,7 @@ Random.seed!(42)
                 inverse_retraction_methods=inverse_retraction_methods,
                 point_distributions=[power_r2_pt_dist],
                 tvector_distributions=[power_r2_tv_dist],
-                rand_tvector_atol_multiplier=5.0,
+                rand_tvector_atol_multiplier=8.0,
                 retraction_atol_multiplier=12,
                 is_tangent_atol_multiplier=12.0,
                 exp_log_atol_multiplier=4e3 * prod(power_dimensions(Mr2)),
@@ -314,7 +314,7 @@ Random.seed!(42)
                 inverse_retraction_methods=inverse_retraction_methods,
                 point_distributions=[power_rn2_pt_dist],
                 tvector_distributions=[power_rn2_tv_dist],
-                rand_tvector_atol_multiplier=5.0,
+                rand_tvector_atol_multiplier=8.0,
                 retraction_atol_multiplier=12,
                 is_tangent_atol_multiplier=12.0,
                 exp_log_atol_multiplier=4e3 * prod(power_dimensions(Mrn2)),
@@ -380,5 +380,15 @@ Random.seed!(42)
             retraction_atol_multiplier=12,
             is_tangent_atol_multiplier=12.0,
         )
+    end
+
+    @testset "Atlas & Induced Basis" begin
+        M = PowerManifold(Euclidean(2), NestedPowerRepresentation(), 2)
+        p = [zeros(2), ones(2)]
+        X = [ones(2), 2 .* ones(2)]
+        A = RetractionAtlas()
+        a = get_parameters(M, A, p, p)
+        p2 = get_point(M, A, p, a)
+        @test all(p2 .== p)
     end
 end

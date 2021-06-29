@@ -1,5 +1,5 @@
 @doc raw"""
-    Euclidean{T<:Tuple,𝔽} <: Manifold{𝔽}
+    Euclidean{T<:Tuple,𝔽} <: AbstractManifold{𝔽}
 
 Euclidean vector space.
 
@@ -25,7 +25,7 @@ The dimension of this space is ``k \dim_ℝ 𝔽``, where ``\dim_ℝ 𝔽`` is t
 Generate the 1D Euclidean manifold for an `ℝ`-, `ℂ`-valued  real- or complex-valued immutable
 values (in contrast to 1-element arrays from the constructor above).
 """
-struct Euclidean{N,𝔽} <: Manifold{𝔽} where {N<:Tuple} end
+struct Euclidean{N,𝔽} <: AbstractManifold{𝔽} where {N<:Tuple} end
 
 function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers=ℝ) where {I}
     return Euclidean{Tuple{n...},field}()
@@ -61,7 +61,7 @@ function allocation_promotion_function(
     return complex
 end
 
-function check_manifold_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
+function check_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
     if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
@@ -83,17 +83,7 @@ function check_manifold_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
     return nothing
 end
 
-function check_tangent_vector(
-    M::Euclidean{N,𝔽},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {N,𝔽}
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::Euclidean{N,𝔽}, p, X; kwargs...) where {N,𝔽}
     if (𝔽 === ℝ) && !(eltype(X) <: Real)
         return DomainError(
             eltype(X),
@@ -115,7 +105,11 @@ function check_tangent_vector(
     return nothing
 end
 
-function det_local_metric(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
+function det_local_metric(
+    ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
+    p,
+    ::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
+) where {𝔽}
     return one(eltype(p))
 end
 
@@ -187,25 +181,15 @@ Base.exp(::Euclidean, p::Number, q::Number) = p + q
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 
-"""
-    flat(M::Euclidean, p, X)
-
-Transform a tangent vector `X` into a cotangent. Since they can directly be identified in the
-[`Euclidean`](@ref) case, this yields just the identity for a tangent vector `w` in the
-tangent space of `p` on `M`.
-"""
-flat(::Euclidean, ::Any...)
-function flat(::Euclidean{Tuple{}}, ::Number, X::TFVector)
-    return FVector(CotangentSpace, X.data)
-end
-
-flat!(::Euclidean, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
-
-function get_basis(::Euclidean, p, B::DefaultOrthonormalBasis{ℝ})
+function get_basis(::Euclidean, p, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     return CachedBasis(B, vecs)
 end
-function get_basis(::Euclidean{<:Tuple,ℂ}, p, B::DefaultOrthonormalBasis{ℂ})
+function get_basis(
+    ::Euclidean{<:Tuple,ℂ},
+    p,
+    B::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
+)
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     return CachedBasis(B, [vecs; im * vecs])
 end
@@ -215,7 +199,7 @@ function get_basis(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates!(M::Euclidean, Y, p, X, B::DefaultOrDiagonalizingBasis{ℝ})
+function get_coordinates!(M::Euclidean, Y, p, X, ::DefaultOrDiagonalizingBasis{ℝ})
     S = representation_size(M)
     PS = prod(S)
     copyto!(Y, reshape(X, PS))
@@ -278,15 +262,44 @@ where ``\cdot^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate trans
 """
 inner(::Euclidean, ::Any...)
 @inline inner(::Euclidean, p, X, Y) = dot(X, Y)
-@inline inner(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p, X, Y) where {𝔽} = dot(X, Y)
+@inline function inner(
+    ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
+    p,
+    X,
+    Y,
+) where {𝔽}
+    return dot(X, Y)
+end
 
-function inverse_local_metric(M::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
-    return local_metric(M, p)
+function inverse_local_metric(
+    M::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
+    p,
+    B::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
+) where {𝔽}
+    return local_metric(M, p, B)
+end
+function inverse_local_metric(
+    M::Euclidean,
+    p,
+    B::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
+) where {𝔽}
+    return local_metric(M, p, B)
 end
 
 default_metric_dispatch(::Euclidean, ::EuclideanMetric) = Val(true)
 
-function local_metric(::MetricManifold{𝔽,<:Manifold,EuclideanMetric}, p) where {𝔽}
+function local_metric(
+    ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
+    p,
+    B::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
+) where {𝔽}
+    return Diagonal(ones(SVector{size(p, 1),eltype(p)}))
+end
+function local_metric(
+    ::Euclidean,
+    p,
+    B::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
+) where {𝔽}
     return Diagonal(ones(SVector{size(p, 1),eltype(p)}))
 end
 
@@ -317,8 +330,9 @@ Base.log(::Euclidean{Tuple{}}, p::Number, q::Number) = q - p
 log!(::Euclidean, X, p, q) = (X .= q .- p)
 
 function log_local_metric_density(
-    ::MetricManifold{𝔽,<:Manifold,EuclideanMetric},
+    ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
     p,
+    ::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
 ) where {𝔽}
     return zero(eltype(p))
 end
@@ -405,7 +419,7 @@ Compute the norm of a tangent vector `X` at `p` on the [`Euclidean`](@ref)
 in this case, just the (Frobenius) norm of `X`.
 """
 LinearAlgebra.norm(::Euclidean, ::Any, X) = norm(X)
-LinearAlgebra.norm(::MetricManifold{ℝ,<:Manifold,EuclideanMetric}, p, X) = norm(X)
+LinearAlgebra.norm(::MetricManifold{ℝ,<:AbstractManifold,EuclideanMetric}, p, X) = norm(X)
 
 function project!(
     ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2}},
@@ -469,21 +483,6 @@ end
 function retract(M::Euclidean{Tuple{}}, p::Number, q::Number, ::ExponentialRetraction)
     return exp(M, p, q)
 end
-
-"""
-    sharp(M::Euclidean, p, ξ)
-
-Transform the cotangent vector `ξ` at `p` on the [`Euclidean`](@ref) `M` to a tangent vector `X`.
-Since cotangent and tangent vectors can directly be identified in the [`Euclidean`](@ref)
-case, this yields just the identity.
-"""
-sharp(::Euclidean, ::Any...)
-
-function sharp(::Euclidean{Tuple{}}, ::Number, ξ::CoTFVector)
-    return FVector(TangentSpace, ξ.data)
-end
-
-sharp!(::Euclidean, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 function Base.show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
     return print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")
@@ -549,12 +548,12 @@ function Statistics.var(::Euclidean, x::AbstractVector{<:Number}, m::Number; kwa
 end
 
 """
-    zero_tangent_vector(M::Euclidean, x)
+    zero_vector(M::Euclidean, x)
 
 Return the zero vector in the tangent space of `x` on the [`Euclidean`](@ref)
 `M`, which here is just a zero filled array the same size as `x`.
 """
-zero_tangent_vector(::Euclidean, ::Any...)
-zero_tangent_vector(::Euclidean{Tuple{}}, p::Number) = zero(p)
+zero_vector(::Euclidean, ::Any...)
+zero_vector(::Euclidean{Tuple{}}, p::Number) = zero(p)
 
-zero_tangent_vector!(::Euclidean, v, ::Any) = fill!(v, 0)
+zero_vector!(::Euclidean, v, ::Any) = fill!(v, 0)

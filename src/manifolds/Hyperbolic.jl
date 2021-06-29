@@ -38,14 +38,14 @@ struct Hyperbolic{N} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingTy
 Hyperbolic(n::Int) = Hyperbolic{n}()
 
 @doc raw"""
-    HyperboloidPoint <: MPoint
+    HyperboloidPoint <: AbstractManifoldPoint
 
 In the Hyperboloid model of the [`Hyperbolic`](@ref) $\mathcal H^n$ points are represented
 as vectors in $ℝ^{n+1}$ with [`MinkowskiMetric`](@ref) equal to $-1$.
 
 This representation is the default, i.e. `AbstractVector`s are assumed to have this repesentation.
 """
-struct HyperboloidPoint{TValue<:AbstractVector} <: MPoint
+struct HyperboloidPoint{TValue<:AbstractVector} <: AbstractManifoldPoint
     value::TValue
 end
 
@@ -63,12 +63,12 @@ struct HyperboloidTVector{TValue<:AbstractVector} <: TVector
 end
 
 @doc raw"""
-    PoincareBallPoint <: MPoint
+    PoincareBallPoint <: AbstractManifoldPoint
 
 A point on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ can be represented as a vector of norm
 less than one in $\mathbb R^n$.
 """
-struct PoincareBallPoint{TValue<:AbstractVector} <: MPoint
+struct PoincareBallPoint{TValue<:AbstractVector} <: AbstractManifoldPoint
     value::TValue
 end
 
@@ -78,17 +78,17 @@ end
 In the Poincaré ball model of the [`Hyperbolic`](@ref) $\mathcal H^n$ tangent vectors are represented
 as vectors in $ℝ^{n}$.
 """
-struct PoincareBallTVector{TValue<:AbstractVector} <: MPoint
+struct PoincareBallTVector{TValue<:AbstractVector} <: AbstractManifoldPoint
     value::TValue
 end
 
 @doc raw"""
-    PoincareHalfSpacePoint <: MPoint
+    PoincareHalfSpacePoint <: AbstractManifoldPoint
 
 A point on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ can be represented as a vector in the
 half plane, i.e. $x ∈ ℝ^n$ with $x_d > 0$.
 """
-struct PoincareHalfSpacePoint{TValue<:AbstractVector} <: MPoint
+struct PoincareHalfSpacePoint{TValue<:AbstractVector} <: AbstractManifoldPoint
     value::TValue
 end
 
@@ -121,15 +121,66 @@ for T in _HyperbolicTangentTypes
         Base.:-(v::$T, w::$T) = $T(v.value - w.value)
         Base.:-(v::$T) = $T(-v.value)
         Base.:+(v::$T) = $T(v.value)
-        Base.:(==)(v::$T, w::$T) = (v.value == w.value)
     end
 end
 
 for T in _HyperbolicTypes
     @eval begin
+        Base.:(==)(v::$T, w::$T) = (v.value == w.value)
+
         allocate(p::$T) = $T(allocate(p.value))
         allocate(p::$T, ::Type{P}) where {P} = $T(allocate(p.value, P))
         allocate(p::$T, ::Type{P}, dims::Tuple) where {P} = $T(allocate(p.value, P, dims))
+
+        @inline Base.copy(p::$T) = $T(copy(p.value))
+        Base.copyto!(q::$T, p::$T) = copyto!(q.value, p.value)
+
+        Base.similar(p::$T) = $T(similar(p.value))
+
+        function Broadcast.BroadcastStyle(::Type{<:$T})
+            return Broadcast.Style{$T}()
+        end
+        function Broadcast.BroadcastStyle(
+            ::Broadcast.AbstractArrayStyle{0},
+            b::Broadcast.Style{$T},
+        )
+            return b
+        end
+
+        Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{$T},Nothing}) = bc
+        function Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{$T}})
+            Broadcast.check_broadcast_axes(bc.axes, bc.args...)
+            return bc
+        end
+
+        Broadcast.broadcastable(v::$T) = v
+
+        @inline function Base.copy(bc::Broadcast.Broadcasted{Broadcast.Style{$T}})
+            return $T(Broadcast._broadcast_getindex(bc, 1))
+        end
+
+        Base.@propagate_inbounds Broadcast._broadcast_getindex(v::$T, I) = v.value
+
+        Base.axes(v::$T) = axes(v.value)
+
+        @inline function Base.copyto!(
+            dest::$T,
+            bc::Broadcast.Broadcasted{Broadcast.Style{$T}},
+        )
+            axes(dest) == axes(bc) || Broadcast.throwdm(axes(dest), axes(bc))
+            # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
+            if bc.f === identity && bc.args isa Tuple{$T} # only a single input argument to broadcast!
+                A = bc.args[1]
+                if axes(dest) == axes(A)
+                    return copyto!(dest, A)
+                end
+            end
+            bc′ = Broadcast.preprocess(dest, bc)
+            # Performance may vary depending on whether `@inbounds` is placed outside the
+            # for loop or not. (cf. https://github.com/JuliaLang/julia/issues/38086)
+            copyto!(dest.value, bc′[1])
+            return dest
+        end
     end
 end
 
@@ -140,7 +191,7 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
 end
 
 @doc raw"""
-    check_manifold_point(M::Hyperbolic, p; kwargs...)
+    check_point(M::Hyperbolic, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Hyperbolic`](@ref) `M`.
 
@@ -154,40 +205,29 @@ less than 1.
 For the [`PoincareHalfSpacePoint`](@ref) a valid point is a vector from $p ∈ ℝ^n$ with a positive
 last entry, i.e. $p_n>0$
 """
-check_manifold_point(::Hyperbolic, ::Any)
+check_point(::Hyperbolic, ::Any)
 
 @doc raw"""
-    check_tangent_vector(M::Hyperbolic{n}, p, X; check_base_point = true, kwargs... )
+    check_vector(M::Hyperbolic{n}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`Hyperbolic`](@ref) `M`, i.e.
-after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of the same dimension as `p`.
-The optional parameter `check_base_point` indicates whether to
-call [`check_manifold_point`](@ref)  for `p`. The tolerance for the last test can be set
-using the `kwargs...`.
+after [`check_point`](@ref)`(M,p)`, `X` has to be of the same dimension as `p`.
+The tolerance for the last test can be set using the `kwargs...`.
 
 For a the hyperboloid model or vectors, `X` has to be  orthogonal to `p` with respect
 to the inner product from the embedding, see [`MinkowskiMetric`](@ref).
 
 For a the Poincaré ball as well as the Poincaré half plane model, `X` has to be a vector from $ℝ^{n}$.
 """
-check_tangent_vector(::Hyperbolic, ::Any, ::Any)
+check_vector(::Hyperbolic, ::Any, ::Any)
 
-function check_tangent_vector(
+function check_vector(
     M::Hyperbolic{N},
     p,
     X::Union{PoincareBallTVector,PoincareHalfSpaceTVector};
-    check_base_point=true,
     kwargs...,
 ) where {N}
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
-    return check_manifold_point(Euclidean(N), X.value; kwargs...)
-end
-
-for T in _HyperbolicTypes
-    @eval Base.copyto!(p::$T, q::$T) = copyto!(p.value, q.value)
+    return check_point(Euclidean(N), X.value; kwargs...)
 end
 
 # Define self conversions
@@ -245,7 +285,7 @@ injectivity_radius(::Hyperbolic, ::Any) = Inf
 injectivity_radius(::Hyperbolic, ::Any, ::ExponentialRetraction) = Inf
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::Hyperbolic,
             rm::AbstractRetractionMethod,
         )
@@ -308,7 +348,7 @@ manifold_dimension(::Hyperbolic{N}) where {N} = N
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` on the
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` on the
 [`Hyperbolic`](@ref) space using [`CyclicProximalPointEstimation`](@ref).
 """
 mean(::Hyperbolic, ::Any...)
@@ -384,6 +424,6 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
             ).value
         return Y
     end
-    @eval zero_tangent_vector(::Hyperbolic, p::$P) = $T(zero(p.value))
-    @eval zero_tangent_vector!(::Hyperbolic, X::$T, ::$P) = fill!(X.value, 0)
+    @eval zero_vector(::Hyperbolic, p::$P) = $T(zero(p.value))
+    @eval zero_vector!(::Hyperbolic, X::$T, ::$P) = fill!(X.value, 0)
 end

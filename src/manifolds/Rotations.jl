@@ -1,5 +1,5 @@
 @doc raw"""
-    Rotations{N} <: Manifold{ℝ}
+    Rotations{N} <: AbstractManifold{ℝ}
 
 The special orthogonal manifold $\mathrm{SO}(n)$ represented by $n × n$
 real-valued orthogonal matrices with determinant $+1$ is the manifold of `Rotations`,
@@ -11,7 +11,7 @@ since these matrices represent all rotations of points in $ℝ^n$.
 
 Generate the $\mathrm{SO}(n) \subset ℝ^{n × n}$
 """
-struct Rotations{N} <: Manifold{ℝ} end
+struct Rotations{N} <: AbstractManifold{ℝ} end
 
 Rotations(n::Int) = Rotations{n}()
 
@@ -61,14 +61,14 @@ function angles_4d_skew_sym_matrix(A)
 end
 
 """
-    check_manifold_point(M, p; kwargs...)
+    check_point(M, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Rotations`](@ref) `M`,
 i.e. is an array of size [`manifold_dimension`](@ref)`(M)` and represents a
 valid rotation.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_manifold_point(M::Rotations{N}, p; kwargs...) where {N}
+function check_point(M::Rotations{N}, p; kwargs...) where {N}
     if size(p) != (N, N)
         return DomainError(
             size(p),
@@ -88,38 +88,15 @@ function check_manifold_point(M::Rotations{N}, p; kwargs...) where {N}
 end
 
 """
-    check_tangent_vector(M, p, X; check_base_point = true, kwargs... )
+    check_vector(M, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`Rotations`](@ref)
-space `M`, i.e. after [`check_manifold_point`](@ref)`(M,p)`, `X` has to be of same
+space `M`, i.e. after [`check_point`](@ref)`(M,p)`, `X` has to be of same
 dimension and orthogonal to `p`.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_tangent_vector(
-    M::Rotations{N},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {N}
-    if check_base_point
-        perr = check_manifold_point(M, p)
-        perr === nothing || return perr
-    end
-    if size(X) != (N, N)
-        return DomainError(
-            size(X),
-            "The array $(X) is not a tangent to a point on $M since its size does not match $((N, N)).",
-        )
-    end
-    if !isapprox(transpose(X) + X, zero(X); kwargs...)
-        return DomainError(
-            size(X),
-            "The array $(X) is not a tangent to a point on $M since it is not skew-symmetric.",
-        )
-    end
-    return nothing
+function check_vector(M::Rotations{N}, p, X; kwargs...) where {N}
+    return check_point(SkewSymmetricMatrices(N), X; kwargs...)
 end
 
 @doc raw"""
@@ -188,13 +165,7 @@ function exp!(M::Rotations{2}, q, p, X)
     @assert size(q) == (2, 2)
     θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
     sinθ, cosθ = sincos(θ)
-    @inbounds begin
-        q[1] = cosθ
-        q[2] = sinθ
-        q[3] = -sinθ
-        q[4] = cosθ
-    end
-    return copyto!(q, p * q)
+    return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
 end
 function exp!(M::Rotations{3}, q, p, X)
     θ = norm(M, p, X) / sqrt(2)
@@ -250,8 +221,6 @@ function exp!(M::Rotations{4}, q, p, X)
     return copyto!(q, p * pinvq)
 end
 
-flat!(M::Rotations, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
-
 @doc raw"""
     get_coordinates(M::Rotations, p, X)
 
@@ -269,13 +238,25 @@ For $\mathrm{SO}(n)$ where $n ≥ 4$, the additional elements of $X^i$ are
 $X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
 """
 get_coordinates(::Rotations, ::Any...)
-get_coordinates(::Rotations{2}, p, X, ::DefaultOrthogonalBasis) = [X[2]]
+get_coordinates(::Rotations{2}, p, X, ::DefaultOrthogonalBasis{ℝ,TangentSpaceType}) = [X[2]]
 
-function get_coordinates!(::Rotations{2}, Xⁱ, p, X, ::DefaultOrthogonalBasis)
+function get_coordinates!(
+    ::Rotations{2},
+    Xⁱ,
+    p,
+    X,
+    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
+)
     Xⁱ[1] = X[2]
     return Xⁱ
 end
-function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthogonalBasis) where {N}
+function get_coordinates!(
+    M::Rotations{N},
+    Xⁱ,
+    p,
+    X,
+    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
+) where {N}
     @inbounds begin
         Xⁱ[1] = X[3, 2]
         Xⁱ[2] = X[1, 3]
@@ -289,7 +270,13 @@ function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, B::DefaultOrthogonalBasis
     end
     return Xⁱ
 end
-function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, ::DefaultOrthonormalBasis) where {N}
+function get_coordinates!(
+    M::Rotations{N},
+    Xⁱ,
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+) where {N}
     T = Base.promote_eltype(p, X)
     get_coordinates!(M, Xⁱ, p, X, DefaultOrthogonalBasis())
     Xⁱ .*= sqrt(T(2))
@@ -297,7 +284,7 @@ function get_coordinates!(M::Rotations{N}, Xⁱ, p, X, ::DefaultOrthonormalBasis
 end
 
 @doc raw"""
-    get_vector(M::Rotations, p, Xⁱ, B:: DefaultOrthogonalBasis)
+    get_vector(M::Rotations, p, Xⁱ, B::DefaultOrthogonalBasis)
 
 Convert the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
 group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. See
@@ -305,10 +292,22 @@ group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. S
 """
 get_vector(::Rotations, ::Any...)
 
-function get_vector!(M::Rotations{2}, X, p, Xⁱ, B::DefaultOrthogonalBasis)
+function get_vector!(
+    M::Rotations{2},
+    X,
+    p,
+    Xⁱ,
+    B::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
+)
     return get_vector!(M, X, p, Xⁱ[1], B)
 end
-function get_vector!(::Rotations{2}, X, p, Xⁱ::Real, ::DefaultOrthogonalBasis)
+function get_vector!(
+    M::Rotations{2},
+    X,
+    p,
+    Xⁱ::Real,
+    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
+)
     @assert length(X) == 4
     @inbounds begin
         X[1] = 0
@@ -318,7 +317,13 @@ function get_vector!(::Rotations{2}, X, p, Xⁱ::Real, ::DefaultOrthogonalBasis)
     end
     return X
 end
-function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultOrthogonalBasis) where {N}
+function get_vector!(
+    M::Rotations{N},
+    X,
+    p,
+    Xⁱ,
+    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
+) where {N}
     @assert size(X) == (N, N)
     @assert length(Xⁱ) == manifold_dimension(M)
     @inbounds begin
@@ -343,7 +348,7 @@ function get_vector!(M::Rotations{N}, X, p, Xⁱ, ::DefaultOrthogonalBasis) wher
     end
     return X
 end
-function get_vector!(M::Rotations, X, p, Xⁱ, B::DefaultOrthonormalBasis)
+function get_vector!(M::Rotations, X, p, Xⁱ, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
     T = Base.promote_eltype(p, X)
     get_vector!(M, X, p, Xⁱ, DefaultOrthogonalBasis())
     X ./= sqrt(T(2))
@@ -369,7 +374,7 @@ injectivity_radius(::Rotations) = π * sqrt(2.0)
 injectivity_radius(::Rotations, ::ExponentialRetraction) = π * sqrt(2.0)
 eval(
     quote
-        @invoke_maker 1 Manifold injectivity_radius(
+        @invoke_maker 1 AbstractManifold injectivity_radius(
             M::Rotations,
             rm::AbstractRetractionMethod,
         )
@@ -426,11 +431,11 @@ inverse_retract(::Rotations, ::Any, ::Any, ::QRInverseRetraction)
 
 function inverse_retract!(M::Rotations, X, p, q, method::PolarInverseRetraction)
     A = transpose(p) * q
-    H = 2 * one(p)
+    Amat = A isa StaticMatrix ? A : convert(Matrix, A)
+    H = copyto!(allocate(Amat), -2I)
     try
-        B = sylvester(collect(A), collect(transpose(A)), collect(H))
-        C = A * B
-        X .= (transpose(C) .- C) ./ 2
+        B = lyap(A, H)
+        mul!(X, A, B)
     catch e
         if isa(e, LinearAlgebra.LAPACKException)
             throw(OutOfInjectivityRadiusError())
@@ -438,7 +443,7 @@ function inverse_retract!(M::Rotations, X, p, q, method::PolarInverseRetraction)
             rethrow()
         end
     end
-    return X
+    return project!(M, X, p, X)
 end
 function inverse_retract!(M::Rotations{N}, X, p, q, ::QRInverseRetraction) where {N}
     A = transpose(p) * q
@@ -449,9 +454,8 @@ function inverse_retract!(M::Rotations{N}, X, p, q, ::QRInverseRetraction) where
         b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
         R[1:i, i] = A[1:i, 1:i] \ b
     end
-    C = A * R
-    X .= (C .- transpose(C)) ./ 2
-    return X
+    mul!(X, A, R)
+    return project!(M, X, p, X)
 end
 
 @doc raw"""
@@ -492,8 +496,8 @@ function log!(M::Rotations{3}, X, p, q)
         ax = eig.vectors[inds, ival]
         return get_vector!(M, X, p, π * ax, DefaultOrthogonalBasis())
     end
-    X .= ((U .- transpose(U)) ./ (2 * usinc_from_cos(cosθ)))
-    return X
+    X .= U ./ usinc_from_cos(cosθ)
+    return project!(M, X, p, X)
 end
 function log!(M::Rotations{4}, X, p, q)
     U = transpose(p) * q
@@ -536,7 +540,7 @@ manifold_dimension(::Rotations{N}) where {N} = div(N * (N - 1), 2)
         kwargs...,
     )
 
-Compute the Riemannian [`mean`](@ref mean(M::Manifold, args...)) of `x` using
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::Rotations, ::Any)
@@ -608,7 +612,7 @@ project(::Rotations, ::Any)
 
 function project!(::Rotations{N}, q, p; check_det=true) where {N}
     F = svd(p)
-    copyto!(q, F.U * F.Vt)
+    mul!(q, F.U, F.Vt)
     if check_det && det(q) < 0
         d = similar(F.S)
         @inbounds fill!(view(d, 1:(N - 1)), 1)
@@ -631,7 +635,7 @@ where tangent vectors are represented by elements from the Lie group
 """
 project(::Rotations, ::Any, ::Any)
 
-project!(M::Rotations, Y, p, X) = (Y .= (X .- transpose(X)) ./ 2)
+project!(M::Rotations{N}, Y, p, X) where {N} = project!(SkewSymmetricMatrices(N), Y, X)
 
 @doc raw"""
     representation_size(M::Rotations)
@@ -640,8 +644,6 @@ Return the `size()` of a point on the [`Rotations`](@ref) `M`, i.e. for the
 $\mathrm{SO}(n)$ it's `(n,n)`.
 """
 @generated representation_size(::Rotations{N}) where {N} = (N, N)
-
-sharp!(M::Rotations, X::TFVector, p, ξ::CoTFVector) = copyto!(X, ξ)
 
 function Random.rand(
     rng::AbstractRNG,
@@ -719,11 +721,11 @@ Base.show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
 Distributions.support(d::NormalRotationDistribution) = MPointSupport(d.manifold)
 
 @doc raw"""
-    zero_tangent_vector(M::Rotations, p)
+    zero_vector(M::Rotations, p)
 
 Return the zero tangent vector from the tangent space art `p` on the [`Rotations`](@ref)
 as an element of the Lie group, i.e. the zero matrix.
 """
-zero_tangent_vector(M::Rotations, p) = zero(p)
+zero_vector(M::Rotations, p) = zero(p)
 
-zero_tangent_vector!(M::Rotations, X, p) = fill!(X, 0)
+zero_vector!(M::Rotations, X, p) = fill!(X, 0)

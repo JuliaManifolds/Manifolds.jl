@@ -24,9 +24,9 @@ include("group_utils.jl")
     v_pts = [Manifolds.prod_point(shape_se, tuple_v...)]
 
     X = log(G, pts[1], pts[1])
-    Y = zero_tangent_vector(G, pts[1])
-    Z = Manifolds.allocate_result(G, zero_tangent_vector, pts[1])
-    Z = zero_tangent_vector!(M, Z, pts[1])
+    Y = zero_vector(G, pts[1])
+    Z = Manifolds.allocate_result(G, zero_vector, pts[1])
+    Z = zero_vector!(M, Z, pts[1])
     @test norm(G, pts[1], X) ≈ 0
     @test norm(G, pts[1], Y) ≈ 0
     @test norm(G, pts[1], Z) ≈ 0

@@ -20,7 +20,7 @@ specified in `diff_convs`.
 If the group is equipped with an invariant metric, `test_invariance` indicates that the
 invariance should be checked for the provided points.
 """
-function ManifoldTests.test_group(
+function test_group(
     G,
     g_pts::AbstractVector,
     v_pts::AbstractVector=[],
@@ -38,7 +38,7 @@ function ManifoldTests.test_group(
         Test.@testset "Closed" begin
             for g1 in g_pts, g2 in g_pts
                 g3 = compose(G, g1, g2)
-                Test.@test is_manifold_point(G, g3, true; atol=atol)
+                Test.@test is_point(G, g3, true; atol=atol)
             end
         end
 
@@ -199,14 +199,14 @@ function ManifoldTests.test_group(
             translate_diff(G, g_pts[2], g_pts[1], X, LeftAction());
             atol=atol,
         )
-        Test.@test is_tangent_vector(
+        Test.@test is_vector(
             G,
             g12,
             translate_diff(G, g_pts[2], g_pts[1], X, LeftAction()),
             true;
             atol=atol,
         )
-        RightAction() in diff_convs && Test.@test is_tangent_vector(
+        RightAction() in diff_convs && Test.@test is_vector(
             G,
             g21,
             translate_diff(G, g_pts[2], g_pts[1], X, RightAction()),
@@ -299,7 +299,7 @@ function ManifoldTests.test_group(
         Test.@testset "v = log(exp(v))" begin
             for v in ve_pts
                 g = group_exp(G, v)
-                Test.@test is_manifold_point(G, g; atol=atol)
+                Test.@test is_point(G, g; atol=atol)
                 v2 = group_log(G, g)
                 Test.@test isapprox(G, make_identity(G, g_pts[1]), v2, v; atol=atol)
             end
@@ -308,7 +308,7 @@ function ManifoldTests.test_group(
                 for v in ve_pts
                     g = allocate(g_pts[1])
                     Test.@test group_exp!(G, g, v) === g
-                    Test.@test is_manifold_point(G, g; atol=atol)
+                    Test.@test is_point(G, g; atol=atol)
                     Test.@test isapprox(G, g, group_exp(G, v); atol=atol)
                     v2 = allocate(v)
                     Test.@test group_log!(G, v2, g) === v2
@@ -345,7 +345,7 @@ function ManifoldTests.test_group(
                     v_pts[1],
                     Manifolds.GroupExponentialRetraction(conv...),
                 )
-                Test.@test is_manifold_point(G, y; atol=atol)
+                Test.@test is_point(G, y; atol=atol)
                 v2 = inverse_retract(
                     G,
                     g_pts[1],
@@ -365,7 +365,7 @@ function ManifoldTests.test_group(
                         v_pts[1],
                         Manifolds.GroupExponentialRetraction(conv...),
                     ) === y
-                    Test.@test is_manifold_point(G, y; atol=atol)
+                    Test.@test is_point(G, y; atol=atol)
                     v2 = allocate(v_pts[1])
                     Test.@test inverse_retract!(
                         G,
@@ -430,7 +430,7 @@ on the manifold it acts upon (contained in `m_pts`).
 - `atol_ident_compose = 0`: absolute tolerance for the test that composition with identity
   doesn't change the group element.
 """
-function ManifoldTests.test_action(
+function test_action(
     A::AbstractGroupAction,
     a_pts::AbstractVector,
     m_pts::AbstractVector,
@@ -464,13 +464,13 @@ function ManifoldTests.test_action(
             Test.@testset "over actions" begin
                 for a1 in a_pts, a2 in a_pts
                     a3 = compose(A, a1, a2)
-                    Test.@test is_manifold_point(G, a3, true; atol=atol)
+                    Test.@test is_point(G, a3, true; atol=atol)
                 end
             end
             Test.@testset "over g-manifold" begin
                 for a in a_pts, m in m_pts
-                    Test.@test is_manifold_point(M, apply(A, a, m), true; atol=atol)
-                    Test.@test is_manifold_point(M, inverse_apply(A, a, m), true; atol=atol)
+                    Test.@test is_point(M, apply(A, a, m), true; atol=atol)
+                    Test.@test is_point(M, inverse_apply(A, a, m), true; atol=atol)
                 end
             end
         end
@@ -595,8 +595,8 @@ function ManifoldTests.test_action(
             for a in a_pts
                 am, av = apply(A, a, m), apply_diff(A, a, m, v)
                 ainvm, ainvv = inverse_apply(A, a, m), inverse_apply_diff(A, a, m, v)
-                Test.@test is_tangent_vector(M, am, av, true; atol=atol)
-                Test.@test is_tangent_vector(M, ainvm, ainvv, true; atol=atol)
+                Test.@test is_vector(M, am, av, true; atol=atol)
+                Test.@test is_vector(M, ainvm, ainvv, true; atol=atol)
             end
 
             a12 = compose(A, a_pts[1], a_pts[2])
@@ -618,8 +618,8 @@ function ManifoldTests.test_action(
                     ainvm = inverse_apply(A, a, m)
                     ainvv = allocate(v)
                     Test.@test inverse_apply_diff!(A, ainvv, a, m, v) === ainvv
-                    Test.@test is_tangent_vector(M, am, av, true; atol=atol)
-                    Test.@test is_tangent_vector(M, ainvm, ainvv, true; atol=atol)
+                    Test.@test is_vector(M, am, av, true; atol=atol)
+                    Test.@test is_vector(M, ainvm, ainvv, true; atol=atol)
                 end
 
                 a12 = compose(A, a_pts[1], a_pts[2])

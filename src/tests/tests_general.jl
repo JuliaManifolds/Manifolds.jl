@@ -1,6 +1,15 @@
 """
+    find_eps(x...)
+
+Find an appropriate tolerance for given points or tangent vectors, or their types.
+"""
+find_eps(x...) = find_eps(Base.promote_type(map(number_eltype, x)...))
+find_eps(x::Type{TN}) where {TN<:Number} = eps(real(TN))
+find_eps(x) = find_eps(number_eltype(x))
+
+"""
     test_manifold(
-        M::Manifold,
+        M::AbstractManifold,
         pts::AbstractVector;
         args,
     )
@@ -27,8 +36,8 @@ that lie on it (contained in `pts`).
     [`manifold_dimension`](@ref).
 - `inverse_retraction_methods = []`: inverse retraction methods that will be tested.
 - `is_mutating = true`: whether mutating variants of functions should be tested.
-- `is_point_atol_multiplier = 0`: determines atol of `is_manifold_point` checks.
-- `is_tangent_atol_multiplier = 0`: determines atol of `is_tangent_vector` checks.
+- `is_point_atol_multiplier = 0`: determines atol of `is_point` checks.
+- `is_tangent_atol_multiplier = 0`: determines atol of `is_vector` checks.
 - `mid_point12 = test_exp_log ? shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing`: if not `nothing`, then check
     that `mid_point(M, pts[1], pts[2])` is approximately equal to `mid_point12`. This is
     by default set to `nothing` if `text_exp_log` is set to false.
@@ -41,6 +50,7 @@ that lie on it (contained in `pts`).
 - `retraction_rtol_multiplier = 1`: change the relative tolerance of (inverse) retraction
     tests (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
 - `retraction_methods = []`: retraction methods that will be tested.
+- `test_atlases = []`: Vector or tuple of atlases that should be tested.
 - `test_exp_log = true`: if true, checkthat [`exp`](@ref) is the inverse of [`log`](@ref).
 - `test_forward_diff = true`: if true, automatic differentiation using
     ForwardDiff is tested.
@@ -69,8 +79,8 @@ that lie on it (contained in `pts`).
 - `vector_transport_direction = [ true for _ in 1:length(vector_transport_methods)]`: whether
    to check the `direction` variant of vector transport
 """
-function ManifoldTests.test_manifold(
-    M::Manifold,
+function test_manifold(
+    M::AbstractManifold,
     pts::AbstractVector;
     basis_has_specialized_diagonalizing_get=false,
     basis_types_to_from=(),
@@ -84,12 +94,14 @@ function ManifoldTests.test_manifold(
     is_mutating=true,
     is_point_atol_multiplier=0,
     is_tangent_atol_multiplier=0,
+    musical_isomorphism_bases=[],
     point_distributions=[],
     projection_atol_multiplier=0,
     rand_tvector_atol_multiplier=0,
     retraction_atol_multiplier=0,
     retraction_methods=[],
     retraction_rtol_multiplier=1,
+    test_atlases=(),
     test_exp_log=true,
     test_forward_diff=true,
     test_is_tangent=true,
@@ -123,7 +135,7 @@ function ManifoldTests.test_manifold(
     # get a default tangent vector for every of the three tangent spaces
     n = length(pts)
     if default_inverse_retraction_method === nothing
-        tv = [zero_tangent_vector(M, pts[i]) for i in 1:n] # no other available
+        tv = [zero_vector(M, pts[i]) for i in 1:n] # no other available
     else
         tv = [
             inverse_retract(
@@ -170,27 +182,27 @@ function ManifoldTests.test_manifold(
         end
     end
 
-    Test.@testset "is_manifold_point" begin
+    Test.@testset "is_point" begin
         for pt in pts
-            atol = is_point_atol_multiplier * ManifoldTests.find_eps(pt)
-            Test.@test is_manifold_point(M, pt; atol=atol)
-            Test.@test check_manifold_point(M, pt; atol=atol) === nothing
+            atol = is_point_atol_multiplier * find_eps(pt)
+            Test.@test is_point(M, pt; atol=atol)
+            Test.@test check_point(M, pt; atol=atol) === nothing
         end
     end
 
-    test_is_tangent && Test.@testset "is_tangent_vector" begin
+    test_is_tangent && Test.@testset "is_vector" begin
         for (p, X) in zip(pts, tv)
-            atol = is_tangent_atol_multiplier * ManifoldTests.find_eps(p)
-            if !(check_tangent_vector(M, p, X; atol=atol) === nothing)
-                print(check_tangent_vector(M, p, X; atol=atol))
+            atol = is_tangent_atol_multiplier * find_eps(p)
+            if !(check_vector(M, p, X; atol=atol) === nothing)
+                print(check_vector(M, p, X; atol=atol))
             end
-            Test.@test is_tangent_vector(M, p, X; atol=atol)
-            Test.@test check_tangent_vector(M, p, X; atol=atol) === nothing
+            Test.@test is_vector(M, p, X; atol=atol)
+            Test.@test check_vector(M, p, X; atol=atol) === nothing
         end
     end
 
     test_exp_log && Test.@testset "log/exp tests" begin
-        epsp1p2 = ManifoldTests.find_eps(pts[1], pts[2])
+        epsp1p2 = find_eps(pts[1], pts[2])
         atolp1p2 = exp_log_atol_multiplier * epsp1p2
         rtolp1p2 =
             exp_log_atol_multiplier == 0.0 ? sqrt(epsp1p2) * exp_log_rtol_multiplier : 0
@@ -212,14 +224,14 @@ function ManifoldTests.test_manifold(
         else
             Test.@test isapprox(M, pts[1], exp(M, pts[2], X2); atol=atolp1p2, rtol=rtolp1p2)
         end
-        Test.@test is_manifold_point(M, exp(M, pts[1], X1); atol=atolp1p2, rtol=rtolp1p2)
+        Test.@test is_point(M, exp(M, pts[1], X1); atol=atolp1p2, rtol=rtolp1p2)
         Test.@test isapprox(M, pts[1], exp(M, pts[1], X1, 0); atol=atolp1p2, rtol=rtolp1p2)
         for p in pts
-            epsx = ManifoldTests.find_eps(p)
+            epsx = find_eps(p)
             Test.@test isapprox(
                 M,
                 p,
-                zero_tangent_vector(M, p),
+                zero_vector(M, p),
                 log(M, p, p);
                 atol=epsx * exp_log_atol_multiplier,
                 rtol=exp_log_atol_multiplier == 0.0 ?
@@ -228,20 +240,20 @@ function ManifoldTests.test_manifold(
             Test.@test isapprox(
                 M,
                 p,
-                zero_tangent_vector(M, p),
+                zero_vector(M, p),
                 inverse_retract(M, p, p);
                 atol=epsx * exp_log_atol_multiplier,
                 rtol=exp_log_atol_multiplier == 0.0 ?
                      sqrt(epsx) * exp_log_rtol_multiplier : 0.0,
             )
         end
-        atolp1 = exp_log_atol_multiplier * ManifoldTests.find_eps(pts[1])
+        atolp1 = exp_log_atol_multiplier * find_eps(pts[1])
         if is_mutating
-            zero_tangent_vector!(M, X1, pts[1])
+            zero_vector!(M, X1, pts[1])
         else
-            X1 = zero_tangent_vector(M, pts[1])
+            X1 = zero_vector(M, pts[1])
         end
-        Test.@test isapprox(M, pts[1], X1, zero_tangent_vector(M, pts[1]); atol=atolp1)
+        Test.@test isapprox(M, pts[1], X1, zero_vector(M, pts[1]); atol=atolp1)
         if is_mutating
             log!(M, X1, pts[1], pts[2])
         else
@@ -264,9 +276,9 @@ function ManifoldTests.test_manifold(
 
     Test.@testset "(inverse &) retraction tests" begin
         for (p, X) in zip(pts, tv)
-            epsx = ManifoldTests.find_eps(p)
+            epsx = find_eps(p)
             for retr_method in retraction_methods
-                Test.@test is_manifold_point(M, retract(M, p, X, retr_method))
+                Test.@test is_point(M, retract(M, p, X, retr_method))
                 Test.@test isapprox(
                     M,
                     p,
@@ -281,16 +293,16 @@ function ManifoldTests.test_manifold(
                 else
                     new_pt = retract(M, p, X, retr_method)
                 end
-                Test.@test is_manifold_point(M, new_pt)
+                Test.@test is_point(M, new_pt)
             end
         end
         for p in pts
-            epsx = ManifoldTests.find_eps(p)
+            epsx = find_eps(p)
             for inv_retr_method in inverse_retraction_methods
                 Test.@test isapprox(
                     M,
                     p,
-                    zero_tangent_vector(M, p),
+                    zero_vector(M, p),
                     inverse_retract(M, p, p, inv_retr_method);
                     atol=epsx * retraction_atol_multiplier,
                     rtol=retraction_atol_multiplier == 0 ?
@@ -300,27 +312,42 @@ function ManifoldTests.test_manifold(
         end
     end
 
+    Test.@testset "atlases" begin
+        if !isempty(test_atlases)
+            Test.@test get_default_atlas(M) isa AbstractAtlas{ℝ}
+        end
+        for A in test_atlases
+            i = get_chart_index(M, A, pts[1])
+            a = get_parameters(M, A, i, pts[1])
+            Test.@test isa(a, AbstractVector)
+            Test.@test length(a) == manifold_dimension(M)
+            Test.@test isapprox(M, pts[1], get_point(M, A, i, a))
+            if is_mutating
+                get_parameters!(M, a, A, i, pts[2])
+                Test.@test a ≈ get_parameters(M, A, i, pts[2])
+
+                q = allocate(pts[1])
+                get_point!(M, q, A, i, a)
+                Test.@test isapprox(M, pts[2], q)
+            end
+        end
+    end
+
     test_vector_spaces && Test.@testset "vector spaces tests" begin
         for p in pts
-            X = zero_tangent_vector(M, p)
+            X = zero_vector(M, p)
             mts = Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M)
             Test.@test isapprox(M, p, X, zero_vector(mts, p))
             if is_mutating
                 zero_vector!(mts, X, p)
-                Test.@test isapprox(M, p, X, zero_tangent_vector(M, p))
+                Test.@test isapprox(M, p, X, zero_vector(M, p))
             end
         end
     end
 
     Test.@testset "basic linear algebra in tangent space" begin
         for (p, X) in zip(pts, tv)
-            Test.@test isapprox(
-                M,
-                p,
-                0 * X,
-                zero_tangent_vector(M, p);
-                atol=ManifoldTests.find_eps(pts[1]),
-            )
+            Test.@test isapprox(M, p, 0 * X, zero_vector(M, p); atol=find_eps(pts[1]))
             Test.@test isapprox(M, p, 2 * X, X + X)
             Test.@test isapprox(M, p, 0 * X, X - X)
             Test.@test isapprox(M, p, (-1) * X, -X)
@@ -345,7 +372,7 @@ function ManifoldTests.test_manifold(
 
     test_project_tangent && Test.@testset "project tangent test" begin
         for (p, X) in zip(pts, tv)
-            atol = ManifoldTests.find_eps(p) * projection_atol_multiplier
+            atol = find_eps(p) * projection_atol_multiplier
             Test.@test isapprox(M, p, X, project(M, p, X); atol=atol)
             if is_mutating
                 X2 = allocate(X)
@@ -359,7 +386,7 @@ function ManifoldTests.test_manifold(
 
     test_project_point && Test.@testset "project point test" begin
         for p in pts
-            atol = ManifoldTests.find_eps(p) * projection_atol_multiplier
+            atol = find_eps(p) * projection_atol_multiplier
             Test.@test isapprox(M, p, project(M, p); atol=atol)
             if is_mutating
                 p2 = allocate(p)
@@ -375,15 +402,15 @@ function ManifoldTests.test_manifold(
         default_retraction_method === nothing ||
         default_inverse_retraction_method === nothing
     ) && Test.@testset "vector transport" begin
-        tvatol = is_tangent_atol_multiplier * ManifoldTests.find_eps(pts[1])
+        tvatol = is_tangent_atol_multiplier * find_eps(pts[1])
         X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
         X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
         pts32 = retract(M, pts[1], X2, default_retraction_method)
         test_default_vector_transport && Test.@testset "default vector transport" begin
             v1t1 = vector_transport_to(M, pts[1], X1, pts32)
             v1t2 = vector_transport_direction(M, pts[1], X1, X2)
-            Test.@test is_tangent_vector(M, pts32, v1t1; atol=tvatol)
-            Test.@test is_tangent_vector(M, pts32, v1t2; atol=tvatol)
+            Test.@test is_vector(M, pts32, v1t1; atol=tvatol)
+            Test.@test is_vector(M, pts32, v1t2; atol=tvatol)
             Test.@test isapprox(M, pts32, v1t1, v1t2)
             Test.@test isapprox(M, pts[1], vector_transport_to(M, pts[1], X1, pts[1]), X1)
 
@@ -405,16 +432,14 @@ function ManifoldTests.test_manifold(
             vector_transport_inverse_retractions,
         )
             Test.@testset "vector transport method $(vtm)" begin
-                tvatol = is_tangent_atol_multiplier * ManifoldTests.find_eps(pts[1])
+                tvatol = is_tangent_atol_multiplier * find_eps(pts[1])
                 X1 = inverse_retract(M, pts[1], pts[2], irtr_m)
                 X2 = inverse_retract(M, pts[1], pts[3], irtr_m)
                 pts32 = retract(M, pts[1], X2, rtr_m)
                 test_to && (v1t1 = vector_transport_to(M, pts[1], X1, pts32, vtm))
                 test_dir && (v1t2 = vector_transport_direction(M, pts[1], X1, X2, vtm))
-                test_to &&
-                    Test.@test is_tangent_vector(M, pts32, v1t1, true; atol=tvatol)
-                test_dir &&
-                    Test.@test is_tangent_vector(M, pts32, v1t2, true; atol=tvatol)
+                test_to && Test.@test is_vector(M, pts32, v1t1, true; atol=tvatol)
+                test_dir && Test.@test is_vector(M, pts32, v1t2, true; atol=tvatol)
                 (test_to && test_dir) && Test.@test isapprox(M, pts32, v1t1, v1t2)
                 test_to && Test.@test isapprox(
                     M,
@@ -425,13 +450,7 @@ function ManifoldTests.test_manifold(
                 test_dir && Test.@test isapprox(
                     M,
                     pts[1],
-                    vector_transport_direction(
-                        M,
-                        pts[1],
-                        X1,
-                        zero_tangent_vector(M, pts[1]),
-                        vtm,
-                    ),
+                    vector_transport_direction(M, pts[1], X1, zero_vector(M, pts[1]), vtm),
                     X1,
                 )
 
@@ -464,7 +483,7 @@ function ManifoldTests.test_manifold(
                 Test.@test norm(M, p, bvectors[i]) ≈ 1
                 for j in (i + 1):N
                     Test.@test real(inner(M, p, bvectors[i], bvectors[j])) ≈ 0 atol =
-                        sqrt(ManifoldTests.find_eps(p))
+                        sqrt(find_eps(p))
                 end
             end
             if isa(btype, ProjectedOrthonormalBasis)
@@ -473,7 +492,7 @@ function ManifoldTests.test_manifold(
                     Test.@test norm(M, p, bvectors[i]) ≈ 1
                     for j in (i + 1):N
                         Test.@test real(inner(M, p, bvectors[i], bvectors[j])) ≈ 0 atol =
-                            sqrt(ManifoldTests.find_eps(p))
+                            sqrt(find_eps(p))
                     end
                 end
                 # check projection idempotency
@@ -518,17 +537,17 @@ function ManifoldTests.test_manifold(
             Xs_invs = [get_vector(M, p, Xu, btype) for Xu in Xs]
             # check orthonormality of inverse representation
             for i in 1:N
-                Test.@test norm(M, p, Xs_invs[i]) ≈ 1 atol = ManifoldTests.find_eps(p)
+                Test.@test norm(M, p, Xs_invs[i]) ≈ 1 atol = find_eps(p)
                 for j in (i + 1):N
                     Test.@test real(inner(M, p, Xs_invs[i], Xs_invs[j])) ≈ 0 atol =
-                        sqrt(ManifoldTests.find_eps(p))
+                        sqrt(find_eps(p))
                 end
             end
 
             if is_mutating
                 Xb_s = allocate(Xb)
                 Test.@test get_coordinates!(M, Xb_s, p, X1, btype) === Xb_s
-                Test.@test isapprox(Xb_s, Xb; atol=ManifoldTests.find_eps(p))
+                Test.@test isapprox(Xb_s, Xb; atol=find_eps(p))
 
                 Xbi_s = allocate(Xbi)
                 Test.@test get_vector!(M, Xbi_s, p, Xb, btype) === Xbi_s
@@ -555,7 +574,7 @@ function ManifoldTests.test_manifold(
     end
 
     mid_point12 !== nothing && Test.@testset "midpoint" begin
-        epsp1p2 = ManifoldTests.find_eps(pts[1], pts[2])
+        epsp1p2 = find_eps(pts[1], pts[2])
         atolp1p2 = exp_log_atol_multiplier * epsp1p2
         rtolp1p2 =
             exp_log_atol_multiplier == 0.0 ? sqrt(epsp1p2) * exp_log_rtol_multiplier : 0
@@ -569,23 +588,40 @@ function ManifoldTests.test_manifold(
     end
 
     test_forward_diff && Test.@testset "ForwardDiff support" begin
-        ManifoldTests.test_forwarddiff(M, pts, tv)
+        test_forwarddiff(M, pts, tv)
     end
 
     test_reverse_diff && Test.@testset "ReverseDiff support" begin
-        ManifoldTests.test_reversediff(M, pts, tv)
+        test_reversediff(M, pts, tv)
     end
 
     test_musical_isomorphisms && Test.@testset "Musical isomorphisms" begin
         if default_inverse_retraction_method !== nothing
             tv_m = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
         else
-            tv_m = zero_tangent_vector(M, pts[1])
+            tv_m = zero_vector(M, pts[1])
         end
-        ctv_m = flat(M, pts[1], FVector(TangentSpace, tv_m))
-        Test.@test ctv_m.type == CotangentSpace
+        ctv_m = flat(M, pts[1], tv_m)
+        Test.@test ctv_m(tv_m) ≈ norm(M, pts[1], tv_m)^2
         tv_m_back = sharp(M, pts[1], ctv_m)
-        Test.@test tv_m_back.type == TangentSpace
+        Test.@test isapprox(M, pts[1], tv_m, tv_m_back)
+
+        if is_mutating
+            ctv_m_s = allocate(ctv_m)
+            flat!(M, ctv_m_s, pts[1], tv_m)
+            Test.@test ctv_m_s(tv_m) ≈ ctv_m(tv_m)
+            tv_m_s_back = allocate(tv_m_back)
+            sharp!(M, tv_m_s_back, pts[1], ctv_m_s)
+            Test.@test isapprox(M, pts[1], tv_m, tv_m_s_back)
+        end
+
+        for basis in musical_isomorphism_bases
+            tv_m_f = ManifoldsBase.TFVector(get_coordinates(M, pts[1], tv_m, basis), basis)
+            ctv_m_f = flat(M, pts[1], tv_m_f)
+            Test.@test isa(ctv_m_f, CoTFVector)
+            tv_m_f_back = sharp(M, pts[1], ctv_m_f)
+            Test.@test isapprox(tv_m_f.data, tv_m_f_back.data)
+        end
     end
 
     Test.@testset "number_eltype" begin
@@ -604,9 +640,9 @@ function ManifoldTests.test_manifold(
 
             X2 = allocate(X)
             if default_inverse_retraction_method === nothing
-                X3 = zero_tangent_vector(M, p)
+                X3 = zero_vector(M, p)
                 copyto!(X2, X3)
-                Test.@test isapprox(M, p, X2, zero_tangent_vector(M, p))
+                Test.@test isapprox(M, p, X2, zero_vector(M, p))
             else
                 q = retract(M, p, X, default_retraction_method)
                 X3 = inverse_retract(M, p, q, default_inverse_retraction_method)
@@ -627,10 +663,10 @@ function ManifoldTests.test_manifold(
             for pd in point_distributions
                 Test.@test Manifolds.support(pd) isa Manifolds.MPointSupport{typeof(M)}
                 for _ in 1:10
-                    Test.@test is_manifold_point(M, rand(pd))
+                    Test.@test is_point(M, rand(pd))
                     if test_mutating_rand
                         rand!(pd, prand)
-                        Test.@test is_manifold_point(M, prand)
+                        Test.@test is_point(M, prand)
                     end
                 end
             end
@@ -643,8 +679,8 @@ function ManifoldTests.test_manifold(
             Test.@test supp isa Manifolds.FVectorSupport{TangentBundleFibers{typeof(M)}}
             for _ in 1:10
                 randtv = rand(tvd)
-                atol = rand_tvector_atol_multiplier * ManifoldTests.find_eps(randtv)
-                Test.@test is_tangent_vector(M, supp.point, randtv; atol=atol)
+                atol = rand_tvector_atol_multiplier * find_eps(randtv)
+                Test.@test is_vector(M, supp.point, randtv; atol=atol)
             end
         end
     end

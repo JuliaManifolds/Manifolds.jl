@@ -1,5 +1,5 @@
 @doc raw"""
-    FixedRankMatrices{m,n,k,𝔽} <: Manifold{𝔽}
+    FixedRankMatrices{m,n,k,𝔽} <: AbstractManifold{𝔽}
 
 The manifold of $m × n$ real-valued or complex-valued matrices of fixed rank $k$, i.e.
 ````math
@@ -48,7 +48,7 @@ function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers=ℝ)
 end
 
 @doc raw"""
-    SVDMPoint <: MPoint
+    SVDMPoint <: AbstractManifoldPoint
 
 A point on a certain manifold, where the data is stored in a svd like fashion,
 i.e. in the form $USV^\mathrm{H}$, where this structure stores $U$, $S$ and
@@ -66,7 +66,8 @@ and accordingly shortened $U$ (columns) and $V^\mathrm{T}$ (rows).
 * `SVDMPoint(U,S,Vt,k)` for the svd factors to initialize the `SVDMPoint`,
   stores its svd factors shortened to the best rank $k$ approximation
 """
-struct SVDMPoint{TU<:AbstractMatrix,TS<:AbstractVector,TVt<:AbstractMatrix} <: MPoint
+struct SVDMPoint{TU<:AbstractMatrix,TS<:AbstractVector,TVt<:AbstractMatrix} <:
+       AbstractManifoldPoint
     U::TU
     S::TS
     Vt::TVt
@@ -123,8 +124,63 @@ function allocate_result(::FixedRankMatrices{m,n,k}, ::typeof(embed), v...) wher
     return similar(typeof(v[1].U),m,n)
 end
 
+Base.copy(v::UMVTVector) = UMVTVector(copy(v.U), copy(v.M), copy(v.Vt))
+
+# Tuple-like broadcasting of UMVTVector
+
+function Broadcast.BroadcastStyle(::Type{<:UMVTVector})
+    return Broadcast.Style{UMVTVector}()
+end
+function Broadcast.BroadcastStyle(
+    ::Broadcast.AbstractArrayStyle{0},
+    b::Broadcast.Style{UMVTVector},
+)
+    return b
+end
+
+Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{UMVTVector},Nothing}) = bc
+function Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{UMVTVector}})
+    Broadcast.check_broadcast_axes(bc.axes, bc.args...)
+    return bc
+end
+
+Broadcast.broadcastable(v::UMVTVector) = v
+
+@inline function Base.copy(bc::Broadcast.Broadcasted{Broadcast.Style{UMVTVector}})
+    return UMVTVector(
+        @inbounds(Broadcast._broadcast_getindex(bc, Val(:U))),
+        @inbounds(Broadcast._broadcast_getindex(bc, Val(:M))),
+        @inbounds(Broadcast._broadcast_getindex(bc, Val(:Vt))),
+    )
+end
+
+Base.@propagate_inbounds function Broadcast._broadcast_getindex(
+    v::UMVTVector,
+    ::Val{I},
+) where {I}
+    return getfield(v, I)
+end
+
+Base.axes(::UMVTVector) = ()
+
+@inline function Base.copyto!(
+    dest::UMVTVector,
+    bc::Broadcast.Broadcasted{Broadcast.Style{UMVTVector}},
+)
+    # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
+    if bc.f === identity && bc.args isa Tuple{UMVTVector} # only a single input argument to broadcast!
+        A = bc.args[1]
+        return copyto!(dest, A)
+    end
+    bc′ = Broadcast.preprocess(dest, bc)
+    copyto!(dest.U, Broadcast._broadcast_getindex(bc′, Val(:U)))
+    copyto!(dest.M, Broadcast._broadcast_getindex(bc′, Val(:M)))
+    copyto!(dest.Vt, Broadcast._broadcast_getindex(bc′, Val(:Vt)))
+    return dest
+end
+
 @doc raw"""
-    check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...)
+    check_point(M::FixedRankMatrices{m,n,k}, p; kwargs...)
 
 Check whether the matrix or [`SVDMPoint`](@ref) `x` ids a valid point on the
 [`FixedRankMatrices`](@ref)`{m,n,k,𝔽}` `M`, i.e. is an `m`-by`n` matrix of
@@ -132,7 +188,7 @@ rank `k`. For the [`SVDMPoint`](@ref) the internal representation also has to ha
 shape, i.e. `p.U` and `p.Vt` have to be unitary. The keyword arguments are passed to the
 `rank` function that verifies the rank of `p`.
 """
-function check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {m,n,k}
+function check_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {m,n,k}
     r = rank(p; kwargs...)
     s = "The point $(p) does not lie on $(M), "
     if size(p) != (m, n)
@@ -143,11 +199,7 @@ function check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {
     end
     return nothing
 end
-function check_manifold_point(
-    M::FixedRankMatrices{m,n,k},
-    x::SVDMPoint;
-    kwargs...,
-) where {m,n,k}
+function check_point(M::FixedRankMatrices{m,n,k}, x::SVDMPoint; kwargs...) where {m,n,k}
     s = "The point $(x) does not lie on $(M), "
     if (size(x.U) != (m, k)) || (length(x.S) != k) || (size(x.Vt) != (k, n))
         return DomainError(
@@ -174,24 +226,18 @@ function check_manifold_point(
 end
 
 @doc raw"""
-    check_tangent_vector(M:FixedRankMatrices{m,n,k}, p, X; check_base_point = true, kwargs...)
+    check_vector(M:FixedRankMatrices{m,n,k}, p, X; kwargs...)
 
 Check whether the tangent [`UMVTVector`](@ref) `X` is from the tangent space of the [`SVDMPoint`](@ref) `p` on the
 [`FixedRankMatrices`](@ref) `M`, i.e. that `v.U` and `v.Vt` are (columnwise) orthogonal to `x.U` and `x.Vt`,
 respectively, and its dimensions are consistent with `p` and `X.M`, i.e. correspond to `m`-by-`n` matrices of rank `k`.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 """
-function check_tangent_vector(
+function check_vector(
     M::FixedRankMatrices{m,n,k},
     p::SVDMPoint,
     X::UMVTVector;
-    check_base_point=true,
     kwargs...,
 ) where {m,n,k}
-    if check_base_point
-        c = check_manifold_point(M, p; kwargs...)
-        c === nothing || return c
-    end
     if (size(X.U) != (m, k)) || (size(X.Vt) != (k, n)) || (size(X.M) != (k, k))
         return DomainError(
             cat(size(X.U), size(X.M), size(X.Vt), dims=1),
@@ -429,13 +475,13 @@ function Base.show(io::IO, ::MIME"text/plain", X::UMVTVector)
 end
 
 @doc raw"""
-    zero_tangent_vector(M::FixedRankMatrices, p::SVDMPoint)
+    zero_vector(M::FixedRankMatrices, p::SVDMPoint)
 
 Return a [`UMVTVector`](@ref) representing the zero tangent vector in the tangent space of
 `p` on the [`FixedRankMatrices`](@ref) `M`, for example all three elements of the resulting
 structure are zero matrices.
 """
-function zero_tangent_vector(::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,n,k}
+function zero_vector(::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,n,k}
     v = UMVTVector(
         zeros(eltype(p.U), m, k),
         zeros(eltype(p.S), k, k),
@@ -444,11 +490,7 @@ function zero_tangent_vector(::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,
     return v
 end
 
-function zero_tangent_vector!(
-    ::FixedRankMatrices{m,n,k},
-    X::UMVTVector,
-    p::SVDMPoint,
-) where {m,n,k}
+function zero_vector!(::FixedRankMatrices{m,n,k}, X::UMVTVector, p::SVDMPoint) where {m,n,k}
     X.U .= zeros(eltype(X.U), m, k)
     X.M .= zeros(eltype(X.M), k, k)
     X.Vt .= zeros(eltype(X.Vt), k, n)

@@ -1,5 +1,5 @@
 @doc raw"""
-    CholeskySpace{N} <: Manifold{ℝ}
+    CholeskySpace{N} <: AbstractManifold{ℝ}
 
 The manifold of lower triangular matrices with positive diagonal and
 a metric based on the cholesky decomposition. The formulae for this manifold
@@ -15,19 +15,19 @@ Generate the manifold of $n× n$ lower triangular matrices with positive diagona
     > Lin, Zenhua: "Riemannian Geometry of Symmetric Positive Definite Matrices via
     > Cholesky Decomposition", arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
 """
-struct CholeskySpace{N} <: Manifold{ℝ} end
+struct CholeskySpace{N} <: AbstractManifold{ℝ} end
 
 CholeskySpace(n::Int) = CholeskySpace{n}()
 
 @doc raw"""
-    check_manifold_point(M::CholeskySpace, p; kwargs...)
+    check_point(M::CholeskySpace, p; kwargs...)
 
 Check whether the matrix `p` lies on the [`CholeskySpace`](@ref) `M`, i.e.
 it's size fits the manifold, it is a lower triangular matrix and has positive
 entries on the diagonal.
 The tolerance for the tests can be set using the `kwargs...`.
 """
-function check_manifold_point(M::CholeskySpace, p; kwargs...)
+function check_point(M::CholeskySpace, p; kwargs...)
     if size(p) != representation_size(M)
         return DomainError(
             size(p),
@@ -50,19 +50,14 @@ function check_manifold_point(M::CholeskySpace, p; kwargs...)
 end
 
 """
-    check_tangent_vector(M::CholeskySpace, p, X; check_base_point = true, kwargs... )
+    check_vector(M::CholeskySpace, p, X; kwargs... )
 
 Check whether `v` is a tangent vector to `p` on the [`CholeskySpace`](@ref) `M`, i.e.
-after [`check_manifold_point`](@ref)`(M,p)`, `X` has to have the same dimension as `x`
+after [`check_point`](@ref)`(M,p)`, `X` has to have the same dimension as `p`
 and a symmetric matrix.
-The optional parameter `check_base_point` indicates whether to call [`check_manifold_point`](@ref)  for `p`.
 The tolerance for the tests can be set using the `kwargs...`.
 """
-function check_tangent_vector(M::CholeskySpace, p, X; check_base_point=true, kwargs...)
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe !== nothing && return mpe
-    end
+function check_vector(M::CholeskySpace, p, X; kwargs...)
     if size(X) != representation_size(M)
         return DomainError(
             size(X),
@@ -213,10 +208,10 @@ function vector_transport_to!(::CholeskySpace, Y, p, X, q, ::ParallelTransport)
 end
 
 @doc raw"""
-    zero_tangent_vector(M::CholeskySpace, p)
+    zero_vector(M::CholeskySpace, p)
 
 Return the zero tangent vector on the [`CholeskySpace`](@ref) `M` at `p`.
 """
-zero_tangent_vector(::CholeskySpace, ::Any...)
+zero_vector(::CholeskySpace, ::Any...)
 
-zero_tangent_vector!(M::CholeskySpace, X, p) = fill!(X, 0)
+zero_vector!(M::CholeskySpace, X, p) = fill!(X, 0)

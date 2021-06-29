@@ -11,10 +11,108 @@ Depth = 2
 
 Additionally the [`AbstractDecoratorManifold`](@ref) is provided as well as the [`ValidationManifold`](@ref) as a specific example of such a decorator.
 
-## Types and functions
+## [Types and functions](@id interface-types-and-functions)
 
 The following functions are currently available from the interface.
 If a manifold that you implement for your own package fits this interface, we happily look forward to a [Pull Request](https://github.com/JuliaManifolds/Manifolds.jl/compare) to add it here.
+
+We would like to highlight a few of the types and functions in the next two sections before listing the remaining types and functions alphabetically.
+
+### The Manifold Type
+
+Besides the most central type, that of an [`AbstractManifold`](@ref) accompanied by [`AbstractManifoldPoint`](@ref) to represent points thereon, note that the point type is meant in a lazy fashion.
+This is mean as follows: if you implement a new manifold and your points are represented by matrices, vectors or arrays, then it is best to not restrict types of the points `p` in functions, such that the methods work for example for other array representation types as well.
+You should subtype your new points on a manifold, if the structure you use is more structured, see for example [`FixedRankMatrices`](@ref).
+Another reason is, if you want to distinguish (and hence dispatch on) different representation of points on the manifold.
+For an example, see the [Hyperbolic](@ref HyperbolicSpace) manifold, which has different models to be represented.
+
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["maintypes.jl"]
+Order = [:type, :function]
+```
+
+### The exponential and the logarithmic map, and geodesics
+
+Geodesics are the generalizations of a straight line to manifolds, i.e. their intrinsic acceleration is zero.
+Together with geodesics one also obtains the exponential map and its inverse, the logarithmic map.
+Informally speaking, the exponential map takes a vector (think of a direction and a length) at one point and returns another point,
+which lies towards this direction at distance of the specified length. The logarithmic map does the inverse, i.e. given two points, it tells which vector “points towards” the other point.
+
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["exp_log_geo.jl"]
+Order = [:function]
+```
+
+### Retractions and inverse Retractions
+
+The exponential and logarithmic map might be too expensive to evaluate or not be available in a very stable numerical way. Retractions provide a possibly cheap, fast and stable alternative.
+
+The following figure compares the exponential map [`exp`](@ref)`(M, p, X)` on the [`Circle`](@ref)`(ℂ)` (or [`Sphere`](@ref)`(1)` embedded in $ℝ^2$ with one possible retraction, the one based on projections. Note especially that ``\mathrm{dist}(p,q)=\lVert X\rVert_p`` while this is not the case for ``q'``.
+
+![A comparson of the exponential map and a retraction on the Circle.](assets/images/retraction_illustration_600.png)
+
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["retractions.jl"]
+Order = [:function]
+```
+
+To distinguish different types of retractions, the last argument of the (inverse) retraction
+specifies a type. The following ones are available.
+
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["retractions.jl"]
+Order = [:type]
+```
+
+### Projections
+
+A manifold might be embedded in some space.
+Often this is implicitly assumed, for example the complex [`Circle`](@ref) is embedded in the complex plane.
+Let‘s keep the circle in mind in the following as a simple example.
+For the general case see of explicitly stating an embedding and/or distinguising several, different embeddings, see [Embedded Manifolds](@ref EmbeddedmanifoldSec) below.
+
+To make this a little more concrete, let‘s assume we have a manifold ``\mathcal M`` which is embedded in some manifold ``\mathcal N`` and the image ``i(\mathcal M)`` of the embedding function ``i`` is a closed set (with respect to the topology on ``\mathcal N``). Then we can do two kinds of projections.
+
+To make this concrete in an example for the Circle ``\mathcal M=\mathcal C := \{ p ∈ ℂ | |p| = 1\}``
+the embedding can be chosen to be the manifold ``N = ℂ`` and due to our representation of ``\mathcal C`` as complex numbers already, we have ``i(p) = p`` the identity as the embedding function.
+
+1. Given a point ``p∈\mathcal N`` we can look for the closest point on the manifold ``\mathcal M`` formally as
+
+```math
+  \operatorname*{arg\,min}_{q\in \mathcal M} d_{\mathcal N}(i(q),p)
+```
+
+And this resulting ``q`` we call the projection of ``p`` onto the manifold ``\mathcal M``.
+
+2. Given a point ``p∈\mathcal M`` and a vector in ``X\inT_{i(p)}\mathcal N`` in the embedding we can similarly look for the closest point to ``Y∈ T_p\mathcal M`` using the pushforward ``\mathrm{d}i_p`` of the embedding.
+
+```math
+  \operatorname*{arg\,min}_{Y\in T_p\mathcal M} \lVert \mathrm{d}i(p)[Y] - X \rVert_{i(p)}
+```
+
+And we call the resulting ``Y`` the projection of ``X`` onto the tangent space ``T_p\mathcal M`` at ``p``.
+
+Let‘s look at the little more concrete example of the complex Circle again.
+Here, the closest point of ``p ∈ ℂ`` is just the projection onto the circle, or in other words ``q = \frac{p}{\lvert p \rvert}``. A tangent space ``T_p\mathcal C`` in the embedding is the line orthogonal to a point ``p∈\mathcal C`` through the origin.
+This can be better visualized by looking at ``p+T_p\mathcal C`` which is actually the line tangent to ``p``. Note that this shift does not change the resulting projection relative to the origin of the tangent space.
+
+Here the projection can be computed as the classical projection onto the line, i.e.  ``Y = X - ⟨X,p⟩X``.
+
+this is illustrated in the following figure
+
+![An example illustrating the two kinds of projections on the Circle.](assets/images/projection_illustration_600.png)
+
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["projections.jl"]
+Order = [:function]
+```
+
+### Remaining functions
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
@@ -63,16 +161,20 @@ julia> y[1]
  6.90031725726027e-310
 ```
 
-* [`allocate_result`](@ref) allocates a result of a particular function (for example [`exp`], [`flat`], etc.) on a particular manifold with particular arguments.
+* [`allocate_result`](@ref) allocates a result of a particular function (for example [`exp`](@ref), [`flat`](@ref), etc.) on a particular manifold with particular arguments.
   It takes into account the possibility that different arguments may have different numeric [`number_eltype`](@ref) types thorough the [`ManifoldsBase.allocate_result_type`](@ref) function.
 
 ## Bases
 
 The following functions and types provide support for bases of the tangent space of different manifolds.
+Moreover, bases of the cotangent space are also supported, though this description focuses on the tangent space.
 An orthonormal basis of the tangent space $T_p \mathcal M$ of (real) dimension $n$ has a real-coefficient basis $e_1, e_2, …, e_n$ if $\mathrm{Re}(g_p(e_i, e_j)) = δ_{ij}$ for each $i,j ∈ \{1, 2, …, n\}$ where $g_p$ is the Riemannian metric at point $p$.
 A vector $X$ from the tangent space $T_p \mathcal M$ can be expressed in Einstein notation as a sum $X = X^i e_i$, where (real) coefficients $X^i$ are calculated as $X^i = \mathrm{Re}(g_p(X, e_i))$.
 
+Bases are closely related to [atlases](@ref atlases_and_charts).
+
 The main types are:
+
 * [`DefaultOrthonormalBasis`](@ref), which is designed to work when no special properties of the tangent space basis are required.
    It is designed to make [`get_coordinates`](@ref) and [`get_vector`](@ref) fast.
 * [`DiagonalizingOrthonormalBasis`](@ref), which diagonalizes the curvature tensor and makes the curvature in the selected direction equal to 0.
@@ -86,9 +188,18 @@ The main functions are:
 * [`get_vector`](@ref) returns a vector for the specified coordinates.
 * [`get_vectors`](@ref) returns a vector of basis vectors. Calling it should be avoided for high-dimensional manifolds.
 
+Coordinates of a vector in a basis can be stored in an [`FVector`](@ref) to explicitly indicate which basis they are expressed in.
+It is useful to avoid potential ambiguities.
+
 ```@autodocs
 Modules = [ManifoldsBase,Manifolds]
 Pages = ["bases.jl"]
+Order = [:type, :function]
+```
+
+```@autodocs
+Modules = [ManifoldsBase,Manifolds]
+Pages = ["vector_spaces.jl"]
 Order = [:type, :function]
 ```
 
@@ -113,8 +224,8 @@ Order = [:type, :function]
 
 ## A Decorator for manifolds
 
-A decorator manifold extends the functionality of a [`Manifold`](@ref) in a semi-transparent way.
-It internally stores the [`Manifold`](@ref) it extends and by default for functions defined in the [`ManifoldsBase`](interface.md) it acts transparently in the sense that it passes all functions through to the base except those that it actually affects.
+A decorator manifold extends the functionality of a [`AbstractManifold`](@ref) in a semi-transparent way.
+It internally stores the [`AbstractManifold`](@ref) it extends and by default for functions defined in the [`ManifoldsBase`](interface.md) it acts transparently in the sense that it passes all functions through to the base except those that it actually affects.
 For example, because the [`ValidationManifold`](@ref) affects nearly all functions, it overwrites nearly all functions, except a few like [`manifold_dimension`](@ref).
 On the other hand, the [`MetricManifold`](@ref) only affects functions that involve metrics, especially [`exp`](@ref) and [`log`](@ref) but not the [`manifold_dimension`](@ref).
 Contrary to the previous decorator, the [`MetricManifold`](@ref) does not overwrite functions.
@@ -143,15 +254,15 @@ Order = [:macro, :type, :function]
 ## Abstract Power Manifold
 
 ```@autodocs
-Modules = [ ManifoldsBase]
-Pages = ["PowerManifold.jl"]
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["src/PowerManifold.jl"]
 Order = [:macro, :type, :function]
 ```
 
 ## ValidationManifold
 
 [`ValidationManifold`](@ref) is a simple decorator that “decorates” a manifold with tests that all involved arrays are correct. For example involved input and output paratemers are checked before and after running a function, repectively.
-This is done by calling [`is_manifold_point`](@ref) or [`is_tangent_vector`](@ref) whenever applicable.
+This is done by calling [`is_point`](@ref) or [`is_vector`](@ref) whenever applicable.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
@@ -159,7 +270,7 @@ Pages = ["ValidationManifold.jl"]
 Order = [:macro, :type, :function]
 ```
 
-## EmbeddedManifold
+## [EmbeddedManifold](@id EmbeddedmanifoldSec)
 
 Some manifolds can easily be defined by using a certain embedding.
 For example the [`Sphere`](@ref)`(n)` is embedded in [`Euclidean`](@ref)`(n+1)`.
@@ -181,7 +292,7 @@ and logarithmic maps as well as retractions and vector transports of the embeddi
 used for the embedded manifold as well.
 See [`SymmetricMatrices`](@ref) for an example.
 
-In both cases of course [`check_manifold_point`](@ref) and [`check_tangent_vector`](@ref) have to be implemented.
+In both cases of course [`check_point`](@ref) and [`check_vector`](@ref) have to be implemented.
 
 ### Further Embeddings
 

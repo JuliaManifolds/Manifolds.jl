@@ -143,7 +143,7 @@ function get_vector!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
 end
 eval(
     quote
-        @invoke_maker 1 Manifold get_vector!(
+        @invoke_maker 1 AbstractManifold get_vector!(
             M::SemidirectProductGroup,
             Xⁱ,
             e::Identity,
@@ -167,7 +167,7 @@ function get_coordinates!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBa
 end
 eval(
     quote
-        @invoke_maker 1 Manifold get_coordinates!(
+        @invoke_maker 1 AbstractManifold get_coordinates!(
             M::SemidirectProductGroup,
             Y,
             e::Identity,
@@ -177,19 +177,19 @@ eval(
     end,
 )
 
-function zero_tangent_vector(G::SemidirectProductGroup, p)
-    X = allocate_result(G, zero_tangent_vector, p)
-    zero_tangent_vector!(G, X, p)
+function zero_vector(G::SemidirectProductGroup, p)
+    X = allocate_result(G, zero_vector, p)
+    zero_vector!(G, X, p)
     return X
 end
 
-function zero_tangent_vector!(G::SemidirectProductGroup, X, p)
+function zero_vector!(G::SemidirectProductGroup, X, p)
     M = base_manifold(G)
     N, H = M.manifolds
     np, hp = submanifold_components(G, p)
     nX, hX = submanifold_components(G, X)
-    zero_tangent_vector!(N, nX, np)
-    zero_tangent_vector!(H, hX, hp)
+    zero_vector!(N, nX, np)
+    zero_vector!(H, hX, hp)
     return X
 end
 

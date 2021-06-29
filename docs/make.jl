@@ -1,5 +1,5 @@
 using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PyPlot
-# required for loading the Manifolds.ManifoldTests module
+# required for loading the manifold tests functios
 using Test, ForwardDiff, ReverseDiff
 ENV["GKSwstype"] = "100"
 
@@ -14,7 +14,7 @@ cp(
 makedocs(
     # for development, we disable prettyurls
     format=Documenter.HTML(prettyurls=false, assets=["assets/favicon.ico"]),
-    modules=[Manifolds, ManifoldsBase, Manifolds.ManifoldTests],
+    modules=[Manifolds, ManifoldsBase],
     authors="Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
     sitename="Manifolds.jl",
     pages=[
@@ -44,7 +44,7 @@ makedocs(
                 "Positive numbers" => "manifolds/positivenumbers.md",
                 "Projective space" => "manifolds/projectivespace.md",
                 "Rotations" => "manifolds/rotations.md",
-                "Skew-symmetric matrices" => "manifolds/skewsymmetric.md",
+                "Skew-Hermitian matrices" => "manifolds/skewhermitian.md",
                 "Spectrahedron" => "manifolds/spectrahedron.md",
                 "Sphere" => "manifolds/sphere.md",
                 "Stiefel" => "manifolds/stiefel.md",
@@ -69,6 +69,7 @@ makedocs(
             ],
         ],
         "Features on Manifolds" => [
+            "Atlases and charts" => "features/atlases.md",
             "Differentiation" => "features/differentiation.md",
             "Distributions" => "features/distributions.md",
             "Statistics" => "features/statistics.md",

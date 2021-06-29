@@ -10,19 +10,18 @@ import ManifoldsBase:
     allocation_promotion_function,
     array_value,
     base_manifold,
-    check_manifold_point,
-    check_manifold_point__transparent,
-    check_tangent_vector,
+    check_point,
+    check_point__transparent,
+    check_vector,
     decorated_manifold,
     decorator_transparent_dispatch,
     default_decorator_dispatch,
     distance,
+    dual_basis,
     embed,
     embed!,
     exp!,
     exp!__intransparent,
-    # TODO: uncomment the import if `flat!` goes to ManifoldsBase
-    # flat!__intransparent,
     get_basis,
     get_component,
     get_coordinates,
@@ -36,10 +35,11 @@ import ManifoldsBase:
     injectivity_radius,
     inner,
     inner__intransparent,
-    is_manifold_point,
-    is_tangent_vector,
+    is_point,
+    is_vector,
     inverse_retract,
     inverse_retract!,
+    log,
     log!,
     manifold_dimension,
     mid_point,
@@ -53,12 +53,15 @@ import ManifoldsBase:
     retract,
     retract!,
     set_component!,
+    vector_space_dimension,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
-    zero_tangent_vector,
-    zero_tangent_vector!
+    zero_vector,
+    zero_vector!,
+    CotangentSpace,
+    TangentSpace
 import Base: copyto!, convert, in, isapprox, isempty, length, showerror
 
 using Base.Iterators: repeated
@@ -82,17 +85,28 @@ using ManifoldsBase:
     AbstractPowerRepresentation,
     AbstractVectorTransportMethod,
     AbstractLinearVectorTransportMethod,
+    ApproximateInverseRetraction,
+    ApproximateRetraction,
     DifferentiatedRetractionVectorTransport,
     ComponentManifoldError,
     CompositeManifoldError,
+    CotangentSpaceType,
+    CoTFVector,
     DefaultManifold,
     DefaultOrDiagonalizingBasis,
     DiagonalizingBasisData,
+    DifferentiatedRetractionVectorTransport,
+    FVector,
+    NLsolveInverseRetraction,
     InversePowerRetraction,
     PowerManifold,
     PowerManifoldNested,
     PowerRetraction,
     PowerVectorTransport,
+    TangentSpaceType,
+    TCoTSpaceType,
+    TFVector,
+    VectorSpaceType,
     VeeOrthogonalBasis,
     @decorator_transparent_fallback,
     @decorator_transparent_function,
@@ -119,6 +133,9 @@ using StatsBase
 using StatsBase: AbstractWeights
 
 include("utils.jl")
+
+include("atlases.jl")
+include("cotangent_space.jl")
 include("differentiation.jl")
 include("riemannian_diff.jl")
 
@@ -157,9 +174,11 @@ include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/PositiveNumbers.jl")
 include("manifolds/ProjectiveSpace.jl")
 include("manifolds/Rotations.jl")
-include("manifolds/SkewSymmetric.jl")
+include("manifolds/SkewHermitian.jl")
 include("manifolds/Spectrahedron.jl")
 include("manifolds/Stiefel.jl")
+include("manifolds/StiefelEuclideanMetric.jl")
+include("manifolds/StiefelCanonicalMetric.jl")
 include("manifolds/Sphere.jl")
 include("manifolds/SphereSymmetricMatrices.jl")
 include("manifolds/Symmetric.jl")
@@ -182,6 +201,8 @@ include("groups/array_manifold.jl")
 include("groups/product_group.jl")
 include("groups/semidirect_product_group.jl")
 
+include("groups/general_linear.jl")
+include("groups/special_linear.jl")
 include("groups/translation_group.jl")
 include("groups/special_orthogonal.jl")
 include("groups/circle_group.jl")
@@ -191,27 +212,25 @@ include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
 
-include("tests/ManifoldTests.jl")
-
 @doc raw"""
-    Base.in(p, M::Manifold; kwargs...)
+    Base.in(p, M::AbstractManifold; kwargs...)
     p ∈ M
 
-Check, whether a point `p` is a valid point (i.e. in) a [`Manifold`](@ref) `M`.
-This method employs [`is_manifold_point`](@ref) deaticating the error throwing option.
+Check, whether a point `p` is a valid point (i.e. in) a [`AbstractManifold`](@ref) `M`.
+This method employs [`is_point`](@ref) deaticating the error throwing option.
 """
-Base.in(p, M::Manifold; kwargs...) = is_manifold_point(M, p, false; kwargs...)
+Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
 
 @doc raw"""
     Base.in(p, TpM::TangentSpaceAtPoint; kwargs...)
     X ∈ TangentSpaceAtPoint(M,p)
 
 Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
-the [`TangentSpaceAtPoint`](@ref) at `p` on the [`Manifold`](@ref) `M`.
-This method uses [`is_tangent_vector`](@ref) deactivating the error throw option.
+the [`TangentSpaceAtPoint`](@ref) at `p` on the [`AbstractManifold`](@ref) `M`.
+This method uses [`is_vector`](@ref) deactivating the error throw option.
 """
 function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
-    return is_tangent_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
+    return is_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
 end
 
 function __init__()
@@ -230,16 +249,25 @@ function __init__()
         include("ode.jl")
     end
 
+    @require NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56" begin
+        using .NLsolve: NLsolve
+        include("nlsolve.jl")
+    end
+
     @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
         using .Test: Test
         include("tests/tests_general.jl")
+        export test_manifold
         include("tests/tests_group.jl")
+        export test_group, test_action
         @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
             include("tests/tests_forwarddiff.jl")
+            export test_forwarddiff
         end
 
         @require ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267" begin
             include("tests/tests_reversediff.jl")
+            export test_reversediff
         end
     end
 
@@ -260,7 +288,7 @@ function __init__()
 end
 
 #
-export CoTVector, Manifold, MPoint, TVector, Manifold
+export CoTVector, AbstractManifold, AbstractManifoldPoint, TVector, AbstractManifold
 export AbstractSphere, AbstractProjectiveSpace
 export Euclidean,
     ArrayProjectiveSpace,
@@ -287,6 +315,7 @@ export Euclidean,
     ProbabilitySimplex,
     ProjectiveSpace,
     Rotations,
+    SkewHermitianMatrices,
     SkewSymmetricMatrices,
     Spectrahedron,
     Sphere,
@@ -309,6 +338,7 @@ export AbstractPowerManifold,
     AbstractPowerRepresentation,
     ArrayPowerRepresentation,
     NestedPowerRepresentation,
+    NestedReplacingPowerRepresentation,
     PowerManifold
 export ProductManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
@@ -320,7 +350,7 @@ export AbstractVectorTransportMethod,
 export PoleLadderTransport, SchildsLadderTransport
 export PowerVectorTransport, ProductVectorTransport
 export AbstractEmbeddedManifold
-export Metric,
+export AbstractMetric,
     RiemannianMetric,
     LorentzMetric,
     EmbeddedManifold,
@@ -331,7 +361,9 @@ export Metric,
     MinkowskiMetric,
     PowerMetric,
     ProductMetric,
+    CanonicalMetric,
     MetricManifold
+export AbstractAtlas, RetractionAtlas
 export AbstractEmbeddingType, AbstractIsometricEmbeddingType
 export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
@@ -346,6 +378,8 @@ export AbstractRetractionMethod,
     ProductRetraction,
     PowerRetraction
 export AbstractInverseRetractionMethod,
+    ApproximateInverseRetraction,
+    ApproximateLogarithmicMap,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,
@@ -362,6 +396,7 @@ export CachedBasis,
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
     DiagonalizingOrthonormalBasis,
+    InducedBasis,
     ProjectedOrthonormalBasis
 export ComponentManifoldError, CompositeManifoldError
 export ×,
@@ -369,8 +404,8 @@ export ×,
     allocate_result,
     base_manifold,
     bundle_projection,
-    check_manifold_point,
-    check_tangent_vector,
+    check_point,
+    check_vector,
     christoffel_symbols_first,
     christoffel_symbols_second,
     christoffel_symbols_second_jacobian,
@@ -379,6 +414,7 @@ export ×,
     decorated_manifold,
     det_local_metric,
     distance,
+    dual_basis,
     einstein_tensor,
     embed,
     embed!,
@@ -388,10 +424,12 @@ export ×,
     flat!,
     gaussian_curvature,
     geodesic,
+    get_default_atlas,
     get_component,
     get_embedding,
     hat,
     hat!,
+    induced_basis,
     incident_log,
     injectivity_radius,
     inner,
@@ -403,8 +441,8 @@ export ×,
     is_decorator_transparent,
     is_default_metric,
     is_default_decorator,
-    is_manifold_point,
-    is_tangent_vector,
+    is_point,
+    is_vector,
     isapprox,
     kurtosis,
     local_metric,
@@ -461,9 +499,7 @@ export ×,
     vee,
     vee!,
     zero_vector,
-    zero_vector!,
-    zero_tangent_vector,
-    zero_tangent_vector!
+    zero_vector!
 # Lie group types & functions
 export AbstractGroupAction,
     AbstractGroupOperation,
@@ -471,6 +507,7 @@ export AbstractGroupAction,
     ActionDirection,
     AdditionOperation,
     CircleGroup,
+    GeneralLinear,
     GroupManifold,
     GroupOperationAction,
     Identity,
@@ -485,6 +522,7 @@ export AbstractGroupAction,
     RotationAction,
     SemidirectProductGroup,
     SpecialEuclidean,
+    SpecialLinear,
     SpecialOrthogonal,
     TranslationGroup,
     TranslationAction
@@ -545,5 +583,7 @@ export get_basis,
 export AbstractDiffBackend,
     AbstractRiemannianDiffBackend, FiniteDifferencesBackend, RiemannianONBDiffBackend
 export diff_backend, diff_backend!, diff_backends
+# atlases and charts
+export get_point, get_point!, get_parameters, get_parameters!
 
 end # module

@@ -1,5 +1,5 @@
-function check_manifold_point(M::Hyperbolic{N}, p::PoincareBallPoint; kwargs...) where {N}
-    mpv = check_manifold_point(Euclidean(N), p.value; kwargs...)
+function check_point(M::Hyperbolic{N}, p::PoincareBallPoint; kwargs...) where {N}
+    mpv = check_point(Euclidean(N), p.value; kwargs...)
     mpv === nothing || return mpv
     if !(norm(p.value) < 1)
         return DomainError(

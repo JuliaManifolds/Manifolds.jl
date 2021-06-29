@@ -15,7 +15,7 @@ include("group_utils.jl")
         eg = Identity(G, [0.0, 0.0])
         @test repr(eg) === "Identity($(G), $([0.0, 0.0]))"
         @test number_eltype(eg) == Bool
-        @test is_manifold_point(G, eg) # identity transparent
+        @test is_point(G, eg) # identity transparent
         p = similar(x)
         copyto!(p, eg)
         @test p == eg.p
@@ -176,7 +176,7 @@ include("group_utils.jl")
         G = GroupManifold(NotImplementedManifold(), Manifolds.AdditionOperation())
         test_group(G, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]], [], [[1.0, 2.0]])
 
-        @test_throws DomainError is_manifold_point(
+        @test_throws DomainError is_point(
             G,
             Identity(
                 GroupManifold(NotImplementedManifold(), NotImplementedOperation()),
@@ -237,13 +237,13 @@ include("group_utils.jl")
         G = GroupManifold(NotImplementedManifold(), Manifolds.MultiplicationOperation())
         test_group(
             G,
-            [[1.0 2.0; 3.0 4.0], [2.0 3.0; 4.0 5.0], [3.0 4.0; 5.0 6.0]],
+            [[2.0 1.0; 3.0 4.0], [3.0 2.0; 4.0 5.0], [4.0 3.0; 5.0 6.0]],
             [],
             [[1.0 2.0; 3.0 4.0]];
-            test_group_exp_log=false,
+            test_group_exp_log=true,
         )
 
-        x = [1.0 2.0; 2.0 3.0]
+        x = [2.0 1.0; 2.0 3.0]
         ge = Identity(G, [1.0 0.0; 0.0 1.0])
         @test number_eltype(ge) == Bool
         @test copyto!(ge, ge) === ge
@@ -283,6 +283,18 @@ include("group_utils.jl")
         y = allocate(x)
         identity!(G, y, x)
         @test y ≈ one(x)
+        z = allocate(x)
+        copyto!(G, z, x)
+        z2 = allocate(x)
+        copyto!(G.manifold, z2, x)
+        @test z == z2
+        X = zeros(2, 2)
+        Y = allocate(X)
+        copyto!(G, Y, x, X)
+        Y2 = allocate(X)
+        copyto!(G.manifold, Y2, x, X)
+        @test Y == Y2
+
         @test_throws ErrorException identity!(G, [0.0], ge)
         @test compose(G, x, x) ≈ x * x
         @test compose(G, x, ge) ≈ x
@@ -294,8 +306,12 @@ include("group_utils.jl")
         @test y ≈ x
         compose!(G, y, ge, x)
         @test y ≈ x
-        @test group_exp!(G, y, x) === y
-        @test y ≈ exp(x)
+        X = [1.0 2.0; 3.0 4.0]
+        @test group_exp!(G, y, X) === y
+        @test y ≈ exp(X)
+        Y = allocate(X)
+        @test group_log!(G, Y, y) === Y
+        @test Y ≈ log(y)
 
         @testset "identity optimization" begin
             x2 = copy(x)
@@ -354,7 +370,7 @@ end
 struct DefaultEmbeddedGroup <:
        AbstractGroupManifold{ℝ,AdditionOperation,DefaultEmbeddingType} end
 
-@testset "DefaltEmbeddedGroup" begin
+@testset "DefaultEmbeddedGroup" begin
     G = DefaultEmbeddedGroup()
     @test ManifoldsBase.decorator_transparent_dispatch(get_vector!, G, [1], [1], [1]) ===
           Val(:parent)

@@ -13,25 +13,15 @@ include("utils.jl")
         @test isinf(injectivity_radius(M, ExponentialRetraction()))
         @test isinf(injectivity_radius(M, [0.0, 0.0, 1.0]))
         @test isinf(injectivity_radius(M, [0.0, 0.0, 1.0], ExponentialRetraction()))
-        @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
-        @test !is_tangent_vector(M, [0.0, 0.0, 1.0], [0.0, 0.0, 1.0, 0.0])
-        @test_throws DomainError is_manifold_point(M, [2.0, 0.0, 0.0], true)
-        @test !is_manifold_point(M, [2.0, 0.0, 0.0])
-        @test !is_tangent_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
+        @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
+        @test !is_vector(M, [0.0, 0.0, 1.0], [0.0, 0.0, 1.0, 0.0])
+        @test_throws DomainError is_point(M, [2.0, 0.0, 0.0], true)
+        @test !is_point(M, [2.0, 0.0, 0.0])
+        @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
         @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
-        @test_throws DomainError is_tangent_vector(
-            M,
-            [1.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0],
-            true,
-        )
-        @test !is_tangent_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0])
-        @test_throws DomainError is_tangent_vector(
-            M,
-            [0.0, 0.0, 1.0],
-            [1.0, 0.0, 1.0],
-            true,
-        )
+        @test_throws DomainError is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], true)
+        @test !is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0])
+        @test_throws DomainError is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0], true)
         @test is_default_metric(M, MinkowskiMetric())
         @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
         @test manifold_dimension(M) == 2
@@ -49,6 +39,13 @@ include("utils.jl")
             @test Manifolds.allocate_result_type(M, log, (p, p)) == T
             @test Manifolds.allocate_result_type(M, inverse_retract, (p, p)) == T
             convert(T, p, X) == X
+            # copyto
+            pC = allocate(p)
+            copyto!(M, pC, p)
+            @test pC.value == p.value
+            XC = allocate(X)
+            copyto!(M, XC, p, X)
+            @test XC.value == X.value
         end
     end
     @testset "Hyperbolic Representation Conversion I" begin
@@ -63,35 +60,23 @@ include("utils.jl")
         @test convert(HyperboloidTVector, X).value == XH.value
         @test convert(AbstractVector, XH) == X
         @test convert(HyperboloidPoint, p).value == pH.value
-        is_manifold_point(M, pH)
+        is_point(M, pH)
         pB = convert(PoincareBallPoint, p)
         @test pB.value == convert(PoincareBallPoint, pH).value
-        @test is_manifold_point(M, pB)
+        @test is_point(M, pB)
         @test convert(AbstractVector, pB) == p # convert back yields again p
         @test convert(HyperboloidPoint, pB).value == pH.value
-        @test_throws DomainError is_manifold_point(
-            M,
-            PoincareBallPoint([0.9, 0.0, 0.0]),
-            true,
-        )
-        @test_throws DomainError is_manifold_point(M, PoincareBallPoint([1.0, 0.0]), true)
+        @test_throws DomainError is_point(M, PoincareBallPoint([0.9, 0.0, 0.0]), true)
+        @test_throws DomainError is_point(M, PoincareBallPoint([1.0, 0.0]), true)
 
-        @test is_tangent_vector(M, pB, PoincareBallTVector([2.0, 2.0]))
+        @test is_vector(M, pB, PoincareBallTVector([2.0, 2.0]))
 
         pS = convert(PoincareHalfSpacePoint, p)
         pS2 = convert(PoincareHalfSpacePoint, pB)
         pS3 = convert(PoincareHalfSpacePoint, pH)
 
-        @test_throws DomainError is_manifold_point(
-            M,
-            PoincareHalfSpacePoint([0.0, 0.0, 1.0]),
-            true,
-        )
-        @test_throws DomainError is_manifold_point(
-            M,
-            PoincareHalfSpacePoint([0.0, -1.0]),
-            true,
-        )
+        @test_throws DomainError is_point(M, PoincareHalfSpacePoint([0.0, 0.0, 1.0]), true)
+        @test_throws DomainError is_point(M, PoincareHalfSpacePoint([0.0, -1.0]), true)
 
         @test pS.value == pS2.value
         @test pS.value == pS3.value
@@ -116,6 +101,17 @@ include("utils.jl")
             (p2, X2) = convert(Tuple{P,T}, (pts[2], X))
             @test isapprox(M, p1, p2)
             @test isapprox(M, p1, X1, X2)
+            # Test broadcast
+            @test 2 .* X1 == T(2 .* X1.value)
+            @test 2 .* p1 == P(2 .* p1.value)
+            @test copy(X1) == X1
+            @test copy(X1) !== X1
+            X1s = similar(X1)
+            X1s .= 2 .* X1
+            @test X1s == 2 * X1
+            X1s .= X1
+            @test X1s == X1
+
             for (P2, T2) in zip(
                 [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
                 [HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector],
@@ -217,7 +213,7 @@ include("utils.jl")
         B = get_basis(M, p, DefaultOrthonormalBasis())
         V = get_vectors(M, p, B)
         for v in V
-            @test is_tangent_vector(M, p, v, true)
+            @test is_vector(M, p, v, true)
             for b in [DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis(V[1])]
                 @test isapprox(M, p, v, get_vector(M, p, get_coordinates(M, p, v, b), b))
             end
@@ -226,7 +222,7 @@ include("utils.jl")
             @test inner(M, p, v, w) ≈ (v == w ? 1 : 0)
         end
         X = 0.5 * V[1] + 1.0 .* V[2]
-        @test is_tangent_vector(M, p, X)
+        @test is_vector(M, p, X)
         c = get_coordinates(M, p, X, B)
         @test c ≈ [0.5, 1.0]
         B2 = DiagonalizingOrthonormalBasis(X)

@@ -1,27 +1,22 @@
 include("utils.jl")
 
+using Manifolds: default_metric_dispatch
+
 @testset "Stiefel" begin
     @testset "Real" begin
         M = Stiefel(3, 2)
+        M2 = MetricManifold(M, EuclideanMetric())
         @testset "Basics" begin
             @test repr(M) == "Stiefel(3, 2, ℝ)"
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            @test (@inferred default_metric_dispatch(M2)) === Val(true)
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 3
             base_manifold(M) === M
-            @test_throws DomainError is_manifold_point(M, [1.0, 0.0, 0.0, 0.0], true)
-            @test_throws DomainError is_manifold_point(
-                M,
-                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                true,
-            )
-            @test !is_tangent_vector(M, x, [0.0, 0.0, 1.0, 0.0])
-            @test_throws DomainError is_tangent_vector(
-                M,
-                x,
-                1 * im * zero_tangent_vector(M, x),
-                true,
-            )
+            @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
+            @test_throws DomainError is_point(M, 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test !is_vector(M, x, [0.0, 0.0, 1.0, 0.0])
+            @test_throws DomainError is_vector(M, x, 1 * im * zero_vector(M, x), true)
         end
         @testset "Embedding and Projection" begin
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
@@ -31,7 +26,7 @@ include("utils.jl")
             embed!(M, y, x)
             @test y == z
             a = [1.0 0.0; 0.0 2.0; 0.0 0.0]
-            @test !is_manifold_point(M, a)
+            @test !is_point(M, a)
             b = similar(a)
             c = project(M, a)
             @test c == x
@@ -92,6 +87,7 @@ include("utils.jl")
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             y = exp(M, x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
             z = exp(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0])
+            @test_throws ErrorException distance(M, x, y)
             @test isapprox(
                 M,
                 retract(
@@ -105,12 +101,12 @@ include("utils.jl")
             )
             pts = convert.(T, [x, y, z])
             v = inverse_retract(M, x, y, PolarInverseRetraction())
-            @test !is_manifold_point(M, 2 * x)
-            @test_throws DomainError !is_manifold_point(M, 2 * x, true)
-            @test !is_tangent_vector(M, 2 * x, v)
-            @test_throws DomainError !is_tangent_vector(M, 2 * x, v, true)
-            @test !is_tangent_vector(M, x, y)
-            @test_throws DomainError is_tangent_vector(M, x, y, true)
+            @test !is_point(M, 2 * x)
+            @test_throws DomainError !is_point(M, 2 * x, true)
+            @test !is_vector(M, 2 * x, v)
+            @test_throws DomainError !is_vector(M, 2 * x, v, true)
+            @test !is_vector(M, x, y)
+            @test_throws DomainError is_vector(M, x, y, true)
             test_manifold(
                 M,
                 pts,
@@ -188,8 +184,8 @@ include("utils.jl")
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 8
             @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
-            @test !is_manifold_point(M, [1.0, 0.0, 0.0, 0.0])
-            @test !is_tangent_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
+            @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
+            @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
         end
         types = [Matrix{ComplexF64}]
@@ -199,12 +195,12 @@ include("utils.jl")
             z = exp(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0])
             pts = convert.(T, [x, y, z])
             v = inverse_retract(M, x, y, PolarInverseRetraction())
-            @test !is_manifold_point(M, 2 * x)
-            @test_throws DomainError !is_manifold_point(M, 2 * x, true)
-            @test !is_tangent_vector(M, 2 * x, v)
-            @test_throws DomainError !is_tangent_vector(M, 2 * x, v, true)
-            @test !is_tangent_vector(M, x, y)
-            @test_throws DomainError is_tangent_vector(M, x, y, true)
+            @test !is_point(M, 2 * x)
+            @test_throws DomainError !is_point(M, 2 * x, true)
+            @test !is_vector(M, 2 * x, v)
+            @test_throws DomainError !is_vector(M, 2 * x, v, true)
+            @test !is_vector(M, x, y)
+            @test_throws DomainError is_vector(M, x, y, true)
             test_manifold(
                 M,
                 pts,
@@ -274,7 +270,7 @@ include("utils.jl")
         @test r1 == PadeRetraction(1)
         @test repr(r1) == "CayleyRetraction()"
         q1 = retract(M, p, X, r1)
-        @test is_manifold_point(M, q1)
+        @test is_point(M, q1)
         Y = vector_transport_direction(
             M,
             p,
@@ -282,7 +278,7 @@ include("utils.jl")
             X,
             DifferentiatedRetractionVectorTransport(CayleyRetraction()),
         )
-        @test is_tangent_vector(M, q1, Y; atol=10^-15)
+        @test is_vector(M, q1, Y; atol=10^-15)
         Y2 = vector_transport_direction(
             M,
             p,
@@ -290,10 +286,35 @@ include("utils.jl")
             X,
             DifferentiatedRetractionVectorTransport{CayleyRetraction}(),
         )
-        @test is_tangent_vector(M, q1, Y2; atol=10^-15)
+        @test is_vector(M, q1, Y2; atol=10^-15)
         r2 = PadeRetraction(2)
         @test repr(r2) == "PadeRetraction(2)"
         q2 = retract(M, p, X, r2)
-        @test is_manifold_point(M, q2)
+        @test is_point(M, q2)
+    end
+
+    @testset "Canonical Metric" begin
+        M3 = MetricManifold(Stiefel(3, 2), CanonicalMetric())
+        p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+        X = [0.0 0.0; 0.0 0.0; 1.0 1.0]
+        q = exp(M3, p, X)
+        Y = [0.0 0.0; 0.0 0.0; -1.0 1.0]
+        r = exp(M3, p, Y)
+        @test isapprox(M3, p, log(M3, p, q), X)
+        @test isapprox(M3, p, log(M3, p, r), Y)
+        @test inner(M3, p, X, Y) == 0
+        @test inner(M3, p, X, 2 * X + 3 * Y) == 2 * inner(M3, p, X, X)
+        @test norm(M3, p, X) ≈ distance(M3, p, q)
+        # check on a higher dimensional manifold, that the iterations are actually used
+        M4 = MetricManifold(Stiefel(10, 2), CanonicalMetric())
+        p = Matrix{Float64}(I, 10, 2)
+        Random.seed!(42)
+        Z = project(base_manifold(M4), p, randn(size(p)))
+        s = exp(M4, p, Z)
+        Z2 = log(M4, p, s)
+        @test isapprox(M4, p, Z, Z2)
+        Z3 = similar(Z2)
+        log!(M4, Z3, p, s)
+        @test isapprox(M4, p, Z2, Z3)
     end
 end

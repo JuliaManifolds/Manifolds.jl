@@ -4,6 +4,12 @@ abstract type AbstractReshaper end
     StaticReshaper()
 
 Reshaper that constructs `SizedArray` from the `StaticArrays.jl` package.
+
+
+!!! note
+
+    Usage of this type has been deprecated. Please switch to [`ProductRepr`](@ref)
+    as a representation of points and tangent vectors on product manifolds.
 """
 struct StaticReshaper <: AbstractReshaper end
 
@@ -11,6 +17,11 @@ struct StaticReshaper <: AbstractReshaper end
     make_reshape(reshaper::AbstractReshaper, ::Type{Size}, data) where Size
 
 Reshape array `data` to size `Size` using method provided by `reshaper`.
+
+!!! note
+
+    Usage of this function has been deprecated. Please switch to [`ProductRepr`](@ref)
+    as a representation of points and tangent vectors on product manifolds.
 """
 function make_reshape(reshaper::AbstractReshaper, ::Type{Size}, data) where {Size}
     return error(
@@ -25,6 +36,11 @@ end
     ArrayReshaper()
 
 Reshaper that constructs `Base.ReshapedArray`.
+
+!!! note
+
+    Usage of this type has been deprecated. Please switch to [`ProductRepr`](@ref)
+    as a representation of points and tangent vectors on product manifolds.
 """
 struct ArrayReshaper <: AbstractReshaper end
 
@@ -33,7 +49,7 @@ function make_reshape(::ArrayReshaper, ::Type{Size}, data) where {Size}
 end
 
 """
-    ShapeSpecification(reshapers, manifolds::Manifold...)
+    ShapeSpecification(reshapers, manifolds::AbstractManifold...)
 
 A structure for specifying array size and offset information for linear
 storage of points and tangent vectors on the product manifold of `manifolds`.
@@ -74,12 +90,17 @@ numbers and is second, so the next four numbers are allocated to it (`4:7`).
 represent points. In this case, `Sphere(2)` expects a three-element vector, so
 the corresponding size is `Tuple{3}`. On the other hand, `Rotations(2)`
 expects two-by-two matrices, so its size specification is `Tuple{2,2}`.
+
+!!! note
+
+    Usage of this type has been deprecated. Please switch to [`ProductRepr`](@ref)
+    as a representation of points and tangent vectors on product manifolds.
 """
 struct ShapeSpecification{TRanges,TSizes,TReshapers}
     reshapers::TReshapers
 end
 
-function ShapeSpecification(reshapers, manifolds::Manifold...)
+function ShapeSpecification(reshapers, manifolds::AbstractManifold...)
     sizes = map(m -> representation_size(m), manifolds)
     lengths = map(prod, sizes)
     ranges = UnitRange{Int64}[]
@@ -104,6 +125,11 @@ An array-based representation for points and tangent vectors on the
 product manifold. `data` contains underlying representation of points
 arranged according to `TRanges` and `TSizes` from `shape`.
 Internal views for each specific sub-point are created and stored in `parts`.
+
+!!! note
+
+    Usage of this type has been deprecated. Please switch to [`ProductRepr`](@ref)
+    as a representation of points and tangent vectors on product manifolds.
 """
 struct ProductArray{
     TM<:ShapeSpecification,
@@ -158,6 +184,10 @@ function ProductArray(
 end
 ProductArray(M::ShapeSpecification, data) = ProductArray(typeof(M), data, M.reshapers)
 
+function Base.copy(x::ProductArray{TShape}) where {TShape}
+    return ProductArray(TShape, copy(x.data), x.reshapers)
+end
+
 @doc raw"""
     prod_point(M::ShapeSpecification, pts...)
 
@@ -178,6 +208,11 @@ corresponds to array representations expected by `Sphere(2)` and `Euclidean(2)`.
 
 Next, the desired point on the product manifold can be obtained by calling
 `Manifolds.prod_point(Mshape, [1.0, 0.0, 0.0], [-3.0, 2.0])`.
+
+!!! note
+
+    Usage of this type has been deprecated. Please switch to [`ProductRepr`](@ref)
+    as a representation of points and tangent vectors on product manifolds.
 """
 function prod_point(M::ShapeSpecification, pts...)
     data = mapreduce(vcat, pts) do pt
@@ -189,29 +224,29 @@ function prod_point(M::ShapeSpecification, pts...)
 end
 
 @doc raw"""
-    submanifold_component(M::Manifold, p, i::Integer)
-    submanifold_component(M::Manifold, p, ::Val(i)) where {i}
+    submanifold_component(M::AbstractManifold, p, i::Integer)
+    submanifold_component(M::AbstractManifold, p, ::Val(i)) where {i}
     submanifold_component(p, i::Integer)
     submanifold_component(p, ::Val(i)) where {i}
 
 Project the product array `p` on `M` to its `i`th component. A new array is returned.
 """
 submanifold_component(::Any...)
-@inline function submanifold_component(M::Manifold, p, i::Integer)
+@inline function submanifold_component(M::AbstractManifold, p, i::Integer)
     return submanifold_component(M, p, Val(i))
 end
-@inline submanifold_component(M::Manifold, p, i::Val) = submanifold_component(p, i)
+@inline submanifold_component(M::AbstractManifold, p, i::Val) = submanifold_component(p, i)
 @inline submanifold_component(p, ::Val{I}) where {I} = p.parts[I]
 @inline submanifold_component(p, i::Integer) = submanifold_component(p, Val(i))
 
 @doc raw"""
-    submanifold_components(M::Manifold, p)
+    submanifold_components(M::AbstractManifold, p)
     submanifold_components(p)
 
 Get the projected components of `p` on the submanifolds of `M`. The components are returned in a Tuple.
 """
 submanifold_components(::Any...)
-@inline submanifold_components(M::Manifold, p) = submanifold_components(p)
+@inline submanifold_components(M::AbstractManifold, p) = submanifold_components(p)
 @inline submanifold_components(p) = p.parts
 
 function Base.BroadcastStyle(
@@ -352,6 +387,8 @@ end
 allocate(p::ProductRepr, ::Type{T}, s::Size{S}) where {S,T} = Vector{T}(undef, S)
 allocate(p::ProductRepr, ::Type{T}, s::Integer) where {S,T} = Vector{T}(undef, s)
 
+Base.copy(x::ProductRepr) = ProductRepr(map(copy, x.parts))
+
 function Base.copyto!(x::ProductRepr, y::ProductRepr)
     map(copyto!, submanifold_components(x), submanifold_components(y))
     return x
@@ -384,3 +421,55 @@ function Base.show(io::IO, ::MIME"text/plain", x::ProductRepr)
 end
 
 ManifoldsBase._get_vector_cache_broadcast(::ProductRepr) = Val(false)
+
+# Tuple-like broadcasting of ProductRepr
+
+function Broadcast.BroadcastStyle(::Type{<:ProductRepr})
+    return Broadcast.Style{ProductRepr}()
+end
+function Broadcast.BroadcastStyle(
+    ::Broadcast.AbstractArrayStyle{0},
+    b::Broadcast.Style{ProductRepr},
+)
+    return b
+end
+
+Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{ProductRepr},Nothing}) = bc
+function Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{ProductRepr}})
+    Broadcast.check_broadcast_axes(bc.axes, bc.args...)
+    return bc
+end
+
+Broadcast.broadcastable(v::ProductRepr) = v
+
+@inline function Base.copy(bc::Broadcast.Broadcasted{Broadcast.Style{ProductRepr}})
+    dim = axes(bc)
+    length(dim) == 1 || throw(DimensionMismatch("ProductRepr only supports one dimension"))
+    N = length(dim[1])
+    return ProductRepr(ntuple(k -> @inbounds(Broadcast._broadcast_getindex(bc, k)), Val(N)))
+end
+
+Base.@propagate_inbounds Broadcast._broadcast_getindex(v::ProductRepr, I) = v.parts[I[1]]
+
+Base.axes(v::ProductRepr) = axes(v.parts)
+
+@inline function Base.copyto!(
+    dest::ProductRepr,
+    bc::Broadcast.Broadcasted{Broadcast.Style{ProductRepr}},
+)
+    axes(dest) == axes(bc) || Broadcast.throwdm(axes(dest), axes(bc))
+    # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
+    if bc.f === identity && bc.args isa Tuple{ProductRepr} # only a single input argument to broadcast!
+        A = bc.args[1]
+        if axes(dest) == axes(A)
+            return copyto!(dest, A)
+        end
+    end
+    bc′ = Broadcast.preprocess(dest, bc)
+    # Performance may vary depending on whether `@inbounds` is placed outside the
+    # for loop or not. (cf. https://github.com/JuliaLang/julia/issues/38086)
+    @inbounds @simd for I in eachindex(bc′)
+        copyto!(dest.parts[I], bc′[I])
+    end
+    return dest
+end

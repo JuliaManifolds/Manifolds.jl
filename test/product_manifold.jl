@@ -19,6 +19,8 @@ end
     @test Mse == ProductManifold(M1) × M2
     @test Mse == ProductManifold(M1) × ProductManifold(M2)
     @test Mse == M1 × ProductManifold(M2)
+    @test Mse[1] == M1
+    @test Mse[2] == M2
     @test injectivity_radius(Mse) ≈ π
     @test injectivity_radius(
         Mse,
@@ -109,6 +111,48 @@ end
         @test get_component(Mse, prs1, Val(2)) == p3
         prs1[Mse, Val(2)] = 2 * p3
         @test prs1[Mse, Val(2)] == 2 * p3
+
+        p1c = copy(p1)
+        p1c.parts[1][1] = -123.0
+        @test p1c.parts[1][1] == -123.0
+        @test p1.parts[1][1] == 0.0
+        copyto!(p1c, p1)
+        @test p1c.parts[1][1] == 0.0
+    end
+
+    @testset "copyto!" begin
+        p = ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0])
+        X = ProductRepr([1.0, 0.0, 0.0], [1.0, 0.0])
+        q = allocate(p)
+        copyto!(Mse, q, p)
+        @test p.parts == q.parts
+        Y = allocate(X)
+        copyto!(Mse, Y, p, X)
+        @test Y.parts == X.parts
+    end
+
+    @testset "Broadcasting" begin
+        p1 = ProductRepr([0.0, 1.0, 0.0], [0.0, 1.0])
+        p2 = ProductRepr([3.0, 4.0, 5.0], [2.0, 5.0])
+        br_result = p1 .+ 2.0 .* p2
+        @test br_result isa ProductRepr
+        @test br_result.parts[1] ≈ [6.0, 9.0, 10.0]
+        @test br_result.parts[2] ≈ [4.0, 11.0]
+
+        br_result .= 2.0 .* p1 .+ p2
+        @test br_result.parts[1] ≈ [3.0, 6.0, 5.0]
+        @test br_result.parts[2] ≈ [2.0, 7.0]
+
+        br_result .= p1
+        @test br_result.parts[1] ≈ [0.0, 1.0, 0.0]
+        @test br_result.parts[2] ≈ [0.0, 1.0]
+
+        @test axes(p1) == (Base.OneTo(2),)
+
+        # errors
+        p3 = ProductRepr([3.0, 4.0, 5.0], [2.0, 5.0], [3.0, 2.0])
+        @test_throws DimensionMismatch p1 .+ p3
+        @test_throws DimensionMismatch p1 .= p3
     end
 
     @testset "CompositeManifoldError" begin
@@ -121,10 +165,10 @@ end
         X = ProductRepr(X1, X2)
         pf = ProductRepr(p1, X1)
         Xf = ProductRepr(X1, p2)
-        @test is_manifold_point(Mpr, p, true)
-        @test_throws CompositeManifoldError is_manifold_point(Mpr, X, true)
-        @test_throws ComponentManifoldError is_tangent_vector(Mpr, pf, X, true)
-        @test_throws ComponentManifoldError is_tangent_vector(Mpr, p, Xf, true)
+        @test is_point(Mpr, p, true)
+        @test_throws CompositeManifoldError is_point(Mpr, X, true)
+        @test_throws ComponentManifoldError is_vector(Mpr, pf, X, true)
+        @test_throws ComponentManifoldError is_vector(Mpr, p, Xf, true)
     end
 
     @testset "arithmetic" begin
@@ -314,6 +358,7 @@ end
                 pts;
                 test_reverse_diff=isa(T, Vector),
                 test_musical_isomorphisms=true,
+                musical_isomorphism_bases=[DefaultOrthonormalBasis()],
                 test_injectivity_radius=true,
                 test_project_point=true,
                 test_project_tangent=true,
@@ -394,6 +439,42 @@ end
         Y = vector_transport_to(Mse, p, X, q, m)
         Z = -log(Mse, q, p)
         @test isapprox(Mse, q, Y, Z)
+    end
+
+    @testset "Implicit product vector transport" begin
+        p = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
+        q = ProductRepr([0.0, 1.0, 0.0], [2.0, 0.0])
+        X = log(Mse, p, q)
+        for m in [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
+            Y = vector_transport_to(Mse, p, X, q, m)
+            Z1 = vector_transport_to(
+                Mse.manifolds[1],
+                submanifold_component.([p, X, q], Ref(1))...,
+                m,
+            )
+            Z2 = vector_transport_to(
+                Mse.manifolds[2],
+                submanifold_component.([p, X, q], Ref(2))...,
+                m,
+            )
+            Z = ProductRepr(Z1, Z2)
+            @test isapprox(Mse, q, Y, Z)
+        end
+        for m in [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
+            Y = vector_transport_direction(Mse, p, X, X, m)
+            Z1 = vector_transport_direction(
+                Mse.manifolds[1],
+                submanifold_component.([p, X, X], Ref(1))...,
+                m,
+            )
+            Z2 = vector_transport_direction(
+                Mse.manifolds[2],
+                submanifold_component.([p, X, X], Ref(2))...,
+                m,
+            )
+            Z = ProductRepr(Z1, Z2)
+            @test isapprox(Mse, q, Y, Z)
+        end
     end
 
     @testset "prod_point" begin
@@ -550,5 +631,15 @@ end
         Msec = ProductManifold(M1, M2c)
         @test Manifolds.allocation_promotion_function(Msec, get_vector, ()) === complex
         @test Manifolds.allocation_promotion_function(Mse, get_vector, ()) === identity
+    end
+
+    @testset "Atlas & Induced Basis" begin
+        M = ProductManifold(Euclidean(2), Euclidean(2))
+        p = ProductRepr(zeros(2), ones(2))
+        X = ProductRepr(ones(2), 2 .* ones(2))
+        A = RetractionAtlas()
+        a = get_parameters(M, A, p, p)
+        p2 = get_point(M, A, p, a)
+        @test all(p2.parts .== p.parts)
     end
 end

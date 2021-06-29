@@ -21,7 +21,7 @@ where $0_k$ is the $k × k$ zero matrix and $\overline{\cdot}$ the (elementwise)
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
-[`zero_tangent_vector`](@ref zero_tangent_vector(::Euclidean, ::Any...)) are inherited from the embedding.
+[`zero_vector`](@ref zero_vector(::Euclidean, ::Any...)) are inherited from the embedding.
 
 The manifold is named after
 [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
@@ -61,15 +61,14 @@ function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where
 end
 
 @doc raw"""
-    check_manifold_point(M::Stiefel, p; kwargs...)
+    check_point(M::Stiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$, i.e. that it has the right
 [`AbstractNumbers`](@ref) type and $p^{\mathrm{H}}p$ is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
-function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv =
-        invoke(check_manifold_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
+function check_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
+    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
@@ -82,33 +81,21 @@ function check_manifold_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,�
 end
 
 @doc raw"""
-    check_tangent_vector(M::Stiefel, p, X; check_base_point = true, kwargs...)
+    check_vector(M::Stiefel, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
 `M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](@ref) fits and
 it (approximately) holds that $p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0$,
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian and $\overline{\cdot}$ the (elementwise) complex conjugate.
-The optional parameter `check_base_point` indicates, whether to call [`check_manifold_point`](@ref)  for `p`.
 The settings for approximately can be set with `kwargs...`.
 """
-function check_tangent_vector(
-    M::Stiefel{n,k,𝔽},
-    p,
-    X;
-    check_base_point=true,
-    kwargs...,
-) where {n,k,𝔽}
-    if check_base_point
-        mpe = check_manifold_point(M, p; kwargs...)
-        mpe === nothing || return mpe
-    end
+function check_vector(M::Stiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     mpv = invoke(
-        check_tangent_vector,
+        check_vector,
         Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
         M,
         p,
         X;
-        check_base_point=false, # already checked above
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -122,105 +109,6 @@ function check_tangent_vector(
 end
 
 decorated_manifold(::Stiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field=𝔽)
-
-@doc raw"""
-    exp(M::Stiefel, p, X)
-
-Compute the exponential map on the [`Stiefel`](@ref)`{n,k,𝔽}`() manifold `M`
-emanating from `p` in tangent direction `X`.
-
-````math
-\exp_p X = \begin{pmatrix}
-   p\\X
- \end{pmatrix}
- \operatorname{Exp}
- \left(
- \begin{pmatrix} p^{\mathrm{H}}X & - X^{\mathrm{H}}X\\
- I_n & p^{\mathrm{H}}X\end{pmatrix}
- \right)
-\begin{pmatrix}  \exp( -p^{\mathrm{H}}X) \\ 0_n\end{pmatrix},
-````
-
-where $\operatorname{Exp}$ denotes matrix exponential,
-$\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and $I_k$ and
-$0_k$ are the identity matrix and the zero matrix of dimension $k × k$, respectively.
-"""
-exp(::Stiefel, ::Any...)
-
-function exp!(::Stiefel{n,k}, q, p, X) where {n,k}
-    return copyto!(
-        q,
-        [p X] *
-        exp([p'X -X'*X; one(zeros(eltype(p), k, k)) p'*X]) *
-        [exp(-p'X); zeros(eltype(p), k, k)],
-    )
-end
-
-@doc raw"""
-    get_basis(M::Stiefel{n,k,ℝ}, p, B::DefaultOrthonormalBasis) where {n,k}
-
-Create the default basis using the parametrization for any $X ∈ T_p\mathcal M$.
-Set $p_\bot \in ℝ^{n\times(n-k)}$ the matrix such that the $n\times n$ matrix of the common
-columns $[p\ p_\bot]$ is an ONB.
-For any skew symmetric matrix $a ∈ ℝ^{k\times k}$ and any $b ∈ ℝ^{(n-k)\times k}$ the matrix
-
-````math
-X = pa + p_\bot b ∈ T_p\mathcal M
-````
-
-and we can use the $\frac{1}{2}k(k-1) + (n-k)k = nk-\frac{1}{2}k(k+1)$ entries
-of $a$ and $b$ to specify a basis for the tangent space.
-using unit vectors for constructing both
-the upper matrix of $a$ to build a skew symmetric matrix and the matrix b, the default
-basis is constructed.
-
-Since $[p\ p_\bot]$ is an automorphism on $ℝ^{n\times p}$ the elements of $a$ and $b$ are
-orthonormal coordinates for the tangent space. To be precise exactly one element in the upper
-trangular entries of $a$ is set to $1$ its symmetric entry to $-1$ and we normalize with
-the factor $\frac{1}{\sqrt{2}}$ and for $b$ one can just use unit vectors reshaped to a matrix
-to obtain orthonormal set of parameters.
-"""
-function get_basis(M::Stiefel{n,k,ℝ}, p, B::DefaultOrthonormalBasis{ℝ}) where {n,k}
-    V = get_vectors(M, p, B)
-    return CachedBasis(B, V)
-end
-
-function get_coordinates!(
-    M::Stiefel{n,k,ℝ},
-    c,
-    p,
-    X,
-    B::DefaultOrthonormalBasis{ℝ},
-) where {n,k}
-    V = get_vectors(M, p, B)
-    c .= [inner(M, p, v, X) for v in V]
-    return c
-end
-
-function get_vector!(M::Stiefel{n,k,ℝ}, X, p, c, B::DefaultOrthonormalBasis{ℝ}) where {n,k}
-    V = get_vectors(M, p, B)
-    zero_tangent_vector!(M, X, p)
-    length(c) < length(V) && error(
-        "Coordinate vector too short. Excpected $(length(V)), but only got $(length(c)) entries.",
-    )
-    @inbounds for i in 1:length(V)
-        X .+= c[i] .* V[i]
-    end
-    return X
-end
-
-function get_vectors(::Stiefel{n,k,ℝ}, p, ::DefaultOrthonormalBasis{ℝ}) where {n,k}
-    p⊥ = nullspace([p zeros(n, n - k)])
-    an = div(k * (k - 1), 2)
-    bn = (n - k) * k
-    V = vcat(
-        [p * vec2skew(1 / sqrt(2) .* _euclidean_unit_vector(an, i), k) for i in 1:an],
-        [p⊥ * reshape(_euclidean_unit_vector(bn, j), (n - k, k)) for j in 1:bn],
-    )
-    return V
-end
-
-_euclidean_unit_vector(n, i) = [k == i ? 1.0 : 0.0 for k in 1:n]
 
 @doc raw"""
     inverse_retract(M::Stiefel, p, q, ::PolarInverseRetraction)
@@ -256,7 +144,7 @@ in [^KanekoFioriTanaka2013].
 
 [^KanekoFioriTanaka2013]:
     > T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
-    > Compact Stiefel Manifold", IEEE Transactions on Signal Processing, 2013,
+    > Compact Stiefel AbstractManifold", IEEE Transactions on Signal Processing, 2013,
     > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)
@@ -359,7 +247,7 @@ function inverse_retract!(M::Stiefel{n,k}, X, p, q, ::QRInverseRetraction) where
 end
 
 function Base.isapprox(M::Stiefel, p, X, Y; kwargs...)
-    return isapprox(sqrt(inner(M, p, zero_tangent_vector(M, p), X - Y)), 0; kwargs...)
+    return isapprox(sqrt(inner(M, p, zero_vector(M, p), X - Y)), 0; kwargs...)
 end
 Base.isapprox(::Stiefel, p, q; kwargs...) = isapprox(norm(p - q), 0; kwargs...)
 
@@ -380,42 +268,6 @@ The dimension is given by
 manifold_dimension(::Stiefel{n,k,ℝ}) where {n,k} = n * k - div(k * (k + 1), 2)
 manifold_dimension(::Stiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
 manifold_dimension(::Stiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
-
-@doc raw"""
-    project(M::Stiefel,p)
-
-Projects `p` from the embedding onto the [`Stiefel`](@ref) `M`, i.e. compute `q`
-as the polar decomposition of $p$ such that $q^{\mathrm{H}q$ is the identity,
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
-"""
-project(::Stiefel, ::Any, ::Any)
-
-function project!(::Stiefel, q, p)
-    s = svd(p)
-    mul!(q, s.U, s.Vt)
-    return q
-end
-
-@doc raw"""
-    project(M::Stiefel, p, X)
-
-Project `X` onto the tangent space of `p` to the [`Stiefel`](@ref) manifold `M`.
-The formula reads
-
-````math
-\operatorname{proj}_{\mathcal M}(p, X) = X - p \operatorname{Sym}(p^{\mathrm{H}}X),
-````
-
-where $\operatorname{Sym}(q)$ is the symmetrization of $q$, e.g. by
-$\operatorname{Sym}(q) = \frac{q^{\mathrm{H}}+q}{2}$.
-"""
-project(::Stiefel, ::Any...)
-
-function project!(::Stiefel, Y, p, X)
-    A = p' * X
-    copyto!(Y, X - p * Hermitian((A + A') / 2))
-    return Y
-end
 
 @doc raw"""
     retract(::Stiefel, p, X, ::CayleyRetraction)
@@ -812,7 +664,4 @@ function vector_transport_to!(
         Y,
         q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf,
     )
-end
-function vector_transport_to!(M::Stiefel, Y, ::Any, X, q, ::ProjectionTransport)
-    return project!(M, Y, q, X)
 end
