@@ -490,7 +490,12 @@ function get_coordinates(::Tucker, 𝔄, X::TuckerTVector, ℬ::CachedHOSVDBasis
     end
     return coords
 end
-function get_coordinates(M::Tucker, 𝔄, X, ℬ::DefaultOrthonormalBasis)
+function get_coordinates(
+    M::Tucker,
+    𝔄,
+    X,
+    ℬ::DefaultOrthonormalBasis{𝔽,TangentSpaceType},
+) where {𝔽}
     return get_coordinates(M, 𝔄, X, get_basis(M, 𝔄, ℬ))
 end
 
@@ -537,7 +542,13 @@ function get_vector!(
     y.Ċ .= reshape(ξ_core, size(y.Ċ))
     return y
 end
-function get_vector!(ℳ::Tucker, y, 𝔄::TuckerPoint, x, ℬ::DefaultOrthonormalBasis)
+function get_vector!(
+    ℳ::Tucker,
+    y,
+    𝔄::TuckerPoint,
+    x,
+    ℬ::DefaultOrthonormalBasis{𝔽,TangentSpaceType},
+) where {𝔽}
     return get_vector!(ℳ, y, 𝔄, x, get_basis(ℳ, 𝔄, ℬ))
 end
 
@@ -829,12 +840,17 @@ end
 # The standard implementation of allocate_result on vector-valued functions gives an element
 # of the same type as the manifold point. We want a vector instead.
 for fun in [:get_vector, :inverse_retract, :project, :zero_vector]
-    @eval function ManifoldsBase.allocate_result(::Tucker, ::typeof($(fun)), p, args...)
+    @eval function ManifoldsBase.allocate_result(
+        ::Tucker,
+        ::typeof($(fun)),
+        p::TuckerPoint,
+        args...,
+    )
         return TuckerTVector(allocate(p.hosvd.core), allocate(p.hosvd.U))
     end
 end
 
-function ManifoldsBase.allocate_result(M::Tucker{N}, f::typeof(embed), p, args...) where {N}
-    dims = representation_size(M)
+function ManifoldsBase.allocate_result(::Tucker{N}, f::typeof(embed), p, args...) where {N}
+    dims = N
     return Array{number_eltype(p),length(dims)}(undef, dims)
 end

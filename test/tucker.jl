@@ -25,7 +25,6 @@ include("utils.jl")
             @test p ≈ TuckerPoint(p.hosvd.core, p.hosvd.U...)
             @test v == TuckerTVector(v.Ċ, v.U̇)
 
-            @test representation_size(M) == n⃗
             @test manifold_dimension(M) ==
                   prod(r⃗) + sum(ntuple(d -> r⃗[d] * (n⃗[d] - r⃗[d]), length(r⃗)))
 
@@ -65,6 +64,7 @@ include("utils.jl")
                 test_vector_spaces=false,
                 test_vee_hat=false,
                 test_tangent_vector_broadcasting=true,
+                test_representation_size=false,
                 projection_atol_multiplier=15,
                 retraction_methods=[PolarRetraction()],
                 inverse_retraction_methods=[ProjectionInverseRetraction()],
