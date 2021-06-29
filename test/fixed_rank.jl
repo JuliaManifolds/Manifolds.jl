@@ -45,6 +45,7 @@ include("utils.jl")
     @test v == UMVTVector(v.U, v.M, v.Vt)
     @testset "Fixed Rank Matrices – Basics" begin
         @test representation_size(M) == (3, 2)
+        @test get_embedding(M) == Euclidean(3, 2; field=ℝ)
         @test representation_size(Mc) == (3, 2)
         @test manifold_dimension(M) == 6
         @test manifold_dimension(Mc) == 12
@@ -120,13 +121,18 @@ include("utils.jl")
                 xF2 = SVDMPoint(x.U, x.S, 2 * x.Vt)
                 @test !is_point(M, xF2)
                 @test_throws DomainError is_point(M, xF2, true)
-
                 # copyto
                 yC = allocate(y)
                 copyto!(M, yC, y)
                 @test yC.U == y.U
                 @test yC.S == y.S
                 @test yC.Vt == y.Vt
+                # embed
+                N = get_embedding(M)
+                A = embed(M, x)
+                @test isapprox(N, A, x.U * x.S * x.Vt)
+                B = embed(M, x, v)
+                @test isapprox(N, x, B, x.U * v.M * p.Vt + v.U * p.Vt + p.U * v.Vt)
             end
             @testset "UMV TVector Basics" begin
                 w = UMVTVector(v.U, 2 * v.M, v.Vt)
@@ -180,6 +186,7 @@ include("utils.jl")
                 test_is_tangent=false,
                 test_default_vector_transport=false,
                 test_forward_diff=false,
+                test_project_tangent=true,
                 test_reverse_diff=false,
                 test_vector_spaces=false,
                 test_vee_hat=false,
