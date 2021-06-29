@@ -42,7 +42,7 @@ Generate the manifold of `m`-by-`n` (`field`-valued) matrices of rank `k`.
     > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
-struct FixedRankMatrices{M,N,K,𝔽} <: Manifold{𝔽} end
+struct FixedRankMatrices{M,N,K,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType} end
 function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers=ℝ)
     return FixedRankMatrices{m,n,k,field}()
 end
@@ -108,6 +108,20 @@ Base.:-(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U - w.U, v.M - w.M, v.Vt - 
 Base.:-(v::UMVTVector) = UMVTVector(-v.U, -v.M, -v.Vt)
 Base.:+(v::UMVTVector) = UMVTVector(v.U, v.M, v.Vt)
 Base.:(==)(v::UMVTVector, w::UMVTVector) = (v.U == w.U) && (v.M == w.M) && (v.Vt == w.Vt)
+
+allocate(p::SVDMPoint) = SVDMPoint(allocate(p.U), allocate(p.S), allocate(p.Vt))
+function allocate(p::SVDMPoint, ::Type{T}) where {T}
+    return SVDMPoint(allocate(p.U, T), allocate(p.S, T), allocate(p.Vt, T))
+end
+allocate(X::UMVTVector) = UMVTVector(allocate(X.U), allocate(X.M), allocate(X.Vt))
+function allocate(X::UMVTVector, ::Type{T}) where {T}
+    return UMVTVector(allocate(X.U, T), allocate(X.M, T), allocate(X.Vt, T))
+end
+
+function allocate_result(::FixedRankMatrices{m,n,k}, ::typeof(embed), v...) where {m,n,k}
+    #note that vals is (p,) or (X,p) but both first entries have a U of correct type
+    return similar(typeof(v[1].U),m,n)
+end
 
 @doc raw"""
     check_manifold_point(M::FixedRankMatrices{m,n,k}, p; kwargs...)
@@ -199,6 +213,46 @@ function check_tangent_vector(
     return nothing
 end
 
+function Base.copyto!(p::SVDMPoint, q::SVDMPoint)
+    copyto!(p.U, q.U)
+    copyto!(p.S, q.S)
+    copyto!(p.Vt, q.Vt)
+    return p
+end
+function Base.copyto!(X::UMVTVector, Y::UMVTVector)
+    copyto!(X.U, Y.U)
+    copyto!(X.M, Y.M)
+    copyto!(X.Vt, Y.Vt)
+    return X
+end
+
+@doc raw"""
+    embed(::FixedRankMatrices{m,n,k}, p::SVDMPoint)
+
+Embed the point `p` from its `SVDMPoint` representation into the set of ``m×n`` matrices.
+"""
+function embed(::FixedRankMatrices{m,n,k}, p)
+
+function embed!(::FixedRankMatrices, q, p)
+    return mul!(q, p.U * Diagonal(p.S), p.Vt)
+end
+
+@doc raw"""
+    embed(M::FixedRankMatrices, p, X)
+
+Embed the tangent vector `X` at point `p` in `M` from
+its [`UMVTVector`](@ref) representation  into the set of ``m×n`` matrices.
+"""
+embed(::FixedRankMatrices, p, X)
+
+function embed!(::FixedRankMatrices, Y, p, X)
+    tmp = p.U * X.M
+    tmp .+= X.U
+    mul!(Y, tmp, p.Vt)
+    return mul!(Y, p.U, X.Vt, true, true)
+end
+
+
 @doc raw"""
     inner(M::FixedRankMatrices, p::SVDMPoint, X::UMVTVector, Y::UMVTVector)
 
@@ -226,6 +280,14 @@ function Base.isapprox(
     )
 end
 
+
+function number_eltype(p::SVDMPoint)
+    return typeof(one(eltype(p.U)) + one(eltype(p.S)) + one(eltype(p.Vt)))
+end
+function number_eltype(X::UMVTVector)
+    return typeof(one(eltype(X.U)) + one(eltype(X.M)) + one(eltype(X.Vt)))
+end
+
 @doc raw"""
     manifold_dimension(M::FixedRankMatrices{m,n,k,𝔽})
 
@@ -240,6 +302,23 @@ where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
 """
 function manifold_dimension(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽}
     return (m + n - k) * k * real_dimension(𝔽)
+end
+
+function Base.one(p::SVDMPoint)
+    return SVDMPoint(
+        one(zeros(size(p.U, 1), size(p.U, 1))),
+        ones(length(p.S)),
+        one(zeros(size(p.Vt, 2), size(p.Vt, 2))),
+        length(p.S),
+    )
+end
+function Base.one(X::UMVTVector)
+    return UMVTVector(
+        one(zeros(size(X.U, 1), size(X.U, 1))),
+        one(zeros(size(X.M))),
+        one(zeros(size(X.Vt, 2), size(X.Vt, 2))),
+        size(X.M, 1),
+    )
 end
 
 @doc raw"""
@@ -316,7 +395,7 @@ end
 function Base.show(io::IO, ::FixedRankMatrices{M,N,K,𝔽}) where {M,N,K,𝔽}
     return print(io, "FixedRankMatrices($(M), $(N), $(K), $(𝔽))")
 end
-function Base.show(io::IO, mime::MIME"text/plain", p::SVDMPoint)
+function Base.show(io::IO, ::MIME"text/plain", p::SVDMPoint)
     pre = " "
     summary(io, p)
     println(io, "\nU factor:")
@@ -332,7 +411,7 @@ function Base.show(io::IO, mime::MIME"text/plain", p::SVDMPoint)
     sv = replace(sv, '\n' => "\n$(pre)")
     return print(io, pre, sv)
 end
-function Base.show(io::IO, mime::MIME"text/plain", X::UMVTVector)
+function Base.show(io::IO, ::MIME"text/plain", X::UMVTVector)
     pre = " "
     summary(io, X)
     println(io, "\nU factor:")
@@ -347,52 +426,6 @@ function Base.show(io::IO, mime::MIME"text/plain", X::UMVTVector)
     sv = sprint(show, "text/plain", X.Vt; context=io, sizehint=0)
     sv = replace(sv, '\n' => "\n$(pre)")
     return print(io, pre, sv)
-end
-
-allocate(p::SVDMPoint) = SVDMPoint(allocate(p.U), allocate(p.S), allocate(p.Vt))
-function allocate(p::SVDMPoint, ::Type{T}) where {T}
-    return SVDMPoint(allocate(p.U, T), allocate(p.S, T), allocate(p.Vt, T))
-end
-allocate(X::UMVTVector) = UMVTVector(allocate(X.U), allocate(X.M), allocate(X.Vt))
-function allocate(X::UMVTVector, ::Type{T}) where {T}
-    return UMVTVector(allocate(X.U, T), allocate(X.M, T), allocate(X.Vt, T))
-end
-
-function number_eltype(p::SVDMPoint)
-    return typeof(one(eltype(p.U)) + one(eltype(p.S)) + one(eltype(p.Vt)))
-end
-function number_eltype(X::UMVTVector)
-    return typeof(one(eltype(X.U)) + one(eltype(X.M)) + one(eltype(X.Vt)))
-end
-
-function Base.one(p::SVDMPoint)
-    return SVDMPoint(
-        one(zeros(size(p.U, 1), size(p.U, 1))),
-        ones(length(p.S)),
-        one(zeros(size(p.Vt, 2), size(p.Vt, 2))),
-        length(p.S),
-    )
-end
-function Base.one(X::UMVTVector)
-    return UMVTVector(
-        one(zeros(size(X.U, 1), size(X.U, 1))),
-        one(zeros(size(X.M))),
-        one(zeros(size(X.Vt, 2), size(X.Vt, 2))),
-        size(X.M, 1),
-    )
-end
-
-function Base.copyto!(p::SVDMPoint, q::SVDMPoint)
-    copyto!(p.U, q.U)
-    copyto!(p.S, q.S)
-    copyto!(p.Vt, q.Vt)
-    return p
-end
-function Base.copyto!(X::UMVTVector, Y::UMVTVector)
-    copyto!(X.U, Y.U)
-    copyto!(X.M, Y.M)
-    copyto!(X.Vt, Y.Vt)
-    return X
 end
 
 @doc raw"""
@@ -420,38 +453,4 @@ function zero_tangent_vector!(
     X.M .= zeros(eltype(X.M), k, k)
     X.Vt .= zeros(eltype(X.Vt), k, n)
     return X
-end
-
-@doc raw"""
-    embed(p::SVDMPoint)
-
-Embed the point `p` from its `SVDMPoint` representation.
-"""
-
-function embed!(::FixedRankMatrices, q, p)
-    return mul!(q, p.U * Diagonal(p.S), p.Vt)
-end
-function embed(M::FixedRankMatrices{m,n,k}, p) where {m,n,k}
-    q = zeros(m, n)
-    return embed!(M, q, p)
-end
-
-@doc raw"""
-    embed(M::FixedRankMatrices, p, X)
-
-Embed the tangent vector `X` at point `p` in `M` from
-its [`UMVTVector`](@ref) representation.
-"""
-embed(::FixedRankMatrices, p, X)
-
-function embed!(::FixedRankMatrices, Y, p, X)
-    tmp = p.U * X.M
-    tmp .+= X.U
-    mul!(Y, tmp, p.Vt)
-    return mul!(Y, p.U, X.Vt, true, true)
-end
-
-function embed(M::FixedRankMatrices{m,n,k}, p, X) where {m,n,k}
-    Y = zeros(m, n)
-    return embed!(M, Y, p, X)
 end
