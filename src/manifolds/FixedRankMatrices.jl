@@ -123,12 +123,12 @@ function allocate_result(::FixedRankMatrices{m,n,k}, ::typeof(embed), vals...) w
     #note that vals is (p,) or (X,p) but both first entries have a U of correct type
     return similar(typeof(vals[1].U), m, n)
 end
-function allocate_result_type(
+function allocate_result(
     ::FixedRankMatrices{m,n,k},
     ::typeof(project),
-    ::Tuple{SVDMPoint,<:AbstractMatrix},
+    vals...
 ) where {m,n,k}
-    return UMVTVector
+    return UMVTVector(zeros(n,k), zeros(k,k), zeros(m,k))
 end
 
 Base.copy(v::UMVTVector) = UMVTVector(copy(v.U), copy(v.M), copy(v.Vt))
@@ -387,6 +387,12 @@ Project the matrix ``A ∈ ℝ^{m,n}`` or from the embedding the tangent space a
 further decomposing the result into ``X=UMV``, i.e. a [`UMVTVector`](@ref).
 """
 project(::FixedRankMatrices, ::Any, ::Any)
+
+function project(M::FixedRankMatrices, p::SVDMPoint, A::AbstractMatrix)
+    Y = allocate_result(M, typeof(project), p, A)
+    project!(M, Y, p, A)
+    return Y
+end
 
 function project!(::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, A::AbstractMatrix)
     av = A * (p.Vt')
