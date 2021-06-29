@@ -121,7 +121,7 @@ end
 
 function allocate_result(::FixedRankMatrices{m,n,k}, ::typeof(embed), v...) where {m,n,k}
     #note that vals is (p,) or (X,p) but both first entries have a U of correct type
-    return similar(typeof(v[1].U),m,n)
+    return similar(typeof(v[1].U), m, n)
 end
 
 Base.copy(v::UMVTVector) = UMVTVector(copy(v.U), copy(v.M), copy(v.Vt))
@@ -273,11 +273,11 @@ function Base.copyto!(X::UMVTVector, Y::UMVTVector)
 end
 
 @doc raw"""
-    embed(::FixedRankMatrices{m,n,k}, p::SVDMPoint)
+    embed(::FixedRankMatrices, p::SVDMPoint)
 
 Embed the point `p` from its `SVDMPoint` representation into the set of ``m×n`` matrices.
 """
-function embed(::FixedRankMatrices{m,n,k}, p)
+embed(::FixedRankMatrices, p)
 
 function embed!(::FixedRankMatrices, q, p)
     return mul!(q, p.U * Diagonal(p.S), p.Vt)
@@ -297,7 +297,6 @@ function embed!(::FixedRankMatrices, Y, p, X)
     mul!(Y, tmp, p.Vt)
     return mul!(Y, p.U, X.Vt, true, true)
 end
-
 
 @doc raw"""
     inner(M::FixedRankMatrices, p::SVDMPoint, X::UMVTVector, Y::UMVTVector)
@@ -325,7 +324,6 @@ function Base.isapprox(
         kwargs...,
     )
 end
-
 
 function number_eltype(p::SVDMPoint)
     return typeof(one(eltype(p.U)) + one(eltype(p.S)) + one(eltype(p.Vt)))
