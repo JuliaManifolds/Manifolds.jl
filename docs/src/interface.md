@@ -246,7 +246,7 @@ This makes it possible to extend a manifold or all manifolds with a feature or r
 The [`MetricManifold`](@ref) is the best example of the second case, since the default metric indicates for which metric the manifold was originally implemented, such that those functions are just passed through.
 This can best be seen in the [`SymmetricPositiveDefinite`](@ref) manifold with its [`LinearAffineMetric`](@ref).
 
-A final techical note – if several manifold have similar transparency rules concerning functions from the interface, the last parameter `T` of the [`AbstractDecoratorManifold`](@ref)`{𝔽,T<:`[`AbstractDecoratorType`](@ref)`}`. Can be used to dispatch on different transparency schemes.
+A final technical note – if several manifolds have similar transparency rules concerning functions from the interface, the last parameter `T` of the [`AbstractDecoratorManifold`](@ref)`{𝔽,T<:`[`AbstractDecoratorType`](@ref)`}` can be used to dispatch on different transparency schemes.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
@@ -264,7 +264,7 @@ Order = [:macro, :type, :function]
 
 ## ValidationManifold
 
-[`ValidationManifold`](@ref) is a simple decorator using the [`AbstractDecoratorManifold`](@ref) that “decorates” a manifold with tests that all involved arrays are correct.
+[`ValidationManifold`](@ref) is a simple decorator using the [`AbstractDecoratorManifold`](@ref) that “decorates” a manifold with tests that all involved points and vectors are valid for the wrapped manifold.
 For example involved input and output paratemers are checked before and after running a function, repectively.
 This is done by calling [`is_point`](@ref) or [`is_vector`](@ref) whenever applicable.
 
@@ -283,7 +283,7 @@ We introduce the embedded manifolds hence as an [`AbstractDecoratorManifold`](@r
 
 This decorator enables to use such an embedding in an transparent way.
 Different types of embeddings can be distinguished using the [`AbstractEmbeddingType`](@ref),
-which is am [`AbstractDecoratorType`](@ref).
+which is an [`AbstractDecoratorType`](@ref).
 
 ### Isometric Embeddings
 

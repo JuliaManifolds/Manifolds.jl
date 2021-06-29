@@ -24,23 +24,23 @@ abstract type AbstractGroupOperation end
 """
     abstract type AbstractGroupDecroatorType <: AbstractDecoratorType
 
-    A common decorator type for all group decorators
+A common decorator type for all group decorators.
 """
 abstract type AbstractGroupDecoratorType <: AbstractDecoratorType end
 
 """
     struct DefaultGroupDecoratorType <: AbstractDecoratorType
 
-A default group decorator type with no special properties
+The default group decorator type with no special properties.
 """
 struct DefaultGroupDecoratorType <: AbstractGroupDecoratorType end
 """
     struct TransparentGroupDecoratorType <: AbstractDecoratorType
 
-A transparent grou pdecorator type that acts transparent similar to
-the [`TransparentIsometricEmbedding`](@ref), i.e. it inherits the
+A transparent group decorator type that acts transparently, similar to
+the [`TransparentIsometricEmbedding`](@ref), i.e. it passes through all metric-related functions such as
 logarithmic and exponential map as well as retraction and inverse retractions
-from the manifold it decorates.
+to the manifold it decorates.
 """
 struct TransparentGroupDecoratorType <: AbstractGroupDecoratorType end
 
