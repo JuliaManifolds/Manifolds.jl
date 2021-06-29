@@ -126,9 +126,9 @@ end
 function allocate_result(
     ::FixedRankMatrices{m,n,k},
     ::typeof(project),
-    vals...
+    vals...,
 ) where {m,n,k}
-    return UMVTVector(zeros(n,k), zeros(k,k), zeros(m,k))
+    return UMVTVector(zeros(n, k), zeros(k, k), zeros(m, k))
 end
 
 Base.copy(v::UMVTVector) = UMVTVector(copy(v.U), copy(v.M), copy(v.Vt))
