@@ -173,6 +173,7 @@ include("utils.jl")
                 wb .= w
                 @test wb == w
                 # embed/project
+                N = get_embedding(M)
                 B = embed(M, x, v)
                 @test isapprox(N, x, B, x.U * v.M * x.Vt + v.U * x.Vt + x.U * v.Vt)
                 v2 = project(M, x, B)
