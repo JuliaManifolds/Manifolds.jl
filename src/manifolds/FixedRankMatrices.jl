@@ -121,7 +121,7 @@ end
 
 function allocate_result(::FixedRankMatrices{m,n,k}, ::typeof(embed), vals...) where {m,n,k}
     #note that vals is (p,) or (X,p) but both first entries have a U of correct type
-    return similar(typeof(alsv[1].U), m, n)
+    return similar(typeof(vals[1].U), m, n)
 end
 function allocate_result_type(
     ::FixedRankMatrices{m,n,k},

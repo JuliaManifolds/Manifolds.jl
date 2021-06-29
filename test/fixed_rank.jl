@@ -1,3 +1,4 @@
+using DoubleFloats: isapprox
 include("utils.jl")
 
 @testset "fixed Rank" begin
@@ -130,9 +131,7 @@ include("utils.jl")
                 # embed
                 N = get_embedding(M)
                 A = embed(M, x)
-                @test isapprox(N, A, x.U * x.S * x.Vt)
-                B = embed(M, x, v)
-                @test isapprox(N, x, B, x.U * v.M * p.Vt + v.U * p.Vt + p.U * v.Vt)
+                @test isapprox(N, A, x.U * Diagonal(x.S) * x.Vt)
             end
             @testset "UMV TVector Basics" begin
                 w = UMVTVector(v.U, 2 * v.M, v.Vt)
@@ -169,12 +168,15 @@ include("utils.jl")
                 wb = w .+ v .* 2
                 @test wb isa UMVTVector
                 @test wb == w + v * 2
-
                 wb .= 2 .* w .+ v
                 @test wb == 2 * w + v
-
                 wb .= w
                 @test wb == w
+                # embed/project
+                B = embed(M, x, v)
+                @test isapprox(N, x, B, x.U * v.M * x.Vt + v.U * x.Vt + x.U * v.Vt)
+                v2 = project(M, x, B)
+                @test isapprox(M, x, v, v2)
             end
             test_manifold(
                 M,
@@ -186,7 +188,6 @@ include("utils.jl")
                 test_is_tangent=false,
                 test_default_vector_transport=false,
                 test_forward_diff=false,
-                test_project_tangent=true,
                 test_reverse_diff=false,
                 test_vector_spaces=false,
                 test_vee_hat=false,
