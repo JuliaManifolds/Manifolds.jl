@@ -12,7 +12,6 @@ include("utils.jl")
 
     for T in types
         @testset "Type $T" begin
-
             p1 = TuckerPoint(randn(T, n⃗...), r⃗)
             U = (randn(T, n⃗[1], r⃗[1]), randn(T, n⃗[2], r⃗[2]), randn(T, n⃗[3], r⃗[3]))
             p2 = TuckerPoint(randn(T, r⃗), U...)
@@ -28,7 +27,7 @@ include("utils.jl")
 
             @test representation_size(M) == n⃗
             @test manifold_dimension(M) ==
-                prod(r⃗) + sum(ntuple(d -> r⃗[d] * (n⃗[d] - r⃗[d]), length(r⃗)))
+                  prod(r⃗) + sum(ntuple(d -> r⃗[d] * (n⃗[d] - r⃗[d]), length(r⃗)))
 
             @test is_point(M, p1)
             @test is_point(M, p2)
@@ -38,7 +37,11 @@ include("utils.jl")
 
             @test is_vector(M, p2, v)
             @test !is_vector(M, p1, v)
-            @test !is_vector(M, p2, TuckerTVector(randn(T, r⃗), map(u⊥ -> u⊥[:, 1:(end - 1)], U⊥)))
+            @test !is_vector(
+                M,
+                p2,
+                TuckerTVector(randn(T, r⃗), map(u⊥ -> u⊥[:, 1:(end - 1)], U⊥)),
+            )
 
             @test vec(embed(M, p1)) ≈ kron(reverse(p1.hosvd.U)...) * vec(p1.hosvd.core)
             @test inner(M, p2, v, w) ≈ dot(embed(M, p2, v), embed(M, p2, w))
@@ -47,9 +50,9 @@ include("utils.jl")
             test_manifold(
                 M,
                 pts;
-                is_mutating = false, # avoid allocations of the wrong type
-                basis_types_to_from = (DefaultOrthonormalBasis(),),
-                basis_types_vecs = (DefaultOrthonormalBasis(),),
+                is_mutating=false, # avoid allocations of the wrong type
+                basis_types_to_from=(DefaultOrthonormalBasis(),),
+                basis_types_vecs=(DefaultOrthonormalBasis(),),
                 test_exp_log=false,
                 default_inverse_retraction_method=ProjectionInverseRetraction(),
                 test_injectivity_radius=false,
@@ -67,6 +70,6 @@ include("utils.jl")
                 inverse_retraction_methods=[ProjectionInverseRetraction()],
                 mid_point12=nothing,
             )
-            end
         end
+    end
 end
