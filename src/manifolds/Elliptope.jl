@@ -129,7 +129,7 @@ project `q` onto the manifold [`Elliptope`](@ref) `M`, by normalizing the rows o
 """
 project(::Elliptope, ::Any)
 
-project!(::Elliptope, r, q) = copyto!(r, q ./ sum(abs2, q, dims=1))
+project!(::Elliptope, r, q) = copyto!(r, q ./ (sqrt.(sum(abs2, q, dims=2))) )
 
 """
     project(M::Elliptope, q, Y)
