@@ -32,7 +32,8 @@ An overview of basic properties of affine connection manifolds can be found in [
     > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
     > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
-abstract type AbstractConnectionManifold{𝔽} <: AbstractDecoratorManifold{𝔽,MetricDecoratorType} end
+abstract type AbstractConnectionManifold{𝔽} <:
+              AbstractDecoratorManifold{𝔽,MetricDecoratorType} end
 
 """
     connection(M::AbstractManifold)
@@ -302,7 +303,6 @@ function solve_exp_ode(M, p, X, tspan, B::AbstractBasis; kwargs...)
     )
 end
 
-
 #
 # Introduce transparency
 # (a) new functions & other parents
@@ -372,7 +372,16 @@ for f in [
     )
 end
 # (c) special cases
-decorator_transparent_dispatch(::typeof(exp!), M::AbstractConnectionManifold, q, p, X, t) = Val(:parent)
+function decorator_transparent_dispatch(
+    ::typeof(exp!),
+    M::AbstractConnectionManifold,
+    q,
+    p,
+    X,
+    t,
+)
+    return Val(:parent)
+end
 function decorator_transparent_dispatch(
     ::typeof(inverse_retract!),
     M::AbstractConnectionManifold,
@@ -393,4 +402,3 @@ function decorator_transparent_dispatch(
 )
     return Val(:parent)
 end
-

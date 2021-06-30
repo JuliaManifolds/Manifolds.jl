@@ -389,7 +389,6 @@ function Base.show(io::IO, M::MetricManifold)
     return print(io, "MetricManifold($(M.manifold), $(M.metric))")
 end
 
-
 #
 # Introduce transparency
 # (a) new functions & other parents
