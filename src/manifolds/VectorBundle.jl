@@ -272,8 +272,17 @@ function exp!(B::VectorBundle, q, p, X)
     xp, Xp = submanifold_components(B.manifold, p)
     xq, Xq = submanifold_components(B.manifold, q)
     VXM, VXF = submanifold_components(B.manifold, X)
-    exp!(B.manifold, xq, xp, VXM)
-    vector_transport_to!(B.manifold, Xq, xp, Xp + VXF, xq, B.vector_transport.method_point)
+    # this temporary avoids overwriting `p` when `q` and `p` occupy the same memory
+    xqt = exp(B.manifold, xp, VXM)
+    vector_transport_direction!(
+        B.manifold,
+        Xq,
+        xp,
+        Xp + VXF,
+        VXM,
+        B.vector_transport.method_point,
+    )
+    copyto!(B.manifold, xq, xqt)
     return q
 end
 function exp!(M::TangentSpaceAtPoint, q, p, X)

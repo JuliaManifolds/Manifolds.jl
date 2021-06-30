@@ -373,6 +373,7 @@ end
                 ],
                 is_tangent_atol_multiplier=1,
                 exp_log_atol_multiplier=1,
+                test_inplace=true,
             )
         end
     end
@@ -429,6 +430,7 @@ end
         test_reverse_diff=false,
         is_tangent_atol_multiplier=1,
         exp_log_atol_multiplier=1,
+        test_inplace=true,
     )
 
     @testset "product vector transport" begin

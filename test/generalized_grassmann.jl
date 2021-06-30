@@ -86,6 +86,7 @@ include("utils.jl")
                 is_tangent_atol_multiplier=4 * 10.0^2,
                 retraction_methods=[PolarRetraction(), ProjectionRetraction()],
                 mid_point12=nothing,
+                test_inplace=true,
             )
         end
     end

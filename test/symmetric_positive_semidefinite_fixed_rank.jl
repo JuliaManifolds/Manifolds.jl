@@ -32,6 +32,7 @@ include("utils.jl")
                     test_forward_diff=false,
                     test_reverse_diff=false,
                     test_project_tangent=true,
+                    test_inplace=true,
                 )
             end
         end

@@ -65,6 +65,7 @@ include("utils.jl")
                 default_retraction_method=ProjectionRetraction(),
                 is_tangent_atol_multiplier=20,
                 is_point_atol_multiplier=20,
+                test_inplace=true,
             )
         end
     end
