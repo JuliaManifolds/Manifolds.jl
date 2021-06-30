@@ -39,8 +39,9 @@ Unless otherwise specified, the right action is defined in terms of the left act
 ````
 """
 function apply(A::AbstractGroupAction, a, p)
-    y = allocate_result(A, apply, p, a)
-    return apply!(A, y, a, p)
+    q = allocate_result(A, apply, p, a)
+    apply!(A, q, a, p)
+    return q
 end
 
 """
@@ -56,7 +57,8 @@ function apply!(A::AbstractGroupAction{LeftAction}, q, a, p)
 end
 function apply!(A::AbstractGroupAction{RightAction}, q, a, p)
     ainv = inv(base_group(A), a)
-    return apply!(switch_direction(A), q, ainv, p)
+    apply!(switch_direction(A), q, ainv, p)
+    return q
 end
 
 """
@@ -66,7 +68,8 @@ Apply inverse of action `a` to the point `p`. The action is specified by `A`.
 """
 function inverse_apply(A::AbstractGroupAction, a, p)
     q = allocate_result(A, inverse_apply, p, a)
-    return inverse_apply!(A, q, a, p)
+    inverse_apply!(A, q, a, p)
+    return q
 end
 
 """
@@ -77,7 +80,8 @@ The result is saved in `q`.
 """
 function inverse_apply!(A::AbstractGroupAction, q, a, p)
     inva = inv(base_group(A), a)
-    return apply!(A, q, inva, p)
+    apply!(A, q, inva, p)
+    return q
 end
 
 @doc raw"""

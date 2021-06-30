@@ -1,4 +1,5 @@
-using Test: Error
+using Manifolds: decorator_transparent_dispatch
+using Base: decode_overlong
 
 include("../utils.jl")
 include("group_utils.jl")
@@ -139,9 +140,6 @@ include("group_utils.jl")
         @test_throws ErrorException group_log(G, x)
         @test_throws ErrorException group_log!(G, v, x)
 
-        for f in [compose, compose!, translate_diff!, translate_diff]
-            @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:transparent}()
-        end
         for f in [translate, translate!]
             @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:intransparent}()
         end
@@ -201,8 +199,10 @@ include("group_utils.jl")
         @test ge + x ≈ x
         @test x + ge ≈ x
         @test ge + ge === ge
+        @test ge + Identity(G, 1) === ge
         @test -(ge) === ge
         @test +(ge) === ge
+        @test ge - Identity(G, 1) === ge
         @test ge * 1 === ge
         @test 1 * ge === ge
         @test ge * ge === ge
@@ -309,6 +309,7 @@ include("group_utils.jl")
         @test y ≈ x
         X = [1.0 2.0; 3.0 4.0]
         @test group_exp!(G, y, X) === y
+        @test_throws ErrorException group_exp!(G, y, :a)
         @test y ≈ exp(X)
         Y = allocate(X)
         @test group_log!(G, Y, y) === Y
@@ -340,6 +341,26 @@ include("group_utils.jl")
         @test e - e == e
         @test ones(3) + e == ones(3)
     end
+
+    @testset "Transparency tests" begin
+        G = DefaultTransparencyGroup(Euclidean(3), AdditionOperation())
+        p = ones(3)
+        q = 2 * p
+        X = zeros(3)
+        Y = similar(X)
+        for f in
+            [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
+            @test ManifoldsBase.decorator_transparent_dispatch(
+                f,
+                G,
+                Y,
+                p,
+                X,
+                q,
+                ParallelTransport(),
+            ) == Val(:intransparent)
+        end
+    end
 end
 
 struct NotImplementedAction <: AbstractGroupAction{LeftAction} end
@@ -366,20 +387,4 @@ struct NotImplementedAction <: AbstractGroupAction{LeftAction} end
         @test_throws ErrorException optimal_alignment(A, x, x)
         @test_throws ErrorException optimal_alignment!(A, a, x, x)
     end
-end
-
-struct DefaultEmbeddedGroup <:
-       AbstractGroupManifold{ℝ,AdditionOperation,DefaultEmbeddingType} end
-
-@testset "DefaultEmbeddedGroup" begin
-    G = DefaultEmbeddedGroup()
-    @test ManifoldsBase.decorator_transparent_dispatch(get_vector!, G, [1], [1], [1]) ===
-          Val(:parent)
-    @test ManifoldsBase.decorator_transparent_dispatch(
-        get_coordinates!,
-        G,
-        [1],
-        [1],
-        [1],
-    ) === Val(:parent)
 end

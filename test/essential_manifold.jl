@@ -54,6 +54,7 @@ include("utils.jl")
             test_exp_log=true,
             mid_point12=nothing,
             exp_log_atol_multiplier=4,
+            test_inplace=true,
         )
     end
     @testset "Unsigned Essential" begin

@@ -34,6 +34,7 @@ include("utils.jl")
             test_default_vector_transport=false,
             basis_types_to_from=basis_types,
             is_tangent_atol_multiplier=1,
+            test_inplace=true,
         )
     end
 end

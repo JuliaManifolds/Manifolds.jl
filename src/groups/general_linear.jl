@@ -17,7 +17,7 @@ By default, tangent vectors ``X_p`` are represented with their corresponding Lie
 vectors ``X_e = p^{-1}X_p``.
 """
 struct GeneralLinear{n,𝔽} <:
-       AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType} end
+       AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultGroupDecoratorType} end
 
 GeneralLinear(n, 𝔽::AbstractNumbers=ℝ) = GeneralLinear{n,𝔽}()
 

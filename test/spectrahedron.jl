@@ -51,6 +51,7 @@ include("utils.jl")
                 vector_transport_methods=[ProjectionTransport()],
                 default_inverse_retraction_method=nothing,
                 default_retraction_method=ProjectionRetraction(),
+                test_inplace=true,
             )
         end
     end

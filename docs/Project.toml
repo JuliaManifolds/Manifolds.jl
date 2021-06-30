@@ -16,7 +16,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 Documenter = "0.24, 0.25, 0.26"
 HybridArrays = "0.4"
-ManifoldsBase = "0.11.3"
+ManifoldsBase = "0.12"
 Plots = "= 1.10.5"
 PyPlot = "2.9"
 StaticArrays = "1.0"
