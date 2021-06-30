@@ -1,6 +1,5 @@
 module Manifolds
 
-using LinearAlgebra: AbstractMatrix
 import ManifoldsBase:
     _access_nested,
     _read,
