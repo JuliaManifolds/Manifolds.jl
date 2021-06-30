@@ -89,13 +89,6 @@ end
     B::AbstractBasis;
     kwargs...,
 )
-function decorator_transparent_dispatch(
-    ::typeof(christoffel_symbols_first),
-    ::MetricManifold,
-    args...,
-)
-    return Val(:parent)
-end
 
 function christoffel_symbols_second(
     M::AbstractManifold,
@@ -134,13 +127,6 @@ end
     p,
     B::AbstractBasis,
 )
-function decorator_transparent_dispatch(
-    ::typeof(det_local_metric),
-    ::MetricManifold,
-    args...,
-)
-    return Val(:parent)
-end
 """
     einstein_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
 
@@ -166,13 +152,6 @@ end
     B::AbstractBasis;
     kwargs...,
 )
-function decorator_transparent_dispatch(
-    ::typeof(einstein_tensor),
-    ::MetricManifold,
-    args...,
-)
-    return Val(:parent)
-end
 
 @doc raw"""
     flat(N::MetricManifold{M,G}, p, X::FVector{TangentSpaceType})
@@ -216,13 +195,6 @@ end
     p,
     B::AbstractBasis,
 )
-function decorator_transparent_dispatch(
-    ::typeof(inverse_local_metric),
-    ::MetricManifold,
-    args...,
-)
-    return Val(:parent)
-end
 
 default_decorator_dispatch(M::MetricManifold) = default_metric_dispatch(M)
 
@@ -323,9 +295,6 @@ local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
     B::AbstractBasis;
     kwargs...,
 )
-function decorator_transparent_dispatch(::typeof(local_metric), ::MetricManifold, args...)
-    return Val(:parent)
-end
 
 @doc raw"""
     local_metric_jacobian(
@@ -356,13 +325,6 @@ end
     B::AbstractBasis;
     kwargs...,
 )
-function decorator_transparent_dispatch(
-    ::typeof(local_metric_jacobian),
-    ::MetricManifold,
-    args...,
-)
-    return Val(:parent)
-end
 
 @doc raw"""
     log(N::MetricManifold{M,G}, p, q)
@@ -390,13 +352,6 @@ end
     p,
     B::AbstractBasis,
 )
-function decorator_transparent_dispatch(
-    ::typeof(log_local_metric_density),
-    ::MetricManifold,
-    args...,
-)
-    return Val(:parent)
-end
 
 @doc raw"""
     metric(M::MetricManifold)
@@ -432,4 +387,38 @@ end
 
 function Base.show(io::IO, M::MetricManifold)
     return print(io, "MetricManifold($(M.manifold), $(M.metric))")
+end
+
+
+#
+# Introduce transparency
+# (a) new functions & other parents
+for f in [
+    christoffel_symbols_first,
+    det_local_metric,
+    einstein_tensor,
+    inverse_local_metric,
+    local_metric,
+    local_metric_jacobian,
+    log_local_metric_density,
+]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractConnectionManifold,
+                args...,
+            )
+                return Val(:parent)
+            end
+        end,
+    )
+end
+
+function decorator_transparent_dispatch(
+    ::typeof(christoffel_symbols_second),
+    ::MetricManifold,
+    args...,
+)
+    return Val(:parent)
 end

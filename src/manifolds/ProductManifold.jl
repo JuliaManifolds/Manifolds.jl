@@ -798,7 +798,7 @@ end
 
 Calculate the number of manifolds multiplied in the given [`ProductManifold`](@ref) `M`.
 """
-number_of_components(M::ProductManifold{𝔽,<:NTuple{N,Any}}) where {𝔽,N} = N
+number_of_components(::ProductManifold{𝔽,<:NTuple{N,Any}}) where {𝔽,N} = N
 
 function ProductFVectorDistribution(
     type::VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
@@ -1016,7 +1016,7 @@ function _show_product_manifold_no_header(io::IO, M)
     return nothing
 end
 
-function Base.show(io::IO, mime::MIME"text/plain", M::ProductManifold)
+function Base.show(io::IO, ::MIME"text/plain", M::ProductManifold)
     n = length(M.manifolds)
     print(io, "ProductManifold with $(n) submanifold$(n == 1 ? "" : "s"):")
     return _show_product_manifold_no_header(io, M)
@@ -1070,29 +1070,43 @@ function Distributions.support(tvd::ProductFVectorDistribution)
     )
 end
 
-function vector_bundle_transport(fiber::VectorSpaceType, M::ProductManifold)
+function vector_bundle_transport(::VectorSpaceType, M::ProductManifold)
     return ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds))
 end
-
-function vector_transport_direction(M::ProductManifold, p, X, d)
-    return vector_transport_direction(
-        M,
-        p,
-        X,
-        d,
-        ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds)),
+for T in [ManifoldsBase.VECTOR_TRANSPORT_DISAMBIGUATION..., AbstractVectorTransportMethod]
+    eval(
+        quote
+            function vector_transport_direction!(M::ProductManifold, Y, p, X, d, m::$T)
+                return vector_transport_direction!(
+                    M,
+                    Y,
+                    p,
+                    X,
+                    d,
+                    ProductVectorTransport(map(_ -> m, M.manifolds)),
+                )
+            end
+        end,
     )
 end
-
-function vector_transport_direction!(M::ProductManifold, Y, p, X, d)
-    return vector_transport_direction!(
-        M,
-        Y,
-        p,
-        X,
-        d,
-        ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds)),
+function vector_transport_direction!(
+    M::ProductManifold,
+    Y,
+    p,
+    X,
+    d,
+    m::ProductVectorTransport,
+)
+    map(
+        vector_transport_direction!,
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        submanifold_components(M, d),
+        m.methods,
     )
+    return Y
 end
 
 @doc raw"""
@@ -1104,24 +1118,21 @@ This method is performed elementwise, i.e. the method `m` has to be implemented 
 base manifold.
 """
 vector_transport_to(::ProductManifold, ::Any, ::Any, ::Any, ::ProductVectorTransport)
-function vector_transport_to(M::ProductManifold, p, X, q)
-    return vector_transport_to(
-        M,
-        p,
-        X,
-        q,
-        ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds)),
-    )
-end
 
-function vector_transport_to!(M::ProductManifold, Y, p, X, q)
-    return vector_transport_to!(
-        M,
-        Y,
-        p,
-        X,
-        q,
-        ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds)),
+for T in [ManifoldsBase.VECTOR_TRANSPORT_DISAMBIGUATION..., AbstractVectorTransportMethod]
+    eval(
+        quote
+            function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::$T)
+                return vector_transport_to!(
+                    M,
+                    Y,
+                    p,
+                    X,
+                    q,
+                    ProductVectorTransport(map(_ -> m, M.manifolds)),
+                )
+            end
+        end,
     )
 end
 function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTransport)

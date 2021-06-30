@@ -77,6 +77,7 @@ using ManifoldsBase:
     ℂ,
     ℍ,
     AbstractBasis,
+    AbstractDecoratorType,
     AbstractIsometricEmbeddingType,
     AbstractNumbers,
     AbstractOrthogonalBasis,
@@ -332,7 +333,8 @@ export HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVe
 export AbstractNumbers, ℝ, ℂ, ℍ
 
 # decorator manifolds
-export AbstractDecoratorManifold
+export AbstractDecoratorManifold, MetricDecoratorType
+export AbstractGroupDecoratorType, DefaultGroupDecoratorType, TransparentGroupDecoratorType
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector

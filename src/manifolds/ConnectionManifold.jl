@@ -12,6 +12,8 @@ The Levi-Civita connection of a Riemannian manifold.
 """
 struct LeviCivitaConnection <: AbstractAffineConnection end
 
+struct MetricDecoratorType <: AbstractDecoratorType end
+
 """
     AbstractConnectionManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractAffineConnection} <: AbstractDecoratorManifold{𝔽}
 
@@ -30,7 +32,7 @@ An overview of basic properties of affine connection manifolds can be found in [
     > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
     > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
-abstract type AbstractConnectionManifold{𝔽} <: AbstractDecoratorManifold{𝔽} end
+abstract type AbstractConnectionManifold{𝔽} <: AbstractDecoratorManifold{𝔽,MetricDecoratorType} end
 
 """
     connection(M::AbstractManifold)
@@ -78,13 +80,6 @@ christoffel_symbols_second(::AbstractManifold, ::Any, ::AbstractBasis)
     B::AbstractBasis;
     kwargs...,
 )
-function decorator_transparent_dispatch(
-    ::typeof(christoffel_symbols_second),
-    ::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
 
 @doc raw"""
     christoffel_symbols_second_jacobian(
@@ -126,266 +121,11 @@ end
     B::AbstractBasis;
     kwargs...,
 )
-function decorator_transparent_dispatch(
-    ::typeof(christoffel_symbols_second_jacobian),
-    ::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
 
 connection(M::ConnectionManifold) = M.connection
 
 Base.copyto!(M::AbstractConnectionManifold, q, p) = copyto!(M.manifold, q, p)
 Base.copyto!(M::AbstractConnectionManifold, Y, p, X) = copyto!(M.manifold, Y, p, X)
-
-function decorator_transparent_dispatch(
-    ::typeof(exp),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(exp!),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(exp!),
-    M::AbstractConnectionManifold,
-    q,
-    p,
-    X,
-    t,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(flat),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(flat!),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(get_coordinates),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(get_coordinates!),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(get_vector),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(get_vector!),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(get_basis),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(inner),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(inverse_retract),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(inverse_retract!),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(inverse_retract!),
-    M::AbstractConnectionManifold,
-    X,
-    p,
-    q,
-    m::LogarithmicInverseRetraction,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(log),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(log!),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(mean),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(mean!),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(median),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(median!),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(norm),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(project),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(project!),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(sharp),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(sharp!),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(retract),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(retract!),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(retract!),
-    M::AbstractConnectionManifold,
-    q,
-    p,
-    X,
-    m::ExponentialRetraction,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(vector_transport_along),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(vector_transport_along!),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(vector_transport_direction),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(vector_transport_direction!),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(vector_transport_to),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(vector_transport_to!),
-    M::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
 
 @doc raw"""
     exp(M::AbstractConnectionManifold, p, X)
@@ -428,13 +168,6 @@ end
     B::AbstractBasis;
     kwargs...,
 )
-function decorator_transparent_dispatch(
-    ::typeof(gaussian_curvature),
-    ::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
 
 function injectivity_radius(M::AbstractConnectionManifold, p)
     return injectivity_radius(base_manifold(M), p)
@@ -475,13 +208,7 @@ end
     B::AbstractBasis;
     kwargs...,
 )
-function decorator_transparent_dispatch(
-    ::typeof(ricci_curvature),
-    ::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
+
 """
     ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
 
@@ -503,13 +230,7 @@ end
     B::AbstractBasis;
     kwargs...,
 )
-function decorator_transparent_dispatch(
-    ::typeof(ricci_tensor),
-    ::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
+
 @doc raw"""
     riemann_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
 
@@ -538,13 +259,6 @@ end
     B::AbstractBasis;
     kwargs...,
 )
-function decorator_transparent_dispatch(
-    ::typeof(riemann_tensor),
-    ::AbstractConnectionManifold,
-    args...,
-)
-    return Val(:parent)
-end
 
 @doc raw"""
     solve_exp_ode(
@@ -587,3 +301,96 @@ function solve_exp_ode(M, p, X, tspan, B::AbstractBasis; kwargs...)
         "solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq` on Julia 1.1 or greater.",
     )
 end
+
+
+#
+# Introduce transparency
+# (a) new functions & other parents
+for f in [
+    christoffel_symbols_second_jacobian,
+    exp,
+    gaussian_curvature,
+    flat,
+    get_coordinates,
+    get_vector,
+    log,
+    mean,
+    median,
+    project,
+    ricci_curvature,
+    ricci_tensor,
+    riemann_tensor,
+    sharp,
+    vector_transport_along,
+    vector_transport_direction,
+    vector_transport_direction!, #since it has a default using _to!
+    vector_transport_to,
+]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractConnectionManifold,
+                args...,
+            )
+                return Val(:parent)
+            end
+        end,
+    )
+end
+
+# (b) changes / intransparencies.
+for f in [
+    christoffel_symbols_second, # this is basic for connection manifolds but not for metric manifolds
+    exp!,
+    flat!,
+    get_coordinates!,
+    get_vector!,
+    get_basis,
+    inner,
+    inverse_retract!,
+    log!,
+    mean!,
+    median!,
+    norm,
+    project!,
+    sharp!,
+    retract!,
+    vector_transport_along!,
+    vector_transport_to!,
+]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractConnectionManifold,
+                args...,
+            )
+                return Val(:intransparent)
+            end
+        end,
+    )
+end
+# (c) special cases
+decorator_transparent_dispatch(::typeof(exp!), M::AbstractConnectionManifold, q, p, X, t) = Val(:parent)
+function decorator_transparent_dispatch(
+    ::typeof(inverse_retract!),
+    M::AbstractConnectionManifold,
+    X,
+    p,
+    q,
+    m::LogarithmicInverseRetraction,
+)
+    return Val(:parent)
+end
+function decorator_transparent_dispatch(
+    ::typeof(retract!),
+    M::AbstractConnectionManifold,
+    q,
+    p,
+    X,
+    m::ExponentialRetraction,
+)
+    return Val(:parent)
+end
+
