@@ -186,10 +186,10 @@ function log!(M::EssentialManifold, X, p, q)
     # compute the closest representative of q
     t = 0
     f_min = Inf
-    q2 = copy(M,q)
+    q2 = copy(M, q)
 
     if !M.is_signed
-        q2min = copy(M,q)
+        q2min = copy(M, q)
         for k in 1:4
             #flip sign in q to get another member of its equivalence class
             if k == 2
@@ -203,7 +203,7 @@ function log!(M::EssentialManifold, X, p, q)
             end
             t_temp, f_temp = dist_min_angle_pair(p, q2)
             if f_temp < f_min
-                q2min = copy(M,q2)
+                q2min = copy(M, q2)
                 f_min = f_temp
                 t = t_temp
             end
