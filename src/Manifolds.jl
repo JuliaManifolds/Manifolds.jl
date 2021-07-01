@@ -197,6 +197,7 @@ include("manifolds/Multinomial.jl")
 include("manifolds/Oblique.jl")
 include("manifolds/EssentialManifold.jl")
 
+include("groups/connections.jl")
 include("groups/metric.jl")
 include("groups/group_action.jl")
 include("groups/group_operation_action.jl")
