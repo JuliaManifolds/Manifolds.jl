@@ -731,6 +731,8 @@ manifold in the direction `d`. The formula, provided in [^Rentmeesters], reads:
 ```
 where ``q=\exp_p d``.
 
+The formula simplifies to identity for 2-D rotations.
+
 [^Rentmeesters]:
     > Rentmeesters Q., “A gradient method for geodesic data fitting on some symmetric
     > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
@@ -743,11 +745,17 @@ function vector_transport_direction!(M::Rotations, Y, p, X, d, ::ParallelTranspo
     q = exp(M, p, d)
     return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
 end
+function vector_transport_direction!(M::Rotations{2}, Y, p, X, d, ::ParallelTransport)
+    return copyto!(Y, X)
+end
 
 function vector_transport_to!(M::Rotations, Y, p, X, q, ::ParallelTransport)
     d = log(M, p, q)
     expdhalf = exp(d / 2)
     return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
+end
+function vector_transport_to!(M::Rotations{2}, Y, p, X, q, ::ParallelTransport)
+    return copyto!(Y, X)
 end
 
 @doc raw"""
