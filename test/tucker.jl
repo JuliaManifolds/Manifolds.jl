@@ -1,51 +1,154 @@
+using ManifoldsBase: LinearAlgebra
 include("utils.jl")
 
-@testset "Tucker" begin
-    Random.seed!(1)
 
+
+@testset "Tucker" begin
     n⃗ = (4, 5, 6)
     r⃗ = (2, 3, 4)
+    r⃗_small = (2,3,3)
     M = Tucker(n⃗, r⃗)
+    M_small = Tucker(r⃗, (2,3,3))
 
     types = [Float64]
     TEST_FLOAT32 && push!(types, Float32)
 
     for T in types
         @testset "Type $T" begin
-            p1 = TuckerPoint(randn(T, n⃗...), r⃗)
-            U = (randn(T, n⃗[1], r⃗[1]), randn(T, n⃗[2], r⃗[2]), randn(T, n⃗[3], r⃗[3]))
-            p2 = TuckerPoint(randn(T, r⃗), U...)
-            p = p2
-            U⊥ = map(u -> nullspace(u') * randn(T, size(u, 1) - size(u, 2), size(u, 2)), U)
-            v = TuckerTVector(randn(T, r⃗), U⊥)
-            U⊥ = map(u -> nullspace(u') * randn(T, size(u, 1) - size(u, 2), size(u, 2)), U)
-            w = TuckerTVector(randn(T, r⃗), U⊥)
+            U = ntuple(d -> Matrix{T}(LinearAlgebra.I, n⃗[d], r⃗[d]), 3)
+            C₁ = reshape(T[
+                0.0  0.0   1.0  0.0;
+                1.0  1/√2  0.0  0.0;
+                1.0  -1/√2 0.0  0.0;
+                0.0  0.0   0.0  0.0;
+                0.0  0.0   0.0  1.0;
+                0.0  0.0   0.0  0.0;
+            ], (2,3,4))
+            C₂ = reshape(T[
+                0.0    0.0   -1/√2  1/√2;
+                -1/√2 -0.5    0.0   0.0;
+                1.0   -1/√2   0.0   0.0;
+                0.0    0.0    0.0   0.0;
+                0.0    0.0    1/√2  1/√2;
+                1/√2   0.5    0.0   0.0;
+            ], (2,3,4))
+            C₃ = reshape(T[
+                1/√2   0.5   1/√2   0.0
+                1/√2   0.5  -1/√2   0.0
+                1/√2  -0.5   0.0    0.0
+               -1/√2   0.5   0.0    0.0
+                0.0    0.0   0.0    1/√2
+                0.0    0.0   0.0   -1/√2
+            ], (2,3,4))
 
+            p = TuckerPoint(C₁, U...)
+            p_small = TuckerPoint(C₂, r⃗_small)
+            p_ambient = embed(M, p)
+
+            U⊥ = ntuple(d -> nullspace(U[d]')*Matrix{Bool}(I, n⃗[d] - r⃗[d], r⃗[d]), 3)
+            v = TuckerTVector(reshape(collect(1.0:prod(r⃗)), r⃗), U⊥)
+            U⊥ = ntuple(d -> nullspace(U[d]')*Matrix{Bool}(I, n⃗[d] - r⃗[d], r⃗[d]), 3)
+            w = TuckerTVector(reshape((1.0:prod(r⃗)).^2, r⃗), U⊥)
+
+            norm_v = norm(M, p, v)
+            @test norm(M, p, 2*v - v*2) ≤ √eps(T)*norm_v
+            @test norm(M, p, (v / 2) - (2 \ v)) ≤ eps(T)*norm_v
+            @test norm(M, p, (v / 2) - 0.5v) ≤ eps(T)*norm_v
+            @test +v == v
+
+            @test embed(M, p) ≈ reshape(kron(reverse(U)...) * vec(C₁), n⃗)
+            @test inner(M, p, v, w) ≈ dot(embed(M, p, v), embed(M, p, w))
             @test inner(M, p, v, v) ≈ norm(M, p, v)^2
-            @test p ≈ TuckerPoint(p.hosvd.core, p.hosvd.U...)
+            w_ambient = embed(M, p, w)
+            @test inner(M, p, v, w_ambient) ≈ inner(M, p, v, w) ≈ inner(M, p, w_ambient, v)
+
+            @test p ≈ TuckerPoint(p_ambient, r⃗)
             @test v == TuckerTVector(v.Ċ, v.U̇)
 
             @test manifold_dimension(M) ==
                   prod(r⃗) + sum(ntuple(d -> r⃗[d] * (n⃗[d] - r⃗[d]), length(r⃗)))
 
-            @test is_point(M, p1)
-            @test is_point(M, p2)
+            @test is_point(M_small, p_small)
+            @test is_point(M, p)
+            @test !is_point(M, zeros(n⃗))
             @test !is_point(M, TuckerPoint(zeros(T, r⃗), U...))
-            @test !is_point(M, TuckerPoint(randn(T, n⃗), n⃗))
-            @test !is_point(M, TuckerPoint(randn(T, n⃗ .+ 1), r⃗))
+            @test !is_point(M, TuckerPeoint(C₁, map(rk -> Matrix{T}(I, rk, rk), r⃗)...))
+            @test !is_point(M, p_small)
+            @test !is_point(M, embed(M_small, p_small))
+            @test !is_point(M_small, p)
+            q = allocate(p)
+            copyto!(q, p)
+            q.hosvd.core .= 2*p.hosvd.core
+            @test !is_point(M, q)
 
-            @test is_vector(M, p2, v)
-            @test !is_vector(M, p1, v)
+            u = allocate(v)
+            u .= v
+            @test u == v
+            u = allocate(v)
+            copyto!(u, v)
+            @test u == v
+
+            # broadcasting
+            @test axes(v) === ()
+            u = copy(v)
+            # test that the copy is equal to the original, but represented by
+            # a new array
+            @test u.U̇ !== v.U̇
+            @test u.Ċ == v.Ċ
+            x = u .+ v .* 2
+            @test x isa TuckerTVector
+            @test x == v + u * 2
+
+            @test is_vector(M, p, v)
+            @test !is_vector(M, p_small, v)
             @test !is_vector(
                 M,
-                p2,
-                TuckerTVector(randn(T, r⃗), map(u⊥ -> u⊥[:, 1:(end - 1)], U⊥)),
+                p,
+                TuckerTVector(ones(T, r⃗), map(u⊥ -> u⊥[:, 1:(end - 1)], U⊥)),
             )
 
-            @test vec(embed(M, p1)) ≈ kron(reverse(p1.hosvd.U)...) * vec(p1.hosvd.core)
-            @test inner(M, p2, v, w) ≈ dot(embed(M, p2, v), embed(M, p2, w))
+            ℬ = get_basis(M, p, DefaultOrthonormalBasis())
+            J = convert(Matrix, ℬ)
+            @test J'J ≈ LinearAlgebra.I
+            vectors = get_vectors(M, p, DefaultOrthonormalBasis())
+            vectors_mtx = hcat(map(ξ -> vec(embed(M, p, ξ)), vectors)...)
+            @test J ≈ vectors_mtx
 
-            pts = [TuckerPoint(randn(n⃗...), r⃗) for i in 1:3]
+            shiftprint(x) = replace(sprint(show, "text/plain", x), "\n" => "\n ")
+
+            @test sprint(show, "text/plain", M) == "Tucker((4, 5, 6), (2, 3, 4), ℝ)"
+            @test sprint(show, "text/plain", p) == """
+            $(summary(p))
+            U factor 1:
+             $(shiftprint(p.hosvd.U[1]))\n
+            U factor 2:
+             $(shiftprint(p.hosvd.U[2]))\n
+            U factor 3:
+             $(shiftprint(p.hosvd.U[3]))\n
+            Core:
+             $(shiftprint(p.hosvd.core))"""
+
+            @test sprint(show, "text/plain", v) == """
+            $(summary(v))
+            U̇ factor 1:
+             $(shiftprint(v.U̇[1]))\n
+            U̇ factor 2:
+             $(shiftprint(v.U̇[2]))\n
+            U̇ factor 3:
+             $(shiftprint(v.U̇[3]))\n
+            Ċ factor:
+             $(shiftprint(v.Ċ))"""
+
+            @test sprint(show, "text/plain", ℬ) == """
+            $(summary(ℬ)) ≅ $(shiftprint(J))
+            """
+
+
+            pts = [
+                p,
+                TuckerPoint(C₂, map(u -> reverse(u,dims=1), U)...),
+                TuckerPoint(C₃, U...)
+            ]
             test_manifold(
                 M,
                 pts;

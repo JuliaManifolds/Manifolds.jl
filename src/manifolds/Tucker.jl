@@ -160,13 +160,6 @@ function allocate(p::TuckerPoint{Tp,D}, ::Type{T}) where {T,Tp,D}
         HOSVD(allocate(p.hosvd.U, T), allocate(p.hosvd.core, T), allocate(p.hosvd.σ, T)),
     )
 end
-function allocate(p::TuckerPoint{Tp,D}, ::Type{T}, dims::NTuple{D}) where {Tp,T,D}
-    @assert promote_type(Tp, T) == T
-    return Array{T,D}(undef, dims)
-end
-allocate(p::TuckerPoint, t::Type, dims::Integer...) = allocate(p, t, dims)
-allocate(p::TuckerPoint{T,D}, dims::NTuple{D,<:Integer}) where {T,D} = allocate(p, T, dims)
-allocate(p::TuckerPoint, dims::Integer...) = allocate(p, dims)
 allocate(x::TuckerTVector) = allocate(x, number_eltype(x))
 function allocate(x::TuckerTVector, ::Type{T}) where {T}
     return TuckerTVector(allocate(x.Ċ, T), allocate(x.U̇, T))
@@ -259,13 +252,6 @@ function check_point(M::Tucker{N,R,D}, x::TuckerPoint; kwargs...) where {N,R,D}
     s = "The point $(x) does not lie on $(M), "
     U = x.hosvd.U
     ℭ = x.hosvd.core
-    ncolsU = map(u -> size(u, 2), U)
-    if ncolsU ≠ size(ℭ)
-        return DomainError(
-            ncolsU,
-            s * "since the dimensions of the Tucker factors do not match",
-        )
-    end
     if size(ℭ) ≠ R
         return DomainError(
             size(x.hosvd.core),
@@ -389,7 +375,7 @@ $N_1 \times \dots \times N_D$-array.
 embed(::Tucker, A::TuckerPoint, X::TuckerTVector)
 
 Convert a tangent vector `X` with base point `A` on the Tucker manifold to a full tensor,
-epresented as an $N_1 \times \dots \times N_D$-array.
+represented as an $N_1 \times \dots \times N_D$-array.
 """
 embed(::Tucker, ::Any, ::TuckerPoint)
 
@@ -670,6 +656,9 @@ retract(::Tucker, A, x, ::PolarRetraction)
 The truncated HOSVD-based retraction [^Kressner2014] to the Tucker manifold, i.e.
 $R_{\mathcal{A}}(x)$ is the sequentially tuncated HOSVD of $\mathcal{A} + x$
 
+In the exceptional case that the multilinear rank of $\mathcal{A} + x$ is lower than A, this
+retraction produces a boundary point.
+
 [^Kressner2014]:
 > Daniel Kressner, Michael Steinlechner, Bart Vandereycken: "Low-rank tensor completion by Riemannian optimization"
 > BIT Numerical Mathematics, 54(2), pp. 447-468, 2014
@@ -730,7 +719,7 @@ function Base.show(io::IO, ::MIME"text/plain", 𝔄::TuckerPoint)
         su = replace(su, '\n' => "\n$(pre)")
         println(io, pre, su)
     end
-    println(io, "\nCore :")
+    println(io, "\nCore:")
     su = sprint(show, "text/plain", 𝔄.hosvd.core; context=io, sizehint=0)
     su = replace(su, '\n' => "\n$(pre)")
     return print(io, pre, su)
@@ -744,14 +733,14 @@ function Base.show(io::IO, ::MIME"text/plain", x::TuckerTVector)
         su = replace(su, '\n' => "\n$(pre)")
         println(io, pre, su)
     end
-    println(io, "\nĊ factor :")
+    println(io, "\nĊ factor:")
     su = sprint(show, "text/plain", x.Ċ; context=io, sizehint=0)
     su = replace(su, '\n' => "\n$(pre)")
     return print(io, pre, su)
 end
-function Base.show(io::IO, mime::MIME"text/plain", ℬ::CachedHOSVDBasis{𝔽,T,D}) where {𝔽,T,D}
+function Base.show(io::IO, ::MIME"text/plain", ℬ::CachedHOSVDBasis{𝔽,T,D}) where {𝔽,T,D}
     summary(io, ℬ)
-    print(" ≅")
+    print(io, " ≅")
     su = sprint(show, "text/plain", convert(Matrix{T}, ℬ); context=io, sizehint=0)
     su = replace(su, '\n' => "\n ")
     return println(io, " ", su)
