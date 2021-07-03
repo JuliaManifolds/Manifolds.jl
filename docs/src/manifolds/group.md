@@ -23,6 +23,9 @@ The following operations are available for group manifolds:
 
 ### Group manifold
 
+[`GroupManifold`](@ref) adds a group structure to the wrapped manifold.
+It does not affect metric (or connection) structure of the wrapped manifold, however it can to be further wrapped in [`MetricManifold`](@ref) to get invariant metrics, or in a [`ConnectionManifold`](@ref) to equip it with a Cartan-Schouten connection.
+
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/group.jl"]
@@ -153,5 +156,13 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/metric.jl"]
+Order = [:type, :function]
+```
+
+## Cartan-Schouten connections
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/connections.jl"]
 Order = [:type, :function]
 ```

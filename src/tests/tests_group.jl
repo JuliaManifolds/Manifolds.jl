@@ -9,6 +9,8 @@
         test_group_exp_log = true,
         test_diff = false,
         test_invariance = false,
+        test_lie_bracket=false,
+        test_adjoint_action=false,
         diff_convs = [(), (LeftAction(),), (RightAction(),)],
     )
 
@@ -303,8 +305,8 @@ function test_group(
             for X in Xe_pts
                 g = group_exp(G, X)
                 Test.@test is_point(G, g; atol=atol)
-                v2 = group_log(G, g)
-                Test.@test isapprox(G, make_identity(G, g_pts[1]), v2, X; atol=atol)
+                X2 = group_log(G, g)
+                Test.@test isapprox(G, make_identity(G, g_pts[1]), X2, X; atol=atol)
             end
 
             test_mutating && Test.@testset "mutating" begin
@@ -313,9 +315,9 @@ function test_group(
                     Test.@test group_exp!(G, g, X) === g
                     Test.@test is_point(G, g; atol=atol)
                     Test.@test isapprox(G, g, group_exp(G, X); atol=atol)
-                    v2 = allocate(X)
-                    Test.@test group_log!(G, v2, g) === v2
-                    Test.@test isapprox(G, make_identity(G, g_pts[1]), v2, X; atol=atol)
+                    X2 = allocate(X)
+                    Test.@test group_log!(G, X2, g) === X2
+                    Test.@test isapprox(G, make_identity(G, g_pts[1]), X2, X; atol=atol)
                 end
             end
         end
@@ -327,7 +329,7 @@ function test_group(
             Test.@test isapprox(G, ginv, inv(G, g); atol=atol)
         end
 
-        Test.@testset "exp(sv)∘exp(tv) = exp((s+t)X)" begin
+        Test.@testset "exp(sX)∘exp(tX) = exp((s+t)X)" begin
             g1 = group_exp(G, 0.2 * Xe_pts[1])
             g2 = group_exp(G, 0.3 * Xe_pts[1])
             g12 = group_exp(G, 0.5 * Xe_pts[1])
@@ -349,13 +351,13 @@ function test_group(
                     Manifolds.GroupExponentialRetraction(conv...),
                 )
                 Test.@test is_point(G, y; atol=atol)
-                v2 = inverse_retract(
+                X2 = inverse_retract(
                     G,
                     g_pts[1],
                     y,
                     Manifolds.GroupLogarithmicInverseRetraction(conv...),
                 )
-                Test.@test isapprox(G, g_pts[1], v2, X_pts[1]; atol=atol)
+                Test.@test isapprox(G, g_pts[1], X2, X_pts[1]; atol=atol)
             end
 
             test_mutating && Test.@testset "mutating" begin
@@ -369,15 +371,15 @@ function test_group(
                         Manifolds.GroupExponentialRetraction(conv...),
                     ) === y
                     Test.@test is_point(G, y; atol=atol)
-                    v2 = allocate(X_pts[1])
+                    X2 = allocate(X_pts[1])
                     Test.@test inverse_retract!(
                         G,
-                        v2,
+                        X2,
                         g_pts[1],
                         y,
                         Manifolds.GroupLogarithmicInverseRetraction(conv...),
-                    ) === v2
-                    Test.@test isapprox(G, g_pts[1], v2, X_pts[1]; atol=atol)
+                    ) === X2
+                    Test.@test isapprox(G, g_pts[1], X2, X_pts[1]; atol=atol)
                 end
             end
         end
@@ -658,9 +660,9 @@ function test_action(
 
             a12 = compose(A, a_pts[1], a_pts[2])
             a2m = apply(A, a_pts[2], m)
-            a12v = apply_diff(A, a12, m, X)
-            a2v = apply_diff(A, a_pts[2], m, X)
-            Test.@test isapprox(M, a2m, apply_diff(A, a_pts[1], a2m, a2v), a12v; atol=atol)
+            a12X = apply_diff(A, a12, m, X)
+            a2X = apply_diff(A, a_pts[2], m, X)
+            Test.@test isapprox(M, a2m, apply_diff(A, a_pts[1], a2m, a2X), a12X; atol=atol)
 
             Test.@test isapprox(M, m, apply_diff(A, e, m, X), X; atol=atol)
             Test.@test isapprox(M, m, inverse_apply_diff(A, e, m, X), X; atol=atol)
@@ -682,18 +684,18 @@ function test_action(
                 a12 = compose(A, a_pts[1], a_pts[2])
                 a2m = apply(A, a_pts[2], m)
                 a12m = apply(A, a12, m)
-                a12v, a2v, a1_a2v = allocate(X), allocate(X), allocate(X)
-                Test.@test apply_diff!(A, a12v, a12, m, X) === a12v
-                Test.@test apply_diff!(A, a2v, a_pts[2], m, X) === a2v
-                Test.@test apply_diff!(A, a1_a2v, a_pts[1], a2m, a2v) === a1_a2v
-                Test.@test isapprox(M, a12m, a1_a2v, a12v; atol=atol)
+                a12X, a2X, a1_a2X = allocate(X), allocate(X), allocate(X)
+                Test.@test apply_diff!(A, a12X, a12, m, X) === a12X
+                Test.@test apply_diff!(A, a2X, a_pts[2], m, X) === a2X
+                Test.@test apply_diff!(A, a1_a2X, a_pts[1], a2m, a2v) === a1_a2X
+                Test.@test isapprox(M, a12m, a1_a2X, a12X; atol=atol)
 
-                ev = allocate(X)
-                Test.@test apply_diff!(A, ev, e, m, X) === ev
-                Test.@test isapprox(G, m, ev, X; atol=atol)
-                ev = allocate(X)
-                Test.@test inverse_apply_diff!(A, ev, e, m, X) === ev
-                Test.@test isapprox(G, m, ev, X; atol=atol)
+                eX = allocate(X)
+                Test.@test apply_diff!(A, eX, e, m, X) === eX
+                Test.@test isapprox(G, m, eX, X; atol=atol)
+                eX = allocate(X)
+                Test.@test inverse_apply_diff!(A, eX, e, m, X) === eX
+                Test.@test isapprox(G, m, eX, X; atol=atol)
             end
         end
     end

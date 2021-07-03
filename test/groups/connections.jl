@@ -1,8 +1,7 @@
 include("../utils.jl")
 include("group_utils.jl")
 
-using Manifolds:
-    ConnectionManifold, CartanSchoutenMinus, CartanSchoutenPlus, CartanSchoutenZero
+using Manifolds: connection
 
 @testset "Cartan-Schouten connections" begin
     SO3 = SpecialOrthogonal(3)
@@ -15,6 +14,12 @@ using Manifolds:
     q = exp(hat(SO3, Identity(SO3, e), [3.0, 4.0, 1.0]))
     X = hat(SO3, Identity(SO3, e), [2.0, 3.0, 4.0])
     SO3e = Identity(SO3, e)
+
+    @testset "connection" begin
+        @test connection(SO3minus) === CartanSchoutenMinus()
+        @test connection(SO3plus) === CartanSchoutenPlus()
+        @test connection(SO3zero) === CartanSchoutenZero()
+    end
 
     @testset "log/exp" begin
         for CSO3 in [SO3minus, SO3plus, SO3zero]

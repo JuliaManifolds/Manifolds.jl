@@ -9,7 +9,7 @@ If you later introduce a second, the old (first) connection can be used with the
 This manifold decorator serves two purposes:
 
 1. to implement different connections (e.g. in closed form) for one [`AbstractManifold`](@ref)
-2. to provide a way to compute geodesics on manifolds, where this [`AbstractConnection`](@ref) does not yield a closed formula.
+2. to provide a way to compute geodesics on manifolds, where this [`AbstractAffineConnection`](@ref) does not yield a closed formula.
 
 An example of usage can be found in Cartan-Schouten connections, see [`AbstractCartanSchoutenConnection`](@ref).
 
