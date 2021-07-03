@@ -687,7 +687,7 @@ function test_action(
                 a12X, a2X, a1_a2X = allocate(X), allocate(X), allocate(X)
                 Test.@test apply_diff!(A, a12X, a12, m, X) === a12X
                 Test.@test apply_diff!(A, a2X, a_pts[2], m, X) === a2X
-                Test.@test apply_diff!(A, a1_a2X, a_pts[1], a2m, a2v) === a1_a2X
+                Test.@test apply_diff!(A, a1_a2X, a_pts[1], a2m, a2X) === a1_a2X
                 Test.@test isapprox(M, a12m, a1_a2X, a12X; atol=atol)
 
                 eX = allocate(X)
