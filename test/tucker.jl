@@ -1,14 +1,12 @@
 using ManifoldsBase: LinearAlgebra
 include("utils.jl")
 
-
-
 @testset "Tucker" begin
     n⃗ = (4, 5, 6)
     r⃗ = (2, 3, 4)
-    r⃗_small = (2,3,3)
+    r⃗_small = (2, 3, 3)
     M = Tucker(n⃗, r⃗)
-    M_small = Tucker(r⃗, (2,3,3))
+    M_small = Tucker(r⃗, (2, 3, 3))
 
     types = [Float64]
     TEST_FLOAT32 && push!(types, Float32)
@@ -16,44 +14,53 @@ include("utils.jl")
     for T in types
         @testset "Type $T" begin
             U = ntuple(d -> Matrix{T}(LinearAlgebra.I, n⃗[d], r⃗[d]), 3)
-            C₁ = reshape(T[
-                0.0  0.0   1.0  0.0;
-                1.0  1/√2  0.0  0.0;
-                1.0  -1/√2 0.0  0.0;
-                0.0  0.0   0.0  0.0;
-                0.0  0.0   0.0  1.0;
-                0.0  0.0   0.0  0.0;
-            ], (2,3,4))
-            C₂ = reshape(T[
-                0.0    0.0   -1/√2  1/√2;
-                -1/√2 -0.5    0.0   0.0;
-                1.0   -1/√2   0.0   0.0;
-                0.0    0.0    0.0   0.0;
-                0.0    0.0    1/√2  1/√2;
-                1/√2   0.5    0.0   0.0;
-            ], (2,3,4))
-            C₃ = reshape(T[
-                1/√2   0.5   1/√2   0.0
-                1/√2   0.5  -1/√2   0.0
-                1/√2  -0.5   0.0    0.0
-               -1/√2   0.5   0.0    0.0
-                0.0    0.0   0.0    1/√2
-                0.0    0.0   0.0   -1/√2
-            ], (2,3,4))
+            C₁ = reshape(
+                T[
+                    0.0 0.0 1.0 0.0
+                    1.0 1/√2 0.0 0.0
+                    1.0 -1/√2 0.0 0.0
+                    0.0 0.0 0.0 0.0
+                    0.0 0.0 0.0 1.0
+                    0.0 0.0 0.0 0.0
+                ],
+                (2, 3, 4),
+            )
+            C₂ = reshape(
+                T[
+                    0.0 0.0 -1/√2 1/√2
+                    -1/√2 -0.5 0.0 0.0
+                    1.0 -1/√2 0.0 0.0
+                    0.0 0.0 0.0 0.0
+                    0.0 0.0 1/√2 1/√2
+                    1/√2 0.5 0.0 0.0
+                ],
+                (2, 3, 4),
+            )
+            C₃ = reshape(
+                T[
+                    1/√2 0.5 1/√2 0.0
+                    1/√2 0.5 -1/√2 0.0
+                    1/√2 -0.5 0.0 0.0
+                    -1/√2 0.5 0.0 0.0
+                    0.0 0.0 0.0 1/√2
+                    0.0 0.0 0.0 -1/√2
+                ],
+                (2, 3, 4),
+            )
 
             p = TuckerPoint(C₁, U...)
             p_small = TuckerPoint(C₂, r⃗_small)
             p_ambient = embed(M, p)
 
-            U⊥ = ntuple(d -> nullspace(U[d]')*Matrix{Bool}(I, n⃗[d] - r⃗[d], r⃗[d]), 3)
+            U⊥ = ntuple(d -> nullspace(U[d]') * Matrix{Bool}(I, n⃗[d] - r⃗[d], r⃗[d]), 3)
             v = TuckerTVector(reshape(collect(1.0:prod(r⃗)), r⃗), U⊥)
-            U⊥ = ntuple(d -> nullspace(U[d]')*Matrix{Bool}(I, n⃗[d] - r⃗[d], r⃗[d]), 3)
-            w = TuckerTVector(reshape((1.0:prod(r⃗)).^2, r⃗), U⊥)
+            U⊥ = ntuple(d -> nullspace(U[d]') * Matrix{Bool}(I, n⃗[d] - r⃗[d], r⃗[d]), 3)
+            w = TuckerTVector(reshape((1.0:prod(r⃗)) .^ 2, r⃗), U⊥)
 
             norm_v = norm(M, p, v)
-            @test norm(M, p, 2*v - v*2) ≤ √eps(T)*norm_v
-            @test norm(M, p, (v / 2) - (2 \ v)) ≤ eps(T)*norm_v
-            @test norm(M, p, (v / 2) - 0.5v) ≤ eps(T)*norm_v
+            @test norm(M, p, 2 * v - v * 2) ≤ √eps(T) * norm_v
+            @test norm(M, p, (v / 2) - (2 \ v)) ≤ eps(T) * norm_v
+            @test norm(M, p, (v / 2) - 0.5v) ≤ eps(T) * norm_v
             @test +v == v
 
             @test embed(M, p) ≈ reshape(kron(reverse(U)...) * vec(C₁), n⃗)
@@ -78,7 +85,7 @@ include("utils.jl")
             @test !is_point(M_small, p)
             q = allocate(p)
             copyto!(q, p)
-            q.hosvd.core .= 2*p.hosvd.core
+            q.hosvd.core .= 2 * p.hosvd.core
             @test !is_point(M, q)
 
             u = allocate(v)
@@ -143,11 +150,10 @@ include("utils.jl")
             $(summary(ℬ)) ≅ $(shiftprint(J))
             """
 
-
             pts = [
                 p,
-                TuckerPoint(C₂, map(u -> reverse(u,dims=1), U)...),
-                TuckerPoint(C₃, U...)
+                TuckerPoint(C₂, map(u -> reverse(u, dims=1), U)...),
+                TuckerPoint(C₃, U...),
             ]
             test_manifold(
                 M,

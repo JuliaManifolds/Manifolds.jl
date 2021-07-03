@@ -166,6 +166,7 @@ function allocate(x::TuckerTVector, ::Type{T}) where {T}
 end
 
 # Tuple-like broadcasting of TuckerTVector
+Base.axes(::TuckerTVector) = ()
 
 function Broadcast.BroadcastStyle(::Type{TuckerTVector{T,D}}) where {T,D}
     return Broadcast.Style{TuckerTVector{Any,D}}()
@@ -189,15 +190,6 @@ end
 
 Broadcast.broadcastable(v::TuckerTVector) = v
 
-@inline function Base.copy(
-    bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTVector{Any,D}}},
-) where {D}
-    return TuckerTVector(
-        @inbounds(Broadcast._broadcast_getindex(bc, Val(:Ċ))),
-        ntuple(i -> @inbounds(Broadcast._broadcast_getindex(bc, Val((:U̇, i)))), Val(D)),
-    )
-end
-
 Base.@propagate_inbounds function Broadcast._broadcast_getindex(
     v::TuckerTVector,
     ::Val{I},
@@ -207,25 +199,6 @@ Base.@propagate_inbounds function Broadcast._broadcast_getindex(
     else
         return getfield(v, I[1])[I[2]]
     end
-end
-
-Base.axes(::TuckerTVector) = ()
-
-@inline function Base.copyto!(
-    dest::TuckerTVector,
-    bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTVector{Any,D}}},
-) where {D}
-    # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
-    if bc.f === identity && bc.args isa Tuple{TuckerTVector} # only a single input argument to broadcast!
-        A = bc.args[1]
-        return copyto!(dest, A)
-    end
-    bc′ = Broadcast.preprocess(dest, bc)
-    copyto!(dest.U, Broadcast._broadcast_getindex(bc′, Val(:Ċ)))
-    for i in 1:D
-        copyto!(dest.M, Broadcast._broadcast_getindex(bc, Val((:U̇, i))))
-    end
-    return dest
 end
 
 ####
@@ -348,6 +321,14 @@ function Base.convert(::Type{Matrix}, basis::CachedHOSVDBasis{𝔽,T,D}) where {
     return convert(Matrix{T}, basis)
 end
 
+@inline function Base.copy(
+    bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTVector{Any,D}}},
+) where {D}
+    return TuckerTVector(
+        @inbounds(Broadcast._broadcast_getindex(bc, Val(:Ċ))),
+        ntuple(i -> @inbounds(Broadcast._broadcast_getindex(bc, Val((:U̇, i)))), Val(D)),
+    )
+end
 Base.copy(x::TuckerTVector) = TuckerTVector(copy(x.Ċ), map(copy, x.U̇))
 
 function Base.copyto!(q::TuckerPoint, p::TuckerPoint)
@@ -364,6 +345,22 @@ function Base.copyto!(y::TuckerTVector, x::TuckerTVector)
     end
     copyto!(y.Ċ, x.Ċ)
     return y
+end
+@inline function Base.copyto!(
+    dest::TuckerTVector,
+    bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTVector{Any,D}}},
+) where {D}
+    # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
+    if bc.f === identity && bc.args isa Tuple{TuckerTVector} # only a single input argument to broadcast!
+        A = bc.args[1]
+        return copyto!(dest, A)
+    end
+    bc′ = Broadcast.preprocess(dest, bc)
+    copyto!(dest.U, Broadcast._broadcast_getindex(bc′, Val(:Ċ)))
+    for i in 1:D
+        copyto!(dest.M, Broadcast._broadcast_getindex(bc, Val((:U̇, i))))
+    end
+    return dest
 end
 
 @doc raw"""
