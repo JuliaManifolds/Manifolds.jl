@@ -30,6 +30,7 @@ using Manifolds: connection
 
     @testset "Parallel transport" begin
         @test isapprox(SO3, q, X, vector_transport_to(SO3minus, SO3e, X, q))
+        @test isapprox(SO3, q, q * X / q, vector_transport_to(SO3plus, SO3e, X, q))
         @test isapprox(
             SO3,
             q,
