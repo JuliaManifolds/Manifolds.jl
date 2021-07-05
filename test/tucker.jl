@@ -152,8 +152,8 @@ include("utils.jl")
 
             pts = [
                 p,
-                TuckerPoint(C₂, map(u -> reverse(u, dims=1), U)...),
-                TuckerPoint(C₃, U...),
+                TuckerPoint(C₂, U[1][[4,2,1,3], :], U[2:end]...),
+                TuckerPoint(C₃, U[1][[4,3,1,2], :], U[2:end]...),
             ]
             test_manifold(
                 M,
