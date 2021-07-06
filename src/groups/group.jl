@@ -377,7 +377,7 @@ end
 Adjoint action of the element `p` of the Lie group `G` on the element `X`
 of the corresponding Lie algebra.
 
-It is defined as the differential of the group authomorphism $Ψ_p(q) = pqp⁻¹$ at
+It is defined as the differential of the group authomorphism ``Ψ_p(q) = pqp⁻¹`` at
 the identity of `G`.
 
 The formula reads

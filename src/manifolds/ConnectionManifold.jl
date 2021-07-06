@@ -8,7 +8,7 @@ abstract type AbstractAffineConnection end
 """
     LeviCivitaConnection
 
-The Levi-Civita connection of a Riemannian manifold.
+The [Levi-Civita connection](https://en.wikipedia.org/wiki/Levi-Civita_connection) of a Riemannian manifold.
 """
 struct LeviCivitaConnection <: AbstractAffineConnection end
 
