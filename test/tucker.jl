@@ -77,6 +77,7 @@ include("utils.jl")
 
             @test is_point(M_small, p_small)
             @test is_point(M, p)
+            @test is_point(M, embed(M, p))
             @test !is_point(M, zeros(n⃗))
             @test !is_point(M, TuckerPoint(zeros(T, r⃗), U...))
             @test !is_point(M, TuckerPoint(C₁, map(rk -> Matrix{T}(I, rk, rk), r⃗)...))
@@ -105,6 +106,8 @@ include("utils.jl")
             x = u .+ v .* 2
             @test x isa TuckerTVector
             @test x == v + u * 2
+            x .= 2 .* u .+ v
+            @test x == 2*u + v
 
             @test is_vector(M, p, v)
             @test !is_vector(M, p_small, v)

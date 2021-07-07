@@ -179,11 +179,11 @@ function Broadcast.BroadcastStyle(
 end
 
 function Broadcast.instantiate(
-    bc::Broadcast.Broadcasted{Broadcast.Style{<:TuckerTVector},Nothing},
-)
+    bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTVector{Any, D}},Nothing},
+) where {D}
     return bc
 end
-function Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{<:TuckerTVector}})
+function Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTVector{Any, D}}}) where {D}
     Broadcast.check_broadcast_axes(bc.axes, bc.args...)
     return bc
 end
@@ -356,9 +356,9 @@ end
         return copyto!(dest, A)
     end
     bc′ = Broadcast.preprocess(dest, bc)
-    copyto!(dest.U, Broadcast._broadcast_getindex(bc′, Val(:Ċ)))
+    copyto!(dest.Ċ, Broadcast._broadcast_getindex(bc′, Val(:Ċ)))
     for i in 1:D
-        copyto!(dest.M, Broadcast._broadcast_getindex(bc, Val((:U̇, i))))
+        copyto!(dest.U̇[i], Broadcast._broadcast_getindex(bc, Val((:U̇, i))))
     end
     return dest
 end
