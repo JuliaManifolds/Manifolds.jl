@@ -107,7 +107,7 @@ include("utils.jl")
             @test x isa TuckerTVector
             @test x == v + u * 2
             x .= 2 .* u .+ v
-            @test x == 2*u + v
+            @test x == 2 * u + v
 
             @test is_vector(M, p, v)
             @test !is_vector(M, p_small, v)
@@ -155,8 +155,8 @@ include("utils.jl")
 
             pts = [
                 p,
-                TuckerPoint(C₂, U[1][[4,2,1,3], :], U[2:end]...),
-                TuckerPoint(C₃, U[1][[4,3,1,2], :], U[2:end]...),
+                TuckerPoint(C₂, U[1][[4, 2, 1, 3], :], U[2:end]...),
+                TuckerPoint(C₃, U[1][[4, 3, 1, 2], :], U[2:end]...),
             ]
             test_manifold(
                 M,

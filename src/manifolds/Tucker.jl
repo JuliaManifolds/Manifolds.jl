@@ -179,11 +179,13 @@ function Broadcast.BroadcastStyle(
 end
 
 function Broadcast.instantiate(
-    bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTVector{Any, D}},Nothing},
+    bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTVector{Any,D}},Nothing},
 ) where {D}
     return bc
 end
-function Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTVector{Any, D}}}) where {D}
+function Broadcast.instantiate(
+    bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTVector{Any,D}}},
+) where {D}
     Broadcast.check_broadcast_axes(bc.axes, bc.args...)
     return bc
 end
