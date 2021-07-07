@@ -64,6 +64,7 @@ include("utils.jl")
             @test +v == v
 
             @test embed(M, p) ≈ reshape(kron(reverse(U)...) * vec(C₁), n⃗)
+            @test embed(M, TuckerPoint(p_ambient, r⃗)) ≈ p_ambient
             @test inner(M, p, v, w) ≈ dot(embed(M, p, v), embed(M, p, w))
             @test inner(M, p, v, v) ≈ norm(M, p, v)^2
             w_ambient = embed(M, p, w)

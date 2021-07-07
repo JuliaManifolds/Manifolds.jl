@@ -217,8 +217,9 @@ For a [`TuckerPoint`](@ref) it is checked that the point is in correct HOSVD for
 function check_point(M::Tucker{N,R,D}, x; kwargs...) where {N,R,D}
     s = "The point $(x) does not lie on $(M), "
     size(x) == N || return DomainError(size(x), s * "since its size is not $(N).")
+    x_buffer = similar(x)
     for d in 1:ndims(x)
-        r = rank(tensor_unfold(x, d); kwargs...)
+        r = rank(tensor_unfold!(x_buffer, x, d); kwargs...)
         r == R[d] || return DomainError(size(x), s * "since its rank is not $(R).")
     end
     return nothing
@@ -244,8 +245,10 @@ function check_point(M::Tucker{N,R,D}, x::TuckerPoint; kwargs...) where {N,R,D}
             )
         end
     end
+    ℭ_buffer = similar(ℭ)
     for d in 1:ndims(x.hosvd.core)
-        gram = tensor_unfold(ℭ, d) * tensor_unfold(ℭ, d)'
+        ℭ⁽ᵈ⁾ = tensor_unfold!(ℭ_buffer, ℭ, d)
+        gram = ℭ⁽ᵈ⁾ * ℭ⁽ᵈ⁾'
         if gram ≉ Diagonal(x.hosvd.σ[d])^2
             return DomainError(
                 norm(gram - Diagonal(x.hosvd.σ[d])^2),
@@ -382,11 +385,12 @@ function embed!(::Tucker, q, p::TuckerPoint)
     return copyto!(q, reshape(⊗ᴿ(p.hosvd.U...) * vec(p.hosvd.core), size(p)))
 end
 function embed!(ℳ::Tucker, Y, 𝔄::TuckerPoint{T,D}, X::TuckerTVector) where {T,D}
-    Y .= reshape(⊗ᴿ(𝔄.hosvd.U...) * vec(X.Ċ), size(Y))
-    Uℭ = embed(ℳ, 𝔄)
-    n⃗ = size(Uℭ)
-    for d in 1:D
-        Y .= Y + tensor_fold(X.U̇[d] * (𝔄.hosvd.U[d]' * tensor_unfold(Uℭ, d)), d, n⃗)
+    mul!(vec(Y), ⊗ᴿ(𝔄.hosvd.U...), vec(X.Ċ))
+    𝔄_embedded = embed(ℳ, 𝔄)
+    buffer = similar(𝔄_embedded)
+    for k in 1:D
+        U̇ₖUₖᵀ𝔄₍ₖ₎ = X.U̇[k] * (𝔄.hosvd.U[k]' * tensor_unfold!(buffer, 𝔄_embedded, k))
+        Y .= Y + tensor_fold!(buffer, U̇ₖUₖᵀ𝔄₍ₖ₎, k)
     end
     return Y
 end
@@ -521,7 +525,7 @@ function get_vector!(
     # => turn these i and j into matrix indices and do matrix operations
     for d in 1:D
         grid = transpose(reshape(ξU[d], r⃗[d], n⃗[d] - r⃗[d]))
-        y.U̇[d] .= U⊥[d] * grid * Diagonal(1 ./ σ[d])
+        mul!(y.U̇[d], U⊥[d], grid * Diagonal(1 ./ σ[d]))
     end
 
     y.Ċ .= reshape(ξ_core, size(y.Ċ))
@@ -562,8 +566,10 @@ ambient space is represented as a full tensor.
 function inner(::Tucker, 𝔄::TuckerPoint, x::TuckerTVector, y::TuckerTVector)
     ℭ = 𝔄.hosvd.core
     dotprod = dot(x.Ċ, y.Ċ)
-    for d in 1:ndims(𝔄)
-        dotprod += dot(x.U̇[d] * tensor_unfold(ℭ, d), y.U̇[d] * tensor_unfold(ℭ, d))
+    ℭ_buffer = similar(ℭ)
+    for k in 1:ndims(𝔄)
+        ℭ₍ₖ₎ = tensor_unfold!(ℭ_buffer, ℭ, k)
+        dotprod += dot(x.U̇[k] * ℭ₍ₖ₎, y.U̇[k] * ℭ₍ₖ₎)
     end
     return dotprod
 end
@@ -683,16 +689,17 @@ function retract!(
     S = zeros(T, 2 .* size(ℭ))
     S[CartesianIndices(ℭ)] = ℭ + 𝔊
     UQ = Matrix{T}[]
-    for d in 1:D
+    buffer = similar(ℭ)
+    for k in 1:D
         # We make the following adaptation to Kressner2014:
         # Fix the i'th term of the sum and replace Vᵢ by Qᵢ Rᵢ.
         # We can absorb the R factor into the core by replacing Vᵢ by Qᵢ
         # and C (in the i'th term of the sum) by C ×ᵢ Rᵢ
-        Q, R = qr(V[d])
-        idxOffset = CartesianIndex(ntuple(i -> i == d ? r⃗[d] : 0, D))
-        ℭ_transf = tensor_fold(R * tensor_unfold(ℭ, d), d, size(ℭ))
-        S[CartesianIndices(ℭ) .+ idxOffset] = ℭ_transf
-        push!(UQ, hcat(U[d], Matrix(Q)))
+        Q, R = qr(V[k])
+        idxOffset = CartesianIndex(ntuple(i -> i == k ? r⃗[k] : 0, D))
+        ℭ⨉ₖR = tensor_fold!(buffer, R * tensor_unfold!(buffer, ℭ, k), k)
+        S[CartesianIndices(ℭ) .+ idxOffset] = ℭ⨉ₖR
+        push!(UQ, hcat(U[k], Matrix(Q)))
     end
 
     #Convert to truncated HOSVD of p + x
@@ -764,51 +771,63 @@ function st_hosvd(𝔄, mlrank=size(𝔄))
     # Add type assertions to U and σ for type stability
     U::NTuple{D,Matrix{T}} = ntuple(d -> Matrix{T}(undef, n⃗[d], mlrank[d]), D)
     σ::NTuple{D,Vector{T}} = ntuple(d -> Vector{T}(undef, mlrank[d]), D)
+    # Initialise arrays to store successive truncations (𝔄′) and unfoldings (buffer)
+    # so that the type remains constant at every truncation
+    𝔄′ = reshape(view(𝔄, 1:length(𝔄)), n⃗)
+    fold_buffer = reshape(view(similar(𝔄), 1:length(𝔄)), n⃗)
+    unfold_buffer = view(similar(𝔄), 1:length(𝔄))
 
-    for d in 1:D
-        r_d = mlrank[d]
-        𝔄⁽ᵈ⁾ = tensor_unfold(𝔄, d)
+    for k in 1:D
+        rₖ = mlrank[k]
+        𝔄′₍ₖ₎ = tensor_unfold!(unfold_buffer, 𝔄′, k)
         # truncated SVD + incremental construction of the core
-        UΣVᵀ = svd(𝔄⁽ᵈ⁾)
-        U[d] .= UΣVᵀ.U[:, 1:r_d]
-        σ[d] .= UΣVᵀ.S[1:r_d]
-        𝔄⁽ᵈ⁾ = Diagonal(σ[d]) * UΣVᵀ.Vt[1:r_d, :]
-        # Reshape; compiler doesn't know the order of the result without type assertion
-        m⃗::NTuple{D,Int} = tuple(mlrank[1:d]..., n⃗[(d + 1):D]...)
-        𝔄 = tensor_fold(𝔄⁽ᵈ⁾, d, m⃗)
+        UΣVᵀ = svd(𝔄′₍ₖ₎)
+        U[k] .= UΣVᵀ.U[:, 1:rₖ]
+        σ[k] .= UΣVᵀ.S[1:rₖ]
+        𝔄′₍ₖ₎_trunc = Diagonal(σ[k]) * UΣVᵀ.Vt[1:rₖ, :]
+        size𝔄′ = ntuple(i -> i ≤ k ? mlrank[i] : n⃗[i], D)
+        fold_buffer = reshape(view(fold_buffer, 1:prod(size𝔄′)), size𝔄′)
+        unfold_buffer = view(unfold_buffer, 1:prod(size𝔄′))
+        𝔄′ = tensor_fold!(fold_buffer, 𝔄′₍ₖ₎_trunc, k)
     end
+    core = Array(𝔄′)
 
     # Make sure the truncated core is in "all-orthogonal" HOSVD format
     if mlrank ≠ n⃗
-        hosvd_core = st_hosvd(𝔄, mlrank)
+        hosvd_core = st_hosvd(core, mlrank)
         U = U .* hosvd_core.U
-        𝔄 = hosvd_core.core
+        core = hosvd_core.core
         σ = hosvd_core.σ
     end
 
-    return HOSVD{T,D}(U, 𝔄, σ)
+    return HOSVD{T,D}(U, core, σ)
 end
 
-# Inverse of the k'th unfolding of a size n₁ × ... × n_D tensor
-function tensor_fold(
-    𝔄♭::AbstractMatrix{T},
-    k,
-    n⃗::NTuple{D,Int},
-)::Array{T,D} where {T,D,Int}
-    @assert 1 ≤ k ≤ D
-    @assert size(𝔄♭, 1) == n⃗[k]
-
-    # (compiler doesn't know we are reshaping back into order D array without type assertion)
-    size_pre_permute::NTuple{D,Int} = (n⃗[k], n⃗[1:(k - 1)]..., n⃗[(k + 1):D]...)
-    perm::NTuple{D,Int} = ((2:k)..., 1, ((k + 1):D)...)
-    return permutedims(reshape(𝔄♭, size_pre_permute), perm)
+# In-place inverse of the k'th unfolding of a size n₁ × ... × n_D tensor.
+# The size of the reshaped tensor is determined by the size of 𝔄.
+# The result is stored in 𝔄. The returned value uses the same address space as 𝔄.
+function tensor_fold!(𝔄::AbstractArray{T,D}, 𝔄₍ₖ₎::AbstractMatrix{T}, k) where {T,D}
+    @assert length(𝔄₍ₖ₎) == length(𝔄) && size(𝔄₍ₖ₎, 1) == size(𝔄, k)
+    @assert pointer(𝔄) !== pointer(𝔄₍ₖ₎)
+    # Caution: tuple operations can be type unstable if used incorrectly
+    σ(i) = i == 1 ? k : i ≤ k ? i - 1 : i
+    σ⁻¹(i) = i < k ? i + 1 : i == k ? 1 : i
+    permuted_size = ntuple(i -> size(𝔄, σ(i)), D)
+    return permutedims!(𝔄, reshape(𝔄₍ₖ₎, permuted_size), ntuple(σ⁻¹, D))
 end
 
-#Mode-k unfolding of the array 𝔄 of order D ≥ k
-function tensor_unfold(𝔄, k)
-    d = ndims(𝔄)
-    𝔄_ = permutedims(𝔄, vcat(k, 1:(k - 1), (k + 1):d))
-    return reshape(𝔄_, size(𝔄, k), div(length(𝔄), size(𝔄, k)))
+# In-place mode-k unfolding of the array 𝔄 of order D ≥ k.
+# The argument buffer is an array of arbitrary dimensions of the same length as 𝔄.
+# The returned value uses the same address space as the buffer.
+function tensor_unfold!(buffer, 𝔄::AbstractArray{T,D}, k) where {T,D}
+    @assert length(buffer) == length(𝔄)
+    @assert pointer(𝔄) !== pointer(buffer)
+    𝔄₍ₖ₎ = reshape(buffer, size(𝔄, k), :)
+    # Caution: tuple operations can be type unstable if used incorrectly
+    σ(i) = i == 1 ? k : i ≤ k ? i - 1 : i
+    permuted_size = ntuple(i -> size(𝔄, σ(i)), D)
+    permutedims!(reshape(𝔄₍ₖ₎, permuted_size), 𝔄, ntuple(σ, D))
+    return 𝔄₍ₖ₎
 end
 
 @doc raw"""
