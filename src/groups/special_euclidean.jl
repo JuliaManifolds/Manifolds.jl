@@ -84,6 +84,17 @@ Base.@propagate_inbounds function _padvector!(
     return X
 end
 
+@doc raw"""
+    adjoint_action(::SpecialEuclidean{3}, p, fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}})
+
+Adjoint action of the [`SpecialEuclidean`](@ref) group on the vector with coefficients `fX`
+tangent at point `p`.
+
+The formula for the coefficients reads ``t×(R⋅ω) + R⋅r`` for the translation part and
+``R⋅ω`` for the rotation part, where `t` is the translation part of `p`, `R` is the rotation
+matrix part of `p`, `r` is the translation part of `fX` and `ω` is the rotation part of `fX`,
+``×`` is the cross product and ``⋅`` is the matrix product.
+"""
 function adjoint_action(::SpecialEuclidean{3}, p, fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}})
     t = p.parts[1]
     R = p.parts[2]
@@ -425,13 +436,27 @@ function lie_bracket!(G::SpecialEuclidean, Z, X, Y)
     return Z
 end
 
+"""
+    translate_diff(G::SpecialEuclidean, p, q, X, ::RightAction)
+
+Differential of the right action of the [`SpecialEuclidean`](@ref) group on itself.
+The formula for the rotation part is the differential of the right rotation action, while
+the formula for the translation part reads
+````math
+R_q⋅X_R⋅t_p + X_t
+````
+where ``R_q`` is the rotation part of `q`, ``X_R`` is the rotation part of `X`, ``t_p``
+is the translation part of `p` and ``X_t`` is the translation part of `X`.
+"""
+translate_diff(G::SpecialEuclidean, p, q, X, ::RightAction)
+
 function translate_diff!(G::SpecialEuclidean, Y, p, q, X, ::RightAction)
     np, hp = submanifold_components(G, p)
     nq, hq = submanifold_components(G, q)
     nX, hX = submanifold_components(G, X)
     nY, hY = submanifold_components(G, Y)
     hY .= hp' * hX * hp
-    copyto!(nY, hq * (hX * np + hq' * nX))
+    copyto!(nY, hq * (hX * np) + nX)
     @inbounds _padvector!(G, Y)
     return Y
 end

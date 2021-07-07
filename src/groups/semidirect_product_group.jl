@@ -113,7 +113,7 @@ function compose!(G::GT, x, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Iden
 end
 
 @doc raw"""
-    translate_diff!(G::SemidirectProductGroup, Y, p, q, X, conX::LeftAction)
+    translate_diff(G::SemidirectProductGroup, p, q, X, conX::LeftAction)
 
 Perform differential of the left translation on the semidirect product group `G`.
 
@@ -129,6 +129,8 @@ then its differential can be computed as
 \mathrm{d}L_{(n', h')}(X_n, X_h) = ( \mathrm{d}L_{n'} (\mathrm{d}θ_{h'}(X_n)), \mathrm{d}L_{h'} X_h).
 ````
 """
+translate_diff(G::SemidirectProductGroup, p, q, X, conX::LeftAction)
+
 function translate_diff!(G::SemidirectProductGroup, Y, p, q, X, conX::LeftAction)
     M = base_manifold(G)
     N, H = M.manifolds
