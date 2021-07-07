@@ -48,6 +48,7 @@ include("utils.jl")
             test_musical_isomorphisms=true,
             test_default_vector_transport=true,
             is_tangent_atol_multiplier=2,
+            test_inplace=true,
         )
     end
     @testset "Complex Sphere Symmetric Matrices Basics" begin
@@ -73,6 +74,7 @@ include("utils.jl")
             is_point_atol_multiplier=2,
             projection_atol_multiplier=2,
             exp_log_atol_multiplier=2,
+            test_inplace=true,
         )
     end
 end

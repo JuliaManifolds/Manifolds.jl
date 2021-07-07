@@ -51,6 +51,7 @@ include("utils.jl")
             point_distributions=[Manifolds.normal_rotation_distribution(M, pts[1], 1.0)],
             tvector_distributions=[Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
             basis_types_to_from=basis_types,
+            test_inplace=true,
         )
 
         @testset "log edge cases" begin
@@ -61,6 +62,13 @@ include("utils.jl")
 
         v = log(M, pts[1], pts[2])
         @test norm(M, pts[1], v) ≈ (angles[2] - angles[1]) * sqrt(2)
+
+        # check that exp! does not have a side effect
+        q = allocate(pts[1])
+        copyto!(M, q, pts[1])
+        q2 = exp(M, pts[1], v)
+        exp!(M, q, q, v)
+        @test norm(q - q2) ≈ 0
 
         v14_polar = inverse_retract(M, pts[1], pts[4], Manifolds.PolarInverseRetraction())
         p4_polar = retract(M, pts[1], v14_polar, Manifolds.PolarRetraction())
@@ -108,6 +116,7 @@ include("utils.jl")
                 basis_types_to_from=basis_types,
                 exp_log_atol_multiplier=20,
                 retraction_atol_multiplier=12,
+                test_inplace=true,
             )
 
             @testset "vee/hat" begin

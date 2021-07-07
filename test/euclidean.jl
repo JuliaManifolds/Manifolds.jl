@@ -105,6 +105,7 @@ using Manifolds: induced_basis
                     basis_types_to_from=basis_types,
                     basis_has_specialized_diagonalizing_get=true,
                     test_vee_hat=isa(M, Euclidean),
+                    test_inplace=true,
                 )
             end
         end

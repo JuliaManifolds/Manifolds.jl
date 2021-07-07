@@ -79,6 +79,7 @@ using ManifoldsBase:
     ℂ,
     ℍ,
     AbstractBasis,
+    AbstractDecoratorType,
     AbstractIsometricEmbeddingType,
     AbstractNumbers,
     AbstractOrthogonalBasis,
@@ -335,7 +336,8 @@ export HyperboloidTVector,
 export AbstractNumbers, ℝ, ℂ, ℍ
 
 # decorator manifolds
-export AbstractDecoratorManifold
+export AbstractDecoratorManifold, MetricDecoratorType
+export AbstractGroupDecoratorType, DefaultGroupDecoratorType, TransparentGroupDecoratorType
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
@@ -384,6 +386,7 @@ export AbstractRetractionMethod,
     PowerRetraction
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
+    ApproximateLogarithmicMap,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,

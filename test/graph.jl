@@ -52,6 +52,7 @@ include("utils.jl")
             [x[1:2], y[1:2], z[1:2]];
             test_representation_size=false,
             test_reverse_diff=false, #VERSION > v"1.2",
+            test_inplace=true,
         )
         @test sprint(show, "text/plain", NE) == """
         GraphManifold

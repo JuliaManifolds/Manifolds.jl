@@ -73,6 +73,7 @@ end
                 ),
                 basis_types_to_from=bases,
                 is_tangent_atol_multiplier=1,
+                test_inplace=true,
             )
         end
     end
@@ -94,6 +95,7 @@ end
                 basis_types_vecs=(DefaultOrthonormalBasis(ℂ),),
                 basis_types_to_from=(DefaultOrthonormalBasis(ℂ),),
                 is_tangent_atol_multiplier=1,
+                test_inplace=true,
             )
             @test isapprox(
                 -pts_complex[1],
