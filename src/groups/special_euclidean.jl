@@ -417,6 +417,15 @@ function group_log!(G::SpecialEuclidean{3}, X, q)
     return X
 end
 
+"""
+    lie_bracket(G::SpecialEuclidean, X::ProductRepr, Y::ProductRepr)
+    lie_bracket(G::SpecialEuclidean, X::AbstractMatrix, Y::AbstractMatrix)
+
+Calculate the Lie bracket between elements `X` and `Y` of the special Euclidean Lie
+algebra. For the matrix representation (which can be obtained using [`screw_matrix`](@ref))
+the formula is ``[X, Y] = XY-YX``, while in the [`ProductRepr`](@ref) representation the
+formula reads ``[X, Y] = [(t_1, R_1), (t_2, R_2)] = (R_1 t_2 - R_2 t_1, R_1 R_2 - R_2 R_1)``.
+"""
 function lie_bracket(G::SpecialEuclidean, X::ProductRepr, Y::ProductRepr)
     nX, hX = submanifold_components(G, X)
     nY, hY = submanifold_components(G, Y)
@@ -494,10 +503,24 @@ const SE_in_GL = EmbeddedManifold{ℝ,<:SpecialEuclidean,<:GeneralLinear}
 
 SE_in_GL(n) = EmbeddedManifold(SpecialEuclidean(n), GeneralLinear(n + 1))
 
+"""
+    embed(M::SE_in_GL, p)
+
+Embed the point `p` on [`SpecialEuclidean`](@ref) in the [`GeneralLinear`](@ref) group.
+The embedding is calculated using [`affine_matrix`](@ref).
+"""
 function embed(M::SE_in_GL, p)
     G = M.manifold
     return affine_matrix(G, p)
 end
+"""
+    embed(M::SE_in_GL, p, X)
+
+Embed the tangent vector X at point `p` on [`SpecialEuclidean`](@ref) in the
+[`GeneralLinear`](@ref) group. Point `p` can use any representation valid for
+`SpecialEuclidean`. The embedding is similar from the one defined by [`screw_matrix`](@ref)
+but the translation part is multiplied by inverse of the rotation part.
+"""
 function embed(M::SE_in_GL, p, X)
     G = M.manifold
     np, hp = submanifold_components(G, p)
@@ -517,11 +540,24 @@ function embed!(M::SE_in_GL, Y, p, X)
     return copyto!(Y, embed(M, p, X))
 end
 
+"""
+    project(M::SE_in_GL, p)
+
+Project point `p` in [`GeneralLinear`](@ref) to the [`SpecialEuclidean`](@ref) group.
+This is performed by extracting the rotation and translation part as in [`affine_matrix`](@ref).
+"""
 function project(M::SE_in_GL, p)
     G = M.manifold
     np, hp = submanifold_components(G, p)
     return ProductRepr(np, hp)
 end
+"""
+    project(M::SE_in_GL, p, X)
+
+Project tangent vector `X` at point `p` in [`GeneralLinear`](@ref) to the
+[`SpecialEuclidean`](@ref) Lie algebra.
+This reverses the transformation performed by [`embed`](@ref embed(M::SE_in_GL, p, X))
+"""
 function project(M::SE_in_GL, p, X)
     G = M.manifold
     np, hp = submanifold_components(G, p)

@@ -123,6 +123,11 @@ end
     kwargs...,
 )
 
+"""
+    connection(M::ConnectionManifold)
+
+Return the connection associated with [`ConnectionManifold`](@ref) `M`.
+"""
 connection(M::ConnectionManifold) = M.connection
 
 Base.copyto!(M::AbstractConnectionManifold, q, p) = copyto!(M.manifold, q, p)
@@ -158,6 +163,7 @@ end
     gaussian_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Gaussian curvature of the manifold `M` at the point `p` using basis `B`.
+This is equal to half of the scalar Ricci curvature, see [`ricci_curvature`](@ref).
 """
 gaussian_curvature(::AbstractManifold, ::Any, ::AbstractBasis)
 function gaussian_curvature(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
@@ -190,6 +196,12 @@ end
     ricci_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Ricci scalar curvature of the manifold `M` at the point `p` using basis `B`.
+The curvature is computed as the trace of the Ricci curvature tensor with respect to
+the metric, that is ``R=g^{ij}_R_{ij}`` where ``R`` is the scalar Ricci curvature at `p`,
+``g^{ij}`` is the inverse local metric (see [`inverse_local_metric`](@ref)) at `p` and
+``R_{ij}`` is the Riccie curvature tensor, see [`ricci_tensor`](@ref). Both the tensor and
+inverse local metric are expressed in local coordinates defined by `B`, and the formula
+uses the Einstein summation convention.
 """
 ricci_curvature(::AbstractManifold, ::Any, ::AbstractBasis)
 function ricci_curvature(
@@ -215,7 +227,7 @@ end
 
 Compute the Ricci tensor, also known as the Ricci curvature tensor,
 of the manifold `M` at the point `p` using basis `B`,
-see [https://en.wikipedia.org/wiki/Ricci_curvature#Introduction_and_local_definition](https://en.wikipedia.org/wiki/Ricci_curvature#Introduction_and_local_definition).
+see [`https://en.wikipedia.org/wiki/Ricci_curvature#Introduction_and_local_definition`](https://en.wikipedia.org/wiki/Ricci_curvature#Introduction_and_local_definition).
 """
 ricci_tensor(::AbstractManifold, ::Any, ::AbstractBasis)
 function ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
@@ -233,11 +245,19 @@ end
 )
 
 @doc raw"""
-    riemann_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
+    riemann_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend=diff_backend())
 
 Compute the Riemann tensor ``R^l_{ijk}``, also known as the Riemann curvature
-tensor, at the point `p`. The dimensions of the resulting multi-dimensional
-array are ordered ``(l,i,j,k)``.
+tensor, at the point `p` in local coordinates defined by `B`. The dimensions of the
+resulting multi-dimensional array are ordered ``(l,i,j,k)``.
+
+The function uses the coordinate expression involving the second Christoffel symbol,
+see [`https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Coordinate_expression`](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Coordinate_expression)
+for details.
+
+# See also
+
+[`christoffel_symbols_second`], [`christoffel_symbols_second_jacobian`]
 """
 riemann_tensor(::AbstractManifold, ::Any, ::AbstractBasis)
 function riemann_tensor(
