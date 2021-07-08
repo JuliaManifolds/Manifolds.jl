@@ -192,12 +192,12 @@ function injectivity_radius(M::AbstractConnectionManifold, p, m::ExponentialRetr
     return injectivity_radius(base_manifold(M), p, m)
 end
 
-"""
+@doc raw"""
     ricci_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
 
 Compute the Ricci scalar curvature of the manifold `M` at the point `p` using basis `B`.
 The curvature is computed as the trace of the Ricci curvature tensor with respect to
-the metric, that is ``R=g^{ij}_R_{ij}`` where ``R`` is the scalar Ricci curvature at `p`,
+the metric, that is ``R=g^{ij}R_{ij}`` where ``R`` is the scalar Ricci curvature at `p`,
 ``g^{ij}`` is the inverse local metric (see [`inverse_local_metric`](@ref)) at `p` and
 ``R_{ij}`` is the Riccie curvature tensor, see [`ricci_tensor`](@ref). Both the tensor and
 inverse local metric are expressed in local coordinates defined by `B`, and the formula
@@ -257,7 +257,7 @@ for details.
 
 # See also
 
-[`christoffel_symbols_second`], [`christoffel_symbols_second_jacobian`]
+[`christoffel_symbols_second`](@ref), [`christoffel_symbols_second_jacobian`](@ref)
 """
 riemann_tensor(::AbstractManifold, ::Any, ::AbstractBasis)
 function riemann_tensor(
