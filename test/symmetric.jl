@@ -58,6 +58,7 @@ include("utils.jl")
                 ),
                 basis_types_to_from=bases,
                 is_tangent_atol_multiplier=1,
+                test_inplace=true,
             )
             test_manifold(
                 M_complex,
@@ -75,6 +76,7 @@ include("utils.jl")
                 basis_types_vecs=(DefaultOrthonormalBasis(ℂ),),
                 basis_types_to_from=(DefaultOrthonormalBasis(ℂ),),
                 is_tangent_atol_multiplier=1,
+                test_inplace=true,
             )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end # testset type $T

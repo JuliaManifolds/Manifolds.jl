@@ -630,7 +630,7 @@ vector_transport_to(
 @doc raw"""
     vector_transport_to(M::Stiefel, p, X, q, ::ProjectionTransport)
 
-Compute a vector transport by projection, i.e. project `X` from the tangent space at `x` by
+Compute a vector transport by projection, i.e. project `X` from the tangent space at `p` by
 projection it onto the tangent space at `q`.
 """
 vector_transport_to(::Stiefel, ::Any, ::Any, ::Any, ::ProjectionTransport)

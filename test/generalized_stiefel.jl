@@ -83,6 +83,7 @@ include("utils.jl")
                 exp_log_atol_multiplier=10.0^3 * (VERSION >= v"1.6-DEV" ? 10.0^8 : 1.0),
                 retraction_methods=[PolarRetraction(), ProjectionRetraction()],
                 mid_point12=nothing,
+                test_inplace=true,
             )
         end
     end

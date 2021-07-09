@@ -67,6 +67,7 @@ include("utils.jl")
                     QRInverseRetraction(),
                 ],
                 is_tangent_atol_multiplier=1,
+                test_inplace=true,
             )
         end
 

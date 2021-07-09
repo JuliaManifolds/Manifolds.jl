@@ -69,6 +69,7 @@ using Manifolds: default_metric_dispatch
                     basis_types_vecs=basis_types,
                     basis_types_to_from=basis_types,
                     is_tangent_atol_multiplier=1,
+                    test_inplace=true,
                 )
             end
             @testset "Test Error cases in is_point and is_vector" begin
