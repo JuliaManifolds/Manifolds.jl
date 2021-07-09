@@ -121,7 +121,7 @@ Transport tangent vector `X` at point `p` on the group manifold `M` with the
     > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
     > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
-vector_transport_to(M::CartanSchoutenPlusGroup, Y, ::Identity, X, q, ::ParallelTransport)
+vector_transport_to(M::CartanSchoutenPlusGroup, ::Identity, X, q, ::ParallelTransport)
 
 function vector_transport_to!(M::CartanSchoutenPlusGroup, Y, p, X, q, ::ParallelTransport)
     return inverse_translate_diff!(M.manifold, Y, q, p, X, RightAction())
