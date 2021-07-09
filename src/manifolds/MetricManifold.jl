@@ -365,6 +365,36 @@ function metric(M::MetricManifold)
 end
 
 @doc raw"""
+    ricci_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
+
+Compute the Ricci scalar curvature of the manifold `M` at the point `p` using basis `B`.
+The curvature is computed as the trace of the Ricci curvature tensor with respect to
+the metric, that is ``R=g^{ij}R_{ij}`` where ``R`` is the scalar Ricci curvature at `p`,
+``g^{ij}`` is the inverse local metric (see [`inverse_local_metric`](@ref)) at `p` and
+``R_{ij}`` is the Riccie curvature tensor, see [`ricci_tensor`](@ref). Both the tensor and
+inverse local metric are expressed in local coordinates defined by `B`, and the formula
+uses the Einstein summation convention.
+"""
+ricci_curvature(::AbstractManifold, ::Any, ::AbstractBasis)
+function ricci_curvature(
+    M::AbstractManifold,
+    p,
+    B::AbstractBasis;
+    backend::AbstractDiffBackend=diff_backend(),
+)
+    Ginv = inverse_local_metric(M, p, B)
+    Ric = ricci_tensor(M, p, B; backend=backend)
+    S = sum(Ginv .* Ric)
+    return S
+end
+@decorator_transparent_signature ricci_curvature(
+    M::AbstractDecoratorManifold,
+    p,
+    B::AbstractBasis;
+    kwargs...,
+)
+
+@doc raw"""
     sharp(N::MetricManifold{M,G}, p, ξ::FVector{CotangentSpaceType})
 
 Compute the musical isomorphism to transform the cotangent vector `ξ` from the
@@ -400,6 +430,7 @@ for f in [
     local_metric,
     local_metric_jacobian,
     log_local_metric_density,
+    ricci_curvature,
 ]
     eval(
         quote

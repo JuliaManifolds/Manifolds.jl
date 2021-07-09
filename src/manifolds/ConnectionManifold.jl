@@ -63,15 +63,17 @@ end
     )
 
 Compute the Christoffel symbols of the second kind in local coordinates of basis `B`.
-The Christoffel symbols (for a metric manifold) are (in Einstein summation convention)
+For affine connection manifold the Christoffel symbols need to be explicitly implemented
+while, for a [`MetricManifold`](@ref) they are computed as (in Einstein summation convention)
 
 ````math
 Γ^{l}_{ij} = g^{kl} Γ_{ijk},
 ````
 
-where ``Γ_{ijk}`` are the Christoffel symbols of the first kind, and
-``g^{kl}`` is the inverse of the local representation of the metric tensor.
-The dimensions of the resulting multi-dimensional array are ordered ``(l,i,j)``.
+where ``Γ_{ijk}`` are the Christoffel symbols of the first kind
+(see [`christoffel_symbols_first`](@ref)), and ``g^{kl}`` is the inverse of the local
+representation of the metric tensor. The dimensions of the resulting multi-dimensional array
+are ordered ``(l,i,j)``.
 """
 christoffel_symbols_second(::AbstractManifold, ::Any, ::AbstractBasis)
 
@@ -136,11 +138,11 @@ Base.copyto!(M::AbstractConnectionManifold, Y, p, X) = copyto!(M.manifold, Y, p,
 @doc raw"""
     exp(M::AbstractConnectionManifold, p, X)
 
-Copute the exponential map on the [`AbstractConnectionManifold`](@ref) `M` equipped with
-corresponding affine metric.
+Compute the exponential map on the [`AbstractConnectionManifold`](@ref) `M` equipped with
+corresponding affine connection.
 
-If the metric was declared the default metric using [`is_default_metric`](@ref), this method
-falls back to `exp(M, p, X)`.
+If `M` is a [`MetricManifold`](@ref) with a metric that was declared the default metric
+using [`is_default_metric`](@ref), this method falls back to `exp(M, p, X)`.
 
 Otherwise it numerically integrates the underlying ODE, see [`solve_exp_ode`](@ref).
 Currently, the numerical integration is only accurate when using a single
@@ -191,36 +193,6 @@ end
 function injectivity_radius(M::AbstractConnectionManifold, p, m::ExponentialRetraction)
     return injectivity_radius(base_manifold(M), p, m)
 end
-
-@doc raw"""
-    ricci_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
-
-Compute the Ricci scalar curvature of the manifold `M` at the point `p` using basis `B`.
-The curvature is computed as the trace of the Ricci curvature tensor with respect to
-the metric, that is ``R=g^{ij}R_{ij}`` where ``R`` is the scalar Ricci curvature at `p`,
-``g^{ij}`` is the inverse local metric (see [`inverse_local_metric`](@ref)) at `p` and
-``R_{ij}`` is the Riccie curvature tensor, see [`ricci_tensor`](@ref). Both the tensor and
-inverse local metric are expressed in local coordinates defined by `B`, and the formula
-uses the Einstein summation convention.
-"""
-ricci_curvature(::AbstractManifold, ::Any, ::AbstractBasis)
-function ricci_curvature(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=diff_backend(),
-)
-    Ginv = inverse_local_metric(M, p, B)
-    Ric = ricci_tensor(M, p, B; backend=backend)
-    S = sum(Ginv .* Ric)
-    return S
-end
-@decorator_transparent_signature ricci_curvature(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
-    kwargs...,
-)
 
 """
     ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
@@ -337,7 +309,6 @@ for f in [
     mean,
     median,
     project,
-    ricci_curvature,
     ricci_tensor,
     riemann_tensor,
     sharp,
