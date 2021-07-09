@@ -92,9 +92,9 @@ function log!(
 end
 
 """
-    vector_transport_to(M::CartanSchoutenMinusGroup, ::Identity, X, q, ::ParallelTransport)
+    vector_transport_to(M::CartanSchoutenMinusGroup, p, X, q, ::ParallelTransport)
 
-Transport tangent vector `X` identity on the group manifold with the
+Transport tangent vector `X` at point `p` on the group manifold `M` with the
 [`CartanSchoutenMinus`](@ref) connection to point `q`. See [^Pennec2020] for details.
 
 [^Pennec2020]:
@@ -103,16 +103,16 @@ Transport tangent vector `X` identity on the group manifold with the
     > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
     > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
-vector_transport_to(M::CartanSchoutenMinusGroup, Y, ::Identity, X, q, ::ParallelTransport)
+vector_transport_to(M::CartanSchoutenMinusGroup, Y, p, X, q, ::ParallelTransport)
 
 function vector_transport_to!(M::CartanSchoutenMinusGroup, Y, p, X, q, ::ParallelTransport)
     return inverse_translate_diff!(M.manifold, Y, q, p, X, LeftAction())
 end
 
 """
-    vector_transport_to(M::CartanSchoutenPlusGroup, ::Identity, X, q, ::ParallelTransport)
+    vector_transport_to(M::CartanSchoutenPlusGroup, q, X, q, ::ParallelTransport)
 
-Transport tangent vector `X` at identity on the group manifold with the
+Transport tangent vector `X` at point `p` on the group manifold `M` with the
 [`CartanSchoutenPlus`](@ref) connection to point `q`. See [^Pennec2020] for details.
 
 [^Pennec2020]:
@@ -160,6 +160,14 @@ function vector_transport_direction!(
     translate_diff!(M.manifold, Y, dexp_half, p, X, RightAction())
     return translate_diff!(M.manifold, Y, dexp_half, p, Y, LeftAction())
 end
+
+"""
+    vector_transport_to(M::CartanSchoutenZeroGroup, ::Identity, X, q, m::ParallelTransport)
+
+Transport vector `X` at identity of group `M` equipped with the [`CartanSchoutenZero`](@ref)
+connection to point `q` using parallel transport.
+"""
+vector_transport_to(::CartanSchoutenZeroGroup, ::Identity, X, q, ::ParallelTransport)
 
 function vector_transport_to!(
     M::CartanSchoutenZeroGroup,
