@@ -17,7 +17,7 @@ an element of ``𝔰𝔩(n, 𝔽)`` is a closed subgroup of ``\mathrm{SL}(n,𝔽
 metric functions forward to `GeneralLinear`.
 """
 struct SpecialLinear{n,𝔽} <:
-       AbstractGroupManifold{𝔽,MultiplicationOperation,TransparentIsometricEmbedding} end
+       AbstractGroupManifold{𝔽,MultiplicationOperation,TransparentGroupDecoratorType} end
 
 SpecialLinear(n, 𝔽::AbstractNumbers=ℝ) = SpecialLinear{n,𝔽}()
 

@@ -169,6 +169,7 @@ include("utils.jl")
                 test_reverse_diff=is_plain_array,
                 test_tangent_vector_broadcasting=is_plain_array,
                 test_vector_spaces=is_plain_array,
+                test_inplace=true,
             )
         end
     end

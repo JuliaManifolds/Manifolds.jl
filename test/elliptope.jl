@@ -43,10 +43,12 @@ include("utils.jl")
                 test_reverse_diff=false,
                 test_forward_diff=false,
                 test_project_tangent=true,
+                test_project_point=true,
                 test_exp_log=false,
                 default_inverse_retraction_method=nothing,
                 default_retraction_method=ProjectionRetraction(),
                 is_tangent_atol_multiplier=1,
+                test_inplace=true,
             )
         end
     end

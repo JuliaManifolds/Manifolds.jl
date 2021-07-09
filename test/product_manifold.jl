@@ -373,6 +373,7 @@ end
                 ],
                 is_tangent_atol_multiplier=1,
                 exp_log_atol_multiplier=1,
+                test_inplace=true,
             )
         end
     end
@@ -429,6 +430,7 @@ end
         test_reverse_diff=false,
         is_tangent_atol_multiplier=1,
         exp_log_atol_multiplier=1,
+        test_inplace=true,
     )
 
     @testset "product vector transport" begin
@@ -439,6 +441,42 @@ end
         Y = vector_transport_to(Mse, p, X, q, m)
         Z = -log(Mse, q, p)
         @test isapprox(Mse, q, Y, Z)
+    end
+
+    @testset "Implicit product vector transport" begin
+        p = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
+        q = ProductRepr([0.0, 1.0, 0.0], [2.0, 0.0])
+        X = log(Mse, p, q)
+        for m in [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
+            Y = vector_transport_to(Mse, p, X, q, m)
+            Z1 = vector_transport_to(
+                Mse.manifolds[1],
+                submanifold_component.([p, X, q], Ref(1))...,
+                m,
+            )
+            Z2 = vector_transport_to(
+                Mse.manifolds[2],
+                submanifold_component.([p, X, q], Ref(2))...,
+                m,
+            )
+            Z = ProductRepr(Z1, Z2)
+            @test isapprox(Mse, q, Y, Z)
+        end
+        for m in [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
+            Y = vector_transport_direction(Mse, p, X, X, m)
+            Z1 = vector_transport_direction(
+                Mse.manifolds[1],
+                submanifold_component.([p, X, X], Ref(1))...,
+                m,
+            )
+            Z2 = vector_transport_direction(
+                Mse.manifolds[2],
+                submanifold_component.([p, X, X], Ref(2))...,
+                m,
+            )
+            Z = ProductRepr(Z1, Z2)
+            @test isapprox(Mse, q, Y, Z)
+        end
     end
 
     @testset "prod_point" begin
