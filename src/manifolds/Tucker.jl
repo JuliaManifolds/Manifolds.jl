@@ -1,17 +1,18 @@
 
 @doc raw"""
-Tucker{N, R, D, 𝔽} <: AbstractManifold{𝔽}
+    Tucker{N, R, D, 𝔽} <: AbstractManifold{𝔽}
 
 The manifold of $N_1 \times \dots \times N_D$ real-valued or complex-valued tensors of
 fixed multilinear rank $(R_1, \dots, R_D)$ . If $R_1 = \dots = R_D = 1$, this is the
-manifold of rank-1 tensors.
+Segre manifold, i.e., the set of rank-1 tensors.
 
 # Representation in HOSVD format
 
-Any tensor $\mathcal{A}$ on the Tucker manifold can be represented in HOSVD
+Let $\mathbb{F}$ be the real or complex numbers.
+Any tensor $p$ on the Tucker manifold can be represented as a multilinear product in HOSVD
 [^DeLathauwer2000] form
 ```math
-\mathcal{A} = (U_1,\dots,U_D) \cdot \mathcal{C}
+p = (U_1,\dots,U_D) \cdot \mathcal{C}
 ```
 where $\mathcal C \in \mathbb{F}^{R_1 \times \dots \times R_D}$ and, for $d=1,\dots,D$,
 the matrix $U_d \in \mathbb{F}^{N_d \times R_d}$ contains the singular vectors of the
@@ -20,25 +21,25 @@ $d$th unfolding of $\mathcal{A}$
 # Tangent space
 
 The tangent space to the Tucker manifold at
-$\mathcal{A} = (U_1,\dots,U_D) \cdot \mathcal{C}$ is [^Koch2010]
+$p = (U_1,\dots,U_D) \cdot \mathcal{C}$ is [^Koch2010]
 ```math
-T_{\mathcal{A}} \mathcal{M} =
+T_p \mathcal{M} =
 \bigl\{
-(U_1,\dots,U_D) \cdot \dot{\mathcal{C}}
+(U_1,\dots,U_D) \cdot \mathcal{C}^\prime
 + \sum_{d=1}^D \bigl(
-    (U_1, \dots, U_{d-1}, \dot{U}_d, U_{d+1}, \dots, U_D)
+    (U_1, \dots, U_{d-1}, U_d^\prime, U_{d+1}, \dots, U_D)
     \cdot \mathcal{C}
 \bigr)
 \bigr\}
 ```
-where $\dot{\mathcal{C}}$ is arbitrary, $\dot{U}_d^{\mathrm{H}}$ is the Hermitian adjoint of
-$U_d$, and $\dot{U}_d^{\mathrm{H}} U_d = 0$ for all $d$.
+where $\mathcal{C}^\prime$ is arbitrary, $U_d^{\mathrm{H}}$ is the Hermitian adjoint of
+$U_d$, and $U_d^{\mathrm{H}} U_d^\prime = 0$ for all $d$.
 
 # Constructor
-    Tucker(n⃗::NTuple{D, Int}, r⃗::NTuple{D, Int}[, field = ℝ])
+    Tucker(N::NTuple{D, Int}, R::NTuple{D, Int}[, field = ℝ])
 
-Generate the manifold of $N_1 \times \dots \times N_D$ tensors of fixed multilinear rank
-$(R_1, \dots, R_D)$
+Generate the manifold of `field`-valued tensors of dimensions  `N[1] × … × N[D]` and
+multilinear rank `R = (R[1], …, R[D])`.
 
 [^DeLathauwer2000]:
     > Lieven De Lathauwer, Bart De Moor, Joos Vandewalle: "A multilinear singular value decomposition"
@@ -71,22 +72,26 @@ struct HOSVD{T,D}
     σ::NTuple{D,Vector{T}}
 end
 
-"""
-TuckerPoint{T, D}
+@doc raw"""
+    TuckerPoint{T, D}
 
-An order D tensor of fixed multilinear rank and entries of type T. The tensor is
-represented in HOSVD form. See also [`Tucker`](@ref).
+An order `D` tensor of fixed multilinear rank and entries of type `T`, which makes it a
+point on the [`Tucker`](@ref) manifold. The tensor is represented in HOSVD form.
 
 # Constructors:
-    TuckerPoint(core::AbstractArray{T, D}, factors::Vararg{MtxT, D}) where {T, D, MtxT <: AbstractMatrix{T}}
+    TuckerPoint(core::AbstractArray{T, D}, factors::Vararg{<:AbstractMatrix{T}, D}) where {T, D}
 
-A tensor of the form (factors[1], …, factors[D]) ⋅ core
-where it is assumed that the dimensions of the core are the multilinear rank of the tensor.
+Construct an order `D` tensor of element type `T` that can be represented as the
+multilinear product `(factors[1], …, factors[D]) ⋅ core`.
+It is assumed that the dimensions of the core are the multilinear
+rank of the tensor and that the matrices `factors` each have full rank. No further
+assumptions are made.
 
-    TuckerPoint(A::AbstractArray{T, D}, mlrank::NTuple{D, Int}) where {T, D}
+    TuckerPoint(p::AbstractArray{T, D}, mlrank::NTuple{D, Int}) where {T, D}
 
 The low-multilinear rank tensor arising from the sequentially truncated the higher-order
-singular value decomposition of A [^Vannieuwenhoven2012].
+singular value decomposition of `p`, truncated to the multilinear rank `mlrank`
+[^Vannieuwenhoven2012].
 
 [^Vannieuwenhoven2012]:
     > Nick Vannieuwenhoven, Raf Vandebril, Karl Meerbergen: "A new truncation strategy for the higher-order singular value decomposition"
@@ -120,18 +125,22 @@ end
 @doc raw"""
     TuckerTVector{T, D} <: TVector
 
-Tangent vector to the D-th order Tucker manifold at $x = (U_1,\dots,U_D) ⋅ \mathcal{C}$.
-The numbers are of type T and the vector isrepresented as
-```math
-(U_1,\dots,U_D) \cdot \dot{\mathcal{C}} +
-\sum_{d=1}^D (U_1,\dots,U_{d-1},\dot{U}_d,U_{d+1},\dots,U_D) \cdot \mathcal{C}
-```
-where $\dot{U}_d^\mathrm{H} U_d = 0$. See also [`Tucker`](@ref).
+Tangent vector to the `D`-th order [`Tucker`](@ref) manifold at
+$p = (U_1,\dots,U_D) ⋅ \mathcal{C}$. The numbers are of type `T` and the vector is
+represented as
+````math
+X =
+(U_1,\dots,U_D) \cdot \mathcal{C}^\prime +
+\sum_{d=1}^D (U_1,\dots,U_{d-1},U_d^\prime,U_{d+1},\dots,U_D) \cdot \mathcal{C}
+````
+where $U_d^\mathrm{H} U_d^\prime = 0$.
 
 # Constructor
-    TuckerTVector(Ċ::Array{T,D}, U̇::NTuple{D,Matrix{T}})
+    TuckerTVector(C′::Array{T,D}, U′::NTuple{D,Matrix{T}}) where {T,D}
 
-constructs a `TuckerTVector` as decomposed above.
+Constructs a `TuckerTVector` with `C′` and `U′`, so that, together with a
+[`TuckerPoint`](@ref) `p` as above, the tangent vector can be represented as $X$ in the
+above expression.
 """
 struct TuckerTVector{T,D} <: TVector
     Ċ::Array{T,D}
@@ -212,11 +221,11 @@ end
 ####
 
 @doc raw"""
-    check_point(M::Tucker{N,R,D}, x; kwargs...) where {N,R,D}
+    check_point(M::Tucker{N,R,D}, p; kwargs...) where {N,R,D}
 
-Check whether the multidimensional array or [`TuckerPoint`](@ref) x is a point on the
-[`Tucker`](@ref) manifold, i.e. it is an $N_1 \times \dots \times N_D$ tensor of multilinear
-rank $(R_1,\dots,R_D)$. The keyword arguments are passed to the matrix rank function applied
+Check whether the multidimensional array or [`TuckerPoint`](@ref) `p` is a point on the
+[`Tucker`](@ref) manifold, i.e. it is a `D`th order `N[1] × … × N[D]` tensor of multilinear
+rank `(R[1], …, R[D])`. The keyword arguments are passed to the matrix rank function applied
 to the unfoldings.
 For a [`TuckerPoint`](@ref) it is checked that the point is in correct HOSVD form.
 """
@@ -274,11 +283,11 @@ function check_point(M::Tucker{N,R,D}, x::TuckerPoint; kwargs...) where {N,R,D}
 end
 
 @doc raw"""
-    check_vector(M::Tucker{N,R,D}, p::TuckerPoint{T,D}, v::TuckerTVector) where {N,R,T,D}
+    check_vector(M::Tucker{N,R,D}, p::TuckerPoint{T,D}, X::TuckerTVector) where {N,R,T,D}
 
-Check whether a [`TuckerTVector`](@ref) `v` is is in the tangent space to `M` at `p`. This
-is the case when the dimensions of the factors in `v` agree with those of `p` and the factor
-matrices of `v` are in the orthogonal complement of the HOSVD factors of `p`.
+Check whether a [`TuckerTVector`](@ref) `X` is is in the tangent space to `M` at `p`. This
+is the case when the dimensions of the factors in `X` agree with those of `p` and the factor
+matrices of `X` are in the orthogonal complement of the HOSVD factors of `p`.
 """
 function check_vector(
     M::Tucker{N,R,D},
@@ -376,18 +385,15 @@ end
 end
 
 @doc raw"""
-    embed(::Tucker, A::TuckerPoint)
+    embed(::Tucker{N,R,D}, p::TuckerPoint) where {N,R,D}
 
-Convert a [`TuckerPoint`](@ref) `A` on the Tucker manifold to a full tensor, represented as
-an $N_1 \times \dots \times N_D$-array:
-```math
-(U_D \otimes \dots \otimes U_1) \mathrm{vec}(\mathcal{C})
-```
+Convert a [`TuckerPoint`](@ref) `p` the [`Tucker`](@ref) manifold to a full
+`N[1] × … × N[D]`-array by evaluating the Tucker decomposition.
 
-    embed(::Tucker, A::TuckerPoint, X::TuckerTVector)
+    embed(::Tucker{N,R,D}, p::TuckerPoint, X::TuckerTVector) where {N,R,D}
 
-Convert a tangent vector `X` with base point `A` on the Tucker manifold to a full tensor,
-represented as an $N_1 \times \dots \times N_D$-array.
+Convert a tangent vector `X` with base point `p` on the Tucker manifold to a full tensor,
+represented as an `N[1] × … × N[D]`-array.
 """
 embed(::Tucker, ::Any, ::TuckerPoint)
 
@@ -436,21 +442,21 @@ function Base.foreach(
 end
 
 @doc raw"""
-    get_basis(:: Tucker, A::TuckerPoint, basisType::DefaultOrthonormalBasis{𝔽, TangentSpaceType}) where 𝔽
+    get_basis(:: Tucker, p::TuckerPoint, basisType::DefaultOrthonormalBasis{𝔽, TangentSpaceType}) where 𝔽
 
-A implicitly stored basis of the tangent space to the Tucker manifold.
-Assume $\mathcal{A} = (U_1,\dots,U_D) \cdot \mathcal{C}$ is in HOSVD format and that, for
+An implicitly stored basis of the tangent space to the Tucker manifold.
+Assume $p = (U_1,\dots,U_D) \cdot \mathcal{C}$ is in HOSVD format and that, for
 $d=1,\dots,D$, the singular values of the
 $d$'th unfolding are $\sigma_{dj}$, with $j = 1,\dots,R_d$.
 The basis of the tangent space is as follows: [^Dewaele2021]
 
-```math
+````math
 \bigl\{
 (U_1,\dots,U_D) e_i
 \bigr\} \cup \bigl\{
 (U_1,\dots, \sigma_{dj}^{-1} U_d^{\perp} e_i e_j^T,\dots,U_D) \cdot \mathcal{C}
 \bigr\}
-```
+````
 
 for all $d = 1,\dots,D$ and all canonical basis vectors $e_i$ and $e_j$.
 Every $U_d^\perp$ is such that $[U_d \quad U_d^{\perp}]$ forms an orthonormal basis
@@ -562,17 +568,17 @@ function get_vectors(ℳ::Tucker, 𝔄::TuckerPoint, ℬ::DefaultOrthonormalBasi
 end
 
 """
-    inner(M::Tucker, A::TuckerPoint, x::TuckerTVector, y::TuckerTVector)
+    inner(M::Tucker, p::TuckerPoint, X::TuckerTVector, Y::TuckerTVector)
 
-The Euclidean inner product between tangent vectors `x` and `y` at the point `A` on
-the Tucker manifold. This is equal to `embed(M, A, x) ⋅ embed(M, A, y)`.
+The Euclidean inner product between tangent vectors `X` and `X` at the point `p` on
+the Tucker manifold. This is equal to `embed(M, p, X) ⋅ embed(M, p, Y)`.
 
-    inner(::Tucker, A::TuckerPoint, x::TuckerTVector, y)
-    inner(::Tucker, A::TuckerPoint, x, y::TuckerTVector)
+    inner(::Tucker, A::TuckerPoint, X::TuckerTVector, Y)
+    inner(::Tucker, A::TuckerPoint, X, Y::TuckerTVector)
 
-The Euclidean inner product between `x` and `y` where `x` is a vector tangent to the Tucker
-manifold at `A` and `y` is a vector or the ambient space or vice versa. The vector in the
-ambient space is represented as a full tensor.
+The Euclidean inner product between `X` and `Y` where `X` is a vector tangent to the Tucker
+manifold at `p` and `Y` is a vector in the ambient space or vice versa. The vector in the
+ambient space is represented as a full tensor, i.e., a multidimensional array.
 """
 function inner(::Tucker, 𝔄::TuckerPoint, x::TuckerTVector, y::TuckerTVector)
     ℭ = 𝔄.hosvd.core
@@ -588,11 +594,11 @@ inner(M::Tucker, 𝔄::TuckerPoint, x::TuckerTVector, y) = dot(embed(M, 𝔄, x)
 inner(M::Tucker, 𝔄::TuckerPoint, x, y::TuckerTVector) = dot(x, embed(M, 𝔄, y))
 
 """
-    inverse_retract(M::Tucker, A::TuckerPoint, B::TuckerPoint, ::ProjectionInverseRetraction)
+    inverse_retract(M::Tucker, p::TuckerPoint, q::TuckerPoint, ::ProjectionInverseRetraction)
 
-The projection inverse retraction on the Tucker manifold interprets `B` as a point in the
+The projection inverse retraction on the Tucker manifold interprets `q` as a point in the
 ambient Euclidean space (see [`embed`](@ref)) and projects it onto the tangent space at
-to `M` at `A`.
+to `M` at `p`.
 """
 inverse_retract(
     ::Tucker,
@@ -632,20 +638,20 @@ function is_valid_mlrank(n⃗, r⃗)
 end
 
 @doc raw"""
-    manifold_dimension(::Tucker)
+    manifold_dimension(::Tucker{N,R,D}) where {N,R,D}
 
 The dimension of the manifold of $N_1 \times \dots \times N_D$ tensors of multilinear
-rank $R_1 \times \dots \times R_D$, i.e.
-```math
+rank $(R_1, \dots, R_D)$, i.e.
+````math
 \mathrm{dim}(\mathcal{M}) = \prod_{d=1}^D R_d + \sum_{d=1}^D R_d (N_d - R_d).
-```
+````
 """
 manifold_dimension(::Tucker{n⃗,r⃗}) where {n⃗,r⃗} = prod(r⃗) + sum(r⃗ .* (n⃗ .- r⃗))
 
 @doc raw"""
-    Base.ndims(A::TuckerPoint{T, D})
+    Base.ndims(p::TuckerPoint{T, D})
 
-The order of the tensor corresponding to the [`TuckerPoint`](@ref) `A`.
+The order of the tensor corresponding to the [`TuckerPoint`](@ref) `p`, i.e., `D`.
 """
 Base.ndims(::TuckerPoint{T,D}) where {T,D} = D
 
@@ -653,9 +659,9 @@ number_eltype(::TuckerPoint{T,D}) where {T,D} = T
 number_eltype(::TuckerTVector{T,D}) where {T,D} = T
 
 """
-    project(M::Tucker, A::TuckerPoint, X)
+    project(M::Tucker, p::TuckerPoint, X)
 
-The least-squares projection of a tensor `X` to the tangent space to `M` at `A`.
+The least-squares projection of a dense tensor `X` onto the tangent space to `M` at `p`.
 """
 project(::Tucker, ::Any, ::TuckerPoint, ::Any)
 
@@ -668,12 +674,12 @@ function project!(ℳ::Tucker, Y, 𝔄::TuckerPoint, X)
 end
 
 @doc raw"""
-    retract(::Tucker, A::TuckeroPoint, x::TuckerTVector, ::PolarRetraction)
+    retract(::Tucker, p::TuckerPoint, X::TuckerTVector, ::PolarRetraction)
 
 The truncated HOSVD-based retraction [^Kressner2014] to the Tucker manifold, i.e.
-the result is the sequentially tuncated HOSVD approximation of $\mathcal{A} + x$
+the result is the sequentially tuncated HOSVD approximation of $p + X$
 
-In the exceptional case that the multilinear rank of $\mathcal{A} + x$ is lower than A, this
+In the exceptional case that the multilinear rank of $p + X$ is lower than that of `p`, this
 retraction produces a boundary point, which is outside the manifold.
 
 [^Kressner2014]:
@@ -765,9 +771,9 @@ function Base.show(io::IO, ::MIME"text/plain", ℬ::CachedHOSVDBasis{𝔽,T,D}) 
 end
 
 """
-    Base.size(A::TuckerPoint)
+    Base.size(p::TuckerPoint)
 
-The dimensions of a [`TuckerPoint`](@ref) `A`, when regarded as a full tensor
+The dimensions of a [`TuckerPoint`](@ref) `p`, when regarded as a full tensor
 (see [`embed`](@ref)).
 """
 Base.size(𝔄::TuckerPoint) = map(u -> size(u, 1), 𝔄.hosvd.U)
@@ -844,11 +850,13 @@ function tensor_unfold!(buffer, 𝔄::AbstractArray{T,D}, k) where {T,D}
 end
 
 @doc raw"""
-    zero_vector(::Tucker, A::TuckerPoint)
+    zero_vector(::Tucker, p::TuckerPoint)
 
-The zero element in the tangent space to A on the Tucker manifold, represented as a
-[`TuckerTVector`](@ref)
+The zero element in the tangent space to `p` on the [`Tucker`](@ref) manifold, represented
+as a [`TuckerTVector`](@ref).
 """
+zero_vector(::Tucker, ::TuckerPoint)
+
 function zero_vector!(::Tucker, X::TuckerTVector, ::TuckerPoint)
     for U̇ in X.U̇
         fill!(U̇, zero(eltype(U̇)))
