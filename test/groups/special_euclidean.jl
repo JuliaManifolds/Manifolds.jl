@@ -162,7 +162,7 @@ using ManifoldsBase: VeeOrthogonalBasis
 
         GL = GeneralLinear(4)
         SEGL = EmbeddedManifold(G, GL)
-        @test Manifolds.SE_in_GL(3) === SEGL
+        @test Manifolds.SpecialEuclideanInGeneralLinear(3) === SEGL
         pts_gl = [embed(SEGL, pp) for pp in pts]
         q_gl = embed(SEGL, q)
         X_gl = embed(SEGL, pts_gl[1], X)

@@ -156,7 +156,7 @@ the $n + 1 × n + 1$ matrix
 ````
 
 This function embeds $𝔰𝔢(n)$ in the general linear Lie algebra $𝔤𝔩(n+1)$ but it's not
-a homomorphic embedding (see [`SE_in_GL`](@ref) for a homomorphic one).
+a homomorphic embedding (see [`SpecialEuclideanInGeneralLinear`](@ref) for a homomorphic one).
 
 See also [`affine_matrix`](@ref) for matrix representations of the Lie group.
 """
@@ -489,7 +489,7 @@ function translate_diff!(G::SpecialEuclidean, Y, ::Identity, ::Identity, X, ::Ri
 end
 
 @doc raw"""
-    SE_in_GL
+    SpecialEuclideanInGeneralLinear
 
 An explicit isometric and homomorphic embedding of $\mathrm{SE}(n)$ in $\mathrm{GL}(n+1)$
 and $𝔰𝔢(n)$ in $𝔤𝔩(n+1)$.
@@ -497,31 +497,34 @@ Note that this is *not* a transparently isometric embedding.
 
 # Constructor
 
-    SE_in_GL(n)
+    SpecialEuclideanInGeneralLinear(n)
 """
-const SE_in_GL = EmbeddedManifold{ℝ,<:SpecialEuclidean,<:GeneralLinear}
+const SpecialEuclideanInGeneralLinear =
+    EmbeddedManifold{ℝ,<:SpecialEuclidean,<:GeneralLinear}
 
-SE_in_GL(n) = EmbeddedManifold(SpecialEuclidean(n), GeneralLinear(n + 1))
+function SpecialEuclideanInGeneralLinear(n)
+    return EmbeddedManifold(SpecialEuclidean(n), GeneralLinear(n + 1))
+end
 
 """
-    embed(M::SE_in_GL, p)
+    embed(M::SpecialEuclideanInGeneralLinear, p)
 
 Embed the point `p` on [`SpecialEuclidean`](@ref) in the [`GeneralLinear`](@ref) group.
 The embedding is calculated using [`affine_matrix`](@ref).
 """
-function embed(M::SE_in_GL, p)
+function embed(M::SpecialEuclideanInGeneralLinear, p)
     G = M.manifold
     return affine_matrix(G, p)
 end
 """
-    embed(M::SE_in_GL, p, X)
+    embed(M::SpecialEuclideanInGeneralLinear, p, X)
 
 Embed the tangent vector X at point `p` on [`SpecialEuclidean`](@ref) in the
 [`GeneralLinear`](@ref) group. Point `p` can use any representation valid for
 `SpecialEuclidean`. The embedding is similar from the one defined by [`screw_matrix`](@ref)
 but the translation part is multiplied by inverse of the rotation part.
 """
-function embed(M::SE_in_GL, p, X)
+function embed(M::SpecialEuclideanInGeneralLinear, p, X)
     G = M.manifold
     np, hp = submanifold_components(G, p)
     nX, hX = submanifold_components(G, X)
@@ -533,41 +536,41 @@ function embed(M::SE_in_GL, p, X)
     return Y
 end
 
-function embed!(M::SE_in_GL, q, p)
+function embed!(M::SpecialEuclideanInGeneralLinear, q, p)
     return copyto!(q, embed(M, p))
 end
-function embed!(M::SE_in_GL, Y, p, X)
+function embed!(M::SpecialEuclideanInGeneralLinear, Y, p, X)
     return copyto!(Y, embed(M, p, X))
 end
 
 """
-    project(M::SE_in_GL, p)
+    project(M::SpecialEuclideanInGeneralLinear, p)
 
 Project point `p` in [`GeneralLinear`](@ref) to the [`SpecialEuclidean`](@ref) group.
 This is performed by extracting the rotation and translation part as in [`affine_matrix`](@ref).
 """
-function project(M::SE_in_GL, p)
+function project(M::SpecialEuclideanInGeneralLinear, p)
     G = M.manifold
     np, hp = submanifold_components(G, p)
     return ProductRepr(np, hp)
 end
 """
-    project(M::SE_in_GL, p, X)
+    project(M::SpecialEuclideanInGeneralLinear, p, X)
 
 Project tangent vector `X` at point `p` in [`GeneralLinear`](@ref) to the
 [`SpecialEuclidean`](@ref) Lie algebra.
-This reverses the transformation performed by [`embed`](@ref embed(M::SE_in_GL, p, X))
+This reverses the transformation performed by [`embed`](@ref embed(M::SpecialEuclideanInGeneralLinear, p, X))
 """
-function project(M::SE_in_GL, p, X)
+function project(M::SpecialEuclideanInGeneralLinear, p, X)
     G = M.manifold
     np, hp = submanifold_components(G, p)
     nX, hX = submanifold_components(G, X)
     return ProductRepr(hp * nX, hX)
 end
 
-function project!(M::SE_in_GL, q, p)
+function project!(M::SpecialEuclideanInGeneralLinear, q, p)
     return copyto!(q, project(M, p))
 end
-function project!(M::SE_in_GL, Y, p, X)
+function project!(M::SpecialEuclideanInGeneralLinear, Y, p, X)
     return copyto!(Y, project(M, p, X))
 end
