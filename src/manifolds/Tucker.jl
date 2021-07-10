@@ -73,13 +73,13 @@ struct HOSVD{T,D}
 end
 
 @doc raw"""
-    TuckerPoint{T, D}
+    TuckerPoint{T,D}
 
 An order `D` tensor of fixed multilinear rank and entries of type `T`, which makes it a
 point on the [`Tucker`](@ref) manifold. The tensor is represented in HOSVD form.
 
 # Constructors:
-    TuckerPoint(core::AbstractArray{T, D}, factors::Vararg{<:AbstractMatrix{T}, D}) where {T, D}
+    TuckerPoint(core::AbstractArray{T,D}, factors::Vararg{<:AbstractMatrix{T},D}) where {T,D}
 
 Construct an order `D` tensor of element type `T` that can be represented as the
 multilinear product `(factors[1], …, factors[D]) ⋅ core`.
@@ -87,10 +87,11 @@ It is assumed that the dimensions of the core are the multilinear
 rank of the tensor and that the matrices `factors` each have full rank. No further
 assumptions are made.
 
-    TuckerPoint(p::AbstractArray{T, D}, mlrank::NTuple{D, Int}) where {T, D}
+    TuckerPoint(p::AbstractArray{T,D}, mlrank::NTuple{D,Int}) where {T,D}
 
 The low-multilinear rank tensor arising from the sequentially truncated the higher-order
-singular value decomposition of `p`, truncated to the multilinear rank `mlrank`
+singular value decomposition of the `D`-dimensional array `p` of type `T`. The singular
+values are truncated to get a multilinear rank `mlrank`
 [^Vannieuwenhoven2012].
 
 [^Vannieuwenhoven2012]:
@@ -138,7 +139,8 @@ where $U_d^\mathrm{H} U_d^\prime = 0$.
 # Constructor
     TuckerTVector(C′::Array{T,D}, U′::NTuple{D,Matrix{T}}) where {T,D}
 
-Constructs a `TuckerTVector` with `C′` and `U′`, so that, together with a
+Constructs a `D`th order `TuckerTVector` of number type `T` with `C′` and `U′`, so that,
+together with a
 [`TuckerPoint`](@ref) `p` as above, the tangent vector can be represented as $X$ in the
 above expression.
 """
@@ -285,7 +287,9 @@ end
 @doc raw"""
     check_vector(M::Tucker{N,R,D}, p::TuckerPoint{T,D}, X::TuckerTVector) where {N,R,T,D}
 
-Check whether a [`TuckerTVector`](@ref) `X` is is in the tangent space to `M` at `p`. This
+Check whether a [`TuckerTVector`](@ref) `X` is is in the tangent space to
+the `D`th order [`Tucker`](@ref) manifold `M` at the `D`th order [`TuckerPoint`](@ref) `p`.
+This
 is the case when the dimensions of the factors in `X` agree with those of `p` and the factor
 matrices of `X` are in the orthogonal complement of the HOSVD factors of `p`.
 """
@@ -318,7 +322,9 @@ end
     Base.convert(::Type{Matrix{T}}, basis::CachedBasis{𝔽,DefaultOrthonormalBasis{𝔽, TangentSpaceType},HOSVDBasis{T, D}}) where {𝔽, T, D}
     Base.convert(::Type{Matrix}, basis::CachedBasis{𝔽,DefaultOrthonormalBasis{𝔽, TangentSpaceType},HOSVDBasis{T, D}}) where {𝔽, T, D}
 
-Convert a HOSVD basis to a matrix whose columns are the vectorisations of the
+Convert a HOSVD-derived cached basis from [^Dewaele2021] of the `D`th order
+[`Tucker`](@ref) manifold with number type `T` to a matrix.
+The columns of this matrix are the vectorisations of the
 [`embed`](@ref)dings of the basis vectors.
 """
 function Base.convert(::Type{Matrix{T}}, ℬ::CachedHOSVDBasis{𝔽,T,D}) where {𝔽,T,D}
@@ -387,13 +393,13 @@ end
 @doc raw"""
     embed(::Tucker{N,R,D}, p::TuckerPoint) where {N,R,D}
 
-Convert a [`TuckerPoint`](@ref) `p` the [`Tucker`](@ref) manifold to a full
+Convert a [`TuckerPoint`](@ref) `p` on the rank `R` [`Tucker`](@ref) manifold to a full
 `N[1] × … × N[D]`-array by evaluating the Tucker decomposition.
 
     embed(::Tucker{N,R,D}, p::TuckerPoint, X::TuckerTVector) where {N,R,D}
 
-Convert a tangent vector `X` with base point `p` on the Tucker manifold to a full tensor,
-represented as an `N[1] × … × N[D]`-array.
+Convert a tangent vector `X` with base point `p` on the rank `R` [`Tucker`](@ref)
+manifold to a full tensor, represented as an `N[1] × … × N[D]`-array.
 """
 embed(::Tucker, ::Any, ::TuckerPoint)
 
@@ -649,7 +655,7 @@ rank $(R_1, \dots, R_D)$, i.e.
 manifold_dimension(::Tucker{n⃗,r⃗}) where {n⃗,r⃗} = prod(r⃗) + sum(r⃗ .* (n⃗ .- r⃗))
 
 @doc raw"""
-    Base.ndims(p::TuckerPoint{T, D})
+    Base.ndims(p::TuckerPoint{T,D}) where {T,D}
 
 The order of the tensor corresponding to the [`TuckerPoint`](@ref) `p`, i.e., `D`.
 """
@@ -677,9 +683,9 @@ end
     retract(::Tucker, p::TuckerPoint, X::TuckerTVector, ::PolarRetraction)
 
 The truncated HOSVD-based retraction [^Kressner2014] to the Tucker manifold, i.e.
-the result is the sequentially tuncated HOSVD approximation of $p + X$
+the result is the sequentially tuncated HOSVD approximation of `p + X`.
 
-In the exceptional case that the multilinear rank of $p + X$ is lower than that of `p`, this
+In the exceptional case that the multilinear rank of `p + X` is lower than that of `p`, this
 retraction produces a boundary point, which is outside the manifold.
 
 [^Kressner2014]:
