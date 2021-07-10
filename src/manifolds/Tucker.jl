@@ -2,26 +2,26 @@
 @doc raw"""
     Tucker{N, R, D, 𝔽} <: AbstractManifold{𝔽}
 
-The manifold of $N_1 \times \dots \times N_D$ real-valued or complex-valued tensors of
-fixed multilinear rank $(R_1, \dots, R_D)$ . If $R_1 = \dots = R_D = 1$, this is the
+The manifold of ``N_1 \times \dots \times N_D`` real-valued or complex-valued tensors of
+fixed multilinear rank ``(R_1, \dots, R_D)`` . If ``R_1 = \dots = R_D = 1``, this is the
 Segre manifold, i.e., the set of rank-1 tensors.
 
 # Representation in HOSVD format
 
-Let $\mathbb{F}$ be the real or complex numbers.
-Any tensor $p$ on the Tucker manifold can be represented as a multilinear product in HOSVD
+Let ``\mathbb{F}`` be the real or complex numbers.
+Any tensor ``p`` on the Tucker manifold can be represented as a multilinear product in HOSVD
 [^DeLathauwer2000] form
 ```math
 p = (U_1,\dots,U_D) \cdot \mathcal{C}
 ```
-where $\mathcal C \in \mathbb{F}^{R_1 \times \dots \times R_D}$ and, for $d=1,\dots,D$,
-the matrix $U_d \in \mathbb{F}^{N_d \times R_d}$ contains the singular vectors of the
-$d$th unfolding of $\mathcal{A}$
+where ``\mathcal C \in \mathbb{F}^{R_1 \times \dots \times R_D}`` and, for ``d=1,\dots,D``,
+the matrix ``U_d \in \mathbb{F}^{N_d \times R_d}`` contains the singular vectors of the
+``d``th unfolding of ``\mathcal{A}``
 
 # Tangent space
 
 The tangent space to the Tucker manifold at
-$p = (U_1,\dots,U_D) \cdot \mathcal{C}$ is [^Koch2010]
+``p = (U_1,\dots,U_D) \cdot \mathcal{C}`` is [^Koch2010]
 ```math
 T_p \mathcal{M} =
 \bigl\{
@@ -32,8 +32,8 @@ T_p \mathcal{M} =
 \bigr)
 \bigr\}
 ```
-where $\mathcal{C}^\prime$ is arbitrary, $U_d^{\mathrm{H}}$ is the Hermitian adjoint of
-$U_d$, and $U_d^{\mathrm{H}} U_d^\prime = 0$ for all $d$.
+where ``\mathcal{C}^\prime`` is arbitrary, ``U_d^{\mathrm{H}}`` is the Hermitian adjoint of
+``U_d``, and ``U_d^{\mathrm{H}} U_d^\prime = 0`` for all ``d``.
 
 # Constructor
     Tucker(N::NTuple{D, Int}, R::NTuple{D, Int}[, field = ℝ])
@@ -127,21 +127,21 @@ end
     TuckerTVector{T, D} <: TVector
 
 Tangent vector to the `D`-th order [`Tucker`](@ref) manifold at
-$p = (U_1,\dots,U_D) ⋅ \mathcal{C}$. The numbers are of type `T` and the vector is
+``p = (U_1,\dots,U_D) ⋅ \mathcal{C}``. The numbers are of type `T` and the vector is
 represented as
 ````math
 X =
 (U_1,\dots,U_D) \cdot \mathcal{C}^\prime +
 \sum_{d=1}^D (U_1,\dots,U_{d-1},U_d^\prime,U_{d+1},\dots,U_D) \cdot \mathcal{C}
 ````
-where $U_d^\mathrm{H} U_d^\prime = 0$.
+where ``U_d^\mathrm{H} U_d^\prime = 0``.
 
 # Constructor
     TuckerTVector(C′::Array{T,D}, U′::NTuple{D,Matrix{T}}) where {T,D}
 
-Constructs a `D`th order `TuckerTVector` of number type `T` with `C′` and `U′`, so that,
-together with a
-[`TuckerPoint`](@ref) `p` as above, the tangent vector can be represented as $X$ in the
+Constructs a `D`th order [`TuckerTVector`](@ref) of number type `T` with ``C^\prime``
+and ``U^\prime``, so that, together with a
+[`TuckerPoint`](@ref) ``p`` as above, the tangent vector can be represented as ``X`` in the
 above expression.
 """
 struct TuckerTVector{T,D} <: TVector
@@ -451,9 +451,9 @@ end
     get_basis(:: Tucker, p::TuckerPoint, basisType::DefaultOrthonormalBasis{𝔽, TangentSpaceType}) where 𝔽
 
 An implicitly stored basis of the tangent space to the Tucker manifold.
-Assume $p = (U_1,\dots,U_D) \cdot \mathcal{C}$ is in HOSVD format and that, for
-$d=1,\dots,D$, the singular values of the
-$d$'th unfolding are $\sigma_{dj}$, with $j = 1,\dots,R_d$.
+Assume ``p = (U_1,\dots,U_D) \cdot \mathcal{C}`` is in HOSVD format and that, for
+``d=1,\dots,D``, the singular values of the
+``d``'th unfolding are ``\sigma_{dj}``, with ``j = 1,\dots,R_d``.
 The basis of the tangent space is as follows: [^Dewaele2021]
 
 ````math
@@ -464,9 +464,9 @@ The basis of the tangent space is as follows: [^Dewaele2021]
 \bigr\}
 ````
 
-for all $d = 1,\dots,D$ and all canonical basis vectors $e_i$ and $e_j$.
-Every $U_d^\perp$ is such that $[U_d \quad U_d^{\perp}]$ forms an orthonormal basis
-of $\mathbb{R}^{N_d}$.
+for all ``d = 1,\dots,D`` and all canonical basis vectors ``e_i`` and ``e_j``.
+Every ``U_d^\perp`` is such that ``[U_d \quad U_d^{\perp}]`` forms an orthonormal basis
+of ``\mathbb{R}^{N_d}``.
 
 [^Dewaele2021]:
     > Nick Dewaele, Paul Breiding, Nick Vannieuwenhoven, "The condition number of many tensor decompositions is invariant under Tucker compression"
@@ -646,8 +646,8 @@ end
 @doc raw"""
     manifold_dimension(::Tucker{N,R,D}) where {N,R,D}
 
-The dimension of the manifold of $N_1 \times \dots \times N_D$ tensors of multilinear
-rank $(R_1, \dots, R_D)$, i.e.
+The dimension of the manifold of ``N_1 \times \dots \times N_D`` tensors of multilinear
+rank ``(R_1, \dots, R_D)``, i.e.
 ````math
 \mathrm{dim}(\mathcal{M}) = \prod_{d=1}^D R_d + \sum_{d=1}^D R_d (N_d - R_d).
 ````
@@ -683,9 +683,9 @@ end
     retract(::Tucker, p::TuckerPoint, X::TuckerTVector, ::PolarRetraction)
 
 The truncated HOSVD-based retraction [^Kressner2014] to the Tucker manifold, i.e.
-the result is the sequentially tuncated HOSVD approximation of `p + X`.
+the result is the sequentially tuncated HOSVD approximation of ``p + X``.
 
-In the exceptional case that the multilinear rank of `p + X` is lower than that of `p`, this
+In the exceptional case that the multilinear rank of ``p + X`` is lower than that of ``p``, this
 retraction produces a boundary point, which is outside the manifold.
 
 [^Kressner2014]:
