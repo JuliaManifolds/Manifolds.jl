@@ -721,6 +721,44 @@ Base.show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
 Distributions.support(d::NormalRotationDistribution) = MPointSupport(d.manifold)
 
 @doc raw"""
+    vector_transport_direction(M::Rotations, p, X, d)
+
+Compute parallel transport of vector `X` tangent at `p` on the [`Rotations`](@ref)
+manifold in the direction `d`. The formula, provided in [^Rentmeesters], reads:
+
+```math
+\mathcal P_{q\gets p}X = q^\mathrm{T}p \operatorname{Exp}(d/2) X \operatorname{Exp}(d/2)
+```
+where ``q=\exp_p d``.
+
+The formula simplifies to identity for 2-D rotations.
+
+[^Rentmeesters]:
+    > Rentmeesters Q., “A gradient method for geodesic data fitting on some symmetric
+    > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
+    > European Control Conference, Dec. 2011, pp. 7141–7146. doi: 10.1109/CDC.2011.6161280.
+"""
+vector_transport_direction(M::Rotations, p, X, d)
+
+function vector_transport_direction!(M::Rotations, Y, p, X, d, ::ParallelTransport)
+    expdhalf = exp(d / 2)
+    q = exp(M, p, d)
+    return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
+end
+function vector_transport_direction!(M::Rotations{2}, Y, p, X, d, ::ParallelTransport)
+    return copyto!(Y, X)
+end
+
+function vector_transport_to!(M::Rotations, Y, p, X, q, ::ParallelTransport)
+    d = log(M, p, q)
+    expdhalf = exp(d / 2)
+    return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
+end
+function vector_transport_to!(M::Rotations{2}, Y, p, X, q, ::ParallelTransport)
+    return copyto!(Y, X)
+end
+
+@doc raw"""
     zero_vector(M::Rotations, p)
 
 Return the zero tangent vector from the tangent space art `p` on the [`Rotations`](@ref)

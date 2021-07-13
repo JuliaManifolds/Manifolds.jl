@@ -85,6 +85,26 @@ Base.@propagate_inbounds function _padvector!(
 end
 
 @doc raw"""
+    adjoint_action(::SpecialEuclidean{3}, p, fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}})
+
+Adjoint action of the [`SpecialEuclidean`](@ref) group on the vector with coefficients `fX`
+tangent at point `p`.
+
+The formula for the coefficients reads ``t×(R⋅ω) + R⋅r`` for the translation part and
+``R⋅ω`` for the rotation part, where `t` is the translation part of `p`, `R` is the rotation
+matrix part of `p`, `r` is the translation part of `fX` and `ω` is the rotation part of `fX`,
+``×`` is the cross product and ``⋅`` is the matrix product.
+"""
+function adjoint_action(::SpecialEuclidean{3}, p, fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}})
+    t = p.parts[1]
+    R = p.parts[2]
+    r = fX.data[SA[1, 2, 3]]
+    ω = fX.data[SA[4, 5, 6]]
+    Rω = R * ω
+    return TFVector([cross(t, Rω) + R * r; Rω], fX.basis)
+end
+
+@doc raw"""
     affine_matrix(G::SpecialEuclidean, p) -> AbstractMatrix
 
 Represent the point $p ∈ \mathrm{SE}(n)$ as an affine matrix.
@@ -98,7 +118,14 @@ R & t \\
 \end{pmatrix}.
 ````
 
+This function embeds $\mathrm{SE}(n)$ in the general linear group $\mathrm{GL}(n+1)$.
+It is an isometric embedding and group homomorphism [^RicoMartinez1988].
+
 See also [`screw_matrix`](@ref) for matrix representations of the Lie algebra.
+
+[^RicoMartinez1988]:
+    > Rico Martinez, J. M., “Representations of the Euclidean group and its applications
+    > to the kinematics of spatial chains,” PhD Thesis, University of Florida, 1988.
 """
 function affine_matrix(G::SpecialEuclidean{n}, p) where {n}
     pis = submanifold_components(G, p)
@@ -127,6 +154,9 @@ the $n + 1 × n + 1$ matrix
 0^\mathrm{T} & 0
 \end{pmatrix}.
 ````
+
+This function embeds $𝔰𝔢(n)$ in the general linear Lie algebra $𝔤𝔩(n+1)$ but it's not
+a homomorphic embedding (see [`SpecialEuclideanInGeneralLinear`](@ref) for a homomorphic one).
 
 See also [`affine_matrix`](@ref) for matrix representations of the Lie group.
 """
@@ -385,4 +415,162 @@ function group_log!(G::SpecialEuclidean{3}, X, q)
     mul!(b, Jₗ⁻¹, t)
     @inbounds _padvector!(G, X)
     return X
+end
+
+"""
+    lie_bracket(G::SpecialEuclidean, X::ProductRepr, Y::ProductRepr)
+    lie_bracket(G::SpecialEuclidean, X::AbstractMatrix, Y::AbstractMatrix)
+
+Calculate the Lie bracket between elements `X` and `Y` of the special Euclidean Lie
+algebra. For the matrix representation (which can be obtained using [`screw_matrix`](@ref))
+the formula is ``[X, Y] = XY-YX``, while in the [`ProductRepr`](@ref) representation the
+formula reads ``[X, Y] = [(t_1, R_1), (t_2, R_2)] = (R_1 t_2 - R_2 t_1, R_1 R_2 - R_2 R_1)``.
+"""
+function lie_bracket(G::SpecialEuclidean, X::ProductRepr, Y::ProductRepr)
+    nX, hX = submanifold_components(G, X)
+    nY, hY = submanifold_components(G, Y)
+    return ProductRepr(hX * nY - hY * nX, lie_bracket(G.manifold.manifolds[2], hX, hY))
+end
+function lie_bracket(::SpecialEuclidean, X::AbstractMatrix, Y::AbstractMatrix)
+    return X * Y - Y * X
+end
+
+function lie_bracket!(G::SpecialEuclidean, Z, X, Y)
+    nX, hX = submanifold_components(G, X)
+    nY, hY = submanifold_components(G, Y)
+    nZ, hZ = submanifold_components(G, Z)
+    lie_bracket!(G.manifold.manifolds[2], hZ, hX, hY)
+    nZ .= hX * nY .- hY * nX
+    @inbounds _padvector!(G, Z)
+    return Z
+end
+
+"""
+    translate_diff(G::SpecialEuclidean, p, q, X, ::RightAction)
+
+Differential of the right action of the [`SpecialEuclidean`](@ref) group on itself.
+The formula for the rotation part is the differential of the right rotation action, while
+the formula for the translation part reads
+````math
+R_q⋅X_R⋅t_p + X_t
+````
+where ``R_q`` is the rotation part of `q`, ``X_R`` is the rotation part of `X`, ``t_p``
+is the translation part of `p` and ``X_t`` is the translation part of `X`.
+"""
+translate_diff(G::SpecialEuclidean, p, q, X, ::RightAction)
+
+function translate_diff!(G::SpecialEuclidean, Y, p, q, X, ::RightAction)
+    np, hp = submanifold_components(G, p)
+    nq, hq = submanifold_components(G, q)
+    nX, hX = submanifold_components(G, X)
+    nY, hY = submanifold_components(G, Y)
+    hY .= hp' * hX * hp
+    copyto!(nY, hq * (hX * np) + nX)
+    @inbounds _padvector!(G, Y)
+    return Y
+end
+function translate_diff!(G::SpecialEuclidean, Y, ::Identity, q, X, ::RightAction)
+    copyto!(G, Y, X)
+    @inbounds _padvector!(G, Y)
+    return Y
+end
+function translate_diff!(G::SpecialEuclidean, Y, p, ::Identity, X, ::RightAction)
+    np, hp = submanifold_components(G, p)
+    nX, hX = submanifold_components(G, X)
+    nY, hY = submanifold_components(G, Y)
+    hY .= hp' * hX * hp
+    copyto!(nY, hX * np + nX)
+    @inbounds _padvector!(G, Y)
+end
+function translate_diff!(G::SpecialEuclidean, Y, ::Identity, ::Identity, X, ::RightAction)
+    copyto!(G, Y, X)
+    @inbounds _padvector!(G, Y)
+    return Y
+end
+
+@doc raw"""
+    SpecialEuclideanInGeneralLinear
+
+An explicit isometric and homomorphic embedding of $\mathrm{SE}(n)$ in $\mathrm{GL}(n+1)$
+and $𝔰𝔢(n)$ in $𝔤𝔩(n+1)$.
+Note that this is *not* a transparently isometric embedding.
+
+# Constructor
+
+    SpecialEuclideanInGeneralLinear(n)
+"""
+const SpecialEuclideanInGeneralLinear =
+    EmbeddedManifold{ℝ,<:SpecialEuclidean,<:GeneralLinear}
+
+function SpecialEuclideanInGeneralLinear(n)
+    return EmbeddedManifold(SpecialEuclidean(n), GeneralLinear(n + 1))
+end
+
+"""
+    embed(M::SpecialEuclideanInGeneralLinear, p)
+
+Embed the point `p` on [`SpecialEuclidean`](@ref) in the [`GeneralLinear`](@ref) group.
+The embedding is calculated using [`affine_matrix`](@ref).
+"""
+function embed(M::SpecialEuclideanInGeneralLinear, p)
+    G = M.manifold
+    return affine_matrix(G, p)
+end
+"""
+    embed(M::SpecialEuclideanInGeneralLinear, p, X)
+
+Embed the tangent vector X at point `p` on [`SpecialEuclidean`](@ref) in the
+[`GeneralLinear`](@ref) group. Point `p` can use any representation valid for
+`SpecialEuclidean`. The embedding is similar from the one defined by [`screw_matrix`](@ref)
+but the translation part is multiplied by inverse of the rotation part.
+"""
+function embed(M::SpecialEuclideanInGeneralLinear, p, X)
+    G = M.manifold
+    np, hp = submanifold_components(G, p)
+    nX, hX = submanifold_components(G, X)
+    Y = allocate_result(G, screw_matrix, nX, hX)
+    nY, hY = submanifold_components(G, Y)
+    copyto!(hY, hX)
+    copyto!(nY, hp' * nX)
+    @inbounds _padvector!(G, Y)
+    return Y
+end
+
+function embed!(M::SpecialEuclideanInGeneralLinear, q, p)
+    return copyto!(q, embed(M, p))
+end
+function embed!(M::SpecialEuclideanInGeneralLinear, Y, p, X)
+    return copyto!(Y, embed(M, p, X))
+end
+
+"""
+    project(M::SpecialEuclideanInGeneralLinear, p)
+
+Project point `p` in [`GeneralLinear`](@ref) to the [`SpecialEuclidean`](@ref) group.
+This is performed by extracting the rotation and translation part as in [`affine_matrix`](@ref).
+"""
+function project(M::SpecialEuclideanInGeneralLinear, p)
+    G = M.manifold
+    np, hp = submanifold_components(G, p)
+    return ProductRepr(np, hp)
+end
+"""
+    project(M::SpecialEuclideanInGeneralLinear, p, X)
+
+Project tangent vector `X` at point `p` in [`GeneralLinear`](@ref) to the
+[`SpecialEuclidean`](@ref) Lie algebra.
+This reverses the transformation performed by [`embed`](@ref embed(M::SpecialEuclideanInGeneralLinear, p, X))
+"""
+function project(M::SpecialEuclideanInGeneralLinear, p, X)
+    G = M.manifold
+    np, hp = submanifold_components(G, p)
+    nX, hX = submanifold_components(G, X)
+    return ProductRepr(hp * nX, hX)
+end
+
+function project!(M::SpecialEuclideanInGeneralLinear, q, p)
+    return copyto!(q, project(M, p))
+end
+function project!(M::SpecialEuclideanInGeneralLinear, Y, p, X)
+    return copyto!(Y, project(M, p, X))
 end

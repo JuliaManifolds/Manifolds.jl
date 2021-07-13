@@ -100,7 +100,16 @@ using NLsolve
         for T in types
             gpts = convert.(T, pts)
             vgpts = convert.(T, vpts)
-            test_group(G, gpts, vgpts, vgpts; test_diff=true, test_invariance=true)
+            test_group(
+                G,
+                gpts,
+                vgpts,
+                vgpts;
+                test_diff=true,
+                test_invariance=true,
+                test_lie_bracket=true,
+                test_adjoint_action=true,
+            )
             test_manifold(
                 G,
                 gpts;

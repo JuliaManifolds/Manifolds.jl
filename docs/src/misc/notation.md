@@ -10,6 +10,7 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | Symbol | Description | Also used | Comment |
 |:--:|:--------------- |:--:|:-- |
 | ``\tau_p`` | action map by group element ``p`` | ``\mathrm{L}_p``, ``\mathrm{R}_p`` | either left or right |
+| ``\operatorname{Ad}_p(X)`` | adjoint action of element ``p`` of a Lie group on the element ``X`` of the corresponding Lie algebra | | |
 | ``\times`` | Cartesian product of two manifolds | | see [`ProductManifold`](@ref) |
 | ``^{\wedge}`` | (n-ary) Cartesian power of a manifold | | see [`PowerManifold`](@ref) |
 | ``a`` | coordinates of a point in a chart | | see [`get_parameters`](@ref) |

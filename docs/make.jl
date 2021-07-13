@@ -65,8 +65,9 @@ makedocs(
                 "Vector bundle" => "manifolds/vector_bundle.md",
             ],
             "Manifold decorators" => [
-                "Metric manifold" => "manifolds/metric.md",
+                "Connection manifold" => "manifolds/connection.md",
                 "Group manifold" => "manifolds/group.md",
+                "Metric manifold" => "manifolds/metric.md",
             ],
         ],
         "Features on Manifolds" => [
