@@ -12,7 +12,8 @@ include("utils.jl")
         if VERSION.prerelease == () && !Sys.iswindows() && VERSION < v"1.6.0"
             @test length(Test.detect_ambiguities(ManifoldsBase)) <= 66
             @test length(Test.detect_ambiguities(Manifolds)) == 0
-            @test length(our_base_ambiguities()) <= 24
+            # this test takes way too long to perform regularly
+            # @test length(our_base_ambiguities()) <= 24
         else
             @info "Skipping Ambiguity tests for pre-release versions"
         end
