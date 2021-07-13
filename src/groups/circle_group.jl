@@ -14,6 +14,10 @@ invariant_metric_dispatch(::CircleGroup, ::ActionDirection) = Val(true)
 
 default_metric_dispatch(::MetricManifold{ℂ,CircleGroup,EuclideanMetric}) = Val(true)
 
+adjoint_action(::CircleGroup, p, X) = X
+
+adjoint_action!(::CircleGroup, Y, p, X) = copyto!(Y, X)
+
 function compose(G::CircleGroup, p::AbstractVector, q::AbstractVector)
     return map(compose, repeated(G), p, q)
 end
@@ -45,6 +49,10 @@ function inverse_translate(
 )
     return map(/, q, p)
 end
+
+lie_bracket(::CircleGroup, X, Y) = zero(X)
+
+lie_bracket!(::CircleGroup, Z, X, Y) = fill!(Z, 0)
 
 translate_diff(::GT, p, q, X, ::ActionDirection) where {GT<:CircleGroup} = map(*, p, X)
 function translate_diff(

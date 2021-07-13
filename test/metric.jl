@@ -1,7 +1,7 @@
 using FiniteDifferences, ForwardDiff
 using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
-import Manifolds: mean!, median!, InducedBasis, induced_basis, get_chart_index
+import Manifolds: mean!, median!, InducedBasis, induced_basis, get_chart_index, connection
 
 include("utils.jl")
 
@@ -199,6 +199,7 @@ end
 
         @test TestEuclideanMetric()(E) === M
         @test TestEuclideanMetric(E) === M
+        @test connection(M) === Manifolds.LeviCivitaConnection()
 
         G = Diagonal(1.0:n)
         invG = inv(G)
