@@ -134,6 +134,7 @@ include("utils.jl")
     include_test("symmetric.jl")
     include_test("symmetric_positive_definite.jl")
     include_test("symmetric_positive_semidefinite_fixed_rank.jl")
+    include_test("tucker.jl")
 
     include_test("essential_manifold.jl")
     include_test("multinomial_matrices.jl")
