@@ -152,6 +152,13 @@ $♯ : T^{*}\mathcal M → T\mathcal M$
 """
 sharp(::AbstractManifold, p, ξ)
 
+@decorator_transparent_signature sharp(
+    M::AbstractDecoratorManifold,
+    X::TFVector,
+    p,
+    ξ::CoTFVector,
+)
+
 sharp(::AbstractManifold, p, ξ::RieszRepresenterCotangentVector) = ξ.X
 function sharp(M::AbstractManifold, p, X::CoTFVector{<:Any,<:AbstractBasis})
     return TFVector(X.data, dual_basis(M, p, X.basis))
@@ -167,4 +174,36 @@ end
 function sharp!(::AbstractManifold, X, p, ξ::RieszRepresenterCotangentVector)
     copyto!(X, ξ.X)
     return X
+end
+
+#
+# Introduce transparency for connection manfiolds
+# (a) new functions & other parents
+for f in [flat, sharp]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractConnectionManifold,
+                args...,
+            )
+                return Val(:parent)
+            end
+        end,
+    )
+end
+
+# (b) changes / intransparencies.
+for f in [flat!, sharp!]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractConnectionManifold,
+                args...,
+            )
+                return Val(:intransparent)
+            end
+        end,
+    )
 end
