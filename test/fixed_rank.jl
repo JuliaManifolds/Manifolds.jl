@@ -196,6 +196,7 @@ include("utils.jl")
                 projection_atol_multiplier=15,
                 retraction_methods=[PolarRetraction()],
                 mid_point12=nothing,
+                test_inplace=true,
             )
         end
     end

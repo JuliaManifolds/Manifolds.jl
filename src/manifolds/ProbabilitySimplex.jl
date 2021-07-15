@@ -295,10 +295,30 @@ project `Y` from the embedding onto the tangent space at `p` on
 the [`ProbabilitySimplex`](@ref) `M`. The formula reads
 
 ````math
-\operatorname{proj}_{Δ^n}(p,Y) = Y - ⟨p,Y⟩p.
+\operatorname{proj}_{Δ^n}(p,Y) = Y - ⟨\mathbb 1,Y⟩p,
 ````
+where ``\mathbb 1 ∈ ℝ`` denotes the vector of ones.
 """
 project(::ProbabilitySimplex, ::Any, ::Any)
+
+function project!(::ProbabilitySimplex, X, p, Y)
+    X .= Y .- sum(Y) .* p
+    return X
+end
+
+@doc raw"""
+    project(M::ProbabilitySimplex, p)
+
+project `p` from the embedding onto the [`ProbabilitySimplex`](@ref) `M`.
+The formula reads
+
+````math
+\operatorname{proj}_{Δ^n}(p) = \frac{1}{⟨\mathbb 1,p⟩}p,
+````
+where ``\mathbb 1 ∈ ℝ`` denotes the vector of ones.
+Not that this projection is only well-defined if ``p`` has positive entries.
+"""
+project(::ProbabilitySimplex, ::Any)
 
 function project!(::ProbabilitySimplex, q, p)
     if any(x -> x <= 0, p)
@@ -311,11 +331,6 @@ function project!(::ProbabilitySimplex, q, p)
     end
     q .= p ./ sum(p)
     return q
-end
-
-function project!(::ProbabilitySimplex, X, p, Y)
-    X .= Y .- sum(Y) .* p
-    return X
 end
 
 @doc raw"""

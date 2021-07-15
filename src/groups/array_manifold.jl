@@ -4,6 +4,24 @@ array_point(p) = ValidationMPoint(p)
 array_point(p::ValidationMPoint) = p
 array_point(e::Identity) = Identity(e.group, array_point(e.p))
 
+function adjoint_action(M::ValidationManifold, p, X; kwargs...)
+    is_point(M, p, true; kwargs...)
+    eM = make_identity(M.manifold, array_value(p))
+    is_vector(M, eM, X, true; kwargs...)
+    Y = ValidationTVector(adjoint_action(M.manifold, array_value(p), array_value(X)))
+    is_vector(M, eM, Y, true; kwargs...)
+    return Y
+end
+
+function adjoint_action!(M::ValidationManifold, Y, p, X; kwargs...)
+    is_point(M, p, true; kwargs...)
+    eM = make_identity(M.manifold, array_value(p))
+    is_vector(M, eM, X, true; kwargs...)
+    adjoint_action!(M.manifold, array_value(Y), array_value(p), array_value(X))
+    is_vector(M, eM, Y, true; kwargs...)
+    return Y
+end
+
 function Base.inv(M::ValidationManifold, p; kwargs...)
     is_point(M, p, true; kwargs...)
     q = array_point(inv(M.manifold, array_value(p)))
@@ -30,6 +48,24 @@ function identity!(M::ValidationManifold, q, p; kwargs...)
     identity!(M.manifold, array_value(q), array_value(p))
     is_point(M, q, true; kwargs...)
     return q
+end
+
+function lie_bracket(M::ValidationManifold, X, Y)
+    eM = make_identity(M.manifold, array_value(X))
+    is_vector(M, eM, X, true)
+    is_vector(M, eM, Y, true)
+    Z = ValidationTVector(lie_bracket(M.manifold, array_value(X), array_value(Y)))
+    is_vector(M, eM, Z, true)
+    return Z
+end
+
+function lie_bracket!(M::ValidationManifold, Z, X, Y)
+    eM = make_identity(M.manifold, array_value(X))
+    is_vector(M, eM, X, true)
+    is_vector(M, eM, Y, true)
+    lie_bracket!(M.manifold, array_value(Z), array_value(X), array_value(Y))
+    is_vector(M, eM, Z, true)
+    return Z
 end
 
 function compose(M::ValidationManifold, p, q; kwargs...)
