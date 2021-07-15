@@ -371,6 +371,43 @@ end
 ##########################
 
 @doc raw"""
+    adjoint_action(G::AbstractGroupManifold, p, X)
+
+Adjoint action of the element `p` of the Lie group `G` on the element `X`
+of the corresponding Lie algebra.
+
+It is defined as the differential of the group authomorphism ``Ψ_p(q) = pqp⁻¹`` at
+the identity of `G`.
+
+The formula reads
+````math
+\operatorname{Ad}_p(X) = dΨ_p(e)[X]
+````
+where $e$ is the identity element of `G`.
+
+Note that the adjoint representation of a Lie group isn't generally faithful.
+Notably the adjoint representation of SO(2) is trivial.
+"""
+adjoint_action(G::AbstractGroupManifold, p, X)
+@decorator_transparent_function :intransparent function adjoint_action(
+    G::AbstractGroupManifold,
+    p,
+    Xₑ,
+)
+    e = make_identity(G, p)
+    Xₚ = translate_diff(G, p, e, Xₑ, LeftAction())
+    Y = inverse_translate_diff(G, p, p, Xₚ, RightAction())
+    return Y
+end
+
+function adjoint_action!(G::AbstractGroupManifold, Y, p, Xₑ)
+    e = make_identity(G, p)
+    Xₚ = translate_diff(G, p, e, Xₑ, LeftAction())
+    inverse_translate_diff!(G, Y, p, p, Xₚ, RightAction())
+    return Y
+end
+
+@doc raw"""
     inv(G::AbstractGroupManifold, p)
 
 Inverse $p^{-1} ∈ \mathcal{G}$ of an element $p ∈ \mathcal{G}$, such that
@@ -439,6 +476,18 @@ compose(::AbstractGroupManifold, ::Any...)
 end
 
 @decorator_transparent_signature compose!(M::AbstractDecoratorManifold, x, p, q)
+
+"""
+    lie_bracket(G::AbstractGroupManifold, X, Y)
+
+Lie bracket between elements `X` and `Y` of the Lie algebra corresponding to the Lie group `G`.
+
+This can be used to compute the adjoint representation of a Lie algebra.
+Note that this representation isn't generally faithful. Notably the adjoint
+representation of 𝔰𝔬(2) is trivial.
+"""
+lie_bracket(G::AbstractGroupManifold, X, Y)
+@decorator_transparent_signature lie_bracket(M::AbstractDecoratorManifold, X, Y)
 
 _action_order(p, q, ::LeftAction) = (p, q)
 _action_order(p, q, ::RightAction) = (q, p)
@@ -624,7 +673,8 @@ end
 @doc raw"""
     group_exp(G::AbstractGroupManifold, X)
 
-Compute the group exponential of the Lie algebra element `X`.
+Compute the group exponential of the Lie algebra element `X`. It is equivalent to the
+exponential map defined by the [`CartanSchoutenMinus`](@ref) connection.
 
 Given an element $X ∈ 𝔤 = T_e \mathcal{G}$, where $e$ is the [`identity`](@ref) element of
 the group $\mathcal{G}$, and $𝔤$ is its Lie algebra, the group exponential is the map
@@ -674,7 +724,8 @@ end
 @doc raw"""
     group_log(G::AbstractGroupManifold, q)
 
-Compute the group logarithm of the group element `q`.
+Compute the group logarithm of the group element `q`. It is equivalent to the
+logarithmic map defined by the [`CartanSchoutenMinus`](@ref) connection.
 
 Given an element $q ∈ \mathcal{G}$, compute the right inverse of the group exponential map
 [`group_exp`](@ref), that is, the element $\log q = X ∈ 𝔤 = T_e \mathcal{G}$, such that
@@ -861,6 +912,10 @@ Base.:*(e::Identity{G}, p) where {G<:AdditionGroup} = e
 Base.:*(p, e::Identity{G}) where {G<:AdditionGroup} = e
 Base.:*(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
 
+adjoint_action(::AdditionGroup, p, X) = X
+
+adjoint_action!(::AdditionGroup, Y, p, X) = copyto!(Y, X)
+
 Base.zero(e::Identity{G}) where {G<:AdditionGroup} = e
 
 Base.identity(::AdditionGroup, p) = zero(p)
@@ -897,6 +952,10 @@ group_exp!(::AdditionGroup, q, X) = copyto!(q, X)
 group_log(::AdditionGroup, q) = q
 
 group_log!(::AdditionGroup, X, q) = copyto!(X, q)
+
+lie_bracket(::AdditionGroup, X, Y) = zero(X)
+
+lie_bracket!(::AdditionGroup, Z, X, Y) = fill!(Z, 0)
 
 #######################################
 # Overloads for MultiplicationOperation
@@ -972,6 +1031,14 @@ function group_exp!(G::MultiplicationGroup, q, X)
 end
 
 group_log!(::MultiplicationGroup, X::AbstractMatrix, q::AbstractMatrix) = log_safe!(X, q)
+
+lie_bracket(::MultiplicationGroup, X, Y) = mul!(X * Y, Y, X, -1, true)
+
+function lie_bracket!(::MultiplicationGroup, Z, X, Y)
+    mul!(Z, X, Y)
+    mul!(Z, Y, X, -1, true)
+    return Z
+end
 
 # (a) changes / parent.
 for f in [

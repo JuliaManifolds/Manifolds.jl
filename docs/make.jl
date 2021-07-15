@@ -54,6 +54,7 @@ makedocs(
                 "Symmetric positive semidefinite fixed rank" =>
                     "manifolds/symmetricpsdfixedrank.md",
                 "Torus" => "manifolds/torus.md",
+                "Tucker" => "manifolds/tucker.md",
                 "Unit-norm symmetric matrices" =>
                     "manifolds/spheresymmetricmatrices.md",
             ],
@@ -64,8 +65,9 @@ makedocs(
                 "Vector bundle" => "manifolds/vector_bundle.md",
             ],
             "Manifold decorators" => [
-                "Metric manifold" => "manifolds/metric.md",
+                "Connection manifold" => "manifolds/connection.md",
                 "Group manifold" => "manifolds/group.md",
+                "Metric manifold" => "manifolds/metric.md",
             ],
         ],
         "Features on Manifolds" => [

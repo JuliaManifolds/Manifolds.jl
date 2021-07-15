@@ -23,17 +23,17 @@ include("utils.jl")
 
     @testset "vee/hat" begin
         M = Manifolds.Rotations(2)
-        v = [1.23]
-        x = Matrix{Float64}(I, 2, 2)
-        V = Manifolds.hat(M, x, v)
-        @test isa(V, AbstractMatrix)
-        @test norm(M, x, V) / sqrt(2) ≈ norm(v)
-        @test Manifolds.vee(M, x, V) == v
+        Xf = [1.23]
+        p = Matrix{Float64}(I, 2, 2)
+        X = Manifolds.hat(M, p, Xf)
+        @test isa(X, AbstractMatrix)
+        @test norm(M, p, X) / sqrt(2) ≈ norm(Xf)
+        @test Manifolds.vee(M, p, X) == Xf
 
-        V = project(M, x, randn(2, 2))
-        v = Manifolds.vee(M, x, V)
-        @test isa(v, AbstractVector)
-        @test Manifolds.hat(M, x, v) == V
+        X = project(M, p, randn(2, 2))
+        Xf = Manifolds.vee(M, p, X)
+        @test isa(Xf, AbstractVector)
+        @test Manifolds.hat(M, p, Xf) == X
     end
 
     for T in types
@@ -46,6 +46,7 @@ include("utils.jl")
             test_injectivity_radius=false,
             test_project_tangent=true,
             test_musical_isomorphisms=true,
+            test_default_vector_transport=true,
             retraction_methods=retraction_methods,
             inverse_retraction_methods=inverse_retraction_methods,
             point_distributions=[Manifolds.normal_rotation_distribution(M, pts[1], 1.0)],
@@ -55,19 +56,19 @@ include("utils.jl")
         )
 
         @testset "log edge cases" begin
-            v = Manifolds.hat(M, pts[1], [Float64(π)])
-            x = exp(M, pts[1], v)
-            @test isapprox(x, exp(M, pts[1], log(M, pts[1], x)))
+            X = Manifolds.hat(M, pts[1], [Float64(π)])
+            p = exp(M, pts[1], X)
+            @test isapprox(p, exp(M, pts[1], log(M, pts[1], p)))
         end
 
-        v = log(M, pts[1], pts[2])
-        @test norm(M, pts[1], v) ≈ (angles[2] - angles[1]) * sqrt(2)
+        X = log(M, pts[1], pts[2])
+        @test norm(M, pts[1], X) ≈ (angles[2] - angles[1]) * sqrt(2)
 
         # check that exp! does not have a side effect
         q = allocate(pts[1])
         copyto!(M, q, pts[1])
-        q2 = exp(M, pts[1], v)
-        exp!(M, q, q, v)
+        q2 = exp(M, pts[1], X)
+        exp!(M, q, q, X)
         @test norm(q - q2) ≈ 0
 
         v14_polar = inverse_retract(M, pts[1], pts[4], Manifolds.PolarInverseRetraction())
@@ -109,6 +110,7 @@ include("utils.jl")
                 test_injectivity_radius=false,
                 test_musical_isomorphisms=true,
                 test_mutating_rand=true,
+                test_default_vector_transport=true,
                 retraction_methods=retraction_methods,
                 inverse_retraction_methods=inverse_retraction_methods,
                 point_distributions=[ptd],
@@ -120,17 +122,17 @@ include("utils.jl")
             )
 
             @testset "vee/hat" begin
-                x = Matrix(1.0I, n, n)
-                v = randn(manifold_dimension(SOn))
-                V = Manifolds.hat(SOn, x, v)
-                @test isa(V, AbstractMatrix)
-                @test norm(SOn, x, V) / sqrt(2) ≈ norm(v)
-                @test Manifolds.vee(SOn, x, V) == v
+                p = Matrix(1.0I, n, n)
+                Xf = randn(manifold_dimension(SOn))
+                X = Manifolds.hat(SOn, p, Xf)
+                @test isa(X, AbstractMatrix)
+                @test norm(SOn, p, X) / sqrt(2) ≈ norm(Xf)
+                @test Manifolds.vee(SOn, p, X) == Xf
 
-                V = project(SOn, x, randn(n, n))
-                v = Manifolds.vee(SOn, x, V)
-                @test isa(v, AbstractVector)
-                @test Manifolds.hat(SOn, x, v) ≈ V
+                X = project(SOn, p, randn(n, n))
+                Xf = Manifolds.vee(SOn, p, X)
+                @test isa(Xf, AbstractVector)
+                @test Manifolds.hat(SOn, p, Xf) ≈ X
             end
 
             if n == 4
@@ -147,55 +149,55 @@ include("utils.jl")
                         [0, 0, 10, 0, 0, 1] .* 1e-6, # α ⪆ β ⩰ 0
                         [0, 0, π / 4, 0, 0, π / 4 - 1e-6], # α ⪆ β > 0
                     ]
-                    for v in vs
-                        @testset "rotation vector $v" begin
-                            V = Manifolds.hat(SOn, Matrix(1.0I, n, n), v)
-                            x = exp(V)
-                            @test x ≈ exp(SOn, one(x), V)
-                            @test ForwardDiff.derivative(t -> exp(SOn, one(x), t * V), 0) ≈
-                                  V
-                            x2 = exp(log(SOn, one(x), x))
-                            @test isapprox(x, x2; atol=1e-6)
+                    for Xf in vs
+                        @testset "rotation vector $Xf" begin
+                            X = Manifolds.hat(SOn, Matrix(1.0I, n, n), Xf)
+                            p = exp(X)
+                            @test p ≈ exp(SOn, one(p), X)
+                            @test ForwardDiff.derivative(t -> exp(SOn, one(p), t * X), 0) ≈
+                                  X
+                            p2 = exp(log(SOn, one(p), p))
+                            @test isapprox(p, p2; atol=1e-6)
                         end
                     end
                 end
             end
 
-            v = Matrix(
+            X = Matrix(
                 Manifolds.hat(SOn, pts[1], π * normalize(randn(manifold_dimension(SOn)))),
             )
-            x = exp(SOn, pts[1], v)
-            v2 = log(SOn, pts[1], x)
-            @test x ≈ exp(SOn, pts[1], v2)
+            p = exp(SOn, pts[1], X)
+            v2 = log(SOn, pts[1], p)
+            @test p ≈ exp(SOn, pts[1], v2)
         end
     end
     @testset "Test AbstractManifold Point and Tangent Vector checks" begin
         M = Manifolds.Rotations(2)
-        for x in [1, [2.0 0.0; 0.0 1.0], [1.0 0.5; 0.0 1.0]]
-            @test_throws DomainError is_point(M, x, true)
-            @test !is_point(M, x)
+        for p in [1, [2.0 0.0; 0.0 1.0], [1.0 0.5; 0.0 1.0]]
+            @test_throws DomainError is_point(M, p, true)
+            @test !is_point(M, p)
         end
-        x = one(zeros(2, 2))
-        @test is_point(M, x)
-        @test is_point(M, x, true)
-        for v in [1, [0.0 1.0; 0.0 0.0]]
-            @test_throws DomainError is_vector(M, x, v, true)
-            @test !is_vector(M, x, v)
+        p = one(zeros(2, 2))
+        @test is_point(M, p)
+        @test is_point(M, p, true)
+        for X in [1, [0.0 1.0; 0.0 0.0]]
+            @test_throws DomainError is_vector(M, p, X, true)
+            @test !is_vector(M, p, X)
         end
-        v = [0.0 1.0; -1.0 0.0]
-        @test is_vector(M, x, v)
-        @test is_vector(M, x, v, true)
+        X = [0.0 1.0; -1.0 0.0]
+        @test is_vector(M, p, X)
+        @test is_vector(M, p, X, true)
     end
     @testset "Project point" begin
         M = Manifolds.Rotations(2)
-        x = Matrix{Float64}(I, 2, 2)
-        x1 = project(M, x)
-        @test is_point(M, x1, true)
+        p = Matrix{Float64}(I, 2, 2)
+        p1 = project(M, p)
+        @test is_point(M, p1, true)
 
         M = Manifolds.Rotations(3)
-        x = collect(reshape(1.0:9.0, (3, 3)))
-        x2 = project(M, x)
-        @test is_point(M, x2, true)
+        p = collect(reshape(1.0:9.0, (3, 3)))
+        p2 = project(M, p)
+        @test is_point(M, p2, true)
 
         rng = MersenneTwister(44)
         x3 = project(M, randn(rng, 3, 3))

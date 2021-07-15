@@ -62,13 +62,15 @@ import ManifoldsBase:
     zero_vector!,
     CotangentSpace,
     TangentSpace
-import Base: copyto!, convert, in, isapprox, isempty, length, showerror
+import Base:
+    copyto!, convert, foreach, in, isapprox, isempty, length, ndims, showerror, size
 
 using Base.Iterators: repeated
 using Distributions
 using Einsum: @einsum
 using FiniteDifferences
 using HybridArrays
+using Kronecker
 using LightGraphs
 using LinearAlgebra
 using ManifoldsBase
@@ -149,6 +151,8 @@ include("manifolds/VectorBundle.jl")
 include("distributions.jl")
 include("projected_distribution.jl")
 
+include("manifolds/ConnectionManifold.jl")
+
 # It's included early to ensure visibility of `Identity`
 include("groups/group.jl")
 
@@ -188,6 +192,7 @@ include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
+include("manifolds/Tucker.jl")
 
 # Product or power based manifolds
 include("manifolds/Torus.jl")
@@ -195,6 +200,7 @@ include("manifolds/Multinomial.jl")
 include("manifolds/Oblique.jl")
 include("manifolds/EssentialManifold.jl")
 
+include("groups/connections.jl")
 include("groups/metric.jl")
 include("groups/group_action.jl")
 include("groups/group_operation_action.jl")
@@ -325,9 +331,11 @@ export Euclidean,
     SymmetricMatrices,
     SymmetricPositiveDefinite,
     SymmetricPositiveSemidefiniteFixedRank,
-    Torus
-export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint
-export HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector
+    Torus,
+    Tucker
+export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint, TuckerPoint
+export HyperboloidTVector,
+    PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector, TuckerTVector
 export AbstractNumbers, ℝ, ℂ, ℍ
 
 # decorator manifolds
@@ -352,6 +360,10 @@ export AbstractVectorTransportMethod,
 export PoleLadderTransport, SchildsLadderTransport
 export PowerVectorTransport, ProductVectorTransport
 export AbstractEmbeddedManifold
+export AbstractAffineConnection,
+    AbstractConnectionManifold, ConnectionManifold, LeviCivitaConnection
+export AbstractCartanSchoutenConnection,
+    CartanSchoutenMinus, CartanSchoutenPlus, CartanSchoutenZero
 export AbstractMetric,
     RiemannianMetric,
     LorentzMetric,
@@ -528,7 +540,9 @@ export AbstractGroupAction,
     SpecialOrthogonal,
     TranslationGroup,
     TranslationAction
-export affine_matrix,
+export adjoint_action,
+    adjoint_action!,
+    affine_matrix,
     apply,
     apply!,
     apply_diff,
@@ -559,6 +573,8 @@ export affine_matrix,
     inverse_translate!,
     inverse_translate_diff,
     inverse_translate_diff!,
+    lie_bracket,
+    lie_bracket!,
     make_identity,
     optimal_alignment,
     optimal_alignment!,
