@@ -1,4 +1,4 @@
-include("utils.jl")
+include("../utils.jl")
 
 @testset "SkewSymmetricMatrices" begin
     @test SkewSymmetricMatrices(3) === SkewHermitianMatrices(3)

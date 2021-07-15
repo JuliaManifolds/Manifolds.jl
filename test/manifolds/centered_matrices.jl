@@ -1,4 +1,4 @@
-include("utils.jl")
+include("../utils.jl")
 
 @testset "CenteredMatrices" begin
     M = CenteredMatrices(3, 2)

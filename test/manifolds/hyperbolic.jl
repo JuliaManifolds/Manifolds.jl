@@ -1,4 +1,4 @@
-include("utils.jl")
+include("../utils.jl")
 
 @testset "Hyperbolic Space" begin
     M = Hyperbolic(2)

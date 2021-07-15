@@ -1,4 +1,4 @@
-include("utils.jl")
+include("../utils.jl")
 
 @testset "fixed Rank" begin
     M = FixedRankMatrices(3, 2, 2)

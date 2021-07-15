@@ -1,4 +1,4 @@
-include("utils.jl")
+include("../utils.jl")
 
 @testset "Grassmann" begin
     @testset "Real" begin

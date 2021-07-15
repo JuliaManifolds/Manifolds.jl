@@ -1,4 +1,4 @@
-include("utils.jl")
+include("../utils.jl")
 
 @testset "Rotations" begin
     M = Manifolds.Rotations(2)

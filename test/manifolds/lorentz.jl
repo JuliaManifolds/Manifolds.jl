@@ -1,4 +1,4 @@
-include("utils.jl")
+include("../utils.jl")
 
 @testset "Minkowski Metric" begin
     N = Euclidean(3)

@@ -1,4 +1,4 @@
-include("utils.jl")
+include("../utils.jl")
 
 @testset "Elliptope" begin
     M = Elliptope(4, 2)

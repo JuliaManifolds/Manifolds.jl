@@ -1,4 +1,4 @@
-include("utils.jl")
+include("../utils.jl")
 
 @testset "Cholesky Space" begin
     M = Manifolds.CholeskySpace(3)

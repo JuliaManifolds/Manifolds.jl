@@ -1,4 +1,4 @@
-include("utils.jl")
+include("../utils.jl")
 
 @testset "Probability simplex" begin
     M = ProbabilitySimplex(2)

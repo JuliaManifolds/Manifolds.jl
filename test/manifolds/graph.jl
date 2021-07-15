@@ -1,4 +1,4 @@
-include("utils.jl")
+include("../utils.jl")
 
 @testset "Graph AbstractManifold" begin
     M = Euclidean(2)

@@ -1,5 +1,5 @@
 using ManifoldsBase: LinearAlgebra
-include("utils.jl")
+include("../utils.jl")
 
 @testset "Tucker" begin
     n⃗ = (4, 5, 6)

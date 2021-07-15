@@ -1,4 +1,4 @@
-include("utils.jl")
+include("../utils.jl")
 
 using Manifolds: default_metric_dispatch
 
