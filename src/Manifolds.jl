@@ -164,8 +164,9 @@ METAMANIFOLDS = [
     AbstractPowerManifold,
     PowerManifoldNested,
     PowerManifoldNestedReplacing,
-    ValidationManifold,
     ProductManifold,
+    TangentSpaceAtPoint,
+    ValidationManifold,
     VectorBundle,
 ]
 
