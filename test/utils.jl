@@ -41,10 +41,8 @@ end
     Test whether the signature `sig` has an argument of type `T` as one of its paramaters
 """
 function has_type_in_signature(sig, T::Type)
-    return any(
-        map(Base.unwrap_unionall(sig.sig).parameters) do x
-            xw = Base.rewrap_unionall(x, sig.sig)
-            return xw <: T
-        end
-    )
+    return any(map(Base.unwrap_unionall(sig.sig).parameters) do x
+        xw = Base.rewrap_unionall(x, sig.sig)
+        return xw <: T
+    end)
 end

@@ -56,7 +56,18 @@ function get_coordinates(
 ) where {𝔽}
     return get_coordinates(M, p, ξ.X, DefaultOrthonormalBasis{𝔽}())
 end
-
+for TM in filter(x -> x != AbstractManifold, Manifolds.METAMANIFOLDS)
+    eval(
+        quote
+            @invoke_maker 1 AbstractManifold get_coordinates(
+                M::$TM,
+                p,
+                ξ::RieszRepresenterCotangentVector,
+                b::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+            ) where {𝔽}
+        end,
+    )
+end
 # define also for all decorators and explicit definiting subtypes
 
 function get_coordinates!(
@@ -69,10 +80,18 @@ function get_coordinates!(
     get_coordinates!(M, v, p, ξ.X, DefaultOrthonormalBasis{𝔽}())
     return v
 end
-for TM in filter(x -> x != AbstractManifold,METAMANIFOLDS)
-    quote
-        @invoke_maker 1 AbstractManifold get_coordinates!(M::$TM, v, p, ξ::RieszRepresenterCotangentVector, b::DefaultOrthonormalBasis{𝔽,CotangentSpaceType})
-    end
+for TM in filter(x -> x != AbstractManifold, Manifolds.METAMANIFOLDS)
+    eval(
+        quote
+            @invoke_maker 1 AbstractManifold get_coordinates!(
+                M::$TM,
+                v,
+                p,
+                ξ::RieszRepresenterCotangentVector,
+                b::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+            ) where {𝔽}
+        end,
+    )
 end
 
 function get_vector(
@@ -84,6 +103,18 @@ function get_vector(
     X = get_vector(M, p, v, DefaultOrthonormalBasis{𝔽}())
     return RieszRepresenterCotangentVector(M, p, X)
 end
+for TM in filter(x -> x != AbstractManifold, Manifolds.METAMANIFOLDS)
+    eval(
+        quote
+            @invoke_maker 1 AbstractManifold get_vector(
+                M::$TM,
+                p,
+                v,
+                b::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+            ) where {𝔽}
+        end,
+    )
+end
 
 function get_vector!(
     M::AbstractManifold,
@@ -94,6 +125,19 @@ function get_vector!(
 ) where {𝔽}
     get_vector!(M, ξr.X, p, v, DefaultOrthonormalBasis{𝔽}())
     return ξr
+end
+for TM in filter(x -> x != AbstractManifold, Manifolds.METAMANIFOLDS)
+    eval(
+        quote
+            @invoke_maker 1 AbstractManifold get_vector!(
+                M::$TM,
+                ξr::RieszRepresenterCotangentVector,
+                p,
+                v,
+                b::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+            ) where {𝔽}
+        end,
+    )
 end
 
 @doc raw"""
