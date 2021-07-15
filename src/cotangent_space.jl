@@ -57,6 +57,8 @@ function get_coordinates(
     return get_coordinates(M, p, ξ.X, DefaultOrthonormalBasis{𝔽}())
 end
 
+# define also for all decorators and explicit definiting subtypes
+
 function get_coordinates!(
     M::AbstractManifold,
     v,
@@ -66,6 +68,11 @@ function get_coordinates!(
 ) where {𝔽}
     get_coordinates!(M, v, p, ξ.X, DefaultOrthonormalBasis{𝔽}())
     return v
+end
+for TM in filter(x -> x != AbstractManifold,METAMANIFOLDS)
+    quote
+        @invoke_maker 1 AbstractManifold get_coordinates!(M::$TM, v, p, ξ::RieszRepresenterCotangentVector, b::DefaultOrthonormalBasis{𝔽,CotangentSpaceType})
+    end
 end
 
 function get_vector(

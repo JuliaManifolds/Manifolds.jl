@@ -1,3 +1,5 @@
+METAMANIFOLDS = [AbstractManifold, AbstractDecoratorManifold, AbstractPowerManifold, ValidationManifold]
+
 @doc raw"""
     usinc(θ::Real)
 
