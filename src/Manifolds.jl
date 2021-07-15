@@ -104,6 +104,7 @@ using ManifoldsBase:
     InversePowerRetraction,
     PowerManifold,
     PowerManifoldNested,
+    PowerManifoldNestedReplacing,
     PowerRetraction,
     PowerVectorTransport,
     TangentSpaceType,
@@ -137,30 +138,48 @@ using StatsBase: AbstractWeights
 
 include("utils.jl")
 
-include("atlases.jl")
-include("cotangent_space.jl")
+include("product_representations.jl")
 include("differentiation.jl")
 include("riemannian_diff.jl")
 
-include("statistics.jl")
-
-include("product_representations.jl")
-
-include("manifolds/VectorBundle.jl")
-
-include("distributions.jl")
-include("projected_distribution.jl")
-
+# Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
+include("manifolds/MetricManifold.jl")
+include("manifolds/VectorBundle.jl")
 
 # It's included early to ensure visibility of `Identity`
 include("groups/group.jl")
 
-include("manifolds/MetricManifold.jl")
+# Features I: Which are extended on Meta Manifolds
+include("distributions.jl")
+include("projected_distribution.jl")
+include("statistics.jl")
+
+# Meta Manifolds II: Products
 include("manifolds/ProductManifold.jl")
+
+METAMANIFOLDS = [
+    AbstractManifold,
+    AbstractDecoratorManifold,
+    AbstractPowerManifold,
+    PowerManifoldNested,
+    PowerManifoldNestedReplacing,
+    ValidationManifold,
+    ProductManifold,
+    VectorBundle,
+]
+
+# Features II: That require metas
+include("atlases.jl")
+include("cotangent_space.jl")
+
+# Meta Manifolds II: Power Manifolds
 include("manifolds/PowerManifold.jl")
 include("manifolds/GraphManifold.jl")
 
+#
+# Manifolds
+#
 include("manifolds/Euclidean.jl")
 include("manifolds/Lorentz.jl")
 
@@ -200,6 +219,10 @@ include("manifolds/Multinomial.jl")
 include("manifolds/Oblique.jl")
 include("manifolds/EssentialManifold.jl")
 
+#
+# Group Manifolds
+
+# a) generics
 include("groups/connections.jl")
 include("groups/metric.jl")
 include("groups/group_action.jl")
@@ -208,6 +231,7 @@ include("groups/array_manifold.jl")
 include("groups/product_group.jl")
 include("groups/semidirect_product_group.jl")
 
+# Special Group Manifolds
 include("groups/general_linear.jl")
 include("groups/special_linear.jl")
 include("groups/translation_group.jl")
@@ -295,7 +319,7 @@ function __init__()
 end
 
 #
-export CoTVector, AbstractManifold, AbstractManifoldPoint, TVector, AbstractManifold
+export CoTVector, AbstractManifold, AbstractManifoldPoint, TVector
 export AbstractSphere, AbstractProjectiveSpace
 export Euclidean,
     ArrayProjectiveSpace,

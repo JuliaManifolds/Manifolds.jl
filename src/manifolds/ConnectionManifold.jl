@@ -302,7 +302,6 @@ for f in [
     christoffel_symbols_second_jacobian,
     exp,
     gaussian_curvature,
-    flat,
     get_coordinates,
     get_vector,
     log,
@@ -311,7 +310,6 @@ for f in [
     project,
     ricci_tensor,
     riemann_tensor,
-    sharp,
     vector_transport_along,
     vector_transport_direction,
     vector_transport_direction!, #since it has a default using _to!
@@ -334,7 +332,6 @@ end
 for f in [
     christoffel_symbols_second, # this is basic for connection manifolds but not for metric manifolds
     exp!,
-    flat!,
     get_coordinates!,
     get_vector!,
     get_basis,
@@ -345,7 +342,6 @@ for f in [
     median!,
     norm,
     project!,
-    sharp!,
     retract!,
     vector_transport_along!,
     vector_transport_to!,
