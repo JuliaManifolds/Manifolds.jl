@@ -63,7 +63,11 @@ trangular entries of $a$ is set to $1$ its symmetric entry to $-1$ and we normal
 the factor $\frac{1}{\sqrt{2}}$ and for $b$ one can just use unit vectors reshaped to a matrix
 to obtain orthonormal set of parameters.
 """
-function get_basis(M::Stiefel{n,k,ℝ}, p, B::DefaultOrthonormalBasis{ℝ}) where {n,k}
+function get_basis(
+    M::Stiefel{n,k,ℝ},
+    p,
+    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+) where {n,k}
     V = get_vectors(M, p, B)
     return CachedBasis(B, V)
 end
@@ -73,14 +77,20 @@ function get_coordinates!(
     c,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ},
+    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {n,k}
     V = get_vectors(M, p, B)
     c .= inner.(Ref(M), Ref(p), V, Ref(X))
     return c
 end
 
-function get_vector!(M::Stiefel{n,k,ℝ}, X, p, c, B::DefaultOrthonormalBasis{ℝ}) where {n,k}
+function get_vector!(
+    M::Stiefel{n,k,ℝ},
+    X,
+    p,
+    c,
+    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+) where {n,k}
     V = get_vectors(M, p, B)
     zero_vector!(M, X, p)
     length(c) < length(V) && error(
@@ -92,7 +102,11 @@ function get_vector!(M::Stiefel{n,k,ℝ}, X, p, c, B::DefaultOrthonormalBasis{�
     return X
 end
 
-function get_vectors(::Stiefel{n,k,ℝ}, p, ::DefaultOrthonormalBasis{ℝ}) where {n,k}
+function get_vectors(
+    ::Stiefel{n,k,ℝ},
+    p,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+) where {n,k}
     p⊥ = nullspace([p zeros(n, n - k)])
     an = div(k * (k - 1), 2)
     bn = (n - k) * k
