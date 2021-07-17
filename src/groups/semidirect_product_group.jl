@@ -11,6 +11,9 @@ struct SemidirectProductOperation{A<:AbstractGroupAction} <: AbstractGroupOperat
         return new(action)
     end
 end
+function SemidirectProductOperation(action::A) where {A<:AbstractGroupAction}
+    return SemidirectProductOperation{A}(action)
+end
 
 function Base.show(io::IO, op::SemidirectProductOperation)
     return print(io, "SemidirectProductOperation($(op.action))")
