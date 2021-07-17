@@ -7,6 +7,9 @@ Group operation of a semidirect product group. The operation consists of the ope
 """
 struct SemidirectProductOperation{A<:AbstractGroupAction} <: AbstractGroupOperation
     action::A
+    function SemidirectProductOperation{A}(action::A) where {A<:AbstractGroupAction}
+        return new(action)
+    end
 end
 
 function Base.show(io::IO, op::SemidirectProductOperation)
