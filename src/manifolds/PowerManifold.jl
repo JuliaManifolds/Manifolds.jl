@@ -59,6 +59,29 @@ const PowerManifoldMultidimensional =
 
 Base.:^(M::AbstractManifold, n) = PowerManifold(M, n...)
 
+for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
+    @eval begin
+        function allocate_result(M::$PowerRepr, f::typeof(get_point), a)
+            return invoke(
+                allocate_result,
+                Tuple{AbstractManifold,typeof(get_point),Any},
+                M,
+                f,
+                a,
+            )
+        end
+        function allocate_result(M::$PowerRepr, f::typeof(get_parameters), p)
+            return invoke(
+                allocate_result,
+                Tuple{AbstractManifold,typeof(get_parameters),Any},
+                M,
+                f,
+                p,
+            )
+        end
+    end
+end
+
 default_metric_dispatch(::AbstractPowerManifold, ::PowerMetric) = Val(true)
 
 @doc raw"""
