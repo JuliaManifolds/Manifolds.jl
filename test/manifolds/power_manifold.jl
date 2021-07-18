@@ -409,7 +409,7 @@ end
         p2 = get_point(M, A, p, a)
         @test all(p2 .== p)
         A2 = TestExponentialAtlas()
-        a2 = get_parameters(M, A, p, p)
+        a2 = get_parameters(M, A2, p, p)
         @test isapprox(a, a2)
         @test_throws ErrorException get_point(M, A2, p, a2)
     end
