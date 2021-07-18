@@ -557,6 +557,7 @@ end
             test_reverse_diff=false,
             test_project_tangent=true,
             test_project_point=true,
+            test_riesz_representer=true,
             test_default_vector_transport=true,
             vector_transport_methods=[
                 ProductVectorTransport(ParallelTransport(), ParallelTransport()),
