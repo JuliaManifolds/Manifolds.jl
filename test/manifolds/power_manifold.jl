@@ -6,6 +6,16 @@ using StaticArrays: Dynamic
 
 Random.seed!(42)
 
+struct TestExponentialAtlas <: Manifolds.AbstractAtlas{ℝ} end
+
+function Manifolds.get_point!(M::AbstractManifold, p, ::TestExponentialAtlas, i, a)
+    return exp!(M, p, i, get_vector(M, i, a, DefaultOrthonormalBasis()))
+end
+
+function Manifolds.get_parameters!(M::AbstractManifold, a, ::TestExponentialAtlas, i, p)
+    return get_coordinates!(M, a, i, log(M, i, p), DefaultOrthonormalBasis())
+end
+
 @testset "Power manifold" begin
     Ms = Sphere(2)
     Ms1 = PowerManifold(Ms, 5)
@@ -398,5 +408,9 @@ Random.seed!(42)
         a = get_parameters(M, A, p, p)
         p2 = get_point(M, A, p, a)
         @test all(p2 .== p)
+        A2 = TestExponentialAtlas()
+        a2 = get_parameters(M, A, p, p)
+        @test isapprox(a, a2)
+        @test_throws ErrorException get_point(M, A2, p, a2)
     end
 end
