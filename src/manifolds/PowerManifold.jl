@@ -62,7 +62,7 @@ Base.:^(M::AbstractManifold, n) = PowerManifold(M, n...)
 for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
     @eval begin
         function allocate_result(::$PowerRepr, ::typeof(get_point), a)
-            error("Operation unsupported")
+            return error("Operation unsupported")
         end
         function allocate_result(M::$PowerRepr, f::typeof(get_parameters), p)
             return invoke(
