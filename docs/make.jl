@@ -4,12 +4,24 @@ using Test, ForwardDiff, ReverseDiff
 ENV["GKSwstype"] = "100"
 
 generated_path = joinpath(@__DIR__, "src", "misc")
+base_url = "https://github.com/JuliaManifolds/Manifolds.jl/blob/master/"
 isdir(generated_path) || mkdir(generated_path)
-cp(
-    joinpath(dirname(@__DIR__), "CONTRIBUTING.md"),
-    joinpath(generated_path, "contributing.md");
-    force=true,
-)
+
+open(joinpath(generated_path, "contributing.md"), "w") do io
+    # Point to source license file
+    println(
+        io,
+        """
+        ```@meta
+        EditURL = "$(base_url)CONTRIBUTING.md"
+        ```
+        """,
+    )
+    # Write the contents out below the meta block
+    for line in eachline(joinpath(dirname(@__DIR__), "CONTRIBUTING.md"))
+        println(io, line)
+    end
+end
 
 makedocs(
     # for development, we disable prettyurls
