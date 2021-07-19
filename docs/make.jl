@@ -12,8 +12,15 @@ open(joinpath(generated_path, "contributing.md"), "w") do io
     println(
         io,
         """
-```@meta
-EditURL = "$(base_url)CONTRIBUTING.md"
+        ```@meta
+        EditURL = "$(base_url)CONTRIBUTING.md"
+        ```
+        """,
+    )
+    # Write the contents out below the meta block
+    for line in eachline(joinpath(dirname(@__DIR__), "CONTRIBUTING.md"))
+        println(io, line)
+    end
 end
 
 makedocs(
