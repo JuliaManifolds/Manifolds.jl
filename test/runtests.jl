@@ -8,16 +8,7 @@ include("utils.jl")
 @testset "Manifolds.jl" begin
     include_test("differentiation.jl")
 
-    @testset "Ambiguities" begin
-        if VERSION.prerelease == () && !Sys.iswindows() && VERSION < v"1.6.0"
-            @test length(Test.detect_ambiguities(ManifoldsBase)) <= 66
-            @test length(Test.detect_ambiguities(Manifolds)) == 0
-            # this test takes way too long to perform regularly
-            # @test length(our_base_ambiguities()) <= 24
-        else
-            @info "Skipping Ambiguity tests for pre-release versions"
-        end
-    end
+    include_test("ambiguities.jl")
 
     @testset "utils test" begin
         Random.seed!(42)
@@ -109,43 +100,43 @@ include("utils.jl")
     include_test("groups/group_utils.jl")
     include_test("notation.jl")
     # starting with tests of simple manifolds
-    include_test("centered_matrices.jl")
-    include_test("circle.jl")
-    include_test("cholesky_space.jl")
-    include_test("elliptope.jl")
-    include_test("euclidean.jl")
-    include_test("fixed_rank.jl")
-    include_test("generalized_grassmann.jl")
-    include_test("generalized_stiefel.jl")
-    include_test("grassmann.jl")
-    include_test("hyperbolic.jl")
-    include_test("lorentz.jl")
-    include_test("multinomial_doubly_stochastic.jl")
-    include_test("multinomial_symmetric.jl")
-    include_test("positive_numbers.jl")
-    include_test("probability_simplex.jl")
-    include_test("projective_space.jl")
-    include_test("rotations.jl")
-    include_test("skewhermitian.jl")
-    include_test("spectrahedron.jl")
-    include_test("sphere.jl")
-    include_test("sphere_symmetric_matrices.jl")
-    include_test("stiefel.jl")
-    include_test("symmetric.jl")
-    include_test("symmetric_positive_definite.jl")
-    include_test("symmetric_positive_semidefinite_fixed_rank.jl")
-    include_test("tucker.jl")
+    include_test("manifolds/centered_matrices.jl")
+    include_test("manifolds/circle.jl")
+    include_test("manifolds/cholesky_space.jl")
+    include_test("manifolds/elliptope.jl")
+    include_test("manifolds/euclidean.jl")
+    include_test("manifolds/fixed_rank.jl")
+    include_test("manifolds/generalized_grassmann.jl")
+    include_test("manifolds/generalized_stiefel.jl")
+    include_test("manifolds/grassmann.jl")
+    include_test("manifolds/hyperbolic.jl")
+    include_test("manifolds/lorentz.jl")
+    include_test("manifolds/multinomial_doubly_stochastic.jl")
+    include_test("manifolds/multinomial_symmetric.jl")
+    include_test("manifolds/positive_numbers.jl")
+    include_test("manifolds/probability_simplex.jl")
+    include_test("manifolds/projective_space.jl")
+    include_test("manifolds/rotations.jl")
+    include_test("manifolds/skewhermitian.jl")
+    include_test("manifolds/spectrahedron.jl")
+    include_test("manifolds/sphere.jl")
+    include_test("manifolds/sphere_symmetric_matrices.jl")
+    include_test("manifolds/stiefel.jl")
+    include_test("manifolds/symmetric.jl")
+    include_test("manifolds/symmetric_positive_definite.jl")
+    include_test("manifolds/symmetric_positive_semidefinite_fixed_rank.jl")
+    include_test("manifolds/tucker.jl")
 
-    include_test("essential_manifold.jl")
-    include_test("multinomial_matrices.jl")
-    include_test("oblique.jl")
-    include_test("torus.jl")
+    include_test("manifolds/essential_manifold.jl")
+    include_test("manifolds/multinomial_matrices.jl")
+    include_test("manifolds/oblique.jl")
+    include_test("manifolds/torus.jl")
 
     #meta manifolds
-    include_test("product_manifold.jl")
-    include_test("power_manifold.jl")
-    include_test("vector_bundle.jl")
-    include_test("graph.jl")
+    include_test("manifolds/product_manifold.jl")
+    include_test("manifolds/power_manifold.jl")
+    include_test("manifolds/vector_bundle.jl")
+    include_test("manifolds/graph.jl")
 
     include_test("metric.jl")
     include_test("statistics.jl")

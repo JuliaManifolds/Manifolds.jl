@@ -9,7 +9,7 @@ SURFACE_RESOLUTION_DEFAULT = 32
 #
 @recipe function f(
     M::Hyperbolic{2},
-    pts::Union{AbstractVector{P},Nothing}=nothing,
+    pts::AbstractVector{P},
     vecs::Union{AbstractVector{T},Nothing}=nothing;
     circle_points=CIRCLE_DEFAULT_PLOT_POINTS,
     geodesic_interpolation=-1,
@@ -34,38 +34,36 @@ SURFACE_RESOLUTION_DEFAULT = 32
     tickfontcolor --> RGBA(1.0, 1.0, 1.0, 1.0)
     x = []
     y = []
-    if pts !== nothing
-        if vecs === nothing
-            if geodesic_interpolation < 0
-                seriestype --> :scatter
-                x = [p.value[1] for p in pts]
-                y = [p.value[2] for p in pts]
-            else
-                lpts = empty(pts)
-                for i in 1:(length(pts) - 1)
-                    # push interims points on geodesics between two points.
-                    push!(
-                        lpts,
-                        shortest_geodesic(
-                            M,
-                            pts[i],
-                            pts[i + 1],
-                            collect(range(0, 1, length=geodesic_interpolation + 2))[1:(end - 1)], # omit end point
-                        )...,
-                    )
-                end
-                push!(lpts, last(pts)) # add last end point
-                # split into x, y and plot as curve
-                seriestype --> :path
-                x = [p.value[1] for p in lpts]
-                y = [p.value[2] for p in lpts]
-            end
-        else
-            seriestype := :quiver
-            quiver := ([v.value[1] for v in vecs], [v.value[2] for v in vecs])
+    if vecs === nothing
+        if geodesic_interpolation < 0
+            seriestype --> :scatter
             x = [p.value[1] for p in pts]
             y = [p.value[2] for p in pts]
+        else
+            lpts = empty(pts)
+            for i in 1:(length(pts) - 1)
+                # push interims points on geodesics between two points.
+                push!(
+                    lpts,
+                    shortest_geodesic(
+                        M,
+                        pts[i],
+                        pts[i + 1],
+                        collect(range(0, 1, length=geodesic_interpolation + 2))[1:(end - 1)], # omit end point
+                    )...,
+                )
+            end
+            push!(lpts, last(pts)) # add last end point
+            # split into x, y and plot as curve
+            seriestype --> :path
+            x = [p.value[1] for p in lpts]
+            y = [p.value[2] for p in lpts]
         end
+    else
+        seriestype := :quiver
+        quiver := ([v.value[1] for v in vecs], [v.value[2] for v in vecs])
+        x = [p.value[1] for p in pts]
+        y = [p.value[2] for p in pts]
     end
     return x, y
 end
@@ -74,7 +72,7 @@ end
 #
 @recipe function f(
     M::Hyperbolic{2},
-    pts::Union{AbstractVector{P},Nothing}=nothing,
+    pts::AbstractVector{P},
     vecs::Union{AbstractVector{T},Nothing}=nothing;
     geodesic_interpolation=-1,
 ) where {P<:PoincareHalfSpacePoint,T<:PoincareHalfSpaceTVector}
@@ -82,38 +80,36 @@ end
     framestyle --> :origin
     x = []
     y = []
-    if pts !== nothing
-        if vecs === nothing
-            if geodesic_interpolation < 0
-                seriestype --> :scatter
-                x = [p.value[1] for p in pts]
-                y = [p.value[2] for p in pts]
-            else
-                lpts = empty(pts)
-                for i in 1:(length(pts) - 1)
-                    # push interims points on geodesics between two points.
-                    push!(
-                        lpts,
-                        shortest_geodesic(
-                            M,
-                            pts[i],
-                            pts[i + 1],
-                            collect(range(0, 1, length=geodesic_interpolation + 2))[1:(end - 1)], # omit end point
-                        )...,
-                    )
-                end
-                push!(lpts, last(pts)) # add last end point
-                # split into x, y, z and plot as curve
-                seriestype --> :path
-                x = [p.value[1] for p in lpts]
-                y = [p.value[2] for p in lpts]
-            end
-        else
-            quiver := ([v.value[1] for v in vecs], [v.value[2] for v in vecs])
-            seriestype := :quiver
+    if vecs === nothing
+        if geodesic_interpolation < 0
+            seriestype --> :scatter
             x = [p.value[1] for p in pts]
             y = [p.value[2] for p in pts]
+        else
+            lpts = empty(pts)
+            for i in 1:(length(pts) - 1)
+                # push interims points on geodesics between two points.
+                push!(
+                    lpts,
+                    shortest_geodesic(
+                        M,
+                        pts[i],
+                        pts[i + 1],
+                        collect(range(0, 1, length=geodesic_interpolation + 2))[1:(end - 1)], # omit end point
+                    )...,
+                )
+            end
+            push!(lpts, last(pts)) # add last end point
+            # split into x, y, z and plot as curve
+            seriestype --> :path
+            x = [p.value[1] for p in lpts]
+            y = [p.value[2] for p in lpts]
         end
+    else
+        quiver := ([v.value[1] for v in vecs], [v.value[2] for v in vecs])
+        seriestype := :quiver
+        x = [p.value[1] for p in pts]
+        y = [p.value[2] for p in pts]
     end
     return x, y
 end
@@ -136,9 +132,8 @@ end
     surface_resolution_y=surface_resolution,
     surface_color=RGBA(0.9, 0.9, 0.9, 0.8),
 ) where {P,T}
-    px = [p[1] for p in pts]
-    py = [p[2] for p in pts]
-    pz = [p[3] for p in pts]
+    px = isnothing(pts) ? [-2.0, 2.0] : [p[1] for p in pts]
+    py = isnothing(pts) ? [-2.0, 2.0] : [p[2] for p in pts]
     # part I: wire
     if wireframe
         x = range(min(px...), max(px...), length=wires_x)
@@ -209,8 +204,10 @@ end
             y = [p[2] for p in pts]
             z = [p[3] for p in pts]
         end
+        return x, y, z
+    else
+        return nothing
     end
-    return x, y, z
 end
 #
 # Plotting Recipe – Sphere

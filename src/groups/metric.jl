@@ -35,10 +35,13 @@ provided.
 """
 struct InvariantMetric{G<:AbstractMetric,D<:ActionDirection} <: AbstractMetric
     metric::G
+    function InvariantMetric{G,D}(metric::G) where {G<:AbstractMetric,D<:ActionDirection}
+        return new(metric)
+    end
 end
 
-function InvariantMetric(metric, conv=LeftAction())
-    return InvariantMetric{typeof(metric),typeof(conv)}(metric)
+function InvariantMetric(metric::MC, conv=LeftAction()) where {MC<:AbstractMetric}
+    return InvariantMetric{MC,typeof(conv)}(metric)
 end
 
 const LeftInvariantMetric{G} = InvariantMetric{G,LeftAction} where {G<:AbstractMetric}
@@ -48,7 +51,9 @@ const LeftInvariantMetric{G} = InvariantMetric{G,LeftAction} where {G<:AbstractM
 
 Alias for a left-[`InvariantMetric`](@ref).
 """
-LeftInvariantMetric(metric) = InvariantMetric{typeof(metric),LeftAction}(metric)
+function LeftInvariantMetric(metric::T) where {T<:AbstractMetric}
+    return InvariantMetric{T,LeftAction}(metric)
+end
 
 const RightInvariantMetric{G} = InvariantMetric{G,RightAction} where {G<:AbstractMetric}
 
@@ -57,7 +62,9 @@ const RightInvariantMetric{G} = InvariantMetric{G,RightAction} where {G<:Abstrac
 
 Alias for a right-[`InvariantMetric`](@ref).
 """
-RightInvariantMetric(metric) = InvariantMetric{typeof(metric),RightAction}(metric)
+function RightInvariantMetric(metric::T) where {T<:AbstractMetric}
+    return InvariantMetric{T,RightAction}(metric)
+end
 
 @doc raw"""
     has_approx_invariant_metric(
