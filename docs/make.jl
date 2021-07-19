@@ -8,18 +8,13 @@ base_url = "https://github.com/JuliaManifolds/Manifolds.jl/blob/master/"
 isdir(generated_path) || mkdir(generated_path)
 
 open(joinpath(generated_path, "contributing.md"), "w") do io
-  # Point to source license file
-  println(io, """
-  ```@meta
-  EditURL = "$(base_url)CONTRIBUTING.md"
-  ```
-  """)
-  # Write the contents out below the meta block
-  for line in eachline(joinpath(dirname(@__DIR__), "CONTRIBUTING.md"))
-    println(io, line)
-  end
+    # Point to source license file
+    println(
+        io,
+        """
+```@meta
+EditURL = "$(base_url)CONTRIBUTING.md"
 end
-
 
 makedocs(
     # for development, we disable prettyurls
