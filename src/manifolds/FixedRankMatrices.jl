@@ -17,7 +17,7 @@ respectively; see [`SVDMPoint`](@ref) for details.
 The tangent space ``T_p \mathcal M`` at a point ``p ∈ \mathcal M`` with ``p=U_p S V_p^\mathrm{H}``
 is given by
 ````math
-T_p\mathcal M = \bigl\{ U_p M V_p^\mathrm{T} + U_X V_p^\mathrm{H} + U_p V_X^\mathrm{H} :
+T_p\mathcal M = \bigl\{ U_p M V_p^\mathrm{H} + U_X V_p^\mathrm{H} + U_p V_X^\mathrm{H} :
     M  ∈ 𝔽^{k × k},
     U_X  ∈ 𝔽^{m × k},
     V_X  ∈ 𝔽^{n × k}
@@ -53,7 +53,7 @@ end
 A point on a certain manifold, where the data is stored in a svd like fashion,
 i.e. in the form ``USV^\mathrm{H}``, where this structure stores ``U``, ``S`` and
 ``V^\mathrm{H}``. The storage might also be shortened to just ``k`` singular values
-and accordingly shortened ``U`` (columns) and ``V^\mathrm{T}`` (rows).
+and accordingly shortened ``U`` (columns) and ``V^\mathrm{H}`` (rows).
 
 # Constructors
 * `SVDMPoint(A)` for a matrix `A`, stores its svd factors (i.e. implicitly ``k=\min\{m,n\}``)
@@ -286,7 +286,7 @@ end
     embed(::FixedRankMatrices, p::SVDMPoint)
 
 Embed the point `p` from its `SVDMPoint` representation into the set of ``m×n`` matrices
-by computing ``USV^{\mathrm{T}}``.
+by computing ``USV^{\mathrm{H}}``.
 """
 embed(::FixedRankMatrices, p)
 
@@ -302,7 +302,7 @@ its [`UMVTVector`](@ref) representation  into the set of ``m×n`` matrices.
 
 The formula reads
 ```math
-U_pMV_p^{\mathrm{T}} + U_XV_p^{\mathrm{T}} + U_pV_X^{mathrm{T}}
+U_pMV_p^{\mathrm{H}} + U_XV_p^{\mathrm{H}} + U_pV_X^{\mathrm{H}}
 ```
 """
 embed(::FixedRankMatrices, p, X)
@@ -378,7 +378,7 @@ end
     project(M, p, A)
 
 Project the matrix ``A ∈ ℝ^{m,n}`` or from the embedding the tangent space at ``p`` on the [`FixedRankMatrices`](@ref) `M`,
-further decomposing the result into ``X=UMV``, i.e. a [`UMVTVector`](@ref).
+further decomposing the result into ``X=UMV^\mathrm{H}``, i.e. a [`UMVTVector`](@ref).
 """
 project(::FixedRankMatrices, ::Any, ::Any)
 
