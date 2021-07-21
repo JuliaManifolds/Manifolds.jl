@@ -56,6 +56,19 @@ function get_coordinates(
 ) where {𝔽}
     return get_coordinates(M, p, ξ.X, DefaultOrthonormalBasis{𝔽}())
 end
+for TM in filter(x -> x != AbstractManifold, Manifolds.METAMANIFOLDS)
+    eval(
+        quote
+            @invoke_maker 1 AbstractManifold get_coordinates(
+                M::$TM,
+                p,
+                ξ::RieszRepresenterCotangentVector,
+                b::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+            ) where {𝔽}
+        end,
+    )
+end
+# define also for all decorators and explicit definiting subtypes
 
 function get_coordinates!(
     M::AbstractManifold,
@@ -67,6 +80,19 @@ function get_coordinates!(
     get_coordinates!(M, v, p, ξ.X, DefaultOrthonormalBasis{𝔽}())
     return v
 end
+for TM in filter(x -> x != AbstractManifold, Manifolds.METAMANIFOLDS)
+    eval(
+        quote
+            @invoke_maker 1 AbstractManifold get_coordinates!(
+                M::$TM,
+                v,
+                p,
+                ξ::RieszRepresenterCotangentVector,
+                b::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+            ) where {𝔽}
+        end,
+    )
+end
 
 function get_vector(
     M::AbstractManifold,
@@ -76,6 +102,18 @@ function get_vector(
 ) where {𝔽}
     X = get_vector(M, p, v, DefaultOrthonormalBasis{𝔽}())
     return RieszRepresenterCotangentVector(M, p, X)
+end
+for TM in filter(x -> x != AbstractManifold, Manifolds.METAMANIFOLDS)
+    eval(
+        quote
+            @invoke_maker 1 AbstractManifold get_vector(
+                M::$TM,
+                p,
+                v,
+                b::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+            ) where {𝔽}
+        end,
+    )
 end
 
 function get_vector!(
@@ -87,6 +125,19 @@ function get_vector!(
 ) where {𝔽}
     get_vector!(M, ξr.X, p, v, DefaultOrthonormalBasis{𝔽}())
     return ξr
+end
+for TM in filter(x -> x != AbstractManifold, Manifolds.METAMANIFOLDS)
+    eval(
+        quote
+            @invoke_maker 1 AbstractManifold get_vector!(
+                M::$TM,
+                ξr::RieszRepresenterCotangentVector,
+                p,
+                v,
+                b::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+            ) where {𝔽}
+        end,
+    )
 end
 
 @doc raw"""
@@ -100,6 +151,13 @@ from the cotangent bundle to vectors from the tangent bundle
 $♯ : T^{*}\mathcal M → T\mathcal M$
 """
 sharp(::AbstractManifold, p, ξ)
+
+@decorator_transparent_signature sharp(
+    M::AbstractDecoratorManifold,
+    X::TFVector,
+    p,
+    ξ::CoTFVector,
+)
 
 sharp(::AbstractManifold, p, ξ::RieszRepresenterCotangentVector) = ξ.X
 function sharp(M::AbstractManifold, p, X::CoTFVector{<:Any,<:AbstractBasis})
@@ -116,4 +174,36 @@ end
 function sharp!(::AbstractManifold, X, p, ξ::RieszRepresenterCotangentVector)
     copyto!(X, ξ.X)
     return X
+end
+
+#
+# Introduce transparency for connection manfiolds
+# (a) new functions & other parents
+for f in [flat, sharp]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractConnectionManifold,
+                args...,
+            )
+                return Val(:parent)
+            end
+        end,
+    )
+end
+
+# (b) changes / intransparencies.
+for f in [flat!, sharp!]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractConnectionManifold,
+                args...,
+            )
+                return Val(:intransparent)
+            end
+        end,
+    )
 end

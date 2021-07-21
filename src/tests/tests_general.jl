@@ -116,6 +116,7 @@ function test_manifold(
     test_project_tangent=false,
     test_representation_size=true,
     test_reverse_diff=true,
+    test_riesz_representer=false,
     test_tangent_vector_broadcasting=true,
     test_default_vector_transport=false,
     test_vector_spaces=true,
@@ -354,6 +355,17 @@ function test_manifold(
                 Test.@test isapprox(M, pts[2], q)
             end
         end
+    end
+
+    test_riesz_representer && Test.@testset "RieszRepresenterCotangentVector" begin
+        rrcv = flat(M, pts[1], tv[1])
+        Test.@test rrcv isa RieszRepresenterCotangentVector
+        Test.@test rrcv.p === pts[1]
+        Test.@test rrcv.X === tv[1]
+        basis = dual_basis(M, pts[1], basis_types_to_from[1])
+        coords = get_coordinates(M, pts[1], rrcv, basis)
+        rrcv2 = get_vector(M, pts[1], coords, basis)
+        Test.@test isapprox(M, pts[1], rrcv.X, rrcv2.X)
     end
 
     test_vector_spaces && Test.@testset "vector spaces tests" begin

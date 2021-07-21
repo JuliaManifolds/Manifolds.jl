@@ -480,7 +480,12 @@ eval(
         )
     end,
 )
-function get_vector(M::ProductManifold, p::ProductRepr, X, B::AbstractBasis)
+function get_vector(
+    M::ProductManifold,
+    p::ProductRepr,
+    X,
+    B::AbstractBasis{𝔽,TangentSpaceType},
+) where {𝔽}
     N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, [1, dims...])
