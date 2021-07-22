@@ -168,201 +168,46 @@ switch_direction(::RightAction) = LeftAction()
 ##################################
 
 @doc raw"""
-    Identity(G::AbstractGroupManifold, p)
+    Identity{<:AbstractGroupManifold}
 
-The group identity element $e ∈ \mathcal{G}$ represented by point `p`.
+The group identity element $e ∈ \mathcal{G}$ on an [`AbstractGroupManifold`](@ref)  represented by point `p`.
+
+see also [`get_point`](@ref) on how to obtain the corresponding point/array representation.
 """
-struct Identity{G<:AbstractGroupManifold,PT}
-    group::G
-    p::PT
+struct Identity{G<:AbstractGroupManifold} end
+
+@doc raw"""
+    get_point(G::GT,e::Identity{GT}) where {GT <: AbstractGroupManifold}
+
+return a point representation of the [`Identity`](@ref) `e` on the [`AbstractGroupManifold`](@ref) `G`.
+"""
+function get_point(G::AbstractGroupManifold, e::Identity)
+    return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
 
-Identity(M::AbstractDecoratorManifold, p) = Identity(decorated_manifold(M), p)
-function Identity(M::AbstractManifold, p)
+Identity(::G) where {G<:AbstractGroupManifold} = Identity{G}()
+Identity(M::AbstractDecoratorManifold) = Identity(decorated_manifold(M))
+function Identity(M::AbstractManifold)
     return error("Identity not implemented for manifold $(M) and point $(p).")
 end
 
-function Base.:(==)(e1::Identity, e2::Identity)
-    return e1.p == e2.p && e1.group == e2.group
+function Base.:(==)(::Identity{G1}, ::Identity{G2}) where {G1<:AbstractGroupManifold, G2<:AbstractGroupManifold}
+    return G1===G2
 end
 
-make_identity(M::AbstractManifold, p) = Identity(M, identity(M, p))
-
-Base.show(io::IO, e::Identity) = print(io, "Identity($(e.group), $(e.p))")
+Base.show(io::IO, ::Identity{G}) where {G} = print(io, "Identity{$G}")
 
 # To ensure allocate_result_type works
 number_eltype(::Identity) = Bool
 
 Base.copyto!(e::TE, ::TE) where {TE<:Identity} = e
-Base.copyto!(p, ::TE) where {TE<:Identity} = copyto!(p, e.p)
-Base.copyto!(p::AbstractArray, e::TE) where {TE<:Identity} = copyto!(p, e.p)
-
-Base.isapprox(p, e::E; kwargs...) where {E<:Identity} = isapprox(e, p; kwargs...)
-Base.isapprox(e::E, p; kwargs...) where {E<:Identity} = isapprox(e.group, e, p; kwargs...)
-Base.isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
-
-function allocate_result(
-    M::AbstractManifold,
-    f::typeof(get_coordinates),
-    e::Identity,
-    X,
-    B::AbstractBasis,
-)
-    T = allocate_result_type(M, f, (e.p, X))
-    return allocate(e.p, T, Size(number_of_coordinates(M, B)))
-end
-
-function allocate_result(M::AbstractManifold, f::typeof(get_vector), e::Identity, Xⁱ)
-    is_group_decorator(M) && return allocate_result(base_group(M), f, e, Xⁱ)
-    return error(
-        "allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(Xⁱ).",
-    )
-end
-function allocate_result(M::AbstractGroupManifold, f::typeof(get_vector), e::Identity, Xⁱ)
-    return error(
-        "allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(Xⁱ).",
-    )
-end
-function allocate_result(
-    G::GT,
-    ::typeof(get_vector),
-    ::Identity{GT},
-    Xⁱ,
-) where {GT<:AbstractGroupManifold}
-    B = VectorBundleFibers(TangentSpace, G)
-    return allocate(Xⁱ, Size(representation_size(B)))
-end
-
-function allocate_result(
-    M::AbstractDecoratorManifold,
-    f::typeof(get_coordinates),
-    e::Identity,
-    X,
-)
-    is_group_decorator(M) && return allocate_result(base_group(M), f, e, X)
-    return error(
-        "allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(X).",
-    )
-end
-function allocate_result(
-    M::AbstractGroupManifold,
-    f::typeof(get_coordinates),
-    e::Identity,
-    X,
-)
-    return error(
-        "allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(X).",
-    )
-end
-function allocate_result(
-    G::GT,
-    ::typeof(get_coordinates),
-    ::Identity{GT},
-    X,
-) where {GT<:AbstractGroupManifold}
-    return allocate(X, Size(manifold_dimension(G)))
-end
-function get_vector(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group && error("On $(M) the identity $(e) does not match to perform get_vector.")
-    return get_vector(decorated_manifold(M), e.p, X, B)
-end
-function get_vector(M::AbstractManifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold &&
-        error("On $(M) the identity $(e) does not match to perform get_vector.")
-    return get_vector(M, e.p, X, B)
-end
-for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(
-        quote
-            @invoke_maker 1 AbstractManifold get_vector(
-                M::$MT,
-                e::Identity,
-                X,
-                B::VeeOrthogonalBasis,
-            )
-        end,
-    )
-end
-function get_vector!(M::AbstractGroupManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group && error("On $(M) the identity $(e) does not match to perform get_vector!")
-    return get_vector!(decorated_manifold(M), Y, e.p, X, B)
-end
-function get_vector!(M::AbstractManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold &&
-        error("On $(M) the identity $(e) does not match to perform get_vector!")
-    return get_vector!(M, Y, e.p, X, B)
-end
-for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(
-        quote
-            @invoke_maker 1 AbstractManifold get_vector!(
-                M::$MT,
-                Y,
-                e::Identity,
-                X,
-                B::VeeOrthogonalBasis,
-            )
-        end,
-    )
-end
-
-function get_coordinates(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group &&
-        error("On $(M) the identity $(e) does not match to perform get_coordinates")
-    return get_coordinates(decorated_manifold(M), e.p, X, B)
-end
-function get_coordinates(M::AbstractManifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold &&
-        error("On $(M) the identity $(e) does not match to perform get_coordinates")
-    return get_coordinates(M, e.p, X, B)
-end
-for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(
-        quote
-            @invoke_maker 1 AbstractManifold get_coordinates(
-                M::$MT,
-                e::Identity,
-                X,
-                B::VeeOrthogonalBasis,
-            )
-        end,
-    )
-end
-
-function get_coordinates!(
-    M::AbstractGroupManifold,
-    Y,
-    e::Identity,
-    X,
-    B::VeeOrthogonalBasis,
-)
-    M != e.group &&
-        error("On $(M) the identity $(e) does not match to perform get_coordinates!")
-    return get_coordinates!(decorated_manifold(M), Y, e.p, X, B)
-end
-function get_coordinates!(M::AbstractManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold &&
-        error("On $(M) the identity $(e) does not match to perform get_coordinates!")
-    return get_coordinates!(M, Y, e.p, X, B)
-end
-for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(
-        quote
-            @invoke_maker 1 AbstractManifold get_coordinates!(
-                M::$MT,
-                Y,
-                e::Identity,
-                X,
-                B::VeeOrthogonalBasis,
-            )
-        end,
-    )
-end
 
 manifold_dimension(G::GroupManifold) = manifold_dimension(G.manifold)
 
+function check_point(G::GT, e::Identity{GT}; kwargs...) where {GT<:AbstractGroupManifold}
+    return nothing
+end
 function check_point(G::AbstractGroupManifold, e::Identity; kwargs...)
-    e.group === G && return nothing
     return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
 
@@ -394,15 +239,13 @@ adjoint_action(G::AbstractGroupManifold, p, X)
     p,
     Xₑ,
 )
-    e = make_identity(G, p)
-    Xₚ = translate_diff(G, p, e, Xₑ, LeftAction())
+    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftAction())
     Y = inverse_translate_diff(G, p, p, Xₚ, RightAction())
     return Y
 end
 
 function adjoint_action!(G::AbstractGroupManifold, Y, p, Xₑ)
-    e = make_identity(G, p)
-    Xₚ = translate_diff(G, p, e, Xₑ, LeftAction())
+    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftAction())
     inverse_translate_diff!(G, Y, p, p, Xₚ, RightAction())
     return Y
 end
@@ -424,28 +267,13 @@ end
     return inv!(G.manifold, q, p)
 end
 
-@doc raw"""
-    identity(G::AbstractGroupManifold, p)
-
-Identity element $e ∈ \mathcal{G}$, such that for any element $p ∈ \mathcal{G}$,
-$p \circ e = e \circ p = p$.
-The returned element is of a similar type to `p`.
-"""
-identity(::AbstractGroupManifold, ::Any)
-@decorator_transparent_function function Base.identity(G::AbstractGroupManifold, p)
-    y = allocate_result(G, identity, p)
-    return identity!(G, y, p)
-end
-
-@decorator_transparent_signature identity!(G::AbstractDecoratorManifold, q, p)
-
 function Base.isapprox(
     G::GT,
     e::Identity{GT},
     p;
     kwargs...,
 ) where {GT<:AbstractGroupManifold}
-    return isapprox(G, e.p, p; kwargs...)
+    return isapprox(G, get_point( e.p, p; kwargs...)
 end
 function Base.isapprox(
     G::GT,

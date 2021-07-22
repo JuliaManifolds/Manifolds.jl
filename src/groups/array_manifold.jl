@@ -2,11 +2,10 @@ array_value(e::Identity) = Identity(e.group, array_value(e.p))
 
 array_point(p) = ValidationMPoint(p)
 array_point(p::ValidationMPoint) = p
-array_point(e::Identity) = Identity(e.group, array_point(e.p))
 
 function adjoint_action(M::ValidationManifold, p, X; kwargs...)
     is_point(M, p, true; kwargs...)
-    eM = make_identity(M.manifold, array_value(p))
+    eM = Identity(M.manifold)
     is_vector(M, eM, X, true; kwargs...)
     Y = ValidationTVector(adjoint_action(M.manifold, array_value(p), array_value(X)))
     is_vector(M, eM, Y, true; kwargs...)
@@ -15,7 +14,7 @@ end
 
 function adjoint_action!(M::ValidationManifold, Y, p, X; kwargs...)
     is_point(M, p, true; kwargs...)
-    eM = make_identity(M.manifold, array_value(p))
+    eM = Identity(M.manifold)
     is_vector(M, eM, X, true; kwargs...)
     adjoint_action!(M.manifold, array_value(Y), array_value(p), array_value(X))
     is_vector(M, eM, Y, true; kwargs...)
