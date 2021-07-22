@@ -406,7 +406,7 @@ Compute an SVD-based retraction on the [`FixedRankMatrices`](@ref) `M` by comput
 ````math
     q = U_kS_kV_k^\mathrm{H},
 ````
-where ``U_k S_k V_k^\mathrm{H}`` is the shortened singular value decomposition ``USV=p+X``,
+where ``U_k S_k V_k^\mathrm{H}`` is the shortened singular value decomposition ``USV^\mathrm{H}=p+X``,
 in the sense that ``S_k`` is the diagonal matrix of size ``k × k`` with the ``k`` largest
 singular values and ``U`` and ``V`` are shortened accordingly.
 """
