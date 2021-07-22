@@ -1,35 +1,35 @@
 @doc raw"""
     FixedRankMatrices{m,n,k,𝔽} <: AbstractManifold{𝔽}
 
-The manifold of $m × n$ real-valued or complex-valued matrices of fixed rank $k$, i.e.
+The manifold of ``m × n`` real-valued or complex-valued matrices of fixed rank ``k``, i.e.
 ````math
 \bigl\{ p ∈ 𝔽^{m × n}\ \big|\ \operatorname{rank}(p) = k \bigr\},
 ````
-where $𝔽 ∈ \{ℝ,ℂ\}$ and the rank is the number of linearly independent columns of a matrix.
+where ``𝔽 ∈ \{ℝ,ℂ\}`` and the rank is the number of linearly independent columns of a matrix.
 
 # Representation with 3 matrix factors
 
-A point $p ∈ \mathcal M$ can be stored using unitary matrices $U ∈ 𝔽^{m × k}$, $V ∈ 𝔽^{n × k}$ as well as the $k$
-singular values of $p = USV^\mathrm{H}$, where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or
-Hermitian. In other words, $U$ and $V$ are from the manifolds [`Stiefel`](@ref)`(m,k,𝔽)` and [`Stiefel`](@ref)`(n,k,𝔽)`,
+A point ``p ∈ \mathcal M`` can be stored using unitary matrices ``U ∈ 𝔽^{m × k}``, ``V ∈ 𝔽^{n × k}`` as well as the ``k``
+singular values of ``p = U_p S V_p^\mathrm{H}``, where ``\cdot^{\mathrm{H}}`` denotes the complex conjugate transpose or
+Hermitian. In other words, ``U`` and ``V`` are from the manifolds [`Stiefel`](@ref)`(m,k,𝔽)` and [`Stiefel`](@ref)`(n,k,𝔽)`,
 respectively; see [`SVDMPoint`](@ref) for details.
 
-The tangent space $T_p \mathcal M$ at a point $p ∈ \mathcal M$ with $p=USV^\mathrm{H}$
+The tangent space ``T_p \mathcal M`` at a point ``p ∈ \mathcal M`` with ``p=U_p S V_p^\mathrm{H}``
 is given by
 ````math
-T_p\mathcal M = \bigl\{ UMV^\mathrm{T} + U_pV^\mathrm{H} + UV_p^\mathrm{H} :
+T_p\mathcal M = \bigl\{ U_p M V_p^\mathrm{H} + U_X V_p^\mathrm{H} + U_p V_X^\mathrm{H} :
     M  ∈ 𝔽^{k × k},
-    U_p  ∈ 𝔽^{m × k},
-    V_p  ∈ 𝔽^{n × k}
+    U_X  ∈ 𝔽^{m × k},
+    V_X  ∈ 𝔽^{n × k}
     \text{ s.t. }
-    U_p^\mathrm{H}U = 0_k,
-    V_p^\mathrm{H}V = 0_k
+    U_p^\mathrm{H}U_X = 0_k,
+    V_p^\mathrm{H}V_X = 0_k
 \bigr\},
 ````
-where $0_k$ is the $k × k$ zero matrix. See [`UMVTVector`](@ref) for details.
+where ``0_k`` is the ``k × k`` zero matrix. See [`UMVTVector`](@ref) for details.
 
 The (default) metric of this manifold is obtained by restricting the metric
-on $ℝ^{m × n}$ to the tangent bundle[^Vandereycken2013].
+on ``ℝ^{m × n}`` to the tangent bundle[^Vandereycken2013].
 
 # Constructor
     FixedRankMatrices(m, n, k[, field=ℝ])
@@ -42,7 +42,7 @@ Generate the manifold of `m`-by-`n` (`field`-valued) matrices of rank `k`.
     > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
-struct FixedRankMatrices{M,N,K,𝔽} <: AbstractManifold{𝔽} end
+struct FixedRankMatrices{M,N,K,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType} end
 function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers=ℝ)
     return FixedRankMatrices{m,n,k,field}()
 end
@@ -51,20 +51,20 @@ end
     SVDMPoint <: AbstractManifoldPoint
 
 A point on a certain manifold, where the data is stored in a svd like fashion,
-i.e. in the form $USV^\mathrm{H}$, where this structure stores $U$, $S$ and
-$V^\mathrm{H}$. The storage might also be shortened to just $k$ singular values
-and accordingly shortened $U$ (columns) and $V^\mathrm{T}$ (rows).
+i.e. in the form ``USV^\mathrm{H}``, where this structure stores ``U``, ``S`` and
+``V^\mathrm{H}``. The storage might also be shortened to just ``k`` singular values
+and accordingly shortened ``U`` (columns) and ``V^\mathrm{H}`` (rows).
 
 # Constructors
-* `SVDMPoint(A)` for a matrix `A`, stores its svd factors (i.e. implicitly $k=\min\{m,n\}$)
-* `SVDMPoint(S)` for an `SVD` object, stores its svd factors (i.e. implicitly $k=\min\{m,n\}$)
-* `SVDMPoint(U,S,Vt)` for the svd factors to initialize the `SVDMPoint`` (i.e. implicitly $k=\min\{m,n\}$)
+* `SVDMPoint(A)` for a matrix `A`, stores its svd factors (i.e. implicitly ``k=\min\{m,n\}``)
+* `SVDMPoint(S)` for an `SVD` object, stores its svd factors (i.e. implicitly ``k=\min\{m,n\}``)
+* `SVDMPoint(U,S,Vt)` for the svd factors to initialize the `SVDMPoint`` (i.e. implicitly ``k=\min\{m,n\}``)
 * `SVDMPoint(A,k)` for a matrix `A`, stores its svd factors shortened to the
-  best rank $k$ approximation
+  best rank ``k`` approximation
 * `SVDMPoint(S,k)` for an `SVD` object, stores its svd factors shortened to the
-  best rank $k$ approximation
+  best rank ``k`` approximation
 * `SVDMPoint(U,S,Vt,k)` for the svd factors to initialize the `SVDMPoint`,
-  stores its svd factors shortened to the best rank $k$ approximation
+  stores its svd factors shortened to the best rank ``k`` approximation
 """
 struct SVDMPoint{TU<:AbstractMatrix,TS<:AbstractVector,TVt<:AbstractMatrix} <:
        AbstractManifoldPoint
@@ -82,14 +82,14 @@ Base.:(==)(x::SVDMPoint, y::SVDMPoint) = (x.U == y.U) && (x.S == y.S) && (x.Vt =
 @doc raw"""
     UMVTVector <: TVector
 
-A tangent vector that can be described as a product $UMV^\mathrm{H}$, at least
-together with its base point, see for example [`FixedRankMatrices`](@ref). This
-vector structure stores the additionally (to the point) required fields.
+A tangent vector that can be described as a product `U_p M V_p^\mathrm{H} + U_X V_p^\mathrm{H} + U_p V_X^\mathrm{H}`,
+where `X = U_X S V_X^\mathrm{H}` is its base point, see for example [`FixedRankMatrices`](@ref).
+This vector structure stores the additionally (to the point) required fields.
 
 # Constructors
 * `UMVTVector(U,M,Vt)` store umv factors to initialize the `UMVTVector`
 * `UMVTVector(U,M,Vt,k)` store the umv factors after shortening them down to
-  inner dimensions $k$, i.e. in $UMV^\mathrm{H}$, where $M$ is a $k × k$ matrix.
+  inner dimensions `k`.
 """
 struct UMVTVector{TU<:AbstractMatrix,TM<:AbstractMatrix,TVt<:AbstractMatrix} <: TVector
     U::TU
@@ -109,6 +109,30 @@ Base.:-(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U - w.U, v.M - w.M, v.Vt - 
 Base.:-(v::UMVTVector) = UMVTVector(-v.U, -v.M, -v.Vt)
 Base.:+(v::UMVTVector) = UMVTVector(v.U, v.M, v.Vt)
 Base.:(==)(v::UMVTVector, w::UMVTVector) = (v.U == w.U) && (v.M == w.M) && (v.Vt == w.Vt)
+
+allocate(p::SVDMPoint) = SVDMPoint(allocate(p.U), allocate(p.S), allocate(p.Vt))
+function allocate(p::SVDMPoint, ::Type{T}) where {T}
+    return SVDMPoint(allocate(p.U, T), allocate(p.S, T), allocate(p.Vt, T))
+end
+allocate(X::UMVTVector) = UMVTVector(allocate(X.U), allocate(X.M), allocate(X.Vt))
+function allocate(X::UMVTVector, ::Type{T}) where {T}
+    return UMVTVector(allocate(X.U, T), allocate(X.M, T), allocate(X.Vt, T))
+end
+
+function allocate_result(::FixedRankMatrices{m,n,k}, ::typeof(embed), vals...) where {m,n,k}
+    #note that vals is (p,) or (X,p) but both first entries have a U of correct type
+    return similar(typeof(vals[1].U), m, n)
+end
+function allocate_result(
+    ::FixedRankMatrices{m,n,k},
+    ::typeof(project),
+    X,
+    p,
+    vals...,
+) where {m,n,k}
+    # vals are p and X, so we can use their fields to set up those of the UMVTVector
+    return UMVTVector(allocate(p.U, m, k), allocate(p.S, k, k), allocate(p.Vt, k, n))
+end
 
 Base.copy(v::UMVTVector) = UMVTVector(copy(v.U), copy(v.M), copy(v.Vt))
 
@@ -164,8 +188,6 @@ Base.axes(::UMVTVector) = ()
     copyto!(dest.Vt, Broadcast._broadcast_getindex(bc′, Val(:Vt)))
     return dest
 end
-
-####
 
 @doc raw"""
     check_point(M::FixedRankMatrices{m,n,k}, p; kwargs...)
@@ -247,6 +269,53 @@ function check_vector(
     return nothing
 end
 
+function Base.copyto!(p::SVDMPoint, q::SVDMPoint)
+    copyto!(p.U, q.U)
+    copyto!(p.S, q.S)
+    copyto!(p.Vt, q.Vt)
+    return p
+end
+function Base.copyto!(X::UMVTVector, Y::UMVTVector)
+    copyto!(X.U, Y.U)
+    copyto!(X.M, Y.M)
+    copyto!(X.Vt, Y.Vt)
+    return X
+end
+
+@doc raw"""
+    embed(::FixedRankMatrices, p::SVDMPoint)
+
+Embed the point `p` from its `SVDMPoint` representation into the set of ``m×n`` matrices
+by computing ``USV^{\mathrm{H}}``.
+"""
+embed(::FixedRankMatrices, p)
+
+function embed!(::FixedRankMatrices, q, p)
+    return mul!(q, p.U * Diagonal(p.S), p.Vt)
+end
+
+@doc raw"""
+    embed(M::FixedRankMatrices, p, X)
+
+Embed the tangent vector `X` at point `p` in `M` from
+its [`UMVTVector`](@ref) representation  into the set of ``m×n`` matrices.
+
+The formula reads
+```math
+U_pMV_p^{\mathrm{H}} + U_XV_p^{\mathrm{H}} + U_pV_X^{\mathrm{H}}
+```
+"""
+embed(::FixedRankMatrices, p, X)
+
+function embed!(::FixedRankMatrices, Y, p, X)
+    tmp = p.U * X.M
+    tmp .+= X.U
+    mul!(Y, tmp, p.Vt)
+    return mul!(Y, p.U, X.Vt, true, true)
+end
+
+get_embedding(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽} = Euclidean(m, n; field=𝔽)
+
 @doc raw"""
     inner(M::FixedRankMatrices, p::SVDMPoint, X::UMVTVector, Y::UMVTVector)
 
@@ -274,6 +343,13 @@ function Base.isapprox(
     )
 end
 
+function number_eltype(p::SVDMPoint)
+    return typeof(one(eltype(p.U)) + one(eltype(p.S)) + one(eltype(p.Vt)))
+end
+function number_eltype(X::UMVTVector)
+    return typeof(one(eltype(X.U)) + one(eltype(X.M)) + one(eltype(X.Vt)))
+end
+
 @doc raw"""
     manifold_dimension(M::FixedRankMatrices{m,n,k,𝔽})
 
@@ -284,19 +360,24 @@ of dimension `m`x`n` of rank `k`, namely
 \dim(\mathcal M) = k(m + n - k) \dim_ℝ 𝔽,
 ````
 
-where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@ref) of `𝔽`.
 """
 function manifold_dimension(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽}
     return (m + n - k) * k * real_dimension(𝔽)
 end
 
+function Base.one(p::SVDMPoint)
+    m = size(p.U, 1)
+    n = size(p.Vt, 2)
+    k = length(p.S)
+    return SVDMPoint(one(zeros(m, m))[:, 1:k], one.(p.S), one(zeros(n, n))[1:k, :], k)
+end
+
 @doc raw"""
     project(M, p, A)
-    project(M, p, X)
 
-Project the matrix $A ∈ ℝ^{m,n}$ or a [`UMVTVector`](@ref) `X` from the embedding or
-another tangent space onto the tangent space at $p$ on the [`FixedRankMatrices`](@ref) `M`,
-further decomposing the result into $X=UMV$, i.e. a [`UMVTVector`](@ref).
+Project the matrix ``A ∈ ℝ^{m,n}`` or from the embedding the tangent space at ``p`` on the [`FixedRankMatrices`](@ref) `M`,
+further decomposing the result into ``X=UMV^\mathrm{H}``, i.e. a [`UMVTVector`](@ref).
 """
 project(::FixedRankMatrices, ::Any, ::Any)
 
@@ -309,15 +390,12 @@ function project!(::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, A::AbstractM
     Y.Vt .= (aTu - p.Vt' * uTav')'
     return Y
 end
-function project!(M::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, X::UMVTVector)
-    return project!(M, Y, p, X.U * X.M * X.Vt)
-end
 
 @doc raw"""
     representation_size(M::FixedRankMatrices{m,n,k})
 
 Return the element size of a point on the [`FixedRankMatrices`](@ref) `M`, i.e.
-the size of matrices on this manifold $(m,n)$.
+the size of matrices on this manifold ``(m,n)``.
 """
 @generated representation_size(::FixedRankMatrices{m,n}) where {m,n} = (m, n)
 
@@ -328,30 +406,46 @@ Compute an SVD-based retraction on the [`FixedRankMatrices`](@ref) `M` by comput
 ````math
     q = U_kS_kV_k^\mathrm{H},
 ````
-where $U_k S_k V_k^\mathrm{H}$ is the shortened singular value decomposition $USV=p+X$,
-in the sense that $S_k$ is the diagonal matrix of size $k × k$ with the $k$ largest
-singular values and $U$ and $V$ are shortened accordingly.
+where ``U_k S_k V_k^\mathrm{H}`` is the shortened singular value decomposition ``USV^\mathrm{H}=p+X``,
+in the sense that ``S_k`` is the diagonal matrix of size ``k × k`` with the ``k`` largest
+singular values and ``U`` and ``V`` are shortened accordingly.
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)
 
 function retract!(
-    ::FixedRankMatrices{M,N,k},
+    ::FixedRankMatrices{m,n,k},
     q::SVDMPoint,
     p::SVDMPoint,
     X::UMVTVector,
     ::PolarRetraction,
-) where {M,N,k}
-    s = svd(p.U * Diagonal(p.S) * p.Vt + (p.U * X.M * p.Vt + X.U * p.Vt + X.U * X.Vt))
-    q.U .= s.U[:, 1:k]
-    q.S .= s.S[1:k]
-    q.Vt .= s.Vt[1:k, :]
+) where {m,n,k}
+    QU, RU = qr([p.U X.U])
+    QV, RV = qr([p.Vt' X.Vt'])
+
+    # Compute T = svd(RU * [diagm(p.S) + X.M I; I zeros(k, k)] * RV')
+    @views begin
+        RU11 = RU[:, 1:k]
+        RU12 = RU[:, (k + 1):(2 * k)]
+        RV11 = RV[:, 1:k]
+        RV12 = RV[:, (k + 1):(2 * k)]
+    end
+    tmp = RU11 .* p.S' .+ RU12
+    mul!(tmp, RU11, X.M, true, true)
+    tmp2 = tmp * RV11'
+    mul!(tmp2, RU11, RV12', true, true)
+    T = svd(tmp2)
+
+    mul!(q.U, QU, @view(T.U[:, 1:k]))
+    q.S .= @view(T.S[1:k])
+    copyto!(q.Vt, @view(T.Vt[1:k, :]) * QV')
+
     return q
 end
 
 function Base.show(io::IO, ::FixedRankMatrices{M,N,K,𝔽}) where {M,N,K,𝔽}
     return print(io, "FixedRankMatrices($(M), $(N), $(K), $(𝔽))")
 end
-function Base.show(io::IO, mime::MIME"text/plain", p::SVDMPoint)
+function Base.show(io::IO, ::MIME"text/plain", p::SVDMPoint)
     pre = " "
     summary(io, p)
     println(io, "\nU factor:")
@@ -367,7 +461,7 @@ function Base.show(io::IO, mime::MIME"text/plain", p::SVDMPoint)
     sv = replace(sv, '\n' => "\n$(pre)")
     return print(io, pre, sv)
 end
-function Base.show(io::IO, mime::MIME"text/plain", X::UMVTVector)
+function Base.show(io::IO, ::MIME"text/plain", X::UMVTVector)
     pre = " "
     summary(io, X)
     println(io, "\nU factor:")
@@ -382,52 +476,6 @@ function Base.show(io::IO, mime::MIME"text/plain", X::UMVTVector)
     sv = sprint(show, "text/plain", X.Vt; context=io, sizehint=0)
     sv = replace(sv, '\n' => "\n$(pre)")
     return print(io, pre, sv)
-end
-
-allocate(p::SVDMPoint) = SVDMPoint(allocate(p.U), allocate(p.S), allocate(p.Vt))
-function allocate(p::SVDMPoint, ::Type{T}) where {T}
-    return SVDMPoint(allocate(p.U, T), allocate(p.S, T), allocate(p.Vt, T))
-end
-allocate(X::UMVTVector) = UMVTVector(allocate(X.U), allocate(X.M), allocate(X.Vt))
-function allocate(X::UMVTVector, ::Type{T}) where {T}
-    return UMVTVector(allocate(X.U, T), allocate(X.M, T), allocate(X.Vt, T))
-end
-
-function number_eltype(p::SVDMPoint)
-    return typeof(one(eltype(p.U)) + one(eltype(p.S)) + one(eltype(p.Vt)))
-end
-function number_eltype(X::UMVTVector)
-    return typeof(one(eltype(X.U)) + one(eltype(X.M)) + one(eltype(X.Vt)))
-end
-
-function Base.one(p::SVDMPoint)
-    return SVDMPoint(
-        one(zeros(size(p.U, 1), size(p.U, 1))),
-        ones(length(p.S)),
-        one(zeros(size(p.Vt, 2), size(p.Vt, 2))),
-        length(p.S),
-    )
-end
-function Base.one(X::UMVTVector)
-    return UMVTVector(
-        one(zeros(size(X.U, 1), size(X.U, 1))),
-        one(zeros(size(X.M))),
-        one(zeros(size(X.Vt, 2), size(X.Vt, 2))),
-        size(X.M, 1),
-    )
-end
-
-function Base.copyto!(p::SVDMPoint, q::SVDMPoint)
-    copyto!(p.U, q.U)
-    copyto!(p.S, q.S)
-    copyto!(p.Vt, q.Vt)
-    return p
-end
-function Base.copyto!(X::UMVTVector, Y::UMVTVector)
-    copyto!(X.U, Y.U)
-    copyto!(X.M, Y.M)
-    copyto!(X.Vt, Y.Vt)
-    return X
 end
 
 @doc raw"""

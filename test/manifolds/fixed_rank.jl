@@ -45,6 +45,7 @@ include("../utils.jl")
     @test v == UMVTVector(v.U, v.M, v.Vt)
     @testset "Fixed Rank Matrices – Basics" begin
         @test representation_size(M) == (3, 2)
+        @test get_embedding(M) == Euclidean(3, 2; field=ℝ)
         @test representation_size(Mc) == (3, 2)
         @test manifold_dimension(M) == 6
         @test manifold_dimension(Mc) == 12
@@ -120,13 +121,16 @@ include("../utils.jl")
                 xF2 = SVDMPoint(x.U, x.S, 2 * x.Vt)
                 @test !is_point(M, xF2)
                 @test_throws DomainError is_point(M, xF2, true)
-
                 # copyto
                 yC = allocate(y)
                 copyto!(M, yC, y)
                 @test yC.U == y.U
                 @test yC.S == y.S
                 @test yC.Vt == y.Vt
+                # embed
+                N = get_embedding(M)
+                A = embed(M, x)
+                @test isapprox(N, A, x.U * Diagonal(x.S) * x.Vt)
             end
             @testset "UMV TVector Basics" begin
                 w = UMVTVector(v.U, 2 * v.M, v.Vt)
@@ -144,8 +148,6 @@ include("../utils.jl")
                 zero_vector!(M, w, x)
                 oneP = SVDMPoint(one(zeros(3, 3)), ones(2), one(zeros(2, 2)), 2)
                 @test oneP == one(x)
-                oneV = UMVTVector(one(zeros(3, 3)), one(zeros(2, 2)), one(zeros(2, 2)), 2)
-                @test oneV == one(v)
 
                 # copyto
                 w2 = allocate(w)
@@ -163,12 +165,16 @@ include("../utils.jl")
                 wb = w .+ v .* 2
                 @test wb isa UMVTVector
                 @test wb == w + v * 2
-
                 wb .= 2 .* w .+ v
                 @test wb == 2 * w + v
-
                 wb .= w
                 @test wb == w
+                # embed/project
+                N = get_embedding(M)
+                B = embed(M, x, v)
+                @test isapprox(N, x, B, x.U * v.M * x.Vt + v.U * x.Vt + x.U * v.Vt)
+                v2 = project(M, x, B)
+                @test isapprox(M, x, v, v2)
             end
             test_manifold(
                 M,
@@ -178,7 +184,6 @@ include("../utils.jl")
                 test_injectivity_radius=false,
                 default_retraction_method=PolarRetraction(),
                 test_is_tangent=false,
-                test_project_tangent=true,
                 test_default_vector_transport=false,
                 test_forward_diff=false,
                 test_reverse_diff=false,
