@@ -97,8 +97,6 @@ include("group_utils.jl")
 
         @test copyto!(x, eg) === x
         @test isapprox(G, x, eg)
-        @test_throws ErrorException identity!(G, x, x)
-        @test_throws ErrorException identity(G, x)
 
         @test_throws ErrorException compose(G, x, x)
         @test_throws ErrorException compose(G, x, eg)
@@ -153,8 +151,6 @@ include("group_utils.jl")
         for f in [get_vector, get_coordinates]
             @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:parent}()
         end
-        @test Manifolds.decorator_transparent_dispatch(identity!, G, x, x) ===
-              Val{:intransparent}()
         @test Manifolds.decorator_transparent_dispatch(isapprox, G, eg, x) ===
               Val{:transparent}()
         @test Manifolds.decorator_transparent_dispatch(isapprox, G, x, eg) ===
@@ -210,11 +206,6 @@ include("group_utils.jl")
         @test zero(ge) == ge
         @test inv(G, x) ≈ -x
         @test inv(G, ge) === ge
-        @test identity(G, x) ≈ zero(x)
-        @test identity(G, ge) === ge
-        y = allocate(x)
-        identity!(G, y, x)
-        @test y ≈ zero(x)
         @test compose(G, x, x) ≈ x + x
         @test compose(G, x, ge) ≈ x
         @test compose(G, ge, x) ≈ x
@@ -227,11 +218,6 @@ include("group_utils.jl")
         @test y ≈ x
         @test group_exp(G, v) === v
         @test group_log(G, x) === x
-
-        y = identity(G, x)
-        @test isapprox(y, ge; atol=1e-10)
-        @test isapprox(ge, y; atol=1e-10)
-        @test isapprox(ge, ge)
     end
 
     @testset "Multiplication operation" begin
@@ -279,11 +265,6 @@ include("group_utils.jl")
         @test ge.p ≈ one(x)
         @test inv(G, x) ≈ inv(x)
         @test inv(G, ge) === ge
-        @test identity(G, x) ≈ one(x)
-        @test identity(G, ge) === ge
-        y = allocate(x)
-        identity!(G, y, x)
-        @test y ≈ one(x)
         z = allocate(x)
         copyto!(G, z, x)
         z2 = allocate(x)
@@ -296,7 +277,6 @@ include("group_utils.jl")
         copyto!(G.manifold, Y2, x, X)
         @test Y == Y2
 
-        @test_throws ErrorException identity!(G, [0.0], ge)
         @test compose(G, x, x) ≈ x * x
         @test compose(G, x, ge) ≈ x
         @test compose(G, ge, x) ≈ x
@@ -314,24 +294,6 @@ include("group_utils.jl")
         Y = allocate(X)
         @test group_log!(G, Y, y) === Y
         @test Y ≈ log(y)
-
-        @testset "identity optimization" begin
-            x2 = copy(x)
-            identity!(G, x2, x)
-            x3 = copy(x)
-            invoke(
-                identity!,
-                Tuple{
-                    AbstractGroupManifold{ℝ,Manifolds.MultiplicationOperation},
-                    Any,
-                    AbstractMatrix,
-                },
-                G,
-                x3,
-                x,
-            )
-            @test isapprox(G, x2, x3)
-        end
     end
 
     @testset "Identity on Group Manifolds" begin

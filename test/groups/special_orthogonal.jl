@@ -28,7 +28,7 @@ include("group_utils.jl")
     vpts = [hat(M, x, [-1.0, 2.0, 0.5]), hat(M, x, [1.0, 0.0, 0.5])]
 
     ge = allocate(pts[1])
-    copyto!(ge, make_identity(G, pts[1]))
+    copyto!(ge, get_point(G, Identity(G)))
     @test isapprox(ge, I; atol=1e-10)
 
     gI = Identity(G, ge)
@@ -65,7 +65,7 @@ include("group_utils.jl")
         @test base_group(DM) === G
         @test_throws DomainError is_point(
             DM,
-            make_identity(TranslationGroup(3), [1, 2, 3]),
+            Identity(TranslationGroup(3)),
             true,
         )
         test_group(DM, pts, vpts, vpts; test_diff=true)
@@ -136,12 +136,12 @@ include("group_utils.jl")
 
     @testset "vee/hat" begin
         X = vpts[1]
-        pe = identity(G, pts[1])
+        pe = Identity(G)
 
-        Xⁱ = vee(G, make_identity(G, pts[1]), X)
+        Xⁱ = vee(G, get_point(G,pe), X)
         @test Xⁱ ≈ vee(G, pe, X)
 
-        X2 = hat(G, make_identity(G, pts[1]), Xⁱ)
+        X2 = hat(G, pts[1], Xⁱ)
         @test isapprox(M, pe, X2, hat(G, pe, Xⁱ); atol=1e-6)
     end
     @testset "Identity and get_vector/get_coordinates" begin

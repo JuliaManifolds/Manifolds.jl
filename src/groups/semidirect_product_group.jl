@@ -79,25 +79,11 @@ function inv!(G::SemidirectProductGroup, q, p)
     @inbounds _padpoint!(G, q)
     return q
 end
-inv!(G::AG, p, e::Identity{AG}) where {AG<:SemidirectProductGroup} = identity!(G, p, e)
+inv!(G::AG, p, e::Identity{AG}) where {AG<:SemidirectProductGroup} = copyto!(p, get_point(G,e))
 
-Base.identity(G::GT, e::Identity{GT}) where {GT<:SemidirectProductGroup} = e
-
-function identity!(G::SemidirectProductGroup, q, p)
-    M = base_manifold(G)
-    N, H = M.manifolds
-    np, hp = submanifold_components(G, p)
-    nq, hq = submanifold_components(G, q)
-    identity!(N, nq, np)
-    identity!(H, hq, hp)
-    @inbounds _padpoint!(G, q)
-    return q
-end
-identity!(G::GT, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}} = e
-
-compose(G::GT, p, e::Identity{GT}) where {GT<:SemidirectProductGroup} = p
-compose(G::GT, e::Identity{GT}, p) where {GT<:SemidirectProductGroup} = p
-compose(G::GT, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}} = e
+compose(::GT, p, e::Identity{GT}) where {GT<:SemidirectProductGroup} = p
+compose(::GT, e::Identity{GT}, p) where {GT<:SemidirectProductGroup} = p
+compose(::GT, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}} = e
 
 function compose!(G::SemidirectProductGroup, x, p, q)
     M = base_manifold(G)
@@ -112,10 +98,10 @@ function compose!(G::SemidirectProductGroup, x, p, q)
     @inbounds _padpoint!(G, x)
     return x
 end
-compose!(G::GT, x, ::Identity{GT}, q) where {GT<:SemidirectProductGroup} = copyto!(x, q)
-compose!(G::GT, x, p, ::Identity{GT}) where {GT<:SemidirectProductGroup} = copyto!(x, p)
+compose!(::GT, x, ::Identity{GT}, q) where {GT<:SemidirectProductGroup} = copyto!(x, q)
+compose!(::GT, x, p, ::Identity{GT}) where {GT<:SemidirectProductGroup} = copyto!(x, p)
 function compose!(G::GT, x, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}}
-    return identity!(G, x, e)
+    return copyto!(x, get_point(G,e))
 end
 
 @doc raw"""
@@ -247,7 +233,7 @@ function Base.isapprox(
     p;
     kwargs...,
 ) where {GT<:SemidirectProductGroup}
-    return isapprox(G, identity(G, p), p; kwargs...)
+    return isapprox(G, get_point(G, e), p; kwargs...)
 end
 function Base.isapprox(
     ::GT,

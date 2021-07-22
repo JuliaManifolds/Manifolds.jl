@@ -8,8 +8,6 @@ Abstract type for smooth binary operations $∘$ on elements of a Lie group $\ma
 An operation can be either defined for a specific [`AbstractGroupManifold`](@ref) over
 number system `𝔽` or in general, by defining for an operation `Op` the following methods:
 
-    identity!(::AbstractGroupManifold{𝔽,Op}, q, q)
-    identity(::AbstractGroupManifold{𝔽,Op}, p)
     inv!(::AbstractGroupManifold{𝔽,Op}, q, p)
     inv(::AbstractGroupManifold{𝔽,Op}, p)
     compose(::AbstractGroupManifold{𝔽,Op}, p, q)
@@ -50,7 +48,7 @@ struct TransparentGroupDecoratorType <: AbstractGroupDecoratorType end
 
 Abstract type for a Lie group, a group that is also a smooth manifold with an
 [`AbstractGroupOperation`](@ref), a smooth binary operation. `AbstractGroupManifold`s must
-implement at least [`inv`](@ref), [`identity`](@ref), [`compose`](@ref), and
+implement at least [`inv`](@ref), [`compose`](@ref), and
 [`translate_diff`](@ref).
 """
 abstract type AbstractGroupManifold{𝔽,O<:AbstractGroupOperation,T<:AbstractDecoratorType} <:
@@ -254,7 +252,7 @@ end
     inv(G::AbstractGroupManifold, p)
 
 Inverse $p^{-1} ∈ \mathcal{G}$ of an element $p ∈ \mathcal{G}$, such that
-$p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}$, where $e$ is the [`identity`](@ref)
+$p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}$, where $e$ is the [`Identity`](@ref)
 element of $\mathcal{G}$.
 """
 inv(::AbstractGroupManifold, ::Any...)
@@ -273,7 +271,7 @@ function Base.isapprox(
     p;
     kwargs...,
 ) where {GT<:AbstractGroupManifold}
-    return isapprox(G, get_point( e.p, p; kwargs...)
+    return isapprox(G, get_point(G,e), p; kwargs...)
 end
 function Base.isapprox(
     G::GT,
@@ -504,7 +502,7 @@ end
 Compute the group exponential of the Lie algebra element `X`. It is equivalent to the
 exponential map defined by the [`CartanSchoutenMinus`](@ref) connection.
 
-Given an element $X ∈ 𝔤 = T_e \mathcal{G}$, where $e$ is the [`identity`](@ref) element of
+Given an element $X ∈ 𝔤 = T_e \mathcal{G}$, where $e$ is the [`Identity`](@ref) element of
 the group $\mathcal{G}$, and $𝔤$ is its Lie algebra, the group exponential is the map
 
 ````math
@@ -577,7 +575,7 @@ For `Number` and `AbstractMatrix` types of `q`, compute the usual numeric/matrix
 \log q = \operatorname{Log} q = \sum_{n=1}^∞ \frac{(-1)^{n+1}}{n} (q - e)^n,
 ````
 
-where $e$ here is the [`identity`](@ref) element, that is, $1$ for numeric $q$ or the
+where $e$ here is the [`Identity`](@ref) element, that is, $1$ for numeric $q$ or the
 identity matrix $I_m$ for matrix $q ∈ ℝ^{m × m}$.
 """
 group_log(::AbstractGroupManifold, ::Any...)
@@ -746,10 +744,6 @@ adjoint_action!(::AdditionGroup, Y, p, X) = copyto!(Y, X)
 
 Base.zero(e::Identity{G}) where {G<:AdditionGroup} = e
 
-Base.identity(::AdditionGroup, p) = zero(p)
-
-identity!(::AdditionGroup, q, p) = fill!(q, 0)
-
 Base.inv(::AdditionGroup, p) = -p
 
 inv!(::AdditionGroup, q, p) = copyto!(q, -p)
@@ -823,18 +817,8 @@ LinearAlgebra.det(::Identity{<:MultiplicationGroup}) = 1
 LinearAlgebra.mul!(q, ::Identity{G}, p) where {G<:MultiplicationGroup} = copyto!(q, p)
 LinearAlgebra.mul!(q, p, ::Identity{G}) where {G<:MultiplicationGroup} = copyto!(q, p)
 function LinearAlgebra.mul!(q, e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}}
-    return identity!(e.group, q, e)
+    return get_point!(q,e)
 end
-
-Base.identity(::MultiplicationGroup, p) = one(p)
-
-function identity!(G::GT, q, p) where {GT<:MultiplicationGroup}
-    isa(p, Identity{GT}) || return copyto!(q, one(p))
-    return error(
-        "identity! not implemented on $(typeof(G)) for points $(typeof(q)) and $(typeof(p))",
-    )
-end
-identity!(::MultiplicationGroup, q::AbstractMatrix, p) = copyto!(q, I)
 
 Base.inv(::MultiplicationGroup, p) = inv(p)
 
@@ -943,8 +927,6 @@ for f in [
     group_exp!,
     group_log,
     group_log!,
-    identity,
-    identity!,
     translate,
     translate!,
     translate_diff,

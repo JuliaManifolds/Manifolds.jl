@@ -26,16 +26,6 @@ include("group_utils.jl")
     shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M.manifolds...)
     e = Manifolds.prod_point(shape_se, eA...)
 
-    @testset "identity specializations" begin
-        @test inv(G, Identity(G, e)) === Identity(G, e)
-        @test identity(G, Identity(G, e)) === Identity(G, e)
-        @test submanifold_component(G, Identity(G, e), Val(1)) == Identity(SOn, x)
-        @test submanifold_component(G, Identity(G, e), Val(2)) == Identity(Tn, zeros(2))
-        @test submanifold_components(G, Identity(G, e)) ==
-              (Identity(SOn, x), Identity(Tn, zeros(2)))
-        @test compose(G, Identity(G, e), Identity(G, e)) === Identity(G, e)
-    end
-
     @testset "product point" begin
         reshapers = (Manifolds.ArrayReshaper(), Manifolds.StaticReshaper())
         for reshaper in reshapers
@@ -47,7 +37,7 @@ include("group_utils.jl")
             test_group(G, pts, v_pts, v_pts; test_diff=true)
             @test isapprox(
                 M,
-                identity(M, pts[1]),
+                Identity(M),
                 group_exp(M, v_pts[1]),
                 Manifolds.prod_point(
                     shape_se,
@@ -57,7 +47,7 @@ include("group_utils.jl")
             )
             @test isapprox(
                 M,
-                identity(M, pts[1]),
+                Identity(M),
                 group_log(M, pts[1]),
                 Manifolds.prod_point(
                     shape_se,

@@ -79,26 +79,10 @@ function inv!(M::ProductManifold, q, p)
     return q
 end
 
-Base.identity(G::ProductGroup, p) = identity(G.manifold, p)
-Base.identity(::GT, e::Identity{GT}) where {GT<:ProductGroup} = e
-function Base.identity(M::ProductManifold, p::ProductRepr)
-    return ProductRepr(map(identity, M.manifolds, submanifold_components(M, p))...)
-end
-function Base.identity(M::ProductManifold, p)
-    q = allocate_result(M, identity, p)
-    return identity!(M, q, p)
-end
-
-identity!(G::ProductGroup, q, p) = identity!(G.manifold, q, p)
-function identity!(M::ProductManifold, q, p)
-    map(identity!, M.manifolds, submanifold_components(M, q), submanifold_components(M, p))
-    return q
-end
-
 compose(G::ProductGroup, p, q) = compose(G.manifold, p, q)
-compose(G::GT, ::Identity{GT}, p) where {GT<:ProductGroup} = p
-compose(G::GT, p, ::Identity{GT}) where {GT<:ProductGroup} = p
-compose(G::GT, e::E, ::E) where {GT<:ProductGroup,E<:Identity{GT}} = e
+compose(::GT, ::Identity{GT}, p) where {GT<:ProductGroup} = p
+compose(::GT, p, ::Identity{GT}) where {GT<:ProductGroup} = p
+compose(::GT, e::E, ::E) where {GT<:ProductGroup,E<:Identity{GT}} = e
 function compose(M::ProductManifold, p::ProductRepr, q::ProductRepr)
     return ProductRepr(
         map(

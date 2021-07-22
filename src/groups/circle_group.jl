@@ -24,12 +24,6 @@ end
 
 compose!(G::CircleGroup, x, p, q) = copyto!(x, compose(G, p, q))
 
-Base.identity(::CircleGroup, p::AbstractVector) = map(one, p)
-Base.identity(G::GT, e::Identity{GT}) where {GT<:CircleGroup} = e
-
-identity!(::CircleGroup, q::AbstractVector, p) = copyto!(q, 1)
-identity!(::GT, q::AbstractVector, ::Identity{GT}) where {GT<:CircleGroup} = copyto!(q, 1)
-
 Base.inv(G::CircleGroup, p::AbstractVector) = map(inv, repeated(G), p)
 Base.inv(G::GT, e::Identity{GT}) where {GT<:CircleGroup} = e
 

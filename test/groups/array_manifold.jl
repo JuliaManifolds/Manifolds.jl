@@ -13,24 +13,19 @@ include("../utils.jl")
     p, q = [exp(M, eg, hat(M, eg, ωi)) for ωi in ω]
     X = hat(M, eg, [-1.0, 2.0, 0.5])
 
-    e = make_identity(AG, p)
+    e = Identity(AG)
     @test Manifolds.array_value(e).p == Manifolds.array_value(e.p)
     @test Manifolds.array_point(e).p == e.p
     p2, q2 = ValidationMPoint(p), ValidationMPoint(q)
     @test q2 === Manifolds.array_point(q2) # test that double wraps are avoided.
     X2 = ValidationTVector(X)
 
-    @test identity(AG, p2) isa ValidationMPoint
-    @test isapprox(G, identity(AG, p2).value, identity(G, p))
-    @test identity(AG, e) isa Identity
-    @test_throws DomainError identity(AG, Identity(TranslationGroup(3), ω[1]))
+    @test Identity(AG, e) isa Identity
 
     eg = allocate(p2)
-    identity!(AG, eg, p2)
-    @test isapprox(G, eg.value, identity(G, p))
+    get_point!(G, eg, Identity(AG))
+    @test isapprox(G, eg, Identity(G))
     eg = allocate(p2)
-    identity!(AG, eg, e)
-    @test isapprox(G, eg.value, identity(G, p))
 
     @test inv(AG, p2) isa ValidationMPoint
     @test isapprox(G, inv(AG, p2).value, inv(G, p))
