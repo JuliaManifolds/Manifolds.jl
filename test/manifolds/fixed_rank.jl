@@ -148,8 +148,6 @@ include("../utils.jl")
                 zero_vector!(M, w, x)
                 oneP = SVDMPoint(one(zeros(3, 3)), ones(2), one(zeros(2, 2)), 2)
                 @test oneP == one(x)
-                oneV = UMVTVector(one(zeros(3, 3)), one(zeros(2, 2)), one(zeros(2, 2)), 2)
-                @test oneV == one(v)
 
                 # copyto
                 w2 = allocate(w)

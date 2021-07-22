@@ -367,11 +367,10 @@ function manifold_dimension(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽}
 end
 
 function Base.one(p::SVDMPoint)
+    m = size(p.U, 1)
+    n = size(p.Vt, 2)
     k = length(p.S)
-    return SVDMPoint(one(p.U), one.(p.S), one(p.Vt), length(p.S))
-end
-function Base.one(X::UMVTVector)
-    return UMVTVector(one(X.U), one(X.M), one(X.Vt), size(X.M, 1))
+    return SVDMPoint(one(zeros(m, m))[:, 1:k], one.(p.S), one(zeros(n, n))[1:k, :], k)
 end
 
 @doc raw"""
