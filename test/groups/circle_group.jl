@@ -20,7 +20,7 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
     @test is_default_metric(MetricManifold(G, EuclideanMetric()))
 
     @testset "identity overloads" begin
-        ig = Identity(G)
+        ig = Identity()
         @test inv(G, ig) === ig
         @test allocate_result(G, get_coordinates, ig, Complex(1.0), DefaultBasis()) isa
               Array{Complex{Float64},1}

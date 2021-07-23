@@ -10,10 +10,10 @@ using Manifolds: connection
     SO3zero = ConnectionManifold(SO3, CartanSchoutenZero())
 
     e = Matrix{Float64}(I, 3, 3)
-    p = exp(hat(SO3, Identity(SO3, e), [1.0, 2.0, 3.0]))
-    q = exp(hat(SO3, Identity(SO3, e), [3.0, 4.0, 1.0]))
-    X = hat(SO3, Identity(SO3, e), [2.0, 3.0, 4.0])
-    SO3e = Identity(SO3, e)
+    p = exp(hat(SO3, Identity(), [1.0, 2.0, 3.0]))
+    q = exp(hat(SO3, Identity(), [3.0, 4.0, 1.0]))
+    X = hat(SO3, Identity(), [2.0, 3.0, 4.0])
+    SO3e = Identity()
 
     @testset "connection" begin
         @test connection(SO3minus) === CartanSchoutenMinus()

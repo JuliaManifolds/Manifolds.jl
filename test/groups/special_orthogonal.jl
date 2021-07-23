@@ -28,10 +28,10 @@ include("group_utils.jl")
     vpts = [hat(M, x, [-1.0, 2.0, 0.5]), hat(M, x, [1.0, 0.0, 0.5])]
 
     ge = allocate(pts[1])
-    copyto!(ge, get_point(G, Identity(G)))
+    copyto!(ge, get_point(G, Identity()))
     @test isapprox(ge, I; atol=1e-10)
 
-    gI = Identity(G, ge)
+    gI = Identity()
     gT = allocate_result(G, exp, gI, log(G, pts[1], pts[2]))
     @test size(gT) == size(ge)
     @test eltype(gT) == eltype(ge)
@@ -63,7 +63,6 @@ include("group_utils.jl")
         @test (@inferred Manifolds.decorator_group_dispatch(DM)) === Val(true)
         @test Manifolds.is_group_decorator(DM)
         @test base_group(DM) === G
-        @test_throws DomainError is_point(DM, Identity(TranslationGroup(3)), true)
         test_group(DM, pts, vpts, vpts; test_diff=true)
     end
 
@@ -132,7 +131,7 @@ include("group_utils.jl")
 
     @testset "vee/hat" begin
         X = vpts[1]
-        pe = Identity(G)
+        pe = Identity()
 
         Xⁱ = vee(G, get_point(G, pe), X)
         @test Xⁱ ≈ vee(G, pe, X)
@@ -141,7 +140,7 @@ include("group_utils.jl")
         @test isapprox(M, pe, X2, hat(G, pe, Xⁱ); atol=1e-6)
     end
     @testset "Identity and get_vector/get_coordinates" begin
-        e = Identity(G, Matrix{Float64}(I, 3, 3))
+        e = Identity()
         gT = allocate_result(G, get_coordinates, e, pts[1])
         @test size(gT) == (manifold_dimension(M),)
         @test eltype(gT) == eltype(e.p)
@@ -153,7 +152,7 @@ include("group_utils.jl")
         copyto!(eT, e)
         @test eT == e.p
 
-        eF = Identity(SpecialEuclidean(3), 1)
+        eF = Identity()
         c = [1.0, 0.0, 0.0]
         Y = zeros(representation_size(G))
         get_vector!(G, Y, e, c, Manifolds.VeeOrthogonalBasis())

@@ -1,11 +1,11 @@
-array_value(e::Identity) = Identity(e.group, array_value(e.p))
+array_value(e::Identity) = e
 
 array_point(p) = ValidationMPoint(p)
 array_point(p::ValidationMPoint) = p
 
 function adjoint_action(M::ValidationManifold, p, X; kwargs...)
     is_point(M, p, true; kwargs...)
-    eM = Identity(M.manifold)
+    eM = Identity()
     is_vector(M, eM, X, true; kwargs...)
     Y = ValidationTVector(adjoint_action(M.manifold, array_value(p), array_value(X)))
     is_vector(M, eM, Y, true; kwargs...)
@@ -14,7 +14,7 @@ end
 
 function adjoint_action!(M::ValidationManifold, Y, p, X; kwargs...)
     is_point(M, p, true; kwargs...)
-    eM = Identity(M.manifold)
+    eM = Identity()
     is_vector(M, eM, X, true; kwargs...)
     adjoint_action!(M.manifold, array_value(Y), array_value(p), array_value(X))
     is_vector(M, eM, Y, true; kwargs...)
@@ -36,7 +36,7 @@ function inv!(M::ValidationManifold, q, p; kwargs...)
 end
 
 function lie_bracket(M::ValidationManifold, X, Y)
-    eM = get_point(Identity(M.manifold))
+    eM = get_point(Identity())
     is_vector(M, eM, X, true)
     is_vector(M, eM, Y, true)
     Z = ValidationTVector(lie_bracket(M.manifold, array_value(X), array_value(Y)))
@@ -45,7 +45,7 @@ function lie_bracket(M::ValidationManifold, X, Y)
 end
 
 function lie_bracket!(M::ValidationManifold, Z, X, Y)
-    eM = get_point(Identity(M.manifold))
+    eM = get_point(Identity())
     is_vector(M, eM, X, true)
     is_vector(M, eM, Y, true)
     lie_bracket!(M.manifold, array_value(Z), array_value(X), array_value(Y))
@@ -198,7 +198,7 @@ end
 function group_exp(M::ValidationManifold, X; kwargs...)
     is_vector(
         M,
-        get_point(Identity(M.manifold)),
+        get_point(Identity()),
         array_value(X),
         true;
         check_base_point=false,
@@ -212,7 +212,7 @@ end
 function group_exp!(M::ValidationManifold, q, X; kwargs...)
     is_vector(
         M,
-        get_point(Identity(M.manifold)),
+        get_point(Identity()),
         array_value(X),
         true;
         check_base_point=false,
@@ -228,7 +228,7 @@ function group_log(M::ValidationManifold, q; kwargs...)
     X = ValidationTVector(group_log(M.manifold, array_value(q)))
     is_vector(
         M,
-        get_point(Identity(M.manifold)),
+        get_point(Identity()),
         array_value(X),
         true;
         check_base_point=false,
@@ -242,7 +242,7 @@ function group_log!(M::ValidationManifold, X, q; kwargs...)
     group_log!(M.manifold, array_value(X), array_value(q))
     is_vector(
         M,
-        get_point(Identity(M.manifold)),
+        get_point(Identity()),
         array_value(X),
         true;
         check_base_point=false,

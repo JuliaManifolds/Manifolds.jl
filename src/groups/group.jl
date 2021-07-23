@@ -227,13 +227,13 @@ adjoint_action(G::AbstractGroupManifold, p, X)
     p,
     Xₑ,
 )
-    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftAction())
+    Xₚ = translate_diff(G, p, Identity(), Xₑ, LeftAction())
     Y = inverse_translate_diff(G, p, p, Xₚ, RightAction())
     return Y
 end
 
 function adjoint_action!(G::AbstractGroupManifold, Y, p, Xₑ)
-    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftAction())
+    Xₚ = translate_diff(G, p, Identity(), Xₑ, LeftAction())
     inverse_translate_diff!(G, Y, p, p, Xₚ, RightAction())
     return Y
 end
@@ -677,7 +677,7 @@ function inverse_retract(G::GroupManifold, p, q, method::GroupLogarithmicInverse
     conv = direction(method)
     pinvq = inverse_translate(G, p, q, conv)
     Xₑ = group_log(G, pinvq)
-    return translate_diff(G, p, Identity(G, p), Xₑ, conv)
+    return translate_diff(G, p, Identity(), Xₑ, conv)
 end
 
 function inverse_retract!(
@@ -690,7 +690,7 @@ function inverse_retract!(
     conv = direction(method)
     pinvq = inverse_translate(G, p, q, conv)
     Xₑ = group_log(G, pinvq)
-    return translate_diff!(G, X, p, Identity(G, p), Xₑ, conv)
+    return translate_diff!(G, X, p, Identity(), Xₑ, conv)
 end
 
 #################################

@@ -38,7 +38,7 @@ function test_group(
     test_adjoint_action=false,
     diff_convs=[(), (LeftAction(),), (RightAction(),)],
 )
-    e = Identity(G)
+    e = Identity()
 
     Test.@testset "Basic group properties" begin
         Test.@testset "Closed" begin
@@ -72,7 +72,7 @@ function test_group(
                 Test.@test isapprox(G, compose(G, g, e), g)
                 Test.@test isapprox(G, compose(G, e, g), g)
 
-                ge = Identity(G)
+                ge = Identity()
                 Test.@test isapprox(G, compose(G, g, ge), g)
                 Test.@test isapprox(G, compose(G, ge, g), g)
             end
@@ -287,16 +287,16 @@ function test_group(
 
     test_group_exp_log && Test.@testset "group exp/log properties" begin
         Test.@testset "e = exp(0)" begin
-            X = group_log(G, Identity(G))
+            X = group_log(G, Identity())
             g = group_exp(G, X)
-            Test.@test isapprox(G, Identity(G), g; atol=atol)
+            Test.@test isapprox(G, Identity(), g; atol=atol)
 
             test_mutating && Test.@testset "mutating" begin
                 X = allocate(Xe_pts[1])
-                Test.@test group_log!(G, X, Identity(G)) === X
+                Test.@test group_log!(G, X, Identity()) === X
                 g = allocate(g_pts[1])
                 Test.@test group_exp!(G, g, X) === g
-                Test.@test isapprox(G, Identity(G), g; atol=atol)
+                Test.@test isapprox(G, Identity(), g; atol=atol)
             end
         end
 
@@ -305,7 +305,7 @@ function test_group(
                 g = group_exp(G, X)
                 Test.@test is_point(G, g; atol=atol)
                 X2 = group_log(G, g)
-                Test.@test isapprox(G, Identity(G), X2, X; atol=atol)
+                Test.@test isapprox(G, Identity(), X2, X; atol=atol)
             end
 
             test_mutating && Test.@testset "mutating" begin
@@ -316,7 +316,7 @@ function test_group(
                     Test.@test isapprox(G, g, group_exp(G, X); atol=atol)
                     X2 = allocate(X)
                     Test.@test group_log!(G, X2, g) === X2
-                    Test.@test isapprox(G, Identity(G), X2, X; atol=atol)
+                    Test.@test isapprox(G, Identity(), X2, X; atol=atol)
                 end
             end
         end
@@ -414,7 +414,7 @@ function test_group(
         # linearity
         X = Xe_pts[1]
         Y = Xe_pts[2]
-        e = Identity(G)
+        e = Identity()
         Test.@test isapprox(
             G,
             e,
@@ -453,7 +453,7 @@ function test_group(
         # anticommutativity
         X = X_pts[1]
         Y = X_pts[2]
-        e = Identity(G)
+        e = Identity()
         Test.@test isapprox(G, e, lie_bracket(G, X, Y), -lie_bracket(G, Y, X))
 
         if test_mutating
@@ -502,7 +502,7 @@ function test_action(
 )
     G = base_group(A)
     M = g_manifold(A)
-    e = Identity(G)
+    e = Identity()
 
     Test.@testset "Basic action properties" begin
         test_switch_direction && Test.@testset "Direction" begin
@@ -575,7 +575,7 @@ function test_action(
                 Test.@test isapprox(G, compose(A, a, e), a; atol=atol_ident_compose)
                 Test.@test isapprox(G, compose(A, e, a), a; atol=atol_ident_compose)
 
-                ge = Identity(G)
+                ge = Identity()
                 Test.@test isapprox(G, compose(A, a, ge), a; atol=atol_ident_compose)
                 Test.@test isapprox(G, compose(A, ge, a), a; atol=atol_ident_compose)
 
@@ -596,11 +596,11 @@ function test_action(
                     Test.@test compose!(A, h, e, a) === h
                     Test.@test isapprox(G, h, a)
 
-                    ge = Identity(G)
+                    ge = Identity()
                     Test.@test isapprox(G, compose(A, a, ge), a)
                     Test.@test isapprox(G, compose(A, ge, a), a)
 
-                    ge = Identity(G)
+                    ge = Identity()
                     Test.@test compose!(A, ge, e, e) === ge
                     Test.@test isapprox(G, ge, e)
 

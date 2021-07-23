@@ -14,13 +14,13 @@ include("group_utils.jl")
               "GroupManifold(NotImplementedManifold(), NotImplementedOperation())"
         x = [1.0, 2.0]
         v = [2.0, 3.0]
-        eg = Identity(G, [0.0, 0.0])
-        @test repr(eg) === "Identity($(G), $([0.0, 0.0]))"
+        eg = Identity()
+        @test repr(eg) === "Identity()"
         @test number_eltype(eg) == Bool
         @test is_point(G, eg) # identity transparent
         p = similar(x)
         copyto!(p, eg)
-        @test p == eg.p
+        @test p == get_point(G, eg)
         @test isapprox(G, eg, p)
         @test isapprox(G, p, eg)
         @test isapprox(G, eg, eg)
@@ -56,24 +56,6 @@ include("group_utils.jl")
         @test NotImplementedOperation(NotImplementedManifold()) === G
         @test (NotImplementedOperation())(NotImplementedManifold()) === G
 
-        @test_throws ErrorException allocate_result(
-            G,
-            get_vector,
-            Identity(SpecialOrthogonal(3), x),
-            v,
-        )
-        @test_throws ErrorException allocate_result(
-            G,
-            get_coordinates,
-            Identity(SpecialOrthogonal(3), x),
-            v,
-        )
-        @test_throws ErrorException allocate_result(
-            ValidationManifold(NotImplementedManifold()),
-            get_coordinates,
-            Identity(SpecialOrthogonal(3), x),
-            v,
-        )
         @test_throws ErrorException base_group(
             MetricManifold(Euclidean(3), EuclideanMetric()),
         )
@@ -89,7 +71,6 @@ include("group_utils.jl")
             eg,
             [1, 2, 3],
         )
-        @test_throws ErrorException Identity(Euclidean(3), [0, 0, 0])
 
         @test_throws ErrorException inv!(G, x, x)
         @test_throws ErrorException inv!(G, x, eg)
@@ -182,8 +163,7 @@ include("group_utils.jl")
 
         x = [1.0, 2.0]
         v = [3.0, 4.0]
-        ge = Identity(G, [0.0, 0.0])
-        @test zero(ge) === ge
+        ge = Identity()
         @test number_eltype(ge) == Bool
         @test copyto!(ge, ge) === ge
         y = allocate(x)
@@ -195,10 +175,8 @@ include("group_utils.jl")
         @test ge + x ≈ x
         @test x + ge ≈ x
         @test ge + ge === ge
-        @test ge + Identity(G, 1) === ge
         @test -(ge) === ge
         @test +(ge) === ge
-        @test ge - Identity(G, 1) === ge
         @test ge * 1 === ge
         @test 1 * ge === ge
         @test ge * ge === ge
@@ -231,7 +209,7 @@ include("group_utils.jl")
         )
 
         x = [2.0 1.0; 2.0 3.0]
-        ge = Identity(G, [1.0 0.0; 0.0 1.0])
+        ge = Identity()
         @test number_eltype(ge) == Bool
         @test copyto!(ge, ge) === ge
         y = allocate(x)
@@ -298,7 +276,7 @@ include("group_utils.jl")
 
     @testset "Identity on Group Manifolds" begin
         G = TranslationGroup(3)
-        e = Identity(G, zeros(3))
+        e = Identity()
         @test get_vector(G, e, ones(3), DefaultOrthogonalBasis()) == ones(3)
         @test e - e == e
         @test ones(3) + e == ones(3)
