@@ -198,7 +198,7 @@ end
 function group_exp(M::ValidationManifold, X; kwargs...)
     is_vector(
         M,
-        get_point(Identity(M.manifold))
+        get_point(Identity(M.manifold)),
         array_value(X),
         true;
         check_base_point=false,
@@ -228,7 +228,7 @@ function group_log(M::ValidationManifold, q; kwargs...)
     X = ValidationTVector(group_log(M.manifold, array_value(q)))
     is_vector(
         M,
-        make_identity(M.manifold, array_value(X)),
+        get_point(Identity(M.manifold)),
         array_value(X),
         true;
         check_base_point=false,
@@ -242,7 +242,7 @@ function group_log!(M::ValidationManifold, X, q; kwargs...)
     group_log!(M.manifold, array_value(X), array_value(q))
     is_vector(
         M,
-        make_identity(M.manifold, array_value(X)),
+        get_point(Identity(M.manifold)),
         array_value(X),
         true;
         check_base_point=false,

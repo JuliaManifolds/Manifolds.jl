@@ -37,11 +37,6 @@ function check_point(G::GeneralLinear, p; kwargs...)
     end
     return nothing
 end
-check_point(::GT, ::Identity{GT}; kwargs...) where {GT<:GeneralLinear} = nothing
-function check_point(G::GeneralLinear, e::Identity; kwargs...)
-    return DomainError(e, "The identity element $(e) does not belong to $(G).")
-end
-
 function check_vector(G::GeneralLinear, p, X; kwargs...)
     mpv = check_vector(decorated_manifold(G), p, X; kwargs...)
     mpv === nothing || return mpv
@@ -198,7 +193,6 @@ log(::GeneralLinear, p, q)
 function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
     pinvq = inverse_translate(G, p, q, LeftAction())
     𝔽 === ℝ && det(pinvq) ≤ 0 && throw(OutOfInjectivityRadiusError())
-    e = Identity(G, pinvq)
     if isnormal(pinvq; atol=sqrt(eps(real(eltype(pinvq)))))
         log_safe!(X, pinvq)
     else
@@ -207,13 +201,12 @@ function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
         Gᵣ = GeneralLinear(real_dimension(𝔽) * n, ℝ)
         pinvqᵣ = realify(pinvq, 𝔽)
         Xᵣ = realify(X, 𝔽)
-        eᵣ = Identity(Gᵣ, pinvqᵣ)
         log_safe!(Xᵣ, _project_Un_S⁺(pinvqᵣ))
         inverse_retraction = NLsolveInverseRetraction(ExponentialRetraction(), Xᵣ)
-        inverse_retract!(Gᵣ, Xᵣ, eᵣ, pinvqᵣ, inverse_retraction)
+        inverse_retract!(Gᵣ, Xᵣ, Identity(), pinvqᵣ, inverse_retraction)
         unrealify!(X, Xᵣ, 𝔽, n)
     end
-    translate_diff!(G, X, p, e, X, LeftAction())
+    translate_diff!(G, X, p, Identity(), X, LeftAction())
     return X
 end
 function log!(::GeneralLinear{1}, X, p, q)

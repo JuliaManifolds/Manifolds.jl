@@ -25,7 +25,6 @@ end
 compose!(G::CircleGroup, x, p, q) = copyto!(x, compose(G, p, q))
 
 Base.inv(G::CircleGroup, p::AbstractVector) = map(inv, repeated(G), p)
-Base.inv(G::GT, e::Identity{GT}) where {GT<:CircleGroup} = e
 
 function inverse_translate(
     ::CircleGroup,
@@ -49,21 +48,13 @@ lie_bracket(::CircleGroup, X, Y) = zero(X)
 lie_bracket!(::CircleGroup, Z, X, Y) = fill!(Z, 0)
 
 translate_diff(::GT, p, q, X, ::ActionDirection) where {GT<:CircleGroup} = map(*, p, X)
-function translate_diff(
-    ::GT,
-    ::Identity{GT},
-    q,
-    X,
-    ::ActionDirection,
-) where {GT<:CircleGroup}
-    return X
-end
+translate_diff(::CircleGroup, ::Identity, q, X, ::ActionDirection) = X
 
 function translate_diff!(G::CircleGroup, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, translate_diff(G, p, q, X, conv))
 end
 
-function group_exp(G::CircleGroup, X)
+function group_exp(::CircleGroup, X)
     return map(X) do imθ
         θ = imag(imθ)
         sinθ, cosθ = sincos(θ)
@@ -73,7 +64,7 @@ end
 
 group_exp!(G::CircleGroup, q, X) = (q .= group_exp(G, X))
 
-function group_log(G::CircleGroup, q)
+function group_log(::CircleGroup, q)
     return map(q) do z
         cosθ, sinθ = reim(z)
         θ = atan(sinθ, cosθ)

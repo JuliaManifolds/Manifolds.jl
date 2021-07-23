@@ -50,21 +50,21 @@ end
 submanifold(G::ProductGroup, i) = submanifold(base_manifold(G), i)
 
 function submanifold_component(
-    e::Identity{GT},
-    ::Val{I},
-) where {I,MT<:ProductManifold,𝔽,GT<:GroupManifold{𝔽,MT}}
-    return Identity(submanifold(e.group, I), submanifold_component(e.p, I))
+    ::GroupManifold{𝔽,MT},
+    ::Identity,
+    ::Val{I}
+) where {I,MT<:ProductManifold,𝔽}
+    # the identity on a product manifold with is a group consists of a tuple of identities
+    return Identity()
 end
 
 function submanifold_components(
-    e::Identity{GT},
-) where {MT<:ProductManifold,𝔽,GT<:GroupManifold{𝔽,MT}}
-    M = base_manifold(e.group)
-    return map(Identity, M.manifolds, submanifold_components(e.group, e.p))
+    G::GroupManifold{𝔽,MT},
+    e::Identity,
+) where {MT<:ProductManifold,𝔽}
+    M = base_manifold(G)
+    return [ Identity() for _ in M.manifolds ]
 end
-
-Base.inv(G::ProductGroup, p) = inv(G.manifold, p)
-Base.inv(::GT, e::Identity{GT}) where {GT<:ProductGroup} = e
 function Base.inv(M::ProductManifold, x::ProductRepr)
     return ProductRepr(map(inv, M.manifolds, submanifold_components(M, x))...)
 end
@@ -80,9 +80,6 @@ function inv!(M::ProductManifold, q, p)
 end
 
 compose(G::ProductGroup, p, q) = compose(G.manifold, p, q)
-compose(::GT, ::Identity{GT}, p) where {GT<:ProductGroup} = p
-compose(::GT, p, ::Identity{GT}) where {GT<:ProductGroup} = p
-compose(::GT, e::E, ::E) where {GT<:ProductGroup,E<:Identity{GT}} = e
 function compose(M::ProductManifold, p::ProductRepr, q::ProductRepr)
     return ProductRepr(
         map(

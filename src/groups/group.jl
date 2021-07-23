@@ -127,6 +127,8 @@ function (::Type{T})(M::AbstractManifold) where {T<:AbstractGroupOperation}
     return GroupManifold(M, T())
 end
 
+manifold_dimension(G::GroupManifold) = manifold_dimension(G.manifold)
+
 ###################
 # Action directions
 ###################
@@ -166,48 +168,36 @@ switch_direction(::RightAction) = LeftAction()
 ##################################
 
 @doc raw"""
-    Identity{<:AbstractGroupManifold}
+    Identity
 
-The group identity element $e ∈ \mathcal{G}$ on an [`AbstractGroupManifold`](@ref)  represented by point `p`.
+Represent the group identity element $e ∈ \mathcal{G}$ on an [`AbstractGroupManifold`](@ref) `G`.
 
-see also [`get_point`](@ref) on how to obtain the corresponding point/array representation.
+Similar to the philosophy that points are agnostic of their group at hand, the identity
+does not store the group ` g` it belongs to.
+
+see also [`get_point`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](@ref) or array representation.
 """
-struct Identity{G<:AbstractGroupManifold} end
+struct Identity end
 
 @doc raw"""
-    get_point(G::GT,e::Identity{GT}) where {GT <: AbstractGroupManifold}
+    get_point(G::AbstractGroupManifold,e::Identity)
+    get_point!(G::AbstractGroupManifold, p, e::Identity)
 
-return a point representation of the [`Identity`](@ref) `e` on the [`AbstractGroupManifold`](@ref) `G`.
+return a point representation of the [`Identity`](@ref) `e` on the [`AbstractGroupManifold`](@ref) `G` (in place of `p`)
 """
 function get_point(G::AbstractGroupManifold, e::Identity)
-    return DomainError(e, "The identity element $(e) does not belong to $(G).")
+    q = allocate_result(G, e)
+    return get_point!(G, q, e)
 end
 
-Identity(::G) where {G<:AbstractGroupManifold} = Identity{G}()
-Identity(M::AbstractDecoratorManifold) = Identity(decorated_manifold(M))
-function Identity(M::AbstractManifold)
-    return error("Identity not implemented for manifold $(M) and point $(p).")
-end
-
-function Base.:(==)(::Identity{G1}, ::Identity{G2}) where {G1<:AbstractGroupManifold, G2<:AbstractGroupManifold}
-    return G1===G2
-end
-
-Base.show(io::IO, ::Identity{G}) where {G} = print(io, "Identity{$G}")
+Base.show(io::IO, ::Identity) = print(io, "Identity()")
 
 # To ensure allocate_result_type works
 number_eltype(::Identity) = Bool
 
-Base.copyto!(e::TE, ::TE) where {TE<:Identity} = e
+Base.copyto!(e::Identity, ::Identity) = e
 
-manifold_dimension(G::GroupManifold) = manifold_dimension(G.manifold)
-
-function check_point(G::GT, e::Identity{GT}; kwargs...) where {GT<:AbstractGroupManifold}
-    return nothing
-end
-function check_point(G::AbstractGroupManifold, e::Identity; kwargs...)
-    return DomainError(e, "The identity element $(e) does not belong to $(G).")
-end
+check_point(G::AbstractGroupManifold, e::Identity; kwargs...) = nothing
 
 ##########################
 # Group-specific functions
@@ -261,34 +251,23 @@ inv(::AbstractGroupManifold, ::Any...)
     return inv!(G, q, p)
 end
 
+Base.inv(::AbstractGroupManifold, e::Identity) = e
+
 @decorator_transparent_function function inv!(G::AbstractGroupManifold, q, p)
     return inv!(G.manifold, q, p)
 end
 
-function Base.isapprox(
-    G::GT,
-    e::Identity{GT},
-    p;
-    kwargs...,
-) where {GT<:AbstractGroupManifold}
+inv!(G::AbstractGroupManifold, q, e::Identity) = get_point!(G, q, e)
+
+function Base.isapprox(G::AbstractGroupManifold, e::Identity, p; kwargs...)
     return isapprox(G, get_point(G,e), p; kwargs...)
 end
-function Base.isapprox(
-    G::GT,
-    p,
-    e::Identity{GT};
-    kwargs...,
-) where {GT<:AbstractGroupManifold}
+function Base.isapprox(G::AbstractGroupManifold, p, e::Identity; kwargs...)
     return isapprox(G, e, p; kwargs...)
 end
-function Base.isapprox(
-    ::GT,
-    ::E,
-    ::E;
-    kwargs...,
-) where {GT<:AbstractGroupManifold,E<:Identity{GT}}
-    return true
-end
+Base.isapprox(::AbstractGroupManifold, ::Identity, ::Identity; kwargs...) = true
+
+Base.one(e::Identity) = e
 
 @doc raw"""
     compose(G::AbstractGroupManifold, p, q)
@@ -302,6 +281,11 @@ compose(::AbstractGroupManifold, ::Any...)
 end
 
 @decorator_transparent_signature compose!(M::AbstractDecoratorManifold, x, p, q)
+
+compose!(::AbstractGroupManifold, q, p, ::Identity) = copyto!(q,p)
+compose!(::AbstractGroupManifold, q, ::Identity, p) = copyto!(q,p)
+compose!(G::AbstractGroupManifold, q, ::Identity, e::Identity) = copyto(q, get_point(G,e))
+compose!(::AbstractGroupManifold, e::Identity, ::Identity, ::Identity) = e
 
 """
     lie_bracket(G::AbstractGroupManifold, X, Y)
@@ -722,27 +706,19 @@ struct AdditionOperation <: AbstractGroupOperation end
 
 const AdditionGroup = AbstractGroupManifold{𝔽,AdditionOperation} where {𝔽}
 
-Base.:+(e::Identity{G}) where {G<:AdditionGroup} = e
-Base.:+(p::Identity{G}, ::Identity{G}) where {G<:AdditionGroup} = p
-Base.:+(::Identity{G}, p) where {G<:AdditionGroup} = p
-Base.:+(p, ::Identity{G}) where {G<:AdditionGroup} = p
-Base.:+(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
+Base.:+(e::Identity) = e
+Base.:+(e::Identity, ::Identity) = e
+Base.:+(::Identity, p) = p
+Base.:+(p, ::Identity) = p
 
-Base.:-(e::Identity{G}) where {G<:AdditionGroup} = e
-Base.:-(e::Identity{G}, ::Identity{G}) where {G<:AdditionGroup} = e
-Base.:-(::Identity{G}, p) where {G<:AdditionGroup} = -p
-Base.:-(p, ::Identity{G}) where {G<:AdditionGroup} = p
-Base.:-(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
-
-Base.:*(e::Identity{G}, p) where {G<:AdditionGroup} = e
-Base.:*(p, e::Identity{G}) where {G<:AdditionGroup} = e
-Base.:*(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
+Base.:-(e::Identity) = e
+Base.:-(e::Identity, ::Identity) = e
+Base.:-(::Identity, p) = -p
+Base.:-(p, ::Identity) = p
 
 adjoint_action(::AdditionGroup, p, X) = X
 
 adjoint_action!(::AdditionGroup, Y, p, X) = copyto!(Y, X)
-
-Base.zero(e::Identity{G}) where {G<:AdditionGroup} = e
 
 Base.inv(::AdditionGroup, p) = -p
 
@@ -792,33 +768,24 @@ struct MultiplicationOperation <: AbstractGroupOperation end
 
 const MultiplicationGroup = AbstractGroupManifold{𝔽,MultiplicationOperation} where {𝔽}
 
-Base.:*(e::Identity{G}) where {G<:MultiplicationGroup} = e
-Base.:*(::Identity{G}, p) where {G<:MultiplicationGroup} = p
-Base.:*(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
-Base.:*(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
-Base.:*(::Identity{<:MultiplicationGroup}, e::Identity{<:AdditionGroup}) = e
+Base.:*(e::Identity) = e
+Base.:*(::Identity, p) = p
+Base.:*(p, ::Identity) = p
+Base.:*(e::Identity, ::Identity) = e
 
-Base.:/(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
-Base.:/(::Identity{G}, p) where {G<:MultiplicationGroup} = inv(p)
-Base.:/(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
+Base.:/(p, ::Identity) = p
+Base.:/(::Identity, p) = inv(p)
+Base.:/(e::Identity, ::Identity) = e
 
-Base.:\(p, ::Identity{G}) where {G<:MultiplicationGroup} = inv(p)
-Base.:\(::Identity{G}, p) where {G<:MultiplicationGroup} = p
-Base.:\(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
+Base.:\(p, ::Identity) = inv(p)
+Base.:\(::Identity, p) = p
+Base.:\(e::Identity, ::Identity) = e
 
-Base.inv(e::Identity{G}) where {G<:MultiplicationGroup} = e
+LinearAlgebra.det(::Identity) = 1
 
-Base.one(e::Identity{G}) where {G<:MultiplicationGroup} = e
-
-Base.transpose(e::Identity{G}) where {G<:MultiplicationGroup} = e
-
-LinearAlgebra.det(::Identity{<:MultiplicationGroup}) = 1
-
-LinearAlgebra.mul!(q, ::Identity{G}, p) where {G<:MultiplicationGroup} = copyto!(q, p)
-LinearAlgebra.mul!(q, p, ::Identity{G}) where {G<:MultiplicationGroup} = copyto!(q, p)
-function LinearAlgebra.mul!(q, e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}}
-    return get_point!(q,e)
-end
+LinearAlgebra.mul!(q, ::Identity, p) = copyto!(q, p)
+LinearAlgebra.mul!(q, p, ::Identity) = copyto!(q, p)
+LinearAlgebra.mul!(q, e::Identity, ::Identity) = get_point!(G, q, e)
 
 Base.inv(::MultiplicationGroup, p) = inv(p)
 

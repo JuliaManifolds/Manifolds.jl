@@ -38,11 +38,6 @@ function check_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
     end
     return nothing
 end
-check_point(::GT, ::Identity{GT}; kwargs...) where {GT<:SpecialLinear} = nothing
-function check_point(G::SpecialLinear, e::Identity; kwargs...)
-    return DomainError(e, "The identity element $(e) does not belong to $(G).")
-end
-
 function check_vector(G::SpecialLinear, p, X; kwargs...)
     mpv = check_vector(decorated_manifold(G), p, X; kwargs...)
     mpv === nothing || return mpv

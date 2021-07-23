@@ -36,20 +36,20 @@ function switch_direction(A::TranslationAction{TM,TRN,TAD}) where {TM,TRN,TAD}
     return TranslationAction(A.manifold, A.Rn, switch_direction(TAD()))
 end
 
-apply(A::TranslationAction, a, p) = p + a
+apply(::TranslationAction, a, p) = p + a
 
-apply!(A::TranslationAction{M,G}, q, a, p) where {M,G} = (q .= p .+ a)
-apply!(A::TranslationAction{M,G}, q, e::Identity{G}, p) where {M,G} = copyto!(q, p)
+apply!(::TranslationAction, q, a, p) = (q .= p .+ a)
+apply!(::TranslationAction, q, e::Identity, p) = copyto!(q, p)
 
-inverse_apply(A::TranslationAction, a, p) = p - a
+inverse_apply(::TranslationAction, a, p) = p - a
 
-inverse_apply!(A::TranslationAction{M,G}, q, a, p) where {M,G} = (q .= p .- a)
-inverse_apply!(A::TranslationAction{M,G}, q, e::Identity{G}, p) where {M,G} = copyto!(q, p)
+inverse_apply!(::TranslationAction, q, a, p) = (q .= p .- a)
+inverse_apply!(::TranslationAction, q, e::Identity, p) = copyto!(q, p)
 
-apply_diff(A::TranslationAction, a, p, X) = X
+apply_diff(::TranslationAction, a, p, X) = X
 
-apply_diff!(A::TranslationAction, Y, a, p, X) = copyto!(Y, X)
+apply_diff!(::TranslationAction, Y, a, p, X) = copyto!(Y, X)
 
-inverse_apply_diff(A::TranslationAction, a, p, X) = X
+inverse_apply_diff(::TranslationAction, a, p, X) = X
 
-inverse_apply_diff!(A::TranslationAction, Y, a, p, X) = copyto!(Y, X)
+inverse_apply_diff!(::TranslationAction, Y, a, p, X) = copyto!(Y, X)

@@ -61,11 +61,9 @@ end
 
 submanifold(G::SemidirectProductGroup, i) = submanifold(base_manifold(G), i)
 
-_padpoint!(G::SemidirectProductGroup, q) = q
+_padpoint!(::SemidirectProductGroup, q) = q
 
-_padvector!(G::SemidirectProductGroup, X) = X
-
-Base.inv(G::GT, e::Identity{GT}) where {GT<:SemidirectProductGroup} = e
+_padvector!(::SemidirectProductGroup, X) = X
 
 function inv!(G::SemidirectProductGroup, q, p)
     M = base_manifold(G)
@@ -79,11 +77,6 @@ function inv!(G::SemidirectProductGroup, q, p)
     @inbounds _padpoint!(G, q)
     return q
 end
-inv!(G::AG, p, e::Identity{AG}) where {AG<:SemidirectProductGroup} = copyto!(p, get_point(G,e))
-
-compose(::GT, p, e::Identity{GT}) where {GT<:SemidirectProductGroup} = p
-compose(::GT, e::Identity{GT}, p) where {GT<:SemidirectProductGroup} = p
-compose(::GT, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}} = e
 
 function compose!(G::SemidirectProductGroup, x, p, q)
     M = base_manifold(G)
@@ -97,11 +90,6 @@ function compose!(G::SemidirectProductGroup, x, p, q)
     compose!(N, nx, np, nxtmp)
     @inbounds _padpoint!(G, x)
     return x
-end
-compose!(::GT, x, ::Identity{GT}, q) where {GT<:SemidirectProductGroup} = copyto!(x, q)
-compose!(::GT, x, p, ::Identity{GT}) where {GT<:SemidirectProductGroup} = copyto!(x, p)
-function compose!(G::GT, x, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}}
-    return copyto!(x, get_point(G,e))
 end
 
 @doc raw"""
@@ -152,17 +140,6 @@ function get_vector!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
     @inbounds _padvector!(G, Y)
     return Y
 end
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold get_vector!(
-            M::SemidirectProductGroup,
-            Xⁱ,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end,
-)
 
 function get_coordinates!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
     M = base_manifold(G)
@@ -176,17 +153,6 @@ function get_coordinates!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBa
     get_coordinates!(H, view(Y, (dimN + 1):(dimN + dimH)), hp, hY, B)
     return Y
 end
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold get_coordinates!(
-            M::SemidirectProductGroup,
-            Y,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end,
-)
 
 function zero_vector(G::SemidirectProductGroup, p)
     X = allocate_result(G, zero_vector, p)
@@ -218,28 +184,4 @@ function Base.isapprox(G::SemidirectProductGroup, p, X, Y; kwargs...)
     nX, hX = submanifold_components(G, X)
     nY, hY = submanifold_components(G, Y)
     return isapprox(N, np, nX, nY; kwargs...) && isapprox(H, hp, hX, hY; kwargs...)
-end
-function Base.isapprox(
-    G::GT,
-    p,
-    e::Identity{GT};
-    kwargs...,
-) where {GT<:SemidirectProductGroup}
-    return isapprox(G, e, p; kwargs...)
-end
-function Base.isapprox(
-    G::GT,
-    e::Identity{GT},
-    p;
-    kwargs...,
-) where {GT<:SemidirectProductGroup}
-    return isapprox(G, get_point(G, e), p; kwargs...)
-end
-function Base.isapprox(
-    ::GT,
-    ::E,
-    ::E;
-    kwargs...,
-) where {GT<:SemidirectProductGroup,E<:Identity{GT}}
-    return true
 end
