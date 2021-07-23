@@ -121,8 +121,10 @@ invariant_metric_dispatch(::TestDefaultInvariantMetricManifold, ::RightAction) =
 
     @testset "log/exp bi-invariant" begin
         SO3 = SpecialOrthogonal(3)
-        p = exp(hat(SO3, Identity(), [1.0, 2.0, 3.0]))
-        q = exp(hat(SO3, Identity(), [3.0, 4.0, 1.0]))
+        e = Identity()
+        pe = get_point(SO3, e)
+        p = exp(hat(SO3, pe, [1.0, 2.0, 3.0]))
+        q = exp(hat(SO3, pe, [3.0, 4.0, 1.0]))
         X = hat(SO3, Identity(), [2.0, 3.0, 4.0])
 
         G = MetricManifold(SO3, InvariantMetric(TestBiInvariantMetricBase(), LeftAction()))

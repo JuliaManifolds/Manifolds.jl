@@ -31,6 +31,9 @@ include("group_utils.jl")
     @test norm(G, pts[1], Y) ≈ 0
     @test norm(G, pts[1], Z) ≈ 0
 
+    e = Identity()
+    @test inv(G, e) === e
+
     @test compose(G, e, pts[1]) == pts[1]
     @test compose(G, pts[1], e) == pts[1]
     @test compose(G, e, e) === e

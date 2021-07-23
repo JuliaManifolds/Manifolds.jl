@@ -86,11 +86,10 @@ function test_group(
                     Test.@test compose!(G, h, e, g) === h
                     Test.@test isapprox(G, h, g)
 
-                    ge = allocate(g)
-                    Test.@test isapprox(G, compose(G, g, ge), g)
-                    Test.@test isapprox(G, compose(G, ge, g), g)
+                    ge = Identity()
+                    Test.@test isapprox(G, compose(G, g, e), g)
+                    Test.@test isapprox(G, compose(G, e, g), g)
 
-                    ge = allocate(g)
                     Test.@test compose!(G, ge, e, e) === ge
                     Test.@test isapprox(G, ge, e)
                 end

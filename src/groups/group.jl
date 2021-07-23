@@ -167,17 +167,17 @@ switch_direction(::RightAction) = LeftAction()
 # General Identity element methods
 ##################################
 
-@doc raw"""
-    Identity
+function allocate_result_type(::AbstractGroupManifold{𝔽}, f, args::NTuple{N,<:Identity}) where {𝔽,N}
+    return (𝔽 == ℂ) ? ComplexF64 : Float64
+end
 
-Represent the group identity element $e ∈ \mathcal{G}$ on an [`AbstractGroupManifold`](@ref) `G`.
+# To ensure allocate_result_type works in general if idenitty apears in the tuple
+number_eltype(::Identity) = Bool
 
-Similar to the philosophy that points are agnostic of their group at hand, the identity
-does not store the group ` g` it belongs to.
-
-see also [`get_point`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](@ref) or array representation.
-"""
-struct Identity end
+function allocate_result(M::AbstractGroupManifold, f::typeof(get_point), e::Identity)
+    T = allocate_result_type(M, f, (e,))
+    return allocate(Array{T}, T, representation_size(M)...)
+end
 
 @doc raw"""
     get_point(G::AbstractGroupManifold,e::Identity)
@@ -186,14 +186,11 @@ struct Identity end
 return a point representation of the [`Identity`](@ref) `e` on the [`AbstractGroupManifold`](@ref) `G` (in place of `p`)
 """
 function get_point(G::AbstractGroupManifold, e::Identity)
-    q = allocate_result(G, e)
+    q = allocate_result(G, get_point, e)
     return get_point!(G, q, e)
 end
 
 Base.show(io::IO, ::Identity) = print(io, "Identity()")
-
-# To ensure allocate_result_type works
-number_eltype(::Identity) = Bool
 
 Base.copyto!(e::Identity, ::Identity) = e
 
@@ -721,14 +718,19 @@ adjoint_action(::AdditionGroup, p, X) = X
 adjoint_action!(::AdditionGroup, Y, p, X) = copyto!(Y, X)
 
 Base.inv(::AdditionGroup, p) = -p
+Base.inv(::AdditionGroup, e::Identity) = e
 
 inv!(::AdditionGroup, q, p) = copyto!(q, -p)
+inv!(G::AdditionGroup, q, e::Identity) = get_point!(G, q, e)
+inv!(::AdditionGroup, q::Identity, e::Identity) = q
 
 compose(::AdditionGroup, p, q) = p + q
 
-function compose!(::GT, x, p, q) where {GT<:AdditionGroup}
-    p isa Identity{GT} && return copyto!(x, q)
-    q isa Identity{GT} && return copyto!(x, p)
+compose!(::AdditionGroup, x, p, ::Identity) = copyto!(x, p)
+compose!(::AdditionGroup, x, ::Identity, q) = copyto!(x, q)
+compose!(G::AdditionGroup, x, ::Identity, q::Identity) = copyto!(x, get_point(G, q))
+compose!(::AdditionGroup, x::Identity, ::Identity, ::Identity) = x
+function compose!(::AdditionGroup, x, p, q)
     x .= p .+ q
     return x
 end
@@ -750,6 +752,7 @@ group_exp!(::AdditionGroup, q, X) = copyto!(q, X)
 group_log(::AdditionGroup, q) = q
 
 group_log!(::AdditionGroup, X, q) = copyto!(X, q)
+group_log!(::AdditionGroup, X, e::Identity) = X
 
 lie_bracket(::AdditionGroup, X, Y) = zero(X)
 
