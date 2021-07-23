@@ -63,11 +63,7 @@ include("group_utils.jl")
         @test (@inferred Manifolds.decorator_group_dispatch(DM)) === Val(true)
         @test Manifolds.is_group_decorator(DM)
         @test base_group(DM) === G
-        @test_throws DomainError is_point(
-            DM,
-            Identity(TranslationGroup(3)),
-            true,
-        )
+        @test_throws DomainError is_point(DM, Identity(TranslationGroup(3)), true)
         test_group(DM, pts, vpts, vpts; test_diff=true)
     end
 
@@ -138,7 +134,7 @@ include("group_utils.jl")
         X = vpts[1]
         pe = Identity(G)
 
-        Xⁱ = vee(G, get_point(G,pe), X)
+        Xⁱ = vee(G, get_point(G, pe), X)
         @test Xⁱ ≈ vee(G, pe, X)
 
         X2 = hat(G, pts[1], Xⁱ)

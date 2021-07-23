@@ -260,7 +260,7 @@ end
 inv!(G::AbstractGroupManifold, q, e::Identity) = get_point!(G, q, e)
 
 function Base.isapprox(G::AbstractGroupManifold, e::Identity, p; kwargs...)
-    return isapprox(G, get_point(G,e), p; kwargs...)
+    return isapprox(G, get_point(G, e), p; kwargs...)
 end
 function Base.isapprox(G::AbstractGroupManifold, p, e::Identity; kwargs...)
     return isapprox(G, e, p; kwargs...)
@@ -282,9 +282,9 @@ end
 
 @decorator_transparent_signature compose!(M::AbstractDecoratorManifold, x, p, q)
 
-compose!(::AbstractGroupManifold, q, p, ::Identity) = copyto!(q,p)
-compose!(::AbstractGroupManifold, q, ::Identity, p) = copyto!(q,p)
-compose!(G::AbstractGroupManifold, q, ::Identity, e::Identity) = copyto(q, get_point(G,e))
+compose!(::AbstractGroupManifold, q, p, ::Identity) = copyto!(q, p)
+compose!(::AbstractGroupManifold, q, ::Identity, p) = copyto!(q, p)
+compose!(G::AbstractGroupManifold, q, ::Identity, e::Identity) = copyto(q, get_point(G, e))
 compose!(::AbstractGroupManifold, e::Identity, ::Identity, ::Identity) = e
 
 """
