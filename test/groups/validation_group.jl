@@ -14,8 +14,6 @@ include("../utils.jl")
     X = hat(M, eg, [-1.0, 2.0, 0.5])
 
     e = Identity(G)
-    @test Manifolds.array_value(e) == get_point(AG, e)
-    @test Manifolds.array_point(e).p == e.p
     p2, q2 = ValidationMPoint(p), ValidationMPoint(q)
     @test q2 === Manifolds.array_point(q2) # test that double wraps are avoided.
     X2 = ValidationTVector(X)
@@ -23,7 +21,7 @@ include("../utils.jl")
     @test Identity(G) isa Identity
 
     eg = allocate(p2)
-    get_point!(G, eg, Identity(G))
+    identity!(G, eg)
     @test isapprox(G, eg, Identity(G))
     eg = allocate(p2)
 

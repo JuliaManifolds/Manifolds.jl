@@ -793,6 +793,8 @@ adjoint_action(::AdditionGroup, p, X) = X
 
 adjoint_action!(::AdditionGroup, Y, p, X) = copyto!(Y, X)
 
+identity!(::AbstractGroupManifold{𝔽,<:AdditionOperation}, p) where {𝔽} = copyto!(p, zero(p))
+
 Base.inv(::AdditionGroup, p) = -p
 Base.inv(::AdditionGroup, e::Identity) = e
 
@@ -801,6 +803,9 @@ inv!(G::AdditionGroup, q, ::Identity) = identity(G, q)
 inv!(::AdditionGroup, q::Identity, e::Identity) = q
 
 compose(::AdditionGroup, p, q) = p + q
+compose(::AdditionGroup, p, ::Identity{AdditionOperation}) = p
+compose(::AdditionGroup, ::Identity{AdditionOperation}, q) = q
+compose(::AdditionGroup, e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
 
 compose!(::AdditionGroup, x, p, ::Identity{AdditionOperation}) = copyto!(x, p)
 compose!(::AdditionGroup, x, ::Identity{AdditionOperation}, q) = copyto!(x, q)
@@ -869,6 +874,10 @@ Base.:\(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation
 
 LinearAlgebra.det(::Identity{MultiplicationOperation}) = 1
 
+function identity!(::AbstractGroupManifold{𝔽,<:MultiplicationOperation}, p) where {𝔽}
+    return copyto!(p, one(p))
+end
+
 LinearAlgebra.mul!(q, ::Identity{MultiplicationOperation}, p) = copyto!(q, p)
 LinearAlgebra.mul!(q, p, ::Identity{MultiplicationOperation}) = copyto!(q, p)
 function LinearAlgebra.mul!(
@@ -891,8 +900,21 @@ Base.inv(::MultiplicationGroup, p) = inv(p)
 inv!(G::MultiplicationGroup, q, p) = copyto!(q, inv(G, p))
 
 compose(::MultiplicationGroup, p, q) = p * q
+compose(::MultiplicationGroup, p, ::Identity{MultiplicationOperation}) = p
+compose(::MultiplicationGroup, ::Identity{MultiplicationOperation}, q) = q
+function compose(
+    ::MultiplicationGroup,
+    e::Identity{MultiplicationOperation},
+    ::Identity{MultiplicationOperation},
+)
+    return e
+end
 
 compose!(::MultiplicationGroup, x, p, q) = mul!_safe(x, p, q)
+compose!(::MultiplicationGroup, q, p, ::Identity) = copyto!(q, p)
+compose!(::MultiplicationGroup, q, ::Identity, p) = copyto!(q, p)
+compose!(G::MultiplicationGroup, q, ::Identity, e::Identity) = identity!(G, q)
+compose!(::MultiplicationGroup, e::Identity, ::Identity, ::Identity) = e
 
 inverse_translate(::MultiplicationGroup, p, q, ::LeftAction) = p \ q
 inverse_translate(::MultiplicationGroup, p, q, ::RightAction) = q / p
