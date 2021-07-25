@@ -31,7 +31,7 @@ include("group_utils.jl")
     copyto!(ge, get_point(G, Identity(G)))
     @test isapprox(ge, I; atol=1e-10)
 
-    gI = Identity()
+    gI = Identity(G)
     gT = allocate_result(G, exp, gI, log(G, pts[1], pts[2]))
     @test size(gT) == size(ge)
     @test eltype(gT) == eltype(ge)
@@ -131,7 +131,7 @@ include("group_utils.jl")
 
     @testset "vee/hat" begin
         X = vpts[1]
-        pe = Identity()
+        pe = Identity(G)
 
         Xⁱ = vee(G, get_point(G, pe), X)
         @test Xⁱ ≈ vee(G, pe, X)
@@ -140,7 +140,7 @@ include("group_utils.jl")
         @test isapprox(M, pe, X2, hat(G, pe, Xⁱ); atol=1e-6)
     end
     @testset "Identity and get_vector/get_coordinates" begin
-        e = Identity()
+        e = Identity(G, Matrix{Float64}(I, 3, 3))
         gT = allocate_result(G, get_coordinates, e, pts[1])
         @test size(gT) == (manifold_dimension(M),)
         @test eltype(gT) == eltype(e.p)
@@ -152,7 +152,7 @@ include("group_utils.jl")
         copyto!(eT, e)
         @test eT == e.p
 
-        eF = Identity()
+        eF = Identity(SpecialEuclidean(3), 1)
         c = [1.0, 0.0, 0.0]
         Y = zeros(representation_size(G))
         get_vector!(G, Y, e, c, Manifolds.VeeOrthogonalBasis())

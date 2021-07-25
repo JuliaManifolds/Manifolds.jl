@@ -30,7 +30,7 @@ include("../utils.jl")
     @test inv(AG, p2) isa ValidationMPoint
     @test isapprox(G, inv(AG, p2).value, inv(G, p))
     @test inv(AG, e) isa Identity
-    @test_throws DomainError inv(AG, Identity())
+    @test_throws DomainError inv(AG, Identity(AG))
 
     pinvq = allocate(p2)
     inv!(AG, pinvq, p2)

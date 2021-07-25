@@ -144,7 +144,7 @@ include("utils.jl")
 
     # Lie groups and actions
     include_test("groups/groups_general.jl")
-    include_test("groups/array_manifold.jl")
+    include_test("groups/validation_group.jl")
     include_test("groups/circle_group.jl")
     include_test("groups/translation_group.jl")
     include_test("groups/general_linear.jl")

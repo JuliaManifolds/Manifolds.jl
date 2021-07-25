@@ -37,6 +37,11 @@ function check_point(G::GeneralLinear, p; kwargs...)
     end
     return nothing
 end
+check_point(::GeneralLinear, ::Identity{MultiplicationOperation}) = nothing
+function check_point(G::GeneralLinear, e::Identity{O}; kwargs...) where {O}
+    return invoke(check_point, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
+end
+
 function check_vector(G::GeneralLinear, p, X; kwargs...)
     mpv = check_vector(decorated_manifold(G), p, X; kwargs...)
     mpv === nothing || return mpv
@@ -203,10 +208,10 @@ function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
         Xᵣ = realify(X, 𝔽)
         log_safe!(Xᵣ, _project_Un_S⁺(pinvqᵣ))
         inverse_retraction = NLsolveInverseRetraction(ExponentialRetraction(), Xᵣ)
-        inverse_retract!(Gᵣ, Xᵣ, Identity(), pinvqᵣ, inverse_retraction)
+        inverse_retract!(Gᵣ, Xᵣ, Identity(G), pinvqᵣ, inverse_retraction)
         unrealify!(X, Xᵣ, 𝔽, n)
     end
-    translate_diff!(G, X, p, Identity(), X, LeftAction())
+    translate_diff!(G, X, p, Identity(G), X, LeftAction())
     return X
 end
 function log!(::GeneralLinear{1}, X, p, q)

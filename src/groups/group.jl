@@ -249,13 +249,23 @@ return a point representation of the [`Identity`](@ref) on the [`AbstractGroupMa
 """
 identity!(G::AbstractGroupManifold, p)
 
-Base.show(io::IO, ::Identity{O}) where {O}= print(io, "Identity($O)")
+Base.show(io::IO, ::Identity{O}) where {O} = print(io, "Identity($O)")
 
 Base.copyto!(e::Identity{O}, ::Identity{O}) where {O} = e
 
-check_point(G::AbstractGroupManifold{𝔽,M,O}, e::Identity{O}; kwargs...) where {𝔽,M,O} = nothing
+function check_point(
+    G::AbstractGroupManifold{𝔽,M,O},
+    e::Identity{O};
+    kwargs...,
+) where {𝔽,M,O}
+    return nothing
+end
 
-function check_point(G::AbstractGroupManifold{𝔽,M,O1}, e::Identity{O2}; kwargs...) where {𝔽,M,O1,O2}
+function check_point(
+    G::AbstractGroupManifold{𝔽,M,O1},
+    e::Identity{O2};
+    kwargs...,
+) where {𝔽,M,O1,O2}
     return DomainError(
         e,
         "The Identity $e does not lie on $M, since its the identity with respect to $O2 and not $O1.",
@@ -769,15 +779,15 @@ struct AdditionOperation <: AbstractGroupOperation end
 
 const AdditionGroup = AbstractGroupManifold{𝔽,AdditionOperation} where {𝔽}
 
-Base.:+(e::Identity) = e
-Base.:+(e::Identity, ::Identity) = e
-Base.:+(::Identity, p) = p
-Base.:+(p, ::Identity) = p
+Base.:+(e::Identity{AdditionOperation}) = e
+Base.:+(e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
+Base.:+(::Identity{AdditionOperation}, p) = p
+Base.:+(p, ::Identity{AdditionOperation}) = p
 
-Base.:-(e::Identity) = e
-Base.:-(e::Identity, ::Identity) = e
-Base.:-(::Identity, p) = -p
-Base.:-(p, ::Identity) = p
+Base.:-(e::Identity{AdditionOperation}) = e
+Base.:-(e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
+Base.:-(::Identity{AdditionOperation}, p) = -p
+Base.:-(p, ::Identity{AdditionOperation}) = p
 
 adjoint_action(::AdditionGroup, p, X) = X
 
@@ -787,14 +797,21 @@ Base.inv(::AdditionGroup, p) = -p
 Base.inv(::AdditionGroup, e::Identity) = e
 
 inv!(::AdditionGroup, q, p) = copyto!(q, -p)
-inv!(G::AdditionGroup, q, e::Identity) = get_point!(G, q, e)
+inv!(G::AdditionGroup, q, ::Identity) = identity(G, q)
 inv!(::AdditionGroup, q::Identity, e::Identity) = q
 
 compose(::AdditionGroup, p, q) = p + q
 
-compose!(::AdditionGroup, x, p, ::Identity) = copyto!(x, p)
-compose!(::AdditionGroup, x, ::Identity, q) = copyto!(x, q)
-compose!(G::AdditionGroup, x, ::Identity, q::Identity) = copyto!(x, get_point(G, q))
+compose!(::AdditionGroup, x, p, ::Identity{AdditionOperation}) = copyto!(x, p)
+compose!(::AdditionGroup, x, ::Identity{AdditionOperation}, q) = copyto!(x, q)
+function compose!(
+    G::AdditionGroup,
+    x,
+    ::Identity{AdditionOperation},
+    q::Identity{AdditionOperation},
+)
+    return identity!(G, x)
+end
 compose!(::AdditionGroup, x::Identity, ::Identity, ::Identity) = x
 function compose!(::AdditionGroup, x, p, q)
     x .= p .+ q
@@ -818,7 +835,7 @@ group_exp!(::AdditionGroup, q, X) = copyto!(q, X)
 group_log(::AdditionGroup, q) = q
 
 group_log!(::AdditionGroup, X, q) = copyto!(X, q)
-group_log!(::AdditionGroup, X, e::Identity) = X
+group_log!(::AdditionGroup, X, e::Identity{AdditionOperation}) = X
 
 lie_bracket(::AdditionGroup, X, Y) = zero(X)
 
@@ -837,24 +854,37 @@ struct MultiplicationOperation <: AbstractGroupOperation end
 
 const MultiplicationGroup = AbstractGroupManifold{𝔽,MultiplicationOperation} where {𝔽}
 
-Base.:*(e::Identity) = e
-Base.:*(::Identity, p) = p
-Base.:*(p, ::Identity) = p
-Base.:*(e::Identity, ::Identity) = e
+Base.:*(e::Identity{MultiplicationOperation}) = e
+Base.:*(::Identity{MultiplicationOperation}, p) = p
+Base.:*(p, ::Identity{MultiplicationOperation}) = p
+Base.:*(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation}) = e
 
-Base.:/(p, ::Identity) = p
-Base.:/(::Identity, p) = inv(p)
-Base.:/(e::Identity, ::Identity) = e
+Base.:/(p, ::Identity{MultiplicationOperation}) = p
+Base.:/(::Identity{MultiplicationOperation}, p) = inv(p)
+Base.:/(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation}) = e
 
-Base.:\(p, ::Identity) = inv(p)
-Base.:\(::Identity, p) = p
-Base.:\(e::Identity, ::Identity) = e
+Base.:\(p, ::Identity{MultiplicationOperation}) = inv(p)
+Base.:\(::Identity{MultiplicationOperation}, p) = p
+Base.:\(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation}) = e
 
-LinearAlgebra.det(::Identity) = 1
+LinearAlgebra.det(::Identity{MultiplicationOperation}) = 1
 
-LinearAlgebra.mul!(q, ::Identity, p) = copyto!(q, p)
-LinearAlgebra.mul!(q, p, ::Identity) = copyto!(q, p)
-LinearAlgebra.mul!(q, e::Identity, ::Identity) = get_point!(G, q, e)
+LinearAlgebra.mul!(q, ::Identity{MultiplicationOperation}, p) = copyto!(q, p)
+LinearAlgebra.mul!(q, p, ::Identity{MultiplicationOperation}) = copyto!(q, p)
+function LinearAlgebra.mul!(
+    q,
+    ::Identity{MultiplicationOperation},
+    ::Identity{MultiplicationOperation},
+)
+    return identity!(G, q)
+end
+function LinearAlgebra.mul!(
+    q::Identity{MultiplicationOperation},
+    ::Identity{MultiplicationOperation},
+    ::Identity{MultiplicationOperation},
+)
+    return q
+end
 
 Base.inv(::MultiplicationGroup, p) = inv(p)
 

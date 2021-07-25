@@ -169,10 +169,10 @@ function screw_matrix(G::SpecialEuclidean{n}, X) where {n}
 end
 screw_matrix(::SpecialEuclidean{n}, X::AbstractMatrix) where {n} = X
 
-function allocate_result(G::SpecialEuclidean{n}, f::typeof(affine_matrix), p...) where {n}
+function allocate_result(::SpecialEuclidean{n}, f::typeof(affine_matrix), p...) where {n}
     return allocate(p[1], Size(n + 1, n + 1))
 end
-function allocate_result(G::SpecialEuclidean{n}, f::typeof(screw_matrix), X...) where {n}
+function allocate_result(::SpecialEuclidean{n}, f::typeof(screw_matrix), X...) where {n}
     return allocate(X[1], Size(n + 1, n + 1))
 end
 

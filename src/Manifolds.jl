@@ -63,7 +63,17 @@ import ManifoldsBase:
     CotangentSpace,
     TangentSpace
 import Base:
-    copyto!, convert, foreach, in, isapprox, isempty, length, ndims, showerror, size
+    copyto!,
+    convert,
+    foreach,
+    identity,
+    in,
+    isapprox,
+    isempty,
+    length,
+    ndims,
+    showerror,
+    size
 
 using Base.Iterators: repeated
 using Distributions
@@ -466,6 +476,8 @@ export ×,
     get_embedding,
     hat,
     hat!,
+    identity,
+    identity!,
     induced_basis,
     incident_log,
     injectivity_radius,
@@ -474,10 +486,11 @@ export ×,
     inverse_retract,
     inverse_retract!,
     isapprox,
-    is_group_decorator,
     is_decorator_transparent,
-    is_default_metric,
     is_default_decorator,
+    is_default_metric,
+    is_group_decorator,
+    is_identity,
     is_point,
     is_vector,
     isapprox,
