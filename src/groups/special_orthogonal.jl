@@ -24,6 +24,7 @@ SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperatio
 Base.show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
 
 Base.inv(::SpecialOrthogonal, p) = transpose(p)
+Base.inv(::SpecialOrthogonal, e::Identity) = e
 
 inverse_translate(G::SpecialOrthogonal, p, q, ::LeftAction) = inv(G, p) * q
 inverse_translate(G::SpecialOrthogonal, p, q, ::RightAction) = q * inv(G, p)
