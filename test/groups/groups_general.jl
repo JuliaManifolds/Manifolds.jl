@@ -14,8 +14,8 @@ include("group_utils.jl")
               "GroupManifold(NotImplementedManifold(), NotImplementedOperation())"
         x = [1.0, 2.0]
         v = [2.0, 3.0]
-        eg = Identity()
-        @test repr(eg) === "Identity()"
+        eg = Identity(G)
+        @test repr(eg) === "Identity(NotImplementedOperation)"
         @test number_eltype(eg) == Bool
         @test is_point(G, eg) # identity transparent
         p = similar(x)
@@ -163,7 +163,7 @@ include("group_utils.jl")
 
         x = [1.0, 2.0]
         v = [3.0, 4.0]
-        ge = Identity()
+        ge = Identity(G)
         @test number_eltype(ge) == Bool
         @test copyto!(ge, ge) === ge
         y = allocate(x)
@@ -209,7 +209,7 @@ include("group_utils.jl")
         )
 
         x = [2.0 1.0; 2.0 3.0]
-        ge = Identity()
+        ge = Identity(G)
         @test number_eltype(ge) == Bool
         @test copyto!(ge, ge) === ge
         y = allocate(x)

@@ -62,7 +62,7 @@ using ManifoldsBase: VeeOrthogonalBasis
                 Manifolds._padvector!(G, tmp)
                 @test tmp == X_pts[1]
 
-                w = translate_diff(G, pts[1], Identity(), X_pts[1])
+                w = translate_diff(G, pts[1], Identity(G), X_pts[1])
                 w2 = allocate(w)
                 w2.parts[1] .= w.parts[1]
                 w2.parts[2] .= pts[1].parts[2] * w.parts[2]
@@ -92,10 +92,10 @@ using ManifoldsBase: VeeOrthogonalBasis
             g1g2mat = affine_matrix(G, g1g2)
             @test g1g2mat ≈ affine_matrix(G, g1) * affine_matrix(G, g2)
             @test affine_matrix(G, g1g2mat) === g1g2mat
-            @test affine_matrix(G, Identity()) isa SDiagonal{n,Float64}
-            @test affine_matrix(G, Identity()) == SDiagonal{n,Float64}(I)
+            @test affine_matrix(G, Identity(G)) isa SDiagonal{n,Float64}
+            @test affine_matrix(G, Identity(G)) == SDiagonal{n,Float64}(I)
 
-            w = translate_diff(G, pts[1], Identity(), X_pts[1])
+            w = translate_diff(G, pts[1], Identity(G), X_pts[1])
             w2 = allocate(w)
             w2.parts[1] .= w.parts[1]
             w2.parts[2] .= pts[1].parts[2] * w.parts[2]
@@ -146,8 +146,8 @@ using ManifoldsBase: VeeOrthogonalBasis
     end
 
     G = SpecialEuclidean(11)
-    @test affine_matrix(G, Identity()) isa Diagonal{Float64,Vector{Float64}}
-    @test affine_matrix(G, Identity()) == Diagonal(ones(11))
+    @test affine_matrix(G, Identity(G)) isa Diagonal{Float64,Vector{Float64}}
+    @test affine_matrix(G, Identity(G)) == Diagonal(ones(11))
 
     @testset "Explicit embedding in GL(n+1)" begin
         G = SpecialEuclidean(3)
@@ -197,7 +197,7 @@ using ManifoldsBase: VeeOrthogonalBasis
                 G,
                 pts_gl[1],
                 X_gl,
-                translate_diff(G, Identity(), pts_gl[1], X_gl, conv),
+                translate_diff(G, Identity(G), pts_gl[1], X_gl, conv),
             )
         end
     end

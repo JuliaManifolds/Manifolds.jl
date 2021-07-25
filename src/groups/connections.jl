@@ -88,7 +88,7 @@ function log!(
 ) where {𝔽}
     pinvq = compose(M.manifold, inv(M.manifold, p), q)
     group_log!(M.manifold, Y, pinvq)
-    return translate_diff!(M.manifold, Y, p, Identity(), Y)
+    return translate_diff!(M.manifold, Y, p, Identity(M.manifold), Y)
 end
 
 """

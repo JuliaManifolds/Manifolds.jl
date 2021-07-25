@@ -50,20 +50,20 @@ end
 submanifold(G::ProductGroup, i) = submanifold(base_manifold(G), i)
 
 function submanifold_component(
-    ::GroupManifold{𝔽,MT},
+    ::GroupManifold{𝔽,MT,O},
     ::Identity,
     ::Val{I},
-) where {I,MT<:ProductManifold,𝔽}
+) where {I,MT<:ProductManifold,𝔽,O}
     # the identity on a product manifold with is a group consists of a tuple of identities
-    return Identity()
+    return Identity{O}()
 end
 
 function submanifold_components(
-    G::GroupManifold{𝔽,MT},
+    G::GroupManifold{𝔽,MT,O},
     e::Identity,
-) where {MT<:ProductManifold,𝔽}
+) where {MT<:ProductManifold,𝔽,O<:AbstractGroupOperation}
     M = base_manifold(G)
-    return [Identity() for _ in M.manifolds]
+    return [Identity(O) for N in M.manifolds]
 end
 function Base.inv(M::ProductManifold, x::ProductRepr)
     return ProductRepr(map(inv, M.manifolds, submanifold_components(M, x))...)

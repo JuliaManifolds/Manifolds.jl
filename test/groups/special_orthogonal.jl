@@ -28,7 +28,7 @@ include("group_utils.jl")
     vpts = [hat(M, x, [-1.0, 2.0, 0.5]), hat(M, x, [1.0, 0.0, 0.5])]
 
     ge = allocate(pts[1])
-    copyto!(ge, get_point(G, Identity()))
+    copyto!(ge, get_point(G, Identity(G)))
     @test isapprox(ge, I; atol=1e-10)
 
     gI = Identity()

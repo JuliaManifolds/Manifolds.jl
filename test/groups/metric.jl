@@ -100,14 +100,14 @@ invariant_metric_dispatch(::TestDefaultInvariantMetricManifold, ::RightAction) =
     e = Matrix{Float64}(I, 3, 3)
     @testset "inner/norm" begin
         SO3 = SpecialOrthogonal(3)
-        p = exp(hat(SO3, Identity(), [1.0, 2.0, 3.0]))
+        p = exp(hat(SO3, Identity(SO3), [1.0, 2.0, 3.0]))
 
         B = DefaultOrthonormalBasis()
 
         fX = ManifoldsBase.TFVector([2.0, 3.0, 4.0], B)
         fY = ManifoldsBase.TFVector([3.0, 4.0, 1.0], B)
-        X = hat(SO3, Identity(), fX.data)
-        Y = hat(SO3, Identity(), fY.data)
+        X = hat(SO3, Identity(SO3), fX.data)
+        Y = hat(SO3, Identity(SO3), fY.data)
 
         G = MetricManifold(SO3, lmetric)
         @test inner(G, p, fX, fY) ≈ dot(fX.data, Diagonal([1.0, 2.0, 3.0]) * fY.data)
@@ -121,11 +121,11 @@ invariant_metric_dispatch(::TestDefaultInvariantMetricManifold, ::RightAction) =
 
     @testset "log/exp bi-invariant" begin
         SO3 = SpecialOrthogonal(3)
-        e = Identity()
+        e = Identity(SO3)
         pe = get_point(SO3, e)
         p = exp(hat(SO3, pe, [1.0, 2.0, 3.0]))
         q = exp(hat(SO3, pe, [3.0, 4.0, 1.0]))
-        X = hat(SO3, Identity(), [2.0, 3.0, 4.0])
+        X = hat(SO3, e, [2.0, 3.0, 4.0])
 
         G = MetricManifold(SO3, InvariantMetric(TestBiInvariantMetricBase(), LeftAction()))
         @test isapprox(SO3, exp(G, p, X), exp(SO3, p, X))

@@ -168,21 +168,30 @@ switch_direction(::RightAction) = LeftAction()
 ##################################
 
 @doc raw"""
-    Identity
+    Identity{O<:AbstractGroupOperation}
 
 Represent the group identity element $e ∈ \mathcal{G}$ on an [`AbstractGroupManifold`](@ref) `G`.
 
 Similar to the philosophy that points are agnostic of their group at hand, the identity
-does not store the group ` g` it belongs to.
+does not store the group `g` it belongs to. HOwever it depends on the type of the [`AbstractGroupOperation`](@ref) used.
 
-see also [`get_point`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](@ref) or array representation.
+see also [`identity`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](@ref) or array representation.
+
+# Constructors
+
+Identity(G::AbstractGroupManifold{𝔽,O})
+Identity(o::O)
+Identity(::Type{O})
+
+create the identity of the corresponding subtype `O<:`[`AbstractGroupOperation`](@ref)
 """
 struct Identity{O<:AbstractGroupOperation} end
 
-function Identity(::AbstractGroupManifold{𝔽,M,O}) where {𝔽,M,O<:AbstractGroupOperation}
+function Identity(::AbstractGroupManifold{𝔽,O}) where {𝔽,O<:AbstractGroupOperation}
     return Identity{O}()
 end
-Identity(::O) where {O<:AbstractGroupOperation} = Identity{O}()
+Identity(::O) where {O<:AbstractGroupOperation} = Identity(O)
+Identity(::Type{O}) where {O<:AbstractGroupOperation} = Identity{O}()
 
 # To ensure allocate_result_type works in general if idenitty apears in the tuple
 number_eltype(::Identity) = Bool
@@ -240,11 +249,18 @@ return a point representation of the [`Identity`](@ref) on the [`AbstractGroupMa
 """
 identity!(G::AbstractGroupManifold, p)
 
-Base.show(io::IO, ::Identity) = print(io, "Identity()")
+Base.show(io::IO, ::Identity{O}) where {O}= print(io, "Identity($O)")
 
-Base.copyto!(e::Identity, ::Identity) = e
+Base.copyto!(e::Identity{O}, ::Identity{O}) where {O} = e
 
-check_point(G::AbstractGroupManifold, e::Identity; kwargs...) = nothing
+check_point(G::AbstractGroupManifold{𝔽,M,O}, e::Identity{O}; kwargs...) where {𝔽,M,O} = nothing
+
+function check_point(G::AbstractGroupManifold{𝔽,M,O1}, e::Identity{O2}; kwargs...) where {𝔽,M,O1,O2}
+    return DomainError(
+        e,
+        "The Identity $e does not lie on $M, since its the identity with respect to $O2 and not $O1.",
+    )
+end
 
 ##########################
 # Group-specific functions
@@ -274,13 +290,13 @@ adjoint_action(G::AbstractGroupManifold, p, X)
     p,
     Xₑ,
 )
-    Xₚ = translate_diff(G, p, Identity(), Xₑ, LeftAction())
+    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftAction())
     Y = inverse_translate_diff(G, p, p, Xₚ, RightAction())
     return Y
 end
 
 function adjoint_action!(G::AbstractGroupManifold, Y, p, Xₑ)
-    Xₚ = translate_diff(G, p, Identity(), Xₑ, LeftAction())
+    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftAction())
     inverse_translate_diff!(G, Y, p, p, Xₚ, RightAction())
     return Y
 end
@@ -724,7 +740,7 @@ function inverse_retract(G::GroupManifold, p, q, method::GroupLogarithmicInverse
     conv = direction(method)
     pinvq = inverse_translate(G, p, q, conv)
     Xₑ = group_log(G, pinvq)
-    return translate_diff(G, p, Identity(), Xₑ, conv)
+    return translate_diff(G, p, Identity(G), Xₑ, conv)
 end
 
 function inverse_retract!(
@@ -737,7 +753,7 @@ function inverse_retract!(
     conv = direction(method)
     pinvq = inverse_translate(G, p, q, conv)
     Xₑ = group_log(G, pinvq)
-    return translate_diff!(G, X, p, Identity(), Xₑ, conv)
+    return translate_diff!(G, X, p, Identity(G), Xₑ, conv)
 end
 
 #################################

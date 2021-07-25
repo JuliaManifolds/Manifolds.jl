@@ -32,12 +32,12 @@ include("group_utils.jl")
             shape_se = Manifolds.ShapeSpecification(reshaper, M.manifolds...)
             pts = [Manifolds.prod_point(shape_se, tp...) for tp in tuple_pts]
             v_pts = [Manifolds.prod_point(shape_se, tuple_v...)]
-            @test compose(G, pts[1], Identity()) == pts[1]
-            @test compose(G, Identity(), pts[1]) == pts[1]
+            @test compose(G, pts[1], Identity(G)) == pts[1]
+            @test compose(G, Identity(G), pts[1]) == pts[1]
             test_group(G, pts, v_pts, v_pts; test_diff=true)
             @test isapprox(
                 M,
-                Identity(),
+                Identity(G),
                 group_exp(M, v_pts[1]),
                 Manifolds.prod_point(
                     shape_se,
@@ -47,7 +47,7 @@ include("group_utils.jl")
             )
             @test isapprox(
                 M,
-                Identity(),
+                Identity(G),
                 group_log(M, pts[1]),
                 Manifolds.prod_point(
                     shape_se,

@@ -226,7 +226,7 @@ include("groups/connections.jl")
 include("groups/metric.jl")
 include("groups/group_action.jl")
 include("groups/group_operation_action.jl")
-include("groups/array_manifold.jl")
+include("groups/validation_group.jl")
 include("groups/product_group.jl")
 include("groups/semidirect_product_group.jl")
 

@@ -79,7 +79,7 @@ using NLsolve
         @test_throws DomainError is_point(G, zeros(3, 3), true)
         @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
         @test is_point(G, Float64[0 0 1; 0 1 1; 1 1 1], true)
-        @test is_point(G, Identity(), true)
+        @test is_point(G, Identity(G), true)
         @test_throws DomainError is_vector(
             G,
             Float64[0 1 1; 0 1 1; 1 0 0],
@@ -154,7 +154,7 @@ using NLsolve
         @test_throws DomainError is_point(G, zeros(2, 2), true)
         @test_throws DomainError is_point(G, ComplexF64[1 im; 1 im], true)
         @test is_point(G, ComplexF64[1 1; im 1], true)
-        @test is_point(G, Identity(), true)
+        @test is_point(G, Identity(G), true)
         @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
         @test_throws DomainError is_vector(
             G,
