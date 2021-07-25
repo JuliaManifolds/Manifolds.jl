@@ -817,7 +817,7 @@ function compose!(
 )
     return identity!(G, x)
 end
-compose!(::AdditionGroup, x::Identity, ::Identity, ::Identity) = x
+compose!(::AdditionGroup, x::Identity{AdditionOperation}, ::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = x
 function compose!(::AdditionGroup, x, p, q)
     x .= p .+ q
     return x

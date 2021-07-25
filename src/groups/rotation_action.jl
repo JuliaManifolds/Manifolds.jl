@@ -52,7 +52,8 @@ function inverse_apply(A::RotationActionOnVector{N,F,LeftAction}, a, p) where {N
 end
 inverse_apply(A::RotationActionOnVector{N,F,RightAction}, a, p) where {N,F} = a * p
 
-apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, p, X) where {N,F} = a * X
+apply_diff(::RotationActionOnVector{N,F,LeftAction}, a, p, X) where {N,F} = a * X
+apply_diff(::RotationActionOnVector{N,F,LeftAction}, ::Identity, p, X) where {N,F} = X
 function apply_diff(A::RotationActionOnVector{N,F,RightAction}, a, p, X) where {N,F}
     return inv(base_group(A), a) * X
 end
