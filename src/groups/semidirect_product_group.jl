@@ -56,8 +56,8 @@ function get_point!(G::SemidirectProductGroup, q, e::Identity)
     M = base_manifold(G)
     N, H = M.manifolds
     nq, hq = submanifold_components(G, q)
-    get_point!(N,nq,e)
-    get_point!(H,hq,e)
+    get_point!(N, nq, e)
+    get_point!(H, hq, e)
     @inbounds _padpoint!(G, q)
     return q
 end

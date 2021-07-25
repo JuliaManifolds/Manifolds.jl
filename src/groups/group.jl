@@ -167,28 +167,78 @@ switch_direction(::RightAction) = LeftAction()
 # General Identity element methods
 ##################################
 
-function allocate_result_type(::AbstractGroupManifold{𝔽}, f, args::NTuple{N,<:Identity}) where {𝔽,N}
-    return (𝔽 == ℂ) ? ComplexF64 : Float64
+@doc raw"""
+    Identity
+
+Represent the group identity element $e ∈ \mathcal{G}$ on an [`AbstractGroupManifold`](@ref) `G`.
+
+Similar to the philosophy that points are agnostic of their group at hand, the identity
+does not store the group ` g` it belongs to.
+
+see also [`get_point`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](@ref) or array representation.
+"""
+struct Identity{O<:AbstractGroupOperation} end
+
+function Identity(::AbstractGroupManifold{𝔽,M,O}) where {𝔽,M,O<:AbstractGroupOperation}
+    return Identity{O}()
 end
+Identity(::O) where {O<:AbstractGroupOperation} = Identity{O}()
 
 # To ensure allocate_result_type works in general if idenitty apears in the tuple
 number_eltype(::Identity) = Bool
 
-function allocate_result(M::AbstractGroupManifold, f::typeof(get_point), e::Identity)
-    T = allocate_result_type(M, f, (e,))
-    return allocate(Array{T}, T, representation_size(M)...)
+@doc raw"""
+    identity(G::AbstractGroupManifold)
+
+return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G`.
+by default this representation is default array representation.
+It should return the corresponding [`AbstractManifoldPoint`](@ref) of points on `G` if points are not represented by arrays.
+"""
+function identity(G::AbstractGroupManifold)
+    q = zeros(representation_size(G)...)
+    return identity!(G, q)
 end
 
 @doc raw"""
-    get_point(G::AbstractGroupManifold,e::Identity)
-    get_point!(G::AbstractGroupManifold, p, e::Identity)
+    is_identity(G,q; kwargs)
 
-return a point representation of the [`Identity`](@ref) `e` on the [`AbstractGroupManifold`](@ref) `G` (in place of `p`)
+Check, whether `q` is the identity on the [`AbstractGroupManifold`](@ref) `G`, i.e. it is either
+the [`Identity`](@ref)`{O}` with the corresponding [`AbstractGroupOperation`](@ref) `O`, or
+(approximately) the correct point representation.
 """
-function get_point(G::AbstractGroupManifold, e::Identity)
-    q = allocate_result(G, get_point, e)
-    return get_point!(G, q, e)
+is_identity(G::AbstractGroupManifold, q)
+
+function is_identity(G::AbstractGroupManifold, q; kwargs...)
+    return isapprox(G, q, identity(G, q); kwargs...)
 end
+
+function is_identity(
+    ::AbstractGroupManifold{𝔽,M,O},
+    ::Identity{O};
+    kwargs...,
+) where {𝔽,M,O<:AbstractGroupOperation}
+    return true
+end
+is_identity(::AbstractGroupManifold, ::Identity; kwargs...) = false
+
+@doc raw"""
+    identity(G::AbstractGroupManifold, p)
+
+return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G` (in place of `p`).
+by default this representation is default array representation.
+It rhoudl return the corresponding [`AbstractManifoldPoint`](@ref) of points on `G` if points are not represented by arrays.
+"""
+function identity(G::AbstractGroupManifold, p)
+    q = allocate_result(G, identity, p)
+    return identity!(G, q)
+end
+
+@doc raw"""
+    identity!(G::AbstractGroupManifold, p)
+
+return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G` in place of `p`.
+"""
+identity!(G::AbstractGroupManifold, p)
 
 Base.show(io::IO, ::Identity) = print(io, "Identity()")
 

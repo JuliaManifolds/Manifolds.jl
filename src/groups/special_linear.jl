@@ -27,10 +27,9 @@ end
 
 function get_point!(::SpecialLinear{n,𝔽}, p, ::Identity) where {n,𝔽}
     T = (𝔽 == ℂ) ? ComplexF64 : Float64
-    copyto(p, Matrix{T}(I,n,n))
+    copyto(p, Matrix{T}(I, n, n))
     return p
 end
-
 
 function check_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
     mpv = check_point(Euclidean(n, n; field=𝔽), p; kwargs...)

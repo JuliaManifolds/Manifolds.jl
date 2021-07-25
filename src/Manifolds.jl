@@ -138,18 +138,6 @@ using StatsBase: AbstractWeights
 
 include("utils.jl")
 
-@doc raw"""
-    Identity
-
-Represent the group identity element $e ∈ \mathcal{G}$ on an [`AbstractGroupManifold`](@ref) `G`.
-
-Similar to the philosophy that points are agnostic of their group at hand, the identity
-does not store the group ` g` it belongs to.
-
-see also [`get_point`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](@ref) or array representation.
-"""
-struct Identity end
-
 include("product_representations.jl")
 include("differentiation.jl")
 include("riemannian_diff.jl")
@@ -158,6 +146,7 @@ include("riemannian_diff.jl")
 include("manifolds/ConnectionManifold.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/VectorBundle.jl")
+include("groups/group.jl")
 
 # Features I: Which are extended on Meta Manifolds
 include("distributions.jl")
@@ -182,7 +171,6 @@ METAMANIFOLDS = [
 # Features II: That require metas
 include("atlases.jl")
 include("cotangent_space.jl")
-include("groups/group.jl")
 
 # Meta Manifolds II: Power Manifolds
 include("manifolds/PowerManifold.jl")
@@ -595,6 +583,8 @@ export adjoint_action,
     group_log!,
     has_biinvariant_metric,
     has_invariant_metric,
+    identity,
+    identity!,
     inv,
     inv!,
     invariant_metric_dispatch,
