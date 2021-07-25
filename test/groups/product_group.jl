@@ -61,8 +61,8 @@ include("group_utils.jl")
     @testset "product repr" begin
         pts = [ProductRepr(tp...) for tp in tuple_pts]
         v_pts = [ProductRepr(tuple_v...)]
-        @test compose(G, pts[1], Identity()) == pts[1]
-        @test compose(G, Identity(), pts[1]) == pts[1]
+        @test compose(G, pts[1], Identity(G)) == pts[1]
+        @test compose(G, Identity(G), pts[1]) == pts[1]
         test_group(G, pts, v_pts, v_pts; test_diff=true, test_mutating=false)
         @test isapprox(
             M,

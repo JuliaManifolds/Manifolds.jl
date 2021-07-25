@@ -330,10 +330,10 @@ Base.inv(::AbstractGroupManifold, e::Identity) = e
     return inv!(G.manifold, q, p)
 end
 
-inv!(G::AbstractGroupManifold, q, e::Identity) = get_point!(G, q, e)
+inv!(G::AbstractGroupManifold, q, ::Identity) = identity!(G, q)
 
 function Base.isapprox(G::AbstractGroupManifold, e::Identity, p; kwargs...)
-    return isapprox(G, get_point(G, e), p; kwargs...)
+    return isapprox(G, identity(G, p), p; kwargs...)
 end
 function Base.isapprox(G::AbstractGroupManifold, p, e::Identity; kwargs...)
     return isapprox(G, e, p; kwargs...)
@@ -357,7 +357,7 @@ end
 
 compose!(::AbstractGroupManifold, q, p, ::Identity) = copyto!(q, p)
 compose!(::AbstractGroupManifold, q, ::Identity, p) = copyto!(q, p)
-compose!(G::AbstractGroupManifold, q, ::Identity, e::Identity) = copyto(q, get_point(G, e))
+compose!(G::AbstractGroupManifold, q, ::Identity, e::Identity) = identity!(G, q)
 compose!(::AbstractGroupManifold, e::Identity, ::Identity, ::Identity) = e
 
 """
