@@ -20,7 +20,7 @@ include("group_utils.jl")
         @test is_point(G, eg) # identity transparent
         p = similar(x)
         copyto!(p, eg)
-        @test p == identity(G)
+        @test p == identity_element(G)
         @test isapprox(G, eg, p)
         @test isapprox(G, p, eg)
         @test isapprox(G, eg, eg)

@@ -52,12 +52,12 @@ function SemidirectProductGroup(
     return GroupManifold(M, op)
 end
 
-function identity!(G::SemidirectProductGroup, q)
+function identity_element!(G::SemidirectProductGroup, q)
     M = base_manifold(G)
     N, H = M.manifolds
     nq, hq = submanifold_components(G, q)
-    identity!(N, nq)
-    identity!(H, hq)
+    identity_element!(N, nq)
+    identity_element!(H, hq)
     @inbounds _padpoint!(G, q)
     return q
 end
@@ -89,7 +89,7 @@ function inv!(G::SemidirectProductGroup, q, p)
 end
 
 compose!(::SemidirectProductGroup, q, ::Identity, p) = copyto!(q, p)
-compose!(G::SemidirectProductGroup, q, ::Identity, e::Identity) = identity!(G, q)
+compose!(G::SemidirectProductGroup, q, ::Identity, e::Identity) = identity_element!(G, q)
 compose!(::SemidirectProductGroup, e::Identity, ::Identity, ::Identity) = e
 function compose!(G::SemidirectProductGroup, x, p, q)
     M = base_manifold(G)

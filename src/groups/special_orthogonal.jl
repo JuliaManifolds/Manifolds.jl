@@ -17,7 +17,7 @@ function default_metric_dispatch(
 end
 default_metric_dispatch(::SpecialOrthogonal, ::EuclideanMetric) = Val(true)
 
-identity!(::SpecialOrthogonal, q) = copyto!(q, one(q))
+identity_element!(::SpecialOrthogonal, q) = copyto!(q, one(q))
 
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
 

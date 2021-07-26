@@ -25,8 +25,8 @@ function allocation_promotion_function(::SpecialLinear{n,ℂ}, f, args::Tuple) w
     return complex
 end
 
-function identity!(::SpecialLinear, q) where {n,𝔽}
-    return copyto!(q, one(q))
+function identity_element!(::SpecialLinear, q) where {n,𝔽}
+    return copyto!(q, I)
 end
 
 function check_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}

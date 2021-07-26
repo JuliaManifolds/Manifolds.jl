@@ -25,8 +25,8 @@ function include_test(path)
     @time include(path)  # show basic timing, (this will print a newline at end)
 end
 
-function our_base_ambiguities()
-    ambigs = Test.detect_ambiguities(Base)
+function our_ambiguities(m=Base)
+    ambigs = Test.detect_ambiguities(m)
     modules_we_care_about =
         [Base, LinearAlgebra, Manifolds, ManifoldsBase, StaticArrays, Statistics, StatsBase]
     our_ambigs = filter(ambigs) do (m1, m2)

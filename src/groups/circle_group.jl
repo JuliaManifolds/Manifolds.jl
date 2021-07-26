@@ -23,6 +23,17 @@ function compose(G::CircleGroup, p::AbstractVector, q::AbstractVector)
 end
 
 compose!(G::CircleGroup, x, p, q) = copyto!(x, compose(G, p, q))
+compose!(G::CircleGroup, x, p, ::Identity) = copyto!(x, p)
+compose!(G::CircleGroup, x, ::Identity, p) = copyto!(x, p)
+compose!(G::CircleGroup, e::Identity, ::Identity, ::Identity) = e
+
+identity_element(G::CircleGroup) = 1.0
+identity_element(::CircleGroup, p::Number) = one(p)
+identity_element(::CircleGroup, p::AbstractArray) = map(i -> one(eltype(p)), p)
+
+function identity_element!(::CircleGroup, p)
+    return fill!(p, one(eltype(p)))
+end
 
 Base.inv(G::CircleGroup, p::AbstractVector) = map(inv, repeated(G), p)
 
@@ -71,5 +82,6 @@ function group_log(::CircleGroup, q)
         return θ * im
     end
 end
+group_log(::CircleGroup, e::Identity{MultiplicationOperation}) = 0.0 * im
 
 group_log!(G::CircleGroup, X::AbstractVector, q::AbstractVector) = (X .= group_log(G, q))

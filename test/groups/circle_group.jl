@@ -22,8 +22,6 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
     @testset "identity overloads" begin
         ig = Identity(G)
         @test inv(G, ig) === ig
-        @test allocate_result(G, get_coordinates, ig, Complex(1.0), DefaultBasis()) isa
-              Array{Complex{Float64},1}
         y = [1.0 * im]
         v = [Complex(0.5)]
         @test translate_diff(G, ig, y, v) === v
