@@ -28,7 +28,7 @@ include("group_utils.jl")
     vpts = [hat(M, x, [-1.0, 2.0, 0.5]), hat(M, x, [1.0, 0.0, 0.5])]
 
     ge = allocate(pts[1])
-    identity_element!(G, de)
+    identity_element!(G, ge)
     @test isapprox(ge, I; atol=1e-10)
 
     gI = Identity(G)

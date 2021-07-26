@@ -18,14 +18,11 @@ adjoint_action(::CircleGroup, p, X) = X
 
 adjoint_action!(::CircleGroup, Y, p, X) = copyto!(Y, X)
 
-function compose(G::CircleGroup, p::AbstractVector, q::AbstractVector)
+function _compose(G::CircleGroup, p::AbstractVector, q::AbstractVector)
     return map(compose, repeated(G), p, q)
 end
 
-compose!(G::CircleGroup, x, p, q) = copyto!(x, compose(G, p, q))
-compose!(G::CircleGroup, x, p, ::Identity) = copyto!(x, p)
-compose!(G::CircleGroup, x, ::Identity, p) = copyto!(x, p)
-compose!(G::CircleGroup, e::Identity, ::Identity, ::Identity) = e
+_compose!(G::CircleGroup, x, p, q) = copyto!(x, compose(G, p, q))
 
 identity_element(G::CircleGroup) = 1.0
 identity_element(::CircleGroup, p::Number) = one(p)

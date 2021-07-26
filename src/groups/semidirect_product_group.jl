@@ -62,6 +62,13 @@ function identity_element!(G::SemidirectProductGroup, q)
     return q
 end
 
+function is_identity(G::SemidirectProductGroup, p; kwargs...)
+    M = base_manifold(G)
+    N, H = M.manifolds
+    nq, hq = submanifold_components(G, p)
+    return is_identity(N, nq; kwargs...) && is_identity(H, hq; kwargs...)
+end
+
 function Base.show(io::IO, G::SemidirectProductGroup)
     M = base_manifold(G)
     N, H = M.manifolds
@@ -88,10 +95,7 @@ function inv!(G::SemidirectProductGroup, q, p)
     return q
 end
 
-compose!(::SemidirectProductGroup, q, ::Identity, p) = copyto!(q, p)
-compose!(G::SemidirectProductGroup, q, ::Identity, e::Identity) = identity_element!(G, q)
-compose!(::SemidirectProductGroup, e::Identity, ::Identity, ::Identity) = e
-function compose!(G::SemidirectProductGroup, x, p, q)
+function _compose!(G::SemidirectProductGroup, x, p, q)
     M = base_manifold(G)
     N, H = M.manifolds
     A = G.op.action

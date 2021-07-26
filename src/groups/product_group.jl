@@ -34,6 +34,20 @@ function decorator_transparent_dispatch(::typeof(group_log!), M::ProductGroup, X
     return Val(:transparent)
 end
 
+function identity_element(G::ProductGroup)
+    return ProductRepr(map(identity_element, G.manifolds))
+end
+function identity_element!(G::ProductGroup, p)
+    pes = submanifold_components(G, p)
+    map(identity_element!, G.manifolds, pes)
+    return p
+end
+
+function is_identity(G::ProductGroup, p; kwargs...)
+    pes = submanifold_components(G, p)
+    return all(map((M, pe) -> is_identity(M, pe; kwargs...), G.manifolds, pes))
+end
+
 function Base.show(io::IO, ::MIME"text/plain", G::ProductGroup)
     print(
         io,
@@ -50,20 +64,20 @@ end
 submanifold(G::ProductGroup, i) = submanifold(base_manifold(G), i)
 
 function submanifold_component(
-    ::GroupManifold{𝔽,MT,O},
-    ::Identity,
+    G::GroupManifold{𝔽,MT,O},
+    ::Identity{O},
     ::Val{I},
 ) where {I,MT<:ProductManifold,𝔽,O}
     # the identity on a product manifold with is a group consists of a tuple of identities
-    return Identity{O}()
+    return Identity(G.manifolds[I])
 end
 
 function submanifold_components(
     G::GroupManifold{𝔽,MT,O},
-    e::Identity,
+    ::Identity{O},
 ) where {MT<:ProductManifold,𝔽,O<:AbstractGroupOperation}
     M = base_manifold(G)
-    return [Identity(O) for N in M.manifolds]
+    return map(N -> Identity(N), M.manifolds)
 end
 function Base.inv(M::ProductManifold, x::ProductRepr)
     return ProductRepr(map(inv, M.manifolds, submanifold_components(M, x))...)
@@ -79,8 +93,8 @@ function inv!(M::ProductManifold, q, p)
     return q
 end
 
-compose(G::ProductGroup, p, q) = compose(G.manifold, p, q)
-function compose(M::ProductManifold, p::ProductRepr, q::ProductRepr)
+_compose(G::ProductGroup, p, q) = _compose(G.manifold, p, q)
+function _compose(M::ProductManifold, p::ProductRepr, q::ProductRepr)
     return ProductRepr(
         map(
             compose,
@@ -90,13 +104,13 @@ function compose(M::ProductManifold, p::ProductRepr, q::ProductRepr)
         )...,
     )
 end
-function compose(M::ProductManifold, p, q)
+function _compose(M::ProductManifold, p, q)
     x = allocate_result(M, compose, p, q)
     return compose!(M, x, p, q)
 end
 
-compose!(G::ProductGroup, x, p, q) = compose!(G.manifold, x, p, q)
-function compose!(M::ProductManifold, x, p, q)
+_compose!(G::ProductGroup, x, p, q) = compose!(G.manifold, x, p, q)
+function _compose!(M::ProductManifold, x, p, q)
     map(
         compose!,
         M.manifolds,
