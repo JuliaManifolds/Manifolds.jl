@@ -88,8 +88,8 @@ the [`Grassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
     p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0_k,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
-$\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ the $k × k$ zero matrix.
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian
+and $0_k$ the $k × k$ zero matrix.
 """
 function check_vector(M::Grassmann{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     mpv = invoke(
