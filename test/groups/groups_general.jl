@@ -155,9 +155,7 @@ include("group_utils.jl")
 
         @test_throws DomainError is_point(
             G,
-            Identity(
-                GroupManifold(NotImplementedManifold(), NotImplementedOperation()),
-            ),
+            Identity(GroupManifold(NotImplementedManifold(), NotImplementedOperation())),
             true,
         )
 
