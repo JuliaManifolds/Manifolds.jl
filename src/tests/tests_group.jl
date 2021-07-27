@@ -66,7 +66,7 @@ function test_group(
         Test.@testset "Identity" begin
             Test.@test isapprox(G, e, e)
             Test.@test compose(G, e, e) === e
-            Test.@test copyto!(e, e) === e
+            Test.@test copyto!(G, e, e) === e
 
             for g in g_pts
                 Test.@test isapprox(G, compose(G, g, e), g)
@@ -99,22 +99,20 @@ function test_group(
         Test.@testset "Inverse" begin
             for g in g_pts
                 ginv = inv(G, g)
-                Test.@test isapprox(G, compose(G, g, ginv), e; atol=atol)
-                Test.@test isapprox(G, compose(G, ginv, g), e; atol=atol)
-                Test.@test isapprox(G, e, compose(G, g, ginv); atol=atol)
-                Test.@test isapprox(G, e, compose(G, ginv, g); atol=atol)
+                Test.@test is_identity(G, compose(G, g, ginv); atol=atol)
+                Test.@test is_identity(G, compose(G, ginv, g); atol=atol)
                 Test.@test inv(G, e) === e
 
                 test_mutating && Test.@testset "mutating" begin
                     ginv = allocate(g)
                     Test.@test inv!(G, ginv, g) === ginv
-                    Test.@test isapprox(G, compose(G, g, ginv), e; atol=atol)
-                    Test.@test isapprox(G, compose(G, ginv, g), e; atol=atol)
+                    Test.@test is_identity(G, compose(G, g, ginv); atol=atol)
+                    Test.@test is_identity(G, compose(G, ginv, g); atol=atol)
 
                     Test.@test inv(G, e) === e
                     geinv = allocate(g)
                     Test.@test inv!(G, geinv, e) === geinv
-                    Test.@test isapprox(G, geinv, e; atol=atol)
+                    Test.@test is_identity(G, geinv; atol=atol)
                 end
             end
         end
@@ -295,7 +293,7 @@ function test_group(
                 Test.@test group_log!(G, X, Identity(G)) === X
                 g = allocate(g_pts[1])
                 Test.@test group_exp!(G, g, X) === g
-                Test.@test isapprox(G, Identity(G), g; atol=atol)
+                Test.@test is_identity(G, g; atol=atol)
             end
         end
 

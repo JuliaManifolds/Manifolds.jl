@@ -176,9 +176,9 @@ function allocate_result(::SpecialEuclidean{n}, f::typeof(screw_matrix), X...) w
     return allocate(X[1], Size(n + 1, n + 1))
 end
 
-compose(::SpecialEuclidean, p::AbstractMatrix, q::AbstractMatrix) = p * q
+_compose(::SpecialEuclidean, p::AbstractMatrix, q::AbstractMatrix) = p * q
 
-function compose!(
+function _compose!(
     ::SpecialEuclidean,
     x::AbstractMatrix,
     p::AbstractMatrix,
@@ -258,7 +258,7 @@ function group_exp!(G::SpecialEuclidean{2}, q, X)
     @assert size(t) == (2,)
     @assert size(b) == (2,)
 
-    θ = vee(SO2, Identity(SO2), Ω)[1]
+    θ = vee(SO2, identity_element(SO2, R), Ω)[1]
     sinθ, cosθ = sincos(θ)
     if θ ≈ 0
         α = 1 - θ^2 / 6

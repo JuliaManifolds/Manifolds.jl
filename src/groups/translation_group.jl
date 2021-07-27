@@ -18,7 +18,7 @@ function TranslationGroup(n::Int...; field::AbstractNumbers=ℝ)
     )
 end
 
-identity!(::TranslationGroup, p) = fill!(p, 0)
+identity_element!(::TranslationGroup, p) = fill!(p, 0)
 
 invariant_metric_dispatch(::TranslationGroup, ::ActionDirection) = Val(true)
 

@@ -10,8 +10,8 @@ number system `𝔽` or in general, by defining for an operation `Op` the follow
 
     inv!(::AbstractGroupManifold{𝔽,Op}, q, p)
     inv(::AbstractGroupManifold{𝔽,Op}, p)
-    compose(::AbstractGroupManifold{𝔽,Op}, p, q)
-    compose!(::AbstractGroupManifold{𝔽,Op}, x, p, q)
+    _compose(::AbstractGroupManifold{𝔽,Op}, p, q)
+    _compose!(::AbstractGroupManifold{𝔽,Op}, x, p, q)
 
 Note that a manifold is connected with an operation by wrapping it with a decorator,
 [`AbstractGroupManifold`](@ref). In typical cases the concrete wrapper
@@ -197,19 +197,38 @@ Identity(::Type{O}) where {O<:AbstractGroupOperation} = Identity{O}()
 number_eltype(::Identity) = Bool
 
 @doc raw"""
-    identity(G::AbstractGroupManifold)
+    identity_element(G::AbstractGroupManifold)
 
 return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G`.
 by default this representation is default array representation.
 It should return the corresponding [`AbstractManifoldPoint`](@ref) of points on `G` if points are not represented by arrays.
 """
-function identity(G::AbstractGroupManifold)
+function identity_element(G::AbstractGroupManifold)
     q = zeros(representation_size(G)...)
-    return identity!(G, q)
+    return identity_element!(G, q)
 end
 
 @doc raw"""
-    is_identity(G,q; kwargs)
+    identity_element(G::AbstractGroupManifold, p)
+
+return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G` (in place of `p`).
+by default this representation is default array representation.
+It rhoudl return the corresponding [`AbstractManifoldPoint`](@ref) of points on `G` if points are not represented by arrays.
+"""
+function identity_element(G::AbstractGroupManifold, p)
+    q = allocate_result(G, identity_element, p)
+    return identity_element!(G, q)
+end
+
+@doc raw"""
+    identity_element!(G::AbstractGroupManifold, p)
+
+return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G` in place of `p`.
+"""
+identity_element!(G::AbstractGroupManifold, p)
+
+@doc raw"""
+    is_identity(G, q; kwargs)
 
 Check, whether `q` is the identity on the [`AbstractGroupManifold`](@ref) `G`, i.e. it is either
 the [`Identity`](@ref)`{O}` with the corresponding [`AbstractGroupOperation`](@ref) `O`, or
@@ -217,52 +236,23 @@ the [`Identity`](@ref)`{O}` with the corresponding [`AbstractGroupOperation`](@r
 """
 is_identity(G::AbstractGroupManifold, q)
 
-function is_identity(G::AbstractGroupManifold, q; kwargs...)
-    return isapprox(G, q, identity(G, q); kwargs...)
-end
-
 function is_identity(
-    ::AbstractGroupManifold{𝔽,M,O},
+    ::AbstractGroupManifold{𝔽,O},
     ::Identity{O};
     kwargs...,
-) where {𝔽,M,O<:AbstractGroupOperation}
+) where {𝔽,O<:AbstractGroupOperation}
     return true
 end
 is_identity(::AbstractGroupManifold, ::Identity; kwargs...) = false
 
-@doc raw"""
-    identity(G::AbstractGroupManifold, p)
-
-return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G` (in place of `p`).
-by default this representation is default array representation.
-It rhoudl return the corresponding [`AbstractManifoldPoint`](@ref) of points on `G` if points are not represented by arrays.
-"""
-function identity(G::AbstractGroupManifold, p)
-    q = allocate_result(G, identity, p)
-    return identity!(G, q)
-end
-
-@doc raw"""
-    identity!(G::AbstractGroupManifold, p)
-
-return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G` in place of `p`.
-"""
-identity!(G::AbstractGroupManifold, p)
-
 Base.show(io::IO, ::Identity{O}) where {O} = print(io, "Identity($O)")
 
-Base.copyto!(e::Identity{O}, ::Identity{O}) where {O} = e
-
-function check_point(
-    G::AbstractGroupManifold{𝔽,M,O},
-    e::Identity{O};
-    kwargs...,
-) where {𝔽,M,O}
+function check_point(G::AbstractGroupManifold{𝔽,O}, e::Identity{O}; kwargs...) where {𝔽,M,O}
     return nothing
 end
 
 function check_point(
-    G::AbstractGroupManifold{𝔽,M,O1},
+    G::AbstractGroupManifold{𝔽,O1},
     e::Identity{O2};
     kwargs...,
 ) where {𝔽,M,O1,O2}
@@ -330,10 +320,10 @@ Base.inv(::AbstractGroupManifold, e::Identity) = e
     return inv!(G.manifold, q, p)
 end
 
-inv!(G::AbstractGroupManifold, q, ::Identity) = identity!(G, q)
+inv!(G::AbstractGroupManifold, q, ::Identity) = identity_element!(G, q)
 
 function Base.isapprox(G::AbstractGroupManifold, e::Identity, p; kwargs...)
-    return isapprox(G, identity(G, p), p; kwargs...)
+    return isapprox(G, identity_element(G, p), p; kwargs...)
 end
 function Base.isapprox(G::AbstractGroupManifold, p, e::Identity; kwargs...)
     return isapprox(G, e, p; kwargs...)
@@ -342,23 +332,86 @@ Base.isapprox(::AbstractGroupManifold, ::Identity, ::Identity; kwargs...) = true
 
 Base.one(e::Identity) = e
 
+Base.copyto!(::AbstractGroupManifold{𝔽,O}, e::Identity{O}, ::Identity{O}) where {𝔽,O} = e
+function Base.copyto!(G::AbstractGroupManifold{𝔽,O}, p, ::Identity{O}) where {𝔽,O}
+    return identity_element!(G, p)
+end
+
 @doc raw"""
     compose(G::AbstractGroupManifold, p, q)
 
-Compose elements $p,q ∈ \mathcal{G}$ using the group operation $p \circ q$.
+Compose elements ``p,q ∈ \mathcal{G}`` using the group operation ``p \circ q``.
+
+For implementing composition on a new group manifold, please overload [`_compose`](@ref)
+instead so that methods with [`Identity`] arguments are not ambiguous.
 """
 compose(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function function compose(G::AbstractGroupManifold, p, q)
+
+function compose(G::AbstractGroupManifold{𝔽,Op}, p, q) where {𝔽,Op<:AbstractGroupOperation}
+    return _compose(G, p, q)
+end
+function compose(
+    ::AbstractGroupManifold{𝔽,Op},
+    ::Identity{Op},
+    p,
+) where {𝔽,Op<:AbstractGroupOperation}
+    return p
+end
+function compose(
+    ::AbstractGroupManifold{𝔽,Op},
+    p,
+    ::Identity{Op},
+) where {𝔽,Op<:AbstractGroupOperation}
+    return p
+end
+function compose(
+    ::AbstractGroupManifold{𝔽,Op},
+    e::Identity{Op},
+    ::Identity{Op},
+) where {𝔽,Op<:AbstractGroupOperation}
+    return e
+end
+
+@decorator_transparent_function function _compose(G::AbstractGroupManifold, p, q)
     x = allocate_result(G, compose, p, q)
-    return compose!(G, x, p, q)
+    return _compose!(G, x, p, q)
 end
 
 @decorator_transparent_signature compose!(M::AbstractDecoratorManifold, x, p, q)
 
-compose!(::AbstractGroupManifold, q, p, ::Identity) = copyto!(q, p)
-compose!(::AbstractGroupManifold, q, ::Identity, p) = copyto!(q, p)
-compose!(G::AbstractGroupManifold, q, ::Identity, e::Identity) = identity!(G, q)
-compose!(::AbstractGroupManifold, e::Identity, ::Identity, ::Identity) = e
+compose!(G::AbstractGroupManifold, x, q, p) = _compose!(G, x, q, p)
+function compose!(
+    ::AbstractGroupManifold{𝔽,Op},
+    q,
+    p,
+    ::Identity{Op},
+) where {𝔽,Op<:AbstractGroupOperation}
+    return copyto!(q, p)
+end
+function compose!(
+    ::AbstractGroupManifold{𝔽,Op},
+    q,
+    ::Identity{Op},
+    p,
+) where {𝔽,Op<:AbstractGroupOperation}
+    return copyto!(q, p)
+end
+function compose!(
+    G::AbstractGroupManifold{𝔽,Op},
+    q,
+    ::Identity{Op},
+    e::Identity{Op},
+) where {𝔽,Op<:AbstractGroupOperation}
+    return identity_element!(G, q)
+end
+function compose!(
+    ::AbstractGroupManifold{𝔽,Op},
+    e::Identity{Op},
+    ::Identity{Op},
+    ::Identity{Op},
+) where {𝔽,Op<:AbstractGroupOperation}
+    return e
+end
 
 """
     lie_bracket(G::AbstractGroupManifold, X, Y)
@@ -640,8 +693,22 @@ group_log(::AbstractGroupManifold, ::Any...)
     X = allocate_result(G, group_log, q)
     return group_log!(G, X, q)
 end
+function group_log(
+    G::AbstractGroupManifold{𝔽,Op},
+    ::Identity{Op},
+) where {𝔽,Op<:AbstractGroupOperation}
+    return zero_vector(G, identity_element(G))
+end
 
 @decorator_transparent_signature group_log!(M::AbstractDecoratorManifold, X, q)
+
+function group_log!(
+    G::AbstractGroupManifold{𝔽,Op},
+    X,
+    ::Identity{Op},
+) where {𝔽,Op<:AbstractGroupOperation}
+    return zero_vector!(G, X, identity_element(G))
+end
 
 ############################
 # Group-specific Retractions
@@ -789,36 +856,32 @@ Base.:-(e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
 Base.:-(::Identity{AdditionOperation}, p) = -p
 Base.:-(p, ::Identity{AdditionOperation}) = p
 
+Base.:*(e::Identity{AdditionOperation}, p) = e
+Base.:*(p, e::Identity{AdditionOperation}) = e
+Base.:*(e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
+
 adjoint_action(::AdditionGroup, p, X) = X
 
 adjoint_action!(::AdditionGroup, Y, p, X) = copyto!(Y, X)
 
-identity!(::AbstractGroupManifold{𝔽,<:AdditionOperation}, p) where {𝔽} = copyto!(p, zero(p))
+function identity_element!(::AbstractGroupManifold{𝔽,<:AdditionOperation}, p) where {𝔽}
+    return fill!(p, zero(eltype(p)))
+end
 
 Base.inv(::AdditionGroup, p) = -p
 Base.inv(::AdditionGroup, e::Identity) = e
 
 inv!(::AdditionGroup, q, p) = copyto!(q, -p)
-inv!(G::AdditionGroup, q, ::Identity) = identity(G, q)
+inv!(G::AdditionGroup, q, ::Identity) = identity_element!(G, q)
 inv!(::AdditionGroup, q::Identity, e::Identity) = q
 
-compose(::AdditionGroup, p, q) = p + q
-compose(::AdditionGroup, p, ::Identity{AdditionOperation}) = p
-compose(::AdditionGroup, ::Identity{AdditionOperation}, q) = q
-compose(::AdditionGroup, e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
-
-compose!(::AdditionGroup, x, p, ::Identity{AdditionOperation}) = copyto!(x, p)
-compose!(::AdditionGroup, x, ::Identity{AdditionOperation}, q) = copyto!(x, q)
-function compose!(
-    G::AdditionGroup,
-    x,
-    ::Identity{AdditionOperation},
-    q::Identity{AdditionOperation},
-)
-    return identity!(G, x)
+function is_identity(G::AdditionGroup, q; kwargs...)
+    return isapprox(G, q, zero(q); kwargs...)
 end
-compose!(::AdditionGroup, x::Identity{AdditionOperation}, ::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = x
-function compose!(::AdditionGroup, x, p, q)
+
+_compose(::AdditionGroup, p, q) = p + q
+
+function _compose!(::AdditionGroup, x, p, q)
     x .= p .+ q
     return x
 end
@@ -863,6 +926,8 @@ Base.:*(e::Identity{MultiplicationOperation}) = e
 Base.:*(::Identity{MultiplicationOperation}, p) = p
 Base.:*(p, ::Identity{MultiplicationOperation}) = p
 Base.:*(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation}) = e
+Base.:*(::Identity{MultiplicationOperation}, e::Identity{AdditionOperation}) = e
+Base.:*(e::Identity{AdditionOperation}, ::Identity{MultiplicationOperation}) = e
 
 Base.:/(p, ::Identity{MultiplicationOperation}) = p
 Base.:/(::Identity{MultiplicationOperation}, p) = inv(p)
@@ -874,18 +939,28 @@ Base.:\(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation
 
 LinearAlgebra.det(::Identity{MultiplicationOperation}) = 1
 
-function identity!(::AbstractGroupManifold{𝔽,<:MultiplicationOperation}, p) where {𝔽}
-    return copyto!(p, one(p))
+function identity_element!(::MultiplicationGroup, p)
+    return copyto!(p, I)
+end
+
+function is_identity(G::MultiplicationGroup, q::Number; kwargs...)
+    return isapprox(G, q, one(q); kwargs...)
+end
+function is_identity(G::MultiplicationGroup, q::AbstractVector; kwargs...)
+    return length(q) == 1 && isapprox(G, q[], one(q[]); kwargs...)
+end
+function is_identity(G::MultiplicationGroup, q::AbstractMatrix; kwargs...)
+    return isapprox(G, q, I; kwargs...)
 end
 
 LinearAlgebra.mul!(q, ::Identity{MultiplicationOperation}, p) = copyto!(q, p)
 LinearAlgebra.mul!(q, p, ::Identity{MultiplicationOperation}) = copyto!(q, p)
 function LinearAlgebra.mul!(
     q,
-    ::Identity{MultiplicationOperation},
+    e::Identity{MultiplicationOperation},
     ::Identity{MultiplicationOperation},
 )
-    return identity!(G, q)
+    return identity_element!(G, q) # Here we have a problem with mul, since we do not know G.
 end
 function LinearAlgebra.mul!(
     q::Identity{MultiplicationOperation},
@@ -896,25 +971,16 @@ function LinearAlgebra.mul!(
 end
 
 Base.inv(::MultiplicationGroup, p) = inv(p)
+Base.inv(::MultiplicationGroup, e::Identity{MultiplicationOperation}) = e
 
 inv!(G::MultiplicationGroup, q, p) = copyto!(q, inv(G, p))
-
-compose(::MultiplicationGroup, p, q) = p * q
-compose(::MultiplicationGroup, p, ::Identity{MultiplicationOperation}) = p
-compose(::MultiplicationGroup, ::Identity{MultiplicationOperation}, q) = q
-function compose(
-    ::MultiplicationGroup,
-    e::Identity{MultiplicationOperation},
-    ::Identity{MultiplicationOperation},
-)
-    return e
+function inv!(G::MultiplicationGroup, q, ::Identity{MultiplicationOperation})
+    return identity_element!(G, q)
 end
 
-compose!(::MultiplicationGroup, x, p, q) = mul!_safe(x, p, q)
-compose!(::MultiplicationGroup, q, p, ::Identity) = copyto!(q, p)
-compose!(::MultiplicationGroup, q, ::Identity, p) = copyto!(q, p)
-compose!(G::MultiplicationGroup, q, ::Identity, e::Identity) = identity!(G, q)
-compose!(::MultiplicationGroup, e::Identity, ::Identity, ::Identity) = e
+_compose(::MultiplicationGroup, p, q) = p * q
+
+_compose!(::MultiplicationGroup, x, p, q) = mul!_safe(x, p, q)
 
 inverse_translate(::MultiplicationGroup, p, q, ::LeftAction) = p \ q
 inverse_translate(::MultiplicationGroup, p, q, ::RightAction) = q / p

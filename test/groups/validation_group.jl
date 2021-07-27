@@ -21,7 +21,7 @@ include("../utils.jl")
     @test Identity(G) isa Identity
 
     eg = allocate(p2)
-    identity!(G, eg)
+    identity_element!(G, eg)
     @test isapprox(G, eg, Identity(G))
     eg = allocate(p2)
 

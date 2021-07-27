@@ -1,3 +1,4 @@
+using StaticArrays: identity_perm
 using Manifolds: decorator_transparent_dispatch
 using Base: decode_overlong
 
@@ -17,10 +18,10 @@ include("group_utils.jl")
         eg = Identity(G)
         @test repr(eg) === "Identity(NotImplementedOperation)"
         @test number_eltype(eg) == Bool
-        @test is_point(G, eg) # identity transparent
+        @test is_identity(G, eg) # identity transparent
         p = similar(x)
-        copyto!(p, eg)
-        @test p == identity(G)
+        copyto!(G, p, e)
+        @test p == identity_element(G)
         @test isapprox(G, eg, p)
         @test isapprox(G, p, eg)
         @test isapprox(G, eg, eg)
@@ -51,7 +52,7 @@ include("group_utils.jl")
         ) === Val{:intransparent}()
         @test base_group(G) === G
         z = similar(x)
-        copyto!(z, eg)
+        copyto!(G, z, eg)
         @test z == eg.p
         @test NotImplementedOperation(NotImplementedManifold()) === G
         @test (NotImplementedOperation())(NotImplementedManifold()) === G
@@ -76,7 +77,7 @@ include("group_utils.jl")
         @test_throws ErrorException inv!(G, x, eg)
         @test_throws ErrorException inv(G, x)
 
-        @test copyto!(x, eg) === x
+        @test copyto!(G, x, eg) === x
         @test isapprox(G, x, eg)
 
         @test_throws ErrorException compose(G, x, x)
@@ -154,10 +155,7 @@ include("group_utils.jl")
 
         @test_throws DomainError is_point(
             G,
-            Identity(
-                GroupManifold(NotImplementedManifold(), NotImplementedOperation()),
-                [0.0, 0.0],
-            ),
+            Identity(GroupManifold(NotImplementedManifold(), NotImplementedOperation())),
             true,
         )
 
@@ -165,9 +163,8 @@ include("group_utils.jl")
         v = [3.0, 4.0]
         ge = Identity(G)
         @test number_eltype(ge) == Bool
-        @test copyto!(ge, ge) === ge
         y = allocate(x)
-        copyto!(y, ge)
+        copyto!(G, y, ge)
         @test y ≈ zero(x)
         @test ge - x == -x
         @test x - ge === x
@@ -213,7 +210,7 @@ include("group_utils.jl")
         @test number_eltype(ge) == Bool
         @test copyto!(ge, ge) === ge
         y = allocate(x)
-        copyto!(y, ge)
+        identity_element!(G, y)
         @test y ≈ one(x)
         @test one(ge) === ge
         @test transpose(ge) === ge
@@ -221,15 +218,15 @@ include("group_utils.jl")
         @test ge * x ≈ x
         @test x * ge ≈ x
         @test ge * ge === ge
-        @test inv(ge) === ge
+        @test inv(G, ge) === ge
         @test *(ge) === ge
 
         @test x / ge ≈ x
         @test ge \ x ≈ x
         @test ge / ge === ge
         @test ge \ ge === ge
-        @test ge / x ≈ inv(x)
-        @test x \ ge ≈ inv(x)
+        @test ge / x ≈ inv(G, x)
+        @test x \ ge ≈ inv(G, x)
         y = allocate(x)
         @test LinearAlgebra.mul!(y, x, ge) === y
         @test y ≈ x
