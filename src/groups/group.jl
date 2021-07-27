@@ -237,20 +237,18 @@ the [`Identity`](@ref)`{O}` with the corresponding [`AbstractGroupOperation`](@r
 is_identity(G::AbstractGroupManifold, q)
 
 function is_identity(
-    ::AbstractGroupManifold{𝔽,M,O},
+    ::AbstractGroupManifold{𝔽,O},
     ::Identity{O};
     kwargs...,
-) where {𝔽,M,O<:AbstractGroupOperation}
+) where {𝔽,O<:AbstractGroupOperation}
     return true
 end
 is_identity(::AbstractGroupManifold, ::Identity; kwargs...) = false
 
 Base.show(io::IO, ::Identity{O}) where {O} = print(io, "Identity($O)")
 
-Base.copyto!(e::Identity{O}, ::Identity{O}) where {O} = e
-
 function check_point(
-    G::AbstractGroupManifold{𝔽,M,O},
+    G::AbstractGroupManifold{𝔽,O},
     e::Identity{O};
     kwargs...,
 ) where {𝔽,M,O}
@@ -258,7 +256,7 @@ function check_point(
 end
 
 function check_point(
-    G::AbstractGroupManifold{𝔽,M,O1},
+    G::AbstractGroupManifold{𝔽,O1},
     e::Identity{O2};
     kwargs...,
 ) where {𝔽,M,O1,O2}
@@ -337,6 +335,9 @@ end
 Base.isapprox(::AbstractGroupManifold, ::Identity, ::Identity; kwargs...) = true
 
 Base.one(e::Identity) = e
+
+Base.copyto!(::AbstractGroupManifold{𝔽,M,O}, e::Identity{O}, ::Identity{O}) where {𝔽,M,O} = e
+Base.copyto!(G::AbstractGroupManifold{𝔽,M,O}, p, ::Identity{O}) where {𝔽,M,O} = identity_element!(G,p)
 
 @doc raw"""
     compose(G::AbstractGroupManifold, p, q)
@@ -958,10 +959,10 @@ LinearAlgebra.mul!(q, ::Identity{MultiplicationOperation}, p) = copyto!(q, p)
 LinearAlgebra.mul!(q, p, ::Identity{MultiplicationOperation}) = copyto!(q, p)
 function LinearAlgebra.mul!(
     q,
-    ::Identity{MultiplicationOperation},
+    e::Identity{MultiplicationOperation},
     ::Identity{MultiplicationOperation},
 )
-    return identity_element!(G, q)
+    return identity_element!(G,q) # Here we have a problem with mul, since we do not know G.
 end
 function LinearAlgebra.mul!(
     q::Identity{MultiplicationOperation},

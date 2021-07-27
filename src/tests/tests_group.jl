@@ -66,7 +66,7 @@ function test_group(
         Test.@testset "Identity" begin
             Test.@test isapprox(G, e, e)
             Test.@test compose(G, e, e) === e
-            Test.@test copyto!(e, e) === e
+            Test.@test copyto!(G, e, e) === e
 
             for g in g_pts
                 Test.@test isapprox(G, compose(G, g, e), g)
