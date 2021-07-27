@@ -247,11 +247,7 @@ is_identity(::AbstractGroupManifold, ::Identity; kwargs...) = false
 
 Base.show(io::IO, ::Identity{O}) where {O} = print(io, "Identity($O)")
 
-function check_point(
-    G::AbstractGroupManifold{𝔽,O},
-    e::Identity{O};
-    kwargs...,
-) where {𝔽,M,O}
+function check_point(G::AbstractGroupManifold{𝔽,O}, e::Identity{O}; kwargs...) where {𝔽,M,O}
     return nothing
 end
 
@@ -337,7 +333,9 @@ Base.isapprox(::AbstractGroupManifold, ::Identity, ::Identity; kwargs...) = true
 Base.one(e::Identity) = e
 
 Base.copyto!(::AbstractGroupManifold{𝔽,O}, e::Identity{O}, ::Identity{O}) where {𝔽,O} = e
-Base.copyto!(G::AbstractGroupManifold{𝔽,O}, p, ::Identity{O}) where {𝔽,O} = identity_element!(G,p)
+function Base.copyto!(G::AbstractGroupManifold{𝔽,O}, p, ::Identity{O}) where {𝔽,O}
+    return identity_element!(G, p)
+end
 
 @doc raw"""
     compose(G::AbstractGroupManifold, p, q)
@@ -962,7 +960,7 @@ function LinearAlgebra.mul!(
     e::Identity{MultiplicationOperation},
     ::Identity{MultiplicationOperation},
 )
-    return identity_element!(G,q) # Here we have a problem with mul, since we do not know G.
+    return identity_element!(G, q) # Here we have a problem with mul, since we do not know G.
 end
 function LinearAlgebra.mul!(
     q::Identity{MultiplicationOperation},
