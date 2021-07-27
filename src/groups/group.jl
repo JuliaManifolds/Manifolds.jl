@@ -956,11 +956,18 @@ end
 LinearAlgebra.mul!(q, ::Identity{MultiplicationOperation}, p) = copyto!(q, p)
 LinearAlgebra.mul!(q, p, ::Identity{MultiplicationOperation}) = copyto!(q, p)
 function LinearAlgebra.mul!(
-    q,
-    e::Identity{MultiplicationOperation},
+    q::AbstractMatrix,
+    ::Identity{MultiplicationOperation},
     ::Identity{MultiplicationOperation},
 )
-    return identity_element!(G, q) # Here we have a problem with mul, since we do not know G.
+    return copyto!(q, I)
+end
+function LinearAlgebra.mul!(
+    q::Number,
+    ::Identity{MultiplicationOperation},
+    ::Identity{MultiplicationOperation},
+)
+    return copyto!(q, one(eltype(q)))
 end
 function LinearAlgebra.mul!(
     q::Identity{MultiplicationOperation},
