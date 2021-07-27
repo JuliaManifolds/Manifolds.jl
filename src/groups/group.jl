@@ -336,8 +336,8 @@ Base.isapprox(::AbstractGroupManifold, ::Identity, ::Identity; kwargs...) = true
 
 Base.one(e::Identity) = e
 
-Base.copyto!(::AbstractGroupManifold{𝔽,M,O}, e::Identity{O}, ::Identity{O}) where {𝔽,M,O} = e
-Base.copyto!(G::AbstractGroupManifold{𝔽,M,O}, p, ::Identity{O}) where {𝔽,M,O} = identity_element!(G,p)
+Base.copyto!(::AbstractGroupManifold{𝔽,O}, e::Identity{O}, ::Identity{O}) where {𝔽,O} = e
+Base.copyto!(G::AbstractGroupManifold{𝔽,O}, p, ::Identity{O}) where {𝔽,O} = identity_element!(G,p)
 
 @doc raw"""
     compose(G::AbstractGroupManifold, p, q)
