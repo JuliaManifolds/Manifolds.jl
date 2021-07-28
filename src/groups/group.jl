@@ -1027,6 +1027,32 @@ function lie_bracket!(::MultiplicationGroup, Z, X, Y)
     return Z
 end
 
+@doc raw"""
+    get_vector_lie(G::AbstractGroupManifold, a, B::AbstractBasis)
+
+Reconstruct a tangent vector from the Lie algebra of `G` from cooordinates `a` of a basis `B`.
+This is similar to calling [`get_vector`](@ref) at the `p=`[`Identity`]('ref)`(G)`
+"""
+function get_vector_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
+    return get_vector(G, Identity(G), X, B)
+end
+function get_vector_lie!(G::AbstractGroupManifold, Y, X, B::AbstractBasis)
+    return get_vector!(G, Y, Identity(G), X, B)
+end
+
+@doc raw"""
+    get_coordinates_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
+
+Get the coordinates of an element `X` from the Lie algebra og `G` with respect to a basis `B`.
+This is similar to calling [`get_coordinates`](@ref) at the `p=`[`Identity`]('ref)`G`
+"""
+function get_coordinates_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
+    return get_coordinates(G, Identity(G), X, B)
+end
+function get_coordinates_lie!(G::AbstractGroupManifold, a, X, B::AbstractBasis)
+    return get_coordinates!(G, a, Identity(G), X, B)
+end
+
 # (a) changes / parent.
 for f in [
     embed,
