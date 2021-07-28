@@ -47,9 +47,6 @@ include("group_utils.jl")
             x,
         ) === Val{:intransparent}()
         @test base_group(G) === G
-        z = similar(x)
-        copyto!(G, z, eg)
-        @test z == eg.p
         @test NotImplementedOperation(NotImplementedManifold()) === G
         @test (NotImplementedOperation())(NotImplementedManifold()) === G
 
@@ -57,38 +54,42 @@ include("group_utils.jl")
             MetricManifold(Euclidean(3), EuclideanMetric()),
         )
         @test_throws ErrorException hat(Rotations(3), eg, [1, 2, 3])
-        @test_throws ErrorException hat(
+        # If you force it, you get a not that readable MethodError
+        @test_throws MethodError hat(
             GroupManifold(Rotations(3), NotImplementedOperation()),
             eg,
             [1, 2, 3],
         )
         @test_throws ErrorException vee(Rotations(3), eg, [1, 2, 3])
-        @test_throws ErrorException vee(
+        @test_throws MethodError vee(
             GroupManifold(Rotations(3), NotImplementedOperation()),
             eg,
             [1, 2, 3],
         )
 
         @test_throws ErrorException inv!(G, x, x)
-        @test_throws ErrorException inv!(G, x, eg)
+        @test_throws MethodError inv!(G, x, eg)
         @test_throws ErrorException inv(G, x)
 
-        @test copyto!(G, x, eg) === x
-        @test isapprox(G, x, eg)
+        # no function defined to return the identity array representation
+        @test_throws MethodError copyto!(G, x, eg)
 
-        @test_throws ErrorException compose(G, x, x)
-        @test_throws ErrorException compose(G, x, eg)
-        @test_throws ErrorException compose!(G, x, eg, x)
-        @test_throws ErrorException compose!(G, x, x, eg)
-        @test_throws ErrorException compose!(G, x, x, x)
-        @test_throws ErrorException compose!(G, x, eg, eg)
+        @test_throws MethodError compose(G, x, x)
+        @test compose(G, x, eg) == x
+        xO = deepcopy(x)
+        compose!(G, x, eg, x)
+        @test xO == x
+        compose!(G, x, x, eg)
+        @test xO == x
+        @test_throws MethodError compose!(G, x, x, x)
+        @test_throws MethodError compose!(G, x, eg, eg)
 
-        @test_throws ErrorException translate(G, x, x)
-        @test_throws ErrorException translate(G, x, x, LeftAction())
-        @test_throws ErrorException translate(G, x, x, RightAction())
-        @test_throws ErrorException translate!(G, x, x, x)
-        @test_throws ErrorException translate!(G, x, x, x, LeftAction())
-        @test_throws ErrorException translate!(G, x, x, x, RightAction())
+        @test_throws MethodError translate(G, x, x)
+        @test_throws MethodError translate(G, x, x, LeftAction())
+        @test_throws MethodError translate(G, x, x, RightAction())
+        @test_throws MethodError translate!(G, x, x, x)
+        @test_throws MethodError translate!(G, x, x, x, LeftAction())
+        @test_throws MethodError translate!(G, x, x, x, RightAction())
 
         @test_throws ErrorException inverse_translate(G, x, x)
         @test_throws ErrorException inverse_translate(G, x, x, LeftAction())
@@ -147,12 +148,12 @@ include("group_utils.jl")
 
     @testset "Addition operation" begin
         G = GroupManifold(NotImplementedManifold(), Manifolds.AdditionOperation())
-        test_group(G, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]], [], [[1.0, 2.0]])
-
-        @test_throws DomainError is_point(
+        test_group(
             G,
-            Identity(GroupManifold(NotImplementedManifold(), NotImplementedOperation())),
-            true,
+            [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]],
+            [],
+            [[1.0, 2.0]];
+            test_exp_lie_log=false, # there is no identity element so log/exp on Lie do not work
         )
 
         x = [1.0, 2.0]
@@ -173,7 +174,6 @@ include("group_utils.jl")
         @test ge * 1 === ge
         @test 1 * ge === ge
         @test ge * ge === ge
-        @test identity_element(G) ≈ zero(x)
         @test inv(G, x) ≈ -x
         @test inv(G, ge) === ge
         @test compose(G, x, x) ≈ x + x
@@ -197,13 +197,13 @@ include("group_utils.jl")
             [[2.0 1.0; 3.0 4.0], [3.0 2.0; 4.0 5.0], [4.0 3.0; 5.0 6.0]],
             [],
             [[1.0 2.0; 3.0 4.0]];
-            test_exp_lie_log=true,
+            test_exp_lie_log=false, # no identity available as array
         )
 
         x = [2.0 1.0; 2.0 3.0]
         ge = Identity(G)
         @test number_eltype(ge) == Bool
-        @test copyto!(ge, ge) === ge
+        @test copyto!(G, ge, ge) === ge
         y = allocate(x)
         identity_element!(G, y)
         @test y ≈ one(x)
@@ -232,7 +232,6 @@ include("group_utils.jl")
         @test LinearAlgebra.mul!(y, ge, ge) === y
         @test y ≈ one(y)
 
-        @test ge.p ≈ one(x)
         @test inv(G, x) ≈ inv(x)
         @test inv(G, ge) === ge
         z = allocate(x)
@@ -269,7 +268,7 @@ include("group_utils.jl")
     @testset "Identity on Group Manifolds" begin
         G = TranslationGroup(3)
         e = Identity(G)
-        @test get_vector(G, e, ones(3), DefaultOrthogonalBasis()) == ones(3)
+        @test get_vector_lie(G, ones(3), DefaultOrthogonalBasis()) == ones(3)
         @test e - e == e
         @test ones(3) + e == ones(3)
     end

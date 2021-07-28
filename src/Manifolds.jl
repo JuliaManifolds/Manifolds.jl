@@ -33,6 +33,8 @@ import ManifoldsBase:
     get_vector!,
     get_vectors,
     gram_schmidt,
+    hat,
+    hat!,
     injectivity_radius,
     inner,
     inner__intransparent,
@@ -59,6 +61,8 @@ import ManifoldsBase:
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
+    vee,
+    vee!,
     zero_vector,
     zero_vector!,
     CotangentSpace,
@@ -74,7 +78,8 @@ import Base:
     length,
     ndims,
     showerror,
-    size
+    size,
+    transpose
 
 using Base.Iterators: repeated
 using Distributions
