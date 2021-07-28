@@ -26,6 +26,9 @@ function adjoint_action!(M::ValidationGroup, Y, p, X; kwargs...)
     return Y
 end
 
+Identity(M::ValidationGroup) = array_point(Identity(M.manifold))
+identity_element!(M::ValidationGroup, p) = identity_element!(M.manifold, array_value(p))
+
 function Base.inv(M::ValidationGroup, p; kwargs...)
     is_point(M, p, true; kwargs...)
     q = array_point(inv(M.manifold, array_value(p)))
