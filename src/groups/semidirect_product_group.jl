@@ -52,6 +52,15 @@ function SemidirectProductGroup(
     return GroupManifold(M, op)
 end
 
+function allocate_result(G::SemidirectProductGroup, ::typeof(identity_element))
+    M = base_manifold(G)
+    N, H = M.manifolds
+    np = allocate_result(N, identity_element)
+    hp = allocate_result(H, identity_element)
+    reshaper = ShapeSpecification(StaticReshaper(), M.manifolds...)
+    return prod_point(reshaper, np,hp)
+end
+
 function identity_element!(G::SemidirectProductGroup, q)
     M = base_manifold(G)
     N, H = M.manifolds
@@ -194,6 +203,14 @@ function Base.isapprox(G::SemidirectProductGroup, p, q; kwargs...)
     nq, hq = submanifold_components(G, q)
     return isapprox(N, np, nq; kwargs...) && isapprox(H, hp, hq; kwargs...)
 end
+function Base.isapprox(G::SemidirectProductGroup, e::Identity, p; kwargs...)
+    return isapprox(G, identity_element(G, p), p; kwargs...)
+end
+function Base.isapprox(G::SemidirectProductGroup, p, e::Identity; kwargs...)
+    return isapprox(G, e, p; kwargs...)
+end
+Base.isapprox(::SemidirectProductGroup, ::Identity, ::Identity; kwargs...) = true
+
 function Base.isapprox(G::SemidirectProductGroup, p, X, Y; kwargs...)
     M = base_manifold(G)
     N, H = M.manifolds

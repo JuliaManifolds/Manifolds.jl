@@ -19,11 +19,7 @@ include("group_utils.jl")
         @test repr(eg) === "Identity(NotImplementedOperation)"
         @test number_eltype(eg) == Bool
         @test is_identity(G, eg) # identity transparent
-        p = similar(x)
-        copyto!(G, p, e)
-        @test p == identity_element(G)
-        @test isapprox(G, eg, p)
-        @test isapprox(G, p, eg)
+        @test_throws MethodError identity_element(G) # but for a NotImplOp there is no concrete id.
         @test isapprox(G, eg, eg)
         @test length(methods(is_group_decorator)) == 1
 
@@ -177,8 +173,7 @@ include("group_utils.jl")
         @test ge * 1 === ge
         @test 1 * ge === ge
         @test ge * ge === ge
-        @test ge.p ≈ zero(x)
-        @test zero(ge) == ge
+        @test identity_element(G) ≈ zero(x)
         @test inv(G, x) ≈ -x
         @test inv(G, ge) === ge
         @test compose(G, x, x) ≈ x + x

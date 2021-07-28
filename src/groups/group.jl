@@ -74,8 +74,8 @@ end
 
 Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
-Base.copyto!(M::GroupManifold, q, p) = copyto!(M.manifold, q, p)
-Base.copyto!(M::GroupManifold, Y, p, X) = copyto!(M.manifold, Y, p, X)
+Base.copyto!(G::GroupManifold{𝔽,M,O}, q, p) where {𝔽,M,O}= copyto!(G.manifold, q, p)
+Base.copyto!(G::GroupManifold{𝔽,M,O}, Y, p, X) where {𝔽,M,O} = copyto!(G.manifold, Y, p, X)
 
 const GROUP_MANIFOLD_BASIS_DISAMBIGUATION =
     [AbstractDecoratorManifold, ValidationManifold, VectorBundle]
@@ -204,9 +204,11 @@ by default this representation is default array representation.
 It should return the corresponding [`AbstractManifoldPoint`](@ref) of points on `G` if points are not represented by arrays.
 """
 function identity_element(G::AbstractGroupManifold)
-    q = zeros(representation_size(G)...)
+    q = allocate_result(G, identity_element)
     return identity_element!(G, q)
 end
+
+allocate_result(G::AbstractGroupManifold, ::typeof(identity_element)) = zeros(representation_size(G)...)
 
 @doc raw"""
     identity_element(G::AbstractGroupManifold, p)
@@ -258,8 +260,13 @@ function check_point(
 ) where {𝔽,M,O1,O2}
     return DomainError(
         e,
-        "The Identity $e does not lie on $M, since its the identity with respect to $O2 and not $O1.",
+        "The Identity $e does not lie on $G, since its the identity with respect to $O2 and not $O1.",
     )
+end
+
+Base.copyto!(::GroupManifold{𝔽,M,O}, e::Identity{O}, ::Identity{O}) where {𝔽,M,O} = e
+function Base.copyto!(G::GroupManifold{𝔽,M,O}, p, ::Identity{O}) where {𝔽,M,O}
+    return identity_element!(G, p)
 end
 
 ##########################
@@ -901,9 +908,10 @@ group_exp(::AdditionGroup, X) = X
 group_exp!(::AdditionGroup, q, X) = copyto!(q, X)
 
 group_log(::AdditionGroup, q) = q
+group_log(G::AdditionGroup, ::Identity{AdditionOperation}) = zero_vector(G, identity_element(G))
 
 group_log!(::AdditionGroup, X, q) = copyto!(X, q)
-group_log!(::AdditionGroup, X, e::Identity{AdditionOperation}) = X
+group_log!(G::AdditionGroup, X, ::Identity{AdditionOperation}) = zero_vector!(G,X, identity_element(G))
 
 lie_bracket(::AdditionGroup, X, Y) = zero(X)
 
