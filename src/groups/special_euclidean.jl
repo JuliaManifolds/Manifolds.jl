@@ -188,7 +188,7 @@ function _compose!(
 end
 
 @doc raw"""
-    group_exp(G::SpecialEuclidean{n}, X)
+    exp_lie(G::SpecialEuclidean{n}, X)
 
 Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(n)$, where $b ∈ 𝔱(n)$ and $Ω ∈ 𝔰𝔬(n)$:
 
@@ -199,12 +199,12 @@ Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(n)$, where $b ∈ �
 where $t ∈ \mathrm{T}(n)$ and $R = \exp Ω$ is the group exponential on $\mathrm{SO}(n)$.
 
 In the [`screw_matrix`](@ref) representation, the group exponential is the matrix
-exponential (see [`group_exp`](@ref)).
+exponential (see [`exp_lie`](@ref)).
 """
-group_exp(::SpecialEuclidean, ::Any)
+exp_lie(::SpecialEuclidean, ::Any)
 
 @doc raw"""
-    group_exp(G::SpecialEuclidean{2}, X)
+    exp_lie(G::SpecialEuclidean{2}, X)
 
 Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(2)$, where $b ∈ 𝔱(2)$ and $Ω ∈ 𝔰𝔬(2)$:
 
@@ -221,10 +221,10 @@ U(θ) = \frac{\sin θ}{θ} I_2 + \frac{1 - \cos θ}{θ^2} Ω,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-group_exp(::SpecialEuclidean{2}, ::Any)
+exp_lie(::SpecialEuclidean{2}, ::Any)
 
 @doc raw"""
-    group_exp(G::SpecialEuclidean{3}, X)
+    exp_lie(G::SpecialEuclidean{3}, X)
 
 Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(3)$, where $b ∈ 𝔱(3)$ and $Ω ∈ 𝔰𝔬(3)$:
 
@@ -241,16 +241,16 @@ U(θ) = I_3 + \frac{1 - \cos θ}{θ^2} Ω + \frac{θ - \sin θ}{θ^3} Ω^2,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-group_exp(::SpecialEuclidean{3}, ::Any)
+exp_lie(::SpecialEuclidean{3}, ::Any)
 
-function group_exp!(G::SpecialEuclidean, q, X)
+function exp_lie!(G::SpecialEuclidean, q, X)
     Xmat = screw_matrix(G, X)
     qmat = exp(Xmat)
     map(copyto!, submanifold_components(G, q), submanifold_components(G, qmat))
     _padpoint!(G, q)
     return q
 end
-function group_exp!(G::SpecialEuclidean{2}, q, X)
+function exp_lie!(G::SpecialEuclidean{2}, q, X)
     SO2 = submanifold(G, 2)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
@@ -279,7 +279,7 @@ function group_exp!(G::SpecialEuclidean{2}, q, X)
     end
     return q
 end
-function group_exp!(G::SpecialEuclidean{3}, q, X)
+function exp_lie!(G::SpecialEuclidean{3}, q, X)
     SO3 = submanifold(G, 2)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
@@ -308,7 +308,7 @@ function group_exp!(G::SpecialEuclidean{3}, q, X)
 end
 
 @doc raw"""
-    group_log(G::SpecialEuclidean{n}, p) where {n}
+    log_lie(G::SpecialEuclidean{n}, p) where {n}
 
 Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(n)$, where $t ∈ \mathrm{T}(n)$
 and $R ∈ \mathrm{SO}(n)$:
@@ -320,12 +320,12 @@ and $R ∈ \mathrm{SO}(n)$:
 where $b ∈ 𝔱(n)$ and $Ω = \log R ∈ 𝔰𝔬(n)$ is the group logarithm on $\mathrm{SO}(n)$.
 
 In the [`affine_matrix`](@ref) representation, the group logarithm is the matrix logarithm
-(see [`group_log`](@ref)):
+(see [`log_lie`](@ref)):
 """
-group_log(::SpecialEuclidean, ::Any)
+log_lie(::SpecialEuclidean, ::Any)
 
 @doc raw"""
-    group_log(G::SpecialEuclidean{2}, p)
+    log_lie(G::SpecialEuclidean{2}, p)
 
 Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(2)$, where $t ∈ \mathrm{T}(2)$
 and $R ∈ \mathrm{SO}(2)$:
@@ -343,10 +343,10 @@ U(θ) = \frac{\sin θ}{θ} I_2 + \frac{1 - \cos θ}{θ^2} Ω,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-group_log(::SpecialEuclidean{2}, ::Any)
+log_lie(::SpecialEuclidean{2}, ::Any)
 
 @doc raw"""
-    group_log(G::SpecialEuclidean{3}, p)
+    log_lie(G::SpecialEuclidean{3}, p)
 
 Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(3)$, where $t ∈ \mathrm{T}(3)$
 and $R ∈ \mathrm{SO}(3)$:
@@ -364,22 +364,22 @@ U(θ) = I_3 + \frac{1 - \cos θ}{θ^2} Ω + \frac{θ - \sin θ}{θ^3} Ω^2,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-group_log(::SpecialEuclidean{3}, ::Any)
+log_lie(::SpecialEuclidean{3}, ::Any)
 
-function group_log!(G::SpecialEuclidean, X, q)
+function log_lie!(G::SpecialEuclidean, X, q)
     qmat = affine_matrix(G, q)
     Xmat = real(log_safe(qmat))
     map(copyto!, submanifold_components(G, X), submanifold_components(G, Xmat))
     _padvector!(G, X)
     return X
 end
-function group_log!(G::SpecialEuclidean{2}, X, q)
+function log_lie!(G::SpecialEuclidean{2}, X, q)
     SO2 = submanifold(G, 2)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
     @assert size(b) == (2,)
 
-    group_log!(SO2, Ω, R)
+    log_lie!(SO2, Ω, R)
     @inbounds θ = Ω[2]
     β = θ / 2
     α = θ ≈ 0 ? 1 - β^2 / 3 : β * cot(β)
@@ -391,7 +391,7 @@ function group_log!(G::SpecialEuclidean{2}, X, q)
     end
     return X
 end
-function group_log!(G::SpecialEuclidean{3}, X, q)
+function log_lie!(G::SpecialEuclidean{3}, X, q)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
     @assert size(Ω) == (3, 3)

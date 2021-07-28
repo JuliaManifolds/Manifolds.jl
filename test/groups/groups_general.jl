@@ -33,9 +33,9 @@ include("group_utils.jl")
               Val{:intransparent}()
         @test Manifolds.decorator_transparent_dispatch(compose!, G, x, x, x) ===
               Val{:intransparent}()
-        @test Manifolds.decorator_transparent_dispatch(group_exp, G, x, x) ===
+        @test Manifolds.decorator_transparent_dispatch(exp_lie, G, x, x) ===
               Val{:intransparent}()
-        @test Manifolds.decorator_transparent_dispatch(group_log, G, x, x) ===
+        @test Manifolds.decorator_transparent_dispatch(log_lie, G, x, x) ===
               Val{:intransparent}()
         @test Manifolds.decorator_transparent_dispatch(
             translate_diff!,
@@ -111,10 +111,10 @@ include("group_utils.jl")
         @test_throws ErrorException inverse_translate_diff!(G, v, x, x, v, LeftAction())
         @test_throws ErrorException inverse_translate_diff!(G, v, x, x, v, RightAction())
 
-        @test_throws ErrorException group_exp(G, v)
-        @test_throws ErrorException group_exp!(G, x, v)
-        @test_throws ErrorException group_log(G, x)
-        @test_throws ErrorException group_log!(G, v, x)
+        @test_throws ErrorException exp_lie(G, v)
+        @test_throws ErrorException exp_lie!(G, x, v)
+        @test_throws ErrorException log_lie(G, x)
+        @test_throws ErrorException log_lie!(G, v, x)
 
         for f in [translate, translate!]
             @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:intransparent}()
@@ -122,7 +122,7 @@ include("group_utils.jl")
         for f in [inverse_translate_diff!, inverse_translate_diff]
             @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:transparent}()
         end
-        for f in [group_exp!, group_exp, group_log, group_log!]
+        for f in [exp_lie!, exp_lie, log_lie, log_lie!]
             @test Manifolds.decorator_transparent_dispatch(f, G, x, x) ===
                   Val{:intransparent}()
         end
@@ -186,8 +186,8 @@ include("group_utils.jl")
         @test y ≈ x
         compose!(G, y, ge, x)
         @test y ≈ x
-        @test group_exp(G, v) === v
-        @test group_log(G, x) === x
+        @test exp_lie(G, v) === v
+        @test log_lie(G, x) === x
     end
 
     @testset "Multiplication operation" begin
@@ -197,7 +197,7 @@ include("group_utils.jl")
             [[2.0 1.0; 3.0 4.0], [3.0 2.0; 4.0 5.0], [4.0 3.0; 5.0 6.0]],
             [],
             [[1.0 2.0; 3.0 4.0]];
-            test_group_exp_log=true,
+            test_exp_lie_log=true,
         )
 
         x = [2.0 1.0; 2.0 3.0]
@@ -258,11 +258,11 @@ include("group_utils.jl")
         compose!(G, y, ge, x)
         @test y ≈ x
         X = [1.0 2.0; 3.0 4.0]
-        @test group_exp!(G, y, X) === y
-        @test_throws ErrorException group_exp!(G, y, :a)
+        @test exp_lie!(G, y, X) === y
+        @test_throws ErrorException exp_lie!(G, y, :a)
         @test y ≈ exp(X)
         Y = allocate(X)
-        @test group_log!(G, Y, y) === Y
+        @test log_lie!(G, Y, y) === Y
         @test Y ≈ log(y)
     end
 

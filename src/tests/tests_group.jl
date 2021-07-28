@@ -7,7 +7,7 @@ using Base: IdentityUnitRange
         Xe_pts::AbstractVector = [];
         atol = 1e-10,
         test_mutating = true,
-        test_group_exp_log = true,
+        test_exp_lie_log = true,
         test_diff = false,
         test_invariance = false,
         test_lie_bracket=false,
@@ -31,7 +31,7 @@ function test_group(
     Xe_pts::AbstractVector=[];
     atol=1e-10,
     test_mutating=true,
-    test_group_exp_log=true,
+    test_exp_lie_log=true,
     test_diff=false,
     test_invariance=false,
     test_lie_bracket=false,
@@ -282,37 +282,37 @@ function test_group(
         end
     end
 
-    test_group_exp_log && Test.@testset "group exp/log properties" begin
+    test_exp_lie_log && Test.@testset "group exp/log properties" begin
         Test.@testset "e = exp(0)" begin
-            X = group_log(G, Identity(G))
-            g = group_exp(G, X)
+            X = log_lie(G, Identity(G))
+            g = exp_lie(G, X)
             Test.@test isapprox(G, Identity(G), g; atol=atol)
 
             test_mutating && Test.@testset "mutating" begin
                 X = allocate(Xe_pts[1])
-                Test.@test group_log!(G, X, Identity(G)) === X
+                Test.@test log_lie!(G, X, Identity(G)) === X
                 g = allocate(g_pts[1])
-                Test.@test group_exp!(G, g, X) === g
+                Test.@test exp_lie!(G, g, X) === g
                 Test.@test is_identity(G, g; atol=atol)
             end
         end
 
         Test.@testset "X = log(exp(X))" begin
             for X in Xe_pts
-                g = group_exp(G, X)
+                g = exp_lie(G, X)
                 Test.@test is_point(G, g; atol=atol)
-                X2 = group_log(G, g)
+                X2 = log_lie(G, g)
                 Test.@test isapprox(G, Identity(G), X2, X; atol=atol)
             end
 
             test_mutating && Test.@testset "mutating" begin
                 for X in Xe_pts
                     g = allocate(g_pts[1])
-                    Test.@test group_exp!(G, g, X) === g
+                    Test.@test exp_lie!(G, g, X) === g
                     Test.@test is_point(G, g; atol=atol)
-                    Test.@test isapprox(G, g, group_exp(G, X); atol=atol)
+                    Test.@test isapprox(G, g, exp_lie(G, X); atol=atol)
                     X2 = allocate(X)
-                    Test.@test group_log!(G, X2, g) === X2
+                    Test.@test log_lie!(G, X2, g) === X2
                     Test.@test isapprox(G, Identity(G), X2, X; atol=atol)
                 end
             end
@@ -320,15 +320,15 @@ function test_group(
 
         Test.@testset "inv(g) = exp(-log(g))" begin
             g = g_pts[1]
-            X = group_log(G, g)
-            ginv = group_exp(G, -X)
+            X = log_lie(G, g)
+            ginv = exp_lie(G, -X)
             Test.@test isapprox(G, ginv, inv(G, g); atol=atol)
         end
 
         Test.@testset "exp(sX)∘exp(tX) = exp((s+t)X)" begin
-            g1 = group_exp(G, 0.2 * Xe_pts[1])
-            g2 = group_exp(G, 0.3 * Xe_pts[1])
-            g12 = group_exp(G, 0.5 * Xe_pts[1])
+            g1 = exp_lie(G, 0.2 * Xe_pts[1])
+            g2 = exp_lie(G, 0.3 * Xe_pts[1])
+            g12 = exp_lie(G, 0.5 * Xe_pts[1])
             g1_g2 = compose(G, g1, g2)
             g2_g1 = compose(G, g2, g1)
             isapprox(G, g1_g2, g12; atol=atol)
@@ -336,7 +336,7 @@ function test_group(
         end
     end
 
-    test_group_exp_log &&
+    test_exp_lie_log &&
         test_diff &&
         Test.@testset "exp/log retract/inverse_retract" begin
             for conv in diff_convs

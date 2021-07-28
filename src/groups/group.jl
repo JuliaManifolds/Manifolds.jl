@@ -616,7 +616,7 @@ end
 end
 
 @doc raw"""
-    group_exp(G::AbstractGroupManifold, X)
+    exp_lie(G::AbstractGroupManifold, X)
 
 Compute the group exponential of the Lie algebra element `X`. It is equivalent to the
 exponential map defined by the [`CartanSchoutenMinus`](@ref) connection.
@@ -644,12 +644,12 @@ following properties:
     [`exp`](@ref).
 
 ```
-group_exp(G::AbstractGroupManifold{𝔽,AdditionOperation}, X) where {𝔽}
+exp_lie(G::AbstractGroupManifold{𝔽,AdditionOperation}, X) where {𝔽}
 ```
 
 Compute $q = X$.
 
-    group_exp(G::AbstractGroupManifold{𝔽,MultiplicationOperation}, X) where {𝔽}
+    exp_lie(G::AbstractGroupManifold{𝔽,MultiplicationOperation}, X) where {𝔽}
 
 For `Number` and `AbstractMatrix` types of `X`, compute the usual numeric/matrix
 exponential,
@@ -658,22 +658,22 @@ exponential,
 \exp X = \operatorname{Exp} X = \sum_{n=0}^∞ \frac{1}{n!} X^n.
 ````
 """
-group_exp(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function function group_exp(G::AbstractGroupManifold, X)
-    q = allocate_result(G, group_exp, X)
-    return group_exp!(G, q, X)
+exp_lie(::AbstractGroupManifold, ::Any...)
+@decorator_transparent_function function exp_lie(G::AbstractGroupManifold, X)
+    q = allocate_result(G, exp_lie, X)
+    return exp_lie!(G, q, X)
 end
 
-@decorator_transparent_signature group_exp!(M::AbstractDecoratorManifold, q, X)
+@decorator_transparent_signature exp_lie!(M::AbstractDecoratorManifold, q, X)
 
 @doc raw"""
-    group_log(G::AbstractGroupManifold, q)
+    log_lie(G::AbstractGroupManifold, q)
 
 Compute the group logarithm of the group element `q`. It is equivalent to the
 logarithmic map defined by the [`CartanSchoutenMinus`](@ref) connection.
 
 Given an element $q ∈ \mathcal{G}$, compute the right inverse of the group exponential map
-[`group_exp`](@ref), that is, the element $\log q = X ∈ 𝔤 = T_e \mathcal{G}$, such that
+[`exp_lie`](@ref), that is, the element $\log q = X ∈ 𝔤 = T_e \mathcal{G}$, such that
 $q = \exp X$
 
 !!! note
@@ -681,12 +681,12 @@ $q = \exp X$
     [`log`](@ref).
 
 ```
-group_log(G::AbstractGroupManifold{𝔽,AdditionOperation}, q) where {𝔽}
+log_lie(G::AbstractGroupManifold{𝔽,AdditionOperation}, q) where {𝔽}
 ```
 
 Compute $X = q$.
 
-    group_log(G::AbstractGroupManifold{𝔽,MultiplicationOperation}, q) where {𝔽}
+    log_lie(G::AbstractGroupManifold{𝔽,MultiplicationOperation}, q) where {𝔽}
 
 For `Number` and `AbstractMatrix` types of `q`, compute the usual numeric/matrix logarithm:
 
@@ -697,21 +697,21 @@ For `Number` and `AbstractMatrix` types of `q`, compute the usual numeric/matrix
 where $e$ here is the [`Identity`](@ref) element, that is, $1$ for numeric $q$ or the
 identity matrix $I_m$ for matrix $q ∈ ℝ^{m × m}$.
 """
-group_log(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function function group_log(G::AbstractGroupManifold, q)
-    X = allocate_result(G, group_log, q)
-    return group_log!(G, X, q)
+log_lie(::AbstractGroupManifold, ::Any...)
+@decorator_transparent_function function log_lie(G::AbstractGroupManifold, q)
+    X = allocate_result(G, log_lie, q)
+    return log_lie!(G, X, q)
 end
-function group_log(
+function log_lie(
     G::AbstractGroupManifold{𝔽,Op},
     ::Identity{Op},
 ) where {𝔽,Op<:AbstractGroupOperation}
     return zero_vector(G, identity_element(G))
 end
 
-@decorator_transparent_signature group_log!(M::AbstractDecoratorManifold, X, q)
+@decorator_transparent_signature log_lie!(M::AbstractDecoratorManifold, X, q)
 
-function group_log!(
+function log_lie!(
     G::AbstractGroupManifold{𝔽,Op},
     X,
     ::Identity{Op},
@@ -726,7 +726,7 @@ end
 """
     GroupExponentialRetraction{D<:ActionDirection} <: AbstractRetractionMethod
 
-Retraction using the group exponential [`group_exp`](@ref) "translated" to any point on the
+Retraction using the group exponential [`exp_lie`](@ref) "translated" to any point on the
 manifold.
 
 For more details, see
@@ -745,7 +745,7 @@ end
 """
     GroupLogarithmicInverseRetraction{D<:ActionDirection} <: AbstractInverseRetractionMethod
 
-Retraction using the group logarithm [`group_log`](@ref) "translated" to any point on the
+Retraction using the group logarithm [`log_lie`](@ref) "translated" to any point on the
 manifold.
 
 For more details, see
@@ -773,7 +773,7 @@ direction(::GroupLogarithmicInverseRetraction{D}) where {D} = D()
         method::GroupExponentialRetraction{<:ActionDirection},
     )
 
-Compute the retraction using the group exponential [`group_exp`](@ref) "translated" to any
+Compute the retraction using the group exponential [`exp_lie`](@ref) "translated" to any
 point on the manifold.
 With a group translation ([`translate`](@ref)) $τ_p$ in a specified direction, the
 retraction is
@@ -782,14 +782,14 @@ retraction is
 \operatorname{retr}_p = τ_p \circ \exp \circ (\mathrm{d}τ_p^{-1})_p,
 ````
 
-where $\exp$ is the group exponential ([`group_exp`](@ref)), and $(\mathrm{d}τ_p^{-1})_p$ is
+where $\exp$ is the group exponential ([`exp_lie`](@ref)), and $(\mathrm{d}τ_p^{-1})_p$ is
 the action of the differential of inverse translation $τ_p^{-1}$ evaluated at $p$ (see
 [`inverse_translate_diff`](@ref)).
 """
 function retract(G::AbstractGroupManifold, p, X, method::GroupExponentialRetraction)
     conv = direction(method)
     Xₑ = inverse_translate_diff(G, p, p, X, conv)
-    pinvq = group_exp(G, Xₑ)
+    pinvq = exp_lie(G, Xₑ)
     q = translate(G, p, pinvq, conv)
     return q
 end
@@ -797,7 +797,7 @@ end
 function retract!(G::AbstractGroupManifold, q, p, X, method::GroupExponentialRetraction)
     conv = direction(method)
     Xₑ = inverse_translate_diff(G, p, p, X, conv)
-    pinvq = group_exp(G, Xₑ)
+    pinvq = exp_lie(G, Xₑ)
     return translate!(G, q, p, pinvq, conv)
 end
 
@@ -809,7 +809,7 @@ end
         method::GroupLogarithmicInverseRetraction{<:ActionDirection},
     )
 
-Compute the inverse retraction using the group logarithm [`group_log`](@ref) "translated"
+Compute the inverse retraction using the group logarithm [`log_lie`](@ref) "translated"
 to any point on the manifold.
 With a group translation ([`translate`](@ref)) $τ_p$ in a specified direction, the
 retraction is
@@ -818,14 +818,14 @@ retraction is
 \operatorname{retr}_p^{-1} = (\mathrm{d}τ_p)_e \circ \log \circ τ_p^{-1},
 ````
 
-where $\log$ is the group logarithm ([`group_log`](@ref)), and $(\mathrm{d}τ_p)_e$ is the
+where $\log$ is the group logarithm ([`log_lie`](@ref)), and $(\mathrm{d}τ_p)_e$ is the
 action of the differential of translation $τ_p$ evaluated at the identity element $e$
 (see [`translate_diff`](@ref)).
 """
 function inverse_retract(G::GroupManifold, p, q, method::GroupLogarithmicInverseRetraction)
     conv = direction(method)
     pinvq = inverse_translate(G, p, q, conv)
-    Xₑ = group_log(G, pinvq)
+    Xₑ = log_lie(G, pinvq)
     return translate_diff(G, p, Identity(G), Xₑ, conv)
 end
 
@@ -838,7 +838,7 @@ function inverse_retract!(
 )
     conv = direction(method)
     pinvq = inverse_translate(G, p, q, conv)
-    Xₑ = group_log(G, pinvq)
+    Xₑ = log_lie(G, pinvq)
     return translate_diff!(G, X, p, Identity(G), Xₑ, conv)
 end
 
@@ -905,17 +905,17 @@ function inverse_translate_diff!(::AdditionGroup, Y, p, q, X, ::ActionDirection)
     return copyto!(Y, X)
 end
 
-group_exp(::AdditionGroup, X) = X
+exp_lie(::AdditionGroup, X) = X
 
-group_exp!(::AdditionGroup, q, X) = copyto!(q, X)
+exp_lie!(::AdditionGroup, q, X) = copyto!(q, X)
 
-group_log(::AdditionGroup, q) = q
-function group_log(G::AdditionGroup, ::Identity{AdditionOperation})
+log_lie(::AdditionGroup, q) = q
+function log_lie(G::AdditionGroup, ::Identity{AdditionOperation})
     return zero_vector(G, identity_element(G))
 end
 
-group_log!(::AdditionGroup, X, q) = copyto!(X, q)
-function group_log!(G::AdditionGroup, X, ::Identity{AdditionOperation})
+log_lie!(::AdditionGroup, X, q) = copyto!(X, q)
+function log_lie!(G::AdditionGroup, X, ::Identity{AdditionOperation})
     return zero_vector!(G, X, identity_element(G))
 end
 
@@ -1010,14 +1010,14 @@ function inverse_translate!(G::MultiplicationGroup, x, p, q, conv::ActionDirecti
     return copyto!(x, inverse_translate(G, p, q, conv))
 end
 
-function group_exp!(G::MultiplicationGroup, q, X)
+function exp_lie!(G::MultiplicationGroup, q, X)
     X isa Union{Number,AbstractMatrix} && return copyto!(q, exp(X))
     return error(
-        "group_exp! not implemented on $(typeof(G)) for vector $(typeof(X)) and element $(typeof(q)).",
+        "exp_lie! not implemented on $(typeof(G)) for vector $(typeof(X)) and element $(typeof(q)).",
     )
 end
 
-group_log!(::MultiplicationGroup, X::AbstractMatrix, q::AbstractMatrix) = log_safe!(X, q)
+log_lie!(::MultiplicationGroup, X::AbstractMatrix, q::AbstractMatrix) = log_safe!(X, q)
 
 lie_bracket(::MultiplicationGroup, X, Y) = mul!(X * Y, Y, X, -1, true)
 
@@ -1098,10 +1098,10 @@ end
 for f in [
     compose,
     compose!,
-    group_exp,
-    group_exp!,
-    group_log,
-    group_log!,
+    exp_lie,
+    exp_lie!,
+    log_lie,
+    log_lie!,
     translate,
     translate!,
     translate_diff,

@@ -42,13 +42,13 @@ function inverse_translate_diff!(G::SpecialOrthogonal, Y, p, q, X, conv::ActionD
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
 end
 
-group_exp!(G::SpecialOrthogonal, q, X) = exp!(G, q, identity_element(G, q), X)
+exp_lie!(G::SpecialOrthogonal, q, X) = exp!(G, q, identity_element(G, q), X)
 
-group_log!(G::SpecialOrthogonal, X, q) = log!(G, X, identity_element(G, q), q)
-function group_log!(G::SpecialOrthogonal, X::AbstractMatrix, q::AbstractMatrix)
+log_lie!(G::SpecialOrthogonal, X, q) = log!(G, X, identity_element(G, q), q)
+function log_lie!(G::SpecialOrthogonal, X::AbstractMatrix, q::AbstractMatrix)
     return log!(G, X, identity_element(G, q), q)
 end
-function group_log!(::SpecialOrthogonal, X, ::Identity{MultiplicationOperation})
+function log_lie!(::SpecialOrthogonal, X, ::Identity{MultiplicationOperation})
     return fill!(X, zero(eltype(X)))
 end
 

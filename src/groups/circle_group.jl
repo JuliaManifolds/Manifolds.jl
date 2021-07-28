@@ -62,7 +62,7 @@ function translate_diff!(G::CircleGroup, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, translate_diff(G, p, q, X, conv))
 end
 
-function group_exp(::CircleGroup, X)
+function exp_lie(::CircleGroup, X)
     return map(X) do imθ
         θ = imag(imθ)
         sinθ, cosθ = sincos(θ)
@@ -70,15 +70,15 @@ function group_exp(::CircleGroup, X)
     end
 end
 
-group_exp!(G::CircleGroup, q, X) = (q .= group_exp(G, X))
+exp_lie!(G::CircleGroup, q, X) = (q .= exp_lie(G, X))
 
-function group_log(::CircleGroup, q)
+function log_lie(::CircleGroup, q)
     return map(q) do z
         cosθ, sinθ = reim(z)
         θ = atan(sinθ, cosθ)
         return θ * im
     end
 end
-group_log(::CircleGroup, e::Identity{MultiplicationOperation}) = 0.0 * im
+log_lie(::CircleGroup, e::Identity{MultiplicationOperation}) = 0.0 * im
 
-group_log!(G::CircleGroup, X::AbstractVector, q::AbstractVector) = (X .= group_log(G, q))
+log_lie!(G::CircleGroup, X::AbstractVector, q::AbstractVector) = (X .= log_lie(G, q))

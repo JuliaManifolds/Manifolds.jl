@@ -65,7 +65,7 @@ function exp!(
     X,
 ) where {𝔽}
     Y = inverse_translate_diff(M.manifold, q, p, X)
-    return compose!(M.manifold, q, p, group_exp(M.manifold, Y))
+    return compose!(M.manifold, q, p, exp_lie(M.manifold, Y))
 end
 
 """
@@ -87,7 +87,7 @@ function log!(
     q,
 ) where {𝔽}
     pinvq = compose(M.manifold, inv(M.manifold, p), q)
-    group_log!(M.manifold, Y, pinvq)
+    log_lie!(M.manifold, Y, pinvq)
     return translate_diff!(M.manifold, Y, p, Identity(M.manifold), Y)
 end
 
@@ -156,7 +156,7 @@ function vector_transport_direction!(
     d,
     ::ParallelTransport,
 )
-    dexp_half = group_exp(M.manifold, d / 2)
+    dexp_half = exp_lie(M.manifold, d / 2)
     translate_diff!(M.manifold, Y, dexp_half, p, X, RightAction())
     return translate_diff!(M.manifold, Y, dexp_half, p, Y, LeftAction())
 end
@@ -177,6 +177,6 @@ function vector_transport_to!(
     q,
     m::ParallelTransport,
 )
-    d = group_log(M.manifold, q)
+    d = log_lie(M.manifold, q)
     return vector_transport_direction!(M, Y, p, X, d, m)
 end

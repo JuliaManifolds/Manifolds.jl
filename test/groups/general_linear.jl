@@ -54,8 +54,8 @@ using NLsolve
             q = exp(G, p, X)
             Y = log(G, p, q)
             @test Y ≈ X
-            @test group_exp(G, X) ≈ exp(X)
-            @test group_log(G, exp(X)) ≈ X
+            @test exp_lie(G, X) ≈ exp(X)
+            @test log_lie(G, exp(X)) ≈ X
         end
         @testset "complex" begin
             G = GeneralLinear(1, ℂ)
@@ -65,8 +65,8 @@ using NLsolve
             q = exp(G, p, X)
             Y = log(G, p, q)
             @test Y ≈ X
-            @test group_exp(G, X) ≈ exp(X)
-            @test group_log(G, exp(X)) ≈ X
+            @test exp_lie(G, X) ≈ exp(X)
+            @test log_lie(G, exp(X)) ≈ X
         end
     end
 

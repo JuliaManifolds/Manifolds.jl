@@ -15,7 +15,7 @@ include("group_utils.jl")
     @test sprint(show, G) == "ProductGroup($(SOn), $(Tn))"
     @test sprint(show, "text/plain", G) == "ProductGroup with 2 subgroups:\n $(SOn)\n $(Tn)"
     x = Matrix{Float64}(I, 3, 3)
-    for f in [group_exp!, group_log!]
+    for f in [exp_lie!, log_lie!]
         @test Manifolds.decorator_transparent_dispatch(f, G, x, x) === Val{:transparent}()
     end
     t = Vector{Float64}.([1:2, 2:3, 3:4])
@@ -38,21 +38,21 @@ include("group_utils.jl")
             @test isapprox(
                 M,
                 Identity(G),
-                group_exp(M, v_pts[1]),
+                exp_lie(M, v_pts[1]),
                 Manifolds.prod_point(
                     shape_se,
-                    group_exp(SOn, v_pts[1].parts[1]),
-                    group_exp(Tn, v_pts[1].parts[2]),
+                    exp_lie(SOn, v_pts[1].parts[1]),
+                    exp_lie(Tn, v_pts[1].parts[2]),
                 ),
             )
             @test isapprox(
                 M,
                 Identity(G),
-                group_log(M, pts[1]),
+                log_lie(M, pts[1]),
                 Manifolds.prod_point(
                     shape_se,
-                    group_log(SOn, pts[1].parts[1]),
-                    group_log(Tn, pts[1].parts[2]),
+                    log_lie(SOn, pts[1].parts[1]),
+                    log_lie(Tn, pts[1].parts[2]),
                 ),
             )
         end
@@ -66,16 +66,16 @@ include("group_utils.jl")
         test_group(G, pts, v_pts, v_pts; test_diff=true, test_mutating=false)
         @test isapprox(
             M,
-            group_exp(M, v_pts[1]),
+            exp_lie(M, v_pts[1]),
             ProductRepr(
-                group_exp(SOn, v_pts[1].parts[1]),
-                group_exp(Tn, v_pts[1].parts[2]),
+                exp_lie(SOn, v_pts[1].parts[1]),
+                exp_lie(Tn, v_pts[1].parts[2]),
             ),
         )
         @test isapprox(
             M,
-            group_log(M, pts[1]),
-            ProductRepr(group_log(SOn, pts[1].parts[1]), group_log(Tn, pts[1].parts[2])),
+            log_lie(M, pts[1]),
+            ProductRepr(log_lie(SOn, pts[1].parts[1]), log_lie(Tn, pts[1].parts[2])),
         )
     end
     @test sprint(show, "text/plain", G) === """

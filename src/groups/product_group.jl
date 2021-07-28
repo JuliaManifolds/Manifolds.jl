@@ -27,10 +27,10 @@ function ProductGroup(manifold::ProductManifold{𝔽}) where {𝔽}
     return GroupManifold(manifold, op)
 end
 
-function decorator_transparent_dispatch(::typeof(group_exp!), M::ProductGroup, q, X)
+function decorator_transparent_dispatch(::typeof(exp_lie!), M::ProductGroup, q, X)
     return Val(:transparent)
 end
-function decorator_transparent_dispatch(::typeof(group_log!), M::ProductGroup, X, q)
+function decorator_transparent_dispatch(::typeof(log_lie!), M::ProductGroup, X, q)
     return Val(:transparent)
 end
 
@@ -281,28 +281,28 @@ function inverse_translate_diff!(M::ProductManifold, Y, p, q, X, conv::ActionDir
     return Y
 end
 
-function group_exp(M::ProductManifold, X::ProductRepr)
-    return ProductRepr(map(group_exp, M.manifolds, submanifold_components(M, X))...)
+function exp_lie(M::ProductManifold, X::ProductRepr)
+    return ProductRepr(map(exp_lie, M.manifolds, submanifold_components(M, X))...)
 end
-function group_exp(M::ProductManifold, X)
-    q = allocate_result(M, group_exp, X)
-    return group_exp!(M, q, X)
+function exp_lie(M::ProductManifold, X)
+    q = allocate_result(M, exp_lie, X)
+    return exp_lie!(M, q, X)
 end
 
-function group_exp!(M::ProductManifold, q, X)
-    map(group_exp!, M.manifolds, submanifold_components(M, q), submanifold_components(M, X))
+function exp_lie!(M::ProductManifold, q, X)
+    map(exp_lie!, M.manifolds, submanifold_components(M, q), submanifold_components(M, X))
     return q
 end
 
-function group_log(M::ProductManifold, q::ProductRepr)
-    return ProductRepr(map(group_log, M.manifolds, submanifold_components(M, q))...)
+function log_lie(M::ProductManifold, q::ProductRepr)
+    return ProductRepr(map(log_lie, M.manifolds, submanifold_components(M, q))...)
 end
-function group_log(M::ProductManifold, q)
-    X = allocate_result(M, group_log, q)
-    return group_log!(M, X, q)
+function log_lie(M::ProductManifold, q)
+    X = allocate_result(M, log_lie, q)
+    return log_lie!(M, X, q)
 end
 
-function group_log!(M::ProductManifold, X, q)
-    map(group_log!, M.manifolds, submanifold_components(M, X), submanifold_components(M, q))
+function log_lie!(M::ProductManifold, X, q)
+    map(log_lie!, M.manifolds, submanifold_components(M, X), submanifold_components(M, q))
     return X
 end

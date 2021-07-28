@@ -200,7 +200,7 @@ function inverse_translate_diff!(
     return Y
 end
 
-function group_exp(M::ValidationManifold, X; kwargs...)
+function exp_lie(M::ValidationManifold, X; kwargs...)
     is_vector(
         M,
         Identity(M.manifold),
@@ -209,12 +209,12 @@ function group_exp(M::ValidationManifold, X; kwargs...)
         check_base_point=false,
         kwargs...,
     )
-    q = array_point(group_exp(M.manifold, array_value(X)))
+    q = array_point(exp_lie(M.manifold, array_value(X)))
     is_point(M, q, true; kwargs...)
     return q
 end
 
-function group_exp!(M::ValidationManifold, q, X; kwargs...)
+function exp_lie!(M::ValidationManifold, q, X; kwargs...)
     is_vector(
         M,
         Identity(M.manifold),
@@ -223,14 +223,14 @@ function group_exp!(M::ValidationManifold, q, X; kwargs...)
         check_base_point=false,
         kwargs...,
     )
-    group_exp!(M.manifold, array_value(q), array_value(X))
+    exp_lie!(M.manifold, array_value(q), array_value(X))
     is_point(M, q, true; kwargs...)
     return q
 end
 
-function group_log(M::ValidationManifold, q; kwargs...)
+function log_lie(M::ValidationManifold, q; kwargs...)
     is_point(M, q, true; kwargs...)
-    X = ValidationTVector(group_log(M.manifold, array_value(q)))
+    X = ValidationTVector(log_lie(M.manifold, array_value(q)))
     is_vector(
         M,
         Identity(M.manifold),
@@ -242,9 +242,9 @@ function group_log(M::ValidationManifold, q; kwargs...)
     return X
 end
 
-function group_log!(M::ValidationManifold, X, q; kwargs...)
+function log_lie!(M::ValidationManifold, X, q; kwargs...)
     is_point(M, q, true; kwargs...)
-    group_log!(M.manifold, array_value(X), array_value(q))
+    log_lie!(M.manifold, array_value(X), array_value(q))
     is_vector(
         M,
         Identity(M.manifold),

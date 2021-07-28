@@ -52,17 +52,17 @@ include("../utils.jl")
     compose!(AG, pq, p2, e)
     @test isapprox(G, pq.value, compose(G, p, e))
 
-    @test group_exp(AG, X2) isa ValidationMPoint
-    @test isapprox(G, group_exp(AG, X2).value, group_exp(G, X))
+    @test exp_lie(AG, X2) isa ValidationMPoint
+    @test isapprox(G, exp_lie(AG, X2).value, exp_lie(G, X))
     expX = allocate(p2)
-    group_exp!(AG, expX, X2)
-    @test isapprox(G, expX.value, group_exp(G, X))
+    exp_lie!(AG, expX, X2)
+    @test isapprox(G, expX.value, exp_lie(G, X))
 
-    @test group_log(AG, p2) isa ValidationTVector
-    @test isapprox(G, e, group_log(AG, p2).value, group_log(G, p))
+    @test log_lie(AG, p2) isa ValidationTVector
+    @test isapprox(G, e, log_lie(AG, p2).value, log_lie(G, p))
     logp = allocate(X2)
-    group_log!(AG, logp, p2)
-    @test isapprox(G, e, logp.value, group_log(G, p))
+    log_lie!(AG, logp, p2)
+    @test isapprox(G, e, logp.value, log_lie(G, p))
 
     @test lie_bracket(AG, X, X2) isa ValidationTVector
     Xlb = allocate(X2)
