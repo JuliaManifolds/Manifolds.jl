@@ -74,7 +74,7 @@ end
 
 Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
-Base.copyto!(G::GroupManifold{𝔽,M,O}, q, p) where {𝔽,M,O}= copyto!(G.manifold, q, p)
+Base.copyto!(G::GroupManifold{𝔽,M,O}, q, p) where {𝔽,M,O} = copyto!(G.manifold, q, p)
 Base.copyto!(G::GroupManifold{𝔽,M,O}, Y, p, X) where {𝔽,M,O} = copyto!(G.manifold, Y, p, X)
 
 const GROUP_MANIFOLD_BASIS_DISAMBIGUATION =
@@ -208,7 +208,9 @@ function identity_element(G::AbstractGroupManifold)
     return identity_element!(G, q)
 end
 
-allocate_result(G::AbstractGroupManifold, ::typeof(identity_element)) = zeros(representation_size(G)...)
+function allocate_result(G::AbstractGroupManifold, ::typeof(identity_element))
+    return zeros(representation_size(G)...)
+end
 
 @doc raw"""
     identity_element(G::AbstractGroupManifold, p)
@@ -908,10 +910,14 @@ group_exp(::AdditionGroup, X) = X
 group_exp!(::AdditionGroup, q, X) = copyto!(q, X)
 
 group_log(::AdditionGroup, q) = q
-group_log(G::AdditionGroup, ::Identity{AdditionOperation}) = zero_vector(G, identity_element(G))
+function group_log(G::AdditionGroup, ::Identity{AdditionOperation})
+    return zero_vector(G, identity_element(G))
+end
 
 group_log!(::AdditionGroup, X, q) = copyto!(X, q)
-group_log!(G::AdditionGroup, X, ::Identity{AdditionOperation}) = zero_vector!(G,X, identity_element(G))
+function group_log!(G::AdditionGroup, X, ::Identity{AdditionOperation})
+    return zero_vector!(G, X, identity_element(G))
+end
 
 lie_bracket(::AdditionGroup, X, Y) = zero(X)
 

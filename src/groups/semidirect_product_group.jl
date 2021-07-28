@@ -58,7 +58,7 @@ function allocate_result(G::SemidirectProductGroup, ::typeof(identity_element))
     np = allocate_result(N, identity_element)
     hp = allocate_result(H, identity_element)
     reshaper = ShapeSpecification(StaticReshaper(), M.manifolds...)
-    return prod_point(reshaper, np,hp)
+    return prod_point(reshaper, np, hp)
 end
 
 function identity_element!(G::SemidirectProductGroup, q)
