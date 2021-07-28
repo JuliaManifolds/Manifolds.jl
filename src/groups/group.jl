@@ -190,6 +190,7 @@ struct Identity{O<:AbstractGroupOperation} end
 function Identity(::AbstractGroupManifold{𝔽,O}) where {𝔽,O<:AbstractGroupOperation}
     return Identity{O}()
 end
+Identity(M::AbstractDecoratorManifold) = Identity(base_group(M))
 Identity(::O) where {O<:AbstractGroupOperation} = Identity(O)
 Identity(::Type{O}) where {O<:AbstractGroupOperation} = Identity{O}()
 
@@ -203,10 +204,13 @@ return a point representation of the [`Identity`](@ref) on the [`AbstractGroupMa
 by default this representation is default array representation.
 It should return the corresponding [`AbstractManifoldPoint`](@ref) of points on `G` if points are not represented by arrays.
 """
-function identity_element(G::AbstractGroupManifold)
+identity_element(G::AbstractGroupManifold)
+@decorator_transparent_function function identity_element(G::AbstractGroupManifold)
     q = allocate_result(G, identity_element)
     return identity_element!(G, q)
 end
+
+@decorator_transparent_signature identity_element!(G::AbstractGroupManifold, p)
 
 function allocate_result(G::AbstractGroupManifold, ::typeof(identity_element))
     return zeros(representation_size(G)...)
