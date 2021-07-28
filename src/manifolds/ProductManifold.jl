@@ -153,6 +153,12 @@ function check_point(M::ProductManifold, p::Union{ProductRepr,ProductArray}; kwa
     (length(errors) == 1) && return cerr[1]
     return nothing
 end
+function check_point(M::ProductManifold, p; kwargs...)
+    return DomainError(
+        typeof(p),
+        "The point $p is not a point on $M, since currently only ProductRepr and ProductArray are suppored typoes for points on product manifolds",
+    )
+end
 
 """
     check_vector(M::ProductManifold, p, X; kwargs... )
@@ -182,6 +188,12 @@ function check_vector(
     (length(errors) > 1) && return CompositeManifoldError(cerr)
     (length(errors) == 1) && return cerr[1]
     return nothing
+end
+function check_vector(M::ProductManifold, p, X; kwargs...)
+    return DomainError(
+        typeof(X),
+        "The vector $X is not a tangent vector to any tangent space on $M, since currently only ProductRepr and ProductArray are suppored typoes for tangent vectors on product manifolds",
+    )
 end
 
 function copyto!(M::ProductManifold, q::ProductRepr, p::ProductRepr)
