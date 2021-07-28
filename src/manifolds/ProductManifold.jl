@@ -156,7 +156,7 @@ end
 function check_point(M::ProductManifold, p; kwargs...)
     return DomainError(
         typeof(p),
-        "The point $p is not a point on $M, since currently only ProductRepr and ProductArray are suppored typoes for points on product manifolds",
+        "The point $p is not a point on $M, since currently only ProductRepr and ProductArray are supported types for points on product manifolds",
     )
 end
 
@@ -192,7 +192,7 @@ end
 function check_vector(M::ProductManifold, p, X; kwargs...)
     return DomainError(
         typeof(X),
-        "The vector $X is not a tangent vector to any tangent space on $M, since currently only ProductRepr and ProductArray are suppored typoes for tangent vectors on product manifolds",
+        "The vector $X is not a tangent vector to any tangent space on $M, since currently only ProductRepr and ProductArray are supported types for tangent vectors on product manifolds",
     )
 end
 
