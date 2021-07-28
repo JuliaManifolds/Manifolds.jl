@@ -67,10 +67,7 @@ include("group_utils.jl")
         @test isapprox(
             M,
             exp_lie(M, v_pts[1]),
-            ProductRepr(
-                exp_lie(SOn, v_pts[1].parts[1]),
-                exp_lie(Tn, v_pts[1].parts[2]),
-            ),
+            ProductRepr(exp_lie(SOn, v_pts[1].parts[1]), exp_lie(Tn, v_pts[1].parts[2])),
         )
         @test isapprox(
             M,
