@@ -74,9 +74,6 @@ end
 
 Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
-Base.copyto!(G::GroupManifold{𝔽,M,O}, q, p) where {𝔽,M,O} = copyto!(G.manifold, q, p)
-Base.copyto!(G::GroupManifold{𝔽,M,O}, Y, p, X) where {𝔽,M,O} = copyto!(G.manifold, Y, p, X)
-
 const GROUP_MANIFOLD_BASIS_DISAMBIGUATION =
     [AbstractDecoratorManifold, ValidationManifold, VectorBundle]
 
@@ -425,20 +422,20 @@ end
 
 compose!(G::AbstractGroupManifold, x, q, p) = _compose!(G, x, q, p)
 function compose!(
-    ::AbstractGroupManifold{𝔽,Op},
+    G::AbstractGroupManifold{𝔽,Op},
     q,
     p,
     ::Identity{Op},
 ) where {𝔽,Op<:AbstractGroupOperation}
-    return copyto!(q, p)
+    return copyto!(G, q, p)
 end
 function compose!(
-    ::AbstractGroupManifold{𝔽,Op},
+    G::AbstractGroupManifold{𝔽,Op},
     q,
     ::Identity{Op},
     p,
 ) where {𝔽,Op<:AbstractGroupOperation}
-    return copyto!(q, p)
+    return copyto!(G, q, p)
 end
 function compose!(
     G::AbstractGroupManifold{𝔽,Op},
@@ -980,7 +977,7 @@ Base.:*(e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
 
 adjoint_action(::AdditionGroup, p, X) = X
 
-adjoint_action!(::AdditionGroup, Y, p, X) = copyto!(Y, X)
+adjoint_action!(G::AdditionGroup, Y, p, X) = copyto!(G, p, Y, X)
 
 function identity_element!(::AbstractGroupManifold{𝔽,<:AdditionOperation}, p) where {𝔽}
     return fill!(p, zero(eltype(p)))
@@ -989,7 +986,7 @@ end
 Base.inv(::AdditionGroup, p) = -p
 Base.inv(::AdditionGroup, e::Identity) = e
 
-inv!(::AdditionGroup, q, p) = copyto!(q, -p)
+inv!(G::AdditionGroup, q, p) = copyto!(G, q, -p)
 inv!(G::AdditionGroup, q, ::Identity) = identity_element!(G, q)
 inv!(::AdditionGroup, q::Identity, e::Identity) = q
 
@@ -1011,19 +1008,19 @@ translate_diff!(::AdditionGroup, Y, p, q, X, ::ActionDirection) = copyto!(Y, X)
 inverse_translate_diff(::AdditionGroup, p, q, X, ::ActionDirection) = X
 
 function inverse_translate_diff!(::AdditionGroup, Y, p, q, X, ::ActionDirection)
-    return copyto!(Y, X)
+    return copyto!(G, p, Y, X)
 end
 
 exp_lie(::AdditionGroup, X) = X
 
-exp_lie!(::AdditionGroup, q, X) = copyto!(q, X)
+exp_lie!(G::AdditionGroup, q, X) = copyto!(G, q, X)
 
 log_lie(::AdditionGroup, q) = q
 function log_lie(G::AdditionGroup, ::Identity{AdditionOperation})
     return zero_vector(G, identity_element(G))
 end
 
-_log_lie!(::AdditionGroup, X, q) = copyto!(X, q)
+_log_lie!(G::AdditionGroup, X, q) = copyto!(G, X, q)
 
 lie_bracket(::AdditionGroup, X, Y) = zero(X)
 
@@ -1192,6 +1189,8 @@ end
 for f in [
     check_point,
     check_vector,
+    copy,
+    copyto!,
     distance,
     exp,
     exp!,
