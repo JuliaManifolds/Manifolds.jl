@@ -20,15 +20,17 @@ include("../utils.jl")
 
     @test Identity(G) isa Identity
 
-    eg = allocate(p2)
+    eg = allocate(p)
     identity_element!(G, eg)
-    @test isapprox(G, eg, Identity(G))
+    eg2 = allocate(p2)
+    identity_element!(AG, eg2)
+    @test eg2.value == eg
     eg = allocate(p2)
 
     @test inv(AG, p2) isa ValidationMPoint
     @test isapprox(G, inv(AG, p2).value, inv(G, p))
-    @test inv(AG, e) isa Identity
-    @test_throws DomainError inv(AG, Identity(AG))
+    @test inv(AG, e) isa ValidationMPoint{<:Identity}
+    @test inv(AG, Identity(AG)) == inv(AG, e)
 
     pinvq = allocate(p2)
     inv!(AG, pinvq, p2)

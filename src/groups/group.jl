@@ -190,6 +190,7 @@ struct Identity{O<:AbstractGroupOperation} end
 function Identity(::AbstractGroupManifold{𝔽,O}) where {𝔽,O<:AbstractGroupOperation}
     return Identity{O}()
 end
+Identity(M::AbstractDecoratorManifold) = Identity(base_group(M))
 Identity(::O) where {O<:AbstractGroupOperation} = Identity(O)
 Identity(::Type{O}) where {O<:AbstractGroupOperation} = Identity{O}()
 
@@ -203,10 +204,13 @@ return a point representation of the [`Identity`](@ref) on the [`AbstractGroupMa
 by default this representation is default array representation.
 It should return the corresponding [`AbstractManifoldPoint`](@ref) of points on `G` if points are not represented by arrays.
 """
-function identity_element(G::AbstractGroupManifold)
+identity_element(G::AbstractGroupManifold)
+@decorator_transparent_function function identity_element(G::AbstractGroupManifold)
     q = allocate_result(G, identity_element)
     return identity_element!(G, q)
 end
+
+@decorator_transparent_signature identity_element!(G::AbstractGroupManifold, p)
 
 function allocate_result(G::AbstractGroupManifold, ::typeof(identity_element))
     return zeros(representation_size(G)...)
@@ -447,6 +451,82 @@ function compose!(
     ::Identity{Op},
 ) where {𝔽,Op<:AbstractGroupOperation}
     return e
+end
+
+transpose(e::Identity) = e
+
+@doc raw"""
+    hat(M::AbstractGroupManifold{𝔽,O}, ::Identity{O}, Xⁱ) where {𝔽,O<:AbstractGroupOperation}
+
+Given a basis $e_i$ on the tangent space at a the [`Identity`}(@ref) and tangent
+component vector ``X^i``, compute the equivalent vector representation
+``X=X^i e_i**, where Einstein summation notation is used:
+
+````math
+∧ : X^i ↦ X^i e_i
+````
+
+For array manifolds, this converts a vector representation of the tangent
+vector to an array representation. The [`vee`](@ref) map is the `hat` map's
+inverse.
+"""
+function hat(
+    G::AbstractGroupManifold{𝔽,O},
+    ::Identity{O},
+    X,
+) where {𝔽,O<:AbstractGroupOperation}
+    return get_vector_lie(G, X, VeeOrthogonalBasis())
+end
+function hat!(
+    G::AbstractGroupManifold{𝔽,O},
+    Y,
+    ::Identity{O},
+    X,
+) where {𝔽,O<:AbstractGroupOperation}
+    return get_vector_lie!(G, Y, X, VeeOrthogonalBasis())
+end
+function hat(M::AbstractManifold, e::Identity, ::Any)
+    return throw(ErrorException("On $M there exsists no identity $e"))
+end
+function hat!(M::AbstractManifold, ::Any, e::Identity, ::Any)
+    return throw(ErrorException("On $M there exsists no identity $e"))
+end
+
+@doc raw"""
+    vee(M::AbstractManifold, p, X)
+
+Given a basis $e_i$ on the tangent space at a point `p` and tangent
+vector `X`, compute the vector components $X^i$, such that $X = X^i e_i$, where
+Einstein summation notation is used:
+
+````math
+\vee : X^i e_i ↦ X^i
+````
+
+For array manifolds, this converts an array representation of the tangent
+vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
+inverse.
+"""
+function vee(
+    M::AbstractGroupManifold{𝔽,O},
+    ::Identity{O},
+    X,
+) where {𝔽,O<:AbstractGroupOperation}
+    return get_coordinates_lie(M, X, VeeOrthogonalBasis())
+end
+function vee!(
+    M::AbstractGroupManifold{𝔽,O},
+    Y,
+    ::Identity{O},
+    X,
+) where {𝔽,O<:AbstractGroupOperation}
+    return get_coordinates_lie!(M, Y, X, VeeOrthogonalBasis())
+end
+function vee(M::AbstractManifold, e::Identity, ::Any)
+    return throw(ErrorException("On $M there exsists no identity $e"))
+end
+function vee!(M::AbstractManifold, ::Any, e::Identity, ::Any)
+    return throw(ErrorException("On $M there exsists no identity $e"))
 end
 
 """
@@ -1056,10 +1136,10 @@ Reconstruct a tangent vector from the Lie algebra of `G` from cooordinates `a` o
 This is similar to calling [`get_vector`](@ref) at the `p=`[`Identity`]('ref)`(G)`
 """
 function get_vector_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
-    return get_vector(G, Identity(G), X, B)
+    return get_vector(G, identity_element(G), X, B)
 end
 function get_vector_lie!(G::AbstractGroupManifold, Y, X, B::AbstractBasis)
-    return get_vector!(G, Y, Identity(G), X, B)
+    return get_vector!(G, Y, identity_element(G), X, B)
 end
 
 @doc raw"""
@@ -1069,10 +1149,10 @@ Get the coordinates of an element `X` from the Lie algebra og `G` with respect t
 This is similar to calling [`get_coordinates`](@ref) at the `p=`[`Identity`]('ref)`G`
 """
 function get_coordinates_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
-    return get_coordinates(G, Identity(G), X, B)
+    return get_coordinates(G, identity_element(G), X, B)
 end
 function get_coordinates_lie!(G::AbstractGroupManifold, a, X, B::AbstractBasis)
-    return get_coordinates!(G, a, Identity(G), X, B)
+    return get_coordinates!(G, a, identity_element(G), X, B)
 end
 
 # (a) changes / parent.
