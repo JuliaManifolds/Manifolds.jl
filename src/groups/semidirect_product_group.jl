@@ -103,6 +103,10 @@ function inv!(G::SemidirectProductGroup, q, p)
     @inbounds _padpoint!(G, q)
     return q
 end
+inv!(G::SemidirectProductGroup, q, ::Identity) = identity_element!(G, q)
+
+
+
 
 function _compose!(G::SemidirectProductGroup, x, p, q)
     M = base_manifold(G)
@@ -218,4 +222,13 @@ function Base.isapprox(G::SemidirectProductGroup, p, X, Y; kwargs...)
     nX, hX = submanifold_components(G, X)
     nY, hY = submanifold_components(G, Y)
     return isapprox(N, np, nX, nY; kwargs...) && isapprox(H, hp, hX, hY; kwargs...)
+end
+function isapprox(
+    G::SemidirectProductGroup,
+    p::Identity{O},
+    X,
+    Y;
+    kwargs...,
+) where {𝔽,O}
+    return isapprox(G, identity_element(G), X, Y; kwargs...)
 end
