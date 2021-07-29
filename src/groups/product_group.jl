@@ -35,17 +35,20 @@ function decorator_transparent_dispatch(::typeof(log_lie!), M::ProductGroup, X, 
 end
 
 function identity_element(G::ProductGroup)
-    return ProductRepr(map(identity_element, G.manifolds))
+    M = G.manifold
+    return ProductRepr(map(identity_element, M.manifolds))
 end
 function identity_element!(G::ProductGroup, p)
     pes = submanifold_components(G, p)
-    map(identity_element!, G.manifolds, pes)
+    M = G.manifold
+    map(identity_element!, M.manifolds, pes)
     return p
 end
 
 function is_identity(G::ProductGroup, p; kwargs...)
     pes = submanifold_components(G, p)
-    return all(map((M, pe) -> is_identity(M, pe; kwargs...), G.manifolds, pes))
+    M = G.manifold # Inner prodct manifold (of groups)
+    return all(map((M, pe) -> is_identity(M, pe; kwargs...), M.manifolds, pes))
 end
 
 function Base.show(io::IO, ::MIME"text/plain", G::ProductGroup)
@@ -79,17 +82,11 @@ function submanifold_components(
     M = base_manifold(G)
     return map(N -> Identity(N), M.manifolds)
 end
-function Base.inv(M::ProductManifold, x::ProductRepr)
-    return ProductRepr(map(inv, M.manifolds, submanifold_components(M, x))...)
-end
-function Base.inv(M::ProductManifold, p)
-    q = allocate_result(M, inv, p)
-    return inv!(M, q, p)
-end
 
-inv!(G::ProductGroup, q, p) = inv!(G.manifold, q, p)
-function inv!(M::ProductManifold, q, p)
-    map(inv!, M.manifolds, submanifold_components(M, q), submanifold_components(M, p))
+inv!(G::ProductGroup, q, ::Identity) = identity_element!(G, q)
+function inv!(G::ProductGroup, q, p)
+    M = G.manifold
+    map(inv!, M.manifolds, submanifold_components(G, q), submanifold_components(G, p))
     return q
 end
 
@@ -106,10 +103,10 @@ function _compose(M::ProductManifold, p::ProductRepr, q::ProductRepr)
 end
 function _compose(M::ProductManifold, p, q)
     x = allocate_result(M, compose, p, q)
-    return compose!(M, x, p, q)
+    return _compose!(M, x, p, q)
 end
 
-_compose!(G::ProductGroup, x, p, q) = compose!(G.manifold, x, p, q)
+_compose!(G::ProductGroup, x, p, q) = _compose!(G.manifold, x, p, q)
 function _compose!(M::ProductManifold, x, p, q)
     map(
         compose!,
@@ -159,150 +156,111 @@ function translate!(M::ProductManifold, x, p, q, conv::ActionDirection)
 end
 
 function inverse_translate(G::ProductGroup, p, q, conv::ActionDirection)
-    return inverse_translate(G.manifold, p, q, conv)
-end
-function inverse_translate(
-    M::ProductManifold,
-    p::ProductRepr,
-    q::ProductRepr,
-    conv::ActionDirection,
-)
+    M = G.manifold
     return ProductRepr(
         map(
             inverse_translate,
             M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, q),
+            submanifold_components(G, p),
+            submanifold_components(G, q),
             repeated(conv),
         )...,
     )
 end
-function inverse_translate(M::ProductManifold, p, q, conv::ActionDirection)
-    x = allocate_result(M, inverse_translate, p, q)
-    return inverse_translate!(M, x, p, q, conv)
-end
 
 function inverse_translate!(G::ProductGroup, x, p, q, conv::ActionDirection)
-    return inverse_translate!(G.manifold, x, p, q, conv)
-end
-function inverse_translate!(M::ProductManifold, x, p, q, conv::ActionDirection)
+    M = G.manifold
     map(
         inverse_translate!,
         M.manifolds,
-        submanifold_components(M, x),
-        submanifold_components(M, p),
-        submanifold_components(M, q),
+        submanifold_components(G, x),
+        submanifold_components(G, p),
+        submanifold_components(G, q),
         repeated(conv),
     )
     return x
 end
 
 function translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
-    return translate_diff(G.manifold, p, q, X, conv)
-end
-function translate_diff(
-    M::ProductManifold,
-    p::ProductRepr,
-    q::ProductRepr,
-    X::ProductRepr,
-    conv::ActionDirection,
-)
+    M = G.manifold
     return ProductRepr(
         map(
             translate_diff,
             M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, q),
-            submanifold_components(M, X),
+            submanifold_components(G, p),
+            submanifold_components(G, q),
+            submanifold_components(G, X),
             repeated(conv),
         )...,
     )
 end
-function translate_diff(M::ProductManifold, p, q, X, conv::ActionDirection)
-    Y = allocate_result(M, translate_diff, X, p, q)
-    return translate_diff!(M, Y, p, q, X, conv)
-end
 
 function translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirection)
-    return translate_diff!(G.manifold, Y, p, q, X, conv)
-end
-function translate_diff!(M::ProductManifold, Y, p, q, X, conv::ActionDirection)
+    M = G.manifold
     map(
         translate_diff!,
         M.manifolds,
-        submanifold_components(M, Y),
-        submanifold_components(M, p),
-        submanifold_components(M, q),
-        submanifold_components(M, X),
+        submanifold_components(G, Y),
+        submanifold_components(G, p),
+        submanifold_components(G, q),
+        submanifold_components(G, X),
         repeated(conv),
     )
     return Y
 end
 
 function inverse_translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
-    return inverse_translate_diff(G.manifold, p, q, X, conv)
-end
-function inverse_translate_diff(
-    M::ProductManifold,
-    p::ProductRepr,
-    q::ProductRepr,
-    X::ProductRepr,
-    conv::ActionDirection,
-)
+    M = G.manifold
     return ProductRepr(
         map(
             inverse_translate_diff,
             M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, q),
-            submanifold_components(M, X),
+            submanifold_components(G, p),
+            submanifold_components(G, q),
+            submanifold_components(G, X),
             repeated(conv),
         )...,
     )
 end
-function inverse_translate_diff(M::ProductManifold, p, q, X, conv::ActionDirection)
-    Y = allocate_result(M, inverse_translate_diff, X, p, q)
-    return inverse_translate_diff!(M, Y, p, q, X, conv)
-end
 
 function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirection)
-    return inverse_translate_diff!(G.manifold, Y, p, q, X, conv)
-end
-function inverse_translate_diff!(M::ProductManifold, Y, p, q, X, conv::ActionDirection)
+    M = G.manifold
     map(
         inverse_translate_diff!,
         M.manifolds,
-        submanifold_components(M, Y),
-        submanifold_components(M, p),
-        submanifold_components(M, q),
-        submanifold_components(M, X),
+        submanifold_components(G, Y),
+        submanifold_components(G, p),
+        submanifold_components(G, q),
+        submanifold_components(G, X),
         repeated(conv),
     )
     return Y
 end
 
-function exp_lie(M::ProductManifold, X::ProductRepr)
-    return ProductRepr(map(exp_lie, M.manifolds, submanifold_components(M, X))...)
+function exp_lie(G::ProductGroup, X::ProductRepr)
+    M = G.manifold
+    return ProductRepr(map(exp_lie, M.manifolds, submanifold_components(G, X))...)
 end
-function exp_lie(M::ProductManifold, X)
-    q = allocate_result(M, exp_lie, X)
-    return exp_lie!(M, q, X)
+function exp_lie(G::ProductGroup, X)
+    q = allocate_result(G, exp_lie, X)
+    return exp_lie!(G, q, X)
 end
 
-function exp_lie!(M::ProductManifold, q, X)
-    map(exp_lie!, M.manifolds, submanifold_components(M, q), submanifold_components(M, X))
+function exp_lie!(G::ProductGroup, q, X)
+    M = G.manifold
+    map(exp_lie!, M.manifolds, submanifold_components(G, q), submanifold_components(G, X))
     return q
 end
 
-function log_lie(M::ProductManifold, q::ProductRepr)
-    return ProductRepr(map(log_lie, M.manifolds, submanifold_components(M, q))...)
-end
-function log_lie(M::ProductManifold, q)
-    X = allocate_result(M, log_lie, q)
-    return log_lie!(M, X, q)
+#overwrite identity case to avoid allocating identity too early.
+function log_lie!(G::ProductGroup, X, q::Identity{<:ProductOperation})
+    M = G.manifold
+    map(log_lie!, M.manifolds, submanifold_components(G, X), submanifold_components(G, q))
+    return X
 end
 
-function log_lie!(M::ProductManifold, X, q)
-    map(log_lie!, M.manifolds, submanifold_components(M, X), submanifold_components(M, q))
+function _log_lie!(G::ProductGroup, X, q)
+    M = G.manifold
+    map(_log_lie!, M.manifolds, submanifold_components(G, X), submanifold_components(G, q))
     return X
 end

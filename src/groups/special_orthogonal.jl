@@ -44,13 +44,7 @@ end
 
 exp_lie!(G::SpecialOrthogonal, q, X) = exp!(G, q, identity_element(G, q), X)
 
-log_lie!(G::SpecialOrthogonal, X, q) = log!(G, X, identity_element(G, q), q)
-function log_lie!(G::SpecialOrthogonal, X::AbstractMatrix, q::AbstractMatrix)
-    return log!(G, X, identity_element(G, q), q)
-end
-function log_lie!(::SpecialOrthogonal, X, ::Identity{MultiplicationOperation})
-    return fill!(X, zero(eltype(X)))
-end
+_log_lie!(G::SpecialOrthogonal, X, q) = log!(G, X, identity_element(G, q), q)
 
 function allocate_result(
     ::GT,

@@ -81,4 +81,4 @@ function log_lie(::CircleGroup, q)
 end
 log_lie(::CircleGroup, e::Identity{MultiplicationOperation}) = 0.0 * im
 
-log_lie!(G::CircleGroup, X::AbstractVector, q::AbstractVector) = (X .= log_lie(G, q))
+_log_lie!(G::CircleGroup, X, q) = (X .= log_lie(G, q))

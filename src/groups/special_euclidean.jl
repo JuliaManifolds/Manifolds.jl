@@ -366,14 +366,14 @@ and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 """
 log_lie(::SpecialEuclidean{3}, ::Any)
 
-function log_lie!(G::SpecialEuclidean, X, q)
+function _log_lie!(G::SpecialEuclidean, X, q)
     qmat = affine_matrix(G, q)
     Xmat = real(log_safe(qmat))
     map(copyto!, submanifold_components(G, X), submanifold_components(G, Xmat))
     _padvector!(G, X)
     return X
 end
-function log_lie!(G::SpecialEuclidean{2}, X, q)
+function _log_lie!(G::SpecialEuclidean{2}, X, q)
     SO2 = submanifold(G, 2)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
@@ -391,7 +391,7 @@ function log_lie!(G::SpecialEuclidean{2}, X, q)
     end
     return X
 end
-function log_lie!(G::SpecialEuclidean{3}, X, q)
+function _log_lie!(G::SpecialEuclidean{3}, X, q)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
     @assert size(Ω) == (3, 3)

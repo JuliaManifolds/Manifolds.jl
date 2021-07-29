@@ -247,7 +247,34 @@ function is_identity(
 ) where {𝔽,O<:AbstractGroupOperation}
     return true
 end
+function is_identity(G::AbstractGroupManifold, q; kwargs...)
+    return isapprox(G, identity_element(G), q; kwargs...)
+end
 is_identity(::AbstractGroupManifold, ::Identity; kwargs...) = false
+
+function isapprox(G::AbstractGroupManifold{𝔽,O}, p::Identity{O}, q; kwargs...) where {𝔽,O}
+    return isapprox(G, identity_element(G), q; kwargs...)
+end
+function isapprox(G::AbstractGroupManifold{𝔽,O}, p, q::Identity{O}; kwargs...) where {𝔽,O}
+    return isapprox(G, p, identity_element(G); kwargs...)
+end
+function isapprox(
+    G::AbstractGroupManifold{𝔽,O},
+    p::Identity{O},
+    q::Identity{O};
+    kwargs...,
+) where {𝔽,O}
+    return isapprox(G, p, identity_element(G); kwargs...)
+end
+function isapprox(
+    G::AbstractGroupManifold{𝔽,O},
+    p::Identity{O},
+    X,
+    Y;
+    kwargs...,
+) where {𝔽,O}
+    return isapprox(G, identity_element(G), X, Y; kwargs...)
+end
 
 Base.show(io::IO, ::Identity{O}) where {O} = print(io, "Identity($O)")
 
@@ -668,8 +695,9 @@ end
 
 @doc raw"""
     log_lie(G::AbstractGroupManifold, q)
+    log_lie!(G::AbstractGroupManifold, X, q)
 
-Compute the group logarithm of the group element `q`. It is equivalent to the
+Compute the Lie group logarithm of the Lie group element `q`. It is equivalent to the
 logarithmic map defined by the [`CartanSchoutenMinus`](@ref) connection.
 
 Given an element $q ∈ \mathcal{G}$, compute the right inverse of the group exponential map
@@ -680,15 +708,7 @@ $q = \exp X$
     In general, the group logarithm map is distinct from the Riemannian logarithm map
     [`log`](@ref).
 
-```
-log_lie(G::AbstractGroupManifold{𝔽,AdditionOperation}, q) where {𝔽}
-```
-
-Compute $X = q$.
-
-    log_lie(G::AbstractGroupManifold{𝔽,MultiplicationOperation}, q) where {𝔽}
-
-For `Number` and `AbstractMatrix` types of `q`, compute the usual numeric/matrix logarithm:
+    For matrix Llie groups this is equal to the (matrix) logarithm:
 
 ````math
 \log q = \operatorname{Log} q = \sum_{n=1}^∞ \frac{(-1)^{n+1}}{n} (q - e)^n,
@@ -696,11 +716,14 @@ For `Number` and `AbstractMatrix` types of `q`, compute the usual numeric/matrix
 
 where $e$ here is the [`Identity`](@ref) element, that is, $1$ for numeric $q$ or the
 identity matrix $I_m$ for matrix $q ∈ ℝ^{m × m}$.
+
+Since this function handles [`Identity`](@ref) arguments, the preferred function to override
+is `_log_lie!`.
 """
 log_lie(::AbstractGroupManifold, ::Any...)
 @decorator_transparent_function function log_lie(G::AbstractGroupManifold, q)
     X = allocate_result(G, log_lie, q)
-    return log_lie!(G, X, q)
+    return _log_lie!(G, X, q)
 end
 function log_lie(
     G::AbstractGroupManifold{𝔽,Op},
@@ -709,7 +732,9 @@ function log_lie(
     return zero_vector(G, identity_element(G))
 end
 
-@decorator_transparent_signature log_lie!(M::AbstractDecoratorManifold, X, q)
+@decorator_transparent_function function log_lie!(G::AbstractGroupManifold, X, q)
+    return _log_lie!(G, X, q)
+end
 
 function log_lie!(
     G::AbstractGroupManifold{𝔽,Op},
@@ -914,10 +939,7 @@ function log_lie(G::AdditionGroup, ::Identity{AdditionOperation})
     return zero_vector(G, identity_element(G))
 end
 
-log_lie!(::AdditionGroup, X, q) = copyto!(X, q)
-function log_lie!(G::AdditionGroup, X, ::Identity{AdditionOperation})
-    return zero_vector!(G, X, identity_element(G))
-end
+_log_lie!(::AdditionGroup, X, q) = copyto!(X, q)
 
 lie_bracket(::AdditionGroup, X, Y) = zero(X)
 
