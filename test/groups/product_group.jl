@@ -36,9 +36,9 @@ include("group_utils.jl")
             @test compose(G, Identity(G), pts[1]) == pts[1]
             test_group(G, pts, v_pts, v_pts; test_diff=true)
             @test isapprox(
-                M,
+                G,
                 Identity(G),
-                exp_lie(M, v_pts[1]),
+                exp_lie(G, v_pts[1]),
                 Manifolds.prod_point(
                     shape_se,
                     exp_lie(SOn, v_pts[1].parts[1]),
@@ -46,9 +46,9 @@ include("group_utils.jl")
                 ),
             )
             @test isapprox(
-                M,
+                G,
                 Identity(G),
-                log_lie(M, pts[1]),
+                log_lie(G, pts[1]),
                 Manifolds.prod_point(
                     shape_se,
                     log_lie(SOn, pts[1].parts[1]),
@@ -65,13 +65,13 @@ include("group_utils.jl")
         @test compose(G, Identity(G), pts[1]) == pts[1]
         test_group(G, pts, v_pts, v_pts; test_diff=true, test_mutating=false)
         @test isapprox(
-            M,
-            exp_lie(M, v_pts[1]),
+            G,
+            exp_lie(G, v_pts[1]),
             ProductRepr(exp_lie(SOn, v_pts[1].parts[1]), exp_lie(Tn, v_pts[1].parts[2])),
         )
         @test isapprox(
-            M,
-            log_lie(M, pts[1]),
+            G,
+            log_lie(G, pts[1]),
             ProductRepr(log_lie(SOn, pts[1].parts[1]), log_lie(Tn, pts[1].parts[2])),
         )
     end
