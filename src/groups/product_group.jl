@@ -252,6 +252,11 @@ function exp_lie!(G::ProductGroup, q, X)
     return q
 end
 
+function _log_lie!(G::ProductGroup, q)
+    M = G.manifold
+    return ProductRepr(map(_log_lie!, M.manifolds, submanifold_components(G, q))...)
+end
+
 #overwrite identity case to avoid allocating identity too early.
 function log_lie!(G::ProductGroup, X, q::Identity{<:ProductOperation})
     M = G.manifold

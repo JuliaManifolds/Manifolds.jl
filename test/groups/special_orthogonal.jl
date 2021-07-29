@@ -142,24 +142,20 @@ include("group_utils.jl")
     @testset "Identity and get_vector/get_coordinates" begin
         e = Identity(G)
 
-        eF = Identity(SpecialEuclidean(3), 1)
+        eF = Identity(SpecialEuclidean(3))
         c = [1.0, 0.0, 0.0]
         Y = zeros(representation_size(G))
         get_vector_lie!(G, Y, c, Manifolds.VeeOrthogonalBasis())
-        @test Y ≈ get_vector(M, identity(G), c, Manifolds.VeeOrthogonalBasis())
-        get_vector!(M, Y, identity(G), c, Manifolds.VeeOrthogonalBasis())
-        @test Y ≈ get_vector(M, identity(G), c, Manifolds.VeeOrthogonalBasis())
+        @test Y ≈ get_vector_lie(G, c, Manifolds.VeeOrthogonalBasis())
+        get_vector!(M, Y, identity_element(G), c, Manifolds.VeeOrthogonalBasis())
+        @test Y ≈ get_vector(M, identity_element(G), c, Manifolds.VeeOrthogonalBasis())
 
-        @test get_coordinates(
-            decorated_manifold(G),
-            identity(G),
-            Y,
-            Manifolds.VeeOrthogonalBasis(),
-        ) == c
+        @test get_coordinates(M, identity_element(G), Y, Manifolds.VeeOrthogonalBasis()) ==
+              c
         c2 = similar(c)
         get_coordinates_lie!(G, c2, Y, Manifolds.VeeOrthogonalBasis())
         @test c == c2
-        get_coordinates!(M, c2, identity(G), Y, Manifolds.VeeOrthogonalBasis())
+        get_coordinates!(M, c2, identity_element(G), Y, Manifolds.VeeOrthogonalBasis())
         @test c == c2
     end
 end

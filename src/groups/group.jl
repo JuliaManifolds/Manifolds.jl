@@ -244,15 +244,15 @@ the [`Identity`](@ref)`{O}` with the corresponding [`AbstractGroupOperation`](@r
 """
 is_identity(G::AbstractGroupManifold, q)
 
+@decorator_transparent_function function is_identity(G::AbstractGroupManifold, q; kwargs...)
+    return isapprox(G, identity_element(G), q; kwargs...)
+end
 function is_identity(
     ::AbstractGroupManifold{𝔽,O},
     ::Identity{O};
     kwargs...,
 ) where {𝔽,O<:AbstractGroupOperation}
     return true
-end
-function is_identity(G::AbstractGroupManifold, q; kwargs...)
-    return isapprox(G, identity_element(G), q; kwargs...)
 end
 is_identity(::AbstractGroupManifold, ::Identity; kwargs...) = false
 
@@ -387,7 +387,11 @@ instead so that methods with [`Identity`] arguments are not ambiguous.
 """
 compose(::AbstractGroupManifold, ::Any...)
 
-function compose(G::AbstractGroupManifold{𝔽,Op}, p, q) where {𝔽,Op<:AbstractGroupOperation}
+@decorator_transparent_function function compose(
+    G::AbstractGroupManifold{𝔽,Op},
+    p,
+    q,
+) where {𝔽,Op<:AbstractGroupOperation}
     return _compose(G, p, q)
 end
 function compose(
@@ -412,7 +416,7 @@ function compose(
     return e
 end
 
-@decorator_transparent_function function _compose(G::AbstractGroupManifold, p, q)
+function _compose(G::AbstractGroupManifold, p, q)
     x = allocate_result(G, compose, p, q)
     return _compose!(G, x, p, q)
 end
