@@ -427,7 +427,7 @@ function compose!(
     p,
     ::Identity{Op},
 ) where {𝔽,Op<:AbstractGroupOperation}
-    return copyto!(G, q, p)
+    return copyto!(q, p)
 end
 function compose!(
     G::AbstractGroupManifold{𝔽,Op},
@@ -435,7 +435,7 @@ function compose!(
     ::Identity{Op},
     p,
 ) where {𝔽,Op<:AbstractGroupOperation}
-    return copyto!(G, q, p)
+    return copyto!(q, p)
 end
 function compose!(
     G::AbstractGroupManifold{𝔽,Op},
@@ -977,7 +977,7 @@ Base.:*(e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
 
 adjoint_action(::AdditionGroup, p, X) = X
 
-adjoint_action!(G::AdditionGroup, Y, p, X) = copyto!(G, p, Y, X)
+adjoint_action!(::AdditionGroup, Y, ::Any, X) = copyto!(Y, X)
 
 function identity_element!(::AbstractGroupManifold{𝔽,<:AdditionOperation}, p) where {𝔽}
     return fill!(p, zero(eltype(p)))
@@ -986,7 +986,7 @@ end
 Base.inv(::AdditionGroup, p) = -p
 Base.inv(::AdditionGroup, e::Identity) = e
 
-inv!(G::AdditionGroup, q, p) = copyto!(G, q, -p)
+inv!(::AdditionGroup, q, p) = copyto!(q, -p)
 inv!(G::AdditionGroup, q, ::Identity) = identity_element!(G, q)
 inv!(::AdditionGroup, q::Identity, e::Identity) = q
 
@@ -1007,20 +1007,20 @@ translate_diff!(::AdditionGroup, Y, p, q, X, ::ActionDirection) = copyto!(Y, X)
 
 inverse_translate_diff(::AdditionGroup, p, q, X, ::ActionDirection) = X
 
-function inverse_translate_diff!(::AdditionGroup, Y, p, q, X, ::ActionDirection)
-    return copyto!(G, p, Y, X)
+function inverse_translate_diff!(::AdditionGroup, Y, ::Any, ::Any, ::ActionDirection)
+    return copyto!(Y, X)
 end
 
 exp_lie(::AdditionGroup, X) = X
 
-exp_lie!(G::AdditionGroup, q, X) = copyto!(G, q, X)
+exp_lie!(G::AdditionGroup, q, X) = copyto!(q, X)
 
 log_lie(::AdditionGroup, q) = q
 function log_lie(G::AdditionGroup, ::Identity{AdditionOperation})
     return zero_vector(G, identity_element(G))
 end
 
-_log_lie!(G::AdditionGroup, X, q) = copyto!(G, X, q)
+_log_lie!(::AdditionGroup, X, q) = copyto!(X, q)
 
 lie_bracket(::AdditionGroup, X, Y) = zero(X)
 
