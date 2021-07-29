@@ -252,9 +252,11 @@ function exp_lie!(G::ProductGroup, q, X)
     return q
 end
 
-function _log_lie!(G::ProductGroup, q)
+# on this meta level we first pass down before we resolve identity.
+function log_lie!(G::ProductGroup, X, q)
     M = G.manifold
-    return ProductRepr(map(_log_lie!, M.manifolds, submanifold_components(G, q))...)
+    map(log_lie!, M.manifolds, submanifold_components(G, X), submanifold_components(G, q))
+    return X
 end
 
 #overwrite identity case to avoid allocating identity too early.
