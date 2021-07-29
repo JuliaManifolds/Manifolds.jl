@@ -103,7 +103,9 @@ function inv!(G::SemidirectProductGroup, q, p)
     @inbounds _padpoint!(G, q)
     return q
 end
-inv!(G::SemidirectProductGroup, q, ::Identity) = identity_element!(G, q)
+function inv!(G::SemidirectProductGroup, q, p::Identity{<:SemidirectProductOperation})
+    return identity_element!(G, q)
+end
 
 function _compose!(G::SemidirectProductGroup, x, p, q)
     M = base_manifold(G)
