@@ -257,6 +257,7 @@ function log_lie!(G::ProductGroup, X, q)
     M = G.manifold
     map(log_lie!, M.manifolds, submanifold_components(G, X), submanifold_components(G, q))
     return X
+end
 function _log_lie(G::ProductGroup, q)
     M = G.manifold
     return ProductRepr(map(_log_lie, M.manifolds, submanifold_components(G, q))...)
