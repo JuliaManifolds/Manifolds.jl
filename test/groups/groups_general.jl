@@ -114,8 +114,9 @@ include("group_utils.jl")
 
         @test_throws ErrorException exp_lie(G, v)
         @test_throws ErrorException exp_lie!(G, x, v)
-        @test_throws ErrorException log_lie(G, x)
-        @test_throws ErrorException log_lie!(G, v, x)
+        # no transparency error, but _log_lie missing
+        @test_throws MethodError log_lie(G, x)
+        @test_throws MethodError log_lie!(G, v, x)
 
         for f in [translate, translate!]
             @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:intransparent}()
