@@ -237,7 +237,7 @@ function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirect
     return Y
 end
 
-function exp_lie(G::ProductGroup, X::ProductRepr)
+function exp_lie(G::ProductGroup, X::Union{ProductRepr,ProductArray})
     M = G.manifold
     return ProductRepr(map(exp_lie, M.manifolds, submanifold_components(G, X))...)
 end
@@ -252,9 +252,9 @@ function exp_lie!(G::ProductGroup, q, X)
     return q
 end
 
-function _log_lie!(G::ProductGroup, q)
+function _log_lie(G::ProductGroup, q)
     M = G.manifold
-    return ProductRepr(map(_log_lie!, M.manifolds, submanifold_components(G, q))...)
+    return ProductRepr(map(_log_lie, M.manifolds, submanifold_components(G, q))...)
 end
 
 #overwrite identity case to avoid allocating identity too early.
