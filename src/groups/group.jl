@@ -292,6 +292,10 @@ function isapprox(
 ) where {𝔽,O<:AbstractGroupOperation}
     return isapprox(G, identity_element(G), X, Y; kwargs...)
 end
+function Base.isapprox(G::AbstractGroupManifold, p, e::Identity; kwargs...)
+    return isapprox(G, e, p; kwargs...)
+end
+Base.isapprox(::AbstractGroupManifold, ::Identity, ::Identity; kwargs...) = false
 
 function Base.show(io::IO, ::Identity{O}) where {O<:AbstractGroupOperation}
     return print(io, "Identity($O)")
@@ -381,27 +385,6 @@ function inv!(
 ) where {𝔽,O<:AbstractGroupOperation}
     return identity_element!(G, q)
 end
-
-function Base.isapprox(
-    G::AbstractGroupManifold{𝔽,O},
-    e::Identity{O},
-    p;
-    kwargs...,
-) where {𝔽,O<:AbstractGroupOperation}
-    return isapprox(G, identity_element(G, p), p; kwargs...)
-end
-function Base.isapprox(G::AbstractGroupManifold, p, e::Identity; kwargs...)
-    return isapprox(G, e, p; kwargs...)
-end
-function Base.isapprox(
-    ::AbstractGroupManifold{𝔽,O},
-    ::Identity{O},
-    ::Identity{O};
-    kwargs...,
-) where {𝔽,O<:AbstractGroupOperation}
-    return true
-end
-Base.isapprox(::AbstractGroupManifold, ::Identity, ::Identity; kwargs...) = false
 
 function Base.copyto!(
     ::AbstractGroupManifold{𝔽,O},
