@@ -1,6 +1,5 @@
 module Manifolds
 
-using Base: IdentityUnitRange
 import ManifoldsBase:
     _access_nested,
     _read,
