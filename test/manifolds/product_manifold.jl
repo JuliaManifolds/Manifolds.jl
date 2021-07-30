@@ -42,7 +42,7 @@ end
     @test Manifolds.number_of_components(Mse) == 2
     # test that arrays are not points
     @test_throws DomainError is_point(Mse, [1, 2], true)
-    @test_throws DomainError is_vector(Mse, 1, [1, 2]; check_base_point=false, true)
+    @test_throws DomainError is_vector(Mse, 1, [1, 2], true; check_base_point=false)
     types = [Vector{Float64}]
     TEST_FLOAT32 && push!(types, Vector{Float32})
     TEST_STATIC_SIZED && push!(types, MVector{5,Float64})
