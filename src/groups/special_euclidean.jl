@@ -141,11 +141,11 @@ function affine_matrix(::GT, ::Identity{GT}) where {n,GT<:SpecialEuclidean{n}}
     return Diagonal{Float64}(I, n)
 end
 
-function check_point(G::SpecialEuclidean{n}, p::AbstractMatrix) where {n}
+function check_point(G::SpecialEuclidean{n}, p::AbstractMatrix; kwargs...) where {n}
     err1 = check_point(Euclidean(n + 1, n + 1), p)
     !isnothing(err1) && return err1
-    err2a = check_point(submanifold(G, 1), p[1:n, end])
-    err2b = check_point(submanifold(G, 2), p[1:n, 1:n])
+    err2a = check_point(submanifold(G, 1), p[1:n, end]; kwargs...)
+    err2b = check_point(submanifold(G, 2), p[1:n, 1:n]; kwargs...)
     isnothing(err2a) && return err2b
     isnothing(err2b) && return err2a
     return CompositeManifoldError([err2a, err2b])
@@ -153,12 +153,13 @@ end
 function check_vector(
     G::SpecialEuclidean{n},
     p::AbstractMatrix,
-    X::AbstractMatrix,
+    X::AbstractMatrix;
+    kwargs...,
 ) where {n}
     err1 = check_point(Euclidean(n + 1, n + 1), X)
     !isnothing(err1) && return err1
-    err2a = check_vector(submanifold(G, 1), p[1:n, end], X[1:n, end])
-    err2b = check_vector(submanifold(G, 2), p[1:n, 1:n], X[1:n, 1:n])
+    err2a = check_vector(submanifold(G, 1), p[1:n, end], X[1:n, end]; kwargs...)
+    err2b = check_vector(submanifold(G, 2), p[1:n, 1:n], X[1:n, 1:n]; kwargs...)
     isnothing(err2a) && return err2b
     isnothing(err2b) && return err2a
     return CompositeManifoldError([err2a, err2b])
