@@ -17,7 +17,7 @@ Depth = 3
 
 The following operations are available for group manifolds:
 
-* [`Identity`](@ref): an allocation free representation of the identity element of the group.
+* [`Identity`](@ref): an allocation-free representation of the identity element of the group.
 * [`inv`](@ref): get the inverse of a given element.
 * [`compose`](@ref): compose two given elements of a group.
 
