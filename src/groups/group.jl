@@ -8,6 +8,8 @@ Abstract type for smooth binary operations $∘$ on elements of a Lie group $\ma
 An operation can be either defined for a specific [`AbstractGroupManifold`](@ref) over
 number system `𝔽` or in general, by defining for an operation `Op` the following methods:
 
+    identity_element!(::AbstractGroupManifold{𝔽,Op}, q, q)
+    identity_element(::AbstractGroupManifold{𝔽,Op} [, q])
     inv!(::AbstractGroupManifold{𝔽,Op}, q, p)
     inv(::AbstractGroupManifold{𝔽,Op}, p)
     _compose(::AbstractGroupManifold{𝔽,Op}, p, q)
