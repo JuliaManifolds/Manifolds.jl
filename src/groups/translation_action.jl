@@ -39,12 +39,12 @@ end
 apply(::TranslationAction, a, p) = p + a
 
 apply!(::TranslationAction, q, a, p) = (q .= p .+ a)
-apply!(::TranslationAction, q, e::Identity, p) = copyto!(q, p)
+apply!(::TranslationAction, q, e::Identity{AdditionOperation}, p) = copyto!(q, p)
 
 inverse_apply(::TranslationAction, a, p) = p - a
 
 inverse_apply!(::TranslationAction, q, a, p) = (q .= p .- a)
-inverse_apply!(::TranslationAction, q, e::Identity, p) = copyto!(q, p)
+inverse_apply!(::TranslationAction, q, e::Identity{AdditionOperation}, p) = copyto!(q, p)
 
 apply_diff(::TranslationAction, a, p, X) = X
 
