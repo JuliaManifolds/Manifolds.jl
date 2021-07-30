@@ -142,13 +142,30 @@ function affine_matrix(::GT, ::Identity{GT}) where {n,GT<:SpecialEuclidean{n}}
 end
 
 function check_point(G::SpecialEuclidean{n}, p::AbstractMatrix; kwargs...) where {n}
+    errs = DomainError[]
+    # Valid matrix
     err1 = check_point(Euclidean(n + 1, n + 1), p)
-    !isnothing(err1) && return err1
-    err2a = check_point(submanifold(G, 1), p[1:n, end]; kwargs...)
-    err2b = check_point(submanifold(G, 2), p[1:n, 1:n]; kwargs...)
-    isnothing(err2a) && return err2b
-    isnothing(err2b) && return err2a
-    return CompositeManifoldError([err2a, err2b])
+    !isnothing(err1) && push!(errs, err1)
+    # homogeneous
+    if !isapprox(p[end, :], [zeros(n)..., 1]; kwargs...)
+        push!(
+            errs,
+            DomainError(
+                p[end, :],
+                "The last row of $p is not homogeneous, i.e. of form [0,..,0,1].",
+            ),
+        )
+    end
+    # translate part
+    err2 = check_point(submanifold(G, 1), p[1:n, end]; kwargs...)
+    !isnothing(err2) && push!(errs, err2)
+    # SOn
+    err3 = check_point(submanifold(G, 2), p[1:n, 1:n]; kwargs...)
+    !isnothing(err3) && push!(errs, err3)
+    if length(errs) > 1
+        return CompositeManifoldError(errs)
+    end
+    return length(errs) == 0 ? nothing : first(errs)
 end
 function check_vector(
     G::SpecialEuclidean{n},
@@ -156,13 +173,30 @@ function check_vector(
     X::AbstractMatrix;
     kwargs...,
 ) where {n}
-    err1 = check_point(Euclidean(n + 1, n + 1), X)
-    !isnothing(err1) && return err1
-    err2a = check_vector(submanifold(G, 1), p[1:n, end], X[1:n, end]; kwargs...)
-    err2b = check_vector(submanifold(G, 2), p[1:n, 1:n], X[1:n, 1:n]; kwargs...)
-    isnothing(err2a) && return err2b
-    isnothing(err2b) && return err2a
-    return CompositeManifoldError([err2a, err2b])
+    errs = DomainError[]
+    # Valid matrix
+    err1 = check_point(Euclidean(n + 1, n + 1), p)
+    !isnothing(err1) && push!(errs, err1)
+    # homogeneous
+    if !isapprox(X[end, :], zeros(n + 1); kwargs...)
+        push!(
+            errs,
+            DomainError(
+                X[end, :],
+                "The last row of $X is not homogeneous, i.e. of form [0,..,0,1].",
+            ),
+        )
+    end
+    # translate part
+    err2 = check_vector(submanifold(G, 1), p[1:n, end], X[1:n, end]; kwargs...)
+    !isnothing(err2) && push!(errs, err2)
+    # SOn
+    err3 = check_vector(submanifold(G, 2), p[1:n, 1:n], X[1:n, 1:n]; kwargs...)
+    !isnothing(err3) && push!(errs, err3)
+    if length(errs) > 1
+        return CompositeManifoldError(errs)
+    end
+    return length(errs) == 0 ? nothing : first(errs)
 end
 
 @doc raw"""

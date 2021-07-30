@@ -127,6 +127,13 @@ using ManifoldsBase: VeeOrthogonalBasis
                 test_lie_bracket=true,
                 diff_convs=[(), (LeftAction(),), (RightAction(),)],
             )
+            # specific affine tests
+            p = copy(G, pts[1])
+            X = copy(G, p, X_pts[1])
+            X[n + 1, n + 1] = 0.1
+            @test_throws DomainError is_vector(G, p, X, true)
+            p[n + 1, n + 1] = 0.1
+            @test_throws DomainError is_point(G, p, true)
         end
 
         @testset "hat/vee" begin
