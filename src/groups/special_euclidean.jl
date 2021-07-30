@@ -141,6 +141,29 @@ function affine_matrix(::GT, ::Identity{GT}) where {n,GT<:SpecialEuclidean{n}}
     return Diagonal{Float64}(I, n)
 end
 
+function check_point(G::SpecialEuclidean{n}, p::AbstractMatrix) where {n}
+    err1 = check_point(Euclidean(n + 1, n + 1), p)
+    !isnothing(err1) && return err1
+    err2a = check_point(submanifold(G, 1), p[1:n, end])
+    err2b = check_point(submanifold(G, 2), p[1:n, 1:n])
+    isnothing(err2a) && return err2b
+    isnothing(err2b) && return err2a
+    return CompositeManifoldError([err2a, err2b])
+end
+function check_vector(
+    G::SpecialEuclidean{n},
+    p::AbstractMatrix,
+    X::AbstractMatrix,
+) where {n}
+    err1 = check_point(Euclidean(n + 1, n + 1), X)
+    !isnothing(err1) && return err1
+    err2a = check_vector(submanifold(G, 1), p[1:n, end], X[1:n, end])
+    err2b = check_vector(submanifold(G, 2), p[1:n, 1:n], X[1:n, 1:n])
+    isnothing(err2a) && return err2b
+    isnothing(err2b) && return err2a
+    return CompositeManifoldError([err2a, err2b])
+end
+
 @doc raw"""
     screw_matrix(G::SpecialEuclidean, X) -> AbstractMatrix
 
@@ -169,10 +192,10 @@ function screw_matrix(G::SpecialEuclidean{n}, X) where {n}
 end
 screw_matrix(::SpecialEuclidean{n}, X::AbstractMatrix) where {n} = X
 
-function allocate_result(G::SpecialEuclidean{n}, f::typeof(affine_matrix), p...) where {n}
+function allocate_result(::SpecialEuclidean{n}, ::typeof(affine_matrix), p...) where {n}
     return allocate(p[1], Size(n + 1, n + 1))
 end
-function allocate_result(G::SpecialEuclidean{n}, f::typeof(screw_matrix), X...) where {n}
+function allocate_result(::SpecialEuclidean{n}, ::typeof(screw_matrix), X...) where {n}
     return allocate(X[1], Size(n + 1, n + 1))
 end
 
