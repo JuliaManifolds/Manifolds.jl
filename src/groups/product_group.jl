@@ -83,7 +83,7 @@ function submanifold_components(
     return map(N -> Identity(N), M.manifolds)
 end
 
-inv!(G::ProductGroup, q, ::Identity) = identity_element!(G, q)
+inv!(G::ProductGroup, q, ::Identity{ProductOperation}) = identity_element!(G, q)
 function inv!(G::ProductGroup, q, p)
     M = G.manifold
     map(inv!, M.manifolds, submanifold_components(G, q), submanifold_components(G, p))

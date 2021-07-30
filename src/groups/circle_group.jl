@@ -56,7 +56,15 @@ lie_bracket(::CircleGroup, X, Y) = zero(X)
 lie_bracket!(::CircleGroup, Z, X, Y) = fill!(Z, 0)
 
 translate_diff(::GT, p, q, X, ::ActionDirection) where {GT<:CircleGroup} = map(*, p, X)
-translate_diff(::CircleGroup, ::Identity, q, X, ::ActionDirection) = X
+function translate_diff(
+    ::CircleGroup,
+    ::Identity{MultiplicationOperation},
+    q,
+    X,
+    ::ActionDirection,
+)
+    return X
+end
 
 function translate_diff!(G::CircleGroup, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, translate_diff(G, p, q, X, conv))

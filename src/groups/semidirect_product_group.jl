@@ -103,7 +103,7 @@ function inv!(G::SemidirectProductGroup, q, p)
     @inbounds _padpoint!(G, q)
     return q
 end
-function inv!(G::SemidirectProductGroup, q, p::Identity{<:SemidirectProductOperation})
+function inv!(G::SemidirectProductGroup, q, ::Identity{<:SemidirectProductOperation})
     return identity_element!(G, q)
 end
 
@@ -206,13 +206,30 @@ function Base.isapprox(G::SemidirectProductGroup, p, q; kwargs...)
     nq, hq = submanifold_components(G, q)
     return isapprox(N, np, nq; kwargs...) && isapprox(H, hp, hq; kwargs...)
 end
-function Base.isapprox(G::SemidirectProductGroup, e::Identity, p; kwargs...)
+function Base.isapprox(
+    G::SemidirectProductGroup,
+    e::Identity{<:SemidirectProductOperation},
+    p;
+    kwargs...,
+)
     return isapprox(G, identity_element(G, p), p; kwargs...)
 end
-function Base.isapprox(G::SemidirectProductGroup, p, e::Identity; kwargs...)
+function Base.isapprox(
+    G::SemidirectProductGroup,
+    p,
+    e::Identity{<:SemidirectProductOperation};
+    kwargs...,
+)
     return isapprox(G, e, p; kwargs...)
 end
-Base.isapprox(::SemidirectProductGroup, ::Identity, ::Identity; kwargs...) = true
+function Base.isapprox(
+    ::SemidirectProductGroup,
+    ::Identity{<:SemidirectProductOperation},
+    ::Identity{<:SemidirectProductOperation};
+    kwargs...,
+)
+    return true
+end
 
 function Base.isapprox(G::SemidirectProductGroup, p, X, Y; kwargs...)
     M = base_manifold(G)
@@ -222,6 +239,12 @@ function Base.isapprox(G::SemidirectProductGroup, p, X, Y; kwargs...)
     nY, hY = submanifold_components(G, Y)
     return isapprox(N, np, nX, nY; kwargs...) && isapprox(H, hp, hX, hY; kwargs...)
 end
-function isapprox(G::SemidirectProductGroup, p::Identity{O}, X, Y; kwargs...) where {𝔽,O}
+function isapprox(
+    G::SemidirectProductGroup,
+    ::Identity{<:SemidirectProductOperation},
+    X,
+    Y;
+    kwargs...,
+)
     return isapprox(G, identity_element(G), X, Y; kwargs...)
 end
