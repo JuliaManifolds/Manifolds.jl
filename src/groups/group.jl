@@ -167,12 +167,13 @@ switch_direction(::RightAction) = LeftAction()
 @doc raw"""
     Identity{O<:AbstractGroupOperation}
 
-Represent the group identity element $e ∈ \mathcal{G}$ on an [`AbstractGroupManifold`](@ref) `G`.
+Represent the group identity element ``e ∈ \mathcal{G}`` on an [`AbstractGroupManifold`](@ref) `G`
+with [`AbstractGroupOperation`](@ref) of type `O`.
 
 Similar to the philosophy that points are agnostic of their group at hand, the identity
-does not store the group `g` it belongs to. HOwever it depends on the type of the [`AbstractGroupOperation`](@ref) used.
+does not store the group `g` it belongs to. However it depends on the type of the [`AbstractGroupOperation`](@ref) used.
 
-see also [`identity`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](@ref) or array representation.
+See also [`identity_element`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](@ref) or array representation.
 
 # Constructors
 
@@ -268,7 +269,7 @@ function isapprox(
     q::Identity{O};
     kwargs...,
 ) where {𝔽,O}
-    return isapprox(G, p, identity_element(G); kwargs...)
+    return true
 end
 function isapprox(
     G::AbstractGroupManifold{𝔽,O},
