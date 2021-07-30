@@ -260,7 +260,7 @@ function isapprox(
     q;
     kwargs...,
 ) where {𝔽,O<:AbstractGroupOperation}
-    return isapprox(G, identity_element(G), q; kwargs...)
+    return is_identity(G, q; kwargs...)
 end
 function isapprox(
     G::AbstractGroupManifold{𝔽,O},
@@ -268,7 +268,7 @@ function isapprox(
     q::Identity{O};
     kwargs...,
 ) where {𝔽,O<:AbstractGroupOperation}
-    return isapprox(G, p, identity_element(G); kwargs...)
+    return is_identity(G, p; kwargs...)
 end
 function isapprox(
     G::AbstractGroupManifold{𝔽,O},

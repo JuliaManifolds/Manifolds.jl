@@ -38,7 +38,11 @@ function check_point(G::GeneralLinear, p; kwargs...)
     return nothing
 end
 check_point(::GeneralLinear, ::Identity{MultiplicationOperation}) = nothing
-function check_point(G::GeneralLinear, e::Identity{O}; kwargs...) where {O}
+function check_point(
+    G::GeneralLinear,
+    e::Identity{O};
+    kwargs...,
+) where {O<:AbstractGroupOperation}
     return invoke(check_point, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
 end
 

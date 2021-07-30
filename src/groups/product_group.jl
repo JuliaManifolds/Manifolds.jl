@@ -50,6 +50,9 @@ function is_identity(G::ProductGroup, p; kwargs...)
     M = G.manifold # Inner prodct manifold (of groups)
     return all(map((M, pe) -> is_identity(M, pe; kwargs...), M.manifolds, pes))
 end
+function is_identity(G::ProductGroup, e::Identity; kwargs...)
+    return invoke(is_identity, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
+end
 
 function Base.show(io::IO, ::MIME"text/plain", G::ProductGroup)
     print(

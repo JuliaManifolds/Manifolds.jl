@@ -43,7 +43,11 @@ function check_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
     return nothing
 end
 check_point(G::SpecialLinear, ::Identity{MultiplicationOperation}; kwargs...) = nothing
-function check_point(G::SpecialLinear, e::Identity{O}; kwargs...) where {O}
+function check_point(
+    G::SpecialLinear,
+    e::Identity{O};
+    kwargs...,
+) where {O<:AbstractGroupOperation}
     return invoke(check_point, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
 end
 
