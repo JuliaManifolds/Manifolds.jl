@@ -254,10 +254,20 @@ function is_identity(
 end
 is_identity(::AbstractGroupManifold, ::Identity; kwargs...) = false
 
-function isapprox(G::AbstractGroupManifold{𝔽,O}, p::Identity{O}, q; kwargs...) where {𝔽,O}
+function isapprox(
+    G::AbstractGroupManifold{𝔽,O},
+    p::Identity{O},
+    q;
+    kwargs...,
+) where {𝔽,O<:AbstractGroupOperation}
     return isapprox(G, identity_element(G), q; kwargs...)
 end
-function isapprox(G::AbstractGroupManifold{𝔽,O}, p, q::Identity{O}; kwargs...) where {𝔽,O}
+function isapprox(
+    G::AbstractGroupManifold{𝔽,O},
+    p,
+    q::Identity{O};
+    kwargs...,
+) where {𝔽,O<:AbstractGroupOperation}
     return isapprox(G, p, identity_element(G); kwargs...)
 end
 function isapprox(
@@ -265,7 +275,7 @@ function isapprox(
     p::Identity{O},
     q::Identity{O};
     kwargs...,
-) where {𝔽,O}
+) where {𝔽,O<:AbstractGroupOperation}
     return true
 end
 function isapprox(
@@ -274,13 +284,23 @@ function isapprox(
     X,
     Y;
     kwargs...,
-) where {𝔽,O}
+) where {𝔽,O<:AbstractGroupOperation}
     return isapprox(G, identity_element(G), X, Y; kwargs...)
 end
+function Base.isapprox(G::AbstractGroupManifold, p, e::Identity; kwargs...)
+    return isapprox(G, e, p; kwargs...)
+end
+Base.isapprox(::AbstractGroupManifold, ::Identity, ::Identity; kwargs...) = false
 
-Base.show(io::IO, ::Identity{O}) where {O} = print(io, "Identity($O)")
+function Base.show(io::IO, ::Identity{O}) where {O<:AbstractGroupOperation}
+    return print(io, "Identity($O)")
+end
 
-function check_point(G::AbstractGroupManifold{𝔽,O}, e::Identity{O}; kwargs...) where {𝔽,M,O}
+function check_point(
+    G::AbstractGroupManifold{𝔽,O},
+    e::Identity{O};
+    kwargs...,
+) where {𝔽,M,O<:AbstractGroupOperation}
     return nothing
 end
 
@@ -288,16 +308,11 @@ function check_point(
     G::AbstractGroupManifold{𝔽,O1},
     e::Identity{O2};
     kwargs...,
-) where {𝔽,M,O1,O2}
+) where {𝔽,M,O1<:AbstractGroupOperation,O2<:AbstractGroupOperation}
     return DomainError(
         e,
         "The Identity $e does not lie on $G, since its the identity with respect to $O2 and not $O1.",
     )
-end
-
-Base.copyto!(::GroupManifold{𝔽,M,O}, e::Identity{O}, ::Identity{O}) where {𝔽,M,O} = e
-function Base.copyto!(G::GroupManifold{𝔽,M,O}, p, ::Identity{O}) where {𝔽,M,O}
-    return identity_element!(G, p)
 end
 
 ##########################
@@ -358,20 +373,26 @@ Base.inv(::AbstractGroupManifold, e::Identity) = e
     return inv!(G.manifold, q, p)
 end
 
-inv!(G::AbstractGroupManifold, q, ::Identity) = identity_element!(G, q)
-
-function Base.isapprox(G::AbstractGroupManifold, e::Identity, p; kwargs...)
-    return isapprox(G, identity_element(G, p), p; kwargs...)
+function inv!(
+    G::AbstractGroupManifold{𝔽,O},
+    q,
+    ::Identity{O},
+) where {𝔽,O<:AbstractGroupOperation}
+    return identity_element!(G, q)
 end
-function Base.isapprox(G::AbstractGroupManifold, p, e::Identity; kwargs...)
-    return isapprox(G, e, p; kwargs...)
+
+function Base.copyto!(
+    ::AbstractGroupManifold{𝔽,O},
+    e::Identity{O},
+    ::Identity{O},
+) where {𝔽,O<:AbstractGroupOperation}
+    return e
 end
-Base.isapprox(::AbstractGroupManifold, ::Identity, ::Identity; kwargs...) = true
-
-Base.one(e::Identity) = e
-
-Base.copyto!(::AbstractGroupManifold{𝔽,O}, e::Identity{O}, ::Identity{O}) where {𝔽,O} = e
-function Base.copyto!(G::AbstractGroupManifold{𝔽,O}, p, ::Identity{O}) where {𝔽,O}
+function Base.copyto!(
+    G::AbstractGroupManifold{𝔽,O},
+    p,
+    ::Identity{O},
+) where {𝔽,O<:AbstractGroupOperation}
     return identity_element!(G, p)
 end
 
@@ -994,6 +1015,9 @@ inv!(::AdditionGroup, q::Identity, e::Identity) = q
 function is_identity(G::AdditionGroup, q; kwargs...)
     return isapprox(G, q, zero(q); kwargs...)
 end
+function is_identity(G::AdditionGroup, e::Identity; kwargs...)
+    return invoke(is_identity, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
+end
 
 _compose(::AdditionGroup, p, q) = p + q
 
@@ -1070,6 +1094,9 @@ end
 function is_identity(G::MultiplicationGroup, q::AbstractMatrix; kwargs...)
     return isapprox(G, q, I; kwargs...)
 end
+function is_identity(G::MultiplicationGroup, e::Identity; kwargs...)
+    return invoke(is_identity, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
+end
 
 LinearAlgebra.mul!(q, ::Identity{MultiplicationOperation}, p) = copyto!(q, p)
 LinearAlgebra.mul!(q, p, ::Identity{MultiplicationOperation}) = copyto!(q, p)
@@ -1094,6 +1121,8 @@ function LinearAlgebra.mul!(
 )
     return q
 end
+
+Base.one(e::Identity{MultiplicationOperation}) = e
 
 Base.inv(::MultiplicationGroup, p) = inv(p)
 Base.inv(::MultiplicationGroup, e::Identity{MultiplicationOperation}) = e

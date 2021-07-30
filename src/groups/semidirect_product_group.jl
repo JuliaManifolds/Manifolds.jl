@@ -77,6 +77,9 @@ function is_identity(G::SemidirectProductGroup, p; kwargs...)
     nq, hq = submanifold_components(G, p)
     return is_identity(N, nq; kwargs...) && is_identity(H, hq; kwargs...)
 end
+function is_identity(G::SemidirectProductGroup, e::Identity; kwargs...)
+    return invoke(is_identity, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
+end
 
 function Base.show(io::IO, G::SemidirectProductGroup)
     M = base_manifold(G)
