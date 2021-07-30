@@ -20,6 +20,7 @@ The following operations are available for group manifolds:
 * [`Identity`](@ref): an allocation-free representation of the identity element of the group.
 * [`inv`](@ref): get the inverse of a given element.
 * [`compose`](@ref): compose two given elements of a group.
+* [`identity_element`](@ref) get the identity element of the group, in the representation used by other points from the group.
 
 ### Group manifold
 
