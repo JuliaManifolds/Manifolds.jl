@@ -9,10 +9,7 @@ An operation can be either defined for a specific [`AbstractGroupManifold`](@ref
 number system `𝔽` or in general, by defining for an operation `Op` the following methods:
 
     identity_element!(::AbstractGroupManifold{𝔽,Op}, q, q)
-    identity_element(::AbstractGroupManifold{𝔽,Op} [, q])
     inv!(::AbstractGroupManifold{𝔽,Op}, q, p)
-    inv(::AbstractGroupManifold{𝔽,Op}, p)
-    _compose(::AbstractGroupManifold{𝔽,Op}, p, q)
     _compose!(::AbstractGroupManifold{𝔽,Op}, x, p, q)
 
 Note that a manifold is connected with an operation by wrapping it with a decorator,
@@ -179,9 +176,9 @@ See also [`identity_element`](@ref) on how to obtain the corresponding [`Abstrac
 
 # Constructors
 
-Identity(G::AbstractGroupManifold{𝔽,O})
-Identity(o::O)
-Identity(::Type{O})
+    Identity(G::AbstractGroupManifold{𝔽,O})
+    Identity(o::O)
+    Identity(::Type{O})
 
 create the identity of the corresponding subtype `O<:`[`AbstractGroupOperation`](@ref)
 """
@@ -220,10 +217,8 @@ end
 @doc raw"""
     identity_element(G::AbstractGroupManifold, p)
 
-Return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G`
-(in place of `p`). By default this representation is default array or number representation.
-It rhoudl return the corresponding [`AbstractManifoldPoint`](@ref) of points on `G` if
-points are not represented by arrays or numbers.
+Return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G`,
+where `p` indicates the type to represent the identity.
 """
 function identity_element(G::AbstractGroupManifold, p)
     q = allocate_result(G, identity_element, p)
