@@ -112,6 +112,7 @@ function test_group(
                 Test.@test inv(G, e) === e
 
                 test_mutating && Test.@testset "mutating" begin
+                    Test.@test inv!(G, e, e) === e
                     ginv = allocate(g)
                     Test.@test inv!(G, ginv, g) === ginv
                     Test.@test is_identity(G, compose(G, g, ginv); atol=atol)
@@ -601,11 +602,11 @@ function test_action(
                     Test.@test compose!(A, h, e, a) === h
                     Test.@test isapprox(G, h, a)
 
-                    ge = Identity(G)
+                    ge = identity_element(G, a)
                     Test.@test isapprox(G, compose(A, a, ge), a)
                     Test.@test isapprox(G, compose(A, ge, a), a)
 
-                    ge = Identity(G)
+                    ge = allocate(a)
                     Test.@test compose!(A, ge, e, e) === ge
                     Test.@test isapprox(G, ge, e)
 

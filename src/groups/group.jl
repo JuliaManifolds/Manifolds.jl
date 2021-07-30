@@ -1009,8 +1009,8 @@ Base.inv(::AdditionGroup, p) = -p
 Base.inv(::AdditionGroup, e::Identity) = e
 
 inv!(G::AdditionGroup, q, p) = copyto!(G, q, -p)
-inv!(G::AdditionGroup, q, ::Identity) = identity_element!(G, q)
-inv!(::AdditionGroup, q::Identity, e::Identity) = q
+inv!(G::AdditionGroup, q, ::Identity{AdditionOperation}) = identity_element!(G, q)
+inv!(::AdditionGroup, q::Identity{AdditionOperation}, e::Identity{AdditionOperation}) = q
 
 function is_identity(G::AdditionGroup, q; kwargs...)
     return isapprox(G, q, zero(q); kwargs...)
@@ -1081,7 +1081,7 @@ Base.:\(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation
 
 LinearAlgebra.det(::Identity{MultiplicationOperation}) = 1
 
-function identity_element!(::MultiplicationGroup, p)
+function identity_element!(::MultiplicationGroup, p::AbstractMatrix)
     return copyto!(p, I)
 end
 
@@ -1130,6 +1130,13 @@ Base.inv(::MultiplicationGroup, e::Identity{MultiplicationOperation}) = e
 inv!(G::MultiplicationGroup, q, p) = copyto!(q, inv(G, p))
 function inv!(G::MultiplicationGroup, q, ::Identity{MultiplicationOperation})
     return identity_element!(G, q)
+end
+function inv!(
+    ::MultiplicationGroup,
+    q::Identity{MultiplicationOperation},
+    e::Identity{MultiplicationOperation},
+)
+    return q
 end
 
 _compose(::MultiplicationGroup, p, q) = p * q

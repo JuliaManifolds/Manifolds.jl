@@ -25,6 +25,10 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
         y = [1.0 * im]
         v = [Complex(0.5)]
         @test translate_diff(G, ig, y, v) === v
+
+        @test identity_element(G) === 1.0
+        @test identity_element(G, 1.0f0) === 1.0f0
+        @test identity_element(G, [1.0f0]) == [1.0f0]
     end
 
     @testset "scalar points" begin

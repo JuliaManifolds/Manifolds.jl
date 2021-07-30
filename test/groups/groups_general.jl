@@ -270,6 +270,11 @@ include("group_utils.jl")
         @test get_vector_lie(G, ones(3), DefaultOrthogonalBasis()) == ones(3)
         @test e - e == e
         @test ones(3) + e == ones(3)
+        e_add = Identity(AdditionOperation)
+        e_mul = Identity(MultiplicationOperation)
+        @test e_add * e_mul === e_add
+        @test e_mul * e_add === e_add
+        @test mul!(e_mul, e_mul, e_mul) === e_mul
     end
 
     @testset "Transparency tests" begin
