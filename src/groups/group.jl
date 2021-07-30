@@ -197,9 +197,10 @@ number_eltype(::Identity) = Bool
 @doc raw"""
     identity_element(G::AbstractGroupManifold)
 
-return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G`.
-by default this representation is default array representation.
-It should return the corresponding [`AbstractManifoldPoint`](@ref) of points on `G` if points are not represented by arrays.
+Return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G`.
+By default this representation is the default array or number representation.
+It should return the corresponding [`AbstractManifoldPoint`](@ref) of points on `G` if
+points are not represented by arrays.
 """
 identity_element(G::AbstractGroupManifold)
 @decorator_transparent_function function identity_element(G::AbstractGroupManifold)
@@ -216,9 +217,10 @@ end
 @doc raw"""
     identity_element(G::AbstractGroupManifold, p)
 
-return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G` (in place of `p`).
-by default this representation is default array representation.
-It rhoudl return the corresponding [`AbstractManifoldPoint`](@ref) of points on `G` if points are not represented by arrays.
+Return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G`
+(in place of `p`). By default this representation is default array or number representation.
+It rhoudl return the corresponding [`AbstractManifoldPoint`](@ref) of points on `G` if
+points are not represented by arrays or numbers.
 """
 function identity_element(G::AbstractGroupManifold, p)
     q = allocate_result(G, identity_element, p)
@@ -228,14 +230,15 @@ end
 @doc raw"""
     identity_element!(G::AbstractGroupManifold, p)
 
-return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G` in place of `p`.
+Return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G`
+in place of `p`.
 """
 identity_element!(G::AbstractGroupManifold, p)
 
 @doc raw"""
     is_identity(G, q; kwargs)
 
-Check, whether `q` is the identity on the [`AbstractGroupManifold`](@ref) `G`, i.e. it is either
+Check whether `q` is the identity on the [`AbstractGroupManifold`](@ref) `G`, i.e. it is either
 the [`Identity`](@ref)`{O}` with the corresponding [`AbstractGroupOperation`](@ref) `O`, or
 (approximately) the correct point representation.
 """
