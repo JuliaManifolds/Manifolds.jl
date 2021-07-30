@@ -64,6 +64,13 @@ function test_group(
         end
 
         Test.@testset "Identity" begin
+            Test.@test is_point(G, e)
+            wrong_e = if e === Identity(MultiplicationOperation())
+                Identity(AdditionOperation())
+            else
+                Identity(MultiplicationOperation())
+            end
+            Test.@test !is_point(G, wrong_e)
             Test.@test isapprox(G, e, e)
             Test.@test compose(G, e, e) === e
             Test.@test copyto!(G, e, e) === e
