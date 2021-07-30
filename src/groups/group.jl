@@ -804,7 +804,7 @@ is `_log_lie!`.
 log_lie(::AbstractGroupManifold, ::Any...)
 @decorator_transparent_function function log_lie(G::AbstractGroupManifold, q)
     X = allocate_result(G, log_lie, q)
-    return _log_lie!(G, X, q)
+    return log_lie!(G, X, q)
 end
 function log_lie(
     G::AbstractGroupManifold{𝔽,Op},
