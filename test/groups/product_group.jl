@@ -26,6 +26,13 @@ include("group_utils.jl")
     shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M.manifolds...)
     e = Manifolds.prod_point(shape_se, eA...)
 
+    @testset "Product Identity" begin
+        i = Identity(G)
+        @test submanifold_components(G, i) == (Identity(SOn), Identity(Tn))
+        @test submanifold_component(G, i, 1) == Identity(SOn)
+        @test submanifold_component(G, i, 2) == Identity(Tn)
+    end
+
     @testset "product point" begin
         reshapers = (Manifolds.ArrayReshaper(), Manifolds.StaticReshaper())
         for reshaper in reshapers
