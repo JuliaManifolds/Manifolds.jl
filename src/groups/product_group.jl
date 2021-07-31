@@ -74,8 +74,9 @@ function submanifold_component(
     ::Identity{O},
     ::Val{I},
 ) where {I,MT<:ProductManifold,𝔽,O}
+    M = G.manifold
     # the identity on a product manifold with is a group consists of a tuple of identities
-    return Identity(G.manifolds[I])
+    return Identity(M.manifolds[I])
 end
 
 function submanifold_components(
