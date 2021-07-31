@@ -93,6 +93,7 @@ function inv!(G::ProductGroup, q, p)
     map(inv!, M.manifolds, submanifold_components(G, q), submanifold_components(G, p))
     return q
 end
+inv!(::ProductGroup, q::Identity{ProductOperation}, ::Identity{ProductOperation}) = q
 
 _compose(G::ProductGroup, p, q) = _compose(G.manifold, p, q)
 function _compose(M::ProductManifold, p::ProductRepr, q::ProductRepr)
