@@ -34,7 +34,7 @@ X ∈ 𝔽^{n × k} :
 X^{\mathrm{H}}p + p^{\mathrm{H}}X = 0_{k} \bigr\},
 ````
 
-where $0_k$ is the $k × k$ zero matrix and $\overline{\cdot}$ the complex conjugate.
+where $0_k$ is the $k × k$ zero matrix.
 
 Note that a point $p ∈ \operatorname{Gr}(n,k)$ might be represented by
 different matrices (i.e. matrices with unitary column vectors that span
@@ -85,11 +85,11 @@ Check whether `X` is a tangent vector in the tangent space of `p` on
 the [`Grassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
 
 ````math
-    p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0_k,
+    p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0_k,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
-$\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ the $k × k$ zero matrix.
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian
+and $0_k$ the $k × k$ zero matrix.
 """
 function check_vector(M::Grassmann{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     mpv = invoke(
