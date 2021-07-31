@@ -156,7 +156,7 @@ function exp_lie!(::GeneralLinear{1}, q, X)
 end
 exp_lie!(::GeneralLinear{2}, q, X) = copyto!(q, exp(SizedMatrix{2,2}(X)))
 
-function _log_lie!(::GeneralLinear{1}, X::AbstractMatrix, p::AbstractMatrix)
+function _log_lie!(::GeneralLinear{1}, X, p)
     X[1] = log(p[1])
     return X
 end

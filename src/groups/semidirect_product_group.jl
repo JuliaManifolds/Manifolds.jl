@@ -25,10 +25,10 @@ const SemidirectProductGroup{𝔽,N,H,A} =
 @doc raw"""
     SemidirectProductGroup(N::GroupManifold, H::GroupManifold, A::AbstractGroupAction)
 
-A group that is the semidirect product of a normal group $\mathcal{N}$ and a subgroup
-$\mathcal{H}$, written $\mathcal{G} = \mathcal{N} ⋊_θ \mathcal{H}$, where
-$θ: \mathcal{H} × \mathcal{N} → \mathcal{N}$ is an automorphism action of $\mathcal{H}$ on
-$\mathcal{N}$. The group $\mathcal{G}$ has the composition rule
+A group that is the semidirect product of a normal group ``\mathcal{N}`` and a subgroup
+``\mathcal{H}``, written ``\mathcal{G} = \mathcal{N} ⋊_θ \mathcal{H}``, where
+``θ: \mathcal{H} × \mathcal{N} → \mathcal{N}`` is an automorphism action of ``\mathcal{H}`` on
+``\mathcal{N}``. The group ``\mathcal{G}`` has the composition rule
 
 ````math
 g \circ g' = (n, h) \circ (n', h') = (n \circ θ_h(n'), h \circ h')

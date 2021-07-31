@@ -56,6 +56,8 @@ using NLsolve
             @test Y ≈ X
             @test exp_lie(G, X) ≈ exp(X)
             @test log_lie(G, exp(X)) ≈ X
+            @test log_lie(G, [1.0]) == zeros(1) # vector to vector
+            log_lie(G, Identity(G)) == zeros(1, 1) # Matrix to matrix
         end
         @testset "complex" begin
             G = GeneralLinear(1, ℂ)

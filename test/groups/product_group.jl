@@ -62,6 +62,22 @@ include("group_utils.jl")
                     log_lie(Tn, pts[1].parts[2]),
                 ),
             )
+            X = log_lie(G, pts[1])
+            Z = zero_vector(G, pts[1])
+            log_lie!(G, Z, pts[1])
+            @test isapprox(G, pts[1], X, Z)
+            p = exp_lie(G, X)
+            q = identity_element(G)
+            exp_lie!(G, q, X)
+            @test isapprox(G, p, q)
+            log_lie!(G, Z, Identity(G))
+            @test isapprox(G, Identity(G), Z, zero_vector(G, identity_element(G)))
+            @test isapprox(
+                G,
+                Identity(G),
+                log_lie(G, Identity(G)),
+                zero_vector(G, identity_element(G)),
+            )
         end
     end
 
