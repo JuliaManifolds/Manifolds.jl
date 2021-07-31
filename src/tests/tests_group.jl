@@ -313,7 +313,7 @@ function test_group(
                 for X in Xe_pts
                     g = allocate(g_pts[1])
                     Test.@test group_exp!(G, g, X) === g
-                    Test.@test is_point(G, g; atol=atol)
+                    Test.@test is_point(G, g, true; atol=atol)
                     Test.@test isapprox(G, g, group_exp(G, X); atol=atol)
                     X2 = allocate(X)
                     Test.@test group_log!(G, X2, g) === X2
@@ -350,7 +350,7 @@ function test_group(
                     X_pts[1],
                     Manifolds.GroupExponentialRetraction(conv...),
                 )
-                Test.@test is_point(G, y; atol=atol)
+                Test.@test is_point(G, y, true; atol=atol)
                 X2 = inverse_retract(
                     G,
                     g_pts[1],
@@ -370,7 +370,7 @@ function test_group(
                         X_pts[1],
                         Manifolds.GroupExponentialRetraction(conv...),
                     ) === y
-                    Test.@test is_point(G, y; atol=atol)
+                    Test.@test is_point(G, y, true; atol=atol)
                     X2 = allocate(X_pts[1])
                     Test.@test inverse_retract!(
                         G,

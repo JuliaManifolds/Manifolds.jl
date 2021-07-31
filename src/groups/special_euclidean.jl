@@ -141,6 +141,64 @@ function affine_matrix(::GT, ::Identity{GT}) where {n,GT<:SpecialEuclidean{n}}
     return Diagonal{Float64}(I, n)
 end
 
+function check_point(G::SpecialEuclidean{n}, p::AbstractMatrix; kwargs...) where {n}
+    errs = DomainError[]
+    # Valid matrix
+    err1 = check_point(Euclidean(n + 1, n + 1), p)
+    !isnothing(err1) && push!(errs, err1)
+    # homogeneous
+    if !isapprox(p[end, :], [zeros(size(p, 2) - 1)..., 1]; kwargs...)
+        push!(
+            errs,
+            DomainError(
+                p[end, :],
+                "The last row of $p is not homogeneous, i.e. of form [0,..,0,1].",
+            ),
+        )
+    end
+    # translate part
+    err2 = check_point(submanifold(G, 1), p[1:n, end]; kwargs...)
+    !isnothing(err2) && push!(errs, err2)
+    # SOn
+    err3 = check_point(submanifold(G, 2), p[1:n, 1:n]; kwargs...)
+    !isnothing(err3) && push!(errs, err3)
+    if length(errs) > 1
+        return CompositeManifoldError(errs)
+    end
+    return length(errs) == 0 ? nothing : first(errs)
+end
+function check_vector(
+    G::SpecialEuclidean{n},
+    p::AbstractMatrix,
+    X::AbstractMatrix;
+    kwargs...,
+) where {n}
+    errs = DomainError[]
+    # Valid matrix
+    err1 = check_point(Euclidean(n + 1, n + 1), X)
+    !isnothing(err1) && push!(errs, err1)
+    # homogeneous
+    if !isapprox(X[end, :], zeros(size(X, 2)); kwargs...)
+        push!(
+            errs,
+            DomainError(
+                X[end, :],
+                "The last row of $X is not homogeneous, i.e. of form [0,..,0,0].",
+            ),
+        )
+    end
+    # translate part
+    err2 = check_vector(submanifold(G, 1), p[1:n, end], X[1:n, end]; kwargs...)
+    !isnothing(err2) && push!(errs, err2)
+    # SOn
+    err3 = check_vector(submanifold(G, 2), p[1:n, 1:n], X[1:n, 1:n]; kwargs...)
+    !isnothing(err3) && push!(errs, err3)
+    if length(errs) > 1
+        return CompositeManifoldError(errs)
+    end
+    return length(errs) == 0 ? nothing : first(errs)
+end
+
 @doc raw"""
     screw_matrix(G::SpecialEuclidean, X) -> AbstractMatrix
 
@@ -169,10 +227,10 @@ function screw_matrix(G::SpecialEuclidean{n}, X) where {n}
 end
 screw_matrix(::SpecialEuclidean{n}, X::AbstractMatrix) where {n} = X
 
-function allocate_result(G::SpecialEuclidean{n}, f::typeof(affine_matrix), p...) where {n}
+function allocate_result(::SpecialEuclidean{n}, ::typeof(affine_matrix), p...) where {n}
     return allocate(p[1], Size(n + 1, n + 1))
 end
-function allocate_result(G::SpecialEuclidean{n}, f::typeof(screw_matrix), X...) where {n}
+function allocate_result(::SpecialEuclidean{n}, ::typeof(screw_matrix), X...) where {n}
     return allocate(X[1], Size(n + 1, n + 1))
 end
 
