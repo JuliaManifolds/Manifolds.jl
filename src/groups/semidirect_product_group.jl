@@ -109,6 +109,13 @@ end
 function inv!(G::SemidirectProductGroup, q, ::Identity{<:SemidirectProductOperation})
     return identity_element!(G, q)
 end
+function inv!(
+    G::SemidirectProductGroup,
+    q::Identity{<:SemidirectProductOperation},
+    ::Identity{<:SemidirectProductOperation},
+)
+    return q
+end
 
 function _compose!(G::SemidirectProductGroup, x, p, q)
     M = base_manifold(G)
