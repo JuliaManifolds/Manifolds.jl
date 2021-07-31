@@ -147,7 +147,7 @@ function check_point(G::SpecialEuclidean{n}, p::AbstractMatrix; kwargs...) where
     err1 = check_point(Euclidean(n + 1, n + 1), p)
     !isnothing(err1) && push!(errs, err1)
     # homogeneous
-    if !isapprox(p[end, :], [zeros(n)..., 1]; kwargs...)
+    if !isapprox(p[end, :], [zeros(size(p, 2) - 1)..., 1]; kwargs...)
         push!(
             errs,
             DomainError(
@@ -175,15 +175,15 @@ function check_vector(
 ) where {n}
     errs = DomainError[]
     # Valid matrix
-    err1 = check_point(Euclidean(n + 1, n + 1), p)
+    err1 = check_point(Euclidean(n + 1, n + 1), X)
     !isnothing(err1) && push!(errs, err1)
     # homogeneous
-    if !isapprox(X[end, :], zeros(n + 1); kwargs...)
+    if !isapprox(X[end, :], zeros(size(X, 2)); kwargs...)
         push!(
             errs,
             DomainError(
                 X[end, :],
-                "The last row of $X is not homogeneous, i.e. of form [0,..,0,1].",
+                "The last row of $X is not homogeneous, i.e. of form [0,..,0,0].",
             ),
         )
     end
