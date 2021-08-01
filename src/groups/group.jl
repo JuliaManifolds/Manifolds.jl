@@ -288,9 +288,6 @@ function isapprox(
 ) where {𝔽,O<:AbstractGroupOperation}
     return isapprox(G, identity_element(G), X, Y; kwargs...)
 end
-function Base.isapprox(G::AbstractGroupManifold, p, e::Identity; kwargs...)
-    return isapprox(G, e, p; kwargs...)
-end
 Base.isapprox(::AbstractGroupManifold, ::Identity, ::Identity; kwargs...) = false
 
 function Base.show(io::IO, ::Identity{O}) where {O<:AbstractGroupOperation}
