@@ -296,6 +296,8 @@ function test_group(
             X = log_lie(G, Identity(G))
             g = exp_lie(G, X)
             Test.@test isapprox(G, Identity(G), g; atol=atol)
+            ep = identity_element(G, g)
+            Test.@test isapprox(G, ep, zero_vector(G, ep), log_lie(G, ep); atol=atol)
 
             test_mutating && Test.@testset "mutating" begin
                 X = allocate(Xe_pts[1])
