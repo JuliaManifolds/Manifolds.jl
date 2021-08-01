@@ -146,6 +146,11 @@ using ManifoldsBase: VeeOrthogonalBasis
             p2[1:n, end] .= p[1:n, end]
             p2[end, end] = p[end, end]
             @test_throws CompositeManifoldError is_point(G, p2, true)
+            # exp/log_lie for ProductGroup on arrays
+            X = copy(G, p, X_pts[1])
+            p3 = exp_lie(G, X)
+            X3 = log_lie(G, p3)
+            isapprox(G, Identity(G), X, X3)
         end
 
         @testset "hat/vee" begin
@@ -161,6 +166,23 @@ using ManifoldsBase: VeeOrthogonalBasis
             v = vee(G, affine_matrix(G, p), screw_matrix(G, V))
             @test v ≈ vexp
             @test hat(G, affine_matrix(G, p), v) ≈ screw_matrix(G, V)
+
+            e = Identity(G)
+            Ve = log_lie(G, p)
+            v = vee(G, e, Ve)
+            @test_throws ErrorException vee(M, e, Ve)
+            w = similar(v)
+            vee!(G, w, e, Ve)
+            @test isapprox(v, w)
+            @test_throws ErrorException vee!(M, w, e, Ve)
+
+            We = hat(G, e, v)
+            @test_throws ErrorException hat(M, e, v)
+            isapprox(G, e, Ve, We)
+            We2 = copy(G, p, V)
+            hat!(G, We2, e, v)
+            @test_throws ErrorException hat!(M, We, e, v)
+            @test isapprox(G, e, We, We2)
         end
     end
 

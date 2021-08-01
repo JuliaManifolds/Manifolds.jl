@@ -43,6 +43,11 @@ using NLsolve
             )
         ) === Val(true)
         @test Manifolds.allocation_promotion_function(Gc, exp!, (1,)) === complex
+
+        q = identity_element(G)
+        @test is_identity(G, q)
+        @test isapprox(G, q, Identity(G))
+        @test isapprox(G, Identity(G), q)
     end
 
     @testset "GL(1,𝔽) special cases" begin

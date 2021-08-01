@@ -157,5 +157,11 @@ include("group_utils.jl")
         @test c == c2
         get_coordinates!(M, c2, identity_element(G), Y, Manifolds.VeeOrthogonalBasis())
         @test c == c2
+
+        q = zeros(3, 3)
+        mul!(q, e, e)
+        @test isone(q)
+        e2 = Identity(G)
+        @test mul!(e2, e, e) === e2
     end
 end
