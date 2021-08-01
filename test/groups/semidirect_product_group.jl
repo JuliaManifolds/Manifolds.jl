@@ -43,5 +43,5 @@ include("group_utils.jl")
     @test isapprox(G, e, eA)
     W = log(G, eA, pts[1])
     Z = log(G, eA, pts[1])
-    @test isapprox(G, e, X, Z)
+    @test isapprox(G, e, W, Z)
 end
