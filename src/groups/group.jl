@@ -220,7 +220,8 @@ end
 Return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G`,
 where `p` indicates the type to represent the identity.
 """
-function identity_element(G::AbstractGroupManifold, p)
+identity_element(G::AbstractGroupManifold, p)
+@decorator_transparent_function function identity_element(G::AbstractGroupManifold, p)
     q = allocate_result(G, identity_element, p)
     return identity_element!(G, q)
 end
