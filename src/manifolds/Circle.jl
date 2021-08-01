@@ -143,17 +143,6 @@ function get_coordinates(
     return @SVector [Xⁱ]
 end
 
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold get_coordinates(
-            M::Circle,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end,
-)
-
 function get_coordinates!(
     M::Circle,
     Y::AbstractArray,

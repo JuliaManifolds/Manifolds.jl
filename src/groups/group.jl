@@ -365,7 +365,12 @@ inv(::AbstractGroupManifold, ::Any...)
     return inv!(G, q, p)
 end
 
-Base.inv(::AbstractGroupManifold, e::Identity) = e
+function Base.inv(
+    ::AbstractGroupManifold{𝔽,O},
+    e::Identity{O},
+) where {𝔽,O<:AbstractGroupOperation}
+    return e
+end
 
 @decorator_transparent_function function inv!(G::AbstractGroupManifold, q, p)
     return inv!(G.manifold, q, p)
@@ -1077,10 +1082,20 @@ Base.:\(p, ::Identity{MultiplicationOperation}) = inv(p)
 Base.:\(::Identity{MultiplicationOperation}, p) = p
 Base.:\(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation}) = e
 
-LinearAlgebra.det(::Identity{MultiplicationOperation}) = 1
+LinearAlgebra.det(::Identity{MultiplicationOperation}) = true
+LinearAlgebra.adjoint(e::Identity{MultiplicationOperation}) = e
 
 function identity_element!(::MultiplicationGroup, p::AbstractMatrix)
     return copyto!(p, I)
+end
+
+function identity_element!(G::MultiplicationGroup, p::AbstractArray)
+    if length(p) == 1
+        fill!(p, one(eltype(p)))
+    else
+        throw(DimensionMismatch("Array $p cannot be set to identity element of group $G"))
+    end
+    return p
 end
 
 function is_identity(G::MultiplicationGroup, q::Number; kwargs...)
@@ -1104,13 +1119,6 @@ function LinearAlgebra.mul!(
     ::Identity{MultiplicationOperation},
 )
     return copyto!(q, I)
-end
-function LinearAlgebra.mul!(
-    q::Number,
-    ::Identity{MultiplicationOperation},
-    ::Identity{MultiplicationOperation},
-)
-    return copyto!(q, one(eltype(q)))
 end
 function LinearAlgebra.mul!(
     q::Identity{MultiplicationOperation},

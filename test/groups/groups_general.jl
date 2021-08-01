@@ -206,6 +206,7 @@ include("group_utils.jl")
         @test copyto!(G, ge, ge) === ge
         y = allocate(p)
         identity_element!(G, y)
+        @test_throws DimensionMismatch identity_element!(G, [1, 2, 3])
         @test y ≈ one(p)
         @test one(ge) === ge
         @test transpose(ge) === ge

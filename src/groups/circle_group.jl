@@ -28,10 +28,6 @@ identity_element(G::CircleGroup) = 1.0
 identity_element(::CircleGroup, p::Number) = one(p)
 identity_element(::CircleGroup, p::AbstractArray) = map(i -> one(eltype(p)), p)
 
-function identity_element!(::CircleGroup, p)
-    return fill!(p, one(eltype(p)))
-end
-
 Base.inv(G::CircleGroup, p::AbstractVector) = map(inv, repeated(G), p)
 
 function inverse_translate(

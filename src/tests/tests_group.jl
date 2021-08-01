@@ -76,11 +76,11 @@ function test_group(
             Test.@test compose(G, e, e) === e
             Test.@test copyto!(G, e, e) === e
 
+            ge = identity_element(G, g_pts[1])
             for g in g_pts
                 Test.@test isapprox(G, compose(G, g, e), g)
                 Test.@test isapprox(G, compose(G, e, g), g)
 
-                ge = Identity(G)
                 Test.@test isapprox(G, compose(G, g, ge), g)
                 Test.@test isapprox(G, compose(G, ge, g), g)
             end
@@ -105,11 +105,11 @@ function test_group(
         end
 
         Test.@testset "Inverse" begin
+            Test.@test inv(G, e) === e
             for g in g_pts
                 ginv = inv(G, g)
                 Test.@test is_identity(G, compose(G, g, ginv); atol=atol)
                 Test.@test is_identity(G, compose(G, ginv, g); atol=atol)
-                Test.@test inv(G, e) === e
 
                 test_mutating && Test.@testset "mutating" begin
                     Test.@test inv!(G, e, e) === e
@@ -583,7 +583,7 @@ function test_action(
                 Test.@test isapprox(G, compose(A, a, e), a; atol=atol_ident_compose)
                 Test.@test isapprox(G, compose(A, e, a), a; atol=atol_ident_compose)
 
-                ge = Identity(G)
+                ge = identity_element(G, a)
                 Test.@test isapprox(G, compose(A, a, ge), a; atol=atol_ident_compose)
                 Test.@test isapprox(G, compose(A, ge, a), a; atol=atol_ident_compose)
 

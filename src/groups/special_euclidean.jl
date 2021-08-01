@@ -39,6 +39,12 @@ function SpecialEuclidean(n)
     return SemidirectProductGroup(Tn, SOn, A)
 end
 
+const SpecialEuclideanIdentity{N} = Identity{
+    SemidirectProductOperation{
+        RotationAction{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N},LeftAction},
+    },
+}
+
 Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
 
 Base.@propagate_inbounds function submanifold_component(
@@ -135,10 +141,7 @@ function affine_matrix(G::SpecialEuclidean{n}, p) where {n}
     return pmat
 end
 affine_matrix(::SpecialEuclidean{n}, p::AbstractMatrix) where {n} = p
-function affine_matrix(
-    ::GT,
-    ::Identity{<:SemidirectProductOperation},
-) where {n,GT<:SpecialEuclidean{n}}
+function affine_matrix(::SpecialEuclidean{n}, ::SpecialEuclideanIdentity{n}) where {n}
     s = maybesize(Size(n, n))
     s isa Size && return SDiagonal{n,Float64}(I)
     return Diagonal{Float64}(I, n)
@@ -527,45 +530,6 @@ function translate_diff!(G::SpecialEuclidean, Y, p, q, X, ::RightAction)
     nY, hY = submanifold_components(G, Y)
     hY .= hp' * hX * hp
     copyto!(nY, hq * (hX * np) + nX)
-    @inbounds _padvector!(G, Y)
-    return Y
-end
-function translate_diff!(
-    G::SpecialEuclidean,
-    Y,
-    ::Identity{<:SemidirectProductOperation},
-    q,
-    X,
-    ::RightAction,
-)
-    copyto!(G, Y, X)
-    @inbounds _padvector!(G, Y)
-    return Y
-end
-function translate_diff!(
-    G::SpecialEuclidean,
-    Y,
-    p,
-    ::Identity{<:SemidirectProductOperation},
-    X,
-    ::RightAction,
-)
-    np, hp = submanifold_components(G, p)
-    nX, hX = submanifold_components(G, X)
-    nY, hY = submanifold_components(G, Y)
-    hY .= hp' * hX * hp
-    copyto!(nY, hX * np + nX)
-    @inbounds _padvector!(G, Y)
-end
-function translate_diff!(
-    G::SpecialEuclidean,
-    Y,
-    ::Identity{Op},
-    ::Identity{Op},
-    X,
-    ::RightAction,
-) where {Op<:SemidirectProductOperation}
-    copyto!(G, Y, X)
     @inbounds _padvector!(G, Y)
     return Y
 end
