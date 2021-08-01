@@ -42,10 +42,6 @@ function inverse_translate_diff!(G::SpecialOrthogonal, Y, p, q, X, conv::ActionD
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
 end
 
-exp_lie!(G::SpecialOrthogonal, q, X) = exp!(G, q, identity_element(G, q), X)
-
-_log_lie!(G::SpecialOrthogonal, X, q) = log!(G, X, identity_element(G, q), q)
-
 function allocate_result(
     ::GT,
     ::typeof(exp),
