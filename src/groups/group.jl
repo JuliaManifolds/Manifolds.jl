@@ -1121,13 +1121,19 @@ function LinearAlgebra.mul!(
     return copyto!(q, I)
 end
 function LinearAlgebra.mul!(
+    q,
+    ::Identity{MultiplicationOperation},
+    ::Identity{MultiplicationOperation},
+)
+    return copyto!(q, one(q))
+end
+function LinearAlgebra.mul!(
     q::Identity{MultiplicationOperation},
     ::Identity{MultiplicationOperation},
     ::Identity{MultiplicationOperation},
 )
     return q
 end
-
 Base.one(e::Identity{MultiplicationOperation}) = e
 
 Base.inv(::MultiplicationGroup, p) = inv(p)

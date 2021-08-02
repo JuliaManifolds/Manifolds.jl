@@ -20,8 +20,8 @@ include("group_utils.jl")
         @test number_eltype(eg) == Bool
         @test is_identity(G, eg) # identity transparent
         @test_throws MethodError identity_element(G) # but for a NotImplOp there is no concrete id.
-        @test_throws MethodError is_directed(G, 1) # same rror as before i.e. dispatch isapprox works
         @test isapprox(G, eg, eg)
+        @test_throws MethodError is_identity(G, 1) # same rror as before i.e. dispatch isapprox works
         @test length(methods(is_group_decorator)) == 1
 
         @test Identity(NotImplementedOperation()) === eg
