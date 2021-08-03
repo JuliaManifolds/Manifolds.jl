@@ -3,6 +3,8 @@ include("group_utils.jl")
 
 using ManifoldsBase: VeeOrthogonalBasis
 
+Random.seed!(10)
+
 @testset "Special Euclidean group" begin
     @testset "SpecialEuclidean($n)" for n in (2, 3, 4)
         G = SpecialEuclidean(n)
