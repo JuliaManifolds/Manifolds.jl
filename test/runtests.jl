@@ -95,6 +95,14 @@ include("utils.jl")
             x3r = Manifolds.realify(x3, ℂ)
             @test x2 * x3 ≈ Manifolds.unrealify!(similar(x2), x2r * x3r, ℂ)
         end
+        @testset "allocation" begin
+            @test allocate([1 2; 3 4], Float64, Size(3, 3)) isa Matrix{Float64}
+            @test allocate(SA[1 2; 3 4], Float64, Size(3, 3)) isa MMatrix{3,3,Float64}
+        end
+        @testset "eigen_safe" begin
+            @test Manifolds.eigen_safe(SA[1.0 0.0; 0.0 1.0]) isa
+                  Eigen{Float64,Float64,<:SizedMatrix{2,2},<:SizedVector{2}}
+        end
     end
 
     include_test("groups/group_utils.jl")
