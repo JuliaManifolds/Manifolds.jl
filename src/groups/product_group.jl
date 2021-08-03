@@ -242,13 +242,9 @@ function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirect
     return Y
 end
 
-function exp_lie(G::ProductGroup, X::Union{ProductRepr,ProductArray})
+function exp_lie(G::ProductGroup, X)
     M = G.manifold
     return ProductRepr(map(exp_lie, M.manifolds, submanifold_components(G, X))...)
-end
-function exp_lie(G::ProductGroup, X)
-    q = allocate_result(G, exp_lie, X)
-    return exp_lie!(G, q, X)
 end
 
 function exp_lie!(G::ProductGroup, q, X)

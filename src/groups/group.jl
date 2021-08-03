@@ -1299,19 +1299,6 @@ for f in [
         end,
     )
 end
-for f in [exp_lie, log_lie]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractGroupManifold{𝔽,O},
-                X,
-            ) where {𝔽,O}
-                return Val(:parent)
-            end
-        end,
-    )
-end
 # (d) specials
 for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
     eval(
