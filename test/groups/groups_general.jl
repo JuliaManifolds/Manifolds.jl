@@ -264,6 +264,11 @@ include("group_utils.jl")
         Y = allocate(X)
         @test log_lie!(G, Y, y) === Y
         @test Y ≈ log(y)
+
+        q2 = SVDMPoint(2 * Matrix{Float64}(I, 3, 3))
+        mul!(q2, ge, ge)
+        qT = SVDMPoint(Matrix{Float64}(I, 3, 3))
+        @test isapprox(FixedRankMatrices(3, 3, 3), q2, qT)
     end
 
     @testset "Identity on Group Manifolds" begin
