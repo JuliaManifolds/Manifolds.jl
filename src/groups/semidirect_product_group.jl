@@ -209,7 +209,12 @@ function zero_vector!(G::SemidirectProductGroup, X, p)
     return X
 end
 
-function Base.isapprox(G::SemidirectProductGroup, p::AbstractArray, q::AbstractArray; kwargs...)
+function Base.isapprox(
+    G::SemidirectProductGroup,
+    p::AbstractArray,
+    q::AbstractArray;
+    kwargs...,
+)
     M = base_manifold(G)
     N, H = M.manifolds
     np, hp = submanifold_components(G, p)
@@ -217,7 +222,13 @@ function Base.isapprox(G::SemidirectProductGroup, p::AbstractArray, q::AbstractA
     return isapprox(N, np, nq; kwargs...) && isapprox(H, hp, hq; kwargs...)
 end
 
-function Base.isapprox(G::SemidirectProductGroup, p, X::AbstractMatrix, Y::AbstractMatrix; kwargs...)
+function Base.isapprox(
+    G::SemidirectProductGroup,
+    p,
+    X::AbstractMatrix,
+    Y::AbstractMatrix;
+    kwargs...,
+)
     M = base_manifold(G)
     N, H = M.manifolds
     np, hp = submanifold_components(G, p)
@@ -231,7 +242,6 @@ function isapprox(
     X::AbstractMatrix,
     Y::AbstractMatrix;
     kwargs...,
-) where{𝔽,N<:AbstractManifold,H<:AbstractManifold,A<:AbstractGroupAction}
+) where {𝔽,N<:AbstractManifold,H<:AbstractManifold,A<:AbstractGroupAction}
     return isapprox(G, identity_element(G), X, Y; kwargs...)
 end
-
