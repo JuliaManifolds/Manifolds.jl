@@ -37,9 +37,13 @@ function check_point(G::GeneralLinear, p; kwargs...)
     end
     return nothing
 end
-check_point(::GT, ::Identity{GT}; kwargs...) where {GT<:GeneralLinear} = nothing
-function check_point(G::GeneralLinear, e::Identity; kwargs...)
-    return DomainError(e, "The identity element $(e) does not belong to $(G).")
+check_point(::GeneralLinear, ::Identity{MultiplicationOperation}) = nothing
+function check_point(
+    G::GeneralLinear,
+    e::Identity{O};
+    kwargs...,
+) where {O<:AbstractGroupOperation}
+    return invoke(check_point, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
 end
 
 function check_vector(G::GeneralLinear, p, X; kwargs...)
@@ -146,13 +150,13 @@ function get_vector!(
     return copyto!(X, Xⁱ)
 end
 
-function group_exp!(::GeneralLinear{1}, q, X)
+function exp_lie!(::GeneralLinear{1}, q, X)
     q[1] = exp(X[1])
     return q
 end
-group_exp!(::GeneralLinear{2}, q, X) = copyto!(q, exp(SizedMatrix{2,2}(X)))
+exp_lie!(::GeneralLinear{2}, q, X) = copyto!(q, exp(SizedMatrix{2,2}(X)))
 
-function group_log!(::GeneralLinear{1}, X::AbstractMatrix, p::AbstractMatrix)
+function _log_lie!(::GeneralLinear{1}, X, p)
     X[1] = log(p[1])
     return X
 end
@@ -198,7 +202,6 @@ log(::GeneralLinear, p, q)
 function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
     pinvq = inverse_translate(G, p, q, LeftAction())
     𝔽 === ℝ && det(pinvq) ≤ 0 && throw(OutOfInjectivityRadiusError())
-    e = Identity(G, pinvq)
     if isnormal(pinvq; atol=sqrt(eps(real(eltype(pinvq)))))
         log_safe!(X, pinvq)
     else
@@ -207,13 +210,12 @@ function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
         Gᵣ = GeneralLinear(real_dimension(𝔽) * n, ℝ)
         pinvqᵣ = realify(pinvq, 𝔽)
         Xᵣ = realify(X, 𝔽)
-        eᵣ = Identity(Gᵣ, pinvqᵣ)
         log_safe!(Xᵣ, _project_Un_S⁺(pinvqᵣ))
         inverse_retraction = NLsolveInverseRetraction(ExponentialRetraction(), Xᵣ)
-        inverse_retract!(Gᵣ, Xᵣ, eᵣ, pinvqᵣ, inverse_retraction)
+        inverse_retract!(Gᵣ, Xᵣ, Identity(G), pinvqᵣ, inverse_retraction)
         unrealify!(X, Xᵣ, 𝔽, n)
     end
-    translate_diff!(G, X, p, e, X, LeftAction())
+    translate_diff!(G, X, p, Identity(G), X, LeftAction())
     return X
 end
 function log!(::GeneralLinear{1}, X, p, q)

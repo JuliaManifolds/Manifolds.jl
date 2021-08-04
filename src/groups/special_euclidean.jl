@@ -39,6 +39,12 @@ function SpecialEuclidean(n)
     return SemidirectProductGroup(Tn, SOn, A)
 end
 
+const SpecialEuclideanIdentity{N} = Identity{
+    SemidirectProductOperation{
+        RotationAction{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N},LeftAction},
+    },
+}
+
 Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
 
 Base.@propagate_inbounds function submanifold_component(
@@ -135,7 +141,7 @@ function affine_matrix(G::SpecialEuclidean{n}, p) where {n}
     return pmat
 end
 affine_matrix(::SpecialEuclidean{n}, p::AbstractMatrix) where {n} = p
-function affine_matrix(::GT, ::Identity{GT}) where {n,GT<:SpecialEuclidean{n}}
+function affine_matrix(::SpecialEuclidean{n}, ::SpecialEuclideanIdentity{n}) where {n}
     s = maybesize(Size(n, n))
     s isa Size && return SDiagonal{n,Float64}(I)
     return Diagonal{Float64}(I, n)
@@ -234,9 +240,9 @@ function allocate_result(::SpecialEuclidean{n}, ::typeof(screw_matrix), X...) wh
     return allocate(X[1], Size(n + 1, n + 1))
 end
 
-compose(::SpecialEuclidean, p::AbstractMatrix, q::AbstractMatrix) = p * q
+_compose(::SpecialEuclidean, p::AbstractMatrix, q::AbstractMatrix) = p * q
 
-function compose!(
+function _compose!(
     ::SpecialEuclidean,
     x::AbstractMatrix,
     p::AbstractMatrix,
@@ -246,7 +252,7 @@ function compose!(
 end
 
 @doc raw"""
-    group_exp(G::SpecialEuclidean{n}, X)
+    exp_lie(G::SpecialEuclidean{n}, X)
 
 Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(n)$, where $b ∈ 𝔱(n)$ and $Ω ∈ 𝔰𝔬(n)$:
 
@@ -257,12 +263,12 @@ Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(n)$, where $b ∈ �
 where $t ∈ \mathrm{T}(n)$ and $R = \exp Ω$ is the group exponential on $\mathrm{SO}(n)$.
 
 In the [`screw_matrix`](@ref) representation, the group exponential is the matrix
-exponential (see [`group_exp`](@ref)).
+exponential (see [`exp_lie`](@ref)).
 """
-group_exp(::SpecialEuclidean, ::Any)
+exp_lie(::SpecialEuclidean, ::Any)
 
 @doc raw"""
-    group_exp(G::SpecialEuclidean{2}, X)
+    exp_lie(G::SpecialEuclidean{2}, X)
 
 Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(2)$, where $b ∈ 𝔱(2)$ and $Ω ∈ 𝔰𝔬(2)$:
 
@@ -279,10 +285,10 @@ U(θ) = \frac{\sin θ}{θ} I_2 + \frac{1 - \cos θ}{θ^2} Ω,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-group_exp(::SpecialEuclidean{2}, ::Any)
+exp_lie(::SpecialEuclidean{2}, ::Any)
 
 @doc raw"""
-    group_exp(G::SpecialEuclidean{3}, X)
+    exp_lie(G::SpecialEuclidean{3}, X)
 
 Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(3)$, where $b ∈ 𝔱(3)$ and $Ω ∈ 𝔰𝔬(3)$:
 
@@ -299,16 +305,16 @@ U(θ) = I_3 + \frac{1 - \cos θ}{θ^2} Ω + \frac{θ - \sin θ}{θ^3} Ω^2,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-group_exp(::SpecialEuclidean{3}, ::Any)
+exp_lie(::SpecialEuclidean{3}, ::Any)
 
-function group_exp!(G::SpecialEuclidean, q, X)
+function exp_lie!(G::SpecialEuclidean, q, X)
     Xmat = screw_matrix(G, X)
     qmat = exp(Xmat)
     map(copyto!, submanifold_components(G, q), submanifold_components(G, qmat))
     _padpoint!(G, q)
     return q
 end
-function group_exp!(G::SpecialEuclidean{2}, q, X)
+function exp_lie!(G::SpecialEuclidean{2}, q, X)
     SO2 = submanifold(G, 2)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
@@ -316,7 +322,7 @@ function group_exp!(G::SpecialEuclidean{2}, q, X)
     @assert size(t) == (2,)
     @assert size(b) == (2,)
 
-    θ = vee(SO2, Identity(SO2, Ω), Ω)[1]
+    θ = vee(SO2, identity_element(SO2, R), Ω)[1]
     sinθ, cosθ = sincos(θ)
     if θ ≈ 0
         α = 1 - θ^2 / 6
@@ -337,14 +343,14 @@ function group_exp!(G::SpecialEuclidean{2}, q, X)
     end
     return q
 end
-function group_exp!(G::SpecialEuclidean{3}, q, X)
+function exp_lie!(G::SpecialEuclidean{3}, q, X)
     SO3 = submanifold(G, 2)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
     @assert size(R) == (3, 3)
     @assert size(t) == (3,)
 
-    θ = norm(SO3, Identity(SO3, Ω), Ω) / sqrt(2)
+    θ = norm(SO3, Identity(SO3), Ω) / sqrt(2)
     θ² = θ^2
     if θ ≈ 0
         α = 1 - θ² / 6
@@ -366,7 +372,7 @@ function group_exp!(G::SpecialEuclidean{3}, q, X)
 end
 
 @doc raw"""
-    group_log(G::SpecialEuclidean{n}, p) where {n}
+    log_lie(G::SpecialEuclidean{n}, p) where {n}
 
 Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(n)$, where $t ∈ \mathrm{T}(n)$
 and $R ∈ \mathrm{SO}(n)$:
@@ -378,12 +384,12 @@ and $R ∈ \mathrm{SO}(n)$:
 where $b ∈ 𝔱(n)$ and $Ω = \log R ∈ 𝔰𝔬(n)$ is the group logarithm on $\mathrm{SO}(n)$.
 
 In the [`affine_matrix`](@ref) representation, the group logarithm is the matrix logarithm
-(see [`group_log`](@ref)):
+(see [`log_lie`](@ref)):
 """
-group_log(::SpecialEuclidean, ::Any)
+log_lie(::SpecialEuclidean, ::Any)
 
 @doc raw"""
-    group_log(G::SpecialEuclidean{2}, p)
+    log_lie(G::SpecialEuclidean{2}, p)
 
 Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(2)$, where $t ∈ \mathrm{T}(2)$
 and $R ∈ \mathrm{SO}(2)$:
@@ -401,10 +407,10 @@ U(θ) = \frac{\sin θ}{θ} I_2 + \frac{1 - \cos θ}{θ^2} Ω,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-group_log(::SpecialEuclidean{2}, ::Any)
+log_lie(::SpecialEuclidean{2}, ::Any)
 
 @doc raw"""
-    group_log(G::SpecialEuclidean{3}, p)
+    log_lie(G::SpecialEuclidean{3}, p)
 
 Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(3)$, where $t ∈ \mathrm{T}(3)$
 and $R ∈ \mathrm{SO}(3)$:
@@ -422,22 +428,22 @@ U(θ) = I_3 + \frac{1 - \cos θ}{θ^2} Ω + \frac{θ - \sin θ}{θ^3} Ω^2,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-group_log(::SpecialEuclidean{3}, ::Any)
+log_lie(::SpecialEuclidean{3}, ::Any)
 
-function group_log!(G::SpecialEuclidean, X, q)
+function _log_lie!(G::SpecialEuclidean, X, q)
     qmat = affine_matrix(G, q)
     Xmat = real(log_safe(qmat))
     map(copyto!, submanifold_components(G, X), submanifold_components(G, Xmat))
     _padvector!(G, X)
     return X
 end
-function group_log!(G::SpecialEuclidean{2}, X, q)
+function _log_lie!(G::SpecialEuclidean{2}, X, q)
     SO2 = submanifold(G, 2)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
     @assert size(b) == (2,)
 
-    group_log!(SO2, Ω, R)
+    log_lie!(SO2, Ω, R)
     @inbounds θ = Ω[2]
     β = θ / 2
     α = θ ≈ 0 ? 1 - β^2 / 3 : β * cot(β)
@@ -449,7 +455,7 @@ function group_log!(G::SpecialEuclidean{2}, X, q)
     end
     return X
 end
-function group_log!(G::SpecialEuclidean{3}, X, q)
+function _log_lie!(G::SpecialEuclidean{3}, X, q)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
     @assert size(Ω) == (3, 3)
@@ -524,24 +530,6 @@ function translate_diff!(G::SpecialEuclidean, Y, p, q, X, ::RightAction)
     nY, hY = submanifold_components(G, Y)
     hY .= hp' * hX * hp
     copyto!(nY, hq * (hX * np) + nX)
-    @inbounds _padvector!(G, Y)
-    return Y
-end
-function translate_diff!(G::SpecialEuclidean, Y, ::Identity, q, X, ::RightAction)
-    copyto!(G, Y, X)
-    @inbounds _padvector!(G, Y)
-    return Y
-end
-function translate_diff!(G::SpecialEuclidean, Y, p, ::Identity, X, ::RightAction)
-    np, hp = submanifold_components(G, p)
-    nX, hX = submanifold_components(G, X)
-    nY, hY = submanifold_components(G, Y)
-    hY .= hp' * hX * hp
-    copyto!(nY, hX * np + nX)
-    @inbounds _padvector!(G, Y)
-end
-function translate_diff!(G::SpecialEuclidean, Y, ::Identity, ::Identity, X, ::RightAction)
-    copyto!(G, Y, X)
     @inbounds _padvector!(G, Y)
     return Y
 end

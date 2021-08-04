@@ -18,20 +18,17 @@ adjoint_action(::CircleGroup, p, X) = X
 
 adjoint_action!(::CircleGroup, Y, p, X) = copyto!(Y, X)
 
-function compose(G::CircleGroup, p::AbstractVector, q::AbstractVector)
+function _compose(G::CircleGroup, p::AbstractVector, q::AbstractVector)
     return map(compose, repeated(G), p, q)
 end
 
-compose!(G::CircleGroup, x, p, q) = copyto!(x, compose(G, p, q))
+_compose!(G::CircleGroup, x, p, q) = copyto!(x, compose(G, p, q))
 
-Base.identity(::CircleGroup, p::AbstractVector) = map(one, p)
-Base.identity(G::GT, e::Identity{GT}) where {GT<:CircleGroup} = e
-
-identity!(::CircleGroup, q::AbstractVector, p) = copyto!(q, 1)
-identity!(::GT, q::AbstractVector, ::Identity{GT}) where {GT<:CircleGroup} = copyto!(q, 1)
+identity_element(G::CircleGroup) = 1.0
+identity_element(::CircleGroup, p::Number) = one(p)
+identity_element(::CircleGroup, p::AbstractArray) = map(i -> one(eltype(p)), p)
 
 Base.inv(G::CircleGroup, p::AbstractVector) = map(inv, repeated(G), p)
-Base.inv(G::GT, e::Identity{GT}) where {GT<:CircleGroup} = e
 
 function inverse_translate(
     ::CircleGroup,
@@ -56,12 +53,12 @@ lie_bracket!(::CircleGroup, Z, X, Y) = fill!(Z, 0)
 
 translate_diff(::GT, p, q, X, ::ActionDirection) where {GT<:CircleGroup} = map(*, p, X)
 function translate_diff(
-    ::GT,
-    ::Identity{GT},
+    ::CircleGroup,
+    ::Identity{MultiplicationOperation},
     q,
     X,
     ::ActionDirection,
-) where {GT<:CircleGroup}
+)
     return X
 end
 
@@ -69,7 +66,7 @@ function translate_diff!(G::CircleGroup, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, translate_diff(G, p, q, X, conv))
 end
 
-function group_exp(G::CircleGroup, X)
+function exp_lie(::CircleGroup, X)
     return map(X) do imθ
         θ = imag(imθ)
         sinθ, cosθ = sincos(θ)
@@ -77,14 +74,15 @@ function group_exp(G::CircleGroup, X)
     end
 end
 
-group_exp!(G::CircleGroup, q, X) = (q .= group_exp(G, X))
+exp_lie!(G::CircleGroup, q, X) = (q .= exp_lie(G, X))
 
-function group_log(G::CircleGroup, q)
+function log_lie(::CircleGroup, q)
     return map(q) do z
         cosθ, sinθ = reim(z)
         θ = atan(sinθ, cosθ)
         return θ * im
     end
 end
+log_lie(::CircleGroup, e::Identity{MultiplicationOperation}) = 0.0 * im
 
-group_log!(G::CircleGroup, X::AbstractVector, q::AbstractVector) = (X .= group_log(G, q))
+_log_lie!(G::CircleGroup, X, q) = (X .= log_lie(G, q))

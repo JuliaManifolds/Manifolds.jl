@@ -8,12 +8,9 @@ Abstract type for smooth binary operations $∘$ on elements of a Lie group $\ma
 An operation can be either defined for a specific [`AbstractGroupManifold`](@ref) over
 number system `𝔽` or in general, by defining for an operation `Op` the following methods:
 
-    identity!(::AbstractGroupManifold{𝔽,Op}, q, q)
-    identity(::AbstractGroupManifold{𝔽,Op}, p)
+    identity_element!(::AbstractGroupManifold{𝔽,Op}, q, q)
     inv!(::AbstractGroupManifold{𝔽,Op}, q, p)
-    inv(::AbstractGroupManifold{𝔽,Op}, p)
-    compose(::AbstractGroupManifold{𝔽,Op}, p, q)
-    compose!(::AbstractGroupManifold{𝔽,Op}, x, p, q)
+    _compose!(::AbstractGroupManifold{𝔽,Op}, x, p, q)
 
 Note that a manifold is connected with an operation by wrapping it with a decorator,
 [`AbstractGroupManifold`](@ref). In typical cases the concrete wrapper
@@ -50,7 +47,7 @@ struct TransparentGroupDecoratorType <: AbstractGroupDecoratorType end
 
 Abstract type for a Lie group, a group that is also a smooth manifold with an
 [`AbstractGroupOperation`](@ref), a smooth binary operation. `AbstractGroupManifold`s must
-implement at least [`inv`](@ref), [`identity`](@ref), [`compose`](@ref), and
+implement at least [`inv`](@ref), [`compose`](@ref), and
 [`translate_diff`](@ref).
 """
 abstract type AbstractGroupManifold{𝔽,O<:AbstractGroupOperation,T<:AbstractDecoratorType} <:
@@ -75,9 +72,6 @@ struct GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <
 end
 
 Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
-
-Base.copyto!(M::GroupManifold, q, p) = copyto!(M.manifold, q, p)
-Base.copyto!(M::GroupManifold, Y, p, X) = copyto!(M.manifold, Y, p, X)
 
 const GROUP_MANIFOLD_BASIS_DISAMBIGUATION =
     [AbstractDecoratorManifold, ValidationManifold, VectorBundle]
@@ -129,6 +123,8 @@ function (::Type{T})(M::AbstractManifold) where {T<:AbstractGroupOperation}
     return GroupManifold(M, T())
 end
 
+manifold_dimension(G::GroupManifold) = manifold_dimension(G.manifold)
+
 ###################
 # Action directions
 ###################
@@ -168,202 +164,153 @@ switch_direction(::RightAction) = LeftAction()
 ##################################
 
 @doc raw"""
-    Identity(G::AbstractGroupManifold, p)
+    Identity{O<:AbstractGroupOperation}
 
-The group identity element $e ∈ \mathcal{G}$ represented by point `p`.
+Represent the group identity element ``e ∈ \mathcal{G}`` on an [`AbstractGroupManifold`](@ref) `G`
+with [`AbstractGroupOperation`](@ref) of type `O`.
+
+Similar to the philosophy that points are agnostic of their group at hand, the identity
+does not store the group `g` it belongs to. However it depends on the type of the [`AbstractGroupOperation`](@ref) used.
+
+See also [`identity_element`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](@ref) or array representation.
+
+# Constructors
+
+    Identity(G::AbstractGroupManifold{𝔽,O})
+    Identity(o::O)
+    Identity(::Type{O})
+
+create the identity of the corresponding subtype `O<:`[`AbstractGroupOperation`](@ref)
 """
-struct Identity{G<:AbstractGroupManifold,PT}
-    group::G
-    p::PT
+struct Identity{O<:AbstractGroupOperation} end
+
+function Identity(::AbstractGroupManifold{𝔽,O}) where {𝔽,O<:AbstractGroupOperation}
+    return Identity{O}()
 end
+Identity(M::AbstractDecoratorManifold) = Identity(base_group(M))
+Identity(::O) where {O<:AbstractGroupOperation} = Identity(O)
+Identity(::Type{O}) where {O<:AbstractGroupOperation} = Identity{O}()
 
-Identity(M::AbstractDecoratorManifold, p) = Identity(decorated_manifold(M), p)
-function Identity(M::AbstractManifold, p)
-    return error("Identity not implemented for manifold $(M) and point $(p).")
-end
-
-function Base.:(==)(e1::Identity, e2::Identity)
-    return e1.p == e2.p && e1.group == e2.group
-end
-
-make_identity(M::AbstractManifold, p) = Identity(M, identity(M, p))
-
-Base.show(io::IO, e::Identity) = print(io, "Identity($(e.group), $(e.p))")
-
-# To ensure allocate_result_type works
+# To ensure allocate_result_type works in general if idenitty apears in the tuple
 number_eltype(::Identity) = Bool
 
-Base.copyto!(e::TE, ::TE) where {TE<:Identity} = e
-Base.copyto!(p, ::TE) where {TE<:Identity} = copyto!(p, e.p)
-Base.copyto!(p::AbstractArray, e::TE) where {TE<:Identity} = copyto!(p, e.p)
+@doc raw"""
+    identity_element(G::AbstractGroupManifold)
 
-Base.isapprox(p, e::E; kwargs...) where {E<:Identity} = isapprox(e, p; kwargs...)
-Base.isapprox(e::E, p; kwargs...) where {E<:Identity} = isapprox(e.group, e, p; kwargs...)
-Base.isapprox(e::E, ::E; kwargs...) where {E<:Identity} = true
+Return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G`.
+By default this representation is the default array or number representation.
+It should return the corresponding [`AbstractManifoldPoint`](@ref) of points on `G` if
+points are not represented by arrays.
+"""
+identity_element(G::AbstractGroupManifold)
+@decorator_transparent_function function identity_element(G::AbstractGroupManifold)
+    q = allocate_result(G, identity_element)
+    return identity_element!(G, q)
+end
 
-function allocate_result(
-    M::AbstractManifold,
-    f::typeof(get_coordinates),
-    e::Identity,
+@decorator_transparent_signature identity_element!(G::AbstractGroupManifold, p)
+
+function allocate_result(G::AbstractGroupManifold, ::typeof(identity_element))
+    return zeros(representation_size(G)...)
+end
+
+@doc raw"""
+    identity_element(G::AbstractGroupManifold, p)
+
+Return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G`,
+where `p` indicates the type to represent the identity.
+"""
+identity_element(G::AbstractGroupManifold, p)
+@decorator_transparent_function function identity_element(G::AbstractGroupManifold, p)
+    q = allocate_result(G, identity_element, p)
+    return identity_element!(G, q)
+end
+
+@doc raw"""
+    identity_element!(G::AbstractGroupManifold, p)
+
+Return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G`
+in place of `p`.
+"""
+identity_element!(G::AbstractGroupManifold, p)
+
+@doc raw"""
+    is_identity(G, q; kwargs)
+
+Check whether `q` is the identity on the [`AbstractGroupManifold`](@ref) `G`, i.e. it is either
+the [`Identity`](@ref)`{O}` with the corresponding [`AbstractGroupOperation`](@ref) `O`, or
+(approximately) the correct point representation.
+"""
+is_identity(G::AbstractGroupManifold, q)
+
+@decorator_transparent_function function is_identity(G::AbstractGroupManifold, q; kwargs...)
+    return isapprox(G, identity_element(G), q; kwargs...)
+end
+function is_identity(
+    ::AbstractGroupManifold{𝔽,O},
+    ::Identity{O};
+    kwargs...,
+) where {𝔽,O<:AbstractGroupOperation}
+    return true
+end
+is_identity(::AbstractGroupManifold, ::Identity; kwargs...) = false
+
+function isapprox(
+    G::AbstractGroupManifold{𝔽,O},
+    p::Identity{O},
+    q;
+    kwargs...,
+) where {𝔽,O<:AbstractGroupOperation}
+    return is_identity(G, q; kwargs...)
+end
+function isapprox(
+    G::AbstractGroupManifold{𝔽,O},
+    p,
+    q::Identity{O};
+    kwargs...,
+) where {𝔽,O<:AbstractGroupOperation}
+    return is_identity(G, p; kwargs...)
+end
+function isapprox(
+    G::AbstractGroupManifold{𝔽,O},
+    p::Identity{O},
+    q::Identity{O};
+    kwargs...,
+) where {𝔽,O<:AbstractGroupOperation}
+    return true
+end
+function isapprox(
+    G::AbstractGroupManifold{𝔽,O},
+    p::Identity{O},
     X,
-    B::AbstractBasis,
-)
-    T = allocate_result_type(M, f, (e.p, X))
-    return allocate(e.p, T, Size(number_of_coordinates(M, B)))
+    Y;
+    kwargs...,
+) where {𝔽,O<:AbstractGroupOperation}
+    return isapprox(G, identity_element(G), X, Y; kwargs...)
+end
+Base.isapprox(::AbstractGroupManifold, ::Identity, ::Identity; kwargs...) = false
+
+function Base.show(io::IO, ::Identity{O}) where {O<:AbstractGroupOperation}
+    return print(io, "Identity($O)")
 end
 
-function allocate_result(M::AbstractManifold, f::typeof(get_vector), e::Identity, Xⁱ)
-    is_group_decorator(M) && return allocate_result(base_group(M), f, e, Xⁱ)
-    return error(
-        "allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(Xⁱ).",
-    )
-end
-function allocate_result(M::AbstractGroupManifold, f::typeof(get_vector), e::Identity, Xⁱ)
-    return error(
-        "allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(Xⁱ).",
-    )
-end
-function allocate_result(
-    G::GT,
-    ::typeof(get_vector),
-    ::Identity{GT},
-    Xⁱ,
-) where {GT<:AbstractGroupManifold}
-    B = VectorBundleFibers(TangentSpace, G)
-    return allocate(Xⁱ, Size(representation_size(B)))
+function check_point(
+    G::AbstractGroupManifold{𝔽,O},
+    e::Identity{O};
+    kwargs...,
+) where {𝔽,M,O<:AbstractGroupOperation}
+    return nothing
 end
 
-function allocate_result(
-    M::AbstractDecoratorManifold,
-    f::typeof(get_coordinates),
-    e::Identity,
-    X,
-)
-    is_group_decorator(M) && return allocate_result(base_group(M), f, e, X)
-    return error(
-        "allocate_result not implemented for manifold $(M), function $(f), point $(e), and vector $(X).",
+function check_point(
+    G::AbstractGroupManifold{𝔽,O1},
+    e::Identity{O2};
+    kwargs...,
+) where {𝔽,M,O1<:AbstractGroupOperation,O2<:AbstractGroupOperation}
+    return DomainError(
+        e,
+        "The Identity $e does not lie on $G, since its the identity with respect to $O2 and not $O1.",
     )
-end
-function allocate_result(
-    M::AbstractGroupManifold,
-    f::typeof(get_coordinates),
-    e::Identity,
-    X,
-)
-    return error(
-        "allocate_result not implemented for group manifold $(M), function $(f), $(e), and vector $(X).",
-    )
-end
-function allocate_result(
-    G::GT,
-    ::typeof(get_coordinates),
-    ::Identity{GT},
-    X,
-) where {GT<:AbstractGroupManifold}
-    return allocate(X, Size(manifold_dimension(G)))
-end
-function get_vector(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group && error("On $(M) the identity $(e) does not match to perform get_vector.")
-    return get_vector(decorated_manifold(M), e.p, X, B)
-end
-function get_vector(M::AbstractManifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold &&
-        error("On $(M) the identity $(e) does not match to perform get_vector.")
-    return get_vector(M, e.p, X, B)
-end
-for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(
-        quote
-            @invoke_maker 1 AbstractManifold get_vector(
-                M::$MT,
-                e::Identity,
-                X,
-                B::VeeOrthogonalBasis,
-            )
-        end,
-    )
-end
-function get_vector!(M::AbstractGroupManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group && error("On $(M) the identity $(e) does not match to perform get_vector!")
-    return get_vector!(decorated_manifold(M), Y, e.p, X, B)
-end
-function get_vector!(M::AbstractManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold &&
-        error("On $(M) the identity $(e) does not match to perform get_vector!")
-    return get_vector!(M, Y, e.p, X, B)
-end
-for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(
-        quote
-            @invoke_maker 1 AbstractManifold get_vector!(
-                M::$MT,
-                Y,
-                e::Identity,
-                X,
-                B::VeeOrthogonalBasis,
-            )
-        end,
-    )
-end
-
-function get_coordinates(M::AbstractGroupManifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group &&
-        error("On $(M) the identity $(e) does not match to perform get_coordinates")
-    return get_coordinates(decorated_manifold(M), e.p, X, B)
-end
-function get_coordinates(M::AbstractManifold, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold &&
-        error("On $(M) the identity $(e) does not match to perform get_coordinates")
-    return get_coordinates(M, e.p, X, B)
-end
-for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(
-        quote
-            @invoke_maker 1 AbstractManifold get_coordinates(
-                M::$MT,
-                e::Identity,
-                X,
-                B::VeeOrthogonalBasis,
-            )
-        end,
-    )
-end
-
-function get_coordinates!(
-    M::AbstractGroupManifold,
-    Y,
-    e::Identity,
-    X,
-    B::VeeOrthogonalBasis,
-)
-    M != e.group &&
-        error("On $(M) the identity $(e) does not match to perform get_coordinates!")
-    return get_coordinates!(decorated_manifold(M), Y, e.p, X, B)
-end
-function get_coordinates!(M::AbstractManifold, Y, e::Identity, X, B::VeeOrthogonalBasis)
-    M != e.group.manifold &&
-        error("On $(M) the identity $(e) does not match to perform get_coordinates!")
-    return get_coordinates!(M, Y, e.p, X, B)
-end
-for MT in GROUP_MANIFOLD_BASIS_DISAMBIGUATION
-    eval(
-        quote
-            @invoke_maker 1 AbstractManifold get_coordinates!(
-                M::$MT,
-                Y,
-                e::Identity,
-                X,
-                B::VeeOrthogonalBasis,
-            )
-        end,
-    )
-end
-
-manifold_dimension(G::GroupManifold) = manifold_dimension(G.manifold)
-
-function check_point(G::AbstractGroupManifold, e::Identity; kwargs...)
-    e.group === G && return nothing
-    return DomainError(e, "The identity element $(e) does not belong to $(G).")
 end
 
 ##########################
@@ -394,15 +341,13 @@ adjoint_action(G::AbstractGroupManifold, p, X)
     p,
     Xₑ,
 )
-    e = make_identity(G, p)
-    Xₚ = translate_diff(G, p, e, Xₑ, LeftAction())
+    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftAction())
     Y = inverse_translate_diff(G, p, p, Xₚ, RightAction())
     return Y
 end
 
 function adjoint_action!(G::AbstractGroupManifold, Y, p, Xₑ)
-    e = make_identity(G, p)
-    Xₚ = translate_diff(G, p, e, Xₑ, LeftAction())
+    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftAction())
     inverse_translate_diff!(G, Y, p, p, Xₚ, RightAction())
     return Y
 end
@@ -411,7 +356,7 @@ end
     inv(G::AbstractGroupManifold, p)
 
 Inverse $p^{-1} ∈ \mathcal{G}$ of an element $p ∈ \mathcal{G}$, such that
-$p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}$, where $e$ is the [`identity`](@ref)
+$p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}$, where $e$ is the [`Identity`](@ref)
 element of $\mathcal{G}$.
 """
 inv(::AbstractGroupManifold, ::Any...)
@@ -420,62 +365,195 @@ inv(::AbstractGroupManifold, ::Any...)
     return inv!(G, q, p)
 end
 
+function Base.inv(
+    ::AbstractGroupManifold{𝔽,O},
+    e::Identity{O},
+) where {𝔽,O<:AbstractGroupOperation}
+    return e
+end
+
 @decorator_transparent_function function inv!(G::AbstractGroupManifold, q, p)
     return inv!(G.manifold, q, p)
 end
 
-@doc raw"""
-    identity(G::AbstractGroupManifold, p)
-
-Identity element $e ∈ \mathcal{G}$, such that for any element $p ∈ \mathcal{G}$,
-$p \circ e = e \circ p = p$.
-The returned element is of a similar type to `p`.
-"""
-identity(::AbstractGroupManifold, ::Any)
-@decorator_transparent_function function Base.identity(G::AbstractGroupManifold, p)
-    y = allocate_result(G, identity, p)
-    return identity!(G, y, p)
+function inv!(
+    G::AbstractGroupManifold{𝔽,O},
+    q,
+    ::Identity{O},
+) where {𝔽,O<:AbstractGroupOperation}
+    return identity_element!(G, q)
 end
 
-@decorator_transparent_signature identity!(G::AbstractDecoratorManifold, q, p)
-
-function Base.isapprox(
-    G::GT,
-    e::Identity{GT},
-    p;
-    kwargs...,
-) where {GT<:AbstractGroupManifold}
-    return isapprox(G, e.p, p; kwargs...)
+function Base.copyto!(
+    ::AbstractGroupManifold{𝔽,O},
+    e::Identity{O},
+    ::Identity{O},
+) where {𝔽,O<:AbstractGroupOperation}
+    return e
 end
-function Base.isapprox(
-    G::GT,
+function Base.copyto!(
+    G::AbstractGroupManifold{𝔽,O},
     p,
-    e::Identity{GT};
-    kwargs...,
-) where {GT<:AbstractGroupManifold}
-    return isapprox(G, e, p; kwargs...)
-end
-function Base.isapprox(
-    ::GT,
-    ::E,
-    ::E;
-    kwargs...,
-) where {GT<:AbstractGroupManifold,E<:Identity{GT}}
-    return true
+    ::Identity{O},
+) where {𝔽,O<:AbstractGroupOperation}
+    return identity_element!(G, p)
 end
 
 @doc raw"""
     compose(G::AbstractGroupManifold, p, q)
 
-Compose elements $p,q ∈ \mathcal{G}$ using the group operation $p \circ q$.
+Compose elements ``p,q ∈ \mathcal{G}`` using the group operation ``p \circ q``.
+
+For implementing composition on a new group manifold, please overload [`_compose`](@ref)
+instead so that methods with [`Identity`] arguments are not ambiguous.
 """
 compose(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function function compose(G::AbstractGroupManifold, p, q)
+
+@decorator_transparent_function function compose(
+    G::AbstractGroupManifold{𝔽,Op},
+    p,
+    q,
+) where {𝔽,Op<:AbstractGroupOperation}
+    return _compose(G, p, q)
+end
+function compose(
+    ::AbstractGroupManifold{𝔽,Op},
+    ::Identity{Op},
+    p,
+) where {𝔽,Op<:AbstractGroupOperation}
+    return p
+end
+function compose(
+    ::AbstractGroupManifold{𝔽,Op},
+    p,
+    ::Identity{Op},
+) where {𝔽,Op<:AbstractGroupOperation}
+    return p
+end
+function compose(
+    ::AbstractGroupManifold{𝔽,Op},
+    e::Identity{Op},
+    ::Identity{Op},
+) where {𝔽,Op<:AbstractGroupOperation}
+    return e
+end
+
+function _compose(G::AbstractGroupManifold, p, q)
     x = allocate_result(G, compose, p, q)
-    return compose!(G, x, p, q)
+    return _compose!(G, x, p, q)
 end
 
 @decorator_transparent_signature compose!(M::AbstractDecoratorManifold, x, p, q)
+
+compose!(G::AbstractGroupManifold, x, q, p) = _compose!(G, x, q, p)
+function compose!(
+    G::AbstractGroupManifold{𝔽,Op},
+    q,
+    p,
+    ::Identity{Op},
+) where {𝔽,Op<:AbstractGroupOperation}
+    return copyto!(G, q, p)
+end
+function compose!(
+    G::AbstractGroupManifold{𝔽,Op},
+    q,
+    ::Identity{Op},
+    p,
+) where {𝔽,Op<:AbstractGroupOperation}
+    return copyto!(G, q, p)
+end
+function compose!(
+    G::AbstractGroupManifold{𝔽,Op},
+    q,
+    ::Identity{Op},
+    e::Identity{Op},
+) where {𝔽,Op<:AbstractGroupOperation}
+    return identity_element!(G, q)
+end
+function compose!(
+    ::AbstractGroupManifold{𝔽,Op},
+    e::Identity{Op},
+    ::Identity{Op},
+    ::Identity{Op},
+) where {𝔽,Op<:AbstractGroupOperation}
+    return e
+end
+
+transpose(e::Identity) = e
+
+@doc raw"""
+    hat(M::AbstractGroupManifold{𝔽,O}, ::Identity{O}, Xⁱ) where {𝔽,O<:AbstractGroupOperation}
+
+Given a basis $e_i$ on the tangent space at a the [`Identity`}(@ref) and tangent
+component vector ``X^i``, compute the equivalent vector representation
+``X=X^i e_i**, where Einstein summation notation is used:
+
+````math
+∧ : X^i ↦ X^i e_i
+````
+
+For array manifolds, this converts a vector representation of the tangent
+vector to an array representation. The [`vee`](@ref) map is the `hat` map's
+inverse.
+"""
+function hat(
+    G::AbstractGroupManifold{𝔽,O},
+    ::Identity{O},
+    X,
+) where {𝔽,O<:AbstractGroupOperation}
+    return get_vector_lie(G, X, VeeOrthogonalBasis())
+end
+function hat!(
+    G::AbstractGroupManifold{𝔽,O},
+    Y,
+    ::Identity{O},
+    X,
+) where {𝔽,O<:AbstractGroupOperation}
+    return get_vector_lie!(G, Y, X, VeeOrthogonalBasis())
+end
+function hat(M::AbstractManifold, e::Identity, ::Any)
+    return throw(ErrorException("On $M there exsists no identity $e"))
+end
+function hat!(M::AbstractManifold, ::Any, e::Identity, ::Any)
+    return throw(ErrorException("On $M there exsists no identity $e"))
+end
+
+@doc raw"""
+    vee(M::AbstractManifold, p, X)
+
+Given a basis $e_i$ on the tangent space at a point `p` and tangent
+vector `X`, compute the vector components $X^i$, such that $X = X^i e_i$, where
+Einstein summation notation is used:
+
+````math
+\vee : X^i e_i ↦ X^i
+````
+
+For array manifolds, this converts an array representation of the tangent
+vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
+inverse.
+"""
+function vee(
+    M::AbstractGroupManifold{𝔽,O},
+    ::Identity{O},
+    X,
+) where {𝔽,O<:AbstractGroupOperation}
+    return get_coordinates_lie(M, X, VeeOrthogonalBasis())
+end
+function vee!(
+    M::AbstractGroupManifold{𝔽,O},
+    Y,
+    ::Identity{O},
+    X,
+) where {𝔽,O<:AbstractGroupOperation}
+    return get_coordinates_lie!(M, Y, X, VeeOrthogonalBasis())
+end
+function vee(M::AbstractManifold, e::Identity, ::Any)
+    return throw(ErrorException("On $M there exsists no identity $e"))
+end
+function vee!(M::AbstractManifold, ::Any, e::Identity, ::Any)
+    return throw(ErrorException("On $M there exsists no identity $e"))
+end
 
 """
     lie_bracket(G::AbstractGroupManifold, X, Y)
@@ -671,12 +749,12 @@ end
 end
 
 @doc raw"""
-    group_exp(G::AbstractGroupManifold, X)
+    exp_lie(G::AbstractGroupManifold, X)
 
 Compute the group exponential of the Lie algebra element `X`. It is equivalent to the
 exponential map defined by the [`CartanSchoutenMinus`](@ref) connection.
 
-Given an element $X ∈ 𝔤 = T_e \mathcal{G}$, where $e$ is the [`identity`](@ref) element of
+Given an element $X ∈ 𝔤 = T_e \mathcal{G}$, where $e$ is the [`Identity`](@ref) element of
 the group $\mathcal{G}$, and $𝔤$ is its Lie algebra, the group exponential is the map
 
 ````math
@@ -699,12 +777,12 @@ following properties:
     [`exp`](@ref).
 
 ```
-group_exp(G::AbstractGroupManifold{𝔽,AdditionOperation}, X) where {𝔽}
+exp_lie(G::AbstractGroupManifold{𝔽,AdditionOperation}, X) where {𝔽}
 ```
 
 Compute $q = X$.
 
-    group_exp(G::AbstractGroupManifold{𝔽,MultiplicationOperation}, X) where {𝔽}
+    exp_lie(G::AbstractGroupManifold{𝔽,MultiplicationOperation}, X) where {𝔽}
 
 For `Number` and `AbstractMatrix` types of `X`, compute the usual numeric/matrix
 exponential,
@@ -713,52 +791,64 @@ exponential,
 \exp X = \operatorname{Exp} X = \sum_{n=0}^∞ \frac{1}{n!} X^n.
 ````
 """
-group_exp(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function function group_exp(G::AbstractGroupManifold, X)
-    q = allocate_result(G, group_exp, X)
-    return group_exp!(G, q, X)
+exp_lie(::AbstractGroupManifold, ::Any...)
+@decorator_transparent_function function exp_lie(G::AbstractGroupManifold, X)
+    q = allocate_result(G, exp_lie, X)
+    return exp_lie!(G, q, X)
 end
 
-@decorator_transparent_signature group_exp!(M::AbstractDecoratorManifold, q, X)
+@decorator_transparent_signature exp_lie!(M::AbstractDecoratorManifold, q, X)
 
 @doc raw"""
-    group_log(G::AbstractGroupManifold, q)
+    log_lie(G::AbstractGroupManifold, q)
+    log_lie!(G::AbstractGroupManifold, X, q)
 
-Compute the group logarithm of the group element `q`. It is equivalent to the
+Compute the Lie group logarithm of the Lie group element `q`. It is equivalent to the
 logarithmic map defined by the [`CartanSchoutenMinus`](@ref) connection.
 
 Given an element $q ∈ \mathcal{G}$, compute the right inverse of the group exponential map
-[`group_exp`](@ref), that is, the element $\log q = X ∈ 𝔤 = T_e \mathcal{G}$, such that
+[`exp_lie`](@ref), that is, the element $\log q = X ∈ 𝔤 = T_e \mathcal{G}$, such that
 $q = \exp X$
 
 !!! note
     In general, the group logarithm map is distinct from the Riemannian logarithm map
     [`log`](@ref).
 
-```
-group_log(G::AbstractGroupManifold{𝔽,AdditionOperation}, q) where {𝔽}
-```
-
-Compute $X = q$.
-
-    group_log(G::AbstractGroupManifold{𝔽,MultiplicationOperation}, q) where {𝔽}
-
-For `Number` and `AbstractMatrix` types of `q`, compute the usual numeric/matrix logarithm:
+    For matrix Llie groups this is equal to the (matrix) logarithm:
 
 ````math
 \log q = \operatorname{Log} q = \sum_{n=1}^∞ \frac{(-1)^{n+1}}{n} (q - e)^n,
 ````
 
-where $e$ here is the [`identity`](@ref) element, that is, $1$ for numeric $q$ or the
+where $e$ here is the [`Identity`](@ref) element, that is, $1$ for numeric $q$ or the
 identity matrix $I_m$ for matrix $q ∈ ℝ^{m × m}$.
+
+Since this function handles [`Identity`](@ref) arguments, the preferred function to override
+is `_log_lie!`.
 """
-group_log(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function function group_log(G::AbstractGroupManifold, q)
-    X = allocate_result(G, group_log, q)
-    return group_log!(G, X, q)
+log_lie(::AbstractGroupManifold, ::Any...)
+@decorator_transparent_function function log_lie(G::AbstractGroupManifold, q)
+    X = allocate_result(G, log_lie, q)
+    return log_lie!(G, X, q)
+end
+function log_lie(
+    G::AbstractGroupManifold{𝔽,Op},
+    ::Identity{Op},
+) where {𝔽,Op<:AbstractGroupOperation}
+    return zero_vector(G, identity_element(G))
 end
 
-@decorator_transparent_signature group_log!(M::AbstractDecoratorManifold, X, q)
+@decorator_transparent_function function log_lie!(G::AbstractGroupManifold, X, q)
+    return _log_lie!(G, X, q)
+end
+
+function log_lie!(
+    G::AbstractGroupManifold{𝔽,Op},
+    X,
+    ::Identity{Op},
+) where {𝔽,Op<:AbstractGroupOperation}
+    return zero_vector!(G, X, identity_element(G))
+end
 
 ############################
 # Group-specific Retractions
@@ -767,7 +857,7 @@ end
 """
     GroupExponentialRetraction{D<:ActionDirection} <: AbstractRetractionMethod
 
-Retraction using the group exponential [`group_exp`](@ref) "translated" to any point on the
+Retraction using the group exponential [`exp_lie`](@ref) "translated" to any point on the
 manifold.
 
 For more details, see
@@ -786,7 +876,7 @@ end
 """
     GroupLogarithmicInverseRetraction{D<:ActionDirection} <: AbstractInverseRetractionMethod
 
-Retraction using the group logarithm [`group_log`](@ref) "translated" to any point on the
+Retraction using the group logarithm [`log_lie`](@ref) "translated" to any point on the
 manifold.
 
 For more details, see
@@ -814,7 +904,7 @@ direction(::GroupLogarithmicInverseRetraction{D}) where {D} = D()
         method::GroupExponentialRetraction{<:ActionDirection},
     )
 
-Compute the retraction using the group exponential [`group_exp`](@ref) "translated" to any
+Compute the retraction using the group exponential [`exp_lie`](@ref) "translated" to any
 point on the manifold.
 With a group translation ([`translate`](@ref)) $τ_p$ in a specified direction, the
 retraction is
@@ -823,14 +913,14 @@ retraction is
 \operatorname{retr}_p = τ_p \circ \exp \circ (\mathrm{d}τ_p^{-1})_p,
 ````
 
-where $\exp$ is the group exponential ([`group_exp`](@ref)), and $(\mathrm{d}τ_p^{-1})_p$ is
+where $\exp$ is the group exponential ([`exp_lie`](@ref)), and $(\mathrm{d}τ_p^{-1})_p$ is
 the action of the differential of inverse translation $τ_p^{-1}$ evaluated at $p$ (see
 [`inverse_translate_diff`](@ref)).
 """
 function retract(G::AbstractGroupManifold, p, X, method::GroupExponentialRetraction)
     conv = direction(method)
     Xₑ = inverse_translate_diff(G, p, p, X, conv)
-    pinvq = group_exp(G, Xₑ)
+    pinvq = exp_lie(G, Xₑ)
     q = translate(G, p, pinvq, conv)
     return q
 end
@@ -838,7 +928,7 @@ end
 function retract!(G::AbstractGroupManifold, q, p, X, method::GroupExponentialRetraction)
     conv = direction(method)
     Xₑ = inverse_translate_diff(G, p, p, X, conv)
-    pinvq = group_exp(G, Xₑ)
+    pinvq = exp_lie(G, Xₑ)
     return translate!(G, q, p, pinvq, conv)
 end
 
@@ -850,7 +940,7 @@ end
         method::GroupLogarithmicInverseRetraction{<:ActionDirection},
     )
 
-Compute the inverse retraction using the group logarithm [`group_log`](@ref) "translated"
+Compute the inverse retraction using the group logarithm [`log_lie`](@ref) "translated"
 to any point on the manifold.
 With a group translation ([`translate`](@ref)) $τ_p$ in a specified direction, the
 retraction is
@@ -859,15 +949,15 @@ retraction is
 \operatorname{retr}_p^{-1} = (\mathrm{d}τ_p)_e \circ \log \circ τ_p^{-1},
 ````
 
-where $\log$ is the group logarithm ([`group_log`](@ref)), and $(\mathrm{d}τ_p)_e$ is the
+where $\log$ is the group logarithm ([`log_lie`](@ref)), and $(\mathrm{d}τ_p)_e$ is the
 action of the differential of translation $τ_p$ evaluated at the identity element $e$
 (see [`translate_diff`](@ref)).
 """
 function inverse_retract(G::GroupManifold, p, q, method::GroupLogarithmicInverseRetraction)
     conv = direction(method)
     pinvq = inverse_translate(G, p, q, conv)
-    Xₑ = group_log(G, pinvq)
-    return translate_diff(G, p, Identity(G, p), Xₑ, conv)
+    Xₑ = log_lie(G, pinvq)
+    return translate_diff(G, p, Identity(G), Xₑ, conv)
 end
 
 function inverse_retract!(
@@ -879,8 +969,8 @@ function inverse_retract!(
 )
     conv = direction(method)
     pinvq = inverse_translate(G, p, q, conv)
-    Xₑ = group_log(G, pinvq)
-    return translate_diff!(G, X, p, Identity(G, p), Xₑ, conv)
+    Xₑ = log_lie(G, pinvq)
+    return translate_diff!(G, X, p, Identity(G), Xₑ, conv)
 end
 
 #################################
@@ -896,62 +986,69 @@ struct AdditionOperation <: AbstractGroupOperation end
 
 const AdditionGroup = AbstractGroupManifold{𝔽,AdditionOperation} where {𝔽}
 
-Base.:+(e::Identity{G}) where {G<:AdditionGroup} = e
-Base.:+(p::Identity{G}, ::Identity{G}) where {G<:AdditionGroup} = p
-Base.:+(::Identity{G}, p) where {G<:AdditionGroup} = p
-Base.:+(p, ::Identity{G}) where {G<:AdditionGroup} = p
-Base.:+(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
+Base.:+(e::Identity{AdditionOperation}) = e
+Base.:+(e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
+Base.:+(::Identity{AdditionOperation}, p) = p
+Base.:+(p, ::Identity{AdditionOperation}) = p
 
-Base.:-(e::Identity{G}) where {G<:AdditionGroup} = e
-Base.:-(e::Identity{G}, ::Identity{G}) where {G<:AdditionGroup} = e
-Base.:-(::Identity{G}, p) where {G<:AdditionGroup} = -p
-Base.:-(p, ::Identity{G}) where {G<:AdditionGroup} = p
-Base.:-(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
+Base.:-(e::Identity{AdditionOperation}) = e
+Base.:-(e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
+Base.:-(::Identity{AdditionOperation}, p) = -p
+Base.:-(p, ::Identity{AdditionOperation}) = p
 
-Base.:*(e::Identity{G}, p) where {G<:AdditionGroup} = e
-Base.:*(p, e::Identity{G}) where {G<:AdditionGroup} = e
-Base.:*(e::E, ::E) where {G<:AdditionGroup,E<:Identity{G}} = e
+Base.:*(e::Identity{AdditionOperation}, p) = e
+Base.:*(p, e::Identity{AdditionOperation}) = e
+Base.:*(e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
 
 adjoint_action(::AdditionGroup, p, X) = X
 
-adjoint_action!(::AdditionGroup, Y, p, X) = copyto!(Y, X)
+adjoint_action!(G::AdditionGroup, Y, p, X) = copyto!(G, Y, p, X)
 
-Base.zero(e::Identity{G}) where {G<:AdditionGroup} = e
-
-Base.identity(::AdditionGroup, p) = zero(p)
-
-identity!(::AdditionGroup, q, p) = fill!(q, 0)
+function identity_element!(::AbstractGroupManifold{𝔽,<:AdditionOperation}, p) where {𝔽}
+    return fill!(p, zero(eltype(p)))
+end
 
 Base.inv(::AdditionGroup, p) = -p
+Base.inv(::AdditionGroup, e::Identity) = e
 
-inv!(::AdditionGroup, q, p) = copyto!(q, -p)
+inv!(G::AdditionGroup, q, p) = copyto!(G, q, -p)
+inv!(G::AdditionGroup, q, ::Identity{AdditionOperation}) = identity_element!(G, q)
+inv!(::AdditionGroup, q::Identity{AdditionOperation}, e::Identity{AdditionOperation}) = q
 
-compose(::AdditionGroup, p, q) = p + q
+function is_identity(G::AdditionGroup, q; kwargs...)
+    return isapprox(G, q, zero(q); kwargs...)
+end
+function is_identity(G::AdditionGroup, e::Identity; kwargs...)
+    return invoke(is_identity, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
+end
 
-function compose!(::GT, x, p, q) where {GT<:AdditionGroup}
-    p isa Identity{GT} && return copyto!(x, q)
-    q isa Identity{GT} && return copyto!(x, p)
+_compose(::AdditionGroup, p, q) = p + q
+
+function _compose!(::AdditionGroup, x, p, q)
     x .= p .+ q
     return x
 end
 
 translate_diff(::AdditionGroup, p, q, X, ::ActionDirection) = X
 
-translate_diff!(::AdditionGroup, Y, p, q, X, ::ActionDirection) = copyto!(Y, X)
+translate_diff!(G::AdditionGroup, Y, p, q, X, ::ActionDirection) = copyto!(G, Y, p, X)
 
 inverse_translate_diff(::AdditionGroup, p, q, X, ::ActionDirection) = X
 
-function inverse_translate_diff!(::AdditionGroup, Y, p, q, X, ::ActionDirection)
-    return copyto!(Y, X)
+function inverse_translate_diff!(G::AdditionGroup, Y, p, q, X, ::ActionDirection)
+    return copyto!(G, Y, p, X)
 end
 
-group_exp(::AdditionGroup, X) = X
+exp_lie(::AdditionGroup, X) = X
 
-group_exp!(::AdditionGroup, q, X) = copyto!(q, X)
+exp_lie!(G::AdditionGroup, q, X) = copyto!(G, q, X)
 
-group_log(::AdditionGroup, q) = q
+log_lie(::AdditionGroup, q) = q
+function log_lie(G::AdditionGroup, ::Identity{AdditionOperation})
+    return zero_vector(G, identity_element(G))
+end
 
-group_log!(::AdditionGroup, X, q) = copyto!(X, q)
+_log_lie!(G::AdditionGroup, X, q) = copyto!(G, X, q)
 
 lie_bracket(::AdditionGroup, X, Y) = zero(X)
 
@@ -970,51 +1067,93 @@ struct MultiplicationOperation <: AbstractGroupOperation end
 
 const MultiplicationGroup = AbstractGroupManifold{𝔽,MultiplicationOperation} where {𝔽}
 
-Base.:*(e::Identity{G}) where {G<:MultiplicationGroup} = e
-Base.:*(::Identity{G}, p) where {G<:MultiplicationGroup} = p
-Base.:*(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
-Base.:*(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
-Base.:*(::Identity{<:MultiplicationGroup}, e::Identity{<:AdditionGroup}) = e
+Base.:*(e::Identity{MultiplicationOperation}) = e
+Base.:*(::Identity{MultiplicationOperation}, p) = p
+Base.:*(p, ::Identity{MultiplicationOperation}) = p
+Base.:*(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation}) = e
+Base.:*(::Identity{MultiplicationOperation}, e::Identity{AdditionOperation}) = e
+Base.:*(e::Identity{AdditionOperation}, ::Identity{MultiplicationOperation}) = e
 
-Base.:/(p, ::Identity{G}) where {G<:MultiplicationGroup} = p
-Base.:/(::Identity{G}, p) where {G<:MultiplicationGroup} = inv(p)
-Base.:/(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
+Base.:/(p, ::Identity{MultiplicationOperation}) = p
+Base.:/(::Identity{MultiplicationOperation}, p) = inv(p)
+Base.:/(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation}) = e
 
-Base.:\(p, ::Identity{G}) where {G<:MultiplicationGroup} = inv(p)
-Base.:\(::Identity{G}, p) where {G<:MultiplicationGroup} = p
-Base.:\(e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}} = e
+Base.:\(p, ::Identity{MultiplicationOperation}) = inv(p)
+Base.:\(::Identity{MultiplicationOperation}, p) = p
+Base.:\(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation}) = e
 
-Base.inv(e::Identity{G}) where {G<:MultiplicationGroup} = e
+LinearAlgebra.det(::Identity{MultiplicationOperation}) = true
+LinearAlgebra.adjoint(e::Identity{MultiplicationOperation}) = e
 
-Base.one(e::Identity{G}) where {G<:MultiplicationGroup} = e
-
-Base.transpose(e::Identity{G}) where {G<:MultiplicationGroup} = e
-
-LinearAlgebra.det(::Identity{<:MultiplicationGroup}) = 1
-
-LinearAlgebra.mul!(q, ::Identity{G}, p) where {G<:MultiplicationGroup} = copyto!(q, p)
-LinearAlgebra.mul!(q, p, ::Identity{G}) where {G<:MultiplicationGroup} = copyto!(q, p)
-function LinearAlgebra.mul!(q, e::E, ::E) where {G<:MultiplicationGroup,E<:Identity{G}}
-    return identity!(e.group, q, e)
+function identity_element!(::MultiplicationGroup, p::AbstractMatrix)
+    return copyto!(p, I)
 end
 
-Base.identity(::MultiplicationGroup, p) = one(p)
-
-function identity!(G::GT, q, p) where {GT<:MultiplicationGroup}
-    isa(p, Identity{GT}) || return copyto!(q, one(p))
-    return error(
-        "identity! not implemented on $(typeof(G)) for points $(typeof(q)) and $(typeof(p))",
-    )
+function identity_element!(G::MultiplicationGroup, p::AbstractArray)
+    if length(p) == 1
+        fill!(p, one(eltype(p)))
+    else
+        throw(DimensionMismatch("Array $p cannot be set to identity element of group $G"))
+    end
+    return p
 end
-identity!(::MultiplicationGroup, q::AbstractMatrix, p) = copyto!(q, I)
+
+function is_identity(G::MultiplicationGroup, q::Number; kwargs...)
+    return isapprox(G, q, one(q); kwargs...)
+end
+function is_identity(G::MultiplicationGroup, q::AbstractVector; kwargs...)
+    return length(q) == 1 && isapprox(G, q[], one(q[]); kwargs...)
+end
+function is_identity(G::MultiplicationGroup, q::AbstractMatrix; kwargs...)
+    return isapprox(G, q, I; kwargs...)
+end
+function is_identity(G::MultiplicationGroup, e::Identity; kwargs...)
+    return invoke(is_identity, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
+end
+
+LinearAlgebra.mul!(q, ::Identity{MultiplicationOperation}, p) = copyto!(q, p)
+LinearAlgebra.mul!(q, p, ::Identity{MultiplicationOperation}) = copyto!(q, p)
+function LinearAlgebra.mul!(
+    q::AbstractMatrix,
+    ::Identity{MultiplicationOperation},
+    ::Identity{MultiplicationOperation},
+)
+    return copyto!(q, I)
+end
+function LinearAlgebra.mul!(
+    q,
+    ::Identity{MultiplicationOperation},
+    ::Identity{MultiplicationOperation},
+)
+    return copyto!(q, one(q))
+end
+function LinearAlgebra.mul!(
+    q::Identity{MultiplicationOperation},
+    ::Identity{MultiplicationOperation},
+    ::Identity{MultiplicationOperation},
+)
+    return q
+end
+Base.one(e::Identity{MultiplicationOperation}) = e
 
 Base.inv(::MultiplicationGroup, p) = inv(p)
+Base.inv(::MultiplicationGroup, e::Identity{MultiplicationOperation}) = e
 
 inv!(G::MultiplicationGroup, q, p) = copyto!(q, inv(G, p))
+function inv!(G::MultiplicationGroup, q, ::Identity{MultiplicationOperation})
+    return identity_element!(G, q)
+end
+function inv!(
+    ::MultiplicationGroup,
+    q::Identity{MultiplicationOperation},
+    e::Identity{MultiplicationOperation},
+)
+    return q
+end
 
-compose(::MultiplicationGroup, p, q) = p * q
+_compose(::MultiplicationGroup, p, q) = p * q
 
-compose!(::MultiplicationGroup, x, p, q) = mul!_safe(x, p, q)
+_compose!(::MultiplicationGroup, x, p, q) = mul!_safe(x, p, q)
 
 inverse_translate(::MultiplicationGroup, p, q, ::LeftAction) = p \ q
 inverse_translate(::MultiplicationGroup, p, q, ::RightAction) = q / p
@@ -1023,14 +1162,14 @@ function inverse_translate!(G::MultiplicationGroup, x, p, q, conv::ActionDirecti
     return copyto!(x, inverse_translate(G, p, q, conv))
 end
 
-function group_exp!(G::MultiplicationGroup, q, X)
+function exp_lie!(G::MultiplicationGroup, q, X)
     X isa Union{Number,AbstractMatrix} && return copyto!(q, exp(X))
     return error(
-        "group_exp! not implemented on $(typeof(G)) for vector $(typeof(X)) and element $(typeof(q)).",
+        "exp_lie! not implemented on $(typeof(G)) for vector $(typeof(X)) and element $(typeof(q)).",
     )
 end
 
-group_log!(::MultiplicationGroup, X::AbstractMatrix, q::AbstractMatrix) = log_safe!(X, q)
+log_lie!(::MultiplicationGroup, X::AbstractMatrix, q::AbstractMatrix) = log_safe!(X, q)
 
 lie_bracket(::MultiplicationGroup, X, Y) = mul!(X * Y, Y, X, -1, true)
 
@@ -1038,6 +1177,32 @@ function lie_bracket!(::MultiplicationGroup, Z, X, Y)
     mul!(Z, X, Y)
     mul!(Z, Y, X, -1, true)
     return Z
+end
+
+@doc raw"""
+    get_vector_lie(G::AbstractGroupManifold, a, B::AbstractBasis)
+
+Reconstruct a tangent vector from the Lie algebra of `G` from cooordinates `a` of a basis `B`.
+This is similar to calling [`get_vector`](@ref) at the `p=`[`Identity`]('ref)`(G)`
+"""
+function get_vector_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
+    return get_vector(G, identity_element(G), X, B)
+end
+function get_vector_lie!(G::AbstractGroupManifold, Y, X, B::AbstractBasis)
+    return get_vector!(G, Y, identity_element(G), X, B)
+end
+
+@doc raw"""
+    get_coordinates_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
+
+Get the coordinates of an element `X` from the Lie algebra og `G` with respect to a basis `B`.
+This is similar to calling [`get_coordinates`](@ref) at the `p=`[`Identity`]('ref)`G`
+"""
+function get_coordinates_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
+    return get_coordinates(G, identity_element(G), X, B)
+end
+function get_coordinates_lie!(G::AbstractGroupManifold, a, X, B::AbstractBasis)
+    return get_coordinates!(G, a, identity_element(G), X, B)
 end
 
 # (a) changes / parent.
@@ -1073,6 +1238,8 @@ end
 for f in [
     check_point,
     check_vector,
+    copy,
+    copyto!,
     distance,
     exp,
     exp!,
@@ -1111,12 +1278,10 @@ end
 for f in [
     compose,
     compose!,
-    group_exp,
-    group_exp!,
-    group_log,
-    group_log!,
-    identity,
-    identity!,
+    exp_lie,
+    exp_lie!,
+    log_lie,
+    log_lie!,
     translate,
     translate!,
     translate_diff,

@@ -1,5 +1,5 @@
 @doc raw"""
-    FixedRankMatrices{m,n,k,𝔽} <: AbstractManifold{𝔽}
+    FixedRankMatrices{m,n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
 
 The manifold of ``m × n`` real-valued or complex-valued matrices of fixed rank ``k``, i.e.
 ````math

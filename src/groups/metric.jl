@@ -179,7 +179,7 @@ function invariant_metric_dispatch(
     direction(metric(M)) === conv && return Val(true)
     return invoke(invariant_metric_dispatch, Tuple{MetricManifold,typeof(conv)}, M, conv)
 end
-invariant_metric_dispatch(M::AbstractManifold, ::ActionDirection) = Val(false)
+invariant_metric_dispatch(::AbstractManifold, ::ActionDirection) = Val(false)
 
 function has_invariant_metric(M::AbstractManifold, conv::ActionDirection)
     return _extract_val(invariant_metric_dispatch(M, conv))
@@ -191,7 +191,7 @@ function inner(M::MetricManifold{𝔽,<:AbstractManifold,<:InvariantMetric}, p, 
     N = MetricManifold(M.manifold, imetric.metric)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
     Yₑ = inverse_translate_diff(M, p, p, Y, conv)
-    return inner(N, Identity(N, p), Xₑ, Yₑ)
+    return inner(N, Identity(N), Xₑ, Yₑ)
 end
 
 function default_metric_dispatch(
@@ -232,7 +232,7 @@ function LinearAlgebra.norm(
     conv = direction(imetric)
     N = MetricManifold(M.manifold, imetric.metric)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
-    return norm(N, Identity(N, p), Xₑ)
+    return norm(N, Identity(N), Xₑ)
 end
 
 function Base.show(io::IO, metric::LeftInvariantMetric)

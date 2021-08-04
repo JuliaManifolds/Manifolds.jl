@@ -22,6 +22,7 @@ SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperatio
 Base.show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
 
 Base.inv(::SpecialOrthogonal, p) = transpose(p)
+Base.inv(::SpecialOrthogonal, e::Identity{MultiplicationOperation}) = e
 
 inverse_translate(G::SpecialOrthogonal, p, q, ::LeftAction) = inv(G, p) * q
 inverse_translate(G::SpecialOrthogonal, p, q, ::RightAction) = q * inv(G, p)
@@ -41,17 +42,10 @@ function inverse_translate_diff!(G::SpecialOrthogonal, Y, p, q, X, conv::ActionD
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
 end
 
-group_exp!(G::SpecialOrthogonal, q, X) = exp!(G, q, make_identity(G, q).p, X)
-
-group_log!(G::SpecialOrthogonal, X, q) = log!(G, X, make_identity(G, q).p, q)
-function group_log!(G::SpecialOrthogonal, X::AbstractMatrix, q::AbstractMatrix)
-    return log!(G, X, make_identity(G, q).p, q)
-end
-
 function allocate_result(
     ::GT,
     ::typeof(exp),
-    ::Identity{GT},
+    ::Identity,
     X,
 ) where {n,GT<:SpecialOrthogonal{n}}
     return allocate(X)
@@ -59,7 +53,7 @@ end
 function allocate_result(
     ::GT,
     ::typeof(log),
-    ::Identity{GT},
+    ::Identity,
     q,
 ) where {n,GT<:SpecialOrthogonal{n}}
     return allocate(q)

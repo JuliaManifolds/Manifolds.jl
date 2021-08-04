@@ -3,6 +3,8 @@ include("group_utils.jl")
 
 using ManifoldsBase: VeeOrthogonalBasis
 
+Random.seed!(10)
+
 @testset "Special Euclidean group" begin
     @testset "SpecialEuclidean($n)" for n in (2, 3, 4)
         G = SpecialEuclidean(n)
@@ -62,7 +64,7 @@ using ManifoldsBase: VeeOrthogonalBasis
                 Manifolds._padvector!(G, tmp)
                 @test tmp == X_pts[1]
 
-                w = translate_diff(G, pts[1], make_identity(G, pts[1]), X_pts[1])
+                w = translate_diff(G, pts[1], Identity(G), X_pts[1])
                 w2 = allocate(w)
                 w2.parts[1] .= w.parts[1]
                 w2.parts[2] .= pts[1].parts[2] * w.parts[2]
@@ -92,10 +94,10 @@ using ManifoldsBase: VeeOrthogonalBasis
             g1g2mat = affine_matrix(G, g1g2)
             @test g1g2mat ≈ affine_matrix(G, g1) * affine_matrix(G, g2)
             @test affine_matrix(G, g1g2mat) === g1g2mat
-            @test affine_matrix(G, make_identity(G, pts[1])) isa SDiagonal{n,Float64}
-            @test affine_matrix(G, make_identity(G, pts[1])) == SDiagonal{n,Float64}(I)
+            @test affine_matrix(G, Identity(G)) isa SDiagonal{n,Float64}
+            @test affine_matrix(G, Identity(G)) == SDiagonal{n,Float64}(I)
 
-            w = translate_diff(G, pts[1], make_identity(G, pts[1]), X_pts[1])
+            w = translate_diff(G, pts[1], Identity(G), X_pts[1])
             w2 = allocate(w)
             w2.parts[1] .= w.parts[1]
             w2.parts[2] .= pts[1].parts[2] * w.parts[2]
@@ -146,6 +148,11 @@ using ManifoldsBase: VeeOrthogonalBasis
             p2[1:n, end] .= p[1:n, end]
             p2[end, end] = p[end, end]
             @test_throws CompositeManifoldError is_point(G, p2, true)
+            # exp/log_lie for ProductGroup on arrays
+            X = copy(G, p, X_pts[1])
+            p3 = exp_lie(G, X)
+            X3 = log_lie(G, p3)
+            isapprox(G, Identity(G), X, X3)
         end
 
         @testset "hat/vee" begin
@@ -161,13 +168,29 @@ using ManifoldsBase: VeeOrthogonalBasis
             v = vee(G, affine_matrix(G, p), screw_matrix(G, V))
             @test v ≈ vexp
             @test hat(G, affine_matrix(G, p), v) ≈ screw_matrix(G, V)
+
+            e = Identity(G)
+            Ve = log_lie(G, p)
+            v = vee(G, e, Ve)
+            @test_throws ErrorException vee(M, e, Ve)
+            w = similar(v)
+            vee!(G, w, e, Ve)
+            @test isapprox(v, w)
+            @test_throws ErrorException vee!(M, w, e, Ve)
+
+            We = hat(G, e, v)
+            @test_throws ErrorException hat(M, e, v)
+            isapprox(G, e, Ve, We)
+            We2 = copy(G, p, V)
+            hat!(G, We2, e, v)
+            @test_throws ErrorException hat!(M, We, e, v)
+            @test isapprox(G, e, We, We2)
         end
     end
 
     G = SpecialEuclidean(11)
-    @test affine_matrix(G, make_identity(G, ones(12, 12))) isa
-          Diagonal{Float64,Vector{Float64}}
-    @test affine_matrix(G, make_identity(G, ones(12, 12))) == Diagonal(ones(11))
+    @test affine_matrix(G, Identity(G)) isa Diagonal{Float64,Vector{Float64}}
+    @test affine_matrix(G, Identity(G)) == Diagonal(ones(11))
 
     @testset "Explicit embedding in GL(n+1)" begin
         G = SpecialEuclidean(3)
@@ -217,7 +240,7 @@ using ManifoldsBase: VeeOrthogonalBasis
                 G,
                 pts_gl[1],
                 X_gl,
-                translate_diff(G, Identity(G, pts_gl[1]), pts_gl[1], X_gl, conv),
+                translate_diff(G, Identity(G), pts_gl[1], X_gl, conv),
             )
         end
     end

@@ -25,10 +25,10 @@ const SemidirectProductGroup{𝔽,N,H,A} =
 @doc raw"""
     SemidirectProductGroup(N::GroupManifold, H::GroupManifold, A::AbstractGroupAction)
 
-A group that is the semidirect product of a normal group $\mathcal{N}$ and a subgroup
-$\mathcal{H}$, written $\mathcal{G} = \mathcal{N} ⋊_θ \mathcal{H}$, where
-$θ: \mathcal{H} × \mathcal{N} → \mathcal{N}$ is an automorphism action of $\mathcal{H}$ on
-$\mathcal{N}$. The group $\mathcal{G}$ has the composition rule
+A group that is the semidirect product of a normal group ``\mathcal{N}`` and a subgroup
+``\mathcal{H}``, written ``\mathcal{G} = \mathcal{N} ⋊_θ \mathcal{H}``, where
+``θ: \mathcal{H} × \mathcal{N} → \mathcal{N}`` is an automorphism action of ``\mathcal{H}`` on
+``\mathcal{N}``. The group ``\mathcal{G}`` has the composition rule
 
 ````math
 g \circ g' = (n, h) \circ (n', h') = (n \circ θ_h(n'), h \circ h')
@@ -52,6 +52,35 @@ function SemidirectProductGroup(
     return GroupManifold(M, op)
 end
 
+function allocate_result(G::SemidirectProductGroup, ::typeof(identity_element))
+    M = base_manifold(G)
+    N, H = M.manifolds
+    np = allocate_result(N, identity_element)
+    hp = allocate_result(H, identity_element)
+    reshaper = ShapeSpecification(StaticReshaper(), M.manifolds...)
+    return prod_point(reshaper, np, hp)
+end
+
+function identity_element!(G::SemidirectProductGroup, q)
+    M = base_manifold(G)
+    N, H = M.manifolds
+    nq, hq = submanifold_components(G, q)
+    identity_element!(N, nq)
+    identity_element!(H, hq)
+    @inbounds _padpoint!(G, q)
+    return q
+end
+
+function is_identity(G::SemidirectProductGroup, p; kwargs...)
+    M = base_manifold(G)
+    N, H = M.manifolds
+    nq, hq = submanifold_components(G, p)
+    return is_identity(N, nq; kwargs...) && is_identity(H, hq; kwargs...)
+end
+function is_identity(G::SemidirectProductGroup, e::Identity; kwargs...)
+    return invoke(is_identity, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
+end
+
 function Base.show(io::IO, G::SemidirectProductGroup)
     M = base_manifold(G)
     N, H = M.manifolds
@@ -61,11 +90,9 @@ end
 
 submanifold(G::SemidirectProductGroup, i) = submanifold(base_manifold(G), i)
 
-_padpoint!(G::SemidirectProductGroup, q) = q
+_padpoint!(::SemidirectProductGroup, q) = q
 
-_padvector!(G::SemidirectProductGroup, X) = X
-
-Base.inv(G::GT, e::Identity{GT}) where {GT<:SemidirectProductGroup} = e
+_padvector!(::SemidirectProductGroup, X) = X
 
 function inv!(G::SemidirectProductGroup, q, p)
     M = base_manifold(G)
@@ -79,27 +106,18 @@ function inv!(G::SemidirectProductGroup, q, p)
     @inbounds _padpoint!(G, q)
     return q
 end
-inv!(G::AG, p, e::Identity{AG}) where {AG<:SemidirectProductGroup} = identity!(G, p, e)
-
-Base.identity(G::GT, e::Identity{GT}) where {GT<:SemidirectProductGroup} = e
-
-function identity!(G::SemidirectProductGroup, q, p)
-    M = base_manifold(G)
-    N, H = M.manifolds
-    np, hp = submanifold_components(G, p)
-    nq, hq = submanifold_components(G, q)
-    identity!(N, nq, np)
-    identity!(H, hq, hp)
-    @inbounds _padpoint!(G, q)
+function inv!(G::SemidirectProductGroup, q, ::Identity{<:SemidirectProductOperation})
+    return identity_element!(G, q)
+end
+function inv!(
+    G::SemidirectProductGroup,
+    q::Identity{<:SemidirectProductOperation},
+    ::Identity{<:SemidirectProductOperation},
+)
     return q
 end
-identity!(G::GT, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}} = e
 
-compose(G::GT, p, e::Identity{GT}) where {GT<:SemidirectProductGroup} = p
-compose(G::GT, e::Identity{GT}, p) where {GT<:SemidirectProductGroup} = p
-compose(G::GT, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}} = e
-
-function compose!(G::SemidirectProductGroup, x, p, q)
+function _compose!(G::SemidirectProductGroup, x, p, q)
     M = base_manifold(G)
     N, H = M.manifolds
     A = G.op.action
@@ -111,11 +129,6 @@ function compose!(G::SemidirectProductGroup, x, p, q)
     compose!(N, nx, np, nxtmp)
     @inbounds _padpoint!(G, x)
     return x
-end
-compose!(G::GT, x, ::Identity{GT}, q) where {GT<:SemidirectProductGroup} = copyto!(x, q)
-compose!(G::GT, x, p, ::Identity{GT}) where {GT<:SemidirectProductGroup} = copyto!(x, p)
-function compose!(G::GT, x, e::E, ::E) where {GT<:SemidirectProductGroup,E<:Identity{GT}}
-    return identity!(G, x, e)
 end
 
 @doc raw"""
@@ -166,17 +179,6 @@ function get_vector!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
     @inbounds _padvector!(G, Y)
     return Y
 end
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold get_vector!(
-            M::SemidirectProductGroup,
-            Xⁱ,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end,
-)
 
 function get_coordinates!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
     M = base_manifold(G)
@@ -190,17 +192,6 @@ function get_coordinates!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBa
     get_coordinates!(H, view(Y, (dimN + 1):(dimN + dimH)), hp, hY, B)
     return Y
 end
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold get_coordinates!(
-            M::SemidirectProductGroup,
-            Y,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end,
-)
 
 function zero_vector(G::SemidirectProductGroup, p)
     X = allocate_result(G, zero_vector, p)
@@ -218,14 +209,26 @@ function zero_vector!(G::SemidirectProductGroup, X, p)
     return X
 end
 
-function Base.isapprox(G::SemidirectProductGroup, p, q; kwargs...)
+function Base.isapprox(
+    G::SemidirectProductGroup,
+    p::AbstractArray,
+    q::AbstractArray;
+    kwargs...,
+)
     M = base_manifold(G)
     N, H = M.manifolds
     np, hp = submanifold_components(G, p)
     nq, hq = submanifold_components(G, q)
     return isapprox(N, np, nq; kwargs...) && isapprox(H, hp, hq; kwargs...)
 end
-function Base.isapprox(G::SemidirectProductGroup, p, X, Y; kwargs...)
+
+function Base.isapprox(
+    G::SemidirectProductGroup,
+    p,
+    X::AbstractMatrix,
+    Y::AbstractMatrix;
+    kwargs...,
+)
     M = base_manifold(G)
     N, H = M.manifolds
     np, hp = submanifold_components(G, p)
@@ -233,27 +236,12 @@ function Base.isapprox(G::SemidirectProductGroup, p, X, Y; kwargs...)
     nY, hY = submanifold_components(G, Y)
     return isapprox(N, np, nX, nY; kwargs...) && isapprox(H, hp, hX, hY; kwargs...)
 end
-function Base.isapprox(
-    G::GT,
-    p,
-    e::Identity{GT};
+function isapprox(
+    G::SemidirectProductGroup{𝔽,N,H,A},
+    ::Identity{SemidirectProductOperation{A}},
+    X::AbstractMatrix,
+    Y::AbstractMatrix;
     kwargs...,
-) where {GT<:SemidirectProductGroup}
-    return isapprox(G, e, p; kwargs...)
-end
-function Base.isapprox(
-    G::GT,
-    e::Identity{GT},
-    p;
-    kwargs...,
-) where {GT<:SemidirectProductGroup}
-    return isapprox(G, identity(G, p), p; kwargs...)
-end
-function Base.isapprox(
-    ::GT,
-    ::E,
-    ::E;
-    kwargs...,
-) where {GT<:SemidirectProductGroup,E<:Identity{GT}}
-    return true
+) where {𝔽,N<:AbstractManifold,H<:AbstractManifold,A<:AbstractGroupAction}
+    return isapprox(G, identity_element(G), X, Y; kwargs...)
 end

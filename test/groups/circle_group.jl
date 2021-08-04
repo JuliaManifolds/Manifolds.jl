@@ -20,17 +20,15 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
     @test is_default_metric(MetricManifold(G, EuclideanMetric()))
 
     @testset "identity overloads" begin
-        ig = Identity(G, [Complex(1.0)])
-        @test identity(G, ig) === ig
+        ig = Identity(G)
         @test inv(G, ig) === ig
-        @test allocate_result(G, get_coordinates, ig, Complex(1.0), DefaultBasis()) isa
-              Array{Complex{Float64},1}
-        y = [Complex(0.0)]
-        @test identity!(G, y, [Complex(1.0)]) === y
-        @test y == [Complex(1.0)]
         y = [1.0 * im]
         v = [Complex(0.5)]
         @test translate_diff(G, ig, y, v) === v
+
+        @test identity_element(G) === 1.0
+        @test identity_element(G, 1.0f0) === 1.0f0
+        @test identity_element(G, [1.0f0]) == [1.0f0]
     end
 
     @testset "scalar points" begin

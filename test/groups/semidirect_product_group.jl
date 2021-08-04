@@ -31,12 +31,17 @@ include("group_utils.jl")
     @test norm(G, pts[1], Y) ≈ 0
     @test norm(G, pts[1], Z) ≈ 0
 
-    e = Identity(G, (zeros(2), zeros(2)))
+    e = Identity(G)
     @test inv(G, e) === e
-    @test identity(G, e) === e
-    @test identity!(G, e, e) === e
 
     @test compose(G, e, pts[1]) == pts[1]
     @test compose(G, pts[1], e) == pts[1]
     @test compose(G, e, e) === e
+
+    eA = identity_element(G)
+    @test isapprox(G, eA, e)
+    @test isapprox(G, e, eA)
+    W = log(G, eA, pts[1])
+    Z = log(G, eA, pts[1])
+    @test isapprox(G, e, W, Z)
 end

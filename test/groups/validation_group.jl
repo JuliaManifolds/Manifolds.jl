@@ -13,29 +13,24 @@ include("../utils.jl")
     p, q = [exp(M, eg, hat(M, eg, ωi)) for ωi in ω]
     X = hat(M, eg, [-1.0, 2.0, 0.5])
 
-    e = make_identity(AG, p)
-    @test Manifolds.array_value(e).p == Manifolds.array_value(e.p)
-    @test Manifolds.array_point(e).p == e.p
+    e = Identity(G)
     p2, q2 = ValidationMPoint(p), ValidationMPoint(q)
     @test q2 === Manifolds.array_point(q2) # test that double wraps are avoided.
     X2 = ValidationTVector(X)
 
-    @test identity(AG, p2) isa ValidationMPoint
-    @test isapprox(G, identity(AG, p2).value, identity(G, p))
-    @test identity(AG, e) isa Identity
-    @test_throws DomainError identity(AG, Identity(TranslationGroup(3), ω[1]))
+    @test Identity(G) isa Identity
 
+    eg = allocate(p)
+    identity_element!(G, eg)
+    eg2 = allocate(p2)
+    identity_element!(AG, eg2)
+    @test eg2.value == eg
     eg = allocate(p2)
-    identity!(AG, eg, p2)
-    @test isapprox(G, eg.value, identity(G, p))
-    eg = allocate(p2)
-    identity!(AG, eg, e)
-    @test isapprox(G, eg.value, identity(G, p))
 
     @test inv(AG, p2) isa ValidationMPoint
     @test isapprox(G, inv(AG, p2).value, inv(G, p))
-    @test inv(AG, e) isa Identity
-    @test_throws DomainError inv(AG, Identity(TranslationGroup(3), ω[1]))
+    @test inv(AG, e) isa ValidationMPoint{<:Identity}
+    @test inv(AG, Identity(AG)) == inv(AG, e)
 
     pinvq = allocate(p2)
     inv!(AG, pinvq, p2)
@@ -59,17 +54,17 @@ include("../utils.jl")
     compose!(AG, pq, p2, e)
     @test isapprox(G, pq.value, compose(G, p, e))
 
-    @test group_exp(AG, X2) isa ValidationMPoint
-    @test isapprox(G, group_exp(AG, X2).value, group_exp(G, X))
+    @test exp_lie(AG, X2) isa ValidationMPoint
+    @test isapprox(G, exp_lie(AG, X2).value, exp_lie(G, X))
     expX = allocate(p2)
-    group_exp!(AG, expX, X2)
-    @test isapprox(G, expX.value, group_exp(G, X))
+    exp_lie!(AG, expX, X2)
+    @test isapprox(G, expX.value, exp_lie(G, X))
 
-    @test group_log(AG, p2) isa ValidationTVector
-    @test isapprox(G, e, group_log(AG, p2).value, group_log(G, p))
+    @test log_lie(AG, p2) isa ValidationTVector
+    @test isapprox(G, e, log_lie(AG, p2).value, log_lie(G, p))
     logp = allocate(X2)
-    group_log!(AG, logp, p2)
-    @test isapprox(G, e, logp.value, group_log(G, p))
+    log_lie!(AG, logp, p2)
+    @test isapprox(G, e, logp.value, log_lie(G, p))
 
     @test lie_bracket(AG, X, X2) isa ValidationTVector
     Xlb = allocate(X2)

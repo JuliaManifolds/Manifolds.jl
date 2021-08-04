@@ -38,9 +38,13 @@ function check_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
     end
     return nothing
 end
-check_point(::GT, ::Identity{GT}; kwargs...) where {GT<:SpecialLinear} = nothing
-function check_point(G::SpecialLinear, e::Identity; kwargs...)
-    return DomainError(e, "The identity element $(e) does not belong to $(G).")
+check_point(G::SpecialLinear, ::Identity{MultiplicationOperation}; kwargs...) = nothing
+function check_point(
+    G::SpecialLinear,
+    e::Identity{O};
+    kwargs...,
+) where {O<:AbstractGroupOperation}
+    return invoke(check_point, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
 end
 
 function check_vector(G::SpecialLinear, p, X; kwargs...)

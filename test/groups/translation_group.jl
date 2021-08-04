@@ -15,7 +15,7 @@ include("group_utils.jl")
               Val{true}()
         types = [Matrix{Float64}]
         @test base_manifold(G) === Euclidean(2, 3)
-
+        @test log_lie(G, Identity(G)) == zeros(2, 3) # log_lie with Identity on Addition group.
         pts = [reshape(i:(i + 5), (2, 3)) for i in 1:3]
         vpts = [reshape(-2:3, (2, 3)), reshape(-1:4, (2, 3))]
         for T in types

@@ -13,6 +13,8 @@ import ManifoldsBase:
     check_point,
     check_point__transparent,
     check_vector,
+    copy,
+    copyto!,
     decorated_manifold,
     decorator_transparent_dispatch,
     default_decorator_dispatch,
@@ -20,6 +22,7 @@ import ManifoldsBase:
     dual_basis,
     embed,
     embed!,
+    exp,
     exp!,
     exp!__intransparent,
     get_basis,
@@ -32,6 +35,8 @@ import ManifoldsBase:
     get_vector!,
     get_vectors,
     gram_schmidt,
+    hat,
+    hat!,
     injectivity_radius,
     inner,
     inner__intransparent,
@@ -58,12 +63,25 @@ import ManifoldsBase:
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
+    vee,
+    vee!,
     zero_vector,
     zero_vector!,
     CotangentSpace,
     TangentSpace
 import Base:
-    copyto!, convert, foreach, in, isapprox, isempty, length, ndims, showerror, size
+    copyto!,
+    convert,
+    foreach,
+    identity,
+    in,
+    isapprox,
+    isempty,
+    length,
+    ndims,
+    showerror,
+    size,
+    transpose
 
 using Base.Iterators: repeated
 using Distributions
@@ -146,8 +164,6 @@ include("riemannian_diff.jl")
 include("manifolds/ConnectionManifold.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/VectorBundle.jl")
-
-# It's included early to ensure visibility of `Identity`
 include("groups/group.jl")
 
 # Features I: Which are extended on Meta Manifolds
@@ -228,7 +244,7 @@ include("groups/connections.jl")
 include("groups/metric.jl")
 include("groups/group_action.jl")
 include("groups/group_operation_action.jl")
-include("groups/array_manifold.jl")
+include("groups/validation_group.jl")
 include("groups/product_group.jl")
 include("groups/semidirect_product_group.jl")
 
@@ -468,6 +484,8 @@ export ×,
     get_embedding,
     hat,
     hat!,
+    identity_element,
+    identity_element!,
     induced_basis,
     incident_log,
     injectivity_radius,
@@ -476,10 +494,11 @@ export ×,
     inverse_retract,
     inverse_retract!,
     isapprox,
-    is_group_decorator,
     is_decorator_transparent,
-    is_default_metric,
     is_default_decorator,
+    is_default_metric,
+    is_group_decorator,
+    is_identity,
     is_point,
     is_vector,
     isapprox,
@@ -578,15 +597,17 @@ export adjoint_action,
     compose,
     compose!,
     direction,
+    exp_lie,
+    exp_lie!,
     g_manifold,
-    group_exp,
-    group_exp!,
-    group_log,
-    group_log!,
+    get_coordinates_lie,
+    get_coordinates_lie!,
+    get_vector_lie,
+    get_vector_lie!,
     has_biinvariant_metric,
     has_invariant_metric,
-    identity,
-    identity!,
+    identity_element,
+    identity_element!,
     inv,
     inv!,
     invariant_metric_dispatch,
@@ -600,7 +621,8 @@ export adjoint_action,
     inverse_translate_diff!,
     lie_bracket,
     lie_bracket!,
-    make_identity,
+    log_lie,
+    log_lie!,
     optimal_alignment,
     optimal_alignment!,
     screw_matrix,

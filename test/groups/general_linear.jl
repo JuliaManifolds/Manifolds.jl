@@ -43,6 +43,11 @@ using NLsolve
             )
         ) === Val(true)
         @test Manifolds.allocation_promotion_function(Gc, exp!, (1,)) === complex
+
+        q = identity_element(G)
+        @test is_identity(G, q)
+        @test isapprox(G, q, Identity(G))
+        @test isapprox(G, Identity(G), q)
     end
 
     @testset "GL(1,𝔽) special cases" begin
@@ -54,8 +59,10 @@ using NLsolve
             q = exp(G, p, X)
             Y = log(G, p, q)
             @test Y ≈ X
-            @test group_exp(G, X) ≈ exp(X)
-            @test group_log(G, exp(X)) ≈ X
+            @test exp_lie(G, X) ≈ exp(X)
+            @test log_lie(G, exp(X)) ≈ X
+            @test log_lie(G, [1.0]) == zeros(1) # vector to vector
+            log_lie(G, Identity(G)) == zeros(1, 1) # Matrix to matrix
         end
         @testset "complex" begin
             G = GeneralLinear(1, ℂ)
@@ -65,8 +72,8 @@ using NLsolve
             q = exp(G, p, X)
             Y = log(G, p, q)
             @test Y ≈ X
-            @test group_exp(G, X) ≈ exp(X)
-            @test group_log(G, exp(X)) ≈ X
+            @test exp_lie(G, X) ≈ exp(X)
+            @test log_lie(G, exp(X)) ≈ X
         end
     end
 
@@ -78,13 +85,8 @@ using NLsolve
         @test_throws DomainError is_point(G, randn(ComplexF64, 3, 3), true)
         @test_throws DomainError is_point(G, zeros(3, 3), true)
         @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
-        @test_throws DomainError is_point(
-            G,
-            make_identity(GeneralLinear(2), ones(2, 2)),
-            true,
-        )
         @test is_point(G, Float64[0 0 1; 0 1 1; 1 1 1], true)
-        @test is_point(G, make_identity(G, ones(3, 3)), true)
+        @test is_point(G, Identity(G), true)
         @test_throws DomainError is_vector(
             G,
             Float64[0 1 1; 0 1 1; 1 0 0],
@@ -159,13 +161,8 @@ using NLsolve
         @test_throws DomainError is_point(G, zeros(2, 2), true)
         @test_throws DomainError is_point(G, ComplexF64[1 im; 1 im], true)
         @test is_point(G, ComplexF64[1 1; im 1], true)
-        @test is_point(G, make_identity(G, ones(ComplexF64, 2, 2)), true)
+        @test is_point(G, Identity(G), true)
         @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
-        @test_throws DomainError is_point(
-            G,
-            make_identity(GeneralLinear(3), ones(3, 3)),
-            true,
-        )
         @test_throws DomainError is_vector(
             G,
             ComplexF64[im im; im im],
