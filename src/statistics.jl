@@ -156,7 +156,7 @@ end
         ),
     )
 
-Estimate the covariance matrix of points `x` on manifold `M`. Since the covariance matrix
+Estimate the covariance matrix of a set of points `x` on manifold `M`. Since the covariance matrix
 on a manifold is a rank 2 tensor, the function returns its coefficients in basis induced by
 the given tangent space basis. See Section 5 of [^Pennec2006] for details.
 
