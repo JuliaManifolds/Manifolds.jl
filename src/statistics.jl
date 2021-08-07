@@ -148,7 +148,7 @@ end
         x::AbstractVector;
         basis::AbstractBasis=DefaultOrthonormalBasis(),
         tangent_space_covariance_estimator::CovarianceEstimator=SimpleCovariance(;
-            corrected=false,
+            corrected=true,
         ),
         mean_estimation_method::AbstractEstimationMethod=GradientDescentEstimation(),
         inverse_retraction_method::AbstractInverseRetractionMethod=default_inverse_retraction_method(
@@ -160,11 +160,14 @@ Estimate the covariance matrix of points `x` on manifold `M`. Since the covarian
 on a manifold is a rank 2 tensor, the function returns its coefficients in basis induced by
 the given tangent space basis. See Section 5 of [^Pennec2006] for details.
 
-The mean is calculated using the specified `mean_estimation_method`, and tangent vectors at
-this mean are calculated using the provided `inverse_retraction_method`. Finally, the
-covariance matrix in the tangent plane is estimated using `tangent_space_covariance_estimator`
-(the type is defined in `StatsBase.jl` and examples of covariance estimation methods can be
-found in `CovarianceEstimation.jl`).
+The mean is calculated using the specified `mean_estimation_method` using
+[mean](@ref Statistics.mean(::AbstractManifold, ::AbstractVector, ::AbstractEstimationMethod),
+and tangent vectors at this mean are calculated using the provided `inverse_retraction_method`.
+Finally, the covariance matrix in the tangent plane is estimated using the Euclidean space
+ estimator `tangent_space_covariance_estimator`. The type `CovarianceEstimator` is defined
+ in [`StatsBase.jl`](https://juliastats.org/StatsBase.jl/stable/cov/#StatsBase.CovarianceEstimator)
+ and examples of covariance estimation methods can be found in
+ [`CovarianceEstimation.jl`](https://github.com/mateuszbaran/CovarianceEstimation.jl/).
 
 [^Pennec2006]:
     > X. Pennec, “Intrinsic Statistics on Riemannian Manifolds: Basic Tools for Geometric

@@ -405,7 +405,7 @@ end
 Compose elements ``p,q ∈ \mathcal{G}`` using the group operation ``p \circ q``.
 
 For implementing composition on a new group manifold, please overload [`_compose`](@ref)
-instead so that methods with [`Identity`] arguments are not ambiguous.
+instead so that methods with [`Identity`](@ref) arguments are not ambiguous.
 """
 compose(::AbstractGroupManifold, ::Any...)
 
@@ -1183,7 +1183,7 @@ end
     get_vector_lie(G::AbstractGroupManifold, a, B::AbstractBasis)
 
 Reconstruct a tangent vector from the Lie algebra of `G` from cooordinates `a` of a basis `B`.
-This is similar to calling [`get_vector`](@ref) at the `p=`[`Identity`]('ref)`(G)`
+This is similar to calling [`get_vector`](@ref) at the `p=`[`Identity`](@ref)`(G)`.
 """
 function get_vector_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
     return get_vector(G, identity_element(G), X, B)
@@ -1196,7 +1196,7 @@ end
     get_coordinates_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
 
 Get the coordinates of an element `X` from the Lie algebra og `G` with respect to a basis `B`.
-This is similar to calling [`get_coordinates`](@ref) at the `p=`[`Identity`]('ref)`G`
+This is similar to calling [`get_coordinates`](@ref) at the `p=`[`Identity`](@ref)`(G)`.
 """
 function get_coordinates_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
     return get_coordinates(G, identity_element(G), X, B)
