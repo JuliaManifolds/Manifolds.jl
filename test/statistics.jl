@@ -773,4 +773,22 @@ end
         mg = median(S, x, w, ExtrinsicEstimation())
         @test isapprox(S, m, mg)
     end
+
+    @testset "Covariance matrix, Euclidean" begin
+        rng = MersenneTwister(47)
+        M = Euclidean(3)
+        x = [randn(rng, 3) for _ in 1:10]
+        @test isapprox(cov(M, x), cov(x))
+        covest = SimpleCovariance(; corrected=false)
+        @test isapprox(cov(M, x; tangent_space_covariance_estimator=covest), cov(covest, x))
+    end
+    @testset "Covariance matrix, sphere" begin
+        rng = MersenneTwister(47)
+        S = Sphere(2)
+        x = [normalize(randn(rng, 3)) for _ in 1:10]
+        covm = cov(S, x)
+        @test size(covm) == (2, 2)
+        @test isposdef(covm)
+        @test issymmetric(covm)
+    end
 end
