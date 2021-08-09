@@ -60,6 +60,14 @@ function allocate_result(G::SemidirectProductGroup, ::typeof(identity_element))
     return ProductRepr(np, hp)
 end
 
+"""
+    identity_element(G::SemidirectProductGroup)
+
+Get the identity element of [`SemidirectProductGroup`](@ref) `G`. Uses [`ProductRepr`](@ref)
+to represent the point.
+"""
+identity_element(G::SemidirectProductGroup)
+
 function identity_element!(G::SemidirectProductGroup, q)
     M = base_manifold(G)
     N, H = M.manifolds
