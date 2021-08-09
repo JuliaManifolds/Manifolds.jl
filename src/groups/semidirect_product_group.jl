@@ -57,9 +57,16 @@ function allocate_result(G::SemidirectProductGroup, ::typeof(identity_element))
     N, H = M.manifolds
     np = allocate_result(N, identity_element)
     hp = allocate_result(H, identity_element)
-    reshaper = ShapeSpecification(StaticReshaper(), M.manifolds...)
-    return prod_point(reshaper, np, hp)
+    return ProductRepr(np, hp)
 end
+
+"""
+    identity_element(G::SemidirectProductGroup)
+
+Get the identity element of [`SemidirectProductGroup`](@ref) `G`. Uses [`ProductRepr`](@ref)
+to represent the point.
+"""
+identity_element(G::SemidirectProductGroup)
 
 function identity_element!(G::SemidirectProductGroup, q)
     M = base_manifold(G)
