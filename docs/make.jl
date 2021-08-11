@@ -47,8 +47,7 @@ makedocs(
                 "Grassmann" => "manifolds/grassmann.md",
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
                 "Lorentzian manifold" => "manifolds/lorentz.md",
-                "Multinomial doubly stochastic matrices" =>
-                    "manifolds/multinomialdoublystochastic.md",
+                "Multinomial doubly stochastic matrices" => "manifolds/multinomialdoublystochastic.md",
                 "Multinomial matrices" => "manifolds/multinomial.md",
                 "Multinomial symmetric matrices" => "manifolds/multinomialsymmetric.md",
                 "Oblique manifold" => "manifolds/oblique.md",
@@ -61,14 +60,11 @@ makedocs(
                 "Sphere" => "manifolds/sphere.md",
                 "Stiefel" => "manifolds/stiefel.md",
                 "Symmetric matrices" => "manifolds/symmetric.md",
-                "Symmetric positive definite" =>
-                    "manifolds/symmetricpositivedefinite.md",
-                "Symmetric positive semidefinite fixed rank" =>
-                    "manifolds/symmetricpsdfixedrank.md",
+                "Symmetric positive definite" => "manifolds/symmetricpositivedefinite.md",
+                "Symmetric positive semidefinite fixed rank" => "manifolds/symmetricpsdfixedrank.md",
                 "Torus" => "manifolds/torus.md",
                 "Tucker" => "manifolds/tucker.md",
-                "Unit-norm symmetric matrices" =>
-                    "manifolds/spheresymmetricmatrices.md",
+                "Unit-norm symmetric matrices" => "manifolds/spheresymmetricmatrices.md",
             ],
             "Combined manifolds" => [
                 "Graph manifold" => "manifolds/graph.md",

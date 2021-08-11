@@ -534,7 +534,7 @@ function get_vector!(M::ProductManifold, Xⁱ, p, X, B::AbstractBasis)
     dims = map(manifold_dimension, M.manifolds)
     dims_acc = accumulate(+, vcat(1, SVector(dims)))
     @inline function set_for_i(i)
-        get_vector!(
+        return get_vector!(
             M.manifolds[i],
             submanifold_component(Xⁱ, i),
             submanifold_component(p, i),
