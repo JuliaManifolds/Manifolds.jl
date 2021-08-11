@@ -500,12 +500,12 @@ function get_vector(
 ) where {𝔽}
     N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
-    dims_acc = accumulate(+, [1, dims...])
+    dims_acc = accumulate(+, vcat(1, SVector(dims)))
     parts = ntuple(N) do i
         return get_vector(
             M.manifolds[i],
             submanifold_component(p, i),
-            X[dims_acc[i]:(dims_acc[i] + dims[i] - 1)],
+            view(X, dims_acc[i]:(dims_acc[i] + dims[i] - 1)),
             B,
         )
     end
@@ -532,16 +532,17 @@ end
 function get_vector!(M::ProductManifold, Xⁱ, p, X, B::AbstractBasis)
     N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
-    dims_acc = accumulate(+, [1, dims...])
-    for i in 1:N
+    dims_acc = accumulate(+, vcat(1, SVector(dims)))
+    @inline function set_for_i(i)
         get_vector!(
             M.manifolds[i],
             submanifold_component(Xⁱ, i),
             submanifold_component(p, i),
-            X[dims_acc[i]:(dims_acc[i] + dims[i] - 1)],
+            view(X, dims_acc[i]:(dims_acc[i] + dims[i] - 1)),
             B,
         )
     end
+    ntuple(set_for_i, Val(N))
     return Xⁱ
 end
 function get_vector!(
