@@ -535,7 +535,6 @@ function get_vector(M::ProductManifold, p, Xⁱ, B::VeeOrthogonalBasis)
 end
 
 function get_vector!(M::ProductManifold, X, p, Xⁱ, B::AbstractBasis)
-    N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
     @assert length(Xⁱ) == sum(dims)
     dim_ranges = _get_dim_ranges(dims)
@@ -558,8 +557,8 @@ function get_vector!(
     Xⁱ,
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
 ) where {𝔽}
-    N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
+    @assert length(Xⁱ) == sum(dims)
     dim_ranges = _get_dim_ranges(dims)
     tXⁱ = map(dr -> (@inbounds view(Xⁱ, dr)), dim_ranges)
     ts = ziptuples(
