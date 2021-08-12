@@ -453,6 +453,11 @@ eval(
     end,
 )
 
+function _get_dim_ranges(dims::NTuple{N,Any}) where {N}
+    dims_acc = accumulate(+, vcat(1, SVector(dims)))
+    return ntuple(i -> (dims_acc[i]:(dims_acc[i] + dims[i] - 1)), Val(N))
+end
+
 function get_vector(
     M::ProductManifold,
     p::ProductRepr,
@@ -461,12 +466,12 @@ function get_vector(
 ) where {𝔽}
     N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
-    dims_acc = accumulate(+, [1, dims...])
+    dim_ranges = _get_dim_ranges(dims)
     parts = ntuple(N) do i
         return get_vector(
             M.manifolds[i],
             submanifold_component(p, i),
-            X[dims_acc[i]:(dims_acc[i] + dims[i] - 1)],
+            view(X, dim_ranges[i]),
             B.data.parts[i],
         )
     end
@@ -500,12 +505,12 @@ function get_vector(
 ) where {𝔽}
     N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
-    dims_acc = accumulate(+, vcat(1, SVector(dims)))
+    dim_ranges = _get_dim_ranges(dims)
     parts = ntuple(N) do i
         return get_vector(
             M.manifolds[i],
             submanifold_component(p, i),
-            view(X, dims_acc[i]:(dims_acc[i] + dims[i] - 1)),
+            view(X, dim_ranges[i]),
             B,
         )
     end
@@ -529,21 +534,21 @@ function get_vector(M::ProductManifold, p, Xⁱ, B::VeeOrthogonalBasis)
     return get_vector!(M, X, p, Xⁱ, B)
 end
 
-function get_vector!(M::ProductManifold, Xⁱ, p, X, B::AbstractBasis)
-    N = number_of_components(M)
+function get_vector!(M::ProductManifold, X, p, Xⁱ, B::AbstractBasis)
     dims = map(manifold_dimension, M.manifolds)
-    dims_acc = accumulate(+, vcat(1, SVector(dims)))
-    @inline function set_for_i(i)
-        return get_vector!(
-            M.manifolds[i],
-            submanifold_component(Xⁱ, i),
-            submanifold_component(p, i),
-            view(X, dims_acc[i]:(dims_acc[i] + dims[i] - 1)),
-            B,
-        )
+    @assert length(Xⁱ) == sum(dims)
+    dim_ranges = _get_dim_ranges(dims)
+    tXⁱ = map(dr -> (@inbounds view(Xⁱ, dr)), dim_ranges)
+    ts = ziptuples(
+        M.manifolds,
+        submanifold_components(M, X),
+        submanifold_components(M, p),
+        tXⁱ,
+    )
+    map(ts) do t
+        return get_vector!(t..., B)
     end
-    ntuple(set_for_i, Val(N))
-    return Xⁱ
+    return X
 end
 function get_vector!(
     M::ProductManifold,
@@ -552,17 +557,19 @@ function get_vector!(
     Xⁱ,
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
 ) where {𝔽}
-    N = number_of_components(M)
     dims = map(manifold_dimension, M.manifolds)
-    dims_acc = accumulate(+, [1, dims...])
-    for i in 1:N
-        get_vector!(
-            M.manifolds[i],
-            submanifold_component(X, i),
-            submanifold_component(p, i),
-            Xⁱ[dims_acc[i]:(dims_acc[i] + dims[i] - 1)],
-            B.data.parts[i],
-        )
+    @assert length(Xⁱ) == sum(dims)
+    dim_ranges = _get_dim_ranges(dims)
+    tXⁱ = map(dr -> (@inbounds view(Xⁱ, dr)), dim_ranges)
+    ts = ziptuples(
+        M.manifolds,
+        submanifold_components(M, X),
+        submanifold_components(M, p),
+        tXⁱ,
+        B.data.parts,
+    )
+    map(ts) do t
+        return get_vector!(t...)
     end
     return X
 end
