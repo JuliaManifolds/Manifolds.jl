@@ -376,8 +376,9 @@ end
 
 ProductRepr(points...) = ProductRepr{typeof(points)}(points)
 
-function number_eltype(x::ProductRepr)
-    return typeof(reduce(+, one(number_eltype(eti)) for eti in x.parts))
+@inline function number_eltype(x::ProductRepr)
+    @inline eti_to_one(eti) = one(number_eltype(eti))
+    return typeof(sum(map(eti_to_one, x.parts)))
 end
 
 allocate(x::ProductRepr) = ProductRepr(map(allocate, submanifold_components(x))...)

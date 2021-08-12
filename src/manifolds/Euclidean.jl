@@ -220,13 +220,23 @@ end
 
 function get_vector!(M::Euclidean, Y, ::Any, X, ::DefaultOrDiagonalizingBasis{ℝ})
     S = representation_size(M)
-    Y .= reshape(X, S)
+    copyto!(Y, reshape(X, S))
+    return Y
+end
+function get_vector!(
+    ::Euclidean,
+    Y::AbstractVector,
+    ::Any,
+    X,
+    ::DefaultOrDiagonalizingBasis{ℝ},
+)
+    copyto!(Y, X)
     return Y
 end
 function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, ::Any, X, ::DefaultOrDiagonalizingBasis{ℂ})
     S = representation_size(M)
     N = div(length(X), 2)
-    Y .= reshape(X[1:N] + im * X[(N + 1):end], S)
+    copyto!(Y, reshape(X[1:N] + im * X[(N + 1):end], S))
     return Y
 end
 
