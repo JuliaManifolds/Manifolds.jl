@@ -1209,11 +1209,6 @@ end
 for f in [
     embed,
     get_basis,
-    inverse_retract!,
-    mid_point!,
-    project,
-    retract!,
-    vector_transport_along,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,
