@@ -32,6 +32,9 @@ const SpecialEuclidean{N} = SemidirectProductGroup{
     RotationAction{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N},LeftAction},
 }
 
+const SpecialEuclideanManifold{N} =
+    ProductManifold{ℝ,Tuple{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N}}}
+
 function SpecialEuclidean(n)
     Tn = TranslationGroup(n)
     SOn = SpecialOrthogonal(n)
@@ -48,21 +51,24 @@ const SpecialEuclideanIdentity{N} = Identity{
 Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
 
 Base.@propagate_inbounds function submanifold_component(
-    ::SpecialEuclidean{n},
+    ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
     p::AbstractMatrix,
     ::Val{1},
 ) where {n}
     return view(p, 1:n, n + 1)
 end
 Base.@propagate_inbounds function submanifold_component(
-    ::SpecialEuclidean{n},
+    ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
     p::AbstractMatrix,
     ::Val{2},
 ) where {n}
     return view(p, 1:n, 1:n)
 end
 
-function submanifold_components(G::SpecialEuclidean{n}, p::AbstractMatrix) where {n}
+function submanifold_components(
+    G::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
+    p::AbstractMatrix,
+) where {n}
     @assert size(p) == (n + 1, n + 1)
     @inbounds t = submanifold_component(G, p, Val(1))
     @inbounds R = submanifold_component(G, p, Val(2))
