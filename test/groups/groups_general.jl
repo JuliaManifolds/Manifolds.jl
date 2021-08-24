@@ -120,15 +120,13 @@ include("group_utils.jl")
         for f in [translate, translate!]
             @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:intransparent}()
         end
-        for f in [inverse_translate_diff!, inverse_translate_diff]
+        for f in
+            [get_vector, get_coordinates, inverse_translate_diff!, inverse_translate_diff]
             @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:transparent}()
         end
         for f in [exp_lie!, exp_lie, log_lie, log_lie!]
             @test Manifolds.decorator_transparent_dispatch(f, G, p, p) ===
                   Val{:intransparent}()
-        end
-        for f in [get_vector, get_coordinates]
-            @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:parent}()
         end
         @test Manifolds.decorator_transparent_dispatch(isapprox, G, eg, p) ===
               Val{:transparent}()
