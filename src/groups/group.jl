@@ -1225,6 +1225,29 @@ for f in [
         end,
     )
 end
+for f in [
+    get_coordinates,
+    get_coordinates!,
+    get_vector,
+    get_vector!,
+    inverse_retract!,
+    mid_point!,
+    project,
+    retract!,
+    vector_transport_along,
+]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractGroupManifold{𝔽,O,DefaultGroupDecoratorType},
+                args...,
+            ) where {𝔽,O}
+                return Val(:parent)
+            end
+        end,
+    )
+end
 # (b) changes / transparencies
 for f in [
     check_point,
