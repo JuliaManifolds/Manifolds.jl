@@ -86,3 +86,7 @@ end
 log_lie(::CircleGroup, e::Identity{MultiplicationOperation}) = 0.0 * im
 
 _log_lie!(G::CircleGroup, X, q) = (X .= log_lie(G, q))
+
+function number_of_coordinates(G::CircleGroup, B::AbstractBasis)
+    return number_of_coordinates(base_manifold(G), B)
+end

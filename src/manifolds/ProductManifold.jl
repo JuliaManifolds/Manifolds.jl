@@ -367,7 +367,7 @@ eval(
 function get_coordinates(M::ProductManifold, p, X, B::AbstractBasis)
     reps = map(
         t -> get_coordinates(t..., B),
-        ziptuples(M.manifolds, submanifold_components(p), submanifold_components(X)),
+        ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, X)),
     )
     return vcat(reps...)
 end

@@ -72,6 +72,7 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
         test_manifold(
             G,
             pts,
+            basis_types_to_from=(Manifolds.VeeOrthogonalBasis(), DefaultOrthonormalBasis()),
             test_forward_diff=false,
             test_reverse_diff=false,
             test_vector_spaces=false,
