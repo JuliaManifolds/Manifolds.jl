@@ -152,6 +152,7 @@ include("group_utils.jl")
             [],
             [[1.0, 2.0]];
             test_exp_lie_log=false, # there is no identity element so log/exp on Lie do not work
+            test_one_arg_identity_element=false,
         )
 
         p = [1.0, 2.0]
@@ -196,6 +197,7 @@ include("group_utils.jl")
             [],
             [[1.0 2.0; 3.0 4.0]];
             test_exp_lie_log=false, # no identity available as array
+            test_one_arg_identity_element=false,
         )
 
         p = [2.0 1.0; 2.0 3.0]

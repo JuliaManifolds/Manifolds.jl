@@ -32,6 +32,7 @@ function test_group(
     atol=1e-10,
     test_mutating=true,
     test_exp_lie_log=true,
+    test_one_arg_identity_element=true,
     test_diff=false,
     test_invariance=false,
     test_lie_bracket=false,
@@ -77,7 +78,7 @@ function test_group(
             Test.@test copyto!(G, e, e) === e
 
             ge = identity_element(G, g_pts[1])
-            Test.@test is_point(G, identity_element(G))
+            test_one_arg_identity_element && Test.@test is_identity(G, identity_element(G))
             for g in g_pts
                 Test.@test isapprox(G, compose(G, g, e), g)
                 Test.@test isapprox(G, compose(G, e, g), g)
