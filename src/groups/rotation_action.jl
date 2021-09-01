@@ -91,3 +91,31 @@ end
 function optimal_alignment(A::RotationActionOnVector{N,T,RightAction}, p, q) where {N,T}
     return optimal_alignment(switch_direction(A), q, p)
 end
+
+@doc raw"""
+    RotationAroundAxisAction(axis::AbstractVector)
+
+Space of actions of the group $\mathrm{SO}(2)$ on ℝ around given `axis`.
+"""
+struct RotationAroundAxisAction{TA<:AbstractVector} <: AbstractGroupAction{LeftAction}
+    axis::TA
+end
+
+base_group(::RotationAroundAxisAction) = RealCircleGroup()
+
+g_manifold(::RotationAroundAxisAction) = Euclidean(3)
+
+function apply(A::RotationAroundAxisAction, θ, p)
+    sθ, cθ = sincos(θ)
+    apd = dot(A.axis, p)
+    return p .* cθ .+ cross(A.axis, p) .* sθ .+ A.axis .* apd .* (1 - cθ)
+end
+apply(::RotationAroundAxisAction, ::Identity{AdditionOperation}, p) = p
+
+function apply!(A::RotationAroundAxisAction, q, θ, p)
+    return copyto!(q, apply(A, θ, p))
+end
+
+function inverse_apply(A::RotationAroundAxisAction, θ, p)
+    return apply(A, -θ, p)
+end

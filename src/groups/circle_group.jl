@@ -90,3 +90,57 @@ _log_lie!(G::CircleGroup, X, q) = (X .= log_lie(G, q))
 function number_of_coordinates(G::CircleGroup, B::AbstractBasis)
     return number_of_coordinates(base_manifold(G), B)
 end
+
+@doc raw"""
+    RealCircleGroup <: GroupManifold{Circle{ℝ},AdditionOperation}
+
+The real circle group is the real circle ([`Circle(ℝ)`](@ref)) equipped with
+the group operation of addition ([`AdditionOperation`](@ref)).
+"""
+const RealCircleGroup = GroupManifold{ℝ,Circle{ℝ},AdditionOperation}
+
+RealCircleGroup() = GroupManifold(Circle{ℝ}(), AdditionOperation())
+
+Base.show(io::IO, ::RealCircleGroup) = print(io, "RealCircleGroup()")
+
+invariant_metric_dispatch(::RealCircleGroup, ::ActionDirection) = Val(true)
+
+default_metric_dispatch(::MetricManifold{ℝ,RealCircleGroup,EuclideanMetric}) = Val(true)
+
+_compose(::RealCircleGroup, p, q) = sym_rem(p + q)
+function _compose(G::RealCircleGroup, p::AbstractVector, q::AbstractVector)
+    return map(compose, repeated(G), p, q)
+end
+
+function _compose!(::RealCircleGroup, x, p, q)
+    x .= sym_rem.(p .+ q)
+    return x
+end
+
+identity_element(G::RealCircleGroup) = 0.0
+identity_element(::RealCircleGroup, p::AbstractArray) = map(i -> zero(eltype(p)), p)
+
+Base.inv(G::RealCircleGroup, p::AbstractVector) = map(inv, repeated(G), p)
+
+function inverse_translate(
+    ::RealCircleGroup,
+    p::AbstractVector,
+    q::AbstractVector,
+    ::LeftAction,
+)
+    return map((x, y) -> sym_rem(x - y), q, p)
+end
+function inverse_translate(
+    ::RealCircleGroup,
+    p::AbstractVector,
+    q::AbstractVector,
+    ::RightAction,
+)
+    return map((x, y) -> sym_rem(x - y), q, p)
+end
+
+function exp_lie(::RealCircleGroup, X)
+    return sym_rem(X)
+end
+
+exp_lie!(G::RealCircleGroup, q, X) = (q .= sym_rem(X))

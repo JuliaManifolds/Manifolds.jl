@@ -25,7 +25,7 @@ include("group_utils.jl")
         angles = (0.0, π / 2, 2π / 3, π / 4)
         a_pts = convert.(T_A, [[cos(ϕ) -sin(ϕ); sin(ϕ) cos(ϕ)] for ϕ in angles])
         m_pts = convert.(T_M, [[0.0, 1.0], [-1.0, 0.0], [1.0, 1.0]])
-        v_pts = convert.(T_M, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        X_pts = convert.(T_M, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
 
         atol = if eltype(T_M) == Float32
             2e-7
@@ -36,7 +36,7 @@ include("group_utils.jl")
             A_left,
             a_pts,
             m_pts,
-            v_pts;
+            X_pts;
             test_optimal_alignment=true,
             test_diff=true,
             atol=atol,
@@ -46,9 +46,49 @@ include("group_utils.jl")
             A_right,
             a_pts,
             m_pts,
-            v_pts;
+            X_pts;
             test_optimal_alignment=true,
             test_diff=true,
+            atol=atol,
+        )
+    end
+end
+
+@testset "Rotation around axis action" begin
+    M = Circle()
+    G = RealCircleGroup()
+    axis = [sqrt(2) / 2, sqrt(2) / 2, 0.0]
+    A = Manifolds.RotationAroundAxisAction(axis)
+
+    types_a = [Ref(Float64)]
+
+    types_m = [Vector{Float64}]
+
+    @test g_manifold(A) == Euclidean(3)
+    @test base_group(A) == G
+    @test isa(A, AbstractGroupAction{LeftAction})
+    @test base_manifold(G) == M
+
+    for (i, T_A, T_M) in zip(1:length(types_a), types_a, types_m)
+        angles = (0.0, π / 2, 2π / 3, π / 4)
+        a_pts = convert.(T_A, [angles...])
+        m_pts = convert.(T_M, [[0.0, 1.0, 0.0], [-1.0, 0.0, 1.0], [1.0, 1.0, -2.0]])
+        X_pts = convert.(T_M, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+
+        atol = if eltype(T_M) == Float32
+            2e-7
+        else
+            1e-15
+        end
+        test_action(
+            A,
+            a_pts,
+            m_pts,
+            X_pts;
+            test_optimal_alignment=false,
+            test_diff=false,
+            test_mutating=false,
+            test_switch_direction=false,
             atol=atol,
         )
     end
