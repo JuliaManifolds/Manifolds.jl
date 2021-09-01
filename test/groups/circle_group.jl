@@ -156,7 +156,7 @@ end
             G,
             pts,
             basis_types_to_from=(Manifolds.VeeOrthogonalBasis(), DefaultOrthonormalBasis()),
-            test_forward_diff=true,
+            test_forward_diff=false,
             test_reverse_diff=false,
             test_vector_spaces=false,
             test_project_tangent=true,
