@@ -77,6 +77,7 @@ function test_group(
             Test.@test copyto!(G, e, e) === e
 
             ge = identity_element(G, g_pts[1])
+            Test.@test is_point(G, identity_element(G))
             for g in g_pts
                 Test.@test isapprox(G, compose(G, g, e), g)
                 Test.@test isapprox(G, compose(G, e, g), g)
