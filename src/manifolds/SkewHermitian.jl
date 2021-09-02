@@ -199,6 +199,10 @@ function manifold_dimension(::SkewHermitianMatrices{N,𝔽}) where {N,𝔽}
     return div(N * (N + 1), 2) * real_dimension(𝔽) - N
 end
 
+function number_of_coordinates(M::SkewHermitianMatrices{N,ℂ}, ::AbstractBasis{ℂ}) where {N}
+    return manifold_dimension(M)
+end
+
 @doc raw"""
     project(M::SkewHermitianMatrices, p)
 

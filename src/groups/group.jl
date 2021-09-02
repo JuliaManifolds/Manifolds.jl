@@ -1004,6 +1004,8 @@ adjoint_action(::AdditionGroup, p, X) = X
 
 adjoint_action!(G::AdditionGroup, Y, p, X) = copyto!(G, Y, p, X)
 
+identity_element(::AdditionGroup, p::Number) = zero(p)
+
 function identity_element!(::AbstractGroupManifold{𝔽,<:AdditionOperation}, p) where {𝔽}
     return fill!(p, zero(eltype(p)))
 end

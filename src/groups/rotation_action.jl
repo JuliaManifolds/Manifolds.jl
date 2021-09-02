@@ -50,7 +50,7 @@ apply!(A::RotationActionOnVector{N,F,LeftAction}, q, a, p) where {N,F} = mul!(q,
 function inverse_apply(A::RotationActionOnVector{N,F,LeftAction}, a, p) where {N,F}
     return inv(base_group(A), a) * p
 end
-inverse_apply(A::RotationActionOnVector{N,F,RightAction}, a, p) where {N,F} = a * p
+inverse_apply(::RotationActionOnVector{N,F,RightAction}, a, p) where {N,F} = a * p
 
 apply_diff(::RotationActionOnVector{N,F,LeftAction}, a, p, X) where {N,F} = a * X
 function apply_diff(
@@ -90,4 +90,42 @@ function optimal_alignment(A::RotationActionOnVector{N,T,LeftAction}, p, q) wher
 end
 function optimal_alignment(A::RotationActionOnVector{N,T,RightAction}, p, q) where {N,T}
     return optimal_alignment(switch_direction(A), q, p)
+end
+
+@doc raw"""
+    RotationAroundAxisAction(axis::AbstractVector)
+
+Space of actions of the circle group [`RealCircleGroup`](@ref) on $ℝ^3$ around given `axis`.
+"""
+struct RotationAroundAxisAction{TA<:AbstractVector} <: AbstractGroupAction{LeftAction}
+    axis::TA
+end
+
+base_group(::RotationAroundAxisAction) = RealCircleGroup()
+
+g_manifold(::RotationAroundAxisAction) = Euclidean(3)
+
+@doc raw"""
+    apply(A::RotationAroundAxisAction, θ, p)
+
+Rotate point `p` from [`Euclidean(3)`](@ref) manifold around axis `A.axis` by angle `θ`.
+The formula reads
+````math
+p_{rot} = (\cos(θ))p + (k×p) \sin(θ) + k (k⋅p) (1-\cos(θ)),
+````
+where $k$ is the vector `A.axis` and `⋅` is the dot product.
+"""
+function apply(A::RotationAroundAxisAction, θ, p)
+    sθ, cθ = sincos(θ)
+    apd = dot(A.axis, p)
+    return p .* cθ .+ cross(A.axis, p) .* sθ .+ A.axis .* apd .* (1 - cθ)
+end
+apply(::RotationAroundAxisAction, ::Identity{AdditionOperation}, p) = p
+
+function apply!(A::RotationAroundAxisAction, q, θ, p)
+    return copyto!(q, apply(A, θ, p))
+end
+
+function inverse_apply(A::RotationAroundAxisAction, θ, p)
+    return apply(A, -θ, p)
 end
