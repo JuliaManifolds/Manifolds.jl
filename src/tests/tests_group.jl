@@ -563,14 +563,15 @@ function test_action(
                 end
             end
 
-            test_mutating_group && Test.@testset "mutating" begin
+            test_mutating_group && Test.@testset "mutating group composition" begin
                 a12, a23, a12_3, a1_23 = allocate.(repeat([a_pts[1]], 4))
                 Test.@test compose!(A, a12, a_pts[1], a_pts[2]) === a12
                 Test.@test compose!(A, a23, a_pts[2], a_pts[3]) === a23
                 Test.@test compose!(A, a12_3, a12, a_pts[3]) === a12_3
                 Test.@test compose!(A, a1_23, a_pts[1], a23) === a1_23
                 Test.@test isapprox(G, a12_3, a1_23; atol=atol)
-
+            end
+            test_mutating_action && Test.@testset "mutating apply!" begin
                 for m in m_pts
                     a12_a3_m, a1_a23_m = allocate(m), allocate(m)
                     Test.@test apply!(A, a12_a3_m, a12, apply(A, a_pts[3], m)) === a12_a3_m
