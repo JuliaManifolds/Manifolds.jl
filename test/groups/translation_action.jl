@@ -38,7 +38,7 @@ include("group_utils.jl")
                     [1.0 1.0 2.0; 3.0 2.0 1.0],
                 ],
             )
-        v_pts =
+        X_pts =
             convert.(
                 T_M,
                 [
@@ -53,13 +53,13 @@ include("group_utils.jl")
         else
             1e-15
         end
-        @test apply_diff(A, a_pts[1], m_pts[1], v_pts[1]) === v_pts[1]
-        @test inverse_apply_diff(A, a_pts[1], m_pts[1], v_pts[1]) === v_pts[1]
+        @test apply_diff(A, a_pts[1], m_pts[1], X_pts[1]) === X_pts[1]
+        @test inverse_apply_diff(A, a_pts[1], m_pts[1], X_pts[1]) === X_pts[1]
         test_action(
             A,
             a_pts,
             m_pts,
-            v_pts;
+            X_pts;
             test_optimal_alignment=false,
             test_diff=true,
             atol=atol,

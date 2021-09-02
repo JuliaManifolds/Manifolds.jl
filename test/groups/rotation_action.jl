@@ -87,7 +87,7 @@ end
             X_pts;
             test_optimal_alignment=false,
             test_diff=false,
-            test_mutating=false,
+            test_mutating_group=false,
             test_switch_direction=false,
             atol=atol,
         )

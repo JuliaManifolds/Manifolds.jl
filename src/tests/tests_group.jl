@@ -485,7 +485,8 @@ end
         atol = 1e-10,
         atol_ident_compose = 0,
         test_optimal_alignment = false,
-        test_mutating = true,
+        test_mutating_group=true,
+        test_mutating_action=true,
         test_diff = false,
         test_switch_direction = true,
     )
@@ -506,7 +507,8 @@ function test_action(
     atol=1e-10,
     atol_ident_compose=0,
     test_optimal_alignment=false,
-    test_mutating=true,
+    test_mutating_group=true,
+    test_mutating_action=true,
     test_diff=false,
     test_switch_direction=true,
 )
@@ -561,7 +563,7 @@ function test_action(
                 end
             end
 
-            test_mutating && Test.@testset "mutating" begin
+            test_mutating_group && Test.@testset "mutating" begin
                 a12, a23, a12_3, a1_23 = allocate.(repeat([a_pts[1]], 4))
                 Test.@test compose!(A, a12, a_pts[1], a_pts[2]) === a12
                 Test.@test compose!(A, a23, a_pts[2], a_pts[3]) === a23
@@ -597,7 +599,7 @@ function test_action(
                 end
             end
 
-            test_mutating && Test.@testset "mutating" begin
+            test_mutating_group && Test.@testset "mutating" begin
                 for a in a_pts
                     h = allocate(a)
                     Test.@test compose!(A, h, a, e) === h
@@ -677,7 +679,7 @@ function test_action(
             Test.@test isapprox(M, m, inverse_apply_diff(A, e, m, X), X; atol=atol)
         end
 
-        test_mutating && Test.@testset "mutating" begin
+        test_mutating_action && Test.@testset "mutating" begin
             for (m, X) in zip(m_pts, X_pts)
                 for a in a_pts
                     am = apply(A, a, m)
@@ -716,7 +718,7 @@ function test_action(
         Test.@test isapprox(G, act, act_opt; atol=atol)
         Test.@test isapprox(G, act2, act_opt; atol=atol)
 
-        test_mutating && Test.@testset "mutating" begin
+        test_mutating_group && Test.@testset "mutating" begin
             act_opt2 = allocate(act_opt)
             optimal_alignment!(A, act_opt2, m_pts[2], m_pts[1])
             Test.@test isapprox(G, act_opt, act_opt2; atol=atol)
