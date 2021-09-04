@@ -144,7 +144,11 @@ components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_point(M::ProductManifold, p::Union{ProductRepr,ProductArray}; kwargs...)
+function check_point(
+    M::ProductManifold,
+    p::Union{ProductRepr,ProductArray,ArrayPartition};
+    kwargs...,
+)
     ts = ziptuples(Tuple(1:length(M.manifolds)), M.manifolds, submanifold_components(M, p))
     e = [(t[1], check_point(t[2:end]...; kwargs...)) for t in ts]
     errors = filter((x) -> !(x[2] === nothing), e)
@@ -156,7 +160,7 @@ end
 function check_point(M::ProductManifold, p; kwargs...)
     return DomainError(
         typeof(p),
-        "The point $p is not a point on $M, since currently only ProductRepr and ProductArray are supported types for points on arbitrary product manifolds",
+        "The point $p is not a point on $M, since currently only ProductRepr, ProductArray and ArrayPartition are supported types for points on arbitrary product manifolds",
     )
 end
 
@@ -172,8 +176,8 @@ The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(
     M::ProductManifold,
-    p::Union{ProductRepr,ProductArray},
-    X::Union{ProductRepr,ProductArray};
+    p::Union{ProductRepr,ProductArray,ArrayPartition},
+    X::Union{ProductRepr,ProductArray,ArrayPartition};
     kwargs...,
 )
     ts = ziptuples(
@@ -192,27 +196,38 @@ end
 function check_vector(M::ProductManifold, p, X; kwargs...)
     return DomainError(
         typeof(X),
-        "The vector $X is not a tangent vector to any tangent space on $M, since currently only ProductRepr and ProductArray are supported types for tangent vectors on arbitrary product manifolds",
+        "The vector $X is not a tangent vector to any tangent space on $M, since currently only ProductRepr, ProductArray and ArrayPartition are supported types for tangent vectors on arbitrary product manifolds",
     )
 end
 
-function copyto!(M::ProductManifold, q::ProductRepr, p::ProductRepr)
-    map(copyto!, M.manifolds, submanifold_components(q), submanifold_components(p))
-    return q
-end
-function copyto!(M::ProductManifold, Y::ProductRepr, p::ProductRepr, X::ProductRepr)
-    map(
-        copyto!,
-        M.manifolds,
-        submanifold_components(Y),
-        submanifold_components(p),
-        submanifold_components(X),
+for TP in [ProductRepr, ArrayPartition]
+    eval(
+        quote
+            function copyto!(M::ProductManifold, q::$TP, p::$TP)
+                map(
+                    copyto!,
+                    M.manifolds,
+                    submanifold_components(q),
+                    submanifold_components(p),
+                )
+                return q
+            end
+            function copyto!(M::ProductManifold, Y::$TP, p::$TP, X::$TP)
+                map(
+                    copyto!,
+                    M.manifolds,
+                    submanifold_components(Y),
+                    submanifold_components(p),
+                    submanifold_components(X),
+                )
+                return Y
+            end
+        end,
     )
-    return Y
 end
 
 @doc raw"""
-    cross(M,N)
+    cross(M, N)
     cross(M1, M2, M3,...)
 
 Return the [`ProductManifold`](@ref) For two [`AbstractManifold`](@ref)s `M` and `N`,
@@ -264,6 +279,16 @@ which is the elementwise exponential map on the internal manifolds that build `M
 exp(::ProductManifold, ::Any...)
 function Base.exp(M::ProductManifold, p::ProductRepr, X::ProductRepr)
     return ProductRepr(
+        map(
+            exp,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+        )...,
+    )
+end
+function Base.exp(M::ProductManifold, p::ArrayPartition, X::ArrayPartition)
+    return ArrayPartition(
         map(
             exp,
             M.manifolds,
@@ -458,35 +483,6 @@ function _get_dim_ranges(dims::NTuple{N,Any}) where {N}
     return ntuple(i -> (dims_acc[i]:(dims_acc[i] + dims[i] - 1)), Val(N))
 end
 
-function get_vector(
-    M::ProductManifold,
-    p::ProductRepr,
-    X,
-    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
-) where {𝔽}
-    N = number_of_components(M)
-    dims = map(manifold_dimension, M.manifolds)
-    dim_ranges = _get_dim_ranges(dims)
-    parts = ntuple(N) do i
-        return get_vector(
-            M.manifolds[i],
-            submanifold_component(p, i),
-            view(X, dim_ranges[i]),
-            B.data.parts[i],
-        )
-    end
-    return ProductRepr(parts)
-end
-eval(
-    quote
-        @invoke_maker 4 (CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData} where {𝔽}) get_vector(
-            M::ProductManifold,
-            p::ProductRepr,
-            X,
-            B::CachedBasis{ℝ,<:AbstractBasis{ℝ},<:ProductBasisData},
-        )
-    end,
-)
 eval(
     quote
         @invoke_maker 1 AbstractManifold get_vector(
@@ -497,37 +493,70 @@ eval(
         )
     end,
 )
-function get_vector(
-    M::ProductManifold,
-    p::ProductRepr,
-    X,
-    B::AbstractBasis{𝔽,TangentSpaceType},
-) where {𝔽}
-    N = number_of_components(M)
-    dims = map(manifold_dimension, M.manifolds)
-    dim_ranges = _get_dim_ranges(dims)
-    parts = ntuple(N) do i
-        return get_vector(
-            M.manifolds[i],
-            submanifold_component(p, i),
-            view(X, dim_ranges[i]),
-            B,
-        )
-    end
-    return ProductRepr(parts)
-end
-function get_vector(M::ProductManifold, p::ProductRepr, Xⁱ, B::VeeOrthogonalBasis)
-    dim = manifold_dimension(M)
-    @assert length(Xⁱ) == dim
-    i = one(dim)
-    ts = ziptuples(M.manifolds, submanifold_components(M, p))
-    mapped = map(ts) do t
-        dim = manifold_dimension(first(t))
-        tXⁱ = @inbounds view(Xⁱ, i:(i + dim - 1))
-        i += dim
-        return get_vector(t..., tXⁱ, B)
-    end
-    return ProductRepr(mapped...)
+for TP in [ProductRepr, ArrayPartition]
+    eval(
+        quote
+            @invoke_maker 4 (
+                CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData} where {𝔽}
+            ) get_vector(
+                M::ProductManifold,
+                p::$TP,
+                X,
+                B::CachedBasis{ℝ,<:AbstractBasis{ℝ},<:ProductBasisData},
+            )
+            function get_vector(
+                M::ProductManifold,
+                p::$TP,
+                X,
+                B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+            ) where {𝔽}
+                N = number_of_components(M)
+                dims = map(manifold_dimension, M.manifolds)
+                dim_ranges = _get_dim_ranges(dims)
+                parts = ntuple(N) do i
+                    return get_vector(
+                        M.manifolds[i],
+                        submanifold_component(p, i),
+                        view(X, dim_ranges[i]),
+                        B.data.parts[i],
+                    )
+                end
+                return $TP(parts)
+            end
+            function get_vector(
+                M::ProductManifold,
+                p::$TP,
+                X,
+                B::AbstractBasis{𝔽,TangentSpaceType},
+            ) where {𝔽}
+                N = number_of_components(M)
+                dims = map(manifold_dimension, M.manifolds)
+                dim_ranges = _get_dim_ranges(dims)
+                parts = ntuple(N) do i
+                    return get_vector(
+                        M.manifolds[i],
+                        submanifold_component(p, i),
+                        view(X, dim_ranges[i]),
+                        B,
+                    )
+                end
+                return $TP(parts)
+            end
+            function get_vector(M::ProductManifold, p::$TP, Xⁱ, B::VeeOrthogonalBasis)
+                dim = manifold_dimension(M)
+                @assert length(Xⁱ) == dim
+                i = one(dim)
+                ts = ziptuples(M.manifolds, submanifold_components(M, p))
+                mapped = map(ts) do t
+                    dim = manifold_dimension(first(t))
+                    tXⁱ = @inbounds view(Xⁱ, i:(i + dim - 1))
+                    i += dim
+                    return get_vector(t..., tXⁱ, B)
+                end
+                return $TP(mapped...)
+            end
+        end,
+    )
 end
 function get_vector(M::ProductManifold, p, Xⁱ, B::VeeOrthogonalBasis)
     X = allocate_result(M, hat, p, Xⁱ)
@@ -613,6 +642,24 @@ function get_vectors(
     end
     return vs
 end
+function get_vectors(
+    M::ProductManifold,
+    p::ArrayPartition,
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+) where {𝔽}
+    N = number_of_components(M)
+    xparts = submanifold_components(p)
+    BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.data.parts))
+    zero_tvs = map(t -> zero_vector(t...), ziptuples(M.manifolds, xparts))
+    vs = typeof(ArrayPartition(zero_tvs...))[]
+    for i in 1:N, k in 1:length(BVs[i])
+        push!(
+            vs,
+            ArrayPartition(zero_tvs[1:(i - 1)]..., BVs[i][k], zero_tvs[(i + 1):end]...),
+        )
+    end
+    return vs
+end
 
 """
     getindex(p, M::ProductManifold, i::Union{Integer,Colon,AbstractVector})
@@ -635,6 +682,13 @@ Base.@propagate_inbounds function Base.getindex(
     i::Union{Integer,Colon,AbstractVector,Val},
 )
     return collect(get_component(M, p, i))
+end
+Base.@propagate_inbounds function Base.getindex(
+    p::ArrayPartition,
+    M::ProductManifold,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return get_component(M, p, i)
 end
 
 @doc raw"""
@@ -759,8 +813,19 @@ Compute the logarithmic map from `p` to `q` on the [`ProductManifold`](@ref) `M`
 which can be computed using the logarithmic maps of the manifolds elementwise.
 """
 log(::ProductManifold, ::Any...)
+
 function Base.log(M::ProductManifold, p::ProductRepr, q::ProductRepr)
     return ProductRepr(
+        map(
+            log,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
+        )...,
+    )
+end
+function Base.log(M::ProductManifold, p::ArrayPartition, q::ArrayPartition)
+    return ArrayPartition(
         map(
             log,
             M.manifolds,
@@ -867,6 +932,9 @@ end
 function project(M::ProductManifold, p::ProductRepr)
     return ProductRepr(map(project, M.manifolds, submanifold_components(M, p))...)
 end
+function project(M::ProductManifold, p::ArrayPartition)
+    return ArrayPartition(map(project, M.manifolds, submanifold_components(M, p))...)
+end
 
 function project!(M::ProductManifold, q, p)
     map(project!, M.manifolds, submanifold_components(M, q), submanifold_components(M, p))
@@ -875,6 +943,16 @@ end
 
 function project(M::ProductManifold, p::ProductRepr, X::ProductRepr)
     return ProductRepr(
+        map(
+            project,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+        )...,
+    )
+end
+function project(M::ProductManifold, p::ArrayPartition, X::ArrayPartition)
+    return ArrayPartition(
         map(
             project,
             M.manifolds,
@@ -1056,7 +1134,7 @@ function Base.show(
     mime::MIME"text/plain",
     B::CachedBasis{𝔽,T,D},
 ) where {𝔽,T<:AbstractBasis{𝔽},D<:ProductBasisData}
-    println(io, "$(T()) for a product manifold")
+    println(io, "$(T) for a product manifold")
     for (i, cb) in enumerate(B.data.parts)
         println(io, "Basis for component $i:")
         show(io, mime, cb)
