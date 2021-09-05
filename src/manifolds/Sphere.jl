@@ -190,7 +190,7 @@ function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) w
         V = hcat(B.frame_direction / norm(M, p, B.frame_direction), V)
         κ[1] = 0 # no curvature along the geodesic direction, if x!=y
     end
-    T = typeof(B.frame_direction)
+    T = typeof(similar(B.frame_direction))
     Ξ = [convert(T, V[:, i]) for i in 1:n]
     return CachedBasis(B, κ, Ξ)
 end

@@ -1,5 +1,7 @@
 include("../utils.jl")
 
+using RecursiveArrayTools: ArrayPartition
+
 struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
 
 function parray(M, x)
