@@ -52,6 +52,34 @@ inner product ``g(X, X) > 0`` whenever ``X`` is not the zero vector.
 abstract type RiemannianMetric <: AbstractMetric end
 
 @doc raw"""
+    change_metric(M::AbstractcManifold, G2::AbstractMetric, p, X)
+
+On the [`AbstractManifold`](@ref) `M` with implicitly given metric ``g_1``
+and a second [`AbstractMetric`](@ref) ``g_2`` this method performs a change of metric in the
+sense that it returns the tangent vector `Z` for which
+
+```
+g_2(X,Y) = g_1(Z,Y) \quad \text{for all} Y ∈ T_p\mathcal M.
+```
+
+holds. With respect to any basis ``b_1,…,b_d``, i.e. in [`local_metric`](@ref)s ``G_1 = (g^1_{ij})``
+``G_2 = (g^2_{ij})`` with [`inverse_local_metric`](@ref) and decomposing ``G^{-1}_1 = (g_1^{ij})``
+``G^{-1}_2 = (g_2^{ij})``
+-- using Einstein notation in the following -- ``X = X^ib_i`` and ``Z = Z^ib_i`` this reads
+
+```
+g^2_{ij} X^iY^i = g^1_{ij} Z^iY^i \text{for all} Y = Y^ib_i ∈ T_p\mathcal M
+```
+
+and hence writing ``x = (X^1,\ldots,X^d)^° \mathrm{T}`` and ``z = (Z^1,\ldots,Z^d)^\mathrm{T}``
+
+```
+z = G_1^{-1} G_2 x.
+```
+"""
+change_metric(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
+
+@doc raw"""
     christoffel_symbols_first(
         M::MetricManifold,
         p,
@@ -179,12 +207,16 @@ flat(::MetricManifold, ::Any...)
 end
 
 @doc raw"""
-    inverse_local_metric(M::AbstractcManifold, p, B::AbstractBasis)
+    inverse_local_metric(M::AbstractcManifold{𝔽}, p, B::AbstractBasis)
 
-Return the local matrix representation of the inverse metric (cometric) tensor, usually
-written ``g^{ij}``.
+Return the local matrix representation of the inverse metric (cometric) tensor
+of the tangent space at `p` on the [`AbstractManifold`](@ref) `M` with respect
+to the [`AbstractBasis`](@ref) basis `B`.
 
-See also [`local_metric`](@ref)
+The metric tensor (see [`local_metric`](@ref)) os isually denoted by ``G = (g_{ij}) ∈ 𝔽^{d×d}``,
+where ``d`` is the dimension of the manifold.
+
+Then the inverse local metric is denoted by ``G^{-1} = g^{ij}``.
 """
 inverse_local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 function inverse_local_metric(M::AbstractManifold, p, B::AbstractBasis)
@@ -280,13 +312,16 @@ inner(::MetricManifold, ::Any, ::Any, ::Any)
 end
 
 @doc raw"""
-    local_metric(M::AbstractManifold, p, B::AbstractBasis)
+    local_metric(M::AbstractManifold{𝔽}, p, B::AbstractBasis)
 
 Return the local matrix representation at the point `p` of the metric tensor ``g`` with
-respect to the [`AbstractBasis`](@ref) `B` on the [`AbstractManifold`](@ref) `M`, usually written ``g_{ij}``.
-The matrix has the property that ``g(X, Y)=X^\mathrm{T} [g_{ij}] Y = g_{ij} X^i Y^j``,
-where the latter expression uses Einstein summation convention.
-The metric tensor is such that the formula works for the given [`AbstractBasis`](@ref) `B`.
+respect to the [`AbstractBasis`](@ref) `B` on the [`AbstractManifold`](@ref) `M`.
+Let ``d``denote the dimension of the manifold and $b_1,\ldots,b_d$ the basis vectors.
+Then the local matrix representation is a matrix ``G\in 𝔽^{n\times n}`` whose entries are
+given by ``g_{ij} = g_p(b_i,b_j)_p, i,j\in\{1,…,d\}``.
+
+This yields the property for two tangent vectors (using Einstein summation convention)
+``X = X^ib_i, Y=Y^ib_i \in T_p\mathcal M`` we get ``g_p(X, Y) = g_{ij} X^i Y^j``.
 """
 local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 @decorator_transparent_signature local_metric(
