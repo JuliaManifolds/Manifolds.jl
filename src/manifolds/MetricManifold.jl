@@ -52,6 +52,69 @@ inner product ``g(X, X) > 0`` whenever ``X`` is not the zero vector.
 abstract type RiemannianMetric <: AbstractMetric end
 
 @doc raw"""
+    change_gradient(M::AbstractManifold, G2::AbstractMetric, p, X)
+
+Convert the gradint `X` at `p` on the[`AbstractManifold`](@ref) `M` from one metric to another.
+
+Assume that for a real-valued function ``f: \mathcal M \to \mathcal M`` we are given the Riesz representer of the differential with respect to the metric ``g_2`` i.e.
+
+```math
+    g_2(X,Y) = Df(p)[Y] \quad \text{for all} Y ∈ T_p\mathcal M.
+```
+
+In order to convert this into the gradient with respect to the (implicitly given) metric ``g_1`` of `M`,
+we have to find the conversion function ``c: T_p\mathcal M \to \T_p\mathcal M`` such that
+
+```math
+    g_2(X,Y) = g_1(c(X),Y)
+```
+
+If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
+representations ``G_1`` and ``G_2`` and ``x,y`` are the local coordinates with respect to
+the same basis of the tangent space, the equation reads
+
+```math
+   x^*G_2y = c(x)^*G_1 y \quad \text{for all} y \in ℝ^d,
+```
+where `\cdot^*`` denotes the conjugate transpose.
+
+and we obtain `c(x) = (G_1\backslask G_2)^*x `
+
+# Examples
+
+    change_gradient(Sphere(2), EuclideanMetric(), p, X)
+
+Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embedding restricted to ``T_p\mathbb S^2``, this just returns `X`
+
+    change_gradient(SymmetricPOsitiveDefinite(3), EuclideanMetric, p, X)
+
+Here, the default metric in `\mathcal P(3)` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``pXp``
+"""
+change_tangent(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_tangent(M::AbstractManifold, G::AbstractMetric, p, X)
+    if is_default_metric(M, G)
+        return X
+    end
+    # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
+    B = DefaultOrthogonalBasis()
+    G1 = local_metric(M, p, B)
+    G2 = localMetric(G(M), p, B)
+    x = get_coordinates(M, p, X, B)
+    z = (G2 \ G1)'x
+    return get_vector(M, p, z, B)
+end
+
+function change_metric(
+    ::MetricManifold{<:M,<:G},
+    ::G,
+    p,
+    X,
+) where {M<:AbstractManifold,G<:AbstractMetric}
+    return X
+end
+
+@doc raw"""
     change_metric(M::AbstractcManifold, G2::AbstractMetric, p, X)
 
 On the [`AbstractManifold`](@ref) `M` with implicitly given metric ``g_1``
@@ -66,7 +129,7 @@ holds.
 
 If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
 representations ``G_1 = C_1C_1^*`` and ``G_2 = C_2C_2^*``, where ``C_1,C_2`` denote their
-Cholesky factor, then solving ``C_1C_1^* = G_1 = B^*G_2B = B^*C_2C_2^*B`` yields ``B = (C_2 \backslash C_1)^*``,
+Cholesky factor, then solving ``C_2C_2^* = G_2 = B^*G_1B = B^*C_1C_1^*B`` yields ``B = (C_1 \backslash C_2)^*``,
 where `\cdot^*`` denotes the conjugate transpose.
 
 This function returns `Z = BX`.
@@ -79,7 +142,7 @@ Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embeddin
 
     change_metric(SymmetricPOsitiveDefinite(3), EuclideanMetric, p, X)
 
-Here, the default metric in `\mathcal P(3)` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``p^{-1}Xp^{-1} = p\backslash X/p``
+Here, the default metric in `\mathcal P(3)` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``B=p``
 
 """
 change_metric(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
@@ -88,11 +151,15 @@ function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
     if is_default_metric(M, G)
         return X
     end
-    return throw(
-        ErrorException(
-            "No metric conversion implemented from the metric $G into the default metric on $M in the tangent space at $p",
-        ),
-    )
+    # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
+    B = DefaultOrthogonalBasis()
+    G1 = local_metric(M, p, B)
+    G2 = localMetric(G(M), p, B)
+    x = get_coordinates(M, p, X, B)
+    C1 = cholesky(G1)
+    C2 = cholesky(G2)
+    z = (C1 \ C2)'x
+    return get_vector(M, p, z, B)
 end
 
 function change_metric(
@@ -164,7 +231,7 @@ Return the [`LeviCivitaConnection`](@ref) for a metric manifold.
 connection(::MetricManifold) = LeviCivitaConnection()
 
 @doc raw"""
-    det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
+    det_local_metric(M::AbstractManifold, p, B::AbstractBasis=DefaultOrthogonalBasis)
 
 Return the determinant of local matrix representation of the metric tensor ``g``, i.e. of the
 matrix ``G(p)`` representing the metric in the tangent space at ``p`` with as a matrix.
