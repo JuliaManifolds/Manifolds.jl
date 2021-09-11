@@ -641,7 +641,7 @@ end
         Bc = get_basis(Mse, p, B)
         Bc_components_s = sprint.(show, "text/plain", Bc.data.parts)
         @test sprint(show, "text/plain", Bc) == """
-        DefaultOrthonormalBasis{ℝ, ManifoldsBase.TangentSpaceType} for a product manifold
+        $(typeof(B)) for a product manifold
         Basis for component 1:
         $(Bc_components_s[1])
         Basis for component 2:
