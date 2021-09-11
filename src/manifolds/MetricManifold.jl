@@ -56,11 +56,14 @@ abstract type RiemannianMetric <: AbstractMetric end
 
 Convert the gradint `X` at `p` on the[`AbstractManifold`](@ref) `M` from one metric to another.
 
-Assume that for a real-valued function ``f: \mathcal M \to ℝ`` we are given the Riesz representer of the differential with respect to the metric ``g_2`` i.e.
+Assume that for a real-valued function ``f: \mathcal M \to ℝ`` the input `X` is the gradient or in
+other words the [Riesz representer](https://en.wikipedia.org/wiki/Riesz_representation_theorem#Riesz_representation_theorem) of the differential ``Df(p)``` with respect to the metric ``g_2`` i.e.
 
 ```math
     g_2(X,Y) = Df(p)[Y] \quad \text{for all } Y ∈ T_p\mathcal M.
 ```
+
+(It could actually also be the Riesz representer of _any_ linear function, not just ``Df(p)``).
 
 In order to convert this into the gradient with respect to the (implicitly given) metric ``g_1`` of `M`,
 we have to find the conversion function ``c: T_p\mathcal M \to \T_p\mathcal M`` such that
@@ -74,11 +77,11 @@ representations ``G_1`` and ``G_2`` and ``x,y`` are the local coordinates with r
 the same basis of the tangent space, the equation reads
 
 ```math
-   x^*G_2y = c(x)^*G_1 y \quad \text{for all } y \in ℝ^d,
+   x^{\mathrm{H}}G_2y = c(x)^{\mathrm{H}}G_1 y \quad \text{for all } y \in ℝ^d,
 ```
-where `\cdot^*`` denotes the conjugate transpose.
+where `\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
 
-and we obtain `c(x) = (G_1\backslask G_2)^*x `
+and we obtain `c(x) = (G_1\backslask G_2)^{\mathrm{H}}x `
 
 # Examples
 
@@ -128,9 +131,9 @@ g_2(Y_1,Y_2) = g_1(BY_1,BY_2) \quad \text{for all } Y_1, Y_2 ∈ T_p\mathcal M.
 holds.
 
 If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
-representations ``G_1 = C_1C_1^*`` and ``G_2 = C_2C_2^*``, where ``C_1,C_2`` denote their
-Cholesky factor, then solving ``C_2C_2^* = G_2 = B^*G_1B = B^*C_1C_1^*B`` yields ``B = (C_1 \backslash C_2)^*``,
-where `\cdot^*`` denotes the conjugate transpose.
+representations ``G_1 = C_1C_1^{\mathrm{H}}`` and ``G_2 = C_2C_2^{\mathrm{H}}``, where ``C_1,C_2`` denote their
+Cholesky factor, then solving ``C_2C_2^{\mathrm{H}} = G_2 = B^{\mathrm{H}}G_1B = B^{\mathrm{H}}C_1C_1^{\mathrm{H}}B`` yields ``B = (C_1 \backslash C_2)^{\mathrm{H}}``,
+where `\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
 
 This function returns `Z = BX`.
 
