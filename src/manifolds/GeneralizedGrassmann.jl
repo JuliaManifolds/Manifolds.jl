@@ -58,6 +58,28 @@ function GeneralizedGrassmann(
 end
 
 @doc raw"""
+    change_metric(M::GeneralizedGrassmann, ::EuclideanMetric, p X)
+
+Change `X` to the corresponding representer of the gradient with respect to the scaled metric
+of the [`GeneralizedGrassmann`](@ref) `M`, i.e. `B\X`.
+"""
+function change_gradient(M::GeneralizedGrassmann, ::EuclideanMetric, p, X)
+    return M.B \ X
+end
+
+@doc raw"""
+    change_metric(M::GeneralizedGrassmann, ::EuclideanMetric, p X)
+
+Change `X` to the corresponding vector with respect to the metric of the [`GeneralizedGrassmann`](@ref) `M`,
+i.e. let ``B=LL'`` be the cholesky decomposition of the metrix `B` then the corresponding vector is ``L\X``.
+
+"""
+function change_metric(M::GeneralizedGrassmann, ::EuclideanMetric, p, X)
+    C2 = cholesky(M.B).L
+    return C2 \ X
+end
+
+@doc raw"""
     check_point(M::GeneralizedGrassmann{n,k,𝔽}, p)
 
 Check whether `p` is representing a point on the [`GeneralizedGrassmann`](@ref) `M`, i.e. its

@@ -1,3 +1,16 @@
+@doc raw"""
+    change_gradient(M::Hyperbolic, ::EuclideanMetric, p, X)
+
+to change a Euclidena gradient from the embedding that was already projected onto the tangent space at `X`
+we only have to correct for the metric, which means, that the sign of the last entry changes.
+"""
+function change_gradient(::Hyperbolic, ::EuclideanMetric, p, X)
+    Y = copy(M, p, X)
+    Y[end] *= -1
+    return Y
+end
+
+# a metric change does not seem possible here
 
 function check_point(M::Hyperbolic, p; kwargs...)
     mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
@@ -325,7 +338,7 @@ component such that for the
 resulting `p` we have that its [`minkowski_metric`](@ref) is $⟨p,X⟩_{\mathrm{M}} = 0$,
 i.e. $X_{n+1} = \frac{⟨\tilde p, Y⟩}{p_{n+1}}$, where $\tilde p = (p_1,\ldots,p_n)$.
 """
-_hyperbolize(M::Hyperbolic, p, Y) = vcat(Y, dot(p[1:(end - 1)], Y) / p[end])
+_hyperbolize(::Hyperbolic, p, Y) = vcat(Y, dot(p[1:(end - 1)], Y) / p[end])
 
 @doc raw"""
     inner(M::Hyperbolic{n}, p, X, Y)

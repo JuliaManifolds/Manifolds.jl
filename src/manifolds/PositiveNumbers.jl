@@ -53,6 +53,23 @@ function check_point(M::PositiveNumbers, p; kwargs...)
     return nothing
 end
 
+@doc raw"""
+    change_metric(M::PositiveNumbers, E::EuclideanMetric, p, X)
+
+Given a tangent vector ``X ∈ T_p\mathcal M``representing a gradient with respect to the [`EuclideanMetric`](@ref) `g_E`,
+this function changes into the positivity metric representation of
+[`PositiveNumbers`](lref) `M` for the same gradient.
+"""
+change_gradient(::PositiveNumbers, ::EuclideanMetric, p, X) = p .* X .* p
+
+@doc raw"""
+    change_metric(M::SymmetricPOsitiveDefinite, E::EuclideanMetric, p, X)
+
+Given a tangent vector ``X ∈ T_p\mathcal M`` with respect to the [`EuclideanMetric`](@ref) `g_E`,
+this function changes into the positivity metric of [`PositiveNumbers`](lref) `M` for the same gradient.
+"""
+change_metric(::PositiveNumbers, ::EuclideanMetric, p, X) = p .* X
+
 """
     check_vector(M::PositiveNumbers, p, X; kwargs...)
 
