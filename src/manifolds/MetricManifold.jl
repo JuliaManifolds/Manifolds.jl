@@ -308,7 +308,7 @@ Return the local matrix representation of the inverse metric (cometric) tensor
 of the tangent space at `p` on the [`AbstractManifold`](@ref) `M` with respect
 to the [`AbstractBasis`](@ref) basis `B`.
 
-The metric tensor (see [`local_metric`](@ref)) os isually denoted by ``G = (g_{ij}) ∈ 𝔽^{d×d}``,
+The metric tensor (see [`local_metric`](@ref)) is usually denoted by ``G = (g_{ij}) ∈ 𝔽^{d×d}``,
 where ``d`` is the dimension of the manifold.
 
 Then the inverse local metric is denoted by ``G^{-1} = g^{ij}``.
