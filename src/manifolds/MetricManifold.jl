@@ -56,10 +56,10 @@ abstract type RiemannianMetric <: AbstractMetric end
 
 Convert the gradint `X` at `p` on the[`AbstractManifold`](@ref) `M` from one metric to another.
 
-Assume that for a real-valued function ``f: \mathcal M \to \mathcal M`` we are given the Riesz representer of the differential with respect to the metric ``g_2`` i.e.
+Assume that for a real-valued function ``f: \mathcal M \to ℝ`` we are given the Riesz representer of the differential with respect to the metric ``g_2`` i.e.
 
 ```math
-    g_2(X,Y) = Df(p)[Y] \quad \text{for all} Y ∈ T_p\mathcal M.
+    g_2(X,Y) = Df(p)[Y] \quad \text{for all } Y ∈ T_p\mathcal M.
 ```
 
 In order to convert this into the gradient with respect to the (implicitly given) metric ``g_1`` of `M`,
@@ -74,7 +74,7 @@ representations ``G_1`` and ``G_2`` and ``x,y`` are the local coordinates with r
 the same basis of the tangent space, the equation reads
 
 ```math
-   x^*G_2y = c(x)^*G_1 y \quad \text{for all} y \in ℝ^d,
+   x^*G_2y = c(x)^*G_1 y \quad \text{for all } y \in ℝ^d,
 ```
 where `\cdot^*`` denotes the conjugate transpose.
 
@@ -86,7 +86,7 @@ and we obtain `c(x) = (G_1\backslask G_2)^*x `
 
 Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embedding restricted to ``T_p\mathbb S^2``, this just returns `X`
 
-    change_gradient(SymmetricPOsitiveDefinite(3), EuclideanMetric, p, X)
+    change_gradient(SymmetricPOsitiveDefinite(3), EuclideanMetric(), p, X)
 
 Here, the default metric in `\mathcal P(3)` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``pXp``
 """
@@ -119,10 +119,10 @@ end
 
 On the [`AbstractManifold`](@ref) `M` with implicitly given metric ``g_1``
 and a second [`AbstractMetric`](@ref) ``g_2`` this method performs a change of metric in the
-sense that it returns the tangent vector ``Z=BX`` such that the linear map ``B``fulfills
+sense that it returns the tangent vector ``Z=BX`` such that the linear map ``B`` fulfills
 
 ````math
-g_2(Y_1,Y_2) = g_1(BY_1,BY_2) \quad \text{for all} Y_1,\Y_2 ∈ T_p\mathcal M.
+g_2(Y_1,Y_2) = g_1(BY_1,BY_2) \quad \text{for all } Y_1, Y_2 ∈ T_p\mathcal M.
 ````
 
 holds.
