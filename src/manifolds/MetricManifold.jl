@@ -106,11 +106,11 @@ function change_tangent(M::AbstractManifold, G::AbstractMetric, p, X)
 end
 
 function change_metric(
-    ::MetricManifold{<:M,<:G},
+    ::MetricManifold{𝔽,M,G},
     ::G,
     p,
     X,
-) where {M<:AbstractManifold,G<:AbstractMetric}
+) where {𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric}
     return X
 end
 
