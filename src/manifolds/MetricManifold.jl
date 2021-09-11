@@ -58,15 +58,16 @@ On the [`AbstractManifold`](@ref) `M` with implicitly given metric ``g_1``
 and a second [`AbstractMetric`](@ref) ``g_2`` this method performs a change of metric in the
 sense that it returns the tangent vector ``Z=BX`` such that the linear map ``B``fulfills
 
-```
+````math
 g_2(Y_1,Y_2) = g_1(BY_1,BY_2) \quad \text{for all} Y_1,\Y_2 ∈ T_p\mathcal M.
-```
+````
 
 holds.
 
 If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
 representations ``G_1 = C_1C_1^*`` and ``G_2 = C_2C_2^*``, where ``C_1,C_2`` denote their
-Cholesky factor, then solving ``C_1C_1^* = G_1 = B^*G_2B = B^*C_2C_2^*B`` yields ``B = (C_2 \ C_1)^*``
+Cholesky factor, then solving ``C_1C_1^* = G_1 = B^*G_2B = B^*C_2C_2^*B`` yields ``B = (C_2 \backslash C_1)^*``,
+where `\cdot^*`` denotes the conjugate transpose.
 
 This function returns `Z = BX`.
 
@@ -78,7 +79,7 @@ Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embeddin
 
     change_metric(SymmetricPOsitiveDefinite(3), EuclideanMetric, p, X)
 
-Here, the default metric in `\mathcal P(3)` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as `p^{-1}Xp^{-1} = p\X/p`
+Here, the default metric in `\mathcal P(3)` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``p^{-1}Xp^{-1} = p\backslash X/p``
 
 """
 change_metric(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
@@ -114,9 +115,9 @@ end
 Compute the Christoffel symbols of the first kind in local coordinates of basis `B`.
 The Christoffel symbols are (in Einstein summation convention)
 
-```math
+````math
 Γ_{ijk} = \frac{1}{2} \Bigl[g_{kj,i} + g_{ik,j} - g_{ij,k}\Bigr],
-```
+````
 
 where ``g_{ij,k}=\frac{∂}{∂ p^k} g_{ij}`` is the coordinate
 derivative of the local representation of the metric tensor. The dimensions of
