@@ -13,7 +13,7 @@ Given a tangent vector ``X ∈ T_p\mathcal M`` with respect to the [`EuclideanMe
 this function changes into the [`LinearAffine`](@ref) (default) metric on the
 [`SymmetricPOsitiveDefinite`](lref) `M`.
 """
-change_metric(::SymmetricPositiveDefinite, ::EuclideanMetric, p, X) = p*X*p
+change_metric(::SymmetricPositiveDefinite, ::EuclideanMetric, p, X) = p * X * p
 
 default_metric_dispatch(::SymmetricPositiveDefinite, ::LinearAffineMetric) = Val(true)
 

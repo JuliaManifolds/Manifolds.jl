@@ -84,13 +84,22 @@ Here, the default metric in `\mathcal P(3)` is the [`LinearAffineMetric`](@ref) 
 change_metric(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
 
 function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
-    if is_default_metric(M,G)
+    if is_default_metric(M, G)
         return X
     end
-    throw(ErrorException("No metric conversion implemented from the metric $G into the default metric on $M in the tangent space at $p"))
+    return throw(
+        ErrorException(
+            "No metric conversion implemented from the metric $G into the default metric on $M in the tangent space at $p",
+        ),
+    )
 end
 
-function change_metric(::MetricManifold{<:M,<:G}, ::G, p, X) where {M<:AbstractManifold, G <: AbstractMetric}
+function change_metric(
+    ::MetricManifold{<:M,<:G},
+    ::G,
+    p,
+    X,
+) where {M<:AbstractManifold,G<:AbstractMetric}
     return X
 end
 
