@@ -54,7 +54,7 @@ abstract type RiemannianMetric <: AbstractMetric end
 @doc raw"""
     change_gradient(M::AbstractManifold, G2::AbstractMetric, p, X)
 
-Convert the gradint `X` at `p` on the[`AbstractManifold`](@ref) `M` from one metric to another.
+Convert the gradient `X` at `p` on the[`AbstractManifold`](@ref) `M` from one metric to another.
 
 Assume that for a real-valued function ``f: \mathcal M \to ℝ`` the input `X` is the gradient or in
 other words the [Riesz representer](https://en.wikipedia.org/wiki/Riesz_representation_theorem#Riesz_representation_theorem) of the differential ``Df(p)``` with respect to the metric ``g_2`` i.e.
@@ -81,7 +81,7 @@ the same basis of the tangent space, the equation reads
 ```
 where `\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
 
-and we obtain `c(x) = (G_1\backslask G_2)^{\mathrm{H}}x `
+and we obtain ``c(X) = (G_1\backslash G_2)^{\mathrm{H}X``
 
 # Examples
 
@@ -93,7 +93,7 @@ Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embeddin
 
 Here, the default metric in `\mathcal P(3)` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``pXp``
 """
-change_tangent(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
+change_gradient(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
 
 function change_tangent(M::AbstractManifold, G::AbstractMetric, p, X)
     if is_default_metric(M, G)
@@ -109,11 +109,11 @@ function change_tangent(M::AbstractManifold, G::AbstractMetric, p, X)
 end
 
 function change_metric(
-    ::MetricManifold{<:M,<:G},
+    ::MetricManifold{𝔽,M,G},
     ::G,
     p,
     X,
-) where {M<:AbstractManifold,G<:AbstractMetric}
+) where {𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric}
     return X
 end
 
