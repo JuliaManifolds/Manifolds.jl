@@ -102,7 +102,7 @@ function change_tangent(M::AbstractManifold, G::AbstractMetric, p, X)
     # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
     B = DefaultOrthogonalBasis()
     G1 = local_metric(M, p, B)
-    G2 = localMetric(G(M), p, B)
+    G2 = local_metric(G(M), p, B)
     x = get_coordinates(M, p, X, B)
     z = (G2 \ G1)'x
     return get_vector(M, p, z, B)
@@ -159,8 +159,8 @@ function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
     G1 = local_metric(M, p, B)
     G2 = localMetric(G(M), p, B)
     x = get_coordinates(M, p, X, B)
-    C1 = cholesky(G1)
-    C2 = cholesky(G2)
+    C1 = cholesky(G1).L
+    C2 = cholesky(G2).L
     z = (C1 \ C2)'x
     return get_vector(M, p, z, B)
 end
