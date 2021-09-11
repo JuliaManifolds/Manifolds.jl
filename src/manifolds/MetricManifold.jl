@@ -56,28 +56,43 @@ abstract type RiemannianMetric <: AbstractMetric end
 
 On the [`AbstractManifold`](@ref) `M` with implicitly given metric ``g_1``
 and a second [`AbstractMetric`](@ref) ``g_2`` this method performs a change of metric in the
-sense that it returns the tangent vector `Z` for which
+sense that it returns the tangent vector ``Z=BX`` such that the linear map ``B``fulfills
 
 ```
-g_2(X,Y) = g_1(Z,Y) \quad \text{for all} Y ∈ T_p\mathcal M.
+g_2(Y_1,Y_2) = g_1(BY_1,BY_2) \quad \text{for all} Y_1,\Y_2 ∈ T_p\mathcal M.
 ```
 
-holds. With respect to any basis ``b_1,…,b_d``, i.e. in [`local_metric`](@ref)s ``G_1 = (g^1_{ij})``
-``G_2 = (g^2_{ij})`` with [`inverse_local_metric`](@ref) and decomposing ``G^{-1}_1 = (g_1^{ij})``
-``G^{-1}_2 = (g_2^{ij})``
--- using Einstein notation in the following -- ``X = X^ib_i`` and ``Z = Z^ib_i`` this reads
+holds.
 
-```
-g^2_{ij} X^iY^i = g^1_{ij} Z^iY^i \text{for all} Y = Y^ib_i ∈ T_p\mathcal M
-```
+If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
+representations ``G_1 = C_1C_1^*`` and ``G_2 = C_2C_2^*``, where ``C_1,C_2`` denote their
+Cholesky factor, then solving ``C_1C_1^* = G_1 = B^*G_2B = B^*C_2C_2^*B`` yields ``B = (C_2 \ C_1)^*``
 
-and hence writing ``x = (X^1,\ldots,X^d)^° \mathrm{T}`` and ``z = (Z^1,\ldots,Z^d)^\mathrm{T}``
+This function returns `Z = BX`.
 
-```
-z = G_1^{-1} G_2 x.
-```
+# Examples
+
+    change_metric(Sphere(2), EuclideanMetric(), p, X)
+
+Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embedding restricted to ``T_p\mathbb S^2``, this just returns `X`
+
+    change_metric(SymmetricPOsitiveDefinite(3), EuclideanMetric, p, X)
+
+Here, the default metric in `\mathcal P(3)` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as `p^{-1}Xp^{-1} = p\X/p`
+
 """
 change_metric(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
+    if is_default_metric(M,G)
+        return X
+    end
+    throw(ErrorException("No metric conversion implemented from the metric $G into the default metric on $M in the tangent space at $p"))
+end
+
+function change_metric(::MetricManifold{<:M,<:G}, ::G, p, X) where {M<:AbstractManifold, G <: AbstractMetric}
+    return X
+end
 
 @doc raw"""
     christoffel_symbols_first(

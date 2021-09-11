@@ -6,6 +6,15 @@ matrix logarithms and exponentials, which yields a linear and affine metric.
 """
 struct LinearAffineMetric <: RiemannianMetric end
 
+@doc raw"""
+    change_metric(M::SymmetricPOsitiveDefinite, E::EuclideanMetric, p, X)
+
+Given a tangent vector ``X ∈ T_p\mathcal M`` with respect to the [`EuclideanMetric`](@ref) `g_E`,
+this function changes into the [`LinearAffine`](@ref) (default) metric on the
+[`SymmetricPOsitiveDefinite`](lref) `M`.
+"""
+change_metric(::SymmetricPositiveDefinite, ::EuclideanMetric, p, X) = p*X*p
+
 default_metric_dispatch(::SymmetricPositiveDefinite, ::LinearAffineMetric) = Val(true)
 
 @doc raw"""
