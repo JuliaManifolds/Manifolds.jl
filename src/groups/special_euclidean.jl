@@ -76,7 +76,7 @@ function submanifold_components(
 end
 
 Base.@propagate_inbounds function _padpoint!(
-    ::SpecialEuclidean{n},
+    ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
     q::AbstractMatrix,
 ) where {n}
     for i in 1:n
@@ -87,7 +87,7 @@ Base.@propagate_inbounds function _padpoint!(
 end
 
 Base.@propagate_inbounds function _padvector!(
-    ::SpecialEuclidean{n},
+    ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
     X::AbstractMatrix,
 ) where {n}
     for i in 1:(n + 1)

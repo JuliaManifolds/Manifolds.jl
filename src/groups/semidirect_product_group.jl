@@ -173,6 +173,14 @@ function translate_diff!(G::SemidirectProductGroup, Y, p, q, X, conX::LeftAction
     return Y
 end
 
+# We need to prevent decorator unwrapping so that the correct `get_vector!` gets called
+# and applies proper padding to the result if `X` happens to be a matrix.
+# Otherwise rare random bugs happen where the padding is not applied.
+function get_vector(G::SemidirectProductGroup, p, X, B::VeeOrthogonalBasis)
+    Y = allocate_result(M, get_vector, p, X)
+    return get_vector!(G, Y, p, X, B)
+end
+
 function get_vector!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)
     M = base_manifold(G)
     N, H = M.manifolds
