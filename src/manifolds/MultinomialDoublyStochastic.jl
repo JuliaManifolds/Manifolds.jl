@@ -57,7 +57,7 @@ function MultinomialDoubleStochastic(n::Int)
 end
 
 """
-    change_gradient(M::ProbabilitySimplex, ::EuclideanMetric, ü, X)
+    change_gradient(M::AbstractMultinomialDoublyStochastic, ::EuclideanMetric, p, X)
 
 Given a tangent vector with respect to the metric from the embedding, the [`EuclideanMetric`](@ref),
 the representer of a linear functional on the tangent space is adapted as ``Z = p .* X``, since
