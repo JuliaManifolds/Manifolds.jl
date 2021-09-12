@@ -237,6 +237,7 @@ submanifold_component(::Any...)
 end
 @inline submanifold_component(M::AbstractManifold, p, i::Val) = submanifold_component(p, i)
 @inline submanifold_component(p, ::Val{I}) where {I} = p.parts[I]
+@inline submanifold_component(p::ArrayPartition, ::Val{I}) where {I} = p.x[I]
 @inline submanifold_component(p, i::Integer) = submanifold_component(p, Val(i))
 
 @doc raw"""
@@ -248,6 +249,7 @@ Get the projected components of `p` on the submanifolds of `M`. The components a
 submanifold_components(::Any...)
 @inline submanifold_components(M::AbstractManifold, p) = submanifold_components(p)
 @inline submanifold_components(p) = p.parts
+@inline submanifold_components(p::ArrayPartition) = p.x
 
 function Base.BroadcastStyle(
     ::Type{<:ProductArray{ShapeSpec}},
@@ -474,3 +476,7 @@ Base.axes(v::ProductRepr) = axes(v.parts)
     end
     return dest
 end
+
+## ArrayPartition
+
+ManifoldsBase._get_vector_cache_broadcast(::ArrayPartition) = Val(false)
