@@ -63,7 +63,7 @@ Given a tangent vector with respect to the metric from the embedding, the [`Eucl
 the representer of a linear functional on the tangent space is adapted as ``Z = p .* X``, since
 this “compensates” for the divsion by ``p`` in the Riemannian metric on the [`ProbabilitySimplex`](@ref)
 """
-change_gradient(::MultinomialDoubleStochastic, ::EuclideanMetric, p, X) = p .* X
+change_gradient(::AbstractMultinomialDoublyStochastic, ::EuclideanMetric, p, X) = p .* X
 
 @doc raw"""
     check_point(M::MultinomialDoubleStochastic, p)
