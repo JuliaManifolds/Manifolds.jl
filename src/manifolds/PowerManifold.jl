@@ -78,6 +78,30 @@ end
 
 default_metric_dispatch(::AbstractPowerManifold, ::PowerMetric) = Val(true)
 
+"""
+    change_gradient(M::AbstractPowerManifold, ::AbstractMetric, p, X)
+
+Since the metric on a power manifold decouples, the change of a representer can be done elementwise
+"""
+function change_gradient(M::AbstractPowerManifold, G::AbstractMetric, p, X)
+    Z = copy(M, p, X)
+    for i in get_iterator(M)
+        Z[i...] = change_gradient(M.manifold, G, p[i...], X[i...])
+    end
+end
+
+"""
+    change_metric(M::AbstractPowerManifold, ::AbstractMetric, p, X)
+
+Since the metric on a power manifold decouples, the change of a representer can be done elementwise
+"""
+function change_gradient(::AbstractPowerManifold, M::AbstractMetric, p, X)
+    Z = copy(M, p, X)
+    for i in get_iterator(M)
+        Z[i...] = change_gradient(M.manifold, G, p[i...], X[i...])
+    end
+end
+
 @doc raw"""
     flat(M::AbstractPowerManifold, p, X)
 
