@@ -1058,7 +1058,7 @@ set the element `[i...]` of a point `q` on a [`ProductManifold`](@ref) by linear
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
 Base.@propagate_inbounds function Base.setindex!(
-    q::Union{ProductArray,ProductRepr},
+    q::Union{ProductArray,ProductRepr,ArrayPartition},
     p,
     M::ProductManifold,
     i::Union{Integer,Colon,AbstractVector,Val},

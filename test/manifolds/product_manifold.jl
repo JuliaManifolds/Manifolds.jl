@@ -83,6 +83,23 @@ end
         p1[Mse, Val(2)] = 2 * p3
         @test p1[Mse, Val(2)] == 2 * p3
 
+        p1ap = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
+        @test get_component(Mse, p1ap, 1) == p1ap.x[1]
+        @test get_component(Mse, p1ap, Val(1)) == p1ap.x[1]
+        @test p1ap[Mse, 1] == p1ap.x[1]
+        @test p1ap[Mse, Val(1)] == p1ap.x[1]
+        @test p1ap[Mse, 1] isa Vector
+        @test p1ap[Mse, Val(1)] isa Vector
+        set_component!(Mse, p1ap, p2, 2)
+        @test get_component(Mse, p1ap, 2) == p2
+        p1ap[Mse, 2] = 2 * p2
+        @test p1ap[Mse, 2] == 2 * p2
+        p3 = [11.0, 15.0]
+        set_component!(Mse, p1ap, p3, Val(2))
+        @test get_component(Mse, p1ap, Val(2)) == p3
+        p1ap[Mse, Val(2)] = 2 * p3
+        @test p1ap[Mse, Val(2)] == 2 * p3
+
         shape_a_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M1, M2)
         pra1 = Manifolds.ProductArray(shape_a_se, [0.0, 1.0, 0.0, 0.0, 0.0])
         @test get_component(Mse, pra1, 1) == p1.parts[1]
