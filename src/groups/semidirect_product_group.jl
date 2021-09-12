@@ -177,7 +177,7 @@ end
 # and applies proper padding to the result if `X` happens to be a matrix.
 # Otherwise rare random bugs happen where the padding is not applied.
 function get_vector(G::SemidirectProductGroup, p, X, B::VeeOrthogonalBasis)
-    Y = allocate_result(M, get_vector, p, X)
+    Y = allocate_result(G, get_vector, p, X)
     return get_vector!(G, Y, p, X, B)
 end
 
