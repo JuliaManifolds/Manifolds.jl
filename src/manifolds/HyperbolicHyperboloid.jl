@@ -1,8 +1,8 @@
 @doc raw"""
     change_gradient(M::Hyperbolic, ::EuclideanMetric, p, X)
 
-to change a Euclidena gradient from the embedding that was already projected onto the tangent space at `X`
-we only have to correct for the metric, which means, that the sign of the last entry changes.
+Change a Eucliden gradient from the embedding that was already projected onto the tangent space at `p`.
+We only have to correct for the metric, which means that the sign of the last entry changes.
 """
 function change_gradient(::Hyperbolic, ::EuclideanMetric, p, X)
     Y = copy(M, p, X)
