@@ -95,7 +95,7 @@ Here, the default metric in `\mathcal P(3)` is the [`LinearAffineMetric`](@ref) 
 """
 change_gradient(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
 
-function change_tangent(M::AbstractManifold, G::AbstractMetric, p, X)
+function change_gradient(M::AbstractManifold, G::AbstractMetric, p, X)
     if is_default_metric(M, G)
         return X
     end
@@ -108,7 +108,7 @@ function change_tangent(M::AbstractManifold, G::AbstractMetric, p, X)
     return get_vector(M, p, z, B)
 end
 
-function change_metric(
+function change_gradient(
     ::MetricManifold{𝔽,M,G},
     ::G,
     p,
@@ -127,8 +127,6 @@ sense that it returns the tangent vector ``Z=BX`` such that the linear map ``B``
 ````math
 g_2(Y_1,Y_2) = g_1(BY_1,BY_2) \quad \text{for all } Y_1, Y_2 ∈ T_p\mathcal M.
 ````
-
-holds.
 
 If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
 representations ``G_1 = C_1C_1^{\mathrm{H}}`` and ``G_2 = C_2C_2^{\mathrm{H}}``, where ``C_1,C_2`` denote their
@@ -234,7 +232,7 @@ Return the [`LeviCivitaConnection`](@ref) for a metric manifold.
 connection(::MetricManifold) = LeviCivitaConnection()
 
 @doc raw"""
-    det_local_metric(M::AbstractManifold, p, B::AbstractBasis=DefaultOrthogonalBasis)
+    det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
 
 Return the determinant of local matrix representation of the metric tensor ``g``, i.e. of the
 matrix ``G(p)`` representing the metric in the tangent space at ``p`` with as a matrix.

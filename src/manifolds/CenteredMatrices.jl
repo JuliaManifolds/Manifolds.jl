@@ -119,7 +119,7 @@ where $c_i = \frac{1}{m}\sum_{j=1}^m x_{j,i}$  for $i = 1, \dots, n$.
 """
 project(::CenteredMatrices, ::Any, ::Any)
 
-project!(::CenteredMatrices, Y, p::Any, X) = (Y .= X .- mean(X, dims=1))
+project!(::CenteredMatrices, Y, p, X) = (Y .= X .- mean(X, dims=1))
 
 @generated representation_size(::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽} = (m, n)
 

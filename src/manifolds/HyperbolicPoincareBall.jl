@@ -11,9 +11,7 @@ function change_gradient(
     X::PoincareBallTVector,
 )
     α = 2 / (1 - norm(p.value)^2)
-    Y = copy(M, p, X)
-    Y.value ./= α^2
-    return Y
+    return PoincareBallTVector(X.value ./ α^2)
 end
 
 @doc raw"""
@@ -29,9 +27,7 @@ function change_metric(
     X::PoincareBallTVector,
 )
     α = 2 / (1 - norm(p.value)^2)
-    Y = copy(M, p, X)
-    Y.value ./= α
-    return Y
+    return PoincareBallTVector(X.value ./ α)
 end
 
 function check_point(M::Hyperbolic{N}, p::PoincareBallPoint; kwargs...) where {N}

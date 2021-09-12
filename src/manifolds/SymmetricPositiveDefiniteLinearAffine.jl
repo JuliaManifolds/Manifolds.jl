@@ -11,7 +11,7 @@ struct LinearAffineMetric <: RiemannianMetric end
 
 Given a tangent vector ``X ∈ T_p\mathcal M``representing a gradient with respect to the [`EuclideanMetric`](@ref) `g_E`,
 this function changes into the [`LinearAffine`](@ref) (default) metric representation of
-[`SymmetricPOsitiveDefinite`](lref) `M` for the same gradient.
+[`SymmetricPOsitiveDefinite`](@ref) `M` for the same gradient.
 """
 change_gradient(::SymmetricPositiveDefinite, ::EuclideanMetric, p, X) = p * X * p
 
@@ -20,7 +20,7 @@ change_gradient(::SymmetricPositiveDefinite, ::EuclideanMetric, p, X) = p * X * 
 
 Given a tangent vector ``X ∈ T_p\mathcal M`` with respect to the [`EuclideanMetric`](@ref) `g_E`,
 this function changes into the [`LinearAffine`](@ref) (default) metric on the
-[`SymmetricPOsitiveDefinite`](lref) `M`.
+[`SymmetricPOsitiveDefinite`](@ref) `M`.
 """
 change_metric(::SymmetricPositiveDefinite, ::EuclideanMetric, p, X) = p * X
 

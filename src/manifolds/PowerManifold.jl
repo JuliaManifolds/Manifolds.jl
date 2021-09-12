@@ -95,7 +95,7 @@ end
 
 Since the metric on a power manifold decouples, the change of a representer can be done elementwise
 """
-function change_gradient(::AbstractPowerManifold, M::AbstractMetric, p, X)
+function change_metric(::AbstractPowerManifold, M::AbstractMetric, p, X)
     Z = copy(M, p, X)
     for i in get_iterator(M)
         Z[i...] = change_gradient(M.manifold, G, p[i...], X[i...])
