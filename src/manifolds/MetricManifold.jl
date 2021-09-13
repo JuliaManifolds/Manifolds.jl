@@ -96,25 +96,33 @@ Here, the default metric in `\mathcal P(3)` is the [`LinearAffineMetric`](@ref) 
 change_gradient(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
 
 function change_gradient(M::AbstractManifold, G::AbstractMetric, p, X)
-    if is_default_metric(M, G)
-        return X
-    end
+    Y = allocate_result(M, change_metric, X, p) # this way we allocate a tangent
+    change_gradient!(M, G, Y, p, X)
+end
+
+@decorator_transparent_signature change_gradient(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
+@decorator_transparent_signature change_gradient!(M::AbstractDecoratorManifold, Y, G::AbstractMetric, X, p)
+
+
+function change_gradient(M::AbstractManifold, G::AbstractMetric, p, X)
+    is_default_metric(M, G) && return copyto!(M, Y, p, X)
     # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
     B = DefaultOrthogonalBasis()
     G1 = local_metric(M, p, B)
     G2 = local_metric(G(M), p, B)
     x = get_coordinates(M, p, X, B)
     z = (G2 \ G1)'x
-    return get_vector(M, p, z, B)
+    return get_vector!(M, Y, p, z, B)
 end
 
-function change_gradient(
+function change_gradient!(
     ::MetricManifold{𝔽,M,G},
+    Y,
     ::G,
     p,
     X,
 ) where {𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric}
-    return X
+    return copyto!(M, Y, p, X)
 end
 
 @doc raw"""
@@ -131,7 +139,7 @@ g_2(Y_1,Y_2) = g_1(BY_1,BY_2) \quad \text{for all } Y_1, Y_2 ∈ T_p\mathcal M.
 If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
 representations ``G_1 = C_1C_1^{\mathrm{H}}`` and ``G_2 = C_2C_2^{\mathrm{H}}``, where ``C_1,C_2`` denote their
 Cholesky factor, then solving ``C_2C_2^{\mathrm{H}} = G_2 = B^{\mathrm{H}}G_1B = B^{\mathrm{H}}C_1C_1^{\mathrm{H}}B`` yields ``B = (C_1 \backslash C_2)^{\mathrm{H}}``,
-where `\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
+where ``\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
 
 This function returns `Z = BX`.
 
@@ -149,9 +157,11 @@ Here, the default metric in `\mathcal P(3)` is the [`LinearAffineMetric`](@ref) 
 change_metric(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
 
 function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
-    if is_default_metric(M, G)
-        return X
-    end
+    Y = allocate_result(M, change_metric, X, p) # this way we allocate a tangent
+    change_metric!(M, G, Y, p, X)
+end
+function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
+    is_default_metric(M, G) && return copyto!(M, Y, p, X)
     # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
     B = DefaultOrthogonalBasis()
     G1 = local_metric(M, p, B)
@@ -160,16 +170,20 @@ function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
     C1 = cholesky(G1).L
     C2 = cholesky(G2).L
     z = (C1 \ C2)'x
-    return get_vector(M, p, z, B)
+    return get_vector!(M, Y, p, z, B)
 end
 
-function change_metric(
+@decorator_transparent_signature change_metric(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
+@decorator_transparent_signature change_metric!(M::AbstractDecoratorManifold, Y, G::AbstractMetric, X, p)
+
+function change_metric!(
     ::MetricManifold{<:M,<:G},
+    Y,
     ::G,
     p,
     X,
 ) where {M<:AbstractManifold,G<:AbstractMetric}
-    return X
+    return copyto!(M, Y, p, X)
 end
 
 @doc raw"""
